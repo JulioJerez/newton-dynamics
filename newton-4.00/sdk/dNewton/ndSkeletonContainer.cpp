@@ -2129,10 +2129,11 @@ ndFloat32 ndSkeletonContainer::CalculateCorrectionImpulse(ndFloat32 timestep, nd
 	return maxPositError2;
 }
 
-bool ndSkeletonContainer::ResolveViolations(ndFloat32 timestep)
+//bool ndSkeletonContainer::ResolveViolations(ndFloat32 timestep)
+bool ndSkeletonContainer::ResolveViolations(ndFloat32)
 {
 return false;
-
+#if 0
 	const ndInt32 nodeCount = m_nodeList.GetCount();
 	ndForcePair* const jointVeloc = ndAlloca(ndForcePair, nodeCount);
 	ndForcePair* const jointAccel = ndAlloca(ndForcePair, nodeCount);
@@ -2207,4 +2208,5 @@ return false;
 	}
 
 	return maxViolation2 > D_MAX_POSIT_ERROR_VIOLATION2;
+#endif
 }
