@@ -907,51 +907,50 @@ class ndVector : public ndClassAlloc
 			(m_w < data.m_w) ? m_w : data.m_w);
 	}
 
-
 	// relational operators
 	inline ndVector operator== (const ndVector& data) const
 	{
 		return ndVector(
-			(m_x == data.m_x) ? ndInt32(0xffffffff) : 0,
-			(m_y == data.m_y) ? ndInt32(0xffffffff) : 0,
-			(m_z == data.m_z) ? ndInt32(0xffffffff) : 0,
-			(m_w == data.m_w) ? ndInt32(0xffffffff) : 0);
+			(m_x == data.m_x) ? ndInt32(0xffffffff) : ndInt32(0),
+			(m_y == data.m_y) ? ndInt32(0xffffffff) : ndInt32(0),
+			(m_z == data.m_z) ? ndInt32(0xffffffff) : ndInt32(0),
+			(m_w == data.m_w) ? ndInt32(0xffffffff) : ndInt32(0));
 	}
 
 	inline ndVector operator> (const ndVector& data) const
 	{
 		return ndVector(
-			(m_x > data.m_x) ? ndInt32(0xffffffff) : 0,
-			(m_y > data.m_y) ? ndInt32(0xffffffff) : 0,
-			(m_z > data.m_z) ? ndInt32(0xffffffff) : 0,
-			(m_w > data.m_w) ? ndInt32(0xffffffff) : 0);
+			(m_x > data.m_x) ? ndInt32(0xffffffff) : ndInt32(0),
+			(m_y > data.m_y) ? ndInt32(0xffffffff) : ndInt32(0),
+			(m_z > data.m_z) ? ndInt32(0xffffffff) : ndInt32(0),
+			(m_w > data.m_w) ? ndInt32(0xffffffff) : ndInt32(0));
 	}
 
 	inline ndVector operator< (const ndVector& data) const
 	{
 		return ndVector(
-			(m_x < data.m_x) ? ndInt32(0xffffffff) : 0,
-			(m_y < data.m_y) ? ndInt32(0xffffffff) : 0,
-			(m_z < data.m_z) ? ndInt32(0xffffffff) : 0,
-			(m_w < data.m_w) ? ndInt32(0xffffffff) : 0);
+			(m_x < data.m_x) ? ndInt32(0xffffffff) : ndInt32(0),
+			(m_y < data.m_y) ? ndInt32(0xffffffff) : ndInt32(0),
+			(m_z < data.m_z) ? ndInt32(0xffffffff) : ndInt32(0),
+			(m_w < data.m_w) ? ndInt32(0xffffffff) : ndInt32(0));
 	}
 
 	inline ndVector operator>= (const ndVector& data) const
 	{
 		return ndVector(
-			(m_x >= data.m_x) ? ndInt32(0xffffffff) : 0,
-			(m_y >= data.m_y) ? ndInt32(0xffffffff) : 0,
-			(m_z >= data.m_z) ? ndInt32(0xffffffff) : 0,
-			(m_w >= data.m_w) ? ndInt32(0xffffffff) : 0);
+			(m_x >= data.m_x) ? ndInt32(0xffffffff) : ndInt32(0),
+			(m_y >= data.m_y) ? ndInt32(0xffffffff) : ndInt32(0),
+			(m_z >= data.m_z) ? ndInt32(0xffffffff) : ndInt32(0),
+			(m_w >= data.m_w) ? ndInt32(0xffffffff) : ndInt32(0));
 	}
 
 	inline ndVector operator<= (const ndVector& data) const
 	{
 		return ndVector(
-			(m_x <= data.m_x) ? ndInt32(0xffffffff) : 0,
-			(m_y <= data.m_y) ? ndInt32(0xffffffff) : 0,
-			(m_z <= data.m_z) ? ndInt32(0xffffffff) : 0,
-			(m_w <= data.m_w) ? ndInt32(0xffffffff) : 0);
+			(m_x <= data.m_x) ? ndInt32(0xffffffff) : ndInt32(0),
+			(m_y <= data.m_y) ? ndInt32(0xffffffff) : ndInt32(0),
+			(m_z <= data.m_z) ? ndInt32(0xffffffff) : ndInt32(0),
+			(m_w <= data.m_w) ? ndInt32(0xffffffff) : ndInt32(0));
 	}
 
 	// logical operations
