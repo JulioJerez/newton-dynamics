@@ -661,7 +661,7 @@ void ndDynamicsUpdateAvx2::InitJacobianMatrix()
 	auto InitJacobianMatrix = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32)
 	{
 		D_TRACKTIME_NAMED(InitJacobianMatrix);
-		ndVector8* const internalForces = &GetTempInternalForces()[0];
+		ndVector8* const internalForces = (ndVector8*)&GetTempInternalForces()[0];
 		auto BuildJacobianMatrix = [this, &internalForces](ndConstraint* const joint, ndInt32 jointIndex)
 		{
 			ndAssert(joint->GetBody0());
@@ -703,11 +703,13 @@ void ndDynamicsUpdateAvx2::InitJacobianMatrix()
 				//const ndVector8& JMinvM0 = (ndVector8&)row->m_JMinv.m_jacobianM0;
 				//const ndVector8& JMinvM1 = (ndVector8&)row->m_JMinv.m_jacobianM1;
 				//const ndVector8 tmpAccel((JMinvM0 * force0).MulAdd(JMinvM1, force1));
-				const ndVector16 JMinv(row->m_JMinv.m_jacobianM0, row->m_JMinv.m_jacobianM1);
-				const ndVector16 tmpAccel1(JMinv * force);
-				const ndVector8 tmpAccel(tmpAccel1.m_low + tmpAccel1.m_high);
-				
+				//const ndVector16 JMinv(row->m_JMinv.m_jacobianM0, row->m_JMinv.m_jacobianM1);
+				const ndVector16& JMinv = (ndVector16&)row->m_JMinv.m_jacobianM0;
+				const ndVector16 tmpAccel(JMinv * force);
+				//const ndVector8 tmpAccel(tmpAccel1.m_low + tmpAccel1.m_high);
+				//ndFloat32 extenalAcceleration = -tmpAccel.AddHorizontal();
 				ndFloat32 extenalAcceleration = -tmpAccel.AddHorizontal();
+
 				rhs->m_deltaAccel = extenalAcceleration;
 				rhs->m_coordenateAccel += extenalAcceleration;
 				ndAssert(rhs->m_jointFeebackForce);
@@ -761,8 +763,8 @@ void ndDynamicsUpdateAvx2::InitJacobianMatrix()
 
 		//ndJacobian* const internalForces = &GetInternalForces()[0];
 		//const ndJacobian* const jointInternalForces = &GetTempInternalForces()[0];
-		ndVector8* const internalForces = &GetInternalForces()[0];
-		const ndVector8* const jointInternalForces = &GetTempInternalForces()[0];
+		ndVector8* const internalForces = (ndVector8*) &GetInternalForces()[0];
+		const ndVector8* const jointInternalForces = (ndVector8*)&GetTempInternalForces()[0];
 		const ndJointBodyPairIndex* const jointBodyPairIndexBuffer = &GetJointBodyPairIndexBuffer()[0];
 
 		//ndVector force(zero);
@@ -875,14 +877,14 @@ void ndDynamicsUpdateAvx2::InitJacobianMatrix()
 					row.m_Jt.m_jacobianM0.m_angular.m_y.m_low,
 					row.m_Jt.m_jacobianM0.m_angular.m_z.m_low,
 					dommy,
-					row0->m_Jt.m_jacobianM0,
-					row1->m_Jt.m_jacobianM0,
-					row2->m_Jt.m_jacobianM0,
-					row3->m_Jt.m_jacobianM0,
-					row4->m_Jt.m_jacobianM0,
-					row5->m_Jt.m_jacobianM0,
-					row6->m_Jt.m_jacobianM0,
-					row7->m_Jt.m_jacobianM0);
+					(ndVector8&)row0->m_Jt.m_jacobianM0,
+					(ndVector8&)row1->m_Jt.m_jacobianM0,
+					(ndVector8&)row2->m_Jt.m_jacobianM0,
+					(ndVector8&)row3->m_Jt.m_jacobianM0,
+					(ndVector8&)row4->m_Jt.m_jacobianM0,
+					(ndVector8&)row5->m_Jt.m_jacobianM0,
+					(ndVector8&)row6->m_Jt.m_jacobianM0,
+					(ndVector8&)row7->m_Jt.m_jacobianM0);
 				
 				ndVector8::Transpose(
 					row.m_Jt.m_jacobianM1.m_linear.m_x.m_low,
@@ -893,14 +895,14 @@ void ndDynamicsUpdateAvx2::InitJacobianMatrix()
 					row.m_Jt.m_jacobianM1.m_angular.m_y.m_low,
 					row.m_Jt.m_jacobianM1.m_angular.m_z.m_low,
 					dommy,
-					row0->m_Jt.m_jacobianM1,
-					row1->m_Jt.m_jacobianM1,
-					row2->m_Jt.m_jacobianM1,
-					row3->m_Jt.m_jacobianM1,
-					row4->m_Jt.m_jacobianM1,
-					row5->m_Jt.m_jacobianM1,
-					row6->m_Jt.m_jacobianM1,
-					row7->m_Jt.m_jacobianM1);
+					(ndVector8&)row0->m_Jt.m_jacobianM1,
+					(ndVector8&)row1->m_Jt.m_jacobianM1,
+					(ndVector8&)row2->m_Jt.m_jacobianM1,
+					(ndVector8&)row3->m_Jt.m_jacobianM1,
+					(ndVector8&)row4->m_Jt.m_jacobianM1,
+					(ndVector8&)row5->m_Jt.m_jacobianM1,
+					(ndVector8&)row6->m_Jt.m_jacobianM1,
+					(ndVector8&)row7->m_Jt.m_jacobianM1);
 				
 				ndVector8::Transpose(
 					row.m_JMinv.m_jacobianM0.m_linear.m_x.m_low,
@@ -911,14 +913,14 @@ void ndDynamicsUpdateAvx2::InitJacobianMatrix()
 					row.m_JMinv.m_jacobianM0.m_angular.m_y.m_low,
 					row.m_JMinv.m_jacobianM0.m_angular.m_z.m_low,
 					dommy,
-					row0->m_JMinv.m_jacobianM0,
-					row1->m_JMinv.m_jacobianM0,
-					row2->m_JMinv.m_jacobianM0,
-					row3->m_JMinv.m_jacobianM0,
-					row4->m_JMinv.m_jacobianM0,
-					row5->m_JMinv.m_jacobianM0,
-					row6->m_JMinv.m_jacobianM0,
-					row7->m_JMinv.m_jacobianM0);
+					(ndVector8&)row0->m_JMinv.m_jacobianM0,
+					(ndVector8&)row1->m_JMinv.m_jacobianM0,
+					(ndVector8&)row2->m_JMinv.m_jacobianM0,
+					(ndVector8&)row3->m_JMinv.m_jacobianM0,
+					(ndVector8&)row4->m_JMinv.m_jacobianM0,
+					(ndVector8&)row5->m_JMinv.m_jacobianM0,
+					(ndVector8&)row6->m_JMinv.m_jacobianM0,
+					(ndVector8&)row7->m_JMinv.m_jacobianM0);
 				
 				ndVector8::Transpose(
 					row.m_JMinv.m_jacobianM1.m_linear.m_x.m_low,
@@ -929,14 +931,14 @@ void ndDynamicsUpdateAvx2::InitJacobianMatrix()
 					row.m_JMinv.m_jacobianM1.m_angular.m_y.m_low,
 					row.m_JMinv.m_jacobianM1.m_angular.m_z.m_low,
 					dommy,
-					row0->m_JMinv.m_jacobianM1,
-					row1->m_JMinv.m_jacobianM1,
-					row2->m_JMinv.m_jacobianM1,
-					row3->m_JMinv.m_jacobianM1,
-					row4->m_JMinv.m_jacobianM1,
-					row5->m_JMinv.m_jacobianM1,
-					row6->m_JMinv.m_jacobianM1,
-					row7->m_JMinv.m_jacobianM1);
+					(ndVector8&)row0->m_JMinv.m_jacobianM1,
+					(ndVector8&)row1->m_JMinv.m_jacobianM1,
+					(ndVector8&)row2->m_JMinv.m_jacobianM1,
+					(ndVector8&)row3->m_JMinv.m_jacobianM1,
+					(ndVector8&)row4->m_JMinv.m_jacobianM1,
+					(ndVector8&)row5->m_JMinv.m_jacobianM1,
+					(ndVector8&)row6->m_JMinv.m_jacobianM1,
+					(ndVector8&)row7->m_JMinv.m_jacobianM1);
 
 				const ndLeftHandSide* const row8 =  &leftHandSide[jointsPtr[index + 8]->m_rowStart + k];
 				const ndLeftHandSide* const row9 =  &leftHandSide[jointsPtr[index + 9]->m_rowStart + k];
@@ -955,14 +957,14 @@ void ndDynamicsUpdateAvx2::InitJacobianMatrix()
 					row.m_Jt.m_jacobianM0.m_angular.m_y.m_high,
 					row.m_Jt.m_jacobianM0.m_angular.m_z.m_high,
 					dommy,
-					row8->m_Jt.m_jacobianM0,
-					row9->m_Jt.m_jacobianM0,
-					row10->m_Jt.m_jacobianM0,
-					row11->m_Jt.m_jacobianM0,
-					row12->m_Jt.m_jacobianM0,
-					row13->m_Jt.m_jacobianM0,
-					row14->m_Jt.m_jacobianM0,
-					row15->m_Jt.m_jacobianM0);
+					(ndVector8&)row8->m_Jt.m_jacobianM0,
+					(ndVector8&)row9->m_Jt.m_jacobianM0,
+					(ndVector8&)row10->m_Jt.m_jacobianM0,
+					(ndVector8&)row11->m_Jt.m_jacobianM0,
+					(ndVector8&)row12->m_Jt.m_jacobianM0,
+					(ndVector8&)row13->m_Jt.m_jacobianM0,
+					(ndVector8&)row14->m_Jt.m_jacobianM0,
+					(ndVector8&)row15->m_Jt.m_jacobianM0);
 
 				ndVector8::Transpose(
 					row.m_Jt.m_jacobianM1.m_linear.m_x.m_high,
@@ -973,14 +975,14 @@ void ndDynamicsUpdateAvx2::InitJacobianMatrix()
 					row.m_Jt.m_jacobianM1.m_angular.m_y.m_high,
 					row.m_Jt.m_jacobianM1.m_angular.m_z.m_high,
 					dommy,
-					row8->m_Jt.m_jacobianM1,
-					row9->m_Jt.m_jacobianM1,
-					row10->m_Jt.m_jacobianM1,
-					row11->m_Jt.m_jacobianM1,
-					row12->m_Jt.m_jacobianM1,
-					row13->m_Jt.m_jacobianM1,
-					row14->m_Jt.m_jacobianM1,
-					row15->m_Jt.m_jacobianM1);
+					(ndVector8&)row8->m_Jt.m_jacobianM1,
+					(ndVector8&)row9->m_Jt.m_jacobianM1,
+					(ndVector8&)row10->m_Jt.m_jacobianM1,
+					(ndVector8&)row11->m_Jt.m_jacobianM1,
+					(ndVector8&)row12->m_Jt.m_jacobianM1,
+					(ndVector8&)row13->m_Jt.m_jacobianM1,
+					(ndVector8&)row14->m_Jt.m_jacobianM1,
+					(ndVector8&)row15->m_Jt.m_jacobianM1);
 
 				ndVector8::Transpose(
 					row.m_JMinv.m_jacobianM0.m_linear.m_x.m_high,
@@ -991,14 +993,14 @@ void ndDynamicsUpdateAvx2::InitJacobianMatrix()
 					row.m_JMinv.m_jacobianM0.m_angular.m_y.m_high,
 					row.m_JMinv.m_jacobianM0.m_angular.m_z.m_high,
 					dommy,
-					row8->m_JMinv.m_jacobianM0,
-					row9->m_JMinv.m_jacobianM0,
-					row10->m_JMinv.m_jacobianM0,
-					row11->m_JMinv.m_jacobianM0,
-					row12->m_JMinv.m_jacobianM0,
-					row13->m_JMinv.m_jacobianM0,
-					row14->m_JMinv.m_jacobianM0,
-					row15->m_JMinv.m_jacobianM0);
+					(ndVector8&)row8->m_JMinv.m_jacobianM0,
+					(ndVector8&)row9->m_JMinv.m_jacobianM0,
+					(ndVector8&)row10->m_JMinv.m_jacobianM0,
+					(ndVector8&)row11->m_JMinv.m_jacobianM0,
+					(ndVector8&)row12->m_JMinv.m_jacobianM0,
+					(ndVector8&)row13->m_JMinv.m_jacobianM0,
+					(ndVector8&)row14->m_JMinv.m_jacobianM0,
+					(ndVector8&)row15->m_JMinv.m_jacobianM0);
 
 				ndVector8::Transpose(
 					row.m_JMinv.m_jacobianM1.m_linear.m_x.m_high,
@@ -1009,14 +1011,14 @@ void ndDynamicsUpdateAvx2::InitJacobianMatrix()
 					row.m_JMinv.m_jacobianM1.m_angular.m_y.m_high,
 					row.m_JMinv.m_jacobianM1.m_angular.m_z.m_high,
 					dommy,
-					row8->m_JMinv.m_jacobianM1,
-					row9->m_JMinv.m_jacobianM1,
-					row10->m_JMinv.m_jacobianM1,
-					row11->m_JMinv.m_jacobianM1,
-					row12->m_JMinv.m_jacobianM1,
-					row13->m_JMinv.m_jacobianM1,
-					row14->m_JMinv.m_jacobianM1,
-					row15->m_JMinv.m_jacobianM1);
+					(ndVector8&)row8->m_JMinv.m_jacobianM1,
+					(ndVector8&)row9->m_JMinv.m_jacobianM1,
+					(ndVector8&)row10->m_JMinv.m_jacobianM1,
+					(ndVector8&)row11->m_JMinv.m_jacobianM1,
+					(ndVector8&)row12->m_JMinv.m_jacobianM1,
+					(ndVector8&)row13->m_JMinv.m_jacobianM1,
+					(ndVector8&)row14->m_JMinv.m_jacobianM1,
+					(ndVector8&)row15->m_JMinv.m_jacobianM1);
 
 				#ifdef D_NEWTON_USE_DOUBLE
 					ndInt64* const normalIndex = (ndInt64*)&row.m_normalForceIndex[0];
@@ -1166,7 +1168,7 @@ void ndDynamicsUpdateAvx2::RegenerateSkeletonJacobians(ndSkeletonContainer* cons
 	constraintParam.m_timestep = m_timestep;
 	constraintParam.m_invTimestep = m_invTimestep;
 
-	ndVector8* const internalForces = &GetTempInternalForces()[0];
+	ndVector8* const internalForces = (ndVector8*) &GetTempInternalForces()[0];
 	auto BuildJacobianMatrix = [this, &internalForces](ndConstraint* const joint)
 	{
 		ndAssert(joint->GetBody0());
@@ -1207,10 +1209,11 @@ void ndDynamicsUpdateAvx2::RegenerateSkeletonJacobians(ndSkeletonContainer* cons
 
 			//const ndVectorSoa& JMinvM0 = (ndVectorSoa&)row->m_JMinv.m_jacobianM0;
 			//const ndVectorSoa& JMinvM1 = (ndVectorSoa&)row->m_JMinv.m_jacobianM1;
-			const ndVector16 JMinv(row->m_JMinv.m_jacobianM0, row->m_JMinv.m_jacobianM1);
+			//const ndVector16 JMinv(row->m_JMinv.m_jacobianM0, row->m_JMinv.m_jacobianM1);
+			const ndVector16& JMinv = (ndVector16&)row->m_JMinv.m_jacobianM0;
 			//const ndVectorSoa tmpAccel((JMinvM0 * force0).MulAdd(JMinvM1, force1));
-			const ndVector16 tmpAccel1(JMinv * forcePair);
-			const ndVector8 tmpAccel(tmpAccel1.m_low + tmpAccel1.m_high);
+			const ndVector16 tmpAccel(JMinv * forcePair);
+			//const ndVector8 tmpAccel(tmpAccel1.m_low + tmpAccel1.m_high);
 
 			ndFloat32 extenalAcceleration = -tmpAccel.AddHorizontal();
 			rhs->m_deltaAccel = extenalAcceleration;
@@ -1312,7 +1315,7 @@ void ndDynamicsUpdateAvx2::RegenerateSkeletonJacobians(ndSkeletonContainer* cons
 
 	const ndVector8 zero(ndVector8::m_zero);
 	const ndArray<ndInt32>& bodyIndex = GetJointForceIndexBuffer();
-	const ndVector8* const jointInternalForces = &GetTempInternalForces()[0];
+	const ndVector8* const jointInternalForces = (ndVector8*)&GetTempInternalForces()[0];
 	const ndJointBodyPairIndex* const jointBodyPairIndexBuffer = &GetJointBodyPairIndexBuffer()[0];
 	for (ndInt32 j = 0; j < nodeCount; ++j)
 	{
@@ -1446,8 +1449,8 @@ void ndDynamicsUpdateAvx2::UpdateForceFeedback()
 			rhs->m_jointFeebackForce->m_impact = rhs->m_maxImpact * timestepRK;
 		
 			const ndVector8 f(rhs->m_force);
-			force0 = force0.MulAdd(lhs->m_Jt.m_jacobianM0, f);
-			force1 = force1.MulAdd(lhs->m_Jt.m_jacobianM1, f);
+			force0 = force0.MulAdd((ndVector8&)lhs->m_Jt.m_jacobianM0, f);
+			force1 = force1.MulAdd((ndVector8&)lhs->m_Jt.m_jacobianM1, f);
 		}
 		joint->m_forceBody0 = force0.GetLow();
 		joint->m_torqueBody0 = force0.GetHigh();
@@ -1656,7 +1659,7 @@ void ndDynamicsUpdateAvx2::CalculateJointsForce()
 	auto CalculateJointsForce = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32)
 	{
 		D_TRACKTIME_NAMED(CalculateJointsForce);
-		ndJacobian* const jointPartialForces = &GetTempInternalForces()[0];
+		ndVector8* const jointPartialForces = (ndVector8*)&GetTempInternalForces()[0];
 
 		const ndInt32* const soaJointRows = &m_avxJointRows[0];
 		ndAvxMatrixArray& soaMassMatrixArray = *m_avxMassMatrixArray;
@@ -1751,7 +1754,8 @@ void ndDynamicsUpdateAvx2::CalculateJointsForce()
 				}
 			}
 
-			normalForce[0] = ndVector16(ndFloat32(1.0f));
+			//normalForce[0] = ndVector16(ndFloat32(1.0f));
+			normalForce[0] = ndVector16::m_one;
 			const ndInt32 rowsCount = jointGroup[0]->m_rowCount;
 
 			for (ndInt32 j = 0; j < rowsCount; ++j)
@@ -1929,24 +1933,23 @@ void ndDynamicsUpdateAvx2::CalculateJointsForce()
 		D_TRACKTIME_NAMED(ApplyJacobianAccumulatePartialForces);
 		const ndVector8 zero(ndVector8::m_zero);
 		const ndInt32* const bodyIndex = &GetJointForceIndexBuffer()[0];
-		ndVector8* const internalForces = &GetInternalForces()[0];
-		const ndVector8* const jointInternalForces = &GetTempInternalForces()[0];
+		ndVector8* const internalForces = (ndVector8*)&GetInternalForces()[0];
+		const ndVector8* const jointInternalForces = (ndVector8*)&GetTempInternalForces()[0];
 		const ndJointBodyPairIndex* const jointBodyPairIndexBuffer = &GetJointBodyPairIndexBuffer()[0];
 
-		ndVector8 force(zero);
-		ndVector8 torque(zero);
 		const ndInt32 m = group;
 		const ndBodyKinematic* const body = bodyArray[m];
-
 		const ndInt32 startIndex = bodyIndex[m];
 		const ndInt32 mask = body->m_isStatic - 1;
 		const ndInt32 count = mask & (bodyIndex[m + 1] - startIndex);
+
+		ndVector8 forceTorque(ndVector8::m_zero);
 		for (ndInt32 k = 0; k < count; ++k)
 		{
 			const ndInt32 index = jointBodyPairIndexBuffer[startIndex + k].m_joint;
-			force = force + jointInternalForces[index];
+			forceTorque = forceTorque + jointInternalForces[index];
 		}
-		internalForces[m] = force;
+		internalForces[m] = forceTorque;
 	});
 
 	for (ndInt32 i = 0; i < ndInt32(passes); ++i)

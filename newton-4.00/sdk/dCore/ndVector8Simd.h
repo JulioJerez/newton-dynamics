@@ -22,9 +22,7 @@
 #ifndef __ND_VECTOR8_SIMD_H__
 #define __ND_VECTOR8_SIMD_H__
 
-//#include "ndCore.h"
 #include "ndVector.h"
-
 
 #ifdef D_NEWTON_USE_AVX2_OPTION
 
@@ -163,12 +161,14 @@
 
 			inline ndVector GetLow() const
 			{
-				return m_linear;
+				//return m_linear;
+				return m_low;
 			}
 
 			inline ndVector GetHigh() const
 			{
-				return m_angular;
+				//return m_angular;
+				return m_high;
 			}
 
 			inline ndFloat32 GetMax() const
@@ -239,7 +239,8 @@
 				{
 					ndBigVector m_linear;
 					ndBigVector m_angular;
-				};
+				} m_vector8;
+
 				struct
 				{
 					__m256d m_low;
@@ -388,20 +389,21 @@
 			inline ndVector GetLow() const
 			{
 				//return m_vector8.m_linear;
-				return m_linear;
+				return m_typeLow;
 			}
 
 			inline ndVector GetHigh() const
 			{
 				//return m_vector8.m_angular;
-				return m_angular;
+				return m_typeHigh;
 			}
 
 			inline ndFloat32 GetMax() const
 			{
 				__m128 tmp0(_mm_max_ps(m_typeLow, m_typeHigh));
 				__m128 tmp1(_mm_max_ps(tmp0, _mm_movehl_ps(tmp0, tmp0)));
-				__m128 tmp2(_mm_max_ps(tmp1, _mm_shuffle_ps(tmp1, tmp1, PERMUTE_MASK(2, 3, 0, 1))));
+				//__m128 tmp2(_mm_max_ps(tmp1, _mm_shuffle_ps(tmp1, tmp1, PERMUTE_MASK(2, 3, 0, 1))));
+				__m128 tmp2(_mm_max_ps(tmp1, _mm_permute_ps(tmp1, PERMUTE_MASK(2, 3, 0, 1))));
 				return _mm_cvtss_f32(tmp2);
 			}
 
@@ -409,7 +411,8 @@
 			{
 				__m128 tmp0(_mm_add_ps(m_typeLow, m_typeHigh));
 				__m128 tmp1(_mm_add_ps(tmp0, _mm_movehl_ps(tmp0, tmp0)));
-				__m128 tmp2(_mm_add_ps(tmp1, _mm_shuffle_ps(tmp1, tmp1, PERMUTE_MASK(2, 3, 0, 1))));
+				//__m128 tmp2(_mm_add_ps(tmp1, _mm_shuffle_ps(tmp1, tmp1, PERMUTE_MASK(2, 3, 0, 1))));
+				__m128 tmp2(_mm_add_ps(tmp1, _mm_permute_ps(tmp1, PERMUTE_MASK(2, 3, 0, 1))));
 				return _mm_cvtss_f32(tmp2);
 			}
 
@@ -463,8 +466,7 @@
 				{
 					ndVector m_linear;
 					ndVector m_angular;
-				//} m_vector8;
-				};
+				} m_vector8;
 
 				__m256 m_type;
 				__m256i m_typeInt;

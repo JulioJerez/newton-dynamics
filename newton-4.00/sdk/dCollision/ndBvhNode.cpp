@@ -285,11 +285,6 @@ void ndBvhNode::SetAabb(const ndVector& minBox, const ndVector& maxBox)
 	m_minBox = p0.Floor() * m_aabbInvQuantization;
 	m_maxBox = p1.Floor() * m_aabbInvQuantization;
 
-	if (ndAbs(m_maxBox.m_x) > 1000)
-	{
-		m_maxBox.m_x = 0.0;
-	}
-
 	ndAssert(m_minBox.m_w == ndFloat32(0.0f));
 	ndAssert(m_maxBox.m_w == ndFloat32(0.0f));
 }

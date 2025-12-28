@@ -1327,7 +1327,7 @@ class ndVector : public ndClassAlloc
 	inline ndVector CrossProduct(const ndVector& B) const
 	{
 #if 1
-		// actually this is better because the compulier replace 
+		// actually this is better because the compilier replace 
 		// shffle with permutes.
 		__m128 tmp0 = _mm_shuffle_ps(m_type, m_type, _MM_SHUFFLE(3, 0, 2, 1));
 		__m128 tmp1 = _mm_shuffle_ps(B.m_type, B.m_type, _MM_SHUFFLE(3, 1, 0, 2));
@@ -1424,6 +1424,7 @@ class ndVector : public ndClassAlloc
 
 	inline ndVector GetMax() const
 	{
+		// using shuffle because in avx, the compiel replace it with prmoute 
 		__m128 tmp(_mm_max_ps(m_type, _mm_shuffle_ps(m_type, m_type, PERMUTE_MASK(1, 0, 3, 2))));
 		return _mm_max_ps(tmp, _mm_shuffle_ps(tmp, tmp, PERMUTE_MASK(2, 3, 0, 1)));
 	}
