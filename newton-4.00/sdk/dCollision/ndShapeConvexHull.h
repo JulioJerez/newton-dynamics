@@ -24,6 +24,8 @@
 
 #include "ndShapeConvex.h"
 
+//#define D_USING_VECTOR_8_SUPPORT
+
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndShapeConvexHull : public ndShapeConvex
 {
@@ -53,10 +55,18 @@ class ndShapeConvexHull : public ndShapeConvex
 
 	ndConvexBox* m_supportTree;
 	ndConvexSimplexEdge** m_faceArray;
+
+#ifdef D_USING_VECTOR_8_SUPPORT
+	ndVector8* m_soa_x;
+	ndVector8* m_soa_y;
+	ndVector8* m_soa_z;
+	ndVector8* m_soa_index;
+#else
 	ndVector* m_soa_x;
 	ndVector* m_soa_y;
 	ndVector* m_soa_z;
 	ndVector* m_soa_index;
+#endif
 	const ndConvexSimplexEdge** m_vertexToEdgeMapping;
 	ndInt32 m_faceCount;
 	ndInt32 m_soaVertexCount;
