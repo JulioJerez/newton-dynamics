@@ -142,6 +142,8 @@ class ndDynamicsUpdate : public ndClassAlloc
 
 	friend class ndWorld;
 	friend class ndSkeletonContainer;
+	friend class ndDynamicsUpdateSoa;
+	friend class ndDynamicsUpdateAvx2;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 inline ndVector ndDynamicsUpdate::GetVelocTol() const

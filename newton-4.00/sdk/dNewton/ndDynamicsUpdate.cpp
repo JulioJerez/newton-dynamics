@@ -817,7 +817,6 @@ void ndDynamicsUpdate::InitJacobianMatrix()
 	auto InitJacobianMatrix = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32)
 	{
 		D_TRACKTIME_NAMED(InitJacobianMatrix);
-		//ndJacobian* const internalForces = &GetTempInternalForces()[0];
 		ndVector8* const internalForces = (ndVector8*)&GetTempInternalForces()[0];
 		auto BuildJacobianMatrix = [this, &internalForces](ndConstraint* const joint, ndInt32 jointIndex)
 		{
@@ -826,12 +825,9 @@ void ndDynamicsUpdate::InitJacobianMatrix()
 			const ndBodyKinematic* const body0 = joint->GetBody0();
 			const ndBodyKinematic* const body1 = joint->GetBody1();
 
-			//const ndVector force0(body0->GetForce());
-			//const ndVector torque0(body0->GetTorque());
-			//const ndVector force1(body1->GetForce());
-			//const ndVector torque1(body1->GetTorque());
-			ndVector8 forceTorque0(body0->GetForce(), body0->GetTorque());
-			ndVector8 forceTorque1(body1->GetForce(), body1->GetTorque());
+			//ndVector8 forceTorque0(body0->GetForce(), body0->GetTorque());
+			//ndVector8 forceTorque1(body1->GetForce(), body1->GetTorque());
+			ndVector16 forceTorque(body0->GetForce(), body0->GetTorque(), body1->GetForce(), body1->GetTorque());
 
 			const ndInt32 index = joint->m_rowStart;
 			const ndInt32 count = joint->m_rowCount;
@@ -840,18 +836,13 @@ void ndDynamicsUpdate::InitJacobianMatrix()
 			const ndVector invMass0(body0->m_invMass[3]);
 			const ndVector invMass1(body1->m_invMass[3]);
 
-			//const ndVector zero(ndVector::m_zero);
-			//ndVector forceAcc0(zero);
-			//ndVector torqueAcc0(zero);
-			//ndVector forceAcc1(zero);
-			//ndVector torqueAcc1(zero);
-			//const ndVector weigh0(body0->m_weigh);
-			//const ndVector weigh1(body1->m_weigh);
+			//ndVector8 forceAcc0(ndVector8::m_zero);
+			//ndVector8 forceAcc1(ndVector8::m_zero);
+			ndVector16 forceAcc(ndVector16::m_zero);
 
-			ndVector8 forceAcc0(ndVector8::m_zero);
-			ndVector8 forceAcc1(ndVector8::m_zero);
-			const ndVector8 weigh0(body0->m_weigh);
-			const ndVector8 weigh1(body1->m_weigh);
+			//const ndVector8 weigh0(body0->m_weigh);
+			//const ndVector8 weigh1(body1->m_weigh);
+			const ndVector16 weigh(ndVector8(body0->m_weigh), ndVector8(body1->m_weigh));
 
 			const bool isBilateral = joint->IsBilateral();
 			for (ndInt32 i = 0; i < count; ++i)
@@ -864,17 +855,12 @@ void ndDynamicsUpdate::InitJacobianMatrix()
 				row->m_JMinv.m_jacobianM1.m_linear = row->m_Jt.m_jacobianM1.m_linear * invMass1;
 				row->m_JMinv.m_jacobianM1.m_angular = invInertia1.RotateVector(row->m_Jt.m_jacobianM1.m_angular);
 
-				//const ndJacobian& JMinvM0 = row->m_JMinv.m_jacobianM0;
-				//const ndJacobian& JMinvM1 = row->m_JMinv.m_jacobianM1;
-				//const ndVector tmpAccel(
-				//	JMinvM0.m_linear * force0 + JMinvM0.m_angular * torque0 +
-				//	JMinvM1.m_linear * force1 + JMinvM1.m_angular * torque1);
-				const ndVector8& JMinvM0 = (ndVector8&)row->m_JMinv.m_jacobianM0;
-				const ndVector8& JMinvM1 = (ndVector8&)row->m_JMinv.m_jacobianM1;
+				//const ndVector8& JMinvM0 = (ndVector8&)row->m_JMinv.m_jacobianM0;
+				//const ndVector8& JMinvM1 = (ndVector8&)row->m_JMinv.m_jacobianM1;
+				//const ndVector8 tmpAccel((JMinvM0 * forceTorque0).MulAdd(JMinvM1, forceTorque1));
+				const ndVector16& JMinvM = (ndVector16&)row->m_JMinv.m_jacobianM0;
+				const ndVector16 tmpAccel(JMinvM * forceTorque);
 
-				const ndVector8 tmpAccel((JMinvM0 * forceTorque0).MulAdd(JMinvM1, forceTorque1));
-
-				//const ndFloat32 extenalAcceleration = -tmpAccel.AddHorizontal().GetScalar();
 				const ndFloat32 extenalAcceleration = -tmpAccel.AddHorizontal();
 				rhs->m_deltaAccel = extenalAcceleration;
 				rhs->m_coordenateAccel += extenalAcceleration;
@@ -885,15 +871,12 @@ void ndDynamicsUpdate::InitJacobianMatrix()
 				rhs->m_maxImpact = ndFloat32(0.0f);
 				ndAssert(rhs->SanityCheck());
 
-				//const ndJacobian& JtM0 = row->m_Jt.m_jacobianM0;
-				//const ndJacobian& JtM1 = row->m_Jt.m_jacobianM1;
-				//const ndVector tmpDiag(
-				//	weigh0 * (JMinvM0.m_linear * JtM0.m_linear + JMinvM0.m_angular * JtM0.m_angular) +
-				//	weigh1 * (JMinvM1.m_linear * JtM1.m_linear + JMinvM1.m_angular * JtM1.m_angular));
-				//ndFloat32 diag = tmpDiag.AddHorizontal().GetScalar();
-				const ndVector8& JtM0 = (ndVector8&)row->m_Jt.m_jacobianM0;
-				const ndVector8& JtM1 = (ndVector8&)row->m_Jt.m_jacobianM1;
-				const ndVector8 tmpDiag(weigh0 * JMinvM0 * JtM0 + weigh1 * JMinvM1 * JtM1);
+				//const ndVector8& JtM0 = (ndVector8&)row->m_Jt.m_jacobianM0;
+				//const ndVector8& JtM1 = (ndVector8&)row->m_Jt.m_jacobianM1;
+				const ndVector16& JtM = (ndVector16&)row->m_Jt.m_jacobianM0;
+
+				//const ndVector8 tmpDiag(weigh0 * JMinvM0 * JtM0 + weigh1 * JMinvM1 * JtM1);
+				const ndVector16 tmpDiag(weigh * JMinvM * JtM);
 				ndFloat32 diag = tmpDiag.AddHorizontal();
 				
 				ndAssert(diag > ndFloat32(0.0f));
@@ -903,29 +886,20 @@ void ndDynamicsUpdate::InitJacobianMatrix()
 				rhs->m_JinvMJt = diag;
 				rhs->m_invJinvMJt = ndFloat32(1.0f) / diag;
 
-				//const ndVector f(rhs->m_force);
-				//forceAcc0 = forceAcc0 + JtM0.m_linear * f;
-				//torqueAcc0 = torqueAcc0 + JtM0.m_angular * f;
-				//forceAcc1 = forceAcc1 + JtM1.m_linear * f;
-				//torqueAcc1 = torqueAcc1 + JtM1.m_angular * f;
-				const ndVector8 forceScaler(rhs->m_force);
-				forceAcc0 = forceAcc0.MulAdd(JtM0, forceScaler);
-				forceAcc1 = forceAcc1.MulAdd(JtM1, forceScaler);
+				//const ndVector8 forceScaler(rhs->m_force);
+				//forceAcc0 = forceAcc0.MulAdd(JtM0, forceScaler);
+				//forceAcc1 = forceAcc1.MulAdd(JtM1, forceScaler);
+				const ndVector16 forceScaler(rhs->m_force);
+				forceAcc = forceAcc.MulAdd(JtM, forceScaler);
 			}
 
 			const ndInt32 index0 = jointIndex * 2 + 0;
-			//ndJacobian& outBody0 = internalForces[index0];
-			//outBody0.m_linear = forceAcc0;
-			//outBody0.m_angular = torqueAcc0;
 			ndVector8& outBody0 = internalForces[index0];
-			outBody0 = forceAcc0;
+			outBody0 = forceAcc.m_low;
 
 			const ndInt32 index1 = jointIndex * 2 + 1;
-			//ndJacobian& outBody1 = internalForces[index1];
-			//outBody1.m_linear = forceAcc1;
-			//outBody1.m_angular = torqueAcc1;
 			ndVector8& outBody1 = internalForces[index1];
-			outBody1 = forceAcc1;
+			outBody1 = forceAcc.m_high;
 		};
 
 		ndConstraint* const joint = jointArray[groupId];
@@ -1618,12 +1592,8 @@ void ndDynamicsUpdate::CalculateJointsForce()
 		for (ndInt32 k = 0; k < count; ++k)
 		{
 			const ndInt32 index = jointBodyPairIndexBuffer[startIndex + k].m_joint;
-			//force += jointInternalForces[index].m_linear;
-			//torque += jointInternalForces[index].m_angular;
 			forceTorque = forceTorque + jointInternalForces[index];
 		}
-		//internalForces[m].m_linear = force;
-		//internalForces[m].m_angular = torque;
 		internalForces[m] = forceTorque;
 	});
 
