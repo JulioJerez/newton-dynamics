@@ -44,13 +44,10 @@ class ndDynamicsUpdateSoa: public ndDynamicsUpdate
 	void SortJoints();
 	void SortIslands();
 	void BuildIsland();
-	void InitWeights();
-	//void InitBodyArray();
 	void CalculateForces();
 	void InitJacobianMatrix();
 	void CalculateJointsForce();
 	void CalculateJointsAcceleration();
-	void IntegrateUnconstrainedBodies();
 	virtual void RegenerateSkeletonJacobians(ndSkeletonContainer* const skeleton) override;
 
 	ndVector m_ordinals;

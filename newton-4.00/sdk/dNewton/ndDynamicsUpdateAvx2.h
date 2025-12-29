@@ -43,12 +43,10 @@ class ndDynamicsUpdateAvx2: public ndDynamicsUpdate
 	void SortJoints();
 	void SortIslands();
 	void BuildIsland();
-	void InitWeights();
 	void CalculateForces();
 	void InitJacobianMatrix();
 	void CalculateJointsForce();
 	void CalculateJointsAcceleration();
-	void IntegrateUnconstrainedBodies();
 	virtual void RegenerateSkeletonJacobians(ndSkeletonContainer* const skeleton) override;
 
 	ndArray<ndInt8> m_groupType;
