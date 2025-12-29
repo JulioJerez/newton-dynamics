@@ -76,14 +76,14 @@ class ndBigVector: public ndClassAlloc
 		:m_type(_mm256_loadu_pd(ptr))
 	{
 	}
-#else
+	#else
 	inline ndBigVector(const ndVector& v);
 
 	inline ndBigVector(const ndFloat64* const ptr)
 		:m_type(_mm256_loadu_pd(ptr))
 	{
 	}
-#endif
+	#endif
 
 	inline ndBigVector(ndFloat64 x, ndFloat64 y, ndFloat64 z, ndFloat64 w)
 		:m_type(_mm256_set_pd(w, z, y, x))
