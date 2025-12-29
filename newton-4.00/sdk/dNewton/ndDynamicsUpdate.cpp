@@ -1224,17 +1224,16 @@ void ndDynamicsUpdate::UpdateForceFeedback()
 		ndArray<ndRightHandSide>& rightHandSide = m_rightHandSide;
 		const ndArray<ndLeftHandSide>& leftHandSide = m_leftHandSide;
 
-		const ndVector zero(ndVector::m_zero);
 		const ndFloat32 timestepRK = GetTimestepRK();
-
 		ndConstraint* const joint = jointArray[groupId];
 		const ndInt32 rows = joint->m_rowCount;
 		const ndInt32 first = joint->m_rowStart;
 
-		ndVector force0(zero);
-		ndVector force1(zero);
-		ndVector torque0(zero);
-		ndVector torque1(zero);
+		//ndVector force0(zero);
+		//ndVector force1(zero);
+		//ndVector torque0(zero);
+		//ndVector torque1(zero);
+		ndVector16 forceTorque(ndVector16::m_zero);
 
 		for (ndInt32 k = 0; k < rows; ++k)
 		{
@@ -1245,16 +1244,17 @@ void ndDynamicsUpdate::UpdateForceFeedback()
 			rhs->m_jointFeebackForce->m_force = rhs->m_force;
 			rhs->m_jointFeebackForce->m_impact = rhs->m_maxImpact * timestepRK;
 
-			const ndVector f(rhs->m_force);
-			force0 += lhs->m_Jt.m_jacobianM0.m_linear * f;
-			torque0 += lhs->m_Jt.m_jacobianM0.m_angular * f;
-			force1 += lhs->m_Jt.m_jacobianM1.m_linear * f;
-			torque1 += lhs->m_Jt.m_jacobianM1.m_angular * f;
+			const ndVector16 f(rhs->m_force);
+			//force0 += lhs->m_Jt.m_jacobianM0.m_linear * f;
+			//torque0 += lhs->m_Jt.m_jacobianM0.m_angular * f;
+			//force1 += lhs->m_Jt.m_jacobianM1.m_linear * f;
+			//torque1 += lhs->m_Jt.m_jacobianM1.m_angular * f;
+			forceTorque = forceTorque.MulAdd((ndVector16&)lhs->m_Jt.m_jacobianM0, f);
 		}
-		joint->m_forceBody0 = force0;
-		joint->m_torqueBody0 = torque0;
-		joint->m_forceBody1 = force1;
-		joint->m_torqueBody1 = torque1;
+		joint->m_forceBody0 = forceTorque.m_low.GetLow();
+		joint->m_torqueBody0 = forceTorque.m_low.GetHigh();
+		joint->m_forceBody1 = forceTorque.m_high.GetLow();
+		joint->m_torqueBody1 = forceTorque.m_high.GetHigh();
 		joint->UpdateParameters();
 	});
 
