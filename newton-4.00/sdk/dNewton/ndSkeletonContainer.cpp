@@ -691,7 +691,8 @@ void ndSkeletonContainer::CalculateBufferSizeInBytes()
 void ndSkeletonContainer::CalculateLoopMassMatrixCoefficients(ndFloat32* const diagDamp)
 {
 	D_TRACKTIME();
-	auto CalculateLoopMassMatrixCoefficients = [this, diagDamp](ndInt32 groupId)
+	ndInt32 nonZerosCount = 0;
+	auto CalculateLoopMassMatrixCoefficients = [this, diagDamp, &nonZerosCount](ndInt32 groupId)
 	{
 		const ndInt32 index = groupId;
 		const ndVector8 zero(ndVector8::m_zero);
@@ -701,16 +702,20 @@ void ndSkeletonContainer::CalculateLoopMassMatrixCoefficients(ndFloat32* const d
 		const ndLeftHandSide* const row_i = &m_leftHandSide[ii];
 		const ndRightHandSide* const rhs_i = &m_rightHandSide[ii];
 
-		const ndVector8 JMinvM0(row_i->m_JMinv.m_jacobianM0.m_linear, row_i->m_JMinv.m_jacobianM0.m_angular);
-		const ndVector8 JMinvM1(row_i->m_JMinv.m_jacobianM1.m_linear, row_i->m_JMinv.m_jacobianM1.m_angular);
-		const ndVector8 element(JMinvM0 * (ndVector8&)row_i->m_Jt.m_jacobianM0 + JMinvM1 * (ndVector8&)row_i->m_Jt.m_jacobianM1);
+		const ndVector8& JtM0 = (ndVector8&)row_i->m_Jt.m_jacobianM0;
+		const ndVector8& JtM1 = (ndVector8&)row_i->m_Jt.m_jacobianM1;
+		const ndVector8& JMinvM0 = (ndVector8&)row_i->m_JMinv.m_jacobianM0;
+		const ndVector8& JMinvM1 = (ndVector8&)row_i->m_JMinv.m_jacobianM1;
+		const ndVector8 element(JMinvM0 * JtM0 + JMinvM1 * JtM1);
 
 		// I know I am doubling the matrix regularizer, but this makes the solution more robust.
 		ndFloat32* const matrixRow11 = &m_massMatrix11[m_auxiliaryRowCount * index];
-		ndFloat32 diagonal = element.AddHorizontal() + rhs_i->m_diagDamp;
-		matrixRow11[index] = diagonal + rhs_i->m_diagDamp;
-		diagDamp[index] = matrixRow11[index] * ndFloat32(4.0e-3f);
+		ndFloat32 diagonal = element.AddHorizontal() + rhs_i->m_diagDamp * ndFloat32(2.0f);
+		ndAssert(matrixRow11[index] == ndFloat32(0.0f));
+		matrixRow11[index] = diagonal;
+		diagDamp[index] = diagonal * ndFloat32(4.0e-3f);
 
+		nonZerosCount++;
 		const ndInt32 m0_i = m_pairs[primaryCount + index].m_m0;
 		const ndInt32 m1_i = m_pairs[primaryCount + index].m_m1;
 		for (ndInt32 j = index + 1; j < m_auxiliaryRowCount; ++j)
@@ -749,9 +754,13 @@ void ndSkeletonContainer::CalculateLoopMassMatrixCoefficients(ndFloat32* const d
 			if (hasEffect)
 			{
 				ndFloat32 offDiagValue = acc.AddHorizontal();
-				ndAssert(matrixRow11[j] == ndFloat32 (0.0f));
-				matrixRow11[j] = offDiagValue;
-				m_massMatrix11[j * m_auxiliaryRowCount + index] = offDiagValue;
+				if (ndAbs(offDiagValue) > ndFloat32(0.0f))
+				{
+					ndAssert(matrixRow11[j] == ndFloat32(0.0f));
+					matrixRow11[j] = offDiagValue;
+					m_massMatrix11[j * m_auxiliaryRowCount + index] = offDiagValue;
+					nonZerosCount += 2;
+				}
 			}
 		}
 
@@ -800,6 +809,10 @@ void ndSkeletonContainer::CalculateLoopMassMatrixCoefficients(ndFloat32* const d
 	{
 		CalculateLoopMassMatrixCoefficients(index);
 	}
+
+#if 0
+	ndTrace(("non zeros(%d) out of(%d)\n", nonZerosCount, m_auxiliaryRowCount* m_auxiliaryRowCount));
+#endif
 }
 
 void ndSkeletonContainer::SolveForward(ndForcePair* const force, const ndForcePair* const accel, ndInt32 startNode) const
