@@ -229,8 +229,8 @@ void ndContact::JacobianContactDerivative(ndConstraintDescritor& desc, const ndC
 	const ndVector omega1(m_body1->GetOmega());
 	const ndVector veloc0(m_body0->GetVelocity());
 	const ndVector veloc1(m_body1->GetVelocity());
-	const ndVector gyroAlpha0(m_body0->GetGyroAlpha());
-	const ndVector gyroAlpha1(m_body1->GetGyroAlpha());
+	const ndVector gyroAlpha0(m_body0->m_gyroAlpha);
+	const ndVector gyroAlpha1(m_body1->m_gyroAlpha);
 
 	ndAssert(contact.m_normal.m_w == ndFloat32(0.0f));
 	const ndJacobian& normalJacobian0 = desc.m_jacobian[normalIndex].m_jacobianM0;
@@ -374,8 +374,8 @@ void ndContact::JointAccelerations(ndJointAccelerationDecriptor* const desc)
 	const ndVector bodyOmega1(m_body1->GetOmega());
 	const ndVector bodyVeloc0(m_body0->GetVelocity());
 	const ndVector bodyVeloc1(m_body1->GetVelocity());
-	const ndVector gyroAlpha0(m_body0->GetGyroAlpha());
-	const ndVector gyroAlpha1(m_body1->GetGyroAlpha());
+	const ndVector gyroAlpha0(m_body0->m_gyroAlpha);
+	const ndVector gyroAlpha1(m_body1->m_gyroAlpha);
 
 	const ndInt32 count = desc->m_rowsCount;
 	const ndFloat32 timestep = desc->m_timestep;

@@ -403,12 +403,12 @@ void ndJointBilateralConstraint::SetMassSpringDamperAcceleration(ndConstraintDes
 
 void ndJointBilateralConstraint::JointAccelerations(ndJointAccelerationDecriptor* const desc)
 {
-	const ndVector& bodyVeloc0 = m_body0->m_veloc;
-	const ndVector& bodyOmega0 = m_body0->m_omega;
-	const ndVector& bodyVeloc1 = m_body1->m_veloc;
-	const ndVector& bodyOmega1 = m_body1->m_omega;
-	const ndVector gyroAlpha0(m_body0->GetGyroAlpha());
-	const ndVector gyroAlpha1(m_body1->GetGyroAlpha());
+	const ndVector bodyVeloc0(m_body0->m_veloc);
+	const ndVector bodyOmega0(m_body0->m_omega);
+	const ndVector bodyVeloc1(m_body1->m_veloc);
+	const ndVector bodyOmega1(m_body1->m_omega);
+	const ndVector gyroAlpha0(m_body0->m_gyroAlpha);
+	const ndVector gyroAlpha1(m_body1->m_gyroAlpha);
 
 	ndRightHandSide* const rhs = desc->m_rightHandSide;
 	const ndLeftHandSide* const row = desc->m_leftHandSide;
@@ -491,13 +491,12 @@ void ndJointBilateralConstraint::AddLinearRowJacobian(ndConstraintDescritor& des
 	ndAssert(desc.m_timestep > ndFloat32(0.0f));
 	ndForceImpactPair* const jointForce = &m_jointForce[index];
 
-	const ndVector& omega0 = m_body0->m_omega;
-	const ndVector& omega1 = m_body1->m_omega;
-	const ndVector& veloc0 = m_body0->m_veloc;
-	const ndVector& veloc1 = m_body1->m_veloc;
-
-	const ndVector gyroAlpha0(m_body0->GetGyroAlpha());
-	const ndVector gyroAlpha1(m_body1->GetGyroAlpha());
+	const ndVector omega0 (m_body0->m_omega);
+	const ndVector omega1 (m_body1->m_omega);
+	const ndVector veloc0 (m_body0->m_veloc);
+	const ndVector veloc1 (m_body1->m_veloc);
+	const ndVector gyroAlpha0(m_body0->m_gyroAlpha);
+	const ndVector gyroAlpha1(m_body1->m_gyroAlpha);
 	const ndVector centripetal0(omega0.CrossProduct(omega0.CrossProduct(m_r0[index])));
 	const ndVector centripetal1(omega1.CrossProduct(omega1.CrossProduct(m_r1[index])));
 
@@ -549,10 +548,10 @@ void ndJointBilateralConstraint::AddAngularRowJacobian(ndConstraintDescritor& de
 	jacobian1.m_angular = dir * ndVector::m_negOne;
 	ndAssert(jacobian1.m_angular.m_w == ndFloat32(0.0f));
 
-	const ndVector omega0 (m_body0->GetOmega());
-	const ndVector omega1 (m_body1->GetOmega());
-	const ndVector gyroAlpha0(m_body0->GetGyroAlpha());
-	const ndVector gyroAlpha1(m_body1->GetGyroAlpha());
+	const ndVector omega0 (m_body0->m_omega);
+	const ndVector omega1 (m_body1->m_omega);
+	const ndVector gyroAlpha0(m_body0->m_gyroAlpha);
+	const ndVector gyroAlpha1(m_body1->m_gyroAlpha);
 
 	const ndFloat32 relOmega = -(omega0 * jacobian0.m_angular + omega1 * jacobian1.m_angular).AddHorizontal().GetScalar();
 

@@ -558,7 +558,7 @@ void ndIkSolver::Solve()
 		{
 			ndBodyKinematic* const body = m_bodies[i];
 			body->m_accel = body->GetForce();
-			body->m_alpha = body->GetTorque() - body->GetGyroTorque();
+			body->m_alpha = body->GetTorque() - body->m_gyroTorque;
 		}
 		for (ndInt32 i = ndInt32(m_contacts.GetCount()) - 1; i >= 0; --i)
 		{
@@ -619,7 +619,7 @@ void ndIkSolver::Solve()
 				{
 					ndBodyKinematic* const body = m_bodies[j];
 					body->m_accel = body->GetForce();
-					body->m_alpha = body->GetTorque() - body->GetGyroTorque();
+					body->m_alpha = body->GetTorque() - body->m_gyroTorque;
 				}
 				m_skeleton->SolveImmediate(*this);
 			}
