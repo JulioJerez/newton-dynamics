@@ -20,8 +20,8 @@
 
 namespace ndUnicyclePlayer
 {
-	#define CONTROLLER_NAME_SAC		"cartpoleSac"
-	#define CONTROLLER_NAME_PPO		"cartpolePpo"
+	#define CONTROLLER_NAME_SAC		"unicycleSac"
+	#define CONTROLLER_NAME_PPO		"unicyclePpo"
 
 	#define CART_MASS				ndFloat32(10.0f)
 	#define POLE_MASS				ndFloat32(5.0f)

@@ -50,5 +50,4 @@ class ndRand127
     ndSpinLock m_lock;
 };
 
-
 #endif

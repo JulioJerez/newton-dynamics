@@ -116,6 +116,9 @@ namespace ndUnicycleTrainer_ppo
 			m_outFile = fopen(name, "wb");
 			fprintf(m_outFile, "vpg\n");
 
+			// set random see for replication
+			ndSetRandSeed(42);
+
 			// create a Soft Actor Critic traniing agent
 			ndBrainAgentOnPolicyGradient_Trainer::HyperParameters hyperParameters;
 			
@@ -278,20 +281,21 @@ void ndUnicyclePpoTraining(ndDemoEntityManager* const scene)
 	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend());
 	scene->SetDemoHelp(demoHelper);
 
-	ndMatrix matrix(ndGetIdentityMatrix());
-	ndRenderMeshLoader loader(*scene->GetRenderer());
-	loader.LoadMesh(ndGetWorkingFileName("unicycle.nd"));
-
-	// create a material that make the objects in training not collsionnle
+	// create a material that make models in training non collidable
 	TrainMaterial material;
 	ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
 	callback->RegisterMaterial(material, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_modelPart);
 
-	ndSetRandSeed(42);
+	//load the mesh so that is can be re used
+	ndMatrix matrix(ndGetIdentityMatrix());
+	ndRenderMeshLoader loader(*scene->GetRenderer());
+	loader.LoadMesh(ndGetWorkingFileName("unicycle.nd"));
+
+	// create the trainer agent
 	ndSharedPtr<ndDemoEntityManager::OnPostUpdate>trainer(new TrainingUpdata(scene, matrix, loader));
 	scene->RegisterPostUpdate(trainer);
 
-	// supress v sync refresh rate
+	// supress v sync refresh rate for fast tranning
 	scene->SetAcceleratedUpdate();
 	
 	matrix.m_posit.m_x -= 0.0f;
