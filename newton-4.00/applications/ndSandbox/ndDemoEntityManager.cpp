@@ -37,18 +37,19 @@
 //#define DEFAULT_SCENE	10		// basic convex approximate compound shapes
 //#define DEFAULT_SCENE	11		// basic model, a npd vehicle prop
 //#define DEFAULT_SCENE	12		// basic rag doll
-#define DEFAULT_SCENE	13		// complex model, implement a complex model with joints
+//#define DEFAULT_SCENE	13		// complex model, implement a complex model with joints
 //#define DEFAULT_SCENE	14		// basics multi body vehicle
 //#define DEFAULT_SCENE	15		// object Placement
 //#define DEFAULT_SCENE	16		// third person player capsule
 //#define DEFAULT_SCENE	17		// cart pole SAC trained controller
 //#define DEFAULT_SCENE	18		// cart pole PPO trained controller
 //#define DEFAULT_SCENE	19		// unicycle PPO trained controller
-//#define DEFAULT_SCENE	20		// procedurally animated quadruped spider
+#define DEFAULT_SCENE	20		// procedurally animated quadruped spider
 
 // These are the machine learning training demos
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// train cart pole using SAC agent
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// train cart pole using PPO agent
+//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// train double pendulu unycycle using PPO agent
 
 // legacy demos 
 //#define DEFAULT_SCENE	8		// particle fluid
@@ -80,8 +81,6 @@ void ndBasicVehicle(ndDemoEntityManager* const scene);
 void ndBasicFriction(ndDemoEntityManager* const scene);
 void ndBasicRigidBody(ndDemoEntityManager* const scene);
 void ndObjectPlacement(ndDemoEntityManager* const scene);
-void ndCartpolePlayer_SAC(ndDemoEntityManager* const scene);
-void ndCartpolePlayer_PPO(ndDemoEntityManager* const scene);
 void ndQuadSpiderAnimated(ndDemoEntityManager* const scene);
 void ndBasicAngularMomentum(ndDemoEntityManager* const scene);
 void ndBasicSlidingPlatform(ndDemoEntityManager* const scene);
@@ -91,9 +90,13 @@ void ndBasicStaticMeshCollision(ndDemoEntityManager* const scene);
 void ndPlayerCapsule_ThirdPerson(ndDemoEntityManager* const scene);
 void ndBasicSceneCompoundCollision(ndDemoEntityManager* const scene);
 
-void ndUniCyclePlayer_PPO(ndDemoEntityManager* const scene);
+void ndCartpolePlayer_SAC(ndDemoEntityManager* const scene);
+void ndCartpolePlayer_PPO(ndDemoEntityManager* const scene);
+void ndUnicyclePlayer_PPO(ndDemoEntityManager* const scene);
+
 void ndCartpoleSacTraining(ndDemoEntityManager* const scene);
 void ndCartpolePpoTraining(ndDemoEntityManager* const scene);
+void ndUnicyclePpoTraining(ndDemoEntityManager* const scene);
 
 ndDemoEntityManager::ndDemos ndDemoEntityManager::m_demosSelection[] =
 {
@@ -116,7 +119,7 @@ ndDemoEntityManager::ndDemos ndDemoEntityManager::m_demosSelection[] =
 	{ "basic player", ndPlayerCapsule_ThirdPerson},
 	{ "cart pole SAC player controller", ndCartpolePlayer_SAC},
 	{ "cart pole PPO player controller", ndCartpolePlayer_PPO},
-	{ "unicycle PPO player controller", ndUniCyclePlayer_PPO},
+	{ "unicycle PPO player controller", ndUnicyclePlayer_PPO},
 	{ "procedural animated quad spider", ndQuadSpiderAnimated},
 
 #if 0
@@ -144,6 +147,7 @@ ndDemoEntityManager::ndDemos ndDemoEntityManager::m_machineLearning[]
 {
 	{ "cartpole SAC training", ndCartpoleSacTraining},
 	{ "Cartpole PPO Training", ndCartpolePpoTraining},
+	{ "Unicycle PPO Training", ndUnicyclePpoTraining},
 };
 
 ndDemoEntityManager::ButtonKey::ButtonKey (bool state)

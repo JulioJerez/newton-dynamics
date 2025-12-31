@@ -18,7 +18,7 @@
 #include "ndDemoEntityNotify.h"
 #include "ndDemoEntityManager.h"
 
-namespace ndUniCyclePlayer
+namespace ndUnicyclePlayer
 {
 	#define CONTROLLER_NAME_SAC		"cartpoleSac"
 	#define CONTROLLER_NAME_PPO		"cartpolePpo"

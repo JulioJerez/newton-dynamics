@@ -22,7 +22,7 @@
 namespace ndQuadSpiderPlayer
 {
 	#define D_WALK_STRIDE		ndReal(0.3f)
-	#define D_STRIDE_AMPLITUD	ndReal(0.35f)
+	#define D_STRIDE_AMPLITUD	(ndReal(0.5f) * D_WALK_STRIDE)
 	#define D_TURN_RATE			ndReal(0.25f)
 
 	#define D_HIP_SWAY_X		ndReal(0.1f)
@@ -175,7 +175,8 @@ namespace ndQuadSpiderPlayer
 				ndFloat32 y0 = m_pose[legIndex].m_start.m_y;
 				ndFloat32 y1 = m_pose[legIndex].m_end.m_y;
 
-				ndFloat32 h = ndFloat32(0.5f) * (y1 + y0) + m_stride * D_STRIDE_AMPLITUD;
+				//ndFloat32 h = ndFloat32(0.5f) * (y1 + y0) + m_stride * D_STRIDE_AMPLITUD;
+				ndFloat32 h = ndFloat32(0.5f) * (y1 + y0) + D_STRIDE_AMPLITUD;
 
 				ndFloat32 a0 = y0;
 				ndFloat32 a1 = ndFloat32(4.0f) * (h - y0) - (y1 - y0);
@@ -518,9 +519,9 @@ namespace ndQuadSpiderPlayer
 
 		ndWorld* const world = scene->GetWorld();
 		const ndMatrix upMatrix(rootBody->GetMatrix());
-		ndSharedPtr<ndJointBilateralConstraint> upVector(new ndJointUpVector(upMatrix.m_up, rootBody->GetAsBodyKinematic(), world->GetSentinelBody()));
 		//ndSharedPtr<ndJointBilateralConstraint> upVector(new ndJointFix6dof(upMatrix, rootBody->GetAsBodyKinematic(), world->GetSentinelBody()));
-		//model->AddCloseLoop(upVector);
+		ndSharedPtr<ndJointBilateralConstraint> upVector(new ndJointUpVector(upMatrix.m_up, rootBody->GetAsBodyKinematic(), world->GetSentinelBody()));
+		model->AddCloseLoop(upVector);
 	}
 
 	ndSharedPtr<ndModel> ndController::CreateModel(ndDemoEntityManager* const scene, const ndMatrix& location, const ndRenderMeshLoader& loader)
@@ -580,7 +581,6 @@ namespace ndQuadSpiderPlayer
 			ImGui::SliderFloat("Swaying x", &swingControl->m_x, -D_HIP_SWAY_X, D_HIP_SWAY_X);
 			ImGui::SliderFloat("Swaying z", &swingControl->m_z, -D_HIP_SWAY_Z, D_HIP_SWAY_Z);
 
-
 			//ndModelArticulation* xxx = m_playerController->GetModel()->GetAsModelArticulation();;
 			//const ndList<ndModelArticulation::ndNode>& list = xxx->GetCloseLoops();
 			//ndJointUpVector* xxx1 = (ndJointUpVector*) *list.GetLast()->GetInfo().m_joint;
@@ -634,5 +634,5 @@ void ndQuadSpiderAnimated(ndDemoEntityManager* const scene)
 	// set the robot camera as the active camera
 	ndController* const controller = (ndController*)*model->GetNotifyCallback();
 	ndRender* const renderer = *scene->GetRenderer();
-	//renderer->SetCamera(controller->m_cameraNode);
+	renderer->SetCamera(controller->m_cameraNode);
 }

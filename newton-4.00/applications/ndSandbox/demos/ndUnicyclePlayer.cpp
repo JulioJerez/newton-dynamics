@@ -18,7 +18,7 @@
 #include "ndDemoEntityNotify.h"
 #include "ndDemoEntityManager.h"
 
-namespace ndUniCyclePlayer
+namespace ndUnicyclePlayer
 {
 	class ndHelpLegend_Sac : public ndDemoEntityManager::ndDemoHelper
 	{
@@ -51,7 +51,6 @@ namespace ndUniCyclePlayer
 			scene->Print(color, "to knock the pole over using the mouse.");
 		}
 	};
-
 
 	class ndPlaybackController : public ndController
 	{
@@ -234,10 +233,10 @@ namespace ndUniCyclePlayer
 	}
 }
 
-using namespace ndUniCyclePlayer;
+using namespace ndUnicyclePlayer;
 
 
-void ndUniCyclePlayer_SAC(ndDemoEntityManager* const scene)
+void ndUnicyclePlayer_SAC(ndDemoEntityManager* const scene)
 {
 	ndSharedPtr<ndBody> mapBody(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
 
@@ -257,7 +256,7 @@ void ndUniCyclePlayer_SAC(ndDemoEntityManager* const scene)
 	scene->SetCameraMatrix(rotation, matrix.m_posit);
 }
 
-void ndUniCyclePlayer_PPO(ndDemoEntityManager* const scene)
+void ndUnicyclePlayer_PPO(ndDemoEntityManager* const scene)
 {
 	ndSharedPtr<ndBody> mapBody(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
 
