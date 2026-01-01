@@ -143,7 +143,7 @@ void ndDynamicsUpdateSoa::SortJoints()
 	const ndInt32 mask = -ndInt32(ND_SIMD8_WORK_GROUP_SIZE);
 	const ndInt32 jointCount = ndInt32(jointArray.GetCount());
 	const ndInt32 soaJointCount = (jointCount + ND_SIMD8_WORK_GROUP_SIZE - 1) & mask;
-	ndAssert(jointArray.GetCapacity() > soaJointCount);
+	ndAssert(jointArray.GetCapacity() >= soaJointCount);
 	ndConstraint** const jointArrayPtr = &jointArray[0];
 	for (ndInt32 i = jointCount; i < soaJointCount; ++i)
 	{
