@@ -80,7 +80,7 @@ namespace ndUnicyclePlayer
 		boxMatrix.m_posit = m_topBox->GetMatrix().m_posit;
 		boxMatrix.m_posit.m_x = ndFloat32(0.0f);
 		//cartMatrix.m_posit.m_x = ndFloat32(10.0f) * (ndRand() - ndFloat32(0.5f));
-		boxMatrix.m_posit.m_y = ndFloat32(2.0f);
+		boxMatrix.m_posit.m_y = ndFloat32(2.0f) + ndFloat32(2.0f) * ndRand();
 		m_topBox->SetMatrix(boxMatrix);
 		
 		const ndMatrix poleMatrix(m_poleHinge->GetLocalMatrix0().OrthoInverse() * m_poleHinge->CalculateGlobalMatrix1());
