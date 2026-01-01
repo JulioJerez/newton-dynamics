@@ -25,7 +25,7 @@ namespace ndUnicyclePlayer
 		virtual void PresentHelp(ndDemoEntityManager* const scene) override
 		{
 			ndVector color(1.0f, 1.0f, 0.0f, 0.0f);
-			scene->Print(color, "Cart Pole is the classic hello world of reinforcement learning");
+			scene->Print(color, "unicycle is a typical reinforcement learning");
 			scene->Print(color, "it is use to test the correctness of an algorithm implementation.");
 			scene->Print(color, "The model is trained using Soft Actor Critic(SAC).");
 			scene->Print(color, "It consists of a pole attached by a hinge to a sliding cart.");
@@ -41,7 +41,7 @@ namespace ndUnicyclePlayer
 		virtual void PresentHelp(ndDemoEntityManager* const scene) override
 		{
 			ndVector color(1.0f, 1.0f, 0.0f, 0.0f);
-			scene->Print(color, "Cart Pole is the classic hello world of reinforcement learning");
+			scene->Print(color, "unicycle is a typical reinforcement learning");
 			scene->Print(color, "It is used to test the correctness of an algorithm implementation.");
 			scene->Print(color, "The model is trained using Proximal Policy Gradient (PPO).");
 			scene->Print(color, "It consists of a pole attached by a hinge to a sliding cart.");
@@ -241,7 +241,6 @@ namespace ndUnicyclePlayer
 
 	ndModelArticulation* ndController::CreateModel(ndDemoEntityManager* const scene, const ndMatrix& location, const ndRenderMeshLoader& loader, const char* const name)
 	{
-		ndAssert(0);
 		ndMatrix matrix(location);
 		matrix.m_posit = FindFloor(*scene->GetWorld(), matrix.m_posit, 200.0f);
 		matrix.m_posit.m_y += ndFloat32(0.1f);
@@ -299,9 +298,6 @@ void ndUnicyclePlayer_PPO(ndDemoEntityManager* const scene)
 {
 	ndSharedPtr<ndBody> mapBody(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
 
-	// TO DO
-	ndAssert(0);
-#if 0
 	// add a help message
 	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend_Ppo());
 	scene->SetDemoHelp(demoHelper);
@@ -312,9 +308,8 @@ void ndUnicyclePlayer_PPO(ndDemoEntityManager* const scene)
 	ndController::CreateModel(scene, matrix, loader, CONTROLLER_NAME_PPO);
 
 	matrix.m_posit.m_x -= 0.0f;
-	matrix.m_posit.m_y += 0.5f;
-	matrix.m_posit.m_z += 2.0f;
-	ndQuaternion rotation(ndVector(0.0f, 1.0f, 0.0f, 0.0f), 90.0f * ndDegreeToRad);
+	matrix.m_posit.m_y += 1.5f;
+	matrix.m_posit.m_z += -9.0f;
+	ndQuaternion rotation(ndVector(0.0f, 1.0f, 0.0f, 0.0f), -90.0f * ndDegreeToRad);
 	scene->SetCameraMatrix(rotation, matrix.m_posit);
-#endif
 }
