@@ -25,21 +25,22 @@ void ndBasicProcedualStaticCollision(ndDemoEntityManager* const scene)
 	ndQuaternion rot(ndYawMatrix(180.0f * ndDegreeToRad));
 	ndVector floor(FindFloor(*scene->GetWorld(), ndVector::m_zero, 200.0f));
 
-	// no ray case yet, 
-	floor.m_y = 20.0f;
+	// no ray case yet
+	floor.m_y = 0.1f;
+	floor.m_x += 1.0f;
 
 	ndMatrix origin(ndCalculateMatrix(rot, floor));
 
-	// add few props
-	origin.m_posit += origin.m_front.Scale (ndFloat32 (40.0f));
-//	AddCapsuleStacks(scene, origin, 10.0f, 0.5f, 0.5f, 1.0f, 10, 10, 7);
-	
-	origin.m_posit += origin.m_right.Scale(20.0f);
+	//// add few props
+	//origin.m_posit += origin.m_front.Scale (ndFloat32 (40.0f));
+	//AddCapsuleStacks(scene, origin, 10.0f, 0.5f, 0.5f, 1.0f, 10, 10, 7);
+	//
+	//origin.m_posit += origin.m_right.Scale(20.0f);
 	//AddPlanks(scene, origin, 1.0f, 4);
 
 	ndSharedPtr<ndBody> xxx(AddBox(scene, origin, 1.0f, 1.0f, 0.5f, 2.0f, "wood_0.png"));
 	ndMatrix xxxxx(xxx->GetMatrix());
-	xxxxx.m_posit.m_y = 2.0f;
+	xxxxx.m_posit.m_y = floor.m_y;
 	xxx->SetMatrix(xxxxx);
 	//xxx->GetAsBodyKinematic()->SetMatrixUpdateScene(xxxxx);
 	//xxx->GetAsBodyKinematic()->SetAutoSleep(false);

@@ -25,7 +25,6 @@
 #define D_TERRAIN_NOISE_OCTAVES		8
 #define D_TERRAIN_NOISE_PERSISTANCE	0.5f
 #define D_TERRAIN_NOISE_GRID_SCALE  (1.0f / 500.0f)
-//#define D_TERRAIN_NOISE_GRID_SCALE  1.0f / (ndFloat32 (D_TERRAIN_WIDTH) / 5)
 
 #define D_TERRAIN_GRID_SIZE			2.0f
 #define D_TERRAIN_TILE_SIZE			128
@@ -59,10 +58,9 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 
 	ndProceduralTerrainShape()
 		:ndShapeStaticProceduralMesh()
+		,m_padding(ndVector(0.1f) & ndVector::m_triplexMask)
 	{
 		MakeNoiseHeightfield();
-
-		m_padding = ndVector(0.1f) & ndVector::m_triplexMask;
 
 		ndFloat32 minY = 1.0e20f;
 		ndFloat32 maxY = -1.0e20f;
@@ -97,27 +95,31 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 		const ndFloat32 noiseGridScale = D_TERRAIN_NOISE_GRID_SCALE;
 
 		ndFloat32 minHeight = ndFloat32(1.0e10f);
-		ndFloat32 maxHight = ndFloat32(-1.0e10f);
+		ndFloat32 maxHeight = ndFloat32(-1.0e10f);
 		for (ndInt32 z = 0; z < D_TERRAIN_HEIGHT; z++)
 		{
 			for (ndInt32 x = 0; x < D_TERRAIN_WIDTH; x++)
 			{
 				ndFloat32 noiseVal = BrownianMotion(octaves, persistance, noiseGridScale * ndFloat32(x), noiseGridScale * ndFloat32(z));
+				noiseVal = 0.0f;
 				m_heightfield[z * D_TERRAIN_WIDTH + x] = noiseVal;
 				minHeight = ndMin(minHeight, noiseVal);
-				maxHight = ndMax(maxHight, noiseVal);
+				maxHeight = ndMax(maxHeight, noiseVal);
 
 				// that app should populate this with app matrials.
 				// just make a zero material index,
 				m_material[z * D_TERRAIN_WIDTH + x] = 0;
 			}
 		}
+		minHeight -= m_padding.m_y;
+		maxHeight += m_padding.m_y;
 
-		ndFloat32 scale = D_TERRAIN_ELEVATION_SCALE / (maxHight - minHeight);
+		ndFloat32 scale = D_TERRAIN_ELEVATION_SCALE / (maxHeight - minHeight);
 		for (ndInt32 i = 0; i < m_heightfield.GetCapacity(); ++i)
 		{
 			ndFloat32 y = m_heightfield[i];
-			y = scale * (y - minHeight);
+			//y = scale * (y - minHeight);
+			y = scale * y;
 			m_heightfield[i] = y;
 		}
 	}
@@ -175,10 +177,11 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 		boxP1 += data->m_boxDistanceTravelInMeshSpace & (data->m_boxDistanceTravelInMeshSpace > ndVector::m_zero);
 
 		// clamp sweep box against shape bounds, and get the integet dimension
+		const ndVector invSize(ndFloat32 (1.0f) / D_TERRAIN_GRID_SIZE);
 		const ndVector p0(boxP0.GetMax(m_minBox));
 		const ndVector p1(boxP1.GetMin(m_maxBox));
-		const ndVector intP0(p0.GetInt());
-		const ndVector intP1(p1.GetInt());
+		const ndVector intP0((p0 * invSize).GetInt());
+		const ndVector intP1((p1 * invSize).GetInt());
 
 		const ndInt32 x0 = ndInt32(intP0.m_ix);
 		const ndInt32 x1 = ndInt32(intP1.m_ix);
@@ -391,7 +394,7 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 		boxP1 = ndVector((p1.Scale(invGridSize).Floor() + ndVector::m_one).Scale(D_TERRAIN_GRID_SIZE) + m_padding);
 
 		boxP0.m_y = p0.m_y - m_padding.m_y;
-		boxP1.m_y = p0.m_y + m_padding.m_y;
+		boxP1.m_y = p1.m_y + m_padding.m_y;
 	}
 
 	void CalculateMinAndMaxElevation(ndInt32 x0, ndInt32 x1, ndInt32 z0, ndInt32 z1, ndFloat32& minHeight, ndFloat32& maxHeight) const
