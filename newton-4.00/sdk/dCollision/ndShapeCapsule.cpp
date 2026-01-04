@@ -487,16 +487,16 @@ ndInt32 ndShapeCapsule::CalculatePlaneIntersection(const ndVector& direction, co
 
 void ndShapeCapsule::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) const
 {
-	ndVector size0(m_radius0);
-	ndVector size1(m_radius1);
-	ndVector q0(matrix.m_posit - matrix.m_front.Scale(m_height));
-	ndVector q1(matrix.m_posit + matrix.m_front.Scale(m_height));
+	const ndVector size0(m_radius0);
+	const ndVector size1(m_radius1);
+	const ndVector q0(matrix.m_posit - matrix.m_front.Scale(m_height));
+	const ndVector q1(matrix.m_posit + matrix.m_front.Scale(m_height));
 
-	ndVector min_q0(q0 - size0);
-	ndVector min_q1(q1 - size1);
+	const ndVector min_q0(q0 - size0);
+	const ndVector min_q1(q1 - size1);
 
-	ndVector max_q0(q0 + size1);
-	ndVector max_q1(q1 + size1);
+	const ndVector max_q0(q0 + size1);
+	const ndVector max_q1(q1 + size1);
 
 	p0 = min_q0.GetMin(min_q1) & ndVector::m_triplexMask;
 	p1 = max_q0.GetMax(max_q1) & ndVector::m_triplexMask;
