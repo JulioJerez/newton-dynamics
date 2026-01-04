@@ -532,10 +532,10 @@ void ndShapeHeightfield::GetCollidingFaces(ndPolygonMeshDesc* const data) const
 	ndAssert(p1.m_ix == FastInt(boxP1.m_x * m_horizontalScaleInv_x));
 	ndAssert(p1.m_iz == FastInt(boxP1.m_z * m_horizontalScaleInv_x));
 
-	ndInt32 x0 = ndInt32(p0.m_ix);
-	ndInt32 x1 = ndInt32(p1.m_ix);
-	ndInt32 z0 = ndInt32(p0.m_iz);
-	ndInt32 z1 = ndInt32(p1.m_iz);
+	const ndInt32 x0 = ndInt32(p0.m_ix);
+	const ndInt32 x1 = ndInt32(p1.m_ix);
+	const ndInt32 z0 = ndInt32(p0.m_iz);
+	const ndInt32 z1 = ndInt32(p1.m_iz);
 
 	if ((x1 == x0) || (z1 == z0))
 	{
@@ -574,7 +574,7 @@ void ndShapeHeightfield::GetCollidingFaces(ndPolygonMeshDesc* const data) const
 		ndInt32 normalBase = vertexIndex;
 		vertexIndex = 0;
 		ndInt32 quadCount = 0;
-		ndInt32 step = x1 - x0 + 1;
+		const ndInt32 step = x1 - x0 + 1;
 
 		ndArray<ndInt32>& quadDataArray = query.m_faceVertexIndex;
 		ndArray<ndInt32>& faceIndexCount = query.m_faceIndexCount;
