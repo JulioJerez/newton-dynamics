@@ -26,7 +26,7 @@ void ndBasicProcedualStaticCollision(ndDemoEntityManager* const scene)
 	ndVector floor(FindFloor(*scene->GetWorld(), ndVector::m_zero, 200.0f));
 
 	// no ray case yet
-	floor.m_y = -1.2f;
+	floor.m_y = 3.25f;
 	floor.m_x += 1.0f;
 
 	ndMatrix origin(ndCalculateMatrix(rot, floor));

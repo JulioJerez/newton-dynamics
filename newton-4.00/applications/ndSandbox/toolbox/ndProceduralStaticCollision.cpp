@@ -35,7 +35,7 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 	public:
 	D_CLASS_REFLECTION(ndProceduralTerrainShape, ndShapeStaticProceduralMesh)
 
-		class ndTriangle
+	class ndTriangle
 	{
 		public:
 		ndInt32 m_i0;
@@ -507,10 +507,10 @@ ndSharedPtr<ndBody> BuildProceduralTerrain(ndDemoEntityManager* const scene, con
 	ndProceduralTerrainShape* const heighfield = (ndProceduralTerrainShape*)proceduralInstance.GetShape()->GetAsShapeStaticProceduralMesh();
 	
 	ndMatrix heighfieldLocation(location);
-	ndVector origin (heighfield->GetObbOrigin());
+	const ndVector origin (heighfield->GetObbOrigin());
 	heighfieldLocation.m_posit.m_x -= origin.m_x;
 	heighfieldLocation.m_posit.m_z -= origin.m_z;
-	heighfieldLocation.m_posit.m_y -= origin.m_y;
+	//heighfieldLocation.m_posit.m_y -= origin.m_y;
 	
 	// add tile base sence node
 	ndRender* const render = *scene->GetRenderer();
