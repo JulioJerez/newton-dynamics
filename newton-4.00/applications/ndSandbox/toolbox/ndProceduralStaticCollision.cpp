@@ -165,7 +165,6 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 		return 1.0f;
 	}
 
-	//virtual void GetCollidingFaces(const ndVector& minBox, const ndVector& maxBox, ndArray<ndVector>& vertex, ndArray<ndInt32>& faceList, ndArray<ndInt32>& faceMaterial, ndArray<ndInt32>& indexList) const
 	void GetFacesPatch(ndPolygonMeshDesc* const data) const override
 	{
 		// calculate box extend rounded you the padding
@@ -178,10 +177,8 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 
 		// clamp sweep box against shape bounds, and get the integet dimension
 		const ndVector invSize(ndFloat32 (1.0f) / D_TERRAIN_GRID_SIZE);
-		const ndVector p0(boxP0.GetMax(m_minBox));
-		const ndVector p1(boxP1.GetMin(m_maxBox));
-		const ndVector intP0((p0 * invSize).GetInt());
-		const ndVector intP1((p1 * invSize).GetInt());
+		const ndVector intP0((invSize * boxP0.GetMax(m_minBox)).GetInt());
+		const ndVector intP1((invSize * boxP1.GetMin(m_maxBox)).GetInt());
 
 		const ndInt32 x0 = ndInt32(intP0.m_ix);
 		const ndInt32 x1 = ndInt32(intP1.m_ix);
@@ -214,18 +211,19 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 		}
 
 		const ndFloat32 gridSize = D_TERRAIN_GRID_SIZE;
+		const ndVector p0(ndFloat32(x0), ndFloat32(0.0f), ndFloat32(z0), ndFloat32(0.0f));
 
 		// get the point array
-		ndVector patchOrigin(p0);
+		ndVector patchOrigin(p0.Scale(gridSize));
 		ndArray<ndVector>& vertex = data->m_proceduralStaticMeshFaceQuery->m_vertex;
 		vertex.SetCount(0);
 		for (ndInt32 iz = 0; iz <= count_z; iz++)
 		{
 			ndVector point(patchOrigin);
-			const ndReal* const heightfield = &m_heightfield[iz * D_TERRAIN_WIDTH];
+			const ndReal* const heightfield = &m_heightfield[(iz + z0) * D_TERRAIN_WIDTH];
 			for (ndInt32 ix = 0; ix <= count_x; ix++)
 			{
-				point.m_y = heightfield[ix];
+				point.m_y = heightfield[ix + x0];
 				vertex.PushBack(point);
 				point.m_x += gridSize;
 			}
