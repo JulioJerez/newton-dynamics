@@ -25,11 +25,10 @@ void ndBasicProcedualStaticCollision(ndDemoEntityManager* const scene)
 	ndQuaternion rot(ndYawMatrix(180.0f * ndDegreeToRad));
 	ndVector floor(FindFloor(*scene->GetWorld(), ndVector::m_zero, 200.0f));
 
-	// no ray case yet
-	floor.m_y = 4.0f;
-	floor.m_x += 1.0f;
-
 	ndMatrix origin(ndCalculateMatrix(rot, floor));
+
+	// add single box for testing
+	AddBox(scene, origin, 1.0f, 1.0f, 0.5f, 2.0f, "wood_0.png");
 
 	//// add few props
 	//origin.m_posit += origin.m_front.Scale (ndFloat32 (40.0f));
@@ -38,16 +37,7 @@ void ndBasicProcedualStaticCollision(ndDemoEntityManager* const scene)
 	//origin.m_posit += origin.m_right.Scale(20.0f);
 	//AddPlanks(scene, origin, 1.0f, 4);
 
-	ndSharedPtr<ndBody> xxx(AddBox(scene, origin, 1.0f, 1.0f, 0.5f, 2.0f, "wood_0.png"));
-	ndMatrix xxxxx(xxx->GetMatrix());
-	xxxxx.m_posit.m_y = floor.m_y;
-	xxx->SetMatrix(xxxxx);
-	//xxx->GetAsBodyKinematic()->SetMatrixUpdateScene(xxxxx);
-	//xxx->GetAsBodyKinematic()->SetAutoSleep(false);
-	//xxx->GetNotifyCallback()->OnTransform(0.0f, xxxxx);
-	
-	//floor.m_y += 15.0f;
-	floor = xxxxx.m_posit;
+	// set the camera
 	floor.m_y += 1.0f;
 	floor.m_x += 8.0f;
 	scene->SetCameraMatrix(rot, floor);

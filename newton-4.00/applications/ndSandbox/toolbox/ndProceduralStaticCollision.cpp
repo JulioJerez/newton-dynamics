@@ -81,7 +81,7 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 	//virtual ndUnsigned64 GetHash(ndUnsigned64 hash) const override
 	virtual ndUnsigned64 GetHash(ndUnsigned64) const override
 	{
-		// return a unique hash code for thies shape
+		// return a unique hash code for this shape
 		return 0x1234567;
 	}
 
@@ -101,13 +101,12 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 			for (ndInt32 x = 0; x < D_TERRAIN_WIDTH; x++)
 			{
 				ndFloat32 noiseVal = BrownianMotion(octaves, persistance, noiseGridScale * ndFloat32(x), noiseGridScale * ndFloat32(z));
-				//noiseVal = 0.0f;
 				m_heightfield[z * D_TERRAIN_WIDTH + x] = noiseVal;
 				minHeight = ndMin(minHeight, noiseVal);
 				maxHeight = ndMax(maxHeight, noiseVal);
 
-				// that app should populate this with app matrials.
-				// just make a zero material index,
+				// that app should populate this with app materials ids.
+				// just make a zero material index, for the demo
 				m_material[z * D_TERRAIN_WIDTH + x] = 0;
 			}
 		}
@@ -157,12 +156,117 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 		}
 	}
 
-	//virtual ndFloat32 RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32, const ndBody* const, ndContactPoint& contactOut) const override
-	virtual ndFloat32 RayCast(ndRayCastNotify&, const ndVector&, const ndVector&, ndFloat32, const ndBody* const, ndContactPoint&) const override
+	virtual ndFloat32 RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const, ndContactPoint& contactOut) const override
 	{
-		//ndAssert(0);
-		// TO DO 
-		return 1.0f;
+		ndVector boxP0;
+		ndVector boxP1;
+
+		// calculate the ray bounding box
+		CalculateMinExtend2d(localP0, localP1, boxP0, boxP1);
+
+		ndVector p0(localP0);
+		ndVector p1(localP1);
+		
+		// clip the line against the bounding box
+		if (ndRayBoxClip(p0, p1, boxP0, boxP1))
+		{
+			ndVector dp(p1 - p0);
+			ndVector normalOut(ndVector::m_zero);
+		
+			ndFloat32 scale_x = D_TERRAIN_GRID_SIZE;
+			ndFloat32 invScale_x = ndFloat32(1.0f) / D_TERRAIN_GRID_SIZE;
+			ndFloat32 scale_z = D_TERRAIN_GRID_SIZE;
+			ndFloat32 invScale_z = ndFloat32(1.0f) / D_TERRAIN_GRID_SIZE;
+			ndInt32 ix0 = ndInt32(ndFloor(p0.m_x * invScale_x));
+			ndInt32 iz0 = ndInt32(ndFloor(p0.m_z * invScale_z));
+		
+			// implement a 3ddda line algorithm 
+			ndInt32 xInc;
+			ndFloat32 tx;
+			ndFloat32 stepX;
+			if (dp.m_x > ndFloat32(0.0f))
+			{
+				xInc = 1;
+				ndFloat32 val = ndFloat32(1.0f) / dp.m_x;
+				stepX = scale_x * val;
+				tx = (scale_x * ((ndFloat32)ix0 + ndFloat32(1.0f)) - p0.m_x) * val;
+			}
+			else if (dp.m_x < ndFloat32(0.0f))
+			{
+				xInc = -1;
+				ndFloat32 val = -ndFloat32(1.0f) / dp.m_x;
+				stepX = scale_x * val;
+				tx = -(scale_x * (ndFloat32)ix0 - p0.m_x) * val;
+			}
+			else
+			{
+				xInc = 0;
+				stepX = ndFloat32(0.0f);
+				tx = ndFloat32(1.0e10f);
+			}
+		
+			ndInt32 zInc;
+			ndFloat32 tz;
+			ndFloat32 stepZ;
+			if (dp.m_z > ndFloat32(0.0f))
+			{
+				zInc = 1;
+				ndFloat32 val = ndFloat32(1.0f) / dp.m_z;
+				stepZ = scale_z * val;
+				tz = (scale_z * ((ndFloat32)iz0 + ndFloat32(1.0f)) - p0.m_z) * val;
+			}
+			else if (dp.m_z < ndFloat32(0.0f))
+			{
+				zInc = -1;
+				ndFloat32 val = -ndFloat32(1.0f) / dp.m_z;
+				stepZ = scale_z * val;
+				tz = -(scale_z * (ndFloat32)iz0 - p0.m_z) * val;
+			}
+			else
+			{
+				zInc = 0;
+				stepZ = ndFloat32(0.0f);
+				tz = ndFloat32(1.0e10f);
+			}
+		
+			ndFloat32 txAcc = tx;
+			ndFloat32 tzAcc = tz;
+			ndInt32 xIndex0 = ix0;
+			ndInt32 zIndex0 = iz0;
+			ndFastRay ray(localP0, localP1);
+		
+			// for each cell touched by the line
+			do
+			{
+				ndFloat32 t = RayCastCell(ray, xIndex0, zIndex0, normalOut, maxT);
+				if (t < maxT)
+				{
+					// bail out at the first intersection and copy the data into the descriptor
+					ndAssert(normalOut.m_w == ndFloat32(0.0f));
+					contactOut.m_normal = normalOut.Normalize();
+					contactOut.m_shapeId0 = m_material[zIndex0 * D_TERRAIN_WIDTH + xIndex0];
+					contactOut.m_shapeId1 = m_material[zIndex0 * D_TERRAIN_WIDTH + xIndex0];
+		
+					return t;
+				}
+		
+				if (txAcc < tzAcc)
+				{
+					tx = txAcc;
+					xIndex0 += xInc;
+					txAcc += stepX;
+				}
+				else
+				{
+					tz = tzAcc;
+					zIndex0 += zInc;
+					tzAcc += stepZ;
+				}
+			} while ((tx <= ndFloat32(1.0f)) || (tz <= ndFloat32(1.0f)));
+		}
+
+		// if no cell was hit, return a large value
+		return ndFloat32(1.2f);
 	}
 
 	void GetFacesPatch(ndPolygonMeshDesc* const data) const override
@@ -377,6 +481,7 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 	}
 
 	private:
+
 	void CalculateMinExtend3d(const ndVector& p0, const ndVector& p1, ndVector& boxP0, ndVector& boxP1) const
 	{
 		ndAssert(p0.m_x <= p1.m_x);
@@ -388,11 +493,24 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 		const ndFloat32 gridSize = D_TERRAIN_GRID_SIZE;
 		const ndFloat32 invGridSize = ndFloat32(1.0f) / gridSize;
 
-		boxP0 = ndVector(p0.Scale(invGridSize).Floor().Scale(D_TERRAIN_GRID_SIZE) - m_padding);
-		boxP1 = ndVector((p1.Scale(invGridSize).Floor() + ndVector::m_one).Scale(D_TERRAIN_GRID_SIZE) + m_padding);
+		boxP0 = ndVector::m_triplexMask & ndVector(p0.Scale(invGridSize).Floor().Scale(D_TERRAIN_GRID_SIZE) - m_padding);
+		boxP1 = ndVector::m_triplexMask & ndVector((p1.Scale(invGridSize).Floor() + ndVector::m_one).Scale(D_TERRAIN_GRID_SIZE) + m_padding);
 
 		boxP0.m_y = p0.m_y - m_padding.m_y;
 		boxP1.m_y = p1.m_y + m_padding.m_y;
+	}
+
+	void CalculateMinExtend2d(const ndVector& p0, const ndVector& p1, ndVector& boxP0, ndVector& boxP1) const
+	{
+		// make sure p0 and p1 are in the right order
+		const ndVector q0(p0.GetMin(p1));
+		const ndVector q1(p0.GetMax(p1));
+		CalculateMinExtend3d(q0, q1, boxP0, boxP1);
+
+		// make the box a beam tha extend from 
+		// infinite poistive high to -infinity hight, 1e10 represent infinity.
+		boxP0.m_y = -ndFloat32(1.0e10f);
+		boxP1.m_y = ndFloat32(1.0e10f);
 	}
 
 	void CalculateMinAndMaxElevation(ndInt32 x0, ndInt32 x1, ndInt32 z0, ndInt32 z1, ndFloat32& minHeight, ndFloat32& maxHeight) const
@@ -413,6 +531,56 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 		}
 		minHeight = minVal;
 		maxHeight = maxVal;
+	}
+
+	ndFloat32 RayCastCell(const ndFastRay& ray, ndInt32 xIndex0, ndInt32 zIndex0, ndVector& normalOut, ndFloat32 maxT) const
+	{
+		ndVector points[4];
+		ndInt32 triangle[3];
+
+		// get the 3d point at the corner of the cell
+		if ((xIndex0 < 0) || (zIndex0 < 0) || (xIndex0 >= (D_TERRAIN_WIDTH - 1)) || (zIndex0 >= (D_TERRAIN_WIDTH - 1)))
+		{
+			return ndFloat32(1.2f);
+		}
+		maxT = ndMin(maxT, ndFloat32(1.0f));
+
+		ndInt32 base = zIndex0 * D_TERRAIN_WIDTH + xIndex0;
+
+		points[0 * 2 + 0] = ndVector((ndFloat32)(xIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + 0]), (ndFloat32)(zIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
+		points[0 * 2 + 1] = ndVector((ndFloat32)(xIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + 1]), (ndFloat32)(zIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
+		points[1 * 2 + 1] = ndVector((ndFloat32)(xIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + D_TERRAIN_WIDTH + 1]), (ndFloat32)(zIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
+		points[1 * 2 + 0] = ndVector((ndFloat32)(xIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + D_TERRAIN_WIDTH + 0]), (ndFloat32)(zIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
+
+		ndFloat32 t = ndFloat32(1.2f);
+		triangle[0] = 1;
+		triangle[1] = 2;
+		triangle[2] = 3;
+
+		ndVector e10(points[2] - points[1]);
+		ndVector e20(points[3] - points[1]);
+		ndVector normal(e10.CrossProduct(e20));
+		normal = normal.Normalize();
+		t = ray.PolygonIntersect(normal, maxT, &points[0].m_x, sizeof(ndVector), triangle, 3);
+		if (t < maxT)
+		{
+			normalOut = normal;
+			return t;
+		}
+
+		triangle[0] = 1;
+		triangle[1] = 0;
+		triangle[2] = 2;
+
+		ndVector e30(points[0] - points[1]);
+		normal = e30.CrossProduct(e10);
+		normal = normal.Normalize();
+		t = ray.PolygonIntersect(normal, maxT, &points[0].m_x, sizeof(ndVector), triangle, 3);
+		if (t < maxT)
+		{
+			normalOut = normal;
+		}
+		return t;
 	}
 
 	public:
