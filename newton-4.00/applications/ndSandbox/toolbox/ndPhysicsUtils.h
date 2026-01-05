@@ -18,39 +18,9 @@
 
 class ndDemoEntityManager;
 
-class ndParamMapper
-{
-	public:
-	ndParamMapper()
-		:m_x0(0.0f)
-		,m_scale(0.0f)
-	{
-	}
-
-	ndParamMapper(ndFloat32 x0, ndFloat32 x1)
-		:m_x0(x0 + (x1 - x0) * 0.5f)
-		,m_scale((x1 - x0) * 0.5f)
-	{
-	}
-
-	ndFloat32 Interpolate(const ndFloat32 t) const
-	{
-		return m_x0 + m_scale * t;
-	}
-
-	ndFloat32 CalculateParam(const ndFloat32 value) const
-	{
-		return (value - m_x0) / m_scale;
-	}
-
-	ndFloat32 m_x0;
-	ndFloat32 m_scale;
-};
-
 ndVector FindFloor(const ndWorld& world, const ndVector& origin, ndFloat32 dist);
 ndMatrix FindFloor(const ndWorld& world, const ndMatrix& origin, const ndShapeInstance& shape, ndFloat32 dist);
 ndVector FindFloor(const ndWorld& world, const ndVector& origin, const ndShapeInstance& shape, ndFloat32 dist);
-
 
 ndSharedPtr<ndBody> CreateRigidbody(ndDemoEntityManager* const scene,
 	ndSharedPtr<ndShapeInstance>& shape,
