@@ -23,6 +23,7 @@
 #include "ndCollisionStdafx.h"
 #include "ndShapeInstance.h"
 #include "ndShapeConvexHull.h"
+#include "ndShapeConvexPolygon.h"
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndShapeConvexHull::ndConvexBox

@@ -28,6 +28,7 @@
 #include "ndShapeInstance.h"
 #include "ndContactSolver.h"
 #include "ndBodyKinematic.h"
+#include "ndShapeConvexPolygon.h"
 
 #define D_MAX_MIN_VOLUME				ndFloat32 (1.0e-6f)
 #define D_MAX_VERTEX_CLIP_FACE			16
@@ -1046,27 +1047,9 @@ ndVector ndShapeConvex::CalculateVolumeIntegral(const ndMatrix& globalMatrix, co
 	return cg;
 }
 
-//ndInt32 dgCollisionConvex::BuildCylinderCapPoly(ndFloat32 radius, const dMatrix& transform, ndVector* const vertexOut) const
+
 ndInt32 ndShapeConvex::BuildCylinderCapPoly(ndFloat32 radius, const ndMatrix& transform, ndVector* const vertexOut) const
 {
-	/*
-	ndFloat32 h = 2.0;
-	ndInt32 n = 8;
-	ndFloat32 a0 = h * h * (dgPi / n);
-
-	ndFloat32 h0 = h * dgSin (0.5 * dgPI2 / n);
-	ndFloat32 h1 = h * dgCos (0.5 * dgPI2 / n);
-	ndFloat32 a1 = h * h * (dgSin (0.5 * dgPI2 / n) * dgCos (0.5 * dgPI2 / n));
-
-	ndFloat32 a = h * h * (dgPi / n - 0.5f * dgSin (dgPI2 / n));
-
-	for (ndInt32 i = 8; i < 16; ++i) {
-	ndFloat32 den = dgPi / i - 0.5f * dgSin (dgPI2 / i);
-	ndFloat32 h1 = dgSqrt (a / den);
-	ndFloat32 h2 = dgSqrt (a / den);
-	}
-	*/
-
 	ndInt32 count = (radius < ndFloat32(1.0f)) ? 8 : ((radius < ndFloat32(2.0f)) ? 12 : 16);
 
 	ndFloat32 angle = ndFloat32 (2.0f) * ndPi / (ndFloat32)count;
@@ -1095,4 +1078,56 @@ ndVector ndShapeConvex::SupportVertexSpecialProjectPoint(const ndVector& point, 
 const ndShapeConvex::ndConvexSimplexEdge** ndShapeConvex::GetVertexToEdgeMapping() const
 {
 	return nullptr;
+}
+
+ndInt32 ndShapeConvex::ValidatePolygonCapContacts(ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const
+{
+	ndFixSizeArray<ndBigVector, 32> poly;
+	ndAssert(convexPolygon->m_count < poly.GetCapacity());
+	for (ndInt32 i = 0; i < convexPolygon->m_count; ++i)
+	{
+		poly.PushBack(convexPolygon->m_localPoly[i]);
+	}
+
+	ndInt32 count = contactCount;
+	for (ndInt32 i = contactCount - 1; i >= 0; --i)
+	{
+		const ndBigVector contact(contacts[i]);
+		const ndBigVector point(contact - convexPolygon->m_normal * (contact - poly[0]).DotProduct(convexPolygon->m_normal));
+		const ndBigVector pointInPoly(ndPointToPolygonDistance(point, &poly[0], convexPolygon->m_count));
+	
+		const ndBigVector error(point - pointInPoly);
+		ndFloat64 dist2 = error.DotProduct(error & ndBigVector::m_triplexMask).GetScalar();
+	
+		if (dist2 > ndFloat64(5.0e-4f))
+		{
+			count--;
+			contacts[i] = contacts[count];
+		}
+	}
+	return count;
+}
+
+ndInt32 ndShapeConvex::ValidateImplicitShapePolygonCapContacts(ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const
+{
+	ndFixSizeArray<ndBigVector, 32> poly;
+	ndAssert(convexPolygon->m_count < poly.GetCapacity());
+	for (ndInt32 i = 0; i < convexPolygon->m_count; ++i)
+	{
+		poly.PushBack(convexPolygon->m_localPoly[i]);
+	}
+
+	if (contactCount == 1)
+	{
+		const ndBigVector point(pointInPolygon - convexPolygon->m_normal * (pointInPolygon - poly[0]).DotProduct(convexPolygon->m_normal));
+		const ndBigVector pointInPoly(ndPointToPolygonDistance(point, &poly[0], convexPolygon->m_count));
+		const ndBigVector error(point - pointInPoly);
+		ndFloat64 dist2 = error.DotProduct(error & ndBigVector::m_triplexMask).GetScalar();
+		return (dist2 < ndFloat64(5.0e-4f)) ? contactCount : 0;
+	}
+	else
+	{
+		//ndAssert(0);
+		return ValidatePolygonCapContacts(ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector & pointInPolygon);
+	}
 }

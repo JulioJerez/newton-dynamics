@@ -104,6 +104,10 @@ class ndShapeInstance: public ndContainersFreeListAlloc<ndShapeInstance>
 		m_global,
 	};
 
+	const char* ClassName() const;
+	const char* SuperClassName() const;
+	static const char* StaticClassName();
+
 	D_COLLISION_API ndShapeInstance(ndShape* const shape);
 	D_COLLISION_API ndShapeInstance(const ndShapeInstance& instance);
 	D_COLLISION_API ndShapeInstance(const ndShapeInstance& instance, ndShape* const shape);
@@ -121,10 +125,6 @@ class ndShapeInstance: public ndContainersFreeListAlloc<ndShapeInstance>
 	D_COLLISION_API ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, const ndBody* const body, ndContactPoint& contactOut, ndFloat32 maxT) const;
 
 	D_COLLISION_API void SavePLY(const char* const fileName) const;
-
-	const char* ClassName() const;
-	const char* SuperClassName() const;
-	static const char* StaticClassName();
 	
 	D_COLLISION_API ndShape* GetShape();
 	D_COLLISION_API const ndShape* GetShape() const;
@@ -163,6 +163,8 @@ class ndShapeInstance: public ndContainersFreeListAlloc<ndShapeInstance>
 	D_COLLISION_API ndScaleType GetScaleType() const;
 	D_COLLISION_API ndFloat32 GetUmbraClipSize() const;
 	D_COLLISION_API ndUnsigned64 GetUserDataID() const;
+
+	ndInt32 ValidatePolygonCapContacts(const ndShapeInstance& convexInstance, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const;
 
 	ndMatrix m_globalMatrix;
 	ndMatrix m_localMatrix;

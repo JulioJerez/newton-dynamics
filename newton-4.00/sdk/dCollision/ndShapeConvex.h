@@ -72,9 +72,11 @@ class ndShapeConvex: public ndShape
 	virtual ndInt32 GetConvexVertexCount() const override { return m_vertexCount; }
 	virtual ndVector SupportVertexSpecial(const ndVector& dir, ndFloat32) const override;
 	virtual ndVector SupportVertexSpecialProjectPoint(const ndVector& point, const ndVector&) const override;
-
+	
 	ndVector CalculateVolumeIntegral(const ndPlane& plane) const;
 	ndInt32 BuildCylinderCapPoly (ndFloat32 radius, const ndMatrix& transform, ndVector* const vertexOut) const;
+	ndInt32 ValidateImplicitShapePolygonCapContacts(ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const;
+	virtual ndInt32 ValidatePolygonCapContacts(ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const override;
 
 	ndVector* m_vertex;
 	ndConvexSimplexEdge* m_simplex;

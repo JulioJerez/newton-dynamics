@@ -71,7 +71,6 @@ void ndShapeStaticProceduralMesh::GetCollidingFaces(ndPolygonMeshDesc* const dat
 		ndArray<ndInt32>& faceList = query.m_faceIndexCount;
 		ndArray<ndInt32>& indices = query.m_faceVertexIndex;
 		ndArray<ndFloat32>& hitDistance = query.m_hitDistance;
-		//ndArray<ndInt32>& indexList = meshPatch.m_indexListList;
 		ndArray<ndInt32>& faceIndexCount = query.m_faceIndexCount;
 		if (data->m_doContinueCollisionTest)
 		{
