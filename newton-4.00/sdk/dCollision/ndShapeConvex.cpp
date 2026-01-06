@@ -1128,6 +1128,6 @@ ndInt32 ndShapeConvex::ValidateImplicitShapePolygonCapContacts(ndShapeConvexPoly
 	else
 	{
 		//ndAssert(0);
-		return ValidatePolygonCapContacts(ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector & pointInPolygon);
+		return ValidatePolygonCapContacts(convexPolygon, contactCount, contacts, pointInPolygon);
 	}
 }
