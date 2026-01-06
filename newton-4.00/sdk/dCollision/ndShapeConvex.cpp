@@ -1117,17 +1117,21 @@ ndInt32 ndShapeConvex::ValidateImplicitShapePolygonCapContacts(ndShapeConvexPoly
 		poly.PushBack(convexPolygon->m_localPoly[i]);
 	}
 
+	const ndBigVector point(pointInPolygon - convexPolygon->m_normal * (pointInPolygon - poly[0]).DotProduct(convexPolygon->m_normal));
+	const ndBigVector pointInPoly(ndPointToPolygonDistance(point, &poly[0], convexPolygon->m_count));
+	const ndBigVector error(point - pointInPoly);
+	ndFloat64 dist2 = error.DotProduct(error & ndBigVector::m_triplexMask).GetScalar();
 	if (contactCount == 1)
 	{
-		const ndBigVector point(pointInPolygon - convexPolygon->m_normal * (pointInPolygon - poly[0]).DotProduct(convexPolygon->m_normal));
-		const ndBigVector pointInPoly(ndPointToPolygonDistance(point, &poly[0], convexPolygon->m_count));
-		const ndBigVector error(point - pointInPoly);
-		ndFloat64 dist2 = error.DotProduct(error & ndBigVector::m_triplexMask).GetScalar();
 		return (dist2 < ndFloat64(5.0e-4f)) ? contactCount : 0;
 	}
-	else
+	if (dist2 < ndFloat64(5.0e-4f))
 	{
-		//ndAssert(0);
+		// more than one point and the close is inside the polygon.
 		return ndShapeConvex::ValidatePolygonCapContacts(convexPolygon, contactCount, contacts, pointInPolygon);
 	}
+	//ndAssert(0);
+	//return ndShapeConvex::ValidatePolygonCapContacts(convexPolygon, contactCount, contacts, pointInPolygon);
+	// for now just reject all points
+	return 0;
 }
