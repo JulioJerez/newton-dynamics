@@ -1080,7 +1080,7 @@ const ndShapeConvex::ndConvexSimplexEdge** ndShapeConvex::GetVertexToEdgeMapping
 	return nullptr;
 }
 
-ndInt32 ndShapeConvex::ValidatePolygonCapContacts(ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const
+ndInt32 ndShapeConvex::ValidatePolygonCapContacts(ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector&) const
 {
 	ndFixSizeArray<ndBigVector, 32> poly;
 	ndAssert(convexPolygon->m_count < poly.GetCapacity());
@@ -1117,20 +1117,37 @@ ndInt32 ndShapeConvex::ValidateImplicitShapePolygonCapContacts(ndShapeConvexPoly
 		poly.PushBack(convexPolygon->m_localPoly[i]);
 	}
 
-	const ndBigVector point(pointInPolygon - convexPolygon->m_normal * (pointInPolygon - poly[0]).DotProduct(convexPolygon->m_normal));
-	const ndBigVector pointInPoly(ndPointToPolygonDistance(point, &poly[0], convexPolygon->m_count));
-	const ndBigVector error(point - pointInPoly);
-	ndFloat64 dist2 = error.DotProduct(error & ndBigVector::m_triplexMask).GetScalar();
+	auto TestPoint = [convexPolygon, &poly](const ndVector& contactPoint)
+	{
+		const ndBigVector point(contactPoint - convexPolygon->m_normal * (contactPoint - poly[0]).DotProduct(convexPolygon->m_normal));
+		const ndBigVector pointInPoly(ndPointToPolygonDistance(point, &poly[0], poly.GetCount()));
+		const ndBigVector error(point - pointInPoly);
+		ndFloat64 dist2 = error.DotProduct(error & ndBigVector::m_triplexMask).GetScalar();
+		return dist2;
+	};
+	ndFloat64 closetDist2 = TestPoint(pointInPolygon);
 	if (contactCount == 1)
 	{
-		return (dist2 < ndFloat64(5.0e-4f)) ? contactCount : 0;
+		return (closetDist2 < ndFloat64(5.0e-4f)) ? contactCount : 0;
 	}
-	if (dist2 < ndFloat64(5.0e-4f))
+	if (closetDist2 < ndFloat64(5.0e-4f))
 	{
-		// more than one point and the close is inside the polygon.
-		return ndShapeConvex::ValidatePolygonCapContacts(convexPolygon, contactCount, contacts, pointInPolygon);
+		// more than one contact point and the closest point is inside the polygon.
+		// we simply reject the contact outside th epoligon
+		ndInt32 count = contactCount;
+		for (ndInt32 i = contactCount - 1; i >= 0; --i)
+		{
+			ndFloat64 dist2 = TestPoint(contacts[i]);
+			if (dist2 > ndFloat64(5.0e-4f))
+			{
+				count--;
+				contacts[i] = contacts[count];
+			}
+		}
+		ndAssert(count);
+		return count;
 	}
-	//ndAssert(0);
+	// more than one contact point but closest point outside the polygon.
 	//return ndShapeConvex::ValidatePolygonCapContacts(convexPolygon, contactCount, contacts, pointInPolygon);
 	// for now just reject all points
 	return 0;
