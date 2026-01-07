@@ -508,7 +508,7 @@ ndUnsigned64 ndShapeCapsule::GetHash(ndUnsigned64 hash) const
 	return info.GetHash(hash);
 }
 
-ndInt32 ndShapeCapsule::ValidatePolygonCapContacts(ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const
+ndInt32 ndShapeCapsule::ValidatePolygonCapContacts(const ndShapeInstance& instance, const ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const
 {
-	return ValidateImplicitShapePolygonCapContacts(convexPolygon, contactCount, contacts, pointInPolygon);
+	return ValidateImplicitShapePolygonCapContacts(instance, convexPolygon, contactCount, contacts, pointInPolygon);
 }

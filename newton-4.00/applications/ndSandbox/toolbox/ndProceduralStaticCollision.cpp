@@ -82,7 +82,7 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 			for (ndInt32 x = 0; x < D_TERRAIN_WIDTH; x++)
 			{
 				ndFloat32 noiseVal = BrownianMotion(octaves, persistance, noiseGridScale * ndFloat32(x), noiseGridScale * ndFloat32(z));
-				noiseVal = 0.0f;
+				//noiseVal = 0.0f;
 
 				m_heightfield[z * D_TERRAIN_WIDTH + x] = noiseVal;
 				minHeight = ndMin(minHeight, noiseVal);

@@ -1080,7 +1080,7 @@ const ndShapeConvex::ndConvexSimplexEdge** ndShapeConvex::GetVertexToEdgeMapping
 	return nullptr;
 }
 
-ndInt32 ndShapeConvex::ValidatePolygonCapContacts(ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector&) const
+ndInt32 ndShapeConvex::ValidatePolygonCapContacts(const ndShapeInstance& instance, const ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector&) const
 {
 	ndFixSizeArray<ndBigVector, 32> poly;
 	ndAssert(convexPolygon->m_count < poly.GetCapacity());
@@ -1108,7 +1108,7 @@ ndInt32 ndShapeConvex::ValidatePolygonCapContacts(ndShapeConvexPolygon* const co
 	return count;
 }
 
-ndInt32 ndShapeConvex::ValidateImplicitShapePolygonCapContacts(ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const
+ndInt32 ndShapeConvex::ValidateImplicitShapePolygonCapContacts(const ndShapeInstance& instance, const ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const
 {
 	ndFixSizeArray<ndBigVector, 32> poly;
 	ndAssert(convexPolygon->m_count < poly.GetCapacity());
@@ -1147,8 +1147,7 @@ ndInt32 ndShapeConvex::ValidateImplicitShapePolygonCapContacts(ndShapeConvexPoly
 		ndAssert(count);
 		return count;
 	}
-	// more than one contact point but closest point outside the polygon.
-	//return ndShapeConvex::ValidatePolygonCapContacts(convexPolygon, contactCount, contacts, pointInPolygon);
-	// for now just reject all points
+	// the contact are unreliable, 
+	// we have to trow them away and recalculate a new set base of the shape type.
 	return 0;
 }

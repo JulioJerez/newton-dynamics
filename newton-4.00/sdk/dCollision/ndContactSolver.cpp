@@ -3992,6 +3992,8 @@ ndInt32 ndContactSolver::CalculatePolySoupToHullContactsDescrete(ndPolygonMeshDe
 	ndContact* const contactJoint = m_contact;
 	const ndInt32* const indexArray = &query.m_faceVertexIndex[0];
 
+static int xxxx;
+
 	data.SortFaceArray();
 	const ndInt32 faceCount = ndInt32(query.m_faceIndexCount.GetCount());
 	//fix legacy from 3.14
@@ -4020,6 +4022,10 @@ ndInt32 ndContactSolver::CalculatePolySoupToHullContactsDescrete(ndPolygonMeshDe
 		m_maxCount = countleft;
 		m_vertexIndex = 0;
 		m_contactBuffer = &contactOut[count];
+
+xxxx++;
+if (xxxx == 2763)
+xxxx *= 1;
 
 		ndInt32 count1 = polygon.CalculateContactToConvexHullDescrete(&polySoupInstance, *this);
 		closestDist = ndMin(closestDist, m_separationDistance);

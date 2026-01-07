@@ -273,7 +273,7 @@ ndUnsigned64 ndShapeSphere::GetHash(ndUnsigned64 hash) const
 	return info.GetHash(hash);
 }
 
-ndInt32 ndShapeSphere::ValidatePolygonCapContacts(ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const
+ndInt32 ndShapeSphere::ValidatePolygonCapContacts(const ndShapeInstance& convexInstance, const ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const
 {
-	return ValidateImplicitShapePolygonCapContacts(convexPolygon, contactCount, contacts, pointInPolygon);
+	return ValidateImplicitShapePolygonCapContacts(convexInstance, convexPolygon, contactCount, contacts, pointInPolygon);
 }

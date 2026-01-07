@@ -52,7 +52,7 @@ class ndShapeChamferCylinder: public ndShapeConvex
 	D_COLLISION_API virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const override;
 
 	virtual ndInt32 CalculatePlaneIntersection(const ndVector& normal, const ndVector& point, ndVector* const contactsOut) const override;
-	virtual ndInt32 ValidatePolygonCapContacts(ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const override;
+	virtual ndInt32 ValidatePolygonCapContacts(const ndShapeInstance& instance, const ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const override;
 
 	private:
 	ndFloat32 m_height;

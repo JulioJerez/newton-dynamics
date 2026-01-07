@@ -23,9 +23,11 @@
 #define __ND_COLLISION_CONVEX_POLYGON_H__
 
 #include "ndShapeConvex.h"
-class ndShapeInstance;
 
 #define D_CONVEX_POLYGON_MAX_VERTEX_COUNT	64
+
+class ndContactSolver;
+class ndShapeInstance;
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndShapeConvexPolygon: public ndShapeConvex

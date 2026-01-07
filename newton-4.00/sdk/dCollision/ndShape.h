@@ -252,7 +252,7 @@ class ndShape: public ndContainersFreeListAlloc<ndShape>
 	D_COLLISION_API virtual ndShapeInfo GetShapeInfo() const;
 	D_COLLISION_API virtual ndMatrix CalculateInertiaAndCenterOfMass(const ndMatrix& alignMatrix, const ndVector& localScale, const ndMatrix& matrix) const;
 	D_COLLISION_API virtual ndFloat32 CalculateMassProperties(const ndMatrix& offset, ndVector& inertia, ndVector& crossInertia, ndVector& centerOfMass) const;
-	D_COLLISION_API virtual ndInt32 ValidatePolygonCapContacts(ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const;
+	D_COLLISION_API virtual ndInt32 ValidatePolygonCapContacts(const ndShapeInstance& instance, const ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const;
 
 	virtual ndFloat32 GetVolume() const = 0;
 	virtual ndFloat32 GetBoxMinRadius() const = 0;

@@ -754,5 +754,5 @@ ndInt32 ndShapeInstance::ValidatePolygonCapContacts(const ndShapeInstance& conve
 {
 	ndShapeConvexPolygon* const convexPolygon = ((ndShape*) m_shape)->GetAsShapeConvexPolygon();
 	ndAssert(convexPolygon);
-	return convexInstance.m_shape->ValidatePolygonCapContacts(convexPolygon, contactCount, contacts, pointInPolygon);
+	return convexInstance.m_shape->ValidatePolygonCapContacts(convexInstance, convexPolygon, contactCount, contacts, pointInPolygon);
 }
