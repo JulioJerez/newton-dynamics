@@ -54,11 +54,17 @@ void ndShapeStaticProceduralMesh::SetAABB(const ndVector& p0, const ndVector& p1
 
 void ndShapeStaticProceduralMesh::GetCollidingFaces(ndPolygonMeshDesc* const data) const
 {
-	data->m_proceduralStaticMeshFaceQuery->m_vertex.SetCount(0);
-	GetFacesPatch(data);
+	ndPatchMesh patch;
+	patch.m_boxP0 = data->GetOrigin();
+	patch.m_boxP1 = data->GetTarget();
+	patch.m_boxP0 += data->m_boxDistanceTravelInMeshSpace & (data->m_boxDistanceTravelInMeshSpace < ndVector::m_zero);
+	patch.m_boxP1 += data->m_boxDistanceTravelInMeshSpace & (data->m_boxDistanceTravelInMeshSpace > ndVector::m_zero);
+	GetFacesPatch(patch);
+	data->SetSeparatingDistance(ndFloat32(0.0f));
 
-	if (data->m_proceduralStaticMeshFaceQuery->m_vertex.GetCount())
+	if (patch.m_faceArray.GetCount())
 	{
+		patch.GetFacesPatch(data);
 		ndInt32 faceCount0 = 0;
 		ndInt32 faceIndexCount0 = 0;
 		ndInt32 faceIndexCount1 = 0;

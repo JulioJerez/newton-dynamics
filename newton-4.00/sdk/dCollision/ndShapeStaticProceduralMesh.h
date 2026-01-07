@@ -29,33 +29,6 @@ D_MSV_NEWTON_CLASS_ALIGN_32
 class ndShapeStaticProceduralMesh: public ndShapeStaticMesh
 {
 	public:
-	class ndEdge
-	{
-		public:
-		ndEdge();
-		ndEdge(ndInt32 i0, ndInt32 i1, const ndPlane& plane, ndInt32 testIndex);
-
-		bool operator< (const ndEdge& edge) const;
-		bool operator> (const ndEdge& edge) const;
-
-		ndPlane m_plane;
-		ndInt32 m_testIndex;
-		union
-		{
-			ndUnsigned64 m_key;
-			struct
-			{
-				ndInt32 m_i0;
-				ndInt32 m_i1;
-			};
-		};
-	};
-
-	class ndEdgeMap : public ndTree<ndInt32, ndEdge, ndContainersFreeListAlloc<ndInt32>>
-	{
-		public:
-		ndEdgeMap();
-	};
 
 	D_CLASS_REFLECTION(ndShapeStaticProceduralMesh, ndShapeStaticMesh)
 	D_COLLISION_API ndShapeStaticProceduralMesh();
@@ -64,7 +37,7 @@ class ndShapeStaticProceduralMesh: public ndShapeStaticMesh
 	D_COLLISION_API void SetAABB(const ndVector& p0, const ndVector& p1);
 	D_COLLISION_API void GetAABB(const ndVector& p0, const ndVector& p1);
 
-	virtual void GetFacesPatch(ndPolygonMeshDesc* const data) const = 0;
+	virtual void GetFacesPatch(ndPatchMesh& patch) const = 0;
 	virtual ndShapeStaticProceduralMesh* GetAsShapeStaticProceduralMesh() override { return this; }
 
 	protected:
@@ -75,33 +48,5 @@ class ndShapeStaticProceduralMesh: public ndShapeStaticMesh
 	private:
 	friend class ndContactSolver;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
-
-inline ndShapeStaticProceduralMesh::ndEdge::ndEdge()
-{
-}
-
-inline ndShapeStaticProceduralMesh::ndEdge::ndEdge(ndInt32 i0, ndInt32 i1, 
-	const ndPlane& plane, ndInt32 testIndex)
-	:m_plane(plane)
-	,m_testIndex(testIndex)
-	,m_i0(i0)
-	,m_i1(i1)
-{
-}
-
-inline bool ndShapeStaticProceduralMesh::ndEdge::operator< (const ndEdge& edge) const
-{
-	return m_key < edge.m_key;
-}
-
-inline bool ndShapeStaticProceduralMesh::ndEdge::operator> (const ndEdge& edge) const
-{
-	return m_key > edge.m_key;
-}
-
-inline ndShapeStaticProceduralMesh::ndEdgeMap::ndEdgeMap()
-	:ndTree<ndInt32, ndEdge, ndContainersFreeListAlloc<ndInt32>>()
-{
-}
 
 #endif

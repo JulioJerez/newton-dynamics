@@ -35,27 +35,6 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 	public:
 	D_CLASS_REFLECTION(ndProceduralTerrainShape, ndShapeStaticProceduralMesh)
 
-	class ndTriangle
-	{
-		public:
-		ndInt32 m_i0;
-		ndInt32 m_i1;
-		ndInt32 m_i2;
-		ndInt32 m_material;
-		ndInt32 m_normal;
-		ndInt32 m_normal_edge01;
-		ndInt32 m_normal_edge12;
-		ndInt32 m_normal_edge20;
-		ndInt32 m_area;
-	};
-
-	class ndGridQuad
-	{
-		public:
-		ndTriangle m_triangle0;
-		ndTriangle m_triangle1;
-	};
-
 	ndProceduralTerrainShape()
 		:ndShapeStaticProceduralMesh()
 		,m_padding(ndVector::m_triplexMask & ndVector(0.1f))
@@ -273,52 +252,37 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 		return ndFloat32(1.2f);
 	}
 
-	void GetFacesPatch(ndPolygonMeshDesc* const data) const override
+	void GetFacesPatch(ndPatchMesh& patch) const override
 	{
 		// calculate box extend rounded you the padding
 		ndVector boxP0;
 		ndVector boxP1;
-		CalculateMinExtend3d(data->GetOrigin(), data->GetTarget(), boxP0, boxP1);
-
-// debuging adjacency build.
-//static ndInt32 xxxx;
-//const ndBody* xxxxxxx = data->m_convexInstance->m_ownerBody;
-//ndVector veloc(xxxxxxx->GetVelocity());
-//xxxx++;
-//ndTrace(("%d %f\n", xxxx, veloc.m_y));
-//if (xxxx >= 1836)
-//xxxx *= 1;
-//if (ndAbs(veloc.m_y) > 1.0f)
-//xxxx *= 1;
-
-		boxP0 += data->m_boxDistanceTravelInMeshSpace & (data->m_boxDistanceTravelInMeshSpace < ndVector::m_zero);
-		boxP1 += data->m_boxDistanceTravelInMeshSpace & (data->m_boxDistanceTravelInMeshSpace > ndVector::m_zero);
-
+		CalculateMinExtend3d(patch.m_boxP0, patch.m_boxP1, boxP0, boxP1);
+		
 		// clamp sweep box against shape bounds, and get the integer dimension
 		const ndVector intP0((m_invGridSize * boxP0.GetMax(m_minBox)).GetInt());
 		const ndVector intP1((m_invGridSize * boxP1.GetMin(m_maxBox)).GetInt());
-
+		
 		const ndInt32 x0 = ndInt32(intP0.m_ix);
 		const ndInt32 x1 = ndInt32(intP1.m_ix);
 		const ndInt32 z0 = ndInt32(intP0.m_iz);
 		const ndInt32 z1 = ndInt32(intP1.m_iz);
-
+		
 		if ((x1 == x0) || (z1 == z0))
 		{
-			data->m_staticMeshQuery->m_faceIndexCount.SetCount(0);
 			return;
 		}
-
+		
 		ndFloat32 minHeight = ndFloat32(1.0e10f);
 		ndFloat32 maxHeight = ndFloat32(-1.0e10f);
-		data->SetSeparatingDistance(ndFloat32(0.0f));
 		CalculateMinAndMaxElevation(x0, x1, z0, z1, minHeight, maxHeight);
-
+		
 		if ((maxHeight < boxP0.m_y) || (minHeight > boxP1.m_y))
 		{
 			// the box does not interset the heightfield
 			return;
 		}
+		
 		const ndInt32 count_x = x1 - x0;
 		const ndInt32 count_z = z1 - z0;
 		ndInt32 numberOfQuad = (x1 - x0) * (z1 - z0);
@@ -328,17 +292,15 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 			return;
 		}
 
+		// start building the mesh
+		
+		// since the vertex pathc has no duplicate, we can skip 
+		// the vertex sorting
+		patch.m_vertexArrayHasDuplicated = false;
+
+		// build the array of unique vertices
 		const ndVector p0(ndFloat32(x0), ndFloat32(0.0f), ndFloat32(z0), ndFloat32(0.0f));
-
-		// get the point array
 		ndVector patchOrigin(p0 * m_gridSize);
-		ndArray<ndVector>& vertex = data->m_proceduralStaticMeshFaceQuery->m_vertex;
-
-		// optimization: calculate the number of vertices in adcance
-		// and do not using PushBack function
-		const ndInt32 vertexCount = (count_z + 1) * (count_x + 1) + 2 * numberOfQuad;
-		vertex.SetCount(vertexCount);
-		ndInt32 vextexIndex = 0;
 		for (ndInt32 iz = 0; iz <= count_z; iz++)
 		{
 			ndVector point(patchOrigin);
@@ -346,169 +308,74 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 			for (ndInt32 ix = 0; ix <= count_x; ix++)
 			{
 				point.m_y = heightfield[ix + x0];
-				//vertex.PushBack(point);
-				vertex[vextexIndex] = point;
-				vextexIndex++;
+				patch.m_pointArray.PushBack(point);
 				point.m_x += m_gridSize.m_x;
 			}
 			patchOrigin.m_z += m_gridSize.m_z;
 		}
-
-		// build the mesh simplex maniforld:
-		// index list, face index, face normal, face material, face edge adjacency
-		ndPolygonMeshDesc::ndStaticMeshFaceQuery& query = *data->m_staticMeshQuery;
-		ndArray<ndInt32>& quadDataArray = query.m_faceVertexIndex;
-		ndArray<ndInt32>& faceIndexCount = query.m_faceIndexCount;
-
-		// Iterate over the quads and build mesh indices list
-		ndInt32 quadCount = 0;
+		
+		// add the face array 
 		ndInt32 vertexIndex = 0;
-		const ndInt32 faceSize = ndInt32(D_TERRAIN_GRID_SIZE * D_TERRAIN_GRID_SIZE/2.0f);
-
 		const ndInt32 step = x1 - x0 + 1;
-		//ndInt32 normalBase = ndInt32 (vertex.GetCount());
-		ndInt32 normalBase = (count_z + 1) * (count_x + 1);
-
-		// set the number of triangles in integers, 
-		// and get the pointer to the quad array
-		quadDataArray.SetCount(2 * numberOfQuad * ndInt32(sizeof(ndGridQuad) / sizeof(ndInt32)));
-		ndGridQuad* const quadArray = (ndGridQuad*)&quadDataArray[0];
 		for (ndInt32 z = z0; z < z1; ++z)
 		{
-			ndInt32 zStep = z * D_TERRAIN_WIDTH;
 			for (ndInt32 x = x0; x < x1; ++x)
 			{
+				// for each quad
 				const ndInt32 i0 = vertexIndex;
 				const ndInt32 i1 = vertexIndex + 1;
 				const ndInt32 i2 = vertexIndex + step;
 				const ndInt32 i3 = vertexIndex + step + 1;
-				
-				const ndVector e0(vertex[i0] - vertex[i1]);
-				const ndVector e1(vertex[i2] - vertex[i1]);
-				const ndVector e2(vertex[i3] - vertex[i1]);
+		
+				// we calculate the two triangle normals of this quad
+				const ndVector e0(patch.m_pointArray[i0] - patch.m_pointArray[i1]);
+				const ndVector e1(patch.m_pointArray[i2] - patch.m_pointArray[i1]);
+				const ndVector e2(patch.m_pointArray[i3] - patch.m_pointArray[i1]);
 				const ndVector n0(e0.CrossProduct(e1).Normalize());
 				const ndVector n1(e1.CrossProduct(e2).Normalize());
 				ndAssert(n0.m_w == ndFloat32(0.0f));
 				ndAssert(n1.m_w == ndFloat32(0.0f));
-				
+		
 				ndAssert(n0.DotProduct(n0).GetScalar() > ndFloat32(0.0f));
 				ndAssert(n1.DotProduct(n1).GetScalar() > ndFloat32(0.0f));
-				
-				// save the triangle normals
-				//vertex.PushBack(n0);
-				//vertex.PushBack(n1);
-				const ndInt32 normalIndex0 = normalBase;
-				const ndInt32 normalIndex1 = normalBase + 1;
-				vertex[normalIndex0] = n0;
-				vertex[normalIndex1] = n1;
-
-				ndAssert(n0.m_y == 1.0f);
-				ndAssert(n1.m_y == 1.0f);
-
-				ndGridQuad& quad = quadArray[quadCount];
-				// add first quad triangle
-				faceIndexCount.PushBack(3);
-				quad.m_triangle0.m_i0 = i2;
-				quad.m_triangle0.m_i1 = i1;
-				quad.m_triangle0.m_i2 = i0;
-				quad.m_triangle0.m_material = m_material[zStep + x];
-				quad.m_triangle0.m_normal = normalIndex0;
-				quad.m_triangle0.m_normal_edge01 = normalIndex0;
-				quad.m_triangle0.m_normal_edge12 = normalIndex0;
-				quad.m_triangle0.m_normal_edge20 = normalIndex0;
-				quad.m_triangle0.m_area = faceSize;
-				
-				// add secund quad triangle
-				faceIndexCount.PushBack(3);
-				quad.m_triangle1.m_i0 = i1;
-				quad.m_triangle1.m_i1 = i2;
-				quad.m_triangle1.m_i2 = i3;
-				quad.m_triangle1.m_material = m_material[zStep + x];
-				quad.m_triangle1.m_normal = normalIndex1;
-				quad.m_triangle1.m_normal_edge01 = normalIndex1;
-				quad.m_triangle1.m_normal_edge12 = normalIndex1;
-				quad.m_triangle1.m_normal_edge20 = normalIndex1;
-				quad.m_triangle1.m_area = faceSize;
-				
-				// check that these two triangle are part of a convex cap.
-				const ndVector dp(vertex[i3] - vertex[i1]);
+		
+				// we now check if the two triangles are coplanar
+				const ndVector dp(patch.m_pointArray[i3] - patch.m_pointArray[i1]);
 				ndAssert(dp.m_w == ndFloat32(0.0f));
 				ndFloat32 dist = n0.DotProduct(dp).GetScalar();
-
-				// coplanar faces are considered part of a convex cap
-				if (dist < ndFloat32(1.0e-3f))
+		
+				if (ndAbs(dist) < ndFloat32(1.0e-3f))
 				{
-					// these two triangles form a convex edge
-					// therefore the two edge diagonal point to each other
-					quad.m_triangle0.m_normal_edge01 = normalIndex1;
-					quad.m_triangle1.m_normal_edge01 = normalIndex0;
+					// triangles are coplanal, so this is a quad
+					patch.m_faceArray.PushBack(4);
+					patch.m_normalArray.PushBack(n0);
+					patch.m_faceMaterialArray.PushBack(0);
+					patch.m_indexArray.PushBack(i2);
+					patch.m_indexArray.PushBack(i3);
+					patch.m_indexArray.PushBack(i1);
+					patch.m_indexArray.PushBack(i0);
 				}
-				normalBase += 2;
-				quadCount++;
+				else
+				{
+					// triangles are not coplanal, triangulate the quad
+					// into two triangles
+					patch.m_faceArray.PushBack(3);
+					patch.m_normalArray.PushBack(n0);
+					patch.m_faceMaterialArray.PushBack(0);
+					patch.m_indexArray.PushBack(i2);
+					patch.m_indexArray.PushBack(i1);
+					patch.m_indexArray.PushBack(i0);
+
+					patch.m_faceArray.PushBack(3);
+					patch.m_normalArray.PushBack(n0);
+					patch.m_faceMaterialArray.PushBack(0);
+					patch.m_indexArray.PushBack(i1);
+					patch.m_indexArray.PushBack(i2);
+					patch.m_indexArray.PushBack(i3);
+				}
 				vertexIndex++;
 			}
 			vertexIndex++;
-		}
-
-		// iterate over the quad array and build the 
-		// vertical edge adjancency info.
-		for (ndInt32 z = (z1 - z0) - 1; z >= 0; --z)
-		{
-			ndInt32 z_step = z * (x1 - x0);
-			for (ndInt32 x = (x1 - x0) - 1; x >= 1; --x)
-			{
-				ndInt32 quadIndex = z_step + x;
-				ndGridQuad& quad0 = quadArray[quadIndex - 1];
-				ndGridQuad& quad1 = quadArray[quadIndex - 0];
-
-				ndTriangle& triangle0 = quad0.m_triangle1;
-				ndTriangle& triangle1 = quad1.m_triangle0;
-
-				const ndVector& origin = vertex[triangle1.m_i0];
-				const ndVector& testPoint = vertex[triangle1.m_i1];
-				const ndVector& normal = vertex[triangle0.m_normal];
-				ndAssert(normal.m_w == ndFloat32(0.0f));
-				ndFloat32 dist(normal.DotProduct(testPoint - origin).GetScalar());
-				//if (dist < -ndFloat32(1.0e-3f))
-				if (dist < ndFloat32(1.0e-3f))
-				{
-					ndInt32 n0 = triangle0.m_normal;
-					ndInt32 n1 = triangle1.m_normal;
-					triangle0.m_normal_edge20 = n1;
-					triangle1.m_normal_edge20 = n0;
-				}
-			}
-		}
-
-		// iterate over the quad array and build the 
-		// horizontal edge adjancency info.
-		for (ndInt32 x = (x1 - x0) - 1; x >= 0; --x)
-		{
-			ndInt32 x_step = x1 - x0;
-			for (ndInt32 z = (z1 - z0) - 1; z >= 1; --z)
-			{
-				ndInt32 quadIndex = x_step * z + x;
-
-				ndGridQuad& quad0 = quadArray[quadIndex - x_step];
-				ndGridQuad& quad1 = quadArray[quadIndex];
-
-				ndTriangle& triangle0 = quad0.m_triangle1;
-				ndTriangle& triangle1 = quad1.m_triangle0;
-
-				const ndVector& origin = vertex[triangle1.m_i1];
-				const ndVector& testPoint = vertex[triangle1.m_i0];
-				const ndVector& normal = vertex[triangle0.m_normal];
-				ndAssert(normal.m_w == ndFloat32(0.0f));
-				ndFloat32 dist(normal.DotProduct(testPoint - origin).GetScalar());
-				//if (dist < -ndFloat32(1.0e-3f))
-				if (dist < ndFloat32(1.0e-3f))
-				{
-					ndInt32 n0 = triangle0.m_normal;
-					ndInt32 n1 = triangle1.m_normal;
-					triangle0.m_normal_edge12 = n1;
-					triangle1.m_normal_edge12 = n0;
-				}
-			}
 		}
 	}
 

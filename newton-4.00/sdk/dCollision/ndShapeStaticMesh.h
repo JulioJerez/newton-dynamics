@@ -32,6 +32,41 @@ D_MSV_NEWTON_CLASS_ALIGN_32
 class ndShapeStaticMesh: public ndShape
 {
 	public:
+	class ndPatchMesh
+	{
+		#define MESH_SIZE 512
+		public:
+		ndPatchMesh()
+			:m_vertexArrayHasDuplicated(true)
+		{
+		}
+		
+		ndVector m_boxP0;
+		ndVector m_boxP1;
+
+		ndFixSizeArray<ndVector, MESH_SIZE> m_pointArray;
+		ndFixSizeArray<ndVector, MESH_SIZE> m_normalArray;
+
+		ndFixSizeArray<ndInt32, MESH_SIZE> m_faceArray;
+		ndFixSizeArray<ndInt32, MESH_SIZE * 4> m_indexArray;
+		ndFixSizeArray<ndInt32, MESH_SIZE> m_faceMaterialArray;
+		bool m_vertexArrayHasDuplicated;
+
+		private:
+		class ndEdgeList
+		{
+			public:
+			ndInt32 m_key;
+			ndInt32 m_edge;
+			ndInt32 m_faceStart;
+			ndInt32 m_faceVertexCount;
+		};
+
+		void GetFacesPatch(ndPolygonMeshDesc* const data);
+
+		friend class ndShapeStaticProceduralMesh;
+	};
+
 	D_CLASS_REFLECTION(ndShapeStaticMesh,ndShape)
 	D_COLLISION_API ndShapeStaticMesh(ndShapeID id);
 	D_COLLISION_API virtual ~ndShapeStaticMesh();
