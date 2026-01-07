@@ -3992,8 +3992,6 @@ ndInt32 ndContactSolver::CalculatePolySoupToHullContactsDescrete(ndPolygonMeshDe
 	ndContact* const contactJoint = m_contact;
 	const ndInt32* const indexArray = &query.m_faceVertexIndex[0];
 
-static int xxxx;
-
 	data.SortFaceArray();
 	const ndInt32 faceCount = ndInt32(query.m_faceIndexCount.GetCount());
 	for (ndInt32 i = 0; (i < faceCount) && (count < 32); ++i)
@@ -4009,10 +4007,6 @@ static int xxxx;
 		polygon.m_faceNormalIndex = data.GetNormalIndex(localIndexArray, polygon.m_count);
 		polygon.m_normal = polygon.CalculateGlobalNormal(&polySoupInstance, ndVector(&vertex[polygon.m_faceNormalIndex * stride]) & ndVector::m_triplexMask);
 		ndAssert(polygon.m_normal.m_w == ndFloat32(0.0f));
-
-xxxx++;
-if (xxxx == 2763)
-xxxx *= 1;
 
 		for (ndInt32 j = 0; j < polygon.m_count; ++j)
 		{
