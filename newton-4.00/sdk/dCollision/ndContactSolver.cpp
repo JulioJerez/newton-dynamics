@@ -3996,8 +3996,6 @@ static int xxxx;
 
 	data.SortFaceArray();
 	const ndInt32 faceCount = ndInt32(query.m_faceIndexCount.GetCount());
-	//fix legacy from 3.14
-	//for (ndInt32 i = faceCount - 1; (i >= 0) && (count < 32); --i)
 	for (ndInt32 i = 0; (i < faceCount) && (count < 32); ++i)
 	{
 		ndInt32 address = query.m_faceIndexStart[i];
@@ -4011,6 +4009,11 @@ static int xxxx;
 		polygon.m_faceNormalIndex = data.GetNormalIndex(localIndexArray, polygon.m_count);
 		polygon.m_normal = polygon.CalculateGlobalNormal(&polySoupInstance, ndVector(&vertex[polygon.m_faceNormalIndex * stride]) & ndVector::m_triplexMask);
 		ndAssert(polygon.m_normal.m_w == ndFloat32(0.0f));
+
+xxxx++;
+if (xxxx == 2763)
+xxxx *= 1;
+
 		for (ndInt32 j = 0; j < polygon.m_count; ++j)
 		{
 			ndVector p(&vertex[localIndexArray[j] * stride]);
@@ -4022,10 +4025,6 @@ static int xxxx;
 		m_maxCount = countleft;
 		m_vertexIndex = 0;
 		m_contactBuffer = &contactOut[count];
-
-xxxx++;
-if (xxxx == 2763)
-xxxx *= 1;
 
 		ndInt32 count1 = polygon.CalculateContactToConvexHullDescrete(&polySoupInstance, *this);
 		closestDist = ndMin(closestDist, m_separationDistance);

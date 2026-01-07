@@ -258,6 +258,12 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 		ndVector boxP1;
 		CalculateMinExtend3d(patch.m_boxP0, patch.m_boxP1, boxP0, boxP1);
 		
+static int xxxx;
+ndTrace(("%d\n", xxxx));
+if (xxxx == 459)
+xxxx *= 1;
+xxxx++;
+
 		// clamp sweep box against shape bounds, and get the integer dimension
 		const ndVector intP0((m_invGridSize * boxP0.GetMax(m_minBox)).GetInt());
 		const ndVector intP1((m_invGridSize * boxP1.GetMin(m_maxBox)).GetInt());
@@ -366,7 +372,7 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 					patch.m_indexArray.PushBack(i0);
 
 					patch.m_faceArray.PushBack(3);
-					patch.m_normalArray.PushBack(n0);
+					patch.m_normalArray.PushBack(n1);
 					patch.m_faceMaterialArray.PushBack(0);
 					patch.m_indexArray.PushBack(i1);
 					patch.m_indexArray.PushBack(i2);
