@@ -67,6 +67,7 @@ class ndShapeHeightfield: public ndShapeStaticMesh
 	D_COLLISION_API ndInt32 GetHeight() const;
 	D_COLLISION_API ndFloat32 GetWithScale() const;
 	D_COLLISION_API ndFloat32 GetHeightScale() const;
+	D_COLLISION_API ndGridConstruction GetBuildMode() const;
 	D_COLLISION_API ndVector GetLocation(ndInt32 x, ndInt32 y) const;
 
 	D_COLLISION_API ndArray<ndInt8>& GetAttributeMap();

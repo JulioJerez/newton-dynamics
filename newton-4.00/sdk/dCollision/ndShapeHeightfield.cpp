@@ -134,14 +134,13 @@ ndVector ndShapeHeightfield::GetLocation(ndInt32 x, ndInt32 z) const
 	return ndVector(ndFloat32(x) * m_horizontalScaleInv_x, h, ndFloat32(z) * m_horizontalScaleInv_z, ndFloat32(0.0f));
 }
 
+ndShapeHeightfield::ndGridConstruction ndShapeHeightfield::GetBuildMode() const
+{
+	return m_diagonalMode;
+}
+
 ndInt32 ndShapeHeightfield::FastInt(ndFloat32 x) const
 {
-	//ndInt32 i = ndInt32(x);
-	//if (ndFloat32(i) > x)
-	//{
-	//	i--;
-	//}
-	//return i;
 	return ndInt32(ndFloor(x));
 }
 
@@ -172,54 +171,6 @@ const ndInt32* ndShapeHeightfield::GetIndexList() const
 	return &m_cellIndices[(m_diagonalMode == m_normalDiagonals) ? 0 : 1][0];
 }
 
-void ndShapeHeightfield::DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& debugCallback) const
-{
-	ndVector points[4];
-	ndVector triangle[3];
-
-	ndShapeDebugNotify::ndEdgeType edgeType[4];
-	ndMemSet(edgeType, ndShapeDebugNotify::m_shared, 4);
-
-	const ndInt32* const indirectIndex = GetIndexList();
-	const ndInt32 i0 = indirectIndex[0];
-	const ndInt32 i1 = indirectIndex[1];
-	const ndInt32 i2 = indirectIndex[2];
-	const ndInt32 i3 = indirectIndex[3];
-
-	ndInt32 base = 0;
-	for (ndInt32 z = 0; z < m_height - 1; ++z)
-	{
-		const ndVector p0 ((ndFloat32)(0 + 0) * m_horizontalScale_x, ndFloat32(m_elevationMap[base + 0]),               (ndFloat32)(z + 0) * m_horizontalScale_z, ndFloat32(0.0f));
-		const ndVector p1 ((ndFloat32)(0 + 0) * m_horizontalScale_x, ndFloat32(m_elevationMap[base + 0 + m_width + 0]), (ndFloat32)(z + 1) * m_horizontalScale_z, ndFloat32(0.0f));
-
-		points[0 * 2 + 0] = matrix.TransformVector(p0);
-		points[1 * 2 + 0] = matrix.TransformVector(p1);
-
-		for (ndInt32 x = 0; x < m_width - 1; ++x) 
-		{
-			const ndVector p2 ((ndFloat32)(x + 1) * m_horizontalScale_x, ndFloat32(m_elevationMap[base + x + 1]),			(ndFloat32)(z + 0) * m_horizontalScale_z, ndFloat32(0.0f));
-			const ndVector p3 ((ndFloat32)(x + 1) * m_horizontalScale_x, ndFloat32(m_elevationMap[base + x + m_width + 1]), (ndFloat32)(z + 1) * m_horizontalScale_z, ndFloat32(0.0f));
-
-			points[0 * 2 + 1] = matrix.TransformVector(p2);
-			points[1 * 2 + 1] = matrix.TransformVector(p3);
-
-			triangle[0] = points[i1];
-			triangle[1] = points[i0];
-			triangle[2] = points[i2];
-			debugCallback.DrawPolygon(3, triangle, edgeType);
-
-			triangle[0] = points[i1];
-			triangle[1] = points[i2];
-			triangle[2] = points[i3];
-			debugCallback.DrawPolygon(3, triangle, edgeType);
-
-			points[0 * 2 + 0] = points[0 * 2 + 1];
-			points[1 * 2 + 0] = points[1 * 2 + 1];
-		}
-		base += m_width;
-	}
-}
-
 void ndShapeHeightfield::CalculateMinExtend2d(const ndVector& p0, const ndVector& p1, ndVector& boxP0, ndVector& boxP1) const
 {
 	const ndVector scale(m_horizontalScale_x, ndFloat32(0.0f), m_horizontalScale_z, ndFloat32(0.0f));
@@ -248,18 +199,21 @@ void ndShapeHeightfield::CalculateMinExtend3d(const ndVector& p0, const ndVector
 	ndAssert(p1.m_w == ndFloat32(0.0f));
 
 	const ndVector scale(m_horizontalScale_x, ndFloat32(0.0f), m_horizontalScale_z, ndFloat32(0.0f));
-	const ndVector q0(p0.GetMin(p1) - m_padding);
-	const ndVector q1(p0.GetMax(p1) + scale + m_padding);
 	const ndVector invScale(m_horizontalScaleInv_x, ndFloat32(0.0f), m_horizontalScaleInv_z, ndFloat32(0.0f));
+	//const ndVector q0(p0.GetMin(p1) - m_padding);
+	//const ndVector q1(p0.GetMax(p1) + scale + m_padding);
+	//boxP0 = q0.Select((q0 * invScale).Floor() * scale, m_yMask);
+	//boxP1 = q1.Select((q1 * invScale).Floor() * scale + scale, m_yMask);
+	//boxP0 = boxP0.Select(boxP0.GetMax(m_minBox), m_yMask);
+	//boxP1 = boxP1.Select(boxP1.GetMax(m_minBox), m_yMask);
+	//boxP0 = boxP0.Select(boxP0.GetMin(m_maxBox), m_yMask);
+	//boxP1 = boxP1.Select(boxP1.GetMin(m_maxBox), m_yMask);
 
-	boxP0 = q0.Select((q0 * invScale).Floor() * scale, m_yMask);
-	boxP1 = q1.Select((q1 * invScale).Floor() * scale + scale, m_yMask);
-	
-	boxP0 = boxP0.Select(boxP0.GetMax(m_minBox), m_yMask);
-	boxP1 = boxP1.Select(boxP1.GetMax(m_minBox), m_yMask);
+	boxP0 = (invScale * (p0 - m_padding).Floor()) * scale;
+	boxP1 = (invScale * (p1 + scale).Floor()) * scale;
 
-	boxP0 = boxP0.Select(boxP0.GetMin(m_maxBox), m_yMask);
-	boxP1 = boxP1.Select(boxP1.GetMin(m_maxBox), m_yMask);
+	boxP0.m_y = p0.m_y - m_padding.m_y;
+	boxP1.m_y = p1.m_y + m_padding.m_y;
 
 	ndAssert(boxP0.m_x <= boxP1.m_x);
 	ndAssert(boxP0.m_z <= boxP1.m_z);
@@ -512,15 +466,93 @@ void ndShapeHeightfield::CalculateMinAndMaxElevation(ndInt32 x0, ndInt32 x1, ndI
 	maxHeight = maxVal;
 }
 
+ndUnsigned64 ndShapeHeightfield::GetHash(ndUnsigned64 hash) const
+{
+	hash = ndCRC64(&m_attributeMap[0], ndInt32(m_attributeMap.GetCount()) * ndInt32(sizeof(ndInt8)), hash);
+	hash = ndCRC64(&m_elevationMap[0], ndInt32(m_elevationMap.GetCount()) * ndInt32(sizeof(ndReal)), hash);
+	return hash;
+}
+
+//ndVector ndShapeHeightfield::SupportVertexSpecial(const ndVector& dir, ndFloat32 skinMargin) const
+ndVector ndShapeHeightfield::SupportVertexSpecial(const ndVector&, ndFloat32) const
+{
+	//return SupportVertex(dir);
+	ndAssert(0);
+	return ndVector::m_zero;
+}
+
+void ndShapeHeightfield::DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& debugCallback) const
+{
+	ndVector points[4];
+	ndVector face[4];
+
+	ndShapeDebugNotify::ndEdgeType edgeType[4];
+	ndMemSet(edgeType, ndShapeDebugNotify::m_shared, 4);
+
+	const ndInt32* const indirectIndex = GetIndexList();
+	const ndInt32 i0 = indirectIndex[0];
+	const ndInt32 i1 = indirectIndex[1];
+	const ndInt32 i2 = indirectIndex[2];
+	const ndInt32 i3 = indirectIndex[3];
+
+	ndInt32 base = 0;
+	for (ndInt32 z = 0; z < m_height - 1; ++z)
+	{
+		const ndVector p0(ndFloat32(0) * m_horizontalScale_x, ndFloat32(m_elevationMap[base + 0]),               ndFloat32(z + 0) * m_horizontalScale_z, ndFloat32(0.0f));
+		const ndVector p1(ndFloat32(0) * m_horizontalScale_x, ndFloat32(m_elevationMap[base + 0 + m_width + 0]), ndFloat32(z + 1) * m_horizontalScale_z, ndFloat32(0.0f));
+
+		points[0 * 2 + 0] = matrix.TransformVector(p0);
+		points[1 * 2 + 0] = matrix.TransformVector(p1);
+
+		for (ndInt32 x = 1; x < m_width; ++x)
+		{
+			const ndVector p2(ndFloat32(x) * m_horizontalScale_x, ndFloat32(m_elevationMap[base + x]),           ndFloat32(z + 0) * m_horizontalScale_z, ndFloat32(0.0f));
+			const ndVector p3(ndFloat32(x) * m_horizontalScale_x, ndFloat32(m_elevationMap[base + x + m_width]), ndFloat32(z + 1) * m_horizontalScale_z, ndFloat32(0.0f));
+
+			points[0 * 2 + 1] = matrix.TransformVector(p2);
+			points[1 * 2 + 1] = matrix.TransformVector(p3);
+
+			const ndVector normal(((points[i2] - points[i0]).CrossProduct(points[i1] - points[i0])).Normalize());
+			ndAssert(normal.m_w == ndFloat32(0.0f));
+			ndFloat32 dist = normal.DotProduct(points[i3] - points[i0]).GetScalar();
+			if (ndAbs(dist) < ndFloat32(1.0e-3f))
+			{
+				face[0] = points[i1];
+				face[1] = points[i0];
+				face[2] = points[i2];
+				face[3] = points[i3];
+				debugCallback.DrawPolygon(4, face, edgeType);
+			}
+			else
+			{
+				face[0] = points[i1];
+				face[1] = points[i0];
+				face[2] = points[i2];
+				debugCallback.DrawPolygon(3, face, edgeType);
+
+				face[0] = points[i1];
+				face[1] = points[i2];
+				face[2] = points[i3];
+				debugCallback.DrawPolygon(3, face, edgeType);
+			}
+
+			points[0 * 2 + 0] = points[0 * 2 + 1];
+			points[1 * 2 + 0] = points[1 * 2 + 1];
+		}
+		base += m_width;
+	}
+}
+
 void ndShapeHeightfield::GetCollidingFaces(ndPolygonMeshDesc* const data) const
 {
+	// the user data is the pointer to the collision geometry
 	ndVector boxP0;
 	ndVector boxP1;
-
-	// the user data is the pointer to the collision geometry
-	CalculateMinExtend3d(data->GetOrigin(), data->GetTarget(), boxP0, boxP1);
-	boxP0 += data->m_boxDistanceTravelInMeshSpace & (data->m_boxDistanceTravelInMeshSpace < ndVector::m_zero);
-	boxP1 += data->m_boxDistanceTravelInMeshSpace & (data->m_boxDistanceTravelInMeshSpace > ndVector::m_zero);
+	ndVector minP0 (data->GetOrigin());
+	ndVector maxP1 (data->GetTarget());
+	minP0 += data->m_boxDistanceTravelInMeshSpace & (data->m_boxDistanceTravelInMeshSpace < ndVector::m_zero);
+	maxP1 += data->m_boxDistanceTravelInMeshSpace & (data->m_boxDistanceTravelInMeshSpace > ndVector::m_zero);
+	CalculateMinExtend3d(minP0, maxP1, boxP0, boxP1);
 
 	boxP0 = boxP0.Select(boxP0.GetMax(m_minBox), m_yMask);
 	boxP1 = boxP1.Select(boxP1.GetMin(m_maxBox), m_yMask);
@@ -549,303 +581,522 @@ void ndShapeHeightfield::GetCollidingFaces(ndPolygonMeshDesc* const data) const
 	data->SetSeparatingDistance(ndFloat32(0.0f));
 	CalculateMinAndMaxElevation(x0, x1, z0, z1, minHeight, maxHeight);
 
-	if (!((maxHeight < boxP0.m_y) || (minHeight > boxP1.m_y))) 
+	if ((maxHeight < boxP0.m_y) || (minHeight > boxP1.m_y))
 	{
-		ndPolygonMeshDesc::ndStaticMeshFaceQuery& query = *data->m_staticMeshQuery;
-		ndArray<ndVector>& vertex = data->m_proceduralStaticMeshFaceQuery->m_vertex;
+		// the box does not interset the heightfield
+		return;
+	}
 
-		// scan the vertices's intersected by the box extend
-		ndInt32 vertexCount = (z1 - z0 + 1) * (x1 - x0 + 1) + 2 * (z1 - z0) * (x1 - x0);
-		vertex.SetCount(vertexCount);
+#if 0
+	ndPolygonMeshDesc::ndStaticMeshFaceQuery& query = *data->m_staticMeshQuery;
+	ndArray<ndVector>& vertex = data->m_proceduralStaticMeshFaceQuery->m_vertex;
 
-		ndInt32 vertexIndex = 0;
-		ndInt32 base = z0 * m_width;
-		for (ndInt32 z = z0; z <= z1; ++z) 
+	// scan the vertices's intersected by the box extend
+	ndInt32 vertexCount = (z1 - z0 + 1) * (x1 - x0 + 1) + 2 * (z1 - z0) * (x1 - x0);
+	vertex.SetCount(vertexCount);
+
+	ndInt32 vertexIndex = 0;
+	ndInt32 base = z0 * m_width;
+	for (ndInt32 z = z0; z <= z1; ++z)
+	{
+		ndFloat32 zVal = m_horizontalScale_z * (ndFloat32)z;
+		for (ndInt32 x = x0; x <= x1; ++x)
 		{
-			ndFloat32 zVal = m_horizontalScale_z * (ndFloat32)z;
-			for (ndInt32 x = x0; x <= x1; ++x) 
+			const ndVector point(m_horizontalScale_x * (ndFloat32)x, ndFloat32(m_elevationMap[base + x]), zVal, ndFloat32(0.0f));
+			vertex[vertexIndex] = point;
+			vertexIndex++;
+			ndAssert(vertexIndex <= vertex.GetCount());
+		}
+		base += m_width;
+	}
+
+	ndInt32 normalBase = vertexIndex;
+	vertexIndex = 0;
+	ndInt32 quadCount = 0;
+	const ndInt32 step = x1 - x0 + 1;
+
+	ndArray<ndInt32>& quadDataArray = query.m_faceVertexIndex;
+	ndArray<ndInt32>& faceIndexCount = query.m_faceIndexCount;
+	ndFloat32 maxDiagonal = ndMax(m_horizontalScale_x, m_horizontalScale_z) * ndFloat32(2.0f);
+	ndInt32 faceSize = ndInt32(ndFloor(maxDiagonal / D_FACE_CLIP_DIAGONAL_SCALE + ndFloat32(1.0f)));
+	const ndInt32* const indirectIndex = GetIndexList();
+
+	quadDataArray.SetCount(2 * (x1 - x0) * (z1 - z0) * ndInt32(sizeof(ndGridQuad) / sizeof(ndInt32)));
+	if (quadDataArray.GetCount())
+	{
+		ndGridQuad* const quadArray = (ndGridQuad*)&quadDataArray[0];
+		for (ndInt32 z = z0; z < z1; ++z)
+		{
+			ndInt32 zStep = z * m_width;
+			for (ndInt32 x = x0; x < x1; ++x)
 			{
-				vertex[vertexIndex] = ndVector(m_horizontalScale_x * (ndFloat32)x, ndFloat32(m_elevationMap[base + x]), zVal, ndFloat32(0.0f));
+				ndInt32 vIndex[4];
+				vIndex[0] = vertexIndex;
+				vIndex[1] = vertexIndex + 1;
+				vIndex[2] = vertexIndex + step;
+				vIndex[3] = vertexIndex + step + 1;
+
+				const ndInt32 i0 = vIndex[indirectIndex[0]];
+				const ndInt32 i1 = vIndex[indirectIndex[1]];
+				const ndInt32 i2 = vIndex[indirectIndex[2]];
+				const ndInt32 i3 = vIndex[indirectIndex[3]];
+
+				const ndVector e0(vertex[i0] - vertex[i1]);
+				const ndVector e1(vertex[i2] - vertex[i1]);
+				const ndVector e2(vertex[i3] - vertex[i1]);
+				ndVector n0(e0.CrossProduct(e1));
+				ndVector n1(e1.CrossProduct(e2));
+				ndAssert(n0.m_w == ndFloat32(0.0f));
+				ndAssert(n1.m_w == ndFloat32(0.0f));
+
+				ndAssert(n0.DotProduct(n0).GetScalar() > ndFloat32(0.0f));
+				ndAssert(n1.DotProduct(n1).GetScalar() > ndFloat32(0.0f));
+
+				//normalBase 
+				const ndInt32 normalIndex0 = normalBase;
+				const ndInt32 normalIndex1 = normalBase + 1;
+
+				n0 = n0.Normalize();
+				n1 = n1.Normalize();
+				vertex[normalIndex0] = n0;
+				vertex[normalIndex1] = n1;
+
+				ndGridQuad& quad = quadArray[quadCount];
+
+				faceIndexCount.PushBack(3);
+				quad.m_triangle0.m_i0 = i2;
+				quad.m_triangle0.m_i1 = i1;
+				quad.m_triangle0.m_i2 = i0;
+				quad.m_triangle0.m_material = m_attributeMap[zStep + x];
+				quad.m_triangle0.m_normal = normalIndex0;
+				quad.m_triangle0.m_normal_edge01 = normalIndex0;
+				quad.m_triangle0.m_normal_edge12 = normalIndex0;
+				quad.m_triangle0.m_normal_edge20 = normalIndex0;
+				quad.m_triangle0.m_area = faceSize;
+
+				faceIndexCount.PushBack(3);
+				quad.m_triangle1.m_i0 = i1;
+				quad.m_triangle1.m_i1 = i2;
+				quad.m_triangle1.m_i2 = i3;
+				quad.m_triangle1.m_material = m_attributeMap[zStep + x];
+				quad.m_triangle1.m_normal = normalIndex1;
+				quad.m_triangle1.m_normal_edge01 = normalIndex1;
+				quad.m_triangle1.m_normal_edge12 = normalIndex1;
+				quad.m_triangle1.m_normal_edge20 = normalIndex1;
+				quad.m_triangle1.m_area = faceSize;
+
+				ndVector dp(vertex[i3] - vertex[i1]);
+				ndAssert(dp.m_w == ndFloat32(0.0f));
+				ndFloat32 dist = n0.DotProduct(dp).GetScalar();
+				if (dist < -ndFloat32(1.0e-3f))
+				{
+					quad.m_triangle0.m_normal_edge01 = normalIndex1;
+					quad.m_triangle1.m_normal_edge01 = normalIndex0;
+				}
+
+				normalBase += 2;
+				quadCount++;
 				vertexIndex++;
-				ndAssert(vertexIndex <= vertex.GetCount());
 			}
-			base += m_width;
+			vertexIndex++;
 		}
 
-		ndInt32 normalBase = vertexIndex;
-		vertexIndex = 0;
-		ndInt32 quadCount = 0;
-		const ndInt32 step = x1 - x0 + 1;
-
-		ndArray<ndInt32>& quadDataArray = query.m_faceVertexIndex;
-		ndArray<ndInt32>& faceIndexCount = query.m_faceIndexCount;
-		ndFloat32 maxDiagonal = ndMax(m_horizontalScale_x, m_horizontalScale_z) * ndFloat32(2.0f);
-		ndInt32 faceSize = ndInt32(ndFloor(maxDiagonal / D_FACE_CLIP_DIAGONAL_SCALE + ndFloat32(1.0f)));
-		const ndInt32* const indirectIndex = GetIndexList();
-
-		quadDataArray.SetCount(2 * (x1 - x0) * (z1 - z0) * ndInt32(sizeof(ndGridQuad) / sizeof(ndInt32)));
-		if (quadDataArray.GetCount())
+		if (m_diagonalMode == m_invertedDiagonals)
 		{
-			ndGridQuad* const quadArray = (ndGridQuad*)&quadDataArray[0];
-			for (ndInt32 z = z0; z < z1; ++z)
+			for (ndInt32 z = (z1 - z0) - 1; z >= 0; --z)
 			{
-				ndInt32 zStep = z * m_width;
-				for (ndInt32 x = x0; x < x1; ++x)
+				ndInt32 z_step = z * (x1 - x0);
+				for (ndInt32 x = (x1 - x0) - 1; x >= 1; --x)
 				{
-					ndInt32 vIndex[4];
-					vIndex[0] = vertexIndex;
-					vIndex[1] = vertexIndex + 1;
-					vIndex[2] = vertexIndex + step;
-					vIndex[3] = vertexIndex + step + 1;
+					ndInt32 quadIndex = z_step + x;
+					ndGridQuad& quad0 = quadArray[quadIndex - 1];
+					ndGridQuad& quad1 = quadArray[quadIndex - 0];
 
-					const ndInt32 i0 = vIndex[indirectIndex[0]];
-					const ndInt32 i1 = vIndex[indirectIndex[1]];
-					const ndInt32 i2 = vIndex[indirectIndex[2]];
-					const ndInt32 i3 = vIndex[indirectIndex[3]];
+					ndTriangle& triangle0 = quad0.m_triangle0;
+					ndTriangle& triangle1 = quad1.m_triangle1;
 
-					const ndVector e0(vertex[i0] - vertex[i1]);
-					const ndVector e1(vertex[i2] - vertex[i1]);
-					const ndVector e2(vertex[i3] - vertex[i1]);
-					ndVector n0(e0.CrossProduct(e1));
-					ndVector n1(e1.CrossProduct(e2));
-					ndAssert(n0.m_w == ndFloat32(0.0f));
-					ndAssert(n1.m_w == ndFloat32(0.0f));
-
-					ndAssert(n0.DotProduct(n0).GetScalar() > ndFloat32(0.0f));
-					ndAssert(n1.DotProduct(n1).GetScalar() > ndFloat32(0.0f));
-
-					//normalBase 
-					const ndInt32 normalIndex0 = normalBase;
-					const ndInt32 normalIndex1 = normalBase + 1;
-
-					n0 = n0.Normalize();
-					n1 = n1.Normalize();
-					vertex[normalIndex0] = n0;
-					vertex[normalIndex1] = n1;
-
-					ndGridQuad& quad = quadArray[quadCount];
-
-					faceIndexCount.PushBack(3);
-					quad.m_triangle0.m_i0 = i2;
-					quad.m_triangle0.m_i1 = i1;
-					quad.m_triangle0.m_i2 = i0;
-					quad.m_triangle0.m_material = m_attributeMap[zStep + x];
-					quad.m_triangle0.m_normal = normalIndex0;
-					quad.m_triangle0.m_normal_edge01 = normalIndex0;
-					quad.m_triangle0.m_normal_edge12 = normalIndex0;
-					quad.m_triangle0.m_normal_edge20 = normalIndex0;
-					quad.m_triangle0.m_area = faceSize;
-
-					faceIndexCount.PushBack(3);
-					quad.m_triangle1.m_i0 = i1;
-					quad.m_triangle1.m_i1 = i2;
-					quad.m_triangle1.m_i2 = i3;
-					quad.m_triangle1.m_material = m_attributeMap[zStep + x];
-					quad.m_triangle1.m_normal = normalIndex1;
-					quad.m_triangle1.m_normal_edge01 = normalIndex1;
-					quad.m_triangle1.m_normal_edge12 = normalIndex1;
-					quad.m_triangle1.m_normal_edge20 = normalIndex1;
-					quad.m_triangle1.m_area = faceSize;
-
-					ndVector dp(vertex[i3] - vertex[i1]);
-					ndAssert(dp.m_w == ndFloat32(0.0f));
-					ndFloat32 dist = n0.DotProduct(dp).GetScalar();
+					const ndVector& origin = vertex[triangle1.m_i1];
+					const ndVector& testPoint = vertex[triangle1.m_i0];
+					const ndVector& normal = vertex[triangle0.m_normal];
+					ndAssert(normal.m_w == ndFloat32(0.0f));
+					ndFloat32 dist(normal.DotProduct(testPoint - origin).GetScalar());
 					if (dist < -ndFloat32(1.0e-3f))
 					{
-						quad.m_triangle0.m_normal_edge01 = normalIndex1;
-						quad.m_triangle1.m_normal_edge01 = normalIndex0;
-					}
-
-					normalBase += 2;
-					quadCount++;
-					vertexIndex++;
-				}
-				vertexIndex++;
-			}
-
-			if (m_diagonalMode == m_invertedDiagonals)
-			{
-				for (ndInt32 z = (z1 - z0) - 1; z >= 0; --z)
-				{
-					ndInt32 z_step = z * (x1 - x0);
-					for (ndInt32 x = (x1 - x0) - 1; x >= 1; --x)
-					{
-						ndInt32 quadIndex = z_step + x;
-						ndGridQuad& quad0 = quadArray[quadIndex - 1];
-						ndGridQuad& quad1 = quadArray[quadIndex - 0];
-
-						ndTriangle& triangle0 = quad0.m_triangle0;
-						ndTriangle& triangle1 = quad1.m_triangle1;
-
-						const ndVector& origin = vertex[triangle1.m_i1];
-						const ndVector& testPoint = vertex[triangle1.m_i0];
-						const ndVector& normal = vertex[triangle0.m_normal];
-						ndAssert(normal.m_w == ndFloat32(0.0f));
-						ndFloat32 dist(normal.DotProduct(testPoint - origin).GetScalar());
-						if (dist < -ndFloat32(1.0e-3f))
-						{
-							ndInt32 n0 = triangle0.m_normal;
-							ndInt32 n1 = triangle1.m_normal;
-							triangle0.m_normal_edge12 = n1;
-							triangle1.m_normal_edge12 = n0;
-						}
-					}
-				}
-
-				for (ndInt32 x = (x1 - x0) - 1; x >= 0; --x)
-				{
-					ndInt32 x_step = x1 - x0;
-					for (ndInt32 z = (z1 - z0) - 1; z >= 1; --z)
-					{
-						ndInt32 quadIndex = x_step * z + x;
-
-						ndGridQuad& quad0 = quadArray[quadIndex - x_step];
-						ndGridQuad& quad1 = quadArray[quadIndex];
-
-						ndTriangle& triangle0 = quad0.m_triangle1;
-						ndTriangle& triangle1 = quad1.m_triangle0;
-
-						const ndVector& origin = vertex[triangle1.m_i0];
-						const ndVector& testPoint = vertex[triangle1.m_i1];
-						const ndVector& normal = vertex[triangle0.m_normal];
-						ndAssert(normal.m_w == ndFloat32(0.0f));
-						ndFloat32 dist(normal.DotProduct(testPoint - origin).GetScalar());
-						if (dist < -ndFloat32(1.0e-3f))
-						{
-							ndInt32 n0 = triangle0.m_normal;
-							ndInt32 n1 = triangle1.m_normal;
-							triangle0.m_normal_edge20 = n1;
-							triangle1.m_normal_edge20 = n0;
-						}
-
+						ndInt32 n0 = triangle0.m_normal;
+						ndInt32 n1 = triangle1.m_normal;
+						triangle0.m_normal_edge12 = n1;
+						triangle1.m_normal_edge12 = n0;
 					}
 				}
 			}
-			else
+
+			for (ndInt32 x = (x1 - x0) - 1; x >= 0; --x)
 			{
-				for (ndInt32 z = (z1 - z0) - 1; z >= 0; --z)
+				ndInt32 x_step = x1 - x0;
+				for (ndInt32 z = (z1 - z0) - 1; z >= 1; --z)
 				{
-					ndInt32 z_step = z * (x1 - x0);
-					for (ndInt32 x = (x1 - x0) - 1; x >= 1; --x)
+					ndInt32 quadIndex = x_step * z + x;
+
+					ndGridQuad& quad0 = quadArray[quadIndex - x_step];
+					ndGridQuad& quad1 = quadArray[quadIndex];
+
+					ndTriangle& triangle0 = quad0.m_triangle1;
+					ndTriangle& triangle1 = quad1.m_triangle0;
+
+					const ndVector& origin = vertex[triangle1.m_i0];
+					const ndVector& testPoint = vertex[triangle1.m_i1];
+					const ndVector& normal = vertex[triangle0.m_normal];
+					ndAssert(normal.m_w == ndFloat32(0.0f));
+					ndFloat32 dist(normal.DotProduct(testPoint - origin).GetScalar());
+					if (dist < -ndFloat32(1.0e-3f))
 					{
-						ndInt32 quadIndex = z_step + x;
-						ndGridQuad& quad0 = quadArray[quadIndex - 1];
-						ndGridQuad& quad1 = quadArray[quadIndex - 0];
+						ndInt32 n0 = triangle0.m_normal;
+						ndInt32 n1 = triangle1.m_normal;
+						triangle0.m_normal_edge20 = n1;
+						triangle1.m_normal_edge20 = n0;
+					}
 
-						ndTriangle& triangle0 = quad0.m_triangle1;
-						ndTriangle& triangle1 = quad1.m_triangle0;
+				}
+			}
+		}
+		else
+		{
+			for (ndInt32 z = (z1 - z0) - 1; z >= 0; --z)
+			{
+				ndInt32 z_step = z * (x1 - x0);
+				for (ndInt32 x = (x1 - x0) - 1; x >= 1; --x)
+				{
+					ndInt32 quadIndex = z_step + x;
+					ndGridQuad& quad0 = quadArray[quadIndex - 1];
+					ndGridQuad& quad1 = quadArray[quadIndex - 0];
 
-						const ndVector& origin = vertex[triangle1.m_i0];
-						const ndVector& testPoint = vertex[triangle1.m_i1];
-						const ndVector& normal = vertex[triangle0.m_normal];
-						ndAssert(normal.m_w == ndFloat32(0.0f));
-						ndFloat32 dist(normal.DotProduct(testPoint - origin).GetScalar());
-						if (dist < -ndFloat32(1.0e-3f))
-						{
-							ndInt32 n0 = triangle0.m_normal;
-							ndInt32 n1 = triangle1.m_normal;
-							triangle0.m_normal_edge20 = n1;
-							triangle1.m_normal_edge20 = n0;
-						}
+					ndTriangle& triangle0 = quad0.m_triangle1;
+					ndTriangle& triangle1 = quad1.m_triangle0;
+
+					const ndVector& origin = vertex[triangle1.m_i0];
+					const ndVector& testPoint = vertex[triangle1.m_i1];
+					const ndVector& normal = vertex[triangle0.m_normal];
+					ndAssert(normal.m_w == ndFloat32(0.0f));
+					ndFloat32 dist(normal.DotProduct(testPoint - origin).GetScalar());
+					if (dist < -ndFloat32(1.0e-3f))
+					{
+						ndInt32 n0 = triangle0.m_normal;
+						ndInt32 n1 = triangle1.m_normal;
+						triangle0.m_normal_edge20 = n1;
+						triangle1.m_normal_edge20 = n0;
 					}
 				}
+			}
 
-				for (ndInt32 x = (x1 - x0) - 1; x >= 0; --x)
+			for (ndInt32 x = (x1 - x0) - 1; x >= 0; --x)
+			{
+				ndInt32 x_step = x1 - x0;
+				for (ndInt32 z = (z1 - z0) - 1; z >= 1; --z)
 				{
-					ndInt32 x_step = x1 - x0;
-					for (ndInt32 z = (z1 - z0) - 1; z >= 1; --z)
+					ndInt32 quadIndex = x_step * z + x;
+
+					ndGridQuad& quad0 = quadArray[quadIndex - x_step];
+					ndGridQuad& quad1 = quadArray[quadIndex];
+
+					ndTriangle& triangle0 = quad0.m_triangle1;
+					ndTriangle& triangle1 = quad1.m_triangle0;
+
+					const ndVector& origin = vertex[triangle1.m_i1];
+					const ndVector& testPoint = vertex[triangle1.m_i0];
+					const ndVector& normal = vertex[triangle0.m_normal];
+					ndAssert(normal.m_w == ndFloat32(0.0f));
+					ndFloat32 dist(normal.DotProduct(testPoint - origin).GetScalar());
+					if (dist < -ndFloat32(1.0e-3f))
 					{
-						ndInt32 quadIndex = x_step * z + x;
-
-						ndGridQuad& quad0 = quadArray[quadIndex - x_step];
-						ndGridQuad& quad1 = quadArray[quadIndex];
-
-						ndTriangle& triangle0 = quad0.m_triangle1;
-						ndTriangle& triangle1 = quad1.m_triangle0;
-
-						const ndVector& origin = vertex[triangle1.m_i1];
-						const ndVector& testPoint = vertex[triangle1.m_i0];
-						const ndVector& normal = vertex[triangle0.m_normal];
-						ndAssert(normal.m_w == ndFloat32(0.0f));
-						ndFloat32 dist(normal.DotProduct(testPoint - origin).GetScalar());
-						if (dist < -ndFloat32(1.0e-3f))
-						{
-							ndInt32 n0 = triangle0.m_normal;
-							ndInt32 n1 = triangle1.m_normal;
-							triangle0.m_normal_edge12 = n1;
-							triangle1.m_normal_edge12 = n0;
-						}
+						ndInt32 n0 = triangle0.m_normal;
+						ndInt32 n1 = triangle1.m_normal;
+						triangle0.m_normal_edge12 = n1;
+						triangle1.m_normal_edge12 = n0;
 					}
 				}
 			}
 		}
+	}
 
-		ndInt32 stride = sizeof(ndVector) / sizeof(ndFloat32);
+	ndInt32 stride = sizeof(ndVector) / sizeof(ndFloat32);
+	ndInt32 faceCount0 = 0;
+	ndInt32 faceIndexCount0 = 0;
+	ndInt32 faceIndexCount1 = 0;
+
+	ndArray<ndInt32>& address = query.m_faceIndexStart;
+	ndArray<ndFloat32>& hitDistance = query.m_hitDistance;
+
+	if (data->m_doContinueCollisionTest)
+	{
+		//ndAssert(0);
+		ndInt32* const indices = &quadDataArray[0];
+		ndFastRay ray(ndVector::m_zero, data->m_boxDistanceTravelInMeshSpace);
+		for (ndInt32 i = 0; i < quadCount * 2; ++i)
+		{
+			const ndInt32* const indexArray = &indices[faceIndexCount1];
+			const ndVector& faceNormal = vertex[indexArray[4]];
+			ndFloat32 dist = data->PolygonBoxRayDistance(faceNormal, 3, indexArray, stride, &vertex[0].m_x, ray);
+			if (dist < ndFloat32(1.0f))
+			{
+				hitDistance.PushBack(dist);
+				address.PushBack(faceIndexCount0);
+				ndMemCpy(&indices[faceIndexCount0], indexArray, 9);
+				faceCount0++;
+				faceIndexCount0 += 9;
+			}
+			faceIndexCount1 += 9;
+		}
+	}
+	else
+	{
+		ndInt32* const indices = &quadDataArray[0];
+		for (ndInt32 i = 0; i < quadCount * 2; ++i)
+		{
+			const ndInt32* const indexArray = &indices[faceIndexCount1];
+			const ndVector& faceNormal = vertex[indexArray[4]];
+			ndFloat32 dist = data->PolygonBoxDistance(faceNormal, 3, indexArray, stride, &vertex[0].m_x);
+			if (dist > ndFloat32(0.0f))
+			{
+				hitDistance.PushBack(dist);
+				address.PushBack(faceIndexCount0);
+				ndMemCpy(&indices[faceIndexCount0], indexArray, 9);
+				faceCount0++;
+				faceIndexCount0 += 9;
+			}
+			faceIndexCount1 += 9;
+		}
+	}
+
+	faceIndexCount.SetCount(faceCount0);
+	data->m_vertex = &vertex[0].m_x;
+	data->m_vertexStrideInBytes = sizeof(ndVector);
+
+#else
+
+	const ndInt32 count_x = x1 - x0;
+	const ndInt32 count_z = z1 - z0;
+	ndInt32 numberOfQuad = (x1 - x0) * (z1 - z0);
+	if (numberOfQuad == 0)
+	{
+		// box overlap but not faces are collected
+		return;
+	}
+
+	// start building the mesh
+	ndPatchMesh patch;
+	// since the vertex patch has no duplicate, 
+	// we can skip  the vertex sorting
+	patch.m_vertexArrayHasDuplicated = false;
+
+	// build the array of unique vertices
+	ndInt32 base = z0 * m_width;
+	for (ndInt32 iz = 0; iz <= count_z; iz++)
+	{
+		ndFloat32 zVal = m_horizontalScale_z * ndFloat32(iz + z0);
+		for (ndInt32 ix = 0; ix <= count_x; ix++)
+		{
+			const ndVector point(m_horizontalScale_x * ndFloat32(x0 + ix), ndFloat32(m_elevationMap[base + x0 + ix]), zVal, ndFloat32(0.0f));
+			patch.m_pointArray.PushBack(point);
+		}
+		base += m_width;
+	}
+
+	if (m_diagonalMode == m_normalDiagonals)
+	{
+		// add the face array 
+		ndInt32 vertexIndex = 0;
+		const ndInt32 step = x1 - x0 + 1;
+		for (ndInt32 z = z0; z < z1; ++z)
+		{
+			for (ndInt32 x = x0; x < x1; ++x)
+			{
+				// for each quad
+				const ndInt32 i0 = vertexIndex;
+				const ndInt32 i1 = vertexIndex + 1;
+				const ndInt32 i2 = vertexIndex + step;
+				const ndInt32 i3 = vertexIndex + step + 1;
+
+				// we calculate the two triangle normals of this quad
+				const ndVector e0(patch.m_pointArray[i0] - patch.m_pointArray[i1]);
+				const ndVector e1(patch.m_pointArray[i2] - patch.m_pointArray[i1]);
+				const ndVector e2(patch.m_pointArray[i3] - patch.m_pointArray[i1]);
+				const ndVector n0(e0.CrossProduct(e1).Normalize());
+				const ndVector n1(e1.CrossProduct(e2).Normalize());
+				ndAssert(n0.m_w == ndFloat32(0.0f));
+				ndAssert(n1.m_w == ndFloat32(0.0f));
+
+				ndAssert(n0.DotProduct(n0).GetScalar() > ndFloat32(0.0f));
+				ndAssert(n1.DotProduct(n1).GetScalar() > ndFloat32(0.0f));
+
+				// we now check if the two triangles are coplanar
+				const ndVector dp(patch.m_pointArray[i3] - patch.m_pointArray[i1]);
+				ndAssert(dp.m_w == ndFloat32(0.0f));
+				ndFloat32 dist = n0.DotProduct(dp).GetScalar();
+
+				if (ndAbs(dist) < ndFloat32(1.0e-3f))
+				{
+					// triangles are coplanal, so this is a quad
+					patch.m_faceArray.PushBack(4);
+					patch.m_normalArray.PushBack(n0);
+					patch.m_faceMaterialArray.PushBack(0);
+					patch.m_indexArray.PushBack(i2);
+					patch.m_indexArray.PushBack(i3);
+					patch.m_indexArray.PushBack(i1);
+					patch.m_indexArray.PushBack(i0);
+				}
+				else
+				{
+					// triangles are not coplanal, triangulate the quad
+					// into two triangles
+					patch.m_faceArray.PushBack(3);
+					patch.m_normalArray.PushBack(n0);
+					patch.m_faceMaterialArray.PushBack(0);
+					patch.m_indexArray.PushBack(i2);
+					patch.m_indexArray.PushBack(i1);
+					patch.m_indexArray.PushBack(i0);
+
+					patch.m_faceArray.PushBack(3);
+					patch.m_normalArray.PushBack(n1);
+					patch.m_faceMaterialArray.PushBack(0);
+					patch.m_indexArray.PushBack(i1);
+					patch.m_indexArray.PushBack(i2);
+					patch.m_indexArray.PushBack(i3);
+				}
+				vertexIndex++;
+			}
+			vertexIndex++;
+		}
+	}
+	else
+	{
+		ndInt32 vertexIndex = 0;
+		const ndInt32 step = x1 - x0 + 1;
+		for (ndInt32 z = z0; z < z1; ++z)
+		{
+			for (ndInt32 x = x0; x < x1; ++x)
+			{
+				// for each quad
+				const ndInt32 i0 = vertexIndex;
+				const ndInt32 i1 = vertexIndex + 1;
+				const ndInt32 i2 = vertexIndex + step;
+				const ndInt32 i3 = vertexIndex + step + 1;
+
+				// we calculate the two triangle normals of this quad
+				const ndVector e0(patch.m_pointArray[i2] - patch.m_pointArray[i0]);
+				const ndVector e1(patch.m_pointArray[i3] - patch.m_pointArray[i0]);
+				const ndVector e2(patch.m_pointArray[i1] - patch.m_pointArray[i0]);
+				const ndVector n0(e0.CrossProduct(e1).Normalize());
+				const ndVector n1(e1.CrossProduct(e2).Normalize());
+				ndAssert(n0.m_w == ndFloat32(0.0f));
+				ndAssert(n1.m_w == ndFloat32(0.0f));
+
+				ndAssert(n0.DotProduct(n0).GetScalar() > ndFloat32(0.0f));
+				ndAssert(n1.DotProduct(n1).GetScalar() > ndFloat32(0.0f));
+
+				// we now check if the two triangles are coplanar
+				//const ndVector dp(patch.m_pointArray[i3] - patch.m_pointArray[i1]);
+				//ndAssert(dp.m_w == ndFloat32(0.0f));
+				ndAssert(e2.m_w == ndFloat32(0.0f));
+				//ndFloat32 dist = n0.DotProduct(dp).GetScalar();
+				ndFloat32 dist = n0.DotProduct(e2).GetScalar();
+
+				if (ndAbs(dist) < ndFloat32(1.0e-3f))
+				{
+					// triangles are coplanal, so this is a quad
+					patch.m_faceArray.PushBack(4);
+					patch.m_normalArray.PushBack(n0);
+					patch.m_faceMaterialArray.PushBack(0);
+					patch.m_indexArray.PushBack(i2);
+					patch.m_indexArray.PushBack(i3);
+					patch.m_indexArray.PushBack(i1);
+					patch.m_indexArray.PushBack(i0);
+				}
+				else
+				{
+					// triangles are not coplanal, triangulate the quad
+					// into two triangles
+					patch.m_faceArray.PushBack(3);
+					patch.m_normalArray.PushBack(n0);
+					patch.m_faceMaterialArray.PushBack(0);
+					patch.m_indexArray.PushBack(i0);
+					patch.m_indexArray.PushBack(i2);
+					patch.m_indexArray.PushBack(i3);
+
+					patch.m_faceArray.PushBack(3);
+					patch.m_normalArray.PushBack(n1);
+					patch.m_faceMaterialArray.PushBack(0);
+					patch.m_indexArray.PushBack(i0);
+					patch.m_indexArray.PushBack(i3);
+					patch.m_indexArray.PushBack(i1);
+				}
+				vertexIndex++;
+			}
+			vertexIndex++;
+		}
+	}
+
+	if (patch.m_faceArray.GetCount())
+	{
+		patch.GetFacesPatch(data);
 		ndInt32 faceCount0 = 0;
 		ndInt32 faceIndexCount0 = 0;
 		ndInt32 faceIndexCount1 = 0;
-	
-		ndArray<ndInt32>& address = query.m_faceIndexStart;
-		ndArray<ndFloat32>& hitDistance = query.m_hitDistance;
+		const ndInt32 stride = sizeof(ndVector) / sizeof(ndFloat32);
 
-		if (data->m_doContinueCollisionTest) 
+		ndPolygonMeshDesc::ndStaticMeshFaceQuery& query = *data->m_staticMeshQuery;
+		ndPolygonMeshDesc::ndProceduralStaticMeshFaceQuery& meshPatch = *data->m_proceduralStaticMeshFaceQuery;
+		ndArray<ndVector>& vertex = meshPatch.m_vertex;
+		ndArray<ndInt32>& address = query.m_faceIndexStart;
+		ndArray<ndInt32>& faceList = query.m_faceIndexCount;
+		ndArray<ndInt32>& indices = query.m_faceVertexIndex;
+		ndArray<ndFloat32>& hitDistance = query.m_hitDistance;
+		ndArray<ndInt32>& faceIndexCount = query.m_faceIndexCount;
+		if (data->m_doContinueCollisionTest)
 		{
-			//ndAssert(0);
-			ndInt32* const indices = &quadDataArray[0];
 			ndFastRay ray(ndVector::m_zero, data->m_boxDistanceTravelInMeshSpace);
-			for (ndInt32 i = 0; i < quadCount * 2; ++i)
+			for (ndInt32 i = 0; i < faceList.GetCount(); ++i)
 			{
+				const ndInt32 vertexCount = faceIndexCount[i];
 				const ndInt32* const indexArray = &indices[faceIndexCount1];
 				const ndVector& faceNormal = vertex[indexArray[4]];
 				ndFloat32 dist = data->PolygonBoxRayDistance(faceNormal, 3, indexArray, stride, &vertex[0].m_x, ray);
-				if (dist < ndFloat32(1.0f)) 
+				if (dist < ndFloat32(1.0f))
 				{
 					hitDistance.PushBack(dist);
 					address.PushBack(faceIndexCount0);
-					ndMemCpy(&indices[faceIndexCount0], indexArray, 9);
+					faceList[faceCount0] = vertexCount;
+					ndMemCpy(&indices[faceIndexCount0], indexArray, vertexCount * 2 + 3);
 					faceCount0++;
-					faceIndexCount0 += 9;
+					faceIndexCount0 += vertexCount * 2 + 3;
 				}
-				faceIndexCount1 += 9;
+				faceIndexCount1 += vertexCount * 2 + 3;
 			}
 		}
-		else 
+		else
 		{
-			ndInt32* const indices = &quadDataArray[0];
-			for (ndInt32 i = 0; i < quadCount * 2; ++i) 
+			for (ndInt32 i = 0; i < faceList.GetCount(); ++i)
 			{
+				const ndInt32 vertexCount = faceIndexCount[i];
 				const ndInt32* const indexArray = &indices[faceIndexCount1];
-				const ndVector& faceNormal = vertex[indexArray[4]];
-				ndFloat32 dist = data->PolygonBoxDistance(faceNormal, 3, indexArray, stride, &vertex[0].m_x);
-				if (dist > ndFloat32(0.0f)) 
+				const ndVector& faceNormal = vertex[indexArray[vertexCount + 1]];
+				ndFloat32 dist = data->PolygonBoxDistance(faceNormal, vertexCount, indexArray, stride, &vertex[0].m_x);
+				if (dist > ndFloat32(0.0f))
 				{
 					hitDistance.PushBack(dist);
 					address.PushBack(faceIndexCount0);
-					ndMemCpy(&indices[faceIndexCount0], indexArray, 9);
+					faceList[faceCount0] = vertexCount;
+					ndMemCpy(&indices[faceIndexCount0], indexArray, vertexCount * 2 + 3);
 					faceCount0++;
-					faceIndexCount0 += 9;
+					faceIndexCount0 += vertexCount * 2 + 3;
 				}
-				faceIndexCount1 += 9;
+				faceIndexCount1 += vertexCount * 2 + 3;
 			}
 		}
-	
+
+		// initialize the callback data structure
 		faceIndexCount.SetCount(faceCount0);
 		data->m_vertex = &vertex[0].m_x;
 		data->m_vertexStrideInBytes = sizeof(ndVector);
 	}
-}
-
-ndUnsigned64 ndShapeHeightfield::GetHash(ndUnsigned64 hash) const
-{
-	hash = ndCRC64(&m_attributeMap[0], ndInt32(m_attributeMap.GetCount()) * ndInt32(sizeof(ndInt8)), hash);
-	hash = ndCRC64(&m_elevationMap[0], ndInt32(m_elevationMap.GetCount()) * ndInt32(sizeof(ndReal)), hash);
-	return hash;
-}
-
-//ndVector ndShapeHeightfield::SupportVertexSpecial(const ndVector& dir, ndFloat32 skinMargin) const
-ndVector ndShapeHeightfield::SupportVertexSpecial(const ndVector&, ndFloat32) const
-{
-	//return SupportVertex(dir);
-	ndAssert(0);
-	return ndVector::m_zero;
+#endif
 }
