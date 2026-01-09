@@ -403,8 +403,15 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 		boxP0 = (m_invGridSize * (p0 - m_padding).Floor()) * m_gridSize;
 		boxP1 = (m_invGridSize * (p1 + m_gridSize).Floor()) * m_gridSize;
 
+		//boxP0 = (m_invGridSize * (p0 - m_padding).Floor()) * m_gridSize;
+		//boxP1 = (m_invGridSize * (p1 + m_padding).Ceiling()) * m_gridSize;
+
 		boxP0.m_y = p0.m_y - m_padding.m_y;
 		boxP1.m_y = p1.m_y + m_padding.m_y;
+
+		ndAssert(boxP0.m_x < boxP1.m_x);
+		ndAssert(boxP0.m_y < boxP1.m_y);
+		ndAssert(boxP0.m_z < boxP1.m_z);
 	}
 
 	void CalculateMinExtend2d(const ndVector& p0, const ndVector& p1, ndVector& boxP0, ndVector& boxP1) const

@@ -3995,15 +3995,15 @@ ndInt32 ndContactSolver::CalculatePolySoupToHullContactsDescrete(ndPolygonMeshDe
 	const ndInt32* const indexArray = &query.m_faceVertexIndex[0];
 
 static int xxxx;
-if (xxxx >= 21228)
-xxxx *= 1;
+//if (xxxx >= 21228)
+//xxxx *= 1;
 
 	data.SortFaceArray();
 	const ndInt32 faceCount = ndInt32(query.m_faceIndexCount.GetCount());
 	for (ndInt32 i = 0; (i < faceCount) && (count < 32); ++i)
 	{
 
-xxxx++;
+//xxxx++;
 		ndInt32 address = query.m_faceIndexStart[i];
 		const ndInt32* const localIndexArray = &indexArray[address];
 		polygon.m_vertexIndex = localIndexArray;
@@ -4028,11 +4028,44 @@ xxxx++;
 		m_vertexIndex = 0;
 		m_contactBuffer = &contactOut[count];
 
+//xxxx++;
+//if (xxxx == 1598)
+//xxxx *= 1;
+
 		ndInt32 count1 = polygon.CalculateContactToConvexHullDescrete(&polySoupInstance, *this);
 		closestDist = ndMin(closestDist, m_separationDistance);
 
 		if (count1 > 0)
 		{
+			if (0)
+			{
+				ndFixSizeArray<ndVector, 32> faceInShapeSpace;
+				const ndMatrix invMatrix(m_instance0.GetInvScaledTransform(m_instance0.GetGlobalMatrix()));
+				for (ndInt32 k = 0; k < count1; ++k)
+				{
+					const ndVector p(m_contactBuffer[k].m_point);
+					const ndVector q(invMatrix.TransformVector(p));
+					if (q.m_x > 0.501f)
+					{
+						ndVector q1(q);
+						q1.m_x -= 0.50f;
+						q1.m_w = 0.0f;
+						ndFloat32 mag(ndSqrt(q1.DotProduct(q1).GetScalar()));
+						ndAssert(mag <= 0.501f);
+					}
+					else if (q.m_x < -0.501f)
+					{
+						ndVector q1(q);
+						q1.m_x -= -0.50f;
+						q1.m_w = 0.0f;
+						ndFloat32 mag(ndSqrt(q1.DotProduct(q1).GetScalar()));
+						ndAssert(mag <= 0.501f);
+					}
+					faceInShapeSpace.PushBack(q);
+				}
+				count1 *= 1;
+			}
+
 			if (!m_intersectionTestOnly)
 			{
 				count += count1;
@@ -4061,7 +4094,6 @@ xxxx++;
 	m_separationDistance = closestDist;
 	m_instance1.m_shape = polySoupInstance.m_shape;
 	m_instance1 = polySoupInstance;
-
 	return count;
 }
 
