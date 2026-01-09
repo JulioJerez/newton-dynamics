@@ -30,11 +30,17 @@ void ndBasicProcedualStaticCollision(ndDemoEntityManager* const scene)
 
 	// add single box for testing
 	//ndSharedPtr<ndBody> testBody(AddSphere(scene, originMatrix, 1.0f, 0.25f, "wood_0.png"));
-	ndSharedPtr<ndBody> testBody(AddCapsule(scene, originMatrix, 1.0f, 0.5f, 0.5f, 1.0f, "wood_0.png"));
-	//ndSharedPtr<ndBody> testBody(AddBox(scene, originMatrix, 1.0f, 0.5f, 0.5f, 1.0f, "wood_0.png"));
+	//ndSharedPtr<ndBody> testBody(AddCapsule(scene, originMatrix, 1.0f, 0.5f, 0.5f, 1.0f, "wood_0.png"));
+	//ndSharedPtr<ndBody> testBody(AddBox(scene, originMatrix, 1.0f, 1.0f, 1.0f, 1.0f, "wood_0.png"));
 	//ndSharedPtr<ndBody> testBody(AddCylinder(scene, originMatrix, 1.0f, 0.5f, 0.5f, 1.0f, "wood_0.png"));
 	//ndSharedPtr<ndBody> testBody(AddConvexHull(scene, originMatrix, 40.0f, 0.7f, 1.0f, 10, "wood_0.png"));
-	testBody->SetOmega(ndVector (-10.0f, 0.0f, 0.0f, 0.0f));
+	//testBody->SetOmega(ndVector (-10.0f, 0.0f, 0.0f, 0.0f));
+
+	for (ndInt32 i = 0; i < 20; ++i)
+	{
+		ndSharedPtr<ndBody> testBody(AddBox(scene, originMatrix, 1.0f, 1.0f, 1.0f, 1.0f, "wood_0.png"));
+	}
+
 
 	////// add few props
 	//originMatrix.m_posit += originMatrix.m_front.Scale (ndFloat32 (40.0f));
