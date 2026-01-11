@@ -884,9 +884,6 @@ void ndShapeHeightfield::GetCollidingFaces(ndPolygonMeshDesc* const data) const
 
 	// start building the mesh
 	ndPatchMesh patch;
-	// since the vertex patch has no duplicate, 
-	// we can skip  the vertex sorting
-	patch.m_vertexArrayHasDuplicated = false;
 
 	// build the array of unique vertices
 	ndInt32 base = z0 * m_width;
@@ -1037,6 +1034,10 @@ void ndShapeHeightfield::GetCollidingFaces(ndPolygonMeshDesc* const data) const
 
 	if (patch.m_faceArray.GetCount())
 	{
+		// since the vertex patch has no duplicates, 
+		// we can skip  the vertex sorting
+		patch.m_vertexArrayHasDuplicated = false;
+
 		patch.GetFacesPatch(data);
 		ndInt32 faceCount0 = 0;
 		ndInt32 faceIndexCount0 = 0;
@@ -1099,4 +1100,206 @@ void ndShapeHeightfield::GetCollidingFaces(ndPolygonMeshDesc* const data) const
 		data->m_vertexStrideInBytes = sizeof(ndVector);
 	}
 #endif
+}
+
+void ndShapeHeightfield::GetFacesPatch(ndPatchMesh& patch) const
+{
+	ndVector boxP0;
+	ndVector boxP1;
+	CalculateMinExtend3d(patch.m_boxP0, patch.m_boxP1, boxP0, boxP1);
+
+	ndAssert(patch.m_convexShapeInstance);
+	boxP0 = boxP0.Select(boxP0.GetMax(m_minBox), m_yMask);
+	boxP1 = boxP1.Select(boxP1.GetMin(m_maxBox), m_yMask);
+
+	ndVector p0(boxP0.Scale(m_horizontalScaleInv_x).GetInt());
+	ndVector p1(boxP1.Scale(m_horizontalScaleInv_x).GetInt());
+
+	ndAssert(p0.m_ix == FastInt(boxP0.m_x * m_horizontalScaleInv_x));
+	ndAssert(p0.m_iz == FastInt(boxP0.m_z * m_horizontalScaleInv_x));
+	ndAssert(p1.m_ix == FastInt(boxP1.m_x * m_horizontalScaleInv_x));
+	ndAssert(p1.m_iz == FastInt(boxP1.m_z * m_horizontalScaleInv_x));
+
+	const ndInt32 x0 = ndInt32(p0.m_ix);
+	const ndInt32 x1 = ndInt32(p1.m_ix);
+	const ndInt32 z0 = ndInt32(p0.m_iz);
+	const ndInt32 z1 = ndInt32(p1.m_iz);
+
+	if ((x1 == x0) || (z1 == z0))
+	{
+		return;
+	}
+
+	ndFloat32 minHeight = ndFloat32(1.0e10f);
+	ndFloat32 maxHeight = ndFloat32(-1.0e10f);
+	CalculateMinAndMaxElevation(x0, x1, z0, z1, minHeight, maxHeight);
+
+	if ((maxHeight < boxP0.m_y) || (minHeight > boxP1.m_y))
+	{
+		// the box does not interset the heightfield
+		return;
+	}
+
+	const ndInt32 count_x = x1 - x0;
+	const ndInt32 count_z = z1 - z0;
+	ndInt32 numberOfQuad = (x1 - x0) * (z1 - z0);
+	if (numberOfQuad == 0)
+	{
+		// box overlap but not faces are collected
+		return;
+	}
+
+	// if this is a aabb test, we just add one vertex 
+	if (patch.m_queryType == ndPatchMesh::m_vertexListOnly)
+	{
+		patch.m_pointArray.PushBack(ndVector::m_zero);
+		return;
+	}
+
+	// build the array of unique vertices
+	ndInt32 base = z0 * m_width;
+	for (ndInt32 iz = 0; iz <= count_z; iz++)
+	{
+		ndFloat32 zVal = m_horizontalScale_z * ndFloat32(iz + z0);
+		for (ndInt32 ix = 0; ix <= count_x; ix++)
+		{
+			const ndVector point(m_horizontalScale_x * ndFloat32(x0 + ix), ndFloat32(m_elevationMap[base + x0 + ix]), zVal, ndFloat32(0.0f));
+			patch.m_pointArray.PushBack(point);
+		}
+		base += m_width;
+	}
+
+	if (m_diagonalMode == m_normalDiagonals)
+	{
+		// add the face array 
+		ndInt32 vertexIndex = 0;
+		const ndInt32 step = x1 - x0 + 1;
+		for (ndInt32 z = z0; z < z1; ++z)
+		{
+			for (ndInt32 x = x0; x < x1; ++x)
+			{
+				// for each quad
+				const ndInt32 i0 = vertexIndex;
+				const ndInt32 i1 = vertexIndex + 1;
+				const ndInt32 i2 = vertexIndex + step;
+				const ndInt32 i3 = vertexIndex + step + 1;
+
+				// we calculate the two triangle normals of this quad
+				const ndVector e0(patch.m_pointArray[i0] - patch.m_pointArray[i1]);
+				const ndVector e1(patch.m_pointArray[i2] - patch.m_pointArray[i1]);
+				const ndVector e2(patch.m_pointArray[i3] - patch.m_pointArray[i1]);
+				const ndVector n0(e0.CrossProduct(e1).Normalize());
+				const ndVector n1(e1.CrossProduct(e2).Normalize());
+				ndAssert(n0.m_w == ndFloat32(0.0f));
+				ndAssert(n1.m_w == ndFloat32(0.0f));
+
+				ndAssert(n0.DotProduct(n0).GetScalar() > ndFloat32(0.0f));
+				ndAssert(n1.DotProduct(n1).GetScalar() > ndFloat32(0.0f));
+
+				// we now check if the two triangles are coplanar
+				const ndVector dp(patch.m_pointArray[i3] - patch.m_pointArray[i1]);
+				ndAssert(dp.m_w == ndFloat32(0.0f));
+				ndFloat32 dist = n0.DotProduct(dp).GetScalar();
+
+				if (ndAbs(dist) < ndFloat32(1.0e-3f))
+				{
+					// triangles are coplanal, so this is a quad
+					patch.m_faceArray.PushBack(4);
+					patch.m_normalArray.PushBack(n0);
+					patch.m_faceMaterialArray.PushBack(0);
+					patch.m_indexArray.PushBack(i2);
+					patch.m_indexArray.PushBack(i3);
+					patch.m_indexArray.PushBack(i1);
+					patch.m_indexArray.PushBack(i0);
+				}
+				else
+				{
+					// triangles are not coplanal, triangulate the quad
+					// into two triangles
+					patch.m_faceArray.PushBack(3);
+					patch.m_normalArray.PushBack(n0);
+					patch.m_faceMaterialArray.PushBack(0);
+					patch.m_indexArray.PushBack(i2);
+					patch.m_indexArray.PushBack(i1);
+					patch.m_indexArray.PushBack(i0);
+
+					patch.m_faceArray.PushBack(3);
+					patch.m_normalArray.PushBack(n1);
+					patch.m_faceMaterialArray.PushBack(0);
+					patch.m_indexArray.PushBack(i1);
+					patch.m_indexArray.PushBack(i2);
+					patch.m_indexArray.PushBack(i3);
+				}
+				vertexIndex++;
+			}
+			vertexIndex++;
+		}
+	}
+	else
+	{
+		ndInt32 vertexIndex = 0;
+		const ndInt32 step = x1 - x0 + 1;
+		for (ndInt32 z = z0; z < z1; ++z)
+		{
+			for (ndInt32 x = x0; x < x1; ++x)
+			{
+				// for each quad
+				const ndInt32 i0 = vertexIndex;
+				const ndInt32 i1 = vertexIndex + 1;
+				const ndInt32 i2 = vertexIndex + step;
+				const ndInt32 i3 = vertexIndex + step + 1;
+
+				// we calculate the two triangle normals of this quad
+				const ndVector e0(patch.m_pointArray[i2] - patch.m_pointArray[i0]);
+				const ndVector e1(patch.m_pointArray[i3] - patch.m_pointArray[i0]);
+				const ndVector e2(patch.m_pointArray[i1] - patch.m_pointArray[i0]);
+				const ndVector n0(e0.CrossProduct(e1).Normalize());
+				const ndVector n1(e1.CrossProduct(e2).Normalize());
+				ndAssert(n0.m_w == ndFloat32(0.0f));
+				ndAssert(n1.m_w == ndFloat32(0.0f));
+
+				ndAssert(n0.DotProduct(n0).GetScalar() > ndFloat32(0.0f));
+				ndAssert(n1.DotProduct(n1).GetScalar() > ndFloat32(0.0f));
+
+				// we now check if the two triangles are coplanar
+				//const ndVector dp(patch.m_pointArray[i3] - patch.m_pointArray[i1]);
+				//ndAssert(dp.m_w == ndFloat32(0.0f));
+				ndAssert(e2.m_w == ndFloat32(0.0f));
+				//ndFloat32 dist = n0.DotProduct(dp).GetScalar();
+				ndFloat32 dist = n0.DotProduct(e2).GetScalar();
+
+				if (ndAbs(dist) < ndFloat32(1.0e-3f))
+				{
+					// triangles are coplanal, so this is a quad
+					patch.m_faceArray.PushBack(4);
+					patch.m_normalArray.PushBack(n0);
+					patch.m_faceMaterialArray.PushBack(0);
+					patch.m_indexArray.PushBack(i2);
+					patch.m_indexArray.PushBack(i3);
+					patch.m_indexArray.PushBack(i1);
+					patch.m_indexArray.PushBack(i0);
+				}
+				else
+				{
+					// triangles are not coplanal, triangulate the quad
+					// into two triangles
+					patch.m_faceArray.PushBack(3);
+					patch.m_normalArray.PushBack(n0);
+					patch.m_faceMaterialArray.PushBack(0);
+					patch.m_indexArray.PushBack(i0);
+					patch.m_indexArray.PushBack(i2);
+					patch.m_indexArray.PushBack(i3);
+
+					patch.m_faceArray.PushBack(3);
+					patch.m_normalArray.PushBack(n1);
+					patch.m_faceMaterialArray.PushBack(0);
+					patch.m_indexArray.PushBack(i0);
+					patch.m_indexArray.PushBack(i3);
+					patch.m_indexArray.PushBack(i1);
+				}
+				vertexIndex++;
+			}
+			vertexIndex++;
+		}
+	}
 }

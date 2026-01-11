@@ -276,6 +276,7 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 
 	void GetFacesPatch(ndPatchMesh& patch) const override
 	{
+		ndAssert(patch.m_convexShapeInstance);
 		// calculate box extend rounded you the padding
 		ndVector boxP0;
 		ndVector boxP1;
@@ -317,6 +318,13 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 		// since the vertex pathc has no duplicate, 
 		// we can skip the vertex sorting
 		patch.m_vertexArrayHasDuplicated = false;
+
+		// if this is a aabb test, we just add one vertex 
+		if (patch.m_queryType == ndPatchMesh::m_vertexListOnly)
+		{
+			patch.m_pointArray.PushBack(ndVector::m_zero);
+			return;
+		}
 
 		// start building the mesh
 		// build the array of unique vertices

@@ -23,14 +23,14 @@ void ndBasicProcedualStaticCollision(ndDemoEntityManager* const scene)
 
 	// build a placemnet matrix
 	ndQuaternion rot(ndYawMatrix(180.0f * ndDegreeToRad));
-	ndVector origin(10.5f, 0.0f, 0.0f, 1.0f);
+	ndVector origin(10.5f, 0.5f, 0.0f, 1.0f);
 	ndVector floor(FindFloor(*scene->GetWorld(), origin, 200.0f));
 
 	ndMatrix originMatrix(ndCalculateMatrix(rot, floor));
 
 	// add single box for testing
-	//ndSharedPtr<ndBody> testBody(AddSphere(scene, originMatrix, 1.0f, 0.25f, "wood_0.png"));
-	ndSharedPtr<ndBody> testBody(AddCapsule(scene, originMatrix, 1.0f, 0.5f, 0.5f, 1.0f, "wood_0.png"));
+	ndSharedPtr<ndBody> testBody(AddSphere(scene, originMatrix, 1.0f, 0.25f, "wood_0.png"));
+	//ndSharedPtr<ndBody> testBody(AddCapsule(scene, originMatrix, 1.0f, 0.5f, 0.5f, 1.0f, "wood_0.png"));
 	//ndSharedPtr<ndBody> testBody(AddBox(scene, originMatrix, 1.0f, 1.0f, 1.0f, 1.0f, "wood_0.png"));
 	//ndSharedPtr<ndBody> testBody(AddCylinder(scene, originMatrix, 1.0f, 0.5f, 0.5f, 1.0f, "wood_0.png"));
 	//ndSharedPtr<ndBody> testBody(AddConvexHull(scene, originMatrix, 40.0f, 0.7f, 1.0f, 10, "wood_0.png"));

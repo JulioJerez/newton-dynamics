@@ -4133,66 +4133,69 @@ ndInt32 ndContactSolver::ConvexToStaticMeshContactsDiscrete()
 	}
 	if (!(count && data.m_staticMeshQuery->m_faceIndexCount.GetCount()))
 	{
-		//if (polysoup->GetAsShapeHeightfield())
-		//{
-		//	m_separationDistance = ndFloat32(0.0f);
-		//	m_separatingVector = ndVector::m_zero;
-		//	m_separatingVector.m_y = ndFloat32(1.0f);
-		//}
-		//else
-		//{
-		//	CalculateClosestPoints();
-		//	ndFloat32 penetration = m_separatingVector.DotProduct(m_closestPoint1 - m_closestPoint0).GetScalar() - m_skinMargin - D_PENETRATION_TOL;
-		//	m_separationDistance = penetration;
-		//}
-
 		m_separationDistance = ndFloat32(0.0f);
 		m_separatingVector = ndVector::m_zero;
 		m_separatingVector.m_y = ndFloat32(1.0f);
-		if (m_instance0.GetScaleType() == ndShapeInstance::m_unit)
-		{
-			ndAssert(m_instance0.GetScale().m_x == ndFloat32(1.0f));
-			const ndFloat32 minDist = ndFloat32(1.0f);
-			ndFloat32 dist = m_instance0.GetBoxMinRadius();
-			ndFloat32 scale = (dist + minDist) / dist;
-			m_instance0.SetScale(scale);
-			ndPolygonMeshDesc data1(*this, false);
-			polysoup->GetCollidingFaces(&data1);
-			m_instance0.SetScale(ndFloat32(1.0f));
 
-			m_separationDistance = minDist;
-			const ndPolygonMeshDesc::ndStaticMeshFaceQuery& query = *data1.m_staticMeshQuery;
-			if (query.m_faceIndexCount.GetCount())
+		#if 1
+
+		// her we do a conservatiive box test to see if the 
+		// box is har away enough that it can move by distanceTravel
+		const ndVector distanceTravel(ndFloat32(1.0f));
+		ndShapeStaticMesh::ndPatchMesh patch;
+		patch.m_convexShapeInstance = data.m_convexInstance;
+		patch.m_boxP0 = (data.GetOrigin() - distanceTravel) & ndVector::m_triplexMask;
+		patch.m_boxP1 = (data.GetTarget() + distanceTravel)& ndVector::m_triplexMask;
+		patch.m_queryType = ndShapeStaticMesh::ndPatchMesh::m_vertexListOnly;
+		polysoup->GetFacesPatch(patch);
+		m_separationDistance = patch.m_pointArray.GetCount() ? ndFloat32 (0.0f) : distanceTravel.m_x;
+
+		#else
+			if (m_instance0.GetScaleType() == ndShapeInstance::m_unit)
 			{
-				ndVector min(ndFloat32(1.0e15f));
-				ndVector max(ndFloat32(-1.0e15f));
-				const ndInt32* const indexArray = &query.m_faceVertexIndex[0];
-				ndInt32 stride = ndInt32(data1.m_vertexStrideInBytes / sizeof(ndFloat32));
-				for (ndInt32 i = ndInt32 (query.m_faceIndexCount.GetCount()) - 1; i >= 0; --i)
+				ndAssert(m_instance0.GetScale().m_x == ndFloat32(1.0f));
+				const ndFloat32 minDist = ndFloat32(1.0f);
+				ndFloat32 dist = m_instance0.GetBoxMinRadius();
+				ndFloat32 scale = (dist + minDist) / dist;
+				m_instance0.SetScale(scale);
+				ndPolygonMeshDesc data1(*this, false);
+				polysoup->GetCollidingFaces(&data1);
+				m_instance0.SetScale(ndFloat32(1.0f));
+
+				m_separationDistance = minDist;
+				const ndPolygonMeshDesc::ndStaticMeshFaceQuery& query = *data1.m_staticMeshQuery;
+				if (query.m_faceIndexCount.GetCount())
 				{
-					const ndInt32 address = query.m_faceIndexStart[i];
-					const ndInt32 vertexCount = query.m_faceIndexCount[i];
-					const ndInt32* const localIndexArray = &indexArray[address];
-					for (ndInt32 j = 0; j < vertexCount; ++j)
+					ndVector min(ndFloat32(1.0e15f));
+					ndVector max(ndFloat32(-1.0e15f));
+					const ndInt32* const indexArray = &query.m_faceVertexIndex[0];
+					ndInt32 stride = ndInt32(data1.m_vertexStrideInBytes / sizeof(ndFloat32));
+					for (ndInt32 i = ndInt32(query.m_faceIndexCount.GetCount()) - 1; i >= 0; --i)
 					{
-						const ndVector point(ndVector(&data1.m_vertex[localIndexArray[j] * stride])& ndVector::m_triplexMask);
-						min = min.GetMin(point);
-						max = max.GetMax(point);
+						const ndInt32 address = query.m_faceIndexStart[i];
+						const ndInt32 vertexCount = query.m_faceIndexCount[i];
+						const ndInt32* const localIndexArray = &indexArray[address];
+						for (ndInt32 j = 0; j < vertexCount; ++j)
+						{
+							const ndVector point(ndVector(&data1.m_vertex[localIndexArray[j] * stride]) & ndVector::m_triplexMask);
+							min = min.GetMin(point);
+							max = max.GetMax(point);
+						}
 					}
+
+					ndVector minP;
+					ndVector maxP;
+					ndMatrix matrix(m_instance0.GetGlobalMatrix() * m_instance1.GetGlobalMatrix().OrthoInverse());
+					m_instance0.CalculateAabb(matrix, minP, maxP);
+
+					const ndVector q1(maxP - min);
+					const ndVector q0(minP - max);
+					ndFloat32 dist2 = ndBoxDistanceToOrigin2(q0, q1);
+
+					m_separationDistance = ndSqrt(dist2);
 				}
-
-				ndVector minP;
-				ndVector maxP;
-				ndMatrix matrix(m_instance0.GetGlobalMatrix() * m_instance1.GetGlobalMatrix().OrthoInverse());
-				m_instance0.CalculateAabb(matrix, minP, maxP);
-
-				const ndVector q1(maxP - min);
-				const ndVector q0(minP - max);
-				ndFloat32 dist2 = ndBoxDistanceToOrigin2(q0, q1);
-
-				m_separationDistance = ndSqrt(dist2);
 			}
-		}
+		#endif
 	}
 
 	ndAssert(!count || (m_separationDistance < ndFloat32(1.0e6f)));

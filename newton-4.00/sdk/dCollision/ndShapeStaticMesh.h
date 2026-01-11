@@ -35,9 +35,18 @@ class ndShapeStaticMesh: public ndShape
 	class ndPatchMesh
 	{
 		#define MESH_SIZE 512
+
 		public:
+		enum ndQueryType
+		{
+			m_buildIndexList,
+			m_vertexListOnly,
+		};
+
 		ndPatchMesh()
-			:m_vertexArrayHasDuplicated(true)
+			:m_convexShapeInstance(nullptr)
+			,m_queryType(m_buildIndexList)
+			,m_vertexArrayHasDuplicated(true)
 		{
 		}
 		
@@ -50,6 +59,10 @@ class ndShapeStaticMesh: public ndShape
 		ndFixSizeArray<ndInt32, MESH_SIZE> m_faceArray;
 		ndFixSizeArray<ndInt32, MESH_SIZE * 4> m_indexArray;
 		ndFixSizeArray<ndInt32, MESH_SIZE> m_faceMaterialArray;
+
+		const ndShapeInstance* m_convexShapeInstance;
+
+		ndQueryType m_queryType;
 		bool m_vertexArrayHasDuplicated;
 
 		private:
@@ -90,6 +103,8 @@ class ndShapeStaticMesh: public ndShape
 	D_COLLISION_API virtual void CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) const override;
 	D_COLLISION_API ndInt32 CalculatePlaneIntersection(const ndFloat32* const vertex, const ndInt32* const index, ndInt32 indexCount, ndInt32 strideInFloat, const ndPlane& localPlane, ndVector* const contactsOut) const;
 
+	virtual void GetFacesPatch(ndPatchMesh& patch) const = 0;
+
 	D_MSV_NEWTON_CLASS_ALIGN_32 
 	class ndMeshVertexListIndexList
 	{
@@ -103,6 +118,7 @@ class ndShapeStaticMesh: public ndShape
 		ndInt32 m_vertexStrideInBytes;
 	} D_GCC_NEWTON_CLASS_ALIGN_32;
 
+	friend class ndContactSolver;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 

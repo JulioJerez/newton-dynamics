@@ -37,7 +37,6 @@ class ndShapeStaticProceduralMesh: public ndShapeStaticMesh
 	D_COLLISION_API void SetAABB(const ndVector& p0, const ndVector& p1);
 	D_COLLISION_API void GetAABB(const ndVector& p0, const ndVector& p1);
 
-	virtual void GetFacesPatch(ndPatchMesh& patch) const = 0;
 	virtual ndShapeStaticProceduralMesh* GetAsShapeStaticProceduralMesh() override { return this; }
 
 	protected:

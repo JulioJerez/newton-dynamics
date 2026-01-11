@@ -50,12 +50,14 @@ class ndShapeStatic_bvh: public ndShapeStaticMesh, public ndAabbPolygonSoup
 	static ndIntersectStatus ShowDebugPolygon(void* const context, const ndFloat32* const polygon, ndInt32 strideInBytes, const ndInt32* const indexArray, ndInt32 indexCount, ndFloat32 hitDistance);
 	static ndIntersectStatus GetTriangleCount(void* const context, const ndFloat32* const polygon, ndInt32 strideInBytes, const ndInt32* const indexArray, ndInt32 indexCount, ndFloat32 hitDistance);
 	static ndIntersectStatus GetPolygon(void* const context, const ndFloat32* const polygon, ndInt32 strideInBytes, const ndInt32* const indexArray, ndInt32 indexCount, ndFloat32 hitDistance);
+	static ndIntersectStatus GetBoxTest(void* const context, const ndFloat32* const polygon, ndInt32 strideInBytes, const ndInt32* const indexArray, ndInt32 indexCount, ndFloat32 hitDistance);
 
 	private: 
 	static ndIntersectStatus CalculateHash (
 			void* const context, const ndFloat32* const polygon, ndInt32 strideInBytes,
 			const ndInt32* const indexArray, ndInt32 indexCount, ndFloat32 hitDistance);
 
+	virtual void GetFacesPatch(ndPatchMesh& patch) const override;
 	D_COLLISION_API virtual ndVector SupportVertexSpecial(const ndVector& dir, ndFloat32 skinMargin) const override;
 
 	ndInt32 m_trianglesCount;

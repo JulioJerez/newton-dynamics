@@ -93,6 +93,7 @@ class ndShapeHeightfield: public ndShapeStaticMesh
 	ndFloat32 RayCastCell(const ndFastRay& ray, ndInt32 xIndex0, ndInt32 zIndex0, ndVector& normalOut, ndFloat32 maxT) const;
 	void CalculateMinAndMaxElevation(ndInt32 x0, ndInt32 x1, ndInt32 z0, ndInt32 z1, ndFloat32& minHeight, ndFloat32& maxHeight) const;
 
+	virtual void GetFacesPatch(ndPatchMesh& patch) const override;
 	D_COLLISION_API virtual ndVector SupportVertexSpecial(const ndVector& dir, ndFloat32 skinMargin) const override;
 
 	ndArray<ndInt8> m_attributeMap;

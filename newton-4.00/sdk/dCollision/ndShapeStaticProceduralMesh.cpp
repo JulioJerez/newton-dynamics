@@ -57,6 +57,7 @@ void ndShapeStaticProceduralMesh::GetCollidingFaces(ndPolygonMeshDesc* const dat
 	ndPatchMesh patch;
 	patch.m_boxP0 = data->GetOrigin();
 	patch.m_boxP1 = data->GetTarget();
+	patch.m_convexShapeInstance = data->m_convexInstance;
 	patch.m_boxP0 += data->m_boxDistanceTravelInMeshSpace & (data->m_boxDistanceTravelInMeshSpace < ndVector::m_zero);
 	patch.m_boxP1 += data->m_boxDistanceTravelInMeshSpace & (data->m_boxDistanceTravelInMeshSpace > ndVector::m_zero);
 	GetFacesPatch(patch);
@@ -133,7 +134,6 @@ void ndShapeStaticProceduralMesh::GetCollidingFaces(ndPolygonMeshDesc* const dat
 		//	xxxx *= 1;
 		//}
 		//xxxx++;
-
 	}
 }
 

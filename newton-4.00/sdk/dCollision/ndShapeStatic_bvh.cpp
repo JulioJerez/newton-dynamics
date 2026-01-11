@@ -193,30 +193,6 @@ ndFloat32 ndShapeStatic_bvh::RayCast(ndRayCastNotify& callback, const ndVector& 
 	return t;
 }
 
-ndIntersectStatus ndShapeStatic_bvh::GetPolygon(void* const context, const ndFloat32* const, ndInt32, const ndInt32* const indexArray, ndInt32 indexCount, ndFloat32 hitDistance)
-{
-	ndPolygonMeshDesc& data = (*(ndPolygonMeshDesc*)context);
-	ndPolygonMeshDesc::ndStaticMeshFaceQuery& query = *data.m_staticMeshQuery;
-
-	ndInt32 count = indexCount * 2 + 3;
-	query.m_hitDistance.PushBack(hitDistance);
-	query.m_faceIndexCount.PushBack(indexCount);
-	query.m_faceIndexStart.PushBack(ndInt32(query.m_faceVertexIndex.GetCount()));
-
-	for (ndInt32 i = 0; i < count; ++i) 
-	{
-		query.m_faceVertexIndex.PushBack(indexArray[i]);
-	}
-	return m_continueSearh;
-}
-
-void ndShapeStatic_bvh::GetCollidingFaces(ndPolygonMeshDesc* const data) const
-{
-	data->m_vertex = GetLocalVertexPool();
-	data->m_vertexStrideInBytes = GetStrideInBytes();
-	ForAllSectors(*data, data->m_boxDistanceTravelInMeshSpace, data->m_maxT, GetPolygon, data);
-}
-
 ndIntersectStatus ndShapeStatic_bvh::CalculateHash(
 	void* const context, const ndFloat32* const polygon, ndInt32 strideInBytes,
 	const ndInt32* const indexArray, ndInt32 indexCount, ndFloat32)
@@ -251,4 +227,45 @@ ndVector ndShapeStatic_bvh::SupportVertexSpecial(const ndVector& dir, ndFloat32)
 {
 	ndVector support (ForAllSectorsSupportVertex(dir));
 	return support;
+}
+
+ndIntersectStatus ndShapeStatic_bvh::GetBoxTest(void* const context, const ndFloat32* const polygon, ndInt32 strideInBytes, const ndInt32* const indexArray, ndInt32 indexCount, ndFloat32 hitDistance)
+{
+	// if any polygon interset the aabb, we stop the search
+	// we can do a better test here. 
+	ndPatchMesh& data = (*(ndPatchMesh*)context);
+	data.m_pointArray.PushBack(ndVector::m_zero);
+	return m_stopSearch;
+}
+
+void ndShapeStatic_bvh::GetFacesPatch(ndPatchMesh& patch) const
+{
+	ndAssert(patch.m_queryType == ndPatchMesh::m_vertexListOnly);
+	ndFastAabb aabbInfo(patch.m_boxP0, patch.m_boxP1);
+	ForAllSectors(aabbInfo, ndVector::m_zero, ndFloat32 (0.0f), GetBoxTest, &patch);
+	//ndAssert(patch.m_pointArray.GetCount());
+}
+
+ndIntersectStatus ndShapeStatic_bvh::GetPolygon(void* const context, const ndFloat32* const, ndInt32, const ndInt32* const indexArray, ndInt32 indexCount, ndFloat32 hitDistance)
+{
+	ndPolygonMeshDesc& data = (*(ndPolygonMeshDesc*)context);
+	ndPolygonMeshDesc::ndStaticMeshFaceQuery& query = *data.m_staticMeshQuery;
+
+	ndInt32 count = indexCount * 2 + 3;
+	query.m_hitDistance.PushBack(hitDistance);
+	query.m_faceIndexCount.PushBack(indexCount);
+	query.m_faceIndexStart.PushBack(ndInt32(query.m_faceVertexIndex.GetCount()));
+
+	for (ndInt32 i = 0; i < count; ++i)
+	{
+		query.m_faceVertexIndex.PushBack(indexArray[i]);
+	}
+	return m_continueSearh;
+}
+
+void ndShapeStatic_bvh::GetCollidingFaces(ndPolygonMeshDesc* const data) const
+{
+	data->m_vertex = GetLocalVertexPool();
+	data->m_vertexStrideInBytes = GetStrideInBytes();
+	ForAllSectors(*data, data->m_boxDistanceTravelInMeshSpace, data->m_maxT, GetPolygon, data);
 }

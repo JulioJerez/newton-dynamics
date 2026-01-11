@@ -109,18 +109,7 @@ class ndPolygonMeshDesc: public ndFastAabb
 	ndFloat32 m_maxT;
 	ndInt32 m_threadId;
 	bool m_doContinueCollisionTest;
-
 } D_GCC_NEWTON_CLASS_ALIGN_32;
-
-
-//class ndPolygonMeshLocalDesc : public ndPolygonMeshDesc
-//{
-//	public:
-//	D_COLLISION_API ndPolygonMeshLocalDesc(ndContactSolver& proxy, bool ccdMode);
-//
-//	ndPolygonMeshDesc::ndStaticMeshFaceQuery m_localStaticMeshQuery;
-//	ndPolygonMeshDesc::ndProceduralStaticMeshFaceQuery m_localProceduralStaticMeshQuery;
-//};
 
 #endif 
 

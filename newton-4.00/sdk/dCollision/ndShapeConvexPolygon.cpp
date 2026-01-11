@@ -649,10 +649,9 @@ ndInt32 ndShapeConvexPolygon::CalculateContactToConvexHullContinue(const ndShape
 		}
 	
 		const ndUnsigned64 hullId = contactSolver.m_instance0.GetUserDataID();
-		if (inside & !contactSolver.m_intersectionTestOnly) 
+		if (inside && !contactSolver.m_intersectionTestOnly) 
 		{
 			const ndMatrix& matrixInstance0 = contactSolver.m_instance0.m_globalMatrix;
-			//const ndVector normalInHull(matrixInstance0.UnrotateVector(m_normal.Scale(ndFloat32(-1.0f))));
 			const ndVector normalInHull(matrixInstance0.UnrotateVector(m_normal * ndVector::m_negOne));
 			ndVector pointInHull(contactSolver.m_instance0.SupportVertex(normalInHull));
 			const ndVector p0(matrixInstance0.TransformVector(pointInHull));
@@ -804,7 +803,7 @@ ndInt32 ndShapeConvexPolygon::CalculateContactToConvexHullDescrete(const ndShape
 
 	ndInt32 count = 0;
 	const ndUnsigned64 hullId = hull->GetUserDataID();
-	if (inside & !contactSolver.m_intersectionTestOnly)
+	if (inside && !contactSolver.m_intersectionTestOnly)
 	{
 		contactSolver.m_separationDistance = -penetration;
 		contactSolver.m_separatingVector = m_normal;
@@ -848,6 +847,5 @@ ndInt32 ndShapeConvexPolygon::CalculateContactToConvexHullDescrete(const ndShape
 			}
 		}
 	}
-
 	return count;
 }
