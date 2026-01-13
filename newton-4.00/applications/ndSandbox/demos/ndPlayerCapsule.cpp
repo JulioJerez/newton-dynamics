@@ -39,6 +39,13 @@ class ndPlayerCapsuleNotify : public ndDemoEntityNotify
 	void OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep) override
 	{
 	}
+
+	// an app can use this to determine what ovject form the scene 
+	// is colliding with, and take appropiate action.
+	virtual bool OnSceneAabbOverlap(const ndBody* const otherBody) const
+	{
+		return true;
+	}
 };
 
 class ndPlayerCapsuleController : public ndModelNotify
