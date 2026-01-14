@@ -416,17 +416,19 @@ world.AddBody(bodyPtr);</code></pre>
         <section id="ndBodyKinematic">
             <h2>4. ndBodyKinematic</h2>
             <p>
-                <code>ndBodyKinematic</code> has infinite mass and is controlled directly by your code.
-                It doesn't respond to forces or collisions, but other dynamic bodies collide with it.
+                <code>ndBodyKinematic</code> is a body that is not affected by forces - acceleration
+                has no effect on it. You control its position and velocity directly through code.
+                Other dynamic bodies will collide with it normally.
             </p>
 
             <h3>Use Cases</h3>
             <ul>
-                <li>Moving platforms</li>
-                <li>Elevators</li>
+                <li>Moving platforms and elevators</li>
                 <li>Doors and gates</li>
                 <li>Scripted animations</li>
-                <li>Terrain and static geometry (when mass = 0)</li>
+                <li>Player capsules</li>
+                <li>Force fields and triggers</li>
+                <li>Terrain and static geometry</li>
             </ul>
 
 <pre><code>// Create kinematic body

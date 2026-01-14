@@ -780,9 +780,9 @@ public:
 };</code></pre>
 
             <div class="note">
-                <strong>Note:</strong> Static mesh shapes should only be used with
-                <code>ndBodyKinematic</code> bodies (zero mass). Using them with dynamic
-                bodies will cause undefined behavior.
+                <strong>Note:</strong> Static mesh shapes are designed for non-moving geometry
+                and should be assigned to bodies with zero/infinite mass. Using them with
+                moving dynamic bodies will cause undefined behavior.
             </div>
         </section>
 

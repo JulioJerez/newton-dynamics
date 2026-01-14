@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building Networks - dBrain Neural Network Library</title>
+    <style>
+        :root {
+            --primary-color: #7c3aed;
+            --secondary-color: #6d28d9;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        nav.toc {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            margin-bottom: 1rem;
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        nav.toc ul {
+            list-style: none;
+            columns: 2;
+        }
+
+        nav.toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav.toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        nav.toc a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h3 {
+            color: var(--heading-color);
+            font-size: 1.35rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #ede9fe;
+            color: #6d28d9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f5f3ff;
+            font-weight: 600;
+        }
+
+        .note {
+            background: #faf5ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .class-header {
+            background: #f5f3ff;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+        }
+
+        .class-header code {
+            background: none;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Building Networks</h1>
+            <p>The ndBrain class, layer composition, inference, and serialization</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; Back to dBrain Documentation</a>
+
+        <nav class="toc">
+            <h2>Contents</h2>
+            <ul>
+                <li><a href="#ndBrain">1. The ndBrain Class</a></li>
+                <li><a href="#building">2. Building Networks</a></li>
+                <li><a href="#inference">3. Making Predictions</a></li>
+                <li><a href="#weights">4. Weight Management</a></li>
+                <li><a href="#serialization">5. Saving and Loading</a></li>
+                <li><a href="#examples">6. Network Examples</a></li>
+            </ul>
+        </nav>
+
+        <section id="ndBrain">
+            <h2>1. The ndBrain Class</h2>
+            <div class="class-header">
+                <code>class ndBrain : public ndArray&lt;ndBrainLayer*&gt;</code>
+            </div>
+            <p>
+                <code>ndBrain</code> is the main neural network container. It stores layers
+                in sequential order and manages forward/backward passes through the network.
+            </p>
+
+            <h3>Key Methods</h3>
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>AddLayer(layer)</code></td>
+                    <td>Add a layer to the network</td>
+                </tr>
+                <tr>
+                    <td><code>GetInputSize()</code></td>
+                    <td>Input dimensions of first layer</td>
+                </tr>
+                <tr>
+                    <td><code>GetOutputSize()</code></td>
+                    <td>Output dimensions of last layer</td>
+                </tr>
+                <tr>
+                    <td><code>InitWeights()</code></td>
+                    <td>Initialize all layer weights</td>
+                </tr>
+                <tr>
+                    <td><code>MakePrediction(in, out)</code></td>
+                    <td>Forward pass through network</td>
+                </tr>
+                <tr>
+                    <td><code>IsGpuReady()</code></td>
+                    <td>Check if GPU acceleration available</td>
+                </tr>
+                <tr>
+                    <td><code>SaveToFile(path)</code></td>
+                    <td>Serialize network to file</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="building">
+            <h2>2. Building Networks</h2>
+            <p>
+                Networks are built by adding layers sequentially. Each layer's output
+                becomes the next layer's input.
+            </p>
+
+            <h3>Basic Pattern</h3>
+<pre><code>ndBrain brain;
+
+// Add layers in sequence
+brain.AddLayer(new ndBrainLayerLinear(inputSize, hiddenSize));
+brain.AddLayer(new ndBrainLayerActivationRelu(hiddenSize));
+brain.AddLayer(new ndBrainLayerLinear(hiddenSize, outputSize));
+
+// Initialize weights after building
+brain.InitWeights();</code></pre>
+
+            <h3>Layer Matching</h3>
+            <p>
+                Each layer's input size must match the previous layer's output size.
+            </p>
+<pre><code>// CORRECT: sizes match
+brain.AddLayer(new ndBrainLayerLinear(128, 64));  // output: 64
+brain.AddLayer(new ndBrainLayerActivationRelu(64)); // input: 64, output: 64
+brain.AddLayer(new ndBrainLayerLinear(64, 32));    // input: 64
+
+// WRONG: size mismatch
+brain.AddLayer(new ndBrainLayerLinear(128, 64));   // output: 64
+brain.AddLayer(new ndBrainLayerActivationRelu(32)); // ERROR: expects 32, gets 64</code></pre>
+
+            <h3>Multi-Layer Network</h3>
+<pre><code>ndBrain brain;
+
+// Input layer
+brain.AddLayer(new ndBrainLayerLinear(inputSize, 256));
+brain.AddLayer(new ndBrainLayerActivationRelu(256));
+
+// Hidden layers
+brain.AddLayer(new ndBrainLayerLinear(256, 128));
+brain.AddLayer(new ndBrainLayerActivationRelu(128));
+
+brain.AddLayer(new ndBrainLayerLinear(128, 64));
+brain.AddLayer(new ndBrainLayerActivationRelu(64));
+
+// Output layer
+brain.AddLayer(new ndBrainLayerLinear(64, outputSize));
+// No activation for regression, or Softmax for classification
+
+brain.InitWeights();
+
+// Query dimensions
+printf("Input size: %d\n", brain.GetInputSize());
+printf("Output size: %d\n", brain.GetOutputSize());
+printf("Parameters: %d\n", brain.GetNumberOfParameters());</code></pre>
+        </section>
+
+        <section id="inference">
+            <h2>3. Making Predictions</h2>
+            <p>
+                Use <code>MakePrediction()</code> to run the forward pass through the network.
+            </p>
+
+            <h3>Basic Inference</h3>
+<pre><code>ndBrainVector input(brain.GetInputSize());
+ndBrainVector output(brain.GetOutputSize());
+
+// Fill input with data
+input[0] = 1.0f;
+input[1] = 0.5f;
+// ...
+
+// Forward pass
+brain.MakePrediction(input, output);
+
+// Use output
+for (ndInt32 i = 0; i &lt; output.GetCount(); i++)
+{
+    printf("output[%d] = %f\n", i, output[i]);
+}</code></pre>
+
+            <h3>With Working Buffer</h3>
+            <p>
+                For repeated predictions, reuse a working buffer to avoid allocations.
+            </p>
+<pre><code>// Pre-allocate working buffer
+ndInt32 maxBufferSize = brain.CalculateMaxLayerBufferSize();
+ndBrainVector workingBuffer;
+workingBuffer.SetCount(maxBufferSize);
+
+// Reuse for multiple predictions
+for (ndInt32 i = 0; i &lt; batchCount; i++)
+{
+    // ... fill input ...
+    brain.MakePrediction(input, output, workingBuffer);
+}</code></pre>
+
+            <h3>Classification Example</h3>
+<pre><code>// Softmax output - find predicted class
+brain.MakePrediction(input, output);
+
+// ArgMax to find highest probability class
+ndInt64 predictedClass = output.ArgMax();
+printf("Predicted class: %lld\n", predictedClass);
+
+// Get confidence (probability)
+ndBrainFloat confidence = output[predictedClass];
+printf("Confidence: %.2f%%\n", confidence * 100.0f);</code></pre>
+        </section>
+
+        <section id="weights">
+            <h2>4. Weight Management</h2>
+
+            <h3>Initialization</h3>
+<pre><code>// Initialize all weights (recommended after building network)
+brain.InitWeights();
+
+// Or initialize individual layers
+for (ndInt32 i = 0; i &lt; brain.GetCount(); i++)
+{
+    brain[i]->InitWeights();
+}</code></pre>
+
+            <h3>Copying Networks</h3>
+<pre><code>// Full copy
+ndBrain copy(originalBrain);  // Copy constructor
+
+// Or use CopyFrom
+ndBrain target;
+// ... build same architecture ...
+target.CopyFrom(source);</code></pre>
+
+            <h3>Soft Copy (Polyak Averaging)</h3>
+<pre><code>// Blend weights: target = target * (1 - blend) + source * blend
+// Used in reinforcement learning for target network updates
+ndBrainFloat tau = 0.005f;  // Soft update coefficient
+targetNetwork.SoftCopy(policyNetwork, tau);</code></pre>
+
+            <h3>Dropout</h3>
+<pre><code>// Enable dropout during training
+brain.ApplyDropOutRate(0.2f);  // 20% dropout
+
+// Disable for inference
+brain.ResetDropOut();</code></pre>
+        </section>
+
+        <section id="serialization">
+            <h2>5. Saving and Loading</h2>
+            <p>
+                Trained networks can be serialized to disk for later use.
+            </p>
+
+            <h3>Saving</h3>
+<pre><code>// Save to file
+brain.SaveToFile("model.bin");
+
+// Or use the save interface
+ndBrainSave saveFile;
+brain.Save(&amp;saveFile);
+saveFile.SaveToFile("model.bin");</code></pre>
+
+            <h3>Loading</h3>
+<pre><code>// Load network from file
+// Note: You need to rebuild the network structure first,
+// then load the weights
+ndBrain loadedBrain;
+
+// ... rebuild same architecture as saved network ...
+
+// Load weights
+ndBrainLoad loadFile;
+loadFile.Load("model.bin");
+// Weights are restored to matching layers</code></pre>
+
+            <div class="warning">
+                <strong>Important:</strong> When loading, the network architecture must match
+                exactly what was saved. Mismatched architectures will cause errors or undefined behavior.
+            </div>
+        </section>
+
+        <section id="examples">
+            <h2>6. Network Examples</h2>
+
+            <h3>Multi-Layer Perceptron (Regression)</h3>
+<pre><code>ndBrain CreateMLP(ndInt32 inputs, ndInt32 outputs)
+{
+    ndBrain brain;
+
+    brain.AddLayer(new ndBrainLayerLinear(inputs, 128));
+    brain.AddLayer(new ndBrainLayerActivationRelu(128));
+    brain.AddLayer(new ndBrainLayerLinear(128, 64));
+    brain.AddLayer(new ndBrainLayerActivationRelu(64));
+    brain.AddLayer(new ndBrainLayerLinear(64, outputs));
+    // No final activation for regression
+
+    brain.InitWeights();
+    return brain;
+}</code></pre>
+
+            <h3>Classification Network</h3>
+<pre><code>ndBrain CreateClassifier(ndInt32 inputs, ndInt32 numClasses)
+{
+    ndBrain brain;
+
+    brain.AddLayer(new ndBrainLayerLinear(inputs, 256));
+    brain.AddLayer(new ndBrainLayerActivationRelu(256));
+    brain.AddLayer(new ndBrainLayerLinearWithDropOut(256, 128));
+    brain.AddLayer(new ndBrainLayerActivationRelu(128));
+    brain.AddLayer(new ndBrainLayerLinear(128, numClasses));
+    brain.AddLayer(new ndBrainLayerActivationSoftmax(numClasses));
+
+    brain.InitWeights();
+    return brain;
+}</code></pre>
+
+            <h3>Convolutional Network</h3>
+<pre><code>ndBrain CreateCNN(ndInt32 width, ndInt32 height, ndInt32 channels, ndInt32 numClasses)
+{
+    ndBrain brain;
+
+    // Conv block 1
+    brain.AddLayer(new ndBrainLayerConvolutional_2d(width, height, channels, 3, 32));
+    ndInt32 w1 = width - 2, h1 = height - 2;
+    brain.AddLayer(new ndBrainLayerActivationRelu(w1 * h1 * 32));
+    brain.AddLayer(new ndBrainLayerImagePolling_2x2(w1, h1, 32));
+    w1 /= 2; h1 /= 2;
+
+    // Conv block 2
+    brain.AddLayer(new ndBrainLayerConvolutional_2d(w1, h1, 32, 3, 64));
+    ndInt32 w2 = w1 - 2, h2 = h1 - 2;
+    brain.AddLayer(new ndBrainLayerActivationRelu(w2 * h2 * 64));
+
+    // Fully connected
+    brain.AddLayer(new ndBrainLayerLinear(w2 * h2 * 64, 128));
+    brain.AddLayer(new ndBrainLayerActivationRelu(128));
+    brain.AddLayer(new ndBrainLayerLinear(128, numClasses));
+    brain.AddLayer(new ndBrainLayerActivationSoftmax(numClasses));
+
+    brain.InitWeights();
+    return brain;
+}</code></pre>
+
+            <h3>Policy Network (Reinforcement Learning)</h3>
+<pre><code>ndBrain CreatePolicyNetwork(ndInt32 stateSize, ndInt32 actionSize)
+{
+    ndBrain brain;
+
+    brain.AddLayer(new ndBrainLayerLinear(stateSize, 256));
+    brain.AddLayer(new ndBrainLayerActivationTanh(256));
+    brain.AddLayer(new ndBrainLayerLinear(256, 128));
+    brain.AddLayer(new ndBrainLayerActivationTanh(128));
+    brain.AddLayer(new ndBrainLayerLinear(128, actionSize));
+    brain.AddLayer(new ndBrainLayerActivationTanh(actionSize));  // Actions in [-1, 1]
+
+    brain.InitWeights();
+    return brain;
+}</code></pre>
+        </section>
+
+        <section>
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="training.html">Training Pipeline</a> - Train your networks</li>
+                <li><a href="reinforcement-learning.html">Reinforcement Learning</a> - Train RL agents</li>
+            </ul>
+        </section>
+    </div>
+</body>
+</html>

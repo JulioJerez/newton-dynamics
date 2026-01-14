@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getting Started - dBrain Neural Network Library</title>
+    <style>
+        :root {
+            --primary-color: #7c3aed;
+            --secondary-color: #6d28d9;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        nav.toc {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            margin-bottom: 1rem;
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        nav.toc ul {
+            list-style: none;
+            columns: 2;
+        }
+
+        nav.toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav.toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        nav.toc a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h3 {
+            color: var(--heading-color);
+            font-size: 1.35rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            color: var(--heading-color);
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #ede9fe;
+            color: #6d28d9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f5f3ff;
+            font-weight: 600;
+        }
+
+        .note {
+            background: #faf5ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Getting Started</h1>
+            <p>Build, configure, and create your first neural network with dBrain</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; Back to dBrain Documentation</a>
+
+        <nav class="toc">
+            <h2>Contents</h2>
+            <ul>
+                <li><a href="#building">1. Building dBrain</a></li>
+                <li><a href="#includes">2. Include Files</a></li>
+                <li><a href="#first-network">3. Your First Network</a></li>
+                <li><a href="#context-selection">4. GPU vs CPU Context</a></li>
+                <li><a href="#training-loop">5. Basic Training Loop</a></li>
+                <li><a href="#save-load">6. Saving and Loading</a></li>
+            </ul>
+        </nav>
+
+        <section id="building">
+            <h2>1. Building dBrain</h2>
+            <p>
+                dBrain is built as part of Newton Dynamics. When you build Newton, dBrain is
+                automatically included. No additional CMake options are required for basic usage.
+            </p>
+
+            <h3>CMake Configuration</h3>
+<pre><code>mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . --config Release</code></pre>
+
+            <h3>GPU Acceleration</h3>
+            <p>
+                dBrain uses OpenCL for GPU acceleration. If OpenCL is available on your system,
+                GPU support is enabled automatically. Otherwise, dBrain falls back to CPU computation.
+            </p>
+
+            <div class="note">
+                <strong>Note:</strong> GPU acceleration requires an OpenCL-compatible GPU and
+                drivers. Most modern NVIDIA, AMD, and Intel GPUs support OpenCL.
+            </div>
+        </section>
+
+        <section id="includes">
+            <h2>2. Include Files</h2>
+            <p>The main headers you'll need for dBrain:</p>
+
+            <table>
+                <tr>
+                    <th>Header</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td><code>ndBrain.h</code></td>
+                    <td>Core network class and layer includes</td>
+                </tr>
+                <tr>
+                    <td><code>ndBrainVector.h</code></td>
+                    <td>Vector data structures</td>
+                </tr>
+                <tr>
+                    <td><code>ndBrainMatrix.h</code></td>
+                    <td>Matrix data structures</td>
+                </tr>
+                <tr>
+                    <td><code>ndBrainTrainer.h</code></td>
+                    <td>Training infrastructure</td>
+                </tr>
+                <tr>
+                    <td><code>ndBrainOptimizerAdam.h</code></td>
+                    <td>Adam optimizer</td>
+                </tr>
+                <tr>
+                    <td><code>ndBrainLoss.h</code></td>
+                    <td>Loss functions</td>
+                </tr>
+                <tr>
+                    <td><code>ndBrainAgent.h</code></td>
+                    <td>Reinforcement learning agents</td>
+                </tr>
+            </table>
+
+<pre><code>// Typical includes for supervised learning
+#include &lt;ndBrain.h&gt;
+#include &lt;ndBrainVector.h&gt;
+#include &lt;ndBrainTrainer.h&gt;
+#include &lt;ndBrainOptimizerAdam.h&gt;
+#include &lt;ndBrainLossLeastSquaredError.h&gt;</code></pre>
+        </section>
+
+        <section id="first-network">
+            <h2>3. Your First Network</h2>
+            <p>
+                Let's create a simple feed-forward network with two hidden layers. This network
+                could be used for regression or classification tasks.
+            </p>
+
+<pre><code>// Define network dimensions
+const ndInt32 inputSize = 4;
+const ndInt32 hiddenSize = 64;
+const ndInt32 outputSize = 2;
+
+// Create the network
+ndBrain brain;
+
+// Add layers: input -> hidden1 -> hidden2 -> output
+brain.AddLayer(new ndBrainLayerLinear(inputSize, hiddenSize));
+brain.AddLayer(new ndBrainLayerActivationRelu(hiddenSize));
+brain.AddLayer(new ndBrainLayerLinear(hiddenSize, hiddenSize));
+brain.AddLayer(new ndBrainLayerActivationRelu(hiddenSize));
+brain.AddLayer(new ndBrainLayerLinear(hiddenSize, outputSize));
+
+// Initialize weights (Xavier/He initialization)
+brain.InitWeights();</code></pre>
+
+            <h3>Making Predictions</h3>
+<pre><code>// Create input and output vectors
+ndBrainVector input(inputSize);
+ndBrainVector output(outputSize);
+
+// Fill input with data
+input[0] = 1.0f;
+input[1] = 0.5f;
+input[2] = -0.3f;
+input[3] = 0.8f;
+
+// Forward pass (inference)
+brain.MakePrediction(input, output);
+
+// output now contains the network's prediction
+printf("Output: [%f, %f]\n", output[0], output[1]);</code></pre>
+
+            <div class="note">
+                <strong>Layer Pattern:</strong> Neural networks typically alternate between
+                linear layers (which transform dimensions) and activation layers (which add
+                non-linearity). The pattern is: Linear -> Activation -> Linear -> Activation -> ...
+            </div>
+        </section>
+
+        <section id="context-selection">
+            <h2>4. GPU vs CPU Context</h2>
+            <p>
+                dBrain provides two execution contexts: GPU (OpenCL) and CPU. The GPU context
+                offers significant speedup for training, while CPU is always available as fallback.
+            </p>
+
+            <h3>Creating Contexts</h3>
+<pre><code>// GPU context (uses OpenCL)
+ndBrainGpuContext gpuContext;
+
+// CPU context (fallback)
+ndBrainCpuContext cpuContext;
+
+// Check if GPU is available
+if (brain.IsGpuReady())
+{
+    // Use GPU for training
+    printf("Using GPU acceleration\n");
+}
+else
+{
+    // Fall back to CPU
+    printf("GPU not available, using CPU\n");
+}</code></pre>
+
+            <h3>When to Use Each</h3>
+            <table>
+                <tr>
+                    <th>Context</th>
+                    <th>Best For</th>
+                </tr>
+                <tr>
+                    <td><code>ndBrainGpuContext</code></td>
+                    <td>Training large networks, batch processing, parallel operations</td>
+                </tr>
+                <tr>
+                    <td><code>ndBrainCpuContext</code></td>
+                    <td>Inference, small networks, debugging, systems without GPU</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="training-loop">
+            <h2>5. Basic Training Loop</h2>
+            <p>
+                Here's a complete example of training a network using supervised learning
+                with the Adam optimizer and mean squared error loss.
+            </p>
+
+<pre><code>// Network setup (as before)
+ndBrain brain;
+brain.AddLayer(new ndBrainLayerLinear(inputSize, 64));
+brain.AddLayer(new ndBrainLayerActivationRelu(64));
+brain.AddLayer(new ndBrainLayerLinear(64, outputSize));
+brain.InitWeights();
+
+// Training parameters
+const ndInt32 epochs = 1000;
+const ndInt32 batchSize = 32;
+const ndBrainFloat learningRate = 0.001f;
+
+// Create optimizer
+ndBrainOptimizerAdam optimizer;
+
+// Training data (your dataset)
+ndArray&lt;ndBrainVector&gt; inputs;   // Training inputs
+ndArray&lt;ndBrainVector&gt; targets;  // Expected outputs
+// ... fill with training data ...
+
+// Training loop
+for (ndInt32 epoch = 0; epoch &lt; epochs; epoch++)
+{
+    ndBrainFloat totalLoss = 0.0f;
+
+    for (ndInt32 i = 0; i &lt; inputs.GetCount(); i += batchSize)
+    {
+        // Process mini-batch
+        for (ndInt32 j = 0; j &lt; batchSize && (i + j) &lt; inputs.GetCount(); j++)
+        {
+            const ndBrainVector&amp; input = inputs[i + j];
+            const ndBrainVector&amp; target = targets[i + j];
+
+            // Forward pass
+            ndBrainVector output(outputSize);
+            brain.MakePrediction(input, output);
+
+            // Compute loss (MSE)
+            ndBrainFloat loss = 0.0f;
+            for (ndInt32 k = 0; k &lt; outputSize; k++)
+            {
+                ndBrainFloat diff = output[k] - target[k];
+                loss += diff * diff;
+            }
+            totalLoss += loss;
+
+            // Backward pass and update weights
+            // (using trainer infrastructure)
+        }
+    }
+
+    if (epoch % 100 == 0)
+    {
+        printf("Epoch %d, Loss: %f\n", epoch, totalLoss);
+    }
+}</code></pre>
+
+            <div class="note">
+                <strong>Note:</strong> For production training, use the <code>ndBrainTrainer</code>
+                class which handles backpropagation, gradient accumulation, and optimizer updates
+                efficiently. See the <a href="training.html">Training Pipeline</a> documentation.
+            </div>
+        </section>
+
+        <section id="save-load">
+            <h2>6. Saving and Loading</h2>
+            <p>
+                Trained networks can be saved to disk and loaded later for inference
+                or continued training.
+            </p>
+
+            <h3>Saving a Network</h3>
+<pre><code>// Save trained network to file
+brain.SaveToFile("trained_model.bin");</code></pre>
+
+            <h3>Loading a Network</h3>
+<pre><code>// Load network from file
+ndBrain loadedBrain;
+// Use ndBrainLoad to restore the network
+// (network structure is preserved)</code></pre>
+
+            <div class="warning">
+                <strong>Important:</strong> When loading a network, ensure the saved file
+                matches the expected architecture. Loading incompatible architectures
+                will cause errors.
+            </div>
+        </section>
+
+        <section>
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="data-structures.html">Data Structures</a> - Learn about vectors, matrices, and buffers</li>
+                <li><a href="layers.html">Neural Network Layers</a> - Explore all available layer types</li>
+                <li><a href="training.html">Training Pipeline</a> - Deep dive into training infrastructure</li>
+                <li><a href="reinforcement-learning.html">Reinforcement Learning</a> - Train agents with physics</li>
+            </ul>
+        </section>
+    </div>
+</body>
+</html>
