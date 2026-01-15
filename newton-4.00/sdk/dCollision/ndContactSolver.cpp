@@ -1631,7 +1631,6 @@ ndInt32 ndContactSolver::Prune2dContacts(ndFixSizeArray<ndVector, D_MAX_CONTATCS
 		contactArray[i] = buffer[i];
 	}
 
-//ndTrace(("xxxxxx %d", buffer.GetCount()));
 	return ndInt32 (buffer.GetCount());
 }
 

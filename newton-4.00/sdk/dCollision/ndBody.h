@@ -119,7 +119,6 @@ class ndBody : public ndContainersFreeListAlloc<ndBody>
 	ndVector m_globalCentreOfMass;
 	ndVector m_minAabb;
 	ndVector m_maxAabb;
-	//ndBodyNotify* m_notifyCallback;
 	ndSharedPtr<ndBodyNotify> m_notifyCallback;
 	ndUnsigned32 m_uniqueId;
 	union

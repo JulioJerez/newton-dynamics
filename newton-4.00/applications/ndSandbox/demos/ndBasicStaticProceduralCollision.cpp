@@ -41,15 +41,17 @@ void ndBasicProcedualStaticCollision(ndDemoEntityManager* const scene)
 	//	ndSharedPtr<ndBody> testBody(AddBox(scene, originMatrix, 1.0f, 1.0f, 1.0f, 1.0f, "wood_0.png"));
 	//}
 
-	//// add few props
-	originMatrix.m_posit += originMatrix.m_front.Scale (ndFloat32 (40.0f));
-	AddCapsuleStacks(scene, originMatrix, 10.0f, 0.5f, 0.5f, 1.0f, 10, 10, 7);
-	
-	originMatrix.m_posit += originMatrix.m_right.Scale(20.0f);
+	// add a stack of planks
 	AddPlanks(scene, originMatrix, 1.0f, 4);
 
+	// add few props
+	originMatrix.m_posit.m_z += 30.0f;
+	//originMatrix.m_posit -= originMatrix.m_front.Scale (ndFloat32 (30.0f));
+	AddCapsuleStacks(scene, originMatrix, 10.0f, 0.5f, 0.5f, 1.0f, 10, 10, 7);
+	
 	// set the camera
-	floor.m_y += 1.0f;
-	floor.m_x += 4.0f;
-	scene->SetCameraMatrix(rot, floor);
+	originMatrix.m_posit.m_y += 8.0f;
+	originMatrix.m_posit.m_x += 40.0f;
+	originMatrix.m_posit.m_z -= 10.0f;
+	scene->SetCameraMatrix(rot, originMatrix.m_posit);
 }

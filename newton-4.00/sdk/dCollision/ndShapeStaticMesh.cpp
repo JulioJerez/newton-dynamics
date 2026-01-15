@@ -154,10 +154,10 @@ void ndShapeStaticMesh::ndPatchMesh::GetFacesPatch(ndPolygonMeshDesc* const data
 		const ndEdgeList& edge1 = egdeArray[i + 1];
 		if (edge0.m_key == edge1.m_key)
 		{
-			ndInt32 orginIndex = indexArray[edge0.m_faceStart + edge0.m_edge];
-			ndInt32 normalIndex = indexArray[edge0.m_faceStart + edge0.m_faceVertexCount + 2];
+			ndInt32 originIndex = indexArray[edge0.m_faceStart + edge0.m_edge];
+			ndInt32 normalIndex = indexArray[edge0.m_faceStart + edge0.m_faceVertexCount + 1];
 			const ndVector normal(vertex[normalIndex]);
-			const ndVector origin(vertex[orginIndex]);
+			const ndVector origin(vertex[originIndex]);
 
 			ndFloat32 absDist = ndFloat32(0.0f);
 			ndFloat32 maxDist = ndFloat32(0.0f);

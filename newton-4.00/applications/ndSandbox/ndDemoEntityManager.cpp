@@ -31,7 +31,7 @@
 //#define DEFAULT_SCENE	5		// conservation of momentum 
 //#define DEFAULT_SCENE	6		// basic joints
 //#define DEFAULT_SCENE	7		// static mesh collision
-//#define DEFAULT_SCENE	8		// Highfield collision
+//#define DEFAULT_SCENE	8		// heightfield collision
 //#define DEFAULT_SCENE	9		// static compound scene collision
 //#define DEFAULT_SCENE	10		// basic convex approximate compound shapes
 //#define DEFAULT_SCENE	11		// basic procedural static collision

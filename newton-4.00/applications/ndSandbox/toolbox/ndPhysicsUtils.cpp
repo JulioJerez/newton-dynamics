@@ -303,7 +303,7 @@ void AddCapsuleStacks(ndDemoEntityManager* const scene, const ndMatrix& location
 				body->GetAsBodyKinematic()->SetMassMatrix(mass, **shape);
 				body->GetAsBodyDynamic()->SetAngularDamping(ndVector(ndFloat32(0.5f)));
 				world->AddBody(body);
-				matrix.m_posit.m_y += high * 2.5f;
+				matrix.m_posit.m_y += high * ndFloat32(2.5f);
 			}
 		}
 	}

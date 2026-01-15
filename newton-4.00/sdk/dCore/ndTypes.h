@@ -297,18 +297,6 @@ union ndIntPtr
 	ndInt64 m_int;
 };
 
-union ndDoubleInt
-{
-	struct 
-	{
-		ndInt32 m_intL;
-		ndInt32 m_intH;
-	};
-	void* m_ptr;
-	ndInt64 m_int;
-	ndFloat64 m_float;
-};
-
 class ndTriplex
 {
 	public:

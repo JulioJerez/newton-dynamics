@@ -1116,11 +1116,6 @@ ndInt32 ndShapeConvex::RecalculateFaceContacts(ndInt32 pointCount, const ndVecto
 
 ndInt32 ndShapeConvex::ValidateImplicitShapePolygonCapContacts(const ndShapeInstance& convexShapeInstance, const ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const
 {
-static int xxxx;
-if (xxxx >= 6981)
-xxxx *= 1;
-xxxx++;
-
 	ndFixSizeArray<ndBigVector, 32> poly;
 	ndAssert(convexPolygon->m_count < poly.GetCapacity());
 	for (ndInt32 i = 0; i < convexPolygon->m_count; ++i)
