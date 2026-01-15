@@ -165,8 +165,6 @@ class ndShapeInstance: public ndContainersFreeListAlloc<ndShapeInstance>
 	D_COLLISION_API ndFloat32 GetUmbraClipSize() const;
 	D_COLLISION_API ndUnsigned64 GetUserDataID() const;
 
-	ndInt32 ValidatePolygonCapContacts(const ndShapeInstance& convexInstance, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const;
-
 	ndMatrix m_globalMatrix;
 	ndMatrix m_localMatrix;
 	ndMatrix m_alignmentMatrix;

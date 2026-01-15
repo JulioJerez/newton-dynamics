@@ -759,10 +759,3 @@ void ndShapeInstance::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVect
 		p1 = p1 & ndVector::m_triplexMask;
 	}
 }
-
-ndInt32 ndShapeInstance::ValidatePolygonCapContacts(const ndShapeInstance& convexInstance, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const
-{
-	ndShapeConvexPolygon* const convexPolygon = ((ndShape*) m_shape)->GetAsShapeConvexPolygon();
-	ndAssert(convexPolygon);
-	return convexInstance.m_shape->ValidatePolygonCapContacts(convexInstance, convexPolygon, contactCount, contacts, pointInPolygon);
-}
