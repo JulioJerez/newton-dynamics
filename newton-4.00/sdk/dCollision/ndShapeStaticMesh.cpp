@@ -105,7 +105,7 @@ void ndShapeStaticMesh::ndPatchMesh::GetFacesPatch(ndPolygonMeshDesc* const data
 	}
 
 	// add the adjacency info
-	ndFixSizeArray<ndEdgeList, MESH_SIZE * 4> egdeArray(0);
+	ndFixSizeArray<ndFaceEdge, MESH_SIZE * 4> egdeArray(0);
 	for (ndInt32 i = 0; i < m_faceArray.GetCount() - 1; ++i)
 	{
 		const ndInt32 indexStart = m_faceArray[i];
@@ -114,8 +114,9 @@ void ndShapeStaticMesh::ndPatchMesh::GetFacesPatch(ndPolygonMeshDesc* const data
 		for (ndInt32 j = 0; j < indexCount; ++j)
 		{
 			ndInt32 v1 = m_indexArray[indexStart + j];
-			ndEdgeList edge;
-			edge.m_key = (ndMin(v0, v1) << 16) + ndMax(v0, v1);
+			ndFaceEdge edge;
+			edge.m_lowKey = ndInt16(ndMin(v0, v1));
+			edge.m_highKey = ndInt16(ndMax(v0, v1));
 			edge.m_faceStart = patchScan[i];
 			edge.m_faceVertexCount = indexCount;
 			edge.m_edge = (j + indexCount - 1) % indexCount;
@@ -131,7 +132,7 @@ void ndShapeStaticMesh::ndPatchMesh::GetFacesPatch(ndPolygonMeshDesc* const data
 		{
 		}
 
-		ndInt32 Compare(const ndEdgeList& elementA, const ndEdgeList& elementB) const
+		ndInt32 Compare(const ndFaceEdge& elementA, const ndFaceEdge& elementB) const
 		{
 			ndInt32 indexA = elementA.m_key;
 			ndInt32 indexB = elementB.m_key;
@@ -146,12 +147,12 @@ void ndShapeStaticMesh::ndPatchMesh::GetFacesPatch(ndPolygonMeshDesc* const data
 			return 0;
 		}
 	};
-	ndSort<ndEdgeList, CompareKey>(&egdeArray[0], egdeArray.GetCount(), nullptr);
+	ndSort<ndFaceEdge, CompareKey>(&egdeArray[0], egdeArray.GetCount(), nullptr);
 
 	for (ndInt32 i = 0; i < egdeArray.GetCount() - 1; ++i)
 	{
-		const ndEdgeList& edge0 = egdeArray[i];
-		const ndEdgeList& edge1 = egdeArray[i + 1];
+		const ndFaceEdge& edge0 = egdeArray[i];
+		const ndFaceEdge& edge1 = egdeArray[i + 1];
 		if (edge0.m_key == edge1.m_key)
 		{
 			ndInt32 originIndex = indexArray[edge0.m_faceStart + edge0.m_edge];

@@ -66,10 +66,18 @@ class ndShapeStaticMesh: public ndShape
 		bool m_vertexArrayHasDuplicated;
 
 		private:
-		class ndEdgeList
+		class ndFaceEdge
 		{
 			public:
-			ndInt32 m_key;
+			union
+			{
+				struct
+				{
+					ndInt16 m_highKey;
+					ndInt16 m_lowKey;
+				};
+				ndInt32 m_key;
+			};
 			ndInt32 m_edge;
 			ndInt32 m_faceStart;
 			ndInt32 m_faceVertexCount;
