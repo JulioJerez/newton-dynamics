@@ -44,6 +44,9 @@ class ndBasicPlayerCapsule: public ndBodyPlayerCapsule
 	void ApplyInputs(ndFloat32 timestep) override;
 	ndFloat32 ContactFrictionCallback(const ndVector& position, const ndVector& normal, ndInt32 contactId, const ndBodyKinematic* const otherbody) const override;
 
+	ndMatrix GetLocalFrame() const;
+	void SetLocalFrame(const ndMatrix& frame);
+
 	PlayerInputs m_playerInput;
 };
 

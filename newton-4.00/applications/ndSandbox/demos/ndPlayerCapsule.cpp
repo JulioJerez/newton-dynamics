@@ -36,13 +36,13 @@ class ndPlayerCapsuleNotify : public ndDemoEntityNotify
 	}
 
 	// not call for this body
-	void OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep) override
+	void OnApplyExternalForce(ndInt32, ndFloat32) override
 	{
 	}
 
 	// an app can use this to determine what ovject form the scene 
 	// is colliding with, and take appropiate action.
-	virtual bool OnSceneAabbOverlap(const ndBody* const otherBody) const
+	virtual bool OnSceneAabbOverlap(const ndBody* const) const
 	{
 		return true;
 	}
@@ -63,6 +63,7 @@ class ndPlayerCapsuleController : public ndModelNotify
 			scene->Print(color, "shift w key for running forwad");
 			scene->Print(color, "left click on dynamics body for picking the body");
 			scene->Print(color, "left click on the scene for turning and look up and down");
+			scene->Print(color, "num pad 1, 2 for changing play local frame");
 		}
 	};
 
@@ -177,7 +178,6 @@ class ndPlayerCapsuleController : public ndModelNotify
 		ndSharedPtr<ndBodyNotify> playerNotify(new ndPlayerCapsuleNotify(scene, entityDuplicate));
 		playerBody->SetNotifyCallback(playerNotify);
 
-
 		// make the player a ndModel for game play logic
 		ndSharedPtr<ndModel> model(new ndModel());
 		ndSharedPtr<ndModelNotify> controller(new ndPlayerCapsuleController(scene, playerBody));
@@ -280,6 +280,25 @@ class ndPlayerCapsuleController : public ndModelNotify
 			idleWalkBlender->SetTransition(0.0f);
 		}
 
+		if (m_scene->GetKeyState(ImGuiKey_1))
+		{
+			ndMatrix localAxis(ndGetIdentityMatrix());
+			localAxis[0] = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
+			localAxis[1] = ndVector(1.0f, 0.0f, 0.0f, 0.0f);
+			localAxis[2] = localAxis[0].CrossProduct(localAxis[1]);
+			localAxis = localAxis * ndPitchMatrix(20.0f * ndDegreeToRad);
+			player->SetLocalFrame(localAxis);
+		}
+		else if (m_scene->GetKeyState(ImGuiKey_2))
+		{
+			ndMatrix localAxis(ndGetIdentityMatrix());
+			localAxis[0] = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
+			localAxis[1] = ndVector(1.0f, 0.0f, 0.0f, 0.0f);
+			localAxis[2] = localAxis[0].CrossProduct(localAxis[1]);
+			localAxis = localAxis * ndPitchMatrix(-20.0f * ndDegreeToRad);
+			player->SetLocalFrame(localAxis);
+		}
+
 		ndVector veloc;
 		m_animBlendTree->Update(timestep * timestepSign);
 		m_animBlendTree->Evaluate(m_keyFrameOutput, veloc);
@@ -373,8 +392,8 @@ void ndPlayerCapsule_ThirdPerson (ndDemoEntityManager* const scene)
 {
 	// build a floor
 	//ndSharedPtr<ndBody> bodyFloor(BuildPlayground(scene));
-	ndSharedPtr<ndBody> bodyFloor(BuildCompoundScene(scene, ndGetIdentityMatrix()));
-	//ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true));
+	//ndSharedPtr<ndBody> bodyFloor(BuildCompoundScene(scene, ndGetIdentityMatrix()));
+	ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true));
 
 	// add a help menu
 	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndPlayerCapsuleController::ndHelpLegend());
@@ -399,7 +418,7 @@ void ndPlayerCapsule_ThirdPerson (ndDemoEntityManager* const scene)
 	ndRender* const renderer = *scene->GetRenderer();
 	renderer->SetCamera(playerController->GetCamera());
 
-#if 1
+#if 0
 	{
 		// populate the world with props and other players
 		AddSomeProps(scene);

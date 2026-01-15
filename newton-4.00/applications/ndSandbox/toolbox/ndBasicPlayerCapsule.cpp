@@ -74,3 +74,12 @@ ndFloat32 ndBasicPlayerCapsule::ContactFrictionCallback(const ndVector&, const n
 	return ndFloat32(2.0f);
 }
 
+ndMatrix ndBasicPlayerCapsule::GetLocalFrame() const
+{
+	return m_worldFrame;
+}
+
+void ndBasicPlayerCapsule::SetLocalFrame(const ndMatrix& frame)
+{
+	m_worldFrame = frame;
+}

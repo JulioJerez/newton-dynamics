@@ -77,6 +77,7 @@ class ndBodyPlayerCapsule : public ndBodyKinematicBase
 
 	protected: 
 	ndMatrix m_localFrame;
+	ndMatrix m_worldFrame;
 	ndVector m_impulse;
 	ndFloat32 m_mass;
 	ndFloat32 m_height;

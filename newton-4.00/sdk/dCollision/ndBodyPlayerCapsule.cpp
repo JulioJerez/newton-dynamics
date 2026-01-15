@@ -44,6 +44,7 @@ class ndBodyPlayerCapsuleContactSolver
 	ndBodyPlayerCapsuleContactSolver(ndBodyPlayerCapsule* const player);
 	void CalculateContacts();
 
+	ndMatrix m_targetFrame;
 	ndFixSizeArray<ndContactPoint, D_PLAYER_MAX_ROWS> m_contactBuffer;
 	ndBodyPlayerCapsule* m_player;
 	ndFloat32 m_maxPrenetration;
@@ -126,6 +127,8 @@ void ndBodyPlayerCapsule::Init(const ndMatrix& localAxis, ndFloat32 mass, ndFloa
 
 	m_localFrame = shapeMatrix;
 	m_localFrame.m_posit = ndVector::m_wOne;
+	m_worldFrame = m_localFrame;
+
 	m_contactPatch = radius / m_weistScale;
 	m_stepHeight = ndMax(stepHeight, m_contactPatch * ndFloat32(2.0f));
 }
@@ -176,11 +179,9 @@ ndFloat32 ndBodyPlayerCapsule::GetHeadingAngle() const
 
 void ndBodyPlayerCapsule::SetHeadingAngle(ndFloat32 angle)
 {
-	//m_headingAngle = dClamp(angle, ndFloat32(-dPi), ndFloat32(dPi)); 
 	const ndFloat32 interpolation = ndFloat32(0.3f);
 	ndFloat32 deltaAngle = ndAnglesAdd(angle, -m_headingAngle) * interpolation;
 	ndFloat32 headingAngle = ndAnglesAdd(m_headingAngle, deltaAngle);
-	//dTrace(("%f %f %f\n", angle * dRadToDegree, m_headingAngle * dRadToDegree, headingAngle * dRadToDegree));
 	m_headingAngle = headingAngle;
 }
 
@@ -203,11 +204,11 @@ void ndBodyPlayerCapsule::IntegrateExternalForce(ndFloat32)
 void ndBodyPlayerCapsule::ResolveStep(ndBodyPlayerCapsuleContactSolver& contactSolver, ndFloat32 timestep)
 {
 	ndMatrix matrix(m_matrix);
-	ndVector savedVeloc(m_veloc);
-
 	ndMatrix startMatrix(matrix);
-	ndBodyPlayerCapsuleImpulseSolver impulseSolver(this);
+	const ndVector savedVeloc(m_veloc);
 
+	ndBodyPlayerCapsuleImpulseSolver impulseSolver(this);
+	
 	bool hasStartMatrix = false;
 	const ndFloat32 invTimeStep = ndFloat32 (1.0f) / timestep;
 	for (ndInt32 j = 0; !hasStartMatrix && (j < 4); ++j) 
@@ -217,7 +218,8 @@ void ndBodyPlayerCapsule::ResolveStep(ndBodyPlayerCapsuleContactSolver& contactS
 		for (ndInt32 i = contactSolver.m_contactBuffer.GetCount() - 1; i >= 0; --i)
 		{
 			const ndVector& point = contactSolver.m_contactBuffer[i].m_point;
-			const ndVector localPointpoint(m_localFrame.UntransformVector(startMatrix.UntransformVector(point)));
+			//const ndVector localPointpoint(m_localFrame.UntransformVector(startMatrix.UntransformVector(point)));
+			const ndVector localPointpoint(contactSolver.m_targetFrame.UntransformVector(startMatrix.UntransformVector(point)));
 			if (localPointpoint.m_x < m_stepHeight) 
 			{
 				contactSolver.m_contactBuffer[i] = contactSolver.m_contactBuffer[contactSolver.m_contactBuffer.GetCount() - 1];
@@ -269,8 +271,8 @@ void ndBodyPlayerCapsule::ResolveStep(ndBodyPlayerCapsuleContactSolver& contactS
 		bool advanceIsBlocked = true;
 		for (ndInt32 j = 0; advanceIsBlocked && (j < 4); ++j) 
 		{
-			advanceIsBlocked = false;
 			SetVelocity(veloc);
+			advanceIsBlocked = false;
 			ndBodyKinematic::IntegrateVelocity(timestep);
 			contactSolver.CalculateContacts();
 			if (contactSolver.m_contactBuffer.GetCount())
@@ -790,9 +792,12 @@ void ndBodyPlayerCapsule::SpecialUpdate(ndFloat32 timestep)
 	m_equilibrium0 = 0;
 
 	// set player orientation
-	ndMatrix matrix(ndYawMatrix(GetHeadingAngle()));
-	matrix.m_posit = m_matrix.m_posit;
-	SetMatrix(matrix);
+	const ndMatrix headingMatrix(ndPitchMatrix(GetHeadingAngle()));
+	//const ndMatrix targetdMatrix(headingMatrix * m_worldFrame);
+	contactSolver.m_targetFrame = headingMatrix * m_worldFrame;
+	ndMatrix bodyMatrix(m_localFrame.OrthoInverse() * contactSolver.m_targetFrame);
+	bodyMatrix.m_posit = m_matrix.m_posit;
+	SetMatrix(bodyMatrix);
 
 	// set play desired velocity
 	ndVector veloc(GetVelocity() + m_impulse.Scale(m_invMass));
@@ -817,4 +822,3 @@ void ndBodyPlayerCapsule::SpecialUpdate(ndFloat32 timestep)
 
 	UpdatePlayerStatus(contactSolver);
 }
-
