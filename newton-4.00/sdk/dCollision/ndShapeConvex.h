@@ -76,10 +76,6 @@ class ndShapeConvex: public ndShape
 	ndVector CalculateVolumeIntegral(const ndPlane& plane) const;
 	ndInt32 BuildCylinderCapPoly (ndFloat32 radius, const ndMatrix& transform, ndVector* const vertexOut) const;
 
-	virtual ndInt32 RecalculateFaceContacts(ndInt32 pointCount, const ndVector* const localPolygon, ndVector* const contacts) const;
-	ndInt32 ValidateImplicitShapePolygonCapContacts(const ndShapeInstance& instance, const ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const;
-	virtual ndInt32 ValidatePolygonCapContacts(const ndShapeInstance& instance, const ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const override;
-
 	ndVector* m_vertex;
 	ndConvexSimplexEdge* m_simplex;
 	ndFloat32 m_boxMinRadius;

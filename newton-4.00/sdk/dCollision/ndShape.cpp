@@ -176,9 +176,3 @@ ndInt32 ndShape::GetRefCount() const
 {
 	return m_refCount.load();
 }
-
-ndInt32 ndShape::ValidatePolygonCapContacts(const ndShapeInstance&, const ndShapeConvexPolygon* const, ndInt32 contactCount, ndVector* const, const ndVector&) const
-{
-	ndAssert(0);
-	return contactCount;
-}

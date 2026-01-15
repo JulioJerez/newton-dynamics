@@ -2537,10 +2537,6 @@ ndInt32 ndContactSolver::ConvexToConvexContactsDiscrete()
 					m_buffer[0] = ndVector::m_half * (m_closestPoint0 + m_closestPoint1);
 					count = 1;
 				}
-				else if (convexPolygon && count)
-				{
-					//count = m_instance1.ValidatePolygonCapContacts(m_instance0, count, m_buffer, m_closestPoint1);
-				}
 			}
 		}
 

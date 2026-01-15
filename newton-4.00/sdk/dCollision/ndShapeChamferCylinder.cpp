@@ -411,8 +411,3 @@ ndUnsigned64 ndShapeChamferCylinder::GetHash(ndUnsigned64 hash) const
 	ndShapeInfo info(GetShapeInfo());
 	return info.GetHash(hash);
 }
-
-ndInt32 ndShapeChamferCylinder::ValidatePolygonCapContacts(const ndShapeInstance& instance, const ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const
-{
-	return ValidateImplicitShapePolygonCapContacts(instance, convexPolygon, contactCount, contacts, pointInPolygon);
-}
