@@ -64,11 +64,10 @@ class ndShapeConvexPolygon: public ndShapeConvex
 	virtual ndInt32 Release() const;
 
 	ndVector m_normal;
-	ndVector m_localPoly[D_CONVEX_POLYGON_MAX_VERTEX_COUNT];
-	ndInt32 m_clippEdgeNormal[D_CONVEX_POLYGON_MAX_VERTEX_COUNT];
+	ndFixSizeArray<ndVector, D_CONVEX_POLYGON_MAX_VERTEX_COUNT> m_localPoly;
+	ndFixSizeArray<ndInt32, 4 * D_CONVEX_POLYGON_MAX_VERTEX_COUNT> m_convexCapFace;
+	ndFixSizeArray<ndInt32, 8 * D_CONVEX_POLYGON_MAX_VERTEX_COUNT> m_convexCapFaceIndex;
 	ndFloat32 m_faceClipSize;
-	ndInt32 m_count;
-	ndInt32 m_paddedCount;
 	ndInt32 m_faceId;
 	ndInt32 m_faceNormalIndex;
 

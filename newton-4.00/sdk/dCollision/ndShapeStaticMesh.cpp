@@ -177,12 +177,30 @@ void ndShapeStaticMesh::ndPatchMesh::GetFacesPatch(ndPolygonMeshDesc* const data
 			}
 			if (maxDist < ndFloat32(1.0e-3f))
 			{
-				ndInt32 normalIndex0 = edge0.m_faceStart + edge0.m_faceVertexCount + edge0.m_edge + 2;
-				ndInt32 normalIndex1 = edge1.m_faceStart + edge1.m_faceVertexCount + edge1.m_edge + 2;
-				ndSwap(indexArray[normalIndex0], indexArray[normalIndex1]);
+				ndInt32 edgeIndex0 = edge0.m_faceStart + edge0.m_faceVertexCount + edge0.m_edge + 2;
+				ndInt32 edgeIndex1 = edge1.m_faceStart + edge1.m_faceVertexCount + edge1.m_edge + 2;
+				ndSwap(indexArray[edgeIndex0], indexArray[edgeIndex1]);
 			}
 			i++;
 		}
+		else
+		{
+			// flag perimeter edge as negative
+			ndInt32 normalIndex = edge0.m_faceStart + edge0.m_faceVertexCount + edge0.m_edge + 2;
+			ndAssert(indexArray[normalIndex] > 0);
+			ndAssert(indexArray[normalIndex] == indexArray[edge0.m_faceStart + edge0.m_faceVertexCount + 1]);
+			indexArray[normalIndex] *= -1;
+		}
+	}
+
+	const ndFaceEdge& edge0 = egdeArray[egdeArray.GetCount() - 2];
+	const ndFaceEdge& edge1 = egdeArray[egdeArray.GetCount() - 1];
+	if (edge0.m_key != edge1.m_key)
+	{
+		ndInt32 normalIndex = edge1.m_faceStart + edge1.m_faceVertexCount + edge1.m_edge + 2;
+		ndAssert(indexArray[normalIndex] > 0);
+		ndAssert(indexArray[normalIndex] == indexArray[edge1.m_faceStart + edge1.m_faceVertexCount + 1]);
+		indexArray[normalIndex] *= -1;
 	}
 }
 

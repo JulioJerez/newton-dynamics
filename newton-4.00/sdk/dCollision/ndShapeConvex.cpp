@@ -1082,30 +1082,32 @@ const ndShapeConvex::ndConvexSimplexEdge** ndShapeConvex::GetVertexToEdgeMapping
 
 ndInt32 ndShapeConvex::ValidatePolygonCapContacts(const ndShapeInstance&, const ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector&) const
 {
-	ndFixSizeArray<ndBigVector, 32> poly;
-	ndAssert(convexPolygon->m_count < poly.GetCapacity());
-	for (ndInt32 i = 0; i < convexPolygon->m_count; ++i)
-	{
-		poly.PushBack(convexPolygon->m_localPoly[i]);
-	}
-
-	ndInt32 count = contactCount;
-	for (ndInt32 i = contactCount - 1; i >= 0; --i)
-	{
-		const ndBigVector contact(contacts[i]);
-		const ndBigVector point(contact - convexPolygon->m_normal * (contact - poly[0]).DotProduct(convexPolygon->m_normal));
-		const ndBigVector pointInPoly(ndPointToPolygonDistance(point, &poly[0], convexPolygon->m_count));
-	
-		const ndBigVector error(point - pointInPoly);
-		ndFloat64 dist2 = error.DotProduct(error & ndBigVector::m_triplexMask).GetScalar();
-	
-		if (dist2 > ndFloat64(5.0e-4f))
-		{
-			count--;
-			contacts[i] = contacts[count];
-		}
-	}
-	return count;
+	//ndFixSizeArray<ndBigVector, 32> poly;
+	//ndAssert(convexPolygon->m_count < poly.GetCapacity());
+	//for (ndInt32 i = 0; i < convexPolygon->m_count; ++i)
+	//{
+	//	poly.PushBack(convexPolygon->m_localPoly[i]);
+	//}
+	//
+	//ndInt32 count = contactCount;
+	//for (ndInt32 i = contactCount - 1; i >= 0; --i)
+	//{
+	//	const ndBigVector contact(contacts[i]);
+	//	const ndBigVector point(contact - convexPolygon->m_normal * (contact - poly[0]).DotProduct(convexPolygon->m_normal));
+	//	const ndBigVector pointInPoly(ndPointToPolygonDistance(point, &poly[0], convexPolygon->m_count));
+	//
+	//	const ndBigVector error(point - pointInPoly);
+	//	ndFloat64 dist2 = error.DotProduct(error & ndBigVector::m_triplexMask).GetScalar();
+	//
+	//	if (dist2 > ndFloat64(5.0e-4f))
+	//	{
+	//		count--;
+	//		contacts[i] = contacts[count];
+	//	}
+	//}
+	//return count;
+	ndAssert(0);
+	return 0;
 }
 
 ndInt32 ndShapeConvex::RecalculateFaceContacts(ndInt32 pointCount, const ndVector* const localPolygon, ndVector* const contacts) const
@@ -1116,57 +1118,59 @@ ndInt32 ndShapeConvex::RecalculateFaceContacts(ndInt32 pointCount, const ndVecto
 
 ndInt32 ndShapeConvex::ValidateImplicitShapePolygonCapContacts(const ndShapeInstance& convexShapeInstance, const ndShapeConvexPolygon* const convexPolygon, ndInt32 contactCount, ndVector* const contacts, const ndVector& pointInPolygon) const
 {
-	ndFixSizeArray<ndBigVector, 32> poly;
-	ndAssert(convexPolygon->m_count < poly.GetCapacity());
-	for (ndInt32 i = 0; i < convexPolygon->m_count; ++i)
-	{
-		poly.PushBack(convexPolygon->m_localPoly[i]);
-	}
-
-	auto TestPoint = [convexPolygon, &poly](const ndVector& contactPoint)
-	{
-		const ndBigVector point(contactPoint - convexPolygon->m_normal * (contactPoint - poly[0]).DotProduct(convexPolygon->m_normal));
-		const ndBigVector pointInPoly(ndPointToPolygonDistance(point, &poly[0], poly.GetCount()));
-		const ndBigVector error(point - pointInPoly);
-		ndFloat64 dist2 = error.DotProduct(error & ndBigVector::m_triplexMask).GetScalar();
-		return dist2;
-	};
-	ndFloat64 closetDist2 = TestPoint(pointInPolygon);
-	if (contactCount == 1)
-	{
-		return (closetDist2 < ndFloat64(5.0e-4f)) ? contactCount : 0;
-	}
-	if (closetDist2 < ndFloat64(5.0e-4f))
-	{
-		// more than one contact point and the closest point is inside the polygon.
-		// we simply reject the contact outside th epoligon
-		ndInt32 count = contactCount;
-		for (ndInt32 i = contactCount - 1; i >= 0; --i)
-		{
-			ndFloat64 dist2 = TestPoint(contacts[i]);
-			if (dist2 > ndFloat64(5.0e-4f))
-			{
-				count--;
-				contacts[i] = contacts[count];
-			}
-		}
-		ndAssert(count);
-		return count;
-	}
-	// the contacts are unreliable. 
-	// we have to trow them away and recalculate a new set base of the shape type.
-	ndFixSizeArray<ndVector, 32> faceInShapeSpace;
-	const ndMatrix invMatrix(convexShapeInstance.GetInvScaledTransform(convexShapeInstance.GetGlobalMatrix()));
-	for (ndInt32 i = 0; i < convexPolygon->m_count; ++i)
-	{
-		const ndVector p(convexPolygon->m_localPoly[i]);
-		faceInShapeSpace.PushBack(invMatrix.TransformVector(p));
-	}
-	const ndMatrix matrix (convexShapeInstance.GetScaledTransform(convexShapeInstance.GetGlobalMatrix()));
-	const ndInt32 count = RecalculateFaceContacts(faceInShapeSpace.GetCount(), &faceInShapeSpace[0], contacts);
-	for (ndInt32 i = 0; i < count; ++i)
-	{
-		contacts[i] = matrix.TransformVector(contacts[i]);
-	}
-	return count;
+	ndAssert(0);
+	return 0;
+	//ndFixSizeArray<ndBigVector, 32> poly;
+	//ndAssert(convexPolygon->m_count < poly.GetCapacity());
+	//for (ndInt32 i = 0; i < convexPolygon->m_count; ++i)
+	//{
+	//	poly.PushBack(convexPolygon->m_localPoly[i]);
+	//}
+	//
+	//auto TestPoint = [convexPolygon, &poly](const ndVector& contactPoint)
+	//{
+	//	const ndBigVector point(contactPoint - convexPolygon->m_normal * (contactPoint - poly[0]).DotProduct(convexPolygon->m_normal));
+	//	const ndBigVector pointInPoly(ndPointToPolygonDistance(point, &poly[0], poly.GetCount()));
+	//	const ndBigVector error(point - pointInPoly);
+	//	ndFloat64 dist2 = error.DotProduct(error & ndBigVector::m_triplexMask).GetScalar();
+	//	return dist2;
+	//};
+	//ndFloat64 closetDist2 = TestPoint(pointInPolygon);
+	//if (contactCount == 1)
+	//{
+	//	return (closetDist2 < ndFloat64(5.0e-4f)) ? contactCount : 0;
+	//}
+	//if (closetDist2 < ndFloat64(5.0e-4f))
+	//{
+	//	// more than one contact point and the closest point is inside the polygon.
+	//	// we simply reject the contact outside th epoligon
+	//	ndInt32 count = contactCount;
+	//	for (ndInt32 i = contactCount - 1; i >= 0; --i)
+	//	{
+	//		ndFloat64 dist2 = TestPoint(contacts[i]);
+	//		if (dist2 > ndFloat64(5.0e-4f))
+	//		{
+	//			count--;
+	//			contacts[i] = contacts[count];
+	//		}
+	//	}
+	//	ndAssert(count);
+	//	return count;
+	//}
+	//// the contacts are unreliable. 
+	//// we have to trow them away and recalculate a new set base of the shape type.
+	//ndFixSizeArray<ndVector, 32> faceInShapeSpace;
+	//const ndMatrix invMatrix(convexShapeInstance.GetInvScaledTransform(convexShapeInstance.GetGlobalMatrix()));
+	//for (ndInt32 i = 0; i < convexPolygon->m_count; ++i)
+	//{
+	//	const ndVector p(convexPolygon->m_localPoly[i]);
+	//	faceInShapeSpace.PushBack(invMatrix.TransformVector(p));
+	//}
+	//const ndMatrix matrix (convexShapeInstance.GetScaledTransform(convexShapeInstance.GetGlobalMatrix()));
+	//const ndInt32 count = RecalculateFaceContacts(faceInShapeSpace.GetCount(), &faceInShapeSpace[0], contacts);
+	//for (ndInt32 i = 0; i < count; ++i)
+	//{
+	//	contacts[i] = matrix.TransformVector(contacts[i]);
+	//}
+	//return count;
 }
