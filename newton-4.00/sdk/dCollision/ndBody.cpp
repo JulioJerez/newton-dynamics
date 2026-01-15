@@ -176,18 +176,6 @@ void ndBody::SetCentreOfMass(const ndVector& com)
 
 void ndBody::SetNotifyCallback(const ndSharedPtr<ndBodyNotify>& notify)
 {
-	//if (notify != m_notifyCallback)
-	//{
-	//	if (m_notifyCallback)
-	//	{
-	//		delete m_notifyCallback;
-	//	}
-	//	m_notifyCallback = notify;
-	//	if (m_notifyCallback)
-	//	{
-	//		m_notifyCallback->m_body = this;
-	//	}
-	//}
 	m_notifyCallback = notify;
 	if (*m_notifyCallback)
 	{
