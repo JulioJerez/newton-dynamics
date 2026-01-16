@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>dBrain Neural Network Library - Newton Dynamics 4.00</title>
+    <style>
+        :root {
+            --primary-color: #7c3aed;
+            --secondary-color: #6d28d9;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .doc-card {
+            background: #f5f3ff;
+            border-radius: 6px;
+            padding: 1.25rem;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .doc-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .doc-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .doc-card p {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin: 0 0 0.75rem 0;
+        }
+
+        .doc-card a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .doc-card a:hover {
+            text-decoration: underline;
+        }
+
+        .intro {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .feature-item::before {
+            content: ">";
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        code {
+            background: #ede9fe;
+            color: #6d28d9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        .architecture {
+            background: #faf5ff;
+            border: 1px solid #e9d5ff;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .architecture h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .arch-layer {
+            background: white;
+            border: 1px solid #d8b4fe;
+            border-radius: 4px;
+            padding: 0.75rem 1rem;
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        .arch-layer strong {
+            color: var(--primary-color);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>dBrain Neural Network Library</h1>
+            <p>GPU-accelerated machine learning for physics simulation - Newton Dynamics 4.00</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="../newton_docs/index.html" class="back-link">&larr; Back to Newton Dynamics Documentation</a>
+
+        <section>
+            <h2>Overview</h2>
+            <p class="intro">
+                dBrain is a neural network library integrated into Newton Dynamics, designed for both
+                supervised learning and reinforcement learning applications in physics simulation.
+                It provides GPU acceleration via OpenCL with automatic CPU fallback.
+            </p>
+
+            <div class="feature-list">
+                <div class="feature-item">Supervised Learning</div>
+                <div class="feature-item">Reinforcement Learning</div>
+                <div class="feature-item">GPU Acceleration (OpenCL)</div>
+                <div class="feature-item">CPU Fallback Support</div>
+                <div class="feature-item">Convolutional Networks</div>
+                <div class="feature-item">Policy Gradient Algorithms</div>
+                <div class="feature-item">Adam Optimizer</div>
+                <div class="feature-item">Physics Integration</div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Architecture</h2>
+            <div class="architecture">
+                <h3>Library Layers</h3>
+                <div class="arch-layer">
+                    <strong>RL Agents</strong> - ndBrainAgent, Policy Gradient Trainers
+                </div>
+                <div class="arch-layer">
+                    <strong>Training</strong> - ndBrainTrainer, Optimizers, Loss Functions
+                </div>
+                <div class="arch-layer">
+                    <strong>Networks</strong> - ndBrain (layer container)
+                </div>
+                <div class="arch-layer">
+                    <strong>Layers</strong> - Linear, Activation, Convolutional, Dropout
+                </div>
+                <div class="arch-layer">
+                    <strong>GPU Compute</strong> - ndBrainGpuContext, OpenCL Kernels
+                </div>
+                <div class="arch-layer">
+                    <strong>Data Structures</strong> - ndBrainVector, ndBrainMatrix, Buffers
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Quick Example</h2>
+<pre><code>#include &lt;ndBrain.h&gt;
+
+// Create a simple feed-forward network
+ndBrain brain;
+brain.AddLayer(new ndBrainLayerLinear(inputSize, 128));
+brain.AddLayer(new ndBrainLayerActivationRelu(128));
+brain.AddLayer(new ndBrainLayerLinear(128, 64));
+brain.AddLayer(new ndBrainLayerActivationRelu(64));
+brain.AddLayer(new ndBrainLayerLinear(64, outputSize));
+brain.InitWeights();
+
+// Forward inference
+ndBrainVector input(inputSize);
+ndBrainVector output(outputSize);
+// ... fill input ...
+brain.MakePrediction(input, output);</code></pre>
+        </section>
+
+        <section>
+            <h2>Documentation</h2>
+            <div class="doc-grid">
+                <div class="doc-card">
+                    <h3>Getting Started</h3>
+                    <p>Build configuration, first network, basic training loop.</p>
+                    <a href="getting-started.html">Read Guide &rarr;</a>
+                </div>
+
+                <div class="doc-card">
+                    <h3>Data Structures</h3>
+                    <p><code>ndBrainVector</code>, <code>ndBrainMatrix</code>, and buffer types.</p>
+                    <a href="data-structures.html">Learn More &rarr;</a>
+                </div>
+
+                <div class="doc-card">
+                    <h3>Neural Network Layers</h3>
+                    <p>Linear, activation, convolutional, and dropout layers.</p>
+                    <a href="layers.html">Explore Layers &rarr;</a>
+                </div>
+
+                <div class="doc-card">
+                    <h3>Building Networks</h3>
+                    <p><code>ndBrain</code> class, layer composition, serialization.</p>
+                    <a href="networks.html">Build Networks &rarr;</a>
+                </div>
+
+                <div class="doc-card">
+                    <h3>Training Pipeline</h3>
+                    <p>Trainers, optimizers, loss functions, backpropagation.</p>
+                    <a href="training.html">Train Models &rarr;</a>
+                </div>
+
+                <div class="doc-card">
+                    <h3>Reinforcement Learning</h3>
+                    <p>Policy gradient agents, on/off-policy training.</p>
+                    <a href="reinforcement-learning.html">RL Agents &rarr;</a>
+                </div>
+
+                <div class="doc-card">
+                    <h3>GPU Acceleration</h3>
+                    <p>OpenCL contexts, GPU buffers, kernel operations.</p>
+                    <a href="gpu-compute.html">GPU Guide &rarr;</a>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Use Cases</h2>
+            <p>dBrain is designed for machine learning applications in physics simulation:</p>
+            <ul style="margin-top: 1rem; margin-left: 1.5rem;">
+                <li><strong>Robot Locomotion</strong> - Train articulated characters to walk, run, and balance</li>
+                <li><strong>Vehicle Control</strong> - Learn driving policies for cars, boats, aircraft</li>
+                <li><strong>Industrial Robots</strong> - Inverse kinematics via neural networks</li>
+                <li><strong>Game AI</strong> - NPCs that learn from physics interactions</li>
+                <li><strong>Control Systems</strong> - PID replacement with learned controllers</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Header Files</h2>
+            <p>Main include for dBrain:</p>
+<pre><code>#include &lt;ndBrain.h&gt;        // Core network and layers
+#include &lt;ndBrainTrainer.h&gt; // Training infrastructure
+#include &lt;ndBrainAgent.h&gt;   // Reinforcement learning agents</code></pre>
+            <p style="margin-top: 1rem;">
+                The dBrain library is located in <code>sdk/dBrain/</code> with GPU implementations
+                in <code>sdk/dBrain/dOpenCl/</code> and CPU fallback in <code>sdk/dBrain/cpuEmulation/</code>.
+            </p>
+        </section>
+    </div>
+</body>
+</html>

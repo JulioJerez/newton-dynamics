@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collision &amp; Contacts - Newton Dynamics 4.00</title>
+    <style>
+        :root {
+            --primary-color: #7c3aed;
+            --secondary-color: #6d28d9;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        nav.toc {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            margin-bottom: 1rem;
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        nav.toc ul {
+            list-style: none;
+            columns: 2;
+        }
+
+        nav.toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav.toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        nav.toc a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h3 {
+            color: var(--heading-color);
+            font-size: 1.35rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            color: var(--heading-color);
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #e2e8f0;
+            color: #be185d;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: var(--heading-color);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .tip {
+            background: #dcfce7;
+            border-left: 4px solid #22c55e;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .warning {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            nav.toc ul {
+                columns: 1;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            header {
+                padding: 2rem 1rem;
+            }
+
+            header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Collision &amp; Contacts</h1>
+            <p>Newton Dynamics 4.00 Documentation</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; Back to Index</a>
+
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#overview">1. Overview</a></li>
+                <li><a href="#contact-notify">2. Contact Notify Callbacks</a></li>
+                <li><a href="#materials">3. Contact Materials</a></li>
+                <li><a href="#contact-points">4. Contact Points</a></li>
+                <li><a href="#raycast">5. Ray Casting</a></li>
+                <li><a href="#convex-cast">6. Convex Casting</a></li>
+                <li><a href="#aabb-queries">7. AABB Queries</a></li>
+                <li><a href="#filtering">8. Collision Filtering</a></li>
+            </ul>
+        </nav>
+
+        <section id="overview">
+            <h2>1. Overview</h2>
+            <p>
+                Newton's collision system provides multi-phase collision detection with customizable
+                callbacks at each stage. The system generates contact points between colliding bodies
+                and allows you to modify contact properties, filter collisions, and perform spatial queries.
+            </p>
+
+            <h3>Collision Pipeline</h3>
+<pre><code>1. Broad Phase (AABB overlap detection)
+       |
+       v
+2. OnAabbOverlap() callback (optional filtering)
+       |
+       v
+3. Narrow Phase (GJK/EPA contact generation)
+       |
+       v
+4. GetMaterial() callback (set friction/restitution)
+       |
+       v
+5. OnContactCallback() (access contact points)
+       |
+       v
+6. Constraint Solver (resolve penetration/friction)</code></pre>
+
+            <h3>Key Classes</h3>
+            <table>
+                <tr>
+                    <th>Class</th>
+                    <th>Header</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>ndContactNotify</code></td>
+                    <td><code>ndContactNotify.h</code></td>
+                    <td>Base class for contact callbacks</td>
+                </tr>
+                <tr>
+                    <td><code>ndContact</code></td>
+                    <td><code>ndContact.h</code></td>
+                    <td>Contact constraint between two bodies</td>
+                </tr>
+                <tr>
+                    <td><code>ndContactPoint</code></td>
+                    <td><code>ndContact.h</code></td>
+                    <td>Single contact point data</td>
+                </tr>
+                <tr>
+                    <td><code>ndMaterial</code></td>
+                    <td><code>ndContactNotify.h</code></td>
+                    <td>Friction, restitution, softness</td>
+                </tr>
+                <tr>
+                    <td><code>ndRayCastNotify</code></td>
+                    <td><code>ndRayCastNotify.h</code></td>
+                    <td>Raycast callback handler</td>
+                </tr>
+                <tr>
+                    <td><code>ndConvexCastNotify</code></td>
+                    <td><code>ndConvexCastNotify.h</code></td>
+                    <td>Convex sweep callback handler</td>
+                </tr>
+                <tr>
+                    <td><code>ndBodiesInAabbNotify</code></td>
+                    <td><code>ndBodiesInAabbNotify.h</code></td>
+                    <td>AABB query callback handler</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="contact-notify">
+            <h2>2. Contact Notify Callbacks</h2>
+            <p>
+                Subclass <code>ndContactNotify</code> to customize collision behavior. Register it
+                with the world's scene to receive callbacks.
+            </p>
+
+            <h3>Creating a Contact Handler</h3>
+<pre><code>class MyContactNotify : public ndContactNotify
+{
+public:
+    MyContactNotify(ndScene* const scene)
+        : ndContactNotify(scene)
+    {
+    }
+
+    // Called during broad phase - return false to skip collision
+    virtual bool OnAabbOverlap(const ndContact* const contact,
+        ndFloat32 timestep) const override
+    {
+        const ndBodyKinematic* body0 = contact-&gt;GetBody0();
+        const ndBodyKinematic* body1 = contact-&gt;GetBody1();
+
+        // Example: skip collision between same group
+        if (GetCollisionGroup(body0) == GetCollisionGroup(body1))
+        {
+            return false;  // No collision
+        }
+        return true;  // Allow collision
+    }
+
+    // Called to get material properties
+    virtual ndMaterial* GetMaterial(const ndContact* const contact,
+        const ndShapeInstance&amp; shape0,
+        const ndShapeInstance&amp; shape1) const override
+    {
+        // Return custom material or default
+        return &amp;m_default;
+    }
+
+    // Called after contact generation
+    virtual void OnContactCallback(const ndContact* const contact,
+        ndFloat32 timestep) const override
+    {
+        const ndContactPointList&amp; points = contact-&gt;GetContactPoints();
+        for (ndContactPointList::ndNode* node = points.GetFirst();
+             node; node = node-&gt;GetNext())
+        {
+            const ndContactMaterial&amp; cp = node-&gt;GetInfo();
+            // Access contact data...
+            ndVector position = cp.m_point;
+            ndVector normal = cp.m_normal;
+            ndFloat32 penetration = cp.m_penetration;
+        }
+    }
+};</code></pre>
+
+            <h3>Registering the Handler</h3>
+<pre><code>// Create and register contact notify
+ndScene* scene = world.GetScene();
+scene-&gt;SetContactNotify(new MyContactNotify(scene));</code></pre>
+
+            <h3>Callback Methods</h3>
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>When Called</th>
+                    <th>Return</th>
+                </tr>
+                <tr>
+                    <td><code>OnAabbOverlap()</code></td>
+                    <td>After AABB overlap detected</td>
+                    <td><code>true</code> to continue, <code>false</code> to skip</td>
+                </tr>
+                <tr>
+                    <td><code>OnCompoundSubShapeOverlap()</code></td>
+                    <td>For compound shape sub-collisions</td>
+                    <td><code>true</code> to continue, <code>false</code> to skip</td>
+                </tr>
+                <tr>
+                    <td><code>GetMaterial()</code></td>
+                    <td>Before contact solving</td>
+                    <td>Pointer to <code>ndMaterial</code></td>
+                </tr>
+                <tr>
+                    <td><code>OnContactCallback()</code></td>
+                    <td>After contacts generated</td>
+                    <td>void</td>
+                </tr>
+                <tr>
+                    <td><code>OnBodyAdded()</code></td>
+                    <td>Body added to world</td>
+                    <td>void</td>
+                </tr>
+                <tr>
+                    <td><code>OnBodyRemoved()</code></td>
+                    <td>Body removed from world</td>
+                    <td>void</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="materials">
+            <h2>3. Contact Materials</h2>
+            <p>
+                <code>ndMaterial</code> defines physical properties for contacts: friction,
+                restitution (bounciness), and softness.
+            </p>
+
+            <h3>Material Properties</h3>
+<pre><code>class ndMaterial
+{
+public:
+    ndFloat32 m_restitution;      // Bounciness (0-1)
+    ndFloat32 m_staticFriction0;  // Static friction (tangent 0)
+    ndFloat32 m_staticFriction1;  // Static friction (tangent 1)
+    ndFloat32 m_dynamicFriction0; // Dynamic friction (tangent 0)
+    ndFloat32 m_dynamicFriction1; // Dynamic friction (tangent 1)
+    ndFloat32 m_skinMargin;       // Contact skin thickness
+    ndFloat32 m_softness;         // Contact softness (0 = hard)
+    ndUnsigned32 m_flags;         // Contact option flags
+    ndUnsigned32 m_userFlags;     // User-defined flags
+};</code></pre>
+
+            <h3>Setting Up Materials</h3>
+<pre><code>class MyContactNotify : public ndContactNotify
+{
+public:
+    MyContactNotify(ndScene* const scene)
+        : ndContactNotify(scene)
+    {
+        // Setup default material
+        m_default.m_restitution = 0.3f;
+        m_default.m_staticFriction0 = 0.8f;
+        m_default.m_staticFriction1 = 0.8f;
+        m_default.m_dynamicFriction0 = 0.6f;
+        m_default.m_dynamicFriction1 = 0.6f;
+        m_default.m_softness = 0.1f;
+
+        // Setup ice material
+        m_ice.m_restitution = 0.0f;
+        m_ice.m_staticFriction0 = 0.05f;
+        m_ice.m_staticFriction1 = 0.05f;
+        m_ice.m_dynamicFriction0 = 0.02f;
+        m_ice.m_dynamicFriction1 = 0.02f;
+
+        // Setup rubber material
+        m_rubber.m_restitution = 0.8f;
+        m_rubber.m_staticFriction0 = 1.2f;
+        m_rubber.m_staticFriction1 = 1.2f;
+        m_rubber.m_dynamicFriction0 = 1.0f;
+        m_rubber.m_dynamicFriction1 = 1.0f;
+    }
+
+    virtual ndMaterial* GetMaterial(const ndContact* const contact,
+        const ndShapeInstance&amp; shape0,
+        const ndShapeInstance&amp; shape1) const override
+    {
+        // Get material IDs from shape user data
+        ndInt64 id0 = shape0.GetMaterial().m_userId;
+        ndInt64 id1 = shape1.GetMaterial().m_userId;
+
+        // Return appropriate material
+        if (id0 == MATERIAL_ICE || id1 == MATERIAL_ICE)
+        {
+            return &amp;m_ice;
+        }
+        if (id0 == MATERIAL_RUBBER || id1 == MATERIAL_RUBBER)
+        {
+            return &amp;m_rubber;
+        }
+        return &amp;m_default;
+    }
+
+private:
+    mutable ndMaterial m_ice;
+    mutable ndMaterial m_rubber;
+};</code></pre>
+
+            <h3>Contact Option Flags</h3>
+            <table>
+                <tr>
+                    <th>Flag</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>m_collisionEnable</code></td>
+                    <td>Enable/disable collision response</td>
+                </tr>
+                <tr>
+                    <td><code>m_friction0Enable</code></td>
+                    <td>Enable friction in tangent 0 direction</td>
+                </tr>
+                <tr>
+                    <td><code>m_friction1Enable</code></td>
+                    <td>Enable friction in tangent 1 direction</td>
+                </tr>
+                <tr>
+                    <td><code>m_isSoftContact</code></td>
+                    <td>Use soft contact constraint</td>
+                </tr>
+                <tr>
+                    <td><code>m_override0Accel</code></td>
+                    <td>Override friction 0 acceleration</td>
+                </tr>
+                <tr>
+                    <td><code>m_override1Accel</code></td>
+                    <td>Override friction 1 acceleration</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="contact-points">
+            <h2>4. Contact Points</h2>
+            <p>
+                Each contact between bodies consists of one or more contact points. Access
+                them through the <code>ndContact</code> constraint.
+            </p>
+
+            <h3>ndContactPoint Structure</h3>
+<pre><code>class ndContactPoint
+{
+public:
+    ndVector m_point;           // Contact point (world space)
+    ndVector m_normal;          // Contact normal (from body0 to body1)
+
+    const ndBodyKinematic* m_body0;        // First body
+    const ndBodyKinematic* m_body1;        // Second body
+    const ndShapeInstance* m_shapeInstance0;  // First shape
+    const ndShapeInstance* m_shapeInstance1;  // Second shape
+
+    ndInt64 m_shapeId0;         // Sub-shape ID (for compounds)
+    ndInt64 m_shapeId1;         // Sub-shape ID (for compounds)
+    ndFloat32 m_penetration;    // Penetration depth (&lt;0 = separated)
+};</code></pre>
+
+            <h3>ndContactMaterial (Extended)</h3>
+<pre><code>class ndContactMaterial : public ndContactPoint
+{
+public:
+    ndVector m_dir0;            // Friction tangent 0
+    ndVector m_dir1;            // Friction tangent 1
+
+    ndForceImpactPair m_normal_Force;  // Normal force/impulse
+    ndForceImpactPair m_dir0_Force;    // Friction 0 force/impulse
+    ndForceImpactPair m_dir1_Force;    // Friction 1 force/impulse
+
+    ndMaterial m_material;      // Material properties
+
+    // Override friction acceleration
+    void OverrideFriction0Accel(ndFloat32 accel);
+    void OverrideFriction1Accel(ndFloat32 accel);
+
+    // Rotate friction directions
+    void RotateTangentDirections(const ndVector&amp; dir);
+};</code></pre>
+
+            <h3>Iterating Contact Points</h3>
+<pre><code>void OnContactCallback(const ndContact* const contact,
+    ndFloat32 timestep) const override
+{
+    const ndContactPointList&amp; points = contact-&gt;GetContactPoints();
+
+    for (ndContactPointList::ndNode* node = points.GetFirst();
+         node; node = node-&gt;GetNext())
+    {
+        const ndContactMaterial&amp; cp = node-&gt;GetInfo();
+
+        // World-space contact point
+        ndVector worldPos = cp.m_point;
+
+        // Normal points from body0 to body1
+        ndVector normal = cp.m_normal;
+
+        // Penetration depth (negative = separated)
+        ndFloat32 depth = cp.m_penetration;
+
+        // Bodies involved
+        const ndBodyKinematic* body0 = cp.m_body0;
+        const ndBodyKinematic* body1 = cp.m_body1;
+
+        // After solver: get contact forces
+        ndFloat32 normalForce = cp.m_normal_Force.m_force;
+        ndFloat32 frictionForce0 = cp.m_dir0_Force.m_force;
+        ndFloat32 frictionForce1 = cp.m_dir1_Force.m_force;
+    }
+}</code></pre>
+
+            <h3>Getting Separating Surface</h3>
+<pre><code>// Get separation info for non-penetrating bodies
+ndVector normal, point0, point1;
+contact-&gt;GetSeparatingSurface(normal, point0, point1);
+
+// Distance between shapes
+ndFloat32 separation = (point1 - point0).DotProduct(normal).GetScalar();</code></pre>
+
+            <div class="tip">
+                <strong>Tip:</strong> Contact forces are only valid after the solver has run.
+                Read them in <code>OnContactCallback()</code> or after <code>world.Sync()</code>.
+            </div>
+        </section>
+
+        <section id="raycast">
+            <h2>5. Ray Casting</h2>
+            <p>
+                Cast rays through the physics world to detect intersections with bodies.
+                Subclass <code>ndRayCastNotify</code> to handle hit results.
+            </p>
+
+            <h3>Simple Raycast</h3>
+<pre><code>// Use the built-in closest-hit callback
+ndRayCastClosestHitCallback callback;
+
+ndVector origin(0.0f, 10.0f, 0.0f, 1.0f);
+ndVector dest(0.0f, -10.0f, 0.0f, 1.0f);
+
+bool hit = world.RayCast(callback, origin, dest);
+
+if (hit)
+{
+    ndFloat32 t = callback.m_param;  // 0-1 parameter
+    ndVector hitPoint = origin + (dest - origin).Scale(t);
+    ndVector hitNormal = callback.m_contact.m_normal;
+    const ndBody* hitBody = callback.m_contact.m_body0;
+}</code></pre>
+
+            <h3>Custom Raycast Callback</h3>
+<pre><code>class MyRayCast : public ndRayCastNotify
+{
+public:
+    MyRayCast()
+        : ndRayCastNotify()
+        , m_hitBody(nullptr)
+    {
+    }
+
+    // Filter which bodies to test (return 0 to skip)
+    virtual ndUnsigned32 OnRayPrecastAction(const ndBody* const body,
+        const ndShapeInstance* const shape) override
+    {
+        // Skip trigger volumes
+        if (body-&gt;GetAsBodyTriggerVolume())
+            return 0;
+
+        // Skip specific groups
+        if (IsIgnoredBody(body))
+            return 0;
+
+        return 1;  // Test this body
+    }
+
+    // Handle ray hit (return param to continue, 0 to stop)
+    virtual ndFloat32 OnRayCastAction(const ndContactPoint&amp; contact,
+        ndFloat32 intersetParam) override
+    {
+        // Only keep closest hit
+        if (intersetParam &lt; m_param)
+        {
+            m_param = intersetParam;
+            m_contact = contact;
+            m_hitBody = contact.m_body0;
+        }
+        return intersetParam;  // Continue to find closer hits
+    }
+
+    const ndBody* m_hitBody;
+};
+
+// Use custom callback
+MyRayCast raycast;
+world.RayCast(raycast, origin, dest);</code></pre>
+
+            <h3>All-Hits Raycast</h3>
+<pre><code>class AllHitsRayCast : public ndRayCastNotify
+{
+public:
+    virtual ndFloat32 OnRayCastAction(const ndContactPoint&amp; contact,
+        ndFloat32 intersetParam) override
+    {
+        // Store all hits
+        HitInfo hit;
+        hit.m_param = intersetParam;
+        hit.m_point = contact.m_point;
+        hit.m_normal = contact.m_normal;
+        hit.m_body = contact.m_body0;
+        m_hits.PushBack(hit);
+
+        return 1.0f;  // Continue to find all hits
+    }
+
+    struct HitInfo
+    {
+        ndFloat32 m_param;
+        ndVector m_point;
+        ndVector m_normal;
+        const ndBody* m_body;
+    };
+
+    ndArray&lt;HitInfo&gt; m_hits;
+};</code></pre>
+
+            <h3>Raycast Against Single Shape</h3>
+<pre><code>// Cast against a specific shape instance
+ndRayCastClosestHitCallback callback;
+ndVector localP0 = inverseShapeMatrix.TransformVector(worldP0);
+ndVector localP1 = inverseShapeMatrix.TransformVector(worldP1);
+
+ndFloat32 t = shapeInstance.RayCast(callback, localP0, localP1, body, contact, 1.0f);
+
+if (t &lt; 1.0f)
+{
+    // Hit detected
+}</code></pre>
+        </section>
+
+        <section id="convex-cast">
+            <h2>6. Convex Casting</h2>
+            <p>
+                Sweep a convex shape through the world to detect the first intersection.
+                Useful for character movement, projectiles, and predictive collision.
+            </p>
+
+            <h3>Basic Convex Cast</h3>
+<pre><code>// Create a sphere to sweep
+ndShapeInstance sweepShape(new ndShapeSphere(0.5f));
+
+// Start and end positions
+ndMatrix startMatrix(ndGetIdentityMatrix());
+startMatrix.m_posit = ndVector(0.0f, 10.0f, 0.0f, 1.0f);
+ndVector endPos(0.0f, -10.0f, 0.0f, 1.0f);
+
+// Perform sweep
+ndConvexCastNotify callback;
+bool hit = world.ConvexCast(callback, sweepShape, startMatrix, endPos);
+
+if (hit)
+{
+    ndFloat32 t = callback.m_param;
+    ndVector hitNormal = callback.m_normal;
+    ndVector contactOnShape = callback.m_closestPoint0;
+    ndVector contactOnWorld = callback.m_closestPoint1;
+
+    // Contact points (up to 8)
+    for (ndInt32 i = 0; i &lt; callback.m_contacts.GetCount(); i++)
+    {
+        const ndContactPoint&amp; cp = callback.m_contacts[i];
+        // Process contact...
+    }
+}</code></pre>
+
+            <h3>Custom Convex Cast</h3>
+<pre><code>class MyConvexCast : public ndConvexCastNotify
+{
+public:
+    // Filter bodies before testing
+    virtual ndUnsigned32 OnRayPrecastAction(const ndBody* const body,
+        const ndShapeInstance* const shape) override
+    {
+        // Skip self
+        if (body == m_ignoreBody)
+            return 0;
+
+        // Skip triggers
+        if (body-&gt;GetAsBodyTriggerVolume())
+            return 0;
+
+        return 1;
+    }
+
+    const ndBody* m_ignoreBody;
+};
+
+MyConvexCast sweep;
+sweep.m_ignoreBody = playerBody;
+world.ConvexCast(sweep, capsule, startMatrix, endPos);</code></pre>
+
+            <h3>Shape-to-Shape Cast</h3>
+<pre><code>// Cast against a specific body/shape
+ndConvexCastNotify callback;
+
+bool hit = callback.CastShape(
+    sweepShape,          // Shape to sweep
+    startMatrix,         // Start transform
+    endPosition,         // End position
+    targetBody           // Target body
+);
+
+// Or against a shape directly
+hit = callback.CastShape(
+    sweepShape,
+    startMatrix,
+    endPosition,
+    targetShape,         // Target shape instance
+    targetMatrix         // Target transform
+);</code></pre>
+
+            <div class="note">
+                <strong>Note:</strong> Convex casts only work with convex shapes. For
+                concave shapes, use compounds or multiple casts.
+            </div>
+        </section>
+
+        <section id="aabb-queries">
+            <h2>7. AABB Queries</h2>
+            <p>
+                Find all bodies whose bounding boxes overlap a given region.
+            </p>
+
+            <h3>Basic AABB Query</h3>
+<pre><code>ndBodiesInAabbNotify callback;
+
+ndVector minBox(-5.0f, -5.0f, -5.0f, 0.0f);
+ndVector maxBox(5.0f, 5.0f, 5.0f, 0.0f);
+
+world.BodiesInAabb(callback, minBox, maxBox);
+
+// Process results
+for (ndInt32 i = 0; i &lt; callback.m_bodyArray.GetCount(); i++)
+{
+    const ndBody* body = callback.m_bodyArray[i];
+    // Process body...
+}</code></pre>
+
+            <h3>Custom AABB Callback</h3>
+<pre><code>class MyAabbQuery : public ndBodiesInAabbNotify
+{
+public:
+    MyAabbQuery()
+        : m_filterMask(0xFFFFFFFF)
+    {
+    }
+
+    virtual void OnOverlap(const ndBody* const body) override
+    {
+        // Filter by group mask
+        ndUnsigned32 bodyMask = GetBodyMask(body);
+        if (bodyMask &amp; m_filterMask)
+        {
+            m_bodyArray.PushBack(body);
+        }
+    }
+
+    virtual void Reset() override
+    {
+        m_bodyArray.SetCount(0);
+    }
+
+    ndUnsigned32 m_filterMask;
+};
+
+MyAabbQuery query;
+query.m_filterMask = GROUP_ENEMIES | GROUP_PROJECTILES;
+world.BodiesInAabb(query, minBox, maxBox);</code></pre>
+
+            <h3>Sphere Query (via AABB)</h3>
+<pre><code>// Create AABB that contains the sphere
+ndVector center(10.0f, 5.0f, 0.0f, 0.0f);
+ndFloat32 radius = 3.0f;
+
+ndVector minBox = center - ndVector(radius, radius, radius, 0.0f);
+ndVector maxBox = center + ndVector(radius, radius, radius, 0.0f);
+
+ndBodiesInAabbNotify callback;
+world.BodiesInAabb(callback, minBox, maxBox);
+
+// Filter to actual sphere overlap
+for (ndInt32 i = 0; i &lt; callback.m_bodyArray.GetCount(); i++)
+{
+    const ndBody* body = callback.m_bodyArray[i];
+    ndVector bodyPos = body-&gt;GetMatrix().m_posit;
+    ndFloat32 dist = (bodyPos - center).DotProduct(bodyPos - center).GetScalar();
+
+    if (dist &lt;= radius * radius)
+    {
+        // Body is within sphere
+    }
+}</code></pre>
+        </section>
+
+        <section id="filtering">
+            <h2>8. Collision Filtering</h2>
+            <p>
+                Newton provides multiple ways to filter which bodies can collide.
+            </p>
+
+            <h3>Body Notify Filter (Per-Body)</h3>
+<pre><code>class MyBodyNotify : public ndBodyNotify
+{
+public:
+    MyBodyNotify()
+        : ndBodyNotify(ndVector(0, -9.8f, 0, 0))
+        , m_collisionMask(0xFFFFFFFF)
+    {
+    }
+
+    // Called during broad phase
+    virtual bool OnSceneAabbOverlap(
+        const ndBody* const otherBody) const override
+    {
+        // Get other body's mask
+        const MyBodyNotify* other =
+            (const MyBodyNotify*)otherBody-&gt;GetNotifyCallback();
+
+        if (other)
+        {
+            // Check mask compatibility
+            return (m_collisionMask &amp; other-&gt;m_collisionMask) != 0;
+        }
+        return true;
+    }
+
+    ndUnsigned32 m_collisionMask;
+};
+
+// Setup collision groups
+body1-&gt;GetNotifyCallback()-&gt;m_collisionMask = GROUP_PLAYER;
+body2-&gt;GetNotifyCallback()-&gt;m_collisionMask = GROUP_ENEMIES;
+// These won't collide if masks don't overlap</code></pre>
+
+            <h3>Contact Notify Filter (Global)</h3>
+<pre><code>class MyContactNotify : public ndContactNotify
+{
+public:
+    // AABB overlap filter
+    virtual bool OnAabbOverlap(const ndContact* const contact,
+        ndFloat32 timestep) const override
+    {
+        const ndBodyKinematic* body0 = contact-&gt;GetBody0();
+        const ndBodyKinematic* body1 = contact-&gt;GetBody1();
+
+        // Example: no collision between bodies in same group
+        return GetGroup(body0) != GetGroup(body1);
+    }
+
+    // Alternative: filter by body pair directly
+    virtual bool OnAabbOverlap(const ndBodyKinematic* const body0,
+        const ndBodyKinematic* const body1) const override
+    {
+        return true;  // Allow by default
+    }
+
+    // Compound sub-shape filter
+    virtual bool OnCompoundSubShapeOverlap(
+        const ndContact* const contact,
+        ndFloat32 timestep,
+        const ndShapeInstance* const subShapeA,
+        const ndShapeInstance* const subShapeB) const override
+    {
+        // Filter specific sub-shape pairs
+        ndInt64 idA = subShapeA-&gt;GetMaterial().m_userId;
+        ndInt64 idB = subShapeB-&gt;GetMaterial().m_userId;
+
+        // Example: skip collision between matching IDs
+        return idA != idB;
+    }
+};</code></pre>
+
+            <h3>Shape Collision Mode</h3>
+<pre><code>// Disable collisions for a shape instance
+ndShapeInstance&amp; shape = body-&gt;GetCollisionShape();
+shape.SetCollisionMode(false);  // Shape becomes non-colliding
+
+// Re-enable
+shape.SetCollisionMode(true);</code></pre>
+
+            <h3>Skeleton Self-Collision</h3>
+<pre><code>// For articulated models, control self-collision
+ndContact* contact = ...;
+
+// Check if contact is skeleton self-collision
+if (contact-&gt;IsSkeletonSelftCollision())
+{
+    // Handle specially or skip
+}</code></pre>
+
+            <div class="tip">
+                <strong>Tip:</strong> Use per-body notify filters for simple group-based filtering.
+                Use global contact notify for complex logic involving multiple bodies or materials.
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        Newton Dynamics 4.00 Documentation | <a href="index.html">Back to Index</a>
+    </footer>
+</body>
+</html>

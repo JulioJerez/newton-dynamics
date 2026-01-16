@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPU Acceleration - dBrain Neural Network Library</title>
+    <style>
+        :root {
+            --primary-color: #7c3aed;
+            --secondary-color: #6d28d9;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        nav.toc {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            margin-bottom: 1rem;
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        nav.toc ul {
+            list-style: none;
+            columns: 2;
+        }
+
+        nav.toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav.toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        nav.toc a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h3 {
+            color: var(--heading-color);
+            font-size: 1.35rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            color: var(--heading-color);
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #ede9fe;
+            color: #6d28d9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f5f3ff;
+            font-weight: 600;
+        }
+
+        .note {
+            background: #faf5ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .class-header {
+            background: #f5f3ff;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+        }
+
+        .class-header code {
+            background: none;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>GPU Acceleration</h1>
+            <p>OpenCL contexts, GPU buffers, and kernel operations</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; Back to dBrain Documentation</a>
+
+        <nav class="toc">
+            <h2>Contents</h2>
+            <ul>
+                <li><a href="#overview">1. GPU Overview</a></li>
+                <li><a href="#contexts">2. Execution Contexts</a></li>
+                <li><a href="#buffers">3. GPU Buffers</a></li>
+                <li><a href="#kernels">4. GPU Kernels</a></li>
+                <li><a href="#command-queue">5. Command Queue</a></li>
+                <li><a href="#performance">6. Performance Tips</a></li>
+            </ul>
+        </nav>
+
+        <section id="overview">
+            <h2>1. GPU Overview</h2>
+            <p>
+                dBrain uses OpenCL for GPU acceleration, providing significant speedups for
+                training neural networks. The library includes a CPU emulation layer for
+                systems without GPU support.
+            </p>
+
+            <h3>Architecture</h3>
+            <table>
+                <tr>
+                    <th>Component</th>
+                    <th>GPU (OpenCL)</th>
+                    <th>CPU (Emulation)</th>
+                </tr>
+                <tr>
+                    <td>Context</td>
+                    <td><code>ndBrainGpuContext</code></td>
+                    <td><code>ndBrainCpuContext</code></td>
+                </tr>
+                <tr>
+                    <td>Buffer</td>
+                    <td><code>ndBrainGpuBuffer</code></td>
+                    <td>CPU memory</td>
+                </tr>
+                <tr>
+                    <td>Execution</td>
+                    <td>OpenCL kernels</td>
+                    <td>C++ functions</td>
+                </tr>
+            </table>
+
+            <h3>File Locations</h3>
+            <ul>
+                <li><code>sdk/dBrain/dOpenCl/</code> - OpenCL kernel implementations</li>
+                <li><code>sdk/dBrain/cpuEmulation/</code> - CPU fallback implementations</li>
+            </ul>
+        </section>
+
+        <section id="contexts">
+            <h2>2. Execution Contexts</h2>
+
+            <h3>ndBrainContext (Abstract Base)</h3>
+            <div class="class-header">
+                <code>class ndBrainContext : public ndClassAlloc</code>
+            </div>
+            <p>
+                Abstract interface for execution backends. All GPU/CPU operations are
+                dispatched through the context.
+            </p>
+
+            <h3>ndBrainGpuContext (OpenCL)</h3>
+            <div class="class-header">
+                <code>class ndBrainGpuContext : public ndBrainContext</code>
+            </div>
+            <p>
+                OpenCL-based GPU context. Automatically detects and initializes the
+                best available GPU device.
+            </p>
+<pre><code>// Create GPU context
+ndSharedPtr&lt;ndBrainContext&gt; gpuContext(new ndBrainGpuContext());
+
+// Check if GPU is available
+if (brain.IsGpuReady())
+{
+    printf("GPU acceleration enabled\n");
+}</code></pre>
+
+            <h3>ndBrainCpuContext (Fallback)</h3>
+            <div class="class-header">
+                <code>class ndBrainCpuContext : public ndBrainContext</code>
+            </div>
+            <p>
+                CPU-only context using the same interface. Useful for debugging
+                or when GPU is unavailable.
+            </p>
+<pre><code>// Create CPU context
+ndSharedPtr&lt;ndBrainContext&gt; cpuContext(new ndBrainCpuContext());
+
+// Works with same code as GPU context
+ndBrainOptimizerAdam optimizer(cpuContext);</code></pre>
+
+            <h3>Automatic Selection</h3>
+<pre><code>// Create context based on availability
+ndSharedPtr&lt;ndBrainContext&gt; CreateBestContext()
+{
+    ndSharedPtr&lt;ndBrainContext&gt; context(new ndBrainGpuContext());
+
+    // Test if GPU initialization succeeded
+    // Fall back to CPU if needed
+    if (!context->IsValid())
+    {
+        context = ndSharedPtr&lt;ndBrainContext&gt;(new ndBrainCpuContext());
+    }
+
+    return context;
+}</code></pre>
+        </section>
+
+        <section id="buffers">
+            <h2>3. GPU Buffers</h2>
+            <p>
+                GPU buffers manage memory that can be efficiently transferred between
+                host (CPU) and device (GPU).
+            </p>
+
+            <h3>ndBrainFloatBuffer</h3>
+            <div class="class-header">
+                <code>class ndBrainFloatBuffer : public ndBrainBuffer</code>
+            </div>
+
+<pre><code>// Create buffer on GPU
+ndBrainFloatBuffer buffer(context.GetPtr(), 1024);  // 1024 floats
+
+// Transfer data to GPU
+ndBrainVector hostData(1024);
+// ... fill hostData ...
+buffer.VectorToDevice(hostData);
+
+// Transfer data from GPU
+buffer.VectorFromDevice(hostData);</code></pre>
+
+            <h3>Buffer Operations</h3>
+            <p>
+                Buffer operations execute on the GPU when using <code>ndBrainGpuContext</code>.
+            </p>
+
+            <h4>Basic Math</h4>
+<pre><code>ndBrainFloatBuffer a(context.GetPtr(), 1024);
+ndBrainFloatBuffer b(context.GetPtr(), 1024);
+
+// Scalar operations
+a.Set(0.0f);         // Fill with value
+a.Scale(0.5f);       // a *= 0.5
+a.Min(1.0f);         // a = min(a, 1.0)
+a.Max(0.0f);         // a = max(a, 0.0)
+
+// Element-wise operations
+a.Add(b);            // a += b
+a.Sub(b);            // a -= b
+a.Mul(b);            // a *= b
+a.Exp(b);            // a = exp(b)
+
+// Blending
+a.Blend(b, 0.1f);    // a = a + 0.1 * (b - a)</code></pre>
+
+            <h4>Reduction Operations</h4>
+<pre><code>// Sum all elements
+a.ReductionSum();
+
+// Math operations
+a.Sqrt(1024);        // Square root
+a.InvSqrt(1024);     // Inverse square root</code></pre>
+
+            <h4>Comparison Operations</h4>
+<pre><code>// Element-wise comparison (results in 0.0 or 1.0)
+a.Less(0.5f);        // a[i] = (a[i] < 0.5) ? 1 : 0
+a.Greater(0.5f);     // a[i] = (a[i] > 0.5) ? 1 : 0
+a.LessEqual(b);      // Compare with another buffer
+a.GreaterEqual(b);</code></pre>
+
+            <h3>Memory Management</h3>
+<pre><code>// Get buffer size
+size_t bytes = buffer.SizeInBytes();
+size_t count = buffer.GetCount();
+
+// Access GPU buffer object
+ndBrainGpuBuffer* gpuBuffer = buffer.GetGpuBuffer();
+
+// Get element (triggers device->host transfer)
+ndBrainFloat value = buffer.GetElement(0);  // Slow - avoid in loops</code></pre>
+
+            <div class="warning">
+                <strong>Performance Warning:</strong> <code>GetElement()</code> triggers
+                a GPU-to-CPU transfer. Avoid calling it in loops during training.
+            </div>
+        </section>
+
+        <section id="kernels">
+            <h2>4. GPU Kernels</h2>
+            <p>
+                dBrain includes 50+ OpenCL kernels for neural network operations.
+                These are automatically invoked by the training infrastructure.
+            </p>
+
+            <h3>Feed-Forward Kernels</h3>
+            <table>
+                <tr>
+                    <th>Kernel</th>
+                    <th>Operation</th>
+                </tr>
+                <tr>
+                    <td><code>m_brainLayerMatrixMatrixMultiply</code></td>
+                    <td>Y = W * X + b (linear layer)</td>
+                </tr>
+                <tr>
+                    <td><code>m_brainLayerReluActivation</code></td>
+                    <td>Y = max(0, X)</td>
+                </tr>
+                <tr>
+                    <td><code>m_brainLayerTanhActivation</code></td>
+                    <td>Y = tanh(X)</td>
+                </tr>
+                <tr>
+                    <td><code>m_brainLayerSigmoidActivation</code></td>
+                    <td>Y = 1/(1+exp(-X))</td>
+                </tr>
+                <tr>
+                    <td><code>m_brainLayerSoftmaxActivation</code></td>
+                    <td>Y = exp(X)/sum(exp(X))</td>
+                </tr>
+                <tr>
+                    <td><code>m_brainLayerDropOutActivation</code></td>
+                    <td>Stochastic dropout</td>
+                </tr>
+            </table>
+
+            <h3>Backpropagation Kernels</h3>
+            <table>
+                <tr>
+                    <th>Kernel</th>
+                    <th>Operation</th>
+                </tr>
+                <tr>
+                    <td><code>m_brainLayerMatrixBackPropagateInputGradients</code></td>
+                    <td>dL/dX = W^T * dL/dY</td>
+                </tr>
+                <tr>
+                    <td><code>m_brainLayerMatrixBackPropagateWeightGradients</code></td>
+                    <td>dL/dW = dL/dY * X^T</td>
+                </tr>
+                <tr>
+                    <td><code>m_brainLayerMatrixBackPropagateBiasGradients</code></td>
+                    <td>dL/db = sum(dL/dY)</td>
+                </tr>
+            </table>
+
+            <h3>Optimizer Kernels</h3>
+            <table>
+                <tr>
+                    <th>Kernel</th>
+                    <th>Operation</th>
+                </tr>
+                <tr>
+                    <td><code>m_brainAdamMomentumUpdate</code></td>
+                    <td>Update first/second moment estimates</td>
+                </tr>
+                <tr>
+                    <td><code>m_brainAdamRidgeOptimizerUpdate</code></td>
+                    <td>Adam update with L2 regularization</td>
+                </tr>
+                <tr>
+                    <td><code>m_brainAdamLassoOptimizerUpdate</code></td>
+                    <td>Adam update with L1 regularization</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="command-queue">
+            <h2>5. Command Queue</h2>
+            <p>
+                GPU operations are queued and executed asynchronously. The command
+                system allows efficient batching of operations.
+            </p>
+
+            <h3>Command Types</h3>
+            <div class="class-header">
+                <code>class ndBrainBufferCommand</code>
+            </div>
+            <ul>
+                <li><code>ndBrainLayerFeedForwardCpuCommand</code> - Forward pass (CPU)</li>
+                <li><code>ndBrainLayerBackPropagateCpuCommand</code> - Backward pass (CPU)</li>
+                <li><code>ndBrainGpuCommand</code> - GPU kernel execution</li>
+            </ul>
+
+            <h3>Synchronization</h3>
+<pre><code>// Commands are queued automatically during training
+trainer.MakePrediction();    // Queues forward pass commands
+trainer.BackPropagate();     // Queues backward pass commands
+
+// GPU commands execute asynchronously
+// Synchronization happens automatically when needed</code></pre>
+        </section>
+
+        <section id="performance">
+            <h2>6. Performance Tips</h2>
+
+            <h3>Batch Size</h3>
+            <p>
+                Larger batch sizes improve GPU utilization but require more memory.
+            </p>
+<pre><code>// Good batch sizes for GPU training
+const ndInt32 miniBatchSize = 32;   // Minimum for GPU efficiency
+const ndInt32 optimalBatch = 64;    // Good balance
+const ndInt32 largeBatch = 128;     // Maximum throughput</code></pre>
+
+            <h3>Memory Transfers</h3>
+            <ul>
+                <li><strong>Minimize transfers</strong> - Keep data on GPU throughout training</li>
+                <li><strong>Batch transfers</strong> - Transfer large blocks, not individual elements</li>
+                <li><strong>Avoid GetElement()</strong> - Causes synchronization stalls</li>
+            </ul>
+
+<pre><code>// BAD: Reading elements one at a time
+for (ndInt32 i = 0; i &lt; 1000; i++)
+{
+    ndBrainFloat val = buffer.GetElement(i);  // Slow!
+}
+
+// GOOD: Transfer entire vector at once
+ndBrainVector hostData(1000);
+buffer.VectorFromDevice(hostData);  // One transfer
+for (ndInt32 i = 0; i &lt; 1000; i++)
+{
+    ndBrainFloat val = hostData[i];  // Fast
+}</code></pre>
+
+            <h3>Layer Sizing</h3>
+            <p>
+                GPU matrix operations are most efficient with dimensions that are
+                multiples of 16 (warp/wavefront size).
+            </p>
+<pre><code>// Efficient layer sizes (multiples of 16)
+brain.AddLayer(new ndBrainLayerLinear(128, 256));  // Good
+brain.AddLayer(new ndBrainLayerLinear(256, 128));  // Good
+
+// Less efficient (odd sizes)
+brain.AddLayer(new ndBrainLayerLinear(100, 50));   // Works but slower</code></pre>
+
+            <h3>Memory Layout</h3>
+            <p>
+                dBrain uses row-major layout with tiled blocks for efficient GPU access.
+                The tiling is handled automatically by the trainer.
+            </p>
+
+            <div class="note">
+                <strong>Performance Recommendations:</strong>
+                <ul>
+                    <li>Use batch sizes of 32-128 for GPU training</li>
+                    <li>Use layer sizes that are multiples of 16</li>
+                    <li>Minimize CPU-GPU data transfers</li>
+                    <li>Let the trainer manage buffer synchronization</li>
+                    <li>Profile with larger networks to see GPU benefits</li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2>Troubleshooting</h2>
+
+            <h3>GPU Not Detected</h3>
+<pre><code>// Check GPU availability
+ndBrainGpuContext gpuContext;
+if (!brain.IsGpuReady())
+{
+    printf("GPU not available. Possible causes:\n");
+    printf("- No OpenCL-compatible GPU\n");
+    printf("- OpenCL drivers not installed\n");
+    printf("- Insufficient GPU memory\n");
+
+    // Fall back to CPU
+    ndBrainCpuContext cpuContext;
+    // ... use CPU context ...
+}</code></pre>
+
+            <h3>Out of Memory</h3>
+            <ul>
+                <li>Reduce batch size</li>
+                <li>Use smaller network architecture</li>
+                <li>Close other GPU applications</li>
+            </ul>
+
+            <h3>Slow Performance</h3>
+            <ul>
+                <li>Increase batch size</li>
+                <li>Use multiples of 16 for layer dimensions</li>
+                <li>Verify GPU is being used (not CPU fallback)</li>
+                <li>Check for excessive CPU-GPU transfers</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="training.html">Training Pipeline</a> - Full training details</li>
+                <li><a href="reinforcement-learning.html">Reinforcement Learning</a> - Train RL agents</li>
+            </ul>
+        </section>
+    </div>
+</body>
+</html>

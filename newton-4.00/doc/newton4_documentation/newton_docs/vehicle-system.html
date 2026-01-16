@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle System - Newton Dynamics 4.00</title>
+    <style>
+        :root {
+            --primary-color: #f59e0b;
+            --secondary-color: #d97706;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        nav.toc {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            margin-bottom: 1rem;
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        nav.toc ul {
+            list-style: none;
+            columns: 2;
+        }
+
+        nav.toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav.toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        nav.toc a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h3 {
+            color: var(--heading-color);
+            font-size: 1.35rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            color: var(--heading-color);
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #e2e8f0;
+            color: #be185d;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: var(--heading-color);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .tip {
+            background: #dcfce7;
+            border-left: 4px solid #22c55e;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .warning {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            nav.toc ul {
+                columns: 1;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            header {
+                padding: 2rem 1rem;
+            }
+
+            header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Vehicle System</h1>
+            <p>Newton Dynamics 4.00 Documentation</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; Back to Index</a>
+
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#overview">1. Overview</a></li>
+                <li><a href="#vehicle-model">2. Vehicle Model</a></li>
+                <li><a href="#tires">3. Tires &amp; Suspension</a></li>
+                <li><a href="#motor">4. Motor</a></li>
+                <li><a href="#gearbox">5. Gearbox</a></li>
+                <li><a href="#differential">6. Differential</a></li>
+                <li><a href="#tire-friction">7. Tire Friction Models</a></li>
+                <li><a href="#aerodynamics">8. Aerodynamics</a></li>
+                <li><a href="#complete-example">9. Complete Example</a></li>
+            </ul>
+        </nav>
+
+        <section id="overview">
+            <h2>1. Overview</h2>
+            <p>
+                Newton's vehicle system provides a complete multi-body vehicle simulation with
+                realistic tire physics, suspension, motor, gearbox, and differential. It extends
+                <code>ndModelArticulation</code> to create physically accurate vehicles.
+            </p>
+
+            <h3>Vehicle Components</h3>
+<pre><code>ndMultiBodyVehicle (extends ndModelArticulation)
+    |
+    +-- Chassis (ndBodyDynamic)
+    |
+    +-- Tires (ndMultiBodyVehicleTireJoint)
+    |       +-- Wheel Bodies
+    |       +-- Suspension (spring-damper)
+    |       +-- Tire Friction Model
+    |
+    +-- Motor (ndMultiBodyVehicleMotor)
+    |
+    +-- Gearbox (ndMultiBodyVehicleGearBox)
+    |
+    +-- Differential(s) (ndMultiBodyVehicleDifferential)
+            +-- Differential Axles</code></pre>
+
+            <h3>Key Features</h3>
+            <ul>
+                <li>Multi-body physics with realistic mass distribution</li>
+                <li>Advanced tire models (Coulomb, Pacejka variants)</li>
+                <li>Configurable suspension with spring-damper</li>
+                <li>Engine with torque curve simulation</li>
+                <li>Automatic/manual gearbox with clutch</li>
+                <li>Limited-slip differentials</li>
+                <li>Aerodynamic downforce</li>
+                <li>Stability control</li>
+            </ul>
+        </section>
+
+        <section id="vehicle-model">
+            <h2>2. Vehicle Model</h2>
+            <p>
+                <code>ndMultiBodyVehicle</code> is the main class for creating vehicles.
+                It manages all vehicle components and their interactions.
+            </p>
+
+            <h3>Creating a Vehicle</h3>
+<pre><code>// Create vehicle with gravity magnitude
+ndFloat32 gravity = 10.0f;
+ndMultiBodyVehicle* vehicle = new ndMultiBodyVehicle(gravity);
+
+// Set local frame (defines forward, up, right directions)
+ndMatrix localFrame(ndGetIdentityMatrix());
+// X = right, Y = up, Z = forward (default)
+vehicle-&gt;SetLocalFrame(localFrame);
+
+// Create chassis body
+ndBodyDynamic* chassisBody = new ndBodyDynamic();
+chassisBody-&gt;SetCollisionShape(chassisShape);
+chassisBody-&gt;SetMassMatrix(1500.0f, chassisShape);  // 1500 kg
+chassisBody-&gt;SetMatrix(chassisMatrix);
+
+// Add chassis to vehicle
+ndSharedPtr&lt;ndBody&gt; chassisPtr(chassisBody);
+vehicle-&gt;AddChassis(chassisPtr);
+
+// Add vehicle to world
+world.AddModel(ndSharedPtr&lt;ndModel&gt;(vehicle));</code></pre>
+
+            <h3>Vehicle State</h3>
+<pre><code>// Get chassis body
+ndBodyDynamic* chassis = vehicle-&gt;GetChassis();
+
+// Get current speed (m/s)
+ndFloat32 speed = vehicle-&gt;GetSpeed();
+
+// Check if vehicle is sleeping
+bool sleeping = vehicle-&gt;IsSleeping();
+
+// Get local frame
+const ndMatrix&amp; frame = vehicle-&gt;GetLocalFrame();</code></pre>
+
+            <h3>Update Cycle</h3>
+<pre><code>class MyVehicle : public ndMultiBodyVehicle
+{
+public:
+    MyVehicle() : ndMultiBodyVehicle(10.0f)
+    {
+        // Build vehicle...
+    }
+
+    void Update(ndFloat32 timestep) override
+    {
+        // Apply player input
+        ApplyControls();
+
+        // Call base update
+        ndMultiBodyVehicle::Update(timestep);
+    }
+
+    void PostUpdate(ndFloat32 timestep) override
+    {
+        // Post-physics update
+        // Update sound, effects, etc.
+        ndMultiBodyVehicle::PostUpdate(timestep);
+    }
+};</code></pre>
+        </section>
+
+        <section id="tires">
+            <h2>3. Tires &amp; Suspension</h2>
+            <p>
+                Tires are created using <code>ndMultiBodyVehicleTireJoint</code> which combines
+                wheel physics with suspension and tire friction models.
+            </p>
+
+            <h3>Tire Descriptor</h3>
+<pre><code>// Configure tire parameters
+ndMultiBodyVehicleTireJointInfo tireInfo;
+
+// Suspension settings (inherited from ndWheelDescriptor)
+tireInfo.m_springK = 5000.0f;      // Spring stiffness (N/m)
+tireInfo.m_damperC = 200.0f;       // Damping coefficient (N*s/m)
+tireInfo.m_upperStop = 0.3f;       // Max extension (m)
+tireInfo.m_lowerStop = -0.1f;      // Max compression (m)
+tireInfo.m_regularizer = 0.1f;     // Constraint softness
+
+// Wheel settings
+tireInfo.m_radio = 0.35f;          // Wheel radius (m)
+tireInfo.m_width = 0.25f;          // Tire width (m)
+tireInfo.m_mass = 20.0f;           // Wheel mass (kg)
+
+// Friction model (see section 7)
+tireInfo.m_frictionModel = ndTireFrictionModel::m_pacejkaSport;</code></pre>
+
+            <h3>Creating Tires</h3>
+<pre><code>// Create tire shape
+ndFloat32 radius = 0.35f;
+ndFloat32 width = 0.25f;
+ndShapeInstance tireShape = vehicle-&gt;CreateTireShape(radius, width);
+
+// Create tire body
+ndBodyDynamic* tireBody = new ndBodyDynamic();
+tireBody-&gt;SetCollisionShape(tireShape);
+tireBody-&gt;SetMassMatrix(20.0f, tireShape);
+
+// Position tire
+ndMatrix tireMatrix(ndGetIdentityMatrix());
+tireMatrix.m_posit = ndVector(0.8f, 0.0f, 1.2f, 1.0f);  // Front-right
+tireBody-&gt;SetMatrix(tireMatrix);
+
+// Add tire to vehicle
+ndSharedPtr&lt;ndBody&gt; tirePtr(tireBody);
+ndMultiBodyVehicleTireJoint* tire = vehicle-&gt;AddTire(tireInfo, tirePtr);
+
+// Repeat for all wheels...</code></pre>
+
+            <h3>Tire Control</h3>
+<pre><code>// Access tires
+const ndList&lt;ndMultiBodyVehicleTireJoint*&gt;&amp; tires = vehicle-&gt;GetTireList();
+
+for (ndMultiBodyVehicleTireJoint* tire : tires)
+{
+    // Steering (normalized -1 to 1)
+    tire-&gt;SetSteering(steeringInput);
+
+    // Brake (normalized 0 to 1)
+    tire-&gt;SetBreak(brakeInput);
+
+    // Hand brake (normalized 0 to 1)
+    tire-&gt;SetHandBreak(handBrakeInput);
+}</code></pre>
+
+            <h3>Tire State</h3>
+<pre><code>// Get tire slip information
+ndFloat32 sideSlip = tire-&gt;GetSideSlip();
+ndFloat32 longSlip = tire-&gt;GetLongitudinalSlip();
+
+// Get tire info
+ndMultiBodyVehicleTireJointInfo info = tire-&gt;GetInfo();</code></pre>
+
+            <h3>Four-Wheel Example</h3>
+<pre><code>void CreateWheels(ndMultiBodyVehicle* vehicle)
+{
+    // Wheel positions (local to chassis)
+    struct WheelPos { ndFloat32 x, y, z; bool steer; };
+    WheelPos positions[] = {
+        { -0.8f, 0.0f,  1.2f, true  },  // Front-left
+        {  0.8f, 0.0f,  1.2f, true  },  // Front-right
+        { -0.8f, 0.0f, -1.2f, false },  // Rear-left
+        {  0.8f, 0.0f, -1.2f, false }   // Rear-right
+    };
+
+    for (int i = 0; i &lt; 4; ++i)
+    {
+        ndMultiBodyVehicleTireJointInfo info;
+        info.m_springK = 5000.0f;
+        info.m_damperC = 200.0f;
+        info.m_upperStop = 0.3f;
+        info.m_lowerStop = -0.1f;
+        info.m_radio = 0.35f;
+        info.m_frictionModel = ndTireFrictionModel::m_pacejkaSport;
+
+        ndBodyDynamic* wheelBody = CreateWheelBody(0.35f, 0.25f, 20.0f);
+        // Position wheel...
+
+        ndSharedPtr&lt;ndBody&gt; wheelPtr(wheelBody);
+        m_tires[i] = vehicle-&gt;AddTire(info, wheelPtr);
+        m_canSteer[i] = positions[i].steer;
+    }
+}</code></pre>
+        </section>
+
+        <section id="motor">
+            <h2>4. Motor</h2>
+            <p>
+                <code>ndMultiBodyVehicleMotor</code> simulates an engine with torque output,
+                RPM limits, and internal friction.
+            </p>
+
+            <h3>Adding a Motor</h3>
+<pre><code>// Add motor (mass in kg, flywheel radius in m)
+ndFloat32 motorMass = 50.0f;
+ndFloat32 flywheelRadius = 0.2f;
+ndMultiBodyVehicleMotor* motor = vehicle-&gt;AddMotor(motorMass, flywheelRadius);</code></pre>
+
+            <h3>Motor Configuration</h3>
+<pre><code>// Get motor
+ndMultiBodyVehicleMotor* motor = vehicle-&gt;GetMotor();
+
+// Set redline RPM
+motor-&gt;SetMaxRpm(7000.0f);
+
+// Set RPM acceleration step (how fast RPM changes)
+motor-&gt;SetOmegaAccel(50.0f);  // rad/s^2
+
+// Set internal friction (simulates engine braking)
+motor-&gt;SetFrictionLoss(20.0f);  // Newton-meters</code></pre>
+
+            <h3>Motor Control</h3>
+<pre><code>// Apply throttle (torque and target RPM)
+ndFloat32 throttleInput = 0.8f;  // 0 to 1
+
+// Calculate torque from throttle
+ndFloat32 maxTorque = 400.0f;  // Peak torque (N*m)
+ndFloat32 torque = throttleInput * maxTorque;
+
+// Calculate target RPM
+ndFloat32 idleRpm = 800.0f;
+ndFloat32 maxRpm = 7000.0f;
+ndFloat32 targetRpm = idleRpm + throttleInput * (maxRpm - idleRpm);
+
+motor-&gt;SetTorqueAndRpm(torque, targetRpm);</code></pre>
+
+            <h3>Motor State</h3>
+<pre><code>// Get current RPM
+ndFloat32 rpm = motor-&gt;GetRpm();
+
+// Convert omega (rad/s) to RPM
+// RPM = omega * dRadPerSecToRpm
+// where dRadPerSecToRpm = 9.55</code></pre>
+        </section>
+
+        <section id="gearbox">
+            <h2>5. Gearbox</h2>
+            <p>
+                <code>ndMultiBodyVehicleGearBox</code> connects the motor to the differential
+                with gear ratios and clutch simulation.
+            </p>
+
+            <h3>Adding a Gearbox</h3>
+<pre><code>// Add gearbox (connects motor to differential)
+ndMultiBodyVehicleGearBox* gearbox = vehicle-&gt;AddGearBox(differential);</code></pre>
+
+            <h3>Gearbox Configuration</h3>
+<pre><code>// Get gearbox
+ndMultiBodyVehicleGearBox* gearbox = vehicle-&gt;GetGearBox();
+
+// Set idle RPM
+gearbox-&gt;SetIdleOmega(800.0f / dRadPerSecToRpm);  // Convert RPM to rad/s
+
+// Set clutch torque capacity
+gearbox-&gt;SetClutchTorque(500.0f);  // Newton-meters
+
+// Set drivetrain friction
+gearbox-&gt;SetInternalTorqueLoss(10.0f);  // Newton-meters</code></pre>
+
+            <h3>Gear Ratios</h3>
+<pre><code>// Gear ratios are set via the gear joint ratio
+// The gearbox extends ndJointGear
+
+// Typical gear ratios:
+// 1st: 3.5:1
+// 2nd: 2.2:1
+// 3rd: 1.5:1
+// 4th: 1.0:1
+// 5th: 0.8:1
+// Reverse: -3.0:1
+
+// Set current gear ratio
+gearbox-&gt;SetRatio(gearRatios[currentGear]);</code></pre>
+
+            <h3>Automatic Transmission</h3>
+<pre><code>class AutomaticVehicle : public ndMultiBodyVehicle
+{
+public:
+    ndFloat32 m_gearRatios[6] = { -3.0f, 3.5f, 2.2f, 1.5f, 1.0f, 0.8f };
+    ndFloat32 m_upshiftRpm = 6000.0f;
+    ndFloat32 m_downshiftRpm = 2500.0f;
+    ndInt32 m_currentGear = 1;
+
+    void Update(ndFloat32 timestep) override
+    {
+        ndMultiBodyVehicleMotor* motor = GetMotor();
+        ndFloat32 rpm = motor-&gt;GetRpm();
+
+        // Automatic shifting
+        if (rpm &gt; m_upshiftRpm &amp;&amp; m_currentGear &lt; 5)
+        {
+            m_currentGear++;
+            GetGearBox()-&gt;SetRatio(m_gearRatios[m_currentGear]);
+        }
+        else if (rpm &lt; m_downshiftRpm &amp;&amp; m_currentGear &gt; 1)
+        {
+            m_currentGear--;
+            GetGearBox()-&gt;SetRatio(m_gearRatios[m_currentGear]);
+        }
+
+        ndMultiBodyVehicle::Update(timestep);
+    }
+};</code></pre>
+        </section>
+
+        <section id="differential">
+            <h2>6. Differential</h2>
+            <p>
+                <code>ndMultiBodyVehicleDifferential</code> distributes power between wheels
+                with optional limited-slip behavior.
+            </p>
+
+            <h3>Adding Differentials</h3>
+<pre><code>// Create rear differential connecting two tires
+ndFloat32 diffMass = 10.0f;
+ndFloat32 diffRadius = 0.1f;
+ndFloat32 slipOmega = 5.0f;  // Limited slip threshold (rad/s)
+
+ndMultiBodyVehicleDifferential* rearDiff = vehicle-&gt;AddDifferential(
+    diffMass, diffRadius,
+    leftRearTire, rightRearTire,
+    slipOmega
+);
+
+// For AWD, create front differential similarly
+ndMultiBodyVehicleDifferential* frontDiff = vehicle-&gt;AddDifferential(
+    diffMass, diffRadius,
+    leftFrontTire, rightFrontTire,
+    slipOmega
+);
+
+// Create center differential connecting front and rear
+ndMultiBodyVehicleDifferential* centerDiff = vehicle-&gt;AddDifferential(
+    diffMass, diffRadius,
+    frontDiff, rearDiff,
+    slipOmega
+);</code></pre>
+
+            <h3>Limited Slip Configuration</h3>
+<pre><code>// Get/set slip threshold
+ndFloat32 slipOmega = diff-&gt;GetSlipOmega();
+diff-&gt;SetSlipOmega(10.0f);  // Higher = more slip allowed
+
+// Open differential: high slip omega (effectively unlimited)
+diff-&gt;SetSlipOmega(1000.0f);
+
+// Locked differential: low slip omega
+diff-&gt;SetSlipOmega(0.1f);</code></pre>
+
+            <h3>Drivetrain Configurations</h3>
+            <table>
+                <tr>
+                    <th>Configuration</th>
+                    <th>Description</th>
+                    <th>Differentials</th>
+                </tr>
+                <tr>
+                    <td>RWD</td>
+                    <td>Rear-wheel drive</td>
+                    <td>1 rear diff</td>
+                </tr>
+                <tr>
+                    <td>FWD</td>
+                    <td>Front-wheel drive</td>
+                    <td>1 front diff</td>
+                </tr>
+                <tr>
+                    <td>AWD</td>
+                    <td>All-wheel drive</td>
+                    <td>Front + rear + center diffs</td>
+                </tr>
+                <tr>
+                    <td>4WD</td>
+                    <td>Four-wheel drive (locked)</td>
+                    <td>Front + rear + locked center</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="tire-friction">
+            <h2>7. Tire Friction Models</h2>
+            <p>
+                Newton provides multiple tire friction models ranging from simple Coulomb
+                friction to advanced Pacejka tire models.
+            </p>
+
+            <h3>Available Friction Models</h3>
+            <table>
+                <tr>
+                    <th>Model</th>
+                    <th>Description</th>
+                    <th>Use Case</th>
+                </tr>
+                <tr>
+                    <td><code>m_coulomb</code></td>
+                    <td>Simple Coulomb friction</td>
+                    <td>Basic vehicles, arcade</td>
+                </tr>
+                <tr>
+                    <td><code>m_coulombCicleOfFriction</code></td>
+                    <td>Coulomb with friction ellipse</td>
+                    <td>Better handling feel</td>
+                </tr>
+                <tr>
+                    <td><code>m_pacejkaSport</code></td>
+                    <td>Sport car tire curve</td>
+                    <td>Sports cars, racing</td>
+                </tr>
+                <tr>
+                    <td><code>m_pacejkaTruck</code></td>
+                    <td>Truck tire curve</td>
+                    <td>Trucks, heavy vehicles</td>
+                </tr>
+                <tr>
+                    <td><code>m_pacejkaUtility</code></td>
+                    <td>Utility vehicle tire</td>
+                    <td>SUVs, utility vehicles</td>
+                </tr>
+                <tr>
+                    <td><code>m_pacejkaCustom</code></td>
+                    <td>Custom Pacejka parameters</td>
+                    <td>Specialized simulation</td>
+                </tr>
+            </table>
+
+            <h3>Setting Friction Model</h3>
+<pre><code>ndMultiBodyVehicleTireJointInfo tireInfo;
+
+// Use preset model
+tireInfo.SetPacejkaCurves(ndTireFrictionModel::m_pacejkaSport);
+
+// Or access friction model directly
+ndTireFrictionModel&amp; frictionModel = tireInfo;
+frictionModel.m_frictionModel = ndTireFrictionModel::m_pacejkaSport;</code></pre>
+
+            <h3>Custom Pacejka Parameters</h3>
+<pre><code>// Pacejka "Magic Formula" parameters
+// F = D * sin(C * atan(B*x - E*(B*x - atan(B*x)))) + Sv
+
+ndTireFrictionModel::ndPacejkaTireModel lateral;
+lateral.m_b = 10.0f;    // Stiffness factor
+lateral.m_c = 1.9f;     // Shape factor
+lateral.m_d = 1.0f;     // Peak value
+lateral.m_e = 0.97f;    // Curvature factor
+lateral.m_sv = 0.0f;    // Vertical shift
+lateral.m_sh = 0.0f;    // Horizontal shift
+
+ndTireFrictionModel::ndPacejkaTireModel longitudinal;
+longitudinal.m_b = 12.0f;
+longitudinal.m_c = 1.65f;
+longitudinal.m_d = 1.0f;
+longitudinal.m_e = 0.97f;
+longitudinal.m_sv = 0.0f;
+longitudinal.m_sh = 0.0f;
+
+// Apply custom curves
+tireInfo.SetPacejkaCurves(lateral, longitudinal);</code></pre>
+
+            <h3>Getting Stock Pacejka Curves</h3>
+<pre><code>// Retrieve preset Pacejka parameters for reference
+ndTireFrictionModel::ndPacejkaTireModel lateral, longitudinal;
+tireInfo.GetPacejkaCurves(
+    ndTireFrictionModel::m_pacejkaSport,
+    longitudinal, lateral
+);</code></pre>
+
+            <div class="tip">
+                <strong>Tip:</strong> Use <code>PlotPacejkaCurves()</code> to visualize
+                friction curves during development:
+                <code>tireInfo.PlotPacejkaCurves("sport_tires.csv");</code>
+            </div>
+        </section>
+
+        <section id="aerodynamics">
+            <h2>8. Aerodynamics</h2>
+            <p>
+                The vehicle system includes aerodynamic downforce simulation that increases
+                tire grip at higher speeds.
+            </p>
+
+            <h3>Downforce Configuration</h3>
+<pre><code>// Downforce is configured via ndDownForce class internally
+// The vehicle automatically applies downforce based on speed
+
+// Downforce table defines force factor at different speeds:
+// Speed (m/s) | Force Factor | Downforce Constant
+// 0           | 0.0          | 0.0
+// 30          | 0.1          | calculated
+// 60          | 0.3          | calculated
+// 90          | 0.6          | calculated
+// 120         | 1.0          | calculated
+
+// Higher speeds = more downforce = more grip</code></pre>
+
+            <h3>Effect on Suspension</h3>
+            <p>
+                Downforce is applied through the suspension, effectively increasing
+                the weight on each tire proportionally to speed squared.
+            </p>
+
+            <div class="note">
+                <strong>Note:</strong> Downforce parameters are currently set internally.
+                For custom aerodynamics, you may need to extend the vehicle class and
+                override the <code>ApplyAerodynamics()</code> method.
+            </div>
+        </section>
+
+        <section id="complete-example">
+            <h2>9. Complete Example</h2>
+            <p>
+                Here's a complete example of creating a rear-wheel drive sports car:
+            </p>
+
+<pre><code>class SportsCar : public ndMultiBodyVehicle
+{
+public:
+    SportsCar(ndWorld* world) : ndMultiBodyVehicle(10.0f)
+    {
+        // Set local frame
+        SetLocalFrame(ndGetIdentityMatrix());
+
+        // Create chassis
+        CreateChassis();
+
+        // Create wheels
+        CreateWheels();
+
+        // Create drivetrain
+        CreateDrivetrain();
+    }
+
+private:
+    ndMultiBodyVehicleTireJoint* m_tires[4];
+    ndFloat32 m_gearRatios[6] = { -3.0f, 3.5f, 2.2f, 1.5f, 1.0f, 0.8f };
+    ndInt32 m_currentGear = 1;
+
+    void CreateChassis()
+    {
+        // Create chassis shape (box approximation)
+        ndShapeInstance chassisShape(new ndShapeBox(2.0f, 0.5f, 4.5f));
+
+        // Create chassis body
+        ndBodyDynamic* chassis = new ndBodyDynamic();
+        chassis-&gt;SetCollisionShape(chassisShape);
+        chassis-&gt;SetMassMatrix(1500.0f, chassisShape);
+
+        // Position chassis
+        ndMatrix chassisMatrix(ndGetIdentityMatrix());
+        chassisMatrix.m_posit = ndVector(0.0f, 1.0f, 0.0f, 1.0f);
+        chassis-&gt;SetMatrix(chassisMatrix);
+
+        // Add to vehicle
+        AddChassis(ndSharedPtr&lt;ndBody&gt;(chassis));
+    }
+
+    void CreateWheels()
+    {
+        struct WheelConfig {
+            ndFloat32 x, z;
+            bool steerable;
+        };
+
+        WheelConfig configs[] = {
+            { -0.9f,  1.4f, true  },   // Front-left
+            {  0.9f,  1.4f, true  },   // Front-right
+            { -0.9f, -1.4f, false },   // Rear-left
+            {  0.9f, -1.4f, false }    // Rear-right
+        };
+
+        for (int i = 0; i &lt; 4; ++i)
+        {
+            // Tire info
+            ndMultiBodyVehicleTireJointInfo info;
+            info.m_springK = 6000.0f;
+            info.m_damperC = 250.0f;
+            info.m_upperStop = 0.25f;
+            info.m_lowerStop = -0.08f;
+            info.m_regularizer = 0.1f;
+            info.m_radio = 0.35f;
+            info.m_width = 0.25f;
+            info.SetPacejkaCurves(ndTireFrictionModel::m_pacejkaSport);
+
+            // Create tire shape and body
+            ndShapeInstance tireShape = CreateTireShape(0.35f, 0.25f);
+            ndBodyDynamic* wheelBody = new ndBodyDynamic();
+            wheelBody-&gt;SetCollisionShape(tireShape);
+            wheelBody-&gt;SetMassMatrix(25.0f, tireShape);
+
+            // Position wheel
+            ndMatrix wheelMatrix(ndGetIdentityMatrix());
+            wheelMatrix.m_posit = ndVector(configs[i].x, 0.35f, configs[i].z, 1.0f);
+            wheelBody-&gt;SetMatrix(GetChassis()-&gt;GetMatrix() * wheelMatrix);
+
+            // Add tire
+            m_tires[i] = AddTire(info, ndSharedPtr&lt;ndBody&gt;(wheelBody));
+        }
+    }
+
+    void CreateDrivetrain()
+    {
+        // Add motor
+        ndMultiBodyVehicleMotor* motor = AddMotor(50.0f, 0.2f);
+        motor-&gt;SetMaxRpm(7500.0f);
+        motor-&gt;SetOmegaAccel(50.0f);
+        motor-&gt;SetFrictionLoss(25.0f);
+
+        // Create rear differential (RWD)
+        ndMultiBodyVehicleDifferential* rearDiff = AddDifferential(
+            10.0f, 0.1f,
+            m_tires[2], m_tires[3],  // Rear tires
+            5.0f  // Limited slip
+        );
+
+        // Add gearbox
+        ndMultiBodyVehicleGearBox* gearbox = AddGearBox(rearDiff);
+        gearbox-&gt;SetIdleOmega(900.0f / dRadPerSecToRpm);
+        gearbox-&gt;SetClutchTorque(600.0f);
+        gearbox-&gt;SetInternalTorqueLoss(15.0f);
+        gearbox-&gt;SetRatio(m_gearRatios[m_currentGear]);
+    }
+
+public:
+    void ApplyControls(ndFloat32 throttle, ndFloat32 brake,
+                       ndFloat32 steering, ndFloat32 handbrake)
+    {
+        // Apply steering to front wheels
+        m_tires[0]-&gt;SetSteering(steering);
+        m_tires[1]-&gt;SetSteering(steering);
+
+        // Apply brakes to all wheels
+        for (int i = 0; i &lt; 4; ++i)
+        {
+            m_tires[i]-&gt;SetBreak(brake);
+        }
+
+        // Apply handbrake to rear wheels
+        m_tires[2]-&gt;SetHandBreak(handbrake);
+        m_tires[3]-&gt;SetHandBreak(handbrake);
+
+        // Apply throttle
+        ndMultiBodyVehicleMotor* motor = GetMotor();
+        ndFloat32 maxTorque = 450.0f;
+        ndFloat32 torque = throttle * maxTorque;
+        ndFloat32 targetRpm = 900.0f + throttle * 6600.0f;
+        motor-&gt;SetTorqueAndRpm(torque, targetRpm);
+    }
+
+    void ShiftUp()
+    {
+        if (m_currentGear &lt; 5)
+        {
+            m_currentGear++;
+            GetGearBox()-&gt;SetRatio(m_gearRatios[m_currentGear]);
+        }
+    }
+
+    void ShiftDown()
+    {
+        if (m_currentGear &gt; 0)
+        {
+            m_currentGear--;
+            GetGearBox()-&gt;SetRatio(m_gearRatios[m_currentGear]);
+        }
+    }
+};</code></pre>
+
+            <h3>Using the Vehicle</h3>
+<pre><code>// Create and add vehicle
+SportsCar* car = new SportsCar(&amp;world);
+world.AddModel(ndSharedPtr&lt;ndModel&gt;(car));
+
+// In game loop:
+void GameLoop()
+{
+    // Get player input
+    ndFloat32 throttle = GetThrottleInput();   // 0 to 1
+    ndFloat32 brake = GetBrakeInput();         // 0 to 1
+    ndFloat32 steering = GetSteeringInput();   // -1 to 1
+    ndFloat32 handbrake = GetHandbrakeInput(); // 0 to 1
+
+    // Apply controls
+    car-&gt;ApplyControls(throttle, brake, steering, handbrake);
+
+    // Handle gear shifts
+    if (ShiftUpPressed()) car-&gt;ShiftUp();
+    if (ShiftDownPressed()) car-&gt;ShiftDown();
+
+    // Update physics
+    world.Update(1.0f / 60.0f);
+    world.Sync();
+}</code></pre>
+        </section>
+    </div>
+
+    <footer>
+        Newton Dynamics 4.00 Documentation | <a href="index.html">Back to Index</a>
+    </footer>
+</body>
+</html>

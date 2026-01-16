@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Character Controllers - Newton Dynamics 4.00</title>
+    <style>
+        :root {
+            --primary-color: #84cc16;
+            --secondary-color: #65a30d;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        nav.toc {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            margin-bottom: 1rem;
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        nav.toc ul {
+            list-style: none;
+            columns: 2;
+        }
+
+        nav.toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav.toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        nav.toc a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h3 {
+            color: var(--heading-color);
+            font-size: 1.35rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            color: var(--heading-color);
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #e2e8f0;
+            color: #be185d;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: var(--heading-color);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .tip {
+            background: #dcfce7;
+            border-left: 4px solid #22c55e;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .warning {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            nav.toc ul {
+                columns: 1;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            header {
+                padding: 2rem 1rem;
+            }
+
+            header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Character Controllers</h1>
+            <p>Newton Dynamics 4.00 Documentation</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; Back to Index</a>
+
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#overview">1. Overview</a></li>
+                <li><a href="#player-capsule">2. Player Capsule</a></li>
+                <li><a href="#movement">3. Movement Control</a></li>
+                <li><a href="#ground-detection">4. Ground Detection</a></li>
+                <li><a href="#friction">5. Contact Friction</a></li>
+                <li><a href="#extending">6. Extending the Controller</a></li>
+                <li><a href="#complete-example">7. Complete Example</a></li>
+            </ul>
+        </nav>
+
+        <section id="overview">
+            <h2>1. Overview</h2>
+            <p>
+                Newton provides <code>ndBodyPlayerCapsule</code>, a specialized kinematic body
+                designed for character controllers. It handles ground detection, step climbing,
+                and movement control while interacting naturally with the physics world.
+            </p>
+
+            <h3>Key Features</h3>
+            <ul>
+                <li>Capsule-shaped collision for smooth movement</li>
+                <li>Automatic step climbing</li>
+                <li>Ground contact detection</li>
+                <li>Forward and lateral movement</li>
+                <li>Heading control (rotation)</li>
+                <li>Customizable friction response</li>
+                <li>Works with dynamic and static objects</li>
+            </ul>
+
+            <h3>How It Works</h3>
+            <p>
+                Unlike rigid bodies, the player capsule uses a kinematic approach where you
+                set desired velocities rather than applying forces. The controller resolves
+                collisions and adjusts movement to slide along walls and climb steps.
+            </p>
+
+<pre><code>ndBodyPlayerCapsule (extends ndBodyKinematicBase)
+    |
+    +-- Capsule collision shape
+    +-- Step climbing logic
+    +-- Ground detection
+    +-- Movement resolution
+    +-- Contact friction callback</code></pre>
+        </section>
+
+        <section id="player-capsule">
+            <h2>2. Player Capsule</h2>
+            <p>
+                Creating a player capsule requires specifying the local coordinate frame,
+                mass, capsule dimensions, and step height.
+            </p>
+
+            <h3>Constructor Parameters</h3>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>localAxis</td>
+                    <td><code>ndMatrix</code></td>
+                    <td>Local coordinate frame (defines up, forward)</td>
+                </tr>
+                <tr>
+                    <td>mass</td>
+                    <td><code>ndFloat32</code></td>
+                    <td>Character mass in kg</td>
+                </tr>
+                <tr>
+                    <td>radius</td>
+                    <td><code>ndFloat32</code></td>
+                    <td>Capsule radius in meters</td>
+                </tr>
+                <tr>
+                    <td>height</td>
+                    <td><code>ndFloat32</code></td>
+                    <td>Total capsule height in meters</td>
+                </tr>
+                <tr>
+                    <td>stepHeight</td>
+                    <td><code>ndFloat32</code></td>
+                    <td>Maximum step height to climb</td>
+                </tr>
+            </table>
+
+            <h3>Creating a Player</h3>
+<pre><code>// Define local coordinate frame
+// X = right, Y = up, Z = forward
+ndMatrix localAxis(ndGetIdentityMatrix());
+
+// Player dimensions
+ndFloat32 mass = 80.0f;        // 80 kg
+ndFloat32 radius = 0.35f;      // 35 cm radius
+ndFloat32 height = 1.8f;       // 1.8 m tall
+ndFloat32 stepHeight = 0.4f;   // Can climb 40 cm steps
+
+// Create player capsule
+ndBodyPlayerCapsule* player = new ndBodyPlayerCapsule(
+    localAxis, mass, radius, height, stepHeight
+);
+
+// Set initial position
+ndMatrix playerMatrix(ndGetIdentityMatrix());
+playerMatrix.m_posit = ndVector(0.0f, 2.0f, 0.0f, 1.0f);
+player-&gt;SetMatrix(playerMatrix);
+
+// Add to world
+world.AddBody(ndSharedPtr&lt;ndBody&gt;(player));</code></pre>
+
+            <h3>Default Player</h3>
+<pre><code>// Default constructor creates player with:
+// - Identity local axis
+// - 80 kg mass
+// - 0.4 m radius
+// - 1.8 m height
+// - 0.4 m step height
+ndBodyPlayerCapsule* player = new ndBodyPlayerCapsule();</code></pre>
+        </section>
+
+        <section id="movement">
+            <h2>3. Movement Control</h2>
+            <p>
+                Movement is controlled by setting forward speed, lateral speed, and heading angle.
+                The controller automatically handles collision resolution and sliding.
+            </p>
+
+            <h3>Forward/Backward Movement</h3>
+<pre><code>// Set forward speed (positive = forward, negative = backward)
+ndFloat32 forwardSpeed = 5.0f;  // 5 m/s forward
+player-&gt;SetForwardSpeed(forwardSpeed);
+
+// Get current forward speed
+ndFloat32 currentSpeed = player-&gt;GetForwardSpeed();</code></pre>
+
+            <h3>Lateral (Strafing) Movement</h3>
+<pre><code>// Set lateral speed (positive = right, negative = left)
+ndFloat32 lateralSpeed = 3.0f;  // 3 m/s rightward
+player-&gt;SetLateralSpeed(lateralSpeed);
+
+// Get current lateral speed
+ndFloat32 currentLateral = player-&gt;GetLateralSpeed();</code></pre>
+
+            <h3>Heading (Rotation)</h3>
+<pre><code>// Set heading angle (radians, around up axis)
+ndFloat32 headingAngle = ndPi * 0.5f;  // 90 degrees
+player-&gt;SetHeadingAngle(headingAngle);
+
+// Get current heading
+ndFloat32 currentHeading = player-&gt;GetHeadingAngle();
+
+// Typical mouse look:
+void UpdateHeading(ndFloat32 mouseX, ndFloat32 sensitivity)
+{
+    ndFloat32 currentAngle = player-&gt;GetHeadingAngle();
+    ndFloat32 newAngle = currentAngle - mouseX * sensitivity;
+    player-&gt;SetHeadingAngle(newAngle);
+}</code></pre>
+
+            <h3>Movement Input Processing</h3>
+<pre><code>void ProcessInput(ndBodyPlayerCapsule* player, ndFloat32 timestep)
+{
+    // Get input (example values)
+    ndFloat32 moveForward = 0.0f;
+    ndFloat32 moveRight = 0.0f;
+
+    if (KeyPressed(KEY_W)) moveForward += 1.0f;
+    if (KeyPressed(KEY_S)) moveForward -= 1.0f;
+    if (KeyPressed(KEY_D)) moveRight += 1.0f;
+    if (KeyPressed(KEY_A)) moveRight -= 1.0f;
+
+    // Normalize diagonal movement
+    ndFloat32 length = ndSqrt(moveForward * moveForward + moveRight * moveRight);
+    if (length &gt; 1.0f)
+    {
+        moveForward /= length;
+        moveRight /= length;
+    }
+
+    // Set movement speeds
+    ndFloat32 walkSpeed = 5.0f;
+    ndFloat32 strafeSpeed = 4.0f;
+
+    player-&gt;SetForwardSpeed(moveForward * walkSpeed);
+    player-&gt;SetLateralSpeed(moveRight * strafeSpeed);
+}</code></pre>
+        </section>
+
+        <section id="ground-detection">
+            <h2>4. Ground Detection</h2>
+            <p>
+                The player capsule automatically detects when it's standing on a surface,
+                which is essential for jumping and movement logic.
+            </p>
+
+            <h3>Checking Ground Contact</h3>
+<pre><code>// Check if player is on the ground
+bool onGround = player-&gt;IsOnFloor();
+
+// Jump only when grounded
+if (onGround &amp;&amp; KeyPressed(KEY_SPACE))
+{
+    ApplyJump(player);
+}</code></pre>
+
+            <h3>Airborne State</h3>
+            <p>
+                The controller tracks whether the player is airborne internally.
+                When airborne, movement controls may have reduced effect (depending
+                on your implementation).
+            </p>
+
+<pre><code>void UpdateMovement(ndBodyPlayerCapsule* player)
+{
+    bool grounded = player-&gt;IsOnFloor();
+
+    // Adjust speed based on ground state
+    ndFloat32 speedMultiplier = grounded ? 1.0f : 0.3f;
+
+    ndFloat32 forwardInput = GetForwardInput();
+    ndFloat32 lateralInput = GetLateralInput();
+
+    player-&gt;SetForwardSpeed(forwardInput * 5.0f * speedMultiplier);
+    player-&gt;SetLateralSpeed(lateralInput * 4.0f * speedMultiplier);
+}</code></pre>
+
+            <h3>Step Climbing</h3>
+            <p>
+                Steps up to <code>stepHeight</code> are automatically climbed.
+                The controller smoothly raises the player over obstacles.
+            </p>
+<pre><code>// Step height is set in constructor
+// Typical values: 0.3 to 0.5 meters
+
+// To prevent climbing certain surfaces, use the friction callback
+// (see section 5)</code></pre>
+        </section>
+
+        <section id="friction">
+            <h2>5. Contact Friction</h2>
+            <p>
+                The <code>ContactFrictionCallback</code> virtual method lets you customize
+                how the player interacts with different surfaces.
+            </p>
+
+            <h3>Friction Callback</h3>
+<pre><code>class MyPlayer : public ndBodyPlayerCapsule
+{
+public:
+    MyPlayer(const ndMatrix&amp; localAxis, ndFloat32 mass,
+             ndFloat32 radius, ndFloat32 height, ndFloat32 stepHeight)
+        : ndBodyPlayerCapsule(localAxis, mass, radius, height, stepHeight)
+    {
+    }
+
+    ndFloat32 ContactFrictionCallback(
+        const ndVector&amp; position,
+        const ndVector&amp; normal,
+        ndInt32 contactId,
+        const ndBodyKinematic* const otherBody) const override
+    {
+        // Default friction
+        ndFloat32 friction = 2.0f;
+
+        // Check surface type (using material or other criteria)
+        // Ice: low friction
+        // Rubber: high friction
+        // Walls: prevent climbing
+
+        // Example: reduce friction on steep slopes
+        ndFloat32 slopeAngle = ndAcos(normal.m_y);
+        if (slopeAngle &gt; ndDegreeToRad * 45.0f)
+        {
+            friction = 0.1f;  // Slide down steep slopes
+        }
+
+        return friction;
+    }
+};</code></pre>
+
+            <h3>Callback Parameters</h3>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>position</code></td>
+                    <td>World-space contact point</td>
+                </tr>
+                <tr>
+                    <td><code>normal</code></td>
+                    <td>Contact normal (pointing toward player)</td>
+                </tr>
+                <tr>
+                    <td><code>contactId</code></td>
+                    <td>Material/surface identifier</td>
+                </tr>
+                <tr>
+                    <td><code>otherBody</code></td>
+                    <td>The body being contacted</td>
+                </tr>
+            </table>
+
+            <h3>Surface-Based Friction</h3>
+<pre><code>ndFloat32 MyPlayer::ContactFrictionCallback(
+    const ndVector&amp; position,
+    const ndVector&amp; normal,
+    ndInt32 contactId,
+    const ndBodyKinematic* const otherBody) const
+{
+    // Get material from contact ID or other body
+    enum SurfaceType { NORMAL, ICE, RUBBER, WALL };
+    SurfaceType surface = GetSurfaceType(contactId);
+
+    switch (surface)
+    {
+        case ICE:
+            return 0.1f;    // Very slippery
+        case RUBBER:
+            return 3.0f;    // High grip
+        case WALL:
+            // Check if this is a wall (not floor)
+            if (ndAbs(normal.m_y) &lt; 0.5f)
+                return 0.0f;  // No friction on walls
+            break;
+        default:
+            break;
+    }
+
+    return 2.0f;  // Default friction
+}</code></pre>
+        </section>
+
+        <section id="extending">
+            <h2>6. Extending the Controller</h2>
+            <p>
+                Create custom player controllers by extending <code>ndBodyPlayerCapsule</code>
+                and overriding the <code>ApplyInputs</code> method.
+            </p>
+
+            <h3>ApplyInputs Override</h3>
+<pre><code>class GamePlayer : public ndBodyPlayerCapsule
+{
+public:
+    GamePlayer(const ndMatrix&amp; localAxis, ndFloat32 mass,
+               ndFloat32 radius, ndFloat32 height, ndFloat32 stepHeight)
+        : ndBodyPlayerCapsule(localAxis, mass, radius, height, stepHeight)
+        , m_jumpVelocity(0.0f)
+        , m_canJump(true)
+    {
+    }
+
+    void ApplyInputs(ndFloat32 timestep) override
+    {
+        // Process movement input
+        ProcessMovementInput();
+
+        // Handle jumping
+        ProcessJumpInput(timestep);
+
+        // Call base implementation
+        ndBodyPlayerCapsule::ApplyInputs(timestep);
+    }
+
+private:
+    ndFloat32 m_jumpVelocity;
+    bool m_canJump;
+
+    void ProcessMovementInput()
+    {
+        ndFloat32 forward = 0.0f;
+        ndFloat32 lateral = 0.0f;
+
+        // Get input from game system...
+
+        SetForwardSpeed(forward * 5.0f);
+        SetLateralSpeed(lateral * 4.0f);
+    }
+
+    void ProcessJumpInput(ndFloat32 timestep)
+    {
+        bool grounded = IsOnFloor();
+
+        if (grounded)
+        {
+            m_canJump = true;
+            m_jumpVelocity = 0.0f;
+        }
+        else
+        {
+            // Apply gravity to jump velocity
+            m_jumpVelocity -= 10.0f * timestep;
+        }
+
+        if (m_canJump &amp;&amp; grounded &amp;&amp; JumpPressed())
+        {
+            m_jumpVelocity = 6.0f;  // Jump impulse
+            m_canJump = false;
+        }
+
+        // Apply vertical velocity (integrate with capsule movement)
+        // This requires additional implementation
+    }
+};</code></pre>
+
+            <h3>Adding Jumping</h3>
+            <p>
+                Jumping requires applying an impulse or modifying the vertical velocity.
+                Here's one approach:
+            </p>
+<pre><code>class JumpingPlayer : public ndBodyPlayerCapsule
+{
+public:
+    ndFloat32 m_verticalVelocity;
+    ndFloat32 m_jumpStrength;
+    ndFloat32 m_gravity;
+
+    JumpingPlayer()
+        : ndBodyPlayerCapsule()
+        , m_verticalVelocity(0.0f)
+        , m_jumpStrength(7.0f)
+        , m_gravity(20.0f)
+    {
+    }
+
+    void ApplyInputs(ndFloat32 timestep) override
+    {
+        bool onGround = IsOnFloor();
+
+        // Reset vertical velocity when landing
+        if (onGround &amp;&amp; m_verticalVelocity &lt; 0.0f)
+        {
+            m_verticalVelocity = 0.0f;
+        }
+
+        // Jump input
+        if (onGround &amp;&amp; JumpKeyPressed())
+        {
+            m_verticalVelocity = m_jumpStrength;
+        }
+
+        // Apply gravity
+        if (!onGround)
+        {
+            m_verticalVelocity -= m_gravity * timestep;
+        }
+
+        // Apply vertical impulse
+        if (m_verticalVelocity != 0.0f)
+        {
+            ndVector impulse(0.0f, m_verticalVelocity * GetMass() * timestep, 0.0f, 0.0f);
+            SetImpulse(impulse);
+        }
+
+        ndBodyPlayerCapsule::ApplyInputs(timestep);
+    }
+
+    void SetImpulse(const ndVector&amp; impulse)
+    {
+        // Store impulse for integration
+        m_impulse = impulse;
+    }
+
+    ndVector m_impulse;
+};</code></pre>
+
+            <h3>Crouching</h3>
+            <p>
+                The player capsule has internal crouch state that can be modified:
+            </p>
+<pre><code>// Crouch scale is stored internally
+// To implement crouching, you would typically:
+// 1. Modify the capsule height
+// 2. Adjust movement speed
+// 3. Check for overhead clearance before standing
+
+class CrouchingPlayer : public ndBodyPlayerCapsule
+{
+    bool m_isCrouching;
+    ndFloat32 m_standingHeight;
+    ndFloat32 m_crouchHeight;
+
+public:
+    void SetCrouching(bool crouch)
+    {
+        if (crouch == m_isCrouching)
+            return;
+
+        if (!crouch)
+        {
+            // Check if there's room to stand
+            if (!CanStand())
+                return;
+        }
+
+        m_isCrouching = crouch;
+        // Rebuild capsule with new height...
+    }
+
+    bool CanStand()
+    {
+        // Raycast upward to check clearance
+        // Return false if blocked
+        return true;
+    }
+};</code></pre>
+        </section>
+
+        <section id="complete-example">
+            <h2>7. Complete Example</h2>
+            <p>
+                Here's a complete first-person character controller:
+            </p>
+
+<pre><code>class FirstPersonPlayer : public ndBodyPlayerCapsule
+{
+public:
+    // Configuration
+    ndFloat32 m_walkSpeed;
+    ndFloat32 m_runSpeed;
+    ndFloat32 m_strafeSpeed;
+    ndFloat32 m_jumpStrength;
+    ndFloat32 m_gravity;
+    ndFloat32 m_mouseSensitivity;
+
+    // State
+    ndFloat32 m_verticalVelocity;
+    ndFloat32 m_pitch;  // Camera pitch (up/down)
+    bool m_isRunning;
+
+    FirstPersonPlayer()
+        : ndBodyPlayerCapsule(ndGetIdentityMatrix(), 80.0f, 0.35f, 1.8f, 0.4f)
+        , m_walkSpeed(5.0f)
+        , m_runSpeed(8.0f)
+        , m_strafeSpeed(4.0f)
+        , m_jumpStrength(7.0f)
+        , m_gravity(20.0f)
+        , m_mouseSensitivity(0.002f)
+        , m_verticalVelocity(0.0f)
+        , m_pitch(0.0f)
+        , m_isRunning(false)
+    {
+    }
+
+    void ApplyInputs(ndFloat32 timestep) override
+    {
+        // Mouse look
+        UpdateMouseLook();
+
+        // Movement
+        UpdateMovement();
+
+        // Jumping
+        UpdateJump(timestep);
+
+        // Call base
+        ndBodyPlayerCapsule::ApplyInputs(timestep);
+    }
+
+    void UpdateMouseLook()
+    {
+        ndFloat32 mouseX = GetMouseDeltaX();
+        ndFloat32 mouseY = GetMouseDeltaY();
+
+        // Yaw (heading)
+        ndFloat32 heading = GetHeadingAngle();
+        heading -= mouseX * m_mouseSensitivity;
+        SetHeadingAngle(heading);
+
+        // Pitch (camera only, not body)
+        m_pitch -= mouseY * m_mouseSensitivity;
+        m_pitch = ndClamp(m_pitch, -ndPi * 0.45f, ndPi * 0.45f);
+    }
+
+    void UpdateMovement()
+    {
+        ndFloat32 forward = 0.0f;
+        ndFloat32 lateral = 0.0f;
+
+        if (KeyDown(KEY_W)) forward += 1.0f;
+        if (KeyDown(KEY_S)) forward -= 1.0f;
+        if (KeyDown(KEY_D)) lateral += 1.0f;
+        if (KeyDown(KEY_A)) lateral -= 1.0f;
+
+        // Normalize diagonal
+        ndFloat32 length = ndSqrt(forward * forward + lateral * lateral);
+        if (length &gt; 1.0f)
+        {
+            forward /= length;
+            lateral /= length;
+        }
+
+        // Running
+        m_isRunning = KeyDown(KEY_SHIFT);
+        ndFloat32 speed = m_isRunning ? m_runSpeed : m_walkSpeed;
+
+        // Reduce control in air
+        if (!IsOnFloor())
+        {
+            speed *= 0.3f;
+        }
+
+        SetForwardSpeed(forward * speed);
+        SetLateralSpeed(lateral * m_strafeSpeed);
+    }
+
+    void UpdateJump(ndFloat32 timestep)
+    {
+        bool grounded = IsOnFloor();
+
+        if (grounded)
+        {
+            if (m_verticalVelocity &lt; 0.0f)
+            {
+                m_verticalVelocity = 0.0f;
+            }
+
+            if (KeyPressed(KEY_SPACE))
+            {
+                m_verticalVelocity = m_jumpStrength;
+            }
+        }
+        else
+        {
+            m_verticalVelocity -= m_gravity * timestep;
+        }
+    }
+
+    ndFloat32 ContactFrictionCallback(
+        const ndVector&amp; position,
+        const ndVector&amp; normal,
+        ndInt32 contactId,
+        const ndBodyKinematic* const otherBody) const override
+    {
+        // Steep slope check
+        ndFloat32 slopeAngle = ndAcos(normal.m_y);
+        if (slopeAngle &gt; ndDegreeToRad * 50.0f)
+        {
+            return 0.05f;  // Slide down
+        }
+
+        return 2.0f;  // Normal friction
+    }
+
+    ndMatrix GetCameraMatrix() const
+    {
+        ndMatrix bodyMatrix = GetMatrix();
+        ndMatrix pitchMatrix = ndPitchMatrix(m_pitch);
+
+        // Camera at eye level
+        ndMatrix cameraMatrix = pitchMatrix * bodyMatrix;
+        cameraMatrix.m_posit.m_y += 1.6f;  // Eye height
+
+        return cameraMatrix;
+    }
+
+private:
+    // Input helpers (implement based on your input system)
+    ndFloat32 GetMouseDeltaX() const { return 0.0f; }
+    ndFloat32 GetMouseDeltaY() const { return 0.0f; }
+    bool KeyDown(int key) const { return false; }
+    bool KeyPressed(int key) const { return false; }
+};
+
+// Usage
+void CreatePlayer(ndWorld&amp; world)
+{
+    FirstPersonPlayer* player = new FirstPersonPlayer();
+
+    ndMatrix startPos(ndGetIdentityMatrix());
+    startPos.m_posit = ndVector(0.0f, 2.0f, 0.0f, 1.0f);
+    player-&gt;SetMatrix(startPos);
+
+    world.AddBody(ndSharedPtr&lt;ndBody&gt;(player));
+}
+
+void GameLoop(ndWorld&amp; world, FirstPersonPlayer* player)
+{
+    // Update physics
+    world.Update(1.0f / 60.0f);
+    world.Sync();
+
+    // Get camera for rendering
+    ndMatrix cameraMatrix = player-&gt;GetCameraMatrix();
+    RenderScene(cameraMatrix);
+}</code></pre>
+
+            <div class="tip">
+                <strong>Tip:</strong> For a complete implementation, see the sandbox demo
+                at <code>applications/ndSandbox/demos/ndPlayerCapsule.cpp</code> and the
+                helper class at <code>applications/ndSandbox/toolbox/ndBasicPlayerCapsule.h</code>.
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        Newton Dynamics 4.00 Documentation | <a href="index.html">Back to Index</a>
+    </footer>
+</body>
+</html>

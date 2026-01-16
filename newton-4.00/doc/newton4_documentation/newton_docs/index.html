@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newton Dynamics 4.00 Documentation</title>
+    <style>
+        :root {
+            --primary-color: #0891b2;
+            --secondary-color: #0e7490;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .doc-card {
+            background: #f1f5f9;
+            border-radius: 6px;
+            padding: 1.25rem;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .doc-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .doc-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .doc-card p {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin: 0 0 0.75rem 0;
+        }
+
+        .doc-card a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .doc-card a:hover {
+            text-decoration: underline;
+        }
+
+        .intro {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.75rem;
+            margin: 1rem 0;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .feature-item::before {
+            content: ">";
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        code {
+            background: #e2e8f0;
+            color: #be185d;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        .version-info {
+            background: #f0fdfa;
+            border: 1px solid #99f6e4;
+            border-radius: 6px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .version-info strong {
+            color: var(--primary-color);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+        }
+
+        footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            header {
+                padding: 2rem 1rem;
+            }
+
+            header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Newton Dynamics 4.00</h1>
+            <p>Real-Time Physics Simulation Library Documentation</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <section>
+            <h2>Welcome</h2>
+            <div class="version-info">
+                <strong>Version 4.03</strong> | C++11 | Cross-Platform | zlib License
+            </div>
+            <p class="intro">
+                Newton Dynamics is a production-ready physics simulation library for games, robotics, and engineering applications.
+                This documentation covers the core physics SDK including rigid body dynamics, collision detection, constraints,
+                inverse kinematics, and vehicle simulation.
+            </p>
+            <div class="feature-list">
+                <div class="feature-item">19 collision shape types</div>
+                <div class="feature-item">16 joint/constraint types</div>
+                <div class="feature-item">Inverse kinematics solver</div>
+                <div class="feature-item">Multi-body vehicle system</div>
+                <div class="feature-item">Character controllers</div>
+                <div class="feature-item">SPH fluid simulation</div>
+                <div class="feature-item">SIMD optimized (SSE/AVX2/NEON)</div>
+                <div class="feature-item">Multi-threaded solver</div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Getting Started</h2>
+            <div class="doc-grid">
+                <div class="doc-card">
+                    <h3>Getting Started Guide</h3>
+                    <p>Build instructions, SDK structure, and your first Newton application.</p>
+                    <a href="getting-started.html">View Documentation</a>
+                </div>
+                <div class="doc-card">
+                    <h3>Math Primitives</h3>
+                    <p><code>ndVector</code>, <code>ndMatrix</code>, <code>ndQuaternion</code> - core math types and coordinate systems.</p>
+                    <a href="math-primitives.html">View Documentation</a>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Core Physics</h2>
+            <div class="doc-grid">
+                <div class="doc-card">
+                    <h3>World & Simulation</h3>
+                    <p><code>ndWorld</code> physics engine, timestep management, solver modes, and threading.</p>
+                    <a href="world-simulation.html">View Documentation</a>
+                </div>
+                <div class="doc-card">
+                    <h3>Body System</h3>
+                    <p><code>ndBodyDynamic</code>, <code>ndBodyKinematic</code> - rigid bodies, mass, transforms, and velocity.</p>
+                    <a href="body-system.html">View Documentation</a>
+                </div>
+                <div class="doc-card">
+                    <h3>Shape System</h3>
+                    <p>All 19 collision shapes: Box, Sphere, Capsule, ConvexHull, Compound, HeightField, and more.</p>
+                    <a href="shape-system.html">View Documentation</a>
+                </div>
+                <div class="doc-card">
+                    <h3>Collision & Contacts</h3>
+                    <p>Collision detection, contact points, raycasts, convex casts, and callbacks.</p>
+                    <a href="collision-contacts.html">View Documentation</a>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Constraints & Joints</h2>
+            <div class="doc-grid">
+                <div class="doc-card">
+                    <h3>Joint System</h3>
+                    <p>All 16 joint types: Hinge, Slider, Spherical, Fix6dof, Gear, Wheel, and more. Limits, motors, spring-dampers.</p>
+                    <a href="joint-system.html">View Documentation</a>
+                </div>
+                <div class="doc-card">
+                    <h3>IK Solver</h3>
+                    <p>Inverse kinematics for articulated chains. <code>ndIkSolver</code>, effectors, and IK joints.</p>
+                    <a href="ik-solver.html">View Documentation</a>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Advanced Systems</h2>
+            <div class="doc-grid">
+                <div class="doc-card">
+                    <h3>Vehicle System</h3>
+                    <p><code>ndMultiBodyVehicle</code> - tires, suspension, drivetrain, motor, gearbox, and differential.</p>
+                    <a href="vehicle-system.html">View Documentation</a>
+                </div>
+                <div class="doc-card">
+                    <h3>Character Controllers</h3>
+                    <p><code>ndBodyPlayerCapsule</code>, trigger volumes, and buoyancy for character physics.</p>
+                    <a href="character-controllers.html">View Documentation</a>
+                </div>
+                <div class="doc-card">
+                    <h3>Mesh System</h3>
+                    <p><code>ndMesh</code>, <code>ndMeshEffect</code> - mesh processing, convex hull generation, and decomposition.</p>
+                    <a href="mesh-system.html">View Documentation</a>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Quick Reference</h2>
+            <p>Include the main header to access the complete physics API:</p>
+<pre><code>#include &lt;ndNewton.h&gt;
+
+// Create physics world
+ndWorld world;
+world.SetSubSteps(2);
+
+// Create a dynamic body with sphere collision
+ndSharedPtr&lt;ndBody&gt; body(new ndBodyDynamic());
+ndShapeInstance sphere(new ndShapeSphere(1.0f));
+body-&gt;SetCollisionShape(sphere);
+body-&gt;SetMassMatrix(10.0f, sphere);
+world.AddBody(body);
+
+// Simulation loop
+world.Update(1.0f / 60.0f);
+world.Sync();</code></pre>
+        </section>
+    </div>
+
+    <footer>
+        <p>Newton Dynamics 4.00 | <a href="https://github.com/MADEAPPS/newton-dynamics">GitHub Repository</a> | zlib License</p>
+        <p>Copyright (c) 2003-2024 Julio Jerez, Newton Game Dynamics</p>
+    </footer>
+</body>
+</html>

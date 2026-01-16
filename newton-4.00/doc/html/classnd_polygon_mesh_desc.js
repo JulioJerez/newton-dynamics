@@ -1,0 +1,26 @@
+var classnd_polygon_mesh_desc =
+[
+    [ "ndProceduralStaticMeshFaceQuery", "classnd_polygon_mesh_desc_1_1nd_procedural_static_mesh_face_query.html", "classnd_polygon_mesh_desc_1_1nd_procedural_static_mesh_face_query" ],
+    [ "ndStaticMeshFaceQuery", "classnd_polygon_mesh_desc_1_1nd_static_mesh_face_query.html", "classnd_polygon_mesh_desc_1_1nd_static_mesh_face_query" ],
+    [ "ndPolygonMeshDesc", "classnd_polygon_mesh_desc.html#a9c5fc0a94b75582806f797496363a700", null ],
+    [ "ndPolygonMeshDesc", "classnd_polygon_mesh_desc.html#ac35aac8f536f6bf00f327e713fa724f4", null ],
+    [ "GetAdjacentFaceEdgeNormalArray", "classnd_polygon_mesh_desc.html#a83d1abef6185e7bfb8c7cc8fa4668617", null ],
+    [ "GetFaceId", "classnd_polygon_mesh_desc.html#a20a82d64dbcdfea26423bba9b8e486dc", null ],
+    [ "GetFaceIndexCount", "classnd_polygon_mesh_desc.html#a68146a8019c0d306e1f32a696345fc6e", null ],
+    [ "GetFaceSize", "classnd_polygon_mesh_desc.html#aa3a58f2f908f80e71ffd5457e04a0810", null ],
+    [ "GetNormalIndex", "classnd_polygon_mesh_desc.html#aed2c2e62242750dac9d4f909907a6c8f", null ],
+    [ "GetSeparetionDistance", "classnd_polygon_mesh_desc.html#a66c4d20153eb8b2efeeb837d20ea6aab", null ],
+    [ "SetDistanceTravel", "classnd_polygon_mesh_desc.html#a5c74f121c323da5be47ec77218201c22", null ],
+    [ "SortFaceArray", "classnd_polygon_mesh_desc.html#a6343f88d2bf821642c4bdf0084b299cc", null ],
+    [ "m_boxDistanceTravelInMeshSpace", "classnd_polygon_mesh_desc.html#a3e5eeadb721514293e3595a17bbbfd96", null ],
+    [ "m_convexInstance", "classnd_polygon_mesh_desc.html#af1fbd40db6e854bf6ca62a4d6a8df342", null ],
+    [ "m_doContinueCollisionTest", "classnd_polygon_mesh_desc.html#a033a4404eaa08fa243700a8a8ac02fdd", null ],
+    [ "m_maxT", "classnd_polygon_mesh_desc.html#ad144922543610a89b7a789983050bc94", null ],
+    [ "m_polySoupInstance", "classnd_polygon_mesh_desc.html#a2b8ef00b6fef443da5e84640c17d7562", null ],
+    [ "m_proceduralStaticMeshFaceQuery", "classnd_polygon_mesh_desc.html#aea5fb8d9dc63aa70f1b0faa388e9d2ef", null ],
+    [ "m_skinMargin", "classnd_polygon_mesh_desc.html#a9d13a466c3d7b988336b19f7d4918d08", null ],
+    [ "m_staticMeshQuery", "classnd_polygon_mesh_desc.html#a1a922a47b5fa7681c096de74cec40619", null ],
+    [ "m_threadId", "classnd_polygon_mesh_desc.html#a0972f06a85dd5954f847917bcd1e4bbc", null ],
+    [ "m_vertex", "classnd_polygon_mesh_desc.html#a863f1a73ff73ed243db662d6b8bacc44", null ],
+    [ "m_vertexStrideInBytes", "classnd_polygon_mesh_desc.html#a2a77531d879f037b3f06d6b11d6cc887", null ]
+];

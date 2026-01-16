@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Body System - Newton Dynamics 4.00</title>
+    <style>
+        :root {
+            --primary-color: #dc2626;
+            --secondary-color: #b91c1c;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        nav.toc {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            margin-bottom: 1rem;
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        nav.toc ul {
+            list-style: none;
+            columns: 2;
+        }
+
+        nav.toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav.toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        nav.toc a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h3 {
+            color: var(--heading-color);
+            font-size: 1.35rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            color: var(--heading-color);
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #e2e8f0;
+            color: #be185d;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: var(--heading-color);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .tip {
+            background: #dcfce7;
+            border-left: 4px solid #22c55e;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .warning {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            nav.toc ul {
+                columns: 1;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            header {
+                padding: 2rem 1rem;
+            }
+
+            header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Body System</h1>
+            <p>Newton Dynamics 4.00 Documentation</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; Back to Index</a>
+
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#overview">1. Overview</a></li>
+                <li><a href="#body-hierarchy">2. Body Hierarchy</a></li>
+                <li><a href="#ndBodyDynamic">3. ndBodyDynamic</a></li>
+                <li><a href="#ndBodyKinematic">4. ndBodyKinematic</a></li>
+                <li><a href="#transforms">5. Transforms</a></li>
+                <li><a href="#mass-inertia">6. Mass & Inertia</a></li>
+                <li><a href="#forces">7. Forces & Impulses</a></li>
+                <li><a href="#damping">8. Damping</a></li>
+                <li><a href="#sleep">9. Sleep System</a></li>
+                <li><a href="#notify">10. Body Notify Callbacks</a></li>
+                <li><a href="#special-bodies">11. Special Body Types</a></li>
+            </ul>
+        </nav>
+
+        <section id="overview">
+            <h2>1. Overview</h2>
+            <p>
+                Bodies are the fundamental simulation objects in Newton. They represent physical entities with
+                mass, position, velocity, and collision shapes. Newton provides several body types for different
+                use cases.
+            </p>
+
+            <h3>Body Types</h3>
+            <table>
+                <tr>
+                    <th>Class</th>
+                    <th>Header</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>ndBodyDynamic</code></td>
+                    <td><code>ndBodyDynamic.h</code></td>
+                    <td>Standard physics body with mass, forces, and collisions</td>
+                </tr>
+                <tr>
+                    <td><code>ndBodyKinematic</code></td>
+                    <td><code>ndBodyKinematic.h</code></td>
+                    <td>Script-controlled body (infinite mass, user-driven motion)</td>
+                </tr>
+                <tr>
+                    <td><code>ndBodyPlayerCapsule</code></td>
+                    <td><code>ndBodyPlayerCapsule.h</code></td>
+                    <td>Character controller with capsule collision</td>
+                </tr>
+                <tr>
+                    <td><code>ndBodyTriggerVolume</code></td>
+                    <td><code>ndBodyTriggerVolume.h</code></td>
+                    <td>Non-solid trigger for overlap detection</td>
+                </tr>
+                <tr>
+                    <td><code>ndBodySphFluid</code></td>
+                    <td><code>ndBodySphFluid.h</code></td>
+                    <td>SPH fluid particle system</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="body-hierarchy">
+            <h2>2. Body Hierarchy</h2>
+            <p>Newton bodies follow an inheritance hierarchy:</p>
+
+<pre><code>ndBody (base class)
+    |
+    +-- ndBodyKinematic (adds collision, inertia)
+            |
+            +-- ndBodyDynamic (adds forces, damping)
+            |
+            +-- ndBodyPlayerCapsule (character controller)
+            |
+            +-- ndBodyTriggerVolume (trigger volumes)</code></pre>
+
+            <h3>Memory Management</h3>
+            <p>Bodies are managed using shared pointers for automatic cleanup:</p>
+
+<pre><code>// Create body with new, wrap in shared pointer
+ndBodyDynamic* rawBody = new ndBodyDynamic();
+
+// Wrap in shared pointer before adding to world
+ndSharedPtr&lt;ndBody&gt; body(rawBody);
+world.AddBody(body);
+
+// Body is automatically deleted when removed from world
+// and all references are released</code></pre>
+
+            <div class="tip">
+                <strong>Tip:</strong> Always use <code>ndSharedPtr</code> when adding bodies to the world.
+                This ensures proper reference counting and prevents memory leaks.
+            </div>
+        </section>
+
+        <section id="ndBodyDynamic">
+            <h2>3. ndBodyDynamic</h2>
+            <p>
+                <code>ndBodyDynamic</code> is the most common body type. It responds to forces, gravity, and
+                collisions according to physics laws.
+            </p>
+
+            <h3>Creating a Dynamic Body</h3>
+<pre><code>// Create the body
+ndBodyDynamic* body = new ndBodyDynamic();
+
+// Set position and rotation
+ndMatrix matrix(ndGetIdentityMatrix());
+matrix.m_posit = ndVector(0.0f, 10.0f, 0.0f, 1.0f);
+body-&gt;SetMatrix(matrix);
+
+// Attach collision shape
+ndShapeInstance sphere(new ndShapeSphere(1.0f));
+body-&gt;SetCollisionShape(sphere);
+
+// Set mass (auto-computes inertia from shape)
+body-&gt;SetMassMatrix(10.0f, sphere);
+
+// Add gravity callback
+body-&gt;SetNotifyCallback(new ndBodyNotify(ndVector(0.0f, -9.8f, 0.0f, 0.0f)));
+
+// Add to world
+ndSharedPtr&lt;ndBody&gt; bodyPtr(body);
+world.AddBody(bodyPtr);</code></pre>
+
+            <h3>Key Properties</h3>
+            <table>
+                <tr>
+                    <th>Property</th>
+                    <th>Methods</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>Position/Rotation</td>
+                    <td><code>GetMatrix()</code>, <code>SetMatrix()</code></td>
+                    <td>World transform (4x4 matrix)</td>
+                </tr>
+                <tr>
+                    <td>Velocity</td>
+                    <td><code>GetVelocity()</code>, <code>SetVelocity()</code></td>
+                    <td>Linear velocity (m/s)</td>
+                </tr>
+                <tr>
+                    <td>Angular Velocity</td>
+                    <td><code>GetOmega()</code>, <code>SetOmega()</code></td>
+                    <td>Angular velocity (rad/s)</td>
+                </tr>
+                <tr>
+                    <td>Force</td>
+                    <td><code>GetForce()</code>, <code>SetForce()</code></td>
+                    <td>Applied force (Newtons)</td>
+                </tr>
+                <tr>
+                    <td>Torque</td>
+                    <td><code>GetTorque()</code>, <code>SetTorque()</code></td>
+                    <td>Applied torque (N*m)</td>
+                </tr>
+                <tr>
+                    <td>Mass</td>
+                    <td><code>GetMassMatrix()</code>, <code>SetMassMatrix()</code></td>
+                    <td>Mass and inertia tensor</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="ndBodyKinematic">
+            <h2>4. ndBodyKinematic</h2>
+            <p>
+                <code>ndBodyKinematic</code> is a body that is not affected by forces - acceleration
+                has no effect on it. You control its position and velocity directly through code.
+                Other dynamic bodies will collide with it normally.
+            </p>
+
+            <h3>Use Cases</h3>
+            <ul>
+                <li>Moving platforms and elevators</li>
+                <li>Doors and gates</li>
+                <li>Scripted animations</li>
+                <li>Player capsules</li>
+                <li>Force fields and triggers</li>
+                <li>Terrain and static geometry</li>
+            </ul>
+
+<pre><code>// Create kinematic body
+ndBodyKinematic* platform = new ndBodyKinematic();
+
+// Setup collision
+ndShapeInstance box(new ndShapeBox(10.0f, 1.0f, 10.0f));
+platform-&gt;SetCollisionShape(box);
+
+// Kinematic bodies have zero/infinite mass (no SetMassMatrix call)
+
+// Add to world
+ndSharedPtr&lt;ndBody&gt; platformPtr(platform);
+world.AddBody(platformPtr);
+
+// In your update loop, move it directly:
+void UpdatePlatform(ndBodyKinematic* platform, float time)
+{
+    ndMatrix matrix = platform-&gt;GetMatrix();
+    matrix.m_posit.m_y = 5.0f + ndSin(time) * 2.0f;  // Oscillate
+    platform-&gt;SetMatrix(matrix);
+}</code></pre>
+
+            <div class="note">
+                <strong>Note:</strong> Use <code>SetMatrixNoSleep()</code> if you don't want the movement
+                to wake up nearby sleeping bodies.
+            </div>
+        </section>
+
+        <section id="transforms">
+            <h2>5. Transforms</h2>
+            <p>Body transforms are represented as 4x4 matrices:</p>
+
+<pre><code>// Get current transform
+ndMatrix matrix = body-&gt;GetMatrix();
+ndVector position = matrix.m_posit;
+ndQuaternion rotation = body-&gt;GetRotation();
+
+// Set new transform
+ndMatrix newMatrix(ndGetIdentityMatrix());
+newMatrix.m_posit = ndVector(10.0f, 0.0f, 0.0f, 1.0f);
+body-&gt;SetMatrix(newMatrix);
+
+// Set position only (preserving rotation)
+matrix.m_posit = ndVector(20.0f, 5.0f, 0.0f, 1.0f);
+body-&gt;SetMatrix(matrix);
+
+// Set rotation using quaternion
+ndQuaternion rot(ndVector(0, 1, 0, 0), ndPi * 0.5f);  // 90 deg around Y
+ndMatrix rotMatrix(ndCalculateMatrix(rot, position));
+body-&gt;SetMatrix(rotMatrix);</code></pre>
+
+            <h3>Transform Methods</h3>
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>GetMatrix()</code></td>
+                    <td>Get world transform matrix</td>
+                </tr>
+                <tr>
+                    <td><code>SetMatrix(matrix)</code></td>
+                    <td>Set world transform (wakes body)</td>
+                </tr>
+                <tr>
+                    <td><code>SetMatrixNoSleep(matrix)</code></td>
+                    <td>Set transform without waking</td>
+                </tr>
+                <tr>
+                    <td><code>GetPosition()</code></td>
+                    <td>Get position vector</td>
+                </tr>
+                <tr>
+                    <td><code>GetRotation()</code></td>
+                    <td>Get rotation as quaternion</td>
+                </tr>
+                <tr>
+                    <td><code>GetCentreOfMass()</code></td>
+                    <td>Get local center of mass</td>
+                </tr>
+                <tr>
+                    <td><code>GetGlobalGetCentreOfMass()</code></td>
+                    <td>Get world center of mass</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="mass-inertia">
+            <h2>6. Mass & Inertia</h2>
+            <p>Newton automatically calculates inertia tensors from the collision shape:</p>
+
+<pre><code>// Simple: mass from shape (most common)
+ndFloat32 mass = 10.0f;  // kg
+ndShapeInstance shape(new ndShapeSphere(1.0f));
+body-&gt;SetMassMatrix(mass, shape);
+
+// Explicit inertia tensor
+body-&gt;SetMassMatrix(Ixx, Iyy, Izz, mass);
+
+// Get mass properties
+ndFloat32 Ixx, Iyy, Izz, m;
+body-&gt;GetMassMatrix(Ixx, Iyy, Izz, m);
+
+// Get inverse mass (0 = infinite/static)
+ndFloat32 invMass = body-&gt;GetInvMass();</code></pre>
+
+            <h3>Static Bodies</h3>
+            <p>For static bodies (terrain, walls), don't call <code>SetMassMatrix()</code>:</p>
+
+<pre><code>// Static body (infinite mass)
+ndBodyKinematic* ground = new ndBodyKinematic();
+ndShapeInstance floor(new ndShapeBox(100.0f, 1.0f, 100.0f));
+ground-&gt;SetCollisionShape(floor);
+// No SetMassMatrix() = static body</code></pre>
+
+            <h3>Center of Mass</h3>
+<pre><code>// Get center of mass (local space)
+ndVector com = body-&gt;GetCentreOfMass();
+
+// Set custom center of mass
+body-&gt;SetCentreOfMass(ndVector(0.0f, -0.5f, 0.0f, 0.0f));
+
+// Get center of mass in world space
+ndVector worldCom = body-&gt;GetGlobalGetCentreOfMass();</code></pre>
+        </section>
+
+        <section id="forces">
+            <h2>7. Forces & Impulses</h2>
+
+            <h3>Continuous Forces</h3>
+            <p>Apply forces each frame (cleared after each step):</p>
+
+<pre><code>// Set force (replaces any existing force)
+body-&gt;SetForce(ndVector(0.0f, 100.0f, 0.0f, 0.0f));
+
+// Set torque
+body-&gt;SetTorque(ndVector(0.0f, 50.0f, 0.0f, 0.0f));
+
+// Get current force/torque
+ndVector force = body-&gt;GetForce();
+ndVector torque = body-&gt;GetTorque();</code></pre>
+
+            <h3>Impulses</h3>
+            <p>Apply instant velocity changes:</p>
+
+<pre><code>// Apply impulse at center of mass
+ndVector linearImpulse(0.0f, 1000.0f, 0.0f, 0.0f);
+ndVector angularImpulse(0.0f, 0.0f, 0.0f, 0.0f);
+body-&gt;ApplyImpulsePair(linearImpulse, angularImpulse, timestep);
+
+// Apply impulse at a point (causes rotation)
+ndVector impulse(100.0f, 0.0f, 0.0f, 0.0f);
+ndVector point(0.0f, 1.0f, 0.5f, 1.0f);  // World space
+body-&gt;AddImpulse(impulse, point, timestep);
+
+// Apply multiple impulses
+ndVector impulses[] = { ... };
+ndVector points[] = { ... };
+body-&gt;ApplyImpulsesAtPoint(count, impulses, points, timestep);</code></pre>
+
+            <h3>Velocity at Point</h3>
+<pre><code>// Get velocity at a world point (includes angular contribution)
+ndVector point(1.0f, 2.0f, 0.5f, 1.0f);
+ndVector vel = body-&gt;GetVelocityAtPoint(point);</code></pre>
+        </section>
+
+        <section id="damping">
+            <h2>8. Damping</h2>
+            <p>Damping simulates air resistance and friction:</p>
+
+<pre><code>// Linear damping (0 = no damping, 1 = full damping)
+body-&gt;SetLinearDamping(0.1f);
+ndFloat32 linDamp = body-&gt;GetLinearDamping();
+
+// Angular damping (per-axis)
+body-&gt;SetAngularDamping(ndVector(0.1f, 0.1f, 0.1f, 0.0f));
+ndVector angDamp = body-&gt;GetAngularDamping();</code></pre>
+
+            <div class="tip">
+                <strong>Tip:</strong> Use small damping values (0.01-0.1). Higher values make objects
+                feel sluggish. Default is 0.
+            </div>
+        </section>
+
+        <section id="sleep">
+            <h2>9. Sleep System</h2>
+            <p>
+                Newton automatically puts stationary bodies to "sleep" to save CPU. Sleeping bodies
+                are skipped by the solver until woken by contact or velocity changes.
+            </p>
+
+<pre><code>// Check sleep state
+bool isSleeping = body-&gt;GetSleepState();
+
+// Wake a body
+body-&gt;SetSleepState(false);
+
+// Put to sleep (if stationary)
+body-&gt;SetSleepState(true);
+
+// Enable/disable auto-sleep
+body-&gt;SetAutoSleep(true);   // Default: true
+bool autoSleep = body-&gt;GetAutoSleep();
+
+// Adjust sleep threshold (squared acceleration)
+ndBodyDynamic* dynBody = body-&gt;GetAsBodyDynamic();
+dynBody-&gt;SetSleepAccel(0.5f);  // Lower = sleeps faster</code></pre>
+
+            <h3>Keep Awake Patterns</h3>
+<pre><code>// Use NoSleep variants to avoid waking neighbors
+body-&gt;SetVelocityNoSleep(newVelocity);
+body-&gt;SetOmegaNoSleep(newOmega);
+body-&gt;SetMatrixNoSleep(newMatrix);</code></pre>
+        </section>
+
+        <section id="notify">
+            <h2>10. Body Notify Callbacks</h2>
+            <p>
+                <code>ndBodyNotify</code> provides hooks for custom behavior. Subclass it to implement
+                gravity, transform updates, or AABB filtering.
+            </p>
+
+<pre><code>class MyBodyNotify : public ndBodyNotify
+{
+public:
+    MyBodyNotify()
+        : ndBodyNotify(ndVector(0.0f, -9.8f, 0.0f, 0.0f))
+    {
+    }
+
+    // Called each frame to apply forces
+    virtual void OnApplyExternalForce(ndInt32 threadIndex,
+        ndFloat32 timestep) override
+    {
+        ndBodyDynamic* body = GetBody()-&gt;GetAsBodyDynamic();
+        if (body)
+        {
+            // Apply gravity
+            ndVector gravity = GetGravity();
+            ndFloat32 mass = 1.0f / body-&gt;GetInvMass();
+            body-&gt;SetForce(gravity.Scale(mass));
+
+            // Add custom forces here
+        }
+    }
+
+    // Called when transform changes
+    virtual void OnTransform(ndFloat32 timestep,
+        const ndMatrix&amp; matrix) override
+    {
+        // Update your game object's graphics transform
+        m_gameObject-&gt;SetTransform(matrix);
+    }
+
+    // AABB broad-phase filter
+    virtual bool OnSceneAabbOverlap(
+        const ndBody* const otherBody) const override
+    {
+        // Return false to skip collision with this body
+        return true;
+    }
+
+    GameObject* m_gameObject;
+};
+
+// Attach to body
+body-&gt;SetNotifyCallback(new MyBodyNotify());</code></pre>
+
+            <h3>Default Gravity</h3>
+<pre><code>// Create notify with custom gravity
+ndVector customGravity(0.0f, -4.9f, 0.0f, 0.0f);  // Moon gravity
+body-&gt;SetNotifyCallback(new ndBodyNotify(customGravity));
+
+// Change gravity later
+ndSharedPtr&lt;ndBodyNotify&gt;&amp; notify = body-&gt;GetNotifyCallback();
+notify-&gt;SetGravity(ndVector(0.0f, -9.8f, 0.0f, 0.0f));</code></pre>
+        </section>
+
+        <section id="special-bodies">
+            <h2>11. Special Body Types</h2>
+
+            <h3>ndBodyPlayerCapsule</h3>
+            <p>Character controller with capsule collision:</p>
+<pre><code>ndBodyPlayerCapsule* player = new ndBodyPlayerCapsule(
+    matrix,           // Initial transform
+    mass,             // Player mass
+    radius,           // Capsule radius
+    height,           // Capsule height (cylinder portion)
+    stepHeight,       // Max step-up height
+    ndDegreeToRad * 45.0f  // Max slope angle
+);
+
+world.AddBody(ndSharedPtr&lt;ndBody&gt;(player));</code></pre>
+
+            <h3>ndBodyTriggerVolume</h3>
+            <p>Non-solid trigger for overlap detection:</p>
+<pre><code>class MyTrigger : public ndBodyTriggerVolume
+{
+public:
+    MyTrigger(const ndMatrix&amp; matrix)
+        : ndBodyTriggerVolume(matrix)
+    {
+    }
+
+    virtual void OnTriggerEnter(ndBody* const body, ndFloat32 timestep) override
+    {
+        // Body entered trigger
+    }
+
+    virtual void OnTriggerExit(ndBody* const body, ndFloat32 timestep) override
+    {
+        // Body exited trigger
+    }
+};
+
+ndShapeInstance box(new ndShapeBox(5.0f, 5.0f, 5.0f));
+MyTrigger* trigger = new MyTrigger(matrix);
+trigger-&gt;SetCollisionShape(box);
+world.AddBody(ndSharedPtr&lt;ndBody&gt;(trigger));</code></pre>
+
+            <h3>ndBodySphFluid</h3>
+            <p>SPH fluid simulation with particles:</p>
+<pre><code>ndBodySphFluid* fluid = new ndBodySphFluid();
+fluid-&gt;SetParticleRadius(0.25f);
+fluid-&gt;SetRestDensity(1000.0f);  // Water density
+
+// Add particles
+for (int i = 0; i &lt; particleCount; i++)
+{
+    fluid-&gt;AddParticle(timestep, positions[i], velocities[i]);
+}
+
+world.AddBody(ndSharedPtr&lt;ndBody&gt;(fluid));</code></pre>
+        </section>
+    </div>
+
+    <footer>
+        Newton Dynamics 4.00 Documentation | <a href="index.html">Back to Index</a>
+    </footer>
+</body>
+</html>

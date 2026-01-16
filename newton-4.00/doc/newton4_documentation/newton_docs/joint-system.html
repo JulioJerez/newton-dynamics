@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joint System - Newton Dynamics 4.00</title>
+    <style>
+        :root {
+            --primary-color: #ea580c;
+            --secondary-color: #c2410c;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        nav.toc {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            margin-bottom: 1rem;
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        nav.toc ul {
+            list-style: none;
+            columns: 2;
+        }
+
+        nav.toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav.toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        nav.toc a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h3 {
+            color: var(--heading-color);
+            font-size: 1.35rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            color: var(--heading-color);
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #e2e8f0;
+            color: #be185d;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: var(--heading-color);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .tip {
+            background: #dcfce7;
+            border-left: 4px solid #22c55e;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .warning {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            nav.toc ul {
+                columns: 1;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            header {
+                padding: 2rem 1rem;
+            }
+
+            header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Joint System</h1>
+            <p>Newton Dynamics 4.00 Documentation</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; Back to Index</a>
+
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#overview">1. Overview</a></li>
+                <li><a href="#creating-joints">2. Creating Joints</a></li>
+                <li><a href="#hinge-joint">3. Hinge Joint</a></li>
+                <li><a href="#slider-joint">4. Slider Joint</a></li>
+                <li><a href="#spherical-joint">5. Spherical Joint</a></li>
+                <li><a href="#fix6dof-joint">6. Fix6DOF Joint</a></li>
+                <li><a href="#other-joints">7. Other Joint Types</a></li>
+                <li><a href="#spring-damper">8. Spring-Damper System</a></li>
+                <li><a href="#motors-limits">9. Motors &amp; Limits</a></li>
+                <li><a href="#debugging">10. Debug Visualization</a></li>
+            </ul>
+        </nav>
+
+        <section id="overview">
+            <h2>1. Overview</h2>
+            <p>
+                Joints (constraints) connect bodies and restrict their relative motion. Newton provides
+                a variety of joint types for common mechanical connections like hinges, sliders,
+                ball-and-socket joints, and more specialized constraints.
+            </p>
+
+            <h3>Joint Hierarchy</h3>
+<pre><code>ndConstraint (base class)
+    |
+    +-- ndContact (collision constraint)
+    |
+    +-- ndJointBilateralConstraint (user joints)
+            |
+            +-- ndJointHinge (rotation around axis)
+            +-- ndJointSlider (translation along axis)
+            +-- ndJointSpherical (ball-and-socket)
+            +-- ndJointFix6dof (rigid connection)
+            +-- ndJointCylinder (rotate + slide)
+            +-- ndJointDoubleHinge (universal joint)
+            +-- ndJointGear (gear ratio coupling)
+            +-- ndJointPulley (rope/cable)
+            +-- ndJointWheel (vehicle suspension)
+            +-- ndJointKinematicController (IK target)
+            +-- ... and more</code></pre>
+
+            <h3>Available Joint Types</h3>
+            <table>
+                <tr>
+                    <th>Joint</th>
+                    <th>DOF Removed</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>ndJointHinge</code></td>
+                    <td>5</td>
+                    <td>Rotation around single axis (door hinge)</td>
+                </tr>
+                <tr>
+                    <td><code>ndJointSlider</code></td>
+                    <td>5</td>
+                    <td>Translation along single axis (piston)</td>
+                </tr>
+                <tr>
+                    <td><code>ndJointSpherical</code></td>
+                    <td>3</td>
+                    <td>Ball-and-socket (shoulder joint)</td>
+                </tr>
+                <tr>
+                    <td><code>ndJointFix6dof</code></td>
+                    <td>6</td>
+                    <td>Rigid attachment (weld)</td>
+                </tr>
+                <tr>
+                    <td><code>ndJointCylinder</code></td>
+                    <td>4</td>
+                    <td>Rotate and slide on same axis</td>
+                </tr>
+                <tr>
+                    <td><code>ndJointDoubleHinge</code></td>
+                    <td>4</td>
+                    <td>Universal joint (two perpendicular axes)</td>
+                </tr>
+                <tr>
+                    <td><code>ndJointGear</code></td>
+                    <td>1</td>
+                    <td>Gear ratio between rotations</td>
+                </tr>
+                <tr>
+                    <td><code>ndJointPulley</code></td>
+                    <td>1</td>
+                    <td>Pulley/cable constraint</td>
+                </tr>
+                <tr>
+                    <td><code>ndJointWheel</code></td>
+                    <td>4</td>
+                    <td>Vehicle wheel with suspension</td>
+                </tr>
+                <tr>
+                    <td><code>ndJointRoller</code></td>
+                    <td>4</td>
+                    <td>Rolling constraint</td>
+                </tr>
+                <tr>
+                    <td><code>ndJointPlane</code></td>
+                    <td>1</td>
+                    <td>Constrains body to plane</td>
+                </tr>
+                <tr>
+                    <td><code>ndJointFixDistance</code></td>
+                    <td>1</td>
+                    <td>Fixed distance between points</td>
+                </tr>
+                <tr>
+                    <td><code>ndJointUpVector</code></td>
+                    <td>2</td>
+                    <td>Keeps body upright</td>
+                </tr>
+                <tr>
+                    <td><code>ndJointFollowPath</code></td>
+                    <td>-</td>
+                    <td>Follows spline path</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="creating-joints">
+            <h2>2. Creating Joints</h2>
+            <p>
+                Joints are created by specifying a pivot frame and the two connected bodies.
+                One body can be <code>nullptr</code> to connect to the world (static anchor).
+            </p>
+
+            <h3>Joint Pivot Frame</h3>
+            <p>
+                The pivot frame defines where and how the joint is oriented. The X-axis typically
+                defines the primary axis of motion.
+            </p>
+<pre><code>// Create pivot frame at world position
+ndMatrix pivotFrame(ndGetIdentityMatrix());
+pivotFrame.m_posit = ndVector(0.0f, 2.0f, 0.0f, 1.0f);
+
+// Rotate to align hinge axis with world Y
+pivotFrame = ndYawMatrix(ndPi * 0.5f) * pivotFrame;
+
+// Create hinge between two bodies
+ndJointHinge* hinge = new ndJointHinge(pivotFrame, childBody, parentBody);
+
+// Or connect to world (parentBody = nullptr)
+ndJointHinge* worldHinge = new ndJointHinge(pivotFrame, childBody, nullptr);</code></pre>
+
+            <h3>Adding Joints to World</h3>
+<pre><code>// Create joint
+ndJointHinge* hinge = new ndJointHinge(pivotFrame, body0, body1);
+
+// Wrap in shared pointer and add to world
+ndSharedPtr&lt;ndJointBilateralConstraint&gt; jointPtr(hinge);
+world.AddJoint(jointPtr);
+
+// Joint is automatically removed when shared pointer is released</code></pre>
+
+            <h3>Removing Joints</h3>
+<pre><code>// Remove by shared pointer
+world.RemoveJoint(jointPtr);
+
+// Or simply release the shared pointer - joint is removed automatically</code></pre>
+
+            <h3>Two-Frame Construction</h3>
+            <p>For precise control, specify separate frames for each body:</p>
+<pre><code>// Frame in child body's local space
+ndMatrix childFrame(ndGetIdentityMatrix());
+childFrame.m_posit = ndVector(0.0f, 0.5f, 0.0f, 1.0f);
+
+// Frame in parent body's local space
+ndMatrix parentFrame(ndGetIdentityMatrix());
+parentFrame.m_posit = ndVector(0.0f, -0.5f, 0.0f, 1.0f);
+
+// Create joint with separate frames
+ndJointHinge* hinge = new ndJointHinge(childFrame, parentFrame, childBody, parentBody);</code></pre>
+        </section>
+
+        <section id="hinge-joint">
+            <h2>3. Hinge Joint</h2>
+            <p>
+                <code>ndJointHinge</code> allows rotation around a single axis (X-axis of the pivot frame).
+                Used for doors, wheels, hinges, and revolute joints.
+            </p>
+
+            <h3>Creating a Hinge</h3>
+<pre><code>// Pivot frame with X as hinge axis
+ndMatrix pivotFrame(ndGetIdentityMatrix());
+pivotFrame.m_posit = ndVector(0.0f, 1.0f, 0.0f, 1.0f);
+
+ndJointHinge* hinge = new ndJointHinge(pivotFrame, door, doorFrame);
+world.AddJoint(ndSharedPtr&lt;ndJointBilateralConstraint&gt;(hinge));</code></pre>
+
+            <h3>Reading State</h3>
+<pre><code>// Get current angle (radians)
+ndFloat32 angle = hinge-&gt;GetAngle();
+
+// Get current angular velocity (rad/s)
+ndFloat32 omega = hinge-&gt;GetOmega();</code></pre>
+
+            <h3>Angular Limits</h3>
+<pre><code>// Enable limits
+hinge-&gt;SetLimitState(true);
+
+// Set limit angles (radians)
+ndFloat32 minAngle = -ndPi * 0.5f;  // -90 degrees
+ndFloat32 maxAngle = ndPi * 0.5f;   // +90 degrees
+hinge-&gt;SetLimits(minAngle, maxAngle);
+
+// Get current limits
+ndFloat32 min, max;
+hinge-&gt;GetLimits(min, max);
+
+// Check if limits enabled
+bool hasLimits = hinge-&gt;GetLimitState();</code></pre>
+
+            <h3>Target Angle (Motor)</h3>
+<pre><code>// Set target angle for spring-damper to reach
+hinge-&gt;SetTargetAngle(ndPi * 0.25f);  // 45 degrees
+
+// Get current target
+ndFloat32 target = hinge-&gt;GetTargetAngle();</code></pre>
+
+            <h3>Spring-Damper</h3>
+<pre><code>// Configure as spring-damper
+ndFloat32 regularizer = 0.1f;   // Constraint softness (0-1)
+ndFloat32 spring = 100.0f;      // Spring stiffness (N*m/rad)
+ndFloat32 damper = 10.0f;       // Damping coefficient (N*m*s/rad)
+
+hinge-&gt;SetAsSpringDamper(regularizer, spring, damper);
+
+// Get spring-damper parameters
+ndFloat32 r, k, c;
+hinge-&gt;GetSpringDamper(r, k, c);</code></pre>
+        </section>
+
+        <section id="slider-joint">
+            <h2>4. Slider Joint</h2>
+            <p>
+                <code>ndJointSlider</code> allows translation along a single axis (X-axis of pivot frame).
+                Used for pistons, sliders, and prismatic joints.
+            </p>
+
+            <h3>Creating a Slider</h3>
+<pre><code>ndMatrix pivotFrame(ndGetIdentityMatrix());
+pivotFrame.m_posit = ndVector(0.0f, 0.0f, 0.0f, 1.0f);
+
+ndJointSlider* slider = new ndJointSlider(pivotFrame, piston, cylinder);
+world.AddJoint(ndSharedPtr&lt;ndJointBilateralConstraint&gt;(slider));</code></pre>
+
+            <h3>Reading State</h3>
+<pre><code>// Get current position (meters)
+ndFloat32 position = slider-&gt;GetPosit();
+
+// Get current velocity (m/s)
+ndFloat32 speed = slider-&gt;GetSpeed();</code></pre>
+
+            <h3>Linear Limits</h3>
+<pre><code>// Enable limits
+slider-&gt;SetLimitState(true);
+
+// Set limit positions (meters)
+slider-&gt;SetLimits(-1.0f, 2.0f);  // -1m to +2m range
+
+// Get current limits
+ndFloat32 min, max;
+slider-&gt;GetLimits(min, max);</code></pre>
+
+            <h3>Target Position</h3>
+<pre><code>// Set target position for spring-damper
+slider-&gt;SetTargetPosit(0.5f);  // 0.5 meters
+
+// Get current target
+ndFloat32 target = slider-&gt;GetTargetPosit();</code></pre>
+
+            <h3>Force Limits</h3>
+<pre><code>// Enable force limiting
+slider-&gt;SetMaxForceState(true);
+
+// Set maximum force (Newtons)
+slider-&gt;SetMaxForce(1000.0f);
+
+// Get force limit
+ndFloat32 maxForce = slider-&gt;GetMaxForce();</code></pre>
+        </section>
+
+        <section id="spherical-joint">
+            <h2>5. Spherical Joint</h2>
+            <p>
+                <code>ndJointSpherical</code> is a ball-and-socket joint allowing rotation in all
+                directions. Supports cone limits and twist limits.
+            </p>
+
+            <h3>Creating a Spherical Joint</h3>
+<pre><code>ndMatrix pivotFrame(ndGetIdentityMatrix());
+pivotFrame.m_posit = ndVector(0.0f, 1.5f, 0.0f, 1.0f);
+
+ndJointSpherical* ball = new ndJointSpherical(pivotFrame, upperArm, shoulder);
+world.AddJoint(ndSharedPtr&lt;ndJointBilateralConstraint&gt;(ball));</code></pre>
+
+            <h3>Cone Limit</h3>
+            <p>Limits the angle the joint can deviate from its initial orientation:</p>
+<pre><code>// Set maximum cone angle (radians)
+ndFloat32 maxConeAngle = ndDegreeToRad * 45.0f;  // 45 degrees
+ball-&gt;SetConeLimit(maxConeAngle);
+
+// Get cone limit
+ndFloat32 cone = ball-&gt;GetConeLimit();</code></pre>
+
+            <h3>Twist Limits</h3>
+            <p>Limits rotation around the primary axis:</p>
+<pre><code>// Set twist limits (radians)
+ndFloat32 minTwist = -ndPi * 0.25f;  // -45 degrees
+ndFloat32 maxTwist = ndPi * 0.25f;   // +45 degrees
+ball-&gt;SetTwistLimits(minTwist, maxTwist);
+
+// Get twist limits
+ndFloat32 tMin, tMax;
+ball-&gt;GetTwistLimits(tMin, tMax);</code></pre>
+
+            <h3>Offset Rotation</h3>
+<pre><code>// Set orientation offset
+ndMatrix offset(ndPitchMatrix(0.2f));
+ball-&gt;SetOffsetRotation(offset);
+
+// Get current offset
+ndMatrix currentOffset = ball-&gt;GetOffsetRotation();</code></pre>
+        </section>
+
+        <section id="fix6dof-joint">
+            <h2>6. Fix6DOF Joint</h2>
+            <p>
+                <code>ndJointFix6dof</code> rigidly connects two bodies (weld joint).
+                Removes all 6 degrees of freedom. Can be configured as soft for breakable joints.
+            </p>
+
+            <h3>Creating a Weld Joint</h3>
+<pre><code>// Create at current body positions
+ndMatrix frame = body0-&gt;GetMatrix();
+ndJointFix6dof* weld = new ndJointFix6dof(frame, body0, body1);
+
+// Or with explicit frames
+ndJointFix6dof* weld2 = new ndJointFix6dof(body0, body1,
+    body0-&gt;GetMatrix(), body1-&gt;GetMatrix());
+
+world.AddJoint(ndSharedPtr&lt;ndJointBilateralConstraint&gt;(weld));</code></pre>
+
+            <h3>Soft Joint (Breakable)</h3>
+<pre><code>// Enable soft mode
+weld-&gt;SetAsSoftJoint(true);
+
+// Set softness (regularizer)
+weld-&gt;SetRegularizer(0.01f);  // 0 = rigid, 1 = very soft
+
+// Get maximum forces (for break detection)
+ndFloat32 maxForce = weld-&gt;GetMaxForce();
+ndFloat32 maxTorque = weld-&gt;GetMaxTorque();
+
+// Check if should break
+if (maxForce &gt; breakThreshold)
+{
+    world.RemoveJoint(weldPtr);
+}</code></pre>
+        </section>
+
+        <section id="other-joints">
+            <h2>7. Other Joint Types</h2>
+
+            <h3>ndJointGear</h3>
+            <p>Couples rotation of two bodies with a gear ratio:</p>
+<pre><code>// Gear ratio: body0 rotates 2x faster than body1
+ndFloat32 gearRatio = 2.0f;
+ndVector body0Pin(0, 1, 0, 0);  // Rotation axis of body0
+ndVector body1Pin(0, 1, 0, 0);  // Rotation axis of body1
+
+ndJointGear* gear = new ndJointGear(gearRatio, body0Pin, body0, body1Pin, body1);
+world.AddJoint(ndSharedPtr&lt;ndJointBilateralConstraint&gt;(gear));
+
+// Change ratio
+gear-&gt;SetRatio(3.0f);</code></pre>
+
+            <h3>ndJointPulley</h3>
+            <p>Rope/cable constraint between two sliding bodies:</p>
+<pre><code>ndFloat32 pulleyRatio = 1.0f;  // 1:1 ratio
+ndVector pin0(0, 1, 0, 0);
+ndVector pin1(0, 1, 0, 0);
+
+ndJointPulley* pulley = new ndJointPulley(pulleyRatio, pin0, body0, pin1, body1);
+world.AddJoint(ndSharedPtr&lt;ndJointBilateralConstraint&gt;(pulley));</code></pre>
+
+            <h3>ndJointWheel</h3>
+            <p>Vehicle wheel with spring suspension:</p>
+<pre><code>// Configure wheel parameters
+ndWheelDescriptor desc;
+desc.m_springK = 2000.0f;     // Spring stiffness
+desc.m_damperC = 50.0f;       // Damping coefficient
+desc.m_upperStop = 0.2f;      // Max extension (meters)
+desc.m_lowerStop = -0.1f;     // Max compression
+desc.m_regularizer = 0.1f;    // Softness
+
+ndJointWheel* wheel = new ndJointWheel(pivotFrame, wheelBody, chassisBody, desc);
+world.AddJoint(ndSharedPtr&lt;ndJointBilateralConstraint&gt;(wheel));
+
+// Control wheel
+wheel-&gt;SetSteering(0.5f);     // Normalized steering (-1 to 1)
+wheel-&gt;SetBreak(0.8f);        // Normalized brake (0 to 1)
+wheel-&gt;SetHandBreak(1.0f);    // Hand brake</code></pre>
+
+            <h3>ndJointCylinder</h3>
+            <p>Combined rotation and translation on same axis:</p>
+<pre><code>ndJointCylinder* cylinder = new ndJointCylinder(pivotFrame, body0, body1);
+world.AddJoint(ndSharedPtr&lt;ndJointBilateralConstraint&gt;(cylinder));</code></pre>
+
+            <h3>ndJointUpVector</h3>
+            <p>Keeps a body aligned with a world direction:</p>
+<pre><code>ndVector upPin(0, 1, 0, 0);  // World up direction
+ndJointUpVector* upright = new ndJointUpVector(upPin, body);
+world.AddJoint(ndSharedPtr&lt;ndJointBilateralConstraint&gt;(upright));</code></pre>
+
+            <h3>ndJointFixDistance</h3>
+            <p>Maintains fixed distance between two points:</p>
+<pre><code>ndVector pivot0(0, 0.5f, 0, 1);   // Local point on body0
+ndVector pivot1(0, -0.5f, 0, 1);  // Local point on body1
+ndFloat32 distance = 2.0f;
+
+ndJointFixDistance* rod = new ndJointFixDistance(pivot0, pivot1, body0, body1);
+world.AddJoint(ndSharedPtr&lt;ndJointBilateralConstraint&gt;(rod));</code></pre>
+
+            <h3>ndJointKinematicController</h3>
+            <p>IK-style position/rotation target for a body:</p>
+<pre><code>ndMatrix targetFrame(ndGetIdentityMatrix());
+targetFrame.m_posit = ndVector(5, 2, 0, 1);
+
+ndJointKinematicController* controller =
+    new ndJointKinematicController(body, targetFrame);
+world.AddJoint(ndSharedPtr&lt;ndJointBilateralConstraint&gt;(controller));
+
+// Update target each frame
+controller-&gt;SetTargetMatrix(newTargetFrame);</code></pre>
+        </section>
+
+        <section id="spring-damper">
+            <h2>8. Spring-Damper System</h2>
+            <p>
+                Most joints support spring-damper behavior, which creates elastic connections
+                that seek a target position/angle.
+            </p>
+
+            <h3>Spring-Damper Parameters</h3>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Unit</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>Regularizer</td>
+                    <td>0-1</td>
+                    <td>Constraint softness (0 = rigid, 1 = very soft)</td>
+                </tr>
+                <tr>
+                    <td>Spring (K)</td>
+                    <td>N/m or N*m/rad</td>
+                    <td>Spring stiffness coefficient</td>
+                </tr>
+                <tr>
+                    <td>Damper (C)</td>
+                    <td>N*s/m or N*m*s/rad</td>
+                    <td>Damping coefficient</td>
+                </tr>
+            </table>
+
+            <h3>Configuring Spring-Damper</h3>
+<pre><code>// For hinge (angular spring)
+hinge-&gt;SetAsSpringDamper(
+    0.1f,    // regularizer
+    500.0f,  // spring (N*m/rad)
+    20.0f    // damper (N*m*s/rad)
+);
+hinge-&gt;SetTargetAngle(ndPi * 0.25f);  // Target 45 degrees
+
+// For slider (linear spring)
+slider-&gt;SetAsSpringDamper(
+    0.1f,    // regularizer
+    1000.0f, // spring (N/m)
+    50.0f    // damper (N*s/m)
+);
+slider-&gt;SetTargetPosit(0.5f);  // Target 0.5 meters</code></pre>
+
+            <h3>Tuning Guidelines</h3>
+            <div class="tip">
+                <strong>Tuning Tips:</strong>
+                <ul>
+                    <li>Start with regularizer = 0.1, increase if unstable</li>
+                    <li>Spring should match expected loads (force = spring * displacement)</li>
+                    <li>Damper around 10-20% of spring for critical damping</li>
+                    <li>Higher damping = slower response, less oscillation</li>
+                </ul>
+            </div>
+
+            <h3>Critical Damping Formula</h3>
+<pre><code>// For critical damping (no oscillation):
+// C_critical = 2 * sqrt(K * M)
+// Where M is the effective mass
+
+ndFloat32 mass = 10.0f;   // Body mass in kg
+ndFloat32 spring = 1000.0f;
+ndFloat32 criticalDamping = 2.0f * ndSqrt(spring * mass);
+
+// Use slightly less for some bounce
+ndFloat32 damper = criticalDamping * 0.8f;</code></pre>
+        </section>
+
+        <section id="motors-limits">
+            <h2>9. Motors &amp; Limits</h2>
+
+            <h3>Angular Limits (Hinge)</h3>
+<pre><code>// Enable limits
+hinge-&gt;SetLimitState(true);
+
+// Set symmetric limits
+hinge-&gt;SetLimits(-ndPi * 0.5f, ndPi * 0.5f);
+
+// Asymmetric limits
+hinge-&gt;SetLimits(-ndPi * 0.25f, ndPi * 0.75f);</code></pre>
+
+            <h3>Linear Limits (Slider)</h3>
+<pre><code>slider-&gt;SetLimitState(true);
+slider-&gt;SetLimits(-0.5f, 1.5f);  // -0.5m to +1.5m</code></pre>
+
+            <h3>Cone and Twist Limits (Spherical)</h3>
+<pre><code>// Limit swing angle
+ball-&gt;SetConeLimit(ndDegreeToRad * 60.0f);
+
+// Limit twist rotation
+ball-&gt;SetTwistLimits(-ndPi * 0.5f, ndPi * 0.5f);</code></pre>
+
+            <h3>Force/Torque Motors</h3>
+            <p>Use spring-damper with high damping as a velocity motor:</p>
+<pre><code>// Velocity motor (high damping, zero spring, moving target)
+hinge-&gt;SetAsSpringDamper(0.0f, 0.0f, 100.0f);
+
+// Each frame, increment target to simulate constant velocity
+ndFloat32 desiredOmega = 5.0f;  // rad/s
+ndFloat32 currentTarget = hinge-&gt;GetTargetAngle();
+hinge-&gt;SetTargetAngle(currentTarget + desiredOmega * timestep);</code></pre>
+
+            <h3>Reading Joint Forces</h3>
+<pre><code>// Get constraint forces on body0
+ndVector force0 = joint-&gt;GetForceBody0();
+ndVector torque0 = joint-&gt;GetTorqueBody0();
+
+// Get constraint forces on body1
+ndVector force1 = joint-&gt;GetForceBody1();
+ndVector torque1 = joint-&gt;GetTorqueBody1();</code></pre>
+        </section>
+
+        <section id="debugging">
+            <h2>10. Debug Visualization</h2>
+            <p>
+                Joints provide debug visualization callbacks to help understand their configuration.
+            </p>
+
+            <h3>Debug Callback</h3>
+<pre><code>class MyJointDebugger : public ndConstraintDebugCallback
+{
+public:
+    virtual void DrawPoint(const ndVector&amp; point,
+        const ndVector&amp; color, ndFloat32 thickness) override
+    {
+        // Render point
+        RenderPoint(point, color, thickness);
+    }
+
+    virtual void DrawLine(const ndVector&amp; p0, const ndVector&amp; p1,
+        const ndVector&amp; color, ndFloat32 thickness) override
+    {
+        // Render line
+        RenderLine(p0, p1, color, thickness);
+    }
+};
+
+// Draw all joints
+MyJointDebugger debugger;
+debugger.SetScale(0.5f);  // Visual scale
+
+for (ndSharedPtr&lt;ndJointBilateralConstraint&gt;&amp; joint : world.GetJointList())
+{
+    joint-&gt;DebugJoint(debugger);
+}</code></pre>
+
+            <h3>Debug Colors Convention</h3>
+            <table>
+                <tr>
+                    <th>Color</th>
+                    <th>Meaning</th>
+                </tr>
+                <tr>
+                    <td>Red (X)</td>
+                    <td>Primary axis / rotation axis</td>
+                </tr>
+                <tr>
+                    <td>Green (Y)</td>
+                    <td>Secondary axis</td>
+                </tr>
+                <tr>
+                    <td>Blue (Z)</td>
+                    <td>Tertiary axis</td>
+                </tr>
+                <tr>
+                    <td>Yellow</td>
+                    <td>Limit indicators</td>
+                </tr>
+                <tr>
+                    <td>Cyan</td>
+                    <td>Spring-damper direction</td>
+                </tr>
+            </table>
+
+            <h3>Joint State Queries</h3>
+<pre><code>// Check if joint is active
+bool active = joint-&gt;IsActive();
+
+// Enable/disable joint
+joint-&gt;SetActive(false);  // Temporarily disable
+
+// Get connected bodies
+ndBodyKinematic* body0 = joint-&gt;GetBody0();
+ndBodyKinematic* body1 = joint-&gt;GetBody1();
+
+// Get constraint row count
+ndUnsigned32 rows = joint-&gt;GetRowsCount();</code></pre>
+        </section>
+    </div>
+
+    <footer>
+        Newton Dynamics 4.00 Documentation | <a href="index.html">Back to Index</a>
+    </footer>
+</body>
+</html>

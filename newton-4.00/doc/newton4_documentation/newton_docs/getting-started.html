@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getting Started - Newton Dynamics 4.00</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        nav.toc {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            margin-bottom: 1rem;
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        nav.toc ul {
+            list-style: none;
+            columns: 2;
+        }
+
+        nav.toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav.toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        nav.toc a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h3 {
+            color: var(--heading-color);
+            font-size: 1.35rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            color: var(--heading-color);
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #e2e8f0;
+            color: #be185d;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: var(--heading-color);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .tip {
+            background: #dcfce7;
+            border-left: 4px solid #22c55e;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .warning {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            nav.toc ul {
+                columns: 1;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            header {
+                padding: 2rem 1rem;
+            }
+
+            header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Getting Started</h1>
+            <p>Newton Dynamics 4.00 Documentation</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; Back to Index</a>
+
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#requirements">1. Requirements</a></li>
+                <li><a href="#building">2. Building Newton</a></li>
+                <li><a href="#cmake-options">3. CMake Options</a></li>
+                <li><a href="#sdk-structure">4. SDK Structure</a></li>
+                <li><a href="#linking">5. Linking to Your Project</a></li>
+                <li><a href="#hello-world">6. Hello World Example</a></li>
+                <li><a href="#simulation-loop">7. The Simulation Loop</a></li>
+                <li><a href="#next-steps">8. Next Steps</a></li>
+            </ul>
+        </nav>
+
+        <section id="requirements">
+            <h2>1. Requirements</h2>
+            <p>Newton Dynamics 4.00 requires:</p>
+            <ul>
+                <li><strong>C++11 compiler</strong> - MSVC 2017+, GCC 7+, Clang 5+, or Apple Clang</li>
+                <li><strong>CMake 3.10+</strong> - for build configuration</li>
+                <li><strong>Platform</strong> - Windows, Linux, macOS, or ARM (Android, iOS, Raspberry Pi)</li>
+            </ul>
+
+            <h3>Optional Dependencies</h3>
+            <ul>
+                <li><strong>OpenGL + GLFW</strong> - for the demo application (ndSandbox)</li>
+                <li><strong>OpenCL SDK</strong> - for GPU acceleration (Windows only)</li>
+            </ul>
+        </section>
+
+        <section id="building">
+            <h2>2. Building Newton</h2>
+
+            <h3>Windows (Visual Studio)</h3>
+<pre><code># Create build directory
+mkdir build
+cd build
+
+# Configure with CMake
+cmake .. -G "Visual Studio 17 2022" -A x64
+
+# Build Release configuration
+cmake --build . --config Release</code></pre>
+
+            <h3>Linux / macOS</h3>
+<pre><code># Create build directory
+mkdir build && cd build
+
+# Configure with CMake
+cmake .. -DCMAKE_BUILD_TYPE=Release
+
+# Build
+cmake --build . -j$(nproc)</code></pre>
+
+            <h3>Build Output</h3>
+            <p>After building, you'll find:</p>
+            <ul>
+                <li><code>ndNewton.dll</code> / <code>libndNewton.so</code> - the main physics library</li>
+                <li><code>ndSandbox</code> - demo application (if enabled)</li>
+                <li>Header files in <code>sdk/</code> subdirectories</li>
+            </ul>
+        </section>
+
+        <section id="cmake-options">
+            <h2>3. CMake Options</h2>
+            <p>Configure Newton with these CMake options:</p>
+
+            <table>
+                <tr>
+                    <th>Option</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>NEWTON_BUILD_SANDBOX_DEMOS</code></td>
+                    <td>ON</td>
+                    <td>Build the demo applications</td>
+                </tr>
+                <tr>
+                    <td><code>NEWTON_BUILD_SHARED_LIBS</code></td>
+                    <td>ON</td>
+                    <td>Build as shared library (.dll/.so)</td>
+                </tr>
+                <tr>
+                    <td><code>NEWTON_DOUBLE_PRECISION</code></td>
+                    <td>OFF</td>
+                    <td>Use double precision floats</td>
+                </tr>
+                <tr>
+                    <td><code>NEWTON_ENABLE_AVX2</code></td>
+                    <td>ON</td>
+                    <td>Enable AVX2 SIMD (x86 only)</td>
+                </tr>
+                <tr>
+                    <td><code>NEWTON_BUILD_SINGLE_THREADED</code></td>
+                    <td>OFF</td>
+                    <td>Disable multithreading</td>
+                </tr>
+                <tr>
+                    <td><code>NEWTON_BUILD_PROFILER</code></td>
+                    <td>OFF</td>
+                    <td>Enable Tracy profiler support</td>
+                </tr>
+                <tr>
+                    <td><code>NEWTON_STATIC_RUNTIME_LIBRARIES</code></td>
+                    <td>OFF</td>
+                    <td>Use static runtime (Windows /MT)</td>
+                </tr>
+            </table>
+
+            <h3>Example: Static Library with Double Precision</h3>
+<pre><code>cmake .. -DNEWTON_BUILD_SHARED_LIBS=OFF -DNEWTON_DOUBLE_PRECISION=ON</code></pre>
+        </section>
+
+        <section id="sdk-structure">
+            <h2>4. SDK Structure</h2>
+            <p>The Newton SDK is organized into layered modules:</p>
+
+<pre><code>newton-4.00/
+├── sdk/
+│   ├── dCore/          # Math, containers, threading (foundation)
+│   ├── dCollision/     # Bodies, shapes, collision detection
+│   │   └── dMesh/      # Mesh processing utilities
+│   └── dNewton/        # Physics world, solver, dynamics
+│       ├── dJoints/    # All joint/constraint types
+│       ├── dIkSolver/  # Inverse kinematics
+│       └── dModels/
+│           └── dVehicle/  # Vehicle simulation
+├── applications/
+│   └── ndSandbox/      # Demo application
+└── tests/              # Unit tests (GoogleTest)</code></pre>
+
+            <h3>Key Header Files</h3>
+            <table>
+                <tr>
+                    <th>Header</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td><code>ndNewton.h</code></td>
+                    <td>Main include - brings in entire physics API</td>
+                </tr>
+                <tr>
+                    <td><code>ndWorld.h</code></td>
+                    <td>Physics world and simulation control</td>
+                </tr>
+                <tr>
+                    <td><code>ndBody.h</code></td>
+                    <td>Base body class and body types</td>
+                </tr>
+                <tr>
+                    <td><code>ndShape*.h</code></td>
+                    <td>Collision shape definitions</td>
+                </tr>
+                <tr>
+                    <td><code>ndJoint*.h</code></td>
+                    <td>Joint/constraint definitions</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="linking">
+            <h2>5. Linking to Your Project</h2>
+
+            <h3>CMake (Recommended)</h3>
+<pre><code># Add Newton as a subdirectory
+add_subdirectory(newton-4.00)
+
+# Link to your target
+target_link_libraries(MyGame PRIVATE ndNewton)
+
+# Include directories are set automatically</code></pre>
+
+            <h3>Manual Linking</h3>
+            <p>Add include paths:</p>
+<pre><code>newton-4.00/sdk/dCore
+newton-4.00/sdk/dCollision
+newton-4.00/sdk/dNewton
+newton-4.00/sdk/dNewton/dJoints
+newton-4.00/sdk/dNewton/dModels
+newton-4.00/sdk/dNewton/dIkSolver</code></pre>
+
+            <p>Link against <code>ndNewton</code> library.</p>
+        </section>
+
+        <section id="hello-world">
+            <h2>6. Hello World Example</h2>
+            <p>A minimal Newton application that creates a world, adds a falling sphere, and simulates one second:</p>
+
+<pre><code>#include &lt;ndNewton.h&gt;
+#include &lt;cstdio&gt;
+
+int main()
+{
+    // Create physics world
+    ndWorld world;
+    world.SetSubSteps(2);
+
+    // Create a dynamic body
+    ndBodyDynamic* body = new ndBodyDynamic();
+
+    // Set position 10 meters up
+    ndMatrix matrix(ndGetIdentityMatrix());
+    matrix.m_posit = ndVector(0.0f, 10.0f, 0.0f, 1.0f);
+    body-&gt;SetMatrix(matrix);
+
+    // Attach sphere collision (radius = 1 meter)
+    ndShapeInstance sphere(new ndShapeSphere(1.0f));
+    body-&gt;SetCollisionShape(sphere);
+
+    // Set mass (10 kg) - auto-computes inertia from shape
+    body-&gt;SetMassMatrix(10.0f, sphere);
+
+    // Add gravity callback
+    body-&gt;SetNotifyCallback(new ndBodyNotify(ndVector(0.0f, -9.8f, 0.0f, 0.0f)));
+
+    // Add body to world (using shared pointer)
+    ndSharedPtr&lt;ndBody&gt; bodyPtr(body);
+    world.AddBody(bodyPtr);
+
+    // Simulate 1 second at 60 Hz
+    for (int i = 0; i &lt; 60; i++)
+    {
+        world.Update(1.0f / 60.0f);
+        world.Sync();
+
+        ndVector pos = body-&gt;GetMatrix().m_posit;
+        printf("Frame %d: Y = %.2f m\n", i, pos.m_y);
+    }
+
+    return 0;
+}</code></pre>
+
+            <div class="tip">
+                <strong>Tip:</strong> Newton uses shared pointers (<code>ndSharedPtr</code>) for automatic memory management.
+                Bodies, joints, and models are reference-counted and automatically deleted when no longer referenced.
+            </div>
+        </section>
+
+        <section id="simulation-loop">
+            <h2>7. The Simulation Loop</h2>
+            <p>A typical Newton simulation loop:</p>
+
+<pre><code>void GameLoop(ndWorld&amp; world, float deltaTime)
+{
+    // 1. Apply forces/inputs to bodies
+    ApplyPlayerInput();
+
+    // 2. Step the physics simulation
+    world.Update(deltaTime);
+
+    // 3. Wait for physics thread to complete
+    world.Sync();
+
+    // 4. Read body transforms for rendering
+    UpdateGraphics();
+}</code></pre>
+
+            <h3>Key Methods</h3>
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>Update(timestep)</code></td>
+                    <td>Advances simulation by timestep seconds. Runs asynchronously.</td>
+                </tr>
+                <tr>
+                    <td><code>Sync()</code></td>
+                    <td>Blocks until physics update completes. Call before reading transforms.</td>
+                </tr>
+                <tr>
+                    <td><code>SetSubSteps(n)</code></td>
+                    <td>Divides timestep into n sub-steps for stability. Default: 1.</td>
+                </tr>
+                <tr>
+                    <td><code>SetThreadCount(n)</code></td>
+                    <td>Sets number of worker threads. Default: auto-detect.</td>
+                </tr>
+            </table>
+
+            <div class="note">
+                <strong>Note:</strong> Use a fixed timestep (e.g., 1/60) for deterministic simulation.
+                Variable timesteps can cause instability and non-reproducible results.
+            </div>
+        </section>
+
+        <section id="next-steps">
+            <h2>8. Next Steps</h2>
+            <p>Now that you have Newton building and running, explore these topics:</p>
+            <ul>
+                <li><a href="math-primitives.html">Math Primitives</a> - Vector, Matrix, and Quaternion operations</li>
+                <li><a href="world-simulation.html">World & Simulation</a> - Solver modes, threading, and performance</li>
+                <li><a href="body-system.html">Body System</a> - Dynamic, kinematic, and special body types</li>
+                <li><a href="shape-system.html">Shape System</a> - All 19 collision shape types</li>
+                <li><a href="joint-system.html">Joint System</a> - Constraints, motors, and spring-dampers</li>
+            </ul>
+
+            <h3>Run the Demos</h3>
+            <p>The <code>ndSandbox</code> application demonstrates all Newton features. Run it from the build directory:</p>
+<pre><code># Windows
+.\applications\ndSandbox\Release\ndSandbox.exe
+
+# Linux/macOS
+./applications/ndSandbox/ndSandbox</code></pre>
+        </section>
+    </div>
+
+    <footer>
+        Newton Dynamics 4.00 Documentation | <a href="index.html">Back to Index</a>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reinforcement Learning - dBrain Neural Network Library</title>
+    <style>
+        :root {
+            --primary-color: #7c3aed;
+            --secondary-color: #6d28d9;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        nav.toc {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            margin-bottom: 1rem;
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        nav.toc ul {
+            list-style: none;
+            columns: 2;
+        }
+
+        nav.toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav.toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        nav.toc a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h3 {
+            color: var(--heading-color);
+            font-size: 1.35rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #ede9fe;
+            color: #6d28d9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f5f3ff;
+            font-weight: 600;
+        }
+
+        .note {
+            background: #faf5ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .class-header {
+            background: #f5f3ff;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+        }
+
+        .class-header code {
+            background: none;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Reinforcement Learning</h1>
+            <p>Policy gradient agents and training for physics simulation</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; Back to dBrain Documentation</a>
+
+        <nav class="toc">
+            <h2>Contents</h2>
+            <ul>
+                <li><a href="#overview">1. RL Overview</a></li>
+                <li><a href="#agent-base">2. Agent Base Class</a></li>
+                <li><a href="#policy-gradient">3. Policy Gradient Agents</a></li>
+                <li><a href="#implementing">4. Implementing Agents</a></li>
+                <li><a href="#training">5. Training Process</a></li>
+                <li><a href="#physics-integration">6. Physics Integration</a></li>
+            </ul>
+        </nav>
+
+        <section id="overview">
+            <h2>1. RL Overview</h2>
+            <p>
+                dBrain provides reinforcement learning infrastructure for training agents
+                that interact with physics simulations. The library focuses on policy gradient
+                methods suitable for continuous control tasks.
+            </p>
+
+            <h3>Key Concepts</h3>
+            <table>
+                <tr>
+                    <th>Term</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><strong>Agent</strong></td>
+                    <td>Neural network that observes state and outputs actions</td>
+                </tr>
+                <tr>
+                    <td><strong>Observation</strong></td>
+                    <td>State information from the environment (positions, velocities, etc.)</td>
+                </tr>
+                <tr>
+                    <td><strong>Action</strong></td>
+                    <td>Control signals output by the agent (forces, torques, etc.)</td>
+                </tr>
+                <tr>
+                    <td><strong>Reward</strong></td>
+                    <td>Scalar feedback signal guiding learning</td>
+                </tr>
+                <tr>
+                    <td><strong>Episode</strong></td>
+                    <td>One complete interaction sequence (start to terminal state)</td>
+                </tr>
+            </table>
+
+            <h3>Supported Algorithms</h3>
+            <ul>
+                <li><strong>On-Policy</strong> - PPO-like training with current policy data</li>
+                <li><strong>Off-Policy</strong> - SAC-like training with replay buffer</li>
+                <li><strong>Continuous Control</strong> - Gaussian policies for continuous action spaces</li>
+            </ul>
+        </section>
+
+        <section id="agent-base">
+            <h2>2. Agent Base Class</h2>
+            <div class="class-header">
+                <code>class ndBrainAgent : public ndClassAlloc</code>
+            </div>
+            <p>
+                All RL agents inherit from <code>ndBrainAgent</code>, which defines the
+                core interface for environment interaction and training.
+            </p>
+
+            <h3>Pure Virtual Methods (Must Implement)</h3>
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td><code>Step()</code></td>
+                    <td>Execute one environment step (observe, act)</td>
+                </tr>
+                <tr>
+                    <td><code>OptimizeStep()</code></td>
+                    <td>Perform one training update</td>
+                </tr>
+                <tr>
+                    <td><code>InitWeights()</code></td>
+                    <td>Initialize network weights</td>
+                </tr>
+                <tr>
+                    <td><code>IsTrainer()</code></td>
+                    <td>Returns true if agent is in training mode</td>
+                </tr>
+            </table>
+
+            <h3>Protected Methods (Override in Subclass)</h3>
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td><code>GetObservation(obs)</code></td>
+                    <td>Fill observation buffer with current state</td>
+                </tr>
+                <tr>
+                    <td><code>ApplyActions(actions)</code></td>
+                    <td>Apply agent's action output to environment</td>
+                </tr>
+                <tr>
+                    <td><code>CalculateReward()</code></td>
+                    <td>Compute reward for current state/action</td>
+                </tr>
+                <tr>
+                    <td><code>IsTerminal()</code></td>
+                    <td>Check if episode has ended</td>
+                </tr>
+                <tr>
+                    <td><code>ResetModel()</code></td>
+                    <td>Reset environment for new episode</td>
+                </tr>
+                <tr>
+                    <td><code>GetEpisodeFrames()</code></td>
+                    <td>Current frame count in episode</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="policy-gradient">
+            <h2>3. Policy Gradient Agents</h2>
+
+            <h3>Continuous Policy Gradient</h3>
+            <div class="class-header">
+                <code>class ndBrainAgentContinuePolicyGradient : public ndBrainAgent</code>
+            </div>
+            <p>
+                Base class for continuous control using Gaussian policies. Actions are sampled
+                from a normal distribution parameterized by mean and variance.
+            </p>
+
+            <h3>On-Policy Trainer (PPO-like)</h3>
+            <div class="class-header">
+                <code>class ndBrainAgentOnPolicyGradient_Trainer</code>
+            </div>
+            <p>
+                Collects trajectories using the current policy and updates immediately.
+                Good for exploration-heavy tasks.
+            </p>
+            <ul>
+                <li>Updates policy using collected experience</li>
+                <li>Discards data after each update</li>
+                <li>More sample efficient for exploration</li>
+            </ul>
+
+            <h3>Off-Policy Trainer (SAC-like)</h3>
+            <div class="class-header">
+                <code>class ndBrainAgentOffPolicyGradient_Trainer</code>
+            </div>
+            <p>
+                Uses a replay buffer to store past experience. More sample efficient
+                for stable environments.
+            </p>
+            <ul>
+                <li>Maintains replay buffer of past transitions</li>
+                <li>Can reuse old data for multiple updates</li>
+                <li>Better sample efficiency</li>
+                <li>Entropy regularization for exploration</li>
+            </ul>
+        </section>
+
+        <section id="implementing">
+            <h2>4. Implementing Agents</h2>
+            <p>
+                Create a custom agent by inheriting from the policy gradient class and
+                implementing the required methods.
+            </p>
+
+<pre><code>class MyRobotAgent : public ndBrainAgentContinuePolicyGradient
+{
+public:
+    MyRobotAgent(const ndSharedPtr&lt;ndBrain&gt;&amp; brain, ndBodyDynamic* robot)
+        : ndBrainAgentContinuePolicyGradient(brain)
+        , m_robot(robot)
+        , m_frameCount(0)
+    {
+    }
+
+    // Fill observation with robot state
+    virtual void GetObservation(ndBrainFloat* const observation) override
+    {
+        // Get robot position
+        ndVector pos = m_robot->GetMatrix().m_posit;
+        observation[0] = pos.m_x;
+        observation[1] = pos.m_y;
+        observation[2] = pos.m_z;
+
+        // Get robot velocity
+        ndVector vel = m_robot->GetVelocity();
+        observation[3] = vel.m_x;
+        observation[4] = vel.m_y;
+        observation[5] = vel.m_z;
+
+        // Add more state as needed...
+    }
+
+    // Apply network output as forces/torques
+    virtual void ApplyActions(ndBrainFloat* const actions) override
+    {
+        // Scale actions to physical range
+        ndVector force(
+            actions[0] * 100.0f,
+            actions[1] * 100.0f,
+            actions[2] * 100.0f,
+            0.0f
+        );
+        m_robot->SetForce(force);
+    }
+
+    // Compute reward signal
+    virtual ndBrainFloat CalculateReward() override
+    {
+        // Reward for staying upright
+        ndMatrix matrix = m_robot->GetMatrix();
+        ndFloat32 upright = matrix.m_up.m_y;  // 1.0 when upright
+
+        // Penalty for falling
+        ndFloat32 height = matrix.m_posit.m_y;
+        if (height &lt; 0.5f) return -10.0f;
+
+        // Reward forward progress
+        ndVector vel = m_robot->GetVelocity();
+        ndFloat32 forwardSpeed = vel.m_x;
+
+        return upright * 0.1f + forwardSpeed * 0.01f;
+    }
+
+    // Check if episode should end
+    virtual bool IsTerminal() const override
+    {
+        // Terminate if fallen
+        ndMatrix matrix = m_robot->GetMatrix();
+        if (matrix.m_posit.m_y &lt; 0.3f) return true;
+
+        // Terminate if too many steps
+        if (m_frameCount &gt; 1000) return true;
+
+        return false;
+    }
+
+    // Reset for new episode
+    virtual void ResetModel() override
+    {
+        // Reset robot to initial pose
+        ndMatrix matrix(ndGetIdentityMatrix());
+        matrix.m_posit = ndVector(0.0f, 1.0f, 0.0f, 1.0f);
+        m_robot->SetMatrix(matrix);
+        m_robot->SetVelocity(ndVector::m_zero);
+        m_robot->SetOmega(ndVector::m_zero);
+
+        m_frameCount = 0;
+    }
+
+    virtual ndInt32 GetEpisodeFrames() const override
+    {
+        return m_frameCount;
+    }
+
+private:
+    ndBodyDynamic* m_robot;
+    ndInt32 m_frameCount;
+};</code></pre>
+        </section>
+
+        <section id="training">
+            <h2>5. Training Process</h2>
+
+            <h3>Creating the Policy Network</h3>
+<pre><code>// Observation: 12 values (position, velocity, orientation, angular velocity)
+// Actions: 6 values (torques for 6 joints)
+const ndInt32 observationSize = 12;
+const ndInt32 actionSize = 6;
+
+ndSharedPtr&lt;ndBrain&gt; policyNetwork(new ndBrain());
+policyNetwork->AddLayer(new ndBrainLayerLinear(observationSize, 256));
+policyNetwork->AddLayer(new ndBrainLayerActivationTanh(256));
+policyNetwork->AddLayer(new ndBrainLayerLinear(256, 128));
+policyNetwork->AddLayer(new ndBrainLayerActivationTanh(128));
+policyNetwork->AddLayer(new ndBrainLayerLinear(128, actionSize));
+policyNetwork->AddLayer(new ndBrainLayerActivationTanh(actionSize));  // [-1, 1]
+policyNetwork->InitWeights();</code></pre>
+
+            <h3>Training Loop</h3>
+<pre><code>// Create agent
+MyRobotAgent agent(policyNetwork, robotBody);
+
+// Training loop
+const ndInt32 totalSteps = 1000000;
+ndInt32 stepCount = 0;
+
+while (stepCount &lt; totalSteps)
+{
+    // Run physics simulation step
+    world.Update(1.0f / 60.0f);
+    world.Sync();
+
+    // Agent observes and acts
+    agent.Step();
+
+    // Check for episode end
+    if (agent.IsTerminal())
+    {
+        // Perform training update
+        agent.OptimizeStep();
+
+        // Reset for new episode
+        agent.ResetModel();
+    }
+
+    stepCount++;
+
+    // Periodic logging
+    if (stepCount % 10000 == 0)
+    {
+        printf("Step %d\n", stepCount);
+    }
+}
+
+// Save trained agent
+agent.SaveToFile("trained_robot.bin");</code></pre>
+        </section>
+
+        <section id="physics-integration">
+            <h2>6. Physics Integration</h2>
+            <p>
+                dBrain is designed for tight integration with Newton Dynamics physics.
+                Common use cases include:
+            </p>
+
+            <h3>Robot Locomotion</h3>
+<pre><code>// Observation includes joint angles and velocities
+void GetObservation(ndBrainFloat* const obs) override
+{
+    ndInt32 idx = 0;
+
+    // Base position and velocity
+    ndVector pos = m_body->GetMatrix().m_posit;
+    ndVector vel = m_body->GetVelocity();
+    obs[idx++] = pos.m_y;  // height
+    obs[idx++] = vel.m_x;
+    obs[idx++] = vel.m_z;
+
+    // Each joint angle and angular velocity
+    for (ndInt32 i = 0; i &lt; m_joints.GetCount(); i++)
+    {
+        obs[idx++] = m_joints[i]->GetAngle();
+        obs[idx++] = m_joints[i]->GetOmega();
+    }
+}</code></pre>
+
+            <h3>Vehicle Control</h3>
+<pre><code>// Actions control steering and throttle
+void ApplyActions(ndBrainFloat* const actions) override
+{
+    ndFloat32 steering = actions[0] * m_maxSteering;  // [-30, 30] degrees
+    ndFloat32 throttle = actions[1];                   // [-1, 1]
+
+    m_vehicle->SetSteering(steering);
+    m_vehicle->SetThrottle(throttle);
+}</code></pre>
+
+            <h3>Reward Design Tips</h3>
+            <ul>
+                <li><strong>Dense rewards</strong> - Provide frequent feedback, not just at episode end</li>
+                <li><strong>Scale appropriately</strong> - Keep rewards in reasonable range (-10 to 10)</li>
+                <li><strong>Shape carefully</strong> - Guide exploration without over-constraining</li>
+                <li><strong>Avoid reward hacking</strong> - Agent will exploit any shortcut</li>
+            </ul>
+
+<pre><code>// Example: Balanced walking reward
+ndBrainFloat CalculateReward() override
+{
+    ndBrainFloat reward = 0.0f;
+
+    // Reward forward velocity
+    ndVector vel = m_body->GetVelocity();
+    reward += vel.m_x * 0.1f;
+
+    // Reward staying upright
+    ndMatrix mat = m_body->GetMatrix();
+    reward += mat.m_up.m_y * 0.05f;
+
+    // Penalize energy use (encourage efficiency)
+    reward -= m_totalTorque * 0.001f;
+
+    // Penalize falling (terminal)
+    if (mat.m_posit.m_y &lt; 0.3f)
+    {
+        reward = -10.0f;
+    }
+
+    return reward;
+}</code></pre>
+
+            <div class="note">
+                <strong>Best Practices:</strong>
+                <ul>
+                    <li>Normalize observations to [-1, 1] or [0, 1] range</li>
+                    <li>Use tanh output activation for bounded actions</li>
+                    <li>Train with multiple parallel environments for efficiency</li>
+                    <li>Start with simple tasks and gradually increase complexity</li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="gpu-compute.html">GPU Acceleration</a> - Speed up training</li>
+                <li><a href="training.html">Training Pipeline</a> - Supervised learning details</li>
+            </ul>
+        </section>
+    </div>
+</body>
+</html>

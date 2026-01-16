@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Pipeline - dBrain Neural Network Library</title>
+    <style>
+        :root {
+            --primary-color: #7c3aed;
+            --secondary-color: #6d28d9;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        nav.toc {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            margin-bottom: 1rem;
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        nav.toc ul {
+            list-style: none;
+            columns: 2;
+        }
+
+        nav.toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav.toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        nav.toc a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h3 {
+            color: var(--heading-color);
+            font-size: 1.35rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #ede9fe;
+            color: #6d28d9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f5f3ff;
+            font-weight: 600;
+        }
+
+        .note {
+            background: #faf5ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .class-header {
+            background: #f5f3ff;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+        }
+
+        .class-header code {
+            background: none;
+            font-size: 1.1em;
+        }
+
+        .formula {
+            background: #f8f9fa;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            margin: 0.5rem 0;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Training Pipeline</h1>
+            <p>Trainers, optimizers, loss functions, and backpropagation</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; Back to dBrain Documentation</a>
+
+        <nav class="toc">
+            <h2>Contents</h2>
+            <ul>
+                <li><a href="#overview">1. Training Overview</a></li>
+                <li><a href="#trainer">2. ndBrainTrainer</a></li>
+                <li><a href="#optimizers">3. Optimizers</a></li>
+                <li><a href="#loss">4. Loss Functions</a></li>
+                <li><a href="#training-loop">5. Training Loop</a></li>
+                <li><a href="#regularization">6. Regularization</a></li>
+            </ul>
+        </nav>
+
+        <section id="overview">
+            <h2>1. Training Overview</h2>
+            <p>
+                Training a neural network involves iteratively updating weights to minimize
+                a loss function. dBrain provides infrastructure for:
+            </p>
+            <ul>
+                <li><strong>Forward Pass</strong> - Compute predictions from inputs</li>
+                <li><strong>Loss Computation</strong> - Measure prediction error</li>
+                <li><strong>Backpropagation</strong> - Compute gradients for all weights</li>
+                <li><strong>Optimization</strong> - Update weights using gradients</li>
+            </ul>
+
+            <h3>Training Components</h3>
+            <table>
+                <tr>
+                    <th>Component</th>
+                    <th>Class</th>
+                    <th>Purpose</th>
+                </tr>
+                <tr>
+                    <td>Trainer</td>
+                    <td><code>ndBrainTrainer</code></td>
+                    <td>Manages forward/backward passes, buffers</td>
+                </tr>
+                <tr>
+                    <td>Optimizer</td>
+                    <td><code>ndBrainOptimizerAdam</code></td>
+                    <td>Updates weights using gradients</td>
+                </tr>
+                <tr>
+                    <td>Loss</td>
+                    <td><code>ndBrainLoss*</code></td>
+                    <td>Computes error and gradient</td>
+                </tr>
+                <tr>
+                    <td>Context</td>
+                    <td><code>ndBrainGpuContext</code></td>
+                    <td>GPU/CPU execution backend</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="trainer">
+            <h2>2. ndBrainTrainer</h2>
+            <div class="class-header">
+                <code>class ndBrainTrainer : public ndBrainTrainerInference</code>
+            </div>
+            <p>
+                The trainer manages the full training pipeline including gradient computation
+                and buffer management for mini-batch processing.
+            </p>
+
+            <h3>Creating a Trainer</h3>
+<pre><code>// Create context (GPU or CPU)
+ndSharedPtr&lt;ndBrainContext&gt; context(new ndBrainGpuContext());
+
+// Create optimizer
+ndSharedPtr&lt;ndBrainOptimizer&gt; optimizer(new ndBrainOptimizerAdam(context));
+
+// Create trainer descriptor
+ndTrainerDescriptor descriptor;
+descriptor.m_brain = &amp;brain;
+descriptor.m_context = context;
+descriptor.m_miniBatchSize = 32;
+
+// Create trainer
+ndBrainTrainer trainer(descriptor, optimizer);</code></pre>
+
+            <h3>Key Methods</h3>
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>MakePrediction()</code></td>
+                    <td>Forward pass for mini-batch</td>
+                </tr>
+                <tr>
+                    <td><code>BackPropagate()</code></td>
+                    <td>Compute gradients via backprop</td>
+                </tr>
+                <tr>
+                    <td><code>ApplyLearnRate(lr)</code></td>
+                    <td>Update weights with learning rate</td>
+                </tr>
+                <tr>
+                    <td><code>GetInputBuffer()</code></td>
+                    <td>Access input mini-batch buffer</td>
+                </tr>
+                <tr>
+                    <td><code>GetOuputBuffer()</code></td>
+                    <td>Access output mini-batch buffer</td>
+                </tr>
+            </table>
+
+            <h3>Inference-Only Trainer</h3>
+            <div class="class-header">
+                <code>class ndBrainTrainerInference</code>
+            </div>
+            <p>
+                For inference without gradient computation, use <code>ndBrainTrainerInference</code>
+                which provides efficient batched forward passes.
+            </p>
+        </section>
+
+        <section id="optimizers">
+            <h2>3. Optimizers</h2>
+
+            <h3>Adam Optimizer</h3>
+            <div class="class-header">
+                <code>class ndBrainOptimizerAdam : public ndBrainOptimizer</code>
+            </div>
+            <p>
+                Adam (Adaptive Moment Estimation) is the recommended optimizer. It maintains
+                first and second moment estimates for adaptive learning rates.
+            </p>
+
+            <h4>Default Parameters</h4>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>beta (&#x03B2;)</td>
+                    <td>0.999</td>
+                    <td>Second moment decay rate</td>
+                </tr>
+                <tr>
+                    <td>alpha (&#x03B1;)</td>
+                    <td>0.9</td>
+                    <td>First moment decay rate</td>
+                </tr>
+                <tr>
+                    <td>epsilon (&#x03B5;)</td>
+                    <td>1e-6</td>
+                    <td>Numerical stability constant</td>
+                </tr>
+                <tr>
+                    <td>decay</td>
+                    <td>1e-4</td>
+                    <td>Weight decay regularizer</td>
+                </tr>
+            </table>
+
+<pre><code>// Create Adam optimizer
+ndSharedPtr&lt;ndBrainContext&gt; context(new ndBrainGpuContext());
+ndSharedPtr&lt;ndBrainOptimizer&gt; adam(new ndBrainOptimizerAdam(context));
+
+// Apply weight updates with learning rate
+adam-&gt;ApplyLearnRate(0.001f);</code></pre>
+
+            <h3>SGD Optimizer</h3>
+            <div class="class-header">
+                <code>class ndBrainOptimizerSgd : public ndBrainOptimizer</code>
+            </div>
+            <p>
+                Simple stochastic gradient descent, available for comparison or specific use cases.
+            </p>
+<pre><code>ndSharedPtr&lt;ndBrainOptimizer&gt; sgd(new ndBrainOptimizerSgd(context));</code></pre>
+
+            <div class="note">
+                <strong>Recommendation:</strong> Use Adam for most training scenarios. SGD may
+                converge to better minima in some cases but requires more careful tuning.
+            </div>
+        </section>
+
+        <section id="loss">
+            <h2>4. Loss Functions</h2>
+            <div class="class-header">
+                <code>class ndBrainLoss : public ndClassAlloc</code>
+            </div>
+            <p>
+                Loss functions measure prediction error and provide gradients for backpropagation.
+            </p>
+
+            <h3>Mean Squared Error (Regression)</h3>
+            <div class="class-header">
+                <code>class ndBrainLossLeastSquaredError : public ndBrainLoss</code>
+            </div>
+            <div class="formula">L = (1/n) * sum((output - target)^2)</div>
+
+<pre><code>// Create MSE loss with target values
+ndBrainVector target(outputSize);
+// ... fill target with ground truth ...
+
+ndBrainLossLeastSquaredError loss(target);
+
+// Get loss gradient (for backprop)
+ndBrainVector lossGradient(outputSize);
+loss.GetLoss(output, lossGradient);</code></pre>
+
+            <h3>Cross-Entropy Loss (Classification)</h3>
+            <div class="class-header">
+                <code>class ndBrainLossCategoricalCrossEntropy : public ndBrainLoss</code>
+            </div>
+            <div class="formula">L = -sum(target * log(output))</div>
+
+<pre><code>// Create cross-entropy loss
+// target is one-hot encoded class labels
+ndBrainVector target(numClasses);
+target.Set(0.0f);
+target[correctClass] = 1.0f;
+
+ndBrainLossCategoricalCrossEntropy loss(target);
+
+// Get loss gradient
+ndBrainVector lossGradient(numClasses);
+loss.GetLoss(output, lossGradient);</code></pre>
+
+            <h3>Choosing Loss Functions</h3>
+            <table>
+                <tr>
+                    <th>Task</th>
+                    <th>Output Layer</th>
+                    <th>Loss Function</th>
+                </tr>
+                <tr>
+                    <td>Regression</td>
+                    <td>Linear</td>
+                    <td>LeastSquaredError</td>
+                </tr>
+                <tr>
+                    <td>Binary Classification</td>
+                    <td>Sigmoid</td>
+                    <td>CrossEntropy</td>
+                </tr>
+                <tr>
+                    <td>Multi-class Classification</td>
+                    <td>Softmax</td>
+                    <td>CategoricalCrossEntropy</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="training-loop">
+            <h2>5. Training Loop</h2>
+            <p>
+                A complete training loop processes mini-batches, computes losses,
+                and updates weights.
+            </p>
+
+<pre><code>// Setup
+ndBrain brain;
+// ... build network architecture ...
+brain.InitWeights();
+
+// Create training infrastructure
+ndSharedPtr&lt;ndBrainContext&gt; context(new ndBrainGpuContext());
+ndSharedPtr&lt;ndBrainOptimizer&gt; optimizer(new ndBrainOptimizerAdam(context));
+
+ndTrainerDescriptor descriptor;
+descriptor.m_brain = &amp;brain;
+descriptor.m_context = context;
+descriptor.m_miniBatchSize = 32;
+
+ndBrainTrainer trainer(descriptor, optimizer);
+
+// Training parameters
+const ndInt32 epochs = 100;
+const ndBrainFloat learningRate = 0.001f;
+
+// Training loop
+for (ndInt32 epoch = 0; epoch &lt; epochs; epoch++)
+{
+    ndBrainFloat epochLoss = 0.0f;
+    ndInt32 batchCount = 0;
+
+    // Shuffle training data each epoch
+    ShuffleData(trainingData);
+
+    // Process mini-batches
+    for (ndInt32 batch = 0; batch &lt; numSamples; batch += miniBatchSize)
+    {
+        // Load mini-batch into trainer buffers
+        ndBrainFloatBuffer* inputBuffer = trainer.GetInputBuffer();
+        // ... copy batch inputs to inputBuffer ...
+
+        // Forward pass
+        trainer.MakePrediction();
+
+        // Compute loss gradients
+        ndBrainFloatBuffer* outputBuffer = trainer.GetOuputBuffer();
+        ndBrainFloatBuffer* gradientBuffer = trainer.GetOuputGradientBuffer();
+        // ... compute loss and set gradients ...
+
+        // Backward pass
+        trainer.BackPropagate();
+
+        // Update weights
+        trainer.ApplyLearnRate(learningRate);
+
+        epochLoss += ComputeBatchLoss();
+        batchCount++;
+    }
+
+    printf("Epoch %d, Loss: %f\n", epoch, epochLoss / batchCount);
+}</code></pre>
+
+            <h3>Learning Rate Scheduling</h3>
+<pre><code>// Decay learning rate over time
+ndBrainFloat GetLearningRate(ndInt32 epoch, ndBrainFloat initialLR)
+{
+    // Exponential decay
+    ndBrainFloat decay = 0.95f;
+    return initialLR * ndPow(decay, ndBrainFloat(epoch));
+}
+
+// Step decay
+ndBrainFloat StepDecay(ndInt32 epoch, ndBrainFloat initialLR)
+{
+    if (epoch &lt; 50) return initialLR;
+    if (epoch &lt; 100) return initialLR * 0.1f;
+    return initialLR * 0.01f;
+}</code></pre>
+        </section>
+
+        <section id="regularization">
+            <h2>6. Regularization</h2>
+            <p>
+                Regularization techniques prevent overfitting by constraining model complexity.
+            </p>
+
+            <h3>Dropout</h3>
+<pre><code>// Enable dropout during training (20% dropout rate)
+brain.ApplyDropOutRate(0.2f);
+
+// Disable for validation/inference
+brain.ResetDropOut();</code></pre>
+
+            <h3>L1 Regularization (Lasso)</h3>
+<pre><code>// Add L1 penalty to gradients
+// Encourages sparse weights
+layer->AddReqularizerL1(weightsLayer, regularizationStrength);</code></pre>
+
+            <h3>L2 Regularization (Ridge)</h3>
+<pre><code>// Add L2 penalty to gradients
+// Encourages small weights
+layer->AddReqularizerL2(weightsLayer, regularizationStrength);</code></pre>
+
+            <h3>Weight Decay</h3>
+            <p>
+                The Adam optimizer includes built-in weight decay (default 1e-4).
+                This acts as L2 regularization applied directly during optimization.
+            </p>
+
+            <div class="note">
+                <strong>Best Practices:</strong>
+                <ul>
+                    <li>Start with dropout 0.2-0.5 for hidden layers</li>
+                    <li>Use L2 regularization (1e-4 to 1e-3) for most networks</li>
+                    <li>Monitor validation loss to detect overfitting</li>
+                    <li>Reduce regularization if underfitting</li>
+                </ul>
+            </div>
+        </section>
+
+        <section>
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="reinforcement-learning.html">Reinforcement Learning</a> - Train RL agents</li>
+                <li><a href="gpu-compute.html">GPU Acceleration</a> - Optimize training performance</li>
+            </ul>
+        </section>
+    </div>
+</body>
+</html>

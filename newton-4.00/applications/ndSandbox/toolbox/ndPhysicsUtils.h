@@ -1,0 +1,46 @@
+/* Copyright (c) <2003-2022> <Newton Game Dynamics>
+* 
+* This software is provided 'as-is', without any express or implied
+* warranty. In no event will the authors be held liable for any damages
+* arising from the use of this software.
+* 
+* Permission is granted to anyone to use this software for any purpose,
+* including commercial applications, and to alter it and redistribute it
+* freely
+*/
+
+#ifndef __PHYSICS_UTIL__
+#define __PHYSICS_UTIL__
+
+#define DEMO_GRAVITY  ndFloat32(-10.0f)
+//#define DEMO_GRAVITY  ndFloat32(-1.0f)
+//#define DEMO_GRAVITY  ndFloat32(0.0f)
+
+class ndDemoEntityManager;
+
+ndVector FindFloor(const ndWorld& world, const ndVector& origin, ndFloat32 dist);
+ndMatrix FindFloor(const ndWorld& world, const ndMatrix& origin, const ndShapeInstance& shape, ndFloat32 dist);
+ndVector FindFloor(const ndWorld& world, const ndVector& origin, const ndShapeInstance& shape, ndFloat32 dist);
+
+ndSharedPtr<ndBody> CreateRigidbody(ndDemoEntityManager* const scene,
+	ndSharedPtr<ndShapeInstance>& shape,
+	const ndMatrix& location,
+	ndFloat32 mass,
+	const char* const textName,
+	ndRenderPrimitive::ndUvMapingMode mappingMode);
+
+ndSharedPtr<ndBody> CreateBox(ndDemoEntityManager* const scene, const ndMatrix& origin, ndFloat32 mass, ndFloat32 sizex, ndFloat32 sizey, ndFloat32 sizez, const char* const textName = "wood_0.png");
+ndSharedPtr<ndBody> CreateSphere(ndDemoEntityManager* const scene, const ndMatrix& origin, ndFloat32 mass, ndFloat32 radius, const char* const textName = "wood_0.png");
+ndSharedPtr<ndBody> CreateCapsule(ndDemoEntityManager* const scene, const ndMatrix& origin, ndFloat32 mass, ndFloat32 radius0, ndFloat32 radius1, ndFloat32 high, const char* const textName = "wood_1.png");
+ndSharedPtr<ndBody> CreateCylinder(ndDemoEntityManager* const scene, const ndMatrix& origin, ndFloat32 mass, ndFloat32 radius0, ndFloat32 radius1, ndFloat32 high, const char* const textName = "wood_1.png");
+
+ndSharedPtr<ndBody> AddSphere(ndDemoEntityManager* const scene, const ndMatrix& origin, ndFloat32 mass, ndFloat32 radius, const char* const textName = "smilli.png");
+ndSharedPtr<ndBody> AddBox(ndDemoEntityManager* const scene, const ndMatrix& origin, ndFloat32 mass, ndFloat32 sizex, ndFloat32 sizey, ndFloat32 sizez, const char* const textName = "wood_0.png");
+ndSharedPtr<ndBody> AddCapsule(ndDemoEntityManager* const scene, const ndMatrix& origin, ndFloat32 mass, ndFloat32 radius0, ndFloat32 radius1, ndFloat32 high, const char* const textName = "wood_1.png");
+ndSharedPtr<ndBody> AddCylinder(ndDemoEntityManager* const scene, const ndMatrix& origin, ndFloat32 mass, ndFloat32 radius0, ndFloat32 radius1, ndFloat32 high, const char* const textName = "wood_1.png");
+ndSharedPtr<ndBody> AddConvexHull(ndDemoEntityManager* const scene, const ndMatrix& origin, ndFloat32 mass, ndFloat32 radius, ndFloat32 high, ndInt32 segments, const char* const textName = "wood_0.png");
+
+void AddPlanks(ndDemoEntityManager* const scene, const ndMatrix& origin, ndFloat32 mass, ndInt32 count);
+void AddCapsuleStacks(ndDemoEntityManager* const scene, const ndMatrix& origin, ndFloat32 mass, ndFloat32 radius0, ndFloat32 radius1, ndFloat32 high, ndInt32 rows_x, ndInt32 rows_z, ndInt32 columHigh);
+
+#endif

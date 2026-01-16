@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Primitives - Newton Dynamics 4.00</title>
+    <style>
+        :root {
+            --primary-color: #7c3aed;
+            --secondary-color: #6d28d9;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        nav.toc {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            margin-bottom: 1rem;
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        nav.toc ul {
+            list-style: none;
+            columns: 2;
+        }
+
+        nav.toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav.toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        nav.toc a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h3 {
+            color: var(--heading-color);
+            font-size: 1.35rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            color: var(--heading-color);
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #e2e8f0;
+            color: #be185d;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: var(--heading-color);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .tip {
+            background: #dcfce7;
+            border-left: 4px solid #22c55e;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .warning {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            nav.toc ul {
+                columns: 1;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            header {
+                padding: 2rem 1rem;
+            }
+
+            header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Math Primitives</h1>
+            <p>Newton Dynamics 4.00 Documentation</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; Back to Index</a>
+
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#overview">1. Overview</a></li>
+                <li><a href="#coordinate-system">2. Coordinate System</a></li>
+                <li><a href="#ndvector">3. ndVector</a></li>
+                <li><a href="#ndmatrix">4. ndMatrix</a></li>
+                <li><a href="#ndquaternion">5. ndQuaternion</a></li>
+                <li><a href="#utility-functions">6. Utility Functions</a></li>
+                <li><a href="#simd">7. SIMD Implementation</a></li>
+                <li><a href="#examples">8. Examples</a></li>
+            </ul>
+        </nav>
+
+        <section id="overview">
+            <h2>1. Overview</h2>
+            <p>
+                Newton Dynamics provides optimized math types for physics simulation. All math types are SIMD-accelerated
+                on supported platforms (SSE3/AVX2 on x86, NEON on ARM) with scalar fallbacks available.
+            </p>
+
+            <table>
+                <tr>
+                    <th>Type</th>
+                    <th>Header</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>ndVector</code></td>
+                    <td><code>ndVector.h</code></td>
+                    <td>4-component vector (x, y, z, w) - positions, directions, colors</td>
+                </tr>
+                <tr>
+                    <td><code>ndMatrix</code></td>
+                    <td><code>ndMatrix.h</code></td>
+                    <td>4x4 transformation matrix - rotation + translation</td>
+                </tr>
+                <tr>
+                    <td><code>ndQuaternion</code></td>
+                    <td><code>ndQuaternion.h</code></td>
+                    <td>Unit quaternion - compact rotation representation</td>
+                </tr>
+                <tr>
+                    <td><code>ndBigVector</code></td>
+                    <td><code>ndVector.h</code></td>
+                    <td>Double-precision 4-component vector</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="coordinate-system">
+            <h2>2. Coordinate System</h2>
+            <p>Newton uses a <strong>right-handed coordinate system</strong>:</p>
+            <ul>
+                <li><strong>+X</strong> - Forward (out of screen)</li>
+                <li><strong>+Y</strong> - Up</li>
+                <li><strong>+Z</strong> - Right</li>
+            </ul>
+
+            <p>Rotation conventions:</p>
+            <ul>
+                <li><strong>Pitch</strong> - rotation around X axis</li>
+                <li><strong>Yaw</strong> - rotation around Y axis</li>
+                <li><strong>Roll</strong> - rotation around Z axis</li>
+            </ul>
+
+            <div class="note">
+                <strong>Note:</strong> Newton uses column-major matrices with basis vectors stored as rows.
+                The matrix <code>m_front</code>, <code>m_up</code>, <code>m_right</code> members are the local axes,
+                and <code>m_posit</code> is the translation.
+            </div>
+        </section>
+
+        <section id="ndvector">
+            <h2>3. ndVector</h2>
+            <p>
+                A 4-component SIMD-optimized vector. The fourth component (w) is used for homogeneous coordinates
+                and SIMD padding.
+            </p>
+
+            <h3>Structure</h3>
+<pre><code>class ndVector
+{
+public:
+    // Components (union with SIMD register)
+    ndFloat32 m_x, m_y, m_z, m_w;
+
+    // Static constants
+    static ndVector m_zero;      // (0, 0, 0, 0)
+    static ndVector m_one;       // (1, 1, 1, 1)
+    static ndVector m_wOne;      // (0, 0, 0, 1)
+    static ndVector m_half;      // (0.5, 0.5, 0.5, 0.5)
+    static ndVector m_negOne;    // (-1, -1, -1, -1)
+    static ndVector m_xMask;     // Mask for x component
+    static ndVector m_triplexMask; // Mask for xyz (w=0)
+};</code></pre>
+
+            <h3>Constructors</h3>
+            <table>
+                <tr>
+                    <th>Constructor</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>ndVector()</code></td>
+                    <td>Uninitialized (for performance)</td>
+                </tr>
+                <tr>
+                    <td><code>ndVector(ndFloat32 val)</code></td>
+                    <td>Broadcast single value to all components</td>
+                </tr>
+                <tr>
+                    <td><code>ndVector(x, y, z, w)</code></td>
+                    <td>Explicit component initialization</td>
+                </tr>
+                <tr>
+                    <td><code>ndVector(const ndFloat32* ptr)</code></td>
+                    <td>Load from array</td>
+                </tr>
+            </table>
+
+            <h3>Key Methods</h3>
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>Returns</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>DotProduct(v)</code></td>
+                    <td><code>ndVector</code></td>
+                    <td>4D dot product (result broadcast to all components)</td>
+                </tr>
+                <tr>
+                    <td><code>CrossProduct(v)</code></td>
+                    <td><code>ndVector</code></td>
+                    <td>3D cross product (w=0)</td>
+                </tr>
+                <tr>
+                    <td><code>Normalize()</code></td>
+                    <td><code>ndVector</code></td>
+                    <td>Returns unit vector</td>
+                </tr>
+                <tr>
+                    <td><code>Scale(s)</code></td>
+                    <td><code>ndVector</code></td>
+                    <td>Multiply all components by scalar</td>
+                </tr>
+                <tr>
+                    <td><code>GetScalar()</code></td>
+                    <td><code>ndFloat32</code></td>
+                    <td>Extract x component as scalar</td>
+                </tr>
+                <tr>
+                    <td><code>GetMax(v)</code></td>
+                    <td><code>ndVector</code></td>
+                    <td>Component-wise maximum</td>
+                </tr>
+                <tr>
+                    <td><code>GetMin(v)</code></td>
+                    <td><code>ndVector</code></td>
+                    <td>Component-wise minimum</td>
+                </tr>
+                <tr>
+                    <td><code>Abs()</code></td>
+                    <td><code>ndVector</code></td>
+                    <td>Absolute value of all components</td>
+                </tr>
+                <tr>
+                    <td><code>Reciproc()</code></td>
+                    <td><code>ndVector</code></td>
+                    <td>1/x for each component</td>
+                </tr>
+                <tr>
+                    <td><code>InvSqrt()</code></td>
+                    <td><code>ndVector</code></td>
+                    <td>1/sqrt(x) for each component</td>
+                </tr>
+            </table>
+
+            <h3>Operators</h3>
+<pre><code>ndVector a(1, 2, 3, 0);
+ndVector b(4, 5, 6, 0);
+
+ndVector c = a + b;      // Component-wise add
+ndVector d = a - b;      // Component-wise subtract
+ndVector e = a * b;      // Component-wise multiply
+ndVector f = a & b;      // Bitwise AND (for masks)
+ndVector g = a | b;      // Bitwise OR
+ndFloat32 x = a[0];      // Array access (0=x, 1=y, 2=z, 3=w)</code></pre>
+        </section>
+
+        <section id="ndmatrix">
+            <h2>4. ndMatrix</h2>
+            <p>
+                A 4x4 transformation matrix stored as four row vectors. Used for rigid body transformations
+                combining rotation and translation.
+            </p>
+
+            <h3>Structure</h3>
+<pre><code>class ndMatrix
+{
+public:
+    ndVector m_front;   // Local X axis (row 0)
+    ndVector m_up;      // Local Y axis (row 1)
+    ndVector m_right;   // Local Z axis (row 2)
+    ndVector m_posit;   // Translation  (row 3)
+};</code></pre>
+
+            <h3>Constructors</h3>
+            <table>
+                <tr>
+                    <th>Constructor</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>ndMatrix()</code></td>
+                    <td>Uninitialized</td>
+                </tr>
+                <tr>
+                    <td><code>ndMatrix(front, up, right, posit)</code></td>
+                    <td>From four row vectors</td>
+                </tr>
+                <tr>
+                    <td><code>ndMatrix(const ndFloat32* array)</code></td>
+                    <td>From 16-element array</td>
+                </tr>
+            </table>
+
+            <h3>Factory Functions</h3>
+            <table>
+                <tr>
+                    <th>Function</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>ndGetIdentityMatrix()</code></td>
+                    <td>Returns identity matrix</td>
+                </tr>
+                <tr>
+                    <td><code>ndGetZeroMatrix()</code></td>
+                    <td>Returns zero matrix</td>
+                </tr>
+                <tr>
+                    <td><code>ndPitchMatrix(angle)</code></td>
+                    <td>Rotation around X axis</td>
+                </tr>
+                <tr>
+                    <td><code>ndYawMatrix(angle)</code></td>
+                    <td>Rotation around Y axis</td>
+                </tr>
+                <tr>
+                    <td><code>ndRollMatrix(angle)</code></td>
+                    <td>Rotation around Z axis</td>
+                </tr>
+                <tr>
+                    <td><code>ndGramSchmidtMatrix(dir)</code></td>
+                    <td>Orthonormal basis from direction</td>
+                </tr>
+                <tr>
+                    <td><code>ndCalculateMatrix(quat, pos)</code></td>
+                    <td>From quaternion and position</td>
+                </tr>
+            </table>
+
+            <h3>Key Methods</h3>
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>TransformVector(v)</code></td>
+                    <td>Full transform: rotation + translation</td>
+                </tr>
+                <tr>
+                    <td><code>UntransformVector(v)</code></td>
+                    <td>Inverse transform</td>
+                </tr>
+                <tr>
+                    <td><code>RotateVector(v)</code></td>
+                    <td>Rotation only (ignores translation)</td>
+                </tr>
+                <tr>
+                    <td><code>UnrotateVector(v)</code></td>
+                    <td>Inverse rotation only</td>
+                </tr>
+                <tr>
+                    <td><code>Inverse()</code></td>
+                    <td>General 4x4 inverse</td>
+                </tr>
+                <tr>
+                    <td><code>OrthoInverse()</code></td>
+                    <td>Fast inverse for orthonormal matrices</td>
+                </tr>
+                <tr>
+                    <td><code>Transpose3x3()</code></td>
+                    <td>Transpose rotation part only</td>
+                </tr>
+                <tr>
+                    <td><code>Transpose4X4()</code></td>
+                    <td>Full 4x4 transpose</td>
+                </tr>
+                <tr>
+                    <td><code>operator*(B)</code></td>
+                    <td>Matrix multiplication</td>
+                </tr>
+                <tr>
+                    <td><code>CalcPitchYawRoll(euler)</code></td>
+                    <td>Extract Euler angles</td>
+                </tr>
+                <tr>
+                    <td><code>TestOrthogonal()</code></td>
+                    <td>Check if orthonormal</td>
+                </tr>
+            </table>
+
+            <div class="tip">
+                <strong>Performance Tip:</strong> Use <code>OrthoInverse()</code> instead of <code>Inverse()</code>
+                for rigid body transforms. It's much faster and numerically stable for orthonormal matrices.
+            </div>
+        </section>
+
+        <section id="ndquaternion">
+            <h2>5. ndQuaternion</h2>
+            <p>
+                A unit quaternion for representing rotations. Inherits from <code>ndVector</code> with
+                components (x, y, z, w) where w is the scalar part.
+            </p>
+
+            <h3>Structure</h3>
+<pre><code>class ndQuaternion : public ndVector
+{
+public:
+    // Identity quaternion: (0, 0, 0, 1)
+    // Components: (x, y, z, w) where w = cos(angle/2)
+};</code></pre>
+
+            <h3>Constructors</h3>
+            <table>
+                <tr>
+                    <th>Constructor</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>ndQuaternion()</code></td>
+                    <td>Identity quaternion (0, 0, 0, 1)</td>
+                </tr>
+                <tr>
+                    <td><code>ndQuaternion(x, y, z, w)</code></td>
+                    <td>Explicit components (auto-normalized)</td>
+                </tr>
+                <tr>
+                    <td><code>ndQuaternion(axis, angle)</code></td>
+                    <td>From axis-angle representation</td>
+                </tr>
+                <tr>
+                    <td><code>ndQuaternion(matrix)</code></td>
+                    <td>From rotation matrix</td>
+                </tr>
+            </table>
+
+            <h3>Key Methods</h3>
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>Normalize()</code></td>
+                    <td>Returns unit quaternion</td>
+                </tr>
+                <tr>
+                    <td><code>Inverse()</code></td>
+                    <td>Returns conjugate (negated xyz)</td>
+                </tr>
+                <tr>
+                    <td><code>operator*(q)</code></td>
+                    <td>Quaternion multiplication (combines rotations)</td>
+                </tr>
+                <tr>
+                    <td><code>RotateVector(v)</code></td>
+                    <td>Rotate a vector by the quaternion</td>
+                </tr>
+                <tr>
+                    <td><code>UnrotateVector(v)</code></td>
+                    <td>Inverse rotation</td>
+                </tr>
+                <tr>
+                    <td><code>Slerp(q1, t)</code></td>
+                    <td>Spherical linear interpolation</td>
+                </tr>
+                <tr>
+                    <td><code>GetEulerAngles(euler)</code></td>
+                    <td>Convert to Euler angles</td>
+                </tr>
+                <tr>
+                    <td><code>IntegrateOmega(omega, dt)</code></td>
+                    <td>Integrate angular velocity</td>
+                </tr>
+                <tr>
+                    <td><code>CalcAverageOmega(q1, invdt)</code></td>
+                    <td>Calculate angular velocity between quaternions</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="utility-functions">
+            <h2>6. Utility Functions</h2>
+
+            <h3>Scalar Math</h3>
+            <table>
+                <tr>
+                    <th>Function</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>ndSin(x)</code></td>
+                    <td>Sine</td>
+                </tr>
+                <tr>
+                    <td><code>ndCos(x)</code></td>
+                    <td>Cosine</td>
+                </tr>
+                <tr>
+                    <td><code>ndTan(x)</code></td>
+                    <td>Tangent</td>
+                </tr>
+                <tr>
+                    <td><code>ndAsin(x)</code></td>
+                    <td>Arc sine</td>
+                </tr>
+                <tr>
+                    <td><code>ndAcos(x)</code></td>
+                    <td>Arc cosine</td>
+                </tr>
+                <tr>
+                    <td><code>ndAtan2(y, x)</code></td>
+                    <td>Two-argument arc tangent</td>
+                </tr>
+                <tr>
+                    <td><code>ndSqrt(x)</code></td>
+                    <td>Square root</td>
+                </tr>
+                <tr>
+                    <td><code>ndRsqrt(x)</code></td>
+                    <td>Reciprocal square root (1/sqrt)</td>
+                </tr>
+                <tr>
+                    <td><code>ndFloor(x)</code></td>
+                    <td>Floor</td>
+                </tr>
+                <tr>
+                    <td><code>ndCeil(x)</code></td>
+                    <td>Ceiling</td>
+                </tr>
+                <tr>
+                    <td><code>ndAbs(x)</code></td>
+                    <td>Absolute value</td>
+                </tr>
+                <tr>
+                    <td><code>ndClamp(x, min, max)</code></td>
+                    <td>Clamp value to range</td>
+                </tr>
+            </table>
+
+            <h3>Angle Constants</h3>
+<pre><code>const ndFloat32 ndPi = 3.14159265358979323846f;
+const ndFloat32 ndDegreeToRad = ndPi / 180.0f;
+const ndFloat32 ndRadToDegree = 180.0f / ndPi;</code></pre>
+        </section>
+
+        <section id="simd">
+            <h2>7. SIMD Implementation</h2>
+            <p>Newton automatically selects the best SIMD implementation at compile time:</p>
+
+            <table>
+                <tr>
+                    <th>Platform</th>
+                    <th>Header</th>
+                    <th>Instructions</th>
+                </tr>
+                <tr>
+                    <td>x86/x64</td>
+                    <td><code>ndVectorSimd.h</code></td>
+                    <td>SSE3, AVX2 (optional)</td>
+                </tr>
+                <tr>
+                    <td>ARM/ARM64</td>
+                    <td><code>ndVectorArmNeon.h</code></td>
+                    <td>NEON</td>
+                </tr>
+                <tr>
+                    <td>Fallback</td>
+                    <td><code>ndVectorScalar.h</code></td>
+                    <td>Scalar C++</td>
+                </tr>
+            </table>
+
+            <p>To force scalar implementation, define <code>D_SCALAR_VECTOR_CLASS</code> or use CMake:</p>
+<pre><code>cmake .. -DNEWTON_SCALAR_VECTOR_CLASS=ON</code></pre>
+        </section>
+
+        <section id="examples">
+            <h2>8. Examples</h2>
+
+            <h3>Vector Operations</h3>
+<pre><code>// Create vectors
+ndVector pos(1.0f, 2.0f, 3.0f, 1.0f);  // Position (w=1)
+ndVector dir(1.0f, 0.0f, 0.0f, 0.0f);  // Direction (w=0)
+
+// Normalize direction
+ndVector unitDir = dir.Normalize();
+
+// Dot product (returns scalar in all components)
+ndFloat32 dot = dir.DotProduct(unitDir).GetScalar();
+
+// Cross product
+ndVector up(0.0f, 1.0f, 0.0f, 0.0f);
+ndVector right = dir.CrossProduct(up);
+
+// Scale
+ndVector scaled = pos.Scale(2.0f);
+
+// Mask xyz (set w to 0)
+ndVector xyz = pos & ndVector::m_triplexMask;</code></pre>
+
+            <h3>Matrix Operations</h3>
+<pre><code>// Identity matrix
+ndMatrix identity = ndGetIdentityMatrix();
+
+// Rotation matrices
+ndFloat32 angle = 45.0f * ndDegreeToRad;
+ndMatrix rotY = ndYawMatrix(angle);     // Rotate around Y
+ndMatrix rotX = ndPitchMatrix(angle);   // Rotate around X
+
+// Combine rotations
+ndMatrix combined = rotY * rotX;
+
+// Set position
+combined.m_posit = ndVector(10.0f, 5.0f, 0.0f, 1.0f);
+
+// Transform a point
+ndVector worldPos = combined.TransformVector(localPos);
+
+// Inverse transform (local from world)
+ndVector localPos = combined.UntransformVector(worldPos);
+
+// Create matrix from direction vector
+ndVector forward(1.0f, 0.0f, 1.0f, 0.0f);
+ndMatrix basis = ndGramSchmidtMatrix(forward.Normalize());</code></pre>
+
+            <h3>Quaternion Operations</h3>
+<pre><code>// Identity quaternion (no rotation)
+ndQuaternion identity;  // (0, 0, 0, 1)
+
+// From axis-angle
+ndVector axis(0.0f, 1.0f, 0.0f, 0.0f);  // Y-axis
+ndFloat32 angle = 90.0f * ndDegreeToRad;
+ndQuaternion q1(axis, angle);
+
+// From rotation matrix
+ndMatrix mat = ndYawMatrix(angle);
+ndQuaternion q2(mat);
+
+// Combine rotations
+ndQuaternion q3 = q1 * q2;
+
+// Interpolate (slerp)
+ndQuaternion qStart;
+ndQuaternion qEnd(axis, ndPi);
+ndQuaternion qMid = qStart.Slerp(qEnd, 0.5f);  // Halfway rotation
+
+// Convert to matrix
+ndVector position(0.0f, 10.0f, 0.0f, 1.0f);
+ndMatrix transform = ndCalculateMatrix(q3, position);
+
+// Rotate a vector
+ndVector rotated = q1.RotateVector(forward);</code></pre>
+        </section>
+    </div>
+
+    <footer>
+        Newton Dynamics 4.00 Documentation | <a href="index.html">Back to Index</a>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Structures - dBrain Neural Network Library</title>
+    <style>
+        :root {
+            --primary-color: #7c3aed;
+            --secondary-color: #6d28d9;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        nav.toc {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            margin-bottom: 1rem;
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        nav.toc ul {
+            list-style: none;
+            columns: 2;
+        }
+
+        nav.toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav.toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        nav.toc a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h3 {
+            color: var(--heading-color);
+            font-size: 1.35rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            color: var(--heading-color);
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #ede9fe;
+            color: #6d28d9;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f5f3ff;
+            font-weight: 600;
+        }
+
+        .note {
+            background: #faf5ff;
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        ul, ol {
+            margin: 1rem 0 1rem 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .class-header {
+            background: #f5f3ff;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+        }
+
+        .class-header code {
+            background: none;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Data Structures</h1>
+            <p>Core vector, matrix, and buffer types for neural network computation</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; Back to dBrain Documentation</a>
+
+        <nav class="toc">
+            <h2>Contents</h2>
+            <ul>
+                <li><a href="#overview">1. Overview</a></li>
+                <li><a href="#ndBrainVector">2. ndBrainVector</a></li>
+                <li><a href="#ndBrainMemVector">3. ndBrainMemVector</a></li>
+                <li><a href="#ndBrainFixSizeVector">4. ndBrainFixSizeVector</a></li>
+                <li><a href="#ndBrainMatrix">5. ndBrainMatrix</a></li>
+                <li><a href="#buffers">6. GPU Buffers</a></li>
+            </ul>
+        </nav>
+
+        <section id="overview">
+            <h2>1. Overview</h2>
+            <p>
+                dBrain provides specialized data structures optimized for neural network operations.
+                These types handle memory efficiently for both CPU and GPU computation.
+            </p>
+
+            <table>
+                <tr>
+                    <th>Type</th>
+                    <th>Purpose</th>
+                    <th>Header</th>
+                </tr>
+                <tr>
+                    <td><code>ndBrainVector</code></td>
+                    <td>Dynamic array of floats for activations, gradients</td>
+                    <td><code>ndBrainVector.h</code></td>
+                </tr>
+                <tr>
+                    <td><code>ndBrainMemVector</code></td>
+                    <td>Memory-mapped vector wrapper</td>
+                    <td><code>ndBrainVector.h</code></td>
+                </tr>
+                <tr>
+                    <td><code>ndBrainFixSizeVector&lt;N&gt;</code></td>
+                    <td>Stack-allocated fixed-size vector</td>
+                    <td><code>ndBrainVector.h</code></td>
+                </tr>
+                <tr>
+                    <td><code>ndBrainMatrix</code></td>
+                    <td>2D array for weight matrices</td>
+                    <td><code>ndBrainMatrix.h</code></td>
+                </tr>
+                <tr>
+                    <td><code>ndBrainFloatBuffer</code></td>
+                    <td>GPU-compatible float buffer</td>
+                    <td><code>ndBrainFloatBuffer.h</code></td>
+                </tr>
+                <tr>
+                    <td><code>ndBrainIntegerBuffer</code></td>
+                    <td>GPU-compatible integer buffer</td>
+                    <td><code>ndBrainIntegerBuffer.h</code></td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="ndBrainVector">
+            <h2>2. ndBrainVector</h2>
+            <div class="class-header">
+                <code>class ndBrainVector : public ndArray&lt;ndBrainFloat&gt;</code>
+            </div>
+            <p>
+                The primary vector type for storing network activations, gradients, and intermediate
+                computations. Extends <code>ndArray</code> with neural network-specific operations.
+            </p>
+
+            <h3>Construction</h3>
+<pre><code>// Create empty vector
+ndBrainVector vec;
+
+// Resize to specific size
+vec.SetCount(64);
+
+// Copy constructor
+ndBrainVector copy(vec);</code></pre>
+
+            <h3>Element Access</h3>
+<pre><code>ndBrainVector vec;
+vec.SetCount(4);
+
+// Index access
+vec[0] = 1.0f;
+vec[1] = 2.0f;
+ndBrainFloat value = vec[2];
+
+// Find index of maximum value
+ndInt64 maxIdx = vec.ArgMax();</code></pre>
+
+            <h3>Basic Operations</h3>
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>Set(value)</code></td>
+                    <td>Set all elements to a scalar value</td>
+                </tr>
+                <tr>
+                    <td><code>Set(other)</code></td>
+                    <td>Copy elements from another vector</td>
+                </tr>
+                <tr>
+                    <td><code>Add(other)</code></td>
+                    <td>Element-wise addition</td>
+                </tr>
+                <tr>
+                    <td><code>Sub(other)</code></td>
+                    <td>Element-wise subtraction</td>
+                </tr>
+                <tr>
+                    <td><code>Mul(other)</code></td>
+                    <td>Element-wise multiplication (Hadamard product)</td>
+                </tr>
+                <tr>
+                    <td><code>Scale(value)</code></td>
+                    <td>Multiply all elements by scalar</td>
+                </tr>
+                <tr>
+                    <td><code>Dot(other)</code></td>
+                    <td>Compute dot product</td>
+                </tr>
+            </table>
+
+            <h3>Math Operations</h3>
+<pre><code>ndBrainVector a, b, c;
+// ... initialize vectors ...
+
+// Element-wise operations
+a.Add(b);              // a += b
+a.Sub(b);              // a -= b
+a.Mul(b);              // a *= b (element-wise)
+a.Scale(0.5f);         // a *= 0.5
+
+// Exponential
+a.Exp(b);              // a = exp(b)
+
+// Min/Max clamping
+a.Min(1.0f);           // a = min(a, 1.0)
+a.Max(0.0f);           // a = max(a, 0.0)
+a.Clamp(-1.0f, 1.0f);  // a = clamp(a, -1, 1)
+
+// Normalization
+a.SoftMaxNormalize();  // Softmax normalization
+a.GaussianNormalize(); // Gaussian normalization
+
+// Dot product
+ndBrainFloat dot = a.Dot(b);</code></pre>
+
+            <h3>Comparison Operations</h3>
+<pre><code>// Element-wise comparisons (results in 0.0 or 1.0)
+a.Less(0.0f);          // a[i] = (a[i] &lt; 0) ? 1 : 0
+a.Greater(0.0f);       // a[i] = (a[i] &gt; 0) ? 1 : 0
+a.LessEqual(1.0f);     // a[i] = (a[i] &lt;= 1) ? 1 : 0
+a.GreaterEqual(0.0f);  // a[i] = (a[i] &gt;= 0) ? 1 : 0</code></pre>
+
+            <h3>Advanced Operations</h3>
+<pre><code>// Blend (linear interpolation)
+a.Blend(target, 0.1f);  // a = a + 0.1 * (target - a)
+
+// Multiply-add: a = b * c + a
+a.MulAdd(b, c);
+
+// Scale and add: a = b * scale + a
+a.ScaleAdd(b, 0.5f);
+
+// Square root and inverse square root
+a.Sqrt();
+a.InvSqrt();
+
+// Statistics
+ndBrainFloat mean, variance;
+a.CalculateMeanAndVariance(mean, variance);
+
+// Weight initialization
+a.InitGaussianWeights(0.01f);  // Initialize with Gaussian noise</code></pre>
+        </section>
+
+        <section id="ndBrainMemVector">
+            <h2>3. ndBrainMemVector</h2>
+            <div class="class-header">
+                <code>class ndBrainMemVector : public ndBrainVector</code>
+            </div>
+            <p>
+                A memory-mapped vector that wraps an existing memory buffer without owning it.
+                Useful for accessing portions of larger buffers or working with GPU memory.
+            </p>
+
+<pre><code>// Wrap existing memory
+ndBrainFloat buffer[128];
+ndBrainMemVector memVec(buffer, 128);
+
+// Now memVec provides vector operations on the buffer
+memVec.Set(0.0f);  // Zero the buffer
+memVec[0] = 1.0f;
+
+// Change the underlying pointer
+ndBrainFloat* newBuffer = ...;
+memVec.SetPointer(newBuffer);
+memVec.SetSize(256);</code></pre>
+
+            <div class="note">
+                <strong>Note:</strong> <code>ndBrainMemVector</code> does not own its memory.
+                Ensure the underlying buffer remains valid for the lifetime of the vector.
+            </div>
+        </section>
+
+        <section id="ndBrainFixSizeVector">
+            <h2>4. ndBrainFixSizeVector&lt;N&gt;</h2>
+            <div class="class-header">
+                <code>template&lt;ndInt32 size&gt; class ndBrainFixSizeVector : public ndBrainMemVector</code>
+            </div>
+            <p>
+                A stack-allocated vector with a fixed compile-time size. Avoids heap allocation
+                for small vectors, improving performance in hot paths.
+            </p>
+
+<pre><code>// Create a fixed-size vector (stack-allocated)
+ndBrainFixSizeVector&lt;64&gt; fixed;
+
+// All vector operations are available
+fixed.Set(0.0f);
+fixed[0] = 1.0f;
+
+// Can also specify initial count (must be &lt;= template size)
+ndBrainFixSizeVector&lt;128&gt; partial(64);  // Uses 64 of 128 elements</code></pre>
+
+            <h3>When to Use</h3>
+            <ul>
+                <li><strong>Small, known sizes</strong> - When vector size is known at compile time</li>
+                <li><strong>Temporary buffers</strong> - For intermediate calculations in loops</li>
+                <li><strong>Performance-critical code</strong> - Avoids heap allocation overhead</li>
+            </ul>
+        </section>
+
+        <section id="ndBrainMatrix">
+            <h2>5. ndBrainMatrix</h2>
+            <div class="class-header">
+                <code>class ndBrainMatrix : public ndArray&lt;ndBrainMemVector&gt;</code>
+            </div>
+            <p>
+                A 2D matrix for storing weight matrices and performing matrix operations.
+                Stored as an array of row vectors for efficient row-major access.
+            </p>
+
+            <h3>Construction</h3>
+<pre><code>// Create matrix with dimensions
+ndBrainMatrix weights(64, 128);  // 64 rows, 128 columns
+
+// Or create and initialize later
+ndBrainMatrix matrix;
+matrix.Init(32, 64);</code></pre>
+
+            <h3>Dimensions</h3>
+<pre><code>ndInt32 rows = matrix.GetRows();
+ndInt32 cols = matrix.GetColumns();</code></pre>
+
+            <h3>Element Access</h3>
+<pre><code>// Access row as vector
+ndBrainMemVector&amp; row = matrix[0];
+row[5] = 1.0f;
+
+// Or direct element access
+matrix[2][7] = 0.5f;</code></pre>
+
+            <h3>Matrix Operations</h3>
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>Set(value)</code></td>
+                    <td>Set all elements to scalar</td>
+                </tr>
+                <tr>
+                    <td><code>Scale(value)</code></td>
+                    <td>Multiply all elements by scalar</td>
+                </tr>
+                <tr>
+                    <td><code>Add(other)</code></td>
+                    <td>Element-wise addition</td>
+                </tr>
+                <tr>
+                    <td><code>Mul(other)</code></td>
+                    <td>Element-wise multiplication</td>
+                </tr>
+                <tr>
+                    <td><code>Blend(other, t)</code></td>
+                    <td>Linear interpolation</td>
+                </tr>
+            </table>
+
+            <h3>Matrix-Vector Multiplication</h3>
+<pre><code>ndBrainMatrix weights(64, 128);  // 64x128 matrix
+ndBrainVector input(128);         // Input vector (128 elements)
+ndBrainVector output(64);         // Output vector (64 elements)
+
+// Forward: output = weights * input
+weights.Mul(input, output);
+
+// Transpose multiply: output = weights^T * input
+// (useful for backpropagation)
+ndBrainVector gradInput(128);
+weights.TransposeMul(gradOutput, gradInput);</code></pre>
+
+            <h3>Weight Initialization</h3>
+<pre><code>// Initialize with Gaussian weights
+ndBrainFloat variance = 2.0f / (inputSize + outputSize);  // Xavier init
+weights.InitGaussianWeights(variance);
+
+// Flush tiny values to zero (avoid denormals)
+weights.FlushToZero();</code></pre>
+        </section>
+
+        <section id="buffers">
+            <h2>6. GPU Buffers</h2>
+            <p>
+                GPU buffers provide memory that can be efficiently transferred between CPU and GPU.
+                They form the foundation of GPU-accelerated training.
+            </p>
+
+            <h3>ndBrainFloatBuffer</h3>
+            <div class="class-header">
+                <code>class ndBrainFloatBuffer : public ndBrainBuffer</code>
+            </div>
+            <p>
+                Float buffer for network weights, activations, and gradients.
+            </p>
+
+<pre><code>// Create buffer with context
+ndBrainGpuContext context;
+ndBrainFloatBuffer buffer(&amp;context, 1024);  // 1024 floats
+
+// Create from existing vector
+ndBrainVector vec(1024);
+ndBrainFloatBuffer fromVec(&amp;context, vec);
+
+// Transfer to/from device
+ndBrainVector hostData(1024);
+buffer.VectorToDevice(hostData);    // CPU -> GPU
+buffer.VectorFromDevice(hostData);  // GPU -> CPU</code></pre>
+
+            <h3>Buffer Operations</h3>
+<pre><code>ndBrainFloatBuffer a(&amp;context, 1024);
+ndBrainFloatBuffer b(&amp;context, 1024);
+
+// Set all elements
+a.Set(0.0f);
+
+// Element-wise operations (executed on GPU)
+a.Add(b);
+a.Sub(b);
+a.Mul(b);
+a.Scale(0.5f);
+
+// Math operations
+a.Exp(b);
+a.Sqrt(1024);
+a.ReductionSum();
+
+// Get single element (device -> host transfer)
+ndBrainFloat val = a.GetElement(0);</code></pre>
+
+            <h3>ndBrainIntegerBuffer</h3>
+            <div class="class-header">
+                <code>class ndBrainIntegerBuffer : public ndBrainBuffer</code>
+            </div>
+            <p>
+                Integer buffer for indices, random number generation, and control data.
+            </p>
+
+<pre><code>// Create integer buffer
+ndBrainIntegerBuffer indices(&amp;context, 256);
+
+// Used for:
+// - Batch indices in training
+// - Random number seeds
+// - Index arrays for scatter/gather operations</code></pre>
+
+            <div class="note">
+                <strong>Performance Tip:</strong> Minimize CPU-GPU transfers by keeping data on
+                the GPU throughout training. Only transfer final results or for checkpointing.
+            </div>
+        </section>
+
+        <section>
+            <h2>Next Steps</h2>
+            <ul>
+                <li><a href="layers.html">Neural Network Layers</a> - Build networks with these data structures</li>
+                <li><a href="gpu-compute.html">GPU Acceleration</a> - Detailed GPU buffer usage</li>
+            </ul>
+        </section>
+    </div>
+</body>
+</html>

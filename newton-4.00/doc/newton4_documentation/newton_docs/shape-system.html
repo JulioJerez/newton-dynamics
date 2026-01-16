@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shape System - Newton Dynamics 4.00</title>
+    <style>
+        :root {
+            --primary-color: #059669;
+            --secondary-color: #047857;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        nav.toc {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            margin-bottom: 1rem;
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        nav.toc ul {
+            list-style: none;
+            columns: 2;
+        }
+
+        nav.toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav.toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        nav.toc a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h3 {
+            color: var(--heading-color);
+            font-size: 1.35rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            color: var(--heading-color);
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #e2e8f0;
+            color: #be185d;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: var(--heading-color);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .tip {
+            background: #dcfce7;
+            border-left: 4px solid #22c55e;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .warning {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            nav.toc ul {
+                columns: 1;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            header {
+                padding: 2rem 1rem;
+            }
+
+            header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Shape System</h1>
+            <p>Newton Dynamics 4.00 Documentation</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; Back to Index</a>
+
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#overview">1. Overview</a></li>
+                <li><a href="#shape-instance">2. ndShapeInstance</a></li>
+                <li><a href="#primitive-shapes">3. Primitive Shapes</a></li>
+                <li><a href="#convex-hull">4. Convex Hull</a></li>
+                <li><a href="#compound-shapes">5. Compound Shapes</a></li>
+                <li><a href="#static-meshes">6. Static Mesh Shapes</a></li>
+                <li><a href="#materials">7. Shape Materials</a></li>
+                <li><a href="#scaling">8. Scaling &amp; Transforms</a></li>
+                <li><a href="#queries">9. Shape Queries</a></li>
+            </ul>
+        </nav>
+
+        <section id="overview">
+            <h2>1. Overview</h2>
+            <p>
+                Newton's collision system is built on a two-layer architecture: <strong>shapes</strong>
+                define geometry, and <strong>shape instances</strong> wrap shapes with transform, scale,
+                and material properties. This separation allows efficient memory sharing when multiple
+                bodies use the same geometry.
+            </p>
+
+            <h3>Shape Hierarchy</h3>
+<pre><code>ndShape (base class)
+    |
+    +-- ndShapeConvex (convex primitives)
+    |       |
+    |       +-- ndShapeBox
+    |       +-- ndShapeSphere
+    |       +-- ndShapeCapsule
+    |       +-- ndShapeCylinder
+    |       +-- ndShapeCone
+    |       +-- ndShapeChamferCylinder
+    |       +-- ndShapeConvexHull
+    |
+    +-- ndShapeCompound (multiple sub-shapes)
+    |
+    +-- ndShapeStaticMesh (triangle meshes)
+            |
+            +-- ndShapeHeightfield
+            +-- ndShapeStatic_bvh
+            +-- ndShapeStaticProceduralMesh</code></pre>
+
+            <h3>Shape Types</h3>
+            <table>
+                <tr>
+                    <th>Category</th>
+                    <th>Shapes</th>
+                    <th>Use Case</th>
+                </tr>
+                <tr>
+                    <td>Primitives</td>
+                    <td>Box, Sphere, Capsule, Cylinder, Cone, ChamferCylinder</td>
+                    <td>Fast collision, dynamic objects</td>
+                </tr>
+                <tr>
+                    <td>Convex</td>
+                    <td>ConvexHull</td>
+                    <td>Arbitrary convex geometry</td>
+                </tr>
+                <tr>
+                    <td>Compound</td>
+                    <td>Compound</td>
+                    <td>Complex objects from multiple convex parts</td>
+                </tr>
+                <tr>
+                    <td>Static Mesh</td>
+                    <td>Heightfield, StaticMesh, ProceduralMesh</td>
+                    <td>Terrain, static level geometry</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="shape-instance">
+            <h2>2. ndShapeInstance</h2>
+            <p>
+                <code>ndShapeInstance</code> is the wrapper class that holds a reference to an
+                <code>ndShape</code> along with local transform, scale, and material. Bodies use
+                shape instances, not raw shapes.
+            </p>
+
+            <h3>Creating a Shape Instance</h3>
+<pre><code>// Create shape (reference counted)
+ndShapeSphere* sphereShape = new ndShapeSphere(1.0f);
+
+// Wrap in instance (takes ownership via reference counting)
+ndShapeInstance sphere(sphereShape);
+
+// Assign to body
+body-&gt;SetCollisionShape(sphere);
+
+// The shape is automatically managed - no manual delete needed</code></pre>
+
+            <h3>Instance Properties</h3>
+            <table>
+                <tr>
+                    <th>Property</th>
+                    <th>Methods</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>Shape</td>
+                    <td><code>GetShape()</code>, <code>SetShape()</code></td>
+                    <td>Underlying geometry</td>
+                </tr>
+                <tr>
+                    <td>Local Matrix</td>
+                    <td><code>GetLocalMatrix()</code>, <code>SetLocalMatrix()</code></td>
+                    <td>Offset from body center</td>
+                </tr>
+                <tr>
+                    <td>Scale</td>
+                    <td><code>GetScale()</code>, <code>SetScale()</code></td>
+                    <td>Non-uniform scaling</td>
+                </tr>
+                <tr>
+                    <td>Material</td>
+                    <td><code>GetMaterial()</code>, <code>SetMaterial()</code></td>
+                    <td>User data and friction/restitution</td>
+                </tr>
+                <tr>
+                    <td>Collision Mode</td>
+                    <td><code>GetCollisionMode()</code>, <code>SetCollisionMode()</code></td>
+                    <td>Enable/disable collisions</td>
+                </tr>
+            </table>
+
+            <h3>Local Offset</h3>
+            <p>Use the local matrix to offset a shape from the body's origin:</p>
+<pre><code>ndShapeInstance box(new ndShapeBox(2.0f, 1.0f, 2.0f));
+
+// Offset shape up by 0.5 units
+ndMatrix offset(ndGetIdentityMatrix());
+offset.m_posit = ndVector(0.0f, 0.5f, 0.0f, 1.0f);
+box.SetLocalMatrix(offset);
+
+body-&gt;SetCollisionShape(box);</code></pre>
+
+            <h3>Shape Queries</h3>
+<pre><code>// Get shape info
+ndShapeInfo info = instance.GetShapeInfo();
+
+// Calculate AABB in world space
+ndVector minBox, maxBox;
+instance.CalculateAabb(body-&gt;GetMatrix(), minBox, maxBox);
+
+// Calculate oriented bounding box
+ndVector origin, size;
+instance.CalculateObb(origin, size);
+
+// Get volume
+ndFloat32 volume = instance.GetVolume();
+
+// Calculate inertia matrix
+ndMatrix inertia = instance.CalculateInertia();</code></pre>
+        </section>
+
+        <section id="primitive-shapes">
+            <h2>3. Primitive Shapes</h2>
+            <p>
+                Primitives are the fastest collision shapes. They use analytical collision detection
+                and are ideal for most dynamic objects.
+            </p>
+
+            <h3>ndShapeBox</h3>
+            <p>Axis-aligned box centered at origin. Parameters are full extents (width, height, depth).</p>
+<pre><code>// Create a 2x1x3 box
+ndShapeInstance box(new ndShapeBox(2.0f, 1.0f, 3.0f));
+
+// Box extends from (-1, -0.5, -1.5) to (1, 0.5, 1.5)</code></pre>
+
+            <h3>ndShapeSphere</h3>
+            <p>Sphere centered at origin with given radius.</p>
+<pre><code>// Create sphere with radius 1.5
+ndShapeInstance sphere(new ndShapeSphere(1.5f));</code></pre>
+
+            <h3>ndShapeCapsule</h3>
+            <p>
+                Capsule (cylinder with hemispherical caps) aligned along the X-axis.
+                Supports tapered capsules with different end radii.
+            </p>
+<pre><code>// Uniform capsule: radius 0.5, height 2.0 (cylinder portion)
+ndShapeInstance capsule(new ndShapeCapsule(0.5f, 0.5f, 2.0f));
+
+// Tapered capsule: radius0 0.3, radius1 0.6, height 2.0
+ndShapeInstance tapered(new ndShapeCapsule(0.3f, 0.6f, 2.0f));</code></pre>
+
+            <div class="note">
+                <strong>Note:</strong> The height parameter is the cylinder portion only.
+                Total length = height + radius0 + radius1.
+            </div>
+
+            <h3>ndShapeCylinder</h3>
+            <p>
+                Cylinder aligned along the X-axis. Supports tapered cylinders with
+                different radii at each end.
+            </p>
+<pre><code>// Uniform cylinder: radius 0.5, height 2.0
+ndShapeInstance cylinder(new ndShapeCylinder(0.5f, 0.5f, 2.0f));
+
+// Tapered cylinder (truncated cone): radius0 0.3, radius1 0.6, height 2.0
+ndShapeInstance tapered(new ndShapeCylinder(0.3f, 0.6f, 2.0f));</code></pre>
+
+            <h3>ndShapeCone</h3>
+            <p>Cone with apex at origin, base extending along +X axis.</p>
+<pre><code>// Cone with base radius 0.5, height 2.0
+ndShapeInstance cone(new ndShapeCone(0.5f, 2.0f));</code></pre>
+
+            <h3>ndShapeChamferCylinder</h3>
+            <p>
+                Cylinder with rounded edges (like a hockey puck or wheel). The chamfer creates
+                smooth rolling behavior, making it ideal for wheels and barrels.
+            </p>
+<pre><code>// Chamfer cylinder: radius 0.5, height 0.3
+ndShapeInstance wheel(new ndShapeChamferCylinder(0.5f, 0.3f));</code></pre>
+
+            <div class="tip">
+                <strong>Tip:</strong> Use <code>ndShapeChamferCylinder</code> for wheels and rolling
+                objects. The rounded edges prevent catching on seams between polygons.
+            </div>
+
+            <h3>Primitive Axis Orientation</h3>
+            <table>
+                <tr>
+                    <th>Shape</th>
+                    <th>Primary Axis</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>Box</td>
+                    <td>-</td>
+                    <td>Symmetric, parameters are (X, Y, Z) extents</td>
+                </tr>
+                <tr>
+                    <td>Sphere</td>
+                    <td>-</td>
+                    <td>Symmetric in all directions</td>
+                </tr>
+                <tr>
+                    <td>Capsule</td>
+                    <td>X</td>
+                    <td>Cylinder along X-axis</td>
+                </tr>
+                <tr>
+                    <td>Cylinder</td>
+                    <td>X</td>
+                    <td>Cylinder along X-axis</td>
+                </tr>
+                <tr>
+                    <td>Cone</td>
+                    <td>X</td>
+                    <td>Apex at origin, base along +X</td>
+                </tr>
+                <tr>
+                    <td>ChamferCylinder</td>
+                    <td>X</td>
+                    <td>Cylinder along X-axis</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="convex-hull">
+            <h2>4. Convex Hull</h2>
+            <p>
+                <code>ndShapeConvexHull</code> creates a convex shape from a point cloud.
+                Newton computes the convex hull automatically, discarding interior points.
+            </p>
+
+            <h3>Creating a Convex Hull</h3>
+<pre><code>// Define vertex array
+ndFloat32 vertices[] = {
+    // x, y, z
+    -1.0f, -1.0f, -1.0f,
+     1.0f, -1.0f, -1.0f,
+     1.0f,  1.0f, -1.0f,
+    -1.0f,  1.0f, -1.0f,
+    -0.5f, -0.5f,  1.5f,
+     0.5f, -0.5f,  1.5f,
+     0.5f,  0.5f,  1.5f,
+    -0.5f,  0.5f,  1.5f,
+};
+
+ndInt32 vertexCount = 8;
+ndInt32 strideInBytes = 3 * sizeof(ndFloat32);
+ndFloat32 tolerance = 0.0f;  // Weld tolerance
+
+ndShapeInstance hull(new ndShapeConvexHull(
+    vertexCount,
+    strideInBytes,
+    tolerance,
+    vertices
+));</code></pre>
+
+            <h3>Parameters</h3>
+            <table>
+                <tr>
+                    <th>Parameter</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>count</td>
+                    <td><code>ndInt32</code></td>
+                    <td>Number of vertices</td>
+                </tr>
+                <tr>
+                    <td>strideInBytes</td>
+                    <td><code>ndInt32</code></td>
+                    <td>Bytes between consecutive vertices</td>
+                </tr>
+                <tr>
+                    <td>tolerance</td>
+                    <td><code>ndFloat32</code></td>
+                    <td>Vertex weld distance (0 = no welding)</td>
+                </tr>
+                <tr>
+                    <td>vertexArray</td>
+                    <td><code>const ndFloat32*</code></td>
+                    <td>Pointer to vertex data</td>
+                </tr>
+                <tr>
+                    <td>maxPointsOut</td>
+                    <td><code>ndInt32</code></td>
+                    <td>Maximum hull vertices (optional, default = max)</td>
+                </tr>
+            </table>
+
+            <div class="tip">
+                <strong>Tip:</strong> Keep convex hulls under 64 vertices for best performance.
+                Use the <code>maxPointsOut</code> parameter to simplify complex hulls.
+            </div>
+
+            <h3>Getting Hull Info</h3>
+<pre><code>ndShapeInfo info = hullInstance.GetShapeInfo();
+ndInt32 vertexCount = info.m_convexhull.m_vertexCount;
+ndInt32 faceCount = info.m_convexhull.m_faceCount;
+ndVector* vertices = info.m_convexhull.m_vertex;</code></pre>
+        </section>
+
+        <section id="compound-shapes">
+            <h2>5. Compound Shapes</h2>
+            <p>
+                <code>ndShapeCompound</code> combines multiple convex shapes into a single
+                collision shape. Use it for concave objects that need to be dynamic.
+            </p>
+
+            <h3>Creating a Compound Shape</h3>
+<pre><code>// Create compound shape
+ndShapeCompound* compound = new ndShapeCompound();
+
+// Begin adding sub-shapes
+compound-&gt;BeginAddRemove();
+
+// Add a box at the base
+ndShapeInstance* box = new ndShapeInstance(new ndShapeBox(2.0f, 0.5f, 2.0f));
+ndMatrix boxOffset(ndGetIdentityMatrix());
+boxOffset.m_posit = ndVector(0.0f, 0.25f, 0.0f, 1.0f);
+box-&gt;SetLocalMatrix(boxOffset);
+compound-&gt;AddCollision(box);
+
+// Add a cylinder on top
+ndShapeInstance* cyl = new ndShapeInstance(new ndShapeCylinder(0.3f, 0.3f, 1.5f));
+ndMatrix cylOffset(ndGetIdentityMatrix());
+cylOffset.m_posit = ndVector(0.0f, 1.25f, 0.0f, 1.0f);
+// Rotate cylinder to be vertical (default is X-aligned)
+ndMatrix rotation(ndYawMatrix(ndPi * 0.5f));
+cyl-&gt;SetLocalMatrix(rotation * cylOffset);
+compound-&gt;AddCollision(cyl);
+
+// Finish building
+compound-&gt;EndAddRemove();
+
+// Wrap in instance and assign to body
+ndShapeInstance compoundInstance(compound);
+body-&gt;SetCollisionShape(compoundInstance);</code></pre>
+
+            <h3>Modifying Compound Shapes</h3>
+<pre><code>// Get compound from instance
+ndShapeCompound* compound = instance.GetShape()-&gt;GetAsShapeCompound();
+
+// Begin modification
+compound-&gt;BeginAddRemove();
+
+// Add new sub-shape
+ndShapeInstance* newPart = new ndShapeInstance(new ndShapeSphere(0.5f));
+ndShapeCompound::ndTreeArray::ndNode* node = compound-&gt;AddCollision(newPart);
+
+// Remove a sub-shape
+compound-&gt;RemoveNode(node);
+
+// Finish modification
+compound-&gt;EndAddRemove();</code></pre>
+
+            <h3>Accessing Sub-Shapes</h3>
+<pre><code>ndShapeCompound* compound = instance.GetShape()-&gt;GetAsShapeCompound();
+const ndShapeCompound::ndTreeArray&amp; tree = compound-&gt;GetTree();
+
+// Iterate through sub-shapes
+ndShapeCompound::ndTreeArray::Iterator iter(tree);
+for (iter.Begin(); iter; iter++)
+{
+    ndShapeCompound::ndTreeArray::ndNode* node = iter.GetNode();
+    ndShapeInstance* subShape = compound-&gt;GetShapeInstance(node);
+    // Process sub-shape...
+}</code></pre>
+
+            <div class="warning">
+                <strong>Warning:</strong> Always call <code>BeginAddRemove()</code> before
+                modifying and <code>EndAddRemove()</code> when done. This rebuilds the
+                internal acceleration structures.
+            </div>
+        </section>
+
+        <section id="static-meshes">
+            <h2>6. Static Mesh Shapes</h2>
+            <p>
+                Static mesh shapes are for non-moving geometry like terrain and level architecture.
+                They cannot be used with dynamic bodies.
+            </p>
+
+            <h3>ndShapeHeightfield</h3>
+            <p>
+                Efficient terrain representation using a 2D elevation grid. Supports material
+                attributes per cell for different surface types.
+            </p>
+<pre><code>// Create heightfield: 128x128 grid
+ndInt32 width = 128;
+ndInt32 height = 128;
+ndFloat32 scaleX = 1.0f;  // Horizontal spacing
+ndFloat32 scaleZ = 1.0f;
+
+ndShapeHeightfield* heightfield = new ndShapeHeightfield(
+    width, height,
+    ndShapeHeightfield::m_normalDiagonals,
+    scaleX, scaleZ
+);
+
+// Get elevation array and fill it
+ndArray&lt;ndReal&gt;&amp; elevation = heightfield-&gt;GetElevationMap();
+for (ndInt32 z = 0; z &lt; height; z++)
+{
+    for (ndInt32 x = 0; x &lt; width; x++)
+    {
+        ndInt32 index = z * width + x;
+        elevation[index] = GetTerrainHeight(x, z);
+    }
+}
+
+// Optional: set per-cell material attributes
+ndArray&lt;ndInt8&gt;&amp; attributes = heightfield-&gt;GetAttributeMap();
+for (ndInt32 i = 0; i &lt; width * height; i++)
+{
+    attributes[i] = GetTerrainMaterial(i);  // e.g., grass, rock, water
+}
+
+// Update internal structures after modifying elevation
+heightfield-&gt;UpdateElevationMapAabb();
+
+// Create instance and assign to static body
+ndShapeInstance terrain(heightfield);
+ndBodyKinematic* ground = new ndBodyKinematic();
+ground-&gt;SetCollisionShape(terrain);
+world.AddBody(ndSharedPtr&lt;ndBody&gt;(ground));</code></pre>
+
+            <h3>Heightfield Grid Modes</h3>
+            <table>
+                <tr>
+                    <th>Mode</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>m_normalDiagonals</code></td>
+                    <td>Triangles split from top-left to bottom-right</td>
+                </tr>
+                <tr>
+                    <td><code>m_invertedDiagonals</code></td>
+                    <td>Triangles split from top-right to bottom-left</td>
+                </tr>
+            </table>
+
+            <h3>ndShapeStatic_bvh</h3>
+            <p>
+                BVH-based triangle mesh for arbitrary static geometry. Automatically builds
+                an acceleration structure for fast collision queries.
+            </p>
+<pre><code>// Create from mesh data
+ndShapeStatic_bvh* staticMesh = new ndShapeStatic_bvh();
+
+// Add triangles (typically loaded from file)
+for (ndInt32 i = 0; i &lt; triangleCount; i++)
+{
+    ndVector v0 = vertices[indices[i * 3 + 0]];
+    ndVector v1 = vertices[indices[i * 3 + 1]];
+    ndVector v2 = vertices[indices[i * 3 + 2]];
+    ndInt32 materialId = materials[i];
+
+    staticMesh-&gt;AddFace(v0, v1, v2, materialId);
+}
+
+// Finalize mesh (builds BVH)
+staticMesh-&gt;EndBuild();
+
+ndShapeInstance level(staticMesh);
+staticBody-&gt;SetCollisionShape(level);</code></pre>
+
+            <h3>ndShapeStaticProceduralMesh</h3>
+            <p>
+                Base class for procedurally generated collision geometry. Subclass it to
+                provide triangles on-demand during collision queries.
+            </p>
+<pre><code>class MyProceduralMesh : public ndShapeStaticProceduralMesh
+{
+public:
+    MyProceduralMesh()
+    {
+        // Set world-space bounding box
+        SetAABB(ndVector(-1000, -100, -1000, 0),
+                ndVector(1000, 100, 1000, 0));
+    }
+
+    virtual void GetCollidingFaces(ndPolygonMeshDesc* const data) const override
+    {
+        // Generate triangles that intersect data-&gt;m_boxP0 to data-&gt;m_boxP1
+        // Add faces to data-&gt;...
+    }
+};</code></pre>
+
+            <div class="note">
+                <strong>Note:</strong> Static mesh shapes are designed for non-moving geometry
+                and should be assigned to bodies with zero/infinite mass. Using them with
+                moving dynamic bodies will cause undefined behavior.
+            </div>
+        </section>
+
+        <section id="materials">
+            <h2>7. Shape Materials</h2>
+            <p>
+                <code>ndShapeMaterial</code> stores user-defined data and can be used to
+                identify shapes and customize contact behavior.
+            </p>
+
+            <h3>Setting Material Properties</h3>
+<pre><code>ndShapeInstance instance(new ndShapeBox(1, 1, 1));
+
+// Get material reference
+ndShapeMaterial material = instance.GetMaterial();
+
+// Set user ID (for identification)
+material.m_userId = 42;
+
+// Set user data pointer
+material.m_data.m_userData = myGameObject;
+
+// Set custom parameters (6 available)
+material.m_userParam[0].m_floatData = 0.5f;   // friction
+material.m_userParam[1].m_floatData = 0.3f;   // restitution
+material.m_userParam[2].m_intData = 1;        // surface type
+material.m_userParam[3].m_ptrData = soundPtr; // custom pointer
+
+// Apply material back to instance
+instance.SetMaterial(material);</code></pre>
+
+            <h3>Material Structure</h3>
+<pre><code>class ndShapeMaterial
+{
+public:
+    ndInt64 m_userId;        // User-defined ID
+
+    union {
+        void* m_userData;    // User data pointer
+        ndUnsigned64 m_alignPad;
+    } m_data;
+
+    union ndExtraData {
+        void* m_ptrData;
+        ndFloat32 m_floatData;
+        ndUnsigned64 m_intData;
+    } m_userParam[6];        // 6 custom parameters
+};</code></pre>
+
+            <h3>Using Materials in Contact Callbacks</h3>
+<pre><code>// In contact callback
+virtual void OnContactCallback(const ndContact* const contact) override
+{
+    const ndShapeInstance&amp; shape0 = contact-&gt;GetBody0()-&gt;GetCollisionShape();
+    const ndShapeInstance&amp; shape1 = contact-&gt;GetBody1()-&gt;GetCollisionShape();
+
+    ndShapeMaterial mat0 = shape0.GetMaterial();
+    ndShapeMaterial mat1 = shape1.GetMaterial();
+
+    // Check material IDs
+    if (mat0.m_userId == MATERIAL_METAL &amp;&amp;
+        mat1.m_userId == MATERIAL_WOOD)
+    {
+        // Play metal-on-wood sound
+    }
+
+    // Get friction values
+    ndFloat32 friction0 = mat0.m_userParam[0].m_floatData;
+    ndFloat32 friction1 = mat1.m_userParam[0].m_floatData;
+    ndFloat32 combinedFriction = ndSqrt(friction0 * friction1);
+}</code></pre>
+        </section>
+
+        <section id="scaling">
+            <h2>8. Scaling &amp; Transforms</h2>
+            <p>
+                Shape instances support both uniform and non-uniform scaling. Scaling is
+                applied on top of the local matrix transform.
+            </p>
+
+            <h3>Uniform Scaling</h3>
+<pre><code>ndShapeInstance box(new ndShapeBox(1.0f, 1.0f, 1.0f));
+
+// Scale uniformly by 2x
+box.SetScale(ndVector(2.0f, 2.0f, 2.0f, 0.0f));
+
+// Result: 2x2x2 box</code></pre>
+
+            <h3>Non-Uniform Scaling</h3>
+<pre><code>ndShapeInstance sphere(new ndShapeSphere(1.0f));
+
+// Scale to create ellipsoid
+sphere.SetScale(ndVector(1.0f, 2.0f, 0.5f, 0.0f));
+
+// Result: ellipsoid with radii (1, 2, 0.5)</code></pre>
+
+            <h3>Scale Types</h3>
+<pre><code>ndShapeInstance::ndScaleType scaleType = instance.GetScaleType();
+
+switch (scaleType)
+{
+    case ndShapeInstance::m_unit:
+        // No scaling (1, 1, 1)
+        break;
+    case ndShapeInstance::m_uniform:
+        // Uniform scaling (s, s, s)
+        break;
+    case ndShapeInstance::m_nonUniform:
+        // Axis-aligned non-uniform (sx, sy, sz)
+        break;
+    case ndShapeInstance::m_global:
+        // Full matrix scaling
+        break;
+}</code></pre>
+
+            <h3>Global Scale Matrix</h3>
+            <p>For complex scaling (shear, rotation + scale), use global scale:</p>
+<pre><code>// Create rotation + non-uniform scale matrix
+ndMatrix scaleMatrix(ndPitchMatrix(0.3f));  // Slight rotation
+scaleMatrix[0] = scaleMatrix[0].Scale(2.0f);
+scaleMatrix[1] = scaleMatrix[1].Scale(1.0f);
+scaleMatrix[2] = scaleMatrix[2].Scale(0.5f);
+
+instance.SetGlobalScale(scaleMatrix);</code></pre>
+
+            <div class="warning">
+                <strong>Warning:</strong> Non-uniform scaling increases collision detection
+                cost. Use uniform scaling when possible for best performance.
+            </div>
+        </section>
+
+        <section id="queries">
+            <h2>9. Shape Queries</h2>
+            <p>
+                Shape instances provide methods for geometric queries like bounding boxes,
+                raycasts, and closest point calculations.
+            </p>
+
+            <h3>Bounding Box</h3>
+<pre><code>ndMatrix worldMatrix = body-&gt;GetMatrix();
+ndVector minBox, maxBox;
+
+// Calculate world-space AABB
+instance.CalculateAabb(worldMatrix, minBox, maxBox);
+
+// Calculate local-space OBB
+ndVector origin, size;
+instance.CalculateObb(origin, size);</code></pre>
+
+            <h3>Ray Cast</h3>
+<pre><code>class MyRayCastCallback : public ndRayCastNotify
+{
+public:
+    virtual ndFloat32 OnRayCastAction(const ndContactPoint&amp; contact,
+        ndFloat32 intersetParam) override
+    {
+        m_hitPoint = contact.m_point;
+        m_hitNormal = contact.m_normal;
+        return intersetParam;  // Continue to find closest
+    }
+
+    ndVector m_hitPoint;
+    ndVector m_hitNormal;
+};
+
+// Cast ray against shape
+MyRayCastCallback callback;
+ndVector localP0(0, 10, 0, 1);  // Ray start (local space)
+ndVector localP1(0, -10, 0, 1); // Ray end (local space)
+ndContactPoint contact;
+
+ndFloat32 t = instance.RayCast(callback, localP0, localP1, body, contact, 1.0f);
+
+if (t &lt; 1.0f)
+{
+    // Hit at t parameter (0-1 along ray)
+    ndVector hitPoint = localP0 + (localP1 - localP0).Scale(t);
+}</code></pre>
+
+            <h3>Closest Point Between Shapes</h3>
+<pre><code>// Setup distance calculator
+ndShapeInstance::ndDistanceCalculator calc(
+    scene,
+    &amp;shapeA, matrixA,
+    &amp;shapeB, matrixB
+);
+
+// Calculate closest points
+if (calc.ClosestPoint())
+{
+    ndVector pointOnA = calc.m_point0;
+    ndVector pointOnB = calc.m_point1;
+    ndVector separationNormal = calc.m_normal;
+    ndFloat32 distance = (pointOnB - pointOnA).DotProduct(separationNormal).GetScalar();
+}</code></pre>
+
+            <h3>Volume and Mass Properties</h3>
+<pre><code>// Get volume
+ndFloat32 volume = instance.GetVolume();
+
+// Calculate inertia matrix (for given density)
+ndMatrix inertia = instance.CalculateInertia();
+
+// Calculate buoyancy center of pressure
+ndVector fluidPlane(0, 1, 0, -waterLevel);  // Water plane
+ndVector centerOfPressure;
+ndFloat32 submergedVolume = instance.CalculateBuoyancyCenterOfPresure(
+    centerOfPressure,
+    worldMatrix,
+    fluidPlane
+);</code></pre>
+
+            <h3>Debug Visualization</h3>
+<pre><code>class MyDebugDraw : public ndShapeDebugNotify
+{
+public:
+    virtual void DrawPolygon(ndInt32 vertexCount,
+        const ndVector* const faceArray,
+        const ndEdgeType* const edgeType) override
+    {
+        // Draw polygon edges
+        for (ndInt32 i = 0; i &lt; vertexCount; i++)
+        {
+            ndInt32 next = (i + 1) % vertexCount;
+            DrawLine(faceArray[i], faceArray[next]);
+        }
+    }
+};
+
+MyDebugDraw debugDraw;
+ndMatrix worldMatrix = body-&gt;GetMatrix();
+instance.DebugShape(worldMatrix, debugDraw);</code></pre>
+
+            <h3>Save Shape to PLY File</h3>
+<pre><code>// Export shape geometry for debugging
+instance.SavePLY("debug_shape.ply");</code></pre>
+        </section>
+    </div>
+
+    <footer>
+        Newton Dynamics 4.00 Documentation | <a href="index.html">Back to Index</a>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,138 @@
+/* Copyright (c) <2003-2022> <Newton Game Dynamics>
+* 
+* This software is provided 'as-is', without any express or implied
+* warranty. In no event will the authors be held liable for any damages
+* arising from the use of this software.
+* 
+* Permission is granted to anyone to use this software for any purpose,
+* including commercial applications, and to alter it and redistribute it
+* freely
+*/
+
+#include "ndSandboxStdafx.h"
+#include "ndMeshLoader.h"
+#include "ndPhysicsUtils.h"
+#include "ndPhysicsWorld.h"
+#include "ndMakeStaticMap.h"
+#include "ndDemoEntityNotify.h"
+#include "ndDemoEntityManager.h"
+
+namespace ndQuadSpiderPlayer
+{
+	#define D_BODY_MASS	ndFloat32(20.0f)
+	#define D_LIMB_MASS ndFloat32(0.25f)
+
+	class ndController;
+
+	class ndEffectorInfo
+	{
+		public:
+		ndEffectorInfo()
+			:m_calf(nullptr)
+			,m_heel(nullptr)
+			,m_effector(nullptr)
+		{
+		}
+
+		ndJointHinge* m_calf;
+		ndJointHinge* m_heel;
+		ndIkSwivelPositionEffector* m_effector;
+	};
+
+	class ndBodySwingControl : public ndAnimationBlendTreeNode
+	{
+		public:
+		ndBodySwingControl(const ndSharedPtr<ndAnimationBlendTreeNode>& input);
+		void Reset();
+		void Evaluate(ndAnimationPose& output, ndVector& veloc) override;;
+
+		ndReal m_x;
+		ndReal m_y;
+		ndReal m_z;
+		ndReal m_yaw;
+		ndReal m_roll;
+		ndReal m_pitch;
+		//ndReal m_animSpeed;
+		//bool m_enableController;
+	};
+
+	class ndProdeduralGaitGenerator : public ndAnimationSequence
+	{
+		public:
+		enum State
+		{
+			onAir,
+			onGround, 
+			groundToAir,
+			airToGround,
+		};
+
+		class ndPose
+		{
+			public:
+			ndVector m_start;
+			ndVector m_end;
+			ndVector m_base;
+			ndVector m_posit;
+			ndFloat32 m_time;
+			ndFloat32 m_maxTime;
+			ndFloat32 m_a0;
+			ndFloat32 m_a1;
+			ndFloat32 m_a2;
+		};
+
+		ndProdeduralGaitGenerator(ndController* const controller);
+		void CalculatePose(ndAnimationPose& output, ndFloat32 param) override;
+
+		State GetState(ndInt32 legIndex) const;
+		void IntegrateLeg(ndAnimationPose& output, ndInt32 legIndex);
+		ndFloat32 CalculateTime() const;
+
+		ndPose m_pose[4];
+		ndFloat32 m_timeLine[3];
+		ndController* m_owner;
+		ndFloat32 m_omega;
+		ndFloat32 m_stride;
+		ndFloat32 m_timeAcc;
+		ndInt32 m_gaitSequence[4];
+	};
+
+	class ndGeneratorWalkGait : public ndProdeduralGaitGenerator
+	{
+		public:
+		ndGeneratorWalkGait(ndController* const controller);
+	};
+
+	class ndController : public ndModelNotify
+	{
+		public:
+
+		ndController();
+
+		void Update(ndFloat32 timestep) override;
+		void PostTransformUpdate(ndFloat32 timetep) override;
+		void Debug(ndConstraintDebugCallback& callback) const  override;
+
+		void ResetModel();
+		bool IsTerminal() const;
+
+		void CreateArticulatedModel(
+			ndDemoEntityManager* const scene,
+			ndModelArticulation* const model,
+			ndSharedPtr<ndMesh> mesh,
+			ndSharedPtr<ndRenderSceneNode> visualMesh);
+		void CreateAnimationBlendTree();
+
+		static ndSharedPtr<ndModel> CreateModel(ndDemoEntityManager* const scene, const ndMatrix& location, const ndRenderMeshLoader& loader);
+
+		ndAnimationPose m_pose;
+		ndFixSizeArray<ndEffectorInfo, 4> m_legs;
+		ndSharedPtr<ndRenderSceneNode> m_cameraNode;
+
+		ndSharedPtr<ndGeneratorWalkGait> m_walkGait;
+		ndSharedPtr<ndBodySwingControl> m_animBlendTree;
+
+		ndFloat32 m_timestep;
+	};
+};
+

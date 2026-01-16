@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesh System - Newton Dynamics 4.00</title>
+    <style>
+        :root {
+            --primary-color: #f43f5e;
+            --secondary-color: #e11d48;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        nav.toc {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            margin-bottom: 1rem;
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        nav.toc ul {
+            list-style: none;
+            columns: 2;
+        }
+
+        nav.toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav.toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        nav.toc a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h3 {
+            color: var(--heading-color);
+            font-size: 1.35rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            color: var(--heading-color);
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #e2e8f0;
+            color: #be185d;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: var(--heading-color);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .tip {
+            background: #dcfce7;
+            border-left: 4px solid #22c55e;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .warning {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            nav.toc ul {
+                columns: 1;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            header {
+                padding: 2rem 1rem;
+            }
+
+            header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Mesh System</h1>
+            <p>Newton Dynamics 4.00 Documentation</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; Back to Index</a>
+
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#overview">1. Overview</a></li>
+                <li><a href="#ndmesh">2. ndMesh (Scene Graph)</a></li>
+                <li><a href="#ndmesheffect">3. ndMeshEffect</a></li>
+                <li><a href="#convex-hull">4. Convex Hull Generation</a></li>
+                <li><a href="#collision-from-mesh">5. Collision from Mesh</a></li>
+                <li><a href="#mesh-operations">6. Mesh Operations</a></li>
+                <li><a href="#materials">7. Materials &amp; Textures</a></li>
+                <li><a href="#skinning">8. Skinning &amp; Weights</a></li>
+            </ul>
+        </nav>
+
+        <section id="overview">
+            <h2>1. Overview</h2>
+            <p>
+                Newton's mesh system provides tools for working with 3D geometry, including
+                scene graph management, mesh manipulation, convex hull generation, and
+                collision shape creation from arbitrary meshes.
+            </p>
+
+            <h3>Key Classes</h3>
+            <table>
+                <tr>
+                    <th>Class</th>
+                    <th>Purpose</th>
+                    <th>Location</th>
+                </tr>
+                <tr>
+                    <td><code>ndMesh</code></td>
+                    <td>Scene graph node with hierarchy</td>
+                    <td>sdk/dCollision/dMesh/</td>
+                </tr>
+                <tr>
+                    <td><code>ndMeshEffect</code></td>
+                    <td>Mesh manipulation and processing</td>
+                    <td>sdk/dCollision/dMesh/</td>
+                </tr>
+                <tr>
+                    <td><code>ndConvexHull3d</code></td>
+                    <td>Convex hull computation</td>
+                    <td>sdk/dCore/</td>
+                </tr>
+                <tr>
+                    <td><code>ndMeshLoader</code></td>
+                    <td>Mesh file I/O</td>
+                    <td>sdk/dCollision/dMesh/</td>
+                </tr>
+            </table>
+
+            <h3>Mesh System Architecture</h3>
+<pre><code>ndMesh (scene graph node)
+    |
+    +-- ndMeshEffect (geometry data)
+    |       +-- Vertices, normals, UVs
+    |       +-- Materials
+    |       +-- Skinning weights
+    |
+    +-- Child ndMesh nodes (hierarchy)
+    |
+    +-- Animation curves (posit, rotation, scale)</code></pre>
+        </section>
+
+        <section id="ndmesh">
+            <h2>2. ndMesh (Scene Graph)</h2>
+            <p>
+                <code>ndMesh</code> represents a node in a scene graph hierarchy. It can contain
+                geometry (via <code>ndMeshEffect</code>), child nodes, and animation data.
+            </p>
+
+            <h3>Creating Mesh Nodes</h3>
+<pre><code>// Create empty mesh node
+ndMesh* node = new ndMesh();
+node-&gt;SetName("MyNode");
+
+// Create from shape instance (for debug visualization)
+ndShapeInstance shape(new ndShapeBox(1.0f, 1.0f, 1.0f));
+ndMesh* boxMesh = new ndMesh(shape);
+
+// Clone a mesh
+ndMesh* cloned = original-&gt;CreateClone();</code></pre>
+
+            <h3>Hierarchy Management</h3>
+<pre><code>// Create parent-child relationship
+ndSharedPtr&lt;ndMesh&gt; parent(new ndMesh());
+ndSharedPtr&lt;ndMesh&gt; child(new ndMesh());
+
+parent-&gt;AddChild(child);
+
+// Access parent
+ndMesh* parentPtr = child-&gt;GetParent();
+
+// Access children
+ndList&lt;ndSharedPtr&lt;ndMesh&gt;&gt;&amp; children = parent-&gt;GetChildren();
+
+// Remove child
+parent-&gt;RemoveChild(child);</code></pre>
+
+            <h3>Node Types</h3>
+<pre><code>// Set node type
+node-&gt;SetNodeType(ndMesh::m_node);        // Regular geometry node
+node-&gt;SetNodeType(ndMesh::m_bone);        // Skeleton bone
+node-&gt;SetNodeType(ndMesh::m_boneEnd);     // End of bone chain
+node-&gt;SetNodeType(ndMesh::m_collisionShape);  // Collision shape
+
+// Get node type
+ndMesh::ndNodeType type = node-&gt;GetNodeType();</code></pre>
+
+            <h3>Transforms</h3>
+<pre><code>// Local transform matrix
+node-&gt;m_matrix = ndPitchMatrix(ndPi * 0.25f);
+node-&gt;m_matrix.m_posit = ndVector(1.0f, 2.0f, 3.0f, 1.0f);
+
+// Calculate global (world) matrix
+ndMesh* parent = node-&gt;GetParent();
+ndMatrix globalMatrix = node-&gt;CalculateGlobalMatrix(parent);
+
+// Apply transform to all vertices
+ndMatrix transform = ndYawMatrix(ndPi * 0.5f);
+node-&gt;ApplyTransform(transform);</code></pre>
+
+            <h3>Finding Nodes</h3>
+<pre><code>// Find by exact name
+ndMesh* found = root-&gt;FindByName("ArmatureRightHand");
+
+// Find by partial match
+ndMesh* similar = root-&gt;FindByClosestMatch("RightHand");
+
+// Iterate through hierarchy
+ndMesh* current = root-&gt;IteratorFirst();
+while (current)
+{
+    ProcessNode(current);
+    current = root-&gt;IteratorNext(current);
+}</code></pre>
+
+            <h3>Mesh Geometry</h3>
+<pre><code>// Set mesh geometry
+ndSharedPtr&lt;ndMeshEffect&gt; geometry(new ndMeshEffect());
+// ... populate geometry ...
+node-&gt;SetMesh(geometry);
+
+// Get mesh geometry
+ndSharedPtr&lt;ndMeshEffect&gt;&amp; mesh = node-&gt;GetMesh();
+const ndSharedPtr&lt;ndMeshEffect&gt;&amp; constMesh = node-&gt;GetMesh();</code></pre>
+        </section>
+
+        <section id="ndmesheffect">
+            <h2>3. ndMeshEffect</h2>
+            <p>
+                <code>ndMeshEffect</code> stores and manipulates mesh geometry including vertices,
+                normals, UVs, materials, and skinning data.
+            </p>
+
+            <h3>Creating Mesh Geometry</h3>
+<pre><code>// Create empty mesh
+ndMeshEffect* mesh = new ndMeshEffect();
+
+// Create from shape (for visualization)
+ndShapeInstance shape(new ndShapeSphere(1.0f));
+ndMeshEffect* sphereMesh = new ndMeshEffect(shape);
+
+// Create from point cloud (convex hull)
+ndFloat64 points[] = {
+    0.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+    0.0, 1.0, 0.0,
+    // ... more points
+};
+ndInt32 pointCount = 4;
+ndInt32 strideBytes = sizeof(ndFloat64) * 3;
+ndFloat64 tolerance = 0.001;
+ndMeshEffect* hullMesh = new ndMeshEffect(points, pointCount, strideBytes, tolerance);
+
+// Copy constructor
+ndMeshEffect* copy = new ndMeshEffect(*originalMesh);</code></pre>
+
+            <h3>Building Meshes Face by Face</h3>
+<pre><code>ndMeshEffect* mesh = new ndMeshEffect();
+mesh-&gt;BeginBuild();
+
+// Add a triangle
+mesh-&gt;BeginBuildFace();
+    // Vertex 0
+    mesh-&gt;AddPoint(0.0, 0.0, 0.0);
+    mesh-&gt;AddNormal(0.0f, 1.0f, 0.0f);
+    mesh-&gt;AddUV0(0.0f, 0.0f);
+    mesh-&gt;AddMaterial(0);
+
+    // Vertex 1
+    mesh-&gt;AddPoint(1.0, 0.0, 0.0);
+    mesh-&gt;AddNormal(0.0f, 1.0f, 0.0f);
+    mesh-&gt;AddUV0(1.0f, 0.0f);
+    mesh-&gt;AddMaterial(0);
+
+    // Vertex 2
+    mesh-&gt;AddPoint(0.5, 0.0, 1.0);
+    mesh-&gt;AddNormal(0.0f, 1.0f, 0.0f);
+    mesh-&gt;AddUV0(0.5f, 1.0f);
+    mesh-&gt;AddMaterial(0);
+mesh-&gt;EndBuildFace();
+
+// Add more faces...
+
+mesh-&gt;EndBuild(true);  // true = fix T-joints</code></pre>
+
+            <h3>Vertex Data Access</h3>
+<pre><code>// Get vertex count
+ndInt32 vertexCount = mesh-&gt;GetVertexCount();
+
+// Get vertex stride
+ndInt32 stride = mesh-&gt;GetVertexStrideInByte();
+
+// Get raw vertex data
+const ndFloat64* vertices = mesh-&gt;GetVertexPool();
+
+// Extract to buffer
+ndReal* vertexBuffer = new ndReal[vertexCount * 3];
+mesh-&gt;GetVertexChannel(sizeof(ndReal) * 3, vertexBuffer);
+
+// Extract normals
+ndReal* normalBuffer = new ndReal[vertexCount * 3];
+mesh-&gt;GetNormalChannel(sizeof(ndReal) * 3, normalBuffer);
+
+// Extract UVs
+ndReal* uvBuffer = new ndReal[vertexCount * 2];
+mesh-&gt;GetUV0Channel(sizeof(ndReal) * 2, uvBuffer);</code></pre>
+
+            <h3>Mesh Properties</h3>
+<pre><code>// Calculate volume
+ndFloat64 volume = mesh-&gt;CalculateVolume();
+
+// Calculate axis-aligned bounding box
+ndBigVector minBox, maxBox;
+mesh-&gt;CalculateAABB(minBox, maxBox);
+
+// Calculate oriented bounding box
+ndBigVector size;
+ndMatrix oobb = mesh-&gt;CalculateOOBB(size);
+
+// Get origin (centroid)
+ndBigVector origin = mesh-&gt;GetOrigin();</code></pre>
+        </section>
+
+        <section id="convex-hull">
+            <h2>4. Convex Hull Generation</h2>
+            <p>
+                <code>ndConvexHull3d</code> computes the convex hull of a point cloud,
+                which is essential for creating convex collision shapes.
+            </p>
+
+            <h3>Creating Convex Hull</h3>
+<pre><code>// Point cloud data
+ndFloat64 points[] = {
+    -1.0, -1.0, -1.0,
+     1.0, -1.0, -1.0,
+    -1.0,  1.0, -1.0,
+     1.0,  1.0, -1.0,
+    -1.0, -1.0,  1.0,
+     1.0, -1.0,  1.0,
+    -1.0,  1.0,  1.0,
+     1.0,  1.0,  1.0,
+    // ... more points
+};
+ndInt32 count = 8;
+ndInt32 strideBytes = sizeof(ndFloat64) * 3;
+ndFloat64 tolerance = 0.001;
+
+// Create convex hull
+ndConvexHull3d hull(points, strideBytes, count, tolerance);
+
+// Optional: limit vertex count
+ndInt32 maxVertices = 64;
+ndConvexHull3d limitedHull(points, strideBytes, count, tolerance, maxVertices);</code></pre>
+
+            <h3>Hull Properties</h3>
+<pre><code>// Get hull vertices
+const ndArray&lt;ndBigVector&gt;&amp; hullPoints = hull.GetVertexPool();
+
+// Get bounding box
+ndBigVector p0, p1;
+hull.GetAABB(p0, p1);
+
+// Get diagonal (size measure)
+ndFloat64 diagonal = hull.GetDiagonal();
+
+// Calculate volume and surface area
+ndFloat64 volume, surfaceArea;
+hull.CalculateVolumeAndSurfaceArea(volume, surfaceArea);
+
+// Ray cast against hull
+ndBigVector rayStart(0.0, 5.0, 0.0, 1.0);
+ndBigVector rayEnd(0.0, -5.0, 0.0, 1.0);
+ndFloat64 t = hull.RayCast(rayStart, rayEnd);
+if (t &lt; 1.0)
+{
+    // Hit at rayStart + t * (rayEnd - rayStart)
+}</code></pre>
+
+            <h3>Iterating Hull Faces</h3>
+<pre><code>// Convex hull is a list of faces
+for (ndConvexHull3d::ndNode* node = hull.GetFirst();
+     node; node = node-&gt;GetNext())
+{
+    const ndConvexHull3dFace&amp; face = node-&gt;GetInfo();
+
+    // Get face vertex indices
+    ndInt32 i0 = face.m_index[0];
+    ndInt32 i1 = face.m_index[1];
+    ndInt32 i2 = face.m_index[2];
+
+    // Get actual vertices
+    const ndArray&lt;ndBigVector&gt;&amp; verts = hull.GetVertexPool();
+    ndBigVector v0 = verts[i0];
+    ndBigVector v1 = verts[i1];
+    ndBigVector v2 = verts[i2];
+}</code></pre>
+        </section>
+
+        <section id="collision-from-mesh">
+            <h2>5. Collision from Mesh</h2>
+            <p>
+                <code>ndMesh</code> provides convenient methods to create collision shapes
+                from mesh geometry.
+            </p>
+
+            <h3>Primitive Collision Shapes</h3>
+<pre><code>// Create box collision fitting the mesh
+ndSharedPtr&lt;ndShapeInstance&gt; boxShape = mesh-&gt;CreateCollisionBox();
+
+// Create sphere collision
+ndSharedPtr&lt;ndShapeInstance&gt; sphereShape = mesh-&gt;CreateCollisionSphere();
+
+// Create capsule collision
+ndSharedPtr&lt;ndShapeInstance&gt; capsuleShape = mesh-&gt;CreateCollisionCapsule();
+
+// Create chamfer cylinder
+ndSharedPtr&lt;ndShapeInstance&gt; cylinderShape = mesh-&gt;CreateCollisionChamferCylinder();
+
+// Create tire shape (for wheels)
+ndSharedPtr&lt;ndShapeInstance&gt; tireShape = mesh-&gt;CreateCollisionTire();</code></pre>
+
+            <h3>Convex Hull Collision</h3>
+<pre><code>// Create convex hull from mesh vertices
+ndSharedPtr&lt;ndShapeInstance&gt; convexShape = mesh-&gt;CreateCollisionConvex();
+
+// Create convex approximation (for complex meshes)
+bool lowDetail = false;  // true = fewer vertices
+ndSharedPtr&lt;ndShapeInstance&gt; approxShape = mesh-&gt;CreateCollisionConvexApproximation(lowDetail);</code></pre>
+
+            <h3>Static Mesh Collision (Tree)</h3>
+<pre><code>// Create static mesh collision (for terrain, buildings)
+bool optimize = true;  // Optimize BVH structure
+ndSharedPtr&lt;ndShapeInstance&gt; treeShape = mesh-&gt;CreateCollisionTree(optimize);</code></pre>
+
+            <h3>Compound from Children</h3>
+<pre><code>// Create compound shape from child mesh nodes
+ndSharedPtr&lt;ndShapeInstance&gt; compoundShape = mesh-&gt;CreateCollisionFromChildren();
+
+// Create collision from this mesh node
+ndSharedPtr&lt;ndShapeInstance&gt; shape = mesh-&gt;CreateCollision();</code></pre>
+
+            <h3>From ndMeshEffect</h3>
+<pre><code>// Create convex collision directly from mesh effect
+ndFloat64 tolerance = 0.001;
+ndShapeInstance* convex = meshEffect-&gt;CreateConvexCollision(tolerance);
+
+// Use the shape
+body-&gt;SetCollisionShape(*convex);
+
+// Clean up
+delete convex;</code></pre>
+        </section>
+
+        <section id="mesh-operations">
+            <h2>6. Mesh Operations</h2>
+            <p>
+                <code>ndMeshEffect</code> supports various mesh manipulation operations.
+            </p>
+
+            <h3>Transform</h3>
+<pre><code>// Apply matrix transform to all vertices
+ndMatrix transform = ndYawMatrix(ndPi * 0.5f);
+transform.m_posit = ndVector(10.0f, 0.0f, 0.0f, 1.0f);
+meshEffect-&gt;ApplyTransform(transform);</code></pre>
+
+            <h3>Normals</h3>
+<pre><code>// Recalculate vertex normals
+ndFloat64 angleThreshold = ndDegreeToRad * 45.0;  // Smoothing angle
+meshEffect-&gt;CalculateNormals(angleThreshold);</code></pre>
+
+            <h3>Topology</h3>
+<pre><code>// Convert to triangles
+meshEffect-&gt;Triangulate();
+
+// Convert triangles to polygons
+meshEffect-&gt;ConvertToPolygons();
+
+// Flip face winding
+meshEffect-&gt;FlipWinding();
+
+// Check for open edges
+bool hasHoles = meshEffect-&gt;HasOpenEdges();
+
+// Repair T-joints
+meshEffect-&gt;RepairTJoints();</code></pre>
+
+            <h3>Boolean Operations</h3>
+<pre><code>// Convex mesh intersection
+ndMeshEffect* convexMesh = ...;
+ndMeshEffect* result = meshEffect-&gt;ConvexMeshIntersection(convexMesh);
+
+// Inverse intersection
+ndMeshEffect* inverse = meshEffect-&gt;InverseConvexMeshIntersection(convexMesh);</code></pre>
+
+            <h3>Voronoi Decomposition</h3>
+<pre><code>// Decompose mesh into convex pieces using Voronoi
+ndArray&lt;ndVector&gt; seeds;
+// ... populate seed points ...
+
+ndInt32 interiorMaterial = 1;  // Material for cut faces
+ndMatrix textureMatrix(ndGetIdentityMatrix());
+
+ndMeshEffect* decomposed = meshEffect-&gt;CreateVoronoiConvexDecomposition(
+    seeds, interiorMaterial, textureMatrix
+);</code></pre>
+
+            <h3>UV Mapping</h3>
+<pre><code>ndInt32 materialIndex = 0;
+ndMatrix textureMatrix(ndGetIdentityMatrix());
+textureMatrix.m_posit = ndVector(0.5f, 0.5f, 0.0f, 1.0f);  // Offset
+// Scale can be set via matrix scaling
+
+// Spherical UV mapping
+meshEffect-&gt;SphericalMapping(materialIndex, textureMatrix);
+
+// Box UV mapping
+ndInt32 frontMat = 0, sideMat = 1, topMat = 2;
+meshEffect-&gt;BoxMapping(frontMat, sideMat, topMat, textureMatrix);
+
+// Uniform box mapping (same material all sides)
+meshEffect-&gt;UniformBoxMapping(materialIndex, textureMatrix);
+
+// Cylindrical UV mapping
+meshEffect-&gt;CylindricalMapping(materialIndex, textureMatrix);</code></pre>
+        </section>
+
+        <section id="materials">
+            <h2>7. Materials &amp; Textures</h2>
+            <p>
+                <code>ndMeshEffect</code> supports multiple materials with properties
+                for rendering.
+            </p>
+
+            <h3>Material Structure</h3>
+<pre><code>// ndMeshEffect::ndMaterial structure
+struct ndMaterial
+{
+    ndVector m_ambient;     // Ambient color
+    ndVector m_diffuse;     // Diffuse color
+    ndVector m_specular;    // Specular color
+    ndVector m_reflection;  // Reflection color
+    ndFloat32 m_opacity;    // Transparency
+    ndFloat32 m_shiness;    // Specular power
+    char m_name[32];        // Material name
+    char m_textureName[32]; // Texture filename
+};</code></pre>
+
+            <h3>Working with Materials</h3>
+<pre><code>// Access materials array
+ndArray&lt;ndMeshEffect::ndMaterial&gt;&amp; materials = meshEffect-&gt;GetMaterials();
+
+// Add a material
+ndMeshEffect::ndMaterial newMat;
+newMat.m_diffuse = ndVector(1.0f, 0.0f, 0.0f, 1.0f);  // Red
+newMat.m_shiness = 100.0f;
+strcpy(newMat.m_textureName, "red_texture.png");
+materials.PushBack(newMat);
+
+// Modify existing material
+if (materials.GetCount() &gt; 0)
+{
+    materials[0].m_diffuse = ndVector(0.0f, 1.0f, 0.0f, 1.0f);  // Green
+}</code></pre>
+
+            <h3>Per-Face Materials</h3>
+<pre><code>// When building mesh, specify material per face
+mesh-&gt;BeginBuildFace();
+    mesh-&gt;AddPoint(x, y, z);
+    mesh-&gt;AddMaterial(2);  // Use material index 2
+    // ... more vertices
+mesh-&gt;EndBuildFace();
+
+// Get material for a face
+ndEdge* faceEdge = ...;
+ndInt32 materialId = meshEffect-&gt;GetFaceMaterial(faceEdge);</code></pre>
+
+            <h3>Material Iteration</h3>
+<pre><code>// Iterate through materials and their triangles
+ndIndexArray* indexArray = meshEffect-&gt;MaterialGeometryBegin();
+
+for (ndInt32 mat = meshEffect-&gt;GetFirstMaterial(indexArray);
+     mat != -1;
+     mat = meshEffect-&gt;GetNextMaterial(indexArray, mat))
+{
+    // Get material ID
+    ndInt32 materialId = meshEffect-&gt;GetMaterialID(indexArray, mat);
+
+    // Get index count for this material
+    ndInt32 indexCount = meshEffect-&gt;GetMaterialIndexCount(indexArray, mat);
+
+    // Get indices (32-bit or 16-bit)
+    ndInt32* indices32 = new ndInt32[indexCount];
+    meshEffect-&gt;GetMaterialGetIndexStream(indexArray, mat, indices32);
+
+    // Or 16-bit indices
+    ndInt16* indices16 = new ndInt16[indexCount];
+    meshEffect-&gt;GetMaterialGetIndexStream(indexArray, mat, indices16);
+
+    // Process indices...
+
+    delete[] indices32;
+    delete[] indices16;
+}
+
+meshEffect-&gt;MaterialGeometryEnd(indexArray);</code></pre>
+        </section>
+
+        <section id="skinning">
+            <h2>8. Skinning &amp; Weights</h2>
+            <p>
+                <code>ndMeshEffect</code> supports vertex skinning with bone weights
+                for skeletal animation.
+            </p>
+
+            <h3>Vertex Weight Structure</h3>
+<pre><code>// ndMeshEffect::ndVertexWeight structure
+class ndVertexWeight
+{
+public:
+    // Up to 4 bone influences per vertex
+    ndReal m_weight[4];   // Blend weights (sum to 1.0)
+    ndInt32 m_boneId[4];  // Bone indices (-1 = unused)
+};</code></pre>
+
+            <h3>Accessing Weights</h3>
+<pre><code>// Get vertex weights array
+ndArray&lt;ndMeshEffect::ndVertexWeight&gt;&amp; weights = meshEffect-&gt;GetVertexWeights();
+
+// Check if skinning data exists
+bool hasSkinning = weights.GetCount() &gt; 0;
+
+// Extract to buffer
+ndInt32 vertexCount = meshEffect-&gt;GetVertexCount();
+ndMeshEffect::ndVertexWeight* weightBuffer = new ndMeshEffect::ndVertexWeight[vertexCount];
+meshEffect-&gt;GetVertexWeightChannel(sizeof(ndMeshEffect::ndVertexWeight), weightBuffer);</code></pre>
+
+            <h3>Setting Weights</h3>
+<pre><code>// During mesh building
+mesh-&gt;BeginBuild();
+mesh-&gt;BeginBuildFace();
+
+    mesh-&gt;AddPoint(x, y, z);
+    mesh-&gt;AddNormal(nx, ny, nz);
+
+    // Weight is set per vertex in the weights array
+    // Typically loaded from file or calculated
+
+mesh-&gt;EndBuildFace();
+mesh-&gt;EndBuild();
+
+// Manually set weights after building
+ndArray&lt;ndMeshEffect::ndVertexWeight&gt;&amp; weights = mesh-&gt;GetVertexWeights();
+weights.SetCount(mesh-&gt;GetVertexCount());
+
+for (ndInt32 i = 0; i &lt; weights.GetCount(); ++i)
+{
+    weights[i].Clear();
+    weights[i].SetWeight(boneHash, weight);  // Add bone influence
+}</code></pre>
+
+            <h3>Animation Curves (ndMesh)</h3>
+<pre><code>// ndMesh supports animation curves for bones
+ndMesh* bone = ...;
+
+// Position curve
+ndMesh::ndCurve&amp; positCurve = bone-&gt;GetPositCurve();
+ndMesh::ndCurveValue posKey;
+posKey.m_x = 0.0f;
+posKey.m_y = 1.0f;
+posKey.m_z = 0.0f;
+posKey.m_time = 0.0f;  // Time in seconds
+positCurve.Append(posKey);
+
+// Rotation curve (Euler angles or quaternion components)
+ndMesh::ndCurve&amp; rotCurve = bone-&gt;GetRotationCurve();
+ndMesh::ndCurveValue rotKey;
+rotKey.m_x = 0.0f;  // Pitch
+rotKey.m_y = 0.0f;  // Yaw
+rotKey.m_z = 0.0f;  // Roll
+rotKey.m_time = 0.0f;
+rotCurve.Append(rotKey);
+
+// Scale curve
+ndMesh::ndCurve&amp; scaleCurve = bone-&gt;GetScaleCurve();
+ndMesh::ndCurveValue scaleKey;
+scaleKey.m_x = 1.0f;
+scaleKey.m_y = 1.0f;
+scaleKey.m_z = 1.0f;
+scaleKey.m_time = 0.0f;
+scaleCurve.Append(scaleKey);</code></pre>
+
+            <h3>Bone Target</h3>
+<pre><code>// For bones, set the end point target
+ndMesh* bone = ...;
+bone-&gt;SetNodeType(ndMesh::m_bone);
+
+ndVector target(0.0f, 0.5f, 0.0f, 1.0f);  // Local space
+bone-&gt;SetBoneTarget(target);
+
+ndVector currentTarget = bone-&gt;GetBoneTarget();</code></pre>
+
+            <div class="tip">
+                <strong>Tip:</strong> For complete mesh loading examples, see the sandbox
+                demos that load FBX/OBJ files and the <code>ndMeshLoader</code> class.
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        Newton Dynamics 4.00 Documentation | <a href="index.html">Back to Index</a>
+    </footer>
+</body>
+</html>

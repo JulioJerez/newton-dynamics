@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IK Solver System - Newton Dynamics 4.00</title>
+    <style>
+        :root {
+            --primary-color: #db2777;
+            --secondary-color: #be185d;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        nav.toc {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            margin-bottom: 1rem;
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        nav.toc ul {
+            list-style: none;
+            columns: 2;
+        }
+
+        nav.toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav.toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        nav.toc a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h3 {
+            color: var(--heading-color);
+            font-size: 1.35rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            color: var(--heading-color);
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #e2e8f0;
+            color: #be185d;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: var(--heading-color);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .tip {
+            background: #dcfce7;
+            border-left: 4px solid #22c55e;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .warning {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            nav.toc ul {
+                columns: 1;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            header {
+                padding: 2rem 1rem;
+            }
+
+            header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>IK Solver System</h1>
+            <p>Newton Dynamics 4.00 Documentation</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; Back to Index</a>
+
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#overview">1. Overview</a></li>
+                <li><a href="#ik-solver">2. ndIkSolver</a></li>
+                <li><a href="#ik-joints">3. IK Joints</a></li>
+                <li><a href="#effectors">4. End Effectors</a></li>
+                <li><a href="#swivel-effector">5. Swivel Position Effector</a></li>
+                <li><a href="#articulation">6. Articulated Models</a></li>
+                <li><a href="#skeleton">7. Skeleton Containers</a></li>
+                <li><a href="#best-practices">8. Best Practices</a></li>
+            </ul>
+        </nav>
+
+        <section id="overview">
+            <h2>1. Overview</h2>
+            <p>
+                Newton's Inverse Kinematics (IK) system provides tools for controlling articulated
+                bodies using target positions rather than explicit joint angles. This is particularly
+                useful for robotic arms, character animation, and any multi-body system that needs
+                to reach specific positions in space.
+            </p>
+
+            <h3>IK System Components</h3>
+<pre><code>ndIkSolver (solver engine)
+    |
+    +-- ndIkJointHinge (rotational joint)
+    +-- ndIkJointSpherical (ball-and-socket joint)
+    +-- ndIkJointDoubleHinge (universal joint)
+    |
+    +-- ndIk6DofEffector (6DOF end effector)
+    +-- ndIkSwivelPositionEffector (position + swivel control)</code></pre>
+
+            <h3>IK vs Forward Kinematics</h3>
+            <table>
+                <tr>
+                    <th>Aspect</th>
+                    <th>Forward Kinematics</th>
+                    <th>Inverse Kinematics</th>
+                </tr>
+                <tr>
+                    <td>Input</td>
+                    <td>Joint angles</td>
+                    <td>Target position/orientation</td>
+                </tr>
+                <tr>
+                    <td>Output</td>
+                    <td>End effector position</td>
+                    <td>Joint angles</td>
+                </tr>
+                <tr>
+                    <td>Use Case</td>
+                    <td>Playback animations</td>
+                    <td>Reach targets, procedural motion</td>
+                </tr>
+                <tr>
+                    <td>Joints Used</td>
+                    <td>Standard joints</td>
+                    <td>IK joints (ndIkJoint*)</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="ik-solver">
+            <h2>2. ndIkSolver</h2>
+            <p>
+                <code>ndIkSolver</code> is the core engine that computes joint accelerations to reach
+                target positions. It works with skeleton containers and IK joints to solve the
+                inverse kinematics problem.
+            </p>
+
+            <h3>Basic Usage</h3>
+<pre><code>// Create IK solver
+ndIkSolver ikSolver;
+
+// Set acceleration limits
+ndFloat32 maxLinearAccel = 100.0f;   // m/s^2
+ndFloat32 maxAngularAccel = 50.0f;   // rad/s^2
+ikSolver.SetMaxAccel(maxLinearAccel, maxAngularAccel);
+
+// Check if skeleton is at rest
+ndSkeletonContainer* skeleton = body-&gt;GetSkeleton();
+bool sleeping = ikSolver.IsSleeping(skeleton);</code></pre>
+
+            <h3>Solving IK</h3>
+<pre><code>// Get skeleton and joints
+ndSkeletonContainer* skeleton = rootBody-&gt;GetSkeleton();
+ndJointBilateralConstraint* joints[] = { joint0, joint1, joint2 };
+ndInt32 jointCount = 3;
+
+// Begin solve
+ikSolver.SolverBegin(skeleton, joints, jointCount, &amp;world, timestep);
+
+// Solve the IK problem
+ikSolver.Solve();
+
+// Update joint accelerations
+for (ndInt32 i = 0; i &lt; jointCount; ++i)
+{
+    ikSolver.UpdateJointAcceleration(joints[i]);
+}
+
+// End solve
+ikSolver.SolverEnd();</code></pre>
+
+            <h3>Acceleration Limits</h3>
+            <p>
+                The solver respects acceleration limits to prevent unrealistic motion:
+            </p>
+<pre><code>// Conservative limits for smooth motion
+ikSolver.SetMaxAccel(50.0f, 25.0f);
+
+// Aggressive limits for fast response
+ikSolver.SetMaxAccel(200.0f, 100.0f);
+
+// No limits (use with caution)
+ikSolver.SetMaxAccel(1.0e10f, 1.0e10f);</code></pre>
+        </section>
+
+        <section id="ik-joints">
+            <h2>3. IK Joints</h2>
+            <p>
+                IK joints extend standard joints with inverse dynamics capabilities. They implement
+                the <code>ndIkInterface</code> which allows the IK solver to compute required accelerations.
+            </p>
+
+            <h3>ndIkJointHinge</h3>
+            <p>A hinge joint with IK support for single-axis rotation:</p>
+<pre><code>// Create IK hinge joint
+ndMatrix pivotFrame(ndGetIdentityMatrix());
+pivotFrame.m_posit = ndVector(0.0f, 1.0f, 0.0f, 1.0f);
+
+ndIkJointHinge* ikHinge = new ndIkJointHinge(pivotFrame, child, parent);
+
+// Set torque limit
+ikHinge-&gt;SetMaxTorque(100.0f);  // Newton-meters
+
+// Get max torque
+ndFloat32 maxTorque = ikHinge-&gt;GetMaxTorque();
+
+// Torque limiting can be disabled
+ikHinge-&gt;SetMaxTorque(D_IK_HINGE_MAX_TORQUE);  // Effectively unlimited
+
+// Add to world
+world.AddJoint(ndSharedPtr&lt;ndJointBilateralConstraint&gt;(ikHinge));</code></pre>
+
+            <h3>ndIkJointSpherical</h3>
+            <p>A ball-and-socket joint with IK support for 3-axis rotation:</p>
+<pre><code>// Create IK spherical joint
+ndMatrix pivotFrame(ndGetIdentityMatrix());
+pivotFrame.m_posit = ndVector(0.0f, 1.5f, 0.0f, 1.0f);
+
+ndIkJointSpherical* ikBall = new ndIkJointSpherical(pivotFrame, child, parent);
+
+// Spherical joints support cone and twist limits (inherited from ndJointSpherical)
+// Set via base class methods
+ndFloat32 coneAngle = ndDegreeToRad * 45.0f;
+// Cast to access spherical methods if needed
+
+world.AddJoint(ndSharedPtr&lt;ndJointBilateralConstraint&gt;(ikBall));</code></pre>
+
+            <h3>ndIkJointDoubleHinge</h3>
+            <p>A universal joint with IK support (two perpendicular rotation axes):</p>
+<pre><code>// Create IK double hinge (universal joint)
+ndMatrix pivotFrame(ndGetIdentityMatrix());
+pivotFrame.m_posit = ndVector(0.0f, 2.0f, 0.0f, 1.0f);
+
+ndIkJointDoubleHinge* ikUniversal = new ndIkJointDoubleHinge(pivotFrame, child, parent);
+
+world.AddJoint(ndSharedPtr&lt;ndJointBilateralConstraint&gt;(ikUniversal));</code></pre>
+
+            <h3>IK Joint Inheritance</h3>
+            <p>IK joints inherit all functionality from their base classes:</p>
+            <table>
+                <tr>
+                    <th>IK Joint</th>
+                    <th>Base Class</th>
+                    <th>Inherited Features</th>
+                </tr>
+                <tr>
+                    <td><code>ndIkJointHinge</code></td>
+                    <td><code>ndJointHinge</code></td>
+                    <td>Angle limits, spring-damper, target angle</td>
+                </tr>
+                <tr>
+                    <td><code>ndIkJointSpherical</code></td>
+                    <td><code>ndJointSpherical</code></td>
+                    <td>Cone limits, twist limits</td>
+                </tr>
+                <tr>
+                    <td><code>ndIkJointDoubleHinge</code></td>
+                    <td><code>ndJointDoubleHinge</code></td>
+                    <td>Dual-axis rotation</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="effectors">
+            <h2>4. End Effectors</h2>
+            <p>
+                <code>ndIk6DofEffector</code> defines the target position and orientation for an IK chain.
+                It supports selective axis control and spring-damper behavior.
+            </p>
+
+            <h3>Creating a 6DOF Effector</h3>
+<pre><code>// Define effector frames
+ndMatrix childFrame(ndGetIdentityMatrix());
+childFrame.m_posit = childBody-&gt;GetMatrix().m_posit;
+
+ndMatrix parentFrame(ndGetIdentityMatrix());
+parentFrame.m_posit = ndVector(5.0f, 2.0f, 0.0f, 1.0f);  // Target position
+
+// Create effector
+ndIk6DofEffector* effector = new ndIk6DofEffector(childFrame, parentFrame, childBody, parentBody);
+
+world.AddJoint(ndSharedPtr&lt;ndJointBilateralConstraint&gt;(effector));</code></pre>
+
+            <h3>Axis Control</h3>
+            <p>Enable or disable individual position axes:</p>
+<pre><code>// Control which axes are constrained
+effector-&gt;EnableAxisX(true);   // Constrain X position
+effector-&gt;EnableAxisY(true);   // Constrain Y position
+effector-&gt;EnableAxisZ(true);   // Constrain Z position
+
+// Query axis state
+bool xEnabled = effector-&gt;GetAxisX();
+bool yEnabled = effector-&gt;GetAxisY();
+bool zEnabled = effector-&gt;GetAxisZ();</code></pre>
+
+            <h3>Rotation Control</h3>
+            <p>Three rotation modes are available:</p>
+<pre><code>// Rotation types
+ndIk6DofEffector::ndRotationType rotationType;
+
+// Disable rotation constraints
+effector-&gt;EnableRotationAxis(ndIk6DofEffector::m_disabled);
+
+// Fix orientation to target
+effector-&gt;EnableRotationAxis(ndIk6DofEffector::m_fixAxis);
+
+// Use shortest path rotation
+effector-&gt;EnableRotationAxis(ndIk6DofEffector::m_shortestPath);
+
+// Query current mode
+rotationType = effector-&gt;GetRotationAxis();</code></pre>
+
+            <h3>Target Matrix</h3>
+<pre><code>// Set target position/orientation
+ndMatrix targetFrame(ndGetIdentityMatrix());
+targetFrame.m_posit = ndVector(3.0f, 2.0f, 1.0f, 1.0f);
+effector-&gt;SetOffsetMatrix(targetFrame);
+
+// Get current target
+ndMatrix currentTarget = effector-&gt;GetOffsetMatrix();
+
+// Get effector's current world matrix
+ndMatrix effectorMatrix = effector-&gt;GetEffectorMatrix();</code></pre>
+
+            <h3>Spring-Damper Settings</h3>
+<pre><code>// Linear spring-damper (position)
+ndFloat32 linearRegularizer = 0.1f;
+ndFloat32 linearSpring = 1000.0f;    // N/m
+ndFloat32 linearDamper = 50.0f;      // N*s/m
+effector-&gt;SetLinearSpringDamper(linearRegularizer, linearSpring, linearDamper);
+
+// Angular spring-damper (orientation)
+ndFloat32 angularRegularizer = 0.1f;
+ndFloat32 angularSpring = 500.0f;    // N*m/rad
+ndFloat32 angularDamper = 25.0f;     // N*m*s/rad
+effector-&gt;SetAngularSpringDamper(angularRegularizer, angularSpring, angularDamper);
+
+// Query settings
+ndFloat32 r, k, c;
+effector-&gt;GetLinearSpringDamper(r, k, c);
+effector-&gt;GetAngularSpringDamper(r, k, c);</code></pre>
+
+            <h3>Force/Torque Limits</h3>
+<pre><code>// Set maximum force the effector can apply
+effector-&gt;SetMaxForce(500.0f);   // Newtons
+effector-&gt;SetMaxTorque(100.0f);  // Newton-meters
+
+// Query limits
+ndFloat32 maxForce = effector-&gt;GetMaxForce();
+ndFloat32 maxTorque = effector-&gt;GetMaxTorque();</code></pre>
+        </section>
+
+        <section id="swivel-effector">
+            <h2>5. Swivel Position Effector</h2>
+            <p>
+                <code>ndIkSwivelPositionEffector</code> provides position control with swivel angle
+                (elbow direction) control. This is useful for arms and legs where you want to
+                control both the end position and the elbow/knee direction.
+            </p>
+
+            <h3>Creating Swivel Effector</h3>
+<pre><code>// Parent frame in world space (shoulder/hip)
+ndMatrix parentFrame(ndGetIdentityMatrix());
+parentFrame.m_posit = ndVector(0.0f, 2.0f, 0.0f, 1.0f);
+
+// Child pivot in world space (hand/foot)
+ndVector childPivot(2.0f, 1.0f, 0.0f, 1.0f);
+
+// Create effector
+ndIkSwivelPositionEffector* swivel = new ndIkSwivelPositionEffector(
+    parentFrame, parentBody,
+    childPivot, childBody
+);
+
+world.AddJoint(ndSharedPtr&lt;ndJointBilateralConstraint&gt;(swivel));</code></pre>
+
+            <h3>Target Position</h3>
+<pre><code>// Set local target position (relative to parent)
+ndVector localTarget(1.5f, -0.5f, 0.2f, 1.0f);
+swivel-&gt;SetLocalTargetPosition(localTarget);
+
+// Get current target
+ndVector target = swivel-&gt;GetLocalTargetPosition();
+
+// Get current effector world position
+ndVector effectorPos = swivel-&gt;GetEffectorPosit();
+
+// Check if target is within workspace
+ndVector testPos(2.5f, 0.0f, 0.0f, 1.0f);
+bool valid = swivel-&gt;TestWorkSpaceViolation(testPos);</code></pre>
+
+            <h3>Swivel Angle Control</h3>
+            <p>The swivel angle controls the rotation of the arm/leg around its axis:</p>
+<pre><code>// Enable swivel control
+swivel-&gt;SetSwivelMode(true);
+
+// Set swivel angle (radians)
+swivel-&gt;SetSwivelAngle(ndPi * 0.25f);  // 45 degrees
+
+// Get current swivel angle
+ndFloat32 angle = swivel-&gt;GetSwivelAngle();
+
+// Calculate swivel angle to look at a direction
+ndVector lookDir(0.0f, 0.0f, 1.0f, 0.0f);
+ndFloat32 swivelAngle = swivel-&gt;CalculateLookAtSwivelAngle(lookDir);
+swivel-&gt;SetSwivelAngle(swivelAngle);
+
+// Query swivel mode
+bool swivelEnabled = swivel-&gt;GetSwivelMode();</code></pre>
+
+            <h3>Rest Position</h3>
+<pre><code>// Set rest/default position
+ndVector restPos(0.5f, -0.5f, 0.0f, 1.0f);
+swivel-&gt;SetRestPosit(restPos);
+
+// Get rest position
+ndVector currentRest = swivel-&gt;GetRestPosit();</code></pre>
+
+            <h3>Workspace Constraints</h3>
+<pre><code>// Limit effector to sphere shell around parent
+ndFloat32 minRadius = 0.5f;   // Minimum reach
+ndFloat32 maxRadius = 2.0f;   // Maximum reach
+
+swivel-&gt;SetWorkSpaceConstraints(minRadius, maxRadius);
+
+// Get workspace limits
+ndFloat32 minR, maxR;
+swivel-&gt;GetWorkSpaceConstraints(minR, maxR);</code></pre>
+
+            <h3>Rotation Order</h3>
+<pre><code>// Set rotation order for Euler angles
+swivel-&gt;SetRotationOrder(ndIkSwivelPositionEffector::m_pitchRollYaw);
+// or
+swivel-&gt;SetRotationOrder(ndIkSwivelPositionEffector::m_pitchYawRoll);
+
+// Get current order
+ndIkSwivelPositionEffector::ndRotationOrder order = swivel-&gt;GetRotationOrder();</code></pre>
+
+            <h3>Reduced DOF Mode</h3>
+<pre><code>// Set as reduced degrees of freedom
+// Useful for specific kinematic chains
+swivel-&gt;SetAsReducedDof();</code></pre>
+        </section>
+
+        <section id="articulation">
+            <h2>6. Articulated Models</h2>
+            <p>
+                For complex IK chains, use <code>ndModelArticulation</code> which manages multiple
+                bodies and joints as a unified model with built-in IK support.
+            </p>
+
+            <h3>Building an IK Chain</h3>
+<pre><code>class RobotArm : public ndModelArticulation
+{
+public:
+    RobotArm()
+    {
+        // Create bodies
+        ndSharedPtr&lt;ndBody&gt; base(CreateBody(baseShape));
+        ndSharedPtr&lt;ndBody&gt; upperArm(CreateBody(armShape));
+        ndSharedPtr&lt;ndBody&gt; lowerArm(CreateBody(armShape));
+        ndSharedPtr&lt;ndBody&gt; hand(CreateBody(handShape));
+
+        // Add root
+        AddRootBody(base);
+
+        // Create IK joints
+        ndMatrix shoulderFrame = CalculateShoulderFrame();
+        ndIkJointSpherical* shoulder =
+            new ndIkJointSpherical(shoulderFrame, upperArm-&gt;GetAsBodyKinematic(),
+                                   base-&gt;GetAsBodyKinematic());
+
+        ndMatrix elbowFrame = CalculateElbowFrame();
+        ndIkJointHinge* elbow =
+            new ndIkJointHinge(elbowFrame, lowerArm-&gt;GetAsBodyKinematic(),
+                               upperArm-&gt;GetAsBodyKinematic());
+
+        ndMatrix wristFrame = CalculateWristFrame();
+        ndIkJointSpherical* wrist =
+            new ndIkJointSpherical(wristFrame, hand-&gt;GetAsBodyKinematic(),
+                                   lowerArm-&gt;GetAsBodyKinematic());
+
+        // Add limbs with joints
+        AddLimb(base, upperArm, ndSharedPtr&lt;ndJointBilateralConstraint&gt;(shoulder));
+        AddLimb(upperArm, lowerArm, ndSharedPtr&lt;ndJointBilateralConstraint&gt;(elbow));
+        AddLimb(lowerArm, hand, ndSharedPtr&lt;ndJointBilateralConstraint&gt;(wrist));
+
+        // Create end effector
+        ndMatrix effectorFrame = hand-&gt;GetMatrix();
+        m_effector = new ndIk6DofEffector(effectorFrame, effectorFrame,
+                                          hand-&gt;GetAsBodyKinematic(), nullptr);
+        m_effector-&gt;EnableAxisX(true);
+        m_effector-&gt;EnableAxisY(true);
+        m_effector-&gt;EnableAxisZ(true);
+        m_effector-&gt;EnableRotationAxis(ndIk6DofEffector::m_shortestPath);
+    }
+
+    void SetTarget(const ndMatrix&amp; target)
+    {
+        m_effector-&gt;SetOffsetMatrix(target);
+    }
+
+private:
+    ndIk6DofEffector* m_effector;
+};</code></pre>
+
+            <div class="tip">
+                <strong>Tip:</strong> Use <code>ndModelArticulation</code> for complex IK chains
+                as it automatically manages skeleton containers and provides optimized solving.
+            </div>
+        </section>
+
+        <section id="skeleton">
+            <h2>7. Skeleton Containers</h2>
+            <p>
+                Skeleton containers organize bodies into kinematic chains for efficient IK solving.
+                They are automatically created when bodies are connected in a tree structure.
+            </p>
+
+            <h3>Accessing Skeletons</h3>
+<pre><code>// Get skeleton from root body
+ndBodyKinematic* rootBody = ...;
+ndSkeletonContainer* skeleton = rootBody-&gt;GetSkeleton();
+
+// Check if skeleton exists
+if (skeleton)
+{
+    // Use with IK solver
+    ikSolver.SolverBegin(skeleton, joints, jointCount, &amp;world, timestep);
+}</code></pre>
+
+            <h3>Skeleton and Articulation</h3>
+<pre><code>// ndModelArticulation creates skeletons automatically
+class MyModel : public ndModelArticulation
+{
+public:
+    void Update(ndFloat32 timestep) override
+    {
+        // Get the skeleton for IK solving
+        ndBodyKinematic* root = GetRoot()-&gt;m_body-&gt;GetAsBodyKinematic();
+        ndSkeletonContainer* skeleton = root-&gt;GetSkeleton();
+
+        if (skeleton &amp;&amp; !m_ikSolver.IsSleeping(skeleton))
+        {
+            // Perform IK solve
+            SolveIK(timestep);
+        }
+    }
+};</code></pre>
+        </section>
+
+        <section id="best-practices">
+            <h2>8. Best Practices</h2>
+
+            <h3>Chain Design</h3>
+            <ul>
+                <li>Use spherical joints at the base for maximum reachability</li>
+                <li>Use hinge joints for elbows/knees (single axis)</li>
+                <li>Limit total chain length for better stability</li>
+                <li>Add joint limits to prevent impossible configurations</li>
+            </ul>
+
+            <h3>Performance</h3>
+            <ul>
+                <li>Use <code>IsSleeping()</code> to skip IK solving for static chains</li>
+                <li>Limit max acceleration for smoother, more stable motion</li>
+                <li>Use articulation models for complex chains</li>
+                <li>Consider reducing solve frequency for distant/unimportant targets</li>
+            </ul>
+
+            <h3>Stability</h3>
+            <div class="warning">
+                <strong>Warning:</strong> Very high spring constants or low regularizer values
+                can cause instability. Start with conservative values and tune carefully.
+            </div>
+<pre><code>// Conservative, stable settings
+effector-&gt;SetLinearSpringDamper(0.2f, 500.0f, 50.0f);
+effector-&gt;SetAngularSpringDamper(0.2f, 200.0f, 20.0f);
+ikSolver.SetMaxAccel(50.0f, 25.0f);
+
+// More responsive (may be less stable)
+effector-&gt;SetLinearSpringDamper(0.05f, 2000.0f, 100.0f);
+effector-&gt;SetAngularSpringDamper(0.05f, 1000.0f, 50.0f);
+ikSolver.SetMaxAccel(200.0f, 100.0f);</code></pre>
+
+            <h3>Common Issues</h3>
+            <table>
+                <tr>
+                    <th>Issue</th>
+                    <th>Cause</th>
+                    <th>Solution</th>
+                </tr>
+                <tr>
+                    <td>Oscillation</td>
+                    <td>Low damping</td>
+                    <td>Increase damper coefficient</td>
+                </tr>
+                <tr>
+                    <td>Slow response</td>
+                    <td>High regularizer</td>
+                    <td>Reduce regularizer value</td>
+                </tr>
+                <tr>
+                    <td>Unreachable target</td>
+                    <td>Target outside workspace</td>
+                    <td>Use workspace constraints</td>
+                </tr>
+                <tr>
+                    <td>Jerky motion</td>
+                    <td>High max acceleration</td>
+                    <td>Reduce max acceleration limits</td>
+                </tr>
+                <tr>
+                    <td>Joint limits ignored</td>
+                    <td>Limits not set on base class</td>
+                    <td>Set limits on base joint class</td>
+                </tr>
+            </table>
+        </section>
+    </div>
+
+    <footer>
+        Newton Dynamics 4.00 Documentation | <a href="index.html">Back to Index</a>
+    </footer>
+</body>
+</html>

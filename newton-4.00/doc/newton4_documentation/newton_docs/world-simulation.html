@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World & Simulation - Newton Dynamics 4.00</title>
+    <style>
+        :root {
+            --primary-color: #059669;
+            --secondary-color: #047857;
+            --bg-color: #f8fafc;
+            --code-bg: #1e293b;
+            --border-color: #e2e8f0;
+            --text-color: #334155;
+            --heading-color: #0f172a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.7;
+            color: var(--text-color);
+            background: var(--bg-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        nav.toc {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        nav.toc h2 {
+            margin-bottom: 1rem;
+            color: var(--heading-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+
+        nav.toc ul {
+            list-style: none;
+            columns: 2;
+        }
+
+        nav.toc li {
+            margin-bottom: 0.5rem;
+        }
+
+        nav.toc a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        nav.toc a:hover {
+            text-decoration: underline;
+        }
+
+        section {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            color: var(--heading-color);
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+        }
+
+        h3 {
+            color: var(--heading-color);
+            font-size: 1.35rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        h4 {
+            color: var(--heading-color);
+            font-size: 1.1rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 1.25rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        code {
+            background: #e2e8f0;
+            color: #be185d;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: var(--heading-color);
+        }
+
+        tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .note {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .tip {
+            background: #dcfce7;
+            border-left: 4px solid #22c55e;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .warning {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 1rem 1.25rem;
+            margin: 1rem 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        ul, ol {
+            margin: 1rem 0;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+            border-top: 1px solid var(--border-color);
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            nav.toc ul {
+                columns: 1;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            header {
+                padding: 2rem 1rem;
+            }
+
+            header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>World & Simulation</h1>
+            <p>Newton Dynamics 4.00 Documentation</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">&larr; Back to Index</a>
+
+        <nav class="toc">
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#overview">1. Overview</a></li>
+                <li><a href="#creating-world">2. Creating a World</a></li>
+                <li><a href="#simulation-loop">3. Simulation Loop</a></li>
+                <li><a href="#timestep">4. Timestep Management</a></li>
+                <li><a href="#solver-modes">5. Solver Modes</a></li>
+                <li><a href="#threading">6. Threading</a></li>
+                <li><a href="#callbacks">7. Callbacks</a></li>
+                <li><a href="#queries">8. Scene Queries</a></li>
+                <li><a href="#performance">9. Performance Tips</a></li>
+            </ul>
+        </nav>
+
+        <section id="overview">
+            <h2>1. Overview</h2>
+            <p>
+                The <code>ndWorld</code> class is the central hub of Newton Dynamics. It owns and manages all physics
+                objects (bodies, joints, models) and coordinates the simulation. Each frame, you call <code>Update()</code>
+                to advance the simulation, then <code>Sync()</code> to wait for completion.
+            </p>
+
+            <h3>Key Responsibilities</h3>
+            <ul>
+                <li><strong>Object Management</strong> - Add/remove bodies, joints, and models</li>
+                <li><strong>Simulation</strong> - Step the physics forward in time</li>
+                <li><strong>Collision Detection</strong> - Broad/narrow phase, contact generation</li>
+                <li><strong>Constraint Solving</strong> - Resolve joints and contacts</li>
+                <li><strong>Scene Queries</strong> - Raycasts, convex casts, AABB queries</li>
+            </ul>
+
+            <table>
+                <tr>
+                    <th>Header</th>
+                    <th>Class</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>ndWorld.h</code></td>
+                    <td><code>ndWorld</code></td>
+                    <td>Physics world container and simulation manager</td>
+                </tr>
+                <tr>
+                    <td><code>ndScene.h</code></td>
+                    <td><code>ndScene</code></td>
+                    <td>Collision scene (internal, accessed via ndWorld)</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="creating-world">
+            <h2>2. Creating a World</h2>
+            <p>Create an <code>ndWorld</code> instance. It can be allocated on the stack or heap:</p>
+
+<pre><code>#include &lt;ndNewton.h&gt;
+
+// Stack allocation (typical usage)
+ndWorld world;
+
+// Heap allocation
+ndWorld* world = new ndWorld();
+
+// Configure world settings
+world.SetSubSteps(2);
+world.SetSolverIterations(4);
+world.SetThreadCount(4);</code></pre>
+
+            <h3>Default Settings</h3>
+            <table>
+                <tr>
+                    <th>Setting</th>
+                    <th>Default</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>Sub-steps</td>
+                    <td>1</td>
+                    <td>Physics sub-iterations per Update() call</td>
+                </tr>
+                <tr>
+                    <td>Solver iterations</td>
+                    <td>4</td>
+                    <td>Constraint solver iterations</td>
+                </tr>
+                <tr>
+                    <td>Thread count</td>
+                    <td>Auto</td>
+                    <td>Number of worker threads (0 = auto-detect)</td>
+                </tr>
+                <tr>
+                    <td>Solver mode</td>
+                    <td>ndSimdSoaSolver</td>
+                    <td>SIMD-optimized solver</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="simulation-loop">
+            <h2>3. Simulation Loop</h2>
+            <p>The simulation loop follows a standard pattern:</p>
+
+<pre><code>void GameLoop(ndWorld&amp; world, float deltaTime)
+{
+    // 1. Pre-physics: Apply forces, user input
+    for (auto body : GetPlayerBodies())
+    {
+        body-&gt;SetForce(playerForce);
+    }
+
+    // 2. Step simulation (asynchronous)
+    world.Update(deltaTime);
+
+    // 3. Wait for physics to complete
+    world.Sync();
+
+    // 4. Post-physics: Read transforms for rendering
+    for (auto body : world.GetBodyList())
+    {
+        UpdateGraphicsTransform(body);
+    }
+}</code></pre>
+
+            <h3>Key Methods</h3>
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>Update(timestep)</code></td>
+                    <td>Starts physics simulation for the given timestep. Runs asynchronously on worker threads.</td>
+                </tr>
+                <tr>
+                    <td><code>Sync()</code></td>
+                    <td>Blocks until the current Update() completes. Must call before reading body transforms.</td>
+                </tr>
+                <tr>
+                    <td><code>CollisionUpdate(timestep)</code></td>
+                    <td>Updates collision detection only (no dynamics). Useful for queries without simulation.</td>
+                </tr>
+            </table>
+
+            <div class="warning">
+                <strong>Warning:</strong> Never access body transforms between <code>Update()</code> and <code>Sync()</code>.
+                The physics thread may be modifying them concurrently.
+            </div>
+        </section>
+
+        <section id="timestep">
+            <h2>4. Timestep Management</h2>
+
+            <h3>Fixed vs Variable Timestep</h3>
+            <p>Newton works best with a <strong>fixed timestep</strong>. Variable timesteps cause instability and
+            non-deterministic behavior:</p>
+
+<pre><code>// RECOMMENDED: Fixed timestep with accumulator
+const float FIXED_DT = 1.0f / 60.0f;
+float accumulator = 0.0f;
+
+void GameLoop(float frameDelta)
+{
+    accumulator += frameDelta;
+
+    while (accumulator >= FIXED_DT)
+    {
+        world.Update(FIXED_DT);
+        world.Sync();
+        accumulator -= FIXED_DT;
+    }
+
+    // Interpolate for rendering (optional)
+    float alpha = accumulator / FIXED_DT;
+    InterpolateRenderTransforms(alpha);
+}</code></pre>
+
+            <h3>Sub-Steps</h3>
+            <p>Sub-steps divide each <code>Update()</code> call into smaller internal steps for improved stability:</p>
+
+<pre><code>// With SetSubSteps(2), a 1/60 timestep becomes two 1/120 steps internally
+world.SetSubSteps(2);  // Default: 1
+
+// Higher sub-steps = more stable but slower
+// - 1: Fast, suitable for simple scenes
+// - 2: Good balance for most games
+// - 4+: High stability for complex constraints</code></pre>
+
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td><code>SetSubSteps(n)</code></td>
+                    <td>Set number of sub-steps per Update() call</td>
+                </tr>
+                <tr>
+                    <td><code>GetSubSteps()</code></td>
+                    <td>Get current sub-step count</td>
+                </tr>
+                <tr>
+                    <td><code>GetFrameNumber()</code></td>
+                    <td>Get total simulation frames (Update calls)</td>
+                </tr>
+                <tr>
+                    <td><code>GetSubFrameNumber()</code></td>
+                    <td>Get total sub-frame count</td>
+                </tr>
+            </table>
+
+            <div class="tip">
+                <strong>Tip:</strong> Start with sub-steps=2 and increase only if you see joint instability or
+                objects passing through each other (tunneling).
+            </div>
+        </section>
+
+        <section id="solver-modes">
+            <h2>5. Solver Modes</h2>
+            <p>Newton provides multiple solver implementations optimized for different hardware:</p>
+
+<pre><code>// Select solver mode
+world.SelectSolver(ndWorld::ndSimdAvx2Solver);  // Best for modern x86
+
+// Get current solver info
+const char* solverName = world.GetSolverString();
+bool isHighPerf = world.IsHighPerformanceCompute();</code></pre>
+
+            <h3>Available Solvers</h3>
+            <table>
+                <tr>
+                    <th>Enum</th>
+                    <th>Description</th>
+                    <th>Best For</th>
+                </tr>
+                <tr>
+                    <td><code>ndStandardSolver</code></td>
+                    <td>Scalar C++ implementation</td>
+                    <td>Debugging, fallback</td>
+                </tr>
+                <tr>
+                    <td><code>ndSimdSoaSolver</code></td>
+                    <td>SSE3 SIMD with SoA layout</td>
+                    <td>Most x86/x64 systems (default)</td>
+                </tr>
+                <tr>
+                    <td><code>ndSimdAvx2Solver</code></td>
+                    <td>AVX2 SIMD with SoA layout</td>
+                    <td>Modern Intel/AMD (Haswell+)</td>
+                </tr>
+            </table>
+
+            <h3>Solver Iterations</h3>
+            <p>More iterations improve constraint accuracy at the cost of performance:</p>
+
+<pre><code>// Set solver iterations (default: 4)
+world.SetSolverIterations(8);  // More accurate constraints
+
+// Get current setting
+int iterations = world.GetSolverIterations();</code></pre>
+
+            <div class="note">
+                <strong>Note:</strong> Increase solver iterations if joints appear "loose" or constraints aren't
+                being satisfied. 4-8 iterations is typical; 16+ is rarely needed.
+            </div>
+        </section>
+
+        <section id="threading">
+            <h2>6. Threading</h2>
+            <p>Newton automatically parallelizes simulation across multiple CPU cores:</p>
+
+<pre><code>// Auto-detect thread count (recommended)
+world.SetThreadCount(0);
+
+// Or set explicitly
+world.SetThreadCount(4);
+
+// Query current setting
+int threads = world.GetThreadCount();</code></pre>
+
+            <h3>Threading Model</h3>
+            <ul>
+                <li><code>Update()</code> dispatches work to a thread pool and returns immediately</li>
+                <li><code>Sync()</code> blocks until all worker threads complete</li>
+                <li>The main thread can do other work between Update() and Sync()</li>
+                <li>Bodies, joints, and contacts are processed in parallel where possible</li>
+            </ul>
+
+<pre><code>// Example: Overlap rendering with physics
+world.Update(dt);
+
+// Do rendering while physics runs in background
+RenderScene();
+
+// Wait for physics before next frame
+world.Sync();</code></pre>
+
+            <h3>Thread Safety</h3>
+            <ul>
+                <li><strong>Safe between frames:</strong> Add/remove bodies, joints, models</li>
+                <li><strong>Safe during simulation:</strong> Read-only queries (raycasts, etc.)</li>
+                <li><strong>Unsafe during simulation:</strong> Modifying body properties</li>
+            </ul>
+        </section>
+
+        <section id="callbacks">
+            <h2>7. Callbacks</h2>
+            <p>Newton provides callback hooks for custom behavior during simulation:</p>
+
+            <h3>Contact Notify</h3>
+            <p>Override <code>ndContactNotify</code> to customize contact behavior:</p>
+
+<pre><code>class MyContactNotify : public ndContactNotify
+{
+public:
+    // Called when contact is about to be created
+    virtual void OnContactCallback(ndInt32 threadIndex,
+        const ndContact* const contact) override
+    {
+        // Custom contact handling
+    }
+
+    // Return material properties for a body pair
+    virtual ndMaterial&amp; GetMaterial(
+        const ndContact* const contact,
+        const ndShapeInstance&amp; shapeInst0,
+        const ndShapeInstance&amp; shapeInst1) const override
+    {
+        // Return custom material
+        return m_material;
+    }
+};
+
+// Install contact notify
+MyContactNotify* notify = new MyContactNotify();
+world.SetContactNotify(notify);</code></pre>
+
+            <h3>Virtual Methods</h3>
+            <p>Subclass <code>ndWorld</code> to override these virtual hooks:</p>
+
+            <table>
+                <tr>
+                    <th>Method</th>
+                    <th>When Called</th>
+                </tr>
+                <tr>
+                    <td><code>PreUpdate(timestep)</code></td>
+                    <td>Before each simulation frame</td>
+                </tr>
+                <tr>
+                    <td><code>PostUpdate(timestep)</code></td>
+                    <td>After each simulation frame</td>
+                </tr>
+                <tr>
+                    <td><code>OnSubStepPreUpdate(timestep)</code></td>
+                    <td>Before each sub-step</td>
+                </tr>
+                <tr>
+                    <td><code>OnSubStepPostUpdate(timestep)</code></td>
+                    <td>After each sub-step</td>
+                </tr>
+            </table>
+        </section>
+
+        <section id="queries">
+            <h2>8. Scene Queries</h2>
+            <p>Query the physics scene for collision information:</p>
+
+            <h3>Raycasting</h3>
+<pre><code>class MyRaycastCallback : public ndRayCastNotify
+{
+public:
+    virtual ndFloat32 OnRayCastAction(
+        const ndContactPoint&amp; contact, ndFloat32 intersetParam) override
+    {
+        // Store hit information
+        m_hitPoint = contact.m_point;
+        m_hitNormal = contact.m_normal;
+        m_hitBody = contact.m_body0;
+
+        // Return intersetParam to continue, or 0 to stop
+        return intersetParam;  // Continue to find closest
+    }
+
+    ndVector m_hitPoint;
+    ndVector m_hitNormal;
+    ndBody* m_hitBody;
+};
+
+// Perform raycast
+MyRaycastCallback callback;
+ndVector origin(0.0f, 10.0f, 0.0f, 1.0f);
+ndVector dest(0.0f, -10.0f, 0.0f, 1.0f);
+
+if (world.RayCast(callback, origin, dest))
+{
+    // Hit something
+    ProcessHit(callback.m_hitPoint, callback.m_hitBody);
+}</code></pre>
+
+            <h3>Convex Cast</h3>
+<pre><code>class MyConvexCastCallback : public ndConvexCastNotify
+{
+public:
+    virtual ndUnsigned32 OnRayPrecastAction(
+        const ndBody* const body, const ndShapeInstance* const) override
+    {
+        // Return 1 to test this body, 0 to skip
+        return 1;
+    }
+};
+
+// Sweep a sphere through the scene
+MyConvexCastCallback callback;
+ndShapeInstance sphere(new ndShapeSphere(0.5f));
+ndMatrix startMatrix(ndGetIdentityMatrix());
+startMatrix.m_posit = ndVector(0.0f, 10.0f, 0.0f, 1.0f);
+ndVector endPos(0.0f, -10.0f, 0.0f, 1.0f);
+
+if (world.ConvexCast(callback, sphere, startMatrix, endPos))
+{
+    // Sphere hit something during sweep
+}</code></pre>
+
+            <h3>AABB Query</h3>
+<pre><code>class MyAabbCallback : public ndBodiesInAabbNotify
+{
+public:
+    virtual bool OnBodiesInAabb(ndBody* const body) override
+    {
+        m_bodies.push_back(body);
+        return true;  // Continue searching
+    }
+
+    std::vector&lt;ndBody*&gt; m_bodies;
+};
+
+// Find all bodies in a box
+MyAabbCallback callback;
+ndVector minBox(-10.0f, 0.0f, -10.0f, 0.0f);
+ndVector maxBox(10.0f, 20.0f, 10.0f, 0.0f);
+
+world.BodiesInAabb(callback, minBox, maxBox);</code></pre>
+        </section>
+
+        <section id="performance">
+            <h2>9. Performance Tips</h2>
+
+            <h3>Profiling</h3>
+<pre><code>// Get timing information
+float updateTime = world.GetUpdateTime();       // Last frame time
+float avgTime = world.GetAverageUpdateTime();   // Rolling average</code></pre>
+
+            <h3>Optimization Checklist</h3>
+            <ul>
+                <li><strong>Use appropriate solver:</strong> Select AVX2 on supported hardware</li>
+                <li><strong>Match thread count to cores:</strong> Usually leave at 0 (auto)</li>
+                <li><strong>Minimize sub-steps:</strong> Use the lowest value that's stable</li>
+                <li><strong>Use compound shapes:</strong> Prefer ndShapeCompound over many individual bodies</li>
+                <li><strong>Sleep bodies:</strong> Bodies automatically sleep when stationary</li>
+                <li><strong>Use skeletons:</strong> Connected bodies benefit from skeleton optimization</li>
+                <li><strong>Batch operations:</strong> Add/remove multiple bodies in one frame when possible</li>
+            </ul>
+
+            <h3>Memory Management</h3>
+<pre><code>// Clear internal caches (reduces memory, may hurt performance)
+world.ClearCache();
+
+// Clean up when done
+world.CleanUp();  // Called automatically in destructor</code></pre>
+
+            <div class="tip">
+                <strong>Tip:</strong> Use <code>GetAverageUpdateTime()</code> to monitor physics performance.
+                If it exceeds your frame budget, reduce object count, simplify shapes, or lower solver iterations.
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        Newton Dynamics 4.00 Documentation | <a href="index.html">Back to Index</a>
+    </footer>
+</body>
+</html>
