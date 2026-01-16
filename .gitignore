@@ -18,33 +18,35 @@ DerivedData
 #
 # ignore settings for VisualStudio
 #
-
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
-[Rr]elease/
-[Rr]eleases/
-x64/
+#[Rr]elease/
+#[Rr]eleases/
+#x64/
 x86/
 bld/
 [Bb]in/
 [Oo]bj/
 
+#*.cs
+*.tt
 *.db
+*.asm
+*.cxx
 *.suo
 *.obj
 *.sdf
-*.pdb
-*.dll
 *.lib
+*.dll
+*.exe
+*.spv
 *.dat
 *.log
 *.exp
 *.ilk
 *.map
-*.exe
 *.idb
-*.bin
 *.ncb
 *.htm
 *.dep
@@ -54,34 +56,45 @@ bld/
 *.sbr
 *.res
 *.ipa
+*.pyc
+*.libs
 *.user
 *.tlog
 *.json
 *.ipch
 *.hmap
+*.ipdb
+*.iobj
 *.cache
 *.ib_tag
 *.opendb
 *.opensdf
 *.manifest
+*.DS_Store
 *.userprefs
 *.xcuserstate
 *.sln.docstates
 *.lastbuildstate
 *.unsuccessfulbuild
 
-
-# script language
-sdk/dCompilerKit/dVirtualAssembler/dAssemblerParser.cpp.txt
-sdk/dCompilerKit/dLittleScriptLanguage/dLittleScriptParser.cpp.txt
+# ignore intall folder
+install
 
 # Ignore auxiliary output from Doxygen and Sphinx
 doc/xml
 doc/html
 
-# third party
-sdk/thirdParty/wxWidgets/wxWidgets-2.9.4/lib/
-#sdk/thirdParty/wxWidgets/wxWidgets-2.9.4/lib/vc_lib/mswud/wx/msw/rcdefs.h
-sdk/thirdParty/wxWidgets/wxWidgets-2.9.4/lib/vc_lib/mswud/wx/msw/rcdefs.h
-*.ipdb
-*.iobj
+# script language
+sdk/dCompilerKit/dNewtonLua/dNewtonLuaParcer.cpp.txt
+sdk/dCompilerKit/dVirtualAssembler/dAssemblerParser.cpp.txt
+sdk/dCompilerKit/dLittleScriptLanguage/dLittleScriptParser.cpp.txt
+
+# Clang/CCLS cache for LSP servers as well as Emacs specific files.
+*/.ccls-cache/
+*/.projectile
+
+# Unreal engine filters
+.vs
+practice/
+Intermediate/
+UnrealNewtonProject*/
