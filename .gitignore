@@ -80,6 +80,9 @@ bld/
 # ignore intall folder
 install
 
+# ignore intall folder
+build/
+
 # Ignore auxiliary output from Doxygen and Sphinx
 doc/xml
 doc/html
