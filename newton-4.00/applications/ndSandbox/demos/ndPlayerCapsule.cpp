@@ -63,7 +63,7 @@ class ndPlayerCapsuleController : public ndModelNotify
 			scene->Print(color, "shift w key for running forwad");
 			scene->Print(color, "left click on dynamics body for picking the body");
 			scene->Print(color, "left click on the scene for turning and look up and down");
-			scene->Print(color, "num pad 1, 2 for changing play local frame");
+			scene->Print(color, "num pad 1, 2, 3 for changing play local frame");
 		}
 	};
 
@@ -286,10 +286,18 @@ class ndPlayerCapsuleController : public ndModelNotify
 			localAxis[0] = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
 			localAxis[1] = ndVector(1.0f, 0.0f, 0.0f, 0.0f);
 			localAxis[2] = localAxis[0].CrossProduct(localAxis[1]);
-			localAxis = localAxis * ndPitchMatrix(20.0f * ndDegreeToRad);
 			player->SetLocalFrame(localAxis);
 		}
 		else if (m_scene->GetKeyState(ImGuiKey_2))
+		{
+			ndMatrix localAxis(ndGetIdentityMatrix());
+			localAxis[0] = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
+			localAxis[1] = ndVector(1.0f, 0.0f, 0.0f, 0.0f);
+			localAxis[2] = localAxis[0].CrossProduct(localAxis[1]);
+			localAxis = localAxis * ndPitchMatrix(20.0f * ndDegreeToRad);
+			player->SetLocalFrame(localAxis);
+		}
+		else if (m_scene->GetKeyState(ImGuiKey_3))
 		{
 			ndMatrix localAxis(ndGetIdentityMatrix());
 			localAxis[0] = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
