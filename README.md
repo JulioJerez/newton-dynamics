@@ -1,11 +1,13 @@
 ![emscripten logo](https://raw.githubusercontent.com/MADEAPPS/newton-dynamics/master/applications/newtonLogo/newtonLogo.png)
 
 Newton dynamics is a realistic, cross-platform physics simulation library. It can easily be integrated into games and game engines and provides top of its class performance and simulation stability.
-Ongoing development and a permissive license makes Newton Dynamics a top choice for all kinds of projects from scientific projects to game engines.
+Ongoing development and a permissive license makes Newton Dynamics a good choice for all kinds of projects from scientific projects to game engines.
 
+* Links to older repository can be found at: <https://github.com/MADEAPPS/newton-dynamics>
 * Links to **demos**, **tutorial**, **FAQ**, etc: <https://github.com/MADEAPPS/newton-dynamics/wiki>
-* Main project page: <http://newtondynamics.com>
-* Forums and public discussion: <http://newtondynamics.com/forum/index.php>
+
+* note: <http://newtondynamics.com> is discontinue
+
 
 Compiling Newton
 ================
@@ -24,8 +26,7 @@ Newton Core does not have any third party dependencies.
 To build the demo sandbox the following packages need to be installed:
 * OpenGL
 * glfw3
-* OpenAL
-* TinyXML
+* glatter
 
 All of these should be available on any major Linux distribution (with associated `-dev` or `-devel` packages).
 
