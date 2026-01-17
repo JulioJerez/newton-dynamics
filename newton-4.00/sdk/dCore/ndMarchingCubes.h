@@ -19,15 +19,15 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_ISO_SURFACE_H__
-#define __ND_ISO_SURFACE_H__
+#ifndef __ND_MARCHING_CUBES_H__
+#define __ND_MARCHING_CUBES_H__
 
 #include "ndCoreStdafx.h"
 #include "ndTypes.h"
 #include "ndArray.h"
 #include "ndTree.h"
 
-class ndIsoSurface: public ndClassAlloc
+class ndMarchingCubes: public ndClassAlloc
 {
 	public:
 	class ndCalculateIsoValue
@@ -46,11 +46,11 @@ class ndIsoSurface: public ndClassAlloc
 
 	class ndImplementation;
 
-	D_CORE_API ndIsoSurface();
-	D_CORE_API ~ndIsoSurface();
+	D_CORE_API ndMarchingCubes();
+	D_CORE_API ~ndMarchingCubes();
 
-	ndVector GetOrigin() const;
-	const ndArray<ndVector>& GetPoints() const;
+	D_CORE_API ndVector GetOrigin() const;
+	D_CORE_API const ndArray<ndVector>& GetPoints() const;
 
 	D_CORE_API void GenerateMesh(const ndArray<ndVector>& pointCloud, ndFloat32 gridSize, ndCalculateIsoValue* const computeIsoValue = nullptr);
 	D_CORE_API ndInt32 GenerateListIndexList(ndInt32 * const indexList, ndInt32 strideInFloat32, ndReal* const posit, ndReal* const normals) const;
@@ -66,15 +66,6 @@ class ndIsoSurface: public ndClassAlloc
 	bool m_isLowRes;
 };
 
-inline const ndArray<ndVector>& ndIsoSurface::GetPoints() const
-{
-	return m_points;
-}
-
-inline ndVector ndIsoSurface::GetOrigin() const
-{
-	return m_origin;
-}
 
 #endif
 
