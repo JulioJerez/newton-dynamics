@@ -53,7 +53,6 @@
 #include <ndSharedPtr.h>
 #include <ndClassAlloc.h>
 #include <ndThreadPool.h>
-#include <ndIsoSurface.h>
 #include <ndQuaternion.h>
 #include <ndProbability.h>
 #include <ndPerlinNoise.h>
@@ -69,6 +68,7 @@
 #include <ndSpatialMatrix.h>
 #include <ndGeneralVector.h>
 #include <ndGeneralMatrix.h>
+#include <ndMarchingCubes.h>
 #include <ndTemplateVector.h>
 #include <ndThreadSyncUtils.h>
 #include <ndContainersAlloc.h>
