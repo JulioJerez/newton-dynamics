@@ -15,7 +15,6 @@ xcuserdata
 *.moved-aside
 DerivedData
 
-
 #
 # ignore settings for VisualStudio
 #
@@ -80,6 +79,9 @@ bld/
 
 # ignore intall folder
 install
+
+# ignore intall folder
+build/
 
 # Ignore auxiliary output from Doxygen and Sphinx
 doc/xml
