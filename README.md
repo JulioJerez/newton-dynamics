@@ -12,7 +12,7 @@ Ongoing development and a permissive license makes Newton Dynamics a good choice
 Compiling Newton
 ================
 
-## Windows and OSX
+## Windows
 Cmake generate solutions Project Visual Studio, build sdk, demos, wrapes and ulities 
 
 * Newton Core and packages: [sdk/projects/](sdk/projects/)
