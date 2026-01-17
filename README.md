@@ -1,6 +1,4 @@
-![emscripten logo](https://raw.githubusercontent.com/MADEAPPS/newton-dynamics/master/applications/newtonLogo/newtonLogo.png)
-
-![emscripten logo](https://raw.githubusercontent.com/JulioJerez/newton-dynamics/newtonLogo/newtonLogo.png)
+![emscripten logo](https://github.com/JulioJerez/newton-dynamics/blob/dliw/newton-dynamics/newtonLogo/newtonLogo.png)
 
 Newton dynamics is a realistic, cross-platform physics simulation library. It can easily be integrated into games and game engines and provides top of its class performance and simulation stability.
 Ongoing development and a permissive license makes Newton Dynamics a good choice for all kinds of projects from scientific projects to game engines.
