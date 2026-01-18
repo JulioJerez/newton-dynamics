@@ -42,6 +42,21 @@ class ndShapeConvexPolygon: public ndShapeConvex
 		ndInt32 m_incidentVertex;
 	};
 
+	class ndEdge
+	{
+		public:
+		union
+		{
+			struct
+			{
+				ndInt16 m_low;
+				ndInt16 m_high;
+			};
+			ndInt32 m_edge;
+		};
+		ndInt32 m_faceStart;
+	};
+
 	ndShapeConvexPolygon ();
 	~ndShapeConvexPolygon ();
 
@@ -67,6 +82,7 @@ class ndShapeConvexPolygon: public ndShapeConvex
 	ndFixSizeArray<ndVector, D_CONVEX_POLYGON_MAX_VERTEX_COUNT> m_localPoly;
 	ndFixSizeArray<ndInt32, 4 * D_CONVEX_POLYGON_MAX_VERTEX_COUNT> m_convexCapFace;
 	ndFixSizeArray<ndInt32, 8 * D_CONVEX_POLYGON_MAX_VERTEX_COUNT> m_convexCapFaceIndex;
+	ndFixSizeArray<ndEdge, 64> m_adjancentEdge;
 	ndFloat32 m_faceClipSize;
 	ndInt32 m_faceId;
 	ndInt32 m_faceNormalIndex;

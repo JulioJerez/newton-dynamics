@@ -27,7 +27,7 @@
 #include "ndArray.h"
 #include "ndTree.h"
 
-class ndMarchingCubes: public ndClassAlloc
+class ndMarchingCubes_legacy: public ndClassAlloc
 {
 	public:
 	class ndCalculateIsoValue
@@ -46,8 +46,8 @@ class ndMarchingCubes: public ndClassAlloc
 
 	class ndImplementation;
 
-	D_CORE_API ndMarchingCubes();
-	D_CORE_API ~ndMarchingCubes();
+	D_CORE_API ndMarchingCubes_legacy();
+	D_CORE_API ~ndMarchingCubes_legacy();
 
 	D_CORE_API ndVector GetOrigin() const;
 	D_CORE_API const ndArray<ndVector>& GetPoints() const;
@@ -66,6 +66,35 @@ class ndMarchingCubes: public ndClassAlloc
 	bool m_isLowRes;
 };
 
+
+class ndMarchingCubes : public ndClassAlloc
+{
+	public:
+	class ndCalculateIsoValue
+	{
+		public:
+		ndCalculateIsoValue()
+		{
+		}
+
+		virtual ~ndCalculateIsoValue()
+		{
+		}
+
+		virtual ndFloat32 CalculateIsoValue(const ndVector& point) const = 0;
+	};
+
+	D_CORE_API ndMarchingCubes();
+	D_CORE_API ~ndMarchingCubes();
+
+	//D_CORE_API ndVector GetOrigin() const;
+	//D_CORE_API const ndArray<ndVector>& GetPoints() const;
+	//
+	//D_CORE_API void GenerateMesh(const ndArray<ndVector>& pointCloud, ndFloat32 gridSize, ndCalculateIsoValue* const computeIsoValue = nullptr);
+	//D_CORE_API ndInt32 GenerateListIndexList(ndInt32* const indexList, ndInt32 strideInFloat32, ndReal* const posit, ndReal* const normals) const;
+
+	ndArray<ndVector> m_points;
+};
 
 #endif
 

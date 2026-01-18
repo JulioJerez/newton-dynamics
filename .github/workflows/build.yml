@@ -1,0 +1,65 @@
+name: Build and run the Hello World apps
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ master ]
+jobs:
+  build-linux:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Linux
+      shell: bash
+      run: |
+        sudo apt update
+        sudo apt-get install libxi-dev
+        sudo apt-get install libxrandr-dev
+        sudo apt-get install libxcursor-dev
+        sudo apt-get install libxinerama-dev
+        sudo apt-get install libgl1-mesa-dev
+        sudo apt install -y cmake ninja-build
+        cmake --version
+        ninja --version
+
+    - name: Build And Install Newton
+      shell: bash
+      run: |
+        cd newton-4.00
+        cmake \
+            -S . -B build \
+            -DNEWTON_BUILD_SANDBOX_DEMOS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -G "Ninja" \
+            -DCMAKE_INSTALL_PREFIX:PATH=/tmp/newton
+
+        cmake --build build -j2
+        cmake --install build --strip
+
+
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Windows
+      shell: bash
+      run: |
+        choco install ninja cmake
+        cmake --version
+        ninja --version
+
+    - name: Build And Install Newton
+      shell: bash
+      run: |
+        cd newton-4.00
+        cmake \
+            -S . -B build \
+            -DNEWTON_BUILD_SANDBOX_DEMOS=OFF \
+            -DCMAKE_BUILD_TYPE=Release \
+            -G "Visual Studio 17 2022" -A x64 \
+            -DCMAKE_INSTALL_PREFIX:PATH=out
+
+        cmake --build build -j2
