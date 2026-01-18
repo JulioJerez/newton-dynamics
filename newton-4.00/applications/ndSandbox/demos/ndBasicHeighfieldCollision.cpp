@@ -21,7 +21,7 @@ void ndBasicHeighfieldCollision(ndDemoEntityManager* const scene)
 {
 	ndSharedPtr<ndBody> mapBody(BuildHeightFieldTerrain(scene, "grass.png", ndGetIdentityMatrix()));
 
-	// build a placemnet matrix
+	// build a placement matrix
 	ndQuaternion rot(ndYawMatrix(180.0f * ndDegreeToRad));
 
 	ndVector origin(10.0f, 0.0f, 0.0f, 1.0f);

@@ -3452,13 +3452,243 @@ ndInt32 ndMarchingCubes_legacy::GenerateListIndexList(ndInt32* const indexList, 
 // ***********************************************************
 //
 // ***********************************************************
+ndMarchingCubes::ndCalculateIsoValue::ndCalculateIsoValue(ndFloat32 gridSize)
+	:m_gridSize(gridSize)
+{
+}
 
+ndMarchingCubes::ndCalculateIsoValue::~ndCalculateIsoValue()
+{
+}
+
+// ***********************************************************
+//
+// ***********************************************************
+ndMarchingCubeParticleIsoValue::ndMarchingCubeParticleIsoValue(ndThreadPool* const threadPool, ndFloat32 gridSize)
+	:ndCalculateIsoValue(gridSize)
+	,m_threadPool(threadPool)
+{
+}
+
+ndMarchingCubeParticleIsoValue::~ndMarchingCubeParticleIsoValue()
+{
+}
+
+//ndFloat32 ndMarchingCubeParticleIsoValue::CalculateIsoValue(const ndVector& point) const
+ndFloat32 ndMarchingCubeParticleIsoValue::CalculateIsoValue(const ndVector&) const
+{
+	ndAssert(0);
+	return 0;
+}
+
+
+void ndMarchingCubeParticleIsoValue::RemoveDuplicates()
+{
+	class ndKey_xlow
+	{
+		public:
+		ndKey_xlow(void* const) {}
+		ndInt32 GetKey(const ndGridHash& cell) const
+		{
+			return cell.m_xLow;
+		}
+	};
+
+	class ndKey_xhigh
+	{
+		public:
+		ndKey_xhigh(void* const) {}
+		ndInt32 GetKey(const ndGridHash& cell) const
+		{
+			return cell.m_xHigh;
+		}
+	};
+
+	class ndKey_ylow
+	{
+		public:
+		ndKey_ylow(void* const) {}
+		ndInt32 GetKey(const ndGridHash& cell) const
+		{
+			return cell.m_yLow;
+		}
+	};
+
+	class ndKey_yhigh
+	{
+		public:
+		ndKey_yhigh(void* const) {}
+		ndInt32 GetKey(const ndGridHash& cell) const
+		{
+			return cell.m_yHigh;
+		}
+	};
+
+	class ndKey_zlow
+	{
+		public:
+		ndKey_zlow(void* const) {}
+		ndInt32 GetKey(const ndGridHash& cell) const
+		{
+			return cell.m_zLow;
+		}
+	};
+
+	class ndKey_zhigh
+	{
+		public:
+		ndKey_zhigh(void* const) {}
+		ndInt32 GetKey(const ndGridHash& cell) const
+		{
+			return cell.m_zHigh;
+		}
+	};
+
+#if 0
+	const ndVector origin(m_boxP0);
+	const ndVector invGridSize(m_invGridSize);
+
+	//const ndVector rounding(ndVector::m_half);
+	const ndVector rounding(ndVector::m_zero);
+	ndUpperDigit upperDigits;
+	const ndGridHashSteps steps;
+	
+#endif
+
+	const ndVector gridSize(m_gridSize);
+	const ndVector invGridSize(ndFloat32(1.0f) / m_gridSize);
+	m_hashGridMapScratchBuffer.SetCount(m_points.GetCount());
+
+	//for (ndInt32 i = 0; i < m_points.GetCount(); ++i)
+	//{
+	//	const ndVector r(points[i] - origin);
+	//	const ndVector p(r * invGridSize + rounding);
+	//	const ndGridHash hashKey(p);
+	//	m_hashGridMapScratchBuffer[i] = hashKey;
+	//
+	//	upperDigits.m_x = dMax(upperDigits.m_x, ndInt32(hashKey.m_xHigh));
+	//	upperDigits.m_y = dMax(upperDigits.m_y, ndInt32(hashKey.m_yHigh));
+	//	upperDigits.m_z = dMax(upperDigits.m_z, ndInt32(hashKey.m_zHigh));
+	//}
+	//m_upperDigitsIsValid = upperDigits;
+	
+	ndInt32 jobStride = 256;
+	auto CalculateHashes = ndMakeObject::ndFunction([this, jobStride](ndInt32 groupId, ndInt32)
+	{
+		const ndInt32 start = groupId;
+		const ndInt32 count = ((start + jobStride) < ndInt32(m_points.GetCount())) ? jobStride : ndInt32(m_points.GetCount()) - groupId;
+
+		const ndVector origin(m_boxP0);
+		const ndVector gridSize(m_gridSize);
+		const ndVector invGridSize(ndFloat32(1.0f) / m_gridSize);
+
+		for (ndInt32 i = 0; i < count; ++i)
+		{
+			const ndVector r(m_points[start + i] - origin);
+			const ndVector p(r * invGridSize);
+			const ndGridHash hashKey(p);
+			m_hashGridMapScratchBuffer[start + i] = hashKey;
+	
+			//upperDigits.m_x = dMax(upperDigits.m_x, ndInt32(hashKey.m_xHigh));
+			//upperDigits.m_y = dMax(upperDigits.m_y, ndInt32(hashKey.m_yHigh));
+			//upperDigits.m_z = dMax(upperDigits.m_z, ndInt32(hashKey.m_zHigh));
+		}
+	});
+
+	ndInt32 count = ndInt32(m_points.GetCount());
+	m_threadPool->ParallelExecute(CalculateHashes, count, jobStride);
+
+	ndCountingSort<ndCalculateIsoValue::ndGridHash, ndKey_xlow, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+	//if (m_upperDigitsIsValid.m_x)
+	{
+		ndCountingSort<ndGridHash, ndKey_xhigh, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+	}
+
+	ndCountingSort<ndGridHash, ndKey_ylow, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+	//if (m_upperDigitsIsValid.m_y)
+	{
+		ndCountingSort<ndGridHash, ndKey_yhigh, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+	}
+	
+	ndCountingSort<ndGridHash, ndKey_zlow, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+	//if (m_upperDigitsIsValid.m_z)
+	{
+		ndCountingSort<ndGridHash, ndKey_zhigh, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+	}
+	
+	ndInt32 gridCount = 0;
+	for (ndInt32 i = 1; i < m_hashGridMapScratchBuffer.GetCount(); ++i)
+	{
+		const ndGridHash cell(m_hashGridMapScratchBuffer[i]);
+		const ndInt32 uniqueGrid = (cell.m_gridFullHash != m_hashGridMapScratchBuffer[i - 1].m_gridFullHash) ? 1 : 0;
+		gridCount += uniqueGrid;
+		m_hashGridMapScratchBuffer[gridCount] = cell;
+	}
+	gridCount++;
+	m_hashGridMapScratchBuffer.SetCount(gridCount);
+}
+
+void ndMarchingCubeParticleIsoValue::CalculateAABB()
+{
+	ndInt32 jobStride = 256;
+	ndFixSizeArray<ndVector, D_MAX_THREADS_COUNT * 2> partialAABB(m_threadPool->GetThreadCount() * 2);
+
+	auto CalculateAABB = ndMakeObject::ndFunction([this, jobStride, &partialAABB](ndInt32 groupId, ndInt32 threadIndex)
+	{
+		const ndInt32 start = groupId;
+		const ndInt32 count = ((start + jobStride) < ndInt32 (m_points.GetCount())) ? jobStride : ndInt32(m_points.GetCount()) - groupId;
+
+		ndVector boxP0(ndFloat32(1.0e10f));
+		ndVector boxP1(ndFloat32(-1.0e10f));
+		for (ndInt32 i = 0; i < count; ++i)
+		{
+			boxP0 = boxP0.GetMin(m_points[start + i]);
+			boxP1 = boxP1.GetMax(m_points[start + i]);
+		}
+		partialAABB[threadIndex * 2 + 0] = boxP0.GetMin(partialAABB[threadIndex * 2 + 0]);
+		partialAABB[threadIndex * 2 + 1] = boxP1.GetMax(partialAABB[threadIndex * 2 + 1]);
+	});
+
+	for (ndInt32 i = 0; i < m_threadPool->GetThreadCount(); ++i)
+	{
+		partialAABB[i * 2 + 0] = ndVector(ndFloat32(1.0e10f));
+		partialAABB[i * 2 + 1] = ndVector(ndFloat32(-1.0e10f));
+	}
+	ndInt32 count = ndInt32 (m_points.GetCount());
+	m_threadPool->ParallelExecute(CalculateAABB, count, jobStride);
+
+	ndVector boxP0(partialAABB[0]);
+	ndVector boxP1(partialAABB[1]);
+	for (ndInt32 i = 1; i < m_threadPool->GetThreadCount(); ++i)
+	{
+		boxP0 = boxP0.GetMin(partialAABB[i * 2 + 0]);
+		boxP1 = boxP1.GetMax(partialAABB[i * 2 + 1]);
+	}
+	//boxP0 -= m_gridSize;
+	//boxP1 += m_gridSize;
+
+	const ndVector gridSize(m_gridSize);
+	const ndVector invGridSize(ndFloat32(1.0f) / m_gridSize);
+	boxP0 = gridSize * (boxP0 * invGridSize).Floor();
+	boxP1 = gridSize * (boxP1 * invGridSize).Ceiling();
+
+	m_boxP0 = boxP0 & ndVector::m_triplexMask;
+	m_boxP1 = boxP1 & ndVector::m_triplexMask;
+}
+
+// ***********************************************************
+//
+// ***********************************************************
 ndMarchingCubes::ndMarchingCubes()
 {
-
 }
 
 ndMarchingCubes::~ndMarchingCubes()
 {
+}
 
+void ndMarchingCubes::GenerateMesh(ndCalculateIsoValue* const computeIsoValue)
+{
+	computeIsoValue->CalculateAABB();
+	computeIsoValue->RemoveDuplicates();
 }

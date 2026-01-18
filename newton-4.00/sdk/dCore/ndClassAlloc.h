@@ -56,7 +56,7 @@ class ndClassAlloc
 		ndMemory::Free(ptr);			
 	}
 
-	/// <summary> the placemnet operators new and delete are only use by 
+	/// <summary> the placement operators new and delete are only use by 
 	/// language like rush that use manage memory
 	/// <param name=""></param>
 	/// <param name="ptr"></param>
@@ -67,7 +67,7 @@ class ndClassAlloc
 		return ptr;
 	}
 
-	/// <summary> the placemnet operators new and delete are only use by 
+	/// <summary> the placement operators new and delete are only use by 
 	/// language like rush that use manage memory
 	/// <param name=""></param>
 	/// <param name="ptr"></param>

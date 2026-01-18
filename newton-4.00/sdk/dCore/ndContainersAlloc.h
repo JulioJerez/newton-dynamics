@@ -50,7 +50,7 @@ class ndFreeListAlloc
 	D_CORE_API void *operator new (size_t size);
 	D_CORE_API void operator delete (void* ptr);
 
-	/// <summary> the placemnet operators new and delete are only use by 
+	/// <summary> the placement operators new and delete are only use by 
 	/// language like rush that use manage memory
 	/// <param name=""></param>
 	/// <param name="ptr"></param>
@@ -58,7 +58,7 @@ class ndFreeListAlloc
 	//D_CORE_API void* operator new(std::size_t, void* ptr);
 	D_CORE_API void* operator new(size_t, void* ptr);
 
-	/// <summary> the placemnet operators new and delete are only use by 
+	/// <summary> the placement operators new and delete are only use by 
 	/// language like rush that use manage memory
 	/// <param name=""></param>
 	/// <param name="ptr"></param>

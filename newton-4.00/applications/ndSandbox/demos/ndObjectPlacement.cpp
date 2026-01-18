@@ -39,7 +39,7 @@ class ndObjectPlacementCamera : public ndDemoCameraNode
 	{
 		m_none,
 		m_inTraceMode,
-		m_releasePlacemnet,
+		m_releasePlacement,
 		m_hasValidPlacement,
 	};
 
@@ -228,11 +228,11 @@ class ndObjectPlacementCamera : public ndDemoCameraNode
 			{
 				// place an object at this location and move to the freeze state
 				SpawnObjectAtLocation(scene);
-				m_state = m_releasePlacemnet;
+				m_state = m_releasePlacement;
 				break;
 			}
 
-			case m_releasePlacemnet:
+			case m_releasePlacement:
 			{
 				//TraceLocation(scene);
 				if (!(ImGui::IsMouseDown(0) && ImGui::IsMouseDown(1)))
@@ -373,7 +373,7 @@ void ndObjectPlacement(ndDemoEntityManager* const scene)
 	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndObjectPlacementCamera::ndHelpLegend());
 	scene->SetDemoHelp(demoHelper);
 
-	// set a special object placemnet Camera;
+	// set a special object placement Camera;
 	ndRender* const renderer = *scene->GetRenderer();
 	ndSharedPtr<ndRenderSceneNode> camera(new ndObjectPlacementCamera(renderer));
 	renderer->SetCamera(camera);
