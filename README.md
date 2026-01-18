@@ -6,6 +6,7 @@ Ongoing development and a permissive license makes Newton Dynamics a good choice
 
 * Links to older repository can be found at: <https://github.com/MADEAPPS/newton-dynamics>
 * Links to **demos**, **tutorial**, **FAQ**, etc: <https://github.com/MADEAPPS/newton-dynamics/wiki>
+* youtube channel at: <https://www.youtube.com/@NewtonDynamics-j2j/videos>
 
 * note: <http://newtondynamics.com> is discontinue
 
