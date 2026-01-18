@@ -93,6 +93,7 @@ void ndShapeConvexPolygon::GenerateConvexCap()
 	m_convexCapFace[0] = 0;
 
 	ndInt32 i0 = count - 1;
+	m_adjancentEdge.SetCount(0);
 	for (ndInt32 i = 0; i < count; ++i)
 	{
 		if (m_adjacentFaceEdgeNormalIndex[i0] > 0)
@@ -110,6 +111,12 @@ void ndShapeConvexPolygon::GenerateConvexCap()
 
 			m_localPoly.PushBack(m_localPoly[i] + edgeSkirt);
 			m_localPoly.PushBack(m_localPoly[i0] + edgeSkirt);
+
+			ndEdge adjacentEdge;
+			adjacentEdge.m_low = ndInt16(i0);
+			adjacentEdge.m_high = ndInt16(i);
+			adjacentEdge.m_faceStart = faceSum;
+			m_adjancentEdge.PushBack(adjacentEdge);
 
 			m_convexCapFace.PushBack(faceSum);
 			m_convexCapFaceIndex.PushBack(i);
@@ -617,7 +624,7 @@ ndInt32 ndShapeConvexPolygon::CalculateContactToConvexHullDescrete(ndContactSolv
 
 ndInt32 ndShapeConvexPolygon::CalculatePlaneIntersection(const ndVector& normalIn, const ndVector& origin, ndVector* const contactsOut) const
 {
-#if 1
+#if 0
 	ndAssert(normalIn.m_w == ndFloat32(0.0f));
 	ndVector normal(normalIn);
 	ndFloat32 maxDist = ndFloat32(1.0f);
@@ -629,7 +636,6 @@ ndInt32 ndShapeConvexPolygon::CalculatePlaneIntersection(const ndVector& normalI
 	}
 
 	ndInt32 count = 0;
-	//const ndInt32 vertexCount = m_localPoly.GetCount();
 	const ndInt32 vertexCount = m_convexCapFace[1];
 	if (projectFactor > ndFloat32(0.9999f))
 	{
@@ -823,77 +829,116 @@ ndInt32 ndShapeConvexPolygon::CalculatePlaneIntersection(const ndVector& normalI
 
 	bool isInsideFace = true;
 	const ndInt32 vertexCount = m_convexCapFace[1];
-	ndVector p0(m_localPoly[vertexCount - 1]);
-	for (ndInt32 i = 0; (i < vertexCount) && isInsideFace; ++i)
+	ndInt32 i0 = vertexCount - 1;
+	ndVector p0(m_localPoly[i0]);
+
+	ndEdge adjacentEdge;
+	adjacentEdge.m_edge = -1;
+	adjacentEdge.m_faceStart = -1;
+	for (ndInt32 i = 0; i < vertexCount; ++i)
 	{
 		const ndVector& p1 = m_localPoly[i];
 		ndVector sideDir(unitFaceNormal.CrossProduct(p1 - p0).Normalize());
 		ndAssert(sideDir.m_w == ndFloat32(0.0f));
 		ndFloat32 dist = sideDir.DotProduct(pointInFacePlane - p0).GetScalar();
-		isInsideFace = isInsideFace && (dist >= ndFloat32(-1.0e-3f));
+		if (dist < ndFloat32(-1.0e-3f))
+		{
+			isInsideFace = false;
+		}
+		if (dist < ndFloat32(0.0f))
+		{
+			adjacentEdge.m_low = ndInt16(i0);
+			adjacentEdge.m_high = ndInt16(i);
+		}
+		i0 = i;
 		p0 = p1;
 	}
 
-	if (!isInsideFace)
+	if (isInsideFace)
 	{
-		// translation distance outside the face are rejected
-		return 0;
-	}
-
-	// support fall issize colliding face,
-	// we now check if this it a face or an edge contact
-	ndFloat32 cosDir = normalIn.DotProduct(unitFaceNormal).GetScalar();
-	if (cosDir >= ndFloat32(0.9994f))
-	{
-		// if the normals are aligned within 2 degree, 
-		// we consider this a face contact 
-		for (ndInt32 i = 0; i < vertexCount; ++i)
+		// translation is inside polygon
+		// we now check if this it a face contact
+		ndFloat32 cosDir = normalIn.DotProduct(unitFaceNormal).GetScalar();
+		if (cosDir >= ndFloat32(0.9994f))
 		{
-			contactsOut[i] = m_localPoly[i];
+			// if the normals are aligned within 2 degree, 
+			// we consider this a face contact 
+			for (ndInt32 i = 0; i < vertexCount; ++i)
+			{
+				contactsOut[i] = m_localPoly[i];
+			}
+			return vertexCount;
 		}
-		return vertexCount;
+		else
+		{
+			// handle edge contact
+			ndInt32 closestEdge = -1;
+			ndFloat32 param = ndFloat32(0.0);
+			ndFloat32 minDistance2 = ndFloat32(1.0e10f);
+			ndVector ray_p0(m_localPoly[vertexCount - 1]);
+			for (ndInt32 i = 0; i < vertexCount; ++i)
+			{
+				const ndVector& ray_p1 = m_localPoly[i];
+				const ndVector dp(ray_p1 - ray_p0);
+
+				ndAssert(dp.m_w == ndFloat32(0.0f));
+				ndFloat32 den = dp.DotProduct(dp).GetScalar();
+				ndAssert(den > ndFloat32(0.0f));
+				ndFloat32 parameter = dp.DotProduct(pointInFacePlane - ray_p0).GetScalar() / den;
+				if ((parameter >= ndFloat32(0.0f)) && (parameter <= ndFloat32(1.0f)))
+				{
+					const ndVector edgePoint(ray_p0 + dp.Scale(parameter));
+					const ndVector dist(pointInFacePlane - edgePoint);
+					ndFloat32 dist2 = dist.DotProduct(dist & ndVector::m_triplexMask).GetScalar();
+					if (dist2 < minDistance2)
+					{
+						closestEdge = i;
+						param = parameter;
+						minDistance2 = dist2;
+					}
+				}
+				ray_p0 = ray_p1;
+			}
+
+			if (closestEdge == -1)
+			{
+				ndAssert(0);
+				return 0;
+			}
+
+			// we got an edge contact
+			ndInt32 closestEdge0 = (closestEdge == 0) ? vertexCount - 1 : closestEdge - 1;
+			contactsOut[0] = m_localPoly[closestEdge];
+			contactsOut[1] = m_localPoly[closestEdge0];
+			return 2;
+		}
 	}
 	else
 	{
-		ndInt32 closestEdge = -1;
-		ndFloat32 param = ndFloat32(0.0);
-		ndFloat32 minDistance2 = ndFloat32(1.0e10f);
-		ndVector ray_p0(m_localPoly[vertexCount - 1]);
-		for (ndInt32 i = 0; (i < vertexCount) && isInsideFace; ++i)
+		// if it comes here this is an edge contact 
+		for (ndInt32 i = m_adjancentEdge.GetCount() - 1; i >= 0; --i)
 		{
-			const ndVector& ray_p1 = m_localPoly[i];
-			const ndVector dp(ray_p1 - ray_p0);
-
-			ndAssert(dp.m_w == ndFloat32(0.0f));
-			ndFloat32 den = dp.DotProduct(dp).GetScalar();
-			ndAssert(den > ndFloat32(0.0f));
-			ndFloat32 parameter = dp.DotProduct(pointInFacePlane - ray_p0).GetScalar() / den;
-			if ((parameter >= ndFloat32(0.0f)) && (parameter <= ndFloat32(1.0f)))
+			if (m_adjancentEdge[i].m_edge == adjacentEdge.m_edge)
 			{
-				//const ndVector dp(ray_p1 - ray_p0);
-				const ndVector edgePoint(ray_p0 + dp.Scale(parameter));
-				const ndVector dist(pointInFacePlane - edgePoint);
-				ndFloat32 dist2 = dist.DotProduct(dist & ndVector::m_triplexMask).GetScalar();
-				if (dist2 < minDistance2)
-				{
-					closestEdge = i;
-					param = parameter;
-					minDistance2 = dist2;
-				}
+				adjacentEdge.m_faceStart = m_adjancentEdge[i].m_faceStart;
+				break;
 			}
-			ray_p0 = ray_p1;
 		}
-
-		if (closestEdge == -1)
+		if (adjacentEdge.m_faceStart != -1)
 		{
-			return 0;
+			// we fond the adjacent edge, we check if this is a face normal
+			for (ndInt32 i = 0; i < vertexCount; ++i)
+			{
+				contactsOut[i] = m_localPoly[i];
+			}
+			return vertexCount;
 		}
-
-		// we got an edge contact
-		ndInt32 closestEdge0 = (closestEdge == 0) ? vertexCount - 1 : closestEdge - 1;
-		contactsOut[0] = m_localPoly[closestEdge];
-		contactsOut[1] = m_localPoly[closestEdge0];
-		return 2;
+		// this should not happens
+		ndAssert(0);
+		//return 0;
 	}
+	// this should not happens
+	ndAssert(0);
+	return 0;
 #endif
 }
