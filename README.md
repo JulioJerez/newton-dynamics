@@ -14,7 +14,7 @@ Compiling Newton
 ================
 
 ## Windows
-Cmake generate solutions Project Visual Studio, build sdk, demos, wrapes and ulities 
+Cmake generate varius Visual Studio solutions for: build sdk, demos, wrappers and ulities 
 
 * Newton Core and packages: [sdk/projects/](sdk/projects/)
 * demo sandbox: [applications/demosSandbox/projects/](applications/demosSandbox/projects/)
@@ -24,7 +24,7 @@ Cmake XCode for SDK,
 
 * Newton Core and packages: [sdk/projects/](sdk/projects/)
 
-note: at the time since demos ar build for opengl, they is not backend graphich for apple metal. 
+note: at this time since demos are build for opengl, there is not backend graphics for apple metal. 
 
 ## Linux
 There are Unix makefiles in the project folders mentioned above, but it is *highly* recommended to use CMake instead.
