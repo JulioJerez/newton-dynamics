@@ -133,8 +133,13 @@ if(UNIX)
 		set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -march=haswell ")
 	endif()
 
-	if (X86)
+	if (X86 AND NOT EMSCRIPTEN)
 		add_compile_options(-msse3)
+	endif()
+
+	if (EMSCRIPTEN)
+		add_compile_options(-sSHARED_MEMORY=1 -sSIDE_MODULE=2)
+		add_compile_options(-matomics -mbulk-memory -mmutable-globals)
 	endif()
 
 	include("GNUInstallDirs")

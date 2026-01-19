@@ -839,6 +839,15 @@ class ndVector : public ndClassAlloc
 		return ndVector(ndFloor(m_x), ndFloor(m_y), ndFloor(m_z), ndFloor(m_w));
 	}
 
+	inline ndVector Ceiling() const
+	{
+		ndFloat32 x = ndCeil(m_x);
+		ndFloat32 y = ndCeil(m_y);
+		ndFloat32 z = ndCeil(m_z);
+		ndFloat32 w = ndCeil(m_w);
+		return ndVector(x, y, z, w);
+	}
+
 	inline ndVector DotProduct(const ndVector& A) const
 	{
 		return ndVector(m_x * A.m_x + m_y * A.m_y + m_z * A.m_z + m_w * A.m_w);
