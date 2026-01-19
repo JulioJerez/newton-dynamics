@@ -32,7 +32,7 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 
 		void BuildBox(const ndMatrix& matrix, ndInt32 size)
 		{
-			ndFloat32 spacing = m_gridSize * ndFloat32(0.9f);
+			ndFloat32 spacing = m_gridSize.m_x * ndFloat32(0.9f);
 			ndFloat32 sigma = spacing * ndFloat32(0.01f);
 
 			//ndVector v(ndVector::m_zero);
