@@ -2577,7 +2577,6 @@ void ndMarchingCubes::GenerateMesh(ndCalculateIsoValue* const computeIsoValue)
 	computeIsoValue->GenerateMesh();
 }
 
-
 // ***********************************************************
 //
 // ***********************************************************
@@ -2589,6 +2588,21 @@ ndMarchingCubeParticleIsoValue::ndMarchingCubeParticleIsoValue(ndThreadPool* con
 
 ndMarchingCubeParticleIsoValue::~ndMarchingCubeParticleIsoValue()
 {
+}
+
+const ndArray<ndInt32>& ndMarchingCubeParticleIsoValue::GetTriangles() const
+{
+	return m_meshIndices;
+}
+
+const ndArray<ndVector>& ndMarchingCubeParticleIsoValue::GetMeshVertex() const
+{
+	return m_meshNormals;
+}
+
+const ndArray<ndVector>& ndMarchingCubeParticleIsoValue::GetMeshNormals() const
+{
+	return m_meshNormals;
 }
 
 void ndMarchingCubeParticleIsoValue::GenerateMesh()

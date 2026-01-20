@@ -112,6 +112,10 @@ class ndMarchingCubeParticleIsoValue: public ndMarchingCubes::ndCalculateIsoValu
 	D_CORE_API ndMarchingCubeParticleIsoValue(ndThreadPool* const threadPool,ndFloat32 gridSize);
 	D_CORE_API virtual ~ndMarchingCubeParticleIsoValue();
 
+	D_CORE_API const ndArray<ndInt32>& GetTriangles() const;
+	D_CORE_API const ndArray<ndVector>& GetMeshVertex() const;
+	D_CORE_API const ndArray<ndVector>& GetMeshNormals() const;
+
 	D_CORE_API virtual void GenerateMesh() override;
 
 	protected:
