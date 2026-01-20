@@ -20,7 +20,7 @@ add_subdirectory(imgui)
 add_subdirectory(openFBX/src)
 add_subdirectory(hacd/src/VHACD_Lib)
 
-if (NOT APPLE)
+if (NOT APPLE AND NOT EMSCRIPTEN)
 	add_subdirectory(glfw)
 	add_subdirectory(glatter)
 endif()
