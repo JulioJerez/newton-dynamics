@@ -110,6 +110,7 @@ class ndThreadPool: public ndSyncMutex, public ndThread
 	D_CORE_API virtual void WaitForWorkers();
 
 	ndWorker* m_workers;
+	ndAtomic<ndInt32> m_isInUpdate;
 	ndAtomic<ndInt32> m_taskInProgress;
 	ndInt32 m_count;
 	char m_baseName[32];
@@ -199,7 +200,7 @@ template <typename Function>
 void ndThreadPool::ParallelExecute(const Function& function, ndInt32 workGroupCount, ndInt32 groupsPerThreads)
 {
 	const ndInt32 threadCount = GetThreadCount();
-	if (threadCount <= 1)
+	if ((threadCount <= 1) || (m_isInUpdate.load() == 0))
 	{
 		// in single threaded, just execute all jobs in the main thread
 		for (ndInt32 i = 0; i < workGroupCount; ++i)

@@ -81,6 +81,8 @@ ndThreadPool::ndThreadPool(const char* const baseName)
 	:ndSyncMutex()
 	,ndThread()
 	,m_workers(nullptr)
+	,m_isInUpdate(0)
+	,m_taskInProgress(0)
 	,m_count(0)
 {
 	char name[256];
@@ -157,10 +159,10 @@ void ndThreadPool::Begin()
 {
 	D_TRACKTIME();
 	#ifndef	D_USE_THREAD_EMULATION
-	for (ndInt32 i = 0; i < m_count; ++i)
-	{
-		m_workers[i].Signal();
-	}
+		for (ndInt32 i = 0; i < m_count; ++i)
+		{
+			m_workers[i].Signal();
+		}
 	#endif
 
 	auto BeginJobs = ndMakeObject::ndFunction([](ndInt32, ndInt32)
@@ -168,10 +170,14 @@ void ndThreadPool::Begin()
 		D_TRACKTIME_NAMED(BeginJobs);
 	});
 	ParallelExecute(BeginJobs, GetThreadCount(), 1);
+
+	m_isInUpdate.store(1);
 }
 
 void ndThreadPool::End()
 {
+	m_isInUpdate.store(0);
+
 	#ifndef	D_USE_THREAD_EMULATION
 	for (ndInt32 i = 0; i < m_count; ++i)
 	{
