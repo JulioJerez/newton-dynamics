@@ -184,8 +184,8 @@ ndSharedPtr<ndBody> BuildFlatPlane(ndDemoEntityManager* const scene, const ndMat
 	meshBuilder.Begin();
 	//meshBuilder.LoadPLY("sword.ply");
 	//meshBuilder.LoadPLY("static_mesh.ply");
-	meshBuilder.AddFaceIndirect(&floor[0].m_x, sizeof(ndVector), 31, &index[0][0], 3);
-	meshBuilder.AddFaceIndirect(&floor[0].m_x, sizeof(ndVector), 31, &index[1][0], 3);
+	meshBuilder.AddFaceIndirect(&floor[0], 31, &index[0][0], 3);
+	meshBuilder.AddFaceIndirect(&floor[0], 31, &index[1][0], 3);
 	meshBuilder.End(optimized);
 	
 	ndSharedPtr<ndShapeInstance>plane(new ndShapeInstance(new ndShapeStatic_bvh(meshBuilder)));
