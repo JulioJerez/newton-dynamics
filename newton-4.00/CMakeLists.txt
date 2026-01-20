@@ -137,11 +137,6 @@ if(UNIX)
 		add_compile_options(-msse3)
 	endif()
 
-	if (EMSCRIPTEN)
-		add_compile_options(-sSHARED_MEMORY=1 -sSIDE_MODULE=2)
-		add_compile_options(-matomics -mbulk-memory -mmutable-globals)
-	endif()
-
 	include("GNUInstallDirs")
 
 	# uninstall target
