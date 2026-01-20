@@ -24,10 +24,14 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 	{
 		public:
 		MatchingCubeParticle(ndDemoEntityManager* const scene)
-			:ndMarchingCubeParticleIsoValue(scene->GetWorld()->GetScene(), ndFloat32(1.0f))
+			:ndMarchingCubeParticleIsoValue(scene->GetWorld()->GetScene(), ndFloat32(0.125f))
 		{
 			ndMatrix matrix(ndGetIdentityMatrix());
-			BuildBox(matrix, 10);
+			matrix.m_posit = ndVector(2.0f);
+			matrix.m_posit.m_w = 1.0f;
+
+			BuildBox(matrix, 32);
+			//BuildBox(matrix, 1);
 		}
 
 		void BuildBox(const ndMatrix& matrix, ndInt32 size)
@@ -51,6 +55,10 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 						p.m_x = ndGaussianRandom(p.m_x, sigma);
 						p.m_y = ndGaussianRandom(p.m_y, sigma);
 						p.m_z = ndGaussianRandom(p.m_z, sigma);
+
+						//p.m_x += 0.1f;
+						//p.m_y += 0.1f;
+						//p.m_z += 0.1f;
 						m_points.PushBack(p);
 					}
 				}
@@ -63,11 +71,12 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 		,m_surface()
 		,m_particleMesh(scene)
 	{
+		m_surface.GenerateMesh(&m_particleMesh);
 	}
 
 	void Update(ndDemoEntityManager* const, ndFloat32) override
 	{
-		m_surface.GenerateMesh(&m_particleMesh);
+		//m_surface.GenerateMesh(&m_particleMesh);
 	}
 
 	ndMarchingCubes m_surface;

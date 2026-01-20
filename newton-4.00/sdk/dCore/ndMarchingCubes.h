@@ -39,22 +39,9 @@ class ndMarchingCubes : public ndClassAlloc
 	class ndKey_zlow;
 	class ndKey_zhigh;
 
+	class ndEdge;
 	class ndIsoCell;
 	class ndGridHashSteps;
-
-	class ndUpperDigit
-	{
-		public:
-		ndUpperDigit()
-			:m_x(0)
-			,m_y(0)
-			,m_z(0)
-		{
-		}
-		ndInt32 m_x;
-		ndInt32 m_y;
-		ndInt32 m_z;
-	};
 
 	class ndGridHash
 	{
@@ -100,12 +87,15 @@ class ndMarchingCubes : public ndClassAlloc
 		ndVector m_boxP1;
 		ndVector m_gridSize;
 		ndVector m_invGridSize;
+		ndVector m_volumeInGrids;
 		ndArray<ndInt32> m_cellScans;
-		ndArray<ndInt32> m_cellTrainglesScans;
+		ndArray<ndInt32> m_cellTrianglesScans;
 		ndArray<ndGridHash> m_hashGridMap;
 		ndArray<ndGridHash> m_hashGridMapScratchBuffer;
-		ndUpperDigit m_upperDigitsIsValid;
 		ndFloat32 m_isoSufaceValue;
+		static ndEdge m_edges[];
+		static ndInt32 m_faces[][3];
+		static ndInt32 m_edgeScan[];
 		static ndInt32 m_facesScan[];
 		static ndVector m_gridCorners[];
 	};
@@ -129,9 +119,13 @@ class ndMarchingCubeParticleIsoValue: public ndMarchingCubes::ndCalculateIsoValu
 	D_CORE_API virtual void CalculateAABB();
 	D_CORE_API virtual void RemoveDuplicates();
 	D_CORE_API virtual void GenerateTriangles();
+	D_CORE_API virtual void GenerateIndexList();
 
 	ndArray<ndVector> m_points;
-	ndArray<ndVector> m_uniquePoints;
+	ndArray<ndVector> m_meshPoints;
+	ndArray<ndVector> m_meshNormals;
+	ndArray<ndInt32> m_meshIndices;
+
 	ndThreadPool* m_threadPool;
 };
 
