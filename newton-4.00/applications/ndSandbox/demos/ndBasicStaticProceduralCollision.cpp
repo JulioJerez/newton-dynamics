@@ -24,29 +24,29 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 	{
 		public:
 		MatchingCubeParticle(ndDemoEntityManager* const scene)
-			:ndMarchingCubeParticleIsoValue(scene->GetWorld()->GetScene(), ndFloat32(0.125f))
+			:ndMarchingCubeParticleIsoValue(scene->GetWorld()->GetScene(), ndFloat32(1.0f))
 		{
 			ndMatrix matrix(ndGetIdentityMatrix());
-			matrix.m_posit = ndVector(2.0f);
+			matrix.m_posit.m_x = 0.0f;
+			matrix.m_posit.m_y = 0.5f;
 			matrix.m_posit.m_w = 1.0f;
 
 			//BuildBox(matrix, 32);
-			BuildBox(matrix, 1);
+			BuildBox(matrix, 20);
 		}
 
 		void BuildBox(const ndMatrix& matrix, ndInt32 size)
 		{
 			ndFloat32 spacing = m_gridSize.m_x;
-			ndFloat32 sigma = spacing * ndFloat32(0.01f);
-			//spacing *= m_gridSize.m_x * ndFloat32(0.9f);
+			ndFloat32 sigma = spacing * ndFloat32(0.001f);
+			spacing *= m_gridSize.m_x * ndFloat32(0.9f);
 
 			//ndVector v(ndVector::m_zero);
 			for (ndInt32 z = 0; z < size; z++)
 			{
 				for (ndInt32 y = 0; y < size; y++)
 				{
-					//for (ndInt32 x = 0; x < size; x++)
-					for (ndInt32 x = 0; x < 2; x++)
+					for (ndInt32 x = 0; x < size; x++)
 					{
 						ndFloat32 xf = ndFloat32(x) * spacing;
 						ndFloat32 yf = ndFloat32(y) * spacing;
@@ -54,13 +54,12 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 
 						ndVector p(matrix.TransformVector(ndVector(xf, yf, zf, ndFloat32(1.0f))));
 
-						//p.m_x = ndGaussianRandom(p.m_x, sigma);
-						//p.m_y = ndGaussianRandom(p.m_y, sigma);
-						//p.m_z = ndGaussianRandom(p.m_z, sigma);
-
-						//p.m_x += 0.1f;
-						//p.m_y += 0.1f;
-						//p.m_z += 0.1f;
+						ndFloat32 noisex = ndGaussianRandom(ndFloat32(0.0f), sigma);
+						ndFloat32 noisey = ndGaussianRandom(ndFloat32(0.0f), sigma);
+						ndFloat32 noisez = ndGaussianRandom(ndFloat32(0.0f), sigma);
+						p.m_x += noisex;
+						p.m_y += noisey;
+						p.m_z += noisez;
 						m_points.PushBack(p);
 					}
 				}
@@ -117,7 +116,7 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 
 	void Update(ndDemoEntityManager* const, ndFloat32) override
 	{
-		//m_surface.GenerateMesh(&m_particleMesh);
+		m_surface.GenerateMesh(&m_particleMesh);
 	}
 
 	ndMarchingCubes m_surface;
@@ -140,7 +139,7 @@ void ndBasicProcedualHeightfieldCollision(ndDemoEntityManager* const scene)
 
 	// add single box for testing
 	//ndSharedPtr<ndBody> testBody(AddSphere(scene, originMatrix, 1.0f, 0.25f, "wood_0.png"));
-	ndSharedPtr<ndBody> testBody(AddCapsule(scene, originMatrix, 1.0f, 0.5f, 0.5f, 1.0f, "wood_0.png"));
+	//ndSharedPtr<ndBody> testBody(AddCapsule(scene, originMatrix, 1.0f, 0.5f, 0.5f, 1.0f, "wood_0.png"));
 	//ndSharedPtr<ndBody> testBody(AddBox(scene, originMatrix, 1.0f, 1.0f, 1.0f, 1.0f, "wood_0.png"));
 	//ndSharedPtr<ndBody> testBody(AddCylinder(scene, originMatrix, 1.0f, 0.5f, 0.5f, 1.0f, "wood_0.png"));
 	//ndSharedPtr<ndBody> testBody(AddConvexHull(scene, originMatrix, 40.0f, 0.7f, 1.0f, 10, "wood_0.png"));
@@ -163,7 +162,7 @@ void ndBasicProcedualHeightfieldCollision(ndDemoEntityManager* const scene)
 	scene->RegisterPostUpdate(marchingCubeMesh);
 	
 	// set the camera
-	originMatrix.m_posit.m_y += 8.0f;
+	originMatrix.m_posit.m_y += 2.0f;
 	//originMatrix.m_posit.m_x += 40.0f;
 	//originMatrix.m_posit.m_z -= 10.0f;
 	scene->SetCameraMatrix(rot, originMatrix.m_posit);
