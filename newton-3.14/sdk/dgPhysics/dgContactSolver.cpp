@@ -1488,13 +1488,7 @@ dgInt32 dgContactSolver::CalculateContacts(const dgVector& point0, const dgVecto
 					if (ql0 > ql1) {
 						dgSwap(ql0, ql1);
 					}
-
-					dgAssert(pl1 >= pl0);
-					dgAssert(ql1 >= ql0);
-					dgFloat32 overlapTest = (ql1 - pl0) * (ql0 - pl1);
-					//if (!((ql0 > pl1) && (ql1 < pl0))) {
-					if (overlapTest < dgFloat32(0.0f)) {
-				
+					if (!((ql0 > pl1) && (ql1 < pl0))) {
 						dgFloat32 clip0 = (ql0 > pl0) ? ql0 : pl0;
 						dgFloat32 clip1 = (ql1 < pl1) ? ql1 : pl1;
 
