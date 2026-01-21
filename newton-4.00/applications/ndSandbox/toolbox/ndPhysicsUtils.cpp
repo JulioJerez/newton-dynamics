@@ -106,7 +106,7 @@ ndVector FindFloor(const ndWorld& world, const ndVector& origin, const ndShapeIn
 }
 
 //******************************************************************************
-// Create simple rigid body with a collsion shspe and render primitev but 
+// Create simple rigid body with a collision shape and render primiteve but 
 // is not added to the scene
 //******************************************************************************
 ndSharedPtr<ndBody> CreateRigidbody(

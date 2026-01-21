@@ -20,7 +20,10 @@ endif()
 
 add_subdirectory(dModel)
 add_subdirectory(dBrain)
-add_subdirectory(dRender)
+
+if (NOT EMSCRIPTEN)
+  add_subdirectory(dRender)
+endif()
 
 if (NEWTON_BUILD_CREATE_SUB_PROJECTS)
 	add_subdirectory(dCore)

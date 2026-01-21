@@ -40,6 +40,8 @@ class ndFloatExceptions
 	//#if defined (WIN32) || defined(_WIN32)
 	#if defined (_MSC_VER)
 		#define D_FLOAT_EXCEPTIONS_MASK	(_EM_ZERODIVIDE | _EM_INVALID | _EM_DENORMAL)
+	#elif defined(__EMSCRIPTEN__)
+		#define D_FLOAT_EXCEPTIONS_MASK 0
 	#else
 		#define D_FLOAT_EXCEPTIONS_MASK	(FE_DIVBYZERO | FE_INVALID | FE_INEXACT)
 	#endif

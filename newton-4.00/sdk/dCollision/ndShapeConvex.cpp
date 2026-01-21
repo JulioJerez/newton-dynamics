@@ -207,7 +207,7 @@ ndMatrix ndShapeConvex::CalculateInertiaAndCenterOfMass(const ndMatrix& alignMat
 		ndAssert(alignMatrix.TestIdentity());
 	
 		// using general central theorem, is much faster and more accurate;
-		//IImatrix = IIorigin + mass * [(displacemnet % displacemnet) * identityMatrix - transpose(displacement) * displacement)];
+		//IImatrix = IIorigin + mass * [(displacement % displacement) * identityMatrix - transpose(displacement) * displacement)];
 		ndFloat32 mag2 = localScale.m_x * localScale.m_x;
 		ndMatrix inertia(ndGetIdentityMatrix());
 		inertia[0][0] = m_inertia[0] * mag2;

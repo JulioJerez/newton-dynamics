@@ -27,74 +27,110 @@
 #include "ndArray.h"
 #include "ndTree.h"
 
-class ndMarchingCubes_legacy: public ndClassAlloc
-{
-	public:
-	class ndCalculateIsoValue
-	{
-		public:
-		ndCalculateIsoValue()
-		{
-		}
-
-		virtual ~ndCalculateIsoValue()
-		{
-		}
-
-		virtual ndFloat32 CalculateIsoValue(const ndVector& point) const = 0;
-	};
-
-	class ndImplementation;
-
-	D_CORE_API ndMarchingCubes_legacy();
-	D_CORE_API ~ndMarchingCubes_legacy();
-
-	D_CORE_API ndVector GetOrigin() const;
-	D_CORE_API const ndArray<ndVector>& GetPoints() const;
-
-	D_CORE_API void GenerateMesh(const ndArray<ndVector>& pointCloud, ndFloat32 gridSize, ndCalculateIsoValue* const computeIsoValue = nullptr);
-	D_CORE_API ndInt32 GenerateListIndexList(ndInt32 * const indexList, ndInt32 strideInFloat32, ndReal* const posit, ndReal* const normals) const;
-
-	private:
-	ndVector m_origin;
-	ndArray<ndVector> m_points;
-	ndImplementation* m_implement;
-	ndFloat32 m_gridSize;
-	ndInt32 m_volumeSizeX;
-	ndInt32 m_volumeSizeY;
-	ndInt32 m_volumeSizeZ;
-	bool m_isLowRes;
-};
-
+class ndThreadPool;
 
 class ndMarchingCubes : public ndClassAlloc
 {
 	public:
-	class ndCalculateIsoValue
+	class ndKey_xlow;
+	class ndKey_xhigh;
+	class ndKey_ylow;
+	class ndKey_yhigh;
+	class ndKey_zlow;
+	class ndKey_zhigh;
+
+	class ndEdge;
+	class ndIsoCell;
+	class ndGridHashSteps;
+
+	class ndGridHash
 	{
 		public:
-		ndCalculateIsoValue()
-		{
-		}
+		ndGridHash();
+		ndGridHash(const ndVector& grid);
+		ndGridHash(const ndGridHash& src, ndUnsigned16 cellType);
+		ndGridHash(ndInt32 x, ndInt32 y, ndInt32 z);
 
-		virtual ~ndCalculateIsoValue()
+		union
 		{
-		}
+			struct
+			{
+				ndUnsigned16 m_x;
+				ndUnsigned16 m_y;
+				ndUnsigned16 m_z;
+				ndUnsigned16 m_cellType;
+			};
+			struct
+			{
+				ndUnsigned8 m_xLow;
+				ndUnsigned8 m_xHigh;
+				ndUnsigned8 m_yLow;
+				ndUnsigned8 m_yHigh;
+				ndUnsigned8 m_zLow;
+				ndUnsigned8 m_zHigh;
+			};
+			//ndUnsigned64 m_gridCellHash : 48;
+			ndUnsigned64 m_gridFullHash;
+		};
+	};
 
-		virtual ndFloat32 CalculateIsoValue(const ndVector& point) const = 0;
+	class ndCalculateIsoValue : public ndClassAlloc
+	{
+		public:
+		
+		D_CORE_API ndCalculateIsoValue(ndFloat32 gridSize);
+		D_CORE_API virtual ~ndCalculateIsoValue();
+
+		virtual void GenerateMesh() = 0;
+
+		ndVector m_boxP0;
+		ndVector m_boxP1;
+		ndVector m_gridSize;
+		ndVector m_invGridSize;
+		ndVector m_volumeInGrids;
+		ndArray<ndInt32> m_cellScans;
+		ndArray<ndInt32> m_cellTrianglesScans;
+		ndArray<ndGridHash> m_hashGridMap;
+		ndArray<ndGridHash> m_hashGridMapScratchBuffer;
+		ndFloat32 m_isoSufaceValue;
+		static ndEdge m_edges[];
+		static ndInt32 m_faces[][3];
+		static ndInt32 m_edgeScan[];
+		static ndInt32 m_facesScan[];
+		static ndVector m_gridCorners[];
 	};
 
 	D_CORE_API ndMarchingCubes();
 	D_CORE_API ~ndMarchingCubes();
 
-	//D_CORE_API ndVector GetOrigin() const;
-	//D_CORE_API const ndArray<ndVector>& GetPoints() const;
-	//
-	//D_CORE_API void GenerateMesh(const ndArray<ndVector>& pointCloud, ndFloat32 gridSize, ndCalculateIsoValue* const computeIsoValue = nullptr);
-	//D_CORE_API ndInt32 GenerateListIndexList(ndInt32* const indexList, ndInt32 strideInFloat32, ndReal* const posit, ndReal* const normals) const;
+	D_CORE_API void GenerateMesh(ndCalculateIsoValue* const computeIsoValue);
+};
+
+class ndMarchingCubeParticleIsoValue: public ndMarchingCubes::ndCalculateIsoValue
+{
+	public:
+	D_CORE_API ndMarchingCubeParticleIsoValue(ndThreadPool* const threadPool,ndFloat32 gridSize);
+	D_CORE_API virtual ~ndMarchingCubeParticleIsoValue();
+
+	D_CORE_API const ndArray<ndInt32>& GetTriangles() const;
+	D_CORE_API const ndArray<ndVector>& GetMeshVertex() const;
+	D_CORE_API const ndArray<ndVector>& GetMeshNormals() const;
+
+	D_CORE_API virtual void GenerateMesh() override;
+
+	protected:
+	D_CORE_API virtual void GenerateGrids();
+	D_CORE_API virtual void CalculateAABB();
+	D_CORE_API virtual void RemoveDuplicates();
+	D_CORE_API virtual void GenerateTriangles();
+	D_CORE_API virtual void GenerateIndexList();
 
 	ndArray<ndVector> m_points;
+	ndArray<ndVector> m_meshPoints;
+	ndArray<ndVector> m_meshNormals;
+	ndArray<ndInt32> m_meshIndices;
+
+	ndThreadPool* m_threadPool;
 };
 
 #endif
-

@@ -1,10 +1,12 @@
 ![emscripten logo](https://github.com/JulioJerez/newton-dynamics/blob/dliw/newton-dynamics/newtonLogo/newtonLogo.png)
 
-Newton dynamics is a realistic, cross-platform physics simulation library. It can easily be integrated into games and game engines and provides top of its class performance and simulation stability.
-Ongoing development and a permissive license makes Newton Dynamics a good choice for all kinds of projects from scientific projects to game engines.
+Newton Dynamics is a realistic, cross-platform rigidbodies physics simulation library. 
+It integrates easily into games and game engines or realtime any interactive simulation application, delivering a balance between top performance along with high accuracy and stability.
+With ongoing development and a permissive license, Newton Dynamics is an excellent choice for a wide range of projects, from scientific simulations to full-scale game engines.
 
 * Links to older repository can be found at: <https://github.com/MADEAPPS/newton-dynamics>
 * Links to **demos**, **tutorial**, **FAQ**, etc: <https://github.com/MADEAPPS/newton-dynamics/wiki>
+* youtube channel at: <https://www.youtube.com/@NewtonDynamics-j2j/videos>
 
 * note: <http://newtondynamics.com> is discontinue
 
@@ -13,7 +15,7 @@ Compiling Newton
 ================
 
 ## Windows
-Cmake generate solutions Project Visual Studio, build sdk, demos, wrapes and ulities 
+Cmake generate varius Visual Studio solutions for: build sdk, demos, wrappers and ulities 
 
 * Newton Core and packages: [sdk/projects/](sdk/projects/)
 * demo sandbox: [applications/demosSandbox/projects/](applications/demosSandbox/projects/)
@@ -23,7 +25,7 @@ Cmake XCode for SDK,
 
 * Newton Core and packages: [sdk/projects/](sdk/projects/)
 
-note: at the time since demos ar build for opengl, they is not backend graphich for apple metal. 
+note: at this time since demos are build for opengl, there is not backend graphics for apple metal. 
 
 ## Linux
 There are Unix makefiles in the project folders mentioned above, but it is *highly* recommended to use CMake instead.

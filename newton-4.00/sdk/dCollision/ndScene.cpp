@@ -418,7 +418,6 @@ void ndScene::BalanceScene()
 	}
 }
 
-//void ndScene::UpdateTransformNotify(ndInt32 threadIndex, ndBodyKinematic* const body)
 void ndScene::UpdateTransformNotify(ndFloat32 timestep, ndBodyKinematic* const body)
 {
 	if (body->m_transformIsDirty)
@@ -427,7 +426,6 @@ void ndScene::UpdateTransformNotify(ndFloat32 timestep, ndBodyKinematic* const b
 		ndBodyNotify* const notify = *body->GetNotifyCallback();
 		if (notify)
 		{
-			//notify->OnTransform(threadIndex, body->GetMatrix());
 			notify->OnTransform(timestep, body->GetMatrix());
 		}
 	}

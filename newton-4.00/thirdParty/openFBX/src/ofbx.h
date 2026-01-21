@@ -9,6 +9,9 @@ namespace ofbx
 	#if (defined(WIN32) || defined(_WIN32))
 		typedef long long i64;
 		typedef unsigned long long u64;
+	#elif defined(__EMSCRIPTEN__)
+		typedef long long i64;
+		typedef unsigned long long u64;
 	#else
 		typedef long i64;
 		typedef unsigned long u64;

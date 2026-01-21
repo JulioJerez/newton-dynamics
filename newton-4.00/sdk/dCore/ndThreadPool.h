@@ -112,6 +112,7 @@ class ndThreadPool: public ndSyncMutex, public ndThread
 	ndWorker* m_workers;
 	ndAtomic<ndInt32> m_taskInProgress;
 	ndInt32 m_count;
+	ndInt32 m_isInUpdate;
 	char m_baseName[32];
 };
 
@@ -199,7 +200,7 @@ template <typename Function>
 void ndThreadPool::ParallelExecute(const Function& function, ndInt32 workGroupCount, ndInt32 groupsPerThreads)
 {
 	const ndInt32 threadCount = GetThreadCount();
-	if (threadCount <= 1)
+	if ((threadCount <= 1) || (m_isInUpdate == 0))
 	{
 		// in single threaded, just execute all jobs in the main thread
 		for (ndInt32 i = 0; i < workGroupCount; ++i)
@@ -209,46 +210,46 @@ void ndThreadPool::ParallelExecute(const Function& function, ndInt32 workGroupCo
 	}
 	else
 	{
-#ifdef	D_USE_THREAD_EMULATION
-		// in emulation mode, threads execute all task in the main thread
-		for (ndInt32 i = 0; i < workGroupCount; ++i)
-		{
-			function(i, 0);
-		}
-#else	
-
-		// calculate number of thread needed
-		ndAssert(groupsPerThreads >= 1);
-
-		// enough work to use more than one core. get number of cores needed using batch size
-		ndAtomic<ndInt32> threadIterator(0);
-		const ndInt32 requiredThreads = (workGroupCount + groupsPerThreads - 1) / groupsPerThreads;
-		const ndInt32 numberOfThreads = ndMax(ndMin(requiredThreads, threadCount) - 1, 0);
-		ndTaskImplement<Function>* const jobsArray = ndAlloca(ndTaskImplement<Function>, numberOfThreads);
-		for (ndInt32 i = 0; i < numberOfThreads; ++i)
-		{
-			ndTaskImplement<Function>* const job = &jobsArray[i];
-			new (job) ndTaskImplement<Function>(this, function, threadIterator, workGroupCount, groupsPerThreads, i + 1);
-		}
-	
-		//ndTrace(("start batches\n"));
-		for (ndInt32 i = numberOfThreads - 1; i >= 0; --i)
-		{
-			ndTaskImplement<Function>* const job = &jobsArray[i];
-			m_taskInProgress.fetch_add(1);
-			m_workers[i].ExecuteTask(job);
-		}
-	
-		for (ndInt32 batchIndex = threadIterator.fetch_add(groupsPerThreads); batchIndex < workGroupCount; batchIndex = threadIterator.fetch_add(groupsPerThreads))
-		{
-			const ndInt32 count = ((batchIndex + groupsPerThreads) < workGroupCount) ? groupsPerThreads : workGroupCount - batchIndex;
-			for (ndInt32 j = 0; j < count; ++j)
+		#ifdef	D_USE_THREAD_EMULATION
+			// in emulation mode, threads execute all task in the main thread
+			for (ndInt32 i = 0; i < workGroupCount; ++i)
 			{
-				function(batchIndex + j, 0);
+				function(i, 0);
 			}
-		}
-		WaitForWorkers();
-#endif
+		#else	
+
+			// calculate number of thread needed
+			ndAssert(groupsPerThreads >= 1);
+
+			// enough work to use more than one core. get number of cores needed using batch size
+			ndAtomic<ndInt32> threadIterator(0);
+			const ndInt32 requiredThreads = (workGroupCount + groupsPerThreads - 1) / groupsPerThreads;
+			const ndInt32 numberOfThreads = ndMax(ndMin(requiredThreads, threadCount) - 1, 0);
+			ndTaskImplement<Function>* const jobsArray = ndAlloca(ndTaskImplement<Function>, numberOfThreads);
+			for (ndInt32 i = 0; i < numberOfThreads; ++i)
+			{
+				ndTaskImplement<Function>* const job = &jobsArray[i];
+				new (job) ndTaskImplement<Function>(this, function, threadIterator, workGroupCount, groupsPerThreads, i + 1);
+			}
+	
+			//ndTrace(("start batches\n"));
+			for (ndInt32 i = numberOfThreads - 1; i >= 0; --i)
+			{
+				ndTaskImplement<Function>* const job = &jobsArray[i];
+				m_taskInProgress.fetch_add(1);
+				m_workers[i].ExecuteTask(job);
+			}
+	
+			for (ndInt32 batchIndex = threadIterator.fetch_add(groupsPerThreads); batchIndex < workGroupCount; batchIndex = threadIterator.fetch_add(groupsPerThreads))
+			{
+				const ndInt32 count = ((batchIndex + groupsPerThreads) < workGroupCount) ? groupsPerThreads : workGroupCount - batchIndex;
+				for (ndInt32 j = 0; j < count; ++j)
+				{
+					function(batchIndex + j, 0);
+				}
+			}
+			WaitForWorkers();
+		#endif
 	}
 }
 
