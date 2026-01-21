@@ -23,8 +23,9 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 	class MatchingCubeParticle : public ndMarchingCubeParticleIsoValue
 	{
 		public:
+		#define PARTICLE_SIZE ndFloat32 (1.0f / 50.0f)
 		MatchingCubeParticle(ndDemoEntityManager* const scene)
-			:ndMarchingCubeParticleIsoValue(scene->GetWorld()->GetScene(), ndFloat32(1.0f))
+			:ndMarchingCubeParticleIsoValue(scene->GetWorld()->GetScene(), PARTICLE_SIZE)
 		{
 			ndMatrix matrix(ndGetIdentityMatrix());
 			matrix.m_posit.m_x = 0.0f;
@@ -39,7 +40,7 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 		{
 			ndFloat32 spacing = m_gridSize.m_x;
 			ndFloat32 sigma = spacing * ndFloat32(0.001f);
-			spacing *= m_gridSize.m_x * ndFloat32(0.9f);
+			spacing *= ndFloat32(0.9f);
 
 			//ndVector v(ndVector::m_zero);
 			for (ndInt32 z = 0; z < size; z++)
@@ -99,7 +100,7 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 		descriptor.m_collision = collision;
 		descriptor.m_mapping = ndRenderPrimitive::m_box;
 		ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(scene->GetRenderer()->GetTextureCache()->GetTexture(ndGetWorkingFileName("metal_30.png")));
-		material.m_opacity = ndFloat32(0.3f);
+		material.m_opacity = ndFloat32(0.5f);
 
 		ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
 		ndSharedPtr<ndRenderSceneNode>entity(new ndRenderSceneNode(location));
