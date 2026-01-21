@@ -30,7 +30,7 @@
 // adapted from code by written by Paul Bourke may 1994
 //http://paulbourke.net/geometry/polygonise/
 
-class ndMarchingCubes::ndImplementation : public ndClassAlloc
+class ndMarchingCubes_legacy::ndImplementation : public ndClassAlloc
 {
 	public:
 	class ndEdge
@@ -52,10 +52,10 @@ class ndMarchingCubes::ndImplementation : public ndClassAlloc
 
 	void Clear();
 	ndVector GetOrigin() const;
-	void BuildLowResolutionMesh(ndMarchingCubes* const me, const ndArray<ndVector>& pointCloud, ndFloat32 gridSize);
-	void BuildHighResolutionMesh(ndMarchingCubes* const me, const ndArray<ndVector>& pointCloud, ndFloat32 gridSize, ndCalculateIsoValue* const computeIsoValue);
+	void BuildLowResolutionMesh(ndMarchingCubes_legacy* const me, const ndArray<ndVector>& pointCloud, ndFloat32 gridSize);
+	void BuildHighResolutionMesh(ndMarchingCubes_legacy* const me, const ndArray<ndVector>& pointCloud, ndFloat32 gridSize, ndCalculateIsoValue* const computeIsoValue);
 
-	ndInt32 GenerateLowResIndexList(const ndMarchingCubes* const me, 
+	ndInt32 GenerateLowResIndexList(const ndMarchingCubes_legacy* const me, 
 		ndInt32* const indexList, ndInt32 strideInFloats, 
 		ndReal* const posit, ndReal* const normals);
 
@@ -167,10 +167,10 @@ class ndMarchingCubes::ndImplementation : public ndClassAlloc
 	void SortCellBuckects();
 	void GenerateLowResIsoSurface();
 	void ProcessLowResCell(ndIsoCell& cell);
-	void MakeTriangleList(ndMarchingCubes* const me);
-	void CalculateNormals(ndMarchingCubes* const me);
+	void MakeTriangleList(ndMarchingCubes_legacy* const me);
+	void CalculateNormals(ndMarchingCubes_legacy* const me);
 	
-	void GenerateHighResIndexList(ndMarchingCubes* const me);
+	void GenerateHighResIndexList(ndMarchingCubes_legacy* const me);
 	void RemoveDuplicates(const ndArray<ndVector>& points);
 	void CalculateAabb(const ndArray<ndVector>& points, ndFloat32 gridSize);
 	void GenerateHighResIsoSurface(ndCalculateIsoValue* const computeIsoValue);
@@ -199,13 +199,13 @@ class ndMarchingCubes::ndImplementation : public ndClassAlloc
 	static ndInt32 m_facesScan[];
 	static ndVector m_gridCorners[];
 
-	friend class ndMarchingCubes;
+	friend class ndMarchingCubes_legacy;
 };
 
-ndInt32 ndMarchingCubes::ndImplementation::m_facesScan[] = { 0,0,1,2,4,5,7,9,12,13,15,17,20,22,25,28,30,31,33,35,38,40,43,46,50,52,55,58,62,65,69,73,76,77,79,81,84,86,89,92,96,98,101,104,108,111,115,119,122,124,127,130,132,135,139,143,146,149,153,157,160,164,169,174,176,177,179,181,184,186,189,192,196,198,201,204,208,211,215,219,222,224,227,230,234,237,241,245,250,253,257,261,266,270,275,280,284,286,289,292,296,299,303,305,308,311,315,319,324,328,333,336,338,341,345,349,352,356,361,364,366,370,375,380,384,389,391,395,396,397,399,401,404,406,409,412,416,418,421,424,428,431,435,439,442,444,447,450,454,457,461,465,470,473,475,479,482,486,489,494,496,498,501,504,508,511,515,519,524,527,531,535,540,544,549,554,558,561,565,569,572,576,581,586,590,594,597,602,604,609,613,615,616,618,621,624,628,631,635,639,644,647,651,655,660,662,665,668,670,673,677,681,686,690,695,700,702,706,709,714,718,721,723,727,728,731,735,739,744,748,753,756,760,764,769,774,776,779,783,785,786,788,791,794,796,799,803,805,806,809,811,815,816,818,819,820};
-ndInt32 ndMarchingCubes::ndImplementation::m_edgeScan[] = { 0,0,3,6,10,13,19,23,28,31,35,41,46,50,55,60,64,67,71,77,82,88,95,102,108,114,119,128,134,141,147,155,160,163,169,173,178,184,193,198,204,210,217,224,230,237,245,251,256,260,265,270,274,281,289,295,300,307,313,321,326,334,341,348,352,355,361,367,374,378,385,390,396,402,409,418,426,431,437,443,448,454,461,470,478,485,493,501,508,517,525,537,546,554,561,570,576,580,587,592,598,603,611,615,620,627,635,643,650,656,663,668,672,677,683,689,694,700,707,712,716,724,731,740,746,753,759,765,768,771,777,783,790,796,805,812,820,824,829,836,842,847,853,859,864,868,873,880,886,893,901,909,916,921,925,933,938,944,949,956,960,966,975,982,990,999,1011,1019,1028,1035,1043,1051,1058,1066,1075,1082,1088,1093,1099,1105,1110,1118,1127,1134,1140,1146,1151,1158,1162,1169,1175,1181,1184,1188,1195,1202,1210,1215,1223,1229,1236,1241,1247,1255,1262,1266,1271,1276,1280,1285,1291,1299,1306,1312,1319,1326,1332,1338,1343,1352,1358,1363,1367,1373,1376,1381,1389,1395,1402,1408,1417,1422,1428,1434,1441,1448,1454,1459,1465,1469,1472,1476,1481,1486,1490,1495,1501,1505,1508,1513,1517,1523,1526,1530,1533,1536 };
+ndInt32 ndMarchingCubes_legacy::ndImplementation::m_facesScan[] = { 0,0,1,2,4,5,7,9,12,13,15,17,20,22,25,28,30,31,33,35,38,40,43,46,50,52,55,58,62,65,69,73,76,77,79,81,84,86,89,92,96,98,101,104,108,111,115,119,122,124,127,130,132,135,139,143,146,149,153,157,160,164,169,174,176,177,179,181,184,186,189,192,196,198,201,204,208,211,215,219,222,224,227,230,234,237,241,245,250,253,257,261,266,270,275,280,284,286,289,292,296,299,303,305,308,311,315,319,324,328,333,336,338,341,345,349,352,356,361,364,366,370,375,380,384,389,391,395,396,397,399,401,404,406,409,412,416,418,421,424,428,431,435,439,442,444,447,450,454,457,461,465,470,473,475,479,482,486,489,494,496,498,501,504,508,511,515,519,524,527,531,535,540,544,549,554,558,561,565,569,572,576,581,586,590,594,597,602,604,609,613,615,616,618,621,624,628,631,635,639,644,647,651,655,660,662,665,668,670,673,677,681,686,690,695,700,702,706,709,714,718,721,723,727,728,731,735,739,744,748,753,756,760,764,769,774,776,779,783,785,786,788,791,794,796,799,803,805,806,809,811,815,816,818,819,820};
+ndInt32 ndMarchingCubes_legacy::ndImplementation::m_edgeScan[] = { 0,0,3,6,10,13,19,23,28,31,35,41,46,50,55,60,64,67,71,77,82,88,95,102,108,114,119,128,134,141,147,155,160,163,169,173,178,184,193,198,204,210,217,224,230,237,245,251,256,260,265,270,274,281,289,295,300,307,313,321,326,334,341,348,352,355,361,367,374,378,385,390,396,402,409,418,426,431,437,443,448,454,461,470,478,485,493,501,508,517,525,537,546,554,561,570,576,580,587,592,598,603,611,615,620,627,635,643,650,656,663,668,672,677,683,689,694,700,707,712,716,724,731,740,746,753,759,765,768,771,777,783,790,796,805,812,820,824,829,836,842,847,853,859,864,868,873,880,886,893,901,909,916,921,925,933,938,944,949,956,960,966,975,982,990,999,1011,1019,1028,1035,1043,1051,1058,1066,1075,1082,1088,1093,1099,1105,1110,1118,1127,1134,1140,1146,1151,1158,1162,1169,1175,1181,1184,1188,1195,1202,1210,1215,1223,1229,1236,1241,1247,1255,1262,1266,1271,1276,1280,1285,1291,1299,1306,1312,1319,1326,1332,1338,1343,1352,1358,1363,1367,1373,1376,1381,1389,1395,1402,1408,1417,1422,1428,1434,1441,1448,1454,1459,1465,1469,1472,1476,1481,1486,1490,1495,1501,1505,1508,1513,1517,1523,1526,1530,1533,1536 };
 
-ndMarchingCubes::ndImplementation::ndEdge ndMarchingCubes::ndImplementation::m_edges[] =
+ndMarchingCubes_legacy::ndImplementation::ndEdge ndMarchingCubes_legacy::ndImplementation::m_edges[] =
 {
 	{ 0, 0, 1 },
 	{ 3, 3, 0 },
@@ -1745,7 +1745,7 @@ ndMarchingCubes::ndImplementation::ndEdge ndMarchingCubes::ndImplementation::m_e
 	{ 8, 0, 4 },
 };
 
-ndInt32 ndMarchingCubes::ndImplementation::m_faces[][3] =
+ndInt32 ndMarchingCubes_legacy::ndImplementation::m_faces[][3] =
 {
 	{ 0, 8, 3 },
 	{ 0, 1, 9 },
@@ -2569,7 +2569,7 @@ ndInt32 ndMarchingCubes::ndImplementation::m_faces[][3] =
 	{ 0, 3, 8 },
 };
 
-ndVector ndMarchingCubes::ndImplementation::m_gridCorners[] =
+ndVector ndMarchingCubes_legacy::ndImplementation::m_gridCorners[] =
 {
 	ndVector(ndFloat32(0.0f), ndFloat32(-1.0f), ndFloat32(-1.0f), ndFloat32(0.0f)),
 	ndVector(ndFloat32(0.0f), ndFloat32(-1.0f), ndFloat32(0.0f), ndFloat32(0.0f)),
@@ -2581,7 +2581,7 @@ ndVector ndMarchingCubes::ndImplementation::m_gridCorners[] =
 	ndVector(ndFloat32(-1.0f), ndFloat32(0.0f), ndFloat32(-1.0f), ndFloat32(0.0f))
 };
 
-inline ndMarchingCubes::ndImplementation::ndImplementation()
+inline ndMarchingCubes_legacy::ndImplementation::ndImplementation()
 	:ndClassAlloc()
 	,m_boxP0(ndVector::m_zero)
 	,m_boxP1(ndVector::m_zero)
@@ -2601,16 +2601,16 @@ inline ndMarchingCubes::ndImplementation::ndImplementation()
 {
 }
 
-ndMarchingCubes::ndImplementation::~ndImplementation()
+ndMarchingCubes_legacy::ndImplementation::~ndImplementation()
 {
 }
 
-ndVector ndMarchingCubes::ndImplementation::GetOrigin() const
+ndVector ndMarchingCubes_legacy::ndImplementation::GetOrigin() const
 {
 	return m_boxP0;
 }
 
-void ndMarchingCubes::ndImplementation::Clear()
+void ndMarchingCubes_legacy::ndImplementation::Clear()
 {
 	m_triangles.Resize(256);
 	m_hashGridMap.Resize(256);
@@ -2618,7 +2618,7 @@ void ndMarchingCubes::ndImplementation::Clear()
 	m_hashGridMapScratchBuffer.Resize(256);
 }
 
-void ndMarchingCubes::ndImplementation::CalculateAabb(const ndArray<ndVector>& points, ndFloat32 gridSize)
+void ndMarchingCubes_legacy::ndImplementation::CalculateAabb(const ndArray<ndVector>& points, ndFloat32 gridSize)
 {
 	D_TRACKTIME();
 
@@ -2653,14 +2653,14 @@ void ndMarchingCubes::ndImplementation::CalculateAabb(const ndArray<ndVector>& p
 	//m_worlToGridScale = ndFloat32(1 << D_GRID_X_RESOLUTION) * m_volumeSizeX / (m_boxP1.m_x - m_boxP0.m_x);
 }
 
-ndVector ndMarchingCubes::ndImplementation::InterpolateLowResVertex(const ndVector& p0, const ndVector& p1) const
+ndVector ndMarchingCubes_legacy::ndImplementation::InterpolateLowResVertex(const ndVector& p0, const ndVector& p1) const
 {
 	ndAssert(ndAbs(p1.m_w - p0.m_w) == ndFloat32(1.0f));
 	const ndVector p1p0(p1 - p0);
 	return ndVector(p0 + p1p0 * ndVector::m_half);
 }
 
-ndVector ndMarchingCubes::ndImplementation::InterpolateHighResVertex(ndFloat32, const ndVector& p0, const ndVector& p1) const
+ndVector ndMarchingCubes_legacy::ndImplementation::InterpolateHighResVertex(ndFloat32, const ndVector& p0, const ndVector& p1) const
 {
 	//ndVector p;
 	//ndFloat32 mu = (isolevel - p0.m_w) / (p1.m_w - p0.m_w);
@@ -2676,7 +2676,7 @@ ndVector ndMarchingCubes::ndImplementation::InterpolateHighResVertex(ndFloat32, 
 	return ndVector(p0 + p1p0 * ndVector::m_half);
 }
 
-void ndMarchingCubes::ndImplementation::ProcessLowResCell(ndIsoCell& cell)
+void ndMarchingCubes_legacy::ndImplementation::ProcessLowResCell(ndIsoCell& cell)
 {
 	ndInt32 tableIndex = 0;
 	for (ndInt32 i = 0; i < 8; ++i)
@@ -2718,7 +2718,7 @@ void ndMarchingCubes::ndImplementation::ProcessLowResCell(ndIsoCell& cell)
 	}
 }
 
-void ndMarchingCubes::ndImplementation::ProcessHighResCell(ndIsoCell& cell, ndCalculateIsoValue* const computeIsoValue)
+void ndMarchingCubes_legacy::ndImplementation::ProcessHighResCell(ndIsoCell& cell, ndCalculateIsoValue* const computeIsoValue)
 {
 	ndInt32 tableIndex = 0;
 	for (ndInt32 i = 0; i < 8; ++i)
@@ -2762,8 +2762,8 @@ void ndMarchingCubes::ndImplementation::ProcessHighResCell(ndIsoCell& cell, ndCa
 	}
 }
 
-//void ndMarchingCubes::ndImplementation::CalculateNormals(ndMarchingCubes* const me)
-void ndMarchingCubes::ndImplementation::CalculateNormals(ndMarchingCubes* const)
+//void ndMarchingCubes_legacy::ndImplementation::CalculateNormals(ndMarchingCubes_legacy* const me)
+void ndMarchingCubes_legacy::ndImplementation::CalculateNormals(ndMarchingCubes_legacy* const)
 {
 	D_TRACKTIME();
 	ndAssert(0);
@@ -2798,7 +2798,7 @@ void ndMarchingCubes::ndImplementation::CalculateNormals(ndMarchingCubes* const)
 	//}
 }
 
-void ndMarchingCubes::ndImplementation::SortCellBuckects()
+void ndMarchingCubes_legacy::ndImplementation::SortCellBuckects()
 {
 	D_TRACKTIME();
 	class ndKey_xlow
@@ -2880,7 +2880,7 @@ void ndMarchingCubes::ndImplementation::SortCellBuckects()
 	}
 }
 
-void ndMarchingCubes::ndImplementation::RemoveDuplicates(const ndArray<ndVector>& points)
+void ndMarchingCubes_legacy::ndImplementation::RemoveDuplicates(const ndArray<ndVector>& points)
 {
 	D_TRACKTIME();
 	class ndKey_xlow
@@ -2992,7 +2992,7 @@ void ndMarchingCubes::ndImplementation::RemoveDuplicates(const ndArray<ndVector>
 	m_hashGridMapScratchBuffer.SetCount(gridCount);
 }
 	
-void ndMarchingCubes::ndImplementation::GenerateLowResIsoSurface()
+void ndMarchingCubes_legacy::ndImplementation::GenerateLowResIsoSurface()
 {
 	D_TRACKTIME();
 	ndInt32 end = 0;
@@ -3029,7 +3029,7 @@ void ndMarchingCubes::ndImplementation::GenerateLowResIsoSurface()
 	}
 }
 
-void ndMarchingCubes::ndImplementation::GenerateHighResIsoSurface(ndCalculateIsoValue* const computeIsoValue)
+void ndMarchingCubes_legacy::ndImplementation::GenerateHighResIsoSurface(ndCalculateIsoValue* const computeIsoValue)
 {
 	D_TRACKTIME();
 	ndInt32 end = 0;
@@ -3066,8 +3066,8 @@ void ndMarchingCubes::ndImplementation::GenerateHighResIsoSurface(ndCalculateIso
 	}
 }
 
-ndInt32 ndMarchingCubes::ndImplementation::GenerateLowResIndexList(
-	const ndMarchingCubes* const me, 
+ndInt32 ndMarchingCubes_legacy::ndImplementation::GenerateLowResIndexList(
+	const ndMarchingCubes_legacy* const me, 
 	ndInt32* const indexList, ndInt32 strideInFloats, 
 	ndReal* const posit, ndReal* const normals)
 {
@@ -3304,7 +3304,7 @@ ndInt32 ndMarchingCubes::ndImplementation::GenerateLowResIndexList(
 	return vertexCount;
 }
 
-void ndMarchingCubes::ndImplementation::MakeTriangleList(ndMarchingCubes* const me)
+void ndMarchingCubes_legacy::ndImplementation::MakeTriangleList(ndMarchingCubes_legacy* const me)
 {
 	D_TRACKTIME();
 	ndArray<ndVector>& points = me->m_points;
@@ -3316,14 +3316,14 @@ void ndMarchingCubes::ndImplementation::MakeTriangleList(ndMarchingCubes* const 
 	}
 }
 
-//void ndMarchingCubes::ndImplementation::GenerateHighResIndexList(ndMarchingCubes* const me)
-void ndMarchingCubes::ndImplementation::GenerateHighResIndexList(ndMarchingCubes* const)
+//void ndMarchingCubes_legacy::ndImplementation::GenerateHighResIndexList(ndMarchingCubes_legacy* const me)
+void ndMarchingCubes_legacy::ndImplementation::GenerateHighResIndexList(ndMarchingCubes_legacy* const)
 {
 	D_TRACKTIME();
 	ndAssert(0);
 }
 
-void ndMarchingCubes::ndImplementation::CreateGrids()
+void ndMarchingCubes_legacy::ndImplementation::CreateGrids()
 {
 	D_TRACKTIME();
 	const ndGridHashSteps steps;
@@ -3343,7 +3343,7 @@ void ndMarchingCubes::ndImplementation::CreateGrids()
 	}
 }
 
-void ndMarchingCubes::ndImplementation::ClearBuffers()
+void ndMarchingCubes_legacy::ndImplementation::ClearBuffers()
 {
 	D_TRACKTIME();
 	m_triangles.SetCount(0);
@@ -3352,8 +3352,8 @@ void ndMarchingCubes::ndImplementation::ClearBuffers()
 	m_hashGridMapScratchBuffer.SetCount(0);
 }
 
-//void ndMarchingCubes::ndImplementation::BuildHighResolutionMesh(ndMarchingCubes* const me, const ndArray<ndVector>& points, ndFloat32 gridSize, ndCalculateIsoValue* const computeIsoValue)
-void ndMarchingCubes::ndImplementation::BuildHighResolutionMesh(ndMarchingCubes* const, const ndArray<ndVector>&, ndFloat32, ndCalculateIsoValue* const)
+//void ndMarchingCubes_legacy::ndImplementation::BuildHighResolutionMesh(ndMarchingCubes_legacy* const me, const ndArray<ndVector>& points, ndFloat32 gridSize, ndCalculateIsoValue* const computeIsoValue)
+void ndMarchingCubes_legacy::ndImplementation::BuildHighResolutionMesh(ndMarchingCubes_legacy* const, const ndArray<ndVector>&, ndFloat32, ndCalculateIsoValue* const)
 {
 	D_TRACKTIME();
 	ndAssert(0);
@@ -3367,7 +3367,7 @@ void ndMarchingCubes::ndImplementation::BuildHighResolutionMesh(ndMarchingCubes*
 	//ClearBuffers();
 }
 
-void ndMarchingCubes::ndImplementation::BuildLowResolutionMesh(ndMarchingCubes* const me, const ndArray<ndVector>& points, ndFloat32 gridSize)
+void ndMarchingCubes_legacy::ndImplementation::BuildLowResolutionMesh(ndMarchingCubes_legacy* const me, const ndArray<ndVector>& points, ndFloat32 gridSize)
 {
 	D_TRACKTIME();
 	CalculateAabb(points, gridSize);
@@ -3381,7 +3381,7 @@ void ndMarchingCubes::ndImplementation::BuildLowResolutionMesh(ndMarchingCubes* 
 	ClearBuffers();
 }
 
-ndMarchingCubes::ndMarchingCubes()
+ndMarchingCubes_legacy::ndMarchingCubes_legacy()
 	:m_origin(ndVector::m_zero)
 	,m_points(1024)
 	,m_implement(new ndImplementation())
@@ -3393,7 +3393,7 @@ ndMarchingCubes::ndMarchingCubes()
 {
 }
 
-ndMarchingCubes::~ndMarchingCubes()
+ndMarchingCubes_legacy::~ndMarchingCubes_legacy()
 {
 	//GetImplementation().Clear();
 	if (m_implement)
@@ -3402,17 +3402,17 @@ ndMarchingCubes::~ndMarchingCubes()
 	}
 }
 
-const ndArray<ndVector>& ndMarchingCubes::GetPoints() const
+const ndArray<ndVector>& ndMarchingCubes_legacy::GetPoints() const
 {
 	return m_points;
 }
 
-ndVector ndMarchingCubes::GetOrigin() const
+ndVector ndMarchingCubes_legacy::GetOrigin() const
 {
 	return m_origin;
 }
 
-void ndMarchingCubes::GenerateMesh(const ndArray<ndVector>& pointCloud, ndFloat32 gridSize, ndCalculateIsoValue* const computeIsoValue)
+void ndMarchingCubes_legacy::GenerateMesh(const ndArray<ndVector>& pointCloud, ndFloat32 gridSize, ndCalculateIsoValue* const computeIsoValue)
 {
 	if (pointCloud.GetCount())
 	{
@@ -3435,7 +3435,7 @@ void ndMarchingCubes::GenerateMesh(const ndArray<ndVector>& pointCloud, ndFloat3
 	}
 }
 
-ndInt32 ndMarchingCubes::GenerateListIndexList(ndInt32* const indexList, ndInt32 strideInFloats, ndReal* const posit, ndReal* const normals) const
+ndInt32 ndMarchingCubes_legacy::GenerateListIndexList(ndInt32* const indexList, ndInt32 strideInFloats, ndReal* const posit, ndReal* const normals) const
 {
 	ndInt32 vertexCount = 0;
 	if (m_isLowRes)
@@ -3447,4 +3447,18 @@ ndInt32 ndMarchingCubes::GenerateListIndexList(ndInt32* const indexList, ndInt32
 		ndAssert(0);
 	}
 	return vertexCount;
+}
+
+// ***********************************************************
+//
+// ***********************************************************
+
+ndMarchingCubes::ndMarchingCubes()
+{
+
+}
+
+ndMarchingCubes::~ndMarchingCubes()
+{
+
 }

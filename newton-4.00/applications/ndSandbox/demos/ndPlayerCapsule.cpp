@@ -228,6 +228,11 @@ class ndPlayerCapsuleController : public ndModelNotify
 		m_walkRunBlend = ndSharedPtr<ndAnimationBlendTreeNode>(new ndAnimationBlendTransition(walk, run));
 		m_idleWalkBlend = ndSharedPtr<ndAnimationBlendTreeNode>(new ndAnimationBlendTransition(idle, m_walkRunBlend));
 		m_animBlendTree = ndSharedPtr<ndAnimationBlendTreeNode>(m_idleWalkBlend);
+
+		// make sure that the transform intepolation memories are set on initialization 
+		playerNotify->OnTransform(0.0f, playerNotify->GetBody()->GetMatrix());
+		playerNotify->m_entity->SetTransform(playerNotify->GetBody()->GetMatrix(), playerNotify->GetBody()->GetMatrix().m_posit);
+		playerNotify->m_entity->SetTransform(playerNotify->GetBody()->GetMatrix(), playerNotify->GetBody()->GetMatrix().m_posit);
 	}
 
 	private:
@@ -399,9 +404,9 @@ static void LoadAnimations(ndRenderMeshLoader& loader)
 void ndPlayerCapsule_ThirdPerson (ndDemoEntityManager* const scene)
 {
 	// build a floor
-	//ndSharedPtr<ndBody> bodyFloor(BuildPlayground(scene));
+	ndSharedPtr<ndBody> bodyFloor(BuildPlayground(scene));
 	//ndSharedPtr<ndBody> bodyFloor(BuildCompoundScene(scene, ndGetIdentityMatrix()));
-	ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true));
+	//ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true));
 
 	// add a help menu
 	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndPlayerCapsuleController::ndHelpLegend());
@@ -426,7 +431,7 @@ void ndPlayerCapsule_ThirdPerson (ndDemoEntityManager* const scene)
 	ndRender* const renderer = *scene->GetRenderer();
 	renderer->SetCamera(playerController->GetCamera());
 
-#if 0
+#if 1
 	{
 		// populate the world with props and other players
 		AddSomeProps(scene);
