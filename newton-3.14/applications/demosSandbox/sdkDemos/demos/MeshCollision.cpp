@@ -112,21 +112,18 @@ void SimpleMeshLevelCollision (DemoEntityManager* const scene)
 
 	// add a upright cylider.
 
-	dVector size(0.7f, 1.8f, 0.7f, 0.0f);
+	//dVector size(0.7f, 1.8f, 0.7f, 0.0f);
 	//NewtonCollision* const collision = CreateConvexCollision(world, dRollMatrix(90.0f * dRadToDegree), size, _CYLINDER_PRIMITIVE, 0);
-	NewtonCollision* const collision = CreateConvexCollision(world, dRollMatrix(90.0f * dDegreeToRad), size, _BOX_PRIMITIVE, 0);
+	dVector size(1.0);
+	NewtonCollision* const collision = CreateConvexCollision(world, dRollMatrix(00.0f * dDegreeToRad), size, _BOX_PRIMITIVE, 0);
 	DemoMesh* const geometry = new DemoMesh("primitive", scene->GetShaderCache(), collision, "smilli.tga", "smilli.tga", "smilli.tga");
 
-	dFloat32 startElevation = 10.0f;
 	dMatrix matrix(dGetIdentityMatrix());
 	matrix.m_posit.m_x = 10.0f;
 	matrix.m_posit.m_z = 4.0f;
 	matrix.m_posit.m_y = 3.0f;
 
-	//dVector floor(FindFloor(world, dVector(matrix.m_posit.m_x, startElevation, matrix.m_posit.m_z, 0.0f), 2.0f * startElevation));
-	//matrix.m_posit.m_y = floor.m_y + 2.0f;
-
-	CreateSimpleSolid(scene, geometry, 10.0f, matrix, collision, 0);
+	NewtonBody* body = CreateSimpleSolid(scene, geometry, 10.0f, matrix, collision, 0);
 	// do not forget to release the assets	
 	geometry->Release();
 	NewtonDestroyCollision(collision);

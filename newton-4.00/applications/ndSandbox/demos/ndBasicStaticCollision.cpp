@@ -113,8 +113,8 @@ void ndBasicStaticMeshCollision(ndDemoEntityManager* const scene)
 	matrix.m_posit.m_z = 4.0f;
 	matrix.m_posit.m_y = 3.0f;
 	//ndSharedPtr<ndBody> testBody(AddCylinder(scene, matrix, ndFloat32(10.0f), 0.7f, 1.8f, 0.7f));
-	ndSharedPtr<ndBody> testBody(AddBox(scene, matrix, ndFloat32(10.0f), 0.7f * 0.5f, 1.8f * 0.5f, 0.7f * 0.5f));
-
+	ndSharedPtr<ndBody> testBody(AddBox(scene, matrix, ndFloat32(10.0f), 1.0f, 1.0f, 1.0f));
+	testBody->GetAsBodyKinematic()->SetMatrixUpdateScene(matrix);
 
 	ndMatrix camMatrix(ndGetIdentityMatrix());
 	ndQuaternion rot(camMatrix);
