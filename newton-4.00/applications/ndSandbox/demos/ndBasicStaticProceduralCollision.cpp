@@ -20,12 +20,12 @@
 class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 {
 	public:
-	class MatchingCubeParticle : public ndMarchingCubeParticleIsoValue
+	class MatchingCubeParticle : public ndMarchingCubeFromParticleArray
 	{
 		public:
 		#define PARTICLE_SIZE ndFloat32 (1.0f / 50.0f)
 		MatchingCubeParticle(ndDemoEntityManager* const scene)
-			:ndMarchingCubeParticleIsoValue(scene->GetWorld()->GetScene(), PARTICLE_SIZE)
+			:ndMarchingCubeFromParticleArray(scene->GetWorld()->GetScene(), PARTICLE_SIZE)
 		{
 			ndMatrix matrix(ndGetIdentityMatrix());
 			matrix.m_posit.m_x = 0.0f;

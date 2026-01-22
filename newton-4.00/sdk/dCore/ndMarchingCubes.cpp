@@ -485,7 +485,6 @@ namespace Original
 	}
 }
 
-
 class ndMarchingCubes::ndKey_xlow
 {
 	public:
@@ -3004,10 +3003,11 @@ ndMarchingCubes::ndGridHash::ndGridHash(const ndVector& grid)
 // ***********************************************************
 //
 // ***********************************************************
-ndMarchingCubes::ndCalculateIsoValue::ndCalculateIsoValue(ndFloat32 gridSize)
+ndMarchingCubes::ndCalculateIsoValue::ndCalculateIsoValue(ndFloat32 gridSize, ndThreadPool* const threadPool)
 	:m_gridSize(gridSize)
 	,m_invGridSize(ndFloat32 (1.0f)/ gridSize)
 	,m_isoSufaceValue(ndFloat32(0.5f))
+	,m_threadPool(threadPool)
 {
 	m_gridSize = m_gridSize & ndVector::m_triplexMask;
 	m_invGridSize = m_invGridSize & ndVector::m_triplexMask;
@@ -3028,40 +3028,206 @@ ndMarchingCubes::~ndMarchingCubes()
 {
 }
 
+const ndArray<ndInt32>& ndMarchingCubes::ndCalculateIsoValue::GetTriangles() const
+{
+	return m_meshIndices;
+}
+
+const ndArray<ndVector>& ndMarchingCubes::ndCalculateIsoValue::GetMeshVertex() const
+{
+	return m_meshPoints;
+}
+
+const ndArray<ndVector>& ndMarchingCubes::ndCalculateIsoValue::GetMeshNormals() const
+{
+	return m_meshNormals;
+}
+
 void ndMarchingCubes::GenerateMesh(ndCalculateIsoValue* const computeIsoValue)
 {
 	computeIsoValue->GenerateMesh();
 }
 
+void ndMarchingCubes::ndCalculateIsoValue::GenerateIndexList()
+{
+	#define D_LOW_RES_BITS	   1
+	#define D_LOW_RES_FRACTION (1 << D_LOW_RES_BITS)
+
+	class ndKey_lowX
+	{
+		public:
+		ndKey_lowX(void* const) {}
+		ndInt32 GetKey(const ndVector& point) const
+		{
+			ndFloat32 val = (point.m_x * D_LOW_RES_FRACTION);
+			ndInt32 key = ndInt32(val);
+			return key & 0xff;
+		}
+	};
+
+	class ndKey_highX
+	{
+		public:
+		ndKey_highX(void* const) {}
+		ndInt32 GetKey(const ndVector& point) const
+		{
+			ndFloat32 val = point.m_x * ndFloat32(D_LOW_RES_FRACTION);
+			ndInt32 key = ndInt32(val) >> 8;
+			return key & 0xff;
+		}
+	};
+
+	class ndKey_lowY
+	{
+		public:
+		ndKey_lowY(void* const) {}
+		ndInt32 GetKey(const ndVector& point) const
+		{
+			ndFloat32 val = (point.m_y * D_LOW_RES_FRACTION);
+			ndInt32 key = ndInt32(val);
+			return key & 0xff;
+		}
+	};
+
+	class ndKey_highY
+	{
+		public:
+		ndKey_highY(void* const) {}
+		ndInt32 GetKey(const ndVector& point) const
+		{
+			ndFloat32 val = point.m_y * ndFloat32(D_LOW_RES_FRACTION);
+			ndInt32 key = ndInt32(val) >> 8;
+			return key & 0xff;
+		}
+	};
+
+	class ndKey_lowZ
+	{
+		public:
+		ndKey_lowZ(void* const) {}
+		ndInt32 GetKey(const ndVector& point) const
+		{
+			ndFloat32 val = (point.m_z * D_LOW_RES_FRACTION);
+			ndInt32 key = ndInt32(val);
+			return key & 0xff;
+		}
+	};
+
+	class ndKey_highZ
+	{
+		public:
+		ndKey_highZ(void* const) {}
+		ndInt32 GetKey(const ndVector& point) const
+		{
+			ndFloat32 val = point.m_z * ndFloat32(D_LOW_RES_FRACTION);
+			ndInt32 key = ndInt32(val) >> 8;
+			return key & 0xff;
+		}
+	};
+
+	ndCountingSort<ndVector, ndKey_lowX, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
+	if (D_LOW_RES_FRACTION * m_volumeInGrids.m_ix >= 256)
+	{
+		ndCountingSort<ndVector, ndKey_highX, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
+	}
+
+	ndCountingSort<ndVector, ndKey_lowY, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
+	if (D_LOW_RES_FRACTION * m_volumeInGrids.m_iy >= 256)
+	{
+		ndCountingSort<ndVector, ndKey_highY, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
+	}
+
+	ndCountingSort<ndVector, ndKey_lowZ, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
+	if (D_LOW_RES_FRACTION * m_volumeInGrids.m_iz >= 256)
+	{
+		ndCountingSort<ndVector, ndKey_highZ, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
+	}
+	m_meshIndices.SetCount(m_meshPoints.GetCount());
+
+	ndInt32 vertexCount = 0;
+	m_meshPoints.PushBack(m_boxP1);
+	for (ndInt32 i = 0; i < ndInt32(m_meshPoints.GetCount()) - 1; ++i)
+	{
+		const ndInt32 index = ndInt32(m_meshPoints[i].m_w);
+		m_meshIndices[index] = vertexCount;
+		m_meshPoints[vertexCount] = m_meshPoints[i] & ndVector::m_triplexMask;
+
+		const ndMarchingCubes::ndGridHash hash(m_meshPoints[i] * ndVector::m_two, 0);
+		for (i = i + 1; i < ndInt32(m_meshPoints.GetCount()); ++i)
+		{
+			const ndMarchingCubes::ndGridHash hash1(m_meshPoints[i] * ndVector::m_two, 0);
+			if (hash.m_gridFullHash != hash1.m_gridFullHash)
+			{
+				break;
+			}
+			const ndInt32 duplicateIndex = ndInt32(m_meshPoints[i].m_w);
+			m_meshIndices[duplicateIndex] = vertexCount;
+		}
+		--i;
+		vertexCount++;
+	}
+	m_meshPoints.SetCount(vertexCount);
+	m_meshNormals.SetCount(vertexCount);
+
+	// transform to world space
+	auto ApplyScale = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	{
+		m_meshNormals[groupId] = ndVector::m_zero;
+		m_meshPoints[groupId] = m_meshPoints[groupId] * m_gridSize + m_boxP0;
+	});
+
+	const ndInt32 jobStride = 256;
+	const ndInt32 count = ndInt32(m_meshPoints.GetCount());
+	m_threadPool->ParallelExecute(ApplyScale, count, jobStride);
+
+	auto CalculateVertexNormals = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	{
+		const ndInt32 index = groupId * 3;
+		const ndInt32 id0 = m_meshIndices[index + 0];
+		const ndInt32 id1 = m_meshIndices[index + 1];
+		const ndInt32 id2 = m_meshIndices[index + 2];
+
+		const ndVector p0(m_meshPoints[id0]);
+		const ndVector p1(m_meshPoints[id1]);
+		const ndVector p2(m_meshPoints[id2]);
+
+		const ndVector e_10(p1 - p0);
+		const ndVector e_20(p2 - p0);
+		const ndVector normal(e_10.CrossProduct(e_20) & ndVector::m_triplexMask);
+		m_meshNormals[id0] += normal;
+		m_meshNormals[id1] += normal;
+		m_meshNormals[id2] += normal;
+	});
+
+	const ndInt32 triangleCount = ndInt32(m_meshIndices.GetCount()) / 3;
+	// need to build an edge list to parallelize this,
+	// for now just add the contributions 
+	//m_threadPool->ParallelExecute(CalculateVertexNormals, triangleCount, jobStride);
+	for (ndInt32 i = 0; i < triangleCount; ++i)
+	{
+		CalculateVertexNormals(i, 0);
+	}
+
+	// Normalize normals.
+	for (ndInt32 i = 0; i < vertexCount; i++)
+	{
+		m_meshNormals[i] = m_meshNormals[i].Normalize();
+	}
+}
+
 // ***********************************************************
 //
 // ***********************************************************
-ndMarchingCubeParticleIsoValue::ndMarchingCubeParticleIsoValue(ndThreadPool* const threadPool, ndFloat32 gridSize)
-	:ndCalculateIsoValue(gridSize)
-	,m_threadPool(threadPool)
+ndMarchingCubeFromParticleArray::ndMarchingCubeFromParticleArray(ndThreadPool* const threadPool, ndFloat32 gridSize)
+	:ndCalculateIsoValue(gridSize, threadPool)
 {
 }
 
-ndMarchingCubeParticleIsoValue::~ndMarchingCubeParticleIsoValue()
+ndMarchingCubeFromParticleArray::~ndMarchingCubeFromParticleArray()
 {
 }
 
-const ndArray<ndInt32>& ndMarchingCubeParticleIsoValue::GetTriangles() const
-{
-	return m_meshIndices;
-}
-
-const ndArray<ndVector>& ndMarchingCubeParticleIsoValue::GetMeshVertex() const
-{
-	return m_meshPoints;
-}
-
-const ndArray<ndVector>& ndMarchingCubeParticleIsoValue::GetMeshNormals() const
-{
-	return m_meshNormals;
-}
-
-void ndMarchingCubeParticleIsoValue::CalculateAABB()
+void ndMarchingCubeFromParticleArray::CalculateAABB()
 {
 	ndFixSizeArray<ndVector, D_MAX_THREADS_COUNT * 2> partialAABB(m_threadPool->GetThreadCount() * 2);
 	auto CalculateAABB = ndMakeObject::ndFunction([this, &partialAABB](ndInt32 groupId, ndInt32 threadIndex)
@@ -3094,7 +3260,7 @@ void ndMarchingCubeParticleIsoValue::CalculateAABB()
 	m_boxP1 = m_gridSize * (boxP1 * m_invGridSize).Ceiling();
 }
 
-void ndMarchingCubeParticleIsoValue::RemoveDuplicates()
+void ndMarchingCubeFromParticleArray::RemoveDuplicates()
 {
 	m_hashGridMapScratchBuffer.SetCount(m_points.GetCount());
 	auto CalculateHashes = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
@@ -3142,7 +3308,7 @@ void ndMarchingCubeParticleIsoValue::RemoveDuplicates()
 	m_hashGridMapScratchBuffer.SetCount(gridCount);
 }
 
-void ndMarchingCubeParticleIsoValue::GenerateGrids()
+void ndMarchingCubeFromParticleArray::GenerateGrids()
 {
 	const ndMarchingCubes::ndGridHashSteps steps;
 	m_hashGridMap.SetCount(m_hashGridMapScratchBuffer.GetCount() * 8);
@@ -3222,7 +3388,7 @@ void ndMarchingCubeParticleIsoValue::GenerateGrids()
 	ndAssert(sum == m_hashGridMap.GetCount());
 }
 
-void ndMarchingCubeParticleIsoValue::GenerateTriangles()
+void ndMarchingCubeFromParticleArray::GenerateTriangles()
 {
 	auto CountTriangles = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
 	{
@@ -3374,171 +3540,7 @@ void ndMarchingCubeParticleIsoValue::GenerateTriangles()
 	m_threadPool->ParallelExecute(GenerateTriangles, count, jobStride);
 }
 
-void ndMarchingCubeParticleIsoValue::GenerateIndexList()
-{
-	#define D_LOW_RES_BITS	   1
-	#define D_LOW_RES_FRACTION (1 << D_LOW_RES_BITS)
-
-	class ndKey_lowX
-	{
-		public:
-		ndKey_lowX(void* const) {}
-		ndInt32 GetKey(const ndVector& point) const
-		{
-			ndFloat32 val = (point.m_x * D_LOW_RES_FRACTION);
-			ndInt32 key = ndInt32(val);
-			return key & 0xff;
-		}
-	};
-
-	class ndKey_highX
-	{
-		public:
-		ndKey_highX(void* const) {}
-		ndInt32 GetKey(const ndVector& point) const
-		{
-			ndFloat32 val = point.m_x * ndFloat32(D_LOW_RES_FRACTION);
-			ndInt32 key = ndInt32(val) >> 8;
-			return key & 0xff;
-		}
-	};
-
-	class ndKey_lowY
-	{
-		public:
-		ndKey_lowY(void* const) {}
-		ndInt32 GetKey(const ndVector& point) const
-		{
-			ndFloat32 val = (point.m_y * D_LOW_RES_FRACTION);
-			ndInt32 key = ndInt32(val);
-			return key & 0xff;
-		}
-	};
-
-	class ndKey_highY
-	{
-		public:
-		ndKey_highY(void* const) {}
-		ndInt32 GetKey(const ndVector& point) const
-		{
-			ndFloat32 val = point.m_y * ndFloat32(D_LOW_RES_FRACTION);
-			ndInt32 key = ndInt32(val) >> 8;
-			return key & 0xff;
-		}
-	};
-
-	class ndKey_lowZ
-	{
-		public:
-		ndKey_lowZ(void* const) {}
-		ndInt32 GetKey(const ndVector& point) const
-		{
-			ndFloat32 val = (point.m_z * D_LOW_RES_FRACTION);
-			ndInt32 key = ndInt32(val);
-			return key & 0xff;
-		}
-	};
-
-	class ndKey_highZ
-	{
-		public:
-		ndKey_highZ(void* const) {}
-		ndInt32 GetKey(const ndVector& point) const
-		{
-			ndFloat32 val = point.m_z * ndFloat32(D_LOW_RES_FRACTION);
-			ndInt32 key = ndInt32(val) >> 8;
-			return key & 0xff;
-		}
-	};
-
-	ndCountingSort<ndVector, ndKey_lowX, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
-	if (D_LOW_RES_FRACTION * m_volumeInGrids.m_ix >= 256)
-	{
-		ndCountingSort<ndVector, ndKey_highX, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
-	}
-	
-	ndCountingSort<ndVector, ndKey_lowY, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
-	if (D_LOW_RES_FRACTION * m_volumeInGrids.m_iy >= 256)
-	{
-		ndCountingSort<ndVector, ndKey_highY, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
-	}
-	
-	ndCountingSort<ndVector, ndKey_lowZ, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
-	if (D_LOW_RES_FRACTION * m_volumeInGrids.m_iz >= 256)
-	{
-		ndCountingSort<ndVector, ndKey_highZ, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
-	}
-	m_meshIndices.SetCount(m_meshPoints.GetCount());
-
-	ndInt32 vertexCount = 0;
-	m_meshPoints.PushBack(m_boxP1);
-	for (ndInt32 i = 0; i < ndInt32 (m_meshPoints.GetCount()) - 1; ++i)
-	{
-		const ndInt32 index = ndInt32(m_meshPoints[i].m_w);
-		m_meshIndices[index] = vertexCount;
-		m_meshPoints[vertexCount] = m_meshPoints[i] & ndVector::m_triplexMask;
-
-		const ndMarchingCubes::ndGridHash hash(m_meshPoints[i] * ndVector::m_two, 0);
-		for (i = i + 1; i < ndInt32(m_meshPoints.GetCount()); ++i)
-		{
-			const ndMarchingCubes::ndGridHash hash1(m_meshPoints[i] * ndVector::m_two, 0);
-			if (hash.m_gridFullHash != hash1.m_gridFullHash)
-			{
-				break;
-			}
-			const ndInt32 duplicateIndex = ndInt32(m_meshPoints[i].m_w);
-			m_meshIndices[duplicateIndex] = vertexCount;
-		}
-		--i;
-		vertexCount++;
-	}
-	m_meshPoints.SetCount(vertexCount);
-	m_meshNormals.SetCount(vertexCount);
-
-	// transform to world space
-	auto ApplyScale = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
-	{
-		m_meshNormals[groupId] = ndVector::m_zero;
-		m_meshPoints[groupId] = m_meshPoints[groupId] * m_gridSize + m_boxP0;
-	});
-	const ndInt32 jobStride = 256;
-	const ndInt32 count = ndInt32(m_meshPoints.GetCount());
-	m_threadPool->ParallelExecute(ApplyScale, count, jobStride);
-
-	auto CalculateVertexNormals = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
-	{
-		const ndInt32 index = groupId * 3;
-		const ndInt32 id0 = m_meshIndices[index + 0];
-		const ndInt32 id1 = m_meshIndices[index + 1];
-		const ndInt32 id2 = m_meshIndices[index + 2];
-
-		const ndVector p0(m_meshPoints[id0]);
-		const ndVector p1(m_meshPoints[id1]);
-		const ndVector p2(m_meshPoints[id2]);
-
-		const ndVector e_10(p1 - p0);
-		const ndVector e_20(p2 - p0);
-		const ndVector normal (e_10.CrossProduct(e_20) & ndVector::m_triplexMask);
-		m_meshNormals[id0] += normal;
-		m_meshNormals[id1] += normal;
-		m_meshNormals[id2] += normal;
-	});
-
-	const ndInt32 triangleCount = ndInt32(m_meshIndices.GetCount()) / 3;
-	//m_threadPool->ParallelExecute(CalculateVertexNormals, triangleCount, jobStride);
-	for (ndInt32 i = 0; i < triangleCount; ++i)
-	{
-		CalculateVertexNormals(i, 0);
-	}
-	
-	// Normalize normals.
-	for (ndInt32 i = 0; i < vertexCount; i++)
-	{
-		m_meshNormals[i] = m_meshNormals[i].Normalize();
-	}
-}
-
-void ndMarchingCubeParticleIsoValue::GenerateMesh()
+void ndMarchingCubeFromParticleArray::GenerateMesh()
 {
 	CalculateAABB();
 	RemoveDuplicates();
@@ -3551,3 +3553,23 @@ void ndMarchingCubeParticleIsoValue::GenerateMesh()
 	m_cellTrianglesScans.SetCount(0);
 	m_hashGridMapScratchBuffer.SetCount(0);
 }
+
+// ***********************************************************
+//
+// ***********************************************************
+ndMarchingCubeIsoFunction::ndMarchingCubeIsoFunction(ndThreadPool* const threadPool, ndFloat32 gridSize)
+	:ndCalculateIsoValue(gridSize, threadPool)
+{
+	ndAssert(0);
+}
+
+ndMarchingCubeIsoFunction::~ndMarchingCubeIsoFunction()
+{
+	ndAssert(0);
+}
+
+void ndMarchingCubeIsoFunction::GenerateMesh()
+{
+	ndAssert(0);
+}
+
