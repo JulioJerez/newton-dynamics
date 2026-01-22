@@ -580,7 +580,6 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionTree(bool optimize)
 			ndInt32 mark = meshEffect->IncLRU();
 			ndPolyhedra::Iterator iter(*(*meshEffect));
 		
-			//ndMatrix worldMatrix(node->m_meshMatrix * matrix);
 			const ndMatrix worldMatrix(matrix);
 			for (iter.Begin(); iter; iter++)
 			{
@@ -599,7 +598,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionTree(bool optimize)
 					} while (ptr != edge);
 		
 					ndInt32 materialIndex = meshEffect->GetFaceMaterial(edge);
-					meshBuilder.AddFace(&face[0].m_x, sizeof(ndVector), face.GetCount(), materialIndex);
+					meshBuilder.AddFace(&face[0], face.GetCount(), materialIndex);
 				}
 			}
 		}
