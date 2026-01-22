@@ -84,7 +84,11 @@ void SimpleMeshLevelCollision (DemoEntityManager* const scene)
 		DemoEntity* const ent = node->GetInfo();
 		for (DemoEntity* child = ent->GetChild(); child; child = child->GetSibling())
 		{
-			if (child->GetMesh())
+			const dString& name = child->GetName();
+			bool test = (name == "Box");
+			test = test || (name == "Cylinder");
+
+			if (test && child->GetMesh())
 			{
 				NewtonCollision* const collision = child->CreateConvexHull(world);
 				dAssert(child->GetMesh()->IsType(DemoMesh::GetRttiType()));
@@ -114,6 +118,9 @@ void SimpleMeshLevelCollision (DemoEntityManager* const scene)
 
 	dFloat32 startElevation = 10.0f;
 	dMatrix matrix(dGetIdentityMatrix());
+	matrix.m_posit.m_x = 10.0f;
+	matrix.m_posit.m_z = 4.0f;
+
 	dVector floor(FindFloor(world, dVector(matrix.m_posit.m_x, startElevation, matrix.m_posit.m_z, 0.0f), 2.0f * startElevation));
 	matrix.m_posit.m_y = floor.m_y + 1.0f;
 
@@ -125,7 +132,7 @@ void SimpleMeshLevelCollision (DemoEntityManager* const scene)
 
 	dMatrix camMatrix(dGetIdentityMatrix());
 	dQuaternion rot(camMatrix);
-	dVector origin(-20.0f, 5.0f, 0.0f, 0.0f);
+	dVector origin(-0.0f, 5.0f, 0.0f, 0.0f);
 	scene->SetCameraMatrix(rot, origin);
 
 #endif
