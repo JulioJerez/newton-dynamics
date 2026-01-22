@@ -1,0 +1,297 @@
+<?xml version="1.0" ?>
+<ndMesh>
+    <name string="root" />
+    <matrix>
+        <posit float3="0 0 0" />
+        <angles float3="0 -0 9.33467e-06" />
+    </matrix>
+    <type nodeType="node" target="0 0 0 " />
+    <ndMesh>
+        <name string="Box" />
+        <matrix>
+            <posit float3="1.90735e-06 -8.13152e-19 0" />
+            <angles float3="0 -0 -9.33466e-06" />
+        </matrix>
+        <type nodeType="node" target="0 0 0 " />
+        <geometry>
+            <vertices>
+                <positions count="8" float3Array="17.92 0.16 -17.92 17.92 -0.16 -17.92 -17.92 0.16 -17.92 -17.92 -0.16 -17.92 -17.92 -0.16 17.92 17.92 -0.16 17.92 17.92 0.16 17.92 -17.92 0.16 17.92" />
+                <indices count="36" intArray="6 0 2 7 6 2 4 3 1 5 4 1 5 1 0 6 5 0 3 4 7 2 3 7 1 3 2 0 1 2 6 7 4 5 6 4" />
+            </vertices>
+            <normal>
+                <normals count="6" float3Array="0 0 -1 -1 0 0 0 1 0 1 0 0 0 -1 0 0 0 1" />
+                <indices count="36" intArray="2 2 2 2 2 2 4 4 4 4 4 4 3 3 3 3 3 3 1 1 1 1 1 1 0 0 0 0 0 0 5 5 5 5 5 5" />
+            </normal>
+            <uvs>
+                <uv count="12" float3Array="3.5 -6 0 -3.5 -6 0 3.5 0.9375 0 -3.5 0.9375 0 3.5 0.9375 0 -3.5 0.9375 0 -3.5 1.0625 0 3.5 1.0625 0 -3.5 1.0625 0 3.5 1.0625 0 -3.5 8 0 3.5 8 0" />
+                <indices count="36" intArray="10 11 0 1 10 0 1 0 11 10 1 11 5 4 9 8 5 9 5 4 9 8 5 9 3 2 7 6 3 7 6 7 2 3 6 2" />
+            </uvs>
+            <material>
+                <name string="01 - Default" />
+                <ambient float3="0.588235 0.588235 0.588235" />
+                <diffuse float3="0.588235 0.588235 0.588235" />
+                <specular float3="0.9 0.9 0.9" />
+                <reflection float3="1 1 1" />
+                <opacity float="1" />
+                <shiness float="2" />
+                <texture string="wood_2.png" />
+            </material>
+            <faces>
+                <faceMaterial count="12" intArray="0 0 0 0 0 0 0 0 0 0 0 0" />
+                <faceIndexCount count="12" intArray="3 3 3 3 3 3 3 3 3 3 3 3" />
+            </faces>
+        </geometry>
+    </ndMesh>
+    <ndMesh>
+        <name string="Cylinder" />
+        <matrix>
+            <posit float3="10.64 0.24 4" />
+            <angles float3="0 -0 -9.33466e-06" />
+        </matrix>
+        <type nodeType="node" target="0 0 0 " />
+        <geometry>
+            <vertices>
+                <positions count="12" float3Array="-2.32 0 0.96 -2.32 -0.762102 0.48 -2.32 -0.762102 -0.48 -2.32 0.762102 0.48 -2.32 -7.6932e-08 -0.96 -2.32 0.762102 -0.48 2.32 -0.762102 -0.48 2.32 0 0.96 2.32 -0.762102 0.48 2.32 -7.6932e-08 -0.96 2.32 0.762102 0.48 2.32 0.762102 -0.48" />
+                <indices count="60" intArray="0 7 10 3 0 10 3 10 11 5 3 11 5 11 9 4 5 9 4 9 6 2 4 6 2 6 8 1 2 8 1 8 7 0 1 7 4 2 1 5 4 1 3 5 1 0 3 1 11 10 7 9 11 7 6 9 7 8 6 7" />
+            </vertices>
+            <normal>
+                <normals count="14" float3Array="0 -1 0 0 -0.532939 -0.846154 0 -0.532939 0.846154 -1 -6.51757e-07 0 1 -6.51757e-07 0 1 0 0 -1 0 0 -1 3.25878e-07 0 1 6.51756e-07 0 0 0.532938 -0.846154 0 0.532939 -0.846154 0 0.532939 0.846154 0 1 -1.07049e-07 0 1 0" />
+                <indices count="60" intArray="11 11 11 11 11 11 12 13 13 12 12 13 9 10 10 9 9 10 1 1 1 1 1 1 0 0 0 0 0 0 2 2 2 2 2 2 7 3 6 6 7 6 6 6 6 6 6 6 8 8 5 4 8 5 5 4 5 5 5 5" />
+            </normal>
+            <uvs>
+                <uv count="26" float3Array="-0.875 0.796054 0 1.625 0.796054 0 -1.625 0.796054 0 -2.53125 0.796054 0 2.53125 0.796054 0 -0.6875 0.796054 0 -0.96875 1.09375 0 -1.625 1.09375 0 -2.53125 1.09375 0 -0.59375 1.09375 0 2.53125 1.09375 0 1.625 1.09375 0 -1.625 1.39145 0 -0.6875 1.39145 0 -0.875 1.39145 0 -2.53125 1.39145 0 1.625 1.39145 0 2.53125 1.39145 0 -0.6875 4.25 0 0.875 4.25 0 -0.875 4.25 0 0.6875 4.25 0 -0.875 6.0625 0 -0.6875 6.0625 0 0.875 6.0625 0 0.6875 6.0625 0" />
+                <indices count="60" intArray="7 8 15 12 7 15 20 22 23 18 20 23 16 17 10 11 16 10 11 10 4 1 11 4 21 25 24 19 21 24 2 3 8 7 2 8 9 5 0 13 9 0 14 13 0 6 14 0 13 14 6 9 13 6 5 9 6 0 5 6" />
+            </uvs>
+            <material>
+                <name string="07 - Default" />
+                <ambient float3="0.588235 0.588235 0.588235" />
+                <diffuse float3="0.588235 0.588235 0.588235" />
+                <specular float3="0.9 0.9 0.9" />
+                <reflection float3="1 1 1" />
+                <opacity float="1" />
+                <shiness float="2" />
+                <texture string="wood_0.png" />
+            </material>
+            <faces>
+                <faceMaterial count="20" intArray="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0" />
+                <faceIndexCount count="20" intArray="3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3" />
+            </faces>
+        </geometry>
+    </ndMesh>
+    <ndMesh>
+        <name string="Cylinder.001" />
+        <matrix>
+            <posit float3="10.64 0.24 9.20001" />
+            <angles float3="0 -0 -9.33466e-06" />
+        </matrix>
+        <type nodeType="node" target="0 0 0 " />
+        <geometry>
+            <vertices>
+                <positions count="12" float3Array="-2.32 -0.08 5.2 -2.32 -0.56 4.56 -2.32 -0.56 3.6 -2.32 0.56 4.56 -2.32 0.08 3.12 -2.32 0.56 3.6 2.32 -0.56 3.6 2.32 -0.08 5.2 2.32 -0.56 4.56 2.32 0.08 3.12 2.32 0.56 4.56 2.32 0.56 3.6" />
+                <indices count="60" intArray="0 7 10 3 0 10 3 10 11 5 3 11 5 11 9 4 5 9 4 9 6 2 4 6 2 6 8 1 2 8 1 8 7 0 1 7 4 2 1 5 4 1 3 5 1 0 3 1 11 10 7 9 11 7 6 9 7 8 6 7" />
+            </vertices>
+            <normal>
+                <normals count="12" float3Array="0 -1 0 0 -0.800001 0.599999 0 -0.800001 0.599999 0 -0.6 -0.8 1 -3.88051e-07 0 1 0 0 -1 0 0 0 0.707106 -0.707107 0 0.707106 -0.707107 0 0.707108 0.707106 0 0.707108 0.707106 0 1 0" />
+                <indices count="60" intArray="10 9 10 10 10 10 11 11 11 11 11 11 7 8 8 7 7 8 3 3 3 3 3 3 0 0 0 0 0 0 1 1 2 2 1 2 6 6 6 6 6 6 6 6 6 6 6 6 4 4 5 5 4 5 5 5 5 5 5 5" />
+            </normal>
+            <uvs>
+                <uv count="30" float3Array="-2.8125 1.0625 0 -2.8125 4.25 0 -2.8125 6.0625 0 -2.6875 6.0625 0 -2.6875 0.875 0 -2.6875 4.25 0 -2.6875 1.3125 0 -2.53125 1.3125 0 -2.53125 1.125 0 -2.53125 0.875 0 -2.5 1.3125 0 -2.5 0.875 0 -2.5 6.0625 0 -2.5 4.25 0 -2.40625 1.125 0 -1.625 0.875 0 -1.625 1.3125 0 -1.625 1.125 0 2.40625 1.125 0 2.5 6.0625 0 2.5 4.25 0 2.5 0.875 0 2.5 1.3125 0 2.6875 6.0625 0 2.6875 4.25 0 2.6875 1.3125 0 2.6875 0.875 0 2.8125 1.0625 0 2.8125 6.0625 0 2.8125 4.25 0" />
+                <indices count="60" intArray="29 28 23 24 29 23 24 23 19 20 24 19 16 7 8 17 16 8 17 8 9 15 17 9 13 12 3 5 13 3 5 3 2 1 5 2 18 21 26 22 18 26 25 22 26 27 25 26 10 6 0 14 10 0 11 14 0 4 11 0" />
+            </uvs>
+            <material>
+                <name string="07 - Default" />
+                <ambient float3="0.588235 0.588235 0.588235" />
+                <diffuse float3="0.588235 0.588235 0.588235" />
+                <specular float3="0.9 0.9 0.9" />
+                <reflection float3="1 1 1" />
+                <opacity float="1" />
+                <shiness float="2" />
+                <texture string="wood_0.png" />
+            </material>
+            <faces>
+                <faceMaterial count="20" intArray="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0" />
+                <faceIndexCount count="20" intArray="3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3" />
+            </faces>
+        </geometry>
+    </ndMesh>
+    <ndMesh>
+        <name string="Cylinder.002" />
+        <matrix>
+            <posit float3="4.72 1.44 -10" />
+            <angles float3="0 -0 -9.33466e-06" />
+        </matrix>
+        <type nodeType="node" target="0 0 0 " />
+        <geometry>
+            <vertices>
+                <positions count="16" float3Array="-4.56 1.28 6.01469e-07 -4.56 -1.28 6.01469e-07 -3.22441 1.28 -2.43245 -3.22441 -1.28 -2.43245 -3.22441 1.28 2.43245 -3.22441 -1.28 2.43245 -3.98648e-07 1.28 -3.44 -3.98648e-07 -1.28 -3.44 0 -1.28 3.44 0 1.28 3.44 3.22441 -1.28 2.43245 3.22441 1.28 2.43245 3.22441 1.28 -2.43245 3.22441 -1.28 -2.43245 4.56 1.28 -3.00734e-07 4.56 -1.28 -3.00734e-07" />
+                <indices count="84" intArray="10 11 9 8 10 9 15 14 11 10 15 11 13 12 14 15 13 14 7 6 12 13 7 12 3 2 6 7 3 6 1 0 2 3 1 2 5 4 0 1 5 0 8 9 4 5 8 4 15 10 8 13 15 8 7 13 8 3 7 8 1 3 8 5 1 8 2 0 4 6 2 4 12 6 4 14 12 4 11 14 4 9 11 4" />
+            </vertices>
+            <normal>
+                <normals count="18" float3Array="0.298255 0 -0.954486 0.298255 0 -0.954486 -0.298255 0 -0.954486 -0.298255 0 -0.954486 0.876559 0 -0.481295 0.876559 0 -0.481295 -0.876559 0 -0.481295 -0.876559 0 -0.481295 0 -1 -6.07963e-08 0 1 -2.91823e-08 0 -1 0 0 1 0 0.876559 0 0.481295 0.876559 0 0.481295 -0.876559 0 0.481295 0.298255 0 0.954486 -0.298255 0 0.954486 -0.298255 0 0.954486" />
+                <indices count="84" intArray="15 15 15 15 15 15 13 12 12 13 13 12 5 5 5 4 5 5 1 1 0 0 1 0 2 2 3 3 2 3 6 6 7 7 6 7 14 14 14 14 14 14 16 17 16 16 16 16 10 10 10 10 10 10 10 10 10 10 10 10 8 10 10 10 8 10 11 11 11 9 11 11 11 9 11 11 11 11 11 11 11 11 11 11" />
+            </normal>
+            <uvs>
+                <uv count="32" float3Array="-2.42821 1.0625 0 -2.42821 2.0625 0 -1.95312 2.0625 0 -1.95312 1.0625 0 -1.55164 1.0625 0 -1.55164 2.0625 0 -1.47804 2.0625 0 -1.47804 1.0625 0 -0.921875 2.0625 0 -0.921875 1.0625 0 -0.292108 2.0625 0 -0.292108 1.0625 0 0.292108 2.0625 0 0.292108 1.0625 0 0.921875 1.0625 0 0.921875 2.0625 0 1.28125 2.84375 0 1.47804 1.58422 0 1.47804 2.0625 0 1.47804 4.10328 0 1.47804 1.0625 0 1.55164 1.0625 0 1.55164 2.0625 0 1.95312 1.0625 0 1.95312 4.625 0 1.95312 1.0625 0 1.95312 2.0625 0 2.42821 1.58422 0 2.42821 2.0625 0 2.42821 4.10328 0 2.42821 1.0625 0 2.625 2.84375 0" />
+                <indices count="84" intArray="21 22 15 14 21 15 25 26 18 20 25 18 30 28 26 25 30 26 9 8 5 4 9 5 11 10 8 9 11 8 3 2 1 0 3 1 7 6 2 3 7 2 14 15 12 13 14 12 24 19 16 29 24 16 31 29 16 27 31 16 23 27 16 17 23 16 27 23 17 31 27 17 29 31 17 24 29 17 19 24 17 16 19 17" />
+            </uvs>
+            <material>
+                <name string="03 - Default" />
+                <ambient float3="0.588235 0.588235 0.588235" />
+                <diffuse float3="0.588235 0.588235 0.588235" />
+                <specular float3="0.9 0.9 0.9" />
+                <reflection float3="1 1 1" />
+                <opacity float="1" />
+                <shiness float="2" />
+                <texture string="wood_0.png" />
+            </material>
+            <faces>
+                <faceMaterial count="28" intArray="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0" />
+                <faceIndexCount count="28" intArray="3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3" />
+            </faces>
+        </geometry>
+    </ndMesh>
+    <ndMesh>
+        <name string="Wedge" />
+        <matrix>
+            <posit float3="-9.35999 1.36 -1.84" />
+            <angles float3="0 -0 -9.33466e-06" />
+        </matrix>
+        <type nodeType="node" target="0 0 0 " />
+        <geometry>
+            <vertices>
+                <positions count="6" float3Array="-1.68 -1.2 -0.88 -1.68 -1.2 0.88 5.52 2.96 0.88 5.52 -1.2 0.88 5.52 -1.2 -0.88 5.52 2.96 -0.88" />
+                <indices count="24" intArray="3 1 0 4 3 0 3 4 5 2 3 5 2 5 0 1 2 0 2 1 3 4 0 5" />
+            </vertices>
+            <normal>
+                <normals count="6" float3Array="0 -1 0 -1.592e-08 0 -1 0 0 1 1 0 0 -0.500278 0.865865 0 -0.500278 0.865865 0" />
+                <indices count="24" intArray="0 0 0 0 0 0 3 3 3 3 3 3 5 4 5 5 5 5 2 2 2 1 1 1" />
+            </normal>
+            <uvs>
+                <uv count="18" float3Array="-0.0312501 -1.6875 0 -0.3125 -1.6875 0 0.0312501 -1.6875 0 0.3125 -1.6875 0 -0.53125 1.0625 0 0.875 1.0625 0 -0.875 1.0625 0 0.0312501 1.0625 0 -0.3125 1.0625 0 0.53125 1.0625 0 -0.3125 1.125 0 -0.0312501 1.125 0 0.3125 1.125 0 0.0312501 1.125 0 0.875 2.6875 0 -0.3125 2.6875 0 0.0312501 2.6875 0 -0.875 2.6875 0" />
+                <indices count="24" intArray="10 1 2 13 10 2 8 7 16 15 8 16 12 11 0 3 12 0 14 4 5 6 9 17" />
+            </uvs>
+            <material>
+                <name string="01 - Default" />
+                <ambient float3="0.588235 0.588235 0.588235" />
+                <diffuse float3="0.588235 0.588235 0.588235" />
+                <specular float3="0.9 0.9 0.9" />
+                <reflection float3="1 1 1" />
+                <opacity float="1" />
+                <shiness float="2" />
+                <texture string="wood_2.png" />
+            </material>
+            <faces>
+                <faceMaterial count="8" intArray="0 0 0 0 0 0 0 0" />
+                <faceIndexCount count="8" intArray="3 3 3 3 3 3 3 3" />
+            </faces>
+        </geometry>
+    </ndMesh>
+    <ndMesh>
+        <name string="Wedge.001" />
+        <matrix>
+            <posit float3="-9.60001 0.720001 -10.48" />
+            <angles float3="0 -0 -9.33466e-06" />
+        </matrix>
+        <type nodeType="node" target="0 0 0 " />
+        <geometry>
+            <vertices>
+                <positions count="6" float3Array="-1.92 -0.56 -0.88 -1.92 -0.56 0.88 1.92 0.56 0.88 1.92 -0.56 0.88 1.92 -0.56 -0.88 1.92 0.56 -0.88" />
+                <indices count="24" intArray="3 1 0 4 3 0 3 4 5 2 3 5 2 5 0 1 2 0 2 1 3 4 0 5" />
+            </vertices>
+            <normal>
+                <normals count="5" float3Array="0 -1 0 0 0 -1 0 0 1 1 0 0 -0.28 0.96 0" />
+                <indices count="24" intArray="0 0 0 0 0 0 3 3 3 3 3 3 4 4 4 4 4 4 2 2 2 1 1 1" />
+            </normal>
+            <uvs>
+                <uv count="11" float3Array="-0.375 -2 0 -0.71875 -2 0 -0.375 -0.5 0 -0.71875 -0.5 0 -1.5 1.0625 0 -0.71875 1.0625 0 -0.375 1.0625 0 -0.75 1.0625 0 -0.375 1.5 0 -0.75 1.5 0 -0.71875 1.5 0" />
+                <indices count="24" intArray="2 0 1 3 2 1 6 5 10 8 6 10 2 3 1 0 2 1 9 4 7 7 4 9" />
+            </uvs>
+            <material>
+                <name string="01 - Default" />
+                <ambient float3="0.588235 0.588235 0.588235" />
+                <diffuse float3="0.588235 0.588235 0.588235" />
+                <specular float3="0.9 0.9 0.9" />
+                <reflection float3="1 1 1" />
+                <opacity float="1" />
+                <shiness float="2" />
+                <texture string="wood_2.png" />
+            </material>
+            <faces>
+                <faceMaterial count="8" intArray="0 0 0 0 0 0 0 0" />
+                <faceIndexCount count="8" intArray="3 3 3 3 3 3 3 3" />
+            </faces>
+        </geometry>
+    </ndMesh>
+    <ndMesh>
+        <name string="Wedge.002" />
+        <matrix>
+            <posit float3="3.84 2.56 -1.84" />
+            <angles float3="0 -0 -9.33466e-06" />
+        </matrix>
+        <type nodeType="node" target="0 0 0 " />
+        <geometry>
+            <vertices>
+                <positions count="6" float3Array="-3.84 -2.56 -0.88 -3.84 -2.56 0.88 3.84 2.56 0.88 3.84 -2.56 0.88 3.84 -2.56 -0.88 3.84 2.56 -0.88" />
+                <indices count="24" intArray="3 1 0 4 3 0 3 4 5 2 3 5 2 5 0 1 2 0 2 1 3 4 0 5" />
+            </vertices>
+            <normal>
+                <normals count="5" float3Array="0 -1 0 0 0 -1 0 0 1 1 0 0 -0.5547 0.83205 0" />
+                <indices count="24" intArray="0 0 0 0 0 0 3 3 3 3 3 3 4 4 4 4 4 4 2 2 2 1 1 1" />
+            </normal>
+            <uvs>
+                <uv count="9" float3Array="0 1 0 1.5 1 0 -0.1875 1 0 -0.53125 1 0 1.5 3 0 -0.1875 3 0 -0.53125 3 0 -0.53125 4 0 -0.1875 4 0" />
+                <indices count="24" intArray="8 2 3 7 8 3 2 3 6 5 2 6 8 7 3 2 8 3 4 0 1 1 0 4" />
+            </uvs>
+            <material>
+                <name string="01 - Default" />
+                <ambient float3="0.588235 0.588235 0.588235" />
+                <diffuse float3="0.588235 0.588235 0.588235" />
+                <specular float3="0.9 0.9 0.9" />
+                <reflection float3="1 1 1" />
+                <opacity float="1" />
+                <shiness float="2" />
+                <texture string="wood_2.png" />
+            </material>
+            <faces>
+                <faceMaterial count="8" intArray="0 0 0 0 0 0 0 0" />
+                <faceIndexCount count="8" intArray="3 3 3 3 3 3 3 3" />
+            </faces>
+        </geometry>
+    </ndMesh>
+    <ndMesh>
+        <name string="Wedge.003" />
+        <matrix>
+            <posit float3="3.84 2.56 -6.31999" />
+            <angles float3="0 -0 -9.33466e-06" />
+        </matrix>
+        <type nodeType="node" target="0 0 0 " />
+        <geometry>
+            <vertices>
+                <positions count="6" float3Array="-11.68 -2.56 20.4 -11.68 -2.56 22.96 -3.68 2.56 22.96 -3.68 -2.56 22.96 -3.68 -2.56 20.4 -3.68 2.56 20.4" />
+                <indices count="24" intArray="3 1 0 4 3 0 3 4 5 2 3 5 2 5 0 1 2 0 2 1 3 4 0 5" />
+            </vertices>
+            <normal>
+                <normals count="5" float3Array="0 -1 0 0 0 -1 0 0 1 1 0 0 -0.539054 0.842271 0" />
+                <indices count="24" intArray="0 0 0 0 0 0 3 3 3 3 3 3 4 4 4 4 4 4 2 2 2 1 1 1" />
+            </normal>
+            <uvs>
+                <uv count="18" float3Array="-3.25 1.0625 0 -3.25 3 0 -3.25 1 0 -3.25 -2.0625 0 -2.75 1.0625 0 -2.75 -2.0625 0 -2.75 1 0 -2.75 3 0 -1.53125 1 0 -0.0312501 1 0 -0.0312501 3 0 0.0312501 3 0 0.0312501 1 0 1.53125 1 0 2.75 -2.0625 0 2.75 1.0625 0 3.25 -2.0625 0 3.25 1.0625 0" />
+                <indices count="24" intArray="0 3 5 4 0 5 2 6 7 1 2 7 17 15 14 16 17 14 11 8 12 9 13 10" />
+            </uvs>
+            <material>
+                <name string="01 - Default" />
+                <ambient float3="0.588235 0.588235 0.588235" />
+                <diffuse float3="0.588235 0.588235 0.588235" />
+                <specular float3="0.9 0.9 0.9" />
+                <reflection float3="1 1 1" />
+                <opacity float="1" />
+                <shiness float="2" />
+                <texture string="wood_2.png" />
+            </material>
+            <faces>
+                <faceMaterial count="8" intArray="0 0 0 0 0 0 0 0" />
+                <faceIndexCount count="8" intArray="3 3 3 3 3 3 3 3" />
+            </faces>
+        </geometry>
+    </ndMesh>
+</ndMesh>
