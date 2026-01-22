@@ -12,8 +12,9 @@
 #ifndef __PHYSICS_UTIL__
 #define __PHYSICS_UTIL__
 
-//#define DEMO_GRAVITY  dFloat(-10.0f)
-#define DEMO_GRAVITY  dFloat(0.0f)
+#define DEMO_GRAVITY  dFloat(-10.0f)
+//#define DEMO_GRAVITY  dFloat(0.0f)
+
 
 enum PrimitiveType
 {

@@ -25,8 +25,6 @@
 #include "dgMeshEffect.h"
 #include "dgCollisionConvexHull.h"
 
-
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -870,29 +868,40 @@ void dgCollisionConvexHull::CreateSOAdata()
 {
 	m_soaVertexArray = (dgSOAVectorArray*)m_allocator->Malloc(sizeof(dgSOAVectorArray));
 
-	m_soaVertexCount = ((m_vertexCount + 7) & -8) / 8;
+	//m_soaVertexCount = ((m_vertexCount + 7) & -8) / 8;
+	m_soaVertexCount = ((m_vertexCount + 3) & -4) / 4;
+
 	dgVector array[DG_CONVEX_VERTEX_SPLITE_SIZE];
-	for (dgInt32 i = 0; i < m_vertexCount; i++) {
+	for (dgInt32 i = 0; i < m_vertexCount; i++) 
+	{
 		array[i] = m_vertex[i];
 	}
 
-	for (dgInt32 i = m_vertexCount; i < DG_CONVEX_VERTEX_SPLITE_SIZE; i++) {
-		array[i] = array[0];
+	for (dgInt32 i = m_vertexCount; i < DG_CONVEX_VERTEX_SPLITE_SIZE; i++)
+	{
+		array[i] = m_vertex[0];
 	}
 
 	dgVector step(dgFloat32(4.0f));
 	dgVector index(dgFloat32(0.0f), dgFloat32(1.0f), dgFloat32(2.0f), dgFloat32(3.0f));
-	for (dgInt32 i = 0; i < DG_CONVEX_VERTEX_SPLITE_SIZE; i += 4) {
+	for (dgInt32 i = 0; i < DG_CONVEX_VERTEX_SPLITE_SIZE; i += 4) 
+	{
 		dgVector temp;
 		dgInt32 j = i / 4;
-		dgVector::Transpose4x4(m_soaVertexArray->m_x[j], m_soaVertexArray->m_y[j], m_soaVertexArray->m_z[j], temp,
-			m_vertex[i + 0], m_vertex[i + 1], m_vertex[i + 2], m_vertex[i + 3]);
+		//dgVector::Transpose4x4(
+		//	m_soaVertexArray->m_x[j], m_soaVertexArray->m_y[j], m_soaVertexArray->m_z[j], temp,
+		//	m_vertex[i + 0], m_vertex[i + 1], m_vertex[i + 2], m_vertex[i + 3]);
+		dgVector::Transpose4x4(
+			m_soaVertexArray->m_x[j], m_soaVertexArray->m_y[j], m_soaVertexArray->m_z[j], temp,
+			array[i + 0], array[i + 1], array[i + 2], array[i + 3]);
+
 		m_soaVertexArray->m_index[j] = index;
 		index += step;
 	}
 
 	dgFloat32* const indexPtr = &m_soaVertexArray->m_index[0][0];
-	for (dgInt32 i = m_vertexCount; i < DG_CONVEX_VERTEX_SPLITE_SIZE; i++) {
+	for (dgInt32 i = m_vertexCount; i < DG_CONVEX_VERTEX_SPLITE_SIZE; i++) 
+	{
 		indexPtr[i] = dgFloat32(0.0f);
 	}
 }
@@ -901,11 +910,13 @@ dgVector dgCollisionConvexHull::SupportVertex(const dgVector& dir, dgInt32* cons
 {
 	dgAssert(dir.m_w == dgFloat32(0.0f));
 	dgInt32 index = -1;
-	dgVector maxProj(dgFloat32(-1.0e20f));
-	if (m_vertexCount > DG_CONVEX_VERTEX_SPLITE_SIZE) {
+	
+	if (m_vertexCount > DG_CONVEX_VERTEX_SPLITE_SIZE) 
+	{
 		dgFloat32 distPool[32];
 		const dgConvexBox* stackPool[32];
 
+		dgVector maxProj(dgFloat32(-1.0e20f));
 		dgInt32 ix = (dir[0] > dgFloat64(0.0f)) ? 1 : 0;
 		dgInt32 iy = (dir[1] > dgFloat64(0.0f)) ? 1 : 0;
 		dgInt32 iz = (dir[2] > dgFloat64(0.0f)) ? 1 : 0;
@@ -1004,18 +1015,13 @@ dgVector dgCollisionConvexHull::SupportVertex(const dgVector& dir, dgInt32* cons
 		const dgVector x(dir.m_x);
 		const dgVector y(dir.m_y);
 		const dgVector z(dir.m_z);
-		dgVector support (dgVector::m_negOne);
-		for (dgInt32 i = 0; i < m_soaVertexCount; i+=2) {
-			dgVector dot (m_soaVertexArray->m_x[i] * x + 
-						  m_soaVertexArray->m_y[i] * y + 
-						  m_soaVertexArray->m_z[i] * z);
-			support = support.Select (m_soaVertexArray->m_index[i], dot > maxProj);
-			maxProj = maxProj.GetMax(dot);
 
-			dot = m_soaVertexArray->m_x[i + 1] * x +
-				  m_soaVertexArray->m_y[i + 1] * y +
-				  m_soaVertexArray->m_z[i + 1] * z;
-			support = support.Select(m_soaVertexArray->m_index[i + 1], dot > maxProj);
+		dgVector support (m_soaVertexArray->m_index[0]);
+		dgVector maxProj(m_soaVertexArray->m_x[0] * x + m_soaVertexArray->m_y[0] * y + m_soaVertexArray->m_z[0] * z);
+		for (dgInt32 i = 1; i < m_soaVertexCount; ++i) 
+		{
+			dgVector dot (m_soaVertexArray->m_x[i] * x + m_soaVertexArray->m_y[i] * y + m_soaVertexArray->m_z[i] * z);
+			support = support.Select (m_soaVertexArray->m_index[i], dot > maxProj);
 			maxProj = maxProj.GetMax(dot);
 		}
 		 
@@ -1032,11 +1038,10 @@ dgVector dgCollisionConvexHull::SupportVertex(const dgVector& dir, dgInt32* cons
 #endif
 	}
 
-	if (vertexIndex) {
+	if (vertexIndex) 
+	{
 		*vertexIndex = index;
 	}
 	dgAssert(index != -1);
 	return m_vertex[index];
 }
-
-
