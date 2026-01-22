@@ -1,0 +1,282 @@
+<?xml version="1.0" ?>
+<NewtonGameDynamnics>
+    <header description="Newton Dynamnics 3.00, universal file format" revision="105" />
+    <nodes count="26">
+        <dRootNodeInfo>
+            <dNodeInfo name="rootNode" nodeID="0" editorFlags="0" />
+            <childrenNodes count="4" indices="1 3 12 15" />
+        </dRootNodeInfo>
+        <dSceneCacheInfo cacheId="-3320094658024126097">
+            <dNodeInfo name="dMaterialCache" nodeID="1" editorFlags="0" />
+            <parentNodes count="1" indices="0" />
+            <childrenNodes count="3" indices="14 19 21" />
+        </dSceneCacheInfo>
+        <dSceneNodeInfo>
+            <dNodeInfo name="root" nodeID="3" editorFlags="0" />
+            <color float4="0.75 0.75 0 0" />
+            <transform position="0 0 0 1" eulerAngles="-1.02287e-13 -0 1.62921e-07 0" localScale="1 1 1 1" stretchAxis="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1" />
+            <geometryTransform matrix="100 0 5.68434e-12 0 0 100 0 0 -5.68434e-12 0 100 0 0 0 0 1" />
+            <parentNodes count="1" indices="0" />
+            <childrenNodes count="8" indices="4 5 6 7 8 9 10 11" />
+        </dSceneNodeInfo>
+        <dSceneNodeInfo>
+            <dNodeInfo name="Wedge.003" nodeID="4" editorFlags="0" />
+            <color float4="0.75 0.75 0 0" />
+            <transform position="3.84 2.56 -6.31999 1" eulerAngles="1.02287e-13 -5.68434e-14 -1.62921e-07 0" localScale="1 1 1 1" stretchAxis="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1" />
+            <geometryTransform matrix="100 0 5.68434e-12 0 0 100 0 0 -5.68434e-12 0 100 0 0 0 0 1" />
+            <parentNodes count="1" indices="3" />
+            <childrenNodes count="1" indices="26" />
+        </dSceneNodeInfo>
+        <dSceneNodeInfo>
+            <dNodeInfo name="Wedge.002" nodeID="5" editorFlags="0" />
+            <color float4="0.75 0.75 0 0" />
+            <transform position="3.84 2.56 -1.83999 1" eulerAngles="1.02287e-13 -5.68434e-14 -1.62921e-07 0" localScale="1 1 1 1" stretchAxis="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1" />
+            <geometryTransform matrix="100 0 5.68434e-12 0 0 100 0 0 -5.68434e-12 0 100 0 0 0 0 1" />
+            <parentNodes count="1" indices="3" />
+            <childrenNodes count="1" indices="25" />
+        </dSceneNodeInfo>
+        <dSceneNodeInfo>
+            <dNodeInfo name="Wedge.001" nodeID="6" editorFlags="0" />
+            <color float4="0.75 0.75 0 0" />
+            <transform position="-9.6 0.720001 -10.48 1" eulerAngles="1.02287e-13 -5.68434e-14 -1.62921e-07 0" localScale="1 1 1 1" stretchAxis="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1" />
+            <geometryTransform matrix="100 0 5.68434e-12 0 0 100 0 0 -5.68434e-12 0 100 0 0 0 0 1" />
+            <parentNodes count="1" indices="3" />
+            <childrenNodes count="1" indices="24" />
+        </dSceneNodeInfo>
+        <dSceneNodeInfo>
+            <dNodeInfo name="Wedge" nodeID="7" editorFlags="0" />
+            <color float4="0.75 0.75 0 0" />
+            <transform position="-9.35998 1.36 -1.84 1" eulerAngles="1.02287e-13 -5.68434e-14 -1.62921e-07 0" localScale="1 1 1 1" stretchAxis="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1" />
+            <geometryTransform matrix="100 0 5.68434e-12 0 0 100 0 0 -5.68434e-12 0 100 0 0 0 0 1" />
+            <parentNodes count="1" indices="3" />
+            <childrenNodes count="1" indices="23" />
+        </dSceneNodeInfo>
+        <dSceneNodeInfo>
+            <dNodeInfo name="Cylinder.002" nodeID="8" editorFlags="0" />
+            <color float4="0.75 0.75 0 0" />
+            <transform position="4.72001 1.44 -10 1" eulerAngles="1.02287e-13 -5.68434e-14 -1.62921e-07 0" localScale="1 1 1 1" stretchAxis="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1" />
+            <geometryTransform matrix="100 0 5.68434e-12 0 0 100 0 0 -5.68434e-12 0 100 0 0 0 0 1" />
+            <parentNodes count="1" indices="3" />
+            <childrenNodes count="1" indices="18" />
+        </dSceneNodeInfo>
+        <dSceneNodeInfo>
+            <dNodeInfo name="Cylinder.001" nodeID="9" editorFlags="0" />
+            <color float4="0.75 0.75 0 0" />
+            <transform position="10.64 0.24 9.20002 1" eulerAngles="1.02287e-13 -5.68434e-14 -1.62921e-07 0" localScale="1 1 1 1" stretchAxis="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1" />
+            <geometryTransform matrix="100 0 5.68434e-12 0 0 100 0 0 -5.68434e-12 0 100 0 0 0 0 1" />
+            <parentNodes count="1" indices="3" />
+            <childrenNodes count="1" indices="17" />
+        </dSceneNodeInfo>
+        <dSceneNodeInfo>
+            <dNodeInfo name="Cylinder" nodeID="10" editorFlags="0" />
+            <color float4="0.75 0.75 0 0" />
+            <transform position="10.64 0.24 4.00001 1" eulerAngles="1.02287e-13 -5.68434e-14 -1.62921e-07 0" localScale="1 1 1 1" stretchAxis="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1" />
+            <geometryTransform matrix="100 0 5.68434e-12 0 0 100 0 0 -5.68434e-12 0 100 0 0 0 0 1" />
+            <parentNodes count="1" indices="3" />
+            <childrenNodes count="1" indices="13" />
+        </dSceneNodeInfo>
+        <dSceneNodeInfo>
+            <dNodeInfo name="Box" nodeID="11" editorFlags="0" />
+            <color float4="0.75 0.75 0 0" />
+            <transform position="1.90735e-06 -8.13152e-19 1.1975e-12 1" eulerAngles="1.02287e-13 -5.68434e-14 -1.62921e-07 0" localScale="1 1 1 1" stretchAxis="1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1" />
+            <geometryTransform matrix="100 0 5.68434e-12 0 0 100 0 0 -5.68434e-12 0 100 0 0 0 0 1" />
+            <parentNodes count="1" indices="3" />
+            <childrenNodes count="1" indices="20" />
+        </dSceneNodeInfo>
+        <dSceneCacheInfo cacheId="-7649022316178375635">
+            <dNodeInfo name="dGeometryCache" nodeID="12" editorFlags="0" />
+            <parentNodes count="1" indices="0" />
+            <childrenNodes count="8" indices="13 17 18 20 23 24 25 26" />
+        </dSceneCacheInfo>
+        <dMeshNodeInfo>
+            <dGeometryNodeInfo>
+                <dNodeInfo name="Cylinder_mesh" nodeID="13" editorFlags="0" />
+            </dGeometryNodeInfo>
+            <points controlPointBaseCount="36">
+                <position float4="36" floats="-0.0232 0.00762102 0.00479999 0 0.0232 0.00762102 0.00480002 0 -0.0232 0 0.00959999 0 0.0232 0 0.00960001 0 -0.0232 0.00762102 -0.00480002 0 0.0232 0.00762102 -0.00479999 0 -0.0232 0.00762102 0.00479999 0 0.0232 0.00762102 0.00480002 0 -0.0232 -7.6932e-10 -0.00960001 0 0.0232 -7.6932e-10 -0.00959998 0 -0.0232 0.00762102 -0.00480002 0 0.0232 0.00762102 -0.00479999 0 -0.0232 -0.00762102 -0.00480001 0 0.0232 -0.00762102 -0.00479998 0 -0.0232 -7.6932e-10 -0.00960001 0 0.0232 -7.6932e-10 -0.00959998 0 -0.0232 -0.00762102 0.00479999 0 0.0232 -0.00762102 0.00480002 0 -0.0232 -0.00762102 -0.00480001 0 0.0232 -0.00762102 -0.00479998 0 -0.0232 0 0.00959999 0 0.0232 0 0.00960001 0 -0.0232 -0.00762102 0.00479999 0 0.0232 -0.00762102 0.00480002 0 -0.0232 -0.00762102 0.00479999 0 -0.0232 -0.00762102 -0.00480001 0 -0.0232 -7.6932e-10 -0.00960001 0 -0.0232 0.00762102 -0.00480002 0 -0.0232 0.00762102 0.00479999 0 -0.0232 0 0.00959999 0 0.0232 0 0.00960001 0 0.0232 0.00762102 0.00480002 0 0.0232 0.00762102 -0.00479999 0 0.0232 -7.6932e-10 -0.00959998 0 0.0232 -0.00762102 -0.00479998 0 0.0232 -0.00762102 0.00480002 0" />
+                <normal float3="8" floats="-1 -6.51757e-07 -6.27833e-07 -5.31243e-07 -0.532939 0.846154 -5.31243e-07 0.532939 0.846154 0 1 -0 0 -1 0 5.31243e-07 -0.532939 -0.846154 5.31243e-07 0.532938 -0.846154 1 6.51756e-07 6.27833e-07" />
+                <uv0 float2="26" floats="-2.53125 1.39145 -2.53125 1.09375 -2.53125 0.796054 -1.625 0.796054 -1.625 1.09375 -1.625 1.39145 -0.96875 1.09375 -0.875 4.25 -0.875 0.796054 -0.875 6.0625 -0.875 1.39145 -0.6875 0.796054 -0.6875 1.39145 -0.6875 6.0625 -0.6875 4.25 -0.59375 1.09375 0.6875 4.25 0.6875 6.0625 0.875 6.0625 0.875 4.25 1.625 1.09375 1.625 1.39145 1.625 0.796054 2.53125 1.39145 2.53125 1.09375 2.53125 0.796054" />
+            </points>
+            <polygons count="20" faceIndexCount="3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3">
+                <faceMaterial index="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0" />
+                <position index="0 2 1 1 2 3 4 6 5 5 6 7 8 10 9 9 10 11 12 14 13 13 14 15 16 18 17 17 18 19 20 22 21 21 22 23 24 26 25 24 27 26 24 28 27 24 29 28 30 32 31 30 33 32 30 34 33 30 35 34" />
+                <normal index="2 2 2 2 2 2 3 3 3 3 3 3 6 6 6 6 6 6 5 5 5 5 5 5 4 4 4 4 4 4 1 1 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 7 7 7 7 7 7 7 7 7 7 7 7" />
+                <uv0 index="5 4 0 0 4 1 14 7 13 13 7 9 20 21 24 24 21 23 22 20 25 25 20 24 19 16 18 18 16 17 4 3 1 1 3 2 8 15 11 8 12 15 8 10 12 8 6 10 6 12 10 6 15 12 6 11 15 6 8 11" />
+            </polygons>
+            <parentNodes count="2" indices="10 12" />
+            <childrenNodes count="1" indices="14" />
+        </dMeshNodeInfo>
+        <dMaterialNodeInfo id="0">
+            <dNodeInfo name="07 - Default" nodeID="14" editorFlags="0" />
+            <ambient textureId="-8803938765252087025" color="0.588235 0.588235 0.588235 1" />
+            <diffuse textureId="-8803938765252087025" color="0.588235 0.588235 0.588235 1" />
+            <specular textureId="-8803938765252087025" color="0.9 0.9 0.9 1" />
+            <emissive textureId="-1" color="0 0 0 1" />
+            <shininess float="2.000000" />
+            <opacity float="1.000000" />
+            <parentNodes count="3" indices="1 13 17" />
+            <childrenNodes count="1" indices="16" />
+        </dMaterialNodeInfo>
+        <dSceneCacheInfo cacheId="-4756206156716410326">
+            <dNodeInfo name="dTextureCache" nodeID="15" editorFlags="0" />
+            <parentNodes count="1" indices="0" />
+            <childrenNodes count="2" indices="16 22" />
+        </dSceneCacheInfo>
+        <dTextureNodeInfo path="wood_0.png">
+            <dNodeInfo name="wood_0.png" nodeID="16" editorFlags="0" />
+            <parentNodes count="3" indices="15 14 19" />
+        </dTextureNodeInfo>
+        <dMeshNodeInfo>
+            <dGeometryNodeInfo>
+                <dNodeInfo name="Cylinder.001_mesh" nodeID="17" editorFlags="0" />
+            </dGeometryNodeInfo>
+            <points controlPointBaseCount="36">
+                <position float4="36" floats="-0.0232 0.0056 0.0456 0 0.0232 0.0056 0.0456 0 -0.0232 -0.0008 0.052 0 0.0232 -0.0008 0.052 0 -0.0232 0.0056 0.036 0 0.0232 0.0056 0.036 0 -0.0232 0.0056 0.0456 0 0.0232 0.0056 0.0456 0 -0.0232 0.0008 0.0312 0 0.0232 0.0008 0.0312 0 -0.0232 0.0056 0.036 0 0.0232 0.0056 0.036 0 -0.0232 -0.0056 0.036 0 0.0232 -0.0056 0.036 0 -0.0232 0.0008 0.0312 0 0.0232 0.0008 0.0312 0 -0.0232 -0.0056 0.0456 0 0.0232 -0.0056 0.0456 0 -0.0232 -0.0056 0.036 0 0.0232 -0.0056 0.036 0 -0.0232 -0.0008 0.052 0 0.0232 -0.0008 0.052 0 -0.0232 -0.0056 0.0456 0 0.0232 -0.0056 0.0456 0 -0.0232 -0.0056 0.0456 0 -0.0232 -0.0056 0.036 0 -0.0232 0.0008 0.0312 0 -0.0232 0.0056 0.036 0 -0.0232 0.0056 0.0456 0 -0.0232 -0.0008 0.052 0 0.0232 -0.0008 0.052 0 0.0232 0.0056 0.0456 0 0.0232 0.0056 0.036 0 0.0232 0.0008 0.0312 0 0.0232 -0.0056 0.036 0 0.0232 -0.0056 0.0456 0" />
+                <normal float3="8" floats="-1 0 -6.27833e-07 -4.43944e-07 0.707108 0.707106 -3.76699e-07 -0.8 0.599999 0 1 -0 0 -1 0 4.43945e-07 0.707106 -0.707107 5.02266e-07 -0.6 -0.8 1 0 6.27833e-07" />
+                <uv0 float2="30" floats="-2.8125 4.25 -2.8125 6.0625 -2.8125 1.0625 -2.6875 4.25 -2.6875 1.3125 -2.6875 6.0625 -2.6875 0.875 -2.53125 1.125 -2.53125 1.3125 -2.53125 0.875 -2.5 4.25 -2.5 1.3125 -2.5 0.875 -2.5 6.0625 -2.40625 1.125 -1.625 1.3125 -1.625 1.125 -1.625 0.875 2.40625 1.125 2.5 1.3125 2.5 0.875 2.5 6.0625 2.5 4.25 2.6875 0.875 2.6875 1.3125 2.6875 6.0625 2.6875 4.25 2.8125 4.25 2.8125 1.0625 2.8125 6.0625" />
+            </points>
+            <polygons count="20" faceIndexCount="3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3">
+                <faceMaterial index="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0" />
+                <position index="0 2 1 1 2 3 4 6 5 5 6 7 8 10 9 9 10 11 12 14 13 13 14 15 16 18 17 17 18 19 20 22 21 21 22 23 24 26 25 24 27 26 24 28 27 24 29 28 30 32 31 30 33 32 30 34 33 30 35 34" />
+                <normal index="1 1 1 1 1 1 3 3 3 3 3 3 5 5 5 5 5 5 6 6 6 6 6 6 4 4 4 4 4 4 2 2 2 2 2 2 0 0 0 0 0 0 0 0 0 0 0 0 7 7 7 7 7 7 7 7 7 7 7 7" />
+                <uv0 index="26 27 25 25 27 29 22 26 21 21 26 25 16 15 7 7 15 8 17 16 9 9 16 7 3 10 5 5 10 13 0 3 1 1 3 5 23 18 20 23 19 18 23 24 19 23 28 24 2 11 4 2 14 11 2 12 14 2 6 12" />
+            </polygons>
+            <parentNodes count="2" indices="9 12" />
+            <childrenNodes count="1" indices="14" />
+        </dMeshNodeInfo>
+        <dMeshNodeInfo>
+            <dGeometryNodeInfo>
+                <dNodeInfo name="Cylinder.002_mesh" nodeID="18" editorFlags="0" />
+            </dGeometryNodeInfo>
+            <points controlPointBaseCount="48">
+                <position float4="48" floats="-2.15975e-08 -0.0128 0.0344 0 -2.15975e-08 0.0128 0.0344 0 0.0322441 -0.0128 0.0243245 0 0.0322441 0.0128 0.0243245 0 0.0322441 -0.0128 0.0243245 0 0.0322441 0.0128 0.0243245 0 0.0456 -0.0128 2.56218e-08 0 0.0456 0.0128 2.56218e-08 0 0.0456 -0.0128 2.56218e-08 0 0.0456 0.0128 2.56218e-08 0 0.0322441 -0.0128 -0.0243245 0 0.0322441 0.0128 -0.0243245 0 0.0322441 -0.0128 -0.0243245 0 0.0322441 0.0128 -0.0243245 0 1.7611e-08 -0.0128 -0.0344 0 1.7611e-08 0.0128 -0.0344 0 1.7611e-08 -0.0128 -0.0344 0 1.7611e-08 0.0128 -0.0344 0 -0.0322441 -0.0128 -0.0243245 0 -0.0322441 0.0128 -0.0243245 0 -0.0322441 -0.0128 -0.0243245 0 -0.0322441 0.0128 -0.0243245 0 -0.0456 -0.0128 -2.26145e-08 0 -0.0456 0.0128 -2.26145e-08 0 -0.0456 -0.0128 -2.26145e-08 0 -0.0456 0.0128 -2.26145e-08 0 -0.0322441 -0.0128 0.0243245 0 -0.0322441 0.0128 0.0243245 0 -0.0322441 -0.0128 0.0243245 0 -0.0322441 0.0128 0.0243245 0 -2.15975e-08 -0.0128 0.0344 0 -2.15975e-08 0.0128 0.0344 0 -2.15975e-08 -0.0128 0.0344 0 0.0322441 -0.0128 0.0243245 0 0.0456 -0.0128 2.56218e-08 0 0.0322441 -0.0128 -0.0243245 0 1.7611e-08 -0.0128 -0.0344 0 -0.0322441 -0.0128 -0.0243245 0 -0.0456 -0.0128 -2.26145e-08 0 -0.0322441 -0.0128 0.0243245 0 -0.0322441 0.0128 0.0243245 0 -0.0456 0.0128 -2.26145e-08 0 -0.0322441 0.0128 -0.0243245 0 1.7611e-08 0.0128 -0.0344 0 0.0322441 0.0128 -0.0243245 0 0.0456 0.0128 2.56218e-08 0 0.0322441 0.0128 0.0243245 0 -2.15975e-08 0.0128 0.0344 0" />
+                <normal float3="10" floats="-0.876559 0 0.481295 -0.876558 0 -0.481296 -0.298255 0 0.954486 -0.298255 0 -0.954486 -2.69902e-14 1 4.29894e-08 -1.89236e-15 -1 3.01411e-09 0.298254 0 0.954486 0.298255 0 -0.954486 0.876558 0 0.481296 0.876559 0 -0.481295" />
+                <uv0 float2="31" floats="-2.42821 2.0625 -2.42821 1.0625 -1.95312 1.0625 -1.95312 2.0625 -1.55164 2.0625 -1.55164 1.0625 -1.47804 1.0625 -1.47804 2.0625 -0.921875 2.0625 -0.921875 1.0625 -0.292108 2.0625 -0.292108 1.0625 0.292108 1.0625 0.292108 2.0625 0.921875 1.0625 0.921875 2.0625 1.28125 2.84375 1.47804 1.58422 1.47804 2.0625 1.47804 1.0625 1.47804 4.10328 1.55164 1.0625 1.55164 2.0625 1.95312 1.0625 1.95312 2.0625 1.95312 4.625 2.42821 1.58422 2.42821 2.0625 2.42821 1.0625 2.42821 4.10328 2.625 2.84375" />
+            </points>
+            <polygons count="28" faceIndexCount="3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3">
+                <faceMaterial index="1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1" />
+                <position index="0 2 1 1 2 3 4 6 5 5 6 7 8 10 9 9 10 11 12 14 13 13 14 15 16 18 17 17 18 19 20 22 21 21 22 23 24 26 25 25 26 27 28 30 29 29 30 31 32 34 33 32 35 34 32 36 35 32 37 36 32 38 37 32 39 38 40 42 41 40 43 42 40 44 43 40 45 44 40 46 45 40 47 46" />
+                <normal index="6 6 6 6 6 6 8 8 8 8 8 8 9 9 9 9 9 9 7 7 7 7 7 7 3 3 3 3 3 3 1 1 1 1 1 1 0 0 0 0 0 0 2 2 2 2 2 2 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4" />
+                <uv0 index="14 21 15 15 21 22 19 23 18 18 23 24 23 28 24 24 28 27 5 9 4 4 9 8 9 11 8 8 11 10 1 2 0 0 2 3 2 6 3 3 6 7 12 14 13 13 14 15 16 25 20 16 29 25 16 30 29 16 26 30 16 23 26 16 17 23 17 26 23 17 30 26 17 29 30 17 25 29 17 20 25 17 16 20" />
+            </polygons>
+            <parentNodes count="2" indices="8 12" />
+            <childrenNodes count="1" indices="19" />
+        </dMeshNodeInfo>
+        <dMaterialNodeInfo id="1">
+            <dNodeInfo name="03 - Default" nodeID="19" editorFlags="0" />
+            <ambient textureId="-8803938765252087025" color="0.588235 0.588235 0.588235 1" />
+            <diffuse textureId="-8803938765252087025" color="0.588235 0.588235 0.588235 1" />
+            <specular textureId="-8803938765252087025" color="0.9 0.9 0.9 1" />
+            <emissive textureId="-1" color="0 0 0 1" />
+            <shininess float="2.000000" />
+            <opacity float="1.000000" />
+            <parentNodes count="2" indices="1 18" />
+            <childrenNodes count="1" indices="16" />
+        </dMaterialNodeInfo>
+        <dMeshNodeInfo>
+            <dGeometryNodeInfo>
+                <dNodeInfo name="Box_mesh" nodeID="20" editorFlags="0" />
+            </dGeometryNodeInfo>
+            <points controlPointBaseCount="24">
+                <position float4="24" floats="-0.1792 0.0016 0.1792 0 -0.1792 0.0016 -0.1792 0 0.1792 0.0016 0.1792 0 0.1792 0.0016 -0.1792 0 0.1792 -0.0016 0.1792 0 0.1792 -0.0016 -0.1792 0 -0.1792 -0.0016 0.1792 0 -0.1792 -0.0016 -0.1792 0 0.1792 0.0016 0.1792 0 0.1792 0.0016 -0.1792 0 0.1792 -0.0016 0.1792 0 0.1792 -0.0016 -0.1792 0 -0.1792 0.0016 -0.1792 0 -0.1792 0.0016 0.1792 0 -0.1792 -0.0016 -0.1792 0 -0.1792 -0.0016 0.1792 0 0.1792 0.0016 -0.1792 0 -0.1792 0.0016 -0.1792 0 0.1792 -0.0016 -0.1792 0 -0.1792 -0.0016 -0.1792 0 0.1792 -0.0016 0.1792 0 -0.1792 -0.0016 0.1792 0 0.1792 0.0016 0.1792 0 -0.1792 0.0016 0.1792 0" />
+                <normal float3="6" floats="-1 0 -6.27833e-07 -6.27833e-07 0 1 0 1 -0 0 -1 0 6.27833e-07 0 -1 1 0 6.27833e-07" />
+                <uv0 float2="8" floats="-3.5 1.0625 -3.5 0.9375 -3.5 8 -3.5 -6 3.5 1.0625 3.5 0.9375 3.5 8 3.5 -6" />
+            </points>
+            <polygons count="12" faceIndexCount="3 3 3 3 3 3 3 3 3 3 3 3">
+                <faceMaterial index="2 2 2 2 2 2 2 2 2 2 2 2" />
+                <position index="0 2 1 1 2 3 4 6 5 5 6 7 8 10 9 9 10 11 12 14 13 13 14 15 16 18 17 17 18 19 20 22 21 21 22 23" />
+                <normal index="2 2 2 2 2 2 3 3 3 3 3 3 5 5 5 5 5 5 0 0 0 0 0 0 4 4 4 4 4 4 1 1 1 1 1 1" />
+                <uv0 index="3 2 7 7 2 6 2 3 6 6 3 7 0 1 4 4 1 5 0 1 4 4 1 5 0 1 4 4 1 5 1 0 5 5 0 4" />
+            </polygons>
+            <parentNodes count="2" indices="11 12" />
+            <childrenNodes count="1" indices="21" />
+        </dMeshNodeInfo>
+        <dMaterialNodeInfo id="2">
+            <dNodeInfo name="01 - Default" nodeID="21" editorFlags="0" />
+            <ambient textureId="-8132138746611129528" color="0.588235 0.588235 0.588235 1" />
+            <diffuse textureId="-8132138746611129528" color="0.588235 0.588235 0.588235 1" />
+            <specular textureId="-8132138746611129528" color="0.9 0.9 0.9 1" />
+            <emissive textureId="-1" color="0 0 0 1" />
+            <shininess float="2.000000" />
+            <opacity float="1.000000" />
+            <parentNodes count="6" indices="1 20 23 24 25 26" />
+            <childrenNodes count="1" indices="22" />
+        </dMaterialNodeInfo>
+        <dTextureNodeInfo path="wood_2.png">
+            <dNodeInfo name="wood_2.png" nodeID="22" editorFlags="0" />
+            <parentNodes count="2" indices="15 21" />
+        </dTextureNodeInfo>
+        <dMeshNodeInfo>
+            <dGeometryNodeInfo>
+                <dNodeInfo name="Wedge_mesh" nodeID="23" editorFlags="0" />
+            </dGeometryNodeInfo>
+            <points controlPointBaseCount="18">
+                <position float4="18" floats="0.0552 -0.012 -0.00879997 0 -0.0168 -0.012 -0.00880001 0 0.0552 -0.012 0.00880003 0 -0.0168 -0.012 0.00879999 0 0.0552 0.0296 0.00880003 0 0.0552 0.0296 -0.00879997 0 0.0552 -0.012 0.00880003 0 0.0552 -0.012 -0.00879997 0 -0.0168 -0.012 0.00879999 0 -0.0168 -0.012 -0.00880001 0 0.0552 0.0296 0.00880003 0 0.0552 0.0296 -0.00879997 0 0.0552 -0.012 0.00880003 0 -0.0168 -0.012 0.00879999 0 0.0552 0.0296 0.00880003 0 0.0552 0.0296 -0.00879997 0 -0.0168 -0.012 -0.00880001 0 0.0552 -0.012 -0.00879997 0" />
+                <normal float3="5" floats="-0.500278 0.865865 -3.14091e-07 -6.27833e-07 0 1 0 -1 0 6.11913e-07 0 -1 1 0 6.27833e-07" />
+                <uv0 float2="18" floats="-0.875 2.6875 -0.875 1.0625 -0.53125 1.0625 -0.3125 2.6875 -0.3125 -1.6875 -0.3125 1.0625 -0.3125 1.125 -0.0312501 1.125 -0.0312501 -1.6875 0.0312501 2.6875 0.0312501 -1.6875 0.0312501 1.125 0.0312501 1.0625 0.3125 1.125 0.3125 -1.6875 0.53125 1.0625 0.875 2.6875 0.875 1.0625" />
+            </points>
+            <polygons count="8" faceIndexCount="3 3 3 3 3 3 3 3">
+                <faceMaterial index="2 2 2 2 2 2 2 2" />
+                <position index="0 2 1 1 2 3 4 6 5 5 6 7 8 10 9 9 10 11 12 14 13 15 17 16" />
+                <normal index="2 2 2 2 2 2 4 4 4 4 4 4 0 0 0 0 0 0 1 1 1 3 3 3" />
+                <uv0 index="11 6 10 10 6 4 3 5 9 9 5 12 14 13 8 8 13 7 17 16 2 0 1 15" />
+            </polygons>
+            <parentNodes count="2" indices="7 12" />
+            <childrenNodes count="1" indices="21" />
+        </dMeshNodeInfo>
+        <dMeshNodeInfo>
+            <dGeometryNodeInfo>
+                <dNodeInfo name="Wedge.001_mesh" nodeID="24" editorFlags="0" />
+            </dGeometryNodeInfo>
+            <points controlPointBaseCount="18">
+                <position float4="18" floats="0.0192 -0.0056 -0.00879999 0 -0.0192 -0.0056 -0.00880001 0 0.0192 -0.0056 0.00880001 0 -0.0192 -0.0056 0.00879999 0 0.0192 0.0056 0.00880001 0 0.0192 0.0056 -0.00879999 0 0.0192 -0.0056 0.00880001 0 0.0192 -0.0056 -0.00879999 0 -0.0192 -0.0056 0.00879999 0 -0.0192 -0.0056 -0.00880001 0 0.0192 0.0056 0.00880001 0 0.0192 0.0056 -0.00879999 0 0.0192 -0.0056 0.00880001 0 -0.0192 -0.0056 0.00879999 0 0.0192 0.0056 0.00880001 0 0.0192 0.0056 -0.00879999 0 -0.0192 -0.0056 -0.00880001 0 0.0192 -0.0056 -0.00879999 0" />
+                <normal float3="5" floats="-0.28 0.96 -1.75793e-07 -6.27833e-07 0 1 0 -1 0 6.27833e-07 0 -1 1 0 6.27833e-07" />
+                <uv0 float2="11" floats="-1.5 1.0625 -0.75 1.0625 -0.75 1.5 -0.71875 1.0625 -0.71875 -2 -0.71875 1.5 -0.71875 -0.5 -0.375 1.0625 -0.375 1.5 -0.375 -2 -0.375 -0.5" />
+            </points>
+            <polygons count="8" faceIndexCount="3 3 3 3 3 3 3 3">
+                <faceMaterial index="2 2 2 2 2 2 2 2" />
+                <position index="0 2 1 1 2 3 4 6 5 5 6 7 8 10 9 9 10 11 12 14 13 15 17 16" />
+                <normal index="2 2 2 2 2 2 4 4 4 4 4 4 0 0 0 0 0 0 1 1 1 3 3 3" />
+                <uv0 index="6 10 4 4 10 9 8 7 5 5 7 3 9 10 4 4 10 6 1 2 0 2 1 0" />
+            </polygons>
+            <parentNodes count="2" indices="6 12" />
+            <childrenNodes count="1" indices="21" />
+        </dMeshNodeInfo>
+        <dMeshNodeInfo>
+            <dGeometryNodeInfo>
+                <dNodeInfo name="Wedge.002_mesh" nodeID="25" editorFlags="0" />
+            </dGeometryNodeInfo>
+            <points controlPointBaseCount="18">
+                <position float4="18" floats="0.0384 -0.0256 -0.00879998 0 -0.0384 -0.0256 -0.00880002 0 0.0384 -0.0256 0.00880002 0 -0.0384 -0.0256 0.00879998 0 0.0384 0.0256 0.00880002 0 0.0384 0.0256 -0.00879998 0 0.0384 -0.0256 0.00880002 0 0.0384 -0.0256 -0.00879998 0 -0.0384 -0.0256 0.00879998 0 -0.0384 -0.0256 -0.00880002 0 0.0384 0.0256 0.00880002 0 0.0384 0.0256 -0.00879998 0 0.0384 -0.0256 0.00880002 0 -0.0384 -0.0256 0.00879998 0 0.0384 0.0256 0.00880002 0 0.0384 0.0256 -0.00879998 0 -0.0384 -0.0256 -0.00880002 0 0.0384 -0.0256 -0.00879998 0" />
+                <normal float3="5" floats="-0.5547 0.83205 -3.48259e-07 -6.27833e-07 0 1 0 -1 0 6.27833e-07 0 -1 1 0 6.27833e-07" />
+                <uv0 float2="9" floats="-0.53125 4 -0.53125 1 -0.53125 3 -0.1875 1 -0.1875 3 -0.1875 4 0 1 1.5 3 1.5 1" />
+            </points>
+            <polygons count="8" faceIndexCount="3 3 3 3 3 3 3 3">
+                <faceMaterial index="2 2 2 2 2 2 2 2" />
+                <position index="0 2 1 1 2 3 4 6 5 5 6 7 8 10 9 9 10 11 12 14 13 15 17 16" />
+                <normal index="2 2 2 2 2 2 4 4 4 4 4 4 0 0 0 0 0 0 1 1 1 3 3 3" />
+                <uv0 index="0 5 1 1 5 3 4 3 2 2 3 1 3 5 1 1 5 0 8 7 6 7 8 6" />
+            </polygons>
+            <parentNodes count="2" indices="5 12" />
+            <childrenNodes count="1" indices="21" />
+        </dMeshNodeInfo>
+        <dMeshNodeInfo>
+            <dGeometryNodeInfo>
+                <dNodeInfo name="Wedge.003_mesh" nodeID="26" editorFlags="0" />
+            </dGeometryNodeInfo>
+            <points controlPointBaseCount="18">
+                <position float4="18" floats="-0.0368001 -0.0256 0.204 0 -0.1168 -0.0256 0.204 0 -0.0368001 -0.0256 0.2296 0 -0.1168 -0.0256 0.2296 0 -0.0368001 0.0256 0.2296 0 -0.0368001 0.0256 0.204 0 -0.0368001 -0.0256 0.2296 0 -0.0368001 -0.0256 0.204 0 -0.1168 -0.0256 0.2296 0 -0.1168 -0.0256 0.204 0 -0.0368001 0.0256 0.2296 0 -0.0368001 0.0256 0.204 0 -0.0368001 -0.0256 0.2296 0 -0.1168 -0.0256 0.2296 0 -0.0368001 0.0256 0.2296 0 -0.0368001 0.0256 0.204 0 -0.1168 -0.0256 0.204 0 -0.0368001 -0.0256 0.204 0" />
+                <normal float3="5" floats="-0.539054 0.842271 -3.38436e-07 -6.27833e-07 0 1 0 -1 0 6.27833e-07 0 -1 1 0 6.27833e-07" />
+                <uv0 float2="18" floats="-3.25 3 -3.25 1.0625 -3.25 -2.0625 -3.25 1 -2.75 3 -2.75 -2.0625 -2.75 1.0625 -2.75 1 -1.53125 1 -0.0312501 1 -0.0312501 3 0.0312501 1 0.0312501 3 1.53125 1 2.75 -2.0625 2.75 1.0625 3.25 -2.0625 3.25 1.0625" />
+            </points>
+            <polygons count="8" faceIndexCount="3 3 3 3 3 3 3 3">
+                <faceMaterial index="2 2 2 2 2 2 2 2" />
+                <position index="0 2 1 1 2 3 4 6 5 5 6 7 8 10 9 9 10 11 12 14 13 15 17 16" />
+                <normal index="2 2 2 2 2 2 4 4 4 4 4 4 0 0 0 0 0 0 1 1 1 3 3 3" />
+                <uv0 index="6 1 5 5 1 2 0 3 4 4 3 7 16 17 14 14 17 15 11 12 8 10 9 13" />
+            </polygons>
+            <parentNodes count="2" indices="4 12" />
+            <childrenNodes count="1" indices="21" />
+        </dMeshNodeInfo>
+    </nodes>
+</NewtonGameDynamnics>

@@ -440,6 +440,17 @@ void ndPolygonSoupBuilder::AddFace(const ndFloat32* const vertex, ndInt32 stride
 	AddFaceIndirect(vertex, strideInBytes, faceId, indexArray, vertexCount);
 }
 
+void ndPolygonSoupBuilder::AddFace(const ndVector* const vertex, ndInt32 vertexCount, const ndInt32 faceId)
+{
+	ndInt32 indexArray[1024];
+	ndAssert(vertexCount < ndInt32(sizeof(indexArray) / sizeof(indexArray[0])));
+	for (ndInt32 i = 0; i < vertexCount; ++i)
+	{
+		indexArray[i] = i;
+	}
+	AddFaceIndirect(vertex, faceId, indexArray, vertexCount);
+}
+
 void ndPolygonSoupBuilder::PackArray()
 {
 	ndStack<ndInt32> indexMapPool (ndInt32(m_vertexPoints.GetCount()));

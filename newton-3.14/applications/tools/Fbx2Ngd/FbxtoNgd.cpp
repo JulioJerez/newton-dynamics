@@ -1012,7 +1012,7 @@ void ImportAnimationLayer(dScene* const ngdScene, FbxScene* const fbxScene, Glob
 int main(int argc, char** argv)
 {
 	bool importMesh = true;
-	bool importAnimations = true;
+	bool importAnimations = false;
 	const char* name = NULL;
 	for (int i = 1; i < argc; i ++) {
 		if (argv[i][0] == '-') {

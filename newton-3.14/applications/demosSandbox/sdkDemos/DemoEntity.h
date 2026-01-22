@@ -72,6 +72,8 @@ class DemoEntity: public dHierarchy<DemoEntity>, virtual public dClassInfo
 	virtual void Render(dFloat timeStep, DemoEntityManager* const scene, const dMatrix& matrix) const;
 	NewtonCollision* CreateCollisionFromchildren(NewtonWorld* const world) const;
 
+	NewtonCollision* CreateConvexHull(NewtonWorld* const world) const;
+
 	static void TransformCallback(const NewtonBody* body, const dFloat* matrix, int threadIndex);
 
 	protected:
