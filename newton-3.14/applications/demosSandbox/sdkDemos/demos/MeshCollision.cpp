@@ -16,7 +16,6 @@
 #include "DemoCamera.h"
 #include "PhysicsUtils.h"
 
-
 static void SimpleMeshLevel (DemoEntityManager* const scene, bool optimization)
 {
 	// load the skybox
@@ -52,13 +51,11 @@ static void SimpleMeshLevel (DemoEntityManager* const scene, bool optimization)
 		AddPrimitiveArray(scene, 10.0f, location, size, count, count, 3.0f, _COMPOUND_CONVEX_CRUZ_PRIMITIVE, defaultMaterialID, shapeOffsetMatrix);
 	}
 
-
-count = 8;
-for (int i = 0; i < 50; i ++){
-//AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _REGULAR_CONVEX_HULL_PRIMITIVE, defaultMaterialID, shapeOffsetMatrix);
-//AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.0f, _SPHERE_PRIMITIVE, defaultMaterialID, shapeOffsetMatrix);
-}
-
+	count = 8;
+	for (int i = 0; i < 50; i ++){
+	//AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _REGULAR_CONVEX_HULL_PRIMITIVE, defaultMaterialID, shapeOffsetMatrix);
+	//AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.0f, _SPHERE_PRIMITIVE, defaultMaterialID, shapeOffsetMatrix);
+	}
 }
 
 void OptimizedMeshLevelCollision (DemoEntityManager* const scene)
@@ -68,5 +65,82 @@ void OptimizedMeshLevelCollision (DemoEntityManager* const scene)
 
 void SimpleMeshLevelCollision (DemoEntityManager* const scene)
 {
+#if 0
 	SimpleMeshLevel (scene, false);
+#else
+
+	// load the skybox
+	scene->CreateSkyBox();
+	// load the scene from a ngd file format
+	//CreateLevelMesh (scene, "flatPlane.ngd", false);
+
+	char fileName[2048];
+	dGetWorkingFileName("leadwerktest.ngd", fileName);
+	scene->LoadScene(fileName);
+
+	NewtonWorld* const world = scene->GetNewton();
+	for (DemoEntityManager::dListNode* node = scene->GetLast(); node; node = node->GetPrev()) 
+	{
+		DemoEntity* const ent = node->GetInfo();
+		for (DemoEntity* child = ent->GetChild(); child; child = child->GetSibling())
+		{
+			if (child->GetMesh())
+			{
+				NewtonCollision* const collision = child->CreateConvexHull(world);
+				dAssert(child->GetMesh()->IsType(DemoMesh::GetRttiType()));
+
+				dMatrix matrix (child->CalculateGlobalMatrix());
+				NewtonBody* const rigidBody = NewtonCreateDynamicBody(world, collision, &matrix[0][0]);
+
+				// set a destructor for this rigid body
+				NewtonBodySetDestructorCallback(rigidBody, PhysicsBodyDestructor);
+
+				// set the transform call back function
+				NewtonBodySetTransformCallback(rigidBody, DemoEntity::TransformCallback);
+
+				// set the force and torque call back function
+				//NewtonBodySetForceAndTorqueCallback(rigidBody, PhysicsApplyGravityForce);
+
+				NewtonDestroyCollision(collision);
+			}
+		}
+	}
+	//return levelBody;
+
+
+	//	dMatrix camMatrix (dRollMatrix(-20.0f * dDegreeToRad) * dYawMatrix(-45.0f * dDegreeToRad));
+	dMatrix camMatrix(dGetIdentityMatrix());
+	dQuaternion rot(camMatrix);
+	dVector origin(-20.0f, 5.0f, 0.0f, 0.0f);
+	scene->SetCameraMatrix(rot, origin);
+
+#if 0
+		NewtonWorld* const world = scene->GetNewton();
+		int defaultMaterialID = NewtonMaterialGetDefaultGroupID(world);
+		dVector location(0.0f, 0.0f, 0.0f, 0.0f);
+		dVector size(0.25f, 0.25f, 0.5f, 0.0f);
+		size = size.Scale(2.0f);
+	
+		int count = 5;
+		dMatrix shapeOffsetMatrix(dGetIdentityMatrix());
+		for (int i = 0; i < 20; i++) {
+			AddPrimitiveArray(scene, 10.0f, location, size, count, count, 3.0f, _SPHERE_PRIMITIVE, defaultMaterialID, shapeOffsetMatrix);
+			AddPrimitiveArray(scene, 10.0f, location, size, count, count, 3.0f, _BOX_PRIMITIVE, defaultMaterialID, shapeOffsetMatrix);
+			AddPrimitiveArray(scene, 10.0f, location, size, count, count, 3.0f, _CAPSULE_PRIMITIVE, defaultMaterialID, shapeOffsetMatrix);
+			AddPrimitiveArray(scene, 10.0f, location, size, count, count, 3.0f, _CYLINDER_PRIMITIVE, defaultMaterialID, shapeOffsetMatrix);
+			AddPrimitiveArray(scene, 10.0f, location, size, count, count, 3.0f, _CHAMFER_CYLINDER_PRIMITIVE, defaultMaterialID, shapeOffsetMatrix);
+			AddPrimitiveArray(scene, 10.0f, location, size, count, count, 3.0f, _CONE_PRIMITIVE, defaultMaterialID, shapeOffsetMatrix);
+			AddPrimitiveArray(scene, 10.0f, location, size, count, count, 3.0f, _REGULAR_CONVEX_HULL_PRIMITIVE, defaultMaterialID, shapeOffsetMatrix);
+			AddPrimitiveArray(scene, 10.0f, location, size, count, count, 3.0f, _RANDOM_CONVEX_HULL_PRIMITIVE, defaultMaterialID, shapeOffsetMatrix);
+			AddPrimitiveArray(scene, 10.0f, location, size, count, count, 3.0f, _COMPOUND_CONVEX_CRUZ_PRIMITIVE, defaultMaterialID, shapeOffsetMatrix);
+		}
+	
+		count = 8;
+		for (int i = 0; i < 50; i++) {
+			//AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.7f, _REGULAR_CONVEX_HULL_PRIMITIVE, defaultMaterialID, shapeOffsetMatrix);
+			//AddPrimitiveArray(scene, 10.0f, location, size, count, count, 1.0f, _SPHERE_PRIMITIVE, defaultMaterialID, shapeOffsetMatrix);
+		}
+	}
+#endif
+#endif
 }

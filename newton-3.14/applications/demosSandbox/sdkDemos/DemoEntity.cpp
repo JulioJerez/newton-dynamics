@@ -481,6 +481,36 @@ DemoEntity* DemoEntity::LoadNGD_mesh(const char* const fileName, NewtonWorld* co
 	return returnEntity;
 }
 
+NewtonCollision* DemoEntity::CreateConvexHull(NewtonWorld* const world) const
+{
+	DemoMesh* const mesh = (DemoMesh*)GetMesh();
+	dAssert(mesh->IsType(DemoMesh::GetRttiType()));
+	dFloat* const array = mesh->m_vertex;
+
+	dArray<dVector> points;
+	points.Resize(mesh->m_vertexCount);
+
+	dVector origin(0.0f);
+	for (dInt32 i = 0; i < mesh->m_vertexCount; ++i)
+	{
+		dVector p(array[i * 3 + 0], array[i * 3 + 1], array[i * 3 + 2], dFloat32(1.0f));
+		points[i] = m_meshMatrix.TransformVector(p);
+		origin += points[i];
+	}
+
+	origin = origin.Scale(1.0f / dFloat32(mesh->m_vertexCount));
+	for (dInt32 i = 0; i < mesh->m_vertexCount; ++i)
+	{
+		points[i] -= origin;
+	}
+
+	dMatrix matrix(GetCurrentMatrix());
+	matrix.m_posit = origin;
+	matrix.m_posit.m_w = 1.0f;
+	NewtonCollision* const collision = NewtonCreateConvexHull(world, mesh->m_vertexCount, &points[0].m_x, 4 * sizeof(dFloat), 0.001f, 0, &matrix[0][0]);
+	return collision;
+}
+
 NewtonCollision* DemoEntity::CreateCollisionFromchildren(NewtonWorld* const world) const
 {
 	int count = 1;
