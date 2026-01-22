@@ -115,13 +115,14 @@ void SimpleMeshLevelCollision (DemoEntityManager* const scene)
 	//dVector size(0.7f, 1.8f, 0.7f, 0.0f);
 	//NewtonCollision* const collision = CreateConvexCollision(world, dRollMatrix(90.0f * dRadToDegree), size, _CYLINDER_PRIMITIVE, 0);
 	dVector size(1.0);
-	NewtonCollision* const collision = CreateConvexCollision(world, dRollMatrix(00.0f * dDegreeToRad), size, _BOX_PRIMITIVE, 0);
+	NewtonCollision* const collision = CreateConvexCollision(world, dRollMatrix(00.0f * dDegreeToRad), size, _SPHERE_PRIMITIVE, 0);
+	//NewtonCollision* const collision = CreateConvexCollision(world, dRollMatrix(00.0f * dDegreeToRad), size, _BOX_PRIMITIVE, 0);
 	DemoMesh* const geometry = new DemoMesh("primitive", scene->GetShaderCache(), collision, "smilli.tga", "smilli.tga", "smilli.tga");
 
 	dMatrix matrix(dGetIdentityMatrix());
 	matrix.m_posit.m_x = 10.0f;
 	matrix.m_posit.m_z = 4.0f;
-	matrix.m_posit.m_y = 3.0f;
+	matrix.m_posit.m_y = 1.48f;
 
 	NewtonBody* body = CreateSimpleSolid(scene, geometry, 10.0f, matrix, collision, 0);
 	// do not forget to release the assets	
