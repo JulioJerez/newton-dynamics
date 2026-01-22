@@ -49,7 +49,7 @@ void ndBasicSceneCompoundCollision(ndDemoEntityManager* const scene)
 	scene->SetCameraMatrix(rot, origin);
 }
 
-#if 0
+#if 1
 void ndBasicStaticMeshCollision(ndDemoEntityManager* const scene)
 {
 	ndSharedPtr<ndBody> background(BuildPlayground(scene));

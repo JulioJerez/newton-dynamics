@@ -30,11 +30,11 @@
 //#define DEFAULT_SCENE	4		// basic Trigger
 //#define DEFAULT_SCENE	5		// conservation of momentum 
 //#define DEFAULT_SCENE	6		// basic joints
-#define DEFAULT_SCENE	7		// static mesh collision
+//#define DEFAULT_SCENE	7		// static mesh collision
 //#define DEFAULT_SCENE	8		// heightfield collision
 //#define DEFAULT_SCENE	9		// static compound scene collision
 //#define DEFAULT_SCENE	10		// basic convex approximate compound shapes
-//#define DEFAULT_SCENE	11		// basic procedural static collision
+#define DEFAULT_SCENE	11		// basic procedural static collision
 //#define DEFAULT_SCENE	12		// basic model, a npd vehicle prop
 //#define DEFAULT_SCENE	13		// basic rag doll
 //#define DEFAULT_SCENE	14		// complex model, implement a complex model with joints
