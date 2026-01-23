@@ -73,7 +73,7 @@ class ndMarchingCubes : public ndClassAlloc
 		};
 	};
 
-	D_CORE_API ndMarchingCubes(ndFloat32 particleSize);
+	D_CORE_API ndMarchingCubes(ndFloat32 cubeSize);
 	D_CORE_API virtual ~ndMarchingCubes();
 
 	D_CORE_API const ndArray<ndInt32>& GetTriangles() const;
@@ -124,26 +124,4 @@ class ndPaticlesMarchingCubes : public ndMarchingCubes
 	ndThreadPool* m_threadPool;
 };
 
-
-#if 0
-
-class ndMarchingCubeIsoFunction : public ndMarchingCubes::ndCalculateIsoValue
-{
-public:
-	D_CORE_API ndMarchingCubeIsoFunction(ndThreadPool* const threadPool, ndFloat32 gridSize);
-	D_CORE_API virtual ~ndMarchingCubeIsoFunction();
-
-	D_CORE_API virtual void GenerateMesh() override;
-	D_CORE_API virtual ndReal GetIsoValue(ndInt32 x, ndInt32 y, ndInt32 z) const = 0;
-
-	//protected:
-	//	D_CORE_API virtual void GenerateGrids();
-	//	D_CORE_API virtual void CalculateAABB();
-	//	D_CORE_API virtual void RemoveDuplicates();
-	//	D_CORE_API virtual void GenerateTriangles();
-	//	D_CORE_API virtual void GenerateIndexList();
-
-	//	ndArray<ndVector> m_points;
-};
-#endif
 #endif

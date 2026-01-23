@@ -36,19 +36,20 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 
 			//BuildBox(matrix, 32);
 			//BuildBox(matrix, 20);
-			BuildBox(matrix, 1);
+			BuildBox(matrix, 4);
 		}
 
 		void BuildBox(const ndMatrix& matrix, ndInt32 size)
 		{
 			ndFloat32 spacing = m_gridSize.m_x;
 			ndFloat32 sigma = spacing * ndFloat32(0.001f);
-			spacing *= ndFloat32(0.9f);
+			//spacing *= ndFloat32(0.9f);
 
-			//ndVector v(ndVector::m_zero);
-			for (ndInt32 z = 0; z < size; z++)
+			//for (ndInt32 z = 0; z < size; z++)
+			for (ndInt32 z = 0; z < 2; z++)
 			{
-				for (ndInt32 y = 0; y < size; y++)
+				//for (ndInt32 y = 0; y < size; y++)
+				for (ndInt32 y = 0; y < 1; y++)
 				{
 					//for (ndInt32 x = 0; x < size; x++)
 					for (ndInt32 x = 0; x < 2; x++)

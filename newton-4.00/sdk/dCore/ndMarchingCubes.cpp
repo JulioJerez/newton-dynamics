@@ -30,6 +30,7 @@
 // adapted from code by written by Paul Bourke may 1994
 //http://paulbourke.net/geometry/polygonise/
 
+#if 0
 namespace Original
 {
 	struct XYZ
@@ -484,7 +485,7 @@ namespace Original
 		return(ntriang);
 	}
 }
-
+#endif
 
 // ***********************************************************
 //
@@ -493,7 +494,7 @@ class ndMarchingCubes::ndKey_xlow
 {
 	public:
 	ndKey_xlow(void* const) {}
-	ndInt32 GetKey(const ndMarchingCubes::ndGridHash& cell) const
+	ndInt32 GetKey(const ndGridHash& cell) const
 	{
 		return cell.m_xLow;
 	}
@@ -503,7 +504,7 @@ class ndMarchingCubes::ndKey_xhigh
 {
 	public:
 	ndKey_xhigh(void* const) {}
-	ndInt32 GetKey(const ndMarchingCubes::ndGridHash& cell) const
+	ndInt32 GetKey(const ndGridHash& cell) const
 	{
 		return cell.m_xHigh;
 	}
@@ -513,7 +514,7 @@ class ndMarchingCubes::ndKey_ylow
 {
 	public:
 	ndKey_ylow(void* const) {}
-	ndInt32 GetKey(const ndMarchingCubes::ndGridHash& cell) const
+	ndInt32 GetKey(const ndGridHash& cell) const
 	{
 		return cell.m_yLow;
 	}
@@ -523,7 +524,7 @@ class ndMarchingCubes::ndKey_yhigh
 {
 	public:
 	ndKey_yhigh(void* const) {}
-	ndInt32 GetKey(const ndMarchingCubes::ndGridHash& cell) const
+	ndInt32 GetKey(const ndGridHash& cell) const
 	{
 		return cell.m_yHigh;
 	}
@@ -533,7 +534,7 @@ class ndMarchingCubes::ndKey_zlow
 {
 	public:
 	ndKey_zlow(void* const) {}
-	ndInt32 GetKey(const ndMarchingCubes::ndGridHash& cell) const
+	ndInt32 GetKey(const ndGridHash& cell) const
 	{
 		return cell.m_zLow;
 	}
@@ -543,7 +544,7 @@ class ndMarchingCubes::ndKey_zhigh
 {
 	public:
 	ndKey_zhigh(void* const) {}
-	ndInt32 GetKey(const ndMarchingCubes::ndGridHash& cell) const
+	ndInt32 GetKey(const ndGridHash& cell) const
 	{
 		return cell.m_zHigh;
 	}
@@ -3006,27 +3007,6 @@ ndMarchingCubes::ndGridHash::ndGridHash(const ndVector& grid)
 	m_z = ndInt16(hash.m_iz);
 }
 
-#if 0
-// ***********************************************************
-//
-// ***********************************************************
-ndMarchingCubeIsoFunction::ndMarchingCubeIsoFunction(ndThreadPool* const threadPool, ndFloat32 gridSize)
-	:ndCalculateIsoValue(gridSize, threadPool)
-{
-	ndAssert(0);
-}
-
-ndMarchingCubeIsoFunction::~ndMarchingCubeIsoFunction()
-{
-	ndAssert(0);
-}
-
-void ndMarchingCubeIsoFunction::GenerateMesh()
-{
-	ndAssert(0);
-}
-#endif
-
 ndMarchingCubes::ndMarchingCubes(ndFloat32 particleSize)
 	:ndClassAlloc()
 	,m_gridSize(particleSize)
@@ -3114,7 +3094,7 @@ void ndPaticlesMarchingCubes::RemoveDuplicates()
 	{
 		const ndVector r(m_pointParticles[groupId] - m_boxP0);
 		const ndVector p(r * m_invGridSize);
-		const ndMarchingCubes::ndGridHash hashKey(p);
+		const ndGridHash hashKey(p);
 		m_hashGridMapScratchBuffer[groupId] = hashKey;
 	});
 
@@ -3123,28 +3103,28 @@ void ndPaticlesMarchingCubes::RemoveDuplicates()
 	m_threadPool->ParallelExecute(CalculateHashes, count, jobStride);
 
 	m_volumeInGrids = (m_invGridSize * (m_boxP1 - m_boxP0 + m_gridSize * ndVector::m_two)).Ceiling().GetInt();
-	ndCountingSort<ndMarchingCubes::ndGridHash, ndMarchingCubes::ndKey_xlow, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+	ndCountingSort<ndGridHash, ndKey_xlow, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
 	if (m_volumeInGrids.m_ix >= 256)
 	{
-		ndCountingSort<ndMarchingCubes::ndGridHash, ndMarchingCubes::ndKey_xhigh, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+		ndCountingSort<ndGridHash, ndKey_xhigh, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
 	}
 
-	ndCountingSort<ndMarchingCubes::ndGridHash, ndMarchingCubes::ndKey_ylow, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+	ndCountingSort<ndGridHash, ndKey_ylow, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
 	if (m_volumeInGrids.m_iy >= 256)
 	{
-		ndCountingSort<ndMarchingCubes::ndGridHash, ndMarchingCubes::ndKey_yhigh, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+		ndCountingSort<ndGridHash, ndKey_yhigh, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
 	}
 
-	ndCountingSort<ndMarchingCubes::ndGridHash, ndMarchingCubes::ndKey_zlow, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+	ndCountingSort<ndGridHash, ndKey_zlow, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
 	if (m_volumeInGrids.m_iz >= 256)
 	{
-		ndCountingSort<ndMarchingCubes::ndGridHash, ndMarchingCubes::ndKey_zhigh, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+		ndCountingSort<ndGridHash, ndKey_zhigh, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
 	}
 
 	ndInt32 gridCount = 0;
 	for (ndInt32 i = 1; i < m_hashGridMapScratchBuffer.GetCount(); ++i)
 	{
-		const ndMarchingCubes::ndGridHash cell(m_hashGridMapScratchBuffer[i]);
+		const ndGridHash cell(m_hashGridMapScratchBuffer[i]);
 		ndAssert(cell.m_cellType == 0);
 		ndAssert(m_hashGridMapScratchBuffer[i - 1].m_cellType == 0);
 		const ndInt32 uniqueGrid = (cell.m_gridFullHash != m_hashGridMapScratchBuffer[i - 1].m_gridFullHash) ? 1 : 0;
@@ -3157,7 +3137,7 @@ void ndPaticlesMarchingCubes::RemoveDuplicates()
 
 void ndPaticlesMarchingCubes::GenerateGrids()
 {
-	const ndMarchingCubes::ndGridHashSteps steps;
+	const ndGridHashSteps steps;
 	m_hashGridMap.SetCount(m_hashGridMapScratchBuffer.GetCount() * 8);
 	auto GenerateGrids = ndMakeObject::ndFunction([this, &steps](ndInt32 groupId, ndInt32)
 	{
@@ -3185,7 +3165,7 @@ void ndPaticlesMarchingCubes::GenerateGrids()
 	//{
 	//	public:
 	//	ndParticleOwners(void* const) {}
-	//	ndInt32 GetKey(const ndMarchingCubes::ndGridHash& cell) const
+	//	ndInt32 GetKey(const ndGridHash& cell) const
 	//	{
 	//		// the last cell is the onw that own the particle
 	//		// that is cell type 3
@@ -3219,10 +3199,10 @@ void ndPaticlesMarchingCubes::GenerateGrids()
 	m_hashGridMap.PushBack(ndGridHash(0x7fff, 0x7fff, 0x7fff));
 	for (ndInt32 i = 0; i < ndInt32(m_hashGridMap.GetCount()) - 1; ++i)
 	{
-		const ndMarchingCubes::ndGridHash hash(m_hashGridMap[i], 0);
+		const ndGridHash hash(m_hashGridMap[i], 0);
 		for (ndInt32 j = i + 1; j < ndInt32(m_hashGridMap.GetCount()); ++j)
 		{
-			const ndMarchingCubes::ndGridHash hash1(m_hashGridMap[j], 0);
+			const ndGridHash hash1(m_hashGridMap[j], 0);
 			if (hash.m_gridFullHash != hash1.m_gridFullHash)
 			{
 				i = j;
@@ -3259,9 +3239,9 @@ void ndPaticlesMarchingCubes::GenerateTriangles()
 
 		if (cellCount < 8)
 		{
-			const ndMarchingCubes::ndGridHash startGrid(m_hashGridMap[cellStart], 0);
+			const ndGridHash startGrid(m_hashGridMap[cellStart], 0);
 
-			ndMarchingCubes::ndIsoCell cell;
+			ndIsoCell cell;
 			ndVector* const isoValue = &cell.m_isoValues[0];
 			ndVector origin(ndFloat32(startGrid.m_x + 1), ndFloat32(startGrid.m_y + 1), ndFloat32(startGrid.m_z + 1), ndFloat32(0.0f));
 			for (ndInt32 j = 0; j < 8; j++)
@@ -3315,9 +3295,9 @@ void ndPaticlesMarchingCubes::GenerateTriangles()
 			ndAssert(cellCount > 0);
 			ndAssert(cellCount < 8);
 
-			const ndMarchingCubes::ndGridHash startGrid(m_hashGridMap[cellStart], 0);
+			const ndGridHash startGrid(m_hashGridMap[cellStart], 0);
 
-			ndMarchingCubes::ndIsoCell cell;
+			ndIsoCell cell;
 			ndVector* const isoValue = &cell.m_isoValues[0];
 			ndVector origin(ndFloat32(startGrid.m_x + 1), ndFloat32(startGrid.m_y + 1), ndFloat32(startGrid.m_z + 1), ndFloat32(0.0f));
 			for (ndInt32 i = 0; i < 8; i++)
@@ -3343,7 +3323,7 @@ void ndPaticlesMarchingCubes::GenerateTriangles()
 			const ndInt32 edgeCount = m_edgeScan[tableIndex + 1] - edgeStart;
 			for (ndInt32 i = 0; i < edgeCount; ++i)
 			{
-				const ndMarchingCubes::ndEdge& edge = m_edges[edgeStart + i];
+				const ndEdge& edge = m_edges[edgeStart + i];
 				const ndInt32 midPoint = edge.m_midPoint;
 
 				const ndVector p0(cell.m_isoValues[edge.m_p0]);
@@ -3508,10 +3488,10 @@ void ndPaticlesMarchingCubes::GenerateIndexList()
 		m_meshIndices[index] = vertexCount;
 		m_meshPoints[vertexCount] = m_meshPoints[i] & ndVector::m_triplexMask;
 
-		const ndMarchingCubes::ndGridHash hash(m_meshPoints[i] * ndVector::m_two, 0);
+		const ndGridHash hash(m_meshPoints[i] * ndVector::m_two, 0);
 		for (i = i + 1; i < ndInt32(m_meshPoints.GetCount()); ++i)
 		{
-			const ndMarchingCubes::ndGridHash hash1(m_meshPoints[i] * ndVector::m_two, 0);
+			const ndGridHash hash1(m_meshPoints[i] * ndVector::m_two, 0);
 			if (hash.m_gridFullHash != hash1.m_gridFullHash)
 			{
 				break;
@@ -3527,33 +3507,33 @@ void ndPaticlesMarchingCubes::GenerateIndexList()
 
 	// transform to world space
 	auto ApplyScale = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
-		{
-			m_meshNormals[groupId] = ndVector::m_zero;
-			m_meshPoints[groupId] = m_meshPoints[groupId] * m_gridSize + m_boxP0;
-		});
+	{
+		m_meshNormals[groupId] = ndVector::m_zero;
+		m_meshPoints[groupId] = m_meshPoints[groupId] * m_gridSize + m_boxP0;
+	});
 
 	const ndInt32 jobStride = 256;
 	const ndInt32 count = ndInt32(m_meshPoints.GetCount());
 	m_threadPool->ParallelExecute(ApplyScale, count, jobStride);
 
 	auto CalculateVertexNormals = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
-		{
-			const ndInt32 index = groupId * 3;
-			const ndInt32 id0 = m_meshIndices[index + 0];
-			const ndInt32 id1 = m_meshIndices[index + 1];
-			const ndInt32 id2 = m_meshIndices[index + 2];
+	{
+		const ndInt32 index = groupId * 3;
+		const ndInt32 id0 = m_meshIndices[index + 0];
+		const ndInt32 id1 = m_meshIndices[index + 1];
+		const ndInt32 id2 = m_meshIndices[index + 2];
 
-			const ndVector p0(m_meshPoints[id0]);
-			const ndVector p1(m_meshPoints[id1]);
-			const ndVector p2(m_meshPoints[id2]);
+		const ndVector p0(m_meshPoints[id0]);
+		const ndVector p1(m_meshPoints[id1]);
+		const ndVector p2(m_meshPoints[id2]);
 
-			const ndVector e_10(p1 - p0);
-			const ndVector e_20(p2 - p0);
-			const ndVector normal(e_10.CrossProduct(e_20) & ndVector::m_triplexMask);
-			m_meshNormals[id0] += normal;
-			m_meshNormals[id1] += normal;
-			m_meshNormals[id2] += normal;
-		});
+		const ndVector e_10(p1 - p0);
+		const ndVector e_20(p2 - p0);
+		const ndVector normal(e_10.CrossProduct(e_20) & ndVector::m_triplexMask);
+		m_meshNormals[id0] += normal;
+		m_meshNormals[id1] += normal;
+		m_meshNormals[id2] += normal;
+	});
 
 	const ndInt32 triangleCount = ndInt32(m_meshIndices.GetCount()) / 3;
 	// need to build an edge list to parallelize this,
