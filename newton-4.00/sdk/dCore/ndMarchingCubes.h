@@ -48,17 +48,17 @@ class ndMarchingCubes : public ndClassAlloc
 		public:
 		ndGridHash();
 		ndGridHash(const ndVector& grid);
-		ndGridHash(const ndGridHash& src, ndUnsigned16 cellType);
+		ndGridHash(const ndGridHash& src, ndInt8 cellType);
 		ndGridHash(ndInt32 x, ndInt32 y, ndInt32 z);
 
 		union
 		{
 			struct
 			{
-				ndUnsigned16 m_x;
-				ndUnsigned16 m_y;
-				ndUnsigned16 m_z;
-				ndUnsigned16 m_cellType;
+				ndInt16 m_x;
+				ndInt16 m_y;
+				ndInt16 m_z;
+				ndInt16 m_cellType;
 			};
 			struct
 			{
@@ -73,90 +73,77 @@ class ndMarchingCubes : public ndClassAlloc
 		};
 	};
 
-	class ndCalculateIsoValue : public ndClassAlloc
-	{
-		public:
-		
-		D_CORE_API ndCalculateIsoValue(ndFloat32 gridSize, ndThreadPool* const threadPool);
-		D_CORE_API virtual ~ndCalculateIsoValue();
+	D_CORE_API ndMarchingCubes(ndFloat32 particleSize);
+	D_CORE_API virtual ~ndMarchingCubes();
 
-		D_CORE_API const ndArray<ndInt32>& GetTriangles() const;
-		D_CORE_API const ndArray<ndVector>& GetMeshVertex() const;
-		D_CORE_API const ndArray<ndVector>& GetMeshNormals() const;
+	D_CORE_API const ndArray<ndInt32>& GetTriangles() const;
+	D_CORE_API const ndArray<ndVector>& GetMeshVertex() const;
+	D_CORE_API const ndArray<ndVector>& GetMeshNormals() const;
 
-		virtual void GenerateMesh() = 0;
+	virtual void GenerateMesh() = 0;
 
-		protected:
-		void GenerateIndexList();
+	protected:
+	ndVector m_gridSize;
+	ndVector m_invGridSize;
 
-		ndVector m_boxP0;
-		ndVector m_boxP1;
-		ndVector m_gridSize;
-		ndVector m_invGridSize;
-		ndVector m_volumeInGrids;
-		ndArray<ndVector> m_meshPoints;
-		ndArray<ndVector> m_meshNormals;
-		ndArray<ndInt32> m_meshIndices;
+	ndArray<ndVector> m_meshPoints;
+	ndArray<ndVector> m_meshNormals;
+	ndArray<ndInt32> m_meshIndices;
 
-		ndArray<ndInt32> m_cellScans;
-		ndArray<ndInt32> m_cellTrianglesScans;
-		ndArray<ndGridHash> m_hashGridMap;
-		ndArray<ndGridHash> m_hashGridMapScratchBuffer;
-
-		ndFloat32 m_isoSufaceValue;
-		ndThreadPool* m_threadPool;
-
-		static ndEdge m_edges[];
-		static ndInt32 m_faces[][3];
-		static ndInt32 m_edgeScan[];
-		static ndInt32 m_facesScan[];
-		static ndVector m_gridCorners[];
-	};
-
-	D_CORE_API ndMarchingCubes();
-	D_CORE_API ~ndMarchingCubes();
-
-	D_CORE_API void GenerateMesh(ndCalculateIsoValue* const computeIsoValue);
+	static ndEdge m_edges[];
+	static ndInt32 m_faces[][3];
+	static ndInt32 m_edgeScan[];
+	static ndInt32 m_facesScan[];
+	static ndVector m_gridCorners[];
 };
 
-class ndMarchingCubeFromParticleArray: public ndMarchingCubes::ndCalculateIsoValue
+class ndPaticlesMarchingCubes : public ndMarchingCubes
 {
 	public:
-	D_CORE_API ndMarchingCubeFromParticleArray(ndThreadPool* const threadPool,ndFloat32 gridSize);
-	D_CORE_API virtual ~ndMarchingCubeFromParticleArray();
+	D_CORE_API ndPaticlesMarchingCubes(ndThreadPool* const threadPool, ndFloat32 particleSize);
 
 	D_CORE_API virtual void GenerateMesh() override;
 
 	protected:
-	void GenerateGrids();
 	void CalculateAABB();
+	void GenerateGrids();
 	void RemoveDuplicates();
 	void GenerateTriangles();
-	ndArray<ndVector> m_points;
+	void GenerateIndexList();
+
+	ndVector m_boxP0;
+	ndVector m_boxP1;
+	ndVector m_volumeInGrids;
+	ndArray<ndVector> m_pointParticles;
+	ndArray<ndGridHash> m_hashGridMap;
+	ndArray<ndGridHash> m_hashGridMapScratchBuffer;
+
+	ndArray<ndInt32> m_cellScans;
+	ndArray<ndInt32> m_cellTrianglesScans;
+
+	ndThreadPool* m_threadPool;
 };
+
+
+#if 0
 
 class ndMarchingCubeIsoFunction : public ndMarchingCubes::ndCalculateIsoValue
 {
-	public:
+public:
 	D_CORE_API ndMarchingCubeIsoFunction(ndThreadPool* const threadPool, ndFloat32 gridSize);
 	D_CORE_API virtual ~ndMarchingCubeIsoFunction();
 
 	D_CORE_API virtual void GenerateMesh() override;
 	D_CORE_API virtual ndReal GetIsoValue(ndInt32 x, ndInt32 y, ndInt32 z) const = 0;
 
-//protected:
-//	D_CORE_API virtual void GenerateGrids();
-//	D_CORE_API virtual void CalculateAABB();
-//	D_CORE_API virtual void RemoveDuplicates();
-//	D_CORE_API virtual void GenerateTriangles();
-//	D_CORE_API virtual void GenerateIndexList();
-//
-//	ndArray<ndVector> m_points;
-//	ndArray<ndVector> m_meshPoints;
-//	ndArray<ndVector> m_meshNormals;
-//	ndArray<ndInt32> m_meshIndices;
-//
+	//protected:
+	//	D_CORE_API virtual void GenerateGrids();
+	//	D_CORE_API virtual void CalculateAABB();
+	//	D_CORE_API virtual void RemoveDuplicates();
+	//	D_CORE_API virtual void GenerateTriangles();
+	//	D_CORE_API virtual void GenerateIndexList();
 
+	//	ndArray<ndVector> m_points;
 };
-
+#endif
 #endif
