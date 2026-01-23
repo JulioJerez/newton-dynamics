@@ -3041,7 +3041,7 @@ const ndArray<ndVector>& ndMarchingCubes::GetMeshNormals() const
 // ***********************************************************
 //
 // ***********************************************************
-ndPaticlesMarchingCubes::ndPaticlesMarchingCubes(ndThreadPool* const threadPool, ndFloat32 particleSize)
+ndMarchingCubesPaticles::ndMarchingCubesPaticles(ndThreadPool* const threadPool, ndFloat32 particleSize)
 	:ndMarchingCubes(particleSize)
 	,m_boxP0(ndVector::m_zero)
 	,m_boxP1(ndVector::m_zero)
@@ -3054,7 +3054,7 @@ ndPaticlesMarchingCubes::ndPaticlesMarchingCubes(ndThreadPool* const threadPool,
 {
 }
 
-void ndPaticlesMarchingCubes::CalculateAABB()
+void ndMarchingCubesPaticles::CalculateAABB()
 {
 	ndFixSizeArray<ndVector, D_MAX_THREADS_COUNT * 2> partialAABB(m_threadPool->GetThreadCount() * 2);
 	auto CalculateAABB = ndMakeObject::ndFunction([this, &partialAABB](ndInt32 groupId, ndInt32 threadIndex)
@@ -3087,7 +3087,7 @@ void ndPaticlesMarchingCubes::CalculateAABB()
 	m_boxP1 = m_gridSize * (boxP1 * m_invGridSize).Ceiling();
 }
 
-void ndPaticlesMarchingCubes::RemoveDuplicates()
+void ndMarchingCubesPaticles::RemoveDuplicates()
 {
 	m_hashGridMapScratchBuffer.SetCount(m_pointParticles.GetCount());
 	auto CalculateHashes = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
@@ -3135,7 +3135,7 @@ void ndPaticlesMarchingCubes::RemoveDuplicates()
 	m_hashGridMapScratchBuffer.SetCount(gridCount);
 }
 
-void ndPaticlesMarchingCubes::GenerateGrids()
+void ndMarchingCubesPaticles::GenerateGrids()
 {
 	const ndGridHashSteps steps;
 	m_hashGridMap.SetCount(m_hashGridMapScratchBuffer.GetCount() * 8);
@@ -3229,7 +3229,7 @@ void ndPaticlesMarchingCubes::GenerateGrids()
 	ndAssert(sum == (m_hashGridMap.GetCount() - 1));
 }
 
-void ndPaticlesMarchingCubes::GenerateTriangles()
+void ndMarchingCubesPaticles::GenerateTriangles()
 {
 	auto CountTriangles = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
 	{
@@ -3384,7 +3384,7 @@ void ndPaticlesMarchingCubes::GenerateTriangles()
 	m_threadPool->ParallelExecute(GenerateTriangles, count, jobStride);
 }
 
-void ndPaticlesMarchingCubes::GenerateIndexList()
+void ndMarchingCubesPaticles::GenerateIndexList()
 {
 	#define D_LOW_RES_BITS	   1
 	#define D_LOW_RES_FRACTION (1 << D_LOW_RES_BITS)
@@ -3551,7 +3551,7 @@ void ndPaticlesMarchingCubes::GenerateIndexList()
 	}
 }
 
-void ndPaticlesMarchingCubes::GenerateMesh()
+void ndMarchingCubesPaticles::GenerateMesh()
 {
 	CalculateAABB();
 	RemoveDuplicates();

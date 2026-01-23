@@ -486,18 +486,18 @@ namespace Original
 }
 
 
-ndMarchingCubeIsoSurface::ndMarchingCubeIsoSurface(ndFloat32 gridSize)
+ndMarchingCubeIsoSurface::ndMarchingCubeIsoSurface(const ndVector& boxP0, const ndVector& boxP1, ndFloat32 gridSize)
 	:ndMarchingCubes(gridSize)
+	,m_boxP0(m_gridSize * (boxP0 * m_invGridSize).Floor() & ndVector::m_triplexMask)
+	,m_boxP1(m_gridSize * (boxP1 * m_invGridSize).Ceiling() & ndVector::m_triplexMask)
 {
-	ndAssert(0);
 }
 
 ndMarchingCubeIsoSurface::~ndMarchingCubeIsoSurface()
 {
-	ndAssert(0);
 }
 
 void ndMarchingCubeIsoSurface::GenerateMesh()
 {
-	ndAssert(0);
+	//ndAssert(0);
 }

@@ -581,12 +581,12 @@ class ndHeightfieldMesh : public ndRenderSceneNode
 				triangle[0] = p0;
 				triangle[1] = p1;
 				triangle[2] = q0;
-				tileBuilder.AddFace(&triangle[0].m_x, sizeof(ndVector), 3, materialRow[x0 + x - 1]);
+				tileBuilder.AddFace(&triangle[0], 3, materialRow[x0 + x - 1]);
 				
 				triangle[0] = p1;
 				triangle[1] = q1;
 				triangle[2] = q0;
-				tileBuilder.AddFace(&triangle[0].m_x, sizeof(ndVector), 3, materialRow[x0 + x]);
+				tileBuilder.AddFace(&triangle[0], 3, materialRow[x0 + x]);
 
 				p0 = q0;
 				p1 = q1;

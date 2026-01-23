@@ -25,15 +25,17 @@
 #include "ndCoreStdafx.h"
 #include "ndMarchingCubes.h"
 
-
 class ndMarchingCubeIsoSurface : public ndMarchingCubes
 {
 	public:
-	D_CORE_API ndMarchingCubeIsoSurface(ndFloat32 gridSize);
+	D_CORE_API ndMarchingCubeIsoSurface(const ndVector& boxP0, const ndVector& boxP1, ndFloat32 gridSize);
 	D_CORE_API virtual ~ndMarchingCubeIsoSurface();
 
 	D_CORE_API virtual void GenerateMesh() override;
 	D_CORE_API virtual ndReal GetIsoValue(ndInt32 x, ndInt32 y, ndInt32 z) const = 0;
+
+	ndVector m_boxP0;
+	ndVector m_boxP1;
 };
 
 #endif

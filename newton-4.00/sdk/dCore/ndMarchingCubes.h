@@ -97,10 +97,10 @@ class ndMarchingCubes : public ndClassAlloc
 	static ndVector m_gridCorners[];
 };
 
-class ndPaticlesMarchingCubes : public ndMarchingCubes
+class ndMarchingCubesPaticles : public ndMarchingCubes
 {
 	public:
-	D_CORE_API ndPaticlesMarchingCubes(ndThreadPool* const threadPool, ndFloat32 particleSize);
+	D_CORE_API ndMarchingCubesPaticles(ndThreadPool* const threadPool, ndFloat32 particleSize);
 
 	D_CORE_API virtual void GenerateMesh() override;
 

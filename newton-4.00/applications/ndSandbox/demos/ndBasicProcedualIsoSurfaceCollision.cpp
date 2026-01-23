@@ -20,13 +20,13 @@
 class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 {
 	public:
-	class MarchingCubeParticle : public ndPaticlesMarchingCubes
+	class ParticlesVolume : public ndMarchingCubesPaticles
 	{
 		public:
 		//#define PARTICLE_SIZE ndFloat32 (1.0f / 50.0f)
 		#define PARTICLE_SIZE ndFloat32 (1.0f)
-		MarchingCubeParticle(ndDemoEntityManager* const scene)
-			:ndPaticlesMarchingCubes(scene->GetWorld()->GetScene(), PARTICLE_SIZE)
+		ParticlesVolume(ndDemoEntityManager* const scene)
+			:ndMarchingCubesPaticles(scene->GetWorld()->GetScene(), PARTICLE_SIZE)
 		{
 			ndMatrix matrix(ndGetIdentityMatrix());
 			matrix.m_posit.m_x = 0.25f;
@@ -36,40 +36,99 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 
 			//BuildBox(matrix, 32);
 			//BuildBox(matrix, 20);
-			BuildBox(matrix, 4);
+			//BuildBox(matrix, 4);
 		}
 
-		void BuildBox(const ndMatrix& matrix, ndInt32 size)
+		//void BuildBox(const ndMatrix& matrix, ndInt32 size)
+		//{
+		//	ndFloat32 spacing = m_gridSize.m_x;
+		//	ndFloat32 sigma = spacing * ndFloat32(0.001f);
+		//	//spacing *= ndFloat32(0.9f);
+		//
+		//	//for (ndInt32 z = 0; z < size; z++)
+		//	for (ndInt32 z = 0; z < 2; z++)
+		//	{
+		//		//for (ndInt32 y = 0; y < size; y++)
+		//		for (ndInt32 y = 0; y < 1; y++)
+		//		{
+		//			//for (ndInt32 x = 0; x < size; x++)
+		//			for (ndInt32 x = 0; x < 2; x++)
+		//			{
+		//				ndFloat32 xf = ndFloat32(x) * spacing;
+		//				ndFloat32 yf = ndFloat32(y) * spacing;
+		//				ndFloat32 zf = ndFloat32(z) * spacing;
+		//
+		//				ndVector p(matrix.TransformVector(ndVector(xf, yf, zf, ndFloat32(1.0f))));
+		//
+		//				//ndFloat32 noisex = ndGaussianRandom(ndFloat32(0.0f), sigma);
+		//				//ndFloat32 noisey = ndGaussianRandom(ndFloat32(0.0f), sigma);
+		//				//ndFloat32 noisez = ndGaussianRandom(ndFloat32(0.0f), sigma);
+		//				//p.m_x += noisex;
+		//				//p.m_y += noisey;
+		//				//p.m_z += noisez;
+		//				m_pointParticles.PushBack(p);
+		//			}
+		//		}
+		//	}
+		//}
+	};
+
+	class IsoSurfaceVolume : public ndMarchingCubeIsoSurface
+	{
+		public:
+		//#define PARTICLE_SIZE ndFloat32 (1.0f / 50.0f)
+		#define PARTICLE_SIZE ndFloat32 (1.0f)
+
+		IsoSurfaceVolume(ndDemoEntityManager* const scene)
+			:ndMarchingCubeIsoSurface(ndVector(ndFloat32 (-128.0f)), ndVector(ndFloat32(-128.0f)), PARTICLE_SIZE)
 		{
-			ndFloat32 spacing = m_gridSize.m_x;
-			ndFloat32 sigma = spacing * ndFloat32(0.001f);
-			//spacing *= ndFloat32(0.9f);
+			//ndMatrix matrix(ndGetIdentityMatrix());
+			//matrix.m_posit.m_x = 0.25f;
+			//matrix.m_posit.m_y = 0.5f;
+			//matrix.m_posit.m_z = 0.75f;
+			//matrix.m_posit.m_w = 1.0f;
+			//
+			////BuildBox(matrix, 32);
+			////BuildBox(matrix, 20);
+			//BuildBox(matrix, 4);
+		}
 
-			//for (ndInt32 z = 0; z < size; z++)
-			for (ndInt32 z = 0; z < 2; z++)
-			{
-				//for (ndInt32 y = 0; y < size; y++)
-				for (ndInt32 y = 0; y < 1; y++)
-				{
-					//for (ndInt32 x = 0; x < size; x++)
-					for (ndInt32 x = 0; x < 2; x++)
-					{
-						ndFloat32 xf = ndFloat32(x) * spacing;
-						ndFloat32 yf = ndFloat32(y) * spacing;
-						ndFloat32 zf = ndFloat32(z) * spacing;
+		//void BuildBox(const ndMatrix& matrix, ndInt32 size)
+		//{
+		//	ndFloat32 spacing = m_gridSize.m_x;
+		//	ndFloat32 sigma = spacing * ndFloat32(0.001f);
+		//	//spacing *= ndFloat32(0.9f);
+		//
+		//	//for (ndInt32 z = 0; z < size; z++)
+		//	for (ndInt32 z = 0; z < 2; z++)
+		//	{
+		//		//for (ndInt32 y = 0; y < size; y++)
+		//		for (ndInt32 y = 0; y < 1; y++)
+		//		{
+		//			//for (ndInt32 x = 0; x < size; x++)
+		//			for (ndInt32 x = 0; x < 2; x++)
+		//			{
+		//				ndFloat32 xf = ndFloat32(x) * spacing;
+		//				ndFloat32 yf = ndFloat32(y) * spacing;
+		//				ndFloat32 zf = ndFloat32(z) * spacing;
+		//
+		//				ndVector p(matrix.TransformVector(ndVector(xf, yf, zf, ndFloat32(1.0f))));
+		//
+		//				//ndFloat32 noisex = ndGaussianRandom(ndFloat32(0.0f), sigma);
+		//				//ndFloat32 noisey = ndGaussianRandom(ndFloat32(0.0f), sigma);
+		//				//ndFloat32 noisez = ndGaussianRandom(ndFloat32(0.0f), sigma);
+		//				//p.m_x += noisex;
+		//				//p.m_y += noisey;
+		//				//p.m_z += noisez;
+		//				m_pointParticles.PushBack(p);
+		//			}
+		//		}
+		//	}
+		//}
 
-						ndVector p(matrix.TransformVector(ndVector(xf, yf, zf, ndFloat32(1.0f))));
-
-						//ndFloat32 noisex = ndGaussianRandom(ndFloat32(0.0f), sigma);
-						//ndFloat32 noisey = ndGaussianRandom(ndFloat32(0.0f), sigma);
-						//ndFloat32 noisez = ndGaussianRandom(ndFloat32(0.0f), sigma);
-						//p.m_x += noisex;
-						//p.m_y += noisey;
-						//p.m_z += noisez;
-						m_pointParticles.PushBack(p);
-					}
-				}
-			}
+		ndReal GetIsoValue(ndInt32 x, ndInt32 y, ndInt32 z) const override
+		{
+			return 0.0f;
 		}
 	};
 
@@ -85,6 +144,11 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 	{
 		const ndArray<ndVector>& vertexArray = m_isoSurface.GetMeshVertex();
 		const ndArray<ndInt32>& indexList = m_isoSurface.GetTriangles();
+
+		if (!indexList.GetCount())
+		{
+			return;
+		}
 		
 		ndPolygonSoupBuilder meshBuilder;
 		meshBuilder.Begin();
@@ -124,11 +188,11 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 		//m_surface.GenerateMesh(&m_particleMesh);
 	}
 
-	MarchingCubeParticle m_isoSurface;
+	//ParticlesVolume m_isoSurface;
+	IsoSurfaceVolume m_isoSurface;
 };
 
-
-void ndBasicProcedualHeightfieldCollision(ndDemoEntityManager* const scene)
+void ndBasicProcedualIsoSurfaceCollision(ndDemoEntityManager* const scene)
 {
 	//ndSharedPtr<ndBody> mapBody(BuildProceduralTerrain(scene, "grass.png", ndGetIdentityMatrix()));
 	//ndSharedPtr<ndBody> mapBody(BuildFlatPlane(scene, ndGetIdentityMatrix(), "blueCheckerboard.png", true));
