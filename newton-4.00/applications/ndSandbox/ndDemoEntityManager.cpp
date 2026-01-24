@@ -537,8 +537,8 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_showContactPoints = true;
 	//m_showJointDebugInfo = true;
 	//m_showModelsDebugInfo = true;
-	//m_showCollisionMeshMode = 1;
-	m_showCollisionMeshMode = 2;
+	m_showCollisionMeshMode = 1;
+	//m_showCollisionMeshMode = 2;
 	//m_showCollisionMeshMode = 3;		// solid wire frame
 	m_synchronousPhysicsUpdate = true;
 	m_synchronousParticlesUpdate = true;

@@ -39,9 +39,16 @@ class ndMarchingCubes : public ndClassAlloc
 	class ndKey_zlow;
 	class ndKey_zhigh;
 
-	class ndEdge;
 	class ndIsoCell;
 	class ndGridHashSteps;
+
+	class ndEdge
+	{
+		public:
+		ndInt32 m_midPoint;
+		ndInt32 m_p0;
+		ndInt32 m_p1;
+	};
 
 	class ndGridHash
 	{

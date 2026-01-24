@@ -79,8 +79,9 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 		//#define PARTICLE_SIZE ndFloat32 (1.0f / 50.0f)
 		#define PARTICLE_SIZE ndFloat32 (1.0f)
 
-		IsoSurfaceVolume(ndDemoEntityManager* const scene)
-			:ndMarchingCubeIsoSurface(ndVector(ndFloat32 (-128.0f)), ndVector(ndFloat32(-128.0f)), PARTICLE_SIZE)
+		//IsoSurfaceVolume(ndDemoEntityManager* const scene)
+		IsoSurfaceVolume(ndDemoEntityManager* const)
+			:ndMarchingCubeIsoSurface(ndVector(ndFloat32 (-128.0f)), ndVector(ndFloat32(128.0f)), PARTICLE_SIZE)
 		{
 			//ndMatrix matrix(ndGetIdentityMatrix());
 			//matrix.m_posit.m_x = 0.25f;
@@ -93,42 +94,28 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 			//BuildBox(matrix, 4);
 		}
 
-		//void BuildBox(const ndMatrix& matrix, ndInt32 size)
-		//{
-		//	ndFloat32 spacing = m_gridSize.m_x;
-		//	ndFloat32 sigma = spacing * ndFloat32(0.001f);
-		//	//spacing *= ndFloat32(0.9f);
-		//
-		//	//for (ndInt32 z = 0; z < size; z++)
-		//	for (ndInt32 z = 0; z < 2; z++)
-		//	{
-		//		//for (ndInt32 y = 0; y < size; y++)
-		//		for (ndInt32 y = 0; y < 1; y++)
-		//		{
-		//			//for (ndInt32 x = 0; x < size; x++)
-		//			for (ndInt32 x = 0; x < 2; x++)
-		//			{
-		//				ndFloat32 xf = ndFloat32(x) * spacing;
-		//				ndFloat32 yf = ndFloat32(y) * spacing;
-		//				ndFloat32 zf = ndFloat32(z) * spacing;
-		//
-		//				ndVector p(matrix.TransformVector(ndVector(xf, yf, zf, ndFloat32(1.0f))));
-		//
-		//				//ndFloat32 noisex = ndGaussianRandom(ndFloat32(0.0f), sigma);
-		//				//ndFloat32 noisey = ndGaussianRandom(ndFloat32(0.0f), sigma);
-		//				//ndFloat32 noisez = ndGaussianRandom(ndFloat32(0.0f), sigma);
-		//				//p.m_x += noisex;
-		//				//p.m_y += noisey;
-		//				//p.m_z += noisez;
-		//				m_pointParticles.PushBack(p);
-		//			}
-		//		}
-		//	}
-		//}
-
-		ndReal GetIsoValue(ndInt32 x, ndInt32 y, ndInt32 z) const override
+		ndReal GetIsoValue(const ndVector& posit) const override
 		{
-			return 0.0f;
+			// draw a sphere
+			//ndFloat32 radius = 60.0f;
+			ndFloat32 radius = 10.0f;
+			//ndVector origin(ndVector::m_zero);
+			ndVector origin(0.1f);
+
+			ndVector step(posit - origin);
+			ndFloat32 dist = ndSqrt (step.DotProduct(step & ndVector::m_triplexMask).GetScalar()) - radius;
+			
+			if ((posit.m_y >= -0) && (posit.m_y <= 1))
+			{
+				if ((posit.m_z >= -0) && (posit.m_z <= 1))
+				{
+					if ((posit.m_x >= -0) && (posit.m_x <= 1))
+					{
+						dist *= 1;
+					}
+				}
+			}
+			return dist;
 		}
 	};
 
@@ -161,7 +148,7 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 		ndSharedPtr<ndShapeInstance> collision(new ndShapeInstance(new ndShapeStatic_bvh(meshBuilder)));
 		
 		ndMatrix location(ndGetIdentityMatrix());
-		location.m_posit.m_y = 1.0f;
+		location.m_posit.m_y = 10.0f;
 		location.m_posit.m_x = 1.0f;
 		
 		ndRenderPrimitive::ndDescriptor descriptor(*scene->GetRenderer());
@@ -230,8 +217,8 @@ void ndBasicProcedualIsoSurfaceCollision(ndDemoEntityManager* const scene)
 	scene->RegisterPostUpdate(marchingCubeMesh);
 	
 	// set the camera
-	originMatrix.m_posit.m_y += 2.0f;
-	//originMatrix.m_posit.m_x += 40.0f;
+	originMatrix.m_posit.m_y += 10.0f;
+	originMatrix.m_posit.m_x += 20.0f;
 	//originMatrix.m_posit.m_z -= 10.0f;
 	scene->SetCameraMatrix(rot, originMatrix.m_posit);
 }

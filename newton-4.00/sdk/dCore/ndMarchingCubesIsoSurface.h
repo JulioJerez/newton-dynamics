@@ -27,15 +27,21 @@
 
 class ndMarchingCubeIsoSurface : public ndMarchingCubes
 {
+	class ndIsoCell;
+
 	public:
 	D_CORE_API ndMarchingCubeIsoSurface(const ndVector& boxP0, const ndVector& boxP1, ndFloat32 gridSize);
 	D_CORE_API virtual ~ndMarchingCubeIsoSurface();
 
 	D_CORE_API virtual void GenerateMesh() override;
-	D_CORE_API virtual ndReal GetIsoValue(ndInt32 x, ndInt32 y, ndInt32 z) const = 0;
+	virtual ndReal GetIsoValue(const ndVector& posit) const = 0;
 
+	protected:
+	void GenerateIndexList();
 	ndVector m_boxP0;
 	ndVector m_boxP1;
+	ndArray<ndReal> m_densityWindow0;
+	ndArray<ndReal> m_densityWindow1;
 };
 
 #endif

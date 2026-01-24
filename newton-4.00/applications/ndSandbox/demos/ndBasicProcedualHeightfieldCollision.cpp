@@ -32,8 +32,8 @@ void ndBasicProcedualHeightfieldCollision(ndDemoEntityManager* const scene)
 	ndMatrix originMatrix(ndCalculateMatrix(rot, floor));
 
 	// add single box for testing
-	//ndSharedPtr<ndBody> testBody(AddSphere(scene, originMatrix, 1.0f, 0.25f, "wood_0.png"));
-	ndSharedPtr<ndBody> testBody(AddCapsule(scene, originMatrix, 1.0f, 0.5f, 0.5f, 1.0f, "wood_0.png"));
+	ndSharedPtr<ndBody> testBody(AddSphere(scene, originMatrix, 1.0f, 0.25f, "wood_0.png"));
+	//ndSharedPtr<ndBody> testBody(AddCapsule(scene, originMatrix, 1.0f, 0.5f, 0.5f, 1.0f, "wood_0.png"));
 	//ndSharedPtr<ndBody> testBody(AddBox(scene, originMatrix, 1.0f, 1.0f, 1.0f, 1.0f, "wood_0.png"));
 	//ndSharedPtr<ndBody> testBody(AddCylinder(scene, originMatrix, 1.0f, 0.5f, 0.5f, 1.0f, "wood_0.png"));
 	//ndSharedPtr<ndBody> testBody(AddConvexHull(scene, originMatrix, 40.0f, 0.7f, 1.0f, 10, "wood_0.png"));
@@ -54,7 +54,7 @@ void ndBasicProcedualHeightfieldCollision(ndDemoEntityManager* const scene)
 	
 	// set the camera
 	originMatrix.m_posit.m_y += 2.0f;
-	originMatrix.m_posit.m_x += 40.0f;
-	originMatrix.m_posit.m_z -= 10.0f;
+	//originMatrix.m_posit.m_x += 40.0f;
+	//originMatrix.m_posit.m_z -= 10.0f;
 	scene->SetCameraMatrix(rot, originMatrix.m_posit);
 }
