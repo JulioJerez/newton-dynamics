@@ -36,41 +36,38 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 
 			//BuildBox(matrix, 32);
 			//BuildBox(matrix, 20);
-			//BuildBox(matrix, 4);
+			BuildBox(matrix, 4);
 		}
 
-		//void BuildBox(const ndMatrix& matrix, ndInt32 size)
-		//{
-		//	ndFloat32 spacing = m_gridSize.m_x;
-		//	ndFloat32 sigma = spacing * ndFloat32(0.001f);
-		//	//spacing *= ndFloat32(0.9f);
-		//
-		//	//for (ndInt32 z = 0; z < size; z++)
-		//	for (ndInt32 z = 0; z < 2; z++)
-		//	{
-		//		//for (ndInt32 y = 0; y < size; y++)
-		//		for (ndInt32 y = 0; y < 1; y++)
-		//		{
-		//			//for (ndInt32 x = 0; x < size; x++)
-		//			for (ndInt32 x = 0; x < 2; x++)
-		//			{
-		//				ndFloat32 xf = ndFloat32(x) * spacing;
-		//				ndFloat32 yf = ndFloat32(y) * spacing;
-		//				ndFloat32 zf = ndFloat32(z) * spacing;
-		//
-		//				ndVector p(matrix.TransformVector(ndVector(xf, yf, zf, ndFloat32(1.0f))));
-		//
-		//				//ndFloat32 noisex = ndGaussianRandom(ndFloat32(0.0f), sigma);
-		//				//ndFloat32 noisey = ndGaussianRandom(ndFloat32(0.0f), sigma);
-		//				//ndFloat32 noisez = ndGaussianRandom(ndFloat32(0.0f), sigma);
-		//				//p.m_x += noisex;
-		//				//p.m_y += noisey;
-		//				//p.m_z += noisez;
-		//				m_pointParticles.PushBack(p);
-		//			}
-		//		}
-		//	}
-		//}
+		void BuildBox(const ndMatrix& matrix, ndInt32 size)
+		{
+			ndFloat32 spacing = m_gridSize.m_x;
+			//ndFloat32 sigma = spacing * ndFloat32(0.001f);
+			//spacing *= ndFloat32(0.9f);
+		
+			for (ndInt32 z = 0; z < size; z++)
+			{
+				for (ndInt32 y = 0; y < size; y++)
+				{
+					for (ndInt32 x = 0; x < size; x++)
+					{
+						ndFloat32 xf = ndFloat32(x) * spacing;
+						ndFloat32 yf = ndFloat32(y) * spacing;
+						ndFloat32 zf = ndFloat32(z) * spacing;
+		
+						ndVector p(matrix.TransformVector(ndVector(xf, yf, zf, ndFloat32(1.0f))));
+		
+						//ndFloat32 noisex = ndGaussianRandom(ndFloat32(0.0f), sigma);
+						//ndFloat32 noisey = ndGaussianRandom(ndFloat32(0.0f), sigma);
+						//ndFloat32 noisez = ndGaussianRandom(ndFloat32(0.0f), sigma);
+						//p.m_x += noisex;
+						//p.m_y += noisey;
+						//p.m_z += noisez;
+						m_pointParticles.PushBack(p);
+					}
+				}
+			}
+		}
 	};
 
 	class IsoSurfaceVolume : public ndMarchingCubeIsoSurface
@@ -98,9 +95,9 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 		{
 			// draw a sphere
 			//ndFloat32 radius = 60.0f;
-			ndFloat32 radius = 10.0f;
+			ndFloat32 radius = 10.5f;
 			//ndVector origin(ndVector::m_zero);
-			ndVector origin(0.1f);
+			ndVector origin(0.01f);
 
 			ndVector step(posit - origin);
 			ndFloat32 dist = ndSqrt (step.DotProduct(step & ndVector::m_triplexMask).GetScalar()) - radius;
@@ -148,8 +145,8 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 		ndSharedPtr<ndShapeInstance> collision(new ndShapeInstance(new ndShapeStatic_bvh(meshBuilder)));
 		
 		ndMatrix location(ndGetIdentityMatrix());
-		location.m_posit.m_y = 10.0f;
-		location.m_posit.m_x = 1.0f;
+		location.m_posit.m_y = 6.0f;
+		location.m_posit.m_x = 0.0f;
 		
 		ndRenderPrimitive::ndDescriptor descriptor(*scene->GetRenderer());
 		descriptor.m_collision = collision;
@@ -186,7 +183,7 @@ void ndBasicProcedualIsoSurfaceCollision(ndDemoEntityManager* const scene)
 	ndSharedPtr<ndBody> mapBody(BuildFlatPlane(scene, ndGetIdentityMatrix(), "marblecheckboard.png", true));
 
 	// build a placement matrix
-	ndQuaternion rot(ndYawMatrix(180.0f * ndDegreeToRad));
+	ndQuaternion rot(ndYawMatrix(0.0f * ndDegreeToRad));
 	ndVector origin(10.5f, 0.5f, 0.0f, 1.0f);
 	ndVector floor(FindFloor(*scene->GetWorld(), origin, 200.0f));
 
@@ -217,8 +214,8 @@ void ndBasicProcedualIsoSurfaceCollision(ndDemoEntityManager* const scene)
 	scene->RegisterPostUpdate(marchingCubeMesh);
 	
 	// set the camera
-	originMatrix.m_posit.m_y += 10.0f;
-	originMatrix.m_posit.m_x += 20.0f;
+	originMatrix.m_posit.m_y = 8.0f;
+	originMatrix.m_posit.m_x = -23.0f;
 	//originMatrix.m_posit.m_z -= 10.0f;
 	scene->SetCameraMatrix(rot, originMatrix.m_posit);
 }
