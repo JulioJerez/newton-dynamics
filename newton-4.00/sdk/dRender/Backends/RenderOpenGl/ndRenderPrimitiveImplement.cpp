@@ -696,8 +696,10 @@ void ndRenderPrimitiveImplement::BuildDebugFlatShadedMesh(const ndRenderPrimitiv
 			const ndVector p0(faceVertex[0]);
 			const ndVector p1(faceVertex[1]);
 			const ndVector p2(faceVertex[2]);
+			const ndVector p10(p1 - p0);
+			const ndVector p20(p2 - p0);
+			ndVector normal(p10.CrossProduct(p20));
 
-			ndVector normal((p1 - p0).CrossProduct(p2 - p0));
 			ndAssert(normal.m_w == ndFloat32 (0.0f));
 			ndAssert (ndCheckVector(normal));
 			normal = normal.Normalize();
@@ -875,7 +877,7 @@ void ndRenderPrimitiveImplement::BuildWireframeDebugMesh(const ndRenderPrimitive
 	descriptor.m_collision->DebugShape(ndGetIdentityMatrix(), drawShapes);
 	if (drawShapes.m_lines.GetCount())
 	{
-		ndArray<ndInt32> m_lines(drawShapes.m_lines.GetCount());
+		ndArray<ndInt32> m_lines;
 		m_lines.SetCount(drawShapes.m_lines.GetCount());
 
 		m_indexCount = ndInt32(m_lines.GetCount());

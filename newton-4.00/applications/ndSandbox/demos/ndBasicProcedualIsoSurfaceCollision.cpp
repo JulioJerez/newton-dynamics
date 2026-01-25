@@ -97,7 +97,7 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 			//ndFloat32 radius = 60.0f;
 			ndFloat32 radius = 10.5f;
 			//ndVector origin(ndVector::m_zero);
-			ndVector origin(0.01f);
+			ndVector origin(0.0f);
 
 			ndVector step(posit - origin);
 			ndFloat32 dist = ndSqrt (step.DotProduct(step & ndVector::m_triplexMask).GetScalar()) - radius;
@@ -126,8 +126,8 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 
 	void AddTestMesh(ndDemoEntityManager* const scene)
 	{
-		const ndArray<ndVector>& vertexArray = m_isoSurface.GetMeshVertex();
 		const ndArray<ndInt32>& indexList = m_isoSurface.GetTriangles();
+		const ndArray<ndVector>& vertexArray = m_isoSurface.GetMeshVertex();
 
 		if (!indexList.GetCount())
 		{
@@ -178,9 +178,9 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 
 void ndBasicProcedualIsoSurfaceCollision(ndDemoEntityManager* const scene)
 {
-	//ndSharedPtr<ndBody> mapBody(BuildProceduralTerrain(scene, "grass.png", ndGetIdentityMatrix()));
-	//ndSharedPtr<ndBody> mapBody(BuildFlatPlane(scene, ndGetIdentityMatrix(), "blueCheckerboard.png", true));
-	ndSharedPtr<ndBody> mapBody(BuildFlatPlane(scene, ndGetIdentityMatrix(), "marblecheckboard.png", true));
+	//ndSharedPtr<ndBody> mapBody(BuildFlatPlane(scene, ndGetIdentityMatrix(), "marblecheckboard.png", true));
+	//ndSharedPtr<ndBody> mapBody(BuildProceduralTerrain2d(scene, "grass.png", ndGetIdentityMatrix()));
+	ndSharedPtr<ndBody> mapBody(BuildProceduralTerrain3d(scene, "grass.png", ndGetIdentityMatrix()));
 
 	// build a placement matrix
 	ndQuaternion rot(ndYawMatrix(0.0f * ndDegreeToRad));
@@ -210,8 +210,8 @@ void ndBasicProcedualIsoSurfaceCollision(ndDemoEntityManager* const scene)
 	////originMatrix.m_posit -= originMatrix.m_front.Scale (ndFloat32 (30.0f));
 	//AddCapsuleStacks(scene, originMatrix, 10.0f, 0.5f, 0.5f, 1.0f, 10, 10, 7);
 
-	ndSharedPtr<ndDemoEntityManager::OnPostUpdate>marchingCubeMesh(new MarchingCubeTest(scene));
-	scene->RegisterPostUpdate(marchingCubeMesh);
+	//ndSharedPtr<ndDemoEntityManager::OnPostUpdate>marchingCubeMesh(new MarchingCubeTest(scene));
+	//scene->RegisterPostUpdate(marchingCubeMesh);
 	
 	// set the camera
 	originMatrix.m_posit.m_y = 8.0f;

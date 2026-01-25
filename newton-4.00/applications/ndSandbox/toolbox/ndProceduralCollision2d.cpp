@@ -31,12 +31,12 @@
 #define D_TERRAIN_TILE_SIZE			128
 #define D_TERRAIN_ELEVATION_SCALE	32.0f
 
-class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
+class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 {
 	public:
-	D_CLASS_REFLECTION(ndProceduralTerrainShape, ndShapeStaticProceduralMesh)
+	D_CLASS_REFLECTION(ndProcedural2dTerrainShape, ndShapeStaticProceduralMesh)
 
-	ndProceduralTerrainShape()
+	ndProcedural2dTerrainShape()
 		:ndShapeStaticProceduralMesh()
 		,m_padding(ndVector::m_triplexMask & ndVector(0.1f))
 		,m_gridSize(ndVector::m_triplexMask & ndVector (D_TERRAIN_GRID_SIZE))
@@ -512,10 +512,10 @@ class ndProceduralTerrainShape : public ndShapeStaticProceduralMesh
 	ndArray<ndReal> m_heightfield;
 };
 
-class ndHeightfieldMesh : public ndRenderSceneNode
+class ndHeightfieldMesh2d : public ndRenderSceneNode
 {
 	public:
-	ndHeightfieldMesh(ndRender* const render, const ndProceduralTerrainShape* const shape, const ndSharedPtr<ndRenderTexture>& texture, const ndMatrix& location)
+	ndHeightfieldMesh2d(ndRender* const render, const ndProcedural2dTerrainShape* const shape, const ndSharedPtr<ndRenderTexture>& texture, const ndMatrix& location)
 		:ndRenderSceneNode(location)
 	{
 		ndMatrix uvMapping(ndGetIdentityMatrix());
@@ -554,7 +554,7 @@ class ndHeightfieldMesh : public ndRenderSceneNode
 		ndRenderSceneNode::Render(owner, parentMatrix, renderMode);
 	}
 
-	ndSharedPtr<ndShapeInstance> BuildTile(const ndProceduralTerrainShape* const shape, ndInt32 x0, ndInt32 z0)
+	ndSharedPtr<ndShapeInstance> BuildTile(const ndProcedural2dTerrainShape* const shape, ndInt32 x0, ndInt32 z0)
 	{
 		const ndInt32 xMax = ((x0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN_WIDTH) ? D_TERRAIN_TILE_SIZE - 1: D_TERRAIN_TILE_SIZE + 1;
 		const ndInt32 zMax = ((z0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN_HEIGHT) ? D_TERRAIN_TILE_SIZE - 1: D_TERRAIN_TILE_SIZE + 1;
@@ -581,12 +581,12 @@ class ndHeightfieldMesh : public ndRenderSceneNode
 				triangle[0] = p0;
 				triangle[1] = p1;
 				triangle[2] = q0;
-				tileBuilder.AddFace(&triangle[0].m_x, sizeof(ndVector), 3, materialRow[x0 + x - 1]);
+				tileBuilder.AddFace(triangle, 3, materialRow[x0 + x - 1]);
 				
 				triangle[0] = p1;
 				triangle[1] = q1;
 				triangle[2] = q0;
-				tileBuilder.AddFace(&triangle[0].m_x, sizeof(ndVector), 3, materialRow[x0 + x]);
+				tileBuilder.AddFace(triangle, 3, materialRow[x0 + x]);
 
 				p0 = q0;
 				p1 = q1;
@@ -598,21 +598,21 @@ class ndHeightfieldMesh : public ndRenderSceneNode
 	}
 };
 
-ndSharedPtr<ndBody> BuildProceduralTerrain(ndDemoEntityManager* const scene, const char* const textureName, const ndMatrix& location)
+ndSharedPtr<ndBody> BuildProceduralTerrain2d(ndDemoEntityManager* const scene, const char* const textureName, const ndMatrix& location)
 {
-	ndShapeInstance proceduralInstance(new ndProceduralTerrainShape());
+	ndShapeInstance proceduralInstance(new ndProcedural2dTerrainShape());
 
-	ndProceduralTerrainShape* const heighfield = (ndProceduralTerrainShape*)proceduralInstance.GetShape()->GetAsShapeStaticProceduralMesh();
+	ndProcedural2dTerrainShape* const heighfield = (ndProcedural2dTerrainShape*)proceduralInstance.GetShape()->GetAsShapeStaticProceduralMesh();
 	
 	ndMatrix heighfieldLocation(location);
 	const ndVector origin (heighfield->GetObbOrigin());
 	heighfieldLocation.m_posit.m_x -= origin.m_x;
 	heighfieldLocation.m_posit.m_z -= origin.m_z;
 	
-	// add tile base sence node
+	// add tile base scence node
 	ndRender* const render = *scene->GetRenderer();
 	ndSharedPtr<ndRenderTexture> texture(render->GetTextureCache()->GetTexture(ndGetWorkingFileName(textureName)));
-	ndSharedPtr<ndRenderSceneNode> entity(new ndHeightfieldMesh(render, heighfield, texture, heighfieldLocation));
+	ndSharedPtr<ndRenderSceneNode> entity(new ndHeightfieldMesh2d(render, heighfield, texture, heighfieldLocation));
 	
 	// generate a rigibody and added to the scene and world
 	ndPhysicsWorld* const world = scene->GetWorld();

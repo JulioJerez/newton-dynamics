@@ -35,6 +35,7 @@ class ndMarchingCubeIsoSurface : public ndMarchingCubes
 
 	D_CORE_API virtual void GenerateMesh() override;
 	virtual ndReal GetIsoValue(const ndVector& posit) const = 0;
+	D_CORE_API ndVector PositionToGrid(const ndVector& posit) const;
 
 	protected:
 	void GenerateIndexList();
