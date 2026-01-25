@@ -509,134 +509,148 @@ ndMarchingCubeIsoSurface::~ndMarchingCubeIsoSurface()
 
 void ndMarchingCubeIsoSurface::GenerateIndexList()
 {
-	//#define D_LOW_RES_BITS	   1
-	//#define D_LOW_RES_FRACTION (1 << D_LOW_RES_BITS)
-
-	//class ndKey_lowX
-	//{
-	//	public:
-	//	ndKey_lowX(void* const) {}
-	//	ndInt32 GetKey(const ndVector& point) const
-	//	{
-	//		ndFloat32 val = (point.m_x * D_LOW_RES_FRACTION);
-	//		ndInt32 key = ndInt32(val);
-	//		return key & 0xff;
-	//	}
-	//};
-	//
-	//class ndKey_highX
-	//{
-	//public:
-	//	ndKey_highX(void* const) {}
-	//	ndInt32 GetKey(const ndVector& point) const
-	//	{
-	//		ndFloat32 val = point.m_x * ndFloat32(D_LOW_RES_FRACTION);
-	//		ndInt32 key = ndInt32(val) >> 8;
-	//		return key & 0xff;
-	//	}
-	//};
-	//
-	//class ndKey_lowY
-	//{
-	//public:
-	//	ndKey_lowY(void* const) {}
-	//	ndInt32 GetKey(const ndVector& point) const
-	//	{
-	//		ndFloat32 val = (point.m_y * D_LOW_RES_FRACTION);
-	//		ndInt32 key = ndInt32(val);
-	//		return key & 0xff;
-	//	}
-	//};
-	//
-	//class ndKey_highY
-	//{
-	//public:
-	//	ndKey_highY(void* const) {}
-	//	ndInt32 GetKey(const ndVector& point) const
-	//	{
-	//		ndFloat32 val = point.m_y * ndFloat32(D_LOW_RES_FRACTION);
-	//		ndInt32 key = ndInt32(val) >> 8;
-	//		return key & 0xff;
-	//	}
-	//};
-	//
-	//class ndKey_lowZ
-	//{
-	//public:
-	//	ndKey_lowZ(void* const) {}
-	//	ndInt32 GetKey(const ndVector& point) const
-	//	{
-	//		ndFloat32 val = (point.m_z * D_LOW_RES_FRACTION);
-	//		ndInt32 key = ndInt32(val);
-	//		return key & 0xff;
-	//	}
-	//};
-	//
-	//class ndKey_highZ
-	//{
-	//public:
-	//	ndKey_highZ(void* const) {}
-	//	ndInt32 GetKey(const ndVector& point) const
-	//	{
-	//		ndFloat32 val = point.m_z * ndFloat32(D_LOW_RES_FRACTION);
-	//		ndInt32 key = ndInt32(val) >> 8;
-	//		return key & 0xff;
-	//	}
-	//};
-	//
-	//ndCountingSort<ndVector, ndKey_lowX, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
-	//if (D_LOW_RES_FRACTION * m_volumeInGrids.m_ix >= 256)
-	//{
-	//	ndCountingSort<ndVector, ndKey_highX, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
-	//}
-	//
-	//ndCountingSort<ndVector, ndKey_lowY, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
-	//if (D_LOW_RES_FRACTION * m_volumeInGrids.m_iy >= 256)
-	//{
-	//	ndCountingSort<ndVector, ndKey_highY, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
-	//}
-	//
-	//ndCountingSort<ndVector, ndKey_lowZ, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
-	//if (D_LOW_RES_FRACTION * m_volumeInGrids.m_iz >= 256)
-	//{
-	//	ndCountingSort<ndVector, ndKey_highZ, 8>(*m_threadPool, m_meshPoints, m_meshNormals, nullptr, nullptr);
-	//}
-	//m_meshIndices.SetCount(m_meshPoints.GetCount());
-
-	//ndInt32 vertexCount = 0;
-	//m_meshPoints.PushBack(m_boxP1);
-	//for (ndInt32 i = 0; i < ndInt32(m_meshPoints.GetCount()) - 1; ++i)
-	//{
-	//	const ndInt32 index = ndInt32(m_meshPoints[i].m_w);
-	//	m_meshIndices[index] = vertexCount;
-	//	m_meshPoints[vertexCount] = m_meshPoints[i] & ndVector::m_triplexMask;
-	//
-	//	const ndGridHash hash(m_meshPoints[i] * ndVector::m_two, 0);
-	//	for (i = i + 1; i < ndInt32(m_meshPoints.GetCount()); ++i)
-	//	{
-	//		const ndGridHash hash1(m_meshPoints[i] * ndVector::m_two, 0);
-	//		if (hash.m_gridFullHash != hash1.m_gridFullHash)
-	//		{
-	//			break;
-	//		}
-	//		const ndInt32 duplicateIndex = ndInt32(m_meshPoints[i].m_w);
-	//		m_meshIndices[duplicateIndex] = vertexCount;
-	//	}
-	//	--i;
-	//	vertexCount++;
-	//}
-	//m_meshPoints.SetCount(vertexCount);
-	//m_meshNormals.SetCount(vertexCount);
+	class ndKey_lowX
+	{
+		public:
+		ndKey_lowX(void* const) {}
+		ndInt32 GetKey(const ndVector& point) const
+		{
+			const ndFloat32 intBase = ndFloor(point.m_x);
+			const ndInt32 frac = ((point.m_x - intBase) > ndFloat32(0.0f)) ? 1 : 0;
+			const ndInt32 key = 2 * ndInt32(intBase) + frac;
+			return key & 0xff;
+		}
+	};
+	
+	class ndKey_highX
+	{
+		public:
+		ndKey_highX(void* const) {}
+		ndInt32 GetKey(const ndVector& point) const
+		{
+			const ndFloat32 intBase = ndFloor(point.m_x);
+			const ndInt32 frac = ((point.m_x - intBase) > ndFloat32(0.0f)) ? 1 : 0;
+			const ndInt32 key = (2 * ndInt32(intBase) + frac) >> 8;
+			return key & 0xff;
+		}
+	};
+	
+	class ndKey_lowY
+	{
+		public:
+		ndKey_lowY(void* const) {}
+		ndInt32 GetKey(const ndVector& point) const
+		{
+			const ndFloat32 intBase = ndFloor(point.m_y);
+			const ndInt32 frac = ((point.m_y - intBase) > ndFloat32(0.0f)) ? 1 : 0;
+			const ndInt32 key = 2 * ndInt32(intBase) + frac;
+			return key & 0xff;
+		}
+	};
+	
+	class ndKey_highY
+	{
+		public:
+		ndKey_highY(void* const) {}
+		ndInt32 GetKey(const ndVector& point) const
+		{
+			const ndFloat32 intBase = ndFloor(point.m_y);
+			const ndInt32 frac = ((point.m_y - intBase) > ndFloat32(0.0f)) ? 1 : 0;
+			const ndInt32 key = (2 * ndInt32(intBase) + frac) >> 8;
+			return key & 0xff;
+		}
+	};
+	
+	class ndKey_lowZ
+	{
+		public:
+		ndKey_lowZ(void* const) {}
+		ndInt32 GetKey(const ndVector& point) const
+		{
+			const ndFloat32 intBase = ndFloor(point.m_z);
+			const ndInt32 frac = ((point.m_z - intBase) > ndFloat32(0.0f)) ? 1 : 0;
+			const ndInt32 key = 2 * ndInt32(intBase) + frac;
+			return key & 0xff;
+		}
+	};
+	
+	class ndKey_highZ
+	{
+		public:
+		ndKey_highZ(void* const) {}
+		ndInt32 GetKey(const ndVector& point) const
+		{
+			const ndFloat32 intBase = ndFloor(point.m_z);
+			const ndInt32 frac = ((point.m_z - intBase) > ndFloat32(0.0f)) ? 1 : 0;
+			const ndInt32 key = (2 * ndInt32(intBase) + frac) >> 8;
+			return key & 0xff;
+		}
+	};
+	
+	for (ndInt32 i = 0; i < ndInt32 (m_meshPoints.GetCount()); ++i)
+	{
+		m_meshPoints[i].m_w = ndFloat32(i);
+	}
 
 	m_meshNormals.SetCount(m_meshPoints.GetCount());
+	ndCountingSort<ndVector, ndKey_lowX, 8>(m_meshPoints, m_meshNormals, nullptr, nullptr);
+	ndCountingSort<ndVector, ndKey_highX, 8>(m_meshPoints, m_meshNormals, nullptr, nullptr);
+	ndCountingSort<ndVector, ndKey_lowY, 8>(m_meshPoints, m_meshNormals, nullptr, nullptr);
+	ndCountingSort<ndVector, ndKey_highY, 8>(m_meshPoints, m_meshNormals, nullptr, nullptr);
+	ndCountingSort<ndVector, ndKey_lowZ, 8>(m_meshPoints, m_meshNormals, nullptr, nullptr);
+	ndCountingSort<ndVector, ndKey_highZ, 8>(m_meshPoints, m_meshNormals, nullptr, nullptr);
+
+
+	class ndHash : public ndGridHash
+	{
+		public:
+		ndHash(const ndVector& p)
+			:ndGridHash()
+		{
+			auto GetHash = [this](ndFloat32 x)
+			{
+				const ndFloat32 intBase = ndFloor(x);
+				const ndInt32 frac = ((x - intBase) > ndFloat32(0.0f)) ? 1 : 0;
+				const ndInt32 hash = 2 * ndInt32(intBase) + frac;
+				return ndInt16(hash);
+			};
+			m_x = GetHash(p.m_x);
+			m_y = GetHash(p.m_y);
+			m_z = GetHash(p.m_z);
+			m_cellType = 0;
+		}
+	};
+
+	ndInt32 vertexCount = 0;
 	m_meshIndices.SetCount(m_meshPoints.GetCount());
-	// transform to world space
-	//auto ApplyScale = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	m_meshPoints.PushBack(ndVector (ndFloat32 (128 * 256)));
+	for (ndInt32 i = 0; i < ndInt32(m_meshPoints.GetCount()) - 1; ++i)
+	{
+		const ndInt32 index = ndInt32(m_meshPoints[i].m_w);
+		m_meshIndices[index] = vertexCount;
+		m_meshPoints[vertexCount] = m_meshPoints[i] & ndVector::m_triplexMask;
+	
+		const ndHash hash0(m_meshPoints[i]);
+		for (i = i + 1; i < ndInt32(m_meshPoints.GetCount()); ++i)
+		{
+			const ndHash hash1(m_meshPoints[i]);
+			if (hash0.m_gridFullHash != hash1.m_gridFullHash)
+			{
+				break;
+			}
+			const ndInt32 duplicateIndex = ndInt32(m_meshPoints[i].m_w);
+			m_meshIndices[duplicateIndex] = vertexCount;
+		}
+		--i;
+		vertexCount++;
+	}
+	m_meshPoints.SetCount(vertexCount);
+	m_meshNormals.SetCount(vertexCount);
+	
 	auto ApplyScale = [this](ndInt32 groupId)
 	{
 		m_meshNormals[groupId] = ndVector::m_zero;
 		m_meshPoints[groupId] = m_meshPoints[groupId] * m_gridSize + m_boxP0;
-		m_meshIndices[groupId] = groupId;
 	};
 	for (ndInt32 i = 0; i < ndInt32(m_meshPoints.GetCount()); ++i)
 	{
