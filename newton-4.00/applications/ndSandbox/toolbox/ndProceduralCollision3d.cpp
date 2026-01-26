@@ -88,18 +88,16 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 			}
 		}
 
-		virtual ndReal SampleSphere(const ndVector& posit) const
+		virtual ndReal SampleTorus(const ndVector& posit, ndMatrix& matrix) const
 		{
-			// draw a sphere
-			//ndFloat32 radius = 60.0f;
-			ndFloat32 radius = 5.5f;
-			//ndVector origin(ndVector::m_zero);
-			ndVector origin(0.0f);
+			// draw a torud
+			ndFloat32 bigRadius = 40.0f;
+			ndFloat32 smallRadius = 5.5f;
 
-			ndVector step(posit - origin);
-			ndFloat32 dist = ndSqrt(step.DotProduct(step & ndVector::m_triplexMask).GetScalar()) - radius;
-
-			return dist;
+			const ndVector step(matrix.UntransformVector(posit));
+			ndFloat32 y = ndSqrt(step.m_y * step.m_y + step.m_z * step.m_z) - bigRadius;
+			ndFloat32 isoValue = ndSqrt(y * y + step.m_x * step.m_x) - smallRadius;
+			return isoValue;
 		}
 
 		// make a rolling terrain from a 2d noise function
@@ -113,10 +111,14 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 
 			ndInt32 address = ndInt32(gridSpace.m_z * D_TERRAIN_WIDTH + gridSpace.m_x);
 			ndReal heightField = posit.m_y - m_heightfield[address];
-			ndReal sphereValue = SampleSphere(posit);
 
-			//ndReal isoValue = ndMin(heightField, sphereValue);
-			ndReal isoValue = ndMax(heightField, -sphereValue);
+			static ndMatrix tunnelMatrix(ndCalculateMatrix(ndYawMatrix(90.0f * ndDegreeToRad), ndVector(20.0f, 0.0f, 0.0f, 1.0f)));
+			ndReal tunnelValue = SampleTorus(posit, tunnelMatrix);
+			ndReal isoValue = ndMax(heightField, -tunnelValue);
+
+			static ndMatrix bridgeMatrix(ndCalculateMatrix(ndYawMatrix(0.0f * ndDegreeToRad), ndVector(00.0f, 0.0f, 40.0f, 1.0f)));
+			ndReal bridgeValue = SampleTorus(posit, bridgeMatrix);
+			isoValue = ndMin(isoValue, bridgeValue);
 
 			return isoValue;
 		}
