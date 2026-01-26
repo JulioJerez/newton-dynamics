@@ -35,7 +35,7 @@ class ndRenderSceneCamera : public ndRenderSceneNode
 	ndMatrix m_invViewMatrix;
 	ndMatrix m_projectionMatrix;
 	ndMatrix m_invProjectionMatrix;
-	ndMatrix m_invViewRrojectionMatrix;
+	ndMatrix m_invViewProjectionMatrix;
 	ndVector m_frustum[8];
 
 	ndFloat32 m_fov;

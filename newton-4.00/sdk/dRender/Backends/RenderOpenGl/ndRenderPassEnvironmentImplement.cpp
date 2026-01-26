@@ -24,10 +24,10 @@ ndRenderPassEnvironmentImplement::ndRenderPassEnvironmentImplement(ndRenderConte
 {
 	GLfloat vertices[] =
 	{
-	  -1.0f, -1.0f, 0.999f,
-	   1.0f, -1.0f, 0.999f,
-	   1.0f,  1.0f, 0.999f,
-	  -1.0f,  1.0f, 0.999f
+	  -1.0f, -1.0f, 0.99999f,
+	   1.0f, -1.0f, 0.99999f,
+	   1.0f,  1.0f, 0.99999f,
+	  -1.0f,  1.0f, 0.99999f
 	};
 
 	ndInt32 indices[] =

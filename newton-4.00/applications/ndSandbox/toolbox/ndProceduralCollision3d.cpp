@@ -15,12 +15,12 @@
 #include "ndDemoEntityManager.h"
 #include "ndHeightFieldPrimitive.h"
 
-//#define D_TERRAIN_WIDTH			1024
-//#define D_TERRAIN_HEIGHT			1024
-//#define D_TERRAIN_WIDTH			512
-//#define D_TERRAIN_HEIGHT			512
-#define D_TERRAIN_WIDTH				256
-#define D_TERRAIN_HEIGHT			256
+//#define D_TERRAIN_WIDTH		1024
+//#define D_TERRAIN_HEIGHT		1024
+//#define D_TERRAIN_WIDTH		512
+//#define D_TERRAIN_HEIGHT		512
+#define D_TERRAIN_WIDTH			256
+#define D_TERRAIN_HEIGHT		256
 
 #define D_TERRAIN_NOISE_OCTAVES		8
 #define D_TERRAIN_NOISE_PERSISTANCE	0.5f
@@ -589,11 +589,11 @@ class ndHeightfieldMesh3d : public ndRenderSceneNode
 		ndPolygonSoupBuilder tileBuilder;
 		tileBuilder.Begin();
 
-		ndFloat32 fx1 = ndFloat32(x0);
-		ndFloat32 fx0 = ndFloat32(x0 - D_TERRAIN_TILE_SIZE);
+		ndFloat32 fx0 = ndFloat32(x0 - D_TERRAIN_WIDTH / 2);
+		ndFloat32 fx1 = fx0 + D_TERRAIN_TILE_SIZE;
 
-		ndFloat32 fz1 = ndFloat32(z0);
-		ndFloat32 fz0 = ndFloat32(z0 - D_TERRAIN_TILE_SIZE);
+		ndFloat32 fz0 = ndFloat32(z0 - D_TERRAIN_HEIGHT / 2);
+		ndFloat32 fz1 = fz0 + D_TERRAIN_TILE_SIZE;
 
 		ndVector triangle[3];
 		for (ndInt32 faceIndex = 0; faceIndex < ndInt32(indexList.GetCount()); faceIndex += 3)
