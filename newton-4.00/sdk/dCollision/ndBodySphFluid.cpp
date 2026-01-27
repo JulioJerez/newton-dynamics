@@ -36,6 +36,7 @@
 #define D_GRID_SIZE_SCALER			(1.0f)
 
 #if 0
+#if 0
 
 class ndBodySphFluid::ndGridHash
 {
@@ -2384,4 +2385,5 @@ void ndBodySphFluid::Execute(ndThreadPool* const threadPool)
 
 #endif
 
+#endif
 #endif

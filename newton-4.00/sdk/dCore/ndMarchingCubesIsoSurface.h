@@ -27,7 +27,19 @@
 
 class ndMarchingCubeIsoSurface : public ndMarchingCubes
 {
-	class ndIsoCell;
+	class ndTriangle
+	{
+		public:
+		ndVector m_p0;
+		ndVector m_p1;
+		ndVector m_p2;
+	};
+
+	class ndIsoCell
+	{
+		public:
+		ndVector m_isoValues[8];
+	};
 
 	public:
 	D_CORE_API ndMarchingCubeIsoSurface(ndThreadPool* const threadPool, const ndVector& boxP0, const ndVector& boxP1, ndFloat32 gridSize);
@@ -41,11 +53,27 @@ class ndMarchingCubeIsoSurface : public ndMarchingCubes
 	D_CORE_API ndVector PositionToGrid(const ndVector& posit) const;
 
 	protected:
+	class ndGridInfo
+	{
+		public:
+		ndGridInfo(ndInt32 faceVount = 0)
+			:m_triangleCount(faceVount)
+		{
+		}
+		ndInt32 m_triangleCount;
+		ndInt32 m_x;
+		ndInt32 m_z;
+		ndInt32 m_tableIndex;
+	};
+
 	void GenerateIndexList();
 	ndVector m_boxP0;
 	ndVector m_boxP1;
+	ndArray<ndGridInfo> m_gridScansLayer;
+	ndArray<ndGridInfo> m_gridScansLayerTemp;
 	ndArray<ndReal> m_densityWindow0;
 	ndArray<ndReal> m_densityWindow1;
+	bool m_generateNormals;
 };
 
 #endif

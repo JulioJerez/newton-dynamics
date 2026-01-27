@@ -111,7 +111,6 @@ class ndWorld: public ndClassAlloc
 	D_NEWTON_API void SetContactNotify(ndContactNotify* const notify);
 
 	D_NEWTON_API void DebugScene(ndSceneTreeNotiFy* const notify);
-	D_NEWTON_API void SendBackgroundTask(ndBackgroundTask* const job);
 
 	D_NEWTON_API void ClearCache();
 	D_NEWTON_API void BodiesInAabb(ndBodiesInAabbNotify& callback, const ndVector& minBox, const ndVector& maxBox) const;

@@ -70,13 +70,13 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 		}
 	};
 
-	class IsoSurfaceVolume : public ndMarchingCubeIsoSurface
+	class ndBasicProcedua2disoSurface : public ndMarchingCubeIsoSurface
 	{
 		public:
 		//#define PARTICLE_SIZE ndFloat32 (1.0f / 50.0f)
 		#define PARTICLE_SIZE ndFloat32 (1.0f)
 
-		IsoSurfaceVolume(ndDemoEntityManager* const scene)
+		ndBasicProcedua2disoSurface(ndDemoEntityManager* const scene)
 			:ndMarchingCubeIsoSurface(scene->GetWorld()->GetScene(), ndVector(ndFloat32 (-128.0f)), ndVector(ndFloat32(128.0f)), PARTICLE_SIZE)
 		{
 			//ndMatrix matrix(ndGetIdentityMatrix());
@@ -93,10 +93,8 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 		ndReal GetIsoValue(const ndVector& posit) const override
 		{
 			// draw a sphere
-			//ndFloat32 radius = 60.0f;
 			ndFloat32 radius = 10.5f;
-			//ndVector origin(ndVector::m_zero);
-			ndVector origin(0.0f);
+			const ndVector origin(0.0f, 0.0f, 20.0f, 0.0f);
 
 			ndVector step(posit - origin);
 			ndFloat32 dist = ndSqrt (step.DotProduct(step & ndVector::m_triplexMask).GetScalar()) - radius;
@@ -161,17 +159,12 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 	}
 
 	//ParticlesVolume m_isoSurface;
-	IsoSurfaceVolume m_isoSurface;
+	ndBasicProcedua2disoSurface m_isoSurface;
 };
 
-void ndBasicProcedualIsoSurfaceCollision(ndDemoEntityManager* const scene)
+void ndBasicProcedual3dIsoSurfaceCollision(ndDemoEntityManager* const scene)
 {
-	ndRenderMeshLoader loader(*scene->GetRenderer());
-	loader.LoadMesh(ndGetWorkingFileName("testcube.nd"));
-
-
 	//ndSharedPtr<ndBody> mapBody(BuildFlatPlane(scene, ndGetIdentityMatrix(), "marblecheckboard.png", true));
-	//ndSharedPtr<ndBody> mapBody(BuildProceduralTerrain2d(scene, "grass.png", ndGetIdentityMatrix()));
 	ndSharedPtr<ndBody> mapBody(BuildProceduralTerrain3d(scene, "grass.png", ndGetIdentityMatrix()));
 
 	// build a placement matrix
@@ -205,12 +198,8 @@ void ndBasicProcedualIsoSurfaceCollision(ndDemoEntityManager* const scene)
 	////originMatrix.m_posit -= originMatrix.m_front.Scale (ndFloat32 (30.0f));
 	//AddCapsuleStacks(scene, originMatrix, 10.0f, 0.5f, 0.5f, 1.0f, 10, 10, 7);
 
-	//ndSharedPtr<ndDemoEntityManager::OnPostUpdate>marchingCubeMesh(new MarchingCubeTest(scene));
-	//scene->RegisterPostUpdate(marchingCubeMesh);
-	
 	// set the camera
-	originMatrix.m_posit.m_y = 8.0f;
-	originMatrix.m_posit.m_x = -23.0f;
-	//originMatrix.m_posit.m_z -= 10.0f;
+	originMatrix.m_posit.m_y = 20.0f;
+	originMatrix.m_posit.m_x = -60.0f;
 	scene->SetCameraMatrix(rot, originMatrix.m_posit);
 }

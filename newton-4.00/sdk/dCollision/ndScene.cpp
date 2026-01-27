@@ -64,7 +64,6 @@ ndScene::ndScene()
 	,m_rootNode(nullptr)
 	,m_sentinelBody(nullptr)
 	,m_contactNotifyCallback(new ndContactNotify(nullptr))
-	,m_backgroundThread(nullptr)
 	,m_timestep(ndFloat32 (0.0f))
 	,m_lru(D_CONTACT_DELAY_FRAMES)
 	,m_frameNumber(0)
@@ -96,7 +95,6 @@ ndScene::ndScene(const ndScene& src)
 	,m_rootNode(nullptr)
 	,m_sentinelBody(nullptr)
 	,m_contactNotifyCallback(nullptr)
-	,m_backgroundThread(nullptr)
 	,m_timestep(ndFloat32(0.0f))
 	,m_lru(src.m_lru)
 	,m_frameNumber(src.m_frameNumber)
@@ -106,7 +104,6 @@ ndScene::ndScene(const ndScene& src)
 	ndScene* const stealData = (ndScene*)&src;
 
 	SetThreadCount(src.GetThreadCount());
-	//m_backgroundThread.SetThreadCount(m_backgroundThread.GetThreadCount());
 
 	m_scratchBuffer.Swap(stealData->m_scratchBuffer);
 	m_sceneBodyArray.Swap(stealData->m_sceneBodyArray);
@@ -125,14 +122,14 @@ ndScene::ndScene(const ndScene& src)
 		m_specialUpdateList.Append(node);
 	}
 
-	ndBodyList::ndNode* nextParticleNode;
-	for (ndBodyList::ndNode* node = stealData->m_particleSetList.GetFirst(); node; node = nextParticleNode)
-	{
-		nextParticleNode = node->GetNext();
-		stealData->m_particleSetList.Unlink(node);
-		ndBodyParticleSet* const particle = (*node->GetInfo())->GetAsBodyParticleSet();
-		particle->m_listNode = m_particleSetList.Append(node);
-	}
+	//ndBodyList::ndNode* nextParticleNode;
+	//for (ndBodyList::ndNode* node = stealData->m_particleSetList.GetFirst(); node; node = nextParticleNode)
+	//{
+	//	nextParticleNode = node->GetNext();
+	//	stealData->m_particleSetList.Unlink(node);
+	//	ndBodyParticleSet* const particle = (*node->GetInfo())->GetAsBodyParticleSet();
+	//	particle->m_listNode = m_particleSetList.Append(node);
+	//}
 
 	for (ndBodyListView::ndNode* node = m_bodyList.GetFirst(); node; node = node->GetNext())
 	{
@@ -262,20 +259,24 @@ void ndScene::End()
 	m_frameNumber++;
 }
 
-bool ndScene::AddParticle(const ndSharedPtr<ndBody>& particle)
+//bool ndScene::AddParticle(const ndSharedPtr<ndBody>& particle)
+bool ndScene::AddParticle(const ndSharedPtr<ndBody>&)
 {
-	ndBodyParticleSet* const particleSet = particle->GetAsBodyParticleSet();
-	ndAssert(particleSet->m_listNode == nullptr);
-	ndBodyList::ndNode* const node = m_particleSetList.Append(particle);
-	particleSet->m_listNode = node;
+	ndAssert(0);
+	//ndBodyParticleSet* const particleSet = particle->GetAsBodyParticleSet();
+	//ndAssert(particleSet->m_listNode == nullptr);
+	//ndBodyList::ndNode* const node = m_particleSetList.Append(particle);
+	//particleSet->m_listNode = node;
 	return true;
 }
 
-bool ndScene::RemoveParticle(const ndSharedPtr<ndBody>& particle)
+//bool ndScene::RemoveParticle(const ndSharedPtr<ndBody>& particle)
+bool ndScene::RemoveParticle(const ndSharedPtr<ndBody>&)
 {
-	ndBodyParticleSet* const particleSet = particle->GetAsBodyParticleSet();
-	ndAssert(particleSet->m_listNode);
-	m_particleSetList.Remove(particleSet->m_listNode);
+	ndAssert(0);
+	//ndBodyParticleSet* const particleSet = particle->GetAsBodyParticleSet();
+	//ndAssert(particleSet->m_listNode);
+	//m_particleSetList.Remove(particleSet->m_listNode);
 	return true;
 }
 
@@ -865,16 +866,17 @@ void ndScene::FindCollidingPairsBackward(ndBodyKinematic* const body, ndInt32 th
 void ndScene::UpdateTransform()
 {
 	D_TRACKTIME();
-	for (ndBodyList::ndNode* node = m_particleSetList.GetFirst(); node; node = node->GetNext())
-	{
-		ndBodyParticleSet* const particleSet = node->GetInfo()->GetAsBodyParticleSet();
-		ndAssert(particleSet);
-		ndBodyNotify* const notify = *particleSet->GetNotifyCallback();
-		if (notify)
-		{
-			notify->OnTransform(0, particleSet->GetMatrix());
-		}
-	}
+
+	//for (ndBodyList::ndNode* node = m_particleSetList.GetFirst(); node; node = node->GetNext())
+	//{
+	//	ndBodyParticleSet* const particleSet = node->GetInfo()->GetAsBodyParticleSet();
+	//	ndAssert(particleSet);
+	//	ndBodyNotify* const notify = *particleSet->GetNotifyCallback();
+	//	if (notify)
+	//	{
+	//		notify->OnTransform(0, particleSet->GetMatrix());
+	//	}
+	//}
 
 	ndFloat32 timestep = GetTimestep();
 	auto TransformUpdate = ndMakeObject::ndFunction([this, timestep](ndInt32 groupId, ndInt32)
@@ -1263,10 +1265,6 @@ void ndScene::BodiesInAabb(ndBodiesInAabbNotify& callback, const ndVector& minBo
 void ndScene::Cleanup()
 {
 	Sync();
-	if (m_backgroundThread)
-	{
-		m_backgroundThread->Terminate();
-	}
 	PrepareCleanup();
 	
 	m_frameNumber = 0;
@@ -1341,19 +1339,6 @@ bool ndScene::ConvexCast(ndConvexCastNotify& callback, const ndShapeInstance& co
 		state = ConvexCast(callback, stackPool, distance, ray, convexShape, globalOrigin, globalDest);
 	}
 	return state;
-}
-
-void ndScene::SendBackgroundTask(ndBackgroundTask* const job)
-{
-	if (m_backgroundThread)
-	{
-		m_backgroundThread->SendTask(job);
-	}
-	else
-	{
-		ndAssert(0);
-		delete job;
-	}
 }
 
 void ndScene::AddPair(ndBodyKinematic* const body0, ndBodyKinematic* const body1, ndInt32 threadId)
@@ -1731,14 +1716,16 @@ void ndScene::DeleteDeadContacts()
 	}
 }
 
-void ndScene::ParticleUpdate(ndFloat32 timestep)
+//void ndScene::ParticleUpdate(ndFloat32 timestep)
+void ndScene::ParticleUpdate(ndFloat32)
 {
 	D_TRACKTIME();
-	for (ndBodyList::ndNode* node = m_particleSetList.GetFirst(); node; node = node->GetNext())
-	{
-		ndBodyParticleSet* const body = node->GetInfo()->GetAsBodyParticleSet();
-		body->Update(this, timestep);
-	}
+	//ndAssert(0);
+	//for (ndBodyList::ndNode* node = m_particleSetList.GetFirst(); node; node = node->GetNext())
+	//{
+	//	ndBodyParticleSet* const body = node->GetInfo()->GetAsBodyParticleSet();
+	//	body->Update(this, timestep);
+	//}
 }
 
 bool ndScene::ValidateScene()

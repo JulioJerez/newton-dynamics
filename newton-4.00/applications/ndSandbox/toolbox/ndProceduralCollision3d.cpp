@@ -553,24 +553,17 @@ class ndHeightfieldMesh3d : public ndRenderSceneNode
 	ndHeightfieldMesh3d(ndRender* const render, const ndProceduralTerrainShape3d* const shape, const ndSharedPtr<ndRenderTexture>& texture, const ndMatrix& location)
 		:ndRenderSceneNode(location)
 	{
-		ndMatrix uvMapping(ndGetIdentityMatrix());
-		uvMapping[0][0] = 1.0f / 20.0f;
-		uvMapping[1][1] = 1.0f / 20.0f;
-		uvMapping[2][2] = 1.0f / 20.0f;
-		
 		for (ndInt32 z = 0; z < D_TERRAIN_HEIGHT - 1; z += D_TERRAIN_TILE_SIZE)
 		{
 			for (ndInt32 x = 0; x < D_TERRAIN_WIDTH - 1; x += D_TERRAIN_TILE_SIZE)
 			{
-				ndSharedPtr<ndShapeInstance> tileShape(BuildTile(shape, x, z));
+				ndSharedPtr<ndMeshEffect> tileMesh(BuildTileMesh(shape, x, z));
+
 				ndSharedPtr<ndRenderSceneNode> tileNode(new ndRenderSceneNode(ndGetIdentityMatrix()));
 				AddChild(tileNode);
 				
 				ndRenderPrimitive::ndDescriptor descriptor(render);
-				descriptor.m_collision = tileShape;
-				descriptor.m_stretchMaping = false;
-				descriptor.m_uvMatrix = uvMapping;
-				descriptor.m_mapping = ndRenderPrimitive::m_box;
+				descriptor.m_meshNode = tileMesh;
 				ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(texture);
 				material.m_castShadows = false;
 				
@@ -589,26 +582,22 @@ class ndHeightfieldMesh3d : public ndRenderSceneNode
 		ndRenderSceneNode::Render(owner, parentMatrix, renderMode);
 	}
 
-	ndSharedPtr<ndShapeInstance> BuildTile(const ndProceduralTerrainShape3d* const shape, ndInt32 x0, ndInt32 z0)
+	ndSharedPtr<ndMeshEffect> BuildTileMesh(const ndProceduralTerrainShape3d* const shape, ndInt32 x0, ndInt32 z0)
 	{
-		//// build a collision sub tile
-		// const ndArray<ndInt8>& materialMap = shape->m_material;
-		//const ndArray<ndReal>& heightMap = shape->m_heightfield;
-
-		// using a naive brute force scan		
 		const ndArray<ndInt32>& indexList = shape->m_terrain->GetTriangles();
 		const ndArray<ndVector>& vertexArray = shape->m_terrain->GetMeshVertex();
-
-		ndPolygonSoupBuilder tileBuilder;
-		tileBuilder.Begin();
-
+		const ndArray<ndVector>& normalArray = shape->m_terrain->GetMeshNormals();
+		
 		ndFloat32 fx0 = ndFloat32(x0 - D_TERRAIN_WIDTH / 2);
 		ndFloat32 fx1 = fx0 + D_TERRAIN_TILE_SIZE;
-
+		
 		ndFloat32 fz0 = ndFloat32(z0 - D_TERRAIN_HEIGHT / 2);
 		ndFloat32 fz1 = fz0 + D_TERRAIN_TILE_SIZE;
-
+		
 		ndVector triangle[3];
+		ndArray<ndInt32> vertexIndexArray;
+		ndArray<ndInt32> faceMaterialArray;
+		ndArray<ndInt32> faceIndexCountArray;
 		for (ndInt32 faceIndex = 0; faceIndex < ndInt32(indexList.GetCount()); faceIndex += 3)
 		{
 			const ndInt32 i0 = indexList[faceIndex + 0];
@@ -617,7 +606,7 @@ class ndHeightfieldMesh3d : public ndRenderSceneNode
 			triangle[0] = vertexArray[i0];
 			triangle[1] = vertexArray[i1];
 			triangle[2] = vertexArray[i2];
-
+		
 			bool pass = true;
 			pass = pass && (triangle[0].m_x >= fx0);
 			pass = pass && (triangle[0].m_x <= fx1);
@@ -625,24 +614,62 @@ class ndHeightfieldMesh3d : public ndRenderSceneNode
 			pass = pass && (triangle[1].m_x <= fx1);
 			pass = pass && (triangle[2].m_x >= fx0);
 			pass = pass && (triangle[2].m_x <= fx1);
-
+		
 			pass = pass && (triangle[0].m_z >= fz0);
 			pass = pass && (triangle[0].m_z <= fz1);
 			pass = pass && (triangle[1].m_z >= fz0);
 			pass = pass && (triangle[1].m_z <= fz1);
 			pass = pass && (triangle[2].m_z >= fz0);
 			pass = pass && (triangle[2].m_z <= fz1);
-
+		
 			if (pass)
 			{
-				//tileBuilder.AddFace(triangle, 3, materialRow[x0 + x - 1]);
-				tileBuilder.AddFace(triangle, 3, 0);
+				faceMaterialArray.PushBack(0);
+				faceIndexCountArray.PushBack(3);
+				vertexIndexArray.PushBack(i0);
+				vertexIndexArray.PushBack(i1);
+				vertexIndexArray.PushBack(i2);
 			}
 		}
 
-		tileBuilder.End(false);
-		ndSharedPtr<ndShapeInstance> tileInstance(new ndShapeInstance(new ndShapeStatic_bvh(tileBuilder))); 
-		return tileInstance;
+		ndArray<ndBigVector> meshVertexArray;
+		ndArray<ndTriplexReal> meshNormalArray;
+		meshNormalArray.SetCount(vertexArray.GetCount());
+		meshVertexArray.SetCount(vertexArray.GetCount());
+		ndAssert(meshNormalArray.GetCount() == meshVertexArray.GetCount());
+		for (ndInt32 i = 0; i < vertexArray.GetCount(); ++i)
+		{
+			meshVertexArray[i] = vertexArray[i];
+			meshNormalArray[i].m_x = ndReal(normalArray[i].m_x);
+			meshNormalArray[i].m_y = ndReal(normalArray[i].m_y);
+			meshNormalArray[i].m_z = ndReal(normalArray[i].m_z);
+		}
+
+		
+		ndMeshEffect::ndMeshVertexFormat format;
+		
+		format.m_faceCount = ndInt32(faceMaterialArray.GetCount());
+		format.m_faceMaterial = &faceMaterialArray[0];
+		format.m_faceIndexCount = &faceIndexCountArray[0];
+		
+		format.m_vertex.m_data = &meshVertexArray[0].m_x;
+		format.m_vertex.m_indexList = &vertexIndexArray[0];
+		format.m_vertex.m_strideInBytes = sizeof(ndBigVector);
+
+		format.m_normal.m_data = &meshNormalArray[0].m_x;
+		format.m_normal.m_indexList = &vertexIndexArray[0];
+		format.m_normal.m_strideInBytes = 3 * sizeof(ndReal);
+
+		ndSharedPtr<ndMeshEffect> mesh(new ndMeshEffect());
+		mesh->BuildFromIndexList(&format);
+
+		ndMatrix uvMapping(ndGetIdentityMatrix());
+		uvMapping[0][0] = 1.0f / 20.0f;
+		uvMapping[1][1] = 1.0f / 20.0f;
+		uvMapping[2][2] = 1.0f / 20.0f;
+
+		mesh->UniformBoxMapping(0, uvMapping);
+		return mesh;
 	}
 };
 

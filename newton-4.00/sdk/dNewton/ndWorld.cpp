@@ -102,7 +102,6 @@ ndWorld::~ndWorld()
 void ndWorld::CleanUp()
 {
 	Sync();
-	//m_scene->m_backgroundThread.Terminate();
 	m_scene->PrepareCleanup();
 
 	m_activeSkeletons.Resize(256);
@@ -167,12 +166,6 @@ ndInt32 ndWorld::GetThreadCount() const
 void ndWorld::SetThreadCount(ndInt32 count)
 {
 	m_scene->SetThreadCount(count);
-
-	if (m_scene->m_backgroundThread)
-	{
-		m_scene->m_backgroundThread->Terminate();
-		m_scene->m_backgroundThread->SetThreadCount(count);
-	}
 }
 
 ndInt32 ndWorld::GetSubSteps() const
@@ -278,11 +271,6 @@ ndWorld::ndSolverModes ndWorld::GetSelectedSolver() const
 ndInt32 ndWorld::GetEngineVersion() const
 {
 	return D_NEWTON_ENGINE_MAJOR_VERSION * 100 + D_NEWTON_ENGINE_MINOR_VERSION;
-}
-
-void ndWorld::SendBackgroundTask(ndBackgroundTask* const job)
-{
-	m_scene->SendBackgroundTask(job);
 }
 
 void ndWorld::UpdateTransforms()
