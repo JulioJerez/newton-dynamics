@@ -107,12 +107,15 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 			const ndVector step(matrix.UntransformVector(posit));
 			ndFloat32 y = ndSqrt(step.m_y * step.m_y + step.m_z * step.m_z) - bigRadius;
 			ndFloat32 isoValue = ndSqrt(y * y + step.m_x * step.m_x) - smallRadius;
-			return isoValue;
+			return ndReal(isoValue);
 		}
 
 		// make a rolling terrain from a 2d noise function
 		virtual ndReal GetIsoValue(const ndVector& posit) const override
 		{
+			//float xxxx = ndSqrt(posit.DotProduct(posit).GetScalar()) - 5.0f;
+			//return xxxx;
+
 			const ndVector gridSpace(PositionToGrid(posit));
 			ndAssert(gridSpace.m_x >= 0);
 			ndAssert(gridSpace.m_z >= 0);
@@ -120,7 +123,7 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 			ndAssert(gridSpace.m_z < D_TERRAIN_WIDTH);
 
 			ndInt32 address = ndInt32(gridSpace.m_z * D_TERRAIN_WIDTH + gridSpace.m_x);
-			ndReal heightField = posit.m_y - m_heightfield[address];
+			ndReal heightField = ndReal(posit.m_y - m_heightfield[address]);
 
 			static ndMatrix tunnelMatrix(ndCalculateMatrix(ndYawMatrix(90.0f * ndDegreeToRad), ndVector(20.0f, 0.0f, 0.0f, 1.0f)));
 			ndReal tunnelValue = SampleTorus(posit, tunnelMatrix);

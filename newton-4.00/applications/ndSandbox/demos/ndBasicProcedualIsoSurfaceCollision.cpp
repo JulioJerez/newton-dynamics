@@ -100,18 +100,7 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 
 			ndVector step(posit - origin);
 			ndFloat32 dist = ndSqrt (step.DotProduct(step & ndVector::m_triplexMask).GetScalar()) - radius;
-			
-			if ((posit.m_y >= -0) && (posit.m_y <= 1))
-			{
-				if ((posit.m_z >= -0) && (posit.m_z <= 1))
-				{
-					if ((posit.m_x >= -0) && (posit.m_x <= 1))
-					{
-						dist *= 1;
-					}
-				}
-			}
-			return dist;
+			return ndReal(dist);
 		}
 	};
 
@@ -177,6 +166,10 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 
 void ndBasicProcedualIsoSurfaceCollision(ndDemoEntityManager* const scene)
 {
+	ndRenderMeshLoader loader(*scene->GetRenderer());
+	loader.LoadMesh(ndGetWorkingFileName("testcube.nd"));
+
+
 	//ndSharedPtr<ndBody> mapBody(BuildFlatPlane(scene, ndGetIdentityMatrix(), "marblecheckboard.png", true));
 	//ndSharedPtr<ndBody> mapBody(BuildProceduralTerrain2d(scene, "grass.png", ndGetIdentityMatrix()));
 	ndSharedPtr<ndBody> mapBody(BuildProceduralTerrain3d(scene, "grass.png", ndGetIdentityMatrix()));
