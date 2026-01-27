@@ -76,9 +76,8 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 		//#define PARTICLE_SIZE ndFloat32 (1.0f / 50.0f)
 		#define PARTICLE_SIZE ndFloat32 (1.0f)
 
-		//IsoSurfaceVolume(ndDemoEntityManager* const scene)
-		IsoSurfaceVolume(ndDemoEntityManager* const)
-			:ndMarchingCubeIsoSurface(ndVector(ndFloat32 (-128.0f)), ndVector(ndFloat32(128.0f)), PARTICLE_SIZE)
+		IsoSurfaceVolume(ndDemoEntityManager* const scene)
+			:ndMarchingCubeIsoSurface(scene->GetWorld()->GetScene(), ndVector(ndFloat32 (-128.0f)), ndVector(ndFloat32(128.0f)), PARTICLE_SIZE)
 		{
 			//ndMatrix matrix(ndGetIdentityMatrix());
 			//matrix.m_posit.m_x = 0.25f;
@@ -188,6 +187,9 @@ void ndBasicProcedualIsoSurfaceCollision(ndDemoEntityManager* const scene)
 	ndVector floor(FindFloor(*scene->GetWorld(), origin, 200.0f));
 
 	ndMatrix originMatrix(ndCalculateMatrix(rot, floor));
+
+	ndSharedPtr<ndDemoEntityManager::OnPostUpdate>marchingCubeMesh(new MarchingCubeTest(scene));
+	scene->RegisterPostUpdate(marchingCubeMesh);
 
 	// add single box for testing
 	//ndSharedPtr<ndBody> testBody(AddSphere(scene, originMatrix, 1.0f, 0.25f, "wood_0.png"));

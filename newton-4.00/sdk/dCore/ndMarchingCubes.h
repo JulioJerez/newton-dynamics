@@ -80,7 +80,7 @@ class ndMarchingCubes : public ndClassAlloc
 		};
 	};
 
-	D_CORE_API ndMarchingCubes(ndFloat32 cubeSize);
+	D_CORE_API ndMarchingCubes(ndThreadPool* const threadPool, ndFloat32 cubeSize);
 	D_CORE_API virtual ~ndMarchingCubes();
 
 	D_CORE_API const ndArray<ndInt32>& GetTriangles() const;
@@ -96,6 +96,7 @@ class ndMarchingCubes : public ndClassAlloc
 	ndArray<ndVector> m_meshPoints;
 	ndArray<ndVector> m_meshNormals;
 	ndArray<ndInt32> m_meshIndices;
+	ndThreadPool* m_threadPool;
 
 	static ndEdge m_edges[];
 	static ndInt32 m_faces[][3];
@@ -127,8 +128,6 @@ class ndMarchingCubesPaticles : public ndMarchingCubes
 
 	ndArray<ndInt32> m_cellScans;
 	ndArray<ndInt32> m_cellTrianglesScans;
-
-	ndThreadPool* m_threadPool;
 };
 
 #endif

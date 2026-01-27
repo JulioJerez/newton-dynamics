@@ -39,8 +39,8 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 	class ndIsoTerrain: public ndMarchingCubeIsoSurface
 	{
 		public:
-		ndIsoTerrain(ndProceduralTerrainShape3d* const owner)
-			:ndMarchingCubeIsoSurface(ndVector(ndFloat32(-D_TERRAIN_WIDTH / 2)), ndVector(ndFloat32(D_TERRAIN_WIDTH / 2)), D_TERRAIN_GRID_SIZE)
+		ndIsoTerrain(ndProceduralTerrainShape3d* const owner, ndDemoEntityManager* const scene)
+			:ndMarchingCubeIsoSurface(scene->GetWorld()->GetScene(), ndVector(ndFloat32(-D_TERRAIN_WIDTH / 2)), ndVector(ndFloat32(D_TERRAIN_WIDTH / 2)), D_TERRAIN_GRID_SIZE)
 			,m_material()
 			,m_heightfield()
 			,m_owner(owner)
@@ -77,8 +77,18 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 					m_material[z * D_TERRAIN_WIDTH + x] = 0;
 				}
 			}
-
 			ndReal scale = D_TERRAIN_ELEVATION_SCALE;
+
+			// resize the aabb
+			ndVector boxP0;
+			ndVector boxP1;
+			GetBox(boxP0, boxP1);
+			//need to calculate the min/max of the toroid
+			//for now just add +-40 units in each side
+			boxP1.m_y = ndCeil(maxHeight * scale + 40.0f);
+			boxP0.m_y = ndFloor(minHeight * scale - 40.0f);
+			//SetBox(boxP0, boxP1);
+
 			for (ndInt32 i = 0; i < m_heightfield.GetCapacity(); ++i)
 			{
 				ndReal y = m_heightfield[i];
@@ -128,11 +138,11 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 		ndProceduralTerrainShape3d* m_owner;
 	};
 
-	ndProceduralTerrainShape3d()
+	ndProceduralTerrainShape3d(ndDemoEntityManager* const scene)
 		:ndShapeStaticProceduralMesh()
 		,m_terrain()
 	{
-		m_terrain = ndSharedPtr<ndIsoTerrain>(new ndIsoTerrain(this));
+		m_terrain = ndSharedPtr<ndIsoTerrain>(new ndIsoTerrain(this, scene));
 	}
 
 	~ndProceduralTerrainShape3d()
@@ -634,9 +644,8 @@ class ndHeightfieldMesh3d : public ndRenderSceneNode
 };
 
 ndSharedPtr<ndBody> BuildProceduralTerrain3d(ndDemoEntityManager* const scene, const char* const textureName, const ndMatrix& location)
-//ndSharedPtr<ndBody> BuildProceduralTerrain3d(ndDemoEntityManager* const, const char* const, const ndMatrix&)
 {
-	ndShapeInstance proceduralInstance(new ndProceduralTerrainShape3d());
+	ndShapeInstance proceduralInstance(new ndProceduralTerrainShape3d(scene));
 	ndProceduralTerrainShape3d* const heighfield = (ndProceduralTerrainShape3d*)proceduralInstance.GetShape()->GetAsShapeStaticProceduralMesh();
 	
 	ndMatrix heighfieldLocation(location);

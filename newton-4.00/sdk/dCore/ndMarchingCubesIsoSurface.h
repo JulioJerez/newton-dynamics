@@ -30,8 +30,11 @@ class ndMarchingCubeIsoSurface : public ndMarchingCubes
 	class ndIsoCell;
 
 	public:
-	D_CORE_API ndMarchingCubeIsoSurface(const ndVector& boxP0, const ndVector& boxP1, ndFloat32 gridSize);
+	D_CORE_API ndMarchingCubeIsoSurface(ndThreadPool* const threadPool, const ndVector& boxP0, const ndVector& boxP1, ndFloat32 gridSize);
 	D_CORE_API virtual ~ndMarchingCubeIsoSurface();
+
+	D_CORE_API void GetBox (ndVector& boxP0, ndVector& boxP1) const;
+	D_CORE_API void SetBox(const ndVector& boxP0, const ndVector& boxP1);
 
 	D_CORE_API virtual void GenerateMesh() override;
 	virtual ndReal GetIsoValue(const ndVector& posit) const = 0;
