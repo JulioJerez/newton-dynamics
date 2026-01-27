@@ -158,46 +158,54 @@ void ndThreadPool::SetThreadCount(ndInt32 count)
 void ndThreadPool::Begin()
 {
 	D_TRACKTIME();
-	#ifndef	D_USE_THREAD_EMULATION
+	ndAssert(m_isInUpdate >= 0);
+
+	m_isInUpdate++;
+	if (m_isInUpdate == 1)
+	{
+		#ifndef	D_USE_THREAD_EMULATION
 		for (ndInt32 i = 0; i < m_count; ++i)
 		{
 			m_workers[i].Signal();
 		}
-	#endif
+		#endif
 
-	m_isInUpdate = 1;
-	auto BeginJobs = ndMakeObject::ndFunction([](ndInt32, ndInt32)
-	{
-		D_TRACKTIME_NAMED(BeginJobs);
-	});
-	ParallelExecute(BeginJobs, GetThreadCount(), 1);
+		auto BeginJobs = ndMakeObject::ndFunction([](ndInt32, ndInt32)
+		{
+			D_TRACKTIME_NAMED(BeginJobs);
+		});
+		ParallelExecute(BeginJobs, GetThreadCount(), 1);
+	}
 }
 
 void ndThreadPool::End()
 {
-	#ifndef	D_USE_THREAD_EMULATION
-	for (ndInt32 i = 0; i < m_count; ++i)
+	if (m_isInUpdate == 1)
 	{
-		m_workers[i].m_begin = 0;
-	}
-
-	ndUnsigned8 stillLooping = 1;
-	do 
-	{
-		ndUnsigned8 looping = 0;
+		#ifndef	D_USE_THREAD_EMULATION
 		for (ndInt32 i = 0; i < m_count; ++i)
 		{
-			looping = ndUnsigned8(looping | m_workers[i].m_stillLooping);
+			m_workers[i].m_begin = 0;
 		}
-		stillLooping = ndUnsigned8(stillLooping & looping);
-		if (m_count && stillLooping)
-		{
-			ndThreadYield();
-		}
-	} while (stillLooping);
-	#endif
 
-	m_isInUpdate = 0;
+		ndUnsigned8 stillLooping = 1;
+		do
+		{
+			ndUnsigned8 looping = 0;
+			for (ndInt32 i = 0; i < m_count; ++i)
+			{
+				looping = ndUnsigned8(looping | m_workers[i].m_stillLooping);
+			}
+			stillLooping = ndUnsigned8(stillLooping & looping);
+			if (m_count && stillLooping)
+			{
+				ndThreadYield();
+			}
+		} while (stillLooping);
+		#endif
+	}
+	m_isInUpdate--;
+	ndAssert(m_isInUpdate >= 0);
 }
 
 void ndThreadPool::Release()
