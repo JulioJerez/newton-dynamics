@@ -162,10 +162,10 @@ class MarchingCubeTest : public ndDemoEntityManager::OnPostUpdate
 	ndBasicProcedua2disoSurface m_isoSurface;
 };
 
-void ndBasicProcedual3dIsoSurfaceCollision(ndDemoEntityManager* const scene)
+void ndBasicMarchingCube32Collision(ndDemoEntityManager* const scene)
 {
 	//ndSharedPtr<ndBody> mapBody(BuildFlatPlane(scene, ndGetIdentityMatrix(), "marblecheckboard.png", true));
-	ndSharedPtr<ndBody> mapBody(BuildProceduralTerrain3d(scene, "grass.png", ndGetIdentityMatrix()));
+	ndSharedPtr<ndBody> mapBody(BuildMarchingCubeHeighfield(scene, "grass.png", ndGetIdentityMatrix()));
 
 	// build a placement matrix
 	ndQuaternion rot(ndYawMatrix(0.0f * ndDegreeToRad));

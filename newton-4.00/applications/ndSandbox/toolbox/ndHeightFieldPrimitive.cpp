@@ -15,12 +15,10 @@
 #include "ndDemoEntityManager.h"
 #include "ndHeightFieldPrimitive.h"
 
-//#define D_TERRAIN_WIDTH		1024
-//#define D_TERRAIN_HEIGHT		1024
-//#define D_TERRAIN_WIDTH		512
-//#define D_TERRAIN_HEIGHT		512
-#define D_TERRAIN_WIDTH			256
-#define D_TERRAIN_HEIGHT		256
+//#define D_TERRAIN_WIDTH			1024
+//#define D_TERRAIN_HEIGHT			1024
+#define D_TERRAIN_WIDTH				512
+#define D_TERRAIN_HEIGHT			512
 
 #define D_TERRAIN_NOISE_OCTAVES		8
 #define D_TERRAIN_NOISE_PERSISTANCE	0.5f
@@ -30,45 +28,61 @@
 #define D_TERRAIN_TILE_SIZE			128
 #define D_TERRAIN_ELEVATION_SCALE	32.0f
 
-
 class ndHeightfieldMesh : public ndRenderSceneNode
 {
 	public:
-	ndHeightfieldMesh(ndRender* const render, const ndShapeHeightfield* const shape, const ndSharedPtr<ndRenderTexture>& texture, const ndMatrix& location)
+	ndHeightfieldMesh(ndDemoEntityManager* const scene, const ndShapeHeightfield* const shape, const ndSharedPtr<ndRenderTexture>& texture, const ndMatrix& location)
 		:ndRenderSceneNode(location)
 	{
-		ndMatrix uvMapping(ndGetIdentityMatrix());
-		uvMapping[0][0] = 1.0f / 20.0f;
-		uvMapping[1][1] = 1.0f / 20.0f;
-		uvMapping[2][2] = 1.0f / 20.0f;
+		ndRender* const render = *scene->GetRenderer();
+
+		struct TilePosit
+		{
+			ndInt32 m_x;
+			ndInt32 m_z;
+		};
+		ndFixSizeArray<TilePosit, 256> tilesOrigin(0);
+		ndFixSizeArray<ndSharedPtr<ndMeshEffect>, 256> tileSlots(0);
 
 		for (ndInt32 z = 0; z < D_TERRAIN_HEIGHT - 1; z += D_TERRAIN_TILE_SIZE)
 		{
 			for (ndInt32 x = 0; x < D_TERRAIN_WIDTH - 1; x += D_TERRAIN_TILE_SIZE)
 			{
-				ndSharedPtr<ndShapeInstance> tileShape(BuildTile(shape, x, z));
-				const ndShapeHeightfield* const heightfield = tileShape->GetShape()->GetAsShapeHeightfield();
-
-				ndMatrix tileMatrix(ndGetIdentityMatrix());
-				tileMatrix.m_posit += heightfield->GetLocation(0, 0);
-				tileMatrix.m_posit.m_y = ndFloat32(0.0f);
-				tileMatrix.m_posit.m_x += ndFloat32(x) * heightfield->GetWithScale();
-				tileMatrix.m_posit.m_z += ndFloat32(z) * heightfield->GetHeightScale();
-
-				ndSharedPtr<ndRenderSceneNode> tileNode(new ndRenderSceneNode(tileMatrix));
-				AddChild(tileNode);
-
-				ndRenderPrimitive::ndDescriptor descriptor(render);
-				descriptor.m_collision = tileShape;
-				descriptor.m_stretchMaping = false;
-				descriptor.m_uvMatrix = uvMapping;
-				descriptor.m_mapping = ndRenderPrimitive::m_box;
-				ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(texture);
-				material.m_castShadows = false;
-
-				ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
-				tileNode->SetPrimitive(mesh);
+				TilePosit posit;
+				posit.m_x = x;
+				posit.m_z = z;
+				tilesOrigin.PushBack(posit);
+				tileSlots.PushBack(ndSharedPtr<ndMeshEffect>(nullptr));
 			}
+		}
+
+		auto BuildTiles = ndMakeObject::ndFunction([this, shape, &tilesOrigin, &tileSlots](ndInt32 groupId, ndInt32)
+		{
+			const TilePosit& posit = tilesOrigin[groupId];
+			tileSlots[groupId] = BuildTile(shape, posit.m_x, posit.m_z);
+		});
+
+		// build all tiles in parellel
+		ndThreadPool* const threadPool = scene->GetWorld()->GetScene();
+
+		threadPool->Begin();
+		threadPool->ParallelExecute(BuildTiles, ndInt32(tileSlots.GetCount()), 1);
+		threadPool->End();
+
+		// add each tile to the scene for visualization
+		for (ndInt32 i = 0; i < ndInt32(tileSlots.GetCount()); ++i)
+		{
+			ndSharedPtr<ndMeshEffect> tileMesh(tileSlots[i]);
+			ndSharedPtr<ndRenderSceneNode> tileNode(new ndRenderSceneNode(ndGetIdentityMatrix()));
+
+			AddChild(tileNode);
+			ndRenderPrimitive::ndDescriptor descriptor(render);
+			descriptor.m_meshNode = tileMesh;
+			ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(texture);
+			material.m_castShadows = false;
+
+			ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
+			tileNode->SetPrimitive(mesh);
 		}
 	}
 
@@ -113,28 +127,77 @@ class ndHeightfieldMesh : public ndRenderSceneNode
 		ndRenderSceneNode::Render(owner, parentMatrix, renderMode);
 	}
 
-	ndSharedPtr<ndShapeInstance> BuildTile(const ndShapeHeightfield* const shape, ndInt32 x0, ndInt32 z0)
+	ndSharedPtr<ndMeshEffect> BuildTile(const ndShapeHeightfield* const shape, ndInt32 x0, ndInt32 z0)
 	{
-		const ndInt32 xMax = ((x0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN_WIDTH) ? D_TERRAIN_TILE_SIZE : D_TERRAIN_TILE_SIZE + 1;
-		const ndInt32 zMax = ((z0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN_HEIGHT) ? D_TERRAIN_TILE_SIZE : D_TERRAIN_TILE_SIZE + 1;
+		const ndInt32 xMax = ((x0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN_WIDTH) ? D_TERRAIN_TILE_SIZE - 1 : D_TERRAIN_TILE_SIZE + 1;
+		const ndInt32 zMax = ((z0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN_HEIGHT) ? D_TERRAIN_TILE_SIZE - 1 : D_TERRAIN_TILE_SIZE + 1;
 
-		// build a collision subtile
 		const ndArray<ndReal>& heightMap = shape->GetElevationMap();
-		ndSharedPtr<ndShapeInstance> tileInstance(new ndShapeInstance(
-			new ndShapeHeightfield(xMax, zMax,
-			shape->GetBuildMode(), D_TERRAIN_GRID_SIZE, D_TERRAIN_GRID_SIZE)));
+		const ndArray<ndInt8>& materialMap = shape->GetAttributeMap();
 
-		ndArray<ndReal>& tileHeightMap = tileInstance->GetShape()->GetAsShapeHeightfield()->GetElevationMap();
+		ndArray<ndBigVector> meshVertexArray;
 		for (ndInt32 z = 0; z < zMax; z++)
 		{
+			const ndReal* const row = &heightMap[(z + z0) * D_TERRAIN_WIDTH];
+			ndFloat32 zf = ndFloat32(z0 + z) * D_TERRAIN_GRID_SIZE;
 			for (ndInt32 x = 0; x < xMax; x++)
 			{
-				ndReal h = heightMap[(z0 + z) * D_TERRAIN_WIDTH + x0 + x];
-				tileHeightMap[z * xMax + x] = h;
+				ndFloat32 h = ndFloat32(row[x0 + x]);
+				ndFloat32 xf = ndFloat32(x0 + x) * D_TERRAIN_GRID_SIZE;
+				const ndBigVector p(xf, h, zf, ndFloat32(1.0f));
+				meshVertexArray.PushBack(p);
 			}
 		}
-		tileInstance->GetShape()->GetAsShapeHeightfield()->UpdateElevationMapAabb();
-		return tileInstance;
+
+		ndArray<ndInt32> vertexIndexArray;
+		ndArray<ndInt32> faceMaterialArray;
+		ndArray<ndInt32> faceIndexCountArray;
+		for (ndInt32 z = 0; z < zMax - 1; z++)
+		{
+			ndInt32 zStart = z * xMax;
+			const ndInt8* const materialRow = &materialMap[(z + z0) * D_TERRAIN_WIDTH];
+			for (ndInt32 x = 0; x < xMax - 1; x++)
+			{
+				ndInt32 i0 = zStart + x;
+				ndInt32 i1 = zStart + xMax + x;
+				ndInt32 i2 = zStart + x + 1;
+				ndInt32 i3 = zStart + xMax + x + 1;
+
+				vertexIndexArray.PushBack(i0);
+				vertexIndexArray.PushBack(i1);
+				vertexIndexArray.PushBack(i2);
+				faceIndexCountArray.PushBack(3);
+				faceMaterialArray.PushBack(materialRow[x0 + x]);
+
+				vertexIndexArray.PushBack(i1);
+				vertexIndexArray.PushBack(i3);
+				vertexIndexArray.PushBack(i2);
+				faceIndexCountArray.PushBack(3);
+				faceMaterialArray.PushBack(materialRow[x0 + x]);
+			}
+		}
+
+		ndMeshEffect::ndMeshVertexFormat format;
+
+		format.m_faceCount = ndInt32(faceMaterialArray.GetCount());
+		format.m_faceMaterial = &faceMaterialArray[0];
+		format.m_faceIndexCount = &faceIndexCountArray[0];
+
+		format.m_vertex.m_data = &meshVertexArray[0].m_x;
+		format.m_vertex.m_indexList = &vertexIndexArray[0];
+		format.m_vertex.m_strideInBytes = sizeof(ndBigVector);
+
+		ndSharedPtr<ndMeshEffect> mesh(new ndMeshEffect());
+		mesh->BuildFromIndexList(&format);
+
+		ndMatrix uvMapping(ndGetIdentityMatrix());
+		uvMapping[0][0] = 1.0f / 20.0f;
+		uvMapping[1][1] = 1.0f / 20.0f;
+		uvMapping[2][2] = 1.0f / 20.0f;
+
+		mesh->CalculateNormals(60 * ndDegreeToRad);
+		mesh->UniformBoxMapping(0, uvMapping);
+		return mesh;
 	}
 };
 
@@ -164,9 +227,11 @@ ndSharedPtr<ndBody> BuildHeightFieldTerrain(ndDemoEntityManager* const scene, co
 	heighfieldLocation.m_posit.m_z -= 0.5f * ndFloat32(heighfield->GetHeight()) * heighfield->GetHeightScale();
 
 	// add tile base sence node
-	ndRender* const render = *scene->GetRenderer();
-	ndSharedPtr<ndRenderTexture> texture(render->GetTextureCache()->GetTexture(ndGetWorkingFileName(textureName)));
-	ndSharedPtr<ndRenderSceneNode> entity(new ndHeightfieldMesh(render, heighfield, texture, heighfieldLocation));
+	ndSharedPtr<ndRenderTexture> texture(scene->GetRenderer()->GetTextureCache()->GetTexture(ndGetWorkingFileName(textureName)));
+	ndUnsigned64 time = ndGetTimeInMicroseconds();
+	ndSharedPtr<ndRenderSceneNode> entity(new ndHeightfieldMesh(scene, heighfield, texture, heighfieldLocation));
+	time = ndGetTimeInMicroseconds() - time;
+	ndExpandTraceMessage("%s: build time %g (sec)\n", __FUNCTION__, ndFloat32(time) * ndFloat32(1.0e-6f));
 	
 	// generate a rigibody and added to the scene and world
 	ndPhysicsWorld* const world = scene->GetWorld();

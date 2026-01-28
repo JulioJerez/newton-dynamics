@@ -17,16 +17,14 @@
 
 //#define D_TERRAIN_WIDTH			1024
 //#define D_TERRAIN_HEIGHT			1024
-//#define D_TERRAIN_WIDTH			512
-//#define D_TERRAIN_HEIGHT			512
-#define D_TERRAIN_WIDTH				256
-#define D_TERRAIN_HEIGHT			256
+#define D_TERRAIN_WIDTH				512
+#define D_TERRAIN_HEIGHT			512
 
 #define D_TERRAIN_NOISE_OCTAVES		8
 #define D_TERRAIN_NOISE_PERSISTANCE	0.5f
 #define D_TERRAIN_NOISE_GRID_SCALE  (1.0f / 500.0f)
 
-//#define D_TERRAIN_GRID_SIZE			2.0f
+//#define D_TERRAIN_GRID_SIZE		2.0f
 #define D_TERRAIN_GRID_SIZE			1.0f
 #define D_TERRAIN_TILE_SIZE			128
 #define D_TERRAIN_ELEVATION_SCALE	32.0f
@@ -417,9 +415,6 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 		ndAssert(p0.m_w == ndFloat32(0.0f));
 		ndAssert(p1.m_w == ndFloat32(0.0f));
 
-		//boxP0 = (m_invGridSize * (p0 - m_padding).Floor()) * m_gridSize;
-		//boxP1 = (m_invGridSize * (p1 + m_gridSize).Floor()) * m_gridSize;
-
 		boxP0 = (m_invGridSize * p0.Floor()) * m_gridSize;
 		boxP1 = (m_invGridSize * (p1 + m_padding).Ceiling()) * m_gridSize;
 
@@ -515,33 +510,58 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 class ndHeightfieldMesh2d : public ndRenderSceneNode
 {
 	public:
-	ndHeightfieldMesh2d(ndRender* const render, const ndProcedural2dTerrainShape* const shape, const ndSharedPtr<ndRenderTexture>& texture, const ndMatrix& location)
+	ndHeightfieldMesh2d(ndDemoEntityManager* const scene, const ndProcedural2dTerrainShape* const shape, const ndSharedPtr<ndRenderTexture>& texture, const ndMatrix& location)
 		:ndRenderSceneNode(location)
 	{
-		ndMatrix uvMapping(ndGetIdentityMatrix());
-		uvMapping[0][0] = 1.0f / 20.0f;
-		uvMapping[1][1] = 1.0f / 20.0f;
-		uvMapping[2][2] = 1.0f / 20.0f;
+		ndRender* const render = *scene->GetRenderer();
+
+		struct TilePosit
+		{
+			ndInt32 m_x;
+			ndInt32 m_z;
+		};
+		ndFixSizeArray<TilePosit, 256> tilesOrigin(0);
+		ndFixSizeArray<ndSharedPtr<ndMeshEffect>, 256> tileSlots(0);
 
 		for (ndInt32 z = 0; z < D_TERRAIN_HEIGHT - 1; z += D_TERRAIN_TILE_SIZE)
 		{
 			for (ndInt32 x = 0; x < D_TERRAIN_WIDTH - 1; x += D_TERRAIN_TILE_SIZE)
 			{
-				ndSharedPtr<ndShapeInstance> tileShape(BuildTile(shape, x, z));
-				ndSharedPtr<ndRenderSceneNode> tileNode(new ndRenderSceneNode(ndGetIdentityMatrix()));
-				AddChild(tileNode);
-
-				ndRenderPrimitive::ndDescriptor descriptor(render);
-				descriptor.m_collision = tileShape;
-				descriptor.m_stretchMaping = false;
-				descriptor.m_uvMatrix = uvMapping;
-				descriptor.m_mapping = ndRenderPrimitive::m_box;
-				ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(texture);
-				material.m_castShadows = false;
-
-				ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
-				tileNode->SetPrimitive(mesh);
+				TilePosit posit;
+				posit.m_x = x;
+				posit.m_z = z;
+				tilesOrigin.PushBack(posit);
+				tileSlots.PushBack(ndSharedPtr<ndMeshEffect>(nullptr));
 			}
+		}
+
+		auto BuildTiles = ndMakeObject::ndFunction([this, shape, &tilesOrigin, &tileSlots](ndInt32 groupId, ndInt32)
+		{
+			const TilePosit& posit = tilesOrigin[groupId];
+			tileSlots[groupId] = BuildTile(shape, posit.m_x, posit.m_z);
+		});
+
+		// build all tiles in parallel
+		ndThreadPool* const threadPool = scene->GetWorld()->GetScene();
+
+		threadPool->Begin();
+		threadPool->ParallelExecute(BuildTiles, ndInt32(tileSlots.GetCount()), 1);
+		threadPool->End();
+		
+		// add each tile to the scene for visualization
+		for (ndInt32 i = 0; i < ndInt32(tileSlots.GetCount()); ++i)
+		{
+			ndSharedPtr<ndMeshEffect> tileMesh (tileSlots[i]);
+			ndSharedPtr<ndRenderSceneNode> tileNode(new ndRenderSceneNode(ndGetIdentityMatrix()));
+
+			AddChild(tileNode);
+			ndRenderPrimitive::ndDescriptor descriptor(render);
+			descriptor.m_meshNode = tileMesh;
+			ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(texture);
+			material.m_castShadows = false;
+			
+			ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
+			tileNode->SetPrimitive(mesh);
 		}
 	}
 
@@ -554,51 +574,82 @@ class ndHeightfieldMesh2d : public ndRenderSceneNode
 		ndRenderSceneNode::Render(owner, parentMatrix, renderMode);
 	}
 
-	ndSharedPtr<ndShapeInstance> BuildTile(const ndProcedural2dTerrainShape* const shape, ndInt32 x0, ndInt32 z0)
+	ndSharedPtr<ndMeshEffect> BuildTile(const ndProcedural2dTerrainShape* const shape, ndInt32 x0, ndInt32 z0)
 	{
-		const ndInt32 xMax = ((x0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN_WIDTH) ? D_TERRAIN_TILE_SIZE - 1: D_TERRAIN_TILE_SIZE + 1;
-		const ndInt32 zMax = ((z0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN_HEIGHT) ? D_TERRAIN_TILE_SIZE - 1: D_TERRAIN_TILE_SIZE + 1;
+		const ndInt32 xMax = ((x0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN_WIDTH) ? D_TERRAIN_TILE_SIZE - 1 : D_TERRAIN_TILE_SIZE + 1;
+		const ndInt32 zMax = ((z0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN_HEIGHT) ? D_TERRAIN_TILE_SIZE - 1 : D_TERRAIN_TILE_SIZE + 1;
 
 		// build a collision sub tile
 		const ndArray<ndInt8>& materialMap = shape->m_material;
 		const ndArray<ndReal>& heightMap = shape->m_heightfield;
 
-		ndPolygonSoupBuilder tileBuilder;
-		tileBuilder.Begin();
+		ndArray<ndBigVector> meshVertexArray;
 		for (ndInt32 z = 0; z < zMax; z++)
 		{
 			const ndReal* const row = &heightMap[(z + z0) * D_TERRAIN_WIDTH];
-			const ndInt8* const materialRow = &materialMap[(z + z0) * D_TERRAIN_WIDTH];
-
-			ndVector p0(ndFloat32(x0) * D_TERRAIN_GRID_SIZE, ndFloat32(row[x0]),				   ndFloat32(z0 + z + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(1.0f));
-			ndVector p1(ndFloat32(x0) * D_TERRAIN_GRID_SIZE, ndFloat32(row[x0 + D_TERRAIN_WIDTH]), ndFloat32(z0 + z + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(1.0f));
-			for (ndInt32 x = 1; x < xMax; x++)
+			ndFloat32 zf = ndFloat32(z0 + z) * D_TERRAIN_GRID_SIZE;
+			for (ndInt32 x = 0; x < xMax; x++)
 			{
-				const ndVector q0(ndFloat32(x0 + x) * D_TERRAIN_GRID_SIZE, ndFloat32(row[x0 + x]),                   ndFloat32(z0 + z + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(1.0f));
-				const ndVector q1(ndFloat32(x0 + x) * D_TERRAIN_GRID_SIZE, ndFloat32(row[x0 + x + D_TERRAIN_WIDTH]), ndFloat32(z0 + z + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(1.0f));
-
-				ndVector triangle[3];
-				triangle[0] = p0;
-				triangle[1] = p1;
-				triangle[2] = q0;
-				tileBuilder.AddFace(triangle, 3, materialRow[x0 + x - 1]);
-				
-				triangle[0] = p1;
-				triangle[1] = q1;
-				triangle[2] = q0;
-				tileBuilder.AddFace(triangle, 3, materialRow[x0 + x]);
-
-				p0 = q0;
-				p1 = q1;
+				ndFloat32 h = ndFloat32(row[x0 + x]);
+				ndFloat32 xf = ndFloat32(x0 + x) * D_TERRAIN_GRID_SIZE;
+				const ndBigVector p(xf, h, zf, ndFloat32(1.0f));
+				meshVertexArray.PushBack(p);
 			}
 		}
-		tileBuilder.End(false);
-		ndSharedPtr<ndShapeInstance> tileInstance(new ndShapeInstance(new ndShapeStatic_bvh(tileBuilder))); 
-		return tileInstance;
+
+		ndArray<ndInt32> vertexIndexArray;
+		ndArray<ndInt32> faceMaterialArray;
+		ndArray<ndInt32> faceIndexCountArray;
+		for (ndInt32 z = 0; z < zMax - 1; z++)
+		{
+			ndInt32 zStart = z * xMax;
+			const ndInt8* const materialRow = &materialMap[(z + z0) * D_TERRAIN_WIDTH];
+			for (ndInt32 x = 0; x < xMax - 1; x++)
+			{
+				ndInt32 i0 = zStart + x;
+				ndInt32 i1 = zStart + xMax + x;
+				ndInt32 i2 = zStart + x + 1;
+				ndInt32 i3 = zStart + xMax + x + 1;
+
+				vertexIndexArray.PushBack(i0);
+				vertexIndexArray.PushBack(i1);
+				vertexIndexArray.PushBack(i2);
+				faceIndexCountArray.PushBack(3);
+				faceMaterialArray.PushBack(materialRow[x0 + x]);
+
+				vertexIndexArray.PushBack(i1);
+				vertexIndexArray.PushBack(i3);
+				vertexIndexArray.PushBack(i2);
+				faceIndexCountArray.PushBack(3);
+				faceMaterialArray.PushBack(materialRow[x0 + x]);
+			}
+		}
+
+		ndMeshEffect::ndMeshVertexFormat format;
+
+		format.m_faceCount = ndInt32(faceMaterialArray.GetCount());
+		format.m_faceMaterial = &faceMaterialArray[0];
+		format.m_faceIndexCount = &faceIndexCountArray[0];
+
+		format.m_vertex.m_data = &meshVertexArray[0].m_x;
+		format.m_vertex.m_indexList = &vertexIndexArray[0];
+		format.m_vertex.m_strideInBytes = sizeof(ndBigVector);
+
+		ndSharedPtr<ndMeshEffect> mesh(new ndMeshEffect());
+		mesh->BuildFromIndexList(&format);
+
+		ndMatrix uvMapping(ndGetIdentityMatrix());
+		uvMapping[0][0] = 1.0f / 20.0f;
+		uvMapping[1][1] = 1.0f / 20.0f;
+		uvMapping[2][2] = 1.0f / 20.0f;
+
+		mesh->CalculateNormals(60 * ndDegreeToRad);
+		mesh->UniformBoxMapping(0, uvMapping);
+		return mesh;
 	}
 };
 
-ndSharedPtr<ndBody> BuildProceduralTerrain2d(ndDemoEntityManager* const scene, const char* const textureName, const ndMatrix& location)
+ndSharedPtr<ndBody> BuildUserHeighfieldTerrain(ndDemoEntityManager* const scene, const char* const textureName, const ndMatrix& location)
 {
 	ndShapeInstance proceduralInstance(new ndProcedural2dTerrainShape());
 
@@ -609,10 +660,13 @@ ndSharedPtr<ndBody> BuildProceduralTerrain2d(ndDemoEntityManager* const scene, c
 	heighfieldLocation.m_posit.m_x -= origin.m_x;
 	heighfieldLocation.m_posit.m_z -= origin.m_z;
 	
-	// add tile base scence node
-	ndRender* const render = *scene->GetRenderer();
-	ndSharedPtr<ndRenderTexture> texture(render->GetTextureCache()->GetTexture(ndGetWorkingFileName(textureName)));
-	ndSharedPtr<ndRenderSceneNode> entity(new ndHeightfieldMesh2d(render, heighfield, texture, heighfieldLocation));
+	// add tile base scene node
+	ndSharedPtr<ndRenderTexture> texture(scene->GetRenderer()->GetTextureCache()->GetTexture(ndGetWorkingFileName(textureName)));
+
+	ndUnsigned64 time = ndGetTimeInMicroseconds();
+	ndSharedPtr<ndRenderSceneNode> entity(new ndHeightfieldMesh2d(scene, heighfield, texture, heighfieldLocation));
+	time = ndGetTimeInMicroseconds() - time;
+	ndExpandTraceMessage("%s: build time %g (sec)\n", __FUNCTION__, ndFloat32(time) * ndFloat32(1.0e-6f));
 	
 	// generate a rigibody and added to the scene and world
 	ndPhysicsWorld* const world = scene->GetWorld();

@@ -30,23 +30,24 @@
 //#define DEFAULT_SCENE	4		// basic Trigger
 //#define DEFAULT_SCENE	5		// conservation of momentum 
 //#define DEFAULT_SCENE	6		// basic joints
-//#define DEFAULT_SCENE	7		// static mesh collision
-//#define DEFAULT_SCENE	8		// heightfield collision
-//#define DEFAULT_SCENE	9		// static compound scene collision
-//#define DEFAULT_SCENE	10		// basic convex approximate compound shapes
-//#define DEFAULT_SCENE	11		// basic procedural heightfield collision
-//#define DEFAULT_SCENE	12		// basic procedural 2d noise heightfield collision
-#define DEFAULT_SCENE	13		// basic procedural 3d noise marching cube collision
-//#define DEFAULT_SCENE	14		// basic model, a npd vehicle prop
-//#define DEFAULT_SCENE	15		// basic rag doll
-//#define DEFAULT_SCENE	16		// complex model, implement a complex model with joints
-//#define DEFAULT_SCENE	17		// basics multi body vehicle
-//#define DEFAULT_SCENE	18		// object Placement
-//#define DEFAULT_SCENE	19		// third person player capsule
-//#define DEFAULT_SCENE	20		// cart pole SAC trained controller
-//#define DEFAULT_SCENE	21		// cart pole PPO trained controller
-//#define DEFAULT_SCENE	22		// unicycle PPO trained controller
-//#define DEFAULT_SCENE	23		// procedurally animated quadruped spider
+//#define DEFAULT_SCENE	7		// static mesh collision 
+// 
+//#define DEFAULT_SCENE	8		// basic heightfield collision
+//#define DEFAULT_SCENE	9		// basic user heightfield 2d collision
+#define DEFAULT_SCENE	10		// basic user marching cube 3d collision
+
+//#define DEFAULT_SCENE	11		// static compound scene collision 
+//#define DEFAULT_SCENE	12		// basic convex approximate compound shapes
+//#define DEFAULT_SCENE	13		// basic model, a npd vehicle prop
+//#define DEFAULT_SCENE	14		// basic rag doll
+//#define DEFAULT_SCENE	15		// complex model, implement a complex model with joints
+//#define DEFAULT_SCENE	16		// basics multi body vehicle
+//#define DEFAULT_SCENE	17		// object Placement
+//#define DEFAULT_SCENE	18		// third person player capsule
+//#define DEFAULT_SCENE	19		// cart pole SAC trained controller
+//#define DEFAULT_SCENE	20		// cart pole PPO trained controller
+//#define DEFAULT_SCENE	21		// unicycle PPO trained controller
+//#define DEFAULT_SCENE	22		// procedurally animated quadruped spider
 
 // These are the machine learning training demos
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// train cart pole using SAC agent
@@ -89,9 +90,8 @@ void ndBasicHeighfieldCollision(ndDemoEntityManager* const scene);
 void ndBasicStaticMeshCollision(ndDemoEntityManager* const scene);
 void ndPlayerCapsule_ThirdPerson(ndDemoEntityManager* const scene);
 void ndBasicSceneCompoundCollision(ndDemoEntityManager* const scene);
-void ndBasicProcedualHeightfieldCollision(ndDemoEntityManager* const scene);
-void ndBasicProcedual2dIsoSurfaceCollision(ndDemoEntityManager* const scene);
-void ndBasicProcedual3dIsoSurfaceCollision(ndDemoEntityManager* const scene);
+void ndBasicMarchingCube32Collision(ndDemoEntityManager* const scene);
+void ndBasicUserHeightfieldCollision(ndDemoEntityManager* const scene);
 
 void ndCartpolePlayer_SAC(ndDemoEntityManager* const scene);
 void ndCartpolePlayer_PPO(ndDemoEntityManager* const scene);
@@ -111,12 +111,14 @@ ndDemoEntityManager::ndDemos ndDemoEntityManager::m_demosSelection[] =
 	{ "basic momentum conservation", ndBasicAngularMomentum},
 	{ "basic joints", ndBasicJoints},
 	{ "basic static mesh collision", ndBasicStaticMeshCollision},
+
 	{ "basic heighfield collision", ndBasicHeighfieldCollision},
-	{ "basic static compound scene collision", ndBasicSceneCompoundCollision},
+	{ "basic user heightfield collision", ndBasicUserHeightfieldCollision},
+	{ "basic user marching cube 3d collision", ndBasicMarchingCube32Collision},
+
 	{ "basic compound collision", ndBasicCompoundCollision},
-	{ "basic procedural heightfield collision", ndBasicProcedualHeightfieldCollision},
-	{ "basic procedural 2d isosurface collision", ndBasicProcedual2dIsoSurfaceCollision},
-	{ "basic procedural 3d isosurface collision", ndBasicProcedual3dIsoSurfaceCollision},
+	{ "basic compound scene collision", ndBasicSceneCompoundCollision},
+
 	{ "basic model", ndBasicModel},
 	{ "basic ragdoll", ndBasicRagdoll},
 	{ "complex model", ndComplexModel},
@@ -532,7 +534,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_solverMode = ndWorld::ndSimdSoaSolver;
 	//m_solverMode = ndWorld::ndSimdAvx2Solver;
 	//m_solverPasses = 4;
-	m_workerThreads = 1;
+	m_workerThreads = 4;
 	//m_solverSubSteps = 2;
 	//m_showRaycastHit = true;
 	//m_showCenterOfMass = true;

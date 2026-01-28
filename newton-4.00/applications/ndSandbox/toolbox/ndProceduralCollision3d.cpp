@@ -15,12 +15,10 @@
 #include "ndDemoEntityManager.h"
 #include "ndHeightFieldPrimitive.h"
 
-//#define D_TERRAIN_WIDTH		1024
-//#define D_TERRAIN_HEIGHT		1024
-//#define D_TERRAIN_WIDTH		512
-//#define D_TERRAIN_HEIGHT		512
-#define D_TERRAIN_WIDTH			256
-#define D_TERRAIN_HEIGHT		256
+//#define D_TERRAIN_WIDTH			1024
+//#define D_TERRAIN_HEIGHT			1024
+#define D_TERRAIN_WIDTH				512
+#define D_TERRAIN_HEIGHT			512
 
 #define D_TERRAIN_NOISE_OCTAVES		8
 #define D_TERRAIN_NOISE_PERSISTANCE	0.5f
@@ -113,9 +111,6 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 		// make a rolling terrain from a 2d noise function
 		virtual ndReal GetIsoValue(const ndVector& posit) const override
 		{
-			//float xxxx = ndSqrt(posit.DotProduct(posit).GetScalar()) - 5.0f;
-			//return xxxx;
-
 			const ndVector gridSpace(PositionToGrid(posit));
 			ndAssert(gridSpace.m_x >= 0);
 			ndAssert(gridSpace.m_z >= 0);
@@ -150,12 +145,7 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 		ndVector boxP0;
 		ndVector boxP1;
 		m_terrain->GetBox(boxP0, boxP1);
-		//ndVector p0(ndFloat32(0.0f), minY, ndFloat32(0.0f), ndFloat32(1.0f));
-		//ndVector p1(ndFloat32(D_TERRAIN_WIDTH * D_TERRAIN_GRID_SIZE), maxY, ndFloat32(D_TERRAIN_WIDTH * D_TERRAIN_GRID_SIZE), ndFloat32(1.0f));
 		SetAABB(boxP0, boxP1);
-
-		// to account for rounding
-		//CalculateAabb(ndGetIdentityMatrix(), m_minBox, m_maxBox);
 	}
 
 	~ndProceduralTerrainShape3d()
@@ -338,26 +328,77 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 class ndHeightfieldMesh3d : public ndRenderSceneNode
 {
 	public:
-	ndHeightfieldMesh3d(ndRender* const render, const ndProceduralTerrainShape3d* const shape, const ndSharedPtr<ndRenderTexture>& texture, const ndMatrix& location)
+	ndHeightfieldMesh3d(ndDemoEntityManager* const scene, const ndProceduralTerrainShape3d* const shape, const ndSharedPtr<ndRenderTexture>& texture, const ndMatrix& location)
 		:ndRenderSceneNode(location)
 	{
+		ndRender* const render = *scene->GetRenderer();
+
+		struct TilePosit
+		{
+			ndInt32 m_x;
+			ndInt32 m_z;
+		};
+		ndFixSizeArray<TilePosit, 256> tilesOrigin(0);
+		ndFixSizeArray<ndSharedPtr<ndMeshEffect>, 256> tileSlots(0);
+
 		for (ndInt32 z = 0; z < D_TERRAIN_HEIGHT - 1; z += D_TERRAIN_TILE_SIZE)
 		{
 			for (ndInt32 x = 0; x < D_TERRAIN_WIDTH - 1; x += D_TERRAIN_TILE_SIZE)
 			{
-				ndSharedPtr<ndMeshEffect> tileMesh(BuildTileMesh(shape, x, z));
-
-				ndSharedPtr<ndRenderSceneNode> tileNode(new ndRenderSceneNode(ndGetIdentityMatrix()));
-				AddChild(tileNode);
-				
-				ndRenderPrimitive::ndDescriptor descriptor(render);
-				descriptor.m_meshNode = tileMesh;
-				ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(texture);
-				material.m_castShadows = false;
-				
-				ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
-				tileNode->SetPrimitive(mesh);
+				TilePosit posit;
+				posit.m_x = x;
+				posit.m_z = z;
+				tilesOrigin.PushBack(posit);
+				tileSlots.PushBack(ndSharedPtr<ndMeshEffect>(nullptr));
 			}
+		}
+
+		//for (ndInt32 z = 0; z < D_TERRAIN_HEIGHT - 1; z += D_TERRAIN_TILE_SIZE)
+		//{
+		//	for (ndInt32 x = 0; x < D_TERRAIN_WIDTH - 1; x += D_TERRAIN_TILE_SIZE)
+		//	{
+		//		ndSharedPtr<ndMeshEffect> tileMesh(BuildTile(shape, x, z));
+		//
+		//		ndSharedPtr<ndRenderSceneNode> tileNode(new ndRenderSceneNode(ndGetIdentityMatrix()));
+		//		AddChild(tileNode);
+		//		
+		//		ndRenderPrimitive::ndDescriptor descriptor(render);
+		//		descriptor.m_meshNode = tileMesh;
+		//		ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(texture);
+		//		material.m_castShadows = false;
+		//		
+		//		ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
+		//		tileNode->SetPrimitive(mesh);
+		//	}
+		//}
+
+		auto BuildTiles = ndMakeObject::ndFunction([this, shape, &tilesOrigin, &tileSlots](ndInt32 groupId, ndInt32)
+		{
+			const TilePosit& posit = tilesOrigin[groupId];
+			tileSlots[groupId] = BuildTile(shape, posit.m_x, posit.m_z);
+		});
+
+		// build all tiles in parallel
+		ndThreadPool* const threadPool = scene->GetWorld()->GetScene();
+
+		threadPool->Begin();
+		threadPool->ParallelExecute(BuildTiles, ndInt32(tileSlots.GetCount()), 1);
+		threadPool->End();
+
+		// add each tile to the scene for visualization
+		for (ndInt32 i = 0; i < ndInt32(tileSlots.GetCount()); ++i)
+		{
+			ndSharedPtr<ndMeshEffect> tileMesh(tileSlots[i]);
+			ndSharedPtr<ndRenderSceneNode> tileNode(new ndRenderSceneNode(ndGetIdentityMatrix()));
+
+			AddChild(tileNode);
+			ndRenderPrimitive::ndDescriptor descriptor(render);
+			descriptor.m_meshNode = tileMesh;
+			ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(texture);
+			material.m_castShadows = false;
+
+			ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
+			tileNode->SetPrimitive(mesh);
 		}
 	}
 
@@ -370,7 +411,7 @@ class ndHeightfieldMesh3d : public ndRenderSceneNode
 		ndRenderSceneNode::Render(owner, parentMatrix, renderMode);
 	}
 
-	ndSharedPtr<ndMeshEffect> BuildTileMesh(const ndProceduralTerrainShape3d* const shape, ndInt32 x0, ndInt32 z0)
+	ndSharedPtr<ndMeshEffect> BuildTile(const ndProceduralTerrainShape3d* const shape, ndInt32 x0, ndInt32 z0)
 	{
 		const ndArray<ndInt32>& indexList = shape->m_terrain->GetTriangles();
 		const ndArray<ndVector>& vertexArray = shape->m_terrain->GetMeshVertex();
@@ -432,7 +473,6 @@ class ndHeightfieldMesh3d : public ndRenderSceneNode
 			meshNormalArray[i].m_y = ndReal(normalArray[i].m_y);
 			meshNormalArray[i].m_z = ndReal(normalArray[i].m_z);
 		}
-
 		
 		ndMeshEffect::ndMeshVertexFormat format;
 		
@@ -461,7 +501,7 @@ class ndHeightfieldMesh3d : public ndRenderSceneNode
 	}
 };
 
-ndSharedPtr<ndBody> BuildProceduralTerrain3d(ndDemoEntityManager* const scene, const char* const textureName, const ndMatrix& location)
+ndSharedPtr<ndBody> BuildMarchingCubeHeighfield(ndDemoEntityManager* const scene, const char* const textureName, const ndMatrix& location)
 {
 	ndShapeInstance proceduralInstance(new ndProceduralTerrainShape3d(scene));
 	ndProceduralTerrainShape3d* const heighfield = (ndProceduralTerrainShape3d*)proceduralInstance.GetShape()->GetAsShapeStaticProceduralMesh();
@@ -472,10 +512,13 @@ ndSharedPtr<ndBody> BuildProceduralTerrain3d(ndDemoEntityManager* const scene, c
 	heighfieldLocation.m_posit.m_z -= origin.m_z;
 	
 	// add tile base sence node
-	ndRender* const render = *scene->GetRenderer();
-	ndSharedPtr<ndRenderTexture> texture(render->GetTextureCache()->GetTexture(ndGetWorkingFileName(textureName)));
-	ndSharedPtr<ndRenderSceneNode> entity(new ndHeightfieldMesh3d(render, heighfield, texture, heighfieldLocation));
-	
+	ndSharedPtr<ndRenderTexture> texture(scene->GetRenderer()->GetTextureCache()->GetTexture(ndGetWorkingFileName(textureName)));
+
+	ndUnsigned64 time = ndGetTimeInMicroseconds();
+	ndSharedPtr<ndRenderSceneNode> entity(new ndHeightfieldMesh3d(scene, heighfield, texture, heighfieldLocation));
+	time = ndGetTimeInMicroseconds() - time;
+	ndExpandTraceMessage("%s: build time %g (sec)\n", __FUNCTION__, ndFloat32(time) * ndFloat32(1.0e-6f));
+
 	// generate a rigibody and added to the scene and world
 	ndPhysicsWorld* const world = scene->GetWorld();
 	ndSharedPtr<ndBody> body (new ndBodyDynamic());
