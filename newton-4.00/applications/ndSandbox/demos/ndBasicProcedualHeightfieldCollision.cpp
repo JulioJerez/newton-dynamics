@@ -18,11 +18,10 @@
 #include "ndHeightFieldPrimitive.h"
 
 
-void ndBasicProcedualHeightfieldCollision(ndDemoEntityManager* const scene)
+void ndBasicUserHeightfieldCollision(ndDemoEntityManager* const scene)
 {
-	//ndSharedPtr<ndBody> mapBody(BuildFlatPlane(scene, ndGetIdentityMatrix(), "blueCheckerboard.png", true));
 	//ndSharedPtr<ndBody> mapBody(BuildFlatPlane(scene, ndGetIdentityMatrix(), "marblecheckboard.png", true));
-	ndSharedPtr<ndBody> mapBody(BuildProceduralTerrain2d(scene, "grass.png", ndGetIdentityMatrix()));
+	ndSharedPtr<ndBody> mapBody(BuildUserHeighfieldTerrain(scene, "grass.png", ndGetIdentityMatrix()));
 
 	// build a placement matrix
 	ndQuaternion rot(ndYawMatrix(180.0f * ndDegreeToRad));

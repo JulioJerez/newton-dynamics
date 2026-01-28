@@ -16,8 +16,8 @@
 
 class ndDemoEntityManager;
 ndSharedPtr<ndBody> BuildHeightFieldTerrain(ndDemoEntityManager* const scene, const char* const textureName, const ndMatrix& location = ndGetIdentityMatrix());
-ndSharedPtr<ndBody> BuildProceduralTerrain2d(ndDemoEntityManager* const scene, const char* const textureName, const ndMatrix& location = ndGetIdentityMatrix());
-ndSharedPtr<ndBody> BuildProceduralTerrain3d(ndDemoEntityManager* const scene, const char* const textureName, const ndMatrix& location = ndGetIdentityMatrix());
+ndSharedPtr<ndBody> BuildUserHeighfieldTerrain(ndDemoEntityManager* const scene, const char* const textureName, const ndMatrix& location = ndGetIdentityMatrix());
+ndSharedPtr<ndBody> BuildMarchingCubeHeighfield(ndDemoEntityManager* const scene, const char* const textureName, const ndMatrix& location = ndGetIdentityMatrix());
 
 #endif 
 

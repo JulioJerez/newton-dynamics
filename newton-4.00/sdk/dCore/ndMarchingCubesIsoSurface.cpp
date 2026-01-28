@@ -24,7 +24,9 @@
 #include "ndDebug.h"
 #include "ndVector.h"
 #include "ndMatrix.h"
+#include "ndFastRay.h"
 #include "ndProfiler.h"
+#include "ndIntersections.h"
 #include "ndMarchingCubesIsoSurface.h"
 
 // adapted from code by written by Paul Bourke may 1994
@@ -57,7 +59,7 @@ void ndMarchingCubeIsoSurface::SetBox(const ndVector& boxP0, const ndVector& box
 	m_boxP1 = boxP1 & ndVector::m_triplexMask;
 }
 
-void ndMarchingCubeIsoSurface::CalculateMinExtend3d(const ndVector& p0, const ndVector& p1, ndVector& boxP0, ndVector& boxP1) const
+bool ndMarchingCubeIsoSurface::CalculateMinExtend3d(const ndVector& p0, const ndVector& p1, ndVector& boxP0, ndVector& boxP1) const
 {
 	ndAssert(p0.m_x <= p1.m_x);
 	ndAssert(p0.m_y <= p1.m_y);
@@ -65,192 +67,240 @@ void ndMarchingCubeIsoSurface::CalculateMinExtend3d(const ndVector& p0, const nd
 	ndAssert(p0.m_w == ndFloat32(0.0f));
 	ndAssert(p1.m_w == ndFloat32(0.0f));
 
-	////boxP0 = (m_invGridSize * (p0 - m_padding).Floor()) * m_gridSize;
-	////boxP1 = (m_invGridSize * (p1 + m_gridSize).Floor()) * m_gridSize;
-	//
-	//ndVector gridSize(GetGridSize());
-	//boxP0 = (m_terrain->m_invGridSize * p0.Floor()) * m_terrain->m_gridSize;
-	//boxP1 = (m_invGridSize * (p1 + m_padding).Ceiling()) * m_gridSize;
-	//
-	//boxP0.m_y = p0.m_y - m_padding.m_y;
-	//boxP1.m_y = p1.m_y + m_padding.m_y;
-	//
-	//ndAssert(boxP0.m_x < boxP1.m_x);
-	//ndAssert(boxP0.m_y < boxP1.m_y);
-	//ndAssert(boxP0.m_z < boxP1.m_z);
+	ndVector padding(ndFloat32(0.01f));
+	boxP0 = (m_invGridSize * p0.Floor()) * m_gridSize;
+	boxP1 = (m_invGridSize * (p1 + padding).Ceiling()) * m_gridSize;
+	ndAssert(boxP0.m_x < boxP1.m_x);
+	ndAssert(boxP0.m_y < boxP1.m_y);
+	ndAssert(boxP0.m_z < boxP1.m_z);
+	return ndBoxBoxIntestion(boxP0, boxP1, m_boxP0, m_boxP1, boxP0, boxP1);
 }
 
+ndFixSizeArray<ndMarchingCubeIsoSurface::ndTriangle, 5> ndMarchingCubeIsoSurface::GetFacesInCell(const ndVector& gridPosit) const
+{
+	ndFixSizeArray<ndMarchingCubeIsoSurface::ndTriangle, 5> patch;
+
+
+	return patch;
+}
+
+ndFloat32 ndMarchingCubeIsoSurface::RayCastCell(const ndFastRay& ray, ndInt32 xIndex0, ndInt32 yIndex0, ndInt32 zIndex0, ndVector& normalOut, ndFloat32 maxT) const
+{
 #if 0
-	ndFloat32 RayCastCell(const ndFastRay& ray, ndInt32 xIndex0, ndInt32 zIndex0, ndVector& normalOut, ndFloat32 maxT) const
+	ndVector points[4];
+	ndInt32 triangle[3];
+
+	// get the 3d point at the corner of the cell
+	if ((xIndex0 < 0) || (zIndex0 < 0) || (xIndex0 >= (D_TERRAIN_WIDTH - 1)) || (zIndex0 >= (D_TERRAIN_WIDTH - 1)))
 	{
-		ndVector points[4];
-		ndInt32 triangle[3];
+		return ndFloat32(1.2f);
+	}
+	maxT = ndMin(maxT, ndFloat32(1.0f));
 
-		// get the 3d point at the corner of the cell
-		if ((xIndex0 < 0) || (zIndex0 < 0) || (xIndex0 >= (D_TERRAIN_WIDTH - 1)) || (zIndex0 >= (D_TERRAIN_WIDTH - 1)))
-		{
-			return ndFloat32(1.2f);
-		}
-		maxT = ndMin(maxT, ndFloat32(1.0f));
+	ndInt32 base = zIndex0 * D_TERRAIN_WIDTH + xIndex0;
 
-		ndInt32 base = zIndex0 * D_TERRAIN_WIDTH + xIndex0;
+	points[0 * 2 + 0] = ndVector((ndFloat32)(xIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + 0]), (ndFloat32)(zIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
+	points[0 * 2 + 1] = ndVector((ndFloat32)(xIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + 1]), (ndFloat32)(zIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
+	points[1 * 2 + 1] = ndVector((ndFloat32)(xIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + D_TERRAIN_WIDTH + 1]), (ndFloat32)(zIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
+	points[1 * 2 + 0] = ndVector((ndFloat32)(xIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + D_TERRAIN_WIDTH + 0]), (ndFloat32)(zIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
 
-		points[0 * 2 + 0] = ndVector((ndFloat32)(xIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + 0]), (ndFloat32)(zIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
-		points[0 * 2 + 1] = ndVector((ndFloat32)(xIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + 1]), (ndFloat32)(zIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
-		points[1 * 2 + 1] = ndVector((ndFloat32)(xIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + D_TERRAIN_WIDTH + 1]), (ndFloat32)(zIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
-		points[1 * 2 + 0] = ndVector((ndFloat32)(xIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + D_TERRAIN_WIDTH + 0]), (ndFloat32)(zIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
+	ndFloat32 t = ndFloat32(1.2f);
+	triangle[0] = 1;
+	triangle[1] = 2;
+	triangle[2] = 3;
 
-		ndFloat32 t = ndFloat32(1.2f);
-		triangle[0] = 1;
-		triangle[1] = 2;
-		triangle[2] = 3;
-
-		ndVector e10(points[2] - points[1]);
-		ndVector e20(points[3] - points[1]);
-		ndVector normal(e10.CrossProduct(e20));
-		normal = normal.Normalize();
-		t = ray.PolygonIntersect(normal, maxT, points, triangle, 3);
-		if (t < maxT)
-		{
-			normalOut = normal;
-			return t;
-		}
-
-		triangle[0] = 1;
-		triangle[1] = 0;
-		triangle[2] = 2;
-
-		ndVector e30(points[0] - points[1]);
-		normal = e30.CrossProduct(e10);
-		normal = normal.Normalize();
-		t = ray.PolygonIntersect(normal, maxT, points, triangle, 3);
-		if (t < maxT)
-		{
-			normalOut = normal;
-		}
+	ndVector e10(points[2] - points[1]);
+	ndVector e20(points[3] - points[1]);
+	ndVector normal(e10.CrossProduct(e20));
+	normal = normal.Normalize();
+	t = ray.PolygonIntersect(normal, maxT, points, triangle, 3);
+	if (t < maxT)
+	{
+		normalOut = normal;
 		return t;
 	}
+
+	triangle[0] = 1;
+	triangle[1] = 0;
+	triangle[2] = 2;
+
+	ndVector e30(points[0] - points[1]);
+	normal = e30.CrossProduct(e10);
+	normal = normal.Normalize();
+	t = ray.PolygonIntersect(normal, maxT, points, triangle, 3);
+	if (t < maxT)
+	{
+		normalOut = normal;
+	}
+	return t;
 #endif
+
+	ndVector point(ndFloat32(xIndex0), ndFloat32(yIndex0), ndFloat32(zIndex0), ndFloat32(0.0f));
+	ndFixSizeArray<ndTriangle, 5> patch(GetFacesInCell(point));
+	
+return 10;
+}
 
 ndFloat32 ndMarchingCubeIsoSurface::RayCast(const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT) const
 {
-	ndAssert(0);
-#if 0
 	ndVector boxP0;
 	ndVector boxP1;
 
 	// make sure p0 and p1 are in the right order
-	const ndVector q0(localP0.GetMin(localP1) - m_padding);
-	const ndVector q1(localP0.GetMax(localP1) + m_padding);
-	CalculateMinExtend3d(q0, q1, boxP0, boxP1);
-
-	// make the box a beam tha extend from 
-	// infinite positive high to -infinity high.
-	// 1.0e10 represents infinity.
-	boxP0.m_y = -ndFloat32(1.0e10f);
-	boxP1.m_y = ndFloat32(1.0e10f);
-
+	const ndVector q0(localP0.GetMin(localP1));
+	const ndVector q1(localP0.GetMax(localP1));
+	if (!CalculateMinExtend3d(q0, q1, boxP0, boxP1))
+	{
+		return ndFloat32(1.2f);
+	}
 	ndVector p0(localP0);
 	ndVector p1(localP1);
 
-	// clip the line against the bounding box
-	if (ndRayBoxClip(p0, p1, boxP0, boxP1))
+	// check if the origin in indide the aabb
+	bool test = ndOverlapTest(p0, p0, boxP0, boxP1) ? true : false;
+	if (!test)
 	{
-		ndVector dp(p1 - p0);
-		ndVector normalOut(ndVector::m_zero);
-
-		ndFloat32 scale_x = D_TERRAIN_GRID_SIZE;
-		ndFloat32 invScale_x = ndFloat32(1.0f) / D_TERRAIN_GRID_SIZE;
-		ndFloat32 scale_z = D_TERRAIN_GRID_SIZE;
-		ndFloat32 invScale_z = ndFloat32(1.0f) / D_TERRAIN_GRID_SIZE;
-		ndInt32 ix0 = ndInt32(ndFloor(p0.m_x * invScale_x));
-		ndInt32 iz0 = ndInt32(ndFloor(p0.m_z * invScale_z));
-
-		// implement a 3ddda line algorithm 
-		ndInt32 xInc;
-		ndFloat32 tx;
-		ndFloat32 stepX;
-		if (dp.m_x > ndFloat32(0.0f))
-		{
-			xInc = 1;
-			ndFloat32 val = ndFloat32(1.0f) / dp.m_x;
-			stepX = scale_x * val;
-			tx = (scale_x * ((ndFloat32)ix0 + ndFloat32(1.0f)) - p0.m_x) * val;
-		}
-		else if (dp.m_x < ndFloat32(0.0f))
-		{
-			xInc = -1;
-			ndFloat32 val = -ndFloat32(1.0f) / dp.m_x;
-			stepX = scale_x * val;
-			tx = -(scale_x * (ndFloat32)ix0 - p0.m_x) * val;
-		}
-		else
-		{
-			xInc = 0;
-			stepX = ndFloat32(0.0f);
-			tx = ndFloat32(1.0e10f);
-		}
-
-		ndInt32 zInc;
-		ndFloat32 tz;
-		ndFloat32 stepZ;
-		if (dp.m_z > ndFloat32(0.0f))
-		{
-			zInc = 1;
-			ndFloat32 val = ndFloat32(1.0f) / dp.m_z;
-			stepZ = scale_z * val;
-			tz = (scale_z * ((ndFloat32)iz0 + ndFloat32(1.0f)) - p0.m_z) * val;
-		}
-		else if (dp.m_z < ndFloat32(0.0f))
-		{
-			zInc = -1;
-			ndFloat32 val = -ndFloat32(1.0f) / dp.m_z;
-			stepZ = scale_z * val;
-			tz = -(scale_z * (ndFloat32)iz0 - p0.m_z) * val;
-		}
-		else
-		{
-			zInc = 0;
-			stepZ = ndFloat32(0.0f);
-			tz = ndFloat32(1.0e10f);
-		}
-
-		ndFloat32 txAcc = tx;
-		ndFloat32 tzAcc = tz;
-		ndInt32 xIndex0 = ix0;
-		ndInt32 zIndex0 = iz0;
-		ndFastRay ray(localP0, localP1);
-
-		// for each cell touched by the line
-		do
-		{
-			ndFloat32 t = RayCastCell(ray, xIndex0, zIndex0, normalOut, maxT);
-			if (t < maxT)
-			{
-				// bail out at the first intersection and copy the data into the descriptor
-				ndAssert(normalOut.m_w == ndFloat32(0.0f));
-				contactOut.m_normal = normalOut.Normalize();
-				contactOut.m_shapeId0 = m_material[zIndex0 * D_TERRAIN_WIDTH + xIndex0];
-				contactOut.m_shapeId1 = m_material[zIndex0 * D_TERRAIN_WIDTH + xIndex0];
-
-				return t;
-			}
-
-			if (txAcc < tzAcc)
-			{
-				tx = txAcc;
-				xIndex0 += xInc;
-				txAcc += stepX;
-			}
-			else
-			{
-				tz = tzAcc;
-				zIndex0 += zInc;
-				tzAcc += stepZ;
-			}
-		} while ((tx <= ndFloat32(1.0f)) || (tz <= ndFloat32(1.0f)));
+		ndAssert(0);
+		// orgin is outsize the intesection box. 
+		// clip the ray 
+		test = ndRayBoxClip(p0, p1, boxP0, boxP1);
 	}
-#endif
+	if (!test)
+	{
+		return ndFloat32(1.2f);
+	}
+
+	ndVector dp(p1 - p0);
+	ndVector normalOut(ndVector::m_zero);
+
+	ndFloat32 scale_x = m_gridSize.m_x;
+	ndFloat32 invScale_x = ndFloat32(1.0f) / m_gridSize.m_x;
+	ndFloat32 scale_y = m_gridSize.m_y;
+	ndFloat32 invScale_y = ndFloat32(1.0f) / m_gridSize.m_y;
+	ndFloat32 scale_z = m_gridSize.m_z;
+	ndFloat32 invScale_z = ndFloat32(1.0f) / m_gridSize.m_z;
+
+	ndInt32 ix0 = ndInt32(ndFloor(p0.m_x * invScale_x));
+	ndInt32 iy0 = ndInt32(ndFloor(p0.m_y * invScale_y));
+	ndInt32 iz0 = ndInt32(ndFloor(p0.m_z * invScale_z));
+
+	// implement a 3ddda line algorithm 
+	ndInt32 xInc;
+	ndFloat32 tx;
+	ndFloat32 stepX;
+	if (dp.m_x > ndFloat32(0.0f))
+	{
+		xInc = 1;
+		ndFloat32 val = ndFloat32(1.0f) / dp.m_x;
+		stepX = scale_x * val;
+		tx = (scale_x * ((ndFloat32)ix0 + ndFloat32(1.0f)) - p0.m_x) * val;
+	}
+	else if (dp.m_x < ndFloat32(0.0f))
+	{
+		xInc = -1;
+		ndFloat32 val = -ndFloat32(1.0f) / dp.m_x;
+		stepX = scale_x * val;
+		tx = -(scale_x * (ndFloat32)ix0 - p0.m_x) * val;
+	}
+	else
+	{
+		xInc = 0;
+		stepX = ndFloat32(0.0f);
+		tx = ndFloat32(1.0e10f);
+	}
+
+	ndInt32 yInc;
+	ndFloat32 ty;
+	ndFloat32 stepY;
+	if (dp.m_y > ndFloat32(0.0f))
+	{
+		yInc = 1;
+		ndFloat32 val = ndFloat32(1.0f) / dp.m_y;
+		stepY = scale_y * val;
+		ty = (scale_y * ((ndFloat32)ix0 + ndFloat32(1.0f)) - p0.m_y) * val;
+	}
+	else if (dp.m_y < ndFloat32(0.0f))
+	{
+		yInc = -1;
+		ndFloat32 val = -ndFloat32(1.0f) / dp.m_y;
+		stepY = scale_y * val;
+		ty = -(scale_y * (ndFloat32)iy0 - p0.m_y) * val;
+	}
+	else
+	{
+		yInc = 0;
+		stepY = ndFloat32(0.0f);
+		ty = ndFloat32(1.0e10f);
+	}
+
+	ndInt32 zInc;
+	ndFloat32 tz;
+	ndFloat32 stepZ;
+	if (dp.m_z > ndFloat32(0.0f))
+	{
+		zInc = 1;
+		ndFloat32 val = ndFloat32(1.0f) / dp.m_z;
+		stepZ = scale_z * val;
+		tz = (scale_z * ((ndFloat32)iz0 + ndFloat32(1.0f)) - p0.m_z) * val;
+	}
+	else if (dp.m_z < ndFloat32(0.0f))
+	{
+		zInc = -1;
+		ndFloat32 val = -ndFloat32(1.0f) / dp.m_z;
+		stepZ = scale_z * val;
+		tz = -(scale_z * (ndFloat32)iz0 - p0.m_z) * val;
+	}
+	else
+	{
+		zInc = 0;
+		stepZ = ndFloat32(0.0f);
+		tz = ndFloat32(1.0e10f);
+	}
+
+	ndFloat32 txAcc = tx;
+	ndFloat32 tyAcc = ty;
+	ndFloat32 tzAcc = tz;
+	ndInt32 xIndex0 = ix0;
+	ndInt32 yIndex0 = iy0;
+	ndInt32 zIndex0 = iz0;
+	ndFastRay ray(localP0, localP1);
+
+	// for each cell touched by the line
+	do
+	{
+		ndFloat32 t = RayCastCell(ray, xIndex0, yIndex0, zIndex0, normalOut, maxT);
+		if (t < maxT)
+		{
+			ndAssert(0);
+			//// bail out at the first intersection and copy the data into the descriptor
+			//ndAssert(normalOut.m_w == ndFloat32(0.0f));
+			//contactOut.m_normal = normalOut.Normalize();
+			//contactOut.m_shapeId0 = m_material[zIndex0 * D_TERRAIN_WIDTH + xIndex0];
+			//contactOut.m_shapeId1 = m_material[zIndex0 * D_TERRAIN_WIDTH + xIndex0];
+			//
+			//return t;
+		}
+
+		if ((txAcc < tyAcc) && (txAcc < tzAcc))
+		{
+			tx = txAcc;
+			xIndex0 += xInc;
+			txAcc += stepX;
+		}
+		if (tyAcc < tzAcc)
+		{
+			ty = tyAcc;
+			yIndex0 += yInc;
+			tyAcc += stepY;
+		}
+		else
+		{
+			tz = tzAcc;
+			zIndex0 += zInc;
+			tzAcc += stepZ;
+		}
+	} while ((tx <= ndFloat32(1.0f)) || (ty <= ndFloat32(1.0f)) || (tz <= ndFloat32(1.0f)));
+
 	// if no cell was hit, return a large value
 	return ndFloat32(1.2f);
 }
@@ -484,8 +534,92 @@ void ndMarchingCubeIsoSurface::GenerateMesh()
 		high += m_gridSize.m_y;
 		m_threadPool->ParallelExecute(ReadLayerDensity, ndInt32(boxSizeInGrids.m_iz), 1);
 		
+		//ndInt32 stride = 0;
 		ndFloat32 grid_Z0 = ndFloat32(0.0f);
 		ndFloat32 grid_Z1 = ndFloat32(1.0f);
+		//for (ndInt32 z = 0; z < boxSizeInGrids.m_iz - 1; ++z)
+		//{
+		//	for (ndInt32 x = 0; x < boxSizeInGrids.m_ix - 1; ++x)
+		//	{
+		//		ndIsoCell cell;
+		//		const ndInt32 i0 = stride + x;
+		//		const ndInt32 i1 = stride + x + 1;
+		//		const ndInt32 i2 = boxSizeInGrids.m_ix + stride + x + 1;
+		//		const ndInt32 i3 = boxSizeInGrids.m_ix + stride + x;
+		//
+		//		ndFloat32 isoValues[8];
+		//		isoValues[0] = m_densityWindow0[i0];
+		//		isoValues[1] = m_densityWindow0[i1];
+		//		isoValues[2] = m_densityWindow0[i2];
+		//		isoValues[3] = m_densityWindow0[i3];
+		//		isoValues[4] = m_densityWindow1[i0];
+		//		isoValues[5] = m_densityWindow1[i1];
+		//		isoValues[6] = m_densityWindow1[i2];
+		//		isoValues[7] = m_densityWindow1[i3];
+		//
+		//		ndInt32 tableIndex = 0;
+		//		for (ndInt32 i = 0; i < 8; ++i)
+		//		{
+		//			tableIndex |= (isoValues[i] <= 0.0f) << i;
+		//		}
+		//
+		//		const ndInt32 edgeStart = m_edgeScan[tableIndex];
+		//		const ndInt32 edgeCount = m_edgeScan[tableIndex + 1] - edgeStart;
+		//		if (edgeCount)
+		//		{
+		//			cell.m_isoValues[0] = ndVector(ndFloat32(x + 0), grid_y0, grid_Z0, isoValues[0]);
+		//			cell.m_isoValues[1] = ndVector(ndFloat32(x + 1), grid_y0, grid_Z0, isoValues[1]);
+		//			cell.m_isoValues[2] = ndVector(ndFloat32(x + 1), grid_y0, grid_Z1, isoValues[2]);
+		//			cell.m_isoValues[3] = ndVector(ndFloat32(x + 0), grid_y0, grid_Z1, isoValues[3]);
+		//			cell.m_isoValues[4] = ndVector(ndFloat32(x + 0), grid_y1, grid_Z0, isoValues[4]);
+		//			cell.m_isoValues[5] = ndVector(ndFloat32(x + 1), grid_y1, grid_Z0, isoValues[5]);
+		//			cell.m_isoValues[6] = ndVector(ndFloat32(x + 1), grid_y1, grid_Z1, isoValues[6]);
+		//			cell.m_isoValues[7] = ndVector(ndFloat32(x + 0), grid_y1, grid_Z1, isoValues[7]);
+		//
+		//			ndVector vertlist[12];
+		//			for (ndInt32 i = 0; i < edgeCount; ++i)
+		//			{
+		//				const ndEdge& edge = m_edges[edgeStart + i];
+		//				const ndInt32 midPoint = edge.m_midPoint;
+		//					
+		//				const ndVector p0(cell.m_isoValues[edge.m_p0]);
+		//				const ndVector p1(cell.m_isoValues[edge.m_p1]);
+		//				ndAssert((p1.m_w * p0.m_w) <= ndFloat32(0.0f));
+		//				const ndVector p1p0(p1 - p0);
+		//				ndFloat32 param = p0.m_w / (p1.m_w - p0.m_w);
+		//				const ndVector p3 (ndVector::m_triplexMask & (p0 - p1p0.Scale(param)));
+		//				vertlist[midPoint] = p3;
+		//			}
+		//
+		//			const ndInt32 faceStart = m_facesScan[tableIndex];
+		//			const ndInt32 triangleStart = m_facesScan[tableIndex];
+		//			const ndInt32 triangleCount = m_facesScan[tableIndex + 1] - triangleStart;
+		//			for (ndInt32 i = 0; i < triangleCount; ++i)
+		//			{
+		//				const ndInt32 j0 = m_faces[faceStart + i][0];
+		//				const ndInt32 j1 = m_faces[faceStart + i][1];
+		//				const ndInt32 j2 = m_faces[faceStart + i][2];
+		//
+		//				const ndVector& p0 = vertlist[j0];
+		//				const ndVector& p1 = vertlist[j1];
+		//				const ndVector& p2 = vertlist[j2];
+		//				const ndVector p10(p1 - p0);
+		//				const ndVector p20(p2 - p0);
+		//				const ndVector area(p10.CrossProduct(p20));
+		//				ndFloat32 areaMag2 = area.DotProduct(area & ndVector::m_triplexMask).GetScalar();
+		//				if (areaMag2 > ndFloat32(1.0e-6f))
+		//				{
+		//					m_meshPoints.PushBack(p0);
+		//					m_meshPoints.PushBack(p1);
+		//					m_meshPoints.PushBack(p2);
+		//				}
+		//			}
+		//		}
+		//	}
+		//	grid_Z0 += ndFloat32(1.0f);
+		//	grid_Z1 += ndFloat32(1.0f);
+		//	stride += boxSizeInGrids.m_ix;
+		//}
 
 		m_gridScansLayer.SetCount((boxSizeInGrids.m_ix - 1) * (boxSizeInGrids.m_iz - 1));
 		m_gridScansLayer.PushBack(ndGridInfo());

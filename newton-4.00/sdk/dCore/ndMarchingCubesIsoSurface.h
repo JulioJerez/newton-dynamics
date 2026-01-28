@@ -51,6 +51,7 @@ class ndMarchingCubeIsoSurface : public ndMarchingCubes
 	D_CORE_API virtual void GenerateMesh() override;
 	D_CORE_API ndVector PositionToGrid(const ndVector& posit) const;
 
+	D_CORE_API ndFixSizeArray<ndTriangle, 5> GetFacesInCell(const ndVector& gridPosit) const;
 	D_CORE_API ndFloat32 RayCast(const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT) const;
 
 	virtual ndReal GetIsoValue(const ndVector& posit) const = 0;
@@ -70,7 +71,8 @@ class ndMarchingCubeIsoSurface : public ndMarchingCubes
 	};
 
 	void GenerateIndexList();
-	void CalculateMinExtend3d(const ndVector& p0, const ndVector& p1, ndVector& boxP0, ndVector& boxP1) const;
+	bool CalculateMinExtend3d(const ndVector& p0, const ndVector& p1, ndVector& boxP0, ndVector& boxP1) const;
+	ndFloat32 RayCastCell(const ndFastRay& ray, ndInt32 xIndex0, ndInt32 yIndex0, ndInt32 zIndex0, ndVector& normalOut, ndFloat32 maxT) const;
 
 	ndVector m_boxP0;
 	ndVector m_boxP1;
