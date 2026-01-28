@@ -87,6 +87,9 @@ class ndMarchingCubes : public ndClassAlloc
 	D_CORE_API const ndArray<ndVector>& GetMeshVertex() const;
 	D_CORE_API const ndArray<ndVector>& GetMeshNormals() const;
 
+	D_CORE_API ndVector GetGridSize() const;
+	D_CORE_API ndVector GetInvGridSize() const;
+
 	virtual void GenerateMesh() = 0;
 
 	protected:

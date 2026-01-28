@@ -3081,6 +3081,16 @@ const ndArray<ndVector>& ndMarchingCubes::GetMeshNormals() const
 	return m_meshNormals;
 }
 
+ndVector ndMarchingCubes::GetGridSize() const
+{
+	return m_gridSize;
+}
+
+ndVector ndMarchingCubes::GetInvGridSize() const
+{
+	return m_invGridSize;
+}
+
 // ***********************************************************
 //
 // ***********************************************************

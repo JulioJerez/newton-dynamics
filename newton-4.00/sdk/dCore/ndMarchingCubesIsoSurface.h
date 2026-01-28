@@ -49,8 +49,11 @@ class ndMarchingCubeIsoSurface : public ndMarchingCubes
 	D_CORE_API void SetBox(const ndVector& boxP0, const ndVector& boxP1);
 
 	D_CORE_API virtual void GenerateMesh() override;
-	virtual ndReal GetIsoValue(const ndVector& posit) const = 0;
 	D_CORE_API ndVector PositionToGrid(const ndVector& posit) const;
+
+	D_CORE_API ndFloat32 RayCast(const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT) const;
+
+	virtual ndReal GetIsoValue(const ndVector& posit) const = 0;
 
 	protected:
 	class ndGridInfo
@@ -67,6 +70,8 @@ class ndMarchingCubeIsoSurface : public ndMarchingCubes
 	};
 
 	void GenerateIndexList();
+	void CalculateMinExtend3d(const ndVector& p0, const ndVector& p1, ndVector& boxP0, ndVector& boxP1) const;
+
 	ndVector m_boxP0;
 	ndVector m_boxP1;
 	ndArray<ndGridInfo> m_gridScansLayer;
