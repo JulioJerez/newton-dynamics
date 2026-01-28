@@ -84,19 +84,6 @@ inline void ndMovingAABB (ndVector& p0, ndVector& p1, const ndVector& veloc, con
 	p1 = r1.GetMax (q1) & ndVector::m_triplexMask;
 }
 
-//inline ndFloat32 ndBoxPenetration (const ndVector& minBox, const ndVector& maxBox)
-//{
-//	ndAssert(maxBox.m_x >= minBox.m_x);
-//	ndAssert(maxBox.m_y >= minBox.m_y);
-//	ndAssert(maxBox.m_z >= minBox.m_z);
-//
-//	ndVector mask ((minBox * maxBox) < ndVector::m_zero);
-//	ndVector dist (maxBox.GetMin (minBox.Abs()) & mask);
-//	dist = dist.GetMin(dist.ShiftTripleRight());
-//	dist = dist.GetMin(dist.ShiftTripleRight());
-//	return dist.GetScalar();
-//}
-
 inline ndFloat32 ndBoxDistanceToOrigin2 (const ndVector& minBox, const ndVector& maxBox)
 {
 	ndAssert(maxBox.m_x >= minBox.m_x);
@@ -105,6 +92,26 @@ inline ndFloat32 ndBoxDistanceToOrigin2 (const ndVector& minBox, const ndVector&
 	const ndVector mask (((minBox * maxBox) > ndVector::m_zero) & ndVector::m_triplexMask);
 	const ndVector dist (maxBox.Abs().GetMin (minBox.Abs()) & mask);
 	return dist.DotProduct(dist).GetScalar();
+}
+
+inline bool ndBoxBoxIntestion(ndVector& minBox, ndVector& maxBox,
+	const ndVector& minBox0, const ndVector& maxBox0,
+	const ndVector& minBox1, const ndVector& maxBox1)
+{
+	ndAssert(maxBox0.m_x >= minBox0.m_x);
+	ndAssert(maxBox0.m_y >= minBox0.m_y);
+	ndAssert(maxBox0.m_z >= minBox0.m_z);
+	ndAssert(maxBox1.m_x >= minBox1.m_x);
+	ndAssert(maxBox1.m_y >= minBox1.m_y);
+	ndAssert(maxBox1.m_z >= minBox1.m_z);
+
+	bool test = ndOverlapTest(minBox0, maxBox0, minBox1, maxBox1) ? true : false;
+	if (test)
+	{
+		minBox = minBox0.GetMax(minBox1);
+		maxBox = maxBox0.GetMin(maxBox1);
+	}
+	return test;
 }
 
 #endif
