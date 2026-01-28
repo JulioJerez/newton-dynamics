@@ -191,9 +191,9 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 
 	virtual ndFloat32 RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const, ndContactPoint& contactOut) const override
 	{
-		ndFloat32 t = m_terrain->RayCast(localP0, localP1, maxT);
-
-		return t;
+		//ndFloat32 t = m_terrain->RayCast(localP0, localP1, maxT);
+		//return t;
+		return 1.2f;
 	}
 
 	//void GetFacesPatch(ndPatchMesh& patch) const override
