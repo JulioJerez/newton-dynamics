@@ -26,6 +26,7 @@
 
 #ifndef D_USE_NEW_FLUID
 
+#if 0
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndBodySphFluid: public ndBodyParticleSet
 {
@@ -141,4 +142,5 @@ inline void ndBodySphFluid::SetGasConstant(ndFloat32 gasConst)
 
 #endif 
 
+#endif
 #endif

@@ -280,10 +280,16 @@ void ndBvhNode::SetAabb(const ndVector& minBox, const ndVector& maxBox)
 	ndAssert(minBox.m_z <= maxBox.m_z);
 
 	const ndVector p0(minBox * m_aabbQuantization);
-	const ndVector p1(maxBox * m_aabbQuantization + ndVector::m_one);
+	//const ndVector p1(maxBox * m_aabbQuantization + ndVector::m_one);
+	const ndVector p1(maxBox * m_aabbQuantization);
+
+	//const ndVector xxx0 = (maxBox * m_aabbQuantization);
+	//const ndVector xxx1 = (xxx0 + ndVector::m_one).Floor();
+	//const ndVector xxx2 = xxx0.Ceiling();
 
 	m_minBox = p0.Floor() * m_aabbInvQuantization;
-	m_maxBox = p1.Floor() * m_aabbInvQuantization;
+	//m_maxBox = p1.Floor() * m_aabbInvQuantization;
+	m_maxBox = p1.Ceiling() * m_aabbInvQuantization;
 
 	ndAssert(m_minBox.m_w == ndFloat32(0.0f));
 	ndAssert(m_maxBox.m_w == ndFloat32(0.0f));

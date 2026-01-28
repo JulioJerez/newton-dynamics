@@ -22,9 +22,9 @@
 #include "ndCoreStdafx.h"
 #include "ndBodyParticleSet.h"
 
+#if 0
 ndBodyParticleSet::ndBodyParticleSet()
 	:ndBody()
-	,ndBackgroundTask()
 	,m_box0(ndFloat32(-1e10f))
 	,m_box1(ndFloat32(1e10f))
 	,m_gravity(ndVector::m_zero)
@@ -40,3 +40,4 @@ ndBodyParticleSet::ndBodyParticleSet()
 ndBodyParticleSet::~ndBodyParticleSet()
 {
 }
+#endif

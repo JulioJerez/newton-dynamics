@@ -30,6 +30,7 @@
 // adapted from code by written by Paul Bourke may 1994
 //http://paulbourke.net/geometry/polygonise/
 
+#if 0
 namespace Original
 {
 	struct XYZ
@@ -484,12 +485,16 @@ namespace Original
 		return(ntriang);
 	}
 }
+#endif
 
+// ***********************************************************
+//
+// ***********************************************************
 class ndMarchingCubes::ndKey_xlow
 {
 	public:
 	ndKey_xlow(void* const) {}
-	ndInt32 GetKey(const ndMarchingCubes::ndGridHash& cell) const
+	ndInt32 GetKey(const ndGridHash& cell) const
 	{
 		return cell.m_xLow;
 	}
@@ -499,7 +504,7 @@ class ndMarchingCubes::ndKey_xhigh
 {
 	public:
 	ndKey_xhigh(void* const) {}
-	ndInt32 GetKey(const ndMarchingCubes::ndGridHash& cell) const
+	ndInt32 GetKey(const ndGridHash& cell) const
 	{
 		return cell.m_xHigh;
 	}
@@ -509,7 +514,7 @@ class ndMarchingCubes::ndKey_ylow
 {
 	public:
 	ndKey_ylow(void* const) {}
-	ndInt32 GetKey(const ndMarchingCubes::ndGridHash& cell) const
+	ndInt32 GetKey(const ndGridHash& cell) const
 	{
 		return cell.m_yLow;
 	}
@@ -519,7 +524,7 @@ class ndMarchingCubes::ndKey_yhigh
 {
 	public:
 	ndKey_yhigh(void* const) {}
-	ndInt32 GetKey(const ndMarchingCubes::ndGridHash& cell) const
+	ndInt32 GetKey(const ndGridHash& cell) const
 	{
 		return cell.m_yHigh;
 	}
@@ -529,7 +534,7 @@ class ndMarchingCubes::ndKey_zlow
 {
 	public:
 	ndKey_zlow(void* const) {}
-	ndInt32 GetKey(const ndMarchingCubes::ndGridHash& cell) const
+	ndInt32 GetKey(const ndGridHash& cell) const
 	{
 		return cell.m_zLow;
 	}
@@ -539,19 +544,12 @@ class ndMarchingCubes::ndKey_zhigh
 {
 	public:
 	ndKey_zhigh(void* const) {}
-	ndInt32 GetKey(const ndMarchingCubes::ndGridHash& cell) const
+	ndInt32 GetKey(const ndGridHash& cell) const
 	{
 		return cell.m_zHigh;
 	}
 };
 
-class ndMarchingCubes::ndEdge
-{
-	public:
-	ndInt32 m_midPoint;
-	ndInt32 m_p0;
-	ndInt32 m_p1;
-};
 
 class ndMarchingCubes::ndIsoCell
 {
@@ -584,10 +582,10 @@ class ndMarchingCubes::ndGridHashSteps
 	}
 
 	ndGridHash m_steps[8];
-	ndUnsigned8 m_cellType[8];
+	ndInt8 m_cellType[8];
 };
 
-ndVector ndMarchingCubes::ndCalculateIsoValue::m_gridCorners[] =
+ndVector ndMarchingCubes::m_gridCorners[] =
 {
 	ndVector(ndFloat32(0.0f), ndFloat32(-1.0f), ndFloat32(-1.0f), ndFloat32(0.0f)),
 	ndVector(ndFloat32(0.0f), ndFloat32(-1.0f), ndFloat32(0.0f), ndFloat32(0.0f)),
@@ -599,10 +597,60 @@ ndVector ndMarchingCubes::ndCalculateIsoValue::m_gridCorners[] =
 	ndVector(ndFloat32(-1.0f), ndFloat32(0.0f), ndFloat32(-1.0f), ndFloat32(0.0f))
 };
 
-ndInt32 ndMarchingCubes::ndCalculateIsoValue::m_facesScan[] = { 0,0,1,2,4,5,7,9,12,13,15,17,20,22,25,28,30,31,33,35,38,40,43,46,50,52,55,58,62,65,69,73,76,77,79,81,84,86,89,92,96,98,101,104,108,111,115,119,122,124,127,130,132,135,139,143,146,149,153,157,160,164,169,174,176,177,179,181,184,186,189,192,196,198,201,204,208,211,215,219,222,224,227,230,234,237,241,245,250,253,257,261,266,270,275,280,284,286,289,292,296,299,303,305,308,311,315,319,324,328,333,336,338,341,345,349,352,356,361,364,366,370,375,380,384,389,391,395,396,397,399,401,404,406,409,412,416,418,421,424,428,431,435,439,442,444,447,450,454,457,461,465,470,473,475,479,482,486,489,494,496,498,501,504,508,511,515,519,524,527,531,535,540,544,549,554,558,561,565,569,572,576,581,586,590,594,597,602,604,609,613,615,616,618,621,624,628,631,635,639,644,647,651,655,660,662,665,668,670,673,677,681,686,690,695,700,702,706,709,714,718,721,723,727,728,731,735,739,744,748,753,756,760,764,769,774,776,779,783,785,786,788,791,794,796,799,803,805,806,809,811,815,816,818,819,820 };
-ndInt32 ndMarchingCubes::ndCalculateIsoValue::m_edgeScan[] = { 0,0,3,6,10,13,19,23,28,31,35,41,46,50,55,60,64,67,71,77,82,88,95,102,108,114,119,128,134,141,147,155,160,163,169,173,178,184,193,198,204,210,217,224,230,237,245,251,256,260,265,270,274,281,289,295,300,307,313,321,326,334,341,348,352,355,361,367,374,378,385,390,396,402,409,418,426,431,437,443,448,454,461,470,478,485,493,501,508,517,525,537,546,554,561,570,576,580,587,592,598,603,611,615,620,627,635,643,650,656,663,668,672,677,683,689,694,700,707,712,716,724,731,740,746,753,759,765,768,771,777,783,790,796,805,812,820,824,829,836,842,847,853,859,864,868,873,880,886,893,901,909,916,921,925,933,938,944,949,956,960,966,975,982,990,999,1011,1019,1028,1035,1043,1051,1058,1066,1075,1082,1088,1093,1099,1105,1110,1118,1127,1134,1140,1146,1151,1158,1162,1169,1175,1181,1184,1188,1195,1202,1210,1215,1223,1229,1236,1241,1247,1255,1262,1266,1271,1276,1280,1285,1291,1299,1306,1312,1319,1326,1332,1338,1343,1352,1358,1363,1367,1373,1376,1381,1389,1395,1402,1408,1417,1422,1428,1434,1441,1448,1454,1459,1465,1469,1472,1476,1481,1486,1490,1495,1501,1505,1508,1513,1517,1523,1526,1530,1533,1536 };
+ndInt32 ndMarchingCubes::m_facesScan[] = 
+{ 
+	0,0,1,2,4,5,7,9,12,13,15,17,20,22,25,28,30,31,
+	33,35,38,40,43,46,50,52,55,58,62,65,69,73,76,
+	77,79,81,84,86,89,92,96,98,101,104,108,111,115,
+	119,122,124,127,130,132,135,139,143,146,149,153,
+	157,160,164,169,174,176,177,179,181,184,186,189,
+	192,196,198,201,204,208,211,215,219,222,224,227,
+	230,234,237,241,245,250,253,257,261,266,270,275,
+	280,284,286,289,292,296,299,303,305,308,311,315,
+	319,324,328,333,336,338,341,345,349,352,356,361,
+	364,366,370,375,380,384,389,391,395,396,397,399,
+	401,404,406,409,412,416,418,421,424,428,431,435,
+	439,442,444,447,450,454,457,461,465,470,473,475,
+	479,482,486,489,494,496,498,501,504,508,511,515,
+	519,524,527,531,535,540,544,549,554,558,561,565,
+	569,572,576,581,586,590,594,597,602,604,609,613,
+	615,616,618,621,624,628,631,635,639,644,647,651,
+	655,660,662,665,668,670,673,677,681,686,690,695,
+	700,702,706,709,714,718,721,723,727,728,731,735,
+	739,744,748,753,756,760,764,769,774,776,779,783,
+	785,786,788,791,794,796,799,803,805,806,809,811,
+	815,816,818,819,820,820 };
 
-ndInt32 ndMarchingCubes::ndCalculateIsoValue::m_faces[][3] =
+ndInt32 ndMarchingCubes::m_edgeScan[] = 
+{ 
+	0,0,3,6,10,13,19,23,28,31,35,41,46,50,55,60,
+	64,67,71,77,82,88,95,102,108,114,119,128,134,
+	141,147,155,160,163,169,173,178,184,193,198,
+	204,210,217,224,230,237,245,251,256,260,265,
+	270,274,281,289,295,300,307,313,321,326,334,
+	341,348,352,355,361,367,374,378,385,390,396,
+	402,409,418,426,431,437,443,448,454,461,470,
+	478,485,493,501,508,517,525,537,546,554,561,
+	570,576,580,587,592,598,603,611,615,620,627,
+	635,643,650,656,663,668,672,677,683,689,694,
+	700,707,712,716,724,731,740,746,753,759,765,
+	768,771,777,783,790,796,805,812,820,824,829,
+	836,842,847,853,859,864,868,873,880,886,893,
+	901,909,916,921,925,933,938,944,949,956,960,
+	966,975,982,990,999,1011,1019,1028,1035,1043,
+	1051,1058,1066,1075,1082,1088,1093,1099,1105,
+	1110,1118,1127,1134,1140,1146,1151,1158,1162,
+	1169,1175,1181,1184,1188,1195,1202,1210,1215,
+	1223,1229,1236,1241,1247,1255,1262,1266,1271,
+	1276,1280,1285,1291,1299,1306,1312,1319,1326,
+	1332,1338,1343,1352,1358,1363,1367,1373,1376,
+	1381,1389,1395,1402,1408,1417,1422,1428,1434,
+	1441,1448,1454,1459,1465,1469,1472,1476,1481,
+	1486,1490,1495,1501,1505,1508,1513,1517,1523,
+	1526,1530,1533,1536,1536 
+};
+
+ndInt32 ndMarchingCubes::m_faces[][3] =
 {
 	{ 0, 8, 3 },
 	{ 0, 1, 9 },
@@ -1426,7 +1474,7 @@ ndInt32 ndMarchingCubes::ndCalculateIsoValue::m_faces[][3] =
 	{ 0, 3, 8 },
 };
 
-ndMarchingCubes::ndEdge ndMarchingCubes::ndCalculateIsoValue::m_edges[] =
+ndMarchingCubes::ndEdge ndMarchingCubes::m_edges[] =
 {
 	{ 0, 0, 1 },
 	{ 3, 3, 0 },
@@ -2966,11 +3014,12 @@ ndMarchingCubes::ndEdge ndMarchingCubes::ndCalculateIsoValue::m_edges[] =
 	{ 8, 0, 4 },
 };
 
+
 ndMarchingCubes::ndGridHash::ndGridHash()
 {
 }
 
-ndMarchingCubes::ndGridHash::ndGridHash(const ndGridHash& src, ndUnsigned16 cellType)
+ndMarchingCubes::ndGridHash::ndGridHash(const ndGridHash& src, ndInt8 cellType)
 {
 	m_gridFullHash = src.m_gridFullHash;
 	m_cellType = cellType;
@@ -2979,9 +3028,9 @@ ndMarchingCubes::ndGridHash::ndGridHash(const ndGridHash& src, ndUnsigned16 cell
 ndMarchingCubes::ndGridHash::ndGridHash(ndInt32 x, ndInt32 y, ndInt32 z)
 {
 	m_gridFullHash = 0;
-	m_x = ndUnsigned16(x);
-	m_y = ndUnsigned16(y);
-	m_z = ndUnsigned16(z);
+	m_x = ndInt16(x);
+	m_y = ndInt16(y);
+	m_z = ndInt16(z);
 }
 
 ndMarchingCubes::ndGridHash::ndGridHash(const ndVector& grid)
@@ -2989,66 +3038,405 @@ ndMarchingCubes::ndGridHash::ndGridHash(const ndVector& grid)
 	ndAssert(grid.m_x >= ndFloat32(0.0f));
 	ndAssert(grid.m_y >= ndFloat32(0.0f));
 	ndAssert(grid.m_z >= ndFloat32(0.0f));
-	ndAssert(grid.m_x < ndFloat32(256.0f * 256.0f));
-	ndAssert(grid.m_y < ndFloat32(256.0f * 256.0f));
-	ndAssert(grid.m_z < ndFloat32(256.0f * 256.0f));
+	ndAssert(grid.m_x < ndFloat32(128.0f * 256.0f));
+	ndAssert(grid.m_y < ndFloat32(128.0f * 256.0f));
+	ndAssert(grid.m_z < ndFloat32(128.0f * 256.0f));
 
 	ndVector hash(grid.Floor().GetInt());
 	m_gridFullHash = 0;
-	m_x = ndUnsigned16(hash.m_ix);
-	m_y = ndUnsigned16(hash.m_iy);
-	m_z = ndUnsigned16(hash.m_iz);
+	m_x = ndInt16(hash.m_ix);
+	m_y = ndInt16(hash.m_iy);
+	m_z = ndInt16(hash.m_iz);
 }
 
-// ***********************************************************
-//
-// ***********************************************************
-ndMarchingCubes::ndCalculateIsoValue::ndCalculateIsoValue(ndFloat32 gridSize, ndThreadPool* const threadPool)
-	:m_gridSize(gridSize)
-	,m_invGridSize(ndFloat32 (1.0f)/ gridSize)
-	,m_isoSufaceValue(ndFloat32(0.5f))
+ndMarchingCubes::ndMarchingCubes(ndThreadPool* const threadPool, ndFloat32 particleSize)
+	:ndClassAlloc()
+	,m_gridSize(particleSize)
+	,m_invGridSize(ndFloat32(1.0f) / particleSize)
+	,m_meshPoints()
+	,m_meshNormals()
+	,m_meshIndices()
 	,m_threadPool(threadPool)
 {
 	m_gridSize = m_gridSize & ndVector::m_triplexMask;
 	m_invGridSize = m_invGridSize & ndVector::m_triplexMask;
 }
 
-ndMarchingCubes::ndCalculateIsoValue::~ndCalculateIsoValue()
+ndMarchingCubes::~ndMarchingCubes()
 {
+}
+
+const ndArray<ndInt32>& ndMarchingCubes::GetTriangles() const
+{
+	return m_meshIndices;
+}
+
+const ndArray<ndVector>& ndMarchingCubes::GetMeshVertex() const
+{
+	return m_meshPoints;
+}
+
+const ndArray<ndVector>& ndMarchingCubes::GetMeshNormals() const
+{
+	return m_meshNormals;
+}
+
+ndVector ndMarchingCubes::GetGridSize() const
+{
+	return m_gridSize;
+}
+
+ndVector ndMarchingCubes::GetInvGridSize() const
+{
+	return m_invGridSize;
 }
 
 // ***********************************************************
 //
 // ***********************************************************
-ndMarchingCubes::ndMarchingCubes()
+ndMarchingCubesPaticles::ndMarchingCubesPaticles(ndThreadPool* const threadPool, ndFloat32 particleSize)
+	:ndMarchingCubes(threadPool, particleSize)
+	,m_boxP0(ndVector::m_zero)
+	,m_boxP1(ndVector::m_zero)
+	,m_volumeInGrids(ndVector::m_zero)
+	,m_hashGridMap()
+	,m_hashGridMapScratchBuffer()
+	,m_cellScans()
+	,m_cellTrianglesScans()
 {
 }
 
-ndMarchingCubes::~ndMarchingCubes()
+void ndMarchingCubesPaticles::CalculateAABB()
 {
+	ndFixSizeArray<ndVector, D_MAX_THREADS_COUNT * 2> partialAABB(m_threadPool->GetThreadCount() * 2);
+	auto CalculateAABB = ndMakeObject::ndFunction([this, &partialAABB](ndInt32 groupId, ndInt32 threadIndex)
+	{
+		const ndVector p(m_pointParticles[groupId]);
+		partialAABB[threadIndex * 2 + 0] = p.GetMin(partialAABB[threadIndex * 2 + 0]);
+		partialAABB[threadIndex * 2 + 1] = p.GetMax(partialAABB[threadIndex * 2 + 1]);
+	});
+
+	for (ndInt32 i = 0; i < m_threadPool->GetThreadCount(); ++i)
+	{
+		partialAABB[i * 2 + 0] = ndVector(ndFloat32(1.0e10f));
+		partialAABB[i * 2 + 1] = ndVector(ndFloat32(-1.0e10f));
+	}
+	const ndInt32 jobStride = 256;
+	const ndInt32 count = ndInt32(m_pointParticles.GetCount());
+	m_threadPool->ParallelExecute(CalculateAABB, count, jobStride);
+
+	ndVector boxP0(partialAABB[0]);
+	ndVector boxP1(partialAABB[1]);
+	for (ndInt32 i = 1; i < m_threadPool->GetThreadCount(); ++i)
+	{
+		boxP0 = boxP0.GetMin(partialAABB[i * 2 + 0]);
+		boxP1 = boxP1.GetMax(partialAABB[i * 2 + 1]);
+	}
+	boxP0 -= m_gridSize;
+	boxP1 += m_gridSize;
+
+	m_boxP0 = m_gridSize * (boxP0 * m_invGridSize).Floor();
+	m_boxP1 = m_gridSize * (boxP1 * m_invGridSize).Ceiling();
 }
 
-const ndArray<ndInt32>& ndMarchingCubes::ndCalculateIsoValue::GetTriangles() const
+void ndMarchingCubesPaticles::RemoveDuplicates()
 {
-	return m_meshIndices;
+	m_hashGridMapScratchBuffer.SetCount(m_pointParticles.GetCount());
+	auto CalculateHashes = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	{
+		const ndVector r(m_pointParticles[groupId] - m_boxP0);
+		const ndVector p(r * m_invGridSize);
+		const ndGridHash hashKey(p);
+		m_hashGridMapScratchBuffer[groupId] = hashKey;
+	});
+
+	const ndInt32 jobStride = 256;
+	const ndInt32 count = ndInt32(m_pointParticles.GetCount());
+	m_threadPool->ParallelExecute(CalculateHashes, count, jobStride);
+
+	m_volumeInGrids = (m_invGridSize * (m_boxP1 - m_boxP0 + m_gridSize * ndVector::m_two)).Ceiling().GetInt();
+	ndCountingSort<ndGridHash, ndKey_xlow, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+	if (m_volumeInGrids.m_ix >= 256)
+	{
+		ndCountingSort<ndGridHash, ndKey_xhigh, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+	}
+
+	ndCountingSort<ndGridHash, ndKey_ylow, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+	if (m_volumeInGrids.m_iy >= 256)
+	{
+		ndCountingSort<ndGridHash, ndKey_yhigh, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+	}
+
+	ndCountingSort<ndGridHash, ndKey_zlow, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+	if (m_volumeInGrids.m_iz >= 256)
+	{
+		ndCountingSort<ndGridHash, ndKey_zhigh, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
+	}
+
+	ndInt32 gridCount = 0;
+	for (ndInt32 i = 1; i < m_hashGridMapScratchBuffer.GetCount(); ++i)
+	{
+		const ndGridHash cell(m_hashGridMapScratchBuffer[i]);
+		ndAssert(cell.m_cellType == 0);
+		ndAssert(m_hashGridMapScratchBuffer[i - 1].m_cellType == 0);
+		const ndInt32 uniqueGrid = (cell.m_gridFullHash != m_hashGridMapScratchBuffer[i - 1].m_gridFullHash) ? 1 : 0;
+		gridCount += uniqueGrid;
+		m_hashGridMapScratchBuffer[gridCount] = cell;
+	}
+	gridCount++;
+	m_hashGridMapScratchBuffer.SetCount(gridCount);
 }
 
-const ndArray<ndVector>& ndMarchingCubes::ndCalculateIsoValue::GetMeshVertex() const
+void ndMarchingCubesPaticles::GenerateGrids()
 {
-	return m_meshPoints;
+	const ndGridHashSteps steps;
+	m_hashGridMap.SetCount(m_hashGridMapScratchBuffer.GetCount() * 8);
+	auto GenerateGrids = ndMakeObject::ndFunction([this, &steps](ndInt32 groupId, ndInt32)
+	{
+		const ndInt32 gridStartIndex = groupId;
+		const ndGridHash hashKey(m_hashGridMapScratchBuffer[gridStartIndex]);
+		for (ndInt32 j = 0; j < 8; ++j)
+		{
+			ndGridHash cell(hashKey);
+			cell.m_x += steps.m_steps[j].m_x;
+			cell.m_y += steps.m_steps[j].m_y;
+			cell.m_z += steps.m_steps[j].m_z;
+			cell.m_cellType = steps.m_cellType[j];
+			ndAssert(cell.m_x <= 0x7fff);
+			ndAssert(cell.m_y <= 0x7fff);
+			ndAssert(cell.m_z <= 0x7fff);
+			m_hashGridMap[gridStartIndex * 8 + j] = cell;
+		}
+	});
+
+	const ndInt32 jobStride = 256;
+	const ndInt32 count = ndInt32(m_hashGridMapScratchBuffer.GetCount());
+	m_threadPool->ParallelExecute(GenerateGrids, count, jobStride);
+
+	//class ndParticleOwners
+	//{
+	//	public:
+	//	ndParticleOwners(void* const) {}
+	//	ndInt32 GetKey(const ndGridHash& cell) const
+	//	{
+	//		// the last cell is the onw that own the particle
+	//		// that is cell type 3
+	//		return (cell.m_cellType == 3) ? 0 : 1;
+	//	}
+	//};
+	//ndUnsigned32 cellOwnersScans[8];
+	//ndCountingSort<ndGridHash, ndParticleOwners, 2>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, cellOwnersScans, nullptr);
+	//m_hashGridMap.SetCount(cellOwnersScans[1]);
+
+	ndCountingSort<ndGridHash, ndKey_xlow, 8>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, nullptr, nullptr);
+	if (m_volumeInGrids.m_ix >= 256)
+	{
+		ndCountingSort<ndGridHash, ndKey_xhigh, 8>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, nullptr, nullptr);
+	}
+
+	ndCountingSort<ndGridHash, ndKey_ylow, 8>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, nullptr, nullptr);
+	if (m_volumeInGrids.m_iy >= 256)
+	{
+		ndCountingSort<ndGridHash, ndKey_yhigh, 8>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, nullptr, nullptr);
+	}
+
+	ndCountingSort<ndGridHash, ndKey_zlow, 8>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, nullptr, nullptr);
+	if (m_volumeInGrids.m_iz >= 256)
+	{
+		ndCountingSort<ndGridHash, ndKey_zhigh, 8>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, nullptr, nullptr);
+	}
+
+	ndInt32 start = 0;
+	m_cellScans.SetCount(0);
+	m_hashGridMap.PushBack(ndGridHash(0x7fff, 0x7fff, 0x7fff));
+	for (ndInt32 i = 0; i < ndInt32(m_hashGridMap.GetCount()) - 1; ++i)
+	{
+		const ndGridHash hash(m_hashGridMap[i], 0);
+		for (ndInt32 j = i + 1; j < ndInt32(m_hashGridMap.GetCount()); ++j)
+		{
+			const ndGridHash hash1(m_hashGridMap[j], 0);
+			if (hash.m_gridFullHash != hash1.m_gridFullHash)
+			{
+				i = j;
+				break;
+			}
+		}
+		ndAssert((i - start) > 0);
+		ndAssert((i - start) <= 8);
+		m_cellScans.PushBack(i - start);
+		start = i;
+		i--;
+	}
+	ndAssert((ndInt32(m_hashGridMap.GetCount()) - start) > 0);
+	ndAssert((ndInt32(m_hashGridMap.GetCount()) - start) <= 8);
+
+	ndInt32 sum = 0;
+	for (ndInt32 i = 0; i < ndInt32(m_cellScans.GetCount()); ++i)
+	{
+		ndInt32 sum1 = sum + m_cellScans[i];
+		m_cellScans[i] = sum;
+		sum = sum1;
+	}
+	m_cellScans.PushBack(sum);
+	ndAssert(sum == (m_hashGridMap.GetCount() - 1));
 }
 
-const ndArray<ndVector>& ndMarchingCubes::ndCalculateIsoValue::GetMeshNormals() const
+void ndMarchingCubesPaticles::GenerateTriangles()
 {
-	return m_meshNormals;
+	auto CountTriangles = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	{
+		m_cellTrianglesScans[groupId] = 0;
+		const ndInt32 cellStart = m_cellScans[groupId];
+		const ndInt32 cellCount = m_cellScans[groupId + 1] - cellStart;
+
+		if (cellCount < 8)
+		{
+			const ndGridHash startGrid(m_hashGridMap[cellStart], 0);
+
+			ndIsoCell cell;
+			ndVector* const isoValue = &cell.m_isoValues[0];
+			ndVector origin(ndFloat32(startGrid.m_x + 1), ndFloat32(startGrid.m_y + 1), ndFloat32(startGrid.m_z + 1), ndFloat32(0.0f));
+			for (ndInt32 j = 0; j < 8; j++)
+			{
+				isoValue[j] = origin + m_gridCorners[j];
+			}
+
+			for (ndInt32 j = 0; j < cellCount; j++)
+			{
+				ndInt32 index = m_hashGridMap[cellStart + j].m_cellType;
+				isoValue[index].m_w = ndFloat32(1.0f);
+			}
+
+			ndInt32 tableIndex = 0;
+			for (ndInt32 j = 0; j < 8; ++j)
+			{
+				//tableIndex |= (cell.m_isoValues[j].m_w < m_isoSufaceValue) << j;
+				tableIndex |= (cell.m_isoValues[j].m_w < 0.5f) << j;
+			}
+
+			const ndInt32 triangleStart = m_facesScan[tableIndex];
+			const ndInt32 triangleCount = m_facesScan[tableIndex + 1] - triangleStart;
+			m_cellTrianglesScans[groupId] = triangleCount;
+		}
+	});
+
+	m_cellTrianglesScans.SetCount(m_cellScans.GetCount());
+
+	const ndInt32 jobStride = 256;
+	const ndInt32 count = ndInt32(m_cellScans.GetCount()) - 1;
+	m_threadPool->ParallelExecute(CountTriangles, count, jobStride);
+
+	ndInt32 sum = 0;
+	for (ndInt32 i = 0; i < count; ++i)
+	{
+		ndInt32 sum1 = sum + m_cellTrianglesScans[i];
+		m_cellTrianglesScans[i] = sum;
+		sum = sum1;
+	}
+	m_cellTrianglesScans[count] = sum;
+
+	m_meshPoints.SetCount(sum * 3);
+	auto GenerateTriangles = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	{
+		const ndInt32 triangleStart = m_cellTrianglesScans[groupId];
+		const ndInt32 triangleCount = m_cellTrianglesScans[groupId + 1] - triangleStart;
+		if (triangleCount)
+		{
+			const ndInt32 cellStart = m_cellScans[groupId];
+			const ndInt32 cellCount = m_cellScans[groupId + 1] - cellStart;
+			ndAssert(cellCount > 0);
+			ndAssert(cellCount < 8);
+
+			const ndGridHash startGrid(m_hashGridMap[cellStart], 0);
+
+			ndIsoCell cell;
+			ndVector* const isoValue = &cell.m_isoValues[0];
+			ndVector origin(ndFloat32(startGrid.m_x + 1), ndFloat32(startGrid.m_y + 1), ndFloat32(startGrid.m_z + 1), ndFloat32(0.0f));
+			for (ndInt32 i = 0; i < 8; i++)
+			{
+				isoValue[i] = origin + m_gridCorners[i];
+			}
+
+			for (ndInt32 i = 0; i < cellCount; i++)
+			{
+				ndInt32 index = m_hashGridMap[cellStart + i].m_cellType;
+				isoValue[index].m_w = ndFloat32(1.0f);
+			}
+
+			ndInt32 tableIndex = 0;
+			for (ndInt32 i = 0; i < 8; ++i)
+			{
+				//tableIndex |= (cell.m_isoValues[i].m_w < m_isoSufaceValue) << i;
+				tableIndex |= (cell.m_isoValues[i].m_w < 0.5f) << i;
+			}
+
+			ndVector vertlist[12];
+			const ndInt32 edgeStart = m_edgeScan[tableIndex];
+			const ndInt32 edgeCount = m_edgeScan[tableIndex + 1] - edgeStart;
+			for (ndInt32 i = 0; i < edgeCount; ++i)
+			{
+				const ndEdge& edge = m_edges[edgeStart + i];
+				const ndInt32 midPoint = edge.m_midPoint;
+
+				const ndVector p0(cell.m_isoValues[edge.m_p0]);
+				const ndVector p1(cell.m_isoValues[edge.m_p1]);
+				ndAssert(ndAbs(p1.m_w - p0.m_w) == ndFloat32(1.0f));
+				const ndVector p1p0(p1 - p0);
+				vertlist[midPoint] = ndVector::m_triplexMask & (p0 + p1p0 * ndVector::m_half);
+			}
+
+			const ndInt32 faceStart = m_facesScan[tableIndex];
+			const ndInt32 triangleStartOffset = triangleStart * 3;
+			for (ndInt32 i = 0; i < triangleCount; ++i)
+			{
+				const ndInt32 j = i * 3;
+				const ndInt32 j0 = m_faces[faceStart + i][0];
+				const ndInt32 j2 = m_faces[faceStart + i][1];
+				const ndInt32 j1 = m_faces[faceStart + i][2];
+
+				m_meshPoints[triangleStartOffset + j + 0] = vertlist[j0];
+				m_meshPoints[triangleStartOffset + j + 1] = vertlist[j1];
+				m_meshPoints[triangleStartOffset + j + 2] = vertlist[j2];
+
+				m_meshPoints[triangleStartOffset + j + 0].m_w = ndFloat32(triangleStartOffset + j + 0);
+				m_meshPoints[triangleStartOffset + j + 1].m_w = ndFloat32(triangleStartOffset + j + 1);
+				m_meshPoints[triangleStartOffset + j + 2].m_w = ndFloat32(triangleStartOffset + j + 2);
+			}
+
+#if 0
+			{
+				Original::GRIDCELL grid;
+				for (ndInt32 i = 0; i < 8; i++)
+				{
+					grid.p[i].x = isoValue[i].m_x;
+					grid.p[i].y = isoValue[i].m_y;
+					grid.p[i].z = isoValue[i].m_z;
+					grid.val[i] = isoValue[i].m_w;
+				}
+				Original::TRIANGLE triangles[8];
+				ndInt32 originalCount = Original::Polygonise(grid, 0.5f, &triangles[0]);
+				ndAssert(originalCount == triangleCount);
+				for (ndInt32 i = 0; i < originalCount; ++i)
+				{
+					Original::TRIANGLE tr = triangles[i];
+					for (ndInt32 j = 0; j < 3; ++j)
+					{
+						ndVector q(tr.p[j].x, tr.p[j].y, tr.p[j].z, ndFloat32(0.0f));
+						ndVector p(m_meshPoints[triangleStartOffset + i * 3 + j + 0]);
+						ndVector error(p - q);
+						ndAssert(error.m_x == ndFloat32(0.0f));
+						ndAssert(error.m_y == ndFloat32(0.0f));
+						ndAssert(error.m_z == ndFloat32(0.0f));
+					}
+				}
+			}
+#endif
+		}
+	});
+	m_threadPool->ParallelExecute(GenerateTriangles, count, jobStride);
 }
 
-void ndMarchingCubes::GenerateMesh(ndCalculateIsoValue* const computeIsoValue)
-{
-	computeIsoValue->GenerateMesh();
-}
-
-void ndMarchingCubes::ndCalculateIsoValue::GenerateIndexList()
+void ndMarchingCubesPaticles::GenerateIndexList()
 {
 	#define D_LOW_RES_BITS	   1
 	#define D_LOW_RES_FRACTION (1 << D_LOW_RES_BITS)
@@ -3152,10 +3540,10 @@ void ndMarchingCubes::ndCalculateIsoValue::GenerateIndexList()
 		m_meshIndices[index] = vertexCount;
 		m_meshPoints[vertexCount] = m_meshPoints[i] & ndVector::m_triplexMask;
 
-		const ndMarchingCubes::ndGridHash hash(m_meshPoints[i] * ndVector::m_two, 0);
+		const ndGridHash hash(m_meshPoints[i] * ndVector::m_two, 0);
 		for (i = i + 1; i < ndInt32(m_meshPoints.GetCount()); ++i)
 		{
-			const ndMarchingCubes::ndGridHash hash1(m_meshPoints[i] * ndVector::m_two, 0);
+			const ndGridHash hash1(m_meshPoints[i] * ndVector::m_two, 0);
 			if (hash.m_gridFullHash != hash1.m_gridFullHash)
 			{
 				break;
@@ -3215,332 +3603,7 @@ void ndMarchingCubes::ndCalculateIsoValue::GenerateIndexList()
 	}
 }
 
-// ***********************************************************
-//
-// ***********************************************************
-ndMarchingCubeFromParticleArray::ndMarchingCubeFromParticleArray(ndThreadPool* const threadPool, ndFloat32 gridSize)
-	:ndCalculateIsoValue(gridSize, threadPool)
-{
-}
-
-ndMarchingCubeFromParticleArray::~ndMarchingCubeFromParticleArray()
-{
-}
-
-void ndMarchingCubeFromParticleArray::CalculateAABB()
-{
-	ndFixSizeArray<ndVector, D_MAX_THREADS_COUNT * 2> partialAABB(m_threadPool->GetThreadCount() * 2);
-	auto CalculateAABB = ndMakeObject::ndFunction([this, &partialAABB](ndInt32 groupId, ndInt32 threadIndex)
-	{
-		const ndVector p(m_points[groupId]);
-		partialAABB[threadIndex * 2 + 0] = p.GetMin(partialAABB[threadIndex * 2 + 0]);
-		partialAABB[threadIndex * 2 + 1] = p.GetMax(partialAABB[threadIndex * 2 + 1]);
-	});
-
-	for (ndInt32 i = 0; i < m_threadPool->GetThreadCount(); ++i)
-	{
-		partialAABB[i * 2 + 0] = ndVector(ndFloat32(1.0e10f));
-		partialAABB[i * 2 + 1] = ndVector(ndFloat32(-1.0e10f));
-	}
-	const ndInt32 jobStride = 256;
-	const ndInt32 count = ndInt32(m_points.GetCount());
-	m_threadPool->ParallelExecute(CalculateAABB, count, jobStride);
-
-	ndVector boxP0(partialAABB[0]);
-	ndVector boxP1(partialAABB[1]);
-	for (ndInt32 i = 1; i < m_threadPool->GetThreadCount(); ++i)
-	{
-		boxP0 = boxP0.GetMin(partialAABB[i * 2 + 0]);
-		boxP1 = boxP1.GetMax(partialAABB[i * 2 + 1]);
-	}
-	boxP0 -= m_gridSize;
-	boxP1 += m_gridSize;
-
-	m_boxP0 = m_gridSize * (boxP0 * m_invGridSize).Floor();
-	m_boxP1 = m_gridSize * (boxP1 * m_invGridSize).Ceiling();
-}
-
-void ndMarchingCubeFromParticleArray::RemoveDuplicates()
-{
-	m_hashGridMapScratchBuffer.SetCount(m_points.GetCount());
-	auto CalculateHashes = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
-	{
-		const ndVector r(m_points[groupId] - m_boxP0);
-		const ndVector p(r * m_invGridSize);
-		const ndMarchingCubes::ndGridHash hashKey(p);
-		m_hashGridMapScratchBuffer[groupId] = hashKey;
-	});
-
-	const ndInt32 jobStride = 256;
-	const ndInt32 count = ndInt32(m_points.GetCount());
-	m_threadPool->ParallelExecute(CalculateHashes, count, jobStride);
-
-	m_volumeInGrids = (m_invGridSize * (m_boxP1 - m_boxP0 + m_gridSize * ndVector::m_two)).Ceiling().GetInt();
-	ndCountingSort<ndMarchingCubes::ndGridHash, ndMarchingCubes::ndKey_xlow, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
-	if (m_volumeInGrids.m_ix >= 256)
-	{
-		ndCountingSort<ndMarchingCubes::ndGridHash, ndMarchingCubes::ndKey_xhigh, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
-	}
-	
-	ndCountingSort<ndMarchingCubes::ndGridHash, ndMarchingCubes::ndKey_ylow, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
-	if (m_volumeInGrids.m_iy >= 256)
-	{
-		ndCountingSort<ndMarchingCubes::ndGridHash, ndMarchingCubes::ndKey_yhigh, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
-	}
-	
-	ndCountingSort<ndMarchingCubes::ndGridHash, ndMarchingCubes::ndKey_zlow, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
-	if (m_volumeInGrids.m_iz >= 256)
-	{
-		ndCountingSort<ndMarchingCubes::ndGridHash, ndMarchingCubes::ndKey_zhigh, 8>(*m_threadPool, m_hashGridMapScratchBuffer, m_hashGridMap, nullptr, nullptr);
-	}
-	
-	ndInt32 gridCount = 0;
-	for (ndInt32 i = 1; i < m_hashGridMapScratchBuffer.GetCount(); ++i)
-	{
-		const ndMarchingCubes::ndGridHash cell(m_hashGridMapScratchBuffer[i]);
-		ndAssert(cell.m_cellType == 0);
-		ndAssert(m_hashGridMapScratchBuffer[i - 1].m_cellType == 0);
-		const ndInt32 uniqueGrid = (cell.m_gridFullHash != m_hashGridMapScratchBuffer[i - 1].m_gridFullHash) ? 1 : 0;
-		gridCount += uniqueGrid;
-		m_hashGridMapScratchBuffer[gridCount] = cell;
-	}
-	gridCount++;
-	m_hashGridMapScratchBuffer.SetCount(gridCount);
-}
-
-void ndMarchingCubeFromParticleArray::GenerateGrids()
-{
-	const ndMarchingCubes::ndGridHashSteps steps;
-	m_hashGridMap.SetCount(m_hashGridMapScratchBuffer.GetCount() * 8);
-	auto GenerateGrids = ndMakeObject::ndFunction([this, &steps](ndInt32 groupId, ndInt32)
-	{
-		const ndInt32 gridStartIndex = groupId;
-		const ndMarchingCubes::ndGridHash hashKey(m_hashGridMapScratchBuffer[gridStartIndex]);
-		for (ndInt32 j = 0; j < 8; ++j)
-		{
-			ndMarchingCubes::ndGridHash cell(hashKey);
-			cell.m_x += steps.m_steps[j].m_x;
-			cell.m_y += steps.m_steps[j].m_y;
-			cell.m_z += steps.m_steps[j].m_z;
-			cell.m_cellType = steps.m_cellType[j];
-			ndAssert(cell.m_x < 0x7fff);
-			ndAssert(cell.m_y < 0x7fff);
-			ndAssert(cell.m_z < 0x7fff);
-			m_hashGridMap[gridStartIndex * 8 + j] = cell;
-		}
-	});
-
-	const ndInt32 jobStride = 256;
-	const ndInt32 count = ndInt32(m_hashGridMapScratchBuffer.GetCount());
-	m_threadPool->ParallelExecute(GenerateGrids, count, jobStride);
-
-	ndCountingSort<ndMarchingCubes::ndGridHash, ndMarchingCubes::ndKey_xlow, 8>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, nullptr, nullptr);
-	if (m_volumeInGrids.m_ix >= 256)
-	{
-		ndCountingSort<ndMarchingCubes::ndGridHash, ndMarchingCubes::ndKey_xhigh, 8>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, nullptr, nullptr);
-	}
-	
-	ndCountingSort<ndMarchingCubes::ndGridHash, ndMarchingCubes::ndKey_ylow, 8>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, nullptr, nullptr);
-	if (m_volumeInGrids.m_iy >= 256)
-	{
-		ndCountingSort<ndMarchingCubes::ndGridHash, ndMarchingCubes::ndKey_yhigh, 8>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, nullptr, nullptr);
-	}
-	
-	ndCountingSort<ndMarchingCubes::ndGridHash, ndMarchingCubes::ndKey_zlow, 8>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, nullptr, nullptr);
-	if (m_volumeInGrids.m_iz >= 256)
-	{
-		ndCountingSort<ndMarchingCubes::ndGridHash, ndMarchingCubes::ndKey_zhigh, 8>(*m_threadPool, m_hashGridMap, m_hashGridMapScratchBuffer, nullptr, nullptr);
-	}
-
-	ndInt32 start = 0;
-	m_cellScans.SetCount(0);
-	for (ndInt32 i = 0; i < ndInt32 (m_hashGridMap.GetCount()) - 1; ++i)
-	{
-		const ndMarchingCubes::ndGridHash hash (m_hashGridMap[i], 0);
-		for (ndInt32 j = i + 1; j < ndInt32(m_hashGridMap.GetCount()); ++j)
-		{
-			const ndMarchingCubes::ndGridHash hash1(m_hashGridMap[j], 0);
-			if (hash.m_gridFullHash != hash1.m_gridFullHash)
-			{
-				i = j;
-				break;
-			}
-		}
-		ndAssert((i - start) > 0);
-		ndAssert((i - start) <= 8);
-		m_cellScans.PushBack(i - start);
-		start = i;
-		i--;
-	}
-	ndAssert((ndInt32(m_hashGridMap.GetCount()) - start) > 0);
-	ndAssert((ndInt32(m_hashGridMap.GetCount()) - start) <= 8);
-	m_cellScans.PushBack(ndInt32(m_hashGridMap.GetCount()) - start);
-
-	ndInt32 sum = 0;
-	for (ndInt32 i = 0; i < ndInt32(m_cellScans.GetCount()); ++i)
-	{
-		ndInt32 sum1 = sum + m_cellScans[i];
-		m_cellScans[i] = sum;
-		sum = sum1;
-	}
-	m_cellScans.PushBack(sum);
-	m_cellTrianglesScans.SetCount(m_cellScans.GetCount());
-	ndAssert(sum == m_hashGridMap.GetCount());
-}
-
-void ndMarchingCubeFromParticleArray::GenerateTriangles()
-{
-	auto CountTriangles = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
-	{
-		m_cellTrianglesScans[groupId] = 0;
-		const ndInt32 cellStart = m_cellScans[groupId];
-		const ndInt32 cellCount = m_cellScans[groupId + 1] - cellStart;
-			
-		if (cellCount < 8)
-		{
-			const ndMarchingCubes::ndGridHash startGrid(m_hashGridMap[cellStart], 0);
-		
-			ndMarchingCubes::ndIsoCell cell;
-			ndVector* const isoValue = &cell.m_isoValues[0];
-			ndVector origin(ndFloat32(startGrid.m_x + 1), ndFloat32(startGrid.m_y + 1), ndFloat32(startGrid.m_z + 1), ndFloat32(0.0f));
-			for (ndInt32 j = 0; j < 8; j++)
-			{
-				isoValue[j] = origin + m_gridCorners[j];
-			}
-		
-			for (ndInt32 j = 0; j < cellCount; j++)
-			{
-				ndInt32 index = m_hashGridMap[cellStart + j].m_cellType;
-				isoValue[index].m_w = ndFloat32(1.0f);
-			}
-		
-			ndInt32 tableIndex = 0;
-			for (ndInt32 j = 0; j < 8; ++j)
-			{
-				tableIndex |= (cell.m_isoValues[j].m_w < m_isoSufaceValue) << j;
-			}
-		
-			const ndInt32 triangleStart = m_facesScan[tableIndex];
-			const ndInt32 triangleCount = m_facesScan[tableIndex + 1] - triangleStart;
-			m_cellTrianglesScans[groupId] = triangleCount;
-		}
-	});
-
-	const ndInt32 jobStride = 256;
-	const ndInt32 count = ndInt32(m_cellScans.GetCount())-1;
-	m_threadPool->ParallelExecute(CountTriangles, count, jobStride);
-
-	ndInt32 sum = 0;
-	for (ndInt32 i = 0; i < count; ++i)
-	{
-		ndInt32 sum1 = sum + m_cellTrianglesScans[i];
-		m_cellTrianglesScans[i] = sum;
-		sum = sum1;
-	}
-	m_cellTrianglesScans[count] = sum;
-
-	m_meshPoints.SetCount(sum * 3);
-	auto GenerateTriangles = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
-	{
-		const ndInt32 triangleStart = m_cellTrianglesScans[groupId];
-		const ndInt32 triangleCount = m_cellTrianglesScans[groupId + 1] - triangleStart;
-		if (triangleCount)
-		{
-			const ndInt32 cellStart = m_cellScans[groupId];
-			const ndInt32 cellCount = m_cellScans[groupId + 1] - cellStart;
-			ndAssert(cellCount > 0);
-			ndAssert(cellCount < 8);
-
-			const ndMarchingCubes::ndGridHash startGrid(m_hashGridMap[cellStart], 0);
-
-			ndMarchingCubes::ndIsoCell cell;
-			ndVector* const isoValue = &cell.m_isoValues[0];
-			ndVector origin(ndFloat32(startGrid.m_x + 1), ndFloat32(startGrid.m_y + 1), ndFloat32(startGrid.m_z + 1), ndFloat32(0.0f));
-			for (ndInt32 i = 0; i < 8; i++)
-			{
-				isoValue[i] = origin + m_gridCorners[i];
-			}
-
-			for (ndInt32 i = 0; i < cellCount; i++)
-			{
-				ndInt32 index = m_hashGridMap[cellStart + i].m_cellType;
-				isoValue[index].m_w = ndFloat32(1.0f);
-			}
-
-			ndInt32 tableIndex = 0;
-			for (ndInt32 i = 0; i < 8; ++i)
-			{
-				tableIndex |= (cell.m_isoValues[i].m_w < m_isoSufaceValue) << i;
-			}
-
-			ndVector vertlist[12];
-			const ndInt32 edgeStart = m_edgeScan[tableIndex];
-			const ndInt32 edgeCount = m_edgeScan[tableIndex + 1] - edgeStart;
-			for (ndInt32 i = 0; i < edgeCount; ++i)
-			{
-				const ndMarchingCubes::ndEdge& edge = m_edges[edgeStart + i];
-				const ndInt32 midPoint = edge.m_midPoint;
-
-				const ndVector p0(cell.m_isoValues[edge.m_p0]);
-				const ndVector p1(cell.m_isoValues[edge.m_p1]);
-				ndAssert(ndAbs(p1.m_w - p0.m_w) == ndFloat32(1.0f));
-				const ndVector p1p0(p1 - p0);
-				vertlist[midPoint] = ndVector::m_triplexMask & (p0 + p1p0 * ndVector::m_half);
-			}
-
-			const ndInt32 faceStart = m_facesScan[tableIndex];
-			const ndInt32 triangleStartOffset = triangleStart * 3;
-			for (ndInt32 i = 0; i < triangleCount; ++i)
-			{
-				const ndInt32 j = i * 3;
-				const ndInt32 j0 = m_faces[faceStart + i][0];
-				const ndInt32 j2 = m_faces[faceStart + i][1];
-				const ndInt32 j1 = m_faces[faceStart + i][2];
-				
-				m_meshPoints[triangleStartOffset + j + 0] = vertlist[j0];
-				m_meshPoints[triangleStartOffset + j + 1] = vertlist[j1];
-				m_meshPoints[triangleStartOffset + j + 2] = vertlist[j2];
-
-				m_meshPoints[triangleStartOffset + j + 0].m_w = ndFloat32(triangleStartOffset + j + 0);
-				m_meshPoints[triangleStartOffset + j + 1].m_w = ndFloat32(triangleStartOffset + j + 1);
-				m_meshPoints[triangleStartOffset + j + 2].m_w = ndFloat32(triangleStartOffset + j + 2);
-			}
-
-			#if 0
-			{
-				Original::GRIDCELL grid;
-				for (ndInt32 i = 0; i < 8; i++)
-				{
-					grid.p[i].x = isoValue[i].m_x;
-					grid.p[i].y = isoValue[i].m_y;
-					grid.p[i].z = isoValue[i].m_z;
-					grid.val[i] = isoValue[i].m_w;
-				}
-				Original::TRIANGLE triangles[8];
-				ndInt32 originalCount = Original::Polygonise(grid, 0.5f, &triangles[0]);
-				ndAssert(originalCount == triangleCount);
-				for (ndInt32 i = 0; i < originalCount; ++i)
-				{
-					Original::TRIANGLE tr = triangles[i];
-					for (ndInt32 j = 0; j < 3; ++j)
-					{
-						ndVector q(tr.p[j].x, tr.p[j].y, tr.p[j].z, ndFloat32 (0.0f));
-						ndVector p(m_meshPoints[triangleStartOffset + i * 3 + j + 0]);
-						ndVector error(p - q);
-						ndAssert(error.m_x == ndFloat32(0.0f));
-						ndAssert(error.m_y == ndFloat32(0.0f));
-						ndAssert(error.m_z == ndFloat32(0.0f));
-					}
-				}
-			}
-			#endif
-		}
-	});
-
-	m_threadPool->ParallelExecute(GenerateTriangles, count, jobStride);
-}
-
-void ndMarchingCubeFromParticleArray::GenerateMesh()
+void ndMarchingCubesPaticles::GenerateMesh()
 {
 	CalculateAABB();
 	RemoveDuplicates();
@@ -3553,23 +3616,3 @@ void ndMarchingCubeFromParticleArray::GenerateMesh()
 	m_cellTrianglesScans.SetCount(0);
 	m_hashGridMapScratchBuffer.SetCount(0);
 }
-
-// ***********************************************************
-//
-// ***********************************************************
-ndMarchingCubeIsoFunction::ndMarchingCubeIsoFunction(ndThreadPool* const threadPool, ndFloat32 gridSize)
-	:ndCalculateIsoValue(gridSize, threadPool)
-{
-	ndAssert(0);
-}
-
-ndMarchingCubeIsoFunction::~ndMarchingCubeIsoFunction()
-{
-	ndAssert(0);
-}
-
-void ndMarchingCubeIsoFunction::GenerateMesh()
-{
-	ndAssert(0);
-}
-

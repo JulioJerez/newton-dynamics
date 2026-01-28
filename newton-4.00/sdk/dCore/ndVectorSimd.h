@@ -845,7 +845,7 @@ class ndBigVector : public ndClassAlloc
 		//ndFloat64 w = ndFloor(m_w);
 		//return ndBigVector(x, y, z, w);
 
-		// no really
+		// no really, compiler still does a very poor job 
 		ndInt64 x = _mm_cvtsd_si64(m_typeLow);
 		ndInt64 y = _mm_cvtsd_si64(_mm_unpackhi_pd(m_typeLow, m_typeLow));
 		ndInt64 z = _mm_cvtsd_si64(m_typeHigh);
@@ -862,6 +862,8 @@ class ndBigVector : public ndClassAlloc
 
 	inline ndBigVector Ceiling() const
 	{
+		// no that frequently called 
+		// just use the standard scalar function for now
 		ndFloat64 x = ndCeil(m_x);
 		ndFloat64 y = ndCeil(m_y);
 		ndFloat64 z = ndCeil(m_z);
@@ -871,6 +873,8 @@ class ndBigVector : public ndClassAlloc
 
 	inline ndBigVector GetInt() const
 	{
+		// compiler does even worse job here. 
+		// so, still intrinsics do a better job
 		ndInt64 x = _mm_cvtsd_si64(m_typeLow);
 		ndInt64 y = _mm_cvtsd_si64(_mm_unpackhi_pd(m_typeLow, m_typeLow));
 		ndInt64 z = _mm_cvtsd_si64(m_typeHigh);
@@ -1471,7 +1475,8 @@ class ndVector : public ndClassAlloc
 		#ifdef D_NEWTON_USE_AVX2_OPTION
 			return _mm_floor_ps(m_type);
 		#else
-			ndVector truncated(_mm_cvtepi32_ps(_mm_cvttps_epi32(m_type)));
+			__m128i integer(_mm_cvttps_epi32(m_type));
+			ndVector truncated(_mm_cvtepi32_ps(integer));
 			ndVector ret(truncated - (ndVector::m_one & (*this < truncated)));
 			ndAssert(ret.m_f[0] == ndFloor(m_f[0]));
 			ndAssert(ret.m_f[1] == ndFloor(m_f[1]));
@@ -1486,17 +1491,14 @@ class ndVector : public ndClassAlloc
 		#ifdef D_NEWTON_USE_AVX2_OPTION
 			return _mm_ceil_ps(m_type);
 		#else
-			ndFloat32 x = ndCeil(m_x);
-			ndFloat32 y = ndCeil(m_y);
-			ndFloat32 z = ndCeil(m_z);
-			ndFloat32 w = ndCeil(m_w);
-			ndVector ret(x, y, z, w);
-			//ndVector truncated(_mm_cvtepi32_ps(_mm_cvttps_epi32(m_type)));
-			//ndVector ret(truncated - (ndVector::m_one & (*this < truncated)));
-			//ndAssert(ret.m_f[0] == ndFloor(m_f[0]));
-			//ndAssert(ret.m_f[1] == ndFloor(m_f[1]));
-			//ndAssert(ret.m_f[2] == ndFloor(m_f[2]));
-			//ndAssert(ret.m_f[3] == ndFloor(m_f[3]));
+			__m128i integer(_mm_cvttps_epi32(m_type));
+			ndVector truncated(_mm_cvtepi32_ps(integer));
+			ndVector ret(truncated + (ndVector::m_one & (*this > truncated)));
+
+			ndAssert(ret.m_f[0] == ndCeil(m_f[0]));
+			ndAssert(ret.m_f[1] == ndCeil(m_f[1]));
+			ndAssert(ret.m_f[2] == ndCeil(m_f[2]));
+			ndAssert(ret.m_f[3] == ndCeil(m_f[3]));
 			return ret;
 		#endif
 	}

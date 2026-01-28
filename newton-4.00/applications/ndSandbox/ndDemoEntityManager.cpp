@@ -34,17 +34,19 @@
 //#define DEFAULT_SCENE	8		// heightfield collision
 //#define DEFAULT_SCENE	9		// static compound scene collision
 //#define DEFAULT_SCENE	10		// basic convex approximate compound shapes
-#define DEFAULT_SCENE	11		// basic procedural static collision
-//#define DEFAULT_SCENE	12		// basic model, a npd vehicle prop
-//#define DEFAULT_SCENE	13		// basic rag doll
-//#define DEFAULT_SCENE	14		// complex model, implement a complex model with joints
-//#define DEFAULT_SCENE	15		// basics multi body vehicle
-//#define DEFAULT_SCENE	16		// object Placement
-//#define DEFAULT_SCENE	17		// third person player capsule
-//#define DEFAULT_SCENE	18		// cart pole SAC trained controller
-//#define DEFAULT_SCENE	19		// cart pole PPO trained controller
-//#define DEFAULT_SCENE	20		// unicycle PPO trained controller
-//#define DEFAULT_SCENE	21		// procedurally animated quadruped spider
+//#define DEFAULT_SCENE	11		// basic procedural heightfield collision
+//#define DEFAULT_SCENE	12		// basic procedural 2d noise heightfield collision
+#define DEFAULT_SCENE	13		// basic procedural 3d noise marching cube collision
+//#define DEFAULT_SCENE	14		// basic model, a npd vehicle prop
+//#define DEFAULT_SCENE	15		// basic rag doll
+//#define DEFAULT_SCENE	16		// complex model, implement a complex model with joints
+//#define DEFAULT_SCENE	17		// basics multi body vehicle
+//#define DEFAULT_SCENE	18		// object Placement
+//#define DEFAULT_SCENE	19		// third person player capsule
+//#define DEFAULT_SCENE	20		// cart pole SAC trained controller
+//#define DEFAULT_SCENE	21		// cart pole PPO trained controller
+//#define DEFAULT_SCENE	22		// unicycle PPO trained controller
+//#define DEFAULT_SCENE	23		// procedurally animated quadruped spider
 
 // These are the machine learning training demos
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// train cart pole using SAC agent
@@ -88,6 +90,8 @@ void ndBasicStaticMeshCollision(ndDemoEntityManager* const scene);
 void ndPlayerCapsule_ThirdPerson(ndDemoEntityManager* const scene);
 void ndBasicSceneCompoundCollision(ndDemoEntityManager* const scene);
 void ndBasicProcedualHeightfieldCollision(ndDemoEntityManager* const scene);
+void ndBasicProcedual2dIsoSurfaceCollision(ndDemoEntityManager* const scene);
+void ndBasicProcedual3dIsoSurfaceCollision(ndDemoEntityManager* const scene);
 
 void ndCartpolePlayer_SAC(ndDemoEntityManager* const scene);
 void ndCartpolePlayer_PPO(ndDemoEntityManager* const scene);
@@ -110,7 +114,9 @@ ndDemoEntityManager::ndDemos ndDemoEntityManager::m_demosSelection[] =
 	{ "basic heighfield collision", ndBasicHeighfieldCollision},
 	{ "basic static compound scene collision", ndBasicSceneCompoundCollision},
 	{ "basic compound collision", ndBasicCompoundCollision},
-	{ "basic static procedural collision", ndBasicProcedualHeightfieldCollision},
+	{ "basic procedural heightfield collision", ndBasicProcedualHeightfieldCollision},
+	{ "basic procedural 2d isosurface collision", ndBasicProcedual2dIsoSurfaceCollision},
+	{ "basic procedural 3d isosurface collision", ndBasicProcedual3dIsoSurfaceCollision},
 	{ "basic model", ndBasicModel},
 	{ "basic ragdoll", ndBasicRagdoll},
 	{ "complex model", ndComplexModel},
@@ -535,7 +541,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_showJointDebugInfo = true;
 	//m_showModelsDebugInfo = true;
 	//m_showCollisionMeshMode = 1;
-	m_showCollisionMeshMode = 2;
+	//m_showCollisionMeshMode = 2;
 	//m_showCollisionMeshMode = 3;		// solid wire frame
 	m_synchronousPhysicsUpdate = true;
 	m_synchronousParticlesUpdate = true;
@@ -1072,23 +1078,23 @@ void ndDemoEntityManager::ToggleProfiler()
 ndInt32 ndDemoEntityManager::ParticleCount() const
 {
 	ndInt32 count = 0;
-	const ndBodyList& particles = m_world->GetParticleList();
-	for (ndBodyList::ndNode* node = particles.GetFirst(); node; node = node->GetNext())
-	{
-		ndBodyParticleSet* const set = node->GetInfo()->GetAsBodyParticleSet();
-		count += ndInt32(set->GetPositions().GetCount());
-	}
+	//const ndBodyList& particles = m_world->GetParticleList();
+	//for (ndBodyList::ndNode* node = particles.GetFirst(); node; node = node->GetNext())
+	//{
+	//	ndBodyParticleSet* const set = node->GetInfo()->GetAsBodyParticleSet();
+	//	count += ndInt32(set->GetPositions().GetCount());
+	//}
 	return count;
 }
 
 void ndDemoEntityManager::SetParticleUpdateMode() const
 {
-	const ndBodyList& particles = m_world->GetParticleList();
-	for (ndBodyList::ndNode* node = particles.GetFirst(); node; node = node->GetNext())
-	{
-		ndBodyParticleSet* const set = node->GetInfo()->GetAsBodyParticleSet();
-		set->SetAsynUpdate(!m_synchronousParticlesUpdate);
-	}
+	//const ndBodyList& particles = m_world->GetParticleList();
+	//for (ndBodyList::ndNode* node = particles.GetFirst(); node; node = node->GetNext())
+	//{
+	//	ndBodyParticleSet* const set = node->GetInfo()->GetAsBodyParticleSet();
+	//	set->SetAsynUpdate(!m_synchronousParticlesUpdate);
+	//}
 }
 
 void ndDemoEntityManager::RenderStats()

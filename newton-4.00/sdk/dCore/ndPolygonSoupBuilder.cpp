@@ -259,13 +259,13 @@ void ndPolygonSoupBuilder::LoadPLY(const char* const fileName)
 				count += fscanf(file, "%d", &index);
 				face[j] = vertexArray[index];
 			}
-			AddFace(&face[0].m_x, sizeof (ndVector), indexCount, 0);
+			AddFace(face, indexCount, 0);
 		}
 	}
 	fclose(file);
 }
 
-void ndPolygonSoupBuilder::AddFaceIndirect(const ndFloat32* const vertex, ndInt32 strideInBytes, ndInt32 faceId, const ndInt32* const indexArray, ndInt32 indexCount)
+void ndPolygonSoupBuilder::AddFaceIndirect____(const ndFloat32* const vertex, ndInt32 strideInBytes, ndInt32 faceId, const ndInt32* const indexArray, ndInt32 indexCount)
 {
 	ndInt32 faces[32];
 	ndInt32 pool[512];
@@ -375,7 +375,7 @@ void ndPolygonSoupBuilder::AddFaceIndirect(const ndVector* const vertex, ndInt32
 			ndFloat64 mag2 = edge.DotProduct(edge).GetScalar();
 			if (mag2 < ndFloat32(1.0e-12f))
 			{
-				ndAssert(0);
+				//ndAssert(0);
 				ndTrace(("rejecting degenerated face, edge too small\n"));
 				convexFaces = 0;
 			}
@@ -392,7 +392,7 @@ void ndPolygonSoupBuilder::AddFaceIndirect(const ndVector* const vertex, ndInt32
 			ndFloat64 mag2 = normal.DotProduct(normal).GetScalar();
 			if (mag2 < ndFloat32(1.0e-12f))
 			{
-				ndAssert(0);
+				//ndAssert(0);
 				ndTrace(("rejecting degenerated face, area too small\n"));
 				convexFaces = 0;
 			}
@@ -429,7 +429,7 @@ void ndPolygonSoupBuilder::AddFaceIndirect(const ndVector* const vertex, ndInt32
 	}
 }
 
-void ndPolygonSoupBuilder::AddFace(const ndFloat32* const vertex, ndInt32 strideInBytes, ndInt32 vertexCount, const ndInt32 faceId)
+void ndPolygonSoupBuilder::AddFace____(const ndFloat32* const vertex, ndInt32 strideInBytes, ndInt32 vertexCount, const ndInt32 faceId)
 {
 	ndInt32 indexArray[1024];
 	ndAssert(vertexCount < ndInt32 (sizeof(indexArray)/sizeof (indexArray[0])));
@@ -437,7 +437,7 @@ void ndPolygonSoupBuilder::AddFace(const ndFloat32* const vertex, ndInt32 stride
 	{
 		indexArray[i] = i;
 	}
-	AddFaceIndirect(vertex, strideInBytes, faceId, indexArray, vertexCount);
+	AddFaceIndirect____(vertex, strideInBytes, faceId, indexArray, vertexCount);
 }
 
 void ndPolygonSoupBuilder::AddFace(const ndVector* const vertex, ndInt32 vertexCount, const ndInt32 faceId)
@@ -533,7 +533,7 @@ void ndPolygonSoupBuilder::FinalizeAndOptimize(ndInt32 id)
 				tmpVertexPool[j] = source.m_vertexPoints[index];
 				tmpIndexPool[j] = j;
 			}
-			leftOver.AddFaceIndirect(&tmpVertexPool[0].m_x, sizeof (ndVector), attribute, tmpIndexPool, indexCount - 1);
+			leftOver.AddFaceIndirect(tmpVertexPool, attribute, tmpIndexPool, indexCount - 1);
 		} 
 		else 
 		{
@@ -612,8 +612,7 @@ void ndPolygonSoupBuilder::FinalizeAndOptimize(ndInt32 id)
 		} while (ptr != edge);
 		if (indexCount >= 3) 
 		{
-			//AddMesh (&tmpVertexPool[0].m_x, indexCount, sizeof (ndVector), 1, &indexCount, tmpIndexPool, &attribute, dGetIdentityMatrix());
-			AddFaceIndirect(&tmpVertexPool[0].m_x, sizeof(ndVector), attribute, tmpIndexPool, indexCount);
+			AddFaceIndirect(tmpVertexPool, attribute, tmpIndexPool, indexCount);
 		}
 	}
 
@@ -627,7 +626,7 @@ void ndPolygonSoupBuilder::FinalizeAndOptimize(ndInt32 id)
 			tmpVertexPool[j] = leftOver.m_vertexPoints[index];
 			tmpIndexPool[j] = j;
 		}
-		AddFaceIndirect(&tmpVertexPool[0].m_x, sizeof(ndVector), attribute, tmpIndexPool, indexCount);
+		AddFaceIndirect(tmpVertexPool, attribute, tmpIndexPool, indexCount);
 
 		faceIndexNumber += (indexCount + 1); 
 	}
@@ -748,17 +747,22 @@ void ndPolygonSoupBuilder::Optimize(ndInt32 faceId, const ndFaceBucket& faceBuck
 			count ++;
 		}
 
-		ndInt32 stack = 1;
-		ndInt32 segments[32][2];
+		//ndInt32 stack = 1;
+		//ndInt32 segments[32][2];
+		ndFixSizeArray<ndInt32, 128> segments;
 			
-		segments[0][0] = 0;
-		segments[0][1] = count;
+		//segments[0][0] = 0;
+		//segments[0][1] = count;
+		segments.PushBack(0);
+		segments.PushBack(count);
 	
-		while (stack) 
+		while (segments.GetCount())
 		{
-			stack --;
-			ndInt32 faceStart = segments[stack][0];
-			ndInt32 faceCount = segments[stack][1];
+			//stack --;
+			//ndInt32 faceStart = segments[stack][0];
+			//ndInt32 faceCount = segments[stack][1];
+			ndInt32 faceCount = segments.Pop();
+			ndInt32 faceStart = segments.Pop();
 
 			if (faceCount <= DG_MESH_PARTITION_SIZE) 
 			{
@@ -776,7 +780,7 @@ void ndPolygonSoupBuilder::Optimize(ndInt32 faceId, const ndFaceBucket& faceBuck
 						face[j] = points[index];
 						faceIndex[j] = j;
 					}
-					tmpBuilder.AddFaceIndirect(&face[0].m_x, sizeof(ndVector), faceId, faceIndex, count1);
+					tmpBuilder.AddFaceIndirect(face, faceId, faceIndex, count1);
 				}
 				tmpBuilder.FinalizeAndOptimize (faceId);
 
@@ -790,7 +794,7 @@ void ndPolygonSoupBuilder::Optimize(ndInt32 faceId, const ndFaceBucket& faceBuck
 						face[j] = tmpBuilder.m_vertexPoints[index];
 						faceIndex[j] = j;
 					}
-					AddFaceIndirect(&face[0].m_x, sizeof(ndVector), faceId, faceIndex, indexCount);
+					AddFaceIndirect(face, faceId, faceIndex, indexCount);
 					faceIndexNumber += (indexCount + 1); 
 				}
 			} 
@@ -868,13 +872,17 @@ void ndPolygonSoupBuilder::Optimize(ndInt32 faceId, const ndFaceBucket& faceBuck
 				ndAssert (leftCount);
 				ndAssert (leftCount < faceCount);
 
-				segments[stack][0] = faceStart;
-				segments[stack][1] = leftCount;
-				stack ++;
+				//segments[stack][0] = faceStart;
+				//segments[stack][1] = leftCount;
+				//stack ++;
+				segments.PushBack(faceStart);
+				segments.PushBack(leftCount);
 
-				segments[stack][0] = faceStart + leftCount;
-				segments[stack][1] = faceCount - leftCount;
-				stack ++;
+				//segments[stack][0] = faceStart + leftCount;
+				//segments[stack][1] = faceCount - leftCount;
+				//stack ++;
+				segments.PushBack(faceStart + leftCount);
+				segments.PushBack(faceCount - leftCount);
 			}
 		}
 	} 

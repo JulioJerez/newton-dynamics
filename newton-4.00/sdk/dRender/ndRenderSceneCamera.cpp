@@ -30,7 +30,7 @@ ndRenderSceneCamera::ndRenderSceneCamera(ndRender* const owner)
 	,m_projectionMatrix(ndGetIdentityMatrix())
 	,m_invProjectionMatrix(ndGetIdentityMatrix())
 	,m_fov(D_RENDER_CAMERA_ANGLE* ndDegreeToRad)
-	,m_backPlane(ndFloat32(2000.0f))
+	,m_backPlane(ndFloat32(1000.0f))
 	,m_frontPlane(ndFloat32(0.1f))
 	,m_yaw(ndFloat32(0.0f))
 	,m_pitch(ndFloat32(0.0f))
@@ -110,7 +110,7 @@ void ndRenderSceneCamera::SetViewMatrix(ndInt32 width, ndInt32 height)
 	// calculate projection matrix
 	m_projectionMatrix = CreatePerspectiveMatrix(m_fov, ndFloat32(width) / ndFloat32(height), m_frontPlane, m_backPlane);
 	m_invProjectionMatrix = m_projectionMatrix.Inverse4x4();
-	m_invViewRrojectionMatrix = m_invViewMatrix * m_projectionMatrix;
+	m_invViewProjectionMatrix = m_invViewMatrix * m_projectionMatrix;
 	
 	auto CalculateFrustumPoint = [this](const ndVector& pointInClickSpace, ndFloat32 zdist)
 	{

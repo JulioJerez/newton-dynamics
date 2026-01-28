@@ -62,7 +62,7 @@ void ndRenderShaderSetZbufferCleanBlock::Render(const ndRenderPrimitiveImplement
 {
 	const ndRenderSceneCamera* const camera = render->GetCamera()->FindCameraNode();
 
-	const ndMatrix modelViewProjectionMatrixMatrix(modelMatrix * camera->m_invViewRrojectionMatrix);
+	const ndMatrix modelViewProjectionMatrixMatrix(modelMatrix * camera->m_invViewProjectionMatrix);
 	const glMatrix glViewModelProjectionMatrix(modelViewProjectionMatrixMatrix);
 
 	glCullFace(GL_BACK);

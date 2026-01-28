@@ -98,8 +98,6 @@ class ndScene : public ndThreadPool
 	D_COLLISION_API virtual bool RayCast(ndRayCastNotify& callback, const ndVector& globalOrigin, const ndVector& globalDest) const;
 	D_COLLISION_API virtual bool ConvexCast(ndConvexCastNotify& callback, const ndShapeInstance& convexShape, const ndMatrix& globalOrigin, const ndVector& globalDest) const;
 
-	D_COLLISION_API void SendBackgroundTask(ndBackgroundTask* const job);
-
 	D_COLLISION_API ndInt32 GetThreadCount() const;
 
 	D_COLLISION_API virtual ndWorld* GetWorld() const;
@@ -173,7 +171,6 @@ class ndScene : public ndThreadPool
 	ndBvhNode* m_rootNode;
 	ndBodyKinematic* m_sentinelBody;
 	ndContactNotify* m_contactNotifyCallback;
-	ndThreadBackgroundWorker* m_backgroundThread;
 	
 	ndFloat32 m_timestep;
 	ndUnsigned32 m_lru;

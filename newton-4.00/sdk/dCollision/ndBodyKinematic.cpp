@@ -599,7 +599,7 @@ void ndBodyKinematic::SetIntrinsicMassMatrix(ndFloat32 mass, const ndShapeInstan
 	ndShapeInstance instance(shapeInstance);
 	ndMatrix matrix(instance.GetLocalMatrix());
 	matrix.m_posit = ndVector::m_wOne;
-	if (instance.GetShape()->GetAsShapeConvexHull())
+	if (instance.GetShape()->GetAsShapeCompound())
 	{
 		matrix.m_posit = saveCom * ndVector::m_negOne;
 		matrix.m_posit.m_w = ndFloat32 (1.0f);
