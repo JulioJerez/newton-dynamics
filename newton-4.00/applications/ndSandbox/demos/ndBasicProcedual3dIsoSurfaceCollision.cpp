@@ -174,8 +174,8 @@ void ndBasicMarchingCube32Collision(ndDemoEntityManager* const scene)
 
 	ndMatrix originMatrix(ndCalculateMatrix(rot, floor));
 
-	ndSharedPtr<ndDemoEntityManager::OnPostUpdate>marchingCubeMesh(new MarchingCubeTest(scene));
-	scene->RegisterPostUpdate(marchingCubeMesh);
+	//ndSharedPtr<ndDemoEntityManager::OnPostUpdate>marchingCubeMesh(new MarchingCubeTest(scene));
+	//scene->RegisterPostUpdate(marchingCubeMesh);
 
 	// add single box for testing
 	//ndSharedPtr<ndBody> testBody(AddSphere(scene, originMatrix, 1.0f, 0.25f, "wood_0.png"));
