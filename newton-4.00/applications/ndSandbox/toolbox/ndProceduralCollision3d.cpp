@@ -353,25 +353,6 @@ class ndHeightfieldMesh3d : public ndRenderSceneNode
 			}
 		}
 
-		//for (ndInt32 z = 0; z < D_TERRAIN_HEIGHT - 1; z += D_TERRAIN_TILE_SIZE)
-		//{
-		//	for (ndInt32 x = 0; x < D_TERRAIN_WIDTH - 1; x += D_TERRAIN_TILE_SIZE)
-		//	{
-		//		ndSharedPtr<ndMeshEffect> tileMesh(BuildTile(shape, x, z));
-		//
-		//		ndSharedPtr<ndRenderSceneNode> tileNode(new ndRenderSceneNode(ndGetIdentityMatrix()));
-		//		AddChild(tileNode);
-		//		
-		//		ndRenderPrimitive::ndDescriptor descriptor(render);
-		//		descriptor.m_meshNode = tileMesh;
-		//		ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(texture);
-		//		material.m_castShadows = false;
-		//		
-		//		ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
-		//		tileNode->SetPrimitive(mesh);
-		//	}
-		//}
-
 		auto BuildTiles = ndMakeObject::ndFunction([this, shape, &tilesOrigin, &tileSlots](ndInt32 groupId, ndInt32)
 		{
 			const TilePosit& posit = tilesOrigin[groupId];
