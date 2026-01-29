@@ -109,7 +109,7 @@ class ndExcavatorController : public ndModelNotify
 		ndWorld* const world = scene->GetWorld();
 		scene->AddEntity(vehicleMesh);
 		world->AddModel(vehicleModel);
-		vehicleModel->AddBodiesAndJointsToWorld();
+		//vehicleModel->AddBodiesAndJointsToWorld();
 
 		// restore mesh Matrix 
 		mesh.m_mesh->m_matrix = saveMatrix;

@@ -86,9 +86,6 @@ class ndBody : public ndContainersFreeListAlloc<ndBody>
 		return m_omega;
 	}
 
-	//D_COLLISION_API ndVector GetOmega() const;
-	//D_COLLISION_API ndMatrix GetMatrix() const;
-	//D_COLLISION_API ndVector GetVelocity() const;
 	D_COLLISION_API ndVector GetPosition() const;
 	D_COLLISION_API ndQuaternion GetRotation() const;
 	D_COLLISION_API ndVector GetGlobalGetCentreOfMass() const;

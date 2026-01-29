@@ -1036,7 +1036,7 @@ bool ndScene::ConvexCast(
 	while (stackPool.GetCount())
 	{
 		ndFloat32 dist = stackDistance.Pop();
-		const ndBvhNode* const me = stackPool.Pop();
+		const ndBvhNode* const self = stackPool.Pop();
 		
 		if (dist > callback.m_param)
 		{
@@ -1044,8 +1044,8 @@ bool ndScene::ConvexCast(
 		}
 		else 
 		{
-			ndBody* const body = me->GetBody();
-			if (body) 
+			ndBody* const body = self->GetBody();
+			if (!self->m_isDead && body)
 			{
 				if (callback.OnRayPrecastAction (body, &convexShape)) 
 				{
@@ -1115,7 +1115,7 @@ bool ndScene::ConvexCast(
 			else 
 			{
 				{
-					const ndBvhNode* const left = me->GetLeft();
+					const ndBvhNode* const left = self->GetLeft();
 					ndAssert(left);
 					const ndVector minBox(left->m_minBox - boxP1);
 					const ndVector maxBox(left->m_maxBox - boxP0);
@@ -1127,7 +1127,7 @@ bool ndScene::ConvexCast(
 				}
 		
 				{
-					const ndBvhNode* const right = me->GetRight();
+					const ndBvhNode* const right = self->GetRight();
 					ndAssert(right);
 					const ndVector minBox(right->m_minBox - boxP1);
 					const ndVector maxBox = right->m_maxBox - boxP0;
@@ -1175,8 +1175,8 @@ bool ndScene::RayCast(
 	while (stackPool.GetCount())
 	{
 		ndFloat32 dist = stackDistance.Pop();
-		const ndBvhNode* const me = stackPool.Pop();
-		ndAssert(me);
+		const ndBvhNode* const self = stackPool.Pop();
+		ndAssert(self);
 
 		if (dist > callback.m_param)
 		{
@@ -1184,11 +1184,11 @@ bool ndScene::RayCast(
 		}
 		else
 		{
-			ndBodyKinematic* const body = me->GetBody();
-			if (body)
+			ndBodyKinematic* const body = self->GetBody();
+			if (!self->m_isDead && body)
 			{
-				ndAssert(!me->GetLeft());
-				ndAssert(!me->GetRight());
+				ndAssert(!self->GetLeft());
+				ndAssert(!self->GetRight());
 
 				if (body->RayCast(callback, ray, callback.m_param))
 				{
@@ -1202,7 +1202,7 @@ bool ndScene::RayCast(
 			else
 			{
 				{
-					const ndBvhNode* const left = me->GetLeft();
+					const ndBvhNode* const left = self->GetLeft();
 					ndAssert(left);
 					ndFloat32 dist1 = ray.BoxIntersect(left->m_minBox, left->m_maxBox);
 					if (dist1 < callback.m_param)
@@ -1212,7 +1212,7 @@ bool ndScene::RayCast(
 				}
 				
 				{
-					const ndBvhNode* const right = me->GetRight();
+					const ndBvhNode* const right = self->GetRight();
 					ndAssert(right);
 					ndFloat32 dist1 = ray.BoxIntersect(right->m_minBox, right->m_maxBox);
 					if (dist1 < callback.m_param)
@@ -1235,15 +1235,15 @@ void ndScene::BodiesInAabb(ndBodiesInAabbNotify& callback, const ndVector& minBo
 		stackPool.PushBack(m_rootNode);
 		while (stackPool.GetCount())
 		{
-			const ndBvhNode* const rootNode = stackPool.Pop();
-			ndAssert(rootNode);
-			if (ndOverlapTest(rootNode->m_minBox, rootNode->m_maxBox, minBox, maxBox))
+			const ndBvhNode* const self = stackPool.Pop();
+			ndAssert(self);
+			if (ndOverlapTest(self->m_minBox, self->m_maxBox, minBox, maxBox))
 			{
-				ndBodyKinematic* const body = rootNode->GetBody();
-				if (body)
+				ndBodyKinematic* const body = self->GetBody();
+				if (!self->m_isDead && body)
 				{
-					ndAssert(!rootNode->GetLeft());
-					ndAssert(!rootNode->GetRight());
+					ndAssert(!self->GetLeft());
+					ndAssert(!self->GetRight());
 					if (ndOverlapTest(body->m_minAabb, body->m_maxAabb, minBox, maxBox))
 					{
 						callback.OnOverlap(body);
@@ -1251,10 +1251,10 @@ void ndScene::BodiesInAabb(ndBodiesInAabbNotify& callback, const ndVector& minBo
 				}
 				else
 				{
-					const ndBvhNode* const left = rootNode->GetLeft();
+					const ndBvhNode* const left = self->GetLeft();
 					stackPool.PushBack(left);
 
-					const ndBvhNode* const right = rootNode->GetRight();
+					const ndBvhNode* const right = self->GetRight();
 					stackPool.PushBack(right);
 				}
 			}

@@ -360,7 +360,7 @@ namespace ndUnicyclePlayer
 		ndWorld* const world = scene->GetWorld();
 		world->AddModel(model);
 		scene->AddEntity(visualMesh);
-		model->AddBodiesAndJointsToWorld();
+		//model->AddBodiesAndJointsToWorld();
 
 		return model;
 	}

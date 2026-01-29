@@ -206,13 +206,13 @@ ndBvhSceneManager::~ndBvhSceneManager()
 // **************************************************************
 ndBvhNode::ndBvhNode(ndBvhNode* const parent)
 	:ndContainersFreeListAlloc<ndBvhNode>()
-	, m_minBox(ndFloat32(-1.0e15f))
-	, m_maxBox(ndFloat32(1.0e15f))
-	, m_parent(parent)
-	, m_lock()
-	, m_depthLevel(0)
-	, m_isDead(0)
-	, m_bhvLinked(0)
+	,m_minBox(ndFloat32(-1.0e15f))
+	,m_maxBox(ndFloat32(1.0e15f))
+	,m_parent(parent)
+	,m_lock()
+	,m_depthLevel(0)
+	,m_isDead(0)
+	,m_bhvLinked(0)
 {
 #ifdef _DEBUG
 	m_nodeId = 0;
@@ -221,13 +221,13 @@ ndBvhNode::ndBvhNode(ndBvhNode* const parent)
 
 ndBvhNode::ndBvhNode(const ndBvhNode& src)
 	:ndContainersFreeListAlloc<ndBvhNode>()
-	, m_minBox(src.m_minBox)
-	, m_maxBox(src.m_maxBox)
-	, m_parent(nullptr)
-	, m_lock()
-	, m_depthLevel(0)
-	, m_isDead(0)
-	, m_bhvLinked(0)
+	,m_minBox(src.m_minBox)
+	,m_maxBox(src.m_maxBox)
+	,m_parent(nullptr)
+	,m_lock()
+	,m_depthLevel(0)
+	,m_isDead(0)
+	,m_bhvLinked(0)
 {
 #ifdef _DEBUG
 	m_nodeId = 0;

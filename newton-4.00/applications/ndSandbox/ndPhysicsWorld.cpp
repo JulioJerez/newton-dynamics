@@ -66,8 +66,6 @@ ndPhysicsWorld::ndDefferedModelList::ndDefferedModelList()
 
 void ndPhysicsWorld::ndDefferedModelList::RemovePendingItems()
 {
-	// TO DO
-	ndAssert(0);
 	Iterator it(*this);
 	for (it.Begin(); it; it++)
 	{
@@ -154,6 +152,9 @@ void ndPhysicsWorld::OnSubStepPostUpdate(ndFloat32 timestep)
 
 void ndPhysicsWorld::OnAddBody(ndBody* const body) const
 {
+	ndWorld::OnAddBody(body);
+	ndTrace(("adding a body %d from world\n", body->GetId()));
+
 	ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*body->GetNotifyCallback();
 	if (notify)
 	{
@@ -163,11 +164,37 @@ void ndPhysicsWorld::OnAddBody(ndBody* const body) const
 
 void ndPhysicsWorld::OnRemoveBody(ndBody* const body) const
 {
+	ndWorld::OnRemoveBody(body);
+	ndTrace(("removing a body %d from world\n", body->GetId()));
 	ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*body->GetNotifyCallback();
 	if (notify)
 	{
 		notify->OnBodyRemovedFromWorld();
 	}
+}
+
+void ndPhysicsWorld::OnAddJoint(ndJointBilateralConstraint* const joint) const
+{
+	ndWorld::OnAddJoint(joint);
+	ndTrace(("adding a joint to world\n"));
+}
+
+void ndPhysicsWorld::OnRemoveJoint(ndJointBilateralConstraint* const joint) const
+{
+	ndWorld::OnRemoveJoint(joint);
+	ndTrace(("removing a joint from world\n"));
+}
+
+void ndPhysicsWorld::OnAddModel(ndModel* const model) const
+{
+	ndWorld::OnAddModel(model);
+	ndTrace(("adding a model to world\n"));
+}
+
+void ndPhysicsWorld::OnRemoveModel(ndModel* const model) const
+{
+	ndWorld::OnRemoveModel(model);
+	ndTrace(("removing a model from world\n"));
 }
 
 void ndPhysicsWorld::NormalUpdates()
@@ -231,33 +258,46 @@ void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
 void ndPhysicsWorld::DefferedRemoveBody(ndBody* const body)
 {
 	ndScopeSpinLock Lock(m_lock);
-	ndAssert (body->GetAsBodyKinematic()->GetScene());
-	if (body->GetAsBodyKinematic()->GetScene())
+	ndBodyKinematic* const kinematicBody = body->GetAsBodyKinematic();
+	ndAssert (kinematicBody);
+	if (kinematicBody->GetScene())
 	{
-		ndSharedPtr<ndBody> sharedPtr(body->GetAsBodyKinematic()->GetScene()->GetBody(body));
-		ndDefferedBodyList::ndNode* const node = m_deadBodies.Find(sharedPtr);
-		if (!node)
+		ndModel* const model = kinematicBody->GetModel();
+		if (model)
 		{
-			// we now find all bodies and joints linked to this body to this body
-			ndFixSizeArray<ndSharedPtr<ndBody>, 256> stack;
-			stack.PushBack(sharedPtr);
-			while (stack.GetCount())
+			ndSharedPtr<ndModel> modelPtr(GetModel(model));
+			if (*modelPtr)
 			{
-				ndSharedPtr<ndBody> bodyNode(stack.Pop());
-				if (m_deadBodies.Insert(0, bodyNode))
+				m_deadModels.Insert(modelPtr);
+			}
+		}
+		else
+		{
+			ndSharedPtr<ndBody> sharedPtr(kinematicBody->GetAsBodyKinematic()->GetScene()->GetBody(kinematicBody));
+			ndDefferedBodyList::ndNode* const node = m_deadBodies.Find(sharedPtr);
+			if (!node)
+			{
+				// we now find all bodies and joints linked to this body to this body
+				ndFixSizeArray<ndSharedPtr<ndBody>, 256> stack;
+				stack.PushBack(sharedPtr);
+				while (stack.GetCount())
 				{
-					const ndBodyKinematic* const pivotBody = bodyNode->GetAsBodyKinematic();
-					const ndBodyKinematic::ndJointList& joints = pivotBody->GetJointList();
-					for (ndBodyKinematic::ndJointList::ndNode* jointNode = joints.GetFirst(); jointNode; jointNode = jointNode->GetNext())
+					ndSharedPtr<ndBody> bodyNode(stack.Pop());
+					if (m_deadBodies.Insert(0, bodyNode))
 					{
-						ndJointBilateralConstraint* const joint = jointNode->GetInfo();
-						const ndBodyKinematic* const body0 = joint->GetBody0();
-						const ndBodyKinematic* const body1 = joint->GetBody1();
-						ndBodyKinematic* const childBody = (ndBodyKinematic*)((body0 == pivotBody) ? body1 : body0);
-						ndSharedPtr<ndBody> childBodyPtr(childBody->GetScene()->GetBody(childBody));
-						if (childBodyPtr->GetInvMass() > ndFloat32(0.0f))
+						const ndBodyKinematic* const pivotBody = bodyNode->GetAsBodyKinematic();
+						const ndBodyKinematic::ndJointList& joints = pivotBody->GetJointList();
+						for (ndBodyKinematic::ndJointList::ndNode* jointNode = joints.GetFirst(); jointNode; jointNode = jointNode->GetNext())
 						{
-							stack.PushBack(childBodyPtr);
+							ndJointBilateralConstraint* const joint = jointNode->GetInfo();
+							const ndBodyKinematic* const body0 = joint->GetBody0();
+							const ndBodyKinematic* const body1 = joint->GetBody1();
+							ndBodyKinematic* const childBody = (ndBodyKinematic*)((body0 == pivotBody) ? body1 : body0);
+							ndSharedPtr<ndBody> childBodyPtr(childBody->GetScene()->GetBody(childBody));
+							if (childBodyPtr->GetInvMass() > ndFloat32(0.0f))
+							{
+								stack.PushBack(childBodyPtr);
+							}
 						}
 					}
 				}

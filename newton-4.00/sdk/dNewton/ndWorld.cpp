@@ -299,6 +299,16 @@ ndSharedPtr<ndBody> ndWorld::GetBody(ndBody* const body) const
 	return m_scene->GetBody(body);
 }
 
+ndSharedPtr<ndJointBilateralConstraint> ndWorld::GetJoint(ndJointBilateralConstraint* joint) const
+{
+	return joint->m_worldNode->GetInfo();
+}
+
+ndSharedPtr<ndModel> ndWorld::GetModel(ndModel* const model) const
+{
+	return model->m_worldNode->GetInfo();
+}
+
 ndInt32 ndWorld::CompareJointByInvMass(const ndJointBilateralConstraint* const jointA, const ndJointBilateralConstraint* const jointB, void*)
 {
 	ndInt32 modeA = jointA->GetSolverModel();
@@ -909,11 +919,15 @@ void ndWorld::AddModel(const ndSharedPtr<ndModel>& model)
 {
 	ndScopeSpinLock lock(m_addRemoveModelsLock);
 	m_modelList.AddModel(model, this);
+	model->OnAddWorld();
+	OnAddModel((ndModel*)*model);
 }
 
 void ndWorld::RemoveModel(ndModel* const model)
 {
 	ndScopeSpinLock lock(m_addRemoveModelsLock);
+	OnRemoveModel(model);
+	model->OnRemoveFromWorld();
 	m_modelList.RemoveModel(model);
 }
 
@@ -935,6 +949,7 @@ void ndWorld::AddJoint(const ndSharedPtr<ndJointBilateralConstraint>& joint)
 		joint->m_worldNode = m_jointList.Append(joint);
 		joint->m_body0Node = joint->GetBody0()->AttachJoint((ndJointBilateralConstraint*)*joint);
 		joint->m_body1Node = joint->GetBody1()->AttachJoint((ndJointBilateralConstraint*)*joint);
+		OnAddJoint((ndJointBilateralConstraint*)*joint);
 	}
 }
 
@@ -946,6 +961,8 @@ void ndWorld::RemoveJoint(ndJointBilateralConstraint* const joint)
 	{
 		ndAssert(joint->m_body0Node != nullptr);
 		ndAssert(joint->m_body1Node != nullptr);
+
+		OnRemoveJoint(joint);
 		joint->GetBody0()->DetachJoint(joint->m_body0Node);
 		joint->GetBody1()->DetachJoint(joint->m_body1Node);
 
@@ -998,5 +1015,21 @@ void ndWorld::OnAddBody(ndBody* const) const
 }
 
 void ndWorld::OnRemoveBody(ndBody* const) const
+{
+}
+
+void ndWorld::OnAddJoint(ndJointBilateralConstraint* const) const
+{
+}
+
+void ndWorld::OnRemoveJoint(ndJointBilateralConstraint* const) const
+{
+}
+
+void ndWorld::OnAddModel(ndModel* const) const
+{
+}
+
+void ndWorld::OnRemoveModel(ndModel* const) const
 {
 }

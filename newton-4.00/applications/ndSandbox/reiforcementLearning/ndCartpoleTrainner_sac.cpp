@@ -123,7 +123,7 @@ namespace ndCartpoleTrainer_sac
 			// add model a visual mesh to the scene and world
 			world->AddModel(model);
 			scene->AddEntity(visualMesh);
-			model->AddBodiesAndJointsToWorld();
+			//model->AddBodiesAndJointsToWorld();
 		}
 
 		~TrainingUpdata()

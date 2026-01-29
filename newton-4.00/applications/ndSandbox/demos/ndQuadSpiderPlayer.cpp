@@ -549,7 +549,7 @@ namespace ndQuadSpiderPlayer
 		ndWorld* const world = scene->GetWorld();
 		world->AddModel(model);
 		scene->AddEntity(visualMesh);
-		model->AddBodiesAndJointsToWorld();
+		//model->AddBodiesAndJointsToWorld();
 
 		loader.m_mesh->m_matrix = saveMatrix;
 		return model;

@@ -156,7 +156,7 @@ namespace ndUnicycleTrainer_ppo
 				// add model a visual mesh to the scene and world
 				world->AddModel(model);
 				scene->AddEntity(visualMesh);
-				model->AddBodiesAndJointsToWorld();
+				//model->AddBodiesAndJointsToWorld();
 			}
 		}
 
