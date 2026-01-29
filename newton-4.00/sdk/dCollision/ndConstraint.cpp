@@ -215,6 +215,6 @@ bool ndConstraint::CheckBlockMatrixPSD(const ndLeftHandSide* const bigMatrix, co
 		}
 	}
 
-	bool test = ndTestPSDmatrix(count, D_CONSTRAINT_MAX_ROWS, &matrix[0][0]);
+	bool test = !count || ndTestPSDmatrix(count, D_CONSTRAINT_MAX_ROWS, &matrix[0][0]);
 	return test;
 }
