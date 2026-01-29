@@ -21,6 +21,39 @@
 #define MAX_PHYSICS_STEPS			1
 #define MAX_PHYSICS_FPS				60.0f
 
+ndPhysicsWorld::ndDefferedBodyList::ndDefferedBodyList()
+	:m_owner(nullptr)
+{
+}
+
+void ndPhysicsWorld::ndDefferedBodyList::RemovePendingBodies()
+{
+	Iterator it(*this);
+	for (it.Begin(); it; it++)
+	{
+		ndSharedPtr<ndBody> body(it.GetKey());
+		m_owner->RemoveBody(*body);
+	}
+	RemoveAll();
+}
+
+ndPhysicsWorld::ndDefferedJointList::ndDefferedJointList()
+	:m_owner(nullptr)
+{
+}
+
+void ndPhysicsWorld::ndDefferedJointList::RemovePendingBodies()
+{
+	Iterator it(*this);
+	for (it.Begin(); it; it++)
+	{
+		ndSharedPtr<ndJointBilateralConstraint> joint(it.GetKey());
+		m_owner->RemoveJoint(*joint);
+	}
+	RemoveAll();
+}
+
+
 ndDemoContactCallback::ndDemoContactCallback()
 {
 }
@@ -29,69 +62,22 @@ ndDemoContactCallback::~ndDemoContactCallback()
 {
 }
 
-ndPhysicsWorld::ndDeffereDeadBodies::ndDeffereDeadBodies()
-	:ndArray<ndBody*>()
-	,m_owner(nullptr)
-{
-}
-
-void ndPhysicsWorld::ndDeffereDeadBodies::RemovePendingBodies()
-{
-	if (!GetCount())
-	{
-		return;
-	}
-
-	ndTree<ndInt32, ndBodyKinematic*> filter;
-
-	for (ndInt32 i = 0; i < GetCount(); ++i)
-	{
-		ndBodyKinematic* const body = (*this)[i]->GetAsBodyKinematic();
-		if (body->GetInvMass() > ndFloat32(0.0f))
-		{
-			const ndBodyKinematic::ndJointList& joints = body->GetJointList();
-			for (ndBodyKinematic::ndJointList::ndNode* jointNode = joints.GetFirst(); jointNode; jointNode = jointNode->GetNext())
-			{
-				ndJointBilateralConstraint* const joint = jointNode->GetInfo();
-				ndBodyKinematic* const body1 = (joint->GetBody0() == body) ? joint->GetBody1() : joint->GetBody0();
-				ndTree<ndInt32, ndBodyKinematic*>::ndNode* const deadNode = filter.Insert(0, body1);
-				if (deadNode)
-				{
-					ndAssert(0);
-					PushBack(body1);
-				}
-			}
-		}
-	}
-		
-	for (ndInt32 i = ndInt32 (GetCount()) - 1; i >= 0 ; --i)
-	{
-		ndBodyKinematic* const body = (*this)[i]->GetAsBodyKinematic();
-		ndDemoEntityNotify* const notification = (ndDemoEntityNotify*)*body->GetNotifyCallback();
-		m_owner->m_defferedDeadEntities.Append(notification->GetUserData());
-		m_owner->RemoveBody(body);
-	}
-
-	SetCount(0);
-}
-
-void ndPhysicsWorld::ndDeffereDeadBodies::RemoveBody(ndBody* const body)
-{
-	ndScopeSpinLock Lock(m_owner->m_lock);
-	PushBack(body);
-}
-
 ndPhysicsWorld::ndPhysicsWorld(ndDemoEntityManager* const manager)
 	:ndWorld()
 	,m_manager(manager)
 	,m_timeAccumulator(0.0f)
 	,m_interplationParameter(0.0f)
 	,m_deadBodies()
-	,m_defferedDeadEntities()
+	//,m_deadModels()
+	//,m_deadEntities()
+	,m_deadJoints()
 	,m_acceleratedUpdate(false)
 {
 	ClearCache();
 	m_deadBodies.m_owner = this;
+	m_deadJoints.m_owner = this;
+	//m_deadModels.m_owner = this;
+	//m_deadEntities.m_owner = this;
 	SetContactNotify(new ndDemoContactCallback);
 }
 
@@ -172,29 +158,59 @@ void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
 	ndAssert(camera);
 	camera->TickUpdate(timestep);
 
-	RemoveDeadBodies();
-}
-
-void ndPhysicsWorld::RemoveDeadBodies()
-{
+	// remove all pending objects
+	//m_deadModels.RemovePendingBodies();
+	//m_deadJoints.RemovePendingBodies();
 	m_deadBodies.RemovePendingBodies();
+	//m_deadEntities.RemovePendingBodies();
 }
 
 void ndPhysicsWorld::DefferedRemoveBody(ndBody* const body)
 {
-	m_deadBodies.RemoveBody(body);
-}
-
-void ndPhysicsWorld::RemoveDeadEntities()
-{
-	ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* nextNode;
-	for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* node = m_defferedDeadEntities.GetFirst(); node; node = nextNode)
+	ndScopeSpinLock Lock(m_lock);
+	ndAssert (body->GetAsBodyKinematic()->GetScene());
+	if (body->GetAsBodyKinematic()->GetScene())
 	{
-		nextNode = node->GetNext();
-		m_manager->RemoveEntity(node->GetInfo());
-		m_defferedDeadEntities.Remove(node);
+		ndSharedPtr<ndBody> sharedPtr(body->GetAsBodyKinematic()->GetScene()->GetBody(body));
+		ndDefferedBodyList::ndNode* const node = m_deadBodies.Find(sharedPtr);
+		if (!node)
+		{
+			// we now find all bodies ann bodies and joints connected to this body
+			//m_deadBodies.Insert(0, sharedPtr);
+
+			ndFixSizeArray<ndSharedPtr<ndBody>, 256> stack;
+			stack.PushBack(sharedPtr);
+			while (stack.GetCount())
+			{
+				ndSharedPtr<ndBody> bodyNode(stack.Pop());
+				if (!m_deadBodies.Find(bodyNode))
+				{
+					m_deadBodies.Insert(0, bodyNode);
+					const ndBodyKinematic::ndJointList& joints = body->GetAsBodyDynamic()->GetJointList();
+					for (ndBodyKinematic::ndJointList::ndNode* jointNode = joints.GetFirst(); jointNode; jointNode = jointNode->GetNext())
+					{
+						ndJointBilateralConstraint* const joint = jointNode->GetInfo();
+						ndBodyKinematic* const childBody = (joint->GetBody0() == body) ? joint->GetBody1() : joint->GetBody0();
+						ndSharedPtr<ndBody> childBodyPtr(childBody->GetScene()->GetBody(body));
+						stack.PushBack(childBodyPtr);
+					}
+				}
+			}
+		}
 	}
 }
+
+//void ndPhysicsWorld::RemoveDeadEntities()
+//{
+//	ndAssert(0);
+//	//ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* nextNode;
+//	//for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* node = m_defferedDeadEntities.GetFirst(); node; node = nextNode)
+//	//{
+//	//	nextNode = node->GetNext();
+//	//	m_manager->RemoveEntity(node->GetInfo());
+//	//	m_defferedDeadEntities.Remove(node);
+//	//}
+//}
 
 void ndPhysicsWorld::AdvanceTime(ndFloat32 timestep)
 {
@@ -204,7 +220,6 @@ void ndPhysicsWorld::AdvanceTime(ndFloat32 timestep)
 	if (m_acceleratedUpdate)
 	{
 		Update(descreteStep);
-		RemoveDeadEntities();
 	} 
 	else
 	{
@@ -224,7 +239,6 @@ void ndPhysicsWorld::AdvanceTime(ndFloat32 timestep)
 		{
 			Update(descreteStep);
 			m_timeAccumulator -= descreteStep;
-			RemoveDeadEntities();
 		}
 	}
 

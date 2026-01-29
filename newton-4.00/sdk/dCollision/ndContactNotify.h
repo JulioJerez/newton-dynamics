@@ -56,8 +56,8 @@ class ndContactNotify: public ndClassAlloc
 	D_COLLISION_API virtual ndMaterial* GetMaterial(const ndContact* const, const ndShapeInstance&, const ndShapeInstance&) const;
 
 	protected:
-	D_COLLISION_API virtual void OnBodyAdded(ndBodyKinematic* const) const;
-	D_COLLISION_API virtual void OnBodyRemoved(ndBodyKinematic* const) const;
+	//D_COLLISION_API virtual void OnBodyAdded(ndBodyKinematic* const) const;
+	//D_COLLISION_API virtual void OnBodyRemoved(ndBodyKinematic* const) const;
 	D_COLLISION_API virtual void OnContactCallback(const ndContact* const, ndFloat32) const;
 	D_COLLISION_API virtual bool OnAabbOverlap(const ndContact* const contact, ndFloat32 timestep) const;
 	D_COLLISION_API virtual bool OnAabbOverlap(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1) const;

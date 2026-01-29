@@ -55,14 +55,19 @@ class ndPhysicsWorld: public ndWorld
 	public:
 	D_CLASS_REFLECTION(ndPhysicsWorld, ndWorld)
 
-	class ndDeffereDeadBodies : public ndArray<ndBody*>
+	class ndDefferedBodyList : public ndTree<ndInt32, ndSharedPtr<ndBody>>
 	{
 		public:
-		ndDeffereDeadBodies();
-
+		ndDefferedBodyList();
 		void RemovePendingBodies();
-		void RemoveBody(ndBody* const body);
+		ndPhysicsWorld* m_owner;
+	};
 
+	class ndDefferedJointList : public ndTree<ndInt32, ndSharedPtr<ndJointBilateralConstraint>>
+	{
+		public:
+		ndDefferedJointList();
+		void RemovePendingBodies();
 		ndPhysicsWorld* m_owner;
 	};
 
@@ -83,16 +88,16 @@ class ndPhysicsWorld: public ndWorld
 	void PostUpdate(ndFloat32 timestep) override;
 	void OnSubStepPostUpdate(ndFloat32 timestep) override;
 
-	void RemoveDeadBodies();
-	void RemoveDeadEntities();
-
 	ndDemoEntityManager* m_manager;
 	ndFloat32 m_timeAccumulator;
 	ndFloat32 m_interplationParameter;
 	ndSpinLock m_lock;
 
-	ndDeffereDeadBodies m_deadBodies;
-	ndList<ndSharedPtr<ndRenderSceneNode>> m_defferedDeadEntities;
+	ndDefferedBodyList m_deadBodies;
+	ndDefferedJointList m_deadJoints;
+	//ndDefferedList<ndModel> m_deadModels;
+	//ndDefferedList<ndRenderSceneNode> m_deadEntities;
+	
 	bool m_acceleratedUpdate;
 };
 

@@ -40,6 +40,8 @@ class ndDemoEntityNotify : public ndModelBodyNotify
 	}
 
 	void RemoveBody();
+	virtual void OnBodyAddedToWorld() override;
+	virtual void OnBodyRemovedFromWorld() override;
 	virtual void OnTransform(ndFloat32 timestep, const ndMatrix& matrix) override;
 	virtual void OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep) override;
 
@@ -48,18 +50,6 @@ class ndDemoEntityNotify : public ndModelBodyNotify
 	ndTransform m_transform;
 	ndMatrix m_bindMatrix;
 	ndFloat32 m_capSpeed;
+	bool m_bodyIsInWorld;
 };
-
-//class ndBindingRagdollEntityNotify : public ndDemoEntityNotify
-//{
-//	public:
-//	ndBindingRagdollEntityNotify(ndDemoEntityManager* const manager, const ndSharedPtr<ndRenderSceneNode>& entity, ndBodyDynamic* const parentBody, ndFloat32 campSpeed);
-//	~ndBindingRagdollEntityNotify();
-//
-//	void OnTransform(ndInt32, const ndMatrix& matrix);
-//	void OnApplyExternalForce(ndInt32 thread, ndFloat32 timestep);
-//
-//	ndMatrix m_bindMatrix;
-//	ndFloat32 m_capSpeed;
-//};
 #endif

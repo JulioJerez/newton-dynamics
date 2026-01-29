@@ -24,7 +24,6 @@
 #include "ndBodyNotify.h"
 #include "ndBodyKinematic.h"
 
-
 ndBodyNotify::ndBodyNotify(const ndBodyNotify& src)
 	:ndContainersFreeListAlloc<ndBodyNotify>()
 	,m_defaultGravity(src.m_defaultGravity)
@@ -78,10 +77,15 @@ void ndBodyNotify::SetGravity(const ndVector & defaultGravity)
 	m_defaultGravity = defaultGravity;
 }
 
-//void ndBodyNotify::OnTransform(ndInt32, const ndMatrix&)
-//{
-//	ndTrace(("please use new inteface %s\n", __FUNCTION__));
-//}
+void ndBodyNotify::OnBodyAddedToWorld()
+{
+	ndAssert(0);
+}
+
+void ndBodyNotify::OnBodyRemovedFromWorld()
+{
+	ndAssert(0);
+}
 
 void ndBodyNotify::OnTransform(ndFloat32, const ndMatrix&)
 {

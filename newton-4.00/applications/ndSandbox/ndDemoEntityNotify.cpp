@@ -19,6 +19,7 @@ ndDemoEntityNotify::ndDemoEntityNotify(ndDemoEntityManager* const manager, const
 	,m_entity(entity)
 	,m_transform()
 	,m_capSpeed(ndFloat32 (100.0f))
+	,m_bodyIsInWorld(false)
 {
 	if (!parentBody)
 	{
@@ -49,6 +50,7 @@ ndDemoEntityNotify::ndDemoEntityNotify(const ndDemoEntityNotify& notify)
 	,m_entity(notify.m_entity)
 	,m_transform()
 	,m_capSpeed(100.0f)
+	,m_bodyIsInWorld(false)
 {
 	if (notify.GetParentBody())
 	{
@@ -89,6 +91,16 @@ void ndDemoEntityNotify::OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 tim
 			body->SetVelocity(veloc);
 		}
 	}
+}
+
+void ndDemoEntityNotify::OnBodyAddedToWorld()
+{
+	m_bodyIsInWorld = true;
+}
+
+void ndDemoEntityNotify::OnBodyRemovedFromWorld()
+{
+	m_bodyIsInWorld = false;
 }
 
 void ndDemoEntityNotify::OnTransform(ndFloat32, const ndMatrix& matrix)
