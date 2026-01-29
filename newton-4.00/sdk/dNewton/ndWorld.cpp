@@ -299,6 +299,11 @@ ndSharedPtr<ndBody> ndWorld::GetBody(ndBody* const body) const
 	return m_scene->GetBody(body);
 }
 
+ndSharedPtr<ndJointBilateralConstraint> ndWorld::GetJoint(ndJointBilateralConstraint* joint) const
+{
+	return joint->m_worldNode->GetInfo();
+}
+
 ndSharedPtr<ndModel> ndWorld::GetModel(ndModel* const model) const
 {
 	return model->m_worldNode->GetInfo();

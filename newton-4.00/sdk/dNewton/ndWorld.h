@@ -90,7 +90,7 @@ class ndWorld: public ndClassAlloc
 
 	D_NEWTON_API ndSharedPtr<ndBody> GetBody(ndBody* const body) const;
 	D_NEWTON_API ndSharedPtr<ndModel> GetModel(ndModel* const model) const;
-	//D_NEWTON_API virtual void GetJoint(ndSharedPtr<ndJointBilateralConstraint>& joint);
+	D_NEWTON_API ndSharedPtr<ndJointBilateralConstraint> GetJoint(ndJointBilateralConstraint* joint) const;
 
 	D_NEWTON_API virtual void OnAddBody(ndBody* const body) const;
 	D_NEWTON_API virtual void OnRemoveBody(ndBody* const body) const;
