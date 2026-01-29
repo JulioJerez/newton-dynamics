@@ -153,9 +153,10 @@ namespace ndCartpoleTrainer_ppo
 				ndSharedPtr<ndModel>model(CreateModel(scene, loader.m_mesh, visualMesh));
 			
 				// add model a visual mesh to the scene and world
+				ndAssert(0);
 				world->AddModel(model);
 				scene->AddEntity(visualMesh);
-				model->AddBodiesAndJointsToWorld();
+				//model->AddBodiesAndJointsToWorld();
 			}
 		}
 

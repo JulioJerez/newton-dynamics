@@ -299,6 +299,11 @@ ndSharedPtr<ndBody> ndWorld::GetBody(ndBody* const body) const
 	return m_scene->GetBody(body);
 }
 
+ndSharedPtr<ndModel> ndWorld::GetModel(ndModel* const model) const
+{
+	return model->m_worldNode->GetInfo();
+}
+
 ndInt32 ndWorld::CompareJointByInvMass(const ndJointBilateralConstraint* const jointA, const ndJointBilateralConstraint* const jointB, void*)
 {
 	ndInt32 modeA = jointA->GetSolverModel();
@@ -909,6 +914,7 @@ void ndWorld::AddModel(const ndSharedPtr<ndModel>& model)
 {
 	ndScopeSpinLock lock(m_addRemoveModelsLock);
 	m_modelList.AddModel(model, this);
+	model->OnAddWorld();
 	OnAddModel((ndModel*)*model);
 }
 
@@ -916,6 +922,7 @@ void ndWorld::RemoveModel(ndModel* const model)
 {
 	ndScopeSpinLock lock(m_addRemoveModelsLock);
 	OnRemoveModel(model);
+	model->OnRemoveFromWorld();
 	m_modelList.RemoveModel(model);
 }
 

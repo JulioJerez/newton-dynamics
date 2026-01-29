@@ -56,7 +56,6 @@ void ndModelList::AddModel(const ndSharedPtr<ndModel>& model, ndWorld* const wor
 		m_dirty = true;
 		model->m_world = world;
 		model->m_worldNode = Append(model);
-		model->OnAddToWorld();
 	}
 }
 
@@ -66,7 +65,6 @@ void ndModelList::RemoveModel(ndModel* const model)
 	if (node)
 	{
 		m_dirty = true;
-		model->OnRemoveFromToWorld();
 		model->m_world = nullptr;
 		model->m_worldNode = nullptr;
 		Remove(node);

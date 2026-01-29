@@ -804,7 +804,7 @@ void ndBasicRagdoll(ndDemoEntityManager* const scene)
 
     ndPhysicsWorld* world = scene->GetWorld();
     world->AddModel(model);
-    model->AddBodiesAndJointsToWorld();
+    //model->AddBodiesAndJointsToWorld();
 
     ndQuaternion rot;
     ndVector origin(-20.0f, 10.0f, 0.0f, 1.0f);

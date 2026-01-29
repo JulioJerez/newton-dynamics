@@ -80,12 +80,6 @@ class ndModelArticulation: public ndModel
 	D_NEWTON_API const ndList<ndModelArticulation::ndNode>& GetCloseLoops() const;
 	D_NEWTON_API void AddCloseLoop(const ndSharedPtr<ndJointBilateralConstraint>& joint, const char* const name = nullptr);
 
-	D_NEWTON_API virtual void OnAddToWorld() override;
-	D_NEWTON_API virtual void OnRemoveFromToWorld() override;
-
-	D_NEWTON_API virtual void AddBodiesAndJointsToWorld() override;
-	D_NEWTON_API virtual void RemoveBodiesAndJointsFromWorld() override;
-
 	D_NEWTON_API virtual void SetSleep(ndFloat32 speed, ndFloat32 angularSpeed, ndFloat32 accel, ndFloat32 alpha) const override;
 
 	D_NEWTON_API const ndString& GetName() const;
@@ -102,6 +96,9 @@ class ndModelArticulation: public ndModel
 	
 	protected:
 	D_NEWTON_API void ConvertToUrdf();
+	D_COLLISION_API virtual void OnAddWorld() override;
+	D_COLLISION_API virtual void OnRemoveFromWorld() override;
+
 	void CalculateCentreOfMass(ndCenterOfMassDynamics& comDynamics, ndFixSizeArray<const ndBodyKinematic*, 256>& bodyArrayOut, ndFixSizeArray<ndVector, 256>& bodyCenterOut) const;
 	
 	ndString m_name;
