@@ -38,7 +38,6 @@ class ndBvhNode : public ndContainersFreeListAlloc<ndBvhNode>
 	virtual ndBvhNode* Clone() const;
 
 	void Kill();
-	//void GetAabb(ndVector& minBox, ndVector& maxBox) const;
 	void SetAabb(const ndVector& minBox, const ndVector& maxBox);
 	void GetAabb(ndVector& minBox, ndVector& maxBox) const
 	{
