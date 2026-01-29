@@ -95,6 +95,12 @@ class ndWorld: public ndClassAlloc
 	D_NEWTON_API virtual void OnAddBody(ndBody* const body) const;
 	D_NEWTON_API virtual void OnRemoveBody(ndBody* const body) const;
 
+	D_NEWTON_API virtual void OnAddJoint(ndJointBilateralConstraint* const joint) const;
+	D_NEWTON_API virtual void OnRemoveJoint(ndJointBilateralConstraint* const joint) const;
+
+	D_NEWTON_API virtual void OnAddModel(ndModel* const model) const;
+	D_NEWTON_API virtual void OnRemoveModel(ndModel* const model) const;
+
 	D_NEWTON_API const ndJointList& GetJointList() const;
 	D_NEWTON_API const ndModelList& GetModelList() const;
 	D_NEWTON_API const ndBodyListView& GetBodyList() const;

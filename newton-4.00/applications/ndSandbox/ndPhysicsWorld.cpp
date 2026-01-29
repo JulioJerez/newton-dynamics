@@ -66,11 +66,11 @@ ndPhysicsWorld::ndDefferedModelList::ndDefferedModelList()
 
 void ndPhysicsWorld::ndDefferedModelList::RemovePendingItems()
 {
-	// TO DO
-	ndAssert(0);
 	Iterator it(*this);
 	for (it.Begin(); it; it++)
 	{
+		// TO DO
+		ndAssert(0);
 		ndSharedPtr<ndModel> item(it.GetKey());
 		m_owner->RemoveModel(*item);
 	}
@@ -154,6 +154,9 @@ void ndPhysicsWorld::OnSubStepPostUpdate(ndFloat32 timestep)
 
 void ndPhysicsWorld::OnAddBody(ndBody* const body) const
 {
+	ndWorld::OnAddBody(body);
+	ndTrace(("adding a body %d from world\n", body->GetId()));
+
 	ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*body->GetNotifyCallback();
 	if (notify)
 	{
@@ -163,11 +166,37 @@ void ndPhysicsWorld::OnAddBody(ndBody* const body) const
 
 void ndPhysicsWorld::OnRemoveBody(ndBody* const body) const
 {
+	ndWorld::OnRemoveBody(body);
+	ndTrace(("removing a body %d from world\n", body->GetId()));
 	ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*body->GetNotifyCallback();
 	if (notify)
 	{
 		notify->OnBodyRemovedFromWorld();
 	}
+}
+
+void ndPhysicsWorld::OnAddJoint(ndJointBilateralConstraint* const joint) const
+{
+	ndWorld::OnAddJoint(joint);
+	ndTrace(("adding a joint to world\n"));
+}
+
+void ndPhysicsWorld::OnRemoveJoint(ndJointBilateralConstraint* const joint) const
+{
+	ndWorld::OnRemoveJoint(joint);
+	ndTrace(("removing a joint from world\n"));
+}
+
+void ndPhysicsWorld::OnAddModel(ndModel* const model) const
+{
+	ndWorld::OnAddModel(model);
+	ndTrace(("adding a model to world\n"));
+}
+
+void ndPhysicsWorld::OnRemoveModel(ndModel* const model) const
+{
+	ndWorld::OnRemoveModel(model);
+	ndTrace(("removing a model from world\n"));
 }
 
 void ndPhysicsWorld::NormalUpdates()

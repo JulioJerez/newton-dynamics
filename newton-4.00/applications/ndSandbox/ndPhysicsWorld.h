@@ -106,6 +106,10 @@ class ndPhysicsWorld: public ndWorld
 
 	void OnAddBody(ndBody* const) const override;
 	void OnRemoveBody(ndBody* const) const override;
+	void OnAddModel(ndModel* const) const override;
+	void OnRemoveModel(ndModel* const) const override;
+	void OnAddJoint(ndJointBilateralConstraint* const) const override;
+	void OnRemoveJoint(ndJointBilateralConstraint* const) const override;
 
 	ndDemoEntityManager* m_manager;
 	ndFloat32 m_timeAccumulator;

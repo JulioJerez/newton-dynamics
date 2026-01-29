@@ -909,11 +909,13 @@ void ndWorld::AddModel(const ndSharedPtr<ndModel>& model)
 {
 	ndScopeSpinLock lock(m_addRemoveModelsLock);
 	m_modelList.AddModel(model, this);
+	OnAddModel((ndModel*)*model);
 }
 
 void ndWorld::RemoveModel(ndModel* const model)
 {
 	ndScopeSpinLock lock(m_addRemoveModelsLock);
+	OnRemoveModel(model);
 	m_modelList.RemoveModel(model);
 }
 
@@ -935,6 +937,7 @@ void ndWorld::AddJoint(const ndSharedPtr<ndJointBilateralConstraint>& joint)
 		joint->m_worldNode = m_jointList.Append(joint);
 		joint->m_body0Node = joint->GetBody0()->AttachJoint((ndJointBilateralConstraint*)*joint);
 		joint->m_body1Node = joint->GetBody1()->AttachJoint((ndJointBilateralConstraint*)*joint);
+		OnAddJoint((ndJointBilateralConstraint*)*joint);
 	}
 }
 
@@ -946,6 +949,8 @@ void ndWorld::RemoveJoint(ndJointBilateralConstraint* const joint)
 	{
 		ndAssert(joint->m_body0Node != nullptr);
 		ndAssert(joint->m_body1Node != nullptr);
+
+		OnRemoveJoint(joint);
 		joint->GetBody0()->DetachJoint(joint->m_body0Node);
 		joint->GetBody1()->DetachJoint(joint->m_body1Node);
 
@@ -998,5 +1003,21 @@ void ndWorld::OnAddBody(ndBody* const) const
 }
 
 void ndWorld::OnRemoveBody(ndBody* const) const
+{
+}
+
+void ndWorld::OnAddJoint(ndJointBilateralConstraint* const) const
+{
+}
+
+void ndWorld::OnRemoveJoint(ndJointBilateralConstraint* const) const
+{
+}
+
+void ndWorld::OnAddModel(ndModel* const) const
+{
+}
+
+void ndWorld::OnRemoveModel(ndModel* const) const
 {
 }
