@@ -30,8 +30,8 @@ enum ndRenderPassMode
 	m_debugDisplaySetZbuffer,
 	m_debugDisplayWireFrameMesh,
 	m_directionalDiffusseShadow,
+	m_generateInstanceShadowMaps,
 	m_directionalDiffusseNoShadow,
-	m_m_generateInstanceShadowMaps,
 	m_directionalDiffusseInstanceShadow,
 };
 

@@ -55,14 +55,35 @@ class ndPhysicsWorld: public ndWorld
 	public:
 	D_CLASS_REFLECTION(ndPhysicsWorld, ndWorld)
 
-	class ndDeffereDeadBodies : public ndArray<ndBody*>
+	class ndDefferedBodyList : public ndTree<ndInt32, ndSharedPtr<ndBody>, ndContainersFreeListAlloc<ndBody>>
 	{
 		public:
-		ndDeffereDeadBodies();
+		ndDefferedBodyList();
+		void RemovePendingItems();
+		ndPhysicsWorld* m_owner;
+	};
 
-		void RemovePendingBodies();
-		void RemoveBody(ndBody* const body);
+	class ndDefferedJointList : public ndTree<ndInt32, ndSharedPtr<ndJointBilateralConstraint>, ndContainersFreeListAlloc<ndJointBilateralConstraint>>
+	{
+		public:
+		ndDefferedJointList();
+		void RemovePendingItems();
+		ndPhysicsWorld* m_owner;
+	};
 
+	class ndDefferedModelList : public ndTree<ndInt32, ndSharedPtr<ndModel>, ndContainersFreeListAlloc<ndModel>>
+	{
+		public:
+		ndDefferedModelList();
+		void RemovePendingItems();
+		ndPhysicsWorld* m_owner;
+	};
+
+	class ndDefferedEntityList : public ndTree<ndInt32, ndSharedPtr<ndRenderSceneNode>, ndContainersFreeListAlloc<ndRenderSceneNode>>
+	{
+		public:
+		ndDefferedEntityList();
+		void RemovePendingItems();
 		ndPhysicsWorld* m_owner;
 	};
 
@@ -83,16 +104,19 @@ class ndPhysicsWorld: public ndWorld
 	void PostUpdate(ndFloat32 timestep) override;
 	void OnSubStepPostUpdate(ndFloat32 timestep) override;
 
-	void RemoveDeadBodies();
-	void RemoveDeadEntities();
+	void OnAddBody(ndBody* const) const override;
+	void OnRemoveBody(ndBody* const) const override;
 
 	ndDemoEntityManager* m_manager;
 	ndFloat32 m_timeAccumulator;
 	ndFloat32 m_interplationParameter;
 	ndSpinLock m_lock;
 
-	ndDeffereDeadBodies m_deadBodies;
-	ndList<ndSharedPtr<ndRenderSceneNode>> m_defferedDeadEntities;
+	ndDefferedBodyList m_deadBodies;
+	ndDefferedJointList m_deadJoints;
+	ndDefferedModelList m_deadModels;
+	ndDefferedEntityList m_deadEntities;
+	
 	bool m_acceleratedUpdate;
 };
 

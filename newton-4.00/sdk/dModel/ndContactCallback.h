@@ -78,10 +78,10 @@ class ndContactCallback: public ndContactNotify
 	virtual ~ndContactCallback();
 	virtual ndApplicationMaterial& RegisterMaterial(const ndApplicationMaterial& material, ndUnsigned32 id0, ndUnsigned32 id1);
 
-	virtual void OnBodyAdded(ndBodyKinematic* const body) const;
-	virtual void OnBodyRemoved(ndBodyKinematic* const body) const;
+	//virtual void OnBodyAdded(ndBodyKinematic* const body) const override;
+	//virtual void OnBodyRemoved(ndBodyKinematic* const body) const override;
 
-	virtual ndMaterial* GetMaterial(const ndContact* const contactJoint, const ndShapeInstance& instance0, const ndShapeInstance& instance1) const;
+	virtual ndMaterial* GetMaterial(const ndContact* const contactJoint, const ndShapeInstance& instance0, const ndShapeInstance& instance1) const override;
 
 	private:
 	virtual bool OnAabbOverlap(const ndContact* const contactJoint, ndFloat32 timestep) const override;
@@ -143,13 +143,13 @@ inline ndContactCallback::~ndContactCallback()
 {
 }
 
-inline void ndContactCallback::OnBodyAdded(ndBodyKinematic* const) const
-{
-}
-
-inline void ndContactCallback::OnBodyRemoved(ndBodyKinematic* const) const
-{
-}
+//inline void ndContactCallback::OnBodyAdded(ndBodyKinematic* const) const
+//{
+//}
+//
+//inline void ndContactCallback::OnBodyRemoved(ndBodyKinematic* const) const
+//{
+//}
 
 inline ndMaterial* ndContactCallback::GetMaterial(const ndContact* const, const ndShapeInstance& instance0, const ndShapeInstance& instance1) const
 {

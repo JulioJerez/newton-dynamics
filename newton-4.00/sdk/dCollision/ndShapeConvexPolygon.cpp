@@ -885,7 +885,7 @@ ndInt32 ndShapeConvexPolygon::CalculatePlaneIntersection(const ndVector& normalI
 				ndFloat32 den = dp.DotProduct(dp).GetScalar();
 				ndAssert(den > ndFloat32(0.0f));
 				ndFloat32 parameter = dp.DotProduct(pointInFacePlane - ray_p0).GetScalar() / den;
-				if ((parameter >= ndFloat32(0.0f)) && (parameter <= ndFloat32(1.0f)))
+				if ((parameter >= ndFloat32(-1.0e-4f)) && (parameter <= ndFloat32(1.0f + 1.0e-4f)))
 				{
 					const ndVector edgePoint(ray_p0 + dp.Scale(parameter));
 					const ndVector dist(pointInFacePlane - edgePoint);

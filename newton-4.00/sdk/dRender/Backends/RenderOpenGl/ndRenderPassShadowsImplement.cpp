@@ -201,10 +201,27 @@ void ndRenderPassShadowsImplement::RenderScene(const ndRenderSceneCamera* const 
 	const ndMatrix& cameraProjection = camera->m_projectionMatrix;
 	
 	ndRender* const owner = m_context->m_owner;
-	
+	auto SetCascadesLayers = [this, &owner, camera, &cameraTestPoint, &cameraProjection, &tileMatrix]()
+	{
+		const ndVector zBiasUnits(ndFloat32(1024.0f * 64.0f), ndFloat32(1024.0f * 64.0f), ndFloat32(1024.0f * 40.0f), ndFloat32(1024.0f * 16.0f));
+		for (ndInt32 i = 0; i < 4; i++)
+		{
+			const ndMatrix lightSpaceMatrix(CalculateLightSpaceMatrix(camera, i));
+			const ndVector viewPortTile(m_viewPortTiles[i]);
+			cameraTestPoint.m_x = m_farFrustumPlanes[i];
+			const ndVector cameraPoint(cameraProjection.TransformVector1x4(cameraTestPoint));
+			//m_cameraSpaceSplits[i] = GLfloat(ndFloat32(0.5f) * cameraPoint.m_z / cameraPoint.m_w + ndFloat32(0.5f));
+			m_cameraSpaceSplits[i] = GLfloat(cameraPoint.m_z / cameraPoint.m_w);
+
+			tileMatrix[3][0] = viewPortTile.m_x;
+			tileMatrix[3][1] = viewPortTile.m_y;
+			m_lighProjectionMatrix[i] = lightSpaceMatrix * m_lightProjectToTextureSpace * tileMatrix;
+		}
+	};
+
 	auto RenderPrimitive = [this, &owner, camera, &cameraTestPoint, &cameraProjection, &tileMatrix](ndRenderPassMode modepass)
 	{
-		ndVector zBiasUnits(ndFloat32(1024.0f * 64.0f), ndFloat32(1024.0f * 64.0f), ndFloat32(1024.0f * 40.0f), ndFloat32(1024.0f * 16.0f));
+		const ndVector zBiasUnits(ndFloat32(1024.0f * 64.0f), ndFloat32(1024.0f * 64.0f), ndFloat32(1024.0f * 40.0f), ndFloat32(1024.0f * 16.0f));
 		const ndList<ndSharedPtr<ndRenderSceneNode>>& scene = owner->m_scene;
 		for (ndInt32 i = 0; i < 4; i++)
 		{
@@ -212,31 +229,33 @@ void ndRenderPassShadowsImplement::RenderScene(const ndRenderSceneCamera* const 
 			const ndVector viewPortTile(m_viewPortTiles[i]);
 			ndInt32 vp_x = ndInt32(viewPortTile.m_x * ndFloat32(2 * m_width));
 			ndInt32 vp_y = ndInt32(viewPortTile.m_y * ndFloat32(2 * m_height));
-
-			cameraTestPoint.m_x = m_farFrustumPlanes[i];
-			const ndVector cameraPoint(cameraProjection.TransformVector1x4(cameraTestPoint));
-			m_cameraSpaceSplits[i] = GLfloat(ndFloat32(0.5f) * cameraPoint.m_z / cameraPoint.m_w + ndFloat32(0.5f));
-
-			tileMatrix[3][0] = viewPortTile.m_x;
-			tileMatrix[3][1] = viewPortTile.m_y;
-			m_lighProjectionMatrix[i] = lightSpaceMatrix * m_lightProjectToTextureSpace * tileMatrix;
-
+		
+			//cameraTestPoint.m_x = m_farFrustumPlanes[i];
+			//const ndVector cameraPoint(cameraProjection.TransformVector1x4(cameraTestPoint));
+			//m_cameraSpaceSplits[i] = GLfloat(ndFloat32(0.5f) * cameraPoint.m_z / cameraPoint.m_w + ndFloat32(0.5f));
+			//
+			//tileMatrix[3][0] = viewPortTile.m_x;
+			//tileMatrix[3][1] = viewPortTile.m_y;
+			//m_lighProjectionMatrix[i] = lightSpaceMatrix * m_lightProjectToTextureSpace * tileMatrix;
+		
 			glViewport(vp_x, vp_y, m_width, m_height);
 			glPolygonOffset(GLfloat(1.0f), GLfloat(zBiasUnits[i]));
 			for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* node = scene.GetFirst(); node; node = node->GetNext())
 			{
 				ndRenderSceneNode* const sceneNode = *node->GetInfo();
-				//if (i == 1)
 				sceneNode->Render(owner, lightSpaceMatrix, modepass);
 			}
 		}
 	};
 
+	// set the parameter for each cascade layers
+	SetCascadesLayers();
+
 	// render simple primitive pass
 	RenderPrimitive(m_generateShadowMaps);
 
-	// render instance primitives, fucking big mistake
-	RenderPrimitive(m_m_generateInstanceShadowMaps);
+	// render instance primitives
+	RenderPrimitive(m_generateInstanceShadowMaps);
 
 	glDisable(GL_POLYGON_OFFSET_FILL);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);

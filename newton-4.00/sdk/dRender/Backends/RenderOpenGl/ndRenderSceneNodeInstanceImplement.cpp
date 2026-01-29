@@ -38,7 +38,7 @@ void ndRenderSceneNodeInstanceImplement::Finalize()
 
 void ndRenderSceneNodeInstanceImplement::Render(const ndRender* const owner, const ndMatrix& modelViewMatrix, ndRenderPassMode renderMode) const
 {
-	if ((renderMode == m_m_generateInstanceShadowMaps) || (renderMode == m_directionalDiffusseShadow))
+	if ((renderMode == m_generateInstanceShadowMaps) || (renderMode == m_directionalDiffusseShadow))
 	{
 		ndRenderPrimitive* const mesh = *m_owner->m_primitive;
 		ndRenderPassMode overrideRenderMode = (renderMode == m_directionalDiffusseShadow) ? m_directionalDiffusseInstanceShadow : renderMode;

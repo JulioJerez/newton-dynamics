@@ -323,7 +323,6 @@ bool ndScene::AddBody(const ndSharedPtr<ndBody>& body)
 		{
 			ndBodyListView::ndNode* const node = m_bodyList.AddItem(body);
 			kinematicBody->SetSceneNodes(this, node);
-			m_contactNotifyCallback->OnBodyAdded(kinematicBody);
 			kinematicBody->UpdateCollisionMatrix();
 
 			m_rootNode = m_bvhSceneManager.AddBody(kinematicBody, m_rootNode);
@@ -334,6 +333,7 @@ bool ndScene::AddBody(const ndSharedPtr<ndBody>& body)
 
 			m_forceBalanceSceneCounter = 0;
 
+			GetWorld()->OnAddBody(kinematicBody);
 			return true;
 		}
 	}
@@ -383,7 +383,7 @@ bool ndScene::RemoveBody(const ndSharedPtr<ndBody>& body)
 				kinematicBody->m_spetialUpdateNode = nullptr;
 			}
 
-			m_contactNotifyCallback->OnBodyRemoved(kinematicBody);
+			GetWorld()->OnRemoveBody(kinematicBody);
 			kinematicBody->SetSceneNodes(nullptr, nullptr);
 			m_bodyList.RemoveItem(sceneNode);
 			return true;

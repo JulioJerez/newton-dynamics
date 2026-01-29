@@ -38,6 +38,7 @@
 template<class T>
 void ndMatrixTimeVector(ndInt32 size, ndInt32 stride, const T* const matrix, const T* const v, T* const out)
 {
+	ndAssert(size);
 	ndInt32 rowStart = 0;
 	for (ndInt32 i = 0; i < size; ++i) 
 	{
@@ -50,6 +51,7 @@ void ndMatrixTimeVector(ndInt32 size, ndInt32 stride, const T* const matrix, con
 template<class T>
 void ndMatrixTimeMatrix(ndInt32 size, const T* const matrixA, const T* const matrixB, T* const out)
 {
+	ndAssert(size);
 	for (ndInt32 i = 0; i < size; ++i) 
 	{
 		const T* const rowA = &matrixA[i * size];
@@ -69,6 +71,7 @@ void ndMatrixTimeMatrix(ndInt32 size, const T* const matrixA, const T* const mat
 template<class T>
 void ndCovarianceMatrix(ndInt32 size, ndInt32 stride, T* const matrix, const T* const vectorA, const T* const vectorB)
 {
+	ndAssert(size);
 	ndInt32 rowStart = 0;
 	for (ndInt32 i = 0; i < size; ++i) 
 	{
@@ -143,6 +146,7 @@ bool ndCholeskyFactorization(ndInt32 size, ndInt32 stride, T* const psdMatrix)
 template<class T>
 bool ndTestPSDmatrix(ndInt32 size, ndInt32 stride, const T* const matrix)
 {
+	ndAssert(size);
 	ndInt32 srcRow = 0;
 	ndInt32 dstRow = 0;
 	T* const copy = ndAlloca(T, size * size);
@@ -159,6 +163,7 @@ bool ndTestPSDmatrix(ndInt32 size, ndInt32 stride, const T* const matrix)
 template<class T>
 void ndSolveCholesky(const ndInt32 size, const ndInt32 stride, const T* const choleskyMatrix, T* const x, const T* const b)
 {
+	ndAssert(size);
 	ndInt32 rowStart = 0;
 	for (ndInt32 i = 0; i < size; ++i) 
 	{
@@ -192,6 +197,7 @@ void ndSolveCholesky(const ndInt32 size, const ndInt32 stride, T* const cholesky
 template<class T>
 void ndSolveGaussian(const ndInt32 size, const ndInt32 stride, const T* const matrixSrc, const T* const bsrc, T* const x)
 {
+	ndAssert(size);
 	T* const b = ndAlloca(T, size);
 	T* const matrix = ndAlloca(T, size * size);
 	for (ndInt32 i = 0; i < size; ++i)

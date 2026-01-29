@@ -411,7 +411,7 @@ void ndRenderShaderOpaqueDiffusedShadowColorBlock::Render(const ndRenderPrimitiv
 	ndRenderPassShadowsImplement* const shadowPass = render->m_cachedShadowPass;
 	ndAssert(shadowPass);
 	
-	glVector4 cameraSpaceSplits(shadowPass->m_cameraSpaceSplits);
+	const glVector4 cameraSpaceSplits(shadowPass->m_cameraSpaceSplits);
 	glMatrix lightViewProjectMatrix[4];
 	for (ndInt32 i = 0; i < 4; ++i)
 	{
@@ -609,7 +609,7 @@ void ndRenderShaderInstancedOpaqueDiffusedShadowBlock::Render(const ndRenderPrim
 	ndRenderPassShadowsImplement* const shadowPass = render->m_cachedShadowPass;
 	ndAssert(shadowPass);
 
-	glVector4 cameraSpaceSplits(shadowPass->m_cameraSpaceSplits);
+	const glVector4 cameraSpaceSplits(shadowPass->m_cameraSpaceSplits);
 	glMatrix lightViewProjectMatrix[4];
 	for (ndInt32 i = 0; i < 4; ++i)
 	{
@@ -706,7 +706,7 @@ void ndRenderShaderOpaqueDiffusedShadowSkinColorBlock::Render(const ndRenderPrim
 	ndRenderPassShadowsImplement* const shadowPass = render->m_cachedShadowPass;
 	ndAssert(shadowPass);
 
-	glVector4 cameraSpaceSplits(shadowPass->m_cameraSpaceSplits);
+	const glVector4 cameraSpaceSplits(shadowPass->m_cameraSpaceSplits);
 	glMatrix lightViewProjectMatrix[4];
 	for (ndInt32 i = 0; i < 4; ++i)
 	{

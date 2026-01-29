@@ -32,11 +32,11 @@ void ndRenderPassColor::RenderScene()
 	// first render solid that do not get shadows
 	const ndMatrix globalMatrix(ndGetIdentityMatrix());
 	ndList<ndSharedPtr<ndRenderSceneNode>>& scene = m_owner->m_scene;
-	for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* node = scene.GetFirst(); node; node = node->GetNext())
-	{
-		ndRenderSceneNode* const sceneNode = *node->GetInfo();
-		sceneNode->Render(sceneNode->m_owner, globalMatrix, m_directionalDiffusseNoShadow);
-	}
+	//for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* node = scene.GetFirst(); node; node = node->GetNext())
+	//{
+	//	ndRenderSceneNode* const sceneNode = *node->GetInfo();
+	//	sceneNode->Render(sceneNode->m_owner, globalMatrix, m_directionalDiffusseNoShadow);
+	//}
 
 	// render all meshes that get shadows
 	for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* node = scene.GetFirst(); node; node = node->GetNext())

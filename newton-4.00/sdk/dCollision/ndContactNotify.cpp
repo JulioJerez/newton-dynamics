@@ -52,13 +52,13 @@ ndMaterial* ndContactNotify::GetMaterial(const ndContact* const, const ndShapeIn
 	return (ndMaterial*)&m_default;
 }
 
-void ndContactNotify::OnBodyAdded(ndBodyKinematic* const) const
-{
-}
-
-void ndContactNotify::OnBodyRemoved(ndBodyKinematic* const) const
-{
-}
+//void ndContactNotify::OnBodyAdded(ndBodyKinematic* const) const
+//{
+//}
+//
+//void ndContactNotify::OnBodyRemoved(ndBodyKinematic* const) const
+//{
+//}
 
 //bool OnCompoundSubShapeOverlap(const ndContact* const contact, ndFloat32 timestep, const ndShapeInstance* const subShapeA, const ndShapeInstance* const subShapeB);
 bool ndContactNotify::OnCompoundSubShapeOverlap(const ndContact* const, ndFloat32, const ndShapeInstance* const, const ndShapeInstance* const) const

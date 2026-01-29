@@ -1220,7 +1220,7 @@ void ndRenderPrimitiveImplement::Render(const ndRender* const render, const ndMa
 			RenderDirectionalDiffuseColorInstanceShadow(render, modelMatrix);
 			break;
 
-		case m_m_generateInstanceShadowMaps:
+		case m_generateInstanceShadowMaps:
 			RenderGenerateInstancedShadowMaps(render, modelMatrix);
 			break;
 
