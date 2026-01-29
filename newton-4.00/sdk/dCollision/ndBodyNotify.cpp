@@ -77,16 +77,6 @@ void ndBodyNotify::SetGravity(const ndVector & defaultGravity)
 	m_defaultGravity = defaultGravity;
 }
 
-void ndBodyNotify::OnBodyAddedToWorld()
-{
-	ndAssert(0);
-}
-
-void ndBodyNotify::OnBodyRemovedFromWorld()
-{
-	ndAssert(0);
-}
-
 void ndBodyNotify::OnTransform(ndFloat32, const ndMatrix&)
 {
 }

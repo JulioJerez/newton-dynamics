@@ -40,8 +40,8 @@ class ndDemoEntityNotify : public ndModelBodyNotify
 	}
 
 	void RemoveBody();
-	virtual void OnBodyAddedToWorld() override;
-	virtual void OnBodyRemovedFromWorld() override;
+	virtual void OnBodyAddedToWorld();
+	virtual void OnBodyRemovedFromWorld();
 	virtual void OnTransform(ndFloat32 timestep, const ndMatrix& matrix) override;
 	virtual void OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep) override;
 

@@ -46,14 +46,9 @@ class ndBodyNotify : public ndContainersFreeListAlloc<ndBodyNotify>
 	D_COLLISION_API ndVector GetGravity() const;
 	D_COLLISION_API void SetGravity(const ndVector& defaultGravity);
 
+	D_COLLISION_API virtual void OnTransform(ndFloat32 timestep, const ndMatrix& matrix);
 	D_COLLISION_API virtual bool OnSceneAabbOverlap(const ndBody* const otherBody) const;
 	D_COLLISION_API virtual void OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep);
-
-	// new interface
-	D_COLLISION_API virtual void OnBodyAddedToWorld();
-	D_COLLISION_API virtual void OnBodyRemovedFromWorld();
-
-	D_COLLISION_API virtual void OnTransform(ndFloat32 timestep, const ndMatrix& matrix);
 
 	private:
 	ndVector m_defaultGravity;

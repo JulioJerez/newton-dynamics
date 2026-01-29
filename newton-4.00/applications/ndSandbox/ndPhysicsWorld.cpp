@@ -107,6 +107,24 @@ void ndPhysicsWorld::OnSubStepPostUpdate(ndFloat32 timestep)
 	m_manager->OnSubStepPostUpdate(timestep);
 }
 
+void ndPhysicsWorld::OnAddBody(ndBody* const body) const
+{
+	ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*body->GetNotifyCallback();
+	if (notify)
+	{
+		notify->OnBodyAddedToWorld();
+	}
+}
+
+void ndPhysicsWorld::OnRemoveBody(ndBody* const body) const
+{
+	ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*body->GetNotifyCallback();
+	if (notify)
+	{
+		notify->OnBodyRemovedFromWorld();
+	}
+}
+
 void ndPhysicsWorld::NormalUpdates()
 {
 	m_acceleratedUpdate = false;

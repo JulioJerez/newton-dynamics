@@ -992,3 +992,11 @@ void ndWorld::RemoveBody(ndBody* const body)
 		m_scene->RemoveBody(sharedBody);
 	}
 }
+
+void ndWorld::OnAddBody(ndBody* const) const
+{
+}
+
+void ndWorld::OnRemoveBody(ndBody* const) const
+{
+}

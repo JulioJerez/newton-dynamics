@@ -88,6 +88,9 @@ class ndPhysicsWorld: public ndWorld
 	void PostUpdate(ndFloat32 timestep) override;
 	void OnSubStepPostUpdate(ndFloat32 timestep) override;
 
+	void OnAddBody(ndBody* const) const override;
+	void OnRemoveBody(ndBody* const) const override;
+
 	ndDemoEntityManager* m_manager;
 	ndFloat32 m_timeAccumulator;
 	ndFloat32 m_interplationParameter;
