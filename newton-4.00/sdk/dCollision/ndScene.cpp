@@ -1045,9 +1045,10 @@ bool ndScene::ConvexCast(
 		else 
 		{
 			ndBody* const body = self->GetBody();
-			if (!self->m_isDead && body)
+			//if (!self->m_isDead && body)
+			if (body)
 			{
-				if (callback.OnRayPrecastAction (body, &convexShape)) 
+				if (!self->m_isDead && callback.OnRayPrecastAction (body, &convexShape))
 				{
 					// save contacts and try new set
 					ndConvexCastNotify savedNotification(callback);
@@ -1185,12 +1186,13 @@ bool ndScene::RayCast(
 		else
 		{
 			ndBodyKinematic* const body = self->GetBody();
-			if (!self->m_isDead && body)
+			//if (!self->m_isDead && body)
+			if (body)
 			{
 				ndAssert(!self->GetLeft());
 				ndAssert(!self->GetRight());
 
-				if (body->RayCast(callback, ray, callback.m_param))
+				if (!self->m_isDead && body->RayCast(callback, ray, callback.m_param))
 				{
 					state = true;
 					if (callback.m_param < ndFloat32(1.0e-8f))
@@ -1240,11 +1242,12 @@ void ndScene::BodiesInAabb(ndBodiesInAabbNotify& callback, const ndVector& minBo
 			if (ndOverlapTest(self->m_minBox, self->m_maxBox, minBox, maxBox))
 			{
 				ndBodyKinematic* const body = self->GetBody();
-				if (!self->m_isDead && body)
+				//if (!self->m_isDead && body)
+				if (body)
 				{
 					ndAssert(!self->GetLeft());
 					ndAssert(!self->GetRight());
-					if (ndOverlapTest(body->m_minAabb, body->m_maxAabb, minBox, maxBox))
+					if (!self->m_isDead && ndOverlapTest(body->m_minAabb, body->m_maxAabb, minBox, maxBox))
 					{
 						callback.OnOverlap(body);
 					}
