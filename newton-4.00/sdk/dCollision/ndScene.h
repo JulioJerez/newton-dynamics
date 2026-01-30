@@ -121,7 +121,7 @@ class ndScene : public ndThreadPool
 	bool ValidateContactCache(ndContact* const contact, const ndVector& timestep) const;
 	
 	const ndContactArray& GetContactArray() const;
-	void FindCollidingPairs(ndBodyKinematic* const body, ndInt32 threadId);
+	//void FindCollidingPairs(ndBodyKinematic* const body, ndInt32 threadId);
 	void FindCollidingPairsForward(ndBodyKinematic* const body, ndInt32 threadId);
 	void FindCollidingPairsBackward(ndBodyKinematic* const body, ndInt32 threadId);
 	void AddPair(ndBodyKinematic* const body0, ndBodyKinematic* const body1, ndInt32 threadId);
