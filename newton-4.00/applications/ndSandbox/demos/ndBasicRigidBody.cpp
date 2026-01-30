@@ -13,6 +13,7 @@
 #include "ndPhysicsUtils.h"
 #include "ndPhysicsWorld.h"
 #include "ndMakeStaticMap.h"
+#include "ndDemoEntityNotify.h"
 #include "ndDemoEntityManager.h"
 
 void ndBasicRigidBody(ndDemoEntityManager* const scene)

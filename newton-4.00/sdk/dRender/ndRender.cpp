@@ -35,11 +35,13 @@ ndRender::ndRender(ndSharedPtr<ndUserCallback>& owner, ndInt32 width, ndInt32 he
 	,m_camera(nullptr)
 	,m_textureCache(nullptr)
 	,m_scene()
+	,m_deadNodes()
 	,m_renderPasses()
 	,m_sunLightDir(ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(1.0f))
 	,m_sunLightAmbient(ndFloat32(0.2f), ndFloat32(0.2f), ndFloat32(0.2f), ndFloat32(0.0f))
 	,m_sunLightIntesity(ndFloat32(0.7f), ndFloat32(0.7f), ndFloat32(0.7f), ndFloat32(0.0f))
 	,m_backgroundColor(ndFloat32(0.45f), ndFloat32(0.55f), ndFloat32(0.60f), ndFloat32(1.0f))
+	,m_addRemoveLock()
 	,m_cachedDebugPass(nullptr)
 	,m_cachedShadowPass(nullptr)
 	,m_cachedEnvironmentPass(nullptr)
@@ -156,6 +158,7 @@ void ndRender::ResetScene()
 
 void ndRender::AddSceneNode(const ndSharedPtr<ndRenderSceneNode>& node)
 {
+	//ndScopeSpinLock lock(m_addRemoveLock);
 	ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* const handle = m_scene.Append(node);
 	ndAssert(!node->m_owner);
 	ndAssert(!node->m_sceneHandle);
@@ -165,23 +168,8 @@ void ndRender::AddSceneNode(const ndSharedPtr<ndRenderSceneNode>& node)
 
 void ndRender::RemoveSceneNode(const ndSharedPtr<ndRenderSceneNode>& node)
 {
-	ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* const handle = node->m_sceneHandle;
-	if (handle)
-	{
-		node->m_owner = nullptr;
-		node->m_sceneHandle = nullptr;
-		m_scene.Remove(handle);
-	}
-	else
-	{
-		// see if this node is part of the scene
-		const ndRenderSceneNode* parent = node->GetParent();
-		for (; parent && !parent->m_sceneHandle; parent = parent->GetParent());
-		if (parent)
-		{
-			node->GetParent()->RemoveChild(node);
-		}
-	}
+	ndScopeSpinLock lock(m_addRemoveLock);
+	m_deadNodes.Append(node);
 }
 
 void ndRender::InterpolateTransforms(ndFloat32 param)
@@ -248,17 +236,49 @@ void ndRender::UpdateGlobalMatrices() const
 	}
 }
 
+void ndRender::RemoveDefferedEntities()
+{
+	for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* deadNode = m_deadNodes.GetFirst(); deadNode; deadNode = deadNode->GetNext())
+	{
+		ndSharedPtr<ndRenderSceneNode> node(deadNode->GetInfo());
+		ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* const handle = node->m_sceneHandle;
+		if (handle)
+		{
+			node->m_owner = nullptr;
+			node->m_sceneHandle = nullptr;
+			m_scene.Remove(handle);
+		}
+		else
+		{
+			// see if this node is part of the scene
+			const ndRenderSceneNode* parent = node->GetParent();
+			for (; parent && !parent->m_sceneHandle; parent = parent->GetParent());
+			if (parent)
+			{
+				node->GetParent()->RemoveChild(node);
+			}
+		}
+	}
+	m_deadNodes.RemoveAll();
+}
+
 void ndRender::Render()
 {
 	m_context->BeginFrame();
 	m_context->ClearFrameBuffer(m_backgroundColor);
+	ndScopeSpinLock lock(m_addRemoveLock);
+
+	if (m_deadNodes.GetCount())
+	{
+		RemoveDefferedEntities();
+	}
 
 	ImGuiIO& io = ImGui::GetIO();
 	ndInt32 fb_width = (ndInt32)(io.DisplaySize.x * io.DisplayFramebufferScale.x);
 	ndInt32 fb_height = (ndInt32)(io.DisplaySize.y * io.DisplayFramebufferScale.y);
 	if (!(fb_width == 0 || fb_height == 0))
 	{
-		// calaculate all grbal matrices
+		// calaculate all grobal matrices
 		UpdateGlobalMatrices();
 
 		ndInt32 display_w = m_context->GetWidth();

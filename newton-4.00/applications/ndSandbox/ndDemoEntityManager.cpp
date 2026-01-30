@@ -23,31 +23,32 @@
 
 #define MACHINE_LEARNING_BASE	100
 
-//#define DEFAULT_SCENE	0		// basic rigidbody
-//#define DEFAULT_SCENE	1		// basic Stacks 
-//#define DEFAULT_SCENE	2		// basic friction
-//#define DEFAULT_SCENE	3		// basic sliding platform
-//#define DEFAULT_SCENE	4		// basic Trigger
-//#define DEFAULT_SCENE	5		// conservation of momentum 
-//#define DEFAULT_SCENE	6		// basic joints
-//#define DEFAULT_SCENE	7		// static mesh collision 
-// 
-//#define DEFAULT_SCENE	8		// basic heightfield collision
-//#define DEFAULT_SCENE	9		// basic user heightfield 2d collision
-#define DEFAULT_SCENE	10		// basic user marching cube 3d collision
+#define DEFAULT_SCENE	0		// basic collision only
+//#define DEFAULT_SCENE	1		// basic rigidbody
+//#define DEFAULT_SCENE	2		// basic Stacks 
+//#define DEFAULT_SCENE	3		// basic friction
+//#define DEFAULT_SCENE	4		// basic sliding platform
+//#define DEFAULT_SCENE	5		// basic Trigger
+//#define DEFAULT_SCENE	6		// conservation of momentum 
+//#define DEFAULT_SCENE	7		// basic joints
+//#define DEFAULT_SCENE	8		// static mesh collision 
+ 
+//#define DEFAULT_SCENE	9		// basic heightfield collision
+//#define DEFAULT_SCENE	10		// basic user heightfield 2d collision
+//#define DEFAULT_SCENE	11		// basic user marching cube 3d collision
 
-//#define DEFAULT_SCENE	11		// static compound scene collision 
-//#define DEFAULT_SCENE	12		// basic convex approximate compound shapes
-//#define DEFAULT_SCENE	13		// basic model, a npd vehicle prop
-//#define DEFAULT_SCENE	14		// basic rag doll
-//#define DEFAULT_SCENE	15		// complex model, implement a complex model with joints
-//#define DEFAULT_SCENE	16		// basics multi body vehicle
-//#define DEFAULT_SCENE	17		// object Placement
-//#define DEFAULT_SCENE	18		// third person player capsule
-//#define DEFAULT_SCENE	19		// cart pole SAC trained controller
-//#define DEFAULT_SCENE	20		// cart pole PPO trained controller
-//#define DEFAULT_SCENE	21		// unicycle PPO trained controller
-//#define DEFAULT_SCENE	22		// procedurally animated quadruped spider
+//#define DEFAULT_SCENE	12		// static compound scene collision 
+//#define DEFAULT_SCENE	13		// basic convex approximate compound shapes
+//#define DEFAULT_SCENE	14		// basic model, a npd vehicle prop
+//#define DEFAULT_SCENE	15		// basic rag doll
+//#define DEFAULT_SCENE	16		// complex model, implement a complex model with joints
+//#define DEFAULT_SCENE	17		// basics multi body vehicle
+//#define DEFAULT_SCENE	18		// object Placement
+//#define DEFAULT_SCENE	19		// third person player capsule
+//#define DEFAULT_SCENE	20		// cart pole SAC trained controller
+//#define DEFAULT_SCENE	21		// cart pole PPO trained controller
+//#define DEFAULT_SCENE	22		// unicycle PPO trained controller
+//#define DEFAULT_SCENE	23		// procedurally animated quadruped spider
 
 // These are the machine learning training demos
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// train cart pole using SAC agent
@@ -82,6 +83,7 @@ void ndBasicVehicle(ndDemoEntityManager* const scene);
 void ndBasicFriction(ndDemoEntityManager* const scene);
 void ndBasicRigidBody(ndDemoEntityManager* const scene);
 void ndObjectPlacement(ndDemoEntityManager* const scene);
+void ndBasicCollisionOnly(ndDemoEntityManager* const scene);
 void ndQuadSpiderAnimated(ndDemoEntityManager* const scene);
 void ndBasicAngularMomentum(ndDemoEntityManager* const scene);
 void ndBasicSlidingPlatform(ndDemoEntityManager* const scene);
@@ -103,6 +105,7 @@ void ndUnicyclePpoTraining(ndDemoEntityManager* const scene);
 
 ndDemoEntityManager::ndDemos ndDemoEntityManager::m_demosSelection[] =
 {
+	{ "collision only scene", ndBasicCollisionOnly},
 	{ "basic rigidbody", ndBasicRigidBody},
 	{ "basic stacking", ndBasicStacks},
 	{ "basic friction", ndBasicFriction},
@@ -452,7 +455,6 @@ ndDemoEntityManager::ndDemoEntityManager()
 	,m_fps(0.0f)
 	,m_timestepAcc(0.0f)
 	,m_currentListenerTimestep(0.0f)
-	,m_addDeleteLock()
 	,m_showUI(true)
 	,m_showAABB(false)
 	,m_showStats(true)
@@ -784,13 +786,13 @@ void ndDemoEntityManager::RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& po
 
 void ndDemoEntityManager::AddEntity(const ndSharedPtr<ndRenderSceneNode>& entity)
 {
-	ndScopeSpinLock lock(m_addDeleteLock);
+	//ndScopeSpinLock lock(m_addDeleteLock);
 	m_renderer->AddSceneNode(entity);
 }
 
 void ndDemoEntityManager::RemoveEntity (const ndSharedPtr<ndRenderSceneNode>& entity)
 {
-	ndScopeSpinLock lock(m_addDeleteLock);
+	//ndScopeSpinLock lock(m_addDeleteLock);
 	m_renderer->RemoveSceneNode(entity);
 }
 
@@ -1344,8 +1346,11 @@ void ndDemoEntityManager::TestImGui()
 		ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 		ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
-		if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+		if (ImGui::Button("Button"))
+		{
+			// Buttons return true when clicked (most widgets return true when edited/activated)
 			counter++;
+		}
 		ImGui::SameLine();
 		ImGui::Text("counter = %d", counter);
 

@@ -128,7 +128,8 @@ class ndWorld: public ndClassAlloc
 
 	D_NEWTON_API void CalculateJointContacts(ndContact* const contact);
 
-	D_NEWTON_API virtual void MainUpdate();
+	D_NEWTON_API virtual void PhysicsUpdate();
+	D_NEWTON_API virtual void CollisionUpdate();
 	D_NEWTON_API virtual void WorkerUpdate(ndInt32 threadIndex);
 
 	private:
@@ -196,6 +197,7 @@ class ndWorld: public ndClassAlloc
 	ndSolverModes m_solverMode;
 	ndInt32 m_solverIterations;
 	bool m_inUpdate;
+	bool m_collisionUpdate;
 	
 	friend class ndScene;
 	friend class ndIkSolver;

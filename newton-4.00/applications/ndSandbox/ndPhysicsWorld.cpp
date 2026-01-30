@@ -114,6 +114,7 @@ ndPhysicsWorld::ndPhysicsWorld(ndDemoEntityManager* const manager)
 	,m_deadJoints()
 	,m_deadModels()
 	,m_deadEntities()
+	,m_updateMode(false)
 	,m_acceleratedUpdate(false)
 {
 	ClearCache();
@@ -207,6 +208,11 @@ void ndPhysicsWorld::AccelerateUpdates()
 	m_acceleratedUpdate = true;
 }
 
+void ndPhysicsWorld::SetUpdateMode(bool collisionOnly)
+{
+	m_updateMode = collisionOnly;
+}
+
 void ndPhysicsWorld::UpdateTransforms()
 {
 	// for some reason this cause a dead lock. I need to investigate.
@@ -255,7 +261,7 @@ void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
 	m_deadEntities.RemovePendingItems();
 }
 
-void ndPhysicsWorld::DefferedRemoveBody(ndBody* const body)
+void ndPhysicsWorld::DefferedRemoveBody(ndSharedPtr<ndBody> body)
 {
 	ndScopeSpinLock Lock(m_lock);
 	ndBodyKinematic* const kinematicBody = body->GetAsBodyKinematic();
@@ -306,15 +312,19 @@ void ndPhysicsWorld::DefferedRemoveBody(ndBody* const body)
 	}
 }
 
-void ndPhysicsWorld::AdvanceTime(ndFloat32 timestep)
+void ndPhysicsWorld::DefferedRemoveSceneNode(ndSharedPtr<ndRenderSceneNode> entity)
 {
-	D_TRACKTIME();
+	m_deadEntities.Insert(0, entity);
+}
+
+void ndPhysicsWorld::PhysicsUpdate(ndFloat32 timestep)
+{
 	const ndFloat32 descreteStep = (1.0f / MAX_PHYSICS_FPS);
 
 	if (m_acceleratedUpdate)
 	{
 		Update(descreteStep);
-	} 
+	}
 	else
 	{
 		ndInt32 maxSteps = MAX_PHYSICS_STEPS;
@@ -345,5 +355,30 @@ void ndPhysicsWorld::AdvanceTime(ndFloat32 timestep)
 	if (m_manager->m_synchronousPhysicsUpdate)
 	{
 		Sync();
+	}
+}
+
+void ndPhysicsWorld::CollisionUpdate(ndFloat32 timestep)
+{
+	ndWorld::CollisionUpdate(timestep);
+
+	{
+		ndScopeSpinLock Lock(m_lock);
+		ndFloat32 param = 0.0f;
+		m_manager->m_renderer->InterpolateTransforms(param);
+	}
+	Sync();
+}
+
+void ndPhysicsWorld::AdvanceTime(ndFloat32 timestep)
+{
+	D_TRACKTIME();
+	if (m_updateMode)
+	{
+		CollisionUpdate(timestep);
+	}
+	else
+	{
+		PhysicsUpdate(timestep);
 	}
 }

@@ -70,7 +70,7 @@ static void BuildPyramid(ndDemoEntityManager* const scene,
 	}
 }
 
-void BuildPyramidStacks(ndDemoEntityManager* const scene, ndFloat32 mass, const ndVector& origin, const ndVector& boxSize, ndInt32 stackHigh)
+static void BuildPyramidStacks(ndDemoEntityManager* const scene, ndFloat32 mass, const ndVector& origin, const ndVector& boxSize, ndInt32 stackHigh)
 {
 	ndVector origin1(origin);
 	ndVector size(boxSize.Scale(1.0f));

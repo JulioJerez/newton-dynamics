@@ -344,20 +344,6 @@ bool ndScene::AddBody(const ndSharedPtr<ndBody>& body)
 	return false;
 }
 
-ndSharedPtr<ndBody> ndScene::GetBody(ndBody* const body) const
-{
-	ndBodyKinematic* const kinematicBody = body->GetAsBodyKinematic();
-	if (kinematicBody)
-	{
-		return kinematicBody->m_sceneNode->GetInfo();
-	}
-	else
-	{
-		ndAssert(0);
-		return ndSharedPtr<ndBody>(nullptr);
-	}
-}
-
 bool ndScene::RemoveBody(const ndSharedPtr<ndBody>& body)
 {
 	ndBodyKinematic* const kinematicBody = body->GetAsBodyKinematic();
@@ -396,6 +382,20 @@ bool ndScene::RemoveBody(const ndSharedPtr<ndBody>& body)
 		RemoveParticle(body);
 	}
 	return false;
+}
+
+ndSharedPtr<ndBody> ndScene::GetBody(ndBody* const body) const
+{
+	ndBodyKinematic* const kinematicBody = body->GetAsBodyKinematic();
+	if (kinematicBody)
+	{
+		return kinematicBody->m_sceneNode->GetInfo();
+	}
+	else
+	{
+		ndAssert(0);
+		return ndSharedPtr<ndBody>(nullptr);
+	}
 }
 
 void ndScene::BalanceScene()
@@ -752,17 +752,17 @@ void ndScene::SubmitPairs(ndBvhLeafNode* const leafNode, ndBvhNode* const node, 
 	pool.PushBack(node);
 	while (pool.GetCount() && (pool.GetCount() < (D_SCENE_MAX_STACK_DEPTH - 16)))
 	{
-		ndBvhNode* const rootNode = pool.Pop();
-		if (ndOverlapTest(rootNode->m_minBox, rootNode->m_maxBox, boxP0, boxP1)) 
+		ndBvhNode* const bvhNode = pool.Pop();
+		if (ndOverlapTest(bvhNode->m_minBox, bvhNode->m_maxBox, boxP0, boxP1))
 		{
-			if (rootNode->GetAsSceneBodyNode()) 
+			if (bvhNode->GetAsSceneBodyNode())
 			{
-				ndAssert(!rootNode->GetRight());
-				ndAssert(!rootNode->GetLeft());
+				ndAssert(!bvhNode->GetRight());
+				ndAssert(!bvhNode->GetLeft());
 				
-				ndBodyKinematic* const body1 = rootNode->GetBody();
+				ndBodyKinematic* const body1 = bvhNode->GetBody();
 				ndAssert(body1);
-				const ndUnsigned8 test = ndUnsigned8((body1->m_sceneEquilibrium | fowardTest) & (test0 | ndUnsigned8(!body1->m_equilibrium)));
+				const ndUnsigned8 test = ndUnsigned8(!bvhNode->m_isDead && (body1->m_sceneEquilibrium | fowardTest) & (test0 | ndUnsigned8(!body1->m_equilibrium)));
 				if (test)
 				{
 					if (!notify || notify->OnSceneAabbOverlap(body1))
@@ -773,7 +773,7 @@ void ndScene::SubmitPairs(ndBvhLeafNode* const leafNode, ndBvhNode* const node, 
 			}
 			else 
 			{
-				ndBvhInternalNode* const tmpNode = rootNode->GetAsSceneTreeNode();
+				ndBvhInternalNode* const tmpNode = bvhNode->GetAsSceneTreeNode();
 				ndAssert(tmpNode->m_left);
 				ndAssert(tmpNode->m_right);
 				pool.PushBack(tmpNode->m_left);
@@ -815,21 +815,21 @@ ndJointBilateralConstraint* ndScene::FindBilateralJoint(ndBodyKinematic* const b
 	return nullptr;
 }
 
-void ndScene::FindCollidingPairs(ndBodyKinematic* const body, ndInt32 threadId)
-{
-	ndBvhLeafNode* const bodyNode = m_bvhSceneManager.GetLeafNode(body);
-	ndAssert(bodyNode->GetAsSceneBodyNode());
-	for (ndBvhNode* ptr = bodyNode; ptr->m_parent; ptr = ptr->m_parent)
-	{
-		ndBvhInternalNode* const parent = ptr->m_parent->GetAsSceneTreeNode();
-		ndAssert(!parent->GetAsSceneBodyNode());
-		ndBvhNode* const sibling = parent->m_right;
-		if (sibling != ptr)
-		{
-			SubmitPairs(bodyNode, sibling, true, threadId);
-		}
-	}
-}
+//void ndScene::FindCollidingPairs(ndBodyKinematic* const body, ndInt32 threadId)
+//{
+//	ndBvhLeafNode* const bodyNode = m_bvhSceneManager.GetLeafNode(body);
+//	ndAssert(bodyNode->GetAsSceneBodyNode());
+//	for (ndBvhNode* ptr = bodyNode; ptr->m_parent; ptr = ptr->m_parent)
+//	{
+//		ndBvhInternalNode* const parent = ptr->m_parent->GetAsSceneTreeNode();
+//		ndAssert(!parent->GetAsSceneBodyNode());
+//		ndBvhNode* const sibling = parent->m_right;
+//		if (sibling != ptr)
+//		{
+//			SubmitPairs(bodyNode, sibling, true, threadId);
+//		}
+//	}
+//}
 
 void ndScene::FindCollidingPairsForward(ndBodyKinematic* const body, ndInt32 threadId)
 {
@@ -1045,9 +1045,10 @@ bool ndScene::ConvexCast(
 		else 
 		{
 			ndBody* const body = self->GetBody();
-			if (!self->m_isDead && body)
+			//if (!self->m_isDead && body)
+			if (body)
 			{
-				if (callback.OnRayPrecastAction (body, &convexShape)) 
+				if (!self->m_isDead && callback.OnRayPrecastAction (body, &convexShape))
 				{
 					// save contacts and try new set
 					ndConvexCastNotify savedNotification(callback);
@@ -1185,12 +1186,13 @@ bool ndScene::RayCast(
 		else
 		{
 			ndBodyKinematic* const body = self->GetBody();
-			if (!self->m_isDead && body)
+			//if (!self->m_isDead && body)
+			if (body)
 			{
 				ndAssert(!self->GetLeft());
 				ndAssert(!self->GetRight());
 
-				if (body->RayCast(callback, ray, callback.m_param))
+				if (!self->m_isDead && body->RayCast(callback, ray, callback.m_param))
 				{
 					state = true;
 					if (callback.m_param < ndFloat32(1.0e-8f))
@@ -1240,11 +1242,12 @@ void ndScene::BodiesInAabb(ndBodiesInAabbNotify& callback, const ndVector& minBo
 			if (ndOverlapTest(self->m_minBox, self->m_maxBox, minBox, maxBox))
 			{
 				ndBodyKinematic* const body = self->GetBody();
-				if (!self->m_isDead && body)
+				//if (!self->m_isDead && body)
+				if (body)
 				{
 					ndAssert(!self->GetLeft());
 					ndAssert(!self->GetRight());
-					if (ndOverlapTest(body->m_minAabb, body->m_maxAabb, minBox, maxBox))
+					if (!self->m_isDead && ndOverlapTest(body->m_minAabb, body->m_maxAabb, minBox, maxBox))
 					{
 						callback.OnOverlap(body);
 					}
@@ -1551,7 +1554,6 @@ void ndScene::InitBodyArray()
 			});
 	
 			D_TRACKTIME_NAMED(UpdateSceneBvhLight);
-			//const ndArray<ndBodyKinematic*>& view = m_sceneBodyArray;
 			const ndInt32 viewBodyCount = ndInt32(m_sceneBodyArray.GetCount());
 			ParallelExecute(UpdateSceneBvh, viewBodyCount, OptimalGroupBatch(viewBodyCount));
 		}
