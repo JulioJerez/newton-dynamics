@@ -54,6 +54,7 @@ ndWorld::ndWorld()
 	,m_solverMode(ndStandardSolver)
 	,m_solverIterations(4)
 	,m_inUpdate(false)
+	,m_collisionUpdate(false)
 {
 	// start the engine thread;
 	ndBody::m_uniqueIdCount = 0;
@@ -343,7 +344,7 @@ void ndWorld::WorkerUpdate(ndInt32 threadIndex)
 	m_scene->TaskUpdate(threadIndex);
 }
 
-void ndWorld::MainUpdate()
+void ndWorld::PhysicsUpdate()
 {
 	D_TRACKTIME();
 	ndUnsigned64 timeAcc = ndGetTimeInMicroseconds();
@@ -377,9 +378,65 @@ void ndWorld::MainUpdate()
 	CalculateAverageUpdateTime();
 }
 
+void ndWorld::CollisionUpdate()
+{
+	D_TRACKTIME();
+	ndUnsigned64 timeAcc = ndGetTimeInMicroseconds();
+
+	m_inUpdate = true;
+	m_scene->Begin();
+
+	m_scene->SetTimestep(m_timestep);
+
+	PreUpdate(m_timestep);
+
+	ndInt32 const steps = m_subSteps;
+	ndFloat32 timestep = m_timestep / (ndFloat32)steps;
+
+	//SubStepUpdate(timestep);
+	OnSubStepPreUpdate(timestep);
+
+	m_scene->m_lru = m_scene->m_lru + 1;
+	m_scene->SetTimestep(timestep);
+
+	m_scene->BalanceScene();
+	m_scene->InitBodyArray();
+
+	// update the collision system
+	m_scene->FindCollidingPairs();
+	m_scene->CreateNewContacts();
+	m_scene->CalculateContacts();
+	m_scene->DeleteDeadContacts();
+
+	OnSubStepPostUpdate(timestep);
+
+	m_scene->m_subStepNumber++;
+
+	m_scene->SetTimestep(m_timestep);
+
+	UpdateTransforms();
+
+	PostUpdate(m_timestep);
+	m_inUpdate = false;
+
+	m_scene->End();
+
+	m_lastExecutionTime = (ndFloat32)(ndGetTimeInMicroseconds() - timeAcc) * ndFloat32(1.0e-6f);
+	CalculateAverageUpdateTime();
+
+	m_collisionUpdate = false;
+}
+
 void ndWorld::ThreadFunction()
 {
-	MainUpdate();
+	if (m_collisionUpdate)
+	{
+		CollisionUpdate();
+	}
+	else
+	{
+		PhysicsUpdate();
+	}
 }
 
 void ndWorld::CalculateAverageUpdateTime()
@@ -883,6 +940,7 @@ void ndWorld::CollisionUpdate(ndFloat32 timestep)
 	Sync();
 	m_timestep = timestep;
 
+	m_collisionUpdate = true;
 	// update the next frame asynchronous 
 	m_scene->TickOne();
 }

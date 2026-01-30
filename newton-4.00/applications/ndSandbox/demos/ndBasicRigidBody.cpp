@@ -135,6 +135,9 @@ void ndBasicRigidBody(ndDemoEntityManager* const scene)
 	// build a floor
 	ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
 
+	// set the physics as collision only mode
+	scene->GetWorld()->SetUpdateMode(true);
+
 	// add an UI panel for recreating Steve Hurley's crash
 	ndSharedPtr<ndDemoEntityManager::ndDemoUIpanel> controlPanel(new ndBuildWallPanel());
 	scene->SetDemoUIpanel(controlPanel);

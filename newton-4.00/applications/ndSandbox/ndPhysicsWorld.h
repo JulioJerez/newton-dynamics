@@ -96,6 +96,7 @@ class ndPhysicsWorld: public ndWorld
 
 	void NormalUpdates();
 	void AccelerateUpdates();
+	void SetUpdateMode(bool collisionOnly);
 
 	void DefferedRemoveBody(ndSharedPtr<ndBody> body);
 	void DefferedRemoveSceneNode(ndSharedPtr<ndRenderSceneNode> entity);
@@ -113,6 +114,9 @@ class ndPhysicsWorld: public ndWorld
 	void OnAddJoint(ndJointBilateralConstraint* const) const override;
 	void OnRemoveJoint(ndJointBilateralConstraint* const) const override;
 
+	void PhysicsUpdate(ndFloat32 timestep);
+	void CollisionUpdate(ndFloat32 timestep);
+
 	ndDemoEntityManager* m_manager;
 	ndFloat32 m_timeAccumulator;
 	ndFloat32 m_interplationParameter;
@@ -123,6 +127,7 @@ class ndPhysicsWorld: public ndWorld
 	ndDefferedModelList m_deadModels;
 	ndDefferedEntityList m_deadEntities;
 	
+	bool m_updateMode;
 	bool m_acceleratedUpdate;
 };
 
