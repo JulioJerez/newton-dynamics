@@ -293,9 +293,9 @@ void ndPhysicsWorld::DefferedRemoveBody(ndBody* const body)
 							const ndBodyKinematic* const body0 = joint->GetBody0();
 							const ndBodyKinematic* const body1 = joint->GetBody1();
 							ndBodyKinematic* const childBody = (ndBodyKinematic*)((body0 == pivotBody) ? body1 : body0);
-							ndSharedPtr<ndBody> childBodyPtr(childBody->GetScene()->GetBody(childBody));
-							if (childBodyPtr->GetInvMass() > ndFloat32(0.0f))
+							if (childBody->GetInvMass() > ndFloat32(0.0f))
 							{
+								ndSharedPtr<ndBody> childBodyPtr(childBody->GetScene()->GetBody(childBody));
 								stack.PushBack(childBodyPtr);
 							}
 						}
