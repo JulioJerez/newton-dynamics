@@ -23,7 +23,7 @@
 
 #define MACHINE_LEARNING_BASE	100
 
-//#define DEFAULT_SCENE	0		// basic rigidbody
+#define DEFAULT_SCENE	0		// basic rigidbody
 //#define DEFAULT_SCENE	1		// basic Stacks 
 //#define DEFAULT_SCENE	2		// basic friction
 //#define DEFAULT_SCENE	3		// basic sliding platform
@@ -34,7 +34,7 @@
 // 
 //#define DEFAULT_SCENE	8		// basic heightfield collision
 //#define DEFAULT_SCENE	9		// basic user heightfield 2d collision
-#define DEFAULT_SCENE	10		// basic user marching cube 3d collision
+//#define DEFAULT_SCENE	10		// basic user marching cube 3d collision
 
 //#define DEFAULT_SCENE	11		// static compound scene collision 
 //#define DEFAULT_SCENE	12		// basic convex approximate compound shapes
@@ -452,7 +452,6 @@ ndDemoEntityManager::ndDemoEntityManager()
 	,m_fps(0.0f)
 	,m_timestepAcc(0.0f)
 	,m_currentListenerTimestep(0.0f)
-	,m_addDeleteLock()
 	,m_showUI(true)
 	,m_showAABB(false)
 	,m_showStats(true)
@@ -784,13 +783,13 @@ void ndDemoEntityManager::RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& po
 
 void ndDemoEntityManager::AddEntity(const ndSharedPtr<ndRenderSceneNode>& entity)
 {
-	ndScopeSpinLock lock(m_addDeleteLock);
+	//ndScopeSpinLock lock(m_addDeleteLock);
 	m_renderer->AddSceneNode(entity);
 }
 
 void ndDemoEntityManager::RemoveEntity (const ndSharedPtr<ndRenderSceneNode>& entity)
 {
-	ndScopeSpinLock lock(m_addDeleteLock);
+	//ndScopeSpinLock lock(m_addDeleteLock);
 	m_renderer->RemoveSceneNode(entity);
 }
 
@@ -1344,8 +1343,11 @@ void ndDemoEntityManager::TestImGui()
 		ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 		ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
-		if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+		if (ImGui::Button("Button"))
+		{
+			// Buttons return true when clicked (most widgets return true when edited/activated)
 			counter++;
+		}
 		ImGui::SameLine();
 		ImGui::Text("counter = %d", counter);
 

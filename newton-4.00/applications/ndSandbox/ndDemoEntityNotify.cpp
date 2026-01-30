@@ -131,7 +131,7 @@ void ndDemoEntityNotify::OnTransform(ndFloat32, const ndMatrix& matrix)
 void ndDemoEntityNotify::RemoveBody()
 {
 	// check world bounds
-	ndBody* const body = GetBody();
 	ndPhysicsWorld* const world = m_manager->GetWorld();
+	ndSharedPtr<ndBody> body(world->GetBody(GetBody()));
 	world->DefferedRemoveBody(body);
 }

@@ -261,7 +261,6 @@ class ndDemoEntityManager : public ndClassAlloc
 	ndFloat32 m_fps;
 	ndFloat32 m_timestepAcc;
 	ndFloat32 m_currentListenerTimestep;
-	ndSpinLock m_addDeleteLock;
 	
 	bool m_showUI;
 	bool m_showAABB;

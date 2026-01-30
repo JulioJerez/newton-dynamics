@@ -89,6 +89,7 @@ class ndRender: public ndClassAlloc
 	void InterpolateTransforms(ndFloat32 param);
 
 	private:
+	void RemoveDefferedEntities();
 	void UpdateGlobalMatrices() const;
 
 	ndSharedPtr<ndUserCallback> m_owner;
@@ -96,12 +97,14 @@ class ndRender: public ndClassAlloc
 	ndSharedPtr<ndRenderSceneNode> m_camera;
 	ndSharedPtr<ndRenderTextureCache> m_textureCache;
 	ndList<ndSharedPtr<ndRenderSceneNode>> m_scene;
+	ndList<ndSharedPtr<ndRenderSceneNode>> m_deadNodes;
 	ndList<ndSharedPtr<ndRenderPass>> m_renderPasses;
 
 	ndVector m_sunLightDir;
 	ndVector m_sunLightAmbient;
 	ndVector m_sunLightIntesity;
 	ndVector m_backgroundColor;
+	ndSpinLock m_addRemoveLock;
 
 	ndRenderPassDebug* m_cachedDebugPass;
 	ndRenderPassShadowsImplement* m_cachedShadowPass;

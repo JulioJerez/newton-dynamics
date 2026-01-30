@@ -96,7 +96,9 @@ class ndPhysicsWorld: public ndWorld
 
 	void NormalUpdates();
 	void AccelerateUpdates();
-	void DefferedRemoveBody(ndBody* const body);
+
+	void DefferedRemoveBody(ndSharedPtr<ndBody> body);
+	void DefferedRemoveSceneNode(ndSharedPtr<ndRenderSceneNode> entity);
 
 	private:
 	void UpdateTransforms() override;

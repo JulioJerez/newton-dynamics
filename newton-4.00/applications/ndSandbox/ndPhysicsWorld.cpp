@@ -255,7 +255,7 @@ void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
 	m_deadEntities.RemovePendingItems();
 }
 
-void ndPhysicsWorld::DefferedRemoveBody(ndBody* const body)
+void ndPhysicsWorld::DefferedRemoveBody(ndSharedPtr<ndBody> body)
 {
 	ndScopeSpinLock Lock(m_lock);
 	ndBodyKinematic* const kinematicBody = body->GetAsBodyKinematic();
@@ -304,6 +304,11 @@ void ndPhysicsWorld::DefferedRemoveBody(ndBody* const body)
 			}
 		}
 	}
+}
+
+void ndPhysicsWorld::DefferedRemoveSceneNode(ndSharedPtr<ndRenderSceneNode> entity)
+{
+	m_deadEntities.Insert(0, entity);
 }
 
 void ndPhysicsWorld::AdvanceTime(ndFloat32 timestep)
