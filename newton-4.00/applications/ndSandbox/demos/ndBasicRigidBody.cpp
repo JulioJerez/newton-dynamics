@@ -135,14 +135,12 @@ void ndBasicRigidBody(ndDemoEntityManager* const scene)
 	// build a floor
 	ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
 
-	// add an UI panel for recreating Steve's crash
+	// add an UI panel for recreating Steve Hurley's crash
 	ndSharedPtr<ndDemoEntityManager::ndDemoUIpanel> controlPanel(new ndBuildWallPanel());
 	scene->SetDemoUIpanel(controlPanel);
 
 	ndMatrix matrix(ndGetIdentityMatrix());
 	ndSharedPtr<ndBody> testBody(AddBox(scene, matrix, 1.0f, 1.0f, 1.0f, 1.0f, "wood_0.png"));
-
-	//BuildPyramid(scene);
 
 	matrix.m_posit.m_x -= 8.0f;
 	matrix.m_posit.m_y += 2.0f;
