@@ -114,21 +114,6 @@ ndSharedPtr<ndBodyNotify>& ndBody::GetNotifyCallback()
 	return m_notifyCallback;
 }
 
-//ndMatrix ndBody::GetMatrix() const
-//{
-//	return m_matrix;
-//}
-//
-//ndVector ndBody::GetVelocity() const
-//{
-//	return m_veloc;
-//}
-//
-//ndVector ndBody::GetOmega() const
-//{
-//	return m_omega;
-//}
-
 ndVector ndBody::GetPosition() const
 {
 	return m_matrix.m_posit;

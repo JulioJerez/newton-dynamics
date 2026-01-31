@@ -26,7 +26,7 @@
 #include "ndShapeStaticMesh.h"
 #include "ndPolygonMeshDesc.h"
 
-void ndShapeStaticMesh::ndPatchMesh::GetFacesPatch(ndPolygonMeshDesc* const data)
+void ndPatchMesh::GetFacesPatch(ndPolygonMeshDesc* const data)
 {
 	ndFixSizeArray<ndInt32, MESH_SIZE> patchScan(0);
 	if (m_vertexArrayHasDuplicated)

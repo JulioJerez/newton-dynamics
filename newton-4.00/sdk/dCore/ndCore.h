@@ -44,6 +44,7 @@
 #include <ndVector8.h>
 #include <ndRand127.h>
 #include <ndFastRay.h>
+#include <ndWeakPtr.h>
 #include <ndVector16.h>
 #include <ndFastAabb.h>
 #include <ndProfiler.h>
@@ -79,7 +80,6 @@
 #include <ndPolygonSoupBuilder.h>
 #include <ndSharedNodeHierarchy.h>
 #include <ndPolygonSoupDatabase.h>
-#include <ndMarchingCubesIsoSurface.h>
 #include <ndPolyhedraMassProperties.h>
 #include <ndDelaunayTetrahedralization.h>
 

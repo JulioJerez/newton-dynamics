@@ -29,66 +29,65 @@ class ndShapeInstance;
 class ndPolygonMeshDesc;
 
 D_MSV_NEWTON_CLASS_ALIGN_32
+class ndPatchMesh
+{
+	#define MESH_SIZE 512
+	public:
+	enum ndQueryType
+	{
+		m_buildIndexList,
+		m_vertexListOnly,
+	};
+
+	ndPatchMesh()
+		:m_convexShapeInstance(nullptr)
+		,m_queryType(m_buildIndexList)
+		,m_vertexArrayHasDuplicated(true)
+	{
+	}
+
+	ndVector m_boxP0;
+	ndVector m_boxP1;
+
+	ndFixSizeArray<ndVector, MESH_SIZE> m_pointArray;
+	ndFixSizeArray<ndVector, MESH_SIZE> m_normalArray;
+
+	ndFixSizeArray<ndInt32, MESH_SIZE> m_faceArray;
+	ndFixSizeArray<ndInt32, MESH_SIZE * 4> m_indexArray;
+	ndFixSizeArray<ndInt32, MESH_SIZE> m_faceMaterialArray;
+
+	const ndShapeInstance* m_convexShapeInstance;
+	ndQueryType m_queryType;
+	bool m_vertexArrayHasDuplicated;
+
+	private:
+	class ndFaceEdge
+	{
+		public:
+		union
+		{
+			struct
+			{
+				ndInt16 m_highKey;
+				ndInt16 m_lowKey;
+			};
+			ndInt32 m_key;
+		};
+		ndInt32 m_edge;
+		ndInt32 m_faceStart;
+		ndInt32 m_faceVertexCount;
+	};
+
+	void GetFacesPatch(ndPolygonMeshDesc* const data);
+
+	friend class ndShapeHeightfield;
+	friend class ndShapeStaticProceduralMesh;
+} D_GCC_NEWTON_CLASS_ALIGN_32;
+
+D_MSV_NEWTON_CLASS_ALIGN_32
 class ndShapeStaticMesh: public ndShape
 {
 	public:
-	class ndPatchMesh
-	{
-		#define MESH_SIZE 512
-
-		public:
-		enum ndQueryType
-		{
-			m_buildIndexList,
-			m_vertexListOnly,
-		};
-
-		ndPatchMesh()
-			:m_convexShapeInstance(nullptr)
-			,m_queryType(m_buildIndexList)
-			,m_vertexArrayHasDuplicated(true)
-		{
-		}
-		
-		ndVector m_boxP0;
-		ndVector m_boxP1;
-
-		ndFixSizeArray<ndVector, MESH_SIZE> m_pointArray;
-		ndFixSizeArray<ndVector, MESH_SIZE> m_normalArray;
-
-		ndFixSizeArray<ndInt32, MESH_SIZE> m_faceArray;
-		ndFixSizeArray<ndInt32, MESH_SIZE * 4> m_indexArray;
-		ndFixSizeArray<ndInt32, MESH_SIZE> m_faceMaterialArray;
-
-		const ndShapeInstance* m_convexShapeInstance;
-
-		ndQueryType m_queryType;
-		bool m_vertexArrayHasDuplicated;
-
-		private:
-		class ndFaceEdge
-		{
-			public:
-			union
-			{
-				struct
-				{
-					ndInt16 m_highKey;
-					ndInt16 m_lowKey;
-				};
-				ndInt32 m_key;
-			};
-			ndInt32 m_edge;
-			ndInt32 m_faceStart;
-			ndInt32 m_faceVertexCount;
-		};
-
-		void GetFacesPatch(ndPolygonMeshDesc* const data);
-
-		friend class ndShapeHeightfield;
-		friend class ndShapeStaticProceduralMesh;
-	};
-
 	D_CLASS_REFLECTION(ndShapeStaticMesh,ndShape)
 	D_COLLISION_API ndShapeStaticMesh(ndShapeID id);
 	D_COLLISION_API virtual ~ndShapeStaticMesh();

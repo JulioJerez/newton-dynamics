@@ -15,10 +15,13 @@
 #include "ndDemoEntityManager.h"
 #include "ndHeightFieldPrimitive.h"
 
-//#define D_TERRAIN_WIDTH			1024
+//#define D_TERRAIN__WIDTH			1024
 //#define D_TERRAIN_HEIGHT			1024
-#define D_TERRAIN_WIDTH				512
-#define D_TERRAIN_HEIGHT			512
+//#define D_TERRAIN__WIDTH			512
+//#define D_TERRAIN_HEIGHT			512
+#define D_TERRAIN__WIDTH			256
+#define D_TERRAIN_HEIGHT			256
+
 
 #define D_TERRAIN_NOISE_OCTAVES		8
 #define D_TERRAIN_NOISE_PERSISTANCE	0.5f
@@ -51,7 +54,7 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 		}
 
 		ndVector p0(ndFloat32 (0.0f), minY, ndFloat32(0.0f), ndFloat32(1.0f));
-		ndVector p1(ndFloat32(D_TERRAIN_WIDTH * D_TERRAIN_GRID_SIZE), maxY, ndFloat32(D_TERRAIN_WIDTH * D_TERRAIN_GRID_SIZE), ndFloat32(1.0f));
+		ndVector p1(ndFloat32(D_TERRAIN__WIDTH * D_TERRAIN_GRID_SIZE), maxY, ndFloat32(D_TERRAIN__WIDTH * D_TERRAIN_GRID_SIZE), ndFloat32(1.0f));
 		SetAABB(p0, p1);
 
 		// to account for rounding
@@ -67,8 +70,8 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 
 	void MakeNoiseHeightfield()
 	{
-		m_material.SetCount(D_TERRAIN_WIDTH * D_TERRAIN_HEIGHT);
-		m_heightfield.SetCount(D_TERRAIN_WIDTH * D_TERRAIN_HEIGHT);
+		m_material.SetCount(D_TERRAIN__WIDTH * D_TERRAIN_HEIGHT);
+		m_heightfield.SetCount(D_TERRAIN__WIDTH * D_TERRAIN_HEIGHT);
 
 		const ndInt32 octaves = D_TERRAIN_NOISE_OCTAVES;
 		const ndFloat32 persistance = D_TERRAIN_NOISE_PERSISTANCE;
@@ -78,18 +81,18 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 		ndReal maxHeight = ndFloat32(-1.0e10f);
 		for (ndInt32 z = 0; z < D_TERRAIN_HEIGHT; z++)
 		{
-			for (ndInt32 x = 0; x < D_TERRAIN_WIDTH; x++)
+			for (ndInt32 x = 0; x < D_TERRAIN__WIDTH; x++)
 			{
 				ndReal noiseVal = ndReal (BrownianMotion(octaves, persistance, noiseGridScale * ndFloat32(x), noiseGridScale * ndFloat32(z)));
 				//noiseVal = 0.0f;
 
-				m_heightfield[z * D_TERRAIN_WIDTH + x] = noiseVal;
+				m_heightfield[z * D_TERRAIN__WIDTH + x] = noiseVal;
 				minHeight = ndMin(minHeight, noiseVal);
 				maxHeight = ndMax(maxHeight, noiseVal);
 
 				// that app should populate this with app materials ids.
 				// just make a zero material index, for the demo
-				m_material[z * D_TERRAIN_WIDTH + x] = 0;
+				m_material[z * D_TERRAIN__WIDTH + x] = 0;
 			}
 		}
 		minHeight -= ndReal(m_padding.m_y);
@@ -110,16 +113,16 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 		ndShapeDebugNotify::ndEdgeType edgeType = ndShapeDebugNotify::m_shared;
 		for (ndInt32 z = 0; z < D_TERRAIN_HEIGHT - 1; z++)
 		{
-			const ndReal* const row = &m_heightfield[z * D_TERRAIN_WIDTH];
+			const ndReal* const row = &m_heightfield[z * D_TERRAIN__WIDTH];
 			ndVector p0(ndFloat32(0.0f), ndFloat32(row[0]),				  ndFloat32(z + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(1.0f));
-			ndVector p1(ndFloat32(0.0f), ndFloat32(row[D_TERRAIN_WIDTH]), ndFloat32(z + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(1.0f));
+			ndVector p1(ndFloat32(0.0f), ndFloat32(row[D_TERRAIN__WIDTH]), ndFloat32(z + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(1.0f));
 			p0 = matrix.TransformVector(p0);
 			p1 = matrix.TransformVector(p1);
 
-			for (ndInt32 x = 1; x < D_TERRAIN_WIDTH - 1; x++)
+			for (ndInt32 x = 1; x < D_TERRAIN__WIDTH - 1; x++)
 			{
 				const ndVector q0(matrix.TransformVector(ndVector(ndFloat32(x) * D_TERRAIN_GRID_SIZE, ndFloat32(row[x]),                   ndFloat32(z + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(1.0f))));
-				const ndVector q1(matrix.TransformVector(ndVector(ndFloat32(x) * D_TERRAIN_GRID_SIZE, ndFloat32(row[x + D_TERRAIN_WIDTH]), ndFloat32(z + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(1.0f))));
+				const ndVector q1(matrix.TransformVector(ndVector(ndFloat32(x) * D_TERRAIN_GRID_SIZE, ndFloat32(row[x + D_TERRAIN__WIDTH]), ndFloat32(z + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(1.0f))));
 
 				const ndVector normal(((p0 - q0).CrossProduct(p1 - q0)).Normalize());
 				ndAssert(normal.m_w == ndFloat32(0.0f));
@@ -247,8 +250,8 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 					// bail out at the first intersection and copy the data into the descriptor
 					ndAssert(normalOut.m_w == ndFloat32(0.0f));
 					contactOut.m_normal = normalOut.Normalize();
-					contactOut.m_shapeId0 = m_material[zIndex0 * D_TERRAIN_WIDTH + xIndex0];
-					contactOut.m_shapeId1 = m_material[zIndex0 * D_TERRAIN_WIDTH + xIndex0];
+					contactOut.m_shapeId0 = m_material[zIndex0 * D_TERRAIN__WIDTH + xIndex0];
+					contactOut.m_shapeId1 = m_material[zIndex0 * D_TERRAIN__WIDTH + xIndex0];
 		
 					return t;
 				}
@@ -331,7 +334,7 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 		for (ndInt32 iz = 0; iz <= count_z; iz++)
 		{
 			ndVector point(patchOrigin);
-			const ndReal* const heightfield = &m_heightfield[(iz + z0) * D_TERRAIN_WIDTH];
+			const ndReal* const heightfield = &m_heightfield[(iz + z0) * D_TERRAIN__WIDTH];
 			for (ndInt32 ix = 0; ix <= count_x; ix++)
 			{
 				point.m_y = heightfield[ix + x0];
@@ -424,6 +427,7 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 		ndAssert(boxP0.m_x < boxP1.m_x);
 		ndAssert(boxP0.m_y < boxP1.m_y);
 		ndAssert(boxP0.m_z < boxP1.m_z);
+		ndBoxBoxIntestion(boxP0, boxP1, m_minBox, m_maxBox, boxP0, boxP1);
 	}
 
 	void CalculateMinAndMaxElevation(ndInt32 x0, ndInt32 x1, ndInt32 z0, ndInt32 z1, ndFloat32& minHeight, ndFloat32& maxHeight) const
@@ -431,7 +435,7 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 		ndReal minVal = ndReal(1.0e10f);
 		ndReal maxVal = -ndReal(1.0e10f);
 
-		ndInt32 base = z0 * D_TERRAIN_WIDTH;
+		ndInt32 base = z0 * D_TERRAIN__WIDTH;
 		for (ndInt32 z = z0; z <= z1; ++z)
 		{
 			for (ndInt32 x = x0; x <= x1; ++x)
@@ -440,7 +444,7 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 				minVal = ndMin(high, minVal);
 				maxVal = ndMax(high, maxVal);
 			}
-			base += D_TERRAIN_WIDTH;
+			base += D_TERRAIN__WIDTH;
 		}
 		minHeight = minVal;
 		maxHeight = maxVal;
@@ -452,18 +456,18 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 		ndInt32 triangle[3];
 
 		// get the 3d point at the corner of the cell
-		if ((xIndex0 < 0) || (zIndex0 < 0) || (xIndex0 >= (D_TERRAIN_WIDTH - 1)) || (zIndex0 >= (D_TERRAIN_WIDTH - 1)))
+		if ((xIndex0 < 0) || (zIndex0 < 0) || (xIndex0 >= (D_TERRAIN__WIDTH - 1)) || (zIndex0 >= (D_TERRAIN__WIDTH - 1)))
 		{
 			return ndFloat32(1.2f);
 		}
 		maxT = ndMin(maxT, ndFloat32(1.0f));
 
-		ndInt32 base = zIndex0 * D_TERRAIN_WIDTH + xIndex0;
+		ndInt32 base = zIndex0 * D_TERRAIN__WIDTH + xIndex0;
 
 		points[0 * 2 + 0] = ndVector((ndFloat32)(xIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + 0]), (ndFloat32)(zIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
 		points[0 * 2 + 1] = ndVector((ndFloat32)(xIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + 1]), (ndFloat32)(zIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
-		points[1 * 2 + 1] = ndVector((ndFloat32)(xIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + D_TERRAIN_WIDTH + 1]), (ndFloat32)(zIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
-		points[1 * 2 + 0] = ndVector((ndFloat32)(xIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + D_TERRAIN_WIDTH + 0]), (ndFloat32)(zIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
+		points[1 * 2 + 1] = ndVector((ndFloat32)(xIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + D_TERRAIN__WIDTH + 1]), (ndFloat32)(zIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
+		points[1 * 2 + 0] = ndVector((ndFloat32)(xIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + D_TERRAIN__WIDTH + 0]), (ndFloat32)(zIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
 
 		ndFloat32 t = ndFloat32(1.2f);
 		triangle[0] = 1;
@@ -525,7 +529,7 @@ class ndHeightfieldMesh2d : public ndRenderSceneNode
 
 		for (ndInt32 z = 0; z < D_TERRAIN_HEIGHT - 1; z += D_TERRAIN_TILE_SIZE)
 		{
-			for (ndInt32 x = 0; x < D_TERRAIN_WIDTH - 1; x += D_TERRAIN_TILE_SIZE)
+			for (ndInt32 x = 0; x < D_TERRAIN__WIDTH - 1; x += D_TERRAIN_TILE_SIZE)
 			{
 				TilePosit posit;
 				posit.m_x = x;
@@ -576,7 +580,7 @@ class ndHeightfieldMesh2d : public ndRenderSceneNode
 
 	ndSharedPtr<ndMeshEffect> BuildTile(const ndProcedural2dTerrainShape* const shape, ndInt32 x0, ndInt32 z0)
 	{
-		const ndInt32 xMax = ((x0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN_WIDTH) ? D_TERRAIN_TILE_SIZE - 1 : D_TERRAIN_TILE_SIZE + 1;
+		const ndInt32 xMax = ((x0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN__WIDTH) ? D_TERRAIN_TILE_SIZE - 1 : D_TERRAIN_TILE_SIZE + 1;
 		const ndInt32 zMax = ((z0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN_HEIGHT) ? D_TERRAIN_TILE_SIZE - 1 : D_TERRAIN_TILE_SIZE + 1;
 
 		// build a collision sub tile
@@ -586,7 +590,7 @@ class ndHeightfieldMesh2d : public ndRenderSceneNode
 		ndArray<ndBigVector> meshVertexArray;
 		for (ndInt32 z = 0; z < zMax; z++)
 		{
-			const ndReal* const row = &heightMap[(z + z0) * D_TERRAIN_WIDTH];
+			const ndReal* const row = &heightMap[(z + z0) * D_TERRAIN__WIDTH];
 			ndFloat32 zf = ndFloat32(z0 + z) * D_TERRAIN_GRID_SIZE;
 			for (ndInt32 x = 0; x < xMax; x++)
 			{
@@ -603,7 +607,7 @@ class ndHeightfieldMesh2d : public ndRenderSceneNode
 		for (ndInt32 z = 0; z < zMax - 1; z++)
 		{
 			ndInt32 zStart = z * xMax;
-			const ndInt8* const materialRow = &materialMap[(z + z0) * D_TERRAIN_WIDTH];
+			const ndInt8* const materialRow = &materialMap[(z + z0) * D_TERRAIN__WIDTH];
 			for (ndInt32 x = 0; x < xMax - 1; x++)
 			{
 				ndInt32 i0 = zStart + x;
