@@ -15,9 +15,9 @@
 #include "ndDemoEntityManager.h"
 #include "ndHeightFieldPrimitive.h"
 
-//#define D_TERRAIN_WIDTH			1024
+//#define D_TERRAIN__WIDTH			1024
 //#define D_TERRAIN_HEIGHT			1024
-#define D_TERRAIN_WIDTH				512
+#define D_TERRAIN__WIDTH			512
 #define D_TERRAIN_HEIGHT			512
 
 #define D_TERRAIN_NOISE_OCTAVES		8
@@ -46,7 +46,7 @@ class ndHeightfieldMesh : public ndRenderSceneNode
 
 		for (ndInt32 z = 0; z < D_TERRAIN_HEIGHT - 1; z += D_TERRAIN_TILE_SIZE)
 		{
-			for (ndInt32 x = 0; x < D_TERRAIN_WIDTH - 1; x += D_TERRAIN_TILE_SIZE)
+			for (ndInt32 x = 0; x < D_TERRAIN__WIDTH - 1; x += D_TERRAIN_TILE_SIZE)
 			{
 				TilePosit posit;
 				posit.m_x = x;
@@ -88,7 +88,7 @@ class ndHeightfieldMesh : public ndRenderSceneNode
 
 	static void MakeNoiseHeightfield(ndArray<ndVector>& heightfield)
 	{
-		heightfield.SetCount(D_TERRAIN_WIDTH * D_TERRAIN_HEIGHT);
+		heightfield.SetCount(D_TERRAIN__WIDTH * D_TERRAIN_HEIGHT);
 
 		const ndInt32 octaves = D_TERRAIN_NOISE_OCTAVES;
 		const ndFloat32 cellSize = D_TERRAIN_GRID_SIZE;
@@ -99,10 +99,10 @@ class ndHeightfieldMesh : public ndRenderSceneNode
 		ndFloat32 maxHight = ndFloat32(-1.0e10f);
 		for (ndInt32 z = 0; z < D_TERRAIN_HEIGHT; z++)
 		{
-			for (ndInt32 x = 0; x < D_TERRAIN_WIDTH; x++)
+			for (ndInt32 x = 0; x < D_TERRAIN__WIDTH; x++)
 			{
 				ndFloat32 noiseVal = BrownianMotion(octaves, persistance, noiseGridScale * ndFloat32(x), noiseGridScale * ndFloat32(z));
-				heightfield[z * D_TERRAIN_WIDTH + x] = ndVector((ndFloat32)x * cellSize, noiseVal, (ndFloat32)z * cellSize, ndFloat32(0.0f));
+				heightfield[z * D_TERRAIN__WIDTH + x] = ndVector((ndFloat32)x * cellSize, noiseVal, (ndFloat32)z * cellSize, ndFloat32(0.0f));
 				minHeight = ndMin(minHeight, noiseVal);
 				maxHight = ndMax(maxHight, noiseVal);
 			}
@@ -129,7 +129,7 @@ class ndHeightfieldMesh : public ndRenderSceneNode
 
 	ndSharedPtr<ndMeshEffect> BuildTile(const ndShapeHeightfield* const shape, ndInt32 x0, ndInt32 z0)
 	{
-		const ndInt32 xMax = ((x0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN_WIDTH) ? D_TERRAIN_TILE_SIZE - 1 : D_TERRAIN_TILE_SIZE + 1;
+		const ndInt32 xMax = ((x0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN__WIDTH) ? D_TERRAIN_TILE_SIZE - 1 : D_TERRAIN_TILE_SIZE + 1;
 		const ndInt32 zMax = ((z0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN_HEIGHT) ? D_TERRAIN_TILE_SIZE - 1 : D_TERRAIN_TILE_SIZE + 1;
 
 		const ndArray<ndReal>& heightMap = shape->GetElevationMap();
@@ -138,7 +138,7 @@ class ndHeightfieldMesh : public ndRenderSceneNode
 		ndArray<ndBigVector> meshVertexArray;
 		for (ndInt32 z = 0; z < zMax; z++)
 		{
-			const ndReal* const row = &heightMap[(z + z0) * D_TERRAIN_WIDTH];
+			const ndReal* const row = &heightMap[(z + z0) * D_TERRAIN__WIDTH];
 			ndFloat32 zf = ndFloat32(z0 + z) * D_TERRAIN_GRID_SIZE;
 			for (ndInt32 x = 0; x < xMax; x++)
 			{
@@ -155,7 +155,7 @@ class ndHeightfieldMesh : public ndRenderSceneNode
 		for (ndInt32 z = 0; z < zMax - 1; z++)
 		{
 			ndInt32 zStart = z * xMax;
-			const ndInt8* const materialRow = &materialMap[(z + z0) * D_TERRAIN_WIDTH];
+			const ndInt8* const materialRow = &materialMap[(z + z0) * D_TERRAIN__WIDTH];
 			for (ndInt32 x = 0; x < xMax - 1; x++)
 			{
 				ndInt32 i0 = zStart + x;
@@ -203,13 +203,13 @@ class ndHeightfieldMesh : public ndRenderSceneNode
 
 ndSharedPtr<ndBody> BuildHeightFieldTerrain(ndDemoEntityManager* const scene, const char* const textureName, const ndMatrix& location)
 {
-	ndArray<ndVector> heightfield(D_TERRAIN_WIDTH * D_TERRAIN_HEIGHT);
+	ndArray<ndVector> heightfield(D_TERRAIN__WIDTH * D_TERRAIN_HEIGHT);
 	ndHeightfieldMesh::MakeNoiseHeightfield(heightfield);
 
 	// create the height field collision and rigid body
-	ndShapeInstance heighfieldInstance(new ndShapeHeightfield(D_TERRAIN_WIDTH, D_TERRAIN_WIDTH,
+	ndShapeInstance heighfieldInstance(new ndShapeHeightfield(D_TERRAIN__WIDTH, D_TERRAIN__WIDTH,
 			ndShapeHeightfield::m_invertedDiagonals, D_TERRAIN_GRID_SIZE, D_TERRAIN_GRID_SIZE));
-	//ndShapeInstance heighfieldInstance(new ndShapeHeightfield(D_TERRAIN_WIDTH, D_TERRAIN_WIDTH,
+	//ndShapeInstance heighfieldInstance(new ndShapeHeightfield(D_TERRAIN__WIDTH, D_TERRAIN__WIDTH,
 	//	ndShapeHeightfield::m_normalDiagonals, D_TERRAIN_GRID_SIZE, D_TERRAIN_GRID_SIZE));
 	
 	ndShapeHeightfield* const heighfield = heighfieldInstance.GetShape()->GetAsShapeHeightfield();

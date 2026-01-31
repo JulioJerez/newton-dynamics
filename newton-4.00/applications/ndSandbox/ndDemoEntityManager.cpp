@@ -529,7 +529,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_showScene = true;
 	//m_showConcaveEdge = true;
 	//m_showMeshSkeleton = true;
-	//m_autoSleepMode = false;
+	m_autoSleepMode = false;
 	///m_hidePostUpdate = true;
 	//m_hideVisualMeshes = true;
 	//m_solverMode = ndWorld::ndStandardSolver;
