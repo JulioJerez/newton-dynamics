@@ -23,8 +23,9 @@
 #define __ND_MARCHING_CUBES_ISO_SURFACE_H__
 
 #include "ndCoreStdafx.h"
-#include "ndMarchingCubes.h"
+#include "ndCollisionStdafx.h"
 
+class ndPatchMesh;
 class ndMarchingCubeIsoSurface : public ndMarchingCubes
 {
 	class ndTriangle
@@ -42,17 +43,17 @@ class ndMarchingCubeIsoSurface : public ndMarchingCubes
 	};
 
 	public:
-	D_CORE_API ndMarchingCubeIsoSurface(ndThreadPool* const threadPool, const ndVector& boxP0, const ndVector& boxP1, ndFloat32 gridSize);
-	D_CORE_API virtual ~ndMarchingCubeIsoSurface();
+	D_COLLISION_API ndMarchingCubeIsoSurface(ndThreadPool* const threadPool, const ndVector& boxP0, const ndVector& boxP1, ndFloat32 gridSize);
+	D_COLLISION_API virtual ~ndMarchingCubeIsoSurface();
 
-	D_CORE_API void GetBox (ndVector& boxP0, ndVector& boxP1) const;
-	D_CORE_API void SetBox(const ndVector& boxP0, const ndVector& boxP1);
+	D_COLLISION_API void GetBox (ndVector& boxP0, ndVector& boxP1) const;
+	D_COLLISION_API void SetBox(const ndVector& boxP0, const ndVector& boxP1);
 
-	D_CORE_API virtual void GenerateMesh() override;
-	D_CORE_API ndVector PositionToGrid(const ndVector& posit) const;
+	D_COLLISION_API virtual void GenerateMesh() override;
+	D_COLLISION_API ndVector PositionToGrid(const ndVector& posit) const;
 
-	D_CORE_API ndFixSizeArray<ndTriangle, 5> GetFacesInCell(const ndVector& gridPosit) const;
-	D_CORE_API ndFloat32 RayCast(const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT) const;
+	D_COLLISION_API void GetFacesPatch(ndPatchMesh& patch) const;
+	D_COLLISION_API ndFloat32 RayCast(const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT) const;
 
 	virtual ndReal GetIsoValue(const ndVector& posit) const = 0;
 
@@ -70,16 +71,23 @@ class ndMarchingCubeIsoSurface : public ndMarchingCubes
 		ndInt32 m_tableIndex;
 	};
 
+	enum ndCellFill
+	{
+		m_empty,
+		m_solid,
+		m_partial,
+	};
+
 	void GenerateIndexList();
+	ndCellFill GetFacesInCell(ndFixSizeArray<ndTriangle, 5>& patch, const ndVector& gridPosit) const;
 	bool CalculateMinExtend3d(const ndVector& p0, const ndVector& p1, ndVector& boxP0, ndVector& boxP1) const;
 	ndFloat32 RayCastCell(const ndFastRay& ray, ndInt32 xIndex0, ndInt32 yIndex0, ndInt32 zIndex0, ndVector& normalOut, ndFloat32 maxT) const;
 
 	ndVector m_boxP0;
 	ndVector m_boxP1;
-	ndArray<ndGridInfo> m_gridScansLayer;
-	ndArray<ndGridInfo> m_gridScansLayerTemp;
-	ndArray<ndReal> m_densityWindow0;
-	ndArray<ndReal> m_densityWindow1;
+	ndFixSizeArray<ndVector, 8> m_gridStep;
+	//ndArray<ndGridInfo> m_gridScansLayer;
+	//ndArray<ndGridInfo> m_gridScansLayerTemp;
 	bool m_generateNormals;
 };
 

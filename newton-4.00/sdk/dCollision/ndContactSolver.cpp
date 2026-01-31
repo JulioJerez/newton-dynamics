@@ -4130,6 +4130,7 @@ ndInt32 ndContactSolver::ConvexToStaticMeshContactsDiscrete()
 	}
 	if (!(count && data.m_staticMeshQuery->m_faceIndexCount.GetCount()))
 	{
+		ndPatchMesh patch;
 		m_separationDistance = ndFloat32(0.0f);
 		m_separatingVector = ndVector::m_zero;
 		m_separatingVector.m_y = ndFloat32(1.0f);
@@ -4137,11 +4138,11 @@ ndInt32 ndContactSolver::ConvexToStaticMeshContactsDiscrete()
 		// here we do a conservatiive box test to see if the 
 		// box is far away enough that the body can move by distanceTravel
 		const ndVector distanceTravel(ndFloat32(1.0f));
-		ndShapeStaticMesh::ndPatchMesh patch;
+		
 		patch.m_convexShapeInstance = data.m_convexInstance;
 		patch.m_boxP0 = (data.GetOrigin() - distanceTravel) & ndVector::m_triplexMask;
 		patch.m_boxP1 = (data.GetTarget() + distanceTravel)& ndVector::m_triplexMask;
-		patch.m_queryType = ndShapeStaticMesh::ndPatchMesh::m_vertexListOnly;
+		patch.m_queryType = ndPatchMesh::m_vertexListOnly;
 		polysoup->GetFacesPatch(patch);
 		m_separationDistance = patch.m_pointArray.GetCount() ? ndFloat32 (0.0f) : distanceTravel.m_x;
 	}

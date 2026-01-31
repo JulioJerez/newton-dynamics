@@ -17,8 +17,12 @@
 
 //#define D_TERRAIN_WIDTH			1024
 //#define D_TERRAIN_HEIGHT			1024
-#define D_TERRAIN_WIDTH				512
-#define D_TERRAIN_HEIGHT			512
+//#define D_TERRAIN_WIDTH				512
+//#define D_TERRAIN_HEIGHT			512
+
+#define D_TERRAIN_WIDTH				256
+#define D_TERRAIN_HEIGHT			256
+
 
 #define D_TERRAIN_NOISE_OCTAVES		8
 #define D_TERRAIN_NOISE_PERSISTANCE	0.5f
@@ -424,6 +428,7 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 		ndAssert(boxP0.m_x < boxP1.m_x);
 		ndAssert(boxP0.m_y < boxP1.m_y);
 		ndAssert(boxP0.m_z < boxP1.m_z);
+		ndBoxBoxIntestion(boxP0, boxP1, m_minBox, m_maxBox, boxP0, boxP1);
 	}
 
 	void CalculateMinAndMaxElevation(ndInt32 x0, ndInt32 x1, ndInt32 z0, ndInt32 z1, ndFloat32& minHeight, ndFloat32& maxHeight) const

@@ -23,7 +23,7 @@
 
 #define MACHINE_LEARNING_BASE	100
 
-#define DEFAULT_SCENE	0		// basic collision only
+//#define DEFAULT_SCENE	0		// basic collision only
 //#define DEFAULT_SCENE	1		// basic rigidbody
 //#define DEFAULT_SCENE	2		// basic Stacks 
 //#define DEFAULT_SCENE	3		// basic friction
@@ -35,7 +35,7 @@
  
 //#define DEFAULT_SCENE	9		// basic heightfield collision
 //#define DEFAULT_SCENE	10		// basic user heightfield 2d collision
-//#define DEFAULT_SCENE	11		// basic user marching cube 3d collision
+#define DEFAULT_SCENE	11		// basic user marching cube 3d collision
 
 //#define DEFAULT_SCENE	12		// static compound scene collision 
 //#define DEFAULT_SCENE	13		// basic convex approximate compound shapes

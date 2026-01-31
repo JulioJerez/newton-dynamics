@@ -72,6 +72,7 @@
 #include <ndBodiesInAabbNotify.h>
 #include <ndShapeConvexPolygon.h>
 #include <ndShapeChamferCylinder.h>
+#include <ndMarchingCubesIsoSurface.h>
 #include <ndShapeUserDefinedImplicit.h>
 #include <ndJointBilateralConstraint.h>
 #include <ndShapeStaticProceduralMesh.h>
