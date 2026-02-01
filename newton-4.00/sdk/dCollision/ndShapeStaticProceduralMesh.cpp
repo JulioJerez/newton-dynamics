@@ -58,6 +58,8 @@ void ndShapeStaticProceduralMesh::GetCollidingFaces(ndPolygonMeshDesc* const dat
 	patch.m_boxP0 = data->GetOrigin();
 	patch.m_boxP1 = data->GetTarget();
 	patch.m_convexShapeInstance = data->m_convexInstance;
+	patch.m_worldMatrix = data->m_polySoupInstance->GetGlobalMatrix();
+	patch.m_worldMatrix.m_posit += data->m_contactSolver->GetWorldOffset();
 	patch.m_boxP0 += data->m_boxDistanceTravelInMeshSpace & (data->m_boxDistanceTravelInMeshSpace < ndVector::m_zero);
 	patch.m_boxP1 += data->m_boxDistanceTravelInMeshSpace & (data->m_boxDistanceTravelInMeshSpace > ndVector::m_zero);
 	GetFacesPatch(patch);

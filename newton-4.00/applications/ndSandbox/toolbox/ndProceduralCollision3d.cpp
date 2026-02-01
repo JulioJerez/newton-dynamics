@@ -197,10 +197,19 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 
 		ndRenderPassDebug* const debugRenderPass = m_owner->GetDebugRenderPass();
 		const ndRenderPassDebug::ndDebugOptions& options = debugRenderPass->GetDebugDisplayOptions();
-		if (options.m_showStaticMeshCollidingFaces)
+		if (options.m_showStaticMeshCollidingFaces && (patch.m_pointArray.GetCount() > 1))
 		{
-			ndTrace(("TO DO: display patch here\n"));
-			//debugRenderPass->ClearRuntimeLines();
+			const ndVector color(1.0f, 1.0f, 0.0f, 1.0f);
+			const ndMatrix& matrix(patch.m_worldMatrix);
+			for (ndInt32 i = 0; i < ndInt32 (patch.m_pointArray.GetCount()); i += 3)
+			{
+				const ndVector p0(matrix.TransformVector(patch.m_pointArray[i + 0]));
+				const ndVector p1(matrix.TransformVector(patch.m_pointArray[i + 1]));
+				const ndVector p2(matrix.TransformVector(patch.m_pointArray[i + 2]));
+				debugRenderPass->AddRuntimeLine(p0, p1, color);
+				debugRenderPass->AddRuntimeLine(p1, p2, color);
+				debugRenderPass->AddRuntimeLine(p2, p0, color);
+			}
 		}
 	}
 

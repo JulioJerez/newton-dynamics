@@ -43,6 +43,7 @@ void ndPatchMesh::GetFacesPatch(ndPolygonMeshDesc* const data)
 			m_indexArray[i] = patchScan[index];
 		}
 		patchScan.SetCount(0);
+		m_vertexArrayHasDuplicated = false;
 	}
 
 	// generate the scan prefit

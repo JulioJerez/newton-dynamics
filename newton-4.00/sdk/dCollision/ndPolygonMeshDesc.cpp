@@ -28,24 +28,25 @@
 #include "ndShapeInstance.h"
 #include "ndPolygonMeshDesc.h"
 
-ndPolygonMeshDesc::ndPolygonMeshDesc(ndContactSolver& proxy, bool ccdMode)
+ndPolygonMeshDesc::ndPolygonMeshDesc(ndContactSolver* const proxy, bool ccdMode)
 	:ndFastAabb()
 	,m_boxDistanceTravelInMeshSpace(ndVector::m_zero)
-	,m_convexInstance(&proxy.m_instance0)
-	,m_polySoupInstance(&proxy.m_instance1)
+	,m_convexInstance(&proxy->m_instance0)
+	,m_polySoupInstance(&proxy->m_instance1)
+	,m_contactSolver(proxy)
 	,m_pointArray(nullptr)
 	,m_staticMeshQuery(nullptr)
 	,m_proceduralStaticMeshFaceQuery(nullptr)
 	,m_maxT(ndFloat32(1.0f))
-	,m_skinMargin(proxy.m_skinMargin)
+	,m_skinMargin(proxy->m_skinMargin)
 	,m_vertexCount(0)
-	,m_threadId(proxy.m_threadId)
+	,m_threadId(proxy->m_threadId)
 	,m_doContinueCollisionTest(ccdMode)
 {
-	ndAssert(proxy.m_notification->m_scene);
-	ndScene* const scene = *proxy.m_notification->m_scene;
-	m_staticMeshQuery = &scene->m_staticMeshQuery[proxy.m_threadId];
-	m_proceduralStaticMeshFaceQuery = &scene->m_proceduralStaticMeshQuery[proxy.m_threadId];
+	ndAssert(proxy->m_notification->m_scene);
+	ndScene* const scene = *proxy->m_notification->m_scene;
+	m_staticMeshQuery = &scene->m_staticMeshQuery[proxy->m_threadId];
+	m_proceduralStaticMeshFaceQuery = &scene->m_proceduralStaticMeshQuery[proxy->m_threadId];
 	Init();
 }
 

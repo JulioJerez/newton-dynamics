@@ -27,6 +27,7 @@ class ndRenderPassDebug : public ndRenderPass
 
 	class ndRuntimeLine
 	{
+		public:
 		ndVector m_p0;
 		ndVector m_p1;
 		ndVector m_color;
@@ -62,6 +63,7 @@ class ndRenderPassDebug : public ndRenderPass
 
 	void ClearRuntimeLines();
 	void SwapRuntimeLinesBuffers();
+	void AddRuntimeLine(const ndVector& p0, const ndVector& p1, const ndVector& color);
 
 	protected:
 	class ndCallback;

@@ -40,7 +40,8 @@ class ndPatchMesh
 	};
 
 	ndPatchMesh()
-		:m_convexShapeInstance(nullptr)
+		:m_worldMatrix(ndGetIdentityMatrix())
+		,m_convexShapeInstance(nullptr)
 		,m_queryType(m_buildIndexList)
 		,m_vertexArrayHasDuplicated(true)
 	{
@@ -56,6 +57,7 @@ class ndPatchMesh
 	ndFixSizeArray<ndInt32, MESH_SIZE * 4> m_indexArray;
 	ndFixSizeArray<ndInt32, MESH_SIZE> m_faceMaterialArray;
 
+	ndMatrix m_worldMatrix;
 	const ndShapeInstance* m_convexShapeInstance;
 	ndQueryType m_queryType;
 	bool m_vertexArrayHasDuplicated;
