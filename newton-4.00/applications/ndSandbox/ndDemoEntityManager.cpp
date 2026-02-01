@@ -461,7 +461,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	,m_helperLegend(false)
 	,m_autoSleepMode(true)
 	,m_showScene(false)
-	,m_showConcaveEdge(false)
+	//,m_showConcaveEdge(false)
 	,m_hideVisualMeshes(false)
 	,m_showNormalForces(false)
 	,m_showCenterOfMass(false)
@@ -471,10 +471,10 @@ ndDemoEntityManager::ndDemoEntityManager()
 	,m_showContactPoints(false)
 	,m_showJointDebugInfo(false)
 	,m_showModelsDebugInfo(false)
-	,m_showCollidingFaces(false)
 	,m_suspendPhysicsUpdate(false)
 	,m_synchronousPhysicsUpdate(false)
 	,m_synchronousParticlesUpdate(false)
+	,m_showStaticMeshCollidingFaces(false)
 	,m_showRaycastHit(false)
 	,m_profilerMode(false)
 	,m_nextActiveCamera()
@@ -549,6 +549,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_showCollisionMeshMode = 3;		// solid wire frame
 	m_synchronousPhysicsUpdate = true;
 	m_synchronousParticlesUpdate = true;
+	m_showStaticMeshCollidingFaces = true;
 
 	Cleanup();
 	ndResetTimer();
@@ -582,6 +583,11 @@ ndPhysicsWorld* ndDemoEntityManager::GetWorld() const
 ndSharedPtr<ndRender>& ndDemoEntityManager::GetRenderer()
 {
 	return m_renderer;
+}
+
+ndDebugDisplayRenderPass* ndDemoEntityManager::GetDebugRenderPass()
+{
+	return (ndDebugDisplayRenderPass*)*m_debugDisplayRenderPass;
 }
 
 void ndDemoEntityManager::Terminate()
@@ -963,8 +969,8 @@ void ndDemoEntityManager::ShowMainMenuBar()
 			ImGui::Checkbox("show center of mass", &m_showCenterOfMass);
 			ImGui::Checkbox("show joints debug info", &m_showJointDebugInfo);
 			ImGui::Checkbox("show models debug info", &m_showModelsDebugInfo);
+			ImGui::Checkbox("show colliding faces", &m_showStaticMeshCollidingFaces);
 
-			//ImGui::Checkbox("show colliding faces", &m_showCollidingFaces);
 			//ImGui::Checkbox("show ray cast hit point", &m_showRaycastHit);
 			//ImGui::Checkbox("show concave edges", &m_showConcaveEdge);
 			

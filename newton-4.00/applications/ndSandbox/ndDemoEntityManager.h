@@ -12,6 +12,7 @@
 #define __DEMO_MAIN_FRAME_H__
 
 class ndPhysicsWorld;
+class ndDebugDisplayRenderPass;
 
 class ndDemoEntityManager : public ndClassAlloc
 {
@@ -172,6 +173,7 @@ class ndDemoEntityManager : public ndClassAlloc
 	
 	ndPhysicsWorld* GetWorld() const;
 	ndSharedPtr<ndRender>& GetRenderer();
+	ndDebugDisplayRenderPass* GetDebugRenderPass();
 
 	void AddEntity(const ndSharedPtr<ndRenderSceneNode>& entity);
 	void RemoveEntity(const ndSharedPtr<ndRenderSceneNode>& entity);
@@ -268,7 +270,7 @@ class ndDemoEntityManager : public ndClassAlloc
 	bool m_helperLegend;
 	bool m_autoSleepMode;
 	bool m_showScene;
-	bool m_showConcaveEdge;
+	//bool m_showConcaveEdge;
 	bool m_hideVisualMeshes;
 	bool m_showNormalForces;
 	bool m_showCenterOfMass;
@@ -278,10 +280,10 @@ class ndDemoEntityManager : public ndClassAlloc
 	bool m_showContactPoints;
 	bool m_showJointDebugInfo;
 	bool m_showModelsDebugInfo;
-	bool m_showCollidingFaces;
 	bool m_suspendPhysicsUpdate;
 	bool m_synchronousPhysicsUpdate;
 	bool m_synchronousParticlesUpdate;
+	bool m_showStaticMeshCollidingFaces;
 	bool m_showRaycastHit;
 	bool m_profilerMode;
 	ndKeyTrigger m_nextActiveCamera;

@@ -25,12 +25,19 @@ class ndRenderPassDebug : public ndRenderPass
 		ndVector m_color;
 	};
 
-	class ndDebugLineOptions
+	class ndRuntimeLine
+	{
+		ndVector m_p0;
+		ndVector m_p1;
+		ndVector m_color;
+	};
+
+	class ndDebugOptions
 	{
 		public:
-		ndDebugLineOptions()
+		ndDebugOptions()
 		{
-			memset(this, 0, sizeof(ndDebugLineOptions));
+			memset(this, 0, sizeof(ndDebugOptions));
 		}
 
 		bool m_showContacts;
@@ -41,6 +48,7 @@ class ndRenderPassDebug : public ndRenderPass
 		bool m_showContactsForce;
 		bool m_showJointDebugInfo;
 		bool m_showModelsDebugInfo;
+		bool m_showStaticMeshCollidingFaces;
 	};
 
 	ndRenderPassDebug(ndRender* const owner, ndWorld* const world);
@@ -48,7 +56,12 @@ class ndRenderPassDebug : public ndRenderPass
 
 	const ndArray<ndPoint>& GetVertex() const;
 	const ndArray<ndPoint>& GetPoints() const;
-	void SetDebugDisplayOptions(const ndDebugLineOptions& options);
+
+	const ndDebugOptions& GetDebugDisplayOptions() const;
+	void SetDebugDisplayOptions(const ndDebugOptions& options);
+
+	void ClearRuntimeLines();
+	void SwapRuntimeLinesBuffers();
 
 	protected:
 	class ndCallback;
@@ -62,11 +75,16 @@ class ndRenderPassDebug : public ndRenderPass
 	void GenerateContactForce();
 	virtual void RenderScene() override;
 	
-	ndDebugLineOptions m_options;
+	ndDebugOptions m_options;
 	ndArray<ndPoint> m_debugLines;
 	ndArray<ndPoint> m_debugPoints;
 	ndSharedPtr<ndRenderPrimitive> m_renderLinesPrimitive;
 	ndSharedPtr<ndRenderPrimitive> m_renderPointsPrimitive;
+
+	ndArray<ndRuntimeLine> m_runtimeLines;
+	ndArray<ndRuntimeLine> m_runtimeRenderLines;
+	ndSpinLock m_runtimeLineLock;
+
 	ndWorld* m_world;
 };
 

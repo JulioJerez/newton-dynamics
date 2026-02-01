@@ -16,6 +16,7 @@
 #include "ndContactCallback.h"
 #include "ndDemoEntityNotify.h"
 #include "ndDemoEntityManager.h"
+#include "ndDebugDisplayRenderPass.h"
 #include "ndArchimedesBuoyancyVolume.h"
 
 #define MAX_PHYSICS_STEPS			1
@@ -140,11 +141,6 @@ ndDemoEntityManager* ndPhysicsWorld::GetManager() const
 	return m_manager;
 }
 
-void ndPhysicsWorld::PreUpdate(ndFloat32 timestep)
-{
-	ndWorld::PreUpdate(timestep);
-}
-
 void ndPhysicsWorld::OnSubStepPostUpdate(ndFloat32 timestep)
 {
 	ndWorld::OnSubStepPostUpdate(timestep);
@@ -220,6 +216,14 @@ void ndPhysicsWorld::UpdateTransforms()
 	ndWorld::UpdateTransforms();
 }
 
+void ndPhysicsWorld::PreUpdate(ndFloat32 timestep)
+{
+	ndWorld::PreUpdate(timestep);
+
+	ndRenderPassDebug* const debugRenderPass = m_manager->GetDebugRenderPass();
+	debugRenderPass->ClearRuntimeLines();
+}
+
 void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
 {
 	ndWorld::PostUpdate(timestep);
@@ -259,6 +263,10 @@ void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
 	m_deadJoints.RemovePendingItems();
 	m_deadBodies.RemovePendingItems();
 	m_deadEntities.RemovePendingItems();
+
+	// swap runtime line buffer
+	ndRenderPassDebug* const debugRenderPass = m_manager->GetDebugRenderPass();
+	debugRenderPass->SwapRuntimeLinesBuffers();
 }
 
 void ndPhysicsWorld::DefferedRemoveBody(ndSharedPtr<ndBody> body)

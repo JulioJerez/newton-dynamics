@@ -49,7 +49,6 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	ndVector m_sleepColor;
 	ndDemoEntityManager* m_manager;
 	ndTree<ndSharedPtr<ndDebugMesh>, ndShape*> m_meshCache;
-
 	ndInt32 m_showCollisionMeshMode;
 };
 

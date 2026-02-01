@@ -123,9 +123,14 @@ const ndArray<ndRenderPassDebug::ndPoint>& ndRenderPassDebug::GetVertex() const
 	return m_debugLines;
 }
 
-void ndRenderPassDebug::SetDebugDisplayOptions(const ndDebugLineOptions& options)
+void ndRenderPassDebug::SetDebugDisplayOptions(const ndDebugOptions& options)
 {
 	m_options = options;
+}
+
+const ndRenderPassDebug::ndDebugOptions& ndRenderPassDebug::GetDebugDisplayOptions() const
+{
+	return m_options;
 }
 
 void ndRenderPassDebug::GenerateBodyAABB()
@@ -295,6 +300,17 @@ void ndRenderPassDebug::GenerateContactForce()
 	}
 }
 
+void ndRenderPassDebug::ClearRuntimeLines()
+{
+	m_runtimeLines.SetCount(0);
+}
+
+void ndRenderPassDebug::SwapRuntimeLinesBuffers()
+{
+	ndScopeSpinLock lock(m_runtimeLineLock);
+	m_runtimeLines.Swap(m_runtimeRenderLines);
+}
+
 void ndRenderPassDebug::RenderScene()
 {
 	ndAssert(m_world);
@@ -345,5 +361,12 @@ void ndRenderPassDebug::RenderScene()
 	{
 		const ndMatrix matrix(ndGetIdentityMatrix());
 		m_renderLinesPrimitive->Render(m_owner, matrix, m_debugLineArray);
+	}
+
+	if (m_options.m_showStaticMeshCollidingFaces)
+	{
+		ndScopeSpinLock lock(m_runtimeLineLock);
+		// render dynamics runetime lines here
+
 	}
 }
