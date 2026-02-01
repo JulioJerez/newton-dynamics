@@ -1045,7 +1045,6 @@ bool ndScene::ConvexCast(
 		else 
 		{
 			ndBody* const body = self->GetBody();
-			//if (!self->m_isDead && body)
 			if (body)
 			{
 				if (!self->m_isDead && callback.OnRayPrecastAction (body, &convexShape))
@@ -1186,7 +1185,6 @@ bool ndScene::RayCast(
 		else
 		{
 			ndBodyKinematic* const body = self->GetBody();
-			//if (!self->m_isDead && body)
 			if (body)
 			{
 				ndAssert(!self->GetLeft());
@@ -1242,7 +1240,6 @@ void ndScene::BodiesInAabb(ndBodiesInAabbNotify& callback, const ndVector& minBo
 			if (ndOverlapTest(self->m_minBox, self->m_maxBox, minBox, maxBox))
 			{
 				ndBodyKinematic* const body = self->GetBody();
-				//if (!self->m_isDead && body)
 				if (body)
 				{
 					ndAssert(!self->GetLeft());
