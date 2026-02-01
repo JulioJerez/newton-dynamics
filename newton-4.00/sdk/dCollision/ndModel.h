@@ -59,7 +59,8 @@ class ndModel: public ndContainersFreeListAlloc<ndModel>
 	ndWorld* m_world;
 
 	private:
-	ndModelList::ndNode* m_worldNode;
+	//ndModelList::ndNode* m_worldNode;
+	ndWeakPtr<ndModelList::ndNode> m_worldNode;
 	ndSharedPtr<ndModelNotify> m_notifyCallback;
 
 	friend class ndWorld;

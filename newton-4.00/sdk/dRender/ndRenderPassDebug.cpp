@@ -123,9 +123,14 @@ const ndArray<ndRenderPassDebug::ndPoint>& ndRenderPassDebug::GetVertex() const
 	return m_debugLines;
 }
 
-void ndRenderPassDebug::SetDebugDisplayOptions(const ndDebugLineOptions& options)
+void ndRenderPassDebug::SetDebugDisplayOptions(const ndDebugOptions& options)
 {
 	m_options = options;
+}
+
+const ndRenderPassDebug::ndDebugOptions& ndRenderPassDebug::GetDebugDisplayOptions() const
+{
+	return m_options;
 }
 
 void ndRenderPassDebug::GenerateBodyAABB()
@@ -295,6 +300,26 @@ void ndRenderPassDebug::GenerateContactForce()
 	}
 }
 
+void ndRenderPassDebug::ClearRuntimeLines()
+{
+	m_runtimeLines.SetCount(0);
+}
+
+void ndRenderPassDebug::AddRuntimeLine(const ndVector& p0, const ndVector& p1, const ndVector& color)
+{
+	ndRuntimeLine line;
+	line.m_p0 = p0;
+	line.m_p1 = p1;
+	line.m_color = color;
+	m_runtimeLines.PushBack(line);
+}
+
+void ndRenderPassDebug::SwapRuntimeLinesBuffers()
+{
+	ndScopeSpinLock lock(m_runtimeLineLock);
+	m_runtimeLines.Swap(m_runtimeRenderLines);
+}
+
 void ndRenderPassDebug::RenderScene()
 {
 	ndAssert(m_world);
@@ -339,6 +364,21 @@ void ndRenderPassDebug::RenderScene()
 	{
 		const ndMatrix matrix(ndGetIdentityMatrix());
 		m_renderPointsPrimitive->Render(m_owner, matrix, m_debugPointArray);
+	}
+
+	if (m_options.m_showStaticMeshCollidingFaces)
+	{
+		ndScopeSpinLock lock(m_runtimeLineLock);
+		for (ndInt32 i = 0; i < m_runtimeRenderLines.GetCount(); ++i)
+		{
+			ndPoint line;
+			line.m_point = m_runtimeRenderLines[i].m_p0;
+			line.m_color = m_runtimeRenderLines[i].m_color;
+			m_debugLines.PushBack(line);
+
+			line.m_point = m_runtimeRenderLines[i].m_p1;
+			m_debugLines.PushBack(line);
+		}
 	}
 
 	if (m_debugLines.GetCount())

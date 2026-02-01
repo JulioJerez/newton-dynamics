@@ -14,6 +14,7 @@
 #include "ndDemoEntityNotify.h"
 #include "ndDemoEntityManager.h"
 #include "ndHeightFieldPrimitive.h"
+#include "ndDebugDisplayRenderPass.h"
 
 //#define D_TERRAIN__WIDTH		1024
 //#define D_TERRAIN_HEIGHT		1024
@@ -141,6 +142,7 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 	ndProceduralTerrainShape3d(ndDemoEntityManager* const scene)
 		:ndShapeStaticProceduralMesh()
 		,m_terrain()
+		,m_owner(scene)
 	{
 		m_terrain = ndSharedPtr<ndIsoTerrain>(new ndIsoTerrain(this, scene));
 
@@ -181,7 +183,8 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 		}
 	}
 
-	virtual ndFloat32 RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const, ndContactPoint& contactOut) const override
+	//virtual ndFloat32 RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const, ndContactPoint& contactOut) const override
+	virtual ndFloat32 RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const, ndContactPoint&) const override
 	{
 		ndFloat32 t = m_terrain->RayCast(localP0, localP1, maxT);
 
@@ -191,9 +194,27 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 	void GetFacesPatch(ndPatchMesh& patch) const override
 	{
 		m_terrain->GetFacesPatch(patch);
+
+		ndRenderPassDebug* const debugRenderPass = m_owner->GetDebugRenderPass();
+		const ndRenderPassDebug::ndDebugOptions& options = debugRenderPass->GetDebugDisplayOptions();
+		if (options.m_showStaticMeshCollidingFaces && (patch.m_pointArray.GetCount() > 1))
+		{
+			const ndVector color(1.0f, 1.0f, 0.0f, 1.0f);
+			const ndMatrix& matrix(patch.m_worldMatrix);
+			for (ndInt32 i = 0; i < ndInt32 (patch.m_pointArray.GetCount()); i += 3)
+			{
+				const ndVector p0(matrix.TransformVector(patch.m_pointArray[i + 0]));
+				const ndVector p1(matrix.TransformVector(patch.m_pointArray[i + 1]));
+				const ndVector p2(matrix.TransformVector(patch.m_pointArray[i + 2]));
+				debugRenderPass->AddRuntimeLine(p0, p1, color);
+				debugRenderPass->AddRuntimeLine(p1, p2, color);
+				debugRenderPass->AddRuntimeLine(p2, p0, color);
+			}
+		}
 	}
 
 	ndSharedPtr<ndIsoTerrain> m_terrain;
+	ndWeakPtr<ndDemoEntityManager> m_owner;
 };
 
 class ndHeightfieldMesh3d : public ndRenderSceneNode

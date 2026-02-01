@@ -51,7 +51,8 @@ class ndModelNotify : public ndContainersFreeListAlloc<ndModelNotify>
 	D_COLLISION_API virtual void Debug(ndConstraintDebugCallback& context) const;
 
 	private:
-	ndModel* m_model;
+	//ndModel* m_model;
+	ndWeakPtr<ndModel> m_model;
 
 	friend class ndModel;
 } D_GCC_NEWTON_CLASS_ALIGN_32;

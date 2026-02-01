@@ -305,6 +305,7 @@ ndContactSolver::ndContactSolver()
 	,m_instance0(nullptr)
 	,m_instance1(nullptr)
 	,m_separatingVector(ndContact::m_initialSeparatingVector)
+	,m_savedOriginOffset(ndVector::m_zero)
 	,m_contact(nullptr)
 	,m_freeFace(nullptr)
 	,m_notification(nullptr)
@@ -326,6 +327,7 @@ ndContactSolver::ndContactSolver(ndShapeInstance* const instance, ndContactNotif
 	,m_instance0(*instance, (ndShape*)instance->GetShape())
 	,m_instance1(*instance, (ndShape*)instance->GetShape())
 	,m_separatingVector(ndContact::m_initialSeparatingVector)
+	,m_savedOriginOffset(ndVector::m_zero)
 	,m_contact(nullptr)
 	,m_freeFace(nullptr)
 	,m_notification(notification)
@@ -349,6 +351,7 @@ ndContactSolver::ndContactSolver(ndContact* const contact, ndContactNotify* cons
 	,m_closestPoint0(ndVector::m_zero)
 	,m_closestPoint1(ndVector::m_zero)
 	,m_separatingVector(ndContact::m_initialSeparatingVector)
+	,m_savedOriginOffset(ndVector::m_zero)
 	,m_contact(contact)
 	,m_freeFace(nullptr)
 	,m_notification(notification)
@@ -372,6 +375,7 @@ ndContactSolver::ndContactSolver(const ndContactSolver& src, const ndShapeInstan
 	,m_closestPoint0(ndVector::m_zero)
 	,m_closestPoint1(ndVector::m_zero)
 	,m_separatingVector(src.m_separatingVector)
+	,m_savedOriginOffset(ndVector::m_zero)
 	,m_contact(src.m_contact)
 	,m_freeFace(nullptr)
 	,m_notification(src.m_notification)
@@ -2428,8 +2432,10 @@ ndInt32 ndContactSolver::ConvexContactsDiscrete()
 {
 	const ndVector origin0(m_instance0.m_globalMatrix.m_posit);
 	const ndVector origin1(m_instance1.m_globalMatrix.m_posit);
+	m_savedOriginOffset = origin0 & ndVector::m_triplexMask;
+
 	m_instance0.m_globalMatrix.m_posit = ndVector::m_wOne;
-	m_instance1.m_globalMatrix.m_posit -= (origin0 & ndVector::m_triplexMask);
+	m_instance1.m_globalMatrix.m_posit -= m_savedOriginOffset;
 
 	// handle rare case of two shapes located exactly at the same origin
 	const ndVector error(m_instance1.m_globalMatrix.m_posit - m_instance0.m_globalMatrix.m_posit);
@@ -3840,7 +3846,7 @@ ndInt32 ndContactSolver::ConvexToStaticMeshContactsContinue()
 	ndAssert(m_instance1.GetShape()->GetAsShapeStaticMesh());
 
 	ndInt32 count = 0;
-	ndPolygonMeshDesc data(*this, true);
+	ndPolygonMeshDesc data(this, true);
 
 	ndVector relVeloc(m_contact->m_body0->GetVelocity() - m_contact->m_body1->GetVelocity());
 	ndFloat32 baseLinearSpeed = ndSqrt(relVeloc.DotProduct(relVeloc).GetScalar());
@@ -4103,7 +4109,7 @@ ndInt32 ndContactSolver::ConvexToStaticMeshContactsDiscrete()
 	ndAssert(m_instance1.GetShape()->GetAsShapeStaticMesh());
 
 	ndInt32 count = 0;
-	ndPolygonMeshDesc data(*this, false);
+	ndPolygonMeshDesc data(this, false);
 	ndShapeStaticMesh* const polysoup = m_instance1.GetShape()->GetAsShapeStaticMesh();
 	ndAssert(polysoup);
 	polysoup->GetCollidingFaces(&data);
@@ -4139,6 +4145,8 @@ ndInt32 ndContactSolver::ConvexToStaticMeshContactsDiscrete()
 		// box is far away enough that the body can move by distanceTravel
 		const ndVector distanceTravel(ndFloat32(1.0f));
 		
+		patch.m_worldMatrix = data.m_polySoupInstance->GetGlobalMatrix();
+		patch.m_worldMatrix.m_posit += m_savedOriginOffset;
 		patch.m_convexShapeInstance = data.m_convexInstance;
 		patch.m_boxP0 = (data.GetOrigin() - distanceTravel) & ndVector::m_triplexMask;
 		patch.m_boxP1 = (data.GetTarget() + distanceTravel)& ndVector::m_triplexMask;
@@ -4162,7 +4170,7 @@ ndInt32 ndContactSolver::ConvexToSaticStaticBvhContactsNodeDescrete(const ndAabb
 
 	ndShapeStatic_bvh* const polysoup = m_instance1.GetShape()->GetAsShapeStaticBVH();
 	ndAssert(polysoup);
-	ndPolygonMeshDesc data(*this, false);
+	ndPolygonMeshDesc data(this, false);
 	data.m_pointArray = polysoup->GetLocalVertexPool();
 	polysoup->ForThisSector(node, data, data.m_boxDistanceTravelInMeshSpace, data.m_maxT, polysoup->GetPolygon, &data);
 
@@ -4378,8 +4386,10 @@ ndInt32 ndContactSolver::ConvexContactsContinue()
 {
 	const ndVector origin0(m_instance0.m_globalMatrix.m_posit);
 	const ndVector origin1(m_instance1.m_globalMatrix.m_posit);
+	m_savedOriginOffset = origin0 & ndVector::m_triplexMask;
+
 	m_instance0.m_globalMatrix.m_posit = ndVector::m_wOne;
-	m_instance1.m_globalMatrix.m_posit -= (origin0 & ndVector::m_triplexMask);
+	m_instance1.m_globalMatrix.m_posit -= m_savedOriginOffset;
 
 	// handle rare case of two shapes located exactly at the same origin
 	const ndVector error(m_instance1.m_globalMatrix.m_posit - m_instance0.m_globalMatrix.m_posit);

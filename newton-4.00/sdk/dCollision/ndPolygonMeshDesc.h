@@ -82,7 +82,7 @@ class ndPolygonMeshDesc: public ndFastAabb
 	};
 
 	// colliding box in polygonSoup local space
-	D_COLLISION_API ndPolygonMeshDesc(ndContactSolver& proxy, bool ccdMode);
+	D_COLLISION_API ndPolygonMeshDesc(ndContactSolver* const proxy, bool ccdMode);
 	D_COLLISION_API ~ndPolygonMeshDesc();
 
 	D_COLLISION_API void SortFaceArray();
@@ -99,6 +99,7 @@ class ndPolygonMeshDesc: public ndFastAabb
 	ndVector m_boxDistanceTravelInMeshSpace;
 	ndShapeInstance* m_convexInstance;
 	ndShapeInstance* m_polySoupInstance;
+	ndContactSolver* m_contactSolver;
 	ndVector* m_pointArray;
 
 	// private data;

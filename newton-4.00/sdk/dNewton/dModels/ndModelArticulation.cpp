@@ -162,7 +162,7 @@ void ndModelArticulation::ClearMemory()
 		}
 	}
 
-	for (ndList<ndNode>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
+	for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
 	{
 		node->GetInfo().m_joint->ClearMemory();
 	}
@@ -198,7 +198,7 @@ ndModelArticulation::ndNode* ndModelArticulation::AddLimb(ndNode* const parent, 
 	return new ndNode(body, joint, parent);
 }
 
-const ndList<ndModelArticulation::ndNode>& ndModelArticulation::GetCloseLoops() const
+const ndList<ndModelArticulation::ndNode, ndContainersFreeListAlloc<ndModelArticulation::ndNode>>& ndModelArticulation::GetCloseLoops() const
 {
 	return m_closeLoops;
 }
@@ -236,7 +236,7 @@ void ndModelArticulation::AddCloseLoop(const ndSharedPtr<ndJointBilateralConstra
 	ndAssert(Check(joint->GetBody0()) || Check(joint->GetBody1()));
 	#endif
 
-	for (ndList<ndNode>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
+	for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
 	{
 		if (*node->GetInfo().m_joint == *joint)
 		{
@@ -254,7 +254,7 @@ void ndModelArticulation::AddCloseLoop(const ndSharedPtr<ndJointBilateralConstra
 	snprintf(loopName, sizeof(loopName), "%s", name);
 
 	ndSharedPtr<ndBody> body;
-	ndList<ndNode>::ndNode* const node = m_closeLoops.Append(ndNode(body, joint, nullptr));
+	ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* const node = m_closeLoops.Append(ndNode(body, joint, nullptr));
 	node->GetInfo().m_name = loopName;
 }
 
@@ -310,7 +310,7 @@ ndModelArticulation::ndNode* ndModelArticulation::FindLoopByName(const char* con
 {
 	if (m_rootNode)
 	{
-		for (ndList<ndNode>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
+		for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
 		{
 			if (strcmp(node->GetInfo().m_name.GetStr(), name) == 0)
 			{
@@ -326,7 +326,7 @@ ndModelArticulation::ndNode* ndModelArticulation::FindLoopByJoint(const ndJointB
 {
 	if (m_rootNode)
 	{
-		for (ndList<ndNode>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
+		for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
 		{
 			if (*node->GetInfo().m_joint == joint)
 			{
@@ -517,20 +517,19 @@ void ndModelArticulation::OnAddWorld()
 		}
 	}
 	
-	for (ndList<ndNode>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
+	for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
 	{
 		m_world->AddJoint(node->GetInfo().m_joint);
 	}
 }
 
-//void ndModelArticulation::RemoveBodiesAndJointsFromWorld____()
 void ndModelArticulation::OnRemoveFromWorld()
 {
 	ndAssert(m_world);
 	ndFixSizeArray<ndNode*, 256> stack;
 	if (m_rootNode)
 	{
-		for (ndList<ndNode>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
+		for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
 		{
 			if (node->GetInfo().m_joint->m_worldNode)
 			{

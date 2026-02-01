@@ -141,7 +141,8 @@ const ndRenderSceneNodeInstance* ndRenderSceneNode::GetAsInstance() const
 
 ndRenderSceneNode* ndRenderSceneNode::GetParent() const
 {
-	return m_parent;
+	//const ndRenderSceneNode* ccc = *m_parent;
+	return (ndRenderSceneNode*) *m_parent;
 }
 
 ndRenderSceneNode* ndRenderSceneNode::GetRoot() const
@@ -149,7 +150,7 @@ ndRenderSceneNode* ndRenderSceneNode::GetRoot() const
 	const ndRenderSceneNode* self = this;
 	while (self->m_parent)
 	{
-		self = self->m_parent;
+		self = *self->m_parent;
 	}
 	return (ndRenderSceneNode*)self;
 }
@@ -192,7 +193,7 @@ ndRenderSceneNode* ndRenderSceneNode::IteratorNext()
 			}
 			return *next->GetInfo();
 		}
-		return m_parent;
+		return *m_parent;
 	}
 	return nullptr;
 }
@@ -210,7 +211,7 @@ const ndRenderSceneNode* ndRenderSceneNode::IteratorNext() const
 			}
 			return *next->GetInfo();
 		}
-		return m_parent;
+		return *m_parent;
 	}
 	return nullptr;
 }

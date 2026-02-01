@@ -95,6 +95,10 @@ class ndContactSolver: public ndDownHeap<ndMinkFace *, ndFloat32>
 		return m_instance1;
 	}
 
+	const ndVector& GetWorldOffset() const
+	{
+		return m_savedOriginOffset;
+	}
 
 	private:
 	ndContactSolver(ndContact* const contact, ndContactNotify* const notification, ndFloat32 timestep, ndInt32 threadId);
@@ -173,6 +177,10 @@ class ndContactSolver: public ndDownHeap<ndMinkFace *, ndFloat32>
 	ndVector m_closestPoint0;
 	ndVector m_closestPoint1;
 	ndVector m_separatingVector;
+
+	// for debugging
+	ndVector m_savedOriginOffset;
+
 	union
 	{
 		ndVector m_buffer[2 * D_CONVEX_MINK_MAX_POINTS];

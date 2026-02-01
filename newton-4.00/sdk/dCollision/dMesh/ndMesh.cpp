@@ -31,11 +31,11 @@ ndMesh::ndMesh()
 	:ndClassAlloc()
 	,m_matrix(ndGetIdentityMatrix())
 	,m_name()
-	,m_mesh()
 	,m_scale()
 	,m_posit()
 	,m_rotation()
 	,m_parent(nullptr)
+	,m_mesh(nullptr)
 	,m_selfChildNode(nullptr)
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
@@ -52,11 +52,11 @@ ndMesh::ndMesh(const ndShapeInstance&)
 	:ndClassAlloc()
 	,m_matrix(ndGetIdentityMatrix())
 	,m_name()
-	,m_mesh()
 	,m_scale()
 	,m_posit()
 	,m_rotation()
 	,m_parent(nullptr)
+	,m_mesh(nullptr)
 	,m_selfChildNode(nullptr)
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
@@ -90,12 +90,12 @@ void ndMesh::RemoveChild(const ndSharedPtr<ndMesh>& child)
 
 ndMesh* ndMesh::GetParent()
 {
-	return m_parent;
+	return *m_parent;
 }
 
 const ndMesh* ndMesh::GetParent() const
 {
-	return m_parent;
+	return *m_parent;
 }
 
 ndList<ndSharedPtr<ndMesh>>& ndMesh::GetChildren()
@@ -259,7 +259,7 @@ ndMesh* ndMesh::IteratorNext(const ndMesh* const root)
 			}
 			return *next->GetInfo();
 		}
-		return m_parent;
+		return *m_parent;
 	}
 
 	return nullptr;
@@ -268,7 +268,7 @@ ndMesh* ndMesh::IteratorNext(const ndMesh* const root)
 ndMatrix ndMesh::CalculateGlobalMatrix(ndMesh* const parent) const
 {
 	ndMatrix matrix(ndGetIdentityMatrix());
-	for (const ndMesh* ptr = this; ptr != parent; ptr = ptr->m_parent)
+	for (const ndMesh* ptr = this; ptr != parent; ptr = *ptr->m_parent)
 	{
 		matrix = matrix * ptr->m_matrix;
 	}

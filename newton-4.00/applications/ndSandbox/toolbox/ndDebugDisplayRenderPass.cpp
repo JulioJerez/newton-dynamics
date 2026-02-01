@@ -30,7 +30,7 @@ ndDebugDisplayRenderPass::~ndDebugDisplayRenderPass()
 
 void ndDebugDisplayRenderPass::SetDebugDisplayOptions()
 {
-	ndDebugLineOptions options;
+	ndDebugOptions options;
 	options.m_showBodyAABB = m_manager->m_showAABB;
 	options.m_showBroadPhase = m_manager->m_showScene;
 	options.m_showBodyFrame = m_manager->m_showBodyFrame;
@@ -39,6 +39,8 @@ void ndDebugDisplayRenderPass::SetDebugDisplayOptions()
 	options.m_showContactsForce = m_manager->m_showNormalForces;
 	options.m_showJointDebugInfo = m_manager->m_showJointDebugInfo;
 	options.m_showModelsDebugInfo = m_manager->m_showModelsDebugInfo;
+	options.m_showStaticMeshCollidingFaces = m_manager->m_showStaticMeshCollidingFaces;
+	
 	ndRenderPassDebug::SetDebugDisplayOptions(options);
 
 	m_showCollisionMeshMode = m_manager->m_showCollisionMeshMode;

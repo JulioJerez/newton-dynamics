@@ -235,7 +235,7 @@ ndBodyKinematic* ndBodyKinematic::GetAsBodyKinematic()
 
 ndScene* ndBodyKinematic::GetScene() const
 {
-	return m_scene;
+	return (ndScene*)*m_scene;
 }
 
 void ndBodyKinematic::SetSceneNodes(ndScene* const scene, ndBodyListView::ndNode* const node)
@@ -359,7 +359,7 @@ void ndBodyKinematic::SetAutoSleep(bool state)
 
 ndModel* ndBodyKinematic::GetModel() const
 {
-	return m_model;
+	return (ndModel*) *m_model;
 }
 
 void ndBodyKinematic::SetModel(ndModel* const model)
@@ -369,7 +369,7 @@ void ndBodyKinematic::SetModel(ndModel* const model)
 
 ndSkeletonContainer* ndBodyKinematic::GetSkeleton() const
 {
-	return m_skeletonContainer;
+	return (ndSkeletonContainer*)*m_skeletonContainer;
 }
 
 void ndBodyKinematic::SetSkeleton(ndSkeletonContainer* const skeleton)

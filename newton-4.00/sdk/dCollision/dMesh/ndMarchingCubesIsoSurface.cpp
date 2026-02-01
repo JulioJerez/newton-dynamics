@@ -438,10 +438,10 @@ void ndMarchingCubeIsoSurface::GetFacesPatch(ndPatchMesh& patch) const
 		return;
 	}
 
-	const ndVector p0(PositionToGrid(boxP0));
-	const ndVector p1(PositionToGrid(boxP1));
-	const ndVector sizeInGrids(p1 - p0);
-	ndAssert(sizeInGrids.m_w == p0.m_w);
+	const ndVector gridP0(PositionToGrid(boxP0));
+	const ndVector gridP1(PositionToGrid(boxP1));
+	const ndVector sizeInGrids(gridP1 - gridP0);
+	ndAssert(sizeInGrids.m_w == ndFloat32 (0.0f));
 
 	if ((sizeInGrids.m_x == ndFloat32 (0.0f)) || (sizeInGrids.m_y == ndFloat32(0.0f)) || (sizeInGrids.m_z == ndFloat32(0.0f)))
 	{
@@ -562,6 +562,9 @@ void ndMarchingCubeIsoSurface::GetFacesPatch(ndPatchMesh& patch) const
 
 	const ndInt32 count_x = ndInt32(sizeInGrids.m_x);
 	const ndInt32 count_y = ndInt32(sizeInGrids.m_y);
+
+static int xxxx;
+	ndFloat32 fy = boxP0.m_y;
 	for (ndInt32 y = 1; y < count_y; ++y)
 	{
 		layerIndex = 1 - layerIndex;
@@ -575,92 +578,116 @@ void ndMarchingCubeIsoSurface::GetFacesPatch(ndPatchMesh& patch) const
 		const ndFixSizeArray<ndReal, 1024>& density0 = layerIndex ? layer0 : layer1;
 		const ndFixSizeArray<ndReal, 1024>& density1 = layerIndex ? layer1 : layer0;
 
-		////ndInt32 stride = 0;
-		//ndFloat32 grid_Z0 = ndFloat32(0.0f);
-		//ndFloat32 grid_Z1 = ndFloat32(1.0f);
-		for (ndInt32 z = 0; z < count_z - 1; ++z)
+		ndInt32 row = 0;
+		ndFloat32 fz = boxP0.m_z;
+		for (ndInt32 z = 0; z < count_z; ++z)
 		{
-			for (ndInt32 x = 0; x < count_x - 1; ++x)
+			ndFloat32 fx = boxP0.m_x;
+			for (ndInt32 x = 0; x < count_x; ++x)
 			{
 				ndIsoCell cell;
-		//		const ndInt32 i0 = stride + x;
-		//		const ndInt32 i1 = stride + x + 1;
-		//		const ndInt32 i2 = boxSizeInGrids.m_ix + stride + x + 1;
-		//		const ndInt32 i3 = boxSizeInGrids.m_ix + stride + x;
-		//
-		//		ndFloat32 isoValues[8];
-		//		isoValues[0] = densityWindow0[i0];
-		//		isoValues[1] = densityWindow0[i1];
-		//		isoValues[2] = densityWindow0[i2];
-		//		isoValues[3] = densityWindow0[i3];
-		//		isoValues[4] = densityWindow1[i0];
-		//		isoValues[5] = densityWindow1[i1];
-		//		isoValues[6] = densityWindow1[i2];
-		//		isoValues[7] = densityWindow1[i3];
-		//
-		//		ndInt32 tableIndex = 0;
-		//		for (ndInt32 i = 0; i < 8; ++i)
-		//		{
-		//			tableIndex |= (isoValues[i] <= 0.0f) << i;
-		//		}
-		//
-		//		const ndInt32 edgeStart = m_edgeScan[tableIndex];
-		//		const ndInt32 edgeCount = m_edgeScan[tableIndex + 1] - edgeStart;
-		//		if (edgeCount)
-		//		{
-		//			cell.m_isoValues[0] = ndVector(ndFloat32(x + 0), grid_y0, grid_Z0, isoValues[0]);
-		//			cell.m_isoValues[1] = ndVector(ndFloat32(x + 1), grid_y0, grid_Z0, isoValues[1]);
-		//			cell.m_isoValues[2] = ndVector(ndFloat32(x + 1), grid_y0, grid_Z1, isoValues[2]);
-		//			cell.m_isoValues[3] = ndVector(ndFloat32(x + 0), grid_y0, grid_Z1, isoValues[3]);
-		//			cell.m_isoValues[4] = ndVector(ndFloat32(x + 0), grid_y1, grid_Z0, isoValues[4]);
-		//			cell.m_isoValues[5] = ndVector(ndFloat32(x + 1), grid_y1, grid_Z0, isoValues[5]);
-		//			cell.m_isoValues[6] = ndVector(ndFloat32(x + 1), grid_y1, grid_Z1, isoValues[6]);
-		//			cell.m_isoValues[7] = ndVector(ndFloat32(x + 0), grid_y1, grid_Z1, isoValues[7]);
-		//
-		//			ndVector vertlist[12];
-		//			for (ndInt32 i = 0; i < edgeCount; ++i)
-		//			{
-		//				const ndEdge& edge = m_edges[edgeStart + i];
-		//				const ndInt32 midPoint = edge.m_midPoint;
-		//					
-		//				const ndVector p0(cell.m_isoValues[edge.m_p0]);
-		//				const ndVector p1(cell.m_isoValues[edge.m_p1]);
-		//				ndAssert((p1.m_w * p0.m_w) <= ndFloat32(0.0f));
-		//				const ndVector p1p0(p1 - p0);
-		//				ndFloat32 param = p0.m_w / (p1.m_w - p0.m_w);
-		//				const ndVector p3 (ndVector::m_triplexMask & (p0 - p1p0.Scale(param)));
-		//				vertlist[midPoint] = p3;
-		//			}
-		//
-		//			const ndInt32 faceStart = m_facesScan[tableIndex];
-		//			const ndInt32 triangleStart = m_facesScan[tableIndex];
-		//			const ndInt32 triangleCount = m_facesScan[tableIndex + 1] - triangleStart;
-		//			for (ndInt32 i = 0; i < triangleCount; ++i)
-		//			{
-		//				const ndInt32 j0 = m_faces[faceStart + i][0];
-		//				const ndInt32 j1 = m_faces[faceStart + i][1];
-		//				const ndInt32 j2 = m_faces[faceStart + i][2];
-		//
-		//				const ndVector& p0 = vertlist[j0];
-		//				const ndVector& p1 = vertlist[j1];
-		//				const ndVector& p2 = vertlist[j2];
-		//				const ndVector p10(p1 - p0);
-		//				const ndVector p20(p2 - p0);
-		//				const ndVector area(p10.CrossProduct(p20));
-		//				ndFloat32 areaMag2 = area.DotProduct(area & ndVector::m_triplexMask).GetScalar();
-		//				if (areaMag2 > ndFloat32(1.0e-6f))
-		//				{
-		//					m_meshPoints.PushBack(p0);
-		//					m_meshPoints.PushBack(p1);
-		//					m_meshPoints.PushBack(p2);
-		//				}
-		//			}
-		//		}
+				const ndInt32 i0 = row + x;
+				const ndInt32 i1 = row + x + 1;
+				const ndInt32 i2 = row + (count_x + 1) + x + 1;
+				const ndInt32 i3 = row + (count_x + 1) + x;
+		
+				ndFloat32 isoValues[8];
+				isoValues[0] = density0[i0];
+				isoValues[1] = density0[i1];
+				isoValues[2] = density0[i2];
+				isoValues[3] = density0[i3];
+				isoValues[4] = density1[i0];
+				isoValues[5] = density1[i1];
+				isoValues[6] = density1[i2];
+				isoValues[7] = density1[i3];
+		
+				ndInt32 tableIndex = 0;
+				for (ndInt32 i = 0; i < 8; ++i)
+				{
+					tableIndex |= (isoValues[i] <= 0.0f) << i;
+				}
+
+				if ((tableIndex != 0) && (tableIndex != 255))
+				{
+					xxxx++;
+					const ndInt32 edgeStart = m_edgeScan[tableIndex];
+					const ndInt32 edgeCount = m_edgeScan[tableIndex + 1] - edgeStart;
+					ndAssert(edgeCount);
+
+					//cell.m_isoValues[0] = ndVector(ndFloat32(x + 0), grid_y0, grid_Z0, isoValues[0]);
+					//cell.m_isoValues[1] = ndVector(ndFloat32(x + 1), grid_y0, grid_Z0, isoValues[1]);
+					//cell.m_isoValues[2] = ndVector(ndFloat32(x + 1), grid_y0, grid_Z1, isoValues[2]);
+					//cell.m_isoValues[3] = ndVector(ndFloat32(x + 0), grid_y0, grid_Z1, isoValues[3]);
+					//cell.m_isoValues[4] = ndVector(ndFloat32(x + 0), grid_y1, grid_Z0, isoValues[4]);
+					//cell.m_isoValues[5] = ndVector(ndFloat32(x + 1), grid_y1, grid_Z0, isoValues[5]);
+					//cell.m_isoValues[6] = ndVector(ndFloat32(x + 1), grid_y1, grid_Z1, isoValues[6]);
+					//cell.m_isoValues[7] = ndVector(ndFloat32(x + 0), grid_y1, grid_Z1, isoValues[7]);
+
+					cell.m_isoValues[0] = ndVector(fx,                  fy,                  fz,                  isoValues[0]);
+					cell.m_isoValues[1] = ndVector(fx + m_gridSize.m_x, fy,                  fz,	              isoValues[1]);
+					cell.m_isoValues[2] = ndVector(fx + m_gridSize.m_x, fy,                  fz + m_gridSize.m_z, isoValues[2]);
+					cell.m_isoValues[3] = ndVector(fx,                  fy,                  fz + m_gridSize.m_z, isoValues[3]);
+
+					cell.m_isoValues[4] = ndVector(fx,                  fy + m_gridSize.m_y, fz,                  isoValues[4]);
+					cell.m_isoValues[5] = ndVector(fx + m_gridSize.m_x, fy + m_gridSize.m_y, fz,                  isoValues[5]);
+					cell.m_isoValues[6] = ndVector(fx + m_gridSize.m_x, fy + m_gridSize.m_y, fz + m_gridSize.m_z, isoValues[6]);
+					cell.m_isoValues[7] = ndVector(fx,                  fy + m_gridSize.m_y, fz + m_gridSize.m_z, isoValues[7]);
+					
+					ndVector vertlist[12];
+					for (ndInt32 i = 0; i < edgeCount; ++i)
+					{
+						const ndEdge& edge = m_edges[edgeStart + i];
+						const ndInt32 midPoint = edge.m_midPoint;
+							
+						const ndVector p0(cell.m_isoValues[edge.m_p0]);
+						const ndVector p1(cell.m_isoValues[edge.m_p1]);
+						ndAssert((p1.m_w * p0.m_w) <= ndFloat32(0.0f));
+						const ndVector p1p0(p1 - p0);
+						ndFloat32 param = p0.m_w / (p1.m_w - p0.m_w);
+						const ndVector p3 (ndVector::m_triplexMask & (p0 - p1p0.Scale(param)));
+						vertlist[midPoint] = p3;
+					}
+					
+					const ndInt32 faceStart = m_facesScan[tableIndex];
+					const ndInt32 triangleStart = m_facesScan[tableIndex];
+					const ndInt32 triangleCount = m_facesScan[tableIndex + 1] - triangleStart;
+					for (ndInt32 i = 0; i < triangleCount; ++i)
+					{
+						const ndInt32 j0 = m_faces[faceStart + i][0];
+						const ndInt32 j1 = m_faces[faceStart + i][1];
+						const ndInt32 j2 = m_faces[faceStart + i][2];
+					
+						const ndVector& p0 = vertlist[j0];
+						const ndVector& p1 = vertlist[j1];
+						const ndVector& p2 = vertlist[j2];
+						const ndVector p10(p1 - p0);
+						const ndVector p20(p2 - p0);
+						const ndVector normal(p10.CrossProduct(p20) & ndVector::m_triplexMask);
+						ndFloat32 areaMag2 = normal.DotProduct(normal).GetScalar();
+						if (areaMag2 > ndFloat32(1.0e-6f))
+						{
+							const ndInt32 triangleIndex = patch.m_indexArray.GetCount();\
+
+							patch.m_faceArray.PushBack(3);
+							patch.m_faceMaterialArray.PushBack(0);
+
+							patch.m_pointArray.PushBack(p0);
+							patch.m_pointArray.PushBack(p1);
+							patch.m_pointArray.PushBack(p2);
+							patch.m_normalArray.PushBack(normal.Normalize());
+							patch.m_indexArray.PushBack(triangleIndex + 0);
+							patch.m_indexArray.PushBack(triangleIndex + 1);
+							patch.m_indexArray.PushBack(triangleIndex + 2);
+						}
+					}
+				}
+				fx += m_gridSize.m_x;
 			}
-		//	grid_Z0 += ndFloat32(1.0f);
-		//	grid_Z1 += ndFloat32(1.0f);
-		//	stride += boxSizeInGrids.m_ix;
+			
+			row += count_x + 1;
+			fz += m_gridSize.m_z;
 		}
+		fy += m_gridSize.m_y;
 	}
 }
 

@@ -66,7 +66,7 @@ class ndContactNotify: public ndClassAlloc
 	ndMaterial m_default;
 
 	private:
-	ndScene* m_scene;
+	ndWeakPtr<ndScene> m_scene;
 
 	friend class ndScene;
 	friend class ndContactSolver;

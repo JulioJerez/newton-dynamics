@@ -49,12 +49,12 @@ ndBodyNotify* ndBodyNotify::Clone() const
 
 ndBody* ndBodyNotify::GetBody()
 { 
-	return m_body; 
+	return *m_body; 
 }
 
 const ndBody* ndBodyNotify::GetBody() const
 { 
-	return m_body; 
+	return *m_body; 
 }
 
 ndBodyNotify* ndBodyNotify::GetAsBodyNotify()
