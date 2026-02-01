@@ -77,7 +77,7 @@ class ndModelArticulation: public ndModel
 	D_NEWTON_API ndNode* AddRootBody(const ndSharedPtr<ndBody>& rootBody);
 	D_NEWTON_API ndNode* AddLimb(ndNode* const parent, const ndSharedPtr<ndBody>& body, const ndSharedPtr<ndJointBilateralConstraint>& joint);
 
-	D_NEWTON_API const ndList<ndModelArticulation::ndNode>& GetCloseLoops() const;
+	D_NEWTON_API const ndList<ndModelArticulation::ndNode, ndContainersFreeListAlloc<ndNode>>& GetCloseLoops() const;
 	D_NEWTON_API void AddCloseLoop(const ndSharedPtr<ndJointBilateralConstraint>& joint, const char* const name = nullptr);
 
 	D_NEWTON_API virtual void SetSleep(ndFloat32 speed, ndFloat32 angularSpeed, ndFloat32 accel, ndFloat32 alpha) const override;
@@ -103,7 +103,7 @@ class ndModelArticulation: public ndModel
 	
 	ndString m_name;
 	ndNode* m_rootNode;
-	ndList<ndNode> m_closeLoops;
+	ndList<ndNode, ndContainersFreeListAlloc<ndNode>> m_closeLoops;
 
 	friend class ndUrdfFile;
 } D_GCC_NEWTON_CLASS_ALIGN_32;

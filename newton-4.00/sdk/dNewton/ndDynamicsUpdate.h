@@ -204,10 +204,10 @@ inline ndArray<ndInt32>& ndDynamicsUpdate::GetJointForceIndexBuffer()
 inline ndBodyKinematic* ndDynamicsUpdate::FindRootAndSplit(ndBodyKinematic* const body)
 {
 	ndBodyKinematic* node = body;
-	while (node->m_islandParent != node)
+	while (*node->m_islandParent != node)
 	{
 		ndBodyKinematic* const prev = node;
-		node = node->m_islandParent;
+		node = *node->m_islandParent;
 		prev->m_islandParent = node->m_islandParent;
 	}
 	return node;

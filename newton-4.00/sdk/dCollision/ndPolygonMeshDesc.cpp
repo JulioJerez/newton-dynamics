@@ -43,7 +43,7 @@ ndPolygonMeshDesc::ndPolygonMeshDesc(ndContactSolver& proxy, bool ccdMode)
 	,m_doContinueCollisionTest(ccdMode)
 {
 	ndAssert(proxy.m_notification->m_scene);
-	ndScene* const scene = proxy.m_notification->m_scene;
+	ndScene* const scene = *proxy.m_notification->m_scene;
 	m_staticMeshQuery = &scene->m_staticMeshQuery[proxy.m_threadId];
 	m_proceduralStaticMeshFaceQuery = &scene->m_proceduralStaticMeshQuery[proxy.m_threadId];
 	Init();

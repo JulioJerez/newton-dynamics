@@ -211,12 +211,12 @@ class ndBodyKinematic : public ndBody
 	ndJointList m_jointList;
 	ndContactMap m_contactList;
 	mutable ndSpinLock m_lock;
-	ndScene* m_scene;
-	ndModel* m_model;
-	ndBodyKinematic* m_islandParent;
-	ndBodyListView::ndNode* m_sceneNode;
-	ndSkeletonContainer* m_skeletonContainer;
-	ndSpecialList<ndBodyKinematic>::ndNode* m_spetialUpdateNode;
+	ndWeakPtr<ndScene> m_scene;
+	ndWeakPtr<ndModel> m_model;
+	ndWeakPtr<ndBodyKinematic> m_islandParent;
+	ndWeakPtr<ndBodyListView::ndNode> m_sceneNode;
+	ndWeakPtr<ndSkeletonContainer> m_skeletonContainer;
+	ndWeakPtr<ndSpecialList<ndBodyKinematic>::ndNode> m_spetialUpdateNode;
 
 	ndFloat32 m_maxAngleStep;
 	ndFloat32 m_maxLinearStep;

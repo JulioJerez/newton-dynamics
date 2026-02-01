@@ -360,12 +360,12 @@ bool ndScene::RemoveBody(const ndSharedPtr<ndBody>& body)
 			m_contactArray.DetachContact(contact);
 		}
 
-		ndBodyListView::ndNode* const sceneNode = kinematicBody->m_sceneNode;
+		ndBodyListView::ndNode* const sceneNode = *kinematicBody->m_sceneNode;
 		if (kinematicBody->m_scene && sceneNode)
 		{
 			if (kinematicBody->GetAsBodyKinematicSpecial())
 			{
-				m_specialUpdateList.Remove(kinematicBody->m_spetialUpdateNode);
+				m_specialUpdateList.Remove(*kinematicBody->m_spetialUpdateNode);
 				kinematicBody->m_spetialUpdateNode = nullptr;
 			}
 

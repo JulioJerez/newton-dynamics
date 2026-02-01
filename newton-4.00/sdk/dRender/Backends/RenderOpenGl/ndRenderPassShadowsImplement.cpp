@@ -203,15 +203,15 @@ void ndRenderPassShadowsImplement::RenderScene(const ndRenderSceneCamera* const 
 	ndRender* const owner = m_context->m_owner;
 	auto SetCascadesLayers = [this, &owner, camera, &cameraTestPoint, &cameraProjection, &tileMatrix]()
 	{
-		const ndVector zBiasUnits(ndFloat32(1024.0f * 64.0f), ndFloat32(1024.0f * 64.0f), ndFloat32(1024.0f * 40.0f), ndFloat32(1024.0f * 16.0f));
+		//const ndVector zBiasUnits(ndFloat32(1024.0f * 64.0f), ndFloat32(1024.0f * 64.0f), ndFloat32(1024.0f * 40.0f), ndFloat32(1024.0f * 16.0f));
 		for (ndInt32 i = 0; i < 4; i++)
 		{
 			const ndMatrix lightSpaceMatrix(CalculateLightSpaceMatrix(camera, i));
 			const ndVector viewPortTile(m_viewPortTiles[i]);
 			cameraTestPoint.m_x = m_farFrustumPlanes[i];
 			const ndVector cameraPoint(cameraProjection.TransformVector1x4(cameraTestPoint));
-			//m_cameraSpaceSplits[i] = GLfloat(ndFloat32(0.5f) * cameraPoint.m_z / cameraPoint.m_w + ndFloat32(0.5f));
-			m_cameraSpaceSplits[i] = GLfloat(cameraPoint.m_z / cameraPoint.m_w);
+			m_cameraSpaceSplits[i] = GLfloat(ndFloat32(0.5f) * cameraPoint.m_z / cameraPoint.m_w + ndFloat32(0.5f));
+			//m_cameraSpaceSplits[i] = GLfloat(cameraPoint.m_z / cameraPoint.m_w);
 
 			tileMatrix[3][0] = viewPortTile.m_x;
 			tileMatrix[3][1] = viewPortTile.m_y;
@@ -229,14 +229,6 @@ void ndRenderPassShadowsImplement::RenderScene(const ndRenderSceneCamera* const 
 			const ndVector viewPortTile(m_viewPortTiles[i]);
 			ndInt32 vp_x = ndInt32(viewPortTile.m_x * ndFloat32(2 * m_width));
 			ndInt32 vp_y = ndInt32(viewPortTile.m_y * ndFloat32(2 * m_height));
-		
-			//cameraTestPoint.m_x = m_farFrustumPlanes[i];
-			//const ndVector cameraPoint(cameraProjection.TransformVector1x4(cameraTestPoint));
-			//m_cameraSpaceSplits[i] = GLfloat(ndFloat32(0.5f) * cameraPoint.m_z / cameraPoint.m_w + ndFloat32(0.5f));
-			//
-			//tileMatrix[3][0] = viewPortTile.m_x;
-			//tileMatrix[3][1] = viewPortTile.m_y;
-			//m_lighProjectionMatrix[i] = lightSpaceMatrix * m_lightProjectToTextureSpace * tileMatrix;
 		
 			glViewport(vp_x, vp_y, m_width, m_height);
 			glPolygonOffset(GLfloat(1.0f), GLfloat(zBiasUnits[i]));

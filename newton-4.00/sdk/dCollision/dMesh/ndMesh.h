@@ -124,11 +124,11 @@ class ndMesh : public ndClassAlloc
 	ndMatrix CalculateLocalMatrix(ndVector& size) const;
 
 	ndString m_name;
-	ndSharedPtr<ndMeshEffect> m_mesh;
 	ndCurve m_scale;
 	ndCurve m_posit;
 	ndCurve m_rotation;
-	ndMesh* m_parent;
+	ndWeakPtr<ndMesh> m_parent;
+	ndSharedPtr<ndMeshEffect> m_mesh;
 	ndList<ndSharedPtr<ndMesh>> m_children;
 	ndList<ndSharedPtr<ndMesh>>::ndNode* m_selfChildNode;
 	ndVector m_boneTarget;
