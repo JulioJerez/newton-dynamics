@@ -17,7 +17,6 @@
 #include "ndDemoEntityManager.h"
 #include "ndHeightFieldPrimitive.h"
 
-
 void ndBasicUserHeightfieldCollision(ndDemoEntityManager* const scene)
 {
 	//ndSharedPtr<ndBody> mapBody(BuildFlatPlane(scene, ndGetIdentityMatrix(), "marblecheckboard.png", true));
