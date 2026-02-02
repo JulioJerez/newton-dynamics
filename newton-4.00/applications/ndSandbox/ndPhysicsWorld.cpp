@@ -299,7 +299,14 @@ void ndPhysicsWorld::DefferedRemoveBody(ndSharedPtr<ndBody> body)
 					ndSharedPtr<ndBody> bodyNode(stack.Pop());
 					if (m_deadBodies.Insert(0, bodyNode))
 					{
-						const ndBodyKinematic* const pivotBody = bodyNode->GetAsBodyKinematic();
+						ndBodyKinematic* const pivotBody = bodyNode->GetAsBodyKinematic();
+						ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*body->GetNotifyCallback();
+						ndSharedPtr<ndRenderSceneNode> visualEntity(notify->GetUserData());
+						if (*visualEntity)
+						{
+							DefferedRemoveSceneNode(visualEntity);
+						}
+
 						const ndBodyKinematic::ndJointList& joints = pivotBody->GetJointList();
 						for (ndBodyKinematic::ndJointList::ndNode* jointNode = joints.GetFirst(); jointNode; jointNode = jointNode->GetNext())
 						{
