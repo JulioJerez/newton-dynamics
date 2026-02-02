@@ -934,11 +934,11 @@ ndInt32 ndShapeConvexPolygon::CalculatePlaneIntersection(const ndVector& normalI
 			return vertexCount;
 		}
 		// this should not happens
-		ndAssert(0);
-		//return 0;
+		//ndAssert(0);
+		ndTrace (("TO DO, %s this should not happens\n", __FUNCTION__))
 	}
 	// this should not happens
-	ndAssert(0);
+	ndTrace(("TO DO, %s this should not happens\n", __FUNCTION__));
 	return 0;
 #endif
 }

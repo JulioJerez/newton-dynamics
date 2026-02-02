@@ -14,6 +14,7 @@
 #include "ndDemoEntityNotify.h"
 #include "ndDemoEntityManager.h"
 #include "ndHeightFieldPrimitive.h"
+#include "ndDebugDisplayRenderPass.h"
 
 //#define D_TERRAIN__WIDTH			1024
 //#define D_TERRAIN_HEIGHT			1024
@@ -21,7 +22,6 @@
 //#define D_TERRAIN_HEIGHT			512
 #define D_TERRAIN__WIDTH			256
 #define D_TERRAIN_HEIGHT			256
-
 
 #define D_TERRAIN_NOISE_OCTAVES		8
 #define D_TERRAIN_NOISE_PERSISTANCE	0.5f
@@ -37,11 +37,12 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 	public:
 	D_CLASS_REFLECTION(ndProcedural2dTerrainShape, ndShapeStaticProceduralMesh)
 
-	ndProcedural2dTerrainShape()
+	ndProcedural2dTerrainShape(ndDemoEntityManager* const scene)
 		:ndShapeStaticProceduralMesh()
 		,m_padding(ndVector::m_triplexMask & ndVector(0.1f))
 		,m_gridSize(ndVector::m_triplexMask & ndVector (D_TERRAIN_GRID_SIZE))
 		,m_invGridSize(ndVector::m_triplexMask & ndVector(ndFloat32(1.0f) / D_TERRAIN_GRID_SIZE))
+		,m_owner(scene)
 	{
 		MakeNoiseHeightfield();
 
@@ -54,7 +55,7 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 		}
 
 		ndVector p0(ndFloat32 (0.0f), minY, ndFloat32(0.0f), ndFloat32(1.0f));
-		ndVector p1(ndFloat32(D_TERRAIN__WIDTH * D_TERRAIN_GRID_SIZE), maxY, ndFloat32(D_TERRAIN__WIDTH * D_TERRAIN_GRID_SIZE), ndFloat32(1.0f));
+		ndVector p1(ndFloat32((D_TERRAIN__WIDTH - 1.0f)* D_TERRAIN_GRID_SIZE), maxY, ndFloat32((D_TERRAIN__WIDTH - 1.0f) * D_TERRAIN_GRID_SIZE), ndFloat32(1.0f));
 		SetAABB(p0, p1);
 
 		// to account for rounding
@@ -154,125 +155,79 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 		}
 	}
 
-	virtual ndFloat32 RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const, ndContactPoint& contactOut) const override
+	void ShowDebugFaces(ndPatchMesh& patch) const
 	{
-		ndVector boxP0;
-		ndVector boxP1;
-		
-		// make sure p0 and p1 are in the right order
-		const ndVector q0(localP0.GetMin(localP1) - m_padding);
-		const ndVector q1(localP0.GetMax(localP1) + m_padding);
-		CalculateMinExtend3d(q0, q1, boxP0, boxP1);
-
-		// make the box a beam tha extend from 
-		// infinite positive high to -infinity high.
-		// 1.0e10 represents infinity.
-		boxP0.m_y = -ndFloat32(1.0e10f);
-		boxP1.m_y = ndFloat32(1.0e10f);
-
-		ndVector p0(localP0);
-		ndVector p1(localP1);
-		
-		// clip the line against the bounding box
-		if (ndRayBoxClip(p0, p1, boxP0, boxP1))
+		ndRenderPassDebug* const debugRenderPass = m_owner->GetDebugRenderPass();
+		const ndRenderPassDebug::ndDebugOptions& options = debugRenderPass->GetDebugDisplayOptions();
+		if (options.m_showStaticMeshCollidingFaces)
 		{
-			ndVector dp(p1 - p0);
-			ndVector normalOut(ndVector::m_zero);
-		
-			ndFloat32 scale_x = D_TERRAIN_GRID_SIZE;
-			ndFloat32 invScale_x = ndFloat32(1.0f) / D_TERRAIN_GRID_SIZE;
-			ndFloat32 scale_z = D_TERRAIN_GRID_SIZE;
-			ndFloat32 invScale_z = ndFloat32(1.0f) / D_TERRAIN_GRID_SIZE;
-			ndInt32 ix0 = ndInt32(ndFloor(p0.m_x * invScale_x));
-			ndInt32 iz0 = ndInt32(ndFloor(p0.m_z * invScale_z));
-		
-			// implement a 3ddda line algorithm 
-			ndInt32 xInc;
-			ndFloat32 tx;
-			ndFloat32 stepX;
-			if (dp.m_x > ndFloat32(0.0f))
+			if (patch.m_pointArray.GetCount() > 1)
 			{
-				xInc = 1;
-				ndFloat32 val = ndFloat32(1.0f) / dp.m_x;
-				stepX = scale_x * val;
-				tx = (scale_x * ((ndFloat32)ix0 + ndFloat32(1.0f)) - p0.m_x) * val;
-			}
-			else if (dp.m_x < ndFloat32(0.0f))
-			{
-				xInc = -1;
-				ndFloat32 val = -ndFloat32(1.0f) / dp.m_x;
-				stepX = scale_x * val;
-				tx = -(scale_x * (ndFloat32)ix0 - p0.m_x) * val;
-			}
-			else
-			{
-				xInc = 0;
-				stepX = ndFloat32(0.0f);
-				tx = ndFloat32(1.0e10f);
-			}
-		
-			ndInt32 zInc;
-			ndFloat32 tz;
-			ndFloat32 stepZ;
-			if (dp.m_z > ndFloat32(0.0f))
-			{
-				zInc = 1;
-				ndFloat32 val = ndFloat32(1.0f) / dp.m_z;
-				stepZ = scale_z * val;
-				tz = (scale_z * ((ndFloat32)iz0 + ndFloat32(1.0f)) - p0.m_z) * val;
-			}
-			else if (dp.m_z < ndFloat32(0.0f))
-			{
-				zInc = -1;
-				ndFloat32 val = -ndFloat32(1.0f) / dp.m_z;
-				stepZ = scale_z * val;
-				tz = -(scale_z * (ndFloat32)iz0 - p0.m_z) * val;
-			}
-			else
-			{
-				zInc = 0;
-				stepZ = ndFloat32(0.0f);
-				tz = ndFloat32(1.0e10f);
-			}
-		
-			ndFloat32 txAcc = tx;
-			ndFloat32 tzAcc = tz;
-			ndInt32 xIndex0 = ix0;
-			ndInt32 zIndex0 = iz0;
-			ndFastRay ray(localP0, localP1);
-		
-			// for each cell touched by the line
-			do
-			{
-				ndFloat32 t = RayCastCell(ray, xIndex0, zIndex0, normalOut, maxT);
-				if (t < maxT)
+				ndInt32 sum = 0;
+				const ndVector color(1.0f, 1.0f, 0.0f, 1.0f);
+				const ndMatrix& matrix(patch.m_worldMatrix);
+				for (ndInt32 i = 0; i < ndInt32(patch.m_faceArray.GetCount()); ++i)
 				{
-					// bail out at the first intersection and copy the data into the descriptor
-					ndAssert(normalOut.m_w == ndFloat32(0.0f));
-					contactOut.m_normal = normalOut.Normalize();
-					contactOut.m_shapeId0 = m_material[zIndex0 * D_TERRAIN__WIDTH + xIndex0];
-					contactOut.m_shapeId1 = m_material[zIndex0 * D_TERRAIN__WIDTH + xIndex0];
-		
-					return t;
+					const ndInt32 faceCount = patch.m_faceArray[i];
+					ndInt32 index = patch.m_indexArray[sum + faceCount - 1];
+					ndVector p0(matrix.TransformVector(patch.m_pointArray[index]));
+					for (ndInt32 j = 0; j < faceCount; ++j)
+					{
+						index = patch.m_indexArray[sum + j];
+						const ndVector p1(matrix.TransformVector(patch.m_pointArray[index]));
+						debugRenderPass->AddRuntimeLine(p0, p1, color);
+						p0 = p1;
+					}
+					sum += faceCount;
 				}
-		
-				if (txAcc < tzAcc)
-				{
-					tx = txAcc;
-					xIndex0 += xInc;
-					txAcc += stepX;
-				}
-				else
-				{
-					tz = tzAcc;
-					zIndex0 += zInc;
-					tzAcc += stepZ;
-				}
-			} while ((tx <= ndFloat32(1.0f)) || (tz <= ndFloat32(1.0f)));
-		}
+			}
 
-		// if no cell was hit, return a large value
-		return ndFloat32(1.2f);
+			ndVector box[12][2];
+			const ndVector p0(patch.m_worldMatrix.TransformVector(patch.m_boxP0));
+			const ndVector p1(patch.m_worldMatrix.TransformVector(patch.m_boxP1));
+
+			box[0][0] = ndVector(p0.m_x, p0.m_y, p0.m_z, ndFloat32(1.0f));
+			box[0][1] = ndVector(p1.m_x, p0.m_y, p0.m_z, ndFloat32(1.0f));
+
+			box[1][0] = ndVector(p0.m_x, p1.m_y, p0.m_z, ndFloat32(1.0f));
+			box[1][1] = ndVector(p1.m_x, p1.m_y, p0.m_z, ndFloat32(1.0f));
+
+			box[2][0] = ndVector(p0.m_x, p1.m_y, p1.m_z, ndFloat32(1.0f));
+			box[2][1] = ndVector(p1.m_x, p1.m_y, p1.m_z, ndFloat32(1.0f));
+
+			box[3][0] = ndVector(p0.m_x, p0.m_y, p1.m_z, ndFloat32(1.0f));
+			box[3][1] = ndVector(p1.m_x, p0.m_y, p1.m_z, ndFloat32(1.0f));
+
+			box[4][0] = ndVector(p0.m_x, p0.m_y, p0.m_z, ndFloat32(1.0f));
+			box[4][1] = ndVector(p0.m_x, p1.m_y, p0.m_z, ndFloat32(1.0f));
+
+			box[5][0] = ndVector(p1.m_x, p0.m_y, p0.m_z, ndFloat32(1.0f));
+			box[5][1] = ndVector(p1.m_x, p1.m_y, p0.m_z, ndFloat32(1.0f));
+
+			box[6][0] = ndVector(p0.m_x, p0.m_y, p1.m_z, ndFloat32(1.0f));
+			box[6][1] = ndVector(p0.m_x, p1.m_y, p1.m_z, ndFloat32(1.0f));
+
+			box[7][0] = ndVector(p1.m_x, p0.m_y, p1.m_z, ndFloat32(1.0f));
+			box[7][1] = ndVector(p1.m_x, p1.m_y, p1.m_z, ndFloat32(1.0f));
+
+			box[8][0] = ndVector(p0.m_x, p0.m_y, p0.m_z, ndFloat32(1.0f));
+			box[8][1] = ndVector(p0.m_x, p0.m_y, p1.m_z, ndFloat32(1.0f));
+
+			box[9][0] = ndVector(p1.m_x, p0.m_y, p0.m_z, ndFloat32(1.0f));
+			box[9][1] = ndVector(p1.m_x, p0.m_y, p1.m_z, ndFloat32(1.0f));
+
+			box[10][0] = ndVector(p0.m_x, p1.m_y, p0.m_z, ndFloat32(1.0f));
+			box[10][1] = ndVector(p0.m_x, p1.m_y, p1.m_z, ndFloat32(1.0f));
+
+			box[11][0] = ndVector(p1.m_x, p1.m_y, p0.m_z, ndFloat32(1.0f));
+			box[11][1] = ndVector(p1.m_x, p1.m_y, p1.m_z, ndFloat32(1.0f));
+
+			const ndVector boxColor(1.0f, 0.0f, 1.0f, 1.0f);
+			for (ndInt32 i = 0; i < 12; ++i)
+			{
+				debugRenderPass->AddRuntimeLine(box[i][0], box[i][1], boxColor);
+			}
+		}
 	}
 
 	void GetFacesPatch(ndPatchMesh& patch) const override
@@ -316,16 +271,18 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 			return;
 		}
 
-		// since the vertex pathc has no duplicate, 
-		// we can skip the vertex sorting
-		patch.m_vertexArrayHasDuplicated = false;
-
+		// box overlap but not faces are collected
 		// if this is a aabb test, we just add one vertex 
 		if (patch.m_queryType == ndPatchMesh::m_vertexListOnly)
 		{
 			patch.m_pointArray.PushBack(ndVector::m_zero);
+			ShowDebugFaces(patch);
 			return;
 		}
+
+		// since the vertex pathc has no duplicate, 
+		// we can skip the vertex sorting
+		patch.m_vertexArrayHasDuplicated = false;
 
 		// start building the mesh
 		// build the array of unique vertices
@@ -407,6 +364,129 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 			}
 			vertexIndex++;
 		}
+
+		ShowDebugFaces(patch);
+	}
+
+	virtual ndFloat32 RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const, ndContactPoint& contactOut) const override
+	{
+		ndVector boxP0;
+		ndVector boxP1;
+
+		// make sure p0 and p1 are in the right order
+		const ndVector q0(localP0.GetMin(localP1) - m_padding);
+		const ndVector q1(localP0.GetMax(localP1) + m_padding);
+		CalculateMinExtend3d(q0, q1, boxP0, boxP1);
+
+		// make the box a beam tha extend from 
+		// infinite positive high to -infinity high.
+		// 1.0e10 represents infinity.
+		boxP0.m_y = -ndFloat32(1.0e10f);
+		boxP1.m_y = ndFloat32(1.0e10f);
+
+		ndVector p0(localP0);
+		ndVector p1(localP1);
+
+		// clip the line against the bounding box
+		if (ndRayBoxClip(p0, p1, boxP0, boxP1))
+		{
+			ndVector dp(p1 - p0);
+			ndVector normalOut(ndVector::m_zero);
+
+			ndFloat32 scale_x = D_TERRAIN_GRID_SIZE;
+			ndFloat32 invScale_x = ndFloat32(1.0f) / D_TERRAIN_GRID_SIZE;
+			ndFloat32 scale_z = D_TERRAIN_GRID_SIZE;
+			ndFloat32 invScale_z = ndFloat32(1.0f) / D_TERRAIN_GRID_SIZE;
+			ndInt32 ix0 = ndInt32(ndFloor(p0.m_x * invScale_x));
+			ndInt32 iz0 = ndInt32(ndFloor(p0.m_z * invScale_z));
+
+			// implement a 3ddda line algorithm 
+			ndInt32 xInc;
+			ndFloat32 tx;
+			ndFloat32 stepX;
+			if (dp.m_x > ndFloat32(0.0f))
+			{
+				xInc = 1;
+				ndFloat32 val = ndFloat32(1.0f) / dp.m_x;
+				stepX = scale_x * val;
+				tx = (scale_x * ((ndFloat32)ix0 + ndFloat32(1.0f)) - p0.m_x) * val;
+			}
+			else if (dp.m_x < ndFloat32(0.0f))
+			{
+				xInc = -1;
+				ndFloat32 val = -ndFloat32(1.0f) / dp.m_x;
+				stepX = scale_x * val;
+				tx = -(scale_x * (ndFloat32)ix0 - p0.m_x) * val;
+			}
+			else
+			{
+				xInc = 0;
+				stepX = ndFloat32(0.0f);
+				tx = ndFloat32(1.0e10f);
+			}
+
+			ndInt32 zInc;
+			ndFloat32 tz;
+			ndFloat32 stepZ;
+			if (dp.m_z > ndFloat32(0.0f))
+			{
+				zInc = 1;
+				ndFloat32 val = ndFloat32(1.0f) / dp.m_z;
+				stepZ = scale_z * val;
+				tz = (scale_z * ((ndFloat32)iz0 + ndFloat32(1.0f)) - p0.m_z) * val;
+			}
+			else if (dp.m_z < ndFloat32(0.0f))
+			{
+				zInc = -1;
+				ndFloat32 val = -ndFloat32(1.0f) / dp.m_z;
+				stepZ = scale_z * val;
+				tz = -(scale_z * (ndFloat32)iz0 - p0.m_z) * val;
+			}
+			else
+			{
+				zInc = 0;
+				stepZ = ndFloat32(0.0f);
+				tz = ndFloat32(1.0e10f);
+			}
+
+			ndFloat32 txAcc = tx;
+			ndFloat32 tzAcc = tz;
+			ndInt32 xIndex0 = ix0;
+			ndInt32 zIndex0 = iz0;
+			ndFastRay ray(localP0, localP1);
+
+			// for each cell touched by the line
+			do
+			{
+				ndFloat32 t = RayCastCell(ray, xIndex0, zIndex0, normalOut, maxT);
+				if (t < maxT)
+				{
+					// bail out at the first intersection and copy the data into the descriptor
+					ndAssert(normalOut.m_w == ndFloat32(0.0f));
+					contactOut.m_normal = normalOut.Normalize();
+					contactOut.m_shapeId0 = m_material[zIndex0 * D_TERRAIN__WIDTH + xIndex0];
+					contactOut.m_shapeId1 = m_material[zIndex0 * D_TERRAIN__WIDTH + xIndex0];
+
+					return t;
+				}
+
+				if (txAcc < tzAcc)
+				{
+					tx = txAcc;
+					xIndex0 += xInc;
+					txAcc += stepX;
+				}
+				else
+				{
+					tz = tzAcc;
+					zIndex0 += zInc;
+					tzAcc += stepZ;
+				}
+			} while ((tx <= ndFloat32(1.0f)) || (tz <= ndFloat32(1.0f)));
+		}
+
+		// if no cell was hit, return a large value
+		return ndFloat32(1.2f);
 	}
 
 	private:
@@ -509,6 +589,7 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 
 	ndArray<ndInt8> m_material;
 	ndArray<ndReal> m_heightfield;
+	ndWeakPtr<ndDemoEntityManager> m_owner;
 };
 
 class ndHeightfieldMesh2d : public ndRenderSceneNode
@@ -580,8 +661,8 @@ class ndHeightfieldMesh2d : public ndRenderSceneNode
 
 	ndSharedPtr<ndMeshEffect> BuildTile(const ndProcedural2dTerrainShape* const shape, ndInt32 x0, ndInt32 z0)
 	{
-		const ndInt32 xMax = ((x0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN__WIDTH) ? D_TERRAIN_TILE_SIZE - 1 : D_TERRAIN_TILE_SIZE + 1;
-		const ndInt32 zMax = ((z0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN_HEIGHT) ? D_TERRAIN_TILE_SIZE - 1 : D_TERRAIN_TILE_SIZE + 1;
+		const ndInt32 xMax = ((x0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN__WIDTH) ? D_TERRAIN_TILE_SIZE : D_TERRAIN_TILE_SIZE + 1;
+		const ndInt32 zMax = ((z0 + D_TERRAIN_TILE_SIZE) >= D_TERRAIN_HEIGHT) ? D_TERRAIN_TILE_SIZE : D_TERRAIN_TILE_SIZE + 1;
 
 		// build a collision sub tile
 		const ndArray<ndInt8>& materialMap = shape->m_material;
@@ -655,7 +736,7 @@ class ndHeightfieldMesh2d : public ndRenderSceneNode
 
 ndSharedPtr<ndBody> BuildUserHeighfieldTerrain(ndDemoEntityManager* const scene, const char* const textureName, const ndMatrix& location)
 {
-	ndShapeInstance proceduralInstance(new ndProcedural2dTerrainShape());
+	ndShapeInstance proceduralInstance(new ndProcedural2dTerrainShape(scene));
 
 	ndProcedural2dTerrainShape* const heighfield = (ndProcedural2dTerrainShape*)proceduralInstance.GetShape()->GetAsShapeStaticProceduralMesh();
 	
