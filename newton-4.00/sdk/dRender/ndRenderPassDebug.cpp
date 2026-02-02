@@ -25,13 +25,11 @@ class ndRenderPassDebug::ndCallback : public ndConstraintDebugCallback
 	{
 	}
 
-	//void DrawPoint(const ndVector& point, const ndVector& color, ndFloat32 thickness) override
 	void DrawPoint(const ndVector&, const ndVector&, ndFloat32) override
 	{
 		ndAssert(0);
 	}
 
-	//void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32 thickness = ndFloat32(1.0f)) override
 	void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32) override
 	{
 		ndPoint line;

@@ -4003,6 +4003,7 @@ ndInt32 ndContactSolver::CalculatePolySoupToHullContactsDescrete(ndPolygonMeshDe
 	const ndVector* const vertex = polygon.m_vertexArray;
 
 	const ndInt32 faceCount = ndInt32(query.m_faceIndexCount.GetCount());
+	//TO DO: I have to revisit the sort function.
 	//for (ndInt32 i = 0; (i < faceCount) && (count < 32); ++i)
 	for (ndInt32 i = faceCount - 1; (i >= 0) && (count < 32); --i)
 	{
@@ -4112,6 +4113,7 @@ ndInt32 ndContactSolver::ConvexToStaticMeshContactsDiscrete()
 	ndPolygonMeshDesc data(this, false);
 	ndShapeStaticMesh* const polysoup = m_instance1.GetShape()->GetAsShapeStaticMesh();
 	ndAssert(polysoup);
+
 	polysoup->GetCollidingFaces(&data);
 	if (data.m_staticMeshQuery->m_faceIndexCount.GetCount())
 	{
@@ -4149,7 +4151,7 @@ ndInt32 ndContactSolver::ConvexToStaticMeshContactsDiscrete()
 		patch.m_worldMatrix.m_posit += m_savedOriginOffset;
 		patch.m_convexShapeInstance = data.m_convexInstance;
 		patch.m_boxP0 = (data.GetOrigin() - distanceTravel) & ndVector::m_triplexMask;
-		patch.m_boxP1 = (data.GetTarget() + distanceTravel)& ndVector::m_triplexMask;
+		patch.m_boxP1 = (data.GetTarget() + distanceTravel) & ndVector::m_triplexMask;
 		patch.m_queryType = ndPatchMesh::m_vertexListOnly;
 		polysoup->GetFacesPatch(patch);
 		m_separationDistance = patch.m_pointArray.GetCount() ? ndFloat32 (0.0f) : distanceTravel.m_x;

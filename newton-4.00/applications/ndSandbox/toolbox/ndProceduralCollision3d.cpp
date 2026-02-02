@@ -18,10 +18,10 @@
 
 //#define D_TERRAIN__WIDTH		1024
 //#define D_TERRAIN_HEIGHT		1024
-//#define D_TERRAIN__WIDTH		512
-//#define D_TERRAIN_HEIGHT		512
-#define D_TERRAIN__WIDTH		256
-#define D_TERRAIN_HEIGHT		256
+#define D_TERRAIN__WIDTH		512
+#define D_TERRAIN_HEIGHT		512
+//#define D_TERRAIN__WIDTH		256
+//#define D_TERRAIN_HEIGHT		256
 
 #define D_TERRAIN_NOISE_OCTAVES		8
 #define D_TERRAIN_NOISE_PERSISTANCE	0.5f
@@ -191,26 +191,86 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 		return t;
 	}
 
+	void ShowDebugFaces(ndPatchMesh& patch) const
+	{
+		ndRenderPassDebug* const debugRenderPass = m_owner->GetDebugRenderPass();
+		const ndRenderPassDebug::ndDebugOptions& options = debugRenderPass->GetDebugDisplayOptions();
+		if (options.m_showStaticMeshCollidingFaces)
+		{
+			if (patch.m_pointArray.GetCount() > 1)
+			{
+				ndInt32 sum = 0;
+				const ndVector color(1.0f, 1.0f, 0.0f, 1.0f);
+				const ndMatrix& matrix(patch.m_worldMatrix);
+				for (ndInt32 i = 0; i < ndInt32(patch.m_faceArray.GetCount()); ++i)
+				{
+					const ndInt32 faceCount = patch.m_faceArray[i];
+					ndInt32 index = patch.m_indexArray[sum + faceCount - 1];
+					ndVector p0(matrix.TransformVector(patch.m_pointArray[index]));
+					for (ndInt32 j = 0; j < faceCount; ++j)
+					{
+						index = patch.m_indexArray[sum + j];
+						const ndVector p1(matrix.TransformVector(patch.m_pointArray[index]));
+						debugRenderPass->AddRuntimeLine(p0, p1, color);
+						p0 = p1;
+					}
+					sum += faceCount;
+				}
+			}
+
+			ndVector box[12][2];
+			const ndVector p0(patch.m_boxP0);
+			const ndVector p1(patch.m_boxP1);
+
+			box[0][0] = ndVector(p0.m_x, p0.m_y, p0.m_z, ndFloat32(1.0f));
+			box[0][1] = ndVector(p1.m_x, p0.m_y, p0.m_z, ndFloat32(1.0f));
+
+			box[1][0] = ndVector(p0.m_x, p1.m_y, p0.m_z, ndFloat32(1.0f));
+			box[1][1] = ndVector(p1.m_x, p1.m_y, p0.m_z, ndFloat32(1.0f));
+
+			box[2][0] = ndVector(p0.m_x, p1.m_y, p1.m_z, ndFloat32(1.0f));
+			box[2][1] = ndVector(p1.m_x, p1.m_y, p1.m_z, ndFloat32(1.0f));
+
+			box[3][0] = ndVector(p0.m_x, p0.m_y, p1.m_z, ndFloat32(1.0f));
+			box[3][1] = ndVector(p1.m_x, p0.m_y, p1.m_z, ndFloat32(1.0f));
+
+			box[4][0] = ndVector(p0.m_x, p0.m_y, p0.m_z, ndFloat32(1.0f));
+			box[4][1] = ndVector(p0.m_x, p1.m_y, p0.m_z, ndFloat32(1.0f));
+
+			box[5][0] = ndVector(p1.m_x, p0.m_y, p0.m_z, ndFloat32(1.0f));
+			box[5][1] = ndVector(p1.m_x, p1.m_y, p0.m_z, ndFloat32(1.0f));
+
+			box[6][0] = ndVector(p0.m_x, p0.m_y, p1.m_z, ndFloat32(1.0f));
+			box[6][1] = ndVector(p0.m_x, p1.m_y, p1.m_z, ndFloat32(1.0f));
+
+			box[7][0] = ndVector(p1.m_x, p0.m_y, p1.m_z, ndFloat32(1.0f));
+			box[7][1] = ndVector(p1.m_x, p1.m_y, p1.m_z, ndFloat32(1.0f));
+
+			box[8][0] = ndVector(p0.m_x, p0.m_y, p0.m_z, ndFloat32(1.0f));
+			box[8][1] = ndVector(p0.m_x, p0.m_y, p1.m_z, ndFloat32(1.0f));
+
+			box[9][0] = ndVector(p1.m_x, p0.m_y, p0.m_z, ndFloat32(1.0f));
+			box[9][1] = ndVector(p1.m_x, p0.m_y, p1.m_z, ndFloat32(1.0f));
+
+			box[10][0] = ndVector(p0.m_x, p1.m_y, p0.m_z, ndFloat32(1.0f));
+			box[10][1] = ndVector(p0.m_x, p1.m_y, p1.m_z, ndFloat32(1.0f));
+
+			box[11][0] = ndVector(p1.m_x, p1.m_y, p0.m_z, ndFloat32(1.0f));
+			box[11][1] = ndVector(p1.m_x, p1.m_y, p1.m_z, ndFloat32(1.0f));
+
+			const ndVector boxColor(1.0f, 0.0f, 1.0f, 1.0f);
+			for (ndInt32 i = 0; i < 12; ++i)
+			{
+				//DrawLine(box[i][0], box[i][1], color, ndFloat32(1.0f));
+				debugRenderPass->AddRuntimeLine(box[i][0], box[i][1], boxColor);
+			}
+		}
+	}
+
 	void GetFacesPatch(ndPatchMesh& patch) const override
 	{
 		m_terrain->GetFacesPatch(patch);
-
-		ndRenderPassDebug* const debugRenderPass = m_owner->GetDebugRenderPass();
-		const ndRenderPassDebug::ndDebugOptions& options = debugRenderPass->GetDebugDisplayOptions();
-		if (options.m_showStaticMeshCollidingFaces && (patch.m_pointArray.GetCount() > 1))
-		{
-			const ndVector color(1.0f, 1.0f, 0.0f, 1.0f);
-			const ndMatrix& matrix(patch.m_worldMatrix);
-			for (ndInt32 i = 0; i < ndInt32 (patch.m_pointArray.GetCount()); i += 3)
-			{
-				const ndVector p0(matrix.TransformVector(patch.m_pointArray[i + 0]));
-				const ndVector p1(matrix.TransformVector(patch.m_pointArray[i + 1]));
-				const ndVector p2(matrix.TransformVector(patch.m_pointArray[i + 2]));
-				debugRenderPass->AddRuntimeLine(p0, p1, color);
-				debugRenderPass->AddRuntimeLine(p1, p2, color);
-				debugRenderPass->AddRuntimeLine(p2, p0, color);
-			}
-		}
+		ShowDebugFaces(patch);
 	}
 
 	ndSharedPtr<ndIsoTerrain> m_terrain;

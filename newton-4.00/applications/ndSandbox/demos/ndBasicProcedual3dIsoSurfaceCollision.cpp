@@ -179,9 +179,9 @@ originMatrix.m_posit.m_y = 10.0f;
 	//scene->RegisterPostUpdate(marchingCubeMesh);
 
 	// add single box for testing
-	ndSharedPtr<ndBody> testBody(AddSphere(scene, originMatrix, 1.0f, 0.25f, "wood_0.png"));
+	//ndSharedPtr<ndBody> testBody(AddSphere(scene, originMatrix, 1.0f, 0.25f, "wood_0.png"));
 	//ndSharedPtr<ndBody> testBody(AddCapsule(scene, originMatrix, 1.0f, 0.5f, 0.5f, 1.0f, "wood_0.png"));
-	//ndSharedPtr<ndBody> testBody(AddBox(scene, originMatrix, 1.0f, 1.0f, 1.0f, 1.0f, "wood_0.png"));
+	ndSharedPtr<ndBody> testBody(AddBox(scene, originMatrix, 1.0f, 1.0f, 1.0f, 1.0f, "wood_0.png"));
 	//ndSharedPtr<ndBody> testBody(AddCylinder(scene, originMatrix, 1.0f, 0.5f, 0.5f, 1.0f, "wood_0.png"));
 	//ndSharedPtr<ndBody> testBody(AddConvexHull(scene, originMatrix, 40.0f, 0.7f, 1.0f, 10, "wood_0.png"));
 	//testBody->SetOmega(ndVector (-10.0f, 0.0f, 0.0f, 0.0f));
@@ -200,12 +200,12 @@ originMatrix.m_posit.m_y = 10.0f;
 	//AddCapsuleStacks(scene, originMatrix, 10.0f, 0.5f, 0.5f, 1.0f, 10, 10, 7);
 
 	// set the camera
-	originMatrix.m_posit.m_y = 13.0f;
+	originMatrix.m_posit.m_y = 10.0f;
 	originMatrix.m_posit.m_x = -60.0f;
 testBody->SetMatrix(originMatrix);
 //testBody->GetNotifyCallback()->OnTransform(0.0f, originMatrix);
 
-	originMatrix.m_posit.m_y = 14.0f;
+	originMatrix.m_posit.m_y = 5.0f;
 	originMatrix.m_posit.m_x -= 4.0f;
 	scene->SetCameraMatrix(rot, originMatrix.m_posit);
 }
