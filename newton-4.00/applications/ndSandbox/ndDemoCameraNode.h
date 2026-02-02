@@ -35,7 +35,7 @@ class ndDemoCameraPickBodyJoint : public ndJointKinematicController
 		}
 	}
 
-	ndDemoCameraNode* m_owner;
+	ndWeakPtr<ndDemoCameraNode> m_owner;
 };
 
 class ndDemoCameraNode: public ndRenderSceneNode
