@@ -62,7 +62,7 @@ class ndHeightfieldMesh : public ndRenderSceneNode
 			tileSlots[groupId] = BuildTile(shape, posit.m_x, posit.m_z);
 		});
 
-		// build all tiles in parellel
+		// build all tiles in parallel
 		ndThreadPool* const threadPool = scene->GetWorld()->GetScene();
 
 		threadPool->Begin();
