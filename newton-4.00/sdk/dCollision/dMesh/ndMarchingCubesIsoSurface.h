@@ -53,7 +53,7 @@ class ndMarchingCubeIsoSurface : public ndMarchingCubes
 	D_COLLISION_API ndVector PositionToGrid(const ndVector& posit) const;
 
 	D_COLLISION_API void GetFacesPatch(ndPatchMesh& patch) const;
-	D_COLLISION_API ndFloat32 RayCast(const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT) const;
+	D_COLLISION_API ndFloat32 RayCast(const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, ndContactPoint& contactOut) const;
 
 	virtual ndReal GetIsoValue(const ndVector& posit) const = 0;
 
