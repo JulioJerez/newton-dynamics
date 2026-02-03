@@ -119,7 +119,6 @@ class ndPhysicsWorld: public ndWorld
 
 	ndDemoEntityManager* m_manager;
 	ndFloat32 m_timeAccumulator;
-	ndFloat32 m_interpolationParameter;
 	ndSpinLock m_lock;
 
 	ndDefferedBodyList m_deadBodies;
