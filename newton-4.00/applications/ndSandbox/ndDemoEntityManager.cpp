@@ -529,7 +529,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_showScene = true;
 	//m_showConcaveEdge = true;
 	//m_showMeshSkeleton = true;
-	m_autoSleepMode = false;
+	//m_autoSleepMode = false;
 	///m_hidePostUpdate = true;
 	//m_hideVisualMeshes = true;
 	//m_solverMode = ndWorld::ndStandardSolver;
@@ -549,7 +549,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_showCollisionMeshMode = 3;		// solid wire frame
 	m_synchronousPhysicsUpdate = true;
 	m_synchronousParticlesUpdate = true;
-	m_showStaticMeshCollidingFaces = true;
+	//m_showStaticMeshCollidingFaces = true;
 
 	Cleanup();
 	ndResetTimer();
