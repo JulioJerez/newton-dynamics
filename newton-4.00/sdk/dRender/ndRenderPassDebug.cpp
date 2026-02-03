@@ -309,6 +309,7 @@ void ndRenderPassDebug::AddRuntimeLine(const ndVector& p0, const ndVector& p1, c
 	line.m_p0 = p0;
 	line.m_p1 = p1;
 	line.m_color = color;
+	ndScopeSpinLock lock(m_runtimeAddLineLock);
 	m_runtimeLines.PushBack(line);
 }
 
