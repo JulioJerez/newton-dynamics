@@ -31,7 +31,7 @@ class MarchingCubeParticles : public ndDemoEntityManager::OnPostUpdate
 		{
 			ndMatrix matrix(ndGetIdentityMatrix());
 			matrix.m_posit.m_x = 0.25f;
-			matrix.m_posit.m_y = 0.5f;
+			matrix.m_posit.m_y = 0.0f;
 			matrix.m_posit.m_z = 0.0f;
 			matrix.m_posit.m_w = 1.0f;
 
