@@ -169,11 +169,9 @@ void ndBasicMarchingCube32Collision(ndDemoEntityManager* const scene)
 
 	// build a placement matrix
 	ndQuaternion rot(ndYawMatrix(0.0f * ndDegreeToRad));
-	ndVector origin(10.5f, 0.5f, 0.0f, 1.0f);
-	ndVector floor(FindFloor(*scene->GetWorld(), origin, 200.0f));
-
+	ndVector origin(10.5f, 0.5f, -30.0f, 1.0f);
+	ndVector floor(FindFloor(*scene->GetWorld(), origin, 400.0f));
 	ndMatrix originMatrix(ndCalculateMatrix(rot, floor));
-originMatrix.m_posit.m_y = 10.0f;
 
 	//ndSharedPtr<ndDemoEntityManager::OnPostUpdate>marchingCubeMesh(new MarchingCubeTest(scene));
 	//scene->RegisterPostUpdate(marchingCubeMesh);
@@ -200,12 +198,7 @@ originMatrix.m_posit.m_y = 10.0f;
 	//AddCapsuleStacks(scene, originMatrix, 10.0f, 0.5f, 0.5f, 1.0f, 10, 10, 7);
 
 	// set the camera
-	originMatrix.m_posit.m_y = 10.0f;
-	originMatrix.m_posit.m_x = -60.0f;
-testBody->SetMatrix(originMatrix);
-//testBody->GetNotifyCallback()->OnTransform(0.0f, originMatrix);
-
-	originMatrix.m_posit.m_y = 5.0f;
-	originMatrix.m_posit.m_x -= 4.0f;
+	originMatrix.m_posit.m_y += 3.0f;
+	originMatrix.m_posit.m_x -= 8.0f;
 	scene->SetCameraMatrix(rot, originMatrix.m_posit);
 }

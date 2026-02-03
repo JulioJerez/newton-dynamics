@@ -16,12 +16,12 @@
 #include "ndHeightFieldPrimitive.h"
 #include "ndDebugDisplayRenderPass.h"
 
-//#define D_TERRAIN__WIDTH		1024
-//#define D_TERRAIN_HEIGHT		1024
-#define D_TERRAIN__WIDTH		512
-#define D_TERRAIN_HEIGHT		512
-//#define D_TERRAIN__WIDTH		256
-//#define D_TERRAIN_HEIGHT		256
+//#define D_TERRAIN__WIDTH			1024
+//#define D_TERRAIN_HEIGHT			1024
+#define D_TERRAIN__WIDTH			512
+#define D_TERRAIN_HEIGHT			512
+//#define D_TERRAIN__WIDTH			256
+//#define D_TERRAIN_HEIGHT			256
 
 #define D_TERRAIN_NOISE_OCTAVES		8
 #define D_TERRAIN_NOISE_PERSISTANCE	0.5f
@@ -114,7 +114,7 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 		// make a rolling terrain from a 2d noise function
 		virtual ndReal GetIsoValue(const ndVector& posit) const override
 		{
-			const ndVector gridSpace(PositionToGrid(posit));
+			const ndVector gridSpace(PositionToGridSpace(posit));
 			ndAssert(gridSpace.m_x >= 0);
 			ndAssert(gridSpace.m_z >= 0);
 			ndAssert(gridSpace.m_x < D_TERRAIN__WIDTH);
@@ -183,12 +183,9 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 		}
 	}
 
-	//virtual ndFloat32 RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const, ndContactPoint& contactOut) const override
-	virtual ndFloat32 RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const, ndContactPoint&) const override
+	virtual ndFloat32 RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const, ndContactPoint& contactOut) const override
 	{
-		ndFloat32 t = m_terrain->RayCast(localP0, localP1, maxT);
-
-		return t;
+		return m_terrain->RayCast(localP0, localP1, maxT, contactOut);
 	}
 
 	void ShowDebugFaces(ndPatchMesh& patch) const

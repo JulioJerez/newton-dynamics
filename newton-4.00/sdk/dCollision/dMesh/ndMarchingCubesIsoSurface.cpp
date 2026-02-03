@@ -21,6 +21,7 @@
 
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
+#include "ndContact.h"
 #include "ndShapeStaticMesh.h"
 #include "ndMarchingCubesIsoSurface.h"
 
@@ -62,9 +63,14 @@ void ndMarchingCubeIsoSurface::SetBox(const ndVector& boxP0, const ndVector& box
 	m_boxP1 = boxP1 & ndVector::m_triplexMask;
 }
 
-ndVector ndMarchingCubeIsoSurface::PositionToGrid(const ndVector& posit) const
+ndVector ndMarchingCubeIsoSurface::PositionToGridSpace(const ndVector& posit) const
 {
 	return m_invGridSize * (posit - m_boxP0);
+}
+
+ndVector ndMarchingCubeIsoSurface::GridSpaceToPosition(const ndVector& gridPosit) const
+{
+	return gridPosit * m_gridSize + m_boxP0;
 }
 
 bool ndMarchingCubeIsoSurface::CalculateMinExtend3d(const ndVector& p0, const ndVector& p1, ndVector& boxP0, ndVector& boxP1) const
@@ -81,340 +87,7 @@ bool ndMarchingCubeIsoSurface::CalculateMinExtend3d(const ndVector& p0, const nd
 	ndAssert(boxP0.m_x < boxP1.m_x);
 	ndAssert(boxP0.m_y < boxP1.m_y);
 	ndAssert(boxP0.m_z < boxP1.m_z);
-	return ndBoxBoxIntestion(boxP0, boxP1, m_boxP0, m_boxP1, boxP0, boxP1);
-}
-
-ndMarchingCubeIsoSurface::ndCellFill ndMarchingCubeIsoSurface::GetFacesInCell(ndFixSizeArray<ndTriangle, 5>& patch, const ndVector& gridPosit) const
-{
-	ndInt32 tableIndex = 0;
-
-	ndIsoCell cell;
-	const ndVector origin(gridPosit * m_gridSize + m_boxP0);
-	for (ndInt32 i = 0; i < 8; ++i)
-	{
-		const ndVector posit(origin + m_gridStep[i]);
-		ndFloat32 isovalue = GetIsoValue(posit);
-		cell.m_isoValues[i] = posit;
-		cell.m_isoValues[i].m_w = isovalue;
-		tableIndex |= (isovalue <= 0.0f) << i;
-	}
-	if (tableIndex == 0)
-	{
-		return m_empty;
-	}
-
-	if (tableIndex == 255)
-	{
-		return m_solid;
-	}
-	
-	const ndInt32 edgeStart = m_edgeScan[tableIndex];
-	const ndInt32 edgeCount = m_edgeScan[tableIndex + 1] - edgeStart;
-
-	ndVector vertlist[12];
-	for (ndInt32 i = 0; i < edgeCount; ++i)
-	{
-		const ndEdge& edge = m_edges[edgeStart + i];
-		const ndInt32 midPoint = edge.m_midPoint;
-			
-		const ndVector p0(cell.m_isoValues[edge.m_p0]);
-		const ndVector p1(cell.m_isoValues[edge.m_p1]);
-		ndAssert((p1.m_w * p0.m_w) <= ndFloat32(0.0f));
-		const ndVector p1p0(p1 - p0);
-		ndFloat32 param = p0.m_w / (p1.m_w - p0.m_w);
-		const ndVector p3 (ndVector::m_triplexMask & (p0 - p1p0.Scale(param)));
-		vertlist[midPoint] = p3;
-	}
-
-	patch.SetCount(0);
-	const ndInt32 faceStart = m_facesScan[tableIndex];
-	const ndInt32 triangleStart = m_facesScan[tableIndex];
-	const ndInt32 triangleCount = m_facesScan[tableIndex + 1] - triangleStart;
-	for (ndInt32 i = 0; i < triangleCount; ++i)
-	{
-		const ndInt32 j0 = m_faces[faceStart + i][0];
-		const ndInt32 j1 = m_faces[faceStart + i][1];
-		const ndInt32 j2 = m_faces[faceStart + i][2];
-
-		const ndVector& p0 = vertlist[j0];
-		const ndVector& p1 = vertlist[j1];
-		const ndVector& p2 = vertlist[j2];
-		
-		const ndVector p10(p1 - p0);
-		const ndVector p20(p2 - p0);
-		const ndVector area(p10.CrossProduct(p20));
-		ndFloat32 areaMag2 = area.DotProduct(area & ndVector::m_triplexMask).GetScalar();
-		if (areaMag2 > ndFloat32(1.0e-6f))
-		{
-			ndTriangle triangle;
-			triangle.m_p0 = p0;
-			triangle.m_p1 = p1;
-			triangle.m_p2 = p2;
-			patch.PushBack(triangle);
-		}
-	}
-
-	return m_partial;
-}
-
-ndFloat32 ndMarchingCubeIsoSurface::RayCastCell(const ndFastRay& ray, ndInt32 xIndex0, ndInt32 yIndex0, ndInt32 zIndex0, ndVector& normalOut, ndFloat32 maxT) const
-{
-	ndFixSizeArray<ndTriangle, 5> patch;
-	ndVector point(ndFloat32(xIndex0), ndFloat32(yIndex0), ndFloat32(zIndex0), ndFloat32(0.0f));
-	ndCellFill fill = GetFacesInCell(patch, point);
-	if (fill == m_empty)
-	{
-		return maxT;
-	}
-
-	if (fill == m_empty)
-	{
-		return ndFloat32 (0.0f);
-	}
-
-#if 0
-	ndVector points[4];
-	ndInt32 triangle[3];
-
-	// get the 3d point at the corner of the cell
-	if ((xIndex0 < 0) || (zIndex0 < 0) || (xIndex0 >= (D_TERRAIN_WIDTH - 1)) || (zIndex0 >= (D_TERRAIN_WIDTH - 1)))
-	{
-		return ndFloat32(1.2f);
-	}
-	maxT = ndMin(maxT, ndFloat32(1.0f));
-
-	ndInt32 base = zIndex0 * D_TERRAIN_WIDTH + xIndex0;
-
-	points[0 * 2 + 0] = ndVector((ndFloat32)(xIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + 0]), (ndFloat32)(zIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
-	points[0 * 2 + 1] = ndVector((ndFloat32)(xIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + 1]), (ndFloat32)(zIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
-	points[1 * 2 + 1] = ndVector((ndFloat32)(xIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + D_TERRAIN_WIDTH + 1]), (ndFloat32)(zIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
-	points[1 * 2 + 0] = ndVector((ndFloat32)(xIndex0 + 0) * D_TERRAIN_GRID_SIZE, ndFloat32(m_heightfield[base + D_TERRAIN_WIDTH + 0]), (ndFloat32)(zIndex0 + 1) * D_TERRAIN_GRID_SIZE, ndFloat32(0.0f));
-
-	ndFloat32 t = ndFloat32(1.2f);
-	triangle[0] = 1;
-	triangle[1] = 2;
-	triangle[2] = 3;
-
-	ndVector e10(points[2] - points[1]);
-	ndVector e20(points[3] - points[1]);
-	ndVector normal(e10.CrossProduct(e20));
-	normal = normal.Normalize();
-	t = ray.PolygonIntersect(normal, maxT, points, triangle, 3);
-	if (t < maxT)
-	{
-		normalOut = normal;
-		return t;
-	}
-
-	triangle[0] = 1;
-	triangle[1] = 0;
-	triangle[2] = 2;
-
-	ndVector e30(points[0] - points[1]);
-	normal = e30.CrossProduct(e10);
-	normal = normal.Normalize();
-	t = ray.PolygonIntersect(normal, maxT, points, triangle, 3);
-	if (t < maxT)
-	{
-		normalOut = normal;
-	}
-	return t;
-#endif
-return 10;
-}
-
-ndFloat32 ndMarchingCubeIsoSurface::RayCast(const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT) const
-{
-#if 0
-	ndVector boxP0;
-	ndVector boxP1;
-
-	// make sure p0 and p1 are in the right order
-	const ndVector q0(localP0.GetMin(localP1));
-	const ndVector q1(localP0.GetMax(localP1));
-	if (!CalculateMinExtend3d(q0, q1, boxP0, boxP1))
-	{
-		return ndFloat32(1.2f);
-	}
-	ndVector p0(localP0);
-	ndVector p1(localP1);
-
-	// check if the origin in indide the aabb
-	bool test = ndOverlapTest(p0, p0, boxP0, boxP1) ? true : false;
-	if (!test)
-	{
-		ndAssert(0);
-		// orgin is outsize the intesection box. 
-		// clip the ray 
-		test = ndRayBoxClip(p0, p1, boxP0, boxP1);
-	}
-	if (!test)
-	{
-		return ndFloat32(1.2f);
-	}
-
-	ndVector dp(p1 - p0);
-	ndVector normalOut(ndVector::m_zero);
-
-	//ndVector positInGrids (PositionToGrid(p0));
-	const ndVector positInGrids(PositionToGrid(p0).Floor());
-	ndInt32 ix0 = ndInt32(ndFloor(positInGrids.m_x));
-	ndInt32 iy0 = ndInt32(ndFloor(positInGrids.m_y));
-	ndInt32 iz0 = ndInt32(ndFloor(positInGrids.m_z));
-
-	// implement a 3ddda line algorithm 
-
-	struct ndDiff
-	{
-		ndInt32 m_inc;
-		ndFloat32 m_tx;
-		ndFloat32 m_step;
-	};
-	ndDiff diff[3];
-
-	for (ndInt32 i = 0; i < 3; i++)
-	{
-		ndDiff& dir = diff[i];
-		if (dp[i] > ndFloat32(0.0f))
-		{
-			dir.m_inc = 1;
-			ndFloat32 val = ndFloat32(1.0f) / dp[i];
-			dir.m_step = m_gridSize[i] * val;
-			dir.m_tx = (m_gridSize[i] * (positInGrids[i] + ndFloat32(1.0f)) - p0.m_x) * val;
-		}
-		else if (dp.m_x < ndFloat32(0.0f))
-		{
-			dir.m_inc = -1;
-			ndFloat32 val = -ndFloat32(1.0f) / dp[i];
-			dir.m_step = m_gridSize[i] * val;
-			dir.m_tx = -(m_gridSize[i] * (positInGrids[i] - p0[i])) * val;
-		}
-		else
-		{
-			dir.m_inc = 0;
-			dir.m_step = ndFloat32(0.0f);
-			dir.m_tx = ndFloat32(1.0e10f);
-		}
-	}
-
-	ndInt32 xInc;
-	ndFloat32 tx;
-	ndFloat32 stepX;
-	if (dp.m_x > ndFloat32(0.0f))
-	{
-		xInc = 1;
-		ndFloat32 val = ndFloat32(1.0f) / dp.m_x;
-		stepX = m_gridSize.m_x * val;
-		tx = (m_gridSize.m_x * ((ndFloat32)ix0 + ndFloat32(1.0f)) - p0.m_x) * val;
-	}
-	else if (dp.m_x < ndFloat32(0.0f))
-	{
-		xInc = -1;
-		ndFloat32 val = -ndFloat32(1.0f) / dp.m_x;
-		stepX = m_gridSize.m_x * val;
-		tx = -(m_gridSize.m_x * (ndFloat32)ix0 - p0.m_x) * val;
-	}
-	else
-	{
-		xInc = 0;
-		stepX = ndFloat32(0.0f);
-		tx = ndFloat32(1.0e10f);
-	}
-
-	ndInt32 yInc;
-	ndFloat32 ty;
-	ndFloat32 stepY;
-	if (dp.m_y > ndFloat32(0.0f))
-	{
-		yInc = 1;
-		ndFloat32 val = ndFloat32(1.0f) / dp.m_y;
-		stepY = m_gridSize.m_y * val;
-		ty = (m_gridSize.m_y * ((ndFloat32)ix0 + ndFloat32(1.0f)) - p0.m_y) * val;
-	}
-	else if (dp.m_y < ndFloat32(0.0f))
-	{
-		yInc = -1;
-		ndFloat32 val = -ndFloat32(1.0f) / dp.m_y;
-		stepY = m_gridSize.m_y * val;
-		ty = -(m_gridSize.m_y * (ndFloat32)iy0 - p0.m_y) * val;
-	}
-	else
-	{
-		yInc = 0;
-		stepY = ndFloat32(0.0f);
-		ty = ndFloat32(1.0e10f);
-	}
-
-	ndInt32 zInc;
-	ndFloat32 tz;
-	ndFloat32 stepZ;
-	if (dp.m_z > ndFloat32(0.0f))
-	{
-		zInc = 1;
-		ndFloat32 val = ndFloat32(1.0f) / dp.m_z;
-		stepZ = m_gridSize.m_z * val;
-		tz = (m_gridSize.m_z * ((ndFloat32)iz0 + ndFloat32(1.0f)) - p0.m_z) * val;
-	}
-	else if (dp.m_z < ndFloat32(0.0f))
-	{
-		zInc = -1;
-		ndFloat32 val = -ndFloat32(1.0f) / dp.m_z;
-		stepZ = m_gridSize.m_z * val;
-		tz = -(m_gridSize.m_z * (ndFloat32)iz0 - p0.m_z) * val;
-	}
-	else
-	{
-		zInc = 0;
-		stepZ = ndFloat32(0.0f);
-		tz = ndFloat32(1.0e10f);
-	}
-
-	ndFloat32 txAcc = tx;
-	ndFloat32 tyAcc = ty;
-	ndFloat32 tzAcc = tz;
-	ndInt32 xIndex0 = ix0;
-	ndInt32 yIndex0 = iy0;
-	ndInt32 zIndex0 = iz0;
-	ndFastRay ray(localP0, localP1);
-
-	// for each cell touched by the line
-	do
-	{
-		ndFloat32 t = RayCastCell(ray, xIndex0, yIndex0, zIndex0, normalOut, maxT);
-		if (t < maxT)
-		{
-			ndAssert(0);
-			//// bail out at the first intersection and copy the data into the descriptor
-			//ndAssert(normalOut.m_w == ndFloat32(0.0f));
-			//contactOut.m_normal = normalOut.Normalize();
-			//contactOut.m_shapeId0 = m_material[zIndex0 * D_TERRAIN_WIDTH + xIndex0];
-			//contactOut.m_shapeId1 = m_material[zIndex0 * D_TERRAIN_WIDTH + xIndex0];
-			//
-			//return t;
-		}
-
-		if ((txAcc < tyAcc) && (txAcc < tzAcc))
-		{
-			tx = txAcc;
-			xIndex0 += xInc;
-			txAcc += stepX;
-		}
-		if (tyAcc < tzAcc)
-		{
-			ty = tyAcc;
-			yIndex0 += yInc;
-			tyAcc += stepY;
-		}
-		else
-		{
-			tz = tzAcc;
-			zIndex0 += zInc;
-			tzAcc += stepZ;
-		}
-	} while ((tx <= ndFloat32(1.0f)) || (ty <= ndFloat32(1.0f)) || (tz <= ndFloat32(1.0f)));
-#endif
-	// if no cell was hit, return a large value
-	return ndFloat32(1.2f);
+	return ndBoxBoxIntestion(boxP0, boxP1, m_boxP0, m_boxP1 - m_gridSize, boxP0, boxP1);
 }
 
 void ndMarchingCubeIsoSurface::GetFacesPatch(ndPatchMesh& patch) const
@@ -432,8 +105,8 @@ void ndMarchingCubeIsoSurface::GetFacesPatch(ndPatchMesh& patch) const
 		return;
 	}
 
-	const ndVector gridP0(PositionToGrid(boxP0));
-	const ndVector gridP1(PositionToGrid(boxP1));
+	const ndVector gridP0(PositionToGridSpace(boxP0));
+	const ndVector gridP1(PositionToGridSpace(boxP1));
 	const ndVector sizeInGrids(gridP1 - gridP0);
 	ndAssert(sizeInGrids.m_w == ndFloat32 (0.0f));
 
@@ -651,6 +324,244 @@ void ndMarchingCubeIsoSurface::GetFacesPatch(ndPatchMesh& patch) const
 			fy += m_gridSize.m_y;
 		}
 	}
+}
+
+ndFloat32 ndMarchingCubeIsoSurface::RayCastCell(const ndFastRay& ray, ndInt32 xIndex0, ndInt32 yIndex0, ndInt32 zIndex0, ndVector& normalOut, ndFloat32 maxT) const
+{
+	ndFixSizeArray<ndTriangle, 5> patch;
+	const ndVector gridPosit(ndFloat32(xIndex0), ndFloat32(yIndex0), ndFloat32(zIndex0), ndFloat32(0.0f));
+	auto FacesInCell = [this, &patch, &gridPosit]()
+	{
+		ndIsoCell cell;
+		const ndVector origin(GridSpaceToPosition(gridPosit));
+		ndInt32 tableIndex = 0;
+		for (ndInt32 i = 0; i < 8; ++i)
+		{
+			const ndVector posit(origin + m_gridStep[i]);
+			ndFloat32 isovalue = GetIsoValue(posit);
+			cell.m_isoValues[i] = posit;
+			cell.m_isoValues[i].m_w = isovalue;
+			tableIndex |= (isovalue <= 0.0f) << i;
+		}
+		if (tableIndex == 0)
+		{
+			return m_empty;
+		}
+		
+		if (tableIndex == 255)
+		{
+			return m_solid;
+		}
+		
+		const ndInt32 edgeStart = m_edgeScan[tableIndex];
+		const ndInt32 edgeCount = m_edgeScan[tableIndex + 1] - edgeStart;
+		
+		ndVector vertlist[12];
+		for (ndInt32 i = 0; i < edgeCount; ++i)
+		{
+			const ndEdge& edge = m_edges[edgeStart + i];
+			const ndInt32 midPoint = edge.m_midPoint;
+				
+			const ndVector p0(cell.m_isoValues[edge.m_p0]);
+			const ndVector p1(cell.m_isoValues[edge.m_p1]);
+			ndAssert((p1.m_w * p0.m_w) <= ndFloat32(0.0f));
+			const ndVector p1p0(p1 - p0);
+			ndFloat32 param = p0.m_w / (p1.m_w - p0.m_w);
+			const ndVector p3 (ndVector::m_triplexMask & (p0 - p1p0.Scale(param)));
+			vertlist[midPoint] = p3;
+		}
+
+		const ndInt32 faceStart = m_facesScan[tableIndex];
+		const ndInt32 triangleStart = m_facesScan[tableIndex];
+		const ndInt32 triangleCount = m_facesScan[tableIndex + 1] - triangleStart;
+		for (ndInt32 i = 0; i < triangleCount; ++i)
+		{
+			const ndInt32 j0 = m_faces[faceStart + i][0];
+			const ndInt32 j1 = m_faces[faceStart + i][1];
+			const ndInt32 j2 = m_faces[faceStart + i][2];
+		
+			const ndVector& p0 = vertlist[j0];
+			const ndVector& p1 = vertlist[j1];
+			const ndVector& p2 = vertlist[j2];
+			
+			const ndVector p10(p1 - p0);
+			const ndVector p20(p2 - p0);
+			const ndVector area(p10.CrossProduct(p20));
+			ndFloat32 areaMag2 = area.DotProduct(area & ndVector::m_triplexMask).GetScalar();
+			if (areaMag2 > ndFloat32(1.0e-6f))
+			{
+				ndTriangle triangle;
+				triangle.m_p0 = p0;
+				triangle.m_p1 = p1;
+				triangle.m_p2 = p2;
+				patch.PushBack(triangle);
+			}
+		}
+		return m_partial;
+	};
+	ndCellFill fill = FacesInCell();
+	if (fill == m_empty)
+	{
+		return maxT;
+	}
+
+	if (fill == m_solid)
+	{
+		return ndFloat32(0.0f);
+	}
+
+	ndInt32 indexArray[] = { 0, 1, 2 };
+	for (ndInt32 i = 0; i < patch.GetCount(); ++i)
+	{
+		const ndTriangle& triangle = patch[i];
+		ndVector e10(triangle.m_p1 - triangle.m_p0);
+		ndVector e20(triangle.m_p2 - triangle.m_p0);
+		ndVector normal(e10.CrossProduct(e20));
+		normal = normal.Normalize();
+		ndFloat32 t = ray.PolygonIntersect(normal, maxT, &triangle.m_p0, indexArray, 3);
+		if (t < maxT)
+		{
+			normalOut = normal;
+			return t;
+		}
+
+	}
+	return maxT;
+}
+
+ndFloat32 ndMarchingCubeIsoSurface::RayCast(const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, ndContactPoint& contactOut) const
+{
+	ndVector boxP0;
+	ndVector boxP1;
+
+	// make sure p0 and p1 are in the right order
+	const ndVector q0(localP0.GetMin(localP1));
+	const ndVector q1(localP0.GetMax(localP1));
+	if (!CalculateMinExtend3d(q0, q1, boxP0, boxP1))
+	{
+		return ndFloat32(1.2f);
+	}
+	ndVector p0(localP0);
+	ndVector p1(localP1);
+
+	// check if the origin in indide the aabb
+	bool test = ndOverlapTest(p0, p0, boxP0, boxP1) ? true : false;
+	if (!test)
+	{
+		ndAssert(0);
+		// orgin is outsize the intesection box. 
+		// clip the ray 
+		test = ndRayBoxClip(p0, p1, boxP0, boxP1);
+	}
+	if (!test)
+	{
+		return ndFloat32(1.2f);
+	}
+
+	ndVector dp(p1 - p0);
+	ndVector normalOut(ndVector::m_zero);
+
+	// extending the 2d dda to 3d
+	//http://www.cse.yorku.ca/~amana/research/grid.pdf
+
+	const ndVector origin(PositionToGridSpace(p0));
+	const ndVector positInGrids(origin.Floor());
+
+	// implement a 3ddda line algorithm 
+	class ndDdda3d
+	{
+		public:
+		ndFloat32 m_t;
+		ndFloat32 m_acc;
+		ndFloat32 m_step;
+		ndInt32 m_inc;
+		ndInt32 m_index;
+
+		void Init(ndFloat32 posit, ndFloat32 positInGrids, ndFloat32 dp, ndFloat32 gridSize)
+		{
+			if (dp > ndFloat32(0.0f))
+			{
+				m_inc = 1;
+				ndFloat32 val = ndFloat32(1.0f) / dp;
+				m_step = gridSize * val;
+				m_t = (positInGrids + ndFloat32(1.0f) - posit) * val;
+			}
+			else if (dp < ndFloat32(0.0f))
+			{
+				m_inc = -1;
+				ndFloat32 val = -ndFloat32(1.0f) / dp;
+				m_step = gridSize * val;
+				m_t = -(positInGrids - posit) * val;;
+			}
+			else
+			{
+				m_inc = 0;
+				m_step = ndFloat32(0.0f);
+				m_t = ndFloat32(1.0e10f);
+			}
+			m_acc = m_t;
+			m_index = ndInt32(ndFloor(positInGrids));
+		}
+
+		void Increment()
+		{
+			m_t = m_acc;
+			m_acc += m_step;
+			m_index += m_inc;
+		}
+	};
+	ndDdda3d diffXYZ[3];
+
+	for (ndInt32 i = 0; i < 3; i++)
+	{
+		diffXYZ[i].Init(origin[i], positInGrids[i], dp[i], m_gridSize[i]);
+	}
+
+	ndFastRay ray(localP0, localP1);
+
+	// for each cell touched by the line
+	do
+	{
+		ndFloat32 t = RayCastCell(ray, diffXYZ[0].m_index, diffXYZ[1].m_index, diffXYZ[2].m_index, normalOut, maxT);
+		if (t < maxT)
+		{
+			// bail out at the first intersection and copy the data into the descriptor
+			ndAssert(normalOut.m_w == ndFloat32(0.0f));
+			contactOut.m_normal = normalOut;
+			//contactOut.m_shapeId0 = m_material[zIndex0 * D_TERRAIN_WIDTH + xIndex0];
+			//contactOut.m_shapeId1 = m_material[zIndex0 * D_TERRAIN_WIDTH + xIndex0];
+			contactOut.m_shapeId0 = 0;
+			contactOut.m_shapeId1 = 0;
+			return t;
+		}
+
+		// handle 2d slices
+		if (diffXYZ[0].m_acc < diffXYZ[1].m_acc)
+		{
+			if (diffXYZ[0].m_acc < diffXYZ[2].m_acc)
+			{
+				diffXYZ[0].Increment();
+			}
+			else
+			{
+				diffXYZ[2].Increment();
+			}
+		}
+		else
+		{
+			if (diffXYZ[1].m_acc < diffXYZ[2].m_acc)
+			{
+				diffXYZ[1].Increment();
+			}
+			else
+			{
+				diffXYZ[2].Increment();
+			}
+		}
+	} while ((diffXYZ[0].m_t <= ndFloat32(1.0f)) || (diffXYZ[1].m_t <= ndFloat32(1.0f)) || (diffXYZ[2].m_t <= ndFloat32(1.0f)));
+
+	// if no cell was hit, return a large value
+	return ndFloat32(1.2f);
 }
 
 void ndMarchingCubeIsoSurface::GenerateIndexList()
