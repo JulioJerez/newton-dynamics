@@ -86,8 +86,9 @@ class ndMarchingCubeIsoSurface : public ndMarchingCubes
 	ndVector m_boxP0;
 	ndVector m_boxP1;
 	ndFixSizeArray<ndVector, 8> m_gridStep;
-	//ndArray<ndGridInfo> m_gridScansLayer;
-	//ndArray<ndGridInfo> m_gridScansLayerTemp;
+	ndInt32 m_maxGrid_x;
+	ndInt32 m_maxGrid_y;
+	ndInt32 m_maxGrid_z;
 	bool m_generateNormals;
 };
 

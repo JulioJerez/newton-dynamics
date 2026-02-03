@@ -59,8 +59,13 @@ void ndMarchingCubeIsoSurface::GetBox(ndVector& boxP0, ndVector& boxP1) const
 
 void ndMarchingCubeIsoSurface::SetBox(const ndVector& boxP0, const ndVector& boxP1)
 {
-	m_boxP0 = boxP0 & ndVector::m_triplexMask;
-	m_boxP1 = boxP1 & ndVector::m_triplexMask;
+	m_boxP0 = boxP0.GetMin(boxP1) & ndVector::m_triplexMask;
+	m_boxP1 = boxP0.GetMax(boxP1) & ndVector::m_triplexMask;
+
+	ndVector size(m_boxP1 - m_boxP0);
+	m_maxGrid_x = ndInt32(size.m_x) - 1;
+	m_maxGrid_y = ndInt32(size.m_y) - 1;
+	m_maxGrid_z = ndInt32(size.m_z) - 1;
 }
 
 ndVector ndMarchingCubeIsoSurface::PositionToGridSpace(const ndVector& posit) const
@@ -87,7 +92,7 @@ bool ndMarchingCubeIsoSurface::CalculateMinExtend3d(const ndVector& p0, const nd
 	ndAssert(boxP0.m_x < boxP1.m_x);
 	ndAssert(boxP0.m_y < boxP1.m_y);
 	ndAssert(boxP0.m_z < boxP1.m_z);
-	return ndBoxBoxIntestion(boxP0, boxP1, m_boxP0, m_boxP1 - m_gridSize, boxP0, boxP1);
+	return ndBoxBoxIntersection(boxP0, boxP1, m_boxP0, m_boxP1 - m_gridSize * ndVector::m_two, boxP0, boxP1);
 }
 
 void ndMarchingCubeIsoSurface::GetFacesPatch(ndPatchMesh& patch) const
@@ -541,6 +546,7 @@ ndFloat32 ndMarchingCubeIsoSurface::RayCast(const ndVector& localP0, const ndVec
 	ndFastRay ray(localP0, localP1);
 
 	// for each cell touched by the line
+	bool insideBounds = true;
 	do
 	{
 		ndFloat32 t = RayCastCell(ray, diffXYZ[0].m_index, diffXYZ[1].m_index, diffXYZ[2].m_index, normalOut, maxT);
@@ -579,7 +585,10 @@ ndFloat32 ndMarchingCubeIsoSurface::RayCast(const ndVector& localP0, const ndVec
 				diffXYZ[2].Increment();
 			}
 		}
-	} while ((diffXYZ[0].m_t <= ndFloat32(1.0f)) || (diffXYZ[1].m_t <= ndFloat32(1.0f)) || (diffXYZ[2].m_t <= ndFloat32(1.0f)));
+		insideBounds = (diffXYZ[0].m_index < m_maxGrid_x);
+		insideBounds = insideBounds && (diffXYZ[1].m_index < m_maxGrid_y);
+		insideBounds = insideBounds && (diffXYZ[2].m_index < m_maxGrid_z);
+	} while (insideBounds && ((diffXYZ[0].m_t <= ndFloat32(1.0f)) || (diffXYZ[1].m_t <= ndFloat32(1.0f)) || (diffXYZ[2].m_t <= ndFloat32(1.0f))));
 
 	// if no cell was hit, return a large value
 	return ndFloat32(1.2f);

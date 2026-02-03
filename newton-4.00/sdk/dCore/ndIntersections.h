@@ -94,7 +94,7 @@ inline ndFloat32 ndBoxDistanceToOrigin2 (const ndVector& minBox, const ndVector&
 	return dist.DotProduct(dist).GetScalar();
 }
 
-inline bool ndBoxBoxIntestion(ndVector& minBox, ndVector& maxBox,
+inline bool ndBoxBoxIntersection(ndVector& minBox, ndVector& maxBox,
 	const ndVector& minBox0, const ndVector& maxBox0,
 	const ndVector& minBox1, const ndVector& maxBox1)
 {

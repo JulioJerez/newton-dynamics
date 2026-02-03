@@ -258,7 +258,6 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 			const ndVector boxColor(1.0f, 0.0f, 1.0f, 1.0f);
 			for (ndInt32 i = 0; i < 12; ++i)
 			{
-				//DrawLine(box[i][0], box[i][1], color, ndFloat32(1.0f));
 				debugRenderPass->AddRuntimeLine(box[i][0], box[i][1], boxColor);
 			}
 		}

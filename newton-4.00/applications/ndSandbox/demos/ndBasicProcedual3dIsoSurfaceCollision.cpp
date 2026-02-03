@@ -189,9 +189,10 @@ void ndBasicMarchingCube32Collision(ndDemoEntityManager* const scene)
 	//	ndSharedPtr<ndBody> testBody(AddBox(scene, originMatrix, 1.0f, 1.0f, 1.0f, 1.0f, "wood_0.png"));
 	//}
 
-	//// add a stack of planks
-	//AddPlanks(scene, originMatrix, 1.0f, 4);
-	//
+	// add a stack of planks
+	originMatrix.m_posit.m_z += 3.0f;
+	AddPlanks(scene, originMatrix, 1.0f, 4);
+	
 	//// add few props
 	//originMatrix.m_posit.m_z += 30.0f;
 	////originMatrix.m_posit -= originMatrix.m_front.Scale (ndFloat32 (30.0f));
