@@ -86,6 +86,7 @@ class ndRenderPassDebug : public ndRenderPass
 	ndArray<ndRuntimeLine> m_runtimeLines;
 	ndArray<ndRuntimeLine> m_runtimeRenderLines;
 	ndSpinLock m_runtimeLineLock;
+	ndSpinLock m_runtimeAddLineLock;
 
 	ndWorld* m_world;
 };
