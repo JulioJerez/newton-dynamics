@@ -400,55 +400,13 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 			ndInt32 ix0 = ndInt32(ndFloor(p0.m_x * invScale_x));
 			ndInt32 iz0 = ndInt32(ndFloor(p0.m_z * invScale_z));
 
-			// implement a 3ddda line algorithm 
-			ndInt32 xInc;
+			// implement a 2d ddda line algorithm 
 			ndFloat32 tx;
-			ndFloat32 stepX;
-			ndInt32 zInc;
 			ndFloat32 tz;
+			ndFloat32 stepX;
 			ndFloat32 stepZ;
-
-			//if (dp.m_x > ndFloat32(0.0f))
-			//{
-			//	xInc = 1;
-			//	ndFloat32 val = ndFloat32(1.0f) / dp.m_x;
-			//	stepX = scale_x * val;
-			//	tx = (scale_x * (ndFloat32(ix0) + ndFloat32(1.0f)) - p0.m_x) * val;
-			//}
-			//else if (dp.m_x < ndFloat32(0.0f))
-			//{
-			//	xInc = -1;
-			//	ndFloat32 val = -ndFloat32(1.0f) / dp.m_x;
-			//	stepX = scale_x * val;
-			//	tx = -(scale_x * ndFloat32(ix0) - p0.m_x) * val;
-			//}
-			//else
-			//{
-			//	xInc = 0;
-			//	stepX = ndFloat32(0.0f);
-			//	tx = ndFloat32(1.0e10f);
-			//}
-			//
-			//if (dp.m_z > ndFloat32(0.0f))
-			//{
-			//	zInc = 1;
-			//	ndFloat32 val = ndFloat32(1.0f) / dp.m_z;
-			//	stepZ = scale_z * val;
-			//	tz = (scale_z * (ndFloat32(iz0) + ndFloat32(1.0f)) - p0.m_z) * val;
-			//}
-			//else if (dp.m_z < ndFloat32(0.0f))
-			//{
-			//	zInc = -1;
-			//	ndFloat32 val = -ndFloat32(1.0f) / dp.m_z;
-			//	stepZ = scale_z * val;
-			//	tz = -(scale_z * ndFloat32(iz0) - p0.m_z) * val;
-			//}
-			//else
-			//{
-			//	zInc = 0;
-			//	stepZ = ndFloat32(0.0f);
-			//	tz = ndFloat32(1.0e10f);
-			//}
+			ndInt32 xInc;
+			ndInt32 zInc;
 
 			auto CalculateDeltas = [](
 				ndInt32& inc, ndFloat32& step, ndFloat32& t,

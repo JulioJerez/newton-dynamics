@@ -16,12 +16,44 @@
 #include "ndDemoEntityNotify.h"
 #include "ndDemoEntityManager.h"
 
+//#define D_COLLISION_UPDATE_ONLY
+
+class ndApplyImpulse : public ndDemoEntityNotify
+{
+	public:
+	ndApplyImpulse(ndDemoEntityManager* const manager, const ndSharedPtr<ndRenderSceneNode>& entity)
+		:ndDemoEntityNotify(manager, entity)
+		,m_addImpulse(false)
+	{
+	}
+
+	void OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep) override
+	{
+		ndDemoEntityNotify::OnApplyExternalForce(threadIndex, timestep);
+		if (m_addImpulse)
+		{
+			ndBodyKinematic* const body = GetBody()->GetAsBodyKinematic();
+			if (body->GetInvMass() > 0.0f)
+			{
+				ndVector upPush(ndVector::m_zero);
+				upPush.m_y = ndFloat32(5.0f) / body->GetInvMass();
+				upPush.m_z = ndFloat32(2.0f) / body->GetInvMass();
+				body->ApplyImpulsePair(upPush, ndVector::m_zero, timestep);
+			}
+		}
+
+		m_addImpulse = false;
+	}
+
+	bool m_addImpulse;
+};
 
 class ndBuildWallPanel : public ndDemoEntityManager::ndDemoUIpanel
 {
 	public:
-	ndBuildWallPanel()
+	ndBuildWallPanel(ndApplyImpulse* const impulse)
 		:ndDemoUIpanel()
+		,m_applyImpulse(impulse)
 	{
 	}
 
@@ -64,6 +96,11 @@ class ndBuildWallPanel : public ndDemoEntityManager::ndDemoUIpanel
 	{
 		ndVector color(1.0f, 1.0f, 0.0f, 0.0f);
 
+		if (ImGui::Button("ApplyPush"))
+		{
+			m_applyImpulse->m_addImpulse = true;
+		}
+
 		if (ImGui::Button("BuildWall"))
 		{
 			if (!m_wall.GetCount())
@@ -94,6 +131,7 @@ class ndBuildWallPanel : public ndDemoEntityManager::ndDemoUIpanel
 	}
 
 	ndList<ndSharedPtr<ndBody>> m_wall;
+	ndWeakPtr<ndApplyImpulse> m_applyImpulse;
 };
 
 void ndBasicCollisionOnly(ndDemoEntityManager* const scene)
@@ -101,15 +139,20 @@ void ndBasicCollisionOnly(ndDemoEntityManager* const scene)
 	// build a floor
 	ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
 
-	// set the physics as collision only mode
-	scene->GetWorld()->SetUpdateMode(true);
-
-	// add an UI panel for recreating Steve Hurley's crash
-	ndSharedPtr<ndDemoEntityManager::ndDemoUIpanel> controlPanel(new ndBuildWallPanel());
-	scene->SetDemoUIpanel(controlPanel);
-
 	ndMatrix matrix(ndGetIdentityMatrix());
 	ndSharedPtr<ndBody> testBody(AddBox(scene, matrix, 1.0f, 1.0f, 1.0f, 1.0f, "wood_0.png"));
+	ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*testBody->GetNotifyCallback();
+	ndSharedPtr<ndBodyNotify> impulseNotify(new ndApplyImpulse(scene, notify->GetUserData()));
+	testBody->SetNotifyCallback(impulseNotify);
+
+#ifdef D_COLLISION_UPDATE_ONLY
+	// set the physics as collision only mode
+	scene->GetWorld()->SetUpdateMode(true);
+#endif
+
+	// add an UI panel for recreating Steve Hurley's crash
+	ndSharedPtr<ndDemoEntityManager::ndDemoUIpanel> controlPanel(new ndBuildWallPanel((ndApplyImpulse*)*testBody->GetNotifyCallback()));
+	scene->SetDemoUIpanel(controlPanel);
 
 	matrix.m_posit.m_x -= 8.0f;
 	matrix.m_posit.m_y += 2.0f;

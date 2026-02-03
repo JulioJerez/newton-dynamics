@@ -285,33 +285,54 @@ void ndMarchingCubeIsoSurface::GetFacesPatch(ndPatchMesh& patch) const
 						const ndInt32 faceStart = m_facesScan[tableIndex];
 						const ndInt32 triangleStart = m_facesScan[tableIndex];
 						const ndInt32 triangleCount = m_facesScan[tableIndex + 1] - triangleStart;
+
+						ndInt32 remapVertexArray[12];
+						for (ndInt32 i = 0; i < 12; ++i)
+						{
+							remapVertexArray[i] = -1;
+						}
+						auto RemapVertexIndex = [this, & patch, &remapVertexArray, &vertlist](ndInt32 index)
+						{
+							ndAssert(index < 12);
+							ndInt32 remapIndex = remapVertexArray[index];
+							if (remapIndex == -1)
+							{
+								const ndVector& p0 = vertlist[index];
+								patch.m_pointArray.PushBack(p0);
+								remapVertexArray[index] = ndInt32 (patch.m_pointArray.GetCount()) - 1;
+							}
+						};
+
 						for (ndInt32 i = 0; i < triangleCount; ++i)
 						{
-							const ndInt32 j0 = m_faces[faceStart + i][0];
-							const ndInt32 j1 = m_faces[faceStart + i][1];
-							const ndInt32 j2 = m_faces[faceStart + i][2];
+							RemapVertexIndex(m_faces[faceStart + i][0]);
+							RemapVertexIndex(m_faces[faceStart + i][1]);
+							RemapVertexIndex(m_faces[faceStart + i][2]);
 
-							const ndVector& p0 = vertlist[j0];
-							const ndVector& p1 = vertlist[j1];
-							const ndVector& p2 = vertlist[j2];
+							const ndInt32 k0 = m_faces[faceStart + i][0];
+							const ndInt32 k1 = m_faces[faceStart + i][1];
+							const ndInt32 k2 = m_faces[faceStart + i][2];
+
+							const ndInt32 j0 = remapVertexArray[k0];
+							const ndInt32 j1 = remapVertexArray[k1];
+							const ndInt32 j2 = remapVertexArray[k2];
+
+							const ndVector& p0 = patch.m_pointArray[j0];
+							const ndVector& p1 = patch.m_pointArray[j1];
+							const ndVector& p2 = patch.m_pointArray[j2];
 							const ndVector p10(p1 - p0);
 							const ndVector p20(p2 - p0);
 							const ndVector normal(p10.CrossProduct(p20) & ndVector::m_triplexMask);
 							ndFloat32 areaMag2 = normal.DotProduct(normal).GetScalar();
 							if (areaMag2 > ndFloat32(1.0e-6f))
 							{
-								const ndInt32 triangleIndex = patch.m_indexArray.GetCount(); \
-
-									patch.m_faceArray.PushBack(3);
+								patch.m_faceArray.PushBack(3);
 								patch.m_faceMaterialArray.PushBack(0);
 
-								patch.m_pointArray.PushBack(p0);
-								patch.m_pointArray.PushBack(p1);
-								patch.m_pointArray.PushBack(p2);
+								patch.m_indexArray.PushBack(j0);
+								patch.m_indexArray.PushBack(j1);
+								patch.m_indexArray.PushBack(j2);
 								patch.m_normalArray.PushBack(normal.Normalize());
-								patch.m_indexArray.PushBack(triangleIndex + 0);
-								patch.m_indexArray.PushBack(triangleIndex + 1);
-								patch.m_indexArray.PushBack(triangleIndex + 2);
 							}
 						}
 					}
