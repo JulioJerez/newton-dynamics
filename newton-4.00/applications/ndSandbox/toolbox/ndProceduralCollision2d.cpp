@@ -378,8 +378,8 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 		const ndVector q1(localP0.GetMax(localP1) + m_padding);
 		CalculateMinExtend3d(q0, q1, boxP0, boxP1);
 
-		// make the box a beam tha extend from 
-		// infinite positive high to -infinity high.
+		// make the box is a beam that extends 
+		// from infinite positive high to -infinity high.
 		// 1.0e10 represents infinity.
 		boxP0.m_y = -ndFloat32(1.0e10f);
 		boxP1.m_y = ndFloat32(1.0e10f);
@@ -404,55 +404,86 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 			ndInt32 xInc;
 			ndFloat32 tx;
 			ndFloat32 stepX;
-			if (dp.m_x > ndFloat32(0.0f))
-			{
-				xInc = 1;
-				ndFloat32 val = ndFloat32(1.0f) / dp.m_x;
-				stepX = scale_x * val;
-				tx = (scale_x * ((ndFloat32)ix0 + ndFloat32(1.0f)) - p0.m_x) * val;
-			}
-			else if (dp.m_x < ndFloat32(0.0f))
-			{
-				xInc = -1;
-				ndFloat32 val = -ndFloat32(1.0f) / dp.m_x;
-				stepX = scale_x * val;
-				tx = -(scale_x * (ndFloat32)ix0 - p0.m_x) * val;
-			}
-			else
-			{
-				xInc = 0;
-				stepX = ndFloat32(0.0f);
-				tx = ndFloat32(1.0e10f);
-			}
-
 			ndInt32 zInc;
 			ndFloat32 tz;
 			ndFloat32 stepZ;
-			if (dp.m_z > ndFloat32(0.0f))
+
+			//if (dp.m_x > ndFloat32(0.0f))
+			//{
+			//	xInc = 1;
+			//	ndFloat32 val = ndFloat32(1.0f) / dp.m_x;
+			//	stepX = scale_x * val;
+			//	tx = (scale_x * (ndFloat32(ix0) + ndFloat32(1.0f)) - p0.m_x) * val;
+			//}
+			//else if (dp.m_x < ndFloat32(0.0f))
+			//{
+			//	xInc = -1;
+			//	ndFloat32 val = -ndFloat32(1.0f) / dp.m_x;
+			//	stepX = scale_x * val;
+			//	tx = -(scale_x * ndFloat32(ix0) - p0.m_x) * val;
+			//}
+			//else
+			//{
+			//	xInc = 0;
+			//	stepX = ndFloat32(0.0f);
+			//	tx = ndFloat32(1.0e10f);
+			//}
+			//
+			//if (dp.m_z > ndFloat32(0.0f))
+			//{
+			//	zInc = 1;
+			//	ndFloat32 val = ndFloat32(1.0f) / dp.m_z;
+			//	stepZ = scale_z * val;
+			//	tz = (scale_z * (ndFloat32(iz0) + ndFloat32(1.0f)) - p0.m_z) * val;
+			//}
+			//else if (dp.m_z < ndFloat32(0.0f))
+			//{
+			//	zInc = -1;
+			//	ndFloat32 val = -ndFloat32(1.0f) / dp.m_z;
+			//	stepZ = scale_z * val;
+			//	tz = -(scale_z * ndFloat32(iz0) - p0.m_z) * val;
+			//}
+			//else
+			//{
+			//	zInc = 0;
+			//	stepZ = ndFloat32(0.0f);
+			//	tz = ndFloat32(1.0e10f);
+			//}
+
+			auto CalculateDeltas = [](
+				ndInt32& inc, ndFloat32& step, ndFloat32& t,
+				ndInt32 gridPosit, ndFloat32 posit, ndFloat32 delta, ndFloat32 scale)
 			{
-				zInc = 1;
-				ndFloat32 val = ndFloat32(1.0f) / dp.m_z;
-				stepZ = scale_z * val;
-				tz = (scale_z * ((ndFloat32)iz0 + ndFloat32(1.0f)) - p0.m_z) * val;
-			}
-			else if (dp.m_z < ndFloat32(0.0f))
-			{
-				zInc = -1;
-				ndFloat32 val = -ndFloat32(1.0f) / dp.m_z;
-				stepZ = scale_z * val;
-				tz = -(scale_z * (ndFloat32)iz0 - p0.m_z) * val;
-			}
-			else
-			{
-				zInc = 0;
-				stepZ = ndFloat32(0.0f);
-				tz = ndFloat32(1.0e10f);
-			}
+				if (delta > ndFloat32(0.0f))
+				{
+					inc = 1;
+					ndFloat32 val = ndFloat32(1.0f) / delta;
+					step = scale * val;
+					t = (scale * (ndFloat32(gridPosit) + ndFloat32(1.0f)) - posit) * val;
+				}
+				else if (delta < ndFloat32(0.0f))
+				{
+					inc = -1;
+					ndFloat32 val = -ndFloat32(1.0f) / delta;
+					step = scale * val;
+					t = -(scale * ndFloat32(gridPosit) - posit) * val;
+				}
+				else
+				{
+					inc = 0;
+					step = ndFloat32(0.0f);
+					t = ndFloat32(1.0e10f);
+				}
+			};
+
+			CalculateDeltas(xInc, stepX, tx, ix0, p0.m_x, dp.m_x, scale_x);
+			CalculateDeltas(zInc, stepZ, tz, iz0, p0.m_z, dp.m_z, scale_z);
 
 			ndFloat32 txAcc = tx;
 			ndFloat32 tzAcc = tz;
 			ndInt32 xIndex0 = ix0;
 			ndInt32 zIndex0 = iz0;
+
 			ndFastRay ray(localP0, localP1);
 
 			// for each cell touched by the line

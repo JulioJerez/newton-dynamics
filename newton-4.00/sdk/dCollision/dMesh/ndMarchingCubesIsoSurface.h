@@ -50,7 +50,8 @@ class ndMarchingCubeIsoSurface : public ndMarchingCubes
 	D_COLLISION_API void SetBox(const ndVector& boxP0, const ndVector& boxP1);
 
 	D_COLLISION_API virtual void GenerateMesh() override;
-	D_COLLISION_API ndVector PositionToGrid(const ndVector& posit) const;
+	D_COLLISION_API ndVector PositionToGridSpace(const ndVector& posit) const;
+	D_COLLISION_API ndVector GridSpaceToPosition(const ndVector& gridPosit) const;
 
 	D_COLLISION_API void GetFacesPatch(ndPatchMesh& patch) const;
 	D_COLLISION_API ndFloat32 RayCast(const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, ndContactPoint& contactOut) const;
@@ -79,7 +80,6 @@ class ndMarchingCubeIsoSurface : public ndMarchingCubes
 	};
 
 	void GenerateIndexList();
-	ndCellFill GetFacesInCell(ndFixSizeArray<ndTriangle, 5>& patch, const ndVector& gridPosit) const;
 	bool CalculateMinExtend3d(const ndVector& p0, const ndVector& p1, ndVector& boxP0, ndVector& boxP1) const;
 	ndFloat32 RayCastCell(const ndFastRay& ray, ndInt32 xIndex0, ndInt32 yIndex0, ndInt32 zIndex0, ndVector& normalOut, ndFloat32 maxT) const;
 
