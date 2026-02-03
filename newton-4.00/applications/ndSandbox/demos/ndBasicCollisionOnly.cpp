@@ -37,6 +37,7 @@ class ndApplyImpulse : public ndDemoEntityNotify
 			{
 				ndVector upPush(ndVector::m_zero);
 				upPush.m_y = ndFloat32(5.0f) / body->GetInvMass();
+				upPush.m_z = ndFloat32(2.0f) / body->GetInvMass();
 				body->ApplyImpulsePair(upPush, ndVector::m_zero, timestep);
 			}
 		}
