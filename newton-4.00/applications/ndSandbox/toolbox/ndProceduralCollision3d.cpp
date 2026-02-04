@@ -32,7 +32,7 @@
 #define D_TERRAIN_TILE_SIZE			128
 #define D_TERRAIN_ELEVATION_SCALE	32.0f
 
-class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
+class ndProceduralTerrainShape3d : public ndShapeStaticProceduralMesh
 {
 	public:
 	D_CLASS_REFLECTION(ndProceduralTerrainShape3d, ndShapeStaticProceduralMesh)
@@ -45,9 +45,18 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 			,m_material()
 			,m_heightfield()
 			,m_owner(owner)
+			,m_wormholeLocation(ndYawMatrix (ndFloat32 (45.0f) * ndRadToDegree))
+			,m_bridgeLocation(ndYawMatrix(ndFloat32(-45.0f)* ndRadToDegree))
 		{
+			m_bridgeLocation.m_posit.m_z = 50.0f;
+			m_wormholeLocation.m_posit.m_z = 50.0f;
+
+			ndUnsigned64 time = ndGetTimeInMicroseconds();
 			MakeNoiseHeightfield();
 			GenerateMesh();
+
+			time = ndGetTimeInMicroseconds() - time;
+			ndExpandTraceMessage("%s: build time %g (sec)\n", __FUNCTION__, ndFloat32(time) * ndFloat32(1.0e-6f));
 		}
 
 		// make a rolling terrain from a 2d noise function
@@ -88,18 +97,16 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 			//for now just add +-40 units in each side
 			boxP1.m_y = ndCeil(maxHeight * scale + 40.0f);
 			boxP0.m_y = ndFloor(minHeight * scale - 40.0f);
-			//SetBox(boxP0, boxP1);
 
 			for (ndInt32 i = 0; i < m_heightfield.GetCapacity(); ++i)
 			{
 				ndReal y = m_heightfield[i];
-				//y = m_heightScale * y + m_heightOrigin;
 				y = scale * y;
 				m_heightfield[i] = y;
 			}
 		}
 
-		virtual ndReal SampleTorus(const ndVector& posit, ndMatrix& matrix) const
+		virtual ndReal SampleTorus(const ndVector& posit, const ndMatrix& matrix) const
 		{
 			// draw a torud
 			ndFloat32 bigRadius = 40.0f;
@@ -121,15 +128,16 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 			ndAssert(gridSpace.m_z < D_TERRAIN__WIDTH);
 
 			ndInt32 address = ndInt32(gridSpace.m_z * D_TERRAIN__WIDTH + gridSpace.m_x);
+
+			ndReal bridgeValue = SampleTorus(posit, m_bridgeLocation);
+			ndReal wormholeValue = SampleTorus(posit, m_wormholeLocation);
 			ndReal heightField = ndReal(posit.m_y - m_heightfield[address]);
 
-			static ndMatrix tunnelMatrix(ndCalculateMatrix(ndYawMatrix(90.0f * ndDegreeToRad), ndVector(20.0f, 0.0f, 0.0f, 1.0f)));
-			ndReal tunnelValue = SampleTorus(posit, tunnelMatrix);
-			ndReal isoValue = ndMax(heightField, -tunnelValue);
+			// fist calculate the SDM union of the ground and the bridge
+			ndReal isoValue = ndMin(heightField, bridgeValue);
 
-			static ndMatrix bridgeMatrix(ndCalculateMatrix(ndYawMatrix(0.0f * ndDegreeToRad), ndVector(00.0f, 0.0f, 40.0f, 1.0f)));
-			ndReal bridgeValue = SampleTorus(posit, bridgeMatrix);
-			isoValue = ndMin(isoValue, bridgeValue);
+			// now calculate the SDM substraction of the ground and the the wormhole
+			isoValue = ndMax(isoValue, -wormholeValue);
 
 			return isoValue;
 		}
@@ -137,6 +145,9 @@ class ndProceduralTerrainShape3d : 	public ndShapeStaticProceduralMesh
 		ndArray<ndInt8> m_material;
 		ndArray<ndReal> m_heightfield;
 		ndProceduralTerrainShape3d* m_owner;
+
+		ndMatrix m_wormholeLocation;
+		ndMatrix m_bridgeLocation;
 	};
 
 	ndProceduralTerrainShape3d(ndDemoEntityManager* const scene)
@@ -310,6 +321,7 @@ class ndHeightfieldMesh3d : public ndRenderSceneNode
 		// build all tiles in parallel
 		ndThreadPool* const threadPool = scene->GetWorld()->GetScene();
 
+		ndUnsigned64 time = ndGetTimeInMicroseconds();
 		threadPool->Begin();
 		threadPool->ParallelExecute(BuildTiles, ndInt32(tileSlots.GetCount()), 1);
 		threadPool->End();
@@ -329,6 +341,9 @@ class ndHeightfieldMesh3d : public ndRenderSceneNode
 			ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
 			tileNode->SetPrimitive(mesh);
 		}
+
+		time = ndGetTimeInMicroseconds() - time;
+		ndExpandTraceMessage("%s: build time %g (sec)\n", __FUNCTION__, ndFloat32(time)* ndFloat32(1.0e-6f));
 	}
 
 	private:
@@ -442,11 +457,7 @@ ndSharedPtr<ndBody> BuildMarchingCubeHeighfield(ndDemoEntityManager* const scene
 	
 	// add tile base sence node
 	ndSharedPtr<ndRenderTexture> texture(scene->GetRenderer()->GetTextureCache()->GetTexture(ndGetWorkingFileName(textureName)));
-
-	ndUnsigned64 time = ndGetTimeInMicroseconds();
 	ndSharedPtr<ndRenderSceneNode> entity(new ndHeightfieldMesh3d(scene, heighfield, texture, heighfieldLocation));
-	time = ndGetTimeInMicroseconds() - time;
-	ndExpandTraceMessage("%s: build time %g (sec)\n", __FUNCTION__, ndFloat32(time) * ndFloat32(1.0e-6f));
 
 	// generate a rigibody and added to the scene and world
 	ndPhysicsWorld* const world = scene->GetWorld();

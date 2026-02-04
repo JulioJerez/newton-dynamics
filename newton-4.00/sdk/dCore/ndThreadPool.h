@@ -200,7 +200,8 @@ template <typename Function>
 void ndThreadPool::ParallelExecute(const Function& function, ndInt32 workGroupCount, ndInt32 groupsPerThreads)
 {
 	const ndInt32 threadCount = GetThreadCount();
-	if ((threadCount <= 1) || (m_isInUpdate == 0))
+	//if ((threadCount <= 1) || (m_isInUpdate == 0))
+	if (threadCount <= 1)
 	{
 		// in single threaded, just execute all jobs in the main thread
 		for (ndInt32 i = 0; i < workGroupCount; ++i)
@@ -210,6 +211,7 @@ void ndThreadPool::ParallelExecute(const Function& function, ndInt32 workGroupCo
 	}
 	else
 	{
+		ndAssert(m_isInUpdate);
 		#ifdef	D_USE_THREAD_EMULATION
 			// in emulation mode, threads execute all task in the main thread
 			for (ndInt32 i = 0; i < workGroupCount; ++i)

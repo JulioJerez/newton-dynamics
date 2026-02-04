@@ -24,6 +24,7 @@
 
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
+#include "ndMarchingCubes.h"
 
 class ndPatchMesh;
 class ndMarchingCubeIsoSurface : public ndMarchingCubes

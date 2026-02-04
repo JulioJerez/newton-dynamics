@@ -23,9 +23,9 @@ void ndBasicMarchingCube3dCollision(ndDemoEntityManager* const scene)
 	ndSharedPtr<ndBody> mapBody(BuildMarchingCubeHeighfield(scene, "grass.png", ndGetIdentityMatrix()));
 
 	// build a placement matrix
-	ndQuaternion rot(ndYawMatrix(0.0f * ndDegreeToRad));
-	ndVector origin(10.5f, 0.5f, -30.0f, 1.0f);
-	ndVector floor(FindFloor(*scene->GetWorld(), origin, 400.0f));
+	const ndQuaternion rot(ndYawMatrix(0.0f * ndDegreeToRad));
+	const ndVector origin(0.5f, 0.0f, -0.0f, 1.0f);
+	const ndVector floor(FindFloor(*scene->GetWorld(), origin, 400.0f));
 	ndMatrix originMatrix(ndCalculateMatrix(rot, floor));
 
 	// add single box for testing
@@ -40,13 +40,13 @@ void ndBasicMarchingCube3dCollision(ndDemoEntityManager* const scene)
 	originMatrix.m_posit.m_z += 3.0f;
 	AddPlanks(scene, originMatrix, 1.0f, 4);
 	
-	//// add few props
-	//originMatrix.m_posit.m_z += 30.0f;
-	////originMatrix.m_posit -= originMatrix.m_front.Scale (ndFloat32 (30.0f));
-	//AddCapsuleStacks(scene, originMatrix, 10.0f, 0.5f, 0.5f, 1.0f, 10, 10, 7);
+	// add few props
+	originMatrix.m_posit.m_z += 15.0f;
+	AddCapsuleStacks(scene, originMatrix, 10.0f, 0.5f, 0.5f, 1.0f, 10, 10, 7);
 
 	// set the camera
-	originMatrix.m_posit.m_y += 3.0f;
-	originMatrix.m_posit.m_x -= 8.0f;
+	originMatrix.m_posit.m_x -= 30.0f;
+	originMatrix.m_posit = FindFloor(*scene->GetWorld(), originMatrix.m_posit, 400.0f);
+	originMatrix.m_posit.m_y += 3;
 	scene->SetCameraMatrix(rot, originMatrix.m_posit);
 }
