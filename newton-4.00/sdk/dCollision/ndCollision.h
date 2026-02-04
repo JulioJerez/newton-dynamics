@@ -49,6 +49,7 @@
 #include <ndBodyListView.h>
 #include <ndContactArray.h>
 #include <ndBodySphFluid.h>
+#include <ndMarchingCubes.h>
 #include <ndBodySphFluid_New.h>
 #include <ndShapeCapsule.h>
 #include <ndShapeCylinder.h>

@@ -20,11 +20,7 @@
 */
 
 #include "ndCoreStdafx.h"
-#include "ndSort.h"
-#include "ndDebug.h"
-#include "ndVector.h"
-#include "ndMatrix.h"
-#include "ndProfiler.h"
+#include "ndCollisionStdafx.h"
 #include "ndMarchingCubes.h"
 
 // adapted from code by written by Paul Bourke may 1994
@@ -3605,11 +3601,13 @@ void ndMarchingCubesPaticles::GenerateIndexList()
 
 void ndMarchingCubesPaticles::GenerateMesh()
 {
-	CalculateAABB();
-	RemoveDuplicates();
-	GenerateGrids();
-	GenerateTriangles();
-	GenerateIndexList();
+	m_threadPool->Begin();
+		CalculateAABB();
+		RemoveDuplicates();
+		GenerateGrids();
+		GenerateTriangles();
+		GenerateIndexList();
+	m_threadPool->End();
 
 	m_cellScans.SetCount(0);
 	m_hashGridMap.SetCount(0);

@@ -37,22 +37,16 @@ void ndBasicUserHeightfieldCollision(ndDemoEntityManager* const scene)
 	//ndSharedPtr<ndBody> testBody(AddConvexHull(scene, originMatrix, 40.0f, 0.7f, 1.0f, 10, "wood_0.png"));
 	testBody->SetOmega(ndVector (-10.0f, 0.0f, 0.0f, 0.0f));
 
-	//for (ndInt32 i = 0; i < 20; ++i)
-	//{
-	//	ndSharedPtr<ndBody> testBody(AddBox(scene, originMatrix, 1.0f, 1.0f, 1.0f, 1.0f, "wood_0.png"));
-	//}
-
-	//// add a stack of planks
-	//AddPlanks(scene, originMatrix, 1.0f, 4);
-	//
-	//// add few props
-	//originMatrix.m_posit.m_z += 30.0f;
-	////originMatrix.m_posit -= originMatrix.m_front.Scale (ndFloat32 (30.0f));
-	//AddCapsuleStacks(scene, originMatrix, 10.0f, 0.5f, 0.5f, 1.0f, 10, 10, 7);
+	// add a stack of planks
+	AddPlanks(scene, originMatrix, 1.0f, 4);
+	
+	// add few props
+	originMatrix.m_posit.m_z += 20.0f;
+	AddCapsuleStacks(scene, originMatrix, 10.0f, 0.5f, 0.5f, 1.0f, 10, 10, 7);
 	
 	// set the camera
 	originMatrix.m_posit.m_y += 2.0f;
-	//originMatrix.m_posit.m_x += 40.0f;
+	originMatrix.m_posit.m_x += 30.0f;
 	//originMatrix.m_posit.m_z -= 10.0f;
 	scene->SetCameraMatrix(rot, originMatrix.m_posit);
 }

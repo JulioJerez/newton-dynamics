@@ -30,14 +30,15 @@ class MarchingCubeParticles : public ndDemoEntityManager::OnPostUpdate
 			:ndMarchingCubesPaticles(scene->GetWorld()->GetScene(), PARTICLE_SIZE)
 		{
 			ndMatrix matrix(ndGetIdentityMatrix());
-			matrix.m_posit.m_x = 0.25f;
-			matrix.m_posit.m_y = 0.0f;
-			matrix.m_posit.m_z = 0.0f;
+			//matrix.m_posit.m_x = 0.25f;
+			matrix.m_posit.m_x = 1.0f;
+			matrix.m_posit.m_y = 1.0f;
+			matrix.m_posit.m_z = 1.0f;
 			matrix.m_posit.m_w = 1.0f;
 
 			//BuildBox(matrix, 32);
 			//BuildBox(matrix, 20);
-			BuildBox(matrix, 4);
+			BuildBox(matrix, 1);
 		}
 
 		void BuildBox(const ndMatrix& matrix, ndInt32 size)
@@ -61,45 +62,18 @@ class MarchingCubeParticles : public ndDemoEntityManager::OnPostUpdate
 						//ndFloat32 noisex = ndGaussianRandom(ndFloat32(0.0f), sigma);
 						//ndFloat32 noisey = ndGaussianRandom(ndFloat32(0.0f), sigma);
 						//ndFloat32 noisez = ndGaussianRandom(ndFloat32(0.0f), sigma);
-						//p.m_x += noisex;
-						//p.m_y += noisey;
-						//p.m_z += noisez;
+
+						ndFloat32 noisex = spacing * 0.5f;
+						ndFloat32 noisey = spacing * 0.5f;
+						ndFloat32 noisez = spacing * 0.5f;
+
+						p.m_x += noisex;
+						p.m_y += noisey;
+						p.m_z += noisez;
 						m_pointParticles.PushBack(p);
 					}
 				}
 			}
-		}
-	};
-
-	class ndBasicProcedua2disoSurface : public ndMarchingCubeIsoSurface
-	{
-		public:
-		//#define PARTICLE_SIZE ndFloat32 (1.0f / 50.0f)
-		#define PARTICLE_SIZE ndFloat32 (1.0f)
-
-		ndBasicProcedua2disoSurface(ndDemoEntityManager* const scene)
-			:ndMarchingCubeIsoSurface(scene->GetWorld()->GetScene(), ndVector(ndFloat32 (-128.0f)), ndVector(ndFloat32(128.0f)), PARTICLE_SIZE)
-		{
-			//ndMatrix matrix(ndGetIdentityMatrix());
-			//matrix.m_posit.m_x = 0.25f;
-			//matrix.m_posit.m_y = 0.5f;
-			//matrix.m_posit.m_z = 0.75f;
-			//matrix.m_posit.m_w = 1.0f;
-			//
-			////BuildBox(matrix, 32);
-			////BuildBox(matrix, 20);
-			//BuildBox(matrix, 4);
-		}
-
-		ndReal GetIsoValue(const ndVector& posit) const override
-		{
-			// draw a sphere
-			ndFloat32 radius = 10.5f;
-			const ndVector origin(0.0f, 0.0f, 20.0f, 0.0f);
-
-			ndVector step(posit - origin);
-			ndFloat32 dist = ndSqrt (step.DotProduct(step & ndVector::m_triplexMask).GetScalar()) - radius;
-			return ndReal(dist);
 		}
 	};
 
@@ -139,7 +113,7 @@ class MarchingCubeParticles : public ndDemoEntityManager::OnPostUpdate
 		descriptor.m_collision = collision;
 		descriptor.m_mapping = ndRenderPrimitive::m_box;
 		ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(scene->GetRenderer()->GetTextureCache()->GetTexture(ndGetWorkingFileName("metal_30.png")));
-		material.m_opacity = ndFloat32(0.5f);
+		material.m_opacity = ndFloat32(0.9f);
 		
 		ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
 		ndSharedPtr<ndRenderSceneNode>entity(new ndRenderSceneNode(location));
@@ -194,7 +168,7 @@ void ndBasicParticles(ndDemoEntityManager* const scene)
 	//AddCapsuleStacks(scene, originMatrix, 10.0f, 0.5f, 0.5f, 1.0f, 10, 10, 7);
 
 	// set the camera
-	originMatrix.m_posit.m_y += 3.0f;
-	originMatrix.m_posit.m_x -= 8.0f;
+	originMatrix.m_posit.m_y += 6.0f;
+	originMatrix.m_posit.m_x -= 3.0f;
 	scene->SetCameraMatrix(rot, originMatrix.m_posit);
 }

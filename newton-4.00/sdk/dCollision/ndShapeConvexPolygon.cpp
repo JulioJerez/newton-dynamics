@@ -902,7 +902,7 @@ ndInt32 ndShapeConvexPolygon::CalculatePlaneIntersection(const ndVector& normalI
 
 			if (closestEdge == -1)
 			{
-				ndAssert(0);
+				// discard edge, if it is too far outside the closest point, 
 				return 0;
 			}
 

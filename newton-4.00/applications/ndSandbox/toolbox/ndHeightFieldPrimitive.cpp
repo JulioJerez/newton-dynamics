@@ -65,6 +65,7 @@ class ndHeightfieldMesh : public ndRenderSceneNode
 		// build all tiles in parallel
 		ndThreadPool* const threadPool = scene->GetWorld()->GetScene();
 
+		ndUnsigned64 time = ndGetTimeInMicroseconds();
 		threadPool->Begin();
 		threadPool->ParallelExecute(BuildTiles, ndInt32(tileSlots.GetCount()), 1);
 		threadPool->End();
@@ -84,6 +85,9 @@ class ndHeightfieldMesh : public ndRenderSceneNode
 			ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
 			tileNode->SetPrimitive(mesh);
 		}
+
+		time = ndGetTimeInMicroseconds() - time;
+		ndExpandTraceMessage("%s: build time %g (sec)\n", __FUNCTION__, ndFloat32(time)* ndFloat32(1.0e-6f));
 	}
 
 	static void MakeNoiseHeightfield(ndArray<ndVector>& heightfield)
@@ -228,10 +232,7 @@ ndSharedPtr<ndBody> BuildHeightFieldTerrain(ndDemoEntityManager* const scene, co
 
 	// add tile base sence node
 	ndSharedPtr<ndRenderTexture> texture(scene->GetRenderer()->GetTextureCache()->GetTexture(ndGetWorkingFileName(textureName)));
-	ndUnsigned64 time = ndGetTimeInMicroseconds();
 	ndSharedPtr<ndRenderSceneNode> entity(new ndHeightfieldMesh(scene, heighfield, texture, heighfieldLocation));
-	time = ndGetTimeInMicroseconds() - time;
-	ndExpandTraceMessage("%s: build time %g (sec)\n", __FUNCTION__, ndFloat32(time) * ndFloat32(1.0e-6f));
 	
 	// generate a rigibody and added to the scene and world
 	ndPhysicsWorld* const world = scene->GetWorld();

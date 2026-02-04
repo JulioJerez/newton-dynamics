@@ -23,9 +23,7 @@
 #define __ND_MARCHING_CUBES_H__
 
 #include "ndCoreStdafx.h"
-#include "ndTypes.h"
-#include "ndArray.h"
-#include "ndTree.h"
+#include "ndCollisionStdafx.h"
 
 class ndThreadPool;
 

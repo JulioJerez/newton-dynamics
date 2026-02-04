@@ -18,10 +18,10 @@
 
 //#define D_TERRAIN__WIDTH			1024
 //#define D_TERRAIN_HEIGHT			1024
-//#define D_TERRAIN__WIDTH			512
-//#define D_TERRAIN_HEIGHT			512
-#define D_TERRAIN__WIDTH			256
-#define D_TERRAIN_HEIGHT			256
+#define D_TERRAIN__WIDTH			512
+#define D_TERRAIN_HEIGHT			512
+//#define D_TERRAIN__WIDTH			256
+//#define D_TERRAIN_HEIGHT			256
 
 #define D_TERRAIN_NOISE_OCTAVES		8
 #define D_TERRAIN_NOISE_PERSISTANCE	0.5f
@@ -44,6 +44,7 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 		,m_invGridSize(ndVector::m_triplexMask & ndVector(ndFloat32(1.0f) / D_TERRAIN_GRID_SIZE))
 		,m_owner(scene)
 	{
+		ndUnsigned64 time = ndGetTimeInMicroseconds();
 		MakeNoiseHeightfield();
 
 		ndReal minY = 1.0e20f;
@@ -60,6 +61,10 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 
 		// to account for rounding
 		CalculateAabb(ndGetIdentityMatrix(), m_minBox, m_maxBox);
+
+		time = ndGetTimeInMicroseconds() - time;
+		ndExpandTraceMessage("%s: build time %g (sec)\n", __FUNCTION__, ndFloat32(time) * ndFloat32(1.0e-6f));
+
 	}
 
 	virtual ndUnsigned64 GetHash(ndUnsigned64 hash) const override
@@ -618,6 +623,7 @@ class ndHeightfieldMesh2d : public ndRenderSceneNode
 		// build all tiles in parallel
 		ndThreadPool* const threadPool = scene->GetWorld()->GetScene();
 
+		ndUnsigned64 time = ndGetTimeInMicroseconds();
 		threadPool->Begin();
 		threadPool->ParallelExecute(BuildTiles, ndInt32(tileSlots.GetCount()), 1);
 		threadPool->End();
@@ -637,6 +643,8 @@ class ndHeightfieldMesh2d : public ndRenderSceneNode
 			ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
 			tileNode->SetPrimitive(mesh);
 		}
+		time = ndGetTimeInMicroseconds() - time;
+		ndExpandTraceMessage("%s: build time %g (sec)\n", __FUNCTION__, ndFloat32(time)* ndFloat32(1.0e-6f));
 	}
 
 	private:
@@ -736,11 +744,7 @@ ndSharedPtr<ndBody> BuildUserHeighfieldTerrain(ndDemoEntityManager* const scene,
 	
 	// add tile base scene node
 	ndSharedPtr<ndRenderTexture> texture(scene->GetRenderer()->GetTextureCache()->GetTexture(ndGetWorkingFileName(textureName)));
-
-	ndUnsigned64 time = ndGetTimeInMicroseconds();
 	ndSharedPtr<ndRenderSceneNode> entity(new ndHeightfieldMesh2d(scene, heighfield, texture, heighfieldLocation));
-	time = ndGetTimeInMicroseconds() - time;
-	ndExpandTraceMessage("%s: build time %g (sec)\n", __FUNCTION__, ndFloat32(time) * ndFloat32(1.0e-6f));
 	
 	// generate a rigibody and added to the scene and world
 	ndPhysicsWorld* const world = scene->GetWorld();
