@@ -48,10 +48,8 @@ void ndForceImpactPair::Push(ndFloat32 val)
 
 ndConstraint::ndConstraint()
 	:ndContainersFreeListAlloc<ndConstraint>()
-	,m_forceBody0(ndVector::m_zero)
-	,m_torqueBody0(ndVector::m_zero)
-	,m_forceBody1(ndVector::m_zero)
-	,m_torqueBody1(ndVector::m_zero)
+	,m_forceTorqueBody0(ndVector8::m_zero)
+	,m_forceTorqueBody1(ndVector8::m_zero)
 	,m_body0(nullptr)
 	,m_body1(nullptr)
 	,m_rowCount(0)
@@ -151,22 +149,32 @@ void ndConstraint::DebugJoint(ndConstraintDebugCallback&) const
 
 ndVector ndConstraint::GetForceBody0() const
 {
-	return m_forceBody0;
+	return m_forceTorqueBody0.GetLow();
 }
 
 ndVector ndConstraint::GetTorqueBody0() const
 {
-	return m_torqueBody0;
+	return m_forceTorqueBody0.GetHigh();
 }
 
 ndVector ndConstraint::GetForceBody1() const
 {
-	return m_forceBody1;
+	return m_forceTorqueBody1.GetLow();
 }
 
 ndVector ndConstraint::GetTorqueBody1() const
 {
-	return m_torqueBody1;
+	return m_forceTorqueBody1.GetHigh();
+}
+
+ndVector8 ndConstraint::GetForceTorqueBody0() const
+{
+	return m_forceTorqueBody0;
+}
+
+ndVector8 ndConstraint::GetForceTorqueBody1() const
+{
+	return m_forceTorqueBody1;
 }
 
 void ndConstraint::UpdateParameters()
