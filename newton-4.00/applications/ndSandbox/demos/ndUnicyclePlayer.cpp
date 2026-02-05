@@ -153,7 +153,7 @@ namespace ndUnicyclePlayer
 
 #if 1
 		const ndMatrix comFrame(ndGetIdentityMatrix());
-		const ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(comFrame, m_timestep));
+		const ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(comFrame));
 
 		const ndVector comOmega(comDynamics.m_omega);
 		const ndVector comAlpha(comDynamics.m_alpha);
