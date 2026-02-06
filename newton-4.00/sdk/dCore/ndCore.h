@@ -77,7 +77,6 @@
 #include <ndConjugateGradient.h>
 #include <ndTriangulatePolygon.h>
 #include <ndPolygonSoupBuilder.h>
-#include <ndSharedNodeHierarchy.h>
 #include <ndPolygonSoupDatabase.h>
 #include <ndPolyhedraMassProperties.h>
 #include <ndDelaunayTetrahedralization.h>
