@@ -94,6 +94,7 @@ class ndModelArticulation: public ndModel
 	D_NEWTON_API void SetTransform(const ndMatrix& matrix);
 	
 	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassDynamics(const ndMatrix& localFrame) const;
+	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassKinematics(const ndMatrix& localFrame) const;
 	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassDynamics(ndIkSolver& solver, const ndMatrix& localFrame, ndFixSizeArray<ndJointBilateralConstraint*, D_MAX_LINKS>& extraJoints, ndFloat32 timestep) const;
 	
 	protected:

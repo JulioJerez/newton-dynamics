@@ -718,6 +718,73 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 	return dynamics;
 }
 
+ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentreOfMassKinematics(const ndMatrix& localFrame) const
+{
+	ndCenterOfMassDynamics dynamics;
+	if (!m_rootNode)
+	{
+		return dynamics;
+	}
+
+	ndFixSizeArray<ndVector, D_MAX_LINKS> bodyCenter;
+	ndFixSizeArray<const ndBodyKinematic*, D_MAX_LINKS> bodyArray;
+	for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
+	{
+		const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+		bodyArray.PushBack(body);
+		const ndMatrix matrix(body->GetMatrix());
+		const ndVector bodyCom(matrix.TransformVector(body->GetCentreOfMass()));
+		bodyCenter.PushBack(bodyCom);
+
+		ndFloat32 mass = body->GetMassMatrix().m_w;
+		dynamics.m_mass += mass;
+		dynamics.m_centerOfMass.m_posit += bodyCom.Scale(mass);
+	}
+	dynamics.m_centerOfMass.m_posit = dynamics.m_centerOfMass.m_posit.Scale(ndFloat32(1.0f) / dynamics.m_mass);
+	dynamics.m_centerOfMass.m_posit.m_w = ndFloat32(1.0f);
+
+	for (ndInt32 i = bodyArray.GetCount() - 1; i >= 0; --i)
+	{
+		bodyCenter[i] = (bodyCenter[i] - dynamics.m_centerOfMass.m_posit) & ndVector::m_triplexMask;
+	}
+
+	for (ndInt32 i = bodyArray.GetCount() - 1; i >= 0; --i)
+	{
+		const ndBodyKinematic* const body = bodyArray[i];
+		ndFloat32 mass = body->GetMassMatrix().m_w;
+		ndMatrix bodyInertia(body->CalculateInertiaMatrix());
+
+		dynamics.m_momentum += body->GetVelocity().Scale(mass);
+		dynamics.m_angularMomentum += bodyInertia.RotateVector(body->GetOmega());
+		dynamics.m_angularMomentum += bodyCenter[i].CrossProduct(body->GetVelocity().Scale(mass));
+
+		ndFloat32 mag2 = bodyCenter[i].DotProduct(bodyCenter[i]).GetScalar();
+		ndMatrix covariance(ndCovarianceMatrix(bodyCenter[i], bodyCenter[i]));
+		for (ndInt32 j = 0; j < 3; j++)
+		{
+			bodyInertia[j][j] += mass * mag2;
+			bodyInertia[j] -= covariance[j].Scale(mass);
+			dynamics.m_inertiaMatrix[j] += bodyInertia[j];
+		}
+	}
+	dynamics.m_inertiaMatrix.m_posit.m_w = ndFloat32(1.0f);
+
+	dynamics.m_momentum = localFrame.UnrotateVector(dynamics.m_momentum);
+	dynamics.m_angularMomentum = localFrame.UnrotateVector(dynamics.m_angularMomentum);
+	dynamics.m_inertiaMatrix = localFrame * dynamics.m_inertiaMatrix * localFrame.OrthoInverse();
+	dynamics.m_inertiaMatrix.m_posit = ndVector::m_wOne;
+
+	const ndMatrix invInertia(dynamics.m_inertiaMatrix.Inverse4x4());
+	dynamics.m_omega = invInertia.RotateVector(dynamics.m_angularMomentum);
+	dynamics.m_veloc = dynamics.m_momentum.Scale(ndFloat32(1.0f) / dynamics.m_mass);
+
+	dynamics.m_centerOfMass.m_front = localFrame.m_front;
+	dynamics.m_centerOfMass.m_up = localFrame.m_up;
+	dynamics.m_centerOfMass.m_right = localFrame.m_right;
+
+	return dynamics;
+}
+
 // I already derived the equations for the linear acceleration and angular velocity
 // of the center of mass. It is interesting to see that this paper follows essentially
 // the same approach to derive the Zero Moment Point (ZMP):
