@@ -34,7 +34,6 @@
 #include "ndBrainUniformBuffer.h"
 #include "ndBrainAgentPolicyGradientActivation.h"
 
-
 ndBrainAgentPolicyGradientActivation::ndBrainAgentPolicyGradientActivation(ndInt32 neurons, ndBrainFloat minVariance, ndBrainFloat maxVariance)
 	:ndBrainLayerActivation(neurons)
 	,m_varianceBuffer(nullptr)
@@ -121,7 +120,6 @@ void ndBrainAgentPolicyGradientActivation::MakePrediction(const ndBrainVector& i
 
 void ndBrainAgentPolicyGradientActivation::InputDerivative(const ndBrainVector&, const ndBrainVector& output, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const
 {
-	//ndAssert(input.GetCount() == outputDerivative.GetCount());
 	ndAssert(output.GetCount() == outputDerivative.GetCount());
 	const ndInt32 size = ndInt32(output.GetCount());
 

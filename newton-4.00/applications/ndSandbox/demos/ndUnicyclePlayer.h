@@ -50,9 +50,7 @@ namespace ndUnicyclePlayer
 		m_poleAngle,
 		m_poleOmega,
 		m_wheelOmega,
-		m_wheelVelocity,
-		m_poleJointAngle,
-		m_poleJointOmega,
+		m_comSpeed,
 		m_hasSupportContact,
 		m_observationsSize
 	};
