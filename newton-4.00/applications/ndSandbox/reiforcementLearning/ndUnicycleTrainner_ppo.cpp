@@ -123,7 +123,7 @@ namespace ndUnicycleTrainer_ppo
 			ndBrainAgentOnPolicyGradient_Trainer::HyperParameters hyperParameters;
 			
 			hyperParameters.m_useGpuBackend = false;
-			hyperParameters.m_batchTrajectoryCount = 100;
+			hyperParameters.m_batchTrajectoryCount = 1000;
 			hyperParameters.m_hiddenLayersNumberOfNeurons = 64;
 			hyperParameters.m_numberOfActions = m_actionsSize;
 			hyperParameters.m_numberOfObservations = m_observationsSize;
@@ -142,7 +142,7 @@ namespace ndUnicycleTrainer_ppo
 			loader.m_mesh->m_matrix = loader.m_mesh->m_matrix * matrix;
 			
 			// create an articulated model
-			const ndInt32 numberOfAgents = 100;
+			const ndInt32 numberOfAgents = 300;
 			//const ndInt32 numberOfAgents = 1;
 			for (ndInt32 i = 0; i < numberOfAgents; ++i)
 			{

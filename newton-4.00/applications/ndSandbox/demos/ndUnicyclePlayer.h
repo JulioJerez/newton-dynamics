@@ -36,7 +36,7 @@ namespace ndUnicyclePlayer
 
 	#define ND_MAX_WHEEL_ALPHA		(ndFloat32 (500.0f))
 
-	#define ND_TERMINATION_ANGLE	(ndFloat32 (25.0f) * ndDegreeToRad)
+	#define ND_TERMINATION_ANGLE	(ndFloat32 (45.0f) * ndDegreeToRad)
 	#define ND_TRAJECTORY_STEPS		(1024 * 4)
 
 	enum ndActionSpace

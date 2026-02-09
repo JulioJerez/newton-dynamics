@@ -138,11 +138,20 @@ ndFloat32 ndStandardNormalGaussian(ndFloat32 randomVariable)
 	return gaussian.NormalGaussian(randomVariable);
 }
 
-#define TINYMT32_MUL (1.0f / 16777216.0f)
 ndFloat32 ndUniformDistribution::operator()()
 {
+#ifdef ND_USE_STD_RAND
+	#define ND_MAX_RAND (ndFloat64(1.0f) / ndFloat64(0xffffffff))
+	uint32_t rand = Generate();
+	ndReal uniform = ndReal(ndFloat64(rand) * ND_MAX_RAND);
+	ndAssert(uniform >= ndReal(0.0f));
+	ndAssert(uniform <= ndReal(1.0f));
+	return uniform;
+#else
+	//#define TINYMT32_MUL (1.0f / 16777216.0f)
 	uint32_t rand = (Generate() >> 8);
 	return ndFloat32(rand) * TINYMT32_MUL;
+#endif
 }
 
 D_CORE_API ndFloat32 ndNomalDistribution::NormalGaussian(ndFloat32 uniform)
@@ -233,7 +242,16 @@ D_CORE_API ndFloat32 ndNomalDistribution::NormalGaussian(ndFloat32 uniform)
 
 ndFloat32 ndNomalDistribution::operator()()
 {
+#ifdef ND_USE_STD_RAND
+	#define ND_MAX_RAND (ndFloat64(1.0f) / ndFloat64(0xffffffff))
+	uint32_t rand = Generate();
+	ndReal uniform = ndReal(ndFloat64(rand) * ND_MAX_RAND);
+	ndAssert(uniform >= ndReal(0.0f));
+	ndAssert(uniform <= ndReal(1.0f));
+	return NormalGaussian(uniform);
+#else
 	uint32_t rand = (Generate() >> 8);
 	ndReal uniform = ndReal(rand) * TINYMT32_MUL;
 	return NormalGaussian(uniform);
+#endif
 }

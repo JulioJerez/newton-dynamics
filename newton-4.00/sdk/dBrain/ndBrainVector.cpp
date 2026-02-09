@@ -503,11 +503,10 @@ void ndBrainVector::CalculateEntropyRegularizationGradient(const ndBrainVector& 
 	for (ndInt32 i = 0; i < base; ++i)
 	{
 		ndBrainFloat sigma = varianceBuffer[i];
-		ndBrainFloat sample = meanSampleBuffer[i];
+		ndBrainFloat zMean = meanSampleBuffer[i];
 		ndBrainFloat invSigma = ndBrainFloat(1.0f) / sigma;
-
-		ndBrainFloat z = sample * invSigma;
-		(*this)[i] = regularization * z * invSigma;
-		(*this)[i + base] = regularization * invSigma * (z * z - ndBrainFloat(1.0f));
+		ndBrainFloat zMeanInvSigma = zMean * invSigma;
+		(*this)[i] = regularization * invSigma * zMeanInvSigma;
+		(*this)[i + base] = regularization * invSigma * (zMeanInvSigma * zMeanInvSigma - ndBrainFloat(1.0f));
 	}
 }

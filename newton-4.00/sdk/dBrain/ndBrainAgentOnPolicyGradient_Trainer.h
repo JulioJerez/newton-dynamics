@@ -133,10 +133,10 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 		ndInt32 m_numberOfActions;
 		ndInt32 m_numberOfObservations;
 
-		ndInt32 m_criticValueIterations;
 		ndInt32 m_numberOfHiddenLayers;
 		ndInt32 m_hiddenLayersNumberOfNeurons;
 
+		ndInt32 m_divergencePasses;
 		ndInt32 m_maxTrajectorySteps;
 		ndInt32 m_batchTrajectoryCount;
 
@@ -229,7 +229,7 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndBrainVector m_lastPolicy;
 	ndBrainVector m_scratchBuffer;
 	ndArray<ndInt32> m_shuffleBuffer;
-	ndArray<ndInt32> m_tmpShuffleBuffer;
+	//ndArray<ndInt32> m_tmpShuffleBuffer;
 	ndArray<ndScore> m_trajectoryScore;
 	ndBrainAgentOnPolicyGradient_Agent::ndTrajectory m_trajectoryAccumulator;
 	ndMovingAverage<ND_ON_POLICY_MOVING_AVERAGE_SCORE> m_averageExpectedRewards;
@@ -240,7 +240,6 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndUnsigned32 m_horizonSteps;
 	ndUnsigned32 m_eposideCount;
 	ndUnsigned32 m_trajectiesCount;
-	ndUnsigned32 m_numberOfGpuTransitions;
 
 	friend class ndBrainAgentOnPolicyGradient_Agent;
 };

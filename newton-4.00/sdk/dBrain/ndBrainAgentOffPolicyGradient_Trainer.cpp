@@ -937,11 +937,9 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 	policyEntropyGradients.m_strideInByte = ndInt32(m_policyTrainer->GetBrain()->GetOutputSize() * sizeof(ndReal));
 	policyMinibatchOutputBuffer->CopyBuffer(policyEntropyGradients, m_parameters.m_miniBatchSize, *criticMinibatchInputGradientBuffer);
 
+	ndAssert(0);
 	ndBrainFloatBuffer* const policyMinibatchOutputGradientBuffer = m_policyTrainer->GetOuputGradientBuffer();
 	policyMinibatchOutputGradientBuffer->CalculateEntropyRegularizationGradient(**m_minibatchGaussianDistribution, **m_minibatchSigma, m_entropyTemperature, ndInt32(meanOutputSizeInBytes / sizeof(ndReal)));
-
-//ndBrainVector xxx0;
-//policyMinibatchOutputGradientBuffer->VectorFromDevice(xxx0);
 
 	// subtract the qValue gradient from the entropy gradient.
 	// The subtraction in reverse order, to get the gradient ascend.

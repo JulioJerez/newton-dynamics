@@ -79,8 +79,8 @@ namespace ndUnicyclePlayer
 		ndMatrix boxMatrix(ndGetIdentityMatrix());
 		boxMatrix.m_posit = m_topBox->GetMatrix().m_posit;
 		boxMatrix.m_posit.m_x = ndFloat32(0.0f);
-		//cartMatrix.m_posit.m_x = ndFloat32(10.0f) * (ndRand() - ndFloat32(0.5f));
-		boxMatrix.m_posit.m_y = ndFloat32(2.0f) + ndFloat32(2.0f) * ndRand();
+		//boxMatrix.m_posit.m_y = ndFloat32(2.0f) + ndFloat32(2.0f) * ndRand();
+		boxMatrix.m_posit.m_y = ndFloat32(2.5f);
 		m_topBox->SetMatrix(boxMatrix);
 		
 		const ndMatrix poleMatrix(m_poleHinge->GetLocalMatrix0().OrthoInverse() * m_poleHinge->CalculateGlobalMatrix1());
@@ -210,14 +210,11 @@ namespace ndUnicyclePlayer
 		//ndModelArticulation::ndCenterOfMassDynamics comKinematic(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(comFrame));
 
 		ndFloat32 omegaReward = ndExp(-0.5f * comDynamics.m_omega.m_x * comDynamics.m_omega.m_x);
-		//ndFloat32 alphaReward = ndExp(-0.01f * comDynamics.m_alpha.m_x * comDynamics.m_alpha.m_x) - ndFloat32(1.0f);
-		ndFloat32 speedReward = ndExp(-50.0f * comDynamics.m_veloc.m_z * comDynamics.m_veloc.m_z);
-
+		ndFloat32 speedReward = ndExp(-4.0f * comDynamics.m_veloc.m_z * comDynamics.m_veloc.m_z);
 		if (IsOnAir())
 		{
 			speedReward = ndFloat32(0.0f);
 		}
-		//ndFloat32 reward = ndFloat32(0.8f) * omegaReward + ndFloat32(0.2f) * speedReward + ndFloat32(0.25f) * alphaReward;
 		ndFloat32 reward = ndFloat32(0.8f) * omegaReward + ndFloat32(0.2f) * speedReward;
 
 #endif
