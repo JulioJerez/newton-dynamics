@@ -743,20 +743,23 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 	dynamics.m_centerOfMass.m_posit = dynamics.m_centerOfMass.m_posit.Scale(ndFloat32(1.0f) / dynamics.m_mass);
 	dynamics.m_centerOfMass.m_posit.m_w = ndFloat32(1.0f);
 
-	for (ndInt32 i = bodyArray.GetCount() - 1; i >= 0; --i)
+	const ndInt32 numOfBodies = bodyArray.GetCount();
+	for (ndInt32 i = 0; i < numOfBodies; ++i)
 	{
 		bodyCenter[i] = (bodyCenter[i] - dynamics.m_centerOfMass.m_posit) & ndVector::m_triplexMask;
 	}
 
-	for (ndInt32 i = bodyArray.GetCount() - 1; i >= 0; --i)
+	for (ndInt32 i = 0; i < numOfBodies; ++i)
 	{
 		const ndBodyKinematic* const body = bodyArray[i];
 		ndFloat32 mass = body->GetMassMatrix().m_w;
 		ndMatrix bodyInertia(body->CalculateInertiaMatrix());
 
-		dynamics.m_momentum += body->GetVelocity().Scale(mass);
-		dynamics.m_angularMomentum += bodyInertia.RotateVector(body->GetOmega());
-		dynamics.m_angularMomentum += bodyCenter[i].CrossProduct(body->GetVelocity().Scale(mass));
+		const ndVector linearMomentum(body->GetVelocity().Scale(mass));
+		const ndVector angularMomentum(bodyInertia.RotateVector(body->GetOmega()));
+		dynamics.m_momentum += linearMomentum;
+		dynamics.m_angularMomentum += angularMomentum;
+		dynamics.m_angularMomentum += bodyCenter[i].CrossProduct(linearMomentum);
 
 		ndFloat32 mag2 = bodyCenter[i].DotProduct(bodyCenter[i]).GetScalar();
 		ndMatrix covariance(ndCovarianceMatrix(bodyCenter[i], bodyCenter[i]));
@@ -774,8 +777,8 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 	dynamics.m_inertiaMatrix = localFrame * dynamics.m_inertiaMatrix * localFrame.OrthoInverse();
 	dynamics.m_inertiaMatrix.m_posit = ndVector::m_wOne;
 
-	const ndMatrix invInertia(dynamics.m_inertiaMatrix.Inverse4x4());
-	dynamics.m_omega = invInertia.RotateVector(dynamics.m_angularMomentum);
+	dynamics.m_invInertiaMatrix = dynamics.m_inertiaMatrix.Inverse4x4();
+	dynamics.m_omega = dynamics.m_invInertiaMatrix.RotateVector(dynamics.m_angularMomentum);
 	dynamics.m_veloc = dynamics.m_momentum.Scale(ndFloat32(1.0f) / dynamics.m_mass);
 
 	dynamics.m_centerOfMass.m_front = localFrame.m_front;
@@ -819,16 +822,19 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 	dynamics.m_centerOfMass.m_posit = dynamics.m_centerOfMass.m_posit.Scale(ndFloat32(1.0f) / dynamics.m_mass);
 	dynamics.m_centerOfMass.m_posit.m_w = ndFloat32(1.0f);
 
-	for (ndInt32 i = bodyArray.GetCount() - 1; i >= 0; --i)
+	const ndInt32 numOfBodies = bodyArray.GetCount();
+	for (ndInt32 i = 0; i < numOfBodies; ++i)
 	{
 		bodyCenter[i] = (bodyCenter[i] - dynamics.m_centerOfMass.m_posit) & ndVector::m_triplexMask;
 	}
 
-	for (ndInt32 i = bodyArray.GetCount() - 1; i >= 0; --i)
+	for (ndInt32 i = 0; i < numOfBodies; ++i)
 	{
 		const ndBodyKinematic* const body = bodyArray[i];
 		ndFloat32 mass = body->GetMassMatrix().m_w;
 		ndMatrix bodyInertia(body->CalculateInertiaMatrix());
+
+		const ndVector linearMomentum(body->GetVelocity().Scale(mass));
 		const ndVector angularMomentum(bodyInertia.RotateVector(body->GetOmega()));
 		
 		ndVector netForce(body->GetForce());
@@ -857,9 +863,9 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 		}
 		nextTorque += bodyCenter[i].CrossProduct(netForce);
 
+		dynamics.m_momentum += linearMomentum;
 		dynamics.m_angularMomentum += angularMomentum;
-		dynamics.m_momentum += body->GetVelocity().Scale(mass);
-		dynamics.m_angularMomentum += bodyCenter[i].CrossProduct(body->GetVelocity().Scale(mass));
+		dynamics.m_angularMomentum += bodyCenter[i].CrossProduct(linearMomentum);
 
 		dynamics.m_force += netForce;
 		dynamics.m_torque += nextTorque;
@@ -882,10 +888,11 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 	dynamics.m_inertiaMatrix = localFrame * dynamics.m_inertiaMatrix * localFrame.OrthoInverse();
 	dynamics.m_inertiaMatrix.m_posit = ndVector::m_wOne;
 
-	const ndMatrix invInertia(dynamics.m_inertiaMatrix.Inverse4x4());
-	dynamics.m_omega = invInertia.RotateVector(dynamics.m_angularMomentum);
+	//const ndMatrix invInertia(dynamics.m_inertiaMatrix.Inverse4x4());
+	dynamics.m_invInertiaMatrix = dynamics.m_inertiaMatrix.Inverse4x4();
+	dynamics.m_omega = dynamics.m_invInertiaMatrix.RotateVector(dynamics.m_angularMomentum);
 	dynamics.m_veloc = dynamics.m_momentum.Scale(ndFloat32(1.0f) / dynamics.m_mass);
-	dynamics.m_alpha = invInertia.RotateVector(dynamics.m_torque);
+	dynamics.m_alpha = dynamics.m_invInertiaMatrix.RotateVector(dynamics.m_torque);
 	dynamics.m_accel = dynamics.m_force.Scale(ndFloat32(1.0f) / dynamics.m_mass);
 	
 	dynamics.m_centerOfMass.m_front = localFrame.m_front;

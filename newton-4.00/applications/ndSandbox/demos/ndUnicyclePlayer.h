@@ -58,6 +58,15 @@ namespace ndUnicyclePlayer
 	class ndController : public ndModelNotify
 	{
 		public:
+		class ndPose
+		{
+			public:
+			ndMatrix m_location;
+			ndVector m_veloc;
+			ndVector m_omega;
+			ndBodyKinematic* m_body;
+		};
+
 		class ndAgent : public ndBrainAgentContinuePolicyGradient
 		{
 			public:
@@ -67,26 +76,30 @@ namespace ndUnicyclePlayer
 			{
 			}
 
-			void GetObservation(ndBrainFloat* const observation)
+			void GetObservation(ndBrainFloat* const observation) override
 			{
 				m_owner->GetObservation(observation);
 			}
 
-			virtual void ApplyActions(ndBrainFloat* const actions)
+			virtual void ApplyActions(ndBrainFloat* const actions) override
 			{
 				m_owner->ApplyActions(actions);
 			}
 
-			bool IsTerminal() const
+			bool IsTerminal() const override
 			{
 				return m_owner->IsTerminal();
+			}
+
+			virtual ndFloat32 GetExpectedReward() const override
+			{
+				return 0.0f;
 			}
 			ndController* m_owner;
 		};
 
 		ndController();
-
-		void Update(ndFloat32 timestep);
+		void Update(ndFloat32 timestep) override;
 
 		void ResetModel();
 		ndBrainFloat IsOnAir() const;
@@ -94,9 +107,8 @@ namespace ndUnicyclePlayer
 		bool IsTerminal() const;
 		ndFloat32 GetPoleAngle() const;
 		ndFloat32 GetPoleOmega() const;
-		ndFloat32 GetBoxAngle() const;
-		ndFloat32 GetBoxOmega() const;
 		ndBrainFloat CalculateReward() const;
+		void SaveInitialPose(ndFloat32 expectedReward);
 		void ApplyActions(ndBrainFloat* const actions);
 		void GetObservation(ndBrainFloat* const observation);
 
@@ -116,5 +128,7 @@ namespace ndUnicyclePlayer
 		ndSharedPtr<ndJointBilateralConstraint> m_wheelRoller;
 		ndSharedPtr<ndBrainAgent> m_agent;
 		ndFloat32 m_timestep;
+		ndFloat32 m_bestReward;
+		ndFixSizeArray<ndPose, 4> m_modelPose;
 	};
 };

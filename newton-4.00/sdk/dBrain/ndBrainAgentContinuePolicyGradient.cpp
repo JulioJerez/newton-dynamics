@@ -74,6 +74,10 @@ ndInt32 ndBrainAgentContinuePolicyGradient::GetEpisodeFrames() const
 	return 0;
 }
 
+ndFloat32 ndBrainAgentContinuePolicyGradient::GetExpectedReward() const
+{
+	return ndFloat32(0.0f);
+}
 
 void ndBrainAgentContinuePolicyGradient::Save(ndBrainSave* const)
 {

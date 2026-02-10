@@ -64,6 +64,7 @@ class ndModelArticulation: public ndModel
 		ndVector m_angularMomentum;
 		ndMatrix m_centerOfMass;
 		ndMatrix m_inertiaMatrix;
+		ndMatrix m_invInertiaMatrix;
 		ndFloat32 m_mass;
 	};
 

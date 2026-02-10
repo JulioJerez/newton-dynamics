@@ -102,6 +102,7 @@ class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 	virtual bool IsTrainer() const { ndAssert(0); return true; }
 	virtual ndInt32 GetEpisodeFrames() const;
 	virtual void SampleActions(ndBrainVector& action);
+	virtual ndFloat32 GetExpectedReward() const override;
 	
 	ndTrajectory m_trajectory;
 	ndNomalDistribution m_normalDistribution;

@@ -50,6 +50,8 @@ class ndBrainAgent: public ndClassAlloc
 	virtual ndBrainFloat CalculateReward() = 0;
 	virtual ndInt32 GetEpisodeFrames() const = 0;
 	virtual void Save(ndBrainSave* const loadSave) = 0;
+
+	virtual ndFloat32 GetExpectedReward() const = 0;
 	virtual void ApplyActions(ndBrainFloat* const actions)= 0;
 	virtual void GetObservation(ndBrainFloat* const observation) = 0;
 

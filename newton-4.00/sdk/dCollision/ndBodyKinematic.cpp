@@ -825,8 +825,10 @@ ndVector ndBodyKinematic::CalculateLinearMomentum() const
 ndVector ndBodyKinematic::CalculateAngularMomentum() const
 {
 	const ndVector localOmega(m_inertiaPrincipalAxis.UnrotateVector (m_matrix.UnrotateVector(m_omega)));
-	const ndVector localAngularMomentum(m_mass * localOmega);
-	return m_matrix.RotateVector(m_inertiaPrincipalAxis.RotateVector(localAngularMomentum));
+	const ndVector intrinsicAngularMomentum(m_mass * localOmega);
+	const ndVector localAngularMomentum(m_inertiaPrincipalAxis.RotateVector(intrinsicAngularMomentum));
+	const ndVector angularMomentum (m_matrix.RotateVector(localAngularMomentum));
+	return angularMomentum;
 }
 
 ndJacobian ndBodyKinematic::CalculateNetForce() const

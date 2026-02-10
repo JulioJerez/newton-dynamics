@@ -66,27 +66,35 @@ namespace ndUnicycleTrainer_ppo
 		{
 		}
 
-		ndBrainFloat CalculateReward()
+		ndBrainFloat CalculateReward() override
 		{
 			return m_owner->CalculateReward();
 		}
 
-		bool IsTerminal() const
+		bool IsTerminal() const override
 		{
 			return m_owner->IsTerminal();
 		}
 
-		void GetObservation(ndBrainFloat* const observation)
+		void GetObservation(ndBrainFloat* const observation) override
 		{
 			m_owner->GetObservation(observation);
 		}
 
-		virtual void ApplyActions(ndBrainFloat* const actions)
+		void GetInitialPose()
 		{
-			m_owner->ApplyActions(actions);
+			//ndFloat32 expectedReward = GetExpectedReward();
+			ndFloat32 expectedReward = CalculateReward();
+			m_owner->SaveInitialPose(expectedReward);
 		}
 
-		void ResetModel()
+		virtual void ApplyActions(ndBrainFloat* const actions) override
+		{
+			m_owner->ApplyActions(actions);
+			GetInitialPose();
+		}
+
+		void ResetModel() override
 		{
 			m_owner->ResetModel();
 		}

@@ -100,8 +100,8 @@ class ndBrainAgentOffPolicyGradient_Agent: public ndBrainAgent
 	virtual void Save(ndBrainSave* const) { ndAssert(0); }
 	virtual bool IsTrainer() const { ndAssert(0); return true; }
 	virtual ndInt32 GetEpisodeFrames() const;
-
 	void SampleActions(ndBrainVector& action);
+	virtual ndFloat32 GetExpectedReward() const override;
 
 	ndBrainAgentOffPolicyGradient_Trainer* m_owner;
 	ndTrajectory m_trajectory;
