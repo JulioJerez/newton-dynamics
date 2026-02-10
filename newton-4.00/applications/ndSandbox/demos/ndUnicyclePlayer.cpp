@@ -125,24 +125,6 @@ namespace ndUnicyclePlayer
 		return angle;
 	}
 
-	//// calculate box angle relative to the world.
-	//ndFloat32 ndController::GetBoxAngle() const
-	//{
-	//	const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
-	//	const ndMatrix matrix(hinge->CalculateGlobalMatrix1());
-	//	ndFloat32 angle = ndAcos(-ndClamp(matrix.m_up.m_y, ndFloat32(-1.0f), ndFloat32(1.0f)));
-	//	return angle;
-	//}
-	//
-	//// calculate box omega relative to the world.
-	//ndFloat32 ndController::GetBoxOmega() const
-	//{
-	//	const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
-	//	const ndMatrix matrix(hinge->CalculateGlobalMatrix0());
-	//	const ndVector omega(m_topBox->GetOmega());
-	//	return omega.DotProduct(matrix.m_front).GetScalar();
-	//}
-
 	bool ndController::IsTerminal() const
 	{
 		ndFloat32 angle = GetPoleAngle();
@@ -155,53 +137,13 @@ namespace ndUnicyclePlayer
 	{
 		if (IsTerminal())
 		{
-			// a terminal reward of zero should make for smoother MDPs. 
-			// training small networks could be much harder with negative terminal rewards..
 			return ndBrainFloat(-1.0f);
 		}
-
-#if 0
-		// objective function that use heuristic intution.
-		// it converge by tent to generate a weak controller
-		ndFloat32 boxAngle = GetBoxAngle();
-		ndFloat32 boxOmega = GetBoxOmega();
-		ndFloat32 poleAngle = GetPoleAngle();
-		ndFloat32 poleOmega = GetPoleOmega();
-		ndVector veloc(m_topBox->GetVelocity());
-
-		ndFloat32 speedReward = ndExp(-100.0f * veloc.m_x * veloc.m_x);
-		ndFloat32 boxAngleReward = ndExp(-500.0f * boxAngle * boxAngle);
-		ndFloat32 boxOmegaReward = ndExp(-100.0f * boxOmega * boxOmega);
-		ndFloat32 poleAngleReward = ndExp(-500.0f * poleAngle * poleAngle);
-		ndFloat32 poleOmegaReward = ndExp(-100.0f * poleOmega * poleOmega);
-
-		if (IsOnAir())
-		{
-			boxAngleReward = 0.0f;
-			boxOmegaReward = 0.0f;
-			poleAngleReward = 0.0f;
-			poleOmegaReward = 0.0f;
-		}
-		//ndTrace(("%f %f %f\n", poleAngleReward, poleOmegaReward, speedReward));
-		ndFloat32 reward = 
-			ndFloat32(1.0 / 2.0f) * boxAngleReward +
-			ndFloat32(1.0 / 2.0f) * boxOmegaReward +
-			ndFloat32(1.0 / 2.0f) * poleAngleReward +
-			ndFloat32(1.0 / 2.0f) * poleOmegaReward +
-			ndFloat32(1.0 / 2.0f) * speedReward;
-
-#else
 
 		// trying with center of mass dynammics
 		// but the result so far the results are very dissapointing
 		// this however word much better is an order version 
 		// maybe I have bugs that I have to track
-
-		if (IsTerminal())
-		{
-			return ndBrainFloat(-1.0f);
-		}
-
 		ndMatrix comFrame(m_wheelRoller->CalculateGlobalMatrix1());
 		comFrame.m_up = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
 		comFrame.m_right = comFrame.m_front.CrossProduct(comFrame.m_up).Normalize();
@@ -212,7 +154,6 @@ namespace ndUnicyclePlayer
 		ndFloat32 angle = GetPoleAngle() / (0.5f * ND_TERMINATION_ANGLE);
 		ndFloat32 omega = comDynamics.m_omega.m_x / ndFloat32 (0.5f);
 		ndFloat32 speed = ndMax((ndAbs(comDynamics.m_veloc.m_z) - 4.0f), 0.0f);
-
 		//ndTrace(("a=%f w=%f s=%f\n", angle, omega, speed));
 
 		ndFloat32 angleReward = ndExp(-angle * angle);
@@ -225,13 +166,11 @@ namespace ndUnicyclePlayer
 			angleReward = ndFloat32(0.0f);
 		}
 		
-		//ndFloat32 reward = ndFloat32(0.8f) * omegaReward + ndFloat32(0.2f) * speedReward;
 		ndFloat32 reward = ndFloat32(0.0f);
 		reward += angleReward * ndFloat32(0.6f);
 		reward += omegaReward * ndFloat32(0.4f);
 		reward += speedReward * ndFloat32(-0.5f);
 
-#endif
 		return ndBrainFloat(reward);
 	}
 
