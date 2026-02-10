@@ -264,7 +264,7 @@ void ndBrainAgentOnPolicyGradient_Agent::Step()
 	m_trajectory.SetCount(entryIndex + 1);
 	m_trajectory.Clear(entryIndex);
 
-	ndBrainAgentOnPolicyGradient_Trainer* const owner = m_owner;
+	ndBrainAgentOnPolicyGradient_Trainer* const owner = *m_owner;
 
 	const ndBrain* const policy = *GetBrain();
 	ndBrainMemVector actions(m_trajectory.GetActions(entryIndex), policy->GetOutputSize());
@@ -385,7 +385,7 @@ ndSharedPtr<ndBrain> ndBrainAgentOnPolicyGradient_Trainer::GetPolicyNetwork()
 void ndBrainAgentOnPolicyGradient_Trainer::AddAgent(ndSharedPtr<ndBrainAgentOnPolicyGradient_Agent>& agent)
 {
 	m_agents.Append(agent);
-	agent->m_owner = this;
+	agent->m_owner = ndWeakPtr<ndBrainAgentOnPolicyGradient_Trainer>(this);
 }
 
 const ndString& ndBrainAgentOnPolicyGradient_Trainer::GetName() const

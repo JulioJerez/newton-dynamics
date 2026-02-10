@@ -105,8 +105,7 @@ class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 	
 	ndTrajectory m_trajectory;
 	ndNomalDistribution m_normalDistribution;
-	
-	ndBrainAgentOnPolicyGradient_Trainer* m_owner;
+	ndWeakPtr<ndBrainAgentOnPolicyGradient_Trainer> m_owner;
 
 	bool m_isDead;
 	friend class ndBrainAgentOnPolicyGradient_Trainer;
