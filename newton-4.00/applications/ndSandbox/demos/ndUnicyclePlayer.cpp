@@ -209,13 +209,27 @@ namespace ndUnicyclePlayer
 		ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(comFrame));
 		//ndModelArticulation::ndCenterOfMassDynamics comKinematic(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(comFrame));
 
-		ndFloat32 omegaReward = ndExp(-0.5f * comDynamics.m_omega.m_x * comDynamics.m_omega.m_x);
-		ndFloat32 speedReward = ndExp(-4.0f * comDynamics.m_veloc.m_z * comDynamics.m_veloc.m_z);
+		ndFloat32 angle = GetPoleAngle() / (0.5f * ND_TERMINATION_ANGLE);
+		ndFloat32 omega = comDynamics.m_omega.m_x / ndFloat32 (0.5f);
+		ndFloat32 speed = ndMax((ndAbs(comDynamics.m_veloc.m_z) - 4.0f), 0.0f);
+
+		//ndTrace(("a=%f w=%f s=%f\n", angle, omega, speed));
+
+		ndFloat32 angleReward = ndExp(-angle * angle);
+		ndFloat32 omegaReward = ndExp(-omega * omega);
+		ndFloat32 speedReward = ndExp(-speed * speed);
 		if (IsOnAir())
 		{
+			omegaReward = ndFloat32(0.0f);
 			speedReward = ndFloat32(0.0f);
+			angleReward = ndFloat32(0.0f);
 		}
-		ndFloat32 reward = ndFloat32(0.8f) * omegaReward + ndFloat32(0.2f) * speedReward;
+		
+		//ndFloat32 reward = ndFloat32(0.8f) * omegaReward + ndFloat32(0.2f) * speedReward;
+		ndFloat32 reward = ndFloat32(0.0f);
+		reward += angleReward * ndFloat32(0.6f);
+		reward += omegaReward * ndFloat32(0.4f);
+		reward += speedReward * ndFloat32(-0.5f);
 
 #endif
 		return ndBrainFloat(reward);
