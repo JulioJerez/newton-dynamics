@@ -57,7 +57,7 @@ ndBrainAgentOnPolicyGradient_Trainer::HyperParameters::HyperParameters()
 	m_numberOfActions = 0;
 	m_numberOfObservations = 0;
 
-	m_divergencePasses = 1;
+	m_divergencePasses = 2;
 	m_learnRate = ndBrainFloat(1.0e-4f);
 
 	m_policyRegularizer = ndBrainFloat(1.0e-4f);
@@ -912,6 +912,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 	m_policyTrainer->ApplyLearnRate(m_learnRate * ND_LEARN_RATE_SCALE);
 }
 
+//#pragma optimize( "", off)
 void ndBrainAgentOnPolicyGradient_Trainer::OptimizedSurrogatePolicy(ndInt32 pass)
 {
 	m_policyGradientAccumulator->Set(ndBrainFloat(0.0f));
@@ -997,6 +998,36 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizedSurrogatePolicy(ndInt32 pass
 		// get this minibatch advantage
 		m_advantageMinibatchBuffer->CopyBuffer(advantageInfo, m_parameters.m_miniBatchSize, **m_advantageBuffer);
 
+//// test surrogate clip loss
+//static ndBrainVector r;
+//static ndBrainVector a;
+//m_advantageMinibatchBuffer->VectorFromDevice(a);
+//m_minibatchLikelihoodRatioBuffer->VectorFromDevice(r);
+//for (ndInt32 k = 0; k < r.GetCount(); k++)
+//{
+//	if (a[k] != -1)
+//	{
+//		if (a[k] >= 0.0f && r[k] > 1.2)
+//		{
+//			k += 1;
+//		}
+//		if (a[k] < 0.0f && r[k] < 0.8)
+//		{
+//			k += 1;
+//		}
+//	}
+//}
+
+//r[0] = 1.0f; a[0] = 2.0f;
+//r[1] = 1.5f; a[1] = 2.0f;
+//r[2] = 0.5f; a[2] = 2.0f;
+//
+//r[3] = 1.0f; a[3] = -2.0f;
+//r[4] = 1.5f; a[4] = -2.0f;
+//r[5] = 0.5f; a[5] = -2.0f;
+//m_minibatchLikelihoodRatioBuffer->VectorToDevice(r);
+//m_advantageMinibatchBuffer->VectorToDevice(a);
+
 		// using this variable as blend factor
 		m_invMinibatchLikelihoodBuffer->Set(**m_advantageMinibatchBuffer);
 		m_invMinibatchLikelihoodBuffer->Less(ndBrainFloat(0.0f));
@@ -1004,8 +1035,6 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizedSurrogatePolicy(ndInt32 pass
 		m_negativeMiniBatchClipRatioBuffer->Set(**m_minibatchLikelihoodRatioBuffer);
 		m_positveMiniBatchClipRatioBuffer->Set(**m_minibatchLikelihoodRatioBuffer);
 
-		//m_negativeMiniBatchClipRatioBuffer->Min(ndBrainFloat(1.0f) + ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON);
-		//m_positveMiniBatchClipRatioBuffer->Max(ndBrainFloat(1.0f) - ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON);
 		m_negativeMiniBatchClipRatioBuffer->Max(ndBrainFloat(1.0f) - ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON);
 		m_positveMiniBatchClipRatioBuffer->Min(ndBrainFloat(1.0f) + ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON);
 

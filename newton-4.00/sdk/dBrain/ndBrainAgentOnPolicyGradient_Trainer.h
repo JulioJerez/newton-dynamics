@@ -27,12 +27,14 @@
 #include "ndBrain.h"
 #include "ndBrainAgent.h"
 
-// This is an implementation the Proximal Policy optimization as decrived in.
+// Implementation of Proximal Policy Optimization (PPO) as described in:
 // https://arxiv.org/abs/1707.06347
-// The algorithm is stochastic, and use the generalized advantage statimation.
-// it optinally supports entropy regularization to scale the loss 
-// of both actor and critic networks. 
-// pseudo code implementation is found here
+//
+// The algorithm is stochastic and uses bootstrapped method for advantage estimation.
+// It optionally supports entropy regularization to scale the loss of both
+// the actor and critic networks.
+//
+// Reference pseudocode:
 // https://spinningup.openai.com/en/latest/algorithms/ppo.html
 
 #define ND_ON_POLICY_MOVING_AVERAGE_SCORE	8
@@ -229,7 +231,6 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndBrainVector m_lastPolicy;
 	ndBrainVector m_scratchBuffer;
 	ndArray<ndInt32> m_shuffleBuffer;
-	//ndArray<ndInt32> m_tmpShuffleBuffer;
 	ndArray<ndScore> m_trajectoryScore;
 	ndBrainAgentOnPolicyGradient_Agent::ndTrajectory m_trajectoryAccumulator;
 	ndMovingAverage<ND_ON_POLICY_MOVING_AVERAGE_SCORE> m_averageExpectedRewards;
