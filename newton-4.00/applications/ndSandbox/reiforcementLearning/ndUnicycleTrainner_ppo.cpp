@@ -29,7 +29,7 @@ namespace ndUnicycleTrainer_ppo
 			const ndVector color(ndFloat32(1.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f));
 			scene->Print(color, "training a double pendulum using Proximal Policy Optimization method");
 			scene->Print(color, "training goes for 100 millions steps. Therefore the training");
-			scene->Print(color, "seccion may tak several hours with GPU backend");
+			scene->Print(color, "section may take several hours with GPU back end");
 		}
 	};
 
