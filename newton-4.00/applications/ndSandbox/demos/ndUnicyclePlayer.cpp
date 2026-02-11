@@ -81,7 +81,6 @@ namespace ndUnicyclePlayer
 		ndMatrix boxMatrix(ndGetIdentityMatrix());
 		boxMatrix.m_posit = m_topBox->GetMatrix().m_posit;
 		boxMatrix.m_posit.m_x = ndFloat32(0.0f);
-		//boxMatrix.m_posit.m_y = ndFloat32(2.0f) + ndFloat32(2.0f) * ndRand();
 		boxMatrix.m_posit.m_y = ndFloat32(2.5f);
 		m_topBox->SetMatrix(boxMatrix);
 		
@@ -135,7 +134,6 @@ namespace ndUnicyclePlayer
 				pose.m_omega = body->GetOmega();
 				pose.m_veloc = body->GetVelocity();
 				pose.m_location = body->GetMatrix();
-				//pose.m_location.m_posit.m_x = 0.0f;
 				m_modelPose.PushBack(pose);
 			}
 		}
@@ -182,13 +180,13 @@ namespace ndUnicyclePlayer
 		comFrame.m_up = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
 		comFrame.m_right = comFrame.m_front.CrossProduct(comFrame.m_up).Normalize();
 		comFrame.m_up = comFrame.m_right.CrossProduct(comFrame.m_front).Normalize();
+
+		// exclude the wheel angular momentum from the com kinematics
+		const ndVector wheelOmega(m_wheel->GetOmega());
+		m_wheel->SetOmegaNoSleep(ndVector::m_zero);
 		//ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(comFrame));
 		ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassKinematics(comFrame));
-		
-		// substract the wheel angular momentum, because it is rotating freetly. 
-		const ndVector wheelAngularMomnetum(comFrame.UnrotateVector(m_wheel->GetAsBodyKinematic()->CalculateAngularMomentum()));
-		comDynamics.m_angularMomentum -= wheelAngularMomnetum;
-		comDynamics.m_omega = comDynamics.m_invInertiaMatrix.RotateVector(comDynamics.m_angularMomentum);
+		m_wheel->SetOmegaNoSleep(wheelOmega);
 
 		ndFloat32 angle = GetPoleAngle() / (0.5f * ND_TERMINATION_ANGLE);
 		ndFloat32 omega = comDynamics.m_omega.m_x / ndFloat32 (0.5f);
