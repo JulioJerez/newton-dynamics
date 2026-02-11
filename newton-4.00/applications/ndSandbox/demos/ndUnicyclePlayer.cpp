@@ -385,9 +385,16 @@ void ndUnicyclePlayer_PPO(ndDemoEntityManager* const scene)
 	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend_Ppo());
 	scene->SetDemoHelp(demoHelper);
 
-	ndModelMaterial material;
+	// oveload the ground friction
+	// make sure the ground has enough friction
 	ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
-	callback->RegisterMaterial(material, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_modelPart);
+	ndMaterial* const defaultMaterial = callback->GetMaterial(ndDemoContactCallback::m_default, ndDemoContactCallback::m_default);
+	ndAssert(defaultMaterial);
+	defaultMaterial->m_dynamicFriction0 = defaultMaterial->m_staticFriction0;
+	defaultMaterial->m_dynamicFriction1 = defaultMaterial->m_staticFriction1;
+
+	//ndModelMaterial material;
+	//callback->RegisterMaterial(material, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_modelPart);
 
 	ndMatrix matrix(ndGetIdentityMatrix());
 	ndRenderMeshLoader loader(*scene->GetRenderer());

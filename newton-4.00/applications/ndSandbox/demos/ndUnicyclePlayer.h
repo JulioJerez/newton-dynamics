@@ -56,9 +56,6 @@ namespace ndUnicyclePlayer
 		ndModelMaterial()
 			:ndApplicationMaterial()
 		{
-			// oveload the dynamics friction
-			m_dynamicFriction0 = m_staticFriction0;
-			m_dynamicFriction1 = m_staticFriction1;
 		}
 
 		ndModelMaterial(const ndModelMaterial& src)

@@ -292,9 +292,18 @@ void ndUnicyclePpoTraining(ndDemoEntityManager* const scene)
 	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend());
 	scene->SetDemoHelp(demoHelper);
 
+	// get the material graph
+	ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
+
+	// oveload the ground friction
+	// make sure the ground has enough friction
+	ndMaterial* const defaultMaterial = callback->GetMaterial(ndDemoContactCallback::m_default, ndDemoContactCallback::m_default);
+	ndAssert(defaultMaterial);
+	defaultMaterial->m_dynamicFriction0 = defaultMaterial->m_staticFriction0;
+	defaultMaterial->m_dynamicFriction1 = defaultMaterial->m_staticFriction1;
+
 	// create a material that make models in training non collidable
 	ndModelMaterial material;
-	ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
 	callback->RegisterMaterial(material, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_modelPart);
 
 	//load the mesh so that is can be re used
