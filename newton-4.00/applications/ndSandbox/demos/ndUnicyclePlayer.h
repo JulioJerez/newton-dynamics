@@ -27,11 +27,6 @@ namespace ndUnicyclePlayer
 	#define POLE_MASS				ndFloat32(1.0f)
 	#define BALL_MASS				ndFloat32(5.0f)
 
-	//#define TRAJECTORY_STEPS		(1024 * 4)
-	//
-	//#define PUSH_ACCEL				ndBrainFloat (-10.0f * DEMO_GRAVITY)
-	//#define REWARD_MIN_ANGLE		ndBrainFloat (20.0f * ndDegreeToRad)
-
 	#define ND_MAX_LEG_JOINT_ANGLE	(ndFloat32 (45.0f) * ndDegreeToRad)
 
 	#define ND_MAX_WHEEL_ALPHA		(ndFloat32 (500.0f))
@@ -53,6 +48,33 @@ namespace ndUnicyclePlayer
 		m_comSpeed,
 		m_hasSupportContact,
 		m_observationsSize
+	};
+
+	class ndModelMaterial : public ndApplicationMaterial
+	{
+		public:
+		ndModelMaterial()
+			:ndApplicationMaterial()
+		{
+			// oveload the dynamics friction
+			m_dynamicFriction0 = m_staticFriction0;
+			m_dynamicFriction1 = m_staticFriction1;
+		}
+
+		ndModelMaterial(const ndModelMaterial& src)
+			:ndApplicationMaterial(src)
+		{
+		}
+
+		ndApplicationMaterial* Clone() const
+		{
+			return new ndModelMaterial(*this);
+		}
+
+		virtual bool OnAabbOverlap(const ndBodyKinematic* const, const ndBodyKinematic* const) const override
+		{
+			return false;
+		}
 	};
 
 	class ndController : public ndModelNotify

@@ -385,6 +385,10 @@ void ndUnicyclePlayer_PPO(ndDemoEntityManager* const scene)
 	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend_Ppo());
 	scene->SetDemoHelp(demoHelper);
 
+	ndModelMaterial material;
+	ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
+	callback->RegisterMaterial(material, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_modelPart);
+
 	ndMatrix matrix(ndGetIdentityMatrix());
 	ndRenderMeshLoader loader(*scene->GetRenderer());
 	loader.LoadMesh(ndGetWorkingFileName("unicycle.nd"));

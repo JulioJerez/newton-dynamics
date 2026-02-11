@@ -293,7 +293,7 @@ void ndUnicyclePpoTraining(ndDemoEntityManager* const scene)
 	scene->SetDemoHelp(demoHelper);
 
 	// create a material that make models in training non collidable
-	TrainMaterial material;
+	ndModelMaterial material;
 	ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
 	callback->RegisterMaterial(material, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_modelPart);
 
