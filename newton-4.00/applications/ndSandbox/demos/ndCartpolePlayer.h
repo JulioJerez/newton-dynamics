@@ -57,17 +57,17 @@ namespace ndCarpolePlayer
 			{
 			}
 
-			void GetObservation(ndBrainFloat* const observation)
+			void GetObservation(ndBrainFloat* const observation) override
 			{
 				m_owner->GetObservation(observation);
 			}
 
-			virtual void ApplyActions(ndBrainFloat* const actions)
+			virtual void ApplyActions(ndBrainFloat* const actions) override
 			{
 				m_owner->ApplyActions(actions);
 			}
 
-			bool IsTerminal() const
+			bool IsTerminal() const override
 			{
 				return m_owner->IsTerminal();
 			}

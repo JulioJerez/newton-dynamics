@@ -300,8 +300,8 @@ class ndConstraint: public ndContainersFreeListAlloc<ndConstraint>
 	D_COLLISION_API ndVector GetTorqueBody0() const;
 	D_COLLISION_API ndVector GetForceBody1() const;
 	D_COLLISION_API ndVector GetTorqueBody1() const;
-	//D_COLLISION_API ndBodyKinematic* GetBody0() const;
-	//D_COLLISION_API ndBodyKinematic* GetBody1() const;
+	D_COLLISION_API ndVector8 GetForceTorqueBody0() const;
+	D_COLLISION_API ndVector8 GetForceTorqueBody1() const;
 
 	ndBodyKinematic* GetBody0() const
 	{
@@ -321,10 +321,8 @@ class ndConstraint: public ndContainersFreeListAlloc<ndConstraint>
 	D_COLLISION_API ndConstraint();
 	virtual void ClearMemory() = 0;
 
-	ndVector m_forceBody0;
-	ndVector m_torqueBody0;
-	ndVector m_forceBody1;
-	ndVector m_torqueBody1;
+	ndVector8 m_forceTorqueBody0;
+	ndVector8 m_forceTorqueBody1;
 	ndBodyKinematic* m_body0;
 	ndBodyKinematic* m_body1;
 

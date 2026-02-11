@@ -121,9 +121,9 @@ class ndBodyKinematic : public ndBody
 	D_COLLISION_API virtual void SetCollisionShape(const ndShapeInstance& shapeInstance);
 	D_COLLISION_API virtual bool RayCast(ndRayCastNotify& callback, const ndFastRay& ray, const ndFloat32 maxT) const override;
 
+	D_COLLISION_API ndFloat32 TotalEnergy() const;
 	D_COLLISION_API ndVector CalculateLinearMomentum() const;
 	D_COLLISION_API virtual ndVector CalculateAngularMomentum() const;
-	D_COLLISION_API ndFloat32 TotalEnergy() const;
 
 	D_COLLISION_API void ClearMemory();
 	D_COLLISION_API virtual void IntegrateVelocity(ndFloat32 timestep);

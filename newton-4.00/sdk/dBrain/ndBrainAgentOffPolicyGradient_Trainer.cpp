@@ -38,7 +38,6 @@
 #include "ndBrainAgentPolicyGradientActivation.h"
 #include "ndBrainAgentOffPolicyGradient_Trainer.h"
 
-
 #define ND_POLICY_MIN_SIGMA_SQUARE				ndBrainFloat(0.01f)
 #define ND_POLICY_MAX_SIGMA_SQUARE				ndBrainFloat(1.0f)
 #define ND_POLICY_MAX_ENTROPY_TEMPERATURE		ndBrainFloat(0.2f)
@@ -254,6 +253,18 @@ ndInt32 ndBrainAgentOffPolicyGradient_Agent::GetEpisodeFrames() const
 	return 0;
 }
 
+ndFloat32 ndBrainAgentOffPolicyGradient_Agent::GetExpectedReward() const
+{
+	ndFloat32 gamma = m_owner->m_parameters.m_discountRewardFactor;
+	ndFloat32 sum = m_trajectory.GetReward(m_trajectory.GetCount() - 1);
+	for (ndInt32 i = m_trajectory.GetCount() - 2; i >= 0; --i)
+	{
+		ndFloat32 r = m_trajectory.GetReward(i);
+		sum = r + gamma * sum;
+	}
+	return sum;
+}
+
 void ndBrainAgentOffPolicyGradient_Agent::SampleActions(ndBrainVector& actions)
 {
 	const ndInt32 size = ndInt32(actions.GetCount()) / 2;
@@ -440,15 +451,12 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildCriticClass()
 		layers.PushBack(new ndBrainLayerLinear(policy.GetOutputSize() + policy.GetInputSize(), m_parameters.m_hiddenLayersNumberOfNeurons));
 		layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 
-		for (ndInt32 i = 0; i < m_parameters.m_numberOfHiddenLayers - 1; ++i)
+		for (ndInt32 i = 0; i < m_parameters.m_numberOfHiddenLayers; ++i)
 		{
 			ndAssert(layers[layers.GetCount() - 1]->GetOutputSize() == m_parameters.m_hiddenLayersNumberOfNeurons);
 			layers.PushBack(new ndBrainLayerLinear(layers[layers.GetCount() - 1]->GetOutputSize(), m_parameters.m_hiddenLayersNumberOfNeurons));
 			layers.PushBack(new ndBrainLayerActivationRelu(layers[layers.GetCount() - 1]->GetOutputSize()));
 		}
-		layers.PushBack(new ndBrainLayerLinear(layers[layers.GetCount() - 1]->GetOutputSize(), m_parameters.m_hiddenLayersNumberOfNeurons));
-		layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
-
 		layers.PushBack(new ndBrainLayerLinear(layers[layers.GetCount() - 1]->GetOutputSize(), 1));
 		layers.PushBack(new ndBrainLayerActivationLeakyRelu(layers[layers.GetCount() - 1]->GetOutputSize()));
 
@@ -940,11 +948,9 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 	policyEntropyGradients.m_strideInByte = ndInt32(m_policyTrainer->GetBrain()->GetOutputSize() * sizeof(ndReal));
 	policyMinibatchOutputBuffer->CopyBuffer(policyEntropyGradients, m_parameters.m_miniBatchSize, *criticMinibatchInputGradientBuffer);
 
+	ndAssert(0);
 	ndBrainFloatBuffer* const policyMinibatchOutputGradientBuffer = m_policyTrainer->GetOuputGradientBuffer();
 	policyMinibatchOutputGradientBuffer->CalculateEntropyRegularizationGradient(**m_minibatchGaussianDistribution, **m_minibatchSigma, m_entropyTemperature, ndInt32(meanOutputSizeInBytes / sizeof(ndReal)));
-
-//ndBrainVector xxx0;
-//policyMinibatchOutputGradientBuffer->VectorFromDevice(xxx0);
 
 	// subtract the qValue gradient from the entropy gradient.
 	// The subtraction in reverse order, to get the gradient ascend.

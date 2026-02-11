@@ -17,7 +17,6 @@
 #include "ndCoreStdafx.h"
 #include "ndRand127.h"
 
-
 #define MIN_LOOP 8
 #define PRE_LOOP 8
 

@@ -446,8 +446,10 @@ ndBrainFloat ndBrainVector::CalculateLikelihood(const ndBrainVector& varianceBuf
 		z2 += z * z;
 		invSigma2Det *= (invSqrtPi * invSigma);
 	}
-	ndBrainFloat exponent = ndBrainFloat(0.5f) * z2;
-	ndBrainFloat likelihood = invSigma2Det * ndBrainFloat(ndExp(-exponent));
+	ndBrainFloat exponent = -ndBrainFloat(0.5f) * z2;
+	ndBrainFloat likelihood = invSigma2Det * ndBrainFloat(ndExp(exponent));
+
+	// make sure the value is larger than zero
 	return ndMax(likelihood, ndBrainFloat(1.0e-4f));
 }
 
@@ -503,11 +505,10 @@ void ndBrainVector::CalculateEntropyRegularizationGradient(const ndBrainVector& 
 	for (ndInt32 i = 0; i < base; ++i)
 	{
 		ndBrainFloat sigma = varianceBuffer[i];
-		ndBrainFloat sample = meanSampleBuffer[i];
+		ndBrainFloat zMean = meanSampleBuffer[i];
 		ndBrainFloat invSigma = ndBrainFloat(1.0f) / sigma;
-
-		ndBrainFloat z = sample * invSigma;
-		(*this)[i] = regularization * z * invSigma;
-		(*this)[i + base] = regularization * invSigma * (z * z - ndBrainFloat(1.0f));
+		ndBrainFloat zMeanInvSigma = zMean * invSigma;
+		(*this)[i] = regularization * invSigma * zMeanInvSigma;
+		(*this)[i + base] = regularization * invSigma * (zMeanInvSigma * zMeanInvSigma - ndBrainFloat(1.0f));
 	}
 }

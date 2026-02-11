@@ -44,6 +44,7 @@ class ndBrainAgentContinuePolicyGradient: public ndBrainAgent
 	ndBrainFloat CalculateReward() override;
 	ndInt32 GetEpisodeFrames() const override;
 	void Save(ndBrainSave* const loadSave) override;
+	virtual ndFloat32 GetExpectedReward() const override;
 	
 	ndBrainVector m_actions;
 	ndBrainVector m_observations;

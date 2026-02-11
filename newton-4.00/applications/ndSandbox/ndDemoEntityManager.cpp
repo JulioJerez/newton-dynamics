@@ -29,7 +29,7 @@
 //#define DEFAULT_SCENE	3		// basic friction
 //#define DEFAULT_SCENE	4		// basic sliding platform
 //#define DEFAULT_SCENE	5		// basic Trigger
-#define DEFAULT_SCENE	6		// basic Particles
+//#define DEFAULT_SCENE	6		// basic Particles
 //#define DEFAULT_SCENE	7		// conservation of momentum 
 //#define DEFAULT_SCENE	8		// basic joints
 //#define DEFAULT_SCENE	9		// static mesh collision 
@@ -54,7 +54,7 @@
 // These are the machine learning training demos
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// train cart pole using SAC agent
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// train cart pole using PPO agent
-//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// train double pendulum unicycle using PPO agent
+#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// train double pendulum unicycle using PPO agent
 
 // legacy demos 
 //#define DEFAULT_SCENE	12		// basic vehicle

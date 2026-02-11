@@ -79,6 +79,7 @@ class ndBrainVector: public ndArray<ndBrainFloat>
 
 	ndBrainFloat CalculateLikelihood(const ndBrainVector& variance) const;
 	ndBrainFloat CalculatePartialKlDivergence(const ndBrainVector& gaussianLikelihood) const;
+
 	ndBrainFloat CalculateEntropyRegularization(const ndBrainVector& variance, ndBrainFloat regularization) const;
 	void CalculateEntropyRegularizationGradient(const ndBrainVector& mean, const ndBrainVector& variance, ndBrainFloat regularization);
 };

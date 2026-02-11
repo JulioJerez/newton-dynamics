@@ -173,10 +173,10 @@ ndSharedPtr<ndBody> BuildFlatPlane(ndDemoEntityManager* const scene, const ndMat
 	ndPhysicsWorld* const world = scene->GetWorld();
 	ndVector floor[] =
 	{
-		{ 200.0f, 0.0f,  200.0f, 1.0f },
-		{ 200.0f, 0.0f, -200.0f, 1.0f },
-		{ -200.0f, 0.0f, -200.0f, 1.0f },
-		{ -200.0f, 0.0f,  200.0f, 1.0f },
+		{  400.0f, 0.0f,  400.0f, 1.0f },
+		{  400.0f, 0.0f, -400.0f, 1.0f },
+		{ -400.0f, 0.0f, -400.0f, 1.0f },
+		{ -400.0f, 0.0f,  400.0f, 1.0f },
 	};
 	ndInt32 index[][3] = { { 0, 1, 2 },{ 0, 2, 3 } };
 	

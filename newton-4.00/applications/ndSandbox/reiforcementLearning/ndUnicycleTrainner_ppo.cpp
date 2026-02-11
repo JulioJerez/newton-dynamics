@@ -66,27 +66,35 @@ namespace ndUnicycleTrainer_ppo
 		{
 		}
 
-		ndBrainFloat CalculateReward()
+		ndBrainFloat CalculateReward() override
 		{
 			return m_owner->CalculateReward();
 		}
 
-		bool IsTerminal() const
+		bool IsTerminal() const override
 		{
 			return m_owner->IsTerminal();
 		}
 
-		void GetObservation(ndBrainFloat* const observation)
+		void GetObservation(ndBrainFloat* const observation) override
 		{
 			m_owner->GetObservation(observation);
 		}
 
-		virtual void ApplyActions(ndBrainFloat* const actions)
+		void GetInitialPose()
 		{
-			m_owner->ApplyActions(actions);
+			//ndFloat32 expectedReward = GetExpectedReward();
+			ndFloat32 expectedReward = CalculateReward();
+			m_owner->SaveInitialPose(expectedReward);
 		}
 
-		void ResetModel()
+		virtual void ApplyActions(ndBrainFloat* const actions) override
+		{
+			m_owner->ApplyActions(actions);
+			GetInitialPose();
+		}
+
+		void ResetModel() override
 		{
 			m_owner->ResetModel();
 		}
@@ -108,7 +116,7 @@ namespace ndUnicycleTrainer_ppo
 			,m_discountRewardFactor(0.99f)
 			,m_horizon(ndFloat32(1.0f) / (ndFloat32(1.0f) - m_discountRewardFactor))
 			,m_lastEpisode(0xfffffff)
-			,m_stopTraining(50 * 1000000)
+			,m_stopTraining(100 * 1000000)
 			,m_modelIsTrained(false)
 		{
 			char name[256];
@@ -123,10 +131,11 @@ namespace ndUnicycleTrainer_ppo
 			ndBrainAgentOnPolicyGradient_Trainer::HyperParameters hyperParameters;
 			
 			hyperParameters.m_useGpuBackend = false;
-			hyperParameters.m_batchTrajectoryCount = 100;
+			hyperParameters.m_batchTrajectoryCount = 1000;
 			hyperParameters.m_hiddenLayersNumberOfNeurons = 64;
 			hyperParameters.m_numberOfActions = m_actionsSize;
 			hyperParameters.m_numberOfObservations = m_observationsSize;
+			hyperParameters.m_discountRewardFactor = ndReal(m_discountRewardFactor);
 			
 			m_master = ndSharedPtr<ndBrainAgentOnPolicyGradient_Trainer>(new ndBrainAgentOnPolicyGradient_Trainer(hyperParameters));
 			m_bestActor = ndSharedPtr<ndBrain>(new ndBrain(**m_master->GetPolicyNetwork()));
@@ -141,7 +150,7 @@ namespace ndUnicycleTrainer_ppo
 			loader.m_mesh->m_matrix = loader.m_mesh->m_matrix * matrix;
 			
 			// create an articulated model
-			const ndInt32 numberOfAgents = 10;
+			const ndInt32 numberOfAgents = 400;
 			//const ndInt32 numberOfAgents = 1;
 			for (ndInt32 i = 0; i < numberOfAgents; ++i)
 			{
@@ -276,7 +285,8 @@ using namespace ndUnicycleTrainer_ppo;
 
 void ndUnicyclePpoTraining(ndDemoEntityManager* const scene)
 {
-	ndSharedPtr<ndBody> mapBody(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
+	//ndSharedPtr<ndBody> ground(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
+	ndSharedPtr<ndBody> ground(BuildFlatPlane(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", true));
 
 	// add a help message
 	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend());
@@ -301,7 +311,7 @@ void ndUnicyclePpoTraining(ndDemoEntityManager* const scene)
 	
 	matrix.m_posit.m_x -= 0.0f;
 	matrix.m_posit.m_y += 1.5f;
-	matrix.m_posit.m_z += -9.0f;
+	matrix.m_posit.m_z += -12.0f;
 	ndQuaternion rotation(ndVector(0.0f, 1.0f, 0.0f, 0.0f), -90.0f * ndDegreeToRad);
 	scene->SetCameraMatrix(rotation, matrix.m_posit);
 }
