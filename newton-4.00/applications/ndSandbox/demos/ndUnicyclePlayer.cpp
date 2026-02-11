@@ -198,9 +198,9 @@ namespace ndUnicyclePlayer
 		ndFloat32 speedPenalty = ndExp(-speed * speed) - ndFloat32(1.0f);
 		if (IsOnAir())
 		{
-			omegaReward = ndFloat32(0.0f);
-			angleReward = ndFloat32(0.0f);
-			speedPenalty = ndFloat32(0.0f);
+			//omegaReward = ndFloat32(0.0f);
+			//angleReward = ndFloat32(0.0f);
+			//speedPenalty = ndFloat32(0.0f);
 		}
 		
 		ndFloat32 reward = ndFloat32(0.0f);
