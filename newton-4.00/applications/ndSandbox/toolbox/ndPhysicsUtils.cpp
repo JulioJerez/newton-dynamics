@@ -51,19 +51,19 @@ ndMatrix FindFloor(const ndWorld& world, const ndMatrix& origin, const ndShapeIn
 				//ndVector obbOrigin;
 				//shape.CalculateObb(obbOrigin, size);
 				//size = size.Scale(ndFloat32 (2.0f));
-				//ndShapeInstance sorrugate(new ndShapeBox(size.m_x, size.m_y, size.m_z));
-				//ndMatrix surrugateMatrix(ndGetIdentityMatrix());
+				//ndShapeInstance surrogate(new ndShapeBox(size.m_x, size.m_y, size.m_z));
+				//ndMatrix surrogateMatrix(ndGetIdentityMatrix());
 				//
 				////ndMatrix xxxxx(shape.CalculateInertia());
 				////ndVector xxxxxx(xxxxx.EigenVectors());
 				//
-				//surrugateMatrix.m_posit = obbOrigin;
-				//surrugateMatrix.m_posit.m_w = ndFloat32(1.0f);
-				//sorrugate.SetLocalMatrix(surrugateMatrix);
+				//surrogateMatrix.m_posit = obbOrigin;
+				//surrogateMatrix.m_posit.m_w = ndFloat32(1.0f);
+				//surrogate.SetLocalMatrix(surrogateMatrix);
 
 				ndFloat32 radios = shape.GetBoxMinRadius();
-				ndShapeInstance sorrugate(new ndShapeSphere(radios));
-				world.ConvexCast(*this, sorrugate, origin, dst);
+				ndShapeInstance surrogate(new ndShapeSphere(radios));
+				world.ConvexCast(*this, surrogate, origin, dst);
 				if (m_param < ndFloat32(1.0f))
 				{
 					ndVector size;

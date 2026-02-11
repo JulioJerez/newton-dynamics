@@ -446,8 +446,10 @@ ndBrainFloat ndBrainVector::CalculateLikelihood(const ndBrainVector& varianceBuf
 		z2 += z * z;
 		invSigma2Det *= (invSqrtPi * invSigma);
 	}
-	ndBrainFloat exponent = ndBrainFloat(0.5f) * z2;
-	ndBrainFloat likelihood = invSigma2Det * ndBrainFloat(ndExp(-exponent));
+	ndBrainFloat exponent = -ndBrainFloat(0.5f) * z2;
+	ndBrainFloat likelihood = invSigma2Det * ndBrainFloat(ndExp(exponent));
+
+	// make sure the value is larger than zero
 	return ndMax(likelihood, ndBrainFloat(1.0e-4f));
 }
 

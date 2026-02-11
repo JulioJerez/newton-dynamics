@@ -220,8 +220,8 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndSharedPtr<ndBrainFloatBuffer> m_invMinibatchLikelihoodBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_minibatchGaussianDistribution;
 	ndSharedPtr<ndBrainFloatBuffer> m_minibatchLikelihoodRatioBuffer;
-	ndSharedPtr<ndBrainFloatBuffer> m_minuminMiniBatchClipRatioBuffer;
-	ndSharedPtr<ndBrainFloatBuffer> m_maximunMiniBatchClipRatioBuffer;
+	ndSharedPtr<ndBrainFloatBuffer> m_negativeMiniBatchClipRatioBuffer;
+	ndSharedPtr<ndBrainFloatBuffer> m_positveMiniBatchClipRatioBuffer;
 	
 
 	ndSharedPtr<ndBrainIntegerBuffer> m_randomShuffleMinibatchBuffer;
