@@ -190,10 +190,10 @@ namespace ndUnicyclePlayer
 
 		ndFloat32 angle = GetPoleAngle() / (0.25f * ND_TERMINATION_ANGLE);
 		ndFloat32 omega = comDynamics.m_omega.m_x / ndFloat32 (0.5f);
-		ndFloat32 speed = ndMax((ndAbs(comDynamics.m_veloc.m_z) - ndFloat32(2.0f)), ndFloat32(0.0f));
+		ndFloat32 speed = ndMax((ndAbs(comDynamics.m_veloc.m_z) - ndFloat32(10.0f)), ndFloat32(0.0f));
 		//ndTrace(("a=%f w=%f s=%f\n", angle, omega, speed));
 
-		const ndFloat32 invSigma2 = ndFloat32(5.0f);
+		const ndFloat32 invSigma2 = ndFloat32(4.0f);
 		ndFloat32 angleReward = ndExp(-invSigma2 * angle * angle);
 		ndFloat32 omegaReward = ndExp(-invSigma2 * omega * omega);
 		ndFloat32 speedPenalty = ndExp(-invSigma2 * speed * speed) - ndFloat32(1.0f);
