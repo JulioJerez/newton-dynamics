@@ -127,7 +127,7 @@ namespace ndUnicycleTrainer_ppo
 			// set random see for replication
 			ndSetRandSeed(42);
 
-			// create a Soft Actor Critic training agent
+			// create a proximal policy training agent
 			ndBrainAgentOnPolicyGradient_Trainer::HyperParameters hyperParameters;
 			
 			hyperParameters.m_useGpuBackend = false;
