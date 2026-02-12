@@ -23,7 +23,7 @@ namespace ndUnicyclePlayer
 	#define CONTROLLER_NAME_SAC		"unicycleSac"
 	#define CONTROLLER_NAME_PPO		"unicyclePpo"
 
-	#define BOX_MASS				ndFloat32(20.0f)
+	#define BOX_MASS				ndFloat32(10.0f)
 	#define POLE_MASS				ndFloat32(1.0f)
 	#define BALL_MASS				ndFloat32(5.0f)
 
@@ -42,10 +42,11 @@ namespace ndUnicyclePlayer
 
 	enum ndStateSpace
 	{
+		m_comSpeed,
 		m_poleAngle,
 		m_poleOmega,
-		m_wheelOmega,
-		m_comSpeed,
+		m_hingeOmega,
+		m_hingeAngle,
 		m_hasSupportContact,
 		m_observationsSize
 	};
