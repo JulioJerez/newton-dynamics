@@ -129,16 +129,17 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 		ndBrainFloat m_criticRegularizer;
 		ndBrainFloat m_discountRewardFactor;
 		ndBrainFloat m_entropyRegularizerCoef;
+		ndBrainFloat m_divergenceStopThreshold;
 
 		ndInt32 m_randomSeed;
 		ndInt32 m_miniBatchSize;
 		ndInt32 m_numberOfActions;
 		ndInt32 m_numberOfObservations;
 
+		ndInt32 m_divergenceMaxPasses;
 		ndInt32 m_numberOfHiddenLayers;
 		ndInt32 m_hiddenLayersNumberOfNeurons;
 
-		ndInt32 m_divergencePasses;
 		ndInt32 m_maxTrajectorySteps;
 		ndInt32 m_batchTrajectoryCount;
 
@@ -202,8 +203,6 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndSharedPtr<ndBrainFloatBuffer> m_zMeanBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_invSigmaBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_invSigma2Buffer;
-	//ndSharedPtr<ndBrainFloatBuffer> m_reparametrizedMeanBuffer;
-	//ndSharedPtr<ndBrainFloatBuffer> m_reparametrizedSgmaBuffer;
 
 	ndSharedPtr<ndBrainFloatBuffer> m_meanGradiendBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_sigmaGradiendBuffer;
@@ -216,9 +215,9 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndSharedPtr<ndBrainFloatBuffer> m_policyActionBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_invLikelihoodBuffer;
 	ndSharedPtr<ndBrainIntegerBuffer> m_randomShuffleBuffer;
+	ndSharedPtr<ndBrainFloatBuffer> m_advantageMinibatchBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_policyGradientAccumulator;
 
-	ndSharedPtr<ndBrainFloatBuffer> m_advantageMinibatchBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_invMinibatchLikelihoodBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_minibatchGaussianDistribution;
 	ndSharedPtr<ndBrainFloatBuffer> m_minibatchLikelihoodRatioBuffer;

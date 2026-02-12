@@ -112,7 +112,7 @@ ndBrainCpuContext::ndBrainCpuContext()
 {
 	ndInt32 numOfThreads = ndBrainThreadPool::GetMaxThreads();
 #ifdef _DEBUG
-//numOfThreads = 1;
+numOfThreads = 1;
 #endif
 
 	SetThreadCount(numOfThreads);
@@ -448,8 +448,8 @@ void ndBrainCpuContext::CalculatePartialKlDivergence(ndBrainFloatBuffer& buffer,
 	const ndInt32 numberOfGroups = ndInt32(buffer.SizeInBytes() / sizeof(ndBrainFloat));
 	
 	ndBrainMemVector dst((ndBrainFloat*)buffer.GetCpuPtr(), numberOfGroups);
-	const ndBrainMemVector baseLikeliHood((ndBrainFloat*)baseGaussianLikelihood.GetCpuPtr(), stride * numberOfGroups);
 	const ndBrainMemVector likeliHood((ndBrainFloat*)gaussianLikelihood.GetCpuPtr(), stride * numberOfGroups);
+	const ndBrainMemVector baseLikeliHood((ndBrainFloat*)baseGaussianLikelihood.GetCpuPtr(), stride * numberOfGroups);
 	
 	for (ndInt32 i = 0; i < numberOfGroups; ++i)
 	{

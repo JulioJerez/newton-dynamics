@@ -458,8 +458,8 @@ ndBrainFloat ndBrainVector::CalculatePartialKlDivergence(const ndBrainVector& ga
 	// https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
 	// since I am using a diagonal sigma, I do not have to use Cholesky 
 
-	ndFloat32 t0 = ndFloat32(0.0f);
-	ndFloat32 t2 = ndFloat32(0.0f);
+	ndFloat32 meanRatio = ndFloat32(0.0f);
+	ndFloat32 traceRatio = ndFloat32(0.0f);
 	ndFloat32 log_det_0 = ndFloat32(0.0f);
 	ndFloat32 log_det_1 = ndFloat32(0.0f);
 	const ndInt32 size = ndInt32 (GetCount()) / 2;
@@ -467,18 +467,19 @@ ndBrainFloat ndBrainVector::CalculatePartialKlDivergence(const ndBrainVector& ga
 	{
 		ndBrainFloat sigma_0 = (*this)[size + i];
 		ndBrainFloat sigma_1 = gaussianLikelihood[size + i];
+		//ndBrainFloat invSigma_0 = 1.0f / sigma_0;
 		ndBrainFloat invSigma_1 = 1.0f / sigma_1;
 		ndBrainFloat meanError = gaussianLikelihood[i] - (*this)[i];
 
-		t0 += sigma_0 * invSigma_1;
-		t2 += meanError * invSigma_1 * meanError;
+		traceRatio += invSigma_1 * sigma_0;
+		meanRatio += meanError * invSigma_1 * meanError;
 
 		log_det_1 += ndLog(sigma_1);
 		log_det_0 += ndLog(sigma_0);
 	}
-	ndFloat32 t3 = log_det_1 - log_det_0;
-	ndFloat32 t1 = ndBrainFloat(size);
-	ndFloat32 divergence = t0 - t1 + t2 + t3;
+	ndFloat32 logSigmaRatio = log_det_1 - log_det_0;
+	ndFloat32 meanSize = ndBrainFloat(size);
+	ndFloat32 divergence = traceRatio - meanSize + meanRatio + logSigmaRatio;
 	return ndBrainFloat(ndFloat32 (0.5f) * divergence);
 }
 
