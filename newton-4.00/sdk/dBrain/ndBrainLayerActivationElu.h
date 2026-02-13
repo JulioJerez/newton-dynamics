@@ -26,6 +26,8 @@
 #include "ndBrainSaveLoad.h"
 #include "ndBrainLayerActivation.h"
 
+#define ND_BRAIN_LAYER_ACTIVATION_ELU_NAME	"ndBrainLayerActivationElu"
+
 class ndBrainLayerActivationElu : public ndBrainLayerActivation
 {
 	public:

@@ -119,7 +119,7 @@ void ndBrainLayerLinear::InitWeights_he()
 void ndBrainLayerLinear::InitWeights_xavier()
 {
 	m_bias.Set(ndBrainFloat(0.0f));
-	ndBrainFloat variance = ndBrainFloat(ndSqrt(ndFloat32(2.0f) / ndFloat32(GetOutputSize() + GetInputSize())));
+	ndBrainFloat variance = ndBrainFloat(ndSqrt(ndFloat32(6.0f) / ndFloat32(GetOutputSize() + GetInputSize())));
 	for (ndInt32 i = ndInt32(m_weights.GetCount() - 1); i >= 0; --i)
 	{
 		m_weights[i].InitGaussianWeights(variance);
