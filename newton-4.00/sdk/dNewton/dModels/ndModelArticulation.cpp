@@ -895,10 +895,10 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 	dynamics.m_inertiaMatrix = localFrame * dynamics.m_inertiaMatrix * localFrame.OrthoInverse();
 	dynamics.m_inertiaMatrix.m_posit = ndVector::m_wOne;
 
-	const ndMatrix invInertia(dynamics.m_inertiaMatrix.Inverse4x4());
-	dynamics.m_omega = invInertia.RotateVector(dynamics.m_angularMomentum);
+	dynamics.m_invInertiaMatrix = dynamics.m_inertiaMatrix.Inverse4x4();
+	dynamics.m_omega = dynamics.m_invInertiaMatrix.RotateVector(dynamics.m_angularMomentum);
 	dynamics.m_veloc = dynamics.m_momentum.Scale(ndFloat32(1.0f) / dynamics.m_mass);
-	dynamics.m_alpha = invInertia.RotateVector(dynamics.m_torque);
+	dynamics.m_alpha = dynamics.m_invInertiaMatrix.RotateVector(dynamics.m_torque);
 	dynamics.m_accel = dynamics.m_force.Scale(ndFloat32(1.0f) / dynamics.m_mass);
 
 	dynamics.m_centerOfMass.m_front = localFrame.m_front;
