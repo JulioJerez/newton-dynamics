@@ -193,24 +193,26 @@ namespace ndUnicyclePlayer
 		comFrame.m_right = comFrame.m_front.CrossProduct(comFrame.m_up).Normalize();
 		comFrame.m_up = comFrame.m_right.CrossProduct(comFrame.m_front).Normalize();
 
+		ndAssert(*m_solver);
 		// exclude the wheel angular momentum from the com kinematics
 		const ndVector savedWheelOmega(m_wheel->GetOmega());
 		m_wheel->SetOmegaNoSleep(ndVector::m_zero);
-
 		ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS> extraJoints;
-		ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassKinematics(comFrame));
-		//ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(*((ndIkSolver*)*m_solver), comFrame, extraJoints, m_timestep));
+		//ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassKinematics(comFrame));
+		ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(*((ndIkSolver*)*m_solver), comFrame, extraJoints, m_timestep));
 		m_wheel->SetOmegaNoSleep(savedWheelOmega);
 
-		ndFloat32 angle = 8.0f * GetPoleAngle() / ND_TERMINATION_ANGLE;
-		ndFloat32 omega = 2.0f * comDynamics.m_omega.m_x;
-		ndFloat32 speed = ndMax((ndAbs(comDynamics.m_veloc.m_z) - ndFloat32(10.0f)), ndFloat32(0.0f));
+		ndFloat32 poleAngle = 8.0f * GetPoleAngle() / ND_TERMINATION_ANGLE;
+		ndFloat32 comOmega = 2.0f * comDynamics.m_omega.m_x;
+		ndFloat32 comAlpha = 0.5f * comDynamics.m_alpha.m_x;
+		ndFloat32 comSpeed = ndMax((ndAbs(comDynamics.m_veloc.m_z) - ndFloat32(8.0f)), ndFloat32(0.0f));
 		//ndTrace(("a=%f w=%f s=%f\n", angle, omega, speed));
 
 		const ndFloat32 invSigma2 = ndFloat32(4.0f);
-		ndFloat32 angleReward = ndExp(-invSigma2 * angle * angle);
-		ndFloat32 omegaReward = ndExp(-invSigma2 * omega * omega);
-		ndFloat32 speedPenalty = ndExp(-invSigma2 * speed * speed) - ndFloat32(1.0f);
+		ndFloat32 poleAngleReward = ndExp(-invSigma2 * poleAngle * poleAngle);
+		ndFloat32 comOmegaReward = ndExp(-invSigma2 * comOmega * comOmega);
+		ndFloat32 comAlphaReward = ndExp(-invSigma2 * comAlpha * comAlpha);
+		ndFloat32 comSpeedPenalty = ndExp(-invSigma2 * comSpeed * comSpeed) - ndFloat32(1.0f);
 		if (IsOnAir())
 		{
 			//omegaReward = ndFloat32(0.0f);
@@ -219,9 +221,10 @@ namespace ndUnicyclePlayer
 		}
 		
 		ndFloat32 reward = ndFloat32(0.0f);
-		reward += angleReward * ndFloat32(0.6f);
-		reward += omegaReward * ndFloat32(0.4f);
-		reward += speedPenalty * ndFloat32(0.5f);
+		reward += poleAngleReward * ndFloat32(0.4f);
+		reward += comOmegaReward * ndFloat32(0.3f);
+		reward += comAlphaReward * ndFloat32(0.3f);
+		reward += comSpeedPenalty * ndFloat32(0.5f);
 
 		return ndBrainFloat(reward);
 	}
