@@ -27,6 +27,8 @@
 class ndIkSolver;
 class ndJointBilateralConstraint;
 
+#define D_INV_IK_MAX_LINKS	256
+
 class ndSkeletonContainer 
 {
 	public:
@@ -228,7 +230,7 @@ class ndSkeletonContainer
 	void SolveImmediate(ndIkSolver& solverInfo);
 	void UpdateForcesImmediate(const ndForcePair* const force) const;
 	void CalculateJointAccelImmediate(ndForcePair* const accel) const;
-	void SolveAuxiliaryImmediate(ndArray<ndBodyKinematic*>& bodyArray, ndForcePair* const force) const;
+	void SolveAuxiliaryImmediate(ndFixSizeArray<ndBodyKinematic*, D_INV_IK_MAX_LINKS>& bodyArray, ndForcePair* const force) const;
 
 	// support
 	void InitLoopMassMatrix();

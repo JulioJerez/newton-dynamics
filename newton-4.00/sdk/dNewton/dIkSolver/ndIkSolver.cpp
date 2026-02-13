@@ -30,13 +30,13 @@
 
 ndIkSolver::ndIkSolver()
 	:ndClassAlloc()
-	,m_contacts(32)
-	,m_bodies(32)
-	,m_savedBodiesIndex(32)
-	,m_leftHandSide(128)
-	,m_rightHandSide(128)
-	,m_surrogateContact(32)
-	,m_surrogateBodies(32)
+	,m_contacts()
+	,m_bodies()
+	,m_savedBodiesIndex()
+	,m_leftHandSide()
+	,m_rightHandSide()
+	,m_surrogateContact()
+	,m_surrogateBodies()
 	,m_world(nullptr)
 	,m_skeleton(nullptr)
 	,m_timestep(ndFloat32(0.0f))
@@ -44,22 +44,13 @@ ndIkSolver::ndIkSolver()
 	,m_maxAccel(ndFloat32(1.0e3f))
 	,m_maxAlpha(ndFloat32(1.0e4f))
 {
-	ndBodyDynamic* const sentinelBody = new ndBodyDynamic;
-	m_surrogateBodies.PushBack(sentinelBody);
-	sentinelBody->m_uniqueId = 0;
+	// add a sentinel body
+	m_surrogateBodies.PushBack(ndSharedPtr<ndBodyDynamic>(new ndBodyDynamic()));
+	m_surrogateBodies[0]->m_uniqueId = 0;
 }
 
 ndIkSolver::~ndIkSolver()
 {
-	for (ndInt32 i = ndInt32(m_surrogateBodies.GetCount()) - 1; i >= 0; --i)
-	{
-		delete m_surrogateBodies[i];
-	}
-
-	for (ndInt32 i = ndInt32(m_surrogateContact.GetCount()) - 1; i >= 0; --i)
-	{
-		delete m_surrogateContact[i];
-	}
 }
 
 void ndIkSolver::SetMaxAccel(ndFloat32 maxAccel, ndFloat32 maxAlpha)
@@ -203,8 +194,8 @@ void ndIkSolver::UpdateJointAcceleration(ndConstraint* const joint)
 	
 	ndAssert(joint->GetAsBilateral());
 	ndAssert(joint->GetAsBilateral()->GetSolverModel() != m_jointkinematicAttachment);
-	ndAssert(joint->GetAsBilateral()->GetBody0()->GetSkeleton() == m_skeleton);
-	ndAssert(joint->GetAsBilateral()->GetBody1()->GetSkeleton() == m_skeleton);
+	ndAssert(joint->GetAsBilateral()->GetBody0()->GetSkeleton() == *m_skeleton);
+	ndAssert(joint->GetAsBilateral()->GetBody1()->GetSkeleton() == *m_skeleton);
 	
 	const ndInt32 baseIndex = joint->m_rowStart;
 	for (ndInt32 i = 0; i < dof; ++i)
@@ -273,7 +264,7 @@ void ndIkSolver::BuildMassMatrix()
 	m_rightHandSide.SetCount(0);
 	
 	const ndVector zero(ndVector::m_zero);
-	m_bodies.PushBack(m_surrogateBodies[0]);
+	m_bodies.PushBack(*m_surrogateBodies[0]);
 	m_surrogateBodies[0]->m_index = 0;
 	m_surrogateBodies[0]->m_accel = zero;
 	m_surrogateBodies[0]->m_alpha = zero;
@@ -407,7 +398,7 @@ void ndIkSolver::BuildMassMatrix()
 								ndBodyDynamic* const surrogateBody = new ndBodyDynamic();
 								m_surrogateBodies.PushBack(surrogateBody);
 							}
-							ndBodyKinematic* const surrogateBody = m_surrogateBodies[surrogateBodiesIndex];
+							ndBodyKinematic* const surrogateBody = *m_surrogateBodies[surrogateBodiesIndex];
 
 							ndBodyPair pair;
 							pair.m_body = body;
@@ -434,9 +425,9 @@ void ndIkSolver::BuildMassMatrix()
 
 								if (surrogateContactIndex == ndInt32(m_surrogateContact.GetCount()))
 								{
-									m_surrogateContact.PushBack(new ndContact);
+									m_surrogateContact.PushBack(ndSharedPtr<ndContact> (new ndContact));
 								}
-								ndContact* const surrogateContact = m_surrogateContact[surrogateContactIndex];
+								ndContact* const surrogateContact = *m_surrogateContact[surrogateContactIndex];
 								surrogateContactIndex++;
 								contact->InitSurrogateContact(surrogateContact, body0, surrogateBody);
 								m_contacts.PushBack(surrogateContact);
@@ -450,9 +441,10 @@ void ndIkSolver::BuildMassMatrix()
 
 							if (surrogateContactIndex == ndInt32(m_surrogateContact.GetCount()))
 							{
-								m_surrogateContact.PushBack(new ndContact);
+								//m_surrogateContact.PushBack(new ndContact);
+								m_surrogateContact.PushBack(ndSharedPtr<ndContact>(new ndContact));
 							}
-							ndContact* const surrogateContact = m_surrogateContact[surrogateContactIndex];
+							ndContact* const surrogateContact = *m_surrogateContact[surrogateContactIndex];
 							surrogateContactIndex++;
 							contact->InitSurrogateContact(surrogateContact, surrogateBody, body1);
 							m_contacts.PushBack(surrogateContact);
@@ -509,9 +501,9 @@ void ndIkSolver::BuildMassMatrix()
 
 void ndIkSolver::SolverBegin(ndSkeletonContainer* const skeleton, ndJointBilateralConstraint* const* joints, ndInt32 jointCount, ndWorld* const world, ndFloat32 timestep)
 {
-	m_world = world;
-	m_skeleton = skeleton;
-	if (m_skeleton)
+	m_world = ndWeakPtr<ndWorld>(world);
+	m_skeleton = ndWeakPtr<ndSkeletonContainer>(skeleton);
+	if (*m_skeleton)
 	{
 		m_timestep = timestep;
 		m_invTimestep = ndFloat32(1.0f) / m_timestep;
@@ -535,7 +527,7 @@ void ndIkSolver::SolverBegin(ndSkeletonContainer* const skeleton, ndJointBilater
 
 void ndIkSolver::SolverEnd()
 {
-	if (m_skeleton)
+	if (*m_skeleton)
 	{
 		for (ndInt32 i = ndInt32(m_bodies.GetCount())-1; i >= 1; --i)
 		{
@@ -550,8 +542,8 @@ void ndIkSolver::SolverEnd()
 
 void ndIkSolver::Solve()
 {
-	ndAssert(m_skeleton);
-	if (m_skeleton)
+	ndAssert(*m_skeleton);
+	if (*m_skeleton)
 	{
 		const ndVector zero(ndVector::m_zero);
 		for (ndInt32 i = ndInt32(m_bodies.GetCount()) - 1; i >= 0; --i)
@@ -567,9 +559,9 @@ void ndIkSolver::Solve()
 			if (body1->GetInvMass() > ndFloat32 (0.0f)) 
 			{
 				ndBodyKinematic* const body0 = contact->GetBody0();
-				ndAssert((body0->GetSkeleton() == m_skeleton) || (body1->GetSkeleton() == m_skeleton));
+				ndAssert((body0->GetSkeleton() == *m_skeleton) || (body1->GetSkeleton() == *m_skeleton));
 
-				ndBodyKinematic* const body = (body0->GetSkeleton() != m_skeleton) ? body0 : body1;
+				ndBodyKinematic* const body = (body0->GetSkeleton() != *m_skeleton) ? body0 : body1;
 				ndBodyKinematic::ndContactMap& contactMap = body->GetContactMap();
 				ndBodyKinematic::ndContactMap::Iterator it(contactMap);
 				for (it.Begin(); it; it++)

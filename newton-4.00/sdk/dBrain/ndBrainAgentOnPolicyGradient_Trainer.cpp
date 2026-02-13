@@ -225,11 +225,13 @@ void ndBrainAgentOnPolicyGradient_Agent::ndTrajectory::GetFlatArray(ndInt32 inde
 	ndMemCpy(&output[GetNextObsevationOffset()], &m_nextObservations[index * m_obsevationsSize], m_obsevationsSize);
 }
 
-ndBrainAgentOnPolicyGradient_Agent::ndBrainAgentOnPolicyGradient_Agent(ndBrainAgentOnPolicyGradient_Trainer* const master)
+ndBrainAgentOnPolicyGradient_Agent::ndBrainAgentOnPolicyGradient_Agent(ndBrainAgentOnPolicyGradient_Trainer* const master, ndInt32 maxTrajecxtoires)
 	:ndBrainAgent(master->GetPolicyNetwork())
 	,m_trajectory()
 	,m_normalDistribution()
 	,m_owner(master)
+	,m_trajectoryIndex(0)
+	,m_maxTrajectores(maxTrajecxtoires)
 	,m_isDead(false)
 {
 	m_trajectory.Init(master->m_parameters.m_numberOfActions, master->m_parameters.m_numberOfObservations);
@@ -507,65 +509,69 @@ ndFloat32 ndBrainAgentOnPolicyGradient_Trainer::GetAverageFrames() const
 
 void ndBrainAgentOnPolicyGradient_Trainer::SaveTrajectory(ndBrainAgentOnPolicyGradient_Agent* const agent)
 {
-	ndBrainAgentOnPolicyGradient_Agent::ndTrajectory& trajectory = agent->m_trajectory;
-
-	// if the agent is dead, then remove all transitions past the last dead step.
-	if (agent->m_isDead)
+	if (agent->m_trajectoryIndex < agent->m_maxTrajectores)
 	{
-		ndInt32 start = ndMax(0, ndInt32(trajectory.GetCount() - 64));
-		for (ndInt32 i = start; i < trajectory.GetCount(); ++i)
+		ndBrainAgentOnPolicyGradient_Agent::ndTrajectory& trajectory = agent->m_trajectory;
+		// if the agent is dead, then remove all transitions past the last dead step.
+		if (agent->m_isDead)
 		{
-			if (trajectory.GetTerminalState(i))
+			ndInt32 start = ndMax(0, ndInt32(trajectory.GetCount() - 64));
+			for (ndInt32 i = start; i < trajectory.GetCount(); ++i)
 			{
-				trajectory.SetCount(i + 1);
-				break;
+				if (trajectory.GetTerminalState(i))
+				{
+					trajectory.SetCount(i + 1);
+					break;
+				}
 			}
 		}
-	}
 
-	ndMemCpy(trajectory.GetNextObservations(trajectory.GetCount() - 1), trajectory.GetObservations(trajectory.GetCount() - 1), m_parameters.m_numberOfObservations);
-	for (ndInt32 i = trajectory.GetCount() - 2; i >= 0; --i)
-	{
-		ndMemCpy(trajectory.GetNextObservations(i), trajectory.GetObservations(i + 1), m_parameters.m_numberOfObservations);
-	}
+		ndMemCpy(trajectory.GetNextObservations(trajectory.GetCount() - 1), trajectory.GetObservations(trajectory.GetCount() - 1), m_parameters.m_numberOfObservations);
+		for (ndInt32 i = trajectory.GetCount() - 2; i >= 0; --i)
+		{
+			ndMemCpy(trajectory.GetNextObservations(i), trajectory.GetObservations(i + 1), m_parameters.m_numberOfObservations);
+		}
 
-	ndBrainFloat gamma = m_parameters.m_discountRewardFactor;
-	ndBrainFloat stateExpectedReward = trajectory.GetReward(trajectory.GetCount() - 1);
-	if ((trajectory.GetCount() - 1) > m_parameters.m_maxTrajectorySteps)
-	{
+		ndBrainFloat gamma = m_parameters.m_discountRewardFactor;
+		ndBrainFloat stateExpectedReward = trajectory.GetReward(trajectory.GetCount() - 1);
+		if ((trajectory.GetCount() - 1) > m_parameters.m_maxTrajectorySteps)
+		{
+			// using the Bellman equation to calculate trajectory expected rewards score.
+			// (Monte Carlo method)
+			for (ndInt32 i = trajectory.GetCount() - 2; i >= m_parameters.m_maxTrajectorySteps; --i)
+			{
+				ndBrainFloat r = trajectory.GetReward(i);
+				stateExpectedReward = r + gamma * stateExpectedReward;
+			}
+			trajectory.SetCount(m_parameters.m_maxTrajectorySteps);
+		}
+
 		// using the Bellman equation to calculate trajectory expected rewards score.
 		// (Monte Carlo method)
-		for (ndInt32 i = trajectory.GetCount() - 2; i >= m_parameters.m_maxTrajectorySteps; --i)
+		ndBrainFloat trajectoryReward = ndBrainFloat(0.0f);
+		for (ndInt32 i = trajectory.GetCount() - 2; i >= 0; --i)
 		{
 			ndBrainFloat r = trajectory.GetReward(i);
 			stateExpectedReward = r + gamma * stateExpectedReward;
+			trajectoryReward += stateExpectedReward;
 		}
-		trajectory.SetCount(m_parameters.m_maxTrajectorySteps);
+
+		ndScore score;
+		score.m_trajectoryReward = trajectoryReward;
+		score.m_trajectorySteps = ndInt32(trajectory.GetCount());
+		m_trajectoryScore.PushBack(score);
+
+		ndInt32 base = m_trajectoryAccumulator.GetCount();
+		m_trajectoryAccumulator.SetCount(m_trajectoryAccumulator.GetCount() + trajectory.GetCount());
+		ndAssert(m_trajectoryAccumulator.GetCount() <= (m_parameters.m_batchTrajectoryCount * m_parameters.m_maxTrajectorySteps));
+
+		for (ndInt32 i = 0; i < trajectory.GetCount(); ++i)
+		{
+			m_trajectoryAccumulator.CopyFrom(base + i, trajectory, i);
+		}
+		m_trajectiesCount++;
 	}
-
-	// using the Bellman equation to calculate trajectory expected rewards score.
-	// (Monte Carlo method)
-	ndBrainFloat trajectoryReward = ndBrainFloat(0.0f);
-	for (ndInt32 i = trajectory.GetCount() - 2; i >= 0; --i)
-	{
-		ndBrainFloat r = trajectory.GetReward(i);
-		stateExpectedReward = r + gamma * stateExpectedReward;
-		trajectoryReward += stateExpectedReward;
-	}
-
-	ndScore score;
-	score.m_trajectoryReward = trajectoryReward;
-	score.m_trajectorySteps = ndInt32(trajectory.GetCount());
-	m_trajectoryScore.PushBack(score);
-
-	ndInt32 base = m_trajectoryAccumulator.GetCount();
-	m_trajectoryAccumulator.SetCount(m_trajectoryAccumulator.GetCount() + trajectory.GetCount());
-	ndAssert(m_trajectoryAccumulator.GetCount() <= (m_parameters.m_batchTrajectoryCount * m_parameters.m_maxTrajectorySteps));
-
-	for (ndInt32 i = 0; i < trajectory.GetCount(); ++i)
-	{
-		m_trajectoryAccumulator.CopyFrom(base + i, trajectory, i);
-	}
+	agent->m_trajectoryIndex++;
 }
 
 void ndBrainAgentOnPolicyGradient_Trainer::UpdateScore()
@@ -1107,11 +1113,6 @@ ndBrainFloat ndBrainAgentOnPolicyGradient_Trainer::CalculateKLdivergence()
 	const ndInt32 policyActionStrideInByte = 2 * m_parameters.m_numberOfActions * m_parameters.m_miniBatchSize * ndInt32(sizeof(ndReal));
 	const ndInt32 transitionStrideInBytes = m_trajectoryAccumulator.GetStride() * m_parameters.m_miniBatchSize * ndInt32(sizeof(ndReal));
 
-//m_policyTrainer->GetWeightAndBiasBuffer()->VectorFromDevice(m_lastPolicy);
-//m_context->SyncBufferCommandQueue();
-//m_policyTrainer->UpdateParameters(m_lastPolicy);
-//const ndBrain* const policy = GetPolicyNetwork();
-
 	minbatchDivergenceAcc->Set(ndBrainFloat(0.0f));
 	const ndInt32 numberOfBatches = ndInt32(m_trajectoryAccumulator.GetCount() / m_parameters.m_miniBatchSize);
 	ndAssert((numberOfBatches * m_parameters.m_miniBatchSize) <= m_trajectoryAccumulator.GetCount());
@@ -1148,7 +1149,6 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeStep()
 			agent->m_trajectory.SetCount(0);
 			agent->ResetModel();
 			agent->m_isDead = false;
-			m_trajectiesCount++;
 		}
 		m_frameCount++;
 	}
@@ -1162,6 +1162,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeStep()
 			agent->m_trajectory.SetCount(0);
 			agent->ResetModel();
 			agent->m_isDead = false;
+			agent->m_trajectoryIndex = 0;
 		}
 		m_eposideCount++;
 		m_trajectiesCount = 0;

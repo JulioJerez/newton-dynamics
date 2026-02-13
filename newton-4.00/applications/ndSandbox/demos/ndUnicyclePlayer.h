@@ -146,6 +146,7 @@ namespace ndUnicyclePlayer
 		ndSharedPtr<ndJointBilateralConstraint> m_plane;
 		ndSharedPtr<ndJointBilateralConstraint> m_poleHinge;
 		ndSharedPtr<ndJointBilateralConstraint> m_wheelRoller;
+		ndSharedPtr<ndIkSolver> m_solver;
 		ndSharedPtr<ndBrainAgent> m_agent;
 		ndFloat32 m_timestep;
 		ndFloat32 m_bestReward;
