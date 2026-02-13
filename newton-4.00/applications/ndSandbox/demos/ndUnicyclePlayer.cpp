@@ -113,7 +113,8 @@ namespace ndUnicyclePlayer
 		GetModel()->GetAsModelArticulation()->ClearMemory();
 		
 		// randomize start position 
-		ndFloat32 angle = ndDegreeToRad * (ndRand() - 0.5f) * 10.0f;
+		//ndFloat32 angle = ndDegreeToRad * (ndRand() - 0.5f) * 10.0f;
+		ndFloat32 angle = ndFloat32(0.0f);
 		ndMatrix rollMatrix(ndRollMatrix(angle));
 		ndMatrix matrix (rollMatrix * boxMatrix);
 		GetModel()->GetAsModelArticulation()->SetTransform(matrix);
