@@ -222,9 +222,9 @@ namespace ndUnicyclePlayer
 		}
 		
 		ndFloat32 reward = ndFloat32(0.0f);
-		reward += poleAngleReward * ndFloat32(0.4f);
-		reward += comOmegaReward * ndFloat32(0.3f);
-		reward += comAlphaReward * ndFloat32(0.3f);
+		reward += poleAngleReward * ndFloat32(0.6f);
+		reward += comOmegaReward * ndFloat32(0.2f);
+		reward += comAlphaReward * ndFloat32(0.2f);
 		reward += comSpeedPenalty * ndFloat32(0.5f);
 
 		return ndBrainFloat(reward);
