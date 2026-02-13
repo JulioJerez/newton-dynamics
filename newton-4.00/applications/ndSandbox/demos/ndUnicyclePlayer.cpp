@@ -202,8 +202,8 @@ namespace ndUnicyclePlayer
 		//ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(*((ndIkSolver*)*m_solver), comFrame, extraJoints, m_timestep));
 		m_wheel->SetOmegaNoSleep(savedWheelOmega);
 
-		ndFloat32 angle = GetPoleAngle() / (0.25f * ND_TERMINATION_ANGLE);
-		ndFloat32 omega = comDynamics.m_omega.m_x / ndFloat32 (0.5f);
+		ndFloat32 angle = 8.0f * GetPoleAngle() / ND_TERMINATION_ANGLE;
+		ndFloat32 omega = 2.0f * comDynamics.m_omega.m_x;
 		ndFloat32 speed = ndMax((ndAbs(comDynamics.m_veloc.m_z) - ndFloat32(10.0f)), ndFloat32(0.0f));
 		//ndTrace(("a=%f w=%f s=%f\n", angle, omega, speed));
 
