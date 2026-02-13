@@ -75,6 +75,17 @@ namespace ndUnicyclePlayer
 		m_agent->Step();
 	}
 
+	#pragma optimize( "", off )
+	void ndController::PostUpdate(ndFloat32)
+	{
+		ndMatrix matrix (m_topBox->GetMatrix());
+		if (ndAbs(matrix.m_posit.m_x) > 399.0f)
+		{
+			matrix.m_posit.m_x = ndFloat32(0.0f);
+			GetModel()->GetAsModelArticulation()->SetTransform(matrix);
+		}
+	}
+
 	void ndController::ResetModel()
 	{
 #if 1
@@ -157,6 +168,7 @@ namespace ndUnicyclePlayer
 		return angle;
 	}
 
+	#pragma optimize( "", off )
 	bool ndController::IsTerminal() const
 	{
 		ndFloat32 angle = GetPoleAngle();
