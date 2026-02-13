@@ -164,6 +164,10 @@ namespace ndUnicycleTrainer_ppo
 			
 				ndSharedPtr<ndModel>model(CreateModel(scene, loader.m_mesh, visualMesh, maxTrajectories));
 			
+				//add a control for the reward function
+				ndController* const controller = (ndController*)(*model->GetNotifyCallback());
+				controller->m_solver = ndSharedPtr<ndIkSolver>(new ndIkSolver);
+			
 				// add model a visual mesh to the scene and world
 				world->AddModel(model);
 				scene->AddEntity(visualMesh);
