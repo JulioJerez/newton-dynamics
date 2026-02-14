@@ -47,9 +47,10 @@
 //#define DEFAULT_SCENE	19		// object Placement
 //#define DEFAULT_SCENE	20		// third person player capsule
 //#define DEFAULT_SCENE	21		// cart pole SAC trained controller
-//#define DEFAULT_SCENE	22		// cart pole PPO trained controller
-//#define DEFAULT_SCENE	23		// unicycle PPO trained controller
-//#define DEFAULT_SCENE	24		// procedurally animated quadruped spider
+//#define DEFAULT_SCENE	22		// unicycle SAC trained controller
+//#define DEFAULT_SCENE	23		// cart pole PPO trained controller
+//#define DEFAULT_SCENE	24		// unicycle PPO trained controller
+//#define DEFAULT_SCENE	25		// procedurally animated quadruped spider
 
 // These are the machine learning training demos
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// SAC cart pole training
@@ -98,6 +99,7 @@ void ndBasicMarchingCube3dCollision(ndDemoEntityManager* const scene);
 void ndBasicUserHeightfieldCollision(ndDemoEntityManager* const scene);
 
 void ndCartpolePlayer_SAC(ndDemoEntityManager* const scene);
+void ndUnicyclePlayer_SAC(ndDemoEntityManager* const scene);
 void ndCartpolePlayer_PPO(ndDemoEntityManager* const scene);
 void ndUnicyclePlayer_PPO(ndDemoEntityManager* const scene);
 
@@ -133,6 +135,7 @@ ndDemoEntityManager::ndDemos ndDemoEntityManager::m_demosSelection[] =
 	{ "object placement", ndObjectPlacement},
 	{ "basic player", ndPlayerCapsule_ThirdPerson},
 	{ "cart pole SAC player controller", ndCartpolePlayer_SAC},
+	{ "unicycle SAC player controller", ndUnicyclePlayer_SAC},
 	{ "cart pole PPO player controller", ndCartpolePlayer_PPO},
 	{ "unicycle PPO player controller", ndUnicyclePlayer_PPO},
 	{ "procedural animated quad spider", ndQuadSpiderAnimated},

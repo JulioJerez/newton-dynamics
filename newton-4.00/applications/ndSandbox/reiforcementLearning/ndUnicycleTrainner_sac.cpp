@@ -141,7 +141,7 @@ namespace ndUnicycleTrainer_sac
 			
 			m_bestActor = ndSharedPtr<ndBrain>(new ndBrain(**m_master->GetPolicyNetwork()));
 			
-			snprintf(name, sizeof(name), "%s.dnn", CONTROLLER_NAME_PPO);
+			snprintf(name, sizeof(name), "%s.dnn", CONTROLLER_NAME_SAC);
 			m_master->SetName(name);
 			
 			// create a visual mesh and add to the scene.
