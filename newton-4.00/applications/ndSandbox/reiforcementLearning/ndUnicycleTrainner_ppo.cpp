@@ -122,7 +122,7 @@ namespace ndUnicycleTrainer_ppo
 			char name[256];
 			snprintf(name, sizeof(name), "%s.csv", CONTROLLER_NAME_PPO);
 			m_outFile = fopen(name, "wb");
-			fprintf(m_outFile, "vpg\n");
+			fprintf(m_outFile, "ppo\n");
 
 			// set random see for replication
 			ndSetRandSeed(42);
@@ -164,7 +164,7 @@ namespace ndUnicycleTrainer_ppo
 				visualMesh->SetTransform(loader.m_mesh->m_matrix);
 			
 				ndSharedPtr<ndModel>model(CreateModel(scene, loader.m_mesh, visualMesh, maxTrajectories));
-			
+
 				//add a control for the reward function
 				ndController* const controller = (ndController*)(*model->GetNotifyCallback());
 				controller->m_solver = ndSharedPtr<ndIkSolver>(new ndIkSolver);
@@ -286,11 +286,9 @@ namespace ndUnicycleTrainer_ppo
 		bool m_modelIsTrained;
 	};
 }
-
 using namespace ndUnicycleTrainer_ppo;
 
-
-void ndUnicyclePpoTraining(ndDemoEntityManager* const scene)
+void ndUnicycleTrainingPPO(ndDemoEntityManager* const scene)
 {
 	//ndSharedPtr<ndBody> ground(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
 	ndSharedPtr<ndBody> ground(BuildFlatPlane(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", true));

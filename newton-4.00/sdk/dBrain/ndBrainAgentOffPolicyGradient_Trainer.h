@@ -27,11 +27,14 @@
 #include "ndBrain.h"
 #include "ndBrainAgent.h"
 
-// This is an implementation the Soft Actor Critic algorithm as decrived in.
+// Implementation of Soft Actor Critic algorithm (SAC) as described in:
 // https://arxiv.org/pdf/1801.01290
-// The algorithm is stochastic, and uses entropy regularization to scale the loss 
-// of both actor and critic networks. 
-// pseudo code implementation is found here
+//
+// The algorithm is stochastic and uses bootstrapped method for critic gain.
+// It supports entropy regularization to scale the loss of both
+// the actor and critic networks.
+//
+// Reference pseudocode:
 // https://spinningup.openai.com/en/latest/algorithms/sac.html
 
 #define ND_OFF_POLICY_MOVING_AVERAGE_SCORE	8
@@ -103,9 +106,9 @@ class ndBrainAgentOffPolicyGradient_Agent: public ndBrainAgent
 	void SampleActions(ndBrainVector& action);
 	virtual ndFloat32 GetExpectedReward() const override;
 
-	ndBrainAgentOffPolicyGradient_Trainer* m_owner;
 	ndTrajectory m_trajectory;
-	ndNomalDistribution m_randomGenerator;
+	ndNomalDistribution m_normalDistribution;
+	ndWeakPtr<ndBrainAgentOffPolicyGradient_Trainer> m_owner;
 	ndUnsigned32 m_trajectoryBaseIndex;
 	friend class ndBrainAgentOffPolicyGradient_Trainer;
 };
@@ -152,7 +155,7 @@ class ndBrainAgentOffPolicyGradient_Trainer : public ndClassAlloc
 	const ndString& GetName() const;
 	void SetName(const ndString& name);
 
-	ndBrain* GetPolicyNetwork();
+	ndSharedPtr<ndBrain> GetPolicyNetwork();
 
 	void OptimizeStep();
 

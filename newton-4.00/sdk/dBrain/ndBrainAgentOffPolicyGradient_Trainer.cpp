@@ -237,14 +237,14 @@ void ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::GetFlatArray(ndInt32 ind
 
 ndBrainAgentOffPolicyGradient_Agent::ndBrainAgentOffPolicyGradient_Agent(ndBrainAgentOffPolicyGradient_Trainer* const master)
 	:ndBrainAgent(master->m_policyTrainer->GetBrain())
-	,m_owner(master)
 	,m_trajectory()
-	,m_randomGenerator()
+	,m_normalDistribution()
+	,m_owner(master)
 	,m_trajectoryBaseIndex(0)
 {
 	m_trajectory.Init(m_brain->GetOutputSize(), master->m_parameters.m_numberOfObservations);
 	ndUnsigned32 agentSeed = m_owner->m_uniformDistribution.Generate();
-	m_randomGenerator.Init(agentSeed);
+	m_normalDistribution.Init(agentSeed);
 }
 
 ndInt32 ndBrainAgentOffPolicyGradient_Agent::GetEpisodeFrames() const
@@ -271,7 +271,7 @@ void ndBrainAgentOffPolicyGradient_Agent::SampleActions(ndBrainVector& actions)
 	for (ndInt32 i = size - 1; i >= 0; --i)
 	{
 		ndBrainFloat sigma = actions[size + i];
-		ndBrainFloat normalSample = ndBrainFloat(m_randomGenerator());
+		ndBrainFloat normalSample = ndBrainFloat(m_normalDistribution());
 		ndBrainFloat sample = ndBrainFloat(actions[i]) + normalSample * sigma;
 		ndBrainFloat clippedAction = ndClamp(sample, ndBrainFloat(-1.0f), ndBrainFloat(1.0f));
 		actions[i] = clippedAction;
@@ -285,8 +285,7 @@ void ndBrainAgentOffPolicyGradient_Agent::Step()
 	m_trajectory.SetCount(entryIndex + 1);
 	m_trajectory.Clear(entryIndex);
 
-	ndBrainAgentOffPolicyGradient_Trainer* const owner = m_owner;
-	//const ndBrain* const policy = owner->GetPolicyNetwork();
+	ndBrainAgentOffPolicyGradient_Trainer* const owner = *m_owner;
 	const ndBrain* const policy = *GetBrain();
 	ndBrainMemVector actions(m_trajectory.GetActions(entryIndex), policy->GetOutputSize());
 	ndBrainMemVector observation(m_trajectory.GetObservations(entryIndex), owner->m_parameters.m_numberOfObservations);
@@ -390,12 +389,12 @@ ndBrainAgentOffPolicyGradient_Trainer::ndBrainAgentOffPolicyGradient_Trainer(con
 void ndBrainAgentOffPolicyGradient_Trainer::AddAgent(ndSharedPtr<ndBrainAgentOffPolicyGradient_Agent>& agent)
 {
 	m_agent = agent;
-	m_agent->m_owner = this;
+	m_agent->m_owner = ndWeakPtr<ndBrainAgentOffPolicyGradient_Trainer>(this);
 }
 
-ndBrain* ndBrainAgentOffPolicyGradient_Trainer::GetPolicyNetwork()
+ndSharedPtr<ndBrain> ndBrainAgentOffPolicyGradient_Trainer::GetPolicyNetwork()
 {
-	return *m_policyTrainer->GetBrain();
+	return m_policyTrainer->GetBrain();
 }
 
 const ndString& ndBrainAgentOffPolicyGradient_Trainer::GetName() const
@@ -948,7 +947,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 	policyEntropyGradients.m_strideInByte = ndInt32(m_policyTrainer->GetBrain()->GetOutputSize() * sizeof(ndReal));
 	policyMinibatchOutputBuffer->CopyBuffer(policyEntropyGradients, m_parameters.m_miniBatchSize, *criticMinibatchInputGradientBuffer);
 
-	ndAssert(0);
 	ndBrainFloatBuffer* const policyMinibatchOutputGradientBuffer = m_policyTrainer->GetOuputGradientBuffer();
 	policyMinibatchOutputGradientBuffer->CalculateEntropyRegularizationGradient(**m_minibatchGaussianDistribution, **m_minibatchSigma, m_entropyTemperature, ndInt32(meanOutputSizeInBytes / sizeof(ndReal)));
 

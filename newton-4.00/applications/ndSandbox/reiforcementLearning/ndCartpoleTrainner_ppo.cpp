@@ -274,7 +274,7 @@ namespace ndCartpoleTrainer_ppo
 using namespace ndCartpoleTrainer_ppo;
 
 
-void ndCartpolePpoTraining(ndDemoEntityManager* const scene)
+void ndCartpoleTrainingPPO(ndDemoEntityManager* const scene)
 {
 	ndSharedPtr<ndBody> mapBody(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
 

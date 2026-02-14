@@ -52,9 +52,10 @@
 //#define DEFAULT_SCENE	24		// procedurally animated quadruped spider
 
 // These are the machine learning training demos
-//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// train cart pole using SAC agent
-#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// train cart pole using PPO agent
-//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// train double pendulum unicycle using PPO agent
+#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// SAC cart pole training
+//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// SAC double pendulum unicycle training
+//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// PPO cart pole training
+//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 3)	// PPO double pendulum unicycle training
 
 // legacy demos 
 //#define DEFAULT_SCENE	12		// basic vehicle
@@ -100,9 +101,10 @@ void ndCartpolePlayer_SAC(ndDemoEntityManager* const scene);
 void ndCartpolePlayer_PPO(ndDemoEntityManager* const scene);
 void ndUnicyclePlayer_PPO(ndDemoEntityManager* const scene);
 
-void ndCartpoleSacTraining(ndDemoEntityManager* const scene);
-void ndCartpolePpoTraining(ndDemoEntityManager* const scene);
-void ndUnicyclePpoTraining(ndDemoEntityManager* const scene);
+void ndCartpoleTrainingSAC(ndDemoEntityManager* const scene);
+void ndUnicycleTrainingSAC(ndDemoEntityManager* const scene);
+void ndCartpoleTrainingPPO(ndDemoEntityManager* const scene);
+void ndUnicycleTrainingPPO(ndDemoEntityManager* const scene);
 
 ndDemoEntityManager::ndDemos ndDemoEntityManager::m_demosSelection[] =
 {
@@ -158,9 +160,11 @@ ndDemoEntityManager::ndDemos ndDemoEntityManager::m_demosSelection[] =
 
 ndDemoEntityManager::ndDemos ndDemoEntityManager::m_machineLearning[]
 {
-	{ "cartpole SAC training", ndCartpoleSacTraining},
-	{ "Cartpole PPO Training", ndCartpolePpoTraining},
-	{ "Unicycle PPO Training", ndUnicyclePpoTraining},
+	{ "cartpole training sac", ndCartpoleTrainingSAC},
+	{ "unicycle Training sac", ndUnicycleTrainingSAC},
+
+	{ "cartpole Training ppo", ndCartpoleTrainingPPO},
+	{ "unicycle Training ppo", ndUnicycleTrainingPPO},
 };
 
 ndDemoEntityManager::ButtonKey::ButtonKey (bool state)
