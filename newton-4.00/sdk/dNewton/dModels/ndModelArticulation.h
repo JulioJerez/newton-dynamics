@@ -26,15 +26,14 @@
 #include "ndNewtonStdafx.h"
 #include "ndModel.h"
 #include "ndIkSolver.h"
+#include "ndSkeletonContainer.h"
 
-class ndIkSolver;
 class ndMultiBodyVehicle;
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndModelArticulation: public ndModel
 {
 	public: 
-	#define D_MAX_LINKS		256
 	D_CLASS_REFLECTION(ndModelArticulation, ndModelBase)
 
 	class ndNode : public ndNodeHierarchy<ndNode>
@@ -94,16 +93,14 @@ class ndModelArticulation: public ndModel
 	D_NEWTON_API void ClearMemory();
 	D_NEWTON_API void SetTransform(const ndMatrix& matrix);
 	
-	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassDynamics(const ndMatrix& localFrame) const;
+	//D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassDynamics(const ndMatrix& localFrame) const;
 	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassKinematics(const ndMatrix& localFrame) const;
-	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassDynamics(ndIkSolver& solver, const ndMatrix& localFrame, ndFixSizeArray<ndJointBilateralConstraint*, D_MAX_LINKS>& extraJoints, ndFloat32 timestep) const;
+	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassDynamics(ndIkSolver& solver, const ndMatrix& localFrame, ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS>& extraJoints, ndFloat32 timestep) const;
 	
 	protected:
 	D_NEWTON_API void ConvertToUrdf();
 	D_COLLISION_API virtual void OnAddWorld() override;
 	D_COLLISION_API virtual void OnRemoveFromWorld() override;
-
-	void CalculateCentreOfMass(ndCenterOfMassDynamics& comDynamics, ndFixSizeArray<const ndBodyKinematic*, 256>& bodyArrayOut, ndFixSizeArray<ndVector, 256>& bodyCenterOut) const;
 	
 	ndString m_name;
 	ndNode* m_rootNode;

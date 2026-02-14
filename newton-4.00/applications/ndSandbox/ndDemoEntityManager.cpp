@@ -53,8 +53,8 @@
 
 // These are the machine learning training demos
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// train cart pole using SAC agent
-//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// train cart pole using PPO agent
-#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// train double pendulum unicycle using PPO agent
+#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// train cart pole using PPO agent
+//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// train double pendulum unicycle using PPO agent
 
 // legacy demos 
 //#define DEFAULT_SCENE	12		// basic vehicle
@@ -538,7 +538,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_solverMode = ndWorld::ndSimdSoaSolver;
 	//m_solverMode = ndWorld::ndSimdAvx2Solver;
 	//m_solverPasses = 4;
-	m_workerThreads = 4;
+	m_workerThreads = 1;
 	//m_solverSubSteps = 2;
 	//m_showRaycastHit = true;
 	//m_showCenterOfMass = true;

@@ -60,8 +60,8 @@ namespace ndCartpoleTrainer_ppo
 	class ndAgent : public ndBrainAgentOnPolicyGradient_Agent
 	{
 		public:
-		ndAgent(ndSharedPtr<ndBrainAgentOnPolicyGradient_Trainer>& master, ndController* const owner)
-			:ndBrainAgentOnPolicyGradient_Agent(*master)
+		ndAgent(ndSharedPtr<ndBrainAgentOnPolicyGradient_Trainer>& master, ndController* const owner, ndInt32 maxTrajecxtories)
+			:ndBrainAgentOnPolicyGradient_Agent(*master, maxTrajecxtories)
 			,m_owner(owner)
 		{
 		}
@@ -123,7 +123,7 @@ namespace ndCartpoleTrainer_ppo
 			ndBrainAgentOnPolicyGradient_Trainer::HyperParameters hyperParameters;
 			
 			hyperParameters.m_useGpuBackend = false;
-			hyperParameters.m_batchTrajectoryCount = 100;
+			hyperParameters.m_batchTrajectoryCount = 1000;
 			hyperParameters.m_hiddenLayersNumberOfNeurons = 64;
 			hyperParameters.m_numberOfActions = m_actionsSize;
 			hyperParameters.m_numberOfObservations = m_observationsSize;
@@ -141,7 +141,8 @@ namespace ndCartpoleTrainer_ppo
 			loader.m_mesh->m_matrix = loader.m_mesh->m_matrix * matrix;
 			
 			// create an articulated model
-			const ndInt32 numberOfAgents = 10;
+			const ndInt32 numberOfAgents = 400;
+			const ndInt32 maxTrajectories = (hyperParameters.m_batchTrajectoryCount + numberOfAgents - 1) / numberOfAgents;
 			for (ndInt32 i = 0; i < numberOfAgents; ++i)
 			{
 				ndFloat32 x = ndFloat32(10.0f) * (ndRand() - ndFloat32(0.5f));
@@ -150,13 +151,11 @@ namespace ndCartpoleTrainer_ppo
 				visualMesh->SetTransform(loader.m_mesh->m_matrix);
 				visualMesh->SetTransform(loader.m_mesh->m_matrix);
 			
-				ndSharedPtr<ndModel>model(CreateModel(scene, loader.m_mesh, visualMesh));
+				ndSharedPtr<ndModel>model(CreateModel(scene, loader.m_mesh, visualMesh, maxTrajectories));
 			
 				// add model a visual mesh to the scene and world
-				ndAssert(0);
 				world->AddModel(model);
 				scene->AddEntity(visualMesh);
-				//model->AddBodiesAndJointsToWorld();
 			}
 		}
 
@@ -171,7 +170,8 @@ namespace ndCartpoleTrainer_ppo
 		ndModelArticulation* CreateModel(
 			ndDemoEntityManager* const scene, 
 			ndSharedPtr<ndMesh> mesh,
-			ndSharedPtr<ndRenderSceneNode> visualMesh)
+			ndSharedPtr<ndRenderSceneNode> visualMesh, 
+			ndInt32 maxTrajectories)
 		{
 			ndModelArticulation* const model = new ndModelArticulation();
 			ndSharedPtr<ndModelNotify> controller(new ndController());
@@ -186,7 +186,7 @@ namespace ndCartpoleTrainer_ppo
 				material.m_userId = ndDemoContactCallback::m_modelPart;
 			}
 
-			ndSharedPtr<ndBrainAgentOnPolicyGradient_Agent> agent(new ndAgent(m_master, playerController));
+			ndSharedPtr<ndBrainAgentOnPolicyGradient_Agent> agent(new ndAgent(m_master, playerController, maxTrajectories));
 			playerController->m_agent = (ndSharedPtr<ndBrainAgent>&) agent;
 			m_master->AddAgent(agent);
 

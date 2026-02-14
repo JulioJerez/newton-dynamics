@@ -29,7 +29,7 @@ namespace ndUnicycleTrainer_ppo
 			const ndVector color(ndFloat32(1.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f));
 			scene->Print(color, "training a double pendulum using Proximal Policy Optimization method");
 			scene->Print(color, "training goes for 100 millions steps. Therefore the training");
-			scene->Print(color, "seccion may tak several hours with GPU backend");
+			scene->Print(color, "section may take several hours with GPU back end");
 		}
 	};
 
@@ -60,8 +60,8 @@ namespace ndUnicycleTrainer_ppo
 	class ndAgent : public ndBrainAgentOnPolicyGradient_Agent
 	{
 		public:
-		ndAgent(ndSharedPtr<ndBrainAgentOnPolicyGradient_Trainer>& master, ndController* const owner)
-			:ndBrainAgentOnPolicyGradient_Agent(*master)
+		ndAgent(ndSharedPtr<ndBrainAgentOnPolicyGradient_Trainer>& master, ndController* const owner, ndInt32 maxTrajectories)
+			:ndBrainAgentOnPolicyGradient_Agent(*master, maxTrajectories)
 			,m_owner(owner)
 		{
 		}
@@ -116,7 +116,7 @@ namespace ndUnicycleTrainer_ppo
 			,m_discountRewardFactor(0.99f)
 			,m_horizon(ndFloat32(1.0f) / (ndFloat32(1.0f) - m_discountRewardFactor))
 			,m_lastEpisode(0xfffffff)
-			,m_stopTraining(100 * 1000000)
+			,m_stopTraining(200 * 1000000)
 			,m_modelIsTrained(false)
 		{
 			char name[256];
@@ -127,12 +127,14 @@ namespace ndUnicycleTrainer_ppo
 			// set random see for replication
 			ndSetRandSeed(42);
 
-			// create a Soft Actor Critic training agent
+			// create a proximal policy training agent
 			ndBrainAgentOnPolicyGradient_Trainer::HyperParameters hyperParameters;
 			
 			hyperParameters.m_useGpuBackend = false;
 			hyperParameters.m_batchTrajectoryCount = 1000;
-			hyperParameters.m_hiddenLayersNumberOfNeurons = 64;
+			hyperParameters.m_discountRewardFactor = 0.995f;
+			hyperParameters.m_numberOfHiddenLayers = 2;
+			hyperParameters.m_hiddenLayersNumberOfNeurons = 128;
 			hyperParameters.m_numberOfActions = m_actionsSize;
 			hyperParameters.m_numberOfObservations = m_observationsSize;
 			hyperParameters.m_discountRewardFactor = ndReal(m_discountRewardFactor);
@@ -152,6 +154,7 @@ namespace ndUnicycleTrainer_ppo
 			// create an articulated model
 			const ndInt32 numberOfAgents = 400;
 			//const ndInt32 numberOfAgents = 1;
+			const ndInt32 maxTrajectories = (hyperParameters.m_batchTrajectoryCount + numberOfAgents - 1) / numberOfAgents;
 			for (ndInt32 i = 0; i < numberOfAgents; ++i)
 			{
 				ndFloat32 x = ndFloat32(10.0f) * (ndRand() - ndFloat32(0.5f));
@@ -160,12 +163,15 @@ namespace ndUnicycleTrainer_ppo
 				visualMesh->SetTransform(loader.m_mesh->m_matrix);
 				visualMesh->SetTransform(loader.m_mesh->m_matrix);
 			
-				ndSharedPtr<ndModel>model(CreateModel(scene, loader.m_mesh, visualMesh));
+				ndSharedPtr<ndModel>model(CreateModel(scene, loader.m_mesh, visualMesh, maxTrajectories));
+			
+				//add a control for the reward function
+				ndController* const controller = (ndController*)(*model->GetNotifyCallback());
+				controller->m_solver = ndSharedPtr<ndIkSolver>(new ndIkSolver);
 			
 				// add model a visual mesh to the scene and world
 				world->AddModel(model);
 				scene->AddEntity(visualMesh);
-				//model->AddBodiesAndJointsToWorld();
 			}
 		}
 
@@ -180,7 +186,8 @@ namespace ndUnicycleTrainer_ppo
 		ndModelArticulation* CreateModel(
 			ndDemoEntityManager* const scene, 
 			ndSharedPtr<ndMesh> mesh,
-			ndSharedPtr<ndRenderSceneNode> visualMesh)
+			ndSharedPtr<ndRenderSceneNode> visualMesh,
+			ndInt32 maxTrajectories)
 		{
 			ndModelArticulation* const model = new ndModelArticulation();
 			ndSharedPtr<ndModelNotify> controller(new ndController());
@@ -195,7 +202,7 @@ namespace ndUnicycleTrainer_ppo
 				material.m_userId = ndDemoContactCallback::m_modelPart;
 			}
 
-			ndSharedPtr<ndBrainAgentOnPolicyGradient_Agent> agent(new ndAgent(m_master, playerController));
+			ndSharedPtr<ndBrainAgentOnPolicyGradient_Agent> agent(new ndAgent(m_master, playerController, maxTrajectories));
 			playerController->m_agent = (ndSharedPtr<ndBrainAgent>&) agent;
 			m_master->AddAgent(agent);
 
@@ -292,9 +299,18 @@ void ndUnicyclePpoTraining(ndDemoEntityManager* const scene)
 	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend());
 	scene->SetDemoHelp(demoHelper);
 
-	// create a material that make models in training non collidable
-	TrainMaterial material;
+	// get the material graph
 	ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
+
+	// oveload the ground friction
+	// make sure the ground has enough friction
+	ndMaterial* const defaultMaterial = callback->GetMaterial(ndDemoContactCallback::m_default, ndDemoContactCallback::m_default);
+	ndAssert(defaultMaterial);
+	defaultMaterial->m_dynamicFriction0 = defaultMaterial->m_staticFriction0;
+	defaultMaterial->m_dynamicFriction1 = defaultMaterial->m_staticFriction1;
+
+	// create a material that make models in training non collidable
+	ndModelMaterial material;
 	callback->RegisterMaterial(material, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_modelPart);
 
 	//load the mesh so that is can be re used

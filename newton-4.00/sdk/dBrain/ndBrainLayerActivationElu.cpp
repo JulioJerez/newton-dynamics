@@ -40,7 +40,7 @@ ndBrainLayer* ndBrainLayerActivationElu::Clone() const
 
 const char* ndBrainLayerActivationElu::GetLabelId() const
 {
-	return "ndBrainLayerActivationElu";
+	return ND_BRAIN_LAYER_ACTIVATION_ELU_NAME;
 }
 
 ndBrainLayer* ndBrainLayerActivationElu::Load(const ndBrainLoad* const loadSave)

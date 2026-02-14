@@ -23,14 +23,9 @@ namespace ndUnicyclePlayer
 	#define CONTROLLER_NAME_SAC		"unicycleSac"
 	#define CONTROLLER_NAME_PPO		"unicyclePpo"
 
-	#define BOX_MASS				ndFloat32(20.0f)
+	#define BOX_MASS				ndFloat32(10.0f)
 	#define POLE_MASS				ndFloat32(1.0f)
 	#define BALL_MASS				ndFloat32(5.0f)
-
-	//#define TRAJECTORY_STEPS		(1024 * 4)
-	//
-	//#define PUSH_ACCEL				ndBrainFloat (-10.0f * DEMO_GRAVITY)
-	//#define REWARD_MIN_ANGLE		ndBrainFloat (20.0f * ndDegreeToRad)
 
 	#define ND_MAX_LEG_JOINT_ANGLE	(ndFloat32 (45.0f) * ndDegreeToRad)
 
@@ -47,12 +42,37 @@ namespace ndUnicyclePlayer
 
 	enum ndStateSpace
 	{
+		m_comSpeed,
 		m_poleAngle,
 		m_poleOmega,
-		m_wheelOmega,
-		m_comSpeed,
+		m_hingeOmega,
+		m_hingeAngle,
 		m_hasSupportContact,
 		m_observationsSize
+	};
+
+	class ndModelMaterial : public ndApplicationMaterial
+	{
+		public:
+		ndModelMaterial()
+			:ndApplicationMaterial()
+		{
+		}
+
+		ndModelMaterial(const ndModelMaterial& src)
+			:ndApplicationMaterial(src)
+		{
+		}
+
+		ndApplicationMaterial* Clone() const
+		{
+			return new ndModelMaterial(*this);
+		}
+
+		virtual bool OnAabbOverlap(const ndBodyKinematic* const, const ndBodyKinematic* const) const override
+		{
+			return false;
+		}
 	};
 
 	class ndController : public ndModelNotify
@@ -100,6 +120,7 @@ namespace ndUnicyclePlayer
 
 		ndController();
 		void Update(ndFloat32 timestep) override;
+		void PostUpdate(ndFloat32 timestep) override;
 
 		void ResetModel();
 		ndBrainFloat IsOnAir() const;
@@ -126,6 +147,7 @@ namespace ndUnicyclePlayer
 		ndSharedPtr<ndJointBilateralConstraint> m_plane;
 		ndSharedPtr<ndJointBilateralConstraint> m_poleHinge;
 		ndSharedPtr<ndJointBilateralConstraint> m_wheelRoller;
+		ndSharedPtr<ndIkSolver> m_solver;
 		ndSharedPtr<ndBrainAgent> m_agent;
 		ndFloat32 m_timestep;
 		ndFloat32 m_bestReward;

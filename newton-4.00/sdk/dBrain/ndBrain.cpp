@@ -26,6 +26,7 @@
 #include "ndBrainSaveLoad.h"
 #include "ndBrainContext.h"
 #include "ndBrainLayerLinear.h"
+#include "ndBrainLayerActivationElu.h"
 #include "ndBrainLayerActivationRelu.h"
 #include "ndBrainLossLeastSquaredError.h"
 #include "ndBrainLayerActivationLeakyRelu.h"
@@ -146,7 +147,7 @@ void ndBrain::InitWeights()
 	for (ndInt32 i = ndInt32(layers.GetCount() - 1); i >= 0; --i)
 	{
 		ndBrainLayer* const layer = layers[i];
-#if 1
+#if 0
 		// unless I misundertood the paper, 
 		// the Xavier of He inialization are not 
 		// better than a just plan gaussian ditrubitrion
@@ -159,7 +160,7 @@ void ndBrain::InitWeights()
 			{
 				ndBrainLayer* const activationLayer = layers[i + 1];
 				if ((strcmp(activationLayer->GetLabelId(), ND_BRAIN_LAYER_ACTIVATION_RELU_NAME) == 0) ||
-					//strcmp(activationLayer->GetLabelId(), ND_BRAIN_LAYER_ACTIVATION_RELU_NAME) == 0) ||
+					(strcmp(activationLayer->GetLabelId(), ND_BRAIN_LAYER_ACTIVATION_ELU_NAME) == 0) ||
 					(strcmp(activationLayer->GetLabelId(), ND_BRAIN_LAYER_ACTIVATION_LEAKY_RELU_NAME) == 0))
 				{
 					layer->InitWeights_he();
