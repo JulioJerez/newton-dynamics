@@ -95,7 +95,7 @@ class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 	};
 
 	public:
-	ndBrainAgentOnPolicyGradient_Agent(ndBrainAgentOnPolicyGradient_Trainer* const master, ndInt32 maxTrajecxtoires = 10000);
+	ndBrainAgentOnPolicyGradient_Agent(ndBrainAgentOnPolicyGradient_Trainer* const master, ndInt32 maxTrajecxtories);
 
 	virtual void Step();
 	virtual void InitWeights() { ndAssert(0); }

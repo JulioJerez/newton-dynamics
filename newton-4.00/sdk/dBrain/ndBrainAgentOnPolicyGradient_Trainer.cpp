@@ -1145,7 +1145,10 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeStep()
 		bool isTeminal = agent->m_isDead || (agent->m_trajectory.GetCount() >= ndInt32(m_parameters.m_maxTrajectorySteps + m_horizonSteps));
 		if (isTeminal)
 		{
-			SaveTrajectory(agent);
+			if (ndInt32(m_trajectiesCount) < m_parameters.m_batchTrajectoryCount)
+			{
+				SaveTrajectory(agent);
+			}
 			agent->m_trajectory.SetCount(0);
 			agent->ResetModel();
 			agent->m_isDead = false;
