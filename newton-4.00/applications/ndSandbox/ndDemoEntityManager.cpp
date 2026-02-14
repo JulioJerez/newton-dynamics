@@ -53,8 +53,8 @@
 
 // These are the machine learning training demos
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// train cart pole using SAC agent
-//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// train cart pole using PPO agent
-#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// train double pendulum unicycle using PPO agent
+#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// train cart pole using PPO agent
+//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// train double pendulum unicycle using PPO agent
 
 // legacy demos 
 //#define DEFAULT_SCENE	12		// basic vehicle

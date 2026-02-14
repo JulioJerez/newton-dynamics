@@ -510,6 +510,7 @@ void ndBrainVector::CalculateEntropyRegularizationGradient(const ndBrainVector& 
 		ndBrainFloat invSigma = ndBrainFloat(1.0f) / sigma;
 		ndBrainFloat zMeanInvSigma = zMean * invSigma;
 		(*this)[i] = regularization * invSigma * zMeanInvSigma;
+		//(*this)[i + base] = regularization * invSigma * (zMeanInvSigma * zMeanInvSigma - ndBrainFloat(0.0f));
 		(*this)[i + base] = regularization * invSigma * (zMeanInvSigma * zMeanInvSigma - ndBrainFloat(1.0f));
 	}
 }
