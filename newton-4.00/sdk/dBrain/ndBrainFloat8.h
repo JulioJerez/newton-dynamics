@@ -63,42 +63,6 @@ class ndBrainFloat8
 	ndBrainFloat8 operator>= (const ndBrainFloat8& data) const;
 	ndBrainFloat8 operator<= (const ndBrainFloat8& data) const;
 
-	static void Transpose(
-		ndBrainFloat8& dst0, ndBrainFloat8& dst1, ndBrainFloat8& dst2, ndBrainFloat8& dst3,
-		ndBrainFloat8& dst4, ndBrainFloat8& dst5, ndBrainFloat8& dst6, ndBrainFloat8& dst7,
-		const ndBrainFloat8& src0, const ndBrainFloat8& src1, const ndBrainFloat8& src2, const ndBrainFloat8& src3,
-		const ndBrainFloat8& src4, const ndBrainFloat8& src5, const ndBrainFloat8& src6, const ndBrainFloat8& src7)
-	{
-		ndBrainFloat8 dst[8];
-		ndBrainFloat8 src[8];
-
-		src[0] = src0;
-		src[1] = src1;
-		src[2] = src2;
-		src[3] = src3;
-		src[4] = src4;
-		src[5] = src5;
-		src[6] = src6;
-		src[7] = src7;
-
-		for (ndInt32 j = 0; j < 8; ++j)
-		{
-			for (ndInt32 i = 0; i < 8; ++i)
-			{
-				dst[i].m_f[j] = src[j].m_f[i];
-			}
-		}
-
-		dst0 = dst[0];
-		dst1 = dst[1];
-		dst2 = dst[2];
-		dst3 = dst[3];
-		dst4 = dst[4];
-		dst5 = dst[5];
-		dst6 = dst[6];
-		dst7 = dst[7];
-	}
-
 	union
 	{
 		ndBrainFloat m_f[8];

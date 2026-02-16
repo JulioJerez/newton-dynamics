@@ -66,42 +66,11 @@ class ndBrainFloat16
 	ndBrainFloat16 operator>= (const ndBrainFloat16& data) const;
 	ndBrainFloat16 operator<= (const ndBrainFloat16& data) const;
 
-	static void Transpose(ndBrainFloat16* const ouputs, const ndBrainFloat16* const inputs)
-	{
-		ndBrainFloat8::Transpose(
-			ouputs[0].m_low, ouputs[1].m_low, ouputs[2].m_low, ouputs[3].m_low,
-			ouputs[4].m_low, ouputs[5].m_low, ouputs[6].m_low, ouputs[7].m_low,
-			inputs[0].m_low, inputs[1].m_low, inputs[2].m_low, inputs[3].m_low,
-			inputs[4].m_low, inputs[5].m_low, inputs[6].m_low, inputs[7].m_low);
-
-		ndBrainFloat8::Transpose(
-			ouputs[0].m_high, ouputs[1].m_high, ouputs[2].m_high, ouputs[3].m_high,
-			ouputs[4].m_high, ouputs[5].m_high, ouputs[6].m_high, ouputs[7].m_high,
-			inputs[8].m_low, inputs[9].m_low, inputs[10].m_low, inputs[11].m_low,
-			inputs[12].m_low, inputs[13].m_low, inputs[14].m_low, inputs[15].m_low);
-
-		ndBrainFloat8::Transpose(
-			ouputs[8].m_low, ouputs[9].m_low, ouputs[10].m_low, ouputs[11].m_low,
-			ouputs[12].m_low, ouputs[13].m_low, ouputs[14].m_low, ouputs[15].m_low,
-			inputs[0].m_high, inputs[1].m_high, inputs[2].m_high, inputs[3].m_high,
-			inputs[4].m_high, inputs[5].m_high, inputs[6].m_high, inputs[7].m_high);
-
-		ndBrainFloat8::Transpose(
-			ouputs[8].m_high, ouputs[9].m_high, ouputs[10].m_high, ouputs[11].m_high,
-			ouputs[12].m_high, ouputs[13].m_high, ouputs[14].m_high, ouputs[15].m_high,
-			inputs[8].m_high, inputs[9].m_high, inputs[10].m_high, inputs[11].m_high,
-			inputs[12].m_high, inputs[13].m_high, inputs[14].m_high, inputs[15].m_high);
-	}
 
 	union
 	{
 		ndBrainFloat m_f[16];
 		ndInt32 m_i[16];
-		struct
-		{
-			ndBrainFloat8 m_low;
-			ndBrainFloat8 m_high;
-		};
 	};
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
