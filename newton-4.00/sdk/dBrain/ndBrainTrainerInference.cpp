@@ -392,7 +392,7 @@ void ndBrainTrainerInference::AddLayersCommands(ndFixSizeArray<ndCommandSharedIn
 		uniformParam.m_parametersBatchSize = data.m_parametersBatchSize;
 		uniformParam.m_parametersStartOffset = data.m_parametersStartOffset;
 
-		ndCommandArray forwardCommands(layer->CreateGpuFeedForwardCommand(
+		ndCommandArray forwardCommands(layer->CreateFeedForwardBufferCommand(
 			this, *m_descriptor.m_context, uniformParam, m_descriptor.m_minibatchSize, inputOutputBuffer, weightsBuffer));
 		for (ndInt32 j = 0; j < forwardCommands.GetCount(); ++j)
 		{

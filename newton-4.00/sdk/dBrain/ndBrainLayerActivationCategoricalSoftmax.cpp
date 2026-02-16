@@ -111,7 +111,7 @@ void ndBrainLayerActivationCategoricalSoftmax::BackPropagate(const ndBrainLayerB
 	inputDerivative.FlushToZero();
 }
 
-ndCommandArray ndBrainLayerActivationCategoricalSoftmax::CreateGpuBackPropagateCommand(
+ndCommandArray ndBrainLayerActivationCategoricalSoftmax::CreateBackPropagateBufferCommand(
 	ndBrainTrainerInference* const owner,
 	ndBrainContext* const context, 
 	const ndCommandSharedInfo& info,

@@ -327,6 +327,7 @@ namespace ndUnicyclePlayer
 		// add links
 		const ndMatrix poleMatrix(m_pole->GetMatrix());
 		m_poleHinge = ndSharedPtr<ndJointBilateralConstraint>(new ndJointHinge(poleMatrix, m_pole->GetAsBodyKinematic(), m_topBox->GetAsBodyKinematic()));
+		((ndJointRoller*)*m_poleHinge)->SetAsSpringDamperPosit(0.01f, 0.0f, 5.0f);
 		ndModelArticulation::ndNode* const poleNode = model->AddLimb(modelRootNode, m_pole, m_poleHinge);
 
 		const ndMatrix ballMatrix(m_wheel->GetMatrix());

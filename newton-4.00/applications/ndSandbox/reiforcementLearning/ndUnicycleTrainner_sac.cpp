@@ -136,6 +136,7 @@ namespace ndUnicycleTrainer_sac
 			hyperParameters.m_hiddenLayersNumberOfNeurons = 128;
 			hyperParameters.m_numberOfActions = m_actionsSize;
 			hyperParameters.m_numberOfObservations = m_observationsSize;
+			hyperParameters.m_maxNumberOfTrainingSteps = m_stopTraining;
 			hyperParameters.m_discountRewardFactor = ndReal(m_discountRewardFactor);
 			m_master = ndSharedPtr<ndBrainAgentOffPolicyGradient_Trainer>(new ndBrainAgentOffPolicyGradient_Trainer(hyperParameters));
 			
@@ -204,7 +205,7 @@ namespace ndUnicycleTrainer_sac
 
 		virtual void Update(ndDemoEntityManager* const manager, ndFloat32)
 		{
-			ndUnsigned32 stopTraining = m_master->GetFramesCount();
+			ndInt32 stopTraining = ndInt32(m_master->GetFramesCount());
 			if (stopTraining <= m_stopTraining)
 			{
 				ndUnsigned32 episodeCount = m_master->GetEposideCount();
@@ -215,12 +216,12 @@ namespace ndUnicycleTrainer_sac
 				ndFloat32 rewardTrajectory = m_master->GetAverageScore() * trajectoryLog;
 				if (rewardTrajectory >= ndFloat32(m_maxScore))
 				{
-					if (m_lastEpisode != m_master->GetEposideCount())
+					if (m_lastEpisode != ndInt32 (m_master->GetEposideCount()))
 					{
 						m_maxScore = rewardTrajectory;
 						m_bestActor->CopyFrom(**m_master->GetPolicyNetwork());
 						ndExpandTraceMessage("best actor episode: %d\treward %f\ttrajectoryFrames: %f\n", m_master->GetEposideCount(), 100.0f * m_master->GetAverageScore() / m_horizon, m_master->GetAverageFrames());
-						m_lastEpisode = m_master->GetEposideCount();
+						m_lastEpisode = ndInt32(m_master->GetEposideCount());
 					}
 				}
 			
@@ -270,8 +271,8 @@ namespace ndUnicycleTrainer_sac
 		ndFloat32 m_saveScore;
 		ndFloat32 m_discountRewardFactor;
 		ndFloat32 m_horizon;
-		ndUnsigned32 m_lastEpisode;
-		ndUnsigned32 m_stopTraining;
+		ndInt32 m_lastEpisode;
+		ndInt32 m_stopTraining;
 		bool m_modelIsTrained;
 	};
 }

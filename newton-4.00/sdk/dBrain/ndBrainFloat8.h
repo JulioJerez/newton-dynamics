@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _ND_BRAIN_FLOAT4_H__
-#define _ND_BRAIN_FLOAT4_H__
+#ifndef _ND_BRAIN_FLOAT8_H__
+#define _ND_BRAIN_FLOAT8_H__
 
 #include "ndBrainStdafx.h"
 
@@ -36,32 +36,68 @@
 // This is much better since is let the compiler do other optimizations.
 
 D_MSV_NEWTON_CLASS_ALIGN_32
-class ndBrainSimdFloat8 
+class ndBrainFloat8 
 {
 	public: 
-	ndBrainSimdFloat8();
-	ndBrainSimdFloat8(const ndBrainFloat a);
-	ndBrainSimdFloat8(const ndBrainFloat* const ptr);
+	ndBrainFloat8();
+	ndBrainFloat8(const ndBrainFloat a);
+	ndBrainFloat8(const ndBrainFloat* const ptr);
 
 	void Store(ndBrainFloat* const ptr) const;
 
-	ndBrainSimdFloat8 Tanh() const;
-	ndBrainSimdFloat8 Min(const ndBrainSimdFloat8& src) const;
-	ndBrainSimdFloat8 Max(const ndBrainSimdFloat8& src) const;
-	ndBrainSimdFloat8 Clamp(const ndBrainSimdFloat8& min, const ndBrainSimdFloat8& max) const;
+	ndBrainFloat8 Tanh() const;
+	ndBrainFloat8 Min(const ndBrainFloat8& src) const;
+	ndBrainFloat8 Max(const ndBrainFloat8& src) const;
+	ndBrainFloat8 Clamp(const ndBrainFloat8& min, const ndBrainFloat8& max) const;
 	
-	ndBrainSimdFloat8 operator+ (const ndBrainSimdFloat8& A) const;
-	ndBrainSimdFloat8 operator- (const ndBrainSimdFloat8& A) const;
-	ndBrainSimdFloat8 operator* (const ndBrainSimdFloat8& A) const;
+	ndBrainFloat8 operator+ (const ndBrainFloat8& A) const;
+	ndBrainFloat8 operator- (const ndBrainFloat8& A) const;
+	ndBrainFloat8 operator* (const ndBrainFloat8& A) const;
 	
 	// logical operations;
-	ndBrainSimdFloat8 operator~ () const;
-	ndBrainSimdFloat8 operator& (const ndBrainSimdFloat8& data) const;
-	ndBrainSimdFloat8 operator| (const ndBrainSimdFloat8& data) const;
-	ndBrainSimdFloat8 operator> (const ndBrainSimdFloat8& data) const;
-	ndBrainSimdFloat8 operator< (const ndBrainSimdFloat8& data) const;
-	ndBrainSimdFloat8 operator>= (const ndBrainSimdFloat8& data) const;
-	ndBrainSimdFloat8 operator<= (const ndBrainSimdFloat8& data) const;
+	ndBrainFloat8 operator~ () const;
+	ndBrainFloat8 operator& (const ndBrainFloat8& data) const;
+	ndBrainFloat8 operator| (const ndBrainFloat8& data) const;
+	ndBrainFloat8 operator> (const ndBrainFloat8& data) const;
+	ndBrainFloat8 operator< (const ndBrainFloat8& data) const;
+	ndBrainFloat8 operator>= (const ndBrainFloat8& data) const;
+	ndBrainFloat8 operator<= (const ndBrainFloat8& data) const;
+
+	static void Transpose(
+		ndBrainFloat8& dst0, ndBrainFloat8& dst1, ndBrainFloat8& dst2, ndBrainFloat8& dst3,
+		ndBrainFloat8& dst4, ndBrainFloat8& dst5, ndBrainFloat8& dst6, ndBrainFloat8& dst7,
+		const ndBrainFloat8& src0, const ndBrainFloat8& src1, const ndBrainFloat8& src2, const ndBrainFloat8& src3,
+		const ndBrainFloat8& src4, const ndBrainFloat8& src5, const ndBrainFloat8& src6, const ndBrainFloat8& src7)
+	{
+		ndBrainFloat8 dst[8];
+		ndBrainFloat8 src[8];
+
+		src[0] = src0;
+		src[1] = src1;
+		src[2] = src2;
+		src[3] = src3;
+		src[4] = src4;
+		src[5] = src5;
+		src[6] = src6;
+		src[7] = src7;
+
+		for (ndInt32 j = 0; j < 8; ++j)
+		{
+			for (ndInt32 i = 0; i < 8; ++i)
+			{
+				dst[i].m_f[j] = src[j].m_f[i];
+			}
+		}
+
+		dst0 = dst[0];
+		dst1 = dst[1];
+		dst2 = dst[2];
+		dst3 = dst[3];
+		dst4 = dst[4];
+		dst5 = dst[5];
+		dst6 = dst[6];
+		dst7 = dst[7];
+	}
 
 	union
 	{
@@ -71,11 +107,11 @@ class ndBrainSimdFloat8
 
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
-inline ndBrainSimdFloat8::ndBrainSimdFloat8()
+inline ndBrainFloat8::ndBrainFloat8()
 {
 }
 
-inline ndBrainSimdFloat8::ndBrainSimdFloat8(const ndBrainFloat a)
+inline ndBrainFloat8::ndBrainFloat8(const ndBrainFloat a)
 {
 	for (ndInt32 i = 0; i < 8; ++i)
 	{
@@ -83,7 +119,7 @@ inline ndBrainSimdFloat8::ndBrainSimdFloat8(const ndBrainFloat a)
 	}
 }
 
-inline ndBrainSimdFloat8::ndBrainSimdFloat8(const ndBrainFloat* const ptr)
+inline ndBrainFloat8::ndBrainFloat8(const ndBrainFloat* const ptr)
 {
 	for (ndInt32 i = 0; i < 8; ++i)
 	{
@@ -91,7 +127,7 @@ inline ndBrainSimdFloat8::ndBrainSimdFloat8(const ndBrainFloat* const ptr)
 	}
 }
 
-inline void ndBrainSimdFloat8::Store(ndBrainFloat* const ptr) const
+inline void ndBrainFloat8::Store(ndBrainFloat* const ptr) const
 {
 	for (ndInt32 i = 0; i < 8; ++i)
 	{
@@ -99,9 +135,9 @@ inline void ndBrainSimdFloat8::Store(ndBrainFloat* const ptr) const
 	}
 }
 
-inline ndBrainSimdFloat8 ndBrainSimdFloat8::Clamp(const ndBrainSimdFloat8& min, const ndBrainSimdFloat8& max) const
+inline ndBrainFloat8 ndBrainFloat8::Clamp(const ndBrainFloat8& min, const ndBrainFloat8& max) const
 {
-	ndBrainSimdFloat8 tmp;
+	ndBrainFloat8 tmp;
 	for (ndInt32 i = 0; i < 8; ++i)
 	{
 		tmp.m_f[i] = ndClamp(m_f[i], min.m_f[i], max.m_f[i]);
@@ -109,9 +145,9 @@ inline ndBrainSimdFloat8 ndBrainSimdFloat8::Clamp(const ndBrainSimdFloat8& min, 
 	return tmp;
 }
 
-inline ndBrainSimdFloat8 ndBrainSimdFloat8::Min(const ndBrainSimdFloat8& min) const
+inline ndBrainFloat8 ndBrainFloat8::Min(const ndBrainFloat8& min) const
 {
-	ndBrainSimdFloat8 tmp;
+	ndBrainFloat8 tmp;
 	for (ndInt32 i = 0; i < 8; ++i)
 	{
 		tmp.m_f[i] = ndMin(m_f[i], min.m_f[i]);
@@ -119,9 +155,9 @@ inline ndBrainSimdFloat8 ndBrainSimdFloat8::Min(const ndBrainSimdFloat8& min) co
 	return tmp;
 }
 
-inline ndBrainSimdFloat8 ndBrainSimdFloat8::Max(const ndBrainSimdFloat8& max) const
+inline ndBrainFloat8 ndBrainFloat8::Max(const ndBrainFloat8& max) const
 {
-	ndBrainSimdFloat8 tmp;
+	ndBrainFloat8 tmp;
 	for (ndInt32 i = 0; i < 8; ++i)
 	{
 		tmp.m_f[i] = ndMax(m_f[i], max.m_f[i]);
@@ -132,9 +168,9 @@ inline ndBrainSimdFloat8 ndBrainSimdFloat8::Max(const ndBrainSimdFloat8& max) co
 
 }
 
-inline ndBrainSimdFloat8 ndBrainSimdFloat8::Tanh() const
+inline ndBrainFloat8 ndBrainFloat8::Tanh() const
 {
-	ndBrainSimdFloat8 tmp;
+	ndBrainFloat8 tmp;
 	for (ndInt32 i = 0; i < 8; ++i)
 	{
 		tmp.m_f[i] = ndBrainFloat(ndTanh(m_f[i]));
@@ -144,9 +180,9 @@ inline ndBrainSimdFloat8 ndBrainSimdFloat8::Tanh() const
 	return tmp;
 }
 
-inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator+ (const ndBrainSimdFloat8& A) const
+inline ndBrainFloat8 ndBrainFloat8::operator+ (const ndBrainFloat8& A) const
 {
-	ndBrainSimdFloat8 tmp;
+	ndBrainFloat8 tmp;
 	for (ndInt32 i = 0; i < 8; ++i)
 	{
 		tmp.m_f[i] = m_f[i] + A.m_f[i];
@@ -154,9 +190,9 @@ inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator+ (const ndBrainSimdFloat8& 
 	return tmp;
 }
 
-inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator- (const ndBrainSimdFloat8& A) const
+inline ndBrainFloat8 ndBrainFloat8::operator- (const ndBrainFloat8& A) const
 {
-	ndBrainSimdFloat8 tmp;
+	ndBrainFloat8 tmp;
 	for (ndInt32 i = 0; i < 8; ++i)
 	{
 		tmp.m_f[i] = m_f[i] - A.m_f[i];
@@ -164,9 +200,9 @@ inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator- (const ndBrainSimdFloat8& 
 	return tmp;
 }
 
-inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator* (const ndBrainSimdFloat8& A) const
+inline ndBrainFloat8 ndBrainFloat8::operator* (const ndBrainFloat8& A) const
 {
-	ndBrainSimdFloat8 tmp;
+	ndBrainFloat8 tmp;
 	for (ndInt32 i = 0; i < 8; ++i)
 	{
 		tmp.m_f[i] = m_f[i] * A.m_f[i];
@@ -174,9 +210,9 @@ inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator* (const ndBrainSimdFloat8& 
 	return tmp;
 }
 
-inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator> (const ndBrainSimdFloat8& data) const
+inline ndBrainFloat8 ndBrainFloat8::operator> (const ndBrainFloat8& data) const
 {
-	ndBrainSimdFloat8 tmp;
+	ndBrainFloat8 tmp;
 	for (ndInt32 i = 0; i < 8; ++i)
 	{
 		tmp.m_i[i] = m_f[i] > data.m_f[i] ? -1 : 0;
@@ -184,9 +220,9 @@ inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator> (const ndBrainSimdFloat8& 
 	return tmp;
 }
 
-inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator>= (const ndBrainSimdFloat8& data) const
+inline ndBrainFloat8 ndBrainFloat8::operator>= (const ndBrainFloat8& data) const
 {
-	ndBrainSimdFloat8 tmp;
+	ndBrainFloat8 tmp;
 	for (ndInt32 i = 0; i < 8; ++i)
 	{
 		tmp.m_i[i] = m_f[i] >= data.m_f[i] ? -1 : 0;
@@ -194,9 +230,9 @@ inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator>= (const ndBrainSimdFloat8&
 	return tmp;
 }
 
-inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator< (const ndBrainSimdFloat8& data) const
+inline ndBrainFloat8 ndBrainFloat8::operator< (const ndBrainFloat8& data) const
 {
-	ndBrainSimdFloat8 tmp;
+	ndBrainFloat8 tmp;
 	for (ndInt32 i = 0; i < 8; ++i)
 	{
 		tmp.m_i[i] = m_f[i] < data.m_f[i] ? -1 : 0;
@@ -204,9 +240,9 @@ inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator< (const ndBrainSimdFloat8& 
 	return tmp;
 }
 
-inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator<= (const ndBrainSimdFloat8& data) const
+inline ndBrainFloat8 ndBrainFloat8::operator<= (const ndBrainFloat8& data) const
 {
-	ndBrainSimdFloat8 tmp;
+	ndBrainFloat8 tmp;
 	for (ndInt32 i = 0; i < 8; ++i)
 	{
 		tmp.m_i[i] = m_f[i] <= data.m_f[i] ? -1 : 0;
@@ -214,9 +250,9 @@ inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator<= (const ndBrainSimdFloat8&
 	return tmp;
 }
 
-inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator~ () const
+inline ndBrainFloat8 ndBrainFloat8::operator~ () const
 {
-	ndBrainSimdFloat8 tmp;
+	ndBrainFloat8 tmp;
 	for (ndInt32 i = 0; i < 8; ++i)
 	{
 		tmp.m_i[i] = ~m_i[i];
@@ -224,9 +260,9 @@ inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator~ () const
 	return tmp;
 }
 
-inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator| (const ndBrainSimdFloat8& data) const
+inline ndBrainFloat8 ndBrainFloat8::operator| (const ndBrainFloat8& data) const
 {
-	ndBrainSimdFloat8 tmp;
+	ndBrainFloat8 tmp;
 	for (ndInt32 i = 0; i < 8; ++i)
 	{
 		tmp.m_i[i] = m_i[i] | data.m_i[i];
@@ -234,9 +270,9 @@ inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator| (const ndBrainSimdFloat8& 
 	return tmp;
 }
 
-inline ndBrainSimdFloat8 ndBrainSimdFloat8::operator& (const ndBrainSimdFloat8& data) const
+inline ndBrainFloat8 ndBrainFloat8::operator& (const ndBrainFloat8& data) const
 {
-	ndBrainSimdFloat8 tmp;
+	ndBrainFloat8 tmp;
 	for (ndInt32 i = 0; i < 8; ++i)
 	{
 		tmp.m_i[i] = m_i[i] & data.m_i[i];

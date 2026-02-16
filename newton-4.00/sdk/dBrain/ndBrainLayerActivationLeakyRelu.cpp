@@ -21,10 +21,10 @@
 
 #include "ndBrainStdafx.h"
 #include "ndBrain.h"
+#include "ndBrainFloat8.h"
 #include "ndBrainTrainer.h"
 #include "ndBrainContext.h"
 #include "ndBrainSaveLoad.h"
-#include "ndBrainSimdFloat8.h"
 #include "ndBrainFloatBuffer.h"
 #include "ndBrainLayerActivationLeakyRelu.h"
 
@@ -64,17 +64,17 @@ void ndBrainLayerActivationLeakyRelu::MakePrediction(const ndBrainVector& input,
 {
 	ndAssert(input.GetCount() == output.GetCount());
 
-	const ndBrainSimdFloat8 zero(0.0f);
-	const ndBrainSimdFloat8 leakyGrad(ND_LEAKY_LRU_GRADIENT);
+	const ndBrainFloat8 zero(0.0f);
+	const ndBrainFloat8 leakyGrad(ND_LEAKY_LRU_GRADIENT);
 	ndBrainFloat* const dst = &output[0];
 	const ndBrainFloat* const src = &input[0];
 	const ndInt32 roundCount = ndInt32(input.GetCount()) & -8;
 	for (ndInt32 i = 0; i < roundCount; i += 8)
 	{
-		const ndBrainSimdFloat8 x(&src[i]);
-		const ndBrainSimdFloat8 mask(x >= zero);
-		const ndBrainSimdFloat8 negOut(leakyGrad * x);
-		const ndBrainSimdFloat8 value((x & mask) | (negOut & (~mask)));
+		const ndBrainFloat8 x(&src[i]);
+		const ndBrainFloat8 mask(x >= zero);
+		const ndBrainFloat8 negOut(leakyGrad * x);
+		const ndBrainFloat8 value((x & mask) | (negOut & (~mask)));
 		value.Store(&dst[i]);
 	}
 	for (ndInt32 i = ndInt32(input.GetCount() - 1); i >= roundCount; --i)
@@ -88,17 +88,17 @@ void ndBrainLayerActivationLeakyRelu::InputDerivative(const ndBrainVector& input
 	ndAssert(input.GetCount() == outputDerivative.GetCount());
 	ndAssert(input.GetCount() == inputDerivative.GetCount());
 
-	const ndBrainSimdFloat8 one(1.0f);
-	const ndBrainSimdFloat8 zero(0.0f);
-	const ndBrainSimdFloat8 leakyGrad(ND_LEAKY_LRU_GRADIENT);
+	const ndBrainFloat8 one(1.0f);
+	const ndBrainFloat8 zero(0.0f);
+	const ndBrainFloat8 leakyGrad(ND_LEAKY_LRU_GRADIENT);
 	ndBrainFloat* const dst = &inputDerivative[0];
 	const ndBrainFloat* const src = &input[0];
 	const ndInt32 roundCount = ndInt32(input.GetCount()) & -8;
 	for (ndInt32 i = 0; i < roundCount; i += 8)
 	{
-		const ndBrainSimdFloat8 x(&src[i]);
-		const ndBrainSimdFloat8 mask(x >= zero);
-		const ndBrainSimdFloat8 value((one & mask) | (leakyGrad & (~mask)));
+		const ndBrainFloat8 x(&src[i]);
+		const ndBrainFloat8 mask(x >= zero);
+		const ndBrainFloat8 value((one & mask) | (leakyGrad & (~mask)));
 		value.Store(&dst[i]);
 	}
 	for (ndInt32 i = ndInt32(input.GetCount() - 1); i >= roundCount; --i)
@@ -133,14 +133,14 @@ void ndBrainLayerActivationLeakyRelu::FeedForward(const ndBrainLayerFeedForwardC
 	const ndBrainMemVector input(&inputOutputBuffer[inputOffset], inputSize);
 	ndBrainMemVector output(&inputOutputBuffer[outputOffset], outputSize);
 
-	const ndBrainSimdFloat8 zero(0.0f);
+	const ndBrainFloat8 zero(0.0f);
 	ndBrainFloat* const dst = &output[0];
 	const ndBrainFloat* const src = &input[0];
 	const ndInt32 roundCount = ndInt32(input.GetCount()) & -8;
 	for (ndInt32 i = 0; i < roundCount; i += 8)
 	{
-		const ndBrainSimdFloat8 x(&src[i]);
-		const ndBrainSimdFloat8 value(x.Max(zero));
+		const ndBrainFloat8 x(&src[i]);
+		const ndBrainFloat8 value(x.Max(zero));
 		value.Store(&dst[i]);
 	}
 	for (ndInt32 i = ndInt32(input.GetCount() - 1); i >= roundCount; --i)
@@ -172,16 +172,16 @@ void ndBrainLayerActivationLeakyRelu::BackPropagate(const ndBrainLayerBackPropag
 	const ndBrainMemVector outputDerivative(&inputOutputGradientsBuffer[dstBase], inputSize);
 	ndBrainMemVector inputDerivative(&inputOutputGradientsBuffer[srcBase], inputSize);
 
-	const ndBrainSimdFloat8 one(1.0f);
-	const ndBrainSimdFloat8 zero(0.0f);
+	const ndBrainFloat8 one(1.0f);
+	const ndBrainFloat8 zero(0.0f);
 	ndBrainFloat* const dst = &inputDerivative[0];
 	const ndBrainFloat* const src = &input[0];
 	const ndInt32 roundCount = ndInt32(input.GetCount()) & -8;
 	for (ndInt32 i = 0; i < roundCount; i += 8)
 	{
-		const ndBrainSimdFloat8 x(&src[i]);
-		const ndBrainSimdFloat8 test(x >= zero);
-		const ndBrainSimdFloat8 value(test & one);
+		const ndBrainFloat8 x(&src[i]);
+		const ndBrainFloat8 test(x >= zero);
+		const ndBrainFloat8 value(test & one);
 		value.Store(&dst[i]);
 	}
 	for (ndInt32 i = ndInt32(input.GetCount() - 1); i >= roundCount; --i)
@@ -191,7 +191,7 @@ void ndBrainLayerActivationLeakyRelu::BackPropagate(const ndBrainLayerBackPropag
 	inputDerivative.Mul(outputDerivative);
 }
 
-ndCommandArray ndBrainLayerActivationLeakyRelu::CreateGpuFeedForwardCommand(
+ndCommandArray ndBrainLayerActivationLeakyRelu::CreateFeedForwardBufferCommand(
 	ndBrainTrainerInference* const owner,
 	ndBrainContext* const context,
 	const ndCommandSharedInfo& info,
@@ -219,7 +219,7 @@ ndCommandArray ndBrainLayerActivationLeakyRelu::CreateGpuFeedForwardCommand(
 	return commandArray;
 }
 
-ndCommandArray ndBrainLayerActivationLeakyRelu::CreateGpuBackPropagateCommand(
+ndCommandArray ndBrainLayerActivationLeakyRelu::CreateBackPropagateBufferCommand(
 	ndBrainTrainerInference* const owner,
 	ndBrainContext* const context,
 	const ndCommandSharedInfo& info,

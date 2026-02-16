@@ -228,7 +228,7 @@ ndCommandSharedInfo ndBrainLayer::GetCommandSharedInfo(ndBrainTrainerInference* 
 	return ndCommandSharedInfo(this);
 }
 
-ndCommandArray ndBrainLayer::CreateGpuFeedForwardCommand(
+ndCommandArray ndBrainLayer::CreateFeedForwardBufferCommand(
 	ndBrainTrainerInference* const, 
 	ndBrainContext* const,
 	const ndCommandSharedInfo&, 
@@ -238,7 +238,7 @@ ndCommandArray ndBrainLayer::CreateGpuFeedForwardCommand(
 	return ndCommandArray();
 }
 
-ndCommandArray ndBrainLayer::CreateGpuBackPropagateCommand(
+ndCommandArray ndBrainLayer::CreateBackPropagateBufferCommand(
 	ndBrainTrainerInference* const,
 	ndBrainContext* const, 
 	const ndCommandSharedInfo&,

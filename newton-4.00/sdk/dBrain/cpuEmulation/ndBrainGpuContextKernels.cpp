@@ -29,17 +29,17 @@ inline ndInt32 __cpuKernelRoundoff(ndInt32 value, ndInt32 workgroupSize)
     return (value + workgroupSize - 1) & -workgroupSize;
 }
 
-inline ndInt32 __twoPower(ndInt32 x)
-{
-    ndAssert(x <= 1 << 16);
-    ndAssert(((x - 1) & -x) == 0);
-    ndInt32 bits = 1;
-    bits += (0xff00 & x) & 8;
-    bits += (0xf0f0 & x) & 4;
-    bits += (0xcccc & x) & 2;
-    bits += (0x8888 & x) & 2;
-    return bits;
-}
+//inline ndInt32 __twoPower____(ndInt32 x)
+//{
+//    ndAssert(x <= 1 << 16);
+//    ndAssert(((x - 1) & -x) == 0);
+//    ndInt32 bits = 1;
+//    bits += (0xff00 & x) & 8;
+//    bits += (0xf0f0 & x) & 4;
+//    bits += (0xcccc & x) & 2;
+//    bits += (0x8888 & x) & 1;
+//    return bits;
+//}
 
 inline bool ndCheckValidFloat(ndFloat32 x)
 {

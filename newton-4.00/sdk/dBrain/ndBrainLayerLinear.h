@@ -103,7 +103,7 @@ class ndBrainLayerLinear : public ndBrainLayer
 	void BackPropagateBiasAddPartialSumGradients(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const;
 	void BackPropagateBiasCachePartialSumGradients(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const;
 	
-	virtual ndCommandArray CreateGpuFeedForwardCommand(
+	virtual ndCommandArray CreateFeedForwardBufferCommand(
 		ndBrainTrainerInference* const owner,
 		ndBrainContext* const context,
 		const ndCommandSharedInfo& info,
@@ -111,7 +111,7 @@ class ndBrainLayerLinear : public ndBrainLayer
 		ndBrainFloatBuffer* const inputOutputData,
 		ndBrainFloatBuffer* const weightsAndBias) const override;
 
-	virtual ndCommandArray CreateGpuBackPropagateCommand(
+	virtual ndCommandArray CreateBackPropagateBufferCommand(
 		ndBrainTrainerInference* const owner,
 		ndBrainContext* const context, 
 		const ndCommandSharedInfo& info,

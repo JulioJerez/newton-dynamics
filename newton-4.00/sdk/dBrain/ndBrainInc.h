@@ -31,13 +31,14 @@
 #include <ndBrainBuffer.h>
 #include <ndBrainMatrix.h>
 #include <ndBrainKernel.h>
+#include <ndBrainFloat8.h>
+#include <ndBrainFloat16.h>
 #include <ndBrainContext.h>
 #include <ndBrainTrainer.h>
 #include <ndBrainSaveLoad.h>
 #include <ndBrainOptimizer.h>
 #include <ndBrainGpuBuffer.h>
 #include <ndBrainCpuContext.h>
-#include <ndBrainSimdFloat8.h>
 #include <ndBrainThreadPool.h>
 #include <ndBrainGpuCommand.h>
 #include <ndBrainGpuContext.h>

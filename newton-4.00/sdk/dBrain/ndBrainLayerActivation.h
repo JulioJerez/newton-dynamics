@@ -63,7 +63,7 @@ class ndBrainLayerActivation : public ndBrainLayer
 
 	virtual void Save(const ndBrainSave* const loadSave) const override;
 
-	virtual ndCommandArray CreateGpuFeedForwardCommand(
+	virtual ndCommandArray CreateFeedForwardBufferCommand(
 		ndBrainTrainerInference* const owner,
 		ndBrainContext* const context,
 		const ndCommandSharedInfo& info,
@@ -71,7 +71,7 @@ class ndBrainLayerActivation : public ndBrainLayer
 		ndBrainFloatBuffer* const inputOutputData,
 		ndBrainFloatBuffer* const weightsAndBias) const override;
 
-	virtual ndCommandArray CreateGpuBackPropagateCommand(
+	virtual ndCommandArray CreateBackPropagateBufferCommand(
 		ndBrainTrainerInference* const owner,
 		ndBrainContext* const context,
 		const ndCommandSharedInfo& info,

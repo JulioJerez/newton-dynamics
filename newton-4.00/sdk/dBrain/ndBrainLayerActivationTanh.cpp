@@ -21,10 +21,10 @@
 
 #include "ndBrainStdafx.h"
 #include "ndBrain.h"
+#include "ndBrainFloat8.h"
 #include "ndBrainTrainer.h"
 #include "ndBrainContext.h"
 #include "ndBrainSaveLoad.h"
-#include "ndBrainSimdFloat8.h"
 #include "ndBrainFloatBuffer.h"
 #include "ndBrainLayerActivationTanh.h"
 
@@ -64,15 +64,15 @@ void ndBrainLayerActivationTanh::MakePrediction(const ndBrainVector& input, ndBr
 {
 	ndAssert(input.GetCount() == output.GetCount());
 
-	const ndBrainSimdFloat8 max(30.0f);
-	const ndBrainSimdFloat8 min(-30.0f);
+	const ndBrainFloat8 max(30.0f);
+	const ndBrainFloat8 min(-30.0f);
 	ndBrainFloat* const dst = &output[0];
 	const ndBrainFloat* const src = &input[0];
 	const ndInt32 roundCount = ndInt32(input.GetCount()) & -8;
 	for (ndInt32 i = 0; i < roundCount; i += 8)
 	{
-		const ndBrainSimdFloat8 x(&src[i]);
-		const ndBrainSimdFloat8 value(x.Clamp(min, max));
+		const ndBrainFloat8 x(&src[i]);
+		const ndBrainFloat8 value(x.Clamp(min, max));
 		value.Tanh().Store(&dst[i]);
 	}
 	for (ndInt32 i = ndInt32(input.GetCount() - 1); i >= roundCount; --i)
@@ -119,15 +119,15 @@ void ndBrainLayerActivationTanh::FeedForward(const ndBrainLayerFeedForwardCpuCom
 	const ndBrainMemVector input(&inputOutputBuffer[inputOffset], inputSize);
 	ndBrainMemVector output(&inputOutputBuffer[outputOffset], outputSize);
 
-	const ndBrainSimdFloat8 max(30.0f);
-	const ndBrainSimdFloat8 min(-30.0f);
+	const ndBrainFloat8 max(30.0f);
+	const ndBrainFloat8 min(-30.0f);
 	ndBrainFloat* const dst = &output[0];
 	const ndBrainFloat* const src = &input[0];
 	const ndInt32 roundCount = ndInt32(input.GetCount()) & -8;
 	for (ndInt32 i = 0; i < roundCount; i += 8)
 	{
-		const ndBrainSimdFloat8 x(&src[i]);
-		const ndBrainSimdFloat8 value(x.Clamp(min, max));
+		const ndBrainFloat8 x(&src[i]);
+		const ndBrainFloat8 value(x.Clamp(min, max));
 		value.Tanh().Store(&dst[i]);
 	}
 	for (ndInt32 i = ndInt32(input.GetCount() - 1); i >= roundCount; --i)
@@ -167,7 +167,7 @@ void ndBrainLayerActivationTanh::BackPropagate(const ndBrainLayerBackPropagateCp
 	inputDerivative.FlushToZero();
 }
 
-ndCommandArray ndBrainLayerActivationTanh::CreateGpuFeedForwardCommand(
+ndCommandArray ndBrainLayerActivationTanh::CreateFeedForwardBufferCommand(
 	ndBrainTrainerInference* const owner,
 	ndBrainContext* const context,
 	const ndCommandSharedInfo& info,
@@ -194,7 +194,7 @@ ndCommandArray ndBrainLayerActivationTanh::CreateGpuFeedForwardCommand(
 	return commandArray;
 }
 
-ndCommandArray ndBrainLayerActivationTanh::CreateGpuBackPropagateCommand(
+ndCommandArray ndBrainLayerActivationTanh::CreateBackPropagateBufferCommand(
 	ndBrainTrainerInference* const owner,
 	ndBrainContext* const context, 
 	const ndCommandSharedInfo& info,

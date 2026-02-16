@@ -146,7 +146,7 @@ void ndBrainLayerLinearWithDropOut::BackPropagate(const ndBrainLayerBackPropagat
 	inputDerivative.Mul(outputDerivative);
 }
 
-ndCommandArray ndBrainLayerLinearWithDropOut::CreateGpuFeedForwardCommand(
+ndCommandArray ndBrainLayerLinearWithDropOut::CreateFeedForwardBufferCommand(
 	ndBrainTrainerInference* const owner,
 	ndBrainContext* const context,
 	const ndCommandSharedInfo& info,
@@ -173,7 +173,7 @@ ndCommandArray ndBrainLayerLinearWithDropOut::CreateGpuFeedForwardCommand(
 	return commandArray;
 }
 
-ndCommandArray ndBrainLayerLinearWithDropOut::CreateGpuBackPropagateCommand(
+ndCommandArray ndBrainLayerLinearWithDropOut::CreateBackPropagateBufferCommand(
 	ndBrainTrainerInference* const owner,
 	ndBrainContext* const context, 
 	const ndCommandSharedInfo& info,
