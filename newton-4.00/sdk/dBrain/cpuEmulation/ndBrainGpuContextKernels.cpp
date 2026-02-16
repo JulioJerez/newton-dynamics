@@ -1234,11 +1234,6 @@ class brainLayerMatrixMatrixMultiply : public ndBrainKernel
         const ndInt32 height = (outputSize + tileSize - 1) & -tileSize;
         const ndInt64 parametersBiasOffset = parameterBlockBase + width * height + parameters->m_parametersStartOffset;
         ndAssert(parametersBiasOffset >= 0);
-        for (ndInt32 itemId = 0; itemId < tileSize; ++itemId)
-        {
-            tile_inputs[0][itemId] = weightsAndBias[parametersBiasOffset + itemId];
-        }
-        // barries?
 
         ndBrainFloat tile_accReg[tileSize][tileSize];
         for (ndInt32 itemId_y = 0; itemId_y < tileSize; ++itemId_y)
