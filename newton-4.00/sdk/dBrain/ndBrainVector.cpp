@@ -21,7 +21,8 @@
 
 #include "ndBrainStdafx.h"
 #include "ndBrainVector.h"
-#include "ndBrainSimdFloat8.h"
+#include "ndBrainFloat8.h"
+#include "ndBrainFloat16.h"
 
 void ndBrainVector::Set(ndBrainFloat value)
 {
@@ -124,14 +125,14 @@ void ndBrainVector::Clamp(ndBrainFloat min, ndBrainFloat max)
 
 void ndBrainVector::FlushToZero()
 {
-	const ndBrainSimdFloat8 max(ndBrainFloat(1.0e-16f));
-	const ndBrainSimdFloat8 min(ndBrainFloat(-1.0e-16f));
+	const ndBrainFloat8 max(ndBrainFloat(1.0e-16f));
+	const ndBrainFloat8 min(ndBrainFloat(-1.0e-16f));
 	const ndInt32 roundCount = ndInt32(GetCount()) & -8;
 	ndBrainFloat* const data = &(*this)[0];
 	for (ndInt32 i = 0; i < roundCount; i += 8)
 	{
-		const ndBrainSimdFloat8 x(&data[i]);
-		const ndBrainSimdFloat8 mask((x < min) | (x > max));
+		const ndBrainFloat8 x(&data[i]);
+		const ndBrainFloat8 mask((x < min) | (x > max));
 		(x & mask).Store(&data[i]);
 	}
 	for (ndInt32 i = ndInt32(GetCount() - 1); i >= roundCount; --i)

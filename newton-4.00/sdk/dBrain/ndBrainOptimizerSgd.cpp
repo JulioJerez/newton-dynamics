@@ -31,7 +31,7 @@ ndBrainOptimizerSgd::ndBrainOptimizerSgd(const ndSharedPtr<ndBrainContext>& cont
 	,m_vdw()
 	,m_weightsAndBiasBuffer(nullptr)
 	,m_weightsAndBiasGradientBuffer(nullptr)
-	,m_blendFactor(ndBrainFloat(1.0f - 0.99f))
+	,m_blendFactor(ndBrainFloat(1.0f - 0.9f))
 	,m_miniBatchScale(ndBrainFloat(1.0f))
 {
 }
@@ -52,10 +52,14 @@ void ndBrainOptimizerSgd::Init(ndInt32 minibatchSize, ndBrainFloatBuffer& weight
 
 void ndBrainOptimizerSgd::ApplyLearnRate(ndBrainFloat learnRate)
 {
+	// this optimizer is name gradiend descend but in reality it is a  
+	// first order momentum base gradinet optimizer.
+	//  to make this a gradient descend, we can just set the blend factor to 1.0f
 	// TO DO remenber to add the reqularizer part
 	m_weightsAndBiasGradientBuffer->Scale(m_miniBatchScale);
 	m_vdw->Blend(*m_weightsAndBiasGradientBuffer, m_blendFactor);
-	m_weightsAndBiasGradientBuffer->Set(m_vdw);
-	m_weightsAndBiasGradientBuffer->Scale(learnRate * -1.0f);
+
+	m_weightsAndBiasGradientBuffer->Set(**m_vdw);
+	m_weightsAndBiasGradientBuffer->Scale(learnRate * ndBrainFloat (-1.0f));
 	m_weightsAndBiasBuffer->Add(*m_weightsAndBiasGradientBuffer);
 }

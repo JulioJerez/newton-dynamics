@@ -144,7 +144,7 @@ void ndBrainLayerActivation::CalculateParamGradients(const ndBrainVector& input,
 	InputDerivative(input, output, outputDerivative, inputGradient);
 }
 
-ndCommandArray ndBrainLayerActivation::CreateGpuFeedForwardCommand(
+ndCommandArray ndBrainLayerActivation::CreateFeedForwardBufferCommand(
 	ndBrainTrainerInference* const,
 	ndBrainContext* const,
 	const ndCommandSharedInfo&,
@@ -156,7 +156,7 @@ ndCommandArray ndBrainLayerActivation::CreateGpuFeedForwardCommand(
 	return ndCommandArray();
 }
 
-ndCommandArray ndBrainLayerActivation::CreateGpuBackPropagateCommand(
+ndCommandArray ndBrainLayerActivation::CreateBackPropagateBufferCommand(
 	ndBrainTrainerInference* const,
 	ndBrainContext* const,
 	const ndCommandSharedInfo&,

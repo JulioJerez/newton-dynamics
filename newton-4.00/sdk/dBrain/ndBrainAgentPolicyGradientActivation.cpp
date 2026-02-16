@@ -211,7 +211,7 @@ void ndBrainAgentPolicyGradientActivation::BackPropagate(const ndBrainLayerBackP
 	}
 }
 
-ndCommandArray ndBrainAgentPolicyGradientActivation::CreateGpuFeedForwardCommand(
+ndCommandArray ndBrainAgentPolicyGradientActivation::CreateFeedForwardBufferCommand(
 	ndBrainTrainerInference* const owner,
 	ndBrainContext* const context,
 	const ndCommandSharedInfo& info,
@@ -249,7 +249,7 @@ ndCommandArray ndBrainAgentPolicyGradientActivation::CreateGpuFeedForwardCommand
 	return commandArray;
 }
 
-ndCommandArray ndBrainAgentPolicyGradientActivation::CreateGpuBackPropagateCommand(
+ndCommandArray ndBrainAgentPolicyGradientActivation::CreateBackPropagateBufferCommand(
 	ndBrainTrainerInference* const owner,
 	ndBrainContext* const context,
 	const ndCommandSharedInfo& info,

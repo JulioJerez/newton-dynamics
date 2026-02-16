@@ -749,7 +749,10 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeCritic()
 	ndBrainFloatBuffer* const outputBuffer = m_criticTrainer->GetOuputBuffer();
 	ndBrainFloatBuffer* const outputGradientBuffer = m_criticTrainer->GetOuputGradientBuffer();
 
-	const ndInt32 numberOfIterations = ndMin(ndInt32(m_shuffleBuffer.GetCount()) / m_parameters.m_miniBatchSize, 1024);
+	//const ndInt32 numberOfIterations = ndMin(ndInt32(m_shuffleBuffer.GetCount()) / m_parameters.m_miniBatchSize, 1024);
+	//only take 20% of the collected samples to train the critics.
+	const ndInt32 samplesFraction = 5;
+	const ndInt32 numberOfIterations = ((ndInt32(m_shuffleBuffer.GetCount()) / m_parameters.m_miniBatchSize) + samplesFraction - 1) / samplesFraction;
 	ndAssert(numberOfIterations >= 1);
 
 	// calculate GAE(? = 0): too smooth, and also doesn’t seem to work.
@@ -1188,14 +1191,13 @@ void ndBrainAgentOnPolicyGradient_Trainer::Optimize()
 		ndBrainFloat divergence = CalculateKLdivergence();
 		ndBrainFloat stopDivergence = m_parameters.m_divergenceStopThreshold;
 
-		ndInt32 xxxx = 0;
-		for (ndInt32 i = 0; (i < iterationsCount) && (divergence < stopDivergence); ++i)
+		ndInt32 numOfPasses = 0;
+		for (; (numOfPasses < iterationsCount) && (divergence < stopDivergence); ++numOfPasses)
 		{
-			OptimizedSurrogatePolicy(i + 1);
+			OptimizedSurrogatePolicy(numOfPasses + 1);
 			divergence = CalculateKLdivergence();
-			xxxx++;
 		}
-		ndExpandTraceMessage("surrogate loss passes %d\n", xxxx);
+		ndExpandTraceMessage("surrogate loss passes %d\n", numOfPasses);
 	}
 	OptimizeCritic();
 }

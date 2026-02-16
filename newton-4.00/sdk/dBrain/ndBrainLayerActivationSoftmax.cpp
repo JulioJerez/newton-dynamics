@@ -168,7 +168,7 @@ void ndBrainLayerActivationSoftmax::BackPropagate(const ndBrainLayerBackPropagat
 	ndAssert(0);
 }
 
-ndCommandArray ndBrainLayerActivationSoftmax::CreateGpuFeedForwardCommand(
+ndCommandArray ndBrainLayerActivationSoftmax::CreateFeedForwardBufferCommand(
 	ndBrainTrainerInference* const owner,
 	ndBrainContext* const context,
 	const ndCommandSharedInfo& info,

@@ -122,7 +122,7 @@ class ndBrainLayer : public ndClassAlloc
 	virtual void FeedForward(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const;
 	virtual void BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const;
 
-	virtual ndCommandArray CreateGpuFeedForwardCommand(
+	virtual ndCommandArray CreateFeedForwardBufferCommand(
 		ndBrainTrainerInference* const owner,
 		ndBrainContext* const context,
 		const ndCommandSharedInfo& info,
@@ -130,7 +130,7 @@ class ndBrainLayer : public ndClassAlloc
 		ndBrainFloatBuffer* const inputOutputData,
 		ndBrainFloatBuffer* const weightsAndBias) const;
 
-	virtual ndCommandArray CreateGpuBackPropagateCommand(
+	virtual ndCommandArray CreateBackPropagateBufferCommand(
 		ndBrainTrainerInference* const owner,
 		ndBrainContext* const context, 
 		const ndCommandSharedInfo& info,

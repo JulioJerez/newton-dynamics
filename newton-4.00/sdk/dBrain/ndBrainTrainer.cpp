@@ -267,7 +267,7 @@ void ndBrainTrainer::AddLayersGradientCommands()
 		ndBrainFloatBuffer* const inputOutputGradientBuffer = *m_inputOutputGradientsBuffer;
 		ndBrainFloatBuffer* const weightAndBiasGradientsBuffer = *m_weightAndBiasGradientsBuffer;
 
-		ndCommandArray backCommands(layer->CreateGpuBackPropagateCommand(
+		ndCommandArray backCommands(layer->CreateBackPropagateBufferCommand(
 			this, *m_descriptor.m_context, desc.m_info, m_descriptor.m_minibatchSize,
 			inputOutputBuffer, weightsAndBiasBuffer, inputOutputGradientBuffer, weightAndBiasGradientsBuffer));
 

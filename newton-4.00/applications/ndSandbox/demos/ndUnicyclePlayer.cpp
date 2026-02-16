@@ -327,6 +327,7 @@ namespace ndUnicyclePlayer
 		// add links
 		const ndMatrix poleMatrix(m_pole->GetMatrix());
 		m_poleHinge = ndSharedPtr<ndJointBilateralConstraint>(new ndJointHinge(poleMatrix, m_pole->GetAsBodyKinematic(), m_topBox->GetAsBodyKinematic()));
+		((ndJointRoller*)*m_poleHinge)->SetAsSpringDamperPosit(0.01f, 0.0f, 5.0f);
 		ndModelArticulation::ndNode* const poleNode = model->AddLimb(modelRootNode, m_pole, m_poleHinge);
 
 		const ndMatrix ballMatrix(m_wheel->GetMatrix());
@@ -374,28 +375,7 @@ namespace ndUnicyclePlayer
 		return model;
 	}
 }
-
 using namespace ndUnicyclePlayer;
-
-void ndUnicyclePlayer_SAC(ndDemoEntityManager* const scene)
-{
-	ndSharedPtr<ndBody> mapBody(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
-
-	// add a help message
-	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend_Sac());
-	scene->SetDemoHelp(demoHelper);
-
-	ndMatrix matrix(ndGetIdentityMatrix());
-	ndRenderMeshLoader loader(*scene->GetRenderer());
-	loader.LoadMesh(ndGetWorkingFileName("unicycle.nd"));
-	ndController::CreateModel(scene, matrix, loader, CONTROLLER_NAME_SAC);
-
-	matrix.m_posit.m_x -= 0.0f;
-	matrix.m_posit.m_y += 0.5f;
-	matrix.m_posit.m_z += 2.0f;
-	ndQuaternion rotation(ndVector(0.0f, 1.0f, 0.0f, 0.0f), 90.0f * ndDegreeToRad);
-	scene->SetCameraMatrix(rotation, matrix.m_posit);
-}
 
 void ndUnicyclePlayer_PPO(ndDemoEntityManager* const scene)
 {
@@ -420,6 +400,37 @@ void ndUnicyclePlayer_PPO(ndDemoEntityManager* const scene)
 	ndRenderMeshLoader loader(*scene->GetRenderer());
 	loader.LoadMesh(ndGetWorkingFileName("unicycle.nd"));
 	ndController::CreateModel(scene, matrix, loader, CONTROLLER_NAME_PPO);
+
+	matrix.m_posit.m_x -= 0.0f;
+	matrix.m_posit.m_y += 1.5f;
+	matrix.m_posit.m_z += -9.0f;
+	ndQuaternion rotation(ndVector(0.0f, 1.0f, 0.0f, 0.0f), -90.0f * ndDegreeToRad);
+	scene->SetCameraMatrix(rotation, matrix.m_posit);
+}
+
+void ndUnicyclePlayer_SAC(ndDemoEntityManager* const scene)
+{
+	ndSharedPtr<ndBody> mapBody(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
+
+	// add a help message
+	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend_Ppo());
+	scene->SetDemoHelp(demoHelper);
+
+	// oveload the ground friction
+	// make sure the ground has enough friction
+	ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
+	ndMaterial* const defaultMaterial = callback->GetMaterial(ndDemoContactCallback::m_default, ndDemoContactCallback::m_default);
+	ndAssert(defaultMaterial);
+	defaultMaterial->m_dynamicFriction0 = defaultMaterial->m_staticFriction0;
+	defaultMaterial->m_dynamicFriction1 = defaultMaterial->m_staticFriction1;
+
+	//ndModelMaterial material;
+	//callback->RegisterMaterial(material, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_modelPart);
+
+	ndMatrix matrix(ndGetIdentityMatrix());
+	ndRenderMeshLoader loader(*scene->GetRenderer());
+	loader.LoadMesh(ndGetWorkingFileName("unicycle.nd"));
+	ndController::CreateModel(scene, matrix, loader, CONTROLLER_NAME_SAC);
 
 	matrix.m_posit.m_x -= 0.0f;
 	matrix.m_posit.m_y += 1.5f;

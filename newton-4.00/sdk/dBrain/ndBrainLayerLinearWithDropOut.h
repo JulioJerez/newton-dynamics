@@ -46,7 +46,7 @@ class ndBrainLayerLinearWithDropOut : public ndBrainLayerActivation
 	virtual void FeedForward(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const override;
 	virtual void BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const override;
 
-	virtual ndCommandArray CreateGpuFeedForwardCommand(
+	virtual ndCommandArray CreateFeedForwardBufferCommand(
 		ndBrainTrainerInference* const owner,
 		ndBrainContext* const context,
 		const ndCommandSharedInfo& info,
@@ -54,7 +54,7 @@ class ndBrainLayerLinearWithDropOut : public ndBrainLayerActivation
 		ndBrainFloatBuffer* const inputOutputData,
 		ndBrainFloatBuffer* const weightsAndBias) const override;
 
-	virtual ndCommandArray CreateGpuBackPropagateCommand(
+	virtual ndCommandArray CreateBackPropagateBufferCommand(
 		ndBrainTrainerInference* const owner,
 		ndBrainContext* const context, 
 		const ndCommandSharedInfo& info,

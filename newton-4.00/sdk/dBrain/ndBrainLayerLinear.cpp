@@ -21,12 +21,15 @@
 
 #include "ndBrainStdafx.h"
 #include "ndBrain.h"
+#include "ndBrainFloat16.h"
 #include "ndBrainContext.h"
 #include "ndBrainTrainer.h"
 #include "ndBrainSaveLoad.h"
 #include "ndBrainGpuCommand.h"
 #include "ndBrainLayerLinear.h"
 #include "ndBrainFloatBuffer.h"
+
+//#define ND_USE_CPU_TILE_MATRIX_MULTIPLY
 
 ndBrainLayerLinear::ndBrainLayerLinear(ndInt32 inputs, ndInt32 outputs)
 	:ndBrainLayer()
@@ -400,6 +403,109 @@ ndCommandSharedInfo ndBrainLayerLinear::GetCommandSharedInfo(ndBrainTrainerInfer
 
 void ndBrainLayerLinear::FeedForward(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const
 {
+#ifdef ND_USE_CPU_TILE_MATRIX_MULTIPLY
+	// so far abput twice slower.
+	// the float16 class, it seem need to be intricics implemention
+	const ndInt32 tileSize = ND_GPU_TILED_MATRIX_ROWS;
+	const ndInt32 tileSizeBits = ND_GPU_TILED_MATRIX_ROWS_BITS;
+	ndAssert(tileSize == 16);
+
+	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
+	const ndCommandSharedInfo& info = desc.m_info;
+	ndBrainTrainerInference* const trainer = desc.m_owner;
+	
+	const ndBrainFloat* const weightsAndBias = (ndBrainFloat*)trainer->GetWeightAndBiasBuffer()->GetCpuPtr();
+	const ndBrainFloat* const inputOutputBuffer = (ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr();
+
+	const ndInt32 inputSize = info.m_inputSize;
+	const ndInt32 outputSize = info.m_outputSize;
+	const ndInt32 inputOutputSize = info.m_inputOutputSize;
+	const ndInt32 inputOutputStartOffset = info.m_inputOutputStartOffset;
+	const ndInt32 width = (inputSize + tileSize * 2 - 1) & -tileSize * 2;
+	
+	const ndInt64 inputOffset = miniBatchIndex * ndInt64(inputOutputSize) + inputOutputStartOffset;
+	const ndInt32 inputOutputStride = info.m_inputOutputSize;
+
+	ndBrainFloat16 input_tile[tileSize * 2];
+	ndBrainFloat16 weight_tileTransposed[tileSize][2];
+
+	const ndInt32 minibatchBlock = (outputSize + tileSize - 1) >> tileSizeBits;
+	const ndInt32 groupId_y = miniBatchIndex / minibatchBlock;
+	const ndInt32 groupId_x = miniBatchIndex - groupId_y * minibatchBlock;
+
+	const ndInt64 parameterBlockBase = groupId_x * tileSize;
+	const ndInt64 parametersStartOffset = parameterBlockBase * width + info.m_parametersStartOffset;
+
+	const ndInt32 height = (outputSize + tileSize - 1) & -tileSize;
+	const ndInt64 parametersBiasOffset = parameterBlockBase + width * height + info.m_parametersStartOffset;
+	ndAssert(parametersBiasOffset >= 0);
+	
+	ndBrainFloat16 tile_accReg[tileSize];
+	const ndBrainFloat16 biasTranspose(*((ndBrainFloat16*)&weightsAndBias[parametersBiasOffset]));
+	for (ndInt32 itemId = 0; itemId < tileSize; ++itemId)
+	{
+		tile_accReg[itemId] = ndBrainFloat16(biasTranspose.m_f[itemId]);
+	}
+
+	// multiply the row of tiles
+	for (ndInt32 tile = 0; tile < width; tile += tileSize * 2)
+	{
+		// read the transpose of the tiles (GPU style, but too slow for CPU)
+		ndInt64 inputStartOffset = tile + inputOffset;
+		ndInt64 weightOffsetStart = tile + parametersStartOffset;
+		for (ndInt32 i = 0; i < tileSize; i ++)
+		{
+			const ndBrainFloat16 weight0 (*((ndBrainFloat16*)&weightsAndBias[weightOffsetStart + i * width]));
+			const ndBrainFloat16 inputData0 (*((ndBrainFloat16*)&inputOutputBuffer[inputStartOffset + i * inputOutputStride]));
+			const ndBrainFloat16 weight1(*((ndBrainFloat16*)&weightsAndBias[weightOffsetStart + i * width + tileSize]));
+			const ndBrainFloat16 inputData1(*((ndBrainFloat16*)&inputOutputBuffer[inputStartOffset + i * inputOutputStride + tileSize]));
+
+			weight_tileTransposed[i][0] = weight0;
+			weight_tileTransposed[i][1] = weight1;
+			for (ndInt32 j = 0; j < 16; j++)
+			{
+				input_tile[j].m_f[i] = inputData0.m_f[j];
+				input_tile[j + tileSize].m_f[i] = inputData1.m_f[j];
+			}
+		}
+
+		// Perform the computation for a single tile
+		for (ndInt32 i = 0; i < tileSize; ++i)
+		{
+			ndBrainFloat16 row(tile_accReg[i]);
+			for (ndInt32 itemId_y = 0; itemId_y < tileSize; itemId_y++)
+			{
+				//const ndBrainFloat16 w0(weight_tileTransposed[i][0].m_f[itemId_y]);
+				//const ndBrainFloat16 w1(weight_tileTransposed[i][1].m_f[itemId_y]);
+				const ndBrainFloat16& in0 = input_tile[itemId_y];
+				const ndBrainFloat16& in1 = input_tile[itemId_y + tileSize];
+				row = row + in0.Scale(weight_tileTransposed[i][0].m_f[itemId_y]);
+				row = row + in1.Scale(weight_tileTransposed[i][1].m_f[itemId_y]);
+			}
+			tile_accReg[i] = row;
+		}
+	}
+
+	//const ndBrainFloat16 biasTranspose(*((ndBrainFloat16*)&weightsAndBias[parametersBiasOffset]));
+	//for (ndInt32 itemId = 0; itemId < tileSize; ++itemId)
+	//{
+	//	tile_accReg[itemId] = tile_accReg[itemId] + ndBrainFloat16(biasTranspose.m_f[itemId]);
+	//}
+
+	ndBrainFloat* const outputBuffer = (ndBrainFloat*)inputOutputBuffer;
+	const ndInt32 numberOutput = ((groupId_x + 1) * tileSize < outputSize) ? tileSize : outputSize - groupId_x * tileSize;
+	ndInt64 dstOffset = inputOffset + trainer->RoundOffOffset(inputSize);
+	for (ndInt32 itemId_y = 0; itemId_y < tileSize; ++itemId_y)
+	{
+		for (ndInt32 itemId_x = 0; itemId_x < numberOutput; ++itemId_x)
+		{
+			ndBrainFloat value = tile_accReg[itemId_x].m_f[itemId_y];
+			outputBuffer[dstOffset + itemId_x] = value;
+		}
+		dstOffset += inputOutputStride;
+	}
+#else
+
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
 	ndBrainTrainerInference* const trainer = desc.m_owner;
@@ -431,6 +537,7 @@ void ndBrainLayerLinear::FeedForward(const ndBrainLayerFeedForwardCpuCommand* co
 	
 	const ndBrainMemVector bias(&parameters[matrixSize], outputSize);
 	output.Add(bias);
+#endif
 }
 
 void ndBrainLayerLinear::BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const
@@ -603,7 +710,7 @@ void ndBrainLayerLinear::BackPropagateInputGradients(const ndBrainLayerBackPropa
 	}
 }
 
-ndCommandArray ndBrainLayerLinear::CreateGpuFeedForwardCommand(
+ndCommandArray ndBrainLayerLinear::CreateFeedForwardBufferCommand(
 	ndBrainTrainerInference* const owner,
 	ndBrainContext* const context,
 	const ndCommandSharedInfo& info,
@@ -612,8 +719,34 @@ ndCommandArray ndBrainLayerLinear::CreateGpuFeedForwardCommand(
 	ndBrainFloatBuffer* const weightsAndBias) const
 {
 	ndAssert(info.m_parametersBatchSize);
-
 	ndCommandArray commandArray(0);
+
+#ifdef ND_USE_CPU_TILE_MATRIX_MULTIPLY
+	ndInt32 width;
+	ndInt32 height;
+	CalculateRoundedSize(width, height);
+	ndAssert((miniBatchSize & (ND_GPU_TILED_MATRIX_ROWS - 1)) == 0);
+
+	ndInt32 dim_M = height / ND_GPU_TILED_MATRIX_ROWS;
+	ndInt32 dim_N = miniBatchSize / ND_GPU_TILED_MATRIX_ROWS;
+
+	ndBrainBufferCommandDesc descriptor(MakeFeedForwardDesctriptor(
+		owner, context, info, dim_M * dim_N, 0,	inputOutputData, weightsAndBias));
+	
+	if (context->GetAsCpuContext())
+	{
+		ndBrainBufferCommand* const command = new ndBrainLayerFeedForwardCpuCommand(descriptor, (ndBrainLayer*)this);
+		commandArray.PushBack(command);
+	}
+	else
+	{
+		descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerMatrixMatrixMultiply;
+		ndBrainBufferCommand* const command = new ndBrainGpuCommand(descriptor);
+		commandArray.PushBack(command);
+	}
+
+#else
+
 	if (context->GetAsCpuContext())
 	{
 		ndBrainBufferCommandDesc descriptor(MakeFeedForwardDesctriptor(
@@ -641,10 +774,12 @@ ndCommandArray ndBrainLayerLinear::CreateGpuFeedForwardCommand(
 		commandArray.PushBack(command);
 	}
 
+#endif
+
 	return commandArray;
 }
 
-ndCommandArray ndBrainLayerLinear::CreateGpuBackPropagateCommand(
+ndCommandArray ndBrainLayerLinear::CreateBackPropagateBufferCommand(
 	ndBrainTrainerInference* const owner,
 	ndBrainContext* const context, 
 	const ndCommandSharedInfo& info,

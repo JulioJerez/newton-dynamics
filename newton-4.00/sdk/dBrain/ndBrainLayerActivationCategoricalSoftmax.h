@@ -48,7 +48,7 @@ class ndBrainLayerActivationCategoricalSoftmax : public ndBrainLayerActivationSo
 
 	virtual void BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const override;
 
-	virtual ndCommandArray CreateGpuBackPropagateCommand(
+	virtual ndCommandArray CreateBackPropagateBufferCommand(
 		ndBrainTrainerInference* const owner,
 		ndBrainContext* const context, 
 		const ndCommandSharedInfo& info,

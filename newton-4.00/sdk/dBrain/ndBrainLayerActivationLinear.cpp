@@ -21,10 +21,10 @@
 
 #include "ndBrainStdafx.h"
 #include "ndBrain.h"
+#include "ndBrainFloat8.h"
 #include "ndBrainTrainer.h"
 #include "ndBrainContext.h"
 #include "ndBrainSaveLoad.h"
-#include "ndBrainSimdFloat8.h"
 #include "ndBrainFloatBuffer.h"
 #include "ndBrainLayerActivationLinear.h"
 
@@ -194,7 +194,7 @@ void ndBrainLayerActivationLinear::BackPropagate(const ndBrainLayerBackPropagate
 	inputDerivative.Mul(outputDerivative);
 }
 
-ndCommandArray ndBrainLayerActivationLinear::CreateGpuFeedForwardCommand(
+ndCommandArray ndBrainLayerActivationLinear::CreateFeedForwardBufferCommand(
 	ndBrainTrainerInference* const owner,
 	ndBrainContext* const context,
 	const ndCommandSharedInfo& info,
@@ -226,7 +226,7 @@ ndCommandArray ndBrainLayerActivationLinear::CreateGpuFeedForwardCommand(
 	return commandArray;
 }
 
-ndCommandArray ndBrainLayerActivationLinear::CreateGpuBackPropagateCommand(
+ndCommandArray ndBrainLayerActivationLinear::CreateBackPropagateBufferCommand(
 	ndBrainTrainerInference* const owner,
 	ndBrainContext* const context,
 	const ndCommandSharedInfo& info,

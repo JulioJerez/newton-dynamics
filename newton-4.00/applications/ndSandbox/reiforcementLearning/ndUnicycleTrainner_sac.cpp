@@ -14,22 +14,46 @@
 #include "ndPhysicsUtils.h"
 #include "ndPhysicsWorld.h"
 #include "ndMakeStaticMap.h"
-#include "ndCartpolePlayer.h"
+#include "ndUnicyclePlayer.h"
 #include "ndDemoEntityNotify.h"
 #include "ndDemoEntityManager.h"
 
-using namespace ndCarpolePlayer;
+using namespace ndUnicyclePlayer;
 
-namespace ndCartpoleTrainer_sac
+namespace ndUnicycleTrainer_sac
 {
 	class ndHelpLegend : public ndDemoEntityManager::ndDemoHelper
 	{
 		virtual void PresentHelp(ndDemoEntityManager* const scene) override
 		{
 			const ndVector color(ndFloat32(1.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f));
-			scene->Print(color, "training a cart pole using Soft Actor Critic method");
-			scene->Print(color, "training goes for 200k steps. Therefore the training");
-			scene->Print(color, "seccion takes from one two twp hours with GPU backend");
+			scene->Print(color, "training a double pendulum using Proximal Policy Optimization method");
+			scene->Print(color, "training goes for 100 millions steps. Therefore the training");
+			scene->Print(color, "section may take several hours with GPU back end");
+		}
+	};
+
+	class TrainMaterial : public ndApplicationMaterial
+	{
+		public:
+		TrainMaterial()
+			:ndApplicationMaterial()
+		{
+		}
+
+		TrainMaterial(const TrainMaterial& src)
+			:ndApplicationMaterial(src)
+		{
+		}
+
+		ndApplicationMaterial* Clone() const
+		{
+			return new TrainMaterial(*this);
+		}
+
+		virtual bool OnAabbOverlap(const ndBodyKinematic* const, const ndBodyKinematic* const) const override
+		{
+			return false;
 		}
 	};
 
@@ -42,27 +66,35 @@ namespace ndCartpoleTrainer_sac
 		{
 		}
 
-		ndBrainFloat CalculateReward()
+		ndBrainFloat CalculateReward() override
 		{
 			return m_owner->CalculateReward();
 		}
 
-		bool IsTerminal() const
+		bool IsTerminal() const override
 		{
 			return m_owner->IsTerminal();
 		}
 
-		void GetObservation(ndBrainFloat* const observation)
+		void GetObservation(ndBrainFloat* const observation) override
 		{
 			m_owner->GetObservation(observation);
 		}
 
-		virtual void ApplyActions(ndBrainFloat* const actions)
+		void GetInitialPose()
 		{
-			m_owner->ApplyActions(actions);
+			//ndFloat32 expectedReward = GetExpectedReward();
+			ndFloat32 expectedReward = CalculateReward();
+			m_owner->SaveInitialPose(expectedReward);
 		}
 
-		void ResetModel()
+		virtual void ApplyActions(ndBrainFloat* const actions) override
+		{
+			m_owner->ApplyActions(actions);
+			GetInitialPose();
+		}
+
+		void ResetModel() override
 		{
 			m_owner->ResetModel();
 		}
@@ -83,43 +115,52 @@ namespace ndCartpoleTrainer_sac
 			,m_saveScore(m_maxScore)
 			,m_discountRewardFactor(0.99f)
 			,m_horizon(ndFloat32(1.0f) / (ndFloat32(1.0f) - m_discountRewardFactor))
-			,m_lastEpisode(0xffffffff)
-			,m_stopTraining(500000)
+			,m_lastEpisode(0xfffffff)
+			,m_stopTraining(1000000)
 			,m_modelIsTrained(false)
 		{
 			char name[256];
 			snprintf(name, sizeof(name), "%s.csv", CONTROLLER_NAME_SAC);
 			m_outFile = fopen(name, "wb");
-			fprintf(m_outFile, "vpg\n");
+			fprintf(m_outFile, "sac\n");
 
-			// create a Soft Actor Critic traniing agent
+			// set random see for replication
+			ndSetRandSeed(42);
+
+			// create a proximal policy training agent
 			ndBrainAgentOffPolicyGradient_Trainer::HyperParameters hyperParameters;
-
-			//hyperParameters.m_useGpuBackend = false;
-			hyperParameters.m_hiddenLayersNumberOfNeurons = 64;
+			
+			hyperParameters.m_useGpuBackend = false;
+			hyperParameters.m_discountRewardFactor = 0.995f;
+			hyperParameters.m_numberOfHiddenLayers = 2;
+			hyperParameters.m_hiddenLayersNumberOfNeurons = 128;
 			hyperParameters.m_numberOfActions = m_actionsSize;
 			hyperParameters.m_numberOfObservations = m_observationsSize;
+			hyperParameters.m_maxNumberOfTrainingSteps = m_stopTraining;
+			hyperParameters.m_discountRewardFactor = ndReal(m_discountRewardFactor);
 			m_master = ndSharedPtr<ndBrainAgentOffPolicyGradient_Trainer>(new ndBrainAgentOffPolicyGradient_Trainer(hyperParameters));
 			
 			m_bestActor = ndSharedPtr<ndBrain>(new ndBrain(**m_master->GetPolicyNetwork()));
-
+			
 			snprintf(name, sizeof(name), "%s.dnn", CONTROLLER_NAME_SAC);
 			m_master->SetName(name);
-
+			
 			// create a visual mesh and add to the scene.
 			ndWorld* const world = scene->GetWorld();
 			ndMatrix matrix(location);
-			matrix.m_posit = FindFloor(*scene->GetWorld(), matrix.m_posit, 200.0f);
-			matrix.m_posit.m_y += ndFloat32 (0.1f);
+			matrix.m_posit.m_y = ndFloat32(0.1f);
 			loader.m_mesh->m_matrix = loader.m_mesh->m_matrix * matrix;
-
+			
 			ndSharedPtr<ndRenderSceneNode> visualMesh(loader.m_renderMesh->Clone());
 			visualMesh->SetTransform(loader.m_mesh->m_matrix);
 			visualMesh->SetTransform(loader.m_mesh->m_matrix);
-
-			// create an articulated model
+			
 			ndSharedPtr<ndModel>model(CreateModel(scene, loader.m_mesh, visualMesh));
-
+			
+			//add a control for the reward function
+			ndController* const controller = (ndController*)(*model->GetNotifyCallback());
+			controller->m_solver = ndSharedPtr<ndIkSolver>(new ndIkSolver);
+			
 			// add model a visual mesh to the scene and world
 			world->AddModel(model);
 			scene->AddEntity(visualMesh);
@@ -145,6 +186,12 @@ namespace ndCartpoleTrainer_sac
 			ndController* const playerController = (ndController*)(*controller);
 			playerController->CreateArticulatedModel(scene, model, mesh, visualMesh);
 
+			for (ndModelArticulation::ndNode* node = model->GetRoot()->GetFirstIterator(); node; node = node->GetNextIterator())
+			{
+				ndShapeMaterial& material = node->m_body->GetAsBodyDynamic()->GetCollisionShape().m_shapeMaterial;
+				material.m_userId = ndDemoContactCallback::m_modelPart;
+			}
+
 			ndSharedPtr<ndBrainAgentOffPolicyGradient_Agent> agent(new ndAgent(m_master, playerController));
 			playerController->m_agent = (ndSharedPtr<ndBrainAgent>&) agent;
 			m_master->AddAgent(agent);
@@ -158,37 +205,37 @@ namespace ndCartpoleTrainer_sac
 
 		virtual void Update(ndDemoEntityManager* const manager, ndFloat32)
 		{
-			ndUnsigned32 stopTraining = m_master->GetFramesCount();
+			ndInt32 stopTraining = ndInt32(m_master->GetFramesCount());
 			if (stopTraining <= m_stopTraining)
 			{
 				ndUnsigned32 episodeCount = m_master->GetEposideCount();
 				m_master->OptimizeStep();
-
+			
 				episodeCount -= m_master->GetEposideCount();
 				ndFloat32 trajectoryLog = ndLog(m_master->GetAverageFrames() + 0.001f);
 				ndFloat32 rewardTrajectory = m_master->GetAverageScore() * trajectoryLog;
 				if (rewardTrajectory >= ndFloat32(m_maxScore))
 				{
-					if (m_lastEpisode != m_master->GetEposideCount())
+					if (m_lastEpisode != ndInt32 (m_master->GetEposideCount()))
 					{
 						m_maxScore = rewardTrajectory;
 						m_bestActor->CopyFrom(**m_master->GetPolicyNetwork());
 						ndExpandTraceMessage("best actor episode: %d\treward %f\ttrajectoryFrames: %f\n", m_master->GetEposideCount(), 100.0f * m_master->GetAverageScore() / m_horizon, m_master->GetAverageFrames());
-						m_lastEpisode = m_master->GetEposideCount();
+						m_lastEpisode = ndInt32(m_master->GetEposideCount());
 					}
 				}
-
+			
 				if (rewardTrajectory > m_saveScore)
 				{
 					m_saveScore = ndFloor(rewardTrajectory) + 2.0f;
-
+			
 					// save partial controller in case of crash 
 					ndBrain* const actor = *m_master->GetPolicyNetwork();
 					ndString fileName(ndGetWorkingFileName(m_master->GetName().GetStr()));
 					m_master->GetPolicyNetwork()->SaveToFile(fileName.GetStr());
 					actor->SaveToFile(fileName.GetStr());
 				}
-
+			
 				if (episodeCount && !m_master->IsSampling())
 				{
 					ndExpandTraceMessage("steps: %d\treward: %g\t  trajectoryFrames: %g\n", m_master->GetFramesCount(), 100.0f * m_master->GetAverageScore() / m_horizon, m_master->GetAverageFrames());
@@ -199,8 +246,8 @@ namespace ndCartpoleTrainer_sac
 					}
 				}
 			}
-
-			if ((stopTraining >= m_stopTraining) || (m_master->GetAverageScore() > ndBrainFloat(0.95f)))
+			
+			if ((stopTraining >= m_stopTraining) || (m_master->GetAverageScore() > ndBrainFloat(0.96f)))
 			{
 				m_modelIsTrained = true;
 				m_master->GetPolicyNetwork()->CopyFrom(*(*m_bestActor));
@@ -210,7 +257,7 @@ namespace ndCartpoleTrainer_sac
 				ndExpandTraceMessage("training complete\n");
 				ndUnsigned64 timer = ndGetTimeInMicroseconds() - m_timer;
 				ndExpandTraceMessage("training time: %g seconds\n", ndFloat32(ndFloat64(timer) * ndFloat32(1.0e-6f)));
-
+			
 				manager->Terminate();
 			}
 		}
@@ -224,37 +271,51 @@ namespace ndCartpoleTrainer_sac
 		ndFloat32 m_saveScore;
 		ndFloat32 m_discountRewardFactor;
 		ndFloat32 m_horizon;
-		ndUnsigned32 m_lastEpisode;
-		ndUnsigned32 m_stopTraining;
+		ndInt32 m_lastEpisode;
+		ndInt32 m_stopTraining;
 		bool m_modelIsTrained;
 	};
 }
+using namespace ndUnicycleTrainer_sac;
 
-using namespace ndCartpoleTrainer_sac;
-
-void ndCartpoleTrainingSAC(ndDemoEntityManager* const scene)
+void ndUnicycleTrainingSAC(ndDemoEntityManager* const scene)
 {
-	ndSharedPtr<ndBody> mapBody(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
+	//ndSharedPtr<ndBody> ground(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
+	ndSharedPtr<ndBody> ground(BuildFlatPlane(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", true));
 
 	// add a help message
 	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend());
 	scene->SetDemoHelp(demoHelper);
 
+	// get the material graph
+	ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
+
+	// oveload the ground friction
+	// make sure the ground has enough friction
+	ndMaterial* const defaultMaterial = callback->GetMaterial(ndDemoContactCallback::m_default, ndDemoContactCallback::m_default);
+	ndAssert(defaultMaterial);
+	defaultMaterial->m_dynamicFriction0 = defaultMaterial->m_staticFriction0;
+	defaultMaterial->m_dynamicFriction1 = defaultMaterial->m_staticFriction1;
+
+	// create a material that make models in training non collidable
+	ndModelMaterial material;
+	callback->RegisterMaterial(material, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_modelPart);
+
+	//load the mesh so that is can be re used
 	ndMatrix matrix(ndGetIdentityMatrix());
 	ndRenderMeshLoader loader(*scene->GetRenderer());
-	loader.LoadMesh(ndGetWorkingFileName("cartpole.nd"));
+	loader.LoadMesh(ndGetWorkingFileName("unicycle.nd"));
 
-	ndSetRandSeed(42);
-	ndSharedPtr<ndDemoEntityManager::OnPostUpdate>trainer (new TrainingUpdata(scene, matrix, loader));
+	// create the trainer agent
+	ndSharedPtr<ndDemoEntityManager::OnPostUpdate>trainer(new TrainingUpdata(scene, matrix, loader));
 	scene->RegisterPostUpdate(trainer);
 
-	// supress v sync refress rate
+	// suppress v sync refresh rate for fast training
 	scene->SetAcceleratedUpdate();
 	
 	matrix.m_posit.m_x -= 0.0f;
-	matrix.m_posit.m_y += 0.5f;
-	matrix.m_posit.m_z += 2.0f;
-	ndQuaternion rotation(ndVector(0.0f, 1.0f, 0.0f, 0.0f), 90.0f * ndDegreeToRad);
+	matrix.m_posit.m_y += 1.5f;
+	matrix.m_posit.m_z += -12.0f;
+	ndQuaternion rotation(ndVector(0.0f, 1.0f, 0.0f, 0.0f), -90.0f * ndDegreeToRad);
 	scene->SetCameraMatrix(rotation, matrix.m_posit);
 }
-
