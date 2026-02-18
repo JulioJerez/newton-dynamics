@@ -167,7 +167,7 @@ inline void ndBrainFloat8::Store(ndBrainFloat* const ptr) const
 
 inline void ndBrainFloat8::Store(ndBrainFloat* const dstAddress, const ndBrainFloat8& index) const
 {
-	for (ndInt32 i = 0; i < ND_SIMD8_WORK_GROUP_SIZE; ++i)
+	for (ndInt32 i = 0; i < 8; ++i)
 	{
 		dstAddress[index.m_i[i]] = m_f[i];
 	}
