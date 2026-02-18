@@ -411,7 +411,6 @@
 			{
 				__m128 tmp0(_mm_add_ps(m_typeLow, m_typeHigh));
 				__m128 tmp1(_mm_add_ps(tmp0, _mm_movehl_ps(tmp0, tmp0)));
-				//__m128 tmp2(_mm_add_ps(tmp1, _mm_shuffle_ps(tmp1, tmp1, PERMUTE_MASK(2, 3, 0, 1))));
 				__m128 tmp2(_mm_add_ps(tmp1, _mm_permute_ps(tmp1, PERMUTE_MASK(2, 3, 0, 1))));
 				return _mm_cvtss_f32(tmp2);
 			}
