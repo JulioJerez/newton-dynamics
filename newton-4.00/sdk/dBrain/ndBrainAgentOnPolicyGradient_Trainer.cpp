@@ -856,7 +856,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 	{
 		policyMinibatchInputBuffer->CopyBuffer(policyObservationInfo, m_parameters.m_miniBatchSize, **m_trainingBuffer);
 		m_policyTrainer->MakePrediction();
-		
+
 		// save base mean and sigma for later use calcuation KL divergence.
 		m_policyActionBuffer->CopyBuffer(policyActionInfo, m_parameters.m_miniBatchSize, *policyMinibatchOutputBuffer);
 
@@ -879,7 +879,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 		m_advantageMinibatchBuffer->CopyBuffer(advantageInfo, m_parameters.m_miniBatchSize, **m_advantageBuffer);
 		policyMinibatchOutputBuffer->BroadcastScaler(**m_advantageMinibatchBuffer);
 		policyMinibatchOutputGradientBuffer->Mul(*policyMinibatchOutputBuffer);
-
+		
 		if (m_parameters.m_entropyRegularizerCoef > ndFloat32 (0.0f))
 		{
 			ndAssert(0);

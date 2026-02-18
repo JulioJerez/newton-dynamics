@@ -162,4 +162,3 @@ class ndBrainLayer : public ndClassAlloc
 };
 
 #endif 
-

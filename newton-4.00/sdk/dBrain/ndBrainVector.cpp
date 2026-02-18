@@ -22,7 +22,6 @@
 #include "ndBrainStdafx.h"
 #include "ndBrainVector.h"
 #include "ndBrainFloat8.h"
-#include "ndBrainFloat16.h"
 
 void ndBrainVector::Set(ndBrainFloat value)
 {
@@ -471,10 +470,10 @@ ndBrainFloat ndBrainVector::CalculatePartialKlDivergence(const ndBrainVector& ga
 		//ndBrainFloat invSigma_0 = 1.0f / sigma_0;
 		ndBrainFloat invSigma_1 = 1.0f / sigma_1;
 		ndBrainFloat meanError = gaussianLikelihood[i] - (*this)[i];
-
+		
 		traceRatio += invSigma_1 * sigma_0;
 		meanRatio += meanError * invSigma_1 * meanError;
-
+		
 		log_det_1 += ndLog(sigma_1);
 		log_det_0 += ndLog(sigma_0);
 	}

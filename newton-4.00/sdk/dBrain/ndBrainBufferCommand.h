@@ -47,18 +47,6 @@ class ndCommandSharedInfo
 	{
 	}
 
-	//typedef struct
-	//{
-	//  void* m_empty;
-	//	uint m_inputSize;
-	//	uint m_outputSize;
-	//	uint m_inputOutputSize;
-	//	uint m_inputOutputStartOffset;
-	//	uint m_parametersBatchSize;
-	//	uint m_parametersStartOffset;
-	//	uint m_matrixDimensionK;
-	//} UniformBufferLayerArguments;
-
 	const ndBrainLayer* m_layer;
 	ndInt32 m_inputSize;
 	ndInt32 m_outputSize;
