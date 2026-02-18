@@ -21,7 +21,6 @@
 
 #include "ndBrainStdafx.h"
 #include "ndBrain.h"
-#include "ndBrainFloat8.h"
 #include "ndBrainContext.h"
 #include "ndBrainTrainer.h"
 #include "ndBrainSaveLoad.h"
@@ -29,9 +28,206 @@
 #include "ndBrainLayerLinear.h"
 #include "ndBrainFloatBuffer.h"
 
-#define ndBrainLayerLinearTileSize 8
+#define ndBrainLayerLinearTileSize 16
 
-//#define ND_USE_CPU_TILE_MULTIPLY
+#define ND_USE_CPU_TILE_MULTIPLY
+
+D_MSV_NEWTON_CLASS_ALIGN_32
+class ndBrainFloatTileVector
+{
+	public:
+	ndBrainFloatTileVector() = default;
+	ndBrainFloatTileVector(const ndBrainFloat a);
+	ndBrainFloatTileVector(const ndBrainFloatTileVector& a);
+	ndBrainFloatTileVector(const ndInt32* const indexArray);
+	ndBrainFloatTileVector(const ndBrainFloat* const baseAddr, const ndBrainFloatTileVector& index);
+
+	ndBrainFloat HorizontalAdd() const;
+	ndBrainFloatTileVector Scale(ndBrainFloat s) const;
+	void Store(ndBrainFloat* const dstAddress, const ndBrainFloatTileVector& index) const;
+
+	ndBrainFloatTileVector& operator= (const ndBrainFloatTileVector& A);
+	ndBrainFloatTileVector operator+ (const ndBrainFloatTileVector& A) const;
+	ndBrainFloatTileVector operator* (const ndBrainFloatTileVector& A) const;
+
+	#ifdef D_NEWTON_USE_AVX2_OPTION
+	ndBrainFloatTileVector(__m256 low, __m256 high);
+	#endif
+
+	union
+	{
+		ndBrainFloat m_f[ndBrainLayerLinearTileSize];
+		ndInt32 m_i[ndBrainLayerLinearTileSize];
+
+		#ifdef D_NEWTON_USE_AVX2_OPTION
+		struct
+		{
+			__m256 m_low;
+			__m256 m_high;
+		};
+		#endif	
+	};
+} D_GCC_NEWTON_CLASS_ALIGN_32;
+
+#ifdef D_NEWTON_USE_AVX2_OPTION
+
+	inline ndBrainFloatTileVector::ndBrainFloatTileVector(const ndBrainFloat a)
+		:m_low(_mm256_set1_ps(a))
+		,m_high(_mm256_set1_ps(a))
+	{
+	}
+
+	inline ndBrainFloatTileVector::ndBrainFloatTileVector(const ndBrainFloatTileVector& a)
+		:m_low(a.m_low)
+		,m_high(a.m_high)
+	{
+	}
+
+	inline ndBrainFloatTileVector::ndBrainFloatTileVector(const ndInt32* const indexArray)
+	{
+		for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
+		{
+			m_i[i] = indexArray[i];
+		}
+	}
+
+	inline ndBrainFloatTileVector::ndBrainFloatTileVector(const ndBrainFloat* const baseAddr, const ndBrainFloatTileVector& index)
+		:m_low(_mm256_i32gather_ps(baseAddr, *((__m256i*)&index.m_i[0]), 4))
+		,m_high(_mm256_i32gather_ps(baseAddr, *((__m256i*)& index.m_i[8]), 4))
+	{
+	}
+
+	inline ndBrainFloatTileVector& ndBrainFloatTileVector::operator= (const ndBrainFloatTileVector& A)
+	{
+		m_low = A.m_low;
+		m_high = A.m_high;
+		return *this;
+	}
+
+	inline ndBrainFloatTileVector::ndBrainFloatTileVector(__m256 low, __m256 high)
+		:m_low(low)
+		,m_high(high)
+	{
+	}
+
+	inline ndBrainFloat ndBrainFloatTileVector::HorizontalAdd() const
+	{
+		const __m256 tmp(_mm256_add_ps(m_low, m_high));
+		const __m128 hiQuad = _mm256_extractf128_ps(tmp, 1);
+		const __m128 loQuad = _mm256_castps256_ps128(tmp);
+
+		const __m128 tmp0(_mm_add_ps(loQuad, hiQuad));
+		const __m128 tmp1(_mm_add_ps(tmp0, _mm_movehl_ps(tmp0, tmp0)));
+		const __m128 tmp2(_mm_add_ps(tmp1, _mm_permute_ps(tmp1, PERMUTE_MASK(2, 3, 0, 1))));
+		return _mm_cvtss_f32(tmp2);
+	}
+
+	inline ndBrainFloatTileVector ndBrainFloatTileVector::Scale(ndBrainFloat s) const
+	{
+		const __m256 scale(_mm256_set1_ps(s));
+		const __m256 low(_mm256_mul_ps(m_low, scale));
+		const __m256 high(_mm256_mul_ps(m_high, scale));
+		return ndBrainFloatTileVector(low, high);
+	}
+
+	inline void ndBrainFloatTileVector::Store(ndBrainFloat* const dstAddress, const ndBrainFloatTileVector& index) const
+	{
+		for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
+		{
+			dstAddress[index.m_i[i]] = m_f[i];
+		}
+	}
+
+	inline ndBrainFloatTileVector ndBrainFloatTileVector::operator+ (const ndBrainFloatTileVector& A) const
+	{
+		const __m256 low(_mm256_add_ps(m_low, A.m_low));
+		const __m256 high(_mm256_add_ps(m_high, A.m_high));
+		return ndBrainFloatTileVector(low, high);
+	}
+
+	inline ndBrainFloatTileVector ndBrainFloatTileVector::operator* (const ndBrainFloatTileVector& A) const
+	{
+		const __m256 low (_mm256_mul_ps(m_low, A.m_low));
+		const __m256 high(_mm256_mul_ps(m_high, A.m_high));
+		return ndBrainFloatTileVector(low, high);
+	}
+
+#else
+
+	inline ndBrainFloatTileVector::ndBrainFloatTileVector(const ndBrainFloat a)
+	{
+		for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
+		{
+			m_f[i] = a;
+		}
+	}
+
+	inline ndBrainFloatTileVector::ndBrainFloatTileVector(const ndInt32* const indexArray)
+	{
+		for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
+		{
+			m_i[i] = indexArray[i];
+		}
+	}
+
+	inline ndBrainFloatTileVector::ndBrainFloatTileVector(const ndBrainFloat* const baseAddr, const ndBrainFloatTileVector& index)
+	{
+		for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
+		{
+			const ndInt32 j = index.m_i[i];
+			m_f[i] = baseAddr[j];
+		}
+	}
+
+	inline ndBrainFloat ndBrainFloatTileVector::HorizontalAdd() const
+	{
+		ndBrainFloat acc = ndBrainFloat(0.0f);
+		for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
+		{
+			acc += m_f[i];
+		}
+		return acc;
+	}
+
+	inline ndBrainFloatTileVector ndBrainFloatTileVector::Scale(ndBrainFloat s) const
+	{
+		ndBrainFloatTileVector tmp;
+		for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
+		{
+			tmp.m_f[i] = m_f[i] + s;
+		}
+		return tmp;
+	}
+
+	inline void ndBrainFloatTileVector::Store(ndBrainFloat* const dstAddress, const ndBrainFloatTileVector& index) const
+	{
+		for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
+		{
+			dstAddress[index.m_i[i]] = m_f[i];
+		}
+	}
+
+	inline ndBrainFloatTileVector ndBrainFloatTileVector::operator+ (const ndBrainFloatTileVector& A) const
+	{
+		ndBrainFloatTileVector tmp;
+		for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
+		{
+			tmp.m_f[i] = m_f[i] + A.m_f[i];
+		}
+		return tmp;
+	}
+
+	inline ndBrainFloatTileVector ndBrainFloatTileVector::operator* (const ndBrainFloatTileVector& A) const
+	{
+		ndBrainFloatTileVector tmp;
+		for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
+		{
+			tmp.m_f[i] = m_f[i] * A.m_f[i];
+		}
+		return tmp;
+	}
+
+#endif
 
 class ndBrainLayerFeedForwardCpuCommand_RowMatrixMultiply : public ndBrainLayerFeedForwardCpuCommand
 {
@@ -441,7 +637,7 @@ void ndBrainLayerLinear::MatrixMultiply_RowBased(const ndBrainLayerFeedForwardCp
 	const ndInt64 inputOffset = miniBatchIndex * ndInt64(inputOutputSize) + inputOutputStartOffset;
 	const ndInt64 outputOffset = inputOffset + trainer->RoundOffOffset(inputSize);
 
-#if 1
+
 	ndBrainMemVector output(&inputOutputBuffer[outputOffset], outputSize);
 	const ndBrainMemVector input(&inputOutputBuffer[inputOffset], inputSize);
 	for (ndInt32 i = outputSize - 1; i >= 0; --i)
@@ -449,26 +645,6 @@ void ndBrainLayerLinear::MatrixMultiply_RowBased(const ndBrainLayerFeedForwardCp
 		const ndBrainMemVector row(&parameters[i * width], inputSize);
 		output[i] = row.Dot(input);
 	}
-#else
-	ndBrainMemVector output(&inputOutputBuffer[outputOffset], outputSize);
-	const ndBrainFloat8* matrixRows = (ndBrainFloat8*)&parameters[0];
-	const ndBrainFloat8* const input = (ndBrainFloat8*)&inputOutputBuffer[inputOffset];
-	const ndInt32 vectorElements = inputSize / 8;
-	ndAssert(vectorElements * 8 == inputSize);
-	const ndBrainFloat8 zero(ndBrainFloat(0.0f));
-	for (ndInt32 i = outputSize - 1; i >= 0; --i)
-	{
-		ndBrainFloat8 acc(zero);
-		for (ndInt32 j = vectorElements - 1; j >= 0; --j)
-		{
-			const ndBrainFloat8 a(input[j]);
-			const ndBrainFloat8 b(matrixRows[j]);
-			acc = acc + a * b;
-		}
-		output[i] = acc.HorizontalAdd();
-		matrixRows += width/8;
-	}
-#endif
 
 	const ndBrainMemVector bias(&parameters[matrixSize], outputSize);
 	output.Add(bias);
@@ -492,9 +668,6 @@ void ndBrainLayerLinear::FeedForward(const ndBrainLayerFeedForwardCpuCommand* co
 	const ndInt32 inputOutputStartOffset = info.m_inputOutputStartOffset;
 	const ndInt32 inputRows = (inputSize + ND_CPU_MINI_BATCH_SIZE_GRANULARITY - 1) & -ND_CPU_MINI_BATCH_SIZE_GRANULARITY;
 	
-	ndBrainFloat8 weightTile[ndBrainLayerLinearTileSize];
-	ndBrainFloat8 transposeInputTile[ndBrainLayerLinearTileSize];
-
 	//const ndInt32 minibatchBlock = (info.m_matrixDimensionK + ndBrainLayerLinearTileSize - 1) / ndBrainLayerLinearTileSize;
 	//const ndInt32 groupId_y = miniBatchIndex / minibatchBlock;
 	//const ndInt32 groupId_x = miniBatchIndex - groupId_y * minibatchBlock;
@@ -515,43 +688,66 @@ void ndBrainLayerLinear::FeedForward(const ndBrainLayerFeedForwardCpuCommand* co
 
 	// initialice the transpose parametes
 	ndInt32 indices[ndBrainLayerLinearTileSize];
-	ndBrainFloat8 tile_accReg[ndBrainLayerLinearTileSize];
-	const ndBrainFloat8 biasTranspose(*((ndBrainFloat8*)&weightsAndBias[parametersBiasOffset]));
+	ndInt32 inputIndices[ndBrainLayerLinearTileSize];
+	ndBrainFloatTileVector tile_accReg[ndBrainLayerLinearTileSize];
+	const ndBrainFloatTileVector biasTranspose(*((ndBrainFloatTileVector*)&weightsAndBias[parametersBiasOffset]));
+
+	const ndInt64 inputOffset = ndBrainLayerLinearTileSize * columnTileIndex * ndInt64(inputOutputSize) + inputOutputStartOffset;
 	for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
 	{
 		indices[i] = i * ndBrainLayerLinearTileSize;
-		tile_accReg[i] = ndBrainFloat8(biasTranspose.m_f[i]);
+		inputIndices[i] = ndInt32(inputOffset + i * inputOutputSize);
+		tile_accReg[i] = ndBrainFloatTileVector(biasTranspose.m_f[i]);
 	}
-	const ndBrainFloat8 indexArray(indices);
+	const ndBrainFloatTileVector indexArray(indices);
+	const ndBrainFloatTileVector inputIndexArray(inputIndices);
 
-	const ndInt64 inputOffset = ndBrainLayerLinearTileSize * columnTileIndex * ndInt64(inputOutputSize) + inputOutputStartOffset;
 	for (ndInt32 tile = 0; tile < inputRows; tile += ndBrainLayerLinearTileSize)
 	{
-		// load two tiles, the input tile is transposed
-		ndInt64 inputStartOffset = tile + inputOffset;
-		ndInt64 weightOffsetStart = tile + parametersStartOffset;
-		for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
-		{
-			const ndBrainFloat8 weight (*((ndBrainFloat8*)&weightsAndBias[weightOffsetStart + i * inputRows]));
-			const ndBrainFloat8 inputData (*((ndBrainFloat8*)&inputOutputBuffer[inputStartOffset + i * inputOutputSize]));
-			
-			weightTile[i] = weight;
-			inputData.Store(&transposeInputTile[0].m_f[i], indexArray);
-		}
+#if 0
+		// This is the naive tile-by-tile implementation.
+		// Regardless of how much it is optimized, the fundamental issue is tile size.
+		//
+		// With an 8x8 tile, a 128x128 matrix, and a minibatch size of 256,
+		// this results in 512 calls to this function.
+		// Each call iterates 8 times in the inner loop,
+		// so the accumulated function-call overhead becomes significant.
+		//
+		// In short, an 8x8 tile is simply too small.
+		// The maximum tile size I can use is 16, which may still be a limiting factor.
 
-		// perform a tile x tile matrix multiplication
+		// load two tiles, the input tile is transposed
+		const ndInt64 inputStartOffset = tile + inputOffset;
+		const ndInt64 weightOffsetStart = tile + parametersStartOffset;
+
 		for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
 		{
-			ndBrainFloat8 row(tile_accReg[i]);
-			const ndBrainFloat8 weight(weightTile[i]);
-			for (ndInt32 itemId_y = 0; itemId_y < ndBrainLayerLinearTileSize; itemId_y++)
+			for (ndInt32 j = 0; j < ndBrainLayerLinearTileSize; ++j)
 			{
-				const ndBrainFloat8 input(transposeInputTile[itemId_y]);
-				const ndBrainFloat8 scale(weight.m_f[itemId_y]);
-				row = row + input * scale;
+				ndBrainFloat acc = ndBrainFloat(0.0f);
+				for (ndInt32 k = 0; k < ndBrainLayerLinearTileSize; ++k)
+				{
+					ndBrainFloat weight = weightsAndBias[weightOffsetStart + i * inputRows + k];
+					ndBrainFloat input = inputOutputBuffer[inputStartOffset + j * inputOutputSize + k];
+					acc += weight * input;
+				}
+				tile_accReg[i].m_f[j] += acc;
 			}
-			tile_accReg[i] = row;
 		}
+#else
+
+		// optimized using row linear scaling and add
+		const ndInt64 weightOffsetStart = tile + parametersStartOffset;
+		for (ndInt32 j = 0; j < ndBrainLayerLinearTileSize; ++j)
+		{
+			const ndBrainFloatTileVector input(inputOutputBuffer + tile + j, inputIndexArray);
+		for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
+		{
+				const ndBrainFloat weight = weightsAndBias[weightOffsetStart + i * inputRows + j];
+				tile_accReg[i] = tile_accReg[i] + input.Scale(weight);
+			}
+		}
+#endif
 	}
 
 	ndBrainFloat* const outputBuffer = (ndBrainFloat*)inputOutputBuffer;
@@ -561,8 +757,8 @@ void ndBrainLayerLinear::FeedForward(const ndBrainLayerFeedForwardCpuCommand* co
 
 	for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
 	{
-		ndBrainFloat8 timeColumn(&tile_accReg[0].m_f[i], indexArray);
-		((ndBrainFloat8&)outputBuffer[dstOffset]) = timeColumn;
+		ndBrainFloatTileVector timeColumn(&tile_accReg[0].m_f[i], indexArray);
+		((ndBrainFloatTileVector&)outputBuffer[dstOffset]) = timeColumn;
 		dstOffset += inputOutputSize;
 	}
 }
