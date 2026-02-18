@@ -116,15 +116,18 @@ class ndBrainLayerLinear : public ndBrainLayer
 		ndBrainContext* const context, 
 		const ndCommandSharedInfo& info,
 		ndInt32 miniBatchSize,
-		//const ndSharedPtr<ndBrainUniformBuffer>& uniformBuffer,
 		ndBrainFloatBuffer* const inputOutputData,
 		ndBrainFloatBuffer* const weightsAndBias,
 		ndBrainFloatBuffer* const inputOutputGradients,
 		ndBrainFloatBuffer* const weightsAndBiasGradients) const override;
 
+	private:
+	void MatrixMultiply_RowBased(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex);
+
 	ndBrainVector m_bias;
 	ndBrainMatrix m_weights;
 	friend class ndBrainTrainerInference;
+	friend class ndBrainLayerFeedForwardCpuCommand_RowMatrixMultiply;
 };
 
 #endif 

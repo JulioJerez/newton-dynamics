@@ -32,7 +32,6 @@
 #include <ndBrainMatrix.h>
 #include <ndBrainKernel.h>
 #include <ndBrainFloat8.h>
-#include <ndBrainFloat16.h>
 #include <ndBrainContext.h>
 #include <ndBrainTrainer.h>
 #include <ndBrainSaveLoad.h>
