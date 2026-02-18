@@ -741,8 +741,8 @@ void ndBrainLayerLinear::FeedForward(const ndBrainLayerFeedForwardCpuCommand* co
 		for (ndInt32 j = 0; j < ndBrainLayerLinearTileSize; ++j)
 		{
 			const ndBrainFloatTileVector input(inputOutputBuffer + tile + j, inputIndexArray);
-		for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
-		{
+			for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
+			{
 				const ndBrainFloat weight = weightsAndBias[weightOffsetStart + i * inputRows + j];
 				tile_accReg[i] = tile_accReg[i] + input.Scale(weight);
 			}
