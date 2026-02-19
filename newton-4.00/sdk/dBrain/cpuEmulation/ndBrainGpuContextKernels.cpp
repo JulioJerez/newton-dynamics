@@ -29,18 +29,6 @@ inline ndInt32 __cpuKernelRoundoff(ndInt32 value, ndInt32 workgroupSize)
     return (value + workgroupSize - 1) & -workgroupSize;
 }
 
-//inline ndInt32 __twoPower____(ndInt32 x)
-//{
-//    ndAssert(x <= 1 << 16);
-//    ndAssert(((x - 1) & -x) == 0);
-//    ndInt32 bits = 1;
-//    bits += (0xff00 & x) & 8;
-//    bits += (0xf0f0 & x) & 4;
-//    bits += (0xcccc & x) & 2;
-//    bits += (0x8888 & x) & 1;
-//    return bits;
-//}
-
 inline bool ndCheckValidFloat(ndFloat32 x)
 {
     x = 0;
@@ -1207,6 +1195,7 @@ class brainLayerMatrixMatrixMultiply : public ndBrainKernel
         const ndInt32 tileSize = ND_GPU_TILED_MATRIX_ROWS;
         const ndInt32 tileSizeBits = ND_GPU_TILED_MATRIX_ROWS_BITS;
 
+        ndAssert(0);
         ndBrainFloat tile_inputs[tileSize * 2][tileSize];
         ndBrainFloat tile_weights[tileSize * 2][tileSize];
 
@@ -1347,6 +1336,7 @@ class brainLayerBrainBackPropagateMatrixInputGradients : public ndBrainKernel
         const ndInt32 tileSize = ND_GPU_TILED_MATRIX_ROWS;
         const ndInt32 tileSizeBits = ND_GPU_TILED_MATRIX_ROWS_BITS;
 
+        ndAssert(0);
         ndBrainFloat tile_weights[tileSize][tileSize];
         ndBrainFloat tile_outputGradients[tileSize][tileSize];
 
@@ -1357,7 +1347,8 @@ class brainLayerBrainBackPropagateMatrixInputGradients : public ndBrainKernel
         ndBrainFloat* const weightAndBias = (ndBrainFloat*)buffer2->GetGpuBuffer()->GetPtr();
         ndBrainFloat* const inputOutputGradients = (ndBrainFloat*)buffer3->GetGpuBuffer()->GetPtr();
         ndCommandSharedInfo* const parameters = (ndCommandSharedInfo*)buffer0->GetGpuBuffer()->GetPtr();
-        ndAssert((parameters->m_matrixDimensionK) >= (ND_GPU_TILED_MATRIX_ROWS_BITS + 1));
+        ndAssert(0);
+        //ndAssert((parameters->m_matrixDimensionK) >= (ND_GPU_TILED_MATRIX_ROWS_BITS + 1));
 
         ndBrainFloat tile_accReg[tileSize][tileSize];
         for (ndInt32 itemId_y = 0; itemId_y < tileSize; ++itemId_y)
@@ -1548,29 +1539,30 @@ class brainLayerBrainBackPropagateMatrixBiasGradients : public ndBrainKernel
 
         ndInt32 inputSize = parameters->m_inputSize;
         ndInt32 outputSize = parameters->m_outputSize;
-        ndInt32 height = (outputSize + ND_GPU_TILED_MATRIX_ROWS - 1) & -ND_GPU_TILED_MATRIX_ROWS;
-        ndInt32 width = (inputSize + ND_GPU_TILED_MATRIX_ROWS * 2 - 1) & -ND_GPU_TILED_MATRIX_ROWS * 2;
-        ndInt32 matrixSize = __cpuKernelRoundoff(width * height, ND_DEFAULT_WORKGROUP_SIZE);;
-        
-        ndInt64 parametersStartOffset = ndInt64(parameters->m_parametersStartOffset) + matrixSize;
-
-        const ndInt32 workGroupSizeReminder = outputSize % workGroupSize;
-        const ndInt32 modWorkGroupSize = outputSize - workGroupSizeReminder;
-        for (ndInt32 rowBlock = 0; rowBlock < modWorkGroupSize; rowBlock += workGroupSize)
-        {
-            for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
-            {
-                ndBrainFloat biasDerivative = partialBiasSumBuffer[rowBlock + itemId];
-                //ndAssert(ndCheckValidFloat(biasDerivative));
-                weightAndBiasGradients[parametersStartOffset + rowBlock + itemId] = biasDerivative;
-            }
-        }
-        for (ndInt32 itemId = 0; itemId < workGroupSizeReminder; ++itemId)
-        {
-            ndBrainFloat biasDerivative = partialBiasSumBuffer[modWorkGroupSize + itemId];
-            //ndAssert(ndCheckValidFloat(biasDerivative));
-            weightAndBiasGradients[parametersStartOffset + modWorkGroupSize + itemId] = biasDerivative;
-        }
+        ndAssert(0);
+        //ndInt32 height = (outputSize + ND_GPU_TILED_MATRIX_ROWS - 1) & -ND_GPU_TILED_MATRIX_ROWS;
+        //ndInt32 width = (inputSize + ND_GPU_TILED_MATRIX_ROWS * 2 - 1) & -ND_GPU_TILED_MATRIX_ROWS * 2;
+        //ndInt32 matrixSize = __cpuKernelRoundoff(width * height, ND_DEFAULT_WORKGROUP_SIZE);;
+        //
+        //ndInt64 parametersStartOffset = ndInt64(parameters->m_parametersStartOffset) + matrixSize;
+        //
+        //const ndInt32 workGroupSizeReminder = outputSize % workGroupSize;
+        //const ndInt32 modWorkGroupSize = outputSize - workGroupSizeReminder;
+        //for (ndInt32 rowBlock = 0; rowBlock < modWorkGroupSize; rowBlock += workGroupSize)
+        //{
+        //    for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
+        //    {
+        //        ndBrainFloat biasDerivative = partialBiasSumBuffer[rowBlock + itemId];
+        //        //ndAssert(ndCheckValidFloat(biasDerivative));
+        //        weightAndBiasGradients[parametersStartOffset + rowBlock + itemId] = biasDerivative;
+        //    }
+        //}
+        //for (ndInt32 itemId = 0; itemId < workGroupSizeReminder; ++itemId)
+        //{
+        //    ndBrainFloat biasDerivative = partialBiasSumBuffer[modWorkGroupSize + itemId];
+        //    //ndAssert(ndCheckValidFloat(biasDerivative));
+        //    weightAndBiasGradients[parametersStartOffset + modWorkGroupSize + itemId] = biasDerivative;
+        //}
     }
 };
 
@@ -1620,60 +1612,61 @@ class brainLayerBrainBackPropagateMatrixWeightsGradients : public ndBrainKernel
         const ndInt32 modWorkGroupSize = inputSize - workGroupSizeReminder;
         // barrier
 
-        ndInt64 parametersStartOffset = ndInt64(parameters->m_parametersStartOffset);
-        ndInt32 width = (inputSize + ND_GPU_TILED_MATRIX_ROWS * 2 - 1) & -ND_GPU_TILED_MATRIX_ROWS * 2;
-        for (ndInt32 rowBlock = 0; rowBlock < modWorkGroupSize; rowBlock += workGroupSize)
-        {
-            for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
-            {
-                cachedRowGradient[itemId] = ndBrainFloat(0.0f);
-            }
-            ndInt64 inputOffsetBase = inputOutputStartOffset + rowBlock;
-            for (ndInt32 row = 0; row < numberOfRows; ++row)
-            {
-                ndInt64 inputOffset = inputOffsetBase + row * inputOutputSize;
-                ndBrainFloat outputDerivative = cachedOutputGradients[row];
-
-                for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
-                {
-                    ndBrainFloat inputValue = inputOutputData[inputOffset + itemId];
-                    cachedRowGradient[itemId] += outputDerivative * inputValue;
-                }
-            }
-            // store this weight gradient sum
-            ndInt64 parametersOffset = parametersStartOffset + rowBlock + width * groupId;
-            for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
-            {
-                weightAndBiasGradients[parametersOffset + itemId] = cachedRowGradient[itemId];
-            }
-        }
-
-        if (workGroupSizeReminder != 0)
-        {
-            for (ndInt32 itemId = 0; itemId < workGroupSizeReminder; ++itemId)
-            {
-                cachedRowGradient[itemId] = ndBrainFloat(0.0f);
-            }
-            ndInt64 inputOffsetBase = inputOutputStartOffset + modWorkGroupSize;
-            for (ndInt32 row = 0; row < numberOfRows; ++row)
-            {
-                ndInt64 inputOffset = inputOffsetBase + row * inputOutputSize;
-                ndBrainFloat outputDerivative = cachedOutputGradients[row];
-
-                for (ndInt32 itemId = 0; itemId < workGroupSizeReminder; ++itemId)
-                {
-                    ndBrainFloat inputValue = inputOutputData[inputOffset + itemId];
-                    cachedRowGradient[itemId] += outputDerivative * inputValue;
-                }
-            }
-            // store this weight gradient sum
-            ndInt64 parametersOffset = parametersStartOffset + modWorkGroupSize + width * groupId;
-            for (ndInt32 itemId = 0; itemId < workGroupSizeReminder; ++itemId)
-            {
-                ndBrainFloat weightGradeint = cachedRowGradient[itemId];
-                weightAndBiasGradients[parametersOffset + itemId] = weightGradeint;
-            }
-        }
+        ndAssert(0);
+        //ndInt64 parametersStartOffset = ndInt64(parameters->m_parametersStartOffset);
+        //ndInt32 width = (inputSize + ND_GPU_TILED_MATRIX_ROWS * 2 - 1) & -ND_GPU_TILED_MATRIX_ROWS * 2;
+        //for (ndInt32 rowBlock = 0; rowBlock < modWorkGroupSize; rowBlock += workGroupSize)
+        //{
+        //    for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
+        //    {
+        //        cachedRowGradient[itemId] = ndBrainFloat(0.0f);
+        //    }
+        //    ndInt64 inputOffsetBase = inputOutputStartOffset + rowBlock;
+        //    for (ndInt32 row = 0; row < numberOfRows; ++row)
+        //    {
+        //        ndInt64 inputOffset = inputOffsetBase + row * inputOutputSize;
+        //        ndBrainFloat outputDerivative = cachedOutputGradients[row];
+        //
+        //        for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
+        //        {
+        //            ndBrainFloat inputValue = inputOutputData[inputOffset + itemId];
+        //            cachedRowGradient[itemId] += outputDerivative * inputValue;
+        //        }
+        //    }
+        //    // store this weight gradient sum
+        //    ndInt64 parametersOffset = parametersStartOffset + rowBlock + width * groupId;
+        //    for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
+        //    {
+        //        weightAndBiasGradients[parametersOffset + itemId] = cachedRowGradient[itemId];
+        //    }
+        //}
+        //
+        //if (workGroupSizeReminder != 0)
+        //{
+        //    for (ndInt32 itemId = 0; itemId < workGroupSizeReminder; ++itemId)
+        //    {
+        //        cachedRowGradient[itemId] = ndBrainFloat(0.0f);
+        //    }
+        //    ndInt64 inputOffsetBase = inputOutputStartOffset + modWorkGroupSize;
+        //    for (ndInt32 row = 0; row < numberOfRows; ++row)
+        //    {
+        //        ndInt64 inputOffset = inputOffsetBase + row * inputOutputSize;
+        //        ndBrainFloat outputDerivative = cachedOutputGradients[row];
+        //
+        //        for (ndInt32 itemId = 0; itemId < workGroupSizeReminder; ++itemId)
+        //        {
+        //            ndBrainFloat inputValue = inputOutputData[inputOffset + itemId];
+        //            cachedRowGradient[itemId] += outputDerivative * inputValue;
+        //        }
+        //    }
+        //    // store this weight gradient sum
+        //    ndInt64 parametersOffset = parametersStartOffset + modWorkGroupSize + width * groupId;
+        //    for (ndInt32 itemId = 0; itemId < workGroupSizeReminder; ++itemId)
+        //    {
+        //        ndBrainFloat weightGradeint = cachedRowGradient[itemId];
+        //        weightAndBiasGradients[parametersOffset + itemId] = weightGradeint;
+        //    }
+        //}
     }
 };
 
