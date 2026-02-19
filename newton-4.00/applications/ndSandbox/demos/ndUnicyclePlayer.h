@@ -29,7 +29,7 @@ namespace ndUnicyclePlayer
 
 	#define ND_MAX_LEG_JOINT_ANGLE	(ndFloat32 (45.0f) * ndDegreeToRad)
 
-	#define ND_MAX_WHEEL_ALPHA		(ndFloat32 (500.0f))
+	#define ND_MAX_WHEEL_ALPHA		(ndFloat32 (100.0f))
 
 	#define ND_TERMINATION_ANGLE	(ndFloat32 (45.0f) * ndDegreeToRad)
 	#define ND_TRAJECTORY_STEPS		(1024 * 4)
@@ -42,12 +42,14 @@ namespace ndUnicyclePlayer
 
 	enum ndStateSpace
 	{
-		m_comSpeed,
-		m_poleAngle,
-		m_poleOmega,
+		m_boxAngle,
+		m_boxOmega,
 		m_hingeOmega,
 		m_hingeAngle,
-		m_hasSupportContact,
+		//m_poleAngle___,
+		//m_poleOmega___,
+		m_comSpeed,
+		m_hasContactSupport,
 		m_observationsSize
 	};
 
@@ -126,8 +128,10 @@ namespace ndUnicyclePlayer
 		ndBrainFloat IsOnAir() const;
 
 		bool IsTerminal() const;
+		ndFloat32 GetBoxAngle() const;
+		ndFloat32 GetBoxOmega() const;
 		ndFloat32 GetPoleAngle() const;
-		ndFloat32 GetPoleOmega() const;
+		//ndFloat32 GetPoleOmega() const;
 		ndBrainFloat CalculateReward() const;
 		void SaveInitialPose(ndFloat32 expectedReward);
 		void ApplyActions(ndBrainFloat* const actions);
