@@ -34,6 +34,10 @@ namespace ndUnicyclePlayer
 	#define ND_TERMINATION_ANGLE	(ndFloat32 (45.0f) * ndDegreeToRad)
 	#define ND_TRAJECTORY_STEPS		(1024 * 4)
 
+	#define ND_RANDOM_IMPULSE_MOD		256
+	#define ND_RANDOM_IMPULSE_MAGNITUD	ndFloat32 (5.0f)
+
+
 	enum ndActionSpace
 	{
 		m_wheelTorque,
@@ -80,15 +84,6 @@ namespace ndUnicyclePlayer
 	class ndController : public ndModelNotify
 	{
 		public:
-		class ndPose
-		{
-			public:
-			ndMatrix m_location;
-			ndVector m_veloc;
-			ndVector m_omega;
-			ndBodyKinematic* m_body;
-		};
-
 		class ndAgent : public ndBrainAgentContinuePolicyGradient
 		{
 			public:
@@ -131,9 +126,7 @@ namespace ndUnicyclePlayer
 		ndFloat32 GetBoxAngle() const;
 		ndFloat32 GetBoxOmega() const;
 		ndFloat32 GetPoleAngle() const;
-		//ndFloat32 GetPoleOmega() const;
 		ndBrainFloat CalculateReward() const;
-		void SaveInitialPose(ndFloat32 expectedReward);
 		void ApplyActions(ndBrainFloat* const actions);
 		void GetObservation(ndBrainFloat* const observation);
 
@@ -154,7 +147,7 @@ namespace ndUnicyclePlayer
 		ndSharedPtr<ndIkSolver> m_solver;
 		ndSharedPtr<ndBrainAgent> m_agent;
 		ndFloat32 m_timestep;
-		ndFloat32 m_bestReward;
-		ndFixSizeArray<ndPose, 4> m_modelPose;
+		ndInt32 m_randomImpulseCounter;
+		bool m_isTrainning;
 	};
 };

@@ -48,23 +48,6 @@
 
 ndBrainAgentOffPolicyGradient_Trainer::HyperParameters::HyperParameters()
 {
-	//m_randomSeed = 47;
-	//m_numberOfHiddenLayers = 3;
-	//m_maxTrajectorySteps = 4096;
-	//m_hiddenLayersNumberOfNeurons = 128;
-	//
-	//m_useGpuBackend = true;
-	//m_miniBatchSize = 256;
-	//m_numberOfActions = 0;
-	//m_numberOfObservations = 0;
-	//
-	//m_learnRate = ndBrainFloat(1.0e-4f);
-	//m_policyRegularizer = ndBrainFloat(1.0e-4f);
-	//m_criticRegularizer = ndBrainFloat(1.0e-4f);
-	//m_discountRewardFactor = ndBrainFloat(0.99f);
-	//m_minSigmaSquared = ND_POLICY_MIN_SIGMA_SQUARE;
-	//m_maxSigmaSquared = ND_POLICY_MAX_SIGMA_SQUARE;
-
 	m_replayBufferSize = 1024 * 1024;
 	m_maxNumberOfTrainingSteps = 1024 * 256;
 	m_polyakBlendFactor = ND_POLICY_DEFAULT_POLYAK_BLEND;
