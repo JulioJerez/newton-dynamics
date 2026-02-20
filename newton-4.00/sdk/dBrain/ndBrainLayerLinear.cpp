@@ -71,7 +71,7 @@ class ndBrainFloatTileVector
 	inline ndBrainFloatTileVector::ndBrainFloatTileVector(const ndInt32* const indexArray)
 	{
 		for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
-	{
+		{
 			m_i[i] = indexArray[i];
 		}
 	}
@@ -80,7 +80,7 @@ class ndBrainFloatTileVector
 	{
 		__m256 reg (_mm256_set1_ps(a));
 		for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize / 8; ++i)
-	{
+		{
 			m_register[i] = reg;
 		}
 	}
@@ -141,7 +141,7 @@ class ndBrainFloatTileVector
 		const __m256 scale(_mm256_set1_ps(s));
 		__m256 tmp[ndBrainLayerLinearTileSize / 8];
 		for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize / 8; ++i)
-	{
+		{
 			tmp[i] = _mm256_mul_ps(m_register[i], scale);
 		}
 		return ndBrainFloatTileVector(tmp);
@@ -785,7 +785,7 @@ void ndBrainLayerLinear::FeedForward(const ndBrainLayerFeedForwardCpuCommand* co
 	}
 	const ndBrainFloatTileVector indexArray(indices);
 	const ndBrainFloatTileVector inputIndexArray(inputIndices);
-
+	
 	for (ndInt32 tile = 0; tile < inputRows; tile += ndBrainLayerLinearTileSize)
 	{
 #if 0
