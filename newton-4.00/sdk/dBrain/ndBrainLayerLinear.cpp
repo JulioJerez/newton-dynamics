@@ -990,25 +990,25 @@ void ndBrainLayerLinear::BackPropagateInputGradients(const ndBrainLayerBackPropa
 	const ndBrainFloat* const weightAndBias = (ndBrainFloat*)trainer->GetWeightAndBiasBuffer()->GetCpuPtr();
 	const ndBrainFloat* const inputOutputGradientsBuffer = (ndBrainFloat*)trainer->GetHiddenLayerGradientBuffer()->GetCpuPtr();
 
-	ndInt32 inputSize = info.m_inputSize;
-	ndInt32 outputSize = info.m_outputSize;
-	ndInt32 inputOutputSize = info.m_inputOutputSize;
-	ndInt32 inputOutputStartOffset = info.m_inputOutputStartOffset;
+	const ndInt32 inputSize = info.m_inputSize;
+	const ndInt32 outputSize = info.m_outputSize;
+	const ndInt32 inputOutputSize = info.m_inputOutputSize;
+	const ndInt32 inputOutputStartOffset = info.m_inputOutputStartOffset;
 
 	ndInt32 width;
 	ndInt32 height;
 	CalculateRoundedSize(width, height);
-	ndInt32 matrixSize = width * height;
+	const ndInt32 matrixSize = width * height;
 
-	ndInt64 srcBase = miniBatchIndex * ndInt64(inputOutputSize) + inputOutputStartOffset;
-	ndInt64 dstBase = srcBase + trainer->RoundOffOffset(inputSize);
+	const ndInt64 srcBase = miniBatchIndex * ndInt64(inputOutputSize) + inputOutputStartOffset;
+	const ndInt64 dstBase = srcBase + trainer->RoundOffOffset(inputSize);
 	ndAssert(srcBase >= 0);
 	ndAssert(dstBase >= 0);
-	
-	const ndBrainMemVector outputDerivative(&inputOutputGradientsBuffer[dstBase], outputSize);
-	ndBrainMemVector inputDerivative(&inputOutputGradientsBuffer[srcBase], inputSize);
-	const ndBrainMemVector weightsMatrix(&weightAndBias[info.m_parametersStartOffset], matrixSize);
 
+	const ndBrainMemVector outputDerivative(&inputOutputGradientsBuffer[dstBase], outputSize);
+	const ndBrainMemVector weightsMatrix(&weightAndBias[info.m_parametersStartOffset], matrixSize);
+#if 1
+	ndBrainMemVector inputDerivative(&inputOutputGradientsBuffer[srcBase], inputSize);
 	inputDerivative.Set(ndBrainFloat(0.0f));
 	for (ndInt32 i = 0; i < outputSize; ++i)
 	{
@@ -1016,6 +1016,26 @@ void ndBrainLayerLinear::BackPropagateInputGradients(const ndBrainLayerBackPropa
 		const ndBrainMemVector weightsRow(&weightsMatrix[i * width], inputSize);
 		inputDerivative.ScaleAdd(weightsRow, outDerivative);
 	}
+#else
+
+	const ndInt32 numOfSimd = (inputSize + ndBrainLayerLinearTileSize - 1) / ndBrainLayerLinearTileSize;
+	ndBrainFloatTileVector* const inputDerivative = (ndBrainFloatTileVector*)&inputOutputGradientsBuffer[srcBase];
+
+	const ndBrainFloatTileVector zero(ndBrainFloat(0.0f));
+	for (ndInt32 i = numOfSimd - 1; i >= 0; --i)
+	{
+		inputDerivative[i] = zero;
+	}
+	for (ndInt32 j = outputSize - 1; j >= 0; --j)
+	{
+		const ndBrainFloatTileVector outDerivative (outputDerivative[j]);
+		const ndBrainFloatTileVector* const weightRowSimd = (ndBrainFloatTileVector*)&weightsMatrix[j * width];
+		for (ndInt32 i = numOfSimd - 1; i >= 0; --i)
+		{
+			inputDerivative[i] = inputDerivative[i].MulAdd(weightRowSimd[i], outDerivative);
+		}
+	}
+#endif
 }
 
 ndCommandArray ndBrainLayerLinear::CreateBackPropagateBufferCommand(
