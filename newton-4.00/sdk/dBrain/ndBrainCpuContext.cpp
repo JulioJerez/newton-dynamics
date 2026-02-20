@@ -36,16 +36,16 @@ class ndBrainAdamUpdateParametersRidge : public ndBrainBufferCommandCpu
 	virtual void Execute(ndInt32 groupId) override
 	{
 		ndInt32 workGroupSize = m_desc.m_workGroupSize;
-		
+
 		const ndBrainOptimizerAdam::ndCommandSharedInfo* const parameters = (ndBrainOptimizerAdam::ndCommandSharedInfo*)m_desc[0]->GetCpuPtr();
 		ndBrainFloat* const weightAndBiasBuffer = (ndBrainFloat*)m_desc[1]->GetCpuPtr();
 		ndBrainFloat* const weightAndBiasGradientBuffer = (ndBrainFloat*)m_desc[2]->GetCpuPtr();
 		ndBrainFloat* const vdw = (ndBrainFloat*)m_desc[3]->GetCpuPtr();
 		ndBrainFloat* const vdw2 = (ndBrainFloat*)m_desc[4]->GetCpuPtr();
-		
+
 		ndBrainFloat descendRate = -m_learnRate;
 		ndBrainFloat regularizer = -parameters->m_decayRegularizer;
-		
+
 		ndInt32 start = groupId * workGroupSize;
 		ndBrainFloat miniBatchWeight = parameters->m_minibathScale;
 		for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
@@ -53,13 +53,13 @@ class ndBrainAdamUpdateParametersRidge : public ndBrainBufferCommandCpu
 			ndBrainFloat m = vdw[start + itemId];
 			ndBrainFloat v = vdw2[start + itemId];
 			ndBrainFloat g = miniBatchWeight * weightAndBiasGradientBuffer[start + itemId];
-		
+
 			// calculate moving average
 			m = m * parameters->m_alpha + g * (ndBrainFloat(1.0f) - parameters->m_alpha);
-		
+
 			// calculate RMS
 			v = v * parameters->m_beta + g * g * (ndBrainFloat(1.0f) - parameters->m_beta);
-		
+
 			// save veloc and accel for net update
 			vdw[start + itemId] = m;
 			vdw2[start + itemId] = v;
