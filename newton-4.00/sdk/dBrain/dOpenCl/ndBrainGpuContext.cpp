@@ -691,11 +691,11 @@ void ndBrainGpuContext::SetLearnRateCommandBuffers(ndBrainOptimizerAdam& optimiz
 		ndBrainBufferCommandDesc descriptor(1);
 		descriptor.m_context = this;
 		descriptor.m_owner = nullptr;
-		descriptor.m_id = m_adamOptimizerMomentum;
+		descriptor.m_id = m_adamOptimizerBiasCorrection;
 		descriptor.m_uniformBuffer = adamUniformbuffer;
 		descriptor.PushBack(*adamUniformbuffer);
 
-		descriptor.m_kernel = descriptor.m_context->GetAsGpuContext()->m_brainAdamMomentumUpdate;
+		descriptor.m_kernel = descriptor.m_context->GetAsGpuContext()->m_brainAdamBiasCorrectionUpdate;
 		optimizer.m_commands.Append(ndSharedPtr<ndBrainBufferCommand>(new ndBrainGpuCommand(descriptor)));
 	}
 }

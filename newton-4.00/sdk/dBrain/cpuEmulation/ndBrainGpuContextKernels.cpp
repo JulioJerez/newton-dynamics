@@ -1070,10 +1070,10 @@ class brainLayerBrainPolicyGradientBackPropagate : public ndBrainKernel
     }
 };
 
-class brainAdamMomentumUpdate : public ndBrainKernel
+class brainAdamBiasCorrectionUpdate : public ndBrainKernel
 {
     public:
-    brainAdamMomentumUpdate(ndBrainContext* const context)
+    brainAdamBiasCorrectionUpdate(ndBrainContext* const context)
         :ndBrainKernel(context)
     {
     }
@@ -1084,19 +1084,19 @@ class brainAdamMomentumUpdate : public ndBrainKernel
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainOptimizerAdam::ndCommandSharedInfo* const parameters = (ndBrainOptimizerAdam::ndCommandSharedInfo*)buffer0->GetGpuBuffer()->GetPtr();
 
-        parameters->m_betaAcc *= parameters->m_beta;
-        parameters->m_alphaAcc *= parameters->m_alpha;
-        if (parameters->m_betaAcc < ndBrainFloat(1.0e-6f))
+        parameters->m_biasBetaCorrection *= parameters->m_beta;
+        parameters->m_biasAlphaCorrection *= parameters->m_alpha;
+        if (parameters->m_biasBetaCorrection < ndBrainFloat(1.0e-6f))
         {
-            parameters->m_betaAcc = ndBrainFloat(0.0f);
+            parameters->m_biasBetaCorrection = ndBrainFloat(0.0f);
         }
-        if (parameters->m_alphaAcc < ndBrainFloat(1.0e-6f))
+        if (parameters->m_biasAlphaCorrection < ndBrainFloat(1.0e-6f))
         {
-            parameters->m_alphaAcc = ndBrainFloat(0.0f);
+            parameters->m_biasAlphaCorrection = ndBrainFloat(0.0f);
         }
 
-        parameters->m_invBeta = (ndBrainFloat(1.0f) / (ndBrainFloat(1.0f) - parameters->m_betaAcc));
-        parameters->m_invAlpha = (ndBrainFloat(1.0f) / (ndBrainFloat(1.0f) - parameters->m_alphaAcc));
+        parameters->m_invBiasBetaCorrection = (ndBrainFloat(1.0f) / (ndBrainFloat(1.0f) - parameters->m_biasBetaCorrection));
+        parameters->m_invBiasAlphaCorrection = (ndBrainFloat(1.0f) / (ndBrainFloat(1.0f) - parameters->m_biasAlphaCorrection));
     }
 };
 
@@ -1147,25 +1147,26 @@ class brainAdamUpdateRidgeRegularizer : public ndBrainKernel
         ndBrainFloat miniBatchWeight = parameters->m_minibathScale;
         for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
         {
-            ndBrainFloat weightAndBiasGradient = miniBatchWeight * weightAndBiasGradientBuffer[start + itemId];
-            
-            // calculate moving average
-            ndBrainFloat a = vdw[start + itemId] * parameters->m_alpha + weightAndBiasGradient * (ndBrainFloat(1.0f) - parameters->m_alpha);
-            vdw[start + itemId] = a;
-            
-            // caluate RMS
-            ndBrainFloat b = vdw2[start + itemId] * parameters->m_beta + weightAndBiasGradient * weightAndBiasGradient * (ndBrainFloat(1.0f) - parameters->m_beta);
-            vdw2[start + itemId] = b;
-            
-            ndBrainFloat vdwCorrected = a * parameters->m_invAlpha;
-            ndBrainFloat vdw2Corrected = b * parameters->m_invBeta;
-            
-            ndBrainFloat bias_den = ndBrainFloat(1.0f) / (ndBrainFloat(ndSqrt(vdw2Corrected)) + parameters->m_epsilon);
-            ndBrainFloat gradient = vdwCorrected * bias_den;
-             
-            ndBrainFloat weight = weightAndBiasBuffer[start + itemId];
-            gradient += weight * regularizer;
-            weightAndBiasBuffer[start + itemId] = weight + gradient * descendRate;
+            ndAssert(0);
+            //ndBrainFloat weightAndBiasGradient = miniBatchWeight * weightAndBiasGradientBuffer[start + itemId];
+            //
+            //// calculate moving average
+            //ndBrainFloat a = vdw[start + itemId] * parameters->m_alpha + weightAndBiasGradient * (ndBrainFloat(1.0f) - parameters->m_alpha);
+            //vdw[start + itemId] = a;
+            //
+            //// caluate RMS
+            //ndBrainFloat b = vdw2[start + itemId] * parameters->m_beta + weightAndBiasGradient * weightAndBiasGradient * (ndBrainFloat(1.0f) - parameters->m_beta);
+            //vdw2[start + itemId] = b;
+            //
+            //ndBrainFloat vdwCorrected = a * parameters->m_invAlpha;
+            //ndBrainFloat vdw2Corrected = b * parameters->m_invBeta;
+            //
+            //ndBrainFloat bias_den = ndBrainFloat(1.0f) / (ndBrainFloat(ndSqrt(vdw2Corrected)) + parameters->m_epsilon);
+            //ndBrainFloat gradient = vdwCorrected * bias_den;
+            // 
+            //ndBrainFloat weight = weightAndBiasBuffer[start + itemId];
+            //gradient += weight * regularizer;
+            //weightAndBiasBuffer[start + itemId] = weight + gradient * descendRate;
         }
     }
     ndBrainFloat m_learRate;
@@ -1795,7 +1796,7 @@ void ndBrainGpuContext::CreateKerners()
     m_brainLayerMatrixBackPropagateAddBiasGradients = ndSharedPtr<ndBrainKernel>(new brainLayerBrainBackPropagateMatrixPartialSumBiasGradients(this));
 
     // optimizer kernels
-    m_brainAdamMomentumUpdate = ndSharedPtr<ndBrainKernel>(new brainAdamMomentumUpdate(this));
+    //m_brainAdamMomentumUpdate = ndSharedPtr<ndBrainKernel>(new brainAdamBiasCorrectionUpdate(this));
     m_brainAdamRidgeOptimizerUpdate = ndSharedPtr<ndBrainKernel>(new brainAdamUpdateRidgeRegularizer(this));
     m_brainAdamLassoOptimizerUpdate = ndSharedPtr<ndBrainKernel>(new brainAdamUpdateLassoRegularizer(this));
 

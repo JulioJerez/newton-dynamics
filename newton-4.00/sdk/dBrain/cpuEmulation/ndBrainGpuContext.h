@@ -128,7 +128,7 @@ class ndBrainGpuContext : public ndBrainContext, public ndBrainThreadPool
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateClearBiasGradients;
 
 	// optimizer shaders
-	ndSharedPtr<ndBrainKernel> m_brainAdamMomentumUpdate;
+	ndSharedPtr<ndBrainKernel> m_brainAdamBiasCorrectionUpdate;
 	ndSharedPtr<ndBrainKernel> m_brainAdamRidgeOptimizerUpdate;
 	ndSharedPtr<ndBrainKernel> m_brainAdamLassoOptimizerUpdate;
 

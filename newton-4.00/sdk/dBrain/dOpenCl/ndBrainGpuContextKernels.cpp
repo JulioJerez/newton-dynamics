@@ -1805,7 +1805,7 @@ void ndBrainGpuContext::CreateKerners()
     m_brainLayerMatrixBackPropagateAddBiasGradients = CreateKerner(program, "brainLayerBrainBackPropagateMatrixPartialSumBiasGradients");
 
     // accumulate gradient kernels and optimizer kernels
-    m_brainAdamMomentumUpdate = CreateKerner(program, "brainAdamMomentumUpdate");
+    m_brainAdamBiasCorrectionUpdate = CreateKerner(program, "brainAdamMomentumUpdate");
     m_brainAdamRidgeOptimizerUpdate = CreateKerner(program, "brainAdamUpdateRidgeRegularizer");
     m_brainAdamLassoOptimizerUpdate = CreateKerner(program, "brainAdamUpdateLassoRegularizer");
 

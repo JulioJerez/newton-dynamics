@@ -34,31 +34,39 @@ class ndBrainOptimizerAdam : public ndBrainOptimizer
 	class ndCommandSharedInfo
 	{
 		public:
-		ndCommandSharedInfo()
+		ndCommandSharedInfo(bool enableBiasCorrection = false)
 			:m_beta(ndBrainFloat(0.999f))
 			,m_alpha(ndBrainFloat(0.9f))
 			,m_epsilon(ndBrainFloat(1.0e-6f))
-			,m_betaAcc(m_beta)
-			,m_alphaAcc(m_alpha)
-			,m_invBeta(ndBrainFloat(1.0f)/ (ndBrainFloat(1.0f) - m_betaAcc))
-			,m_invAlpha(ndBrainFloat(1.0f) / (ndBrainFloat(1.0f) - m_alphaAcc))
+			,m_biasBetaCorrection(ndBrainFloat(0.0f))
+			,m_biasAlphaCorrection(ndBrainFloat(0.0f))
+			,m_invBiasBetaCorrection(ndBrainFloat(1.0f))
+			,m_invBiasAlphaCorrection(ndBrainFloat(1.0f))
 			,m_minibathScale(ndBrainFloat(1.0f) / ndBrainFloat(ND_DEFAULT_WORKGROUP_SIZE))
 			,m_decayRegularizer(ndBrainFloat(1.0e-4f))
 		{
+			if (enableBiasCorrection)
+			{
+				m_biasBetaCorrection = m_beta;
+				m_biasAlphaCorrection = m_alpha;
+				m_invBiasBetaCorrection = ndBrainFloat(1.0f) / (ndBrainFloat(1.0f) - m_biasBetaCorrection);
+				m_invBiasAlphaCorrection = ndBrainFloat(1.0f) / (ndBrainFloat(1.0f) - m_biasAlphaCorrection);
+			}
 		}
 
 		ndBrainFloat m_beta;
 		ndBrainFloat m_alpha;
 		ndBrainFloat m_epsilon;
-		ndBrainFloat m_betaAcc;
-		ndBrainFloat m_alphaAcc;
-		ndBrainFloat m_invBeta;
-		ndBrainFloat m_invAlpha;
+		ndBrainFloat m_biasBetaCorrection;
+		ndBrainFloat m_biasAlphaCorrection;
+		ndBrainFloat m_invBiasBetaCorrection;
+		ndBrainFloat m_invBiasAlphaCorrection;
 		ndBrainFloat m_minibathScale;
 		ndBrainFloat m_decayRegularizer;
 	};
 
-	ndBrainOptimizerAdam(const ndSharedPtr<ndBrainContext>& context);
+	//ndBrainOptimizerAdam(const ndSharedPtr<ndBrainContext>& context, bool enableBiasCorrection = true);
+	ndBrainOptimizerAdam(const ndSharedPtr<ndBrainContext>& context, bool enableBiasCorrection = false);
 
 	virtual void ApplyLearnRate(ndBrainFloat learnRate) override;
 	virtual void Init(ndInt32 minibatchSize, ndBrainFloatBuffer& weightsAndBiasBuffer, ndBrainFloatBuffer& weightsAndBiasGradientBuffer) override;

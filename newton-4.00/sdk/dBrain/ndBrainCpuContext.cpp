@@ -29,47 +29,48 @@ class ndBrainAdamUpdateParametersRidge : public ndBrainBufferCommandCpu
 	{
 	}
 
-	//#pragma optimize( "", off )
+	// I am skipping the bias correction 
+	// I am yet to see why bias correction is nesserary, 
+	// to me is just generated an inial gain
+	#pragma optimize( "", off )
 	virtual void Execute(ndInt32 groupId) override
 	{
 		ndInt32 workGroupSize = m_desc.m_workGroupSize;
-
+		
 		const ndBrainOptimizerAdam::ndCommandSharedInfo* const parameters = (ndBrainOptimizerAdam::ndCommandSharedInfo*)m_desc[0]->GetCpuPtr();
 		ndBrainFloat* const weightAndBiasBuffer = (ndBrainFloat*)m_desc[1]->GetCpuPtr();
 		ndBrainFloat* const weightAndBiasGradientBuffer = (ndBrainFloat*)m_desc[2]->GetCpuPtr();
 		ndBrainFloat* const vdw = (ndBrainFloat*)m_desc[3]->GetCpuPtr();
 		ndBrainFloat* const vdw2 = (ndBrainFloat*)m_desc[4]->GetCpuPtr();
-
+		
 		ndBrainFloat descendRate = -m_learnRate;
 		ndBrainFloat regularizer = -parameters->m_decayRegularizer;
-
+		
 		ndInt32 start = groupId * workGroupSize;
 		ndBrainFloat miniBatchWeight = parameters->m_minibathScale;
 		for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
 		{
-			ndBrainFloat veloc = vdw[start + itemId];
-			ndBrainFloat accel = vdw2[start + itemId];
-			ndBrainFloat posit = miniBatchWeight * weightAndBiasGradientBuffer[start + itemId];
-
+			ndBrainFloat m = vdw[start + itemId];
+			ndBrainFloat v = vdw2[start + itemId];
+			ndBrainFloat g = miniBatchWeight * weightAndBiasGradientBuffer[start + itemId];
+		
 			// calculate moving average
-			ndBrainFloat a = veloc * parameters->m_alpha + posit * (ndBrainFloat(1.0f) - parameters->m_alpha);
-
+			m = m * parameters->m_alpha + g * (ndBrainFloat(1.0f) - parameters->m_alpha);
+		
 			// calculate RMS
-			ndBrainFloat b = accel * parameters->m_beta + posit * posit * (ndBrainFloat(1.0f) - parameters->m_beta);
-
+			v = v * parameters->m_beta + g * g * (ndBrainFloat(1.0f) - parameters->m_beta);
+		
 			// save veloc and accel for net update
-			vdw[start + itemId] = a;
-			vdw2[start + itemId] = b;
+			vdw[start + itemId] = m;
+			vdw2[start + itemId] = v;
+			const ndBrainFloat weight = weightAndBiasBuffer[start + itemId];
 
-			// apply correction in initalization, until bias becomes 1.0
-			ndBrainFloat vdwCorrected = a * parameters->m_invAlpha;
-			ndBrainFloat vdw2Corrected = b * parameters->m_invBeta;
+			// apply bias correction, until bias becomes 1.0
+			ndBrainFloat vCorrected = v * parameters->m_invBiasBetaCorrection;
+			ndBrainFloat mCorrected = m * parameters->m_invBiasAlphaCorrection;
 
-			ndBrainFloat bias_den = ndBrainFloat(1.0f) / (ndBrainFloat(ndSqrt(vdw2Corrected)) + parameters->m_epsilon);
-			ndBrainFloat gradient = vdwCorrected * bias_den;
-
-			ndBrainFloat weight = weightAndBiasBuffer[start + itemId];
-			gradient += weight * regularizer;
+			const ndBrainFloat denV = ndBrainFloat(ndSqrt(vCorrected)) + parameters->m_epsilon;
+			const ndBrainFloat gradient = weight * regularizer + mCorrected / denV;
 			weightAndBiasBuffer[start + itemId] = weight + gradient * descendRate;
 		}
 	}
@@ -77,10 +78,10 @@ class ndBrainAdamUpdateParametersRidge : public ndBrainBufferCommandCpu
 	ndBrainFloat m_learnRate;
 };
 
-class ndBrainAdamMomentumUpdate : public ndBrainBufferCommandCpu
+class ndBrainAdamBiasCorrectionUpdate : public ndBrainBufferCommandCpu
 {
 	public:
-	ndBrainAdamMomentumUpdate(const ndBrainBufferCommandDesc& desc)
+	ndBrainAdamBiasCorrectionUpdate(const ndBrainBufferCommandDesc& desc)
 		:ndBrainBufferCommandCpu(desc)
 	{
 	}
@@ -90,19 +91,19 @@ class ndBrainAdamMomentumUpdate : public ndBrainBufferCommandCpu
 	{
 		ndBrainOptimizerAdam::ndCommandSharedInfo* const parameters = (ndBrainOptimizerAdam::ndCommandSharedInfo*)m_desc[0]->GetCpuPtr();
 
-		parameters->m_betaAcc *= parameters->m_beta;
-		parameters->m_alphaAcc *= parameters->m_alpha;
-		if (parameters->m_betaAcc < ndBrainFloat(1.0e-7f))
+		parameters->m_biasBetaCorrection *= parameters->m_beta;
+		parameters->m_biasAlphaCorrection *= parameters->m_alpha;
+		if (parameters->m_biasBetaCorrection < ndBrainFloat(1.0e-7f))
 		{
-			parameters->m_betaAcc = ndBrainFloat(0.0f);
+			parameters->m_biasBetaCorrection = ndBrainFloat(0.0f);
 		}
-		if (parameters->m_alphaAcc < ndBrainFloat(1.0e-7f))
+		if (parameters->m_biasAlphaCorrection < ndBrainFloat(1.0e-7f))
 		{
-			parameters->m_alphaAcc = ndBrainFloat(0.0f);
+			parameters->m_biasAlphaCorrection = ndBrainFloat(0.0f);
 		}
 
-		parameters->m_invBeta = (ndBrainFloat(1.0f) / (ndBrainFloat(1.0f) - parameters->m_betaAcc));
-		parameters->m_invAlpha = (ndBrainFloat(1.0f) / (ndBrainFloat(1.0f) - parameters->m_alphaAcc));
+		parameters->m_invBiasBetaCorrection = (ndBrainFloat(1.0f) / (ndBrainFloat(1.0f) - parameters->m_biasBetaCorrection));
+		parameters->m_invBiasAlphaCorrection = (ndBrainFloat(1.0f) / (ndBrainFloat(1.0f) - parameters->m_biasAlphaCorrection));
 	}
 };
 
@@ -560,10 +561,10 @@ void ndBrainCpuContext::SetLearnRateCommandBuffers(
 		ndBrainBufferCommandDesc descriptor(1);
 		descriptor.m_context = this;
 		descriptor.m_owner = nullptr;
-		descriptor.m_id = m_adamOptimizerMomentum;
+		descriptor.m_id = m_adamOptimizerBiasCorrection;
 		descriptor.m_uniformBuffer = adamUniformbuffer;
 		descriptor.PushBack(*adamUniformbuffer);
-		optimizer.m_commands.Append(ndSharedPtr<ndBrainBufferCommand>(new ndBrainAdamMomentumUpdate(descriptor)));
+		optimizer.m_commands.Append(ndSharedPtr<ndBrainBufferCommand>(new ndBrainAdamBiasCorrectionUpdate(descriptor)));
 	}
 }
 

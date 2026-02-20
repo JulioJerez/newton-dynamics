@@ -35,9 +35,9 @@ class ndBrainContext : public ndClassAlloc
 	{
 		m_inputId = 7,
 		m_outpuId,
-		m_adamOptimizerSum,
+		//m_adamOptimizerSum,
 		m_adamOptimizerUpdate,
-		m_adamOptimizerMomentum,
+		m_adamOptimizerBiasCorrection,
 	};
 
 	ndBrainContext();

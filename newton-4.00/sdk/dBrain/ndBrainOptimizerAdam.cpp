@@ -28,11 +28,11 @@
 #include "ndBrainOptimizerAdam.h"
 #include "ndBrainTrainerInference.h"
 
-ndBrainOptimizerAdam::ndBrainOptimizerAdam(const ndSharedPtr<ndBrainContext>& context)
+ndBrainOptimizerAdam::ndBrainOptimizerAdam(const ndSharedPtr<ndBrainContext>& context, bool enableBiasCorrection)
 	:ndBrainOptimizer(context)
 	,m_vdw()
 	,m_vdw2()
-	,m_parameters()
+	,m_parameters(enableBiasCorrection)
 {
 }
 
@@ -42,7 +42,7 @@ void ndBrainOptimizerAdam::Init(ndInt32 minibatchSize, ndBrainFloatBuffer& weigh
 
 	ndBrainVector buffer;
 	buffer.SetCount(sizeInFloats);
-	buffer.Set(ndReal(0.0f));
+	buffer.Set(ndBrainFloat(0.0f));
 	
 	m_vdw = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, buffer));
 	m_vdw2 = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, buffer));
