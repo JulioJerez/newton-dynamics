@@ -113,7 +113,7 @@ namespace ndUnicycleTrainer_sac
 			,m_timer(ndGetTimeInMicroseconds())
 			,m_maxScore(ndFloat32(-1.0e10f))
 			,m_saveScore(m_maxScore)
-			,m_discountRewardFactor(0.99f)
+			,m_discountRewardFactor(0.995f)
 			,m_horizon(ndFloat32(1.0f) / (ndFloat32(1.0f) - m_discountRewardFactor))
 			,m_lastEpisode(0xfffffff)
 			,m_stopTraining(1000000)
