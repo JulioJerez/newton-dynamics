@@ -132,11 +132,11 @@ namespace ndUnicycleTrainer_ppo
 			
 			hyperParameters.m_useGpuBackend = false;
 			//hyperParameters.m_numberOfHiddenLayers = 2;
-			//hyperParameters.m_discountRewardFactor = 0.99f;
 			//hyperParameters.m_hiddenLayersNumberOfNeurons = 128;
 			hyperParameters.m_batchTrajectoryCount = 1000;
 			hyperParameters.m_numberOfActions = m_actionsSize;
 			hyperParameters.m_numberOfObservations = m_observationsSize;
+			hyperParameters.m_maxNumberOfTrainingSteps = ndInt32(m_stopTraining);
 			hyperParameters.m_discountRewardFactor = ndReal(m_discountRewardFactor);
 			
 			m_master = ndSharedPtr<ndBrainAgentOnPolicyGradient_Trainer>(new ndBrainAgentOnPolicyGradient_Trainer(hyperParameters));
