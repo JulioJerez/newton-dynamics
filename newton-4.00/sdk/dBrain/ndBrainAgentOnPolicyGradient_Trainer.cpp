@@ -40,38 +40,14 @@
 
 #define ND_POLICY_MAX_KL_DIVERGENCE_PASSES			8
 #define ND_POLICY_KL_DIVERGENCE_STOP_THRESHHOLD		ndBrainFloat(1.0e-4f)
-#define ND_LEARN_RATE_SCALE							ndBrainFloat(0.125f)
-#define ND_POLICY_MIN_SIGMA_SQUARE					ndBrainFloat(0.01f)
-#define ND_POLICY_MAX_SIGMA_SQUARE					ndBrainFloat(1.0f)
+#define ND_POLICY_DOWN_SAMPLE_LEARN_RATE			ndBrainFloat(0.125f)
 #define ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON		ndBrainFloat(0.2f)
 
 ndBrainAgentOnPolicyGradient_Trainer::HyperParameters::HyperParameters()
 {
-	m_randomSeed = 47;
-	m_numberOfHiddenLayers = 3;
-	m_maxTrajectorySteps = 4096;
 	m_batchTrajectoryCount = 1000;
-	m_hiddenLayersNumberOfNeurons = 128;
-
-	m_useGpuBackend = true;
-	m_miniBatchSize = 256;
-	m_numberOfActions = 0;
-	m_numberOfObservations = 0;
-
-	m_learnRate = ndBrainFloat(1.0e-4f);
 	m_divergenceMaxPasses = ND_POLICY_MAX_KL_DIVERGENCE_PASSES;
 	m_divergenceStopThreshold = ND_POLICY_KL_DIVERGENCE_STOP_THRESHHOLD;
-
-	m_policyRegularizer = ndBrainFloat(1.0e-4f);
-	m_criticRegularizer = ndBrainFloat(1.0e-3f);
-
-	m_policyRegularizerType = m_ridge;
-	m_criticRegularizerType = m_ridge;
-
-	m_discountRewardFactor = ndBrainFloat(0.99f);
-	m_entropyRegularizerCoef = ndBrainFloat(0.0f);
-	m_minSigmaSquared = ND_POLICY_MIN_SIGMA_SQUARE;
-	m_maxSigmaSquared = ND_POLICY_MAX_SIGMA_SQUARE;
 }
 
 ndBrainAgentOnPolicyGradient_Agent::ndTrajectory::ndTrajectory()
@@ -918,7 +894,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 	weightAndBiasGradientBuffer->Set(**m_policyGradientAccumulator);
 
 	// update network weight and bias.
-	m_policyTrainer->ApplyLearnRate(m_learnRate * ND_LEARN_RATE_SCALE);
+	m_policyTrainer->ApplyLearnRate(m_learnRate * ND_POLICY_DOWN_SAMPLE_LEARN_RATE);
 }
 
 //#pragma optimize( "", off)
@@ -1084,7 +1060,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizedSurrogatePolicy(ndInt32 pass
 	}
 	m_policyGradientAccumulator->Scale(ndBrainFloat(1.0f) / ndBrainFloat(numberOfBatches));
 	weightAndBiasGradientBuffer->Set(**m_policyGradientAccumulator);
-	m_policyTrainer->ApplyLearnRate(m_learnRate * ND_LEARN_RATE_SCALE);
+	m_policyTrainer->ApplyLearnRate(m_learnRate * ND_POLICY_DOWN_SAMPLE_LEARN_RATE);
 }
 
 ndBrainFloat ndBrainAgentOnPolicyGradient_Trainer::CalculateKLdivergence()

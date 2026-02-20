@@ -21,8 +21,37 @@
 
 #include "ndBrainStdafx.h"
 #include "ndBrainVector.h"
-
 #include "ndBrainAgentContinuePolicyGradient.h"
+
+#define ND_POLICY_MAX_SIGMA_SQUARE	ndBrainFloat(1.0f)
+#define ND_POLICY_MIN_SIGMA_SQUARE	ndBrainFloat(0.01f)
+
+ndContinuePolicyGradientHyperParameters::ndContinuePolicyGradientHyperParameters()
+{
+	m_randomSeed = 47;
+	m_learnRate = ndBrainFloat(1.0e-4f);
+	m_minSigmaSquared = ND_POLICY_MIN_SIGMA_SQUARE;
+	m_maxSigmaSquared = ND_POLICY_MAX_SIGMA_SQUARE;
+
+	m_policyRegularizer = ndBrainFloat(1.0e-4f);
+	m_criticRegularizer = ndBrainFloat(1.0e-3f);
+
+	m_discountRewardFactor = ndBrainFloat(0.99f);
+
+	m_miniBatchSize = 256;
+	m_numberOfActions = 0;
+	m_numberOfObservations = 0;
+
+	m_numberOfHiddenLayers = 3;
+	m_hiddenLayersNumberOfNeurons = 128;
+	
+	m_maxTrajectorySteps = 4096;
+	m_maxNumberOfTrainingSteps = 0;
+	m_policyRegularizerType = m_ridge;
+	m_criticRegularizerType = m_ridge;
+
+	m_useGpuBackend = true;
+}
 
 ndBrainAgentContinuePolicyGradient::ndBrainAgentContinuePolicyGradient(const ndSharedPtr<ndBrain>& policy)
 	:ndBrainAgent(policy)

@@ -26,6 +26,7 @@
 
 #include "ndBrain.h"
 #include "ndBrainAgent.h"
+#include "ndBrainAgentContinuePolicyGradient.h"
 
 // Implementation of Proximal Policy Optimization (PPO) as described in:
 // https://arxiv.org/abs/1707.06347
@@ -119,36 +120,39 @@ class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 {
 	public:
-	class HyperParameters
+	class HyperParameters : public ndContinuePolicyGradientHyperParameters
 	{
 		public:
 		HyperParameters();
 
-		ndBrainFloat m_learnRate;
-		ndBrainFloat m_minSigmaSquared;
-		ndBrainFloat m_maxSigmaSquared;
-		ndBrainFloat m_policyRegularizer;
-		ndBrainFloat m_criticRegularizer;
-		ndBrainFloat m_discountRewardFactor;
-		ndBrainFloat m_entropyRegularizerCoef;
-		ndBrainFloat m_divergenceStopThreshold;
-
-		ndInt32 m_randomSeed;
-		ndInt32 m_miniBatchSize;
-		ndInt32 m_numberOfActions;
-		ndInt32 m_numberOfObservations;
+		//ndBrainFloat m_learnRate;
+		//ndBrainFloat m_minSigmaSquared;
+		//ndBrainFloat m_maxSigmaSquared;
+		//ndBrainFloat m_policyRegularizer;
+		//ndBrainFloat m_criticRegularizer;
+		//ndBrainFloat m_discountRewardFactor;
+		//ndBrainFloat m_entropyRegularizerCoef;
+		//ndBrainFloat m_divergenceStopThreshold;
+		//
+		//ndInt32 m_randomSeed;
+		//ndInt32 m_miniBatchSize;
+		//ndInt32 m_numberOfActions;
+		//ndInt32 m_numberOfObservations;
+		//
+		//ndInt32 m_divergenceMaxPasses;
+		//ndInt32 m_numberOfHiddenLayers;
+		//ndInt32 m_hiddenLayersNumberOfNeurons;
+		//
+		//ndInt32 m_maxTrajectorySteps;
+		//
+		//bool m_useGpuBackend;
+		//
+		//ndRegularizerType m_policyRegularizerType;
+		//ndRegularizerType m_criticRegularizerType;
 
 		ndInt32 m_divergenceMaxPasses;
-		ndInt32 m_numberOfHiddenLayers;
-		ndInt32 m_hiddenLayersNumberOfNeurons;
-
-		ndInt32 m_maxTrajectorySteps;
 		ndInt32 m_batchTrajectoryCount;
-
-		bool m_useGpuBackend;
-		
-		ndRegularizerType m_policyRegularizerType;
-		ndRegularizerType m_criticRegularizerType;
+		ndBrainFloat m_divergenceStopThreshold;
 	};
 
 	ndBrainAgentOnPolicyGradient_Trainer(const HyperParameters& parameters);
