@@ -51,14 +51,14 @@ ndBrainAgentOffPolicyGradient_Trainer::HyperParameters::HyperParameters()
 	m_randomSeed = 47;
 	m_numberOfHiddenLayers = 3;
 	m_maxTrajectorySteps = 4096;
-	m_hiddenLayersNumberOfNeurons = 256;
+	m_hiddenLayersNumberOfNeurons = 128;
 
 	m_useGpuBackend = true;
 	m_miniBatchSize = 256;
 	m_numberOfActions = 0;
 	m_numberOfObservations = 0;
 
-	m_learnRate = ndBrainFloat(1.0e-3f);
+	m_learnRate = ndBrainFloat(1.0e-4f);
 	m_policyRegularizer = ndBrainFloat(1.0e-4f);
 	m_criticRegularizer = ndBrainFloat(1.0e-4f);
 	m_discountRewardFactor = ndBrainFloat(0.99f);
