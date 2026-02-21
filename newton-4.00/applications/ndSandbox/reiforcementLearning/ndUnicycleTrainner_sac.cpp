@@ -28,7 +28,7 @@ namespace ndUnicycleTrainer_sac
 		{
 			const ndVector color(ndFloat32(1.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f));
 			scene->Print(color, "Training a double pendulum using the Soft Actor-Critic algorithm.");
-			scene->Print(color, "The training runs for up to 200000 steps (typical runs use 1 million steps for more complex model).");
+			scene->Print(color, "The training runs for up to 200k steps (typical runs use 1 million steps for more complex model).");
 			scene->Print(color, "Depending on the configuration, the session may take over an hour with the GPU backend.");
 		}
 	};
