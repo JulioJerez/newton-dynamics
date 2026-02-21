@@ -65,7 +65,8 @@ namespace ndUnicyclePlayer
 		:ndModelNotify()
 		,m_agent(nullptr)
 		,m_timestep(0.0f)
-		,m_bestReward(0.0f)
+		,m_randomImpulseCounter(1)
+		,m_isTrainning(false)
 	{
 	}
 
@@ -84,11 +85,11 @@ namespace ndUnicyclePlayer
 			matrix.m_posit.m_x = ndFloat32(0.0f);
 			GetModel()->GetAsModelArticulation()->SetTransform(matrix);
 		}
+		m_randomImpulseCounter = (m_randomImpulseCounter + 1) % ND_RANDOM_IMPULSE_MOD;
 	}
 
 	void ndController::ResetModel()
 	{
-#if 1
 		ndMatrix boxMatrix(ndGetIdentityMatrix());
 		boxMatrix.m_posit = m_topBox->GetMatrix().m_posit;
 		boxMatrix.m_posit.m_x = ndFloat32(0.0f);
@@ -111,62 +112,31 @@ namespace ndUnicyclePlayer
 		m_wheel->SetVelocity(ndVector::m_zero);
 		
 		GetModel()->GetAsModelArticulation()->ClearMemory();
-		
-		// randomize start position 
-		//ndFloat32 angle = ndDegreeToRad * (ndRand() - 0.5f) * 10.0f;
-		ndFloat32 angle = ndFloat32(0.0f);
-		ndMatrix rollMatrix(ndRollMatrix(angle));
-		ndMatrix matrix (rollMatrix * boxMatrix);
-		GetModel()->GetAsModelArticulation()->SetTransform(matrix);
-#else	
-		for (ndInt32 i = 0; i < m_modelPose.GetCount(); ++i)
-		{
-			ndBodyKinematic* const body = m_modelPose[i].m_body;
-			body->SetMatrix(m_modelPose[i].m_location);
-			body->SetOmega(m_modelPose[i].m_omega);
-			body->SetVelocity(m_modelPose[i].m_veloc);
-		}
-#endif
-		m_bestReward = ndFloat32(0.0f);
 	}
 		
-	void ndController::SaveInitialPose(ndFloat32 expectedReward)
-	{
-		if (expectedReward > m_bestReward)
-		{
-			// save this state as initial pose
-			m_modelPose.SetCount(0);
-			m_bestReward = expectedReward;
-			ndModelArticulation* const model = GetModel()->GetAsModelArticulation();
-			for (ndModelArticulation::ndNode* node = model->GetRoot()->GetFirstIterator(); node; node = node->GetNextIterator())
-			{
-				ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
-				ndPose pose;
-				pose.m_body = body;
-				pose.m_omega = body->GetOmega();
-				pose.m_veloc = body->GetVelocity();
-				pose.m_location = body->GetMatrix();
-				m_modelPose.PushBack(pose);
-			}
-		}
-	}
-
-	// calculate pole omega relative to the world.
-	ndFloat32 ndController::GetPoleOmega() const
-	{
-		const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
-		const ndMatrix matrix(hinge->CalculateGlobalMatrix0());
-		const ndVector omega(m_pole->GetOmega());
-		return omega.DotProduct(matrix.m_front).GetScalar();
-	}
-
 	// calculate pole angle relative to the world.
 	ndFloat32 ndController::GetPoleAngle() const
 	{
 		const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
 		const ndMatrix matrix(hinge->CalculateGlobalMatrix0());
-		ndFloat32 angle = ndAcos(-ndClamp(matrix.m_up.m_y, ndFloat32(-1.0f), ndFloat32(1.0f)));
+		ndFloat32 angle = ndAcos(ndClamp(matrix.m_up.m_y, ndFloat32(-1.0f), ndFloat32(1.0f)));
 		return angle;
+	}
+
+	ndFloat32 ndController::GetBoxAngle() const
+	{
+		const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
+		const ndMatrix matrix(hinge->CalculateGlobalMatrix1());
+		ndFloat32 angle = ndAcos(ndClamp(matrix.m_up.m_y, ndFloat32(-1.0f), ndFloat32(1.0f)));
+		return angle;
+	}
+
+	ndFloat32 ndController::GetBoxOmega() const
+	{
+		const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
+		const ndMatrix matrix(hinge->CalculateGlobalMatrix1());
+		const ndVector omega(m_topBox->GetOmega());
+		return omega.DotProduct(matrix.m_front).GetScalar();
 	}
 
 	#pragma optimize( "", off )
@@ -199,13 +169,12 @@ namespace ndUnicyclePlayer
 		const ndVector savedWheelOmega(m_wheel->GetOmega());
 		m_wheel->SetOmegaNoSleep(ndVector::m_zero);
 		ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS> extraJoints;
-		//ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassKinematics(comFrame));
 		ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(*((ndIkSolver*)*m_solver), comFrame, extraJoints, m_timestep));
 		m_wheel->SetOmegaNoSleep(savedWheelOmega);
 
-		ndFloat32 poleAngle = 8.0f * GetPoleAngle() / ND_TERMINATION_ANGLE;
-		ndFloat32 comOmega = 2.0f * comDynamics.m_omega.m_x;
-		ndFloat32 comAlpha = 0.5f * comDynamics.m_alpha.m_x;
+		ndFloat32 poleAngle = ndFloat32(8.0f) * GetPoleAngle() / ND_TERMINATION_ANGLE;
+		ndFloat32 comOmega = ndFloat32(2.0f) * comDynamics.m_omega.m_x;
+		ndFloat32 comAlpha = ndFloat32(0.5f) * comDynamics.m_alpha.m_x;
 		ndFloat32 comSpeed = ndMax((ndAbs(comDynamics.m_veloc.m_z) - ndFloat32(8.0f)), ndFloat32(0.0f));
 		//ndTrace(("a=%f w=%f s=%f\n", angle, omega, speed));
 
@@ -246,6 +215,17 @@ namespace ndUnicyclePlayer
 		//ndExpandTraceMessage("%g %g %g\n", speed, drag, wheelTorque);
 		ndVector torque(wheelMatrix.m_front.Scale(wheelTorque));
 		m_wheel->GetAsBodyDynamic()->SetTorque(torque);
+
+		if (m_isTrainning && (m_randomImpulseCounter == 0))
+		{
+			// when in tranning mode,
+			// apply a random impulse to the top box every m_randomImpulseCounter steps
+			ndFloat32 randOmega = ND_RANDOM_IMPULSE_MAGNITUD * (ndFloat32(0.5f) - ndRand());
+			const ndVector mass(m_topBox->GetAsBodyDynamic()->GetMassMatrix());
+			const ndVector pin(m_poleHinge->CalculateGlobalMatrix1().m_front.Scale (randOmega));
+			const ndVector randomImpulseTorque(pin * mass);
+			m_topBox->GetAsBodyDynamic()->ApplyImpulsePair(ndVector::m_zero, randomImpulseTorque, m_timestep);
+		}
 	}
 
 	ndBrainFloat ndController::IsOnAir() const
@@ -277,17 +257,16 @@ namespace ndUnicyclePlayer
 		m_wheel->SetOmegaNoSleep(savedWheelOmega);
 
 		ndFloat32 comSpeed = comKinematics.m_veloc.m_z * ndFloat32(0.25f);
+		ndFloat32 boxAngle = GetBoxAngle() / ndPi;
+		ndFloat32 boxOmega = GetBoxOmega();
 
 		ndFloat32 hingeOmega = ((ndJointHinge*)*m_poleHinge)->GetOmega();
 		ndFloat32 hingeAngle = ((ndJointHinge*)*m_poleHinge)->GetAngle() / ND_MAX_LEG_JOINT_ANGLE;
 
-		ndFloat32 poleOmega = GetPoleOmega();
-		ndFloat32 poleAngle = GetPoleAngle() / ND_MAX_LEG_JOINT_ANGLE;
-		
-		observation[m_hasSupportContact] = IsOnAir();
+		observation[m_hasContactSupport] = IsOnAir();
 		observation[m_comSpeed] = ndBrainFloat(comSpeed);
-		observation[m_poleAngle] = ndBrainFloat(poleAngle);
-		observation[m_poleOmega] = ndBrainFloat(poleOmega); 
+		observation[m_boxAngle] = ndBrainFloat(boxAngle);
+		observation[m_boxOmega] = ndBrainFloat(boxOmega);
 		observation[m_hingeAngle] = ndBrainFloat(hingeAngle);
 		observation[m_hingeOmega] = ndBrainFloat(hingeOmega);
 	}
@@ -325,7 +304,7 @@ namespace ndUnicyclePlayer
 		m_wheel = ndSharedPtr<ndBody>(CreateRigidBody(ballMesh, ballEntity, BALL_MASS, m_pole->GetAsBodyDynamic()));
 
 		// add links
-		const ndMatrix poleMatrix(m_pole->GetMatrix());
+		const ndMatrix poleMatrix(ndPitchMatrix(ndPi) * m_pole->GetMatrix());
 		m_poleHinge = ndSharedPtr<ndJointBilateralConstraint>(new ndJointHinge(poleMatrix, m_pole->GetAsBodyKinematic(), m_topBox->GetAsBodyKinematic()));
 		((ndJointRoller*)*m_poleHinge)->SetAsSpringDamperPosit(0.01f, 0.0f, 5.0f);
 		ndModelArticulation::ndNode* const poleNode = model->AddLimb(modelRootNode, m_pole, m_poleHinge);
@@ -340,9 +319,6 @@ namespace ndUnicyclePlayer
 		const ndMatrix planeMatrix(m_topBox->GetMatrix());
 		m_plane = ndSharedPtr<ndJointBilateralConstraint>(new ndJointPlane(planeMatrix.m_posit, planeMatrix.m_right, m_topBox->GetAsBodyKinematic(), world->GetSentinelBody()));
 		model->AddCloseLoop(m_plane);
-
-		m_bestReward = -1.0f;
-		SaveInitialPose(ndFloat32(0.0f));
 	}
 
 	ndModelArticulation* ndController::CreateModel(ndDemoEntityManager* const scene, const ndMatrix& location, const ndRenderMeshLoader& loader, const char* const name)

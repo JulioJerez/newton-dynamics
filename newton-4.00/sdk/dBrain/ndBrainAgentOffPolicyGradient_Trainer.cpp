@@ -40,42 +40,20 @@
 #include "ndBrainAgentOffPolicyGradient_Trainer.h"
 
 #define ND_POLICY_LEARN_SCALE				ndBrainFloat(0.5f)
-#define ND_POLICY_MIN_SIGMA_SQUARE			ndBrainFloat(0.01f)
-#define ND_POLICY_MAX_SIGMA_SQUARE			ndBrainFloat(1.0f)
 #define ND_POLICY_DEFAULT_POLYAK_BLEND		ndBrainFloat(0.005f)
-#define ND_POLICY_MIN_ENTROPY_TEMPERATURE	ndBrainFloat(0.2f)
-#define ND_POLICY_MAX_ENTROPY_TEMPERATURE	ndBrainFloat(0.3f)
+#define ND_POLICY_MIN_ENTROPY_TEMPERATURE	ndBrainFloat(0.01f)
+#define ND_POLICY_MAX_ENTROPY_TEMPERATURE	ndBrainFloat(0.1f)
 
 ndBrainAgentOffPolicyGradient_Trainer::HyperParameters::HyperParameters()
 {
-	m_randomSeed = 47;
-	m_numberOfHiddenLayers = 3;
-	m_maxTrajectorySteps = 4096;
-	m_hiddenLayersNumberOfNeurons = 256;
-
-	m_useGpuBackend = true;
-	m_miniBatchSize = 256;
-	m_numberOfActions = 0;
-	m_numberOfObservations = 0;
-
-	m_learnRate = ndBrainFloat(1.0e-4f);
-	m_policyRegularizer = ndBrainFloat(1.0e-4f);
-	m_criticRegularizer = ndBrainFloat(1.0e-4f);
-	m_discountRewardFactor = ndBrainFloat(0.99f);
-	m_minSigmaSquared = ND_POLICY_MIN_SIGMA_SQUARE;
-	m_maxSigmaSquared = ND_POLICY_MAX_SIGMA_SQUARE;
-	m_entropyMinTemperature = ND_POLICY_MIN_ENTROPY_TEMPERATURE;
-	m_entropyMaxTemperature = ND_POLICY_MAX_ENTROPY_TEMPERATURE;
-
-	m_policyRegularizerType = m_ridge;
-	m_criticRegularizerType = m_ridge;
-
-	m_numberOfUpdates = 8;
 	m_replayBufferSize = 1024 * 1024;
 	m_maxNumberOfTrainingSteps = 1024 * 256;
-	m_replayBufferStartOptimizeSize = 1024 * 64;
-
 	m_polyakBlendFactor = ND_POLICY_DEFAULT_POLYAK_BLEND;
+	m_entropyMinTemperature = ND_POLICY_MIN_ENTROPY_TEMPERATURE;
+	m_entropyMaxTemperature = ND_POLICY_MAX_ENTROPY_TEMPERATURE;
+	
+	m_numberOfUpdates = 8;
+	m_replayBufferStartOptimizeSize = 1024 * 64;
 }
 
 ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::ndTrajectory()
@@ -338,7 +316,7 @@ ndBrainAgentOffPolicyGradient_Trainer::ndBrainAgentOffPolicyGradient_Trainer(con
 	ndAssert(m_parameters.m_numberOfActions);
 	ndAssert(m_parameters.m_numberOfObservations);
 
-	ndSetRandSeed(m_parameters.m_randomSeed);
+	ndSetRandSeed(ndUnsigned32(m_parameters.m_randomSeed));
 	m_uniformDistribution.Init(ndRandInt());
 	
 	m_parameters.m_numberOfUpdates = ndMax(m_parameters.m_numberOfUpdates, 2);
@@ -1067,7 +1045,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::OptimizeStep()
 		// calculate anneal parameter
 		ndFloat64 num = ndFloat64(m_frameCount);
 		ndFloat64 den = ndFloat64(m_parameters.m_maxNumberOfTrainingSteps - m_parameters.m_replayBufferStartOptimizeSize);
-		//ndBrainFloat param = ndBrainFloat((ndFloat64(1.0f) - ndClamp(num / den, ndFloat64(0.0f), ndFloat64(1.0f))));
 		ndBrainFloat param = ndBrainFloat(ndClamp(num / den, ndFloat64(0.0f), ndFloat64(1.0f)));
 
 		// linearly anneal entropy

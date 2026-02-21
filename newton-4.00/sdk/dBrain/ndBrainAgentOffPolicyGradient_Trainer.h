@@ -26,6 +26,7 @@
 
 #include "ndBrain.h"
 #include "ndBrainAgent.h"
+#include "ndBrainAgentContinuePolicyGradient.h"
 
 // Implementation of Soft Actor Critic algorithm (SAC) as described in:
 // https://arxiv.org/pdf/1801.01290
@@ -116,38 +117,18 @@ class ndBrainAgentOffPolicyGradient_Agent: public ndBrainAgent
 class ndBrainAgentOffPolicyGradient_Trainer : public ndClassAlloc
 {
 	public:
-	class HyperParameters
+	class HyperParameters: public ndContinuePolicyGradientHyperParameters
 	{
 		public:
 		HyperParameters();
 
-		ndBrainFloat m_learnRate;
-		ndBrainFloat m_minSigmaSquared;
-		ndBrainFloat m_maxSigmaSquared;
-		ndBrainFloat m_policyRegularizer;
-		ndBrainFloat m_criticRegularizer;
+		ndInt32 m_numberOfUpdates;
+		ndInt32 m_replayBufferSize;
+		ndInt32 m_replayBufferStartOptimizeSize;
 		ndBrainFloat m_polyakBlendFactor;
-		ndBrainFloat m_discountRewardFactor;
 		ndBrainFloat m_entropyMaxTemperature;
 		ndBrainFloat m_entropyMinTemperature;
 
-		ndUnsigned32 m_randomSeed;
-		ndInt32 m_miniBatchSize;
-		ndInt32 m_numberOfActions;
-		ndInt32 m_numberOfObservations;
-
-		ndInt32 m_numberOfHiddenLayers;
-		ndInt32 m_hiddenLayersNumberOfNeurons;
-
-		ndInt32 m_numberOfUpdates;
-		ndInt32 m_replayBufferSize;
-		ndInt32 m_maxTrajectorySteps;
-		ndInt32 m_maxNumberOfTrainingSteps;
-		ndInt32 m_replayBufferStartOptimizeSize;
-		bool m_useGpuBackend;
-		
-		ndRegularizerType m_policyRegularizerType;
-		ndRegularizerType m_criticRegularizerType;
 	};
 
 	ndBrainAgentOffPolicyGradient_Trainer(const HyperParameters& parameters);

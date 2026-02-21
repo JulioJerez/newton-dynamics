@@ -27,9 +27,9 @@ namespace ndUnicycleTrainer_sac
 		virtual void PresentHelp(ndDemoEntityManager* const scene) override
 		{
 			const ndVector color(ndFloat32(1.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f));
-			scene->Print(color, "training a double pendulum using Proximal Policy Optimization method");
-			scene->Print(color, "training goes for 100 millions steps. Therefore the training");
-			scene->Print(color, "section may take several hours with GPU back end");
+			scene->Print(color, "Training a double pendulum using the Soft Actor-Critic algorithm.");
+			scene->Print(color, "The training runs for up to 200000 steps (typical runs use 1 million steps for more complex model).");
+			scene->Print(color, "Depending on the configuration, the session may take over an hour with the GPU backend.");
 		}
 	};
 
@@ -81,17 +81,9 @@ namespace ndUnicycleTrainer_sac
 			m_owner->GetObservation(observation);
 		}
 
-		void GetInitialPose()
-		{
-			//ndFloat32 expectedReward = GetExpectedReward();
-			ndFloat32 expectedReward = CalculateReward();
-			m_owner->SaveInitialPose(expectedReward);
-		}
-
 		virtual void ApplyActions(ndBrainFloat* const actions) override
 		{
 			m_owner->ApplyActions(actions);
-			GetInitialPose();
 		}
 
 		void ResetModel() override
@@ -113,10 +105,10 @@ namespace ndUnicycleTrainer_sac
 			,m_timer(ndGetTimeInMicroseconds())
 			,m_maxScore(ndFloat32(-1.0e10f))
 			,m_saveScore(m_maxScore)
-			,m_discountRewardFactor(0.99f)
+			,m_discountRewardFactor(0.995f)
 			,m_horizon(ndFloat32(1.0f) / (ndFloat32(1.0f) - m_discountRewardFactor))
 			,m_lastEpisode(0xfffffff)
-			,m_stopTraining(1000000)
+			,m_stopTraining(200000)
 			,m_modelIsTrained(false)
 		{
 			char name[256];
@@ -125,15 +117,14 @@ namespace ndUnicycleTrainer_sac
 			fprintf(m_outFile, "sac\n");
 
 			// set random see for replication
-			ndSetRandSeed(42);
+			ndSetRandSeed(47);
 
 			// create a proximal policy training agent
 			ndBrainAgentOffPolicyGradient_Trainer::HyperParameters hyperParameters;
 			
 			hyperParameters.m_useGpuBackend = false;
-			hyperParameters.m_discountRewardFactor = 0.995f;
-			hyperParameters.m_numberOfHiddenLayers = 2;
-			hyperParameters.m_hiddenLayersNumberOfNeurons = 128;
+			//hyperParameters.m_numberOfHiddenLayers = 2;
+			hyperParameters.m_hiddenLayersNumberOfNeurons = 64;
 			hyperParameters.m_numberOfActions = m_actionsSize;
 			hyperParameters.m_numberOfObservations = m_observationsSize;
 			hyperParameters.m_maxNumberOfTrainingSteps = m_stopTraining;
@@ -159,6 +150,7 @@ namespace ndUnicycleTrainer_sac
 			
 			//add a control for the reward function
 			ndController* const controller = (ndController*)(*model->GetNotifyCallback());
+			controller->m_isTrainning = true;
 			controller->m_solver = ndSharedPtr<ndIkSolver>(new ndIkSolver);
 			
 			// add model a visual mesh to the scene and world

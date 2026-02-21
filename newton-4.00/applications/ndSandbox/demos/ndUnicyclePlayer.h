@@ -29,10 +29,14 @@ namespace ndUnicyclePlayer
 
 	#define ND_MAX_LEG_JOINT_ANGLE	(ndFloat32 (45.0f) * ndDegreeToRad)
 
-	#define ND_MAX_WHEEL_ALPHA		(ndFloat32 (500.0f))
+	#define ND_MAX_WHEEL_ALPHA		(ndFloat32 (100.0f))
 
 	#define ND_TERMINATION_ANGLE	(ndFloat32 (45.0f) * ndDegreeToRad)
 	#define ND_TRAJECTORY_STEPS		(1024 * 4)
+
+	#define ND_RANDOM_IMPULSE_MOD		256
+	#define ND_RANDOM_IMPULSE_MAGNITUD	ndFloat32 (10.0f)
+
 
 	enum ndActionSpace
 	{
@@ -42,12 +46,14 @@ namespace ndUnicyclePlayer
 
 	enum ndStateSpace
 	{
-		m_comSpeed,
-		m_poleAngle,
-		m_poleOmega,
+		m_boxAngle,
+		m_boxOmega,
 		m_hingeOmega,
 		m_hingeAngle,
-		m_hasSupportContact,
+		//m_poleAngle___,
+		//m_poleOmega___,
+		m_comSpeed,
+		m_hasContactSupport,
 		m_observationsSize
 	};
 
@@ -78,15 +84,6 @@ namespace ndUnicyclePlayer
 	class ndController : public ndModelNotify
 	{
 		public:
-		class ndPose
-		{
-			public:
-			ndMatrix m_location;
-			ndVector m_veloc;
-			ndVector m_omega;
-			ndBodyKinematic* m_body;
-		};
-
 		class ndAgent : public ndBrainAgentContinuePolicyGradient
 		{
 			public:
@@ -126,10 +123,10 @@ namespace ndUnicyclePlayer
 		ndBrainFloat IsOnAir() const;
 
 		bool IsTerminal() const;
+		ndFloat32 GetBoxAngle() const;
+		ndFloat32 GetBoxOmega() const;
 		ndFloat32 GetPoleAngle() const;
-		ndFloat32 GetPoleOmega() const;
 		ndBrainFloat CalculateReward() const;
-		void SaveInitialPose(ndFloat32 expectedReward);
 		void ApplyActions(ndBrainFloat* const actions);
 		void GetObservation(ndBrainFloat* const observation);
 
@@ -150,7 +147,7 @@ namespace ndUnicyclePlayer
 		ndSharedPtr<ndIkSolver> m_solver;
 		ndSharedPtr<ndBrainAgent> m_agent;
 		ndFloat32 m_timestep;
-		ndFloat32 m_bestReward;
-		ndFixSizeArray<ndPose, 4> m_modelPose;
+		ndInt32 m_randomImpulseCounter;
+		bool m_isTrainning;
 	};
 };

@@ -25,6 +25,45 @@
 #include "ndBrainStdafx.h"
 #include "ndBrain.h"
 #include "ndBrainAgent.h"
+#include "ndBrainOptimizerAdam.h"
+
+class ndContinuePolicyGradientHyperParameters
+{
+	public:
+	ndContinuePolicyGradientHyperParameters();
+
+	ndBrainFloat m_learnRate;
+	ndBrainFloat m_minSigmaSquared;
+	ndBrainFloat m_maxSigmaSquared;
+	ndBrainFloat m_policyRegularizer;
+	ndBrainFloat m_criticRegularizer;
+	ndBrainFloat m_discountRewardFactor;
+	ndBrainFloat m_entropyRegularizerCoef;
+
+	ndInt32 m_randomSeed;
+	ndInt32 m_miniBatchSize;
+	ndInt32 m_numberOfActions;
+	ndInt32 m_numberOfObservations;
+
+	ndInt32 m_numberOfHiddenLayers;
+	ndInt32 m_hiddenLayersNumberOfNeurons;
+
+	ndInt32 m_maxTrajectorySteps;
+	ndInt32 m_maxNumberOfTrainingSteps;
+
+	ndRegularizerType m_policyRegularizerType;
+	ndRegularizerType m_criticRegularizerType;
+	bool m_useGpuBackend;
+
+	//ndInt32 m_batchTrajectoryCount;
+	//ndBrainFloat m_polyakBlendFactor;
+	//ndBrainFloat m_entropyMaxTemperature;
+	//ndBrainFloat m_entropyMinTemperature;
+	//ndInt32 m_numberOfUpdates;
+	//ndInt32 m_replayBufferSize;
+	//ndInt32 m_maxNumberOfTrainingSteps;
+	//ndInt32 m_replayBufferStartOptimizeSize;
+};
 
 class ndBrainAgentContinuePolicyGradient: public ndBrainAgent
 {

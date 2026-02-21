@@ -81,17 +81,9 @@ namespace ndUnicycleTrainer_ppo
 			m_owner->GetObservation(observation);
 		}
 
-		void GetInitialPose()
-		{
-			//ndFloat32 expectedReward = GetExpectedReward();
-			ndFloat32 expectedReward = CalculateReward();
-			m_owner->SaveInitialPose(expectedReward);
-		}
-
 		virtual void ApplyActions(ndBrainFloat* const actions) override
 		{
 			m_owner->ApplyActions(actions);
-			GetInitialPose();
 		}
 
 		void ResetModel() override
@@ -113,7 +105,7 @@ namespace ndUnicycleTrainer_ppo
 			,m_timer(ndGetTimeInMicroseconds())
 			,m_maxScore(ndFloat32(-1.0e10f))
 			,m_saveScore(m_maxScore)
-			,m_discountRewardFactor(0.99f)
+			,m_discountRewardFactor(0.995f)
 			,m_horizon(ndFloat32(1.0f) / (ndFloat32(1.0f) - m_discountRewardFactor))
 			,m_lastEpisode(0xfffffff)
 			,m_stopTraining(1000 * 1000000)
@@ -131,12 +123,12 @@ namespace ndUnicycleTrainer_ppo
 			ndBrainAgentOnPolicyGradient_Trainer::HyperParameters hyperParameters;
 			
 			hyperParameters.m_useGpuBackend = false;
+			//hyperParameters.m_numberOfHiddenLayers = 2;
+			hyperParameters.m_hiddenLayersNumberOfNeurons = 64;
 			hyperParameters.m_batchTrajectoryCount = 1000;
-			hyperParameters.m_discountRewardFactor = 0.995f;
-			hyperParameters.m_numberOfHiddenLayers = 2;
-			hyperParameters.m_hiddenLayersNumberOfNeurons = 128;
 			hyperParameters.m_numberOfActions = m_actionsSize;
 			hyperParameters.m_numberOfObservations = m_observationsSize;
+			hyperParameters.m_maxNumberOfTrainingSteps = ndInt32(m_stopTraining);
 			hyperParameters.m_discountRewardFactor = ndReal(m_discountRewardFactor);
 			
 			m_master = ndSharedPtr<ndBrainAgentOnPolicyGradient_Trainer>(new ndBrainAgentOnPolicyGradient_Trainer(hyperParameters));
@@ -167,6 +159,7 @@ namespace ndUnicycleTrainer_ppo
 
 				//add a control for the reward function
 				ndController* const controller = (ndController*)(*model->GetNotifyCallback());
+				controller->m_isTrainning = true;
 				controller->m_solver = ndSharedPtr<ndIkSolver>(new ndIkSolver);
 			
 				// add model a visual mesh to the scene and world
