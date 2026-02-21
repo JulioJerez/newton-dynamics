@@ -32,6 +32,8 @@
 //#define ndBrainLayerLinearTileSize 16 // this is better but still some is no correct.
 #define ndBrainLayerLinearTileSize 32 // for some reason, this is too slow when multi threading
 
+#define ND_USING_TILE_VECTOR_CLASS
+
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndBrainFloatTileVector
 {
@@ -704,7 +706,7 @@ void ndBrainLayerLinear::MatrixMultiply_RowBased(const ndBrainLayerFeedForwardCp
 	const ndInt64 outputOffset = inputOffset + trainer->RoundOffOffset(inputSize);
 	ndBrainMemVector output(&inputOutputBuffer[outputOffset], outputSize);
 
-#if 0
+#ifndef ND_USING_TILE_VECTOR_CLASS
 	const ndBrainMemVector input(&inputOutputBuffer[inputOffset], inputSize);
 	for (ndInt32 i = outputSize - 1; i >= 0; --i)
 	{
@@ -943,23 +945,23 @@ void ndBrainLayerLinear::BackPropagateBiasAddPartialSumGradients(const ndBrainLa
 
 void ndBrainLayerLinear::BackPropagateWeightsGradients(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const
 {
-	ndBrainFixSizeVector<1024 * 8> cachedRowGradient;
-
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
 	ndBrainTrainer* const trainer = (ndBrainTrainer*)desc.m_owner;
 
 	const ndBrainFloat* const inputOutputBuffer = (ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr();
 	const ndBrainFloat* const inputOutputGradientsBuffer = (ndBrainFloat*)trainer->GetHiddenLayerGradientBuffer()->GetCpuPtr();
-	ndBrainFloat* const weightAndBiasGradients = (ndBrainFloat*)trainer->GetWeightAndBiasGradientBuffer()->GetCpuPtr();
+	const ndBrainFloat* const weightAndBiasGradients = (ndBrainFloat*)trainer->GetWeightAndBiasGradientBuffer()->GetCpuPtr();
 
-	ndInt32 inputSize = info.m_inputSize;
-	ndInt32 inputOutputSize = info.m_inputOutputSize;
-	ndInt32 numberOfRows = info.m_matrixDimensionK / m_dimFactor;
+	const ndInt32 inputSize = info.m_inputSize;
+	const ndInt32 inputOutputSize = info.m_inputOutputSize;
+	const ndInt32 numberOfRows = info.m_matrixDimensionK / m_dimFactor;
 
-	ndInt64 inputOutputStartOffset = info.m_inputOutputStartOffset;
-	ndInt64 dstBase = inputOutputStartOffset + trainer->RoundOffOffset(inputSize);
+	const ndInt64 inputOutputStartOffset = info.m_inputOutputStartOffset;
+	const ndInt64 dstBase = inputOutputStartOffset + trainer->RoundOffOffset(inputSize);
 
+#ifndef ND_USING_TILE_VECTOR_CLASS
+	ndBrainFixSizeVector<1024 * 8> cachedRowGradient;
 	cachedRowGradient.SetCount(inputSize);
 	cachedRowGradient.Set(ndBrainFloat(0.0f));
 	for (ndInt32 row = 0; row < numberOfRows; ++row)
@@ -972,6 +974,30 @@ void ndBrainLayerLinear::BackPropagateWeightsGradients(const ndBrainLayerBackPro
 		cachedRowGradient.ScaleAdd (inputData, outputDerivative);
 	}
 
+#else
+	const ndInt32 numOfSimd = (inputSize + ndBrainLayerLinearTileSize - 1) / ndBrainLayerLinearTileSize;
+	ndFixSizeArray<ndBrainFloatTileVector, 256> cachedSimdRowGradient;
+	cachedSimdRowGradient.SetCount(numOfSimd);
+
+	const ndBrainFloatTileVector zero(ndBrainFloat(0.0f));
+	for (ndInt32 i = numOfSimd - 1; i >= 0; --i)
+	{
+		cachedSimdRowGradient[i] = zero;
+	}
+	for (ndInt32 row = numberOfRows - 1; row >= 0; --row)
+	{
+		ndInt64 inputOffset = inputOutputStartOffset + row * inputOutputSize;
+		ndInt64 outGradientOffset = dstBase + row * inputOutputSize + miniBatchIndex;
+		const ndBrainFloatTileVector outputDerivative (inputOutputGradientsBuffer[outGradientOffset]);
+
+		const ndBrainFloatTileVector* const  inputData = (ndBrainFloatTileVector*)&inputOutputBuffer[inputOffset];
+		for (ndInt32 i = numOfSimd - 1; i >= 0; --i)
+		{
+			cachedSimdRowGradient[i] = cachedSimdRowGradient[i].MulAdd(inputData[i], outputDerivative);
+		}
+	}
+	const ndBrainMemVector cachedRowGradient(&cachedSimdRowGradient[0].m_f[0], inputSize);
+#endif
 	// store this weight gradient sum
 	ndInt32 width;
 	ndInt32 height;
@@ -1004,10 +1030,11 @@ void ndBrainLayerLinear::BackPropagateInputGradients(const ndBrainLayerBackPropa
 	const ndInt64 dstBase = srcBase + trainer->RoundOffOffset(inputSize);
 	ndAssert(srcBase >= 0);
 	ndAssert(dstBase >= 0);
-
+	
 	const ndBrainMemVector outputDerivative(&inputOutputGradientsBuffer[dstBase], outputSize);
 	const ndBrainMemVector weightsMatrix(&weightAndBias[info.m_parametersStartOffset], matrixSize);
-#if 1
+
+#ifndef ND_USING_TILE_VECTOR_CLASS
 	ndBrainMemVector inputDerivative(&inputOutputGradientsBuffer[srcBase], inputSize);
 	inputDerivative.Set(ndBrainFloat(0.0f));
 	for (ndInt32 i = 0; i < outputSize; ++i)
@@ -1017,7 +1044,6 @@ void ndBrainLayerLinear::BackPropagateInputGradients(const ndBrainLayerBackPropa
 		inputDerivative.ScaleAdd(weightsRow, outDerivative);
 	}
 #else
-
 	const ndInt32 numOfSimd = (inputSize + ndBrainLayerLinearTileSize - 1) / ndBrainLayerLinearTileSize;
 	ndBrainFloatTileVector* const inputDerivative = (ndBrainFloatTileVector*)&inputOutputGradientsBuffer[srcBase];
 
@@ -1035,6 +1061,7 @@ void ndBrainLayerLinear::BackPropagateInputGradients(const ndBrainLayerBackPropa
 			inputDerivative[i] = inputDerivative[i].MulAdd(weightRowSimd[i], outDerivative);
 		}
 	}
+	ndBrainMemVector inputDerivative1(&inputOutputGradientsBuffer[srcBase], inputSize);
 #endif
 }
 
