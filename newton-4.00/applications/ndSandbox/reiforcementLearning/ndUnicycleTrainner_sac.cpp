@@ -27,9 +27,9 @@ namespace ndUnicycleTrainer_sac
 		virtual void PresentHelp(ndDemoEntityManager* const scene) override
 		{
 			const ndVector color(ndFloat32(1.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f));
-			scene->Print(color, "training a double pendulum using Soft Actor Critic algorithm");
-			scene->Print(color, "training goes for 1 millions steps. Therefore the training");
-			scene->Print(color, "section may takes over an hours with GPU back end");
+			scene->Print(color, "Training a double pendulum using the Soft Actor-Critic algorithm.");
+			scene->Print(color, "The training runs for up to 200000 steps (typical runs use 1 million steps for more complex model).");
+			scene->Print(color, "Depending on the configuration, the session may take over an hour with the GPU backend.");
 		}
 	};
 
@@ -108,7 +108,7 @@ namespace ndUnicycleTrainer_sac
 			,m_discountRewardFactor(0.995f)
 			,m_horizon(ndFloat32(1.0f) / (ndFloat32(1.0f) - m_discountRewardFactor))
 			,m_lastEpisode(0xfffffff)
-			,m_stopTraining(1000000)
+			,m_stopTraining(200000)
 			,m_modelIsTrained(false)
 		{
 			char name[256];
