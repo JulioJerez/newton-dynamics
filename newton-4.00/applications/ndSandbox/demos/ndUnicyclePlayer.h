@@ -35,7 +35,7 @@ namespace ndUnicyclePlayer
 	#define ND_TRAJECTORY_STEPS		(1024 * 4)
 
 	#define ND_RANDOM_IMPULSE_MOD		256
-	#define ND_RANDOM_IMPULSE_MAGNITUD	ndFloat32 (10.0f)
+	#define ND_RANDOM_IMPULSE_MAGNITUD	ndFloat32 (7.0f)
 
 
 	enum ndActionSpace
