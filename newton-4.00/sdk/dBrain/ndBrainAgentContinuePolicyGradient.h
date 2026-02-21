@@ -38,7 +38,8 @@ class ndContinuePolicyGradientHyperParameters
 	ndBrainFloat m_policyRegularizer;
 	ndBrainFloat m_criticRegularizer;
 	ndBrainFloat m_discountRewardFactor;
-	ndBrainFloat m_entropyRegularizerCoef;
+	ndBrainFloat m_entropyMaxTemperature;
+	ndBrainFloat m_entropyMinTemperature;
 
 	ndInt32 m_randomSeed;
 	ndInt32 m_miniBatchSize;
@@ -54,15 +55,6 @@ class ndContinuePolicyGradientHyperParameters
 	ndRegularizerType m_policyRegularizerType;
 	ndRegularizerType m_criticRegularizerType;
 	bool m_useGpuBackend;
-
-	//ndInt32 m_batchTrajectoryCount;
-	//ndBrainFloat m_polyakBlendFactor;
-	//ndBrainFloat m_entropyMaxTemperature;
-	//ndBrainFloat m_entropyMinTemperature;
-	//ndInt32 m_numberOfUpdates;
-	//ndInt32 m_replayBufferSize;
-	//ndInt32 m_maxNumberOfTrainingSteps;
-	//ndInt32 m_replayBufferStartOptimizeSize;
 };
 
 class ndBrainAgentContinuePolicyGradient: public ndBrainAgent

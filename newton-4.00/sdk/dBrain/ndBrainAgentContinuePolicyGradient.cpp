@@ -23,8 +23,11 @@
 #include "ndBrainVector.h"
 #include "ndBrainAgentContinuePolicyGradient.h"
 
-#define ND_POLICY_MAX_SIGMA_SQUARE	ndBrainFloat(1.0f)
-#define ND_POLICY_MIN_SIGMA_SQUARE	ndBrainFloat(0.01f)
+#define ND_POLICY_MAX_SIGMA_SQUARE			ndBrainFloat(1.0f)
+#define ND_POLICY_MIN_SIGMA_SQUARE			ndBrainFloat(0.01f)
+#define ND_POLICY_MIN_ENTROPY_TEMPERATURE	ndBrainFloat(0.001f)
+#define ND_POLICY_MAX_ENTROPY_TEMPERATURE	ndBrainFloat(0.01f)
+
 
 ndContinuePolicyGradientHyperParameters::ndContinuePolicyGradientHyperParameters()
 {
@@ -49,6 +52,9 @@ ndContinuePolicyGradientHyperParameters::ndContinuePolicyGradientHyperParameters
 	m_maxNumberOfTrainingSteps = 0;
 	m_policyRegularizerType = m_ridge;
 	m_criticRegularizerType = m_ridge;
+
+	m_entropyMinTemperature = ND_POLICY_MIN_ENTROPY_TEMPERATURE;
+	m_entropyMaxTemperature = ND_POLICY_MAX_ENTROPY_TEMPERATURE;
 
 	m_useGpuBackend = true;
 }

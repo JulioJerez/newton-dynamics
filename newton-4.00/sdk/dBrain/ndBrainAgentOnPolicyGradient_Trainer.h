@@ -125,31 +125,6 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 		public:
 		HyperParameters();
 
-		//ndBrainFloat m_learnRate;
-		//ndBrainFloat m_minSigmaSquared;
-		//ndBrainFloat m_maxSigmaSquared;
-		//ndBrainFloat m_policyRegularizer;
-		//ndBrainFloat m_criticRegularizer;
-		//ndBrainFloat m_discountRewardFactor;
-		//ndBrainFloat m_entropyRegularizerCoef;
-		//ndBrainFloat m_divergenceStopThreshold;
-		//
-		//ndInt32 m_randomSeed;
-		//ndInt32 m_miniBatchSize;
-		//ndInt32 m_numberOfActions;
-		//ndInt32 m_numberOfObservations;
-		//
-		//ndInt32 m_divergenceMaxPasses;
-		//ndInt32 m_numberOfHiddenLayers;
-		//ndInt32 m_hiddenLayersNumberOfNeurons;
-		//
-		//ndInt32 m_maxTrajectorySteps;
-		//
-		//bool m_useGpuBackend;
-		//
-		//ndRegularizerType m_policyRegularizerType;
-		//ndRegularizerType m_criticRegularizerType;
-
 		ndInt32 m_divergenceMaxPasses;
 		ndInt32 m_batchTrajectoryCount;
 		ndBrainFloat m_divergenceStopThreshold;
@@ -240,6 +215,7 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndMovingAverage<ND_ON_POLICY_MOVING_AVERAGE_SCORE> m_averageFramesPerEpisodes;
 
 	ndBrainFloat m_learnRate;
+	ndBrainFloat m_entropyTemperature;
 	ndUnsigned32 m_frameCount;
 	ndUnsigned32 m_horizonSteps;
 	ndUnsigned32 m_eposideCount;

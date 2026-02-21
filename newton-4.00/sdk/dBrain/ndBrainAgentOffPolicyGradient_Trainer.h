@@ -126,9 +126,6 @@ class ndBrainAgentOffPolicyGradient_Trainer : public ndClassAlloc
 		ndInt32 m_replayBufferSize;
 		ndInt32 m_replayBufferStartOptimizeSize;
 		ndBrainFloat m_polyakBlendFactor;
-		ndBrainFloat m_entropyMaxTemperature;
-		ndBrainFloat m_entropyMinTemperature;
-
 	};
 
 	ndBrainAgentOffPolicyGradient_Trainer(const HyperParameters& parameters);

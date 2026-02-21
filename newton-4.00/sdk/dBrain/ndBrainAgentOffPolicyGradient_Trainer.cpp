@@ -41,16 +41,12 @@
 
 #define ND_POLICY_LEARN_SCALE				ndBrainFloat(0.5f)
 #define ND_POLICY_DEFAULT_POLYAK_BLEND		ndBrainFloat(0.005f)
-#define ND_POLICY_MIN_ENTROPY_TEMPERATURE	ndBrainFloat(0.01f)
-#define ND_POLICY_MAX_ENTROPY_TEMPERATURE	ndBrainFloat(0.1f)
 
 ndBrainAgentOffPolicyGradient_Trainer::HyperParameters::HyperParameters()
 {
 	m_replayBufferSize = 1024 * 1024;
 	m_maxNumberOfTrainingSteps = 1024 * 256;
 	m_polyakBlendFactor = ND_POLICY_DEFAULT_POLYAK_BLEND;
-	m_entropyMinTemperature = ND_POLICY_MIN_ENTROPY_TEMPERATURE;
-	m_entropyMaxTemperature = ND_POLICY_MAX_ENTROPY_TEMPERATURE;
 	
 	m_numberOfUpdates = 8;
 	m_replayBufferStartOptimizeSize = 1024 * 64;
@@ -940,6 +936,14 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 
 void ndBrainAgentOffPolicyGradient_Trainer::Optimize()
 {
+	// calculate anneal parameter
+	ndFloat64 num = ndFloat64(m_frameCount);
+	ndFloat64 den = ndFloat64(m_parameters.m_maxNumberOfTrainingSteps - m_parameters.m_replayBufferStartOptimizeSize);
+	ndBrainFloat param = ndBrainFloat(ndClamp(num / den, ndFloat64(0.0f), ndFloat64(1.0f)));
+
+	// linearly anneal entropy
+	m_entropyTemperature = m_parameters.m_entropyMinTemperature + param * (m_parameters.m_entropyMaxTemperature - m_parameters.m_entropyMinTemperature);
+
 	// get the number of indirect transitions 
 	m_miniBatchIndices.SetCount(0);
 	const ndInt32 numberOfSamples = m_parameters.m_numberOfUpdates * m_parameters.m_miniBatchSize;
@@ -1041,13 +1045,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::OptimizeStep()
 	SaveTrajectory();
 	if (m_startOptimization)
 	{
-		// calculate anneal parameter
-		ndFloat64 num = ndFloat64(m_frameCount);
-		ndFloat64 den = ndFloat64(m_parameters.m_maxNumberOfTrainingSteps - m_parameters.m_replayBufferStartOptimizeSize);
-		ndBrainFloat param = ndBrainFloat(ndClamp(num / den, ndFloat64(0.0f), ndFloat64(1.0f)));
-
-		// linearly anneal entropy
-		m_entropyTemperature = m_parameters.m_entropyMinTemperature + param * (m_parameters.m_entropyMaxTemperature - m_parameters.m_entropyMinTemperature);
 		Optimize();
 		m_frameCount++;
 
