@@ -31,7 +31,7 @@ class ndBrainAdamUpdateParametersRidge : public ndBrainBufferCommandCpu
 
 	// I am skipping the bias correction 
 	// I am yet to see why bias correction is nesserary, 
-	// to me is just generated an inial gain
+	// to me is just generated a fake initial gain
 	#pragma optimize( "", off )
 	virtual void Execute(ndInt32 groupId) override
 	{

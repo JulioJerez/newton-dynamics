@@ -121,12 +121,14 @@ class ndBrainLayerLinear : public ndBrainLayer
 		ndBrainFloatBuffer* const weightsAndBiasGradients) const override;
 
 	private:
-	void MatrixMultiply_RowBased(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex);
+	void TiledMatrixMultiply(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex);
+	void DotProductMatrixMultiply(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex);
 
 	ndBrainVector m_bias;
 	ndBrainMatrix m_weights;
 	friend class ndBrainTrainerInference;
-	friend class ndBrainLayerFeedForwardCpuCommand_RowMatrixMultiply;
+	friend class ndBrainLayerFeedForwardCpuCommand_TiledMatrixMultiply;
+	friend class ndBrainLayerFeedForwardCpuCommand_DotProductMatrixMultiply;
 };
 
 #endif 

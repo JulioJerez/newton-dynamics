@@ -29,10 +29,18 @@
 #include "ndBrainFloatBuffer.h"
 
 //#define ND_USE_CPU_TILE_MULTIPLY
-//#define ndBrainLayerLinearTileSize 16 // this is better but still some is no correct.
-#define ndBrainLayerLinearTileSize 32 // for some reason, this is too slow when multi threading
+// Tile-based matrix multiplication on the CPU is mostly an academic exercise.
+// It can be up to 10ms faster per trainning steps on a single core. 
+// However, in a multicore setup, the number of tiles is juts too small,
+// and there’s significant L1/L2 cache contention. 
+// Even a 256x256 matrix is too small for typical neural network training workloads.
+// This limitation doesn’t apply to GPUs, since their L1 cache acts as a scratchpad,
+// and they don’t need to manage cache coherence the same way CPUs do.#define ndBrainLayerLinearTileSize 32 
+// therfere for CPU I am using dot-product based matrix multiplication
+// with the wide 32 float wide vector class.
 
-#define ND_USING_TILE_VECTOR_CLASS
+#define ND_USING_WIDE_VECTOR_CLASS
+#define ndBrainLayerLinearTileSize 32 
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndBrainFloatTileVector
@@ -297,10 +305,45 @@ class ndBrainFloatTileVector
 
 #endif
 
-class ndBrainLayerFeedForwardCpuCommand_RowMatrixMultiply : public ndBrainLayerFeedForwardCpuCommand
+class ndBrainLayerFeedForwardCpuCommand_TiledMatrixMultiply : public ndBrainLayerFeedForwardCpuCommand
 {
 	public:
-	ndBrainLayerFeedForwardCpuCommand_RowMatrixMultiply(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer)
+	ndBrainLayerFeedForwardCpuCommand_TiledMatrixMultiply(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer)
+		:ndBrainLayerFeedForwardCpuCommand(desc, layer)
+	{
+		const ndBrainLayerLinear* const self = (ndBrainLayerLinear*)layer;
+		ndInt32 rows = self->GetOutputSize();
+		ndInt32 columns = self->GetInputSize();
+		self->CalculateRoundedSize(columns, rows);
+
+		ndInt32 miniBatchSize = desc.m_workGroupSize;
+		ndAssert((miniBatchSize & (ndBrainLayerLinearTileSize - 1)) == 0);
+		ndInt32 rowDim = rows / ndBrainLayerLinearTileSize;
+		ndInt32 columnDim = miniBatchSize / ndBrainLayerLinearTileSize;
+
+		for (ndInt32 i = 0; i < rowDim * columnDim; ++i)
+		{
+			m_cacheCoherance.PushBack(i);
+		}
+
+		// for now, just try a random shuffle
+		m_cacheCoherance.RandomShuffle(m_cacheCoherance.GetCount());
+	}
+
+	virtual void Execute(ndInt32 miniBatchIndex) override
+	{
+		ndBrainLayerLinear* const layer = (ndBrainLayerLinear*)m_layer;
+		ndInt32 remaIndex = m_cacheCoherance[miniBatchIndex];
+		layer->TiledMatrixMultiply(this, remaIndex);
+	}
+
+	ndArray<ndInt32> m_cacheCoherance;
+};
+
+class ndBrainLayerFeedForwardCpuCommand_DotProductMatrixMultiply : public ndBrainLayerFeedForwardCpuCommand
+{
+	public:
+	ndBrainLayerFeedForwardCpuCommand_DotProductMatrixMultiply(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer)
 		:ndBrainLayerFeedForwardCpuCommand(desc, layer)
 	{
 	}
@@ -308,7 +351,7 @@ class ndBrainLayerFeedForwardCpuCommand_RowMatrixMultiply : public ndBrainLayerF
 	virtual void Execute(ndInt32 miniBatchIndex) override
 	{
 		ndBrainLayerLinear* const layer = (ndBrainLayerLinear*)m_layer;
-		layer->MatrixMultiply_RowBased(this, miniBatchIndex);
+		layer->DotProductMatrixMultiply(this, miniBatchIndex);
 	}
 };
 
@@ -682,7 +725,7 @@ ndCommandSharedInfo ndBrainLayerLinear::GetCommandSharedInfo(ndBrainTrainerInfer
 	return info;
 }
 
-void ndBrainLayerLinear::MatrixMultiply_RowBased(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex)
+void ndBrainLayerLinear::DotProductMatrixMultiply(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex)
 {
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
@@ -706,7 +749,7 @@ void ndBrainLayerLinear::MatrixMultiply_RowBased(const ndBrainLayerFeedForwardCp
 	const ndInt64 outputOffset = inputOffset + trainer->RoundOffOffset(inputSize);
 	ndBrainMemVector output(&inputOutputBuffer[outputOffset], outputSize);
 
-#ifndef ND_USING_TILE_VECTOR_CLASS
+#ifndef ND_USING_WIDE_VECTOR_CLASS
 	const ndBrainMemVector input(&inputOutputBuffer[inputOffset], inputSize);
 	for (ndInt32 i = outputSize - 1; i >= 0; --i)
 	{
@@ -736,10 +779,11 @@ void ndBrainLayerLinear::MatrixMultiply_RowBased(const ndBrainLayerFeedForwardCp
 #endif
 }
 
-void ndBrainLayerLinear::FeedForward(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const
+void ndBrainLayerLinear::TiledMatrixMultiply(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex)
 {
-	// so far about twice slower.
-	// the float16 class, seems it needs to be an intricics implemention
+	// so far faster in single tread but much slowe in multicores.
+	// I suspect it is because the level one cache collusions 
+	// are more severe.
 
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
@@ -848,6 +892,11 @@ void ndBrainLayerLinear::FeedForward(const ndBrainLayerFeedForwardCpuCommand* co
 		((ndBrainFloatTileVector&)outputBuffer[dstOffset]) = timeColumn;
 		dstOffset += inputOutputSize;
 	}
+}
+
+void ndBrainLayerLinear::FeedForward(const ndBrainLayerFeedForwardCpuCommand* const, ndInt32) const
+{
+	ndAssert(0);
 }
 
 void ndBrainLayerLinear::BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const
@@ -960,7 +1009,7 @@ void ndBrainLayerLinear::BackPropagateWeightsGradients(const ndBrainLayerBackPro
 	const ndInt64 inputOutputStartOffset = info.m_inputOutputStartOffset;
 	const ndInt64 dstBase = inputOutputStartOffset + trainer->RoundOffOffset(inputSize);
 
-#ifndef ND_USING_TILE_VECTOR_CLASS
+#ifndef ND_USING_WIDE_VECTOR_CLASS
 	ndBrainFixSizeVector<1024 * 8> cachedRowGradient;
 	cachedRowGradient.SetCount(inputSize);
 	cachedRowGradient.Set(ndBrainFloat(0.0f));
@@ -1034,7 +1083,7 @@ void ndBrainLayerLinear::BackPropagateInputGradients(const ndBrainLayerBackPropa
 	const ndBrainMemVector outputDerivative(&inputOutputGradientsBuffer[dstBase], outputSize);
 	const ndBrainMemVector weightsMatrix(&weightAndBias[info.m_parametersStartOffset], matrixSize);
 
-#ifndef ND_USING_TILE_VECTOR_CLASS
+#ifndef ND_USING_WIDE_VECTOR_CLASS
 	ndBrainMemVector inputDerivative(&inputOutputGradientsBuffer[srcBase], inputSize);
 	inputDerivative.Set(ndBrainFloat(0.0f));
 	for (ndInt32 i = 0; i < outputSize; ++i)
@@ -1238,14 +1287,14 @@ ndCommandArray ndBrainLayerLinear::CreateFeedForwardBufferCommand(
 		ndBrainBufferCommandDesc tileDescriptor(MakeFeedForwardDesctriptor(
 			owner, context, info, columnDim * rowDim, miniBatchSize, inputOutputData, weightsAndBias));
 
-		ndBrainBufferCommand* const tiledCommand = new ndBrainLayerFeedForwardCpuCommand(tileDescriptor, (ndBrainLayer*)this);
+		ndBrainBufferCommand* const tiledCommand = new ndBrainLayerFeedForwardCpuCommand_TiledMatrixMultiply(tileDescriptor, (ndBrainLayer*)this);
 		commandArray.PushBack(tiledCommand);
 #else
 		// create a row based matrix multiply command buffer
 		ndBrainBufferCommandDesc rowDescriptor(MakeFeedForwardDesctriptor(
 			owner, context, info, miniBatchSize, 0,
 			inputOutputData, weightsAndBias));
-		ndBrainBufferCommand* const rowCommand = new ndBrainLayerFeedForwardCpuCommand_RowMatrixMultiply(rowDescriptor, (ndBrainLayer*)this);
+		ndBrainBufferCommand* const rowCommand = new ndBrainLayerFeedForwardCpuCommand_DotProductMatrixMultiply(rowDescriptor, (ndBrainLayer*)this);
 		commandArray.PushBack(rowCommand);
 #endif
 	}
