@@ -50,8 +50,6 @@ namespace ndUnicyclePlayer
 		m_boxOmega,
 		m_hingeOmega,
 		m_hingeAngle,
-		//m_poleAngle___,
-		//m_poleOmega___,
 		m_comSpeed,
 		m_hasContactSupport,
 		m_observationsSize
