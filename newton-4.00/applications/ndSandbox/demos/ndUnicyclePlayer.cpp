@@ -31,7 +31,7 @@ namespace ndUnicyclePlayer
 			scene->Print(color, "The model was trained using the Soft Actor-Critic (SAC) algorithm.");
 			scene->Print(color, "The system consists of a heavy box attached to a pole,");
 			scene->Print(color, "than can swing freely around a pivot over the box center of mass");
-			scene->Print(color, "the ploe has a wheel at the end that rolls by applying torque.");
+			scene->Print(color, "the pole has a wheel at the end that rolls by applying torque.");
 			scene->Print(color, "The objective is to train a neural network to keep");
 			scene->Print(color, "the pole balanced in an upright position.");
 			scene->Print(color, "You can interact with the simulation");
