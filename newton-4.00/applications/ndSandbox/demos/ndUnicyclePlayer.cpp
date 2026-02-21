@@ -25,14 +25,17 @@ namespace ndUnicyclePlayer
 		virtual void PresentHelp(ndDemoEntityManager* const scene) override
 		{
 			ndVector color(1.0f, 1.0f, 0.0f, 0.0f);
-			scene->Print(color, "unicycle is a typical reinforcement learning");
-			scene->Print(color, "it is use to test the correctness of an algorithm implementation.");
-			scene->Print(color, "The model is trained using Soft Actor Critic(SAC).");
-			scene->Print(color, "It consists of a pole attached by a hinge to a sliding cart.");
-			scene->Print(color, "The objective goal was to train a neural network to keep");
+			scene->Print(color, "Pre-trained inverted pendulum environment.");
+			scene->Print(color, "This is a classic reinforcement learning benchmark,");
+			scene->Print(color, "commonly used to validate algorithm implementations.");
+			scene->Print(color, "The model was trained using the Soft Actor-Critic (SAC) algorithm.");
+			scene->Print(color, "The system consists of a heavy box attached to a pole,");
+			scene->Print(color, "than can swing freely around a pivot over the box center of mass");
+			scene->Print(color, "the ploe has a wheel at the end that rolls by applying torque.");
+			scene->Print(color, "The objective is to train a neural network to keep");
 			scene->Print(color, "the pole balanced in an upright position.");
-			scene->Print(color, "You can interact with the simulation and try.");
-			scene->Print(color, "to knock the pole over using the mouse.");
+			scene->Print(color, "You can interact with the simulation");
+			scene->Print(color, "and try to knock the pole over using the mouse.");
 		}
 	};
 	
@@ -389,7 +392,7 @@ void ndUnicyclePlayer_SAC(ndDemoEntityManager* const scene)
 	ndSharedPtr<ndBody> mapBody(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
 
 	// add a help message
-	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend_Ppo());
+	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend_Sac());
 	scene->SetDemoHelp(demoHelper);
 
 	// oveload the ground friction
