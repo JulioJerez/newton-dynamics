@@ -326,7 +326,9 @@ class ndBrainLayerFeedForwardCpuCommand_TiledMatrixMultiply : public ndBrainLaye
 			m_cacheCoherance.PushBack(i);
 		}
 
-		// for now, just try a random shuffle
+		// no enought tile to resoule cache collusion by sorting
+		// the row-columns tiles.
+		// just try a random shuffle
 		m_cacheCoherance.RandomShuffle(m_cacheCoherance.GetCount());
 	}
 
@@ -1290,7 +1292,7 @@ ndCommandArray ndBrainLayerLinear::CreateFeedForwardBufferCommand(
 		ndBrainBufferCommand* const tiledCommand = new ndBrainLayerFeedForwardCpuCommand_TiledMatrixMultiply(tileDescriptor, (ndBrainLayer*)this);
 		commandArray.PushBack(tiledCommand);
 #else
-		// create a row based matrix multiply command buffer
+		// create a dot product based matrix multiply command buffer
 		ndBrainBufferCommandDesc rowDescriptor(MakeFeedForwardDesctriptor(
 			owner, context, info, miniBatchSize, 0,
 			inputOutputData, weightsAndBias));
