@@ -37,9 +37,8 @@ class ndContinuePolicyGradientHyperParameters
 	ndBrainFloat m_maxSigmaSquared;
 	ndBrainFloat m_policyRegularizer;
 	ndBrainFloat m_criticRegularizer;
+	ndBrainFloat m_entropyTemperature;
 	ndBrainFloat m_discountRewardFactor;
-	ndBrainFloat m_entropyMaxTemperature;
-	ndBrainFloat m_entropyMinTemperature;
 
 	ndInt32 m_randomSeed;
 	ndInt32 m_miniBatchSize;

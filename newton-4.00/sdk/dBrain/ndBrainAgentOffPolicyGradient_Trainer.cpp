@@ -300,7 +300,6 @@ ndBrainAgentOffPolicyGradient_Trainer::ndBrainAgentOffPolicyGradient_Trainer(con
 	,m_averageExpectedRewards()
 	,m_averageFramesPerEpisodes()
 	,m_learnRate(m_parameters.m_learnRate)
-	,m_entropyTemperature(m_parameters.m_entropyMinTemperature)
 	,m_frameCount(0)
 	,m_horizonSteps(0)
 	,m_eposideCount(0)
@@ -760,7 +759,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::CalculateExpectedRewards()
 	m_minibatchNoTerminal->CopyBuffer(criticOutputTerminal, m_parameters.m_miniBatchSize, **m_minibatchOfTransitions);
 
 	// calculate and add entropy regularization to the q value
-	m_minibatchEntropy->CalculateEntropyRegularization(**m_minibatchGaussianDistribution, **m_minibatchSigma, m_entropyTemperature);
+	m_minibatchEntropy->CalculateEntropyRegularization(**m_minibatchGaussianDistribution, **m_minibatchSigma, m_parameters.m_entropyTemperature);
 	qValue.Sub(**m_minibatchEntropy);
 	qValue.Mul(**m_minibatchNoTerminal);
 	qValue.Scale(m_parameters.m_discountRewardFactor);
@@ -924,7 +923,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 	policyMinibatchOutputBuffer->CopyBuffer(policyEntropyGradients, m_parameters.m_miniBatchSize, *criticMinibatchInputGradientBuffer);
 
 	ndBrainFloatBuffer* const policyMinibatchOutputGradientBuffer = m_policyTrainer->GetOuputGradientBuffer();
-	policyMinibatchOutputGradientBuffer->CalculateEntropyRegularizationGradient(**m_minibatchGaussianDistribution, **m_minibatchSigma, m_entropyTemperature, ndInt32(meanOutputSizeInBytes / sizeof(ndReal)));
+	policyMinibatchOutputGradientBuffer->CalculateEntropyRegularizationGradient(**m_minibatchGaussianDistribution, **m_minibatchSigma, m_parameters.m_entropyTemperature, ndInt32(meanOutputSizeInBytes / sizeof(ndReal)));
 
 	// subtract the qValue gradient from the entropy gradient.
 	// The subtraction in reverse order, to get the gradient ascend.
@@ -936,14 +935,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 
 void ndBrainAgentOffPolicyGradient_Trainer::Optimize()
 {
-	// calculate anneal parameter
-	ndFloat64 num = ndFloat64(m_frameCount);
-	ndFloat64 den = ndFloat64(m_parameters.m_maxNumberOfTrainingSteps - m_parameters.m_replayBufferStartOptimizeSize);
-	ndBrainFloat param = ndBrainFloat(ndClamp(num / den, ndFloat64(0.0f), ndFloat64(1.0f)));
-
-	// linearly anneal entropy
-	m_entropyTemperature = m_parameters.m_entropyMinTemperature + param * (m_parameters.m_entropyMaxTemperature - m_parameters.m_entropyMinTemperature);
-
 	// get the number of indirect transitions 
 	m_miniBatchIndices.SetCount(0);
 	const ndInt32 numberOfSamples = m_parameters.m_numberOfUpdates * m_parameters.m_miniBatchSize;

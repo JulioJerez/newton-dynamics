@@ -299,7 +299,6 @@ ndBrainAgentOnPolicyGradient_Trainer::ndBrainAgentOnPolicyGradient_Trainer(const
 	,m_averageExpectedRewards()
 	,m_averageFramesPerEpisodes()
 	,m_learnRate(m_parameters.m_learnRate)
-	,m_entropyTemperature(m_parameters.m_entropyMinTemperature)
 	,m_frameCount(0)
 	,m_horizonSteps(0)
 	,m_eposideCount(0)
@@ -857,7 +856,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 		policyMinibatchOutputBuffer->BroadcastScaler(**m_advantageMinibatchBuffer);
 		policyMinibatchOutputGradientBuffer->Mul(*policyMinibatchOutputBuffer);
 		
-		if (m_entropyTemperature > ndFloat32 (0.0f))
+		if (m_parameters.m_entropyTemperature > ndFloat32 (0.0f))
 		{
 			ndAssert(0);
 			//// calculate entropy regularization
@@ -1030,7 +1029,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizedSurrogatePolicy(ndInt32 pass
 		policyMinibatchOutputBuffer->BroadcastScaler(**m_advantageMinibatchBuffer);
 		policyMinibatchOutputGradientBuffer->Mul(*policyMinibatchOutputBuffer);
 
-		if (m_entropyTemperature > ndFloat32(0.0f))
+		if (m_parameters.m_entropyTemperature > ndFloat32(0.0f))
 		{
 			ndAssert(0);
 			// calculate entropy regularization
@@ -1041,7 +1040,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizedSurrogatePolicy(ndInt32 pass
 			m_minibatchGaussianDistribution->Add(**m_meanBuffer);
 			m_minibatchGaussianDistribution->Min(ndBrainFloat(1.0f));
 			m_minibatchGaussianDistribution->Max(ndBrainFloat(-1.0f));
-			policyMinibatchOutputBuffer->CalculateEntropyRegularizationGradient(**m_minibatchGaussianDistribution, **m_sigmaBuffer, m_entropyTemperature, m_parameters.m_numberOfActions);
+			policyMinibatchOutputBuffer->CalculateEntropyRegularizationGradient(**m_minibatchGaussianDistribution, **m_sigmaBuffer, m_parameters.m_entropyTemperature, m_parameters.m_numberOfActions);
 
 			policyMinibatchOutputGradientBuffer->Sub(*policyMinibatchOutputBuffer);
 		}
@@ -1156,14 +1155,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeStep()
 
 void ndBrainAgentOnPolicyGradient_Trainer::Optimize()
 {
-	// calculate anneal parameter
-	ndFloat64 num = ndFloat64(m_frameCount);
-	ndFloat64 den = ndFloat64(m_parameters.m_maxNumberOfTrainingSteps);
-	ndBrainFloat param = ndBrainFloat(ndClamp(num / den, ndFloat64(0.0f), ndFloat64(1.0f)));
-
-	// linearly anneal entropy
-	m_entropyTemperature = m_parameters.m_entropyMinTemperature + param * (m_parameters.m_entropyMaxTemperature - m_parameters.m_entropyMinTemperature);
-m_entropyTemperature = 0.0f;
+m_parameters.m_entropyTemperature = 0.0f;
 
 	UpdateScore();
 	TrajectoryToGpuBuffers();
