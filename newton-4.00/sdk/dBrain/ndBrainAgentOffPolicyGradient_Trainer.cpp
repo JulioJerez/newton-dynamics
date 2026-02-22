@@ -487,7 +487,6 @@ ndFloat32 ndBrainAgentOffPolicyGradient_Trainer::GetAverageScore() const
 	ndBrainFloat maxScore = ndBrainFloat(1.0f) / (ndBrainFloat(1.0f) - m_parameters.m_discountRewardFactor);
 	ndBrainFloat score = ndBrainFloat(1.0f) * m_averageExpectedRewards.GetAverage() / maxScore;
 	return score;
-	//return m_averageExpectedRewards.GetAverage();
 }
 
 ndFloat32 ndBrainAgentOffPolicyGradient_Trainer::GetAverageFrames() const
