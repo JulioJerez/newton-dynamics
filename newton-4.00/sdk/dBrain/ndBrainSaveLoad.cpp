@@ -39,6 +39,7 @@
 #include "ndBrainAgentPolicyGradientActivation.h"
 #include "ndBrainAgentOnPolicyGradient_Trainer.h"
 #include "ndBrainAgentOffPolicyGradient_Trainer.h"
+#include <ndBrainLayerActivationLinearNormalize.h>
 #include "ndBrainLayerActivationCategoricalSoftmax.h"
 //#include "ndBrainLayerConvolutionalWithDropOut_2d.h"
 
@@ -116,6 +117,10 @@ ndBrain* ndBrainLoad::Load() const
 		else if (!strcmp(layerType, ND_BRAIN_LAYER_ACTIVATION_LINEAR_NAME))
 		{
 			layer = ndBrainLayerActivationLinear::Load(this);
+		}
+		else if (!strcmp(layerType, ND_BRAIN_LAYER_ACTIVATION_LINEAR_NORMALIZE_NAME))
+		{
+			layer = ndBrainLayerActivationLinearNormalize::Load(this);
 		}
 		else if (!strcmp(layerType, ND_BRAIN_LAYER_ACTIVATION_TANGH_NAME))
 		{

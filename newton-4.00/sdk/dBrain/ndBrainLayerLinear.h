@@ -27,10 +27,9 @@
 #include "ndBrainVector.h"
 #include "ndBrainMatrix.h"
 
-#define ND_BRAIN_LAYER_LINEAR_NAME	"ndBrainLayerLinear"
-
-#define ND_GPU_TILED_MATRIX_ROWS_BITS		5
-#define ND_GPU_TILED_MATRIX_ROWS			(1<<ND_GPU_TILED_MATRIX_ROWS_BITS)
+#define ND_BRAIN_LAYER_LINEAR_NAME		"ndBrainLayerLinear"
+#define ND_GPU_TILED_MATRIX_ROWS_BITS	5
+#define ND_GPU_TILED_MATRIX_ROWS		(1<<ND_GPU_TILED_MATRIX_ROWS_BITS)
 
 class ndBrainLayerLinear : public ndBrainLayer
 {

@@ -132,6 +132,10 @@ void ndBrainLayer::ApplyDropOut(ndFloat32)
 {
 }
 
+void ndBrainLayer::SetTrainingMode()
+{
+}
+
 void ndBrainLayer::InitWeights()
 {
 	ndAssert(0);

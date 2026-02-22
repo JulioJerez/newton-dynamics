@@ -193,6 +193,15 @@ void ndBrain::ResetDropOut()
 	ApplyDropOutRate(ndFloat32(0.0f));
 }
 
+void ndBrain::SetTrainingMode()
+{
+	ndArray<ndBrainLayer*>& layers = *this;
+	for (ndInt32 i = ndInt32(layers.GetCount() - 1); i >= 0; --i)
+	{
+		layers[i]->SetTrainingMode();
+	}
+}
+
 ndInt32 ndBrain::CalculateMaxLayerBufferSize() const
 {
 	const ndArray<ndBrainLayer*>& layers = *this;
