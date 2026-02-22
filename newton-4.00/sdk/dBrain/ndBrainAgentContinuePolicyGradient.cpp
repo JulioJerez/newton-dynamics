@@ -28,7 +28,8 @@
 // we ensure that the likelihood never exceeds 1.0, so it can be interpreted
 // as a valid probability density value.
 // This guarantees that the maximum entropy remains <= 0.
-#define ND_POLICY_MIN_SIGMA_SQUARE		ndBrainFloat(0.16f)
+//#define ND_POLICY_MIN_SIGMA_SQUARE		ndBrainFloat(0.16f)
+#define ND_POLICY_MIN_SIGMA_SQUARE		ndBrainFloat(0.01f)
 #define ND_POLICY_MAX_SIGMA_SQUARE		ndBrainFloat(1.0f)
 #define ND_POLICY_ENTROPY_TEMPERATURE	ndBrainFloat(0.05f)
 
