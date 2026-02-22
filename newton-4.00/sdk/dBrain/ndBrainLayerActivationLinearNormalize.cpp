@@ -105,7 +105,6 @@ void ndBrainLayerActivationLinearNormalize::Save(const ndBrainSave* const loadSa
 
 ndBrainLayer* ndBrainLayerActivationLinearNormalize::Load(const ndBrainLoad* const loadSave)
 {
-	ndAssert(0);
 	char buffer[1024];
 	loadSave->ReadString(buffer);
 	
