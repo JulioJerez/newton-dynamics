@@ -34,10 +34,10 @@
 #include "ndBrainLayerActivationRelu.h"
 #include "ndBrainLayerActivationTanh.h"
 #include "ndBrainLossLeastSquaredError.h"
-#include "ndBrainLayerActivationLinear.h"
 #include "ndBrainLayerActivationLeakyRelu.h"
 #include "ndBrainAgentPolicyGradientActivation.h"
 #include "ndBrainAgentOffPolicyGradient_Trainer.h"
+#include "ndBrainLayerActivationLinearNormalize.h"
 
 #define ND_POLICY_LEARN_SCALE				ndBrainFloat(0.5f)
 #define ND_POLICY_DEFAULT_POLYAK_BLEND		ndBrainFloat(0.005f)
@@ -386,6 +386,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildPolicyClass()
 	
 	layers.SetCount(0);
 
+	layers.PushBack(new ndBrainLayerActivationLinearNormalize(m_parameters.m_numberOfObservations));
 	layers.PushBack(new ndBrainLayerLinear(m_parameters.m_numberOfObservations, m_parameters.m_hiddenLayersNumberOfNeurons));
 	layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 	for (ndInt32 i = 0; i < m_parameters.m_numberOfHiddenLayers; ++i)
@@ -403,6 +404,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildPolicyClass()
 		policy->AddLayer(layers[i]);
 	}
 	policy->InitWeights();
+	policy->SetTrainingMode();
 
 	ndSharedPtr<ndBrainOptimizer> optimizer (new ndBrainOptimizerAdam(m_context));
 	//ndSharedPtr<ndBrainOptimizer> optimizer(new ndBrainOptimizerSgd(m_context));
@@ -420,6 +422,8 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildCriticClass()
 		const ndBrain& policy = **m_policyTrainer->GetBrain();
 		ndFixSizeArray<ndBrainLayer*, 32> layers;
 		layers.SetCount(0);
+
+		layers.PushBack(new ndBrainLayerActivationLinearNormalize(policy.GetOutputSize() + policy.GetInputSize()));
 		layers.PushBack(new ndBrainLayerLinear(policy.GetOutputSize() + policy.GetInputSize(), m_parameters.m_hiddenLayersNumberOfNeurons));
 		layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 

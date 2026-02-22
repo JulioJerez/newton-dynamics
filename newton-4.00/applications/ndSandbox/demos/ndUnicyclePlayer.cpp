@@ -259,12 +259,11 @@ namespace ndUnicyclePlayer
 		ndModelArticulation::ndCenterOfMassDynamics comKinematics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassKinematics(comFrame));
 		m_wheel->SetOmegaNoSleep(savedWheelOmega);
 
-		ndFloat32 comSpeed = comKinematics.m_veloc.m_z * ndFloat32(0.25f);
-		ndFloat32 boxAngle = GetBoxAngle() / ndPi;
+		ndFloat32 boxAngle = GetBoxAngle();
 		ndFloat32 boxOmega = GetBoxOmega();
-
+		ndFloat32 comSpeed = comKinematics.m_veloc.m_z;
+		ndFloat32 hingeAngle = ((ndJointHinge*)*m_poleHinge)->GetAngle();
 		ndFloat32 hingeOmega = ((ndJointHinge*)*m_poleHinge)->GetOmega();
-		ndFloat32 hingeAngle = ((ndJointHinge*)*m_poleHinge)->GetAngle() / ND_MAX_LEG_JOINT_ANGLE;
 
 		observation[m_hasContactSupport] = IsOnAir();
 		observation[m_comSpeed] = ndBrainFloat(comSpeed);
