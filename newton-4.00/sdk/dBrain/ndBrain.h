@@ -57,6 +57,7 @@ class ndBrain: public ndArray<ndBrainLayer*>
 	ndInt32 CalculateMaxLayerBufferSize() const;
 
 	void ResetDropOut();
+	void SetTrainingMode();
 	void ApplyDropOutRate(ndFloat32 rate);
 
 	void InitWeights();

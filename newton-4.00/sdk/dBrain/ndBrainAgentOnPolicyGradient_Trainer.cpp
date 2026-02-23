@@ -33,10 +33,10 @@
 #include "ndBrainLayerActivationRelu.h"
 #include "ndBrainLayerActivationTanh.h"
 #include "ndBrainLossLeastSquaredError.h"
-#include "ndBrainLayerActivationLinear.h"
 #include "ndBrainLayerActivationLeakyRelu.h"
 #include "ndBrainAgentPolicyGradientActivation.h"
 #include "ndBrainAgentOnPolicyGradient_Trainer.h"
+#include "ndBrainLayerActivationLinearNormalize.h"
 
 #define ND_POLICY_MAX_KL_DIVERGENCE_PASSES			8
 #define ND_POLICY_KL_DIVERGENCE_STOP_THRESHHOLD		ndBrainFloat(1.0e-4f)
@@ -392,6 +392,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildPolicyClass()
 	ndFixSizeArray<ndBrainLayer*, 32> layers;
 	
 	layers.SetCount(0);
+	layers.PushBack(new ndBrainLayerActivationLinearNormalize(m_parameters.m_numberOfObservations));
 	layers.PushBack(new ndBrainLayerLinear(m_parameters.m_numberOfObservations, m_parameters.m_hiddenLayersNumberOfNeurons));
 	layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 	for (ndInt32 i = 0; i < m_parameters.m_numberOfHiddenLayers; ++i)
@@ -409,6 +410,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildPolicyClass()
 		policy->AddLayer(layers[i]);
 	}
 	policy->InitWeights();
+	policy->SetTrainingMode();
 
 	ndSharedPtr<ndBrainOptimizer> optimizer(new ndBrainOptimizerAdam(m_context));
 	optimizer->SetRegularizer(m_parameters.m_policyRegularizer);
@@ -425,6 +427,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildCriticClass()
 
 	layers.SetCount(0);
 
+	layers.PushBack(new ndBrainLayerActivationLinearNormalize(policy.GetInputSize()));
 	layers.PushBack(new ndBrainLayerLinear(policy.GetInputSize(), m_parameters.m_hiddenLayersNumberOfNeurons));
 	layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 	for (ndInt32 i = 0; i < m_parameters.m_numberOfHiddenLayers; ++i)
@@ -442,6 +445,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildCriticClass()
 		critic->AddLayer(layers[i]);
 	}
 	critic->InitWeights();
+	critic->SetTrainingMode();
 	
 	ndSharedPtr<ndBrainOptimizer> optimizer(new ndBrainOptimizerAdam(m_context));
 	optimizer->SetRegularizer(m_parameters.m_criticRegularizer);
@@ -856,7 +860,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 		policyMinibatchOutputBuffer->BroadcastScaler(**m_advantageMinibatchBuffer);
 		policyMinibatchOutputGradientBuffer->Mul(*policyMinibatchOutputBuffer);
 		
-		if (m_parameters.m_entropyRegularizerCoef > ndFloat32 (0.0f))
+		if (m_parameters.m_entropyTemperature > ndFloat32 (0.0f))
 		{
 			ndAssert(0);
 			//// calculate entropy regularization
@@ -1029,7 +1033,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizedSurrogatePolicy(ndInt32 pass
 		policyMinibatchOutputBuffer->BroadcastScaler(**m_advantageMinibatchBuffer);
 		policyMinibatchOutputGradientBuffer->Mul(*policyMinibatchOutputBuffer);
 
-		if (m_parameters.m_entropyRegularizerCoef > ndFloat32(0.0f))
+		if (m_parameters.m_entropyTemperature > ndFloat32(0.0f))
 		{
 			ndAssert(0);
 			// calculate entropy regularization
@@ -1040,7 +1044,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizedSurrogatePolicy(ndInt32 pass
 			m_minibatchGaussianDistribution->Add(**m_meanBuffer);
 			m_minibatchGaussianDistribution->Min(ndBrainFloat(1.0f));
 			m_minibatchGaussianDistribution->Max(ndBrainFloat(-1.0f));
-			policyMinibatchOutputBuffer->CalculateEntropyRegularizationGradient(**m_minibatchGaussianDistribution, **m_sigmaBuffer, m_parameters.m_entropyRegularizerCoef, m_parameters.m_numberOfActions);
+			policyMinibatchOutputBuffer->CalculateEntropyRegularizationGradient(**m_minibatchGaussianDistribution, **m_sigmaBuffer, m_parameters.m_entropyTemperature, m_parameters.m_numberOfActions);
 
 			policyMinibatchOutputGradientBuffer->Sub(*policyMinibatchOutputBuffer);
 		}
@@ -1155,6 +1159,8 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeStep()
 
 void ndBrainAgentOnPolicyGradient_Trainer::Optimize()
 {
+m_parameters.m_entropyTemperature = 0.0f;
+
 	UpdateScore();
 	TrajectoryToGpuBuffers();
 

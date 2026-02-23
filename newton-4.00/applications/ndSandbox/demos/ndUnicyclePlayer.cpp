@@ -25,14 +25,17 @@ namespace ndUnicyclePlayer
 		virtual void PresentHelp(ndDemoEntityManager* const scene) override
 		{
 			ndVector color(1.0f, 1.0f, 0.0f, 0.0f);
-			scene->Print(color, "unicycle is a typical reinforcement learning");
-			scene->Print(color, "it is use to test the correctness of an algorithm implementation.");
-			scene->Print(color, "The model is trained using Soft Actor Critic(SAC).");
-			scene->Print(color, "It consists of a pole attached by a hinge to a sliding cart.");
-			scene->Print(color, "The objective goal was to train a neural network to keep");
+			scene->Print(color, "Pre-trained inverted pendulum environment.");
+			scene->Print(color, "This is a classic reinforcement learning benchmark,");
+			scene->Print(color, "commonly used to validate algorithm implementations.");
+			scene->Print(color, "The model was trained using the Soft Actor-Critic (SAC) algorithm.");
+			scene->Print(color, "The system consists of a heavy box attached to a pole,");
+			scene->Print(color, "than can swing freely around a pivot over the box center of mass");
+			scene->Print(color, "the pole has a wheel at the end that rolls by applying torque.");
+			scene->Print(color, "The objective is to train a neural network to keep");
 			scene->Print(color, "the pole balanced in an upright position.");
-			scene->Print(color, "You can interact with the simulation and try.");
-			scene->Print(color, "to knock the pole over using the mouse.");
+			scene->Print(color, "You can interact with the simulation");
+			scene->Print(color, "and try to knock the pole over using the mouse.");
 		}
 	};
 	
@@ -142,8 +145,12 @@ namespace ndUnicyclePlayer
 	#pragma optimize( "", off )
 	bool ndController::IsTerminal() const
 	{
-		ndFloat32 angle = GetPoleAngle();
-		bool fail = ndAbs(angle) > ND_TERMINATION_ANGLE;
+		bool fail = ndAbs(GetPoleAngle()) > ND_TERMINATION_ANGLE;
+		fail = fail || ndAbs(GetBoxAngle()) > ndFloat32 (90.0f) * ndDegreeToRad;
+		if (ndAbs(GetBoxAngle()) > ndFloat32(90.0f) * ndDegreeToRad)
+		{
+			fail = true;
+		}
 		return fail;
 	}
 
@@ -172,29 +179,26 @@ namespace ndUnicyclePlayer
 		ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(*((ndIkSolver*)*m_solver), comFrame, extraJoints, m_timestep));
 		m_wheel->SetOmegaNoSleep(savedWheelOmega);
 
-		ndFloat32 poleAngle = ndFloat32(8.0f) * GetPoleAngle() / ND_TERMINATION_ANGLE;
-		ndFloat32 comOmega = ndFloat32(2.0f) * comDynamics.m_omega.m_x;
-		ndFloat32 comAlpha = ndFloat32(0.5f) * comDynamics.m_alpha.m_x;
-		ndFloat32 comSpeed = ndMax((ndAbs(comDynamics.m_veloc.m_z) - ndFloat32(8.0f)), ndFloat32(0.0f));
-		//ndTrace(("a=%f w=%f s=%f\n", angle, omega, speed));
+		const ndFloat32 poleAngle = ndFloat32(8.0f) * GetPoleAngle() / ND_TERMINATION_ANGLE;
+		const ndFloat32 comOmega = ndFloat32(2.0f) * comDynamics.m_omega.m_x;
+		const ndFloat32 comAlpha = ndFloat32(0.5f) * comDynamics.m_alpha.m_x;
+		const ndFloat32 comSpeed = ndMax(ndAbs(comDynamics.m_veloc.m_z) - ndFloat32(8.0f), ndFloat32(0.0f));
+		const ndFloat32 boxAngle = ndMax(ndAbs(GetBoxAngle()) - ndFloat32(45.f) * ndDegreeToRad, ndFloat32(0.0f));
 
 		const ndFloat32 invSigma2 = ndFloat32(4.0f);
-		ndFloat32 poleAngleReward = ndExp(-invSigma2 * poleAngle * poleAngle);
-		ndFloat32 comOmegaReward = ndExp(-invSigma2 * comOmega * comOmega);
-		ndFloat32 comAlphaReward = ndExp(-invSigma2 * comAlpha * comAlpha);
-		ndFloat32 comSpeedPenalty = ndExp(-invSigma2 * comSpeed * comSpeed) - ndFloat32(1.0f);
-		if (IsOnAir())
-		{
-			//omegaReward = ndFloat32(0.0f);
-			//angleReward = ndFloat32(0.0f);
-			//speedPenalty = ndFloat32(0.0f);
-		}
-		
+		const ndFloat32 poleAngleReward = ndExp(-invSigma2 * poleAngle * poleAngle);
+		const ndFloat32 comOmegaReward = ndExp(-invSigma2 * comOmega * comOmega);
+		const ndFloat32 comAlphaReward = ndExp(-invSigma2 * comAlpha * comAlpha);
+
+		const ndFloat32 comSpeedPenalty = ndExp(-invSigma2 * comSpeed * comSpeed) - ndFloat32(1.0f);
+		const ndFloat32 boxAnglePenalty = ndExp(-invSigma2 * boxAngle * boxAngle) - ndFloat32(1.0f);
+
 		ndFloat32 reward = ndFloat32(0.0f);
 		reward += poleAngleReward * ndFloat32(0.6f);
 		reward += comOmegaReward * ndFloat32(0.2f);
 		reward += comAlphaReward * ndFloat32(0.2f);
 		reward += comSpeedPenalty * ndFloat32(0.5f);
+		reward += boxAnglePenalty * ndFloat32(0.5f);
 
 		return ndBrainFloat(reward);
 	}
@@ -256,12 +260,11 @@ namespace ndUnicyclePlayer
 		ndModelArticulation::ndCenterOfMassDynamics comKinematics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassKinematics(comFrame));
 		m_wheel->SetOmegaNoSleep(savedWheelOmega);
 
-		ndFloat32 comSpeed = comKinematics.m_veloc.m_z * ndFloat32(0.25f);
-		ndFloat32 boxAngle = GetBoxAngle() / ndPi;
+		ndFloat32 boxAngle = GetBoxAngle();
 		ndFloat32 boxOmega = GetBoxOmega();
-
+		ndFloat32 comSpeed = comKinematics.m_veloc.m_z;
+		ndFloat32 hingeAngle = ((ndJointHinge*)*m_poleHinge)->GetAngle();
 		ndFloat32 hingeOmega = ((ndJointHinge*)*m_poleHinge)->GetOmega();
-		ndFloat32 hingeAngle = ((ndJointHinge*)*m_poleHinge)->GetAngle() / ND_MAX_LEG_JOINT_ANGLE;
 
 		observation[m_hasContactSupport] = IsOnAir();
 		observation[m_comSpeed] = ndBrainFloat(comSpeed);
@@ -389,7 +392,7 @@ void ndUnicyclePlayer_SAC(ndDemoEntityManager* const scene)
 	ndSharedPtr<ndBody> mapBody(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
 
 	// add a help message
-	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend_Ppo());
+	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend_Sac());
 	scene->SetDemoHelp(demoHelper);
 
 	// oveload the ground friction

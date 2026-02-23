@@ -108,7 +108,7 @@ namespace ndUnicycleTrainer_ppo
 			,m_discountRewardFactor(0.995f)
 			,m_horizon(ndFloat32(1.0f) / (ndFloat32(1.0f) - m_discountRewardFactor))
 			,m_lastEpisode(0xfffffff)
-			,m_stopTraining(1000 * 1000000)
+			,m_stopTraining(100 * 1000000)
 			,m_modelIsTrained(false)
 		{
 			char name[256];
@@ -215,15 +215,17 @@ namespace ndUnicycleTrainer_ppo
 				m_master->OptimizeStep();
 			
 				episodeCount -= m_master->GetEposideCount();
+
+				ndFloat32 score = m_master->GetAverageScore();
 				ndFloat32 trajectoryLog = ndLog(m_master->GetAverageFrames() + 0.001f);
-				ndFloat32 rewardTrajectory = m_master->GetAverageScore() * trajectoryLog;
+				ndFloat32 rewardTrajectory = score * trajectoryLog;
 				if (rewardTrajectory >= ndFloat32(m_maxScore))
 				{
 					if (m_lastEpisode != m_master->GetEposideCount())
 					{
 						m_maxScore = rewardTrajectory;
 						m_bestActor->CopyFrom(**m_master->GetPolicyNetwork());
-						ndExpandTraceMessage("best actor episode: %d\treward %f\ttrajectoryFrames: %f\n", m_master->GetEposideCount(), 100.0f * m_master->GetAverageScore() / m_horizon, m_master->GetAverageFrames());
+						ndExpandTraceMessage("best actor episode: %d\treward %f\ttrajectoryFrames: %f\n", m_master->GetEposideCount(), score, m_master->GetAverageFrames());
 						m_lastEpisode = m_master->GetEposideCount();
 					}
 				}
@@ -241,10 +243,10 @@ namespace ndUnicycleTrainer_ppo
 			
 				if (episodeCount && !m_master->IsSampling())
 				{
-					ndExpandTraceMessage("steps: %d\treward: %g\t  trajectoryFrames: %g\n", m_master->GetFramesCount(), 100.0f * m_master->GetAverageScore() / m_horizon, m_master->GetAverageFrames());
+					ndExpandTraceMessage("steps: %d\treward: %g\t  trajectoryFrames: %g\n", m_master->GetFramesCount(), score, m_master->GetAverageFrames());
 					if (m_outFile)
 					{
-						fprintf(m_outFile, "%g\n", m_master->GetAverageScore());
+						fprintf(m_outFile, "%g\n", score);
 						fflush(m_outFile);
 					}
 				}

@@ -27,10 +27,9 @@
 #include "ndBrainVector.h"
 #include "ndBrainMatrix.h"
 
-#define ND_BRAIN_LAYER_LINEAR_NAME	"ndBrainLayerLinear"
-
-#define ND_GPU_TILED_MATRIX_ROWS_BITS		5
-#define ND_GPU_TILED_MATRIX_ROWS			(1<<ND_GPU_TILED_MATRIX_ROWS_BITS)
+#define ND_BRAIN_LAYER_LINEAR_NAME		"ndBrainLayerLinear"
+#define ND_GPU_TILED_MATRIX_ROWS_BITS	5
+#define ND_GPU_TILED_MATRIX_ROWS		(1<<ND_GPU_TILED_MATRIX_ROWS_BITS)
 
 class ndBrainLayerLinear : public ndBrainLayer
 {
@@ -121,12 +120,14 @@ class ndBrainLayerLinear : public ndBrainLayer
 		ndBrainFloatBuffer* const weightsAndBiasGradients) const override;
 
 	private:
-	void MatrixMultiply_RowBased(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex);
+	void TiledMatrixMultiply(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex);
+	void DotProductMatrixMultiply(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex);
 
 	ndBrainVector m_bias;
 	ndBrainMatrix m_weights;
 	friend class ndBrainTrainerInference;
-	friend class ndBrainLayerFeedForwardCpuCommand_RowMatrixMultiply;
+	friend class ndBrainLayerFeedForwardCpuCommand_TiledMatrixMultiply;
+	friend class ndBrainLayerFeedForwardCpuCommand_DotProductMatrixMultiply;
 };
 
 #endif 

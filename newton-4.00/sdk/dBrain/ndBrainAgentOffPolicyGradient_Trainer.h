@@ -126,9 +126,6 @@ class ndBrainAgentOffPolicyGradient_Trainer : public ndClassAlloc
 		ndInt32 m_replayBufferSize;
 		ndInt32 m_replayBufferStartOptimizeSize;
 		ndBrainFloat m_polyakBlendFactor;
-		ndBrainFloat m_entropyMaxTemperature;
-		ndBrainFloat m_entropyMinTemperature;
-
 	};
 
 	ndBrainAgentOffPolicyGradient_Trainer(const HyperParameters& parameters);
@@ -197,8 +194,6 @@ class ndBrainAgentOffPolicyGradient_Trainer : public ndClassAlloc
 	ndMovingAverage<ND_OFF_POLICY_MOVING_AVERAGE_SCORE> m_averageFramesPerEpisodes;
 
 	ndBrainFloat m_learnRate;
-	ndBrainFloat m_entropyTemperature;
-
 	ndUnsigned32 m_frameCount;
 	ndUnsigned32 m_horizonSteps;
 	ndUnsigned32 m_eposideCount;
