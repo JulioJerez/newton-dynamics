@@ -184,6 +184,9 @@ void ndBrainLayerActivationLinearNormalize::MakePrediction(const ndBrainVector& 
 					m_slopes[i] = slope;
 				}
 			}
+		}
+		if (m_inilizeState < 1024 * 1024)
+		{
 			m_inilizeState++;
 		}
 	}
