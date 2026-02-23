@@ -146,7 +146,11 @@ namespace ndUnicyclePlayer
 	bool ndController::IsTerminal() const
 	{
 		bool fail = ndAbs(GetPoleAngle()) > ND_TERMINATION_ANGLE;
-		//fail = fail || ndAbs(GetBoxAngle()) > ndFloat32 (60.0f) * ndDegreeToRad;
+		fail = fail || ndAbs(GetBoxAngle()) > ndFloat32 (90.0f) * ndDegreeToRad;
+		if (ndAbs(GetBoxAngle()) > ndFloat32(90.0f) * ndDegreeToRad)
+		{
+			fail = true;
+		}
 		return fail;
 	}
 

@@ -47,14 +47,14 @@
 //#define DEFAULT_SCENE	19		// object Placement
 //#define DEFAULT_SCENE	20		// third person player capsule
 //#define DEFAULT_SCENE	21		// cart pole SAC trained controller
-//#define DEFAULT_SCENE	22		// unicycle SAC trained controller
+#define DEFAULT_SCENE	22		// unicycle SAC trained controller
 //#define DEFAULT_SCENE	23		// cart pole PPO trained controller
 //#define DEFAULT_SCENE	24		// unicycle PPO trained controller
 //#define DEFAULT_SCENE	25		// procedurally animated quadruped spider
 
 // These are the machine learning training demos
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// SAC cart pole training
-#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// SAC double pendulum unicycle training
+//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// SAC double pendulum unicycle training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// PPO cart pole training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 3)	// PPO double pendulum unicycle training
 
