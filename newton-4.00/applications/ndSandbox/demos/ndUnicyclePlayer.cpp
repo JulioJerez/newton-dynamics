@@ -145,11 +145,8 @@ namespace ndUnicyclePlayer
 	#pragma optimize( "", off )
 	bool ndController::IsTerminal() const
 	{
-		ndFloat32 boxAngle = GetBoxAngle();
-		ndFloat32 poleAngle = GetPoleAngle();
-
-		bool fail = ndAbs(poleAngle) > ND_TERMINATION_ANGLE;
-		fail = fail || ndAbs(boxAngle) > ndFloat32 (60.0f) * ndDegreeToRad;
+		bool fail = ndAbs(GetPoleAngle()) > ND_TERMINATION_ANGLE;
+		//fail = fail || ndAbs(GetBoxAngle()) > ndFloat32 (60.0f) * ndDegreeToRad;
 		return fail;
 	}
 
