@@ -35,10 +35,16 @@ class ndBrainDualNumber
 
 	ndBrainDualNumber& operator=(const ndBrainDualNumber& other);
 
+	ndBrainDualNumber operator-() const;
 	ndBrainDualNumber operator+(const ndBrainDualNumber& other) const;
 	ndBrainDualNumber operator-(const ndBrainDualNumber& other) const;
 	ndBrainDualNumber operator*(const ndBrainDualNumber& other) const;
 	ndBrainDualNumber operator/(const ndBrainDualNumber& other) const;
+
+	ndBrainDualNumber Abs() const;
+	ndBrainDualNumber Exp() const;
+	ndBrainDualNumber Log() const;
+	ndBrainDualNumber Pow(ndBrainFloat eponent) const;
 
 	ndBrainFloat m_real;
 	ndBrainFloat m_gradient;
@@ -79,6 +85,11 @@ inline ndBrainDualNumber& ndBrainDualNumber::operator=(const ndBrainDualNumber& 
 	return *this;
 }
 
+inline ndBrainDualNumber ndBrainDualNumber::operator-() const
+{
+	return ndBrainDualNumber(-m_real, -m_gradient);
+}
+
 inline ndBrainDualNumber ndBrainDualNumber::operator+(const ndBrainDualNumber& other) const
 {
 	return ndBrainDualNumber(m_real + other.m_real, m_gradient + other.m_gradient);
@@ -99,9 +110,37 @@ inline ndBrainDualNumber ndBrainDualNumber::operator*(const ndBrainDualNumber& o
 inline ndBrainDualNumber ndBrainDualNumber::operator/(const ndBrainDualNumber& other) const
 {
 	const ndBrainFloat real = m_real / other.m_real;
-	const ndBrainFloat den = other.m_gradient * other.m_gradient;
+	const ndBrainFloat den = other.m_real * other.m_real;
 	const ndBrainFloat num = m_gradient * other.m_real - m_real * other.m_gradient;
 	const ndBrainFloat grad = num / den;
+	return ndBrainDualNumber(real, grad);
+}
+
+inline ndBrainDualNumber ndBrainDualNumber::Pow(ndBrainFloat eponent) const
+{
+	const ndBrainFloat real = ndPow(m_real, eponent);
+	const ndBrainFloat grad = m_gradient * ndPow(m_real, eponent - ndBrainFloat(1.0f));
+	return ndBrainDualNumber(real, grad);
+}
+
+inline ndBrainDualNumber ndBrainDualNumber::Abs() const
+{
+	const ndBrainFloat real = ndAbs(m_real);
+	const ndBrainFloat grad = m_gradient * ndSign(m_real);
+	return ndBrainDualNumber(real, grad);
+}
+
+inline ndBrainDualNumber ndBrainDualNumber::Exp() const
+{
+	const ndBrainFloat real = ndExp(m_real);
+	const ndBrainFloat grad = m_gradient * real;
+	return ndBrainDualNumber(real, grad);
+}
+
+inline ndBrainDualNumber ndBrainDualNumber::Log() const
+{
+	const ndBrainFloat real = ndLog(m_real);
+	const ndBrainFloat grad = m_gradient / m_real;
 	return ndBrainDualNumber(real, grad);
 }
 

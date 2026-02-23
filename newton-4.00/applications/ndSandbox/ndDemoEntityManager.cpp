@@ -442,38 +442,17 @@ static void TestAutoDifferentiation()
 	ndBrainDualNumber y(3.0f);
 	ndBrainDualNumber epsilon(0.0f, 1.0f);
 
-	class Sum
-	{
-		public:
-		ndBrainDualNumber CalculateGradient(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
-		{
-			return x + y;
-		}
-	};
-
-	class Polynomial
-	{
-		public:
-		//Finding the partials of z = x * (x + y) + y * y at (x, y) = (2, 3)
-		ndBrainDualNumber CalculateGradient(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
-		{
-			return x * (x + y) + y * y;
-		}
-
-		ndBrainFloat ManualGrad_x(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
-		{
-			return (x + x + y).m_real;
-		}
-
-		ndBrainFloat ManualGrad_y(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
-		{
-			return (x + ndBrainDualNumber(2.0f) * y).m_real;
-		}
-
-	};
-
 	{
 		// test sum
+		class Sum
+		{
+			public:
+			ndBrainDualNumber CalculateGradient(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			{
+				return x + y;
+			}
+		};
+
 		Sum sum;
 		ndBrainDualNumber z0_x(sum.CalculateGradient(x + epsilon, y));
 		ndBrainDualNumber z0_y(sum.CalculateGradient(x, y + epsilon));
@@ -481,6 +460,25 @@ static void TestAutoDifferentiation()
 
 	{
 		// test simple example polynomial
+		class Polynomial
+		{
+			public:
+			//Finding the partials of z = x * (x + y) + y * y at (x, y) = (2, 3)
+			ndBrainDualNumber CalculateGradient(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			{
+				return x * (x + y) + y * y;
+			}
+
+			ndBrainFloat ManualGrad_x(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			{
+				return (x + x + y).m_real;
+			}
+
+			ndBrainFloat ManualGrad_y(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			{
+				return (x + ndBrainDualNumber(2.0f) * y).m_real;
+			}
+		};
 		Polynomial poly;
 		ndBrainFloat z1_x_ = poly.ManualGrad_x(x, y);
 		ndBrainFloat z1_y_ = poly.ManualGrad_y(x, y);
@@ -493,7 +491,42 @@ static void TestAutoDifferentiation()
 		ndAssert(z1_y_ == z1_y.m_gradient);
 	}
 
+	{
+		// test ratio of two vaiable
+		class Ratio
+		{
+			public:
+			ndBrainDualNumber CalculateGradient(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			{
+				return x / (x + y) + x * y;
+			}
 
+			ndBrainFloat ManualGrad_x(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			{
+				//ndBrainDualNumber val(y / ((x + y) * (x + y)) + y);
+				ndBrainDualNumber val(y / (x + y).Pow(2.0f) + y);
+				return val.m_real;
+			}
+
+			ndBrainFloat ManualGrad_y(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			{
+				//ndBrainDualNumber val(-x / ((x + y) * (x + y)) + x);
+				ndBrainDualNumber val(-x / (x + y).Pow(2.0f) + x);
+				return val.m_real;
+			}
+		};
+		
+		Ratio poly;
+		ndBrainFloat z1_x_ = poly.ManualGrad_x(x, y);
+		ndBrainDualNumber z1_x(poly.CalculateGradient(x + epsilon, y));
+		ndAssert(z1_x_ == z1_x.m_gradient);
+		z1_x_ *= 1;
+
+		ndBrainFloat z1_y_ = poly.ManualGrad_y(x, y);		
+		ndBrainDualNumber z1_y(poly.CalculateGradient(x, y + epsilon));
+		ndAssert(z1_y_ == z1_y.m_gradient);
+		z1_y_ *= 1;
+	}
 }
 
 // ImGui - standalone example application for Glfw + OpenGL 2, using fixed pipeline
