@@ -182,7 +182,7 @@ namespace ndUnicyclePlayer
 		const ndFloat32 comOmega = ndFloat32(2.0f) * comDynamics.m_omega.m_x;
 		const ndFloat32 comAlpha = ndFloat32(0.5f) * comDynamics.m_alpha.m_x;
 		const ndFloat32 comSpeed = ndMax(ndAbs(comDynamics.m_veloc.m_z) - ndFloat32(8.0f), ndFloat32(0.0f));
-		const ndFloat32 boxAngle = ndMax(ndAbs(GetBoxAngle()) - ndFloat32(30.f) * ndDegreeToRad, ndFloat32(0.0f));
+		const ndFloat32 boxAngle = ndMax(ndAbs(GetBoxAngle()) - ndFloat32(45.f) * ndDegreeToRad, ndFloat32(0.0f));
 
 		const ndFloat32 invSigma2 = ndFloat32(4.0f);
 		const ndFloat32 poleAngleReward = ndExp(-invSigma2 * poleAngle * poleAngle);
