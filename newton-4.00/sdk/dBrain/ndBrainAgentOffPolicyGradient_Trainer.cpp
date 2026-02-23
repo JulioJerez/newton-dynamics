@@ -442,6 +442,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildCriticClass()
 			critic->AddLayer(layers[i]);
 		}
 		critic->InitWeights();
+		critic->SetTrainingMode();
 		return critic;
 	};
 

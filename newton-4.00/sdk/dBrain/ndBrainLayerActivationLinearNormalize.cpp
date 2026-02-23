@@ -138,6 +138,7 @@ ndBrainLayer* ndBrainLayerActivationLinearNormalize::Load(const ndBrainLoad* con
 	return layer;
 }
 
+#pragma optimize( "", off )
 void ndBrainLayerActivationLinearNormalize::MakePrediction(const ndBrainVector& input, ndBrainVector& output) const
 {
 	ndAssert(input.GetCount() == output.GetCount());
@@ -153,8 +154,9 @@ void ndBrainLayerActivationLinearNormalize::MakePrediction(const ndBrainVector& 
 				m_maxAverage[i] = input[i];
 				m_minAverage[i] = input[i];
 			}
+			m_inilizeState++;
 		}
-		else
+		else if (m_inilizeState < 1024 * 128)
 		{
 			for (ndInt32 i = ndInt32(input.GetCount()) - 1; i >= 0; --i)
 			{
@@ -182,9 +184,8 @@ void ndBrainLayerActivationLinearNormalize::MakePrediction(const ndBrainVector& 
 					m_slopes[i] = slope;
 				}
 			}
+			m_inilizeState++;
 		}
-
-		m_inilizeState++;
 	}
 	ndBrainLayerActivationLinear::MakePrediction(input, output);
 }

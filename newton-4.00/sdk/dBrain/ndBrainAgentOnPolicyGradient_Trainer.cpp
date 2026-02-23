@@ -410,6 +410,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildPolicyClass()
 		policy->AddLayer(layers[i]);
 	}
 	policy->InitWeights();
+	policy->SetTrainingMode();
 
 	ndSharedPtr<ndBrainOptimizer> optimizer(new ndBrainOptimizerAdam(m_context));
 	optimizer->SetRegularizer(m_parameters.m_policyRegularizer);
@@ -444,6 +445,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildCriticClass()
 		critic->AddLayer(layers[i]);
 	}
 	critic->InitWeights();
+	critic->SetTrainingMode();
 	
 	ndSharedPtr<ndBrainOptimizer> optimizer(new ndBrainOptimizerAdam(m_context));
 	optimizer->SetRegularizer(m_parameters.m_criticRegularizer);
