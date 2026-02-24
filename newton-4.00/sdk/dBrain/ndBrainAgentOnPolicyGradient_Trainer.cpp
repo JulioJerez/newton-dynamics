@@ -607,7 +607,6 @@ void ndBrainAgentOnPolicyGradient_Trainer::TrajectoryToGpuBuffers()
 	ndAssert(m_trajectoryAccumulator.GetCount() >= m_parameters.m_miniBatchSize);
 	UpdateLayersNormalization();
 
-
 	const ndInt32 count = m_trajectoryAccumulator.GetCount();
 	m_scratchBuffer.SetCount(count * stride);
 	for (ndInt32 i = 0; i < count; ++i)

@@ -108,7 +108,7 @@ class ndBrainAgentOffPolicyGradient_Agent: public ndBrainAgent
 	void SampleActions(ndBrainVector& action);
 	virtual ndFloat32 GetExpectedReward() const override;
 
-	void UpdateLayersNormalization(const ndBrainVector& observations, const ndBrainVector& actions);
+	void UpdateLayersNormalization(const ndBrainVector& observations);
 
 	ndTrajectory m_trajectory;
 	ndNomalDistribution m_normalDistribution;

@@ -254,15 +254,16 @@ void ndBrainAgentOffPolicyGradient_Agent::SampleActions(ndBrainVector& actions)
 }
 
 //#pragma optimize( "", off )
-void ndBrainAgentOffPolicyGradient_Agent::UpdateLayersNormalization(const ndBrainVector& observations, const ndBrainVector& actions)
+void ndBrainAgentOffPolicyGradient_Agent::UpdateLayersNormalization(const ndBrainVector& observations)
 {
 	if (m_owner->m_policyInputNormalization && m_layerNormalizationCounter)
 	{
 		m_owner->m_policyInputNormalization->UpdateParameters(observations);
 
-		ndBrainFixSizeVector<1024> criticInput(ndInt32 (observations.GetCount() + actions.GetCount()));
+		ndInt32 numberOfActions = 2 * m_owner->m_parameters.m_numberOfActions;
+		ndBrainFixSizeVector<1024> criticInput(ndInt32 (observations.GetCount() + numberOfActions));
 		ndBrainMemVector criticObservations (&criticInput[0], observations.GetCount());
-		ndBrainMemVector criticActions(&criticInput[observations.GetCount()], actions.GetCount());
+		ndBrainMemVector criticActions(&criticInput[observations.GetCount()], numberOfActions);
 		ndBrainFloat actionValue = (m_layerNormalizationCounter & 1) ? ndBrainFloat(1.0f) : ndBrainFloat(-1.0f);
 		criticActions.Set(actionValue);
 		criticObservations.Set(observations);
@@ -293,8 +294,7 @@ void ndBrainAgentOffPolicyGradient_Agent::Step()
 	policy->MakePrediction(observation, actions);
 	SampleActions(actions);
 	ApplyActions(&actions[0]);
-
-	UpdateLayersNormalization(observation, actions);
+	UpdateLayersNormalization(observation);
 
 	bool isdead = IsTerminal();
 	ndBrainFloat reward = CalculateReward();
