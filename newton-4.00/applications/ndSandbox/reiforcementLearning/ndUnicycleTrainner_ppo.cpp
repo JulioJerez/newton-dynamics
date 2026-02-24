@@ -219,7 +219,7 @@ namespace ndUnicycleTrainer_ppo
 				const ndFloat32 score = m_master->GetAverageScore();
 				const ndFloat32 stepsLog = ndLog(m_master->GetAverageScore() + 0.001f);
 				const ndFloat32 trajectoryLog = ndLog(m_master->GetAverageFrames() + 0.001f);
-				const ndFloat32 rewardTrajectory = score * trajectoryLog;
+				const ndFloat32 rewardTrajectory = score * (trajectoryLog + stepsLog);
 				if (rewardTrajectory >= ndFloat32(m_maxScore))
 				{
 					if (m_lastEpisode != m_master->GetEposideCount())
