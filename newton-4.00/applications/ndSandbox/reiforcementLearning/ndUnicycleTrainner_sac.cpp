@@ -195,6 +195,7 @@ namespace ndUnicycleTrainer_sac
 		{
 		}
 
+		#pragma optimize( "", off )
 		virtual void Update(ndDemoEntityManager* const manager, ndFloat32)
 		{
 			ndInt32 stopTraining = ndInt32(m_master->GetFramesCount());
@@ -221,8 +222,7 @@ namespace ndUnicycleTrainer_sac
 			
 				if (rewardTrajectory > m_saveScore)
 				{
-					//m_saveScore = ndFloor(rewardTrajectory) + 2.0f;
-					m_saveScore = rewardTrajectory;
+					m_saveScore = rewardTrajectory + 0.1f;
 			
 					// save partial controller in case of crash 
 					ndBrain* const actor = *m_master->GetPolicyNetwork();
