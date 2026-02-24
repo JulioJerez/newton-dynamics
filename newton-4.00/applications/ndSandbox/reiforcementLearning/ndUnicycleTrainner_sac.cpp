@@ -205,8 +205,8 @@ namespace ndUnicycleTrainer_sac
 			
 				episodeCount -= m_master->GetEposideCount();
 				const ndFloat32 score = m_master->GetAverageScore();
-				const ndFloat32 stepsLog = ndLog(ndFloat32(m_master->GetEposideCount()) + 0.001f);
 				const ndFloat32 trajectoryLog = ndLog(m_master->GetAverageFrames() + 0.001f);
+				const ndFloat32 stepsLog = ndLog(ndFloat32(m_master->GetFramesCount()) + 1.0f);
 				const ndFloat32 rewardTrajectory = score * (trajectoryLog + stepsLog);
 				if (rewardTrajectory >= ndFloat32(m_maxScore))
 				{
