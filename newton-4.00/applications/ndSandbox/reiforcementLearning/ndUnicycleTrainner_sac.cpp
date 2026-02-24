@@ -204,7 +204,8 @@ namespace ndUnicycleTrainer_sac
 				const ndFloat32 score = m_master->GetAverageScore();
 				const ndFloat32 trajectoryLog = ndLog(m_master->GetAverageFrames() + 0.001f);
 				const ndFloat32 stepsLog = ndLog(ndFloat32(m_master->GetFramesCount()) + 1.0f);
-				const ndFloat32 combinedTrajectory = score * (trajectoryLog + stepsLog);
+				const ndFloat32 logGrad = stepsLog + trajectoryLog;
+				const ndFloat32 combinedTrajectory = score * logGrad;
 			
 				if (combinedTrajectory > m_savedScore)
 				{
