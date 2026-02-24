@@ -109,8 +109,6 @@ class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 	virtual ndFloat32 GetExpectedReward() const override;
 	
 	protected:
-	void UpdateLayersNormalization(const ndBrainVector& observations);
-
 	ndTrajectory m_trajectory;
 	ndNomalDistribution m_normalDistribution;
 	ndWeakPtr<ndBrainAgentOnPolicyGradient_Trainer> m_owner;
@@ -162,6 +160,7 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	void BuildCriticClass();
 	void CalculateAdvantage();
 	void TrajectoryToGpuBuffers();
+	void UpdateLayersNormalization();
 	void OptimizedSurrogatePolicy(ndInt32 pass);
 
 	ndBrainFloat CalculateKLdivergence();
@@ -225,6 +224,7 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndUnsigned32 m_horizonSteps;
 	ndUnsigned32 m_eposideCount;
 	ndUnsigned32 m_trajectiesCount;
+	ndUnsigned32 m_layerNormalizationCounter;
 
 	friend class ndBrainAgentOnPolicyGradient_Agent;
 };
