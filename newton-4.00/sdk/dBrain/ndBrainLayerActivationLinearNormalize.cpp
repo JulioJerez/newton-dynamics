@@ -64,35 +64,10 @@ const char* ndBrainLayerActivationLinearNormalize::GetLabelId() const
 	return ND_BRAIN_LAYER_ACTIVATION_LINEAR_NORMALIZE_NAME;
 }
 
-void ndBrainLayerActivationLinearNormalize::Save(const ndBrainSave* const loadSave) const
-{
-	ndBrainLayerActivationLinear::Save(loadSave);
-
-	//char buffer[1024];
-	//auto Save = [&buffer, &loadSave](const char* const fmt, ...)
-	//{
-	//	va_list v_args;
-	//	buffer[0] = 0;
-	//	va_start(v_args, fmt);
-	//	vsnprintf(buffer, sizeof(buffer), fmt, v_args);
-	//	va_end(v_args);
-	//	loadSave->WriteData(buffer);
-	//};
-	//
-	//Save("\tslopes ");
-	//for (ndInt32 i = 0; i < m_slopes.GetCount(); ++i)
-	//{
-	//	Save("%g ", m_slopes[i]);
-	//}
-	//Save("\n");
-	//
-	//Save("\tbiases ");
-	//for (ndInt32 i = 0; i < m_biases.GetCount(); ++i)
-	//{
-	//	Save("%g ", m_biases[i]);
-	//}
-	//Save("\n");
-}
+//void ndBrainLayerActivationLinearNormalize::Save(const ndBrainSave* const loadSave) const
+//{
+//	ndBrainLayerActivationLinear::Save(loadSave);
+//}
 
 ndBrainLayer* ndBrainLayerActivationLinearNormalize::Load(const ndBrainLoad* const loadSave)
 {
@@ -142,7 +117,7 @@ void ndBrainLayerActivationLinearNormalize::UpdateParameters(const ndBrainVector
 			m_maxAverage[i] = parameters[i];
 		}
 	}
-	else if (m_startNormalizing > 0)
+	else if (m_startNormalizing >= 0)
 	{
 		for (ndInt32 i = ndInt32(parameters.GetCount()) - 1; i >= 0; --i)
 		{
@@ -158,7 +133,8 @@ void ndBrainLayerActivationLinearNormalize::UpdateParameters(const ndBrainVector
 			}
 		}
 	}
-	else
+
+	if (m_startNormalizing == 0)
 	{
 		for (ndInt32 i = ndInt32(m_minAverage.GetCount()) - 1; i >= 0; --i)
 		{
@@ -177,123 +153,41 @@ void ndBrainLayerActivationLinearNormalize::UpdateParameters(const ndBrainVector
 	}
 }
 
-//#pragma optimize( "", off )
-//void ndBrainLayerActivationLinearNormalize::MakePrediction(const ndBrainVector& input, ndBrainVector& output) const
-//{
-//	ndAssert(input.GetCount() == output.GetCount());
-//	ndAssert(m_slopes.GetCount() == m_biases.GetCount());
-//
-//	if (m_trainingMode)
-//	{
-//		if (m_inilizeState == 0)
-//		{
-//			// initilize the moving average
-//			for (ndInt32 i = ndInt32(input.GetCount()) - 1; i >= 0; --i)
-//			{
-//				m_maxAverage[i] = input[i];
-//				m_minAverage[i] = input[i];
-//			}
-//			m_inilizeState++;
-//		}
-//		else if (m_inilizeState < 1024 * 128)
-//		{
-//			for (ndInt32 i = ndInt32(input.GetCount()) - 1; i >= 0; --i)
-//			{
-//				ndBrainFloat s0 = ND_LINEAR_NORMALIZE_MOVING_AVERAGE;
-//				ndBrainFloat s1 = ndBrainFloat(1.0f) - ND_LINEAR_NORMALIZE_MOVING_AVERAGE;
-//				if (input[i] > m_maxAverage[i])
-//				{
-//					m_maxAverage[i] = m_maxAverage[i] * s0 + input[i] * s1;
-//				}
-//				if (input[i] < m_minAverage[i])
-//				{
-//					m_minAverage[i] = m_minAverage[i] * s0 + input[i] * s1;
-//				}
-//			}
-//
-//			if (m_inilizeState > 1024)
-//			{
-//				for (ndInt32 i = ndInt32(input.GetCount()) - 1; i >= 0; --i)
-//				{
-//					ndBrainFloat den = m_maxAverage[i] - m_minAverage[i];
-//					ndBrainFloat invDen = ndBrainFloat(1.0f) / (den + ndBrainFloat(1.0e-6f));
-//					ndBrainFloat slope = ndBrainFloat(2.0f) * invDen;
-//					ndBrainFloat bias = -(m_maxAverage[i] + m_minAverage[i]) * invDen;
-//					m_biases[i] = bias;
-//					m_slopes[i] = slope;
-//				}
-//			}
-//		}
-//		if (m_inilizeState < m_maxSteps)
-//		{
-//			m_inilizeState++;
-//		}
-//	}
-//	ndBrainLayerActivationLinear::MakePrediction(input, output);
-//}
+void ndBrainLayerActivationLinearNormalize::InputDerivative(const ndBrainVector&, const ndBrainVector&, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const
+{
+	ndAssert(m_slopes.GetCount() == outputDerivative.GetCount());
+	ndAssert(inputDerivative.GetCount() == outputDerivative.GetCount());
+	inputDerivative.Set(outputDerivative);
+}
 
-//void ndBrainLayerActivationLinearNormalize::InputDerivative(const ndBrainVector&, const ndBrainVector&, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const
-//{
-//	ndAssert(m_slopes.GetCount() == outputDerivative.GetCount());
-//	ndAssert(inputDerivative.GetCount() == outputDerivative.GetCount());
-//
-//	inputDerivative.Set(m_slopes);
-//	inputDerivative.Mul(outputDerivative);
-//}
-//
-//bool ndBrainLayerActivationLinearNormalize::HasGpuSupport() const
-//{
-//	return true;
-//}
-//
-//void ndBrainLayerActivationLinearNormalize::FeedForward(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const
-//{
-//	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
-//	const ndCommandSharedInfo& info = desc.m_info;
-//	ndBrainTrainerInference* const trainer = desc.m_owner;
-//	const ndBrainFloat* const inputOutputBuffer = (ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr();
-//
-//	ndInt32 inputSize = info.m_inputSize;
-//	ndInt32 outputSize = info.m_outputSize;
-//	ndInt32 inputOutputSize = info.m_inputOutputSize;
-//	ndInt32 inputOutputStartOffset = info.m_inputOutputStartOffset;
-//
-//	ndInt64 inputOffset = miniBatchIndex * ndInt64(inputOutputSize) + inputOutputStartOffset;
-//	ndInt64 outputOffset = inputOffset + trainer->RoundOffOffset(inputSize);
-//
-//	const ndBrainMemVector input(&inputOutputBuffer[inputOffset], inputSize);
-//	ndBrainMemVector output(&inputOutputBuffer[outputOffset], outputSize);
-//
-//	output.Set(input);
-//	output.Mul(m_slopes);
-//	output.Add(m_biases);
-//}
-//
-//void ndBrainLayerActivationLinearNormalize::BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const
-//{
-//	ndAssert(0);
-//	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
-//	const ndCommandSharedInfo& info = desc.m_info;
-//	ndBrainTrainer* const trainer = (ndBrainTrainer*)desc.m_owner;
-//
-//	const ndBrainFloat* const inputOutputGradientsBuffer = (ndBrainFloat*)trainer->GetHiddenLayerGradientBuffer()->GetCpuPtr();
-//
-//	ndInt32 inputSize = info.m_inputSize;
-//	ndInt32 inputOutputSize = info.m_inputOutputSize;
-//	ndInt32 inputOutputStartOffset = info.m_inputOutputStartOffset;
-//
-//	ndInt64 srcBase = miniBatchIndex * ndInt64(inputOutputSize) + inputOutputStartOffset;
-//	ndInt64 dstBase = srcBase + trainer->RoundOffOffset(inputSize);
-//	ndAssert(srcBase >= 0);
-//	ndAssert(dstBase >= 0);
-//	ndAssert(inputSize == info.m_outputSize);
-//
-//	const ndBrainMemVector outputDerivative(&inputOutputGradientsBuffer[dstBase], inputSize);
-//	ndBrainMemVector inputDerivative(&inputOutputGradientsBuffer[srcBase], inputSize);
-//
-//	inputDerivative.Set(m_slopes);
-//	inputDerivative.Mul(outputDerivative);
-//}
+void ndBrainLayerActivationLinearNormalize::FeedForward(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const
+{
+	ndBrainLayerActivationLinear::FeedForward(command, miniBatchIndex);
+}
+
+void ndBrainLayerActivationLinearNormalize::BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const
+{
+	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
+	const ndCommandSharedInfo& info = desc.m_info;
+	ndBrainTrainer* const trainer = (ndBrainTrainer*)desc.m_owner;
+
+	const ndBrainFloat* const inputOutputGradientsBuffer = (ndBrainFloat*)trainer->GetHiddenLayerGradientBuffer()->GetCpuPtr();
+
+	ndInt32 inputSize = info.m_inputSize;
+	ndInt32 inputOutputSize = info.m_inputOutputSize;
+	ndInt32 inputOutputStartOffset = info.m_inputOutputStartOffset;
+
+	ndInt64 srcBase = miniBatchIndex * ndInt64(inputOutputSize) + inputOutputStartOffset;
+	ndInt64 dstBase = srcBase + trainer->RoundOffOffset(inputSize);
+	ndAssert(srcBase >= 0);
+	ndAssert(dstBase >= 0);
+	ndAssert(inputSize == info.m_outputSize);
+
+	const ndBrainMemVector outputDerivative(&inputOutputGradientsBuffer[dstBase], inputSize);
+	ndBrainMemVector inputDerivative(&inputOutputGradientsBuffer[srcBase], inputSize);
+
+	inputDerivative.Set(outputDerivative);
+}
 
 ndCommandArray ndBrainLayerActivationLinearNormalize::CreateFeedForwardBufferCommand(
 	ndBrainTrainerInference* const owner,

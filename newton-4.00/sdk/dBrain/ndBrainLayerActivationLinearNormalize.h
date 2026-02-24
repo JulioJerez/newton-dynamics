@@ -36,18 +36,19 @@ class ndBrainLayerActivationLinearNormalize : public ndBrainLayerActivationLinea
 	ndBrainLayerActivationLinearNormalize(const ndBrainLayerActivationLinearNormalize& src);
 	ndBrainLayer* Clone() const override;
 
-	virtual void Save(const ndBrainSave* const loadSave) const override;
+	void UpdateParameters(const ndBrainVector& parameters);
+
+	//virtual void Save(const ndBrainSave* const loadSave) const override;
 	static ndBrainLayer* Load(const ndBrainLoad* const loadSave);
 
 	const char* GetLabelId() const override;
-	//void MakePrediction(const ndBrainVector& input, ndBrainVector& output) const override;
-	//void InputDerivative(const ndBrainVector& input, const ndBrainVector& output, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const override;
-
-	void UpdateParameters(const ndBrainVector& parameters);
+	void InputDerivative(const ndBrainVector& input, const ndBrainVector& output, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const override;
 
 	//virtual bool HasGpuSupport() const override;
-	//virtual void FeedForward(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const override;
-	//virtual void BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const override;
+	//void MakePrediction(const ndBrainVector& input, ndBrainVector& output) const override;
+
+	virtual void FeedForward(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const override;
+	virtual void BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const override;
 
 	virtual ndCommandArray CreateFeedForwardBufferCommand(
 		ndBrainTrainerInference* const owner,

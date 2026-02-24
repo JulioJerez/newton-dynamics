@@ -263,8 +263,8 @@ void ndBrainAgentOffPolicyGradient_Agent::UpdateLayersNormalization(const ndBrai
 		ndBrainFixSizeVector<1024> criticInput(ndInt32 (observations.GetCount() + actions.GetCount()));
 		ndBrainMemVector criticObservations (&criticInput[0], observations.GetCount());
 		ndBrainMemVector criticActions(&criticInput[observations.GetCount()], actions.GetCount());
-		
-		criticActions.Set(actions);
+		ndBrainFloat actionValue = (m_layerNormalizationCounter & 1) ? ndBrainFloat(1.0f) : ndBrainFloat(-1.0f);
+		criticActions.Set(actionValue);
 		criticObservations.Set(observations);
 
 		for (ndInt32 i = 0; i < 4; ++i)
