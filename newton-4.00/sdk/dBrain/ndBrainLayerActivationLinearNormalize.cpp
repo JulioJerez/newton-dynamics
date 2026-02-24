@@ -28,20 +28,17 @@
 #include "ndBrainFloatBuffer.h"
 #include "ndBrainLayerActivationLinearNormalize.h"
 
-#define ND_LINEAR_NORMALIZE_MOVING_AVERAGE	ndBrainFloat(0.9f)
-
-ndBrainLayerActivationLinearNormalize::ndBrainLayerActivationLinearNormalize(ndInt32 size)
+ndBrainLayerActivationLinearNormalize::ndBrainLayerActivationLinearNormalize(ndInt32 neurons)
 	:ndBrainLayerActivationLinear(ndBrainVector(), ndBrainVector())
 	,m_minAverage()
 	,m_maxAverage()
-	,m_inilizeState(0)
-	,m_trainingMode(false)
+	,m_startNormalizing(ND_LINEAR_NORMALIZE_START_NORMALIZE)
 {
-	m_neurons = size;
-	m_slopes.SetCount(size);
-	m_biases.SetCount(size);
-	m_minAverage.SetCount(size);
-	m_maxAverage.SetCount(size);
+	m_neurons = neurons;
+	m_slopes.SetCount(m_neurons);
+	m_biases.SetCount(m_neurons);
+	m_minAverage.SetCount(m_neurons);
+	m_maxAverage.SetCount(m_neurons);
 
 	m_biases.Set(ndBrainFloat(0.0f));
 	m_slopes.Set(ndBrainFloat(1.0f));
@@ -53,14 +50,8 @@ ndBrainLayerActivationLinearNormalize::ndBrainLayerActivationLinearNormalize(con
 	:ndBrainLayerActivationLinear(src)
 	,m_minAverage(src.m_minAverage)
 	,m_maxAverage(src.m_maxAverage)
-	,m_inilizeState(src.m_inilizeState)
-	,m_trainingMode(src.m_trainingMode)
+	,m_startNormalizing(ND_LINEAR_NORMALIZE_START_NORMALIZE)
 {
-}
-
-void ndBrainLayerActivationLinearNormalize::SetTrainingMode()
-{
-	m_trainingMode = true;
 }
 
 ndBrainLayer* ndBrainLayerActivationLinearNormalize::Clone() const
@@ -138,60 +129,108 @@ ndBrainLayer* ndBrainLayerActivationLinearNormalize::Load(const ndBrainLoad* con
 	return layer;
 }
 
-#pragma optimize( "", off )
-void ndBrainLayerActivationLinearNormalize::MakePrediction(const ndBrainVector& input, ndBrainVector& output) const
+//#pragma optimize( "", off )
+void ndBrainLayerActivationLinearNormalize::UpdateParameters(const ndBrainVector& parameters)
 {
-	ndAssert(input.GetCount() == output.GetCount());
-	ndAssert(m_slopes.GetCount() == m_biases.GetCount());
-
-	if (m_trainingMode)
-	{
-		if (m_inilizeState == 0)
+	ndAssert(parameters.GetCount() == m_minAverage.GetCount());
+	// initilize the moving average
+	if (m_startNormalizing == ND_LINEAR_NORMALIZE_START_NORMALIZE)
+	{ 
+		for (ndInt32 i = ndInt32(parameters.GetCount()) - 1; i >= 0; --i)
 		{
-			// initilize the moving average
-			for (ndInt32 i = ndInt32(input.GetCount()) - 1; i >= 0; --i)
-			{
-				m_maxAverage[i] = input[i];
-				m_minAverage[i] = input[i];
-			}
-			m_inilizeState++;
-		}
-		else if (m_inilizeState < 1024 * 128)
-		{
-			for (ndInt32 i = ndInt32(input.GetCount()) - 1; i >= 0; --i)
-			{
-				ndBrainFloat s0 = ND_LINEAR_NORMALIZE_MOVING_AVERAGE;
-				ndBrainFloat s1 = ndBrainFloat(1.0f) - ND_LINEAR_NORMALIZE_MOVING_AVERAGE;
-				if (input[i] > m_maxAverage[i])
-				{
-					m_maxAverage[i] = m_maxAverage[i] * s0 + input[i] * s1;
-				}
-				if (input[i] < m_minAverage[i])
-				{
-					m_minAverage[i] = m_minAverage[i] * s0 + input[i] * s1;
-				}
-			}
-
-			if (m_inilizeState > 1024)
-			{
-				for (ndInt32 i = ndInt32(input.GetCount()) - 1; i >= 0; --i)
-				{
-					ndBrainFloat den = m_maxAverage[i] - m_minAverage[i];
-					ndBrainFloat invDen = ndBrainFloat(1.0f) / (den + ndBrainFloat(1.0e-6f));
-					ndBrainFloat slope = ndBrainFloat(2.0f) * invDen;
-					ndBrainFloat bias = -(m_maxAverage[i] + m_minAverage[i]) * invDen;
-					m_biases[i] = bias;
-					m_slopes[i] = slope;
-				}
-			}
-		}
-		if (m_inilizeState < 1024 * 1024)
-		{
-			m_inilizeState++;
+			m_minAverage[i] = parameters[i];
+			m_maxAverage[i] = parameters[i];
 		}
 	}
-	ndBrainLayerActivationLinear::MakePrediction(input, output);
+	else if (m_startNormalizing > 0)
+	{
+		for (ndInt32 i = ndInt32(parameters.GetCount()) - 1; i >= 0; --i)
+		{
+			ndBrainFloat s0 = ND_LINEAR_NORMALIZE_MOVING_AVERAGE;
+			ndBrainFloat s1 = ndBrainFloat(1.0f) - ND_LINEAR_NORMALIZE_MOVING_AVERAGE;
+			if (parameters[i] > m_maxAverage[i])
+			{
+				m_maxAverage[i] = m_maxAverage[i] * s0 + parameters[i] * s1;
+			}
+			if (parameters[i] < m_minAverage[i])
+			{
+				m_minAverage[i] = m_minAverage[i] * s0 + parameters[i] * s1;
+			}
+		}
+	}
+	else
+	{
+		for (ndInt32 i = ndInt32(m_minAverage.GetCount()) - 1; i >= 0; --i)
+		{
+			ndBrainFloat den = m_maxAverage[i] - m_minAverage[i];
+			ndBrainFloat invDen = ndBrainFloat(1.0f) / (den + ndBrainFloat(1.0e-6f));
+			ndBrainFloat slope = ndBrainFloat(2.0f) * invDen;
+			ndBrainFloat bias = -(m_maxAverage[i] + m_minAverage[i]) * invDen;
+			m_biases[i] = bias;
+			m_slopes[i] = slope;
+		}
+	}
+
+	if (m_startNormalizing)
+	{
+		m_startNormalizing--;
+	}
 }
+
+//#pragma optimize( "", off )
+//void ndBrainLayerActivationLinearNormalize::MakePrediction(const ndBrainVector& input, ndBrainVector& output) const
+//{
+//	ndAssert(input.GetCount() == output.GetCount());
+//	ndAssert(m_slopes.GetCount() == m_biases.GetCount());
+//
+//	if (m_trainingMode)
+//	{
+//		if (m_inilizeState == 0)
+//		{
+//			// initilize the moving average
+//			for (ndInt32 i = ndInt32(input.GetCount()) - 1; i >= 0; --i)
+//			{
+//				m_maxAverage[i] = input[i];
+//				m_minAverage[i] = input[i];
+//			}
+//			m_inilizeState++;
+//		}
+//		else if (m_inilizeState < 1024 * 128)
+//		{
+//			for (ndInt32 i = ndInt32(input.GetCount()) - 1; i >= 0; --i)
+//			{
+//				ndBrainFloat s0 = ND_LINEAR_NORMALIZE_MOVING_AVERAGE;
+//				ndBrainFloat s1 = ndBrainFloat(1.0f) - ND_LINEAR_NORMALIZE_MOVING_AVERAGE;
+//				if (input[i] > m_maxAverage[i])
+//				{
+//					m_maxAverage[i] = m_maxAverage[i] * s0 + input[i] * s1;
+//				}
+//				if (input[i] < m_minAverage[i])
+//				{
+//					m_minAverage[i] = m_minAverage[i] * s0 + input[i] * s1;
+//				}
+//			}
+//
+//			if (m_inilizeState > 1024)
+//			{
+//				for (ndInt32 i = ndInt32(input.GetCount()) - 1; i >= 0; --i)
+//				{
+//					ndBrainFloat den = m_maxAverage[i] - m_minAverage[i];
+//					ndBrainFloat invDen = ndBrainFloat(1.0f) / (den + ndBrainFloat(1.0e-6f));
+//					ndBrainFloat slope = ndBrainFloat(2.0f) * invDen;
+//					ndBrainFloat bias = -(m_maxAverage[i] + m_minAverage[i]) * invDen;
+//					m_biases[i] = bias;
+//					m_slopes[i] = slope;
+//				}
+//			}
+//		}
+//		if (m_inilizeState < m_maxSteps)
+//		{
+//			m_inilizeState++;
+//		}
+//	}
+//	ndBrainLayerActivationLinear::MakePrediction(input, output);
+//}
 
 //void ndBrainLayerActivationLinearNormalize::InputDerivative(const ndBrainVector&, const ndBrainVector&, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const
 //{

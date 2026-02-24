@@ -52,12 +52,12 @@ class ndBrain: public ndArray<ndBrainLayer*>
 	void SoftCopy(const ndBrain& src, ndBrainFloat blend);
 
 	ndBrainLayer* AddLayer(ndBrainLayer* const layer);
+	ndBrainLayer* FindLayer(const char* const name) const;
 
 	ndInt32 GetNumberOfParameters() const;
 	ndInt32 CalculateMaxLayerBufferSize() const;
 
 	void ResetDropOut();
-	void SetTrainingMode();
 	void ApplyDropOutRate(ndFloat32 rate);
 
 	void InitWeights();

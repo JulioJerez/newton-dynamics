@@ -25,12 +25,14 @@
 #include "ndBrainStdafx.h"
 #include "ndBrainLayerActivationLinear.h"
 
+#define ND_LINEAR_NORMALIZE_MOVING_AVERAGE	ndBrainFloat(0.95f)
+#define ND_LINEAR_NORMALIZE_START_NORMALIZE	ndInt32 (1024 * 32)
 #define ND_BRAIN_LAYER_ACTIVATION_LINEAR_NORMALIZE_NAME	"ndBrainLayerActivationLinearNormalize"
 
 class ndBrainLayerActivationLinearNormalize : public ndBrainLayerActivationLinear
 {
 	public:
-	ndBrainLayerActivationLinearNormalize(ndInt32 size);
+	ndBrainLayerActivationLinearNormalize(ndInt32 newrons);
 	ndBrainLayerActivationLinearNormalize(const ndBrainLayerActivationLinearNormalize& src);
 	ndBrainLayer* Clone() const override;
 
@@ -38,10 +40,11 @@ class ndBrainLayerActivationLinearNormalize : public ndBrainLayerActivationLinea
 	static ndBrainLayer* Load(const ndBrainLoad* const loadSave);
 
 	const char* GetLabelId() const override;
-	void MakePrediction(const ndBrainVector& input, ndBrainVector& output) const override;
+	//void MakePrediction(const ndBrainVector& input, ndBrainVector& output) const override;
 	//void InputDerivative(const ndBrainVector& input, const ndBrainVector& output, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const override;
 
-	virtual void SetTrainingMode() override;
+	void UpdateParameters(const ndBrainVector& parameters);
+
 	//virtual bool HasGpuSupport() const override;
 	//virtual void FeedForward(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const override;
 	//virtual void BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const override;
@@ -64,11 +67,9 @@ class ndBrainLayerActivationLinearNormalize : public ndBrainLayerActivationLinea
 		ndBrainFloatBuffer* const inputOutputGradients,
 		ndBrainFloatBuffer* const weightsAndBiasGradients) const override;
 
-	mutable ndBrainVector m_minAverage;
-	mutable ndBrainVector m_maxAverage;
-	mutable ndInt32 m_inilizeState;
-	bool m_trainingMode;
-	
+	ndBrainVector m_minAverage;
+	ndBrainVector m_maxAverage;
+	ndInt32 m_startNormalizing;
 };
 
 #endif 

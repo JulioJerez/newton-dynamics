@@ -215,6 +215,7 @@ ndBrainAgentOffPolicyGradient_Agent::ndBrainAgentOffPolicyGradient_Agent(ndBrain
 	,m_normalDistribution()
 	,m_owner(master)
 	,m_trajectoryBaseIndex(0)
+	,m_layerNormalizationCounter(ndUnsigned32 (m_owner->m_parameters.m_replayBufferStartOptimizeSize) + ND_LINEAR_NORMALIZE_START_NORMALIZE)
 {
 	m_trajectory.Init(m_brain->GetOutputSize(), master->m_parameters.m_numberOfObservations);
 	ndUnsigned32 agentSeed = m_owner->m_uniformDistribution.Generate();
@@ -252,6 +253,30 @@ void ndBrainAgentOffPolicyGradient_Agent::SampleActions(ndBrainVector& actions)
 	}
 }
 
+//#pragma optimize( "", off )
+void ndBrainAgentOffPolicyGradient_Agent::UpdateLayersNormalization(const ndBrainVector& observations, const ndBrainVector& actions)
+{
+	if (m_owner->m_policyInputNormalization && m_layerNormalizationCounter)
+	{
+		m_owner->m_policyInputNormalization->UpdateParameters(observations);
+
+		ndBrainFixSizeVector<1024> criticInput(ndInt32 (observations.GetCount() + actions.GetCount()));
+		ndBrainMemVector criticObservations (&criticInput[0], observations.GetCount());
+		ndBrainMemVector criticActions(&criticInput[observations.GetCount()], actions.GetCount());
+		
+		criticActions.Set(actions);
+		criticObservations.Set(observations);
+
+		for (ndInt32 i = 0; i < 4; ++i)
+		{
+			ndAssert(m_owner->m_cricticInputNormalization[i]);
+			m_owner->m_cricticInputNormalization[i]->UpdateParameters(criticInput);
+		}
+
+		m_layerNormalizationCounter--;
+	}
+}
+
 void ndBrainAgentOffPolicyGradient_Agent::Step()
 {
 	ndAssert(m_owner);
@@ -268,6 +293,8 @@ void ndBrainAgentOffPolicyGradient_Agent::Step()
 	policy->MakePrediction(observation, actions);
 	SampleActions(actions);
 	ApplyActions(&actions[0]);
+
+	UpdateLayersNormalization(observation, actions);
 
 	bool isdead = IsTerminal();
 	ndBrainFloat reward = CalculateReward();
@@ -405,8 +432,8 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildPolicyClass()
 		policy->AddLayer(layers[i]);
 	}
 	policy->InitWeights();
-	policy->SetTrainingMode();
-
+	m_policyInputNormalization = ndWeakPtr<ndBrainLayerActivationLinearNormalize>((ndBrainLayerActivationLinearNormalize*)policy->FindLayer(ND_BRAIN_LAYER_ACTIVATION_LINEAR_NORMALIZE_NAME));
+	
 	ndSharedPtr<ndBrainOptimizer> optimizer (new ndBrainOptimizerAdam(m_context));
 	//ndSharedPtr<ndBrainOptimizer> optimizer(new ndBrainOptimizerSgd(m_context));
 	optimizer->SetRegularizer(m_parameters.m_policyRegularizer);
@@ -444,15 +471,14 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildCriticClass()
 			critic->AddLayer(layers[i]);
 		}
 		critic->InitWeights();
-		critic->SetTrainingMode();
 		return critic;
 	};
 
 	for (ndInt32 j = 0; j < ndInt32(sizeof(m_referenceCriticTrainer) / sizeof(m_referenceCriticTrainer[0])); ++j)
 	{
 		ndSharedPtr<ndBrain> critic(BuildNeuralNetwork());
-
 		ndSharedPtr<ndBrain> referenceCritic(new ndBrain(**critic));
+
 		ndTrainerDescriptor referenceDescriptor(referenceCritic, m_context, m_parameters.m_miniBatchSize);
 		referenceDescriptor.m_regularizer = m_parameters.m_criticRegularizer;
 		referenceDescriptor.m_regularizerType = m_parameters.m_criticRegularizerType;
@@ -466,6 +492,9 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildCriticClass()
 
 		ndTrainerDescriptor descriptor(critic, m_context, m_parameters.m_miniBatchSize);
 		m_criticTrainer[j] = ndSharedPtr<ndBrainTrainer>(new ndBrainTrainer(descriptor, optimizer));
+
+		m_cricticInputNormalization[j * 2 + 0] = ndWeakPtr<ndBrainLayerActivationLinearNormalize>((ndBrainLayerActivationLinearNormalize*)critic->FindLayer(ND_BRAIN_LAYER_ACTIVATION_LINEAR_NORMALIZE_NAME));
+		m_cricticInputNormalization[j * 2 + 1] = ndWeakPtr<ndBrainLayerActivationLinearNormalize>((ndBrainLayerActivationLinearNormalize*)referenceCritic->FindLayer(ND_BRAIN_LAYER_ACTIVATION_LINEAR_NORMALIZE_NAME));
 	}
 }
 

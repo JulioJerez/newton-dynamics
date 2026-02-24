@@ -127,6 +127,20 @@ ndBrainLayer* ndBrain::AddLayer(ndBrainLayer* const layer)
 	return layer;
 }
 
+ndBrainLayer* ndBrain::FindLayer(const char* const name) const
+{
+	const ndArray<ndBrainLayer*>& layers = *this;
+	for (ndInt32 i = 0; i < layers.GetCount(); ++i)
+	{
+		if (strcmp(layers[i]->GetLabelId(), name) == 0)
+		{
+			return layers[i];
+		}
+	}
+
+	return nullptr;
+}
+
 ndInt32 ndBrain::GetNumberOfParameters() const
 {
 	const ndArray<ndBrainLayer*>& layers = *this;
@@ -191,15 +205,6 @@ void ndBrain::ApplyDropOutRate(ndFloat32 rate)
 void ndBrain::ResetDropOut()
 {
 	ApplyDropOutRate(ndFloat32(0.0f));
-}
-
-void ndBrain::SetTrainingMode()
-{
-	ndArray<ndBrainLayer*>& layers = *this;
-	for (ndInt32 i = ndInt32(layers.GetCount() - 1); i >= 0; --i)
-	{
-		layers[i]->SetTrainingMode();
-	}
 }
 
 ndInt32 ndBrain::CalculateMaxLayerBufferSize() const

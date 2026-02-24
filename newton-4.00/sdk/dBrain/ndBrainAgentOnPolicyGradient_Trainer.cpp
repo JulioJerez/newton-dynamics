@@ -248,6 +248,16 @@ void ndBrainAgentOnPolicyGradient_Agent::SampleActions(ndBrainVector& actions)
 	}
 }
 
+void ndBrainAgentOnPolicyGradient_Agent::UpdateLayersNormalization(const ndBrainVector& observations)
+{ 
+	ndAssert(0);
+	if (*m_owner->m_policyInputNormalization)
+	{
+
+	}
+
+}
+
 void ndBrainAgentOnPolicyGradient_Agent::Step()
 {
 	ndInt32 entryIndex = m_trajectory.GetCount();
@@ -261,6 +271,8 @@ void ndBrainAgentOnPolicyGradient_Agent::Step()
 	ndBrainMemVector observation(m_trajectory.GetObservations(entryIndex), owner->m_parameters.m_numberOfObservations);
 	
 	GetObservation(&observation[0]);
+	UpdateLayersNormalization(observation);
+
 	policy->MakePrediction(observation, actions);
 	SampleActions(actions);
 	ApplyActions(&actions[0]);
@@ -390,9 +402,8 @@ void ndBrainAgentOnPolicyGradient_Trainer::SetName(const ndString& name)
 void ndBrainAgentOnPolicyGradient_Trainer::BuildPolicyClass()
 {
 	ndFixSizeArray<ndBrainLayer*, 32> layers;
-	
-	layers.SetCount(0);
 
+	layers.SetCount(0);
 	layers.PushBack(new ndBrainLayerActivationLinearNormalize(m_parameters.m_numberOfObservations));
 	layers.PushBack(new ndBrainLayerLinear(m_parameters.m_numberOfObservations, m_parameters.m_hiddenLayersNumberOfNeurons));
 	//layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
@@ -412,7 +423,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildPolicyClass()
 		policy->AddLayer(layers[i]);
 	}
 	policy->InitWeights();
-	policy->SetTrainingMode();
+	m_policyInputNormalization = ndWeakPtr<ndBrainLayerActivationLinearNormalize> ((ndBrainLayerActivationLinearNormalize*)policy->FindLayer(ND_BRAIN_LAYER_ACTIVATION_LINEAR_NORMALIZE_NAME));
 
 	ndSharedPtr<ndBrainOptimizer> optimizer(new ndBrainOptimizerAdam(m_context));
 	optimizer->SetRegularizer(m_parameters.m_policyRegularizer);
@@ -448,7 +459,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildCriticClass()
 		critic->AddLayer(layers[i]);
 	}
 	critic->InitWeights();
-	critic->SetTrainingMode();
+	m_policyInputNormalization = ndWeakPtr<ndBrainLayerActivationLinearNormalize>((ndBrainLayerActivationLinearNormalize*)critic->FindLayer(ND_BRAIN_LAYER_ACTIVATION_LINEAR_NORMALIZE_NAME));
 	
 	ndSharedPtr<ndBrainOptimizer> optimizer(new ndBrainOptimizerAdam(m_context));
 	optimizer->SetRegularizer(m_parameters.m_criticRegularizer);

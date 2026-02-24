@@ -44,6 +44,7 @@ class ndBrainFloatBuffer;
 class ndBrainIntegerBuffer;
 class ndBrainUniformBuffer;
 class ndBrainAgentOnPolicyGradient_Trainer;
+class ndBrainLayerActivationLinearNormalize;
 
 class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 {
@@ -107,6 +108,9 @@ class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 	virtual void SampleActions(ndBrainVector& action);
 	virtual ndFloat32 GetExpectedReward() const override;
 	
+	protected:
+	void UpdateLayersNormalization(const ndBrainVector& observations);
+
 	ndTrajectory m_trajectory;
 	ndNomalDistribution m_normalDistribution;
 	ndWeakPtr<ndBrainAgentOnPolicyGradient_Trainer> m_owner;
@@ -205,6 +209,8 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndSharedPtr<ndBrainFloatBuffer> m_minibatchClippedLikelihoodRatioBuffer;
 
 	ndSharedPtr<ndBrainIntegerBuffer> m_randomShuffleMinibatchBuffer;
+	ndWeakPtr<ndBrainLayerActivationLinearNormalize> m_criticInputNormalization;
+	ndWeakPtr<ndBrainLayerActivationLinearNormalize> m_policyInputNormalization;
 
 	ndBrainVector m_lastPolicy;
 	ndBrainVector m_scratchBuffer;
