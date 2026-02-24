@@ -86,8 +86,8 @@ void ndBrainLayerActivationRelu::InputDerivative(const ndBrainVector& input, con
 	ndAssert(input.GetCount() == outputDerivative.GetCount());
 	ndAssert(input.GetCount() == inputDerivative.GetCount());
 
-	const ndBrainFloat8 one(1.0f);
-	const ndBrainFloat8 zero(0.0f);
+	const ndBrainFloat8 one(ndBrainFloat(1.0f));
+	const ndBrainFloat8 zero(ndBrainFloat(0.0f));
 	ndBrainFloat* const dst = &inputDerivative[0];
 	const ndBrainFloat* const src = &input[0];
 	const ndInt32 roundCount = ndInt32(input.GetCount()) & -8;
