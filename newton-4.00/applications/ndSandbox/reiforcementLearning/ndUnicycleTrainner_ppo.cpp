@@ -216,9 +216,10 @@ namespace ndUnicycleTrainer_ppo
 			
 				episodeCount -= m_master->GetEposideCount();
 
-				ndFloat32 score = m_master->GetAverageScore();
-				ndFloat32 trajectoryLog = ndLog(m_master->GetAverageFrames() + 0.001f);
-				ndFloat32 rewardTrajectory = score * trajectoryLog;
+				const ndFloat32 score = m_master->GetAverageScore();
+				const ndFloat32 stepsLog = ndLog(m_master->GetAverageScore() + 0.001f);
+				const ndFloat32 trajectoryLog = ndLog(m_master->GetAverageFrames() + 0.001f);
+				const ndFloat32 rewardTrajectory = score * trajectoryLog;
 				if (rewardTrajectory >= ndFloat32(m_maxScore))
 				{
 					if (m_lastEpisode != m_master->GetEposideCount())
@@ -232,7 +233,8 @@ namespace ndUnicycleTrainer_ppo
 			
 				if (rewardTrajectory > m_saveScore)
 				{
-					m_saveScore = ndFloor(rewardTrajectory) + 2.0f;
+					//m_saveScore = ndFloor(rewardTrajectory) + 2.0f;
+					m_saveScore = rewardTrajectory;
 			
 					// save partial controller in case of crash 
 					ndBrain* const actor = *m_master->GetPolicyNetwork();
