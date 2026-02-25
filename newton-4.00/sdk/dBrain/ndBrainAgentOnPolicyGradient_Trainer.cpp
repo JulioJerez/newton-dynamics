@@ -286,7 +286,7 @@ ndBrainAgentOnPolicyGradient_Trainer::ndBrainAgentOnPolicyGradient_Trainer(const
 	,m_policyActionBuffer(nullptr)
 	,m_invLikelihoodBuffer(nullptr)
 	,m_randomShuffleBuffer(nullptr)
-	,m_advantageMinibatchBuffer(nullptr)
+	,m_minibatchAdvatageBuffer(nullptr)
 	,m_policyGradientAccumulator(nullptr)
 	,m_invMinibatchLikelihoodBuffer(nullptr)
 	,m_minibatchLikelihoodRatioBuffer(nullptr)
@@ -339,7 +339,7 @@ ndBrainAgentOnPolicyGradient_Trainer::ndBrainAgentOnPolicyGradient_Trainer(const
 	BuildCriticClass();
 
 	m_criticStateValue = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, m_parameters.m_miniBatchSize));
-	m_advantageMinibatchBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, m_parameters.m_miniBatchSize));
+	m_minibatchAdvatageBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, m_parameters.m_miniBatchSize));
 	m_invMinibatchLikelihoodBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, m_parameters.m_miniBatchSize));
 	m_minibatchLikelihoodRatioBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, m_parameters.m_miniBatchSize));
 	m_randomShuffleMinibatchBuffer = ndSharedPtr<ndBrainIntegerBuffer>(new ndBrainIntegerBuffer(*m_context, m_parameters.m_miniBatchSize));
@@ -684,26 +684,34 @@ void ndBrainAgentOnPolicyGradient_Trainer::CalculateAdvantage()
 	// advantage(i) = reward(i) + alive(i) * (gamma * Value(i + 1) - value(i))
 	for (ndInt32 i = 0; i < numberOfBatches; ++i)
 	{
+		// calculate 
+		// At = expectedStateValue - StateValue
+		// Qt = r(t) + g * V(t+1) - V(t)
+		// Qt = r(t) + (g * V(t+1) - V(t)) * terminal
+		 
 		// get next state value
 		inputBuffer->CopyBuffer(nextObservationInfo, m_parameters.m_miniBatchSize, **m_trainingBuffer);
 		m_criticTrainer->MakePrediction();
 		outputBuffer->Scale(m_parameters.m_discountRewardFactor);
-		m_advantageMinibatchBuffer->Set(*outputBuffer);
-		
+		m_minibatchAdvatageBuffer->Set(*outputBuffer);
+
+		// get state value
 		inputBuffer->CopyBuffer(observationInfo, m_parameters.m_miniBatchSize, **m_trainingBuffer);
 		m_criticTrainer->MakePrediction();
-		m_advantageMinibatchBuffer->Sub(*outputBuffer);
+		m_minibatchAdvatageBuffer->Sub(*outputBuffer);
 
+		// if state is terminal the value is zero
 		outputBuffer->CopyBuffer(stateTerminalInfo, m_parameters.m_miniBatchSize, **m_trainingBuffer);
-		m_advantageMinibatchBuffer->Mul(*outputBuffer);
+		m_minibatchAdvatageBuffer->Mul(*outputBuffer);
 		
+		// add the state rewrad
 		outputBuffer->CopyBuffer(stateRewardInfo, m_parameters.m_miniBatchSize, **m_trainingBuffer);
-		m_advantageMinibatchBuffer->Add(*outputBuffer);
-		m_advantageMinibatchBuffer->Min(ndBrainFloat(2.0f));
-		m_advantageMinibatchBuffer->Max(ndBrainFloat(-2.0f));
+		m_minibatchAdvatageBuffer->Add(*outputBuffer);
+		m_minibatchAdvatageBuffer->Min(ndBrainFloat(2.0f));
+		m_minibatchAdvatageBuffer->Max(ndBrainFloat(-2.0f));
 		
 		// save advantage
-		m_advantageBuffer->CopyBuffer(advantageInfo, 1, **m_advantageMinibatchBuffer);
+		m_advantageBuffer->CopyBuffer(advantageInfo, 1, **m_minibatchAdvatageBuffer);
 
 		advantageInfo.m_dstOffsetInByte += advantageStrideInBytes;
 		stateRewardInfo.m_srcOffsetInByte += transitionStrideInBytes;
@@ -794,7 +802,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 	ndBrainFloatBuffer* const policyMinibatchInputBuffer = m_policyTrainer->GetInputBuffer();
 	ndBrainFloatBuffer* const policyMinibatchOutputBuffer = m_policyTrainer->GetOuputBuffer();
 	ndBrainFloatBuffer* const policyMinibatchOutputGradientBuffer = m_policyTrainer->GetOuputGradientBuffer();
-	ndBrainFloatBuffer* const policyMinibatchLikelihood = *m_advantageMinibatchBuffer;
+	ndBrainFloatBuffer* const policyMinibatchLikelihood = *m_minibatchAdvatageBuffer;
 
 	ndCopyBufferCommandInfo policyObservationInfo;
 	policyObservationInfo.m_srcStrideInByte = ndInt32(m_trajectoryAccumulator.GetStride() * sizeof(ndReal));
@@ -872,8 +880,8 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 		policyMinibatchOutputGradientBuffer->CalculateEntropyRegularizationGradient(**m_zMeanBuffer, **m_sigmaBuffer, ndBrainFloat(1.0f), m_parameters.m_numberOfActions);
 
 		// get a advantage minibatch and scale the grad(log) 
-		m_advantageMinibatchBuffer->CopyBuffer(advantageInfo, m_parameters.m_miniBatchSize, **m_advantageBuffer);
-		policyMinibatchOutputBuffer->BroadcastScaler(**m_advantageMinibatchBuffer);
+		m_minibatchAdvatageBuffer->CopyBuffer(advantageInfo, m_parameters.m_miniBatchSize, **m_advantageBuffer);
+		policyMinibatchOutputBuffer->BroadcastScaler(**m_minibatchAdvatageBuffer);
 		policyMinibatchOutputGradientBuffer->Mul(*policyMinibatchOutputBuffer);
 		
 		if (m_parameters.m_entropyTemperature > ndFloat32 (0.0f))
@@ -996,7 +1004,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizedSurrogatePolicy(ndInt32 pass
 		m_zMeanBuffer->Sub(**m_meanBuffer);
 
 		// get this minibatch advantage
-		m_advantageMinibatchBuffer->CopyBuffer(advantageInfo, m_parameters.m_miniBatchSize, **m_advantageBuffer);
+		m_minibatchAdvatageBuffer->CopyBuffer(advantageInfo, m_parameters.m_miniBatchSize, **m_advantageBuffer);
 
 		//calculate the clip surrogate factor
 		m_minibatchLikelihoodRatioBuffer->CalculateLikelihood(**m_zMeanBuffer, **m_sigmaBuffer);
@@ -1006,7 +1014,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizedSurrogatePolicy(ndInt32 pass
 //// test surrogate clip loss
 //static ndBrainVector r;
 //static ndBrainVector a;
-//m_advantageMinibatchBuffer->VectorFromDevice(a);
+//m_minibatchAdvatageBuffer->VectorFromDevice(a);
 //m_minibatchLikelihoodRatioBuffer->VectorFromDevice(r);
 //for (ndInt32 k = 0; k < r.GetCount(); k++)
 //{
@@ -1031,22 +1039,22 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizedSurrogatePolicy(ndInt32 pass
 //r[4] = 1.5f; a[4] = -2.0f;
 //r[5] = 0.5f; a[5] = -2.0f;
 //m_minibatchLikelihoodRatioBuffer->VectorToDevice(r);
-//m_advantageMinibatchBuffer->VectorToDevice(a);
+//m_minibatchAdvatageBuffer->VectorToDevice(a);
 
 		m_minibatchClippedLikelihoodRatioBuffer->Set(**m_minibatchLikelihoodRatioBuffer);
 		m_minibatchClippedLikelihoodRatioBuffer->Min(ndBrainFloat(1.0f) + ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON);
 		m_minibatchClippedLikelihoodRatioBuffer->Max(ndBrainFloat(1.0f) - ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON);
 
-		m_minibatchLikelihoodRatioBuffer->Mul(**m_advantageMinibatchBuffer);
-		m_advantageMinibatchBuffer->Mul(**m_minibatchClippedLikelihoodRatioBuffer);
+		m_minibatchLikelihoodRatioBuffer->Mul(**m_minibatchAdvatageBuffer);
+		m_minibatchAdvatageBuffer->Mul(**m_minibatchClippedLikelihoodRatioBuffer);
 
-		m_advantageMinibatchBuffer->Min(**m_minibatchLikelihoodRatioBuffer);
+		m_minibatchAdvatageBuffer->Min(**m_minibatchLikelihoodRatioBuffer);
 
 		// calculate gradient
 		policyMinibatchOutputGradientBuffer->CalculateEntropyRegularizationGradient(**m_zMeanBuffer, **m_sigmaBuffer, ndBrainFloat(1.0f), m_parameters.m_numberOfActions);
 
 		// get a advantage minibatch and make gradient accend 
-		policyMinibatchOutputBuffer->BroadcastScaler(**m_advantageMinibatchBuffer);
+		policyMinibatchOutputBuffer->BroadcastScaler(**m_minibatchAdvatageBuffer);
 		policyMinibatchOutputGradientBuffer->Mul(*policyMinibatchOutputBuffer);
 
 		if (m_parameters.m_entropyTemperature > ndFloat32(0.0f))
@@ -1093,7 +1101,7 @@ ndBrainFloat ndBrainAgentOnPolicyGradient_Trainer::CalculateKLdivergence()
 	ndBrainFloatBuffer* const policyMinibatchBaseDivergence = m_policyTrainer->GetOuputGradientBuffer();
 
 	ndSharedPtr<ndBrainFloatBuffer> minbatchDivergence(m_criticStateValue);
-	ndSharedPtr<ndBrainFloatBuffer> minbatchDivergenceAcc(m_advantageMinibatchBuffer);
+	ndSharedPtr<ndBrainFloatBuffer> minbatchDivergenceAcc(m_minibatchAdvatageBuffer);
 
 	ndCopyBufferCommandInfo policyObservationInfo;
 	policyObservationInfo.m_srcStrideInByte = ndInt32(m_trajectoryAccumulator.GetStride() * sizeof(ndReal));
