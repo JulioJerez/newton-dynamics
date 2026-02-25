@@ -575,7 +575,6 @@ void ndBrainAgentOnPolicyGradient_Trainer::UpdateLayersNormalization()
 {
 	if (m_policyInputNormalization && m_layerNormalizationCounter)
 	{
-		ndAssert(m_criticInputNormalization);
 		for (ndInt32 i = m_trajectoryAccumulator.GetCount() - 1; i >= 0; --i)
 		{
 			const ndBrainMemVector observations(m_trajectoryAccumulator.GetObservations(i), m_parameters.m_numberOfObservations);
