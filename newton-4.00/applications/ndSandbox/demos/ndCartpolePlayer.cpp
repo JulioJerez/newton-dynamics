@@ -226,7 +226,6 @@ namespace ndCarpolePlayer
 		ndWorld* const world = scene->GetWorld();
 		world->AddModel(model);
 		scene->AddEntity(visualMesh);
-		//model->AddBodiesAndJointsToWorld();
 
 		return model;
 	}

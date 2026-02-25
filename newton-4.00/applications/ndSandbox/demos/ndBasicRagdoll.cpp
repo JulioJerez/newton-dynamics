@@ -18,7 +18,7 @@
 #include "ndDemoCameraNodeFollow.h"
 #include "ndHeightFieldPrimitive.h"
 
-#if 1
+#if 0
 
 // Material ragdoll : désactive les collisions internes
 class DGRagdollMaterial : public ndApplicationMaterial
@@ -804,7 +804,6 @@ void ndBasicRagdoll(ndDemoEntityManager* const scene)
 
     ndPhysicsWorld* world = scene->GetWorld();
     world->AddModel(model);
-    //model->AddBodiesAndJointsToWorld();
 
     ndQuaternion rot;
     ndVector origin(-20.0f, 10.0f, 0.0f, 1.0f);
@@ -1036,7 +1035,7 @@ namespace ndRagdoll
 
 			ndModelArticulation* const ragdoll = (ndModelArticulation*)GetModel();
 			ndModelArticulation::ndNode* const modelRootNode = ragdoll->AddRootBody(rootBody);
-			ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)modelRootNode->m_body->GetAsBodyKinematic()->GetNotifyCallback();
+            ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*modelRootNode->m_body->GetAsBodyKinematic()->GetNotifyCallback();
 
 			struct StackData
 			{
@@ -1104,7 +1103,6 @@ namespace ndRagdoll
 		
 		ndWorld* const world = scene->GetWorld();
 		world->AddModel(model);
-		model->AddBodiesAndJointsToWorld();
 		return controller;
 	}
 }
