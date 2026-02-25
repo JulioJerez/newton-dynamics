@@ -47,14 +47,14 @@
 //#define DEFAULT_SCENE	19		// object Placement
 //#define DEFAULT_SCENE	20		// third person player capsule
 //#define DEFAULT_SCENE	21		// cart pole SAC trained controller
-#define DEFAULT_SCENE	22		// unicycle SAC trained controller
+//#define DEFAULT_SCENE	22		// unicycle SAC trained controller
 //#define DEFAULT_SCENE	23		// cart pole PPO trained controller
 //#define DEFAULT_SCENE	24		// unicycle PPO trained controller
 //#define DEFAULT_SCENE	25		// procedurally animated quadruped spider
 
 // These are the machine learning training demos
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// SAC cart pole training
-//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// SAC double pendulum unicycle training
+#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// SAC double pendulum unicycle training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// PPO cart pole training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 3)	// PPO double pendulum unicycle training
 
@@ -436,6 +436,99 @@ static void SimpleRegressionBrainStressTest()
 	ndExpandTraceMessage(" training time %f (sec)\n\n", ndFloat64(time) / 1000000.0f);
 }
 
+static void TestAutoDifferentiation()
+{
+	ndBrainDualNumber x(2.0f);
+	ndBrainDualNumber y(3.0f);
+	ndBrainDualNumber epsilon(0.0f, 1.0f);
+
+	{
+		// test sum
+		class Sum
+		{
+			public:
+			ndBrainDualNumber CalculateGradient(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			{
+				return x + y;
+			}
+		};
+
+		Sum sum;
+		ndBrainDualNumber z0_x(sum.CalculateGradient(x + epsilon, y));
+		ndBrainDualNumber z0_y(sum.CalculateGradient(x, y + epsilon));
+	}
+
+	{
+		// test simple example polynomial
+		class Polynomial
+		{
+			public:
+			//Finding the partials of z = x * (x + y) + y * y at (x, y) = (2, 3)
+			ndBrainDualNumber CalculateGradient(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			{
+				return x * (x + y) + y * y;
+			}
+
+			ndBrainFloat ManualGrad_x(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			{
+				return (x + x + y).m_real;
+			}
+
+			ndBrainFloat ManualGrad_y(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			{
+				return (x + ndBrainDualNumber(2.0f) * y).m_real;
+			}
+		};
+		Polynomial poly;
+		ndBrainFloat z1_x_ = poly.ManualGrad_x(x, y);
+		ndBrainFloat z1_y_ = poly.ManualGrad_y(x, y);
+		z1_x_ *= 1;
+		z1_y_ *= 1;
+
+		ndBrainDualNumber z1_x(poly.CalculateGradient(x + epsilon, y));
+		ndBrainDualNumber z1_y(poly.CalculateGradient(x, y + epsilon));
+		ndAssert(z1_x_ == z1_x.m_gradient);
+		ndAssert(z1_y_ == z1_y.m_gradient);
+	}
+
+	{
+		// test ratio of two vaiable
+		class Ratio
+		{
+			public:
+			ndBrainDualNumber CalculateGradient(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			{
+				return x / (x + y) + x * y;
+			}
+
+			ndBrainFloat ManualGrad_x(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			{
+				//ndBrainDualNumber val(y / ((x + y) * (x + y)) + y);
+				ndBrainDualNumber val(y / (x + y).Pow(2.0f) + y);
+				return val.m_real;
+			}
+
+			ndBrainFloat ManualGrad_y(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			{
+				//ndBrainDualNumber val(-x / ((x + y) * (x + y)) + x);
+				ndBrainDualNumber val(-x / (x + y).Pow(2.0f) + x);
+				return val.m_real;
+			}
+		};
+		
+		Ratio poly;
+		ndBrainFloat z1_x_ = poly.ManualGrad_x(x, y);
+		ndBrainDualNumber z1_x(poly.CalculateGradient(x + epsilon, y));
+		ndAssert(z1_x_ == z1_x.m_gradient);
+		z1_x_ *= 1;
+
+		ndBrainFloat z1_y_ = poly.ManualGrad_y(x, y);		
+		ndBrainDualNumber z1_y(poly.CalculateGradient(x, y + epsilon));
+		ndAssert(z1_y_ == z1_y.m_gradient);
+		z1_y_ *= 1;
+	}
+}
+
 // ImGui - standalone example application for Glfw + OpenGL 2, using fixed pipeline
 // If you are new to ImGui, see examples/README.txt and documentation at the top of imgui.cpp.
 ndDemoEntityManager::ndDemoEntityManager()
@@ -571,6 +664,8 @@ ndDemoEntityManager::ndDemoEntityManager()
 	ndHandWrittenDigits();
 	//ndCifar10ImageClassification();
 #endif
+
+	TestAutoDifferentiation();
 }
 
 ndDemoEntityManager::~ndDemoEntityManager ()

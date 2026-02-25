@@ -37,6 +37,7 @@
 #include <ndBrainSaveLoad.h>
 #include <ndBrainOptimizer.h>
 #include <ndBrainGpuBuffer.h>
+#include <ndBrainDualNumber.h>
 #include <ndBrainCpuContext.h>
 #include <ndBrainThreadPool.h>
 #include <ndBrainGpuCommand.h>

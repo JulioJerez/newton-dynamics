@@ -100,15 +100,13 @@ namespace ndUnicycleTrainer_ppo
 		TrainingUpdata(ndDemoEntityManager* const scene, const ndMatrix& location, const ndRenderMeshLoader& loader)
 			:OnPostUpdate()
 			,m_master()
-			,m_bestActor()
 			,m_outFile(nullptr)
 			,m_timer(ndGetTimeInMicroseconds())
-			,m_maxScore(ndFloat32(-1.0e10f))
-			,m_saveScore(m_maxScore)
+			,m_savedScore(ndFloat32(-1.0e10f))
 			,m_discountRewardFactor(0.995f)
 			,m_horizon(ndFloat32(1.0f) / (ndFloat32(1.0f) - m_discountRewardFactor))
 			,m_lastEpisode(0xfffffff)
-			,m_stopTraining(100 * 1000000)
+			,m_stopTraining(200 * 1000000)
 			,m_modelIsTrained(false)
 		{
 			char name[256];
@@ -132,7 +130,6 @@ namespace ndUnicycleTrainer_ppo
 			hyperParameters.m_discountRewardFactor = ndReal(m_discountRewardFactor);
 			
 			m_master = ndSharedPtr<ndBrainAgentOnPolicyGradient_Trainer>(new ndBrainAgentOnPolicyGradient_Trainer(hyperParameters));
-			m_bestActor = ndSharedPtr<ndBrain>(new ndBrain(**m_master->GetPolicyNetwork()));
 			
 			snprintf(name, sizeof(name), "%s.dnn", CONTROLLER_NAME_PPO);
 			m_master->SetName(name);
@@ -215,39 +212,33 @@ namespace ndUnicycleTrainer_ppo
 				m_master->OptimizeStep();
 			
 				episodeCount -= m_master->GetEposideCount();
+				if (episodeCount)
+				{
+					const ndFloat32 score = m_master->GetAverageScore();
+					const ndFloat32 trajectoryGain = ndSqrt(m_master->GetAverageFrames());
+					const ndFloat32 stepsGain = ndSqrt(ndFloat32(m_master->GetFramesCount()));
+					const ndFloat32 combinedTrajectory = score * stepsGain * trajectoryGain;
 
-				ndFloat32 score = m_master->GetAverageScore();
-				ndFloat32 trajectoryLog = ndLog(m_master->GetAverageFrames() + 0.001f);
-				ndFloat32 rewardTrajectory = score * trajectoryLog;
-				if (rewardTrajectory >= ndFloat32(m_maxScore))
-				{
-					if (m_lastEpisode != m_master->GetEposideCount())
+					if (combinedTrajectory > m_savedScore)
 					{
-						m_maxScore = rewardTrajectory;
-						m_bestActor->CopyFrom(**m_master->GetPolicyNetwork());
+						m_savedScore = combinedTrajectory + ndFloat32(1.0f);
+
+						// save partial controller in case of crash 
+						ndBrain* const actor = *m_master->GetPolicyNetwork();
+						ndString fileName(ndGetWorkingFileName(m_master->GetName().GetStr()));
+						m_master->GetPolicyNetwork()->SaveToFile(fileName.GetStr());
+						actor->SaveToFile(fileName.GetStr());
 						ndExpandTraceMessage("best actor episode: %d\treward %f\ttrajectoryFrames: %f\n", m_master->GetEposideCount(), score, m_master->GetAverageFrames());
-						m_lastEpisode = m_master->GetEposideCount();
 					}
-				}
-			
-				if (rewardTrajectory > m_saveScore)
-				{
-					m_saveScore = ndFloor(rewardTrajectory) + 2.0f;
-			
-					// save partial controller in case of crash 
-					ndBrain* const actor = *m_master->GetPolicyNetwork();
-					ndString fileName(ndGetWorkingFileName(m_master->GetName().GetStr()));
-					m_master->GetPolicyNetwork()->SaveToFile(fileName.GetStr());
-					actor->SaveToFile(fileName.GetStr());
-				}
-			
-				if (episodeCount && !m_master->IsSampling())
-				{
-					ndExpandTraceMessage("steps: %d\treward: %g\t  trajectoryFrames: %g\n", m_master->GetFramesCount(), score, m_master->GetAverageFrames());
-					if (m_outFile)
+
+					if (!m_master->IsSampling())
 					{
-						fprintf(m_outFile, "%g\n", score);
-						fflush(m_outFile);
+						ndExpandTraceMessage("steps: %d\treward: %g\t  trajectoryFrames: %g\n", m_master->GetFramesCount(), score, m_master->GetAverageFrames());
+						if (m_outFile)
+						{
+							fprintf(m_outFile, "%g\n", score);
+							fflush(m_outFile);
+						}
 					}
 				}
 			}
@@ -255,9 +246,7 @@ namespace ndUnicycleTrainer_ppo
 			if ((stopTraining >= m_stopTraining) || (m_master->GetAverageScore() > ndBrainFloat(0.96f)))
 			{
 				m_modelIsTrained = true;
-				m_master->GetPolicyNetwork()->CopyFrom(*(*m_bestActor));
 				ndString fileName (ndGetWorkingFileName(m_master->GetName().GetStr()));
-				m_master->GetPolicyNetwork()->SaveToFile(fileName.GetStr());
 				ndExpandTraceMessage("saving to file: %s\n", fileName.GetStr());
 				ndExpandTraceMessage("training complete\n");
 				ndUnsigned64 timer = ndGetTimeInMicroseconds() - m_timer;
@@ -268,12 +257,10 @@ namespace ndUnicycleTrainer_ppo
 		}
 
 		ndSharedPtr<ndBrainAgentOnPolicyGradient_Trainer> m_master;
-		ndSharedPtr<ndBrain> m_bestActor;
 		ndList<ndModelArticulation*> m_models;
 		FILE* m_outFile;
 		ndUnsigned64 m_timer;
-		ndFloat32 m_maxScore;
-		ndFloat32 m_saveScore;
+		ndFloat32 m_savedScore;
 		ndFloat32 m_discountRewardFactor;
 		ndFloat32 m_horizon;
 		ndUnsigned32 m_lastEpisode;
