@@ -106,7 +106,7 @@ class ndRenderPrimitive : public ndContainersFreeListAlloc<ndRenderPrimitive>
 		ndDescriptor(const ndDescriptor& src);
 		ndRenderPrimitiveMaterial& AddMaterial(const ndSharedPtr<ndRenderTexture>& texture);
 	
-		ndRender* m_render;
+		ndWeakPtr<ndRender> m_render;
 		ndSharedPtr<ndMeshEffect> m_meshNode;
 		ndSharedPtr<ndRenderPrimitiveSimpleMesh> m_simpleMesh;
 		ndSharedPtr<ndShapeInstance> m_collision;

@@ -52,8 +52,8 @@ ndRenderSceneNode::ndRenderSceneNode(const ndMatrix& matrix)
 	,m_parent(nullptr)
 	,m_primitive(nullptr)
 	,m_children()
-	,m_selfChildNode(nullptr)
 	,m_sceneHandle(nullptr)
+	,m_selfChildNode(nullptr)
 	,m_isVisible(true)
 {
 }
@@ -69,8 +69,8 @@ ndRenderSceneNode::ndRenderSceneNode(const ndRenderSceneNode& src)
 	,m_parent(nullptr)
 	,m_primitive(nullptr)
 	,m_children()
-	,m_selfChildNode(nullptr)
 	,m_sceneHandle(nullptr)
+	,m_selfChildNode(nullptr)
 	,m_isVisible(true)
 {
 	for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* node = src.m_children.GetFirst(); node; node = node->GetNext())
@@ -288,7 +288,7 @@ ndSharedPtr<ndRenderPrimitive> ndRenderSceneNode::GetPrimitive() const
 
 ndRender* ndRenderSceneNode::GetOwner() const
 {
-	return m_owner;
+	return (ndRender*)*m_owner;
 }
 
 ndMatrix ndRenderSceneNode::GetMatrix() const
@@ -364,7 +364,7 @@ void ndRenderSceneNode::InterpolateTransforms(ndFloat32 param)
 
 void ndRenderSceneNode::Render(const ndRender* const owner, const ndMatrix& modelViewMatrix, ndRenderPassMode renderMode) const
 {
-	ndAssert(!m_owner || (m_owner == owner));
+	ndAssert(!*m_owner || (*m_owner == owner));
 	if (m_isVisible && *m_primitive)
 	{
 		const ndRenderPrimitive* const mesh = *m_primitive;

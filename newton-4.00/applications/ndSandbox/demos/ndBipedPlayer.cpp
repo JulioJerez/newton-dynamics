@@ -25,7 +25,7 @@ namespace ndBipedPlayer
 		virtual void PresentHelp(ndDemoEntityManager* const scene) override
 		{
 			ndVector color(1.0f, 1.0f, 0.0f, 0.0f);
-			scene->Print(color, "Pre-trained inverted pendulum environment.");
+			scene->Print(color, "Pre-trained biped.");
 			scene->Print(color, "This is a classic reinforcement learning benchmark,");
 			scene->Print(color, "commonly used to validate algorithm implementations.");
 			scene->Print(color, "The model was trained using the Soft Actor-Critic (SAC) algorithm.");
@@ -76,19 +76,18 @@ namespace ndBipedPlayer
 	void ndController::Update(ndFloat32 timestep)
 	{
 		m_timestep = timestep;
-		m_agent->Step();
+		//m_agent->Step();
 	}
 
-	#pragma optimize( "", off )
 	void ndController::PostUpdate(ndFloat32)
 	{
-		ndMatrix matrix (m_topBox->GetMatrix());
-		if (ndAbs(matrix.m_posit.m_x) > 399.0f)
-		{
-			matrix.m_posit.m_x = ndFloat32(0.0f);
-			GetModel()->GetAsModelArticulation()->SetTransform(matrix);
-		}
-		m_randomImpulseCounter = (m_randomImpulseCounter + 1) % ND_RANDOM_IMPULSE_MOD;
+		//ndMatrix matrix (m_topBox->GetMatrix());
+		//if (ndAbs(matrix.m_posit.m_x) > 399.0f)
+		//{
+		//	matrix.m_posit.m_x = ndFloat32(0.0f);
+		//	GetModel()->GetAsModelArticulation()->SetTransform(matrix);
+		//}
+		//m_randomImpulseCounter = (m_randomImpulseCounter + 1) % ND_RANDOM_IMPULSE_MOD;
 	}
 
 	void ndController::ResetModel()
@@ -291,32 +290,32 @@ namespace ndBipedPlayer
 		m_topBox = ndSharedPtr<ndBody>(CreateRigidBody(mesh, visualMesh, BOX_MASS, nullptr));
 		ndModelArticulation::ndNode* const modelRootNode = model->AddRootBody(m_topBox);
 
-		// add the pole mesh and body
-		ndSharedPtr<ndMesh> poleMesh(mesh->GetChildren().GetFirst()->GetInfo());
-		ndSharedPtr<ndRenderSceneNode> poleEntity(visualMesh->GetChildren().GetFirst()->GetInfo());
-		m_pole = ndSharedPtr<ndBody>(CreateRigidBody(poleMesh, poleEntity, POLE_MASS, m_topBox->GetAsBodyDynamic()));
-
-		// add ball mesh and body
-		ndSharedPtr<ndMesh> ballMesh(poleMesh->GetChildren().GetFirst()->GetInfo());
-		ndSharedPtr<ndRenderSceneNode> ballEntity(poleEntity->GetChildren().GetFirst()->GetInfo());
-		m_wheel = ndSharedPtr<ndBody>(CreateRigidBody(ballMesh, ballEntity, BALL_MASS, m_pole->GetAsBodyDynamic()));
-
-		// add links
-		const ndMatrix poleMatrix(ndPitchMatrix(ndPi) * m_pole->GetMatrix());
-		m_poleHinge = ndSharedPtr<ndJointBilateralConstraint>(new ndJointHinge(poleMatrix, m_pole->GetAsBodyKinematic(), m_topBox->GetAsBodyKinematic()));
-		((ndJointRoller*)*m_poleHinge)->SetAsSpringDamperPosit(0.01f, 0.0f, 5.0f);
-		ndModelArticulation::ndNode* const poleNode = model->AddLimb(modelRootNode, m_pole, m_poleHinge);
-
-		const ndMatrix ballMatrix(m_wheel->GetMatrix());
-		m_wheelRoller = ndSharedPtr<ndJointBilateralConstraint>(new ndJointRoller(ballMatrix, m_wheel->GetAsBodyKinematic(), m_pole->GetAsBodyKinematic()));
-		((ndJointRoller*)*m_wheelRoller)->SetAsSpringDamperPosit(0.01f, 1000.0f, 15.0f);
-		model->AddLimb(poleNode, m_wheel, m_wheelRoller);
-
-		// fix to the word with a plane joint
-		ndWorld* const world = scene->GetWorld();
-		const ndMatrix planeMatrix(m_topBox->GetMatrix());
-		m_plane = ndSharedPtr<ndJointBilateralConstraint>(new ndJointPlane(planeMatrix.m_posit, planeMatrix.m_right, m_topBox->GetAsBodyKinematic(), world->GetSentinelBody()));
-		model->AddCloseLoop(m_plane);
+		//// add the pole mesh and body
+		//ndSharedPtr<ndMesh> poleMesh(mesh->GetChildren().GetFirst()->GetInfo());
+		//ndSharedPtr<ndRenderSceneNode> poleEntity(visualMesh->GetChildren().GetFirst()->GetInfo());
+		//m_pole = ndSharedPtr<ndBody>(CreateRigidBody(poleMesh, poleEntity, POLE_MASS, m_topBox->GetAsBodyDynamic()));
+		//
+		//// add ball mesh and body
+		//ndSharedPtr<ndMesh> ballMesh(poleMesh->GetChildren().GetFirst()->GetInfo());
+		//ndSharedPtr<ndRenderSceneNode> ballEntity(poleEntity->GetChildren().GetFirst()->GetInfo());
+		//m_wheel = ndSharedPtr<ndBody>(CreateRigidBody(ballMesh, ballEntity, BALL_MASS, m_pole->GetAsBodyDynamic()));
+		//
+		//// add links
+		//const ndMatrix poleMatrix(ndPitchMatrix(ndPi) * m_pole->GetMatrix());
+		//m_poleHinge = ndSharedPtr<ndJointBilateralConstraint>(new ndJointHinge(poleMatrix, m_pole->GetAsBodyKinematic(), m_topBox->GetAsBodyKinematic()));
+		//((ndJointRoller*)*m_poleHinge)->SetAsSpringDamperPosit(0.01f, 0.0f, 5.0f);
+		//ndModelArticulation::ndNode* const poleNode = model->AddLimb(modelRootNode, m_pole, m_poleHinge);
+		//
+		//const ndMatrix ballMatrix(m_wheel->GetMatrix());
+		//m_wheelRoller = ndSharedPtr<ndJointBilateralConstraint>(new ndJointRoller(ballMatrix, m_wheel->GetAsBodyKinematic(), m_pole->GetAsBodyKinematic()));
+		//((ndJointRoller*)*m_wheelRoller)->SetAsSpringDamperPosit(0.01f, 1000.0f, 15.0f);
+		//model->AddLimb(poleNode, m_wheel, m_wheelRoller);
+		//
+		//// fix to the word with a plane joint
+		//ndWorld* const world = scene->GetWorld();
+		//const ndMatrix planeMatrix(m_topBox->GetMatrix());
+		//m_plane = ndSharedPtr<ndJointBilateralConstraint>(new ndJointPlane(planeMatrix.m_posit, planeMatrix.m_right, m_topBox->GetAsBodyKinematic(), world->GetSentinelBody()));
+		//model->AddCloseLoop(m_plane);
 	}
 
 	ndModelArticulation* ndController::CreateModel(ndDemoEntityManager* const scene, const ndMatrix& location, const ndRenderMeshLoader& loader, const char* const name)
@@ -336,11 +335,11 @@ namespace ndBipedPlayer
 		ndPlaybackController* const playerController = (ndPlaybackController*)(*controller);
 		playerController->CreateArticulatedModel(scene, model, loader.m_mesh, visualMesh);
 
-		char nameExt[256];
-		snprintf(nameExt, sizeof(nameExt) - 1, "%s.dnn", name);
-		ndString fileName(ndGetWorkingFileName(nameExt));
-		ndSharedPtr<ndBrain> policy(ndBrainLoad::Load(fileName.GetStr()));
-		playerController->m_agent = ndSharedPtr<ndBrainAgent>(new ndController::ndAgent(policy, playerController));
+		//char nameExt[256];
+		//snprintf(nameExt, sizeof(nameExt) - 1, "%s.dnn", name);
+		//ndString fileName(ndGetWorkingFileName(nameExt));
+		//ndSharedPtr<ndBrain> policy(ndBrainLoad::Load(fileName.GetStr()));
+		//playerController->m_agent = ndSharedPtr<ndBrainAgent>(new ndController::ndAgent(policy, playerController));
 
 		// add model a visual mesh to the scene and world
 		ndWorld* const world = scene->GetWorld();
@@ -348,6 +347,60 @@ namespace ndBipedPlayer
 		scene->AddEntity(visualMesh);
 		return model;
 	}
+
+	class DaveGravelModel: public ndRenderMeshLoader
+	{
+		public:
+		DaveGravelModel(ndDemoEntityManager* const scene)
+			:ndRenderMeshLoader(*scene->GetRenderer())
+		{
+			auto CreateCapsule = [scene](ndMesh* const parent, const ndMatrix& matrix, ndFloat32 radios, ndFloat32 height, const char* texture = "smilli.png")
+			{
+				//ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeCapsule(radios, radios, height)));
+				//ndRender* const render = *scene->GetRenderer();
+				//ndRenderPrimitive::ndDescriptor desc(render);
+				//desc.m_collision = shape;
+				//desc.m_mapping = ndRenderPrimitive::m_capsule;
+				//desc.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName(texture)));
+				//ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(desc));
+				//
+				//ndSharedPtr<ndRenderSceneNode> entity(new ndRenderSceneNode(matrix));
+				//entity->SetPrimitive(mesh);
+				//
+				//if (parent)
+				//{
+				//	parent->AddChild(entity);
+				//}
+				//
+				////ndMatrix global = localMatrix * location;
+				////return MakePrimitive(scene, global, **shape, mesh, massPerPart);
+				//return entity;
+
+				ndSharedPtr<ndShapeInstance> capsule(new ndShapeInstance(new ndShapeCapsule(radios, radios, height)));
+				//ndSharedPtr<ndMeshEffect> primitive (new ndMeshEffect(**capsule));
+				ndSharedPtr<ndMesh> mesh(new ndMesh(**capsule));
+				mesh->SetMatrix(matrix);
+				//naning convention for ndMesh rigid body funtionality
+				mesh->SetName("-capsule");
+
+				if (parent)
+				{
+					parent->AddChild(mesh);
+				}
+				return mesh;
+			};
+
+			ndSharedPtr<ndMesh> root(CreateCapsule(nullptr, ndGetIdentityMatrix(), 0.325f, 0.2f));
+
+
+			m_mesh = root;
+			MeshToRenderSceneNode(ndGetWorkingFileName(""));
+		}
+
+
+	};
+	
+
 }
 using namespace ndBipedPlayer;
 
@@ -386,10 +439,10 @@ void ndBipedPlayer_PPO(ndDemoEntityManager* const scene)
 {
 	ndSharedPtr<ndBody> mapBody(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
 
-	//// add a help message
-	//ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend_Ppo());
-	//scene->SetDemoHelp(demoHelper);
-	//
+	// add a help message
+	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend_Ppo());
+	scene->SetDemoHelp(demoHelper);
+	
 	//// oveload the ground friction
 	//// make sure the ground has enough friction
 	//ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
@@ -397,14 +450,12 @@ void ndBipedPlayer_PPO(ndDemoEntityManager* const scene)
 	//ndAssert(defaultMaterial);
 	//defaultMaterial->m_dynamicFriction0 = defaultMaterial->m_staticFriction0;
 	//defaultMaterial->m_dynamicFriction1 = defaultMaterial->m_staticFriction1;
-	//
-	////ndModelMaterial material;
-	////callback->RegisterMaterial(material, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_modelPart);
 	
 	ndMatrix matrix(ndGetIdentityMatrix());
 	//ndRenderMeshLoader loader(*scene->GetRenderer());
-	//loader.LoadMesh(ndGetWorkingFileName("unicycle.nd"));
-	//ndController::CreateModel(scene, matrix, loader, CONTROLLER_NAME_PPO);
+	//loader.LoadMesh(ndGetWorkingFileName("ragdoll.nd"));
+	DaveGravelModel loader(scene);
+	ndController::CreateModel(scene, matrix, loader, CONTROLLER_NAME_PPO);
 
 	matrix.m_posit.m_x -= 0.0f;
 	matrix.m_posit.m_y += 1.5f;
