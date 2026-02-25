@@ -201,31 +201,34 @@ namespace ndUnicycleTrainer_sac
 				m_master->OptimizeStep();
 			
 				episodeCount -= m_master->GetEposideCount();
-				const ndFloat32 score = m_master->GetAverageScore();
-				const ndFloat32 trajectoryLog = ndLog(m_master->GetAverageFrames() + 0.001f);
-				const ndFloat32 stepsLog = ndLog(ndFloat32(m_master->GetFramesCount()) + 1.0f);
-				const ndFloat32 logGrad = stepsLog + trajectoryLog;
-				const ndFloat32 combinedTrajectory = score * logGrad;
 			
-				if (combinedTrajectory > m_savedScore)
+				if (episodeCount)
 				{
-					m_savedScore = combinedTrajectory + ndFloat32 (0.1f);
+					const ndFloat32 score = m_master->GetAverageScore();
+					const ndFloat32 trajectoryGain = ndSqrt(m_master->GetAverageFrames());
+					const ndFloat32 stepsGain = ndSqrt(ndFloat32(m_master->GetFramesCount()));
+					const ndFloat32 combinedTrajectory = score * stepsGain * trajectoryGain;
 
-					// save partial controller in case of crash 
-					ndBrain* const actor = *m_master->GetPolicyNetwork();
-					ndString fileName(ndGetWorkingFileName(m_master->GetName().GetStr()));
-					m_master->GetPolicyNetwork()->SaveToFile(fileName.GetStr());
-					actor->SaveToFile(fileName.GetStr());
-					ndExpandTraceMessage("best actor episode: %d\treward %f\ttrajectoryFrames: %f\n", m_master->GetEposideCount(), score, m_master->GetAverageFrames());
-				}
-			
-				if (episodeCount && !m_master->IsSampling())
-				{
-					ndExpandTraceMessage("steps: %d\treward: %g\t  trajectoryFrames: %g\n", m_master->GetFramesCount(), score, m_master->GetAverageFrames());
-					if (m_outFile)
+					if (combinedTrajectory > m_savedScore)
 					{
-						fprintf(m_outFile, "%g\n", score);
-						fflush(m_outFile);
+						m_savedScore = combinedTrajectory;
+
+						// save partial controller in case of crash 
+						ndBrain* const actor = *m_master->GetPolicyNetwork();
+						ndString fileName(ndGetWorkingFileName(m_master->GetName().GetStr()));
+						m_master->GetPolicyNetwork()->SaveToFile(fileName.GetStr());
+						actor->SaveToFile(fileName.GetStr());
+						ndExpandTraceMessage("best actor episode: %d\treward %f\ttrajectoryFrames: %f\n", m_master->GetEposideCount(), score, m_master->GetAverageFrames());
+					}
+
+					if (!m_master->IsSampling())
+					{
+						ndExpandTraceMessage("steps: %d\treward: %g\t  trajectoryFrames: %g\n", m_master->GetFramesCount(), score, m_master->GetAverageFrames());
+						if (m_outFile)
+						{
+							fprintf(m_outFile, "%g\n", score);
+							fflush(m_outFile);
+						}
 					}
 				}
 			}

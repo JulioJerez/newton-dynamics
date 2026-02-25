@@ -395,8 +395,8 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildPolicyClass()
 	layers.SetCount(0);
 	layers.PushBack(new ndBrainLayerActivationLinearNormalize(m_parameters.m_numberOfObservations));
 	layers.PushBack(new ndBrainLayerLinear(m_parameters.m_numberOfObservations, m_parameters.m_hiddenLayersNumberOfNeurons));
-	//layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 
+	//layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 	layers.PushBack(new ndBrainLayerActivationRelu(layers[layers.GetCount() - 1]->GetOutputSize()));
 	for (ndInt32 i = 0; i < m_parameters.m_numberOfHiddenLayers; ++i)
 	{
@@ -430,11 +430,9 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildCriticClass()
 
 	layers.SetCount(0);
 
-	layers.PushBack(new ndBrainLayerActivationLinearNormalize(policy.GetInputSize()));
 	layers.PushBack(new ndBrainLayerLinear(policy.GetInputSize(), m_parameters.m_hiddenLayersNumberOfNeurons));
-	//layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
+	layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 
-	layers.PushBack(new ndBrainLayerActivationRelu(layers[layers.GetCount() - 1]->GetOutputSize()));
 	for (ndInt32 i = 0; i < m_parameters.m_numberOfHiddenLayers; ++i)
 	{
 		ndAssert(layers[layers.GetCount() - 1]->GetOutputSize() == m_parameters.m_hiddenLayersNumberOfNeurons);
@@ -450,7 +448,6 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildCriticClass()
 		critic->AddLayer(layers[i]);
 	}
 	critic->InitWeights();
-	m_criticInputNormalization = ndWeakPtr<ndBrainLayerActivationLinearNormalize>((ndBrainLayerActivationLinearNormalize*)critic->FindLayer(ND_BRAIN_LAYER_ACTIVATION_LINEAR_NORMALIZE_NAME));
 	
 	ndSharedPtr<ndBrainOptimizer> optimizer(new ndBrainOptimizerAdam(m_context));
 	optimizer->SetRegularizer(m_parameters.m_criticRegularizer);
@@ -583,7 +580,6 @@ void ndBrainAgentOnPolicyGradient_Trainer::UpdateLayersNormalization()
 		{
 			const ndBrainMemVector observations(m_trajectoryAccumulator.GetObservations(i), m_parameters.m_numberOfObservations);
 			m_policyInputNormalization->UpdateParameters(observations);
-			m_criticInputNormalization->UpdateParameters(observations);
 		}
 		m_layerNormalizationCounter--;
 	}

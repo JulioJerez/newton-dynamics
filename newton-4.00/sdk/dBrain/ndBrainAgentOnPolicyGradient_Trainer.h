@@ -208,7 +208,6 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndSharedPtr<ndBrainFloatBuffer> m_minibatchClippedLikelihoodRatioBuffer;
 
 	ndSharedPtr<ndBrainIntegerBuffer> m_randomShuffleMinibatchBuffer;
-	ndWeakPtr<ndBrainLayerActivationLinearNormalize> m_criticInputNormalization;
 	ndWeakPtr<ndBrainLayerActivationLinearNormalize> m_policyInputNormalization;
 
 	ndBrainVector m_lastPolicy;

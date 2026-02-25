@@ -25,8 +25,8 @@
 #include "ndBrainStdafx.h"
 #include "ndBrainLayerActivationLinear.h"
 
-#define ND_LINEAR_NORMALIZE_MOVING_AVERAGE	ndBrainFloat(0.95f)
-#define ND_LINEAR_NORMALIZE_START_NORMALIZE	ndInt32 (1024 * 32)
+#define ND_LINEAR_NORMALIZE_MOVING_AVERAGE				ndBrainFloat(0.9f)
+#define ND_LINEAR_NORMALIZE_START_NORMALIZE				ndInt32 (1024 * 32)
 #define ND_BRAIN_LAYER_ACTIVATION_LINEAR_NORMALIZE_NAME	"ndBrainLayerActivationLinearNormalize"
 
 class ndBrainLayerActivationLinearNormalize : public ndBrainLayerActivationLinear
@@ -38,14 +38,11 @@ class ndBrainLayerActivationLinearNormalize : public ndBrainLayerActivationLinea
 
 	void UpdateParameters(const ndBrainVector& parameters);
 
-	//virtual void Save(const ndBrainSave* const loadSave) const override;
 	static ndBrainLayer* Load(const ndBrainLoad* const loadSave);
 
 	const char* GetLabelId() const override;
+	void MakePrediction(const ndBrainVector& input, ndBrainVector& output) const override;
 	void InputDerivative(const ndBrainVector& input, const ndBrainVector& output, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const override;
-
-	//virtual bool HasGpuSupport() const override;
-	//void MakePrediction(const ndBrainVector& input, ndBrainVector& output) const override;
 
 	virtual void FeedForward(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const override;
 	virtual void BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const override;

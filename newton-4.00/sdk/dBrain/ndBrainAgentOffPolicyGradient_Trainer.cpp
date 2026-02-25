@@ -259,21 +259,6 @@ void ndBrainAgentOffPolicyGradient_Agent::UpdateLayersNormalization(const ndBrai
 	if (m_owner->m_policyInputNormalization && m_layerNormalizationCounter)
 	{
 		m_owner->m_policyInputNormalization->UpdateParameters(observations);
-
-		ndInt32 numberOfActions = 2 * m_owner->m_parameters.m_numberOfActions;
-		ndBrainFixSizeVector<1024> criticInput(ndInt32 (observations.GetCount() + numberOfActions));
-		ndBrainMemVector criticObservations (&criticInput[0], observations.GetCount());
-		ndBrainMemVector criticActions(&criticInput[observations.GetCount()], numberOfActions);
-		ndBrainFloat actionValue = (m_layerNormalizationCounter & 1) ? ndBrainFloat(1.0f) : ndBrainFloat(-1.0f);
-		criticActions.Set(actionValue);
-		criticObservations.Set(observations);
-
-		for (ndInt32 i = 0; i < 4; ++i)
-		{
-			ndAssert(m_owner->m_cricticInputNormalization[i]);
-			m_owner->m_cricticInputNormalization[i]->UpdateParameters(criticInput);
-		}
-
 		m_layerNormalizationCounter--;
 	}
 }
@@ -415,8 +400,8 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildPolicyClass()
 
 	layers.PushBack(new ndBrainLayerActivationLinearNormalize(m_parameters.m_numberOfObservations));
 	layers.PushBack(new ndBrainLayerLinear(m_parameters.m_numberOfObservations, m_parameters.m_hiddenLayersNumberOfNeurons));
-	//layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
-	layers.PushBack(new ndBrainLayerActivationRelu(layers[layers.GetCount() - 1]->GetOutputSize()));
+	layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
+
 	for (ndInt32 i = 0; i < m_parameters.m_numberOfHiddenLayers; ++i)
 	{
 		ndAssert(layers[layers.GetCount() - 1]->GetOutputSize() == m_parameters.m_hiddenLayersNumberOfNeurons);
@@ -451,10 +436,8 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildCriticClass()
 		ndFixSizeArray<ndBrainLayer*, 32> layers;
 		layers.SetCount(0);
 
-		layers.PushBack(new ndBrainLayerActivationLinearNormalize(policy.GetOutputSize() + policy.GetInputSize()));
 		layers.PushBack(new ndBrainLayerLinear(policy.GetOutputSize() + policy.GetInputSize(), m_parameters.m_hiddenLayersNumberOfNeurons));
-		//layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
-		layers.PushBack(new ndBrainLayerActivationRelu(layers[layers.GetCount() - 1]->GetOutputSize()));
+		layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 
 		for (ndInt32 i = 0; i < m_parameters.m_numberOfHiddenLayers; ++i)
 		{
@@ -478,7 +461,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildCriticClass()
 	{
 		ndSharedPtr<ndBrain> critic(BuildNeuralNetwork());
 		ndSharedPtr<ndBrain> referenceCritic(new ndBrain(**critic));
-
 		ndTrainerDescriptor referenceDescriptor(referenceCritic, m_context, m_parameters.m_miniBatchSize);
 		referenceDescriptor.m_regularizer = m_parameters.m_criticRegularizer;
 		referenceDescriptor.m_regularizerType = m_parameters.m_criticRegularizerType;
@@ -492,9 +474,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildCriticClass()
 
 		ndTrainerDescriptor descriptor(critic, m_context, m_parameters.m_miniBatchSize);
 		m_criticTrainer[j] = ndSharedPtr<ndBrainTrainer>(new ndBrainTrainer(descriptor, optimizer));
-
-		m_cricticInputNormalization[j * 2 + 0] = ndWeakPtr<ndBrainLayerActivationLinearNormalize>((ndBrainLayerActivationLinearNormalize*)critic->FindLayer(ND_BRAIN_LAYER_ACTIVATION_LINEAR_NORMALIZE_NAME));
-		m_cricticInputNormalization[j * 2 + 1] = ndWeakPtr<ndBrainLayerActivationLinearNormalize>((ndBrainLayerActivationLinearNormalize*)referenceCritic->FindLayer(ND_BRAIN_LAYER_ACTIVATION_LINEAR_NORMALIZE_NAME));
 	}
 }
 

@@ -171,9 +171,7 @@ class ndBrainAgentOffPolicyGradient_Trainer : public ndClassAlloc
 	ndSharedPtr<ndBrainTrainer> m_policyTrainer;
 	ndSharedPtr<ndBrainTrainer> m_criticTrainer[2];
 	ndSharedPtr<ndBrainTrainerInference> m_referenceCriticTrainer[2];
-
 	ndWeakPtr<ndBrainLayerActivationLinearNormalize> m_policyInputNormalization;
-	ndWeakPtr<ndBrainLayerActivationLinearNormalize> m_cricticInputNormalization[4];
 
 	ndUniformDistribution m_uniformDistribution;
 	ndSharedPtr<ndBrainAgentOffPolicyGradient_Agent> m_agent;
