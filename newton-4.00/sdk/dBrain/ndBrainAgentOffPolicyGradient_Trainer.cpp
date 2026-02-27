@@ -394,10 +394,8 @@ void ndBrainAgentOffPolicyGradient_Trainer::SetName(const ndString& name)
 
 void ndBrainAgentOffPolicyGradient_Trainer::BuildPolicyClass()
 {
-	ndFixSizeArray<ndBrainLayer*, 32> layers;
+	ndFixSizeArray<ndBrainLayer*, 32> layers(0);
 	
-	layers.SetCount(0);
-
 	//layers.PushBack(new ndBrainLayerActivationLinearNormalize(m_parameters.m_numberOfObservations));
 	layers.PushBack(new ndBrainLayerLinear(m_parameters.m_numberOfObservations, m_parameters.m_hiddenLayersNumberOfNeurons));
 	layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
@@ -432,9 +430,8 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildCriticClass()
 {
 	auto BuildNeuralNetwork = [this]()
 	{
+		ndFixSizeArray<ndBrainLayer*, 32> layers(0);
 		const ndBrain& policy = **m_policyTrainer->GetBrain();
-		ndFixSizeArray<ndBrainLayer*, 32> layers;
-		layers.SetCount(0);
 
 		layers.PushBack(new ndBrainLayerLinear(policy.GetOutputSize() + policy.GetInputSize(), m_parameters.m_hiddenLayersNumberOfNeurons));
 		layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
