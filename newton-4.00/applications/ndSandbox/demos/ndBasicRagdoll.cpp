@@ -1035,7 +1035,7 @@ namespace ndRagdoll
 
 			ndModelArticulation* const ragdoll = (ndModelArticulation*)GetModel();
 			ndModelArticulation::ndNode* const modelRootNode = ragdoll->AddRootBody(rootBody);
-            ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*modelRootNode->m_body->GetAsBodyKinematic()->GetNotifyCallback();
+                        ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*modelRootNode->m_body->GetAsBodyKinematic()->GetNotifyCallback();
 
 			struct StackData
 			{
