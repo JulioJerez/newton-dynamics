@@ -83,7 +83,7 @@ namespace ndUnicyclePlayer
 	void ndController::PostUpdate(ndFloat32)
 	{
 		ndMatrix matrix (m_topBox->GetMatrix());
-		if (ndAbs(matrix.m_posit.m_x) > 399.0f)
+		if (ndAbs(matrix.m_posit.m_x) > 300.0f)
 		{
 			matrix.m_posit.m_x = ndFloat32(0.0f);
 			GetModel()->GetAsModelArticulation()->SetTransform(matrix);
