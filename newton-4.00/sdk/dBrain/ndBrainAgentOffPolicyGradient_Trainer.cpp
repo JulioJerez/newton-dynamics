@@ -398,7 +398,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildPolicyClass()
 	
 	layers.SetCount(0);
 
-	layers.PushBack(new ndBrainLayerActivationLinearNormalize(m_parameters.m_numberOfObservations));
+	//layers.PushBack(new ndBrainLayerActivationLinearNormalize(m_parameters.m_numberOfObservations));
 	layers.PushBack(new ndBrainLayerLinear(m_parameters.m_numberOfObservations, m_parameters.m_hiddenLayersNumberOfNeurons));
 	layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 
