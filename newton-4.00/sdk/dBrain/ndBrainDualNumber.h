@@ -45,9 +45,33 @@ class ndBrainDualNumber
 	ndBrainDualNumber Exp() const;
 	ndBrainDualNumber Log() const;
 	ndBrainDualNumber Pow(ndBrainFloat eponent) const;
+	ndBrainDualNumber Min(const ndBrainDualNumber& b) const;
+	ndBrainDualNumber Max(const ndBrainDualNumber& b) const;
 
 	ndBrainFloat m_real;
 	ndBrainFloat m_gradient;
+};
+
+
+class ndFuntionEvaluator
+{
+	public:
+	ndFuntionEvaluator()
+	{
+	}
+	virtual ~ndFuntionEvaluator()
+	{
+	}
+
+	virtual ndBrainDualNumber Evaluate(ndBrainFloat)
+	{
+		return ndBrainDualNumber(1);
+	}
+
+	virtual ndBrainDualNumber Evaluate(const ndBrainDualNumber& x, const ndBrainDualNumber&)
+	{
+		return x;
+	}
 };
 
 inline ndBrainDualNumber::ndBrainDualNumber()
@@ -119,7 +143,7 @@ inline ndBrainDualNumber ndBrainDualNumber::operator/(const ndBrainDualNumber& o
 inline ndBrainDualNumber ndBrainDualNumber::Pow(ndBrainFloat eponent) const
 {
 	const ndBrainFloat real = ndPow(m_real, eponent);
-	const ndBrainFloat grad = m_gradient * ndPow(m_real, eponent - ndBrainFloat(1.0f));
+	const ndBrainFloat grad = m_gradient * eponent * ndPow(m_real, eponent - ndBrainFloat(1.0f));
 	return ndBrainDualNumber(real, grad);
 }
 
@@ -142,6 +166,22 @@ inline ndBrainDualNumber ndBrainDualNumber::Log() const
 	const ndBrainFloat real = ndLog(m_real);
 	const ndBrainFloat grad = m_gradient / m_real;
 	return ndBrainDualNumber(real, grad);
+}
+
+inline ndBrainDualNumber ndBrainDualNumber::Max(const ndBrainDualNumber& b) const
+{
+	const ndBrainDualNumber den(ndBrainFloat(0.5f));
+	const ndBrainDualNumber tmp0(*this + b);
+	const ndBrainDualNumber tmp1((*this - b).Abs());
+	return den * (tmp0 + tmp1);
+}
+
+inline ndBrainDualNumber ndBrainDualNumber::Min(const ndBrainDualNumber& b) const
+{
+	const ndBrainDualNumber den(ndBrainFloat(0.5f));
+	const ndBrainDualNumber tmp0(*this + b);
+	const ndBrainDualNumber tmp1((*this - b).Abs());
+	return den * (tmp0 - tmp1);
 }
 
 #endif 
