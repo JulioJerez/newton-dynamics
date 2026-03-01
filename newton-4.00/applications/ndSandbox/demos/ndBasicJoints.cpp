@@ -495,9 +495,10 @@ static void BuildRoller(ndDemoEntityManager* const scene, const ndVector& origin
 	refMatrix.m_posit = FindFloor(*world, origin, 200.0f);
 	refMatrix.m_posit.m_y += 2.0f;
 
-	ndBodyKinematic* const fixBody = world->GetSentinelBody();
+	// make a roller and fix it to the sentinel body
 	{
-		// spring damper slider with limits, this coudl be use for a roller wheels
+		ndBodyKinematic* const fixBody = world->GetSentinelBody();
+		// spring damper slider with limits, this could be use for a roller wheels
 		ndMatrix matrix(refMatrix);
 		ndSharedPtr<ndBody> body(MakePrimitive(scene, matrix, **shape, mesh, mass));
 		ndJointRoller* const joint = new ndJointRoller(ndPitchMatrix(90.0f * ndDegreeToRad) * matrix, body->GetAsBodyDynamic(), fixBody);

@@ -30,6 +30,8 @@
 
 // Implementation of Proximal Policy Optimization (PPO) as described in:
 // https://arxiv.org/abs/1707.06347
+// for implementation details, see paper
+// https://arxiv.org/pdf/2005.12729
 //
 // The algorithm is stochastic and uses bootstrapped method for advantage estimation.
 // It optionally supports entropy regularization to scale the loss of both
@@ -66,6 +68,9 @@ class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 		ndBrainFloat GetReward(ndInt32 entry) const;
 		void SetReward(ndInt32 entry, ndBrainFloat reward);
 
+		ndBrainFloat GetExpectedReward(ndInt32 entry) const;
+		void SetExpectedReward(ndInt32 entry, ndBrainFloat expectedReward);
+
 		bool GetTerminalState(ndInt32 entry) const;
 		void SetTerminalState(ndInt32 entry, bool isTermimal);
 
@@ -81,6 +86,7 @@ class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 		// for GPU 
 		ndInt32 GetStride() const;
 		ndInt32 GetRewardOffset() const;
+		ndInt32 GetExpectedRewardOffset() const;
 		ndInt32 GetActionOffset() const;
 		ndInt32 GetTerminalOffset() const;
 		ndInt32 GetObsevationOffset() const;
@@ -88,6 +94,7 @@ class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 		void GetFlatArray(ndInt32 index, ndBrainVector& output) const;
 
 		ndBrainVector m_reward;
+		ndBrainVector m_expectedReward;
 		ndBrainVector m_terminal;
 		ndBrainVector m_actions;
 		ndBrainVector m_observations;
@@ -161,7 +168,6 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	void CalculateAdvantage();
 	void TrajectoryToGpuBuffers();
 	void UpdateLayersNormalization();
-	void OptimizedSurrogatePolicy(ndInt32 pass);
 
 	ndBrainFloat CalculateKLdivergence();
 	void SaveTrajectory(ndBrainAgentOnPolicyGradient_Agent* const agent);
@@ -192,28 +198,28 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndSharedPtr<ndBrainFloatBuffer> m_sigmaGradiendBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_uniformDistributionBuffer;
 
-	ndSharedPtr<ndBrainFloatBuffer> m_criticStateValue;
-
 	ndSharedPtr<ndBrainFloatBuffer> m_trainingBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_advantageBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_policyActionBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_invLikelihoodBuffer;
-	ndSharedPtr<ndBrainIntegerBuffer> m_randomShuffleBuffer;
-	ndSharedPtr<ndBrainFloatBuffer> m_minibatchAdvatageBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_policyGradientAccumulator;
 	
-	ndSharedPtr<ndBrainFloatBuffer> m_invMinibatchLikelihoodBuffer;
+	ndSharedPtr<ndBrainFloatBuffer> m_minibatchAdvantageBuffer;
+	ndSharedPtr<ndBrainFloatBuffer> m_minibatchInvLikelihoodBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_minibatchGaussianDistribution;
 	ndSharedPtr<ndBrainFloatBuffer> m_minibatchLikelihoodRatioBuffer;
+	ndSharedPtr<ndBrainFloatBuffer> m_minibatchCriticStateValueBuffer;
+	ndSharedPtr<ndBrainFloatBuffer> m_minibatchBrocastAdvantageBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_minibatchClippedLikelihoodRatioBuffer;
 
-	ndSharedPtr<ndBrainIntegerBuffer> m_randomShuffleMinibatchBuffer;
+	ndSharedPtr<ndBrainIntegerBuffer> m_randomShuffleBuffer;
+	ndSharedPtr<ndBrainIntegerBuffer> m_minibatchRandomShuffleBuffer;
 	ndWeakPtr<ndBrainLayerActivationLinearNormalize> m_policyInputNormalization;
 
 	ndBrainVector m_lastPolicy;
 	ndBrainVector m_scratchBuffer;
 	ndArray<ndInt32> m_shuffleBuffer;
-	ndArray<ndScore> m_trajectoryScore;
+	ndArray<ndInt32> m_trajectoriesScansSteps;
 	ndBrainAgentOnPolicyGradient_Agent::ndTrajectory m_trajectoryAccumulator;
 	ndMovingAverage<ND_ON_POLICY_MOVING_AVERAGE_SCORE> m_averageExpectedRewards;
 	ndMovingAverage<ND_ON_POLICY_MOVING_AVERAGE_SCORE> m_averageFramesPerEpisodes;

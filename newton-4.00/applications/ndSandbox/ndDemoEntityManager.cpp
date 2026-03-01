@@ -395,7 +395,7 @@ static void SimpleRegressionBrainStressTest()
 	ndCopyBufferCommandInfo copyBufferInfo;
 	copyBufferInfo.m_dstOffsetInByte = 0;
 	copyBufferInfo.m_srcOffsetInByte = 0;
-	copyBufferInfo.m_strideInByte = ndInt32(strideInBytes);
+	copyBufferInfo.m_bytesToCopy = ndInt32(strideInBytes);
 	copyBufferInfo.m_srcStrideInByte = ndInt32(strideInBytes);
 	copyBufferInfo.m_dstStrideInByte = ndInt32(strideInBytes);
 	
@@ -677,7 +677,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_solverMode = ndWorld::ndSimdSoaSolver;
 	//m_solverMode = ndWorld::ndSimdAvx2Solver;
 	//m_solverPasses = 4;
-	m_workerThreads = 1;
+	m_workerThreads = 8;
 	//m_solverSubSteps = 2;
 	//m_showRaycastHit = true;
 	//m_showCenterOfMass = true;
