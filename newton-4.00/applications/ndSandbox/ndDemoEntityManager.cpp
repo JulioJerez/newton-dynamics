@@ -471,7 +471,6 @@ static void TestAutoDifferentiation()
 		{
 			public:
 			//Finding the partials of z = x * (x + y) + y * y at (x, y) = (2, 3)
-
 			ndBrainDualNumber Evaluate(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
 			{
 				return x * (x + y) + y * y;
@@ -678,7 +677,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_solverMode = ndWorld::ndSimdSoaSolver;
 	//m_solverMode = ndWorld::ndSimdAvx2Solver;
 	//m_solverPasses = 4;
-	m_workerThreads = 8;
+	m_workerThreads = 1;
 	//m_solverSubSteps = 2;
 	//m_showRaycastHit = true;
 	//m_showCenterOfMass = true;
