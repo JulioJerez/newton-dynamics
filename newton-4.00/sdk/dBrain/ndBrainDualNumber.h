@@ -170,18 +170,28 @@ inline ndBrainDualNumber ndBrainDualNumber::Log() const
 
 inline ndBrainDualNumber ndBrainDualNumber::Max(const ndBrainDualNumber& b) const
 {
-	const ndBrainDualNumber den(ndBrainFloat(0.5f));
-	const ndBrainDualNumber tmp0(*this + b);
-	const ndBrainDualNumber tmp1((*this - b).Abs());
-	return den * (tmp0 + tmp1);
+	// this is not working
+	//const ndBrainDualNumber den(ndBrainFloat(0.5f));
+	//const ndBrainDualNumber sum(*this + b);
+	//const ndBrainDualNumber diff((*this - b));
+	//const ndBrainDualNumber diffAbs(diff.Abs());
+	//const ndBrainDualNumber result (den * (sum + diffAbs));
+	const ndBrainFloat real = ndMax(m_real, b.m_real);
+	const ndBrainFloat grad = (m_real >= b.m_real) ? m_gradient : b.m_gradient;
+	return ndBrainDualNumber(real, grad);
 }
 
 inline ndBrainDualNumber ndBrainDualNumber::Min(const ndBrainDualNumber& b) const
 {
-	const ndBrainDualNumber den(ndBrainFloat(0.5f));
-	const ndBrainDualNumber tmp0(*this + b);
-	const ndBrainDualNumber tmp1((*this - b).Abs());
-	return den * (tmp0 - tmp1);
+	// this is not working
+	//const ndBrainDualNumber den(ndBrainFloat(0.5f));
+	//const ndBrainDualNumber sum(*this + b);
+	//const ndBrainDualNumber diff((*this - b));
+	//const ndBrainDualNumber diffAbs(diff.Abs());
+	//const ndBrainDualNumber result(den * (sum - diffAbs));
+	const ndBrainFloat real = ndMin(m_real, b.m_real);
+	const ndBrainFloat grad = (m_real < b.m_real) ? m_gradient : b.m_gradient;
+	return ndBrainDualNumber(real, grad);
 }
 
 #endif 
