@@ -322,7 +322,6 @@ ndBrainAgentOnPolicyGradient_Trainer::ndBrainAgentOnPolicyGradient_Trainer(const
 	,m_lastPolicy()
 	,m_scratchBuffer()
 	,m_shuffleBuffer()
-	,m_trajectoriesScansSteps()
 	,m_trajectoryAccumulator()
 	,m_averageExpectedRewards()
 	,m_averageFramesPerEpisodes()
@@ -588,7 +587,6 @@ void ndBrainAgentOnPolicyGradient_Trainer::SaveTrajectory(ndBrainAgentOnPolicyGr
 		{
 			m_trajectoryAccumulator.CopyFrom(base + i, trajectory, i);
 		}
-		m_trajectoriesScansSteps.PushBack(trajectory.GetCount());
 		m_trajectiesCount++;
 	}
 	agent->m_trajectoryIndex++;
@@ -638,77 +636,56 @@ void ndBrainAgentOnPolicyGradient_Trainer::TrajectoryToGpuBuffers()
 	}
 	ndAssert(m_trajectoryAccumulator.GetCount() >= m_parameters.m_miniBatchSize);
 
-	// calculate mean and sigma
-	// clip the transition so that we have a fix number of steps per trajectoires
-	ndInt32 sum = 0;
-	ndFloat32 mean = ndFloat32(0.0f);
-	ndFloat32 sigma = ndFloat32(0.0f);
-
-	for (ndInt32 i = 0; i < m_trajectoriesScansSteps.GetCount(); ++i)
-	{
-		ndInt32 steps = m_trajectoriesScansSteps[i];
-		mean += ndFloat32(steps);
-		sigma += ndFloat32(steps) * ndFloat32(steps);
-
-		//shortestTrajectory = ndMin(steps, shortestTrajectory);
-		m_trajectoriesScansSteps[i] = sum;
-		sum = sum + steps;
-	}
-	mean = mean / ndFloat32(m_trajectoriesScansSteps.GetCount());
-	ndAssert((sigma / ndFloat32(m_trajectoriesScansSteps.GetCount()) - mean * mean) > ndFloat32(0.0f));
-	sigma = ndSqrt (sigma/ndFloat32(m_trajectoriesScansSteps.GetCount()) - mean * mean);
-
-	m_trajectoriesScansSteps.PushBack(sum);
-
-	ndInt32 shortestTrajectory = 1024 * 1024 * 1024;
-	const ndInt32 sigmaOuliers = ndInt32 (mean - ndFloat32(2.0f) * sigma);
-
-	for (ndInt32 i = 0; i < m_trajectoriesScansSteps.GetCount() - 1; ++i)
-	{
-		ndInt32 steps = m_trajectoriesScansSteps[i + 1] - m_trajectoriesScansSteps[i];
-		shortestTrajectory = ndMin(ndMax(steps, sigmaOuliers), shortestTrajectory);
-	}
-
-	// trim the trajectory buffer
-	ndInt32 dstIndex = 0;
-	for (ndInt32 i = 0; i < m_trajectoriesScansSteps.GetCount()-1; ++i)
-	{
-		const ndInt32 scan = m_trajectoriesScansSteps[i];
-		const ndInt32 count = m_trajectoriesScansSteps[i + 1] - scan;
-		if (count >= shortestTrajectory)
-		{
-			const ndInt32 skipSteps = count - shortestTrajectory;
-			ndAssert(skipSteps >= 0);
-			const ndInt32 dstStart = dstIndex * shortestTrajectory;
-			const ndInt32 srcStart = scan + skipSteps;
-
-			for (ndInt32 j = 0; j < shortestTrajectory; ++j)
-			{
-				m_trajectoryAccumulator.CopyFrom(dstStart + j, m_trajectoryAccumulator, srcStart + j);
-			}
-			dstIndex++;
-		}
-	}
-	const ndInt32 stepsCount = shortestTrajectory * dstIndex;
-	m_trajectoryAccumulator.SetCount(stepsCount - stepsCount % m_parameters.m_miniBatchSize);
-	m_trajectoriesScansSteps.SetCount(0);
+	//ndInt32 shortestTrajectory = 1024 * 1024 * 1024;
+	//const ndInt32 sigmaOuliers = ndInt32 (mean - ndFloat32(2.0f) * sigma);
+	//
+	//for (ndInt32 i = 0; i < m_trajectoriesScansSteps.GetCount() - 1; ++i)
+	//{
+	//	ndInt32 steps = m_trajectoriesScansSteps[i + 1] - m_trajectoriesScansSteps[i];
+	//	shortestTrajectory = ndMin(ndMax(steps, sigmaOuliers), shortestTrajectory);
+	//}
+	//
+	//// trim the trajectory buffer
+	//ndInt32 dstIndex = 0;
+	//for (ndInt32 i = 0; i < m_trajectoriesScansSteps.GetCount()-1; ++i)
+	//{
+	//	const ndInt32 scan = m_trajectoriesScansSteps[i];
+	//	const ndInt32 count = m_trajectoriesScansSteps[i + 1] - scan;
+	//	ndAssert(count >= shortestTrajectory);
+	//
+	//	if (count >= shortestTrajectory)
+	//	{
+	//		const ndInt32 skipSteps = count - shortestTrajectory;
+	//		ndAssert(skipSteps >= 0);
+	//		const ndInt32 dstStart = dstIndex * shortestTrajectory;
+	//		const ndInt32 srcStart = scan + skipSteps;
+	//
+	//		for (ndInt32 j = 0; j < shortestTrajectory; ++j)
+	//		{
+	//			m_trajectoryAccumulator.CopyFrom(dstStart + j, m_trajectoryAccumulator, srcStart + j);
+	//		}
+	//		dstIndex++;
+	//	}
+	//}
+	//const ndInt32 stepsCount = shortestTrajectory * dstIndex;
+	//m_trajectoryAccumulator.SetCount(stepsCount - stepsCount % m_parameters.m_miniBatchSize);
+	//m_trajectoriesScansSteps.SetCount(0);
+	const ndInt32 numberOfSteps = m_trajectoryAccumulator.GetCount();
+	m_trajectoryAccumulator.SetCount(numberOfSteps - numberOfSteps % m_parameters.m_miniBatchSize);
 	
 	// update layer normalization if there are any
 	UpdateLayersNormalization();
 
 	const ndInt32 count = m_trajectoryAccumulator.GetCount();
+	m_shuffleBuffer.SetCount(count);
 	m_scratchBuffer.SetCount(count * stride);
 	for (ndInt32 i = 0; i < count; ++i)
 	{
+		m_shuffleBuffer[i] = i;
 		ndBrainMemVector dst(&m_scratchBuffer[i * stride], stride);
 		m_trajectoryAccumulator.GetFlatArray(i, dst);
 	}
 
-	m_shuffleBuffer.SetCount(m_trajectoryAccumulator.GetCount());
-	for (ndInt32 i = ndInt32(m_shuffleBuffer.GetCount()) - 1; i >= 0; --i)
-	{
-		m_shuffleBuffer[i] = i;
-	}
 	ndAssert(m_shuffleBuffer.GetCount() >= m_parameters.m_miniBatchSize);
 	if (m_shuffleBuffer.GetCount() < m_parameters.m_miniBatchSize)
 	{
@@ -1108,11 +1085,6 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeCritic()
 			//outputGradientBuffer->Max(*outputBuffer);
 			outputGradientBuffer->Blend (*outputBuffer, *blendBuffer);
 
-			//// maybe apply a huber loss here
-			//ndBrainFloat huberSlope = ndBrainFloat(0.1f);
-			//outputGradientBuffer->Min(huberSlope);
-			//outputGradientBuffer->Max(-huberSlope);
-
 			#ifdef ND_DEBUG_CONTINUE_PROXIMA_POLICY
 				// validate gradient using the automatic differentation
 				class AutoGradient : public ndFuntionEvaluator
@@ -1172,6 +1144,11 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeCritic()
 					gradiant1 *= 1;
 				}
 			#endif
+
+			// maybe apply a huber loss here
+			ndBrainFloat huberSlope = ndBrainFloat(1.0f);
+			outputGradientBuffer->Min(huberSlope);
+			outputGradientBuffer->Max(-huberSlope);
 
 			// back propagate the critic loss
 			m_criticTrainer->BackPropagate();
