@@ -95,7 +95,9 @@ namespace ndUnicyclePlayer
 	{
 		ndMatrix boxMatrix(ndGetIdentityMatrix());
 		boxMatrix.m_posit = m_topBox->GetMatrix().m_posit;
-		boxMatrix.m_posit.m_x = ndFloat32(0.0f);
+
+		ndFloat32 randX = ndFloat32(20.0f) * (ndRand() - ndFloat32(0.5f));
+		boxMatrix.m_posit.m_x = randX;
 		boxMatrix.m_posit.m_y = ndFloat32(2.5f);
 		m_topBox->SetMatrix(boxMatrix);
 		
@@ -113,6 +115,13 @@ namespace ndUnicyclePlayer
 		
 		m_wheel->SetOmega(ndVector::m_zero);
 		m_wheel->SetVelocity(ndVector::m_zero);
+
+		//ndMatrix matrix(m_topBox->GetMatrix());
+		//if (ndAbs(matrix.m_posit.m_x) > 300.0f)
+		//{
+		//	matrix.m_posit.m_x = ndFloat32(0.0f);
+		//	GetModel()->GetAsModelArticulation()->SetTransform(matrix);
+		//}
 		
 		GetModel()->GetAsModelArticulation()->ClearMemory();
 	}
