@@ -676,8 +676,6 @@ void ndBrainAgentOnPolicyGradient_Trainer::TrajectoryToGpuBuffers()
 	{
 		const ndInt32 scan = m_trajectoriesScansSteps[i];
 		const ndInt32 count = m_trajectoriesScansSteps[i + 1] - scan;
-		ndAssert(count >= shortestTrajectory);
-
 		if (count >= shortestTrajectory)
 		{
 			const ndInt32 skipSteps = count - shortestTrajectory;
