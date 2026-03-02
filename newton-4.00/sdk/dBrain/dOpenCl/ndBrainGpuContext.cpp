@@ -226,7 +226,7 @@ void ndBrainGpuContext::CopyBuffer(const ndCopyBufferCommandInfo& parameters, nd
 	ndBrainGpuBuffer* const dst = dstData.GetGpuBuffer();
 	const ndBrainGpuBuffer* const src = srcData.GetGpuBuffer();
 
-	error = shader->setArg(0, cl_uint(parameters.m_strideInByte));
+	error = shader->setArg(0, cl_uint(parameters.m_bytesToCopy));
 	ndAssert(error == CL_SUCCESS);
 	error = shader->setArg(1, cl_uint(parameters.m_srcStrideInByte));
 	ndAssert(error == CL_SUCCESS);
@@ -270,7 +270,7 @@ void ndBrainGpuContext::CopyBufferIndirect(const ndCopyBufferCommandInfo& parame
 	const ndBrainGpuBuffer* const src = srcData.GetGpuBuffer();
 	const ndBrainGpuBuffer* const indirectBuffer = indexBuffer.GetGpuBuffer();
 
-	error = shader->setArg(0, cl_uint(parameters.m_strideInByte));
+	error = shader->setArg(0, cl_uint(parameters.m_bytesToCopy));
 	ndAssert(error == CL_SUCCESS);
 	error = shader->setArg(1, cl_uint(parameters.m_srcStrideInByte));
 	ndAssert(error == CL_SUCCESS);
