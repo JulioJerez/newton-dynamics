@@ -39,15 +39,15 @@
 #include "ndBrainAgentOnPolicyGradient_Trainer.h"
 #include "ndBrainLayerActivationLinearNormalize.h"
 
+#define ND_DEBUG_CONTINUE_PROXIMA_POLICY
+//#define ND_CONTINUE_PROXIMA_POLICY_BOOTHSTRAP_METHOD
+
 #define ND_POLICY_MAX_KL_DIVERGENCE_PASSES			8
 #define ND_MAX_MINIBATCHES_ITERATIONS				64
 #define ND_POLICY_DOWN_SAMPLE_LEARN_RATE			ndBrainFloat(0.5f)
 #define ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON		ndBrainFloat(0.2f)
 #define ND_POLICY_KL_DIVERGENCE_STOP_THRESHHOLD		ndBrainFloat(1.0e-4f)
 
-//#define ND_DEBUG_CONTINUE_PROXIMA_POLICY
-
-//#define ND_CONTINUE_PROXIMA_POLICY_BOOTHSTRAP_METHOD
 
 ndBrainAgentOnPolicyGradient_Trainer::HyperParameters::HyperParameters()
 {
@@ -578,15 +578,14 @@ void ndBrainAgentOnPolicyGradient_Trainer::SaveTrajectory(ndBrainAgentOnPolicyGr
 			trajectory.SetExpectedReward(i, stateExpectedReward);
 		}
 		// remove the last terminal transition
-		trajectory.SetCount(trajectory.GetCount() - 1);
+		//trajectory.SetCount(trajectory.GetCount() - 1);
 
-		// append the transtion to the end of the data buffer
+		// append the transitions to the end of the data buffer
 		const ndInt32 base = m_trajectoryAccumulator.GetCount();
 		m_trajectoryAccumulator.SetCount(m_trajectoryAccumulator.GetCount() + trajectory.GetCount());
 		ndAssert(m_trajectoryAccumulator.GetCount() <= (m_parameters.m_batchTrajectoryCount * m_parameters.m_maxTrajectorySteps));
 		for (ndInt32 i = 0; i < trajectory.GetCount(); ++i)
 		{
-			ndAssert(!trajectory.GetTerminalState(i));
 			m_trajectoryAccumulator.CopyFrom(base + i, trajectory, i);
 		}
 		m_trajectoriesScansSteps.PushBack(trajectory.GetCount());
