@@ -205,11 +205,12 @@ namespace ndUnicycleTrainer_sac
 				if (episodeCount)
 				{
 					const ndFloat32 score = m_master->GetAverageScore();
-					const ndFloat32 trajectoryGain = ndSqrt(m_master->GetAverageFrames());
-					const ndFloat32 stepsGain = ndSqrt(ndFloat32(m_master->GetFramesCount()));
-					const ndFloat32 combinedTrajectory = score * stepsGain * trajectoryGain;
+					//const ndFloat32 trajectoryGain = ndSqrt(m_master->GetAverageFrames());
+					//const ndFloat32 stepsGain = ndSqrt(ndFloat32(m_master->GetFramesCount()));
+					//const ndFloat32 combinedTrajectory = score * stepsGain * trajectoryGain;
+					const ndFloat32 combinedTrajectory = score;
 
-					if (combinedTrajectory > m_savedScore)
+					if (combinedTrajectory >= m_savedScore)
 					{
 						m_savedScore = combinedTrajectory;
 

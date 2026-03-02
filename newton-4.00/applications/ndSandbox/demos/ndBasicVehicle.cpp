@@ -451,16 +451,12 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	//ndSharedPtr<ndModel> vehicle3 (CreateBasicVehicle(scene, monterTruckDesc1, ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 6.0f, 0.0f)), (ndVehicleUI*)*vehicleUI));
 	//
 	//world->AddModel(vehicle0);
-	//vehicle0->AddBodiesAndJointsToWorld();
 	//
 	//world->AddModel(vehicle1);
-	//vehicle1->AddBodiesAndJointsToWorld();
 	//
 	//world->AddModel(vehicle2);
-	//vehicle2->AddBodiesAndJointsToWorld();
 	//
 	//world->AddModel(vehicle3);
-	//vehicle3->AddBodiesAndJointsToWorld();
 	//
 	////test removing model from world
 	////vehicle1->RemoveBodiesAndJointsFromWorld();

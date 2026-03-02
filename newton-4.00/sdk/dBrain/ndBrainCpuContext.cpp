@@ -146,7 +146,7 @@ void ndBrainCpuContext::CopyBuffer(ndBrainBuffer& dstData, const ndBrainBuffer& 
 
 void ndBrainCpuContext::CopyBuffer(const ndCopyBufferCommandInfo& descriptor, ndInt32 numberOfWorkGroups, ndBrainBuffer& dstData, const ndBrainBuffer& srcData)
 {
-	ndInt32 stride = ndInt32(descriptor.m_strideInByte);
+	ndInt32 stride = ndInt32(descriptor.m_bytesToCopy);
 	ndInt32 srcStride = ndInt32(descriptor.m_srcStrideInByte);
 	ndInt32 srcOffset = ndInt32(descriptor.m_srcOffsetInByte);
 	ndInt32 dstStride = ndInt32(descriptor.m_dstStrideInByte);
@@ -168,7 +168,7 @@ void ndBrainCpuContext::CopyBuffer(const ndCopyBufferCommandInfo& descriptor, nd
 
 void ndBrainCpuContext::CopyBufferIndirect(const ndCopyBufferCommandInfo& descriptor, const ndBrainIntegerBuffer& indexBuffer, ndBrainBuffer& dstData, const ndBrainBuffer& srcData)
 {
-	ndInt32 stride = ndInt32(descriptor.m_strideInByte);
+	ndInt32 stride = ndInt32(descriptor.m_bytesToCopy);
 	ndInt32 srcStride = ndInt32(descriptor.m_srcStrideInByte);
 	ndInt32 srcOffset = ndInt32(descriptor.m_srcOffsetInByte);
 	ndInt32 dstStride = ndInt32(descriptor.m_dstStrideInByte);

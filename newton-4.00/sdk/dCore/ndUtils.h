@@ -106,6 +106,8 @@ inline T ndSign(T A)
 	return (A >= T(0)) ? T(1) : T(-1);
 }
 
+// compare two float mantiza
+// only recomended for debuging hard to find floating point round off errors
 template <class T> 
 inline bool ndAreEqual(T A, T B, T tol)
 {

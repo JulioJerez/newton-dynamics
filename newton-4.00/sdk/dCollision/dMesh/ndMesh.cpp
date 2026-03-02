@@ -48,7 +48,7 @@ ndMesh::ndMesh(const ndMesh&)
 	ndAssert(0);
 }
 
-ndMesh::ndMesh(const ndShapeInstance&)
+ndMesh::ndMesh(const ndShapeInstance& shape, ndUvMapingMode mapping)
 	:ndClassAlloc()
 	,m_matrix(ndGetIdentityMatrix())
 	,m_name()
@@ -56,17 +56,65 @@ ndMesh::ndMesh(const ndShapeInstance&)
 	,m_posit()
 	,m_rotation()
 	,m_parent(nullptr)
-	,m_mesh(nullptr)
+	,m_mesh(new ndMeshEffect(shape))
 	,m_selfChildNode(nullptr)
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
 {
-	ndAssert(0);
-	// TO DO: build the mesh form the collision shape;
+	switch (mapping)
+	{
+		//case m_capsule:
+		//case m_spherical:
+		//{
+		//	ndMatrix flipMatrix(ndGetIdentityMatrix());
+		//	flipMatrix[0][0] = ndFloat32(-1.0f);
+		//	ndMatrix aligmentUV(flipMatrix * descriptor.m_uvMatrix);
+		//	mesh.SphericalMapping(textureId, aligmentUV);
+		//	break;
+		//}
+		//
+		//case m_cylindrical:
+		//{
+		//	ndMatrix flipMatrix(ndGetIdentityMatrix());
+		//	flipMatrix[0][0] = ndFloat32(-1.0f);
+		//	ndMatrix aligmentUV(flipMatrix * descriptor.m_uvMatrix);
+		//	mesh.CylindricalMapping(textureId, aligmentUV);
+		//	break;
+		//}
+		//
+		//case m_box:
+		//{
+		//	if (descriptor.m_stretchMaping)
+		//	{
+		//		mesh.BoxMapping(textureId, textureId, textureId, descriptor.m_uvMatrix);
+		//	}
+		//	else
+		//	{
+		//		mesh.UniformBoxMapping(textureId, descriptor.m_uvMatrix);
+		//	}
+		//	break;
+		//}
+		case m_box:
+		default:
+		{
+			m_mesh->UniformBoxMapping(0, ndGetIdentityMatrix());
+		}
+	}
+
 }
 
 ndMesh::~ndMesh()
 {
+}
+
+ndMatrix ndMesh::GetMatrix() const
+{
+	return m_matrix;
+}
+
+void ndMesh::SetMatrix(const ndMatrix& matrix)
+{
+	m_matrix = matrix;
 }
 
 void ndMesh::AddChild(const ndSharedPtr<ndMesh>& child)

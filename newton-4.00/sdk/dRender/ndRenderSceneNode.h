@@ -95,13 +95,12 @@ class ndRenderSceneNode : public ndContainersFreeListAlloc<ndRenderSceneNode>
 	virtual ndRenderSceneNode* CloneSkeleton() const;
 	void ClonePrimitives(const ndRenderSceneNode& src);
 	
-	ndRender* m_owner;
-	//ndRenderSceneNode* m_parent;
+	ndWeakPtr<ndRender> m_owner;
 	ndWeakPtr<ndRenderSceneNode> m_parent;
 	ndSharedPtr<ndRenderPrimitive> m_primitive;
 	ndList<ndSharedPtr<ndRenderSceneNode>> m_children;
-	ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* m_selfChildNode;
 	ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* m_sceneHandle;
+	ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* m_selfChildNode;
 
 	public:
 	bool m_isVisible;

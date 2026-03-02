@@ -1688,9 +1688,9 @@ class brainCopyBuffer : public ndBrainKernel
         ndUnsigned32* const srcBuffer = (ndUnsigned32*)buffer2->GetGpuBuffer()->GetPtr();
         ndUnsigned32* const dstBuffer = (ndUnsigned32*)buffer1->GetGpuBuffer()->GetPtr();
         ndCopyBufferCommandInfo* const parameters = (ndCopyBufferCommandInfo*)buffer0->GetGpuBuffer()->GetPtr();
-        ndAssert((parameters->m_strideInByte & (sizeof(ndInt32) - 1)) == 0);
+        ndAssert((parameters->m_bytesToCopy & (sizeof(ndInt32) - 1)) == 0);
 
-        ndInt32 stride = parameters->m_strideInByte / ndInt32(sizeof(ndInt32));
+        ndInt32 stride = parameters->m_bytesToCopy / ndInt32(sizeof(ndInt32));
         ndInt32 srcStride = parameters->m_srcStrideInByte / ndInt32(sizeof(ndInt32));
         ndInt32 srcOffset = parameters->m_srcOffsetInByte / ndInt32(sizeof(ndInt32));
         ndInt32 dstStride = parameters->m_dstStrideInByte / ndInt32(sizeof(ndInt32));
@@ -1736,9 +1736,9 @@ class brainCopyBufferIndirect : public ndBrainKernel
         ndUnsigned32* const srcBuffer = (ndUnsigned32*)buffer2->GetGpuBuffer()->GetPtr();
         ndUnsigned32* const dstBuffer = (ndUnsigned32*)buffer1->GetGpuBuffer()->GetPtr();
         ndCopyBufferCommandInfo* const parameters = (ndCopyBufferCommandInfo*)buffer0->GetGpuBuffer()->GetPtr();
-        ndAssert((parameters->m_strideInByte & (sizeof(ndInt32) - 1)) == 0);
+        ndAssert((parameters->m_bytesToCopy & (sizeof(ndInt32) - 1)) == 0);
 
-        ndInt32 stride = parameters->m_strideInByte / ndInt32(sizeof(ndInt32));
+        ndInt32 stride = parameters->m_bytesToCopy / ndInt32(sizeof(ndInt32));
         ndInt32 srcStride = parameters->m_srcStrideInByte / ndInt32(sizeof(ndInt32));
         ndInt32 srcOffset = parameters->m_srcOffsetInByte / ndInt32(sizeof(ndInt32));
         ndInt32 dstStride = parameters->m_dstStrideInByte / ndInt32(sizeof(ndInt32));

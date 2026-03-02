@@ -51,14 +51,14 @@
 //#define DEFAULT_SCENE	23		// unicycle SAC trained controller
 //#define DEFAULT_SCENE	24		// unicycle PPO trained controller
 //#define DEFAULT_SCENE	25		// biped SAC trained controller
-#define DEFAULT_SCENE	26		// biped PPO trained controller
+//#define DEFAULT_SCENE	26		// biped PPO trained controller
 //#define DEFAULT_SCENE	26		// procedurally animated quadruped spider
 
 // These are the machine learning training demos
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// SAC cart pole training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// SAC double pendulum unicycle training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// PPO cart pole training
-//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 3)	// PPO double pendulum unicycle training
+#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 3)	// PPO double pendulum unicycle training
 
 // legacy demos 
 //#define DEFAULT_SCENE	12		// basic vehicle
@@ -395,7 +395,7 @@ static void SimpleRegressionBrainStressTest()
 	ndCopyBufferCommandInfo copyBufferInfo;
 	copyBufferInfo.m_dstOffsetInByte = 0;
 	copyBufferInfo.m_srcOffsetInByte = 0;
-	copyBufferInfo.m_strideInByte = ndInt32(strideInBytes);
+	copyBufferInfo.m_bytesToCopy = ndInt32(strideInBytes);
 	copyBufferInfo.m_srcStrideInByte = ndInt32(strideInBytes);
 	copyBufferInfo.m_dstStrideInByte = ndInt32(strideInBytes);
 	
@@ -451,27 +451,27 @@ static void TestAutoDifferentiation()
 
 	{
 		// test sum
-		class Sum
+		class Sum: public ndFuntionEvaluator
 		{
 			public:
-			ndBrainDualNumber CalculateGradient(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			ndBrainDualNumber Evaluate(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
 			{
-				return x + y;
+				return ndBrainDualNumber(2) * x + ndBrainDualNumber(3) * y;
 			}
 		};
 
 		Sum sum;
-		ndBrainDualNumber z0_x(sum.CalculateGradient(x + epsilon, y));
-		ndBrainDualNumber z0_y(sum.CalculateGradient(x, y + epsilon));
+		ndBrainDualNumber z0_x(sum.Evaluate(x + epsilon, y));
+		ndBrainDualNumber z0_y(sum.Evaluate(x, y + epsilon));
 	}
 
 	{
 		// test simple example polynomial
-		class Polynomial
+		class Polynomial : public ndFuntionEvaluator
 		{
 			public:
 			//Finding the partials of z = x * (x + y) + y * y at (x, y) = (2, 3)
-			ndBrainDualNumber CalculateGradient(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			ndBrainDualNumber Evaluate(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
 			{
 				return x * (x + y) + y * y;
 			}
@@ -492,18 +492,18 @@ static void TestAutoDifferentiation()
 		z1_x_ *= 1;
 		z1_y_ *= 1;
 
-		ndBrainDualNumber z1_x(poly.CalculateGradient(x + epsilon, y));
-		ndBrainDualNumber z1_y(poly.CalculateGradient(x, y + epsilon));
+		ndBrainDualNumber z1_x(poly.Evaluate(x + epsilon, y));
+		ndBrainDualNumber z1_y(poly.Evaluate(x, y + epsilon));
 		ndAssert(z1_x_ == z1_x.m_gradient);
 		ndAssert(z1_y_ == z1_y.m_gradient);
 	}
 
 	{
 		// test ratio of two vaiable
-		class Ratio
+		class Ratio : public ndFuntionEvaluator
 		{
 			public:
-			ndBrainDualNumber CalculateGradient(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			ndBrainDualNumber Evaluate(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
 			{
 				return x / (x + y) + x * y;
 			}
@@ -525,14 +525,46 @@ static void TestAutoDifferentiation()
 		
 		Ratio poly;
 		ndBrainFloat z1_x_ = poly.ManualGrad_x(x, y);
-		ndBrainDualNumber z1_x(poly.CalculateGradient(x + epsilon, y));
+		ndBrainDualNumber z1_x(poly.Evaluate(x + epsilon, y));
 		ndAssert(z1_x_ == z1_x.m_gradient);
 		z1_x_ *= 1;
 
 		ndBrainFloat z1_y_ = poly.ManualGrad_y(x, y);		
-		ndBrainDualNumber z1_y(poly.CalculateGradient(x, y + epsilon));
+		ndBrainDualNumber z1_y(poly.Evaluate(x, y + epsilon));
 		ndAssert(z1_y_ == z1_y.m_gradient);
 		z1_y_ *= 1;
+	}
+
+	{
+		// test ratio of two vaiable
+		class MaxValue : public ndFuntionEvaluator
+		{
+			public:
+			ndBrainDualNumber Evaluate(const ndBrainDualNumber& x, const ndBrainDualNumber&)
+			{
+				ndBrainDualNumber a(10.0f);
+				ndBrainDualNumber b(5.0f);
+
+				ndBrainDualNumber x0(x.Pow(2.0f) - a);
+				ndBrainDualNumber x1(x.Pow(3.0f) - b);
+				return x1.Max(x0);
+			}
+
+			ndBrainFloat ManualGrad_x(const ndBrainDualNumber& x, const ndBrainDualNumber&)
+			{
+				ndBrainDualNumber two(2.0f);
+				ndBrainDualNumber trhee(3.0f);
+				ndBrainDualNumber x0(two * x);
+				ndBrainDualNumber x1(trhee * (x.Pow(2.0f)));
+				return ndMax (x0.m_real, x1.m_real);
+			}
+		};
+
+		MaxValue poly;
+		ndBrainFloat z1_x_ = poly.ManualGrad_x(x, y);
+		ndBrainDualNumber z1_x(poly.Evaluate (x + epsilon, y));
+		ndAssert(z1_x_ == z1_x.m_gradient);
+		z1_x_ *= 1;
 	}
 }
 
@@ -645,7 +677,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_solverMode = ndWorld::ndSimdSoaSolver;
 	//m_solverMode = ndWorld::ndSimdAvx2Solver;
 	//m_solverPasses = 4;
-	m_workerThreads = 1;
+	m_workerThreads = 8;
 	//m_solverSubSteps = 2;
 	//m_showRaycastHit = true;
 	//m_showCenterOfMass = true;

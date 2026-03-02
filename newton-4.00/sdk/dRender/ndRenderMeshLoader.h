@@ -22,7 +22,7 @@ class ndRenderMeshLoader : public ndAnimationMeshLoader
 	virtual bool LoadMesh(const ndString& fullPathMeshName) override;
 	virtual bool ImportFbx(const ndString& fbxPathMeshName) override;
 
-	private:
+	protected:
 	bool MeshToRenderSceneNode(const ndString& materialBasePath);
 
 	public:

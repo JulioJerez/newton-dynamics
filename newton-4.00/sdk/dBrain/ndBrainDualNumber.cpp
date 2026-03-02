@@ -21,5 +21,3 @@
 
 #include "ndBrainStdafx.h"
 #include "ndBrainDualNumber.h"
-
-

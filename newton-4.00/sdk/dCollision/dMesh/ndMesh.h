@@ -47,6 +47,15 @@ class ndMesh : public ndClassAlloc
 		ndReal m_time;
 	};
 
+	enum ndUvMapingMode
+	{
+		m_box,
+		m_capsule,
+		m_spherical,
+		m_cylindrical
+	};
+
+
 	class ndCurve: public ndList<ndCurveValue>
 	{
 		public:
@@ -60,10 +69,13 @@ class ndMesh : public ndClassAlloc
 
 	D_COLLISION_API ndMesh();
 	D_COLLISION_API ndMesh(const ndMesh& src);
-	D_COLLISION_API ndMesh(const ndShapeInstance& src);
+	D_COLLISION_API ndMesh(const ndShapeInstance& src, ndUvMapingMode mapping = m_box);
 
 	D_COLLISION_API virtual ~ndMesh();
 	D_COLLISION_API ndMesh* CreateClone() const;
+
+	D_COLLISION_API ndMatrix GetMatrix() const;
+	D_COLLISION_API void SetMatrix(const ndMatrix& matrix);
 
 	D_COLLISION_API void AddChild(const ndSharedPtr<ndMesh>& child);
 	D_COLLISION_API void RemoveChild(const ndSharedPtr<ndMesh>& child);

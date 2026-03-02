@@ -185,7 +185,7 @@ class mnistSupervisedTrainer
 		size_t dataStrideInBytes = inputSize * sizeof(ndReal);
 		copyDataInfo.m_dstOffsetInByte = 0;
 		copyDataInfo.m_srcOffsetInByte = 0;
-		copyDataInfo.m_strideInByte = ndInt32(dataStrideInBytes);
+		copyDataInfo.m_bytesToCopy = ndInt32(dataStrideInBytes);
 		copyDataInfo.m_srcStrideInByte = ndInt32(dataStrideInBytes);
 		copyDataInfo.m_dstStrideInByte = ndInt32(dataStrideInBytes);
 
@@ -259,7 +259,7 @@ class mnistSupervisedTrainer
 		ndInt32 dataStrideInBytes = ndInt32(inputSize * sizeof(ndReal));
 		copyDataInfo.m_dstOffsetInByte = 0;
 		copyDataInfo.m_srcOffsetInByte = 0;
-		copyDataInfo.m_strideInByte = dataStrideInBytes;
+		copyDataInfo.m_bytesToCopy = dataStrideInBytes;
 		copyDataInfo.m_srcStrideInByte = dataStrideInBytes;
 		copyDataInfo.m_dstStrideInByte = dataStrideInBytes;
 
@@ -267,7 +267,7 @@ class mnistSupervisedTrainer
 		ndInt32 labelsStrideInBytes = ndInt32(outputSize * sizeof(ndReal));
 		copyLabelsInfo.m_dstOffsetInByte = 0;
 		copyLabelsInfo.m_srcOffsetInByte = 0;
-		copyLabelsInfo.m_strideInByte = labelsStrideInBytes;
+		copyLabelsInfo.m_bytesToCopy = labelsStrideInBytes;
 		copyLabelsInfo.m_srcStrideInByte = labelsStrideInBytes;
 		copyLabelsInfo.m_dstStrideInByte = labelsStrideInBytes;
 
@@ -275,7 +275,7 @@ class mnistSupervisedTrainer
 		ndInt32 copyIndicesStrideInBytes = ndInt32(m_miniBatchSize * sizeof(ndInt32));
 		copyIndicesInfo.m_dstOffsetInByte = 0;
 		copyIndicesInfo.m_srcOffsetInByte = 0;
-		copyIndicesInfo.m_strideInByte = copyIndicesStrideInBytes;
+		copyIndicesInfo.m_bytesToCopy = copyIndicesStrideInBytes;
 		copyIndicesInfo.m_srcStrideInByte = copyIndicesStrideInBytes;
 		copyIndicesInfo.m_dstStrideInByte = copyIndicesStrideInBytes;
 

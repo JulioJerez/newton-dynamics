@@ -22,7 +22,7 @@ class ndCopyBufferCommandInfo
 {
 	public:
 	ndCopyBufferCommandInfo()
-		:m_strideInByte(0)
+		:m_bytesToCopy(0)
 		,m_srcStrideInByte(0)
 		,m_srcOffsetInByte(0)
 		,m_dstStrideInByte(0)
@@ -32,14 +32,14 @@ class ndCopyBufferCommandInfo
 
 	//typedef struct
 	//{
-	//	uint m_strideInByte;
+	//	uint m_bytesToCopy;
 	//	uint m_srcStrideInByte;
 	//	uint m_srcOffsetInByte;
 	//	uint m_dstStrideInByte;
 	//	uint m_dstOffsetInByte;
 	//} CopyBufferCommandInfo;
 
-	ndInt32 m_strideInByte;
+	ndInt32 m_bytesToCopy;
 	ndInt32 m_srcStrideInByte;
 	ndInt32 m_srcOffsetInByte;
 	ndInt32 m_dstStrideInByte;
