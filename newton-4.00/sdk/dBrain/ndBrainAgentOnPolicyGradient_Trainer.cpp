@@ -566,7 +566,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::SaveTrajectory(ndBrainAgentOnPolicyGr
 
 		// (Monte Carlo method)
 		// using the Bellman equation to calculate trajectory expected rewards score.
-		ndInt32 numberOfSteps = ndInt32 (trajectory.GetCount());
+		const ndInt32 numberOfSteps = ndInt32 (trajectory.GetCount());
 		trajectory.m_expectedReward.SetCount(numberOfSteps);
 		ndBrainFloat trajectoryReward = trajectory.GetReward(numberOfSteps - 1);
 		trajectory.SetExpectedReward(numberOfSteps - 1, trajectoryReward);
@@ -577,13 +577,16 @@ void ndBrainAgentOnPolicyGradient_Trainer::SaveTrajectory(ndBrainAgentOnPolicyGr
 			trajectoryReward += stateExpectedReward;
 			trajectory.SetExpectedReward(i, stateExpectedReward);
 		}
+		// remove the last terminal transition
+		trajectory.SetCount(trajectory.GetCount() - 1);
 
-		ndInt32 base = m_trajectoryAccumulator.GetCount();
+		// append the transtion to the end of the data buffer
+		const ndInt32 base = m_trajectoryAccumulator.GetCount();
 		m_trajectoryAccumulator.SetCount(m_trajectoryAccumulator.GetCount() + trajectory.GetCount());
 		ndAssert(m_trajectoryAccumulator.GetCount() <= (m_parameters.m_batchTrajectoryCount * m_parameters.m_maxTrajectorySteps));
-
 		for (ndInt32 i = 0; i < trajectory.GetCount(); ++i)
 		{
+			ndAssert(!trajectory.GetTerminalState(i));
 			m_trajectoryAccumulator.CopyFrom(base + i, trajectory, i);
 		}
 		m_trajectoriesScansSteps.PushBack(trajectory.GetCount());
@@ -638,14 +641,9 @@ void ndBrainAgentOnPolicyGradient_Trainer::TrajectoryToGpuBuffers()
 	// clip the transition so that we have a fix number of steps per trajectoires
 	ndInt32 sum = 0;
 	ndInt32 shortestTrajectory = 1024 * 1024 * 1024;
-	int xxxxx = 0;
 	for (ndInt32 i = 0; i < m_trajectoriesScansSteps.GetCount(); ++i)
 	{
 		ndInt32 steps = m_trajectoriesScansSteps[i];
-		if (steps < shortestTrajectory)
-		{
-			xxxxx = i;
-		}
 		shortestTrajectory = ndMin(steps, shortestTrajectory);
 		m_trajectoriesScansSteps[i] = sum;
 		sum = sum + steps;
@@ -655,12 +653,18 @@ void ndBrainAgentOnPolicyGradient_Trainer::TrajectoryToGpuBuffers()
 	// trim the trajectory buffer
 	for (ndInt32 i = 0; i < m_trajectoriesScansSteps.GetCount()-1; ++i)
 	{
-		ndInt32 start = m_trajectoriesScansSteps[i];
-		ndInt32 trajectoryStart = i * shortestTrajectory;
-		ndAssert((m_trajectoriesScansSteps[i + 1] - start) >= shortestTrajectory);
+		const ndInt32 scan = m_trajectoriesScansSteps[i];
+		const ndInt32 count = m_trajectoriesScansSteps[i + 1] - scan;
+		ndAssert(count >= shortestTrajectory);
+
+		const ndInt32 skipSteps = count - shortestTrajectory;
+		ndAssert(skipSteps >= 0);
+		const ndInt32 dstStart = i * shortestTrajectory;
+		const ndInt32 srcStart = scan + skipSteps;
+
 		for (ndInt32 j = 0; j < shortestTrajectory; ++j)
 		{
-			m_trajectoryAccumulator.CopyFrom(trajectoryStart + j, m_trajectoryAccumulator, start + j);
+			m_trajectoryAccumulator.CopyFrom(dstStart + j, m_trajectoryAccumulator, srcStart + j);
 		}
 	}
 	ndInt32 stepsCount = shortestTrajectory * ndInt32(m_trajectoriesScansSteps.GetCount() - 1);
