@@ -39,6 +39,8 @@ class ndDemoEntityNotify : public ndModelBodyNotify
 		return m_entity;
 	}
 
+	void ResetEntityTransform(const ndMatrix& matrix);
+
 	void RemoveBody();
 	virtual void OnBodyAddedToWorld();
 	virtual void OnBodyRemovedFromWorld();

@@ -103,6 +103,15 @@ void ndDemoEntityNotify::OnBodyRemovedFromWorld()
 	m_bodyIsInWorld = false;
 }
 
+void ndDemoEntityNotify::ResetEntityTransform(const ndMatrix& matrix)
+{
+	if (*m_entity)
+	{
+		m_entity->SetTransform(ndQuaternion(matrix), matrix.m_posit);
+		m_entity->SetTransform(ndQuaternion(matrix), matrix.m_posit);
+	}
+}
+
 void ndDemoEntityNotify::OnTransform(ndFloat32, const ndMatrix& matrix)
 {
 	// apply this transformation matrix to the application user data.

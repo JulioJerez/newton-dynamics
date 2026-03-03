@@ -404,14 +404,18 @@ static void LoadAnimations(ndRenderMeshLoader& loader)
 void ndPlayerCapsule_ThirdPerson (ndDemoEntityManager* const scene)
 {
 	// build a floor
-	ndSharedPtr<ndBody> bodyFloor(BuildPlayground(scene));
+	//ndSharedPtr<ndBody> bodyFloor(BuildPlayground(scene));
 	//ndSharedPtr<ndBody> bodyFloor(BuildCompoundScene(scene, ndGetIdentityMatrix()));
 	//ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true));
+	ndSharedPtr<ndBody> bodyFloor (AddBox(scene, ndGetIdentityMatrix(), ndFloat32 (0.0f), ndFloat32 (20.0f), ndFloat32(20.0f), ndFloat32(20.0f)));
+	bodyFloor->GetAsBodyDynamic()->SetMatrixUpdateScene(ndGetIdentityMatrix());
+	((ndDemoEntityNotify*)*bodyFloor->GetNotifyCallback())->ResetEntityTransform(ndGetIdentityMatrix());
+
+	AddBox(scene, ndGetIdentityMatrix(), ndFloat32(10.0f), ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(0.5f));
 
 	// add a help menu
 	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndPlayerCapsuleController::ndHelpLegend());
 	scene->SetDemoHelp(demoHelper);
-
 	// load the visual mesh, and animations.
 	ndRenderMeshLoader loader(*scene->GetRenderer());
 	//loader.ImportFbx(ndGetWorkingFileName("skinningtest.fbx"));
@@ -423,6 +427,7 @@ void ndPlayerCapsule_ThirdPerson (ndDemoEntityManager* const scene)
 	
 	// create one player capsule, the mesh will be duplicated
 	ndMatrix location(ndGetIdentityMatrix());
+	location.m_posit.m_x -= 2.0f;
 	
 	ndSharedPtr<ndModelNotify> modelNotity(ndPlayerCapsuleController::CreatePlayer(scene, loader, location));
 
@@ -431,7 +436,7 @@ void ndPlayerCapsule_ThirdPerson (ndDemoEntityManager* const scene)
 	ndRender* const renderer = *scene->GetRenderer();
 	renderer->SetCamera(playerController->GetCamera());
 
-#if 1
+#if 0
 	{
 		// populate the world with props and other players
 		AddSomeProps(scene);

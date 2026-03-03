@@ -33,11 +33,9 @@
 //#define DEFAULT_SCENE	7		// conservation of momentum 
 //#define DEFAULT_SCENE	8		// basic joints
 //#define DEFAULT_SCENE	9		// static mesh collision 
-
 //#define DEFAULT_SCENE	10		// basic heightfield collision
 //#define DEFAULT_SCENE	11		// basic user heightfield 2d collision
 //#define DEFAULT_SCENE	12		// basic user marching cube 3d collision
-
 //#define DEFAULT_SCENE	13		// static compound scene collision 
 //#define DEFAULT_SCENE	14		// basic convex approximate compound shapes
 //#define DEFAULT_SCENE	15		// basic model, a npd vehicle prop
@@ -45,7 +43,7 @@
 //#define DEFAULT_SCENE	17		// complex model, implement a complex model with joints
 //#define DEFAULT_SCENE	18		// basics multi body vehicle
 //#define DEFAULT_SCENE	19		// object Placement
-//#define DEFAULT_SCENE	20		// third person player capsule
+#define DEFAULT_SCENE	20		// third person player capsule
 //#define DEFAULT_SCENE	21		// cart pole SAC trained controller
 //#define DEFAULT_SCENE	22		// cart pole PPO trained controller
 //#define DEFAULT_SCENE	23		// unicycle SAC trained controller
@@ -58,7 +56,7 @@
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// SAC cart pole training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// SAC double pendulum unicycle training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// PPO cart pole training
-#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 3)	// PPO double pendulum unicycle training
+//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 3)	// PPO double pendulum unicycle training
 
 // legacy demos 
 //#define DEFAULT_SCENE	12		// basic vehicle
