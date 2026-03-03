@@ -219,6 +219,18 @@ void ndPhysicsWorld::PreUpdate(ndFloat32 timestep)
 {
 	ndWorld::PreUpdate(timestep);
 
+	const ndBodyListView& bodyArray = GetBodyList();
+	const ndArray<ndBodyKinematic*>& view = bodyArray.GetView();
+	for (ndInt32 i = ndInt32(view.GetCount()) - 2; i >= 0; --i)
+	{
+		ndBodyKinematic* const body = view[i];
+		ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*body->GetNotifyCallback();
+		if (notify)
+		{
+			notify->OnPreUpdate(timestep);
+		}
+	}
+
 	ndRenderPassDebug* const debugRenderPass = m_manager->GetDebugRenderPass();
 	debugRenderPass->ClearRuntimeLines();
 }
@@ -248,6 +260,7 @@ void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
 			ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*body->GetNotifyCallback();
 			if (notify)
 			{
+				notify->OnPostUpdate(timestep);
 				notify->m_entity->SetTransform(notify->m_transform.m_rotation, notify->m_transform.m_position);
 			}
 		}

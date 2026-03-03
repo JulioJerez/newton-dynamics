@@ -30,12 +30,12 @@ ndModelBodyNotify::~ndModelBodyNotify()
 
 ndBodyKinematic* ndModelBodyNotify::GetParentBody() const
 {
-	return m_parentBody;
+	return m_parentBody ? m_parentBody->GetAsBodyKinematic() : nullptr;
 }
 
 void ndModelBodyNotify::SetParentBody(ndBodyKinematic* const kinematicBody)
 {
-	m_parentBody = kinematicBody;
+	m_parentBody = ndWeakPtr<ndBody>(kinematicBody);
 }
 
 void ndModelBodyNotify::OnApplyExternalForce(ndInt32, ndFloat32)

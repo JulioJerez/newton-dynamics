@@ -35,10 +35,14 @@ class ndPlayerCapsuleNotify : public ndDemoEntityNotify
 		ndDemoEntityNotify::OnTransform(timestep, matrix);
 	}
 
-	// not call for this body
-	void OnApplyExternalForce(ndInt32, ndFloat32) override
+	virtual void OnPreUpdate(ndFloat32) override
 	{
+		//here the player local frame of reference
+		ndTrace(("Calculate Player local frame\n"))
 	}
+
+	// not call for this body, since a playe is a kinematic body 
+	//void OnApplyExternalForce(ndInt32, ndFloat32) override
 
 	// an app can use this to determine what ovject form the scene 
 	// is colliding with, and take appropiate action.
@@ -401,16 +405,45 @@ static void LoadAnimations(ndRenderMeshLoader& loader)
 	loader.SetTranslationTracks(ndString("hips"));
 }
 
+
+static ndSharedPtr<ndBody> BuildCubePlanet(ndDemoEntityManager* const scene)
+{
+	class ndCubePlanetGravity : public ndDemoEntityNotify
+	{
+		public:
+		ndCubePlanetGravity(ndDemoEntityManager* const manager, const ndSharedPtr<ndRenderSceneNode>& entity)
+			:ndDemoEntityNotify(manager, entity)
+		{
+		}
+
+		virtual void OnPreUpdate(ndFloat32) override
+		{
+			//here the player local frame of reference
+			ndTrace(("Calculate gravity vector for each body on the surface\n"))
+		}
+	};
+
+	ndSharedPtr<ndBody> cubePlanet(AddBox(scene, ndGetIdentityMatrix(), ndFloat32(0.0f), ndFloat32(20.0f), ndFloat32(20.0f), ndFloat32(20.0f)));
+	cubePlanet->GetAsBodyDynamic()->SetMatrixUpdateScene(ndGetIdentityMatrix());
+
+	const ndSharedPtr<ndRenderSceneNode> entity(((ndDemoEntityNotify*)*cubePlanet->GetNotifyCallback())->GetUserData());
+	ndSharedPtr<ndBodyNotify> cubePlanetGravity(new ndCubePlanetGravity(scene, entity));
+	cubePlanet->SetNotifyCallback(cubePlanetGravity);
+
+	((ndDemoEntityNotify*)*cubePlanet->GetNotifyCallback())->ResetEntityTransform(ndGetIdentityMatrix());
+
+	return cubePlanet;
+}
+
 void ndPlayerCapsule_ThirdPerson (ndDemoEntityManager* const scene)
 {
 	// build a floor
 	//ndSharedPtr<ndBody> bodyFloor(BuildPlayground(scene));
 	//ndSharedPtr<ndBody> bodyFloor(BuildCompoundScene(scene, ndGetIdentityMatrix()));
 	//ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true));
-	ndSharedPtr<ndBody> bodyFloor (AddBox(scene, ndGetIdentityMatrix(), ndFloat32 (0.0f), ndFloat32 (20.0f), ndFloat32(20.0f), ndFloat32(20.0f)));
-	bodyFloor->GetAsBodyDynamic()->SetMatrixUpdateScene(ndGetIdentityMatrix());
-	((ndDemoEntityNotify*)*bodyFloor->GetNotifyCallback())->ResetEntityTransform(ndGetIdentityMatrix());
+	ndSharedPtr<ndBody> bodyFloor (BuildCubePlanet(scene));
 
+	// add a box for testing
 	AddBox(scene, ndGetIdentityMatrix(), ndFloat32(10.0f), ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(0.5f));
 
 	// add a help menu
