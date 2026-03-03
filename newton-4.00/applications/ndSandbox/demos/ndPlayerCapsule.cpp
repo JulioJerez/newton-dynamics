@@ -427,6 +427,7 @@ void ndPlayerCapsule_ThirdPerson (ndDemoEntityManager* const scene)
 	
 	// create one player capsule, the mesh will be duplicated
 	ndMatrix location(ndGetIdentityMatrix());
+	location.m_posit.m_x -= 2.0f;
 	
 	ndSharedPtr<ndModelNotify> modelNotity(ndPlayerCapsuleController::CreatePlayer(scene, loader, location));
 
