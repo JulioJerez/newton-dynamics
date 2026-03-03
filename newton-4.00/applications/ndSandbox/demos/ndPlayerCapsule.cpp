@@ -38,7 +38,7 @@ class ndPlayerCapsuleNotify : public ndDemoEntityNotify
 	virtual void OnPreUpdate(ndFloat32) override
 	{
 		//here the player local frame of reference
-		ndTrace(("Calculate Player local frame\n"))
+		ndTrace(("Calculate Player local frame\n"));
 	}
 
 	// not call for this body, since a playe is a kinematic body 
@@ -405,7 +405,6 @@ static void LoadAnimations(ndRenderMeshLoader& loader)
 	loader.SetTranslationTracks(ndString("hips"));
 }
 
-
 static ndSharedPtr<ndBody> BuildCubePlanet(ndDemoEntityManager* const scene)
 {
 	class ndCubePlanetGravity : public ndDemoEntityNotify
@@ -416,10 +415,52 @@ static ndSharedPtr<ndBody> BuildCubePlanet(ndDemoEntityManager* const scene)
 		{
 		}
 
+		ndVector CalculateVoronoiGravityDirection(const ndShapeBox* const planetGeometry, const ndVector& pointInVoroniSpace) const
+		{
+			// for now, we just rertun and up vector
+			return ndVector(0.0f, 1.0f, 0.0f, 0.0f);
+		}
+
 		virtual void OnPreUpdate(ndFloat32) override
 		{
 			//here the player local frame of reference
-			ndTrace(("Calculate gravity vector for each body on the surface\n"))
+			//ndTrace(("Calculate gravity vector for each body on the surface\n"))
+			 
+			// Calculate gravity vector for each active body on the surface
+			ndBodyKinematic* const planet = GetBody()->GetAsBodyKinematic();
+
+			// get local space transform of the collision shape;
+			const ndShapeInstance& planetShape = planet->GetCollisionShape();
+			const ndShapeBox* const planetGeometry = ((ndShape*)planetShape.GetShape())->GetAsShapeBox();
+			const ndMatrix planetMatrix(planetShape.GetGlobalMatrix());
+			
+			// iterate over each body on the surace that moved
+			ndBodyKinematic::ndContactMap::Iterator it(planet->GetContactMap());
+			for (it.Begin(); it; it++)
+			{
+				const ndContact* const contact = it.GetNode()->GetInfo();
+				if (contact->IsActive())
+				{
+					ndBodyKinematic* const otherBody = contact->GetBody0();
+					ndAssert(otherBody != planet);
+					if (!otherBody->GetSleepState())
+					{
+						// a body changed position, get the new gravity
+						const ndVector localPoint(planetMatrix.UntransformVector(otherBody->GetMatrix().m_posit));
+
+						// calculate the gravity dir in the plane local space
+						const ndVector gravityDir(CalculateVoronoiGravityDirection(planetGeometry, localPoint));
+
+						// take the gavity to the world space, and scale by gravity magnity
+						const ndVector gravity(planetMatrix.RotateVector(gravityDir.Scale(DEMO_GRAVITY)));
+
+						//get the notification of the body on the surface
+						//and set the new gravity
+						ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*otherBody->GetNotifyCallback();
+						notify->SetGravity(gravity);
+					}
+				}
+			}
 		}
 	};
 
