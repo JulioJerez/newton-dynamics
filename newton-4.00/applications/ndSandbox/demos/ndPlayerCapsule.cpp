@@ -417,7 +417,63 @@ static ndSharedPtr<ndBody> BuildCubePlanet(ndDemoEntityManager* const scene)
 
 		ndVector CalculateVoronoiGravityDirection(const ndShapeBox* const planetGeometry, const ndVector& pointInVoroniSpace) const
 		{
-			// for now, we just rertun and up vector
+			ndShapeInfo boxInfo (((ndShape*)planetGeometry)->GetShapeInfo());
+
+			const ndFloat32 boxX = boxInfo.m_box.m_x * ndFloat32(0.5f);
+			const ndFloat32 boxY = boxInfo.m_box.m_y * ndFloat32(0.5f);
+			const ndFloat32 boxZ = boxInfo.m_box.m_z * ndFloat32(0.5f);
+
+			// here there the voronodi space is reprecnet by 27 regions
+			ndInt32 xCode = (pointInVoroniSpace.m_x >= boxX) ? 0 : ((pointInVoroniSpace.m_x < -boxX) ? 1 : 2);
+			ndInt32 yCode = (pointInVoroniSpace.m_y >= boxY) ? 0 : ((pointInVoroniSpace.m_y < -boxY) ? 1 : 2);
+			ndInt32 zCode = (pointInVoroniSpace.m_z >= boxZ) ? 0 : ((pointInVoroniSpace.m_z < -boxZ) ? 1 : 2);
+
+			auto PointToEdgeDir = [](const ndVector& q, const ndVector& p0, const ndVector& p1)
+			{
+				const ndVector e((p1 - p0).Normalize());
+				const ndVector p(p0 + e.Scale(e.DotProduct(q - p0).GetScalar()));
+				const ndVector dir(q - p);
+				return dir.Normalize();
+			};
+
+			ndInt32 code = (zCode << 4) + (yCode << 2) + xCode;
+			switch (code)
+			{
+				case 0x28:		// 101000
+				{
+					return ndVector(1.0f, 0.0f, 0.0f, 0.0f);
+				}
+
+				case 0x22:		// 100010
+				{
+					return ndVector(0.0f, 1.0f, 0.0f, 0.0f);
+				}
+
+				case 0x1a:		// 011010
+				{
+					return ndVector(0.0f, 0.0f, -1.0f, 0.0f);
+				}
+
+				case 0x20:		// 010000
+				{
+					ndVector p0(boxX, boxY,  boxZ, ndFloat32(1.0f));
+					ndVector p1(boxX, boxY, -boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				case 0x12:		// 010010
+				{
+					ndVector p0(-boxX, boxY, -boxZ, ndFloat32(1.0f));
+					ndVector p1(boxX, boxY, -boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				default:
+					ndAssert(0);
+					return ndVector(0.0f, 1.0f, 0.0f, 0.0f);
+			}
+			 
+			// this should never happens
 			return ndVector(0.0f, 1.0f, 0.0f, 0.0f);
 		}
 
@@ -439,14 +495,16 @@ static ndSharedPtr<ndBody> BuildCubePlanet(ndDemoEntityManager* const scene)
 			for (it.Begin(); it; it++)
 			{
 				const ndContact* const contact = it.GetNode()->GetInfo();
-				if (contact->IsActive())
+				//if (contact->IsActive())
 				{
 					ndBodyKinematic* const otherBody = contact->GetBody0();
 					ndAssert(otherBody != planet);
 					if (!otherBody->GetSleepState())
 					{
 						// a body changed position, get the new gravity
-						const ndVector localPoint(planetMatrix.UntransformVector(otherBody->GetMatrix().m_posit));
+						// get the object center of mass
+						const ndVector com (otherBody->GetMatrix().TransformVector(otherBody->GetCentreOfMass()));
+						const ndVector localPoint(planetMatrix.UntransformVector(com));
 
 						// calculate the gravity dir in the plane local space
 						const ndVector gravityDir(CalculateVoronoiGravityDirection(planetGeometry, localPoint));
