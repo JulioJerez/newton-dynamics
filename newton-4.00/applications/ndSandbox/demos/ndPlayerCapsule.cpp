@@ -411,6 +411,8 @@ void ndPlayerCapsule_ThirdPerson (ndDemoEntityManager* const scene)
 	bodyFloor->GetAsBodyDynamic()->SetMatrixUpdateScene(ndGetIdentityMatrix());
 	((ndDemoEntityNotify*)*bodyFloor->GetNotifyCallback())->ResetEntityTransform(ndGetIdentityMatrix());
 
+	AddBox(scene, ndGetIdentityMatrix(), ndFloat32(10.0f), ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(0.5f));
+
 	// add a help menu
 	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndPlayerCapsuleController::ndHelpLegend());
 	scene->SetDemoHelp(demoHelper);
