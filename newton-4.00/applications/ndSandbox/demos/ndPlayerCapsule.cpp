@@ -122,8 +122,12 @@ class ndPlayerCapsuleController : public ndModelNotify
 		{
 			const ndMatrix camMatrix(m_parent->CalculateGlobalTransform().OrthoInverse());
 
+			const ndVector gravity(ndVector::m_triplexMask & m_playerBody->GetNotifyCallback()->GetGravity());
+			const ndVector upDir (gravity.Normalize().Scale (-1.0f));
+			
 			ndMatrix playerMatrix(m_playerBody->GetMatrix());
-			playerMatrix.m_posit.m_y += ndFloat32 (2.5f);
+			//playerMatrix.m_posit.m_y += ndFloat32 (2.5f);
+			playerMatrix.m_posit += upDir.Scale (2.5f);
 
 			// for debugging
 			#if 0
@@ -558,7 +562,6 @@ static ndSharedPtr<ndBody> BuildCubePlanet(ndDemoEntityManager* const scene)
 
 		virtual void OnPreUpdate(ndFloat32) override
 		{
-			return;
 			//here the player local frame of reference
 			//ndTrace(("Calculate gravity vector for each body on the surface\n"))
 			 
