@@ -558,6 +558,7 @@ static ndSharedPtr<ndBody> BuildCubePlanet(ndDemoEntityManager* const scene)
 
 		virtual void OnPreUpdate(ndFloat32) override
 		{
+			return;
 			//here the player local frame of reference
 			//ndTrace(("Calculate gravity vector for each body on the surface\n"))
 			 
