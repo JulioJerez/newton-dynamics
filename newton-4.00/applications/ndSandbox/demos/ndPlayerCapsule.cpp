@@ -27,6 +27,7 @@ class ndPlayerCapsuleNotify : public ndDemoEntityNotify
 	public:
 	ndPlayerCapsuleNotify(ndDemoEntityManager* const manager, const ndSharedPtr<ndRenderSceneNode>& entity)
 		:ndDemoEntityNotify(manager, entity, nullptr)
+		,m_currentGravityDir(0.0f, 1.0f, 0.0f, 0.0f)
 	{
 	}
 
@@ -35,10 +36,29 @@ class ndPlayerCapsuleNotify : public ndDemoEntityNotify
 		ndDemoEntityNotify::OnTransform(timestep, matrix);
 	}
 
-	// not call for this body
-	void OnApplyExternalForce(ndInt32, ndFloat32) override
+	virtual void OnPreUpdate(ndFloat32) override
 	{
+		//here the player local frame of reference
+		ndBodyPlayerCapsule* const body = GetBody()->GetAsBodyPlayerCapsule();
+
+		//const ndMatrix matrix(body->GetMatrix());
+		const ndVector gravityDir(GetGravity().Scale(-1.0f).Normalize());
+		//const ndVector targetUpDir(matrix.UnrotateVector(gravityDir));
+
+		ndFloat32 blend = 0.1f;
+		const ndVector updir (m_currentGravityDir.Scale(blend) + gravityDir.Scale(1.0f - blend));
+		m_currentGravityDir = updir.Normalize();
+
+		ndMatrix globalFrame(ndGetIdentityMatrix());
+		const ndMatrix currentFrame(body->GetGlobalFrame());
+		globalFrame[1] = m_currentGravityDir;
+		globalFrame[2] = currentFrame[0].CrossProduct(m_currentGravityDir).Normalize();
+		globalFrame[0] = globalFrame[1].CrossProduct(globalFrame[2]).Normalize();
+		body->SetGlobalFrame(globalFrame);
 	}
+
+	// not call for this body, since a playe is a kinematic body 
+	//void OnApplyExternalForce(ndInt32, ndFloat32) override
 
 	// an app can use this to determine what ovject form the scene 
 	// is colliding with, and take appropiate action.
@@ -46,6 +66,8 @@ class ndPlayerCapsuleNotify : public ndDemoEntityNotify
 	{
 		return true;
 	}
+
+	ndVector m_currentGravityDir;
 };
 
 class ndPlayerCapsuleController : public ndModelNotify
@@ -163,8 +185,8 @@ class ndPlayerCapsuleController : public ndModelNotify
 		location.m_posit.m_y += 2.0f;
 		
 		ndMatrix localAxis(ndGetIdentityMatrix());
-		localAxis[0] = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
-		localAxis[1] = ndVector(1.0f, 0.0f, 0.0f, 0.0f);
+		localAxis[0] = ndVector(1.0f, 0.0f, 0.0f, 0.0f);
+		localAxis[1] = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
 		localAxis[2] = localAxis[0].CrossProduct(localAxis[1]);
 		
 		// create player capulse rigid body
@@ -285,33 +307,6 @@ class ndPlayerCapsuleController : public ndModelNotify
 			idleWalkBlender->SetTransition(0.0f);
 		}
 
-		if (m_scene->GetKeyState(ImGuiKey_1))
-		{
-			ndMatrix localAxis(ndGetIdentityMatrix());
-			localAxis[0] = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
-			localAxis[1] = ndVector(1.0f, 0.0f, 0.0f, 0.0f);
-			localAxis[2] = localAxis[0].CrossProduct(localAxis[1]);
-			player->SetLocalFrame(localAxis);
-		}
-		else if (m_scene->GetKeyState(ImGuiKey_2))
-		{
-			ndMatrix localAxis(ndGetIdentityMatrix());
-			localAxis[0] = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
-			localAxis[1] = ndVector(1.0f, 0.0f, 0.0f, 0.0f);
-			localAxis[2] = localAxis[0].CrossProduct(localAxis[1]);
-			localAxis = localAxis * ndPitchMatrix(20.0f * ndDegreeToRad);
-			player->SetLocalFrame(localAxis);
-		}
-		else if (m_scene->GetKeyState(ImGuiKey_3))
-		{
-			ndMatrix localAxis(ndGetIdentityMatrix());
-			localAxis[0] = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
-			localAxis[1] = ndVector(1.0f, 0.0f, 0.0f, 0.0f);
-			localAxis[2] = localAxis[0].CrossProduct(localAxis[1]);
-			localAxis = localAxis * ndPitchMatrix(-20.0f * ndDegreeToRad);
-			player->SetLocalFrame(localAxis);
-		}
-
 		ndVector veloc;
 		m_animBlendTree->Update(timestep * timestepSign);
 		m_animBlendTree->Evaluate(m_keyFrameOutput, veloc);
@@ -401,17 +396,236 @@ static void LoadAnimations(ndRenderMeshLoader& loader)
 	loader.SetTranslationTracks(ndString("hips"));
 }
 
+static ndSharedPtr<ndBody> BuildCubePlanet(ndDemoEntityManager* const scene)
+{
+	class ndCubePlanetGravity : public ndDemoEntityNotify
+	{
+		public:
+		ndCubePlanetGravity(ndDemoEntityManager* const manager, const ndSharedPtr<ndRenderSceneNode>& entity)
+			:ndDemoEntityNotify(manager, entity)
+		{
+		}
+
+		ndVector CalculateVoronoiGravityDirection(const ndShapeBox* const planetGeometry, const ndVector& pointInVoroniSpace) const
+		{
+			ndShapeInfo boxInfo (((ndShape*)planetGeometry)->GetShapeInfo());
+
+			const ndFloat32 boxX = boxInfo.m_box.m_x * ndFloat32(0.5f);
+			const ndFloat32 boxY = boxInfo.m_box.m_y * ndFloat32(0.5f);
+			const ndFloat32 boxZ = boxInfo.m_box.m_z * ndFloat32(0.5f);
+
+			// here there the voronodi space is reprecnet by 27 regions
+			ndInt32 xCode = (pointInVoroniSpace.m_x >= boxX) ? 1 : ((pointInVoroniSpace.m_x < -boxX) ? 2 : 0);
+			ndInt32 yCode = (pointInVoroniSpace.m_y >= boxY) ? 1 : ((pointInVoroniSpace.m_y < -boxY) ? 2 : 0);
+			ndInt32 zCode = (pointInVoroniSpace.m_z >= boxZ) ? 1 : ((pointInVoroniSpace.m_z < -boxZ) ? 2 : 0);
+
+			auto PointToEdgeDir = [](const ndVector& q, const ndVector& p0, const ndVector& p1)
+			{
+				const ndVector e((p1 - p0).Normalize());
+				const ndVector p(p0 + e.Scale(e.DotProduct(q - p0).GetScalar()));
+				const ndVector dir(q - p);
+				return dir.Normalize();
+			};
+
+			ndInt32 code = (zCode << 4) + (yCode << 2) + xCode;
+			switch (code)
+			{
+				case 0b000001:
+				{
+					return ndVector(1.0f, 0.0f, 0.0f, 0.0f);
+				}
+
+				case 0b000010:
+				{
+					return ndVector(-1.0f, 0.0f, 0.0f, 0.0f);
+				}
+
+				case 0b000100:
+				{
+					return ndVector(0.0f, 1.0f, 0.0f, 0.0f);
+				}
+
+				case 0b001000:
+				{
+					return ndVector(0.0f, -1.0f, 0.0f, 0.0f);
+				}
+
+				case 0b010000:
+				{
+					return ndVector(0.0f, 0.0f, 1.0f, 0.0f);
+				}
+
+				case 0b100000:
+				{
+					return ndVector(0.0f, 0.0f, -1.0f, 0.0f);
+				}
+
+				// x edges
+				case 0b010100:
+				{
+					ndVector p0(-boxX, boxY, boxZ, ndFloat32(1.0f));
+					ndVector p1( boxX, boxY, boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				case 0b100100:
+				{
+					ndVector p0(-boxX, boxY, -boxZ, ndFloat32(1.0f));
+					ndVector p1( boxX, boxY, -boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				case 0b011000:
+				{
+					ndVector p0(-boxX, -boxY, boxZ, ndFloat32(1.0f));
+					ndVector p1( boxX, -boxY, boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				case 0b101000:
+				{
+					ndVector p0(-boxX, -boxY, -boxZ, ndFloat32(1.0f));
+					ndVector p1( boxX, -boxY, -boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				// y edges
+				case 0b010001:
+				{
+					ndVector p0(boxX, -boxY, boxZ, ndFloat32(1.0f));
+					ndVector p1(boxX, +boxY, boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				case 0b100001:
+				{
+					ndVector p0(boxX, -boxY, -boxZ, ndFloat32(1.0f));
+					ndVector p1(boxX,  boxY, -boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				case 0b010010:
+				{
+					ndVector p0(-boxX, -boxY, boxZ, ndFloat32(1.0f));
+					ndVector p1(-boxX,  boxY, boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				case 0b100010:
+				{
+					ndVector p0(-boxX, -boxY, -boxZ, ndFloat32(1.0f));
+					ndVector p1(-boxX,  boxY, -boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				// z edges
+				case 0b000101:
+				{
+					ndVector p0(boxX, boxY,  boxZ, ndFloat32(1.0f));
+					ndVector p1(boxX, boxY, -boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				case 0b000110:
+				{
+					ndVector p0(-boxX, boxY, boxZ, ndFloat32(1.0f));
+					ndVector p1(-boxX, boxY, -boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				case 0b001001:
+				{
+					ndVector p0(boxX, -boxY, boxZ, ndFloat32(1.0f));
+					ndVector p1(boxX, -boxY, -boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				case 0b001010:
+				{
+					ndVector p0(-boxX, -boxY, boxZ, ndFloat32(1.0f));
+					ndVector p1(-boxX, -boxY, -boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+				 
+				default:
+					ndAssert(0);
+					// here we need to calculate the closest distance 
+					// to the edge and use to push the object outside the volume. 
+					// for now just return an arbitrary vector
+					return ndVector(0.0f, 1.0f, 0.0f, 0.0f);
+			}
+		}
+
+		virtual void OnPreUpdate(ndFloat32) override
+		{
+			//here the player local frame of reference
+			//ndTrace(("Calculate gravity vector for each body on the surface\n"))
+			 
+			// Calculate gravity vector for each active body on the surface
+			ndBodyKinematic* const planet = GetBody()->GetAsBodyKinematic();
+
+			// get local space transform of the collision shape;
+			const ndShapeInstance& planetShape = planet->GetCollisionShape();
+			const ndShapeBox* const planetGeometry = ((ndShape*)planetShape.GetShape())->GetAsShapeBox();
+			const ndMatrix planetMatrix(planetShape.GetGlobalMatrix());
+			
+			// iterate over each body on the surace that moved
+			ndBodyKinematic::ndContactMap::Iterator it(planet->GetContactMap());
+			for (it.Begin(); it; it++)
+			{
+				const ndContact* const contact = it.GetNode()->GetInfo();
+				//if (contact->IsActive())
+				{
+					ndBodyKinematic* const otherBody = contact->GetBody0();
+					ndAssert(otherBody != planet);
+					if (!otherBody->GetSleepState())
+					{
+						// a body changed position, get the new gravity
+						// get the object center of mass
+						const ndVector com (otherBody->GetMatrix().TransformVector(otherBody->GetCentreOfMass()));
+						const ndVector localPoint(planetMatrix.UntransformVector(com));
+
+						// calculate the gravity dir in the plane local space
+						const ndVector gravityDir(CalculateVoronoiGravityDirection(planetGeometry, localPoint));
+
+						// take the gavity to the world space, and scale by gravity magnity
+						const ndVector gravity(planetMatrix.RotateVector(gravityDir.Scale(DEMO_GRAVITY)));
+
+						//get the notification of the body on the surface
+						//and set the new gravity
+						ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*otherBody->GetNotifyCallback();
+						notify->SetGravity(gravity);
+					}
+				}
+			}
+		}
+	};
+
+	ndSharedPtr<ndBody> cubePlanet(AddBox(scene, ndGetIdentityMatrix(), ndFloat32(0.0f), ndFloat32(20.0f), ndFloat32(20.0f), ndFloat32(20.0f)));
+	cubePlanet->GetAsBodyDynamic()->SetMatrixUpdateScene(ndGetIdentityMatrix());
+
+	const ndSharedPtr<ndRenderSceneNode> entity(((ndDemoEntityNotify*)*cubePlanet->GetNotifyCallback())->GetUserData());
+	ndSharedPtr<ndBodyNotify> cubePlanetGravity(new ndCubePlanetGravity(scene, entity));
+	cubePlanet->SetNotifyCallback(cubePlanetGravity);
+
+	((ndDemoEntityNotify*)*cubePlanet->GetNotifyCallback())->ResetEntityTransform(ndGetIdentityMatrix());
+
+	return cubePlanet;
+}
+
 void ndPlayerCapsule_ThirdPerson (ndDemoEntityManager* const scene)
 {
 	// build a floor
 	//ndSharedPtr<ndBody> bodyFloor(BuildPlayground(scene));
 	//ndSharedPtr<ndBody> bodyFloor(BuildCompoundScene(scene, ndGetIdentityMatrix()));
 	//ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true));
-	ndSharedPtr<ndBody> bodyFloor (AddBox(scene, ndGetIdentityMatrix(), ndFloat32 (0.0f), ndFloat32 (20.0f), ndFloat32(20.0f), ndFloat32(20.0f)));
-	bodyFloor->GetAsBodyDynamic()->SetMatrixUpdateScene(ndGetIdentityMatrix());
-	((ndDemoEntityNotify*)*bodyFloor->GetNotifyCallback())->ResetEntityTransform(ndGetIdentityMatrix());
+	ndSharedPtr<ndBody> bodyFloor (BuildCubePlanet(scene));
 
-	AddBox(scene, ndGetIdentityMatrix(), ndFloat32(10.0f), ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(0.5f));
+	// add a box for testing
+	ndMatrix boxMatrix(ndGetIdentityMatrix());
+	boxMatrix.m_posit.m_x += 2.0f;
+	boxMatrix.m_posit.m_z += 2.0f;
+	AddBox(scene, boxMatrix, ndFloat32(10.0f), ndFloat32(0.75f), ndFloat32(0.75f), ndFloat32(0.75f), "smilli.png");
 
 	// add a help menu
 	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndPlayerCapsuleController::ndHelpLegend());

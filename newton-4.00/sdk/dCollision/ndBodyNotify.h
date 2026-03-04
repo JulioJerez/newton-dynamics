@@ -50,6 +50,9 @@ class ndBodyNotify : public ndContainersFreeListAlloc<ndBodyNotify>
 	D_COLLISION_API virtual bool OnSceneAabbOverlap(const ndBody* const otherBody) const;
 	D_COLLISION_API virtual void OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep);
 
+	D_COLLISION_API virtual void OnPreUpdate(ndFloat32 timestep);
+	D_COLLISION_API virtual void OnPostUpdate(ndFloat32 timestep);
+
 	private:
 	ndVector m_defaultGravity;
 	ndWeakPtr<ndBody> m_body;

@@ -102,3 +102,16 @@ void ndBodyNotify::OnApplyExternalForce(ndInt32, ndFloat32)
 	}
 }
 
+// this function is not called by the engine,
+// but and end application can call it by implementing 
+// the ndWord::PreUpdate(ndFloat32 timestep)
+void ndBodyNotify::OnPreUpdate(ndFloat32)
+{
+}
+
+// this function is not called by the engine,
+// but and end application can call it by implementing 
+// the ndWord::PostUpdate(ndFloat32 timestep)
+void ndBodyNotify::OnPostUpdate(ndFloat32)
+{
+}

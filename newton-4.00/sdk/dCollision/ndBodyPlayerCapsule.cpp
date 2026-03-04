@@ -24,6 +24,7 @@
 #include "ndBody.h"
 #include "ndScene.h"
 #include "ndContact.h"
+#include "ndBodyNotify.h"
 #include "ndShapeCapsule.h"
 #include "ndShapeCylinder.h"
 #include "ndContactSolver.h"
@@ -111,12 +112,12 @@ void ndBodyPlayerCapsule::Init(const ndMatrix& localAxis, ndFloat32 mass, ndFloa
 	m_lateralSpeed = ndFloat32(0.0f);
 	m_contactPatch = ndFloat32(0.0f);
 
-	ndMatrix shapeMatrix(localAxis);
-	shapeMatrix.m_posit = shapeMatrix.m_front.Scale(height * ndFloat32(0.5f));
-	shapeMatrix.m_posit.m_w = ndFloat32(1.0f);
-
 	height = ndMax(height - ndFloat32(2.0f) * radius / m_weistScale, ndFloat32(0.1f));
 	ndShapeInstance instance(new ndShapeCapsule(radius / m_weistScale, radius / m_weistScale, height));
+
+	ndMatrix shapeMatrix(ndGramSchmidtMatrix(localAxis.m_up));
+	shapeMatrix.m_posit = shapeMatrix.m_front.Scale(ndFloat32(0.5f) * m_height);
+	shapeMatrix.m_posit.m_w = ndFloat32(1.0f);
 	instance.SetLocalMatrix(shapeMatrix);
 	instance.SetScale(ndVector(ndFloat32(1.0f), m_weistScale, m_weistScale, ndFloat32(0.0f)));
 	ndBodyKinematic::SetCollisionShape(instance);
@@ -125,9 +126,8 @@ void ndBodyPlayerCapsule::Init(const ndMatrix& localAxis, ndFloat32 mass, ndFloa
 	m_invMass = GetInvMass();
 	m_mass = ndBodyKinematic::m_mass.m_w;
 
-	m_localFrame = shapeMatrix;
+	m_localFrame = localAxis;
 	m_localFrame.m_posit = ndVector::m_wOne;
-	m_worldFrame = m_localFrame;
 
 	m_contactPatch = radius / m_weistScale;
 	m_stepHeight = ndMax(stepHeight, m_contactPatch * ndFloat32(2.0f));
@@ -141,6 +141,32 @@ ndBodyPlayerCapsule* ndBodyPlayerCapsule::GetAsBodyPlayerCapsule()
 void ndBodyPlayerCapsule::SetCollisionShape(const ndShapeInstance&)
 {
 	// ignore the changing collision shape;
+}
+
+ndMatrix ndBodyPlayerCapsule::GetGlobalFrame() const
+{
+	//const ndMatrix headingMatrix(ndPitchMatrix(GetHeadingAngle()));
+	//ndMatrix matrix (headingMatrix * m_localFrame);
+	//matrix.m_posit = m_matrix.m_posit;
+
+	const ndBodyNotify* const notify = * ((ndBody*)this)->GetNotifyCallback();
+	const ndVector gravity((ndVector::m_negOne * notify->GetGravity()) & ndVector::m_triplexMask);
+	ndAssert(gravity.DotProduct(gravity).GetScalar() > ndFloat32 (0.0f));
+	const ndQuaternion rotation(gravity.Normalize(), GetHeadingAngle());
+	const ndMatrix headingMatrix(ndCalculateMatrix(rotation));
+	ndMatrix matrix (headingMatrix * m_localFrame);
+	matrix.m_posit = m_matrix.m_posit;
+
+	return matrix;
+}
+
+void ndBodyPlayerCapsule::SetGlobalFrame(const ndMatrix& globalFrame)
+{
+	const ndVector gravity((ndVector::m_negOne * GetNotifyCallback()->GetGravity()) & ndVector::m_triplexMask);
+	const ndQuaternion rotation(gravity.Normalize(), GetHeadingAngle());
+	const ndMatrix headingMatrix(ndCalculateMatrix(rotation));
+	m_localFrame = headingMatrix.OrthoInverse() * globalFrame;
+	m_localFrame.m_posit = ndVector::m_wOne;
 }
 
 void ndBodyPlayerCapsule::ApplyInputs(ndFloat32)
@@ -218,9 +244,8 @@ void ndBodyPlayerCapsule::ResolveStep(ndBodyPlayerCapsuleContactSolver& contactS
 		for (ndInt32 i = contactSolver.m_contactBuffer.GetCount() - 1; i >= 0; --i)
 		{
 			const ndVector& point = contactSolver.m_contactBuffer[i].m_point;
-			//const ndVector localPointpoint(m_localFrame.UntransformVector(startMatrix.UntransformVector(point)));
 			const ndVector localPointpoint(contactSolver.m_targetFrame.UntransformVector(startMatrix.UntransformVector(point)));
-			if (localPointpoint.m_x < m_stepHeight) 
+			if (localPointpoint.m_y < m_stepHeight) 
 			{
 				contactSolver.m_contactBuffer[i] = contactSolver.m_contactBuffer[contactSolver.m_contactBuffer.GetCount() - 1];
 				contactSolver.m_contactBuffer.Pop();
@@ -234,7 +259,7 @@ void ndBodyPlayerCapsule::ResolveStep(ndBodyPlayerCapsuleContactSolver& contactS
 			SetVelocity(ndVector::m_zero);
 			impulseSolver.Reset(this);
 
-			ndVector com(startMatrix.TransformVector(GetCentreOfMass()));
+			const ndVector com(startMatrix.TransformVector(GetCentreOfMass()));
 			for (ndInt32 i = 0; i < contactSolver.m_contactBuffer.GetCount(); ++i)
 			{
 				ndVector point(contactSolver.m_contactBuffer[i].m_point);
@@ -254,7 +279,7 @@ void ndBodyPlayerCapsule::ResolveStep(ndBodyPlayerCapsuleContactSolver& contactS
 	if (hasStartMatrix) 
 	{
 		// clip player velocity along the high contacts
-		ndMatrix coodinateMatrix(m_localFrame * startMatrix);
+		//ndMatrix coodinateMatrix(m_localFrame * startMatrix);
 		ndFloat32 scaleSpeedFactor = ndFloat32 (1.5f);
 		ndFloat32 forwardSpeed = m_forwardSpeed * scaleSpeedFactor;
 		ndFloat32 lateralSpeed = m_lateralSpeed * scaleSpeedFactor;
@@ -263,9 +288,11 @@ void ndBodyPlayerCapsule::ResolveStep(ndBodyPlayerCapsuleContactSolver& contactS
 		
 		SetVelocity(savedVeloc);
 		impulseSolver.Reset(this);
-		ndInt32 index = impulseSolver.AddLinearRow(coodinateMatrix[0], ndVector::m_zero, ndFloat32 (0.0f), ndFloat32(0.0f), ndFloat32(1.0e12f));
-		impulseSolver.AddLinearRow(coodinateMatrix[1], ndVector::m_zero, -forwardSpeed, -stepFriction, stepFriction, index);
-		impulseSolver.AddLinearRow(coodinateMatrix[2], ndVector::m_zero, lateralSpeed, -stepFriction, stepFriction, index);
+		//ndInt32 index = impulseSolver.AddLinearRow(coodinateMatrix[0], ndVector::m_zero, ndFloat32 (0.0f), ndFloat32(0.0f), ndFloat32(1.0e12f));
+		ndInt32 index = 0;
+		index = impulseSolver.AddLinearRow(matrix[0], ndVector::m_zero, -forwardSpeed, -stepFriction, stepFriction, index);
+		index = impulseSolver.AddLinearRow(matrix[2], ndVector::m_zero,  lateralSpeed, -stepFriction, stepFriction, index);
+		index = impulseSolver.AddLinearRow(matrix[1], ndVector::m_zero, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0e12f), index);
 		ndVector veloc(savedVeloc + impulseSolver.CalculateImpulse().Scale(m_invMass));
 		
 		bool advanceIsBlocked = true;
@@ -284,7 +311,7 @@ void ndBodyPlayerCapsule::ResolveStep(ndBodyPlayerCapsuleContactSolver& contactS
 				{
 					const ndVector& point = contactSolver.m_contactBuffer[i].m_point;
 					ndVector localPointpoint(m_localFrame.UntransformVector(stepMatrix.UntransformVector(point)));
-					if (localPointpoint.m_x < m_stepHeight) 
+					if (localPointpoint.m_y < m_stepHeight) 
 					{
 						contactSolver.m_contactBuffer[i] = contactSolver.m_contactBuffer[contactSolver.m_contactBuffer.GetCount()-1];
 						contactSolver.m_contactBuffer.Pop();
@@ -293,10 +320,9 @@ void ndBodyPlayerCapsule::ResolveStep(ndBodyPlayerCapsuleContactSolver& contactS
 				
 				if (contactSolver.m_contactBuffer.GetCount())
 				{
-					ndVector com(stepMatrix.TransformVector(GetCentreOfMass()));
 					advanceIsBlocked = true;
-					
 					impulseSolver.Reset(this);
+					const ndVector com(stepMatrix.TransformVector(GetCentreOfMass()));
 					for (ndInt32 i = 0; i < contactSolver.m_contactBuffer.GetCount(); ++i)
 					{
 						ndVector point(contactSolver.m_contactBuffer[i].m_point);
@@ -324,13 +350,13 @@ void ndBodyPlayerCapsule::ResolveStep(ndBodyPlayerCapsuleContactSolver& contactS
 			{
 				ndVector point (contactSolver.m_contactBuffer[i].m_point);
 				point = m_localFrame.UntransformVector(stepMatrix.UntransformVector(point));
-				if ((point.m_x < m_stepHeight) && (point.m_x > m_contactPatch)) 
+				if ((point.m_y < m_stepHeight) && (point.m_y > m_contactPatch)) 
 				{
 					ndVector normal(contactSolver.m_contactBuffer[i].m_normal);
 					ndFloat32 relSpeed = normal.DotProduct(veloc).GetScalar();
 					if (relSpeed < ndFloat32(-1.0e-2f)) 
 					{
-						maxHigh = ndMax(point.m_x, maxHigh);
+						maxHigh = ndMax(point.m_y, maxHigh);
 					}
 				}
 			}
@@ -352,14 +378,14 @@ void ndBodyPlayerCapsule::UpdatePlayerStatus(ndBodyPlayerCapsuleContactSolver& c
 	m_isAirbone = true;
 	m_isOnFloor = false;
 	contactSolver.CalculateContacts();
-	ndMatrix matrix(m_localFrame * GetMatrix());
+	const ndMatrix matrix(GetMatrix());
 	for (ndInt32 i = 0; i < contactSolver.m_contactBuffer.GetCount(); ++i)
 	{
 		m_isAirbone = false;
 		const ndContactPoint* const contact = &contactSolver.m_contactBuffer[i];
 		ndVector point(contact->m_point);
 		ndVector localPoint(matrix.UntransformVector(point));
-		if (localPoint.m_x < m_contactPatch) 
+		if (localPoint.m_y < m_contactPatch) 
 		{
 			ndVector normal(contact->m_normal);
 			ndVector localNormal(matrix.UnrotateVector(normal));
@@ -517,7 +543,7 @@ void ndBodyPlayerCapsule::ResolveCollision(ndBodyPlayerCapsuleContactSolver& con
 	}
 
 	ndVector veloc (GetVelocity());
-	const ndMatrix frameMatrix(m_localFrame * matrix);
+	//const ndMatrix frameMatrix(m_localFrame * matrix);
 	ndVector com(matrix.TransformVector(GetCentreOfMass()));
 
 	impulseSolver.Reset(this);
@@ -530,19 +556,19 @@ void ndBodyPlayerCapsule::ResolveCollision(ndBodyPlayerCapsuleContactSolver& con
 		ndVector point(contact->m_point);
 		ndVector normal(contact->m_normal);
 		const ndInt32 normalIndex = impulseSolver.AddContactRow(contact, normal, point - com, ndFloat32 (0.0f), ndFloat32(0.0f), ndFloat32(1.0e12f));
-		ndVector localPoint(frameMatrix.UntransformVector(point));
+		ndVector localPoint(matrix.UntransformVector(point));
 		
-		if (localPoint.m_x < contactPatchHigh) 
+		if (localPoint.m_y < contactPatchHigh) 
 		{
 			ndFloat32 friction = ContactFrictionCallback(point, normal, 0, contact->m_body1);
 			if (friction > ndFloat32(0.0f)) 
 			{
 				// add lateral traction friction
-				ndVector sideDir(frameMatrix.m_up.CrossProduct(normal).Normalize());
+				const ndVector sideDir(matrix.m_front.CrossProduct(normal).Normalize());
 				impulseSolver.AddContactRow(contact, sideDir, point - com, -m_lateralSpeed, -friction, friction, normalIndex);
-		
+				
 				// add longitudinal  traction friction
-				ndVector frontDir(normal.CrossProduct(sideDir));
+				const ndVector frontDir(normal.CrossProduct(sideDir));
 				impulseSolver.AddContactRow(contact, frontDir, point - com, -m_forwardSpeed, -friction, friction, normalIndex);
 			}
 		}
@@ -792,10 +818,12 @@ void ndBodyPlayerCapsule::SpecialUpdate(ndFloat32 timestep)
 	m_equilibrium0 = 0;
 
 	// set player orientation
-	const ndMatrix headingMatrix(ndPitchMatrix(GetHeadingAngle()));
-	//const ndMatrix targetdMatrix(headingMatrix * m_worldFrame);
-	contactSolver.m_targetFrame = headingMatrix * m_worldFrame;
-	ndMatrix bodyMatrix(m_localFrame.OrthoInverse() * contactSolver.m_targetFrame);
+	const ndVector gravity((ndVector::m_negOne * GetNotifyCallback()->GetGravity()) & ndVector::m_triplexMask);
+	const ndQuaternion rotation(gravity.Normalize(), GetHeadingAngle());
+	const ndMatrix headingMatrix(ndCalculateMatrix(rotation));
+	contactSolver.m_targetFrame = headingMatrix * m_localFrame;
+
+	ndMatrix bodyMatrix(contactSolver.m_targetFrame);
 	bodyMatrix.m_posit = m_matrix.m_posit;
 	SetMatrix(bodyMatrix);
 
