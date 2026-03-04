@@ -53,8 +53,8 @@ void ndBasicPlayerCapsule::ApplyInputs(ndFloat32 timestep)
 	//dTrace(("  frame: %d    player camera: %f\n", m_scene->GetWorld()->GetFrameIndex(), m_playerInput.m_heading * dRadToDegree));
 	if (m_playerInput.m_jump)
 	{
-		ndVector jumpImpule(0.0f, PLAYER_JUMP_SPEED * m_mass, 0.0f, 0.0f);
-		m_impulse += jumpImpule;
+		const ndVector jumpImpulse(GetMatrix().m_up.Scale(PLAYER_JUMP_SPEED * m_mass));
+		m_impulse += jumpImpulse;
 		m_playerInput.m_jump = false;
 	}
 
@@ -72,14 +72,4 @@ ndFloat32 ndBasicPlayerCapsule::ContactFrictionCallback(const ndVector&, const n
 		return 0.4f;
 	}
 	return ndFloat32(2.0f);
-}
-
-ndMatrix ndBasicPlayerCapsule::GetLocalFrame() const
-{
-	return m_worldFrame;
-}
-
-void ndBasicPlayerCapsule::SetLocalFrame(const ndMatrix& frame)
-{
-	m_worldFrame = frame;
 }

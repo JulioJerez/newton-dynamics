@@ -27,6 +27,7 @@ class ndPlayerCapsuleNotify : public ndDemoEntityNotify
 	public:
 	ndPlayerCapsuleNotify(ndDemoEntityManager* const manager, const ndSharedPtr<ndRenderSceneNode>& entity)
 		:ndDemoEntityNotify(manager, entity, nullptr)
+		,m_currentGravityDir(0.0f, 1.0f, 0.0f, 0.0f)
 	{
 	}
 
@@ -38,7 +39,22 @@ class ndPlayerCapsuleNotify : public ndDemoEntityNotify
 	virtual void OnPreUpdate(ndFloat32) override
 	{
 		//here the player local frame of reference
-		ndTrace(("Calculate Player local frame\n"));
+		ndBodyPlayerCapsule* const body = GetBody()->GetAsBodyPlayerCapsule();
+
+		//const ndMatrix matrix(body->GetMatrix());
+		const ndVector gravityDir(GetGravity().Scale(-1.0f).Normalize());
+		//const ndVector targetUpDir(matrix.UnrotateVector(gravityDir));
+
+		ndFloat32 blend = 0.1f;
+		const ndVector updir (m_currentGravityDir.Scale(blend) + gravityDir.Scale(1.0f - blend));
+		m_currentGravityDir = updir.Normalize();
+
+		ndMatrix globalFrame(ndGetIdentityMatrix());
+		const ndMatrix currentFrame(body->GetGlobalFrame());
+		globalFrame[1] = m_currentGravityDir;
+		globalFrame[2] = currentFrame[0].CrossProduct(m_currentGravityDir).Normalize();
+		globalFrame[0] = globalFrame[1].CrossProduct(globalFrame[2]).Normalize();
+		body->SetGlobalFrame(globalFrame);
 	}
 
 	// not call for this body, since a playe is a kinematic body 
@@ -50,6 +66,8 @@ class ndPlayerCapsuleNotify : public ndDemoEntityNotify
 	{
 		return true;
 	}
+
+	ndVector m_currentGravityDir;
 };
 
 class ndPlayerCapsuleController : public ndModelNotify
@@ -167,8 +185,8 @@ class ndPlayerCapsuleController : public ndModelNotify
 		location.m_posit.m_y += 2.0f;
 		
 		ndMatrix localAxis(ndGetIdentityMatrix());
-		localAxis[0] = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
-		localAxis[1] = ndVector(1.0f, 0.0f, 0.0f, 0.0f);
+		localAxis[0] = ndVector(1.0f, 0.0f, 0.0f, 0.0f);
+		localAxis[1] = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
 		localAxis[2] = localAxis[0].CrossProduct(localAxis[1]);
 		
 		// create player capulse rigid body
@@ -287,33 +305,6 @@ class ndPlayerCapsuleController : public ndModelNotify
 		{
 			walkRunBlender->SetTransition(0.0f);
 			idleWalkBlender->SetTransition(0.0f);
-		}
-
-		if (m_scene->GetKeyState(ImGuiKey_1))
-		{
-			ndMatrix localAxis(ndGetIdentityMatrix());
-			localAxis[0] = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
-			localAxis[1] = ndVector(1.0f, 0.0f, 0.0f, 0.0f);
-			localAxis[2] = localAxis[0].CrossProduct(localAxis[1]);
-			player->SetLocalFrame(localAxis);
-		}
-		else if (m_scene->GetKeyState(ImGuiKey_2))
-		{
-			ndMatrix localAxis(ndGetIdentityMatrix());
-			localAxis[0] = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
-			localAxis[1] = ndVector(1.0f, 0.0f, 0.0f, 0.0f);
-			localAxis[2] = localAxis[0].CrossProduct(localAxis[1]);
-			localAxis = localAxis * ndPitchMatrix(20.0f * ndDegreeToRad);
-			player->SetLocalFrame(localAxis);
-		}
-		else if (m_scene->GetKeyState(ImGuiKey_3))
-		{
-			ndMatrix localAxis(ndGetIdentityMatrix());
-			localAxis[0] = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
-			localAxis[1] = ndVector(1.0f, 0.0f, 0.0f, 0.0f);
-			localAxis[2] = localAxis[0].CrossProduct(localAxis[1]);
-			localAxis = localAxis * ndPitchMatrix(-20.0f * ndDegreeToRad);
-			player->SetLocalFrame(localAxis);
 		}
 
 		ndVector veloc;
@@ -556,7 +547,6 @@ static ndSharedPtr<ndBody> BuildCubePlanet(ndDemoEntityManager* const scene)
 					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
 				}
 				 
-
 				default:
 					ndAssert(0);
 					// here we need to calculate the closest distance 
@@ -632,7 +622,10 @@ void ndPlayerCapsule_ThirdPerson (ndDemoEntityManager* const scene)
 	ndSharedPtr<ndBody> bodyFloor (BuildCubePlanet(scene));
 
 	// add a box for testing
-	AddBox(scene, ndGetIdentityMatrix(), ndFloat32(10.0f), ndFloat32(0.75f), ndFloat32(0.75f), ndFloat32(0.75f), "smilli.png");
+	ndMatrix boxMatrix(ndGetIdentityMatrix());
+	boxMatrix.m_posit.m_x += 2.0f;
+	boxMatrix.m_posit.m_z += 2.0f;
+	AddBox(scene, boxMatrix, ndFloat32(10.0f), ndFloat32(0.75f), ndFloat32(0.75f), ndFloat32(0.75f), "smilli.png");
 
 	// add a help menu
 	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndPlayerCapsuleController::ndHelpLegend());
