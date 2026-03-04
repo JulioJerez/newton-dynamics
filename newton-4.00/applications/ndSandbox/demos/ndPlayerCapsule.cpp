@@ -426,6 +426,25 @@ static ndSharedPtr<ndBody> BuildCubePlanet(ndDemoEntityManager* const scene)
 			ndInt32 code = (zCode << 4) + (yCode << 2) + xCode;
 			switch (code)
 			{
+				// eight vertex Voronoi regions
+				case 0b010101:
+				case 0b010110:
+				case 0b011001:
+				case 0b011010:
+				case 0b100101:
+				case 0b100110:
+				case 0b101001:
+				case 0b101010:
+				{
+					ndFloat32 x = (xCode == 1) ? boxX : -boxX;
+					ndFloat32 y = (yCode == 1) ? boxY : -boxY;
+					ndFloat32 z = (zCode == 1) ? boxZ : -boxZ;
+					const ndVector corner(x, y, z, ndFloat32(1.0f));
+					const ndVector dir(pointInVoroniSpace - corner);
+					return (dir & ndVector::m_triplexMask).Normalize();
+				}
+				 
+				// 6 faces Voronoii regions
 				case 0b000001:
 				{
 					return ndVector(1.0f, 0.0f, 0.0f, 0.0f);
@@ -456,6 +475,7 @@ static ndSharedPtr<ndBody> BuildCubePlanet(ndDemoEntityManager* const scene)
 					return ndVector(0.0f, 0.0f, -1.0f, 0.0f);
 				}
 
+				// 12 edge voronoi regions
 				// x edges
 				case 0b010100:
 				{
