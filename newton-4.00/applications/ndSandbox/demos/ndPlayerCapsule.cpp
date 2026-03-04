@@ -50,11 +50,11 @@ class ndPlayerCapsuleNotify : public ndDemoEntityNotify
 		m_currentGravityDir = updir.Normalize();
 
 		ndMatrix globalFrame(ndGetIdentityMatrix());
-		const ndMatrix currentFrame(body->GetGlobalFrame());
+		const ndMatrix currentFrame(body->GetLocalFrame());
 		globalFrame[1] = m_currentGravityDir;
 		globalFrame[2] = currentFrame[0].CrossProduct(m_currentGravityDir).Normalize();
 		globalFrame[0] = globalFrame[1].CrossProduct(globalFrame[2]).Normalize();
-		body->SetGlobalFrame(globalFrame);
+		body->SetLocalFrame(globalFrame);
 	}
 
 	// not call for this body, since a playe is a kinematic body 
@@ -127,8 +127,9 @@ class ndPlayerCapsuleController : public ndModelNotify
 			playerMatrix.m_posit += upDir.Scale(2.5f);
 
 			const ndMatrix pitchAngle(ndRollMatrix(m_pitch));
-			const ndMatrix yawAngle(ndYawMatrix(m_headingAngle));
-			const ndMatrix matrix(pitchAngle * yawAngle * playerMatrix * camMatrix);
+			//const ndMatrix yawAngle(ndYawMatrix(m_headingAngle));
+			//const ndMatrix matrix(pitchAngle * yawAngle * playerMatrix * camMatrix);
+			const ndMatrix matrix(pitchAngle * playerMatrix * camMatrix);
 			return matrix;
 		}
 

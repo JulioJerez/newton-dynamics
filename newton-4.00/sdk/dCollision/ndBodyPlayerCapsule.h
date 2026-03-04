@@ -40,8 +40,8 @@ class ndBodyPlayerCapsule : public ndBodyKinematicBase
 
 	D_COLLISION_API ndBodyPlayerCapsule* GetAsBodyPlayerCapsule() override;
 
-	D_COLLISION_API ndMatrix GetGlobalFrame() const;
-	D_COLLISION_API void SetGlobalFrame(const ndMatrix& globalFrame);
+	D_COLLISION_API ndMatrix GetLocalFrame() const;
+	D_COLLISION_API void SetLocalFrame(const ndMatrix& globalFrame);
 
 	D_COLLISION_API ndFloat32 GetForwardSpeed() const;
 	D_COLLISION_API void SetForwardSpeed(ndFloat32 speed);

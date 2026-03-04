@@ -143,29 +143,14 @@ void ndBodyPlayerCapsule::SetCollisionShape(const ndShapeInstance&)
 	// ignore the changing collision shape;
 }
 
-ndMatrix ndBodyPlayerCapsule::GetGlobalFrame() const
+ndMatrix ndBodyPlayerCapsule::GetLocalFrame() const
 {
-	//const ndMatrix headingMatrix(ndPitchMatrix(GetHeadingAngle()));
-	//ndMatrix matrix (headingMatrix * m_localFrame);
-	//matrix.m_posit = m_matrix.m_posit;
-
-	const ndBodyNotify* const notify = * ((ndBody*)this)->GetNotifyCallback();
-	const ndVector gravity((ndVector::m_negOne * notify->GetGravity()) & ndVector::m_triplexMask);
-	ndAssert(gravity.DotProduct(gravity).GetScalar() > ndFloat32 (0.0f));
-	const ndQuaternion rotation(gravity.Normalize(), GetHeadingAngle());
-	const ndMatrix headingMatrix(ndCalculateMatrix(rotation));
-	ndMatrix matrix (headingMatrix * m_localFrame);
-	matrix.m_posit = m_matrix.m_posit;
-
-	return matrix;
+	return m_localFrame;
 }
 
-void ndBodyPlayerCapsule::SetGlobalFrame(const ndMatrix& globalFrame)
+void ndBodyPlayerCapsule::SetLocalFrame(const ndMatrix& frame)
 {
-	const ndVector gravity((ndVector::m_negOne * GetNotifyCallback()->GetGravity()) & ndVector::m_triplexMask);
-	const ndQuaternion rotation(gravity.Normalize(), GetHeadingAngle());
-	const ndMatrix headingMatrix(ndCalculateMatrix(rotation));
-	m_localFrame = headingMatrix.OrthoInverse() * globalFrame;
+	m_localFrame = frame;
 	m_localFrame.m_posit = ndVector::m_wOne;
 }
 
@@ -205,6 +190,7 @@ ndFloat32 ndBodyPlayerCapsule::GetHeadingAngle() const
 
 void ndBodyPlayerCapsule::SetHeadingAngle(ndFloat32 angle)
 {
+	//angle = 2.0f * angle;
 	const ndFloat32 interpolation = ndFloat32(0.3f);
 	ndFloat32 deltaAngle = ndAnglesAdd(angle, -m_headingAngle) * interpolation;
 	ndFloat32 headingAngle = ndAnglesAdd(m_headingAngle, deltaAngle);
@@ -822,7 +808,7 @@ void ndBodyPlayerCapsule::SpecialUpdate(ndFloat32 timestep)
 	const ndVector gravity((ndVector::m_negOne * GetNotifyCallback()->GetGravity()) & ndVector::m_triplexMask);
 	const ndQuaternion rotation(gravity.Normalize(), GetHeadingAngle());
 	const ndMatrix headingMatrix(ndCalculateMatrix(rotation));
-	contactSolver.m_targetFrame = headingMatrix * m_localFrame;
+	contactSolver.m_targetFrame = m_localFrame * headingMatrix;
 
 	ndMatrix bodyMatrix(contactSolver.m_targetFrame);
 	bodyMatrix.m_posit = m_matrix.m_posit;
