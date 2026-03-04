@@ -190,7 +190,6 @@ ndFloat32 ndBodyPlayerCapsule::GetHeadingAngle() const
 
 void ndBodyPlayerCapsule::SetHeadingAngle(ndFloat32 angle)
 {
-	//angle = 2.0f * angle;
 	const ndFloat32 interpolation = ndFloat32(0.3f);
 	ndFloat32 deltaAngle = ndAnglesAdd(angle, -m_headingAngle) * interpolation;
 	ndFloat32 headingAngle = ndAnglesAdd(m_headingAngle, deltaAngle);
@@ -273,7 +272,6 @@ void ndBodyPlayerCapsule::ResolveStep(ndBodyPlayerCapsuleContactSolver& contactS
 		
 		SetVelocity(savedVeloc);
 		impulseSolver.Reset(this);
-		//ndInt32 index = 0;
 		ndInt32 index = impulseSolver.AddLinearRow(matrix[1], ndVector::m_zero, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0e12f));
 		impulseSolver.AddLinearRow(matrix[0], ndVector::m_zero, -forwardSpeed, -stepFriction, stepFriction, index);
 		impulseSolver.AddLinearRow(matrix[2], ndVector::m_zero,  lateralSpeed, -stepFriction, stepFriction, index);
@@ -530,7 +528,6 @@ void ndBodyPlayerCapsule::ResolveCollision(ndBodyPlayerCapsuleContactSolver& con
 	}
 
 	ndVector veloc (GetVelocity());
-	//const ndMatrix frameMatrix(m_localFrame * matrix);
 	ndVector com(matrix.TransformVector(GetCentreOfMass()));
 
 	impulseSolver.Reset(this);
