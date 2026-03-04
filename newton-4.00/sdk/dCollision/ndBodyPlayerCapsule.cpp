@@ -200,11 +200,12 @@ void ndBodyPlayerCapsule::SetLateralSpeed(ndFloat32 speed)
 
 ndFloat32 ndBodyPlayerCapsule::GetHeadingAngle() const
 {
-	return m_headingAngle;
+	return m_headingAngle * 0.5f;
 }
 
 void ndBodyPlayerCapsule::SetHeadingAngle(ndFloat32 angle)
 {
+	angle = 2.0f * angle;
 	const ndFloat32 interpolation = ndFloat32(0.3f);
 	ndFloat32 deltaAngle = ndAnglesAdd(angle, -m_headingAngle) * interpolation;
 	ndFloat32 headingAngle = ndAnglesAdd(m_headingAngle, deltaAngle);
