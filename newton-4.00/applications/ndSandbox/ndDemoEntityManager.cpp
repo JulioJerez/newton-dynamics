@@ -1371,6 +1371,9 @@ void ndDemoEntityManager::SetNextActiveCamera()
 			ndInt32 j = (i + 1) % cameraPallete.GetCount();
 			if (j == 0)
 			{
+				const ndTransform tranform (currentCamera->CalculateGlobalTransform());
+				m_defaultCamera->SetTransform(tranform);
+				m_defaultCamera->SetTransform(tranform);
 				m_renderer->SetCamera(m_defaultCamera);
 			}
 			else
