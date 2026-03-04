@@ -424,9 +424,9 @@ static ndSharedPtr<ndBody> BuildCubePlanet(ndDemoEntityManager* const scene)
 			const ndFloat32 boxZ = boxInfo.m_box.m_z * ndFloat32(0.5f);
 
 			// here there the voronodi space is reprecnet by 27 regions
-			ndInt32 xCode = (pointInVoroniSpace.m_x >= boxX) ? 0 : ((pointInVoroniSpace.m_x < -boxX) ? 1 : 2);
-			ndInt32 yCode = (pointInVoroniSpace.m_y >= boxY) ? 0 : ((pointInVoroniSpace.m_y < -boxY) ? 1 : 2);
-			ndInt32 zCode = (pointInVoroniSpace.m_z >= boxZ) ? 0 : ((pointInVoroniSpace.m_z < -boxZ) ? 1 : 2);
+			ndInt32 xCode = (pointInVoroniSpace.m_x >= boxX) ? 1 : ((pointInVoroniSpace.m_x < -boxX) ? 2 : 0);
+			ndInt32 yCode = (pointInVoroniSpace.m_y >= boxY) ? 1 : ((pointInVoroniSpace.m_y < -boxY) ? 2 : 0);
+			ndInt32 zCode = (pointInVoroniSpace.m_z >= boxZ) ? 1 : ((pointInVoroniSpace.m_z < -boxZ) ? 2 : 0);
 
 			auto PointToEdgeDir = [](const ndVector& q, const ndVector& p0, const ndVector& p1)
 			{
@@ -439,42 +439,131 @@ static ndSharedPtr<ndBody> BuildCubePlanet(ndDemoEntityManager* const scene)
 			ndInt32 code = (zCode << 4) + (yCode << 2) + xCode;
 			switch (code)
 			{
-				case 0x28:		// 101000
+				case 0b000001:
 				{
 					return ndVector(1.0f, 0.0f, 0.0f, 0.0f);
 				}
 
-				case 0x22:		// 100010
+				case 0b000010:
+				{
+					return ndVector(-1.0f, 0.0f, 0.0f, 0.0f);
+				}
+
+				case 0b000100:
 				{
 					return ndVector(0.0f, 1.0f, 0.0f, 0.0f);
 				}
 
-				case 0x1a:		// 011010
+				case 0b001000:
+				{
+					return ndVector(0.0f, -1.0f, 0.0f, 0.0f);
+				}
+
+				case 0b010000:
+				{
+					return ndVector(0.0f, 0.0f, 1.0f, 0.0f);
+				}
+
+				case 0b100000:
 				{
 					return ndVector(0.0f, 0.0f, -1.0f, 0.0f);
 				}
 
-				case 0x20:		// 010000
+				// x edges
+				case 0b010100:
+				{
+					ndVector p0(-boxX, boxY, boxZ, ndFloat32(1.0f));
+					ndVector p1( boxX, boxY, boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				case 0b100100:
+				{
+					ndVector p0(-boxX, boxY, -boxZ, ndFloat32(1.0f));
+					ndVector p1( boxX, boxY, -boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				case 0b011000:
+				{
+					ndVector p0(-boxX, -boxY, boxZ, ndFloat32(1.0f));
+					ndVector p1( boxX, -boxY, boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				case 0b101000:
+				{
+					ndVector p0(-boxX, -boxY, -boxZ, ndFloat32(1.0f));
+					ndVector p1( boxX, -boxY, -boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				// y edges
+				case 0b010001:
+				{
+					ndVector p0(boxX, -boxY, boxZ, ndFloat32(1.0f));
+					ndVector p1(boxX, +boxY, boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				case 0b100001:
+				{
+					ndVector p0(boxX, -boxY, -boxZ, ndFloat32(1.0f));
+					ndVector p1(boxX,  boxY, -boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				case 0b010010:
+				{
+					ndVector p0(-boxX, -boxY, boxZ, ndFloat32(1.0f));
+					ndVector p1(-boxX,  boxY, boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				case 0b100010:
+				{
+					ndVector p0(-boxX, -boxY, -boxZ, ndFloat32(1.0f));
+					ndVector p1(-boxX,  boxY, -boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				// z edges
+				case 0b000101:
 				{
 					ndVector p0(boxX, boxY,  boxZ, ndFloat32(1.0f));
 					ndVector p1(boxX, boxY, -boxZ, ndFloat32(1.0f));
 					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
 				}
 
-				case 0x12:		// 010010
+				case 0b000110:
 				{
-					ndVector p0(-boxX, boxY, -boxZ, ndFloat32(1.0f));
-					ndVector p1(boxX, boxY, -boxZ, ndFloat32(1.0f));
+					ndVector p0(-boxX, boxY, boxZ, ndFloat32(1.0f));
+					ndVector p1(-boxX, boxY, -boxZ, ndFloat32(1.0f));
 					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
 				}
 
+				case 0b001001:
+				{
+					ndVector p0(boxX, -boxY, boxZ, ndFloat32(1.0f));
+					ndVector p1(boxX, -boxY, -boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+
+				case 0b001010:
+				{
+					ndVector p0(-boxX, -boxY, boxZ, ndFloat32(1.0f));
+					ndVector p1(-boxX, -boxY, -boxZ, ndFloat32(1.0f));
+					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
+				}
+				 
+
 				default:
 					ndAssert(0);
+					// here we need to calculate the closest distance 
+					// to the edge and use to push the object outside the volume. 
+					// for now just return an arbitrary vector
 					return ndVector(0.0f, 1.0f, 0.0f, 0.0f);
 			}
-			 
-			// this should never happens
-			return ndVector(0.0f, 1.0f, 0.0f, 0.0f);
 		}
 
 		virtual void OnPreUpdate(ndFloat32) override
@@ -543,7 +632,7 @@ void ndPlayerCapsule_ThirdPerson (ndDemoEntityManager* const scene)
 	ndSharedPtr<ndBody> bodyFloor (BuildCubePlanet(scene));
 
 	// add a box for testing
-	AddBox(scene, ndGetIdentityMatrix(), ndFloat32(10.0f), ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(0.5f));
+	AddBox(scene, ndGetIdentityMatrix(), ndFloat32(10.0f), ndFloat32(0.75f), ndFloat32(0.75f), ndFloat32(0.75f), "smilli.png");
 
 	// add a help menu
 	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndPlayerCapsuleController::ndHelpLegend());
