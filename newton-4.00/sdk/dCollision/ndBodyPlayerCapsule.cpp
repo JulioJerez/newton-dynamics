@@ -279,7 +279,6 @@ void ndBodyPlayerCapsule::ResolveStep(ndBodyPlayerCapsuleContactSolver& contactS
 	if (hasStartMatrix) 
 	{
 		// clip player velocity along the high contacts
-		//ndMatrix coodinateMatrix(m_localFrame * startMatrix);
 		ndFloat32 scaleSpeedFactor = ndFloat32 (1.5f);
 		ndFloat32 forwardSpeed = m_forwardSpeed * scaleSpeedFactor;
 		ndFloat32 lateralSpeed = m_lateralSpeed * scaleSpeedFactor;
@@ -288,16 +287,18 @@ void ndBodyPlayerCapsule::ResolveStep(ndBodyPlayerCapsuleContactSolver& contactS
 		
 		SetVelocity(savedVeloc);
 		impulseSolver.Reset(this);
-		//ndInt32 index = impulseSolver.AddLinearRow(coodinateMatrix[0], ndVector::m_zero, ndFloat32 (0.0f), ndFloat32(0.0f), ndFloat32(1.0e12f));
-		ndInt32 index = 0;
-		index = impulseSolver.AddLinearRow(matrix[0], ndVector::m_zero, -forwardSpeed, -stepFriction, stepFriction, index);
-		index = impulseSolver.AddLinearRow(matrix[2], ndVector::m_zero,  lateralSpeed, -stepFriction, stepFriction, index);
-		index = impulseSolver.AddLinearRow(matrix[1], ndVector::m_zero, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0e12f), index);
-		ndVector veloc(savedVeloc + impulseSolver.CalculateImpulse().Scale(m_invMass));
+		//ndInt32 index = 0;
+		ndInt32 index = impulseSolver.AddLinearRow(matrix[1], ndVector::m_zero, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0e12f));
+		impulseSolver.AddLinearRow(matrix[0], ndVector::m_zero, -forwardSpeed, -stepFriction, stepFriction, index);
+		impulseSolver.AddLinearRow(matrix[2], ndVector::m_zero,  lateralSpeed, -stepFriction, stepFriction, index);
+
+		const ndVector impulse(impulseSolver.CalculateImpulse());
+		ndVector veloc(savedVeloc + impulse.Scale(m_invMass));
 		
 		bool advanceIsBlocked = true;
 		for (ndInt32 j = 0; advanceIsBlocked && (j < 4); ++j) 
 		{
+			//ndTrace(("%d: %f %f %f\n", j, veloc.m_x, veloc.m_y, veloc.m_z));
 			SetVelocity(veloc);
 			advanceIsBlocked = false;
 			ndBodyKinematic::IntegrateVelocity(timestep);
