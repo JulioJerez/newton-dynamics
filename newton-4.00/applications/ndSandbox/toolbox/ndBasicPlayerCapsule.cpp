@@ -58,9 +58,10 @@ void ndBasicPlayerCapsule::ApplyInputs(ndFloat32 timestep)
 		m_playerInput.m_jump = false;
 	}
 
-	SetForwardSpeed(m_playerInput.m_forwardSpeed);
-	SetLateralSpeed(m_playerInput.m_strafeSpeed);
+	//ndTrace(("heading = %f\n", m_playerInput.m_heading * ndRadToDegree));
 	SetHeadingAngle(m_playerInput.m_heading);
+	SetLateralSpeed(m_playerInput.m_strafeSpeed);
+	SetForwardSpeed(m_playerInput.m_forwardSpeed);
 }
 
 //ndFloat32 ndBasicPlayerCapsule::ContactFrictionCallback(const ndVector& position, const ndVector& normal, ndInt32 contactId, const ndBodyKinematic* const otherbody) const

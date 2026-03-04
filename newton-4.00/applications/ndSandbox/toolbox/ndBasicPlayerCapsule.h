@@ -23,14 +23,14 @@ class ndBasicPlayerCapsule: public ndBodyPlayerCapsule
 		public:
 		PlayerInputs()
 		{
-			m_heading = 0.0f;
-			m_forwardSpeed = 0.0f;
-			m_strafeSpeed = 0.0f;
+			m_heading = ndFloat32(0.0f);
+			m_strafeSpeed = ndFloat32(0.0f);
+			m_forwardSpeed = ndFloat32(0.0f);
 			m_jump = false;
 		}
 		ndFloat32 m_heading;
-		ndFloat32 m_forwardSpeed;
 		ndFloat32 m_strafeSpeed;
+		ndFloat32 m_forwardSpeed;
 		bool m_jump;
 	};
 
