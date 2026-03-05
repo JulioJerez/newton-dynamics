@@ -321,8 +321,8 @@ class ndConstraint: public ndContainersFreeListAlloc<ndConstraint>
 	D_COLLISION_API ndConstraint();
 	virtual void ClearMemory() = 0;
 
-	ndVector8 m_forceTorqueBody0;
-	ndVector8 m_forceTorqueBody1;
+	ndJacobian m_forceTorqueBody0;
+	ndJacobian m_forceTorqueBody1;
 	ndBodyKinematic* m_body0;
 	ndBodyKinematic* m_body1;
 

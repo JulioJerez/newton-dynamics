@@ -302,13 +302,9 @@ bool ndShapeConvexPolygon::BeamClipping(const ndVector& origin, ndFloat32 dist)
 		ptr = ptr->m_next;
 	} while (ptr != first);
 
-	//ndInt32 count = 0;
-	//m_adjacentFaceEdgeNormalIndex = &m_clippEdgeNormal[0];
 	m_localPoly.SetCount(0);
 	do 
 	{
-		//m_clippEdgeNormal[count] = ptr->m_incidentNormal;
-		//m_localPoly[count] = points[ptr->m_incidentVertex];
 		m_localPoly.PushBack(points[ptr->m_incidentVertex]);
 		ptr = ptr->m_next;
 	} while (ptr != first);
@@ -555,6 +551,9 @@ ndInt32 ndShapeConvexPolygon::CalculateContactToConvexHullDescrete(ndContactSolv
 		}
 		i0 = i;
 	}
+
+static int xxx;
+xxx++;
 
 	bool needSkirts = true;
 	ndFloat32 convexSphapeUmbra = hull->GetUmbraClipSize();

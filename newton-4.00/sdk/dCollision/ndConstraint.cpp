@@ -48,8 +48,6 @@ void ndForceImpactPair::Push(ndFloat32 val)
 
 ndConstraint::ndConstraint()
 	:ndContainersFreeListAlloc<ndConstraint>()
-	,m_forceTorqueBody0(ndVector8::m_zero)
-	,m_forceTorqueBody1(ndVector8::m_zero)
 	,m_body0(nullptr)
 	,m_body1(nullptr)
 	,m_rowCount(0)
@@ -61,6 +59,10 @@ ndConstraint::ndConstraint()
 	,m_resting(0)
 	,m_isInSkeletonLoop(0)
 {
+	m_forceTorqueBody0.m_linear = ndVector::m_zero;
+	m_forceTorqueBody0.m_angular = ndVector::m_zero;
+	m_forceTorqueBody1.m_linear = ndVector::m_zero;
+	m_forceTorqueBody1.m_angular = ndVector::m_zero;
 }
 
 void ndConstraint::InitPointParam(ndPointParam& param, const ndVector& p0Global, const ndVector& p1Global) const
@@ -149,32 +151,32 @@ void ndConstraint::DebugJoint(ndConstraintDebugCallback&) const
 
 ndVector ndConstraint::GetForceBody0() const
 {
-	return m_forceTorqueBody0.GetLow();
+	return m_forceTorqueBody0.m_linear;
 }
 
 ndVector ndConstraint::GetTorqueBody0() const
 {
-	return m_forceTorqueBody0.GetHigh();
+	return m_forceTorqueBody0.m_angular;
 }
 
 ndVector ndConstraint::GetForceBody1() const
 {
-	return m_forceTorqueBody1.GetLow();
+	return m_forceTorqueBody1.m_linear;
 }
 
 ndVector ndConstraint::GetTorqueBody1() const
 {
-	return m_forceTorqueBody1.GetHigh();
+	return m_forceTorqueBody1.m_angular;
 }
 
 ndVector8 ndConstraint::GetForceTorqueBody0() const
 {
-	return m_forceTorqueBody0;
+	return ndVector8(m_forceTorqueBody0.m_linear, m_forceTorqueBody0.m_angular);
 }
 
 ndVector8 ndConstraint::GetForceTorqueBody1() const
 {
-	return m_forceTorqueBody1;
+	return ndVector8(m_forceTorqueBody1.m_linear, m_forceTorqueBody1.m_angular);
 }
 
 void ndConstraint::UpdateParameters()
