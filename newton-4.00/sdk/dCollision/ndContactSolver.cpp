@@ -3767,7 +3767,7 @@ ndInt32 ndContactSolver::CalculatePolySoupToHullContactsContinue(ndPolygonMeshDe
 		const ndInt32* const localIndexArray = &indexArray[address];
 		polygon.m_vertexIndex = localIndexArray;
 		const ndInt32 vertexCount = query.m_faceIndexCount[i];
-		polygon.m_adjacentFaceEdgeNormalIndex = data.GetAdjacentFaceEdgeNormalArray(localIndexArray, vertexCount);
+		const ndInt32* const adjacentFaceEdgeNormalIndex = data.GetAdjacentFaceEdgeNormalArray(localIndexArray, vertexCount);
 		polygon.m_faceId = data.GetFaceId(localIndexArray, vertexCount);
 		polygon.m_faceClipSize = data.GetFaceSize(localIndexArray, vertexCount);
 		polygon.m_faceNormalIndex = data.GetNormalIndex(localIndexArray, vertexCount);
@@ -3778,11 +3778,14 @@ ndInt32 ndContactSolver::CalculatePolySoupToHullContactsContinue(ndPolygonMeshDe
 		polygon.m_convexCapFace.SetCount(0);
 		polygon.m_convexCapFaceIndex.SetCount(0);
 		polygon.m_convexCapFace.PushBack(vertexCount);
+		polygon.m_adjacentFaceEdgeNormalIndex.SetCount(0);
 		for (ndInt32 j = 0; j < vertexCount; ++j)
 		{
 			ndInt32 index = localIndexArray[j];
+			ndInt32 normalIndex = adjacentFaceEdgeNormalIndex[j];
 			const ndVector& p = vertex[index];
 			polygon.m_convexCapFaceIndex.PushBack(j);
+			polygon.m_adjacentFaceEdgeNormalIndex.PushBack(normalIndex);
 			polygon.m_localPoly.PushBack(polySoupScaledMatrix.TransformVector(p));
 		}
 
@@ -4011,7 +4014,7 @@ ndInt32 ndContactSolver::CalculatePolySoupToHullContactsDescrete(ndPolygonMeshDe
 		const ndInt32* const localIndexArray = &indexArray[address];
 		polygon.m_vertexIndex = localIndexArray;
 		const ndInt32 vertexCount = query.m_faceIndexCount[i];
-		polygon.m_adjacentFaceEdgeNormalIndex = data.GetAdjacentFaceEdgeNormalArray(localIndexArray, vertexCount);
+		const ndInt32* const adjacentFaceEdgeNormalIndex = data.GetAdjacentFaceEdgeNormalArray(localIndexArray, vertexCount);
 		polygon.m_faceId = data.GetFaceId(localIndexArray, vertexCount);
 		polygon.m_faceClipSize = data.GetFaceSize(localIndexArray, vertexCount);
 		polygon.m_faceNormalIndex = data.GetNormalIndex(localIndexArray, vertexCount);
@@ -4022,11 +4025,14 @@ ndInt32 ndContactSolver::CalculatePolySoupToHullContactsDescrete(ndPolygonMeshDe
 		polygon.m_convexCapFace.SetCount(0);
 		polygon.m_convexCapFaceIndex.SetCount(0);
 		polygon.m_convexCapFace.PushBack(vertexCount);
+		polygon.m_adjacentFaceEdgeNormalIndex.SetCount(0);
 		for (ndInt32 j = 0; j < vertexCount; ++j)
 		{
 			ndInt32 index = localIndexArray[j];
+			ndInt32 normalIndex = adjacentFaceEdgeNormalIndex[j];
 			const ndVector& p = vertex[index];
 			polygon.m_convexCapFaceIndex.PushBack(j);
+			polygon.m_adjacentFaceEdgeNormalIndex.PushBack(normalIndex);
 			polygon.m_localPoly.PushBack(polySoupScaledMatrix.TransformVector(p));
 		}
 

@@ -36,7 +36,6 @@ ndShapeConvexPolygon::ndShapeConvexPolygon ()
 	,m_faceNormalIndex(0)
 	,m_vertexArray(nullptr)
 	,m_vertexIndex(nullptr)
-	,m_adjacentFaceEdgeNormalIndex(nullptr)
 {
 }
 
@@ -102,13 +101,13 @@ void ndShapeConvexPolygon::GenerateConvexCap()
 			ndAssert(faceEddge.m_w == ndFloat32(0.0f));
 			ndAssert(faceEddge.DotProduct(faceEddge).GetScalar() > ndFloat32(0.0f));
 			const ndVector edge(faceEddge.Normalize());
-			const ndInt32 adjacentNormalIndex = m_adjacentFaceEdgeNormalIndex[i0] & (~D_CONCAVE_EDGE_MASK);
+			
+			//const ndInt32 adjacentNormalIndex = m_adjacentFaceEdgeNormalIndex[i0] & (~D_CONCAVE_EDGE_MASK);
+			const ndInt32 adjacentNormalIndex = m_adjacentFaceEdgeNormalIndex[i0];
 			const ndVector localAdjacentNormal(m_vertexArray[adjacentNormalIndex]);
 			const ndVector adjacentNormal(CalculateGlobalNormal(localAdjacentNormal & ndVector::m_triplexMask));
 			ndAssert(edge.DotProduct(adjacentNormal).GetScalar() < ndFloat32(2.0e-1f));
-
 			const ndVector edgeSkirt(edge.CrossProduct(adjacentNormal) * skirt);
-
 			m_localPoly.PushBack(m_localPoly[i] + edgeSkirt);
 			m_localPoly.PushBack(m_localPoly[i0] + edgeSkirt);
 
@@ -303,9 +302,11 @@ bool ndShapeConvexPolygon::BeamClipping(const ndVector& origin, ndFloat32 dist)
 	} while (ptr != first);
 
 	m_localPoly.SetCount(0);
+	m_adjacentFaceEdgeNormalIndex.SetCount(0);
 	do 
 	{
 		m_localPoly.PushBack(points[ptr->m_incidentVertex]);
+		m_adjacentFaceEdgeNormalIndex.PushBack(ptr->m_incidentNormal);
 		ptr = ptr->m_next;
 	} while (ptr != first);
 
@@ -551,9 +552,6 @@ ndInt32 ndShapeConvexPolygon::CalculateContactToConvexHullDescrete(ndContactSolv
 		}
 		i0 = i;
 	}
-
-static int xxx;
-xxx++;
 
 	bool needSkirts = true;
 	ndFloat32 convexSphapeUmbra = hull->GetUmbraClipSize();
