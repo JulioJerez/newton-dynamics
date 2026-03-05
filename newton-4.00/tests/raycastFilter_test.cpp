@@ -68,7 +68,7 @@ class NotifyClientNode : public ndBodyNotify
 
 	~NotifyClientNode() = default;
 
-	void OnTransform(ndInt32, const ndMatrix&) override
+	void OnTransform(ndFloat32 , const ndMatrix&) override
 	{
 	}
 
@@ -123,7 +123,7 @@ public:
 		ndBody* const nbody = const_cast<ndBody*> (body);
 		ndBodyKinematic* const kBody = nbody->GetAsBodyKinematic();
 
-		NotifyClientNode* const notify = (NotifyClientNode*)kBody->GetNotifyCallback();
+		NotifyClientNode* const notify = (NotifyClientNode*)*kBody->GetNotifyCallback();
 		ClientNodePtr node = static_cast<ClientNode*> (notify->GetUserData())->getPtr();
 		if (!node) return 0;
 
@@ -153,7 +153,7 @@ static void rayCast(ndWorld& world, PickInfo& info)
 		info.normal = rayCaster.m_contact.m_normal;
 		info.pickedBody = (ndBodyKinematic*)rayCaster.m_contact.m_body0;
 
-		NotifyClientNode* const notify = (NotifyClientNode*)info.pickedBody->GetNotifyCallback();
+		NotifyClientNode* const notify = (NotifyClientNode*)*info.pickedBody->GetNotifyCallback();
 		info.pickedNode = static_cast<ClientNode*> (notify->GetUserData())->getPtr();
 	}
 }

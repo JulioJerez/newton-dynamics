@@ -83,6 +83,7 @@ class ndShapeConvexPolygon: public ndShapeConvex
 	ndFixSizeArray<ndInt32, 4 * D_CONVEX_POLYGON_MAX_VERTEX_COUNT> m_convexCapFace;
 	ndFixSizeArray<ndInt32, 8 * D_CONVEX_POLYGON_MAX_VERTEX_COUNT> m_convexCapFaceIndex;
 	ndFixSizeArray<ndEdge, 64> m_adjancentEdge;
+	ndFixSizeArray<ndInt32, 64> m_adjacentFaceEdgeNormalIndex;
 	ndFloat32 m_faceClipSize;
 	ndInt32 m_faceId;
 	ndInt32 m_faceNormalIndex;
@@ -90,7 +91,6 @@ class ndShapeConvexPolygon: public ndShapeConvex
 	const ndShapeInstance* m_owner;
 	const ndVector* m_vertexArray;
 	const ndInt32* m_vertexIndex;
-	const ndInt32* m_adjacentFaceEdgeNormalIndex;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 inline ndShapeConvexPolygon* ndShapeConvexPolygon::GetAsShapeConvexPolygon()

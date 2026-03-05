@@ -1229,8 +1229,10 @@ void ndDynamicsUpdate::UpdateForceFeedback()
 		//joint->m_torqueBody0 = forceTorque.m_low.GetHigh();
 		//joint->m_forceBody1 = forceTorque.m_high.GetLow();
 		//joint->m_torqueBody1 = forceTorque.m_high.GetHigh();
-		joint->m_forceTorqueBody0 = forceTorque.m_low;
-		joint->m_forceTorqueBody1 = forceTorque.m_high;
+		joint->m_forceTorqueBody0.m_linear = forceTorque.m_low.GetLow();
+		joint->m_forceTorqueBody0.m_angular = forceTorque.m_low.GetHigh();
+		joint->m_forceTorqueBody1.m_linear = forceTorque.m_high.GetLow();
+		joint->m_forceTorqueBody1.m_angular = forceTorque.m_high.GetHigh();
 		joint->UpdateParameters();
 	});
 

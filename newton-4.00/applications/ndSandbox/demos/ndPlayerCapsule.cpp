@@ -562,13 +562,40 @@ static ndSharedPtr<ndBody> BuildCubePlanet(ndDemoEntityManager* const scene)
 					ndVector p1(-boxX, -boxY, -boxZ, ndFloat32(1.0f));
 					return PointToEdgeDir(pointInVoroniSpace, p0, p1);
 				}
-				 
+				
+				// the point is inside box
+				case 0b000000:
 				default:
-					ndAssert(0);
-					// here we need to calculate the closest distance 
-					// to the edge and use to push the object outside the volume. 
-					// for now just return an arbitrary vector
-					return ndVector(0.0f, 1.0f, 0.0f, 0.0f);
+				{
+					//here we find the smallest distance to the box face 
+					//and return the negative of that, as the grvity direction
+
+					// with buidl a box.
+					const ndVector boxP0(boxX, boxY, boxZ, ndFloat32(0.0f));
+					const ndVector boxP1(boxP0 * ndVector::m_one);
+
+					// get the minkoisky sum translate it to the origin
+					const ndVector p0(boxP1 - pointInVoroniSpace);
+					const ndVector p1(boxP0 - pointInVoroniSpace);
+					const ndVector error(p1 - p0);
+
+					// find the index minimun distance to the surface
+					ndInt32 index = 0;
+					ndFloat32 minDist = ndFloat32(1.0e10f);
+					for (ndInt32 i = 0; i < 3; ++i)
+					{
+						if (ndAbs(error[i]) < ndAbs(minDist))
+						{
+							index = i;
+							minDist = error[i];
+						}
+					}
+
+					// this face is the normal of the gravity
+					ndVector normal (ndVector::m_zero);
+					normal[index] = ndFloat32 ((minDist >= 0.0f) ? 1.0f : -1.0f);
+					return normal;
+				}
 			}
 		}
 
