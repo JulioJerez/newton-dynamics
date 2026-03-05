@@ -1439,7 +1439,7 @@ static ndBodyDynamic* BuildStaticBunny(const ndVector& pos, const ndVector& grav
 		}
 
 		ndInt32 materialId = faceMaterialId[i];
-		meshBuilder.AddFace(&triangle[0].m_x, sizeof(ndVector), 3, materialId);
+		meshBuilder.AddFace(triangle, 3, materialId);
 	}
 	bool optimize = true;
 	meshBuilder.End(optimize);

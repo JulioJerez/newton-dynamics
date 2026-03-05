@@ -6,11 +6,14 @@ project(newton_tests)
 # ----------------------------------------------------------------------
 
 include_directories(../sdk/dCore)
+include_directories(../sdk/dModel)
 include_directories(../sdk/dNewton)
 include_directories(../sdk/dCollision)
+include_directories(../sdk/dCore/tinyxml)
+include_directories(../sdk/dNewton/dJoints)
 include_directories(../sdk/dNewton/dModels)
+include_directories(../sdk/dCollision/dMesh)
 include_directories(../sdk/dNewton/dIkSolver)
-include_directories(../sdk/dNewton/dParticles)
 include_directories(../sdk/dNewton/dModels/dVehicle)
 
 # ----------------------------------------------------------------------
@@ -45,12 +48,7 @@ file(GLOB CPP_SOURCE *.cpp)
 # ----------------------------------------------------------------------
 add_executable(${PROJECT_NAME} ${CPP_SOURCE})
 
-target_link_libraries(${PROJECT_NAME} GTest::gtest_main)
-target_link_libraries(${PROJECT_NAME} ndNewton ndSolverAvx2)
-
-if (NEWTON_ENABLE_CUDA_SOLVER)
-	target_link_libraries (${PROJECT_NAME} ndSolverCuda)
-endif()
+target_link_libraries(${PROJECT_NAME} GTest::gtest_main ndNewton)
 
 if (MSVC)
 	target_compile_options(${PROJECT_NAME} PRIVATE "/W4")
