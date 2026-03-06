@@ -644,7 +644,8 @@ static ndSharedPtr<ndBody> BuildCubePlanet(ndDemoEntityManager* const scene)
 		}
 	};
 
-	ndSharedPtr<ndBody> cubePlanet(AddBox(scene, ndGetIdentityMatrix(), ndFloat32(0.0f), ndFloat32(20.0f), ndFloat32(20.0f), ndFloat32(20.0f)));
+	ndMatrix matrix(ndGetIdentityMatrix());
+	ndSharedPtr<ndBody> cubePlanet(AddBox(scene, matrix, ndFloat32(0.0f), ndFloat32(20.0f), ndFloat32(20.0f), ndFloat32(20.0f)));
 	cubePlanet->GetAsBodyDynamic()->SetMatrixUpdateScene(ndGetIdentityMatrix());
 
 	const ndSharedPtr<ndRenderSceneNode> entity(((ndDemoEntityNotify*)*cubePlanet->GetNotifyCallback())->GetUserData());
@@ -656,19 +657,51 @@ static ndSharedPtr<ndBody> BuildCubePlanet(ndDemoEntityManager* const scene)
 	return cubePlanet;
 }
 
-void ndPlayerCapsule_ThirdPerson (ndDemoEntityManager* const scene)
+void ndBoxPlanetPlayerCapsule(ndDemoEntityManager* const scene)
 {
 	// build a floor
-	//ndSharedPtr<ndBody> bodyFloor(BuildPlayground(scene));
-	//ndSharedPtr<ndBody> bodyFloor(BuildCompoundScene(scene, ndGetIdentityMatrix()));
-	//ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true));
-	ndSharedPtr<ndBody> bodyFloor (BuildCubePlanet(scene));
+	ndSharedPtr<ndBody> planet (BuildCubePlanet(scene));
 
 	// add a box for testing
 	ndMatrix boxMatrix(ndGetIdentityMatrix());
 	boxMatrix.m_posit.m_x += 2.0f;
 	boxMatrix.m_posit.m_z += 2.0f;
-	AddBox(scene, boxMatrix, ndFloat32(10.0f), ndFloat32(0.75f), ndFloat32(0.75f), ndFloat32(0.75f), "smilli.png");
+	AddBox(scene, boxMatrix, ndFloat32(10.0f), ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(0.5f), "smilli.png");
+
+	// add a help menu
+	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndPlayerCapsuleController::ndHelpLegend());
+	scene->SetDemoHelp(demoHelper);
+	// load the visual mesh, and animations.
+	ndRenderMeshLoader loader(*scene->GetRenderer());
+	loader.LoadMesh(ndGetWorkingFileName("humanoidRobot.nd"));
+
+	// load play animations stack
+	LoadAnimations(loader);
+
+	// create one player capsule, the mesh will be duplicated
+	ndMatrix location(ndGetIdentityMatrix());
+	location.m_posit.m_x -= 2.0f;
+
+	ndSharedPtr<ndModelNotify> modelNotity(ndPlayerCapsuleController::CreatePlayer(scene, loader, location));
+
+	// set this player as the active camera
+	ndPlayerCapsuleController* const playerController = (ndPlayerCapsuleController*)*modelNotity;
+	ndRender* const renderer = *scene->GetRenderer();
+	renderer->SetCamera(playerController->GetCamera());
+}
+
+void ndPlayerCapsule_ThirdPerson (ndDemoEntityManager* const scene)
+{
+	// build a floor
+	//ndSharedPtr<ndBody> bodyFloor(BuildPlayground(scene));
+	ndSharedPtr<ndBody> bodyFloor(BuildCompoundScene(scene, ndGetIdentityMatrix()));
+	//ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true));
+
+	// add a box for testing
+	ndMatrix boxMatrix(ndGetIdentityMatrix());
+	boxMatrix.m_posit.m_x += 2.0f;
+	boxMatrix.m_posit.m_z += 2.0f;
+	AddBox(scene, boxMatrix, ndFloat32(10.0f), ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(0.5f), "smilli.png");
 
 	// add a help menu
 	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndPlayerCapsuleController::ndHelpLegend());
@@ -693,7 +726,7 @@ void ndPlayerCapsule_ThirdPerson (ndDemoEntityManager* const scene)
 	ndRender* const renderer = *scene->GetRenderer();
 	renderer->SetCamera(playerController->GetCamera());
 
-#if 0
+#if 1
 	{
 		// populate the world with props and other players
 		AddSomeProps(scene);
