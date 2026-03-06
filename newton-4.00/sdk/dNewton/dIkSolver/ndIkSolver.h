@@ -56,14 +56,45 @@ class ndIkSolver: public ndClassAlloc
 		ndBodyDynamic* m_surrogateBody;
 	};
 
+	template<class T>
+	class ndSurrogateList : public ndList<ndSharedPtr<T>, ndContainersFreeListAlloc<ndSharedPtr<T>>>
+	{
+		public:
+		ndSurrogateList()
+			:ndList<ndSharedPtr<T>, ndContainersFreeListAlloc<ndSharedPtr<T>>>()
+			,m_array(0)
+		{
+		}
+
+		void Add(ndSharedPtr<T>& object)
+		{
+			Append(object);
+			m_array.PushBack(*object);
+		}
+
+		T* operator[] (ndInt32 i)
+		{
+			return m_array[i];
+		}
+
+		const T* operator[] (ndInt32 i) const
+		{
+			return m_array[i];
+		}
+
+		ndFixSizeArray<T*, D_INV_IK_MAX_LINKS > m_array;
+	};
+
 	ndFixSizeArray<ndContact*, D_INV_IK_MAX_LINKS> m_contacts;
 	ndFixSizeArray<ndBodyKinematic*, D_INV_IK_MAX_LINKS> m_bodies;
 	ndFixSizeArray<ndInt32, D_INV_IK_MAX_LINKS> m_savedBodiesIndex;
 	ndFixSizeArray<ndLeftHandSide, D_INV_IK_MAX_LINKS> m_leftHandSide;
 	ndFixSizeArray<ndRightHandSide, D_INV_IK_MAX_LINKS> m_rightHandSide;
 	
-	ndFixSizeArray<ndSharedPtr<ndContact>, D_INV_IK_MAX_LINKS> m_surrogateContact;
-	ndFixSizeArray<ndSharedPtr<ndBodyDynamic>, D_INV_IK_MAX_LINKS> m_surrogateBodies;
+	//ndFixSizeArray<ndSharedPtr<ndContact>, D_INV_IK_MAX_LINKS> m_surrogateContact;
+	//ndFixSizeArray<ndSharedPtr<ndBodyDynamic>, D_INV_IK_MAX_LINKS> m_surrogateBodies;
+	ndSurrogateList<ndContact> m_surrogateContact;
+	ndSurrogateList<ndBodyDynamic> m_surrogateBodies;
 	
 	ndWeakPtr<ndWorld> m_world;
 	ndWeakPtr<ndSkeletonContainer> m_skeleton;
