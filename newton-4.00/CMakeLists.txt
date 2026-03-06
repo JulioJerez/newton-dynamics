@@ -20,7 +20,7 @@ option("NEWTON_SCALAR_VECTOR_CLASS" "generate simd vector class" OFF)
 option("NEWTON_STATIC_RUNTIME_LIBRARIES" "use windows static libraries" OFF)
 option("NEWTON_BUILD_CREATE_SUB_PROJECTS" "generate independent subproject" OFF)
 option("NEWTON_USE_DEFAULT_NEW_AND_DELETE" "overload new and delete when building dll" OFF)
-option("NEWTON_BUILD_TESTS" "tutorials test (required newton static libraries option" ON)
+option("NEWTON_BUILD_TESTS" "tutorials test (required newton static libraries option" OFF)
 
 if (NOT APPLE)
 	option("NEWTON_ENABLE_AVX2" "enable AVX2" ON)

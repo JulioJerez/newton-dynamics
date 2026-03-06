@@ -106,7 +106,7 @@ namespace ndUnicycleTrainer_sac
 			,m_discountRewardFactor(0.995f)
 			,m_horizon(ndFloat32(1.0f) / (ndFloat32(1.0f) - m_discountRewardFactor))
 			,m_lastEpisode(0xfffffff)
-			,m_stopTraining(500000)
+			,m_stopTraining(200000)
 			,m_modelIsTrained(false)
 		{
 			char name[256];

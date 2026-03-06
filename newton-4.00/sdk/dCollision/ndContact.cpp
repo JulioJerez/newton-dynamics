@@ -155,12 +155,12 @@ void ndContact::InitSurrogateContact(ndContact* const surrogate, ndBodyKinematic
 	surrogate->m_body0 = body0;
 	surrogate->m_body1 = body1;
 
-	//surrogate->m_forceBody0 = m_forceBody0;
-	//surrogate->m_forceBody1 = m_forceBody1;
-	//surrogate->m_torqueBody0 = m_torqueBody0;
-	//surrogate->m_torqueBody1 = m_torqueBody1;
-	surrogate->m_forceTorqueBody0 = m_forceTorqueBody0;
-	surrogate->m_forceTorqueBody1 = m_forceTorqueBody1;
+	surrogate->m_forceBody0 = m_forceBody0;
+	surrogate->m_forceBody1 = m_forceBody1;
+	surrogate->m_torqueBody0 = m_torqueBody0;
+	surrogate->m_torqueBody1 = m_torqueBody1;
+	//surrogate->m_forceTorqueBody0 = m_forceTorqueBody0;
+	//surrogate->m_forceTorqueBody1 = m_forceTorqueBody1;
 
 	surrogate->m_active = m_active;
 	surrogate->m_contacPointsList.RemoveAll();

@@ -45,7 +45,8 @@ ndIkSolver::ndIkSolver()
 	,m_maxAlpha(ndFloat32(1.0e4f))
 {
 	// add a sentinel body
-	m_surrogateBodies.PushBack(ndSharedPtr<ndBodyDynamic>(new ndBodyDynamic()));
+	ndSharedPtr<ndBodyDynamic> sentinel(ndSharedPtr<ndBodyDynamic>(new ndBodyDynamic()));
+	m_surrogateBodies.Add(sentinel);
 	m_surrogateBodies[0]->m_uniqueId = 0;
 }
 
@@ -258,13 +259,14 @@ bool ndIkSolver::IsSleeping(ndSkeletonContainer* const skeleton) const
 
 void ndIkSolver::BuildMassMatrix()
 {
+
 	m_bodies.SetCount(0);
 	m_contacts.SetCount(0);
 	m_leftHandSide.SetCount(0);
 	m_rightHandSide.SetCount(0);
 	
 	const ndVector zero(ndVector::m_zero);
-	m_bodies.PushBack(*m_surrogateBodies[0]);
+	m_bodies.PushBack(m_surrogateBodies[0]);
 	m_surrogateBodies[0]->m_index = 0;
 	m_surrogateBodies[0]->m_accel = zero;
 	m_surrogateBodies[0]->m_alpha = zero;
@@ -395,10 +397,12 @@ void ndIkSolver::BuildMassMatrix()
 							}
 							if (surrogateBodiesIndex == ndInt32(m_surrogateBodies.GetCount()))
 							{
-								ndBodyDynamic* const surrogateBody = new ndBodyDynamic();
-								m_surrogateBodies.PushBack(surrogateBody);
+								ndAssert(0);
+								//ndBodyDynamic* const surrogateBody = new ndBodyDynamic();
+								ndSharedPtr<ndBodyDynamic> surrogateBody (new ndBodyDynamic());
+								m_surrogateBodies.Add(surrogateBody);
 							}
-							ndBodyKinematic* const surrogateBody = *m_surrogateBodies[surrogateBodiesIndex];
+							ndBodyKinematic* const surrogateBody = m_surrogateBodies[surrogateBodiesIndex];
 
 							ndBodyPair pair;
 							pair.m_body = body;
@@ -425,9 +429,11 @@ void ndIkSolver::BuildMassMatrix()
 
 								if (surrogateContactIndex == ndInt32(m_surrogateContact.GetCount()))
 								{
-									m_surrogateContact.PushBack(ndSharedPtr<ndContact> (new ndContact));
+									ndAssert(0);
+									ndSharedPtr<ndContact> surrogateContact(new ndContact);
+									m_surrogateContact.Add(surrogateContact);
 								}
-								ndContact* const surrogateContact = *m_surrogateContact[surrogateContactIndex];
+								ndContact* const surrogateContact = m_surrogateContact[surrogateContactIndex];
 								surrogateContactIndex++;
 								contact->InitSurrogateContact(surrogateContact, body0, surrogateBody);
 								m_contacts.PushBack(surrogateContact);
@@ -441,10 +447,13 @@ void ndIkSolver::BuildMassMatrix()
 
 							if (surrogateContactIndex == ndInt32(m_surrogateContact.GetCount()))
 							{
+								ndAssert(0);
 								//m_surrogateContact.PushBack(new ndContact);
-								m_surrogateContact.PushBack(ndSharedPtr<ndContact>(new ndContact));
+								//m_surrogateContact.PushBack(ndSharedPtr<ndContact>(new ndContact));
+								ndSharedPtr<ndContact> surrogateContact(new ndContact);
+								m_surrogateContact.Add(surrogateContact);
 							}
-							ndContact* const surrogateContact = *m_surrogateContact[surrogateContactIndex];
+							ndContact* const surrogateContact = m_surrogateContact[surrogateContactIndex];
 							surrogateContactIndex++;
 							contact->InitSurrogateContact(surrogateContact, surrogateBody, body1);
 							m_contacts.PushBack(surrogateContact);
@@ -495,7 +504,6 @@ void ndIkSolver::BuildMassMatrix()
 		GetJacobianDerivatives(contact);
 		BuildJacobianMatrix(contact);
 	}
-
 	m_skeleton->InitMassMatrix(m_timestep, &m_leftHandSide[0], &m_rightHandSide[0]);
 }
 

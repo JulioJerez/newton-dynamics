@@ -859,12 +859,15 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 			const ndVector extForce(body->GetAccel().Scale(mass));
 			const ndVector extForceTorque(bodyCenter[i].CrossProduct(extForce));
 			const ndVector extTorque(bodyInertia.RotateVector(body->GetAlpha()));
-			const ndVector angularMomentum(bodyInertia.RotateVector(body->GetOmega()));
-			const ndVector gyroTorque(body->GetOmega().CrossProduct(angularMomentum));
+			const ndVector rotationalAngularMomentum(bodyInertia.RotateVector(body->GetOmega()));
+			const ndVector gyroTorque(body->GetOmega().CrossProduct(rotationalAngularMomentum));
 
-			dynamics.m_momentum += body->GetVelocity().Scale(mass);
-			dynamics.m_angularMomentum += angularMomentum;
-			dynamics.m_angularMomentum += bodyCenter[i].CrossProduct(body->GetVelocity().Scale(mass));
+			const ndVector linearMomentum(body->GetVelocity().Scale(mass));
+			const ndVector linearAngularMomentum(bodyCenter[i].CrossProduct(linearMomentum));
+
+			dynamics.m_momentum += linearMomentum;
+			dynamics.m_angularMomentum += linearAngularMomentum;
+			dynamics.m_angularMomentum += rotationalAngularMomentum;
 
 			// centripetal should always be zero, or else the bodies will be flying apart from each other
 			//const ndVector centripetal((comOmega.CrossProduct(bodyCom)).CrossProduct(linearMomentum));
