@@ -68,7 +68,7 @@ class ndIkSolver: public ndClassAlloc
 
 		void Add(ndSharedPtr<T>& object)
 		{
-			Append(object);
+			this->Append(object);
 			m_array.PushBack(*object);
 		}
 
