@@ -171,8 +171,7 @@ namespace ndUnicyclePlayer
 
 		ndAssert(*m_solver);
 		ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS> extraJoints;
-return 0;
-#if 1
+#if 0
 		// exclude the wheel angular momentum from the com kinematics
 		const ndVector savedWheelOmega(m_wheel->GetOmega());
 		m_wheel->SetOmegaNoSleep(ndVector::m_zero);
@@ -224,16 +223,19 @@ return 0;
 		const ndFloat32 comAlpha = ndFloat32(0.5f) * alpha.m_x;
 		const ndFloat32 comSpeed = ndMax(ndAbs(comDynamics.m_veloc.m_z) - ndFloat32(8.0f), ndFloat32(0.0f));
 		const ndFloat32 boxAngle = ndMax(ndAbs(GetBoxAngle()) - ndFloat32(45.f) * ndDegreeToRad, ndFloat32(0.0f));
+		const ndFloat32 boxOmega = GetBoxOmega() * ndFloat32(2.0f);
 
 		const ndFloat32 invSigma2 = ndFloat32(4.0f);
 		const ndFloat32 poleAngleReward = ndExp(-invSigma2 * poleAngle * poleAngle);
+		const ndFloat32 boxOmegaReward = ndExp(-invSigma2 * boxOmega * boxOmega);
 		const ndFloat32 comAlphaReward = ndExp(-invSigma2 * comAlpha * comAlpha);
 		const ndFloat32 comSpeedPenalty = ndExp(-invSigma2 * comSpeed * comSpeed) - ndFloat32(1.0f);
 		const ndFloat32 boxAnglePenalty = ndExp(-invSigma2 * boxAngle * boxAngle) - ndFloat32(1.0f);
 
 		ndFloat32 reward = ndFloat32(0.0f);
-		reward += comAlphaReward * ndFloat32(0.6);
-		reward += poleAngleReward * ndFloat32(0.4f);
+		reward += comAlphaReward * ndFloat32(0.4f);
+		reward += boxOmegaReward * ndFloat32(0.3f);
+		reward += poleAngleReward * ndFloat32(0.3f);
 		reward += comSpeedPenalty * ndFloat32(0.5f);
 		reward += boxAnglePenalty * ndFloat32(0.5f);
 		return ndBrainFloat(reward);
@@ -257,8 +259,7 @@ return 0;
 		ndVector torque(wheelMatrix.m_front.Scale(wheelTorque));
 		m_wheel->GetAsBodyDynamic()->SetTorque(torque);
 
-		//if (m_isTrainning && (m_randomImpulseCounter == 0))
-		if (m_randomImpulseCounter == 0)
+		if (m_isTrainning && (m_randomImpulseCounter == 0))
 		{
 			// when in training mode,
 			// apply a random impulse to the top box every m_randomImpulseCounter steps
@@ -393,7 +394,6 @@ return 0;
 	}
 }
 using namespace ndUnicyclePlayer;
-
 
 void ndUnicyclePlayer_SAC(ndDemoEntityManager* const scene)
 {
