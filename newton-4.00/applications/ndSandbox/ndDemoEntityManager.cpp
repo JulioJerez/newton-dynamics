@@ -43,20 +43,21 @@
 //#define DEFAULT_SCENE	17		// complex model, implement a complex model with joints
 //#define DEFAULT_SCENE	18		// basics multi body vehicle
 //#define DEFAULT_SCENE	19		// object Placement
-#define DEFAULT_SCENE	20		// third person player capsule
-//#define DEFAULT_SCENE	21		// cart pole SAC trained controller
-//#define DEFAULT_SCENE	22		// cart pole PPO trained controller
-//#define DEFAULT_SCENE	23		// unicycle SAC trained controller
-//#define DEFAULT_SCENE	24		// unicycle PPO trained controller
-//#define DEFAULT_SCENE	25		// biped SAC trained controller
-//#define DEFAULT_SCENE	26		// biped PPO trained controller
-//#define DEFAULT_SCENE	26		// procedurally animated quadruped spider
+//#define DEFAULT_SCENE	20		// third person player capsule
+//#define DEFAULT_SCENE	21		// player capsule in a planet
+//#define DEFAULT_SCENE	22		// cart pole SAC trained controller
+//#define DEFAULT_SCENE	23		// cart pole PPO trained controller
+//#define DEFAULT_SCENE	24		// unicycle SAC trained controller
+//#define DEFAULT_SCENE	25		// unicycle PPO trained controller
+//#define DEFAULT_SCENE	26		// biped SAC trained controller
+//#define DEFAULT_SCENE	27		// biped PPO trained controller
+//#define DEFAULT_SCENE	28		// procedurally animated quadruped spider
 
 // These are the machine learning training demos
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// SAC cart pole training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// SAC double pendulum unicycle training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// PPO cart pole training
-//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 3)	// PPO double pendulum unicycle training
+#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 3)	// PPO double pendulum unicycle training
 
 // legacy demos 
 //#define DEFAULT_SCENE	12		// basic vehicle
@@ -91,6 +92,7 @@ void ndQuadSpiderAnimated(ndDemoEntityManager* const scene);
 void ndBasicAngularMomentum(ndDemoEntityManager* const scene);
 void ndBasicSlidingPlatform(ndDemoEntityManager* const scene);
 void ndBasicCompoundCollision(ndDemoEntityManager* const scene);
+void ndBoxPlanetPlayerCapsule(ndDemoEntityManager* const scene);
 void ndBasicHeighfieldCollision(ndDemoEntityManager* const scene);
 void ndBasicStaticMeshCollision(ndDemoEntityManager* const scene);
 void ndPlayerCapsule_ThirdPerson(ndDemoEntityManager* const scene);
@@ -136,11 +138,12 @@ ndDemoEntityManager::ndDemos ndDemoEntityManager::m_demosSelection[] =
 	{ "basic vehicle", ndBasicVehicle},
 	{ "object placement", ndObjectPlacement},
 	{ "basic player", ndPlayerCapsule_ThirdPerson},
+	{ "box planet player", ndBoxPlanetPlayerCapsule},
 	{ "cart pole SAC player controller", ndCartpolePlayer_SAC},
-	{ "unicycle SAC player controller", ndUnicyclePlayer_SAC},
-	{ "biped SAC player controller", ndBipedPlayer_SAC},
 	{ "cart pole PPO player controller", ndCartpolePlayer_PPO},
+	{ "unicycle SAC player controller", ndUnicyclePlayer_SAC},
 	{ "unicycle PPO player controller", ndUnicyclePlayer_PPO},
+	{ "biped SAC player controller", ndBipedPlayer_SAC},
 	{ "biped PPO player controller", ndBipedPlayer_PPO},
 	
 	{ "procedural animated quad spider", ndQuadSpiderAnimated},
@@ -685,7 +688,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_showModelsDebugInfo = true;
 	//m_showCollisionMeshMode = 1;
 	//m_showCollisionMeshMode = 2;
-	m_showCollisionMeshMode = 3;		// solid wire frame
+	//m_showCollisionMeshMode = 3;		// solid wire frame
 	m_synchronousPhysicsUpdate = true;
 	m_synchronousParticlesUpdate = true;
 	//m_showStaticMeshCollidingFaces = true;
