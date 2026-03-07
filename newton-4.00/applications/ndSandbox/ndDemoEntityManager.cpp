@@ -47,7 +47,7 @@
 //#define DEFAULT_SCENE	21		// player capsule in a planet
 //#define DEFAULT_SCENE	22		// cart pole SAC trained controller
 //#define DEFAULT_SCENE	23		// cart pole PPO trained controller
-//#define DEFAULT_SCENE	24		// unicycle SAC trained controller
+#define DEFAULT_SCENE	24		// unicycle SAC trained controller
 //#define DEFAULT_SCENE	25		// unicycle PPO trained controller
 //#define DEFAULT_SCENE	26		// biped SAC trained controller
 //#define DEFAULT_SCENE	27		// biped PPO trained controller
@@ -57,7 +57,7 @@
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// SAC cart pole training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// SAC double pendulum unicycle training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// PPO cart pole training
-#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 3)	// PPO double pendulum unicycle training
+//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 3)	// PPO double pendulum unicycle training
 
 // legacy demos 
 //#define DEFAULT_SCENE	12		// basic vehicle
