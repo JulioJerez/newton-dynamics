@@ -77,7 +77,6 @@ ndScene::ndScene()
 	{
 		m_partialNewPairs[i].Resize(256);
 	}
-	ndAssert(ndMemory::CheckMemory(this));
 }
 
 ndScene::ndScene(const ndScene& src)
@@ -147,12 +146,10 @@ ndScene::ndScene(const ndScene& src)
 	{
 		m_partialNewPairs[i].Resize(256);
 	}
-	ndAssert(ndMemory::CheckMemory(this));
 }
 
 ndScene::~ndScene()
 {
-	ndAssert(ndMemory::CheckMemory(this));
 	Cleanup();
 	Finish();
 	if (m_contactNotifyCallback)

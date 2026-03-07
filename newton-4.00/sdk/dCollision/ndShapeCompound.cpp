@@ -261,7 +261,6 @@ ndShapeCompound::ndShapeCompound()
 	,m_root(nullptr)
 	,m_idIndex(0)
 {
-	ndAssert(ndMemory::CheckMemory(this));
 }
 
 ndShapeCompound::ndShapeCompound(const ndShapeCompound& source)
@@ -356,12 +355,10 @@ ndShapeCompound::ndShapeCompound(const ndShapeCompound& source)
 			}
 		}
 	}
-	ndAssert(ndMemory::CheckMemory(this));
 }
 
 ndShapeCompound::~ndShapeCompound()
 {
-	ndAssert(ndMemory::CheckMemory(this));
 	if (m_root) 
 	{
 		delete m_root;
