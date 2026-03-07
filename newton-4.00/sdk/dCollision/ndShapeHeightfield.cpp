@@ -62,13 +62,10 @@ ndShapeHeightfield::ndShapeHeightfield(
 	ndMemSet(&m_elevationMap[0], ndReal(0.0f), m_elevationMap.GetCount());
 
 	CalculateLocalObb();
-
-	ndAssert(ndMemory::CheckMemory(this));
 }
 
 ndShapeHeightfield::~ndShapeHeightfield(void)
 {
-	ndAssert(ndMemory::CheckMemory(this));
 }
 
 ndShapeInfo ndShapeHeightfield::GetShapeInfo() const

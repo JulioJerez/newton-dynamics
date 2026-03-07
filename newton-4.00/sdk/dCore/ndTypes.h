@@ -125,9 +125,6 @@
     #endif
 #endif
 
-// uncommemt this line to enable memory corruption checks, (very slow and use lots of memory)
-//#define D_MEMORY_SANITY_CHECK
-
 // uncomment this to inforce double precision 
 //#define D_NEWTON_USE_DOUBLE
 

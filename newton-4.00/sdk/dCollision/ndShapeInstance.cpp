@@ -46,7 +46,7 @@ ndShapeInstance::ndShapeInstance(ndShape* const shape)
 	,m_scaleType(m_unit)
 	,m_collisionMode(true)
 {
-	ndAssert(!m_shape || ndMemory::CheckMemory(m_shape));
+	ndAssert(m_shape);
 }
 
 ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance)
@@ -72,7 +72,7 @@ ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance)
 		m_shape = new ndShapeCompound(*compound);
 		m_shape->AddRef();
 	}
-	ndAssert(!m_shape || ndMemory::CheckMemory(m_shape));
+	ndAssert(m_shape);
 }
 
 ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance, ndShape* const shape)
@@ -91,12 +91,12 @@ ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance, ndShape* const
 	,m_scaleType(instance.m_scaleType)
 	,m_collisionMode(instance.m_collisionMode)
 {
-	ndAssert(!m_shape || ndMemory::CheckMemory(m_shape));
+	ndAssert(m_shape);
 }
 
 ndShapeInstance::~ndShapeInstance()
 {
-	ndAssert(!m_shape || ndMemory::CheckMemory(m_shape));
+	//ndAssert(!m_shape);
 	if (m_shape)
 	{
 		m_shape->Release();

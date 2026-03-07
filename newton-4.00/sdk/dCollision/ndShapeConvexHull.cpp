@@ -802,12 +802,10 @@ class ndShapeConvexHull::ndConvexBox
 		m_simplex = nullptr;
 		Create(count, strideInBytes, vertexArray, tolerance, maxPointsOut);
 		ndAssert(m_faceCount > 0);
-		ndAssert(ndMemory::CheckMemory(this));
 	}
 
 	ndShapeConvexHull::~ndShapeConvexHull()
 	{
-		ndAssert(ndMemory::CheckMemory(this));
 		if (m_vertexToEdgeMapping) 
 		{
 			ndMemory::Free(m_vertexToEdgeMapping);

@@ -29,12 +29,10 @@ ndShapeUserDefinedImplicit::ndShapeUserDefinedImplicit()
 	:ndShapeConvex(m_userDefinedImplicit)
 {
 	ndAssert(0);
-	ndAssert(ndMemory::CheckMemory(this));
 }
 
 ndShapeUserDefinedImplicit::~ndShapeUserDefinedImplicit()
 {
-	ndAssert(ndMemory::CheckMemory(this));
 }
 
 void ndShapeUserDefinedImplicit::MassProperties()
