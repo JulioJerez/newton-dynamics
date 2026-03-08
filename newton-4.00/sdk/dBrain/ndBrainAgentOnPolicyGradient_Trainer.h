@@ -167,7 +167,6 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	void BuildCriticClass();
 	void CalculateAdvantage();
 	void TrajectoryToGpuBuffers();
-	void UpdateLayersNormalization();
 
 	ndBrainFloat CalculateKLdivergence();
 	void SaveTrajectory(ndBrainAgentOnPolicyGradient_Agent* const agent);
@@ -228,7 +227,7 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndUnsigned32 m_horizonSteps;
 	ndUnsigned32 m_eposideCount;
 	ndUnsigned32 m_trajectiesCount;
-	ndUnsigned32 m_layerNormalizationCounter;
+	ndUnsigned32 m_numberOfIterations;
 
 	friend class ndBrainAgentOnPolicyGradient_Agent;
 };
