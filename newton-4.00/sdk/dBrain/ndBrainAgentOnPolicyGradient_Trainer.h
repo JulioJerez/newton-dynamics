@@ -167,7 +167,6 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	void BuildCriticClass();
 	void CalculateAdvantage();
 	void TrajectoryToGpuBuffers();
-	void UpdateLayersNormalization();
 
 	ndBrainFloat CalculateKLdivergence();
 	void SaveTrajectory(ndBrainAgentOnPolicyGradient_Agent* const agent);
@@ -213,12 +212,17 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndSharedPtr<ndBrainFloatBuffer> m_minibatchClippedLikelihoodRatioBuffer;
 
 	ndSharedPtr<ndBrainIntegerBuffer> m_randomShuffleBuffer;
+	ndSharedPtr<ndBrainIntegerBuffer> m_randomCriticShuffleBuffer;
 	ndSharedPtr<ndBrainIntegerBuffer> m_minibatchRandomShuffleBuffer;
+	ndSharedPtr<ndBrainIntegerBuffer> m_minibatchCriticRandomShuffleBuffer;
 	ndWeakPtr<ndBrainLayerActivationLinearNormalize> m_policyInputNormalization;
 
 	ndBrainVector m_lastPolicy;
 	ndBrainVector m_scratchBuffer;
 	ndArray<ndInt32> m_shuffleBuffer;
+	ndArray<ndInt32> m_criticShuffleBuffer;
+	ndArray<ndInt32> m_shuffleBufferBuilder;
+	ndArray<ndInt32> m_criticShuffleBufferBuilder;
 	ndBrainAgentOnPolicyGradient_Agent::ndTrajectory m_trajectoryAccumulator;
 	ndMovingAverage<ND_ON_POLICY_MOVING_AVERAGE_SCORE> m_averageExpectedRewards;
 	ndMovingAverage<ND_ON_POLICY_MOVING_AVERAGE_SCORE> m_averageFramesPerEpisodes;
@@ -228,7 +232,7 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndUnsigned32 m_horizonSteps;
 	ndUnsigned32 m_eposideCount;
 	ndUnsigned32 m_trajectiesCount;
-	ndUnsigned32 m_layerNormalizationCounter;
+	ndUnsigned32 m_numberOfIterations;
 
 	friend class ndBrainAgentOnPolicyGradient_Agent;
 };

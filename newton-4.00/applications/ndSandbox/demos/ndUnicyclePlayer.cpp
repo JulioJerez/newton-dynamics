@@ -160,7 +160,7 @@ namespace ndUnicyclePlayer
 			return ndBrainFloat(-1.0f);
 		}
 
-		// trying with center of mass dynammics
+		// trying with center of mass dynamics
 		// b*ut the result so far the results are very dissapointing
 		// this however word much better is an order version 
 		// maybe I have bugs that I have to track
@@ -181,28 +181,27 @@ namespace ndUnicyclePlayer
 		const ndFloat32 poleAngle = ndFloat32(8.0f) * GetPoleAngle() / ND_TERMINATION_ANGLE;
 		const ndFloat32 comOmega = ndFloat32(2.0f) * comDynamics.m_omega.m_x;
 		const ndFloat32 comAlpha = ndFloat32(0.5f) * comDynamics.m_alpha.m_x;
-		const ndFloat32 comSpeed = ndMax(ndAbs(comDynamics.m_veloc.m_z) - ndFloat32(8.0f), ndFloat32(0.0f));
+		//const ndFloat32 comSpeed = ndMax(ndAbs(comDynamics.m_veloc.m_z) - ndFloat32(8.0f), ndFloat32(0.0f));
 		const ndFloat32 boxOmega = GetBoxOmega() * ndFloat32(2.0f);
-		const ndFloat32 boxAngle = ndMax(ndAbs(GetBoxAngle()) - ndFloat32(45.f) * ndDegreeToRad, ndFloat32(0.0f));
+		const ndFloat32 whellOmega = savedWheelOmega.m_z * ndFloat32(0.25f);
 
 		const ndFloat32 invSigma2 = ndFloat32(4.0f);
 		const ndFloat32 poleAngleReward = ndExp(-invSigma2 * poleAngle * poleAngle);
 		const ndFloat32 comOmegaReward = ndExp(-invSigma2 * comOmega * comOmega);
 		const ndFloat32 comAlphaReward = ndExp(-invSigma2 * comAlpha * comAlpha);
 		const ndFloat32 boxOmegaReward = ndExp(-invSigma2 * boxOmega * boxOmega);
-		const ndFloat32 comSpeedPenalty = ndExp(-invSigma2 * comSpeed * comSpeed) - ndFloat32(1.0f);
-		const ndFloat32 boxAnglePenalty = ndExp(-invSigma2 * boxAngle * boxAngle) - ndFloat32(1.0f);
+		const ndFloat32 whellOmegaReward = ndExp(-invSigma2 * whellOmega * whellOmega);
 
 		ndFloat32 reward = ndFloat32(0.0f);
-		reward += poleAngleReward * ndFloat32(0.25f);
-		reward += boxOmegaReward * ndFloat32(0.25f);
-		reward += comOmegaReward * ndFloat32(0.25f);
-		reward += comAlphaReward * ndFloat32(0.25f);
-		reward += comSpeedPenalty * ndFloat32(0.5f);
-		reward += boxAnglePenalty * ndFloat32(0.5f);
+		reward += comOmegaReward * ndFloat32(0.2f);
+		reward += comAlphaReward * ndFloat32(0.2f);
+		reward += boxOmegaReward * ndFloat32(0.2f);
+		reward += poleAngleReward * ndFloat32(0.2f);
+		reward += whellOmegaReward * ndFloat32(0.2f);
+		
 		return ndBrainFloat(reward);
 #else
-		// claculate cenetr of mass dynamics
+		// calculate center of mass dynamics
 		ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(*((ndIkSolver*)*m_solver), comFrame, extraJoints, m_timestep));
 
 		//// exclude the wheel angular acceleration from the com dynamics
@@ -352,7 +351,7 @@ namespace ndUnicyclePlayer
 		// add links
 		const ndMatrix poleMatrix(ndPitchMatrix(ndPi) * m_pole->GetMatrix());
 		m_poleHinge = ndSharedPtr<ndJointBilateralConstraint>(new ndJointHinge(poleMatrix, m_pole->GetAsBodyKinematic(), m_topBox->GetAsBodyKinematic()));
-		((ndJointHinge*)*m_poleHinge)->SetAsSpringDamper(0.01f, 0.0f, 5.0f);
+		((ndJointHinge*)*m_poleHinge)->SetAsSpringDamper(0.5f, 0.0f, 1.0f);
 		ndModelArticulation::ndNode* const poleNode = model->AddLimb(modelRootNode, m_pole, m_poleHinge);
 
 		const ndMatrix ballMatrix(m_wheel->GetMatrix());
