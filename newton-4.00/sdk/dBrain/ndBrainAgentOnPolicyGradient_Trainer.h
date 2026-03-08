@@ -218,6 +218,9 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndBrainVector m_lastPolicy;
 	ndBrainVector m_scratchBuffer;
 	ndArray<ndInt32> m_shuffleBuffer;
+	ndArray<ndInt32> m_criticShuffleBuffer;
+	ndArray<ndInt32> m_shuffleBufferBuilder;
+	ndArray<ndInt32> m_criticShuffleBufferBuilder;
 	ndBrainAgentOnPolicyGradient_Agent::ndTrajectory m_trajectoryAccumulator;
 	ndMovingAverage<ND_ON_POLICY_MOVING_AVERAGE_SCORE> m_averageExpectedRewards;
 	ndMovingAverage<ND_ON_POLICY_MOVING_AVERAGE_SCORE> m_averageFramesPerEpisodes;
