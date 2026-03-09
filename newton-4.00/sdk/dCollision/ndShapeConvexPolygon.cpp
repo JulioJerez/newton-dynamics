@@ -264,6 +264,28 @@ bool ndShapeConvexPolygon::BeamClipping(const ndVector& origin, ndFloat32 dist)
 			ptr = ptr->m_next;
 		} while (ptr != first);
 
+		if (conectCount == 1)
+		{
+			ndFloat32 minDist = ndFloat32(1.0e10f);
+
+			dgClippedFaceEdge* nextPtr = connect[0]->m_next;
+			dgClippedFaceEdge* cornerPtr = nextPtr->m_next;
+			conectCount = 2;
+			do
+			{
+				ndVector cornerPoint(points[cornerPtr->m_incidentVertex]);
+				ndFloat32 test = ndAbs(plane.Evalue(cornerPoint));
+				if (test < minDist)
+				{
+					minDist = test;
+					connect[1] = nextPtr;
+				}
+				nextPtr = cornerPtr;
+				cornerPtr = cornerPtr->m_next;
+			} while (cornerPtr != connect[0]);
+			ndAssert(minDist < ndFloat32(1.0e-3f));
+		}
+
 		if (conectCount > 1) 
 		{
 			first = newFirst;
@@ -285,6 +307,15 @@ bool ndShapeConvexPolygon::BeamClipping(const ndVector& origin, ndFloat32 dist)
 
 			edgeCount += 2;
 		}
+
+		//ndTrace(("\n"));
+		//dgClippedFaceEdge* ptr___ = first;
+		//do
+		//{
+		//	ndVector xxxx (points[ptr___->m_incidentVertex]);
+		//	ndTrace(("%f %f %f\n", xxxx[0], xxxx[1], xxxx[2]));
+		//	ptr___ = ptr___->m_next;
+		//} while (ptr___ != first);
 	}
 
 	dgClippedFaceEdge* ptr = first;
@@ -293,7 +324,7 @@ bool ndShapeConvexPolygon::BeamClipping(const ndVector& origin, ndFloat32 dist)
 		ndVector dist1(points[ptr->m_next->m_incidentVertex] - points[ptr->m_incidentVertex]);
 		ndAssert(dist1.m_w == ndFloat32(0.0f));
 		ndFloat32 error = dist1.DotProduct(dist1).GetScalar();
-		if (error < ndFloat32(1.0e-6f)) 
+		if (error < ndFloat32(1.0e-4f)) 
 		{
 			ptr->m_next = ptr->m_next->m_next;
 			first = ptr;
@@ -310,11 +341,13 @@ bool ndShapeConvexPolygon::BeamClipping(const ndVector& origin, ndFloat32 dist)
 		ptr = ptr->m_next;
 	} while (ptr != first);
 
-	if (m_localPoly.GetCount() >= 3)
+	bool retFlag = m_localPoly.GetCount() >= 3;
+	if (retFlag)
 	{
+		m_convexCapFace[0] = m_localPoly.GetCount();
 		GenerateConvexCap();
 	}
-	return (m_localPoly.GetCount() >= 3);
+	return retFlag;
 }
 
 ndInt32 ndShapeConvexPolygon::CalculateContactToConvexHullContinue(ndContactSolver& contactSolver)
@@ -811,131 +844,82 @@ ndInt32 ndShapeConvexPolygon::CalculatePlaneIntersection(const ndVector& normalI
 	return count;
 
 #else
-
-	// first check if this minimun translation is a face contact
-	const ndVector faceOrigin(m_localPoly[0]);
-	const ndVector e0(m_localPoly[1] - faceOrigin);
-	const ndVector e1(m_localPoly[2] - faceOrigin);
-	const ndVector faceNormal(e0.CrossProduct(e1));
-	ndAssert(faceNormal.m_w == ndFloat32(0.0f));
-	ndAssert(faceNormal.DotProduct(faceNormal).GetScalar() > ndFloat32(0.0f));
-	const ndVector unitFaceNormal(faceNormal.Normalize());
-
-	const ndVector step(origin - faceOrigin);
-	const ndVector pointInFacePlane(origin - unitFaceNormal.Scale(unitFaceNormal.DotProduct(step).GetScalar()));
-
-	bool isInsideFace = true;
+	
 	const ndInt32 vertexCount = m_convexCapFace[1];
-	ndInt32 i0 = vertexCount - 1;
-	ndVector p0(m_localPoly[i0]);
+	ndFloat32 coplanar = m_normal.DotProduct(normalIn & ndVector::m_triplexMask).GetScalar();
+	if (coplanar >= ndFloat32(0.9994f))
+	{
+		// this is a face/face feature
+		for (ndInt32 i = 0; i < vertexCount; ++i)
+		{
+			contactsOut[i] = m_localPoly[i];
+		}
+		return vertexCount;
+	}
 
-	ndEdge adjacentEdge;
-	adjacentEdge.m_edge = -1;
-	adjacentEdge.m_faceStart = -1;
+	ndMatrix matrix(ndGetIdentityMatrix());
+	matrix.m_front = (m_localPoly[1] - m_localPoly[0]).Normalize();
+	matrix.m_right = m_normal;
+	matrix.m_up = matrix.m_right.CrossProduct(matrix.m_front);
+	matrix.m_posit = origin;
+	matrix.m_posit.m_w = ndFloat32(1.0f);
+
+	ndFixSizeArray<ndVector, 32> poly2d;
 	for (ndInt32 i = 0; i < vertexCount; ++i)
 	{
-		const ndVector& p1 = m_localPoly[i];
-		ndVector sideDir(unitFaceNormal.CrossProduct(p1 - p0).Normalize());
-		ndAssert(sideDir.m_w == ndFloat32(0.0f));
-		ndFloat32 dist = sideDir.DotProduct(pointInFacePlane - p0).GetScalar();
-		if (dist < ndFloat32(-1.0e-3f))
-		{
-			isInsideFace = false;
-		}
-		if (dist < ndFloat32(0.0f))
-		{
-			adjacentEdge.m_low = ndInt16(i0);
-			adjacentEdge.m_high = ndInt16(i);
-		}
-		i0 = i;
-		p0 = p1;
+		ndVector p(matrix.UntransformVector(m_localPoly[i]));
+		p.m_z = ndFloat32(0.0f);
+		poly2d.PushBack(p);
 	}
 
-	if (isInsideFace)
+	bool isInside = true;
+	ndInt32 voronoiEdge0 = -1;
+	ndInt32 i0 = vertexCount - 1;
+	ndFloat32 smallestVolume = ndFloat32(1.0e10f);
+	for (ndInt32 i1 = 0; i1 < vertexCount; ++i1)
 	{
-		// translation is inside polygon
-		// we now check if this it a face contact
-		ndFloat32 cosDir = normalIn.DotProduct(unitFaceNormal).GetScalar();
-		if (cosDir >= ndFloat32(0.9994f))
+		const ndVector n(poly2d[i0].CrossProduct(poly2d[i1]));
+		isInside = isInside && (n.m_z >= ndFloat32(0.0));
+		if (ndAbs(n.m_z) < smallestVolume)
 		{
-			// if the normals are aligned within 2 degree, 
-			// we consider this a face contact 
-			for (ndInt32 i = 0; i < vertexCount; ++i)
-			{
-				contactsOut[i] = m_localPoly[i];
-			}
-			return vertexCount;
+			voronoiEdge0 = i0;
+			smallestVolume = ndAbs(n.m_z);
 		}
-		else
-		{
-			// handle edge contact
-			ndInt32 closestEdge = -1;
-			ndFloat32 param = ndFloat32(0.0);
-			ndFloat32 minDistance2 = ndFloat32(1.0e10f);
-			ndVector ray_p0(m_localPoly[vertexCount - 1]);
-			for (ndInt32 i = 0; i < vertexCount; ++i)
-			{
-				const ndVector& ray_p1 = m_localPoly[i];
-				const ndVector dp(ray_p1 - ray_p0);
-
-				ndAssert(dp.m_w == ndFloat32(0.0f));
-				ndFloat32 den = dp.DotProduct(dp).GetScalar();
-				ndAssert(den > ndFloat32(0.0f));
-				ndFloat32 parameter = dp.DotProduct(pointInFacePlane - ray_p0).GetScalar() / den;
-				if ((parameter >= ndFloat32(-1.0e-4f)) && (parameter <= ndFloat32(1.0f + 1.0e-4f)))
-				{
-					const ndVector edgePoint(ray_p0 + dp.Scale(parameter));
-					const ndVector dist(pointInFacePlane - edgePoint);
-					ndFloat32 dist2 = dist.DotProduct(dist & ndVector::m_triplexMask).GetScalar();
-					if (dist2 < minDistance2)
-					{
-						closestEdge = i;
-						param = parameter;
-						minDistance2 = dist2;
-					}
-				}
-				ray_p0 = ray_p1;
-			}
-
-			if (closestEdge == -1)
-			{
-				// discard edge, if it is too far outside the closest point, 
-				return 0;
-			}
-
-			// we got an edge contact
-			ndInt32 closestEdge0 = (closestEdge == 0) ? vertexCount - 1 : closestEdge - 1;
-			contactsOut[0] = m_localPoly[closestEdge];
-			contactsOut[1] = m_localPoly[closestEdge0];
-			return 2;
-		}
+		i0 = i1;
 	}
-	else
+	if (isInside)
+	{ 
+		// edge feature, the colliding edge is the closest
+		ndInt32 voronoiEdge1 = (voronoiEdge0 + 1) % vertexCount;
+		contactsOut[0] = m_localPoly[voronoiEdge0];
+		contactsOut[1] = m_localPoly[voronoiEdge1];
+		return 2;
+	}
+	// point is ouside the polygon, this could be an edge feature
+	i0 = vertexCount - 1;
+	for (ndInt32 i1 = 0; i1 < vertexCount; ++i1)
 	{
-		// if it comes here this is an edge contact 
-		for (ndInt32 i = m_adjancentEdge.GetCount() - 1; i >= 0; --i)
+		// find the voroni seccion
+		const ndVector n(poly2d[i0].CrossProduct(poly2d[i1]));
+		if (n.m_z <= ndFloat32(0.0))
 		{
-			if (m_adjancentEdge[i].m_edge == adjacentEdge.m_edge)
+			const ndVector& ray_p0 = poly2d[i0];
+			const ndVector& ray_p1 = poly2d[i1];
+			const ndVector dp(ray_p1 - ray_p0);
+			ndAssert(dp.m_w == ndFloat32(0.0f));
+			ndFloat32 den = dp.DotProduct(dp).GetScalar();
+			ndAssert(den > ndFloat32(0.0f));
+			ndFloat32 parameter = -dp.DotProduct(ray_p0).GetScalar() / den;
+			if ((parameter > ndFloat32(1.0e-5f)) && (parameter < ndFloat32(1.0f - 1.0e-5f)))
 			{
-				adjacentEdge.m_faceStart = m_adjancentEdge[i].m_faceStart;
-				break;
+				contactsOut[0] = m_localPoly[i0];
+				contactsOut[1] = m_localPoly[i1];
+				return 2;
 			}
 		}
-		if (adjacentEdge.m_faceStart != -1)
-		{
-			// we fond the adjacent edge, we check if this is a face normal
-			for (ndInt32 i = 0; i < vertexCount; ++i)
-			{
-				contactsOut[i] = m_localPoly[i];
-			}
-			return vertexCount;
-		}
-		// this should not happens
-		//ndAssert(0);
-		ndTrace (("TO DO, %s this should not happens\n", __FUNCTION__))
+		i0 = i1;
 	}
-	// this should not happens
-	ndTrace(("TO DO, %s this should not happens\n", __FUNCTION__));
+	// the voroni feature is a vertex, so we ignored it.
 	return 0;
 #endif
 }

@@ -41,7 +41,8 @@ static ndBodyDynamic *BuildSphere(const ndVector& pos, const ndVector& gravity={
 
 
 /* Rigid body must not move in the absence of forces. */
-TEST(RigidBody, NoMoveWithoutForce) {
+TEST(RigidBody, NoMoveWithoutForce) 
+{
   ndWorld world;
   world.SetSubSteps(2);
 
@@ -56,7 +57,8 @@ TEST(RigidBody, NoMoveWithoutForce) {
   EXPECT_NEAR(err, 0, 1E-6);
 
   // Simulate one second.
-  for (int i = 0; i < 60; i++) {
+  for (int i = 0; i < 60; i++) 
+  {
     world.Update(1.0f / 60.0f);
     world.Sync();
   }
@@ -68,7 +70,8 @@ TEST(RigidBody, NoMoveWithoutForce) {
 
 /* Apply a force of 1N for 1 second to a body with 2kg of mass
    and verify that it moved 0.25 meters. */
-TEST(RigidBody, MoveWithUnitForce) {
+TEST(RigidBody, MoveWithUnitForce) 
+{
   ndWorld world;
   world.SetSubSteps(2);
 
@@ -84,7 +87,8 @@ TEST(RigidBody, MoveWithUnitForce) {
   EXPECT_NEAR(err, 0, 1E-6);
 
   // Simulate one second.
-  for (int i = 0; i < 60; i++) {
+  for (int i = 0; i < 60; i++) 
+  {
     world.Update(1.0f / 60.0f);
     world.Sync();
   }

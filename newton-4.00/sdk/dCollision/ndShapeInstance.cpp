@@ -46,7 +46,7 @@ ndShapeInstance::ndShapeInstance(ndShape* const shape)
 	,m_scaleType(m_unit)
 	,m_collisionMode(true)
 {
-	ndAssert(m_shape);
+	//ndAssert(m_shape);
 }
 
 ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance)
