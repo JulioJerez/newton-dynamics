@@ -76,8 +76,18 @@ void ndMemory::GetMemoryAllocators(ndMemAllocCallback& alloc, ndMemFreeCallback&
 
 void* ndMemory::Malloc(size_t size)
 {
-#if defined (_WIN32) && defined (D_MEMORY_SANITY_CHECK)
-	_ASSERTE(_CrtCheckMemory());
+#if defined (D_MEMORY_SANITY_CHECK)
+	#if defined (WIN32) || defined(_WIN32)
+		_ASSERTE(_CrtCheckMemory());
+	#elif defined (__linux__)
+		// linux OS mememory check
+	#elif defined (__APPLE__)
+		// apple OS mememory check
+	#elif defined (__MINGW32__) || defined (__MINGW64__))
+		// mingwing OS mememory check
+	#elif defined (_M_ARM) || defined (_M_ARM64)
+		// android OS mememory check
+	#endif
 #endif
 
 	ndIntPtr metToVal;
@@ -99,9 +109,19 @@ void* ndMemory::Malloc(size_t size)
 
 void ndMemory::Free(void* const ptr)
 {
-#if defined (_WIN32) && defined (D_MEMORY_SANITY_CHECK)
-	_ASSERTE(_CrtCheckMemory());
-#endif
+	#if defined (D_MEMORY_SANITY_CHECK)
+		#if defined (WIN32) || defined(_WIN32)
+			_ASSERTE(_CrtCheckMemory());
+		#elif defined (__linux__)
+			// linux OS mememory check
+		#elif defined (__APPLE__)
+			// apple OS mememory check
+		#elif defined (__MINGW32__) || defined (__MINGW64__))
+			// mingwing OS mememory check
+		#elif defined (_M_ARM) || defined (_M_ARM64)
+			// android OS mememory check
+		#endif
+	#endif
 
 	if (ptr)
 	{
