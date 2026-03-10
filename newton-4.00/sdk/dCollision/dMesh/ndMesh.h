@@ -24,6 +24,7 @@
 
 #include "ndCore.h"
 
+class ndBody;
 class ndMeshEffect;
 class ndShapeInstance;
 
@@ -55,7 +56,6 @@ class ndMesh : public ndClassAlloc
 		m_cylindrical
 	};
 
-
 	class ndCurve: public ndList<ndCurveValue>
 	{
 		public:
@@ -67,6 +67,18 @@ class ndMesh : public ndClassAlloc
 		ndReal m_lenght;
 	};
 
+	class ndRigidBody
+	{
+		public:
+		ndRigidBody()
+		{
+		}
+		
+		public:
+		ndString m_constructor;
+
+	};
+
 	D_COLLISION_API ndMesh();
 	D_COLLISION_API ndMesh(const ndMesh& src);
 	D_COLLISION_API ndMesh(const ndShapeInstance& src, ndUvMapingMode mapping = m_box);
@@ -74,8 +86,11 @@ class ndMesh : public ndClassAlloc
 	D_COLLISION_API virtual ~ndMesh();
 	D_COLLISION_API ndMesh* CreateClone() const;
 
-	D_COLLISION_API ndMatrix GetMatrix() const;
-	D_COLLISION_API void SetMatrix(const ndMatrix& matrix);
+	ndMatrix GetMatrix() const;
+	void SetMatrix(const ndMatrix& matrix);
+
+	ndMatrix GetGeometryMatrix() const;
+	void SetGeometryMatrix(const ndMatrix& matrix);
 
 	D_COLLISION_API void AddChild(const ndSharedPtr<ndMesh>& child);
 	D_COLLISION_API void RemoveChild(const ndSharedPtr<ndMesh>& child);
@@ -118,6 +133,8 @@ class ndMesh : public ndClassAlloc
 	D_COLLISION_API void ApplyTransform(const ndMatrix& transform);
 	D_COLLISION_API ndMatrix CalculateGlobalMatrix(ndMesh* const parent = nullptr) const;
 
+	D_COLLISION_API void SetRigidBody(ndSharedPtr<ndRigidBody>& rigidBody);
+
 	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollision();
 	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollisionFromChildren();
 
@@ -130,10 +147,13 @@ class ndMesh : public ndClassAlloc
 	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollisionTree(bool optimize = true);
 	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollisionConvexApproximation(bool lowDetail = false);
 
-	ndMatrix m_matrix;
+	D_COLLISION_API static void SaveRigidBody(const ndBody* const body, const char* const path);
 
 	protected:
 	ndMatrix CalculateLocalMatrix(ndVector& size) const;
+
+	ndMatrix m_matrix;
+	ndMatrix m_geometryMatrix;
 
 	ndString m_name;
 	ndCurve m_scale;
@@ -141,6 +161,7 @@ class ndMesh : public ndClassAlloc
 	ndCurve m_rotation;
 	ndWeakPtr<ndMesh> m_parent;
 	ndSharedPtr<ndMeshEffect> m_mesh;
+	ndSharedPtr<ndRigidBody> m_rigidBody;
 	ndList<ndSharedPtr<ndMesh>> m_children;
 	ndList<ndSharedPtr<ndMesh>>::ndNode* m_selfChildNode;
 	ndVector m_boneTarget;
@@ -149,5 +170,26 @@ class ndMesh : public ndClassAlloc
 	friend class ndMeshFile;
 	friend class ndMeshLoader;
 };
+
+inline ndMatrix ndMesh::GetMatrix() const
+{
+	return m_matrix;
+}
+
+inline void ndMesh::SetMatrix(const ndMatrix& matrix)
+{
+	m_matrix = matrix;
+}
+
+inline ndMatrix ndMesh::GetGeometryMatrix() const
+{
+	return m_geometryMatrix;
+}
+
+inline void ndMesh::SetGeometryMatrix(const ndMatrix& matrix)
+{
+	m_geometryMatrix = matrix;
+}
+
 #endif
 

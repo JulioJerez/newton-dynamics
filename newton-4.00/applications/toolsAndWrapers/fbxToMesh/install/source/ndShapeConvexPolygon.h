@@ -23,9 +23,11 @@
 #define __ND_COLLISION_CONVEX_POLYGON_H__
 
 #include "ndShapeConvex.h"
-class ndShapeInstance;
 
 #define D_CONVEX_POLYGON_MAX_VERTEX_COUNT	64
+
+class ndContactSolver;
+class ndShapeInstance;
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndShapeConvexPolygon: public ndShapeConvex
@@ -40,21 +42,36 @@ class ndShapeConvexPolygon: public ndShapeConvex
 		ndInt32 m_incidentVertex;
 	};
 
+	class ndEdge
+	{
+		public:
+		union
+		{
+			struct
+			{
+				ndInt16 m_low;
+				ndInt16 m_high;
+			};
+			ndInt32 m_edge;
+		};
+		ndInt32 m_faceStart;
+	};
+
 	ndShapeConvexPolygon ();
 	~ndShapeConvexPolygon ();
 
 	virtual ndShapeConvexPolygon* GetAsShapeConvexPolygon();
 
-	ndVector CalculateGlobalNormal(const ndShapeInstance* const parentMesh, const ndVector& localNormal) const;
-	ndInt32 CalculateContactToConvexHullDescrete(const ndShapeInstance* const parentMesh, ndContactSolver& proxy);
-	ndInt32 CalculateContactToConvexHullContinue(const ndShapeInstance* const parentMesh, ndContactSolver& proxy);
+	ndVector CalculateGlobalNormal(const ndVector& localNormal) const;
+	ndInt32 CalculateContactToConvexHullDescrete(ndContactSolver& proxy);
+	ndInt32 CalculateContactToConvexHullContinue(ndContactSolver& proxy);
 
+	void GenerateConvexCap();
 	virtual ndFloat32 GetVolume() const;
 	virtual ndFloat32 GetBoxMinRadius() const;
 	virtual ndFloat32 GetBoxMaxRadius() const;
-	void GenerateConvexCap(const ndShapeInstance* const parentMesh);
 	virtual ndVector SupportVertex(const ndVector& dir) const;
-	bool BeamClipping(const ndVector& origin, ndFloat32 size, const ndShapeInstance* const parentMesh);
+	bool BeamClipping(const ndVector& origin, ndFloat32 size);
 	virtual ndInt32 CalculatePlaneIntersection(const ndVector& normal, const ndVector& point, ndVector* const contactsOut) const;
 
 	virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const;
@@ -62,18 +79,18 @@ class ndShapeConvexPolygon: public ndShapeConvex
 	virtual ndInt32 Release() const;
 
 	ndVector m_normal;
-	ndVector m_localPoly[D_CONVEX_POLYGON_MAX_VERTEX_COUNT];
-	ndInt32 m_clippEdgeNormal[D_CONVEX_POLYGON_MAX_VERTEX_COUNT];
+	ndFixSizeArray<ndVector, D_CONVEX_POLYGON_MAX_VERTEX_COUNT> m_localPoly;
+	ndFixSizeArray<ndInt32, 4 * D_CONVEX_POLYGON_MAX_VERTEX_COUNT> m_convexCapFace;
+	ndFixSizeArray<ndInt32, 8 * D_CONVEX_POLYGON_MAX_VERTEX_COUNT> m_convexCapFaceIndex;
+	ndFixSizeArray<ndEdge, 64> m_adjancentEdge;
+	ndFixSizeArray<ndInt32, 64> m_adjacentFaceEdgeNormalIndex;
 	ndFloat32 m_faceClipSize;
-	ndInt32 m_count;
-	ndInt32 m_paddedCount;
 	ndInt32 m_faceId;
-	ndInt32 m_stride;
 	ndInt32 m_faceNormalIndex;
-	
-	const ndFloat32* m_vertex;
+
+	const ndShapeInstance* m_owner;
+	const ndVector* m_vertexArray;
 	const ndInt32* m_vertexIndex;
-	const ndInt32* m_adjacentFaceEdgeNormalIndex;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 inline ndShapeConvexPolygon* ndShapeConvexPolygon::GetAsShapeConvexPolygon()

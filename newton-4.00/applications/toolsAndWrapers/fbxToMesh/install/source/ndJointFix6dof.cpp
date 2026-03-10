@@ -68,6 +68,19 @@ ndFloat32 ndJointFix6dof::GetMaxTorque() const
 	return m_maxTorque;
 }
 
+void ndJointFix6dof::SetMaxForce(ndFloat32 maxForce)
+{
+	m_maxTorque = ndAbs(maxForce);
+	ndAssert(m_maxTorque > ndFloat32(0.0f));
+}
+
+void ndJointFix6dof::SetMaxTorque(ndFloat32 maxTorque)
+{
+	m_maxTorque = ndAbs(maxTorque);
+	ndAssert(m_maxTorque > ndFloat32(0.0f));
+}
+
+
 void ndJointFix6dof::UpdateParameters()
 {
 }

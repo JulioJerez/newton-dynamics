@@ -84,13 +84,22 @@ class ndWorld: public ndClassAlloc
 	D_NEWTON_API virtual void AddModel(const ndSharedPtr<ndModel>& model);
 	D_NEWTON_API virtual void AddJoint(const ndSharedPtr<ndJointBilateralConstraint>& joint);
 
-	D_NEWTON_API ndSharedPtr<ndBody> GetBody(ndBody* const body) const;
-	//D_NEWTON_API virtual void GetModel(ndSharedPtr<ndModel>& model);
-	//D_NEWTON_API virtual void GetJoint(ndSharedPtr<ndJointBilateralConstraint>& joint);
-
 	D_NEWTON_API virtual void RemoveBody(ndBody* const body);
 	D_NEWTON_API virtual void RemoveModel(ndModel* const model);
 	D_NEWTON_API virtual void RemoveJoint(ndJointBilateralConstraint* const joint);
+
+	D_NEWTON_API ndSharedPtr<ndBody> GetBody(ndBody* const body) const;
+	D_NEWTON_API ndSharedPtr<ndModel> GetModel(ndModel* const model) const;
+	D_NEWTON_API ndSharedPtr<ndJointBilateralConstraint> GetJoint(ndJointBilateralConstraint* joint) const;
+
+	D_NEWTON_API virtual void OnAddBody(ndBody* const body) const;
+	D_NEWTON_API virtual void OnRemoveBody(ndBody* const body) const;
+
+	D_NEWTON_API virtual void OnAddJoint(ndJointBilateralConstraint* const joint) const;
+	D_NEWTON_API virtual void OnRemoveJoint(ndJointBilateralConstraint* const joint) const;
+
+	D_NEWTON_API virtual void OnAddModel(ndModel* const model) const;
+	D_NEWTON_API virtual void OnRemoveModel(ndModel* const model) const;
 
 	D_NEWTON_API const ndJointList& GetJointList() const;
 	D_NEWTON_API const ndModelList& GetModelList() const;
@@ -111,7 +120,6 @@ class ndWorld: public ndClassAlloc
 	D_NEWTON_API void SetContactNotify(ndContactNotify* const notify);
 
 	D_NEWTON_API void DebugScene(ndSceneTreeNotiFy* const notify);
-	D_NEWTON_API void SendBackgroundTask(ndBackgroundTask* const job);
 
 	D_NEWTON_API void ClearCache();
 	D_NEWTON_API void BodiesInAabb(ndBodiesInAabbNotify& callback, const ndVector& minBox, const ndVector& maxBox) const;
@@ -120,7 +128,8 @@ class ndWorld: public ndClassAlloc
 
 	D_NEWTON_API void CalculateJointContacts(ndContact* const contact);
 
-	D_NEWTON_API virtual void MainUpdate();
+	D_NEWTON_API virtual void PhysicsUpdate();
+	D_NEWTON_API virtual void CollisionUpdate();
 	D_NEWTON_API virtual void WorkerUpdate(ndInt32 threadIndex);
 
 	private:
@@ -188,6 +197,7 @@ class ndWorld: public ndClassAlloc
 	ndSolverModes m_solverMode;
 	ndInt32 m_solverIterations;
 	bool m_inUpdate;
+	bool m_collisionUpdate;
 	
 	friend class ndScene;
 	friend class ndIkSolver;

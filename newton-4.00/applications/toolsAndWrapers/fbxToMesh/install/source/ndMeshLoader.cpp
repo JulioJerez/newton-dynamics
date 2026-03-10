@@ -152,6 +152,7 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName)
 		MeshXmlNodePair entry(stack.Pop());
 		xmlSaveParam(entry.m_parentXml, "name", entry.m_meshNode->m_name.GetStr());
 		xmlSaveParam(entry.m_parentXml, "matrix", entry.m_meshNode->m_matrix);
+		xmlSaveParam(entry.m_parentXml, "geometryMatrix", entry.m_meshNode->m_geometryMatrix);
 
 		nd::TiXmlElement* const xmlNodeType = new nd::TiXmlElement("type");
 		entry.m_parentXml->LinkEndChild(xmlNodeType);

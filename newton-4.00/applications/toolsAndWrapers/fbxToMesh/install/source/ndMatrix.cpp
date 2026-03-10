@@ -45,13 +45,6 @@ ndMatrix ndMatrix::Multiply3X3 (const ndMatrix &B) const
 
 ndMatrix ndMatrix::operator* (const ndMatrix &B) const
 {
-	//return Multiply(B);
-	//return ndMatrix (
-	//	B.m_front * m_front.BroadcastX() + B.m_up * m_front.BroadcastY() + B.m_right * m_front.BroadcastZ() + B.m_posit * m_front.BroadcastW(), 
-	//	B.m_front * m_up.BroadcastX()    + B.m_up * m_up.BroadcastY()    + B.m_right * m_up.BroadcastZ()    + B.m_posit * m_up.BroadcastW(), 
-	//	B.m_front * m_right.BroadcastX() + B.m_up * m_right.BroadcastY() + B.m_right * m_right.BroadcastZ() + B.m_posit * m_right.BroadcastW(), 
-	//	B.m_front * m_posit.BroadcastX() + B.m_up * m_posit.BroadcastY() + B.m_right * m_posit.BroadcastZ() + B.m_posit * m_posit.BroadcastW()); 
-
 	ndVector front(B.m_front * m_front.BroadcastX());
 	front = front.MulAdd(B.m_up, m_front.BroadcastY());
 	front = front.MulAdd(B.m_right, m_front.BroadcastZ());
@@ -236,10 +229,11 @@ ndVector ndMatrix::SolveByGaussianElimination(const ndVector &v) const
 				}
 			}
 
-			// Lax inside: 
-			// if the matrix becomes singular, 
-			// we can just set the row solusion to zero and use rank reduction.
-			if (!ndCheckFloat(pivot) || ndAbs(pivot) < ndFloat32(1.0e-6f))
+			// Lax insight: 
+			// if the matrix is singular, we can just set the row solusion to zero 
+			// and apply a rank reduction.
+			ndAssert(ndCheckFloat(pivot));
+			if (ndAbs(pivot) < ndFloat32(1.0e-8f))
 			{
 				// Matrix is effectively singular for this system.
 				// Fallback: zero-out remainder of solution (no angular accel contribution).
@@ -248,7 +242,6 @@ ndVector ndMatrix::SolveByGaussianElimination(const ndVector &v) const
 				ret[i] = ndFloat32(0.0f);
 				tmp[i][i] = ndFloat32(1.0f);
 			}
-			// *** END NEW ***
 
 			if (permute != i)
 			{
@@ -663,30 +656,31 @@ ndMatrix ndMatrix::Transpose4X4() const
 	return inv;
 }
 
-ndVector ndMatrix::RotateVector(const ndVector& v) const
-{
-	return m_front * v.BroadcastX() + m_up * v.BroadcastY() + m_right * v.BroadcastZ();
-}
+//ndVector ndMatrix::RotateVector(const ndVector& v) const
+//{
+//	return m_front * v.BroadcastX() + m_up * v.BroadcastY() + m_right * v.BroadcastZ();
+//}
 
-ndVector ndMatrix::UnrotateVector(const ndVector& v) const
-{
-	return v.OptimizedVectorUnrotate(m_front, m_up, m_right);
-}
+//ndVector ndMatrix::UnrotateVector(const ndVector& v) const
+//{
+//	return v.OptimizedVectorUnrotate(m_front, m_up, m_right);
+//}
+//
+//ndVector ndMatrix::TransformVector(const ndVector& v) const
+//{
+//	return m_front * v.BroadcastX() + m_up * v.BroadcastY() + m_right * v.BroadcastZ() + m_posit;
+//}
 
-ndVector ndMatrix::TransformVector(const ndVector& v) const
-{
-	return m_front * v.BroadcastX() + m_up * v.BroadcastY() + m_right * v.BroadcastZ() + m_posit;
-}
+//ndVector ndMatrix::UntransformVector(const ndVector& v) const
+//{
+//	return UnrotateVector(v - m_posit) | ndVector::m_wOne;
+//}
 
 ndVector ndMatrix::TransformVector1x4(const ndVector& v) const
 {
 	return m_front * v.BroadcastX() + m_up * v.BroadcastY() + m_right * v.BroadcastZ() + m_posit * v.BroadcastW();
 }
 
-ndVector ndMatrix::UntransformVector(const ndVector& v) const
-{
-	return UnrotateVector(v - m_posit) | ndVector::m_wOne;
-}
 
 ndPlane ndMatrix::TransformPlane(const ndPlane& localPlane) const
 {

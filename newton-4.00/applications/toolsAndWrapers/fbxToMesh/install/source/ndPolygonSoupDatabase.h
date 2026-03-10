@@ -34,8 +34,7 @@ class ndPolygonSoupDatabase: public ndClassAlloc
 	public:
 	D_CORE_API ndFloat32 GetRadius() const;
 	D_CORE_API ndInt32 GetVertexCount() const;
-	D_CORE_API ndInt32 GetStrideInBytes() const;
-	D_CORE_API ndFloat32* GetLocalVertexPool() const;
+	D_CORE_API ndVector* GetLocalVertexPool() const;
 
 	D_CORE_API ndUnsigned32 GetTagId(const ndInt32* const face, ndInt32 indexCount) const;
 	D_CORE_API void SetTagId(const ndInt32* const face, ndInt32 indexCount, ndUnsigned32 newID) const;
@@ -44,9 +43,8 @@ class ndPolygonSoupDatabase: public ndClassAlloc
 	D_CORE_API ndPolygonSoupDatabase(const char* const name = nullptr);
 	D_CORE_API virtual ~ndPolygonSoupDatabase ();
 
-	ndFloat32* m_localVertex;
+	ndVector* m_localVertex;
 	ndInt32 m_vertexCount;
-	ndInt32 m_strideInBytes;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif

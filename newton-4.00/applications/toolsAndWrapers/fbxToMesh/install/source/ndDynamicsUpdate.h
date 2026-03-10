@@ -40,8 +40,6 @@
 
 class ndWorld;
 
-//#define D_USING_SINGLE_SOA_REGISTER
-
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndDynamicsUpdate : public ndClassAlloc
 {
@@ -112,6 +110,7 @@ class ndDynamicsUpdate : public ndClassAlloc
 
 	void DetermineSleepStates();
 	void GetJacobianDerivatives(ndConstraint* const joint);
+	virtual void RegenerateSkeletonJacobians(ndSkeletonContainer* const skeleton);
 
 	protected:
 	void Clear();
@@ -139,11 +138,12 @@ class ndDynamicsUpdate : public ndClassAlloc
 	ndFloat32 m_invTimestepRK;
 	ndUnsigned32 m_solverPasses;
 	ndInt32 m_activeJointCount;
-	ndInt32 m_parallelSkeletons;
 	ndInt32 m_unConstrainedBodyCount;
 
 	friend class ndWorld;
 	friend class ndSkeletonContainer;
+	friend class ndDynamicsUpdateSoa;
+	friend class ndDynamicsUpdateAvx2;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 inline ndVector ndDynamicsUpdate::GetVelocTol() const
@@ -204,10 +204,10 @@ inline ndArray<ndInt32>& ndDynamicsUpdate::GetJointForceIndexBuffer()
 inline ndBodyKinematic* ndDynamicsUpdate::FindRootAndSplit(ndBodyKinematic* const body)
 {
 	ndBodyKinematic* node = body;
-	while (node->m_islandParent != node)
+	while (*node->m_islandParent != node)
 	{
 		ndBodyKinematic* const prev = node;
-		node = node->m_islandParent;
+		node = *node->m_islandParent;
 		prev->m_islandParent = node->m_islandParent;
 	}
 	return node;

@@ -30,12 +30,13 @@
 ndMesh::ndMesh()
 	:ndClassAlloc()
 	,m_matrix(ndGetIdentityMatrix())
+	,m_geometryMatrix(ndGetIdentityMatrix())
 	,m_name()
-	,m_mesh()
 	,m_scale()
 	,m_posit()
 	,m_rotation()
 	,m_parent(nullptr)
+	,m_mesh(nullptr)
 	,m_selfChildNode(nullptr)
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
@@ -48,21 +49,60 @@ ndMesh::ndMesh(const ndMesh&)
 	ndAssert(0);
 }
 
-ndMesh::ndMesh(const ndShapeInstance&)
+ndMesh::ndMesh(const ndShapeInstance& shape, ndUvMapingMode mapping)
 	:ndClassAlloc()
 	,m_matrix(ndGetIdentityMatrix())
+	,m_geometryMatrix(ndGetIdentityMatrix())
 	,m_name()
-	,m_mesh()
 	,m_scale()
 	,m_posit()
 	,m_rotation()
 	,m_parent(nullptr)
+	,m_mesh(new ndMeshEffect(shape))
 	,m_selfChildNode(nullptr)
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
 {
-	ndAssert(0);
-	// TO DO: build the mesh form the collision shape;
+	switch (mapping)
+	{
+		//case m_capsule:
+		//case m_spherical:
+		//{
+		//	ndMatrix flipMatrix(ndGetIdentityMatrix());
+		//	flipMatrix[0][0] = ndFloat32(-1.0f);
+		//	ndMatrix aligmentUV(flipMatrix * descriptor.m_uvMatrix);
+		//	mesh.SphericalMapping(textureId, aligmentUV);
+		//	break;
+		//}
+		//
+		//case m_cylindrical:
+		//{
+		//	ndMatrix flipMatrix(ndGetIdentityMatrix());
+		//	flipMatrix[0][0] = ndFloat32(-1.0f);
+		//	ndMatrix aligmentUV(flipMatrix * descriptor.m_uvMatrix);
+		//	mesh.CylindricalMapping(textureId, aligmentUV);
+		//	break;
+		//}
+		//
+		//case m_box:
+		//{
+		//	if (descriptor.m_stretchMaping)
+		//	{
+		//		mesh.BoxMapping(textureId, textureId, textureId, descriptor.m_uvMatrix);
+		//	}
+		//	else
+		//	{
+		//		mesh.UniformBoxMapping(textureId, descriptor.m_uvMatrix);
+		//	}
+		//	break;
+		//}
+		case m_box:
+		default:
+		{
+			m_mesh->UniformBoxMapping(0, ndGetIdentityMatrix());
+		}
+	}
+
 }
 
 ndMesh::~ndMesh()
@@ -90,12 +130,12 @@ void ndMesh::RemoveChild(const ndSharedPtr<ndMesh>& child)
 
 ndMesh* ndMesh::GetParent()
 {
-	return m_parent;
+	return *m_parent;
 }
 
 const ndMesh* ndMesh::GetParent() const
 {
-	return m_parent;
+	return *m_parent;
 }
 
 ndList<ndSharedPtr<ndMesh>>& ndMesh::GetChildren()
@@ -259,7 +299,7 @@ ndMesh* ndMesh::IteratorNext(const ndMesh* const root)
 			}
 			return *next->GetInfo();
 		}
-		return m_parent;
+		return *m_parent;
 	}
 
 	return nullptr;
@@ -268,7 +308,7 @@ ndMesh* ndMesh::IteratorNext(const ndMesh* const root)
 ndMatrix ndMesh::CalculateGlobalMatrix(ndMesh* const parent) const
 {
 	ndMatrix matrix(ndGetIdentityMatrix());
-	for (const ndMesh* ptr = this; ptr != parent; ptr = ptr->m_parent)
+	for (const ndMesh* ptr = this; ptr != parent; ptr = *ptr->m_parent)
 	{
 		matrix = matrix * ptr->m_matrix;
 	}
@@ -297,9 +337,8 @@ void ndMesh::ApplyTransform(const ndMatrix& transform)
 		ndSharedPtr<ndMeshEffect> mesh (node->GetMesh());
 		if (mesh)
 		{
-			//const ndMatrix meshMatrix(invTransform * node->m_meshMatrix * transform);
-			//node->m_meshMatrix = meshMatrix;
-			//mesh->ApplyTransform(transform);
+			const ndMatrix meshMatrix(invTransform * node->GetGeometryMatrix() * transform);
+			node->SetGeometryMatrix(meshMatrix);
 			mesh->ApplyTransform(transform);
 		}
 
@@ -580,7 +619,6 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionTree(bool optimize)
 			ndInt32 mark = meshEffect->IncLRU();
 			ndPolyhedra::Iterator iter(*(*meshEffect));
 		
-			//ndMatrix worldMatrix(node->m_meshMatrix * matrix);
 			const ndMatrix worldMatrix(matrix);
 			for (iter.Begin(); iter; iter++)
 			{
@@ -599,7 +637,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionTree(bool optimize)
 					} while (ptr != edge);
 		
 					ndInt32 materialIndex = meshEffect->GetFaceMaterial(edge);
-					meshBuilder.AddFace(&face[0].m_x, sizeof(ndVector), face.GetCount(), materialIndex);
+					meshBuilder.AddFace(&face[0], face.GetCount(), materialIndex);
 				}
 			}
 		}
@@ -660,6 +698,8 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollision()
 	{
 		ndAssert(0);
 	}
+	ndAssert(shape);
+	shape->SetLocalMatrix(shape->GetLocalMatrix() * m_geometryMatrix);
 	return shape;
 }
 

@@ -106,6 +106,8 @@ inline T ndSign(T A)
 	return (A >= T(0)) ? T(1) : T(-1);
 }
 
+// compare two float mantiza
+// only recomended for debuging hard to find floating point round off errors
 template <class T> 
 inline bool ndAreEqual(T A, T B, T tol)
 {
@@ -229,7 +231,7 @@ inline void strtolwr(char* const string)
 
 // visual studion work around since microsf does not want to admit that
 // that ther is a bug in function exp, that can race exeption in some cases.
-D_CORE_API ndFloat32 ndExp_VS__Fix(ndFloat32 x);
+D_CORE_API ndFloat32 ndExp_VS_Fix(ndFloat32 x);
 
 /// Returns the time in micro seconds since application started 
 D_CORE_API ndUnsigned64 ndGetTimeInMicroseconds();

@@ -24,32 +24,31 @@
 #include "ndVector.h"
 #include "ndFastRay.h"
 
-ndFloat32 ndFastRay::PolygonIntersect (const ndVector& faceNormal, ndFloat32 maxT, const ndFloat32* const polygon, ndInt32 strideInBytes, const ndInt32* const indexArray, ndInt32 indexCount) const
+ndFloat32 ndFastRay::PolygonIntersect (const ndVector& faceNormal, ndFloat32 maxT, const ndVector* const vertexBuffer, const ndInt32* const indexArray, ndInt32 indexCount) const
 {
 	ndAssert (m_p0.m_w == ndFloat32 (0.0f));
 	ndAssert (m_p1.m_w == ndFloat32 (0.0f));
 
 	if (faceNormal.DotProduct(m_unitDir).GetScalar() < ndFloat32 (0.0f)) 
 	{
-		ndInt32 stride = ndInt32(strideInBytes / sizeof (ndFloat32));
-		ndBigVector v0(ndVector(&polygon[indexArray[indexCount - 1] * stride]) & ndVector::m_triplexMask);
-		ndBigVector p0(m_p0);
-		ndBigVector p0v0(v0 - p0);
+		ndBigVector v0(vertexBuffer[indexArray[indexCount - 1]]);
+		const ndBigVector p0(m_p0);
+		const ndBigVector p0v0(v0 - p0);
 
-		ndBigVector diff(m_diff);
-		ndBigVector normal(faceNormal);
+		const ndBigVector diff(m_diff);
+		const ndBigVector normal(faceNormal);
 		ndFloat64 tOut = normal.DotProduct(p0v0).GetScalar() / normal.DotProduct(diff).GetScalar();
 		if ((tOut >= ndFloat64(0.0f)) && (tOut <= maxT)) 
 		{
-			ndBigVector p (p0 + diff.Scale (tOut));
+			const ndBigVector p (p0 + diff.Scale (tOut));
 			ndBigVector unitDir(m_unitDir);
 			for (ndInt32 i = 0; i < indexCount; ++i) 
 			{
-				ndInt32 i2 = indexArray[i] * stride;
-				ndBigVector v1(ndVector(&polygon[i2]) & ndVector::m_triplexMask);
+				ndInt32 i2 = indexArray[i];
+				const ndBigVector v1(vertexBuffer[i2]);
 
-				ndBigVector edge0(p - v0);
-				ndBigVector edge1(v1 - v0);
+				const ndBigVector edge0(p - v0);
+				const ndBigVector edge1(v1 - v0);
 				ndFloat64 area = unitDir.DotProduct (edge0.CrossProduct(edge1)).GetScalar();
 				if (area < ndFloat32 (0.0f)) 
 				{

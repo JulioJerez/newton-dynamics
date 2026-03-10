@@ -58,7 +58,7 @@ class ndFastRay: public ndRay
 
 	ndRay PointDistance(const ndVector& point) const;
 	D_CORE_API ndRay RayDistance(const ndVector& ray_p0, const ndVector& ray_p1) const;
-	D_CORE_API ndFloat32 PolygonIntersect(const ndVector& normal, ndFloat32 maxT, const ndFloat32* const polygon, ndInt32 strideInBytes, const ndInt32* const indexArray, ndInt32 indexCount) const;
+	D_CORE_API ndFloat32 PolygonIntersect(const ndVector& normal, ndFloat32 maxT, const ndVector* const vertexBuffer, const ndInt32* const indexArray, ndInt32 indexCount) const;
 
 	const ndVector m_diff;
 	ndVector m_dpInv;

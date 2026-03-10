@@ -32,7 +32,7 @@ bool ndConvexCastNotify::CastShape(const ndShapeInstance& castingInstance, const
 	ndAssert(m_cachedScene);
 	ndContact contactJoint;
 	ndBodyKinematic body0;
-	ndContactNotify notify(m_cachedScene);
+	ndContactNotify notify(*m_cachedScene);
 	ndFixSizeArray<ndContactPoint, D_MAX_CONTATCS> contactBuffer(D_MAX_CONTATCS);
 
 	#ifdef _DEBUG

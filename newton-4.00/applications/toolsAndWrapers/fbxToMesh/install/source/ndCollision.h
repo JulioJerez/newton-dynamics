@@ -49,6 +49,7 @@
 #include <ndBodyListView.h>
 #include <ndContactArray.h>
 #include <ndBodySphFluid.h>
+#include <ndMarchingCubes.h>
 #include <ndBodySphFluid_New.h>
 #include <ndShapeCapsule.h>
 #include <ndShapeCylinder.h>
@@ -72,6 +73,7 @@
 #include <ndBodiesInAabbNotify.h>
 #include <ndShapeConvexPolygon.h>
 #include <ndShapeChamferCylinder.h>
+#include <ndMarchingCubesIsoSurface.h>
 #include <ndShapeUserDefinedImplicit.h>
 #include <ndJointBilateralConstraint.h>
 #include <ndShapeStaticProceduralMesh.h>

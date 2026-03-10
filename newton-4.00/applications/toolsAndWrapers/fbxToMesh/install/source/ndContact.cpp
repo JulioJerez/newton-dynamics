@@ -33,7 +33,6 @@ ndVector ndContact::m_initialSeparatingVector(ndFloat32(0.0f), ndFloat32(1.0f), 
 #define D_MAX_PENETRATION_STIFFNESS		ndFloat32 (50.0f)
 #define D_DIAGONAL_REGULARIZER			ndFloat32 (1.0e-3f)
 
-
 void ndContactMaterial::RotateTangentDirections(const ndVector& dir)
 {
 	const ndVector dir0(dir);
@@ -160,6 +159,8 @@ void ndContact::InitSurrogateContact(ndContact* const surrogate, ndBodyKinematic
 	surrogate->m_forceBody1 = m_forceBody1;
 	surrogate->m_torqueBody0 = m_torqueBody0;
 	surrogate->m_torqueBody1 = m_torqueBody1;
+	//surrogate->m_forceTorqueBody0 = m_forceTorqueBody0;
+	//surrogate->m_forceTorqueBody1 = m_forceTorqueBody1;
 
 	surrogate->m_active = m_active;
 	surrogate->m_contacPointsList.RemoveAll();
@@ -230,8 +231,8 @@ void ndContact::JacobianContactDerivative(ndConstraintDescritor& desc, const ndC
 	const ndVector omega1(m_body1->GetOmega());
 	const ndVector veloc0(m_body0->GetVelocity());
 	const ndVector veloc1(m_body1->GetVelocity());
-	const ndVector gyroAlpha0(m_body0->GetGyroAlpha());
-	const ndVector gyroAlpha1(m_body1->GetGyroAlpha());
+	const ndVector gyroAlpha0(m_body0->m_gyroAlpha);
+	const ndVector gyroAlpha1(m_body1->m_gyroAlpha);
 
 	ndAssert(contact.m_normal.m_w == ndFloat32(0.0f));
 	const ndJacobian& normalJacobian0 = desc.m_jacobian[normalIndex].m_jacobianM0;
@@ -242,6 +243,8 @@ void ndContact::JacobianContactDerivative(ndConstraintDescritor& desc, const ndC
 	ndFloat32 penetration = ndClamp(contact.m_penetration - D_RESTING_CONTACT_PENETRATION, ndFloat32(0.0f), ndFloat32(0.5f));
 	desc.m_flags[normalIndex] = ndInt32(contact.m_material.m_flags & m_isSoftContact);
 	desc.m_jointSpeed[normalIndex] = ndFloat32 (0.0f);
+	desc.m_positError[normalIndex] = ndFloat32(0.0f);
+	desc.m_speedError[normalIndex] = ndFloat32(0.0f);
 	desc.m_penetration[normalIndex] = penetration;
 	desc.m_restitution[normalIndex] = restitutionCoefficient;
 	desc.m_forceBounds[normalIndex].m_low = ndFloat32(0.0f);
@@ -288,6 +291,9 @@ void ndContact::JacobianContactDerivative(ndConstraintDescritor& desc, const ndC
 		desc.m_restitution[jacobIndex] = ndFloat32(0.0f);
 		desc.m_penetration[jacobIndex] = ndFloat32(0.0f);
 		desc.m_jointSpeed[normalIndex] = ndFloat32(0.0f);
+		desc.m_positError[normalIndex] = ndFloat32(0.0f);
+		desc.m_speedError[normalIndex] = ndFloat32(0.0f);
+
 
 		desc.m_penetrationStiffness[jacobIndex] = ndFloat32(0.0f);
 		if (contact.m_material.m_flags & m_override0Accel)
@@ -332,7 +338,11 @@ void ndContact::JacobianContactDerivative(ndConstraintDescritor& desc, const ndC
 
 		desc.m_restitution[jacobIndex] = ndFloat32(0.0f);
 		desc.m_penetration[jacobIndex] = ndFloat32(0.0f);
+
 		desc.m_jointSpeed[normalIndex] = ndFloat32(0.0f);
+		desc.m_positError[normalIndex] = ndFloat32(0.0f);
+		desc.m_speedError[normalIndex] = ndFloat32(0.0f);
+
 		desc.m_penetrationStiffness[jacobIndex] = ndFloat32(0.0f);
 		if (contact.m_material.m_flags & m_override1Accel)
 		{
@@ -366,8 +376,8 @@ void ndContact::JointAccelerations(ndJointAccelerationDecriptor* const desc)
 	const ndVector bodyOmega1(m_body1->GetOmega());
 	const ndVector bodyVeloc0(m_body0->GetVelocity());
 	const ndVector bodyVeloc1(m_body1->GetVelocity());
-	const ndVector gyroAlpha0(m_body0->GetGyroAlpha());
-	const ndVector gyroAlpha1(m_body1->GetGyroAlpha());
+	const ndVector gyroAlpha0(m_body0->m_gyroAlpha);
+	const ndVector gyroAlpha1(m_body1->m_gyroAlpha);
 
 	const ndInt32 count = desc->m_rowsCount;
 	const ndFloat32 timestep = desc->m_timestep;
@@ -420,9 +430,13 @@ void ndContact::JointAccelerations(ndJointAccelerationDecriptor* const desc)
 				}
 				vRel = vRel * restitution + penetrationVeloc;
 			}
-		
+
+			rhs->m_positError = ndFloat32(0.0f);
+			rhs->m_speedError = ndFloat32(0.0f);
+
 			const ndFloat32 relGyro = (jacobian0.m_angular * gyroAlpha0 + jacobian1.m_angular * gyroAlpha1).AddHorizontal().GetScalar();
 			rhs->m_coordenateAccel = relGyro + aRel - vRel * invTimestep;
+
 			//dTrace(("%f ", rhs->m_coordenateAccel));
 		}
 	}

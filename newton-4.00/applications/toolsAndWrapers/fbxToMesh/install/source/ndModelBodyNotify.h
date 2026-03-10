@@ -38,7 +38,7 @@ class ndModelBodyNotify: public ndBodyNotify
 	bool CheckInWorld(const ndMatrix& matrix) const;
 	void CalculateMatrix(const ndMatrix& matrix, ndQuaternion& rot, ndVector& posit) const;
 
-	ndBodyKinematic* m_parentBody;
+	ndWeakPtr<ndBody> m_parentBody;
 };
 
 #endif

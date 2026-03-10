@@ -82,7 +82,7 @@ class ndPolygonMeshDesc: public ndFastAabb
 	};
 
 	// colliding box in polygonSoup local space
-	D_COLLISION_API ndPolygonMeshDesc(ndContactSolver& proxy, bool ccdMode);
+	D_COLLISION_API ndPolygonMeshDesc(ndContactSolver* const proxy, bool ccdMode);
 	D_COLLISION_API ~ndPolygonMeshDesc();
 
 	D_COLLISION_API void SortFaceArray();
@@ -97,30 +97,20 @@ class ndPolygonMeshDesc: public ndFastAabb
 	void Init();
 
 	ndVector m_boxDistanceTravelInMeshSpace;
-	ndInt32 m_vertexStrideInBytes;
-	ndFloat32 m_skinMargin;
 	ndShapeInstance* m_convexInstance;
 	ndShapeInstance* m_polySoupInstance;
-	ndFloat32* m_vertex;
+	ndContactSolver* m_contactSolver;
+	ndVector* m_pointArray;
 
 	// private data;
 	ndStaticMeshFaceQuery* m_staticMeshQuery;
 	ndProceduralStaticMeshFaceQuery* m_proceduralStaticMeshFaceQuery;
 	ndFloat32 m_maxT;
+	ndFloat32 m_skinMargin;
+	ndInt32 m_vertexCount;
 	ndInt32 m_threadId;
 	bool m_doContinueCollisionTest;
-
 } D_GCC_NEWTON_CLASS_ALIGN_32;
-
-
-//class ndPolygonMeshLocalDesc : public ndPolygonMeshDesc
-//{
-//	public:
-//	D_COLLISION_API ndPolygonMeshLocalDesc(ndContactSolver& proxy, bool ccdMode);
-//
-//	ndPolygonMeshDesc::ndStaticMeshFaceQuery m_localStaticMeshQuery;
-//	ndPolygonMeshDesc::ndProceduralStaticMeshFaceQuery m_localProceduralStaticMeshQuery;
-//};
 
 #endif 
 

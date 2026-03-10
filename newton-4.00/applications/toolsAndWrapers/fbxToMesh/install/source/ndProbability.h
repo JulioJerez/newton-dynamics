@@ -38,8 +38,8 @@ D_CORE_API ndUnsigned32 ndRandInt();
 /// Returns sets a new random seed 
 D_CORE_API void ndSetRandSeed(ndUnsigned32 seed);
 
-///// Returns a guardian distributed random value with center at mean and standard deviation sigma
-D_CORE_API ndFloat32 ndStandardNormalGaussian(ndReal uniformRandomVariable);
+///// Returns a gaussian distributed random value with center at mean and standard deviation sigma
+D_CORE_API ndFloat32 ndStandardNormalGaussian(ndFloat32 uniformRandomVariable);
 
 /// Returns a gaussian distributed random value with center at mean and standard deviation sigma
 inline ndFloat32 ndGaussianRandom(ndFloat32 mean, ndFloat32 sigma, ndFloat32 uniformRandomVariable)
@@ -61,7 +61,7 @@ class ndUniformDistribution : public ndRand127
     {
     }
 
-    D_CORE_API ndReal operator()();
+    D_CORE_API ndFloat32 operator()();
 };
 
 class ndNomalDistribution : public ndRand127
@@ -72,8 +72,8 @@ class ndNomalDistribution : public ndRand127
     {
     }
 
-    D_CORE_API ndReal NormalGaussian(ndReal uniform);
-    D_CORE_API ndReal operator()();
+    D_CORE_API ndFloat32 NormalGaussian(ndFloat32 uniform);
+    D_CORE_API ndFloat32 operator()();
 };
 
 #endif

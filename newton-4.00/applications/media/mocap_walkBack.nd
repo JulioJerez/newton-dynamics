@@ -5,6 +5,10 @@
         <posit float3="-0.00532956 0.910607 -0.0131392" />
         <angles float3="68.0404 7.65488 -96.0638" />
     </matrix>
+    <geometryMatrix>
+        <posit float3="0 0 0" />
+        <angles float3="0 -0 0" />
+    </geometryMatrix>
     <type nodeType="node" target="0 0 0 " />
     <ndMesh>
         <name string="mixamorig:Spine" />
@@ -12,6 +16,10 @@
             <posit float3="-0.0992349 -0.012273 -9.00269e-06" />
             <angles float3="-0.207203 -4.6506 -8.10749" />
         </matrix>
+        <geometryMatrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </geometryMatrix>
         <type nodeType="node" target="0 0 0 " />
         <ndMesh>
             <name string="mixamorig:Spine1" />
@@ -19,6 +27,10 @@
                 <posit float3="-0.11732 -3.8147e-08 9.53674e-09" />
                 <angles float3="-0.910952 -2.67069 -5.79169" />
             </matrix>
+            <geometryMatrix>
+                <posit float3="0 0 0" />
+                <angles float3="0 -0 0" />
+            </geometryMatrix>
             <type nodeType="node" target="0 0 0 " />
             <ndMesh>
                 <name string="mixamorig:Spine2" />
@@ -26,6 +38,10 @@
                     <posit float3="-0.134588 3.8147e-08 1.90735e-08" />
                     <angles float3="-0.676142 -2.81141 -12.3837" />
                 </matrix>
+                <geometryMatrix>
+                    <posit float3="0 0 0" />
+                    <angles float3="0 -0 0" />
+                </geometryMatrix>
                 <type nodeType="node" target="0 0 0 " />
                 <ndMesh>
                     <name string="mixamorig:Neck" />
@@ -33,6 +49,10 @@
                         <posit float3="-0.150278 0.00877899 0" />
                         <angles float3="-1.48062 3.53102 3.27586" />
                     </matrix>
+                    <geometryMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </geometryMatrix>
                     <type nodeType="node" target="0 0 0 " />
                     <ndMesh>
                         <name string="mixamorig:Head" />
@@ -40,6 +60,10 @@
                             <posit float3="-0.103218 0.031424 0" />
                             <angles float3="-54.8587 1.38511 18.0324" />
                         </matrix>
+                        <geometryMatrix>
+                            <posit float3="0 0 0" />
+                            <angles float3="0 -0 0" />
+                        </geometryMatrix>
                         <type nodeType="node" target="0 0 0 " />
                         <ndMesh>
                             <name string="mixamorig:HeadTop_End" />
@@ -47,6 +71,10 @@
                                 <posit float3="-0.184747 0.066364 -1.98364e-06" />
                                 <angles float3="6.4033e-07 1.90833e-14 -1.70755e-06" />
                             </matrix>
+                            <geometryMatrix>
+                                <posit float3="0 0 0" />
+                                <angles float3="0 -0 0" />
+                            </geometryMatrix>
                             <type nodeType="node" target="0 0 0 " />
                         </ndMesh>
                     </ndMesh>
@@ -57,6 +85,10 @@
                         <posit float3="-0.0910629 0.00757103 -0.061058" />
                         <angles float3="121.179 -74.2113 144.92" />
                     </matrix>
+                    <geometryMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </geometryMatrix>
                     <type nodeType="node" target="0 0 0 " />
                     <ndMesh>
                         <name string="mixamorig:LeftArm" />
@@ -64,6 +96,10 @@
                             <posit float3="-0.129223 0 0" />
                             <angles float3="37.7791 12.8427 -42.6576" />
                         </matrix>
+                        <geometryMatrix>
+                            <posit float3="0 0 0" />
+                            <angles float3="0 -0 0" />
+                        </geometryMatrix>
                         <type nodeType="node" target="0 0 0 " />
                         <ndMesh>
                             <name string="mixamorig:LeftForeArm" />
@@ -71,6 +107,10 @@
                                 <posit float3="-0.274047 -7.62939e-08 -2.86102e-08" />
                                 <angles float3="-0.18872 47.4759 0.141955" />
                             </matrix>
+                            <geometryMatrix>
+                                <posit float3="0 0 0" />
+                                <angles float3="0 -0 0" />
+                            </geometryMatrix>
                             <type nodeType="node" target="0 0 0 " />
                             <ndMesh>
                                 <name string="mixamorig:LeftHand" />
@@ -78,6 +118,10 @@
                                     <posit float3="-0.276145 -1.52588e-07 1.52588e-07" />
                                     <angles float3="10.6259 -0.26339 0.417036" />
                                 </matrix>
+                                <geometryMatrix>
+                                    <posit float3="0 0 0" />
+                                    <angles float3="0 -0 0" />
+                                </geometryMatrix>
                                 <type nodeType="node" target="0 0 0 " />
                                 <ndMesh>
                                     <name string="mixamorig:LeftHandThumb1" />
@@ -85,6 +129,10 @@
                                         <posit float3="-0.0378881 0.021671 0.0300301" />
                                         <angles float3="-42.1199 11.2088 -50.311" />
                                     </matrix>
+                                    <geometryMatrix>
+                                        <posit float3="0 0 0" />
+                                        <angles float3="0 -0 0" />
+                                    </geometryMatrix>
                                     <type nodeType="node" target="0 0 0 " />
                                     <ndMesh>
                                         <name string="mixamorig:LeftHandThumb2" />
@@ -92,6 +140,10 @@
                                             <posit float3="-0.04745 -1.52588e-07 -3.8147e-08" />
                                             <angles float3="-3.49205 -27.6411 15.2374" />
                                         </matrix>
+                                        <geometryMatrix>
+                                            <posit float3="0 0 0" />
+                                            <angles float3="0 -0 0" />
+                                        </geometryMatrix>
                                         <type nodeType="node" target="0 0 0 " />
                                         <ndMesh>
                                             <name string="mixamorig:LeftHandThumb3" />
@@ -99,6 +151,10 @@
                                                 <posit float3="-0.0438209 7.62939e-08 0" />
                                                 <angles float3="-9.34883 -38.0591 29.5041" />
                                             </matrix>
+                                            <geometryMatrix>
+                                                <posit float3="0 0 0" />
+                                                <angles float3="0 -0 0" />
+                                            </geometryMatrix>
                                             <type nodeType="node" target="0 0 0 " />
                                             <ndMesh>
                                                 <name string="mixamorig:LeftHandThumb4" />
@@ -106,6 +162,10 @@
                                                     <posit float3="-0.034591 0 -9.53674e-09" />
                                                     <angles float3="-14.6214 8.06641 -2.0959" />
                                                 </matrix>
+                                                <geometryMatrix>
+                                                    <posit float3="0 0 0" />
+                                                    <angles float3="0 -0 0" />
+                                                </geometryMatrix>
                                                 <type nodeType="node" target="0 0 0 " />
                                             </ndMesh>
                                         </ndMesh>
@@ -117,6 +177,10 @@
                                         <posit float3="-0.122666 0.00231796 0.02822" />
                                         <angles float3="-0.852591 -7.39389 -60.9145" />
                                     </matrix>
+                                    <geometryMatrix>
+                                        <posit float3="0 0 0" />
+                                        <angles float3="0 -0 0" />
+                                    </geometryMatrix>
                                     <type nodeType="node" target="0 0 0 " />
                                     <ndMesh>
                                         <name string="mixamorig:LeftHandIndex2" />
@@ -124,6 +188,10 @@
                                             <posit float3="-0.03892 -1.90735e-08 0" />
                                             <angles float3="7.62539 -8.26153 -89.8978" />
                                         </matrix>
+                                        <geometryMatrix>
+                                            <posit float3="0 0 0" />
+                                            <angles float3="0 -0 0" />
+                                        </geometryMatrix>
                                         <type nodeType="node" target="0 0 0 " />
                                         <ndMesh>
                                             <name string="mixamorig:LeftHandIndex3" />
@@ -131,6 +199,10 @@
                                                 <posit float3="-0.034152 -7.62939e-08 0" />
                                                 <angles float3="3.86591 -7.51803 -41.9285" />
                                             </matrix>
+                                            <geometryMatrix>
+                                                <posit float3="0 0 0" />
+                                                <angles float3="0 -0 0" />
+                                            </geometryMatrix>
                                             <type nodeType="node" target="0 0 0 " />
                                             <ndMesh>
                                                 <name string="mixamorig:LeftHandIndex4" />
@@ -138,6 +210,10 @@
                                                     <posit float3="-0.03078 0 0" />
                                                     <angles float3="-0.458602 0.00260158 -0.000100745" />
                                                 </matrix>
+                                                <geometryMatrix>
+                                                    <posit float3="0 0 0" />
+                                                    <angles float3="0 -0 0" />
+                                                </geometryMatrix>
                                                 <type nodeType="node" target="0 0 0 " />
                                             </ndMesh>
                                         </ndMesh>
@@ -149,6 +225,10 @@
                                         <posit float3="-0.127755 0 0" />
                                         <angles float3="5.24121 -0.0666978 -62.7543" />
                                     </matrix>
+                                    <geometryMatrix>
+                                        <posit float3="0 0 0" />
+                                        <angles float3="0 -0 0" />
+                                    </geometryMatrix>
                                     <type nodeType="node" target="0 0 0 " />
                                     <ndMesh>
                                         <name string="mixamorig:LeftHandMiddle2" />
@@ -156,6 +236,10 @@
                                             <posit float3="-0.0361401 -3.8147e-08 0" />
                                             <angles float3="9.43661 -9.24942 -87.0569" />
                                         </matrix>
+                                        <geometryMatrix>
+                                            <posit float3="0 0 0" />
+                                            <angles float3="0 -0 0" />
+                                        </geometryMatrix>
                                         <type nodeType="node" target="0 0 0 " />
                                         <ndMesh>
                                             <name string="mixamorig:LeftHandMiddle3" />
@@ -163,6 +247,10 @@
                                                 <posit float3="-0.034598 -1.52588e-07 0" />
                                                 <angles float3="1.41688 -5.12517 -37.461" />
                                             </matrix>
+                                            <geometryMatrix>
+                                                <posit float3="0 0 0" />
+                                                <angles float3="0 -0 0" />
+                                            </geometryMatrix>
                                             <type nodeType="node" target="0 0 0 " />
                                             <ndMesh>
                                                 <name string="mixamorig:LeftHandMiddle4" />
@@ -170,6 +258,10 @@
                                                     <posit float3="-0.036802 7.62939e-08 -7.62939e-08" />
                                                     <angles float3="-0.524799 -0.0749975 0.000500312" />
                                                 </matrix>
+                                                <geometryMatrix>
+                                                    <posit float3="0 0 0" />
+                                                    <angles float3="0 -0 0" />
+                                                </geometryMatrix>
                                                 <type nodeType="node" target="0 0 0 " />
                                             </ndMesh>
                                         </ndMesh>
@@ -181,6 +273,10 @@
                                         <posit float3="-0.12147 -9.99451e-05 -0.022166" />
                                         <angles float3="13.1441 3.03921 -61.2124" />
                                     </matrix>
+                                    <geometryMatrix>
+                                        <posit float3="0 0 0" />
+                                        <angles float3="0 -0 0" />
+                                    </geometryMatrix>
                                     <type nodeType="node" target="0 0 0 " />
                                     <ndMesh>
                                         <name string="mixamorig:LeftHandRing2" />
@@ -188,6 +284,10 @@
                                             <posit float3="-0.036012 7.62939e-08 0" />
                                             <angles float3="5.39408 -11.5633 -66.7293" />
                                         </matrix>
+                                        <geometryMatrix>
+                                            <posit float3="0 0 0" />
+                                            <angles float3="0 -0 0" />
+                                        </geometryMatrix>
                                         <type nodeType="node" target="0 0 0 " />
                                         <ndMesh>
                                             <name string="mixamorig:LeftHandRing3" />
@@ -195,6 +295,10 @@
                                                 <posit float3="-0.0330729 -7.62939e-08 3.8147e-08" />
                                                 <angles float3="7.1283 -9.50893 -70.4088" />
                                             </matrix>
+                                            <geometryMatrix>
+                                                <posit float3="0 0 0" />
+                                                <angles float3="0 -0 0" />
+                                            </geometryMatrix>
                                             <type nodeType="node" target="0 0 0 " />
                                             <ndMesh>
                                                 <name string="mixamorig:LeftHandRing4" />
@@ -202,6 +306,10 @@
                                                     <posit float3="-0.036601 0 0" />
                                                     <angles float3="-0.847601 0.0882747 -0.00160168" />
                                                 </matrix>
+                                                <geometryMatrix>
+                                                    <posit float3="0 0 0" />
+                                                    <angles float3="0 -0 0" />
+                                                </geometryMatrix>
                                                 <type nodeType="node" target="0 0 0 " />
                                             </ndMesh>
                                         </ndMesh>
@@ -213,6 +321,10 @@
                                         <posit float3="-0.109082 0.00226105 -0.047258" />
                                         <angles float3="22.5212 5.1765 -52.7971" />
                                     </matrix>
+                                    <geometryMatrix>
+                                        <posit float3="0 0 0" />
+                                        <angles float3="0 -0 0" />
+                                    </geometryMatrix>
                                     <type nodeType="node" target="0 0 0 " />
                                     <ndMesh>
                                         <name string="mixamorig:LeftHandPinky2" />
@@ -220,6 +332,10 @@
                                             <posit float3="-0.041367 0 0" />
                                             <angles float3="7.83113 -9.61328 -84.7982" />
                                         </matrix>
+                                        <geometryMatrix>
+                                            <posit float3="0 0 0" />
+                                            <angles float3="0 -0 0" />
+                                        </geometryMatrix>
                                         <type nodeType="node" target="0 0 0 " />
                                         <ndMesh>
                                             <name string="mixamorig:LeftHandPinky3" />
@@ -227,6 +343,10 @@
                                                 <posit float3="-0.025948 0 0" />
                                                 <angles float3="5.28521 -8.43136 -59.1912" />
                                             </matrix>
+                                            <geometryMatrix>
+                                                <posit float3="0 0 0" />
+                                                <angles float3="0 -0 0" />
+                                            </geometryMatrix>
                                             <type nodeType="node" target="0 0 0 " />
                                             <ndMesh>
                                                 <name string="mixamorig:LeftHandPinky4" />
@@ -234,6 +354,10 @@
                                                     <posit float3="-0.029239 -3.8147e-08 -3.8147e-08" />
                                                     <angles float3="-0.469799 -0.0659 0.00040042" />
                                                 </matrix>
+                                                <geometryMatrix>
+                                                    <posit float3="0 0 0" />
+                                                    <angles float3="0 -0 0" />
+                                                </geometryMatrix>
                                                 <type nodeType="node" target="0 0 0 " />
                                             </ndMesh>
                                         </ndMesh>
@@ -249,6 +373,10 @@
                         <posit float3="-0.0910638 0.00757111 0.061057" />
                         <angles float3="-113.155 79.3091 154.261" />
                     </matrix>
+                    <geometryMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </geometryMatrix>
                     <type nodeType="node" target="0 0 0 " />
                     <ndMesh>
                         <name string="mixamorig:RightArm" />
@@ -256,6 +384,10 @@
                             <posit float3="-0.129223 0 0" />
                             <angles float3="6.48795 5.69031 -49.9871" />
                         </matrix>
+                        <geometryMatrix>
+                            <posit float3="0 0 0" />
+                            <angles float3="0 -0 0" />
+                        </geometryMatrix>
                         <type nodeType="node" target="0 0 0 " />
                         <ndMesh>
                             <name string="mixamorig:RightForeArm" />
@@ -263,6 +395,10 @@
                                 <posit float3="-0.274047 7.6294e-08 7.62939e-08" />
                                 <angles float3="-15.186 -40.867 -5.17469" />
                             </matrix>
+                            <geometryMatrix>
+                                <posit float3="0 0 0" />
+                                <angles float3="0 -0 0" />
+                            </geometryMatrix>
                             <type nodeType="node" target="0 0 0 " />
                             <ndMesh>
                                 <name string="mixamorig:RightHand" />
@@ -270,6 +406,10 @@
                                     <posit float3="-0.276145 0 0" />
                                     <angles float3="-29.3159 0.5971 21.1906" />
                                 </matrix>
+                                <geometryMatrix>
+                                    <posit float3="0 0 0" />
+                                    <angles float3="0 -0 0" />
+                                </geometryMatrix>
                                 <type nodeType="node" target="0 0 0 " />
                                 <ndMesh>
                                     <name string="mixamorig:RightHandThumb1" />
@@ -277,6 +417,10 @@
                                         <posit float3="-0.0378881 0.021671 -0.0300299" />
                                         <angles float3="-6.27214 -23.3428 -38.2071" />
                                     </matrix>
+                                    <geometryMatrix>
+                                        <posit float3="0 0 0" />
+                                        <angles float3="0 -0 0" />
+                                    </geometryMatrix>
                                     <type nodeType="node" target="0 0 0 " />
                                     <ndMesh>
                                         <name string="mixamorig:RightHandThumb2" />
@@ -284,6 +428,10 @@
                                             <posit float3="-0.0474501 3.8147e-08 -1.52588e-07" />
                                             <angles float3="-0.927051 22.6693 11.8079" />
                                         </matrix>
+                                        <geometryMatrix>
+                                            <posit float3="0 0 0" />
+                                            <angles float3="0 -0 0" />
+                                        </geometryMatrix>
                                         <type nodeType="node" target="0 0 0 " />
                                         <ndMesh>
                                             <name string="mixamorig:RightHandThumb3" />
@@ -291,6 +439,10 @@
                                                 <posit float3="-0.043821 0 -7.62939e-08" />
                                                 <angles float3="1.53425 -14.3776 -6.41902" />
                                             </matrix>
+                                            <geometryMatrix>
+                                                <posit float3="0 0 0" />
+                                                <angles float3="0 -0 0" />
+                                            </geometryMatrix>
                                             <type nodeType="node" target="0 0 0 " />
                                             <ndMesh>
                                                 <name string="mixamorig:RightHandThumb4" />
@@ -298,6 +450,10 @@
                                                     <posit float3="-0.034591 3.8147e-08 0" />
                                                     <angles float3="14.7968 -8.09097 -2.1218" />
                                                 </matrix>
+                                                <geometryMatrix>
+                                                    <posit float3="0 0 0" />
+                                                    <angles float3="0 -0 0" />
+                                                </geometryMatrix>
                                                 <type nodeType="node" target="0 0 0 " />
                                             </ndMesh>
                                         </ndMesh>
@@ -309,6 +465,10 @@
                                         <posit float3="-0.122666 0.00231796 -0.0282199" />
                                         <angles float3="-0.0479379 -0.532725 -0.738249" />
                                     </matrix>
+                                    <geometryMatrix>
+                                        <posit float3="0 0 0" />
+                                        <angles float3="0 -0 0" />
+                                    </geometryMatrix>
                                     <type nodeType="node" target="0 0 0 " />
                                     <ndMesh>
                                         <name string="mixamorig:RightHandIndex2" />
@@ -316,6 +476,10 @@
                                             <posit float3="-0.0389201 -7.62939e-08 -3.8147e-08" />
                                             <angles float3="0.0160907 0.089123 -5.07853" />
                                         </matrix>
+                                        <geometryMatrix>
+                                            <posit float3="0 0 0" />
+                                            <angles float3="0 -0 0" />
+                                        </geometryMatrix>
                                         <type nodeType="node" target="0 0 0 " />
                                         <ndMesh>
                                             <name string="mixamorig:RightHandIndex3" />
@@ -323,6 +487,10 @@
                                                 <posit float3="-0.0341519 -7.62939e-08 0" />
                                                 <angles float3="0.0951401 2.00213 2.83561" />
                                             </matrix>
+                                            <geometryMatrix>
+                                                <posit float3="0 0 0" />
+                                                <angles float3="0 -0 0" />
+                                            </geometryMatrix>
                                             <type nodeType="node" target="0 0 0 " />
                                             <ndMesh>
                                                 <name string="mixamorig:RightHandIndex4" />
@@ -330,6 +498,10 @@
                                                     <posit float3="-0.03078 0 3.8147e-08" />
                                                     <angles float3="0.768826 0.157474 0.0094035" />
                                                 </matrix>
+                                                <geometryMatrix>
+                                                    <posit float3="0 0 0" />
+                                                    <angles float3="0 -0 0" />
+                                                </geometryMatrix>
                                                 <type nodeType="node" target="0 0 0 " />
                                             </ndMesh>
                                         </ndMesh>
@@ -341,6 +513,10 @@
                                         <posit float3="-0.127755 0 3.8147e-08" />
                                         <angles float3="0.0862662 5.92835 -2.56157" />
                                     </matrix>
+                                    <geometryMatrix>
+                                        <posit float3="0 0 0" />
+                                        <angles float3="0 -0 0" />
+                                    </geometryMatrix>
                                     <type nodeType="node" target="0 0 0 " />
                                     <ndMesh>
                                         <name string="mixamorig:RightHandMiddle2" />
@@ -348,6 +524,10 @@
                                             <posit float3="-0.0361401 0 0" />
                                             <angles float3="-0.404537 4.42274 -24.0151" />
                                         </matrix>
+                                        <geometryMatrix>
+                                            <posit float3="0 0 0" />
+                                            <angles float3="0 -0 0" />
+                                        </geometryMatrix>
                                         <type nodeType="node" target="0 0 0 " />
                                         <ndMesh>
                                             <name string="mixamorig:RightHandMiddle3" />
@@ -355,6 +535,10 @@
                                                 <posit float3="-0.0345979 -1.52588e-07 1.90735e-08" />
                                                 <angles float3="-0.041803 -1.75108 5.75163" />
                                             </matrix>
+                                            <geometryMatrix>
+                                                <posit float3="0 0 0" />
+                                                <angles float3="0 -0 0" />
+                                            </geometryMatrix>
                                             <type nodeType="node" target="0 0 0 " />
                                             <ndMesh>
                                                 <name string="mixamorig:RightHandMiddle4" />
@@ -362,6 +546,10 @@
                                                     <posit float3="-0.0368019 0 0" />
                                                     <angles float3="0.767184 -0.195763 0.00459845" />
                                                 </matrix>
+                                                <geometryMatrix>
+                                                    <posit float3="0 0 0" />
+                                                    <angles float3="0 -0 0" />
+                                                </geometryMatrix>
                                                 <type nodeType="node" target="0 0 0 " />
                                             </ndMesh>
                                         </ndMesh>
@@ -373,6 +561,10 @@
                                         <posit float3="-0.12147 -0.000100021 0.0221661" />
                                         <angles float3="0.364824 11.809 -3.99288" />
                                     </matrix>
+                                    <geometryMatrix>
+                                        <posit float3="0 0 0" />
+                                        <angles float3="0 -0 0" />
+                                    </geometryMatrix>
                                     <type nodeType="node" target="0 0 0 " />
                                     <ndMesh>
                                         <name string="mixamorig:RightHandRing2" />
@@ -380,6 +572,10 @@
                                             <posit float3="-0.036012 -1.52588e-07 0" />
                                             <angles float3="-0.101872 4.17534 -26.81" />
                                         </matrix>
+                                        <geometryMatrix>
+                                            <posit float3="0 0 0" />
+                                            <angles float3="0 -0 0" />
+                                        </geometryMatrix>
                                         <type nodeType="node" target="0 0 0 " />
                                         <ndMesh>
                                             <name string="mixamorig:RightHandRing3" />
@@ -387,6 +583,10 @@
                                                 <posit float3="-0.0330728 0 0" />
                                                 <angles float3="-0.0875458 4.20645 -19.444" />
                                             </matrix>
+                                            <geometryMatrix>
+                                                <posit float3="0 0 0" />
+                                                <angles float3="0 -0 0" />
+                                            </geometryMatrix>
                                             <type nodeType="node" target="0 0 0 " />
                                             <ndMesh>
                                                 <name string="mixamorig:RightHandRing4" />
@@ -394,6 +594,10 @@
                                                     <posit float3="-0.036601 7.62939e-08 3.8147e-08" />
                                                     <angles float3="0.872396 -0.0345036 0.00679903" />
                                                 </matrix>
+                                                <geometryMatrix>
+                                                    <posit float3="0 0 0" />
+                                                    <angles float3="0 -0 0" />
+                                                </geometryMatrix>
                                                 <type nodeType="node" target="0 0 0 " />
                                             </ndMesh>
                                         </ndMesh>
@@ -405,6 +609,10 @@
                                         <posit float3="-0.109082 0.00226105 0.047258" />
                                         <angles float3="-1.70044 19.2077 -11.2487" />
                                     </matrix>
+                                    <geometryMatrix>
+                                        <posit float3="0 0 0" />
+                                        <angles float3="0 -0 0" />
+                                    </geometryMatrix>
                                     <type nodeType="node" target="0 0 0 " />
                                     <ndMesh>
                                         <name string="mixamorig:RightHandPinky2" />
@@ -412,6 +620,10 @@
                                             <posit float3="-0.041367 0 0" />
                                             <angles float3="2.49565 3.08882 -18.6991" />
                                         </matrix>
+                                        <geometryMatrix>
+                                            <posit float3="0 0 0" />
+                                            <angles float3="0 -0 0" />
+                                        </geometryMatrix>
                                         <type nodeType="node" target="0 0 0 " />
                                         <ndMesh>
                                             <name string="mixamorig:RightHandPinky3" />
@@ -419,6 +631,10 @@
                                                 <posit float3="-0.025948 0 0" />
                                                 <angles float3="3.17986 7.44785 -28.4627" />
                                             </matrix>
+                                            <geometryMatrix>
+                                                <posit float3="0 0 0" />
+                                                <angles float3="0 -0 0" />
+                                            </geometryMatrix>
                                             <type nodeType="node" target="0 0 0 " />
                                             <ndMesh>
                                                 <name string="mixamorig:RightHandPinky4" />
@@ -426,6 +642,10 @@
                                                     <posit float3="-0.029239 7.62939e-08 -9.53674e-09" />
                                                     <angles float3="0.973951 0.252703 0.0115961" />
                                                 </matrix>
+                                                <geometryMatrix>
+                                                    <posit float3="0 0 0" />
+                                                    <angles float3="0 -0 0" />
+                                                </geometryMatrix>
                                                 <type nodeType="node" target="0 0 0 " />
                                             </ndMesh>
                                         </ndMesh>
@@ -444,6 +664,10 @@
             <posit float3="0.0665719 -0.000554028 -0.091239" />
             <angles float3="-169.79 -13.1832 -130.103" />
         </matrix>
+        <geometryMatrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </geometryMatrix>
         <type nodeType="node" target="0 0 0 " />
         <ndMesh>
             <name string="mixamorig:LeftLeg" />
@@ -451,6 +675,10 @@
                 <posit float3="-0.405994 0 4.76837e-08" />
                 <angles float3="-2.05545 -3.43251 88.5166" />
             </matrix>
+            <geometryMatrix>
+                <posit float3="0 0 0" />
+                <angles float3="0 -0 0" />
+            </geometryMatrix>
             <type nodeType="node" target="0 0 0 " />
             <ndMesh>
                 <name string="mixamorig:LeftFoot" />
@@ -458,6 +686,10 @@
                     <posit float3="-0.42099 0 -4.76837e-09" />
                     <angles float3="-4.37825 2.22447 -64.0048" />
                 </matrix>
+                <geometryMatrix>
+                    <posit float3="0 0 0" />
+                    <angles float3="0 -0 0" />
+                </geometryMatrix>
                 <type nodeType="node" target="0 0 0 " />
                 <ndMesh>
                     <name string="mixamorig:LeftToeBase" />
@@ -465,6 +697,10 @@
                         <posit float3="-0.157216 0 0" />
                         <angles float3="4.029 -0.934002 -25.0355" />
                     </matrix>
+                    <geometryMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </geometryMatrix>
                     <type nodeType="node" target="0 0 0 " />
                     <ndMesh>
                         <name string="mixamorig:LeftToe_End" />
@@ -472,6 +708,10 @@
                             <posit float3="-0.1 -9.53674e-09 -4.76837e-09" />
                             <angles float3="-1.70755e-06 -2.13443e-06 1.70755e-06" />
                         </matrix>
+                        <geometryMatrix>
+                            <posit float3="0 0 0" />
+                            <angles float3="0 -0 0" />
+                        </geometryMatrix>
                         <type nodeType="node" target="0 0 0 " />
                     </ndMesh>
                 </ndMesh>
@@ -484,6 +724,10 @@
             <posit float3="0.066556 -0.000553989 0.09125" />
             <angles float3="178.304 -9.65416 -136.526" />
         </matrix>
+        <geometryMatrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </geometryMatrix>
         <type nodeType="node" target="0 0 0 " />
         <ndMesh>
             <name string="mixamorig:RightLeg" />
@@ -491,6 +735,10 @@
                 <posit float3="-0.405994 -3.8147e-08 -9.53674e-09" />
                 <angles float3="-1.62281 -0.717665 47.986" />
             </matrix>
+            <geometryMatrix>
+                <posit float3="0 0 0" />
+                <angles float3="0 -0 0" />
+            </geometryMatrix>
             <type nodeType="node" target="0 0 0 " />
             <ndMesh>
                 <name string="mixamorig:RightFoot" />
@@ -498,6 +746,10 @@
                     <posit float3="-0.42099 -4.76837e-08 8.34465e-09" />
                     <angles float3="8.85563 -2.83319 -76.8108" />
                 </matrix>
+                <geometryMatrix>
+                    <posit float3="0 0 0" />
+                    <angles float3="0 -0 0" />
+                </geometryMatrix>
                 <type nodeType="node" target="0 0 0 " />
                 <ndMesh>
                     <name string="mixamorig:RightToeBase" />
@@ -505,6 +757,10 @@
                         <posit float3="-0.157216 0 -2.38419e-09" />
                         <angles float3="-3.98358 0.853941 -26.3689" />
                     </matrix>
+                    <geometryMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </geometryMatrix>
                     <type nodeType="node" target="0 0 0 " />
                     <ndMesh>
                         <name string="mixamorig:RightToe_End" />
@@ -512,6 +768,10 @@
                             <posit float3="-0.1 0 -4.76837e-09" />
                             <angles float3="-3.21064e-15 -1.7237e-06 1.06722e-07" />
                         </matrix>
+                        <geometryMatrix>
+                            <posit float3="0 0 0" />
+                            <angles float3="0 -0 0" />
+                        </geometryMatrix>
                         <type nodeType="node" target="0 0 0 " />
                     </ndMesh>
                 </ndMesh>

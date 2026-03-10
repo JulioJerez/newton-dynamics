@@ -235,7 +235,7 @@ ndBodyKinematic* ndBodyKinematic::GetAsBodyKinematic()
 
 ndScene* ndBodyKinematic::GetScene() const
 {
-	return m_scene;
+	return (ndScene*)*m_scene;
 }
 
 void ndBodyKinematic::SetSceneNodes(ndScene* const scene, ndBodyListView::ndNode* const node)
@@ -359,7 +359,7 @@ void ndBodyKinematic::SetAutoSleep(bool state)
 
 ndModel* ndBodyKinematic::GetModel() const
 {
-	return m_model;
+	return (ndModel*) *m_model;
 }
 
 void ndBodyKinematic::SetModel(ndModel* const model)
@@ -369,7 +369,7 @@ void ndBodyKinematic::SetModel(ndModel* const model)
 
 ndSkeletonContainer* ndBodyKinematic::GetSkeleton() const
 {
-	return m_skeletonContainer;
+	return (ndSkeletonContainer*)*m_skeletonContainer;
 }
 
 void ndBodyKinematic::SetSkeleton(ndSkeletonContainer* const skeleton)
@@ -599,7 +599,7 @@ void ndBodyKinematic::SetIntrinsicMassMatrix(ndFloat32 mass, const ndShapeInstan
 	ndShapeInstance instance(shapeInstance);
 	ndMatrix matrix(instance.GetLocalMatrix());
 	matrix.m_posit = ndVector::m_wOne;
-	if (instance.GetShape()->GetAsShapeConvexHull())
+	if (instance.GetShape()->GetAsShapeCompound())
 	{
 		matrix.m_posit = saveCom * ndVector::m_negOne;
 		matrix.m_posit.m_w = ndFloat32 (1.0f);
@@ -765,10 +765,7 @@ void ndBodyKinematic::SetMatrixUpdateScene(const ndMatrix& matrix)
 			{
 				bodyNode->SetAabb(m_minAabb, m_maxAabb);
 			}
-			//sceneEquilibrium = ndUnsigned8(!sceneForceUpdate & (test != 0));
 		}
-		//m_sceneForceUpdate = 0;
-		//m_sceneEquilibrium = sceneEquilibrium;
 
 		m_equilibrium = 0;
 		m_sceneEquilibrium = 0;
@@ -828,8 +825,10 @@ ndVector ndBodyKinematic::CalculateLinearMomentum() const
 ndVector ndBodyKinematic::CalculateAngularMomentum() const
 {
 	const ndVector localOmega(m_inertiaPrincipalAxis.UnrotateVector (m_matrix.UnrotateVector(m_omega)));
-	const ndVector localAngularMomentum(m_mass * localOmega);
-	return m_matrix.RotateVector(m_inertiaPrincipalAxis.RotateVector(localAngularMomentum));
+	const ndVector intrinsicAngularMomentum(m_mass * localOmega);
+	const ndVector localAngularMomentum(m_inertiaPrincipalAxis.RotateVector(intrinsicAngularMomentum));
+	const ndVector angularMomentum (m_matrix.RotateVector(localAngularMomentum));
+	return angularMomentum;
 }
 
 ndJacobian ndBodyKinematic::CalculateNetForce() const
@@ -906,7 +905,7 @@ void ndBodyKinematic::IntegrateVelocity(ndFloat32 timestep)
 			m_uniqueId,	
 			m_omega.m_x, m_omega.m_y, m_omega.m_z, 
 			m_veloc.m_x, m_veloc.m_y, m_veloc.m_z));
-		//ndAssert(0);
+		ndAssert(0);
 	}
 #endif
 
