@@ -95,13 +95,13 @@ class ndSpatialVector : public ndClassAlloc
 	{
 		ndAssert(m_f[6] == ndFloat32(0.0f));
 		ndAssert(m_f[7] == ndFloat32(0.0f));
-		ndBigVector tmp(m_data.m_low * v.m_data.m_low + m_data.m_high * v.m_data.m_high);
+		const ndBigVector tmp(m_data.m_low * v.m_data.m_low + m_data.m_high * v.m_data.m_high);
 		return tmp.AddHorizontal().GetScalar();
 	}
 
 	inline ndSpatialVector Scale(ndFloat64 s) const
 	{
-		ndBigVector tmp(s);
+		const ndBigVector tmp(s);
 		return ndSpatialVector(m_data.m_low * tmp, m_data.m_high * tmp);
 	}
 

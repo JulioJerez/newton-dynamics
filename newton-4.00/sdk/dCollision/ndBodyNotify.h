@@ -24,6 +24,7 @@
 
 #include "ndCollisionStdafx.h"
 
+class ndMesh;
 class ndBody;
 class ndUrdfBodyNotify;
 
@@ -52,6 +53,9 @@ class ndBodyNotify : public ndContainersFreeListAlloc<ndBodyNotify>
 
 	D_COLLISION_API virtual void OnPreUpdate(ndFloat32 timestep);
 	D_COLLISION_API virtual void OnPostUpdate(ndFloat32 timestep);
+
+	D_COLLISION_API virtual void OnSave(ndMesh* const parentNode) const;
+	//D_COLLISION_API virtual ndSharedPtr<ndMesh> GetMesh() const;
 
 	private:
 	ndVector m_defaultGravity;

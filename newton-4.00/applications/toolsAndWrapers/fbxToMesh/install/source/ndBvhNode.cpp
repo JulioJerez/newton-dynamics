@@ -199,6 +199,138 @@ ndBvhSceneManager::~ndBvhSceneManager()
 	CleanUp();
 }
 
+// **************************************************************
+//
+//  functions
+//
+// **************************************************************
+ndBvhNode::ndBvhNode(ndBvhNode* const parent)
+	:ndContainersFreeListAlloc<ndBvhNode>()
+	,m_minBox(ndFloat32(-1.0e15f))
+	,m_maxBox(ndFloat32(1.0e15f))
+	,m_parent(parent)
+	,m_lock()
+	,m_depthLevel(0)
+	,m_isDead(0)
+	,m_bhvLinked(0)
+{
+#ifdef _DEBUG
+	m_nodeId = 0;
+#endif
+}
+
+ndBvhNode::ndBvhNode(const ndBvhNode& src)
+	:ndContainersFreeListAlloc<ndBvhNode>()
+	,m_minBox(src.m_minBox)
+	,m_maxBox(src.m_maxBox)
+	,m_parent(nullptr)
+	,m_lock()
+	,m_depthLevel(0)
+	,m_isDead(0)
+	,m_bhvLinked(0)
+{
+#ifdef _DEBUG
+	m_nodeId = 0;
+#endif
+}
+
+ndBvhNode::~ndBvhNode()
+{
+}
+
+ndBvhNode* ndBvhNode::GetAsSceneNode() const
+{
+	return (ndBvhNode*)this;
+}
+
+ndBvhLeafNode* ndBvhNode::GetAsSceneBodyNode() const
+{
+	return nullptr;
+}
+
+ndBvhInternalNode* ndBvhNode::GetAsSceneTreeNode() const
+{
+	return nullptr;
+}
+
+ndBodyKinematic* ndBvhNode::GetBody() const
+{
+	return nullptr;
+}
+
+ndBvhNode* ndBvhNode::GetLeft() const
+{
+	return nullptr;
+}
+
+ndBvhNode* ndBvhNode::GetRight() const
+{
+	return nullptr;
+}
+
+void ndBvhNode::Kill()
+{
+	m_isDead = 1;
+}
+
+void ndBvhNode::SetAabb(const ndVector& minBox, const ndVector& maxBox)
+{
+	ndAssert(minBox.m_x <= maxBox.m_x);
+	ndAssert(minBox.m_y <= maxBox.m_y);
+	ndAssert(minBox.m_z <= maxBox.m_z);
+
+	const ndVector p0(minBox * m_aabbQuantization);
+	//const ndVector p1(maxBox * m_aabbQuantization + ndVector::m_one);
+	const ndVector p1(maxBox * m_aabbQuantization);
+
+	//const ndVector xxx0 = (maxBox * m_aabbQuantization);
+	//const ndVector xxx1 = (xxx0 + ndVector::m_one).Floor();
+	//const ndVector xxx2 = xxx0.Ceiling();
+
+	m_minBox = p0.Floor() * m_aabbInvQuantization;
+	//m_maxBox = p1.Floor() * m_aabbInvQuantization;
+	m_maxBox = p1.Ceiling() * m_aabbInvQuantization;
+
+	ndAssert(m_minBox.m_w == ndFloat32(0.0f));
+	ndAssert(m_maxBox.m_w == ndFloat32(0.0f));
+}
+
+ndBvhNode* ndBvhNode::Clone() const
+{
+	ndAssert(0);
+	return nullptr;
+}
+
+ndBvhLeafNode* ndBvhLeafNode::GetAsSceneBodyNode() const
+{
+	return (ndBvhLeafNode*)this;
+}
+
+ndBodyKinematic* ndBvhLeafNode::GetBody() const
+{
+	return m_body;
+}
+
+ndBvhInternalNode* ndBvhInternalNode::GetAsSceneTreeNode() const
+{
+	return (ndBvhInternalNode*)this;
+}
+
+ndBvhNode* ndBvhInternalNode::GetLeft() const
+{
+	return m_left;
+}
+
+ndBvhNode* ndBvhInternalNode::GetRight() const
+{
+	return m_right;
+}
+
+ndBvhNodeArray& ndBvhSceneManager::GetNodeArray()
+{
+	return m_workingArray;
+}
+
 ndBvhNode* ndBvhSceneManager::AddBody(ndBodyKinematic* const body, ndBvhNode* root)
 {
 	m_workingArray.m_isDirty = 1;

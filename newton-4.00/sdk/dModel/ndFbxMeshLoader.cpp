@@ -303,14 +303,23 @@ void ndFbxMeshLoader::FreezeScale(ndMesh* const mesh)
 		ndMatrix stretchAxis;
 		ndMatrix transformMatrix;
 		
-		ndMatrix matrix(meshNode->m_matrix * scaleMatrix);
+		ndMatrix matrix(meshNode->GetMatrix() * scaleMatrix);
 		matrix.PolarDecomposition(transformMatrix, scale, stretchAxis);
-		meshNode->m_matrix = transformMatrix;
+		meshNode->SetMatrix(transformMatrix);
 		scaleMatrix = ndMatrix(ndGetIdentityMatrix(), scale, stretchAxis);
 
 		ndSharedPtr<ndMeshEffect> effectMesh (meshNode->GetMesh());
 		if (*effectMesh)
 		{
+			ndVector geometryScale;
+			ndMatrix geometryStretchAxis;
+			ndMatrix geometryTransformMatrix;
+
+			ndMatrix geometryMatrix(meshNode->GetGeometryMatrix() * scaleMatrix);
+			geometryMatrix.PolarDecomposition(geometryTransformMatrix, geometryScale, geometryStretchAxis);
+			meshNode->SetGeometryMatrix(geometryTransformMatrix);
+			geometryMatrix = ndMatrix(ndGetIdentityMatrix(), geometryScale, geometryStretchAxis);
+
 			effectMesh->ApplyTransform(scaleMatrix);
 		}
 
@@ -382,7 +391,7 @@ void ndFbxMeshLoader::AlignToWorld(ndMesh* const mesh)
 {
 	ndFixSizeArray<ndMesh*, ND_FBX_MAX_CHILDREN> entBuffer(0);
 
-	ndMatrix rotation(mesh->m_matrix);
+	ndMatrix rotation(mesh->GetMatrix());
 	ndVector posit(rotation.m_posit);
 	rotation.m_posit = ndVector::m_wOne;
 
@@ -393,8 +402,10 @@ void ndFbxMeshLoader::AlignToWorld(ndMesh* const mesh)
 		entBuffer.PushBack(child);
 	}
 
-	mesh->m_matrix = ndGetIdentityMatrix();
-	mesh->m_matrix.m_posit = posit;
+	ndMatrix matrix(ndGetIdentityMatrix());
+	matrix.m_posit = posit;
+	mesh->SetMatrix(matrix);
+
 	if (mesh->GetScaleCurve().GetCount())
 	{
 		ndAssert(0);
@@ -404,12 +415,15 @@ void ndFbxMeshLoader::AlignToWorld(ndMesh* const mesh)
 	{
 		ndMesh* const meshNode = entBuffer.Pop();
 
-		const ndMatrix entMatrix(invRotation * meshNode->m_matrix * rotation);
-		meshNode->m_matrix = entMatrix;
+		const ndMatrix entMatrix(invRotation * meshNode->GetMatrix() * rotation);
+		//meshNode->m_matrix = entMatrix;
+		meshNode->SetMatrix(entMatrix);
 
 		ndSharedPtr<ndMeshEffect> effectMesh (meshNode->GetMesh());
 		if (*effectMesh)
 		{
+			const ndMatrix meshMatrix(invRotation * meshNode->GetGeometryMatrix() * rotation);
+			meshNode->SetGeometryMatrix(meshMatrix);
 			effectMesh->ApplyTransform(rotation);
 		}
 
@@ -481,7 +495,7 @@ void ndFbxMeshLoader::CalculateBoneProperties(ndMesh* const entity)
 				ndMesh::ndNodeType type = child->GetNodeType();
 				if ((type == ndMesh::m_bone) || (type == ndMesh::m_boneEnd))
 				{
-					ndVector posit(child->m_matrix.m_posit);
+					ndVector posit(child->GetMatrix().m_posit);
 					if (posit.m_x < ndFloat32(1.0e-4f))
 					{
 						ndFloat32 dist2 = posit.m_y * posit.m_y + posit.m_z * posit.m_z;
@@ -496,7 +510,7 @@ void ndFbxMeshLoader::CalculateBoneProperties(ndMesh* const entity)
 
 			if (boneChild)
 			{
-				ndVector posit(boneChild->m_matrix.m_posit);
+				ndVector posit(boneChild->GetMatrix().m_posit);
 				meshNode->SetBoneTarget(posit);
 			}
 			else if (meshNode->GetChildren().GetCount())
@@ -505,7 +519,7 @@ void ndFbxMeshLoader::CalculateBoneProperties(ndMesh* const entity)
 				for (ndList<ndSharedPtr<ndMesh>>::ndNode* node = meshNode->GetChildren().GetFirst(); node; node = node->GetNext())
 				{
 					ndMesh* const child = *node->GetInfo();
-					ndVector posit(child->m_matrix.m_posit);
+					ndVector posit(child->GetMatrix().m_posit);
 					if (posit.m_x < ndFloat32(0.0f))
 					{
 						ndFloat32 dist2 = posit.m_y * posit.m_y + posit.m_z * posit.m_z;
@@ -517,7 +531,7 @@ void ndFbxMeshLoader::CalculateBoneProperties(ndMesh* const entity)
 					}
 				}
 				ndAssert(boneChild);
-				ndVector posit(boneChild->m_matrix.m_posit);
+				ndVector posit(boneChild->GetMatrix().m_posit);
 				meshNode->SetBoneTarget(posit);
 				boneChild->SetNodeType(ndMesh::m_boneEnd);
 			}
@@ -705,7 +719,8 @@ void ndFbxMeshLoader::ImportMeshNode(ofbx::Object* const fbxNode, ndFbx2ndMeshNo
 	meshEffect->BuildFromIndexList(&format);
 
 	ndMatrix pivotMatrix(ofbxMatrix2dMatrix(fbxMesh->getGeometricMatrix()));
-	meshEffect->ApplyTransform(pivotMatrix);
+	//meshEffect->ApplyTransform(pivotMatrix);
+	entity->SetGeometryMatrix(pivotMatrix);
 	entity->SetMesh(meshEffect);
 }
 
@@ -724,7 +739,7 @@ ndMesh* ndFbxMeshLoader::CreateMeshHierarchy(ofbx::IScene* const fbxScene, ndFbx
 	const ofbx::GlobalSettings& globalSettings = *fbxScene->getGlobalSettings();
 	if (globalSettings.UpAxis == UpVector_AxisY)
 	{
-		mesh->m_matrix = ndPitchMatrix(90.0f * ndDegreeToRad);
+		mesh->SetMatrix(ndPitchMatrix(90.0f * ndDegreeToRad));
 	}
 	
 	{
@@ -745,7 +760,7 @@ ndMesh* ndFbxMeshLoader::CreateMeshHierarchy(ofbx::IScene* const fbxScene, ndFbx
 		data.m_parentNode->AddChild(node);
 		ndMatrix localMatrix(ofbxMatrix2dMatrix(data.m_fbxNode->getLocalTransform()));
 		node->SetName(data.m_fbxNode->name);
-		node->m_matrix = localMatrix;
+		node->SetMatrix(localMatrix);
 	
 		nodeMap.Insert(*node, data.m_fbxNode);
 		{
@@ -1220,7 +1235,7 @@ ndSharedPtr<ndMesh> ndFbxMeshLoader::LoadMesh(const char* const fullPathName, bo
 	{
 		OptimizeAnimation(*mesh);
 	}
-	if ((mesh->GetChildren().GetCount() == 1) && mesh->m_matrix.TestIdentity())
+	if ((mesh->GetChildren().GetCount() == 1) && mesh->GetMatrix().TestIdentity())
 	{
 		ndSharedPtr<ndMesh> child (mesh->GetChildren().GetFirst()->GetInfo());
 		mesh->RemoveChild(child);

@@ -47,7 +47,7 @@ ndModelNotify::~ndModelNotify()
 
 ndModel* ndModelNotify::GetModel() const
 {
-	return m_model;
+	return (ndModel*)*m_model;
 }
 
 void ndModelNotify::SetModel(ndModel* const model)

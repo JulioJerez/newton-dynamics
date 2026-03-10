@@ -98,8 +98,8 @@ class ndExcavatorController : public ndModelNotify
 		ndMatrix matrix(location);
 		matrix.m_posit = FindFloor(*scene->GetWorld(), matrix.m_posit, 200.0f);
 
-		ndMatrix saveMatrix(mesh.m_mesh->m_matrix);
-		mesh.m_mesh->m_matrix = saveMatrix * matrix;
+		ndMatrix saveMatrix(mesh.m_mesh->GetMatrix());
+		mesh.m_mesh->SetMatrix(saveMatrix * matrix);
 
 		// using a model articulation for this vehicle
 		ndSharedPtr<ndModel> vehicleModel(new ndModelArticulation());
@@ -111,7 +111,7 @@ class ndExcavatorController : public ndModelNotify
 		world->AddModel(vehicleModel);
 
 		// restore mesh Matrix 
-		mesh.m_mesh->m_matrix = saveMatrix;
+		mesh.m_mesh->SetMatrix(saveMatrix);
 		return controller;
 	}
 

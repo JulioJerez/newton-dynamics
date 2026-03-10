@@ -28,12 +28,10 @@ ndShapeNull::ndShapeNull()
 	:ndShape(m_nullCollision)
 {
 	m_inertia = ndVector::m_one | ndVector::m_triplexMask;
-	ndAssert(ndMemory::CheckMemory(this));
 }
 
 ndShapeNull::~ndShapeNull()
 {
-	ndAssert(ndMemory::CheckMemory(this));
 }
 
 ndShapeNull* ndShapeNull::GetAsShapeNull()

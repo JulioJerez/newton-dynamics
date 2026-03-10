@@ -111,7 +111,13 @@ void ndThread::ThreadFunctionCallback()
 {
 #ifndef D_USE_THREAD_EMULATION
 	#ifdef WIN32
-		std::thread::native_handle_type handle = std::thread::native_handle();
+		HANDLE handle;
+		#if (defined (__MINGW32__) || defined (__MINGW64__))
+			handle = reinterpret_cast<HANDLE>(std::thread::native_handle());
+		#else
+			handle = std::thread::native_handle();
+		#endif
+
 		ndInt32 priority = GetThreadPriority(handle);
 		switch (priority)
 		{

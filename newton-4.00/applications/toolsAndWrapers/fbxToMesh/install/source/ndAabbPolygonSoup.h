@@ -42,12 +42,12 @@ enum ndIntersectStatus
 	m_continueSearh
 };
 
-typedef ndIntersectStatus(*ndAaabbIntersectCallback) (void* const context,
-	const ndFloat32* const polygon, ndInt32 strideInBytes,
+typedef ndIntersectStatus(*ndAaabbIntersectCallback) (
+	void* const context, const ndVector* const vertexBuffer, 
 	const ndInt32* const indexArray, ndInt32 indexCount, ndFloat32 hitDistance);
 
-typedef ndFloat32(*ndRayIntersectCallback) (void* const context,
-	const ndFloat32* const polygon, ndInt32 strideInBytes,
+typedef ndFloat32(*ndRayIntersectCallback) (
+	void* const context, const ndVector* const vertexBuffer,
 	const ndInt32* const indexArray, ndInt32 indexCount);
 
 /// Base class for creating a leafless bounding box hierarchy for queering a polygon list index list mesh.
@@ -118,28 +118,30 @@ class ndAabbPolygonSoup: public ndPolygonSoupDatabase
 		{
 		}
 
-		inline ndFloat32 RayDistance (const ndFastRay& ray, const ndTriplex* const vertexArray) const
+		inline ndFloat32 RayDistance (const ndFastRay& ray, const ndVector* const vertexArray) const
 		{
-			ndVector minBox (&vertexArray[m_indexBox0].m_x);
-			ndVector maxBox (&vertexArray[m_indexBox1].m_x);
-			minBox = minBox & ndVector::m_triplexMask;
-			maxBox = maxBox & ndVector::m_triplexMask;
+			//ndVector minBox (&vertexArray[m_indexBox0].m_x);
+			//ndVector maxBox (&vertexArray[m_indexBox1].m_x);
+			//minBox = minBox & ndVector::m_triplexMask;
+			//maxBox = maxBox & ndVector::m_triplexMask;
+			const ndVector minBox = vertexArray[m_indexBox0];
+			const ndVector maxBox = vertexArray[m_indexBox1];
 			return ray.BoxIntersect(minBox, maxBox);
 		}
 
-		inline ndFloat32 BoxPenetration (const ndFastAabb& obb, const ndTriplex* const vertexArray) const
+		inline ndFloat32 BoxPenetration(const ndFastAabb& obb, const ndVector* const vertexArray) const
 		{
-			ndVector p0 (&vertexArray[m_indexBox0].m_x);
-			ndVector p1 (&vertexArray[m_indexBox1].m_x);
-			p0 = p0 & ndVector::m_triplexMask;
-			p1 = p1 & ndVector::m_triplexMask;
-			ndVector minBox (p0 - obb.m_p1);
-			ndVector maxBox (p1 - obb.m_p0);
+			const ndVector& p0 = vertexArray[m_indexBox0];
+			const ndVector& p1 = vertexArray[m_indexBox1];
+			//p0 = p0 & ndVector::m_triplexMask;
+			//p1 = p1 & ndVector::m_triplexMask;
+			const ndVector minBox (p0 - obb.m_p1);
+			const ndVector maxBox (p1 - obb.m_p0);
 			ndAssert(maxBox.m_x >= minBox.m_x);
 			ndAssert(maxBox.m_y >= minBox.m_y);
 			ndAssert(maxBox.m_z >= minBox.m_z);
 
-			ndVector mask ((minBox * maxBox) < ndVector::m_zero);
+			const ndVector mask ((minBox * maxBox) < ndVector::m_zero);
 			ndVector dist (maxBox.GetMin (minBox.Abs()) & mask);
 			dist = dist.GetMin(dist.ShiftTripleRight());
 			dist = dist.GetMin(dist.ShiftTripleRight());
@@ -151,14 +153,14 @@ class ndAabbPolygonSoup: public ndPolygonSoupDatabase
 
 				origin = obb.UntransformVector(origin);
 				size = obb.m_absDir.RotateVector(size);
-				ndVector q0 (origin - size);
-				ndVector q1 (origin + size);
-				ndVector minBox1 (q0 - obb.m_size);
-				ndVector maxBox1 (q1 + obb.m_size);
+				const ndVector q0 (origin - size);
+				const ndVector q1 (origin + size);
+				const ndVector minBox1 (q0 - obb.m_size);
+				const ndVector maxBox1 (q1 + obb.m_size);
 				ndAssert(maxBox1.m_x >= minBox1.m_x);
 				ndAssert(maxBox1.m_y >= minBox1.m_y);
 				ndAssert(maxBox1.m_z >= minBox1.m_z);
-				ndVector mask1 ((minBox1 * maxBox1) < ndVector::m_zero);
+				const ndVector mask1 ((minBox1 * maxBox1) < ndVector::m_zero);
 				ndVector dist1 (maxBox1.GetMin (minBox1.Abs()) & mask1);
 				dist1 = dist1.GetMin(dist1.ShiftTripleRight());
 				dist1 = dist1.GetMin(dist1.ShiftTripleRight());
@@ -166,22 +168,24 @@ class ndAabbPolygonSoup: public ndPolygonSoupDatabase
 			} 
 			else 
 			{
-				ndVector p1p0((minBox.Abs()).GetMin(maxBox.Abs()).AndNot(mask));
+				const ndVector p1p0((minBox.Abs()).GetMin(maxBox.Abs()).AndNot(mask));
 				dist = p1p0.DotProduct(p1p0);
 				dist = dist.Sqrt() * ndVector::m_negOne;
 			}
 			return	dist.GetScalar();
 		}
 
-		inline ndFloat32 BoxIntersect (const ndFastRay& ray, const ndFastRay& obbRay, const ndFastAabb& obb, const ndTriplex* const vertexArray) const
+		inline ndFloat32 BoxIntersect (const ndFastRay& ray, const ndFastRay& obbRay, const ndFastAabb& obb, const ndVector* const vertexArray) const
 		{
-			ndVector p0 (&vertexArray[m_indexBox0].m_x);
-			ndVector p1 (&vertexArray[m_indexBox1].m_x);
-			p0 = p0 & ndVector::m_triplexMask;
-			p1 = p1 & ndVector::m_triplexMask;
+			//ndVector p0 (&vertexArray[m_indexBox0].m_x);
+			//ndVector p1 (&vertexArray[m_indexBox1].m_x);
+			//p0 = p0 & ndVector::m_triplexMask;
+			//p1 = p1 & ndVector::m_triplexMask;
 
-			ndVector minBox (p0 - obb.m_p1);
-			ndVector maxBox (p1 - obb.m_p0);
+			const ndVector& p0 = vertexArray[m_indexBox0];
+			const ndVector& p1 = vertexArray[m_indexBox1];
+			const ndVector minBox (p0 - obb.m_p1);
+			const ndVector maxBox (p1 - obb.m_p0);
 			ndFloat32 dist = ray.BoxIntersect(minBox, maxBox);
 			if (dist < ndFloat32 (1.0f)) 
 			{
@@ -190,11 +194,11 @@ class ndAabbPolygonSoup: public ndPolygonSoupDatabase
 
 				origin = obb.UntransformVector(origin);
 				size = obb.m_absDir.RotateVector(size);
-				ndVector q0 (origin - size);
-				ndVector q1 (origin + size);
+				const ndVector q0 (origin - size);
+				const ndVector q1 (origin + size);
 
-				ndVector minBox1 (q0 - obb.m_size);
-				ndVector maxBox1 (q1 + obb.m_size);
+				const ndVector minBox1 (q0 - obb.m_size);
+				const ndVector maxBox1 (q1 + obb.m_size);
 				ndFloat32 dist1 = obbRay.BoxIntersect(minBox1, maxBox1);
 				dist = (dist1  > ndFloat32 (1.0f)) ? dist1 : ndMax (dist1, dist);
 			}
@@ -254,16 +258,18 @@ class ndAabbPolygonSoup: public ndPolygonSoupDatabase
 	/// Returns the bounding box of node in point p0 and p1.
 	inline void GetNodeAabb(const ndNode* const node, ndVector& p0, ndVector& p1) const
 	{
-		p0 = ndVector (&((ndTriplex*)m_localVertex)[node->m_indexBox0].m_x);
-		p1 = ndVector (&((ndTriplex*)m_localVertex)[node->m_indexBox1].m_x);
-		p0 = p0 & ndVector::m_triplexMask;
-		p1 = p1 & ndVector::m_triplexMask;
+		//p0 = ndVector (&((ndTriplex*)m_localVertex)[node->m_indexBox0].m_x);
+		//p1 = ndVector (&((ndTriplex*)m_localVertex)[node->m_indexBox1].m_x);
+		//p0 = p0 & ndVector::m_triplexMask;
+		//p1 = p1 & ndVector::m_triplexMask;
+		p0 = m_localVertex[node->m_indexBox0];
+		p1 = m_localVertex[node->m_indexBox1];
 	}
 
 	private:
 	ndNodeBuilder* BuildTopDown (ndNodeBuilder* const leafArray, ndInt32 firstBox, ndInt32 lastBox, ndNodeBuilder** const allocator) const;
 	ndFloat32 CalculateFaceMaxDiagonal (const ndVector* const vertex, ndInt32 indexCount, const ndInt32* const indexArray) const;
-	static ndIntersectStatus CalculateAllFaceEdgeNormals(void* const context, const ndFloat32* const polygon, ndInt32 strideInBytes, const ndInt32* const indexArray, ndInt32 indexCount, ndFloat32 hitDistance);
+	static ndIntersectStatus CalculateAllFaceEdgeNormals(void* const context, const ndVector* const polygon, const ndInt32* const indexArray, ndInt32 indexCount, ndFloat32 hitDistance);
 	
 	ndNode* m_aabb;
 	ndInt32* m_indices;

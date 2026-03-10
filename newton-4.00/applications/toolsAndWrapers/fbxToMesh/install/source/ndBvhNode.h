@@ -38,8 +38,12 @@ class ndBvhNode : public ndContainersFreeListAlloc<ndBvhNode>
 	virtual ndBvhNode* Clone() const;
 
 	void Kill();
-	void GetAabb(ndVector& minBox, ndVector& maxBox) const;
 	void SetAabb(const ndVector& minBox, const ndVector& maxBox);
+	void GetAabb(ndVector& minBox, ndVector& maxBox) const
+	{
+		minBox = m_minBox;
+		maxBox = m_maxBox;
+	}
 
 	virtual ndBvhNode* GetAsSceneNode() const;
 	virtual ndBvhLeafNode* GetAsSceneBodyNode() const;
@@ -195,138 +199,5 @@ class ndBvhSceneManager
 	ndBvhNodeArray m_workingArray;
 	ndBuildBvhTreeBuildState m_bvhBuildState;
 };
-
-
-// **************************************************************
-//
-//  inline functions
-//
-// **************************************************************
-inline ndBvhNode::ndBvhNode(ndBvhNode* const parent)
-	:ndContainersFreeListAlloc<ndBvhNode>()
-	,m_minBox(ndFloat32(-1.0e15f))
-	,m_maxBox(ndFloat32(1.0e15f))
-	,m_parent(parent)
-	,m_lock()
-	,m_depthLevel(0)
-	,m_isDead(0)
-	,m_bhvLinked(0)
-{
-#ifdef _DEBUG
-	m_nodeId = 0;
-#endif
-}
-
-inline ndBvhNode::ndBvhNode(const ndBvhNode& src)
-	:ndContainersFreeListAlloc<ndBvhNode>()
-	,m_minBox(src.m_minBox)
-	,m_maxBox(src.m_maxBox)
-	,m_parent(nullptr)
-	,m_lock()
-	,m_depthLevel(0)
-	,m_isDead(0)
-	,m_bhvLinked(0)
-{
-#ifdef _DEBUG
-	m_nodeId = 0;
-#endif
-}
-
-inline ndBvhNode::~ndBvhNode()
-{
-}
-
-inline ndBvhNode* ndBvhNode::GetAsSceneNode() const
-{ 
-	return (ndBvhNode*)this;
-}
-
-inline ndBvhLeafNode* ndBvhNode::GetAsSceneBodyNode() const
-{ 
-	return nullptr; 
-}
-
-inline ndBvhInternalNode* ndBvhNode::GetAsSceneTreeNode() const
-{ 
-	return nullptr; 
-}
-
-inline ndBodyKinematic* ndBvhNode::GetBody() const
-{
-	return nullptr;
-}
-
-inline ndBvhNode* ndBvhNode::GetLeft() const
-{
-	return nullptr;
-}
-
-inline ndBvhNode* ndBvhNode::GetRight() const
-{
-	return nullptr;
-}
-
-inline void ndBvhNode::Kill()
-{
-	m_isDead = 1;
-}
-
-inline void ndBvhNode::GetAabb(ndVector& minBox, ndVector& maxBox) const
-{
-	minBox = m_minBox;
-	maxBox = m_maxBox;
-}
-
-inline void ndBvhNode::SetAabb(const ndVector& minBox, const ndVector& maxBox)
-{
-	ndAssert(minBox.m_x <= maxBox.m_x);
-	ndAssert(minBox.m_y <= maxBox.m_y);
-	ndAssert(minBox.m_z <= maxBox.m_z);
-
-	const ndVector p0(minBox * m_aabbQuantization);
-	const ndVector p1(maxBox * m_aabbQuantization + ndVector::m_one);
-
-	m_minBox = p0.Floor() * m_aabbInvQuantization;
-	m_maxBox = p1.Floor() * m_aabbInvQuantization;
-
-	ndAssert(m_minBox.m_w == ndFloat32(0.0f));
-	ndAssert(m_maxBox.m_w == ndFloat32(0.0f));
-}
-
-inline ndBvhNode* ndBvhNode::Clone() const
-{
-	ndAssert(0);
-	return nullptr;
-}
-
-inline ndBvhLeafNode* ndBvhLeafNode::GetAsSceneBodyNode() const
-{
-	return (ndBvhLeafNode*)this;
-}
-
-inline ndBodyKinematic* ndBvhLeafNode::GetBody() const
-{
-	return m_body;
-}
-
-inline ndBvhInternalNode* ndBvhInternalNode::GetAsSceneTreeNode() const
-{
-	return (ndBvhInternalNode*)this;
-}
-
-inline ndBvhNode* ndBvhInternalNode::GetLeft() const
-{
-	return m_left;
-}
-
-inline ndBvhNode* ndBvhInternalNode::GetRight() const
-{
-	return m_right;
-}
-
-inline ndBvhNodeArray& ndBvhSceneManager::GetNodeArray()
-{
-	return m_workingArray;
-}
 
 #endif

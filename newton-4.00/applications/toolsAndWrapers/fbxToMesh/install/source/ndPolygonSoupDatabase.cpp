@@ -32,7 +32,6 @@
 ndPolygonSoupDatabase::ndPolygonSoupDatabase(const char* const)
 {
 	m_vertexCount = 0;
-	m_strideInBytes = 0;
 	m_localVertex = nullptr;
 }
 
@@ -55,15 +54,15 @@ ndInt32 ndPolygonSoupDatabase::GetVertexCount()	const
 	return m_vertexCount;
 }
 
-ndFloat32* ndPolygonSoupDatabase::GetLocalVertexPool() const
+ndVector* ndPolygonSoupDatabase::GetLocalVertexPool() const
 {
 	return m_localVertex;
 }
 
-ndInt32 ndPolygonSoupDatabase::GetStrideInBytes() const
-{
-	return m_strideInBytes;
-}
+//ndInt32 ndPolygonSoupDatabase::GetStrideInBytes() const
+//{
+//	return m_strideInBytes;
+//}
 
 ndFloat32 ndPolygonSoupDatabase::GetRadius() const
 {

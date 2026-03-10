@@ -50,20 +50,17 @@ class ndModel: public ndContainersFreeListAlloc<ndModel>
 
 	D_COLLISION_API ndSharedPtr<ndModelNotify>& GetNotifyCallback();
 	D_COLLISION_API void SetNotifyCallback(const ndSharedPtr<ndModelNotify>& notifyCallback);
-
-	D_COLLISION_API virtual void AddBodiesAndJointsToWorld() {}
-	D_COLLISION_API virtual void RemoveBodiesAndJointsFromWorld() {}
-
 	D_COLLISION_API virtual void SetSleep(ndFloat32, ndFloat32, ndFloat32, ndFloat32) const {}
 
 	protected:
-	virtual void OnAddToWorld() {}
-	virtual void OnRemoveFromToWorld() {}
+	D_COLLISION_API virtual void OnAddWorld() {}
+	D_COLLISION_API virtual void OnRemoveFromWorld() {}
 
 	ndWorld* m_world;
 
 	private:
-	ndModelList::ndNode* m_worldNode;
+	//ndModelList::ndNode* m_worldNode;
+	ndWeakPtr<ndModelList::ndNode> m_worldNode;
 	ndSharedPtr<ndModelNotify> m_notifyCallback;
 
 	friend class ndWorld;

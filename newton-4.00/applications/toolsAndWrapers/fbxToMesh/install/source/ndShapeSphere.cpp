@@ -35,7 +35,6 @@ ndShapeSphere::ndShapeSphere(ndFloat32 radius)
 	:ndShapeConvex(m_sphere)
 {
 	Init(radius);
-	ndAssert(ndMemory::CheckMemory(this));
 }
 
 ndShapeSphere::~ndShapeSphere()
@@ -45,7 +44,6 @@ ndShapeSphere::~ndShapeSphere()
 
 	ndShapeConvex::m_simplex = nullptr;
 	ndShapeConvex::m_vertex = nullptr;
-	ndAssert(ndMemory::CheckMemory(this));
 }
 
 void ndShapeSphere::TesselateTriangle(ndInt32 level, const ndVector& p0, const ndVector& p1, const ndVector& p2, ndInt32& count, ndVector* const output) const

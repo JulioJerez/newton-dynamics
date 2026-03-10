@@ -24,7 +24,6 @@
 #include "ndBodyNotify.h"
 #include "ndBodyKinematic.h"
 
-
 ndBodyNotify::ndBodyNotify(const ndBodyNotify& src)
 	:ndContainersFreeListAlloc<ndBodyNotify>()
 	,m_defaultGravity(src.m_defaultGravity)
@@ -50,12 +49,12 @@ ndBodyNotify* ndBodyNotify::Clone() const
 
 ndBody* ndBodyNotify::GetBody()
 { 
-	return m_body; 
+	return *m_body; 
 }
 
 const ndBody* ndBodyNotify::GetBody() const
 { 
-	return m_body; 
+	return *m_body; 
 }
 
 ndBodyNotify* ndBodyNotify::GetAsBodyNotify()
@@ -77,11 +76,6 @@ void ndBodyNotify::SetGravity(const ndVector & defaultGravity)
 {
 	m_defaultGravity = defaultGravity;
 }
-
-//void ndBodyNotify::OnTransform(ndInt32, const ndMatrix&)
-//{
-//	ndTrace(("please use new inteface %s\n", __FUNCTION__));
-//}
 
 void ndBodyNotify::OnTransform(ndFloat32, const ndMatrix&)
 {
@@ -108,3 +102,16 @@ void ndBodyNotify::OnApplyExternalForce(ndInt32, ndFloat32)
 	}
 }
 
+// this function is not called by the engine,
+// but and end application can call it by implementing 
+// the ndWord::PreUpdate(ndFloat32 timestep)
+void ndBodyNotify::OnPreUpdate(ndFloat32)
+{
+}
+
+// this function is not called by the engine,
+// but and end application can call it by implementing 
+// the ndWord::PostUpdate(ndFloat32 timestep)
+void ndBodyNotify::OnPostUpdate(ndFloat32)
+{
+}

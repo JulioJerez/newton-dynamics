@@ -27,7 +27,7 @@
 #include "ndBody.h"
 
 //#define D_USE_NEW_FLUID
-
+#if 0
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndBodyParticleSet: public ndBody, public ndBackgroundTask
 {
@@ -122,6 +122,7 @@ inline void ndBodyParticleSet::SetAsynUpdate(bool updatType)
 }
 
 
+#endif 
 #endif 
 
 

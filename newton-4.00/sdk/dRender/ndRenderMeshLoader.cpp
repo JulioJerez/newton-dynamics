@@ -74,12 +74,14 @@ bool ndRenderMeshLoader::MeshToRenderSceneNode(const ndString& materialBasePath)
 		ndSharedPtr<ndRenderSceneNode> entity(nullptr);
 		if (!(*parentNode))
 		{
-			m_renderMesh = ndSharedPtr<ndRenderSceneNode>(new ndRenderSceneNode(mesh->m_matrix));
+			m_renderMesh = ndSharedPtr<ndRenderSceneNode>(new ndRenderSceneNode(mesh->GetMatrix()));
+			m_renderMesh->SetPrimitiveMatrix(mesh->GetGeometryMatrix());
 			entity = m_renderMesh;
 		}
 		else
 		{
-			ndSharedPtr<ndRenderSceneNode> childNode(new ndRenderSceneNode(mesh->m_matrix));
+			ndSharedPtr<ndRenderSceneNode> childNode(new ndRenderSceneNode(mesh->GetMatrix()));
+			childNode->SetPrimitiveMatrix(mesh->GetGeometryMatrix());
 			parentNode->AddChild(childNode);
 			entity = childNode;
 		}

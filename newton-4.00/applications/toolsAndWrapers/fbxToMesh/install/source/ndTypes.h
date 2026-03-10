@@ -28,7 +28,7 @@
 	#endif
 #endif
 
-#define ND_NEWTON_VERSION	403
+#define ND_NEWTON_VERSION	404
 
 #if (defined (WIN32) || defined(_WIN32) || defined (_M_ARM) || defined (_M_ARM64))
 	#define NOMINMAX
@@ -125,9 +125,6 @@
     #endif
 #endif
 
-// uncommemt this line to enable memory corruption checks, (very slow and use lots of memory)
-//#define D_MEMORY_SANITY_CHECK
-
 // uncomment this to inforce double precision 
 //#define D_NEWTON_USE_DOUBLE
 
@@ -217,14 +214,20 @@
 	#define D_CORE_API 
 #endif
 
+#if defined(_MSC_VER)
+	#define D_FORCE_INLINE __forceinline 
+#else
+	#define D_FORCE_INLINE inline
+#endif
+
 typedef float ndReal;
 typedef int8_t ndInt8;
-typedef uint8_t ndUnsigned8;
 typedef int16_t ndInt16;
-typedef uint16_t ndUnsigned16;
 typedef int32_t ndInt32;
-typedef uint32_t ndUnsigned32;
 typedef int64_t ndInt64;
+typedef uint8_t ndUnsigned8;
+typedef uint16_t ndUnsigned16;
+typedef uint32_t ndUnsigned32;
 typedef uint64_t ndUnsigned64;
 
 typedef double ndFloat64;
@@ -239,7 +242,7 @@ typedef double ndFloat64;
 #define ndDegreeToRad	ndFloat32 (ndPi / 180.0f)
 #define ndRadToDegree  	ndFloat32 (180.0f / ndPi)
 
-extern D_CORE_API ndFloat32 ndExp_VS__Fix(ndReal x);
+extern D_CORE_API ndFloat32 ndExp_VS_Fix(ndReal x);
 
 #define ndSqrt(x)		ndFloat32 (sqrt(x))	
 #define ndSin(x)		ndFloat32 (sin(x))
@@ -250,7 +253,7 @@ extern D_CORE_API ndFloat32 ndExp_VS__Fix(ndReal x);
 #define ndCeil(x)		ndFloat32 (ceil(x))
 #define ndFloor(x)		ndFloat32 (floor(x))	
 //#define ndExp(x)		ndFloat32 (exp(x))
-#define ndExp(x)		ndExp_VS__Fix(ndReal(x))
+#define ndExp(x)		ndExp_VS_Fix(ndReal(x))
 #define ndPow(x,y)		ndFloat32 (pow(x,y))
 #define ndFmod(x,y)		ndFloat32 (fmod(x,y))
 #define ndTan(x)		ndFloat32 (tan(x))
@@ -289,26 +292,6 @@ union ndIntPtr
 	}
 	void* m_ptr;
 	ndInt64 m_int;
-};
-
-union ndDoubleInt
-{
-	struct 
-	{
-		ndInt32 m_intL;
-		ndInt32 m_intH;
-	};
-	void* m_ptr;
-	ndInt64 m_int;
-	ndFloat64 m_float;
-};
-
-class ndTriplex
-{
-	public:
-	ndFloat32 m_x;
-	ndFloat32 m_y;
-	ndFloat32 m_z;
 };
 
 class ndTriplexReal

@@ -50,14 +50,14 @@
 //#define DEFAULT_SCENE	24		// unicycle SAC trained controller
 //#define DEFAULT_SCENE	25		// unicycle PPO trained controller
 //#define DEFAULT_SCENE	26		// biped SAC trained controller
-//#define DEFAULT_SCENE	27		// biped PPO trained controller
+#define DEFAULT_SCENE	27		// biped PPO trained controller
 //#define DEFAULT_SCENE	28		// procedurally animated quadruped spider
 
 // These are the machine learning training demos
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// SAC cart pole training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// SAC double pendulum unicycle training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// PPO cart pole training
-#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 3)	// PPO double pendulum unicycle training
+//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 3)	// PPO double pendulum unicycle training
 
 // legacy demos 
 //#define DEFAULT_SCENE	12		// basic vehicle
@@ -678,7 +678,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_solverMode = ndWorld::ndSimdSoaSolver;
 	//m_solverMode = ndWorld::ndSimdAvx2Solver;
 	//m_solverPasses = 4;
-	m_workerThreads = 8;
+	m_workerThreads = 1;
 	//m_solverSubSteps = 2;
 	//m_showRaycastHit = true;
 	//m_showCenterOfMass = true;
@@ -688,7 +688,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_showModelsDebugInfo = true;
 	//m_showCollisionMeshMode = 1;
 	//m_showCollisionMeshMode = 2;
-	//m_showCollisionMeshMode = 3;		// solid wire frame
+	m_showCollisionMeshMode = 3;		// solid wire frame
 	m_synchronousPhysicsUpdate = true;
 	m_synchronousParticlesUpdate = true;
 	//m_showStaticMeshCollidingFaces = true;

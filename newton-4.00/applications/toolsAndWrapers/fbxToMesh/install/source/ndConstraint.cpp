@@ -46,27 +46,9 @@ void ndForceImpactPair::Push(ndFloat32 val)
 	m_initialGuess[sizeof(m_initialGuess) / sizeof(m_initialGuess[0]) - 1] = val;
 }
 
-ndFloat32 ndForceImpactPair::GetInitialGuess() const
-{
-	//return 100.0f;
-	ndFloat32 smallest = ndFloat32(1.0e15f);
-	ndFloat32 value = ndFloat32(ndFloat32(0.0f));
-	for (ndInt32 i = 0; i < ndInt32(sizeof(m_initialGuess) / sizeof(m_initialGuess[0])); ++i)
-	{
-		ndFloat32 mag = ndAbs(m_initialGuess[i]);
-		if (mag < smallest)
-		{
-			smallest = mag;
-			value = m_initialGuess[i];
-		}
-	}
-	return value;
-}
-
-
 ndConstraint::ndConstraint()
 	:ndContainersFreeListAlloc<ndConstraint>()
-	,m_forceBody0(ndVector::m_zero)
+	,m_forceBody0( ndVector::m_zero)
 	,m_torqueBody0(ndVector::m_zero)
 	,m_forceBody1(ndVector::m_zero)
 	,m_torqueBody1(ndVector::m_zero)
@@ -97,3 +79,152 @@ void ndConstraint::InitPointParam(ndPointParam& param, const ndVector& p0Global,
 	param.m_r1 = (p1Global - body1->m_globalCentreOfMass) & ndVector::m_triplexMask;
 }
 
+#ifdef _DEBUG
+void ndRightHandSide::SetSanityCheck(const ndConstraint* const joint)
+{
+	m_debugCheck = m_bilateral;
+	if (!joint->IsBilateral())
+	{
+		if (m_normalForceIndex == D_INDEPENDENT_ROW)
+		{
+			m_debugCheck = m_contact;
+		}
+		else if (m_normalForceIndex != D_OVERRIDE_FRICTION_ROW)
+		{
+			m_debugCheck = m_friction;
+		}
+	}
+}
+#else
+void ndRightHandSide::SetSanityCheck(const ndConstraint* const)
+{
+}
+#endif
+
+ndConstraint::~ndConstraint()
+{
+}
+
+ndContact* ndConstraint::GetAsContact()
+{
+	return nullptr;
+}
+
+ndJointBilateralConstraint* ndConstraint::GetAsBilateral()
+{
+	return nullptr;
+}
+
+bool ndConstraint::IsActive() const
+{
+	return m_active ? true : false;
+}
+
+void ndConstraint::SetActive(bool state)
+{
+	m_active = ndUnsigned8(state ? 1 : 0);
+}
+
+bool ndConstraint::IsBilateral() const
+{
+	return false;
+}
+
+ndUnsigned32 ndConstraint::GetRowsCount() const
+{
+	return m_maxDof;
+}
+
+//ndBodyKinematic* ndConstraint::GetBody0() const
+//{
+//	return m_body0;
+//}
+//
+//ndBodyKinematic* ndConstraint::GetBody1() const
+//{
+//	return m_body1;
+//}
+
+void ndConstraint::DebugJoint(ndConstraintDebugCallback&) const
+{
+}
+
+ndVector ndConstraint::GetForceBody0() const
+{
+	return m_forceBody0;
+}
+
+ndVector ndConstraint::GetTorqueBody0() const
+{
+	return m_torqueBody0;
+}
+
+ndVector ndConstraint::GetForceBody1() const
+{
+	return m_forceBody1;
+}
+
+ndVector ndConstraint::GetTorqueBody1() const
+{
+	return m_torqueBody1;
+}
+
+ndVector8 ndConstraint::GetForceTorqueBody0() const
+{
+	return ndVector8(m_forceBody0, m_torqueBody0);
+}
+
+ndVector8 ndConstraint::GetForceTorqueBody1() const
+{
+	return ndVector8(m_forceBody1, m_torqueBody1);
+}
+
+void ndConstraint::UpdateParameters()
+{
+}
+
+bool ndConstraint::CheckBlockMatrixPSD(const ndLeftHandSide* const bigMatrix, const ndRightHandSide* const bigRhs) const
+{
+	ndAssert(m_rowCount <= D_CONSTRAINT_MAX_ROWS);
+	ndFloat32 matrix[D_CONSTRAINT_MAX_ROWS][D_CONSTRAINT_MAX_ROWS];
+
+	const ndInt32 index = m_rowStart;
+	const ndInt32 count = m_rowCount;
+	const ndVector zero(ndVector::m_zero);
+
+	for (ndInt32 i = 0; i < count; ++i)
+	{
+		const ndLeftHandSide* const row_i = &bigMatrix[index + i];
+		const ndRightHandSide* const rhs = &bigRhs[index + i];
+
+		const ndJacobian& JtM0 = row_i->m_Jt.m_jacobianM0;
+		const ndJacobian& JtM1 = row_i->m_Jt.m_jacobianM1;
+		const ndJacobian& JMinvM0 = row_i->m_JMinv.m_jacobianM0;
+		const ndJacobian& JMinvM1 = row_i->m_JMinv.m_jacobianM1;
+		const ndVector tmpDiag(
+			JMinvM0.m_linear * JtM0.m_linear + JMinvM0.m_angular * JtM0.m_angular +
+			JMinvM1.m_linear * JtM1.m_linear + JMinvM1.m_angular * JtM1.m_angular);
+		
+		ndFloat32 diag = tmpDiag.AddHorizontal().GetScalar();
+		diag *= (ndFloat32(1.0f) + rhs->m_diagonalRegularizer);
+		matrix[i][i] = diag;
+
+		for (ndInt32 j = i + 1; j < m_rowCount; ++j)
+		{
+			const ndLeftHandSide* const row_j = &bigMatrix[index + j];
+			const ndJacobian& JtM0_j = row_j->m_Jt.m_jacobianM0;
+			const ndJacobian& JtM1_j = row_j->m_Jt.m_jacobianM1;
+
+			const ndVector offDiag(
+				JMinvM0.m_linear * JtM0_j.m_linear + JMinvM0.m_angular * JtM0_j.m_angular +
+				JMinvM1.m_linear * JtM1_j.m_linear + JMinvM1.m_angular * JtM1_j.m_angular);
+
+			ndFloat32 off = offDiag.AddHorizontal().GetScalar();
+			matrix[i][j] = off;
+			matrix[j][i] = off;
+		}
+	}
+
+	bool test = !count || ndTestPSDmatrix(count, D_CONSTRAINT_MAX_ROWS, &matrix[0][0]);
+	return test;
+}

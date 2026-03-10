@@ -28,6 +28,7 @@
 #include "ndShapeInstance.h"
 #include "ndContactSolver.h"
 #include "ndBodyKinematic.h"
+#include "ndShapeConvexPolygon.h"
 
 #define D_MAX_MIN_VOLUME				ndFloat32 (1.0e-6f)
 #define D_MAX_VERTEX_CLIP_FACE			16
@@ -67,9 +68,7 @@ void ndShapeConvex::DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& debug
 	ndAssert(m_edgeCount < D_MAX_EDGE_COUNT);
 	ndAssert(m_vertexCount < D_MAX_EDGE_COUNT);
 
-	//memset(mark, 0, sizeof(mark));
 	ndMemSet(mark, ndInt8(0), D_MAX_EDGE_COUNT);
-	//memset(edgeType, ndShapeDebugNotify::m_shared, sizeof(edgeType));
 	ndMemSet(edgeType, ndShapeDebugNotify::m_shared, D_MAX_EDGE_COUNT);
 	matrix.TransformTriplex(&tmp[0].m_x, sizeof(ndVector), &m_vertex[0].m_x, sizeof(ndVector), m_vertexCount);
 	for (ndInt32 i = 0; i < m_edgeCount; ++i) 
@@ -208,7 +207,7 @@ ndMatrix ndShapeConvex::CalculateInertiaAndCenterOfMass(const ndMatrix& alignMat
 		ndAssert(alignMatrix.TestIdentity());
 	
 		// using general central theorem, is much faster and more accurate;
-		//IImatrix = IIorigin + mass * [(displacemnet % displacemnet) * identityMatrix - transpose(displacement) * displacement)];
+		//IImatrix = IIorigin + mass * [(displacement % displacement) * identityMatrix - transpose(displacement) * displacement)];
 		ndFloat32 mag2 = localScale.m_x * localScale.m_x;
 		ndMatrix inertia(ndGetIdentityMatrix());
 		inertia[0][0] = m_inertia[0] * mag2;
@@ -1048,27 +1047,9 @@ ndVector ndShapeConvex::CalculateVolumeIntegral(const ndMatrix& globalMatrix, co
 	return cg;
 }
 
-//ndInt32 dgCollisionConvex::BuildCylinderCapPoly(ndFloat32 radius, const dMatrix& transform, ndVector* const vertexOut) const
+
 ndInt32 ndShapeConvex::BuildCylinderCapPoly(ndFloat32 radius, const ndMatrix& transform, ndVector* const vertexOut) const
 {
-	/*
-	ndFloat32 h = 2.0;
-	ndInt32 n = 8;
-	ndFloat32 a0 = h * h * (dgPi / n);
-
-	ndFloat32 h0 = h * dgSin (0.5 * dgPI2 / n);
-	ndFloat32 h1 = h * dgCos (0.5 * dgPI2 / n);
-	ndFloat32 a1 = h * h * (dgSin (0.5 * dgPI2 / n) * dgCos (0.5 * dgPI2 / n));
-
-	ndFloat32 a = h * h * (dgPi / n - 0.5f * dgSin (dgPI2 / n));
-
-	for (ndInt32 i = 8; i < 16; ++i) {
-	ndFloat32 den = dgPi / i - 0.5f * dgSin (dgPI2 / i);
-	ndFloat32 h1 = dgSqrt (a / den);
-	ndFloat32 h2 = dgSqrt (a / den);
-	}
-	*/
-
 	ndInt32 count = (radius < ndFloat32(1.0f)) ? 8 : ((radius < ndFloat32(2.0f)) ? 12 : 16);
 
 	ndFloat32 angle = ndFloat32 (2.0f) * ndPi / (ndFloat32)count;

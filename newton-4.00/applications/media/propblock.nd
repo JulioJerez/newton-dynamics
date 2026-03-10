@@ -5,6 +5,10 @@
         <posit float3="0 0 0" />
         <angles float3="0 -0 0" />
     </matrix>
+    <geometryMatrix>
+        <posit float3="0 0 0" />
+        <angles float3="0 -0 0" />
+    </geometryMatrix>
     <type nodeType="node" target="0 0 0 " />
     <geometry>
         <vertices>

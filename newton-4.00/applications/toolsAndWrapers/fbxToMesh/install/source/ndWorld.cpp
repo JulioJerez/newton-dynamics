@@ -54,6 +54,7 @@ ndWorld::ndWorld()
 	,m_solverMode(ndStandardSolver)
 	,m_solverIterations(4)
 	,m_inUpdate(false)
+	,m_collisionUpdate(false)
 {
 	// start the engine thread;
 	ndBody::m_uniqueIdCount = 0;
@@ -102,7 +103,6 @@ ndWorld::~ndWorld()
 void ndWorld::CleanUp()
 {
 	Sync();
-	//m_scene->m_backgroundThread.Terminate();
 	m_scene->PrepareCleanup();
 
 	m_activeSkeletons.Resize(256);
@@ -167,12 +167,6 @@ ndInt32 ndWorld::GetThreadCount() const
 void ndWorld::SetThreadCount(ndInt32 count)
 {
 	m_scene->SetThreadCount(count);
-
-	if (m_scene->m_backgroundThread)
-	{
-		m_scene->m_backgroundThread->Terminate();
-		m_scene->m_backgroundThread->SetThreadCount(count);
-	}
 }
 
 ndInt32 ndWorld::GetSubSteps() const
@@ -280,11 +274,6 @@ ndInt32 ndWorld::GetEngineVersion() const
 	return D_NEWTON_ENGINE_MAJOR_VERSION * 100 + D_NEWTON_ENGINE_MINOR_VERSION;
 }
 
-void ndWorld::SendBackgroundTask(ndBackgroundTask* const job)
-{
-	m_scene->SendBackgroundTask(job);
-}
-
 void ndWorld::UpdateTransforms()
 {
 	m_scene->UpdateTransform();
@@ -309,6 +298,16 @@ void ndWorld::OnSubStepPostUpdate(ndFloat32)
 ndSharedPtr<ndBody> ndWorld::GetBody(ndBody* const body) const
 {
 	return m_scene->GetBody(body);
+}
+
+ndSharedPtr<ndJointBilateralConstraint> ndWorld::GetJoint(ndJointBilateralConstraint* joint) const
+{
+	return joint->m_worldNode->GetInfo();
+}
+
+ndSharedPtr<ndModel> ndWorld::GetModel(ndModel* const model) const
+{
+	return model->m_worldNode->GetInfo();
 }
 
 ndInt32 ndWorld::CompareJointByInvMass(const ndJointBilateralConstraint* const jointA, const ndJointBilateralConstraint* const jointB, void*)
@@ -345,7 +344,7 @@ void ndWorld::WorkerUpdate(ndInt32 threadIndex)
 	m_scene->TaskUpdate(threadIndex);
 }
 
-void ndWorld::MainUpdate()
+void ndWorld::PhysicsUpdate()
 {
 	D_TRACKTIME();
 	ndUnsigned64 timeAcc = ndGetTimeInMicroseconds();
@@ -379,9 +378,65 @@ void ndWorld::MainUpdate()
 	CalculateAverageUpdateTime();
 }
 
+void ndWorld::CollisionUpdate()
+{
+	D_TRACKTIME();
+	ndUnsigned64 timeAcc = ndGetTimeInMicroseconds();
+
+	m_inUpdate = true;
+	m_scene->Begin();
+
+	m_scene->SetTimestep(m_timestep);
+
+	PreUpdate(m_timestep);
+
+	ndInt32 const steps = m_subSteps;
+	ndFloat32 timestep = m_timestep / (ndFloat32)steps;
+
+	//SubStepUpdate(timestep);
+	OnSubStepPreUpdate(timestep);
+
+	m_scene->m_lru = m_scene->m_lru + 1;
+	m_scene->SetTimestep(timestep);
+
+	m_scene->BalanceScene();
+	m_scene->InitBodyArray();
+
+	// update the collision system
+	m_scene->FindCollidingPairs();
+	m_scene->CreateNewContacts();
+	m_scene->CalculateContacts();
+	m_scene->DeleteDeadContacts();
+
+	OnSubStepPostUpdate(timestep);
+
+	m_scene->m_subStepNumber++;
+
+	m_scene->SetTimestep(m_timestep);
+
+	UpdateTransforms();
+
+	PostUpdate(m_timestep);
+	m_inUpdate = false;
+
+	m_scene->End();
+
+	m_lastExecutionTime = (ndFloat32)(ndGetTimeInMicroseconds() - timeAcc) * ndFloat32(1.0e-6f);
+	CalculateAverageUpdateTime();
+
+	m_collisionUpdate = false;
+}
+
 void ndWorld::ThreadFunction()
 {
-	MainUpdate();
+	if (m_collisionUpdate)
+	{
+		CollisionUpdate();
+	}
+	else
+	{
+		PhysicsUpdate();
+	}
 }
 
 void ndWorld::CalculateAverageUpdateTime()
@@ -885,6 +940,7 @@ void ndWorld::CollisionUpdate(ndFloat32 timestep)
 	Sync();
 	m_timestep = timestep;
 
+	m_collisionUpdate = true;
 	// update the next frame asynchronous 
 	m_scene->TickOne();
 }
@@ -921,11 +977,15 @@ void ndWorld::AddModel(const ndSharedPtr<ndModel>& model)
 {
 	ndScopeSpinLock lock(m_addRemoveModelsLock);
 	m_modelList.AddModel(model, this);
+	model->OnAddWorld();
+	OnAddModel((ndModel*)*model);
 }
 
 void ndWorld::RemoveModel(ndModel* const model)
 {
 	ndScopeSpinLock lock(m_addRemoveModelsLock);
+	OnRemoveModel(model);
+	model->OnRemoveFromWorld();
 	m_modelList.RemoveModel(model);
 }
 
@@ -947,6 +1007,7 @@ void ndWorld::AddJoint(const ndSharedPtr<ndJointBilateralConstraint>& joint)
 		joint->m_worldNode = m_jointList.Append(joint);
 		joint->m_body0Node = joint->GetBody0()->AttachJoint((ndJointBilateralConstraint*)*joint);
 		joint->m_body1Node = joint->GetBody1()->AttachJoint((ndJointBilateralConstraint*)*joint);
+		OnAddJoint((ndJointBilateralConstraint*)*joint);
 	}
 }
 
@@ -958,6 +1019,8 @@ void ndWorld::RemoveJoint(ndJointBilateralConstraint* const joint)
 	{
 		ndAssert(joint->m_body0Node != nullptr);
 		ndAssert(joint->m_body1Node != nullptr);
+
+		OnRemoveJoint(joint);
 		joint->GetBody0()->DetachJoint(joint->m_body0Node);
 		joint->GetBody1()->DetachJoint(joint->m_body1Node);
 
@@ -1003,4 +1066,28 @@ void ndWorld::RemoveBody(ndBody* const body)
 		ndSharedPtr<ndBody> sharedBody(GetBody(body));
 		m_scene->RemoveBody(sharedBody);
 	}
+}
+
+void ndWorld::OnAddBody(ndBody* const) const
+{
+}
+
+void ndWorld::OnRemoveBody(ndBody* const) const
+{
+}
+
+void ndWorld::OnAddJoint(ndJointBilateralConstraint* const) const
+{
+}
+
+void ndWorld::OnRemoveJoint(ndJointBilateralConstraint* const) const
+{
+}
+
+void ndWorld::OnAddModel(ndModel* const) const
+{
+}
+
+void ndWorld::OnRemoveModel(ndModel* const) const
+{
 }

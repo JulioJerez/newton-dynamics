@@ -64,7 +64,6 @@ ndScene::ndScene()
 	,m_rootNode(nullptr)
 	,m_sentinelBody(nullptr)
 	,m_contactNotifyCallback(new ndContactNotify(nullptr))
-	,m_backgroundThread(nullptr)
 	,m_timestep(ndFloat32 (0.0f))
 	,m_lru(D_CONTACT_DELAY_FRAMES)
 	,m_frameNumber(0)
@@ -78,7 +77,6 @@ ndScene::ndScene()
 	{
 		m_partialNewPairs[i].Resize(256);
 	}
-	ndAssert(ndMemory::CheckMemory(this));
 }
 
 ndScene::ndScene(const ndScene& src)
@@ -96,7 +94,6 @@ ndScene::ndScene(const ndScene& src)
 	,m_rootNode(nullptr)
 	,m_sentinelBody(nullptr)
 	,m_contactNotifyCallback(nullptr)
-	,m_backgroundThread(nullptr)
 	,m_timestep(ndFloat32(0.0f))
 	,m_lru(src.m_lru)
 	,m_frameNumber(src.m_frameNumber)
@@ -106,7 +103,6 @@ ndScene::ndScene(const ndScene& src)
 	ndScene* const stealData = (ndScene*)&src;
 
 	SetThreadCount(src.GetThreadCount());
-	//m_backgroundThread.SetThreadCount(m_backgroundThread.GetThreadCount());
 
 	m_scratchBuffer.Swap(stealData->m_scratchBuffer);
 	m_sceneBodyArray.Swap(stealData->m_sceneBodyArray);
@@ -125,14 +121,14 @@ ndScene::ndScene(const ndScene& src)
 		m_specialUpdateList.Append(node);
 	}
 
-	ndBodyList::ndNode* nextParticleNode;
-	for (ndBodyList::ndNode* node = stealData->m_particleSetList.GetFirst(); node; node = nextParticleNode)
-	{
-		nextParticleNode = node->GetNext();
-		stealData->m_particleSetList.Unlink(node);
-		ndBodyParticleSet* const particle = (*node->GetInfo())->GetAsBodyParticleSet();
-		particle->m_listNode = m_particleSetList.Append(node);
-	}
+	//ndBodyList::ndNode* nextParticleNode;
+	//for (ndBodyList::ndNode* node = stealData->m_particleSetList.GetFirst(); node; node = nextParticleNode)
+	//{
+	//	nextParticleNode = node->GetNext();
+	//	stealData->m_particleSetList.Unlink(node);
+	//	ndBodyParticleSet* const particle = (*node->GetInfo())->GetAsBodyParticleSet();
+	//	particle->m_listNode = m_particleSetList.Append(node);
+	//}
 
 	for (ndBodyListView::ndNode* node = m_bodyList.GetFirst(); node; node = node->GetNext())
 	{
@@ -150,12 +146,10 @@ ndScene::ndScene(const ndScene& src)
 	{
 		m_partialNewPairs[i].Resize(256);
 	}
-	ndAssert(ndMemory::CheckMemory(this));
 }
 
 ndScene::~ndScene()
 {
-	ndAssert(ndMemory::CheckMemory(this));
 	Cleanup();
 	Finish();
 	if (m_contactNotifyCallback)
@@ -262,20 +256,24 @@ void ndScene::End()
 	m_frameNumber++;
 }
 
-bool ndScene::AddParticle(const ndSharedPtr<ndBody>& particle)
+//bool ndScene::AddParticle(const ndSharedPtr<ndBody>& particle)
+bool ndScene::AddParticle(const ndSharedPtr<ndBody>&)
 {
-	ndBodyParticleSet* const particleSet = particle->GetAsBodyParticleSet();
-	ndAssert(particleSet->m_listNode == nullptr);
-	ndBodyList::ndNode* const node = m_particleSetList.Append(particle);
-	particleSet->m_listNode = node;
+	ndAssert(0);
+	//ndBodyParticleSet* const particleSet = particle->GetAsBodyParticleSet();
+	//ndAssert(particleSet->m_listNode == nullptr);
+	//ndBodyList::ndNode* const node = m_particleSetList.Append(particle);
+	//particleSet->m_listNode = node;
 	return true;
 }
 
-bool ndScene::RemoveParticle(const ndSharedPtr<ndBody>& particle)
+//bool ndScene::RemoveParticle(const ndSharedPtr<ndBody>& particle)
+bool ndScene::RemoveParticle(const ndSharedPtr<ndBody>&)
 {
-	ndBodyParticleSet* const particleSet = particle->GetAsBodyParticleSet();
-	ndAssert(particleSet->m_listNode);
-	m_particleSetList.Remove(particleSet->m_listNode);
+	ndAssert(0);
+	//ndBodyParticleSet* const particleSet = particle->GetAsBodyParticleSet();
+	//ndAssert(particleSet->m_listNode);
+	//m_particleSetList.Remove(particleSet->m_listNode);
 	return true;
 }
 
@@ -322,7 +320,6 @@ bool ndScene::AddBody(const ndSharedPtr<ndBody>& body)
 		{
 			ndBodyListView::ndNode* const node = m_bodyList.AddItem(body);
 			kinematicBody->SetSceneNodes(this, node);
-			m_contactNotifyCallback->OnBodyAdded(kinematicBody);
 			kinematicBody->UpdateCollisionMatrix();
 
 			m_rootNode = m_bvhSceneManager.AddBody(kinematicBody, m_rootNode);
@@ -333,6 +330,7 @@ bool ndScene::AddBody(const ndSharedPtr<ndBody>& body)
 
 			m_forceBalanceSceneCounter = 0;
 
+			GetWorld()->OnAddBody(kinematicBody);
 			return true;
 		}
 	}
@@ -341,20 +339,6 @@ bool ndScene::AddBody(const ndSharedPtr<ndBody>& body)
 		return AddParticle(body);
 	}
 	return false;
-}
-
-ndSharedPtr<ndBody> ndScene::GetBody(ndBody* const body) const
-{
-	ndBodyKinematic* const kinematicBody = body->GetAsBodyKinematic();
-	if (kinematicBody)
-	{
-		return kinematicBody->m_sceneNode->GetInfo();
-	}
-	else
-	{
-		ndAssert(0);
-		return ndSharedPtr<ndBody>(nullptr);
-	}
 }
 
 bool ndScene::RemoveBody(const ndSharedPtr<ndBody>& body)
@@ -373,16 +357,16 @@ bool ndScene::RemoveBody(const ndSharedPtr<ndBody>& body)
 			m_contactArray.DetachContact(contact);
 		}
 
-		ndBodyListView::ndNode* const sceneNode = kinematicBody->m_sceneNode;
+		ndBodyListView::ndNode* const sceneNode = *kinematicBody->m_sceneNode;
 		if (kinematicBody->m_scene && sceneNode)
 		{
 			if (kinematicBody->GetAsBodyKinematicSpecial())
 			{
-				m_specialUpdateList.Remove(kinematicBody->m_spetialUpdateNode);
+				m_specialUpdateList.Remove(*kinematicBody->m_spetialUpdateNode);
 				kinematicBody->m_spetialUpdateNode = nullptr;
 			}
 
-			m_contactNotifyCallback->OnBodyRemoved(kinematicBody);
+			GetWorld()->OnRemoveBody(kinematicBody);
 			kinematicBody->SetSceneNodes(nullptr, nullptr);
 			m_bodyList.RemoveItem(sceneNode);
 			return true;
@@ -395,6 +379,20 @@ bool ndScene::RemoveBody(const ndSharedPtr<ndBody>& body)
 		RemoveParticle(body);
 	}
 	return false;
+}
+
+ndSharedPtr<ndBody> ndScene::GetBody(ndBody* const body) const
+{
+	ndBodyKinematic* const kinematicBody = body->GetAsBodyKinematic();
+	if (kinematicBody)
+	{
+		return kinematicBody->m_sceneNode->GetInfo();
+	}
+	else
+	{
+		ndAssert(0);
+		return ndSharedPtr<ndBody>(nullptr);
+	}
 }
 
 void ndScene::BalanceScene()
@@ -418,16 +416,14 @@ void ndScene::BalanceScene()
 	}
 }
 
-//void ndScene::UpdateTransformNotify(ndInt32 threadIndex, ndBodyKinematic* const body)
 void ndScene::UpdateTransformNotify(ndFloat32 timestep, ndBodyKinematic* const body)
 {
 	if (body->m_transformIsDirty)
 	{
 		body->m_transformIsDirty = 0;
-		ndBodyNotify* const notify = body->GetNotifyCallback();
+		ndBodyNotify* const notify = *body->GetNotifyCallback();
 		if (notify)
 		{
-			//notify->OnTransform(threadIndex, body->GetMatrix());
 			notify->OnTransform(timestep, body->GetMatrix());
 		}
 	}
@@ -748,22 +744,22 @@ void ndScene::SubmitPairs(ndBvhLeafNode* const leafNode, ndBvhNode* const node, 
 	const ndUnsigned8 test0 = ndUnsigned8(!body0->m_equilibrium);
 	const ndUnsigned8 fowardTest = forward ? ndUnsigned8(1) : ndUnsigned8(0);
 
-	ndBodyNotify* const notify = body0->GetNotifyCallback();
+	ndBodyNotify* const notify = *body0->GetNotifyCallback();
 
 	pool.PushBack(node);
 	while (pool.GetCount() && (pool.GetCount() < (D_SCENE_MAX_STACK_DEPTH - 16)))
 	{
-		ndBvhNode* const rootNode = pool.Pop();
-		if (ndOverlapTest(rootNode->m_minBox, rootNode->m_maxBox, boxP0, boxP1)) 
+		ndBvhNode* const bvhNode = pool.Pop();
+		if (ndOverlapTest(bvhNode->m_minBox, bvhNode->m_maxBox, boxP0, boxP1))
 		{
-			if (rootNode->GetAsSceneBodyNode()) 
+			if (bvhNode->GetAsSceneBodyNode())
 			{
-				ndAssert(!rootNode->GetRight());
-				ndAssert(!rootNode->GetLeft());
+				ndAssert(!bvhNode->GetRight());
+				ndAssert(!bvhNode->GetLeft());
 				
-				ndBodyKinematic* const body1 = rootNode->GetBody();
+				ndBodyKinematic* const body1 = bvhNode->GetBody();
 				ndAssert(body1);
-				const ndUnsigned8 test = ndUnsigned8((body1->m_sceneEquilibrium | fowardTest) & (test0 | ndUnsigned8(!body1->m_equilibrium)));
+				const ndUnsigned8 test = ndUnsigned8(!bvhNode->m_isDead && (body1->m_sceneEquilibrium | fowardTest) & (test0 | ndUnsigned8(!body1->m_equilibrium)));
 				if (test)
 				{
 					if (!notify || notify->OnSceneAabbOverlap(body1))
@@ -774,7 +770,7 @@ void ndScene::SubmitPairs(ndBvhLeafNode* const leafNode, ndBvhNode* const node, 
 			}
 			else 
 			{
-				ndBvhInternalNode* const tmpNode = rootNode->GetAsSceneTreeNode();
+				ndBvhInternalNode* const tmpNode = bvhNode->GetAsSceneTreeNode();
 				ndAssert(tmpNode->m_left);
 				ndAssert(tmpNode->m_right);
 				pool.PushBack(tmpNode->m_left);
@@ -816,21 +812,21 @@ ndJointBilateralConstraint* ndScene::FindBilateralJoint(ndBodyKinematic* const b
 	return nullptr;
 }
 
-void ndScene::FindCollidingPairs(ndBodyKinematic* const body, ndInt32 threadId)
-{
-	ndBvhLeafNode* const bodyNode = m_bvhSceneManager.GetLeafNode(body);
-	ndAssert(bodyNode->GetAsSceneBodyNode());
-	for (ndBvhNode* ptr = bodyNode; ptr->m_parent; ptr = ptr->m_parent)
-	{
-		ndBvhInternalNode* const parent = ptr->m_parent->GetAsSceneTreeNode();
-		ndAssert(!parent->GetAsSceneBodyNode());
-		ndBvhNode* const sibling = parent->m_right;
-		if (sibling != ptr)
-		{
-			SubmitPairs(bodyNode, sibling, true, threadId);
-		}
-	}
-}
+//void ndScene::FindCollidingPairs(ndBodyKinematic* const body, ndInt32 threadId)
+//{
+//	ndBvhLeafNode* const bodyNode = m_bvhSceneManager.GetLeafNode(body);
+//	ndAssert(bodyNode->GetAsSceneBodyNode());
+//	for (ndBvhNode* ptr = bodyNode; ptr->m_parent; ptr = ptr->m_parent)
+//	{
+//		ndBvhInternalNode* const parent = ptr->m_parent->GetAsSceneTreeNode();
+//		ndAssert(!parent->GetAsSceneBodyNode());
+//		ndBvhNode* const sibling = parent->m_right;
+//		if (sibling != ptr)
+//		{
+//			SubmitPairs(bodyNode, sibling, true, threadId);
+//		}
+//	}
+//}
 
 void ndScene::FindCollidingPairsForward(ndBodyKinematic* const body, ndInt32 threadId)
 {
@@ -867,16 +863,17 @@ void ndScene::FindCollidingPairsBackward(ndBodyKinematic* const body, ndInt32 th
 void ndScene::UpdateTransform()
 {
 	D_TRACKTIME();
-	for (ndBodyList::ndNode* node = m_particleSetList.GetFirst(); node; node = node->GetNext())
-	{
-		ndBodyParticleSet* const particleSet = node->GetInfo()->GetAsBodyParticleSet();
-		ndAssert(particleSet);
-		ndBodyNotify* const notify = particleSet->GetNotifyCallback();
-		if (notify)
-		{
-			notify->OnTransform(0, particleSet->GetMatrix());
-		}
-	}
+
+	//for (ndBodyList::ndNode* node = m_particleSetList.GetFirst(); node; node = node->GetNext())
+	//{
+	//	ndBodyParticleSet* const particleSet = node->GetInfo()->GetAsBodyParticleSet();
+	//	ndAssert(particleSet);
+	//	ndBodyNotify* const notify = *particleSet->GetNotifyCallback();
+	//	if (notify)
+	//	{
+	//		notify->OnTransform(0, particleSet->GetMatrix());
+	//	}
+	//}
 
 	ndFloat32 timestep = GetTimestep();
 	auto TransformUpdate = ndMakeObject::ndFunction([this, timestep](ndInt32 groupId, ndInt32)
@@ -1036,7 +1033,7 @@ bool ndScene::ConvexCast(
 	while (stackPool.GetCount())
 	{
 		ndFloat32 dist = stackDistance.Pop();
-		const ndBvhNode* const me = stackPool.Pop();
+		const ndBvhNode* const self = stackPool.Pop();
 		
 		if (dist > callback.m_param)
 		{
@@ -1044,10 +1041,10 @@ bool ndScene::ConvexCast(
 		}
 		else 
 		{
-			ndBody* const body = me->GetBody();
-			if (body) 
+			ndBody* const body = self->GetBody();
+			if (body)
 			{
-				if (callback.OnRayPrecastAction (body, &convexShape)) 
+				if (!self->m_isDead && callback.OnRayPrecastAction (body, &convexShape))
 				{
 					// save contacts and try new set
 					ndConvexCastNotify savedNotification(callback);
@@ -1115,7 +1112,7 @@ bool ndScene::ConvexCast(
 			else 
 			{
 				{
-					const ndBvhNode* const left = me->GetLeft();
+					const ndBvhNode* const left = self->GetLeft();
 					ndAssert(left);
 					const ndVector minBox(left->m_minBox - boxP1);
 					const ndVector maxBox(left->m_maxBox - boxP0);
@@ -1127,7 +1124,7 @@ bool ndScene::ConvexCast(
 				}
 		
 				{
-					const ndBvhNode* const right = me->GetRight();
+					const ndBvhNode* const right = self->GetRight();
 					ndAssert(right);
 					const ndVector minBox(right->m_minBox - boxP1);
 					const ndVector maxBox = right->m_maxBox - boxP0;
@@ -1175,8 +1172,8 @@ bool ndScene::RayCast(
 	while (stackPool.GetCount())
 	{
 		ndFloat32 dist = stackDistance.Pop();
-		const ndBvhNode* const me = stackPool.Pop();
-		ndAssert(me);
+		const ndBvhNode* const self = stackPool.Pop();
+		ndAssert(self);
 
 		if (dist > callback.m_param)
 		{
@@ -1184,13 +1181,13 @@ bool ndScene::RayCast(
 		}
 		else
 		{
-			ndBodyKinematic* const body = me->GetBody();
+			ndBodyKinematic* const body = self->GetBody();
 			if (body)
 			{
-				ndAssert(!me->GetLeft());
-				ndAssert(!me->GetRight());
+				ndAssert(!self->GetLeft());
+				ndAssert(!self->GetRight());
 
-				if (body->RayCast(callback, ray, callback.m_param))
+				if (!self->m_isDead && body->RayCast(callback, ray, callback.m_param))
 				{
 					state = true;
 					if (callback.m_param < ndFloat32(1.0e-8f))
@@ -1202,7 +1199,7 @@ bool ndScene::RayCast(
 			else
 			{
 				{
-					const ndBvhNode* const left = me->GetLeft();
+					const ndBvhNode* const left = self->GetLeft();
 					ndAssert(left);
 					ndFloat32 dist1 = ray.BoxIntersect(left->m_minBox, left->m_maxBox);
 					if (dist1 < callback.m_param)
@@ -1212,7 +1209,7 @@ bool ndScene::RayCast(
 				}
 				
 				{
-					const ndBvhNode* const right = me->GetRight();
+					const ndBvhNode* const right = self->GetRight();
 					ndAssert(right);
 					ndFloat32 dist1 = ray.BoxIntersect(right->m_minBox, right->m_maxBox);
 					if (dist1 < callback.m_param)
@@ -1235,26 +1232,26 @@ void ndScene::BodiesInAabb(ndBodiesInAabbNotify& callback, const ndVector& minBo
 		stackPool.PushBack(m_rootNode);
 		while (stackPool.GetCount())
 		{
-			const ndBvhNode* const rootNode = stackPool.Pop();
-			ndAssert(rootNode);
-			if (ndOverlapTest(rootNode->m_minBox, rootNode->m_maxBox, minBox, maxBox))
+			const ndBvhNode* const self = stackPool.Pop();
+			ndAssert(self);
+			if (ndOverlapTest(self->m_minBox, self->m_maxBox, minBox, maxBox))
 			{
-				ndBodyKinematic* const body = rootNode->GetBody();
+				ndBodyKinematic* const body = self->GetBody();
 				if (body)
 				{
-					ndAssert(!rootNode->GetLeft());
-					ndAssert(!rootNode->GetRight());
-					if (ndOverlapTest(body->m_minAabb, body->m_maxAabb, minBox, maxBox))
+					ndAssert(!self->GetLeft());
+					ndAssert(!self->GetRight());
+					if (!self->m_isDead && ndOverlapTest(body->m_minAabb, body->m_maxAabb, minBox, maxBox))
 					{
 						callback.OnOverlap(body);
 					}
 				}
 				else
 				{
-					const ndBvhNode* const left = rootNode->GetLeft();
+					const ndBvhNode* const left = self->GetLeft();
 					stackPool.PushBack(left);
 
-					const ndBvhNode* const right = rootNode->GetRight();
+					const ndBvhNode* const right = self->GetRight();
 					stackPool.PushBack(right);
 				}
 			}
@@ -1265,10 +1262,6 @@ void ndScene::BodiesInAabb(ndBodiesInAabbNotify& callback, const ndVector& minBo
 void ndScene::Cleanup()
 {
 	Sync();
-	if (m_backgroundThread)
-	{
-		m_backgroundThread->Terminate();
-	}
 	PrepareCleanup();
 	
 	m_frameNumber = 0;
@@ -1343,19 +1336,6 @@ bool ndScene::ConvexCast(ndConvexCastNotify& callback, const ndShapeInstance& co
 		state = ConvexCast(callback, stackPool, distance, ray, convexShape, globalOrigin, globalDest);
 	}
 	return state;
-}
-
-void ndScene::SendBackgroundTask(ndBackgroundTask* const job)
-{
-	if (m_backgroundThread)
-	{
-		m_backgroundThread->SendTask(job);
-	}
-	else
-	{
-		ndAssert(0);
-		delete job;
-	}
 }
 
 void ndScene::AddPair(ndBodyKinematic* const body0, ndBodyKinematic* const body1, ndInt32 threadId)
@@ -1568,7 +1548,6 @@ void ndScene::InitBodyArray()
 			});
 	
 			D_TRACKTIME_NAMED(UpdateSceneBvhLight);
-			//const ndArray<ndBodyKinematic*>& view = m_sceneBodyArray;
 			const ndInt32 viewBodyCount = ndInt32(m_sceneBodyArray.GetCount());
 			ParallelExecute(UpdateSceneBvh, viewBodyCount, OptimalGroupBatch(viewBodyCount));
 		}
@@ -1733,14 +1712,16 @@ void ndScene::DeleteDeadContacts()
 	}
 }
 
-void ndScene::ParticleUpdate(ndFloat32 timestep)
+//void ndScene::ParticleUpdate(ndFloat32 timestep)
+void ndScene::ParticleUpdate(ndFloat32)
 {
 	D_TRACKTIME();
-	for (ndBodyList::ndNode* node = m_particleSetList.GetFirst(); node; node = node->GetNext())
-	{
-		ndBodyParticleSet* const body = node->GetInfo()->GetAsBodyParticleSet();
-		body->Update(this, timestep);
-	}
+	//ndAssert(0);
+	//for (ndBodyList::ndNode* node = m_particleSetList.GetFirst(); node; node = node->GetNext())
+	//{
+	//	ndBodyParticleSet* const body = node->GetInfo()->GetAsBodyParticleSet();
+	//	body->Update(this, timestep);
+	//}
 }
 
 bool ndScene::ValidateScene()

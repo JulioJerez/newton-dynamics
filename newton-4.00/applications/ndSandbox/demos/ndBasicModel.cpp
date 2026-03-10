@@ -125,7 +125,7 @@ class ndBackGroundVehicleController : public ndModelNotify
 				// it only generates one contact at the contact patch.
 				// this is faster and generates beter behavior.
 				ndSharedPtr<ndShapeInstance> tireShape(child->CreateCollision());
-				tireShape->SetLocalMatrix(tireShape->GetLocalMatrix() * child->m_matrix);
+				tireShape->SetLocalMatrix(tireShape->GetLocalMatrix() * child->GetMatrix());
 				compoundShape->AddCollision(*tireShape);
 			}
 			renderChildren = renderChildren->GetNext();

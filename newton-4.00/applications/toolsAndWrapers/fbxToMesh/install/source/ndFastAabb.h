@@ -41,13 +41,19 @@ class ndFastAabb : public ndMatrix
 	D_CORE_API void SetSeparatingDistance(const ndFloat32 distance);
 	D_CORE_API void SetTransposeAbsMatrix(const ndMatrix& matrix);
 
-	D_CORE_API ndFloat32 PolygonBoxDistance(const ndVector& faceNormal, ndInt32 indexCount, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray) const;
-	D_CORE_API ndFloat32 PolygonBoxRayDistance(const ndVector& faceNormal, ndInt32 indexCount, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray, const ndFastRay& ray) const;
+	//D_CORE_API ndFloat32 PolygonBoxDistance(const ndVector& faceNormal, ndInt32 indexCount, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray) const;
+	//D_CORE_API ndFloat32 PolygonBoxRayDistance(const ndVector& faceNormal, ndInt32 indexCount, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray, const ndFastRay& ray) const;
+	D_CORE_API ndFloat32 PolygonBoxDistance(const ndVector& faceNormal, ndInt32 indexCount, const ndInt32* const indexArray, const ndVector* const vertexArray) const;
+	D_CORE_API ndFloat32 PolygonBoxRayDistance(const ndVector& faceNormal, ndInt32 indexCount, const ndInt32* const indexArray, const ndVector* const vertexArray, const ndFastRay& ray) const;
 
 	private:
-	ndMatrix MakeFaceMatrix(const ndVector& faceNormal, ndInt32, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray) const;
-	void MakeBox1(ndInt32 indexCount, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray, ndVector& minBox, ndVector& maxBox) const;
-	void MakeBox2(const ndMatrix& faceMatrix, ndInt32 indexCount, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray, ndVector& minBox, ndVector& maxBox) const;
+	//ndMatrix MakeFaceMatrix(const ndVector& faceNormal, ndInt32, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray) const;
+	//void MakeBox1(ndInt32 indexCount, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray, ndVector& minBox, ndVector& maxBox) const;
+	//void MakeBox2(const ndMatrix& faceMatrix, ndInt32 indexCount, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray, ndVector& minBox, ndVector& maxBox) const;
+
+	ndMatrix MakeFaceMatrix(const ndVector& faceNormal, ndInt32, const ndInt32* const indexArray, const ndVector* const vertexArray) const;
+	void MakeBox1(ndInt32 indexCount, const ndInt32* const indexArray, const ndVector* const vertexArray, ndVector& minBox, ndVector& maxBox) const;
+	void MakeBox2(const ndMatrix& faceMatrix, ndInt32 indexCount, const ndInt32* const indexArray, const ndVector* const vertexArray, ndVector& minBox, ndVector& maxBox) const;
 
 	protected:
 	ndMatrix m_absDir;

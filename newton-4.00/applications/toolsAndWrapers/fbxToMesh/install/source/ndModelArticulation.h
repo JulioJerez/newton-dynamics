@@ -26,8 +26,8 @@
 #include "ndNewtonStdafx.h"
 #include "ndModel.h"
 #include "ndIkSolver.h"
+#include "ndSkeletonContainer.h"
 
-class ndIkSolver;
 class ndMultiBodyVehicle;
 
 D_MSV_NEWTON_CLASS_ALIGN_32
@@ -63,6 +63,7 @@ class ndModelArticulation: public ndModel
 		ndVector m_angularMomentum;
 		ndMatrix m_centerOfMass;
 		ndMatrix m_inertiaMatrix;
+		ndMatrix m_invInertiaMatrix;
 		ndFloat32 m_mass;
 	};
 
@@ -77,14 +78,8 @@ class ndModelArticulation: public ndModel
 	D_NEWTON_API ndNode* AddRootBody(const ndSharedPtr<ndBody>& rootBody);
 	D_NEWTON_API ndNode* AddLimb(ndNode* const parent, const ndSharedPtr<ndBody>& body, const ndSharedPtr<ndJointBilateralConstraint>& joint);
 
-	D_NEWTON_API const ndList<ndModelArticulation::ndNode>& GetCloseLoops() const;
+	D_NEWTON_API const ndList<ndModelArticulation::ndNode, ndContainersFreeListAlloc<ndNode>>& GetCloseLoops() const;
 	D_NEWTON_API void AddCloseLoop(const ndSharedPtr<ndJointBilateralConstraint>& joint, const char* const name = nullptr);
-
-	D_NEWTON_API virtual void OnAddToWorld() override;
-	D_NEWTON_API virtual void OnRemoveFromToWorld() override;
-
-	D_NEWTON_API virtual void AddBodiesAndJointsToWorld() override;
-	D_NEWTON_API virtual void RemoveBodiesAndJointsFromWorld() override;
 
 	D_NEWTON_API virtual void SetSleep(ndFloat32 speed, ndFloat32 angularSpeed, ndFloat32 accel, ndFloat32 alpha) const override;
 
@@ -97,16 +92,19 @@ class ndModelArticulation: public ndModel
 
 	D_NEWTON_API void ClearMemory();
 	D_NEWTON_API void SetTransform(const ndMatrix& matrix);
+	
+	//D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassDynamics(const ndMatrix& localFrame) const;
 	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassKinematics(const ndMatrix& localFrame) const;
-	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassDynamics(ndIkSolver& solver, const ndMatrix& localFrame, ndFixSizeArray<ndJointBilateralConstraint*, 64>& extraJoints, ndFloat32 timestep) const;
+	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassDynamics(ndIkSolver& solver, const ndMatrix& localFrame, ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS>& extraJoints, ndFloat32 timestep) const;
 	
 	protected:
 	D_NEWTON_API void ConvertToUrdf();
-	void CalculateCentreOfMass(ndCenterOfMassDynamics& comDynamics, ndFixSizeArray<const ndBodyKinematic*, 256>& bodyArrayOut, ndFixSizeArray<ndVector, 256>& bodyCenterOut) const;
+	D_COLLISION_API virtual void OnAddWorld() override;
+	D_COLLISION_API virtual void OnRemoveFromWorld() override;
 	
 	ndString m_name;
 	ndNode* m_rootNode;
-	ndList<ndNode> m_closeLoops;
+	ndList<ndNode, ndContainersFreeListAlloc<ndNode>> m_closeLoops;
 
 	friend class ndUrdfFile;
 } D_GCC_NEWTON_CLASS_ALIGN_32;

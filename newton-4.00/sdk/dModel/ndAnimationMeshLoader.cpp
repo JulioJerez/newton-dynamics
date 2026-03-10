@@ -139,7 +139,7 @@ bool ndAnimationMeshLoader::ImportFbx(const ndString& fbxPathMeshName)
 				ndSharedPtr<ndMeshEffect> hullMesh(new ndMeshEffect(*subShape));
 
 				convexMesh->SetMesh(hullMesh);
-				convexMesh->m_matrix = subShape->GetLocalMatrix();
+				convexMesh->SetMatrix(subShape->GetLocalMatrix());
 				convexMesh->SetNodeType(ndMesh::m_collisionShape);
 				convexMesh->SetName(collisionshapeName);
 				childMesh->AddChild(convexMesh);
