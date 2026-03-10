@@ -28,6 +28,68 @@
 
 #define ND_MESH_MAX_STACK_DEPTH	2048
 
+
+ndMeshBody::ndMeshBody()
+	:m_matrix(ndGetIdentityMatrix())
+	,m_veloc(ndVector::m_zero)
+	,m_omega(ndVector::m_zero)
+	,m_localCentreOfMass(ndVector::m_zero)
+{
+}
+
+void ndMeshBody::Save(nd::TiXmlElement* const parent) const
+{
+	ndVector euler;
+	ndVector rotation (m_matrix.CalcPitchYawRoll(euler));
+	rotation = rotation.Scale(ndRadToDegree);
+
+	xmlSaveParam(parent, "position", m_matrix.m_posit);
+	xmlSaveParam(parent, "rotation", rotation);
+	xmlSaveParam(parent, "veloc", m_veloc);
+	xmlSaveParam(parent, "omega", m_omega);
+	xmlSaveParam(parent, "com", m_localCentreOfMass);
+}
+
+ndMeshBodyKinematic::ndMeshBodyKinematic()
+	:ndMeshBody()
+	,m_invMass(ndVector::m_zero)
+	,m_inertiaPrincipalAxis(ndGetIdentityMatrix())
+	,m_maxAngleStep(ndFloat32 (45.0f))
+	,m_maxLinearStep(ndFloat32(2.0f))
+{
+}
+
+void ndMeshBodyKinematic::Save(nd::TiXmlElement* const parent) const
+{
+	ndMeshBody::Save(parent);
+
+	ndVector euler;
+	ndVector axisOfInertia(m_inertiaPrincipalAxis.CalcPitchYawRoll(euler));
+	axisOfInertia = axisOfInertia.Scale(ndRadToDegree);
+
+	xmlSaveParam(parent, "inverseMassMatrix", m_invMass);
+	xmlSaveParam(parent, "principalAxis", axisOfInertia);
+	xmlSaveParam(parent, "maxAngleStep", m_maxAngleStep);
+	xmlSaveParam(parent, "maxLinearStep", m_maxLinearStep);
+}
+
+ndMeshBodyDynamic::ndMeshBodyDynamic()
+	:ndMeshBodyKinematic()
+	,m_intrinsicDamping(ndVector::m_zero)
+{
+}
+
+void ndMeshBodyDynamic::Save(nd::TiXmlElement* const parent) const
+{
+	ndMeshBodyKinematic::Save(parent);
+
+	xmlSaveParam(parent, "intrinsicDamping", m_intrinsicDamping);
+}
+
+ndMeshBody::~ndMeshBody()
+{
+}
+
 ndMesh::ndMesh()
 	:ndClassAlloc()
 	,m_matrix(ndGetIdentityMatrix())
@@ -809,7 +871,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionFromChildren()
 	return shapeArray[0];
 }
 
-void ndMesh::SetRigidBody(ndSharedPtr<ndRigidBody>& rigidBody)
+void ndMesh::SetRigidBody(ndSharedPtr<ndMeshBody>& rigidBody)
 {
 	m_rigidBody = rigidBody;
 }

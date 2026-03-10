@@ -157,12 +157,11 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName)
 
 		if (entry.m_meshNode->m_rigidBody)
 		{
-			const ndMesh::ndRigidBody* const rigidBody = *entry.m_meshNode->m_rigidBody;
-
-			nd::TiXmlElement* const rigidBodyNode = new nd::TiXmlElement(rigidBody->m_constructor.GetStr());
+			const ndMeshBody* const rigidBody = *entry.m_meshNode->m_rigidBody;
+			nd::TiXmlElement* const rigidBodyNode = new nd::TiXmlElement("rigidbody");
 			entry.m_parentXml->LinkEndChild(rigidBodyNode);
-
-			//xmlSaveParam(rigidBodyNode, "constructor", rigidBody->m_constructor.GetStr());
+			xmlSaveParam(rigidBodyNode, "constructor", rigidBody->m_classConstructor.GetStr());
+			rigidBody->Save(rigidBodyNode);
 		}
 
 		nd::TiXmlElement* const xmlNodeType = new nd::TiXmlElement("type");

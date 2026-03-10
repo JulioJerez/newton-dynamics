@@ -120,8 +120,6 @@ void ndBodyNotify::OnPostUpdate(ndFloat32)
 
 void ndBodyNotify::OnSave(ndMesh* const parentNode) const
 {
-	ndSharedPtr<ndMesh::ndRigidBody> rigidBody(new ndMesh::ndRigidBody());
-
-	rigidBody->m_constructor = ndString(GetBody()->ClassName());
+	ndSharedPtr<ndMeshBody> rigidBody (GetBody()->CreateMeshBody());
 	parentNode->SetRigidBody(rigidBody);
 }

@@ -22,6 +22,7 @@
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
 #include "ndBody.h"
+#include "ndMesh.h"
 #include "ndContact.h"
 #include "ndBodyNotify.h"
 
@@ -216,3 +217,9 @@ void ndBody::SetMatrix(const ndMatrix& matrix)
 	SetMatrixNoSleep(matrix);
 }
 
+ndSharedPtr<ndMeshBody> ndBody::CreateMeshBody() const
+{
+	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBody());
+	meshBody->m_classConstructor = ndString(ClassName());
+	return meshBody;
+}

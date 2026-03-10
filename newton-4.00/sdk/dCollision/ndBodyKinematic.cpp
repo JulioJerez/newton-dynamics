@@ -21,6 +21,8 @@
 
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
+
+#include "ndMesh.h"
 #include "ndScene.h"
 #include "ndContact.h"
 #include "ndShapeNull.h"
@@ -1067,3 +1069,9 @@ void ndBodyKinematic::InitSurrogateBody(ndBodyKinematic* const surrogate) const
 	surrogate->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
 }
 
+ndSharedPtr<ndMeshBody> ndBodyKinematic::CreateMeshBody() const
+{
+	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBodyKinematic());
+	meshBody->m_classConstructor = ndString(ClassName());
+	return meshBody;
+}

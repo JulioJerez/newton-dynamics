@@ -470,3 +470,10 @@ void ndBodyDynamic::InitSurrogateBody(ndBodyKinematic* const surrogate) const
 	dst->m_savedExternalForce = m_savedExternalForce;
 	dst->m_savedExternalTorque = m_savedExternalTorque;
 }
+
+ndSharedPtr<ndMeshBody> ndBodyDynamic::CreateMeshBody() const
+{
+	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBodyDynamic());
+	meshBody->m_classConstructor = ndString(ClassName());
+	return meshBody;
+}

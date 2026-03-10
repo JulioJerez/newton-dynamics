@@ -28,6 +28,41 @@ class ndBody;
 class ndMeshEffect;
 class ndShapeInstance;
 
+class ndMeshBody : public ndClassAlloc
+{
+	public:
+	D_COLLISION_API ndMeshBody();
+	D_COLLISION_API virtual ~ndMeshBody();
+	D_COLLISION_API virtual void Save(nd::TiXmlElement* const parent) const;
+
+	ndMatrix m_matrix;
+	ndVector m_veloc;
+	ndVector m_omega;
+	ndVector m_localCentreOfMass;
+	ndString m_classConstructor;
+};
+
+class ndMeshBodyKinematic : public ndMeshBody
+{
+	public:
+	D_COLLISION_API ndMeshBodyKinematic();
+	D_COLLISION_API virtual void Save(nd::TiXmlElement* const parent) const override;
+
+	ndVector m_invMass;
+	ndMatrix m_inertiaPrincipalAxis;
+	ndFloat32 m_maxAngleStep;
+	ndFloat32 m_maxLinearStep;
+};
+
+class ndMeshBodyDynamic : public ndMeshBodyKinematic
+{
+	public:
+	D_COLLISION_API ndMeshBodyDynamic();
+	D_COLLISION_API virtual void Save(nd::TiXmlElement* const parent) const override;
+	ndVector m_intrinsicDamping;
+};
+
+
 class ndMesh : public ndClassAlloc
 {
 	public:
@@ -65,18 +100,6 @@ class ndMesh : public ndClassAlloc
 		{
 		}
 		ndReal m_lenght;
-	};
-
-	class ndRigidBody
-	{
-		public:
-		ndRigidBody()
-		{
-		}
-		
-		public:
-		ndString m_constructor;
-
 	};
 
 	D_COLLISION_API ndMesh();
@@ -133,7 +156,7 @@ class ndMesh : public ndClassAlloc
 	D_COLLISION_API void ApplyTransform(const ndMatrix& transform);
 	D_COLLISION_API ndMatrix CalculateGlobalMatrix(ndMesh* const parent = nullptr) const;
 
-	D_COLLISION_API void SetRigidBody(ndSharedPtr<ndRigidBody>& rigidBody);
+	D_COLLISION_API void SetRigidBody(ndSharedPtr<ndMeshBody>& rigidBody);
 
 	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollision();
 	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollisionFromChildren();
@@ -161,7 +184,7 @@ class ndMesh : public ndClassAlloc
 	ndCurve m_rotation;
 	ndWeakPtr<ndMesh> m_parent;
 	ndSharedPtr<ndMeshEffect> m_mesh;
-	ndSharedPtr<ndRigidBody> m_rigidBody;
+	ndSharedPtr<ndMeshBody> m_rigidBody;
 	ndList<ndSharedPtr<ndMesh>> m_children;
 	ndList<ndSharedPtr<ndMesh>>::ndNode* m_selfChildNode;
 	ndVector m_boneTarget;

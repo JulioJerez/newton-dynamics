@@ -73,6 +73,8 @@ class ndBodyDynamic: public ndBodyKinematic
 
 	D_NEWTON_API ndVector GetForce() const override;
 	D_NEWTON_API ndVector GetTorque() const override;
+
+	D_NEWTON_API virtual ndSharedPtr<ndMeshBody> CreateMeshBody() const override;
 	
 	private:
 	void SaveExternalForces();
