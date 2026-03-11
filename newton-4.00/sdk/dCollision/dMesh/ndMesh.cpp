@@ -37,9 +37,17 @@ ndMeshCollisionShape::~ndMeshCollisionShape()
 {
 }
 
+void ndMeshCollisionShapeNull::Save(nd::TiXmlElement* const parent) const
+{
+	xmlSaveParam(parent, "constructor", ndShapeNull::StaticClassName());
+}
+
 void ndMeshCollisionShapeCapsule::Save(nd::TiXmlElement* const parent) const
 {
-	xmlSaveParam(parent, "xxxxx", 1.0f);
+	xmlSaveParam(parent, "constructor", ndShapeCapsule::StaticClassName());
+	xmlSaveParam(parent, "radio0", m_radius0);
+	xmlSaveParam(parent, "radio1", m_radius1);
+	xmlSaveParam(parent, "heigh", m_height);
 }
 
 ndMeshBodyKinematic::ndMeshShapeInstance::ndMeshShapeInstance()
@@ -58,8 +66,8 @@ void ndMeshBodyKinematic::ndMeshShapeInstance::Save(nd::TiXmlElement* const pare
 
 	nd::TiXmlElement* const shapeNode = new nd::TiXmlElement("shape");
 	parent->LinkEndChild(shapeNode);
-	//ndAssert(*m_shape);
-	//m_shape->Save(shapeNode);
+	ndAssert(*m_shape);
+	m_shape->Save(shapeNode);
 }
 
 ndMeshBody::ndMeshBody()

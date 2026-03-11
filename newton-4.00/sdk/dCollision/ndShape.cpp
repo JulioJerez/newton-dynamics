@@ -21,6 +21,7 @@
 
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
+#include "ndMesh.h"
 #include "ndShape.h"
 
 ndVector ndShape::m_flushZero(ndFloat32(1.0e-7f));
@@ -175,4 +176,10 @@ ndInt32 ndShape::Release() const
 ndInt32 ndShape::GetRefCount() const
 {
 	return m_refCount.load();
+}
+
+ndSharedPtr<ndMeshCollisionShape> ndShape::GetMeshShape() const
+{
+	ndAssert(0);
+	return ndSharedPtr<ndMeshCollisionShape> (new ndMeshCollisionShapeNull());
 }

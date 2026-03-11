@@ -155,15 +155,6 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName)
 		xmlSaveParam(entry.m_parentXml, "matrix", entry.m_meshNode->m_matrix);
 		xmlSaveParam(entry.m_parentXml, "geometryMatrix", entry.m_meshNode->m_geometryMatrix);
 
-		if (entry.m_meshNode->m_rigidBody)
-		{
-			const ndMeshBody* const rigidBody = *entry.m_meshNode->m_rigidBody;
-			nd::TiXmlElement* const rigidBodyNode = new nd::TiXmlElement("rigidbody");
-			entry.m_parentXml->LinkEndChild(rigidBodyNode);
-			xmlSaveParam(rigidBodyNode, "constructor", rigidBody->m_classConstructor.GetStr());
-			rigidBody->Save(rigidBodyNode);
-		}
-
 		nd::TiXmlElement* const xmlNodeType = new nd::TiXmlElement("type");
 		entry.m_parentXml->LinkEndChild(xmlNodeType);
 		switch (entry.m_meshNode->m_type)
@@ -190,6 +181,15 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName)
 			nd::TiXmlElement* const geometry = new nd::TiXmlElement("geometry");
 			entry.m_parentXml->LinkEndChild(geometry);
 			entry.m_meshNode->GetMesh()->SerializeToXml(geometry, bonesMap);
+		}
+
+		if (entry.m_meshNode->m_rigidBody)
+		{
+			const ndMeshBody* const rigidBody = *entry.m_meshNode->m_rigidBody;
+			nd::TiXmlElement* const rigidBodyNode = new nd::TiXmlElement("rigidbody");
+			entry.m_parentXml->LinkEndChild(rigidBodyNode);
+			xmlSaveParam(rigidBodyNode, "constructor", rigidBody->m_classConstructor.GetStr());
+			rigidBody->Save(rigidBodyNode);
 		}
 
 		for (ndList<ndSharedPtr<ndMesh>>::ndNode* node = entry.m_meshNode->m_children.GetFirst(); node; node = node->GetNext())

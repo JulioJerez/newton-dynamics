@@ -1077,6 +1077,7 @@ void ndBodyKinematic::InitMeshBody(ndSharedPtr<ndMeshBody>& meshBody) const
 	kinematicMeshBody->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
 	kinematicMeshBody->m_maxAngleStep = m_maxAngleStep;
 	kinematicMeshBody->m_maxLinearStep = m_maxLinearStep;
+	m_shapeInstance.InitMeshCollision(kinematicMeshBody);
 }
 
 ndSharedPtr<ndMeshBody> ndBodyKinematic::CreateMeshBody() const

@@ -21,6 +21,7 @@
 
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
+#include "ndMesh.h"
 #include "ndScene.h"
 #include "ndContact.h"
 #include "ndShapeInstance.h"
@@ -758,4 +759,12 @@ void ndShapeInstance::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVect
 		p0 = p0 & ndVector::m_triplexMask;
 		p1 = p1 & ndVector::m_triplexMask;
 	}
+}
+
+void ndShapeInstance::InitMeshCollision(ndMeshBodyKinematic* const meshBody) const
+{
+	meshBody->m_shapeInstance.m_scale = m_scale;
+	meshBody->m_shapeInstance.m_localMatrix = m_localMatrix;
+	meshBody->m_shapeInstance.m_alignmentMatrix = m_alignmentMatrix;
+	meshBody->m_shapeInstance.m_shape = m_shape->GetMeshShape();
 }

@@ -44,6 +44,7 @@ class ndShapeStatic_bvh;
 class ndShapeStaticMesh;
 class ndShapeHeightfield;
 class ndShapeDebugNotify;
+class ndMeshCollisionShape;
 class ndShapeConvexPolygon;
 class ndShapeChamferCylinder;
 class ndShapeUserDefinedImplicit;
@@ -252,6 +253,7 @@ class ndShape: public ndContainersFreeListAlloc<ndShape>
 	D_COLLISION_API virtual ndShapeInfo GetShapeInfo() const;
 	D_COLLISION_API virtual ndMatrix CalculateInertiaAndCenterOfMass(const ndMatrix& alignMatrix, const ndVector& localScale, const ndMatrix& matrix) const;
 	D_COLLISION_API virtual ndFloat32 CalculateMassProperties(const ndMatrix& offset, ndVector& inertia, ndVector& crossInertia, ndVector& centerOfMass) const;
+	D_COLLISION_API virtual ndSharedPtr<ndMeshCollisionShape> GetMeshShape() const;
 
 	virtual ndFloat32 GetVolume() const = 0;
 	virtual ndFloat32 GetBoxMinRadius() const = 0;
@@ -266,7 +268,7 @@ class ndShape: public ndContainersFreeListAlloc<ndShape>
 	virtual ndVector CalculateVolumeIntegral(const ndMatrix& globalMatrix, const ndVector& globalPlane, const ndShapeInstance& parentScale) const = 0;
 	virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const = 0;
 	virtual void DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& debugCallback) const = 0;
-
+	
 	protected:
 	D_COLLISION_API ndShape(ndShapeID id);
 	D_COLLISION_API ndShape (const ndShape& source);
