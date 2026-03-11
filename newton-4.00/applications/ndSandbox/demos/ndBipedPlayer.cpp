@@ -325,6 +325,14 @@ namespace ndBipedPlayer
 			ndSharedPtr<ndJointBilateralConstraint> lowerThighJoint(new ndJointHinge(lowerThighMatrix, lowerThighBody->GetAsBodyKinematic(), upperThighBody->GetAsBodyKinematic()));
 			ndModelArticulation::ndNode* const lowerThighBodyLink = model->AddLimb(upperThighBodyLink, lowerThighBody, lowerThighJoint);
 
+			// calf
+			ndSharedPtr<ndMesh> calfMesh(lowerThighMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> calfEntity(lowerThighEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> calfBody(CreateRigidBody(calfMesh, calfEntity, 1.0f, lowerThighBody->GetAsBodyDynamic()));
+			const ndMatrix calfMatrix(calfMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> calfJoint(new ndJointHinge(calfMatrix, calfBody->GetAsBodyKinematic(), lowerThighBody->GetAsBodyKinematic()));
+			ndModelArticulation::ndNode* const calfBodyLink = model->AddLimb(lowerThighBodyLink, calfBody, calfJoint);
+
 		}
 
 		// add left leg
@@ -548,21 +556,25 @@ namespace ndBipedPlayer
 				lowerThigh->SetGeometryMatrix(offset);
 				
 				// calf
-				ndMatrix calfMatrix = ndGetIdentityMatrix();
-				calfMatrix.m_posit.m_x = -1.0f;
+				//ndMatrix calfMatrix = ndGetIdentityMatrix();
+				ndMatrix calfMatrix (ndYawMatrix(90.0f * ndDegreeToRad));
+				calfMatrix.m_posit.m_x = -0.7f;
 				ndSharedPtr<ndMesh> calf(CreateCapsule(*lowerThigh, calfMatrix, 0.25f, 0.25f, 0.65f, "rightCaft"));
+				offset = ndYawMatrix(-90.0f * ndDegreeToRad);
+				offset.m_posit.m_z = -0.385f;
+				calf->SetGeometryMatrix(offset);
 				
 				// soft contact
 				ndMatrix softMatrix = ndGetIdentityMatrix();
 				softMatrix.m_posit.m_x = -0.425f;
 				ndSharedPtr<ndMesh> softContact(CreateCapsule(*calf, softMatrix, 0.185f, 0.185f, 0.15f, "rightContact"));
 				
-				// foot
-				ndMatrix footMatrix = ndGetIdentityMatrix();
-				footMatrix.m_posit.m_x = -0.25f;
-				footMatrix.m_posit.m_y = 0.085f;
-				//CreateBox(*softContact, footMatrix, 0.175f, 0.3f, 0.525f, "rightFoot");
-				CreateBox(*softContact, footMatrix, 0.175f, 0.525f, 0.3f, "rightFoot");
+				//// foot
+				//ndMatrix footMatrix = ndGetIdentityMatrix();
+				//footMatrix.m_posit.m_x = -0.25f;
+				//footMatrix.m_posit.m_y = 0.085f;
+				////CreateBox(*softContact, footMatrix, 0.175f, 0.3f, 0.525f, "rightFoot");
+				//CreateBox(*softContact, footMatrix, 0.175f, 0.525f, 0.3f, "rightFoot");
 			}
 
 			// left leg
