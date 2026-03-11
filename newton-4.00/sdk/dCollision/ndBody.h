@@ -105,6 +105,7 @@ class ndBody : public ndContainersFreeListAlloc<ndBody>
 	D_COLLISION_API void SetMatrixAndCentreOfMass(const ndQuaternion& rotation, const ndVector& globalcom);
 
 	D_COLLISION_API virtual ndSharedPtr<ndMeshBody> CreateMeshBody() const;
+	D_COLLISION_API virtual void InitMeshBody(ndSharedPtr<ndMeshBody>& body) const;
 
 	protected:
 	virtual void AttachContact(ndContact* const) {}

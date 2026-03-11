@@ -29,6 +29,39 @@
 #define ND_MESH_MAX_STACK_DEPTH	2048
 
 
+ndMeshCollisionShape::ndMeshCollisionShape()
+{
+}
+
+ndMeshCollisionShape::~ndMeshCollisionShape()
+{
+}
+
+void ndMeshCollisionShapeCapsule::Save(nd::TiXmlElement* const parent) const
+{
+	xmlSaveParam(parent, "xxxxx", 1.0f);
+}
+
+ndMeshBodyKinematic::ndMeshShapeInstance::ndMeshShapeInstance()
+	:m_localMatrix(ndGetIdentityMatrix())
+	,m_alignmentMatrix(ndGetIdentityMatrix())
+	,m_scale(ndVector::m_one)
+	,m_shape(nullptr)
+{
+}
+
+void ndMeshBodyKinematic::ndMeshShapeInstance::Save(nd::TiXmlElement* const parent) const
+{
+	xmlSaveParam(parent, "localMatrix", m_localMatrix);
+	xmlSaveParam(parent, "alignmentMatrix", m_alignmentMatrix);
+	xmlSaveParam(parent, "scale", m_scale);
+
+	nd::TiXmlElement* const shapeNode = new nd::TiXmlElement("shape");
+	parent->LinkEndChild(shapeNode);
+	//ndAssert(*m_shape);
+	//m_shape->Save(shapeNode);
+}
+
 ndMeshBody::ndMeshBody()
 	:m_matrix(ndGetIdentityMatrix())
 	,m_veloc(ndVector::m_zero)
@@ -39,12 +72,7 @@ ndMeshBody::ndMeshBody()
 
 void ndMeshBody::Save(nd::TiXmlElement* const parent) const
 {
-	ndVector euler;
-	ndVector rotation (m_matrix.CalcPitchYawRoll(euler));
-	rotation = rotation.Scale(ndRadToDegree);
-
-	xmlSaveParam(parent, "position", m_matrix.m_posit);
-	xmlSaveParam(parent, "rotation", rotation);
+	xmlSaveParam(parent, "matrix", m_matrix);
 	xmlSaveParam(parent, "veloc", m_veloc);
 	xmlSaveParam(parent, "omega", m_omega);
 	xmlSaveParam(parent, "com", m_localCentreOfMass);
@@ -52,6 +80,7 @@ void ndMeshBody::Save(nd::TiXmlElement* const parent) const
 
 ndMeshBodyKinematic::ndMeshBodyKinematic()
 	:ndMeshBody()
+	,m_shapeInstance()
 	,m_invMass(ndVector::m_zero)
 	,m_inertiaPrincipalAxis(ndGetIdentityMatrix())
 	,m_maxAngleStep(ndFloat32 (45.0f))
@@ -67,10 +96,15 @@ void ndMeshBodyKinematic::Save(nd::TiXmlElement* const parent) const
 	ndVector axisOfInertia(m_inertiaPrincipalAxis.CalcPitchYawRoll(euler));
 	axisOfInertia = axisOfInertia.Scale(ndRadToDegree);
 
-	xmlSaveParam(parent, "inverseMassMatrix", m_invMass);
+	xmlSaveParam(parent, "inverseMass", m_invMass.m_w);
+	xmlSaveParam(parent, "inverseDiagonalInertia", m_invMass);
 	xmlSaveParam(parent, "principalAxis", axisOfInertia);
 	xmlSaveParam(parent, "maxAngleStep", m_maxAngleStep);
 	xmlSaveParam(parent, "maxLinearStep", m_maxLinearStep);
+
+	nd::TiXmlElement* const collisionInstance = new nd::TiXmlElement("collisionInstance");
+	parent->LinkEndChild(collisionInstance);
+	m_shapeInstance.Save(collisionInstance);
 }
 
 ndMeshBodyDynamic::ndMeshBodyDynamic()

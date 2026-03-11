@@ -28,6 +28,19 @@ class ndBody;
 class ndMeshEffect;
 class ndShapeInstance;
 
+class ndMeshCollisionShape : public ndClassAlloc
+{
+	public:
+	D_COLLISION_API ndMeshCollisionShape();
+	D_COLLISION_API virtual ~ndMeshCollisionShape();
+	D_COLLISION_API virtual void Save(nd::TiXmlElement* const parent) const = 0;
+};
+
+class ndMeshCollisionShapeCapsule : public ndMeshCollisionShape
+{
+	D_COLLISION_API virtual void Save(nd::TiXmlElement* const parent) const override;
+};
+
 class ndMeshBody : public ndClassAlloc
 {
 	public:
@@ -45,9 +58,22 @@ class ndMeshBody : public ndClassAlloc
 class ndMeshBodyKinematic : public ndMeshBody
 {
 	public:
+	class ndMeshShapeInstance
+	{
+		public:
+		D_COLLISION_API ndMeshShapeInstance();
+		D_COLLISION_API void Save(nd::TiXmlElement* const parent) const;
+
+		ndMatrix m_localMatrix;
+		ndMatrix m_alignmentMatrix;
+		ndVector m_scale;
+		ndSharedPtr<ndMeshCollisionShape> m_shape;
+	};
+
 	D_COLLISION_API ndMeshBodyKinematic();
 	D_COLLISION_API virtual void Save(nd::TiXmlElement* const parent) const override;
 
+	ndMeshShapeInstance m_shapeInstance;
 	ndVector m_invMass;
 	ndMatrix m_inertiaPrincipalAxis;
 	ndFloat32 m_maxAngleStep;

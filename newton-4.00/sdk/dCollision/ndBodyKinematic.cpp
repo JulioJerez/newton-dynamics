@@ -1069,9 +1069,20 @@ void ndBodyKinematic::InitSurrogateBody(ndBodyKinematic* const surrogate) const
 	surrogate->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
 }
 
+void ndBodyKinematic::InitMeshBody(ndSharedPtr<ndMeshBody>& meshBody) const
+{
+	ndBody::InitMeshBody(meshBody);
+	ndMeshBodyKinematic* const kinematicMeshBody = (ndMeshBodyKinematic*)*meshBody;
+	kinematicMeshBody->m_invMass = m_invMass;
+	kinematicMeshBody->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
+	kinematicMeshBody->m_maxAngleStep = m_maxAngleStep;
+	kinematicMeshBody->m_maxLinearStep = m_maxLinearStep;
+}
+
 ndSharedPtr<ndMeshBody> ndBodyKinematic::CreateMeshBody() const
 {
 	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBodyKinematic());
+	InitMeshBody(meshBody);
 	meshBody->m_classConstructor = ndString(ClassName());
 	return meshBody;
 }

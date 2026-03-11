@@ -217,9 +217,18 @@ void ndBody::SetMatrix(const ndMatrix& matrix)
 	SetMatrixNoSleep(matrix);
 }
 
+void ndBody::InitMeshBody(ndSharedPtr<ndMeshBody>& meshBody) const
+{
+	meshBody->m_matrix = m_matrix;
+	meshBody->m_omega = m_omega;
+	meshBody->m_veloc = m_veloc;
+	meshBody->m_localCentreOfMass = m_localCentreOfMass;
+}
+
 ndSharedPtr<ndMeshBody> ndBody::CreateMeshBody() const
 {
 	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBody());
+	InitMeshBody(meshBody);
 	meshBody->m_classConstructor = ndString(ClassName());
 	return meshBody;
 }

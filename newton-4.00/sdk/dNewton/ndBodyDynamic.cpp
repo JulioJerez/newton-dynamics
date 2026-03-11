@@ -471,9 +471,17 @@ void ndBodyDynamic::InitSurrogateBody(ndBodyKinematic* const surrogate) const
 	dst->m_savedExternalTorque = m_savedExternalTorque;
 }
 
+void ndBodyDynamic::InitMeshBody(ndSharedPtr<ndMeshBody>& meshBody) const
+{
+	ndBodyKinematic::InitMeshBody(meshBody);
+	ndMeshBodyDynamic* const dynamicMeshBody = (ndMeshBodyDynamic*)*meshBody;
+	dynamicMeshBody->m_intrinsicDamping = m_dampCoef;
+}
+
 ndSharedPtr<ndMeshBody> ndBodyDynamic::CreateMeshBody() const
 {
 	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBodyDynamic());
+	InitMeshBody(meshBody);
 	meshBody->m_classConstructor = ndString(ClassName());
 	return meshBody;
 }
