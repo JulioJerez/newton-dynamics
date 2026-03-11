@@ -287,63 +287,64 @@ namespace ndBipedPlayer
 			body->SetCollisionShape(*(*shape));
 			body->GetAsBodyDynamic()->SetMassMatrix(mass, *(*shape));
 
-			char name[256];
-			static int xxxx = 0;
-			sprintf_s(name, 255, "xxx%d.nd", xxxx);
-			xxxx++;
-			ndMesh::SaveRigidBody(body, ndGetWorkingFileName(name).GetStr());
+			//char name[256];
+			//static int xxxx = 0;
+			//sprintf_s(name, 255, "xxx%d.nd", xxxx);
+			//xxxx++;
+			//ndMesh::SaveRigidBody(body, ndGetWorkingFileName(name).GetStr());
 			return body;
 		};
 
 		// add the root body
 		ndSharedPtr<ndBody> rootBody(CreateRigidBody(mesh, visualMesh, 1.0f, nullptr));
 		ndModelArticulation::ndNode* const modelRootNode = model->AddRootBody(rootBody);
+
+		// add right leg
 		{
-			// add right leg
+			// hip
 			ndSharedPtr<ndMesh> hipMesh(mesh->FindByClosestMatch("rightHip")->GetSharedPtr());
 			ndSharedPtr<ndRenderSceneNode> hipEntity(visualMesh->FindByClosestMatch("rightHip")->GetSharedPtr());
 			ndSharedPtr<ndBody> hipBody(CreateRigidBody(hipMesh, hipEntity, 1.0f, rootBody->GetAsBodyDynamic()));
 			const ndMatrix hipMatrix(hipMesh->CalculateGlobalMatrix());
 			ndSharedPtr<ndJointBilateralConstraint> hipJoint(new ndJointHinge(hipMatrix, hipBody->GetAsBodyKinematic(), rootBody->GetAsBodyKinematic()));
 			ndModelArticulation::ndNode* const hipLink = model->AddLimb(modelRootNode, hipBody, hipJoint);
+
+			// thigh
+			ndSharedPtr<ndMesh> thighMesh(hipMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> thighEntity(hipEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> thighBody(CreateRigidBody(thighMesh, thighEntity, 1.0f, hipBody->GetAsBodyDynamic()));
+			const ndMatrix thighMatrix(thighMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> thighJoint(new ndJointHinge(thighMatrix, thighBody->GetAsBodyKinematic(), hipBody->GetAsBodyKinematic()));
+			ndModelArticulation::ndNode* const thighBodyLink = model->AddLimb(hipLink, thighBody, thighJoint);
+
 		}
 
+		// add left leg
 		{
-			// add left leg
+			// hip
 			ndSharedPtr<ndMesh> hipMesh(mesh->FindByClosestMatch("leftHip")->GetSharedPtr());
 			ndSharedPtr<ndRenderSceneNode> hipEntity(visualMesh->FindByClosestMatch("leftHip")->GetSharedPtr());
 			ndSharedPtr<ndBody> hipBody(CreateRigidBody(hipMesh, hipEntity, 1.0f, rootBody->GetAsBodyDynamic()));
 			const ndMatrix hipMatrix(hipMesh->CalculateGlobalMatrix());
 			ndSharedPtr<ndJointBilateralConstraint> hipJoint(new ndJointHinge(hipMatrix, hipBody->GetAsBodyKinematic(), rootBody->GetAsBodyKinematic()));
 			ndModelArticulation::ndNode* const hipLink = model->AddLimb(modelRootNode, hipBody, hipJoint);
-		}
 
-		//// add the pole mesh and body
-		//ndSharedPtr<ndMesh> poleMesh(mesh->GetChildren().GetFirst()->GetInfo());
-		//ndSharedPtr<ndRenderSceneNode> poleEntity(visualMesh->GetChildren().GetFirst()->GetInfo());
-		//m_pole = ndSharedPtr<ndBody>(CreateRigidBody(poleMesh, poleEntity, POLE_MASS, m_topBox->GetAsBodyDynamic()));
-		//
-		//// add ball mesh and body
-		//ndSharedPtr<ndMesh> ballMesh(poleMesh->GetChildren().GetFirst()->GetInfo());
-		//ndSharedPtr<ndRenderSceneNode> ballEntity(poleEntity->GetChildren().GetFirst()->GetInfo());
-		//m_wheel = ndSharedPtr<ndBody>(CreateRigidBody(ballMesh, ballEntity, BALL_MASS, m_pole->GetAsBodyDynamic()));
-		//
-		//// add links
-		//const ndMatrix poleMatrix(ndPitchMatrix(ndPi) * m_pole->GetMatrix());
-		//m_poleHinge = ndSharedPtr<ndJointBilateralConstraint>(new ndJointHinge(poleMatrix, m_pole->GetAsBodyKinematic(), m_topBox->GetAsBodyKinematic()));
-		//((ndJointRoller*)*m_poleHinge)->SetAsSpringDamperPosit(0.01f, 0.0f, 5.0f);
-		//ndModelArticulation::ndNode* const poleNode = model->AddLimb(modelRootNode, m_pole, m_poleHinge);
-		//
-		//const ndMatrix ballMatrix(m_wheel->GetMatrix());
-		//m_wheelRoller = ndSharedPtr<ndJointBilateralConstraint>(new ndJointRoller(ballMatrix, m_wheel->GetAsBodyKinematic(), m_pole->GetAsBodyKinematic()));
-		//((ndJointRoller*)*m_wheelRoller)->SetAsSpringDamperPosit(0.01f, 1000.0f, 15.0f);
-		//model->AddLimb(poleNode, m_wheel, m_wheelRoller);
-		//
-		//// fix to the word with a plane joint
-		//ndWorld* const world = scene->GetWorld();
-		//const ndMatrix planeMatrix(m_topBox->GetMatrix());
-		//m_plane = ndSharedPtr<ndJointBilateralConstraint>(new ndJointPlane(planeMatrix.m_posit, planeMatrix.m_right, m_topBox->GetAsBodyKinematic(), world->GetSentinelBody()));
-		//model->AddCloseLoop(m_plane);
+			// thigh
+			ndSharedPtr<ndMesh> thighMesh(hipMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> thighEntity(hipEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> thighBody(CreateRigidBody(thighMesh, thighEntity, 1.0f, hipBody->GetAsBodyDynamic()));
+			const ndMatrix thighMatrix(thighMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> thighJoint(new ndJointHinge(thighMatrix, thighBody->GetAsBodyKinematic(), hipBody->GetAsBodyKinematic()));
+			ndModelArticulation::ndNode* const thighBodyLink = model->AddLimb(hipLink, thighBody, thighJoint);
+
+			//ndMesh::SaveRigidBody(body, ndGetWorkingFileName(name).GetStr());
+		}
+		
+		// fix to the world with a fix 6 dof joint
+		ndWorld* const world = scene->GetWorld();
+		const ndMatrix fixMatrix(rootBody->GetMatrix());
+		ndSharedPtr<ndJointBilateralConstraint> fixJoint(new ndJointFix6dof(fixMatrix, rootBody->GetAsBodyKinematic(), world->GetSentinelBody()));
+		model->AddCloseLoop(fixJoint);
 	}
 
 	ndModelArticulation* ndController::CreateModel(ndDemoEntityManager* const scene, const ndMatrix& location, const ndRenderMeshLoader& loader, const char* const name)
