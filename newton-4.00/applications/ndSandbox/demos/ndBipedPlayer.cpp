@@ -299,10 +299,21 @@ namespace ndBipedPlayer
 		ndSharedPtr<ndBody> rootBody(CreateRigidBody(mesh, visualMesh, 1.0f, nullptr));
 		ndModelArticulation::ndNode* const modelRootNode = model->AddRootBody(rootBody);
 		{
-			// add legs
+			// add right leg
+			ndSharedPtr<ndMesh> hipMesh(mesh->FindByClosestMatch("rightHip")->GetSharedPtr());
 			ndSharedPtr<ndRenderSceneNode> hipEntity(visualMesh->FindByClosestMatch("rightHip")->GetSharedPtr());
-			ndSharedPtr<ndBody> hipBody(CreateRigidBody(mesh, hipEntity, 1.0f, rootBody->GetAsBodyDynamic()));
-			const ndMatrix hipMatrix(hipEntity->CalculateGlobalMatrix());
+			ndSharedPtr<ndBody> hipBody(CreateRigidBody(hipMesh, hipEntity, 1.0f, rootBody->GetAsBodyDynamic()));
+			const ndMatrix hipMatrix(hipMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> hipJoint(new ndJointHinge(hipMatrix, hipBody->GetAsBodyKinematic(), rootBody->GetAsBodyKinematic()));
+			ndModelArticulation::ndNode* const hipLink = model->AddLimb(modelRootNode, hipBody, hipJoint);
+		}
+
+		{
+			// add left leg
+			ndSharedPtr<ndMesh> hipMesh(mesh->FindByClosestMatch("leftHip")->GetSharedPtr());
+			ndSharedPtr<ndRenderSceneNode> hipEntity(visualMesh->FindByClosestMatch("leftHip")->GetSharedPtr());
+			ndSharedPtr<ndBody> hipBody(CreateRigidBody(hipMesh, hipEntity, 1.0f, rootBody->GetAsBodyDynamic()));
+			const ndMatrix hipMatrix(hipMesh->CalculateGlobalMatrix());
 			ndSharedPtr<ndJointBilateralConstraint> hipJoint(new ndJointHinge(hipMatrix, hipBody->GetAsBodyKinematic(), rootBody->GetAsBodyKinematic()));
 			ndModelArticulation::ndNode* const hipLink = model->AddLimb(modelRootNode, hipBody, hipJoint);
 		}
