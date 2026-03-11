@@ -333,6 +333,14 @@ namespace ndBipedPlayer
 			ndSharedPtr<ndJointBilateralConstraint> calfJoint(new ndJointHinge(calfMatrix, calfBody->GetAsBodyKinematic(), lowerThighBody->GetAsBodyKinematic()));
 			ndModelArticulation::ndNode* const calfBodyLink = model->AddLimb(lowerThighBodyLink, calfBody, calfJoint);
 
+			// soft Contact
+			ndSharedPtr<ndMesh> softMesh(calfMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> softEntity(calfEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> softBody(CreateRigidBody(softMesh, softEntity, 1.0f, calfBody->GetAsBodyDynamic()));
+			const ndMatrix softMatrix(softMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> softJoint(new ndJointSlider(softMatrix, softBody->GetAsBodyKinematic(), calfBody->GetAsBodyKinematic()));
+			((ndJointSlider*)*softJoint)->SetAsSpringDamper(0.001f, 1000.0f, 20.0f);
+			ndModelArticulation::ndNode* const softBodyLink = model->AddLimb(calfBodyLink, softBody, softJoint);
 		}
 
 		// add left leg
@@ -565,16 +573,15 @@ namespace ndBipedPlayer
 				calf->SetGeometryMatrix(offset);
 				
 				// soft contact
-				ndMatrix softMatrix = ndGetIdentityMatrix();
-				softMatrix.m_posit.m_x = -0.425f;
+				ndMatrix softMatrix (ndYawMatrix(90.0f * ndDegreeToRad));
+				softMatrix.m_posit.m_z = -0.8f;
 				ndSharedPtr<ndMesh> softContact(CreateCapsule(*calf, softMatrix, 0.185f, 0.185f, 0.15f, "rightContact"));
 				
-				//// foot
-				//ndMatrix footMatrix = ndGetIdentityMatrix();
-				//footMatrix.m_posit.m_x = -0.25f;
-				//footMatrix.m_posit.m_y = 0.085f;
-				////CreateBox(*softContact, footMatrix, 0.175f, 0.3f, 0.525f, "rightFoot");
-				//CreateBox(*softContact, footMatrix, 0.175f, 0.525f, 0.3f, "rightFoot");
+				// foot
+				ndMatrix footMatrix(ndGetIdentityMatrix());
+				footMatrix.m_posit.m_x = 0.2f;
+				footMatrix.m_posit.m_y = 0.085f;
+				CreateBox(*softContact, footMatrix, 0.175f, 0.525f, 0.3f, "rightFoot");
 			}
 
 			// left leg
