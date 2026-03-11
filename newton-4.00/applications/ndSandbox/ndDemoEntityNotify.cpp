@@ -112,6 +112,16 @@ void ndDemoEntityNotify::ResetEntityTransform(const ndMatrix& matrix)
 	}
 }
 
+bool ndDemoEntityNotify::CheckInWorld(const ndMatrix& matrix) const
+{
+	bool outsideWorld = (GetBody()->GetInvMass() == 0.0f) || (matrix.m_posit.m_y > ndFloat32(-100.0f));
+	if (!outsideWorld)
+	{
+		ndTrace(("body %d outside world\n", GetBody()->GetId()));
+	}
+	return outsideWorld;
+}
+
 void ndDemoEntityNotify::OnTransform(ndFloat32, const ndMatrix& matrix)
 {
 	// apply this transformation matrix to the application user data.

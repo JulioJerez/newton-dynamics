@@ -419,8 +419,22 @@ ndRenderSceneNode* ndRenderSceneNode::FindByClosestMatch(const ndString& name) c
 	ndRenderSceneNode* closestMatch = FindByName(name);
 	if (!closestMatch)
 	{
-		ndInt32 bestScore = 10000;
+		ndString lowerCaseName(name);
+		lowerCaseName.ToLower();
+
 		ndRenderSceneNode* const self = (ndRenderSceneNode*)this;
+		for (ndRenderSceneNode* node = self->IteratorFirst(); node; node = node->IteratorNext())
+		{
+			ndString nodeName(node->m_name);
+			nodeName.ToLower();
+			ndInt32 findIndex = nodeName.Find(lowerCaseName);
+			if (findIndex != -1)
+			{
+				return node;
+			}
+		}
+
+		ndInt32 bestScore = 10000;
 		for (ndRenderSceneNode* node = self->IteratorFirst(); node && bestScore; node = node->IteratorNext())
 		{
 			ndInt32 distance = node->m_name.Distance(name);

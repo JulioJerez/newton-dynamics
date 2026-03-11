@@ -47,6 +47,8 @@ class ndDemoEntityNotify : public ndModelBodyNotify
 	virtual void OnTransform(ndFloat32 timestep, const ndMatrix& matrix) override;
 	virtual void OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep) override;
 
+	bool CheckInWorld(const ndMatrix& matrix) const;
+
 	ndDemoEntityManager* m_manager;
 	ndSharedPtr<ndRenderSceneNode> m_entity;
 	ndTransform m_transform;

@@ -92,180 +92,183 @@ namespace ndBipedPlayer
 
 	void ndController::ResetModel()
 	{
-		ndMatrix boxMatrix(ndGetIdentityMatrix());
-		boxMatrix.m_posit = m_topBox->GetMatrix().m_posit;
-		boxMatrix.m_posit.m_x = ndFloat32(0.0f);
-		boxMatrix.m_posit.m_y = ndFloat32(2.5f);
-		m_topBox->SetMatrix(boxMatrix);
-		
-		const ndMatrix poleMatrix(m_poleHinge->GetLocalMatrix0().OrthoInverse() * m_poleHinge->CalculateGlobalMatrix1());
-		m_pole->SetMatrix(poleMatrix);
-		
-		const ndMatrix ballMatrix(m_wheelRoller->GetLocalMatrix0().OrthoInverse() * m_wheelRoller->CalculateGlobalMatrix1());
-		m_wheel->SetMatrix(ballMatrix);
-		
-		m_pole->SetOmega(ndVector::m_zero);
-		m_pole->SetVelocity(ndVector::m_zero);
-		
-		m_topBox->SetOmega(ndVector::m_zero);
-		m_topBox->SetVelocity(ndVector::m_zero);
-		
-		m_wheel->SetOmega(ndVector::m_zero);
-		m_wheel->SetVelocity(ndVector::m_zero);
-		
-		GetModel()->GetAsModelArticulation()->ClearMemory();
+		ndAssert(0);
+		//ndMatrix boxMatrix(ndGetIdentityMatrix());
+		//boxMatrix.m_posit = m_topBox->GetMatrix().m_posit;
+		//boxMatrix.m_posit.m_x = ndFloat32(0.0f);
+		//boxMatrix.m_posit.m_y = ndFloat32(2.5f);
+		//m_topBox->SetMatrix(boxMatrix);
+		//
+		//const ndMatrix poleMatrix(m_poleHinge->GetLocalMatrix0().OrthoInverse() * m_poleHinge->CalculateGlobalMatrix1());
+		//m_pole->SetMatrix(poleMatrix);
+		//
+		//const ndMatrix ballMatrix(m_wheelRoller->GetLocalMatrix0().OrthoInverse() * m_wheelRoller->CalculateGlobalMatrix1());
+		//m_wheel->SetMatrix(ballMatrix);
+		//
+		//m_pole->SetOmega(ndVector::m_zero);
+		//m_pole->SetVelocity(ndVector::m_zero);
+		//
+		//m_topBox->SetOmega(ndVector::m_zero);
+		//m_topBox->SetVelocity(ndVector::m_zero);
+		//
+		//m_wheel->SetOmega(ndVector::m_zero);
+		//m_wheel->SetVelocity(ndVector::m_zero);
+		//
+		//GetModel()->GetAsModelArticulation()->ClearMemory();
 	}
 		
-	// calculate pole angle relative to the world.
-	ndFloat32 ndController::GetPoleAngle() const
-	{
-		const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
-		const ndMatrix matrix(hinge->CalculateGlobalMatrix0());
-		ndFloat32 angle = ndAcos(ndClamp(matrix.m_up.m_y, ndFloat32(-1.0f), ndFloat32(1.0f)));
-		return angle;
-	}
-
-	ndFloat32 ndController::GetBoxAngle() const
-	{
-		const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
-		const ndMatrix matrix(hinge->CalculateGlobalMatrix1());
-		ndFloat32 angle = ndAcos(ndClamp(matrix.m_up.m_y, ndFloat32(-1.0f), ndFloat32(1.0f)));
-		return angle;
-	}
-
-	ndFloat32 ndController::GetBoxOmega() const
-	{
-		const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
-		const ndMatrix matrix(hinge->CalculateGlobalMatrix1());
-		const ndVector omega(m_topBox->GetOmega());
-		return omega.DotProduct(matrix.m_front).GetScalar();
-	}
+	//// calculate pole angle relative to the world.
+	//ndFloat32 ndController::GetPoleAngle() const
+	//{
+	//	const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
+	//	const ndMatrix matrix(hinge->CalculateGlobalMatrix0());
+	//	ndFloat32 angle = ndAcos(ndClamp(matrix.m_up.m_y, ndFloat32(-1.0f), ndFloat32(1.0f)));
+	//	return angle;
+	//}
+	//
+	//ndFloat32 ndController::GetBoxAngle() const
+	//{
+	//	const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
+	//	const ndMatrix matrix(hinge->CalculateGlobalMatrix1());
+	//	ndFloat32 angle = ndAcos(ndClamp(matrix.m_up.m_y, ndFloat32(-1.0f), ndFloat32(1.0f)));
+	//	return angle;
+	//}
+	//
+	//ndFloat32 ndController::GetBoxOmega() const
+	//{
+	//	const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
+	//	const ndMatrix matrix(hinge->CalculateGlobalMatrix1());
+	//	const ndVector omega(m_topBox->GetOmega());
+	//	return omega.DotProduct(matrix.m_front).GetScalar();
+	//}
 
 	#pragma optimize( "", off )
 	bool ndController::IsTerminal() const
 	{
-		bool fail = ndAbs(GetPoleAngle()) > ND_TERMINATION_ANGLE;
-		fail = fail || ndAbs(GetBoxAngle()) > ndFloat32 (90.0f) * ndDegreeToRad;
-		return fail;
+		//bool fail = ndAbs(GetPoleAngle()) > ND_TERMINATION_ANGLE;
+		//fail = fail || ndAbs(GetBoxAngle()) > ndFloat32 (90.0f) * ndDegreeToRad;
+		//return fail;
+		return true;
 	}
 
 	#pragma optimize( "", off )
 	ndBrainFloat ndController::CalculateReward() const
 	{
-		if (IsTerminal())
-		{
-			return ndBrainFloat(-1.0f);
-		}
-
-		// trying with center of mass dynammics
-		// b*ut the result so far the results are very dissapointing
-		// this however word much better is an order version 
-		// maybe I have bugs that I have to track
-		ndMatrix comFrame(m_wheelRoller->CalculateGlobalMatrix1());
-		comFrame.m_up = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
-		comFrame.m_right = comFrame.m_front.CrossProduct(comFrame.m_up).Normalize();
-		comFrame.m_up = comFrame.m_right.CrossProduct(comFrame.m_front).Normalize();
-
-		ndAssert(*m_solver);
-		// exclude the wheel angular momentum from the com kinematics
-		const ndVector savedWheelOmega(m_wheel->GetOmega());
-		m_wheel->SetOmegaNoSleep(ndVector::m_zero);
-		ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS> extraJoints;
-		ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(*((ndIkSolver*)*m_solver), comFrame, extraJoints, m_timestep));
-		m_wheel->SetOmegaNoSleep(savedWheelOmega);
-
-		const ndFloat32 poleAngle = ndFloat32(8.0f) * GetPoleAngle() / ND_TERMINATION_ANGLE;
-		const ndFloat32 comOmega = ndFloat32(2.0f) * comDynamics.m_omega.m_x;
-		const ndFloat32 comAlpha = ndFloat32(0.5f) * comDynamics.m_alpha.m_x;
-		const ndFloat32 comSpeed = ndMax(ndAbs(comDynamics.m_veloc.m_z) - ndFloat32(8.0f), ndFloat32(0.0f));
-		const ndFloat32 boxAngle = ndMax(ndAbs(GetBoxAngle()) - ndFloat32(45.f) * ndDegreeToRad, ndFloat32(0.0f));
-
-		const ndFloat32 invSigma2 = ndFloat32(4.0f);
-		const ndFloat32 poleAngleReward = ndExp(-invSigma2 * poleAngle * poleAngle);
-		const ndFloat32 comOmegaReward = ndExp(-invSigma2 * comOmega * comOmega);
-		const ndFloat32 comAlphaReward = ndExp(-invSigma2 * comAlpha * comAlpha);
-		const ndFloat32 comSpeedPenalty = ndExp(-invSigma2 * comSpeed * comSpeed) - ndFloat32(1.0f);
-		const ndFloat32 boxAnglePenalty = ndExp(-invSigma2 * boxAngle * boxAngle) - ndFloat32(1.0f);
-
-		ndFloat32 reward = ndFloat32(0.0f);
-		reward += poleAngleReward * ndFloat32(0.6f);
-		reward += comOmegaReward * ndFloat32(0.2f);
-		reward += comAlphaReward * ndFloat32(0.2f);
-		reward += comSpeedPenalty * ndFloat32(0.5f);
-		reward += boxAnglePenalty * ndFloat32(0.5f);
-
-		return ndBrainFloat(reward);
+		//if (IsTerminal())
+		//{
+		//	return ndBrainFloat(-1.0f);
+		//}
+		//
+		//// trying with center of mass dynammics
+		//// b*ut the result so far the results are very dissapointing
+		//// this however word much better is an order version 
+		//// maybe I have bugs that I have to track
+		//ndMatrix comFrame(m_wheelRoller->CalculateGlobalMatrix1());
+		//comFrame.m_up = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
+		//comFrame.m_right = comFrame.m_front.CrossProduct(comFrame.m_up).Normalize();
+		//comFrame.m_up = comFrame.m_right.CrossProduct(comFrame.m_front).Normalize();
+		//
+		//ndAssert(*m_solver);
+		//// exclude the wheel angular momentum from the com kinematics
+		//const ndVector savedWheelOmega(m_wheel->GetOmega());
+		//m_wheel->SetOmegaNoSleep(ndVector::m_zero);
+		//ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS> extraJoints;
+		//ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(*((ndIkSolver*)*m_solver), comFrame, extraJoints, m_timestep));
+		//m_wheel->SetOmegaNoSleep(savedWheelOmega);
+		//
+		//const ndFloat32 poleAngle = ndFloat32(8.0f) * GetPoleAngle() / ND_TERMINATION_ANGLE;
+		//const ndFloat32 comOmega = ndFloat32(2.0f) * comDynamics.m_omega.m_x;
+		//const ndFloat32 comAlpha = ndFloat32(0.5f) * comDynamics.m_alpha.m_x;
+		//const ndFloat32 comSpeed = ndMax(ndAbs(comDynamics.m_veloc.m_z) - ndFloat32(8.0f), ndFloat32(0.0f));
+		//const ndFloat32 boxAngle = ndMax(ndAbs(GetBoxAngle()) - ndFloat32(45.f) * ndDegreeToRad, ndFloat32(0.0f));
+		//
+		//const ndFloat32 invSigma2 = ndFloat32(4.0f);
+		//const ndFloat32 poleAngleReward = ndExp(-invSigma2 * poleAngle * poleAngle);
+		//const ndFloat32 comOmegaReward = ndExp(-invSigma2 * comOmega * comOmega);
+		//const ndFloat32 comAlphaReward = ndExp(-invSigma2 * comAlpha * comAlpha);
+		//const ndFloat32 comSpeedPenalty = ndExp(-invSigma2 * comSpeed * comSpeed) - ndFloat32(1.0f);
+		//const ndFloat32 boxAnglePenalty = ndExp(-invSigma2 * boxAngle * boxAngle) - ndFloat32(1.0f);
+		//
+		//ndFloat32 reward = ndFloat32(0.0f);
+		//reward += poleAngleReward * ndFloat32(0.6f);
+		//reward += comOmegaReward * ndFloat32(0.2f);
+		//reward += comAlphaReward * ndFloat32(0.2f);
+		//reward += comSpeedPenalty * ndFloat32(0.5f);
+		//reward += boxAnglePenalty * ndFloat32(0.5f);
+		//
+		//return ndBrainFloat(reward);
+		return 0;
 	}
 
 	void ndController::ApplyActions(ndBrainFloat* const actions)
 	{
-		const ndVector wheelMass(m_wheel->GetAsBodyDynamic()->GetMassMatrix());
-		const ndMatrix wheelMatrix(m_wheelRoller->CalculateGlobalMatrix0());
-
-		ndFloat32 wheelTorque = wheelMass.m_z * actions[m_wheelTorque] * ND_MAX_WHEEL_ALPHA;
-		if (IsOnAir())
-		{
-			ndFloat32 omega = m_wheel->GetOmega().m_z;
-			ndFloat32 drag = ndFloat32(0.1f) * omega * omega * ndSign(omega);
-			wheelTorque = -drag;
-		}
-
-		//ndExpandTraceMessage("%g %g %g\n", speed, drag, wheelTorque);
-		ndVector torque(wheelMatrix.m_front.Scale(wheelTorque));
-		m_wheel->GetAsBodyDynamic()->SetTorque(torque);
-
-		if (m_isTrainning && (m_randomImpulseCounter == 0))
-		{
-			// when in tranning mode,
-			// apply a random impulse to the top box every m_randomImpulseCounter steps
-			ndFloat32 randOmega = ND_RANDOM_IMPULSE_MAGNITUD * (ndFloat32(0.5f) - ndRand());
-			const ndVector mass(m_topBox->GetAsBodyDynamic()->GetMassMatrix());
-			const ndVector pin(m_poleHinge->CalculateGlobalMatrix1().m_front.Scale (randOmega));
-			const ndVector randomImpulseTorque(pin * mass);
-			m_topBox->GetAsBodyDynamic()->ApplyImpulsePair(ndVector::m_zero, randomImpulseTorque, m_timestep);
-		}
+		//const ndVector wheelMass(m_wheel->GetAsBodyDynamic()->GetMassMatrix());
+		//const ndMatrix wheelMatrix(m_wheelRoller->CalculateGlobalMatrix0());
+		//
+		//ndFloat32 wheelTorque = wheelMass.m_z * actions[m_wheelTorque] * ND_MAX_WHEEL_ALPHA;
+		//if (IsOnAir())
+		//{
+		//	ndFloat32 omega = m_wheel->GetOmega().m_z;
+		//	ndFloat32 drag = ndFloat32(0.1f) * omega * omega * ndSign(omega);
+		//	wheelTorque = -drag;
+		//}
+		//
+		////ndExpandTraceMessage("%g %g %g\n", speed, drag, wheelTorque);
+		//ndVector torque(wheelMatrix.m_front.Scale(wheelTorque));
+		//m_wheel->GetAsBodyDynamic()->SetTorque(torque);
+		//
+		//if (m_isTrainning && (m_randomImpulseCounter == 0))
+		//{
+		//	// when in tranning mode,
+		//	// apply a random impulse to the top box every m_randomImpulseCounter steps
+		//	ndFloat32 randOmega = ND_RANDOM_IMPULSE_MAGNITUD * (ndFloat32(0.5f) - ndRand());
+		//	const ndVector mass(m_topBox->GetAsBodyDynamic()->GetMassMatrix());
+		//	const ndVector pin(m_poleHinge->CalculateGlobalMatrix1().m_front.Scale (randOmega));
+		//	const ndVector randomImpulseTorque(pin * mass);
+		//	m_topBox->GetAsBodyDynamic()->ApplyImpulsePair(ndVector::m_zero, randomImpulseTorque, m_timestep);
+		//}
 	}
 
 	ndBrainFloat ndController::IsOnAir() const
 	{
-		ndBodyKinematic::ndContactMap& contacts = m_wheel->GetAsBodyKinematic()->GetContactMap();
-		ndBodyKinematic::ndContactMap::Iterator it(contacts);
-		for (it.Begin(); it; it++)
-		{
-			ndContact* const contact = *it;
-			if (contact->IsActive())
-			{
-				const ndContactPointList& contactPoints = contact->GetContactPoints();
-				return contactPoints.GetCount() ? ndBrainFloat(0.0f) : ndBrainFloat(1.0f);
-			}
-		}
+		//ndBodyKinematic::ndContactMap& contacts = m_wheel->GetAsBodyKinematic()->GetContactMap();
+		//ndBodyKinematic::ndContactMap::Iterator it(contacts);
+		//for (it.Begin(); it; it++)
+		//{
+		//	ndContact* const contact = *it;
+		//	if (contact->IsActive())
+		//	{
+		//		const ndContactPointList& contactPoints = contact->GetContactPoints();
+		//		return contactPoints.GetCount() ? ndBrainFloat(0.0f) : ndBrainFloat(1.0f);
+		//	}
+		//}
 		return ndBrainFloat(1.0f);
 	};
 
 	#pragma optimize( "", off)
 	void ndController::GetObservation(ndBrainFloat* const observation)
 	{
-		ndMatrix comFrame(m_wheelRoller->CalculateGlobalMatrix1());
-		comFrame.m_up = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
-		comFrame.m_right = comFrame.m_front.CrossProduct(comFrame.m_up).Normalize();
-		comFrame.m_up = comFrame.m_right.CrossProduct(comFrame.m_front).Normalize();
-		const ndVector savedWheelOmega(m_wheel->GetOmega());
-		m_wheel->SetOmegaNoSleep(ndVector::m_zero);
-		ndModelArticulation::ndCenterOfMassDynamics comKinematics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassKinematics(comFrame));
-		m_wheel->SetOmegaNoSleep(savedWheelOmega);
-
-		ndFloat32 boxAngle = GetBoxAngle();
-		ndFloat32 boxOmega = GetBoxOmega();
-		ndFloat32 comSpeed = comKinematics.m_veloc.m_z;
-		ndFloat32 hingeAngle = ((ndJointHinge*)*m_poleHinge)->GetAngle();
-		ndFloat32 hingeOmega = ((ndJointHinge*)*m_poleHinge)->GetOmega();
-
-		observation[m_hasContactSupport] = IsOnAir();
-		observation[m_comSpeed] = ndBrainFloat(comSpeed);
-		observation[m_boxAngle] = ndBrainFloat(boxAngle);
-		observation[m_boxOmega] = ndBrainFloat(boxOmega);
-		observation[m_hingeAngle] = ndBrainFloat(hingeAngle);
-		observation[m_hingeOmega] = ndBrainFloat(hingeOmega);
+		//ndMatrix comFrame(m_wheelRoller->CalculateGlobalMatrix1());
+		//comFrame.m_up = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
+		//comFrame.m_right = comFrame.m_front.CrossProduct(comFrame.m_up).Normalize();
+		//comFrame.m_up = comFrame.m_right.CrossProduct(comFrame.m_front).Normalize();
+		//const ndVector savedWheelOmega(m_wheel->GetOmega());
+		//m_wheel->SetOmegaNoSleep(ndVector::m_zero);
+		//ndModelArticulation::ndCenterOfMassDynamics comKinematics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassKinematics(comFrame));
+		//m_wheel->SetOmegaNoSleep(savedWheelOmega);
+		//
+		//ndFloat32 boxAngle = GetBoxAngle();
+		//ndFloat32 boxOmega = GetBoxOmega();
+		//ndFloat32 comSpeed = comKinematics.m_veloc.m_z;
+		//ndFloat32 hingeAngle = ((ndJointHinge*)*m_poleHinge)->GetAngle();
+		//ndFloat32 hingeOmega = ((ndJointHinge*)*m_poleHinge)->GetOmega();
+		//
+		//observation[m_hasContactSupport] = IsOnAir();
+		//observation[m_comSpeed] = ndBrainFloat(comSpeed);
+		//observation[m_boxAngle] = ndBrainFloat(boxAngle);
+		//observation[m_boxOmega] = ndBrainFloat(boxOmega);
+		//observation[m_hingeAngle] = ndBrainFloat(hingeAngle);
+		//observation[m_hingeOmega] = ndBrainFloat(hingeOmega);
 	}
 
 	void ndController::CreateArticulatedModel(
@@ -283,14 +286,26 @@ namespace ndBipedPlayer
 			body->SetMatrix(mesh->CalculateGlobalMatrix());
 			body->SetCollisionShape(*(*shape));
 			body->GetAsBodyDynamic()->SetMassMatrix(mass, *(*shape));
+
+			char name[256];
+			static int xxxx = 0;
+			sprintf_s(name, 255, "xxx%d.nd", xxxx);
+			xxxx++;
+			ndMesh::SaveRigidBody(body, ndGetWorkingFileName(name).GetStr());
 			return body;
 		};
 
 		// add the root body
-		m_topBox = ndSharedPtr<ndBody>(CreateRigidBody(mesh, visualMesh, BOX_MASS, nullptr));
-		ndModelArticulation::ndNode* const modelRootNode = model->AddRootBody(m_topBox);
-
-		ndMesh::SaveRigidBody(*m_topBox, ndGetWorkingFileName("xxx.nd").GetStr());
+		ndSharedPtr<ndBody> rootBody(CreateRigidBody(mesh, visualMesh, 1.0f, nullptr));
+		ndModelArticulation::ndNode* const modelRootNode = model->AddRootBody(rootBody);
+		{
+			// add legs
+			ndSharedPtr<ndRenderSceneNode> hipEntity(visualMesh->FindByClosestMatch("rightHip")->GetSharedPtr());
+			ndSharedPtr<ndBody> hipBody(CreateRigidBody(mesh, hipEntity, 1.0f, rootBody->GetAsBodyDynamic()));
+			const ndMatrix hipMatrix(hipEntity->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> hipJoint(new ndJointHinge(hipMatrix, hipBody->GetAsBodyKinematic(), rootBody->GetAsBodyKinematic()));
+			ndModelArticulation::ndNode* const hipLink = model->AddLimb(modelRootNode, hipBody, hipJoint);
+		}
 
 		//// add the pole mesh and body
 		//ndSharedPtr<ndMesh> poleMesh(mesh->GetChildren().GetFirst()->GetInfo());

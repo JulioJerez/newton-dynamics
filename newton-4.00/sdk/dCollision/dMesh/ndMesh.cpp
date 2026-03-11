@@ -361,8 +361,22 @@ ndMesh* ndMesh::FindByClosestMatch(const ndString& name) const
 	ndMesh* closestMatch = FindByName(name);
 	if (!closestMatch)
 	{
-		ndInt32 bestScore = 10000;
+		ndString lowerCaseName(name);
+		lowerCaseName.ToLower();
+
 		ndMesh* const self = (ndMesh*)this;
+		for (ndMesh* node = self->IteratorFirst(); node; node = node->IteratorNext(self))
+		{
+			ndString nodeName(node->m_name);
+			nodeName.ToLower();
+			ndInt32 findIndex = nodeName.Find(lowerCaseName);
+			if (findIndex != -1)
+			{
+				return node;
+			}
+		}
+
+		ndInt32 bestScore = 10000;
 		for (ndMesh* node = self->IteratorFirst(); node && bestScore; node = node->IteratorNext(self))
 		{
 			ndInt32 distance = node->m_name.Distance(name);
