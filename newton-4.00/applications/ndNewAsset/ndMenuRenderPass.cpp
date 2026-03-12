@@ -27,6 +27,7 @@ void ndMenuRenderPass::RenderScene()
 {
 	StateBegin();
 	//m_owner->RenderStats();
-	m_owner->TestImGui();
+	//m_owner->TestImGui();
+	m_owner->RenderLayout();
 	StateEnd();
 }

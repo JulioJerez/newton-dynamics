@@ -467,8 +467,8 @@ void ndDemoEntityManager::ShowMainMenuBar()
 	ndMenuSelection menuSelection = m_none;
 	if (ImGui::BeginMainMenuBar())
 	{
-		//if (ImGui::BeginMenu("File")) 
-		//{
+		if (ImGui::BeginMenu("File")) 
+		{
 		//	m_suspendPhysicsUpdate = true;
 		//
 		//	if (ImGui::MenuItem("Preferences", "")) 
@@ -476,12 +476,21 @@ void ndDemoEntityManager::ShowMainMenuBar()
 		//		ndAssert (0);
 		//	}
 		//	ImGui::Separator();
-		//
-		//	if (ImGui::MenuItem("New", "")) 
-		//	{
-		//		menuSelection = m_new;
-		//	}
-		//
+
+			if (ImGui::MenuItem("New", "")) 
+			{
+				ndAssert(0);
+				//menuSelection = m_new;
+			}
+
+			if (ImGui::MenuItem("Load", ""))
+			{
+				char fileName[2048];
+				dGetLoadNdFileName(fileName, sizeof (fileName) - 1);
+				//ndAssert(0);
+				//menuSelection = m_new;
+			}
+
 		//	ImGui::Separator();
 		//	if (ImGui::MenuItem("import ply file", "")) 
 		//	{
@@ -494,8 +503,8 @@ void ndDemoEntityManager::ShowMainMenuBar()
 		//		m_renderer->Terminate();
 		//	}
 		//
-		//	ImGui::EndMenu();
-		//}
+			ImGui::EndMenu();
+		}
 	
 		//if (ImGui::BeginMenu("Demos")) 
 		//{
@@ -512,82 +521,82 @@ void ndDemoEntityManager::ShowMainMenuBar()
 		//	ImGui::EndMenu();
 		//}
 
-		bool optionsOn = ImGui::BeginMenu("Options");
-		if (optionsOn) 
-		{
-			m_updateMenuOptions = true;
-			m_suspendPhysicsUpdate = true;
-	
-			ImGui::Checkbox("auto sleep mode", &m_autoSleepMode);
-			ImGui::Checkbox("show UI", &m_showUI);
-			ImGui::Checkbox("show stats", &m_showStats);
-			ImGui::Checkbox("show helper legend", &m_helperLegend);
-			ImGui::Checkbox("synchronous physics update", &m_synchronousPhysicsUpdate);
-			ImGui::Checkbox("synchronous particle update", &m_synchronousParticlesUpdate);
-			ImGui::Separator();
-	
-			ImGui::Text("solvers");
-			ndInt32 solverMode(m_solverMode);
-			ImGui::RadioButton("default", &solverMode, ndWorld::ndStandardSolver);
-			ImGui::RadioButton("sse", &solverMode, ndWorld::ndSimdSoaSolver);
-			ImGui::RadioButton("avx2", &solverMode, ndWorld::ndSimdAvx2Solver);
-	
-			m_solverMode = ndWorld::ndSolverModes(solverMode);
-			ImGui::Separator();
-	
-			ImGui::Text("solver sub steps");
-			ImGui::SliderInt("##solv", &m_solverSubSteps, 2, 8);
-			ImGui::Text("iterative solver passes");
-			ImGui::SliderInt("##intera", &m_solverPasses, 4, 32);
-			ImGui::Text("worker threads");
-			ImGui::SliderInt("##worker", &m_workerThreads, 1, ndThreadPool::GetMaxThreads());
-
-			ImGui::Separator();
-			ImGui::Checkbox("hide visual meshes", &m_hideVisualMeshes);
-			//ImGui::Checkbox("show mesh skeleton", &m_showMeshSkeleton);
-
-			ImGui::Separator();
-			//ImGui::RadioButton("show UI", &m_showUI);
-			ImGui::RadioButton("hide collision Mesh", &m_showCollisionMeshMode, 0);
-			ImGui::RadioButton("show solid collision", &m_showCollisionMeshMode, 1);
-			ImGui::RadioButton("show wire frame collision", &m_showCollisionMeshMode, 2);
-			ImGui::RadioButton("show hidden wire frame collision", &m_showCollisionMeshMode, 3);
-	
-			ImGui::Separator();
-			ImGui::Checkbox("show aabb", &m_showAABB);
-			ImGui::Checkbox("show body frame", &m_showBodyFrame);
-			ImGui::Checkbox("show broad phase", &m_showScene);
-			ImGui::Checkbox("show contact points", &m_showContactPoints);
-			ImGui::Checkbox("show contact forces", &m_showNormalForces);
-			ImGui::Checkbox("show center of mass", &m_showCenterOfMass);
-			ImGui::Checkbox("show joints debug info", &m_showJointDebugInfo);
-			ImGui::Checkbox("show models debug info", &m_showModelsDebugInfo);
-			ImGui::Checkbox("show colliding faces", &m_showStaticMeshCollidingFaces);
-
-			//ImGui::Checkbox("show ray cast hit point", &m_showRaycastHit);
-			//ImGui::Checkbox("show concave edges", &m_showConcaveEdge);
-			
-
-			ApplyOptions();
-	
-			ImGui::EndMenu();
-	
-			SetParticleUpdateMode();
-		}
-
-		if (ImGui::BeginMenu("Help")) 
-		{
-			m_suspendPhysicsUpdate = true;
-			ImGui::EndMenu();
-		}
+		//bool optionsOn = ImGui::BeginMenu("Options");
+		//if (optionsOn) 
+		//{
+		//	m_updateMenuOptions = true;
+		//	m_suspendPhysicsUpdate = true;
+		//
+		//	ImGui::Checkbox("auto sleep mode", &m_autoSleepMode);
+		//	ImGui::Checkbox("show UI", &m_showUI);
+		//	ImGui::Checkbox("show stats", &m_showStats);
+		//	ImGui::Checkbox("show helper legend", &m_helperLegend);
+		//	ImGui::Checkbox("synchronous physics update", &m_synchronousPhysicsUpdate);
+		//	ImGui::Checkbox("synchronous particle update", &m_synchronousParticlesUpdate);
+		//	ImGui::Separator();
+		//
+		//	ImGui::Text("solvers");
+		//	ndInt32 solverMode(m_solverMode);
+		//	ImGui::RadioButton("default", &solverMode, ndWorld::ndStandardSolver);
+		//	ImGui::RadioButton("sse", &solverMode, ndWorld::ndSimdSoaSolver);
+		//	ImGui::RadioButton("avx2", &solverMode, ndWorld::ndSimdAvx2Solver);
+		//
+		//	m_solverMode = ndWorld::ndSolverModes(solverMode);
+		//	ImGui::Separator();
+		//
+		//	ImGui::Text("solver sub steps");
+		//	ImGui::SliderInt("##solv", &m_solverSubSteps, 2, 8);
+		//	ImGui::Text("iterative solver passes");
+		//	ImGui::SliderInt("##intera", &m_solverPasses, 4, 32);
+		//	ImGui::Text("worker threads");
+		//	ImGui::SliderInt("##worker", &m_workerThreads, 1, ndThreadPool::GetMaxThreads());
+		//
+		//	ImGui::Separator();
+		//	ImGui::Checkbox("hide visual meshes", &m_hideVisualMeshes);
+		//	//ImGui::Checkbox("show mesh skeleton", &m_showMeshSkeleton);
+		//
+		//	ImGui::Separator();
+		//	//ImGui::RadioButton("show UI", &m_showUI);
+		//	ImGui::RadioButton("hide collision Mesh", &m_showCollisionMeshMode, 0);
+		//	ImGui::RadioButton("show solid collision", &m_showCollisionMeshMode, 1);
+		//	ImGui::RadioButton("show wire frame collision", &m_showCollisionMeshMode, 2);
+		//	ImGui::RadioButton("show hidden wire frame collision", &m_showCollisionMeshMode, 3);
+		//
+		//	ImGui::Separator();
+		//	ImGui::Checkbox("show aabb", &m_showAABB);
+		//	ImGui::Checkbox("show body frame", &m_showBodyFrame);
+		//	ImGui::Checkbox("show broad phase", &m_showScene);
+		//	ImGui::Checkbox("show contact points", &m_showContactPoints);
+		//	ImGui::Checkbox("show contact forces", &m_showNormalForces);
+		//	ImGui::Checkbox("show center of mass", &m_showCenterOfMass);
+		//	ImGui::Checkbox("show joints debug info", &m_showJointDebugInfo);
+		//	ImGui::Checkbox("show models debug info", &m_showModelsDebugInfo);
+		//	ImGui::Checkbox("show colliding faces", &m_showStaticMeshCollidingFaces);
+		//
+		//	//ImGui::Checkbox("show ray cast hit point", &m_showRaycastHit);
+		//	//ImGui::Checkbox("show concave edges", &m_showConcaveEdge);
+		//	
+		//
+		//	ApplyOptions();
+		//
+		//	ImGui::EndMenu();
+		//
+		//	SetParticleUpdateMode();
+		//}
+		//
+		//if (ImGui::BeginMenu("Help")) 
+		//{
+		//	m_suspendPhysicsUpdate = true;
+		//	ImGui::EndMenu();
+		//}
 	
 		ImGui::EndMainMenuBar();
 	
-		if (!optionsOn && m_updateMenuOptions) 
-		{
-			m_updateMenuOptions = false;
-			ApplyMenuOptions();
-		}
+		//if (!optionsOn && m_updateMenuOptions) 
+		//{
+		//	m_updateMenuOptions = false;
+		//	ApplyMenuOptions();
+		//}
 	}
 	
 	switch (menuSelection)
@@ -1000,3 +1009,7 @@ void ndDemoEntityManager::Run()
 	}
 }
 
+void ndDemoEntityManager::RenderLayout()
+{
+	ShowMainMenuBar();
+}
