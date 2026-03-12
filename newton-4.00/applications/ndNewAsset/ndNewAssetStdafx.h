@@ -59,7 +59,7 @@
 // SDK includes
 #include <ndNewton.h>
 #include <ndModelInc.h>
-//#include <ndRenderInc.h>
+#include <ndRenderInc.h>
 
 ndString ndGetWorkingFileName(const char* const name);
 //void ndGetWorkingFileName (const char* const name, char* const outPathName);

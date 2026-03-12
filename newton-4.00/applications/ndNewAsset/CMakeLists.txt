@@ -43,8 +43,10 @@ include_directories(.)
 #include_directories(demos)
 #include_directories(toolbox)
 
+
 include_directories(../../sdk/dCore)
 include_directories(../../sdk/dModel)
+include_directories(../../sdk/dRender)
 include_directories(../../sdk/dNewton)
 include_directories(../../sdk/dCollision)
 include_directories(../../sdk/dCore/tinyxml)

@@ -42,7 +42,6 @@
 #endif
 
 #include <glatter.h>
-//#include <GL/glu.h>
 #include <GL/gl.h>
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>

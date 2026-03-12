@@ -8,8 +8,8 @@
 * including commercial applications, and to alter it and redistribute it
 * freely
 */
-#ifndef __DEMO_MAIN_FRAME_H__
-#define __DEMO_MAIN_FRAME_H__
+#ifndef __ASSET_EDITOR_H__
+#define __ASSET_EDITOR_H__
 
 class ndPhysicsWorld;
 class ndDebugDisplayRenderPass;
@@ -25,36 +25,34 @@ class ndDemoEntityManager : public ndClassAlloc
 			,m_owner(owner)
 		{
 		}
-
+	
 		virtual void KeyCallback(ndInt32 key, ndInt32 action) override
 		{
 			m_owner->KeyCallback(key, action);
 		}
-
+	
 		virtual void CharCallback(ndUnsigned32 ch)
 		{
 			m_owner->CharCallback(ch);
 		}
-
+	
 		virtual void CursorposCallback(ndReal x, ndReal y)
 		{
 			m_owner->CursorposCallback(x, y);
 		}
-
+	
 		virtual void MouseScrollCallback(ndReal x, ndReal y)
 		{
 			m_owner->MouseScrollCallback(x, y);
 		}
-
+	
 		virtual void MouseButtonCallback(ndInt32 button, ndInt32 action)
 		{
 			m_owner->MouseButtonCallback(button, action);
 		}
-
+	
 		ndDemoEntityManager* m_owner;
 	};
-
-	typedef void (*ndDemoCallbackLauncher) (ndDemoEntityManager* const scene);
 
 	enum ndMenuSelection
 	{
@@ -81,13 +79,6 @@ class ndDemoEntityManager : public ndClassAlloc
 		}
 
 		bool m_memory;
-	};
-
-	class ndDemos
-	{
-		public:
-		const char *m_name;
-		ndDemoCallbackLauncher m_demoLauncher;
 	};
 
 	class ndDemoUIpanel : public ndClassAlloc
@@ -171,14 +162,12 @@ class ndDemoEntityManager : public ndClassAlloc
 	ndInt32 GetWidth() const;
 	ndInt32 GetHeight() const;
 	
-	ndPhysicsWorld* GetWorld() const;
+	//ndPhysicsWorld* GetWorld() const;
 	ndSharedPtr<ndRender>& GetRenderer();
-	ndDebugDisplayRenderPass* GetDebugRenderPass();
-
-	void AddEntity(const ndSharedPtr<ndRenderSceneNode>& entity);
-	void RemoveEntity(const ndSharedPtr<ndRenderSceneNode>& entity);
-
-	void ImportPLYfile (const char* const name);
+	//ndDebugDisplayRenderPass* GetDebugRenderPass();
+	//void AddEntity(const ndSharedPtr<ndRenderSceneNode>& entity);
+	//void RemoveEntity(const ndSharedPtr<ndRenderSceneNode>& entity);
+	//void ImportPLYfile (const char* const name);
 
 	bool GetMouseSpeed(ndFloat32& posX, ndFloat32& posY) const;
 	bool GetMousePosition (ndFloat32& posX, ndFloat32& posY) const;
@@ -204,6 +193,7 @@ class ndDemoEntityManager : public ndClassAlloc
 	bool GetMouseKeyState (ndInt32 button ) const;
 	ndInt32 Print (const ndVector& color, const char *fmt, ... ) const;
 
+	void TestImGui();
 	void RenderStats();
 	void SetAcceleratedUpdate();
 	void SetDemoHelp(ndSharedPtr<ndDemoHelper>& helper);
@@ -228,29 +218,27 @@ class ndDemoEntityManager : public ndClassAlloc
 	void ApplyOptions();
 
 	void ApplyMenuOptions();
-	void LoadDemo(ndInt32 menu);
+	//void LoadDemo(ndInt32 menu);
 	void OnSubStepPostUpdate(ndFloat32 timestep);
-
-	void TestImGui();
 	
-	ndPhysicsWorld* m_world;
+	//ndPhysicsWorld* m_world;
 	ndSharedPtr<ndRender> m_renderer;
 	ndSharedPtr<ndRenderPass> m_menuRenderPass;
-	ndSharedPtr<ndRenderPass> m_colorRenderPass;
-	ndSharedPtr<ndRenderPass> m_shadowRenderPass;
-	ndSharedPtr<ndRenderPass> m_environmentRenderPass;
-	ndSharedPtr<ndRenderPass> m_transparentRenderPass;
-	ndSharedPtr<ndRenderPass> m_debugDisplayRenderPass;
-	ndSharedPtr<ndRenderTexture> m_environmentTexture;
+	//ndSharedPtr<ndRenderPass> m_colorRenderPass;
+	//ndSharedPtr<ndRenderPass> m_shadowRenderPass;
+	//ndSharedPtr<ndRenderPass> m_environmentRenderPass;
+	//ndSharedPtr<ndRenderPass> m_transparentRenderPass;
+	//ndSharedPtr<ndRenderPass> m_debugDisplayRenderPass;
+	//ndSharedPtr<ndRenderTexture> m_environmentTexture;
 
-	ndSharedPtr<ndDemoHelper> m_demoHelper;
-	ndSharedPtr<ndDemoUIpanel> m_demoUIpanel;
-	ndSharedPtr<ndRenderSceneNode> m_defaultCamera;
+	//ndSharedPtr<ndDemoHelper> m_demoHelper;
+	//ndSharedPtr<ndDemoUIpanel> m_demoUIpanel;
+	//ndSharedPtr<ndRenderSceneNode> m_defaultCamera;
 
 	ndSharedPtr<OnPostUpdate> m_onPostUpdate;
 
-	ndInt32 m_currentScene;
-	ndInt32 m_lastCurrentScene;
+	//ndInt32 m_currentScene;
+	//ndInt32 m_lastCurrentScene;
 	ndInt32 m_framesCount;
 	ndInt32 m_physicsFramesCount;
 	ndInt32 m_currentPlugin;
@@ -289,8 +277,8 @@ class ndDemoEntityManager : public ndClassAlloc
 	ndKeyTrigger m_nextActiveCamera;
 	
 	ndWorld::ndSolverModes m_solverMode;
-	static ndDemos m_demosSelection[];
-	static ndDemos m_machineLearning[];
+	//static ndDemos m_demosSelection[];
+	//static ndDemos m_machineLearning[];
 
 	friend class ndPhysicsWorld;
 	friend class ndDebugDisplayRenderPass;
