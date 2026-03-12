@@ -365,15 +365,48 @@ namespace ndBipedPlayer
 			ndSharedPtr<ndJointBilateralConstraint> hipJoint(new ndJointHinge(hipMatrix, hipBody->GetAsBodyKinematic(), rootBody->GetAsBodyKinematic()));
 			ndModelArticulation::ndNode* const hipLink = model->AddLimb(modelRootNode, hipBody, hipJoint);
 
-			// thigh
-			ndSharedPtr<ndMesh> thighMesh(hipMesh->GetChildren().GetFirst()->GetInfo());
-			ndSharedPtr<ndRenderSceneNode> thighEntity(hipEntity->GetChildren().GetFirst()->GetInfo());
-			ndSharedPtr<ndBody> thighBody(CreateRigidBody(thighMesh, thighEntity, 1.0f, hipBody->GetAsBodyDynamic()));
-			const ndMatrix thighMatrix(thighMesh->CalculateGlobalMatrix());
-			ndSharedPtr<ndJointBilateralConstraint> thighJoint(new ndJointHinge(thighMatrix, thighBody->GetAsBodyKinematic(), hipBody->GetAsBodyKinematic()));
-			ndModelArticulation::ndNode* const thighBodyLink = model->AddLimb(hipLink, thighBody, thighJoint);
-
+			// upper thigh
+			ndSharedPtr<ndMesh> upperThighMesh(hipMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> upperThighEntity(hipEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> upperThighBody(CreateRigidBody(upperThighMesh, upperThighEntity, 1.0f, hipBody->GetAsBodyDynamic()));
+			const ndMatrix upperThighMatrix(upperThighMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> upperThighJoint(new ndJointHinge(upperThighMatrix, upperThighBody->GetAsBodyKinematic(), hipBody->GetAsBodyKinematic()));
+			ndModelArticulation::ndNode* const upperThighBodyLink = model->AddLimb(hipLink, upperThighBody, upperThighJoint);
 			
+			// lower thigh
+			ndSharedPtr<ndMesh> lowerThighMesh(upperThighMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> lowerThighEntity(upperThighEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> lowerThighBody(CreateRigidBody(lowerThighMesh, lowerThighEntity, 1.0f, upperThighBody->GetAsBodyDynamic()));
+			const ndMatrix lowerThighMatrix(lowerThighMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> lowerThighJoint(new ndJointHinge(lowerThighMatrix, lowerThighBody->GetAsBodyKinematic(), upperThighBody->GetAsBodyKinematic()));
+			ndModelArticulation::ndNode* const lowerThighBodyLink = model->AddLimb(upperThighBodyLink, lowerThighBody, lowerThighJoint);
+			
+			// calf
+			ndSharedPtr<ndMesh> calfMesh(lowerThighMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> calfEntity(lowerThighEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> calfBody(CreateRigidBody(calfMesh, calfEntity, 1.0f, lowerThighBody->GetAsBodyDynamic()));
+			const ndMatrix calfMatrix(calfMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> calfJoint(new ndJointHinge(calfMatrix, calfBody->GetAsBodyKinematic(), lowerThighBody->GetAsBodyKinematic()));
+			ndModelArticulation::ndNode* const calfBodyLink = model->AddLimb(lowerThighBodyLink, calfBody, calfJoint);
+			
+			// soft Contact
+			ndSharedPtr<ndMesh> softMesh(calfMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> softEntity(calfEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> softBody(CreateRigidBody(softMesh, softEntity, 1.0f, calfBody->GetAsBodyDynamic()));
+			const ndMatrix softMatrix(softMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> softJoint(new ndJointSlider(softMatrix, softBody->GetAsBodyKinematic(), calfBody->GetAsBodyKinematic()));
+			((ndJointSlider*)*softJoint)->SetAsSpringDamper(0.001f, 1000.0f, 20.0f);
+			ndModelArticulation::ndNode* const softBodyLink = model->AddLimb(calfBodyLink, softBody, softJoint);
+			
+			// foot
+			ndSharedPtr<ndMesh> footMesh(softMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> footEntity(softEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> footBody(CreateRigidBody(footMesh, footEntity, 1.0f, softBody->GetAsBodyDynamic()));
+			const ndMatrix footMatrix(footMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> footJoint(new ndJointDoubleHinge(footMatrix, footBody->GetAsBodyKinematic(), softBody->GetAsBodyKinematic()));
+			((ndJointDoubleHinge*)*footJoint)->SetAsSpringDamper0(0.01f, 0.0f, 10.0f);
+			((ndJointDoubleHinge*)*footJoint)->SetAsSpringDamper1(0.01f, 0.0f, 10.0f);
+			model->AddLimb(softBodyLink, footBody, footJoint);
 		}
 		
 		// fix to the world with a fix 6 dof joint
@@ -561,22 +594,20 @@ namespace ndBipedPlayer
 				ndSharedPtr<ndMesh> hip(CreateCapsule(*root, hipMatrix, 0.25f, 0.25f, 0.1f, "rightHip"));
 
 				// upper thigh
-				//ndMatrix upperThighMatrix = ndRollMatrix(90.0f * ndDegreeToRad);
 				ndMatrix upperThighMatrix (ndYawMatrix(90.0f * ndDegreeToRad));
 				ndSharedPtr<ndMesh> upperThigh(CreateCapsule(*hip, upperThighMatrix, 0.3f, 0.3f, 0.5f, "upperRightThigh"));
-				ndMatrix offset(ndRollMatrix(85.0f * ndDegreeToRad));
+				ndMatrix offset(ndRollMatrix(90.0f * ndDegreeToRad));
 				offset.m_posit.m_y = -0.385f;
 				upperThigh->SetGeometryMatrix(offset);
 
 				// lower thigh
-				ndMatrix lowerThighMatrix = ndRollMatrix(85.0f * ndDegreeToRad);
+				ndMatrix lowerThighMatrix = ndRollMatrix(90.0f * ndDegreeToRad);
 				ndSharedPtr<ndMesh> lowerThigh(CreateCapsule(*upperThigh, lowerThighMatrix, 0.3f, 0.3f, 0.5f, "lowerRightThigh"));
 				offset = ndGetIdentityMatrix();
 				offset.m_posit.m_x = -0.385f;
 				lowerThigh->SetGeometryMatrix(offset);
 				
 				// calf
-				//ndMatrix calfMatrix = ndGetIdentityMatrix();
 				ndMatrix calfMatrix (ndYawMatrix(90.0f * ndDegreeToRad));
 				calfMatrix.m_posit.m_x = -0.7f;
 				ndSharedPtr<ndMesh> calf(CreateCapsule(*lowerThigh, calfMatrix, 0.25f, 0.25f, 0.65f, "rightCaft"));
@@ -607,27 +638,40 @@ namespace ndBipedPlayer
 				ndSharedPtr<ndMesh> hip(CreateCapsule(*root, hipMatrix, 0.25f, 0.25f, 0.1f, "leftHip"));
 
 				// upper thigh
-				ndMatrix thighMatrix = ndRollMatrix(85.0f * ndDegreeToRad);
-				ndSharedPtr<ndMesh> thigh(CreateCapsule(*hip, thighMatrix, 0.3f, 0.3f, 0.5f, "leftThigh"));
-				ndMatrix offset(ndGetIdentityMatrix());
+				ndMatrix upperThighMatrix(ndYawMatrix(90.0f * ndDegreeToRad));
+				ndSharedPtr<ndMesh> upperThigh(CreateCapsule(*hip, upperThighMatrix, 0.3f, 0.3f, 0.5f, "upperRightThigh"));
+				ndMatrix offset(ndRollMatrix(90.0f * ndDegreeToRad));
+				offset.m_posit.m_y = -0.385f;
+				upperThigh->SetGeometryMatrix(offset);
+
+				// lower thigh
+				ndMatrix lowerThighMatrix = ndRollMatrix(90.0f * ndDegreeToRad);
+				ndSharedPtr<ndMesh> lowerThigh(CreateCapsule(*upperThigh, lowerThighMatrix, 0.3f, 0.3f, 0.5f, "lowerRightThigh"));
+				offset = ndGetIdentityMatrix();
 				offset.m_posit.m_x = -0.385f;
-				thigh->SetGeometryMatrix(offset);
+				lowerThigh->SetGeometryMatrix(offset);
 
 				// calf
-				ndMatrix calfMatrix = ndGetIdentityMatrix();
-				calfMatrix.m_posit.m_x = -1.0f;
-				ndSharedPtr<ndMesh> calf(CreateCapsule(*thigh, calfMatrix, 0.25f, 0.25f, 0.65f, "leftCaft"));
+				//ndMatrix calfMatrix = ndGetIdentityMatrix();
+				ndMatrix calfMatrix(ndYawMatrix(90.0f * ndDegreeToRad));
+				calfMatrix.m_posit.m_x = -0.7f;
+				ndSharedPtr<ndMesh> calf(CreateCapsule(*lowerThigh, calfMatrix, 0.25f, 0.25f, 0.65f, "leftCaft"));
+				offset = ndYawMatrix(-90.0f * ndDegreeToRad);
+				offset.m_posit.m_z = -0.385f;
+				calf->SetGeometryMatrix(offset);
 
 				// soft contact
-				ndMatrix softMatrix = ndGetIdentityMatrix();
-				softMatrix.m_posit.m_x = -0.425f;
+				ndMatrix softMatrix(ndYawMatrix(90.0f * ndDegreeToRad));
+				softMatrix.m_posit.m_z = -0.8f;
 				ndSharedPtr<ndMesh> softContact(CreateCapsule(*calf, softMatrix, 0.185f, 0.185f, 0.15f, "leftContact"));
 
 				// foot
-				ndMatrix footMatrix = ndGetIdentityMatrix();
-				footMatrix.m_posit.m_x = -0.25f;
-				footMatrix.m_posit.m_z = -0.085f;
-				CreateBox(*softContact, footMatrix, 0.175f, 0.3f, 0.525f, "leftFoot");
+				ndMatrix footMatrix(ndYawMatrix(-90.0f * ndDegreeToRad)* ndRollMatrix(00.0f * ndDegreeToRad)* ndPitchMatrix(90.0f * ndDegreeToRad));
+				footMatrix.m_posit.m_x = 0.2f;
+				ndSharedPtr<ndMesh> foot(CreateBox(*softContact, footMatrix, 0.525f, 0.3f, 0.175f, "leftFoot"));
+				offset = ndGetIdentityMatrix();
+				offset.m_posit.m_x = 0.085f;
+				foot->SetGeometryMatrix(offset);
 			}
 
 			m_mesh = root;
