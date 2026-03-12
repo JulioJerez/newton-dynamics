@@ -351,6 +351,8 @@ namespace ndBipedPlayer
 			((ndJointDoubleHinge*)*footJoint)->SetAsSpringDamper0(0.01f, 0.0f, 10.0f);
 			((ndJointDoubleHinge*)*footJoint)->SetAsSpringDamper1(0.01f, 0.0f, 10.0f);
 			model->AddLimb(softBodyLink, footBody, footJoint);
+
+			ndMesh::SaveRigidBody(*footBody, ndGetWorkingFileName("xxx.nd").GetStr());
 		}
 
 		// add left leg
@@ -371,7 +373,7 @@ namespace ndBipedPlayer
 			ndSharedPtr<ndJointBilateralConstraint> thighJoint(new ndJointHinge(thighMatrix, thighBody->GetAsBodyKinematic(), hipBody->GetAsBodyKinematic()));
 			ndModelArticulation::ndNode* const thighBodyLink = model->AddLimb(hipLink, thighBody, thighJoint);
 
-			//ndMesh::SaveRigidBody(body, ndGetWorkingFileName(name).GetStr());
+			
 		}
 		
 		// fix to the world with a fix 6 dof joint

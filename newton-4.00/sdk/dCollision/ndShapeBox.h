@@ -45,9 +45,9 @@ class ndShapeBox: public ndShapeConvex
 	D_COLLISION_API virtual ndVector SupportVertex(const ndVector& dir) const override;
 	D_COLLISION_API virtual ndVector SupportVertexSpecial(const ndVector& dir, ndFloat32 skinMargin) const override;
 	D_COLLISION_API virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const override;
-
 	D_COLLISION_API const ndConvexSimplexEdge** GetVertexToEdgeMapping() const override;
 	D_COLLISION_API virtual ndInt32 CalculatePlaneIntersection(const ndVector& normal, const ndVector& point, ndVector* const contactsOut) const override;
+	D_COLLISION_API ndSharedPtr<ndMeshCollisionShape> GetMeshShape() const override;
 
 	virtual ndVector SupportFeatureVertex(const ndVector& dir, ndInt32* const vertexIndex) const override;
 	ndVector m_size[2];

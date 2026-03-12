@@ -57,9 +57,9 @@ ndShape::~ndShape()
 
 ndShapeInfo::ndShapeInfo()
 	:m_offsetMatrix(ndGetIdentityMatrix())
-	, m_scale(ndFloat32(1.0f))
-	, m_shapeMaterial()
-	, m_collisionType(::m_box)
+	,m_scale(ndFloat32(1.0f))
+	,m_shapeMaterial()
+	,m_collisionType(::m_box)
 {
 	for (ndInt32 i = 0; i < ndInt32(sizeof(m_paramArray) / sizeof(m_paramArray[0])); ++i)
 	{

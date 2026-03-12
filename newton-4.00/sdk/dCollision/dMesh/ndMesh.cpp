@@ -42,6 +42,14 @@ void ndMeshCollisionShapeNull::Save(nd::TiXmlElement* const parent) const
 	xmlSaveParam(parent, "constructor", ndShapeNull::StaticClassName());
 }
 
+void ndMeshCollisionShapeBox::Save(nd::TiXmlElement* const parent) const
+{
+	xmlSaveParam(parent, "constructor", ndShapeBox::StaticClassName());
+	xmlSaveParam(parent, "x", m_x);
+	xmlSaveParam(parent, "y", m_y);
+	xmlSaveParam(parent, "z", m_z);
+}
+
 void ndMeshCollisionShapeCapsule::Save(nd::TiXmlElement* const parent) const
 {
 	xmlSaveParam(parent, "constructor", ndShapeCapsule::StaticClassName());

@@ -41,6 +41,16 @@ class ndMeshCollisionShapeNull : public ndMeshCollisionShape
 	D_COLLISION_API virtual void Save(nd::TiXmlElement* const parent) const override;
 };
 
+class ndMeshCollisionShapeBox : public ndMeshCollisionShape
+{
+	public:
+	D_COLLISION_API virtual void Save(nd::TiXmlElement* const parent) const override;
+
+	ndFloat32 m_x;
+	ndFloat32 m_y;
+	ndFloat32 m_z;
+};
+
 class ndMeshCollisionShapeCapsule : public ndMeshCollisionShape
 {
 	public:
