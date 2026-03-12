@@ -1072,9 +1072,14 @@ void ndDemoEntityManager::ShowMainMenuBar()
 			ImGui::Checkbox("auto sleep mode", &m_autoSleepMode);
 			ImGui::Checkbox("show UI", &m_showUI);
 			ImGui::Checkbox("show stats", &m_showStats);
-			ImGui::Checkbox("show helper legend", &m_helperLegend);
 			ImGui::Checkbox("synchronous physics update", &m_synchronousPhysicsUpdate);
 			ImGui::Checkbox("synchronous particle update", &m_synchronousParticlesUpdate);
+			ImGui::Separator();
+	
+			if (ImGui::Button("show helper legend"))
+			{
+				m_helperLegend = true;
+			}
 			ImGui::Separator();
 	
 			ImGui::Text("solvers");
