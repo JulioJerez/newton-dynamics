@@ -72,28 +72,29 @@ ndDemoEntityManager::ndDemoEntityManager()
 	,m_fps(0.0f)
 	,m_timestepAcc(0.0f)
 	,m_currentListenerTimestep(0.0f)
-	,m_showUI(true)
-	,m_showAABB(false)
-	,m_showStats(true)
-	,m_helperLegend(false)
-	,m_autoSleepMode(true)
-	,m_showScene(false)
+	,m_runScene(false)
+	//,m_showUI(true)
+	//,m_showAABB(false)
+	//,m_showStats(true)
+	//,m_helperLegend(false)
+	//,m_autoSleepMode(true)
+	//,m_showScene(false)
 	//,m_showConcaveEdge(false)
-	,m_hideVisualMeshes(false)
-	,m_showNormalForces(false)
-	,m_showCenterOfMass(false)
-	,m_showBodyFrame(false)
-	,m_showMeshSkeleton(false)
-	,m_updateMenuOptions(true)
-	,m_showContactPoints(false)
-	,m_showJointDebugInfo(false)
-	,m_showModelsDebugInfo(false)
-	,m_suspendPhysicsUpdate(false)
-	,m_synchronousPhysicsUpdate(false)
-	,m_synchronousParticlesUpdate(false)
-	,m_showStaticMeshCollidingFaces(false)
-	,m_showRaycastHit(false)
-	,m_profilerMode(false)
+	//,m_hideVisualMeshes(false)
+	//,m_showNormalForces(false)
+	//,m_showCenterOfMass(false)
+	//,m_showBodyFrame(false)
+	//,m_showMeshSkeleton(false)
+	//,m_updateMenuOptions(true)
+	//,m_showContactPoints(false)
+	//,m_showJointDebugInfo(false)
+	//,m_showModelsDebugInfo(false)
+	//,m_suspendPhysicsUpdate(false)
+	//,m_synchronousPhysicsUpdate(false)
+	//,m_synchronousParticlesUpdate(false)
+	//,m_showStaticMeshCollidingFaces(false)
+	//,m_showRaycastHit(false)
+	//,m_profilerMode(false)
 	,m_nextActiveCamera()
 	,m_solverMode(ndWorld::ndSimdSoaSolver)
 {
@@ -469,14 +470,6 @@ void ndDemoEntityManager::ShowMainMenuBar()
 	{
 		if (ImGui::BeginMenu("File")) 
 		{
-		//	m_suspendPhysicsUpdate = true;
-		//
-		//	if (ImGui::MenuItem("Preferences", "")) 
-		//	{
-		//		ndAssert (0);
-		//	}
-		//	ImGui::Separator();
-
 			if (ImGui::MenuItem("New", "")) 
 			{
 				ndAssert(0);
@@ -491,35 +484,24 @@ void ndDemoEntityManager::ShowMainMenuBar()
 				//menuSelection = m_new;
 			}
 
-		//	ImGui::Separator();
-		//	if (ImGui::MenuItem("import ply file", "")) 
-		//	{
-		//		//mainMenu = 4;
-		//	}
-		//
-		//	ImGui::Separator();
-		//	if (ImGui::MenuItem("Exit", "")) 
-		//	{
-		//		m_renderer->Terminate();
-		//	}
-		//
+			if (ImGui::MenuItem("Exit", "")) 
+			{
+				m_renderer->Terminate();
+			}
+
 			ImGui::EndMenu();
 		}
-	
-		//if (ImGui::BeginMenu("Demos")) 
-		//{
-		//	m_suspendPhysicsUpdate = true;
-		//	ndInt32 demosCount = ndInt32 (sizeof (m_demosSelection) / sizeof m_demosSelection[0]);
-		//	for (ndInt32 i = 0; i < demosCount; ++i) 
-		//	{
-		//		if (ImGui::MenuItem(m_demosSelection[i].m_name, "")) 
-		//		{
-		//			m_currentScene = i;
-		//		}
-		//	}
-		//
-		//	ImGui::EndMenu();
-		//}
+
+		if (ImGui::BeginMenu("Run", !m_runScene))
+		{
+			m_runScene = true;
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Stop", m_runScene))
+		{
+			m_runScene = false;
+			ImGui::EndMenu();
+		}
 
 		//bool optionsOn = ImGui::BeginMenu("Options");
 		//if (optionsOn) 
@@ -707,91 +689,6 @@ void ndDemoEntityManager::SetParticleUpdateMode() const
 	//	ndBodyParticleSet* const set = node->GetInfo()->GetAsBodyParticleSet();
 	//	set->SetAsynUpdate(!m_synchronousParticlesUpdate);
 	//}
-}
-
-void ndDemoEntityManager::RenderStats()
-{
-	if (m_showStats) 
-	{
-		char text[1024];
-		
-		ndAssert(0);
-		//if (ImGui::Begin("statistics", &m_showStats)) 
-		//{
-		//	snprintf(text, sizeof (text), "fps:            %6.3f", m_fps);
-		//	ImGui::Text(text, "");
-		//
-		//	snprintf(text, sizeof (text), "physics time:  %6.3f ms", m_world->GetAverageUpdateTime() * 1.0e3f);
-		//	ImGui::Text(text, "");
-		//
-		//	snprintf(text, sizeof (text), "update mode:    %s", m_synchronousPhysicsUpdate ? "synchronous" : "asynchronous");
-		//	ImGui::Text(text, "");
-		//
-		//	snprintf(text, sizeof (text), "particle mode:  %s", m_synchronousParticlesUpdate ? "synchronous" : "asynchronous");
-		//	ImGui::Text(text, "");
-		//
-		//	snprintf(text, sizeof (text), "bodies:         %d", m_world->GetBodyList().GetCount());
-		//	ImGui::Text(text, "");
-		//
-		//	snprintf(text, sizeof (text), "joints:         %d", m_world->GetJointList().GetCount());
-		//	ImGui::Text(text, "");
-		//
-		//	snprintf(text, sizeof (text), "contact joints: %d", m_world->GetContactList().GetActiveContacts());
-		//	ImGui::Text(text, "");
-		//
-		//	snprintf(text, sizeof (text), "particles:      %d", ParticleCount());
-		//	ImGui::Text(text, "");
-		//
-		//	snprintf(text, sizeof (text), "memory used:   %6.3f mbytes", ndFloat32(ndFloat64(ndMemory::GetMemoryUsed()) / (1024 * 1024)));
-		//	ImGui::Text(text, "");
-		//
-		//	snprintf(text, sizeof (text), "threads:        %d", m_world->GetThreadCount());
-		//	ImGui::Text(text, "");
-		//
-		//	snprintf(text, sizeof (text), "iterations:     %d", m_world->GetSolverIterations());
-		//	ImGui::Text(text, "");
-		//
-		//	snprintf(text, sizeof (text), "Substeps:       %d", m_world->GetSubSteps());
-		//	ImGui::Text(text, "");
-		//
-		//	snprintf(text, sizeof (text), "solver:         %s", m_world->GetSolverString());
-		//	ImGui::Text(text, "");
-		//
-		//	m_suspendPhysicsUpdate = m_suspendPhysicsUpdate || (ImGui::IsWindowHovered() && ImGui::IsMouseDown(0));
-		//	ImGui::End();
-		//}
-	}
-	
-	//if (*m_demoHelper)
-	//{
-	//	if (m_helperLegend)
-	//	{	
-	//		m_helperLegend = false;
-	//		m_demoHelper->ResetTime();
-	//	}
-	//
-	//	if (!m_demoHelper->ExpirationTime())
-	//	{
-	//		bool dummy = true;
-	//		if (ImGui::Begin("User Interface", &dummy))
-	//		{
-	//			m_demoHelper->PresentHelp(this);
-	//			ImGui::End();
-	//		}
-	//	}
-	//}
-
-	//if (*m_demoUIpanel)
-	//{
-	//	bool dummy = true;
-	//	if (ImGui::Begin("Control panel", &dummy))
-	//	{
-	//		m_demoUIpanel->Update(this);
-	//		ImGui::End();
-	//	}
-	//}
-
-	ShowMainMenuBar();
 }
 
 void ndDemoEntityManager::SetDemoHelp(ndSharedPtr<ndDemoHelper>& helper)
@@ -993,15 +890,6 @@ void ndDemoEntityManager::Run()
 	ndFloatExceptions exception;
 	while (!m_renderer->ShouldFinish())
 	{
-		if (m_profilerMode)
-		{
-			ToggleProfiler();
-			m_profilerMode = false;
-		}
-	
-		m_suspendPhysicsUpdate = false;
-		D_TRACKTIME();
-		
 		if (m_renderer->PollEvents())
 		{
 			RenderScene();

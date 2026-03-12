@@ -194,7 +194,6 @@ class ndDemoEntityManager : public ndClassAlloc
 	ndInt32 Print (const ndVector& color, const char *fmt, ... ) const;
 
 	void TestImGui();
-	void RenderStats();
 	void RenderLayout();
 	void SetAcceleratedUpdate();
 	void SetDemoHelp(ndSharedPtr<ndDemoHelper>& helper);
@@ -253,34 +252,32 @@ class ndDemoEntityManager : public ndClassAlloc
 	ndFloat32 m_timestepAcc;
 	ndFloat32 m_currentListenerTimestep;
 	
-	bool m_showUI;
-	bool m_showAABB;
-	bool m_showStats;
-	bool m_helperLegend;
-	bool m_autoSleepMode;
-	bool m_showScene;
-	//bool m_showConcaveEdge;
-	bool m_hideVisualMeshes;
-	bool m_showNormalForces;
-	bool m_showCenterOfMass;
-	bool m_showBodyFrame;
-	bool m_showMeshSkeleton;
-	bool m_updateMenuOptions;
-	bool m_showContactPoints;
-	bool m_showJointDebugInfo;
-	bool m_showModelsDebugInfo;
-	bool m_suspendPhysicsUpdate;
-	bool m_synchronousPhysicsUpdate;
-	bool m_synchronousParticlesUpdate;
-	bool m_showStaticMeshCollidingFaces;
-	bool m_showRaycastHit;
-	bool m_profilerMode;
+	bool m_runScene;
+	//bool m_showUI;
+	//bool m_showAABB;
+	//bool m_showStats;
+	//bool m_helperLegend;
+	//bool m_autoSleepMode;
+	//bool m_showScene;
+	//bool m_hideVisualMeshes;
+	//bool m_showNormalForces;
+	//bool m_showCenterOfMass;
+	//bool m_showBodyFrame;
+	//bool m_showMeshSkeleton;
+	//bool m_updateMenuOptions;
+	//bool m_showContactPoints;
+	//bool m_showJointDebugInfo;
+	//bool m_showModelsDebugInfo;
+	//bool m_suspendPhysicsUpdate;
+	//bool m_synchronousPhysicsUpdate;
+	//bool m_synchronousParticlesUpdate;
+	//bool m_showStaticMeshCollidingFaces;
+	//bool m_showRaycastHit;
+	//bool m_profilerMode;
 	ndKeyTrigger m_nextActiveCamera;
 	
 	ndWorld::ndSolverModes m_solverMode;
-	//static ndDemos m_demosSelection[];
-	//static ndDemos m_machineLearning[];
-
+	
 	friend class ndPhysicsWorld;
 	friend class ndDebugDisplayRenderPass;
 };
