@@ -115,7 +115,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 	return true;
 }
 
-void ndMeshLoader::SaveMesh(const ndString& fullPathName)
+void ndMeshLoader::SaveMesh(const ndString& fullPathName) const
 {
 	ndString oldloc(setlocale(LC_ALL, 0));
 	ndSharedPtr<nd::TiXmlDocument> doc(new nd::TiXmlDocument(""));

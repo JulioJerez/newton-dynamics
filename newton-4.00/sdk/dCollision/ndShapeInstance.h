@@ -166,7 +166,7 @@ class ndShapeInstance: public ndContainersFreeListAlloc<ndShapeInstance>
 	D_COLLISION_API ndFloat32 GetUmbraClipSize() const;
 	D_COLLISION_API ndUnsigned64 GetUserDataID() const;
 
-	D_COLLISION_API void InitMeshCollision(ndMeshBodyKinematic* const meshBody) const;
+	D_COLLISION_API void Serialize(ndMeshBodyKinematic* const meshBody) const;
 
 	ndMatrix m_globalMatrix;
 	ndMatrix m_localMatrix;

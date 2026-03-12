@@ -26,6 +26,7 @@
 #include "ndShapeInstance.h"
 #include "ndBodyListView.h"
 
+class ndMesh;
 class ndContact;
 class ndMeshBody;
 class ndBodyNotify;
@@ -104,8 +105,8 @@ class ndBody : public ndContainersFreeListAlloc<ndBody>
 	D_COLLISION_API void SetMatrixNoSleep(const ndMatrix& matrix);
 	D_COLLISION_API void SetMatrixAndCentreOfMass(const ndQuaternion& rotation, const ndVector& globalcom);
 
-	D_COLLISION_API virtual ndSharedPtr<ndMeshBody> CreateMeshBody() const;
-	D_COLLISION_API virtual void InitMeshBody(ndSharedPtr<ndMeshBody>& body) const;
+	D_COLLISION_API virtual void Serialize(ndMesh* const node) const;
+	D_COLLISION_API virtual void Serialize(ndSharedPtr<ndMeshBody>& body) const;
 
 	protected:
 	virtual void AttachContact(ndContact* const) {}

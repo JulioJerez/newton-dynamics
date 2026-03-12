@@ -761,7 +761,7 @@ void ndShapeInstance::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVect
 	}
 }
 
-void ndShapeInstance::InitMeshCollision(ndMeshBodyKinematic* const meshBody) const
+void ndShapeInstance::Serialize(ndMeshBodyKinematic* const meshBody) const
 {
 	meshBody->m_shapeInstance.m_scale = m_scale;
 	meshBody->m_shapeInstance.m_localMatrix = m_localMatrix;

@@ -217,7 +217,7 @@ void ndBody::SetMatrix(const ndMatrix& matrix)
 	SetMatrixNoSleep(matrix);
 }
 
-void ndBody::InitMeshBody(ndSharedPtr<ndMeshBody>& meshBody) const
+void ndBody::Serialize(ndSharedPtr<ndMeshBody>& meshBody) const
 {
 	meshBody->m_matrix = m_matrix;
 	meshBody->m_omega = m_omega;
@@ -225,10 +225,10 @@ void ndBody::InitMeshBody(ndSharedPtr<ndMeshBody>& meshBody) const
 	meshBody->m_localCentreOfMass = m_localCentreOfMass;
 }
 
-ndSharedPtr<ndMeshBody> ndBody::CreateMeshBody() const
+void ndBody::Serialize(ndMesh* const node) const
 {
 	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBody());
-	InitMeshBody(meshBody);
+	node->SetRigidBody(meshBody);
+	Serialize(meshBody);
 	meshBody->m_classConstructor = ndString(ClassName());
-	return meshBody;
 }

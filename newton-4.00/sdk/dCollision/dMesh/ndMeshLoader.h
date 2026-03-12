@@ -24,7 +24,7 @@ class ndMeshLoader : public ndClassAlloc
 	D_COLLISION_API virtual ~ndMeshLoader();
 
 	D_COLLISION_API virtual bool LoadMesh(const ndString& pathMeshName);
-	D_COLLISION_API virtual void SaveMesh(const ndString& pathMeshName);
+	D_COLLISION_API virtual void SaveMesh(const ndString& pathMeshName) const;
 
 	public:
 	ndSharedPtr<ndMesh> m_mesh;

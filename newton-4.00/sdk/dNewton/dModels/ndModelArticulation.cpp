@@ -910,3 +910,29 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 
 	return dynamics;
 }
+
+void ndModelArticulation::Serialize(ndMesh* const rootNode) const
+{
+	ndFixSizeArray<ndModelArticulation::ndNode*, 1024> stack;
+	stack.PushBack(m_rootNode);
+	while (stack.GetCount())
+	{
+		ndModelArticulation::ndNode* const node = stack.Pop();
+		ndMesh* const meshNode = rootNode->FindByClosestMatch(node->m_name);
+		if (meshNode)
+		{
+			node->m_body->Serialize(meshNode);
+			if (node != m_rootNode)
+			{
+				// TO DO: serialize joint here
+			}
+		}
+
+		for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
+		{
+			stack.PushBack(child);
+		}
+	}
+
+	// TO DO: serialize loop joints here
+}
