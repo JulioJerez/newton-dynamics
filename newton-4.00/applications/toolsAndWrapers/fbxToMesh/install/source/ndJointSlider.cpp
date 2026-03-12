@@ -278,9 +278,6 @@ void ndJointSlider::ApplyBaseRows(ndConstraintDescritor& desc, const ndMatrix& m
 	const ndVector& p1 = matrix1.m_posit;
 	const ndVector prel(p0 - p1);
 	const ndVector vrel(veloc0 - veloc1);
-
-	//m_speed = vrel.DotProduct(matrix1.m_front).GetScalar();
-	//m_posit = prel.DotProduct(matrix1.m_front).GetScalar();
 	const ndVector projectedPoint = p1 + pin.Scale(pin.DotProduct(prel).GetScalar());
 
 	AddLinearRowJacobian(desc, p0, projectedPoint, matrix1[1]);
@@ -305,11 +302,9 @@ void ndJointSlider::JacobianDerivative(ndConstraintDescritor& desc)
 	CalculateGlobalMatrix(matrix0, matrix1);
 
 	ApplyBaseRows(desc, matrix0, matrix1);
-
 	if (m_springDamperRegularizer && ((m_springK > ndFloat32(0.0f)) || (m_damperC > ndFloat32(0.0f))))
 	{
 		SubmitSpringDamper(desc, matrix0, matrix1);
 	}
-
 	SubmitLimits(desc, matrix0, matrix1);
 }

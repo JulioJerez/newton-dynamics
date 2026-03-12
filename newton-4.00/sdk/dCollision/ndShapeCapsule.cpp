@@ -21,6 +21,7 @@
 
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
+#include "ndMesh.h"
 #include "ndContact.h"
 #include "ndShapeCapsule.h"
 #include "ndContactSolver.h"
@@ -504,4 +505,14 @@ ndUnsigned64 ndShapeCapsule::GetHash(ndUnsigned64 hash) const
 {
 	ndShapeInfo info(GetShapeInfo());
 	return info.GetHash(hash);
+}
+
+
+ndSharedPtr<ndMeshCollisionShape> ndShapeCapsule::GetMeshShape() const
+{
+	ndMeshCollisionShapeCapsule* const shape = new ndMeshCollisionShapeCapsule;
+	shape->m_radius0 = m_radius0;
+	shape->m_radius1 = m_radius1;
+	shape->m_height = m_height * ndFloat32(2.0f);
+	return ndSharedPtr<ndMeshCollisionShape> (shape);
 }

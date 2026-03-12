@@ -87,6 +87,7 @@ class ndObjectPlacementCamera : public ndDemoCameraNode
 		m_castingShape = loader.m_mesh->CreateCollision();
 
 		m_meshPrimitive = loader.m_renderMesh->GetPrimitive();
+		m_geometryMatrix = loader.m_renderMesh->GetPrimitiveMatrix();
 
 		m_ghostPrimitive = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive (**m_meshPrimitive));
 		ndRenderPrimitive* const ghoshMesh = *m_ghostPrimitive;
@@ -106,7 +107,7 @@ class ndObjectPlacementCamera : public ndDemoCameraNode
 
 		if (m_showIcon)
 		{
-			const ndMatrix modelMatrix(m_placementMatrix);
+			const ndMatrix modelMatrix(m_geometryMatrix * m_placementMatrix);
 			m_ghostPrimitive->Render(owner, modelMatrix, m_transparencyBackface);
 			m_ghostPrimitive->Render(owner, modelMatrix, m_transparencyFrontface);
 		}
@@ -316,7 +317,7 @@ class ndObjectPlacementCamera : public ndDemoCameraNode
 
 		ndSharedPtr<ndRenderSceneNode>entity(new ndRenderSceneNode(m_placementMatrix));
 		entity->SetPrimitive(m_meshPrimitive);
-		//entity->SetPrimitiveMatrix(m_primitiveOffsetMatrix);
+		entity->SetPrimitiveMatrix(m_geometryMatrix);
 
 		ndFloat32 mass = ndFloat32 (10.0f);
 		ndSharedPtr<ndBody> body(new ndBodyDynamic());
@@ -331,6 +332,7 @@ class ndObjectPlacementCamera : public ndDemoCameraNode
 
 	// for now just sone mesh
 	ndMatrix m_placementMatrix;
+	ndMatrix m_geometryMatrix;
 	ndSharedPtr<ndShapeInstance> m_castingShape;
 	ndSharedPtr<ndRenderPrimitive> m_meshPrimitive;
 	ndSharedPtr<ndRenderPrimitive> m_ghostPrimitive;

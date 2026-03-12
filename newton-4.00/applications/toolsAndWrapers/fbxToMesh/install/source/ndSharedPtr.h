@@ -42,8 +42,11 @@ class ndSharedPtr
 	const T* operator* () const;
 
 	operator bool() const;
-	bool operator == (const ndSharedPtr<T>& other) const;
 	ndSharedPtr<T>& operator = (const ndSharedPtr<T>& sp);
+
+	bool operator> (const ndSharedPtr<T>& other) const;
+	bool operator< (const ndSharedPtr<T>& other) const;
+	bool operator==(const ndSharedPtr<T>& other) const;
 
 	ndInt32 GetRefCount() const;
 
@@ -172,6 +175,18 @@ template <typename T>
 bool ndSharedPtr<T>::operator ==(const ndSharedPtr<T>& other) const
 {
 	return m_ptr == other.m_ptr;
+}
+
+template <typename T>
+bool ndSharedPtr<T>::operator> (const ndSharedPtr<T>& other) const
+{
+	return m_ptr > other.m_ptr;
+}
+
+template <typename T>
+bool ndSharedPtr<T>::operator< (const ndSharedPtr<T>& other) const
+{
+	return m_ptr < other.m_ptr;
 }
 
 template <typename T>

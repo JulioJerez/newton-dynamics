@@ -92,180 +92,183 @@ namespace ndBipedPlayer
 
 	void ndController::ResetModel()
 	{
-		ndMatrix boxMatrix(ndGetIdentityMatrix());
-		boxMatrix.m_posit = m_topBox->GetMatrix().m_posit;
-		boxMatrix.m_posit.m_x = ndFloat32(0.0f);
-		boxMatrix.m_posit.m_y = ndFloat32(2.5f);
-		m_topBox->SetMatrix(boxMatrix);
-		
-		const ndMatrix poleMatrix(m_poleHinge->GetLocalMatrix0().OrthoInverse() * m_poleHinge->CalculateGlobalMatrix1());
-		m_pole->SetMatrix(poleMatrix);
-		
-		const ndMatrix ballMatrix(m_wheelRoller->GetLocalMatrix0().OrthoInverse() * m_wheelRoller->CalculateGlobalMatrix1());
-		m_wheel->SetMatrix(ballMatrix);
-		
-		m_pole->SetOmega(ndVector::m_zero);
-		m_pole->SetVelocity(ndVector::m_zero);
-		
-		m_topBox->SetOmega(ndVector::m_zero);
-		m_topBox->SetVelocity(ndVector::m_zero);
-		
-		m_wheel->SetOmega(ndVector::m_zero);
-		m_wheel->SetVelocity(ndVector::m_zero);
-		
-		GetModel()->GetAsModelArticulation()->ClearMemory();
+		ndAssert(0);
+		//ndMatrix boxMatrix(ndGetIdentityMatrix());
+		//boxMatrix.m_posit = m_topBox->GetMatrix().m_posit;
+		//boxMatrix.m_posit.m_x = ndFloat32(0.0f);
+		//boxMatrix.m_posit.m_y = ndFloat32(2.5f);
+		//m_topBox->SetMatrix(boxMatrix);
+		//
+		//const ndMatrix poleMatrix(m_poleHinge->GetLocalMatrix0().OrthoInverse() * m_poleHinge->CalculateGlobalMatrix1());
+		//m_pole->SetMatrix(poleMatrix);
+		//
+		//const ndMatrix ballMatrix(m_wheelRoller->GetLocalMatrix0().OrthoInverse() * m_wheelRoller->CalculateGlobalMatrix1());
+		//m_wheel->SetMatrix(ballMatrix);
+		//
+		//m_pole->SetOmega(ndVector::m_zero);
+		//m_pole->SetVelocity(ndVector::m_zero);
+		//
+		//m_topBox->SetOmega(ndVector::m_zero);
+		//m_topBox->SetVelocity(ndVector::m_zero);
+		//
+		//m_wheel->SetOmega(ndVector::m_zero);
+		//m_wheel->SetVelocity(ndVector::m_zero);
+		//
+		//GetModel()->GetAsModelArticulation()->ClearMemory();
 	}
 		
-	// calculate pole angle relative to the world.
-	ndFloat32 ndController::GetPoleAngle() const
-	{
-		const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
-		const ndMatrix matrix(hinge->CalculateGlobalMatrix0());
-		ndFloat32 angle = ndAcos(ndClamp(matrix.m_up.m_y, ndFloat32(-1.0f), ndFloat32(1.0f)));
-		return angle;
-	}
-
-	ndFloat32 ndController::GetBoxAngle() const
-	{
-		const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
-		const ndMatrix matrix(hinge->CalculateGlobalMatrix1());
-		ndFloat32 angle = ndAcos(ndClamp(matrix.m_up.m_y, ndFloat32(-1.0f), ndFloat32(1.0f)));
-		return angle;
-	}
-
-	ndFloat32 ndController::GetBoxOmega() const
-	{
-		const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
-		const ndMatrix matrix(hinge->CalculateGlobalMatrix1());
-		const ndVector omega(m_topBox->GetOmega());
-		return omega.DotProduct(matrix.m_front).GetScalar();
-	}
+	//// calculate pole angle relative to the world.
+	//ndFloat32 ndController::GetPoleAngle() const
+	//{
+	//	const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
+	//	const ndMatrix matrix(hinge->CalculateGlobalMatrix0());
+	//	ndFloat32 angle = ndAcos(ndClamp(matrix.m_up.m_y, ndFloat32(-1.0f), ndFloat32(1.0f)));
+	//	return angle;
+	//}
+	//
+	//ndFloat32 ndController::GetBoxAngle() const
+	//{
+	//	const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
+	//	const ndMatrix matrix(hinge->CalculateGlobalMatrix1());
+	//	ndFloat32 angle = ndAcos(ndClamp(matrix.m_up.m_y, ndFloat32(-1.0f), ndFloat32(1.0f)));
+	//	return angle;
+	//}
+	//
+	//ndFloat32 ndController::GetBoxOmega() const
+	//{
+	//	const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
+	//	const ndMatrix matrix(hinge->CalculateGlobalMatrix1());
+	//	const ndVector omega(m_topBox->GetOmega());
+	//	return omega.DotProduct(matrix.m_front).GetScalar();
+	//}
 
 	#pragma optimize( "", off )
 	bool ndController::IsTerminal() const
 	{
-		bool fail = ndAbs(GetPoleAngle()) > ND_TERMINATION_ANGLE;
-		fail = fail || ndAbs(GetBoxAngle()) > ndFloat32 (90.0f) * ndDegreeToRad;
-		return fail;
+		//bool fail = ndAbs(GetPoleAngle()) > ND_TERMINATION_ANGLE;
+		//fail = fail || ndAbs(GetBoxAngle()) > ndFloat32 (90.0f) * ndDegreeToRad;
+		//return fail;
+		return true;
 	}
 
 	#pragma optimize( "", off )
 	ndBrainFloat ndController::CalculateReward() const
 	{
-		if (IsTerminal())
-		{
-			return ndBrainFloat(-1.0f);
-		}
-
-		// trying with center of mass dynammics
-		// b*ut the result so far the results are very dissapointing
-		// this however word much better is an order version 
-		// maybe I have bugs that I have to track
-		ndMatrix comFrame(m_wheelRoller->CalculateGlobalMatrix1());
-		comFrame.m_up = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
-		comFrame.m_right = comFrame.m_front.CrossProduct(comFrame.m_up).Normalize();
-		comFrame.m_up = comFrame.m_right.CrossProduct(comFrame.m_front).Normalize();
-
-		ndAssert(*m_solver);
-		// exclude the wheel angular momentum from the com kinematics
-		const ndVector savedWheelOmega(m_wheel->GetOmega());
-		m_wheel->SetOmegaNoSleep(ndVector::m_zero);
-		ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS> extraJoints;
-		ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(*((ndIkSolver*)*m_solver), comFrame, extraJoints, m_timestep));
-		m_wheel->SetOmegaNoSleep(savedWheelOmega);
-
-		const ndFloat32 poleAngle = ndFloat32(8.0f) * GetPoleAngle() / ND_TERMINATION_ANGLE;
-		const ndFloat32 comOmega = ndFloat32(2.0f) * comDynamics.m_omega.m_x;
-		const ndFloat32 comAlpha = ndFloat32(0.5f) * comDynamics.m_alpha.m_x;
-		const ndFloat32 comSpeed = ndMax(ndAbs(comDynamics.m_veloc.m_z) - ndFloat32(8.0f), ndFloat32(0.0f));
-		const ndFloat32 boxAngle = ndMax(ndAbs(GetBoxAngle()) - ndFloat32(45.f) * ndDegreeToRad, ndFloat32(0.0f));
-
-		const ndFloat32 invSigma2 = ndFloat32(4.0f);
-		const ndFloat32 poleAngleReward = ndExp(-invSigma2 * poleAngle * poleAngle);
-		const ndFloat32 comOmegaReward = ndExp(-invSigma2 * comOmega * comOmega);
-		const ndFloat32 comAlphaReward = ndExp(-invSigma2 * comAlpha * comAlpha);
-		const ndFloat32 comSpeedPenalty = ndExp(-invSigma2 * comSpeed * comSpeed) - ndFloat32(1.0f);
-		const ndFloat32 boxAnglePenalty = ndExp(-invSigma2 * boxAngle * boxAngle) - ndFloat32(1.0f);
-
-		ndFloat32 reward = ndFloat32(0.0f);
-		reward += poleAngleReward * ndFloat32(0.6f);
-		reward += comOmegaReward * ndFloat32(0.2f);
-		reward += comAlphaReward * ndFloat32(0.2f);
-		reward += comSpeedPenalty * ndFloat32(0.5f);
-		reward += boxAnglePenalty * ndFloat32(0.5f);
-
-		return ndBrainFloat(reward);
+		//if (IsTerminal())
+		//{
+		//	return ndBrainFloat(-1.0f);
+		//}
+		//
+		//// trying with center of mass dynammics
+		//// b*ut the result so far the results are very dissapointing
+		//// this however word much better is an order version 
+		//// maybe I have bugs that I have to track
+		//ndMatrix comFrame(m_wheelRoller->CalculateGlobalMatrix1());
+		//comFrame.m_up = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
+		//comFrame.m_right = comFrame.m_front.CrossProduct(comFrame.m_up).Normalize();
+		//comFrame.m_up = comFrame.m_right.CrossProduct(comFrame.m_front).Normalize();
+		//
+		//ndAssert(*m_solver);
+		//// exclude the wheel angular momentum from the com kinematics
+		//const ndVector savedWheelOmega(m_wheel->GetOmega());
+		//m_wheel->SetOmegaNoSleep(ndVector::m_zero);
+		//ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS> extraJoints;
+		//ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(*((ndIkSolver*)*m_solver), comFrame, extraJoints, m_timestep));
+		//m_wheel->SetOmegaNoSleep(savedWheelOmega);
+		//
+		//const ndFloat32 poleAngle = ndFloat32(8.0f) * GetPoleAngle() / ND_TERMINATION_ANGLE;
+		//const ndFloat32 comOmega = ndFloat32(2.0f) * comDynamics.m_omega.m_x;
+		//const ndFloat32 comAlpha = ndFloat32(0.5f) * comDynamics.m_alpha.m_x;
+		//const ndFloat32 comSpeed = ndMax(ndAbs(comDynamics.m_veloc.m_z) - ndFloat32(8.0f), ndFloat32(0.0f));
+		//const ndFloat32 boxAngle = ndMax(ndAbs(GetBoxAngle()) - ndFloat32(45.f) * ndDegreeToRad, ndFloat32(0.0f));
+		//
+		//const ndFloat32 invSigma2 = ndFloat32(4.0f);
+		//const ndFloat32 poleAngleReward = ndExp(-invSigma2 * poleAngle * poleAngle);
+		//const ndFloat32 comOmegaReward = ndExp(-invSigma2 * comOmega * comOmega);
+		//const ndFloat32 comAlphaReward = ndExp(-invSigma2 * comAlpha * comAlpha);
+		//const ndFloat32 comSpeedPenalty = ndExp(-invSigma2 * comSpeed * comSpeed) - ndFloat32(1.0f);
+		//const ndFloat32 boxAnglePenalty = ndExp(-invSigma2 * boxAngle * boxAngle) - ndFloat32(1.0f);
+		//
+		//ndFloat32 reward = ndFloat32(0.0f);
+		//reward += poleAngleReward * ndFloat32(0.6f);
+		//reward += comOmegaReward * ndFloat32(0.2f);
+		//reward += comAlphaReward * ndFloat32(0.2f);
+		//reward += comSpeedPenalty * ndFloat32(0.5f);
+		//reward += boxAnglePenalty * ndFloat32(0.5f);
+		//
+		//return ndBrainFloat(reward);
+		return 0;
 	}
 
 	void ndController::ApplyActions(ndBrainFloat* const actions)
 	{
-		const ndVector wheelMass(m_wheel->GetAsBodyDynamic()->GetMassMatrix());
-		const ndMatrix wheelMatrix(m_wheelRoller->CalculateGlobalMatrix0());
-
-		ndFloat32 wheelTorque = wheelMass.m_z * actions[m_wheelTorque] * ND_MAX_WHEEL_ALPHA;
-		if (IsOnAir())
-		{
-			ndFloat32 omega = m_wheel->GetOmega().m_z;
-			ndFloat32 drag = ndFloat32(0.1f) * omega * omega * ndSign(omega);
-			wheelTorque = -drag;
-		}
-
-		//ndExpandTraceMessage("%g %g %g\n", speed, drag, wheelTorque);
-		ndVector torque(wheelMatrix.m_front.Scale(wheelTorque));
-		m_wheel->GetAsBodyDynamic()->SetTorque(torque);
-
-		if (m_isTrainning && (m_randomImpulseCounter == 0))
-		{
-			// when in tranning mode,
-			// apply a random impulse to the top box every m_randomImpulseCounter steps
-			ndFloat32 randOmega = ND_RANDOM_IMPULSE_MAGNITUD * (ndFloat32(0.5f) - ndRand());
-			const ndVector mass(m_topBox->GetAsBodyDynamic()->GetMassMatrix());
-			const ndVector pin(m_poleHinge->CalculateGlobalMatrix1().m_front.Scale (randOmega));
-			const ndVector randomImpulseTorque(pin * mass);
-			m_topBox->GetAsBodyDynamic()->ApplyImpulsePair(ndVector::m_zero, randomImpulseTorque, m_timestep);
-		}
+		//const ndVector wheelMass(m_wheel->GetAsBodyDynamic()->GetMassMatrix());
+		//const ndMatrix wheelMatrix(m_wheelRoller->CalculateGlobalMatrix0());
+		//
+		//ndFloat32 wheelTorque = wheelMass.m_z * actions[m_wheelTorque] * ND_MAX_WHEEL_ALPHA;
+		//if (IsOnAir())
+		//{
+		//	ndFloat32 omega = m_wheel->GetOmega().m_z;
+		//	ndFloat32 drag = ndFloat32(0.1f) * omega * omega * ndSign(omega);
+		//	wheelTorque = -drag;
+		//}
+		//
+		////ndExpandTraceMessage("%g %g %g\n", speed, drag, wheelTorque);
+		//ndVector torque(wheelMatrix.m_front.Scale(wheelTorque));
+		//m_wheel->GetAsBodyDynamic()->SetTorque(torque);
+		//
+		//if (m_isTrainning && (m_randomImpulseCounter == 0))
+		//{
+		//	// when in tranning mode,
+		//	// apply a random impulse to the top box every m_randomImpulseCounter steps
+		//	ndFloat32 randOmega = ND_RANDOM_IMPULSE_MAGNITUD * (ndFloat32(0.5f) - ndRand());
+		//	const ndVector mass(m_topBox->GetAsBodyDynamic()->GetMassMatrix());
+		//	const ndVector pin(m_poleHinge->CalculateGlobalMatrix1().m_front.Scale (randOmega));
+		//	const ndVector randomImpulseTorque(pin * mass);
+		//	m_topBox->GetAsBodyDynamic()->ApplyImpulsePair(ndVector::m_zero, randomImpulseTorque, m_timestep);
+		//}
 	}
 
 	ndBrainFloat ndController::IsOnAir() const
 	{
-		ndBodyKinematic::ndContactMap& contacts = m_wheel->GetAsBodyKinematic()->GetContactMap();
-		ndBodyKinematic::ndContactMap::Iterator it(contacts);
-		for (it.Begin(); it; it++)
-		{
-			ndContact* const contact = *it;
-			if (contact->IsActive())
-			{
-				const ndContactPointList& contactPoints = contact->GetContactPoints();
-				return contactPoints.GetCount() ? ndBrainFloat(0.0f) : ndBrainFloat(1.0f);
-			}
-		}
+		//ndBodyKinematic::ndContactMap& contacts = m_wheel->GetAsBodyKinematic()->GetContactMap();
+		//ndBodyKinematic::ndContactMap::Iterator it(contacts);
+		//for (it.Begin(); it; it++)
+		//{
+		//	ndContact* const contact = *it;
+		//	if (contact->IsActive())
+		//	{
+		//		const ndContactPointList& contactPoints = contact->GetContactPoints();
+		//		return contactPoints.GetCount() ? ndBrainFloat(0.0f) : ndBrainFloat(1.0f);
+		//	}
+		//}
 		return ndBrainFloat(1.0f);
 	};
 
 	#pragma optimize( "", off)
 	void ndController::GetObservation(ndBrainFloat* const observation)
 	{
-		ndMatrix comFrame(m_wheelRoller->CalculateGlobalMatrix1());
-		comFrame.m_up = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
-		comFrame.m_right = comFrame.m_front.CrossProduct(comFrame.m_up).Normalize();
-		comFrame.m_up = comFrame.m_right.CrossProduct(comFrame.m_front).Normalize();
-		const ndVector savedWheelOmega(m_wheel->GetOmega());
-		m_wheel->SetOmegaNoSleep(ndVector::m_zero);
-		ndModelArticulation::ndCenterOfMassDynamics comKinematics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassKinematics(comFrame));
-		m_wheel->SetOmegaNoSleep(savedWheelOmega);
-
-		ndFloat32 boxAngle = GetBoxAngle();
-		ndFloat32 boxOmega = GetBoxOmega();
-		ndFloat32 comSpeed = comKinematics.m_veloc.m_z;
-		ndFloat32 hingeAngle = ((ndJointHinge*)*m_poleHinge)->GetAngle();
-		ndFloat32 hingeOmega = ((ndJointHinge*)*m_poleHinge)->GetOmega();
-
-		observation[m_hasContactSupport] = IsOnAir();
-		observation[m_comSpeed] = ndBrainFloat(comSpeed);
-		observation[m_boxAngle] = ndBrainFloat(boxAngle);
-		observation[m_boxOmega] = ndBrainFloat(boxOmega);
-		observation[m_hingeAngle] = ndBrainFloat(hingeAngle);
-		observation[m_hingeOmega] = ndBrainFloat(hingeOmega);
+		//ndMatrix comFrame(m_wheelRoller->CalculateGlobalMatrix1());
+		//comFrame.m_up = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
+		//comFrame.m_right = comFrame.m_front.CrossProduct(comFrame.m_up).Normalize();
+		//comFrame.m_up = comFrame.m_right.CrossProduct(comFrame.m_front).Normalize();
+		//const ndVector savedWheelOmega(m_wheel->GetOmega());
+		//m_wheel->SetOmegaNoSleep(ndVector::m_zero);
+		//ndModelArticulation::ndCenterOfMassDynamics comKinematics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassKinematics(comFrame));
+		//m_wheel->SetOmegaNoSleep(savedWheelOmega);
+		//
+		//ndFloat32 boxAngle = GetBoxAngle();
+		//ndFloat32 boxOmega = GetBoxOmega();
+		//ndFloat32 comSpeed = comKinematics.m_veloc.m_z;
+		//ndFloat32 hingeAngle = ((ndJointHinge*)*m_poleHinge)->GetAngle();
+		//ndFloat32 hingeOmega = ((ndJointHinge*)*m_poleHinge)->GetOmega();
+		//
+		//observation[m_hasContactSupport] = IsOnAir();
+		//observation[m_comSpeed] = ndBrainFloat(comSpeed);
+		//observation[m_boxAngle] = ndBrainFloat(boxAngle);
+		//observation[m_boxOmega] = ndBrainFloat(boxOmega);
+		//observation[m_hingeAngle] = ndBrainFloat(hingeAngle);
+		//observation[m_hingeOmega] = ndBrainFloat(hingeOmega);
 	}
 
 	void ndController::CreateArticulatedModel(
@@ -283,39 +286,134 @@ namespace ndBipedPlayer
 			body->SetMatrix(mesh->CalculateGlobalMatrix());
 			body->SetCollisionShape(*(*shape));
 			body->GetAsBodyDynamic()->SetMassMatrix(mass, *(*shape));
+
+			//char name[256];
+			//static int xxxx = 0;
+			//sprintf_s(name, 255, "xxx%d.nd", xxxx);
+			//xxxx++;
+			//ndMesh::SaveRigidBody(body, ndGetWorkingFileName(name).GetStr());
 			return body;
 		};
 
 		// add the root body
-		m_topBox = ndSharedPtr<ndBody>(CreateRigidBody(mesh, visualMesh, BOX_MASS, nullptr));
-		ndModelArticulation::ndNode* const modelRootNode = model->AddRootBody(m_topBox);
+		ndSharedPtr<ndBody> rootBody(CreateRigidBody(mesh, visualMesh, 1.0f, nullptr));
+		ndModelArticulation::ndNode* const modelRootNode = model->AddRootBody(rootBody);
 
-		//// add the pole mesh and body
-		//ndSharedPtr<ndMesh> poleMesh(mesh->GetChildren().GetFirst()->GetInfo());
-		//ndSharedPtr<ndRenderSceneNode> poleEntity(visualMesh->GetChildren().GetFirst()->GetInfo());
-		//m_pole = ndSharedPtr<ndBody>(CreateRigidBody(poleMesh, poleEntity, POLE_MASS, m_topBox->GetAsBodyDynamic()));
-		//
-		//// add ball mesh and body
-		//ndSharedPtr<ndMesh> ballMesh(poleMesh->GetChildren().GetFirst()->GetInfo());
-		//ndSharedPtr<ndRenderSceneNode> ballEntity(poleEntity->GetChildren().GetFirst()->GetInfo());
-		//m_wheel = ndSharedPtr<ndBody>(CreateRigidBody(ballMesh, ballEntity, BALL_MASS, m_pole->GetAsBodyDynamic()));
-		//
-		//// add links
-		//const ndMatrix poleMatrix(ndPitchMatrix(ndPi) * m_pole->GetMatrix());
-		//m_poleHinge = ndSharedPtr<ndJointBilateralConstraint>(new ndJointHinge(poleMatrix, m_pole->GetAsBodyKinematic(), m_topBox->GetAsBodyKinematic()));
-		//((ndJointRoller*)*m_poleHinge)->SetAsSpringDamperPosit(0.01f, 0.0f, 5.0f);
-		//ndModelArticulation::ndNode* const poleNode = model->AddLimb(modelRootNode, m_pole, m_poleHinge);
-		//
-		//const ndMatrix ballMatrix(m_wheel->GetMatrix());
-		//m_wheelRoller = ndSharedPtr<ndJointBilateralConstraint>(new ndJointRoller(ballMatrix, m_wheel->GetAsBodyKinematic(), m_pole->GetAsBodyKinematic()));
-		//((ndJointRoller*)*m_wheelRoller)->SetAsSpringDamperPosit(0.01f, 1000.0f, 15.0f);
-		//model->AddLimb(poleNode, m_wheel, m_wheelRoller);
-		//
-		//// fix to the word with a plane joint
-		//ndWorld* const world = scene->GetWorld();
-		//const ndMatrix planeMatrix(m_topBox->GetMatrix());
-		//m_plane = ndSharedPtr<ndJointBilateralConstraint>(new ndJointPlane(planeMatrix.m_posit, planeMatrix.m_right, m_topBox->GetAsBodyKinematic(), world->GetSentinelBody()));
-		//model->AddCloseLoop(m_plane);
+		// add right leg
+		{
+			// hip
+			ndSharedPtr<ndMesh> hipMesh(mesh->FindByClosestMatch("rightHip")->GetSharedPtr());
+			ndSharedPtr<ndRenderSceneNode> hipEntity(visualMesh->FindByClosestMatch("rightHip")->GetSharedPtr());
+			ndSharedPtr<ndBody> hipBody(CreateRigidBody(hipMesh, hipEntity, 1.0f, rootBody->GetAsBodyDynamic()));
+			const ndMatrix hipMatrix(hipMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> hipJoint(new ndJointHinge(hipMatrix, hipBody->GetAsBodyKinematic(), rootBody->GetAsBodyKinematic()));
+			ndModelArticulation::ndNode* const hipLink = model->AddLimb(modelRootNode, hipBody, hipJoint);
+
+			// upper thigh
+			ndSharedPtr<ndMesh> upperThighMesh(hipMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> upperThighEntity(hipEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> upperThighBody(CreateRigidBody(upperThighMesh, upperThighEntity, 1.0f, hipBody->GetAsBodyDynamic()));
+			const ndMatrix upperThighMatrix(upperThighMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> upperThighJoint(new ndJointHinge(upperThighMatrix, upperThighBody->GetAsBodyKinematic(), hipBody->GetAsBodyKinematic()));
+			ndModelArticulation::ndNode* const upperThighBodyLink = model->AddLimb(hipLink, upperThighBody, upperThighJoint);
+
+			// lower thigh
+			ndSharedPtr<ndMesh> lowerThighMesh(upperThighMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> lowerThighEntity(upperThighEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> lowerThighBody(CreateRigidBody(lowerThighMesh, lowerThighEntity, 1.0f, upperThighBody->GetAsBodyDynamic()));
+			const ndMatrix lowerThighMatrix(lowerThighMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> lowerThighJoint(new ndJointHinge(lowerThighMatrix, lowerThighBody->GetAsBodyKinematic(), upperThighBody->GetAsBodyKinematic()));
+			ndModelArticulation::ndNode* const lowerThighBodyLink = model->AddLimb(upperThighBodyLink, lowerThighBody, lowerThighJoint);
+
+			// calf
+			ndSharedPtr<ndMesh> calfMesh(lowerThighMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> calfEntity(lowerThighEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> calfBody(CreateRigidBody(calfMesh, calfEntity, 1.0f, lowerThighBody->GetAsBodyDynamic()));
+			const ndMatrix calfMatrix(calfMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> calfJoint(new ndJointHinge(calfMatrix, calfBody->GetAsBodyKinematic(), lowerThighBody->GetAsBodyKinematic()));
+			ndModelArticulation::ndNode* const calfBodyLink = model->AddLimb(lowerThighBodyLink, calfBody, calfJoint);
+
+			// soft Contact
+			ndSharedPtr<ndMesh> softMesh(calfMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> softEntity(calfEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> softBody(CreateRigidBody(softMesh, softEntity, 1.0f, calfBody->GetAsBodyDynamic()));
+			const ndMatrix softMatrix(softMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> softJoint(new ndJointSlider(softMatrix, softBody->GetAsBodyKinematic(), calfBody->GetAsBodyKinematic()));
+			((ndJointSlider*)*softJoint)->SetAsSpringDamper(0.001f, 1000.0f, 20.0f);
+			ndModelArticulation::ndNode* const softBodyLink = model->AddLimb(calfBodyLink, softBody, softJoint);
+
+			// foot
+			ndSharedPtr<ndMesh> footMesh(softMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> footEntity(softEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> footBody(CreateRigidBody(footMesh, footEntity, 1.0f, softBody->GetAsBodyDynamic()));
+			const ndMatrix footMatrix(footMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> footJoint(new ndJointDoubleHinge(footMatrix, footBody->GetAsBodyKinematic(), softBody->GetAsBodyKinematic()));
+			((ndJointDoubleHinge*)*footJoint)->SetAsSpringDamper0(0.01f, 0.0f, 10.0f);
+			((ndJointDoubleHinge*)*footJoint)->SetAsSpringDamper1(0.01f, 0.0f, 10.0f);
+			model->AddLimb(softBodyLink, footBody, footJoint);
+
+			ndMesh::SaveRigidBody(*footBody, ndGetWorkingFileName("xxx.nd").GetStr());
+		}
+
+		// add left leg
+		{
+			// hip
+			ndSharedPtr<ndMesh> hipMesh(mesh->FindByClosestMatch("leftHip")->GetSharedPtr());
+			ndSharedPtr<ndRenderSceneNode> hipEntity(visualMesh->FindByClosestMatch("leftHip")->GetSharedPtr());
+			ndSharedPtr<ndBody> hipBody(CreateRigidBody(hipMesh, hipEntity, 1.0f, rootBody->GetAsBodyDynamic()));
+			const ndMatrix hipMatrix(hipMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> hipJoint(new ndJointHinge(hipMatrix, hipBody->GetAsBodyKinematic(), rootBody->GetAsBodyKinematic()));
+			ndModelArticulation::ndNode* const hipLink = model->AddLimb(modelRootNode, hipBody, hipJoint);
+
+			// upper thigh
+			ndSharedPtr<ndMesh> upperThighMesh(hipMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> upperThighEntity(hipEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> upperThighBody(CreateRigidBody(upperThighMesh, upperThighEntity, 1.0f, hipBody->GetAsBodyDynamic()));
+			const ndMatrix upperThighMatrix(upperThighMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> upperThighJoint(new ndJointHinge(upperThighMatrix, upperThighBody->GetAsBodyKinematic(), hipBody->GetAsBodyKinematic()));
+			ndModelArticulation::ndNode* const upperThighBodyLink = model->AddLimb(hipLink, upperThighBody, upperThighJoint);
+			
+			// lower thigh
+			ndSharedPtr<ndMesh> lowerThighMesh(upperThighMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> lowerThighEntity(upperThighEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> lowerThighBody(CreateRigidBody(lowerThighMesh, lowerThighEntity, 1.0f, upperThighBody->GetAsBodyDynamic()));
+			const ndMatrix lowerThighMatrix(lowerThighMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> lowerThighJoint(new ndJointHinge(lowerThighMatrix, lowerThighBody->GetAsBodyKinematic(), upperThighBody->GetAsBodyKinematic()));
+			ndModelArticulation::ndNode* const lowerThighBodyLink = model->AddLimb(upperThighBodyLink, lowerThighBody, lowerThighJoint);
+			
+			// calf
+			ndSharedPtr<ndMesh> calfMesh(lowerThighMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> calfEntity(lowerThighEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> calfBody(CreateRigidBody(calfMesh, calfEntity, 1.0f, lowerThighBody->GetAsBodyDynamic()));
+			const ndMatrix calfMatrix(calfMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> calfJoint(new ndJointHinge(calfMatrix, calfBody->GetAsBodyKinematic(), lowerThighBody->GetAsBodyKinematic()));
+			ndModelArticulation::ndNode* const calfBodyLink = model->AddLimb(lowerThighBodyLink, calfBody, calfJoint);
+			
+			// soft Contact
+			ndSharedPtr<ndMesh> softMesh(calfMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> softEntity(calfEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> softBody(CreateRigidBody(softMesh, softEntity, 1.0f, calfBody->GetAsBodyDynamic()));
+			const ndMatrix softMatrix(softMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> softJoint(new ndJointSlider(softMatrix, softBody->GetAsBodyKinematic(), calfBody->GetAsBodyKinematic()));
+			((ndJointSlider*)*softJoint)->SetAsSpringDamper(0.001f, 1000.0f, 20.0f);
+			ndModelArticulation::ndNode* const softBodyLink = model->AddLimb(calfBodyLink, softBody, softJoint);
+			
+			// foot
+			ndSharedPtr<ndMesh> footMesh(softMesh->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndRenderSceneNode> footEntity(softEntity->GetChildren().GetFirst()->GetInfo());
+			ndSharedPtr<ndBody> footBody(CreateRigidBody(footMesh, footEntity, 1.0f, softBody->GetAsBodyDynamic()));
+			const ndMatrix footMatrix(footMesh->CalculateGlobalMatrix());
+			ndSharedPtr<ndJointBilateralConstraint> footJoint(new ndJointDoubleHinge(footMatrix, footBody->GetAsBodyKinematic(), softBody->GetAsBodyKinematic()));
+			((ndJointDoubleHinge*)*footJoint)->SetAsSpringDamper0(0.01f, 0.0f, 10.0f);
+			((ndJointDoubleHinge*)*footJoint)->SetAsSpringDamper1(0.01f, 0.0f, 10.0f);
+			model->AddLimb(softBodyLink, footBody, footJoint);
+		}
+		
+		// fix to the world with a fix 6 dof joint
+		ndWorld* const world = scene->GetWorld();
+		const ndMatrix fixMatrix(rootBody->GetMatrix());
+		ndSharedPtr<ndJointBilateralConstraint> fixJoint(new ndJointFix6dof(fixMatrix, rootBody->GetAsBodyKinematic(), world->GetSentinelBody()));
+		model->AddCloseLoop(fixJoint);
 	}
 
 	ndModelArticulation* ndController::CreateModel(ndDemoEntityManager* const scene, const ndMatrix& location, const ndRenderMeshLoader& loader, const char* const name)
@@ -323,11 +421,11 @@ namespace ndBipedPlayer
 		ndMatrix matrix(location);
 		matrix.m_posit = FindFloor(*scene->GetWorld(), matrix.m_posit, 200.0f);
 		matrix.m_posit.m_y += ndFloat32(2.5f);
-		loader.m_mesh->m_matrix = loader.m_mesh->m_matrix * matrix;
+		loader.m_mesh->SetMatrix(loader.m_mesh->GetMatrix() * matrix);
 		
 		ndSharedPtr<ndRenderSceneNode> visualMesh(loader.m_renderMesh->Clone());
-		visualMesh->SetTransform(loader.m_mesh->m_matrix);
-		visualMesh->SetTransform(loader.m_mesh->m_matrix);
+		visualMesh->SetTransform(loader.m_mesh->GetMatrix());
+		visualMesh->SetTransform(loader.m_mesh->GetMatrix());
 		
 		ndModelArticulation* const model = new ndModelArticulation();
 		ndSharedPtr<ndModelNotify> controller(new ndPlaybackController());
@@ -408,133 +506,178 @@ namespace ndBipedPlayer
 			};
 
 			// torso
-			ndSharedPtr<ndMesh> root(CreateCapsule(nullptr, ndRollMatrix(90.0f * ndDegreeToRad), 0.325f, 0.325f, 0.2f, "torso"));
+			ndSharedPtr<ndMesh> root(CreateCapsule(nullptr, ndGetIdentityMatrix(), 0.325f, 0.325f, 0.2f, "torso"));
+			root->SetGeometryMatrix(ndRollMatrix(90.0f * ndDegreeToRad));
 
 			// spine1
-			ndMatrix spine1Matrix(ndGetIdentityMatrix());
-			spine1Matrix.m_posit = ndVector(0.525f, 0.0f, 0.0f, 1.0f);
+			ndMatrix spine1Matrix(ndRollMatrix(90.0f * ndDegreeToRad));
+			spine1Matrix.m_posit.m_y = 0.525f;
 			ndSharedPtr<ndMesh> spine1(CreateCapsule(*root, spine1Matrix, 0.3f, 0.3f, 0.4f, "spine1"));
-
+			
 			// spine2
 			ndMatrix spine2Matrix(ndGetIdentityMatrix());
-			spine2Matrix.m_posit = ndVector(0.625f, 0.0f, 0.0f, 1.0f);
+			spine2Matrix.m_posit.m_x = 0.625f;
 			ndSharedPtr<ndMesh> spine2(CreateCapsule(*spine1, spine2Matrix, 0.35f, 0.35f, 0.4f, "spine2"));
-
+			
 			// neck
 			ndMatrix neckMatrix(ndGetIdentityMatrix());
-			neckMatrix.m_posit = ndVector(0.35f, 0.0f, 0.0f, 1.0f);
+			neckMatrix.m_posit.m_x = 0.35f;
 			ndSharedPtr<ndMesh> neck(CreateCapsule(*spine2, neckMatrix, 0.2f, 0.2f, 0.125f, "neck"));
-
+			
 			// head
 			ndMatrix headMatrix(ndGetIdentityMatrix());
-			headMatrix.m_posit = ndVector(0.35f, 0.0f, 0.0f, 1.0f);
+			headMatrix.m_posit.m_x = 0.35f;
 			CreateSphere(*neck, headMatrix, 0.5f, "head");
 
-			// left leg
+			// right arm
 			{
-				// hip
-				ndMatrix matrix(ndRollMatrix (-85.0f * ndDegreeToRad));
-				matrix.m_posit = ndVector(-0.125f, 0.3f, 0.0f, 1.0f);
-				ndSharedPtr<ndMesh> hip(CreateCapsule(*root, matrix, 0.25f, 0.25f, 0.1f, "leftHip"));
-				
-				// thigh
-				matrix = ndRollMatrix(85.0f * ndDegreeToRad);
-				matrix.m_posit = ndVector(-0.05f, -0.385f, 0.0f, 1.0f);
-				ndSharedPtr<ndMesh> thigh(CreateCapsule(*hip, matrix, 0.3f, 0.3f, 0.5f, "leftThigh"));
-				
-				// calf
-				matrix = ndGetIdentityMatrix();
-				matrix.m_posit = ndVector(-0.8f, 0.0f, 0.0f, 1.0f);
-				ndSharedPtr<ndMesh> calf(CreateCapsule(*thigh, matrix, 0.25f, 0.25f, 0.65f, "leftCaft"));
-				
-				// soft contact
-				matrix = ndGetIdentityMatrix();
-				matrix.m_posit = ndVector(-0.425f, 0.0f, 0.0f, 1.0f);
-				ndSharedPtr<ndMesh> softContact(CreateCapsule(*calf, matrix, 0.185f, 0.185f, 0.15f, "leftContact"));
-				
-				// foot
-				matrix = ndGetIdentityMatrix();
-				matrix.m_posit = ndVector(-0.25f, 0.0f, 0.085f, 1.0f);
-				CreateBox(*softContact, matrix, 0.175f, 0.3f, 0.525f, "leftFoot");
+				ndMatrix shouldMatrix(ndYawMatrix(-100.0f * ndDegreeToRad));
+				shouldMatrix.m_posit.m_x = 0.2f;
+				shouldMatrix.m_posit.m_z = 0.25f;
+				ndSharedPtr<ndMesh> shoulder(CreateCapsule(*spine2, shouldMatrix, 0.25f, 0.25f, 0.1f, "rightShoulder"));
+			
+				ndMatrix armMatrix (ndYawMatrix(-65.0f * ndDegreeToRad));
+				armMatrix.m_posit.m_x = 0.2f;
+				ndSharedPtr<ndMesh> arm(CreateCapsule(*shoulder, armMatrix, 0.25f, 0.2f, 0.4f, "rightArm"));
+				ndMatrix offset(ndGetIdentityMatrix());
+				offset.m_posit.m_x = 0.2f;
+				arm->SetGeometryMatrix(offset);
+			
+				ndMatrix forwardArmMatrix (ndRollMatrix(-10.0f * ndDegreeToRad));
+				forwardArmMatrix.m_posit.m_x = 0.4f;
+				ndSharedPtr<ndMesh> forwardArm(CreateCapsule(*arm, forwardArmMatrix, 0.2f, 0.15f, 0.4f, "rightForwardArm"));
+				offset.m_posit.m_x = 0.3f;
+				forwardArm->SetGeometryMatrix(offset);
+			
+				// hand
+				ndMatrix handMatrix = ndGetIdentityMatrix();
+				handMatrix.m_posit.m_x = 0.55f;
+				ndSharedPtr<ndMesh> foot (CreateBox(*forwardArm, handMatrix, 0.2f, 0.2f, 0.1f, "rightHand"));
+				offset.m_posit.m_x = 0.1f;
+				foot->SetGeometryMatrix(offset);
+			}
+
+			// left arm
+			{
+				ndMatrix shouldMatrix(ndYawMatrix(100.0f * ndDegreeToRad));
+				shouldMatrix.m_posit.m_x = 0.2f;
+				shouldMatrix.m_posit.m_z -= 0.25f;
+				ndSharedPtr<ndMesh> shoulder(CreateCapsule(*spine2, shouldMatrix, 0.25f, 0.25f, 0.1f, "leftShoulder"));
+			
+				ndMatrix armMatrix(ndYawMatrix(65.0f * ndDegreeToRad));
+				armMatrix.m_posit.m_x = 0.2f;
+				ndSharedPtr<ndMesh> arm(CreateCapsule(*shoulder, armMatrix, 0.25f, 0.2f, 0.4f, "leftArm"));
+				ndMatrix offset(ndGetIdentityMatrix());
+				offset.m_posit.m_x = 0.2f;
+				arm->SetGeometryMatrix(offset);
+
+				ndMatrix forwardArmMatrix(ndRollMatrix(-10.0f * ndDegreeToRad));
+				forwardArmMatrix.m_posit.m_x = 0.4f;
+				ndSharedPtr<ndMesh> forwardArm(CreateCapsule(*arm, forwardArmMatrix, 0.2f, 0.15f, 0.4f, "leftForwardArm"));
+				offset.m_posit.m_x = 0.3f;
+				forwardArm->SetGeometryMatrix(offset);
+
+				// hand
+				ndMatrix handMatrix = ndGetIdentityMatrix();
+				handMatrix.m_posit.m_x = 0.55f;
+				ndSharedPtr<ndMesh> foot(CreateBox(*forwardArm, handMatrix, 0.2f, 0.2f, 0.1f, "leftHand"));
+				offset.m_posit.m_x = 0.1f;
+				foot->SetGeometryMatrix(offset);
 			}
 
 			// right leg
 			{
 				// hip
-				ndMatrix matrix(ndRollMatrix(85.0f * ndDegreeToRad));
-				matrix.m_posit = ndVector(-0.125f, -0.3f, 0.0f, 1.0f);
-				ndSharedPtr<ndMesh> hip(CreateCapsule(*root, matrix, 0.25f, 0.25f, 0.1f, "rightHip"));
+				ndMatrix hipMatrix(ndYawMatrix(90.0f * ndDegreeToRad));
+				hipMatrix.m_posit.m_y = -0.25f;
+				hipMatrix.m_posit.m_z = 0.22f;
+				ndSharedPtr<ndMesh> hip(CreateCapsule(*root, hipMatrix, 0.25f, 0.25f, 0.1f, "rightHip"));
 
-				// thigh
-				matrix = ndRollMatrix(-85.0f * ndDegreeToRad);
-				matrix.m_posit = ndVector(-0.05f, 0.385f, 0.0f, 1.0f);
-				ndSharedPtr<ndMesh> thigh(CreateCapsule(*hip, matrix, 0.3f, 0.3f, 0.5f, "rightThigh"));
+				// upper thigh
+				ndMatrix upperThighMatrix (ndYawMatrix(90.0f * ndDegreeToRad));
+				ndSharedPtr<ndMesh> upperThigh(CreateCapsule(*hip, upperThighMatrix, 0.3f, 0.3f, 0.5f, "upperRightThigh"));
+				ndMatrix offset(ndRollMatrix(90.0f * ndDegreeToRad));
+				offset.m_posit.m_y = -0.385f;
+				upperThigh->SetGeometryMatrix(offset);
+
+				// lower thigh
+				ndMatrix lowerThighMatrix = ndRollMatrix(90.0f * ndDegreeToRad);
+				ndSharedPtr<ndMesh> lowerThigh(CreateCapsule(*upperThigh, lowerThighMatrix, 0.3f, 0.3f, 0.5f, "lowerRightThigh"));
+				offset = ndGetIdentityMatrix();
+				offset.m_posit.m_x = -0.385f;
+				lowerThigh->SetGeometryMatrix(offset);
 				
 				// calf
-				matrix = ndGetIdentityMatrix();
-				matrix.m_posit = ndVector(-0.8f, 0.0f, 0.0f, 1.0f);
-				ndSharedPtr<ndMesh> calf(CreateCapsule(*thigh, matrix, 0.25f, 0.25f, 0.65f, "rightCaft"));
+				ndMatrix calfMatrix (ndYawMatrix(90.0f * ndDegreeToRad));
+				calfMatrix.m_posit.m_x = -0.7f;
+				ndSharedPtr<ndMesh> calf(CreateCapsule(*lowerThigh, calfMatrix, 0.25f, 0.25f, 0.65f, "rightCaft"));
+				offset = ndYawMatrix(-90.0f * ndDegreeToRad);
+				offset.m_posit.m_z = -0.385f;
+				calf->SetGeometryMatrix(offset);
 				
 				// soft contact
-				matrix = ndGetIdentityMatrix();
-				matrix.m_posit = ndVector(-0.425f, 0.0f, 0.0f, 1.0f);
-				ndSharedPtr<ndMesh> softContact(CreateCapsule(*calf, matrix, 0.185f, 0.185f, 0.15f, "rightContact"));
+				ndMatrix softMatrix (ndYawMatrix(90.0f * ndDegreeToRad));
+				softMatrix.m_posit.m_z = -0.8f;
+				ndSharedPtr<ndMesh> softContact(CreateCapsule(*calf, softMatrix, 0.185f, 0.185f, 0.15f, "rightContact"));
 				
 				// foot
-				matrix = ndGetIdentityMatrix();
-				matrix.m_posit = ndVector(-0.25f, 0.0f, 0.085f, 1.0f);
-				CreateBox(*softContact, matrix, 0.175f, 0.3f, 0.525f, "rightFoot");
+				ndMatrix footMatrix(ndYawMatrix(90.0f * ndDegreeToRad) * ndRollMatrix(00.0f * ndDegreeToRad) * ndPitchMatrix(90.0f * ndDegreeToRad));
+				footMatrix.m_posit.m_x = 0.2f;
+				ndSharedPtr<ndMesh> foot(CreateBox(*softContact, footMatrix, 0.525f, 0.3f, 0.175f, "rightFoot"));
+				offset = ndGetIdentityMatrix();
+				offset.m_posit.m_x = 0.085f;
+				foot->SetGeometryMatrix(offset);
 			}
 
-
-			// left arm
+			// left leg
 			{
-				ndMatrix matrix(ndRollMatrix(-80.0f * ndDegreeToRad));
-				matrix.m_posit = ndVector(0.175f, 0.3f, 0.0f, 1.0f);
-				ndSharedPtr<ndMesh> shoulder(CreateCapsule(*spine2, matrix, 0.3f, 0.3f, 0.1f, "leftShoulder"));
+				// hip
+				ndMatrix hipMatrix(ndYawMatrix(-90.0f * ndDegreeToRad));
+				hipMatrix.m_posit.m_y = -0.25f;
+				hipMatrix.m_posit.m_z = -0.22f;
+				ndSharedPtr<ndMesh> hip(CreateCapsule(*root, hipMatrix, 0.25f, 0.25f, 0.1f, "leftHip"));
 
-				matrix = ndRollMatrix(-10.0f * ndDegreeToRad);
-				matrix.m_posit = ndVector(-0.5f, 0.065f, 0.0f, 1.0f);
-				ndSharedPtr<ndMesh> arm(CreateCapsule(*shoulder, matrix, 0.25f, 0.3f, 0.4f, "leftArm"));
+				// upper thigh
+				ndMatrix upperThighMatrix(ndYawMatrix(90.0f * ndDegreeToRad));
+				ndSharedPtr<ndMesh> upperThigh(CreateCapsule(*hip, upperThighMatrix, 0.3f, 0.3f, 0.5f, "upperRightThigh"));
+				ndMatrix offset(ndRollMatrix(90.0f * ndDegreeToRad));
+				offset.m_posit.m_y = -0.385f;
+				upperThigh->SetGeometryMatrix(offset);
 
-				matrix = ndRollMatrix(-5.0f * ndDegreeToRad);
-				matrix.m_posit = ndVector(-0.65f, 0.0325f, 0.0f, 1.0f);
-				ndSharedPtr<ndMesh> forwardArm(CreateCapsule(*arm, matrix, 0.225f, 0.25f, 0.5f, "leftForwardArm"));
+				// lower thigh
+				ndMatrix lowerThighMatrix = ndRollMatrix(90.0f * ndDegreeToRad);
+				ndSharedPtr<ndMesh> lowerThigh(CreateCapsule(*upperThigh, lowerThighMatrix, 0.3f, 0.3f, 0.5f, "lowerRightThigh"));
+				offset = ndGetIdentityMatrix();
+				offset.m_posit.m_x = -0.385f;
+				lowerThigh->SetGeometryMatrix(offset);
 
-				// hand
-				matrix = ndGetIdentityMatrix();
-				matrix.m_posit = ndVector(-0.55f, 0.0f, 0.0f, 1.0f);
-				CreateBox(*forwardArm, matrix, 0.4f, 0.125f, 0.2f, "leftHand");
-			}
+				// calf
+				//ndMatrix calfMatrix = ndGetIdentityMatrix();
+				ndMatrix calfMatrix(ndYawMatrix(90.0f * ndDegreeToRad));
+				calfMatrix.m_posit.m_x = -0.7f;
+				ndSharedPtr<ndMesh> calf(CreateCapsule(*lowerThigh, calfMatrix, 0.25f, 0.25f, 0.65f, "leftCaft"));
+				offset = ndYawMatrix(-90.0f * ndDegreeToRad);
+				offset.m_posit.m_z = -0.385f;
+				calf->SetGeometryMatrix(offset);
 
-			// right arm
-			{
-				ndMatrix matrix(ndRollMatrix(80.0f * ndDegreeToRad));
-				matrix.m_posit = ndVector(0.175f, -0.3f, 0.0f, 1.0f);
-				ndSharedPtr<ndMesh> shoulder(CreateCapsule(*spine2, matrix, 0.3f, 0.3f, 0.1f, "rightShoulder"));
+				// soft contact
+				ndMatrix softMatrix(ndYawMatrix(90.0f * ndDegreeToRad));
+				softMatrix.m_posit.m_z = -0.8f;
+				ndSharedPtr<ndMesh> softContact(CreateCapsule(*calf, softMatrix, 0.185f, 0.185f, 0.15f, "leftContact"));
 
-				matrix = ndRollMatrix(10.0f * ndDegreeToRad);
-				matrix.m_posit = ndVector(-0.5f, -0.065f, 0.0f, 1.0f);
-				ndSharedPtr<ndMesh> arm(CreateCapsule(*shoulder, matrix, 0.25f, 0.3f, 0.4f, "rightArm"));
-
-				matrix = ndRollMatrix(5.0f * ndDegreeToRad);
-				matrix.m_posit = ndVector(-0.65f, -0.0325f, 0.0f, 1.0f);
-				ndSharedPtr<ndMesh> forwardArm(CreateCapsule(*arm, matrix, 0.225f, 0.25f, 0.5f, "rightForwardArm"));
-
-				// hand
-				matrix = ndGetIdentityMatrix();
-				matrix.m_posit = ndVector(-0.55f, 0.0f, 0.0f, 1.0f);
-				CreateBox(*forwardArm, matrix, 0.4f, 0.125f, 0.2f, "rightHand");
+				// foot
+				ndMatrix footMatrix(ndYawMatrix(-90.0f * ndDegreeToRad)* ndRollMatrix(00.0f * ndDegreeToRad)* ndPitchMatrix(90.0f * ndDegreeToRad));
+				footMatrix.m_posit.m_x = 0.2f;
+				ndSharedPtr<ndMesh> foot(CreateBox(*softContact, footMatrix, 0.525f, 0.3f, 0.175f, "leftFoot"));
+				offset = ndGetIdentityMatrix();
+				offset.m_posit.m_x = 0.085f;
+				foot->SetGeometryMatrix(offset);
 			}
 
 			m_mesh = root;
 			MeshToRenderSceneNode(ndGetWorkingFileName(""));
 		}
-
-
 	};
-	
-
 }
 using namespace ndBipedPlayer;
 
@@ -591,9 +734,9 @@ void ndBipedPlayer_PPO(ndDemoEntityManager* const scene)
 	DaveGravelModel loader(scene);
 	ndController::CreateModel(scene, matrix, loader, CONTROLLER_NAME_PPO);
 
-	matrix.m_posit.m_x -= 0.0f;
+	matrix.m_posit.m_x -= 10.0f;
 	matrix.m_posit.m_y += 2.0f;
-	matrix.m_posit.m_z += -10.0f;
-	ndQuaternion rotation(ndVector(0.0f, 1.0f, 0.0f, 0.0f), -90.0f * ndDegreeToRad);
+	matrix.m_posit.m_z += 0.0f;
+	ndQuaternion rotation(ndVector(0.0f, 1.0f, 0.0f, 0.0f), 0.0f * ndDegreeToRad);
 	scene->SetCameraMatrix(rotation, matrix.m_posit);
 }

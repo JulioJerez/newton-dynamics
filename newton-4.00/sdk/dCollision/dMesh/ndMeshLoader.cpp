@@ -65,6 +65,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 
 		mesh->m_name = ndString(xmlGetString(entry.m_xmlNode, "name"));
 		mesh->m_matrix = xmlGetMatrix(entry.m_xmlNode, "matrix");
+		mesh->m_geometryMatrix = xmlGetMatrix(entry.m_xmlNode, "geometryMatrix");
 
 		nd::TiXmlElement* const xmlNodeType = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("type");
 		ndAssert(xmlNodeType);
@@ -152,6 +153,7 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName)
 		MeshXmlNodePair entry(stack.Pop());
 		xmlSaveParam(entry.m_parentXml, "name", entry.m_meshNode->m_name.GetStr());
 		xmlSaveParam(entry.m_parentXml, "matrix", entry.m_meshNode->m_matrix);
+		xmlSaveParam(entry.m_parentXml, "geometryMatrix", entry.m_meshNode->m_geometryMatrix);
 
 		nd::TiXmlElement* const xmlNodeType = new nd::TiXmlElement("type");
 		entry.m_parentXml->LinkEndChild(xmlNodeType);
@@ -179,6 +181,15 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName)
 			nd::TiXmlElement* const geometry = new nd::TiXmlElement("geometry");
 			entry.m_parentXml->LinkEndChild(geometry);
 			entry.m_meshNode->GetMesh()->SerializeToXml(geometry, bonesMap);
+		}
+
+		if (entry.m_meshNode->m_rigidBody)
+		{
+			const ndMeshBody* const rigidBody = *entry.m_meshNode->m_rigidBody;
+			nd::TiXmlElement* const rigidBodyNode = new nd::TiXmlElement("rigidbody");
+			entry.m_parentXml->LinkEndChild(rigidBodyNode);
+			xmlSaveParam(rigidBodyNode, "constructor", rigidBody->m_classConstructor.GetStr());
+			rigidBody->Save(rigidBodyNode);
 		}
 
 		for (ndList<ndSharedPtr<ndMesh>>::ndNode* node = entry.m_meshNode->m_children.GetFirst(); node; node = node->GetNext())

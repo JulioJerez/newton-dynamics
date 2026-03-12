@@ -44,6 +44,8 @@
 #include <ndVector8.h>
 #include <ndRand127.h>
 #include <ndFastRay.h>
+#include <ndWeakPtr.h>
+#include <ndVector16.h>
 #include <ndFastAabb.h>
 #include <ndProfiler.h>
 #include <ndPolyhedra.h>
@@ -52,7 +54,6 @@
 #include <ndSharedPtr.h>
 #include <ndClassAlloc.h>
 #include <ndThreadPool.h>
-#include <ndIsoSurface.h>
 #include <ndQuaternion.h>
 #include <ndProbability.h>
 #include <ndPerlinNoise.h>
@@ -76,9 +77,7 @@
 #include <ndConjugateGradient.h>
 #include <ndTriangulatePolygon.h>
 #include <ndPolygonSoupBuilder.h>
-#include <ndSharedNodeHierarchy.h>
 #include <ndPolygonSoupDatabase.h>
-#include <ndThreadBackgroundWorker.h>
 #include <ndPolyhedraMassProperties.h>
 #include <ndDelaunayTetrahedralization.h>
 

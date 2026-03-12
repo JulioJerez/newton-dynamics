@@ -115,7 +115,7 @@ ndUnsigned64 ndShape::GetHash(ndUnsigned64 hash) const
 void ndShape::MassProperties()
 {
 	// using general central theorem, to extract the Inertia relative to the center of mass 
-	//IImatrix = IIorigin + unitmass * [(displacemnet % displacemnet) * identityMatrix - transpose(displacement) * displacement)];
+	//IImatrix = IIorigin + unitmass * [(displacement % displacement) * identityMatrix - transpose(displacement) * displacement)];
 
 	ndMatrix inertia(ndGetIdentityMatrix());
 	inertia[0][0] = m_inertia[0];

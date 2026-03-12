@@ -121,9 +121,9 @@ class ndBodyKinematic : public ndBody
 	D_COLLISION_API virtual void SetCollisionShape(const ndShapeInstance& shapeInstance);
 	D_COLLISION_API virtual bool RayCast(ndRayCastNotify& callback, const ndFastRay& ray, const ndFloat32 maxT) const override;
 
+	D_COLLISION_API ndFloat32 TotalEnergy() const;
 	D_COLLISION_API ndVector CalculateLinearMomentum() const;
 	D_COLLISION_API virtual ndVector CalculateAngularMomentum() const;
-	D_COLLISION_API ndFloat32 TotalEnergy() const;
 
 	D_COLLISION_API void ClearMemory();
 	D_COLLISION_API virtual void IntegrateVelocity(ndFloat32 timestep);
@@ -211,12 +211,12 @@ class ndBodyKinematic : public ndBody
 	ndJointList m_jointList;
 	ndContactMap m_contactList;
 	mutable ndSpinLock m_lock;
-	ndScene* m_scene;
-	ndModel* m_model;
-	ndBodyKinematic* m_islandParent;
-	ndBodyListView::ndNode* m_sceneNode;
-	ndSkeletonContainer* m_skeletonContainer;
-	ndSpecialList<ndBodyKinematic>::ndNode* m_spetialUpdateNode;
+	ndWeakPtr<ndScene> m_scene;
+	ndWeakPtr<ndModel> m_model;
+	ndWeakPtr<ndBodyKinematic> m_islandParent;
+	ndWeakPtr<ndBodyListView::ndNode> m_sceneNode;
+	ndWeakPtr<ndSkeletonContainer> m_skeletonContainer;
+	ndWeakPtr<ndSpecialList<ndBodyKinematic>::ndNode> m_spetialUpdateNode;
 
 	ndFloat32 m_maxAngleStep;
 	ndFloat32 m_maxLinearStep;
@@ -233,6 +233,7 @@ class ndBodyKinematic : public ndBody
 	friend class ndScene;
 	friend class ndContact;
 	friend class ndIkSolver;
+	friend class ndConstraint;
 	friend class ndBvhLeafNode;
 	friend class ndContactSolver;
 	friend class ndDynamicsUpdate;

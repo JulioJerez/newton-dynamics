@@ -136,11 +136,11 @@ namespace ndUnicycleTrainer_sac
 			ndWorld* const world = scene->GetWorld();
 			ndMatrix matrix(location);
 			matrix.m_posit.m_y = ndFloat32(0.1f);
-			loader.m_mesh->m_matrix = loader.m_mesh->m_matrix * matrix;
+			loader.m_mesh->SetMatrix(loader.m_mesh->GetMatrix() * matrix);
 			
 			ndSharedPtr<ndRenderSceneNode> visualMesh(loader.m_renderMesh->Clone());
-			visualMesh->SetTransform(loader.m_mesh->m_matrix);
-			visualMesh->SetTransform(loader.m_mesh->m_matrix);
+			visualMesh->SetTransform(loader.m_mesh->GetMatrix());
+			visualMesh->SetTransform(loader.m_mesh->GetMatrix());
 			
 			ndSharedPtr<ndModel>model(CreateModel(scene, loader.m_mesh, visualMesh));
 			

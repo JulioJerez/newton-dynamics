@@ -27,6 +27,7 @@
 #include "ndRayCastNotify.h"
 #include "ndBodyKinematic.h"
 #include "ndShapeCompound.h"
+#include "ndShapeConvexPolygon.h"
 
 ndVector ndShapeInstance::m_padding(D_MAX_SHAPE_AABB_PADDING, D_MAX_SHAPE_AABB_PADDING, D_MAX_SHAPE_AABB_PADDING, ndFloat32(0.0f));
 
@@ -45,7 +46,7 @@ ndShapeInstance::ndShapeInstance(ndShape* const shape)
 	,m_scaleType(m_unit)
 	,m_collisionMode(true)
 {
-	ndAssert(!m_shape || ndMemory::CheckMemory(m_shape));
+	//ndAssert(m_shape);
 }
 
 ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance)
@@ -71,7 +72,7 @@ ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance)
 		m_shape = new ndShapeCompound(*compound);
 		m_shape->AddRef();
 	}
-	ndAssert(!m_shape || ndMemory::CheckMemory(m_shape));
+	ndAssert(m_shape);
 }
 
 ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance, ndShape* const shape)
@@ -90,12 +91,12 @@ ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance, ndShape* const
 	,m_scaleType(instance.m_scaleType)
 	,m_collisionMode(instance.m_collisionMode)
 {
-	ndAssert(!m_shape || ndMemory::CheckMemory(m_shape));
+	ndAssert(m_shape);
 }
 
 ndShapeInstance::~ndShapeInstance()
 {
-	ndAssert(!m_shape || ndMemory::CheckMemory(m_shape));
+	//ndAssert(!m_shape);
 	if (m_shape)
 	{
 		m_shape->Release();
@@ -144,6 +145,16 @@ ndMatrix ndShapeInstance::GetScaledTransform(const ndMatrix& matrix) const
 	scale[1][1] = m_scale.m_y;
 	scale[2][2] = m_scale.m_z;
 	return m_alignmentMatrix * scale * m_localMatrix * matrix;
+}
+
+ndMatrix ndShapeInstance::GetInvScaledTransform(const ndMatrix& matrix) const
+{
+	ndMatrix invScale(ndGetIdentityMatrix());
+	invScale[0][0] = m_invScale.m_x;
+	invScale[1][1] = m_invScale.m_y;
+	invScale[2][2] = m_invScale.m_z;
+	return (m_localMatrix * matrix).OrthoInverse() * invScale * m_alignmentMatrix.OrthoInverse();
+
 }
 
 ndInt32 ndShapeInstance::GetConvexVertexCount() const
@@ -410,7 +421,6 @@ ndShapeInstance& ndShapeInstance::operator=(const ndShapeInstance& instance)
 	m_ownerBody = instance.m_ownerBody;
 
 	m_subCollisionHandle = instance.m_subCollisionHandle;
-	//m_parent____ = instance.m_parent____;
 
 	return *this;
 }
@@ -716,19 +726,36 @@ bool ndShapeInstance::ndDistanceCalculator::ClosestPoint()
 
 void ndShapeInstance::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) const
 {
-	ndMatrix scaleMatrix;
-	scaleMatrix[0] = matrix[0].Scale(m_scale.m_x);
-	scaleMatrix[1] = matrix[1].Scale(m_scale.m_y);
-	scaleMatrix[2] = matrix[2].Scale(m_scale.m_z);
-	scaleMatrix[3] = matrix[3];
-	scaleMatrix = m_alignmentMatrix * scaleMatrix;
+	ndShape* const shape = (ndShape*)m_shape;
+	if (shape->GetAsShapeStaticMesh())
+	{
+		ndMatrix scaleMatrix;
+		scaleMatrix[0] = matrix[0].Scale(m_scale.m_x);
+		scaleMatrix[1] = matrix[1].Scale(m_scale.m_y);
+		scaleMatrix[2] = matrix[2].Scale(m_scale.m_z);
+		scaleMatrix[3] = matrix[3];
+		scaleMatrix = m_alignmentMatrix * scaleMatrix;
 
-	const ndVector size0(m_shape->GetObbSize());
-	const ndVector origin(scaleMatrix.TransformVector(m_shape->GetObbOrigin()));
-	const ndVector size(scaleMatrix.m_front.Abs().Scale(size0.m_x) + scaleMatrix.m_up.Abs().Scale(size0.m_y) + scaleMatrix.m_right.Abs().Scale(size0.m_z));
+		const ndVector size0(m_shape->GetObbSize());
+		const ndVector origin(scaleMatrix.TransformVector(m_shape->GetObbOrigin()));
+		const ndVector size(scaleMatrix.m_front.Abs().Scale(size0.m_x) + scaleMatrix.m_up.Abs().Scale(size0.m_y) + scaleMatrix.m_right.Abs().Scale(size0.m_z));
 
-	p0 = (origin - size - m_padding) & ndVector::m_triplexMask;
-	p1 = (origin + size + m_padding) & ndVector::m_triplexMask;
-	ndAssert(p0.m_w == ndFloat32(0.0f));
-	ndAssert(p1.m_w == ndFloat32(0.0f));
+		p0 = (origin - size - m_padding) & ndVector::m_triplexMask;
+		p1 = (origin + size + m_padding) & ndVector::m_triplexMask;
+		ndAssert(p0.m_w == ndFloat32(0.0f));
+		ndAssert(p1.m_w == ndFloat32(0.0f));
+	}
+	else
+	{
+		for (ndInt32 i = 0; i < 3; ++i)
+		{
+			const ndVector dir(matrix[0][i], matrix[1][i], matrix[2][i], ndFloat32 (0.0f));
+			p1[i] = matrix.TransformVector(SupportVertex(dir))[i];
+			p0[i] = matrix.TransformVector(SupportVertex(dir * ndVector::m_negOne))[i];
+		}
+		p0 -= m_padding;
+		p1 += m_padding;
+		p0 = p0 & ndVector::m_triplexMask;
+		p1 = p1 & ndVector::m_triplexMask;
+	}
 }

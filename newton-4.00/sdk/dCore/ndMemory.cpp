@@ -78,7 +78,7 @@ void* ndMemory::Malloc(size_t size)
 {
 #if defined (D_MEMORY_SANITY_CHECK)
 	#if defined (WIN32) || defined(_WIN32)
-		_ASSERTE(_CrtCheckMemory());
+	_ASSERTE(_CrtCheckMemory());
 	#elif defined (__linux__)
 		// linux OS mememory check
 	#elif defined (__APPLE__)
@@ -111,7 +111,7 @@ void ndMemory::Free(void* const ptr)
 {
 	#if defined (D_MEMORY_SANITY_CHECK)
 		#if defined (WIN32) || defined(_WIN32)
-			_ASSERTE(_CrtCheckMemory());
+	_ASSERTE(_CrtCheckMemory());
 		#elif defined (__linux__)
 			// linux OS mememory check
 		#elif defined (__APPLE__)
@@ -121,7 +121,7 @@ void ndMemory::Free(void* const ptr)
 		#elif defined (_M_ARM) || defined (_M_ARM64)
 			// android OS mememory check
 		#endif
-	#endif
+#endif
 
 	if (ptr)
 	{

@@ -81,7 +81,7 @@ class ndConvexCastNotify : public ndClassAlloc
 	ndVector m_closestPoint1;
 	ndFixSizeArray<ndContactPoint, 8> m_contacts;
 	ndFloat32 m_param;
-	ndScene* m_cachedScene;
+	ndWeakPtr<ndScene> m_cachedScene;
 
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 

@@ -38,7 +38,6 @@ ndBody::ndBody()
 	,m_minAabb(ndVector::m_wOne)
 	,m_maxAabb(ndVector::m_wOne)
 	,m_notifyCallback(nullptr)
-	//,m_deletedNode(nullptr)
 	,m_uniqueId(m_uniqueIdCount)
 	,m_flags(0)
 	,m_isStatic(0)
@@ -67,7 +66,6 @@ ndBody::ndBody(const ndBody& src)
 	,m_minAabb(src.m_minAabb)
 	,m_maxAabb(src.m_maxAabb)
 	,m_notifyCallback(nullptr)
-	//,m_deletedNode(nullptr)
 	,m_uniqueId(m_uniqueIdCount)
 	,m_flags(0)
 	,m_isStatic(0)
@@ -82,19 +80,18 @@ ndBody::ndBody(const ndBody& src)
 {
 	m_uniqueIdCount++;
 	m_transformIsDirty = 1;
-	if (src.m_notifyCallback)
+	if (*src.m_notifyCallback)
 	{
-		SetNotifyCallback(src.m_notifyCallback->Clone());
+		SetNotifyCallback(ndSharedPtr<ndBodyNotify>(src.m_notifyCallback->Clone()));
 	}
 }
 
 ndBody::~ndBody()
 {
-	//ndAssert(!m_deletedNode);
-	if (m_notifyCallback)
-	{
-		delete m_notifyCallback;
-	}
+	//if (m_notifyCallback)
+	//{
+	//	delete m_notifyCallback;
+	//}
 }
 
 bool ndBody::GetSkeletonSelfCollision() const
@@ -112,14 +109,9 @@ ndUnsigned32 ndBody::GetId() const
 	return m_uniqueId;
 }
 
-ndBodyNotify* ndBody::GetNotifyCallback() const
+ndSharedPtr<ndBodyNotify>& ndBody::GetNotifyCallback()
 {
 	return m_notifyCallback;
-}
-
-ndMatrix ndBody::GetMatrix() const
-{
-	return m_matrix;
 }
 
 ndVector ndBody::GetPosition() const
@@ -135,16 +127,6 @@ ndQuaternion ndBody::GetRotation() const
 ndVector ndBody::GetGlobalGetCentreOfMass() const
 {
 	return m_globalCentreOfMass;
-}
-
-ndVector ndBody::GetVelocity() const
-{
-	return m_veloc;
-}
-
-ndVector ndBody::GetOmega() const
-{
-	return m_omega;
 }
 
 void ndBody::GetAABB(ndVector& p0, ndVector& p1) const
@@ -177,19 +159,12 @@ void ndBody::SetCentreOfMass(const ndVector& com)
 	m_globalCentreOfMass = m_matrix.TransformVector(m_localCentreOfMass);
 }
 
-void ndBody::SetNotifyCallback(ndBodyNotify* const notify)
+void ndBody::SetNotifyCallback(const ndSharedPtr<ndBodyNotify>& notify)
 {
-	if (notify != m_notifyCallback)
+	m_notifyCallback = notify;
+	if (*m_notifyCallback)
 	{
-		if (m_notifyCallback)
-		{
-			delete m_notifyCallback;
-		}
-		m_notifyCallback = notify;
-		if (m_notifyCallback)
-		{
-			m_notifyCallback->m_body = this;
-		}
+		m_notifyCallback->m_body = this;
 	}
 }
 

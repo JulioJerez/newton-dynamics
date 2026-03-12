@@ -139,7 +139,7 @@ namespace ndUnicycleTrainer_ppo
 			ndWorld* const world = scene->GetWorld();
 			ndMatrix matrix(location);
 			matrix.m_posit.m_y = ndFloat32(0.1f);
-			loader.m_mesh->m_matrix = loader.m_mesh->m_matrix * matrix;
+			loader.m_mesh->SetMatrix(loader.m_mesh->GetMatrix() * matrix);
 			
 			// create an articulated model
 			const ndInt32 numberOfAgents = 400;
@@ -148,10 +148,14 @@ namespace ndUnicycleTrainer_ppo
 			for (ndInt32 i = 0; i < numberOfAgents; ++i)
 			{
 				ndFloat32 x = ndFloat32(10.0f) * (ndRand() - ndFloat32(0.5f));
-				loader.m_mesh->m_matrix.m_posit.m_x = x;
+				//loader.m_mesh->m_matrix.m_posit.m_x = x;
+				ndMatrix meshMatrix(loader.m_mesh->GetMatrix());
+				meshMatrix.m_posit.m_x = x;
+				loader.m_mesh->SetMatrix(meshMatrix);
+
 				ndSharedPtr<ndRenderSceneNode> visualMesh(loader.m_renderMesh->Clone());
-				visualMesh->SetTransform(loader.m_mesh->m_matrix);
-				visualMesh->SetTransform(loader.m_mesh->m_matrix);
+				visualMesh->SetTransform(loader.m_mesh->GetMatrix());
+				visualMesh->SetTransform(loader.m_mesh->GetMatrix());
 			
 				ndSharedPtr<ndModel>model(CreateModel(scene, loader.m_mesh, visualMesh, maxTrajectories));
 

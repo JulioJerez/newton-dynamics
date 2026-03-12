@@ -89,15 +89,129 @@ void ndFastAabb::SetTransposeAbsMatrix(const ndMatrix& matrix)
 	m_absDir[2] = m_absDir[2].Abs();
 }
 
-void ndFastAabb::MakeBox1(ndInt32 indexCount, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray, ndVector& minBox, ndVector& maxBox) const
+//void ndFastAabb::MakeBox1(ndInt32 indexCount, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray, ndVector& minBox, ndVector& maxBox) const
+//{
+//	ndVector faceBoxP0(&vertexArray[indexArray[0] * stride]);
+//	faceBoxP0 = faceBoxP0 & ndVector::m_triplexMask;
+//	ndVector faceBoxP1(faceBoxP0);
+//	for (ndInt32 i = 1; i < indexCount; ++i)
+//	{
+//		ndVector p(&vertexArray[indexArray[i] * stride]);
+//		p = p & ndVector::m_triplexMask;
+//		faceBoxP0 = faceBoxP0.GetMin(p);
+//		faceBoxP1 = faceBoxP1.GetMax(p);
+//	}
+//
+//	minBox = faceBoxP0 - m_p1;
+//	maxBox = faceBoxP1 - m_p0;
+//}
+//
+//void ndFastAabb::MakeBox2(const ndMatrix& faceMatrix, ndInt32 indexCount, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray, ndVector& minBox, ndVector& maxBox) const
+//
+//ndVector faceBoxP0(faceMatrix.TransformVector(ndVector(&vertexArray[indexArray[0] * stride]) & ndVector::m_triplexMask));
+//ndVector faceBoxP1(faceBoxP0);
+//for (ndInt32 i = 1; i < indexCount; ++i)
+//{
+//	ndVector p(faceMatrix.TransformVector(ndVector(&vertexArray[indexArray[i] * stride]) & ndVector::m_triplexMask));
+//	faceBoxP0 = faceBoxP0.GetMin(p);
+//	faceBoxP1 = faceBoxP1.GetMax(p);
+//}
+//faceBoxP0 = faceBoxP0 & ndVector::m_triplexMask;
+//faceBoxP1 = faceBoxP1 & ndVector::m_triplexMask;
+////ndMatrix matrix = *this * faceMatrix;
+//ndVector size(matrix[0].Abs().Scale(m_size.m_x) + matrix[1].Abs().Scale(m_size.m_y) + matrix[2].Abs().Scale(m_size.m_z));
+//ndVector boxP0((matrix.m_posit - size) & ndVector::m_triplexMask);
+//ndVector boxP1((matrix.m_posit + size) & ndVector::m_triplexMask);
+////minBox = faceBoxP0 - boxP1;
+//maxBox = faceBoxP1 - boxP0;
+//
+////dMatrix ndFastAabb::MakeFaceMatrix(const ndVector& faceNormal, ndInt32, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray) const
+//
+//ndMatrix faceMatrix;
+//ndVector origin(&vertexArray[indexArray[0] * stride]);
+//ndVector pin(&vertexArray[indexArray[0] * stride]);
+//pin = pin & ndVector::m_triplexMask;
+//origin = origin & ndVector::m_triplexMask;
+////ndVector pin1(&vertexArray[indexArray[1] * stride]);
+//pin1 = pin1 & ndVector::m_triplexMask;
+////faceMatrix[0] = faceNormal;
+//faceMatrix[1] = pin1 - origin;
+//faceMatrix[1] = faceMatrix[1].Normalize();
+//faceMatrix[2] = faceMatrix[0].CrossProduct(faceMatrix[1]);
+//faceMatrix[3] = origin | ndVector::m_wOne;
+//return faceMatrix.OrthoInverse();
+//
+////dFloat32 ndFastAabb::PolygonBoxRayDistance(const ndVector& faceNormal, ndInt32 indexCount, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray, const ndFastRay& ray) const
+//
+//ndVector minBox;
+//ndVector maxBox;
+//MakeBox1(indexCount, indexArray, stride, vertexArray, minBox, maxBox);
+//ndFloat32 dist0 = ray.BoxIntersect(minBox, maxBox);
+//if (dist0 < ndFloat32(1.0f))
+//{
+//	ndMatrix faceMatrix(MakeFaceMatrix(faceNormal, indexCount, indexArray, stride, vertexArray));
+////	MakeBox2(faceMatrix, indexCount, indexArray, stride, vertexArray, minBox, maxBox);
+//	ndVector veloc(faceMatrix.RotateVector(ray.m_diff) & ndVector::m_triplexMask);
+//	ndFastRay localRay(ndVector(ndFloat32(0.0f)), veloc);
+//	ndFloat32 dist1 = localRay.BoxIntersect(minBox, maxBox);
+//	dist0 = ndMax(dist1, dist0);
+//}
+//return dist0;
+//
+////dFloat32 ndFastAabb::PolygonBoxDistance(const ndVector& faceNormal, ndInt32 indexCount, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray) const
+//
+//ndVector minBox;
+//ndVector maxBox;
+//MakeBox1(indexCount, indexArray, stride, vertexArray, minBox, maxBox);
+////ndVector mask(minBox * maxBox < ndVector(ndFloat32(0.0f)));
+//ndVector dist(maxBox.GetMin(minBox.Abs()) & mask);
+//dist = dist.GetMin(dist.ShiftTripleRight());
+//dist = dist.GetMin(dist.ShiftTripleRight());
+//ndFloat32 dist0 = dist.GetScalar();
+//if (dist0 > ndFloat32(0.0f))
+//{
+//	ndMatrix faceMatrix(MakeFaceMatrix(faceNormal, indexCount, indexArray, stride, vertexArray));
+//	MakeBox2(faceMatrix, indexCount, indexArray, stride, vertexArray, minBox, maxBox);
+////	ndVector mask2(minBox * maxBox < ndVector(ndFloat32(0.0f)));
+//	ndVector dist2(maxBox.GetMin(minBox.Abs()) & mask2);
+//	dist2 = dist2.GetMin(dist2.ShiftTripleRight());
+//	dist2 = dist2.GetMin(dist2.ShiftTripleRight());
+//	ndFloat32 dist1 = dist2.GetScalar();
+//	dist0 = (dist1 > ndFloat32(0.0f)) ? ndMax(dist0, dist1) : ndFloat32(0.0f);
+//	if (dist0 <= ndFloat32(0.0f))
+//	{
+//		// some how clang crashes in relese and release with debug, 
+//		// but not Visual studio, Intel or Gcc
+//		// I do can't determine why because Clang inline teh code without debug 
+//		//ndVector p1p0((minBox.Abs()).GetMin(maxBox.Abs()).AndNot(mask2));
+//		const ndVector box0(minBox.Abs());
+//		const ndVector box1(maxBox.Abs());
+//		const ndVector p1p0((box0.GetMin(box1)).AndNot(mask2));
+//		dist2 = p1p0.DotProduct(p1p0);
+//		dist2 = dist2.Sqrt() * ndVector::m_negOne;
+//		dist0 = dist2.GetScalar();
+//	}
+//}
+//else
+//{
+//	//ndVector p1p0((minBox.Abs()).GetMin(maxBox.Abs()).AndNot(mask));
+//	const ndVector box0(minBox.Abs());
+//	const ndVector box1(maxBox.Abs());
+//	const ndVector p1p0(box0.GetMin(box1).AndNot(mask));
+//	dist = p1p0.DotProduct(p1p0);
+//	dist = dist.Sqrt() * ndVector::m_negOne;
+//	dist0 = dist.GetScalar();
+//}
+//return	dist0;
+
+
+void ndFastAabb::MakeBox1(ndInt32 indexCount, const ndInt32* const indexArray, const ndVector* const vertexArray, ndVector& minBox, ndVector& maxBox) const
 {
-	ndVector faceBoxP0(&vertexArray[indexArray[0] * stride]);
-	faceBoxP0 = faceBoxP0 & ndVector::m_triplexMask;
+	ndVector faceBoxP0 (vertexArray[indexArray[0]]);
 	ndVector faceBoxP1(faceBoxP0);
 	for (ndInt32 i = 1; i < indexCount; ++i)
 	{
-		ndVector p(&vertexArray[indexArray[i] * stride]);
-		p = p & ndVector::m_triplexMask;
+		const ndVector p (vertexArray[indexArray[i]]);
 		faceBoxP0 = faceBoxP0.GetMin(p);
 		faceBoxP1 = faceBoxP1.GetMax(p);
 	}
@@ -106,71 +220,33 @@ void ndFastAabb::MakeBox1(ndInt32 indexCount, const ndInt32* const indexArray, n
 	maxBox = faceBoxP1 - m_p0;
 }
 
-void ndFastAabb::MakeBox2(const ndMatrix& faceMatrix, ndInt32 indexCount, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray, ndVector& minBox, ndVector& maxBox) const
+void ndFastAabb::MakeBox2(const ndMatrix& faceMatrix, ndInt32 indexCount, const ndInt32* const indexArray, const ndVector* const vertexArray, ndVector& minBox, ndVector& maxBox) const
 {
-	ndVector faceBoxP0(faceMatrix.TransformVector(ndVector(&vertexArray[indexArray[0] * stride]) & ndVector::m_triplexMask));
+	ndVector faceBoxP0(faceMatrix.TransformVector(vertexArray[indexArray[0]]));
 	ndVector faceBoxP1(faceBoxP0);
 	for (ndInt32 i = 1; i < indexCount; ++i)
 	{
-		ndVector p(faceMatrix.TransformVector(ndVector(&vertexArray[indexArray[i] * stride]) & ndVector::m_triplexMask));
+		const ndVector p(faceMatrix.TransformVector(vertexArray[indexArray[i]]));
 		faceBoxP0 = faceBoxP0.GetMin(p);
 		faceBoxP1 = faceBoxP1.GetMax(p);
 	}
 	faceBoxP0 = faceBoxP0 & ndVector::m_triplexMask;
 	faceBoxP1 = faceBoxP1 & ndVector::m_triplexMask;
 
-	ndMatrix matrix = *this * faceMatrix;
-	ndVector size(matrix[0].Abs().Scale(m_size.m_x) + matrix[1].Abs().Scale(m_size.m_y) + matrix[2].Abs().Scale(m_size.m_z));
-	ndVector boxP0((matrix.m_posit - size) & ndVector::m_triplexMask);
-	ndVector boxP1((matrix.m_posit + size) & ndVector::m_triplexMask);
+	const ndMatrix matrix = *this * faceMatrix;
+	const ndVector size(matrix[0].Abs().Scale(m_size.m_x) + matrix[1].Abs().Scale(m_size.m_y) + matrix[2].Abs().Scale(m_size.m_z));
+	const ndVector boxP0((matrix.m_posit - size) & ndVector::m_triplexMask);
+	const ndVector boxP1((matrix.m_posit + size) & ndVector::m_triplexMask);
 
 	minBox = faceBoxP0 - boxP1;
 	maxBox = faceBoxP1 - boxP0;
 }
 
-ndMatrix ndFastAabb::MakeFaceMatrix(const ndVector& faceNormal, ndInt32, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray) const
-{
-	ndMatrix faceMatrix;
-	ndVector origin(&vertexArray[indexArray[0] * stride]);
-	ndVector pin(&vertexArray[indexArray[0] * stride]);
-	pin = pin & ndVector::m_triplexMask;
-	origin = origin & ndVector::m_triplexMask;
-
-	ndVector pin1(&vertexArray[indexArray[1] * stride]);
-	pin1 = pin1 & ndVector::m_triplexMask;
-
-	faceMatrix[0] = faceNormal;
-	faceMatrix[1] = pin1 - origin;
-	faceMatrix[1] = faceMatrix[1].Normalize();
-	faceMatrix[2] = faceMatrix[0].CrossProduct(faceMatrix[1]);
-	faceMatrix[3] = origin | ndVector::m_wOne;
-	return faceMatrix.OrthoInverse();
-}
-
-ndFloat32 ndFastAabb::PolygonBoxRayDistance(const ndVector& faceNormal, ndInt32 indexCount, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray, const ndFastRay& ray) const
+ndFloat32 ndFastAabb::PolygonBoxDistance(const ndVector& faceNormal, ndInt32 indexCount, const ndInt32* const indexArray, const ndVector* const vertexArray) const
 {
 	ndVector minBox;
 	ndVector maxBox;
-	MakeBox1(indexCount, indexArray, stride, vertexArray, minBox, maxBox);
-	ndFloat32 dist0 = ray.BoxIntersect(minBox, maxBox);
-	if (dist0 < ndFloat32(1.0f))
-	{
-		ndMatrix faceMatrix(MakeFaceMatrix(faceNormal, indexCount, indexArray, stride, vertexArray));
-
-		MakeBox2(faceMatrix, indexCount, indexArray, stride, vertexArray, minBox, maxBox);
-		ndVector veloc(faceMatrix.RotateVector(ray.m_diff) & ndVector::m_triplexMask);
-		ndFastRay localRay(ndVector(ndFloat32(0.0f)), veloc);
-		ndFloat32 dist1 = localRay.BoxIntersect(minBox, maxBox);
-		dist0 = ndMax(dist1, dist0);
-	}
-	return dist0;
-}
-
-ndFloat32 ndFastAabb::PolygonBoxDistance(const ndVector& faceNormal, ndInt32 indexCount, const ndInt32* const indexArray, ndInt32 stride, const ndFloat32* const vertexArray) const
-{
-	ndVector minBox;
-	ndVector maxBox;
-	MakeBox1(indexCount, indexArray, stride, vertexArray, minBox, maxBox);
+	MakeBox1(indexCount, indexArray, vertexArray, minBox, maxBox);
 
 	ndVector mask(minBox * maxBox < ndVector(ndFloat32(0.0f)));
 	ndVector dist(maxBox.GetMin(minBox.Abs()) & mask);
@@ -179,9 +255,9 @@ ndFloat32 ndFastAabb::PolygonBoxDistance(const ndVector& faceNormal, ndInt32 ind
 	ndFloat32 dist0 = dist.GetScalar();
 	if (dist0 > ndFloat32(0.0f))
 	{
-		ndMatrix faceMatrix(MakeFaceMatrix(faceNormal, indexCount, indexArray, stride, vertexArray));
-		MakeBox2(faceMatrix, indexCount, indexArray, stride, vertexArray, minBox, maxBox);
-
+		ndMatrix faceMatrix(MakeFaceMatrix(faceNormal, indexCount, indexArray, vertexArray));
+		MakeBox2(faceMatrix, indexCount, indexArray, vertexArray, minBox, maxBox);
+		
 		ndVector mask2(minBox * maxBox < ndVector(ndFloat32(0.0f)));
 		ndVector dist2(maxBox.GetMin(minBox.Abs()) & mask2);
 		dist2 = dist2.GetMin(dist2.ShiftTripleRight());
@@ -190,7 +266,7 @@ ndFloat32 ndFastAabb::PolygonBoxDistance(const ndVector& faceNormal, ndInt32 ind
 		dist0 = (dist1 > ndFloat32(0.0f)) ? ndMax(dist0, dist1) : ndFloat32(0.0f);
 		if (dist0 <= ndFloat32(0.0f))
 		{
-			// some how clang crashes in relese and release with debug, 
+			// some how clang crashes in release and release with debug, 
 			// but not Visual studio, Intel or Gcc
 			// I do can't determine why because Clang inline teh code without debug 
 			//ndVector p1p0((minBox.Abs()).GetMin(maxBox.Abs()).AndNot(mask2));
@@ -204,7 +280,6 @@ ndFloat32 ndFastAabb::PolygonBoxDistance(const ndVector& faceNormal, ndInt32 ind
 	}
 	else
 	{
-		//ndVector p1p0((minBox.Abs()).GetMin(maxBox.Abs()).AndNot(mask));
 		const ndVector box0(minBox.Abs());
 		const ndVector box1(maxBox.Abs());
 		const ndVector p1p0(box0.GetMin(box1).AndNot(mask));
@@ -215,4 +290,36 @@ ndFloat32 ndFastAabb::PolygonBoxDistance(const ndVector& faceNormal, ndInt32 ind
 	return	dist0;
 }
 
+ndMatrix ndFastAabb::MakeFaceMatrix(const ndVector& faceNormal, ndInt32, const ndInt32* const indexArray, const ndVector* const vertexArray) const
+{
+	ndMatrix faceMatrix;
+	const ndVector origin(vertexArray[indexArray[0]]);
+	const ndVector pin(vertexArray[indexArray[0]]);
+	const ndVector pin1(vertexArray[indexArray[1]]);
 
+	faceMatrix[0] = faceNormal;
+	faceMatrix[1] = pin1 - origin;
+	faceMatrix[1] = faceMatrix[1].Normalize();
+	faceMatrix[2] = faceMatrix[0].CrossProduct(faceMatrix[1]);
+	faceMatrix[3] = origin | ndVector::m_wOne;
+	return faceMatrix.OrthoInverse();
+}
+
+ndFloat32 ndFastAabb::PolygonBoxRayDistance(const ndVector& faceNormal, ndInt32 indexCount, const ndInt32* const indexArray, const ndVector* const vertexArray, const ndFastRay& ray) const
+{
+	ndVector minBox;
+	ndVector maxBox;
+	MakeBox1(indexCount, indexArray, vertexArray, minBox, maxBox);
+	ndFloat32 dist0 = ray.BoxIntersect(minBox, maxBox);
+	if (dist0 < ndFloat32(1.0f))
+	{
+		ndMatrix faceMatrix(MakeFaceMatrix(faceNormal, indexCount, indexArray, vertexArray));
+
+		MakeBox2(faceMatrix, indexCount, indexArray, vertexArray, minBox, maxBox);
+		ndVector veloc(faceMatrix.RotateVector(ray.m_diff) & ndVector::m_triplexMask);
+		ndFastRay localRay(ndVector(ndFloat32(0.0f)), veloc);
+		ndFloat32 dist1 = localRay.BoxIntersect(minBox, maxBox);
+		dist0 = ndMax(dist1, dist0);
+	}
+	return dist0;
+}

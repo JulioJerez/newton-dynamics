@@ -203,15 +203,6 @@ void ndJointHinge::ApplyBaseRows(ndConstraintDescritor& desc, const ndMatrix& ma
 
 	const ndFloat32 angle1 = CalculateAngle(matrix0.m_front, matrix1.m_front, matrix1.m_right);
 	AddAngularRowJacobian(desc, matrix1.m_right, angle1);
-
-	//// save the current joint Omega
-	//const ndVector omega0(m_body0->GetOmega());
-	//const ndVector omega1(m_body1->GetOmega());
-	//
-	//// the joint angle can be determined by getting the angle between any two non parallel vectors
-	//const ndFloat32 deltaAngle = ndAnglesAdd(-CalculateAngle(matrix0.m_up, matrix1.m_up, matrix1.m_front), -m_angle);
-	//m_angle += deltaAngle;
-	//m_omega = matrix1.m_front.DotProduct(omega0 - omega1).GetScalar();
 }
 
 ndFloat32 ndJointHinge::PenetrationOmega(ndFloat32 penetration) const

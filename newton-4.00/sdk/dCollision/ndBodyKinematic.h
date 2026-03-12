@@ -197,6 +197,9 @@ class ndBodyKinematic : public ndBody
 	D_COLLISION_API virtual void SetAcceleration(const ndVector& accel, const ndVector& alpha);
 	D_COLLISION_API virtual void EvaluateSleepState(ndFloat32 freezeSpeed2, ndFloat32 freezeAccel2);
 
+	D_COLLISION_API virtual ndSharedPtr<ndMeshBody> CreateMeshBody() const override;
+	D_COLLISION_API virtual void InitMeshBody(ndSharedPtr<ndMeshBody>& body) const override;
+
 	ndMatrix m_inertiaPrincipalAxis;
 	ndMatrix m_invWorldInertiaMatrix;
 	ndShapeInstance m_shapeInstance;

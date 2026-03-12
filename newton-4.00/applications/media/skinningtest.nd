@@ -5,6 +5,10 @@
         <posit float3="0 0 0" />
         <angles float3="0 -0 0" />
     </matrix>
+    <geometryMatrix>
+        <posit float3="0 0 0" />
+        <angles float3="0 -0 0" />
+    </geometryMatrix>
     <type nodeType="node" target="0 0 0 " />
     <ndMesh>
         <name string="Circle" />
@@ -12,6 +16,10 @@
             <posit float3="0 0 0" />
             <angles float3="0 -0 90" />
         </matrix>
+        <geometryMatrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </geometryMatrix>
         <type nodeType="node" target="0 0 0 " />
         <geometry>
             <vertices>
@@ -266,6 +274,10 @@
             <posit float3="0 0 0" />
             <angles float3="0 -0 90" />
         </matrix>
+        <geometryMatrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </geometryMatrix>
         <type nodeType="node" target="0 0 0 " />
         <ndMesh>
             <name string="Bone" />
@@ -273,6 +285,10 @@
                 <posit float3="0 0 0" />
                 <angles float3="0 -0 -90" />
             </matrix>
+            <geometryMatrix>
+                <posit float3="0 0 0" />
+                <angles float3="0 -0 0" />
+            </geometryMatrix>
             <type nodeType="bone" target="-1.26969e-06 4.04468 0 " />
             <ndMesh>
                 <name string="Bone.001" />
@@ -280,6 +296,10 @@
                     <posit float3="-1.26969e-06 4.04468 0" />
                     <angles float3="13.6479 -0.407559 3.40481" />
                 </matrix>
+                <geometryMatrix>
+                    <posit float3="0 0 0" />
+                    <angles float3="0 -0 0" />
+                </geometryMatrix>
                 <type nodeType="bone" target="-1.21179e-06 3.86024 -1.84071e-08 " />
                 <ndMesh>
                     <name string="Bone.001_end" />
@@ -287,6 +307,10 @@
                         <posit float3="-1.21179e-06 3.86024 -1.84071e-08" />
                         <angles float3="-1.06455e-07 -3.3418e-14 1.62844e-12" />
                     </matrix>
+                    <geometryMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </geometryMatrix>
                     <type nodeType="endBone" target="0 0 0 " />
                 </ndMesh>
             </ndMesh>

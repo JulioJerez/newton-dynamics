@@ -35,7 +35,7 @@
 //#define DEFAULT_SCENE	9		// static mesh collision 
 //#define DEFAULT_SCENE	10		// basic heightfield collision
 //#define DEFAULT_SCENE	11		// basic user heightfield 2d collision
-#define DEFAULT_SCENE	12		// basic user marching cube 3d collision
+//#define DEFAULT_SCENE	12		// basic user marching cube 3d collision
 //#define DEFAULT_SCENE	13		// static compound scene collision 
 //#define DEFAULT_SCENE	14		// basic convex approximate compound shapes
 //#define DEFAULT_SCENE	15		// basic model, a npd vehicle prop
@@ -50,7 +50,7 @@
 //#define DEFAULT_SCENE	24		// unicycle SAC trained controller
 //#define DEFAULT_SCENE	25		// unicycle PPO trained controller
 //#define DEFAULT_SCENE	26		// biped SAC trained controller
-//#define DEFAULT_SCENE	27		// biped PPO trained controller
+#define DEFAULT_SCENE	27		// biped PPO trained controller
 //#define DEFAULT_SCENE	28		// procedurally animated quadruped spider
 
 // These are the machine learning training demos
@@ -688,7 +688,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_showModelsDebugInfo = true;
 	//m_showCollisionMeshMode = 1;
 	//m_showCollisionMeshMode = 2;
-	//m_showCollisionMeshMode = 3;		// solid wire frame
+	m_showCollisionMeshMode = 3;		// solid wire frame
 	m_synchronousPhysicsUpdate = true;
 	m_synchronousParticlesUpdate = true;
 	//m_showStaticMeshCollidingFaces = true;

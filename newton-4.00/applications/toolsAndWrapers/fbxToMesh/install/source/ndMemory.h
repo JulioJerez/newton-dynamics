@@ -26,18 +26,21 @@
 #include "ndTypes.h"
 #include "ndThreadSyncUtils.h"
 
-#ifdef D_MEMORY_SANITY_CHECK
-	#define D_MEMORY_SAFE_GUARD		64
-#endif
-
-//#define ND_VALIDATE_HEAP 
-
 typedef void* (*ndMemAllocCallback) (size_t size);
 typedef void (*ndMemFreeCallback) (void* const ptr);
 
 class ndMemory
 {
 	public:
+	class ndMemoryHeader
+	{
+		public:
+		void* m_allocatedPtr;
+		ndMemoryHeader* m_freelistNext;
+		size_t m_bufferSize;
+		size_t m_requestedSize;
+	};
+
 	/// General Memory allocation function.
 	/// All memory allocations used by the Newton Engine and Tools 
 	/// are performed by calling this function.
@@ -60,11 +63,6 @@ class ndMemory
 
 	/// Return the total memory allocated by the newton engine and tools.
 	D_CORE_API static ndUnsigned64 GetMemoryUsed();
-
-	/// Return true is the pointer isn't curroted. thsi funtion onle work in debug and when D_MEMORY_SANITY_CHECK is defined
-	D_CORE_API static bool CheckMemory(const void* const ptr);
-
-	D_CORE_API static bool ValidateHeap();
 
 	/// Install low level system memory allocation functions.
 	/// \param ndMemAllocCallback alloc: is a function pointer callback to allocate a memory chunk.

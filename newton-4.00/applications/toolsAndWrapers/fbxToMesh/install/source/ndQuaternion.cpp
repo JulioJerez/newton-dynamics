@@ -91,7 +91,8 @@ ndQuaternion::ndQuaternion (const ndVector &unitAxis, ndFloat32 angle)
 	ndFloat32 sinAng = ndSin (angle);
 
 #ifdef _DEBUG
-	if (ndAbs (angle) > ndFloat32(ndEpsilon / 10.0f)) {
+	if (ndAbs (angle) > ndFloat32(ndEpsilon / 10.0f)) 
+	{
 		ndAssert (ndAbs (ndFloat32(1.0f) - unitAxis.DotProduct(unitAxis & ndVector::m_triplexMask).GetScalar()) < ndFloat32(ndEpsilon * 10.0f));
 	} 
 #endif

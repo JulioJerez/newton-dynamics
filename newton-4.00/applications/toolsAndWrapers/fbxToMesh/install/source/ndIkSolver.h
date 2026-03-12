@@ -23,10 +23,10 @@
 #define __ND_SKELETON_IMMEDIATE_SOLVER_H__
 
 #include "ndNewtonStdafx.h"
+#include "ndSkeletonContainer.h"
 
 class ndWorld;
 class ndConstraint;
-class ndSkeletonContainer;
 
 class ndIkSolver: public ndClassAlloc
 {
@@ -56,17 +56,48 @@ class ndIkSolver: public ndClassAlloc
 		ndBodyDynamic* m_surrogateBody;
 	};
 
-	ndArray<ndContact*> m_contacts;
-	ndArray<ndBodyKinematic*> m_bodies;
-	ndArray<ndInt32> m_savedBodiesIndex;
-	ndArray<ndLeftHandSide> m_leftHandSide;
-	ndArray<ndRightHandSide> m_rightHandSide;
+	template<class T>
+	class ndSurrogateList : public ndList<ndSharedPtr<T>, ndContainersFreeListAlloc<ndSharedPtr<T>>>
+	{
+		public:
+		ndSurrogateList()
+			:ndList<ndSharedPtr<T>, ndContainersFreeListAlloc<ndSharedPtr<T>>>()
+			,m_array(0)
+		{
+		}
+
+		void Add(ndSharedPtr<T>& object)
+		{
+			this->Append(object);
+			m_array.PushBack(*object);
+		}
+
+		T* operator[] (ndInt32 i)
+		{
+			return m_array[i];
+		}
+
+		const T* operator[] (ndInt32 i) const
+		{
+			return m_array[i];
+		}
+
+		ndFixSizeArray<T*, D_INV_IK_MAX_LINKS > m_array;
+	};
+
+	ndFixSizeArray<ndContact*, D_INV_IK_MAX_LINKS> m_contacts;
+	ndFixSizeArray<ndBodyKinematic*, D_INV_IK_MAX_LINKS> m_bodies;
+	ndFixSizeArray<ndInt32, D_INV_IK_MAX_LINKS> m_savedBodiesIndex;
+	ndFixSizeArray<ndLeftHandSide, D_INV_IK_MAX_LINKS> m_leftHandSide;
+	ndFixSizeArray<ndRightHandSide, D_INV_IK_MAX_LINKS> m_rightHandSide;
 	
-	ndArray<ndContact*> m_surrogateContact;
-	ndArray<ndBodyDynamic*> m_surrogateBodies;
+	//ndFixSizeArray<ndSharedPtr<ndContact>, D_INV_IK_MAX_LINKS> m_surrogateContact;
+	//ndFixSizeArray<ndSharedPtr<ndBodyDynamic>, D_INV_IK_MAX_LINKS> m_surrogateBodies;
+	ndSurrogateList<ndContact> m_surrogateContact;
+	ndSurrogateList<ndBodyDynamic> m_surrogateBodies;
 	
-	ndWorld* m_world;
-	ndSkeletonContainer* m_skeleton;
+	ndWeakPtr<ndWorld> m_world;
+	ndWeakPtr<ndSkeletonContainer> m_skeleton;
 	ndFloat32 m_timestep;
 	ndFloat32 m_invTimestep;
 	ndFloat32 m_maxAccel;

@@ -29,82 +29,23 @@ D_MSV_NEWTON_CLASS_ALIGN_32
 class ndShapeStaticProceduralMesh: public ndShapeStaticMesh
 {
 	public:
-	class ndEdge
-	{
-		public:
-		ndEdge();
-		ndEdge(ndInt32 i0, ndInt32 i1, const ndPlane& plane, ndInt32 testIndex);
-
-		bool operator< (const ndEdge& edge) const;
-		bool operator> (const ndEdge& edge) const;
-
-		ndPlane m_plane;
-		ndInt32 m_testIndex;
-		union
-		{
-			ndUnsigned64 m_key;
-			struct
-			{
-				ndInt32 m_i0;
-				ndInt32 m_i1;
-			};
-		};
-	};
-
-	class ndEdgeMap : public ndTree<ndInt32, ndEdge, ndContainersFreeListAlloc<ndInt32>>
-	{
-		public:
-		ndEdgeMap();
-	};
 
 	D_CLASS_REFLECTION(ndShapeStaticProceduralMesh, ndShapeStaticMesh)
-	D_COLLISION_API ndShapeStaticProceduralMesh(ndFloat32 sizex, ndFloat32 sizey, ndFloat32 sizez);
+	D_COLLISION_API ndShapeStaticProceduralMesh();
 	D_COLLISION_API virtual ~ndShapeStaticProceduralMesh();
 
+	D_COLLISION_API void SetAABB(const ndVector& p0, const ndVector& p1);
+	D_COLLISION_API void GetAABB(const ndVector& p0, const ndVector& p1);
+
 	virtual ndShapeStaticProceduralMesh* GetAsShapeStaticProceduralMesh() override { return this; }
-	virtual void GetCollidingFaces(const ndVector& minBox, const ndVector& maxBox, ndArray<ndVector>& vertex, ndArray<ndInt32>& faceList, ndArray<ndInt32>& faceMaterial, ndArray<ndInt32>& indexListList) const;
 
 	protected:
 	D_COLLISION_API virtual ndShapeInfo GetShapeInfo() const override;
 	D_COLLISION_API virtual ndUnsigned64 GetHash(ndUnsigned64 hash) const override;
-
 	D_COLLISION_API virtual void GetCollidingFaces(ndPolygonMeshDesc* const data) const override;
 
 	private:
 	friend class ndContactSolver;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
-
-inline void ndShapeStaticProceduralMesh::GetCollidingFaces(const ndVector&, const ndVector&, ndArray<ndVector>&, ndArray<ndInt32>&, ndArray<ndInt32>&, ndArray<ndInt32>&) const
-{
-	ndAssert(0);
-}
-
-inline ndShapeStaticProceduralMesh::ndEdge::ndEdge()
-{
-}
-
-inline ndShapeStaticProceduralMesh::ndEdge::ndEdge(ndInt32 i0, ndInt32 i1, 
-	const ndPlane& plane, ndInt32 testIndex)
-	:m_plane(plane)
-	,m_testIndex(testIndex)
-	,m_i0(i0)
-	,m_i1(i1)
-{
-}
-
-inline bool ndShapeStaticProceduralMesh::ndEdge::operator< (const ndEdge& edge) const
-{
-	return m_key < edge.m_key;
-}
-
-inline bool ndShapeStaticProceduralMesh::ndEdge::operator> (const ndEdge& edge) const
-{
-	return m_key > edge.m_key;
-}
-
-inline ndShapeStaticProceduralMesh::ndEdgeMap::ndEdgeMap()
-	:ndTree<ndInt32, ndEdge, ndContainersFreeListAlloc<ndInt32>>()
-{
-}
 
 #endif

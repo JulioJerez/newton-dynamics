@@ -21,6 +21,8 @@
 
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
+
+#include "ndMesh.h"
 #include "ndBodyNotify.h"
 #include "ndBodyKinematic.h"
 
@@ -114,4 +116,10 @@ void ndBodyNotify::OnPreUpdate(ndFloat32)
 // the ndWord::PostUpdate(ndFloat32 timestep)
 void ndBodyNotify::OnPostUpdate(ndFloat32)
 {
+}
+
+void ndBodyNotify::OnSave(ndMesh* const parentNode) const
+{
+	ndSharedPtr<ndMeshBody> rigidBody (GetBody()->CreateMeshBody());
+	parentNode->SetRigidBody(rigidBody);
 }

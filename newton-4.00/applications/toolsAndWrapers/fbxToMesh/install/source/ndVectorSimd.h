@@ -37,7 +37,6 @@ class ndBigVector: public ndClassAlloc
 	#define PERMUT_MASK_DOUBLE(y, x) _MM_SHUFFLE2 (y, x)
 
 	public:
-	//D_OPERATOR_NEW_AND_DELETE
 
 	inline ndBigVector()
 	{
@@ -77,14 +76,14 @@ class ndBigVector: public ndClassAlloc
 		:m_type(_mm256_loadu_pd(ptr))
 	{
 	}
-#else
+	#else
 	inline ndBigVector(const ndVector& v);
 
 	inline ndBigVector(const ndFloat64* const ptr)
 		:m_type(_mm256_loadu_pd(ptr))
 	{
 	}
-#endif
+	#endif
 
 	inline ndBigVector(ndFloat64 x, ndFloat64 y, ndFloat64 z, ndFloat64 w)
 		:m_type(_mm256_set_pd(w, z, y, x))
@@ -267,6 +266,7 @@ class ndBigVector: public ndClassAlloc
 	inline ndBigVector Normalize() const
 	{
 		ndFloat64 mag2 = DotProduct(*this).GetScalar();
+		ndAssert(mag2 > ndFloat32(0.0f));
 		return Scale(ndFloat64 (1.0f) / sqrt (mag2));
 	}
 
@@ -297,6 +297,11 @@ class ndBigVector: public ndClassAlloc
 	inline ndBigVector Floor() const
 	{
 		return ndBigVector(_mm256_floor_pd(m_type));
+	}
+
+	inline ndBigVector Ceiling() const
+	{
+		return ndBigVector(_mm256_ceil_pd(m_type));
 	}
 
 	inline ndBigVector GetInt() const
@@ -810,6 +815,7 @@ class ndBigVector : public ndClassAlloc
 	inline ndBigVector Normalize() const
 	{
 		ndFloat64 mag2 = DotProduct(*this).GetScalar();
+		ndAssert(mag2 > ndFloat32(0.0f));
 		return Scale(ndFloat64(1.0f) / sqrt(mag2));
 	}
 
@@ -832,22 +838,43 @@ class ndBigVector : public ndClassAlloc
 
 	inline ndBigVector Floor() const
 	{
+		// compiler does a better job? 
+		//ndFloat64 x = ndFloor(m_x);
+		//ndFloat64 y = ndFloor(m_y);
+		//ndFloat64 z = ndFloor(m_z);
+		//ndFloat64 w = ndFloor(m_w);
+		//return ndBigVector(x, y, z, w);
+
+		// no really, compiler still does a very poor job 
 		ndInt64 x = _mm_cvtsd_si64(m_typeLow);
 		ndInt64 y = _mm_cvtsd_si64(_mm_unpackhi_pd(m_typeLow, m_typeLow));
 		ndInt64 z = _mm_cvtsd_si64(m_typeHigh);
 		ndInt64 w = _mm_cvtsd_si64(_mm_unpackhi_pd(m_typeHigh, m_typeHigh));
-
+		
 		__m128d one(ndBigVector::m_one.m_typeLow);
 		__m128d xy(_mm_unpacklo_pd(_mm_cvtsi64_sd(m_typeHigh, x), _mm_cvtsi64_sd(m_typeHigh, y)));
 		__m128d zw(_mm_unpacklo_pd(_mm_cvtsi64_sd(m_typeHigh, z), _mm_cvtsi64_sd(m_typeHigh, w)));
-
+		
 		__m128d xy_round(_mm_and_pd(one, _mm_cmplt_pd(m_typeLow, xy)));
 		__m128d zw_round(_mm_and_pd(one, _mm_cmplt_pd(m_typeHigh, zw)));
 		return ndBigVector(_mm_sub_pd(xy, xy_round), _mm_sub_pd(zw, zw_round));
 	}
 
+	inline ndBigVector Ceiling() const
+	{
+		// no that frequently called 
+		// just use the standard scalar function for now
+		ndFloat64 x = ndCeil(m_x);
+		ndFloat64 y = ndCeil(m_y);
+		ndFloat64 z = ndCeil(m_z);
+		ndFloat64 w = ndCeil(m_w);
+		return ndBigVector(x, y, z, w);
+	}
+
 	inline ndBigVector GetInt() const
 	{
+		// compiler does even worse job here. 
+		// so, still intrinsics do a better job
 		ndInt64 x = _mm_cvtsd_si64(m_typeLow);
 		ndInt64 y = _mm_cvtsd_si64(_mm_unpackhi_pd(m_typeLow, m_typeLow));
 		ndInt64 z = _mm_cvtsd_si64(m_typeHigh);
@@ -1085,8 +1112,6 @@ class ndBigVector : public ndClassAlloc
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif
-
-
 
 #ifdef D_NEWTON_USE_DOUBLE
 	//typedef ndBigVector ndVector;
@@ -1328,7 +1353,7 @@ class ndVector : public ndClassAlloc
 	inline ndVector CrossProduct(const ndVector& B) const
 	{
 #if 1
-		// actually this is better because the compulier replace 
+		// actually this is better because the compilier replace 
 		// shffle with permutes.
 		__m128 tmp0 = _mm_shuffle_ps(m_type, m_type, _MM_SHUFFLE(3, 0, 2, 1));
 		__m128 tmp1 = _mm_shuffle_ps(B.m_type, B.m_type, _MM_SHUFFLE(3, 1, 0, 2));
@@ -1425,6 +1450,7 @@ class ndVector : public ndClassAlloc
 
 	inline ndVector GetMax() const
 	{
+		// using shuffle because in avx, the compiel replace it with prmoute 
 		__m128 tmp(_mm_max_ps(m_type, _mm_shuffle_ps(m_type, m_type, PERMUTE_MASK(1, 0, 3, 2))));
 		return _mm_max_ps(tmp, _mm_shuffle_ps(tmp, tmp, PERMUTE_MASK(2, 3, 0, 1)));
 	}
@@ -1446,17 +1472,35 @@ class ndVector : public ndClassAlloc
 
 	inline ndVector Floor() const
 	{
-#ifdef D_NEWTON_USE_AVX2_OPTION
-		return _mm_floor_ps(m_type);
-#else
-		ndVector truncated(_mm_cvtepi32_ps(_mm_cvttps_epi32(m_type)));
-		ndVector ret(truncated - (ndVector::m_one & (*this < truncated)));
-		ndAssert(ret.m_f[0] == ndFloor(m_f[0]));
-		ndAssert(ret.m_f[1] == ndFloor(m_f[1]));
-		ndAssert(ret.m_f[2] == ndFloor(m_f[2]));
-		ndAssert(ret.m_f[3] == ndFloor(m_f[3]));
-		return ret;
-#endif
+		#ifdef D_NEWTON_USE_AVX2_OPTION
+			return _mm_floor_ps(m_type);
+		#else
+			__m128i integer(_mm_cvttps_epi32(m_type));
+			ndVector truncated(_mm_cvtepi32_ps(integer));
+			ndVector ret(truncated - (ndVector::m_one & (*this < truncated)));
+			ndAssert(ret.m_f[0] == ndFloor(m_f[0]));
+			ndAssert(ret.m_f[1] == ndFloor(m_f[1]));
+			ndAssert(ret.m_f[2] == ndFloor(m_f[2]));
+			ndAssert(ret.m_f[3] == ndFloor(m_f[3]));
+			return ret;
+		#endif
+	}
+
+	inline ndVector Ceiling() const
+	{
+		#ifdef D_NEWTON_USE_AVX2_OPTION
+			return _mm_ceil_ps(m_type);
+		#else
+			__m128i integer(_mm_cvttps_epi32(m_type));
+			ndVector truncated(_mm_cvtepi32_ps(integer));
+			ndVector ret(truncated + (ndVector::m_one & (*this > truncated)));
+
+			ndAssert(ret.m_f[0] == ndCeil(m_f[0]));
+			ndAssert(ret.m_f[1] == ndCeil(m_f[1]));
+			ndAssert(ret.m_f[2] == ndCeil(m_f[2]));
+			ndAssert(ret.m_f[3] == ndCeil(m_f[3]));
+			return ret;
+		#endif
 	}
 
 	inline ndVector GetInt() const
@@ -1482,7 +1526,9 @@ class ndVector : public ndClassAlloc
 
 	inline ndVector Normalize() const
 	{
-		return Scale(ndFloat32(1.0f) / ndSqrt(DotProduct(*this).GetScalar()));
+		ndFloat64 mag2 = DotProduct(*this).GetScalar();
+		ndAssert(mag2 > ndFloat32(0.0f));
+		return Scale(ndFloat32(1.0f) / ndSqrt(mag2));
 	}
 
 	// relational operators
