@@ -108,7 +108,6 @@ class ndMeshBodyDynamic : public ndMeshBodyKinematic
 	ndVector m_intrinsicDamping;
 };
 
-
 class ndMesh : public ndClassAlloc
 {
 	public:

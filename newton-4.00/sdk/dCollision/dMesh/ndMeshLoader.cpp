@@ -21,6 +21,12 @@ ndMeshLoader::ndMeshLoader()
 {
 }
 
+ndMeshLoader::ndMeshLoader(const ndSharedPtr<ndMesh>& mesh)
+	:ndClassAlloc()
+	,m_mesh(mesh)
+{
+}
+
 ndMeshLoader::~ndMeshLoader()
 {
 }
