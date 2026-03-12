@@ -14,13 +14,13 @@
 class ndPhysicsWorld;
 class ndDebugDisplayRenderPass;
 
-class ndDemoEntityManager : public ndClassAlloc
+class ndAssetEditor : public ndClassAlloc
 {
 	public:
 	class ndRenderCallback : public ndRender::ndUserCallback
 	{
 		public:
-		ndRenderCallback(ndDemoEntityManager* const owner)
+		ndRenderCallback(ndAssetEditor* const owner)
 			:ndRender::ndUserCallback()
 			,m_owner(owner)
 		{
@@ -51,7 +51,7 @@ class ndDemoEntityManager : public ndClassAlloc
 			m_owner->MouseButtonCallback(button, action);
 		}
 	
-		ndDemoEntityManager* m_owner;
+		ndAssetEditor* m_owner;
 	};
 
 	enum ndMenuSelection
@@ -93,7 +93,7 @@ class ndDemoEntityManager : public ndClassAlloc
 		{
 		}
 
-		virtual void Update(ndDemoEntityManager* const scene) = 0;
+		virtual void Update(ndAssetEditor* const scene) = 0;
 	};
 
 	class ndDemoHelper: public ndClassAlloc
@@ -119,7 +119,7 @@ class ndDemoEntityManager : public ndClassAlloc
 		}
 
 		virtual ~ndDemoHelper() {}
-		virtual void PresentHelp(ndDemoEntityManager* const scene) = 0;
+		virtual void PresentHelp(ndAssetEditor* const scene) = 0;
 
 		ndUnsigned64 m_currentTime;
 	};
@@ -136,8 +136,8 @@ class ndDemoEntityManager : public ndClassAlloc
 		{
 		}
 
-		virtual void OnDebug(ndDemoEntityManager* const, bool) {}
-		virtual void Update(ndDemoEntityManager* const scene, ndFloat32 timestep) = 0;
+		virtual void OnDebug(ndAssetEditor* const, bool) {}
+		virtual void Update(ndAssetEditor* const scene, ndFloat32 timestep) = 0;
 	};
 
 	class ButtonKey
@@ -154,8 +154,8 @@ class ndDemoEntityManager : public ndClassAlloc
 		bool m_memory1;
 	};
 
-	ndDemoEntityManager ();
-	~ndDemoEntityManager ();
+	ndAssetEditor ();
+	~ndAssetEditor ();
 
 	void Run();
 
@@ -195,6 +195,7 @@ class ndDemoEntityManager : public ndClassAlloc
 
 	void TestImGui();
 	void RenderLayout();
+	void RenderOutlier();
 	void SetAcceleratedUpdate();
 	void SetDemoHelp(ndSharedPtr<ndDemoHelper>& helper);
 	void SetDemoUIpanel(ndSharedPtr<ndDemoUIpanel>& panel);
@@ -218,7 +219,6 @@ class ndDemoEntityManager : public ndClassAlloc
 	void ApplyOptions();
 
 	void ApplyMenuOptions();
-	//void LoadDemo(ndInt32 menu);
 	void OnSubStepPostUpdate(ndFloat32 timestep);
 	
 	//ndPhysicsWorld* m_world;

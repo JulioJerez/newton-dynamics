@@ -13,7 +13,7 @@
 #include "ndMenuRenderPass.h"
 #include "ndAssetEditor.h"
 
-ndMenuRenderPass::ndMenuRenderPass(ndDemoEntityManager* const owner)
+ndMenuRenderPass::ndMenuRenderPass(ndAssetEditor* const owner)
 	:ndRenderPassGui(*owner->GetRenderer())
 	,m_owner(owner)
 {

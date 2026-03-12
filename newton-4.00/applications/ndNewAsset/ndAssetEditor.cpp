@@ -21,21 +21,21 @@
 //#include "ndDemoCameraNodeFlyby.h"
 //#include "ndDebugDisplayRenderPass.h"
 
-ndDemoEntityManager::ButtonKey::ButtonKey (bool state)
+ndAssetEditor::ButtonKey::ButtonKey (bool state)
 	:m_state(state)
 	,m_memory0(false)
 	,m_memory1(false)
 {
 }
 
-ndInt32 ndDemoEntityManager::ButtonKey::UpdateTrigger (bool triggerValue)
+ndInt32 ndAssetEditor::ButtonKey::UpdateTrigger (bool triggerValue)
 {
 	m_memory0 = m_memory1;
 	m_memory1 = triggerValue;
 	return (!m_memory0 && m_memory1) ? 1 : 0;
 }
 
-ndInt32 ndDemoEntityManager::ButtonKey::UpdatePushButton (bool triggerValue)
+ndInt32 ndAssetEditor::ButtonKey::UpdatePushButton (bool triggerValue)
 {
 	if (UpdateTrigger (triggerValue)) 
 	{
@@ -46,7 +46,7 @@ ndInt32 ndDemoEntityManager::ButtonKey::UpdatePushButton (bool triggerValue)
 
 // ImGui - standalone example application for Glfw + OpenGL 2, using fixed pipeline
 // If you are new to ImGui, see examples/README.txt and documentation at the top of imgui.cpp.
-ndDemoEntityManager::ndDemoEntityManager()
+ndAssetEditor::ndAssetEditor()
 	:ndClassAlloc()
 	//,m_world(nullptr)
 	//,m_renderer(nullptr)
@@ -165,12 +165,15 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_synchronousParticlesUpdate = true;
 	//m_showStaticMeshCollidingFaces = true;
 
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
 	Cleanup();
 	//ndResetTimer();
 	ApplyOptions();
 }
 
-ndDemoEntityManager::~ndDemoEntityManager ()
+ndAssetEditor::~ndAssetEditor ()
 {
 	//Cleanup ();
 	//
@@ -181,44 +184,44 @@ ndDemoEntityManager::~ndDemoEntityManager ()
 	//}
 }
 
-//ndPhysicsWorld* ndDemoEntityManager::GetWorld() const
+//ndPhysicsWorld* ndAssetEditor::GetWorld() const
 //{
 //	return m_world;
 //}
 
-ndSharedPtr<ndRender>& ndDemoEntityManager::GetRenderer()
+ndSharedPtr<ndRender>& ndAssetEditor::GetRenderer()
 {
 	return m_renderer;
 }
 
-//ndDebugDisplayRenderPass* ndDemoEntityManager::GetDebugRenderPass()
+//ndDebugDisplayRenderPass* ndAssetEditor::GetDebugRenderPass()
 //{
 //	return (ndDebugDisplayRenderPass*)*m_debugDisplayRenderPass;
 //}
 //
-//void ndDemoEntityManager::Terminate()
+//void ndAssetEditor::Terminate()
 //{
 //	m_renderer->Terminate();
 //}
 
-//ndInt32 ndDemoEntityManager::GetWidth() const
+//ndInt32 ndAssetEditor::GetWidth() const
 //{
 //	return m_renderer->GetWidth();
 //}
 //
-//ndInt32 ndDemoEntityManager::GetHeight() const
+//ndInt32 ndAssetEditor::GetHeight() const
 //{
 //	return m_renderer->GetHeight();
 //}
 
-bool ndDemoEntityManager::GetKeyState(ndInt32 key) const
+bool ndAssetEditor::GetKeyState(ndInt32 key) const
 {
 	const ImGuiIO& io = ImGui::GetIO();
 	bool state = io.KeysDown[key];
 	return state;
 }
 
-bool ndDemoEntityManager::AnyKeyDown() const
+bool ndAssetEditor::AnyKeyDown() const
 {
 	const ImGuiIO& io = ImGui::GetIO();
 	for (ndInt32 i = 0; i < ImGuiKey_COUNT; ++i)
@@ -231,26 +234,26 @@ bool ndDemoEntityManager::AnyKeyDown() const
 	return false;
 }
 
-void ndDemoEntityManager::CharCallback(ndUnsigned32 ch)
+void ndAssetEditor::CharCallback(ndUnsigned32 ch)
 {
 	ImGuiIO& io = ImGui::GetIO();
 	io.AddInputCharacter((unsigned short)ch);
 }
 
-void ndDemoEntityManager::CursorposCallback(ndReal x, ndReal y)
+void ndAssetEditor::CursorposCallback(ndReal x, ndReal y)
 {
 	ImGuiIO& io = ImGui::GetIO();
 	io.MousePos = ImVec2(x, y);
 }
 
-void ndDemoEntityManager::MouseScrollCallback(ndReal, ndReal y)
+void ndAssetEditor::MouseScrollCallback(ndReal, ndReal y)
 {
 	//ndTrace(("%f %f\n", x, y));
 	ImGuiIO& io = ImGui::GetIO();
 	io.MouseWheel += y;
 }
 
-void ndDemoEntityManager::MouseButtonCallback(ndInt32 button, ndInt32 action)
+void ndAssetEditor::MouseButtonCallback(ndInt32 button, ndInt32 action)
 {
 	const ndInt32 KEY_PRESS = 1;
 	const ndInt32 KEY_RELEASE = 0;
@@ -269,7 +272,7 @@ void ndDemoEntityManager::MouseButtonCallback(ndInt32 button, ndInt32 action)
 	}
 }
 
-void ndDemoEntityManager::KeyCallback(ndInt32 key, ndInt32)
+void ndAssetEditor::KeyCallback(ndInt32 key, ndInt32)
 {
 	if (key == ImGuiKey_F1)
 	{
@@ -287,7 +290,7 @@ void ndDemoEntityManager::KeyCallback(ndInt32 key, ndInt32)
 	}
 }
 
-bool ndDemoEntityManager::IsShiftKeyDown () const
+bool ndAssetEditor::IsShiftKeyDown () const
 {
 	const ImGuiIO& io = ImGui::GetIO();
 	const ndInt32 KEY_LEFT_SHIFT = 340;
@@ -296,7 +299,7 @@ bool ndDemoEntityManager::IsShiftKeyDown () const
 	return state;
 }
 
-bool ndDemoEntityManager::IsControlKeyDown () const
+bool ndAssetEditor::IsControlKeyDown () const
 {
 	ndAssert(0);
 	return 0;
@@ -305,26 +308,26 @@ bool ndDemoEntityManager::IsControlKeyDown () const
 	//return state;
 }
 
-bool ndDemoEntityManager::GetCaptured() const
+bool ndAssetEditor::GetCaptured() const
 {
 	ImGuiIO& io = ImGui::GetIO();
 	return io.WantCaptureMouse;
 }
 
-bool ndDemoEntityManager::GetMouseKeyState (ndInt32 button) const
+bool ndAssetEditor::GetMouseKeyState (ndInt32 button) const
 {
 	ImGuiIO& io = ImGui::GetIO();
 	return io.MouseDown[button];
 }
 
-bool ndDemoEntityManager::JoystickDetected() const
+bool ndAssetEditor::JoystickDetected() const
 {
 	ndAssert(0);
 	return 0;
 	//return glfwJoystickPresent(0) ? true : false;
 }
 
-void ndDemoEntityManager::GetJoystickAxis(ndFixSizeArray<ndFloat32, 8>&)
+void ndAssetEditor::GetJoystickAxis(ndFixSizeArray<ndFloat32, 8>&)
 {
 	ndAssert(0);
 	//if (JoystickDetected())
@@ -375,7 +378,7 @@ void ndDemoEntityManager::GetJoystickAxis(ndFixSizeArray<ndFloat32, 8>&)
 	//}
 }
 
-void ndDemoEntityManager::GetJoystickButtons(ndFixSizeArray<char, 32>&)
+void ndAssetEditor::GetJoystickButtons(ndFixSizeArray<char, 32>&)
 {
 	ndAssert(0);
 	//if (JoystickDetected())
@@ -392,24 +395,24 @@ void ndDemoEntityManager::GetJoystickButtons(ndFixSizeArray<char, 32>&)
 	//}
 }
 
-void ndDemoEntityManager::RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& postUpdate)
+void ndAssetEditor::RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& postUpdate)
 {
 	m_onPostUpdate = postUpdate;
 }
 
-//void ndDemoEntityManager::AddEntity(const ndSharedPtr<ndRenderSceneNode>& entity)
+//void ndAssetEditor::AddEntity(const ndSharedPtr<ndRenderSceneNode>& entity)
 //{
 //	//ndScopeSpinLock lock(m_addDeleteLock);
 //	m_renderer->AddSceneNode(entity);
 //}
 //
-//void ndDemoEntityManager::RemoveEntity (const ndSharedPtr<ndRenderSceneNode>& entity)
+//void ndAssetEditor::RemoveEntity (const ndSharedPtr<ndRenderSceneNode>& entity)
 //{
 //	//ndScopeSpinLock lock(m_addDeleteLock);
 //	m_renderer->RemoveSceneNode(entity);
 //}
 
-void ndDemoEntityManager::Cleanup ()
+void ndAssetEditor::Cleanup ()
 {
 	// is we are run asynchronous we need make sure no update in on flight.
 	//if (m_world) 
@@ -433,7 +436,7 @@ void ndDemoEntityManager::Cleanup ()
 	//ApplyMenuOptions();
 }
 
-void ndDemoEntityManager::ApplyMenuOptions()
+void ndAssetEditor::ApplyMenuOptions()
 {
 	//m_world->Sync();
 	//m_world->SetSubSteps(m_solverSubSteps);
@@ -453,7 +456,7 @@ void ndDemoEntityManager::ApplyMenuOptions()
 	//m_solverMode = m_world->GetSelectedSolver();
 }
 
-void ndDemoEntityManager::ApplyOptions()
+void ndAssetEditor::ApplyOptions()
 {
 	//m_colorRenderPass->MakeActive(!m_hideVisualMeshes);
 	//m_shadowRenderPass->MakeActive(!m_hideVisualMeshes);
@@ -463,9 +466,8 @@ void ndDemoEntityManager::ApplyOptions()
 	//debugDisplay->SetDebugDisplayOptions();
 }
 
-void ndDemoEntityManager::ShowMainMenuBar()
+void ndAssetEditor::ShowMainMenuBar()
 {
-	ndMenuSelection menuSelection = m_none;
 	if (ImGui::BeginMainMenuBar())
 	{
 		if (ImGui::BeginMenu("File")) 
@@ -502,148 +504,54 @@ void ndDemoEntityManager::ShowMainMenuBar()
 			m_runScene = false;
 			ImGui::EndMenu();
 		}
-
-		//bool optionsOn = ImGui::BeginMenu("Options");
-		//if (optionsOn) 
-		//{
-		//	m_updateMenuOptions = true;
-		//	m_suspendPhysicsUpdate = true;
-		//
-		//	ImGui::Checkbox("auto sleep mode", &m_autoSleepMode);
-		//	ImGui::Checkbox("show UI", &m_showUI);
-		//	ImGui::Checkbox("show stats", &m_showStats);
-		//	ImGui::Checkbox("show helper legend", &m_helperLegend);
-		//	ImGui::Checkbox("synchronous physics update", &m_synchronousPhysicsUpdate);
-		//	ImGui::Checkbox("synchronous particle update", &m_synchronousParticlesUpdate);
-		//	ImGui::Separator();
-		//
-		//	ImGui::Text("solvers");
-		//	ndInt32 solverMode(m_solverMode);
-		//	ImGui::RadioButton("default", &solverMode, ndWorld::ndStandardSolver);
-		//	ImGui::RadioButton("sse", &solverMode, ndWorld::ndSimdSoaSolver);
-		//	ImGui::RadioButton("avx2", &solverMode, ndWorld::ndSimdAvx2Solver);
-		//
-		//	m_solverMode = ndWorld::ndSolverModes(solverMode);
-		//	ImGui::Separator();
-		//
-		//	ImGui::Text("solver sub steps");
-		//	ImGui::SliderInt("##solv", &m_solverSubSteps, 2, 8);
-		//	ImGui::Text("iterative solver passes");
-		//	ImGui::SliderInt("##intera", &m_solverPasses, 4, 32);
-		//	ImGui::Text("worker threads");
-		//	ImGui::SliderInt("##worker", &m_workerThreads, 1, ndThreadPool::GetMaxThreads());
-		//
-		//	ImGui::Separator();
-		//	ImGui::Checkbox("hide visual meshes", &m_hideVisualMeshes);
-		//	//ImGui::Checkbox("show mesh skeleton", &m_showMeshSkeleton);
-		//
-		//	ImGui::Separator();
-		//	//ImGui::RadioButton("show UI", &m_showUI);
-		//	ImGui::RadioButton("hide collision Mesh", &m_showCollisionMeshMode, 0);
-		//	ImGui::RadioButton("show solid collision", &m_showCollisionMeshMode, 1);
-		//	ImGui::RadioButton("show wire frame collision", &m_showCollisionMeshMode, 2);
-		//	ImGui::RadioButton("show hidden wire frame collision", &m_showCollisionMeshMode, 3);
-		//
-		//	ImGui::Separator();
-		//	ImGui::Checkbox("show aabb", &m_showAABB);
-		//	ImGui::Checkbox("show body frame", &m_showBodyFrame);
-		//	ImGui::Checkbox("show broad phase", &m_showScene);
-		//	ImGui::Checkbox("show contact points", &m_showContactPoints);
-		//	ImGui::Checkbox("show contact forces", &m_showNormalForces);
-		//	ImGui::Checkbox("show center of mass", &m_showCenterOfMass);
-		//	ImGui::Checkbox("show joints debug info", &m_showJointDebugInfo);
-		//	ImGui::Checkbox("show models debug info", &m_showModelsDebugInfo);
-		//	ImGui::Checkbox("show colliding faces", &m_showStaticMeshCollidingFaces);
-		//
-		//	//ImGui::Checkbox("show ray cast hit point", &m_showRaycastHit);
-		//	//ImGui::Checkbox("show concave edges", &m_showConcaveEdge);
-		//	
-		//
-		//	ApplyOptions();
-		//
-		//	ImGui::EndMenu();
-		//
-		//	SetParticleUpdateMode();
-		//}
-		//
-		//if (ImGui::BeginMenu("Help")) 
-		//{
-		//	m_suspendPhysicsUpdate = true;
-		//	ImGui::EndMenu();
-		//}
 	
 		ImGui::EndMainMenuBar();
-	
-		//if (!optionsOn && m_updateMenuOptions) 
-		//{
-		//	m_updateMenuOptions = false;
-		//	ApplyMenuOptions();
-		//}
 	}
 	
-	switch (menuSelection)
-	{
-		case m_new:
-		{
-			// menu new 
-			ndAssert(0);
-			//ndMatrix matrix (GetCamera()->GetCurrentMatrix());
-			//Cleanup();
-			//ApplyMenuOptions();
-			//ResetTimer();
-			//m_currentScene = -1;
-			//SetCameraMatrix(ndQuaternion(matrix), matrix.m_posit);
-			break;
-		}
-	
-		case m_none:
-		default:
-		{
-			// load a demo 
-			//if (m_currentScene != -1) 
-			//{
-			//	//m_selectedModel = nullptr;
-			//	//RegisterPostUpdate(nullptr);
-			//	LoadDemo(m_currentScene);
-			//	m_lastCurrentScene = m_currentScene;
-			//	m_currentScene = -1;
-			//}
-		}
-	}
+	//switch (menuSelection)
+	//{
+	//	case m_new:
+	//	{
+	//		// menu new 
+	//		ndAssert(0);
+	//		//ndMatrix matrix (GetCamera()->GetCurrentMatrix());
+	//		//Cleanup();
+	//		//ApplyMenuOptions();
+	//		//ResetTimer();
+	//		//m_currentScene = -1;
+	//		//SetCameraMatrix(ndQuaternion(matrix), matrix.m_posit);
+	//		break;
+	//	}
+	//
+	//	case m_none:
+	//	default:
+	//	{
+	//		// load a demo 
+	//		//if (m_currentScene != -1) 
+	//		//{
+	//		//	//m_selectedModel = nullptr;
+	//		//	//RegisterPostUpdate(nullptr);
+	//		//	LoadDemo(m_currentScene);
+	//		//	m_lastCurrentScene = m_currentScene;
+	//		//	m_currentScene = -1;
+	//		//}
+	//	}
+	//}
 }
 
-//void ndDemoEntityManager::LoadDemo(ndInt32 menuIndex)
-//{
-//	Cleanup();
-//	
-//	char newTitle[256];
-//
-//	// add a demo camera per demo
-//	m_demoHelper = ndSharedPtr<ndDemoHelper>(nullptr);
-//	m_demoUIpanel = ndSharedPtr<ndDemoUIpanel>(nullptr);
-//	m_defaultCamera = ndSharedPtr<ndRenderSceneNode>(new ndDemoCameraNodeFlyby(*m_renderer));
-//	m_renderer->SetCamera(m_defaultCamera);
-//
-//	if (menuIndex < MACHINE_LEARNING_BASE)
-//	{
-//		m_demosSelection[menuIndex].m_demoLauncher(this);
-//		snprintf(newTitle, sizeof(newTitle), "Newton Dynamics %d.%.2i demo: %s", D_NEWTON_ENGINE_MAJOR_VERSION, D_NEWTON_ENGINE_MINOR_VERSION, m_demosSelection[menuIndex].m_name);
-//	}
-//	else
-//	{
-//		menuIndex -= MACHINE_LEARNING_BASE;
-//		m_machineLearning[menuIndex].m_demoLauncher(this);
-//		snprintf(newTitle, sizeof(newTitle), "Newton Dynamics %d.%.2i demo: %s", D_NEWTON_ENGINE_MAJOR_VERSION, D_NEWTON_ENGINE_MINOR_VERSION, m_machineLearning[menuIndex].m_name);
-//	}
-//
-//	m_renderer->SetTitle(newTitle);
-//	ApplyMenuOptions();
-//	ndResetTimer();
-//	
-//	ndAssert (m_world->ValidateScene());
-//}
+void ndAssetEditor::RenderOutlier()
+{
+	static bool* p_open;
+	if (!ImGui::Begin("Oulier", p_open, ImGuiWindowFlags_NoDocking))
+	{
+		ImGui::End();
+		return;
+	}
 
-bool ndDemoEntityManager::GetMouseSpeed(ndFloat32& speedX, ndFloat32& speedY) const
+	ImGui::End();
+}
+
+bool ndAssetEditor::GetMouseSpeed(ndFloat32& speedX, ndFloat32& speedY) const
 {
 	ImVec2 speed(ImGui::GetMouseDragDelta(0, 0.0f));
 	speedX = speed.x;
@@ -651,7 +559,7 @@ bool ndDemoEntityManager::GetMouseSpeed(ndFloat32& speedX, ndFloat32& speedY) co
 	return true;
 }
 
-bool ndDemoEntityManager::GetMousePosition (ndFloat32& posX, ndFloat32& posY) const
+bool ndAssetEditor::GetMousePosition (ndFloat32& posX, ndFloat32& posY) const
 {
 	ImVec2 posit(ImGui::GetMousePos());
 	posX = ndClamp(posit.x, ndReal(-1.0e10f), ndReal(1.0e10f));
@@ -659,7 +567,7 @@ bool ndDemoEntityManager::GetMousePosition (ndFloat32& posX, ndFloat32& posY) co
 	return true;
 }
 
-void ndDemoEntityManager::ToggleProfiler()
+void ndAssetEditor::ToggleProfiler()
 {
 	#ifdef D_PROFILER
 		ndAssert(m_world);
@@ -669,7 +577,7 @@ void ndDemoEntityManager::ToggleProfiler()
 	#endif
 }
 
-ndInt32 ndDemoEntityManager::ParticleCount() const
+ndInt32 ndAssetEditor::ParticleCount() const
 {
 	ndInt32 count = 0;
 	//const ndBodyList& particles = m_world->GetParticleList();
@@ -681,7 +589,7 @@ ndInt32 ndDemoEntityManager::ParticleCount() const
 	return count;
 }
 
-void ndDemoEntityManager::SetParticleUpdateMode() const
+void ndAssetEditor::SetParticleUpdateMode() const
 {
 	//const ndBodyList& particles = m_world->GetParticleList();
 	//for (ndBodyList::ndNode* node = particles.GetFirst(); node; node = node->GetNext())
@@ -691,17 +599,17 @@ void ndDemoEntityManager::SetParticleUpdateMode() const
 	//}
 }
 
-void ndDemoEntityManager::SetDemoHelp(ndSharedPtr<ndDemoHelper>& helper)
+void ndAssetEditor::SetDemoHelp(ndSharedPtr<ndDemoHelper>& helper)
 {
 	//m_demoHelper = helper;
 }
 
-void ndDemoEntityManager::SetDemoUIpanel(ndSharedPtr<ndDemoUIpanel>& panel)
+void ndAssetEditor::SetDemoUIpanel(ndSharedPtr<ndDemoUIpanel>& panel)
 {
 	//m_demoUIpanel = panel;
 }
 
-void ndDemoEntityManager::SetNextActiveCamera()
+void ndAssetEditor::SetNextActiveCamera()
 {
 	ndAssert(0);
 	//if (!m_nextActiveCamera.Update(GetKeyState(ImGuiKey_C) ? true : false))
@@ -747,7 +655,7 @@ void ndDemoEntityManager::SetNextActiveCamera()
 	//}
 }
 
-void ndDemoEntityManager::CalculateFPS(ndFloat32 timestep)
+void ndAssetEditor::CalculateFPS(ndFloat32 timestep)
 {
 	m_framesCount ++;
 	m_timestepAcc += timestep;
@@ -769,14 +677,7 @@ void ndDemoEntityManager::CalculateFPS(ndFloat32 timestep)
 	}
 }
 
-//void ndDemoEntityManager::ImportPLYfile(const char* const)
-//{
-//	ndAssert(0);
-//	//m_showCollisionMeshMode = 2;
-//	//CreatePLYMesh (this, fileName, true);
-//}
-
-ndInt32 ndDemoEntityManager::Print (const ndVector&, const char *fmt, ... ) const
+ndInt32 ndAssetEditor::Print (const ndVector&, const char *fmt, ... ) const
 {
 	va_list argptr;
 	char string[1024];
@@ -788,7 +689,7 @@ ndInt32 ndDemoEntityManager::Print (const ndVector&, const char *fmt, ... ) cons
 	return 0;
 }
 
-void ndDemoEntityManager::SetCameraMatrix (const ndQuaternion& rotation, const ndVector& position)
+void ndAssetEditor::SetCameraMatrix (const ndQuaternion& rotation, const ndVector& position)
 {
 	ndAssert(0);
 	//ndRenderSceneNode* const cameraNode = *m_renderer->GetCamera();
@@ -796,7 +697,7 @@ void ndDemoEntityManager::SetCameraMatrix (const ndQuaternion& rotation, const n
 	//cameraNode->SetTransform(rotation, position);
 }
 
-void ndDemoEntityManager::UpdatePhysics(ndFloat32 timestep)
+void ndAssetEditor::UpdatePhysics(ndFloat32 timestep)
 {
 	ndAssert(0);
 	//// update the physics
@@ -806,14 +707,14 @@ void ndDemoEntityManager::UpdatePhysics(ndFloat32 timestep)
 	//}
 }
 
-void ndDemoEntityManager::SetAcceleratedUpdate()
+void ndAssetEditor::SetAcceleratedUpdate()
 {
 	ndAssert(0);
 	//m_world->AccelerateUpdates();
 }
 
-//void ndDemoEntityManager::OnSubStepPostUpdate(ndFloat32 timestep)
-void ndDemoEntityManager::OnSubStepPostUpdate(ndFloat32)
+//void ndAssetEditor::OnSubStepPostUpdate(ndFloat32 timestep)
+void ndAssetEditor::OnSubStepPostUpdate(ndFloat32)
 {
 	//if (m_colorRenderPass)
 	//{
@@ -821,7 +722,7 @@ void ndDemoEntityManager::OnSubStepPostUpdate(ndFloat32)
 	//}
 }
 
-void ndDemoEntityManager::RenderScene()
+void ndAssetEditor::RenderScene()
 {
 	//D_TRACKTIME();
 	//ndFloat32 timestep = ndGetElapsedSeconds();	
@@ -830,7 +731,7 @@ void ndDemoEntityManager::RenderScene()
 	m_renderer->Render();
 }
 
-void ndDemoEntityManager::TestImGui()
+void ndAssetEditor::TestImGui()
 {
 	// Main loop
 	bool show_demo_window = true;
@@ -884,7 +785,7 @@ void ndDemoEntityManager::TestImGui()
 	ImGui::Render();
 }
 
-void ndDemoEntityManager::Run()
+void ndAssetEditor::Run()
 {
 	// Main loop
 	ndFloatExceptions exception;
@@ -897,7 +798,8 @@ void ndDemoEntityManager::Run()
 	}
 }
 
-void ndDemoEntityManager::RenderLayout()
+void ndAssetEditor::RenderLayout()
 {
 	ShowMainMenuBar();
+	RenderOutlier();
 }

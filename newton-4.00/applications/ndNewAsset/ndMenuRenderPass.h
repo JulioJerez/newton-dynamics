@@ -11,17 +11,17 @@
 #ifndef __ND_MENU_RENDER_PASS_H__
 #define __ND_MENU_RENDER_PASS_H__
 
-class ndDemoEntityManager;
+class ndAssetEditor;
 
 class ndMenuRenderPass: public ndRenderPassGui
 {
 	public:
-	ndMenuRenderPass(ndDemoEntityManager* const owner);
+	ndMenuRenderPass(ndAssetEditor* const owner);
 	virtual ~ndMenuRenderPass();
 
 	void RenderScene() override;
 
-	ndDemoEntityManager* m_owner;
+	ndAssetEditor* m_owner;
 };
 
 #endif

@@ -48,7 +48,7 @@ int main(int, char**)
 {
 	ndSetAllocators setAllocators;
 
-	ndDemoEntityManager editor;
+	ndAssetEditor editor;
 	editor.Run();
 	return 0;
 }
