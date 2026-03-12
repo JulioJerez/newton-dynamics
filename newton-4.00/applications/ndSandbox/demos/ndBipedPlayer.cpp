@@ -298,6 +298,11 @@ namespace ndBipedPlayer
 		// add the root body
 		ndSharedPtr<ndBody> rootBody(CreateRigidBody(mesh, visualMesh, 1.0f, nullptr));
 		ndModelArticulation::ndNode* const modelRootNode = model->AddRootBody(rootBody);
+		modelRootNode->m_name = mesh->GetName();
+
+		//ndMeshLoader savedBody(ndSharedPtr<ndMesh>(new ndMesh(rootBody->GetAsBodyKinematic()->GetCollisionShape())));
+		//rootBody->Serialize(*savedBody.m_mesh);
+		//savedBody.SaveMesh(ndGetWorkingFileName("xxx1.nd").GetStr());
 
 		// add right leg
 		{
@@ -308,6 +313,7 @@ namespace ndBipedPlayer
 			const ndMatrix hipMatrix(hipMesh->CalculateGlobalMatrix());
 			ndSharedPtr<ndJointBilateralConstraint> hipJoint(new ndJointHinge(hipMatrix, hipBody->GetAsBodyKinematic(), rootBody->GetAsBodyKinematic()));
 			ndModelArticulation::ndNode* const hipLink = model->AddLimb(modelRootNode, hipBody, hipJoint);
+			hipLink->m_name = hipMesh->GetName();
 
 			// upper thigh
 			ndSharedPtr<ndMesh> upperThighMesh(hipMesh->GetChildren().GetFirst()->GetInfo());
@@ -316,6 +322,7 @@ namespace ndBipedPlayer
 			const ndMatrix upperThighMatrix(upperThighMesh->CalculateGlobalMatrix());
 			ndSharedPtr<ndJointBilateralConstraint> upperThighJoint(new ndJointHinge(upperThighMatrix, upperThighBody->GetAsBodyKinematic(), hipBody->GetAsBodyKinematic()));
 			ndModelArticulation::ndNode* const upperThighBodyLink = model->AddLimb(hipLink, upperThighBody, upperThighJoint);
+			upperThighBodyLink->m_name = upperThighMesh->GetName();
 
 			// lower thigh
 			ndSharedPtr<ndMesh> lowerThighMesh(upperThighMesh->GetChildren().GetFirst()->GetInfo());
@@ -324,6 +331,7 @@ namespace ndBipedPlayer
 			const ndMatrix lowerThighMatrix(lowerThighMesh->CalculateGlobalMatrix());
 			ndSharedPtr<ndJointBilateralConstraint> lowerThighJoint(new ndJointHinge(lowerThighMatrix, lowerThighBody->GetAsBodyKinematic(), upperThighBody->GetAsBodyKinematic()));
 			ndModelArticulation::ndNode* const lowerThighBodyLink = model->AddLimb(upperThighBodyLink, lowerThighBody, lowerThighJoint);
+			lowerThighBodyLink->m_name = lowerThighMesh->GetName();
 
 			// calf
 			ndSharedPtr<ndMesh> calfMesh(lowerThighMesh->GetChildren().GetFirst()->GetInfo());
@@ -332,6 +340,7 @@ namespace ndBipedPlayer
 			const ndMatrix calfMatrix(calfMesh->CalculateGlobalMatrix());
 			ndSharedPtr<ndJointBilateralConstraint> calfJoint(new ndJointHinge(calfMatrix, calfBody->GetAsBodyKinematic(), lowerThighBody->GetAsBodyKinematic()));
 			ndModelArticulation::ndNode* const calfBodyLink = model->AddLimb(lowerThighBodyLink, calfBody, calfJoint);
+			calfBodyLink->m_name = calfMesh->GetName();
 
 			// soft Contact
 			ndSharedPtr<ndMesh> softMesh(calfMesh->GetChildren().GetFirst()->GetInfo());
@@ -341,6 +350,7 @@ namespace ndBipedPlayer
 			ndSharedPtr<ndJointBilateralConstraint> softJoint(new ndJointSlider(softMatrix, softBody->GetAsBodyKinematic(), calfBody->GetAsBodyKinematic()));
 			((ndJointSlider*)*softJoint)->SetAsSpringDamper(0.001f, 1000.0f, 20.0f);
 			ndModelArticulation::ndNode* const softBodyLink = model->AddLimb(calfBodyLink, softBody, softJoint);
+			softBodyLink->m_name = softMesh->GetName();
 
 			// foot
 			ndSharedPtr<ndMesh> footMesh(softMesh->GetChildren().GetFirst()->GetInfo());
@@ -350,9 +360,8 @@ namespace ndBipedPlayer
 			ndSharedPtr<ndJointBilateralConstraint> footJoint(new ndJointDoubleHinge(footMatrix, footBody->GetAsBodyKinematic(), softBody->GetAsBodyKinematic()));
 			((ndJointDoubleHinge*)*footJoint)->SetAsSpringDamper0(0.01f, 0.0f, 10.0f);
 			((ndJointDoubleHinge*)*footJoint)->SetAsSpringDamper1(0.01f, 0.0f, 10.0f);
-			model->AddLimb(softBodyLink, footBody, footJoint);
-
-			ndMesh::SaveRigidBody(*footBody, ndGetWorkingFileName("xxx.nd").GetStr());
+			ndModelArticulation::ndNode* const footBodyLink = model->AddLimb(softBodyLink, footBody, footJoint);
+			footBodyLink->m_name = footMesh->GetName();
 		}
 
 		// add left leg
@@ -364,6 +373,7 @@ namespace ndBipedPlayer
 			const ndMatrix hipMatrix(hipMesh->CalculateGlobalMatrix());
 			ndSharedPtr<ndJointBilateralConstraint> hipJoint(new ndJointHinge(hipMatrix, hipBody->GetAsBodyKinematic(), rootBody->GetAsBodyKinematic()));
 			ndModelArticulation::ndNode* const hipLink = model->AddLimb(modelRootNode, hipBody, hipJoint);
+			hipLink->m_name = hipMesh->GetName();
 
 			// upper thigh
 			ndSharedPtr<ndMesh> upperThighMesh(hipMesh->GetChildren().GetFirst()->GetInfo());
@@ -372,7 +382,8 @@ namespace ndBipedPlayer
 			const ndMatrix upperThighMatrix(upperThighMesh->CalculateGlobalMatrix());
 			ndSharedPtr<ndJointBilateralConstraint> upperThighJoint(new ndJointHinge(upperThighMatrix, upperThighBody->GetAsBodyKinematic(), hipBody->GetAsBodyKinematic()));
 			ndModelArticulation::ndNode* const upperThighBodyLink = model->AddLimb(hipLink, upperThighBody, upperThighJoint);
-			
+			upperThighBodyLink->m_name = upperThighMesh->GetName();
+
 			// lower thigh
 			ndSharedPtr<ndMesh> lowerThighMesh(upperThighMesh->GetChildren().GetFirst()->GetInfo());
 			ndSharedPtr<ndRenderSceneNode> lowerThighEntity(upperThighEntity->GetChildren().GetFirst()->GetInfo());
@@ -380,6 +391,7 @@ namespace ndBipedPlayer
 			const ndMatrix lowerThighMatrix(lowerThighMesh->CalculateGlobalMatrix());
 			ndSharedPtr<ndJointBilateralConstraint> lowerThighJoint(new ndJointHinge(lowerThighMatrix, lowerThighBody->GetAsBodyKinematic(), upperThighBody->GetAsBodyKinematic()));
 			ndModelArticulation::ndNode* const lowerThighBodyLink = model->AddLimb(upperThighBodyLink, lowerThighBody, lowerThighJoint);
+			lowerThighBodyLink->m_name = lowerThighMesh->GetName();
 			
 			// calf
 			ndSharedPtr<ndMesh> calfMesh(lowerThighMesh->GetChildren().GetFirst()->GetInfo());
@@ -388,6 +400,7 @@ namespace ndBipedPlayer
 			const ndMatrix calfMatrix(calfMesh->CalculateGlobalMatrix());
 			ndSharedPtr<ndJointBilateralConstraint> calfJoint(new ndJointHinge(calfMatrix, calfBody->GetAsBodyKinematic(), lowerThighBody->GetAsBodyKinematic()));
 			ndModelArticulation::ndNode* const calfBodyLink = model->AddLimb(lowerThighBodyLink, calfBody, calfJoint);
+			calfBodyLink->m_name = calfMesh->GetName();
 			
 			// soft Contact
 			ndSharedPtr<ndMesh> softMesh(calfMesh->GetChildren().GetFirst()->GetInfo());
@@ -397,6 +410,7 @@ namespace ndBipedPlayer
 			ndSharedPtr<ndJointBilateralConstraint> softJoint(new ndJointSlider(softMatrix, softBody->GetAsBodyKinematic(), calfBody->GetAsBodyKinematic()));
 			((ndJointSlider*)*softJoint)->SetAsSpringDamper(0.001f, 1000.0f, 20.0f);
 			ndModelArticulation::ndNode* const softBodyLink = model->AddLimb(calfBodyLink, softBody, softJoint);
+			softBodyLink->m_name = softMesh->GetName();
 			
 			// foot
 			ndSharedPtr<ndMesh> footMesh(softMesh->GetChildren().GetFirst()->GetInfo());
@@ -406,9 +420,12 @@ namespace ndBipedPlayer
 			ndSharedPtr<ndJointBilateralConstraint> footJoint(new ndJointDoubleHinge(footMatrix, footBody->GetAsBodyKinematic(), softBody->GetAsBodyKinematic()));
 			((ndJointDoubleHinge*)*footJoint)->SetAsSpringDamper0(0.01f, 0.0f, 10.0f);
 			((ndJointDoubleHinge*)*footJoint)->SetAsSpringDamper1(0.01f, 0.0f, 10.0f);
-			model->AddLimb(softBodyLink, footBody, footJoint);
+			ndModelArticulation::ndNode* const footBodyLink = model->AddLimb(softBodyLink, footBody, footJoint);
+			footBodyLink->m_name = footMesh->GetName();
 		}
-		
+
+		model->Serialize(*mesh);
+
 		// fix to the world with a fix 6 dof joint
 		ndWorld* const world = scene->GetWorld();
 		const ndMatrix fixMatrix(rootBody->GetMatrix());
@@ -432,6 +449,8 @@ namespace ndBipedPlayer
 		model->SetNotifyCallback(controller);
 		ndPlaybackController* const playerController = (ndPlaybackController*)(*controller);
 		playerController->CreateArticulatedModel(scene, model, loader.m_mesh, visualMesh);
+
+		loader.SaveMesh(ndGetWorkingFileName("xxx.nd").GetStr());
 
 		//char nameExt[256];
 		//snprintf(nameExt, sizeof(nameExt) - 1, "%s.dnn", name);

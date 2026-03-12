@@ -108,7 +108,6 @@ class ndMeshBodyDynamic : public ndMeshBodyKinematic
 	ndVector m_intrinsicDamping;
 };
 
-
 class ndMesh : public ndClassAlloc
 {
 	public:
@@ -215,8 +214,6 @@ class ndMesh : public ndClassAlloc
 	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollisionChamferCylinder();
 	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollisionTree(bool optimize = true);
 	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollisionConvexApproximation(bool lowDetail = false);
-
-	D_COLLISION_API static void SaveRigidBody(const ndBody* const body, const char* const path);
 
 	protected:
 	ndMatrix CalculateLocalMatrix(ndVector& size) const;

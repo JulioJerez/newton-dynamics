@@ -21,6 +21,8 @@
 
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
+
+#include "ndMesh.h"
 #include "ndWorld.h"
 #include "ndBodyDynamic.h"
 
@@ -471,17 +473,17 @@ void ndBodyDynamic::InitSurrogateBody(ndBodyKinematic* const surrogate) const
 	dst->m_savedExternalTorque = m_savedExternalTorque;
 }
 
-void ndBodyDynamic::InitMeshBody(ndSharedPtr<ndMeshBody>& meshBody) const
+void ndBodyDynamic::Serialize(ndSharedPtr<ndMeshBody>& meshBody) const
 {
-	ndBodyKinematic::InitMeshBody(meshBody);
+	ndBodyKinematic::Serialize(meshBody);
 	ndMeshBodyDynamic* const dynamicMeshBody = (ndMeshBodyDynamic*)*meshBody;
 	dynamicMeshBody->m_intrinsicDamping = m_dampCoef;
 }
 
-ndSharedPtr<ndMeshBody> ndBodyDynamic::CreateMeshBody() const
+void ndBodyDynamic::Serialize(ndMesh* const node) const
 {
 	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBodyDynamic());
-	InitMeshBody(meshBody);
+	node->SetRigidBody(meshBody);
+	Serialize(meshBody);
 	meshBody->m_classConstructor = ndString(ClassName());
-	return meshBody;
 }

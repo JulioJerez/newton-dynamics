@@ -251,9 +251,9 @@ class ndShape: public ndContainersFreeListAlloc<ndShape>
 
 	D_COLLISION_API virtual void MassProperties();
 	D_COLLISION_API virtual ndShapeInfo GetShapeInfo() const;
+	D_COLLISION_API virtual ndSharedPtr<ndMeshCollisionShape> GetMeshShape() const;
 	D_COLLISION_API virtual ndMatrix CalculateInertiaAndCenterOfMass(const ndMatrix& alignMatrix, const ndVector& localScale, const ndMatrix& matrix) const;
 	D_COLLISION_API virtual ndFloat32 CalculateMassProperties(const ndMatrix& offset, ndVector& inertia, ndVector& crossInertia, ndVector& centerOfMass) const;
-	D_COLLISION_API virtual ndSharedPtr<ndMeshCollisionShape> GetMeshShape() const;
 
 	virtual ndFloat32 GetVolume() const = 0;
 	virtual ndFloat32 GetBoxMinRadius() const = 0;

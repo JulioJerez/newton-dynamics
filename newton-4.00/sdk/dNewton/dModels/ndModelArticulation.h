@@ -97,6 +97,8 @@ class ndModelArticulation: public ndModel
 	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassKinematics(const ndMatrix& localFrame) const;
 	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassDynamics(ndIkSolver& solver, const ndMatrix& localFrame, ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS>& extraJoints, ndFloat32 timestep) const;
 	
+	D_NEWTON_API virtual void Serialize(ndMesh* const rootNode) const;
+
 	protected:
 	D_NEWTON_API void ConvertToUrdf();
 	D_COLLISION_API virtual void OnAddWorld() override;

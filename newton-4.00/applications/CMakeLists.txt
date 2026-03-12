@@ -16,12 +16,14 @@ if (NEWTON_BUILD_TEST)
 	add_subdirectory(ndTest)
 endif()
 
-if (NEWTON_BUILD_PHYSIC_EDITOR)
-    add_subdirectory(ndAuthor)
-endif()
+if (NEWTON_BUILD_ASSET_EDITOR OR NEWTON_BUILD_SANDBOX_DEMOS)
+    if (NEWTON_BUILD_SANDBOX_DEMOS)
+	    add_subdirectory(ndSandbox)
+    endif()
 
-if (NEWTON_BUILD_SANDBOX_DEMOS)
-	add_subdirectory(ndSandbox)
+    if (NEWTON_BUILD_ASSET_EDITOR)
+        add_subdirectory(ndNewAsset)
+    endif()
 
     find_package(OpenGL REQUIRED)
     if(NOT_OpenGL_FOUND)
@@ -30,8 +32,8 @@ if (NEWTON_BUILD_SANDBOX_DEMOS)
         message("Found OpenGL library")
     endif(NOT_OpenGL_FOUND)
 	
-     # common libraries for unix systems
-     if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        # common libraries for unix systems
+        if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
         find_package(X11 REQUIRED)
         if (X11_FOUND)
@@ -59,11 +61,8 @@ if (NEWTON_BUILD_SANDBOX_DEMOS)
         else()
             message(FATAL_ERROR "Xinerama not found. Please install libXinerama-dev or similar package or Disable NEWTON_BUILD_SANDBOX_DEMOS")
         endif()
-
-     endif()
-        
+    endif()
 endif()
-
 
 
 	
