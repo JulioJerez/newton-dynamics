@@ -750,26 +750,24 @@ void ndAssetEditor::ShowMainMenuBar()
 
 			if (ImGui::MenuItem("Save", ""))
 			{
-				ndAssert(0);
-				//char fileName[2048];
-				//if (dGetLoadNdFileName(fileName, sizeof(fileName) - 1))
-				//{
-				//	m_currentPath = ndString(fileName);
-				//	ndRenderMeshLoader loader(*m_renderer);
-				//	loader.LoadMesh(m_currentPath);
-				//}
+				if (*m_model)
+				{
+					ndRenderMeshLoader loader(*m_renderer);
+					loader.m_mesh = m_model;
+					loader.SaveMesh(ndString(m_currentPath));
+				}
 			}
 
 			if (ImGui::MenuItem("Save As ...", ""))
 			{
-				ndAssert(0);
-				//char fileName[2048];
-				//if (dGetLoadNdFileName(fileName, sizeof(fileName) - 1))
-				//{
-				//	m_currentPath = ndString(fileName);
-				//	ndRenderMeshLoader loader(*m_renderer);
-				//	loader.LoadMesh(m_currentPath);
-				//}
+				char fileName[2048];
+				if (*m_model && dGetSaveNdFileName(fileName, sizeof(fileName) - 1))
+				{
+					m_currentPath = ndString(fileName);
+					ndRenderMeshLoader loader(*m_renderer);
+					loader.m_mesh = m_model;
+					loader.SaveMesh(ndString(m_currentPath));
+				}
 			}
 
 			if (ImGui::MenuItem("Exit", ""))

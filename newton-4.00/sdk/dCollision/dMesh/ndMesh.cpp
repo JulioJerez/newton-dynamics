@@ -130,6 +130,7 @@ ndMeshBody::ndMeshBody()
 	,m_omega(ndVector::m_zero)
 	,m_localCentreOfMass(ndVector::m_zero)
 {
+	m_classConstructor = ndString("ndBody");
 }
 
 void ndMeshBody::SerializeToXml(nd::TiXmlElement* const parent) const
@@ -156,6 +157,7 @@ ndMeshBodyKinematic::ndMeshBodyKinematic()
 	,m_maxAngleStep(ndFloat32 (45.0f))
 	,m_maxLinearStep(ndFloat32(2.0f))
 {
+	m_classConstructor = ndString("ndBodyKinematic");
 }
 
 void ndMeshBodyKinematic::SerializeToXml(nd::TiXmlElement* const parent) const
@@ -200,6 +202,7 @@ ndMeshBodyDynamic::ndMeshBodyDynamic()
 	:ndMeshBodyKinematic()
 	,m_intrinsicDamping(ndVector::m_zero)
 {
+	m_classConstructor = ndString("ndBodyDynamic");
 }
 
 void ndMeshBodyDynamic::SerializeToXml(nd::TiXmlElement* const parent) const

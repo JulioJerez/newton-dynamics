@@ -420,10 +420,13 @@ namespace ndBipedPlayer
 			footBodyLink->m_name = footMesh->GetName();
 		}
 
+#if 1
+		model->Serialize(*mesh);
+
 		ndMeshLoader savedBody(ndSharedPtr<ndMesh>(new ndMesh(rootBody->GetAsBodyKinematic()->GetCollisionShape())));
 		rootBody->Serialize(*savedBody.m_mesh);
 		savedBody.SaveMesh(ndGetWorkingFileName("xxx1.nd").GetStr());
-		model->Serialize(*mesh);
+#endif
 
 		// fix to the world with a fix 6 dof joint
 		ndWorld* const world = scene->GetWorld();
@@ -450,7 +453,7 @@ namespace ndBipedPlayer
 		playerController->CreateArticulatedModel(scene, model, loader.m_mesh, visualMesh);
 
 		loader.SaveMesh(ndGetWorkingFileName("xxx.nd").GetStr());
-
+#
 		//char nameExt[256];
 		//snprintf(nameExt, sizeof(nameExt) - 1, "%s.dnn", name);
 		//ndString fileName(ndGetWorkingFileName(nameExt));
