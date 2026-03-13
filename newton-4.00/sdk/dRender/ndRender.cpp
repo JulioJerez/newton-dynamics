@@ -115,6 +115,11 @@ ndInt32 ndRender::GetHeight() const
 	return m_context->GetHeight();
 }
 
+void ndRender::MaximizeWindow() const
+{
+	m_context->MaximizeWindow();
+}
+
 bool ndRender::ShouldFinish() const
 {
 	return m_context->ShouldFinish();
