@@ -264,7 +264,8 @@ void ImGui::ShowDemoWindow(bool* p_open)
 
     // Examples Apps (accessible from the "Examples" menu)
     static bool show_app_main_menu_bar = false;
-    static bool show_app_dockspace = false;
+    //static bool show_app_dockspace = false;
+    static bool show_app_dockspace = true;
     static bool show_app_documents = false;
     static bool show_app_console = false;
     static bool show_app_log = false;
@@ -7840,7 +7841,8 @@ static void ShowExampleAppCustomRendering(bool* p_open)
 //-----------------------------------------------------------------------------
 
 // Demonstrate using DockSpace() to create an explicit docking node within an existing window.
-// Note: You can use most Docking facilities without calling any API. You DO NOT need to call DockSpace() to use Docking!
+// Note: You can use most Docking facilities without calling any API.
+// You DO NOT need to call DockSpace() to use Docking!
 // - Drag from window title bar or their tab to dock/undock. Hold SHIFT to disable docking.
 // - Drag from window menu button (upper-left button) to undock an entire node (all windows).
 // - When io.ConfigDockingWithShift == true, you instead need to hold SHIFT to _enable_ docking/undocking.
@@ -7904,6 +7906,7 @@ void ShowExampleAppDockSpace(bool* p_open)
     // any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
     if (!opt_padding)
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
     ImGui::Begin("DockSpace Demo", p_open, window_flags);
     if (!opt_padding)
         ImGui::PopStyleVar();

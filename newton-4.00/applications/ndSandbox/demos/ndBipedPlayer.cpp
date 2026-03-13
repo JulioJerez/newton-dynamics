@@ -420,7 +420,7 @@ namespace ndBipedPlayer
 			footBodyLink->m_name = footMesh->GetName();
 		}
 
-#if 1
+#if 0
 		model->Serialize(*mesh);
 
 		ndMeshLoader savedBody(ndSharedPtr<ndMesh>(new ndMesh(rootBody->GetAsBodyKinematic()->GetCollisionShape())));
@@ -452,8 +452,8 @@ namespace ndBipedPlayer
 		ndPlaybackController* const playerController = (ndPlaybackController*)(*controller);
 		playerController->CreateArticulatedModel(scene, model, loader.m_mesh, visualMesh);
 
-		loader.SaveMesh(ndGetWorkingFileName("xxx.nd").GetStr());
-#
+		//loader.SaveMesh(ndGetWorkingFileName("xxx.nd").GetStr());
+
 		//char nameExt[256];
 		//snprintf(nameExt, sizeof(nameExt) - 1, "%s.dnn", name);
 		//ndString fileName(ndGetWorkingFileName(nameExt));
