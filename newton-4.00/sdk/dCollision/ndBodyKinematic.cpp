@@ -1075,8 +1075,8 @@ void ndBodyKinematic::Serialize(ndSharedPtr<ndMeshBody>& meshBody) const
 	ndMeshBodyKinematic* const kinematicMeshBody = (ndMeshBodyKinematic*)*meshBody;
 	kinematicMeshBody->m_invMass = m_invMass;
 	kinematicMeshBody->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
-	kinematicMeshBody->m_maxAngleStep = m_maxAngleStep;
 	kinematicMeshBody->m_maxLinearStep = m_maxLinearStep;
+	kinematicMeshBody->m_maxAngleStep = m_maxAngleStep * ndRadToDegree;
 	m_shapeInstance.Serialize(kinematicMeshBody);
 }
 
