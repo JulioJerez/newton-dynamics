@@ -33,18 +33,21 @@ class ndMeshCollisionShape : public ndClassAlloc
 	public:
 	D_COLLISION_API ndMeshCollisionShape();
 	D_COLLISION_API virtual ~ndMeshCollisionShape();
-	D_COLLISION_API virtual void Save(nd::TiXmlElement* const parent) const = 0;
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const = 0;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) = 0;
 };
 
 class ndMeshCollisionShapeNull : public ndMeshCollisionShape
 {
-	D_COLLISION_API virtual void Save(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 };
 
 class ndMeshCollisionShapeBox : public ndMeshCollisionShape
 {
 	public:
-	D_COLLISION_API virtual void Save(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 
 	ndFloat32 m_x;
 	ndFloat32 m_y;
@@ -54,7 +57,8 @@ class ndMeshCollisionShapeBox : public ndMeshCollisionShape
 class ndMeshCollisionShapeCapsule : public ndMeshCollisionShape
 {
 	public:
-	D_COLLISION_API virtual void Save(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 
 	ndFloat32 m_height;
 	ndFloat32 m_radius0;
@@ -66,7 +70,8 @@ class ndMeshBody : public ndClassAlloc
 	public:
 	D_COLLISION_API ndMeshBody();
 	D_COLLISION_API virtual ~ndMeshBody();
-	D_COLLISION_API virtual void Save(nd::TiXmlElement* const parent) const;
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
 
 	ndMatrix m_matrix;
 	ndVector m_veloc;
@@ -82,7 +87,8 @@ class ndMeshBodyKinematic : public ndMeshBody
 	{
 		public:
 		D_COLLISION_API ndMeshShapeInstance();
-		D_COLLISION_API void Save(nd::TiXmlElement* const parent) const;
+		D_COLLISION_API void SerializeToXml(nd::TiXmlElement* const parent) const;
+		D_COLLISION_API void DeserializeFromXml(const nd::TiXmlElement* const parent);
 
 		ndMatrix m_localMatrix;
 		ndMatrix m_alignmentMatrix;
@@ -91,7 +97,8 @@ class ndMeshBodyKinematic : public ndMeshBody
 	};
 
 	D_COLLISION_API ndMeshBodyKinematic();
-	D_COLLISION_API virtual void Save(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 
 	ndMeshShapeInstance m_shapeInstance;
 	ndVector m_invMass;
@@ -104,7 +111,8 @@ class ndMeshBodyDynamic : public ndMeshBodyKinematic
 {
 	public:
 	D_COLLISION_API ndMeshBodyDynamic();
-	D_COLLISION_API virtual void Save(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 	ndVector m_intrinsicDamping;
 };
 

@@ -37,12 +37,17 @@ ndMeshCollisionShape::~ndMeshCollisionShape()
 {
 }
 
-void ndMeshCollisionShapeNull::Save(nd::TiXmlElement* const parent) const
+void ndMeshCollisionShapeNull::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	xmlSaveParam(parent, "constructor", ndShapeNull::StaticClassName());
 }
 
-void ndMeshCollisionShapeBox::Save(nd::TiXmlElement* const parent) const
+void ndMeshCollisionShapeNull::DeserializeFromXml(const nd::TiXmlElement* const)
+{
+	// do nothing
+}
+
+void ndMeshCollisionShapeBox::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	xmlSaveParam(parent, "constructor", ndShapeBox::StaticClassName());
 	xmlSaveParam(parent, "x", m_x);
@@ -50,12 +55,26 @@ void ndMeshCollisionShapeBox::Save(nd::TiXmlElement* const parent) const
 	xmlSaveParam(parent, "z", m_z);
 }
 
-void ndMeshCollisionShapeCapsule::Save(nd::TiXmlElement* const parent) const
+void ndMeshCollisionShapeBox::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	m_x = xmlGetFloat(parent, "x");
+	m_y = xmlGetFloat(parent, "y");
+	m_z = xmlGetFloat(parent, "z");
+}
+
+void ndMeshCollisionShapeCapsule::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	xmlSaveParam(parent, "constructor", ndShapeCapsule::StaticClassName());
 	xmlSaveParam(parent, "radio0", m_radius0);
 	xmlSaveParam(parent, "radio1", m_radius1);
 	xmlSaveParam(parent, "heigh", m_height);
+}
+
+void ndMeshCollisionShapeCapsule::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	m_radius0 = xmlGetFloat(parent, "radio0");
+	m_radius1 = xmlGetFloat(parent, "radio0");
+	m_height = xmlGetFloat(parent, "heigh");
 }
 
 ndMeshBodyKinematic::ndMeshShapeInstance::ndMeshShapeInstance()
@@ -66,7 +85,7 @@ ndMeshBodyKinematic::ndMeshShapeInstance::ndMeshShapeInstance()
 {
 }
 
-void ndMeshBodyKinematic::ndMeshShapeInstance::Save(nd::TiXmlElement* const parent) const
+void ndMeshBodyKinematic::ndMeshShapeInstance::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	xmlSaveParam(parent, "localMatrix", m_localMatrix);
 	xmlSaveParam(parent, "alignmentMatrix", m_alignmentMatrix);
@@ -75,7 +94,34 @@ void ndMeshBodyKinematic::ndMeshShapeInstance::Save(nd::TiXmlElement* const pare
 	nd::TiXmlElement* const shapeNode = new nd::TiXmlElement("shape");
 	parent->LinkEndChild(shapeNode);
 	ndAssert(*m_shape);
-	m_shape->Save(shapeNode);
+	m_shape->SerializeToXml(shapeNode);
+}
+
+void ndMeshBodyKinematic::ndMeshShapeInstance::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	m_localMatrix = xmlGetMatrix(parent, "localMatrix");
+	m_alignmentMatrix = xmlGetMatrix(parent, "alignmentMatrix");
+	m_scale = xmlGetVector3(parent, "scale");
+
+	const nd::TiXmlElement* const xmlShape = (nd::TiXmlElement*)parent->FirstChild("shape");
+	ndAssert(xmlShape);
+	const char* const constructor = xmlGetString(xmlShape, "constructor");
+	if (strcmp(constructor, "ndShapeBox") == 0)
+	{
+		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeBox());
+		m_shape->DeserializeFromXml(xmlShape);
+	}
+	else if (strcmp(constructor, "ndShapeCapsule") == 0)
+	{
+		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeCapsule());
+		m_shape->DeserializeFromXml(xmlShape);
+	}
+	else
+	{
+		ndAssert(0);
+		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeNull());
+		m_shape->DeserializeFromXml(xmlShape);
+	}
 }
 
 ndMeshBody::ndMeshBody()
@@ -86,12 +132,20 @@ ndMeshBody::ndMeshBody()
 {
 }
 
-void ndMeshBody::Save(nd::TiXmlElement* const parent) const
+void ndMeshBody::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	xmlSaveParam(parent, "matrix", m_matrix);
 	xmlSaveParam(parent, "veloc", m_veloc);
 	xmlSaveParam(parent, "omega", m_omega);
 	xmlSaveParam(parent, "com", m_localCentreOfMass);
+}
+
+void ndMeshBody::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	m_matrix = xmlGetMatrix(parent, "matrix");
+	m_veloc = xmlGetVector3(parent, "veloc");
+	m_omega = xmlGetVector3(parent, "omega");
+	m_localCentreOfMass = xmlGetVector3(parent, "com");
 }
 
 ndMeshBodyKinematic::ndMeshBodyKinematic()
@@ -104,9 +158,9 @@ ndMeshBodyKinematic::ndMeshBodyKinematic()
 {
 }
 
-void ndMeshBodyKinematic::Save(nd::TiXmlElement* const parent) const
+void ndMeshBodyKinematic::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	ndMeshBody::Save(parent);
+	ndMeshBody::SerializeToXml(parent);
 
 	ndVector euler;
 	ndVector axisOfInertia(m_inertiaPrincipalAxis.CalcPitchYawRoll(euler));
@@ -120,7 +174,26 @@ void ndMeshBodyKinematic::Save(nd::TiXmlElement* const parent) const
 
 	nd::TiXmlElement* const collisionInstance = new nd::TiXmlElement("collisionInstance");
 	parent->LinkEndChild(collisionInstance);
-	m_shapeInstance.Save(collisionInstance);
+	m_shapeInstance.SerializeToXml(collisionInstance);
+}
+
+void ndMeshBodyKinematic::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndMeshBody::DeserializeFromXml(parent);
+
+	m_invMass = xmlGetVector3(parent, "inverseDiagonalInertia");
+	m_invMass.m_w = xmlGetFloat(parent, "inverseMass");
+
+	ndVector euler(xmlGetVector3(parent, "principalAxis"));
+	euler.Scale(ndDegreeToRad);
+	m_inertiaPrincipalAxis = ndPitchMatrix(euler.m_x) * ndYawMatrix(euler.m_y) * ndRollMatrix(euler.m_z);
+
+	m_maxAngleStep = xmlGetFloat(parent, "maxAngleStep");
+	m_maxLinearStep = xmlGetFloat(parent, "maxLinearStep");
+
+	const nd::TiXmlElement* const xmlShape = (nd::TiXmlElement*)parent->FirstChild("collisionInstance");
+	ndAssert(xmlShape);
+	m_shapeInstance.DeserializeFromXml(xmlShape);
 }
 
 ndMeshBodyDynamic::ndMeshBodyDynamic()
@@ -129,11 +202,20 @@ ndMeshBodyDynamic::ndMeshBodyDynamic()
 {
 }
 
-void ndMeshBodyDynamic::Save(nd::TiXmlElement* const parent) const
+void ndMeshBodyDynamic::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	ndMeshBodyKinematic::Save(parent);
+	ndMeshBodyKinematic::SerializeToXml(parent);
 
-	xmlSaveParam(parent, "intrinsicDamping", m_intrinsicDamping);
+	xmlSaveParam(parent, "intrinsicLinearDamping", m_intrinsicDamping.m_w);
+	xmlSaveParam(parent, "intrinsicAngularDamping", m_intrinsicDamping);
+}
+
+void ndMeshBodyDynamic::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndMeshBodyKinematic::DeserializeFromXml(parent);
+
+	m_intrinsicDamping = xmlGetVector3(parent, "intrinsicAngularDamping");
+	m_intrinsicDamping.m_w = xmlGetFloat(parent, "intrinsicLinearDamping");
 }
 
 ndMeshBody::~ndMeshBody()

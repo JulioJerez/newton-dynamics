@@ -300,10 +300,6 @@ namespace ndBipedPlayer
 		ndModelArticulation::ndNode* const modelRootNode = model->AddRootBody(rootBody);
 		modelRootNode->m_name = mesh->GetName();
 
-		//ndMeshLoader savedBody(ndSharedPtr<ndMesh>(new ndMesh(rootBody->GetAsBodyKinematic()->GetCollisionShape())));
-		//rootBody->Serialize(*savedBody.m_mesh);
-		//savedBody.SaveMesh(ndGetWorkingFileName("xxx1.nd").GetStr());
-
 		// add right leg
 		{
 			// hip
@@ -424,6 +420,9 @@ namespace ndBipedPlayer
 			footBodyLink->m_name = footMesh->GetName();
 		}
 
+		ndMeshLoader savedBody(ndSharedPtr<ndMesh>(new ndMesh(rootBody->GetAsBodyKinematic()->GetCollisionShape())));
+		rootBody->Serialize(*savedBody.m_mesh);
+		savedBody.SaveMesh(ndGetWorkingFileName("xxx1.nd").GetStr());
 		model->Serialize(*mesh);
 
 		// fix to the world with a fix 6 dof joint
