@@ -217,12 +217,15 @@ class ndAssetEditor : public ndClassAlloc
 	void ApplyMenuOptions();
 	void OnSubStepPostUpdate(ndFloat32 timestep);
 
-	void BeginDockSpace();
 	void EndDockSpace();
+	void BeginDockSpace();
 
-	void ShowOutlier();
+	void ShowOutlierPanel();
 	void ShowOutlierToolBar();
 	void ShowOutlierExplorer(ndMesh* const root);
+
+	void ShowPropertiesPanel();
+	void ShowPropertiesMeshInfo();
 		
 	//ndPhysicsWorld* m_world;
 	ndSharedPtr<ndMesh> m_model;

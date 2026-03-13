@@ -167,11 +167,12 @@ ndAssetEditor::ndAssetEditor()
 	//m_showStaticMeshCollidingFaces = true;
 
 	ImGuiIO& io = ImGui::GetIO();
-	//io.ConfigFlags |= ImGuiWindowFlags_MenuBar;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 	Cleanup();
 	ApplyOptions();
+
+	m_renderer->MaximizeWindow();
 }
 
 ndAssetEditor::~ndAssetEditor ()
@@ -776,9 +777,14 @@ void ndAssetEditor::EndDockSpace()
 
 void ndAssetEditor::RenderLayout()
 {
+	//m_renderer->MaximizeWindow();
+
 	BeginDockSpace();
+
 	ShowMainMenuBar();
-	ShowOutlier();
+	ShowOutlierPanel();
+	ShowPropertiesPanel();
+
 	EndDockSpace();
 }
 

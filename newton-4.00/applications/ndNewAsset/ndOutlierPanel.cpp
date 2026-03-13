@@ -12,22 +12,6 @@
 #include "ndNewAssetStdafx.h"
 #include "ndAssetEditor.h"
 
-void ndAssetEditor::ShowOutlier()
-{
-	bool* open = false;
-
-	ndInt32 flags = 0;
-	ImGui::Begin("Oulier", open, flags);
-	ImGui::PushItemWidth(ImGui::GetFontSize() * 12);
-
-	ShowOutlierToolBar();
-	if (*m_model)
-	{
-		ShowOutlierExplorer(*m_model);
-	}
-
-	ImGui::End();
-}
 
 void ndAssetEditor::ShowOutlierToolBar()
 {
@@ -185,4 +169,23 @@ void ndAssetEditor::ShowOutlierExplorer(ndMesh* const root)
 		}
 		ImGui::TreePop();
 	}
+}
+
+void ndAssetEditor::ShowOutlierPanel()
+{
+	bool* open = false;
+	ndInt32 flags = 0;
+	ImGui::Begin("Oulier Panel", open, flags);
+	//ImGui::Begin("Oulier Panel", open);
+	//ImGui::PushItemWidth(ImGui::GetFontSize() * 12);
+	//ImGui::SetNextItemWidth(ImGui::GetFontSize() * 12);
+
+	ShowOutlierToolBar();
+	if (*m_model)
+	{
+		ShowOutlierExplorer(*m_model);
+	}
+
+	//ImGui::PopItemWidth();
+	ImGui::End();
 }
