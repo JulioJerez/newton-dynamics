@@ -236,7 +236,6 @@ void ndRenderContext::InitImGui(const char* const fontPathName)
 #ifdef _MSC_VER 
 	io.ImeWindowHandle = glfwGetWin32Window(m_mainFrame);
 #endif
-
 	SetInputCallbacks();
 }
 
@@ -246,6 +245,7 @@ void ndRenderContext::SetInputCallbacks()
 	glfwSetCharCallback(m_mainFrame, CharCallback);
 	glfwSetScrollCallback(m_mainFrame, MouseScrollCallback);
 	glfwSetCursorPosCallback(m_mainFrame, CursorposCallback);
+	glfwSetWindowMaximizeCallback(m_mainFrame, WindowMaximize);
 	glfwSetMouseButtonCallback(m_mainFrame, MouseButtonCallback);
 }
 
@@ -254,6 +254,11 @@ void ndRenderContext::ErrorCallback(ndInt32 error, const char* description)
 	ndTrace(("Error %d: %s\n", error, description));
 	fprintf(stderr, "Error %d: %s\n", error, description);
 	ndAssert(0);
+}
+
+//void ndRenderContext::WindowMaximize(GLFWwindow* window, int maximized)
+void ndRenderContext::WindowMaximize(GLFWwindow*, int)
+{
 }
 
 void ndRenderContext::ResizeWindowsCallback(GLFWwindow* window, int width, int height)
@@ -314,6 +319,11 @@ ndInt32 ndRenderContext::GetHeight() const
 	ndInt32 w, h;
 	glfwGetWindowSize(m_mainFrame, &w, &h);
 	return h;
+}
+
+void ndRenderContext::MaximizeWindow() const
+{
+	glfwMaximizeWindow(m_mainFrame);
 }
 
 bool ndRenderContext::PollEvents() const

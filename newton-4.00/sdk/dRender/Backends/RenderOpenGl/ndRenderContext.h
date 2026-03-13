@@ -66,6 +66,7 @@ class ndRenderContext: public ndClassAlloc
 
 	ndInt32 GetWidth() const;
 	ndInt32 GetHeight() const;
+	void MaximizeWindow() const;
 	void SetTitle(const char* const title);
 	void InitImGui(const char* const fontPathName);
 
@@ -93,6 +94,7 @@ class ndRenderContext: public ndClassAlloc
 	static void MouseScrollCallback(GLFWwindow* const window, double x, double y);
 	static void MouseButtonCallback(GLFWwindow* const window, ndInt32 button, ndInt32 action, ndInt32 mods);
 	static void KeyCallback(GLFWwindow* const window, ndInt32 key, ndInt32, ndInt32 action, ndInt32 mods);
+	static void WindowMaximize(GLFWwindow* window, int maximized);
 
 #if (defined(_DEBUG) && defined(WIN32))
 	static void APIENTRY OpenMessageCallback(
