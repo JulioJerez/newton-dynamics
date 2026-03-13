@@ -940,24 +940,8 @@ void ndMesh::SetRigidBody(ndSharedPtr<ndMeshBody>& rigidBody)
 	m_rigidBody = rigidBody;
 }
 
-//void ndMesh::SaveRigidBody(const ndBody* const body, const char* const path)
-//{
-//	ndMeshLoader loader;
-//	const ndBodyKinematic* const kinematic = ((ndBody*)body)->GetAsBodyKinematic();
-//	if (kinematic)
-//	{
-//		const ndShapeInstance& shape = kinematic->GetCollisionShape();
-//		loader.m_mesh = ndSharedPtr<ndMesh>(new ndMesh(shape));
-//	}
-//	else
-//	{
-//		loader.m_mesh = ndSharedPtr<ndMesh>(new ndMesh);
-//	}
-//
-//	ndMesh* const rootNode = *loader.m_mesh;
-//	rootNode->SetName("rigidBody");
-//
-//	const ndBodyNotify* const notify = *((ndBody*)body)->GetNotifyCallback();
-//	notify->OnSave(rootNode);
-//	loader.SaveMesh(ndString(path));
-//}
+ndSharedPtr<ndMeshBody> ndMesh::GetRigidBody() const
+{
+	return m_rigidBody;
+}
+

@@ -201,6 +201,7 @@ class ndMesh : public ndClassAlloc
 	D_COLLISION_API void ApplyTransform(const ndMatrix& transform);
 	D_COLLISION_API ndMatrix CalculateGlobalMatrix(ndMesh* const parent = nullptr) const;
 
+	D_COLLISION_API ndSharedPtr<ndMeshBody> GetRigidBody() const;
 	D_COLLISION_API void SetRigidBody(ndSharedPtr<ndMeshBody>& rigidBody);
 
 	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollision();

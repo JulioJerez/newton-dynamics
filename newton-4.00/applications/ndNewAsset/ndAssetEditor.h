@@ -259,5 +259,4 @@ class ndAssetEditor : public ndClassAlloc
 	friend class ndDebugDisplayRenderPass;
 };
 
-
 #endif

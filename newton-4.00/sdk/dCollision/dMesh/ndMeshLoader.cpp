@@ -106,6 +106,24 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			mesh->SetMesh(geometry);
 		}
 
+		const nd::TiXmlElement* const xmlRigidBody = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("rigidbody");
+		if (xmlRigidBody)
+		{
+			const char* const constructor = xmlGetString(xmlRigidBody, "constructor");
+			if (strcmp(constructor, "ndBodyDynamic") == 0)
+			{
+				ndSharedPtr<ndMeshBody> rigidBody(new ndMeshBodyDynamic());
+				mesh->SetRigidBody(rigidBody);
+			}
+			else
+			{
+				ndAssert(strcmp(constructor, "ndBodyKinematic") != 0);
+				ndSharedPtr<ndMeshBody> rigidBody(new ndMeshBodyKinematic());
+				ndAssert(0);
+				mesh->SetRigidBody(rigidBody);
+			}
+		}
+
 		for (const nd::TiXmlNode* node = entry.m_xmlNode->FirstChild("ndMesh"); node; node = node->NextSibling("ndMesh"))
 		{
 			const nd::TiXmlElement* const linkNode = (nd::TiXmlElement*)node;
