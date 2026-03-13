@@ -195,7 +195,6 @@ class ndAssetEditor : public ndClassAlloc
 
 	void TestImGui();
 	void RenderLayout();
-	void RenderOutlier();
 	void SetAcceleratedUpdate();
 	void SetDemoHelp(ndSharedPtr<ndDemoHelper>& helper);
 	void SetDemoUIpanel(ndSharedPtr<ndDemoUIpanel>& panel);
@@ -206,22 +205,24 @@ class ndAssetEditor : public ndClassAlloc
 
 	private:
 	void Cleanup();
-
 	void RenderScene();
 	ndInt32 ParticleCount() const;
 	void SetParticleUpdateMode() const;
-
 	void CalculateFPS(ndFloat32 timestep);
 	void UpdatePhysics(ndFloat32 timestep);
 	
 	void ShowMainMenuBar();
 	void ToggleProfiler();
 	void ApplyOptions();
-
 	void ApplyMenuOptions();
 	void OnSubStepPostUpdate(ndFloat32 timestep);
+
+	void ShowOutlier();
+	void ShowOutlierToolBar();
+	void ShowOutlierExplorer(ndMesh* const root);
 	
 	//ndPhysicsWorld* m_world;
+	ndSharedPtr<ndMesh> m_model;
 	ndSharedPtr<ndRender> m_renderer;
 	ndSharedPtr<ndRenderPass> m_menuRenderPass;
 	//ndSharedPtr<ndRenderPass> m_colorRenderPass;
@@ -230,15 +231,13 @@ class ndAssetEditor : public ndClassAlloc
 	//ndSharedPtr<ndRenderPass> m_transparentRenderPass;
 	//ndSharedPtr<ndRenderPass> m_debugDisplayRenderPass;
 	//ndSharedPtr<ndRenderTexture> m_environmentTexture;
-
 	//ndSharedPtr<ndDemoHelper> m_demoHelper;
 	//ndSharedPtr<ndDemoUIpanel> m_demoUIpanel;
 	//ndSharedPtr<ndRenderSceneNode> m_defaultCamera;
 
 	ndSharedPtr<OnPostUpdate> m_onPostUpdate;
+	ndString m_currentPath;
 
-	//ndInt32 m_currentScene;
-	//ndInt32 m_lastCurrentScene;
 	ndInt32 m_framesCount;
 	ndInt32 m_physicsFramesCount;
 	ndInt32 m_currentPlugin;
@@ -253,29 +252,7 @@ class ndAssetEditor : public ndClassAlloc
 	ndFloat32 m_currentListenerTimestep;
 	
 	bool m_runScene;
-	//bool m_showUI;
-	//bool m_showAABB;
-	//bool m_showStats;
-	//bool m_helperLegend;
-	//bool m_autoSleepMode;
-	//bool m_showScene;
-	//bool m_hideVisualMeshes;
-	//bool m_showNormalForces;
-	//bool m_showCenterOfMass;
-	//bool m_showBodyFrame;
-	//bool m_showMeshSkeleton;
-	//bool m_updateMenuOptions;
-	//bool m_showContactPoints;
-	//bool m_showJointDebugInfo;
-	//bool m_showModelsDebugInfo;
-	//bool m_suspendPhysicsUpdate;
-	//bool m_synchronousPhysicsUpdate;
-	//bool m_synchronousParticlesUpdate;
-	//bool m_showStaticMeshCollidingFaces;
-	//bool m_showRaycastHit;
-	//bool m_profilerMode;
 	ndKeyTrigger m_nextActiveCamera;
-	
 	ndWorld::ndSolverModes m_solverMode;
 	
 	friend class ndPhysicsWorld;
