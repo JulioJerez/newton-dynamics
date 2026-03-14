@@ -61,14 +61,9 @@
 #include <ndModelInc.h>
 #include <ndRenderInc.h>
 
-ndString ndGetWorkingFileName(const char* const name);
-//void ndGetWorkingFileName (const char* const name, char* const outPathName);
+#define EDITOR_GRAVITY  ndFloat32(-10.0f)
 
-// endian conversion
-ndUnsigned32 SWAP_INT32(ndUnsigned32 x);
-ndUnsigned16 SWAP_INT16(ndUnsigned16 x);
-ndUnsigned16 ndIndian16(ndUnsigned16 x);
-ndUnsigned32 ndIndian32(ndUnsigned32 x);
+ndString ndGetWorkingFileName(const char* const name);
 
 #endif 
 

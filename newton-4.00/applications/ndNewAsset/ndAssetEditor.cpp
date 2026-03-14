@@ -12,13 +12,10 @@
 #include "ndNewAssetStdafx.h"
 #include "ndAssetEditor.h"
 #include "ndFileBrowser.h"
+#include "ndEditorCameraFlyby.h"
 //#include "ndPhysicsWorld.h"
 //#include "ndPhysicsUtils.h"
-//#include "ndTestDeepBrain.h"
-//#include "ndDemoCameraNode.h"
 #include "ndMenuRenderPass.h"
-//#include "ndHighResolutionTimer.h"
-//#include "ndDemoCameraNodeFlyby.h"
 //#include "ndDebugDisplayRenderPass.h"
 
 ndAssetEditor::ButtonKey::ButtonKey (bool state)
@@ -62,41 +59,13 @@ ndAssetEditor::ndAssetEditor()
 	//,m_currentScene(DEFAULT_SCENE)
 	//,m_lastCurrentScene(DEFAULT_SCENE)
 	,m_currentPath("")
-	,m_framesCount(0)
-	,m_physicsFramesCount(0)
 	,m_currentPlugin(0)
 	,m_solverPasses(6)
 	,m_solverSubSteps(2)
 	,m_workerThreads(4)
 	,m_debugDisplayMode(0)
 	,m_showCollisionMeshMode(0)
-	,m_fps(0.0f)
-	,m_timestepAcc(0.0f)
-	,m_currentListenerTimestep(0.0f)
 	,m_runScene(false)
-	//,m_showUI(true)
-	//,m_showAABB(false)
-	//,m_showStats(true)
-	//,m_helperLegend(false)
-	//,m_autoSleepMode(true)
-	//,m_showScene(false)
-	//,m_showConcaveEdge(false)
-	//,m_hideVisualMeshes(false)
-	//,m_showNormalForces(false)
-	//,m_showCenterOfMass(false)
-	//,m_showBodyFrame(false)
-	//,m_showMeshSkeleton(false)
-	//,m_updateMenuOptions(true)
-	//,m_showContactPoints(false)
-	//,m_showJointDebugInfo(false)
-	//,m_showModelsDebugInfo(false)
-	//,m_suspendPhysicsUpdate(false)
-	//,m_synchronousPhysicsUpdate(false)
-	//,m_synchronousParticlesUpdate(false)
-	//,m_showStaticMeshCollidingFaces(false)
-	//,m_showRaycastHit(false)
-	//,m_profilerMode(false)
-	,m_nextActiveCamera()
 	,m_solverMode(ndWorld::ndSimdSoaSolver)
 {
 	// Setup window
@@ -172,7 +141,9 @@ ndAssetEditor::ndAssetEditor()
 	Cleanup();
 	ApplyOptions();
 
-	m_renderer->MaximizeWindow();
+	//m_renderer->MaximizeWindow();
+	m_defaultCamera = ndSharedPtr<ndRenderSceneNode>(new ndEditorCameraFlyby(*m_renderer));
+	m_renderer->SetCamera(m_defaultCamera);
 }
 
 ndAssetEditor::~ndAssetEditor ()
@@ -527,74 +498,6 @@ void ndAssetEditor::SetDemoHelp(ndSharedPtr<ndDemoHelper>&)
 void ndAssetEditor::SetDemoUIpanel(ndSharedPtr<ndDemoUIpanel>&)
 {
 	//m_demoUIpanel = panel;
-}
-
-void ndAssetEditor::SetNextActiveCamera()
-{
-	ndAssert(0);
-	//if (!m_nextActiveCamera.Update(GetKeyState(ImGuiKey_C) ? true : false))
-	//{
-	//	return;
-	//}
-	//
-	//ndFixSizeArray<const ndRenderSceneCamera*, 256> cameraPallete;
-	//cameraPallete.PushBack(m_defaultCamera->FindCameraNode());
-	//
-	//ndList<ndSharedPtr<ndRenderSceneNode>>& scene = m_renderer->GetScene();
-	//for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* sceneNode = scene.GetFirst(); sceneNode; sceneNode = sceneNode->GetNext())
-	//{
-	//	ndSharedPtr<ndRenderSceneNode>& node = sceneNode->GetInfo();
-	//	const ndRenderSceneCamera* cameraNode = node->FindCameraNode();
-	//	if (cameraNode)
-	//	{
-	//		cameraPallete.PushBack(cameraNode);
-	//	}
-	//}
-	//
-	//const ndRenderSceneCamera* const currentCamera = m_renderer->GetCamera()->FindCameraNode();
-	//for (ndInt32 i = 0; i < cameraPallete.GetCount(); ++i)
-	//{
-	//	if (cameraPallete[i] == currentCamera)
-	//	{
-	//		ndInt32 j = (i + 1) % cameraPallete.GetCount();
-	//		if (j == 0)
-	//		{
-	//			const ndTransform tranform (currentCamera->CalculateGlobalTransform());
-	//			m_defaultCamera->SetTransform(tranform);
-	//			m_defaultCamera->SetTransform(tranform);
-	//			m_renderer->SetCamera(m_defaultCamera);
-	//		}
-	//		else
-	//		{
-	//			ndRenderSceneNode* const camera = cameraPallete[j]->FindByName("__PlayerCamera__");
-	//			ndSharedPtr<ndRenderSceneNode> cameraNode(camera->GetSharedPtr());
-	//			m_renderer->SetCamera(cameraNode);
-	//		}
-	//		break;
-	//	}
-	//}
-}
-
-void ndAssetEditor::CalculateFPS(ndFloat32 timestep)
-{
-	m_framesCount ++;
-	m_timestepAcc += timestep;
-
-	// this probably happing on loading of and a pause, just rest counters
-	if ((m_timestepAcc <= 0.0f) || (m_timestepAcc > 4.0f))
-	{
-		m_timestepAcc = 0;
-		m_framesCount = 0;
-	}
-
-	//update fps every quarter of a second
-	const ndFloat32 movingAverage = 0.5f;
-	if (m_timestepAcc >= movingAverage)
-	{
-		m_fps = ndFloat32 (m_framesCount) / m_timestepAcc;
-		m_timestepAcc -= movingAverage;
-		m_framesCount = 0;
-	}
 }
 
 ndInt32 ndAssetEditor::Print (const ndVector&, const char *fmt, ... ) const

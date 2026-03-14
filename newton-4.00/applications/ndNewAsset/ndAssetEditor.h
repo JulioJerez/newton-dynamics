@@ -199,8 +199,6 @@ class ndAssetEditor : public ndClassAlloc
 	void SetDemoHelp(ndSharedPtr<ndDemoHelper>& helper);
 	void SetDemoUIpanel(ndSharedPtr<ndDemoUIpanel>& panel);
 
-	void SetNextActiveCamera();
-
 	void RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& postUpdate);
 
 	private:
@@ -208,7 +206,6 @@ class ndAssetEditor : public ndClassAlloc
 	void RenderScene();
 	ndInt32 ParticleCount() const;
 	void SetParticleUpdateMode() const;
-	void CalculateFPS(ndFloat32 timestep);
 	void UpdatePhysics(ndFloat32 timestep);
 	
 	void ShowMainMenuBar();
@@ -239,26 +236,20 @@ class ndAssetEditor : public ndClassAlloc
 	//ndSharedPtr<ndRenderTexture> m_environmentTexture;
 	//ndSharedPtr<ndDemoHelper> m_demoHelper;
 	//ndSharedPtr<ndDemoUIpanel> m_demoUIpanel;
-	//ndSharedPtr<ndRenderSceneNode> m_defaultCamera;
+	ndSharedPtr<ndRenderSceneNode> m_defaultCamera;
 
 	ndSharedPtr<OnPostUpdate> m_onPostUpdate;
 	ndString m_currentPath;
 
-	ndInt32 m_framesCount;
-	ndInt32 m_physicsFramesCount;
+
 	ndInt32 m_currentPlugin;
 	ndInt32 m_solverPasses;
 	ndInt32 m_solverSubSteps;
 	ndInt32 m_workerThreads;
 	ndInt32 m_debugDisplayMode;
 	ndInt32 m_showCollisionMeshMode;
-
-	ndFloat32 m_fps;
-	ndFloat32 m_timestepAcc;
-	ndFloat32 m_currentListenerTimestep;
 	
 	bool m_runScene;
-	ndKeyTrigger m_nextActiveCamera;
 	ndWorld::ndSolverModes m_solverMode;
 	
 	friend class ndPhysicsWorld;

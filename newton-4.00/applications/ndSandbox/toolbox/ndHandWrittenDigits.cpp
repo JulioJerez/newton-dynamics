@@ -55,6 +55,18 @@
 //#endif
 
 
+static ndUnsigned16 ndIndian16(ndUnsigned16 x)
+{
+	return ndUnsigned16(((x >> 8) & 0xff) + ((x & 0xff) << 8));
+}
+
+static ndUnsigned32 ndIndian32(ndUnsigned32 x)
+{
+	ndUnsigned16 low = ndUnsigned16(x);
+	ndUnsigned16 high = ndUnsigned16(x >> 16);
+	return ndUnsigned32(ndIndian16(high)) + (ndUnsigned32(ndIndian16(low)) << 16);
+}
+
 static ndBrainMatrix* LoadMnistLabelData(const char* const filename)
 {
 	ndBrainMatrix* labelData = nullptr;
