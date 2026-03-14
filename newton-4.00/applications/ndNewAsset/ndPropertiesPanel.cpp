@@ -19,6 +19,11 @@ void ndAssetEditor::ShowPropertiesPanel()
 	//ndInt32 flags = 0;
 	ImGui::Begin("Properties Panel");
 
+	WindowFrame frame;
+	frame.m_posit = ImGui::GetWindowPos();
+	frame.m_size = ImGui::GetWindowSize();
+	m_windowSizes.PushBack(frame);
+
 	ShowPropertiesMeshInfo();
 
 	

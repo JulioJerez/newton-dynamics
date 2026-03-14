@@ -180,6 +180,11 @@ void ndAssetEditor::ShowOutlierPanel()
 	//ImGui::PushItemWidth(ImGui::GetFontSize() * 12);
 	//ImGui::SetNextItemWidth(ImGui::GetFontSize() * 12);
 
+	WindowFrame frame;
+	frame.m_posit = ImGui::GetWindowPos();
+	frame.m_size = ImGui::GetWindowSize();
+	m_windowSizes.PushBack(frame);
+
 	ShowOutlierToolBar();
 	if (*m_model)
 	{

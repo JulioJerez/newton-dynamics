@@ -228,7 +228,7 @@ class ndAssetEditor : public ndClassAlloc
 	ndSharedPtr<ndMesh> m_model;
 	ndSharedPtr<ndRender> m_renderer;
 	ndSharedPtr<ndRenderPass> m_menuRenderPass;
-	//ndSharedPtr<ndRenderPass> m_colorRenderPass;
+	ndSharedPtr<ndRenderPass> m_colorRenderPass;
 	//ndSharedPtr<ndRenderPass> m_shadowRenderPass;
 	//ndSharedPtr<ndRenderPass> m_environmentRenderPass;
 	//ndSharedPtr<ndRenderPass> m_transparentRenderPass;
@@ -251,6 +251,14 @@ class ndAssetEditor : public ndClassAlloc
 	
 	bool m_runScene;
 	ndWorld::ndSolverModes m_solverMode;
+
+	class WindowFrame
+	{
+		public:
+		ImVec2 m_posit;
+		ImVec2 m_size;
+	};
+	ndFixSizeArray<WindowFrame, 16> m_windowSizes;
 	
 	friend class ndPhysicsWorld;
 	friend class ndDebugDisplayRenderPass;

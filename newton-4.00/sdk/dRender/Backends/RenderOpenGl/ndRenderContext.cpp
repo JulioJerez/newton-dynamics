@@ -77,7 +77,7 @@ ndRenderContext::ndRenderContext(ndRender* const owner, ndInt32 width, ndInt32 h
 	glfwSetWindowSizeCallback(m_mainFrame, ResizeWindowsCallback);
 
 	glfwSetWindowSize(m_mainFrame, width, height);
-	SetViewport(width, height);
+	SetViewport(0, 0, width, height);
 
 	ndInt32 monitorsCount;
 	GLFWmonitor** monitors = glfwGetMonitors(&monitorsCount);
@@ -131,9 +131,17 @@ void ndRenderContext::Terminate()
 	glfwSetWindowShouldClose(m_mainFrame, 1);
 }
 
-void ndRenderContext::SetViewport(ndInt32 width, ndInt32 height)
+void ndRenderContext::SetViewport(ndInt32 x, ndInt32 y, ndInt32 width, ndInt32 height)
 {
-	glViewport(0, 0, width, height);
+	m_viewport_x0 = x;
+	m_viewport_y0 = y;
+	m_viewport_width = width - x;
+	m_viewport_heigh = height - y;
+}
+
+void ndRenderContext::SetViewport()
+{
+	glViewport(m_viewport_x0, m_viewport_y0, m_viewport_width, m_viewport_heigh);
 }
 
 #if (defined(_DEBUG) && defined(WIN32))
@@ -264,7 +272,7 @@ void ndRenderContext::WindowMaximize(GLFWwindow*, int)
 void ndRenderContext::ResizeWindowsCallback(GLFWwindow* window, int width, int height)
 {
 	ndRenderContext* const self = (ndRenderContext*)glfwGetWindowUserPointer(window);
-	self->SetViewport(width, height);
+	self->SetViewport(0, 0, width, height);
 }
 
 void ndRenderContext::LoadFont(const char* const fontPathName)

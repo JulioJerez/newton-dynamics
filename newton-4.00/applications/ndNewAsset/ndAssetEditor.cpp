@@ -90,18 +90,18 @@ ndAssetEditor::ndAssetEditor()
 
 	//// create render passes
 	m_menuRenderPass = ndSharedPtr<ndRenderPass>(new ndMenuRenderPass(this));
+	m_colorRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassColor(*m_renderer));
 	//m_debugDisplayRenderPass = ndSharedPtr<ndRenderPass>(new ndDebugDisplayRenderPass(this));
-	//m_colorRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassColor(*m_renderer));
 	//m_shadowRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassShadows(*m_renderer));
 	//m_transparentRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassTransparency(*m_renderer));
 	//m_environmentRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassEnvironment(*m_renderer, m_environmentTexture));
 
 	//// add render passes in order of execution
 	//m_renderer->AddRenderPass(m_shadowRenderPass);
-	//m_renderer->AddRenderPass(m_colorRenderPass);
 	//m_renderer->AddRenderPass(m_environmentRenderPass);
 	//m_renderer->AddRenderPass(m_transparentRenderPass);
 	//m_renderer->AddRenderPass(m_debugDisplayRenderPass);
+	m_renderer->AddRenderPass(m_colorRenderPass);
 	m_renderer->AddRenderPass(m_menuRenderPass);
 	
 	////add main directional light
@@ -553,7 +553,40 @@ void ndAssetEditor::RenderScene()
 	//ndFloat32 timestep = ndGetElapsedSeconds();	
 	//CalculateFPS(timestep);
 	//UpdatePhysics(timestep);
+
+	m_windowSizes.SetCount(0);
 	m_renderer->Render();
+
+	ndInt32 minX = ndInt32(m_windowSizes[0].m_posit.x);
+	ndInt32 minY = ndInt32(m_windowSizes[0].m_posit.y);
+	ndInt32 maxX = minX + ndInt32(m_windowSizes[0].m_size.x);
+	ndInt32 maxY = minY + ndInt32(m_windowSizes[0].m_size.y);
+	for (ndInt32 i = 1; i < m_windowSizes.GetCount(); ++i)
+	{
+		ndInt32 x0 = ndInt32 (m_windowSizes[i].m_posit.x);
+		ndInt32 y0 = ndInt32(m_windowSizes[i].m_posit.y);
+		ndInt32 x1 = x0 + ndInt32(m_windowSizes[i].m_size.x);
+		ndInt32 y1 = y0 + ndInt32(m_windowSizes[i].m_size.y);
+		
+		if ((x0 == minX) && (x1 < maxX))
+		{
+			minX = ndMax(minX, x1);
+		}
+		if ((x0 > minX) && (x1 == maxX))
+		{
+			maxX = ndMin(maxX, x0);
+		}
+
+		if ((y0 == minY) && (y1 < maxY))
+		{
+			minY = ndMax(minY, y1);
+		}
+		if ((y0 > minY) && (y1 == maxY))
+		{
+			maxY = ndMin(maxY, y0);
+		}
+	}
+	m_renderer->SetViewport(minX, minY, maxX, maxY);
 }
 
 void ndAssetEditor::TestImGui()
@@ -610,19 +643,6 @@ void ndAssetEditor::TestImGui()
 	ImGui::Render();
 }
 
-void ndAssetEditor::Run()
-{
-	// Main loop
-	ndFloatExceptions exception;
-	while (!m_renderer->ShouldFinish())
-	{
-		if (m_renderer->PollEvents())
-		{
-			RenderScene();
-		}
-	}
-}
-
 void ndAssetEditor::BeginDockSpace()
 {
 	//static bool opt_padding = false;
@@ -668,9 +688,14 @@ void ndAssetEditor::BeginDockSpace()
 	ImGuiIO& io = ImGui::GetIO();
 	if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 	{
-		ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+		ImGuiID dockspace_id = ImGui::GetID("EditorDockSpace");
 		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 	}
+
+	WindowFrame frame;
+	frame.m_posit = ImGui::GetWindowPos();
+	frame.m_size = ImGui::GetWindowSize();
+	m_windowSizes.PushBack(frame);
 }
 
 void ndAssetEditor::EndDockSpace()
@@ -680,8 +705,6 @@ void ndAssetEditor::EndDockSpace()
 
 void ndAssetEditor::RenderLayout()
 {
-	//m_renderer->MaximizeWindow();
-
 	BeginDockSpace();
 
 	ShowMainMenuBar();
@@ -693,9 +716,14 @@ void ndAssetEditor::RenderLayout()
 
 void ndAssetEditor::ShowMainMenuBar()
 {
-	//if (ImGui::BeginMainMenuBar())
 	if (ImGui::BeginMenuBar())
 	{
+		WindowFrame frame;
+		ImGui::GetWindowClipRect(frame.m_posit, frame.m_size);
+		frame.m_size.x -= frame.m_posit.x;
+		frame.m_size.y -= frame.m_posit.y;
+		m_windowSizes.PushBack(frame);
+
 		if (ImGui::BeginMenu("File"))
 		{
 			if (ImGui::MenuItem("New", ""))
@@ -756,7 +784,19 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::EndMenu();
 		}
 
-		//ImGui::EndMainMenuBar();
 		ImGui::EndMenuBar();
+	}
+}
+
+void ndAssetEditor::Run()
+{
+	// Main loop
+	ndFloatExceptions exception;
+	while (!m_renderer->ShouldFinish())
+	{
+		if (m_renderer->PollEvents())
+		{
+			RenderScene();
+		}
 	}
 }
