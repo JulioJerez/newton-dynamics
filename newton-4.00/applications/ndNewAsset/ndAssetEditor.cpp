@@ -561,29 +561,37 @@ void ndAssetEditor::RenderScene()
 	ndInt32 minY = ndInt32(m_windowSizes[0].m_posit.y);
 	ndInt32 maxX = minX + ndInt32(m_windowSizes[0].m_size.x);
 	ndInt32 maxY = minY + ndInt32(m_windowSizes[0].m_size.y);
-	for (ndInt32 i = 1; i < m_windowSizes.GetCount(); ++i)
-	{
-		ndInt32 x0 = ndInt32 (m_windowSizes[i].m_posit.x);
-		ndInt32 y0 = ndInt32(m_windowSizes[i].m_posit.y);
-		ndInt32 x1 = x0 + ndInt32(m_windowSizes[i].m_size.x);
-		ndInt32 y1 = y0 + ndInt32(m_windowSizes[i].m_size.y);
-		
-		if ((x0 == minX) && (x1 < maxX))
-		{
-			minX = ndMax(minX, x1);
-		}
-		if ((x0 > minX) && (x1 == maxX))
-		{
-			maxX = ndMin(maxX, x0);
-		}
 
-		if ((y0 == minY) && (y1 < maxY))
+	for (ndInt32 j = m_windowSizes.GetCount() - 1; j >= 1; --j)
+	{
+		for (ndInt32 i = j; i >= 1; --i)
 		{
-			minY = ndMax(minY, y1);
-		}
-		if ((y0 > minY) && (y1 == maxY))
-		{
-			maxY = ndMin(maxY, y0);
+			ndInt32 x0 = ndInt32(m_windowSizes[i].m_posit.x);
+			ndInt32 y0 = ndInt32(m_windowSizes[i].m_posit.y);
+			ndInt32 x1 = x0 + ndInt32(m_windowSizes[i].m_size.x);
+			ndInt32 y1 = y0 + ndInt32(m_windowSizes[i].m_size.y);
+
+			if ((x0 == minX) && (x1 < maxX))
+			{
+				minX = ndMax(minX, x1);
+				i = 0;
+			}
+			if ((x0 > minX) && (x1 == maxX))
+			{
+				maxX = ndMin(maxX, x0);
+				i = 0;
+			}
+			
+			if ((y0 == minY) && (y1 < maxY))
+			{
+				minY = ndMax(minY, y1);
+				i = 0;
+			}
+			if ((y0 > minY) && (y1 == maxY))
+			{
+				maxY = ndMin(maxY, y0);
+				i = 0;
+			}
 		}
 	}
 	m_renderer->SetViewport(minX, minY, maxX, maxY);
