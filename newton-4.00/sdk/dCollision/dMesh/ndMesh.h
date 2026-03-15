@@ -22,12 +22,10 @@
 #ifndef __ND_MESH_H__
 #define __ND_MESH_H__
 
-//#include "ndCore.h"
 #include "ndCollisionStdafx.h"
 
-
-//class ndBody;
 class ndMeshBody;
+class ndMeshJoint;
 class ndMeshEffect;
 class ndShapeInstance;
 class ndMeshShapeInstance;
@@ -109,6 +107,10 @@ class ndMesh : public ndClassAlloc
 	D_COLLISION_API const ndSharedPtr<ndMeshShapeInstance>& GetPrimitive() const;
 	D_COLLISION_API void SetPrimitive(const ndSharedPtr<ndMeshShapeInstance>& primitive);
 
+	D_COLLISION_API ndSharedPtr<ndMeshJoint>& GetJoint();
+	D_COLLISION_API const ndSharedPtr<ndMeshJoint>& GetJoint() const;
+	D_COLLISION_API void SetJoint(const ndSharedPtr<ndMeshJoint>& primitive);
+
 	D_COLLISION_API const ndString& GetName() const;
 	D_COLLISION_API void SetName(const ndString& name);
 
@@ -156,8 +158,10 @@ class ndMesh : public ndClassAlloc
 	ndCurve m_rotation;
 	ndWeakPtr<ndMesh> m_parent;
 	ndSharedPtr<ndMeshEffect> m_mesh;
-	ndSharedPtr<ndMeshBody> m_rigidBody;
 	ndSharedPtr<ndMeshShapeInstance> m_meshPrimitive;
+
+	ndSharedPtr<ndMeshJoint> m_joint;
+	ndSharedPtr<ndMeshBody> m_rigidBody;
 	ndList<ndSharedPtr<ndMesh>> m_children;
 	ndList<ndSharedPtr<ndMesh>>::ndNode* m_selfChildNode;
 	ndVector m_boneTarget;

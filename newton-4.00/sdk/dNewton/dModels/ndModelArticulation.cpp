@@ -976,9 +976,10 @@ void ndModelArticulation::SaveNdMesh(const char* const path) const
 		ndSharedPtr<ndMeshShapeInstance> meshPrimitive(new ndMeshShapeInstance(body->GetCollisionShape()));
 		meshNode->SetPrimitive(meshPrimitive);
 		node->m_body->Serialize(meshNode);
-		if (node != m_rootNode)
+		if (node->m_joint)
 		{
-			// TO DO: serialize joint here
+			ndSharedPtr<ndMeshJoint> joint(node->m_joint->GetMeshJoint());
+			meshNode->SetJoint(joint);
 		}
 
 		for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
