@@ -119,9 +119,11 @@ class ndMeshBodyDynamic : public ndMeshBodyKinematic
 
 class ndMeshJoint : public ndClassAlloc
 {
+	public:
 	D_COLLISION_API ndMeshJoint();
 	D_COLLISION_API ndMeshJoint(const ndJointBilateralConstraint* const joint);
 	D_COLLISION_API virtual ~ndMeshJoint();
+
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
 };
