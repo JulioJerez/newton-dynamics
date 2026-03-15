@@ -87,9 +87,8 @@ ndMeshShapeInstance::ndMeshShapeInstance(const ndShapeInstance& instance)
 	:m_localMatrix(instance.GetLocalMatrix())
 	,m_alignmentMatrix(instance.GetAlignmentMatrix())
 	,m_scale(instance.GetScale())
-	,m_shape(nullptr)
+	,m_shape(instance.GetShape()->GetMeshShape())
 {
-	m_shape = ndSharedPtr<ndMeshCollisionShape> (new ndMeshCollisionShapeNull());
 }
 
 void ndMeshShapeInstance::SerializeToXml(nd::TiXmlElement* const parent) const
