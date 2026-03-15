@@ -69,6 +69,7 @@ class ndMeshShapeInstance
 {
 	public:
 	D_COLLISION_API ndMeshShapeInstance();
+	D_COLLISION_API ndMeshShapeInstance(const ndShapeInstance& instance);
 	D_COLLISION_API void SerializeToXml(nd::TiXmlElement* const parent) const;
 	D_COLLISION_API void DeserializeFromXml(const nd::TiXmlElement* const parent);
 

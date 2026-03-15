@@ -445,15 +445,16 @@ namespace ndBipedPlayer
 		playerController->CreateArticulatedModel(scene, model, loader.m_mesh, visualMesh);
 
 #if 1
-		const ndMesh* xxxx = *loader.m_mesh;
-		model->Serialize((ndMesh*)xxxx);
-		loader.SaveMesh(ndGetWorkingFileName("xxx.nd").GetStr()); 
-
-		ndMeshLoader savedBody(ndSharedPtr<ndMesh>(new ndMesh(model->GetRoot()->m_body->GetAsBodyKinematic()->GetCollisionShape())));
-		model->GetRoot()->m_body->GetAsBodyKinematic()->Serialize(*savedBody.m_mesh);
-		savedBody.SaveMesh(ndGetWorkingFileName("xxx1.nd").GetStr());
-
-		model->GetRoot()->m_body->GetAsBodyKinematic()->SaveNdMesh(ndGetWorkingFileName("xxx2.nd").GetStr());
+		//const ndMesh* xxxx = *loader.m_mesh;
+		//model->Serialize((ndMesh*)xxxx);
+		//loader.SaveMesh(ndGetWorkingFileName("xxx.nd").GetStr()); 
+		//
+		//ndMeshLoader savedBody(ndSharedPtr<ndMesh>(new ndMesh(model->GetRoot()->m_body->GetAsBodyKinematic()->GetCollisionShape())));
+		//model->GetRoot()->m_body->GetAsBodyKinematic()->Serialize(*savedBody.m_mesh);
+		//savedBody.SaveMesh(ndGetWorkingFileName("xxx1.nd").GetStr());
+		//
+		//model->GetRoot()->m_body->GetAsBodyKinematic()->SaveNdMesh(ndGetWorkingFileName("xxx2.nd").GetStr());
+		model->SaveNdMesh(ndGetWorkingFileName("xxx3.nd").GetStr());
 #endif
 
 
