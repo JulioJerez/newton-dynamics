@@ -12,6 +12,7 @@
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
 #include "ndJointHinge.h"
+#include "ndMeshComponents.h"
 
 #define D_MAX_HINGE_RECOVERY_SPEED	ndFloat32 (0.25f)
 #define D_MAX_HINGE_PENETRATION		(ndFloat32 (4.0f) * ndDegreeToRad)
@@ -292,4 +293,12 @@ void ndJointHinge::JacobianDerivative(ndConstraintDescritor& desc)
 		SubmitSpringDamper(desc, matrix0, matrix1);
 	}
 	SubmitLimits(desc, matrix0, matrix1);
+}
+
+ndSharedPtr<ndMeshJoint> ndJointHinge::GetMeshJoint() const
+{
+	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointHinge(this));
+
+	return joint;
+	
 }

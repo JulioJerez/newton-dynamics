@@ -22,6 +22,7 @@
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
 #include "ndBodyKinematic.h"
+#include "ndMeshComponents.h"
 #include "ndJointBilateralConstraint.h"
 
 #define D_VEL_DAMP			 ndFloat32(100.0f)
@@ -601,4 +602,12 @@ void ndJointBilateralConstraint::UpdateParameters()
 {
 	ndAssert(0);
 	ndTrace(("Fix this joint paremeters\n"));
+}
+
+
+ndSharedPtr<ndMeshJoint> ndJointBilateralConstraint::GetMeshJoint() const
+{
+	ndExpandTraceMessage("serialize class: %s not Implemented", ClassName());
+	ndAssert(0);
+	return ndSharedPtr<ndMeshJoint>(new ndMeshJoint(this));
 }

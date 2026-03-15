@@ -203,14 +203,14 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName) const
 		ndVector boneTarget(entry.m_meshNode->GetBoneTarget());
 		xmlSaveAttribute(xmlNodeType, "target", ndTriplexReal(ndReal(boneTarget.m_x), ndReal(boneTarget.m_y), ndReal(boneTarget.m_z)));
 
-		if (*entry.m_meshNode->GetPrimitive())
+		if (entry.m_meshNode->GetPrimitive())
 		{
 			nd::TiXmlElement* const primitive = new nd::TiXmlElement("primitve");
 			entry.m_parentXml->LinkEndChild(primitive);
 			entry.m_meshNode->GetPrimitive()->SerializeToXml(primitive);
 		}
 
-		if (*entry.m_meshNode->GetMesh())
+		if (entry.m_meshNode->GetMesh())
 		{
 			nd::TiXmlElement* const geometry = new nd::TiXmlElement("geometry");
 			entry.m_parentXml->LinkEndChild(geometry);
@@ -219,11 +219,20 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName) const
 
 		if (entry.m_meshNode->m_rigidBody)
 		{
-			const ndMeshBody* const rigidBody = *entry.m_meshNode->m_rigidBody;
 			nd::TiXmlElement* const rigidBodyNode = new nd::TiXmlElement("rigidbody");
 			entry.m_parentXml->LinkEndChild(rigidBodyNode);
+
+			const ndMeshBody* const rigidBody = *entry.m_meshNode->m_rigidBody;
 			xmlSaveParam(rigidBodyNode, "constructor", rigidBody->m_classConstructor.GetStr());
 			rigidBody->SerializeToXml(rigidBodyNode);
+		}
+
+		if (entry.m_meshNode->m_joint)
+		{
+			nd::TiXmlElement* const jointNode = new nd::TiXmlElement("joint");
+			entry.m_parentXml->LinkEndChild(jointNode);
+			const ndMeshJoint* const joint = *entry.m_meshNode->m_joint;
+			joint->SerializeToXml(jointNode);
 		}
 
 		for (ndList<ndSharedPtr<ndMesh>>::ndNode* node = entry.m_meshNode->m_children.GetFirst(); node; node = node->GetNext())

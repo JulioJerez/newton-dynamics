@@ -126,6 +126,40 @@ class ndMeshJoint : public ndClassAlloc
 
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+
+	ndMatrix m_locatFrame0;
+	ndMatrix m_locatFrame1;
+	ndString m_constructor;
+};
+
+class ndMeshJointHinge : public ndMeshJoint
+{
+	public:
+	D_COLLISION_API ndMeshJointHinge();
+	D_COLLISION_API ndMeshJointHinge(const ndJointBilateralConstraint* const joint);
+
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+};
+
+class ndMeshJointDoubleHinge : public ndMeshJoint
+{
+	public:
+	D_COLLISION_API ndMeshJointDoubleHinge();
+	D_COLLISION_API ndMeshJointDoubleHinge(const ndJointBilateralConstraint* const joint);
+
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+};
+
+class ndMeshJointSlider : public ndMeshJoint
+{
+	public:
+	D_COLLISION_API ndMeshJointSlider();
+	D_COLLISION_API ndMeshJointSlider(const ndJointBilateralConstraint* const joint);
+
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
 };
 
 #endif

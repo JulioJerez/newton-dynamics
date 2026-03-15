@@ -978,8 +978,8 @@ void ndModelArticulation::SaveNdMesh(const char* const path) const
 		node->m_body->Serialize(meshNode);
 		if (node->m_joint)
 		{
-			ndAssert(0);
-			// TO DO: serialize joint here
+			ndSharedPtr<ndMeshJoint> joint(node->m_joint->GetMeshJoint());
+			meshNode->SetJoint(joint);
 		}
 
 		for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())

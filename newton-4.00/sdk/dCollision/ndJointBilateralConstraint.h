@@ -27,9 +27,10 @@
 #include "ndConstraint.h"
 #include "ndBodyKinematic.h"
 
-
 #define ND_BILATERAL_CONTRAINT_DOF	12
 #define ND_SPRING_DAMP_MIN_REG		ndFloat32 (1.0e-3f)
+
+class ndMeshJoint;
 
 enum ndJointBilateralSolverModel
 {
@@ -131,6 +132,8 @@ class ndJointBilateralConstraint : public ndConstraint
 
 	D_COLLISION_API void UpdateParameters() override;
 	D_COLLISION_API void ReplaceSentinel(ndBodyKinematic* const sentinel);
+
+	D_COLLISION_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const;
 
 	// inverse dynamics interface
 	D_COLLISION_API virtual void ClearMemory() override;

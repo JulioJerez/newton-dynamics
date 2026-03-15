@@ -235,27 +235,97 @@ ndMeshBody::~ndMeshBody()
 
 ndMeshJoint::ndMeshJoint()
 	:ndClassAlloc()
+	,m_locatFrame0(ndGetIdentityMatrix())
+	,m_locatFrame1(ndGetIdentityMatrix())
+	,m_constructor("ndJointFix6dof")
 {
-	ndAssert(0);
 }
 
 ndMeshJoint::ndMeshJoint(const ndJointBilateralConstraint* const joint)
 	:ndClassAlloc()
+	,m_locatFrame0(joint->GetLocalMatrix0())
+	,m_locatFrame1(joint->GetLocalMatrix1())
+	,m_constructor(joint->ClassName())
 {
-	ndAssert(0);
 }
 
 ndMeshJoint::~ndMeshJoint()
 {
-	ndAssert(0);
 }
 
 void ndMeshJoint::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	ndAssert(0);
+	xmlSaveParam(parent, "constructor", m_constructor.GetStr());
+	xmlSaveParam(parent, "localFrame0", m_locatFrame0);
+	xmlSaveParam(parent, "localFrame1", m_locatFrame1);
 }
 
 void ndMeshJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndAssert(0);
+}
+
+
+ndMeshJointHinge::ndMeshJointHinge()
+	:ndMeshJoint()
+{
+}
+
+ndMeshJointHinge::ndMeshJointHinge(const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(joint)
+{
+}
+
+void ndMeshJointHinge::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+	//xmlSaveParam(parent, "constructor", m_con);
+	//ndAssert(0);
+}
+
+void ndMeshJointHinge::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndAssert(0);
+}
+
+ndMeshJointDoubleHinge::ndMeshJointDoubleHinge()
+	:ndMeshJoint()
+{
+}
+
+ndMeshJointDoubleHinge::ndMeshJointDoubleHinge(const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(joint)
+{
+}
+
+void ndMeshJointDoubleHinge::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+	//ndAssert(0);
+}
+
+void ndMeshJointDoubleHinge::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndAssert(0);
+}
+
+ndMeshJointSlider::ndMeshJointSlider()
+	:ndMeshJoint()
+{
+}
+
+ndMeshJointSlider::ndMeshJointSlider(const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(joint)
+{
+}
+
+void ndMeshJointSlider::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+	//ndAssert(0);
+}
+
+void ndMeshJointSlider::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndAssert(0);
 }

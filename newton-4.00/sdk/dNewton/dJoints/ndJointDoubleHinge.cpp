@@ -11,6 +11,7 @@
 
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
+#include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
 
 ndJointDoubleHinge::ndAxisParam::ndAxisParam()
@@ -427,3 +428,10 @@ void ndJointDoubleHinge::JacobianDerivative(ndConstraintDescritor& desc)
 	SubmitLimits(desc, matrix0, matrix1);
 }
 
+ndSharedPtr<ndMeshJoint> ndJointDoubleHinge::GetMeshJoint() const
+{
+	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointDoubleHinge(this));
+
+	return joint;
+
+}
