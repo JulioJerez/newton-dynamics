@@ -59,6 +59,7 @@
 #include <ndRayCastNotify.h>
 #include <ndContactNotify.h>
 #include <ndShapeCompound.h>
+#include <ndMeshComponents.h>
 #include <ndContactOptions.h>
 #include <ndBodyParticleSet.h>
 #include <ndPolygonMeshDesc.h>

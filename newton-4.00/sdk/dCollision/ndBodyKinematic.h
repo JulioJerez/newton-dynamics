@@ -174,6 +174,9 @@ class ndBodyKinematic : public ndBody
 	D_COLLISION_API const ndJointList& GetJointList() const;
 	D_COLLISION_API const ndContactMap& GetContactMap() const;
 
+	D_COLLISION_API virtual void SaveNdMesh(const char* const path) const;
+	D_COLLISION_API virtual void Serialize(ndMesh* const node) const override;
+
 	protected:
 	D_COLLISION_API virtual void AttachContact(ndContact* const contact) override;
 	D_COLLISION_API virtual void DetachContact(ndContact* const contact) override;
@@ -196,8 +199,6 @@ class ndBodyKinematic : public ndBody
 	D_COLLISION_API virtual void AddDampingAcceleration(ndFloat32 timestep);
 	D_COLLISION_API virtual void SetAcceleration(const ndVector& accel, const ndVector& alpha);
 	D_COLLISION_API virtual void EvaluateSleepState(ndFloat32 freezeSpeed2, ndFloat32 freezeAccel2);
-
-	D_COLLISION_API virtual void Serialize(ndMesh* const node) const override;
 	D_COLLISION_API virtual void Serialize(ndSharedPtr<ndMeshBody>& body) const override;
 
 	ndMatrix m_inertiaPrincipalAxis;

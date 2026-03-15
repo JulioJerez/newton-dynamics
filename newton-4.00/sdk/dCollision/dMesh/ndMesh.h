@@ -22,12 +22,17 @@
 #ifndef __ND_MESH_H__
 #define __ND_MESH_H__
 
-#include "ndCore.h"
+//#include "ndCore.h"
+#include "ndCollisionStdafx.h"
 
-class ndBody;
+
+//class ndBody;
+class ndMeshBody;
 class ndMeshEffect;
 class ndShapeInstance;
+class ndMeshShapeInstance;
 
+#if 0
 class ndMeshCollisionShape : public ndClassAlloc
 {
 	public:
@@ -65,6 +70,19 @@ class ndMeshCollisionShapeCapsule : public ndMeshCollisionShape
 	ndFloat32 m_radius1;
 };
 
+class ndMeshShapeInstance
+{
+	public:
+	D_COLLISION_API ndMeshShapeInstance();
+	D_COLLISION_API void SerializeToXml(nd::TiXmlElement* const parent) const;
+	D_COLLISION_API void DeserializeFromXml(const nd::TiXmlElement* const parent);
+
+	ndMatrix m_localMatrix;
+	ndMatrix m_alignmentMatrix;
+	ndVector m_scale;
+	ndSharedPtr<ndMeshCollisionShape> m_shape;
+};
+
 class ndMeshBody : public ndClassAlloc
 {
 	public:
@@ -73,7 +91,6 @@ class ndMeshBody : public ndClassAlloc
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
 
-	ndMatrix m_matrix;
 	ndVector m_veloc;
 	ndVector m_omega;
 	ndVector m_localCentreOfMass;
@@ -83,19 +100,6 @@ class ndMeshBody : public ndClassAlloc
 class ndMeshBodyKinematic : public ndMeshBody
 {
 	public:
-	class ndMeshShapeInstance
-	{
-		public:
-		D_COLLISION_API ndMeshShapeInstance();
-		D_COLLISION_API void SerializeToXml(nd::TiXmlElement* const parent) const;
-		D_COLLISION_API void DeserializeFromXml(const nd::TiXmlElement* const parent);
-
-		ndMatrix m_localMatrix;
-		ndMatrix m_alignmentMatrix;
-		ndVector m_scale;
-		ndSharedPtr<ndMeshCollisionShape> m_shape;
-	};
-
 	D_COLLISION_API ndMeshBodyKinematic();
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
@@ -115,6 +119,7 @@ class ndMeshBodyDynamic : public ndMeshBodyKinematic
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 	ndVector m_intrinsicDamping;
 };
+#endif
 
 class ndMesh : public ndClassAlloc
 {
@@ -189,6 +194,10 @@ class ndMesh : public ndClassAlloc
 	D_COLLISION_API const ndSharedPtr<ndMeshEffect>& GetMesh() const;
 	D_COLLISION_API void SetMesh(const ndSharedPtr<ndMeshEffect>& mesh);
 
+	D_COLLISION_API ndSharedPtr<ndMeshShapeInstance>& GetPrimitive();
+	D_COLLISION_API const ndSharedPtr<ndMeshShapeInstance>& GetPrimitive() const;
+	D_COLLISION_API void SetPrimitive(const ndSharedPtr<ndMeshShapeInstance>& primitive);
+
 	D_COLLISION_API const ndString& GetName() const;
 	D_COLLISION_API void SetName(const ndString& name);
 
@@ -237,6 +246,7 @@ class ndMesh : public ndClassAlloc
 	ndWeakPtr<ndMesh> m_parent;
 	ndSharedPtr<ndMeshEffect> m_mesh;
 	ndSharedPtr<ndMeshBody> m_rigidBody;
+	ndSharedPtr<ndMeshShapeInstance> m_meshPrimitive;
 	ndList<ndSharedPtr<ndMesh>> m_children;
 	ndList<ndSharedPtr<ndMesh>>::ndNode* m_selfChildNode;
 	ndVector m_boneTarget;

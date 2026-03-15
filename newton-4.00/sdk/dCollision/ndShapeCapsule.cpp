@@ -25,6 +25,7 @@
 #include "ndContact.h"
 #include "ndShapeCapsule.h"
 #include "ndContactSolver.h"
+#include "ndMeshComponents.h"
 
 #define DG_CAPSULE_SEGMENTS		10
 #define DG_CAPSULE_CAP_SEGMENTS	12
