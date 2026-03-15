@@ -28,6 +28,7 @@
 #include "ndRayCastNotify.h"
 #include "ndBodyKinematic.h"
 #include "ndShapeCompound.h"
+#include "ndMeshComponents.h"
 #include "ndShapeConvexPolygon.h"
 
 ndVector ndShapeInstance::m_padding(D_MAX_SHAPE_AABB_PADDING, D_MAX_SHAPE_AABB_PADDING, D_MAX_SHAPE_AABB_PADDING, ndFloat32(0.0f));
@@ -761,10 +762,10 @@ void ndShapeInstance::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVect
 	}
 }
 
-void ndShapeInstance::Serialize(ndMeshBodyKinematic* const meshBody) const
+void ndShapeInstance::Serialize(ndMeshShapeInstance* const meshInstance) const
 {
-	meshBody->m_shapeInstance.m_scale = m_scale;
-	meshBody->m_shapeInstance.m_localMatrix = m_localMatrix;
-	meshBody->m_shapeInstance.m_alignmentMatrix = m_alignmentMatrix;
-	meshBody->m_shapeInstance.m_shape = m_shape->GetMeshShape();
+	meshInstance->m_scale = m_scale;
+	meshInstance->m_localMatrix = m_localMatrix;
+	meshInstance->m_alignmentMatrix = m_alignmentMatrix;
+	meshInstance->m_shape = m_shape->GetMeshShape();
 }

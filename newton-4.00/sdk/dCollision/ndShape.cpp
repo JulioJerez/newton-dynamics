@@ -23,6 +23,7 @@
 #include "ndCollisionStdafx.h"
 #include "ndMesh.h"
 #include "ndShape.h"
+#include "ndMeshComponents.h"
 
 ndVector ndShape::m_flushZero(ndFloat32(1.0e-7f));
 

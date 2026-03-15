@@ -75,14 +75,15 @@ class ndBodyDynamic: public ndBodyKinematic
 	D_NEWTON_API ndVector GetTorque() const override;
 
 	D_NEWTON_API virtual void Serialize(ndMesh* const node) const override;
-	D_NEWTON_API virtual void Serialize(ndSharedPtr<ndMeshBody>& body) const override;
 	
 	private:
 	void SaveExternalForces();
 	virtual void SetAcceleration(const ndVector& accel, const ndVector& alpha) override;
+
 	D_NEWTON_API virtual void IntegrateGyroSubstep(const ndVector& timestep) override;
 	D_NEWTON_API virtual ndJacobian IntegrateForceAndToque(const ndVector& force, const ndVector& torque, const ndVector& timestep) const override;
 	D_NEWTON_API virtual void EvaluateSleepState(ndFloat32 freezeSpeed2, ndFloat32 freezeAccel2) override;
+	D_NEWTON_API virtual void Serialize(ndSharedPtr<ndMeshBody>& body) const override;
 
 	ndVector m_externalForce;
 	ndVector m_externalTorque;

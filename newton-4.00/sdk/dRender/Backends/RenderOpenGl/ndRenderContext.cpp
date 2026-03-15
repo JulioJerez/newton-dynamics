@@ -77,7 +77,7 @@ ndRenderContext::ndRenderContext(ndRender* const owner, ndInt32 width, ndInt32 h
 	glfwSetWindowSizeCallback(m_mainFrame, ResizeWindowsCallback);
 
 	glfwSetWindowSize(m_mainFrame, width, height);
-	SetViewport(width, height);
+	SetViewport(0, 0, width, height);
 
 	ndInt32 monitorsCount;
 	GLFWmonitor** monitors = glfwGetMonitors(&monitorsCount);
@@ -131,9 +131,17 @@ void ndRenderContext::Terminate()
 	glfwSetWindowShouldClose(m_mainFrame, 1);
 }
 
-void ndRenderContext::SetViewport(ndInt32 width, ndInt32 height)
+void ndRenderContext::SetViewport(ndInt32 x, ndInt32 y, ndInt32 width, ndInt32 height)
 {
-	glViewport(0, 0, width, height);
+	m_viewport_x0 = x;
+	m_viewport_y0 = y;
+	m_viewport_width = width - x;
+	m_viewport_heigh = height - y;
+}
+
+void ndRenderContext::SetViewport()
+{
+	glViewport(m_viewport_x0, m_viewport_y0, m_viewport_width, m_viewport_heigh);
 }
 
 #if (defined(_DEBUG) && defined(WIN32))
@@ -236,7 +244,6 @@ void ndRenderContext::InitImGui(const char* const fontPathName)
 #ifdef _MSC_VER 
 	io.ImeWindowHandle = glfwGetWin32Window(m_mainFrame);
 #endif
-
 	SetInputCallbacks();
 }
 
@@ -246,6 +253,7 @@ void ndRenderContext::SetInputCallbacks()
 	glfwSetCharCallback(m_mainFrame, CharCallback);
 	glfwSetScrollCallback(m_mainFrame, MouseScrollCallback);
 	glfwSetCursorPosCallback(m_mainFrame, CursorposCallback);
+	glfwSetWindowMaximizeCallback(m_mainFrame, WindowMaximize);
 	glfwSetMouseButtonCallback(m_mainFrame, MouseButtonCallback);
 }
 
@@ -256,10 +264,15 @@ void ndRenderContext::ErrorCallback(ndInt32 error, const char* description)
 	ndAssert(0);
 }
 
+//void ndRenderContext::WindowMaximize(GLFWwindow* window, int maximized)
+void ndRenderContext::WindowMaximize(GLFWwindow*, int)
+{
+}
+
 void ndRenderContext::ResizeWindowsCallback(GLFWwindow* window, int width, int height)
 {
 	ndRenderContext* const self = (ndRenderContext*)glfwGetWindowUserPointer(window);
-	self->SetViewport(width, height);
+	self->SetViewport(0, 0, width, height);
 }
 
 void ndRenderContext::LoadFont(const char* const fontPathName)
@@ -314,6 +327,11 @@ ndInt32 ndRenderContext::GetHeight() const
 	ndInt32 w, h;
 	glfwGetWindowSize(m_mainFrame, &w, &h);
 	return h;
+}
+
+void ndRenderContext::MaximizeWindow() const
+{
+	glfwMaximizeWindow(m_mainFrame);
 }
 
 bool ndRenderContext::PollEvents() const

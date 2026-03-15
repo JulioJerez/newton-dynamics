@@ -67,6 +67,8 @@ class ndRender: public ndClassAlloc
 
 	ndInt32 GetWidth() const;
 	ndInt32 GetHeight() const;
+	void MaximizeWindow() const;
+	void SetViewport(ndInt32 x0, ndInt32 y0, ndInt32 x1, ndInt32 y1) const;
 	
 	void ResetScene();
 	void Render();

@@ -26,9 +26,11 @@
 #include "ndScene.h"
 #include "ndContact.h"
 #include "ndShapeNull.h"
+#include "ndMeshLoader.h"
 #include "ndRayCastNotify.h"
 #include "ndBodyKinematic.h"
 #include "ndShapeCompound.h"
+#include "ndMeshComponents.h"
 #include "ndJointBilateralConstraint.h"
 
 #define D_MINIMUM_MASS	ndFloat32(1.0e-5f)
@@ -1077,7 +1079,7 @@ void ndBodyKinematic::Serialize(ndSharedPtr<ndMeshBody>& meshBody) const
 	kinematicMeshBody->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
 	kinematicMeshBody->m_maxLinearStep = m_maxLinearStep;
 	kinematicMeshBody->m_maxAngleStep = m_maxAngleStep * ndRadToDegree;
-	m_shapeInstance.Serialize(kinematicMeshBody);
+	m_shapeInstance.Serialize(&kinematicMeshBody->m_shapeInstance);
 }
 
 void ndBodyKinematic::Serialize(ndMesh* const node) const
@@ -1086,4 +1088,15 @@ void ndBodyKinematic::Serialize(ndMesh* const node) const
 	node->SetRigidBody(meshBody);
 	Serialize(meshBody);
 	meshBody->m_classConstructor = ndString(ClassName());
+}
+
+void ndBodyKinematic::SaveNdMesh(const char* const path) const
+{
+	ndMeshLoader savedBody(ndSharedPtr<ndMesh>(new ndMesh()));
+	savedBody.m_mesh->SetName("rigidBody");
+	savedBody.m_mesh->SetPrimitive(new ndMeshShapeInstance());
+	m_shapeInstance.Serialize(*savedBody.m_mesh->GetPrimitive());
+
+	Serialize(*savedBody.m_mesh);
+	savedBody.SaveMesh(path);
 }

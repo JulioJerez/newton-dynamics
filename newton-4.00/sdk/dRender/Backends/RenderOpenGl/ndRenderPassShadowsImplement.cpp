@@ -251,5 +251,6 @@ void ndRenderPassShadowsImplement::RenderScene(const ndRenderSceneCamera* const 
 
 	glDisable(GL_POLYGON_OFFSET_FILL);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	m_context->SetViewport(m_context->GetWidth(), m_context->GetHeight());
+	//m_context->SetViewport(m_context->GetWidth(), m_context->GetHeight());
+	m_context->SetViewport();
 }

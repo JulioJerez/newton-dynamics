@@ -4922,6 +4922,13 @@ void ImGui::PushClipRect(const ImVec2& clip_rect_min, const ImVec2& clip_rect_ma
     window->ClipRect = window->DrawList->_ClipRectStack.back();
 }
 
+void ImGui::GetWindowClipRect(ImVec2& p0, ImVec2& p1)
+{
+    ImGuiWindow* window = GetCurrentWindow();
+    p0 = window->ClipRect.Min;
+    p1 = window->ClipRect.Max;
+}
+
 void ImGui::PopClipRect()
 {
     ImGuiWindow* window = GetCurrentWindow();

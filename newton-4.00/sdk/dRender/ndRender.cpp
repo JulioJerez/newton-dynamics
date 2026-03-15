@@ -110,9 +110,19 @@ ndInt32 ndRender::GetWidth() const
 	return m_context->GetWidth();
 }
 
+void ndRender::SetViewport(ndInt32 x0, ndInt32 y0, ndInt32 x1, ndInt32 y1) const
+{
+	m_context->SetViewport(x0, y0, x1, y1);
+}
+
 ndInt32 ndRender::GetHeight() const
 {
 	return m_context->GetHeight();
+}
+
+void ndRender::MaximizeWindow() const
+{
+	m_context->MaximizeWindow();
 }
 
 bool ndRender::ShouldFinish() const
@@ -278,7 +288,7 @@ void ndRender::Render()
 	ndInt32 fb_height = (ndInt32)(io.DisplaySize.y * io.DisplayFramebufferScale.y);
 	if (!(fb_width == 0 || fb_height == 0))
 	{
-		// calaculate all grobal matrices
+		// calculate all grobal matrices
 		UpdateGlobalMatrices();
 
 		ndInt32 display_w = m_context->GetWidth();

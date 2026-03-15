@@ -936,3 +936,60 @@ void ndModelArticulation::Serialize(ndMesh* const rootNode) const
 
 	// TO DO: serialize loop joints here
 }
+
+void ndModelArticulation::SaveNdMesh(const char* const path) const
+{
+	ndInt32 nameIndex = 0;
+	ndMesh* rootMesh = nullptr;
+	ndFixSizeArray<ndMesh*, 1024> parent;
+	ndFixSizeArray<ndModelArticulation::ndNode*, 1024> stack;
+
+	parent.PushBack(nullptr);
+	stack.PushBack(m_rootNode);
+	while (stack.GetCount())
+	{
+		ndMesh* const parentMesh = parent.Pop();
+		ndModelArticulation::ndNode* const node = stack.Pop();
+
+		ndMesh* const meshNode = new ndMesh();
+
+		if (node->m_name.GetStr() && *node->m_name.GetStr())
+		{
+			meshNode->SetName(node->m_name.GetStr());
+		}
+		else
+		{
+			char name[256];
+			snprintf(name, sizeof(name) - 1, "rigidBody_%d", nameIndex);
+			nameIndex++;
+			meshNode->SetName(name);
+		}
+		if (!rootMesh)
+		{
+			rootMesh = meshNode;
+		}
+		else
+		{
+			parentMesh->AddChild(ndSharedPtr<ndMesh>(meshNode));
+		}
+		const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+		ndSharedPtr<ndMeshShapeInstance> meshPrimitive(new ndMeshShapeInstance(body->GetCollisionShape()));
+		meshNode->SetPrimitive(meshPrimitive);
+		node->m_body->Serialize(meshNode);
+		if (node != m_rootNode)
+		{
+			// TO DO: serialize joint here
+		}
+
+		for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
+		{
+			stack.PushBack(child);
+			parent.PushBack(meshNode);
+		}
+	}
+
+	ndAssert(rootMesh);
+	ndSharedPtr<ndMesh> mesh(rootMesh);
+	ndMeshLoader articulation(mesh);
+	articulation.SaveMesh(path);
+}

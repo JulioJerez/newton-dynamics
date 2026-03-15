@@ -12,13 +12,10 @@
 #include "ndNewAssetStdafx.h"
 #include "ndAssetEditor.h"
 #include "ndFileBrowser.h"
+#include "ndEditorCameraFlyby.h"
 //#include "ndPhysicsWorld.h"
 //#include "ndPhysicsUtils.h"
-//#include "ndTestDeepBrain.h"
-//#include "ndDemoCameraNode.h"
 #include "ndMenuRenderPass.h"
-//#include "ndHighResolutionTimer.h"
-//#include "ndDemoCameraNodeFlyby.h"
 //#include "ndDebugDisplayRenderPass.h"
 
 ndAssetEditor::ButtonKey::ButtonKey (bool state)
@@ -62,41 +59,13 @@ ndAssetEditor::ndAssetEditor()
 	//,m_currentScene(DEFAULT_SCENE)
 	//,m_lastCurrentScene(DEFAULT_SCENE)
 	,m_currentPath("")
-	,m_framesCount(0)
-	,m_physicsFramesCount(0)
 	,m_currentPlugin(0)
 	,m_solverPasses(6)
 	,m_solverSubSteps(2)
 	,m_workerThreads(4)
 	,m_debugDisplayMode(0)
 	,m_showCollisionMeshMode(0)
-	,m_fps(0.0f)
-	,m_timestepAcc(0.0f)
-	,m_currentListenerTimestep(0.0f)
 	,m_runScene(false)
-	//,m_showUI(true)
-	//,m_showAABB(false)
-	//,m_showStats(true)
-	//,m_helperLegend(false)
-	//,m_autoSleepMode(true)
-	//,m_showScene(false)
-	//,m_showConcaveEdge(false)
-	//,m_hideVisualMeshes(false)
-	//,m_showNormalForces(false)
-	//,m_showCenterOfMass(false)
-	//,m_showBodyFrame(false)
-	//,m_showMeshSkeleton(false)
-	//,m_updateMenuOptions(true)
-	//,m_showContactPoints(false)
-	//,m_showJointDebugInfo(false)
-	//,m_showModelsDebugInfo(false)
-	//,m_suspendPhysicsUpdate(false)
-	//,m_synchronousPhysicsUpdate(false)
-	//,m_synchronousParticlesUpdate(false)
-	//,m_showStaticMeshCollidingFaces(false)
-	//,m_showRaycastHit(false)
-	//,m_profilerMode(false)
-	,m_nextActiveCamera()
 	,m_solverMode(ndWorld::ndSimdSoaSolver)
 {
 	// Setup window
@@ -121,18 +90,18 @@ ndAssetEditor::ndAssetEditor()
 
 	//// create render passes
 	m_menuRenderPass = ndSharedPtr<ndRenderPass>(new ndMenuRenderPass(this));
+	m_colorRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassColor(*m_renderer));
 	//m_debugDisplayRenderPass = ndSharedPtr<ndRenderPass>(new ndDebugDisplayRenderPass(this));
-	//m_colorRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassColor(*m_renderer));
 	//m_shadowRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassShadows(*m_renderer));
 	//m_transparentRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassTransparency(*m_renderer));
 	//m_environmentRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassEnvironment(*m_renderer, m_environmentTexture));
 
 	//// add render passes in order of execution
 	//m_renderer->AddRenderPass(m_shadowRenderPass);
-	//m_renderer->AddRenderPass(m_colorRenderPass);
 	//m_renderer->AddRenderPass(m_environmentRenderPass);
 	//m_renderer->AddRenderPass(m_transparentRenderPass);
 	//m_renderer->AddRenderPass(m_debugDisplayRenderPass);
+	m_renderer->AddRenderPass(m_colorRenderPass);
 	m_renderer->AddRenderPass(m_menuRenderPass);
 	
 	////add main directional light
@@ -167,11 +136,14 @@ ndAssetEditor::ndAssetEditor()
 	//m_showStaticMeshCollidingFaces = true;
 
 	ImGuiIO& io = ImGui::GetIO();
-	//io.ConfigFlags |= ImGuiWindowFlags_MenuBar;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
 	Cleanup();
 	ApplyOptions();
+
+	//m_renderer->MaximizeWindow();
+	m_defaultCamera = ndSharedPtr<ndRenderSceneNode>(new ndEditorCameraFlyby(*m_renderer));
+	m_renderer->SetCamera(m_defaultCamera);
 }
 
 ndAssetEditor::~ndAssetEditor ()
@@ -528,74 +500,6 @@ void ndAssetEditor::SetDemoUIpanel(ndSharedPtr<ndDemoUIpanel>&)
 	//m_demoUIpanel = panel;
 }
 
-void ndAssetEditor::SetNextActiveCamera()
-{
-	ndAssert(0);
-	//if (!m_nextActiveCamera.Update(GetKeyState(ImGuiKey_C) ? true : false))
-	//{
-	//	return;
-	//}
-	//
-	//ndFixSizeArray<const ndRenderSceneCamera*, 256> cameraPallete;
-	//cameraPallete.PushBack(m_defaultCamera->FindCameraNode());
-	//
-	//ndList<ndSharedPtr<ndRenderSceneNode>>& scene = m_renderer->GetScene();
-	//for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* sceneNode = scene.GetFirst(); sceneNode; sceneNode = sceneNode->GetNext())
-	//{
-	//	ndSharedPtr<ndRenderSceneNode>& node = sceneNode->GetInfo();
-	//	const ndRenderSceneCamera* cameraNode = node->FindCameraNode();
-	//	if (cameraNode)
-	//	{
-	//		cameraPallete.PushBack(cameraNode);
-	//	}
-	//}
-	//
-	//const ndRenderSceneCamera* const currentCamera = m_renderer->GetCamera()->FindCameraNode();
-	//for (ndInt32 i = 0; i < cameraPallete.GetCount(); ++i)
-	//{
-	//	if (cameraPallete[i] == currentCamera)
-	//	{
-	//		ndInt32 j = (i + 1) % cameraPallete.GetCount();
-	//		if (j == 0)
-	//		{
-	//			const ndTransform tranform (currentCamera->CalculateGlobalTransform());
-	//			m_defaultCamera->SetTransform(tranform);
-	//			m_defaultCamera->SetTransform(tranform);
-	//			m_renderer->SetCamera(m_defaultCamera);
-	//		}
-	//		else
-	//		{
-	//			ndRenderSceneNode* const camera = cameraPallete[j]->FindByName("__PlayerCamera__");
-	//			ndSharedPtr<ndRenderSceneNode> cameraNode(camera->GetSharedPtr());
-	//			m_renderer->SetCamera(cameraNode);
-	//		}
-	//		break;
-	//	}
-	//}
-}
-
-void ndAssetEditor::CalculateFPS(ndFloat32 timestep)
-{
-	m_framesCount ++;
-	m_timestepAcc += timestep;
-
-	// this probably happing on loading of and a pause, just rest counters
-	if ((m_timestepAcc <= 0.0f) || (m_timestepAcc > 4.0f))
-	{
-		m_timestepAcc = 0;
-		m_framesCount = 0;
-	}
-
-	//update fps every quarter of a second
-	const ndFloat32 movingAverage = 0.5f;
-	if (m_timestepAcc >= movingAverage)
-	{
-		m_fps = ndFloat32 (m_framesCount) / m_timestepAcc;
-		m_timestepAcc -= movingAverage;
-		m_framesCount = 0;
-	}
-}
-
 ndInt32 ndAssetEditor::Print (const ndVector&, const char *fmt, ... ) const
 {
 	va_list argptr;
@@ -649,7 +553,48 @@ void ndAssetEditor::RenderScene()
 	//ndFloat32 timestep = ndGetElapsedSeconds();	
 	//CalculateFPS(timestep);
 	//UpdatePhysics(timestep);
+
+	m_windowSizes.SetCount(0);
 	m_renderer->Render();
+
+	ndInt32 minX = ndInt32(m_windowSizes[0].m_posit.x);
+	ndInt32 minY = ndInt32(m_windowSizes[0].m_posit.y);
+	ndInt32 maxX = minX + ndInt32(m_windowSizes[0].m_size.x);
+	ndInt32 maxY = minY + ndInt32(m_windowSizes[0].m_size.y);
+
+	for (ndInt32 j = m_windowSizes.GetCount() - 1; j >= 1; --j)
+	{
+		for (ndInt32 i = j; i >= 1; --i)
+		{
+			ndInt32 x0 = ndInt32(m_windowSizes[i].m_posit.x);
+			ndInt32 y0 = ndInt32(m_windowSizes[i].m_posit.y);
+			ndInt32 x1 = x0 + ndInt32(m_windowSizes[i].m_size.x);
+			ndInt32 y1 = y0 + ndInt32(m_windowSizes[i].m_size.y);
+
+			if ((x0 == minX) && (x1 < maxX))
+			{
+				minX = ndMax(minX, x1);
+				i = 0;
+			}
+			if ((x0 > minX) && (x1 == maxX))
+			{
+				maxX = ndMin(maxX, x0);
+				i = 0;
+			}
+			
+			if ((y0 == minY) && (y1 < maxY))
+			{
+				minY = ndMax(minY, y1);
+				i = 0;
+			}
+			if ((y0 > minY) && (y1 == maxY))
+			{
+				maxY = ndMin(maxY, y0);
+				i = 0;
+			}
+		}
+	}
+	m_renderer->SetViewport(minX, minY, maxX, maxY);
 }
 
 void ndAssetEditor::TestImGui()
@@ -706,19 +651,6 @@ void ndAssetEditor::TestImGui()
 	ImGui::Render();
 }
 
-void ndAssetEditor::Run()
-{
-	// Main loop
-	ndFloatExceptions exception;
-	while (!m_renderer->ShouldFinish())
-	{
-		if (m_renderer->PollEvents())
-		{
-			RenderScene();
-		}
-	}
-}
-
 void ndAssetEditor::BeginDockSpace()
 {
 	//static bool opt_padding = false;
@@ -764,9 +696,14 @@ void ndAssetEditor::BeginDockSpace()
 	ImGuiIO& io = ImGui::GetIO();
 	if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
 	{
-		ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+		ImGuiID dockspace_id = ImGui::GetID("EditorDockSpace");
 		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
 	}
+
+	WindowFrame frame;
+	frame.m_posit = ImGui::GetWindowPos();
+	frame.m_size = ImGui::GetWindowSize();
+	m_windowSizes.PushBack(frame);
 }
 
 void ndAssetEditor::EndDockSpace()
@@ -777,16 +714,24 @@ void ndAssetEditor::EndDockSpace()
 void ndAssetEditor::RenderLayout()
 {
 	BeginDockSpace();
+
 	ShowMainMenuBar();
-	ShowOutlier();
+	ShowOutlierPanel();
+	ShowPropertiesPanel();
+
 	EndDockSpace();
 }
 
 void ndAssetEditor::ShowMainMenuBar()
 {
-	//if (ImGui::BeginMainMenuBar())
 	if (ImGui::BeginMenuBar())
 	{
+		WindowFrame frame;
+		ImGui::GetWindowClipRect(frame.m_posit, frame.m_size);
+		frame.m_size.x -= frame.m_posit.x;
+		frame.m_size.y -= frame.m_posit.y;
+		m_windowSizes.PushBack(frame);
+
 		if (ImGui::BeginMenu("File"))
 		{
 			if (ImGui::MenuItem("New", ""))
@@ -847,7 +792,19 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::EndMenu();
 		}
 
-		//ImGui::EndMainMenuBar();
 		ImGui::EndMenuBar();
+	}
+}
+
+void ndAssetEditor::Run()
+{
+	// Main loop
+	ndFloatExceptions exception;
+	while (!m_renderer->ShouldFinish())
+	{
+		if (m_renderer->PollEvents())
+		{
+			RenderScene();
+		}
 	}
 }

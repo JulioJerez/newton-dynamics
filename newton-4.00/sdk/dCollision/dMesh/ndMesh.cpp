@@ -23,12 +23,12 @@
 #include "ndCollisionStdafx.h"
 #include "VHACD.h"
 #include "ndMesh.h"
-#include "ndBody.h"
+//#include "ndBody.h"
 #include "ndCollision.h"
 
 #define ND_MESH_MAX_STACK_DEPTH	2048
 
-
+#if 0
 ndMeshCollisionShape::ndMeshCollisionShape()
 {
 }
@@ -77,7 +77,7 @@ void ndMeshCollisionShapeCapsule::DeserializeFromXml(const nd::TiXmlElement* con
 	m_height = xmlGetFloat(parent, "heigh");
 }
 
-ndMeshBodyKinematic::ndMeshShapeInstance::ndMeshShapeInstance()
+ndMeshShapeInstance::ndMeshShapeInstance()
 	:m_localMatrix(ndGetIdentityMatrix())
 	,m_alignmentMatrix(ndGetIdentityMatrix())
 	,m_scale(ndVector::m_one)
@@ -85,7 +85,7 @@ ndMeshBodyKinematic::ndMeshShapeInstance::ndMeshShapeInstance()
 {
 }
 
-void ndMeshBodyKinematic::ndMeshShapeInstance::SerializeToXml(nd::TiXmlElement* const parent) const
+void ndMeshShapeInstance::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	xmlSaveParam(parent, "localMatrix", m_localMatrix);
 	xmlSaveParam(parent, "alignmentMatrix", m_alignmentMatrix);
@@ -97,7 +97,7 @@ void ndMeshBodyKinematic::ndMeshShapeInstance::SerializeToXml(nd::TiXmlElement* 
 	m_shape->SerializeToXml(shapeNode);
 }
 
-void ndMeshBodyKinematic::ndMeshShapeInstance::DeserializeFromXml(const nd::TiXmlElement* const parent)
+void ndMeshShapeInstance::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	m_localMatrix = xmlGetMatrix(parent, "localMatrix");
 	m_alignmentMatrix = xmlGetMatrix(parent, "alignmentMatrix");
@@ -125,8 +125,7 @@ void ndMeshBodyKinematic::ndMeshShapeInstance::DeserializeFromXml(const nd::TiXm
 }
 
 ndMeshBody::ndMeshBody()
-	:m_matrix(ndGetIdentityMatrix())
-	,m_veloc(ndVector::m_zero)
+	:m_veloc(ndVector::m_zero)
 	,m_omega(ndVector::m_zero)
 	,m_localCentreOfMass(ndVector::m_zero)
 {
@@ -135,7 +134,6 @@ ndMeshBody::ndMeshBody()
 
 void ndMeshBody::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	xmlSaveParam(parent, "matrix", m_matrix);
 	xmlSaveParam(parent, "veloc", m_veloc);
 	xmlSaveParam(parent, "omega", m_omega);
 	xmlSaveParam(parent, "com", m_localCentreOfMass);
@@ -143,7 +141,6 @@ void ndMeshBody::SerializeToXml(nd::TiXmlElement* const parent) const
 
 void ndMeshBody::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
-	m_matrix = xmlGetMatrix(parent, "matrix");
 	m_veloc = xmlGetVector3(parent, "veloc");
 	m_omega = xmlGetVector3(parent, "omega");
 	m_localCentreOfMass = xmlGetVector3(parent, "com");
@@ -224,6 +221,7 @@ void ndMeshBodyDynamic::DeserializeFromXml(const nd::TiXmlElement* const parent)
 ndMeshBody::~ndMeshBody()
 {
 }
+#endif
 
 ndMesh::ndMesh()
 	:ndClassAlloc()
@@ -425,6 +423,21 @@ const ndSharedPtr<ndMeshEffect>& ndMesh::GetMesh() const
 void ndMesh::SetMesh(const ndSharedPtr<ndMeshEffect>& mesh)
 {
 	m_mesh = mesh;
+}
+
+ndSharedPtr<ndMeshShapeInstance>& ndMesh::GetPrimitive()
+{
+	return m_meshPrimitive;
+}
+
+const ndSharedPtr<ndMeshShapeInstance>& ndMesh::GetPrimitive() const
+{
+	return m_meshPrimitive;
+}
+
+void ndMesh::SetPrimitive(const ndSharedPtr<ndMeshShapeInstance>& primitive)
+{
+	m_meshPrimitive = primitive;
 }
 
 ndSharedPtr<ndMesh> ndMesh::GetSharedPtr() const

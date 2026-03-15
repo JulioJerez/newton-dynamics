@@ -66,12 +66,14 @@ class ndRenderContext: public ndClassAlloc
 
 	ndInt32 GetWidth() const;
 	ndInt32 GetHeight() const;
+	void MaximizeWindow() const;
 	void SetTitle(const char* const title);
 	void InitImGui(const char* const fontPathName);
 
 	void EndFrame();
 	void BeginFrame();
 	void ClearFrameBuffer(const ndVector& color);
+	void SetViewport(ndInt32 x, ndInt32 yt, ndInt32 width, ndInt32 height);
 
 	private:
 	void LoadFont(const char* const fontPathName);
@@ -84,7 +86,7 @@ class ndRenderContext: public ndClassAlloc
 	void SetGuiRenderStates();
 	void SetCollorPassRenderStates();
 
-	void SetViewport(ndInt32 width, ndInt32 height);
+	void SetViewport();
 	static void ErrorCallback(ndInt32 error, const char* const description);
 	static void ResizeWindowsCallback(GLFWwindow* window, int x, int y);
 
@@ -93,6 +95,7 @@ class ndRenderContext: public ndClassAlloc
 	static void MouseScrollCallback(GLFWwindow* const window, double x, double y);
 	static void MouseButtonCallback(GLFWwindow* const window, ndInt32 button, ndInt32 action, ndInt32 mods);
 	static void KeyCallback(GLFWwindow* const window, ndInt32 key, ndInt32, ndInt32 action, ndInt32 mods);
+	static void WindowMaximize(GLFWwindow* window, int maximized);
 
 #if (defined(_DEBUG) && defined(WIN32))
 	static void APIENTRY OpenMessageCallback(
@@ -107,6 +110,10 @@ class ndRenderContext: public ndClassAlloc
 	ndInt32 m_prevKey;
 	bool m_imGuiEnabled;
 	bool m_mousePressed[3];
+	ndInt32 m_viewport_x0;
+	ndInt32 m_viewport_y0;
+	ndInt32 m_viewport_width;
+	ndInt32 m_viewport_heigh;
 
 	friend class ndRenderTexture;
 	friend class ndRenderPassGui;
