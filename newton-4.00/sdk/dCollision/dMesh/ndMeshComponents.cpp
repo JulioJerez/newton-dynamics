@@ -26,8 +26,10 @@
 #include "ndBody.h"
 #include "ndCollision.h"
 #include "ndMeshComponents.h"
+#include "ndJointBilateralConstraint.h"
 
 ndMeshCollisionShape::ndMeshCollisionShape()
+	:ndClassAlloc()
 {
 }
 
@@ -76,7 +78,8 @@ void ndMeshCollisionShapeCapsule::DeserializeFromXml(const nd::TiXmlElement* con
 }
 
 ndMeshShapeInstance::ndMeshShapeInstance()
-	:m_localMatrix(ndGetIdentityMatrix())
+	:ndClassAlloc()
+	,m_localMatrix(ndGetIdentityMatrix())
 	,m_alignmentMatrix(ndGetIdentityMatrix())
 	,m_scale(ndVector::m_one)
 	,m_shape(nullptr)
@@ -84,7 +87,8 @@ ndMeshShapeInstance::ndMeshShapeInstance()
 }
 
 ndMeshShapeInstance::ndMeshShapeInstance(const ndShapeInstance& instance)
-	:m_localMatrix(instance.GetLocalMatrix())
+	:ndClassAlloc()
+	,m_localMatrix(instance.GetLocalMatrix())
 	,m_alignmentMatrix(instance.GetAlignmentMatrix())
 	,m_scale(instance.GetScale())
 	,m_shape(instance.GetShape()->GetMeshShape())
@@ -131,7 +135,8 @@ void ndMeshShapeInstance::DeserializeFromXml(const nd::TiXmlElement* const paren
 }
 
 ndMeshBody::ndMeshBody()
-	:m_veloc(ndVector::m_zero)
+	:ndClassAlloc()
+	,m_veloc(ndVector::m_zero)
 	,m_omega(ndVector::m_zero)
 	,m_localCentreOfMass(ndVector::m_zero)
 {
@@ -228,3 +233,29 @@ ndMeshBody::~ndMeshBody()
 {
 }
 
+ndMeshJoint::ndMeshJoint()
+	:ndClassAlloc()
+{
+	ndAssert(0);
+}
+
+ndMeshJoint::ndMeshJoint(const ndJointBilateralConstraint* const joint)
+	:ndClassAlloc()
+{
+	ndAssert(0);
+}
+
+ndMeshJoint::~ndMeshJoint()
+{
+	ndAssert(0);
+}
+
+void ndMeshJoint::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndAssert(0);
+}
+
+void ndMeshJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndAssert(0);
+}

@@ -27,6 +27,7 @@
 class ndBody;
 class ndMeshEffect;
 class ndShapeInstance;
+class ndJointBilateralConstraint;
 
 class ndMeshCollisionShape : public ndClassAlloc
 {
@@ -65,7 +66,7 @@ class ndMeshCollisionShapeCapsule : public ndMeshCollisionShape
 	ndFloat32 m_radius1;
 };
 
-class ndMeshShapeInstance
+class ndMeshShapeInstance : public ndClassAlloc
 {
 	public:
 	D_COLLISION_API ndMeshShapeInstance();
@@ -116,6 +117,14 @@ class ndMeshBodyDynamic : public ndMeshBodyKinematic
 	ndVector m_intrinsicDamping;
 };
 
+class ndMeshJoint : public ndClassAlloc
+{
+	D_COLLISION_API ndMeshJoint();
+	D_COLLISION_API ndMeshJoint(const ndJointBilateralConstraint* const joint);
+	D_COLLISION_API virtual ~ndMeshJoint();
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+};
 
 #endif
 
