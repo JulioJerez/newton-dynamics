@@ -71,12 +71,6 @@ enum ndShapeID
 	m_pointCollision,
 	m_polygonCollision,
 	m_boundingBoxHierachy,
-	
-	//m_deformableClothPatch,
-	//m_deformableSolidMesh,
-	// these are for internal use only	
-	//m_contactCloud,
-	//m_lumpedMassCollision
 };
 
 class ndShapeMaterial
