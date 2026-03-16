@@ -374,3 +374,18 @@ void ndJointSpherical::JacobianDerivative(ndConstraintDescritor& desc)
 	}
 	SubmitLimits(matrix0, matrix1, desc);
 }
+
+
+ndSharedPtr<ndMeshJoint> ndJointSpherical::GetMeshJoint() const
+{
+	ndMeshJointSpherical* const joint = new ndMeshJointSpherical(this);
+
+	joint->m_rotation = m_rotation;
+	joint->m_springK = m_springK;
+	joint->m_damperC = m_damperC;
+	joint->m_maxConeAngle = m_maxConeAngle * ndRadToDegree;
+	joint->m_minTwistAngle = m_minTwistAngle * ndRadToDegree;
+	joint->m_maxTwistAngle = m_maxTwistAngle * ndRadToDegree;
+	joint->m_springDamperRegularizer = m_springDamperRegularizer;
+	return ndSharedPtr<ndMeshJoint>(joint);
+}

@@ -26,6 +26,8 @@
 #include "ndTypes.h"
 #include "ndThreadSyncUtils.h"
 
+//#define D_MEMORY_SANITY_CHECK
+
 typedef void* (*ndMemAllocCallback) (size_t size);
 typedef void (*ndMemFreeCallback) (void* const ptr);
 

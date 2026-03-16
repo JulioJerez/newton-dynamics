@@ -34,7 +34,7 @@ class ndJointDoubleHinge: public ndJointBilateralConstraint
 		ndFloat32 m_maxLimit;
 		ndFloat32 m_offsetAngle;
 		ndFloat32 m_springDamperRegularizer;
-		ndInt32 m_limitState;
+		ndInt8 m_limitState;
 	};
 
 	D_CLASS_REFLECTION(ndJointDoubleHinge, ndJointBilateralConstraint)

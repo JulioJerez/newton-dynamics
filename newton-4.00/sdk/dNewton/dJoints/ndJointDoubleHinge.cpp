@@ -430,8 +430,21 @@ void ndJointDoubleHinge::JacobianDerivative(ndConstraintDescritor& desc)
 
 ndSharedPtr<ndMeshJoint> ndJointDoubleHinge::GetMeshJoint() const
 {
-	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointDoubleHinge(this));
+	ndMeshJointDoubleHinge* const joint = new ndMeshJointDoubleHinge(this);
 
-	return joint;
+	joint->m_axis0.m_springK = m_axis0.m_springK;
+	joint->m_axis0.m_damperC = m_axis0.m_damperC;
+	joint->m_axis0.m_limitState = m_axis0.m_limitState;
+	joint->m_axis0.m_minLimit = m_axis0.m_minLimit * ndRadToDegree;
+	joint->m_axis0.m_maxLimit = m_axis0.m_maxLimit * ndRadToDegree;
+	joint->m_axis0.m_springDamperRegularizer = m_axis0.m_springDamperRegularizer;
 
+	joint->m_axis1.m_springK = m_axis1.m_springK;
+	joint->m_axis1.m_damperC = m_axis1.m_damperC;
+	joint->m_axis1.m_limitState = m_axis1.m_limitState;
+	joint->m_axis1.m_minLimit = m_axis1.m_minLimit * ndRadToDegree;
+	joint->m_axis1.m_maxLimit = m_axis1.m_maxLimit * ndRadToDegree;
+	joint->m_axis1.m_springDamperRegularizer = m_axis1.m_springDamperRegularizer;
+
+	return ndSharedPtr<ndMeshJoint>(joint);
 }

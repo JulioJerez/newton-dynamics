@@ -286,12 +286,6 @@ namespace ndBipedPlayer
 			body->SetMatrix(mesh->CalculateGlobalMatrix());
 			body->SetCollisionShape(*(*shape));
 			body->GetAsBodyDynamic()->SetMassMatrix(mass, *(*shape));
-
-			//char name[256];
-			//static int xxxx = 0;
-			//sprintf_s(name, 255, "xxx%d.nd", xxxx);
-			//xxxx++;
-			//ndMesh::SaveRigidBody(body, ndGetWorkingFileName(name).GetStr());
 			return body;
 		};
 
@@ -299,6 +293,25 @@ namespace ndBipedPlayer
 		ndSharedPtr<ndBody> rootBody(CreateRigidBody(mesh, visualMesh, 1.0f, nullptr));
 		ndModelArticulation::ndNode* const modelRootNode = model->AddRootBody(rootBody);
 		modelRootNode->m_name = mesh->GetName();
+
+		// add spine1
+		ndSharedPtr<ndMesh> spine1Mesh(mesh->FindByClosestMatch("spine1")->GetSharedPtr());
+		ndSharedPtr<ndRenderSceneNode> spine1Entity(visualMesh->FindByClosestMatch("spine1")->GetSharedPtr());
+		ndSharedPtr<ndBody> spine1Body(CreateRigidBody(spine1Mesh, spine1Entity, 1.0f, rootBody->GetAsBodyDynamic()));
+		const ndMatrix spine1Matrix(spine1Mesh->CalculateGlobalMatrix());
+		ndSharedPtr<ndJointBilateralConstraint> spine1Joint(new ndJointFix6dof(spine1Matrix, spine1Body->GetAsBodyKinematic(), rootBody->GetAsBodyKinematic()));
+		ndModelArticulation::ndNode* const spine1Link = model->AddLimb(modelRootNode, spine1Body, spine1Joint);
+		spine1Link->m_name = spine1Mesh->GetName();
+
+		// add spine2
+		ndSharedPtr<ndMesh> spine2Mesh(mesh->FindByClosestMatch("spine2")->GetSharedPtr());
+		ndSharedPtr<ndRenderSceneNode> spine2Entity(visualMesh->FindByClosestMatch("spine2")->GetSharedPtr());
+		ndSharedPtr<ndBody> spine2Body(CreateRigidBody(spine2Mesh, spine2Entity, 1.0f, rootBody->GetAsBodyDynamic()));
+		const ndMatrix spine2Matrix(spine2Mesh->CalculateGlobalMatrix());
+		ndSharedPtr<ndJointBilateralConstraint> spine2Joint(new ndJointFix6dof(spine1Matrix, spine2Body->GetAsBodyKinematic(), spine1Body->GetAsBodyKinematic()));
+		ndModelArticulation::ndNode* const spine2Link = model->AddLimb(spine1Link, spine2Body, spine2Joint);
+		spine2Link->m_name = spine2Mesh->GetName();
+
 
 		// add right leg
 		{

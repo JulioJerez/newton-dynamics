@@ -18,7 +18,7 @@
 #include "ndDemoCameraNodeFollow.h"
 #include "ndHeightFieldPrimitive.h"
 
-#if 0
+#if 1
 
 // Material ragdoll : désactive les collisions internes
 class DGRagdollMaterial : public ndApplicationMaterial
@@ -434,7 +434,6 @@ class ndDGController : public ndModelNotify
             nextRootTemp3 = nextRootTemp;
         }
 
-#if 1
         { // head
             ndMatrix tmp1(headBody->GetMatrix());
             tmp1[3] = ndVector(tmp1[3][0], tmp1[3][1] - 1.05f, tmp1[3][2], 1.0f); // offset
@@ -450,9 +449,7 @@ class ndDGController : public ndModelNotify
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint2);
             nextRootTemp = m_model->AddLimb(nextRootTemp, headBody, jointPtr);
         }
-#endif
 
-#if 1
         // upper body parts
         { // epaule_R
             ndMatrix tmp1(epauleRBody->GetMatrix());
@@ -605,9 +602,7 @@ class ndDGController : public ndModelNotify
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint19);
             nextRootTemp1 = m_model->AddLimb(nextRootTemp1, handLBody, jointPtr);
         }
-#endif
 
-#if 1
         // lower body parts
         { // hip_L
             ndMatrix tmp1(hipLBody->GetMatrix());
@@ -785,7 +780,6 @@ class ndDGController : public ndModelNotify
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint11);
             nextRootTemp1 = m_model->AddLimb(nextRootTemp1, orteilLBody, jointPtr);
         }
-#endif
     }
 
     std::vector<ndSharedPtr<ndBody>> m_bodypartlist;
@@ -802,8 +796,19 @@ void ndBasicRagdoll(ndDemoEntityManager* const scene)
     ndSharedPtr<ndModelNotify> controller(new ndDGController(scene, model));
     model->SetNotifyCallback(controller);
 
+    {
+        //testing save. 
+        model->SaveNdMesh(ndGetWorkingFileName("xxx3.nd").GetStr());
+
+        // load model
+        ndRenderMeshLoader loader(*scene->GetRenderer());
+        loader.LoadMesh(ndGetWorkingFileName("xxx3.nd").GetStr());
+        ndSharedPtr<ndModelArticulation> model1 (new ndModelArticulation());
+        model1->Deserialize(*loader.m_mesh);
+    }
+
     ndPhysicsWorld* world = scene->GetWorld();
-    world->AddModel(model);
+    world->AddModel(ndSharedPtr<ndModel>(model));
 
     ndQuaternion rot;
     ndVector origin(-20.0f, 10.0f, 0.0f, 1.0f);

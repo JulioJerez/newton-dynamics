@@ -265,6 +265,28 @@ void ndMeshJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
 	ndAssert(0);
 }
 
+ndMeshJointFix6dof::ndMeshJointFix6dof()
+	:ndMeshJoint()
+{
+}
+
+ndMeshJointFix6dof::ndMeshJointFix6dof(const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(joint)
+{
+}
+
+void ndMeshJointFix6dof::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+
+	xmlSaveParam(parent, "softness", m_softness);
+	xmlSaveParam(parent, "maxForce", m_maxForce);
+	xmlSaveParam(parent, "maxTorque", m_maxTorque);
+}
+
+void ndMeshJointFix6dof::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+}
 
 ndMeshJointHinge::ndMeshJointHinge()
 	:ndMeshJoint()
@@ -281,34 +303,13 @@ void ndMeshJointHinge::SerializeToXml(nd::TiXmlElement* const parent) const
 	ndMeshJoint::SerializeToXml(parent);
 	xmlSaveParam(parent, "springK", m_springK);
 	xmlSaveParam(parent, "damperC", m_damperC);
+	xmlSaveParam(parent, "limitState", m_limitState);
 	xmlSaveParam(parent, "minLimit", m_minLimit);
 	xmlSaveParam(parent, "maxLimit", m_maxLimit);
-	xmlSaveParam(parent, "limitState", m_limitState);
 	xmlSaveParam(parent, "springDamperRegularizer", m_springDamperRegularizer);
 }
 
 void ndMeshJointHinge::DeserializeFromXml(const nd::TiXmlElement* const parent)
-{
-	ndAssert(0);
-}
-
-ndMeshJointDoubleHinge::ndMeshJointDoubleHinge()
-	:ndMeshJoint()
-{
-}
-
-ndMeshJointDoubleHinge::ndMeshJointDoubleHinge(const ndJointBilateralConstraint* const joint)
-	:ndMeshJoint(joint)
-{
-}
-
-void ndMeshJointDoubleHinge::SerializeToXml(nd::TiXmlElement* const parent) const
-{
-	ndMeshJoint::SerializeToXml(parent);
-	//ndAssert(0);
-}
-
-void ndMeshJointDoubleHinge::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndAssert(0);
 }
@@ -326,10 +327,81 @@ ndMeshJointSlider::ndMeshJointSlider(const ndJointBilateralConstraint* const joi
 void ndMeshJointSlider::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	ndMeshJoint::SerializeToXml(parent);
-	//ndAssert(0);
+	xmlSaveParam(parent, "springK", m_springK);
+	xmlSaveParam(parent, "damperC", m_damperC);
+	xmlSaveParam(parent, "limitState", m_limitState);
+	xmlSaveParam(parent, "minLimit", m_minLimit);
+	xmlSaveParam(parent, "maxLimit", m_maxLimit);
+	xmlSaveParam(parent, "springDamperRegularizer", m_springDamperRegularizer);
 }
 
 void ndMeshJointSlider::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndAssert(0);
+}
+
+ndMeshJointDoubleHinge::ndMeshJointDoubleHinge()
+	:ndMeshJoint()
+{
+}
+
+ndMeshJointDoubleHinge::ndMeshJointDoubleHinge(const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(joint)
+{
+}
+
+void ndMeshJointDoubleHinge::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+
+	nd::TiXmlElement* const axis0 = new nd::TiXmlElement("axis0");
+	parent->LinkEndChild(axis0);
+	xmlSaveParam(axis0, "springK", m_axis0.m_springK);
+	xmlSaveParam(axis0, "damperC", m_axis0.m_damperC);
+	xmlSaveParam(axis0, "limitState", m_axis0.m_limitState);
+	xmlSaveParam(axis0, "minLimit", m_axis0.m_minLimit);
+	xmlSaveParam(axis0, "maxLimit", m_axis0.m_maxLimit);
+	xmlSaveParam(axis0, "springDamperRegularizer", m_axis0.m_springDamperRegularizer);
+
+	nd::TiXmlElement* const axis1 = new nd::TiXmlElement("axis1");
+	parent->LinkEndChild(axis1);
+	xmlSaveParam(axis1, "springK", m_axis1.m_springK);
+	xmlSaveParam(axis1, "damperC", m_axis1.m_damperC);
+	xmlSaveParam(axis1, "limitState", m_axis1.m_limitState);
+	xmlSaveParam(axis1, "minLimit", m_axis1.m_minLimit);
+	xmlSaveParam(axis1, "maxLimit", m_axis1.m_maxLimit);
+	xmlSaveParam(axis1, "springDamperRegularizer", m_axis1.m_springDamperRegularizer);
+}
+
+void ndMeshJointDoubleHinge::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndAssert(0);
+}
+
+ndMeshJointSpherical::ndMeshJointSpherical()
+	:ndMeshJoint()
+{
+}
+
+ndMeshJointSpherical::ndMeshJointSpherical(const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(joint)
+{
+}
+
+void ndMeshJointSpherical::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+
+	xmlSaveParam(parent, "rotation", m_rotation);
+	xmlSaveParam(parent, "springK", m_springK);
+	xmlSaveParam(parent, "damperC", m_damperC);
+	xmlSaveParam(parent, "maxConeAngle", m_maxConeAngle);
+	xmlSaveParam(parent, "minTwistAngle", m_minTwistAngle);
+	xmlSaveParam(parent, "maxTwistAngle", m_maxTwistAngle);
+	xmlSaveParam(parent, "springDamperRegularizer", m_springDamperRegularizer);
+}
+
+void ndMeshJointSpherical::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndAssert(0);
 }
