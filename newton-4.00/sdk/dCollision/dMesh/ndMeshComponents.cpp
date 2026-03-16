@@ -279,8 +279,12 @@ ndMeshJointHinge::ndMeshJointHinge(const ndJointBilateralConstraint* const joint
 void ndMeshJointHinge::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	ndMeshJoint::SerializeToXml(parent);
-	//xmlSaveParam(parent, "constructor", m_con);
-	//ndAssert(0);
+	xmlSaveParam(parent, "springK", m_springK);
+	xmlSaveParam(parent, "damperC", m_damperC);
+	xmlSaveParam(parent, "minLimit", m_minLimit);
+	xmlSaveParam(parent, "maxLimit", m_maxLimit);
+	xmlSaveParam(parent, "limitState", m_limitState);
+	xmlSaveParam(parent, "springDamperRegularizer", m_springDamperRegularizer);
 }
 
 void ndMeshJointHinge::DeserializeFromXml(const nd::TiXmlElement* const parent)

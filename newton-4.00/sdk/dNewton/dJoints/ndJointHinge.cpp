@@ -297,8 +297,13 @@ void ndJointHinge::JacobianDerivative(ndConstraintDescritor& desc)
 
 ndSharedPtr<ndMeshJoint> ndJointHinge::GetMeshJoint() const
 {
-	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointHinge(this));
+	ndMeshJointHinge* const joint = new ndMeshJointHinge(this);
 
-	return joint;
-	
+	joint->m_springK = m_springK;
+	joint->m_damperC = m_damperC;
+	joint->m_limitState = m_limitState;
+	joint->m_minLimit = m_minLimit * ndRadToDegree;
+	joint->m_maxLimit = m_maxLimit * ndRadToDegree;
+	joint->m_springDamperRegularizer = m_springDamperRegularizer;
+	return ndSharedPtr<ndMeshJoint> (joint);
 }
