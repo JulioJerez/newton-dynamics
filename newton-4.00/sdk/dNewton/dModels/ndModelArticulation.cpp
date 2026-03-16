@@ -960,7 +960,7 @@ void ndModelArticulation::SaveNdMesh(const char* const path) const
 		else
 		{
 			char name[256];
-			snprintf(name, sizeof(name) - 1, "rigidBody_%d", nameIndex);
+			snprintf(name, sizeof(name) - 1, "unnamed_node_%d", nameIndex);
 			nameIndex++;
 			meshNode->SetName(name);
 		}

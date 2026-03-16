@@ -132,6 +132,20 @@ class ndMeshJoint : public ndClassAlloc
 	ndString m_constructor;
 };
 
+class ndMeshJointFix6dof : public ndMeshJoint
+{
+	public:
+	D_COLLISION_API ndMeshJointFix6dof();
+	D_COLLISION_API ndMeshJointFix6dof(const ndJointBilateralConstraint* const joint);
+
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+
+	ndFloat32 m_softness;
+	ndFloat32 m_maxForce;
+	ndFloat32 m_maxTorque;
+};
+
 class ndMeshJointHinge : public ndMeshJoint
 {
 	public:
@@ -152,11 +166,25 @@ class ndMeshJointHinge : public ndMeshJoint
 class ndMeshJointDoubleHinge : public ndMeshJoint
 {
 	public:
+	class ndAxis
+	{
+		public:
+		ndFloat32 m_springK;
+		ndFloat32 m_damperC;
+		ndFloat32 m_minLimit;
+		ndFloat32 m_maxLimit;
+		ndFloat32 m_springDamperRegularizer;
+		ndInt8 m_limitState;
+	};
+
 	D_COLLISION_API ndMeshJointDoubleHinge();
 	D_COLLISION_API ndMeshJointDoubleHinge(const ndJointBilateralConstraint* const joint);
 
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+
+	ndAxis m_axis0;
+	ndAxis m_axis1;
 };
 
 class ndMeshJointSlider : public ndMeshJoint
@@ -167,6 +195,31 @@ class ndMeshJointSlider : public ndMeshJoint
 
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+
+	ndFloat32 m_springK;
+	ndFloat32 m_damperC;
+	ndFloat32 m_minLimit;
+	ndFloat32 m_maxLimit;
+	ndFloat32 m_springDamperRegularizer;
+	ndInt8 m_limitState;
+};
+
+class ndMeshJointSpherical : public ndMeshJoint
+{
+	public:
+	D_COLLISION_API ndMeshJointSpherical();
+	D_COLLISION_API ndMeshJointSpherical(const ndJointBilateralConstraint* const joint);
+
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+
+	ndMatrix m_rotation;
+	ndFloat32 m_springK;
+	ndFloat32 m_damperC;
+	ndFloat32 m_maxConeAngle;
+	ndFloat32 m_minTwistAngle;
+	ndFloat32 m_maxTwistAngle;
+	ndFloat32 m_springDamperRegularizer;
 };
 
 #endif

@@ -43,6 +43,8 @@ class ndJointFix6dof: public ndJointBilateralConstraint
 	void SubmitAngularAxis(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 	void SubmitAngularAxisCartisianApproximation(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 
+	D_COLLISION_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const override;
+
 	ndFloat32 m_softness;
 	ndFloat32 m_maxForce;
 	ndFloat32 m_maxTorque;

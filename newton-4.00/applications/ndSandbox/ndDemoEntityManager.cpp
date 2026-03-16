@@ -39,7 +39,7 @@
 //#define DEFAULT_SCENE	13		// static compound scene collision 
 //#define DEFAULT_SCENE	14		// basic convex approximate compound shapes
 //#define DEFAULT_SCENE	15		// basic model, a npd vehicle prop
-//#define DEFAULT_SCENE	16		// basic rag doll
+#define DEFAULT_SCENE	16		// basic rag doll
 //#define DEFAULT_SCENE	17		// complex model, implement a complex model with joints
 //#define DEFAULT_SCENE	18		// basics multi body vehicle
 //#define DEFAULT_SCENE	19		// object Placement
@@ -50,7 +50,7 @@
 //#define DEFAULT_SCENE	24		// unicycle SAC trained controller
 //#define DEFAULT_SCENE	25		// unicycle PPO trained controller
 //#define DEFAULT_SCENE	26		// biped SAC trained controller
-#define DEFAULT_SCENE	27		// biped PPO trained controller
+//#define DEFAULT_SCENE	27		// biped PPO trained controller
 //#define DEFAULT_SCENE	28		// procedurally animated quadruped spider
 
 // These are the machine learning training demos

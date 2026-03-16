@@ -51,6 +51,8 @@ class ndJointSpherical: public ndJointBilateralConstraint
 	D_NEWTON_API void SubmitLimits(const ndMatrix& matrix0, const ndMatrix& matrix1, ndConstraintDescritor& desc);
 	D_NEWTON_API void SubmitAngularAxisCartesianApproximation(const ndMatrix& matrix0, const ndMatrix& matrix1, ndConstraintDescritor& desc);
 
+	D_COLLISION_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const override;
+
 	ndMatrix m_rotation;
 	ndVector m_omegaParam;
 	ndQuaternion m_rotationParam;
@@ -61,7 +63,6 @@ class ndJointSpherical: public ndJointBilateralConstraint
 	ndFloat32 m_maxTwistAngle;
 	ndFloat32 m_springDamperRegularizer;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
-
 
 #endif 
 
