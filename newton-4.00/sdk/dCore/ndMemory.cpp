@@ -74,23 +74,30 @@ void ndMemory::GetMemoryAllocators(ndMemAllocCallback& alloc, ndMemFreeCallback&
 	alloc = m_allocMemory;
 }
 
+bool ndMemory::CheckMemoryHeap()
+{
+	bool ret = true;
+#if defined (D_MEMORY_SANITY_CHECK)
+#if defined (WIN32) || defined(_WIN32)
+	ret = _CrtCheckMemory();
+#elif defined (__linux__)
+	// linux OS mememory check
+#elif defined (__APPLE__)
+	// apple OS mememory check
+#elif defined (__MINGW32__) || defined (__MINGW64__))
+	// mingwing OS mememory check
+#elif defined (_M_ARM) || defined (_M_ARM64)
+	// android OS mememory check
+#endif
+#endif
+	return ret;
+}
+
 void* ndMemory::Malloc(size_t size)
 {
-#if defined (D_MEMORY_SANITY_CHECK)
-	#if defined (WIN32) || defined(_WIN32)
-	_ASSERTE(_CrtCheckMemory());
-	#elif defined (__linux__)
-		// linux OS mememory check
-	#elif defined (__APPLE__)
-		// apple OS mememory check
-	#elif defined (__MINGW32__) || defined (__MINGW64__))
-		// mingwing OS mememory check
-	#elif defined (_M_ARM) || defined (_M_ARM64)
-		// android OS mememory check
-	#endif
-#endif
-
 	ndIntPtr metToVal;
+
+	ndAssert(CheckMemoryHeap());
 	size_t bufferSize = CalculateBufferSize(size);
 	metToVal.m_ptr = m_allocMemory(bufferSize);
 	ndUnsigned64 val = ndUnsigned64(metToVal.m_int) + ndGetBufferPaddingInBytes;
@@ -109,20 +116,7 @@ void* ndMemory::Malloc(size_t size)
 
 void ndMemory::Free(void* const ptr)
 {
-	#if defined (D_MEMORY_SANITY_CHECK)
-		#if defined (WIN32) || defined(_WIN32)
-	_ASSERTE(_CrtCheckMemory());
-		#elif defined (__linux__)
-			// linux OS mememory check
-		#elif defined (__APPLE__)
-			// apple OS mememory check
-		#elif defined (__MINGW32__) || defined (__MINGW64__))
-			// mingwing OS mememory check
-		#elif defined (_M_ARM) || defined (_M_ARM64)
-			// android OS mememory check
-		#endif
-#endif
-
+	ndAssert(CheckMemoryHeap());
 	if (ptr)
 	{
 		const ndMemoryHeader* const info = ((ndMemoryHeader*)ptr) - 1;

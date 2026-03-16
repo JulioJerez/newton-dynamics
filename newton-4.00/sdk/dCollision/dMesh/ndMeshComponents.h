@@ -140,6 +140,13 @@ class ndMeshJointHinge : public ndMeshJoint
 
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+
+	ndFloat32 m_springK;
+	ndFloat32 m_damperC;
+	ndFloat32 m_minLimit;
+	ndFloat32 m_maxLimit;
+	ndFloat32 m_springDamperRegularizer;
+	ndInt8 m_limitState;
 };
 
 class ndMeshJointDoubleHinge : public ndMeshJoint
