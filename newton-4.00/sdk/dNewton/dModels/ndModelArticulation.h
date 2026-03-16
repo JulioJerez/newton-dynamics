@@ -98,6 +98,8 @@ class ndModelArticulation: public ndModel
 	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassDynamics(ndIkSolver& solver, const ndMatrix& localFrame, ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS>& extraJoints, ndFloat32 timestep) const;
 	
 	D_NEWTON_API virtual void Serialize(ndMesh* const rootNode) const;
+	D_NEWTON_API virtual void Deserialize(const ndMesh* const rootNode);
+
 	D_NEWTON_API virtual void SaveNdMesh(const char* const path) const;
 
 	protected:

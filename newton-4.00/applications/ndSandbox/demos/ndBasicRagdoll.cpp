@@ -796,7 +796,16 @@ void ndBasicRagdoll(ndDemoEntityManager* const scene)
     ndSharedPtr<ndModelNotify> controller(new ndDGController(scene, model));
     model->SetNotifyCallback(controller);
 
-    model->SaveNdMesh(ndGetWorkingFileName("xxx3.nd").GetStr());
+    {
+        //testing save. 
+        model->SaveNdMesh(ndGetWorkingFileName("xxx3.nd").GetStr());
+
+        // load model
+        ndRenderMeshLoader loader(*scene->GetRenderer());
+        loader.LoadMesh(ndGetWorkingFileName("xxx3.nd").GetStr());
+        ndSharedPtr<ndModelArticulation> model1 (new ndModelArticulation());
+        model1->Deserialize(*loader.m_mesh);
+    }
 
     ndPhysicsWorld* world = scene->GetWorld();
     world->AddModel(ndSharedPtr<ndModel>(model));
