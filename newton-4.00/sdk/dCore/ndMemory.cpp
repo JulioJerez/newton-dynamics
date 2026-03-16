@@ -25,7 +25,6 @@
 #include "ndUtils.h"
 #include "ndMemory.h"
 
-
 //#define D_MEMORY_SANITY_CHECK
 
 #define D_MEMORY_ALIGMNET			32
@@ -80,7 +79,7 @@ bool ndMemory::CheckMemoryHeap()
 	bool ret = true;
 #if defined (D_MEMORY_SANITY_CHECK)
 #if defined (WIN32) || defined(_WIN32)
-	ret = _CrtCheckMemory();
+	ret = _CrtCheckMemory() ? true : false;
 #elif defined (__linux__)
 	// linux OS mememory check
 #elif defined (__APPLE__)
