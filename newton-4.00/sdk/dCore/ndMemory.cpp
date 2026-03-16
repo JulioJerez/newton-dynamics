@@ -30,7 +30,7 @@ ndAtomic<ndUnsigned64> ndMemory::m_memoryUsed(0);
 static ndMemFreeCallback m_freeMemory = free;
 static ndMemAllocCallback m_allocMemory = malloc;
 
-#define D_MEMORY_SANITY_CHECK
+//#define D_MEMORY_SANITY_CHECK
 
 #define D_MEMORY_ALIGMNET			32
 #define ndGetBufferPaddingInBytes	size_t(D_MEMORY_ALIGMNET - 1 + sizeof (ndMemoryHeader))
