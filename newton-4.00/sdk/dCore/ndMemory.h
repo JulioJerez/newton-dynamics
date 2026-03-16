@@ -61,9 +61,8 @@ class ndMemory
 	/// Calculate buffer size.
 	D_CORE_API static size_t CalculateBufferSize(size_t size);
 
-	/// Get memory buffer size previously allocated by Malloc.
+	/// check memory heap integrity using operating system support.
 	D_CORE_API static bool CheckMemoryHeap();
-
 
 	/// Return the total memory allocated by the newton engine and tools.
 	D_CORE_API static ndUnsigned64 GetMemoryUsed();
