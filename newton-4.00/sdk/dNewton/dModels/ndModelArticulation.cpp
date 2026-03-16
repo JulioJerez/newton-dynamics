@@ -1008,8 +1008,8 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 	ndFixSizeArray<const ndMesh*, 1024> stack;
 	ndFixSizeArray<ndModelArticulation::ndNode*, 1024> parentNode;
 
-	parentNode.PushBack(nullptr);
 	stack.PushBack(rootNode);
+	parentNode.PushBack(nullptr);
 	while (stack.GetCount())
 	{
 		const ndMesh* const meshNode = stack.Pop();
