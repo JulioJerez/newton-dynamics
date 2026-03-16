@@ -25,7 +25,6 @@
 #include "ndUtils.h"
 #include "ndMemory.h"
 
-//#define D_MEMORY_SANITY_CHECK
 
 #define D_MEMORY_ALIGMNET			32
 #define ndGetBufferPaddingInBytes	size_t(D_MEMORY_ALIGMNET - 1 + sizeof (ndMemoryHeader))
@@ -77,7 +76,6 @@ void ndMemory::GetMemoryAllocators(ndMemAllocCallback& alloc, ndMemFreeCallback&
 bool ndMemory::CheckMemoryHeap()
 {
 	bool ret = true;
-#if defined (D_MEMORY_SANITY_CHECK)
 #if defined (WIN32) || defined(_WIN32)
 	ret = _CrtCheckMemory() ? true : false;
 #elif defined (__linux__)
@@ -89,7 +87,6 @@ bool ndMemory::CheckMemoryHeap()
 #elif defined (_M_ARM) || defined (_M_ARM64)
 	// android OS mememory check
 #endif
-#endif
 	return ret;
 }
 
@@ -97,7 +94,9 @@ void* ndMemory::Malloc(size_t size)
 {
 	ndIntPtr metToVal;
 
+#if defined (D_MEMORY_SANITY_CHECK)
 	ndAssert(CheckMemoryHeap());
+#endif
 	size_t bufferSize = CalculateBufferSize(size);
 	metToVal.m_ptr = m_allocMemory(bufferSize);
 	ndUnsigned64 val = ndUnsigned64(metToVal.m_int) + ndGetBufferPaddingInBytes;
@@ -116,7 +115,9 @@ void* ndMemory::Malloc(size_t size)
 
 void ndMemory::Free(void* const ptr)
 {
+#if defined (D_MEMORY_SANITY_CHECK)
 	ndAssert(CheckMemoryHeap());
+#endif
 	if (ptr)
 	{
 		const ndMemoryHeader* const info = ((ndMemoryHeader*)ptr) - 1;

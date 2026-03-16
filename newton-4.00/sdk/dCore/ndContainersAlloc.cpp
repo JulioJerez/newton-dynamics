@@ -77,7 +77,9 @@ class ndFreeListDictionary: public ndFixSizeArray<ndFreeListHeader, D_FREELIST_D
 			ndAssert(header->m_count >= 0);
 			if (header->m_count)
 			{
-				ndAssert(ndMemory::CheckMemoryHeap());
+				#if defined (D_MEMORY_SANITY_CHECK)
+					ndAssert(ndMemory::CheckMemoryHeap());
+				#endif
 				header->m_count--;
 				ndMemory::ndMemoryHeader* const self = header->m_headPointer;
 				header->m_headPointer = self->m_freelistNext;
@@ -96,7 +98,9 @@ class ndFreeListDictionary: public ndFixSizeArray<ndFreeListHeader, D_FREELIST_D
 		ndAssert(header);
 		ndMemory::ndMemoryHeader* const self = ((ndMemory::ndMemoryHeader*)ptr) - 1;
 
-		ndAssert(ndMemory::CheckMemoryHeap());
+		#if defined (D_MEMORY_SANITY_CHECK)
+			ndAssert(ndMemory::CheckMemoryHeap());
+		#endif	
 		self->m_freelistNext = header->m_headPointer;
 		header->m_count++;
 		header->m_headPointer = self;
