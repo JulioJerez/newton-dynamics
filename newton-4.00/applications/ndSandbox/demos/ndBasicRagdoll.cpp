@@ -39,8 +39,6 @@ class DGRagdollMaterial : public ndApplicationMaterial
 
 static ndSharedPtr<ndBody> MakePrimitive(ndDemoEntityManager* const scene, const ndMatrix& matrix, const ndShapeInstance& shape, ndSharedPtr<ndRenderPrimitive> mesh, ndFloat32 mass)
 {
-    //ndPhysicsWorld* const world = scene->GetWorld();
-
     ndSharedPtr<ndRenderSceneNode> entity(new ndRenderSceneNode(matrix));
     entity->SetPrimitive(mesh);
 
@@ -50,7 +48,6 @@ static ndSharedPtr<ndBody> MakePrimitive(ndDemoEntityManager* const scene, const
     body->GetAsBodyDynamic()->SetCollisionShape(shape);
     body->GetAsBodyDynamic()->SetMassMatrix(mass, shape);
 
-    //world->AddBody(body);
     scene->AddEntity(entity);
     return body;
 }
