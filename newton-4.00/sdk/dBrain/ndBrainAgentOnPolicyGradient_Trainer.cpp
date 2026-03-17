@@ -673,8 +673,8 @@ void ndBrainAgentOnPolicyGradient_Trainer::TrajectoryToGpuBuffers()
 	}
 
 	m_trainingBuffer->VectorToDevice(m_scratchBuffer);
-	m_randomShuffleBuffer->MemoryToDevice(0, m_shuffleBuffer.GetCount() * sizeof(ndInt32), &m_shuffleBuffer[0]);
-	m_randomCriticShuffleBuffer->MemoryToDevice(0, m_shuffleBuffer.GetCount() * sizeof(ndInt32), &m_criticShuffleBuffer[0]);
+	m_randomShuffleBuffer->MemoryToDevice(0, size_t(m_shuffleBuffer.GetCount()) * sizeof(ndInt32), &m_shuffleBuffer[0]);
+	m_randomCriticShuffleBuffer->MemoryToDevice(0, size_t(m_shuffleBuffer.GetCount()) * sizeof(ndInt32), &m_criticShuffleBuffer[0]);
 	
 	m_scratchBuffer.SetCount(m_numberOfIterations * m_parameters.m_miniBatchSize);
 	for (ndInt32 i = ndInt32(m_numberOfIterations * m_parameters.m_miniBatchSize) - 1; i >= 0; --i)

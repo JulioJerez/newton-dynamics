@@ -21,11 +21,9 @@
 
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
-#include "VHACD.h"
-#include "ndMesh.h"
 #include "ndBody.h"
 #include "ndCollision.h"
-#include "ndMeshComponents.h"
+#include "ndMeshBaseComponents.h"
 #include "ndJointBilateralConstraint.h"
 
 ndMeshCollisionShape::ndMeshCollisionShape()
@@ -143,6 +141,10 @@ ndMeshBody::ndMeshBody()
 	m_classConstructor = ndString("ndBody");
 }
 
+ndMeshBody::~ndMeshBody()
+{
+}
+
 void ndMeshBody::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	xmlSaveParam(parent, "veloc", m_veloc);
@@ -155,6 +157,12 @@ void ndMeshBody::DeserializeFromXml(const nd::TiXmlElement* const parent)
 	m_veloc = xmlGetVector3(parent, "veloc");
 	m_omega = xmlGetVector3(parent, "omega");
 	m_localCentreOfMass = xmlGetVector3(parent, "com");
+}
+
+ndBody* ndMeshBody::CreateObject() const
+{
+	ndAssert(0);
+	return nullptr;
 }
 
 ndMeshBodyKinematic::ndMeshBodyKinematic()
@@ -206,31 +214,10 @@ void ndMeshBodyKinematic::DeserializeFromXml(const nd::TiXmlElement* const paren
 	m_shapeInstance.DeserializeFromXml(xmlShape);
 }
 
-ndMeshBodyDynamic::ndMeshBodyDynamic()
-	:ndMeshBodyKinematic()
-	,m_intrinsicDamping(ndVector::m_zero)
+ndBody* ndMeshBodyKinematic::CreateObject() const
 {
-	m_classConstructor = ndString("ndBodyDynamic");
-}
-
-void ndMeshBodyDynamic::SerializeToXml(nd::TiXmlElement* const parent) const
-{
-	ndMeshBodyKinematic::SerializeToXml(parent);
-
-	xmlSaveParam(parent, "intrinsicLinearDamping", m_intrinsicDamping.m_w);
-	xmlSaveParam(parent, "intrinsicAngularDamping", m_intrinsicDamping);
-}
-
-void ndMeshBodyDynamic::DeserializeFromXml(const nd::TiXmlElement* const parent)
-{
-	ndMeshBodyKinematic::DeserializeFromXml(parent);
-
-	m_intrinsicDamping = xmlGetVector3(parent, "intrinsicAngularDamping");
-	m_intrinsicDamping.m_w = xmlGetFloat(parent, "intrinsicLinearDamping");
-}
-
-ndMeshBody::~ndMeshBody()
-{
+	ndAssert(0);
+	return nullptr;
 }
 
 ndMeshJoint::ndMeshJoint()
@@ -253,6 +240,13 @@ ndMeshJoint::~ndMeshJoint()
 {
 }
 
+ndJointBilateralConstraint* ndMeshJoint::CreateObject(ndBodyKinematic* const, ndBodyKinematic* const) const
+{
+	ndExpandTraceMessage("ndMesh joint: %s serialization not Implemented", m_constructor.GetStr());
+	ndAssert(0);
+	return nullptr;
+}
+
 void ndMeshJoint::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	xmlSaveParam(parent, "constructor", m_constructor.GetStr());
@@ -262,146 +256,7 @@ void ndMeshJoint::SerializeToXml(nd::TiXmlElement* const parent) const
 
 void ndMeshJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
-	ndAssert(0);
-}
-
-ndMeshJointFix6dof::ndMeshJointFix6dof()
-	:ndMeshJoint()
-{
-}
-
-ndMeshJointFix6dof::ndMeshJointFix6dof(const ndJointBilateralConstraint* const joint)
-	:ndMeshJoint(joint)
-{
-}
-
-void ndMeshJointFix6dof::SerializeToXml(nd::TiXmlElement* const parent) const
-{
-	ndMeshJoint::SerializeToXml(parent);
-
-	xmlSaveParam(parent, "softness", m_softness);
-	xmlSaveParam(parent, "maxForce", m_maxForce);
-	xmlSaveParam(parent, "maxTorque", m_maxTorque);
-}
-
-void ndMeshJointFix6dof::DeserializeFromXml(const nd::TiXmlElement* const parent)
-{
-}
-
-ndMeshJointHinge::ndMeshJointHinge()
-	:ndMeshJoint()
-{
-}
-
-ndMeshJointHinge::ndMeshJointHinge(const ndJointBilateralConstraint* const joint)
-	:ndMeshJoint(joint)
-{
-}
-
-void ndMeshJointHinge::SerializeToXml(nd::TiXmlElement* const parent) const
-{
-	ndMeshJoint::SerializeToXml(parent);
-	xmlSaveParam(parent, "springK", m_springK);
-	xmlSaveParam(parent, "damperC", m_damperC);
-	xmlSaveParam(parent, "limitState", m_limitState);
-	xmlSaveParam(parent, "minLimit", m_minLimit);
-	xmlSaveParam(parent, "maxLimit", m_maxLimit);
-	xmlSaveParam(parent, "springDamperRegularizer", m_springDamperRegularizer);
-}
-
-void ndMeshJointHinge::DeserializeFromXml(const nd::TiXmlElement* const parent)
-{
-	ndAssert(0);
-}
-
-ndMeshJointSlider::ndMeshJointSlider()
-	:ndMeshJoint()
-{
-}
-
-ndMeshJointSlider::ndMeshJointSlider(const ndJointBilateralConstraint* const joint)
-	:ndMeshJoint(joint)
-{
-}
-
-void ndMeshJointSlider::SerializeToXml(nd::TiXmlElement* const parent) const
-{
-	ndMeshJoint::SerializeToXml(parent);
-	xmlSaveParam(parent, "springK", m_springK);
-	xmlSaveParam(parent, "damperC", m_damperC);
-	xmlSaveParam(parent, "limitState", m_limitState);
-	xmlSaveParam(parent, "minLimit", m_minLimit);
-	xmlSaveParam(parent, "maxLimit", m_maxLimit);
-	xmlSaveParam(parent, "springDamperRegularizer", m_springDamperRegularizer);
-}
-
-void ndMeshJointSlider::DeserializeFromXml(const nd::TiXmlElement* const parent)
-{
-	ndAssert(0);
-}
-
-ndMeshJointDoubleHinge::ndMeshJointDoubleHinge()
-	:ndMeshJoint()
-{
-}
-
-ndMeshJointDoubleHinge::ndMeshJointDoubleHinge(const ndJointBilateralConstraint* const joint)
-	:ndMeshJoint(joint)
-{
-}
-
-void ndMeshJointDoubleHinge::SerializeToXml(nd::TiXmlElement* const parent) const
-{
-	ndMeshJoint::SerializeToXml(parent);
-
-	nd::TiXmlElement* const axis0 = new nd::TiXmlElement("axis0");
-	parent->LinkEndChild(axis0);
-	xmlSaveParam(axis0, "springK", m_axis0.m_springK);
-	xmlSaveParam(axis0, "damperC", m_axis0.m_damperC);
-	xmlSaveParam(axis0, "limitState", m_axis0.m_limitState);
-	xmlSaveParam(axis0, "minLimit", m_axis0.m_minLimit);
-	xmlSaveParam(axis0, "maxLimit", m_axis0.m_maxLimit);
-	xmlSaveParam(axis0, "springDamperRegularizer", m_axis0.m_springDamperRegularizer);
-
-	nd::TiXmlElement* const axis1 = new nd::TiXmlElement("axis1");
-	parent->LinkEndChild(axis1);
-	xmlSaveParam(axis1, "springK", m_axis1.m_springK);
-	xmlSaveParam(axis1, "damperC", m_axis1.m_damperC);
-	xmlSaveParam(axis1, "limitState", m_axis1.m_limitState);
-	xmlSaveParam(axis1, "minLimit", m_axis1.m_minLimit);
-	xmlSaveParam(axis1, "maxLimit", m_axis1.m_maxLimit);
-	xmlSaveParam(axis1, "springDamperRegularizer", m_axis1.m_springDamperRegularizer);
-}
-
-void ndMeshJointDoubleHinge::DeserializeFromXml(const nd::TiXmlElement* const parent)
-{
-	ndAssert(0);
-}
-
-ndMeshJointSpherical::ndMeshJointSpherical()
-	:ndMeshJoint()
-{
-}
-
-ndMeshJointSpherical::ndMeshJointSpherical(const ndJointBilateralConstraint* const joint)
-	:ndMeshJoint(joint)
-{
-}
-
-void ndMeshJointSpherical::SerializeToXml(nd::TiXmlElement* const parent) const
-{
-	ndMeshJoint::SerializeToXml(parent);
-
-	xmlSaveParam(parent, "rotation", m_rotation);
-	xmlSaveParam(parent, "springK", m_springK);
-	xmlSaveParam(parent, "damperC", m_damperC);
-	xmlSaveParam(parent, "maxConeAngle", m_maxConeAngle);
-	xmlSaveParam(parent, "minTwistAngle", m_minTwistAngle);
-	xmlSaveParam(parent, "maxTwistAngle", m_maxTwistAngle);
-	xmlSaveParam(parent, "springDamperRegularizer", m_springDamperRegularizer);
-}
-
-void ndMeshJointSpherical::DeserializeFromXml(const nd::TiXmlElement* const parent)
-{
-	ndAssert(0);
+	m_constructor = ndString(xmlGetString(parent, "constructor"));
+	m_locatFrame0 = xmlGetMatrix(parent, "localFrame0");
+	m_locatFrame1 = xmlGetMatrix(parent, "localFrame1");
 }

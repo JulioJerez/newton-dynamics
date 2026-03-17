@@ -67,6 +67,8 @@ file(GLOB ANDROID_SOURCE_NEWTON
 	${newtonSrcPath}/dNewton/dIkSolver/*.cpp
 	${newtonSrcPath}/dNewton/dParticles/*.h
 	${newtonSrcPath}/dNewton/dParticles/*.cpp
+	${newtonSrcPath}/dNewton/dMesh/*.h
+	${newtonSrcPath}/dNewton/dMesh/*.cpp
 	${newtonSrcPath}/dNewton/dModels/*.h
 	${newtonSrcPath}/dNewton/dModels/*.cpp
 	${newtonSrcPath}/dNewton/dModels/dVehicle/*.h

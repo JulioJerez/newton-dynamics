@@ -29,9 +29,7 @@
 
 #include <ndCore.h>
 #include <ndCollisionStdafx.h>
-
 #include <ndBody.h>
-#include <ndMesh.h>
 #include <ndScene.h>
 #include <ndShape.h>
 #include <ndBvhNode.h>
@@ -39,7 +37,6 @@
 #include <ndShapeBox.h>
 #include <ndShapeNull.h>
 #include <ndShapeCone.h>
-#include <ndMeshLoader.h>
 #include <ndConstraint.h>
 #include <ndBodyNotify.h>
 #include <ndMeshEffect.h>
@@ -59,7 +56,6 @@
 #include <ndRayCastNotify.h>
 #include <ndContactNotify.h>
 #include <ndShapeCompound.h>
-#include <ndMeshComponents.h>
 #include <ndContactOptions.h>
 #include <ndBodyParticleSet.h>
 #include <ndPolygonMeshDesc.h>
@@ -73,6 +69,7 @@
 #include <ndBodyKinematicBase.h>
 #include <ndBodiesInAabbNotify.h>
 #include <ndShapeConvexPolygon.h>
+#include <ndMeshBaseComponents.h>
 #include <ndShapeChamferCylinder.h>
 #include <ndMarchingCubesIsoSurface.h>
 #include <ndShapeUserDefinedImplicit.h>

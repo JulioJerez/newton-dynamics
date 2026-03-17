@@ -1071,17 +1071,6 @@ void ndBodyKinematic::InitSurrogateBody(ndBodyKinematic* const surrogate) const
 	surrogate->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
 }
 
-void ndBodyKinematic::Serialize(ndSharedPtr<ndMeshBody>& meshBody) const
-{
-	ndBody::Serialize(meshBody);
-	ndMeshBodyKinematic* const kinematicMeshBody = (ndMeshBodyKinematic*)*meshBody;
-	kinematicMeshBody->m_invMass = m_invMass;
-	kinematicMeshBody->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
-	kinematicMeshBody->m_maxLinearStep = m_maxLinearStep;
-	kinematicMeshBody->m_maxAngleStep = m_maxAngleStep * ndRadToDegree;
-	m_shapeInstance.Serialize(&kinematicMeshBody->m_shapeInstance);
-}
-
 void ndBodyKinematic::Serialize(ndMesh* const node) const
 {
 	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBodyKinematic());
@@ -1099,4 +1088,28 @@ void ndBodyKinematic::SaveNdMesh(const char* const path) const
 
 	Serialize(*savedBody.m_mesh);
 	savedBody.SaveMesh(path);
+}
+
+void ndBodyKinematic::Serialize(ndSharedPtr<ndMeshBody>& meshBody) const
+{
+	ndBody::Serialize(meshBody);
+	ndMeshBodyKinematic* const kinematicMeshBody = (ndMeshBodyKinematic*)*meshBody;
+	kinematicMeshBody->m_invMass = m_invMass;
+	kinematicMeshBody->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
+	kinematicMeshBody->m_maxLinearStep = m_maxLinearStep;
+	kinematicMeshBody->m_maxAngleStep = m_maxAngleStep * ndRadToDegree;
+	m_shapeInstance.Serialize(&kinematicMeshBody->m_shapeInstance);
+}
+
+void ndBodyKinematic::Deserialize(const ndMeshBody* const meshBody)
+{
+	ndBody::Deserialize(meshBody);
+
+	ndMeshBodyKinematic* const kinematic = (ndMeshBodyKinematic*)meshBody;
+	const ndVector massMatrix (kinematic->m_invMass.Reciproc());
+	SetMassMatrix(massMatrix);
+
+	m_inertiaPrincipalAxis = kinematic->m_inertiaPrincipalAxis;
+	m_maxLinearStep = kinematic->m_maxLinearStep;
+	m_maxAngleStep = m_maxAngleStep * ndDegreeToRad;
 }

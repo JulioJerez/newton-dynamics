@@ -176,6 +176,7 @@ class ndBodyKinematic : public ndBody
 
 	D_COLLISION_API virtual void SaveNdMesh(const char* const path) const;
 	D_COLLISION_API virtual void Serialize(ndMesh* const node) const override;
+	D_COLLISION_API virtual void Deserialize(const ndMeshBody* const meshBody) override;
 
 	protected:
 	D_COLLISION_API virtual void AttachContact(ndContact* const contact) override;

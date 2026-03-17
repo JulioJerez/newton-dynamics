@@ -648,7 +648,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::SaveTrajectory()
 
 	ndInt32 stride = trajectory.GetStride();
 	ndInt32 entriesCount = ndInt32 (m_scratchBuffer.GetCount() / stride);
-	size_t sizeInBytes = m_scratchBuffer.GetCount() * sizeof(ndReal);
+	size_t sizeInBytes = size_t(m_scratchBuffer.GetCount()) * sizeof(ndReal);
 	size_t startOffset = m_replayBufferIndex * stride * sizeof(ndReal);
 
 	if (ndInt32(m_replayBufferIndex + entriesCount) <= m_parameters.m_replayBufferSize) 

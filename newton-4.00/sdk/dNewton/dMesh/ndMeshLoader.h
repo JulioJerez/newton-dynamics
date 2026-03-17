@@ -12,7 +12,7 @@
 #ifndef _ND_MESH_LOADER_H_
 #define _ND_MESH_LOADER_H_
 
-#include "ndCore.h"
+#include "ndNewtonStdafx.h"
 
 class ndMesh;
 class ndString;
@@ -20,12 +20,12 @@ class ndString;
 class ndMeshLoader : public ndClassAlloc
 {
 	public:
-	D_COLLISION_API ndMeshLoader();
-	D_COLLISION_API ndMeshLoader(const ndSharedPtr<ndMesh>& mesh);
-	D_COLLISION_API virtual ~ndMeshLoader();
+	D_NEWTON_API ndMeshLoader();
+	D_NEWTON_API ndMeshLoader(const ndSharedPtr<ndMesh>& mesh);
+	D_NEWTON_API virtual ~ndMeshLoader();
 
-	D_COLLISION_API virtual bool LoadMesh(const ndString& pathMeshName);
-	D_COLLISION_API virtual void SaveMesh(const ndString& pathMeshName) const;
+	D_NEWTON_API virtual bool LoadMesh(const ndString& pathMeshName);
+	D_NEWTON_API virtual void SaveMesh(const ndString& pathMeshName) const;
 
 	public:
 	ndSharedPtr<ndMesh> m_mesh;

@@ -231,16 +231,39 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			if (strcmp(constructor, "ndBodyDynamic") == 0)
 			{
 				ndSharedPtr<ndMeshBody> rigidBody(new ndMeshBodyDynamic());
-				mesh->SetRigidBody(rigidBody);
 				rigidBody->DeserializeFromXml(xmlRigidBody);
+				mesh->SetRigidBody(rigidBody);
 			}
 			else
 			{
 				ndAssert(0);
 				ndAssert(strcmp(constructor, "ndBodyKinematic") != 0);
 				ndSharedPtr<ndMeshBody> rigidBody(new ndMeshBodyKinematic());
-				mesh->SetRigidBody(rigidBody);
 				rigidBody->DeserializeFromXml(xmlRigidBody);
+				mesh->SetRigidBody(rigidBody);
+			}
+		}
+
+		const nd::TiXmlElement* const xmlJoint = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("joint");
+		if (xmlJoint)
+		{
+			const char* const constructor = xmlGetString(xmlJoint, "constructor");
+			if (strcmp(constructor, "ndJointHinge") == 0)
+			{
+				ndSharedPtr<ndMeshJoint> joint(new ndMeshJointHinge());
+				joint->DeserializeFromXml(xmlJoint);
+				mesh->SetJoint(joint);
+			}
+			else if (strcmp(constructor, "ndJointSpherical") == 0)
+			{
+				ndSharedPtr<ndMeshJoint> joint(new ndMeshJointSpherical());
+				joint->DeserializeFromXml(xmlJoint);
+				mesh->SetJoint(joint);
+			}
+
+			else
+			{
+				ndAssert(0);
 			}
 		}
 

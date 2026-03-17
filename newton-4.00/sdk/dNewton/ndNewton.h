@@ -28,11 +28,13 @@
 #define __ND_NEWTON_H__
 
 #include <ndNewtonStdafx.h>
+#include <ndMesh.h>
 #include <ndWorld.h>
 #include <ndJointList.h>
 #include <ndWorldScene.h>
 #include <ndConstraint.h>
 #include <ndBodyNotify.h>
+#include <ndMeshLoader.h>
 #include <ndBodyDynamic.h>
 #include <ndContactArray.h>
 #include <ndBodySphFluid.h>
@@ -40,6 +42,7 @@
 #include <ndBodyKinematic.h>
 #include <ndContactSolver.h>
 #include <ndDynamicsUpdate.h>
+#include <ndMeshComponents.h>
 #include <ndSkeletonContainer.h>
 #include <ndDynamicsUpdateSoa.h>
 

@@ -74,6 +74,7 @@ class ndBodyDynamic: public ndBodyKinematic
 	D_NEWTON_API ndVector GetTorque() const override;
 
 	D_NEWTON_API virtual void Serialize(ndMesh* const node) const override;
+	D_NEWTON_API virtual void Deserialize(const ndMeshBody* const meshBody) override;
 	
 	private:
 	void SaveExternalForces();
