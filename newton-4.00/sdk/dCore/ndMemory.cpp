@@ -79,13 +79,13 @@ bool ndMemory::CheckMemoryHeap()
 #if defined (WIN32) || defined(_WIN32)
 	ret = _CrtCheckMemory() ? true : false;
 #elif defined (__linux__)
-	// linux OS mememory check
+	// linux OS memory check
 #elif defined (__APPLE__)
-	// apple OS mememory check
+	// apple OS memory check
 #elif defined (__MINGW32__) || defined (__MINGW64__))
-	// mingwing OS mememory check
+	// mingwing OS memory check
 #elif defined (_M_ARM) || defined (_M_ARM64)
-	// android OS mememory check
+	// android OS memory check
 #endif
 	return ret;
 }

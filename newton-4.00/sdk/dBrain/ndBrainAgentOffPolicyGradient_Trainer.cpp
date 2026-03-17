@@ -1052,8 +1052,9 @@ void ndBrainAgentOffPolicyGradient_Trainer::OptimizeStep()
 		Optimize();
 		m_frameCount++;
 
-		m_policyTrainer->GetWeightAndBiasBuffer()->VectorFromDevice(m_lastPolicy);
+		//m_policyTrainer->GetWeightAndBiasBuffer()->VectorFromDevice(m_lastPolicy);
 		m_context->SyncBufferCommandQueue();
+		m_policyTrainer->GetWeightAndBiasBuffer()->VectorFromDevice(m_lastPolicy);
 		m_policyTrainer->UpdateParameters(m_lastPolicy);
 	}
 }
