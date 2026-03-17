@@ -173,7 +173,7 @@
 	#endif
 #endif
 
-//#define D_NEWTON_ENFORCE_CLASS_ALIGNMENT
+#define D_NEWTON_ENFORCE_CLASS_ALIGNMENT
 
 #if defined(D_NEWTON_ENFORCE_CLASS_ALIGNMENT)
 	// enfoce compiler decide the aligments
