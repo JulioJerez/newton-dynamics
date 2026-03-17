@@ -37,6 +37,7 @@ else()
 	include_directories(dNewton)
 	include_directories(dCollision)
 	include_directories(dCore/tinyxml)
+	include_directories(dNewton/dMesh)
 	include_directories(dNewton/dJoints)
 	include_directories(dNewton/dModels)
 	include_directories(dCollision/dMesh)
@@ -56,6 +57,8 @@ else()
 		dCollision/*.cpp
 		dCore/tinyxml/*.h
 		dCore/tinyxml/*.cpp 
+		dNewton/dMesh/*.h 
+		dNewton/dMesh/*.cpp
 		dNewton/dModels/*.h 
 		dNewton/dModels/*.cpp
 		dNewton/dJoints/*.h 

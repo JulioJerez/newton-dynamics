@@ -26,6 +26,7 @@ class ndJointSpherical: public ndJointBilateralConstraint
 	D_CLASS_REFLECTION(ndJointSpherical, ndJointBilateralConstraint)
 	D_NEWTON_API ndJointSpherical();
 	D_NEWTON_API ndJointSpherical(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent);
+	D_NEWTON_API ndJointSpherical(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent);
 	D_NEWTON_API virtual ~ndJointSpherical();
 
 	D_NEWTON_API ndFloat32 GetConeLimit() const;

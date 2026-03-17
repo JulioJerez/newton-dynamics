@@ -406,7 +406,7 @@ void ndBrainTrainerInference::MakeSinglePrediction(const ndBrainVector& input, n
 {
 	m_miniBatchInputBuffer->VectorToDevice(input);
 	MakePrediction();
-	m_miniBatchOutputBuffer->MemoryFromDevice(0, output.GetCount() * sizeof (ndReal), &output[0]);
+	m_miniBatchOutputBuffer->MemoryFromDevice(0, size_t(output.GetCount() * sizeof (ndReal)), &output[0]);
 }
 
 void ndBrainTrainerInference::MakePrediction()

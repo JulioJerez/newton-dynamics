@@ -297,7 +297,7 @@ class mnistSupervisedTrainer
 		for (ndInt32 epoch = 0; epoch < MINIST_NUMBER_OF_EPOCHS; ++epoch)
 		{
 			shuffleBuffer.RandomShuffle(shuffleBuffer.GetCount());
-			randomShuffleBuffer.MemoryToDevice(0, shuffleBuffer.GetCount() * sizeof(ndInt32), &shuffleBuffer[0]);
+			randomShuffleBuffer.MemoryToDevice(0, size_t(shuffleBuffer.GetCount()) * sizeof(ndInt32), &shuffleBuffer[0]);
 
 			for (ndInt32 batchStart = 0; batchStart < batchesSize; batchStart += m_miniBatchSize)
 			{

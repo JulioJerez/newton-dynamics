@@ -12,6 +12,7 @@
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
 #include "ndJointFix6dof.h"
+#include "ndMeshComponents.h"
 
 ndJointFix6dof::ndJointFix6dof()
 	:ndJointBilateralConstraint()

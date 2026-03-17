@@ -12,6 +12,7 @@
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
 #include "ndJointSpherical.h"
+#include "ndMeshComponents.h"
 
 ndJointSpherical::ndJointSpherical()
 	:ndJointBilateralConstraint()
@@ -30,6 +31,20 @@ ndJointSpherical::ndJointSpherical()
 
 ndJointSpherical::ndJointSpherical(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(9, child, parent, pinAndPivotFrame)
+	,m_rotation(ndGetIdentityMatrix())
+	,m_omegaParam(ndVector::m_zero)
+	,m_rotationParam()
+	,m_springK(ndFloat32(0.0f))
+	,m_damperC(ndFloat32(0.0f))
+	,m_maxConeAngle(ndFloat32(1.0e10f))
+	,m_minTwistAngle(-ndFloat32(1.0e10f))
+	,m_maxTwistAngle(ndFloat32(1.0e10f))
+	,m_springDamperRegularizer(ndFloat32(0.0f))
+{
+}
+
+ndJointSpherical::ndJointSpherical(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent)
+	:ndJointBilateralConstraint(9, child, parent, pinAndPivotInChild, pinAndPivotInParent)
 	,m_rotation(ndGetIdentityMatrix())
 	,m_omegaParam(ndVector::m_zero)
 	,m_rotationParam()

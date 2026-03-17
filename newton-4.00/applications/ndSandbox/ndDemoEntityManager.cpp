@@ -1203,6 +1203,7 @@ void ndDemoEntityManager::LoadDemo(ndInt32 menuIndex)
 	m_renderer->SetTitle(newTitle);
 	ApplyMenuOptions();
 	ndResetTimer();
+	ndAssert(ndMemory::CheckMemoryHeap());
 	
 	ndAssert (m_world->ValidateScene());
 }

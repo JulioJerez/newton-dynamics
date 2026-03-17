@@ -17,6 +17,8 @@ message (${projectName})
 file(GLOB CPP_SOURCE 
 	*.h 
 	*.cpp 
+	dMesh/*.h	
+	dMesh/*.cpp
 	dModels/*.h	
 	dModels/*.cpp
 	dJoints/*.h
@@ -30,6 +32,7 @@ file(GLOB CPP_SOURCE
 	dModels/dCharacter/*.h
 	dModels/dCharacter/*.cpp)
 
+file(GLOB HEADERS *.h dMesh/*.h)
 file(GLOB HEADERS *.h dJoints/*.h)
 file(GLOB HEADERS *.h dModels/*.h)
 file(GLOB HEADERS *.h dIkSolver/*.h)
@@ -43,6 +46,7 @@ include_directories(../dTinyxml)
 include_directories(../dProfiler)
 include_directories(../dCollision)
 
+include_directories(dMesh/)
 include_directories(dJoints/)
 include_directories(dModels/)
 include_directories(dIkSolver/)

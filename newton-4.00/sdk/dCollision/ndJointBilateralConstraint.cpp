@@ -93,15 +93,18 @@ ndJointBilateralConstraint::ndJointBilateralConstraint(ndInt32 maxDof, ndBodyKin
 	ndAssert(m_body0 && m_body1);
 	ndAssert(m_body0 != m_body1);
 
+	ndMatrix matrixBody0(globalMatrixBody0);
+	ndMatrix matrixBody1(globalMatrixBody1);
 	if (m_body0->GetInvMass() == ndFloat32(0.0f))
 	{
 		ndSwap(m_body0, m_body1);
+		ndSwap(matrixBody0, matrixBody1);
 	}
 	ndAssert(m_body0->GetInvMass() > ndFloat32(0.0f));
 
 	ndMatrix dummyMatrix;
-	CalculateLocalMatrix(globalMatrixBody0, m_localMatrix0, dummyMatrix);
-	CalculateLocalMatrix(globalMatrixBody1, dummyMatrix, m_localMatrix1);
+	CalculateLocalMatrix(matrixBody0, m_localMatrix0, dummyMatrix);
+	CalculateLocalMatrix(matrixBody1, dummyMatrix, m_localMatrix1);
 
 	m_mark0 = 0;
 	m_mark1 = 0;

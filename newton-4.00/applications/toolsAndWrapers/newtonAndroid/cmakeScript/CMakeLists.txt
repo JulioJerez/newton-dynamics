@@ -19,6 +19,7 @@ include_directories(dCore)
 include_directories(dNewton)
 include_directories(dTinyxml)
 include_directories(dCollision)
+include_directories(dNewton/dMesh)
 include_directories(dNewton/dJoints)
 include_directories(dNewton/dModels)
 include_directories(dNewton/dIkSolver)
@@ -33,6 +34,7 @@ file(GLOB HEADERS
 	dNewton/*.h 
 	dTinyxml/*.h 
 	dCollision/*.h 
+	dNewton/dMesh/*.h 
 	dNewton/dJoints/*.h 
 	dNewton/dModels/*.h 
 	dNewton/dIkSolver/*.h
@@ -52,6 +54,8 @@ file(GLOB CPP_SOURCE
 	dTinyxml/*.cpp
 	dCollision/*.h 
 	dCollision/*.cpp
+	dNewton/dMesh/*.h 
+	dNewton/dMesh/*.cpp 
 	dNewton/dModels/*.h 
 	dNewton/dModels/*.cpp
 	dNewton/dJoints/*.h 

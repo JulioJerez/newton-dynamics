@@ -21,10 +21,13 @@
 
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
+#include "ndMesh.h"
 #include "ndWorld.h"
 #include "ndModel.h"
 #include "ndUrdfFile.h"
+#include "ndMeshLoader.h"
 #include "ndBodyDynamic.h"
+#include "ndMeshComponents.h"
 #include "ndModelArticulation.h"
 
 ndModelArticulation::ndCenterOfMassDynamics::ndCenterOfMassDynamics()
@@ -1013,18 +1016,25 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 	while (stack.GetCount())
 	{
 		const ndMesh* const meshNode = stack.Pop();
-		ndModelArticulation::ndNode* parent = parentNode.Pop();
+		ndModelArticulation::ndNode* const parent = parentNode.Pop();
 
 		ndModelArticulation::ndNode* node = nullptr;
 		if (meshNode->GetRigidBody())
 		{
-			node = nullptr;
-		//	node->m_body->Serialize(meshNode);
-		//	if (node != m_rootNode)
-		//	{
-		//		// TO DO: serialize joint here
-		//	}
-
+			ndSharedPtr<ndBody> body(meshNode->GetRigidBody()->CreateObject());
+			if (!m_rootNode)
+			{
+				m_rootNode = AddRootBody(body);
+				node = m_rootNode;
+			}
+			else
+			{
+				ndAssert(meshNode->GetJoint());
+				ndBodyKinematic* const childBody = body->GetAsBodyKinematic();
+				ndBodyKinematic* const parentBody = parent->m_body->GetAsBodyKinematic();
+				ndSharedPtr<ndJointBilateralConstraint> joint(meshNode->GetJoint()->CreateObject(childBody, parentBody));
+				node = AddLimb(parent, body, joint);
+			}
 		}
 	
 		const ndList<ndSharedPtr<ndMesh>>& children = meshNode->GetChildren();
