@@ -871,7 +871,6 @@ static void BuildUpVector(ndDemoEntityManager* const scene, const ndVector& orig
 	world->AddJoint(upVector);
 }
 
-
 static void BuildWheel(ndDemoEntityManager* const scene, const ndVector& origin, ndFloat32 mass, ndFloat32 diameter)
 {
 	ndPhysicsWorld* const world = scene->GetWorld();
