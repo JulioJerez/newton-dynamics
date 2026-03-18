@@ -784,7 +784,6 @@ class ndDGController : public ndModelNotify
 };
 
 // debugging Dave Gravel ragdoll demo.
-//void ndBasicBipedDG(ndDemoEntityManager* const scene)
 void ndBasicRagdoll(ndDemoEntityManager* const scene)
 {
     ndSharedPtr<ndBody> floor(BuildFloorBox(scene, ndGetIdentityMatrix(), "blueCheckerboard.png", 0.1f, true));
@@ -793,6 +792,7 @@ void ndBasicRagdoll(ndDemoEntityManager* const scene)
     ndSharedPtr<ndModelNotify> controller(new ndDGController(scene, model));
     model->SetNotifyCallback(controller);
 
+#if 0
     {
         //testing save. 
         model->SaveNdMesh(ndGetWorkingFileName("xxx3.nd").GetStr());
@@ -800,9 +800,16 @@ void ndBasicRagdoll(ndDemoEntityManager* const scene)
         // load model
         ndRenderMeshLoader loader(*scene->GetRenderer());
         loader.LoadMesh(ndGetWorkingFileName("xxx3.nd").GetStr());
-        ndSharedPtr<ndModelArticulation> model1 (new ndModelArticulation());
-        model1->Deserialize(*loader.m_mesh);
+        ndSharedPtr<ndModel> model1 (new ndModelArticulation());
+        model1->GetAsModelArticulation()->Deserialize(*loader.m_mesh);
+
+        ndMatrix xxxxx(ndGetIdentityMatrix());
+        xxxxx.m_posit.m_y += 2.0f;
+        xxxxx.m_posit.m_x += 10.0f;
+        model1->GetAsModelArticulation()->SetTransform(xxxxx);
+        scene->GetWorld()->AddModel(model1);
     }
+#endif
 
     ndPhysicsWorld* world = scene->GetWorld();
     world->AddModel(ndSharedPtr<ndModel>(model));
