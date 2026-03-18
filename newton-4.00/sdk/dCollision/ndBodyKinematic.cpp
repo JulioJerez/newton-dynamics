@@ -1109,7 +1109,10 @@ void ndBodyKinematic::Deserialize(const ndMeshBody* const meshBody)
 	const ndVector massMatrix (kinematic->m_invMass.Reciproc());
 	SetMassMatrix(massMatrix);
 
+	ndSharedPtr<ndShapeInstance> instance (kinematic->m_shapeInstance.CreateObject());
+	SetCollisionShape(**instance);
+
 	m_inertiaPrincipalAxis = kinematic->m_inertiaPrincipalAxis;
 	m_maxLinearStep = kinematic->m_maxLinearStep;
-	m_maxAngleStep = m_maxAngleStep * ndDegreeToRad;
+	m_maxAngleStep = kinematic->m_maxAngleStep * ndDegreeToRad;
 }
