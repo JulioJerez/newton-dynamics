@@ -1,7 +1,7 @@
 #ifndef __ND_OFBX_H__
 #define __ND_OFBX_H__
 
-namespace ofbx
+namespace ndOfbx
 {
 	typedef unsigned char u8;
 	typedef unsigned short u16;
@@ -514,6 +514,6 @@ namespace ofbx
 	double fbxTimeToSeconds(i64 value);
 	i64 secondsToFbxTime(double value);
 
-} // namespace ofbx
+} // namespace ndOfbx
 
 #endif

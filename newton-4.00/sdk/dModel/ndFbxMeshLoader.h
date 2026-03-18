@@ -15,7 +15,7 @@
 #include "ndMesh.h"
 class ndAnimationSequence;
 
-using namespace ofbx;
+using namespace ndOfbx;
 
 #define ND_FBX_MAX_CHILDREN	1024
 
@@ -38,22 +38,22 @@ class ndFbxMeshLoader : public ndClassAlloc
 	void AlignToWorld(ndMesh* const entity);
 	void OptimizeCurve(ndMesh::ndCurve& curve);
 	void OptimizeAnimation(ndMesh* const model);
-	ndMesh* Fbx2ndMesh(ofbx::IScene* const fbxScene);
+	ndMesh* Fbx2ndMesh(ndOfbx::IScene* const fbxScene);
 	void CalculateBoneProperties(ndMesh* const entity);
 	void OptimizeRotationCurve(ndMesh::ndCurve& curve);
-	ndMatrix ofbxMatrix2dMatrix(const ofbx::Matrix& fbxMatrix);
-	ndMatrix GetCoordinateSystemMatrix(ofbx::IScene* const fbxScene);
+	ndMatrix ofbxMatrix2dMatrix(const ndOfbx::Matrix& fbxMatrix);
+	ndMatrix GetCoordinateSystemMatrix(ndOfbx::IScene* const fbxScene);
 	void ApplyTransform(ndMesh* const entity, const ndMatrix& transform);
 	void ApplyAllTransforms(ndMesh* const mesh, const ndMatrix& unitMatrix);
-	void LoadAnimation(const ofbx::IScene* const fbxScene, ndMesh* const model);
-	void ImportMeshNode(ofbx::Object* const fbxNode, ndFbx2ndMeshNodeMap& nodeMap);
-	void ImportMaterials(const ofbx::Mesh* const fbxMesh, ndMeshEffect* const mesh);
-	ndFixSizeArray<ofbx::Object*, ND_FBX_MAX_CHILDREN> GetChildrenNodes(const ofbx::Object* const node);
+	void LoadAnimation(const ndOfbx::IScene* const fbxScene, ndMesh* const model);
+	void ImportMeshNode(ndOfbx::Object* const fbxNode, ndFbx2ndMeshNodeMap& nodeMap);
+	void ImportMaterials(const ndOfbx::Mesh* const fbxMesh, ndMeshEffect* const mesh);
+	ndFixSizeArray<ndOfbx::Object*, ND_FBX_MAX_CHILDREN> GetChildrenNodes(const ndOfbx::Object* const node);
 	ndAnimationSequence* CreateSequence(ndMesh* const model, const char* const name);
-	ndMesh* CreateMeshHierarchy(ofbx::IScene* const fbxScene, ndFbx2ndMeshNodeMap& nodeMap);
+	ndMesh* CreateMeshHierarchy(ndOfbx::IScene* const fbxScene, ndFbx2ndMeshNodeMap& nodeMap);
 	ndMatrix GetKeyframe(ndMesh::ndCurveValue& scale, ndMesh::ndCurveValue& position, ndMesh::ndCurveValue& rotation);
-	void LoadAnimationLayer(ndTree <ndFbxAnimationTrack, ndString>& tracks, const ofbx::IScene* const fbxScene, const ofbx::AnimationLayer* const animLayer);
-	void LoadAnimationCurve(ndTree <ndFbxAnimationTrack, ndString>& tracks, const ofbx::IScene* const, const ofbx::Object* const bone, const ofbx::AnimationLayer* const animLayer, ndFloat32 duration, ndInt32 framesCount);
+	void LoadAnimationLayer(ndTree <ndFbxAnimationTrack, ndString>& tracks, const ndOfbx::IScene* const fbxScene, const ndOfbx::AnimationLayer* const animLayer);
+	void LoadAnimationCurve(ndTree <ndFbxAnimationTrack, ndString>& tracks, const ndOfbx::IScene* const, const ndOfbx::Object* const bone, const ndOfbx::AnimationLayer* const animLayer, ndFloat32 duration, ndInt32 framesCount);
 };
 
 #endif
