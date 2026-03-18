@@ -107,6 +107,7 @@ void ndDemoEntityNotify::ResetEntityTransform(const ndMatrix& matrix)
 {
 	if (*m_entity)
 	{
+		OnTransform(0.0f, matrix);
 		m_entity->SetTransform(ndQuaternion(matrix), matrix.m_posit);
 		m_entity->SetTransform(ndQuaternion(matrix), matrix.m_posit);
 	}
@@ -114,7 +115,7 @@ void ndDemoEntityNotify::ResetEntityTransform(const ndMatrix& matrix)
 
 bool ndDemoEntityNotify::CheckInWorld(const ndMatrix& matrix) const
 {
-	bool outsideWorld = (GetBody()->GetInvMass() == 0.0f) || (matrix.m_posit.m_y > ndFloat32(-100.0f));
+	bool outsideWorld = (GetBody() && (GetBody()->GetInvMass() == ndFloat32(0.0f))) || (matrix.m_posit.m_y > ndFloat32(-100.0f));
 	if (!outsideWorld)
 	{
 		ndTrace(("body %d outside world\n", GetBody()->GetId()));

@@ -972,7 +972,6 @@ bool ndWorld::ValidateScene() const
 	return m_scene->ValidateScene();
 }
 
-
 void ndWorld::AddModel(const ndSharedPtr<ndModel>& model)
 {
 	ndScopeSpinLock lock(m_addRemoveModelsLock);

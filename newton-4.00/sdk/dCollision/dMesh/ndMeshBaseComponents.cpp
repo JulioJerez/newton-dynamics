@@ -22,8 +22,11 @@
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
 #include "ndBody.h"
+#include "ndShapeBox.h"
 #include "ndCollision.h"
+#include "ndShapeCapsule.h"
 #include "ndMeshBaseComponents.h"
+#include "ndShapeChamferCylinder.h"
 #include "ndJointBilateralConstraint.h"
 
 ndMeshCollisionShape::ndMeshCollisionShape()
@@ -45,6 +48,12 @@ void ndMeshCollisionShapeNull::DeserializeFromXml(const nd::TiXmlElement* const)
 	// do nothing
 }
 
+ndShape* ndMeshCollisionShapeNull::CreateObject() const
+{
+	ndAssert(0);
+	return nullptr;
+}
+
 void ndMeshCollisionShapeBox::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	xmlSaveParam(parent, "constructor", ndShapeBox::StaticClassName());
@@ -60,6 +69,11 @@ void ndMeshCollisionShapeBox::DeserializeFromXml(const nd::TiXmlElement* const p
 	m_z = xmlGetFloat(parent, "z");
 }
 
+ndShape* ndMeshCollisionShapeBox::CreateObject() const
+{
+	return new ndShapeBox(m_x, m_y, m_z);
+}
+
 void ndMeshCollisionShapeCapsule::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	xmlSaveParam(parent, "constructor", ndShapeCapsule::StaticClassName());
@@ -73,6 +87,30 @@ void ndMeshCollisionShapeCapsule::DeserializeFromXml(const nd::TiXmlElement* con
 	m_radius0 = xmlGetFloat(parent, "radio0");
 	m_radius1 = xmlGetFloat(parent, "radio0");
 	m_height = xmlGetFloat(parent, "heigh");
+}
+
+ndShape* ndMeshCollisionShapeCapsule::CreateObject() const
+{
+	ndAssert(0);
+	return nullptr;
+}
+
+void ndMeshCollisionShapeChamferCylinder::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	xmlSaveParam(parent, "constructor", ndShapeChamferCylinder::StaticClassName());
+	xmlSaveParam(parent, "radio", m_radius);
+	xmlSaveParam(parent, "heigh", m_height);
+}
+
+void ndMeshCollisionShapeChamferCylinder::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	m_height = xmlGetFloat(parent, "heigh");
+	m_radius = xmlGetFloat(parent, "radio");
+}
+
+ndShape* ndMeshCollisionShapeChamferCylinder::CreateObject() const
+{
+	return new ndShapeChamferCylinder(m_radius, m_height);
 }
 
 ndMeshShapeInstance::ndMeshShapeInstance()
@@ -114,14 +152,19 @@ void ndMeshShapeInstance::DeserializeFromXml(const nd::TiXmlElement* const paren
 	const nd::TiXmlElement* const xmlShape = (nd::TiXmlElement*)parent->FirstChild("shape");
 	ndAssert(xmlShape);
 	const char* const constructor = xmlGetString(xmlShape, "constructor");
-	if (strcmp(constructor, "ndShapeBox") == 0)
+	if (strcmp(constructor, ndShapeBox::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeBox());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
-	else if (strcmp(constructor, "ndShapeCapsule") == 0)
+	else if (strcmp(constructor, ndShapeCapsule::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeCapsule());
+		m_shape->DeserializeFromXml(xmlShape);
+	}
+	else if (strcmp(constructor, ndShapeChamferCylinder::StaticClassName()) == 0)
+	{
+		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeChamferCylinder());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
 	else
@@ -130,6 +173,12 @@ void ndMeshShapeInstance::DeserializeFromXml(const nd::TiXmlElement* const paren
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeNull());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
+}
+
+ndShapeInstance* ndMeshShapeInstance::CreateObject() const
+{
+	ndShapeInstance* const shapeInstance = new ndShapeInstance(m_shape->CreateObject());
+	return shapeInstance;
 }
 
 ndMeshBody::ndMeshBody()

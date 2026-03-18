@@ -47,7 +47,7 @@ ndJointHinge::ndJointHinge(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* co
 }
 
 ndJointHinge::ndJointHinge(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent)
-	:ndJointBilateralConstraint(6, child, parent, pinAndPivotInChild, pinAndPivotInParent)
+	:ndJointBilateralConstraint(7, child, parent, pinAndPivotInChild, pinAndPivotInParent)
 	,m_angle(ndFloat32(0.0f))
 	,m_omega(ndFloat32(0.0f))
 	,m_springK(ndFloat32(0.0f))

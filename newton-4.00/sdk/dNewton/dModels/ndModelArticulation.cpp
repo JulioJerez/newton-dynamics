@@ -941,15 +941,19 @@ void ndModelArticulation::SaveNdMesh(const char* const path) const
 			nameIndex++;
 			meshNode->SetName(name);
 		}
+		ndMatrix matrix(node->m_body->GetMatrix());
 		if (!rootMesh)
 		{
 			rootMesh = meshNode;
 		}
 		else
 		{
+			matrix = matrix * node->GetParent()->m_body->GetMatrix().OrthoInverse();
 			parentMesh->AddChild(ndSharedPtr<ndMesh>(meshNode));
 		}
 		const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+
+		meshNode->SetMatrix(matrix);
 		ndSharedPtr<ndMeshShapeInstance> meshPrimitive(new ndMeshShapeInstance(body->GetCollisionShape()));
 		meshNode->SetPrimitive(meshPrimitive);
 		node->m_body->Serialize(meshNode);
@@ -1035,6 +1039,8 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 				ndSharedPtr<ndJointBilateralConstraint> joint(meshNode->GetJoint()->CreateObject(childBody, parentBody));
 				node = AddLimb(parent, body, joint);
 			}
+			node->m_name = meshNode->GetName();
+			node->m_body->SetMatrix(meshNode->CalculateGlobalMatrix());
 		}
 	
 		const ndList<ndSharedPtr<ndMesh>>& children = meshNode->GetChildren();
