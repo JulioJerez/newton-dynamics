@@ -18,7 +18,7 @@
 #include "ndDemoCameraNodeFollow.h"
 #include "ndHeightFieldPrimitive.h"
 
-#if 1
+#if 0
 
 // Material ragdoll : désactive les collisions internes
 class DGRagdollMaterial : public ndApplicationMaterial
@@ -792,7 +792,7 @@ void ndBasicRagdoll(ndDemoEntityManager* const scene)
     ndSharedPtr<ndModelNotify> controller(new ndDGController(scene, model));
     model->SetNotifyCallback(controller);
 
-#if 0
+#if 1
     {
         //testing save. 
         model->SaveNdMesh(ndGetWorkingFileName("xxx3.nd").GetStr());
