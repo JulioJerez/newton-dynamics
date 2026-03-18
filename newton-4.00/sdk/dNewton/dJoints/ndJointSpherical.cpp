@@ -43,7 +43,9 @@ ndJointSpherical::ndJointSpherical(const ndMatrix& pinAndPivotFrame, ndBodyKinem
 {
 }
 
-ndJointSpherical::ndJointSpherical(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent)
+ndJointSpherical::ndJointSpherical(
+	const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, 
+	ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(9, child, parent, pinAndPivotInChild, pinAndPivotInParent)
 	,m_rotation(ndGetIdentityMatrix())
 	,m_omegaParam(ndVector::m_zero)
