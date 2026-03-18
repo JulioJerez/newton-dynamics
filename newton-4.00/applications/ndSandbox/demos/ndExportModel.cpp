@@ -785,8 +785,92 @@ namespace ndDaveRagdoll
     };
 };
 
-namespace ndSimpleModel
+namespace ndSimpleBoxCar
 {
+    ndSharedPtr<ndBody> MakePrimitive(ndDemoEntityManager* const scene, const ndMatrix& matrix, const ndShapeInstance& shape, ndSharedPtr<ndRenderPrimitive> mesh, ndFloat32 mass)
+    {
+        ndPhysicsWorld* const world = scene->GetWorld();
+        ndSharedPtr<ndRenderSceneNode>entity(new ndRenderSceneNode(matrix));
+        entity->SetPrimitive(mesh);
+
+        ndSharedPtr<ndBody> body(new ndBodyDynamic());
+        body->SetNotifyCallback(new ndDemoEntityNotify(scene, entity));
+        body->SetMatrix(matrix);
+        body->GetAsBodyDynamic()->SetCollisionShape(shape);
+        body->GetAsBodyDynamic()->SetMassMatrix(mass, shape);
+
+        world->AddBody(body);
+        scene->AddEntity(entity);
+        return body;
+    }
+
+    void BoxCarModel(ndDemoEntityManager* const scene, const ndVector& origin, ndFloat32 mass, ndFloat32 diameter)
+    {
+        ndPhysicsWorld* const world = scene->GetWorld();
+        ndRender* const render = *scene->GetRenderer();
+
+        ndSharedPtr<ndShapeInstance>shape(new ndShapeInstance(new ndShapeBox(diameter * 2.0f, 0.5f * diameter, 1.5f * diameter)));
+        ndRenderPrimitive::ndDescriptor descriptor(render);
+        descriptor.m_collision = shape;
+        descriptor.m_mapping = ndRenderPrimitive::m_box;
+        descriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName("wood_0.png")));
+
+        ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
+
+        ndMatrix matrix(ndGetIdentityMatrix());
+        matrix.m_posit = FindFloor(*world, origin, 200.0f);
+        matrix.m_posit.m_y += diameter * 1.5f;
+        ndSharedPtr<ndBody> body(MakePrimitive(scene, matrix, **shape, mesh, mass));
+
+        // add two roller wheels
+        {
+            ndSharedPtr<ndShapeInstance>rollerShape(new ndShapeInstance(new ndShapeChamferCylinder(0.25f * diameter, 0.25f * diameter)));
+            ndRenderPrimitive::ndDescriptor rollerDescriptor(render);
+            rollerDescriptor.m_collision = rollerShape;
+            rollerDescriptor.m_mapping = ndRenderPrimitive::m_capsule;
+            rollerDescriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName("smilli.png")));
+            ndSharedPtr<ndRenderPrimitive> rollerMesh(new ndRenderPrimitive(rollerDescriptor));
+
+            {
+                // add a roller
+                ndMatrix rollerMatrix(ndYawMatrix(90.0f * ndDegreeToRad) * matrix);
+                rollerMatrix.m_posit.m_x -= diameter * 0.9f;
+                rollerMatrix.m_posit.m_z -= diameter * 0.8f;
+                rollerMatrix.m_posit.m_y -= diameter * 0.25f;
+                ndSharedPtr<ndBody> roller(MakePrimitive(scene, rollerMatrix, **rollerShape, rollerMesh, mass * 0.125f));
+
+                const ndMatrix rollerPin(rollerMatrix);
+                ndSharedPtr<ndJointBilateralConstraint> rollerAxle(new ndJointHinge(rollerPin, roller->GetAsBodyDynamic(), body->GetAsBodyDynamic()));
+                world->AddJoint(rollerAxle);
+            }
+
+            {
+                // add another roller
+                ndMatrix rollerMatrix(ndYawMatrix(90.0f * ndDegreeToRad) * matrix);
+                rollerMatrix.m_posit.m_x -= diameter * 0.9f;
+                rollerMatrix.m_posit.m_z += diameter * 0.8f;
+                rollerMatrix.m_posit.m_y -= diameter * 0.25f;
+                ndSharedPtr<ndBody> roller(MakePrimitive(scene, rollerMatrix, **rollerShape, rollerMesh, mass * 0.125f));
+
+                const ndMatrix rollerPin(rollerMatrix);
+                ndSharedPtr<ndJointBilateralConstraint> rollerAxle(new ndJointHinge(rollerPin, roller->GetAsBodyDynamic(), body->GetAsBodyDynamic()));
+                world->AddJoint(rollerAxle);
+            }
+
+            {
+                // add a wheel
+                ndMatrix rollerMatrix(ndYawMatrix(90.0f * ndDegreeToRad) * matrix);
+                rollerMatrix.m_posit.m_x += diameter * 1.0f;
+                rollerMatrix.m_posit.m_y -= diameter * 0.25f;
+                ndSharedPtr<ndBody> roller1(MakePrimitive(scene, rollerMatrix, **rollerShape, rollerMesh, mass * 0.125f));
+
+                ndWheelDescriptor desc;
+                const ndMatrix rollerPin(rollerMatrix);
+                ndSharedPtr<ndJointBilateralConstraint> wheelAxle(new ndJointWheel(rollerPin, roller1->GetAsBodyDynamic(), body->GetAsBodyDynamic(), desc));
+                world->AddJoint(wheelAxle);
+            }
+        }
+    }
 
 };
 
@@ -820,10 +904,11 @@ void ndExportModel(ndDemoEntityManager* const scene)
     }
 #endif
 
-    //ndPhysicsWorld* world = scene->GetWorld();
-    //world->AddModel(ndSharedPtr<ndModel>(model));
+    ndVector origin(ndVector::m_zero);
+    ndSimpleBoxCar::BoxCarModel(scene, origin, 100.0f, 0.75f);
 
     ndQuaternion rot;
-    ndVector origin(-20.0f, 10.0f, 0.0f, 1.0f);
+    origin.m_x -= 5.0f;
+    origin.m_y = 2.0f;
     scene->SetCameraMatrix(rot, origin);
 }
