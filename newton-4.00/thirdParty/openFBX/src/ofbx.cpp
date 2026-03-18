@@ -10,7 +10,7 @@
 #include <vector>
 
 
-namespace ofbx
+namespace ndOfbx
 {
 
 
@@ -3822,4 +3822,4 @@ const char* getError()
 }
 
 
-} // namespace ofbx
+} // namespace ndOfbx
