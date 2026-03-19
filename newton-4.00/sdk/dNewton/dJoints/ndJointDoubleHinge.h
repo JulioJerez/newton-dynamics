@@ -41,6 +41,7 @@ class ndJointDoubleHinge: public ndJointBilateralConstraint
 
 	D_NEWTON_API ndJointDoubleHinge();
 	D_NEWTON_API ndJointDoubleHinge(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent);
+	D_NEWTON_API ndJointDoubleHinge(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent);
 	D_NEWTON_API virtual ~ndJointDoubleHinge();
 
 	D_NEWTON_API ndFloat32 GetAngle0() const;
