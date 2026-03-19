@@ -178,11 +178,25 @@ namespace ndDaveRagdoll
         ndMatrix m_head_matrixLocal(ndGetIdentityMatrix());
         m_head_matrixLocal.m_posit.m_x = 1.25f;
 
-        ndMatrix m_epaule_L_matrixLocal(ndYawMatrix(60.0f * ndDegreeToRad));
-        m_epaule_L_matrixLocal.m_posit.m_x = 0.65f;
-
-        ndMatrix m_epaule_R_matrixLocal(ndYawMatrix(-60.0f * ndDegreeToRad));
+        ndMatrix m_epaule_R_matrixLocal(ndYawMatrix(-45.0f * ndDegreeToRad));
         m_epaule_R_matrixLocal.m_posit.m_x = 0.65f;
+
+        ndMatrix m_bras_R_matrixLocal(ndYawMatrix(-120.0f * ndDegreeToRad));
+        m_bras_R_matrixLocal.m_posit.m_x = 0.8f;
+
+        ndMatrix m_avant_bras_R_matrixLocal(ndRollMatrix(-30.0f * ndDegreeToRad));
+        m_avant_bras_R_matrixLocal.m_posit.m_x = 1.0f;
+
+        ndMatrix m_hand_R_matrixLocal(ndGetIdentityMatrix());
+        //m_hand_R_matrixLocal.m_front = ndVector(-8.74227766e-08f, 1.02323938e-07f, -1.0f, 0.0f);
+        //m_hand_R_matrixLocal.m_up = ndVector(1.0f, -1.49011523e-08f, -8.74227766e-08f, 0.0f);
+        //m_hand_R_matrixLocal.m_right = ndVector(-1.49011612e-08f, -1.0f, -1.02323938e-07f, 0.0f);
+        //m_hand_R_matrixLocal.m_posit = ndVector(-0.949999988f, 0.0f, 0.0f, 1.0f);
+        m_hand_R_matrixLocal.m_posit.m_x = 1.0f;
+
+
+        ndMatrix m_epaule_L_matrixLocal(ndYawMatrix(45.0f * ndDegreeToRad));
+        m_epaule_L_matrixLocal.m_posit.m_x = 0.65f;
 
         ndMatrix m_bras_L_matrixLocal(ndGetIdentityMatrix());
         m_bras_L_matrixLocal.m_front = ndVector(-0.42261824f, -0.906307876f, 5.8389503e-08f, 0.0f);
@@ -190,23 +204,12 @@ namespace ndDaveRagdoll
         m_bras_L_matrixLocal.m_right = ndVector(4.42074324e-08f, 3.78551732e-08f, 0.999999881f, 0.0f);
         m_bras_L_matrixLocal.m_posit = ndVector(-0.25f, 0.850000024f, 0.0f, 1.0f);
 
-        ndMatrix m_bras_R_matrixLocal(ndGetIdentityMatrix());
-        m_bras_R_matrixLocal.m_front = ndVector(-0.422618419f, 0.906307757f, 0.0f, 0.0f);
-        m_bras_R_matrixLocal.m_up = ndVector(-0.906307757f, -0.422618419f, 0.0f, 0.0f);
-        m_bras_R_matrixLocal.m_right = ndVector(0.0f, 0.0f, 0.99999994f, 0.0f);
-        m_bras_R_matrixLocal.m_posit = ndVector(-0.25f, -0.850000024f, 0.0f, 1.0f);
-
         ndMatrix m_avant_bras_L_matrixLocal(ndGetIdentityMatrix());
         m_avant_bras_L_matrixLocal.m_front = ndVector(1.0f, 0.0f, 0.0f, 0.0f);
         m_avant_bras_L_matrixLocal.m_up = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
         m_avant_bras_L_matrixLocal.m_right = ndVector(0.0f, 0.0f, 1.0f, 0.0f);
         m_avant_bras_L_matrixLocal.m_posit = ndVector(-1.64999998f, 0.0f, 0.0f, 1.0f);
 
-        ndMatrix m_avant_bras_R_matrixLocal(ndGetIdentityMatrix());
-        m_avant_bras_R_matrixLocal.m_front = ndVector(1.0f, 0.0f, 0.0f, 0.0f);
-        m_avant_bras_R_matrixLocal.m_up = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
-        m_avant_bras_R_matrixLocal.m_right = ndVector(0.0f, 0.0f, 1.0f, 0.0f);
-        m_avant_bras_R_matrixLocal.m_posit = ndVector(-1.64999998f, 0.0f, 0.0f, 1.0f);
 
         ndMatrix m_hand_L_matrixLocal(ndGetIdentityMatrix());
         m_hand_L_matrixLocal.m_front = ndVector(2.22044605e-16f, 1.49011612e-08f, -1.0f, 0.0f);
@@ -214,11 +217,6 @@ namespace ndDaveRagdoll
         m_hand_L_matrixLocal.m_right = ndVector(1.49011612e-08f, 1.0f, 1.49011612e-08f, 0.0f);
         m_hand_L_matrixLocal.m_posit = ndVector(-0.949999988f, 0.0f, 0.0f, 1.0f);
 
-        ndMatrix m_hand_R_matrixLocal(ndGetIdentityMatrix());
-        m_hand_R_matrixLocal.m_front = ndVector(-8.74227766e-08f, 1.02323938e-07f, -1.0f, 0.0f);
-        m_hand_R_matrixLocal.m_up = ndVector(1.0f, -1.49011523e-08f, -8.74227766e-08f, 0.0f);
-        m_hand_R_matrixLocal.m_right = ndVector(-1.49011612e-08f, -1.0f, -1.02323938e-07f, 0.0f);
-        m_hand_R_matrixLocal.m_posit = ndVector(-0.949999988f, 0.0f, 0.0f, 1.0f);
 
         ndMatrix m_hip_L_matrixLocal(ndGetIdentityMatrix());
         m_hip_L_matrixLocal.m_front = ndVector(-0.173648104f, -0.98480773f, 0.0f, 0.0f);
@@ -326,32 +324,35 @@ namespace ndDaveRagdoll
         
         ndMatrix headMatrix (m_head_matrixLocal * colonneMatrix);
         ndSharedPtr<ndBody> headBody (CreateCapsule(headMatrix, capsuleRadius, 0.5f));
-        
-        ndMatrix epauleLMatrix (m_epaule_L_matrixLocal * colonneMatrix);
-        ndSharedPtr<ndBody> epauleLBody (CreateCapsule(epauleLMatrix, capsuleRadius, 0.75f));
 
-        ndMatrix epauleRMatrix = m_epaule_R_matrixLocal * colonneMatrix;
-        ndSharedPtr<ndBody> epauleRBody = CreateCapsule(epauleRMatrix, capsuleRadius, 0.75f);
+        // right arm
+        ndMatrix epauleRMatrix (m_epaule_R_matrixLocal * colonneMatrix);
+        ndSharedPtr<ndBody> epauleRBody (CreateCapsule(epauleRMatrix, capsuleRadius, 0.75f));
+        
+        ndMatrix brasRMatrix (m_bras_R_matrixLocal * epauleRMatrix);
+        ndSharedPtr<ndBody> brasRBody (CreateCapsule(brasRMatrix, capsuleRadius, 1.0f));
+        
+        ndMatrix avantbrasRMatrix (m_avant_bras_R_matrixLocal * brasRMatrix);
+        ndSharedPtr<ndBody> avantbrasRBody (CreateCapsule(avantbrasRMatrix, capsuleRadius, 0.8f));
+        
+        ndMatrix handRMatrix = m_hand_R_matrixLocal * avantbrasRMatrix;
+        ndSharedPtr<ndBody> handRBody(CreateBox(handRMatrix, 0.25f, 0.25f, 0.125f));
+
+        // left arm
+        ndMatrix epauleLMatrix(m_epaule_L_matrixLocal* colonneMatrix);
+        ndSharedPtr<ndBody> epauleLBody(CreateCapsule(epauleLMatrix, capsuleRadius, 0.75f));
 
         //ndMatrix brasLMatrix = m_bras_L_matrixLocal * epauleLMatrix;
         //ndSharedPtr<ndBody> brasLBody = CreateCapsule(1.85f, brasLMatrix);
-        //
+
         //ndMatrix avantbrasLMatrix = m_avant_bras_L_matrixLocal * brasLMatrix;
         //ndSharedPtr<ndBody> avantbrasLBody = CreateCapsule(1.25f, avantbrasLMatrix);
-        //
+
         //ndMatrix handLMatrix = m_hand_L_matrixLocal * avantbrasLMatrix;
         //ndSharedPtr<ndBody> handLBody = CreateBox(0.125f, 0.5f, 0.25f, handLMatrix);
-        //
-        //
-        //ndMatrix brasRMatrix = m_bras_R_matrixLocal * epauleRMatrix;
-        //ndSharedPtr<ndBody> brasRBody = CreateCapsule(1.85f, brasRMatrix);
-        //
-        //ndMatrix avantbrasRMatrix = m_avant_bras_R_matrixLocal * brasRMatrix;
-        //ndSharedPtr<ndBody> avantbrasRBody = CreateCapsule(1.25f, avantbrasRMatrix);
-        //
-        //ndMatrix handRMatrix = m_hand_R_matrixLocal * avantbrasRMatrix;
-        //ndSharedPtr<ndBody> handRBody = CreateBox(0.125f, 0.5f, 0.25f, handRMatrix);
-        //
+
+
+
         //ndMatrix hipLMatrix = m_hip_L_matrixLocal * bassinMatrix;
         //ndSharedPtr<ndBody> hipLBody = CreateCapsule(0.75f, hipLMatrix);
         //
@@ -507,6 +508,20 @@ namespace ndDaveRagdoll
             nextRootTemp2 = model->AddLimb(nextRootTemp3, epauleRBody, jointPtr);
         }
 
+        { // bras_R
+            ndMatrix tmp1(brasRBody->GetMatrix());
+
+            joint16 = new ndJointSpherical(tmp1, brasRBody->GetAsBodyKinematic(), epauleRBody->GetAsBodyKinematic());
+            joint16->SetConeLimit(175.0f * ndDegreeToRad);
+            joint16->SetTwistLimits(-175.0f * ndDegreeToRad, 175.0f * ndDegreeToRad);
+            joint16->SetAsSpringDamper(0.005f, 50.0f, 10.0f);
+            //
+            //m_jointlist.push_back(joint16);
+            //
+            ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint16);
+            nextRootTemp2 = model->AddLimb(nextRootTemp2, brasRBody, jointPtr);
+        }
+
         { // epaule_L
             ndMatrix tmp1(epauleLBody->GetMatrix());
             joint13 = new ndJointSpherical(tmp1, epauleLBody->GetAsBodyKinematic(), colonneBody->GetAsBodyKinematic());
@@ -519,27 +534,39 @@ namespace ndDaveRagdoll
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint13);
             nextRootTemp1 = model->AddLimb(nextRootTemp3, epauleLBody, jointPtr);
         }
-#if 0
-        { // bras_R
-            ndMatrix tmp1(brasRBody->GetMatrix());
-            tmp1[3] = ndVector(tmp1[3][0] + 0.025f, tmp1[3][1] + 0.95f, tmp1[3][2], 1.0f); // offset
-            tmp1 = ndRollMatrix(90.0f * ndDegreeToRad) * tmp1;
-            tmp1 = ndPitchMatrix(-180.0f * ndDegreeToRad) * tmp1;
-            tmp1 = ndYawMatrix(-180.0f * ndDegreeToRad) * tmp1;
 
-            joint16 = new ndJointSpherical(tmp1, brasRBody->GetAsBodyKinematic(), epauleRBody->GetAsBodyKinematic());
-            //joint16->SetLimitState(true);
-            //joint16->SetLimits(-165.0f * ndDegreeToRad, 90.0f * ndDegreeToRad);
-            joint16->SetConeLimit(175.0f * ndDegreeToRad);
-            joint16->SetTwistLimits(-175.0f * ndDegreeToRad, 175.0f * ndDegreeToRad);
-            joint16->SetAsSpringDamper(0.005f, 50.0f, 10.0f);
+        { // avantbras_R arm
+            ndMatrix tmp1(avantbrasRBody->GetMatrix());
+
+            joint18 = new ndJointHinge(tmp1, avantbrasRBody->GetAsBodyKinematic(), brasRBody->GetAsBodyKinematic());
+            joint18->SetLimitState(true);
+            joint18->SetLimits(-165.0f * ndDegreeToRad, 5.0f * ndDegreeToRad);
+
+            // Dave a cool trick that kave more relistic 
+            // is to add some viscuos drag to the free joints 
+            //joint18->SetAsSpringDamper(0.005f, 50.0f, 10.0f);
+            joint18->SetAsSpringDamper(0.1f, 0.0f, 5.0f);
+
+            //m_jointlist.push_back(joint18);
             //
-            //m_jointlist.push_back(joint16);
-            //
-            ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint16);
-            nextRootTemp2 = m_model->AddLimb(nextRootTemp2, brasRBody, jointPtr);
+            ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint18);
+            nextRootTemp2 = model->AddLimb(nextRootTemp2, avantbrasRBody, jointPtr);
         }
 
+        { // hand_R
+            ndMatrix tmp1(handRBody->GetMatrix());
+            //
+            joint20 = new ndJointHinge(tmp1, handRBody->GetAsBodyKinematic(), avantbrasRBody->GetAsBodyKinematic());
+            joint20->SetLimitState(true);
+            joint20->SetLimits(-45.0f * ndDegreeToRad, 65.0f * ndDegreeToRad);
+            ////joint20->SetAsSpringDamper(0.01f, 5.0f, 0.5f);
+            //m_jointlist.push_back(joint20);
+
+            ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint20);
+            nextRootTemp2 = model->AddLimb(nextRootTemp2, handRBody, jointPtr);
+        }
+
+#if 0
         { // bras_L
             ndMatrix tmp1(brasLBody->GetMatrix());
             tmp1[3] = ndVector(tmp1[3][0] - 0.025f, tmp1[3][1] + 0.95f, tmp1[3][2], 1.0f); // offset
@@ -558,27 +585,6 @@ namespace ndDaveRagdoll
             nextRootTemp1 = m_model->AddLimb(nextRootTemp1, brasLBody, jointPtr);
         }
 
-        { // avantbras_R arm
-            ndMatrix tmp1(avantbrasRBody->GetMatrix());
-            tmp1[3] = ndVector(tmp1[3][0], tmp1[3][1] + 0.7f, tmp1[3][2], 1.0f); // offset
-            tmp1 = ndRollMatrix(90.0f * ndDegreeToRad) * tmp1;
-            tmp1 = ndPitchMatrix(-180.0f * ndDegreeToRad) * tmp1;
-            tmp1 = ndYawMatrix(-180.0f * ndDegreeToRad) * tmp1;
-            //
-            joint18 = new ndJointHinge(tmp1, avantbrasRBody->GetAsBodyKinematic(), brasRBody->GetAsBodyKinematic());
-            joint18->SetLimitState(true);
-            joint18->SetLimits(-165.0f * ndDegreeToRad, 5.0f * ndDegreeToRad);
-
-            // Dave a cool trick that kave more relistic 
-            // is to add some viscuos drag to the free joints 
-            //joint18->SetAsSpringDamper(0.005f, 50.0f, 10.0f);
-            joint18->SetAsSpringDamper(0.1f, 0.0f, 5.0f);
-
-            //m_jointlist.push_back(joint18);
-            //
-            ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint18);
-            nextRootTemp2 = m_model->AddLimb(nextRootTemp2, avantbrasRBody, jointPtr);
-        }
 
         { // avantbras_L = arm
             ndMatrix tmp1(avantbrasLBody->GetMatrix());
@@ -600,22 +606,6 @@ namespace ndDaveRagdoll
             nextRootTemp1 = m_model->AddLimb(nextRootTemp1, avantbrasLBody, jointPtr);
         }
 
-        { // hand_R
-            ndMatrix tmp1(handRBody->GetMatrix());
-            tmp1[3] = ndVector(tmp1[3][0], tmp1[3][1] + 0.25f, tmp1[3][2], 1.0f); // offset
-            //tmp1 = ndRollMatrix(180.0f * ndDegreeToRad) * tmp1;
-            tmp1 = ndPitchMatrix(-180.0f * ndDegreeToRad) * tmp1;
-            tmp1 = ndYawMatrix(-90.0f * ndDegreeToRad) * tmp1;
-            //
-            joint20 = new ndJointHinge(tmp1, handRBody->GetAsBodyKinematic(), avantbrasRBody->GetAsBodyKinematic());
-            joint20->SetLimitState(true);
-            joint20->SetLimits(-45.0f * ndDegreeToRad, 65.0f * ndDegreeToRad);
-            ////joint20->SetAsSpringDamper(0.01f, 5.0f, 0.5f);
-            //m_jointlist.push_back(joint20);
-            //
-            ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint20);
-            nextRootTemp2 = m_model->AddLimb(nextRootTemp2, handRBody, jointPtr);
-        }
 
         { // hand_L
             ndMatrix tmp1(handLBody->GetMatrix());
