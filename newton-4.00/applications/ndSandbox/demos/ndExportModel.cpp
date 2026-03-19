@@ -265,7 +265,7 @@ namespace ndDaveRagdoll
         m_orteille_R_matrixLocal.m_right = ndVector(0.0f, 0.0f, 1.0f, 0.0f);
         m_orteille_R_matrixLocal.m_posit = ndVector(0.0f, 0.0f, 0.5f, 1.0f);
 
-        auto MakePrimitive = [](ndDemoEntityManager* const scene, const ndMatrix& matrix, const ndShapeInstance& shape)
+        auto MakePrimitive = [](const ndMatrix& matrix, const ndShapeInstance& shape)
         {
             ndFloat32 mass = 1.0f;
             ndSharedPtr<ndBody> body(new ndBodyDynamic());
@@ -278,12 +278,12 @@ namespace ndDaveRagdoll
             return body;
         };
 
-        auto RootCreateCapsule = [&scene, MakePrimitive](const ndMatrix& matrix, ndFloat32 radius, ndFloat32 height)
+        auto RootCreateCapsule = [MakePrimitive](const ndMatrix& matrix, ndFloat32 radius, ndFloat32 height)
         {
             ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeCapsule(radius, radius, height)));
             ndMatrix localMatrix(ndRollMatrix(90.0f * ndDegreeToRad));
             shape->SetLocalMatrix(localMatrix);
-            return MakePrimitive(scene, matrix, **shape);
+            return MakePrimitive(matrix, **shape);
         };
 
         auto CreateCapsule = [&scene, MakePrimitive](const ndMatrix& matrix, ndFloat32 radius, ndFloat32 height)
@@ -292,13 +292,13 @@ namespace ndDaveRagdoll
             ndMatrix localMatrix(ndGetIdentityMatrix());
             localMatrix.m_posit.m_x = height * 0.5f;
             shape->SetLocalMatrix(localMatrix);
-            return MakePrimitive(scene, matrix, **shape);
+            return MakePrimitive(matrix, **shape);
         };
 
-        auto CreateBox = [&scene, MakePrimitive](const ndMatrix& matrix, ndFloat32 sx, ndFloat32 sy, ndFloat32 sz)
+        auto CreateBox = [MakePrimitive](const ndMatrix& matrix, ndFloat32 sx, ndFloat32 sy, ndFloat32 sz)
         {
             ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeBox(sx, sy, sz)));
-            return MakePrimitive(scene, matrix, **shape);
+            return MakePrimitive(matrix, **shape);
         };
 
         ndFloat32 capsuleRadius = 0.125f;
