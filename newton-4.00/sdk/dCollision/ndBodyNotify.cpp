@@ -63,11 +63,6 @@ ndBodyNotify* ndBodyNotify::GetAsBodyNotify()
 	return this;
 }
 
-ndUrdfBodyNotify* ndBodyNotify::GetAsUrdfBodyNotify()
-{
-	return nullptr;
-}
-
 ndVector ndBodyNotify::GetGravity() const
 {
 	return m_defaultGravity;

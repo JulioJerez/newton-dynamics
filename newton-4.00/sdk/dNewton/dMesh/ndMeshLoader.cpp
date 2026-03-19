@@ -12,8 +12,12 @@
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
 #include "ndMesh.h"
+#include "ndJointHinge.h"
 #include "ndMeshEffect.h"
 #include "ndMeshLoader.h"
+#include "ndJointWheel.h"
+#include "ndBodyDynamic.h"
+#include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
 
 ndMeshLoader::ndMeshLoader()
@@ -228,7 +232,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 		if (xmlRigidBody)
 		{
 			const char* const constructor = xmlGetString(xmlRigidBody, "constructor");
-			if (strcmp(constructor, "ndBodyDynamic") == 0)
+			if (strcmp(constructor, ndBodyDynamic::StaticClassName()) == 0)
 			{
 				ndSharedPtr<ndMeshBody> rigidBody(new ndMeshBodyDynamic());
 				rigidBody->DeserializeFromXml(xmlRigidBody);
@@ -237,7 +241,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			else
 			{
 				ndAssert(0);
-				ndAssert(strcmp(constructor, "ndBodyKinematic") != 0);
+				ndAssert(strcmp(constructor, ndBodyKinematic::StaticClassName()) == 0);
 				ndSharedPtr<ndMeshBody> rigidBody(new ndMeshBodyKinematic());
 				rigidBody->DeserializeFromXml(xmlRigidBody);
 				mesh->SetRigidBody(rigidBody);
@@ -248,13 +252,19 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 		if (xmlJoint)
 		{
 			const char* const constructor = xmlGetString(xmlJoint, "constructor");
-			if (strcmp(constructor, "ndJointHinge") == 0)
+			if (strcmp(constructor, ndJointHinge::StaticClassName()) == 0)
 			{
 				ndSharedPtr<ndMeshJoint> joint(new ndMeshJointHinge());
 				joint->DeserializeFromXml(xmlJoint);
 				mesh->SetJoint(joint);
 			}
-			else if (strcmp(constructor, "ndJointSpherical") == 0)
+			else if (strcmp(constructor, ndJointWheel::StaticClassName()) == 0)
+			{
+				ndSharedPtr<ndMeshJoint> joint(new ndMeshJointWheel());
+				joint->DeserializeFromXml(xmlJoint);
+				mesh->SetJoint(joint);
+			}
+			else if (strcmp(constructor, ndJointSpherical::StaticClassName()) == 0)
 			{
 				ndSharedPtr<ndMeshJoint> joint(new ndMeshJointSpherical());
 				joint->DeserializeFromXml(xmlJoint);

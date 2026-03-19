@@ -103,15 +103,12 @@ class ndModelArticulation: public ndModel
 	D_NEWTON_API virtual void SaveNdMesh(const char* const path) const;
 
 	protected:
-	D_NEWTON_API void ConvertToUrdf();
 	D_COLLISION_API virtual void OnAddWorld() override;
 	D_COLLISION_API virtual void OnRemoveFromWorld() override;
 	
 	ndString m_name;
 	ndNode* m_rootNode;
 	ndList<ndNode, ndContainersFreeListAlloc<ndNode>> m_closeLoops;
-
-	friend class ndUrdfFile;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif 

@@ -1486,7 +1486,7 @@ void ndScene::InitBodyArray()
 		body->m_sceneEquilibrium = sceneEquilibrium;
 	});
 	const ndInt32 count = ndInt32(GetActiveBodyArray().GetCount()) - 1;
-	if ((count + 1) >= m_bvhSceneManager.GetNodeArray().GetCount())
+	if ((count + 1) > m_bvhSceneManager.GetNodeArray().GetCount())
 	{
 		m_bvhSceneManager.GetNodeArray().SetCount(count + 1);
 	}

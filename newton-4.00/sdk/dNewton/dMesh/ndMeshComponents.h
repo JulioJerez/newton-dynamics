@@ -46,8 +46,9 @@ class ndMeshJointFix6dof : public ndMeshJoint
 	D_NEWTON_API ndMeshJointFix6dof();
 	D_NEWTON_API ndMeshJointFix6dof(const ndJointBilateralConstraint* const joint);
 
-	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
-	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
 	ndFloat32 m_softness;
 	ndFloat32 m_maxForce;
@@ -60,8 +61,8 @@ class ndMeshJointHinge : public ndMeshJoint
 	D_NEWTON_API ndMeshJointHinge();
 	D_NEWTON_API ndMeshJointHinge(const ndJointBilateralConstraint* const joint);
 
-	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
-	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
 	ndFloat32 m_springK;
@@ -89,8 +90,8 @@ class ndMeshJointDoubleHinge : public ndMeshJoint
 	D_NEWTON_API ndMeshJointDoubleHinge();
 	D_NEWTON_API ndMeshJointDoubleHinge(const ndJointBilateralConstraint* const joint);
 
-	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
-	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 
 	ndAxis m_axis0;
 	ndAxis m_axis1;
@@ -102,8 +103,8 @@ class ndMeshJointSlider : public ndMeshJoint
 	D_NEWTON_API ndMeshJointSlider();
 	D_NEWTON_API ndMeshJointSlider(const ndJointBilateralConstraint* const joint);
 
-	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
-	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 
 	ndFloat32 m_springK;
 	ndFloat32 m_damperC;
@@ -119,8 +120,8 @@ class ndMeshJointSpherical : public ndMeshJoint
 	D_NEWTON_API ndMeshJointSpherical();
 	D_NEWTON_API ndMeshJointSpherical(const ndJointBilateralConstraint* const joint);
 
-	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
-	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
 	ndMatrix m_rotation;
@@ -130,6 +131,27 @@ class ndMeshJointSpherical : public ndMeshJoint
 	ndFloat32 m_minTwistAngle;
 	ndFloat32 m_maxTwistAngle;
 	ndFloat32 m_springDamperRegularizer;
+};
+
+class ndMeshJointWheel : public ndMeshJoint
+{
+	public:
+	D_NEWTON_API ndMeshJointWheel();
+	D_NEWTON_API ndMeshJointWheel(const ndJointBilateralConstraint* const joint);
+
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
+
+	ndMatrix m_baseFrame;
+	ndFloat32 m_springK;
+	ndFloat32 m_damperC;
+	ndFloat32 m_upperStop;
+	ndFloat32 m_lowerStop;
+	ndFloat32 m_regularizer;
+	ndFloat32 m_brakeTorque;
+	ndFloat32 m_steeringAngle;
+	ndFloat32 m_handBrakeTorque;
 };
 
 #endif
