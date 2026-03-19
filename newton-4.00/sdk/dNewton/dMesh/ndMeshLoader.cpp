@@ -19,6 +19,7 @@
 #include "ndBodyDynamic.h"
 #include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
+#include "ndJointDoubleHinge.h"
 
 ndMeshLoader::ndMeshLoader()
 	:ndClassAlloc()
@@ -252,29 +253,30 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 		if (xmlJoint)
 		{
 			const char* const constructor = xmlGetString(xmlJoint, "constructor");
+			ndSharedPtr<ndMeshJoint> joint(new ndMeshJointFix6dof());
 			if (strcmp(constructor, ndJointHinge::StaticClassName()) == 0)
 			{
-				ndSharedPtr<ndMeshJoint> joint(new ndMeshJointHinge());
-				joint->DeserializeFromXml(xmlJoint);
-				mesh->SetJoint(joint);
+				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointHinge());
 			}
-			else if (strcmp(constructor, ndJointWheel::StaticClassName()) == 0)
+			else if (strcmp(constructor, ndJointDoubleHinge::StaticClassName()) == 0)
 			{
-				ndSharedPtr<ndMeshJoint> joint(new ndMeshJointWheel());
-				joint->DeserializeFromXml(xmlJoint);
-				mesh->SetJoint(joint);
+				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointDoubleHinge());
 			}
 			else if (strcmp(constructor, ndJointSpherical::StaticClassName()) == 0)
 			{
-				ndSharedPtr<ndMeshJoint> joint(new ndMeshJointSpherical());
-				joint->DeserializeFromXml(xmlJoint);
-				mesh->SetJoint(joint);
+				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointSpherical());
 			}
-
+			else if (strcmp(constructor, ndJointWheel::StaticClassName()) == 0)
+			{
+				joint= ndSharedPtr<ndMeshJoint>(new ndMeshJointWheel());
+			}
 			else
 			{
 				ndAssert(0);
 			}
+
+			joint->DeserializeFromXml(xmlJoint);
+			mesh->SetJoint(joint);
 		}
 
 		for (const nd::TiXmlNode* node = entry.m_xmlNode->FirstChild("ndMesh"); node; node = node->NextSibling("ndMesh"))

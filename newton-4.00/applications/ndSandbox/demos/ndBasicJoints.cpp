@@ -424,7 +424,8 @@ static void BuildDoubleHinge(ndDemoEntityManager* const scene, const ndVector& o
 		{
 			// first axis is a angle motor, by setting target angle;
 			ndFloat32 angle0 = GetAngle0();
-			ndFloat32 deltaAngle = ndClamp (m_angle - angle0, -90.0f * ndDegreeToRad, 90.0f * ndDegreeToRad);
+			//ndFloat32 deltaAngle = ndClamp (m_angle - angle0, -90.0f * ndDegreeToRad, 90.0f * ndDegreeToRad);
+			ndFloat32 deltaAngle = 2.0f * m_speed;
 			SetOffsetAngle0(angle0 + deltaAngle * desc.m_timestep);
 
 			// second axis an angular motor by integrating the angle 
@@ -459,7 +460,7 @@ static void BuildDoubleHinge(ndDemoEntityManager* const scene, const ndVector& o
 		ndMatrix matrix(refMatrix);
 		ndSharedPtr<ndBody> body (MakePrimitive(scene, matrix, **shape, mesh, mass));
 		body->SetOmega(ndVector(20.0f, 10.0f, 0.0f, 0.0f));
-
+		
 		ndJointDoubleHinge* const joint = new ndJointDoubleHinge(matrix, body->GetAsBodyDynamic(), fixBody);
 		ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
 		world->AddJoint(jointPtr);
@@ -954,7 +955,6 @@ void ndBasicJoints (ndDemoEntityManager* const scene)
 	BuildFixDistanceJoints(scene, ndVector( -4.0f, 0.0f, -5.0f, 1.0f));
 	BuildRollingFriction(scene, ndVector(-4.0f, 0.0f, 5.0f, 1.0f), 10.0f, 0.5f);
 	BuildPathFollow(scene, ndVector(40.0f, 0.0f, 0.0f, 1.0f));
-
 	BuildWheel(scene, ndVector(-4.0f, 0.0f, 0.0f, 1.0f), 100.0f, 0.75f);
 	BuildUpVector(scene, ndVector(-4.0f, 0.0f, -8.0f, 1.0f), 100.0f, 0.75f);
 	
