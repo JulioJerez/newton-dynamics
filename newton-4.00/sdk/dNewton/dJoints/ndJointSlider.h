@@ -56,7 +56,7 @@ class ndJointSlider: public ndJointBilateralConstraint
 	D_NEWTON_API ndInt32 GetKinematicState(ndKinematicState* const state) const override;
 	D_NEWTON_API void ApplyBaseRows(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 
-	D_COLLISION_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const override;
+	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const override;
 
 	ndFloat32 m_posit;
 	ndFloat32 m_speed;

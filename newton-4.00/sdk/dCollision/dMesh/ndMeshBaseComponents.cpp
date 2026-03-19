@@ -91,8 +91,7 @@ void ndMeshCollisionShapeCapsule::DeserializeFromXml(const nd::TiXmlElement* con
 
 ndShape* ndMeshCollisionShapeCapsule::CreateObject() const
 {
-	ndAssert(0);
-	return nullptr;
+	return new ndShapeCapsule(m_radius0, m_radius1, m_height);
 }
 
 void ndMeshCollisionShapeChamferCylinder::SerializeToXml(nd::TiXmlElement* const parent) const
@@ -178,6 +177,9 @@ void ndMeshShapeInstance::DeserializeFromXml(const nd::TiXmlElement* const paren
 ndShapeInstance* ndMeshShapeInstance::CreateObject() const
 {
 	ndShapeInstance* const shapeInstance = new ndShapeInstance(m_shape->CreateObject());
+	shapeInstance->SetLocalMatrix(m_localMatrix);
+	shapeInstance->SetScale(m_scale);
+	shapeInstance->m_alignmentMatrix = m_alignmentMatrix;
 	return shapeInstance;
 }
 

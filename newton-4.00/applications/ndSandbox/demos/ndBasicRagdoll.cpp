@@ -18,7 +18,7 @@
 #include "ndDemoCameraNodeFollow.h"
 #include "ndHeightFieldPrimitive.h"
 
-#if 0
+#if 1
 
 // Material ragdoll : désactive les collisions internes
 class DGRagdollMaterial : public ndApplicationMaterial
