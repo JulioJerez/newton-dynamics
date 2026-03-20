@@ -482,8 +482,6 @@ namespace ndDaveRagdoll
 
         { // bras_R
             ndMatrix tmp1(brasRBody->GetMatrix());
-            //tmp1.m_up = tmp1.m_right;
-            //tmp1.m_right = tmp1.m_front.CrossProduct(tmp1.m_up);
 
             joint16 = new ndJointDoubleHinge(tmp1, brasRBody->GetAsBodyKinematic(), epauleRBody->GetAsBodyKinematic());
             joint16->SetLimitState0(true);
@@ -538,8 +536,6 @@ namespace ndDaveRagdoll
 
         { // bras_L
             ndMatrix tmp1(brasLBody->GetMatrix());
-            //tmp1.m_up = tmp1.m_right.Scale(-1.0f);
-            //tmp1.m_right = tmp1.m_front.CrossProduct(tmp1.m_up);
 
             joint15 = new ndJointDoubleHinge(tmp1, brasLBody->GetAsBodyKinematic(), epauleLBody->GetAsBodyKinematic());
             joint15->SetLimitState0(true);
