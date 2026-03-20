@@ -30,6 +30,9 @@ install(TARGETS ${projectName}
 		LIBRARY DESTINATION "install/lib" 
 		ARCHIVE DESTINATION "install/lib" 
 		RUNTIME DESTINATION "install/bin")
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${projectName}.pdb DESTINATION "install/lib")
+
+#if (MSVC)
+#	install(FILES $<TARGET_PDB_FILE:${projectName}> DESTINATION "install/lib" OPTIONAL)
+#endif()
 
 set_target_properties(${projectName} PROPERTIES FOLDER "thirdParty")

@@ -103,14 +103,15 @@ else()
 		set_target_properties(${projectName} PROPERTIES COMPILE_FLAGS "/YundCoreStdafx.h")
 		set_source_files_properties(dCore/ndCoreStdAfx.cpp PROPERTIES COMPILE_FLAGS "/YcndCoreStdafx.h")
 
-		if (NEWTON_BUILD_SHARED_LIBS)
-			add_custom_command(
-				TARGET ${projectName} POST_BUILD
-				COMMAND ${CMAKE_COMMAND}
-				ARGS -E copy $<TARGET_FILE:${projectName}> ${PROJECT_BINARY_DIR}/applications/ndTest/${CMAKE_CFG_INTDIR}/$<TARGET_FILE_NAME:${projectName}>)
-		endif ()
+		#if (NEWTON_BUILD_SHARED_LIBS)
+		#	add_custom_command(
+		#		TARGET ${projectName} POST_BUILD
+		#		COMMAND ${CMAKE_COMMAND}
+		#		ARGS -E copy $<TARGET_FILE:${projectName}> ${PROJECT_BINARY_DIR}/applications/ndTest/${CMAKE_CFG_INTDIR}/$<TARGET_FILE_NAME:${projectName}>)
+		#endif ()
 
-		if (NEWTON_BUILD_SANDBOX_DEMOS AND NEWTON_BUILD_SHARED_LIBS)
+		#if (NEWTON_BUILD_SANDBOX_DEMOS AND NEWTON_BUILD_SHARED_LIBS)
+		if (NEWTON_BUILD_SANDBOX_DEMOS)
 			add_custom_command(
 				TARGET ${projectName} POST_BUILD
 				COMMAND ${CMAKE_COMMAND}
@@ -118,8 +119,13 @@ else()
 		endif ()
 
 		if(NEWTON_BUILD_SHARED_LIBS)
-			install(FILES $<TARGET_PDB_FILE:${projectName}> DESTINATION "install/lib" OPTIONAL)
+			add_custom_command(
+				TARGET ${projectName} POST_BUILD
+				COMMAND ${CMAKE_COMMAND}
+				ARGS -E copy $<TARGET_FILE:${projectName}> ${PROJECT_BINARY_DIR}/applications/ndTest/${CMAKE_CFG_INTDIR}/$<TARGET_FILE_NAME:${projectName}>)
 		endif(NEWTON_BUILD_SHARED_LIBS)
+
+		install(FILES $<TARGET_PDB_FILE:${projectName}> DESTINATION "install/lib" OPTIONAL)
 
 	endif(MSVC)
 
@@ -129,17 +135,11 @@ else()
 	endif()
 
 	install(FILES ${CPP_SOURCE} DESTINATION "install/source")
-
-	#message("xxxxxxxx")
-	#message(${CMAKE_BUILD_TYPE})
-	#message(${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${projectName}.pdb)
-
 	install(TARGETS ${projectName} 
 			LIBRARY DESTINATION "install/lib"
 			ARCHIVE DESTINATION "install/lib"
 			RUNTIME DESTINATION "install/bin")
-	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${projectName}.pdb DESTINATION "install/lib")
-
+	
 	set_target_properties(${projectName} PROPERTIES FOLDER "newtonSdk")
 
 endif()
