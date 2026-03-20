@@ -19,9 +19,9 @@
 #include "ndHeightFieldPrimitive.h"
 
 
-namespace ndSimpleBoxCar
+namespace ndBoxTricycle
 {
-    ndModelArticulation* CreateBoxCarModel(ndDemoEntityManager* const scene, const ndVector& origin, ndFloat32 mass, ndFloat32 diameter)
+    ndModelArticulation* CreateBoxTricycle(ndDemoEntityManager* const scene, ndFloat32 mass, ndFloat32 diameter)
     {
         auto MakePrimitive = [scene](const ndMatrix& matrix, const ndShapeInstance& shape, ndFloat32 mass)
         {
@@ -32,21 +32,10 @@ namespace ndSimpleBoxCar
             return body;
         };
 
-        ndPhysicsWorld* const world = scene->GetWorld();
-        ndRender* const render = *scene->GetRenderer();
+        ndMatrix matrix(ndGetIdentityMatrix());
 
         ndSharedPtr<ndShapeInstance>shape(new ndShapeInstance(new ndShapeBox(diameter * 2.0f, 0.5f * diameter, 1.5f * diameter)));
-        ndRenderPrimitive::ndDescriptor descriptor(render);
-        descriptor.m_collision = shape;
-        descriptor.m_mapping = ndRenderPrimitive::m_box;
-        descriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName("wood_0.png")));
-
         ndModelArticulation* const carModel = new ndModelArticulation();
-
-        ndMatrix matrix(ndGetIdentityMatrix());
-        matrix.m_posit = FindFloor(*world, origin, 200.0f);
-        matrix.m_posit.m_y += diameter * 1.5f;
-
         ndSharedPtr<ndBody> rootBody(MakePrimitive(matrix, **shape, mass));
         ndModelArticulation::ndNode* rootNode = carModel->AddRootBody(rootBody);
 
@@ -130,23 +119,23 @@ namespace ndSimpleBoxCar
         }
     }
 
-    void BoxCarModel(ndDemoEntityManager* const scene, const ndVector& origin, ndFloat32 mass, ndFloat32 diameter)
+    void BoxTricycle(ndDemoEntityManager* const scene, const ndVector& origin, ndFloat32 mass, ndFloat32 diameter)
     {
         ndPhysicsWorld* const world = scene->GetWorld();
 
         // we first create an articulated model.
-        ndSharedPtr<ndModel>model(CreateBoxCarModel(scene, origin, mass, diameter));
+        ndSharedPtr<ndModel>model(CreateBoxTricycle(scene, mass, diameter));
 
         // test if the model is valid
         //world->AddModel(ndSharedPtr<ndModel>(model));
 
         // we now export the model as a ndMesh
-        model->GetAsModelArticulation()->SaveNdMesh(ndGetWorkingFileName("boxCar.nd").GetStr());
+        model->GetAsModelArticulation()->SaveNdMesh(ndGetWorkingFileName("boxTricycle.nd").GetStr());
 
         // we now load the ndMesh
         ndMeshLoader loader;
         //ndRenderMeshLoader loader(*scene->GetRenderer());
-        loader.LoadMesh(ndGetWorkingFileName("boxCar.nd").GetStr());
+        loader.LoadMesh(ndGetWorkingFileName("boxTricycle.nd").GetStr());
 
         // make an articulated from the loaded mesh
         ndSharedPtr<ndModel> articulation(new ndModelArticulation());
@@ -154,7 +143,7 @@ namespace ndSimpleBoxCar
 
         // set the matrix location
         ndMatrix matrix(ndGetIdentityMatrix());
-        matrix.m_posit.m_y = 2.0f;
+        matrix.m_posit = origin;
         articulation->GetAsModelArticulation()->SetTransform(matrix);
 
         // Bind application data to the model
@@ -816,11 +805,13 @@ void ndExportModel(ndDemoEntityManager* const scene)
     ndSharedPtr<ndBody> floor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
 
     ndVector origin(ndVector::m_wOne);
-    origin.m_y = 2.0f;
-    //ndSimpleBoxCar::BoxCarModel(scene, origin, 100.0f, 0.75f);
+    origin.m_y = 3.0f;
+    origin.m_z = 2.0f;
+    ndBoxTricycle::BoxTricycle(scene, origin, 100.0f, 0.75f);
 
-    origin.m_x += 3.0f;
-    origin.m_y = 3.5f;
+    //origin.m_x += 3.0f;
+    //origin.m_y = 3.5f;
+    origin.m_z = 0.0f;
     ndDaveRagdoll::RagDoll(scene, origin);
 
     ndQuaternion rot;
