@@ -205,38 +205,32 @@ namespace ndDaveRagdoll
         m_hand_L_matrixLocal.m_posit.m_x = 1.0f;
 
         // left Leg Transforms
-        ndMatrix m_hip_L_matrixLocal(ndRollMatrix(-10.0f * ndDegreeToRad) * ndYawMatrix(90.0f * ndDegreeToRad));
+        ndMatrix m_hip_L_matrixLocal(ndPitchMatrix(-10.0f * ndDegreeToRad) * ndRollMatrix(-10.0f * ndDegreeToRad) * ndYawMatrix(90.0f * ndDegreeToRad));
         m_hip_L_matrixLocal.m_posit.m_y = -0.4f;
         m_hip_L_matrixLocal.m_posit.m_z = -0.1f;
 
         ndMatrix m_cuisse_L_matrixLocal(ndRollMatrix(-80.0f * ndDegreeToRad));
         m_cuisse_L_matrixLocal.m_posit.m_x = 0.45f;
 
-        // right Leg Transforms                    
-        ndMatrix m_hip_R_matrixLocal(ndRollMatrix(-10.0f * ndDegreeToRad) * ndYawMatrix(-90.0f * ndDegreeToRad));
-        m_hip_R_matrixLocal.m_posit.m_y = -0.4f;
-        m_hip_R_matrixLocal.m_posit.m_z =  0.1f;
-
-        ndMatrix m_cuisse_R_matrixLocal(ndRollMatrix(-80.0f * ndDegreeToRad));
-        m_cuisse_R_matrixLocal.m_posit.m_x = 0.45f;
-
-        ndMatrix m_tibia_L_matrixLocal(ndGetIdentityMatrix());
-        m_tibia_L_matrixLocal.m_front = ndVector(0.99999994f, 0.0f, 0.0f, 0.0f);
-        m_tibia_L_matrixLocal.m_up = ndVector(0.0f, 0.99999994f, 0.0f, 0.0f);
-        m_tibia_L_matrixLocal.m_right = ndVector(0.0f, 0.0f, 1.0f, 0.0f);
-        m_tibia_L_matrixLocal.m_posit = ndVector(-1.72500002f, 0.0f, 0.0f, 1.0f);
-
-        ndMatrix m_tibia_R_matrixLocal(ndGetIdentityMatrix());
-        m_tibia_R_matrixLocal.m_front = ndVector(0.99999994f, 0.0f, 0.0f, 0.0f);
-        m_tibia_R_matrixLocal.m_up = ndVector(0.0f, 0.99999994f, 0.0f, 0.0f);
-        m_tibia_R_matrixLocal.m_right = ndVector(0.0f, 0.0f, 1.0f, 0.0f);
-        m_tibia_R_matrixLocal.m_posit = ndVector(-1.72500002f, 0.0f, 0.0f, 1.0f);
+        ndMatrix m_tibia_L_matrixLocal(ndYawMatrix(15.0f * ndDegreeToRad));
+        m_tibia_L_matrixLocal.m_posit.m_x = 1.0f;
 
         ndMatrix m_pied_L_matrixLocal(ndGetIdentityMatrix());
         m_pied_L_matrixLocal.m_front = ndVector(1.0f, 0.0f, 0.0f, 0.0f);
         m_pied_L_matrixLocal.m_up = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
         m_pied_L_matrixLocal.m_right = ndVector(0.0f, 0.0f, 1.0f, 0.0f);
         m_pied_L_matrixLocal.m_posit = ndVector(-0.75f, 0.0f, 0.150000006f, 1.0f);
+
+        // right Leg Transforms                    
+        ndMatrix m_hip_R_matrixLocal(ndPitchMatrix(10.0f * ndDegreeToRad) * ndRollMatrix(-10.0f * ndDegreeToRad) * ndYawMatrix(-90.0f * ndDegreeToRad));
+        m_hip_R_matrixLocal.m_posit.m_y = -0.4f;
+        m_hip_R_matrixLocal.m_posit.m_z =  0.1f;
+
+        ndMatrix m_cuisse_R_matrixLocal(ndRollMatrix(-80.0f * ndDegreeToRad));
+        m_cuisse_R_matrixLocal.m_posit.m_x = 0.45f;
+
+        ndMatrix m_tibia_R_matrixLocal(ndYawMatrix(-15.0f * ndDegreeToRad));
+        m_tibia_R_matrixLocal.m_posit.m_x = 1.0f;
 
         ndMatrix m_pied_R_matrixLocal(ndGetIdentityMatrix());
         m_pied_R_matrixLocal.m_front = ndVector(1.0f, 0.0f, 0.0f, 0.0f);
@@ -336,9 +330,9 @@ namespace ndDaveRagdoll
         ndMatrix cuisseLMatrix (m_cuisse_L_matrixLocal * hipLMatrix);
         ndSharedPtr<ndBody> cuisseLBody (CreateCapsule(cuisseLMatrix, capsuleRadius, 1.0f));
         
-        //ndMatrix tibiaLMatrix = m_tibia_L_matrixLocal * cuisseLMatrix;
-        //ndSharedPtr<ndBody> tibiaLBody = CreateCapsule(1.25f, tibiaLMatrix);
-        //
+        ndMatrix tibiaLMatrix (m_tibia_L_matrixLocal * cuisseLMatrix);
+        ndSharedPtr<ndBody> tibiaLBody (CreateCapsule(tibiaLMatrix, capsuleRadius, 1.0f));
+        
         //ndMatrix piedLMatrix = m_pied_L_matrixLocal * tibiaLMatrix;
         //ndSharedPtr<ndBody> piedLBody = CreateBox(0.13f, 0.4f, 0.75f, piedLMatrix);
         //
@@ -352,9 +346,9 @@ namespace ndDaveRagdoll
         ndMatrix cuisseRMatrix (m_cuisse_R_matrixLocal * hipRMatrix);
         ndSharedPtr<ndBody> cuisseRBody (CreateCapsule(cuisseRMatrix, capsuleRadius, 1.0f));
         
-        //ndMatrix tibiaRMatrix = m_tibia_R_matrixLocal * cuisseRMatrix;
-        //ndSharedPtr<ndBody> tibiaRBody = CreateCapsule(1.25f, tibiaRMatrix);
-        //
+        ndMatrix tibiaRMatrix (m_tibia_R_matrixLocal * cuisseRMatrix);
+        ndSharedPtr<ndBody> tibiaRBody (CreateCapsule(tibiaRMatrix, capsuleRadius, 1.0f));
+        
         //ndMatrix piedRMatrix = m_pied_R_matrixLocal * tibiaRMatrix;
         //ndSharedPtr<ndBody> piedRBody = CreateBox(0.13f, 0.4f, 0.75f, piedRMatrix);
         //
@@ -598,11 +592,27 @@ namespace ndDaveRagdoll
             joint5->SetAsSpringDamper0(0.005f, 50.0f, 10.0f);
 
             joint5->SetLimitState1(true);
-            joint5->SetLimits1(-70.0f * ndDegreeToRad, 10.0f * ndDegreeToRad);
+            joint5->SetLimits1(-10.0f * ndDegreeToRad, 70.0f * ndDegreeToRad);
             joint5->SetAsSpringDamper1(0.005f, 50.0f, 10.0f);
 
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint5);
             nextRootTemp1 = model->AddLimb(nextRootTemp1, cuisseLBody, jointPtr);
+        }
+
+        { // tibia_L
+            ndMatrix tmp1(tibiaLBody->GetMatrix());
+            ndSwap(tmp1.m_up, tmp1.m_front);
+            tmp1.m_right = tmp1.m_front.CrossProduct(tmp1.m_up);
+
+            joint7 = new ndJointHinge(tmp1, tibiaLBody->GetAsBodyKinematic(), cuisseLBody->GetAsBodyKinematic());
+            joint7->SetLimitState(true);
+            joint7->SetLimits(-5.0f * ndDegreeToRad, 150.0f * ndDegreeToRad);
+            joint7->SetAsSpringDamper(0.01f, 2.5f, 0.25f);
+            //
+            //m_jointlist.push_back(joint7);
+            //
+            ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint7);
+            nextRootTemp1 = model->AddLimb(nextRootTemp1, tibiaLBody, jointPtr);
         }
 
         // right leg
@@ -634,38 +644,25 @@ namespace ndDaveRagdoll
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint6);
             nextRootTemp2 = model->AddLimb(nextRootTemp2, cuisseRBody, jointPtr);
         }
-#if 0
-        { // tibia_L
-            ndMatrix tmp1(tibiaLBody->GetMatrix());
-            tmp1[3] = ndVector(tmp1[3][0], tmp1[3][1] + 0.7f, tmp1[3][2], 1.0f); // offset
-            tmp1 = ndRollMatrix(90.0f * ndDegreeToRad) * tmp1;
-            //
-            joint7 = new ndJointHinge(tmp1, tibiaLBody->GetAsBodyKinematic(), cuisseLBody->GetAsBodyKinematic());
-            joint7->SetLimitState(true);
-            joint7->SetLimits(-165.0f * ndDegreeToRad, 2.0f * ndDegreeToRad);
-            joint7->SetAsSpringDamper(0.01f, 2.5f, 0.25f);
-            //
-            //m_jointlist.push_back(joint7);
-            //
-            ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint7);
-            nextRootTemp1 = m_model->AddLimb(nextRootTemp1, tibiaLBody, jointPtr);
-        }
 
         { // tibia_R
             ndMatrix tmp1(tibiaRBody->GetMatrix());
-            tmp1[3] = ndVector(tmp1[3][0], tmp1[3][1] + 0.7f, tmp1[3][2], 1.0f); // offset
-            tmp1 = ndRollMatrix(90.0f * ndDegreeToRad) * tmp1;
+            ndSwap(tmp1.m_up, tmp1.m_front);
+            tmp1.m_right = tmp1.m_front.CrossProduct(tmp1.m_up);
 
             joint8 = new ndJointHinge(tmp1, tibiaRBody->GetAsBodyKinematic(), cuisseRBody->GetAsBodyKinematic());
             joint8->SetLimitState(true);
-            joint8->SetLimits(-165.0f * ndDegreeToRad, 2.0f * ndDegreeToRad);
+            joint8->SetLimits(-150.0f * ndDegreeToRad, 5.0f * ndDegreeToRad);
             joint8->SetAsSpringDamper(0.01f, 2.5f, 0.25f);
             //
             //m_jointlist.push_back(joint8);
             //
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint8);
-            nextRootTemp2 = m_model->AddLimb(nextRootTemp2, tibiaRBody, jointPtr);
+            nextRootTemp2 = model->AddLimb(nextRootTemp2, tibiaRBody, jointPtr);
         }
+
+#if 0
+
 
         { // pied_L
             ndMatrix tmp1(piedLBody->GetMatrix());
@@ -823,10 +820,11 @@ void ndExportModel(ndDemoEntityManager* const scene)
     //ndSimpleBoxCar::BoxCarModel(scene, origin, 100.0f, 0.75f);
 
     origin.m_x += 3.0f;
+    origin.m_y = 3.5f;
     ndDaveRagdoll::RagDoll(scene, origin);
 
     ndQuaternion rot;
-    origin.m_x -= 5.0f;
+    origin.m_x -= 8.0f;
     origin.m_y = 2.0f;
     scene->SetCameraMatrix(rot, origin);
 }
