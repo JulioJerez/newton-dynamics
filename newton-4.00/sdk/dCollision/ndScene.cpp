@@ -1459,8 +1459,6 @@ void ndScene::InitBodyArray()
 	{
 		D_TRACKTIME_NAMED(BuildBodyArray);
 		const ndArray<ndBodyKinematic*>& view = GetActiveBodyArray();
-
-		ndBvhNodeArray& array = m_bvhSceneManager.GetNodeArray();
 		ndBodyKinematic* const body = view[groupId];
 		body->PrepareStep(groupId);
 		ndUnsigned8 sceneEquilibrium = 1;
@@ -1468,28 +1466,32 @@ void ndScene::InitBodyArray()
 		ndUnsigned8 moving = ndUnsigned8(!body->m_equilibrium);
 		if (moving | sceneForceUpdate)
 		{
-			ndBvhLeafNode* const bodyNode = (ndBvhLeafNode*)array[body->m_bodyNodeIndex];
-			ndAssert(bodyNode->GetAsSceneBodyNode());
-			ndAssert(bodyNode->m_body == body);
-			ndAssert(!bodyNode->GetLeft());
-			ndAssert(!bodyNode->GetRight());
-
-			body->UpdateCollisionMatrix();
-			const ndInt32 test = ndBoxInclusionTest(body->m_minAabb, body->m_maxAabb, bodyNode->m_minBox, bodyNode->m_maxBox);
-			if (!test)
+			ndBvhNodeArray& array = m_bvhSceneManager.GetNodeArray();
+			if (body->m_bodyNodeIndex < array.GetCount())
 			{
-				bodyNode->SetAabb(body->m_minAabb, body->m_maxAabb);
+				ndBvhLeafNode* const bodyNode = (ndBvhLeafNode*)array[body->m_bodyNodeIndex];
+				ndAssert(bodyNode->GetAsSceneBodyNode());
+				ndAssert(bodyNode->m_body == body);
+				ndAssert(!bodyNode->GetLeft());
+				ndAssert(!bodyNode->GetRight());
+
+				body->UpdateCollisionMatrix();
+				const ndInt32 test = ndBoxInclusionTest(body->m_minAabb, body->m_maxAabb, bodyNode->m_minBox, bodyNode->m_maxBox);
+				if (!test)
+				{
+					bodyNode->SetAabb(body->m_minAabb, body->m_maxAabb);
+				}
+				sceneEquilibrium = ndUnsigned8(!sceneForceUpdate & (test != 0));
 			}
-			sceneEquilibrium = ndUnsigned8(!sceneForceUpdate & (test != 0));
+			else
+			{
+				sceneEquilibrium = 0;
+			}
 		}
 		body->m_sceneForceUpdate = 0;
 		body->m_sceneEquilibrium = sceneEquilibrium;
 	});
 	const ndInt32 count = ndInt32(GetActiveBodyArray().GetCount()) - 1;
-	if ((count + 1) > m_bvhSceneManager.GetNodeArray().GetCount())
-	{
-		m_bvhSceneManager.GetNodeArray().SetCount(count + 1);
-	}
 	ParallelExecute(BuildBodyArray, count, OptimalGroupBatch(count));
 
 	ndUnsigned32 scans[4];
