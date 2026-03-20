@@ -387,7 +387,7 @@ void ndJointDoubleHinge::SubmitLimits(ndConstraintDescritor& desc, const ndMatri
 					const ndFloat32 penetration = angle - m_axis1.m_minLimit;
 					const ndFloat32 recoveringAceel = desc.m_invTimestep * PenetrationOmega(-penetration);
 					SetMotorAcceleration(desc, stopAccel - recoveringAceel);
-					SetHighFriction(desc, ndFloat32(0.0f));
+					SetLowerFriction(desc, ndFloat32(0.0f));
 				}
 				else if (angle > m_axis1.m_maxLimit)
 				{
@@ -396,7 +396,7 @@ void ndJointDoubleHinge::SubmitLimits(ndConstraintDescritor& desc, const ndMatri
 					const ndFloat32 penetration = angle - m_axis1.m_maxLimit;
 					const ndFloat32 recoveringAceel = -desc.m_invTimestep * PenetrationOmega(penetration);
 					SetMotorAcceleration(desc, stopAccel - recoveringAceel);
-					SetLowerFriction(desc, ndFloat32(0.0f));
+					SetHighFriction(desc, ndFloat32(0.0f));
 				}
 			}
 		}
