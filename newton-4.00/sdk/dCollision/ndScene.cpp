@@ -933,13 +933,24 @@ void ndScene::CalculateContacts(ndInt32 threadIndex, ndContact* const contact)
 			}
 			if (distance < D_NARROW_PHASE_DIST)
 			{
-				CalculateJointContacts(threadIndex, contact);
-				if (contact->m_maxDof || contact->m_isIntersetionTestOnly)
+				const ndBvhLeafNode* const bodyNode0 = m_bvhSceneManager.GetLeafNode(contact->GetBody0());
+				const ndBvhLeafNode* const bodyNode1 = m_bvhSceneManager.GetLeafNode(contact->GetBody1());
+				ndAssert(bodyNode0 && bodyNode0->GetAsSceneBodyNode());
+				ndAssert(bodyNode1 && bodyNode1->GetAsSceneBodyNode());
+				if (ndOverlapTest(bodyNode0->m_minBox, bodyNode0->m_maxBox, bodyNode1->m_minBox, bodyNode1->m_maxBox))
 				{
-					contact->SetActive(true);
-					contact->m_timeOfImpact = ndFloat32(1.0e10f);
+					CalculateJointContacts(threadIndex, contact);
+					if (contact->m_maxDof || contact->m_isIntersetionTestOnly)
+					{
+						contact->SetActive(true);
+						contact->m_timeOfImpact = ndFloat32(1.0e10f);
+					}
+					contact->m_sceneLru = m_lru;
 				}
-				contact->m_sceneLru = m_lru;
+				else
+				{
+					contact->m_isDead = 1;
+				}
 			}
 			else
 			{
