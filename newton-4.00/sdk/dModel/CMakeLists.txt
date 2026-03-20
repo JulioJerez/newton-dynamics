@@ -44,11 +44,9 @@ install(TARGETS ${projectName}
 		LIBRARY DESTINATION "install/lib" 
 		ARCHIVE DESTINATION "install/lib" 
 		RUNTIME DESTINATION "install/bin")
-
 set_target_properties(${projectName} PROPERTIES FOLDER "utils")
 
 if (MSVC)
-	#install(FILES $<TARGET_PDB_FILE:${projectName}> DESTINATION "install/lib" OPTIONAL)
 	set_target_properties(${projectName} PROPERTIES COMPILE_FLAGS "/YundModelStdafx.h")
 	set_source_files_properties(ndModelStdafx.cpp PROPERTIES COMPILE_FLAGS "/YcndModelStdafx.h")
 endif()

@@ -123,9 +123,8 @@ else()
 				TARGET ${projectName} POST_BUILD
 				COMMAND ${CMAKE_COMMAND}
 				ARGS -E copy $<TARGET_FILE:${projectName}> ${PROJECT_BINARY_DIR}/applications/ndTest/${CMAKE_CFG_INTDIR}/$<TARGET_FILE_NAME:${projectName}>)
+			install(FILES $<TARGET_PDB_FILE:${projectName}> DESTINATION "install/lib" OPTIONAL)
 		endif(NEWTON_BUILD_SHARED_LIBS)
-
-		install(FILES $<TARGET_PDB_FILE:${projectName}> DESTINATION "install/lib" OPTIONAL)
 
 	endif(MSVC)
 
@@ -139,7 +138,6 @@ else()
 			LIBRARY DESTINATION "install/lib"
 			ARCHIVE DESTINATION "install/lib"
 			RUNTIME DESTINATION "install/bin")
-	
 	set_target_properties(${projectName} PROPERTIES FOLDER "newtonSdk")
 
 endif()

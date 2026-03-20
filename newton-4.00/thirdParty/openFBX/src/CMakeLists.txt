@@ -31,8 +31,4 @@ install(TARGETS ${projectName}
 		ARCHIVE DESTINATION "install/lib" 
 		RUNTIME DESTINATION "install/bin")
 
-#if (MSVC)
-#	install(FILES $<TARGET_PDB_FILE:${projectName}> DESTINATION "install/lib" OPTIONAL)
-#endif()
-
 set_target_properties(${projectName} PROPERTIES FOLDER "thirdParty")
