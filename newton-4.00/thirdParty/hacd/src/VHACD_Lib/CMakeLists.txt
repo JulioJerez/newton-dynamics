@@ -27,10 +27,4 @@ file(GLOB CPP_SOURCE src/*.cpp src/*.inl  inc/*.inl inc/*.h public/*.h)
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/" FILES ${CPP_SOURCE})
 
 add_library(${projectName} STATIC ${CPP_SOURCE})
-
-#install(FILES ${CPP_SOURCE} DESTINATION "install/source")
-#install(TARGETS ${projectName} 
-#		LIBRARY DESTINATION "install/lib" 
-#		ARCHIVE DESTINATION "install/lib" 
-#		RUNTIME DESTINATION "install/bin")
 set_target_properties(${projectName} PROPERTIES FOLDER "thirdParty")

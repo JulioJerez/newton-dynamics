@@ -933,13 +933,24 @@ void ndScene::CalculateContacts(ndInt32 threadIndex, ndContact* const contact)
 			}
 			if (distance < D_NARROW_PHASE_DIST)
 			{
-				CalculateJointContacts(threadIndex, contact);
-				if (contact->m_maxDof || contact->m_isIntersetionTestOnly)
+				const ndBvhLeafNode* const bodyNode0 = m_bvhSceneManager.GetLeafNode(contact->GetBody0());
+				const ndBvhLeafNode* const bodyNode1 = m_bvhSceneManager.GetLeafNode(contact->GetBody1());
+				ndAssert(bodyNode0 && bodyNode0->GetAsSceneBodyNode());
+				ndAssert(bodyNode1 && bodyNode1->GetAsSceneBodyNode());
+				if (ndOverlapTest(bodyNode0->m_minBox, bodyNode0->m_maxBox, bodyNode1->m_minBox, bodyNode1->m_maxBox))
 				{
-					contact->SetActive(true);
-					contact->m_timeOfImpact = ndFloat32(1.0e10f);
+					CalculateJointContacts(threadIndex, contact);
+					if (contact->m_maxDof || contact->m_isIntersetionTestOnly)
+					{
+						contact->SetActive(true);
+						contact->m_timeOfImpact = ndFloat32(1.0e10f);
+					}
+					contact->m_sceneLru = m_lru;
 				}
-				contact->m_sceneLru = m_lru;
+				else
+				{
+					contact->m_isDead = 1;
+				}
 			}
 			else
 			{
@@ -1459,8 +1470,6 @@ void ndScene::InitBodyArray()
 	{
 		D_TRACKTIME_NAMED(BuildBodyArray);
 		const ndArray<ndBodyKinematic*>& view = GetActiveBodyArray();
-
-		ndBvhNodeArray& array = m_bvhSceneManager.GetNodeArray();
 		ndBodyKinematic* const body = view[groupId];
 		body->PrepareStep(groupId);
 		ndUnsigned8 sceneEquilibrium = 1;
@@ -1468,28 +1477,32 @@ void ndScene::InitBodyArray()
 		ndUnsigned8 moving = ndUnsigned8(!body->m_equilibrium);
 		if (moving | sceneForceUpdate)
 		{
-			ndBvhLeafNode* const bodyNode = (ndBvhLeafNode*)array[body->m_bodyNodeIndex];
-			ndAssert(bodyNode->GetAsSceneBodyNode());
-			ndAssert(bodyNode->m_body == body);
-			ndAssert(!bodyNode->GetLeft());
-			ndAssert(!bodyNode->GetRight());
-
-			body->UpdateCollisionMatrix();
-			const ndInt32 test = ndBoxInclusionTest(body->m_minAabb, body->m_maxAabb, bodyNode->m_minBox, bodyNode->m_maxBox);
-			if (!test)
+			ndBvhNodeArray& array = m_bvhSceneManager.GetNodeArray();
+			if (body->m_bodyNodeIndex < array.GetCount())
 			{
-				bodyNode->SetAabb(body->m_minAabb, body->m_maxAabb);
+				ndBvhLeafNode* const bodyNode = (ndBvhLeafNode*)array[body->m_bodyNodeIndex];
+				ndAssert(bodyNode->GetAsSceneBodyNode());
+				ndAssert(bodyNode->m_body == body);
+				ndAssert(!bodyNode->GetLeft());
+				ndAssert(!bodyNode->GetRight());
+
+				body->UpdateCollisionMatrix();
+				const ndInt32 test = ndBoxInclusionTest(body->m_minAabb, body->m_maxAabb, bodyNode->m_minBox, bodyNode->m_maxBox);
+				if (!test)
+				{
+					bodyNode->SetAabb(body->m_minAabb, body->m_maxAabb);
+				}
+				sceneEquilibrium = ndUnsigned8(!sceneForceUpdate & (test != 0));
 			}
-			sceneEquilibrium = ndUnsigned8(!sceneForceUpdate & (test != 0));
+			else
+			{
+				sceneEquilibrium = 0;
+			}
 		}
 		body->m_sceneForceUpdate = 0;
 		body->m_sceneEquilibrium = sceneEquilibrium;
 	});
 	const ndInt32 count = ndInt32(GetActiveBodyArray().GetCount()) - 1;
-	if ((count + 1) > m_bvhSceneManager.GetNodeArray().GetCount())
-	{
-		m_bvhSceneManager.GetNodeArray().SetCount(count + 1);
-	}
 	ParallelExecute(BuildBodyArray, count, OptimalGroupBatch(count));
 
 	ndUnsigned32 scans[4];

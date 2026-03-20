@@ -92,6 +92,7 @@ class ndMeshJointDoubleHinge : public ndMeshJoint
 
 	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
 	ndAxis m_axis0;
 	ndAxis m_axis1;
