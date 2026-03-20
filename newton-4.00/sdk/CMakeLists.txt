@@ -129,10 +129,17 @@ else()
 	endif()
 
 	install(FILES ${CPP_SOURCE} DESTINATION "install/source")
+
+	#message("xxxxxxxx")
+	#message(${CMAKE_BUILD_TYPE})
+	#message(${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${projectName}.pdb)
+
 	install(TARGETS ${projectName} 
 			LIBRARY DESTINATION "install/lib"
 			ARCHIVE DESTINATION "install/lib"
 			RUNTIME DESTINATION "install/bin")
+	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/${projectName}.pdb DESTINATION "install/lib")
+
 	set_target_properties(${projectName} PROPERTIES FOLDER "newtonSdk")
 
 endif()
