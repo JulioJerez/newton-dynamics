@@ -486,11 +486,11 @@ namespace ndDaveRagdoll
             joint16 = new ndJointDoubleHinge(tmp1, brasRBody->GetAsBodyKinematic(), epauleRBody->GetAsBodyKinematic());
             joint16->SetLimitState0(true);
             joint16->SetLimits0(-90.0f * ndDegreeToRad, 90.0f * ndDegreeToRad);
-            joint16->SetAsSpringDamper0(0.005f, 50.0f, 10.0f);
+            joint16->SetAsSpringDamper0(0.01f, 50.0f, 10.0f);
 
             joint16->SetLimitState1(true);
             joint16->SetLimits1(-120.0f * ndDegreeToRad, 120.0f * ndDegreeToRad);
-            joint16->SetAsSpringDamper1(0.005f, 50.0f, 10.0f);
+            joint16->SetAsSpringDamper1(0.01f, 50.0f, 10.0f);
 
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint16);
             nextRootTemp2 = model->AddLimb(nextRootTemp2, brasRBody, jointPtr);
@@ -503,7 +503,7 @@ namespace ndDaveRagdoll
 
             joint18 = new ndJointHinge(tmp1, avantbrasRBody->GetAsBodyKinematic(), brasRBody->GetAsBodyKinematic());
             joint18->SetLimitState(true);
-            joint18->SetLimits(-120.0f * ndDegreeToRad, 5.0f * ndDegreeToRad);
+            joint18->SetLimits(-120.0f * ndDegreeToRad, 15.0f * ndDegreeToRad);
             joint18->SetAsSpringDamper(0.1f, 0.0f, 5.0f);
 
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint18);
@@ -540,11 +540,11 @@ namespace ndDaveRagdoll
             joint15 = new ndJointDoubleHinge(tmp1, brasLBody->GetAsBodyKinematic(), epauleLBody->GetAsBodyKinematic());
             joint15->SetLimitState0(true);
             joint15->SetLimits0(-90.0f * ndDegreeToRad, 90.0f * ndDegreeToRad);
-            joint15->SetAsSpringDamper0(0.005f, 50.0f, 10.0f);
+            joint15->SetAsSpringDamper0(0.01f, 50.0f, 10.0f);
             
             joint15->SetLimitState1(true);
             joint15->SetLimits1(-120.0f * ndDegreeToRad, 120.0f * ndDegreeToRad);
-            joint15->SetAsSpringDamper1(0.005f, 50.0f, 10.0f);
+            joint15->SetAsSpringDamper1(0.01f, 50.0f, 10.0f);
 
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint15);
             nextRootTemp1 = model->AddLimb(nextRootTemp1, brasLBody, jointPtr);
@@ -557,7 +557,7 @@ namespace ndDaveRagdoll
 
             joint17 = new ndJointHinge(tmp1, avantbrasLBody->GetAsBodyKinematic(), brasLBody->GetAsBodyKinematic());
             joint17->SetLimitState(true);
-            joint17->SetLimits(-5.0f * ndDegreeToRad, 120.0f * ndDegreeToRad);
+            joint17->SetLimits(-15.0f * ndDegreeToRad, 120.0f * ndDegreeToRad);
             joint17->SetAsSpringDamper(0.1f, 0.0f, 5.0f);
 
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint17);
