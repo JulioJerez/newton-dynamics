@@ -48,6 +48,7 @@ ndJointDoubleHinge::ndJointDoubleHinge(const ndMatrix& pinAndPivotInChild, const
 	,m_axis1()
 {
 }
+
 ndJointDoubleHinge::~ndJointDoubleHinge()
 {
 }
@@ -313,9 +314,6 @@ void ndJointDoubleHinge::UpdateParameters()
 
 	const ndMatrix localMatrix(matrix0 * matrix1.OrthoInverse());
 	// calculate joint parameters, angles and omega
-	ndVector temp;
-	const ndVector euler(localMatrix.CalcPitchYawRoll(temp));
-
 	const ndFloat32 angle0 = ndAtan2(-localMatrix.m_right.m_y, localMatrix.m_up.m_y);
 	const ndFloat32 deltaAngle0 = ndAnglesSub(angle0, m_axis0.m_angle);
 	m_axis0.m_angle += deltaAngle0;
