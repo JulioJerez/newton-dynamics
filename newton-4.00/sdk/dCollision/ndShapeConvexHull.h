@@ -46,6 +46,7 @@ class ndShapeConvexHull : public ndShapeConvex
 	bool Create(ndInt32 count, ndInt32 strideInBytes, const ndFloat32* const vertexArray, ndFloat32 tolerance, ndInt32 maxPointsOut);
 	virtual ndVector SupportVertex(const ndVector& dir) const override;
 	virtual ndVector SupportFeatureVertex(const ndVector& dir, ndInt32* const vertexIndex) const override;
+	D_COLLISION_API ndSharedPtr<ndMeshCollisionShape> GetMeshShape() const override;
 	
 	private:
 	ndVector SupportVertexBruteForce(const ndVector& dir, ndInt32* const vertexIndex) const;

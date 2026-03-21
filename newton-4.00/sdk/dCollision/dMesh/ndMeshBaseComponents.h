@@ -27,6 +27,7 @@
 class ndBody;
 class ndMeshEffect;
 class ndShapeInstance;
+class ndBodyKinematic;
 class ndJointBilateralConstraint;
 
 class ndMeshCollisionShape : public ndClassAlloc
@@ -80,6 +81,16 @@ class ndMeshCollisionShapeChamferCylinder : public ndMeshCollisionShape
 
 	ndFloat32 m_height;
 	ndFloat32 m_radius;
+};
+
+class ndMeshCollisionShapeConvexHull : public ndMeshCollisionShape
+{
+	public:
+	D_COLLISION_API virtual ndShape* CreateObject() const override;
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+
+	ndArray<ndVector> m_points;
 };
 
 class ndMeshShapeInstance : public ndClassAlloc

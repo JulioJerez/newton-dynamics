@@ -112,6 +112,24 @@ ndShape* ndMeshCollisionShapeChamferCylinder::CreateObject() const
 	return new ndShapeChamferCylinder(m_radius, m_height);
 }
 
+ndShape* ndMeshCollisionShapeConvexHull::CreateObject() const
+{
+	ndAssert(0);
+	return nullptr;
+}
+
+void ndMeshCollisionShapeConvexHull::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	xmlSaveParam(parent, "constructor", ndShapeConvexHull::StaticClassName());
+	xmlSaveParam(parent, "pointcloud", m_points);
+}
+
+void ndMeshCollisionShapeConvexHull::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndAssert(0);
+}
+
+
 ndMeshShapeInstance::ndMeshShapeInstance()
 	:ndClassAlloc()
 	,m_localMatrix(ndGetIdentityMatrix())
