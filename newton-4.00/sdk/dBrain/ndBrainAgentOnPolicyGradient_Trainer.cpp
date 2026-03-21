@@ -634,7 +634,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::TrajectoryToGpuBuffers()
 	const ndInt32 stride = m_trajectoryAccumulator.GetStride();
 	if (m_trajectoryAccumulator.GetCount() < m_parameters.m_miniBatchSize)
 	{
-		// make sure we have at least one minibatch worth of data
+		// make sure we have at least one mini batch worth of data
 		const ndInt32 transitionsCount = m_trajectoryAccumulator.GetCount();
 		m_trajectoryAccumulator.SetCount(m_parameters.m_miniBatchSize);
 
@@ -741,7 +741,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::CalculateAdvantage()
 	const ndInt32 transitionStrideInBytes = ndInt32(m_parameters.m_miniBatchSize * m_trajectoryAccumulator.GetStride() * sizeof(ndReal));
 	ndAssert(numberOfBatches >= 1);
 
-	// calculate GAE(l, 1) // very noisy, the policy colapse most of the time.
+	// calculate GAE(l, 1) // very noisy, the policy collapse most of the time.
 	// calculate GAE(l, 0) // too smooth, and doesn't seem to work either
 	// just using bellman equation to calculate state expected reward.
 	// advantage(i) = reward(i) + alive(i) * (gamma * Value(i + 1) - value(i))
@@ -934,7 +934,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::CalculateAdvantage()
 		advantageInfo.m_dstOffsetInByte = i * ndInt32(m_parameters.m_miniBatchSize * sizeof(ndReal));
 		shuffleBufferInfo.m_srcOffsetInByte = i * ndInt32(m_parameters.m_miniBatchSize * sizeof(ndReal));
 
-		// Get the state value for thei minibatch
+		// Get the state value for this mini batch
 		m_minibatchRandomShuffleBuffer->CopyBuffer(shuffleBufferInfo, 1, **m_randomShuffleBuffer);
 		inputBuffer->CopyBufferIndirect(observationInfo, **m_minibatchRandomShuffleBuffer, **m_trainingBuffer);
 		m_criticTrainer->MakePrediction();
@@ -998,7 +998,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeCritic()
 	const ndInt32 numberOfIterations = ndInt32(m_numberOfIterations);
 	ndAssert(numberOfIterations >= 1);
 
-	// caculate all of the base values
+	// calculate all of the base values
 	for (ndInt32 i = 0; i < numberOfIterations; ++i)
 	{
 		// only the shuffle buffer is increment to the next batch
@@ -1009,10 +1009,10 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeCritic()
 		inputBuffer->CopyBufferIndirect(observationInfo, **m_minibatchRandomShuffleBuffer, **m_trainingBuffer);
 		m_criticTrainer->MakePrediction();
 
-		// reuse advantage buffer to store the previus state value
+		// reuse advantage buffer to store the previous state value
 		m_advantageBuffer->CopyBuffer(stateValueInfo, 1, *outputBuffer);
 	}
-	// reset the use infor
+	// reset the use info
 	stateValueInfo.m_dstOffsetInByte = 0;
 	shuffleBufferInfo.m_srcOffsetInByte = 0;
 
@@ -1071,7 +1071,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeCritic()
 			outputGradientBuffer->Blend (*outputBuffer, *blendBuffer);
 
 			#ifdef ND_DEBUG_CONTINUE_PROXIMA_POLICY
-				// validate gradient using the automatic differentation
+				// validate gradient using the automatic differentiation
 				class AutoGradient : public ndFuntionEvaluator
 				{
 					public:
