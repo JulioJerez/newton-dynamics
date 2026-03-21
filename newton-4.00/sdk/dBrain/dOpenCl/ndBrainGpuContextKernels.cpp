@@ -1796,7 +1796,6 @@ void ndBrainGpuContext::CreateKerners()
     m_brainLayerTanhBackPropagate = CreateKerner(program, "brainLayerBrainTanhBackPropagate");
     m_brainLayerDropOutBackPropagate = CreateKerner(program, "brainLayerBrainDropOutBackPropagate");
     m_brainLayerLeakyReluBackPropagate = CreateKerner(program, "brainLayerBrainLeakyReluBackPropagate");
-    m_brainLayerPolicyGradientBackPropagate = CreateKerner(program, "brainLayerBrainPolicyGradientBackPropagate");
     m_brainLayerCathegoricalSoftmaxBackPropagate = CreateKerner(program, "brainLayerBrainCathegoricalSoftmaxBackPropagate");
     m_brainLayerMatrixBackPropagateBiasGradients = CreateKerner(program, "brainLayerBrainBackPropagateMatrixBiasGradients");
     m_brainLayerMatrixBackPropagateInputGradients = CreateKerner(program, "brainLayerBrainBackPropagateMatrixInputGradients");

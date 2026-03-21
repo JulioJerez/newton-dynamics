@@ -33,11 +33,10 @@
 #include "ndBrainOptimizerAdam.h"
 #include "ndBrainLayerActivationRelu.h"
 #include "ndBrainLayerActivationTanh.h"
+#include "ndBrainLayerActivationLinear.h"
 #include "ndBrainLossLeastSquaredError.h"
 #include "ndBrainLayerActivationLeakyRelu.h"
-#include "ndBrainAgentPolicyGradientActivation.h"
 #include "ndBrainAgentOnPolicyGradient_Trainer.h"
-#include "ndBrainLayerActivationLinearNormalize.h"
 
 //#define ND_DEBUG_CONTINUE_PROXIMA_POLICY
 //#define ND_CONTINUE_PROXIMA_POLICY_BOOTHSTRAP_METHOD
@@ -427,7 +426,6 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildPolicyClass()
 {
 	ndFixSizeArray<ndBrainLayer*, 32> layers(0);
 
-	//layers.PushBack(new ndBrainLayerActivationLinearNormalize(m_parameters.m_numberOfObservations));
 	layers.PushBack(new ndBrainLayerLinear(m_parameters.m_numberOfObservations, m_parameters.m_hiddenLayersNumberOfNeurons));
 	layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 
@@ -439,7 +437,25 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildPolicyClass()
 		layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 	}
 	layers.PushBack(new ndBrainLayerLinear(layers[layers.GetCount() - 1]->GetOutputSize(), m_parameters.m_numberOfActions * 2));
-	layers.PushBack(new ndBrainAgentPolicyGradientActivation(layers[layers.GetCount() - 1]->GetOutputSize(), ndBrainFloat(ndSqrt(m_parameters.m_minSigmaSquared)), ndBrainFloat(ndSqrt(m_parameters.m_maxSigmaSquared))));
+	layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
+
+	ndBrainFixSizeVector<256> bias;
+	ndBrainFixSizeVector<256> slope;
+	bias.SetCount(m_parameters.m_numberOfActions * 2);
+	slope.SetCount(m_parameters.m_numberOfActions * 2);
+
+	ndBrainFloat minSigma = ndSqrt(m_parameters.m_minSigmaSquared);
+	ndBrainFloat maxSigma = ndSqrt(m_parameters.m_maxSigmaSquared);
+	ndBrainFloat s = ndBrainFloat(0.5f) * (maxSigma - minSigma);
+	ndBrainFloat b = s + minSigma;
+	for (ndInt32 i = 0; i < m_parameters.m_numberOfActions; ++i)
+	{
+		bias[i] = ndBrainFloat(0.0f);
+		slope[i] = ndBrainFloat(1.0f);
+		bias[i + m_parameters.m_numberOfActions] = b;
+		slope[i + m_parameters.m_numberOfActions] = s;
+	}
+	layers.PushBack(new ndBrainLayerActivationLinear(slope, bias));
 
 	ndSharedPtr<ndBrain> policy (new ndBrain);
 	for (ndInt32 i = 0; i < layers.GetCount(); ++i)
@@ -447,7 +463,6 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildPolicyClass()
 		policy->AddLayer(layers[i]);
 	}
 	policy->InitWeights();
-	m_policyInputNormalization = ndWeakPtr<ndBrainLayerActivationLinearNormalize> ((ndBrainLayerActivationLinearNormalize*)policy->FindLayer(ND_BRAIN_LAYER_ACTIVATION_LINEAR_NORMALIZE_NAME));
 
 	ndSharedPtr<ndBrainOptimizer> optimizer(new ndBrainOptimizerAdam(m_context));
 	optimizer->SetRegularizer(m_parameters.m_policyRegularizer);
@@ -614,7 +629,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::TrajectoryToGpuBuffers()
 	const ndInt32 stride = m_trajectoryAccumulator.GetStride();
 	if (m_trajectoryAccumulator.GetCount() < m_parameters.m_miniBatchSize)
 	{
-		// make sure we have at least one minibatch worth of data
+		// make sure we have at least one mini batch worth of data
 		const ndInt32 transitionsCount = m_trajectoryAccumulator.GetCount();
 		m_trajectoryAccumulator.SetCount(m_parameters.m_miniBatchSize);
 
@@ -721,7 +736,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::CalculateAdvantage()
 	const ndInt32 transitionStrideInBytes = ndInt32(m_parameters.m_miniBatchSize * m_trajectoryAccumulator.GetStride() * sizeof(ndReal));
 	ndAssert(numberOfBatches >= 1);
 
-	// calculate GAE(l, 1) // very noisy, the policy colapse most of the time.
+	// calculate GAE(l, 1) // very noisy, the policy collapse most of the time.
 	// calculate GAE(l, 0) // too smooth, and doesn't seem to work either
 	// just using bellman equation to calculate state expected reward.
 	// advantage(i) = reward(i) + alive(i) * (gamma * Value(i + 1) - value(i))
@@ -914,7 +929,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::CalculateAdvantage()
 		advantageInfo.m_dstOffsetInByte = i * ndInt32(m_parameters.m_miniBatchSize * sizeof(ndReal));
 		shuffleBufferInfo.m_srcOffsetInByte = i * ndInt32(m_parameters.m_miniBatchSize * sizeof(ndReal));
 
-		// Get the state value for thei minibatch
+		// Get the state value for this mini batch
 		m_minibatchRandomShuffleBuffer->CopyBuffer(shuffleBufferInfo, 1, **m_randomShuffleBuffer);
 		inputBuffer->CopyBufferIndirect(observationInfo, **m_minibatchRandomShuffleBuffer, **m_trainingBuffer);
 		m_criticTrainer->MakePrediction();
@@ -978,7 +993,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeCritic()
 	const ndInt32 numberOfIterations = ndInt32(m_numberOfIterations);
 	ndAssert(numberOfIterations >= 1);
 
-	// caculate all of the base values
+	// calculate all of the base values
 	for (ndInt32 i = 0; i < numberOfIterations; ++i)
 	{
 		// only the shuffle buffer is increment to the next batch
@@ -989,10 +1004,10 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeCritic()
 		inputBuffer->CopyBufferIndirect(observationInfo, **m_minibatchRandomShuffleBuffer, **m_trainingBuffer);
 		m_criticTrainer->MakePrediction();
 
-		// reuse advantage buffer to store the previus state value
+		// reuse advantage buffer to store the previous state value
 		m_advantageBuffer->CopyBuffer(stateValueInfo, 1, *outputBuffer);
 	}
-	// reset the use infor
+	// reset the use info
 	stateValueInfo.m_dstOffsetInByte = 0;
 	shuffleBufferInfo.m_srcOffsetInByte = 0;
 
@@ -1051,7 +1066,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeCritic()
 			outputGradientBuffer->Blend (*outputBuffer, *blendBuffer);
 
 			#ifdef ND_DEBUG_CONTINUE_PROXIMA_POLICY
-				// validate gradient using the automatic differentation
+				// validate gradient using the automatic differentiation
 				class AutoGradient : public ndFuntionEvaluator
 				{
 					public:
