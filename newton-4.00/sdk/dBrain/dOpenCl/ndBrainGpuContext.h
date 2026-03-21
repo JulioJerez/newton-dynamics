@@ -149,7 +149,6 @@ class ndBrainGpuContext : public ndBrainContext
 	ndSharedPtr<ndBrainKernel> m_brainLayerTanhBackPropagate;
 	ndSharedPtr<ndBrainKernel> m_brainLayerDropOutBackPropagate;
 	ndSharedPtr<ndBrainKernel> m_brainLayerLeakyReluBackPropagate;
-	ndSharedPtr<ndBrainKernel> m_brainLayerPolicyGradientBackPropagate;
 	ndSharedPtr<ndBrainKernel> m_brainLayerCathegoricalSoftmaxBackPropagate;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateInputGradients;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateWeightGradients;

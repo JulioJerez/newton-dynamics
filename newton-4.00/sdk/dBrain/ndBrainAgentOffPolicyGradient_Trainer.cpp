@@ -36,9 +36,7 @@
 #include "ndBrainLayerActivationLinear.h"
 #include "ndBrainLossLeastSquaredError.h"
 #include "ndBrainLayerActivationLeakyRelu.h"
-#include "ndBrainAgentPolicyGradientActivation.h"
 #include "ndBrainAgentOffPolicyGradient_Trainer.h"
-#include "ndBrainLayerActivationLinearNormalize.h"
 
 #define ND_POLICY_LEARN_SCALE				ndBrainFloat(0.5f)
 #define ND_POLICY_DEFAULT_POLYAK_BLEND		ndBrainFloat(0.005f)
@@ -216,7 +214,6 @@ ndBrainAgentOffPolicyGradient_Agent::ndBrainAgentOffPolicyGradient_Agent(ndBrain
 	,m_normalDistribution()
 	,m_owner(master)
 	,m_trajectoryBaseIndex(0)
-	,m_layerNormalizationCounter(ndUnsigned32 (m_owner->m_parameters.m_replayBufferStartOptimizeSize) + ND_LINEAR_NORMALIZE_START_NORMALIZE)
 {
 	m_trajectory.Init(m_brain->GetOutputSize(), master->m_parameters.m_numberOfObservations);
 	ndUnsigned32 agentSeed = m_owner->m_uniformDistribution.Generate();
@@ -254,16 +251,6 @@ void ndBrainAgentOffPolicyGradient_Agent::SampleActions(ndBrainVector& actions)
 	}
 }
 
-//#pragma optimize( "", off )
-void ndBrainAgentOffPolicyGradient_Agent::UpdateLayersNormalization(const ndBrainVector& observations)
-{
-	if (m_owner->m_policyInputNormalization && m_layerNormalizationCounter)
-	{
-		m_owner->m_policyInputNormalization->UpdateParameters(observations);
-		m_layerNormalizationCounter--;
-	}
-}
-
 void ndBrainAgentOffPolicyGradient_Agent::Step()
 {
 	ndAssert(m_owner);
@@ -280,7 +267,6 @@ void ndBrainAgentOffPolicyGradient_Agent::Step()
 	policy->MakePrediction(observation, actions);
 	SampleActions(actions);
 	ApplyActions(&actions[0]);
-	UpdateLayersNormalization(observation);
 
 	bool isdead = IsTerminal();
 	ndBrainFloat reward = CalculateReward();
@@ -397,7 +383,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildPolicyClass()
 {
 	ndFixSizeArray<ndBrainLayer*, 32> layers(0);
 	
-	//layers.PushBack(new ndBrainLayerActivationLinearNormalize(m_parameters.m_numberOfObservations));
 	layers.PushBack(new ndBrainLayerLinear(m_parameters.m_numberOfObservations, m_parameters.m_hiddenLayersNumberOfNeurons));
 	layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 
@@ -409,7 +394,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildPolicyClass()
 		layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 	}
 	layers.PushBack(new ndBrainLayerLinear(layers[layers.GetCount() - 1]->GetOutputSize(), m_parameters.m_numberOfActions * 2));
-	//layers.PushBack(new ndBrainAgentPolicyGradientActivation(layers[layers.GetCount() - 1]->GetOutputSize(), ndBrainFloat(ndSqrt(m_parameters.m_minSigmaSquared)), ndBrainFloat(ndSqrt(m_parameters.m_maxSigmaSquared))));
 	layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 
 	ndBrainFixSizeVector<256> bias;
@@ -436,7 +420,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildPolicyClass()
 		policy->AddLayer(layers[i]);
 	}
 	policy->InitWeights();
-	m_policyInputNormalization = ndWeakPtr<ndBrainLayerActivationLinearNormalize>((ndBrainLayerActivationLinearNormalize*)policy->FindLayer(ND_BRAIN_LAYER_ACTIVATION_LINEAR_NORMALIZE_NAME));
 	
 	ndSharedPtr<ndBrainOptimizer> optimizer (new ndBrainOptimizerAdam(m_context));
 	//ndSharedPtr<ndBrainOptimizer> optimizer(new ndBrainOptimizerSgd(m_context));

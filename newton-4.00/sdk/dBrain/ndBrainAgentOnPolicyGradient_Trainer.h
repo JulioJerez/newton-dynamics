@@ -46,7 +46,6 @@ class ndBrainFloatBuffer;
 class ndBrainIntegerBuffer;
 class ndBrainUniformBuffer;
 class ndBrainAgentOnPolicyGradient_Trainer;
-class ndBrainLayerActivationLinearNormalize;
 
 class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 {
@@ -215,7 +214,6 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndSharedPtr<ndBrainIntegerBuffer> m_randomCriticShuffleBuffer;
 	ndSharedPtr<ndBrainIntegerBuffer> m_minibatchRandomShuffleBuffer;
 	ndSharedPtr<ndBrainIntegerBuffer> m_minibatchCriticRandomShuffleBuffer;
-	ndWeakPtr<ndBrainLayerActivationLinearNormalize> m_policyInputNormalization;
 
 	ndBrainVector m_lastPolicy;
 	ndBrainVector m_scratchBuffer;

@@ -36,9 +36,7 @@
 #include "ndBrainLayerActivationLinear.h"
 #include "ndBrainLossLeastSquaredError.h"
 #include "ndBrainLayerActivationLeakyRelu.h"
-#include "ndBrainAgentPolicyGradientActivation.h"
 #include "ndBrainAgentOnPolicyGradient_Trainer.h"
-#include "ndBrainLayerActivationLinearNormalize.h"
 
 //#define ND_DEBUG_CONTINUE_PROXIMA_POLICY
 //#define ND_CONTINUE_PROXIMA_POLICY_BOOTHSTRAP_METHOD
@@ -428,7 +426,6 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildPolicyClass()
 {
 	ndFixSizeArray<ndBrainLayer*, 32> layers(0);
 
-	//layers.PushBack(new ndBrainLayerActivationLinearNormalize(m_parameters.m_numberOfObservations));
 	layers.PushBack(new ndBrainLayerLinear(m_parameters.m_numberOfObservations, m_parameters.m_hiddenLayersNumberOfNeurons));
 	layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 
@@ -440,7 +437,6 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildPolicyClass()
 		layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 	}
 	layers.PushBack(new ndBrainLayerLinear(layers[layers.GetCount() - 1]->GetOutputSize(), m_parameters.m_numberOfActions * 2));
-	//layers.PushBack(new ndBrainAgentPolicyGradientActivation(layers[layers.GetCount() - 1]->GetOutputSize(), ndBrainFloat(ndSqrt(m_parameters.m_minSigmaSquared)), ndBrainFloat(ndSqrt(m_parameters.m_maxSigmaSquared))));
 	layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 
 	ndBrainFixSizeVector<256> bias;
@@ -467,7 +463,6 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildPolicyClass()
 		policy->AddLayer(layers[i]);
 	}
 	policy->InitWeights();
-	m_policyInputNormalization = ndWeakPtr<ndBrainLayerActivationLinearNormalize> ((ndBrainLayerActivationLinearNormalize*)policy->FindLayer(ND_BRAIN_LAYER_ACTIVATION_LINEAR_NORMALIZE_NAME));
 
 	ndSharedPtr<ndBrainOptimizer> optimizer(new ndBrainOptimizerAdam(m_context));
 	optimizer->SetRegularizer(m_parameters.m_policyRegularizer);
