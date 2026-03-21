@@ -33,6 +33,7 @@
 #include "ndBrainOptimizerAdam.h"
 #include "ndBrainLayerActivationRelu.h"
 #include "ndBrainLayerActivationTanh.h"
+#include "ndBrainLayerActivationLinear.h"
 #include "ndBrainLossLeastSquaredError.h"
 #include "ndBrainLayerActivationLeakyRelu.h"
 #include "ndBrainAgentPolicyGradientActivation.h"
@@ -408,7 +409,26 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildPolicyClass()
 		layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 	}
 	layers.PushBack(new ndBrainLayerLinear(layers[layers.GetCount() - 1]->GetOutputSize(), m_parameters.m_numberOfActions * 2));
-	layers.PushBack(new ndBrainAgentPolicyGradientActivation(layers[layers.GetCount() - 1]->GetOutputSize(), ndBrainFloat(ndSqrt(m_parameters.m_minSigmaSquared)), ndBrainFloat(ndSqrt(m_parameters.m_maxSigmaSquared))));
+	//layers.PushBack(new ndBrainAgentPolicyGradientActivation(layers[layers.GetCount() - 1]->GetOutputSize(), ndBrainFloat(ndSqrt(m_parameters.m_minSigmaSquared)), ndBrainFloat(ndSqrt(m_parameters.m_maxSigmaSquared))));
+	layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
+
+	ndBrainFixSizeVector<256> bias;
+	ndBrainFixSizeVector<256> slope;
+	bias.SetCount(m_parameters.m_numberOfActions * 2);
+	slope.SetCount(m_parameters.m_numberOfActions * 2);
+
+	ndBrainFloat minSigma = ndSqrt(m_parameters.m_minSigmaSquared);
+	ndBrainFloat maxSigma = ndSqrt(m_parameters.m_maxSigmaSquared);
+	ndBrainFloat s = ndBrainFloat(0.5f) * (maxSigma - minSigma);
+	ndBrainFloat b = s + minSigma;
+	for (ndInt32 i = 0; i < m_parameters.m_numberOfActions; ++i)
+	{
+		bias[i] = ndBrainFloat(0.0f);
+		slope[i] = ndBrainFloat(1.0f);
+		bias[i + m_parameters.m_numberOfActions] = b;
+		slope[i + m_parameters.m_numberOfActions] = s;
+	}
+	layers.PushBack(new ndBrainLayerActivationLinear(slope, bias));
 
 	ndSharedPtr<ndBrain> policy (new ndBrain);
 	for (ndInt32 i = 0; i < layers.GetCount(); ++i)
