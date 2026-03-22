@@ -923,6 +923,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::CalculateAdvantage()
 	const ndInt32 numberOfIterations = ndInt32(m_numberOfIterations);
 	ndAssert(numberOfIterations >= 1);
 
+	m_meanBuffer->Set(ndBrainFloat(0.0f));
 	// advantage(i) = ExpectedReward(t) - StateValue(t)
 	for (ndInt32 i = 0; i < numberOfIterations; ++i)
 	{
@@ -938,13 +939,42 @@ void ndBrainAgentOnPolicyGradient_Trainer::CalculateAdvantage()
 		m_minibatchAdvantageBuffer->CopyBufferIndirect(expectedRewardInfo, **m_minibatchRandomShuffleBuffer, **m_trainingBuffer);
 		m_minibatchAdvantageBuffer->Sub(*outputBuffer);
 
+		// calculate the normal deviation
+		m_sigmaBuffer->Set(**m_minibatchAdvantageBuffer);
+		m_sigmaBuffer->Mul(**m_sigmaBuffer);
+		m_meanBuffer->Add(**m_sigmaBuffer);
+
 		// clip huge advantages ?
-		ndBrainFloat maxAdvantageClipping = ndBrainFloat(5.0f);
-		m_minibatchAdvantageBuffer->Min(maxAdvantageClipping);
-		m_minibatchAdvantageBuffer->Max(-maxAdvantageClipping);
+		//ndBrainFloat maxAdvantageClipping = ndBrainFloat(5.0f);
+		//m_minibatchAdvantageBuffer->Min(maxAdvantageClipping);
+		//m_minibatchAdvantageBuffer->Max(-maxAdvantageClipping);
 
 		// save advantage
 		m_advantageBuffer->CopyBuffer(advantageInfo, 1, **m_minibatchAdvantageBuffer);
+	}
+
+	m_meanBuffer->ReductionSum();
+	m_meanBuffer->Scale(ndBrainFloat(1.0f) / ndBrainFloat(numberOfIterations * m_parameters.m_miniBatchSize));
+	m_meanBuffer->Sqrt(m_parameters.m_miniBatchSize);
+	m_invSigmaBuffer->Reciprocal(**m_meanBuffer);
+
+	ndBrainFloat maxAdvantageClipping = ndBrainFloat(10.0f);
+	for (ndInt32 i = 0; i < numberOfIterations; ++i)
+	{
+		advantageInfo.m_dstOffsetInByte = 0;
+		advantageInfo.m_srcOffsetInByte = i * ndInt32(m_parameters.m_miniBatchSize * sizeof(ndReal));
+		m_sigmaBuffer->CopyBuffer(advantageInfo, 1, **m_advantageBuffer);
+		
+		// normalize advantage
+		m_sigmaBuffer->Mul(**m_invSigmaBuffer);
+		// clip huge outlier advantages ?
+		m_sigmaBuffer->Min(maxAdvantageClipping);
+		m_sigmaBuffer->Max(-maxAdvantageClipping);
+
+		// save normalized advatange
+		advantageInfo.m_srcOffsetInByte = 0;
+		advantageInfo.m_dstOffsetInByte = i * ndInt32(m_parameters.m_miniBatchSize * sizeof(ndReal));
+		m_advantageBuffer->CopyBuffer(advantageInfo, 1, **m_sigmaBuffer);
 	}
 }
 
