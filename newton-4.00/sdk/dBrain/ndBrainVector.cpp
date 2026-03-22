@@ -273,7 +273,7 @@ void ndBrainVector::Reciprocal(const ndBrainVector& data)
 
 	for (ndInt64 i = GetCount() - 1; i >= 0; --i)
 	{
-		ndAssert(ndAbs((*this)[i]) > ndBrainFloat(1.e-6f));
+		ndAssert(ndAbs(data[i]) > ndBrainFloat(1.e-6f));
 		(*this)[i] = ndBrainFloat(1.0f) / data[i];
 	}
 }
