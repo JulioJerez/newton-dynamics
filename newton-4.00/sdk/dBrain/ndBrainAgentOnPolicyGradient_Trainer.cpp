@@ -1293,7 +1293,7 @@ m_parameters.m_entropyTemperature = 0.0f;
 	UpdateScore();
 	TrajectoryToGpuBuffers();
 
-	OptimizeCritic();
 	CalculateAdvantage();
 	OptimizePolicy();
+	OptimizeCritic();
 }
