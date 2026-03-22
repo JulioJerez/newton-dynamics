@@ -42,6 +42,8 @@
 
 #define ND_ON_POLICY_MOVING_AVERAGE_SCORE	8
 
+#define ND_ON_POLICY_MONTE_CARLOS_STEPS		8
+
 class ndBrainFloatBuffer;
 class ndBrainIntegerBuffer;
 class ndBrainUniformBuffer;
@@ -63,15 +65,15 @@ class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 
 		void Clear(ndInt32 entry);
 		void CopyFrom(ndInt32 entry, ndTrajectory& src, ndInt32 srcEntry);
-	
-		ndBrainFloat GetReward(ndInt32 entry) const;
-		void SetReward(ndInt32 entry, ndBrainFloat reward);
 
 		ndBrainFloat GetExpectedReward(ndInt32 entry) const;
 		void SetExpectedReward(ndInt32 entry, ndBrainFloat expectedReward);
 
 		bool GetTerminalState(ndInt32 entry) const;
 		void SetTerminalState(ndInt32 entry, bool isTermimal);
+
+		ndBrainFloat* GetReward(ndInt32 entry);
+		const ndBrainFloat* GetReward(ndInt32 entry) const;
 
 		ndBrainFloat* GetActions(ndInt32 entry);
 		const ndBrainFloat* GetActions(ndInt32 entry) const;
@@ -85,10 +87,10 @@ class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 		// for GPU 
 		ndInt32 GetStride() const;
 		ndInt32 GetRewardOffset() const;
-		ndInt32 GetExpectedRewardOffset() const;
 		ndInt32 GetActionOffset() const;
 		ndInt32 GetTerminalOffset() const;
 		ndInt32 GetObsevationOffset() const;
+		ndInt32 GetExpectedRewardOffset() const;
 		ndInt32 GetNextObsevationOffset() const;
 		void GetFlatArray(ndInt32 index, ndBrainVector& output) const;
 
@@ -211,7 +213,6 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndSharedPtr<ndBrainFloatBuffer> m_minibatchClippedLikelihoodRatioBuffer;
 
 	ndSharedPtr<ndBrainIntegerBuffer> m_randomShuffleBuffer;
-	ndSharedPtr<ndBrainIntegerBuffer> m_randomCriticShuffleBuffer;
 	ndSharedPtr<ndBrainIntegerBuffer> m_minibatchRandomShuffleBuffer;
 	ndSharedPtr<ndBrainIntegerBuffer> m_minibatchCriticRandomShuffleBuffer;
 
@@ -220,7 +221,6 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndArray<ndInt32> m_shuffleBuffer;
 	ndArray<ndInt32> m_criticShuffleBuffer;
 	ndArray<ndInt32> m_shuffleBufferBuilder;
-	ndArray<ndInt32> m_criticShuffleBufferBuilder;
 	ndBrainAgentOnPolicyGradient_Agent::ndTrajectory m_trajectoryAccumulator;
 	ndMovingAverage<ND_ON_POLICY_MOVING_AVERAGE_SCORE> m_averageExpectedRewards;
 	ndMovingAverage<ND_ON_POLICY_MOVING_AVERAGE_SCORE> m_averageFramesPerEpisodes;
