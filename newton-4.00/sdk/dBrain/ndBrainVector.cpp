@@ -273,7 +273,7 @@ void ndBrainVector::Reciprocal(const ndBrainVector& data)
 
 	for (ndInt64 i = GetCount() - 1; i >= 0; --i)
 	{
-		ndAssert(ndAbs((*this)[i]) > ndBrainFloat(1.e-6f));
+		ndAssert(ndAbs(data[i]) > ndBrainFloat(1.e-6f));
 		(*this)[i] = ndBrainFloat(1.0f) / data[i];
 	}
 }
@@ -510,7 +510,6 @@ void ndBrainVector::CalculateEntropyRegularizationGradient(const ndBrainVector& 
 		ndBrainFloat invSigma = ndBrainFloat(1.0f) / sigma;
 		ndBrainFloat zMeanInvSigma = zMean * invSigma;
 		(*this)[i] = regularization * invSigma * zMeanInvSigma;
-		//(*this)[i + base] = regularization * invSigma * (zMeanInvSigma * zMeanInvSigma - ndBrainFloat(0.0f));
 		(*this)[i + base] = regularization * invSigma * (zMeanInvSigma * zMeanInvSigma - ndBrainFloat(1.0f));
 	}
 }

@@ -18,6 +18,56 @@
 #include "ndDemoCameraNodeFollow.h"
 #include "ndHeightFieldPrimitive.h"
 
+static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, const ndVector& location, const char* const fileName)
+{
+    ndMeshLoader loader;
+    loader.LoadMesh(ndGetWorkingFileName(fileName).GetStr());
+
+    // make an articulated from the loaded mesh
+    ndSharedPtr<ndModel> model(new ndModelArticulation());
+    model->GetAsModelArticulation()->Deserialize(*loader.m_mesh);
+
+    // set the matrix location
+    ndMatrix matrix(ndGetIdentityMatrix());
+    matrix.m_posit = location;
+    model->GetAsModelArticulation()->SetTransform(matrix);
+
+    // Bind application data to the model
+    auto BindApplicationData = [scene, &loader, model]()
+    {
+        ndRender* const render = *scene->GetRenderer();
+
+        const ndMesh* const rootMesh = *loader.m_mesh;
+        for (ndModelArticulation::ndNode* node = model->GetAsModelArticulation()->GetRoot()->GetFirstIterator(); node; node = node->GetNextIterator())
+        {
+            // find the mesh node
+            const ndMesh* const meshNode = rootMesh->FindByClosestMatch(node->m_name);
+            ndAssert(meshNode);
+
+            // create a graphic primitive for visualization
+            ndSharedPtr<ndMeshShapeInstance> primitive(meshNode->GetPrimitive());
+            ndRenderPrimitive::ndDescriptor descriptor(render);
+            descriptor.m_collision = ndSharedPtr<ndShapeInstance>(primitive->CreateObject());
+            descriptor.m_mapping = ndRenderPrimitive::m_box;
+            descriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName("wood_0.png")));
+            ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
+
+            const ndMatrix matrix(node->m_body->GetMatrix());
+            ndSharedPtr<ndRenderSceneNode>entity(new ndRenderSceneNode(matrix));
+            entity->SetPrimitiveMatrix(meshNode->GetGeometryMatrix());
+            entity->SetPrimitive(mesh);
+            scene->AddEntity(entity);
+
+            // add a rigid body notification callback
+            ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, entity));
+            ((ndDemoEntityNotify*)*notify)->ResetEntityTransform(matrix);
+            node->m_body->SetNotifyCallback(notify);
+        }
+    };
+    BindApplicationData();
+    return model;
+}
+
 namespace ndBoxTricycle
 {
     ndModelArticulation* CreateBoxTricycle(ndDemoEntityManager* const scene, ndFloat32 mass, ndFloat32 diameter)
@@ -83,80 +133,25 @@ namespace ndBoxTricycle
         return carModel;
     }
 
-    void BindApplicationData(
-        ndDemoEntityManager* const scene,
-        ndMeshLoader& meshLoader,
-        ndModelArticulation* const model)
-    {
-        ndRender* const render = *scene->GetRenderer();
-
-        const ndMesh* const rootMesh = *meshLoader.m_mesh;
-        for (ndModelArticulation::ndNode* node = model->GetRoot()->GetFirstIterator(); node; node = node->GetNextIterator())
-        {
-            // find th emesh node
-            const ndMesh* const meshNode = rootMesh->FindByClosestMatch(node->m_name);
-            ndAssert(meshNode);
-
-            // create a graphic primitive for visualization
-            ndSharedPtr<ndMeshShapeInstance> primitive(meshNode->GetPrimitive());
-            ndRenderPrimitive::ndDescriptor descriptor(render);
-            descriptor.m_collision = ndSharedPtr<ndShapeInstance>(primitive->CreateObject());
-            descriptor.m_mapping = ndRenderPrimitive::m_box;
-            descriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName("wood_0.png")));
-            ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
-
-            const ndMatrix matrix(node->m_body->GetMatrix());
-            ndSharedPtr<ndRenderSceneNode>entity(new ndRenderSceneNode(matrix));
-            entity->SetPrimitiveMatrix(meshNode->GetGeometryMatrix());
-            entity->SetPrimitive(mesh);
-            scene->AddEntity(entity);
-
-            // add a rigid body notification callback
-            ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, entity));
-            ((ndDemoEntityNotify*)*notify)->ResetEntityTransform(matrix);
-            node->m_body->SetNotifyCallback(notify);
-        }
-    }
-
     void BoxTricycle(ndDemoEntityManager* const scene, const ndVector& origin, ndFloat32 mass, ndFloat32 diameter)
     {
-        ndPhysicsWorld* const world = scene->GetWorld();
-
         // we first create an articulated model.
         ndSharedPtr<ndModel>model(CreateBoxTricycle(scene, mass, diameter));
-
-        // test if the model is valid
-        //world->AddModel(ndSharedPtr<ndModel>(model));
 
         // we now export the model as a ndMesh
         model->GetAsModelArticulation()->SaveNdMesh(ndGetWorkingFileName("boxTricycle.nd").GetStr());
 
-        // we now load the ndMesh
-        ndMeshLoader loader;
-        //ndRenderMeshLoader loader(*scene->GetRenderer());
-        loader.LoadMesh(ndGetWorkingFileName("boxTricycle.nd").GetStr());
-
-        // make an articulated from the loaded mesh
-        ndSharedPtr<ndModel> articulation(new ndModelArticulation());
-        articulation->GetAsModelArticulation()->Deserialize(*loader.m_mesh);
-
-        // set the matrix location
-        ndMatrix matrix(ndGetIdentityMatrix());
-        matrix.m_posit = origin;
-        articulation->GetAsModelArticulation()->SetTransform(matrix);
-
-        // Bind application data to the model
-        BindApplicationData(scene, loader, articulation->GetAsModelArticulation());
-
-        // add the loaded model to the world
-        world->AddModel(articulation);
+        // test the exported model
+        ndPhysicsWorld* const world = scene->GetWorld();
+        ndSharedPtr<ndModel> testModel(LoadAndBindModel(scene, origin, "boxTricycle.nd"));
+        world->AddModel(testModel);
     }
 };
 
 // Material ragdoll : désactive les collisions internes
 namespace ndDaveRagdoll
 {
-    ndModelArticulation* CreateDaveRagdoll(ndDemoEntityManager* const scene)
+    ndModelArticulation* CreateRagdoll(ndDemoEntityManager* const scene)
     {
         ndMatrix m_bassin_matrixLocal(ndGetIdentityMatrix());
 
@@ -648,69 +643,200 @@ namespace ndDaveRagdoll
         return model;
     }
 
-    void BindApplicationData(
-        ndDemoEntityManager* const scene,
-        ndMeshLoader& meshLoader,
-        ndModelArticulation* const model)
-    {
-        ndRender* const render = *scene->GetRenderer();
-
-        const ndMesh* const rootMesh = *meshLoader.m_mesh;
-        for (ndModelArticulation::ndNode* node = model->GetRoot()->GetFirstIterator(); node; node = node->GetNextIterator())
-        {
-            // find the mesh node
-            const ndMesh* const meshNode = rootMesh->FindByClosestMatch(node->m_name);
-            ndAssert(meshNode);
-
-            // create a graphic primitive for visualization
-            ndSharedPtr<ndMeshShapeInstance> primitive(meshNode->GetPrimitive());
-            ndRenderPrimitive::ndDescriptor descriptor(render);
-            descriptor.m_collision = ndSharedPtr<ndShapeInstance>(primitive->CreateObject());
-            descriptor.m_mapping = ndRenderPrimitive::m_box;
-            descriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName("wood_0.png")));
-            ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
-
-            const ndMatrix matrix(node->m_body->GetMatrix());
-            ndSharedPtr<ndRenderSceneNode>entity(new ndRenderSceneNode(matrix));
-            entity->SetPrimitiveMatrix(meshNode->GetGeometryMatrix());
-            entity->SetPrimitive(mesh);
-            scene->AddEntity(entity);
-
-            // add a rigid body notification callback
-            ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, entity));
-            ((ndDemoEntityNotify*)*notify)->ResetEntityTransform(matrix);
-            node->m_body->SetNotifyCallback(notify);
-        }
-    }
-
     void RagDoll(ndDemoEntityManager* const scene, const ndVector& origin)
     {
-        ndPhysicsWorld* world = scene->GetWorld();
-
         // make a physic rag doll for using as template
-        ndSharedPtr<ndModel> model (CreateDaveRagdoll(scene));
+        ndSharedPtr<ndModel> model (CreateRagdoll(scene));
 
         // we now export the model as a ndMesh
         model->GetAsModelArticulation()->SaveNdMesh(ndGetWorkingFileName("daveRagdoll.nd").GetStr());
 
+        // test the exported model
+        ndPhysicsWorld* const world = scene->GetWorld();
+        ndSharedPtr<ndModel> testModel(LoadAndBindModel(scene, origin, "daveRagdoll.nd"));
+        world->AddModel(testModel);
+    }
+};
+
+namespace ndBasicRagdoll
+{
+    class ndDefinition
+    {
+        public:
+        enum ndjointType
+        {
+            m_root,
+            m_hinge,
+            m_spherical,
+            m_doubleHinge,
+            m_effector
+        };
+
+        struct ndDampData
+        {
+            ndDampData()
+                :m_spring(0.0f)
+                , m_damper(0.25f)
+                , m_regularizer(0.025f)
+            {
+            }
+
+            ndDampData(ndFloat32 spring, ndFloat32 damper, ndFloat32 regularizer)
+                :m_spring(spring)
+                ,m_damper(damper)
+                ,m_regularizer(regularizer)
+            {
+            }
+
+            ndFloat32 m_spring;
+            ndFloat32 m_damper;
+            ndFloat32 m_regularizer;
+        };
+
+        struct ndJointLimits
+        {
+            ndFloat32 m_minTwistAngle;
+            ndFloat32 m_maxTwistAngle;
+            ndFloat32 m_coneAngle;
+        };
+
+        struct ndOffsetFrameMatrix
+        {
+            ndFloat32 m_pitch;
+            ndFloat32 m_yaw;
+            ndFloat32 m_roll;
+        };
+
+        char m_boneName[32];
+        ndjointType m_limbType;
+        ndFloat32 m_massWeight;
+        ndJointLimits m_jointLimits;
+        ndOffsetFrameMatrix m_frameBasics;
+        ndDampData m_coneSpringData;
+        ndDampData m_twistSpringData;
+    };
+
+    static ndDefinition ragdollDefinition[] =
+    {
+        { "root", ndDefinition::m_root, 1.0f, {}, {} },
+
+        { "lowerback", ndDefinition::m_spherical, 1.0f, { -15.0f, 15.0f, 30.0f }, { 0.0f, 0.0f, 0.0f } },
+        { "upperback", ndDefinition::m_spherical, 1.0f,{ -15.0f, 15.0f, 30.0f },{ 0.0f, 0.0f, 0.0f } },
+        { "lowerneck", ndDefinition::m_spherical, 1.0f,{ -15.0f, 15.0f, 30.0f },{ 0.0f, 0.0f, 0.0f } },
+        { "upperneck", ndDefinition::m_spherical, 1.0f,{ -60.0f, 60.0f, 30.0f },{ 0.0f, 0.0f, 0.0f } },
+
+        { "lclavicle", ndDefinition::m_spherical, 1.0f, { -60.0f, 60.0f, 80.0f }, { 0.0f, -60.0f, 0.0f } },
+        { "lhumerus", ndDefinition::m_hinge, 1.0f, { -0.5f, 120.0f, 0.0f }, { 0.0f, 90.0f, 0.0f } },
+        { "lradius", ndDefinition::m_doubleHinge, 1.0f, { 0.0f, 0.0f, 60.0f }, { 90.0f, 0.0f, 90.0f } },
+
+        { "rclavicle", ndDefinition::m_spherical, 1.0f, { -60.0f, 60.0f, 80.0f }, { 0.0f, 60.0f, 0.0f } },
+        { "rhumerus", ndDefinition::m_hinge, 1.0f, { -0.5f, 120.0f, 0.0f }, { 0.0f, 90.0f, 0.0f } },
+        { "rradius", ndDefinition::m_doubleHinge, 1.0f, { 0.0f, 0.0f, 60.0f }, { 90.0f, 0.0f, 90.0f } },
+
+        { "rhipjoint", ndDefinition::m_spherical, 1.0f, { -45.0f, 45.0f, 80.0f }, { 0.0f, -60.0f, 0.0f } },
+        { "rfemur", ndDefinition::m_hinge, 1.0f, { -0.5f, 120.0f, 0.0f }, { 0.0f, 90.0f, 0.0f } },
+        { "rtibia", ndDefinition::m_doubleHinge, 1.0f, { 0.0f, 0.0f, 60.0f }, { 90.0f, 0.0f, 90.0f } },
+
+        { "lhipjoint", ndDefinition::m_spherical, 1.0f, { -45.0f, 45.0f, 80.0f }, { 0.0f, 60.0f, 0.0f } },
+        { "lfemur", ndDefinition::m_hinge, 1.0f, { -0.5f, 120.0f, 0.0f }, { 0.0f, 90.0f, 0.0f } },
+        { "ltibia", ndDefinition::m_doubleHinge, 1.0f, { 0.0f, 0.0f, 60.0f }, { 90.0f, 0.0f, 90.0f } },
+
+        { "", ndDefinition::m_root,{},{} },
+    };
+
+    ndModelArticulation* CreateRagdoll(ndDemoEntityManager* const scene)
+    {
         ndMeshLoader loader;
-        //ndRenderMeshLoader loader(*scene->GetRenderer());
-        loader.LoadMesh(ndGetWorkingFileName("daveRagdoll.nd").GetStr());
+        loader.LoadMesh(ndGetWorkingFileName("ragdoll.nd"));
 
-        // make an articulated from the loaded mesh
-        ndSharedPtr<ndModel> articulation(new ndModelArticulation());
-        articulation->GetAsModelArticulation()->Deserialize(*loader.m_mesh);
+        auto CreateBodyPart = [](const ndMesh* const meshNode)
+        {
+            ndSharedPtr<ndShapeInstance> shape(((ndMesh*)meshNode)->CreateCollisionFromChildren());
+            const ndMatrix matrix(meshNode->CalculateGlobalMatrix());
+            ndSharedPtr<ndBody> body(new ndBodyDynamic());
+            body->SetMatrix(matrix);
+            body->GetAsBodyDynamic()->SetCollisionShape(**shape);
+            body->GetAsBodyDynamic()->SetMassMatrix(1.0f, **shape);
+            return body;
+        };
+        ndModelArticulation* const ragdoll = new ndModelArticulation;
+        
+        ndFixSizeArray<const ndMesh*, 256> stack;
+        ndFixSizeArray<ndModelArticulation::ndNode*, 256> parents;
+        ndMesh* const mesh(loader.m_mesh->FindByName(ragdollDefinition[0].m_boneName));
 
-        // set the matrix location
-        ndMatrix matrix(ndGetIdentityMatrix());
-        matrix.m_posit = origin;
-        articulation->GetAsModelArticulation()->SetTransform(matrix);
+        stack.PushBack(mesh);
+        parents.PushBack(nullptr);
+        
+        while (stack.GetCount())
+        {
+            const ndMesh* const meshNode = stack.Pop();
+            ndModelArticulation::ndNode* parentNode = parents.Pop();
 
-        // Bind application data to the model
-        BindApplicationData(scene, loader, articulation->GetAsModelArticulation());
+            ndSharedPtr<ndBody> body(CreateBodyPart(meshNode));
+            if (!parentNode)
+            {
+                parentNode = ragdoll->AddRootBody(body);
+                parentNode->m_name = meshNode->GetName();
+                break;
+            }
+            else
+            {
+                const char* const name = meshNode->GetName().GetStr();
+                for (ndInt32 i = 0; ragdollDefinition[i].m_boneName[0]; ++i)
+                {
+                    const ndDefinition& definition = ragdollDefinition[i];
+                    if (!strcmp(definition.m_boneName, name))
+                    {
+                        //ndBodyDynamic* const parentBody = data.parentBone->m_body->GetAsBodyDynamic();
+                        //ndSharedPtr<ndBody> childBody(CreateBodyPart(scene, entityDuplicate, loader, definition, parentBody));
+                        //
+                        ////connect this body part to its parentBody with a rag doll joint
+                        //ndSharedPtr<ndJointBilateralConstraint> joint(ConnectBodyParts(childBody->GetAsBodyDynamic(), parentBody, definition));
+                        //
+                        //// add this child body to the rad doll model.
+                        //data.parentBone = ragdoll->AddLimb(data.parentBone, childBody, joint);
+                        break;
+                    }
+                }
+            }
+        
+            const ndList<ndSharedPtr<ndMesh>>& children = meshNode->GetChildren();
+            for (ndList<ndSharedPtr<ndMesh>>::ndNode* node = children.GetFirst(); node; node = node->GetNext())
+            {
+                const ndMesh* const child = *node->GetInfo();
+                const char* const name = child->GetName().GetStr();
+                for (ndInt32 i = 0; ragdollDefinition[i].m_boneName[0]; ++i)
+                {
+                    const ndDefinition& definition = ragdollDefinition[i];
+                    if (!strcmp(definition.m_boneName, name))
+                    {
+                        stack.PushBack(child);
+                        parents.PushBack(parentNode);
+                        break;
+                    }
+                }
+            }
+        }
+        //CalculateMassDistribution(ragdoll, ndFloat32(100.0f));
 
-        // add the loaded model to the world
-        world->AddModel(articulation);
+        return ragdoll;
+    }
+
+    void RagDoll(ndDemoEntityManager* const scene, const ndVector& origin)
+    {
+        //ndPhysicsWorld* world = scene->GetWorld();
+        //
+        // make a physic rag doll for using as template
+        ndSharedPtr<ndModel> model(CreateRagdoll(scene));
+        
+        //// we now export the model as a ndMesh
+        model->GetAsModelArticulation()->SaveNdMesh(ndGetWorkingFileName("basicRagdoll.nd").GetStr());
+
+        // test the exported model
+        ndPhysicsWorld* const world = scene->GetWorld();
+        ndSharedPtr<ndModel> testModel(LoadAndBindModel(scene, origin, "basicRagdoll.nd"));
+        world->AddModel(testModel);
     }
 };
 
@@ -721,12 +847,13 @@ void ndExportModel(ndDemoEntityManager* const scene)
     ndVector origin(ndVector::m_wOne);
     origin.m_y = 3.0f;
     origin.m_z = 2.0f;
-    //ndBoxTricycle::BoxTricycle(scene, origin, 100.0f, 0.75f);
+    ndBoxTricycle::BoxTricycle(scene, origin, 100.0f, 0.75f);
 
     //origin.m_x += 3.0f;
     //origin.m_y = 3.5f;
     origin.m_z = 0.0f;
     ndDaveRagdoll::RagDoll(scene, origin);
+    //ndBasicRagdoll::RagDoll(scene, origin);
 
     ndQuaternion rot;
     origin.m_x -= 8.0f;

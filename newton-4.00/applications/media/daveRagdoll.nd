@@ -1,0 +1,1488 @@
+<?xml version="1.0" ?>
+<ndMesh>
+    <name string="unnamed_node_0" />
+    <matrix>
+        <posit float3="0 0 0" />
+        <angles float3="0 -0 0" />
+    </matrix>
+    <geometryMatrix>
+        <posit float3="0 0 0" />
+        <angles float3="0 -0 0" />
+    </geometryMatrix>
+    <type nodeType="node" target="0 0 0 " />
+    <primitve>
+        <localMatrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 90" />
+        </localMatrix>
+        <alignmentMatrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </alignmentMatrix>
+        <scale float3="1 1 1" />
+        <shape>
+            <constructor string="ndShapeCapsule" />
+            <radio0 float="0.125" />
+            <radio1 float="0.125" />
+            <heigh float="0.75" />
+        </shape>
+    </primitve>
+    <rigidbody>
+        <constructor string="ndBodyDynamic" />
+        <veloc float3="0 0 0" />
+        <omega float3="0 0 0" />
+        <com float3="4.89731e-11 8.95508e-10 -7.34596e-10" />
+        <inverseMass float="1" />
+        <inverseDiagonalInertia float3="13.6943 136.694 13.6943" />
+        <principalAxis float3="0 -0 0" />
+        <maxAngleStep float="90" />
+        <maxLinearStep float="1" />
+        <collisionInstance>
+            <localMatrix>
+                <posit float3="0 0 0" />
+                <angles float3="0 -0 90" />
+            </localMatrix>
+            <alignmentMatrix>
+                <posit float3="0 0 0" />
+                <angles float3="0 -0 0" />
+            </alignmentMatrix>
+            <scale float3="1 1 1" />
+            <shape>
+                <constructor string="ndShapeCapsule" />
+                <radio0 float="0.125" />
+                <radio1 float="0.125" />
+                <heigh float="0.75" />
+            </shape>
+        </collisionInstance>
+        <intrinsicLinearDamping float="0" />
+        <intrinsicAngularDamping float3="0 0 0" />
+    </rigidbody>
+    <ndMesh>
+        <name string="unnamed_node_1" />
+        <matrix>
+            <posit float3="0 -0.4 0.1" />
+            <angles float3="99.9999 -80 -89.9999" />
+        </matrix>
+        <geometryMatrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </geometryMatrix>
+        <type nodeType="node" target="0 0 0 " />
+        <primitve>
+            <localMatrix>
+                <posit float3="0.25 0 0" />
+                <angles float3="0 -0 0" />
+            </localMatrix>
+            <alignmentMatrix>
+                <posit float3="0 0 0" />
+                <angles float3="0 -0 0" />
+            </alignmentMatrix>
+            <scale float3="1 1 1" />
+            <shape>
+                <constructor string="ndShapeCapsule" />
+                <radio0 float="0.125" />
+                <radio1 float="0.125" />
+                <heigh float="0.5" />
+            </shape>
+        </primitve>
+        <rigidbody>
+            <constructor string="ndBodyDynamic" />
+            <veloc float3="0 0 0" />
+            <omega float3="0 0 0" />
+            <com float3="0.25 4.92806e-10 -3.96178e-10" />
+            <inverseMass float="1" />
+            <inverseDiagonalInertia float3="138.854 9.71587 9.71587" />
+            <principalAxis float3="0 -0 0" />
+            <maxAngleStep float="90" />
+            <maxLinearStep float="1" />
+            <collisionInstance>
+                <localMatrix>
+                    <posit float3="0.25 0 0" />
+                    <angles float3="0 -0 0" />
+                </localMatrix>
+                <alignmentMatrix>
+                    <posit float3="0 0 0" />
+                    <angles float3="0 -0 0" />
+                </alignmentMatrix>
+                <scale float3="1 1 1" />
+                <shape>
+                    <constructor string="ndShapeCapsule" />
+                    <radio0 float="0.125" />
+                    <radio1 float="0.125" />
+                    <heigh float="0.5" />
+                </shape>
+            </collisionInstance>
+            <intrinsicLinearDamping float="0" />
+            <intrinsicAngularDamping float3="0 0 0" />
+        </rigidbody>
+        <joint>
+            <constructor string="ndJointHinge" />
+            <localFrame0>
+                <posit float3="0 0 0" />
+                <angles float3="9.33815e-07 -1.06722e-07 0" />
+            </localFrame0>
+            <localFrame1>
+                <posit float3="0 -0.4 0.1" />
+                <angles float3="99.9999 -80 -89.9999" />
+            </localFrame1>
+            <springK float="25" />
+            <damperC float="1" />
+            <limitState int32="1" />
+            <minLimit float="-90" />
+            <maxLimit float="90" />
+            <springDamperRegularizer float="0.01" />
+        </joint>
+        <ndMesh>
+            <name string="unnamed_node_2" />
+            <matrix>
+                <posit float3="0.45 -2.98023e-08 7.45058e-09" />
+                <angles float3="1.06722e-07 6.42415e-07 -80" />
+            </matrix>
+            <geometryMatrix>
+                <posit float3="0 0 0" />
+                <angles float3="0 -0 0" />
+            </geometryMatrix>
+            <type nodeType="node" target="0 0 0 " />
+            <primitve>
+                <localMatrix>
+                    <posit float3="0.5 0 0" />
+                    <angles float3="0 -0 0" />
+                </localMatrix>
+                <alignmentMatrix>
+                    <posit float3="0 0 0" />
+                    <angles float3="0 -0 0" />
+                </alignmentMatrix>
+                <scale float3="1 1 1" />
+                <shape>
+                    <constructor string="ndShapeCapsule" />
+                    <radio0 float="0.125" />
+                    <radio1 float="0.125" />
+                    <heigh float="1" />
+                </shape>
+            </primitve>
+            <rigidbody>
+                <constructor string="ndBodyDynamic" />
+                <veloc float3="0 0 0" />
+                <omega float3="0 0 0" />
+                <com float3="0.5 -6.30543e-10 -5.83938e-09" />
+                <inverseMass float="1" />
+                <inverseDiagonalInertia float3="135.497 2.73215 2.73215" />
+                <principalAxis float3="0 -0 0" />
+                <maxAngleStep float="90" />
+                <maxLinearStep float="1" />
+                <collisionInstance>
+                    <localMatrix>
+                        <posit float3="0.5 0 0" />
+                        <angles float3="0 -0 0" />
+                    </localMatrix>
+                    <alignmentMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </alignmentMatrix>
+                    <scale float3="1 1 1" />
+                    <shape>
+                        <constructor string="ndShapeCapsule" />
+                        <radio0 float="0.125" />
+                        <radio1 float="0.125" />
+                        <heigh float="1" />
+                    </shape>
+                </collisionInstance>
+                <intrinsicLinearDamping float="0" />
+                <intrinsicAngularDamping float3="0 0 0" />
+            </rigidbody>
+            <joint>
+                <constructor string="ndJointDoubleHinge" />
+                <localFrame0>
+                    <posit float3="0 0 0" />
+                    <angles float3="-90 6.42415e-07 1.06722e-07" />
+                </localFrame0>
+                <localFrame1>
+                    <posit float3="0.45 -2.98023e-08 7.45058e-09" />
+                    <angles float3="-90 6.42415e-07 -80" />
+                </localFrame1>
+                <axis0>
+                    <springK float="50" />
+                    <damperC float="10" />
+                    <limitState int32="1" />
+                    <minLimit float="-120" />
+                    <maxLimit float="120" />
+                    <springDamperRegularizer float="0.005" />
+                </axis0>
+                <axis1>
+                    <springK float="50" />
+                    <damperC float="10" />
+                    <limitState int32="1" />
+                    <minLimit float="-70" />
+                    <maxLimit float="10" />
+                    <springDamperRegularizer float="0.005" />
+                </axis1>
+            </joint>
+            <ndMesh>
+                <name string="unnamed_node_3" />
+                <matrix>
+                    <posit float3="1 0 -1.49012e-08" />
+                    <angles float3="1.10486e-07 -15 1.38108e-07" />
+                </matrix>
+                <geometryMatrix>
+                    <posit float3="0 0 0" />
+                    <angles float3="0 -0 0" />
+                </geometryMatrix>
+                <type nodeType="node" target="0 0 0 " />
+                <primitve>
+                    <localMatrix>
+                        <posit float3="0.5 0 0" />
+                        <angles float3="0 -0 0" />
+                    </localMatrix>
+                    <alignmentMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </alignmentMatrix>
+                    <scale float3="1 1 1" />
+                    <shape>
+                        <constructor string="ndShapeCapsule" />
+                        <radio0 float="0.125" />
+                        <radio1 float="0.125" />
+                        <heigh float="1" />
+                    </shape>
+                </primitve>
+                <rigidbody>
+                    <constructor string="ndBodyDynamic" />
+                    <veloc float3="0 0 0" />
+                    <omega float3="0 0 0" />
+                    <com float3="0.5 -6.30543e-10 -5.83938e-09" />
+                    <inverseMass float="1" />
+                    <inverseDiagonalInertia float3="135.497 2.73215 2.73215" />
+                    <principalAxis float3="0 -0 0" />
+                    <maxAngleStep float="90" />
+                    <maxLinearStep float="1" />
+                    <collisionInstance>
+                        <localMatrix>
+                            <posit float3="0.5 0 0" />
+                            <angles float3="0 -0 0" />
+                        </localMatrix>
+                        <alignmentMatrix>
+                            <posit float3="0 0 0" />
+                            <angles float3="0 -0 0" />
+                        </alignmentMatrix>
+                        <scale float3="1 1 1" />
+                        <shape>
+                            <constructor string="ndShapeCapsule" />
+                            <radio0 float="0.125" />
+                            <radio1 float="0.125" />
+                            <heigh float="1" />
+                        </shape>
+                    </collisionInstance>
+                    <intrinsicLinearDamping float="0" />
+                    <intrinsicAngularDamping float3="0 0 0" />
+                </rigidbody>
+                <joint>
+                    <constructor string="ndJointHinge" />
+                    <localFrame0>
+                        <posit float3="0 0 0" />
+                        <angles float3="-180 -0 90" />
+                    </localFrame0>
+                    <localFrame1>
+                        <posit float3="1 0 -1.49012e-08" />
+                        <angles float3="165 -1.06722e-07 90" />
+                    </localFrame1>
+                    <springK float="2.5" />
+                    <damperC float="0.25" />
+                    <limitState int32="1" />
+                    <minLimit float="-150" />
+                    <maxLimit float="5" />
+                    <springDamperRegularizer float="0.01" />
+                </joint>
+                <ndMesh>
+                    <name string="unnamed_node_4" />
+                    <matrix>
+                        <posit float3="1.15 0 -5.96046e-08" />
+                        <angles float3="0 2.42375e-06 1.33402e-07" />
+                    </matrix>
+                    <geometryMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </geometryMatrix>
+                    <type nodeType="node" target="0 0 0 " />
+                    <primitve>
+                        <localMatrix>
+                            <posit float3="0 0 -0.15" />
+                            <angles float3="0 -0 0" />
+                        </localMatrix>
+                        <alignmentMatrix>
+                            <posit float3="0 0 0" />
+                            <angles float3="0 -0 0" />
+                        </alignmentMatrix>
+                        <scale float3="1 1 1" />
+                        <shape>
+                            <constructor string="ndShapeBox" />
+                            <x float="0.13" />
+                            <y float="0.4" />
+                            <z float="0.75" />
+                        </shape>
+                    </primitve>
+                    <rigidbody>
+                        <constructor string="ndBodyDynamic" />
+                        <veloc float3="0 0 0" />
+                        <omega float3="0 0 0" />
+                        <com float3="0 0 0" />
+                        <inverseMass float="1" />
+                        <inverseDiagonalInertia float3="16.609 20.7111 67.8349" />
+                        <principalAxis float3="0 -0 0" />
+                        <maxAngleStep float="90" />
+                        <maxLinearStep float="1" />
+                        <collisionInstance>
+                            <localMatrix>
+                                <posit float3="0 0 -0.15" />
+                                <angles float3="0 -0 0" />
+                            </localMatrix>
+                            <alignmentMatrix>
+                                <posit float3="0 0 0" />
+                                <angles float3="0 -0 0" />
+                            </alignmentMatrix>
+                            <scale float3="1 1 1" />
+                            <shape>
+                                <constructor string="ndShapeBox" />
+                                <x float="0.13" />
+                                <y float="0.4" />
+                                <z float="0.75" />
+                            </shape>
+                        </collisionInstance>
+                        <intrinsicLinearDamping float="0" />
+                        <intrinsicAngularDamping float3="0 0 0" />
+                    </rigidbody>
+                    <joint>
+                        <constructor string="ndJointDoubleHinge" />
+                        <localFrame0>
+                            <posit float3="0 0 0" />
+                            <angles float3="-0 -90 0" />
+                        </localFrame0>
+                        <localFrame1>
+                            <posit float3="1.15 0 -5.96046e-08" />
+                            <angles float3="-0 -90 0" />
+                        </localFrame1>
+                        <axis0>
+                            <springK float="0" />
+                            <damperC float="10" />
+                            <limitState int32="1" />
+                            <minLimit float="-30" />
+                            <maxLimit float="30" />
+                            <springDamperRegularizer float="0.01" />
+                        </axis0>
+                        <axis1>
+                            <springK float="0" />
+                            <damperC float="5" />
+                            <limitState int32="1" />
+                            <minLimit float="-30" />
+                            <maxLimit float="30" />
+                            <springDamperRegularizer float="0.01" />
+                        </axis1>
+                    </joint>
+                </ndMesh>
+            </ndMesh>
+        </ndMesh>
+    </ndMesh>
+    <ndMesh>
+        <name string="unnamed_node_5" />
+        <matrix>
+            <posit float3="0 -0.4 -0.1" />
+            <angles float3="-99.9999 80 -89.9999" />
+        </matrix>
+        <geometryMatrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </geometryMatrix>
+        <type nodeType="node" target="0 0 0 " />
+        <primitve>
+            <localMatrix>
+                <posit float3="0.25 0 0" />
+                <angles float3="0 -0 0" />
+            </localMatrix>
+            <alignmentMatrix>
+                <posit float3="0 0 0" />
+                <angles float3="0 -0 0" />
+            </alignmentMatrix>
+            <scale float3="1 1 1" />
+            <shape>
+                <constructor string="ndShapeCapsule" />
+                <radio0 float="0.125" />
+                <radio1 float="0.125" />
+                <heigh float="0.5" />
+            </shape>
+        </primitve>
+        <rigidbody>
+            <constructor string="ndBodyDynamic" />
+            <veloc float3="0 0 0" />
+            <omega float3="0 0 0" />
+            <com float3="0.25 4.92806e-10 -3.96178e-10" />
+            <inverseMass float="1" />
+            <inverseDiagonalInertia float3="138.854 9.71587 9.71587" />
+            <principalAxis float3="0 -0 0" />
+            <maxAngleStep float="90" />
+            <maxLinearStep float="1" />
+            <collisionInstance>
+                <localMatrix>
+                    <posit float3="0.25 0 0" />
+                    <angles float3="0 -0 0" />
+                </localMatrix>
+                <alignmentMatrix>
+                    <posit float3="0 0 0" />
+                    <angles float3="0 -0 0" />
+                </alignmentMatrix>
+                <scale float3="1 1 1" />
+                <shape>
+                    <constructor string="ndShapeCapsule" />
+                    <radio0 float="0.125" />
+                    <radio1 float="0.125" />
+                    <heigh float="0.5" />
+                </shape>
+            </collisionInstance>
+            <intrinsicLinearDamping float="0" />
+            <intrinsicAngularDamping float3="0 0 0" />
+        </rigidbody>
+        <joint>
+            <constructor string="ndJointHinge" />
+            <localFrame0>
+                <posit float3="0 0 0" />
+                <angles float3="-9.33815e-07 1.06722e-07 0" />
+            </localFrame0>
+            <localFrame1>
+                <posit float3="0 -0.4 -0.1" />
+                <angles float3="-99.9999 80 -89.9999" />
+            </localFrame1>
+            <springK float="25" />
+            <damperC float="1" />
+            <limitState int32="1" />
+            <minLimit float="-90" />
+            <maxLimit float="90" />
+            <springDamperRegularizer float="0.01" />
+        </joint>
+        <ndMesh>
+            <name string="unnamed_node_6" />
+            <matrix>
+                <posit float3="0.45 -2.98023e-08 -7.45058e-09" />
+                <angles float3="-1.06722e-07 -6.42415e-07 -80" />
+            </matrix>
+            <geometryMatrix>
+                <posit float3="0 0 0" />
+                <angles float3="0 -0 0" />
+            </geometryMatrix>
+            <type nodeType="node" target="0 0 0 " />
+            <primitve>
+                <localMatrix>
+                    <posit float3="0.5 0 0" />
+                    <angles float3="0 -0 0" />
+                </localMatrix>
+                <alignmentMatrix>
+                    <posit float3="0 0 0" />
+                    <angles float3="0 -0 0" />
+                </alignmentMatrix>
+                <scale float3="1 1 1" />
+                <shape>
+                    <constructor string="ndShapeCapsule" />
+                    <radio0 float="0.125" />
+                    <radio1 float="0.125" />
+                    <heigh float="1" />
+                </shape>
+            </primitve>
+            <rigidbody>
+                <constructor string="ndBodyDynamic" />
+                <veloc float3="0 0 0" />
+                <omega float3="0 0 0" />
+                <com float3="0.5 -6.30543e-10 -5.83938e-09" />
+                <inverseMass float="1" />
+                <inverseDiagonalInertia float3="135.497 2.73215 2.73215" />
+                <principalAxis float3="0 -0 0" />
+                <maxAngleStep float="90" />
+                <maxLinearStep float="1" />
+                <collisionInstance>
+                    <localMatrix>
+                        <posit float3="0.5 0 0" />
+                        <angles float3="0 -0 0" />
+                    </localMatrix>
+                    <alignmentMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </alignmentMatrix>
+                    <scale float3="1 1 1" />
+                    <shape>
+                        <constructor string="ndShapeCapsule" />
+                        <radio0 float="0.125" />
+                        <radio1 float="0.125" />
+                        <heigh float="1" />
+                    </shape>
+                </collisionInstance>
+                <intrinsicLinearDamping float="0" />
+                <intrinsicAngularDamping float3="0 0 0" />
+            </rigidbody>
+            <joint>
+                <constructor string="ndJointDoubleHinge" />
+                <localFrame0>
+                    <posit float3="0 0 0" />
+                    <angles float3="90 -6.42415e-07 1.06722e-07" />
+                </localFrame0>
+                <localFrame1>
+                    <posit float3="0.45 -2.98023e-08 -7.45058e-09" />
+                    <angles float3="90 -6.42415e-07 -80" />
+                </localFrame1>
+                <axis0>
+                    <springK float="50" />
+                    <damperC float="10" />
+                    <limitState int32="1" />
+                    <minLimit float="-120" />
+                    <maxLimit float="120" />
+                    <springDamperRegularizer float="0.005" />
+                </axis0>
+                <axis1>
+                    <springK float="50" />
+                    <damperC float="10" />
+                    <limitState int32="1" />
+                    <minLimit float="-10" />
+                    <maxLimit float="70" />
+                    <springDamperRegularizer float="0.005" />
+                </axis1>
+            </joint>
+            <ndMesh>
+                <name string="unnamed_node_7" />
+                <matrix>
+                    <posit float3="1 0 1.49012e-08" />
+                    <angles float3="-1.10486e-07 15 1.38108e-07" />
+                </matrix>
+                <geometryMatrix>
+                    <posit float3="0 0 0" />
+                    <angles float3="0 -0 0" />
+                </geometryMatrix>
+                <type nodeType="node" target="0 0 0 " />
+                <primitve>
+                    <localMatrix>
+                        <posit float3="0.5 0 0" />
+                        <angles float3="0 -0 0" />
+                    </localMatrix>
+                    <alignmentMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </alignmentMatrix>
+                    <scale float3="1 1 1" />
+                    <shape>
+                        <constructor string="ndShapeCapsule" />
+                        <radio0 float="0.125" />
+                        <radio1 float="0.125" />
+                        <heigh float="1" />
+                    </shape>
+                </primitve>
+                <rigidbody>
+                    <constructor string="ndBodyDynamic" />
+                    <veloc float3="0 0 0" />
+                    <omega float3="0 0 0" />
+                    <com float3="0.5 -6.30543e-10 -5.83938e-09" />
+                    <inverseMass float="1" />
+                    <inverseDiagonalInertia float3="135.497 2.73215 2.73215" />
+                    <principalAxis float3="0 -0 0" />
+                    <maxAngleStep float="90" />
+                    <maxLinearStep float="1" />
+                    <collisionInstance>
+                        <localMatrix>
+                            <posit float3="0.5 0 0" />
+                            <angles float3="0 -0 0" />
+                        </localMatrix>
+                        <alignmentMatrix>
+                            <posit float3="0 0 0" />
+                            <angles float3="0 -0 0" />
+                        </alignmentMatrix>
+                        <scale float3="1 1 1" />
+                        <shape>
+                            <constructor string="ndShapeCapsule" />
+                            <radio0 float="0.125" />
+                            <radio1 float="0.125" />
+                            <heigh float="1" />
+                        </shape>
+                    </collisionInstance>
+                    <intrinsicLinearDamping float="0" />
+                    <intrinsicAngularDamping float3="0 0 0" />
+                </rigidbody>
+                <joint>
+                    <constructor string="ndJointHinge" />
+                    <localFrame0>
+                        <posit float3="0 0 0" />
+                        <angles float3="180 -0 90" />
+                    </localFrame0>
+                    <localFrame1>
+                        <posit float3="1 0 1.49012e-08" />
+                        <angles float3="-165 1.06722e-07 90" />
+                    </localFrame1>
+                    <springK float="2.5" />
+                    <damperC float="0.25" />
+                    <limitState int32="1" />
+                    <minLimit float="-5" />
+                    <maxLimit float="150" />
+                    <springDamperRegularizer float="0.01" />
+                </joint>
+                <ndMesh>
+                    <name string="unnamed_node_8" />
+                    <matrix>
+                        <posit float3="1.15 0 5.96046e-08" />
+                        <angles float3="0 -2.42375e-06 1.33402e-07" />
+                    </matrix>
+                    <geometryMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </geometryMatrix>
+                    <type nodeType="node" target="0 0 0 " />
+                    <primitve>
+                        <localMatrix>
+                            <posit float3="0 0 0.15" />
+                            <angles float3="0 -0 0" />
+                        </localMatrix>
+                        <alignmentMatrix>
+                            <posit float3="0 0 0" />
+                            <angles float3="0 -0 0" />
+                        </alignmentMatrix>
+                        <scale float3="1 1 1" />
+                        <shape>
+                            <constructor string="ndShapeBox" />
+                            <x float="0.13" />
+                            <y float="0.4" />
+                            <z float="0.75" />
+                        </shape>
+                    </primitve>
+                    <rigidbody>
+                        <constructor string="ndBodyDynamic" />
+                        <veloc float3="0 0 0" />
+                        <omega float3="0 0 0" />
+                        <com float3="0 0 0" />
+                        <inverseMass float="1" />
+                        <inverseDiagonalInertia float3="16.609 20.7111 67.8349" />
+                        <principalAxis float3="0 -0 0" />
+                        <maxAngleStep float="90" />
+                        <maxLinearStep float="1" />
+                        <collisionInstance>
+                            <localMatrix>
+                                <posit float3="0 0 0.15" />
+                                <angles float3="0 -0 0" />
+                            </localMatrix>
+                            <alignmentMatrix>
+                                <posit float3="0 0 0" />
+                                <angles float3="0 -0 0" />
+                            </alignmentMatrix>
+                            <scale float3="1 1 1" />
+                            <shape>
+                                <constructor string="ndShapeBox" />
+                                <x float="0.13" />
+                                <y float="0.4" />
+                                <z float="0.75" />
+                            </shape>
+                        </collisionInstance>
+                        <intrinsicLinearDamping float="0" />
+                        <intrinsicAngularDamping float3="0 0 0" />
+                    </rigidbody>
+                    <joint>
+                        <constructor string="ndJointDoubleHinge" />
+                        <localFrame0>
+                            <posit float3="0 0 0" />
+                            <angles float3="-0 -90 0" />
+                        </localFrame0>
+                        <localFrame1>
+                            <posit float3="1.15 0 5.96046e-08" />
+                            <angles float3="-0 -90 0" />
+                        </localFrame1>
+                        <axis0>
+                            <springK float="0" />
+                            <damperC float="10" />
+                            <limitState int32="1" />
+                            <minLimit float="-30" />
+                            <maxLimit float="30" />
+                            <springDamperRegularizer float="0.01" />
+                        </axis0>
+                        <axis1>
+                            <springK float="0" />
+                            <damperC float="5" />
+                            <limitState int32="1" />
+                            <minLimit float="-30" />
+                            <maxLimit float="30" />
+                            <springDamperRegularizer float="0.01" />
+                        </axis1>
+                    </joint>
+                </ndMesh>
+            </ndMesh>
+        </ndMesh>
+    </ndMesh>
+    <ndMesh>
+        <name string="unnamed_node_9" />
+        <matrix>
+            <posit float3="0 0.375 0" />
+            <angles float3="0 -0 90" />
+        </matrix>
+        <geometryMatrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </geometryMatrix>
+        <type nodeType="node" target="0 0 0 " />
+        <primitve>
+            <localMatrix>
+                <posit float3="0.625 0 0" />
+                <angles float3="0 -0 0" />
+            </localMatrix>
+            <alignmentMatrix>
+                <posit float3="0 0 0" />
+                <angles float3="0 -0 0" />
+            </alignmentMatrix>
+            <scale float3="1 1 1" />
+            <shape>
+                <constructor string="ndShapeCapsule" />
+                <radio0 float="0.125" />
+                <radio1 float="0.125" />
+                <heigh float="1.25" />
+            </shape>
+        </primitve>
+        <rigidbody>
+            <constructor string="ndBodyDynamic" />
+            <veloc float3="0 0 0" />
+            <omega float3="0 0 0" />
+            <com float3="0.625 -2.29907e-10 2.47939e-10" />
+            <inverseMass float="1" />
+            <inverseDiagonalInertia float3="134.737 1.78562 1.78562" />
+            <principalAxis float3="0 -0 0" />
+            <maxAngleStep float="90" />
+            <maxLinearStep float="1" />
+            <collisionInstance>
+                <localMatrix>
+                    <posit float3="0.625 0 0" />
+                    <angles float3="0 -0 0" />
+                </localMatrix>
+                <alignmentMatrix>
+                    <posit float3="0 0 0" />
+                    <angles float3="0 -0 0" />
+                </alignmentMatrix>
+                <scale float3="1 1 1" />
+                <shape>
+                    <constructor string="ndShapeCapsule" />
+                    <radio0 float="0.125" />
+                    <radio1 float="0.125" />
+                    <heigh float="1.25" />
+                </shape>
+            </collisionInstance>
+            <intrinsicLinearDamping float="0" />
+            <intrinsicAngularDamping float3="0 0 0" />
+        </rigidbody>
+        <joint>
+            <constructor string="ndJointHinge" />
+            <localFrame0>
+                <posit float3="0 0 0" />
+                <angles float3="-0 -90 0" />
+            </localFrame0>
+            <localFrame1>
+                <posit float3="0 0.375 0" />
+                <angles float3="90 -90 0" />
+            </localFrame1>
+            <springK float="10" />
+            <damperC float="0.5" />
+            <limitState int32="1" />
+            <minLimit float="-25" />
+            <maxLimit float="0.1" />
+            <springDamperRegularizer float="0.01" />
+        </joint>
+        <ndMesh>
+            <name string="unnamed_node_10" />
+            <matrix>
+                <posit float3="0.65 7.10543e-15 0" />
+                <angles float3="0 45 0" />
+            </matrix>
+            <geometryMatrix>
+                <posit float3="0 0 0" />
+                <angles float3="0 -0 0" />
+            </geometryMatrix>
+            <type nodeType="node" target="0 0 0 " />
+            <primitve>
+                <localMatrix>
+                    <posit float3="0.375 0 0" />
+                    <angles float3="0 -0 0" />
+                </localMatrix>
+                <alignmentMatrix>
+                    <posit float3="0 0 0" />
+                    <angles float3="0 -0 0" />
+                </alignmentMatrix>
+                <scale float3="1 1 1" />
+                <shape>
+                    <constructor string="ndShapeCapsule" />
+                    <radio0 float="0.125" />
+                    <radio1 float="0.125" />
+                    <heigh float="0.75" />
+                </shape>
+            </primitve>
+            <rigidbody>
+                <constructor string="ndBodyDynamic" />
+                <veloc float3="0 0 0" />
+                <omega float3="0 0 0" />
+                <com float3="0.375 -3.14827e-10 -6.29654e-11" />
+                <inverseMass float="1" />
+                <inverseDiagonalInertia float3="136.693 4.68059 4.68059" />
+                <principalAxis float3="0 -0 0" />
+                <maxAngleStep float="90" />
+                <maxLinearStep float="1" />
+                <collisionInstance>
+                    <localMatrix>
+                        <posit float3="0.375 0 0" />
+                        <angles float3="0 -0 0" />
+                    </localMatrix>
+                    <alignmentMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </alignmentMatrix>
+                    <scale float3="1 1 1" />
+                    <shape>
+                        <constructor string="ndShapeCapsule" />
+                        <radio0 float="0.125" />
+                        <radio1 float="0.125" />
+                        <heigh float="0.75" />
+                    </shape>
+                </collisionInstance>
+                <intrinsicLinearDamping float="0" />
+                <intrinsicAngularDamping float3="0 0 0" />
+            </rigidbody>
+            <joint>
+                <constructor string="ndJointHinge" />
+                <localFrame0>
+                    <posit float3="0 0 0" />
+                    <angles float3="0 -0 0" />
+                </localFrame0>
+                <localFrame1>
+                    <posit float3="0.65 7.10543e-15 0" />
+                    <angles float3="0 45 0" />
+                </localFrame1>
+                <springK float="10" />
+                <damperC float="0.5" />
+                <limitState int32="1" />
+                <minLimit float="-90" />
+                <maxLimit float="90" />
+                <springDamperRegularizer float="0.01" />
+            </joint>
+            <ndMesh>
+                <name string="unnamed_node_11" />
+                <matrix>
+                    <posit float3="0.8 0 -5.96046e-08" />
+                    <angles float3="180 60 180" />
+                </matrix>
+                <geometryMatrix>
+                    <posit float3="0 0 0" />
+                    <angles float3="0 -0 0" />
+                </geometryMatrix>
+                <type nodeType="node" target="0 0 0 " />
+                <primitve>
+                    <localMatrix>
+                        <posit float3="0.5 0 0" />
+                        <angles float3="0 -0 0" />
+                    </localMatrix>
+                    <alignmentMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </alignmentMatrix>
+                    <scale float3="1 1 1" />
+                    <shape>
+                        <constructor string="ndShapeCapsule" />
+                        <radio0 float="0.125" />
+                        <radio1 float="0.125" />
+                        <heigh float="1" />
+                    </shape>
+                </primitve>
+                <rigidbody>
+                    <constructor string="ndBodyDynamic" />
+                    <veloc float3="0 0 0" />
+                    <omega float3="0 0 0" />
+                    <com float3="0.5 -6.30543e-10 -5.83938e-09" />
+                    <inverseMass float="1" />
+                    <inverseDiagonalInertia float3="135.497 2.73215 2.73215" />
+                    <principalAxis float3="0 -0 0" />
+                    <maxAngleStep float="90" />
+                    <maxLinearStep float="1" />
+                    <collisionInstance>
+                        <localMatrix>
+                            <posit float3="0.5 0 0" />
+                            <angles float3="0 -0 0" />
+                        </localMatrix>
+                        <alignmentMatrix>
+                            <posit float3="0 0 0" />
+                            <angles float3="0 -0 0" />
+                        </alignmentMatrix>
+                        <scale float3="1 1 1" />
+                        <shape>
+                            <constructor string="ndShapeCapsule" />
+                            <radio0 float="0.125" />
+                            <radio1 float="0.125" />
+                            <heigh float="1" />
+                        </shape>
+                    </collisionInstance>
+                    <intrinsicLinearDamping float="0" />
+                    <intrinsicAngularDamping float3="0 0 0" />
+                </rigidbody>
+                <joint>
+                    <constructor string="ndJointDoubleHinge" />
+                    <localFrame0>
+                        <posit float3="0 0 0" />
+                        <angles float3="4.07111e-13 -0 0" />
+                    </localFrame0>
+                    <localFrame1>
+                        <posit float3="0.8 0 -5.96046e-08" />
+                        <angles float3="180 60 180" />
+                    </localFrame1>
+                    <axis0>
+                        <springK float="50" />
+                        <damperC float="10" />
+                        <limitState int32="1" />
+                        <minLimit float="-90" />
+                        <maxLimit float="90" />
+                        <springDamperRegularizer float="0.01" />
+                    </axis0>
+                    <axis1>
+                        <springK float="50" />
+                        <damperC float="10" />
+                        <limitState int32="1" />
+                        <minLimit float="-120" />
+                        <maxLimit float="120" />
+                        <springDamperRegularizer float="0.01" />
+                    </axis1>
+                </joint>
+                <ndMesh>
+                    <name string="unnamed_node_12" />
+                    <matrix>
+                        <posit float3="1 0 0" />
+                        <angles float3="-8.53774e-07 -0 -30" />
+                    </matrix>
+                    <geometryMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </geometryMatrix>
+                    <type nodeType="node" target="0 0 0 " />
+                    <primitve>
+                        <localMatrix>
+                            <posit float3="0.4 0 0" />
+                            <angles float3="0 -0 0" />
+                        </localMatrix>
+                        <alignmentMatrix>
+                            <posit float3="0 0 0" />
+                            <angles float3="0 -0 0" />
+                        </alignmentMatrix>
+                        <scale float3="1 1 1" />
+                        <shape>
+                            <constructor string="ndShapeCapsule" />
+                            <radio0 float="0.125" />
+                            <radio1 float="0.125" />
+                            <heigh float="0.8" />
+                        </shape>
+                    </primitve>
+                    <rigidbody>
+                        <constructor string="ndBodyDynamic" />
+                        <veloc float3="0 0 0" />
+                        <omega float3="0 0 0" />
+                        <com float3="0.4 -1.92276e-10 -1.96917e-09" />
+                        <inverseMass float="1" />
+                        <inverseDiagonalInertia float3="136.402 4.15302 4.15302" />
+                        <principalAxis float3="0 -0 0" />
+                        <maxAngleStep float="90" />
+                        <maxLinearStep float="1" />
+                        <collisionInstance>
+                            <localMatrix>
+                                <posit float3="0.4 0 0" />
+                                <angles float3="0 -0 0" />
+                            </localMatrix>
+                            <alignmentMatrix>
+                                <posit float3="0 0 0" />
+                                <angles float3="0 -0 0" />
+                            </alignmentMatrix>
+                            <scale float3="1 1 1" />
+                            <shape>
+                                <constructor string="ndShapeCapsule" />
+                                <radio0 float="0.125" />
+                                <radio1 float="0.125" />
+                                <heigh float="0.8" />
+                            </shape>
+                        </collisionInstance>
+                        <intrinsicLinearDamping float="0" />
+                        <intrinsicAngularDamping float3="0 0 0" />
+                    </rigidbody>
+                    <joint>
+                        <constructor string="ndJointHinge" />
+                        <localFrame0>
+                            <posit float3="0 0 0" />
+                            <angles float3="5.33609e-07 90 0" />
+                        </localFrame0>
+                        <localFrame1>
+                            <posit float3="1 0 0" />
+                            <angles float3="30 90 0" />
+                        </localFrame1>
+                        <springK float="0" />
+                        <damperC float="5" />
+                        <limitState int32="1" />
+                        <minLimit float="-15" />
+                        <maxLimit float="120" />
+                        <springDamperRegularizer float="0.1" />
+                    </joint>
+                    <ndMesh>
+                        <name string="unnamed_node_13" />
+                        <matrix>
+                            <posit float3="1 1.49012e-08 -5.96046e-08" />
+                            <angles float3="-8.53774e-07 -0 1.17394e-06" />
+                        </matrix>
+                        <geometryMatrix>
+                            <posit float3="0 0 0" />
+                            <angles float3="0 -0 0" />
+                        </geometryMatrix>
+                        <type nodeType="node" target="0 0 0 " />
+                        <primitve>
+                            <localMatrix>
+                                <posit float3="0 0 0" />
+                                <angles float3="0 -0 0" />
+                            </localMatrix>
+                            <alignmentMatrix>
+                                <posit float3="0 0 0" />
+                                <angles float3="0 -0 0" />
+                            </alignmentMatrix>
+                            <scale float3="1 1 1" />
+                            <shape>
+                                <constructor string="ndShapeBox" />
+                                <x float="0.25" />
+                                <y float="0.25" />
+                                <z float="0.125" />
+                            </shape>
+                        </primitve>
+                        <rigidbody>
+                            <constructor string="ndBodyDynamic" />
+                            <veloc float3="0 0 0" />
+                            <omega float3="0 0 0" />
+                            <com float3="0 0 0" />
+                            <inverseMass float="1" />
+                            <inverseDiagonalInertia float3="153.6 153.6 96" />
+                            <principalAxis float3="0 -0 0" />
+                            <maxAngleStep float="90" />
+                            <maxLinearStep float="1" />
+                            <collisionInstance>
+                                <localMatrix>
+                                    <posit float3="0 0 0" />
+                                    <angles float3="0 -0 0" />
+                                </localMatrix>
+                                <alignmentMatrix>
+                                    <posit float3="0 0 0" />
+                                    <angles float3="0 -0 0" />
+                                </alignmentMatrix>
+                                <scale float3="1 1 1" />
+                                <shape>
+                                    <constructor string="ndShapeBox" />
+                                    <x float="0.25" />
+                                    <y float="0.25" />
+                                    <z float="0.125" />
+                                </shape>
+                            </collisionInstance>
+                            <intrinsicLinearDamping float="0" />
+                            <intrinsicAngularDamping float3="0 0 0" />
+                        </rigidbody>
+                        <joint>
+                            <constructor string="ndJointHinge" />
+                            <localFrame0>
+                                <posit float3="0 0 0" />
+                                <angles float3="-8.53774e-07 -0 1.17394e-06" />
+                            </localFrame0>
+                            <localFrame1>
+                                <posit float3="1 1.49012e-08 -5.96046e-08" />
+                                <angles float3="-8.53774e-07 -0 1.17394e-06" />
+                            </localFrame1>
+                            <springK float="0" />
+                            <damperC float="0" />
+                            <limitState int32="1" />
+                            <minLimit float="-45" />
+                            <maxLimit float="65" />
+                            <springDamperRegularizer float="0.1" />
+                        </joint>
+                    </ndMesh>
+                </ndMesh>
+            </ndMesh>
+        </ndMesh>
+        <ndMesh>
+            <name string="unnamed_node_14" />
+            <matrix>
+                <posit float3="0.65 7.10543e-15 0" />
+                <angles float3="0 -45 0" />
+            </matrix>
+            <geometryMatrix>
+                <posit float3="0 0 0" />
+                <angles float3="0 -0 0" />
+            </geometryMatrix>
+            <type nodeType="node" target="0 0 0 " />
+            <primitve>
+                <localMatrix>
+                    <posit float3="0.375 0 0" />
+                    <angles float3="0 -0 0" />
+                </localMatrix>
+                <alignmentMatrix>
+                    <posit float3="0 0 0" />
+                    <angles float3="0 -0 0" />
+                </alignmentMatrix>
+                <scale float3="1 1 1" />
+                <shape>
+                    <constructor string="ndShapeCapsule" />
+                    <radio0 float="0.125" />
+                    <radio1 float="0.125" />
+                    <heigh float="0.75" />
+                </shape>
+            </primitve>
+            <rigidbody>
+                <constructor string="ndBodyDynamic" />
+                <veloc float3="0 0 0" />
+                <omega float3="0 0 0" />
+                <com float3="0.375 -3.14827e-10 -6.29654e-11" />
+                <inverseMass float="1" />
+                <inverseDiagonalInertia float3="136.693 4.68059 4.68059" />
+                <principalAxis float3="0 -0 0" />
+                <maxAngleStep float="90" />
+                <maxLinearStep float="1" />
+                <collisionInstance>
+                    <localMatrix>
+                        <posit float3="0.375 0 0" />
+                        <angles float3="0 -0 0" />
+                    </localMatrix>
+                    <alignmentMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </alignmentMatrix>
+                    <scale float3="1 1 1" />
+                    <shape>
+                        <constructor string="ndShapeCapsule" />
+                        <radio0 float="0.125" />
+                        <radio1 float="0.125" />
+                        <heigh float="0.75" />
+                    </shape>
+                </collisionInstance>
+                <intrinsicLinearDamping float="0" />
+                <intrinsicAngularDamping float3="0 0 0" />
+            </rigidbody>
+            <joint>
+                <constructor string="ndJointHinge" />
+                <localFrame0>
+                    <posit float3="0 0 0" />
+                    <angles float3="0 -0 0" />
+                </localFrame0>
+                <localFrame1>
+                    <posit float3="0.65 7.10543e-15 0" />
+                    <angles float3="0 -45 0" />
+                </localFrame1>
+                <springK float="10" />
+                <damperC float="0.5" />
+                <limitState int32="1" />
+                <minLimit float="-90" />
+                <maxLimit float="90" />
+                <springDamperRegularizer float="0.01" />
+            </joint>
+            <ndMesh>
+                <name string="unnamed_node_15" />
+                <matrix>
+                    <posit float3="0.8 0 5.96046e-08" />
+                    <angles float3="180 -60 180" />
+                </matrix>
+                <geometryMatrix>
+                    <posit float3="0 0 0" />
+                    <angles float3="0 -0 0" />
+                </geometryMatrix>
+                <type nodeType="node" target="0 0 0 " />
+                <primitve>
+                    <localMatrix>
+                        <posit float3="0.5 0 0" />
+                        <angles float3="0 -0 0" />
+                    </localMatrix>
+                    <alignmentMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </alignmentMatrix>
+                    <scale float3="1 1 1" />
+                    <shape>
+                        <constructor string="ndShapeCapsule" />
+                        <radio0 float="0.125" />
+                        <radio1 float="0.125" />
+                        <heigh float="1" />
+                    </shape>
+                </primitve>
+                <rigidbody>
+                    <constructor string="ndBodyDynamic" />
+                    <veloc float3="0 0 0" />
+                    <omega float3="0 0 0" />
+                    <com float3="0.5 -6.30543e-10 -5.83938e-09" />
+                    <inverseMass float="1" />
+                    <inverseDiagonalInertia float3="135.497 2.73215 2.73215" />
+                    <principalAxis float3="0 -0 0" />
+                    <maxAngleStep float="90" />
+                    <maxLinearStep float="1" />
+                    <collisionInstance>
+                        <localMatrix>
+                            <posit float3="0.5 0 0" />
+                            <angles float3="0 -0 0" />
+                        </localMatrix>
+                        <alignmentMatrix>
+                            <posit float3="0 0 0" />
+                            <angles float3="0 -0 0" />
+                        </alignmentMatrix>
+                        <scale float3="1 1 1" />
+                        <shape>
+                            <constructor string="ndShapeCapsule" />
+                            <radio0 float="0.125" />
+                            <radio1 float="0.125" />
+                            <heigh float="1" />
+                        </shape>
+                    </collisionInstance>
+                    <intrinsicLinearDamping float="0" />
+                    <intrinsicAngularDamping float3="0 0 0" />
+                </rigidbody>
+                <joint>
+                    <constructor string="ndJointDoubleHinge" />
+                    <localFrame0>
+                        <posit float3="0 0 0" />
+                        <angles float3="-4.07111e-13 -0 0" />
+                    </localFrame0>
+                    <localFrame1>
+                        <posit float3="0.8 0 5.96046e-08" />
+                        <angles float3="180 -60 180" />
+                    </localFrame1>
+                    <axis0>
+                        <springK float="50" />
+                        <damperC float="10" />
+                        <limitState int32="1" />
+                        <minLimit float="-90" />
+                        <maxLimit float="90" />
+                        <springDamperRegularizer float="0.01" />
+                    </axis0>
+                    <axis1>
+                        <springK float="50" />
+                        <damperC float="10" />
+                        <limitState int32="1" />
+                        <minLimit float="-120" />
+                        <maxLimit float="120" />
+                        <springDamperRegularizer float="0.01" />
+                    </axis1>
+                </joint>
+                <ndMesh>
+                    <name string="unnamed_node_16" />
+                    <matrix>
+                        <posit float3="1 0 0" />
+                        <angles float3="8.53774e-07 -0 -30" />
+                    </matrix>
+                    <geometryMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </geometryMatrix>
+                    <type nodeType="node" target="0 0 0 " />
+                    <primitve>
+                        <localMatrix>
+                            <posit float3="0.4 0 0" />
+                            <angles float3="0 -0 0" />
+                        </localMatrix>
+                        <alignmentMatrix>
+                            <posit float3="0 0 0" />
+                            <angles float3="0 -0 0" />
+                        </alignmentMatrix>
+                        <scale float3="1 1 1" />
+                        <shape>
+                            <constructor string="ndShapeCapsule" />
+                            <radio0 float="0.125" />
+                            <radio1 float="0.125" />
+                            <heigh float="0.8" />
+                        </shape>
+                    </primitve>
+                    <rigidbody>
+                        <constructor string="ndBodyDynamic" />
+                        <veloc float3="0 0 0" />
+                        <omega float3="0 0 0" />
+                        <com float3="0.4 -1.92276e-10 -1.96917e-09" />
+                        <inverseMass float="1" />
+                        <inverseDiagonalInertia float3="136.402 4.15302 4.15302" />
+                        <principalAxis float3="0 -0 0" />
+                        <maxAngleStep float="90" />
+                        <maxLinearStep float="1" />
+                        <collisionInstance>
+                            <localMatrix>
+                                <posit float3="0.4 0 0" />
+                                <angles float3="0 -0 0" />
+                            </localMatrix>
+                            <alignmentMatrix>
+                                <posit float3="0 0 0" />
+                                <angles float3="0 -0 0" />
+                            </alignmentMatrix>
+                            <scale float3="1 1 1" />
+                            <shape>
+                                <constructor string="ndShapeCapsule" />
+                                <radio0 float="0.125" />
+                                <radio1 float="0.125" />
+                                <heigh float="0.8" />
+                            </shape>
+                        </collisionInstance>
+                        <intrinsicLinearDamping float="0" />
+                        <intrinsicAngularDamping float3="0 0 0" />
+                    </rigidbody>
+                    <joint>
+                        <constructor string="ndJointHinge" />
+                        <localFrame0>
+                            <posit float3="0 0 0" />
+                            <angles float3="-5.33609e-07 -90 0" />
+                        </localFrame0>
+                        <localFrame1>
+                            <posit float3="1 0 0" />
+                            <angles float3="-30 -90 0" />
+                        </localFrame1>
+                        <springK float="0" />
+                        <damperC float="5" />
+                        <limitState int32="1" />
+                        <minLimit float="-120" />
+                        <maxLimit float="15" />
+                        <springDamperRegularizer float="0.1" />
+                    </joint>
+                    <ndMesh>
+                        <name string="unnamed_node_17" />
+                        <matrix>
+                            <posit float3="1 1.49012e-08 5.96046e-08" />
+                            <angles float3="8.53774e-07 -0 1.17394e-06" />
+                        </matrix>
+                        <geometryMatrix>
+                            <posit float3="0 0 0" />
+                            <angles float3="0 -0 0" />
+                        </geometryMatrix>
+                        <type nodeType="node" target="0 0 0 " />
+                        <primitve>
+                            <localMatrix>
+                                <posit float3="0 0 0" />
+                                <angles float3="0 -0 0" />
+                            </localMatrix>
+                            <alignmentMatrix>
+                                <posit float3="0 0 0" />
+                                <angles float3="0 -0 0" />
+                            </alignmentMatrix>
+                            <scale float3="1 1 1" />
+                            <shape>
+                                <constructor string="ndShapeBox" />
+                                <x float="0.25" />
+                                <y float="0.25" />
+                                <z float="0.125" />
+                            </shape>
+                        </primitve>
+                        <rigidbody>
+                            <constructor string="ndBodyDynamic" />
+                            <veloc float3="0 0 0" />
+                            <omega float3="0 0 0" />
+                            <com float3="0 0 0" />
+                            <inverseMass float="1" />
+                            <inverseDiagonalInertia float3="153.6 153.6 96" />
+                            <principalAxis float3="0 -0 0" />
+                            <maxAngleStep float="90" />
+                            <maxLinearStep float="1" />
+                            <collisionInstance>
+                                <localMatrix>
+                                    <posit float3="0 0 0" />
+                                    <angles float3="0 -0 0" />
+                                </localMatrix>
+                                <alignmentMatrix>
+                                    <posit float3="0 0 0" />
+                                    <angles float3="0 -0 0" />
+                                </alignmentMatrix>
+                                <scale float3="1 1 1" />
+                                <shape>
+                                    <constructor string="ndShapeBox" />
+                                    <x float="0.25" />
+                                    <y float="0.25" />
+                                    <z float="0.125" />
+                                </shape>
+                            </collisionInstance>
+                            <intrinsicLinearDamping float="0" />
+                            <intrinsicAngularDamping float3="0 0 0" />
+                        </rigidbody>
+                        <joint>
+                            <constructor string="ndJointHinge" />
+                            <localFrame0>
+                                <posit float3="0 0 0" />
+                                <angles float3="8.53774e-07 -0 1.17394e-06" />
+                            </localFrame0>
+                            <localFrame1>
+                                <posit float3="1 1.49012e-08 5.96046e-08" />
+                                <angles float3="8.53774e-07 -0 1.17394e-06" />
+                            </localFrame1>
+                            <springK float="0" />
+                            <damperC float="0" />
+                            <limitState int32="1" />
+                            <minLimit float="-45" />
+                            <maxLimit float="65" />
+                            <springDamperRegularizer float="0.1" />
+                        </joint>
+                    </ndMesh>
+                </ndMesh>
+            </ndMesh>
+        </ndMesh>
+        <ndMesh>
+            <name string="unnamed_node_18" />
+            <matrix>
+                <posit float3="1.25 7.10543e-15 0" />
+                <angles float3="0 -0 0" />
+            </matrix>
+            <geometryMatrix>
+                <posit float3="0 0 0" />
+                <angles float3="0 -0 0" />
+            </geometryMatrix>
+            <type nodeType="node" target="0 0 0 " />
+            <primitve>
+                <localMatrix>
+                    <posit float3="0.25 0 0" />
+                    <angles float3="0 -0 0" />
+                </localMatrix>
+                <alignmentMatrix>
+                    <posit float3="0 0 0" />
+                    <angles float3="0 -0 0" />
+                </alignmentMatrix>
+                <scale float3="1 1 1" />
+                <shape>
+                    <constructor string="ndShapeCapsule" />
+                    <radio0 float="0.125" />
+                    <radio1 float="0.125" />
+                    <heigh float="0.5" />
+                </shape>
+            </primitve>
+            <rigidbody>
+                <constructor string="ndBodyDynamic" />
+                <veloc float3="0 0 0" />
+                <omega float3="0 0 0" />
+                <com float3="0.25 4.92806e-10 -3.96178e-10" />
+                <inverseMass float="1" />
+                <inverseDiagonalInertia float3="138.854 9.71587 9.71587" />
+                <principalAxis float3="0 -0 0" />
+                <maxAngleStep float="90" />
+                <maxLinearStep float="1" />
+                <collisionInstance>
+                    <localMatrix>
+                        <posit float3="0.25 0 0" />
+                        <angles float3="0 -0 0" />
+                    </localMatrix>
+                    <alignmentMatrix>
+                        <posit float3="0 0 0" />
+                        <angles float3="0 -0 0" />
+                    </alignmentMatrix>
+                    <scale float3="1 1 1" />
+                    <shape>
+                        <constructor string="ndShapeCapsule" />
+                        <radio0 float="0.125" />
+                        <radio1 float="0.125" />
+                        <heigh float="0.5" />
+                    </shape>
+                </collisionInstance>
+                <intrinsicLinearDamping float="0" />
+                <intrinsicAngularDamping float3="0 0 0" />
+            </rigidbody>
+            <joint>
+                <constructor string="ndJointHinge" />
+                <localFrame0>
+                    <posit float3="0 0 0" />
+                    <angles float3="-0 -90 0" />
+                </localFrame0>
+                <localFrame1>
+                    <posit float3="1.25 7.10543e-15 0" />
+                    <angles float3="-0 -90 0" />
+                </localFrame1>
+                <springK float="25" />
+                <damperC float="0.5" />
+                <limitState int32="1" />
+                <minLimit float="-120" />
+                <maxLimit float="2" />
+                <springDamperRegularizer float="0.01" />
+            </joint>
+        </ndMesh>
+    </ndMesh>
+</ndMesh>
