@@ -811,6 +811,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::CalculateAdvantage()
 	m_meanBuffer->Sqrt(m_parameters.m_miniBatchSize);
 	m_invSigmaBuffer->Reciprocal(**m_meanBuffer);
 
+	// clip outlier at 10 standard deviation
 	ndBrainFloat maxAdvantageClipping = ndBrainFloat(10.0f);
 	for (ndInt32 i = 0; i < numberOfIterations; ++i)
 	{
