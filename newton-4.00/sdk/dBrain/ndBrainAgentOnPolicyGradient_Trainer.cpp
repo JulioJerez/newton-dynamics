@@ -279,16 +279,6 @@ ndFloat32 ndBrainAgentOnPolicyGradient_Agent::GetExpectedReward() const
 {
 	ndAssert(0);
 	return 0;
-
-	//ndAssert(m_trajectory.GetCount());
-	//ndFloat32 gamma = m_owner->m_parameters.m_discountRewardFactor;
-	//ndFloat32 sum = m_trajectory.GetReward(m_trajectory.GetCount() - 1);
-	//for (ndInt32 i = m_trajectory.GetCount() - 2; i >= 0; --i)
-	//{
-	//	ndFloat32 r = m_trajectory.GetReward(i);
-	//	sum = r + gamma * sum;
-	//}
-	//return sum;
 }
 
 void ndBrainAgentOnPolicyGradient_Agent::SampleActions(ndBrainVector& actions)

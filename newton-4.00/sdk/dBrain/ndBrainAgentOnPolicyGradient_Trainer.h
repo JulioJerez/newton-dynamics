@@ -42,8 +42,8 @@
 
 #define ND_ON_POLICY_MOVING_AVERAGE_SCORE	8
 
-#define ND_ON_POLICY_MONTE_CARLOS_STEPS		5
-//#define ND_ON_POLICY_MONTE_CARLOS_STEPS	8
+//#define ND_ON_POLICY_MONTE_CARLOS_STEPS		5
+#define ND_ON_POLICY_MONTE_CARLOS_STEPS		8
 
 class ndBrainFloatBuffer;
 class ndBrainIntegerBuffer;
