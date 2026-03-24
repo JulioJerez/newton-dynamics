@@ -44,7 +44,7 @@
 #define ND_MAX_MINIBATCHES_ITERATIONS				64
 #define ND_POLICY_DOWN_SAMPLE_LEARN_RATE			ndBrainFloat(1.0f)
 #define ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON		ndBrainFloat(0.2f)
-#define ND_POLICY_KL_DIVERGENCE_STOP_THRESHHOLD		ndBrainFloat(1.0e-2f)
+#define ND_POLICY_KL_DIVERGENCE_STOP_THRESHHOLD		ndBrainFloat(5.0e-5f)
 
 //entropy regularization improvement from 
 //https://arxiv.org/pdf/1912.01557
@@ -1060,7 +1060,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeCritic()
 
 #else
 
-// Vanilla critick update form the orginal paper
+// Vanilla critic update form the original paper
 // Loss = Gradient (1/2 (Vt - ExpetedValue(t))^2)
 void ndBrainAgentOnPolicyGradient_Trainer::OptimizeCritic()
 {
@@ -1213,7 +1213,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeCritic()
 				}
 			#endif
 
-			// maybe apply a huber loss here
+			// maybe apply a Huber loss here
 			outputGradientBuffer->Min(huberSlope);
 			outputGradientBuffer->Max(-huberSlope);
 
