@@ -37,13 +37,13 @@
 // It optionally supports entropy regularization to scale the loss of both
 // the actor and critic networks.
 //
-// Reference pseudocode:
+// Reference pseudo code:
 // https://spinningup.openai.com/en/latest/algorithms/ppo.html
 
 #define ND_ON_POLICY_MOVING_AVERAGE_SCORE	8
 
-//#define ND_ON_POLICY_MONTE_CARLOS_STEPS		5
-#define ND_ON_POLICY_MONTE_CARLOS_STEPS		8
+#define ND_ON_POLICY_MONTE_CARLOS_STEPS		5
+//#define ND_ON_POLICY_MONTE_CARLOS_STEPS		8
 
 class ndBrainFloatBuffer;
 class ndBrainIntegerBuffer;

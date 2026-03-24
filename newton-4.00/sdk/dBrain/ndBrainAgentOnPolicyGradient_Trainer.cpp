@@ -832,7 +832,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::CalculateAdvantage()
 	}
 }
 
-#if 1
+#if 0
 // using the implementation detail clip loss
 // Q = 1/2 * (V(t) - ExpectedReward(t)) ^ 2
 // Qclipped = 1/2 * [clip(V(t), V(t-1) - epsilon, V(t-1) + epsilon) - ExpectedReward(t)]^2 
