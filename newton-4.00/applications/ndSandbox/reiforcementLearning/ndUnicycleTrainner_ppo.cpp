@@ -103,7 +103,7 @@ namespace ndUnicycleTrainer_ppo
 			,m_outFile(nullptr)
 			,m_timer(ndGetTimeInMicroseconds())
 			,m_savedScore(ndFloat32(-1.0e10f))
-			,m_discountRewardFactor(0.995f)
+			,m_discountRewardFactor(0.99f)
 			,m_horizon(ndFloat32(1.0f) / (ndFloat32(1.0f) - m_discountRewardFactor))
 			,m_lastEpisode(0xfffffff)
 			,m_stopTraining(500 * 1000000)
@@ -224,14 +224,14 @@ namespace ndUnicycleTrainer_ppo
 					//const ndFloat32 combinedTrajectory = score * stepsGain * trajectoryGain;
 					const ndFloat32 combinedTrajectory = score;
 
-					if (combinedTrajectory >= m_savedScore)
+					if ((stopTraining > m_stopTraining / 3) && (combinedTrajectory >= m_savedScore))
 					{
 						m_savedScore = combinedTrajectory;
 
 						// save partial controller in case of crash 
 						ndBrain* const actor = *m_master->GetPolicyNetwork();
 						ndString fileName(ndGetWorkingFileName(m_master->GetName().GetStr()));
-						m_master->GetPolicyNetwork()->SaveToFile(fileName.GetStr());
+						//m_master->GetPolicyNetwork()->SaveToFile(fileName.GetStr());
 						actor->SaveToFile(fileName.GetStr());
 						ndExpandTraceMessage("best actor episode: %d\treward %f\ttrajectoryFrames: %f\n", m_master->GetEposideCount(), score, m_master->GetAverageFrames());
 					}

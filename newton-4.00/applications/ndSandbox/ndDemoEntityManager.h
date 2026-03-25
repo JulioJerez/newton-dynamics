@@ -56,15 +56,6 @@ class ndDemoEntityManager : public ndClassAlloc
 
 	typedef void (*ndDemoCallbackLauncher) (ndDemoEntityManager* const scene);
 
-	enum ndMenuSelection
-	{
-		m_new,
-		//m_load,
-		//m_save,
-		//m_saveModel,
-		m_none,
-	};
-
 	class ndKeyTrigger
 	{
 		public: 
@@ -182,6 +173,8 @@ class ndDemoEntityManager : public ndClassAlloc
 
 	bool GetMouseSpeed(ndFloat32& posX, ndFloat32& posY) const;
 	bool GetMousePosition (ndFloat32& posX, ndFloat32& posY) const;
+
+	ndTransform GetCameraMatrix() const;
 	void SetCameraMatrix (const ndQuaternion& rotation, const ndVector& position);
 	
 	bool AnyKeyDown() const;
@@ -210,8 +203,10 @@ class ndDemoEntityManager : public ndClassAlloc
 	void SetDemoUIpanel(ndSharedPtr<ndDemoUIpanel>& panel);
 
 	void SetNextActiveCamera();
-
 	void RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& postUpdate);
+
+	const ndString& GetLastLoadMesh() const;
+	void SetLastLoadMesh(const ndString& name);
 
 	private:
 	void Cleanup();
@@ -249,6 +244,7 @@ class ndDemoEntityManager : public ndClassAlloc
 
 	ndSharedPtr<OnPostUpdate> m_onPostUpdate;
 
+	ndString m_lastModelName;
 	ndInt32 m_currentScene;
 	ndInt32 m_lastCurrentScene;
 	ndInt32 m_framesCount;

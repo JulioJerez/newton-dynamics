@@ -44,19 +44,23 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
             const ndMesh* const meshNode = rootMesh->FindByClosestMatch(node->m_name);
             ndAssert(meshNode);
 
-            // create a graphic primitive for visualization
-            ndSharedPtr<ndMeshShapeInstance> primitive(meshNode->GetPrimitive());
-            ndRenderPrimitive::ndDescriptor descriptor(render);
-            descriptor.m_collision = ndSharedPtr<ndShapeInstance>(primitive->CreateObject());
-            descriptor.m_mapping = ndRenderPrimitive::m_box;
-            descriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName("wood_0.png")));
-            ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
-
             const ndMatrix matrix(node->m_body->GetMatrix());
             ndSharedPtr<ndRenderSceneNode>entity(new ndRenderSceneNode(matrix));
-            entity->SetPrimitiveMatrix(meshNode->GetGeometryMatrix());
-            entity->SetPrimitive(mesh);
             scene->AddEntity(entity);
+
+            // create a graphic primitive for visualization
+            ndSharedPtr<ndMeshShapeInstance> primitive(meshNode->GetPrimitive());
+            ndSharedPtr<ndShapeInstance> primitiveInstance(primitive->CreateObject());
+            if (!primitiveInstance->GetShape()->GetAsShapeNull())
+            {
+                ndRenderPrimitive::ndDescriptor descriptor(render);
+                descriptor.m_collision = ndSharedPtr<ndShapeInstance>(primitive->CreateObject());
+                descriptor.m_mapping = ndRenderPrimitive::m_box;
+                descriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName("wood_0.png")));
+                ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
+                entity->SetPrimitiveMatrix(meshNode->GetGeometryMatrix());
+                entity->SetPrimitive(mesh);
+            }
 
             // add a rigid body notification callback
             ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, entity));
@@ -744,7 +748,8 @@ namespace ndBasicRagdoll
         { "", ndDefinition::m_root,{},{} },
     };
 
-    ndModelArticulation* CreateRagdoll(ndDemoEntityManager* const scene)
+    //ndModelArticulation* CreateRagdoll(ndDemoEntityManager* const scene)
+    ndModelArticulation* CreateRagdoll(ndDemoEntityManager* const)
     {
         ndMeshLoader loader;
         loader.LoadMesh(ndGetWorkingFileName("ragdoll.nd"));
@@ -852,8 +857,8 @@ void ndExportModel(ndDemoEntityManager* const scene)
     //origin.m_x += 3.0f;
     //origin.m_y = 3.5f;
     origin.m_z = 0.0f;
-    ndDaveRagdoll::RagDoll(scene, origin);
-    //ndBasicRagdoll::RagDoll(scene, origin);
+    //ndDaveRagdoll::RagDoll(scene, origin);
+    ndBasicRagdoll::RagDoll(scene, origin);
 
     ndQuaternion rot;
     origin.m_x -= 8.0f;

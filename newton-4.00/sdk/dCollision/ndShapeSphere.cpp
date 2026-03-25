@@ -24,6 +24,7 @@
 #include "ndContact.h"
 #include "ndShapeSphere.h"
 #include "ndContactSolver.h"
+#include "ndMeshComponents.h"
 
 #define D_SPHERE_EDGE_COUNT 96
 
@@ -269,4 +270,11 @@ ndUnsigned64 ndShapeSphere::GetHash(ndUnsigned64 hash) const
 {
 	ndShapeInfo info(GetShapeInfo());
 	return info.GetHash(hash);
+}
+
+ndSharedPtr<ndMeshCollisionShape> ndShapeSphere::GetMeshShape() const
+{
+	ndMeshCollisionShapeSphere* const shape = new ndMeshCollisionShapeSphere;
+	shape->m_radius = m_radius;
+	return ndSharedPtr<ndMeshCollisionShape>(shape);
 }

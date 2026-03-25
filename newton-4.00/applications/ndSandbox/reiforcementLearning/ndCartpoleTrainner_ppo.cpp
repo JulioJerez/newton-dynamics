@@ -221,14 +221,14 @@ namespace ndCartpoleTrainer_ppo
 					}
 				}
 			
-				if (rewardTrajectory > m_saveScore)
+				if ((stopTraining > m_stopTraining / 3) && (rewardTrajectory > m_saveScore))
 				{
 					m_saveScore = ndFloor(rewardTrajectory) + 2.0f;
 			
 					// save partial controller in case of crash 
 					ndBrain* const actor = *m_master->GetPolicyNetwork();
 					ndString fileName(ndGetWorkingFileName(m_master->GetName().GetStr()));
-					m_master->GetPolicyNetwork()->SaveToFile(fileName.GetStr());
+					//m_master->GetPolicyNetwork()->SaveToFile(fileName.GetStr());
 					actor->SaveToFile(fileName.GetStr());
 				}
 			

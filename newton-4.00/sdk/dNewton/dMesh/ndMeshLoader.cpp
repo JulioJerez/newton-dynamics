@@ -16,6 +16,7 @@
 #include "ndMeshEffect.h"
 #include "ndMeshLoader.h"
 #include "ndJointWheel.h"
+#include "ndJointSlider.h"
 #include "ndBodyDynamic.h"
 #include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
@@ -269,6 +270,10 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			else if (strcmp(constructor, ndJointWheel::StaticClassName()) == 0)
 			{
 				joint= ndSharedPtr<ndMeshJoint>(new ndMeshJointWheel());
+			}
+			else if (strcmp(constructor, ndJointSlider::StaticClassName()) == 0)
+			{
+				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointSlider());
 			}
 			else
 			{
