@@ -48,6 +48,16 @@ class ndMeshCollisionShapeNull : public ndMeshCollisionShape
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 };
 
+class ndMeshCollisionShapeSphere : public ndMeshCollisionShape
+{
+	public:
+	D_COLLISION_API virtual ndShape* CreateObject() const override;
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+
+	ndFloat32 m_radius;
+};
+
 class ndMeshCollisionShapeBox : public ndMeshCollisionShape
 {
 	public:

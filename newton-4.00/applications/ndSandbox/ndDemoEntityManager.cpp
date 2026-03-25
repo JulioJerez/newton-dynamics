@@ -21,6 +21,7 @@
 #include "ndDemoCameraNodeFlyby.h"
 #include "ndDebugDisplayRenderPass.h"
 
+#define LOAD_MESH_INDEX			200
 #define MACHINE_LEARNING_BASE	100
 
 //#define DEFAULT_SCENE	0		// basic collision only
@@ -39,7 +40,7 @@
 //#define DEFAULT_SCENE	13		// static compound scene collision 
 //#define DEFAULT_SCENE	14		// basic convex approximate compound shapes
 //#define DEFAULT_SCENE	15		// basic model, a npd vehicle prop
-//#define DEFAULT_SCENE	16		// export articulated model
+#define DEFAULT_SCENE	16		// export articulated model
 //#define DEFAULT_SCENE	17		// basic rag doll
 //#define DEFAULT_SCENE	18		// complex model, implement a complex model with joints
 //#define DEFAULT_SCENE	19		// basics multi body vehicle
@@ -58,7 +59,7 @@
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// SAC cart pole training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// SAC double pendulum unicycle training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// PPO cart pole training
-#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 3)	// PPO double pendulum unicycle training
+//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 3)	// PPO double pendulum unicycle training
 
 // legacy demos 
 //#define DEFAULT_SCENE	12		// basic vehicle
@@ -79,6 +80,7 @@
 						 
 void ndBasicModel(ndDemoEntityManager* const scene);
 void ndExportModel(ndDemoEntityManager* const scene);
+void ndImportModel(ndDemoEntityManager* const scene);
 void ndBasicJoints(ndDemoEntityManager* const scene);
 void ndBasicStacks(ndDemoEntityManager* const scene);
 void ndComplexModel(ndDemoEntityManager* const scene);
@@ -150,6 +152,8 @@ ndDemoEntityManager::ndDemos ndDemoEntityManager::m_demosSelection[] =
 	{ "biped PPO player controller", ndBipedPlayer_PPO},
 	
 	{ "procedural animated quad spider", ndQuadSpiderAnimated},
+
+	
 
 #if 0
 	{ "basic particle fluid", ndBasicParticleFluid},
@@ -587,6 +591,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	,m_environmentTexture(nullptr)
 	,m_demoHelper(nullptr)
 	,m_demoUIpanel(nullptr)
+	,m_lastModelName("")
 	,m_currentScene(DEFAULT_SCENE)
 	,m_lastCurrentScene(DEFAULT_SCENE)
 	,m_framesCount(0)
@@ -936,6 +941,16 @@ void ndDemoEntityManager::RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& po
 	m_onPostUpdate = postUpdate;
 }
 
+const ndString& ndDemoEntityManager::GetLastLoadMesh() const
+{
+	return m_lastModelName;
+}
+
+void ndDemoEntityManager::SetLastLoadMesh(const ndString& name)
+{
+	m_lastModelName = name;
+}
+
 void ndDemoEntityManager::AddEntity(const ndSharedPtr<ndRenderSceneNode>& entity)
 {
 	//ndScopeSpinLock lock(m_addDeleteLock);
@@ -1004,31 +1019,23 @@ void ndDemoEntityManager::ApplyOptions()
 
 void ndDemoEntityManager::ShowMainMenuBar()
 {
-	ndMenuSelection menuSelection = m_none;
+	//ndMenuSelection menuSelection = m_none;
 	if (ImGui::BeginMainMenuBar())
 	{
 		if (ImGui::BeginMenu("File")) 
 		{
 			m_suspendPhysicsUpdate = true;
 	
-			if (ImGui::MenuItem("Preferences", "")) 
+			if (ImGui::MenuItem("Load ndMesh", "")) 
 			{
-				ndAssert (0);
+				m_currentScene = LOAD_MESH_INDEX;
 			}
-			ImGui::Separator();
-	
-			if (ImGui::MenuItem("New", "")) 
-			{
-				menuSelection = m_new;
-			}
-	
-			ImGui::Separator();
-			if (ImGui::MenuItem("import ply file", "")) 
-			{
-				//mainMenu = 4;
-			}
-	
-			ImGui::Separator();
+
+			//if (ImGui::MenuItem("import ply file", "")) 
+			//{
+			//	//mainMenu = 4;
+			//}
+
 			if (ImGui::MenuItem("Exit", "")) 
 			{
 				m_renderer->Terminate();
@@ -1147,35 +1154,12 @@ void ndDemoEntityManager::ShowMainMenuBar()
 			ApplyMenuOptions();
 		}
 	}
-	
-	switch (menuSelection)
+
+	if (m_currentScene != -1) 
 	{
-		case m_new:
-		{
-			// menu new 
-			ndAssert(0);
-			//ndMatrix matrix (GetCamera()->GetCurrentMatrix());
-			//Cleanup();
-			//ApplyMenuOptions();
-			//ResetTimer();
-			//m_currentScene = -1;
-			//SetCameraMatrix(ndQuaternion(matrix), matrix.m_posit);
-			break;
-		}
-	
-		case m_none:
-		default:
-		{
-			// load a demo 
-			if (m_currentScene != -1) 
-			{
-				//m_selectedModel = nullptr;
-				//RegisterPostUpdate(nullptr);
-				LoadDemo(m_currentScene);
-				m_lastCurrentScene = m_currentScene;
-				m_currentScene = -1;
-			}
-		}
+		LoadDemo(m_currentScene);
+		m_lastCurrentScene = m_currentScene;
+		m_currentScene = -1;
 	}
 }
 
@@ -1188,10 +1172,22 @@ void ndDemoEntityManager::LoadDemo(ndInt32 menuIndex)
 	// add a demo camera per demo
 	m_demoHelper = ndSharedPtr<ndDemoHelper>(nullptr);
 	m_demoUIpanel = ndSharedPtr<ndDemoUIpanel>(nullptr);
+
+	ndTransform savedTransform;
+	if (m_defaultCamera)
+	{
+		savedTransform = m_defaultCamera->GetTransform();
+	}
 	m_defaultCamera = ndSharedPtr<ndRenderSceneNode>(new ndDemoCameraNodeFlyby(*m_renderer));
+	m_defaultCamera->SetTransform(savedTransform);
 	m_renderer->SetCamera(m_defaultCamera);
 
-	if (menuIndex < MACHINE_LEARNING_BASE)
+	if (menuIndex == LOAD_MESH_INDEX)
+	{
+		ndImportModel(this);
+		snprintf(newTitle, sizeof(newTitle), "Newton Dynamics %d.%.2i demo: %s", D_NEWTON_ENGINE_MAJOR_VERSION, D_NEWTON_ENGINE_MINOR_VERSION, "ndMesh model");
+	}
+	else if (menuIndex < ndInt32(sizeof (m_demosSelection)/sizeof(m_demosSelection[0])))
 	{
 		m_demosSelection[menuIndex].m_demoLauncher(this);
 		snprintf(newTitle, sizeof(newTitle), "Newton Dynamics %d.%.2i demo: %s", D_NEWTON_ENGINE_MAJOR_VERSION, D_NEWTON_ENGINE_MINOR_VERSION, m_demosSelection[menuIndex].m_name);
@@ -1445,6 +1441,12 @@ void ndDemoEntityManager::SetCameraMatrix (const ndQuaternion& rotation, const n
 	ndRenderSceneNode* const cameraNode = *m_renderer->GetCamera();
 	cameraNode->SetTransform(rotation, position);
 	cameraNode->SetTransform(rotation, position);
+}
+
+ndTransform ndDemoEntityManager::GetCameraMatrix() const
+{
+	ndRenderSceneNode* const cameraNode = *m_renderer->GetCamera();
+	return cameraNode->GetTransform();
 }
 
 void ndDemoEntityManager::UpdatePhysics(ndFloat32 timestep)

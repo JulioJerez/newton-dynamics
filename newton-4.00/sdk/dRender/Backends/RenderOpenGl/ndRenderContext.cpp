@@ -433,7 +433,7 @@ void ndRenderContext::KeyCallback(GLFWwindow* const window, ndInt32 key, ndInt32
 	
 	if ((key == GLFW_KEY_F1) && (key != self->m_prevKey))
 	{
-		//self->m_owner->m_owner->KeyCallback(key, action);
+		self->m_prevKey = io.KeysDown[key] ? key : 0;
 		self->m_owner->m_owner->KeyCallback(ImGuiKey_F1, action);
 	}
 	

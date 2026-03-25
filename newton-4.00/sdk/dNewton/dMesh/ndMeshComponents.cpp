@@ -24,6 +24,7 @@
 #include "ndMesh.h"
 #include "ndJointHinge.h"
 #include "ndJointWheel.h"
+#include "ndJointSlider.h"
 #include "ndBodyDynamic.h"
 #include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
@@ -155,7 +156,24 @@ void ndMeshJointSlider::SerializeToXml(nd::TiXmlElement* const parent) const
 
 void ndMeshJointSlider::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
-	ndAssert(0);
+	ndMeshJoint::DeserializeFromXml(parent);
+	m_springK = xmlGetFloat(parent, "springK");
+	m_damperC = xmlGetFloat(parent, "damperC");
+	m_minLimit = xmlGetFloat(parent, "minLimit");
+	m_maxLimit = xmlGetFloat(parent, "maxLimit");
+	m_springDamperRegularizer = xmlGetFloat(parent, "springDamperRegularizer");
+	m_limitState = ndInt8(xmlGetInt(parent, "limitState"));
+}
+
+ndJointBilateralConstraint* ndMeshJointSlider::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+{
+	const ndMatrix pinAndPivotInChild(m_locatFrame0 * child->GetMatrix());
+	const ndMatrix pinAndPivotInParent(m_locatFrame1 * parent->GetMatrix());
+	ndJointSlider* const joint = new ndJointSlider(pinAndPivotInChild, pinAndPivotInParent, child, parent);
+	joint->SetAsSpringDamper(m_springDamperRegularizer, m_springK, m_damperC);
+	joint->SetLimits(m_minLimit, m_maxLimit);
+	joint->SetLimitState(m_limitState ? true : false);
+	return joint;
 }
 
 ndMeshJointDoubleHinge::ndMeshJointDoubleHinge()
