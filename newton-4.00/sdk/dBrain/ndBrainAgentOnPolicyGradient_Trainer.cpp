@@ -712,8 +712,8 @@ void ndBrainAgentOnPolicyGradient_Trainer::CalculateAdvantage()
 	ndBrainFloatBuffer* const outputBuffer = m_criticTrainer->GetOuputBuffer();
 	
 	ndCopyBufferCommandInfo advantageInfo;
-	advantageInfo.m_srcStrideInByte = ndInt32(m_parameters.m_miniBatchSize * sizeof(ndReal));
 	advantageInfo.m_srcOffsetInByte = 0;
+	advantageInfo.m_srcStrideInByte = ndInt32(m_parameters.m_miniBatchSize * sizeof(ndReal));
 	advantageInfo.m_dstOffsetInByte = 0;
 	advantageInfo.m_dstStrideInByte = advantageInfo.m_srcStrideInByte;
 	advantageInfo.m_bytesToCopy = advantageInfo.m_srcStrideInByte;
