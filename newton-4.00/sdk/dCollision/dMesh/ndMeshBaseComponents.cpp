@@ -24,6 +24,7 @@
 #include "ndBody.h"
 #include "ndShapeBox.h"
 #include "ndCollision.h"
+#include "ndShapeSphere.h"
 #include "ndShapeCapsule.h"
 #include "ndMeshBaseComponents.h"
 #include "ndShapeChamferCylinder.h"
@@ -50,8 +51,23 @@ void ndMeshCollisionShapeNull::DeserializeFromXml(const nd::TiXmlElement* const)
 
 ndShape* ndMeshCollisionShapeNull::CreateObject() const
 {
-	ndAssert(0);
-	return nullptr;
+	return new ndShapeNull();
+}
+
+void ndMeshCollisionShapeSphere::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	xmlSaveParam(parent, "constructor", ndShapeSphere::StaticClassName());
+	xmlSaveParam(parent, "radius", m_radius);
+}
+
+void ndMeshCollisionShapeSphere::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	m_radius = xmlGetFloat(parent, "radius");
+}
+
+ndShape* ndMeshCollisionShapeSphere::CreateObject() const
+{
+	return new ndShapeSphere(m_radius);
 }
 
 void ndMeshCollisionShapeBox::SerializeToXml(nd::TiXmlElement* const parent) const
@@ -127,8 +143,9 @@ void ndMeshCollisionShapeConvexHull::SerializeToXml(nd::TiXmlElement* const pare
 void ndMeshCollisionShapeConvexHull::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndAssert(0);
+	m_points.SetCount(0);
+	xmlGetFloatArray3(parent, "pointcloud", m_points);
 }
-
 
 ndMeshShapeInstance::ndMeshShapeInstance()
 	:ndClassAlloc()
@@ -186,7 +203,7 @@ void ndMeshShapeInstance::DeserializeFromXml(const nd::TiXmlElement* const paren
 	}
 	else
 	{
-		ndAssert(0);
+		ndExpandTraceMessage("warning ndMesh has a null shape\n");
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeNull());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
