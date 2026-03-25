@@ -840,8 +840,7 @@ namespace ndBasicRagdoll
 
         // test the exported model
         ndPhysicsWorld* const world = scene->GetWorld();
-        //ndSharedPtr<ndModel> testModel(LoadAndBindModel(scene, origin, "basicRagdoll.nd"));
-        ndSharedPtr<ndModel> testModel(LoadAndBindModel(scene, origin, "dg_biped_double_hinges.xml"));
+        ndSharedPtr<ndModel> testModel(LoadAndBindModel(scene, origin, "basicRagdoll.nd"));
         world->AddModel(testModel);
     }
 };

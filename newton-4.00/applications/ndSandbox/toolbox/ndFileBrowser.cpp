@@ -177,7 +177,7 @@ bool dGetLoadNdFileName(char* const fileName, int maxSize)
 #if (defined(WIN32) || defined(_WIN32))
 	OPENFILENAME ofn;
 	// open a file name
-	char appPath[256];
+	char appPath[1024];
 	GetModuleFileNameA(nullptr, appPath, sizeof(appPath));
 	strtolwr(appPath);
 
@@ -189,7 +189,6 @@ bool dGetLoadNdFileName(char* const fileName, int maxSize)
 	ofn.lStructSize = sizeof(ofn);
 	ofn.hwndOwner = nullptr;
 	ofn.lpstrFile = fileName;
-	ofn.lpstrFile[0] = '\0';
 	ofn.nMaxFile = DWORD(maxSize);
 	ofn.lpstrFilter = const_cast<LPSTR>("newton load file *.nd\0*.nd\0");
 	ofn.nFilterIndex = 1;
