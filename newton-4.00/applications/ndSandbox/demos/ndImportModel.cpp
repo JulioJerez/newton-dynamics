@@ -60,6 +60,7 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
         ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
         node->m_body->SetNotifyCallback(notify);
     };
+    model->GetAsModelArticulation()->NodeIterator(BindApplicationData);
 
     return model;
 }
