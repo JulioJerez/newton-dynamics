@@ -167,7 +167,6 @@ namespace ndCartpoleTrainer_sac
 				episodeCount -= m_master->GetEposideCount();
 				const ndFloat32 score = m_master->GetAverageScore();
 
-				//if (rewardTrajectory > m_saveScore)
 				if ((stopTraining > m_stopTraining / 3) && (score > m_saveScore))
 				{
 					m_saveScore = score;
