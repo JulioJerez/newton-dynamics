@@ -190,7 +190,7 @@ bool dGetLoadNdFileName(char* const fileName, int maxSize)
 	ofn.hwndOwner = nullptr;
 	ofn.lpstrFile = fileName;
 	ofn.nMaxFile = DWORD(maxSize);
-	ofn.lpstrFilter = const_cast<LPSTR>("newton load file *.nd\0*.nd\0");
+	ofn.lpstrFilter = const_cast<LPSTR>("newton load file *.nd\0*.nd\0All Files (*.*)\0*.*\0");
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = const_cast<LPSTR>("Newton Dynamics 4.0 demos");
 	ofn.nMaxFileTitle = 0;

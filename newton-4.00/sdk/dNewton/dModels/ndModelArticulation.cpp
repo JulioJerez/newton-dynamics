@@ -260,22 +260,6 @@ void ndModelArticulation::AddCloseLoop(const ndSharedPtr<ndJointBilateralConstra
 	node->GetInfo().m_name = loopName;
 }
 
-//void ndModelArticulation::AddToWorld(ndWorld* const world)
-//{
-//	if (m_rootNode)
-//	{
-//		for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
-//		{
-//			world->AddBody(node->m_body);
-//			if (node->m_joint)
-//			{
-//				world->AddJoint(node->m_joint);
-//			}
-//		}
-//	}
-//	world->AddModel(this);
-//}
-
 ndModelArticulation::ndNode* ndModelArticulation::FindByBody(const ndBody* const body) const
 {
 	if (m_rootNode)
@@ -338,19 +322,6 @@ ndModelArticulation::ndNode* ndModelArticulation::FindLoopByJoint(const ndJointB
 	}
 
 	return nullptr;
-}
-
-void ndModelArticulation::SetTransform(const ndMatrix& matrix)
-{
-	if (m_rootNode)
-	{
-		const ndMatrix offset(m_rootNode->m_body->GetMatrix().OrthoInverse() * matrix);
-		for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
-		{
-			ndSharedPtr<ndBody> body(node->m_body);
-			body->SetMatrix(body->GetMatrix() * offset);
-		}
-	}
 }
 
 //void ndModelArticulation::ConvertToUrdf()
@@ -926,8 +897,8 @@ void ndModelArticulation::SaveNdMesh(const char* const path) const
 		ndMesh* const parentMesh = parent.Pop();
 		ndModelArticulation::ndNode* const node = stack.Pop();
 
-		ndMesh* const meshNode = new ndMesh();
-
+		const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+		ndMesh* const meshNode = new ndMesh(body->GetCollisionShape());
 		if (node->m_name.GetStr() && *node->m_name.GetStr())
 		{
 			meshNode->SetName(node->m_name.GetStr());
@@ -949,11 +920,10 @@ void ndModelArticulation::SaveNdMesh(const char* const path) const
 			matrix = matrix * node->GetParent()->m_body->GetMatrix().OrthoInverse();
 			parentMesh->AddChild(ndSharedPtr<ndMesh>(meshNode));
 		}
-		const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
 
 		meshNode->SetMatrix(matrix);
-		ndSharedPtr<ndMeshShapeInstance> meshPrimitive(new ndMeshShapeInstance(body->GetCollisionShape()));
-		meshNode->SetPrimitive(meshPrimitive);
+		//ndSharedPtr<ndMeshShapeInstance> meshPrimitive(new ndMeshShapeInstance(body->GetCollisionShape()));
+		//meshNode->SetPrimitive(meshPrimitive);
 		node->m_body->Serialize(meshNode);
 		if (node->m_joint)
 		{
@@ -1054,4 +1024,17 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 }
 
 
-
+void ndModelArticulation::SetTransform(const ndMatrix& matrix)
+{
+	if (m_rootNode)
+	{
+		const ndMatrix offset(m_rootNode->m_body->GetMatrix().OrthoInverse() * matrix);
+		auto ApplyTransfrom = [this, &offset](ndModelArticulation::ndNode* const node)
+		{
+			ndSharedPtr<ndBody> body(node->m_body);
+			const ndMatrix matrix(body->GetMatrix() * offset);
+			body->SetMatrix(matrix);
+		};
+		NodeIterator(ApplyTransfrom);
+	}
+}

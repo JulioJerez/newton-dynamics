@@ -1083,8 +1083,9 @@ void ndBodyKinematic::SaveNdMesh(const char* const path) const
 {
 	ndMeshLoader savedBody(ndSharedPtr<ndMesh>(new ndMesh()));
 	savedBody.m_mesh->SetName("unnamed_rigidBody");
-	savedBody.m_mesh->SetPrimitive(new ndMeshShapeInstance());
-	m_shapeInstance.Serialize(*savedBody.m_mesh->GetPrimitive());
+	ndAssert(0);
+	//savedBody.m_mesh->SetPrimitive(new ndMeshShapeInstance());
+	//m_shapeInstance.Serialize(*savedBody.m_mesh->GetPrimitive());
 
 	Serialize(*savedBody.m_mesh);
 	savedBody.SaveMesh(path);

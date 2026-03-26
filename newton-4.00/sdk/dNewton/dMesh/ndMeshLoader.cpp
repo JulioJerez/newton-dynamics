@@ -99,13 +99,6 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName) const
 		ndVector boneTarget(entry.m_meshNode->GetBoneTarget());
 		xmlSaveAttribute(xmlNodeType, "target", ndTriplexReal(ndReal(boneTarget.m_x), ndReal(boneTarget.m_y), ndReal(boneTarget.m_z)));
 
-		if (entry.m_meshNode->GetPrimitive())
-		{
-			nd::TiXmlElement* const primitive = new nd::TiXmlElement("primitve");
-			entry.m_parentXml->LinkEndChild(primitive);
-			entry.m_meshNode->GetPrimitive()->SerializeToXml(primitive);
-		}
-
 		if (entry.m_meshNode->GetMesh())
 		{
 			nd::TiXmlElement* const geometry = new nd::TiXmlElement("geometry");
@@ -213,14 +206,6 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			ndAssert(0);
 		}
 		ndTriplexReal target(xmlGetTriplexRealAttribute(xmlNodeType, "target"));
-
-		const nd::TiXmlElement* const xmlPrimitivey = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("primitve");
-		if (xmlPrimitivey)
-		{
-			ndSharedPtr<ndMeshShapeInstance> primitive(new ndMeshShapeInstance());
-			primitive->DeserializeFromXml(xmlPrimitivey);
-			mesh->SetPrimitive(primitive);
-		}
 
 		const nd::TiXmlElement* const xmlGeometry = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("geometry");
 		if (xmlGeometry)
