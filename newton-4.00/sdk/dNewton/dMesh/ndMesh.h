@@ -103,9 +103,9 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API const ndSharedPtr<ndMeshEffect>& GetMesh() const;
 	D_NEWTON_API void SetMesh(const ndSharedPtr<ndMeshEffect>& mesh);
 
-	D_NEWTON_API ndSharedPtr<ndMeshShapeInstance>& GetPrimitive();
-	D_NEWTON_API const ndSharedPtr<ndMeshShapeInstance>& GetPrimitive() const;
-	D_NEWTON_API void SetPrimitive(const ndSharedPtr<ndMeshShapeInstance>& primitive);
+	//D_NEWTON_API ndSharedPtr<ndMeshShapeInstance>& GetPrimitive();
+	//D_NEWTON_API const ndSharedPtr<ndMeshShapeInstance>& GetPrimitive() const;
+	//D_NEWTON_API void SetPrimitive(const ndSharedPtr<ndMeshShapeInstance>& primitive);
 
 	D_NEWTON_API ndSharedPtr<ndMeshJoint>& GetJoint();
 	D_NEWTON_API const ndSharedPtr<ndMeshJoint>& GetJoint() const;
@@ -158,7 +158,7 @@ class ndMesh : public ndClassAlloc
 	ndCurve m_rotation;
 	ndWeakPtr<ndMesh> m_parent;
 	ndSharedPtr<ndMeshEffect> m_mesh;
-	ndSharedPtr<ndMeshShapeInstance> m_meshPrimitive;
+	//ndSharedPtr<ndMeshShapeInstance> m_meshPrimitive;
 
 	ndSharedPtr<ndMeshJoint> m_joint;
 	ndSharedPtr<ndMeshBody> m_rigidBody;

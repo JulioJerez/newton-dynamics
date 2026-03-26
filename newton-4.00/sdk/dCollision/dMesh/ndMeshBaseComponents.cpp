@@ -26,6 +26,7 @@
 #include "ndCollision.h"
 #include "ndShapeSphere.h"
 #include "ndShapeCapsule.h"
+#include "ndShapeConvexHull.h"
 #include "ndMeshBaseComponents.h"
 #include "ndShapeChamferCylinder.h"
 #include "ndJointBilateralConstraint.h"
@@ -128,12 +129,6 @@ ndShape* ndMeshCollisionShapeChamferCylinder::CreateObject() const
 	return new ndShapeChamferCylinder(m_radius, m_height);
 }
 
-ndShape* ndMeshCollisionShapeConvexHull::CreateObject() const
-{
-	ndAssert(0);
-	return nullptr;
-}
-
 void ndMeshCollisionShapeConvexHull::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	xmlSaveParam(parent, "constructor", ndShapeConvexHull::StaticClassName());
@@ -142,9 +137,13 @@ void ndMeshCollisionShapeConvexHull::SerializeToXml(nd::TiXmlElement* const pare
 
 void ndMeshCollisionShapeConvexHull::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
-	ndAssert(0);
 	m_points.SetCount(0);
 	xmlGetFloatArray3(parent, "pointcloud", m_points);
+}
+
+ndShape* ndMeshCollisionShapeConvexHull::CreateObject() const
+{
+	return new ndShapeConvexHull(ndInt32(m_points.GetCount()), sizeof(ndVector), ndFloat32(0.0f), &m_points[0].m_x);
 }
 
 ndMeshShapeInstance::ndMeshShapeInstance()
@@ -199,6 +198,11 @@ void ndMeshShapeInstance::DeserializeFromXml(const nd::TiXmlElement* const paren
 	else if (strcmp(constructor, ndShapeChamferCylinder::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeChamferCylinder());
+		m_shape->DeserializeFromXml(xmlShape);
+	}
+	else if (strcmp(constructor, ndShapeConvexHull::StaticClassName()) == 0)
+	{
+		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeConvexHull());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
 	else

@@ -18,7 +18,7 @@
 #include "ndDemoCameraNodeFollow.h"
 #include "ndHeightFieldPrimitive.h"
 
-#if 1
+#if 0
 
 static void LoadRagdoll(ndDemoEntityManager* const scene, const ndMatrix& location, const char* const name)
 {

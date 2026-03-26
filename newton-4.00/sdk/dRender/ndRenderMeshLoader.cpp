@@ -23,12 +23,124 @@ ndRenderMeshLoader::ndRenderMeshLoader(ndRender* const renderer)
 {
 }
 
-//ndRenderMeshLoader(const ndRenderMeshLoader& src) {};
 ndRenderMeshLoader::~ndRenderMeshLoader()
 {
 }
 
 bool ndRenderMeshLoader::MeshToRenderSceneNode(const ndString& materialBasePath)
+{
+	//class EntityMeshPair
+	//{
+	//	public:
+	//	EntityMeshPair()
+	//		:m_mesh(nullptr)
+	//		,m_entity(nullptr)
+	//	{
+	//	}
+	//
+	//	EntityMeshPair(const EntityMeshPair& src)
+	//		:m_mesh(src.m_mesh)
+	//		,m_entity(src.m_entity)
+	//	{
+	//	}
+	//
+	//	EntityMeshPair(const ndSharedPtr<ndRenderSceneNode>& entity, const ndSharedPtr<ndMesh>& mesh)
+	//		:m_mesh(mesh)
+	//		,m_entity(entity)
+	//	{
+	//	}
+	//
+	//	ndSharedPtr<ndMesh> m_mesh;
+	//	ndSharedPtr<ndRenderSceneNode> m_entity;
+	//};
+	//
+	//ndList<EntityMeshPair> meshList;
+	//ndList<ndSharedPtr<ndMesh>> effectNodeList;
+	//ndList<ndSharedPtr<ndRenderSceneNode>> parentEntityList;
+	//
+	//effectNodeList.Append(m_mesh);
+	//parentEntityList.Append(ndSharedPtr<ndRenderSceneNode>(nullptr));
+	//
+	//m_renderMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);
+	//while (effectNodeList.GetCount())
+	//{
+	//	ndSharedPtr<ndMesh> mesh(effectNodeList.GetLast()->GetInfo());
+	//	ndSharedPtr<ndRenderSceneNode> parentNode(parentEntityList.GetLast()->GetInfo());
+	//
+	//	effectNodeList.Remove(effectNodeList.GetLast());
+	//	parentEntityList.Remove(parentEntityList.GetLast());
+	//
+	//	ndSharedPtr<ndRenderSceneNode> entity(nullptr);
+	//	if (!(*parentNode))
+	//	{
+	//		m_renderMesh = ndSharedPtr<ndRenderSceneNode>(new ndRenderSceneNode(mesh->GetMatrix()));
+	//		m_renderMesh->SetPrimitiveMatrix(mesh->GetGeometryMatrix());
+	//		entity = m_renderMesh;
+	//	}
+	//	else
+	//	{
+	//		ndSharedPtr<ndRenderSceneNode> childNode(new ndRenderSceneNode(mesh->GetMatrix()));
+	//		childNode->SetPrimitiveMatrix(mesh->GetGeometryMatrix());
+	//		parentNode->AddChild(childNode);
+	//		entity = childNode;
+	//	}
+	//	entity->m_name = mesh->GetName();
+	//
+	//	if (entity->m_name.Find("-hidden") == -1)
+	//	{
+	//		ndSharedPtr<ndMeshEffect> meshEffect(mesh->GetMesh());
+	//		if (*meshEffect)
+	//		{
+	//			meshList.Append(EntityMeshPair(entity, mesh));
+	//		}
+	//	}
+	//
+	//	for (ndList<ndSharedPtr<ndMesh>>::ndNode* childNode = mesh->GetChildren().GetFirst(); childNode; childNode = childNode->GetNext())
+	//	{
+	//		ndMesh::ndNodeType type = childNode->GetInfo()->GetNodeType();
+	//		if (type != ndMesh::m_collisionShape)
+	//		{
+	//			parentEntityList.Append(entity);
+	//			effectNodeList.Append(childNode->GetInfo());
+	//		}
+	//	}
+	//}
+	//
+	//for (ndList<EntityMeshPair>::ndNode* node = meshList.GetFirst(); node; node = node->GetNext())
+	//{
+	//	EntityMeshPair& pair = node->GetInfo();
+	//
+	//	ndAssert(*pair.m_mesh);
+	//	ndAssert(*pair.m_entity);
+	//
+	//	ndSharedPtr<ndMeshEffect> meshEffect(pair.m_mesh->GetMesh());
+	//	ndArray<ndMeshEffect::ndMaterial>& materials = meshEffect->GetMaterials();
+	//
+	//	ndRenderPrimitive::ndDescriptor descriptor(m_owner);
+	//	descriptor.m_meshNode = meshEffect;
+	//	descriptor.m_skeleton = pair.m_entity;
+	//
+	//	for (ndInt32 j = 0; j < materials.GetCount(); ++j)
+	//	{
+	//		const ndString texturePathName(materialBasePath + materials[j].m_textureName);
+	//		ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(m_owner->GetTextureCache()->GetTexture(texturePathName));
+	//		material.m_diffuse = materials[j].m_diffuse;
+	//		material.m_specular = materials[j].m_specular;
+	//		material.m_reflection = materials[j].m_reflection;
+	//		material.m_specularPower = ndReal(materials[j].m_shiness);
+	//		material.m_opacity = ndReal(materials[j].m_opacity);
+	//		material.m_castShadows = true;
+	//	}
+	//
+	//	ndSharedPtr<ndRenderPrimitive> geometry(new ndRenderPrimitive(descriptor));
+	//	pair.m_entity->SetPrimitive(geometry);
+	//}
+
+	m_renderMesh = ndSharedPtr<ndRenderSceneNode>(CreateRenderSceneMesh(m_owner, *m_mesh, materialBasePath));
+	return m_renderMesh ? true : false;
+}
+
+ndSharedPtr<ndRenderSceneNode> ndRenderMeshLoader::CreateRenderSceneMesh(ndRender* const renderer, const ndMesh* const meshRoot, const ndString materialBasePath)
 {
 	class EntityMeshPair
 	{
@@ -45,38 +157,35 @@ bool ndRenderMeshLoader::MeshToRenderSceneNode(const ndString& materialBasePath)
 		{
 		}
 
-		EntityMeshPair(const ndSharedPtr<ndRenderSceneNode>& entity, const ndSharedPtr<ndMesh>& mesh)
+		EntityMeshPair(ndSharedPtr<ndRenderSceneNode> entity, const ndMesh* const mesh)
 			:m_mesh(mesh)
 			,m_entity(entity)
 		{
 		}
 
-		ndSharedPtr<ndMesh> m_mesh;
+		const ndMesh* m_mesh;
 		ndSharedPtr<ndRenderSceneNode> m_entity;
 	};
 
 	ndList<EntityMeshPair> meshList;
-	ndList<ndSharedPtr<ndMesh>> effectNodeList;
+	ndFixSizeArray<const ndMesh*, 1024> effectNodeList;
 	ndList<ndSharedPtr<ndRenderSceneNode>> parentEntityList;
 
-	effectNodeList.Append(m_mesh);
+	effectNodeList.PushBack(meshRoot);
 	parentEntityList.Append(ndSharedPtr<ndRenderSceneNode>(nullptr));
 
-	m_renderMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);
+	ndSharedPtr<ndRenderSceneNode> renderMesh(nullptr);
 	while (effectNodeList.GetCount())
 	{
-		ndSharedPtr<ndMesh> mesh(effectNodeList.GetLast()->GetInfo());
-		ndSharedPtr<ndRenderSceneNode> parentNode(parentEntityList.GetLast()->GetInfo());
-
-		effectNodeList.Remove(effectNodeList.GetLast());
+		const ndMesh* const mesh = effectNodeList.Pop();
+		ndSharedPtr<ndRenderSceneNode> parentNode = parentEntityList.GetLast()->GetInfo();
 		parentEntityList.Remove(parentEntityList.GetLast());
-
 		ndSharedPtr<ndRenderSceneNode> entity(nullptr);
-		if (!(*parentNode))
+		if (!parentNode)
 		{
-			m_renderMesh = ndSharedPtr<ndRenderSceneNode>(new ndRenderSceneNode(mesh->GetMatrix()));
-			m_renderMesh->SetPrimitiveMatrix(mesh->GetGeometryMatrix());
-			entity = m_renderMesh;
+			renderMesh = ndSharedPtr<ndRenderSceneNode>(new ndRenderSceneNode(mesh->GetMatrix()));
+			renderMesh->SetPrimitiveMatrix(mesh->GetGeometryMatrix());
+			entity = renderMesh;
 		}
 		else
 		{
@@ -86,7 +195,7 @@ bool ndRenderMeshLoader::MeshToRenderSceneNode(const ndString& materialBasePath)
 			entity = childNode;
 		}
 		entity->m_name = mesh->GetName();
-
+	
 		if (entity->m_name.Find("-hidden") == -1)
 		{
 			ndSharedPtr<ndMeshEffect> meshEffect(mesh->GetMesh());
@@ -95,36 +204,36 @@ bool ndRenderMeshLoader::MeshToRenderSceneNode(const ndString& materialBasePath)
 				meshList.Append(EntityMeshPair(entity, mesh));
 			}
 		}
-
+	
 		for (ndList<ndSharedPtr<ndMesh>>::ndNode* childNode = mesh->GetChildren().GetFirst(); childNode; childNode = childNode->GetNext())
 		{
 			ndMesh::ndNodeType type = childNode->GetInfo()->GetNodeType();
 			if (type != ndMesh::m_collisionShape)
 			{
 				parentEntityList.Append(entity);
-				effectNodeList.Append(childNode->GetInfo());
+				effectNodeList.PushBack(*childNode->GetInfo());
 			}
 		}
 	}
-
+	
 	for (ndList<EntityMeshPair>::ndNode* node = meshList.GetFirst(); node; node = node->GetNext())
 	{
 		EntityMeshPair& pair = node->GetInfo();
 	
-		ndAssert(*pair.m_mesh);
-		ndAssert(*pair.m_entity);
+		ndAssert(pair.m_mesh);
+		ndAssert(pair.m_entity);
 	
 		ndSharedPtr<ndMeshEffect> meshEffect(pair.m_mesh->GetMesh());
 		ndArray<ndMeshEffect::ndMaterial>& materials = meshEffect->GetMaterials();
 	
-		ndRenderPrimitive::ndDescriptor descriptor(m_owner);
+		ndRenderPrimitive::ndDescriptor descriptor(renderer);
 		descriptor.m_meshNode = meshEffect;
 		descriptor.m_skeleton = pair.m_entity;
 	
 		for (ndInt32 j = 0; j < materials.GetCount(); ++j)
 		{
 			const ndString texturePathName(materialBasePath + materials[j].m_textureName);
-			ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(m_owner->GetTextureCache()->GetTexture(texturePathName));
+			ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(renderer->GetTextureCache()->GetTexture(texturePathName));
 			material.m_diffuse = materials[j].m_diffuse;
 			material.m_specular = materials[j].m_specular;
 			material.m_reflection = materials[j].m_reflection;
@@ -136,7 +245,7 @@ bool ndRenderMeshLoader::MeshToRenderSceneNode(const ndString& materialBasePath)
 		ndSharedPtr<ndRenderPrimitive> geometry(new ndRenderPrimitive(descriptor));
 		pair.m_entity->SetPrimitive(geometry);
 	}
-	return m_renderMesh;
+	return renderMesh;
 }
 
 bool ndRenderMeshLoader::LoadMesh(const ndString& fullPathMeshName)

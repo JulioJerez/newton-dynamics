@@ -102,6 +102,9 @@ class ndModelArticulation: public ndModel
 
 	D_NEWTON_API virtual void SaveNdMesh(const char* const path) const;
 
+	template <typename Function>
+	void NodeIterator(Function func);
+
 	protected:
 	D_COLLISION_API virtual void OnAddWorld() override;
 	D_COLLISION_API virtual void OnRemoveFromWorld() override;
@@ -110,6 +113,26 @@ class ndModelArticulation: public ndModel
 	ndNode* m_rootNode;
 	ndList<ndNode, ndContainersFreeListAlloc<ndNode>> m_closeLoops;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
+
+template <typename Function>
+void ndModelArticulation::NodeIterator(Function func)
+{
+	if (m_rootNode)
+	{
+		ndFixSizeArray<ndNode*, D_INV_IK_MAX_LINKS> stack;
+		stack.PushBack(m_rootNode);
+		while (stack.GetCount())
+		{
+			ndNode* const node = stack.Pop();
+			func(node);
+			for (ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
+			{
+				stack.PushBack(child);
+			}
+		}
+	}
+}
+
 
 #endif 
 

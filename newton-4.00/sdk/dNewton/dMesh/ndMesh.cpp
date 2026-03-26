@@ -228,20 +228,20 @@ void ndMesh::SetMesh(const ndSharedPtr<ndMeshEffect>& mesh)
 	m_mesh = mesh;
 }
 
-ndSharedPtr<ndMeshShapeInstance>& ndMesh::GetPrimitive()
-{
-	return m_meshPrimitive;
-}
-
-const ndSharedPtr<ndMeshShapeInstance>& ndMesh::GetPrimitive() const
-{
-	return m_meshPrimitive;
-}
-
-void ndMesh::SetPrimitive(const ndSharedPtr<ndMeshShapeInstance>& primitive)
-{
-	m_meshPrimitive = primitive;
-}
+//ndSharedPtr<ndMeshShapeInstance>& ndMesh::GetPrimitive()
+//{
+//	return m_meshPrimitive;
+//}
+//
+//const ndSharedPtr<ndMeshShapeInstance>& ndMesh::GetPrimitive() const
+//{
+//	return m_meshPrimitive;
+//}
+//
+//void ndMesh::SetPrimitive(const ndSharedPtr<ndMeshShapeInstance>& primitive)
+//{
+//	m_meshPrimitive = primitive;
+//}
 
 ndSharedPtr<ndMeshJoint>& ndMesh::GetJoint()
 {
