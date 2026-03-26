@@ -82,7 +82,7 @@ bool ndMemory::CheckMemoryHeap()
 	// linux OS memory check
 #elif defined (__APPLE__)
 	// apple OS memory check
-#elif defined (__MINGW32__) || defined (__MINGW64__))
+#elif defined (__MINGW32__) || defined (__MINGW64__)
 	// mingwing OS memory check
 #elif defined (_M_ARM) || defined (_M_ARM64)
 	// android OS memory check
