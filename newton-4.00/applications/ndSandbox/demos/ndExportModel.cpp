@@ -718,6 +718,7 @@ namespace ndBasicRagdoll
 
         { "lowerback", ndDefinition::m_spherical, 1.0f, { -15.0f, 15.0f, 30.0f }, { 0.0f, 0.0f, 0.0f } },
         { "upperback", ndDefinition::m_spherical, 1.0f,{ -15.0f, 15.0f, 30.0f },{ 0.0f, 0.0f, 0.0f } },
+
         { "lowerneck", ndDefinition::m_spherical, 1.0f,{ -15.0f, 15.0f, 30.0f },{ 0.0f, 0.0f, 0.0f } },
         { "upperneck", ndDefinition::m_spherical, 1.0f,{ -60.0f, 60.0f, 30.0f },{ 0.0f, 0.0f, 0.0f } },
 
@@ -755,6 +756,54 @@ namespace ndBasicRagdoll
             body->GetAsBodyDynamic()->SetMassMatrix(1.0f, **shape);
             return body;
         };
+
+        auto ConnectBodyParts = [](ndBodyDynamic* const childBody, ndBodyDynamic* const parentBody, const ndDefinition& definition)
+        {
+            ndMatrix matrix(childBody->GetMatrix());
+            ndDefinition::ndOffsetFrameMatrix frameAngle(definition.m_frameBasics);
+            ndMatrix pinAndPivotInGlobalSpace(ndPitchMatrix(frameAngle.m_pitch * ndDegreeToRad) * ndYawMatrix(frameAngle.m_yaw * ndDegreeToRad) * ndRollMatrix(frameAngle.m_roll * ndDegreeToRad) * matrix);
+
+            ndDefinition::ndJointLimits jointLimits(definition.m_jointLimits);
+
+            switch (definition.m_limbType)
+            {
+                case ndDefinition::m_spherical:
+                {
+                    ndJointSpherical* const joint = new ndJointSpherical(pinAndPivotInGlobalSpace, childBody, parentBody);
+                    joint->SetConeLimit(jointLimits.m_coneAngle * ndDegreeToRad);
+                    joint->SetTwistLimits(jointLimits.m_minTwistAngle * ndDegreeToRad, jointLimits.m_maxTwistAngle * ndDegreeToRad);
+                    joint->SetAsSpringDamper(definition.m_coneSpringData.m_regularizer, definition.m_coneSpringData.m_spring, definition.m_coneSpringData.m_damper);
+                    return (ndJointBilateralConstraint*)joint;
+                }
+
+                case ndDefinition::m_hinge:
+                {
+                    ndJointHinge* const joint = new ndJointHinge(pinAndPivotInGlobalSpace, childBody, parentBody);
+                    joint->SetLimitState(true);
+                    joint->SetLimits(jointLimits.m_minTwistAngle * ndDegreeToRad, jointLimits.m_maxTwistAngle * ndDegreeToRad);
+                    joint->SetAsSpringDamper(definition.m_coneSpringData.m_regularizer, definition.m_coneSpringData.m_spring, definition.m_coneSpringData.m_damper);
+                    return (ndJointBilateralConstraint*)joint;
+                }
+
+                case ndDefinition::m_doubleHinge:
+                {
+                    ndJointDoubleHinge* const joint = new ndJointDoubleHinge(pinAndPivotInGlobalSpace, childBody, parentBody);
+                    joint->SetLimitState0(true);
+                    joint->SetLimitState1(true);
+                    joint->SetLimits0(-30.0f * ndDegreeToRad, 30.0f * ndDegreeToRad);
+                    joint->SetLimits1(-45.0f * ndDegreeToRad, 45.0f * ndDegreeToRad);
+                    joint->SetAsSpringDamper0(definition.m_coneSpringData.m_regularizer, definition.m_coneSpringData.m_spring, definition.m_coneSpringData.m_damper);
+                    joint->SetAsSpringDamper1(definition.m_coneSpringData.m_regularizer, definition.m_coneSpringData.m_spring, definition.m_coneSpringData.m_damper);
+                    return (ndJointBilateralConstraint*)joint;
+                }
+
+                default:
+                    ndAssert(0);
+            }
+            return (ndJointBilateralConstraint*)nullptr;
+        };
+
+
         ndModelArticulation* const ragdoll = new ndModelArticulation;
         
         ndFixSizeArray<const ndMesh*, 256> stack;
@@ -768,32 +817,29 @@ namespace ndBasicRagdoll
         {
             const ndMesh* const meshNode = stack.Pop();
             ndModelArticulation::ndNode* parentNode = parents.Pop();
-
-            ndSharedPtr<ndBody> body(CreateBodyPart(meshNode));
-            if (!parentNode)
+            const char* const name = meshNode->GetName().GetStr();
+            for (ndInt32 i = 0; ragdollDefinition[i].m_boneName[0]; ++i)
             {
-                parentNode = ragdoll->AddRootBody(body);
-                parentNode->m_name = meshNode->GetName();
-                break;
-            }
-            else
-            {
-                const char* const name = meshNode->GetName().GetStr();
-                for (ndInt32 i = 0; ragdollDefinition[i].m_boneName[0]; ++i)
+                const ndDefinition& definition = ragdollDefinition[i];
+                if (strcmp(definition.m_boneName, name) == 0)
                 {
-                    const ndDefinition& definition = ragdollDefinition[i];
-                    if (!strcmp(definition.m_boneName, name))
+                    ndSharedPtr<ndBody> body(CreateBodyPart(meshNode));
+                    if (!parentNode)
                     {
-                        //ndBodyDynamic* const parentBody = data.parentBone->m_body->GetAsBodyDynamic();
-                        //ndSharedPtr<ndBody> childBody(CreateBodyPart(scene, entityDuplicate, loader, definition, parentBody));
-                        //
-                        ////connect this body part to its parentBody with a rag doll joint
-                        //ndSharedPtr<ndJointBilateralConstraint> joint(ConnectBodyParts(childBody->GetAsBodyDynamic(), parentBody, definition));
-                        //
-                        //// add this child body to the rad doll model.
-                        //data.parentBone = ragdoll->AddLimb(data.parentBone, childBody, joint);
-                        break;
+                        parentNode = ragdoll->AddRootBody(body);
+                        parentNode->m_name = meshNode->GetName();
                     }
+                    else
+                    {
+                        ndBodyDynamic* const parentBody = parentNode->m_body->GetAsBodyDynamic();
+                        
+                        //connect this body part to its parentBody with a rag doll joint
+                        ndSharedPtr<ndJointBilateralConstraint> joint(ConnectBodyParts(body->GetAsBodyDynamic(), parentBody, definition));
+                        
+                        // add this child body to the rad doll model.
+                        parentNode = ragdoll->AddLimb(parentNode, body, joint);
+                    }
+                    break;
                 }
             }
         
@@ -801,17 +847,8 @@ namespace ndBasicRagdoll
             for (ndList<ndSharedPtr<ndMesh>>::ndNode* node = children.GetFirst(); node; node = node->GetNext())
             {
                 const ndMesh* const child = *node->GetInfo();
-                const char* const name = child->GetName().GetStr();
-                for (ndInt32 i = 0; ragdollDefinition[i].m_boneName[0]; ++i)
-                {
-                    const ndDefinition& definition = ragdollDefinition[i];
-                    if (!strcmp(definition.m_boneName, name))
-                    {
-                        stack.PushBack(child);
-                        parents.PushBack(parentNode);
-                        break;
-                    }
-                }
+                stack.PushBack(child);
+                parents.PushBack(parentNode);
             }
         }
         //CalculateMassDistribution(ragdoll, ndFloat32(100.0f));
@@ -844,10 +881,10 @@ void ndExportModel(ndDemoEntityManager* const scene)
     //ndBoxTricycle::BoxTricycle(scene, origin, 100.0f, 0.75f);
 
     origin.m_posit.m_z = 0.0f;
-    //ndBasicRagdoll::RagDoll(scene, origin);
+    ndBasicRagdoll::RagDoll(scene, origin);
 
     origin.m_posit.m_z = -3.0f;
-    ndDaveRagdoll::RagDoll(scene, origin);
+    //ndDaveRagdoll::RagDoll(scene, origin);
 
     ndQuaternion rot;
     origin.m_posit.m_x -= 8.0f;

@@ -491,8 +491,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionSphere()
 	ndVector size;
 	ndMatrix localMatrix(CalculateLocalMatrix(size));
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeSphere(size.m_x)));
-	
-	//sphere->SetLocalMatrix(localMatrix);
+
 	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
 	return shape;
 }
