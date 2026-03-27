@@ -719,7 +719,6 @@ void ndFbxMeshLoader::ImportMeshNode(ndOfbx::Object* const fbxNode, ndFbx2ndMesh
 	meshEffect->BuildFromIndexList(&format);
 
 	ndMatrix pivotMatrix(ofbxMatrix2dMatrix(fbxMesh->getGeometricMatrix()));
-	//meshEffect->ApplyTransform(pivotMatrix);
 	entity->SetGeometryMatrix(pivotMatrix);
 	entity->SetMesh(meshEffect);
 }

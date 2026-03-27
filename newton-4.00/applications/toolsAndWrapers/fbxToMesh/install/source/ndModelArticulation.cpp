@@ -883,66 +883,21 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 	return dynamics;
 }
 
-void ndModelArticulation::SaveNdMesh(const char* const path) const
+void ndModelArticulation::SetTransform(const ndMatrix& matrix)
 {
-	ndInt32 nameIndex = 0;
-	ndMesh* rootMesh = nullptr;
-	ndFixSizeArray<ndMesh*, 1024> parent;
-	ndFixSizeArray<ndModelArticulation::ndNode*, 1024> stack;
-
-	parent.PushBack(nullptr);
-	stack.PushBack(m_rootNode);
-	while (stack.GetCount())
+	if (m_rootNode)
 	{
-		ndMesh* const parentMesh = parent.Pop();
-		ndModelArticulation::ndNode* const node = stack.Pop();
-
-		const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
-		ndMesh* const meshNode = new ndMesh(body->GetCollisionShape());
-		if (node->m_name.GetStr() && *node->m_name.GetStr())
-		{
-			meshNode->SetName(node->m_name.GetStr());
-		}
-		else
-		{
-			char name[256];
-			snprintf(name, sizeof(name) - 1, "unnamed_node_%d", nameIndex);
-			nameIndex++;
-			meshNode->SetName(name);
-		}
-		ndMatrix matrix(node->m_body->GetMatrix());
-		if (!rootMesh)
-		{
-			rootMesh = meshNode;
-		}
-		else
-		{
-			matrix = matrix * node->GetParent()->m_body->GetMatrix().OrthoInverse();
-			parentMesh->AddChild(ndSharedPtr<ndMesh>(meshNode));
-		}
-
-		meshNode->SetMatrix(matrix);
-		//ndSharedPtr<ndMeshShapeInstance> meshPrimitive(new ndMeshShapeInstance(body->GetCollisionShape()));
-		//meshNode->SetPrimitive(meshPrimitive);
-		node->m_body->Serialize(meshNode);
-		if (node->m_joint)
-		{
-			ndSharedPtr<ndMeshJoint> joint(node->m_joint->GetMeshJoint());
-			meshNode->SetJoint(joint);
-		}
-
-		for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
-		{
-			stack.PushBack(child);
-			parent.PushBack(meshNode);
-		}
+		const ndMatrix offset(m_rootNode->m_body->GetMatrix().OrthoInverse() * matrix);
+		auto ApplyTransfrom = [this, &offset](ndModelArticulation::ndNode* const node)
+			{
+				ndSharedPtr<ndBody> body(node->m_body);
+				const ndMatrix matrix(body->GetMatrix() * offset);
+				body->SetMatrix(matrix);
+			};
+		NodeIterator(ApplyTransfrom);
 	}
-
-	ndAssert(rootMesh);
-	ndSharedPtr<ndMesh> mesh(rootMesh);
-	ndMeshLoader articulation(mesh);
-	articulation.SaveMesh(path);
 }
+
 
 void ndModelArticulation::Serialize(ndMesh* const rootNode) const
 {
@@ -1023,18 +978,61 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 	// TO DO: deserialize loop joints here
 }
 
-
-void ndModelArticulation::SetTransform(const ndMatrix& matrix)
+void ndModelArticulation::SaveNdMesh(const char* const path) const
 {
-	if (m_rootNode)
+	ndInt32 nameIndex = 0;
+	ndMesh* rootMesh = nullptr;
+	ndFixSizeArray<ndMesh*, 1024> parent;
+	ndFixSizeArray<ndModelArticulation::ndNode*, 1024> stack;
+
+	parent.PushBack(nullptr);
+	stack.PushBack(m_rootNode);
+	while (stack.GetCount())
 	{
-		const ndMatrix offset(m_rootNode->m_body->GetMatrix().OrthoInverse() * matrix);
-		auto ApplyTransfrom = [this, &offset](ndModelArticulation::ndNode* const node)
+		ndMesh* const parentMesh = parent.Pop();
+		ndModelArticulation::ndNode* const node = stack.Pop();
+
+		const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+		ndMesh* const meshNode = new ndMesh(body->GetCollisionShape());
+		if (node->m_name.GetStr() && *node->m_name.GetStr())
 		{
-			ndSharedPtr<ndBody> body(node->m_body);
-			const ndMatrix matrix(body->GetMatrix() * offset);
-			body->SetMatrix(matrix);
-		};
-		NodeIterator(ApplyTransfrom);
+			meshNode->SetName(node->m_name.GetStr());
+		}
+		else
+		{
+			char name[256];
+			snprintf(name, sizeof(name) - 1, "unnamed_node_%d", nameIndex);
+			nameIndex++;
+			meshNode->SetName(name);
+		}
+		ndMatrix matrix(node->m_body->GetMatrix());
+		if (!rootMesh)
+		{
+			rootMesh = meshNode;
+		}
+		else
+		{
+			matrix = matrix * node->GetParent()->m_body->GetMatrix().OrthoInverse();
+			parentMesh->AddChild(ndSharedPtr<ndMesh>(meshNode));
+		}
+
+		meshNode->SetMatrix(matrix);
+		node->m_body->Serialize(meshNode);
+		if (node->m_joint)
+		{
+			ndSharedPtr<ndMeshJoint> joint(node->m_joint->GetMeshJoint());
+			meshNode->SetJoint(joint);
+		}
+
+		for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
+		{
+			stack.PushBack(child);
+			parent.PushBack(meshNode);
+		}
 	}
+
+	ndAssert(rootMesh);
+	ndSharedPtr<ndMesh> mesh(rootMesh);
+	ndMeshLoader articulation(mesh);
+	articulation.SaveMesh(path);
 }

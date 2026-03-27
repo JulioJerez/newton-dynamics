@@ -103,9 +103,8 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API const ndSharedPtr<ndMeshEffect>& GetMesh() const;
 	D_NEWTON_API void SetMesh(const ndSharedPtr<ndMeshEffect>& mesh);
 
-	//D_NEWTON_API ndSharedPtr<ndMeshShapeInstance>& GetPrimitive();
-	//D_NEWTON_API const ndSharedPtr<ndMeshShapeInstance>& GetPrimitive() const;
-	//D_NEWTON_API void SetPrimitive(const ndSharedPtr<ndMeshShapeInstance>& primitive);
+	D_NEWTON_API ndSharedPtr<ndMeshBody> GetRigidBody() const;
+	D_NEWTON_API void SetRigidBody(ndSharedPtr<ndMeshBody>& rigidBody);
 
 	D_NEWTON_API ndSharedPtr<ndMeshJoint>& GetJoint();
 	D_NEWTON_API const ndSharedPtr<ndMeshJoint>& GetJoint() const;
@@ -131,10 +130,8 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API void ApplyTransform(const ndMatrix& transform);
 	D_NEWTON_API ndMatrix CalculateGlobalMatrix(ndMesh* const parent = nullptr) const;
 
-	D_NEWTON_API ndSharedPtr<ndMeshBody> GetRigidBody() const;
-	D_NEWTON_API void SetRigidBody(ndSharedPtr<ndMeshBody>& rigidBody);
-
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollision();
+	D_NEWTON_API ndSharedPtr<ndJointBilateralConstraint> CreateJoint();
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionFromChildren();
 
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionBox();
@@ -145,6 +142,9 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionChamferCylinder();
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionTree(bool optimize = true);
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionConvexApproximation(bool lowDetail = false);
+
+	template <typename Function>
+	void NodeIterator(Function func);
 
 	protected:
 	ndMatrix CalculateLocalMatrix(ndVector& size) const;
@@ -158,8 +158,6 @@ class ndMesh : public ndClassAlloc
 	ndCurve m_rotation;
 	ndWeakPtr<ndMesh> m_parent;
 	ndSharedPtr<ndMeshEffect> m_mesh;
-	//ndSharedPtr<ndMeshShapeInstance> m_meshPrimitive;
-
 	ndSharedPtr<ndMeshJoint> m_joint;
 	ndSharedPtr<ndMeshBody> m_rigidBody;
 	ndList<ndSharedPtr<ndMesh>> m_children;
@@ -189,6 +187,23 @@ inline ndMatrix ndMesh::GetGeometryMatrix() const
 inline void ndMesh::SetGeometryMatrix(const ndMatrix& matrix)
 {
 	m_geometryMatrix = matrix;
+}
+
+template <typename Function>
+void ndMesh::NodeIterator(Function func)
+{
+	ndFixSizeArray<ndMesh*, 1024> stack;
+	stack.PushBack(this);
+	while (stack.GetCount())
+	{
+		ndMesh* const node = stack.Pop();
+		func(node);
+		for (ndList<ndSharedPtr<ndMesh>>::ndNode* childNode = node->m_children.GetFirst(); childNode; childNode = childNode->GetNext())
+		{
+			ndMesh* const child = *childNode->GetInfo();
+			stack.PushBack(child);
+		}
+	}
 }
 
 #endif

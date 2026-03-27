@@ -24,8 +24,13 @@
 #include "VHACD.h"
 #include "ndMesh.h"
 #include "ndCollision.h"
+#include "ndJointHinge.h"
+#include "ndJointWheel.h"
+#include "ndJointSlider.h"
 #include "ndJointFix6dof.h"
+#include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
+#include "ndJointDoubleHinge.h"
 
 ndMesh::ndMesh()
 	:ndClassAlloc()
@@ -857,6 +862,30 @@ ndSharedPtr<ndJointBilateralConstraint> ndMesh::CreateJoint()
 	tmpName.ToLower();
 	const char* const name = tmpName.GetStr();
 	ndSharedPtr<ndJointBilateralConstraint> joint(new ndJointFix6dof());
+	if (strstr(name, "-hinge"))
+	{
+		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointHinge());
+	}
+	if (strstr(name, "-spherical"))
+	{
+		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointSpherical());
+	}
+	if (strstr(name, "-slider"))
+	{
+		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointSlider());
+	}
+	if (strstr(name, "-doublehinge"))
+	{
+		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointDoubleHinge());
+	}
+	if (strstr(name, "-wheel"))
+	{
+		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointWheel());
+	}
+	else
+	{
+		ndExpandTraceMessage("ndMesh Node: %s unknown joint, using ndJointFix6dof as place holder\n", name);
+	}
 
 	ndMesh* parent = GetParent();
 	for (; parent && !(*parent->GetRigidBody()); parent = parent->GetParent());

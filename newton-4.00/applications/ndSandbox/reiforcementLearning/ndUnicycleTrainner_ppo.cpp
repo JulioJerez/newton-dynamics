@@ -227,7 +227,6 @@ namespace ndUnicycleTrainer_ppo
 						// save partial controller in case of crash 
 						ndBrain* const actor = *m_master->GetPolicyNetwork();
 						ndString fileName(ndGetWorkingFileName(m_master->GetName().GetStr()));
-						//m_master->GetPolicyNetwork()->SaveToFile(fileName.GetStr());
 						actor->SaveToFile(fileName.GetStr());
 						ndExpandTraceMessage("best actor episode: %d\treward %f\ttrajectoryFrames: %f\n", m_master->GetEposideCount(), score, m_master->GetAverageFrames());
 					}

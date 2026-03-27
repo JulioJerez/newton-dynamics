@@ -184,34 +184,36 @@ namespace ndCarpolePlayer
 		ndSharedPtr<ndMesh> mesh,
 		ndSharedPtr<ndRenderSceneNode> visualMesh)
 	{
-		auto CreateRigidBody = [scene](ndSharedPtr<ndMesh>& mesh, ndSharedPtr<ndRenderSceneNode>& visualMesh, ndFloat32 mass, ndBodyDynamic* const parentBody)
+		model->GetAsModelArticulation()->Deserialize(*mesh);
+
+		auto BindApplicationData = [this, scene, &visualMesh](ndModelArticulation::ndNode* const node)
 		{
-			ndSharedPtr<ndShapeInstance> shape(mesh->CreateCollision());
+			ndRenderSceneNode* const visualEntityPtr = visualMesh->FindByClosestMatch(node->m_name);
+			ndAssert(visualEntityPtr);
+			ndSharedPtr<ndRenderSceneNode> visualEntity((visualEntityPtr == *visualMesh) ? visualMesh : visualEntityPtr->GetSharedPtr());
 
-			ndBodyKinematic* const body = new ndBodyDynamic();
-			body->SetNotifyCallback(new ndDemoEntityNotify(scene, visualMesh, parentBody));
-			body->SetMatrix(mesh->CalculateGlobalMatrix());
-			body->SetCollisionShape(*(*shape));
-			body->GetAsBodyDynamic()->SetMassMatrix(mass, *(*shape));
-			return body;
+			// add a rigid body with notification callback
+			ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
+			ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
+			node->m_body->SetNotifyCallback(notify);
+
+			if (node->m_name.Find("cart") > -1)
+			{ 
+				m_cart = node->m_body;
+				node->m_body->GetAsBodyKinematic()->SetMassMatrix(CART_MASS, node->m_body->GetAsBodyKinematic()->GetCollisionShape());
+			}
+			else if (node->m_name.Find("pole") > -1)
+			{
+				m_pole = node->m_body;
+				m_poleHinge = node->m_joint;
+				node->m_body->GetAsBodyKinematic()->SetMassMatrix(POLE_MASS, node->m_body->GetAsBodyKinematic()->GetCollisionShape());
+			}
 		};
-
-		// add the cart mesh and body
-		m_cart = ndSharedPtr<ndBody>(CreateRigidBody(mesh, visualMesh, CART_MASS, nullptr));
-		ndModelArticulation::ndNode* const modelRootNode = model->AddRootBody(m_cart);
-
-		// add the pole mesh and body
-		ndSharedPtr<ndMesh> poleMesh(mesh->GetChildren().GetFirst()->GetInfo());
-		ndSharedPtr<ndRenderSceneNode> poleEntity(visualMesh->GetChildren().GetFirst()->GetInfo());
-		m_pole = ndSharedPtr<ndBody>(CreateRigidBody(poleMesh, poleEntity, POLE_MASS, m_cart->GetAsBodyDynamic()));
-
-		const ndMatrix poleMatrix(ndYawMatrix(ndFloat32(90.0f) * ndDegreeToRad) * m_cart->GetMatrix());
-		m_poleHinge = ndSharedPtr<ndJointBilateralConstraint>(new ndJointHinge(poleMatrix, m_pole->GetAsBodyKinematic(), m_cart->GetAsBodyKinematic()));
-		model->AddLimb(modelRootNode, m_pole, m_poleHinge);
+		model->GetAsModelArticulation()->NodeIterator(BindApplicationData);
 
 		ndWorld* const world = scene->GetWorld();
-		const ndMatrix sliderMatrix(m_cart->GetMatrix());
-		m_slider = ndSharedPtr<ndJointBilateralConstraint>(new ndJointSlider(sliderMatrix, m_cart->GetAsBodyKinematic(), world->GetSentinelBody()));
+		const ndMatrix sliderMatrix(model->GetRoot()->m_body->GetMatrix());
+		m_slider = ndSharedPtr<ndJointBilateralConstraint>(new ndJointSlider(sliderMatrix, model->GetRoot()->m_body->GetAsBodyKinematic(), world->GetSentinelBody()));
 		model->AddCloseLoop(m_slider);
 	}
 
@@ -270,7 +272,6 @@ void ndCartpolePlayer_SAC(ndDemoEntityManager* const scene)
 	scene->SetCameraMatrix(rotation, matrix.m_posit);
 }
 
-
 void ndCartpolePlayer_PPO(ndDemoEntityManager* const scene)
 {
 	ndSharedPtr<ndBody> mapBody(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
@@ -281,11 +282,7 @@ void ndCartpolePlayer_PPO(ndDemoEntityManager* const scene)
 
 	ndMatrix matrix(ndGetIdentityMatrix());
 	ndRenderMeshLoader loader(*scene->GetRenderer());
-loader.ImportFbx(ndGetWorkingFileName("cartpole.fbx"));
-loader.SaveMesh(ndGetWorkingFileName("xxxx1.nd"));
-
 	loader.LoadMesh(ndGetWorkingFileName("cartpole.nd"));
-	
 	ndController::CreateModel(scene, matrix, loader, CONTROLLER_NAME_PPO);
 
 	matrix.m_posit.m_x -= 0.0f;
