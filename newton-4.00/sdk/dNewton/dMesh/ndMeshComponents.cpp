@@ -84,7 +84,7 @@ void ndMeshJointFix6dof::DeserializeFromXml(const nd::TiXmlElement* const parent
 {
 	m_softness = xmlGetFloat(parent, "softness");
 	m_maxForce = xmlGetFloat(parent, "maxForce");
-	m_maxTorque = xmlGetFloat(parent, "_maxTorque");
+	m_maxTorque = xmlGetFloat(parent, "maxTorque");
 }
 
 ndJointBilateralConstraint* ndMeshJointFix6dof::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
