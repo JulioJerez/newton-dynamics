@@ -86,7 +86,7 @@ namespace ndCarpolePlayer
 		ndMatrix cartMatrix(ndGetIdentityMatrix());
 		cartMatrix.m_posit = m_cart->GetMatrix().m_posit;
 		cartMatrix.m_posit.m_x = ndFloat32(0.0f);
-		//cartMatrix.m_posit.m_x = ndFloat32(10.0f) * (ndRand() - ndFloat32(0.5f));
+		cartMatrix.m_posit.m_x = ndFloat32(10.0f) * (ndRand() - ndFloat32(0.5f));
 		cartMatrix.m_posit.m_y = ndFloat32(0.1f);
 		m_cart->SetMatrix(cartMatrix);
 
@@ -232,6 +232,8 @@ namespace ndCarpolePlayer
 		ndPlaybackController* const playerController = (ndPlaybackController*)(*controller);
 		playerController->CreateArticulatedModel(scene, model, loader.m_mesh, visualMesh);
 
+//model->SaveNdMesh(ndGetWorkingFileName("xxxx.fbx").GetStr());
+
 		char nameExt[256];
 		snprintf(nameExt, sizeof(nameExt) - 1, "%s.dnn", name);
 		ndString fileName(ndGetWorkingFileName(nameExt));
@@ -246,28 +248,7 @@ namespace ndCarpolePlayer
 		return model;
 	}
 }
-
 using namespace ndCarpolePlayer;
-
-void ndCartpolePlayer_PPO(ndDemoEntityManager* const scene)
-{
-	ndSharedPtr<ndBody> mapBody(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
-
-	// add a help message
-	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend_Ppo());
-	scene->SetDemoHelp(demoHelper);
-
-	ndMatrix matrix(ndGetIdentityMatrix());
-	ndRenderMeshLoader loader(*scene->GetRenderer());
-	loader.LoadMesh(ndGetWorkingFileName("cartpole.nd"));
-	ndController::CreateModel(scene, matrix, loader, CONTROLLER_NAME_PPO);
-
-	matrix.m_posit.m_x -= 0.0f;
-	matrix.m_posit.m_y += 0.5f;
-	matrix.m_posit.m_z += 2.0f;
-	ndQuaternion rotation(ndVector(0.0f, 1.0f, 0.0f, 0.0f), 90.0f * ndDegreeToRad);
-	scene->SetCameraMatrix(rotation, matrix.m_posit);
-}
 
 void ndCartpolePlayer_SAC(ndDemoEntityManager* const scene)
 {
@@ -281,6 +262,31 @@ void ndCartpolePlayer_SAC(ndDemoEntityManager* const scene)
 	ndRenderMeshLoader loader(*scene->GetRenderer());
 	loader.LoadMesh(ndGetWorkingFileName("cartpole.nd"));
 	ndController::CreateModel(scene, matrix, loader, CONTROLLER_NAME_SAC);
+
+	matrix.m_posit.m_x -= 0.0f;
+	matrix.m_posit.m_y += 0.5f;
+	matrix.m_posit.m_z += 2.0f;
+	ndQuaternion rotation(ndVector(0.0f, 1.0f, 0.0f, 0.0f), 90.0f * ndDegreeToRad);
+	scene->SetCameraMatrix(rotation, matrix.m_posit);
+}
+
+
+void ndCartpolePlayer_PPO(ndDemoEntityManager* const scene)
+{
+	ndSharedPtr<ndBody> mapBody(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
+
+	// add a help message
+	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend_Ppo());
+	scene->SetDemoHelp(demoHelper);
+
+	ndMatrix matrix(ndGetIdentityMatrix());
+	ndRenderMeshLoader loader(*scene->GetRenderer());
+loader.ImportFbx(ndGetWorkingFileName("cartpole.fbx"));
+loader.SaveMesh(ndGetWorkingFileName("xxxx1.nd"));
+
+	loader.LoadMesh(ndGetWorkingFileName("cartpole.nd"));
+	
+	ndController::CreateModel(scene, matrix, loader, CONTROLLER_NAME_PPO);
 
 	matrix.m_posit.m_x -= 0.0f;
 	matrix.m_posit.m_y += 0.5f;

@@ -222,7 +222,6 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 
 	ndSharedPtr<ndBrainIntegerBuffer> m_randomShuffleBuffer;
 	ndSharedPtr<ndBrainIntegerBuffer> m_minibatchRandomShuffleBuffer;
-	//ndSharedPtr<ndBrainIntegerBuffer> m_minibatchCriticRandomShuffleBuffer;
 
 	ndBrainVector m_lastPolicy;
 	ndBrainVector m_scratchBuffer;

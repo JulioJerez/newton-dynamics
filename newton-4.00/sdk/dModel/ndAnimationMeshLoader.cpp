@@ -147,13 +147,36 @@ bool ndAnimationMeshLoader::ImportFbx(const ndString& fbxPathMeshName)
 		}
 	}
 
-#if 0
-	ndTrace(("exporting mesh %s\n", fbxPathMeshName.GetStr()));
-	ndString tmpName(fbxPathMeshName);
-	tmpName.ToLower();
-	ndString exportName(tmpName.SubString(0, tmpName.Find(".fbx")) + ".nd");
-	SaveMesh(exportName);
-#endif
+	auto BindApplicationData = [](ndMesh* const node)
+	{
+		ndString name(node->GetName());
+		name.ToLower();
+		const char* const namePtr = name.GetStr();
+		if (strstr(namePtr, "-rb"))
+		{
+			ndSharedPtr<ndShapeInstance> instance (node->CreateCollision());
+			if (instance->GetShape()->GetAsShapeNull())
+			{
+				ndAssert(0);
+				instance = node->CreateCollisionFromChildren();
+			}
+
+			ndBodyDynamic body;
+			body.SetCollisionShape(**instance);
+			body.SetMassMatrix(ndFloat32 (1.0f), **instance);
+			body.Serialize(node);
+		}
+
+		ndMesh* parent = node->GetParent();
+		for (; parent && !(*parent->GetRigidBody()); parent = parent->GetParent());
+		if (parent)
+		{
+			ndSharedPtr<ndJointBilateralConstraint> joint(node->CreateJoint());
+			ndSharedPtr<ndMeshJoint> meshJoint(joint->GetMeshJoint());
+			node->SetJoint(meshJoint);
+		}
+	};
+	m_mesh->NodeIterator(BindApplicationData);
 	return m_mesh;
 }
 

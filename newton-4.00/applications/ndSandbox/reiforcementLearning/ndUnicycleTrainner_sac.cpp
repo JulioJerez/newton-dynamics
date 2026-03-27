@@ -204,15 +204,10 @@ namespace ndUnicycleTrainer_sac
 				if (episodeCount)
 				{
 					const ndFloat32 score = m_master->GetAverageScore();
-					//const ndFloat32 trajectoryGain = ndSqrt(m_master->GetAverageFrames());
-					//const ndFloat32 stepsGain = ndSqrt(ndFloat32(m_master->GetFramesCount()));
-					//const ndFloat32 combinedTrajectory = score * stepsGain * trajectoryGain;
-					const ndFloat32 combinedTrajectory = score;
 
-					//if (combinedTrajectory >= m_savedScore)
-					if ((stopTraining > m_stopTraining / 3) && (combinedTrajectory >= m_savedScore))
+					if ((stopTraining > m_stopTraining / 3) && (score >= m_savedScore))
 					{
-						m_savedScore = combinedTrajectory;
+						m_savedScore = score;
 
 						// save partial controller in case of crash 
 						ndBrain* const actor = *m_master->GetPolicyNetwork();
@@ -237,10 +232,8 @@ namespace ndUnicycleTrainer_sac
 			if ((stopTraining >= m_stopTraining) || (m_master->GetAverageScore() > ndBrainFloat(0.96f)))
 			{
 				m_modelIsTrained = true;
-				ndString fileName (ndGetWorkingFileName(m_master->GetName().GetStr()));
-				ndExpandTraceMessage("saving to file: %s\n", fileName.GetStr());
-				ndExpandTraceMessage("training complete\n");
 				ndUnsigned64 timer = ndGetTimeInMicroseconds() - m_timer;
+				ndExpandTraceMessage("training complete\n");
 				ndExpandTraceMessage("training time: %g seconds\n", ndFloat32(ndFloat64(timer) * ndFloat32(1.0e-6f)));
 			
 				manager->Terminate();
