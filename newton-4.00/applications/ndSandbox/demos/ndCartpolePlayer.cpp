@@ -66,6 +66,7 @@ namespace ndCarpolePlayer
 		,m_agent(nullptr)
 		,m_timestep(0.0f)
 		,m_randomImpulseCounter(1)
+		,m_istrainning(false)
 	{
 	}
 
@@ -77,14 +78,6 @@ namespace ndCarpolePlayer
 
 	void ndController::PostUpdate(ndFloat32)
 	{
-		//ndMatrix matrix(m_topBox->GetMatrix());
-		//if (ndAbs(matrix.m_posit.m_x) > 300.0f)
-		//{
-		//	matrix.m_posit.m_x = ndFloat32(0.0f);
-		//	GetModel()->GetAsModelArticulation()->SetTransform(matrix);
-		//}
-		//m_randomImpulseCounter = (m_randomImpulseCounter + 1) % ND_RANDOM_IMPULSE_MOD;
-		//ndBrainFloat action = actions[0];
 		m_randomImpulseCounter = (m_randomImpulseCounter + 1) % ND_RANDOM_IMPULSE_MOD;
 	}
 
@@ -164,9 +157,9 @@ namespace ndCarpolePlayer
 		{
 			// when in training mode,
 			// apply a random impulse to the top box every m_randomImpulseCounter steps
-			ndFloat32 randOmega = ND_RANDOM_IMPULSE_MAGNITUD * (ndFloat32(0.5f) - ndRand());
+			ndFloat32 randSpeed = ND_RANDOM_IMPULSE_MAGNITUD * (ndFloat32(0.5f) - ndRand());
 			const ndVector mass(m_cart->GetAsBodyDynamic()->GetMassMatrix());
-			const ndVector randomImpulse(matrix.m_front.Scale(mass.m_w));
+			const ndVector randomImpulse(matrix.m_front.Scale(mass.m_w * randSpeed));
 			m_cart->GetAsBodyDynamic()->ApplyImpulsePair(randomImpulse, ndVector::m_zero, m_timestep);
 		}
 	}
