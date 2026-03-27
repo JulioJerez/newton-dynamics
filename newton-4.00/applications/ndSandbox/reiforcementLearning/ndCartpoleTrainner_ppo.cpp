@@ -146,7 +146,6 @@ namespace ndCartpoleTrainer_ppo
 			{
 				ndFloat32 x = ndFloat32(10.0f) * (ndRand() - ndFloat32(0.5f));
 				ndMatrix meshMatrix(loader.m_mesh->GetMatrix());
-				//loader.m_mesh->m_matrix.m_posit.m_x = x;
 				meshMatrix.m_posit.m_x = x;
 				loader.m_mesh->SetMatrix(meshMatrix);
 				ndSharedPtr<ndRenderSceneNode> visualMesh(loader.m_renderMesh->Clone());
@@ -258,9 +257,7 @@ namespace ndCartpoleTrainer_ppo
 		bool m_modelIsTrained;
 	};
 }
-
 using namespace ndCartpoleTrainer_ppo;
-
 
 void ndCartpoleTrainingPPO(ndDemoEntityManager* const scene)
 {

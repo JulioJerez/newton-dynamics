@@ -25,8 +25,12 @@
 #include "ndMesh.h"
 #include "ndCollision.h"
 #include "ndJointHinge.h"
+#include "ndJointWheel.h"
+#include "ndJointSlider.h"
 #include "ndJointFix6dof.h"
+#include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
+#include "ndJointDoubleHinge.h"
 
 ndMesh::ndMesh()
 	:ndClassAlloc()
@@ -861,6 +865,22 @@ ndSharedPtr<ndJointBilateralConstraint> ndMesh::CreateJoint()
 	if (strstr(name, "-hinge"))
 	{
 		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointHinge());
+	}
+	if (strstr(name, "-spherical"))
+	{
+		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointSpherical());
+	}
+	if (strstr(name, "-slider"))
+	{
+		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointSlider());
+	}
+	if (strstr(name, "-doublehinge"))
+	{
+		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointDoubleHinge());
+	}
+	if (strstr(name, "-wheel"))
+	{
+		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointWheel());
 	}
 	else
 	{
