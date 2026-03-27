@@ -78,6 +78,13 @@ namespace ndCarpolePlayer
 
 	void ndController::PostUpdate(ndFloat32)
 	{
+		ndMatrix matrix(m_cart->GetMatrix());
+		if (ndAbs(matrix.m_posit.m_x) > 300.0f)
+		{
+			matrix.m_posit.m_x = ndFloat32(0.0f);
+			GetModel()->GetAsModelArticulation()->SetTransform(matrix);
+		}
+
 		m_randomImpulseCounter = (m_randomImpulseCounter + 1) % ND_RANDOM_IMPULSE_MOD;
 	}
 
@@ -259,7 +266,10 @@ void ndCartpolePlayer_PPO(ndDemoEntityManager* const scene)
 
 	ndMatrix matrix(ndGetIdentityMatrix());
 	ndRenderMeshLoader loader(*scene->GetRenderer());
+//loader.ImportFbx(ndGetWorkingFileName("cartpole.fbx"));
+
 	loader.LoadMesh(ndGetWorkingFileName("cartpole.nd"));
+
 	ndController::CreateModel(scene, matrix, loader, CONTROLLER_NAME_PPO);
 
 	matrix.m_posit.m_x -= 0.0f;
