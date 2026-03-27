@@ -24,6 +24,7 @@
 #include "VHACD.h"
 #include "ndMesh.h"
 #include "ndCollision.h"
+#include "ndJointHinge.h"
 #include "ndJointFix6dof.h"
 #include "ndMeshComponents.h"
 
@@ -857,6 +858,14 @@ ndSharedPtr<ndJointBilateralConstraint> ndMesh::CreateJoint()
 	tmpName.ToLower();
 	const char* const name = tmpName.GetStr();
 	ndSharedPtr<ndJointBilateralConstraint> joint(new ndJointFix6dof());
+	if (strstr(name, "-hinge"))
+	{
+		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointHinge());
+	}
+	else
+	{
+		ndExpandTraceMessage("ndMesh Node: %s unknown joint, using ndJointFix6dof as place holder\n", name);
+	}
 
 	ndMesh* parent = GetParent();
 	for (; parent && !(*parent->GetRigidBody()); parent = parent->GetParent());

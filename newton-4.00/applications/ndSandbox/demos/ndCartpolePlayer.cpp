@@ -284,9 +284,8 @@ void ndCartpolePlayer_PPO(ndDemoEntityManager* const scene)
 loader.ImportFbx(ndGetWorkingFileName("cartpole.fbx"));
 loader.SaveMesh(ndGetWorkingFileName("xxxx1.nd"));
 
-	loader.LoadMesh(ndGetWorkingFileName("cartpole.nd"));
-	
-	ndController::CreateModel(scene, matrix, loader, CONTROLLER_NAME_PPO);
+	//loader.LoadMesh(ndGetWorkingFileName("cartpole.nd"));
+	//ndController::CreateModel(scene, matrix, loader, CONTROLLER_NAME_PPO);
 
 	matrix.m_posit.m_x -= 0.0f;
 	matrix.m_posit.m_y += 0.5f;
