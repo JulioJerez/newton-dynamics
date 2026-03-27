@@ -25,7 +25,7 @@ namespace ndCarpolePlayer
 	#define POLE_MASS					ndFloat32(5.0f)
 	#define TRAJECTORY_STEPS			(1024 * 4)
 	#define ND_RANDOM_IMPULSE_MOD		256
-	#define ND_RANDOM_IMPULSE_MAGNITUD	ndFloat32 (15.0f)
+	#define ND_RANDOM_IMPULSE_MAGNITUD	ndFloat32 (10.0f)
 	#define PUSH_ACCEL					ndBrainFloat (-10.0f * DEMO_GRAVITY)
 	#define REWARD_MIN_ANGLE			ndBrainFloat (20.0f * ndDegreeToRad)
 
