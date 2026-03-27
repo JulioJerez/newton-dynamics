@@ -22,8 +22,10 @@
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
 #include "ndBody.h"
+#include "ndMesh.h"
 #include "ndContact.h"
 #include "ndBodyNotify.h"
+#include "ndMeshComponents.h"
 
 ndUnsigned32 ndBody::m_uniqueIdCount = 0;
 
@@ -216,3 +218,24 @@ void ndBody::SetMatrix(const ndMatrix& matrix)
 	SetMatrixNoSleep(matrix);
 }
 
+void ndBody::Serialize(ndMesh* const node) const
+{
+	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBody());
+	node->SetRigidBody(meshBody);
+	Serialize(meshBody);
+	meshBody->m_classConstructor = ndString(ClassName());
+}
+
+void ndBody::Serialize(ndSharedPtr<ndMeshBody>& meshBody) const
+{
+	meshBody->m_omega = m_omega;
+	meshBody->m_veloc = m_veloc;
+	meshBody->m_localCentreOfMass = m_localCentreOfMass;
+}
+
+void ndBody::Deserialize(const ndMeshBody* const meshBody)
+{
+	SetOmega(meshBody->m_omega);
+	SetVelocity(meshBody->m_veloc);
+	SetCentreOfMass(meshBody->m_localCentreOfMass);
+}

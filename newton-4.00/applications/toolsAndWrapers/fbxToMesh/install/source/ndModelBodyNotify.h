@@ -31,11 +31,9 @@ class ndModelBodyNotify: public ndBodyNotify
 		return new ndModelBodyNotify(*this);
 	}
 
-	//virtual void OnTransform(ndInt32 threadIndex, const ndMatrix& matrix) override;
 	virtual void OnTransform(ndFloat32 timestep, const ndMatrix& matrix) override;
 	virtual void OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep) override;
 
-	bool CheckInWorld(const ndMatrix& matrix) const;
 	void CalculateMatrix(const ndMatrix& matrix, ndQuaternion& rot, ndVector& posit) const;
 
 	ndWeakPtr<ndBody> m_parentBody;

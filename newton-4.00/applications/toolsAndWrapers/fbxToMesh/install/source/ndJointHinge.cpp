@@ -12,6 +12,7 @@
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
 #include "ndJointHinge.h"
+#include "ndMeshComponents.h"
 
 #define D_MAX_HINGE_RECOVERY_SPEED	ndFloat32 (0.25f)
 #define D_MAX_HINGE_PENETRATION		(ndFloat32 (4.0f) * ndDegreeToRad)
@@ -46,7 +47,7 @@ ndJointHinge::ndJointHinge(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* co
 }
 
 ndJointHinge::ndJointHinge(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent)
-	:ndJointBilateralConstraint(6, child, parent, pinAndPivotInChild)
+	:ndJointBilateralConstraint(7, child, parent, pinAndPivotInChild, pinAndPivotInParent)
 	,m_angle(ndFloat32(0.0f))
 	,m_omega(ndFloat32(0.0f))
 	,m_springK(ndFloat32(0.0f))
@@ -57,9 +58,9 @@ ndJointHinge::ndJointHinge(const ndMatrix& pinAndPivotInChild, const ndMatrix& p
 	,m_springDamperRegularizer(ndFloat32(0.1f))
 	,m_limitState(0)
 {
-	ndMatrix tmp;
-	CalculateLocalMatrix(pinAndPivotInChild, m_localMatrix0, tmp);
-	CalculateLocalMatrix(pinAndPivotInParent, tmp, m_localMatrix1);
+	//ndMatrix tmp;
+	//CalculateLocalMatrix(pinAndPivotInChild, m_localMatrix0, tmp);
+	//CalculateLocalMatrix(pinAndPivotInParent, tmp, m_localMatrix1);
 }
 
 ndJointHinge::~ndJointHinge()
@@ -292,4 +293,17 @@ void ndJointHinge::JacobianDerivative(ndConstraintDescritor& desc)
 		SubmitSpringDamper(desc, matrix0, matrix1);
 	}
 	SubmitLimits(desc, matrix0, matrix1);
+}
+
+ndSharedPtr<ndMeshJoint> ndJointHinge::GetMeshJoint() const
+{
+	ndMeshJointHinge* const joint = new ndMeshJointHinge(this);
+
+	joint->m_springK = m_springK;
+	joint->m_damperC = m_damperC;
+	joint->m_limitState = m_limitState;
+	joint->m_minLimit = m_minLimit * ndRadToDegree;
+	joint->m_maxLimit = m_maxLimit * ndRadToDegree;
+	joint->m_springDamperRegularizer = m_springDamperRegularizer;
+	return ndSharedPtr<ndMeshJoint> (joint);
 }

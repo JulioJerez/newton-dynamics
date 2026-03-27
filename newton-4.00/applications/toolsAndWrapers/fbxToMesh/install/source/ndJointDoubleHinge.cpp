@@ -11,6 +11,7 @@
 
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
+#include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
 
 ndJointDoubleHinge::ndAxisParam::ndAxisParam()
@@ -36,6 +37,13 @@ ndJointDoubleHinge::ndJointDoubleHinge()
 
 ndJointDoubleHinge::ndJointDoubleHinge(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(8, child, parent, pinAndPivotFrame)
+	,m_axis0()
+	,m_axis1()
+{
+}
+
+ndJointDoubleHinge::ndJointDoubleHinge(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent)
+	:ndJointBilateralConstraint(8, child, parent, pinAndPivotInChild, pinAndPivotInParent)
 	,m_axis0()
 	,m_axis1()
 {
@@ -304,17 +312,21 @@ void ndJointDoubleHinge::UpdateParameters()
 	const ndVector omega1(m_body1->GetOmega());
 	const ndVector frontDir((matrix0.m_front - matrix1.m_up.Scale(matrix0.m_front.DotProduct(matrix1.m_up).GetScalar())).Normalize());
 
-	ndMatrix localMatrix(matrix0 * matrix1.OrthoInverse());
+	const ndMatrix localMatrix(matrix0 * matrix1.OrthoInverse());
 	// calculate joint parameters, angles and omega
 	const ndFloat32 angle0 = ndAtan2(-localMatrix.m_right.m_y, localMatrix.m_up.m_y);
-	const ndFloat32 deltaAngle0 = ndAnglesAdd(angle0, -m_axis0.m_angle);
+	const ndFloat32 deltaAngle0 = ndAnglesSub(angle0, m_axis0.m_angle);
 	m_axis0.m_angle += deltaAngle0;
 	m_axis0.m_omega = frontDir.DotProduct(omega0 - omega1).GetScalar();
 
-	const ndFloat32 angle1 = ndAtan2(localMatrix.m_front.m_z, localMatrix.m_front.m_x);
+	const ndFloat32 angle1 = -ndAtan2(localMatrix.m_front.m_z, localMatrix.m_front.m_x);
 	const ndFloat32 deltaAngle1 = ndAnglesAdd(angle1, -m_axis1.m_angle);
 	m_axis1.m_angle += deltaAngle1;
 	m_axis1.m_omega = matrix1.m_up.DotProduct(omega0 - omega1).GetScalar();
+
+	//ndTrace(("(%f %f) (%f %f)\n", 
+	//	angle0 * ndRadToDegree, ndMod(m_axis0.m_angle * ndRadToDegree, 2.0f * ndPi * ndRadToDegree),
+	//	angle1 * ndRadToDegree, ndMod(m_axis1.m_angle * ndRadToDegree, 2.0f * ndPi * ndRadToDegree)));
 }
 
 void ndJointDoubleHinge::SubmitLimits(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1)
@@ -375,7 +387,7 @@ void ndJointDoubleHinge::SubmitLimits(ndConstraintDescritor& desc, const ndMatri
 					const ndFloat32 penetration = angle - m_axis1.m_minLimit;
 					const ndFloat32 recoveringAceel = desc.m_invTimestep * PenetrationOmega(-penetration);
 					SetMotorAcceleration(desc, stopAccel - recoveringAceel);
-					SetHighFriction(desc, ndFloat32(0.0f));
+					SetLowerFriction(desc, ndFloat32(0.0f));
 				}
 				else if (angle > m_axis1.m_maxLimit)
 				{
@@ -384,7 +396,7 @@ void ndJointDoubleHinge::SubmitLimits(ndConstraintDescritor& desc, const ndMatri
 					const ndFloat32 penetration = angle - m_axis1.m_maxLimit;
 					const ndFloat32 recoveringAceel = -desc.m_invTimestep * PenetrationOmega(penetration);
 					SetMotorAcceleration(desc, stopAccel - recoveringAceel);
-					SetLowerFriction(desc, ndFloat32(0.0f));
+					SetHighFriction(desc, ndFloat32(0.0f));
 				}
 			}
 		}
@@ -427,3 +439,23 @@ void ndJointDoubleHinge::JacobianDerivative(ndConstraintDescritor& desc)
 	SubmitLimits(desc, matrix0, matrix1);
 }
 
+ndSharedPtr<ndMeshJoint> ndJointDoubleHinge::GetMeshJoint() const
+{
+	ndMeshJointDoubleHinge* const joint = new ndMeshJointDoubleHinge(this);
+
+	joint->m_axis0.m_springK = m_axis0.m_springK;
+	joint->m_axis0.m_damperC = m_axis0.m_damperC;
+	joint->m_axis0.m_limitState = m_axis0.m_limitState;
+	joint->m_axis0.m_minLimit = m_axis0.m_minLimit * ndRadToDegree;
+	joint->m_axis0.m_maxLimit = m_axis0.m_maxLimit * ndRadToDegree;
+	joint->m_axis0.m_springDamperRegularizer = m_axis0.m_springDamperRegularizer;
+
+	joint->m_axis1.m_springK = m_axis1.m_springK;
+	joint->m_axis1.m_damperC = m_axis1.m_damperC;
+	joint->m_axis1.m_limitState = m_axis1.m_limitState;
+	joint->m_axis1.m_minLimit = m_axis1.m_minLimit * ndRadToDegree;
+	joint->m_axis1.m_maxLimit = m_axis1.m_maxLimit * ndRadToDegree;
+	joint->m_axis1.m_springDamperRegularizer = m_axis1.m_springDamperRegularizer;
+
+	return ndSharedPtr<ndMeshJoint>(joint);
+}

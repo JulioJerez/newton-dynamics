@@ -24,6 +24,7 @@
 #include "ndShapeInstance.h"
 #include "ndShapeConvexHull.h"
 #include "ndShapeConvexPolygon.h"
+#include "ndMeshBaseComponents.h"
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndShapeConvexHull::ndConvexBox
@@ -1689,4 +1690,15 @@ void ndShapeConvexHull::DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& d
 ndUnsigned64 ndShapeConvexHull::GetHash(ndUnsigned64 hash) const
 {
 	return ndCRC64(&m_vertex[0].m_x, m_vertexCount * ndInt32(sizeof(ndVector)), hash);
+}
+
+ndSharedPtr<ndMeshCollisionShape> ndShapeConvexHull::GetMeshShape() const
+{
+	ndMeshCollisionShapeConvexHull* const shape = new ndMeshCollisionShapeConvexHull;
+	shape->m_points.SetCount(m_vertexCount);
+	for (ndInt32 i = 0; i < m_vertexCount; ++i)
+	{
+		shape->m_points[i] = m_vertex[i];
+	}
+	return ndSharedPtr<ndMeshCollisionShape>(shape);
 }

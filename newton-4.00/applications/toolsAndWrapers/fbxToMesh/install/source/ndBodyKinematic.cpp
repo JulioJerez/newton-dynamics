@@ -21,12 +21,16 @@
 
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
+
+#include "ndMesh.h"
 #include "ndScene.h"
 #include "ndContact.h"
 #include "ndShapeNull.h"
+#include "ndMeshLoader.h"
 #include "ndRayCastNotify.h"
 #include "ndBodyKinematic.h"
 #include "ndShapeCompound.h"
+#include "ndMeshComponents.h"
 #include "ndJointBilateralConstraint.h"
 
 #define D_MINIMUM_MASS	ndFloat32(1.0e-5f)
@@ -1067,3 +1071,49 @@ void ndBodyKinematic::InitSurrogateBody(ndBodyKinematic* const surrogate) const
 	surrogate->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
 }
 
+void ndBodyKinematic::Serialize(ndMesh* const node) const
+{
+	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBodyKinematic());
+	node->SetRigidBody(meshBody);
+	Serialize(meshBody);
+	meshBody->m_classConstructor = ndString(ClassName());
+}
+
+void ndBodyKinematic::SaveNdMesh(const char* const path) const
+{
+	ndMeshLoader savedBody(ndSharedPtr<ndMesh>(new ndMesh()));
+	savedBody.m_mesh->SetName("unnamed_rigidBody");
+	ndAssert(0);
+	//savedBody.m_mesh->SetPrimitive(new ndMeshShapeInstance());
+	//m_shapeInstance.Serialize(*savedBody.m_mesh->GetPrimitive());
+
+	Serialize(*savedBody.m_mesh);
+	savedBody.SaveMesh(path);
+}
+
+void ndBodyKinematic::Serialize(ndSharedPtr<ndMeshBody>& meshBody) const
+{
+	ndBody::Serialize(meshBody);
+	ndMeshBodyKinematic* const kinematicMeshBody = (ndMeshBodyKinematic*)*meshBody;
+	kinematicMeshBody->m_invMass = m_invMass;
+	kinematicMeshBody->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
+	kinematicMeshBody->m_maxLinearStep = m_maxLinearStep;
+	kinematicMeshBody->m_maxAngleStep = m_maxAngleStep * ndRadToDegree;
+	m_shapeInstance.Serialize(&kinematicMeshBody->m_shapeInstance);
+}
+
+void ndBodyKinematic::Deserialize(const ndMeshBody* const meshBody)
+{
+	ndBody::Deserialize(meshBody);
+
+	ndMeshBodyKinematic* const kinematic = (ndMeshBodyKinematic*)meshBody;
+	const ndVector massMatrix (kinematic->m_invMass.Reciproc());
+	SetMassMatrix(massMatrix);
+
+	ndSharedPtr<ndShapeInstance> instance (kinematic->m_shapeInstance.CreateObject());
+	SetCollisionShape(**instance);
+
+	m_inertiaPrincipalAxis = kinematic->m_inertiaPrincipalAxis;
+	m_maxLinearStep = kinematic->m_maxLinearStep;
+	m_maxAngleStep = kinematic->m_maxAngleStep * ndDegreeToRad;
+}

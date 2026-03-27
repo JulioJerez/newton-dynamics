@@ -40,7 +40,7 @@ ndWorld::ndWorld()
 	,m_modelList()
 	,m_skeletonList()
 	,m_activeSkeletons(256)
-	, m_addRemoveBodiesLock()
+	,m_addRemoveBodiesLock()
 	,m_addRemoveJointsLock()
 	,m_addRemoveModelsLock()
 	,m_timestep(ndFloat32 (0.0f))
@@ -971,7 +971,6 @@ bool ndWorld::ValidateScene() const
 {
 	return m_scene->ValidateScene();
 }
-
 
 void ndWorld::AddModel(const ndSharedPtr<ndModel>& model)
 {

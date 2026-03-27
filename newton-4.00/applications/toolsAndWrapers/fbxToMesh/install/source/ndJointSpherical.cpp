@@ -12,6 +12,7 @@
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
 #include "ndJointSpherical.h"
+#include "ndMeshComponents.h"
 
 ndJointSpherical::ndJointSpherical()
 	:ndJointBilateralConstraint()
@@ -30,6 +31,22 @@ ndJointSpherical::ndJointSpherical()
 
 ndJointSpherical::ndJointSpherical(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(9, child, parent, pinAndPivotFrame)
+	,m_rotation(ndGetIdentityMatrix())
+	,m_omegaParam(ndVector::m_zero)
+	,m_rotationParam()
+	,m_springK(ndFloat32(0.0f))
+	,m_damperC(ndFloat32(0.0f))
+	,m_maxConeAngle(ndFloat32(1.0e10f))
+	,m_minTwistAngle(-ndFloat32(1.0e10f))
+	,m_maxTwistAngle(ndFloat32(1.0e10f))
+	,m_springDamperRegularizer(ndFloat32(0.0f))
+{
+}
+
+ndJointSpherical::ndJointSpherical(
+	const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, 
+	ndBodyKinematic* const child, ndBodyKinematic* const parent)
+	:ndJointBilateralConstraint(9, child, parent, pinAndPivotInChild, pinAndPivotInParent)
 	,m_rotation(ndGetIdentityMatrix())
 	,m_omegaParam(ndVector::m_zero)
 	,m_rotationParam()
@@ -373,4 +390,19 @@ void ndJointSpherical::JacobianDerivative(ndConstraintDescritor& desc)
 		SubmitSpringDamper(matrix0, matrix1, desc);
 	}
 	SubmitLimits(matrix0, matrix1, desc);
+}
+
+
+ndSharedPtr<ndMeshJoint> ndJointSpherical::GetMeshJoint() const
+{
+	ndMeshJointSpherical* const joint = new ndMeshJointSpherical(this);
+
+	joint->m_rotation = m_rotation;
+	joint->m_springK = m_springK;
+	joint->m_damperC = m_damperC;
+	joint->m_maxConeAngle = m_maxConeAngle * ndRadToDegree;
+	joint->m_minTwistAngle = m_minTwistAngle * ndRadToDegree;
+	joint->m_maxTwistAngle = m_maxTwistAngle * ndRadToDegree;
+	joint->m_springDamperRegularizer = m_springDamperRegularizer;
+	return ndSharedPtr<ndMeshJoint>(joint);
 }

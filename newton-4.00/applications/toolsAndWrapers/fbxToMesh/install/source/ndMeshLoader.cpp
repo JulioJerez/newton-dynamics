@@ -12,8 +12,15 @@
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
 #include "ndMesh.h"
+#include "ndJointHinge.h"
 #include "ndMeshEffect.h"
 #include "ndMeshLoader.h"
+#include "ndJointWheel.h"
+#include "ndJointSlider.h"
+#include "ndBodyDynamic.h"
+#include "ndJointSpherical.h"
+#include "ndMeshComponents.h"
+#include "ndJointDoubleHinge.h"
 
 ndMeshLoader::ndMeshLoader()
 	:ndClassAlloc()
@@ -21,100 +28,17 @@ ndMeshLoader::ndMeshLoader()
 {
 }
 
+ndMeshLoader::ndMeshLoader(const ndSharedPtr<ndMesh>& mesh)
+	:ndClassAlloc()
+	,m_mesh(mesh)
+{
+}
+
 ndMeshLoader::~ndMeshLoader()
 {
 }
 
-bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
-{
-	ndString oldloc(setlocale(LC_ALL, 0));
-	nd::TiXmlDocument doc(fullPathMeshName.GetStr());
-	doc.LoadFile();
-	if (doc.Error())
-	{
-		m_mesh = ndSharedPtr<ndMesh>(nullptr);
-		setlocale(LC_ALL, oldloc.GetStr());
-		return false;
-	}
-
-	struct MeshXmlNodePair
-	{
-		MeshXmlNodePair() {}
-		MeshXmlNodePair(ndMesh* const mesh, const nd::TiXmlElement* const xmlNode)
-			:m_mesh(mesh)
-			,m_xmlNode(xmlNode)
-		{
-		}
-		ndMesh* m_mesh;
-		const nd::TiXmlElement* m_xmlNode;
-	};
-
-	ndFixSizeArray<MeshXmlNodePair, 1024> stack;
-
-	const nd::TiXmlElement* const rootNode = doc.RootElement();
-	ndAssert(strcmp(rootNode->Value(), "ndMesh") == 0);
-
-	m_mesh = ndSharedPtr<ndMesh>(new ndMesh());
-	stack.PushBack(MeshXmlNodePair(*m_mesh, rootNode));
-
-	while (stack.GetCount())
-	{
-		MeshXmlNodePair entry(stack.Pop());
-
-		ndMesh* const mesh = entry.m_mesh;
-
-		mesh->m_name = ndString(xmlGetString(entry.m_xmlNode, "name"));
-		mesh->m_matrix = xmlGetMatrix(entry.m_xmlNode, "matrix");
-
-		nd::TiXmlElement* const xmlNodeType = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("type");
-		ndAssert(xmlNodeType);
-		const char* const nodeType = xmlGetNameAttribute(xmlNodeType, "nodeType");
-		if (!strcmp(nodeType, "node"))
-		{
-			mesh->SetNodeType(ndMesh::m_node);
-		}
-		else if (!strcmp(nodeType, "bone"))
-		{
-			mesh->SetNodeType(ndMesh::m_bone);
-		}
-		else if (!strcmp(nodeType, "endBone"))
-		{
-			mesh->SetNodeType(ndMesh::m_boneEnd);
-		}
-		else if (!strcmp(nodeType, "collisionShape"))
-		{
-			mesh->SetNodeType(ndMesh::m_collisionShape);
-		}
-		else
-		{
-			ndAssert(0);
-		}
-		ndTriplexReal target(xmlGetTriplexRealAttribute(xmlNodeType, "target"));
-
-		const nd::TiXmlElement* const xmlGeometry = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("geometry");
-		if (xmlGeometry)
-		{
-			ndSharedPtr<ndMeshEffect> geometry(new ndMeshEffect());
-			geometry->DeserializeFromXml(xmlGeometry);
-			mesh->SetMesh(geometry);
-		}
-
-		for (const nd::TiXmlNode* node = entry.m_xmlNode->FirstChild("ndMesh"); node; node = node->NextSibling("ndMesh"))
-		{
-			const nd::TiXmlElement* const linkNode = (nd::TiXmlElement*)node;
-			ndAssert(strcmp(linkNode->Value(), "ndMesh") == 0);
-
-			ndSharedPtr<ndMesh> child (new ndMesh());
-			entry.m_mesh->AddChild(child);
-			stack.PushBack(MeshXmlNodePair(*child, linkNode));
-		}
-	}
-
-	setlocale(LC_ALL, oldloc.GetStr());
-	return true;
-}
-
-void ndMeshLoader::SaveMesh(const ndString& fullPathName)
+void ndMeshLoader::SaveMesh(const ndString& fullPathName) const
 {
 	ndString oldloc(setlocale(LC_ALL, 0));
 	ndSharedPtr<nd::TiXmlDocument> doc(new nd::TiXmlDocument(""));
@@ -175,11 +99,29 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName)
 		ndVector boneTarget(entry.m_meshNode->GetBoneTarget());
 		xmlSaveAttribute(xmlNodeType, "target", ndTriplexReal(ndReal(boneTarget.m_x), ndReal(boneTarget.m_y), ndReal(boneTarget.m_z)));
 
-		if (*entry.m_meshNode->GetMesh())
+		if (entry.m_meshNode->GetMesh())
 		{
 			nd::TiXmlElement* const geometry = new nd::TiXmlElement("geometry");
 			entry.m_parentXml->LinkEndChild(geometry);
 			entry.m_meshNode->GetMesh()->SerializeToXml(geometry, bonesMap);
+		}
+
+		if (entry.m_meshNode->m_rigidBody)
+		{
+			nd::TiXmlElement* const rigidBodyNode = new nd::TiXmlElement("rigidbody");
+			entry.m_parentXml->LinkEndChild(rigidBodyNode);
+
+			const ndMeshBody* const rigidBody = *entry.m_meshNode->m_rigidBody;
+			xmlSaveParam(rigidBodyNode, "constructor", rigidBody->m_classConstructor.GetStr());
+			rigidBody->SerializeToXml(rigidBodyNode);
+		}
+
+		if (entry.m_meshNode->m_joint)
+		{
+			nd::TiXmlElement* const jointNode = new nd::TiXmlElement("joint");
+			entry.m_parentXml->LinkEndChild(jointNode);
+			const ndMeshJoint* const joint = *entry.m_meshNode->m_joint;
+			joint->SerializeToXml(jointNode);
 		}
 
 		for (ndList<ndSharedPtr<ndMesh>>::ndNode* node = entry.m_meshNode->m_children.GetFirst(); node; node = node->GetNext())
@@ -195,4 +137,149 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName)
 
 	doc->SaveFile(fullPathName.GetStr());
 	setlocale(LC_ALL, oldloc.GetStr());
+}
+
+bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
+{
+	ndString oldloc(setlocale(LC_ALL, 0));
+	nd::TiXmlDocument doc(fullPathMeshName.GetStr());
+	doc.LoadFile();
+	if (doc.Error())
+	{
+		m_mesh = ndSharedPtr<ndMesh>(nullptr);
+		setlocale(LC_ALL, oldloc.GetStr());
+		ndTrace(("file: %s not found", fullPathMeshName.GetStr()));
+		return false;
+	}
+
+	struct MeshXmlNodePair
+	{
+		MeshXmlNodePair() {}
+		MeshXmlNodePair(ndMesh* const mesh, const nd::TiXmlElement* const xmlNode)
+			:m_mesh(mesh)
+			, m_xmlNode(xmlNode)
+		{
+		}
+		ndMesh* m_mesh;
+		const nd::TiXmlElement* m_xmlNode;
+	};
+
+	ndFixSizeArray<MeshXmlNodePair, 1024> stack;
+
+	const nd::TiXmlElement* const rootNode = doc.RootElement();
+	ndAssert(strcmp(rootNode->Value(), "ndMesh") == 0);
+
+	m_mesh = ndSharedPtr<ndMesh>(new ndMesh());
+	stack.PushBack(MeshXmlNodePair(*m_mesh, rootNode));
+
+	while (stack.GetCount())
+	{
+		MeshXmlNodePair entry(stack.Pop());
+
+		ndMesh* const mesh = entry.m_mesh;
+
+		mesh->m_name = ndString(xmlGetString(entry.m_xmlNode, "name"));
+		mesh->m_matrix = xmlGetMatrix(entry.m_xmlNode, "matrix");
+		mesh->m_geometryMatrix = xmlGetMatrix(entry.m_xmlNode, "geometryMatrix");
+
+		nd::TiXmlElement* const xmlNodeType = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("type");
+		ndAssert(xmlNodeType);
+		const char* const nodeType = xmlGetNameAttribute(xmlNodeType, "nodeType");
+		if (!strcmp(nodeType, "node"))
+		{
+			mesh->SetNodeType(ndMesh::m_node);
+		}
+		else if (!strcmp(nodeType, "bone"))
+		{
+			mesh->SetNodeType(ndMesh::m_bone);
+		}
+		else if (!strcmp(nodeType, "endBone"))
+		{
+			mesh->SetNodeType(ndMesh::m_boneEnd);
+		}
+		else if (!strcmp(nodeType, "collisionShape"))
+		{
+			mesh->SetNodeType(ndMesh::m_collisionShape);
+		}
+		else
+		{
+			ndAssert(0);
+		}
+		ndTriplexReal target(xmlGetTriplexRealAttribute(xmlNodeType, "target"));
+
+		const nd::TiXmlElement* const xmlGeometry = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("geometry");
+		if (xmlGeometry)
+		{
+			ndSharedPtr<ndMeshEffect> geometry(new ndMeshEffect());
+			geometry->DeserializeFromXml(xmlGeometry);
+			mesh->SetMesh(geometry);
+		}
+
+		const nd::TiXmlElement* const xmlRigidBody = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("rigidbody");
+		if (xmlRigidBody)
+		{
+			const char* const constructor = xmlGetString(xmlRigidBody, "constructor");
+			if (strcmp(constructor, ndBodyDynamic::StaticClassName()) == 0)
+			{
+				ndSharedPtr<ndMeshBody> rigidBody(new ndMeshBodyDynamic());
+				rigidBody->DeserializeFromXml(xmlRigidBody);
+				mesh->SetRigidBody(rigidBody);
+			}
+			else
+			{
+				ndAssert(0);
+				ndAssert(strcmp(constructor, ndBodyKinematic::StaticClassName()) == 0);
+				ndSharedPtr<ndMeshBody> rigidBody(new ndMeshBodyKinematic());
+				rigidBody->DeserializeFromXml(xmlRigidBody);
+				mesh->SetRigidBody(rigidBody);
+			}
+		}
+
+		const nd::TiXmlElement* const xmlJoint = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("joint");
+		if (xmlJoint)
+		{
+			const char* const constructor = xmlGetString(xmlJoint, "constructor");
+			ndSharedPtr<ndMeshJoint> joint(new ndMeshJointFix6dof());
+			if (strcmp(constructor, ndJointHinge::StaticClassName()) == 0)
+			{
+				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointHinge());
+			}
+			else if (strcmp(constructor, ndJointDoubleHinge::StaticClassName()) == 0)
+			{
+				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointDoubleHinge());
+			}
+			else if (strcmp(constructor, ndJointSpherical::StaticClassName()) == 0)
+			{
+				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointSpherical());
+			}
+			else if (strcmp(constructor, ndJointWheel::StaticClassName()) == 0)
+			{
+				joint= ndSharedPtr<ndMeshJoint>(new ndMeshJointWheel());
+			}
+			else if (strcmp(constructor, ndJointSlider::StaticClassName()) == 0)
+			{
+				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointSlider());
+			}
+			else
+			{
+				ndAssert(0);
+			}
+
+			joint->DeserializeFromXml(xmlJoint);
+			mesh->SetJoint(joint);
+		}
+
+		for (const nd::TiXmlNode* node = entry.m_xmlNode->FirstChild("ndMesh"); node; node = node->NextSibling("ndMesh"))
+		{
+			const nd::TiXmlElement* const linkNode = (nd::TiXmlElement*)node;
+			ndAssert(strcmp(linkNode->Value(), "ndMesh") == 0);
+
+			ndSharedPtr<ndMesh> child(new ndMesh());
+			entry.m_mesh->AddChild(child);
+			stack.PushBack(MeshXmlNodePair(*child, linkNode));
+		}
+	}
+
+	setlocale(LC_ALL, oldloc.GetStr());
+	return true;
 }

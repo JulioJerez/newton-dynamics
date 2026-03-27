@@ -25,15 +25,14 @@
 #include "ndUtils.h"
 #include "ndMemory.h"
 
+
+#define D_MEMORY_ALIGMNET			32
+#define ndGetBufferPaddingInBytes	size_t(D_MEMORY_ALIGMNET - 1 + sizeof (ndMemoryHeader))
+
 ndAtomic<ndUnsigned64> ndMemory::m_memoryUsed(0);
 
 static ndMemFreeCallback m_freeMemory = free;
 static ndMemAllocCallback m_allocMemory = malloc;
-
-//#define D_MEMORY_SANITY_CHECK
-
-#define D_MEMORY_ALIGMNET			32
-#define ndGetBufferPaddingInBytes	size_t(D_MEMORY_ALIGMNET - 1 + sizeof (ndMemoryHeader))
 
 size_t ndMemory::GetMemoryAligment()
 {
@@ -74,23 +73,30 @@ void ndMemory::GetMemoryAllocators(ndMemAllocCallback& alloc, ndMemFreeCallback&
 	alloc = m_allocMemory;
 }
 
+bool ndMemory::CheckMemoryHeap()
+{
+	bool ret = true;
+#if defined (WIN32) || defined(_WIN32)
+	ret = _CrtCheckMemory() ? true : false;
+#elif defined (__linux__)
+	// linux OS memory check
+#elif defined (__APPLE__)
+	// apple OS memory check
+#elif defined (__MINGW32__) || defined (__MINGW64__)
+	// mingwing OS memory check
+#elif defined (_M_ARM) || defined (_M_ARM64)
+	// android OS memory check
+#endif
+	return ret;
+}
+
 void* ndMemory::Malloc(size_t size)
 {
-#if defined (D_MEMORY_SANITY_CHECK)
-	#if defined (WIN32) || defined(_WIN32)
-	_ASSERTE(_CrtCheckMemory());
-	#elif defined (__linux__)
-		// linux OS mememory check
-	#elif defined (__APPLE__)
-		// apple OS mememory check
-	#elif defined (__MINGW32__) || defined (__MINGW64__))
-		// mingwing OS mememory check
-	#elif defined (_M_ARM) || defined (_M_ARM64)
-		// android OS mememory check
-	#endif
-#endif
-
 	ndIntPtr metToVal;
+
+#if defined (D_MEMORY_SANITY_CHECK)
+	ndAssert(CheckMemoryHeap());
+#endif
 	size_t bufferSize = CalculateBufferSize(size);
 	metToVal.m_ptr = m_allocMemory(bufferSize);
 	ndUnsigned64 val = ndUnsigned64(metToVal.m_int) + ndGetBufferPaddingInBytes;
@@ -109,20 +115,9 @@ void* ndMemory::Malloc(size_t size)
 
 void ndMemory::Free(void* const ptr)
 {
-	#if defined (D_MEMORY_SANITY_CHECK)
-		#if defined (WIN32) || defined(_WIN32)
-	_ASSERTE(_CrtCheckMemory());
-		#elif defined (__linux__)
-			// linux OS mememory check
-		#elif defined (__APPLE__)
-			// apple OS mememory check
-		#elif defined (__MINGW32__) || defined (__MINGW64__))
-			// mingwing OS mememory check
-		#elif defined (_M_ARM) || defined (_M_ARM64)
-			// android OS mememory check
-		#endif
+#if defined (D_MEMORY_SANITY_CHECK)
+	ndAssert(CheckMemoryHeap());
 #endif
-
 	if (ptr)
 	{
 		const ndMemoryHeader* const info = ((ndMemoryHeader*)ptr) - 1;

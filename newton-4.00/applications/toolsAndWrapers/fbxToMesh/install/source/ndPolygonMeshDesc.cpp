@@ -99,12 +99,13 @@ void ndPolygonMeshDesc::Init()
 		}
 	}
 
-	ndMatrix fullMatrix(convexMatrix * matrix);
+	const ndMatrix fullMatrix(convexMatrix * matrix);
 	m_convexInstance->CalculateAabb(fullMatrix, m_p0, m_p1);
+
+	SetTransposeAbsMatrix(matrix);
 
 	ndVector p0;
 	ndVector p1;
-	SetTransposeAbsMatrix(matrix);
 	m_convexInstance->CalculateAabb(convexMatrix, p0, p1);
 	m_size = ndVector::m_half * (p1 - p0);
 	m_posit = matrix.TransformVector(ndVector::m_half * (p1 + p0));

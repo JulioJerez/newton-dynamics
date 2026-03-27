@@ -48,6 +48,7 @@ class ndJointWheel : public ndJointBilateralConstraint
 
 	D_NEWTON_API ndJointWheel();
 	D_NEWTON_API ndJointWheel(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent, const ndWheelDescriptor& desc);
+	D_NEWTON_API ndJointWheel(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent, const ndWheelDescriptor& desc);
 	D_NEWTON_API virtual ~ndJointWheel();
 
 	D_NEWTON_API ndFloat32 GetPosit() const;
@@ -67,7 +68,8 @@ class ndJointWheel : public ndJointBilateralConstraint
 
 	D_NEWTON_API const ndWheelDescriptor& GetInfo() const;
 	D_NEWTON_API void SetInfo(const ndWheelDescriptor& info);
-
+	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const override;
+	
 	void DebugJoint(ndConstraintDebugCallback& debugCallback) const override;
 
 	protected:
