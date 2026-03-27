@@ -294,9 +294,14 @@ void ndBrainAgentOnPolicyGradient_Agent::SampleActions(ndBrainVector& actions)
 	}
 }
 
+#pragma optimize( "", off)
 void ndBrainAgentOnPolicyGradient_Agent::Step()
 {
 	ndInt32 entryIndex = m_trajectory.GetCount();
+	if (entryIndex > 4200)
+	{
+		entryIndex *= 1;
+	}
 	m_trajectory.SetCount(entryIndex + 1);
 	m_trajectory.Clear(entryIndex);
 

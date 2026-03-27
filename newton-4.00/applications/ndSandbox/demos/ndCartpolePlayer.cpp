@@ -78,13 +78,6 @@ namespace ndCarpolePlayer
 
 	void ndController::PostUpdate(ndFloat32)
 	{
-		ndMatrix matrix(m_cart->GetMatrix());
-		if (ndAbs(matrix.m_posit.m_x) > 300.0f)
-		{
-			matrix.m_posit.m_x = ndFloat32(0.0f);
-			GetModel()->GetAsModelArticulation()->SetTransform(matrix);
-		}
-
 		m_randomImpulseCounter = (m_randomImpulseCounter + 1) % ND_RANDOM_IMPULSE_MOD;
 	}
 
@@ -93,7 +86,7 @@ namespace ndCarpolePlayer
 		ndMatrix cartMatrix(ndGetIdentityMatrix());
 		cartMatrix.m_posit = m_cart->GetMatrix().m_posit;
 		cartMatrix.m_posit.m_x = ndFloat32(0.0f);
-		//cartMatrix.m_posit.m_x = ndFloat32(10.0f) * (ndRand() - ndFloat32(0.5f));
+		cartMatrix.m_posit.m_x = ndFloat32(10.0f) * (ndRand() - ndFloat32(0.5f));
 		cartMatrix.m_posit.m_y = ndFloat32(0.1f);
 		m_cart->SetMatrix(cartMatrix);
 

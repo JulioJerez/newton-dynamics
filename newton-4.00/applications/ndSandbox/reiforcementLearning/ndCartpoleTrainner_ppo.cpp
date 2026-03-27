@@ -118,7 +118,7 @@ namespace ndCartpoleTrainer_ppo
 			// set random see for replication
 			ndSetRandSeed(42);
 
-			// create a Soft Actor Critic traniing agent
+			// create a policy gradient training agent
 			ndBrainAgentOnPolicyGradient_Trainer::HyperParameters hyperParameters;
 			
 			hyperParameters.m_useGpuBackend = false;
