@@ -26,6 +26,7 @@
 #include "ndJointWheel.h"
 #include "ndJointSlider.h"
 #include "ndBodyDynamic.h"
+#include "ndJointFix6dof.h"
 #include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
@@ -81,13 +82,20 @@ void ndMeshJointFix6dof::SerializeToXml(nd::TiXmlElement* const parent) const
 
 void ndMeshJointFix6dof::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
-	ndAssert(0);
+	m_softness = xmlGetFloat(parent, "softness");
+	m_maxForce = xmlGetFloat(parent, "maxForce");
+	m_maxTorque = xmlGetFloat(parent, "_maxTorque");
 }
 
 ndJointBilateralConstraint* ndMeshJointFix6dof::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
 {
-	ndAssert(0);
-	return nullptr;
+	const ndMatrix pinAndPivotInChild(m_locatFrame0 * child->GetMatrix());
+	const ndMatrix pinAndPivotInParent(m_locatFrame1 * parent->GetMatrix());
+	ndJointFix6dof* const joint = new ndJointFix6dof(child, parent, pinAndPivotInChild, pinAndPivotInParent);
+	joint->SetMaxForce(m_maxForce);
+	joint->SetMaxTorque(m_maxTorque);
+	joint->SetRegularizer(m_softness);
+	return joint;
 }
 
 ndMeshJointHinge::ndMeshJointHinge()

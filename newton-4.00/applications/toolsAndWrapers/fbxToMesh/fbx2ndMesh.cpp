@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 	ndUnsigned64 ndDate = (ndUnsigned64(ndFileInfo.ftLastWriteTime.dwHighDateTime) << 32) + ndFileInfo.ftLastWriteTime.dwLowDateTime;
 	ndUnsigned64 fbxDate = (ndUnsigned64(fbxFileInfo.ftLastWriteTime.dwHighDateTime) << 32) + fbxFileInfo.ftLastWriteTime.dwLowDateTime;
 
-	if (fbxDate >= ndDate)
+	//if (fbxDate >= ndDate)
 	{
 		ndAnimationMeshLoader loader;
 		loader.ImportFbx(fbxPath);

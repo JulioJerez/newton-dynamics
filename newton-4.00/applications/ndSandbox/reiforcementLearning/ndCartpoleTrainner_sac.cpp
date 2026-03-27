@@ -156,8 +156,7 @@ namespace ndCartpoleTrainer_sac
 		{
 		}
 
-		//virtual void Update(ndDemoEntityManager* const manager, ndFloat32)
-		virtual void Update(ndDemoEntityManager* const, ndFloat32)
+		virtual void Update(ndDemoEntityManager* const manager, ndFloat32)
 		{
 			ndUnsigned32 stopTraining = m_master->GetFramesCount();
 			if (stopTraining <= m_stopTraining)
@@ -188,6 +187,15 @@ namespace ndCartpoleTrainer_sac
 						fflush(m_outFile);
 					}
 				}
+			}
+
+			if ((stopTraining >= m_stopTraining) || (m_master->GetAverageScore() > ndBrainFloat(0.97f)))
+			{
+				m_modelIsTrained = true;
+				ndUnsigned64 timer = ndGetTimeInMicroseconds() - m_timer;
+				ndExpandTraceMessage("training complete\n");
+				ndExpandTraceMessage("training time: %g seconds\n", ndFloat32(ndFloat64(timer) * ndFloat32(1.0e-6f)));
+				manager->Terminate();
 			}
 		}
 

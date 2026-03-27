@@ -107,7 +107,7 @@ namespace ndCartpoleTrainer_ppo
 			,m_discountRewardFactor(0.99f)
 			,m_horizon(ndFloat32(1.0f) / (ndFloat32(1.0f) - m_discountRewardFactor))
 			,m_lastEpisode(0xfffffff)
-			,m_stopTraining(100 * 1000000)
+			,m_stopTraining(200 * 1000000)
 			,m_modelIsTrained(false)
 		{
 			char name[256];
@@ -200,7 +200,7 @@ namespace ndCartpoleTrainer_ppo
 		{
 		}
 
-		virtual void Update(ndDemoEntityManager* const, ndFloat32)
+		virtual void Update(ndDemoEntityManager* const manager, ndFloat32)
 		{
 			ndUnsigned32 stopTraining = m_master->GetFramesCount();
 			if (stopTraining <= m_stopTraining)
@@ -233,19 +233,15 @@ namespace ndCartpoleTrainer_ppo
 				}
 			}
 			
-			//if ((stopTraining >= m_stopTraining) || (m_master->GetAverageScore() > ndBrainFloat(0.97f)))
-			//{
-			//	m_modelIsTrained = true;
-			//	m_master->GetPolicyNetwork()->CopyFrom(*(*m_bestActor));
-			//	ndString fileName (ndGetWorkingFileName(m_master->GetName().GetStr()));
-			//	m_master->GetPolicyNetwork()->SaveToFile(fileName.GetStr());
-			//	ndExpandTraceMessage("saving to file: %s\n", fileName.GetStr());
-			//	ndExpandTraceMessage("training complete\n");
-			//	ndUnsigned64 timer = ndGetTimeInMicroseconds() - m_timer;
-			//	ndExpandTraceMessage("training time: %g seconds\n", ndFloat32(ndFloat64(timer) * ndFloat32(1.0e-6f)));
-			//
-			//	manager->Terminate();
-			//}
+			if ((stopTraining >= m_stopTraining) || (m_master->GetAverageScore() > ndBrainFloat(0.97f)))
+			{
+				m_modelIsTrained = true;
+				ndUnsigned64 timer = ndGetTimeInMicroseconds() - m_timer;
+
+				ndExpandTraceMessage("training complete\n");
+				ndExpandTraceMessage("training time: %g seconds\n", ndFloat32(ndFloat64(timer) * ndFloat32(1.0e-6f)));
+				manager->Terminate();
+			}
 		}
 
 		ndSharedPtr<ndBrainAgentOnPolicyGradient_Trainer> m_master;

@@ -133,6 +133,5 @@ void ndModelArticulation::NodeIterator(Function func)
 	}
 }
 
-
 #endif 
 
