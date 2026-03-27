@@ -51,16 +51,6 @@ void ndModelBodyNotify::OnApplyExternalForce(ndInt32, ndFloat32)
 	}
 }
 
-bool ndModelBodyNotify::CheckInWorld(const ndMatrix& matrix) const
-{
-	bool outsideWorld = (GetBody()->GetInvMass() == 0.0f) || (matrix.m_posit.m_y > ndFloat32(-100.0f));
-	if (!outsideWorld)
-	{
-		ndTrace(("body %d outside world\n", GetBody()->GetId()));
-	}
-	return outsideWorld;
-}
-
 void ndModelBodyNotify::CalculateMatrix(const ndMatrix& matrix, ndQuaternion& rot, ndVector& posit) const
 {
 	const ndBody* const body = GetBody();

@@ -192,91 +192,6 @@ ndFloat32 ndShapeConvex::CalculateMassProperties(const ndMatrix& offset, ndVecto
 
 ndMatrix ndShapeConvex::CalculateInertiaAndCenterOfMass(const ndMatrix& alignMatrix, const ndVector& localScale, const ndMatrix& matrix) const
 {
-#if 0
-	bool implicitTest = true;
-	implicitTest = implicitTest && (ndAbs(localScale.m_x - localScale.m_y) < ndFloat32(1.0e-5f));
-	implicitTest = implicitTest && (ndAbs(localScale.m_x - localScale.m_z) < ndFloat32(1.0e-5f));
-	implicitTest = implicitTest && (ndAbs(localScale.m_y - localScale.m_z) < ndFloat32(1.0e-5f));
-	implicitTest = implicitTest && (((ndShape*)this)->GetAsShapeConvexHull() ? false : true);
-
-	//if ((ndAbs(localScale.m_x - localScale.m_y) < ndFloat32(1.0e-5f)) && 
-	//	(ndAbs(localScale.m_x - localScale.m_z) < ndFloat32(1.0e-5f)) && 
-	//	(ndAbs(localScale.m_y - localScale.m_z) < ndFloat32(1.0e-5f)))
-	if (implicitTest)
-	{
-		ndAssert(alignMatrix.TestIdentity());
-	
-		// using general central theorem, is much faster and more accurate;
-		//IImatrix = IIorigin + mass * [(displacement % displacement) * identityMatrix - transpose(displacement) * displacement)];
-		ndFloat32 mag2 = localScale.m_x * localScale.m_x;
-		ndMatrix inertia(ndGetIdentityMatrix());
-		inertia[0][0] = m_inertia[0] * mag2;
-		inertia[1][1] = m_inertia[1] * mag2;
-		inertia[2][2] = m_inertia[2] * mag2;
-		inertia[0][1] = m_crossInertia[2] * mag2;
-		inertia[1][0] = m_crossInertia[2] * mag2;
-		inertia[0][2] = m_crossInertia[1] * mag2;
-		inertia[2][0] = m_crossInertia[1] * mag2;
-		inertia[1][2] = m_crossInertia[0] * mag2;
-		inertia[2][1] = m_crossInertia[0] * mag2;
-		inertia = matrix.OrthoInverse() * inertia * matrix;
-	
-		ndAssert(localScale.m_w == ndFloat32(0.0f));
-		ndVector origin(matrix.TransformVector(m_centerOfMass * localScale));
-	
-		origin.m_w = ndFloat32(0.0f);
-		ndFloat32 originMag2 = origin.DotProduct(origin).GetScalar();
-		ndMatrix covariance(ndCovarianceMatrix(origin, origin));
-		ndMatrix parallel(ndGetIdentityMatrix());
-		for (ndInt32 i = 0; i < 3; ++i) 
-		{
-			parallel[i][i] = originMag2;
-			inertia[i] += (parallel[i] - covariance[i]);
-			ndAssert(inertia[i][i] > ndFloat32(0.0f));
-		}
-	
-		inertia.m_posit = origin;
-		inertia.m_posit.m_w = ndFloat32 (1.0f);
-		return inertia;
-	}
-	else 
-	{
-		// for non uniform scale we need to the general divergence theorem
-		ndVector inertiaII;
-		ndVector crossInertia;
-		ndVector centerOfMass;
-		ndMatrix scaledMatrix(matrix);
-		scaledMatrix[0] = scaledMatrix[0].Scale(localScale.m_x);
-		scaledMatrix[1] = scaledMatrix[1].Scale(localScale.m_y);
-		scaledMatrix[2] = scaledMatrix[2].Scale(localScale.m_z);
-		scaledMatrix = alignMatrix * scaledMatrix;
-	
-		ndFloat32 volume = CalculateMassProperties(scaledMatrix, inertiaII, crossInertia, centerOfMass);
-		if (volume < D_MAX_MIN_VOLUME) 
-		{
-			volume = D_MAX_MIN_VOLUME;
-		}
-	
-		ndFloat32 invVolume = ndFloat32(1.0f) / volume;
-		centerOfMass = centerOfMass.Scale(invVolume);
-		centerOfMass.m_w = ndFloat32(1.0f);
-		inertiaII = inertiaII.Scale(invVolume);
-		crossInertia = crossInertia.Scale(invVolume);
-		ndMatrix inertia(ndGetIdentityMatrix());
-		inertia[0][0] = inertiaII[0];
-		inertia[1][1] = inertiaII[1];
-		inertia[2][2] = inertiaII[2];
-		inertia[0][1] = crossInertia[2];
-		inertia[1][0] = crossInertia[2];
-		inertia[0][2] = crossInertia[1];
-		inertia[2][0] = crossInertia[1];
-		inertia[1][2] = crossInertia[0];
-		inertia[2][1] = crossInertia[0];
-		inertia[3] = centerOfMass;
-		return inertia;
-	}
-#else
-
 	//not using implicit shapes for mass propeties.
 	ndVector inertiaII;
 	ndVector crossInertia;
@@ -310,7 +225,6 @@ ndMatrix ndShapeConvex::CalculateInertiaAndCenterOfMass(const ndMatrix& alignMat
 	inertia[2][1] = crossInertia[0];
 	inertia[3] = centerOfMass;
 	return inertia;
-#endif
 }
 
 void ndShapeConvex::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) const

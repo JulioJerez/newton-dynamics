@@ -65,6 +65,8 @@ namespace ndCarpolePlayer
 		:ndModelNotify()
 		,m_agent(nullptr)
 		,m_timestep(0.0f)
+		,m_randomImpulseCounter(1)
+		,m_istrainning(false)
 	{
 	}
 
@@ -72,6 +74,11 @@ namespace ndCarpolePlayer
 	{
 		m_timestep = timestep;
 		m_agent->Step();
+	}
+
+	void ndController::PostUpdate(ndFloat32)
+	{
+		m_randomImpulseCounter = (m_randomImpulseCounter + 1) % ND_RANDOM_IMPULSE_MOD;
 	}
 
 	void ndController::ResetModel()
@@ -145,6 +152,16 @@ namespace ndCarpolePlayer
 
 		ndVector force(m_cart->GetAsBodyDynamic()->GetForce() + matrix.m_front.Scale(pushForce));
 		m_cart->GetAsBodyDynamic()->SetForce(force);
+
+		if (m_randomImpulseCounter == 0)
+		{
+			// when in training mode,
+			// apply a random impulse to the top box every m_randomImpulseCounter steps
+			ndFloat32 randSpeed = ND_RANDOM_IMPULSE_MAGNITUD * (ndFloat32(0.5f) - ndRand());
+			const ndVector mass(m_cart->GetAsBodyDynamic()->GetMassMatrix());
+			const ndVector randomImpulse(matrix.m_front.Scale(mass.m_w * randSpeed));
+			m_cart->GetAsBodyDynamic()->ApplyImpulsePair(randomImpulse, ndVector::m_zero, m_timestep);
+		}
 	}
 
 	void ndController::GetObservation(ndBrainFloat* const observation)

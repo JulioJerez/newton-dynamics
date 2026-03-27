@@ -34,13 +34,14 @@ class ndJointDoubleHinge: public ndJointBilateralConstraint
 		ndFloat32 m_maxLimit;
 		ndFloat32 m_offsetAngle;
 		ndFloat32 m_springDamperRegularizer;
-		ndInt32 m_limitState;
+		ndInt8 m_limitState;
 	};
 
 	D_CLASS_REFLECTION(ndJointDoubleHinge, ndJointBilateralConstraint)
 
 	D_NEWTON_API ndJointDoubleHinge();
 	D_NEWTON_API ndJointDoubleHinge(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent);
+	D_NEWTON_API ndJointDoubleHinge(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent);
 	D_NEWTON_API virtual ~ndJointDoubleHinge();
 
 	D_NEWTON_API ndFloat32 GetAngle0() const;
@@ -76,6 +77,8 @@ class ndJointDoubleHinge: public ndJointBilateralConstraint
 	D_NEWTON_API void SubmitLimits(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 	D_NEWTON_API void SubmitSpringDamper0(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 	D_NEWTON_API void SubmitSpringDamper1(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
+
+	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const override;
 
 	ndAxisParam m_axis0;
 	ndAxisParam m_axis1;

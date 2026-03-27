@@ -142,6 +142,7 @@ namespace ndCartpoleTrainer_sac
 			model->SetNotifyCallback(controller);
 
 			ndController* const playerController = (ndController*)(*controller);
+			playerController->m_istrainning = true;
 			playerController->CreateArticulatedModel(scene, model, mesh, visualMesh);
 
 			ndSharedPtr<ndBrainAgentOffPolicyGradient_Agent> agent(new ndAgent(m_master, playerController));
@@ -155,7 +156,8 @@ namespace ndCartpoleTrainer_sac
 		{
 		}
 
-		virtual void Update(ndDemoEntityManager* const manager, ndFloat32)
+		//virtual void Update(ndDemoEntityManager* const manager, ndFloat32)
+		virtual void Update(ndDemoEntityManager* const, ndFloat32)
 		{
 			ndUnsigned32 stopTraining = m_master->GetFramesCount();
 			if (stopTraining <= m_stopTraining)
@@ -164,23 +166,11 @@ namespace ndCartpoleTrainer_sac
 				m_master->OptimizeStep();
 
 				episodeCount -= m_master->GetEposideCount();
-				ndFloat32 trajectoryLog = ndLog(m_master->GetAverageFrames() + 0.001f);
-				ndFloat32 rewardTrajectory = m_master->GetAverageScore() * trajectoryLog;
-				if (rewardTrajectory >= ndFloat32(m_maxScore))
-				{
-					if (m_lastEpisode != m_master->GetEposideCount())
-					{
-						m_maxScore = rewardTrajectory;
-						m_bestActor->CopyFrom(**m_master->GetPolicyNetwork());
-						ndExpandTraceMessage("best actor episode: %d\treward %f\ttrajectoryFrames: %f\n", m_master->GetEposideCount(), 100.0f * m_master->GetAverageScore() / m_horizon, m_master->GetAverageFrames());
-						m_lastEpisode = m_master->GetEposideCount();
-					}
-				}
+				const ndFloat32 score = m_master->GetAverageScore();
 
-				//if (rewardTrajectory > m_saveScore)
-				if ((stopTraining > m_stopTraining / 3) && (rewardTrajectory > m_saveScore))
+				if ((stopTraining > m_stopTraining / 3) && (score > m_saveScore))
 				{
-					m_saveScore = ndFloor(rewardTrajectory) + 2.0f;
+					m_saveScore = score;
 
 					// save partial controller in case of crash 
 					ndBrain* const actor = *m_master->GetPolicyNetwork();
@@ -198,20 +188,6 @@ namespace ndCartpoleTrainer_sac
 						fflush(m_outFile);
 					}
 				}
-			}
-
-			if ((stopTraining >= m_stopTraining) || (m_master->GetAverageScore() > ndBrainFloat(0.95f)))
-			{
-				m_modelIsTrained = true;
-				m_master->GetPolicyNetwork()->CopyFrom(*(*m_bestActor));
-				ndString fileName (ndGetWorkingFileName(m_master->GetName().GetStr()));
-				m_master->GetPolicyNetwork()->SaveToFile(fileName.GetStr());
-				ndExpandTraceMessage("saving to file: %s\n", fileName.GetStr());
-				ndExpandTraceMessage("training complete\n");
-				ndUnsigned64 timer = ndGetTimeInMicroseconds() - m_timer;
-				ndExpandTraceMessage("training time: %g seconds\n", ndFloat32(ndFloat64(timer) * ndFloat32(1.0e-6f)));
-
-				manager->Terminate();
 			}
 		}
 

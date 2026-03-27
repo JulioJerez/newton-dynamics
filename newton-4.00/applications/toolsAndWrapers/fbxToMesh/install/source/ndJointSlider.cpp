@@ -12,6 +12,7 @@
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
 #include "ndJointSlider.h"
+#include "ndMeshComponents.h"
 
 #define D_MAX_SLIDER_RECOVERY_SPEED	ndFloat32 (0.5f)
 #define D_MAX_SLIDER_PENETRATION	ndFloat32 (0.05f)
@@ -307,4 +308,11 @@ void ndJointSlider::JacobianDerivative(ndConstraintDescritor& desc)
 		SubmitSpringDamper(desc, matrix0, matrix1);
 	}
 	SubmitLimits(desc, matrix0, matrix1);
+}
+
+ndSharedPtr<ndMeshJoint> ndJointSlider::GetMeshJoint() const
+{
+	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointSlider(this));
+
+	return joint;
 }

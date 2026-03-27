@@ -22,10 +22,13 @@
 #ifndef __ND_MESH_H__
 #define __ND_MESH_H__
 
-#include "ndCore.h"
+#include "ndNewtonStdafx.h"
 
+class ndMeshBody;
+class ndMeshJoint;
 class ndMeshEffect;
 class ndShapeInstance;
+class ndMeshShapeInstance;
 
 class ndMesh : public ndClassAlloc
 {
@@ -55,7 +58,6 @@ class ndMesh : public ndClassAlloc
 		m_cylindrical
 	};
 
-
 	class ndCurve: public ndList<ndCurveValue>
 	{
 		public:
@@ -67,12 +69,12 @@ class ndMesh : public ndClassAlloc
 		ndReal m_lenght;
 	};
 
-	D_COLLISION_API ndMesh();
-	D_COLLISION_API ndMesh(const ndMesh& src);
-	D_COLLISION_API ndMesh(const ndShapeInstance& src, ndUvMapingMode mapping = m_box);
+	D_NEWTON_API ndMesh();
+	D_NEWTON_API ndMesh(const ndMesh& src);
+	D_NEWTON_API ndMesh(const ndShapeInstance& src, ndUvMapingMode mapping = m_box);
 
-	D_COLLISION_API virtual ~ndMesh();
-	D_COLLISION_API ndMesh* CreateClone() const;
+	D_NEWTON_API virtual ~ndMesh();
+	D_NEWTON_API ndMesh* CreateClone() const;
 
 	ndMatrix GetMatrix() const;
 	void SetMatrix(const ndMatrix& matrix);
@@ -80,58 +82,69 @@ class ndMesh : public ndClassAlloc
 	ndMatrix GetGeometryMatrix() const;
 	void SetGeometryMatrix(const ndMatrix& matrix);
 
-	D_COLLISION_API void AddChild(const ndSharedPtr<ndMesh>& child);
-	D_COLLISION_API void RemoveChild(const ndSharedPtr<ndMesh>& child);
+	D_NEWTON_API void AddChild(const ndSharedPtr<ndMesh>& child);
+	D_NEWTON_API void RemoveChild(const ndSharedPtr<ndMesh>& child);
 
-	D_COLLISION_API ndMesh* GetParent();
-	D_COLLISION_API const ndMesh* GetParent() const;
+	D_NEWTON_API ndMesh* GetParent();
+	D_NEWTON_API const ndMesh* GetParent() const;
 
-	D_COLLISION_API ndList<ndSharedPtr<ndMesh>>& GetChildren();
-	D_COLLISION_API const ndList<ndSharedPtr<ndMesh>>& GetChildren() const;
+	D_NEWTON_API ndList<ndSharedPtr<ndMesh>>& GetChildren();
+	D_NEWTON_API const ndList<ndSharedPtr<ndMesh>>& GetChildren() const;
 
-	D_COLLISION_API ndMesh* IteratorFirst();
-	D_COLLISION_API ndMesh* IteratorNext(const ndMesh* const root);
+	D_NEWTON_API ndMesh* IteratorFirst();
+	D_NEWTON_API ndMesh* IteratorNext(const ndMesh* const root);
 
-	D_COLLISION_API ndMesh* FindByName(const ndString& name) const;
-	D_COLLISION_API ndMesh* FindByClosestMatch(const ndString& name) const;
+	D_NEWTON_API ndMesh* FindByName(const ndString& name) const;
+	D_NEWTON_API ndMesh* FindByClosestMatch(const ndString& name) const;
 
-	D_COLLISION_API ndSharedPtr<ndMesh> GetSharedPtr() const;
+	D_NEWTON_API ndSharedPtr<ndMesh> GetSharedPtr() const;
 
-	D_COLLISION_API ndSharedPtr<ndMeshEffect>& GetMesh();
-	D_COLLISION_API const ndSharedPtr<ndMeshEffect>& GetMesh() const;
-	D_COLLISION_API void SetMesh(const ndSharedPtr<ndMeshEffect>& mesh);
+	D_NEWTON_API ndSharedPtr<ndMeshEffect>& GetMesh();
+	D_NEWTON_API const ndSharedPtr<ndMeshEffect>& GetMesh() const;
+	D_NEWTON_API void SetMesh(const ndSharedPtr<ndMeshEffect>& mesh);
 
-	D_COLLISION_API const ndString& GetName() const;
-	D_COLLISION_API void SetName(const ndString& name);
+	//D_NEWTON_API ndSharedPtr<ndMeshShapeInstance>& GetPrimitive();
+	//D_NEWTON_API const ndSharedPtr<ndMeshShapeInstance>& GetPrimitive() const;
+	//D_NEWTON_API void SetPrimitive(const ndSharedPtr<ndMeshShapeInstance>& primitive);
 
-	D_COLLISION_API ndNodeType GetNodeType() const;
-	D_COLLISION_API void SetNodeType(ndNodeType type);
+	D_NEWTON_API ndSharedPtr<ndMeshJoint>& GetJoint();
+	D_NEWTON_API const ndSharedPtr<ndMeshJoint>& GetJoint() const;
+	D_NEWTON_API void SetJoint(const ndSharedPtr<ndMeshJoint>& primitive);
 
-	D_COLLISION_API ndVector GetBoneTarget() const;
-	D_COLLISION_API void SetBoneTarget(const ndVector& target);
+	D_NEWTON_API const ndString& GetName() const;
+	D_NEWTON_API void SetName(const ndString& name);
 
-	D_COLLISION_API ndCurve& GetScaleCurve();
-	D_COLLISION_API ndCurve& GetPositCurve();
-	D_COLLISION_API ndCurve& GetRotationCurve();
+	D_NEWTON_API ndNodeType GetNodeType() const;
+	D_NEWTON_API void SetNodeType(ndNodeType type);
 
-	D_COLLISION_API const ndCurve& GetScaleCurve() const;
-	D_COLLISION_API const ndCurve& GetPositCurve() const;
-	D_COLLISION_API const ndCurve& GetRotationCurve() const;
+	D_NEWTON_API ndVector GetBoneTarget() const;
+	D_NEWTON_API void SetBoneTarget(const ndVector& target);
 
-	D_COLLISION_API void ApplyTransform(const ndMatrix& transform);
-	D_COLLISION_API ndMatrix CalculateGlobalMatrix(ndMesh* const parent = nullptr) const;
+	D_NEWTON_API ndCurve& GetScaleCurve();
+	D_NEWTON_API ndCurve& GetPositCurve();
+	D_NEWTON_API ndCurve& GetRotationCurve();
 
-	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollision();
-	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollisionFromChildren();
+	D_NEWTON_API const ndCurve& GetScaleCurve() const;
+	D_NEWTON_API const ndCurve& GetPositCurve() const;
+	D_NEWTON_API const ndCurve& GetRotationCurve() const;
 
-	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollisionBox();
-	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollisionTire();
-	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollisionSphere();
-	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollisionConvex();
-	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollisionCapsule();
-	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollisionChamferCylinder();
-	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollisionTree(bool optimize = true);
-	D_COLLISION_API ndSharedPtr<ndShapeInstance> CreateCollisionConvexApproximation(bool lowDetail = false);
+	D_NEWTON_API void ApplyTransform(const ndMatrix& transform);
+	D_NEWTON_API ndMatrix CalculateGlobalMatrix(ndMesh* const parent = nullptr) const;
+
+	D_NEWTON_API ndSharedPtr<ndMeshBody> GetRigidBody() const;
+	D_NEWTON_API void SetRigidBody(ndSharedPtr<ndMeshBody>& rigidBody);
+
+	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollision();
+	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionFromChildren();
+
+	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionBox();
+	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionTire();
+	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionSphere();
+	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionConvex();
+	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionCapsule();
+	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionChamferCylinder();
+	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionTree(bool optimize = true);
+	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionConvexApproximation(bool lowDetail = false);
 
 	protected:
 	ndMatrix CalculateLocalMatrix(ndVector& size) const;
@@ -145,6 +158,10 @@ class ndMesh : public ndClassAlloc
 	ndCurve m_rotation;
 	ndWeakPtr<ndMesh> m_parent;
 	ndSharedPtr<ndMeshEffect> m_mesh;
+	//ndSharedPtr<ndMeshShapeInstance> m_meshPrimitive;
+
+	ndSharedPtr<ndMeshJoint> m_joint;
+	ndSharedPtr<ndMeshBody> m_rigidBody;
 	ndList<ndSharedPtr<ndMesh>> m_children;
 	ndList<ndSharedPtr<ndMesh>>::ndNode* m_selfChildNode;
 	ndVector m_boneTarget;

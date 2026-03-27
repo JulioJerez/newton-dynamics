@@ -78,7 +78,7 @@ namespace ndUnicyclePlayer
 		m_agent->Step();
 	}
 
-	#pragma optimize( "", off )
+	//#pragma optimize( "", off )
 	void ndController::PostUpdate(ndFloat32)
 	{
 		ndMatrix matrix (m_topBox->GetMatrix());
@@ -143,7 +143,7 @@ namespace ndUnicyclePlayer
 		return omega.DotProduct(matrix.m_front).GetScalar();
 	}
 
-	#pragma optimize( "", off )
+	//#pragma optimize( "", off )
 	bool ndController::IsTerminal() const
 	{
 		bool fail = ndAbs(GetPoleAngle()) > ND_TERMINATION_ANGLE;
@@ -151,7 +151,7 @@ namespace ndUnicyclePlayer
 		return fail;
 	}
 
-	#pragma optimize( "", off )
+	//#pragma optimize( "", off )
 	ndBrainFloat ndController::CalculateReward() const
 	{
 		if (IsTerminal())
@@ -289,7 +289,7 @@ namespace ndUnicyclePlayer
 		return ndBrainFloat(1.0f);
 	};
 
-	#pragma optimize( "", off)
+	//#pragma optimize( "", off)
 	void ndController::GetObservation(ndBrainFloat* const observation)
 	{
 		ndMatrix comFrame(m_wheelRoller->CalculateGlobalMatrix1());

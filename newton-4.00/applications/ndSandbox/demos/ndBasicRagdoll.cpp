@@ -406,7 +406,7 @@ void ndBasicRagdoll (ndDemoEntityManager* const scene)
 	ndSharedPtr<ndModelNotify> modelNotity(CreateRagdoll(scene, loader, playerMatrix));
 
 	{
-#if 1
+#if 0
 		// add few more rag dolls
 		CreateRagdoll(scene, loader, PlaceMatrix(scene, 0.0f, 0.0f, 0.0f));
 		CreateRagdoll(scene, loader, PlaceMatrix(scene, 3.0f, 0.0f, 0.0f));

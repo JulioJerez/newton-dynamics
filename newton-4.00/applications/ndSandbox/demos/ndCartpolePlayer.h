@@ -27,8 +27,10 @@ namespace ndCarpolePlayer
 
 	#define TRAJECTORY_STEPS		(1024 * 4)
 
-	#define PUSH_ACCEL				ndBrainFloat (-10.0f * DEMO_GRAVITY)
-	#define REWARD_MIN_ANGLE		ndBrainFloat (20.0f * ndDegreeToRad)
+	#define ND_RANDOM_IMPULSE_MOD		256
+	#define ND_RANDOM_IMPULSE_MAGNITUD	ndFloat32 (2.0f)
+	#define PUSH_ACCEL					ndBrainFloat (-10.0f * DEMO_GRAVITY)
+	#define REWARD_MIN_ANGLE			ndBrainFloat (20.0f * ndDegreeToRad)
 
 	enum ndActionSpace
 	{
@@ -77,6 +79,7 @@ namespace ndCarpolePlayer
 		ndController();
 
 		void Update(ndFloat32 timestep);
+		void PostUpdate(ndFloat32 timestep);
 
 		void ResetModel();
 		bool IsTerminal() const;
@@ -98,6 +101,8 @@ namespace ndCarpolePlayer
 		ndSharedPtr<ndJointBilateralConstraint> m_poleHinge;
 		ndSharedPtr<ndBrainAgent> m_agent;
 		ndFloat32 m_timestep;
+		ndInt32 m_randomImpulseCounter;
+		ndInt32 m_istrainning;
 	};
 };
 

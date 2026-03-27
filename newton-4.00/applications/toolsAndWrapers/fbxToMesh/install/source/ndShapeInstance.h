@@ -32,6 +32,7 @@ class ndShapeInfo;
 class ndContactPoint;
 class ndShapeInstance;
 class ndRayCastNotify;
+class ndMeshShapeInstance;
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndShapeDebugNotify : public ndClassAlloc
@@ -164,6 +165,8 @@ class ndShapeInstance: public ndContainersFreeListAlloc<ndShapeInstance>
 	D_COLLISION_API ndScaleType GetScaleType() const;
 	D_COLLISION_API ndFloat32 GetUmbraClipSize() const;
 	D_COLLISION_API ndUnsigned64 GetUserDataID() const;
+
+	D_COLLISION_API void Serialize(ndMeshShapeInstance* const meshInstance) const;
 
 	ndMatrix m_globalMatrix;
 	ndMatrix m_localMatrix;

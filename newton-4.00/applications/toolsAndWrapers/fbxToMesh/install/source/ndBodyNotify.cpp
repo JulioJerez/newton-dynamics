@@ -21,6 +21,7 @@
 
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
+
 #include "ndBodyNotify.h"
 #include "ndBodyKinematic.h"
 
@@ -60,11 +61,6 @@ const ndBody* ndBodyNotify::GetBody() const
 ndBodyNotify* ndBodyNotify::GetAsBodyNotify()
 {
 	return this;
-}
-
-ndUrdfBodyNotify* ndBodyNotify::GetAsUrdfBodyNotify()
-{
-	return nullptr;
 }
 
 ndVector ndBodyNotify::GetGravity() const

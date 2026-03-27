@@ -21,8 +21,11 @@
 
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
+
+#include "ndMesh.h"
 #include "ndWorld.h"
 #include "ndBodyDynamic.h"
+#include "ndMeshComponents.h"
 
 ndVector ndBodyDynamic::m_sleepAccelTestScale2(ndFloat32 (0.0625f));
 
@@ -469,4 +472,27 @@ void ndBodyDynamic::InitSurrogateBody(ndBodyKinematic* const surrogate) const
 	dst->m_impulseTorque = m_impulseTorque;
 	dst->m_savedExternalForce = m_savedExternalForce;
 	dst->m_savedExternalTorque = m_savedExternalTorque;
+}
+
+void ndBodyDynamic::Serialize(ndMesh* const node) const
+{
+	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBodyDynamic());
+	node->SetRigidBody(meshBody);
+	Serialize(meshBody);
+	meshBody->m_classConstructor = ndString(ClassName());
+}
+
+void ndBodyDynamic::Serialize(ndSharedPtr<ndMeshBody>& meshBody) const
+{
+	ndBodyKinematic::Serialize(meshBody);
+	ndMeshBodyDynamic* const dynamicMeshBody = (ndMeshBodyDynamic*)*meshBody;
+	dynamicMeshBody->m_intrinsicDamping = m_dampCoef;
+}
+
+void ndBodyDynamic::Deserialize(const ndMeshBody* const meshBody)
+{
+	ndBodyKinematic::Deserialize(meshBody);
+
+	ndMeshBodyDynamic* const dynamic = (ndMeshBodyDynamic*)meshBody;
+	m_dampCoef = dynamic->m_intrinsicDamping;
 }

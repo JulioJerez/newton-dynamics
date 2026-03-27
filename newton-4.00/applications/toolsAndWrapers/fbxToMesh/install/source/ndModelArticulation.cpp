@@ -21,10 +21,12 @@
 
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
+#include "ndMesh.h"
 #include "ndWorld.h"
 #include "ndModel.h"
-#include "ndUrdfFile.h"
+#include "ndMeshLoader.h"
 #include "ndBodyDynamic.h"
+#include "ndMeshComponents.h"
 #include "ndModelArticulation.h"
 
 ndModelArticulation::ndCenterOfMassDynamics::ndCenterOfMassDynamics()
@@ -258,22 +260,6 @@ void ndModelArticulation::AddCloseLoop(const ndSharedPtr<ndJointBilateralConstra
 	node->GetInfo().m_name = loopName;
 }
 
-//void ndModelArticulation::AddToWorld(ndWorld* const world)
-//{
-//	if (m_rootNode)
-//	{
-//		for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
-//		{
-//			world->AddBody(node->m_body);
-//			if (node->m_joint)
-//			{
-//				world->AddJoint(node->m_joint);
-//			}
-//		}
-//	}
-//	world->AddModel(this);
-//}
-
 ndModelArticulation::ndNode* ndModelArticulation::FindByBody(const ndBody* const body) const
 {
 	if (m_rootNode)
@@ -338,160 +324,146 @@ ndModelArticulation::ndNode* ndModelArticulation::FindLoopByJoint(const ndJointB
 	return nullptr;
 }
 
-void ndModelArticulation::SetTransform(const ndMatrix& matrix)
-{
-	if (m_rootNode)
-	{
-		const ndMatrix offset(m_rootNode->m_body->GetMatrix().OrthoInverse() * matrix);
-		for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
-		{
-			ndSharedPtr<ndBody> body(node->m_body);
-			body->SetMatrix(body->GetMatrix() * offset);
-		}
-	}
-}
+//void ndModelArticulation::ConvertToUrdf()
+//{
+//	class BodyInfo
+//	{
+//		public:
+//		ndVector m_centerOfMass;
+//		ndMatrix m_bodyMatrix;
+//		ndMatrix m_visualMatrix;
+//		ndMatrix m_collisionMatrix;
+//		ndMatrix m_jointMatrix0;
+//		ndMatrix m_jointMatrix1;
+//		ndJointBilateralConstraint* m_joint;
+//	};
+//
+//	if (!m_rootNode)
+//	{
+//		return;
+//	}
+//
+//	ndTree<BodyInfo, ndModelArticulation::ndNode*> map;
+//	for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
+//	{
+//		if (*node->m_joint)
+//		{
+//			BodyInfo info;
+//			ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+//			info.m_bodyMatrix = body->GetMatrix();
+//			info.m_centerOfMass = info.m_bodyMatrix.TransformVector(body->GetCentreOfMass());
+//			info.m_collisionMatrix = body->GetCollisionShape().GetLocalMatrix() * info.m_bodyMatrix;
+//			info.m_visualMatrix = ndGetIdentityMatrix();
+//			ndUrdfBodyNotify* const notify = body->GetNotifyCallback()->GetAsUrdfBodyNotify();
+//			if (notify)
+//			{
+//				info.m_visualMatrix = notify->m_offset * info.m_bodyMatrix;
+//			}
+//
+//			info.m_joint = *node->m_joint;
+//			info.m_joint->CalculateGlobalMatrix(info.m_jointMatrix0, info.m_jointMatrix1);
+//			map.Insert(info, node);
+//		}
+//	}
+//
+//	ndFixSizeArray<BodyInfo, 512> saved;
+//	for (ndModelArticulation::ndNode* child = m_rootNode->GetFirstChild(); child; child = child->GetNext())
+//	{
+//		BodyInfo info;
+//		ndBodyKinematic* const body = child->m_body->GetAsBodyKinematic();
+//		info.m_bodyMatrix = body->GetMatrix();
+//		info.m_centerOfMass = info.m_bodyMatrix.TransformVector(body->GetCentreOfMass());
+//		info.m_collisionMatrix = body->GetCollisionShape().GetLocalMatrix() * info.m_bodyMatrix;
+//		ndUrdfBodyNotify* const notify = body->GetNotifyCallback()->GetAsUrdfBodyNotify();
+//		if (notify)
+//		{
+//			info.m_visualMatrix = notify->m_offset * info.m_bodyMatrix;
+//		}
+//
+//		info.m_joint = *child->m_joint;
+//		info.m_joint->CalculateGlobalMatrix(info.m_jointMatrix0, info.m_jointMatrix1);
+//		saved.PushBack(info);
+//	}
+//
+//	BodyInfo rootBodyInfo;
+//	ndBodyKinematic* const rootBody = m_rootNode->m_body->GetAsBodyKinematic();
+//	ndShapeInstance& rootCollision = rootBody->GetCollisionShape();
+//
+//	rootBodyInfo.m_bodyMatrix = rootBody->GetMatrix();
+//	rootBodyInfo.m_centerOfMass = rootBodyInfo.m_bodyMatrix.TransformVector(rootBody->GetCentreOfMass());
+//	rootBodyInfo.m_collisionMatrix = rootCollision.GetLocalMatrix() * rootBodyInfo.m_bodyMatrix;
+//	ndUrdfBodyNotify* const rootNotify = rootBody->GetNotifyCallback()->GetAsUrdfBodyNotify();
+//	if (rootNotify)
+//	{
+//		rootBodyInfo.m_visualMatrix = rootNotify->m_offset * rootBodyInfo.m_bodyMatrix;
+//	}
+//
+//	rootBody->SetMatrix(ndGetIdentityMatrix());
+//	rootCollision.SetLocalMatrix(rootBodyInfo.m_collisionMatrix);
+//	rootBody->SetCentreOfMass(rootBodyInfo.m_centerOfMass);
+//	if (rootNotify)
+//	{
+//		rootNotify->m_offset = rootBodyInfo.m_visualMatrix;
+//	}
+//
+//	for (ndInt32 i = 0; i < saved.GetCount(); ++i)
+//	{
+//		const BodyInfo& info = saved[i];
+//		info.m_joint->SetLocalMatrix1(info.m_jointMatrix1);
+//	}
+//
+//	ndFixSizeArray<ndModelArticulation::ndNode*, D_INV_IK_MAX_LINKS> stack;
+//	stack.PushBack(m_rootNode);
+//	while (stack.GetCount())
+//	{
+//		ndModelArticulation::ndNode* const node = stack.Pop();
+//		if (*node->m_joint)
+//		{
+//			const BodyInfo& info = map.Find(node)->GetInfo();
+//			ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+//			ndShapeInstance& collision = body->GetCollisionShape();
+//			
+//			body->SetMatrix(info.m_jointMatrix0);
+//			collision.SetLocalMatrix(info.m_collisionMatrix* info.m_jointMatrix0.OrthoInverse());
+//			body->SetCentreOfMass(info.m_jointMatrix0.UntransformVector(info.m_centerOfMass));
+//
+//			ndUrdfBodyNotify* const notify = body->GetNotifyCallback()->GetAsUrdfBodyNotify();
+//			if (notify)
+//			{
+//				notify->m_offset = info.m_visualMatrix * info.m_jointMatrix0.OrthoInverse();
+//			}
+//		}
+//
+//		for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
+//		{
+//			stack.PushBack(child);
+//		}
+//	}
+//
+//	stack.PushBack(m_rootNode);
+//	while (stack.GetCount())
+//	{
+//		ndModelArticulation::ndNode* const node = stack.Pop();
+//		ndJointBilateralConstraint* const joint = *node->m_joint;
+//		if (joint)
+//		{
+//			const BodyInfo& info = map.Find(node)->GetInfo();
+//			ndBodyKinematic* const body0 = joint->GetBody0();
+//			ndBodyKinematic* const body1 = joint->GetBody1();
+//
+//			ndMatrix localMatrix0(info.m_jointMatrix0 * body0->GetMatrix().OrthoInverse());
+//			ndMatrix localMatrix1(info.m_jointMatrix1 * body1->GetMatrix().OrthoInverse());
+//			joint->SetLocalMatrix0(localMatrix0);
+//			joint->SetLocalMatrix1(localMatrix1);
+//		}
+//
+//		for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
+//		{
+//			stack.PushBack(child);
+//		}
+//	}
+//}
 
-void ndModelArticulation::ConvertToUrdf()
-{
-	class BodyInfo
-	{
-		public:
-		ndVector m_centerOfMass;
-		ndMatrix m_bodyMatrix;
-		ndMatrix m_visualMatrix;
-		ndMatrix m_collisionMatrix;
-		ndMatrix m_jointMatrix0;
-		ndMatrix m_jointMatrix1;
-		ndJointBilateralConstraint* m_joint;
-	};
-
-	if (!m_rootNode)
-	{
-		return;
-	}
-
-	ndTree<BodyInfo, ndModelArticulation::ndNode*> map;
-	for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
-	{
-		if (*node->m_joint)
-		{
-			BodyInfo info;
-			ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
-			info.m_bodyMatrix = body->GetMatrix();
-			info.m_centerOfMass = info.m_bodyMatrix.TransformVector(body->GetCentreOfMass());
-			info.m_collisionMatrix = body->GetCollisionShape().GetLocalMatrix() * info.m_bodyMatrix;
-			info.m_visualMatrix = ndGetIdentityMatrix();
-			ndUrdfBodyNotify* const notify = body->GetNotifyCallback()->GetAsUrdfBodyNotify();
-			if (notify)
-			{
-				info.m_visualMatrix = notify->m_offset * info.m_bodyMatrix;
-			}
-
-			info.m_joint = *node->m_joint;
-			info.m_joint->CalculateGlobalMatrix(info.m_jointMatrix0, info.m_jointMatrix1);
-			map.Insert(info, node);
-		}
-	}
-
-	ndFixSizeArray<BodyInfo, 512> saved;
-	for (ndModelArticulation::ndNode* child = m_rootNode->GetFirstChild(); child; child = child->GetNext())
-	{
-		BodyInfo info;
-		ndBodyKinematic* const body = child->m_body->GetAsBodyKinematic();
-		info.m_bodyMatrix = body->GetMatrix();
-		info.m_centerOfMass = info.m_bodyMatrix.TransformVector(body->GetCentreOfMass());
-		info.m_collisionMatrix = body->GetCollisionShape().GetLocalMatrix() * info.m_bodyMatrix;
-		ndUrdfBodyNotify* const notify = body->GetNotifyCallback()->GetAsUrdfBodyNotify();
-		if (notify)
-		{
-			info.m_visualMatrix = notify->m_offset * info.m_bodyMatrix;
-		}
-
-		info.m_joint = *child->m_joint;
-		info.m_joint->CalculateGlobalMatrix(info.m_jointMatrix0, info.m_jointMatrix1);
-		saved.PushBack(info);
-	}
-
-	BodyInfo rootBodyInfo;
-	ndBodyKinematic* const rootBody = m_rootNode->m_body->GetAsBodyKinematic();
-	ndShapeInstance& rootCollision = rootBody->GetCollisionShape();
-
-	rootBodyInfo.m_bodyMatrix = rootBody->GetMatrix();
-	rootBodyInfo.m_centerOfMass = rootBodyInfo.m_bodyMatrix.TransformVector(rootBody->GetCentreOfMass());
-	rootBodyInfo.m_collisionMatrix = rootCollision.GetLocalMatrix() * rootBodyInfo.m_bodyMatrix;
-	ndUrdfBodyNotify* const rootNotify = rootBody->GetNotifyCallback()->GetAsUrdfBodyNotify();
-	if (rootNotify)
-	{
-		rootBodyInfo.m_visualMatrix = rootNotify->m_offset * rootBodyInfo.m_bodyMatrix;
-	}
-
-	rootBody->SetMatrix(ndGetIdentityMatrix());
-	rootCollision.SetLocalMatrix(rootBodyInfo.m_collisionMatrix);
-	rootBody->SetCentreOfMass(rootBodyInfo.m_centerOfMass);
-	if (rootNotify)
-	{
-		rootNotify->m_offset = rootBodyInfo.m_visualMatrix;
-	}
-
-	for (ndInt32 i = 0; i < saved.GetCount(); ++i)
-	{
-		const BodyInfo& info = saved[i];
-		info.m_joint->SetLocalMatrix1(info.m_jointMatrix1);
-	}
-
-	ndFixSizeArray<ndModelArticulation::ndNode*, D_INV_IK_MAX_LINKS> stack;
-	stack.PushBack(m_rootNode);
-	while (stack.GetCount())
-	{
-		ndModelArticulation::ndNode* const node = stack.Pop();
-		if (*node->m_joint)
-		{
-			const BodyInfo& info = map.Find(node)->GetInfo();
-			ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
-			ndShapeInstance& collision = body->GetCollisionShape();
-			
-			body->SetMatrix(info.m_jointMatrix0);
-			collision.SetLocalMatrix(info.m_collisionMatrix* info.m_jointMatrix0.OrthoInverse());
-			body->SetCentreOfMass(info.m_jointMatrix0.UntransformVector(info.m_centerOfMass));
-
-			ndUrdfBodyNotify* const notify = body->GetNotifyCallback()->GetAsUrdfBodyNotify();
-			if (notify)
-			{
-				notify->m_offset = info.m_visualMatrix * info.m_jointMatrix0.OrthoInverse();
-			}
-		}
-
-		for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
-		{
-			stack.PushBack(child);
-		}
-	}
-
-	stack.PushBack(m_rootNode);
-	while (stack.GetCount())
-	{
-		ndModelArticulation::ndNode* const node = stack.Pop();
-		ndJointBilateralConstraint* const joint = *node->m_joint;
-		if (joint)
-		{
-			const BodyInfo& info = map.Find(node)->GetInfo();
-			ndBodyKinematic* const body0 = joint->GetBody0();
-			ndBodyKinematic* const body1 = joint->GetBody1();
-
-			ndMatrix localMatrix0(info.m_jointMatrix0 * body0->GetMatrix().OrthoInverse());
-			ndMatrix localMatrix1(info.m_jointMatrix1 * body1->GetMatrix().OrthoInverse());
-			joint->SetLocalMatrix0(localMatrix0);
-			joint->SetLocalMatrix1(localMatrix1);
-		}
-
-		for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
-		{
-			stack.PushBack(child);
-		}
-	}
-}
-
-//void ndModelArticulation::AddBodiesAndJointsToWorld____()
 void ndModelArticulation::OnAddWorld()
 {
 	ndAssert(m_world);
@@ -909,4 +881,160 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 	dynamics.m_centerOfMass.m_right = localFrame.m_right;
 
 	return dynamics;
+}
+
+void ndModelArticulation::SaveNdMesh(const char* const path) const
+{
+	ndInt32 nameIndex = 0;
+	ndMesh* rootMesh = nullptr;
+	ndFixSizeArray<ndMesh*, 1024> parent;
+	ndFixSizeArray<ndModelArticulation::ndNode*, 1024> stack;
+
+	parent.PushBack(nullptr);
+	stack.PushBack(m_rootNode);
+	while (stack.GetCount())
+	{
+		ndMesh* const parentMesh = parent.Pop();
+		ndModelArticulation::ndNode* const node = stack.Pop();
+
+		const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+		ndMesh* const meshNode = new ndMesh(body->GetCollisionShape());
+		if (node->m_name.GetStr() && *node->m_name.GetStr())
+		{
+			meshNode->SetName(node->m_name.GetStr());
+		}
+		else
+		{
+			char name[256];
+			snprintf(name, sizeof(name) - 1, "unnamed_node_%d", nameIndex);
+			nameIndex++;
+			meshNode->SetName(name);
+		}
+		ndMatrix matrix(node->m_body->GetMatrix());
+		if (!rootMesh)
+		{
+			rootMesh = meshNode;
+		}
+		else
+		{
+			matrix = matrix * node->GetParent()->m_body->GetMatrix().OrthoInverse();
+			parentMesh->AddChild(ndSharedPtr<ndMesh>(meshNode));
+		}
+
+		meshNode->SetMatrix(matrix);
+		//ndSharedPtr<ndMeshShapeInstance> meshPrimitive(new ndMeshShapeInstance(body->GetCollisionShape()));
+		//meshNode->SetPrimitive(meshPrimitive);
+		node->m_body->Serialize(meshNode);
+		if (node->m_joint)
+		{
+			ndSharedPtr<ndMeshJoint> joint(node->m_joint->GetMeshJoint());
+			meshNode->SetJoint(joint);
+		}
+
+		for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
+		{
+			stack.PushBack(child);
+			parent.PushBack(meshNode);
+		}
+	}
+
+	ndAssert(rootMesh);
+	ndSharedPtr<ndMesh> mesh(rootMesh);
+	ndMeshLoader articulation(mesh);
+	articulation.SaveMesh(path);
+}
+
+void ndModelArticulation::Serialize(ndMesh* const rootNode) const
+{
+	ndFixSizeArray<ndModelArticulation::ndNode*, 1024> stack;
+	stack.PushBack(m_rootNode);
+	while (stack.GetCount())
+	{
+		ndModelArticulation::ndNode* const node = stack.Pop();
+		ndMesh* const meshNode = rootNode->FindByClosestMatch(node->m_name);
+		if (meshNode)
+		{
+			node->m_body->Serialize(meshNode);
+			if (node != m_rootNode)
+			{
+				// TO DO: serialize joint here
+			}
+		}
+
+		for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
+		{
+			stack.PushBack(child);
+		}
+	}
+
+	// TO DO: serialize loop joints here
+}
+
+void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
+{
+	ndAssert(!m_rootNode);
+	m_closeLoops.RemoveAll();
+	if (m_rootNode)
+	{
+		delete m_rootNode;
+		m_rootNode = nullptr;
+	}
+
+	ndFixSizeArray<const ndMesh*, 1024> stack;
+	ndFixSizeArray<ndModelArticulation::ndNode*, 1024> parentNode;
+
+	stack.PushBack(rootNode);
+	parentNode.PushBack(nullptr);
+	while (stack.GetCount())
+	{
+		const ndMesh* const meshNode = stack.Pop();
+		ndModelArticulation::ndNode* const parent = parentNode.Pop();
+
+		ndModelArticulation::ndNode* node = nullptr;
+		if (meshNode->GetRigidBody())
+		{
+			ndSharedPtr<ndBody> body(meshNode->GetRigidBody()->CreateObject());
+			if (!m_rootNode)
+			{
+				m_rootNode = AddRootBody(body);
+				node = m_rootNode;
+			}
+			else
+			{
+				ndAssert(meshNode->GetJoint());
+				ndBodyKinematic* const childBody = body->GetAsBodyKinematic();
+				ndBodyKinematic* const parentBody = parent->m_body->GetAsBodyKinematic();
+				ndSharedPtr<ndJointBilateralConstraint> joint(meshNode->GetJoint()->CreateObject(childBody, parentBody));
+				node = AddLimb(parent, body, joint);
+			}
+			node->m_name = meshNode->GetName();
+			node->m_body->SetMatrix(meshNode->CalculateGlobalMatrix());
+		}
+	
+		const ndList<ndSharedPtr<ndMesh>>& children = meshNode->GetChildren();
+		for (ndList<ndSharedPtr<ndMesh>>::ndNode* child = children.GetFirst(); child; child = child->GetNext())
+		{
+			parentNode.PushBack(node);
+			const ndMesh* const childMesh = *child->GetInfo();
+			stack.PushBack(childMesh);
+		}
+	}
+
+	// TO DO: deserialize loop joints here
+}
+
+
+void ndModelArticulation::SetTransform(const ndMatrix& matrix)
+{
+	if (m_rootNode)
+	{
+		const ndMatrix offset(m_rootNode->m_body->GetMatrix().OrthoInverse() * matrix);
+		auto ApplyTransfrom = [this, &offset](ndModelArticulation::ndNode* const node)
+		{
+			ndSharedPtr<ndBody> body(node->m_body);
+			const ndMatrix matrix(body->GetMatrix() * offset);
+			body->SetMatrix(matrix);
+		};
+		NodeIterator(ApplyTransfrom);
+	}
 }

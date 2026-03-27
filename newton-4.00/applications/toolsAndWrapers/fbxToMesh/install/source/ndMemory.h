@@ -26,6 +26,8 @@
 #include "ndTypes.h"
 #include "ndThreadSyncUtils.h"
 
+//#define D_MEMORY_SANITY_CHECK
+
 typedef void* (*ndMemAllocCallback) (size_t size);
 typedef void (*ndMemFreeCallback) (void* const ptr);
 
@@ -60,6 +62,9 @@ class ndMemory
 
 	/// Calculate buffer size.
 	D_CORE_API static size_t CalculateBufferSize(size_t size);
+
+	/// check memory heap integrity using operating system support.
+	D_CORE_API static bool CheckMemoryHeap();
 
 	/// Return the total memory allocated by the newton engine and tools.
 	D_CORE_API static ndUnsigned64 GetMemoryUsed();

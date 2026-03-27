@@ -207,7 +207,8 @@ namespace ndUnicycleTrainer_ppo
 		{
 		}
 
-		virtual void Update(ndDemoEntityManager* const manager, ndFloat32)
+		//virtual void Update(ndDemoEntityManager* const manager, ndFloat32)
+		virtual void Update(ndDemoEntityManager* const, ndFloat32)
 		{
 			ndUnsigned32 stopTraining = m_master->GetFramesCount();
 			if (stopTraining <= m_stopTraining)
@@ -219,9 +220,6 @@ namespace ndUnicycleTrainer_ppo
 				if (episodeCount)
 				{
 					const ndFloat32 score = m_master->GetAverageScore();
-					//const ndFloat32 trajectoryGain = ndSqrt(m_master->GetAverageFrames());
-					//const ndFloat32 stepsGain = ndSqrt(ndFloat32(m_master->GetFramesCount()));
-					//const ndFloat32 combinedTrajectory = score * stepsGain * trajectoryGain;
 					const ndFloat32 combinedTrajectory = score;
 
 					if ((stopTraining > m_stopTraining / 3) && (combinedTrajectory >= m_savedScore))
@@ -248,17 +246,17 @@ namespace ndUnicycleTrainer_ppo
 				}
 			}
 			
-			if ((stopTraining >= m_stopTraining) || (m_master->GetAverageScore() > ndBrainFloat(0.96f)))
-			{
-				m_modelIsTrained = true;
-				ndString fileName (ndGetWorkingFileName(m_master->GetName().GetStr()));
-				ndExpandTraceMessage("saving to file: %s\n", fileName.GetStr());
-				ndExpandTraceMessage("training complete\n");
-				ndUnsigned64 timer = ndGetTimeInMicroseconds() - m_timer;
-				ndExpandTraceMessage("training time: %g seconds\n", ndFloat32(ndFloat64(timer) * ndFloat32(1.0e-6f)));
-			
-				manager->Terminate();
-			}
+			//if ((stopTraining >= m_stopTraining) || (m_master->GetAverageScore() > ndBrainFloat(0.96f)))
+			//{
+			//	m_modelIsTrained = true;
+			//	ndString fileName (ndGetWorkingFileName(m_master->GetName().GetStr()));
+			//	ndExpandTraceMessage("saving to file: %s\n", fileName.GetStr());
+			//	ndExpandTraceMessage("training complete\n");
+			//	ndUnsigned64 timer = ndGetTimeInMicroseconds() - m_timer;
+			//	ndExpandTraceMessage("training time: %g seconds\n", ndFloat32(ndFloat64(timer) * ndFloat32(1.0e-6f)));
+			//
+			//	manager->Terminate();
+			//}
 		}
 
 		ndSharedPtr<ndBrainAgentOnPolicyGradient_Trainer> m_master;

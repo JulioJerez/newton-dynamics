@@ -23,6 +23,7 @@
 #include "ndCollisionStdafx.h"
 #include "ndContact.h"
 #include "ndContactSolver.h"
+#include "ndMeshComponents.h"
 #include "ndShapeChamferCylinder.h"
 
 ndInt32 ndShapeChamferCylinder::m_shapeRefCount = 0;
@@ -408,4 +409,13 @@ ndUnsigned64 ndShapeChamferCylinder::GetHash(ndUnsigned64 hash) const
 {
 	ndShapeInfo info(GetShapeInfo());
 	return info.GetHash(hash);
+}
+
+ndSharedPtr<ndMeshCollisionShape> ndShapeChamferCylinder::GetMeshShape() const
+{
+	ndMeshCollisionShapeChamferCylinder* const shape = new ndMeshCollisionShapeChamferCylinder;
+
+	shape->m_radius = m_radius;
+	shape->m_height = m_height * ndFloat32(2.0f);
+	return ndSharedPtr<ndMeshCollisionShape>(shape);
 }

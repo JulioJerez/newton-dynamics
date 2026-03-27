@@ -12,6 +12,7 @@
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
 #include "ndJointWheel.h"
+#include "ndMeshComponents.h"
 
 ndJointWheel::ndJointWheel()
 	:ndJointBilateralConstraint()
@@ -25,7 +26,6 @@ ndJointWheel::ndJointWheel()
 	,m_normalizedSteering0(ndFloat32(0.0f))
 	,m_normalizedHandBrake(ndFloat32(0.0f))
 	,m_isApplyingBrakes(false)
-	//,m_vcdMode(false)
 {
 	m_maxDof = 7;
 }
@@ -42,7 +42,21 @@ ndJointWheel::ndJointWheel(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* co
 	,m_normalizedSteering0(ndFloat32(0.0f))
 	,m_normalizedHandBrake(ndFloat32(0.0f))
 	,m_isApplyingBrakes(false)
-	//,m_vcdMode(false)
+{
+}
+
+ndJointWheel::ndJointWheel(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent, const ndWheelDescriptor& desc)
+	:ndJointBilateralConstraint(7, child, parent, pinAndPivotInChild, pinAndPivotInParent)
+	,m_baseFrame(m_localMatrix1)
+	,m_info(desc)
+	,m_posit(ndFloat32(0.0f))
+	,m_speed(ndFloat32(0.0f))
+	,m_regularizer(desc.m_regularizer)
+	,m_normalizedBrake(ndFloat32(0.0f))
+	,m_normalizedSteering(ndFloat32(0.0f))
+	,m_normalizedSteering0(ndFloat32(0.0f))
+	,m_normalizedHandBrake(ndFloat32(0.0f))
+	,m_isApplyingBrakes(false)
 {
 }
 
@@ -231,3 +245,19 @@ void ndJointWheel::JacobianDerivative(ndConstraintDescritor& desc)
 	}
 }
 
+ndSharedPtr<ndMeshJoint> ndJointWheel::GetMeshJoint() const
+{
+	ndMeshJointWheel* const joint = new ndMeshJointWheel(this);
+	
+	joint->m_baseFrame = m_baseFrame;
+	joint->m_springK = m_info.m_springK;
+	joint->m_damperC = m_info.m_damperC;
+	joint->m_upperStop = m_info.m_upperStop;
+	joint->m_lowerStop = m_info.m_lowerStop;
+	joint->m_regularizer = m_info.m_regularizer;
+	joint->m_brakeTorque = m_info.m_brakeTorque;
+	joint->m_steeringAngle = m_info.m_steeringAngle * ndRadToDegree;
+	joint->m_handBrakeTorque = m_info.m_handBrakeTorque;
+
+	return ndSharedPtr<ndMeshJoint>(joint);
+}

@@ -19,12 +19,13 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
+#include "ndMesh.h"
 #include "ndContact.h"
 #include "ndShapeBox.h"
 #include "ndContactSolver.h"
+#include "ndMeshComponents.h"
 
 ndInt32 ndShapeBox::m_initSimplex = 0;
 ndShapeConvex::ndConvexSimplexEdge ndShapeBox::m_edgeArray[24];
@@ -488,4 +489,13 @@ ndUnsigned64 ndShapeBox::GetHash(ndUnsigned64 hash) const
 {
 	ndShapeInfo info(GetShapeInfo());
 	return info.GetHash(hash);
+}
+
+ndSharedPtr<ndMeshCollisionShape> ndShapeBox::GetMeshShape() const
+{
+	ndMeshCollisionShapeBox* const shape = new ndMeshCollisionShapeBox;
+	shape->m_x = m_size[0].m_x * ndFloat32(2.0f);
+	shape->m_y = m_size[0].m_y * ndFloat32(2.0f);
+	shape->m_z = m_size[0].m_z * ndFloat32(2.0f);
+	return ndSharedPtr<ndMeshCollisionShape>(shape);
 }

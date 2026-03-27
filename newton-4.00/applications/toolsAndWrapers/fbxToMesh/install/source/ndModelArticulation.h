@@ -97,17 +97,42 @@ class ndModelArticulation: public ndModel
 	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassKinematics(const ndMatrix& localFrame) const;
 	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassDynamics(ndIkSolver& solver, const ndMatrix& localFrame, ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS>& extraJoints, ndFloat32 timestep) const;
 	
+	D_NEWTON_API virtual void Serialize(ndMesh* const rootNode) const;
+	D_NEWTON_API virtual void Deserialize(const ndMesh* const rootNode);
+
+	D_NEWTON_API virtual void SaveNdMesh(const char* const path) const;
+
+	template <typename Function>
+	void NodeIterator(Function func);
+
 	protected:
-	D_NEWTON_API void ConvertToUrdf();
 	D_COLLISION_API virtual void OnAddWorld() override;
 	D_COLLISION_API virtual void OnRemoveFromWorld() override;
 	
 	ndString m_name;
 	ndNode* m_rootNode;
 	ndList<ndNode, ndContainersFreeListAlloc<ndNode>> m_closeLoops;
-
-	friend class ndUrdfFile;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
+
+template <typename Function>
+void ndModelArticulation::NodeIterator(Function func)
+{
+	if (m_rootNode)
+	{
+		ndFixSizeArray<ndNode*, D_INV_IK_MAX_LINKS> stack;
+		stack.PushBack(m_rootNode);
+		while (stack.GetCount())
+		{
+			ndNode* const node = stack.Pop();
+			func(node);
+			for (ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
+			{
+				stack.PushBack(child);
+			}
+		}
+	}
+}
+
 
 #endif 
 
