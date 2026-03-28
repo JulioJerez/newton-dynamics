@@ -943,16 +943,15 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 	while (stack.GetCount())
 	{
 		const ndMesh* const meshNode = stack.Pop();
-		ndModelArticulation::ndNode* const parent = parentNode.Pop();
+		ndModelArticulation::ndNode* parent = parentNode.Pop();
 
-		ndModelArticulation::ndNode* node = nullptr;
 		if (meshNode->GetRigidBody())
 		{
 			ndSharedPtr<ndBody> body(meshNode->GetRigidBody()->CreateObject());
 			if (!m_rootNode)
 			{
 				m_rootNode = AddRootBody(body);
-				node = m_rootNode;
+				parent = m_rootNode;
 			}
 			else
 			{
@@ -960,17 +959,17 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 				ndBodyKinematic* const childBody = body->GetAsBodyKinematic();
 				ndBodyKinematic* const parentBody = parent->m_body->GetAsBodyKinematic();
 				ndSharedPtr<ndJointBilateralConstraint> joint(meshNode->GetJoint()->CreateObject(childBody, parentBody));
-				node = AddLimb(parent, body, joint);
+				parent = AddLimb(parent, body, joint);
 			}
-			node->m_name = meshNode->GetName();
-			node->m_body->SetMatrix(meshNode->CalculateGlobalMatrix());
+			parent->m_name = meshNode->GetName();
+			parent->m_body->SetMatrix(meshNode->CalculateGlobalMatrix());
 		}
 	
 		const ndList<ndSharedPtr<ndMesh>>& children = meshNode->GetChildren();
 		for (ndList<ndSharedPtr<ndMesh>>::ndNode* child = children.GetFirst(); child; child = child->GetNext())
 		{
-			parentNode.PushBack(node);
 			const ndMesh* const childMesh = *child->GetInfo();
+			parentNode.PushBack(parent);
 			stack.PushBack(childMesh);
 		}
 	}
