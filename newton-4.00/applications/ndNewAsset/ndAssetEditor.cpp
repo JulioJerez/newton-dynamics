@@ -773,6 +773,20 @@ void ndAssetEditor::ShowMainMenuBar()
 				}
 			}
 
+			ImGui::Separator();
+			if (ImGui::MenuItem("Import fbx", ""))
+			{
+				char fileName[2048];
+				if (dGetImportFbxFileName(fileName, sizeof(fileName) - 1))
+				{
+					m_currentPath = ndString(fileName);
+					ndRenderMeshLoader loader(*m_renderer);
+					loader.ImportFbx(m_currentPath);
+					m_model = loader.m_mesh;
+				}
+			}
+
+			ImGui::Separator();
 			if (ImGui::MenuItem("Exit", ""))
 			{
 				m_renderer->Terminate();

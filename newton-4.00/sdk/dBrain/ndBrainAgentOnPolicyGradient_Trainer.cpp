@@ -1452,7 +1452,8 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 		// calculate the KL divergence
 		divergence = CalculateKLdivergence();
 	}
-	ndExpandTraceMessage("surrogate loss passes %d\n", passes);
+	//ndExpandTraceMessage("surrogate loss passes %d\n", passes);
+	ndExpandTraceMessage("surrogate loss passes %d  kl: %.6f\n", passes, divergence);
 }
 
 void ndBrainAgentOnPolicyGradient_Trainer::OptimizeStep()
