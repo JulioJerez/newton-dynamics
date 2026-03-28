@@ -157,7 +157,6 @@ bool ndAnimationMeshLoader::ImportFbx(const ndString& fbxPathMeshName)
 			ndSharedPtr<ndShapeInstance> instance (node->CreateCollision());
 			if (instance->GetShape()->GetAsShapeNull())
 			{
-				ndAssert(0);
 				instance = node->CreateCollisionFromChildren();
 			}
 
