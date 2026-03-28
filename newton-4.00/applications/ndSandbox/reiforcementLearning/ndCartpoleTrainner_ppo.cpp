@@ -179,7 +179,7 @@ namespace ndCartpoleTrainer_ppo
 			model->SetNotifyCallback(controller);
 
 			ndController* const playerController = (ndController*)(*controller);
-			playerController->m_istrainning = true;
+			playerController->m_isTrainning = true;
 			playerController->CreateArticulatedModel(scene, model, mesh, visualMesh);
 
 			for (ndModelArticulation::ndNode* node = model->GetRoot()->GetFirstIterator(); node; node = node->GetNextIterator())

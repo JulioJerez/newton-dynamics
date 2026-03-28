@@ -142,7 +142,7 @@ namespace ndCartpoleTrainer_sac
 			model->SetNotifyCallback(controller);
 
 			ndController* const playerController = (ndController*)(*controller);
-			playerController->m_istrainning = true;
+			playerController->m_isTrainning = true;
 			playerController->CreateArticulatedModel(scene, model, mesh, visualMesh);
 
 			ndSharedPtr<ndBrainAgentOffPolicyGradient_Agent> agent(new ndAgent(m_master, playerController));

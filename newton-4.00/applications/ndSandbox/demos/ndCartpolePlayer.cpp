@@ -65,8 +65,8 @@ namespace ndCarpolePlayer
 		:ndModelNotify()
 		,m_agent(nullptr)
 		,m_timestep(0.0f)
-		,m_randomImpulseCounter(1)
-		,m_istrainning(false)
+		,m_randomImpulseCounter(ndInt32(1 + (ndRandInt() & 200)))
+		,m_isTrainning(false)
 	{
 	}
 
@@ -153,7 +153,7 @@ namespace ndCarpolePlayer
 		ndVector force(m_cart->GetAsBodyDynamic()->GetForce() + matrix.m_front.Scale(pushForce));
 		m_cart->GetAsBodyDynamic()->SetForce(force);
 
-		if (m_randomImpulseCounter == 0)
+		if (m_isTrainning && (m_randomImpulseCounter == 0))
 		{
 			// when in training mode,
 			// apply a random impulse to the top box every m_randomImpulseCounter steps
