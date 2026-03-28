@@ -67,7 +67,7 @@ namespace ndUnicyclePlayer
 		:ndModelNotify()
 		,m_agent(nullptr)
 		,m_timestep(0.0f)
-		,m_randomImpulseCounter(1)
+		,m_randomImpulseCounter(ndInt32(1 + (ndRandInt() & 200)))
 		,m_isTrainning(false)
 	{
 	}
@@ -321,47 +321,44 @@ namespace ndUnicyclePlayer
 		ndSharedPtr<ndMesh> mesh,
 		ndSharedPtr<ndRenderSceneNode> visualMesh)
 	{
-		auto CreateRigidBody = [scene](ndSharedPtr<ndMesh>& mesh, ndSharedPtr<ndRenderSceneNode>& visualMesh, ndFloat32 mass, ndBodyDynamic* const parentBody)
+		model->GetAsModelArticulation()->Deserialize(*mesh);
+
+		auto BindApplicationData = [this, scene, &visualMesh](ndModelArticulation::ndNode* const node)
 		{
-			ndSharedPtr<ndShapeInstance> shape(mesh->CreateCollision());
+			ndRenderSceneNode* const visualEntityPtr = visualMesh->FindByClosestMatch(node->m_name);
+			ndAssert(visualEntityPtr);
+			ndSharedPtr<ndRenderSceneNode> visualEntity((visualEntityPtr == *visualMesh) ? visualMesh : visualEntityPtr->GetSharedPtr());
 
-			ndBodyKinematic* const body = new ndBodyDynamic();
-			body->SetNotifyCallback(new ndDemoEntityNotify(scene, visualMesh, parentBody));
-			body->SetMatrix(mesh->CalculateGlobalMatrix());
-			body->SetCollisionShape(*(*shape));
-			body->GetAsBodyDynamic()->SetMassMatrix(mass, *(*shape));
-			return body;
+			// add a rigid body with notification callback
+			ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
+			ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
+			node->m_body->SetNotifyCallback(notify);
+
+			if (node->m_name.Find("body") > -1)
+			{
+				m_topBox = node->m_body;
+				node->m_body->GetAsBodyKinematic()->SetMassMatrix(BOX_MASS, node->m_body->GetAsBodyKinematic()->GetCollisionShape());
+			}
+			else if (node->m_name.Find("pole") > -1)
+			{
+				m_pole = node->m_body;
+				m_poleHinge = node->m_joint;
+				node->m_body->GetAsBodyKinematic()->SetMassMatrix(POLE_MASS, node->m_body->GetAsBodyKinematic()->GetCollisionShape());
+				((ndJointHinge*)*m_poleHinge)->SetAsSpringDamper(0.5f, 0.0f, 1.0f);
+			}
+			else if (node->m_name.Find("roller") > -1)
+			{
+				m_wheel = node->m_body;
+				m_wheelRoller = node->m_joint;
+				node->m_body->GetAsBodyKinematic()->SetMassMatrix(POLE_MASS, node->m_body->GetAsBodyKinematic()->GetCollisionShape());
+			}
 		};
-
-		// add the root body
-		m_topBox = ndSharedPtr<ndBody>(CreateRigidBody(mesh, visualMesh, BOX_MASS, nullptr));
-		ndModelArticulation::ndNode* const modelRootNode = model->AddRootBody(m_topBox);
-
-		// add the pole mesh and body
-		ndSharedPtr<ndMesh> poleMesh(mesh->GetChildren().GetFirst()->GetInfo());
-		ndSharedPtr<ndRenderSceneNode> poleEntity(visualMesh->GetChildren().GetFirst()->GetInfo());
-		m_pole = ndSharedPtr<ndBody>(CreateRigidBody(poleMesh, poleEntity, POLE_MASS, m_topBox->GetAsBodyDynamic()));
-
-		// add ball mesh and body
-		ndSharedPtr<ndMesh> ballMesh(poleMesh->GetChildren().GetFirst()->GetInfo());
-		ndSharedPtr<ndRenderSceneNode> ballEntity(poleEntity->GetChildren().GetFirst()->GetInfo());
-		m_wheel = ndSharedPtr<ndBody>(CreateRigidBody(ballMesh, ballEntity, BALL_MASS, m_pole->GetAsBodyDynamic()));
-
-		// add links
-		const ndMatrix poleMatrix(ndPitchMatrix(ndPi) * m_pole->GetMatrix());
-		m_poleHinge = ndSharedPtr<ndJointBilateralConstraint>(new ndJointHinge(poleMatrix, m_pole->GetAsBodyKinematic(), m_topBox->GetAsBodyKinematic()));
-		((ndJointHinge*)*m_poleHinge)->SetAsSpringDamper(0.5f, 0.0f, 1.0f);
-		ndModelArticulation::ndNode* const poleNode = model->AddLimb(modelRootNode, m_pole, m_poleHinge);
-
-		const ndMatrix ballMatrix(m_wheel->GetMatrix());
-		m_wheelRoller = ndSharedPtr<ndJointBilateralConstraint>(new ndJointRoller(ballMatrix, m_wheel->GetAsBodyKinematic(), m_pole->GetAsBodyKinematic()));
-		((ndJointRoller*)*m_wheelRoller)->SetAsSpringDamperPosit(0.01f, 1000.0f, 15.0f);
-		model->AddLimb(poleNode, m_wheel, m_wheelRoller);
+		model->GetAsModelArticulation()->NodeIterator(BindApplicationData);
 
 		// fix to the word with a plane joint
 		ndWorld* const world = scene->GetWorld();
-		const ndMatrix planeMatrix(m_topBox->GetMatrix());
-		m_plane = ndSharedPtr<ndJointBilateralConstraint>(new ndJointPlane(planeMatrix.m_posit, planeMatrix.m_right, m_topBox->GetAsBodyKinematic(), world->GetSentinelBody()));
+		const ndMatrix planeMatrix(m_poleHinge->CalculateGlobalMatrix1());
+		m_plane = ndSharedPtr<ndJointBilateralConstraint>(new ndJointPlane(planeMatrix.m_posit, planeMatrix.m_front, m_topBox->GetAsBodyKinematic(), world->GetSentinelBody()));
 		model->AddCloseLoop(m_plane);
 	}
 

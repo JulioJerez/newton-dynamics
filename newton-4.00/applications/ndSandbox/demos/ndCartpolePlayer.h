@@ -99,7 +99,7 @@ namespace ndCarpolePlayer
 		ndSharedPtr<ndBrainAgent> m_agent;
 		ndFloat32 m_timestep;
 		ndInt32 m_randomImpulseCounter;
-		ndInt32 m_istrainning;
+		bool m_isTrainning;
 	};
 };
 

@@ -72,11 +72,11 @@
         <name string="pole-rb-convexhull-hinge" />
         <matrix>
             <posit float3="1.24939e-08 0.285826 0" />
-            <angles float3="-180 -90 0" />
+            <angles float3="-6.51378e-12 90 0" />
         </matrix>
         <geometryMatrix>
-            <posit float3="-0.351311 -4.49508e-07 1.53563e-08" />
-            <angles float3="0 -0 0" />
+            <posit float3="0.351311 5.50137e-07 -1.53563e-08" />
+            <angles float3="1.96555e-11 -5.00896e-06 -180" />
         </geometryMatrix>
         <type nodeType="node" target="0 0 0 " />
         <geometry>
@@ -111,7 +111,7 @@
             <constructor string="ndBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
-            <com float3="0.00111089 0.927743 8.99312e-07" />
+            <com float3="-0.00111084 -0.927743 8.98687e-07" />
             <inverseMass float="1" />
             <inverseDiagonalInertia float3="0.875412 20.5401 0.84027" />
             <principalAxis float3="0 -0 0" />
@@ -119,8 +119,8 @@
             <maxLinearStep float="1" />
             <collisionInstance>
                 <localMatrix>
-                    <posit float3="0.00124556 0.929128 -9.62981e-08" />
-                    <angles float3="0 -0 0" />
+                    <posit float3="-0.00124553 -0.929128 -9.61888e-08" />
+                    <angles float3="1.96555e-11 -5.00896e-06 -180" />
                 </localMatrix>
                 <alignmentMatrix>
                     <posit float3="0 0 0" />
@@ -143,7 +143,7 @@
             </localFrame0>
             <localFrame1>
                 <posit float3="1.24939e-08 0.285826 0" />
-                <angles float3="-180 -90 0" />
+                <angles float3="-6.51378e-12 90 0" />
             </localFrame1>
             <springK float="0" />
             <damperC float="0" />
@@ -155,8 +155,8 @@
         <ndMesh>
             <name string="roller-rb--hinge-sphere" />
             <matrix>
-                <posit float3="-1.57073e-06 1.82076 -9.48091e-09" />
-                <angles float3="3.25689e-12 -2.54451e-13 -180" />
+                <posit float3="1.84566e-06 -1.82076 -9.48143e-09" />
+                <angles float3="-3.25689e-12 2.54433e-13 7.19444e-05" />
             </matrix>
             <geometryMatrix>
                 <posit float3="0 0 0" />
@@ -226,8 +226,8 @@
                     <angles float3="0 -0 0" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-1.57073e-06 1.82076 -9.4809e-09" />
-                    <angles float3="3.25689e-12 -2.03556e-13 -180" />
+                    <posit float3="1.84566e-06 -1.82076 -9.48143e-09" />
+                    <angles float3="-3.25689e-12 2.03556e-13 7.19444e-05" />
                 </localFrame1>
                 <springK float="0" />
                 <damperC float="0" />
