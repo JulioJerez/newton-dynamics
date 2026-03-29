@@ -299,7 +299,34 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 		}
 
 		ndSharedPtr<ndShape> shape(shapeInstance.m_shape->CreateObject());
-		if (ImGui::BeginCombo("shape", shape->ClassName()))
+		ImGui::SeparatorText(shape->ClassName());
+		if (strcmp(shape->ClassName(), ndShapeBox::StaticClassName()) == 0)
+		{
+			ndReal size[3];
+			size[0] = 1;
+			size[1] = 2;
+			size[2] = 3;
+			if (ImGui::DragFloat3("size##1", size))
+			{
+
+			}
+		}
+		else if (strcmp(shape->ClassName(), ndShapeSphere::StaticClassName()) == 0)
+		{
+			ndReal size = ndReal(1.0f);
+			if (ImGui::DragFloat("radious##1", &size))
+			{
+
+			}
+		}
+		else
+		{
+			ndAssert(0);
+		}
+
+
+
+		if (ImGui::BeginCombo("shapes", shape->ClassName()))
 		{
 			auto SetDropdownList = [this, rigidBody, &shape, &shapeInstance](const char* name)
 			{
@@ -308,7 +335,12 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 				{
 					if (strcmp(name, shape->ClassName()))
 					{
-						if (strcmp(name, ndShapeSphere::StaticClassName()) == 0)
+						if (strcmp(name, ndShapeBox::StaticClassName()) == 0)
+						{
+							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionBox());
+							instance->Serialize(&shapeInstance);
+						}
+						else if (strcmp(name, ndShapeSphere::StaticClassName()) == 0)
 						{
 							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionSphere());
 							instance->Serialize(&shapeInstance);
