@@ -736,6 +736,7 @@ void ndAssetEditor::ShowMainMenuBar()
 		{
 			if (ImGui::MenuItem("New", ""))
 			{
+				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 				m_model = ndSharedPtr<ndMesh>(nullptr);
 			}
 
@@ -744,6 +745,7 @@ void ndAssetEditor::ShowMainMenuBar()
 				char fileName[2048];
 				if (dGetLoadNdFileName(fileName, sizeof(fileName) - 1))
 				{
+					m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 					m_currentPath = ndString(fileName);
 					ndRenderMeshLoader loader(*m_renderer);
 					loader.LoadMesh(m_currentPath);
@@ -755,6 +757,7 @@ void ndAssetEditor::ShowMainMenuBar()
 			{
 				if (*m_model)
 				{
+					m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 					ndRenderMeshLoader loader(*m_renderer);
 					loader.m_mesh = m_model;
 					loader.SaveMesh(ndString(m_currentPath));
@@ -766,6 +769,7 @@ void ndAssetEditor::ShowMainMenuBar()
 				char fileName[2048];
 				if (*m_model && dGetSaveNdFileName(fileName, sizeof(fileName) - 1))
 				{
+					m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 					m_currentPath = ndString(fileName);
 					ndRenderMeshLoader loader(*m_renderer);
 					loader.m_mesh = m_model;
@@ -779,6 +783,7 @@ void ndAssetEditor::ShowMainMenuBar()
 				char fileName[2048];
 				if (dGetImportFbxFileName(fileName, sizeof(fileName) - 1))
 				{
+					m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 					m_currentPath = ndString(fileName);
 					ndRenderMeshLoader loader(*m_renderer);
 					loader.ImportFbx(m_currentPath);
@@ -789,6 +794,7 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::Separator();
 			if (ImGui::MenuItem("Exit", ""))
 			{
+				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 				m_renderer->Terminate();
 			}
 

@@ -463,6 +463,12 @@ static void BuildDoubleHinge(ndDemoEntityManager* const scene, const ndVector& o
 		
 		ndJointDoubleHinge* const joint = new ndJointDoubleHinge(matrix, body->GetAsBodyDynamic(), fixBody);
 		ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
+		joint->SetLimitState0(true);
+		joint->SetLimits0(-30.0f * ndDegreeToRad, 30.0f * ndDegreeToRad);
+
+		joint->SetLimitState1(true);
+		joint->SetLimits1(-60.0f * ndDegreeToRad, 60.0f * ndDegreeToRad);
+
 		world->AddJoint(jointPtr);
 	}
 
@@ -475,7 +481,7 @@ static void BuildDoubleHinge(ndDemoEntityManager* const scene, const ndVector& o
 		joint->SetAsSpringDamper0(0.1f, 1500.0f, 10.0f);
 		joint->SetAsSpringDamper1(0.1f, 1500.0f, 10.0f);
 		ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
-		world->AddJoint(jointPtr);
+		//world->AddJoint(jointPtr);
 	}
 }
 
@@ -945,18 +951,18 @@ void ndBasicJoints (ndDemoEntityManager* const scene)
 	// build a floor
 	ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "blueCheckerboard.png", 0.1f, true));
 
-	BuildBallSocket(scene, ndVector(0.0f, 0.0f, -7.0f, 1.0f));
-	BuildHinge(scene, ndVector(0.0f, 0.0f, -2.0f, 1.0f), 10.0f, 1.0f);
-	BuildSlider(scene, ndVector(0.0f, 0.0f, 1.0f, 1.0f), 100.0f, 0.75f);
-	BuildGear(scene, ndVector(0.0f, 0.0f, -4.0f, 1.0f), 100.0f, 0.75f);
+	//BuildBallSocket(scene, ndVector(0.0f, 0.0f, -7.0f, 1.0f));
+	//BuildHinge(scene, ndVector(0.0f, 0.0f, -2.0f, 1.0f), 10.0f, 1.0f);
+	//BuildSlider(scene, ndVector(0.0f, 0.0f, 1.0f, 1.0f), 100.0f, 0.75f);
+	//BuildGear(scene, ndVector(0.0f, 0.0f, -4.0f, 1.0f), 100.0f, 0.75f);
 	BuildDoubleHinge(scene, ndVector(0.0f, 0.0f, 4.0f, 1.0f), 100.0f, 0.75f);
-	BuildRoller(scene, ndVector(0.0f, 0.0f, 9.0f, 1.0f), 10.0f, 0.75f);
-	BuildCylindrical(scene, ndVector(0.0f, 0.0f, 12.0f, 1.0f), 10.0f, 0.75f);
-	BuildFixDistanceJoints(scene, ndVector( -4.0f, 0.0f, -5.0f, 1.0f));
-	BuildRollingFriction(scene, ndVector(-4.0f, 0.0f, 5.0f, 1.0f), 10.0f, 0.5f);
-	BuildPathFollow(scene, ndVector(40.0f, 0.0f, 0.0f, 1.0f));
-	BuildWheel(scene, ndVector(-4.0f, 0.0f, 0.0f, 1.0f), 100.0f, 0.75f);
-	BuildUpVector(scene, ndVector(-4.0f, 0.0f, -8.0f, 1.0f), 100.0f, 0.75f);
+	//BuildRoller(scene, ndVector(0.0f, 0.0f, 9.0f, 1.0f), 10.0f, 0.75f);
+	//BuildCylindrical(scene, ndVector(0.0f, 0.0f, 12.0f, 1.0f), 10.0f, 0.75f);
+	//BuildFixDistanceJoints(scene, ndVector( -4.0f, 0.0f, -5.0f, 1.0f));
+	//BuildRollingFriction(scene, ndVector(-4.0f, 0.0f, 5.0f, 1.0f), 10.0f, 0.5f);
+	//BuildPathFollow(scene, ndVector(40.0f, 0.0f, 0.0f, 1.0f));
+	//BuildWheel(scene, ndVector(-4.0f, 0.0f, 0.0f, 1.0f), 100.0f, 0.75f);
+	//BuildUpVector(scene, ndVector(-4.0f, 0.0f, -8.0f, 1.0f), 100.0f, 0.75f);
 	
 	ndQuaternion rot;
 	ndVector origin(-20.0f, 5.0f, 0.0f, 1.0f);

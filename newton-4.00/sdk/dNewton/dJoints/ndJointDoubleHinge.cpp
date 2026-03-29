@@ -135,7 +135,7 @@ void ndJointDoubleHinge::SetLimitState1(bool state)
 	m_axis1.m_limitState = state ? 1 : 0;
 	if (m_axis1.m_limitState)
 	{
-		SetLimits1(m_axis0.m_minLimit, m_axis0.m_maxLimit);
+		SetLimits1(m_axis1.m_minLimit, m_axis1.m_maxLimit);
 	}
 }
 
