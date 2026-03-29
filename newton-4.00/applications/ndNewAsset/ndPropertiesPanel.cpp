@@ -26,8 +26,8 @@ void ndAssetEditor::ShowPropertiesPanel()
 		ShowPropertiesMeshInfo();
 		if (*m_currentSelection->GetRigidBody())
 		{
-			ShowPropertiesCollisionInfo();
 			ShowPropertiesRigidBodyInfo();
+			ShowPropertiesCollisionInfo();
 		}
 	}
 	
@@ -251,5 +251,72 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 		ndMeshBodyKinematic* const rigidBody = (ndMeshBodyKinematic*)*body;
 		ndMeshShapeInstance& shapeInstance = rigidBody->m_shapeInstance;
 
+		// shaw shape scale
+		{
+			ndVector vector(shapeInstance.m_scale);
+			ndReal real[3];
+			real[0] = vector.m_x;
+			real[1] = vector.m_y;
+			real[2] = vector.m_z;
+			if (ImGui::DragFloat3("scale##1", real))
+			{
+				vector.m_x = ndMax(real[0], ndReal(0.01f));
+				vector.m_y = ndMax(real[1], ndReal(0.01f));
+				vector.m_z = ndMax(real[2], ndReal(0.01f));
+				shapeInstance.m_scale = vector;
+			};
+		}
+
+		// show local transform
+		{
+			//ImGui::SeparatorText("local transform");
+			ndMatrix matrix(shapeInstance.m_localMatrix);
+			ndReal position[3];
+			position[0] = matrix.m_posit.m_x;
+			position[1] = matrix.m_posit.m_y;
+			position[2] = matrix.m_posit.m_z;
+			if (ImGui::DragFloat3("position##2", position))
+			{
+				matrix.m_posit.m_x = position[0];
+				matrix.m_posit.m_y = position[1];
+				matrix.m_posit.m_z = position[2];
+				shapeInstance.m_localMatrix = matrix;
+			};
+
+			ndReal euler[3];
+			ndVector tmp;
+			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
+
+			euler[0] = radians[0];
+			euler[1] = radians[1];
+			euler[2] = radians[2];
+			if (ImGui::DragFloat3("rotation##2", euler))
+			{
+				ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
+				newMatrix.m_posit = matrix.m_posit;
+				shapeInstance.m_localMatrix = newMatrix;
+			};
+		}
+
+		ndSharedPtr<ndShape> shape(shapeInstance.m_shape->CreateObject());
+		if (ImGui::BeginCombo("shape", shape->ClassName()))
+		{
+			auto SetDropdownList = [&shape, &shapeInstance](const char* name)
+			{
+				bool selected = strcmp(name, shape->ClassName()) ? false : true;
+				if (ImGui::Selectable(name, selected))
+				{
+					if (strcmp(name, shape->ClassName()))
+					{
+						ndTrace(("%s\n", name));
+					}
+				}
+			};
+			SetDropdownList(ndShapeBox::StaticClassName());
+			SetDropdownList(ndShapeSphere::StaticClassName());
+
+
+			ImGui::EndCombo();
+		}
 	}
 }
