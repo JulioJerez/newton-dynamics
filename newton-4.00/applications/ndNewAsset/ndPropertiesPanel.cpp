@@ -301,14 +301,22 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 		ndSharedPtr<ndShape> shape(shapeInstance.m_shape->CreateObject());
 		if (ImGui::BeginCombo("shape", shape->ClassName()))
 		{
-			auto SetDropdownList = [&shape, &shapeInstance](const char* name)
+			auto SetDropdownList = [this, rigidBody, &shape, &shapeInstance](const char* name)
 			{
 				bool selected = strcmp(name, shape->ClassName()) ? false : true;
 				if (ImGui::Selectable(name, selected))
 				{
 					if (strcmp(name, shape->ClassName()))
 					{
-						ndTrace(("%s\n", name));
+						if (strcmp(name, ndShapeSphere::StaticClassName()) == 0)
+						{
+							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionSphere());
+							instance->Serialize(&shapeInstance);
+						}
+						else
+						{
+							ndAssert(0);
+						}
 					}
 				}
 			};
