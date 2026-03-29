@@ -116,6 +116,111 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 {
 	if (ImGui::CollapsingHeader("Rigid body"))
 	{
+		ndSharedPtr<ndMeshBody> body (m_currentSelection->GetRigidBody());
+		ndMeshBodyDynamic* const rigidBody = (ndMeshBodyDynamic*)*body;
 
+		// body mass
+		{
+			ndReal scalar = ndReal (ndFloat32 (1.0f) / rigidBody->m_invMass.m_w);
+			if (ImGui::DragFloat("mass", &scalar))
+			{
+				scalar = ndMax(scalar, ndReal(0.001f));
+				rigidBody->m_invMass.m_w = ndFloat32(1.0f) / scalar;
+			};
+		}
+
+		// body max angular integration step 
+		{
+			ndReal scalar = ndReal(rigidBody->m_maxAngleStep);
+			if (ImGui::DragFloat("angle Step", &scalar))
+			{
+				scalar = ndClamp(scalar, ndReal(10.0f), ndReal(180.0f));
+				rigidBody->m_maxAngleStep = scalar;
+			};
+		}
+
+		// body max linear integration step 
+		{
+			ndReal scalar = ndReal(rigidBody->m_maxLinearStep);
+			if (ImGui::DragFloat("linear Step", &scalar))
+			{
+				scalar = ndClamp(scalar, ndReal(0.1f), ndReal(30.0f));
+				rigidBody->m_maxLinearStep = scalar;
+			};
+		}
+
+		// body intrinsic linear damp 
+		{
+			ndReal scalar = ndReal(rigidBody->m_intrinsicDamping.m_w);
+			if (ImGui::DragFloat("linear Damp", &scalar))
+			{
+				scalar = ndClamp(scalar, ndReal(0.0f), ndReal(1.0f));
+				rigidBody->m_intrinsicDamping.m_w = scalar;
+			};
+		}
+
+		// body center of mass
+		{
+			ndVector vector(rigidBody->m_localCentreOfMass);
+			ndReal real[3];
+			real[0] = vector.m_x;
+			real[1] = vector.m_y;
+			real[2] = vector.m_z;
+			if (ImGui::DragFloat3("com", real))
+			{
+				vector.m_x = real[0];
+				vector.m_y = real[1];
+				vector.m_z = real[2];
+				rigidBody->m_localCentreOfMass = vector;
+			};
+		}
+
+		// body initial linear velocity
+		{
+			ndVector vector(rigidBody->m_veloc);
+			ndReal real[3];
+			real[0] = vector.m_x;
+			real[1] = vector.m_y;
+			real[2] = vector.m_z;
+			if (ImGui::DragFloat3("veloc", real))
+			{
+				vector.m_x = real[0];
+				vector.m_y = real[1];
+				vector.m_z = real[2];
+				rigidBody->m_veloc = vector;
+			};
+		}
+
+		// body initial angular velocity
+		{
+			ndVector vector(rigidBody->m_omega);
+			ndReal real[3];
+			real[0] = vector.m_x;
+			real[1] = vector.m_y;
+			real[2] = vector.m_z;
+			if (ImGui::DragFloat3("omega", real))
+			{
+				vector.m_x = real[0];
+				vector.m_y = real[1];
+				vector.m_z = real[2];
+				rigidBody->m_omega = vector;
+			};
+		}
+
+		// body intrinsic angulat damp
+		{
+			ndVector vector(rigidBody->m_intrinsicDamping);
+			ndReal real[3];
+			real[0] = vector.m_x;
+			real[1] = vector.m_y;
+			real[2] = vector.m_z;
+			if (ImGui::DragFloat3("angle Damp", real))
+			{
+				vector.m_x = real[0];
+				vector.m_y = real[1];
+				vector.m_z = real[2];
+				rigidBody->m_intrinsicDamping = vector;
+			};
+		}
 	}
 }
