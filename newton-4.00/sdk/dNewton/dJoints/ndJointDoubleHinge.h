@@ -15,8 +15,6 @@
 #include "ndNewtonStdafx.h"
 #include "ndJointBilateralConstraint.h"
 
-#define D_MAX_DOUBLE_HINGE_RECOVERY_SPEED	ndFloat32 (0.25f)
-#define D_MAX_DOUBLE_HINGE_PENETRATION		(ndFloat32 (4.0f) * ndDegreeToRad)
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndJointDoubleHinge: public ndJointBilateralConstraint
@@ -34,7 +32,8 @@ class ndJointDoubleHinge: public ndJointBilateralConstraint
 		ndFloat32 m_maxLimit;
 		ndFloat32 m_offsetAngle;
 		ndFloat32 m_springDamperRegularizer;
-		ndInt8 m_limitState;
+		bool m_limitState;
+		bool m_hitLimits;
 	};
 
 	D_CLASS_REFLECTION(ndJointDoubleHinge, ndJointBilateralConstraint)

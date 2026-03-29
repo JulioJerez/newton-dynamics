@@ -459,28 +459,29 @@ static void BuildDoubleHinge(ndDemoEntityManager* const scene, const ndVector& o
 		// free rolling double hinge
 		ndMatrix matrix(refMatrix);
 		ndSharedPtr<ndBody> body (MakePrimitive(scene, matrix, **shape, mesh, mass));
-		body->SetOmega(ndVector(20.0f, 10.0f, 0.0f, 0.0f));
+		//body->SetOmega(ndVector(20.0f, 10.0f, 0.0f, 0.0f));
+		body->SetOmega(ndVector(0.0f, 10.0f, 0.0f, 0.0f));
 		
 		ndJointDoubleHinge* const joint = new ndJointDoubleHinge(matrix, body->GetAsBodyDynamic(), fixBody);
 		ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
 		joint->SetLimitState0(true);
-		joint->SetLimits0(-30.0f * ndDegreeToRad, 30.0f * ndDegreeToRad);
+		joint->SetLimits0(-120.0f * ndDegreeToRad, 120.0f * ndDegreeToRad);
 
 		joint->SetLimitState1(true);
-		joint->SetLimits1(-60.0f * ndDegreeToRad, 60.0f * ndDegreeToRad);
+		joint->SetLimits1(-150.0f * ndDegreeToRad, 150.0f * ndDegreeToRad);
 
 		world->AddJoint(jointPtr);
 	}
 
 	{
 		// proportional derivative double hinge motor
-		ndMatrix matrix(refMatrix);
-		matrix.m_posit.m_z += 1.8f;
-		ndSharedPtr<ndBody> body (MakePrimitive(scene, matrix, **shape, mesh, mass));
-		ndJointDoubleHinge* const joint = new ndJointDoubleHingeMotor(matrix, body->GetAsBodyDynamic(), fixBody);
-		joint->SetAsSpringDamper0(0.1f, 1500.0f, 10.0f);
-		joint->SetAsSpringDamper1(0.1f, 1500.0f, 10.0f);
-		ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
+		//ndMatrix matrix(refMatrix);
+		//matrix.m_posit.m_z += 1.8f;
+		//ndSharedPtr<ndBody> body (MakePrimitive(scene, matrix, **shape, mesh, mass));
+		//ndJointDoubleHinge* const joint = new ndJointDoubleHingeMotor(matrix, body->GetAsBodyDynamic(), fixBody);
+		//joint->SetAsSpringDamper0(0.1f, 1500.0f, 10.0f);
+		//joint->SetAsSpringDamper1(0.1f, 1500.0f, 10.0f);
+		//ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
 		//world->AddJoint(jointPtr);
 	}
 }

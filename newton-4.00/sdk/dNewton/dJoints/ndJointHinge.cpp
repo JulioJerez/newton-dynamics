@@ -14,7 +14,7 @@
 #include "ndJointHinge.h"
 #include "ndMeshComponents.h"
 
-#define D_MAX_HINGE_RECOVERY_SPEED	ndFloat32 (0.25f)
+#define D_MAX_HINGE_RECOVERY_SPEED	ndFloat32 (1.0f)
 #define D_MAX_HINGE_PENETRATION		(ndFloat32 (4.0f) * ndDegreeToRad)
 
 ndJointHinge::ndJointHinge()
