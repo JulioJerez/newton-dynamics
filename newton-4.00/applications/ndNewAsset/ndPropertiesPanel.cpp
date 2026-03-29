@@ -24,6 +24,10 @@ void ndAssetEditor::ShowPropertiesPanel()
 	if (*m_currentSelection)
 	{
 		ShowPropertiesMeshInfo();
+		if (*m_currentSelection->GetRigidBody())
+		{
+			ShowPropertiesRigidBodyInfo();
+		}
 	}
 	
 	ImGui::End();
@@ -31,7 +35,7 @@ void ndAssetEditor::ShowPropertiesPanel()
 
 void ndAssetEditor::ShowPropertiesMeshInfo()
 {
-	if (ImGui::CollapsingHeader("Mesh node properties"))
+	if (ImGui::CollapsingHeader("Transforms"))
 	{
 		char nodeName[256];
 		snprintf(nodeName, sizeof(nodeName) - 1, "%s", m_currentSelection->GetName().GetStr());
@@ -74,7 +78,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			};
 		}
 
-		// show geometru node matrix
+		// show geometry node matrix
 		if (*m_currentSelection->GetMesh())
 		{
 			ImGui::SeparatorText("geomtry transform");
@@ -105,5 +109,13 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				m_currentSelection->SetGeometryMatrix(newMatrix);
 			};
 		}
+	}
+}
+
+void ndAssetEditor::ShowPropertiesRigidBodyInfo()
+{
+	if (ImGui::CollapsingHeader("Rigid body"))
+	{
+
 	}
 }

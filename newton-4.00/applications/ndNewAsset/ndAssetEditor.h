@@ -223,6 +223,7 @@ class ndAssetEditor : public ndClassAlloc
 
 	void ShowPropertiesPanel();
 	void ShowPropertiesMeshInfo();
+	void ShowPropertiesRigidBodyInfo();
 		
 	ndSharedPtr<ndMesh> m_model;
 	ndSharedPtr<ndRender> m_renderer;
