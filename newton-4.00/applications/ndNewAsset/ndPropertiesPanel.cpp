@@ -423,8 +423,7 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 {
 	if (ImGui::CollapsingHeader("Constraint joint"))
 	{
-		ndSharedPtr<ndMeshJoint>& joint (m_currentSelection->GetJoint());
-
+		ndSharedPtr<ndMeshJoint> joint (m_currentSelection->GetJoint());
 		if (ImGui::BeginCombo("joints", joint->m_constructor.GetStr()))
 		{
 			auto SetDropdownList = [this, &joint](const char* name)
@@ -432,31 +431,50 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 				bool selected = strcmp(name, joint->m_constructor.GetStr()) ? false : true;
 				if (ImGui::Selectable(name, selected))
 				{
-					//if (strcmp(name, shape->ClassName()))
-					//{
-					//	if (strcmp(name, ndShapeBox::StaticClassName()) == 0)
-					//	{
-					//		ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionBox());
-					//		instance->Serialize(&shapeInstance);
-					//		shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
-					//	}
-					//	else if (strcmp(name, ndShapeSphere::StaticClassName()) == 0)
-					//	{
-					//		ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionSphere());
-					//		instance->Serialize(&shapeInstance);
-					//		shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
-					//	}
-					//	else if (strcmp(name, ndShapeCapsule::StaticClassName()) == 0)
-					//	{
-					//		ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionCapsule());
-					//		instance->Serialize(&shapeInstance);
-					//		shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
-					//	}
-					//	else
-					//	{
-					//		ndAssert(0);
-					//	}
-					//}
+					if (strcmp(name, ndJointHinge::StaticClassName()) == 0)
+					{
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointHinge());
+						newJoint->SetLocalMatrix0(joint->m_localFrame0);
+						newJoint->SetLocalMatrix1(joint->m_localFrame1);
+						m_currentSelection->SetJoint(newJoint->GetMeshJoint());
+						joint = m_currentSelection->GetJoint();
+					}
+					else if (strcmp(name, ndJointSlider::StaticClassName()) == 0)
+					{
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointSlider());
+						newJoint->SetLocalMatrix0(joint->m_localFrame0);
+						newJoint->SetLocalMatrix1(joint->m_localFrame1);
+						m_currentSelection->SetJoint(newJoint->GetMeshJoint());
+						joint = m_currentSelection->GetJoint();
+					}
+					else if (strcmp(name, ndJointDoubleHinge::StaticClassName()) == 0)
+					{
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointDoubleHinge());
+						newJoint->SetLocalMatrix0(joint->m_localFrame0);
+						newJoint->SetLocalMatrix1(joint->m_localFrame1);
+						m_currentSelection->SetJoint(newJoint->GetMeshJoint());
+						joint = m_currentSelection->GetJoint();
+					}
+					else if (strcmp(name, ndJointSpherical::StaticClassName()) == 0)
+					{
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointSpherical());
+						newJoint->SetLocalMatrix0(joint->m_localFrame0);
+						newJoint->SetLocalMatrix1(joint->m_localFrame1);
+						m_currentSelection->SetJoint(newJoint->GetMeshJoint());
+						joint = m_currentSelection->GetJoint();
+					}
+					else if (strcmp(name, ndJointFix6dof::StaticClassName()) == 0)
+					{
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointFix6dof());
+						newJoint->SetLocalMatrix0(joint->m_localFrame0);
+						newJoint->SetLocalMatrix1(joint->m_localFrame1);
+						m_currentSelection->SetJoint(newJoint->GetMeshJoint());
+						joint = m_currentSelection->GetJoint();
+					}
+					else
+					{
+						ndAssert(0);
+					}
 				}
 			};
 			SetDropdownList(ndJointFix6dof::StaticClassName());
@@ -464,6 +482,7 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 			SetDropdownList(ndJointSlider::StaticClassName());
 			SetDropdownList(ndJointDoubleHinge::StaticClassName());
 			SetDropdownList(ndJointSpherical::StaticClassName());
+			SetDropdownList(ndJointWheel::StaticClassName());
 
 			ImGui::EndCombo();
 		}
@@ -471,7 +490,7 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 		// child local frame
 		{
 			ImGui::SeparatorText("child local Frame");
-			ndMatrix matrix(joint->m_locatFrame0);
+			ndMatrix matrix(joint->m_localFrame0);
 			ndReal position[3];
 			position[0] = matrix.m_posit.m_x;
 			position[1] = matrix.m_posit.m_y;
@@ -481,7 +500,7 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 				matrix.m_posit.m_x = position[0];
 				matrix.m_posit.m_y = position[1];
 				matrix.m_posit.m_z = position[2];
-				joint->m_locatFrame0 = matrix;
+				joint->m_localFrame0 = matrix;
 			};
 
 			ndReal euler[3];
@@ -495,14 +514,14 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 			{
 				ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
 				newMatrix.m_posit = matrix.m_posit;
-				joint->m_locatFrame0 = newMatrix;
+				joint->m_localFrame0 = newMatrix;
 			};
 		}
 
 		// parent local frame
 		{
 			ImGui::SeparatorText("parent local Frame");
-			ndMatrix matrix(joint->m_locatFrame1);
+			ndMatrix matrix(joint->m_localFrame1);
 			ndReal position[3];
 			position[0] = matrix.m_posit.m_x;
 			position[1] = matrix.m_posit.m_y;
@@ -512,7 +531,7 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 				matrix.m_posit.m_x = position[0];
 				matrix.m_posit.m_y = position[1];
 				matrix.m_posit.m_z = position[2];
-				joint->m_locatFrame1 = matrix;
+				joint->m_localFrame1 = matrix;
 			};
 
 			ndReal euler[3];
@@ -526,8 +545,33 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 			{
 				ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
 				newMatrix.m_posit = matrix.m_posit;
-				joint->m_locatFrame1 = newMatrix;
+				joint->m_localFrame1 = newMatrix;
 			};
 		}
+
+		if (strcmp(joint->m_constructor.GetStr(), ndJointHinge::StaticClassName()) == 0)
+		{
+		}
+		else if (strcmp(joint->m_constructor.GetStr(), ndJointSlider::StaticClassName()) == 0)
+		{
+		}
+		else if (strcmp(joint->m_constructor.GetStr(), ndJointDoubleHinge::StaticClassName()) == 0)
+		{
+		}
+		else if (strcmp(joint->m_constructor.GetStr(), ndJointSpherical::StaticClassName()) == 0)
+		{
+		}
+		else if (strcmp(joint->m_constructor.GetStr(), ndJointFix6dof::StaticClassName()) == 0)
+		{
+		}
+		else if (strcmp(joint->m_constructor.GetStr(), ndJointWheel::StaticClassName()) == 0)
+		{
+		}
+		else
+		{
+			ndAssert(0);
+		}
+
+
 	}
 }
