@@ -12,7 +12,6 @@
 #include "ndNewAssetStdafx.h"
 #include "ndAssetEditor.h"
 
-
 void ndAssetEditor::ShowPropertiesPanel()
 {
 	ImGui::Begin("Properties Panel");
@@ -22,7 +21,10 @@ void ndAssetEditor::ShowPropertiesPanel()
 	frame.m_size = ImGui::GetWindowSize();
 	m_windowSizes.PushBack(frame);
 
-	ShowPropertiesMeshInfo();
+	if (*m_currentSelection)
+	{
+		ShowPropertiesMeshInfo();
+	}
 	
 	ImGui::End();
 }
@@ -31,16 +33,14 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 {
 	if (ImGui::CollapsingHeader("Mesh node properties"))
 	{
-		static char xxxxx0[256];
-		static char xxxxx1[256];
-		//ImGuiInputTextFlags flags = 0;
-		//flags = ImGuiInputTextFlags_CallbackAlways;
-		//flags |= ImGuiInputTextFlags_CallbackHistory;
-		//ImGui::InputText("node Name", xxx, 255, flags, ImGuiInputTextCallback callback = NULL, void* user_data = NULL);
-		ImGui::InputText("node Name0", xxxxx0, 255);
-		if (ImGui::InputText("node Name1", xxxxx1, 255))
+		char nodeName[256];
+		snprintf(nodeName, sizeof(nodeName) - 1, "%s", m_currentSelection->GetName().GetStr());
+		if (ImGui::InputText("node Name1", nodeName, sizeof(nodeName) - 1))
 		{
-
+			if (strcmp(m_currentSelection->GetName().GetStr(), nodeName))
+			{
+				m_currentSelection->SetName(ndString(nodeName));
+			}
 		}
 
 		ImGui::SeparatorText("Transform");
