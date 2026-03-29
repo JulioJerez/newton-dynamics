@@ -314,7 +314,29 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 		else if (strcmp(shape->ClassName(), ndShapeSphere::StaticClassName()) == 0)
 		{
 			ndReal size = ndReal(1.0f);
-			if (ImGui::DragFloat("radious##1", &size))
+			if (ImGui::DragFloat("radio0##1", &size))
+			{
+
+			}
+		}
+		else if (strcmp(shape->ClassName(), ndShapeCapsule::StaticClassName()) == 0)
+		{
+			ndReal radio0 = ndReal(1.0f);
+			if (ImGui::DragFloat("radio0##1", &radio0))
+			{
+
+			}
+
+			ndReal radio1 = ndReal(2.0f);
+			if (ImGui::DragFloat("radious1##1", &radio1))
+			{
+
+			}
+		}
+		else if (strcmp(shape->ClassName(), ndShapeConvexHull::StaticClassName()) == 0)
+		{
+			ndInt32 points = 100;
+			if (ImGui::DragInt("max point count##1", &points))
 			{
 
 			}
@@ -345,6 +367,11 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionSphere());
 							instance->Serialize(&shapeInstance);
 						}
+						else if (strcmp(name, ndShapeCapsule::StaticClassName()) == 0)
+						{
+							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionCapsule());
+							instance->Serialize(&shapeInstance);
+						}
 						else
 						{
 							ndAssert(0);
@@ -354,7 +381,8 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 			};
 			SetDropdownList(ndShapeBox::StaticClassName());
 			SetDropdownList(ndShapeSphere::StaticClassName());
-
+			SetDropdownList(ndShapeCapsule::StaticClassName());
+			SetDropdownList(ndShapeConvexHull::StaticClassName());
 
 			ImGui::EndCombo();
 		}

@@ -19,6 +19,21 @@ void ndAssetEditor::ShowOutlierToolBar()
 	ImGui::Button("undo");
 	ImGui::SameLine();
 	ImGui::Button("redo");
+	ImGui::SameLine();
+	if (m_runScene)
+	{
+		if (ImGui::Button("stop"))
+		{
+			m_runScene = false;
+		}
+	}
+	else
+	{
+		if (ImGui::Button("run"))
+		{
+			m_runScene = true;
+		}
+	}
 }
 
 void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root)
