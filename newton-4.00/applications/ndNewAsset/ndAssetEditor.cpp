@@ -801,16 +801,10 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::EndMenu();
 		}
 
-		//if (ImGui::BeginMenu("Run", !m_runScene))
-		//{
-		//	m_runScene = true;
-		//	ImGui::EndMenu();
-		//}
-		//if (ImGui::BeginMenu("Stop", m_runScene))
-		//{
-		//	m_runScene = false;
-		//	ImGui::EndMenu();
-		//}
+		if (ImGui::BeginMenu("Tools"))
+		{
+			ImGui::EndMenu();
+		}
 
 		ImGui::EndMenuBar();
 	}
