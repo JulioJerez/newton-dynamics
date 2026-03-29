@@ -401,8 +401,8 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildPolicyClass()
 	bias.SetCount(m_parameters.m_numberOfActions * 2);
 	slope.SetCount(m_parameters.m_numberOfActions * 2);
 
-	ndBrainFloat minSigma = ndSqrt(m_parameters.m_minSigmaSquared);
-	ndBrainFloat maxSigma = ndSqrt(m_parameters.m_maxSigmaSquared);
+	ndBrainFloat minSigma = ndBrainFloat(ndSqrt(m_parameters.m_minSigmaSquared));
+	ndBrainFloat maxSigma = ndBrainFloat(ndSqrt(m_parameters.m_maxSigmaSquared));
 	ndBrainFloat s = ndBrainFloat(0.5f) * (maxSigma - minSigma);
 	ndBrainFloat b = s + minSigma;
 	for (ndInt32 i = 0; i < m_parameters.m_numberOfActions; ++i)

@@ -58,9 +58,9 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			ImGui::SeparatorText("Transform");
 			ndMatrix matrix(m_currentSelection->GetMatrix());
 			ndReal position[3];
-			position[0] = matrix.m_posit.m_x;
-			position[1] = matrix.m_posit.m_y;
-			position[2] = matrix.m_posit.m_z;
+			position[0] = ndReal(matrix.m_posit.m_x);
+			position[1] = ndReal(matrix.m_posit.m_y);
+			position[2] = ndReal(matrix.m_posit.m_z);
 			if (ImGui::DragFloat3("position", position))
 			{
 				matrix.m_posit.m_x = position[0];
@@ -73,9 +73,9 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			ndVector tmp;
 			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
 
-			euler[0] = radians[0];
-			euler[1] = radians[1];
-			euler[2] = radians[2];
+			euler[0] = ndReal(radians[0]);
+			euler[1] = ndReal(radians[1]);
+			euler[2] = ndReal(radians[2]);
 			if (ImGui::DragFloat3("rotation", euler))
 			{
 				ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
@@ -90,9 +90,9 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			ImGui::SeparatorText("geomtry transform");
 			ndMatrix matrix(m_currentSelection->GetGeometryMatrix());
 			ndReal position[3];
-			position[0] = matrix.m_posit.m_x;
-			position[1] = matrix.m_posit.m_y;
-			position[2] = matrix.m_posit.m_z;
+			position[0] = ndReal(matrix.m_posit.m_x);
+			position[1] = ndReal(matrix.m_posit.m_y);
+			position[2] = ndReal(matrix.m_posit.m_z);
 			if (ImGui::DragFloat3("position##1", position))
 			{
 				matrix.m_posit.m_x = position[0];
@@ -105,9 +105,9 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			ndVector tmp;
 			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
 
-			euler[0] = radians[0];
-			euler[1] = radians[1];
-			euler[2] = radians[2];
+			euler[0] = ndReal(radians[0]);
+			euler[1] = ndReal(radians[1]);
+			euler[2] = ndReal(radians[2]);
 			if (ImGui::DragFloat3("rotation##1", euler))
 			{
 				ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
@@ -169,9 +169,9 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 		{
 			ndVector vector(rigidBody->m_localCentreOfMass);
 			ndReal real[3];
-			real[0] = vector.m_x;
-			real[1] = vector.m_y;
-			real[2] = vector.m_z;
+			real[0] = ndReal(vector.m_x);
+			real[1] = ndReal(vector.m_y);
+			real[2] = ndReal(vector.m_z);
 			if (ImGui::DragFloat3("com", real))
 			{
 				vector.m_x = real[0];
@@ -185,9 +185,9 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 		{
 			ndVector vector(rigidBody->m_veloc);
 			ndReal real[3];
-			real[0] = vector.m_x;
-			real[1] = vector.m_y;
-			real[2] = vector.m_z;
+			real[0] = ndReal(vector.m_x);
+			real[1] = ndReal(vector.m_y);
+			real[2] = ndReal(vector.m_z);
 			if (ImGui::DragFloat3("veloc", real))
 			{
 				vector.m_x = real[0];
@@ -201,9 +201,9 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 		{
 			ndVector vector(rigidBody->m_omega);
 			ndReal real[3];
-			real[0] = vector.m_x;
-			real[1] = vector.m_y;
-			real[2] = vector.m_z;
+			real[0] = ndReal(vector.m_x);
+			real[1] = ndReal(vector.m_y);
+			real[2] = ndReal(vector.m_z);
 			if (ImGui::DragFloat3("omega", real))
 			{
 				vector.m_x = real[0];
@@ -217,9 +217,9 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 		{
 			ndVector vector(rigidBody->m_intrinsicDamping);
 			ndReal real[3];
-			real[0] = vector.m_x;
-			real[1] = vector.m_y;
-			real[2] = vector.m_z;
+			real[0] = ndReal(vector.m_x);
+			real[1] = ndReal(vector.m_y);
+			real[2] = ndReal(vector.m_z);
 			if (ImGui::DragFloat3("angular damp", real))
 			{
 				vector.m_x = real[0];
@@ -236,9 +236,9 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			ndMatrix matrix(rigidBody->m_inertiaPrincipalAxis);
 			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
 
-			euler[0] = radians[0];
-			euler[1] = radians[1];
-			euler[2] = radians[2];
+			euler[0] = ndReal(radians[0]);
+			euler[1] = ndReal(radians[1]);
+			euler[2] = ndReal(radians[2]);
 			if (ImGui::DragFloat3("inertia axis", euler))
 			{
 				const ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
@@ -374,9 +374,9 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 		{
 			ndVector vector(shapeInstance.m_scale);
 			ndReal real[3];
-			real[0] = vector.m_x;
-			real[1] = vector.m_y;
-			real[2] = vector.m_z;
+			real[0] = ndReal(vector.m_x);
+			real[1] = ndReal(vector.m_y);
+			real[2] = ndReal(vector.m_z);
 			if (ImGui::DragFloat3("scale##1", real))
 			{
 				vector.m_x = ndMax(real[0], ndReal(0.01f));
@@ -391,9 +391,9 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 			//ImGui::SeparatorText("local transform");
 			ndMatrix matrix(shapeInstance.m_localMatrix);
 			ndReal position[3];
-			position[0] = matrix.m_posit.m_x;
-			position[1] = matrix.m_posit.m_y;
-			position[2] = matrix.m_posit.m_z;
+			position[0] = ndReal(matrix.m_posit.m_x);
+			position[1] = ndReal(matrix.m_posit.m_y);
+			position[2] = ndReal(matrix.m_posit.m_z);
 			if (ImGui::DragFloat3("position##2", position))
 			{
 				matrix.m_posit.m_x = position[0];
@@ -406,9 +406,9 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 			ndVector tmp;
 			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
 
-			euler[0] = radians[0];
-			euler[1] = radians[1];
-			euler[2] = radians[2];
+			euler[0] = ndReal(radians[0]);
+			euler[1] = ndReal(radians[1]);
+			euler[2] = ndReal(radians[2]);
 			if (ImGui::DragFloat3("rotation##2", euler))
 			{
 				ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
@@ -492,9 +492,9 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 			ImGui::SeparatorText("child local Frame");
 			ndMatrix matrix(joint->m_localFrame0);
 			ndReal position[3];
-			position[0] = matrix.m_posit.m_x;
-			position[1] = matrix.m_posit.m_y;
-			position[2] = matrix.m_posit.m_z;
+			position[0] = ndReal(matrix.m_posit.m_x);
+			position[1] = ndReal(matrix.m_posit.m_y);
+			position[2] = ndReal(matrix.m_posit.m_z);
 			if (ImGui::DragFloat3("position##2", position))
 			{
 				matrix.m_posit.m_x = position[0];
@@ -507,9 +507,9 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 			ndVector tmp;
 			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
 
-			euler[0] = radians[0];
-			euler[1] = radians[1];
-			euler[2] = radians[2];
+			euler[0] = ndReal(radians[0]);
+			euler[1] = ndReal(radians[1]);
+			euler[2] = ndReal(radians[2]);
 			if (ImGui::DragFloat3("rotation##2", euler))
 			{
 				ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
@@ -523,9 +523,9 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 			ImGui::SeparatorText("parent local Frame");
 			ndMatrix matrix(joint->m_localFrame1);
 			ndReal position[3];
-			position[0] = matrix.m_posit.m_x;
-			position[1] = matrix.m_posit.m_y;
-			position[2] = matrix.m_posit.m_z;
+			position[0] = ndReal(matrix.m_posit.m_x);
+			position[1] = ndReal(matrix.m_posit.m_y);
+			position[2] = ndReal(matrix.m_posit.m_z);
 			if (ImGui::DragFloat3("position##3", position))
 			{
 				matrix.m_posit.m_x = position[0];
@@ -538,9 +538,9 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 			ndVector tmp;
 			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
 
-			euler[0] = radians[0];
-			euler[1] = radians[1];
-			euler[2] = radians[2];
+			euler[0] = ndReal(radians[0]);
+			euler[1] = ndReal(radians[1]);
+			euler[2] = ndReal(radians[2]);
 			if (ImGui::DragFloat3("rotation##3", euler))
 			{
 				ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
