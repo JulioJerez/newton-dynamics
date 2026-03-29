@@ -26,6 +26,7 @@ void ndAssetEditor::ShowPropertiesPanel()
 		ShowPropertiesMeshInfo();
 		if (*m_currentSelection->GetRigidBody())
 		{
+			ShowPropertiesCollisionInfo();
 			ShowPropertiesRigidBodyInfo();
 		}
 	}
@@ -207,14 +208,14 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			};
 		}
 
-		// body intrinsic angulat damp
+		// body intrinsic angular damp
 		{
 			ndVector vector(rigidBody->m_intrinsicDamping);
 			ndReal real[3];
 			real[0] = vector.m_x;
 			real[1] = vector.m_y;
 			real[2] = vector.m_z;
-			if (ImGui::DragFloat3("angle Damp", real))
+			if (ImGui::DragFloat3("angular damp", real))
 			{
 				vector.m_x = real[0];
 				vector.m_y = real[1];
@@ -222,5 +223,33 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 				rigidBody->m_intrinsicDamping = vector;
 			};
 		}
+
+		// body principal axis of inertia
+		{
+			ndReal euler[3];
+			ndVector tmp;
+			ndMatrix matrix(rigidBody->m_inertiaPrincipalAxis);
+			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
+
+			euler[0] = radians[0];
+			euler[1] = radians[1];
+			euler[2] = radians[2];
+			if (ImGui::DragFloat3("inertia axis", euler))
+			{
+				const ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
+				rigidBody->m_inertiaPrincipalAxis = newMatrix;
+			};
+		}
+	}
+}
+
+void ndAssetEditor::ShowPropertiesCollisionInfo()
+{
+	if (ImGui::CollapsingHeader("Collision shape"))
+	{
+		ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
+		ndMeshBodyKinematic* const rigidBody = (ndMeshBodyKinematic*)*body;
+		ndMeshShapeInstance& shapeInstance = rigidBody->m_shapeInstance;
+
 	}
 }
