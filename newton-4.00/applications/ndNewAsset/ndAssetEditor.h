@@ -219,23 +219,19 @@ class ndAssetEditor : public ndClassAlloc
 
 	void ShowOutlierPanel();
 	void ShowOutlierToolBar();
-	void ShowOutlierExplorer(ndMesh* const root);
+	void ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root);
 
 	void ShowPropertiesPanel();
 	void ShowPropertiesMeshInfo();
 		
-	//ndPhysicsWorld* m_world;
 	ndSharedPtr<ndMesh> m_model;
 	ndSharedPtr<ndRender> m_renderer;
 	ndSharedPtr<ndRenderPass> m_menuRenderPass;
 	ndSharedPtr<ndRenderPass> m_colorRenderPass;
-	//ndSharedPtr<ndRenderPass> m_shadowRenderPass;
-	//ndSharedPtr<ndRenderPass> m_environmentRenderPass;
-	//ndSharedPtr<ndRenderPass> m_transparentRenderPass;
+	ndSharedPtr<ndMesh> m_currentSelection;
+
 	//ndSharedPtr<ndRenderPass> m_debugDisplayRenderPass;
 	//ndSharedPtr<ndRenderTexture> m_environmentTexture;
-	//ndSharedPtr<ndDemoHelper> m_demoHelper;
-	//ndSharedPtr<ndDemoUIpanel> m_demoUIpanel;
 	ndSharedPtr<ndRenderSceneNode> m_defaultCamera;
 
 	ndSharedPtr<OnPostUpdate> m_onPostUpdate;

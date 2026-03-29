@@ -15,8 +15,6 @@
 
 void ndAssetEditor::ShowPropertiesPanel()
 {
-	//bool* open = false;
-	//ndInt32 flags = 0;
 	ImGui::Begin("Properties Panel");
 
 	WindowFrame frame;
@@ -25,14 +23,13 @@ void ndAssetEditor::ShowPropertiesPanel()
 	m_windowSizes.PushBack(frame);
 
 	ShowPropertiesMeshInfo();
-
 	
 	ImGui::End();
 }
 
 void ndAssetEditor::ShowPropertiesMeshInfo()
 {
-	if (ImGui::CollapsingHeader("Mesh properties"))
+	if (ImGui::CollapsingHeader("Mesh node properties"))
 	{
 		static char xxxxx0[256];
 		static char xxxxx1[256];
@@ -71,7 +68,5 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 		{
 			//ndAssert(0);
 		};
-
-
 	}
 }

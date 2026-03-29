@@ -21,15 +21,13 @@ void ndAssetEditor::ShowOutlierToolBar()
 	ImGui::Button("redo");
 }
 
-void ndAssetEditor::ShowOutlierExplorer(ndMesh* const root)
+void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root)
 {
 	ImGuiTreeNodeFlags options = 0;
 	options |= ImGuiTreeNodeFlags_DefaultOpen;
 	options |= ImGuiTreeNodeFlags_OpenOnArrow;
 
-	static ndMesh* xxxxx = nullptr;
-
-	if (xxxxx == root)
+	if (m_currentSelection == root)
 	{
 		options |= ImGuiTreeNodeFlags_Selected;
 	}
@@ -38,7 +36,8 @@ void ndAssetEditor::ShowOutlierExplorer(ndMesh* const root)
 	{
 		if (ImGui::IsItemClicked())
 		{
-			xxxxx = root;
+			//m_currentSelection = root;
+			m_currentSelection = (m_currentSelection != root) ? root : ndSharedPtr<ndMesh>(nullptr);
 		}
 
 		options = 0;
@@ -71,7 +70,7 @@ void ndAssetEditor::ShowOutlierExplorer(ndMesh* const root)
 		const ndList<ndSharedPtr<ndMesh>>& children = root->GetChildren();
 		for (ndList<ndSharedPtr<ndMesh>>::ndNode* child = children.GetFirst(); child; child = child->GetNext())
 		{
-			ndMesh* const childMesh = *child->GetInfo();
+			ndSharedPtr<ndMesh> childMesh (child->GetInfo());
 			ShowOutlierExplorer(childMesh);
 		}
 		ImGui::TreePop();
@@ -95,7 +94,7 @@ void ndAssetEditor::ShowOutlierPanel()
 	ShowOutlierToolBar();
 	if (*m_model)
 	{
-		ShowOutlierExplorer(*m_model);
+		ShowOutlierExplorer(m_model);
 	}
 
 	//ImGui::PopItemWidth();
