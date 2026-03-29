@@ -32,14 +32,14 @@
 //#define DEFAULT_SCENE	5		// basic Trigger
 //#define DEFAULT_SCENE	6		// basic Particles
 //#define DEFAULT_SCENE	7		// conservation of momentum 
-//#define DEFAULT_SCENE	8		// basic joints
+#define DEFAULT_SCENE	8		// basic joints
 //#define DEFAULT_SCENE	9		// static mesh collision 
-//#define DEFAULT_SCENE	10		// basic heightfield collision
-//#define DEFAULT_SCENE	11		// basic user heightfield 2d collision
+//#define DEFAULT_SCENE	10		// basic height field collision
+//#define DEFAULT_SCENE	11		// basic user height field 2d collision
 //#define DEFAULT_SCENE	12		// basic user marching cube 3d collision
 //#define DEFAULT_SCENE	13		// static compound scene collision 
 //#define DEFAULT_SCENE	14		// basic convex approximate compound shapes
-//#define DEFAULT_SCENE	15		// basic model, a npd vehicle prop
+//#define DEFAULT_SCENE	15		// basic model, a nd vehicle prop
 //#define DEFAULT_SCENE	16		// export articulated model
 //#define DEFAULT_SCENE	17		// basic rag doll
 //#define DEFAULT_SCENE	18		// complex model, implement a complex model with joints
@@ -48,7 +48,7 @@
 //#define DEFAULT_SCENE	21		// third person player capsule
 //#define DEFAULT_SCENE	22		// player capsule in a planet
 //#define DEFAULT_SCENE	23		// cart pole SAC trained controller
-#define DEFAULT_SCENE	24		// cart pole PPO trained controller
+//#define DEFAULT_SCENE	24		// cart pole PPO trained controller
 //#define DEFAULT_SCENE	25		// unicycle SAC trained controller
 //#define DEFAULT_SCENE	26		// unicycle PPO trained controller
 //#define DEFAULT_SCENE	27		// biped SAC trained controller
@@ -679,7 +679,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_showConcaveEdge = true;
 	//m_showMeshSkeleton = true;
 	//m_autoSleepMode = false;
-	///m_hidePostUpdate = true;
+	//m_hidePostUpdate = true;
 	//m_hideVisualMeshes = true;
 	//m_solverMode = ndWorld::ndStandardSolver;
 	//m_solverMode = ndWorld::ndSimdSoaSolver;
@@ -691,11 +691,11 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_showCenterOfMass = true;
 	//m_showNormalForces = true;
 	//m_showContactPoints = true;
-	//m_showJointDebugInfo = true;
+	m_showJointDebugInfo = true;
 	//m_showModelsDebugInfo = true;
 	//m_showCollisionMeshMode = 1;
 	//m_showCollisionMeshMode = 2;
-	//m_showCollisionMeshMode = 3;		// solid wire frame
+	m_showCollisionMeshMode = 3;		// solid wire frame
 	m_synchronousPhysicsUpdate = true;
 	m_synchronousParticlesUpdate = true;
 	//m_showStaticMeshCollidingFaces = true;

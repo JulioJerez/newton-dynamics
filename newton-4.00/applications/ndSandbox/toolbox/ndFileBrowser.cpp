@@ -119,9 +119,11 @@ bool dGetSaveFileNameSerialization(char* const fileName, int maxSize)
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
 	bool state = GetSaveFileName(&ofn) ? true : false;
-	if (state) {
+	if (state) 
+	{
 		char* const ext = strrchr (fileName, '.');
-		if (!ext) {
+		if (!ext) 
+		{
 			strcat (fileName, ".bin");
 		}
 	}

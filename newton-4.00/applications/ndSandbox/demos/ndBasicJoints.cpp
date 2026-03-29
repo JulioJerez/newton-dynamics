@@ -459,23 +459,30 @@ static void BuildDoubleHinge(ndDemoEntityManager* const scene, const ndVector& o
 		// free rolling double hinge
 		ndMatrix matrix(refMatrix);
 		ndSharedPtr<ndBody> body (MakePrimitive(scene, matrix, **shape, mesh, mass));
-		body->SetOmega(ndVector(20.0f, 10.0f, 0.0f, 0.0f));
+		//body->SetOmega(ndVector(20.0f, 10.0f, 0.0f, 0.0f));
+		body->SetOmega(ndVector(0.0f, 10.0f, 0.0f, 0.0f));
 		
 		ndJointDoubleHinge* const joint = new ndJointDoubleHinge(matrix, body->GetAsBodyDynamic(), fixBody);
 		ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
+		joint->SetLimitState0(true);
+		joint->SetLimits0(-120.0f * ndDegreeToRad, 120.0f * ndDegreeToRad);
+
+		joint->SetLimitState1(true);
+		joint->SetLimits1(-150.0f * ndDegreeToRad, 150.0f * ndDegreeToRad);
+
 		world->AddJoint(jointPtr);
 	}
 
 	{
 		// proportional derivative double hinge motor
-		ndMatrix matrix(refMatrix);
-		matrix.m_posit.m_z += 1.8f;
-		ndSharedPtr<ndBody> body (MakePrimitive(scene, matrix, **shape, mesh, mass));
-		ndJointDoubleHinge* const joint = new ndJointDoubleHingeMotor(matrix, body->GetAsBodyDynamic(), fixBody);
-		joint->SetAsSpringDamper0(0.1f, 1500.0f, 10.0f);
-		joint->SetAsSpringDamper1(0.1f, 1500.0f, 10.0f);
-		ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
-		world->AddJoint(jointPtr);
+		//ndMatrix matrix(refMatrix);
+		//matrix.m_posit.m_z += 1.8f;
+		//ndSharedPtr<ndBody> body (MakePrimitive(scene, matrix, **shape, mesh, mass));
+		//ndJointDoubleHinge* const joint = new ndJointDoubleHingeMotor(matrix, body->GetAsBodyDynamic(), fixBody);
+		//joint->SetAsSpringDamper0(0.1f, 1500.0f, 10.0f);
+		//joint->SetAsSpringDamper1(0.1f, 1500.0f, 10.0f);
+		//ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
+		//world->AddJoint(jointPtr);
 	}
 }
 
@@ -945,18 +952,18 @@ void ndBasicJoints (ndDemoEntityManager* const scene)
 	// build a floor
 	ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "blueCheckerboard.png", 0.1f, true));
 
-	BuildBallSocket(scene, ndVector(0.0f, 0.0f, -7.0f, 1.0f));
-	BuildHinge(scene, ndVector(0.0f, 0.0f, -2.0f, 1.0f), 10.0f, 1.0f);
-	BuildSlider(scene, ndVector(0.0f, 0.0f, 1.0f, 1.0f), 100.0f, 0.75f);
-	BuildGear(scene, ndVector(0.0f, 0.0f, -4.0f, 1.0f), 100.0f, 0.75f);
+	//BuildBallSocket(scene, ndVector(0.0f, 0.0f, -7.0f, 1.0f));
+	//BuildHinge(scene, ndVector(0.0f, 0.0f, -2.0f, 1.0f), 10.0f, 1.0f);
+	//BuildSlider(scene, ndVector(0.0f, 0.0f, 1.0f, 1.0f), 100.0f, 0.75f);
+	//BuildGear(scene, ndVector(0.0f, 0.0f, -4.0f, 1.0f), 100.0f, 0.75f);
 	BuildDoubleHinge(scene, ndVector(0.0f, 0.0f, 4.0f, 1.0f), 100.0f, 0.75f);
-	BuildRoller(scene, ndVector(0.0f, 0.0f, 9.0f, 1.0f), 10.0f, 0.75f);
-	BuildCylindrical(scene, ndVector(0.0f, 0.0f, 12.0f, 1.0f), 10.0f, 0.75f);
-	BuildFixDistanceJoints(scene, ndVector( -4.0f, 0.0f, -5.0f, 1.0f));
-	BuildRollingFriction(scene, ndVector(-4.0f, 0.0f, 5.0f, 1.0f), 10.0f, 0.5f);
-	BuildPathFollow(scene, ndVector(40.0f, 0.0f, 0.0f, 1.0f));
-	BuildWheel(scene, ndVector(-4.0f, 0.0f, 0.0f, 1.0f), 100.0f, 0.75f);
-	BuildUpVector(scene, ndVector(-4.0f, 0.0f, -8.0f, 1.0f), 100.0f, 0.75f);
+	//BuildRoller(scene, ndVector(0.0f, 0.0f, 9.0f, 1.0f), 10.0f, 0.75f);
+	//BuildCylindrical(scene, ndVector(0.0f, 0.0f, 12.0f, 1.0f), 10.0f, 0.75f);
+	//BuildFixDistanceJoints(scene, ndVector( -4.0f, 0.0f, -5.0f, 1.0f));
+	//BuildRollingFriction(scene, ndVector(-4.0f, 0.0f, 5.0f, 1.0f), 10.0f, 0.5f);
+	//BuildPathFollow(scene, ndVector(40.0f, 0.0f, 0.0f, 1.0f));
+	//BuildWheel(scene, ndVector(-4.0f, 0.0f, 0.0f, 1.0f), 100.0f, 0.75f);
+	//BuildUpVector(scene, ndVector(-4.0f, 0.0f, -8.0f, 1.0f), 100.0f, 0.75f);
 	
 	ndQuaternion rot;
 	ndVector origin(-20.0f, 5.0f, 0.0f, 1.0f);

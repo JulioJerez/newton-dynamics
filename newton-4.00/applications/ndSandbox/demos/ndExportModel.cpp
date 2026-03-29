@@ -878,13 +878,13 @@ void ndExportModel(ndDemoEntityManager* const scene)
     ndMatrix origin(ndGetIdentityMatrix());
     origin.m_posit.m_y = 3.0f;
     origin.m_posit.m_z = 2.0f;
-    //ndBoxTricycle::BoxTricycle(scene, origin, 100.0f, 0.75f);
+    ndBoxTricycle::BoxTricycle(scene, origin, 100.0f, 0.75f);
 
     origin.m_posit.m_z = 0.0f;
     ndBasicRagdoll::RagDoll(scene, origin);
 
     origin.m_posit.m_z = -3.0f;
-    //ndDaveRagdoll::RagDoll(scene, origin);
+    ndDaveRagdoll::RagDoll(scene, origin);
 
     ndQuaternion rot;
     origin.m_posit.m_x -= 8.0f;
