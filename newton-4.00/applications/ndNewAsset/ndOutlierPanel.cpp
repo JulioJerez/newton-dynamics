@@ -32,7 +32,13 @@ void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root)
 		options |= ImGuiTreeNodeFlags_Selected;
 	}
 
-	if (ImGui::TreeNodeEx(root->GetName().GetStr(), options))
+	char nodeName[256];
+	snprintf(nodeName, sizeof(nodeName) - 1, "%s", root->GetName().GetStr());
+	if (nodeName[0] == 0)
+	{
+		snprintf(nodeName, sizeof(nodeName) - 1, "unnamed");
+	}
+	if (ImGui::TreeNodeEx(nodeName, options))
 	{
 		if (ImGui::IsItemClicked())
 		{

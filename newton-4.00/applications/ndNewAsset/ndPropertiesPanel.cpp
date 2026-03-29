@@ -43,30 +43,67 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			}
 		}
 
-		ImGui::SeparatorText("Transform");
-		static ndReal v1[3];
-		if (ImGui::DragFloat3("position", v1))
+		// show node matrix
 		{
-			//ndAssert(0);
-		};
+			ImGui::SeparatorText("Transform");
+			ndMatrix matrix(m_currentSelection->GetMatrix());
+			ndReal position[3];
+			position[0] = matrix.m_posit.m_x;
+			position[1] = matrix.m_posit.m_y;
+			position[2] = matrix.m_posit.m_z;
+			if (ImGui::DragFloat3("position", position))
+			{
+				matrix.m_posit.m_x = position[0];
+				matrix.m_posit.m_y = position[1];
+				matrix.m_posit.m_z = position[2];
+				m_currentSelection->SetMatrix(matrix);
+			};
 
-		static ndReal v[3];
-		if (ImGui::DragFloat3("rotation", v))
-		{
-			//ndAssert(0);
-		};
+			ndReal euler[3];
+			ndVector tmp;
+			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
 
-		static ndReal v3[3];
-		ImGui::SeparatorText("geomtry transform");
-		if (ImGui::DragFloat3("position##1", v3))
-		{
-			//ndAssert(0);
-		};
+			euler[0] = radians[0];
+			euler[1] = radians[1];
+			euler[2] = radians[2];
+			if (ImGui::DragFloat3("rotation", euler))
+			{
+				ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
+				newMatrix.m_posit = matrix.m_posit;
+				m_currentSelection->SetMatrix(newMatrix);
+			};
+		}
 
-		static ndReal v2[3];
-		if (ImGui::DragFloat3("rotation##1", v2))
+		// show geometru node matrix
+		if (*m_currentSelection->GetMesh())
 		{
-			//ndAssert(0);
-		};
+			ImGui::SeparatorText("geomtry transform");
+			ndMatrix matrix(m_currentSelection->GetGeometryMatrix());
+			ndReal position[3];
+			position[0] = matrix.m_posit.m_x;
+			position[1] = matrix.m_posit.m_y;
+			position[2] = matrix.m_posit.m_z;
+			if (ImGui::DragFloat3("position##1", position))
+			{
+				matrix.m_posit.m_x = position[0];
+				matrix.m_posit.m_y = position[1];
+				matrix.m_posit.m_z = position[2];
+				m_currentSelection->SetGeometryMatrix(matrix);
+			};
+
+			ndReal euler[3];
+			ndVector tmp;
+			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
+
+			euler[0] = radians[0];
+			euler[1] = radians[1];
+			euler[2] = radians[2];
+			if (ImGui::DragFloat3("rotation##1", euler))
+			{
+				ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
+				newMatrix.m_posit = matrix.m_posit;
+				m_currentSelection->SetGeometryMatrix(newMatrix);
+			};
+		}
 	}
 }
