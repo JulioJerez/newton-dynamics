@@ -571,7 +571,5 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 		{
 			ndAssert(0);
 		}
-
-
 	}
 }

@@ -1478,7 +1478,11 @@ void ndDemoEntityManager::RenderScene()
 	ndFloat32 timestep = ndGetElapsedSeconds();	
 	CalculateFPS(timestep);
 	UpdatePhysics(timestep);
+
+	m_renderer->BegingRender();
 	m_renderer->Render();
+	m_renderer->EndRender();
+	m_renderer->Present();
 }
 
 void ndDemoEntityManager::TestImGui()

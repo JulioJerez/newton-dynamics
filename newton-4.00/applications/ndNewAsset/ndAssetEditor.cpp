@@ -12,11 +12,9 @@
 #include "ndNewAssetStdafx.h"
 #include "ndAssetEditor.h"
 #include "ndFileBrowser.h"
-#include "ndEditorCameraFlyby.h"
-//#include "ndPhysicsWorld.h"
-//#include "ndPhysicsUtils.h"
 #include "ndMenuRenderPass.h"
-//#include "ndDebugDisplayRenderPass.h"
+#include "ndEditorCameraFlyby.h"
+#include "ndHighResolutionTimer.h"
 
 ndAssetEditor::ButtonKey::ButtonKey (bool state)
 	:m_state(state)
@@ -373,18 +371,6 @@ void ndAssetEditor::RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& postUpda
 	m_onPostUpdate = postUpdate;
 }
 
-//void ndAssetEditor::AddEntity(const ndSharedPtr<ndRenderSceneNode>& entity)
-//{
-//	//ndScopeSpinLock lock(m_addDeleteLock);
-//	m_renderer->AddSceneNode(entity);
-//}
-//
-//void ndAssetEditor::RemoveEntity (const ndSharedPtr<ndRenderSceneNode>& entity)
-//{
-//	//ndScopeSpinLock lock(m_addDeleteLock);
-//	m_renderer->RemoveSceneNode(entity);
-//}
-
 void ndAssetEditor::Cleanup ()
 {
 	// is we are run asynchronous we need make sure no update in on flight.
@@ -521,80 +507,76 @@ void ndAssetEditor::SetCameraMatrix(const ndQuaternion&, const ndVector&)
 	//cameraNode->SetTransform(rotation, position);
 }
 
-//void ndAssetEditor::UpdatePhysics(ndFloat32 timestep)
-void ndAssetEditor::UpdatePhysics(ndFloat32)
-{
-	ndAssert(0);
-	//// update the physics
-	//if (m_world && !m_suspendPhysicsUpdate) 
-	//{
-	//	m_world->AdvanceTime(timestep);
-	//}
-}
-
-void ndAssetEditor::SetAcceleratedUpdate()
-{
-	ndAssert(0);
-	//m_world->AccelerateUpdates();
-}
-
-//void ndAssetEditor::OnSubStepPostUpdate(ndFloat32 timestep)
 void ndAssetEditor::OnSubStepPostUpdate(ndFloat32)
 {
-	//if (m_colorRenderPass)
-	//{
-	////	((ndRenderPassColor*)m_colorRenderPass)->UpdateDebugDisplay(timestep);
-	//}
+}
+
+void ndAssetEditor::UpdatePhysics(ndFloat32)
+{
+	if (m_runScene)
+	{
+		ndAssert(0);
+		//// update the physics
+		//if (m_world && !m_suspendPhysicsUpdate) 
+		//{
+		//	m_world->AdvanceTime(timestep);
+		//}
+	}
 }
 
 void ndAssetEditor::RenderScene()
 {
-	//D_TRACKTIME();
-	//ndFloat32 timestep = ndGetElapsedSeconds();	
-	//CalculateFPS(timestep);
-	//UpdatePhysics(timestep);
-
 	m_windowSizes.SetCount(0);
+
+	ndFloat32 timestep = ndGetElapsedSeconds();
+	UpdatePhysics(timestep);
+
+	m_renderer->BegingRender();
 	m_renderer->Render();
+	m_renderer->EndRender();
+	m_renderer->Present();
 
-	ndInt32 minX = ndInt32(m_windowSizes[0].m_posit.x);
-	ndInt32 minY = ndInt32(m_windowSizes[0].m_posit.y);
-	ndInt32 maxX = minX + ndInt32(m_windowSizes[0].m_size.x);
-	ndInt32 maxY = minY + ndInt32(m_windowSizes[0].m_size.y);
-
-	for (ndInt32 j = m_windowSizes.GetCount() - 1; j >= 1; --j)
+	if (m_windowSizes.GetCount())
 	{
-		for (ndInt32 i = j; i >= 1; --i)
-		{
-			ndInt32 x0 = ndInt32(m_windowSizes[i].m_posit.x);
-			ndInt32 y0 = ndInt32(m_windowSizes[i].m_posit.y);
-			ndInt32 x1 = x0 + ndInt32(m_windowSizes[i].m_size.x);
-			ndInt32 y1 = y0 + ndInt32(m_windowSizes[i].m_size.y);
+		ndInt32 minX = ndInt32(m_windowSizes[0].m_posit.x);
+		ndInt32 minY = ndInt32(m_windowSizes[0].m_posit.y);
+		ndInt32 maxX = minX + ndInt32(m_windowSizes[0].m_size.x);
+		ndInt32 maxY = minY + ndInt32(m_windowSizes[0].m_size.y);
 
-			if ((x0 == minX) && (x1 < maxX))
+		for (ndInt32 j = m_windowSizes.GetCount() - 1; j >= 1; --j)
+		{
+			for (ndInt32 i = j; i >= 1; --i)
 			{
-				minX = ndMax(minX, x1);
-				i = 0;
-			}
-			if ((x0 > minX) && (x1 == maxX))
-			{
-				maxX = ndMin(maxX, x0);
-				i = 0;
-			}
-			
-			if ((y0 == minY) && (y1 < maxY))
-			{
-				minY = ndMax(minY, y1);
-				i = 0;
-			}
-			if ((y0 > minY) && (y1 == maxY))
-			{
-				maxY = ndMin(maxY, y0);
-				i = 0;
+				ndInt32 x0 = ndInt32(m_windowSizes[i].m_posit.x);
+				ndInt32 y0 = ndInt32(m_windowSizes[i].m_posit.y);
+				ndInt32 x1 = x0 + ndInt32(m_windowSizes[i].m_size.x);
+				ndInt32 y1 = y0 + ndInt32(m_windowSizes[i].m_size.y);
+
+				if ((x0 == minX) && (x1 < maxX))
+				{
+					minX = ndMax(minX, x1);
+					i = 0;
+				}
+				if ((x0 > minX) && (x1 == maxX))
+				{
+					maxX = ndMin(maxX, x0);
+					i = 0;
+				}
+
+				if ((y0 == minY) && (y1 < maxY))
+				{
+					minY = ndMax(minY, y1);
+					i = 0;
+				}
+				if ((y0 > minY) && (y1 == maxY))
+				{
+					maxY = ndMin(maxY, y0);
+					i = 0;
+				}
 			}
 		}
+		m_renderer->SetViewport(minX, minY, maxX, maxY);
 	}
-	m_renderer->SetViewport(minX, minY, maxX, maxY);
 }
 
 void ndAssetEditor::TestImGui()

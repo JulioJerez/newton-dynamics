@@ -272,9 +272,18 @@ void ndRender::RemoveDefferedEntities()
 	m_deadNodes.RemoveAll();
 }
 
-void ndRender::Render()
+void ndRender::BegingRender()
 {
 	m_context->BeginFrame();
+}
+
+void ndRender::EndRender()
+{
+	m_context->EndFrame();
+}
+
+void ndRender::Render()
+{
 	m_context->ClearFrameBuffer(m_backgroundColor);
 	ndScopeSpinLock lock(m_addRemoveLock);
 
@@ -310,8 +319,5 @@ void ndRender::Render()
 		{
 			m_camera->Render(*m_camera->m_owner, ndGetIdentityMatrix(), m_directionalDiffusseNoShadow);
 		}
-
-		m_context->EndFrame();
 	}
-	Present();
 }
