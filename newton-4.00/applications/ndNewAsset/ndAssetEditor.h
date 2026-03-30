@@ -195,7 +195,6 @@ class ndAssetEditor : public ndClassAlloc
 
 	void TestImGui();
 	void RenderLayout();
-	void SetAcceleratedUpdate();
 	void SetDemoHelp(ndSharedPtr<ndDemoHelper>& helper);
 	void SetDemoUIpanel(ndSharedPtr<ndDemoUIpanel>& panel);
 
