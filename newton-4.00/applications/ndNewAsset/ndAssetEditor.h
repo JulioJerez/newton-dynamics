@@ -203,18 +203,16 @@ class ndAssetEditor : public ndClassAlloc
 	private:
 	void Cleanup();
 	void RenderScene();
-	ndInt32 ParticleCount() const;
-	void SetParticleUpdateMode() const;
 	void UpdatePhysics(ndFloat32 timestep);
 	
 	void ShowMainMenuBar();
-	void ToggleProfiler();
 	void ApplyOptions();
 	void ApplyMenuOptions();
 	void OnSubStepPostUpdate(ndFloat32 timestep);
 
 	void EndDockSpace();
 	void BeginDockSpace();
+	void CalculateDockedViewPostSize();
 
 	void ShowOutlierPanel();
 	void ShowOutlierToolBar();

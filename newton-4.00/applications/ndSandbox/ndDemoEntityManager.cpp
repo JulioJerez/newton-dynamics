@@ -1463,13 +1463,8 @@ void ndDemoEntityManager::SetAcceleratedUpdate()
 	m_world->AccelerateUpdates();
 }
 
-//void ndDemoEntityManager::OnSubStepPostUpdate(ndFloat32 timestep)
 void ndDemoEntityManager::OnSubStepPostUpdate(ndFloat32)
 {
-	//if (m_colorRenderPass)
-	//{
-	////	((ndRenderPassColor*)m_colorRenderPass)->UpdateDebugDisplay(timestep);
-	//}
 }
 
 void ndDemoEntityManager::RenderScene()

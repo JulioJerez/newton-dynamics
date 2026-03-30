@@ -442,38 +442,6 @@ bool ndAssetEditor::GetMousePosition (ndFloat32& posX, ndFloat32& posY) const
 	return true;
 }
 
-void ndAssetEditor::ToggleProfiler()
-{
-	#ifdef D_PROFILER
-		ndAssert(m_world);
-		ndTrace(("profiler Enable\n"));
-		m_world->Sync();
-		dProfilerEnableProling();
-	#endif
-}
-
-ndInt32 ndAssetEditor::ParticleCount() const
-{
-	ndInt32 count = 0;
-	//const ndBodyList& particles = m_world->GetParticleList();
-	//for (ndBodyList::ndNode* node = particles.GetFirst(); node; node = node->GetNext())
-	//{
-	//	ndBodyParticleSet* const set = node->GetInfo()->GetAsBodyParticleSet();
-	//	count += ndInt32(set->GetPositions().GetCount());
-	//}
-	return count;
-}
-
-void ndAssetEditor::SetParticleUpdateMode() const
-{
-	//const ndBodyList& particles = m_world->GetParticleList();
-	//for (ndBodyList::ndNode* node = particles.GetFirst(); node; node = node->GetNext())
-	//{
-	//	ndBodyParticleSet* const set = node->GetInfo()->GetAsBodyParticleSet();
-	//	set->SetAsynUpdate(!m_synchronousParticlesUpdate);
-	//}
-}
-
 //void ndAssetEditor::SetDemoHelp(ndSharedPtr<ndDemoHelper>& helper)
 void ndAssetEditor::SetDemoHelp(ndSharedPtr<ndDemoHelper>&)
 {
@@ -532,10 +500,20 @@ void ndAssetEditor::RenderScene()
 	UpdatePhysics(timestep);
 
 	m_renderer->BegingRender();
+	//BeginDockSpace();
+
 	m_renderer->Render();
+
+	//EndDockSpace();
 	m_renderer->EndRender();
+
 	m_renderer->Present();
 
+	CalculateDockedViewPostSize();
+}
+
+void ndAssetEditor::CalculateDockedViewPostSize()
+{
 	if (m_windowSizes.GetCount())
 	{
 		ndInt32 minX = ndInt32(m_windowSizes[0].m_posit.x);
@@ -577,6 +555,16 @@ void ndAssetEditor::RenderScene()
 		}
 		m_renderer->SetViewport(minX, minY, maxX, maxY);
 	}
+}
+
+void ndAssetEditor::RenderLayout()
+{
+	//BeginDockSpace();
+	ShowMainMenuBar();
+	ShowOutlierPanel();
+	ShowPropertiesPanel();
+
+	//EndDockSpace();
 }
 
 void ndAssetEditor::TestImGui()
@@ -691,17 +679,6 @@ void ndAssetEditor::BeginDockSpace()
 void ndAssetEditor::EndDockSpace()
 {
 	ImGui::End();
-}
-
-void ndAssetEditor::RenderLayout()
-{
-	BeginDockSpace();
-
-	ShowMainMenuBar();
-	ShowOutlierPanel();
-	ShowPropertiesPanel();
-
-	EndDockSpace();
 }
 
 void ndAssetEditor::ShowMainMenuBar()
