@@ -175,11 +175,8 @@ class ndAssetEditor : public ndClassAlloc
 	
 	bool AnyKeyDown() const;
 	bool IsShiftKeyDown () const;
-	bool JoystickDetected() const;
 	bool IsControlKeyDown () const;
 	bool GetKeyState(ndInt32 key) const;
-	void GetJoystickAxis (ndFixSizeArray<ndFloat32, 8>& axisValues);
-	void GetJoystickButtons (ndFixSizeArray<char, 32>& axisbuttons);
 
 	void Terminate();
 
@@ -201,14 +198,13 @@ class ndAssetEditor : public ndClassAlloc
 	void RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& postUpdate);
 
 	private:
-	void Cleanup();
 	void RenderScene();
 	void UpdatePhysics(ndFloat32 timestep);
 	void SetVisualScene(const ndRenderMeshLoader& loader);
 	
 	void ShowMainMenuBar();
 	void ApplyOptions();
-	void ApplyMenuOptions();
+
 	void OnSubStepPostUpdate(ndFloat32 timestep);
 
 	void BeginDockSpace();
