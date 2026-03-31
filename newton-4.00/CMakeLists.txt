@@ -10,7 +10,7 @@
 
 cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
 
-option("NEWTON_BUILD_ASSET_EDITOR" "build the asset editor" OFF)
+option("NEWTON_BUILD_ASSET_EDITOR" "build the asset editor" ON)
 option("NEWTON_BUILD_SANDBOX_DEMOS" "generates demos projects" ON)
 option("NEWTON_BUILD_PROFILER" "build profiler" OFF)
 option("NEWTON_BUILD_SINGLE_THREADED" "single threaded" OFF)

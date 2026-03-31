@@ -317,16 +317,16 @@ ndBody* ndMeshBodyKinematic::CreateObject() const
 
 ndMeshJoint::ndMeshJoint()
 	:ndClassAlloc()
-	,m_locatFrame0(ndGetIdentityMatrix())
-	,m_locatFrame1(ndGetIdentityMatrix())
+	,m_localFrame0(ndGetIdentityMatrix())
+	,m_localFrame1(ndGetIdentityMatrix())
 	,m_constructor("ndJointFix6dof")
 {
 }
 
 ndMeshJoint::ndMeshJoint(const ndJointBilateralConstraint* const joint)
 	:ndClassAlloc()
-	,m_locatFrame0(joint->GetLocalMatrix0())
-	,m_locatFrame1(joint->GetLocalMatrix1())
+	,m_localFrame0(joint->GetLocalMatrix0())
+	,m_localFrame1(joint->GetLocalMatrix1())
 	,m_constructor(joint->ClassName())
 {
 }
@@ -345,13 +345,13 @@ ndJointBilateralConstraint* ndMeshJoint::CreateObject(ndBodyKinematic* const, nd
 void ndMeshJoint::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	xmlSaveParam(parent, "constructor", m_constructor.GetStr());
-	xmlSaveParam(parent, "localFrame0", m_locatFrame0);
-	xmlSaveParam(parent, "localFrame1", m_locatFrame1);
+	xmlSaveParam(parent, "localFrame0", m_localFrame0);
+	xmlSaveParam(parent, "localFrame1", m_localFrame1);
 }
 
 void ndMeshJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	m_constructor = ndString(xmlGetString(parent, "constructor"));
-	m_locatFrame0 = xmlGetMatrix(parent, "localFrame0");
-	m_locatFrame1 = xmlGetMatrix(parent, "localFrame1");
+	m_localFrame0 = xmlGetMatrix(parent, "localFrame0");
+	m_localFrame1 = xmlGetMatrix(parent, "localFrame1");
 }

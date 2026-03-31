@@ -63,14 +63,15 @@ class ndJointRoller: public ndJointBilateralConstraint
 	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
 	D_NEWTON_API void ApplyBaseRows(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 
-	ndFloat32 m_angle;
-	ndFloat32 m_omega;
-	ndFloat32 m_springKAngle;
-	ndFloat32 m_damperCAngle;
-	ndFloat32 m_minLimitAngle;
-	ndFloat32 m_maxLimitAngle;
-	ndFloat32 m_offsetAngle;
-	ndFloat32 m_springDamperRegularizerAngle;
+	//ndFloat32 m_angle;
+	//ndFloat32 m_omega;
+	//ndFloat32 m_springKAngle;
+	//ndFloat32 m_damperCAngle;
+	//ndFloat32 m_minLimitAngle;
+	//ndFloat32 m_maxLimitAngle;
+	//ndFloat32 m_offsetAngle;
+	//ndFloat32 m_springDamperRegularizerAngle;
+	ndAxisParam m_rotationAxis;
 
 	ndFloat32 m_posit;
 	ndFloat32 m_speed;
@@ -82,7 +83,7 @@ class ndJointRoller: public ndJointBilateralConstraint
 	ndFloat32 m_springDamperRegularizerPosit;
 
 	ndInt8 m_limitStatePosit;
-	ndInt8 m_limitStateAngle;
+
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 

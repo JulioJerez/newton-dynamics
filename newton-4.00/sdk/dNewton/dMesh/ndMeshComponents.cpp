@@ -89,8 +89,8 @@ void ndMeshJointFix6dof::DeserializeFromXml(const nd::TiXmlElement* const parent
 
 ndJointBilateralConstraint* ndMeshJointFix6dof::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
 {
-	const ndMatrix pinAndPivotInChild(m_locatFrame0 * child->GetMatrix());
-	const ndMatrix pinAndPivotInParent(m_locatFrame1 * parent->GetMatrix());
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 	ndJointFix6dof* const joint = new ndJointFix6dof(child, parent, pinAndPivotInChild, pinAndPivotInParent);
 	joint->SetMaxForce(m_maxForce);
 	joint->SetMaxTorque(m_maxTorque);
@@ -132,8 +132,8 @@ void ndMeshJointHinge::DeserializeFromXml(const nd::TiXmlElement* const parent)
 
 ndJointBilateralConstraint* ndMeshJointHinge::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
 {
-	const ndMatrix pinAndPivotInChild(m_locatFrame0 * child->GetMatrix());
-	const ndMatrix pinAndPivotInParent(m_locatFrame1 * parent->GetMatrix());
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 	ndJointHinge* const joint = new ndJointHinge(pinAndPivotInChild, pinAndPivotInParent, child, parent);
 	joint->SetAsSpringDamper(m_springDamperRegularizer, m_springK, m_damperC);
 	joint->SetLimits(m_minLimit * ndDegreeToRad, m_maxLimit * ndDegreeToRad);
@@ -175,8 +175,8 @@ void ndMeshJointSlider::DeserializeFromXml(const nd::TiXmlElement* const parent)
 
 ndJointBilateralConstraint* ndMeshJointSlider::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
 {
-	const ndMatrix pinAndPivotInChild(m_locatFrame0 * child->GetMatrix());
-	const ndMatrix pinAndPivotInParent(m_locatFrame1 * parent->GetMatrix());
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 	ndJointSlider* const joint = new ndJointSlider(pinAndPivotInChild, pinAndPivotInParent, child, parent);
 	joint->SetAsSpringDamper(m_springDamperRegularizer, m_springK, m_damperC);
 	joint->SetLimits(m_minLimit, m_maxLimit);
@@ -240,8 +240,8 @@ void ndMeshJointDoubleHinge::DeserializeFromXml(const nd::TiXmlElement* const pa
 
 ndJointBilateralConstraint* ndMeshJointDoubleHinge::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
 {
-	const ndMatrix pinAndPivotInChild(m_locatFrame0 * child->GetMatrix());
-	const ndMatrix pinAndPivotInParent(m_locatFrame1 * parent->GetMatrix());
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 	ndJointDoubleHinge* const joint = new ndJointDoubleHinge(pinAndPivotInChild, pinAndPivotInParent, child, parent);
 
 	//joint->SetAsSpringDamper(m_springDamperRegularizer, m_springK, m_damperC);
@@ -294,8 +294,8 @@ void ndMeshJointSpherical::DeserializeFromXml(const nd::TiXmlElement* const pare
 
 ndJointBilateralConstraint* ndMeshJointSpherical::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
 {
-	const ndMatrix pinAndPivotInChild(m_locatFrame0 * child->GetMatrix());
-	const ndMatrix pinAndPivotInParent(m_locatFrame1 * parent->GetMatrix());
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 	ndJointSpherical* const joint = new ndJointSpherical(pinAndPivotInChild, pinAndPivotInParent, child, parent);
 	joint->SetOffsetRotation(m_rotation);
 	joint->SetAsSpringDamper(m_springDamperRegularizer, m_springK, m_damperC);
@@ -346,8 +346,8 @@ void ndMeshJointWheel::DeserializeFromXml(const nd::TiXmlElement* const parent)
 
 ndJointBilateralConstraint* ndMeshJointWheel::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
 {
-	const ndMatrix pinAndPivotInChild(m_locatFrame0 * child->GetMatrix());
-	const ndMatrix pinAndPivotInParent(m_locatFrame1 * parent->GetMatrix());
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 
 	ndWheelDescriptor desc;
 	desc.m_springK = m_springK;

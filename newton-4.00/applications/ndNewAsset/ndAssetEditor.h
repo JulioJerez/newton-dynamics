@@ -195,7 +195,6 @@ class ndAssetEditor : public ndClassAlloc
 
 	void TestImGui();
 	void RenderLayout();
-	void SetAcceleratedUpdate();
 	void SetDemoHelp(ndSharedPtr<ndDemoHelper>& helper);
 	void SetDemoUIpanel(ndSharedPtr<ndDemoUIpanel>& panel);
 
@@ -204,21 +203,16 @@ class ndAssetEditor : public ndClassAlloc
 	private:
 	void Cleanup();
 	void RenderScene();
-	ndInt32 ParticleCount() const;
-	void SetParticleUpdateMode() const;
 	void UpdatePhysics(ndFloat32 timestep);
 	
 	void ShowMainMenuBar();
-	void ToggleProfiler();
 	void ApplyOptions();
 	void ApplyMenuOptions();
 	void OnSubStepPostUpdate(ndFloat32 timestep);
 
-	void EndDockSpace();
 	void BeginDockSpace();
-
+	void ShowMainToolbar();
 	void ShowOutlierPanel();
-	void ShowOutlierToolBar();
 	void ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root);
 
 	void ShowPropertiesPanel();
@@ -250,14 +244,6 @@ class ndAssetEditor : public ndClassAlloc
 	
 	bool m_runScene;
 	ndWorld::ndSolverModes m_solverMode;
-
-	class WindowFrame
-	{
-		public:
-		ImVec2 m_posit;
-		ImVec2 m_size;
-	};
-	ndFixSizeArray<WindowFrame, 16> m_windowSizes;
 	
 	friend class ndPhysicsWorld;
 	friend class ndDebugDisplayRenderPass;

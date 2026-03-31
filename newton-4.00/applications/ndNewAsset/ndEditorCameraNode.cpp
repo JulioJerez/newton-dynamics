@@ -11,11 +11,6 @@
 
 #include "ndNewAssetStdafx.h"
 #include "ndEditorCameraNode.h"
-//#include "ndPhysicsWorld.h"
-//#include "ndPhysicsUtils.h"
-//#include "ndEditorCameraNode.h"
-//#include "ndDemoEntityNotify.h"
-//#include "ndDemoEntityManager.h"
 
 ndEditorCameraNode::ndEditorCameraNode(ndRender* const owner)
 	:ndRenderSceneNode(ndGetIdentityMatrix())

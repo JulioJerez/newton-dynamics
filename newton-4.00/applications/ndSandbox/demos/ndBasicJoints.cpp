@@ -426,11 +426,11 @@ static void BuildDoubleHinge(ndDemoEntityManager* const scene, const ndVector& o
 			ndFloat32 angle0 = GetAngle0();
 			//ndFloat32 deltaAngle = ndClamp (m_angle - angle0, -90.0f * ndDegreeToRad, 90.0f * ndDegreeToRad);
 			ndFloat32 deltaAngle = 2.0f * m_speed;
-			SetOffsetAngle0(angle0 + deltaAngle * desc.m_timestep);
+			SetTargetAngle0(angle0 + deltaAngle * desc.m_timestep);
 
 			// second axis an angular motor by integrating the angle 
 			ndFloat32 angle1 = GetAngle1();
-			SetOffsetAngle1(angle1 + m_speed * desc.m_timestep);
+			SetTargetAngle1(angle1 + m_speed * desc.m_timestep);
 
 			ndJointDoubleHinge::JacobianDerivative(desc);
 		}

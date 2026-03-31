@@ -1463,13 +1463,8 @@ void ndDemoEntityManager::SetAcceleratedUpdate()
 	m_world->AccelerateUpdates();
 }
 
-//void ndDemoEntityManager::OnSubStepPostUpdate(ndFloat32 timestep)
 void ndDemoEntityManager::OnSubStepPostUpdate(ndFloat32)
 {
-	//if (m_colorRenderPass)
-	//{
-	////	((ndRenderPassColor*)m_colorRenderPass)->UpdateDebugDisplay(timestep);
-	//}
 }
 
 void ndDemoEntityManager::RenderScene()
@@ -1478,7 +1473,11 @@ void ndDemoEntityManager::RenderScene()
 	ndFloat32 timestep = ndGetElapsedSeconds();	
 	CalculateFPS(timestep);
 	UpdatePhysics(timestep);
+
+	m_renderer->BegingRender();
 	m_renderer->Render();
+	m_renderer->EndRender();
+	m_renderer->Present();
 }
 
 void ndDemoEntityManager::TestImGui()

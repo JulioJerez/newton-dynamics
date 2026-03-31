@@ -52,15 +52,7 @@ class ndJointHinge: public ndJointBilateralConstraint
 
 	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const override;
 
-	ndFloat32 m_angle;
-	ndFloat32 m_omega;
-	ndFloat32 m_springK;
-	ndFloat32 m_damperC;
-	ndFloat32 m_minLimit;
-	ndFloat32 m_maxLimit;
-	ndFloat32 m_targetAngle;
-	ndFloat32 m_springDamperRegularizer;
-	ndInt8 m_limitState;
+	ndAxisParam m_axis;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif 

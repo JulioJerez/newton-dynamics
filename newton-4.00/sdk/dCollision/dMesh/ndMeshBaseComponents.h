@@ -162,8 +162,8 @@ class ndMeshJoint : public ndClassAlloc
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
 
-	ndMatrix m_locatFrame0;
-	ndMatrix m_locatFrame1;
+	ndMatrix m_localFrame0;
+	ndMatrix m_localFrame1;
 	ndString m_constructor;
 };
 

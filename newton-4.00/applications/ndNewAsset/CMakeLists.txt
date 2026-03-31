@@ -18,32 +18,17 @@ if (APPLE)
 	file(GLOB CPP_SOURCE 
 		*.h
 		*.cpp
-		#demos/*.h
-		#demos/*.cpp
-		#toolbox/*.h
-		#toolbox/*.cpp 
-		#plaforms/macos/*.mm 	
 	)
 else()
 	file(GLOB CPP_SOURCE 
 		*.h
 		*.cpp
-		#demos/*.h
-		#demos/*.cpp
-		#toolbox/*.h
-		#toolbox/*.cpp 
-		#plaforms/opengl/*.cpp 
-		#reiforcementLearning/*.cpp
 	)
 endif()
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/" FILES ${CPP_SOURCE})
 
 include_directories(.)
-#include_directories(demos)
-#include_directories(toolbox)
-
-
 include_directories(../../sdk/dCore)
 include_directories(../../sdk/dModel)
 include_directories(../../sdk/dRender)
@@ -73,7 +58,7 @@ endif()
 add_executable(${projectName} ${CPP_SOURCE})
 
 message ("adding project libraries")
-target_link_libraries (${projectName} PUBLIC ndRender ndNewton ndBrain ndModel openfbx lodepng imgui)
+target_link_libraries (${projectName} PUBLIC ndRender ndNewton ndModel openfbx lodepng imgui)
 
 if (MSVC OR MINGW)
 	message ("adding required third party opengl libraries")

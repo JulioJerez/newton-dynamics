@@ -554,11 +554,11 @@ class ndExcavatorController : public ndModelNotify
 
 		// integrate tyurn rate angle
 		ndFloat32 turnAngle = engine->GetAngle0();
-		engine->SetOffsetAngle0(turnAngle + m_turnRateOmega * timestep);
+		engine->SetTargetAngle0(turnAngle + m_turnRateOmega * timestep);
 
 		// integrate the joints angle;
 		ndFloat32 fowardAngle = engine->GetAngle1();
-		engine->SetOffsetAngle1(fowardAngle + m_targetOmega * timestep);
+		engine->SetTargetAngle1(fowardAngle + m_targetOmega * timestep);
 	}
 
 	void PostTransformUpdate(ndFloat32)

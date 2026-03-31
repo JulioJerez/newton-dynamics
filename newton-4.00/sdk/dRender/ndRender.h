@@ -69,8 +69,10 @@ class ndRender: public ndClassAlloc
 	ndInt32 GetHeight() const;
 	void MaximizeWindow() const;
 	void SetViewport(ndInt32 x0, ndInt32 y0, ndInt32 x1, ndInt32 y1) const;
-	
 	void ResetScene();
+	
+	void BegingRender();
+	void EndRender();
 	void Render();
 
 	void ClearFrameBuffer(const ndVector& color);
