@@ -63,26 +63,30 @@ ndAssetEditor::ndAssetEditor()
 	const ndString fontPathName(ndGetWorkingFileName("Cousine-Regular.ttf"));
 	m_renderer->InitImGui(fontPathName.GetStr());
 
-	//// load the environment texture
-	//ndFixSizeArray<ndString, 6> environmentTexturePath;
-	//environmentTexturePath.PushBack(ndGetWorkingFileName("Sorsele3/negx.png"));
-	//environmentTexturePath.PushBack(ndGetWorkingFileName("Sorsele3/posx.png"));
-	//environmentTexturePath.PushBack(ndGetWorkingFileName("Sorsele3/posy.png"));
-	//environmentTexturePath.PushBack(ndGetWorkingFileName("Sorsele3/negy.png"));
-	//environmentTexturePath.PushBack(ndGetWorkingFileName("Sorsele3/negz.png"));
-	//environmentTexturePath.PushBack(ndGetWorkingFileName("Sorsele3/posz.png"));
-	//m_environmentTexture = m_renderer->GetTextureCache()->GetCubeMap(environmentTexturePath);
+	// load the environment texture
+	ndFixSizeArray<ndString, 6> environmentTexturePath;
+	environmentTexturePath.PushBack(ndGetWorkingFileName("default.png"));
+	environmentTexturePath.PushBack(ndGetWorkingFileName("default.png"));
+	environmentTexturePath.PushBack(ndGetWorkingFileName("default.png"));
+	environmentTexturePath.PushBack(ndGetWorkingFileName("default.png"));
+	environmentTexturePath.PushBack(ndGetWorkingFileName("default.png"));
+	environmentTexturePath.PushBack(ndGetWorkingFileName("default.png"));
+	m_environmentTexture = m_renderer->GetTextureCache()->GetCubeMap(environmentTexturePath);
 
-	//// create render passes
+	// create render passes
 	m_menuRenderPass = ndSharedPtr<ndRenderPass>(new ndMenuRenderPass(this));
 	m_colorRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassColor(*m_renderer));
+	m_shadowRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassShadows(*m_renderer));
+	m_environmentRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassEnvironment(*m_renderer, m_environmentTexture));
 
-	//// add render passes in order of execution
+	// add render passes in order of execution
+	m_renderer->AddRenderPass(m_shadowRenderPass);
 	m_renderer->AddRenderPass(m_colorRenderPass);
+	m_renderer->AddRenderPass(m_environmentRenderPass);
 	m_renderer->AddRenderPass(m_menuRenderPass);
 	
-	////add main directional light
-	//m_renderer->SetSunLight(ndVector(-0.5f, 1.0f, -0.5f, 0.0f), ndVector(0.7f, 0.7f, 0.7f, 0.0f));
+	//add main directional light
+	m_renderer->SetSunLight(ndVector(-0.5f, 1.0f, -0.5f, 0.0f), ndVector(0.7f, 0.7f, 0.7f, 0.0f));
 
 	// initialized the physics world for the new scene
 	//m_showUI = false;
@@ -600,7 +604,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					m_currentPath = ndString(fileName);
 					ndRenderMeshLoader loader(*m_renderer);
 					loader.LoadMesh(m_currentPath);
-					m_model = loader.m_mesh;
+					SetVisualScene(loader);
 				}
 			}
 
@@ -638,7 +642,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					m_currentPath = ndString(fileName);
 					ndRenderMeshLoader loader(*m_renderer);
 					loader.ImportFbx(m_currentPath);
-					m_model = loader.m_mesh;
+					SetVisualScene(loader);
 				}
 			}
 
@@ -659,6 +663,13 @@ void ndAssetEditor::ShowMainMenuBar()
 
 		ImGui::EndMainMenuBar();
 	}
+}
+
+void ndAssetEditor::SetVisualScene(const ndRenderMeshLoader& loader)
+{
+	m_model = loader.m_mesh;
+	m_renderer->AddSceneNode(loader.m_renderMesh);
+
 }
 
 void ndAssetEditor::Run()

@@ -326,7 +326,7 @@ void ndRenderShaderOpaqueDiffusedColorBlock::Render(const ndRenderPrimitiveImple
 	glUniformMatrix4fv(m_projectMatrixLocation, 1, false, &glProjectionMatrix[0][0]);
 	glUniformMatrix4fv(m_viewModelMatrixLocation, 1, false, &glViewModelMatrix[0][0]);
 
-	ndRenderPassEnvironment* const environment = render->m_cachedEnvironmentPass;
+	const ndRenderPassEnvironment* const environment = *render->m_cachedEnvironmentPass;
 	ndAssert(environment);
 	ndRenderTextureImage* const environmentTexture = (ndRenderTextureImage*)*environment->m_cubeMap;
 
@@ -408,7 +408,7 @@ void ndRenderShaderOpaqueDiffusedShadowColorBlock::Render(const ndRenderPrimitiv
 	glUniformMatrix4fv(m_projectMatrixLocation, 1, false, &glProjectionMatrix[0][0]);
 	glUniformMatrix4fv(m_viewModelMatrixLocation, 1, false, &glViewModelMatrix[0][0]);
 	
-	ndRenderPassShadowsImplement* const shadowPass = render->m_cachedShadowPass;
+	const ndRenderPassShadowsImplement* const shadowPass = *render->m_cachedShadowPass;
 	ndAssert(shadowPass);
 	
 	const glVector4 cameraSpaceSplits(shadowPass->m_cameraSpaceSplits);
@@ -423,7 +423,7 @@ void ndRenderShaderOpaqueDiffusedShadowColorBlock::Render(const ndRenderPrimitiv
 	glUniformMatrix4fv(m_directionLightViewProjectionMatrixShadow, 4, GL_FALSE, &lightViewProjectMatrix[0][0][0]);
 	glUniform4fv(m_shadowSlices, 1, &cameraSpaceSplits[0]);
 	
-	ndRenderPassEnvironment* const environment = render->m_cachedEnvironmentPass;
+	const ndRenderPassEnvironment* const environment = *render->m_cachedEnvironmentPass;
 	ndAssert(environment);
 	ndRenderTextureImage* const environmentTexture = (ndRenderTextureImage*)*environment->m_cubeMap;
 	
@@ -512,7 +512,7 @@ void ndRenderShaderTransparentDiffusedShadowColorBlock::Render(const ndRenderPri
 	glUniformMatrix4fv(m_projectMatrixLocation, 1, false, &glProjectionMatrix[0][0]);
 	glUniformMatrix4fv(m_viewModelMatrixLocation, 1, false, &glViewModelMatrix[0][0]);
 
-	ndRenderPassEnvironment* const environment = render->m_cachedEnvironmentPass;
+	const ndRenderPassEnvironment* const environment = *render->m_cachedEnvironmentPass;
 	ndAssert(environment);
 	ndRenderTextureImage* const environmentTexture = (ndRenderTextureImage*)*environment->m_cubeMap;
 
@@ -606,7 +606,7 @@ void ndRenderShaderInstancedOpaqueDiffusedShadowBlock::Render(const ndRenderPrim
 	glUniformMatrix4fv(m_projectMatrixLocation, 1, false, &glProjectionMatrix[0][0]);
 	glUniformMatrix4fv(m_viewModelMatrixLocation, 1, false, &glViewModelMatrix[0][0]);
 
-	ndRenderPassShadowsImplement* const shadowPass = render->m_cachedShadowPass;
+	const ndRenderPassShadowsImplement* const shadowPass = *render->m_cachedShadowPass;
 	ndAssert(shadowPass);
 
 	const glVector4 cameraSpaceSplits(shadowPass->m_cameraSpaceSplits);
@@ -620,7 +620,7 @@ void ndRenderShaderInstancedOpaqueDiffusedShadowBlock::Render(const ndRenderPrim
 	glUniformMatrix4fv(m_directionLightViewProjectionMatrixShadow, 4, GL_FALSE, &lightViewProjectMatrix[0][0][0]);
 	glUniform4fv(m_shadowSlices, 1, &cameraSpaceSplits[0]);
 
-	ndRenderPassEnvironment* const environment = render->m_cachedEnvironmentPass;
+	const ndRenderPassEnvironment* const environment = *render->m_cachedEnvironmentPass;
 	ndAssert(environment);
 	ndRenderTextureImage* const environmentTexture = (ndRenderTextureImage*)*environment->m_cubeMap;
 
@@ -703,7 +703,7 @@ void ndRenderShaderOpaqueDiffusedShadowSkinColorBlock::Render(const ndRenderPrim
 	glUniformMatrix4fv(m_projectMatrixLocation, 1, GL_FALSE, &glProjectionMatrix[0][0]);
 	glUniformMatrix4fv(m_viewModelMatrixLocation, 1, GL_FALSE, &glViewModelMatrix[0][0]);
 
-	ndRenderPassShadowsImplement* const shadowPass = render->m_cachedShadowPass;
+	const ndRenderPassShadowsImplement* const shadowPass = *render->m_cachedShadowPass;
 	ndAssert(shadowPass);
 
 	const glVector4 cameraSpaceSplits(shadowPass->m_cameraSpaceSplits);
@@ -719,7 +719,7 @@ void ndRenderShaderOpaqueDiffusedShadowSkinColorBlock::Render(const ndRenderPrim
 	glUniform4fv(m_shadowSlices, 1, &cameraSpaceSplits[0]);
 	glUniformMatrix4fv(m_matrixPalette, ndInt32(self->m_skinPaletteMatrixArray.GetCount()), GL_FALSE, &self->m_skinPaletteMatrixArray[0][0][0]);
 
-	ndRenderPassEnvironment* const environment = render->m_cachedEnvironmentPass;
+	const ndRenderPassEnvironment* const environment = *render->m_cachedEnvironmentPass;
 	ndAssert(environment);
 	ndRenderTextureImage* const environmentTexture = (ndRenderTextureImage*)*environment->m_cubeMap;
 
@@ -854,7 +854,7 @@ void ndRenderShaderDynamicLinesArrayBlock::Render(const ndRenderPrimitiveImpleme
 	const ndRenderSceneCamera* const camera = render->GetCamera()->FindCameraNode();
 	
 	glUseProgram(m_shader);
-	ndRenderPassDebug* const debugPass = render->m_cachedDebugPass;
+	const ndRenderPassDebug* const debugPass = *render->m_cachedDebugPass;
 	ndAssert(debugPass);
 
 	const ndMatrix modelViewProjectionMatrixMatrix(modelMatrix * camera->m_invViewMatrix * camera->m_projectionMatrix);
@@ -907,7 +907,7 @@ void ndRenderShaderDynamicPointsArrayBlock::Render(const ndRenderPrimitiveImplem
 	const ndRenderSceneCamera* const camera = render->GetCamera()->FindCameraNode();
 	
 	glUseProgram(m_shader);
-	ndRenderPassDebug* const debugPass = render->m_cachedDebugPass;
+	const ndRenderPassDebug* const debugPass = *render->m_cachedDebugPass;
 	ndAssert(debugPass);
 	
 	const ndMatrix modelViewProjectionMatrixMatrix(modelMatrix * camera->m_invViewMatrix * camera->m_projectionMatrix);

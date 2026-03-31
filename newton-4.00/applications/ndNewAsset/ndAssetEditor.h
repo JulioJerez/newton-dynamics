@@ -204,6 +204,7 @@ class ndAssetEditor : public ndClassAlloc
 	void Cleanup();
 	void RenderScene();
 	void UpdatePhysics(ndFloat32 timestep);
+	void SetVisualScene(const ndRenderMeshLoader& loader);
 	
 	void ShowMainMenuBar();
 	void ApplyOptions();
@@ -225,15 +226,15 @@ class ndAssetEditor : public ndClassAlloc
 	ndSharedPtr<ndRender> m_renderer;
 	ndSharedPtr<ndRenderPass> m_menuRenderPass;
 	ndSharedPtr<ndRenderPass> m_colorRenderPass;
-	ndSharedPtr<ndMesh> m_currentSelection;
+	ndSharedPtr<ndRenderPass> m_shadowRenderPass;
+	ndSharedPtr<ndRenderPass> m_environmentRenderPass;
+	ndSharedPtr<ndRenderTexture> m_environmentTexture;
 
-	//ndSharedPtr<ndRenderPass> m_debugDisplayRenderPass;
-	//ndSharedPtr<ndRenderTexture> m_environmentTexture;
+	ndSharedPtr<ndMesh> m_currentSelection;
 	ndSharedPtr<ndRenderSceneNode> m_defaultCamera;
 
 	ndSharedPtr<OnPostUpdate> m_onPostUpdate;
 	ndString m_currentPath;
-
 
 	ndInt32 m_currentPlugin;
 	ndInt32 m_solverPasses;

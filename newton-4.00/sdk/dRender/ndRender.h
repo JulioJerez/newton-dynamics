@@ -110,9 +110,9 @@ class ndRender: public ndClassAlloc
 	ndVector m_backgroundColor;
 	ndSpinLock m_addRemoveLock;
 
-	ndRenderPassDebug* m_cachedDebugPass;
-	ndRenderPassShadowsImplement* m_cachedShadowPass;
-	ndRenderPassEnvironment* m_cachedEnvironmentPass;
+	ndWeakPtr<ndRenderPassDebug> m_cachedDebugPass;
+	ndWeakPtr<ndRenderPassShadowsImplement> m_cachedShadowPass;
+	ndWeakPtr<ndRenderPassEnvironment> m_cachedEnvironmentPass;
 
 	friend class ndRenderContext;
 	friend class ndRenderPassGui;
