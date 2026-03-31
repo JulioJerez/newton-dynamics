@@ -43,19 +43,6 @@ ndInt32 ndAssetEditor::ButtonKey::UpdatePushButton (bool triggerValue)
 // If you are new to ImGui, see examples/README.txt and documentation at the top of imgui.cpp.
 ndAssetEditor::ndAssetEditor()
 	:ndClassAlloc()
-	//,m_world(nullptr)
-	//,m_renderer(nullptr)
-	//,m_menuRenderPass(nullptr)
-	//,m_colorRenderPass(nullptr)
-	//,m_shadowRenderPass(nullptr)
-	//,m_environmentRenderPass(nullptr)
-	//,m_transparentRenderPass(nullptr)
-	//,m_debugDisplayRenderPass(nullptr)
-	//,m_environmentTexture(nullptr)
-	//,m_demoHelper(nullptr)
-	//,m_demoUIpanel(nullptr)
-	//,m_currentScene(DEFAULT_SCENE)
-	//,m_lastCurrentScene(DEFAULT_SCENE)
 	,m_currentPath("")
 	,m_currentPlugin(0)
 	,m_solverPasses(6)
@@ -89,16 +76,8 @@ ndAssetEditor::ndAssetEditor()
 	//// create render passes
 	m_menuRenderPass = ndSharedPtr<ndRenderPass>(new ndMenuRenderPass(this));
 	m_colorRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassColor(*m_renderer));
-	//m_debugDisplayRenderPass = ndSharedPtr<ndRenderPass>(new ndDebugDisplayRenderPass(this));
-	//m_shadowRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassShadows(*m_renderer));
-	//m_transparentRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassTransparency(*m_renderer));
-	//m_environmentRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassEnvironment(*m_renderer, m_environmentTexture));
 
 	//// add render passes in order of execution
-	//m_renderer->AddRenderPass(m_shadowRenderPass);
-	//m_renderer->AddRenderPass(m_environmentRenderPass);
-	//m_renderer->AddRenderPass(m_transparentRenderPass);
-	//m_renderer->AddRenderPass(m_debugDisplayRenderPass);
 	m_renderer->AddRenderPass(m_colorRenderPass);
 	m_renderer->AddRenderPass(m_menuRenderPass);
 	
@@ -494,77 +473,23 @@ void ndAssetEditor::UpdatePhysics(ndFloat32)
 
 void ndAssetEditor::RenderScene()
 {
-	m_windowSizes.SetCount(0);
-
 	ndFloat32 timestep = ndGetElapsedSeconds();
 	UpdatePhysics(timestep);
 
 	m_renderer->BegingRender();
-	//BeginDockSpace();
+	BeginDockSpace();
 
 	m_renderer->Render();
 
-	//EndDockSpace();
 	m_renderer->EndRender();
-
 	m_renderer->Present();
-
-	CalculateDockedViewPostSize();
-}
-
-void ndAssetEditor::CalculateDockedViewPostSize()
-{
-	if (m_windowSizes.GetCount())
-	{
-		ndInt32 minX = ndInt32(m_windowSizes[0].m_posit.x);
-		ndInt32 minY = ndInt32(m_windowSizes[0].m_posit.y);
-		ndInt32 maxX = minX + ndInt32(m_windowSizes[0].m_size.x);
-		ndInt32 maxY = minY + ndInt32(m_windowSizes[0].m_size.y);
-
-		for (ndInt32 j = m_windowSizes.GetCount() - 1; j >= 1; --j)
-		{
-			for (ndInt32 i = j; i >= 1; --i)
-			{
-				ndInt32 x0 = ndInt32(m_windowSizes[i].m_posit.x);
-				ndInt32 y0 = ndInt32(m_windowSizes[i].m_posit.y);
-				ndInt32 x1 = x0 + ndInt32(m_windowSizes[i].m_size.x);
-				ndInt32 y1 = y0 + ndInt32(m_windowSizes[i].m_size.y);
-
-				if ((x0 == minX) && (x1 < maxX))
-				{
-					minX = ndMax(minX, x1);
-					i = 0;
-				}
-				if ((x0 > minX) && (x1 == maxX))
-				{
-					maxX = ndMin(maxX, x0);
-					i = 0;
-				}
-
-				if ((y0 == minY) && (y1 < maxY))
-				{
-					minY = ndMax(minY, y1);
-					i = 0;
-				}
-				if ((y0 > minY) && (y1 == maxY))
-				{
-					maxY = ndMin(maxY, y0);
-					i = 0;
-				}
-			}
-		}
-		m_renderer->SetViewport(minX, minY, maxX, maxY);
-	}
 }
 
 void ndAssetEditor::RenderLayout()
 {
-	//BeginDockSpace();
 	ShowMainMenuBar();
 	ShowOutlierPanel();
 	ShowPropertiesPanel();
-
-	//EndDockSpace();
 }
 
 void ndAssetEditor::TestImGui()
@@ -623,61 +548,33 @@ void ndAssetEditor::TestImGui()
 
 void ndAssetEditor::BeginDockSpace()
 {
-	//static bool opt_padding = false;
-	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+	ImGuiWindowFlags dockspace_flags = ImGuiWindowFlags_None;
+	dockspace_flags |= ImGuiWindowFlags_NoMove;
+	dockspace_flags |= ImGuiWindowFlags_NoResize;
+	dockspace_flags |= ImGuiWindowFlags_NoDocking;
+	dockspace_flags |= ImGuiWindowFlags_NoTitleBar;
+	dockspace_flags |= ImGuiWindowFlags_NoCollapse;
+	dockspace_flags |= ImGuiWindowFlags_NoNavFocus;
+	dockspace_flags |= ImGuiWindowFlags_NoBackground;
+	dockspace_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
 
-	// We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
-	// because it would be confusing to have two docking targets within each others.
-	ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-	const ImGuiViewport* viewport = ImGui::GetMainViewport();
-	ImGui::SetNextWindowPos(viewport->WorkPos);
-	ImGui::SetNextWindowSize(viewport->WorkSize);
+	ImGuiViewport* const viewport = ImGui::GetMainViewport();
+	ndAssert(viewport);
+	ImGui::SetNextWindowPos(viewport->Pos);
+	ImGui::SetNextWindowSize(viewport->Size);
 	ImGui::SetNextWindowViewport(viewport->ID);
+
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-	window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-	window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-
-	// When using ImGuiDockNodeFlags_PassthruCentralNode, 
-	// DockSpace() will render our background
-	// and handle the pass-thru hole, so we ask Begin() 
-	// to not render a background.
-	if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
-	{
-		window_flags |= ImGuiWindowFlags_NoBackground;
-	}
-
-	// Important: note that we proceed even if Begin() 
-	// returns false (aka window is collapsed).
-	// This is because we want to keep our DockSpace() active. 
-	// If a DockSpace() is inactive, all active windows docked 
-	// into it will lose their parent and become undocked.
-	// We cannot preserve the docking relationship between 
-	// an active window and an inactive docking, 
-	// otherwise any change of dockspace/settings 
-	// would lead to windows being stuck in limbo and never being visible.
 	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
 
-	ImGui::Begin("DockSpace", nullptr, window_flags);
-	ImGui::PopStyleVar();
-	ImGui::PopStyleVar(2);
+	ImGui::Begin("dockFrame", nullptr, dockspace_flags);
+	ImGui::PopStyleVar(3);
 
-	// Submit the DockSpace
-	ImGuiIO& io = ImGui::GetIO();
-	if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
-	{
-		ImGuiID dockspace_id = ImGui::GetID("EditorDockSpace");
-		ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-	}
+	ImGuiID dickSpaceId = ImGui::GetID("dockFrameDockSpace");
+	ndAssert(dickSpaceId);
 
-	WindowFrame frame;
-	frame.m_posit = ImGui::GetWindowPos();
-	frame.m_size = ImGui::GetWindowSize();
-	m_windowSizes.PushBack(frame);
-}
-
-void ndAssetEditor::EndDockSpace()
-{
+	ImGui::DockSpace(dickSpaceId, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_PassthruCentralNode);
 	ImGui::End();
 }
 
@@ -685,12 +582,6 @@ void ndAssetEditor::ShowMainMenuBar()
 {
 	if (ImGui::BeginMainMenuBar())
 	{
-		WindowFrame frame;
-		ImGui::GetWindowClipRect(frame.m_posit, frame.m_size);
-		frame.m_size.x -= frame.m_posit.x;
-		frame.m_size.y -= frame.m_posit.y;
-		m_windowSizes.PushBack(frame);
-
 		if (ImGui::BeginMenu("File"))
 		{
 			if (ImGui::MenuItem("New", ""))

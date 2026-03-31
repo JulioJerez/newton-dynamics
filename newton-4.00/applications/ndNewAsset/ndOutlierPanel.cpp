@@ -103,14 +103,6 @@ void ndAssetEditor::ShowOutlierPanel()
 	bool* open = false;
 	ndInt32 flags = 0;
 	ImGui::Begin("Oulier Panel", open, flags);
-	//ImGui::Begin("Oulier Panel", open);
-	//ImGui::PushItemWidth(ImGui::GetFontSize() * 12);
-	//ImGui::SetNextItemWidth(ImGui::GetFontSize() * 12);
-
-	WindowFrame frame;
-	frame.m_posit = ImGui::GetWindowPos();
-	frame.m_size = ImGui::GetWindowSize();
-	m_windowSizes.PushBack(frame);
 
 	ShowOutlierToolBar();
 	if (*m_model)
@@ -118,6 +110,5 @@ void ndAssetEditor::ShowOutlierPanel()
 		ShowOutlierExplorer(m_model);
 	}
 
-	//ImGui::PopItemWidth();
 	ImGui::End();
 }
