@@ -683,7 +683,7 @@ void ndAssetEditor::EndDockSpace()
 
 void ndAssetEditor::ShowMainMenuBar()
 {
-	if (ImGui::BeginMenuBar())
+	if (ImGui::BeginMainMenuBar())
 	{
 		WindowFrame frame;
 		ImGui::GetWindowClipRect(frame.m_posit, frame.m_size);
@@ -765,7 +765,7 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::EndMenu();
 		}
 
-		ImGui::EndMenuBar();
+		ImGui::EndMainMenuBar();
 	}
 }
 
