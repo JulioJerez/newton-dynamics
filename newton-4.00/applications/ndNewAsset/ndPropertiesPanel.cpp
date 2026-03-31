@@ -36,11 +36,11 @@ void ndAssetEditor::ShowPropertiesPanel()
 
 void ndAssetEditor::ShowPropertiesMeshInfo()
 {
-	if (ImGui::CollapsingHeader("Transforms"))
+	if (ImGui::CollapsingHeader("mesh node"))
 	{
 		char nodeName[256];
 		snprintf(nodeName, sizeof(nodeName) - 1, "%s", m_currentSelection->GetName().GetStr());
-		if (ImGui::InputText("node Name1", nodeName, sizeof(nodeName) - 1))
+		if (ImGui::InputText("Name", nodeName, sizeof(nodeName) - 1))
 		{
 			if (strcmp(m_currentSelection->GetName().GetStr(), nodeName))
 			{
