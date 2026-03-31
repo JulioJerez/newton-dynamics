@@ -20,15 +20,6 @@
 ndJointHinge::ndJointHinge()
 	:ndJointBilateralConstraint()
 	,m_axis()
-	//,m_angle(ndFloat32(0.0f))
-	//,m_omega(ndFloat32(0.0f))
-	//,m_springK(ndFloat32(0.0f))
-	//,m_damperC(ndFloat32(0.0f))
-	//,m_minLimit(ndFloat32(-1.0e10f))
-	//,m_maxLimit(ndFloat32(1.0e10f))
-	//,m_targetAngle(ndFloat32(0.0f))
-	//,m_springDamperRegularizer(ndFloat32(0.1f))
-	//,m_limitState(0)
 {
 	m_maxDof = 7;
 }
@@ -36,34 +27,13 @@ ndJointHinge::ndJointHinge()
 ndJointHinge::ndJointHinge(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(7, child, parent, pinAndPivotFrame)
 	,m_axis()
-	//,m_angle(ndFloat32(0.0f))
-	//,m_omega(ndFloat32(0.0f))
-	//,m_springK(ndFloat32(0.0f))
-	//,m_damperC(ndFloat32(0.0f))
-	//,m_minLimit(ndFloat32(-1.0e10f))
-	//,m_maxLimit(ndFloat32(1.0e10f))
-	//,m_targetAngle(ndFloat32(0.0f))
-	//,m_springDamperRegularizer(ndFloat32(0.1f))
-	//,m_limitState(0)
 {
 }
 
 ndJointHinge::ndJointHinge(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(7, child, parent, pinAndPivotInChild, pinAndPivotInParent)
 	,m_axis()
-	//,m_angle(ndFloat32(0.0f))
-	//,m_omega(ndFloat32(0.0f))
-	//,m_springK(ndFloat32(0.0f))
-	//,m_damperC(ndFloat32(0.0f))
-	//,m_minLimit(ndFloat32(-1.0e10f))
-	//,m_maxLimit(ndFloat32(1.0e10f))
-	//,m_targetAngle(ndFloat32(0.0f))
-	//,m_springDamperRegularizer(ndFloat32(0.1f))
-	//,m_limitState(0)
 {
-	//ndMatrix tmp;
-	//CalculateLocalMatrix(pinAndPivotInChild, m_localMatrix0, tmp);
-	//CalculateLocalMatrix(pinAndPivotInParent, tmp, m_localMatrix1);
 }
 
 ndJointHinge::~ndJointHinge()
@@ -82,12 +52,12 @@ ndFloat32 ndJointHinge::GetOmega() const
 
 bool ndJointHinge::GetLimitState() const
 {
-	return m_axis.m_limitState ? true : false;
+	return m_axis.m_limitState;
 }
 
 void ndJointHinge::SetLimitState(bool state)
 {
-	m_axis.m_limitState = state ? 1 : 0;
+	m_axis.m_limitState = state;
 	if (m_axis.m_limitState)
 	{
 		SetLimits(m_axis.m_minLimit, m_axis.m_maxLimit);
