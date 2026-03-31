@@ -13,28 +13,28 @@
 #include "ndAssetEditor.h"
 
 
-void ndAssetEditor::ShowOutlierToolBar()
-{
-	// draw some bottom to control the explorer
-	ImGui::Button("undo");
-	ImGui::SameLine();
-	ImGui::Button("redo");
-	ImGui::SameLine();
-	if (m_runScene)
-	{
-		if (ImGui::Button("stop"))
-		{
-			m_runScene = false;
-		}
-	}
-	else
-	{
-		if (ImGui::Button("run"))
-		{
-			m_runScene = true;
-		}
-	}
-}
+//void ndAssetEditor::ShowOutlierToolBar()
+//{
+//	// draw some bottom to control the explorer
+//	ImGui::Button("undo");
+//	ImGui::SameLine();
+//	ImGui::Button("redo");
+//	ImGui::SameLine();
+//	if (m_runScene)
+//	{
+//		if (ImGui::Button("stop"))
+//		{
+//			m_runScene = false;
+//		}
+//	}
+//	else
+//	{
+//		if (ImGui::Button("run"))
+//		{
+//			m_runScene = true;
+//		}
+//	}
+//}
 
 void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root)
 {
@@ -100,11 +100,9 @@ void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root)
 
 void ndAssetEditor::ShowOutlierPanel()
 {
-	bool* open = false;
-	ndInt32 flags = 0;
-	ImGui::Begin("Oulier Panel", open, flags);
+	ImGui::Begin("Oulier Panel");
 
-	ShowOutlierToolBar();
+	//ShowOutlierToolBar();
 	if (*m_model)
 	{
 		ShowOutlierExplorer(m_model);

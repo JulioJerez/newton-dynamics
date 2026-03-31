@@ -488,6 +488,7 @@ void ndAssetEditor::RenderScene()
 void ndAssetEditor::RenderLayout()
 {
 	ShowMainMenuBar();
+	ShowMainToolbar();
 	ShowOutlierPanel();
 	ShowPropertiesPanel();
 }
