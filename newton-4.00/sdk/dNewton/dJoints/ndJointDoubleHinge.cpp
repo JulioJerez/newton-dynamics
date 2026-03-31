@@ -17,19 +17,6 @@
 #define D_MAX_DOUBLE_HINGE_RECOVERY_SPEED	ndFloat32 (1.0f)
 #define D_MAX_DOUBLE_HINGE_PENETRATION		(ndFloat32 (4.0f) * ndDegreeToRad)
 
-ndJointDoubleHinge::ndAxisParam::ndAxisParam()
-	:m_angle(ndFloat32(0.0f))
-	,m_omega(ndFloat32(0.0f))
-	,m_springK(ndFloat32(0.0f))
-	,m_damperC(ndFloat32(0.0f))
-	,m_minLimit(ndFloat32(-1.0e10f))
-	,m_maxLimit(ndFloat32(1.0e10f))
-	,m_offsetAngle(ndFloat32(0.0f))
-	,m_springDamperRegularizer(ndFloat32(0.1f))
-	,m_limitState(0)
-{
-}
-
 ndJointDoubleHinge::ndJointDoubleHinge()
 	:ndJointBilateralConstraint()
 	,m_axis0()
@@ -94,14 +81,14 @@ void ndJointDoubleHinge::GetLimits0(ndFloat32& minLimit, ndFloat32& maxLimit)
 	maxLimit = m_axis0.m_maxLimit;
 }
 
-ndFloat32 ndJointDoubleHinge::GetOffsetAngle0() const
+ndFloat32 ndJointDoubleHinge::GetTargetAngle0() const
 {
-	return m_axis0.m_offsetAngle;
+	return m_axis0.m_targetAngle;
 }
 
-void ndJointDoubleHinge::SetOffsetAngle0(ndFloat32 angle)
+void ndJointDoubleHinge::SetTargetAngle0(ndFloat32 angle)
 {
-	m_axis0.m_offsetAngle = angle;
+	m_axis0.m_targetAngle = angle;
 }
 
 void ndJointDoubleHinge::SetAsSpringDamper0(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper)
@@ -156,14 +143,14 @@ void ndJointDoubleHinge::GetLimits1(ndFloat32& minLimit, ndFloat32& maxLimit)
 	maxLimit = m_axis1.m_maxLimit;
 }
 
-ndFloat32 ndJointDoubleHinge::GetOffsetAngle1() const
+ndFloat32 ndJointDoubleHinge::GetTargetAngle1() const
 {
-	return m_axis1.m_offsetAngle;
+	return m_axis1.m_targetAngle;
 }
 
-void ndJointDoubleHinge::SetOffsetAngle1(ndFloat32 angle)
+void ndJointDoubleHinge::SetTargetAngle1(ndFloat32 angle)
 {
-	m_axis1.m_offsetAngle = angle;
+	m_axis1.m_targetAngle = angle;
 }
 
 void ndJointDoubleHinge::SetAsSpringDamper1(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper)
@@ -301,8 +288,8 @@ void ndJointDoubleHinge::ClearMemory()
 	UpdateParameters();
 
 	// calculate joint parameters, angles and omega
-	m_axis0.m_offsetAngle = m_axis0.m_angle;
-	m_axis1.m_offsetAngle = m_axis1.m_angle;
+	m_axis0.m_targetAngle = m_axis0.m_angle;
+	m_axis1.m_targetAngle = m_axis1.m_angle;
 }
 
 void ndJointDoubleHinge::UpdateParameters()
@@ -414,13 +401,13 @@ void ndJointDoubleHinge::SubmitLimits(ndConstraintDescritor& desc, const ndMatri
 void ndJointDoubleHinge::SubmitSpringDamper0(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1)
 {
 	const ndVector frontDir((matrix0.m_front - matrix1.m_up.Scale(matrix0.m_front.DotProduct(matrix1.m_up).GetScalar())).Normalize());
-	AddAngularRowJacobian(desc, frontDir, m_axis0.m_offsetAngle - m_axis0.m_angle);
+	AddAngularRowJacobian(desc, frontDir, m_axis0.m_targetAngle - m_axis0.m_angle);
 	SetMassSpringDamperAcceleration(desc, m_axis0.m_springDamperRegularizer, m_axis0.m_springK, m_axis0.m_damperC);
 }
 
 void ndJointDoubleHinge::SubmitSpringDamper1(ndConstraintDescritor& desc, const ndMatrix&, const ndMatrix& matrix1)
 {
-	AddAngularRowJacobian(desc, matrix1.m_up, m_axis1.m_offsetAngle - m_axis1.m_angle);
+	AddAngularRowJacobian(desc, matrix1.m_up, m_axis1.m_targetAngle - m_axis1.m_angle);
 	SetMassSpringDamperAcceleration(desc, m_axis1.m_springDamperRegularizer, m_axis1.m_springK, m_axis1.m_damperC);
 }
 

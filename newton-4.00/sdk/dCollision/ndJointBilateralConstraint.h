@@ -79,6 +79,35 @@ class ndJointBilateralConstraint : public ndConstraint
 		ndFloat32 m_velocity;
 	};
 
+	class ndAxisParam
+	{
+		public:
+		ndAxisParam()
+			:m_angle(ndFloat32(0.0f))
+			,m_omega(ndFloat32(0.0f))
+			,m_springK(ndFloat32(0.0f))
+			,m_damperC(ndFloat32(0.0f))
+			,m_minLimit(ndFloat32(-1.0e10f))
+			,m_maxLimit(ndFloat32(1.0e10f))
+			,m_targetAngle(ndFloat32(0.0f))
+			,m_springDamperRegularizer(ndFloat32(0.1f))
+			,m_limitState(false)
+			,m_hitLimits(false)
+		{
+		}
+
+		ndFloat32 m_angle;
+		ndFloat32 m_omega;
+		ndFloat32 m_springK;
+		ndFloat32 m_damperC;
+		ndFloat32 m_minLimit;
+		ndFloat32 m_maxLimit;
+		ndFloat32 m_targetAngle;
+		ndFloat32 m_springDamperRegularizer;
+		bool m_limitState;
+		bool m_hitLimits;
+	};
+
 	D_COLLISION_API ndJointBilateralConstraint();
 	D_COLLISION_API ndJointBilateralConstraint(ndInt32 maxDof, ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrix);
 	D_COLLISION_API ndJointBilateralConstraint(ndInt32 maxDof, ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrixBody0,  const ndMatrix& globalMatrixBody1);
