@@ -129,6 +129,7 @@ class ndMesh : public ndClassAlloc
 
 	D_NEWTON_API void ApplyTransform(const ndMatrix& transform);
 	D_NEWTON_API ndMatrix CalculateGlobalMatrix(ndMesh* const parent = nullptr) const;
+	D_NEWTON_API void CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) const;
 
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollision();
 	D_NEWTON_API ndSharedPtr<ndJointBilateralConstraint> CreateJoint();
