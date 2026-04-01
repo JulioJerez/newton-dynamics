@@ -296,7 +296,16 @@ void ndAssetEditor::UpdatePhysics(ndFloat32)
 void ndAssetEditor::RenderScene()
 {
 	ndFloat32 timestep = ndGetElapsedSeconds();
-	UpdatePhysics(timestep);
+	if (timestep > 1.0f / 60.0f)
+	{
+		timestep = 1.0f / 60.0f;
+		ndResetTimer();
+	}
+
+	//UpdatePhysics(timestep);
+
+	ndEditorCameraNode* const camera = (ndEditorCameraNode*)*m_renderer->GetCamera();
+	camera->TickUpdate(timestep);
 
 	m_renderer->BegingRender();
 	ConfigureDockSpace();
