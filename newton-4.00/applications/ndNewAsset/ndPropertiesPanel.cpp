@@ -10,7 +10,25 @@
 */
 
 #include "ndNewAssetStdafx.h"
+#include "ndUndoRedo.h"
 #include "ndAssetEditor.h"
+
+class ndUndoRedoName : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoName(const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(mesh)
+		,m_name(mesh->GetName())
+	{
+	}
+	
+	virtual void Undo() override
+	{
+		m_mesh->SetName(m_name);
+	}
+
+	ndString m_name;
+};
 
 void ndAssetEditor::ShowPropertiesMeshInfo()
 {
@@ -18,11 +36,13 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 	{
 		char nodeName[256];
 		snprintf(nodeName, sizeof(nodeName) - 1, "%s", m_currentSelection->GetName().GetStr());
-		if (ImGui::InputText("Name", nodeName, sizeof(nodeName) - 1))
+		if (ImGui::InputText("Name", nodeName, sizeof(nodeName) - 1, ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			if (strcmp(m_currentSelection->GetName().GetStr(), nodeName))
 			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoName(m_currentSelection)));
 				m_currentSelection->SetName(ndString(nodeName));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoName(m_currentSelection)));
 			}
 		}
 

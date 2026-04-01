@@ -11,6 +11,8 @@
 #ifndef __ASSET_EDITOR_H__
 #define __ASSET_EDITOR_H__
 
+#include "ndUndoRedo.h"
+
 class ndPhysicsWorld;
 class ndDebugDisplayRenderPass;
 
@@ -54,14 +56,11 @@ class ndAssetEditor : public ndClassAlloc
 		ndAssetEditor* m_owner;
 	};
 
-	enum ndMenuSelection
-	{
-		m_new,
-		//m_load,
-		//m_save,
-		//m_saveModel,
-		m_none,
-	};
+	//enum ndMenuSelection
+	//{
+	//	m_new,
+	//	m_none,
+	//};
 
 	class ndKeyTrigger
 	{
@@ -235,6 +234,7 @@ class ndAssetEditor : public ndClassAlloc
 
 	ndSharedPtr<OnPostUpdate> m_onPostUpdate;
 	ndString m_currentPath;
+	ndUndoRedo m_undoRedo;
 
 	ndInt32 m_currentPlugin;
 	ndInt32 m_solverPasses;
@@ -246,6 +246,7 @@ class ndAssetEditor : public ndClassAlloc
 	bool m_runScene;
 	ndWorld::ndSolverModes m_solverMode;
 	
+	friend class ndUndoRedo;
 	friend class ndPhysicsWorld;
 	friend class ndDebugDisplayRenderPass;
 };

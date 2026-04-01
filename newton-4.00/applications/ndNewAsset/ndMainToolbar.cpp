@@ -10,22 +10,23 @@
 */
 
 #include "ndNewAssetStdafx.h"
+#include "ndUndoRedo.h"
 #include "ndAssetEditor.h"
 
 void ndAssetEditor::ShowMainToolbar()
 {
 	ImGui::Begin("Main Toolbar");
 	
-	/// draw some bottom to control the explorer
 	if (ImGui::Button("undo"))
 	{
-		ndTrace(("undo\n"));
+		m_undoRedo.Undo(this);
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("redo"))
 	{
-		ndTrace(("redo\n"));
+		m_undoRedo.Redo(this);
 	}
+
 	ImGui::SameLine();
 	if (m_runScene)
 	{

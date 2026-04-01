@@ -379,7 +379,7 @@ void ndAssetEditor::ConfigureDockSpace()
 	//dockspace_flags |= ImGuiWindowFlags_NoTitleBar;
 	//dockspace_flags |= ImGuiWindowFlags_NoCollapse;
 	//dockspace_flags |= ImGuiWindowFlags_NoNavFocus;
-	//dockspace_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+	dockspace_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
 
 	ImGuiViewport* const viewport = ImGui::GetMainViewport();
 	ndAssert(viewport);
@@ -485,6 +485,7 @@ void ndAssetEditor::ShowMainMenuBar()
 
 void ndAssetEditor::SetVisualScene(const ndRenderMeshLoader& loader)
 {
+	m_undoRedo.Clear();
 	m_newModel = loader.m_mesh;
 	m_newMesh = loader.m_renderMesh;
 }
