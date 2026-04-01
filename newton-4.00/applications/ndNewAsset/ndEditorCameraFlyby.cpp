@@ -117,6 +117,9 @@ void ndEditorCameraFlyby::TickUpdate(ndFloat32 timestep)
 		const ndQuaternion newRotation(newCameMatrix);
 		const ndVector newPosit(newCameMatrix.RotateVector(m_posit));
 		ndEditorCameraNode::SetTransform(newRotation, newPosit);
+
+		const ndVector lightDir(newCameMatrix.RotateVector(ndVector(-1.0f, 1.0f, 0.f, 0.0f)));
+		renderer->SetSunLight(lightDir, ndVector(0.7f, 0.7f, 0.7f, 0.0f));
 	}
 	
 	m_mousePosX = mouseX;

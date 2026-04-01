@@ -86,8 +86,8 @@ ndAssetEditor::ndAssetEditor()
 	m_renderer->AddRenderPass(m_menuRenderPass);
 	
 	//add main directional light
-	m_renderer->SetSunLight(ndVector(-0.5f, 1.0f, -0.5f, 0.0f), ndVector(0.7f, 0.7f, 0.7f, 0.0f));
-
+	//m_renderer->SetSunLight(ndVector(-0.5f, 1.0f, -0.5f, 0.0f), ndVector(0.7f, 0.7f, 0.7f, 0.0f));
+	m_renderer->SetSunLight(ndVector(-1.0f, 1.0f, 0.f, 0.0f), ndVector(0.7f, 0.7f, 0.7f, 0.0f));
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
