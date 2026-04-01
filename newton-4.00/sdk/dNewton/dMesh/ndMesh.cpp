@@ -471,6 +471,30 @@ ndMatrix ndMesh::CalculateLocalMatrix(ndVector& sizeOut) const
 	return covariance;
 }
 
+void ndMesh::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) const
+{
+	p0 = ndVector(1.0e10f);
+	p1 = ndVector(-1.0e10f);
+	auto GetAabb = [&matrix, &p0, &p1](ndMesh* const node)
+	{
+		if (node->GetMesh())
+		{
+			const ndMatrix nodeMatrix(node->GetGeometryMatrix() * node->CalculateGlobalMatrix() * matrix);
+
+			ndInt32 count = node->GetMesh()->GetVertexCount();
+			ndInt32 stride = ndInt32(node->GetMesh()->GetVertexStrideInByte() / sizeof (ndFloat64));
+			const ndFloat64* const array = node->GetMesh()->GetVertexPool();
+			for (ndInt32 i = 0; i < count; ++i)
+			{
+				ndVector p(nodeMatrix.TransformVector(ndVector(array[i * stride + 0], array[i * stride + 1], array[i * stride + 2], ndFloat64(0.0f))));
+				p0 = p0.GetMin(p);
+				p1 = p1.GetMax(p);
+			}
+		}
+	};
+	((ndMesh*)this)->NodeIterator(GetAabb);
+}
+
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionBox()
 {
 	ndSharedPtr<ndMeshEffect> meshEffect = GetMesh();

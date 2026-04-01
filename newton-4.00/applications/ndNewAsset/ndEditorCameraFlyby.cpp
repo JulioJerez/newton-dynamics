@@ -10,14 +10,16 @@
 */
 
 #include "ndNewAssetStdafx.h"
+#include "ndAssetEditor.h"
 #include "ndEditorCameraFlyby.h"
 
 ndEditorCameraFlyby::ndEditorCameraFlyby(ndRender* const owner)
 	:ndEditorCameraNode(owner)
+	,m_posit(ndVector::m_wOne)
 	,m_yaw(ndFloat32(0.0f))
 	,m_pitch(ndFloat32(0.0f))
-	,m_yawRate(ndFloat32(0.02f))
-	,m_pitchRate(ndFloat32(0.02f))
+	,m_yawRate(ndFloat32(0.2f * 60.0f))
+	,m_pitchRate(ndFloat32(0.2f * 60.0f))
 	,m_mousePosX(ndFloat32(0.0f))
 	,m_mousePosY(ndFloat32(0.0f))
 	,m_frontSpeed(ndFloat32(15.0f))
@@ -31,24 +33,22 @@ void ndEditorCameraFlyby::SetTransform(const ndQuaternion& rotation, const ndVec
 	const ndMatrix matrix(GetTransform().GetMatrix());
 	m_pitch = ndAsin(matrix.m_front.m_y);
 	m_yaw = ndAtan2(-matrix.m_front.m_z, matrix.m_front.m_x);
+	m_posit = position;
 }
 
-//void ndEditorCameraFlyby::TickUpdate(ndFloat32 timestep)
-void ndEditorCameraFlyby::TickUpdate(ndFloat32)
+void ndEditorCameraFlyby::TickUpdate(ndFloat32 timestep)
 {
-	ndAssert(0);
-	//ndRender* const renderer = GetOwner();
-	//ndAssert(renderer);
-	//ndDemoEntityManager::ndRenderCallback* const renderCallback = (ndDemoEntityManager::ndRenderCallback*)*renderer->GetOwner();
-	//ndDemoEntityManager* const scene = renderCallback->m_owner;
-	//
-	//ndFloat32 mouseX;
-	//ndFloat32 mouseY;
-	//scene->GetMousePosition(mouseX, mouseY);
-	//
+	ndRender* const renderer = GetOwner();
+	ndAssert(renderer);
+	ndAssetEditor::ndRenderCallback* const renderCallback = (ndAssetEditor::ndRenderCallback*)*renderer->GetOwner();
+	ndAssetEditor* const scene = renderCallback->m_owner;
+	
+	ndFloat32 mouseX;
+	ndFloat32 mouseY;
+	scene->GetMousePosition(mouseX, mouseY);
+	
 	//// slow down the Camera if we have a Body
 	//ndFloat32 slowDownFactor = scene->IsShiftKeyDown() ? 0.5f / 10.0f : 0.5f;
-	//
 	//ndMatrix targetMatrix(m_transform1.GetMatrix());
 	//
 	//// do camera translation
@@ -78,41 +78,50 @@ void ndEditorCameraFlyby::TickUpdate(ndFloat32)
 	//{
 	//	targetMatrix.m_posit += targetMatrix.m_up.Scale(m_sidewaysSpeed * timestep * slowDownFactor);
 	//}
-	//
+	
 	//ndMatrix matrix(ndRollMatrix(m_pitch) * ndYawMatrix(m_yaw));
 	//ndQuaternion newRotation(matrix);
 	//ndEditorCameraNode::SetTransform(newRotation, targetMatrix.m_posit);
-	//
-	//bool mouseState = !scene->GetCaptured() && (scene->GetMouseKeyState(0) && !scene->GetMouseKeyState(1));
-	//// do camera rotation, only if we do not have anything picked
+	
+	bool mouseState = !scene->GetCaptured() && (scene->GetMouseKeyState(0) && !scene->GetMouseKeyState(1));
+	// do camera rotation, only if we do not have anything picked
 	//if (!UpdatePickBody() && mouseState)
-	//{
-	//	ndFloat32 mouseSpeedX = mouseX - m_mousePosX;
-	//	ndFloat32 mouseSpeedY = mouseY - m_mousePosY;
-	//
-	//	if (ImGui::IsMouseDown(0))
-	//	{
-	//		if (mouseSpeedX > 0.0f)
-	//		{
-	//			m_yaw = ndAnglesAdd(m_yaw, -m_yawRate);
-	//		}
-	//		else if (mouseSpeedX < 0.0f)
-	//		{
-	//			m_yaw = ndAnglesAdd(m_yaw, m_yawRate);
-	//		}
-	//
-	//		if (mouseSpeedY > 0.0f)
-	//		{
-	//			m_pitch -= m_pitchRate;
-	//		}
-	//		else if (mouseSpeedY < 0.0f)
-	//		{
-	//			m_pitch += m_pitchRate;
-	//		}
-	//		m_pitch = ndClamp(m_pitch, ndFloat32(-80.0f * ndDegreeToRad), ndFloat32(80.0f * ndDegreeToRad));
-	//	}
-	//}
-	//
-	//m_mousePosX = mouseX;
-	//m_mousePosY = mouseY;
+	if (mouseState)
+	{
+		ndFloat32 mouseSpeedX = mouseX - m_mousePosX;
+		ndFloat32 mouseSpeedY = mouseY - m_mousePosY;
+
+		if (ImGui::IsMouseDown(0))
+		{
+			if (mouseSpeedX > 0.0f)
+			{
+				m_yaw = ndAnglesAdd(m_yaw, -m_yawRate * timestep);
+			}
+			else if (mouseSpeedX < 0.0f)
+			{
+				m_yaw = ndAnglesAdd(m_yaw, m_yawRate * timestep);
+			}
+	
+			if (mouseSpeedY > 0.0f)
+			{
+				m_pitch -= m_pitchRate * timestep;
+			}
+			else if (mouseSpeedY < 0.0f)
+			{
+				m_pitch += m_pitchRate * timestep;
+			}
+			m_pitch = ndClamp(m_pitch, ndFloat32(-80.0f * ndDegreeToRad), ndFloat32(80.0f * ndDegreeToRad));
+		}
+
+		const ndMatrix newCameMatrix(ndRollMatrix(m_pitch) * ndYawMatrix(m_yaw));
+		const ndQuaternion newRotation(newCameMatrix);
+		const ndVector newPosit(newCameMatrix.RotateVector(m_posit));
+		ndEditorCameraNode::SetTransform(newRotation, newPosit);
+
+		const ndVector lightDir(newCameMatrix.RotateVector(ndVector(-1.0f, 1.0f, 0.f, 0.0f)));
+		renderer->SetSunLight(lightDir, ndVector(0.7f, 0.7f, 0.7f, 0.0f));
+	}
+	
+	m_mousePosX = mouseX;
+	m_mousePosY = mouseY;
 }

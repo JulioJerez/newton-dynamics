@@ -248,6 +248,7 @@ class ndAssetEditor : public ndClassAlloc
 	
 	friend class ndUndoRedo;
 	friend class ndPhysicsWorld;
+	friend class ndEditorCameraFlyby;
 	friend class ndDebugDisplayRenderPass;
 };
 

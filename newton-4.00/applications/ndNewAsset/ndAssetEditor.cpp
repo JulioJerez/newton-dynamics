@@ -86,8 +86,7 @@ ndAssetEditor::ndAssetEditor()
 	m_renderer->AddRenderPass(m_menuRenderPass);
 	
 	//add main directional light
-	m_renderer->SetSunLight(ndVector(-0.5f, 1.0f, -0.5f, 0.0f), ndVector(0.7f, 0.7f, 0.7f, 0.0f));
-
+	m_renderer->SetSunLight(ndVector(-1.0f, 1.0f, 0.f, 0.0f), ndVector(0.7f, 0.7f, 0.7f, 0.0f));
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
@@ -296,7 +295,16 @@ void ndAssetEditor::UpdatePhysics(ndFloat32)
 void ndAssetEditor::RenderScene()
 {
 	ndFloat32 timestep = ndGetElapsedSeconds();
-	UpdatePhysics(timestep);
+	if (timestep > 1.0f / 60.0f)
+	{
+		timestep = 1.0f / 60.0f;
+		ndResetTimer();
+	}
+
+	//UpdatePhysics(timestep);
+
+	ndEditorCameraNode* const camera = (ndEditorCameraNode*)*m_renderer->GetCamera();
+	camera->TickUpdate(timestep);
 
 	m_renderer->BegingRender();
 	ConfigureDockSpace();
@@ -515,8 +523,16 @@ void ndAssetEditor::Run()
 					m_newMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);
 					m_renderer->AddSceneNode(m_entity);
 				}
+
+				ndVector p0;
+				ndVector p1;
+				const ndMatrix matrix(ndGetIdentityMatrix());
+				m_model->CalculateAabb(matrix, p0, p1);
+				ndVector size(ndVector::m_half * (p1 - p0));
+				ndVector origin(ndVector::m_half * (p1 + p0));
+				ndFloat32 maxSize = ndMax(ndMax(size.m_x, size.m_y), size.m_z);
+				origin.m_x -= maxSize * 4.0f;
 				ndQuaternion rot;
-				ndVector origin(-5.0f, 0.0f, 0.0f, 1.0f);
 
 				SetCameraMatrix(rot, origin);
 			}

@@ -25,6 +25,7 @@ class ndEditorCameraFlyby: public ndEditorCameraNode
 	void TickUpdate(ndFloat32 timestep);
 	virtual void SetTransform(const ndQuaternion& rotation, const ndVector& position) override;
 
+	ndVector m_posit;
 	ndFloat32 m_yaw;
 	ndFloat32 m_pitch;
 	ndFloat32 m_yawRate;
