@@ -372,14 +372,14 @@ void ndAssetEditor::TestImGui()
 void ndAssetEditor::BeginDockSpace()
 {
 	ImGuiWindowFlags dockspace_flags = ImGuiWindowFlags_None;
-	dockspace_flags |= ImGuiWindowFlags_NoMove;
-	dockspace_flags |= ImGuiWindowFlags_NoResize;
-	dockspace_flags |= ImGuiWindowFlags_NoDocking;
-	dockspace_flags |= ImGuiWindowFlags_NoTitleBar;
-	dockspace_flags |= ImGuiWindowFlags_NoCollapse;
-	dockspace_flags |= ImGuiWindowFlags_NoNavFocus;
 	dockspace_flags |= ImGuiWindowFlags_NoBackground;
-	dockspace_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
+	//dockspace_flags |= ImGuiWindowFlags_NoMove;
+	//dockspace_flags |= ImGuiWindowFlags_NoResize;
+	//dockspace_flags |= ImGuiWindowFlags_NoDocking;
+	//dockspace_flags |= ImGuiWindowFlags_NoTitleBar;
+	//dockspace_flags |= ImGuiWindowFlags_NoCollapse;
+	//dockspace_flags |= ImGuiWindowFlags_NoNavFocus;
+	//dockspace_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
 
 	ImGuiViewport* const viewport = ImGui::GetMainViewport();
 	ndAssert(viewport);

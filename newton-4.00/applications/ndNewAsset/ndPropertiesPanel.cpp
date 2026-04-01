@@ -12,28 +12,6 @@
 #include "ndNewAssetStdafx.h"
 #include "ndAssetEditor.h"
 
-void ndAssetEditor::ShowPropertiesPanel()
-{
-	ImGui::Begin("Properties Panel");
-
-	if (*m_currentSelection)
-	{
-		ShowPropertiesMeshInfo();
-		if (*m_currentSelection->GetRigidBody())
-		{
-			ShowPropertiesRigidBodyInfo();
-			ShowPropertiesCollisionInfo();
-
-			if (*m_currentSelection->GetJoint())
-			{
-				ShowPropertiesJointInfo();
-			}
-		}
-	}
-	
-	ImGui::End();
-}
-
 void ndAssetEditor::ShowPropertiesMeshInfo()
 {
 	if (ImGui::CollapsingHeader("mesh node"))
@@ -567,4 +545,26 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 			ndAssert(0);
 		}
 	}
+}
+
+void ndAssetEditor::ShowPropertiesPanel()
+{
+	ImGui::Begin("Properties Panel");
+
+	if (*m_currentSelection)
+	{
+		ShowPropertiesMeshInfo();
+		if (*m_currentSelection->GetRigidBody())
+		{
+			ShowPropertiesRigidBodyInfo();
+			ShowPropertiesCollisionInfo();
+
+			if (*m_currentSelection->GetJoint())
+			{
+				ShowPropertiesJointInfo();
+			}
+		}
+	}
+
+	ImGui::End();
 }
