@@ -10,41 +10,39 @@
 */
 
 #include "ndNewAssetStdafx.h"
+#include "ndUndoRedo.h"
 #include "ndAssetEditor.h"
 
-void ndAssetEditor::ShowPropertiesPanel()
+class ndUndoRedoName : public ndUndoRedoCommand
 {
-	ImGui::Begin("Properties Panel");
-
-	if (*m_currentSelection)
+	public:
+	ndUndoRedoName(const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(mesh)
+		,m_name(mesh->GetName())
 	{
-		ShowPropertiesMeshInfo();
-		if (*m_currentSelection->GetRigidBody())
-		{
-			ShowPropertiesRigidBodyInfo();
-			ShowPropertiesCollisionInfo();
-
-			if (*m_currentSelection->GetJoint())
-			{
-				ShowPropertiesJointInfo();
-			}
-		}
 	}
 	
-	ImGui::End();
-}
+	virtual void Undo() override
+	{
+		m_mesh->SetName(m_name);
+	}
+
+	ndString m_name;
+};
 
 void ndAssetEditor::ShowPropertiesMeshInfo()
 {
-	if (ImGui::CollapsingHeader("Transforms"))
+	if (ImGui::CollapsingHeader("mesh node"))
 	{
 		char nodeName[256];
 		snprintf(nodeName, sizeof(nodeName) - 1, "%s", m_currentSelection->GetName().GetStr());
-		if (ImGui::InputText("node Name1", nodeName, sizeof(nodeName) - 1))
+		if (ImGui::InputText("Name", nodeName, sizeof(nodeName) - 1, ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			if (strcmp(m_currentSelection->GetName().GetStr(), nodeName))
 			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoName(m_currentSelection)));
 				m_currentSelection->SetName(ndString(nodeName));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoName(m_currentSelection)));
 			}
 		}
 
@@ -567,4 +565,26 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 			ndAssert(0);
 		}
 	}
+}
+
+void ndAssetEditor::ShowPropertiesPanel()
+{
+	ImGui::Begin("Properties Panel");
+
+	if (*m_currentSelection)
+	{
+		ShowPropertiesMeshInfo();
+		if (*m_currentSelection->GetRigidBody())
+		{
+			ShowPropertiesRigidBodyInfo();
+			ShowPropertiesCollisionInfo();
+
+			if (*m_currentSelection->GetJoint())
+			{
+				ShowPropertiesJointInfo();
+			}
+		}
+	}
+
+	ImGui::End();
 }

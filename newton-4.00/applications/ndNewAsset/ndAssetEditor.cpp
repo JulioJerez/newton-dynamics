@@ -63,106 +63,50 @@ ndAssetEditor::ndAssetEditor()
 	const ndString fontPathName(ndGetWorkingFileName("Cousine-Regular.ttf"));
 	m_renderer->InitImGui(fontPathName.GetStr());
 
-	//// load the environment texture
-	//ndFixSizeArray<ndString, 6> environmentTexturePath;
-	//environmentTexturePath.PushBack(ndGetWorkingFileName("Sorsele3/negx.png"));
-	//environmentTexturePath.PushBack(ndGetWorkingFileName("Sorsele3/posx.png"));
-	//environmentTexturePath.PushBack(ndGetWorkingFileName("Sorsele3/posy.png"));
-	//environmentTexturePath.PushBack(ndGetWorkingFileName("Sorsele3/negy.png"));
-	//environmentTexturePath.PushBack(ndGetWorkingFileName("Sorsele3/negz.png"));
-	//environmentTexturePath.PushBack(ndGetWorkingFileName("Sorsele3/posz.png"));
-	//m_environmentTexture = m_renderer->GetTextureCache()->GetCubeMap(environmentTexturePath);
+	// load the environment texture
+	ndFixSizeArray<ndString, 6> environmentTexturePath;
+	environmentTexturePath.PushBack(ndGetWorkingFileName("gray.png"));
+	environmentTexturePath.PushBack(ndGetWorkingFileName("gray.png"));
+	environmentTexturePath.PushBack(ndGetWorkingFileName("gray.png"));
+	environmentTexturePath.PushBack(ndGetWorkingFileName("gray.png"));
+	environmentTexturePath.PushBack(ndGetWorkingFileName("gray.png"));
+	environmentTexturePath.PushBack(ndGetWorkingFileName("gray.png"));
+	m_environmentTexture = m_renderer->GetTextureCache()->GetCubeMap(environmentTexturePath);
 
-	//// create render passes
+	// create render passes
 	m_menuRenderPass = ndSharedPtr<ndRenderPass>(new ndMenuRenderPass(this));
 	m_colorRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassColor(*m_renderer));
+	m_shadowRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassShadows(*m_renderer));
+	m_environmentRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassEnvironment(*m_renderer, m_environmentTexture));
 
-	//// add render passes in order of execution
+	// add render passes in order of execution
+	m_renderer->AddRenderPass(m_shadowRenderPass);
 	m_renderer->AddRenderPass(m_colorRenderPass);
+	m_renderer->AddRenderPass(m_environmentRenderPass);
 	m_renderer->AddRenderPass(m_menuRenderPass);
 	
-	////add main directional light
-	//m_renderer->SetSunLight(ndVector(-0.5f, 1.0f, -0.5f, 0.0f), ndVector(0.7f, 0.7f, 0.7f, 0.0f));
+	//add main directional light
+	m_renderer->SetSunLight(ndVector(-0.5f, 1.0f, -0.5f, 0.0f), ndVector(0.7f, 0.7f, 0.7f, 0.0f));
 
-	// initialized the physics world for the new scene
-	//m_showUI = false;
-	//m_showAABB = true;
-	//m_showScene = true;
-	//m_showConcaveEdge = true;
-	//m_showMeshSkeleton = true;
-	//m_autoSleepMode = false;
-	///m_hidePostUpdate = true;
-	//m_hideVisualMeshes = true;
-	//m_solverMode = ndWorld::ndStandardSolver;
-	//m_solverMode = ndWorld::ndSimdSoaSolver;
-	//m_solverMode = ndWorld::ndSimdAvx2Solver;
-	//m_solverPasses = 4;
-	//m_workerThreads = 1;
-	//m_solverSubSteps = 2;
-	//m_showRaycastHit = true;
-	//m_showCenterOfMass = true;
-	//m_showNormalForces = true;
-	//m_showContactPoints = true;
-	//m_showJointDebugInfo = true;
-	//m_showModelsDebugInfo = true;
-	//m_showCollisionMeshMode = 1;
-	//m_showCollisionMeshMode = 2;
-	//m_showCollisionMeshMode = 3;		// solid wire frame
-	//m_synchronousPhysicsUpdate = true;
-	//m_synchronousParticlesUpdate = true;
-	//m_showStaticMeshCollidingFaces = true;
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-	Cleanup();
 	ApplyOptions();
 
-	//m_renderer->MaximizeWindow();
 	m_defaultCamera = ndSharedPtr<ndRenderSceneNode>(new ndEditorCameraFlyby(*m_renderer));
 	m_renderer->SetCamera(m_defaultCamera);
 }
 
 ndAssetEditor::~ndAssetEditor ()
 {
-	//Cleanup ();
-	//
-	//// destroy the empty world
-	//if (m_world) 
-	//{
-	//	delete m_world;
-	//}
 }
 
-//ndPhysicsWorld* ndAssetEditor::GetWorld() const
-//{
-//	return m_world;
-//}
 
 ndSharedPtr<ndRender>& ndAssetEditor::GetRenderer()
 {
 	return m_renderer;
 }
-
-//ndDebugDisplayRenderPass* ndAssetEditor::GetDebugRenderPass()
-//{
-//	return (ndDebugDisplayRenderPass*)*m_debugDisplayRenderPass;
-//}
-//
-//void ndAssetEditor::Terminate()
-//{
-//	m_renderer->Terminate();
-//}
-
-//ndInt32 ndAssetEditor::GetWidth() const
-//{
-//	return m_renderer->GetWidth();
-//}
-//
-//ndInt32 ndAssetEditor::GetHeight() const
-//{
-//	return m_renderer->GetHeight();
-//}
 
 bool ndAssetEditor::GetKeyState(ndInt32 key) const
 {
@@ -270,128 +214,9 @@ bool ndAssetEditor::GetMouseKeyState (ndInt32 button) const
 	return io.MouseDown[button];
 }
 
-bool ndAssetEditor::JoystickDetected() const
-{
-	ndAssert(0);
-	return 0;
-	//return glfwJoystickPresent(0) ? true : false;
-}
-
-void ndAssetEditor::GetJoystickAxis(ndFixSizeArray<ndFloat32, 8>&)
-{
-	ndAssert(0);
-	//if (JoystickDetected())
-	//{
-	//	bool isInitialized = false;
-	//	static ndFixSizeArray<ndFloat32, 8> initialValues;
-	//	if (!initialValues.GetCount())
-	//	{
-	//		ndInt32 axisCount = 0;
-	//		const float* const axis = glfwGetJoystickAxes(0, &axisCount);
-	//		axisCount = ndMin(axisCount, axisValues.GetCapacity());
-	//		for (ndInt32 i = 0; i < axisCount; ++i)
-	//		{
-	//			initialValues.PushBack(axis[i]);
-	//		}
-	//	}
-	//	
-	//	if (!isInitialized)
-	//	{
-	//		ndInt32 axisCount = 0;
-	//		const float* const axis = glfwGetJoystickAxes(0, &axisCount);
-	//		for (ndInt32 i = 0; i < axisCount; ++i)
-	//		{
-	//			ndFloat32 diff = ndAbs(axis[i] - initialValues[i]);
-	//			isInitialized = isInitialized || (diff != ndFloat32(0.0f));
-	//		}
-	//	}
-	//
-	//	axisValues.SetCount(0);
-	//	for (ndInt32 i = 0; i < axisValues.GetCapacity(); ++i)
-	//	{
-	//		axisValues.PushBack(ndFloat32 (1.0f));
-	//	}
-	//	axisValues[0] = 0.0f;
-	//
-	//	if (isInitialized)
-	//	{
-	//		ndInt32 axisCount = 0;
-	//		const float* const axis = glfwGetJoystickAxes(0, &axisCount);
-	//		axisCount = ndMin(axisCount, axisValues.GetCapacity());
-	//
-	//		axisValues.SetCount(0);
-	//		for (ndInt32 i = 0; i < axisCount; ++i)
-	//		{
-	//			axisValues.PushBack(axis[i]);
-	//		}
-	//	}
-	//}
-}
-
-void ndAssetEditor::GetJoystickButtons(ndFixSizeArray<char, 32>&)
-{
-	ndAssert(0);
-	//if (JoystickDetected())
-	//{
-	//	ndInt32 buttonsCount = 0;
-	//	axisbuttons.SetCount(0);
-	//	const unsigned char* const buttons = glfwGetJoystickButtons(0, &buttonsCount);
-	//	buttonsCount = ndMin(buttonsCount, axisbuttons.GetCapacity());
-	//
-	//	for (ndInt32 i = 0; i < buttonsCount; ++i)
-	//	{
-	//		axisbuttons.PushBack(char(buttons[i]));
-	//	}
-	//}
-}
-
 void ndAssetEditor::RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& postUpdate)
 {
 	m_onPostUpdate = postUpdate;
-}
-
-void ndAssetEditor::Cleanup ()
-{
-	// is we are run asynchronous we need make sure no update in on flight.
-	//if (m_world) 
-	//{
-	//	m_world->Sync();
-	//}
-	//
-	//m_renderer->ResetScene();
-	//RegisterPostUpdate(ndSharedPtr<OnPostUpdate>(nullptr));
-	//
-	//// destroy the Newton world
-	//if (m_world) 
-	//{
-	//	// get serialization call back before destroying the world
-	//	m_world->CleanUp();
-	//	delete m_world;
-	//}
-	//
-	//// create the newton world
-	//m_world = new ndPhysicsWorld(this);
-	//ApplyMenuOptions();
-}
-
-void ndAssetEditor::ApplyMenuOptions()
-{
-	//m_world->Sync();
-	//m_world->SetSubSteps(m_solverSubSteps);
-	//m_world->SetSolverIterations(m_solverPasses);
-	//m_world->SetThreadCount(m_workerThreads);
-	//
-	//bool state = m_autoSleepMode ? true : false;
-	//const ndBodyListView& bodyList = m_world->GetBodyList();
-	//for (ndBodyListView::ndNode* node = bodyList.GetFirst(); node; node = node->GetNext())
-	//{
-	//	ndBodyKinematic* const body = node->GetInfo()->GetAsBodyKinematic();
-	//	body->SetAutoSleep(state);
-	//}
-	//
-	//SetParticleUpdateMode();
-	//m_world->SelectSolver(m_solverMode);
-	//m_solverMode = m_world->GetSelectedSolver();
 }
 
 void ndAssetEditor::ApplyOptions()
@@ -403,7 +228,6 @@ void ndAssetEditor::ApplyOptions()
 	//ndDebugDisplayRenderPass* const debugDisplay = (ndDebugDisplayRenderPass*)*m_debugDisplayRenderPass;
 	//debugDisplay->SetDebugDisplayOptions();
 }
-
 
 bool ndAssetEditor::GetMouseSpeed(ndFloat32& speedX, ndFloat32& speedY) const
 {
@@ -445,13 +269,11 @@ ndInt32 ndAssetEditor::Print (const ndVector&, const char *fmt, ... ) const
 	return 0;
 }
 
-//void ndAssetEditor::SetCameraMatrix (const ndQuaternion& rotation, const ndVector& position)
-void ndAssetEditor::SetCameraMatrix(const ndQuaternion&, const ndVector&)
+void ndAssetEditor::SetCameraMatrix (const ndQuaternion& rotation, const ndVector& position)
 {
-	ndAssert(0);
-	//ndRenderSceneNode* const cameraNode = *m_renderer->GetCamera();
-	//cameraNode->SetTransform(rotation, position);
-	//cameraNode->SetTransform(rotation, position);
+	ndRenderSceneNode* const cameraNode = *m_renderer->GetCamera();
+	cameraNode->SetTransform(rotation, position);
+	cameraNode->SetTransform(rotation, position);
 }
 
 void ndAssetEditor::OnSubStepPostUpdate(ndFloat32)
@@ -477,7 +299,7 @@ void ndAssetEditor::RenderScene()
 	UpdatePhysics(timestep);
 
 	m_renderer->BegingRender();
-	BeginDockSpace();
+	ConfigureDockSpace();
 
 	m_renderer->Render();
 
@@ -547,16 +369,16 @@ void ndAssetEditor::TestImGui()
 	ImGui::Render();
 }
 
-void ndAssetEditor::BeginDockSpace()
+void ndAssetEditor::ConfigureDockSpace()
 {
 	ImGuiWindowFlags dockspace_flags = ImGuiWindowFlags_None;
-	dockspace_flags |= ImGuiWindowFlags_NoMove;
-	dockspace_flags |= ImGuiWindowFlags_NoResize;
-	dockspace_flags |= ImGuiWindowFlags_NoDocking;
-	dockspace_flags |= ImGuiWindowFlags_NoTitleBar;
-	dockspace_flags |= ImGuiWindowFlags_NoCollapse;
-	dockspace_flags |= ImGuiWindowFlags_NoNavFocus;
 	dockspace_flags |= ImGuiWindowFlags_NoBackground;
+	//dockspace_flags |= ImGuiWindowFlags_NoMove;
+	//dockspace_flags |= ImGuiWindowFlags_NoResize;
+	//dockspace_flags |= ImGuiWindowFlags_NoDocking;
+	//dockspace_flags |= ImGuiWindowFlags_NoTitleBar;
+	//dockspace_flags |= ImGuiWindowFlags_NoCollapse;
+	//dockspace_flags |= ImGuiWindowFlags_NoNavFocus;
 	dockspace_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus;
 
 	ImGuiViewport* const viewport = ImGui::GetMainViewport();
@@ -600,7 +422,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					m_currentPath = ndString(fileName);
 					ndRenderMeshLoader loader(*m_renderer);
 					loader.LoadMesh(m_currentPath);
-					m_model = loader.m_mesh;
+					SetVisualScene(loader);
 				}
 			}
 
@@ -638,7 +460,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					m_currentPath = ndString(fileName);
 					ndRenderMeshLoader loader(*m_renderer);
 					loader.ImportFbx(m_currentPath);
-					m_model = loader.m_mesh;
+					SetVisualScene(loader);
 				}
 			}
 
@@ -661,6 +483,13 @@ void ndAssetEditor::ShowMainMenuBar()
 	}
 }
 
+void ndAssetEditor::SetVisualScene(const ndRenderMeshLoader& loader)
+{
+	m_undoRedo.Clear();
+	m_newModel = loader.m_mesh;
+	m_newMesh = loader.m_renderMesh;
+}
+
 void ndAssetEditor::Run()
 {
 	// Main loop
@@ -669,6 +498,29 @@ void ndAssetEditor::Run()
 	{
 		if (m_renderer->PollEvents())
 		{
+			if (*m_newModel || *m_newMesh)
+			{
+				if (*m_newModel)
+				{
+					m_model = m_newModel;
+					m_newModel = ndSharedPtr<ndMesh>(nullptr);
+				}
+				if (*m_newMesh)
+				{
+					if (*m_entity)
+					{
+						m_renderer->RemoveSceneNode(m_entity);
+					}
+					m_entity = m_newMesh;
+					m_newMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);
+					m_renderer->AddSceneNode(m_entity);
+				}
+				ndQuaternion rot;
+				ndVector origin(-5.0f, 0.0f, 0.0f, 1.0f);
+
+				SetCameraMatrix(rot, origin);
+			}
+
 			RenderScene();
 		}
 	}

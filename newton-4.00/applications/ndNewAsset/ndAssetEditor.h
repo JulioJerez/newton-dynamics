@@ -11,6 +11,8 @@
 #ifndef __ASSET_EDITOR_H__
 #define __ASSET_EDITOR_H__
 
+#include "ndUndoRedo.h"
+
 class ndPhysicsWorld;
 class ndDebugDisplayRenderPass;
 
@@ -54,14 +56,11 @@ class ndAssetEditor : public ndClassAlloc
 		ndAssetEditor* m_owner;
 	};
 
-	enum ndMenuSelection
-	{
-		m_new,
-		//m_load,
-		//m_save,
-		//m_saveModel,
-		m_none,
-	};
+	//enum ndMenuSelection
+	//{
+	//	m_new,
+	//	m_none,
+	//};
 
 	class ndKeyTrigger
 	{
@@ -175,11 +174,8 @@ class ndAssetEditor : public ndClassAlloc
 	
 	bool AnyKeyDown() const;
 	bool IsShiftKeyDown () const;
-	bool JoystickDetected() const;
 	bool IsControlKeyDown () const;
 	bool GetKeyState(ndInt32 key) const;
-	void GetJoystickAxis (ndFixSizeArray<ndFloat32, 8>& axisValues);
-	void GetJoystickButtons (ndFixSizeArray<char, 32>& axisbuttons);
 
 	void Terminate();
 
@@ -201,16 +197,16 @@ class ndAssetEditor : public ndClassAlloc
 	void RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& postUpdate);
 
 	private:
-	void Cleanup();
 	void RenderScene();
 	void UpdatePhysics(ndFloat32 timestep);
+	void SetVisualScene(const ndRenderMeshLoader& loader);
 	
 	void ShowMainMenuBar();
 	void ApplyOptions();
-	void ApplyMenuOptions();
+
 	void OnSubStepPostUpdate(ndFloat32 timestep);
 
-	void BeginDockSpace();
+	void ConfigureDockSpace();
 	void ShowMainToolbar();
 	void ShowOutlierPanel();
 	void ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root);
@@ -223,17 +219,22 @@ class ndAssetEditor : public ndClassAlloc
 		
 	ndSharedPtr<ndMesh> m_model;
 	ndSharedPtr<ndRender> m_renderer;
+	ndSharedPtr<ndRenderSceneNode> m_entity;
 	ndSharedPtr<ndRenderPass> m_menuRenderPass;
 	ndSharedPtr<ndRenderPass> m_colorRenderPass;
-	ndSharedPtr<ndMesh> m_currentSelection;
+	ndSharedPtr<ndRenderPass> m_shadowRenderPass;
+	ndSharedPtr<ndRenderPass> m_environmentRenderPass;
+	ndSharedPtr<ndRenderTexture> m_environmentTexture;
 
-	//ndSharedPtr<ndRenderPass> m_debugDisplayRenderPass;
-	//ndSharedPtr<ndRenderTexture> m_environmentTexture;
+	ndSharedPtr<ndMesh> m_newModel;
+	ndSharedPtr<ndRenderSceneNode> m_newMesh;
+
+	ndSharedPtr<ndMesh> m_currentSelection;
 	ndSharedPtr<ndRenderSceneNode> m_defaultCamera;
 
 	ndSharedPtr<OnPostUpdate> m_onPostUpdate;
 	ndString m_currentPath;
-
+	ndUndoRedo m_undoRedo;
 
 	ndInt32 m_currentPlugin;
 	ndInt32 m_solverPasses;
@@ -245,6 +246,7 @@ class ndAssetEditor : public ndClassAlloc
 	bool m_runScene;
 	ndWorld::ndSolverModes m_solverMode;
 	
+	friend class ndUndoRedo;
 	friend class ndPhysicsWorld;
 	friend class ndDebugDisplayRenderPass;
 };

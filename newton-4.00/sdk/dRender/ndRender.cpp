@@ -168,7 +168,6 @@ void ndRender::ResetScene()
 
 void ndRender::AddSceneNode(const ndSharedPtr<ndRenderSceneNode>& node)
 {
-	//ndScopeSpinLock lock(m_addRemoveLock);
 	ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* const handle = m_scene.Append(node);
 	ndAssert(!node->m_owner);
 	ndAssert(!node->m_sceneHandle);

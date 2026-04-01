@@ -323,6 +323,7 @@ void ndRenderSceneNode::SetTransform(const ndQuaternion& rotation, const ndVecto
 	{
 		m_transform1.m_rotation = m_transform1.m_rotation.Scale(ndFloat32 (-1.0f));
 	}
+	m_matrix = ndCalculateMatrix(rotation, position);
 }
 
 ndMatrix ndRenderSceneNode::CalculateGlobalMatrix(const ndRenderSceneNode* const root) const

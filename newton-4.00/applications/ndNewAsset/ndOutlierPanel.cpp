@@ -13,29 +13,6 @@
 #include "ndAssetEditor.h"
 
 
-//void ndAssetEditor::ShowOutlierToolBar()
-//{
-//	// draw some bottom to control the explorer
-//	ImGui::Button("undo");
-//	ImGui::SameLine();
-//	ImGui::Button("redo");
-//	ImGui::SameLine();
-//	if (m_runScene)
-//	{
-//		if (ImGui::Button("stop"))
-//		{
-//			m_runScene = false;
-//		}
-//	}
-//	else
-//	{
-//		if (ImGui::Button("run"))
-//		{
-//			m_runScene = true;
-//		}
-//	}
-//}
-
 void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root)
 {
 	ImGuiTreeNodeFlags options = 0;
@@ -57,7 +34,6 @@ void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root)
 	{
 		if (ImGui::IsItemClicked())
 		{
-			//m_currentSelection = root;
 			m_currentSelection = (m_currentSelection != root) ? root : ndSharedPtr<ndMesh>(nullptr);
 		}
 
@@ -102,7 +78,6 @@ void ndAssetEditor::ShowOutlierPanel()
 {
 	ImGui::Begin("Oulier Panel");
 
-	//ShowOutlierToolBar();
 	if (*m_model)
 	{
 		ShowOutlierExplorer(m_model);
