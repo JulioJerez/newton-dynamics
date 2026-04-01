@@ -163,12 +163,9 @@ class ndAssetEditor : public ndClassAlloc
 	
 	//ndPhysicsWorld* GetWorld() const;
 	ndSharedPtr<ndRender>& GetRenderer();
-	//ndDebugDisplayRenderPass* GetDebugRenderPass();
-	//void AddEntity(const ndSharedPtr<ndRenderSceneNode>& entity);
-	//void RemoveEntity(const ndSharedPtr<ndRenderSceneNode>& entity);
-	//void ImportPLYfile (const char* const name);
 
-	bool GetMouseSpeed(ndFloat32& posX, ndFloat32& posY) const;
+	//bool GetMouseSpeed(ndFloat32& posX, ndFloat32& posY) const;
+	ndFloat32 GetMouseWheel() const;
 	bool GetMousePosition (ndFloat32& posX, ndFloat32& posY) const;
 	void SetCameraMatrix (const ndQuaternion& rotation, const ndVector& position);
 	

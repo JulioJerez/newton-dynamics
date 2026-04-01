@@ -141,8 +141,7 @@ void ndAssetEditor::CursorposCallback(ndReal x, ndReal y)
 
 void ndAssetEditor::MouseScrollCallback(ndReal, ndReal y)
 {
-	//ndTrace(("%f %f\n", x, y));
-	ImGuiIO& io = ImGui::GetIO();
+ 	ImGuiIO& io = ImGui::GetIO();
 	io.MouseWheel += y;
 }
 
@@ -228,12 +227,18 @@ void ndAssetEditor::ApplyOptions()
 	//debugDisplay->SetDebugDisplayOptions();
 }
 
-bool ndAssetEditor::GetMouseSpeed(ndFloat32& speedX, ndFloat32& speedY) const
+//bool ndAssetEditor::GetMouseSpeed(ndFloat32& speedX, ndFloat32& speedY) const
+//{
+//	ImVec2 speed(ImGui::GetMouseDragDelta(0, 0.0f));
+//	speedX = speed.x;
+//	speedY = speed.y;
+//	return true;
+//}
+
+ndFloat32 ndAssetEditor::GetMouseWheel() const
 {
-	ImVec2 speed(ImGui::GetMouseDragDelta(0, 0.0f));
-	speedX = speed.x;
-	speedY = speed.y;
-	return true;
+	ndFloat32 wheel = ImGui::GetIO().MouseWheel;
+	return wheel;
 }
 
 bool ndAssetEditor::GetMousePosition (ndFloat32& posX, ndFloat32& posY) const

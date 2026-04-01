@@ -22,7 +22,7 @@ ndEditorCameraFlyby::ndEditorCameraFlyby(ndRender* const owner)
 	,m_pitchRate(ndFloat32(0.2f * 60.0f))
 	,m_mousePosX(ndFloat32(0.0f))
 	,m_mousePosY(ndFloat32(0.0f))
-	,m_frontSpeed(ndFloat32(0.25f * 60.0f))
+	,m_frontSpeed(ndFloat32(10.0f))
 {
 }
 
@@ -46,7 +46,7 @@ void ndEditorCameraFlyby::TickUpdate(ndFloat32 timestep)
 	ndFloat32 mouseY;
 	scene->GetMousePosition(mouseX, mouseY);
 	
-	if (!scene->GetCaptured() && (scene->GetMouseKeyState(0) || scene->GetMouseKeyState(1)))
+	if (!scene->GetCaptured() && (scene->GetMouseKeyState(0) || scene->GetMouseKeyState(1) || scene->GetMouseKeyState(2)))
 	{
 		if (ImGui::IsMouseDown(0))
 		{
@@ -75,6 +75,30 @@ void ndEditorCameraFlyby::TickUpdate(ndFloat32 timestep)
 
 		if (ImGui::IsMouseDown(1))
 		{
+			ndFloat32 pan_x = mouseX - m_mousePosX;
+			ndFloat32 pan_y = mouseY - m_mousePosY;
+
+			if (pan_x < 0.0f)
+			{
+				m_posit.m_z += m_frontSpeed * timestep;
+			}
+			else if (pan_x > 0.0f)
+			{
+				m_posit.m_z -= m_frontSpeed * timestep;
+			}
+
+			if (pan_y > 0.0f)
+			{
+				m_posit.m_y += m_frontSpeed * timestep;
+			}
+			else if (pan_y < 0.0f)
+			{
+				m_posit.m_y -= m_frontSpeed * timestep;
+			}
+		}
+
+		if (ImGui::IsMouseDown(2))
+		{
 			ndFloat32 zoom = mouseY - m_mousePosY;
 			if (zoom > 0.0f)
 			{
@@ -94,7 +118,7 @@ void ndEditorCameraFlyby::TickUpdate(ndFloat32 timestep)
 		const ndVector lightDir(newCameMatrix.RotateVector(ndVector(-1.0f, 1.0f, 0.f, 0.0f)));
 		renderer->SetSunLight(lightDir, ndVector(0.7f, 0.7f, 0.7f, 0.0f));
 	}
-	
+
 	m_mousePosX = mouseX;
 	m_mousePosY = mouseY;
 }
