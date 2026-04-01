@@ -485,13 +485,8 @@ void ndAssetEditor::ShowMainMenuBar()
 
 void ndAssetEditor::SetVisualScene(const ndRenderMeshLoader& loader)
 {
-	m_model = loader.m_mesh;
-	m_renderer->AddSceneNode(loader.m_renderMesh);
-
-	ndQuaternion rot;
-	ndVector origin(-5.0f, 0.0f, 0.0f, 1.0f);
-
-	SetCameraMatrix(rot, origin);
+	m_newModel = loader.m_mesh;
+	m_newMesh = loader.m_renderMesh;
 }
 
 void ndAssetEditor::Run()
@@ -502,6 +497,29 @@ void ndAssetEditor::Run()
 	{
 		if (m_renderer->PollEvents())
 		{
+			if (*m_newModel || *m_newMesh)
+			{
+				if (*m_newModel)
+				{
+					m_model = m_newModel;
+					m_newModel = ndSharedPtr<ndMesh>(nullptr);
+				}
+				if (*m_newMesh)
+				{
+					if (*m_entity)
+					{
+						m_renderer->RemoveSceneNode(m_entity);
+					}
+					m_entity = m_newMesh;
+					m_newMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);
+					m_renderer->AddSceneNode(m_entity);
+				}
+				ndQuaternion rot;
+				ndVector origin(-5.0f, 0.0f, 0.0f, 1.0f);
+
+				SetCameraMatrix(rot, origin);
+			}
+
 			RenderScene();
 		}
 	}

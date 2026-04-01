@@ -220,11 +220,15 @@ class ndAssetEditor : public ndClassAlloc
 		
 	ndSharedPtr<ndMesh> m_model;
 	ndSharedPtr<ndRender> m_renderer;
+	ndSharedPtr<ndRenderSceneNode> m_entity;
 	ndSharedPtr<ndRenderPass> m_menuRenderPass;
 	ndSharedPtr<ndRenderPass> m_colorRenderPass;
 	ndSharedPtr<ndRenderPass> m_shadowRenderPass;
 	ndSharedPtr<ndRenderPass> m_environmentRenderPass;
 	ndSharedPtr<ndRenderTexture> m_environmentTexture;
+
+	ndSharedPtr<ndMesh> m_newModel;
+	ndSharedPtr<ndRenderSceneNode> m_newMesh;
 
 	ndSharedPtr<ndMesh> m_currentSelection;
 	ndSharedPtr<ndRenderSceneNode> m_defaultCamera;

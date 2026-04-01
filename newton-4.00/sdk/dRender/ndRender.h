@@ -78,8 +78,8 @@ class ndRender: public ndClassAlloc
 	void ClearFrameBuffer(const ndVector& color);
 	void AddRenderPass(const ndSharedPtr<ndRenderPass>& renderPass);
 
-	void AddSceneNode(const ndSharedPtr<ndRenderSceneNode>& body);
-	void RemoveSceneNode(const ndSharedPtr<ndRenderSceneNode>& body);
+	void AddSceneNode(const ndSharedPtr<ndRenderSceneNode>& entity);
+	void RemoveSceneNode(const ndSharedPtr<ndRenderSceneNode>& entity);
 
 	void SetCamera(const ndSharedPtr<ndRenderSceneNode>& camera);
 	void SetSunLight(const ndVector& direction, const ndVector& intensity);
