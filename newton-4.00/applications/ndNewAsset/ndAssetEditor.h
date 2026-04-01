@@ -207,7 +207,7 @@ class ndAssetEditor : public ndClassAlloc
 
 	void OnSubStepPostUpdate(ndFloat32 timestep);
 
-	void BeginDockSpace();
+	void ConfigureDockSpace();
 	void ShowMainToolbar();
 	void ShowOutlierPanel();
 	void ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root);

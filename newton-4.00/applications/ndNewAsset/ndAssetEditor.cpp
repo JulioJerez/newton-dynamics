@@ -299,7 +299,7 @@ void ndAssetEditor::RenderScene()
 	UpdatePhysics(timestep);
 
 	m_renderer->BegingRender();
-	BeginDockSpace();
+	ConfigureDockSpace();
 
 	m_renderer->Render();
 
@@ -369,7 +369,7 @@ void ndAssetEditor::TestImGui()
 	ImGui::Render();
 }
 
-void ndAssetEditor::BeginDockSpace()
+void ndAssetEditor::ConfigureDockSpace()
 {
 	ImGuiWindowFlags dockspace_flags = ImGuiWindowFlags_None;
 	dockspace_flags |= ImGuiWindowFlags_NoBackground;
