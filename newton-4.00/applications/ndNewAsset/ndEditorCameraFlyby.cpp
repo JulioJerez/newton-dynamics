@@ -22,8 +22,7 @@ ndEditorCameraFlyby::ndEditorCameraFlyby(ndRender* const owner)
 	,m_pitchRate(ndFloat32(0.2f * 60.0f))
 	,m_mousePosX(ndFloat32(0.0f))
 	,m_mousePosY(ndFloat32(0.0f))
-	,m_frontSpeed(ndFloat32(15.0f))
-	,m_sidewaysSpeed(ndFloat32(10.0f))
+	,m_frontSpeed(ndFloat32(0.25f * 60.0f))
 {
 }
 
@@ -47,52 +46,13 @@ void ndEditorCameraFlyby::TickUpdate(ndFloat32 timestep)
 	ndFloat32 mouseY;
 	scene->GetMousePosition(mouseX, mouseY);
 	
-	//// slow down the Camera if we have a Body
-	//ndFloat32 slowDownFactor = scene->IsShiftKeyDown() ? 0.5f / 10.0f : 0.5f;
-	//ndMatrix targetMatrix(m_transform1.GetMatrix());
-	//
-	//// do camera translation
-	//if (scene->GetKeyState(ImGuiKey_W))
-	//{
-	//	targetMatrix.m_posit += targetMatrix.m_front.Scale(m_frontSpeed * timestep * slowDownFactor);
-	//}
-	//if (scene->GetKeyState(ImGuiKey_S))
-	//{
-	//	targetMatrix.m_posit -= targetMatrix.m_front.Scale(m_frontSpeed * timestep * slowDownFactor);
-	//}
-	//if (scene->GetKeyState(ImGuiKey_A))
-	//{
-	//	targetMatrix.m_posit -= targetMatrix.m_right.Scale(m_sidewaysSpeed * timestep * slowDownFactor);
-	//}
-	//if (scene->GetKeyState(ImGuiKey_D))
-	//{
-	//	targetMatrix.m_posit += targetMatrix.m_right.Scale(m_sidewaysSpeed * timestep * slowDownFactor);
-	//}
-	//
-	//if (scene->GetKeyState(ImGuiKey_Q))
-	//{
-	//	targetMatrix.m_posit -= targetMatrix.m_up.Scale(m_sidewaysSpeed * timestep * slowDownFactor);
-	//}
-	//
-	//if (scene->GetKeyState(ImGuiKey_E))
-	//{
-	//	targetMatrix.m_posit += targetMatrix.m_up.Scale(m_sidewaysSpeed * timestep * slowDownFactor);
-	//}
-	
-	//ndMatrix matrix(ndRollMatrix(m_pitch) * ndYawMatrix(m_yaw));
-	//ndQuaternion newRotation(matrix);
-	//ndEditorCameraNode::SetTransform(newRotation, targetMatrix.m_posit);
-	
-	bool mouseState = !scene->GetCaptured() && (scene->GetMouseKeyState(0) && !scene->GetMouseKeyState(1));
-	// do camera rotation, only if we do not have anything picked
-	//if (!UpdatePickBody() && mouseState)
-	if (mouseState)
+	if (!scene->GetCaptured() && (scene->GetMouseKeyState(0) || scene->GetMouseKeyState(1)))
 	{
-		ndFloat32 mouseSpeedX = mouseX - m_mousePosX;
-		ndFloat32 mouseSpeedY = mouseY - m_mousePosY;
-
 		if (ImGui::IsMouseDown(0))
 		{
+			ndFloat32 mouseSpeedX = mouseX - m_mousePosX;
+			ndFloat32 mouseSpeedY = mouseY - m_mousePosY;
+
 			if (mouseSpeedX > 0.0f)
 			{
 				m_yaw = ndAnglesAdd(m_yaw, -m_yawRate * timestep);
@@ -111,6 +71,19 @@ void ndEditorCameraFlyby::TickUpdate(ndFloat32 timestep)
 				m_pitch += m_pitchRate * timestep;
 			}
 			m_pitch = ndClamp(m_pitch, ndFloat32(-80.0f * ndDegreeToRad), ndFloat32(80.0f * ndDegreeToRad));
+		}
+
+		if (ImGui::IsMouseDown(1))
+		{
+			ndFloat32 zoom = mouseY - m_mousePosY;
+			if (zoom > 0.0f)
+			{
+				m_posit.m_x += m_frontSpeed * timestep;
+			}
+			else if (zoom < 0.0f)
+			{
+				m_posit.m_x -= m_frontSpeed * timestep;
+			}
 		}
 
 		const ndMatrix newCameMatrix(ndRollMatrix(m_pitch) * ndYawMatrix(m_yaw));
