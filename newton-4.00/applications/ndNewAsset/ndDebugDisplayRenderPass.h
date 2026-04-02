@@ -39,13 +39,14 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	void RenderWireFrame();
 	void RenderHiddenSurface();
 	void RenderCollisionShape();
+	void RenderSelectedNode();
 
 	virtual void ResetScene() override;
 	virtual void RenderScene() override;
 	ndDebugMesh* CreateRenderPrimitive(const ndShapeInstance& shapeInstance) const;
 
-	//ndVector m_awakeColor;
-	//ndVector m_sleepColor;
+	ndVector m_meshColor;
+	ndVector m_selectedColor;
 	ndWeakPtr<ndAssetEditor> m_manager;
 	ndList<ndDebugMesh> m_debugMesh;
 };
