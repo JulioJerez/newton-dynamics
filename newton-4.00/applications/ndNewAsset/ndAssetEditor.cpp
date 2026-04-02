@@ -47,6 +47,7 @@ ndAssetEditor::ndAssetEditor()
 	,m_currentPath("")
 	,m_runScene(false)
 	,m_showSelectedNode(true)
+	,m_showCollisionShape(false)
 	,m_renderMode(m_shaded)
 {
 	// Setup window
@@ -479,7 +480,8 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::RadioButton("hidden Surface", &m_renderMode, m_hiddenSurface);
 
 			ImGui::Separator();
-			ImGui::Checkbox("show selection", &m_showSelectedNode);
+			ImGui::Checkbox("show node", &m_showSelectedNode);
+			ImGui::Checkbox("show collision", &m_showCollisionShape);
 
 			ImGui::EndMenu();
 		}
@@ -510,26 +512,27 @@ void ndAssetEditor::Run()
 				m_renderer->RemoveSceneNode(m_entity);
 				m_entity = ndSharedPtr<ndRenderSceneNode>(nullptr);
 				m_debugDisplayRenderPass->ResetScene();
+				m_model = ndSharedPtr<ndModel>(nullptr);
 			}
 
-			if (*m_newMesh || *m_newSceneMesh)
+			//if (*m_newMesh || *m_newSceneMesh)
+			if (*m_newMesh)
 			{
-				if (*m_newMesh)
+				ndAssert(*m_newSceneMesh);
+				if (*m_entity)
 				{
-					m_mesh = m_newMesh;
-					m_newMesh = ndSharedPtr<ndMesh>(nullptr);
+					m_renderer->RemoveSceneNode(m_entity);
 				}
-				if (*m_newSceneMesh)
-				{
-					if (*m_entity)
-					{
-						m_renderer->RemoveSceneNode(m_entity);
-					}
-					m_entity = m_newSceneMesh;
-					m_newSceneMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);
-					m_renderer->AddSceneNode(m_entity);
-					m_debugDisplayRenderPass->ResetScene();
-				}
+
+				m_mesh = m_newMesh;
+				m_entity = m_newSceneMesh;
+				m_model = ndSharedPtr<ndModel>(new ndModelArticulation());
+
+				m_newMesh = ndSharedPtr<ndMesh>(nullptr);
+				m_newSceneMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);
+
+				m_renderer->AddSceneNode(m_entity);
+				m_debugDisplayRenderPass->ResetScene();
 
 				ndVector p0;
 				ndVector p1;
