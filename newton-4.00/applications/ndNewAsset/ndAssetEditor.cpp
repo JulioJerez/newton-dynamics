@@ -402,7 +402,7 @@ void ndAssetEditor::ShowMainMenuBar()
 		{
 			if (ImGui::MenuItem("New", ""))
 			{
-				m_model = ndSharedPtr<ndMesh>(nullptr);
+				m_mesh = ndSharedPtr<ndMesh>(nullptr);
 			}
 
 			if (ImGui::MenuItem("Load", ""))
@@ -420,11 +420,11 @@ void ndAssetEditor::ShowMainMenuBar()
 
 			if (ImGui::MenuItem("Save", ""))
 			{
-				if (*m_model)
+				if (*m_mesh)
 				{
 					m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 					ndRenderMeshLoader loader(*m_renderer);
-					loader.m_mesh = m_model;
+					loader.m_mesh = m_mesh;
 					loader.SaveMesh(ndString(m_currentPath));
 				}
 			}
@@ -432,12 +432,12 @@ void ndAssetEditor::ShowMainMenuBar()
 			if (ImGui::MenuItem("Save As ...", ""))
 			{
 				char fileName[2048];
-				if (*m_model && dGetSaveNdFileName(fileName, sizeof(fileName) - 1))
+				if (*m_mesh && dGetSaveNdFileName(fileName, sizeof(fileName) - 1))
 				{
 					m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 					m_currentPath = ndString(fileName);
 					ndRenderMeshLoader loader(*m_renderer);
-					loader.m_mesh = m_model;
+					loader.m_mesh = m_mesh;
 					loader.SaveMesh(ndString(m_currentPath));
 				}
 			}
@@ -491,8 +491,8 @@ void ndAssetEditor::ShowMainMenuBar()
 void ndAssetEditor::SetVisualScene(const ndRenderMeshLoader& loader)
 {
 	m_undoRedo.Clear();
-	m_newModel = loader.m_mesh;
-	m_newMesh = loader.m_renderMesh;
+	m_newMesh = loader.m_mesh;
+	m_newSceneMesh = loader.m_renderMesh;
 }
 
 void ndAssetEditor::Run()
@@ -503,7 +503,7 @@ void ndAssetEditor::Run()
 	{
 		if (m_renderer->PollEvents())
 		{
-			if (!*m_model && m_entity)
+			if (!*m_mesh && m_entity)
 			{
 				m_undoRedo.Clear();
 				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
@@ -512,21 +512,21 @@ void ndAssetEditor::Run()
 				m_debugDisplayRenderPass->ResetScene();
 			}
 
-			if (*m_newModel || *m_newMesh)
+			if (*m_newMesh || *m_newSceneMesh)
 			{
-				if (*m_newModel)
-				{
-					m_model = m_newModel;
-					m_newModel = ndSharedPtr<ndMesh>(nullptr);
-				}
 				if (*m_newMesh)
+				{
+					m_mesh = m_newMesh;
+					m_newMesh = ndSharedPtr<ndMesh>(nullptr);
+				}
+				if (*m_newSceneMesh)
 				{
 					if (*m_entity)
 					{
 						m_renderer->RemoveSceneNode(m_entity);
 					}
-					m_entity = m_newMesh;
-					m_newMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);
+					m_entity = m_newSceneMesh;
+					m_newSceneMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);
 					m_renderer->AddSceneNode(m_entity);
 					m_debugDisplayRenderPass->ResetScene();
 				}
@@ -534,7 +534,7 @@ void ndAssetEditor::Run()
 				ndVector p0;
 				ndVector p1;
 				const ndMatrix matrix(ndGetIdentityMatrix());
-				m_model->CalculateAabb(matrix, p0, p1);
+				m_mesh->CalculateAabb(matrix, p0, p1);
 				ndVector size(ndVector::m_half * (p1 - p0));
 				ndVector origin(ndVector::m_half * (p1 + p0));
 				ndFloat32 maxSize = ndMax(ndMax(size.m_x, size.m_y), size.m_z);

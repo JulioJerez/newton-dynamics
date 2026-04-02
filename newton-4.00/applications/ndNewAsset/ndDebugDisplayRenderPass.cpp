@@ -140,7 +140,7 @@ void ndDebugDisplayRenderPass::ResetScene()
 {
 	m_debugMesh.RemoveAll();
 
-	if (!*m_manager->m_model)
+	if (!*m_manager->m_mesh)
 	{
 		return;
 	}
@@ -166,7 +166,7 @@ void ndDebugDisplayRenderPass::ResetScene()
 			entry.m_flatShaded = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
 		}
 	};
-	m_manager->m_model->NodeIterator(BuildDebugMesh);
+	m_manager->m_mesh->NodeIterator(BuildDebugMesh);
 }
 
 void ndDebugDisplayRenderPass::RenderWireFrame()

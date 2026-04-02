@@ -42,7 +42,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoName(m_currentSelection)));
 				ndString newName(nodeName);
-				while (m_model->FindByName(newName))
+				while (m_mesh->FindByName(newName))
 				{
 					newName += "_1";
 				}

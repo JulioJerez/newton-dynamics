@@ -214,7 +214,8 @@ class ndAssetEditor : public ndClassAlloc
 	void ShowPropertiesCollisionInfo();
 	void ShowPropertiesRigidBodyInfo();
 		
-	ndSharedPtr<ndMesh> m_model;
+	ndSharedPtr<ndMesh> m_mesh;
+	ndSharedPtr<ndModel> m_model;
 	ndSharedPtr<ndRender> m_renderer;
 	ndSharedPtr<ndRenderSceneNode> m_entity;
 	ndSharedPtr<ndRenderPass> m_menuRenderPass;
@@ -224,8 +225,8 @@ class ndAssetEditor : public ndClassAlloc
 	ndSharedPtr<ndRenderTexture> m_environmentTexture;
 	ndSharedPtr<ndRenderPass> m_debugDisplayRenderPass;
 
-	ndSharedPtr<ndMesh> m_newModel;
-	ndSharedPtr<ndRenderSceneNode> m_newMesh;
+	ndSharedPtr<ndMesh> m_newMesh;
+	ndSharedPtr<ndRenderSceneNode> m_newSceneMesh;
 
 	ndSharedPtr<ndMesh> m_currentSelection;
 	ndSharedPtr<ndRenderSceneNode> m_defaultCamera;
