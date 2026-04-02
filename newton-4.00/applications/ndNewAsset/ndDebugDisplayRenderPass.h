@@ -11,7 +11,7 @@
 #ifndef __ND_DEBUG_DISPLAY_RENDER_PASS_H__
 #define __ND_DEBUG_DISPLAY_RENDER_PASS_H__
 
-class ndDemoEntityManager;
+class ndAssetEditor;
 
 class ndDebugDisplayRenderPass : public ndRenderPassDebug
 {
@@ -22,34 +22,32 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 		ndDebugMesh()
 			:m_zBuffer()
 			,m_flatShaded()
-			//,m_wireFrameOpenEdge()
 			,m_wireFrameShareEdge()
 		{
 		}
 
+		ndWeakPtr<ndRenderSceneNode> m_parent;
 		ndSharedPtr<ndRenderPrimitive> m_zBuffer;
 		ndSharedPtr<ndRenderPrimitive> m_flatShaded;
 		ndSharedPtr<ndRenderPrimitive> m_wireFrameShareEdge;
-		//ndSharedPtr<ndWireFrameDebugMesh> m_wireFrameOpenEdge;
 	};
 
-	ndDebugDisplayRenderPass(ndDemoEntityManager* const owner);
+	ndDebugDisplayRenderPass(ndAssetEditor* const owner);
 	~ndDebugDisplayRenderPass();
 
-	virtual void SetDebugDisplayOptions();
-
 	private:
+	void RenderWireFrame();
+	void RenderHiddenSurface();
 	void RenderCollisionShape();
 
 	virtual void ResetScene() override;
 	virtual void RenderScene() override;
 	ndDebugMesh* CreateRenderPrimitive(const ndShapeInstance& shapeInstance) const;
 
-	ndVector m_awakeColor;
-	ndVector m_sleepColor;
-	ndWeakPtr<ndDemoEntityManager> m_manager;
-	ndTree<ndSharedPtr<ndDebugMesh>, ndShape*> m_meshCache;
-	ndInt32 m_showCollisionMeshMode;
+	//ndVector m_awakeColor;
+	//ndVector m_sleepColor;
+	ndWeakPtr<ndAssetEditor> m_manager;
+	ndList<ndDebugMesh> m_debugMesh;
 };
 
 #endif

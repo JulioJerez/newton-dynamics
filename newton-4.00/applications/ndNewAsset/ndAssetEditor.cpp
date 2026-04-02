@@ -15,6 +15,7 @@
 #include "ndMenuRenderPass.h"
 #include "ndEditorCameraFlyby.h"
 #include "ndHighResolutionTimer.h"
+#include "ndDebugDisplayRenderPass.h"
 
 ndAssetEditor::ButtonKey::ButtonKey (bool state)
 	:m_state(state)
@@ -44,14 +45,8 @@ ndInt32 ndAssetEditor::ButtonKey::UpdatePushButton (bool triggerValue)
 ndAssetEditor::ndAssetEditor()
 	:ndClassAlloc()
 	,m_currentPath("")
-	,m_currentPlugin(0)
-	,m_solverPasses(6)
-	,m_solverSubSteps(2)
-	,m_workerThreads(4)
-	,m_debugDisplayMode(0)
-	,m_showCollisionMeshMode(0)
 	,m_runScene(false)
-	,m_solverMode(ndWorld::ndSimdSoaSolver)
+	,m_renderMode(m_shaded)
 {
 	// Setup window
 	char title[256];
@@ -77,12 +72,14 @@ ndAssetEditor::ndAssetEditor()
 	m_menuRenderPass = ndSharedPtr<ndRenderPass>(new ndMenuRenderPass(this));
 	m_colorRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassColor(*m_renderer));
 	m_shadowRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassShadows(*m_renderer));
+	m_debugDisplayRenderPass = ndSharedPtr<ndRenderPass>(new ndDebugDisplayRenderPass(this));
 	m_environmentRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassEnvironment(*m_renderer, m_environmentTexture));
 
 	// add render passes in order of execution
 	m_renderer->AddRenderPass(m_shadowRenderPass);
 	m_renderer->AddRenderPass(m_colorRenderPass);
 	m_renderer->AddRenderPass(m_environmentRenderPass);
+	m_renderer->AddRenderPass(m_debugDisplayRenderPass);
 	m_renderer->AddRenderPass(m_menuRenderPass);
 	
 	//add main directional light
@@ -141,8 +138,7 @@ void ndAssetEditor::CursorposCallback(ndReal x, ndReal y)
 
 void ndAssetEditor::MouseScrollCallback(ndReal, ndReal y)
 {
-	//ndTrace(("%f %f\n", x, y));
-	ImGuiIO& io = ImGui::GetIO();
+ 	ImGuiIO& io = ImGui::GetIO();
 	io.MouseWheel += y;
 }
 
@@ -228,12 +224,18 @@ void ndAssetEditor::ApplyOptions()
 	//debugDisplay->SetDebugDisplayOptions();
 }
 
-bool ndAssetEditor::GetMouseSpeed(ndFloat32& speedX, ndFloat32& speedY) const
+//bool ndAssetEditor::GetMouseSpeed(ndFloat32& speedX, ndFloat32& speedY) const
+//{
+//	ImVec2 speed(ImGui::GetMouseDragDelta(0, 0.0f));
+//	speedX = speed.x;
+//	speedY = speed.y;
+//	return true;
+//}
+
+ndFloat32 ndAssetEditor::GetMouseWheel() const
 {
-	ImVec2 speed(ImGui::GetMouseDragDelta(0, 0.0f));
-	speedX = speed.x;
-	speedY = speed.y;
-	return true;
+	ndFloat32 wheel = ImGui::GetIO().MouseWheel;
+	return wheel;
 }
 
 bool ndAssetEditor::GetMousePosition (ndFloat32& posX, ndFloat32& posY) const
@@ -302,6 +304,8 @@ void ndAssetEditor::RenderScene()
 	}
 
 	//UpdatePhysics(timestep);
+
+	m_colorRenderPass->MakeActive(m_renderMode == m_shaded);
 
 	ndEditorCameraNode* const camera = (ndEditorCameraNode*)*m_renderer->GetCamera();
 	camera->TickUpdate(timestep);
@@ -417,7 +421,6 @@ void ndAssetEditor::ShowMainMenuBar()
 		{
 			if (ImGui::MenuItem("New", ""))
 			{
-				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 				m_model = ndSharedPtr<ndMesh>(nullptr);
 			}
 
@@ -487,6 +490,16 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::EndMenu();
 		}
 
+		if (ImGui::BeginMenu("Options"))
+		{
+			ImGui::Text("render mode");
+			ImGui::RadioButton("shaded", &m_renderMode, m_shaded);
+			ImGui::RadioButton("wireframe", &m_renderMode, m_wireframe);
+			ImGui::RadioButton("hidden Surface", &m_renderMode, m_hiddenSurface);
+
+			ImGui::EndMenu();
+		}
+
 		ImGui::EndMainMenuBar();
 	}
 }
@@ -506,6 +519,15 @@ void ndAssetEditor::Run()
 	{
 		if (m_renderer->PollEvents())
 		{
+			if (!*m_model && m_entity)
+			{
+				m_undoRedo.Clear();
+				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
+				m_renderer->RemoveSceneNode(m_entity);
+				m_entity = ndSharedPtr<ndRenderSceneNode>(nullptr);
+				m_debugDisplayRenderPass->ResetScene();
+			}
+
 			if (*m_newModel || *m_newMesh)
 			{
 				if (*m_newModel)
@@ -522,6 +544,7 @@ void ndAssetEditor::Run()
 					m_entity = m_newMesh;
 					m_newMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);
 					m_renderer->AddSceneNode(m_entity);
+					m_debugDisplayRenderPass->ResetScene();
 				}
 
 				ndVector p0;

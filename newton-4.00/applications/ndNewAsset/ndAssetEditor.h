@@ -19,6 +19,14 @@ class ndDebugDisplayRenderPass;
 class ndAssetEditor : public ndClassAlloc
 {
 	public:
+	enum ndRenderModes
+	{
+		m_shaded,
+		m_wireframe,
+		m_hiddenSurface,
+		m_size = 0xffffffff
+	};
+
 	class ndRenderCallback : public ndRender::ndUserCallback
 	{
 		public:
@@ -55,12 +63,6 @@ class ndAssetEditor : public ndClassAlloc
 	
 		ndAssetEditor* m_owner;
 	};
-
-	//enum ndMenuSelection
-	//{
-	//	m_new,
-	//	m_none,
-	//};
 
 	class ndKeyTrigger
 	{
@@ -163,12 +165,9 @@ class ndAssetEditor : public ndClassAlloc
 	
 	//ndPhysicsWorld* GetWorld() const;
 	ndSharedPtr<ndRender>& GetRenderer();
-	//ndDebugDisplayRenderPass* GetDebugRenderPass();
-	//void AddEntity(const ndSharedPtr<ndRenderSceneNode>& entity);
-	//void RemoveEntity(const ndSharedPtr<ndRenderSceneNode>& entity);
-	//void ImportPLYfile (const char* const name);
 
-	bool GetMouseSpeed(ndFloat32& posX, ndFloat32& posY) const;
+	//bool GetMouseSpeed(ndFloat32& posX, ndFloat32& posY) const;
+	ndFloat32 GetMouseWheel() const;
 	bool GetMousePosition (ndFloat32& posX, ndFloat32& posY) const;
 	void SetCameraMatrix (const ndQuaternion& rotation, const ndVector& position);
 	
@@ -225,6 +224,7 @@ class ndAssetEditor : public ndClassAlloc
 	ndSharedPtr<ndRenderPass> m_shadowRenderPass;
 	ndSharedPtr<ndRenderPass> m_environmentRenderPass;
 	ndSharedPtr<ndRenderTexture> m_environmentTexture;
+	ndSharedPtr<ndRenderPass> m_debugDisplayRenderPass;
 
 	ndSharedPtr<ndMesh> m_newModel;
 	ndSharedPtr<ndRenderSceneNode> m_newMesh;
@@ -236,15 +236,8 @@ class ndAssetEditor : public ndClassAlloc
 	ndString m_currentPath;
 	ndUndoRedo m_undoRedo;
 
-	ndInt32 m_currentPlugin;
-	ndInt32 m_solverPasses;
-	ndInt32 m_solverSubSteps;
-	ndInt32 m_workerThreads;
-	ndInt32 m_debugDisplayMode;
-	ndInt32 m_showCollisionMeshMode;
-	
 	bool m_runScene;
-	ndWorld::ndSolverModes m_solverMode;
+	ndInt32 m_renderMode;
 	
 	friend class ndUndoRedo;
 	friend class ndPhysicsWorld;

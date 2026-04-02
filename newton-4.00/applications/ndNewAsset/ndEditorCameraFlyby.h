@@ -33,7 +33,6 @@ class ndEditorCameraFlyby: public ndEditorCameraNode
 	ndFloat32 m_mousePosX;
 	ndFloat32 m_mousePosY;
 	ndFloat32 m_frontSpeed;
-	ndFloat32 m_sidewaysSpeed;
 };
 
 #endif 
