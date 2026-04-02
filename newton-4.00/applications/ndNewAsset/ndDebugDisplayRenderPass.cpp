@@ -219,21 +219,35 @@ void ndDebugDisplayRenderPass::RenderSelectedNode()
 		const ndDebugMesh& debugMesh = ptr->GetInfo();
 		if (debugMesh.m_parent->m_name == seletecName)
 		{
+			const ndMatrix pivotMatrix(debugMesh.m_parent->m_globalMatrix);
 			if (m_manager->m_showSelectedNode)
 			{
-				const ndMatrix matrix(debugMesh.m_parent->m_primitiveMatrix * debugMesh.m_parent->m_globalMatrix);
+				const ndMatrix gemetryMatrix(debugMesh.m_parent->m_primitiveMatrix * pivotMatrix);
 				const ndRenderPrimitive* const primitive = *debugMesh.m_wireFrameShareEdge;
 
 				ndRenderPrimitiveSegment& segment = primitive->m_segments.GetFirst()->GetInfo();
 				ndRenderPrimitiveMaterial* const material = &segment.m_material;
 
 				material->m_diffuse = m_selectedColor;
-				primitive->Render(m_owner, matrix, m_debugDisplayWireFrameMesh);
+				primitive->Render(m_owner, gemetryMatrix, m_debugDisplayWireFrameMesh);
 			}
 
 			if (m_manager->m_showPivot)
 			{
-				DrawFrame(debugMesh.m_parent->m_globalMatrix);
+				DrawFrame(pivotMatrix);
+			}
+
+			if (m_manager->m_showCenterOfMass)
+			{
+				const ndSharedPtr<ndMeshBody>& rigidBody = m_manager->m_currentSelection->GetRigidBody();
+				if (rigidBody)
+				{
+					ndMatrix comMatrix(pivotMatrix);
+					ndVector localcom(rigidBody->m_localCentreOfMass);
+					localcom.m_w = 1.0f;
+					comMatrix.m_posit = pivotMatrix.TransformVector(localcom);
+					DrawFrame(comMatrix);
+				}
 			}
 		}
 	}
@@ -251,6 +265,12 @@ void ndDebugDisplayRenderPass::RenderHiddenSurface()
 
 void ndDebugDisplayRenderPass::RenderScene()
 {
+	if (m_debugLines.GetCount())
+	{
+		const ndMatrix matrix(ndGetIdentityMatrix());
+		m_renderLinesPrimitive->Render(m_owner, matrix, m_debugLineArray);
+	}
+
 	m_debugLines.SetCount(0);
 	m_debugPoints.SetCount(0);
 
@@ -268,11 +288,5 @@ void ndDebugDisplayRenderPass::RenderScene()
 	if (m_manager->m_currentSelection)
 	{
 		RenderSelectedNode();
-	}
-
-	if (m_debugLines.GetCount())
-	{
-		const ndMatrix matrix(ndGetIdentityMatrix());
-		m_renderLinesPrimitive->Render(m_owner, matrix, m_debugLineArray);
 	}
 }

@@ -47,6 +47,7 @@ ndAssetEditor::ndAssetEditor()
 	,m_currentPath("")
 	,m_runScene(false)
 	,m_showPivot(true)
+	,m_showCenterOfMass(false)
 	,m_showSelectedNode(true)
 	,m_showCollisionShape(false)
 	,m_renderMode(m_shaded)
@@ -490,7 +491,8 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::Separator();
 			ImGui::Checkbox("show node", &m_showSelectedNode);
 			ImGui::Checkbox("show pivot", &m_showPivot);
-			ImGui::Checkbox("show collision", &m_showCollisionShape);
+			ImGui::Checkbox("show center of mass", &m_showCenterOfMass);
+			//ImGui::Checkbox("show collision", &m_showCollisionShape);
 
 			ImGui::EndMenu();
 		}

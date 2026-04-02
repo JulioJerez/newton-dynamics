@@ -237,6 +237,7 @@ class ndAssetEditor : public ndClassAlloc
 
 	bool m_runScene;
 	bool m_showPivot;
+	bool m_showCenterOfMass;
 	bool m_showSelectedNode;
 	bool m_showCollisionShape;
 	ndInt32 m_renderMode;
