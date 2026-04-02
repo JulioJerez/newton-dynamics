@@ -236,13 +236,6 @@ class ndAssetEditor : public ndClassAlloc
 	ndString m_currentPath;
 	ndUndoRedo m_undoRedo;
 
-	//ndInt32 m_currentPlugin;
-	//ndInt32 m_solverPasses;
-	//ndInt32 m_solverSubSteps;
-	//ndInt32 m_workerThreads;
-	//ndInt32 m_debugDisplayMode;
-	//ndInt32 m_showCollisionMeshMode;
-	//ndWorld::ndSolverModes m_solverMode;
 	bool m_runScene;
 	ndInt32 m_renderMode;
 	

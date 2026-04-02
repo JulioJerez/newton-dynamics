@@ -9,7 +9,6 @@
 * freely
 */
 
-
 #include "ndNewAssetStdafx.h"
 #include "ndMenuRenderPass.h"
 #include "ndAssetEditor.h"
@@ -18,11 +17,11 @@
 ndDebugDisplayRenderPass::ndDebugDisplayRenderPass(ndAssetEditor* const owner)
 	//:ndRenderPassDebug(*owner->GetRenderer(), owner->GetWorld())
 	:ndRenderPassDebug(*owner->GetRenderer(), nullptr)
-	,m_awakeColor(ndFloat32(1.0f))
-	,m_sleepColor(ndFloat32(0.42f), ndFloat32(0.73f), ndFloat32(0.98f), ndFloat32(1.0f))
 	,m_manager(owner)
-	,m_meshCache()
-	,m_showCollisionMeshMode(0)
+	//,m_awakeColor(ndFloat32(1.0f))
+	//,m_sleepColor(ndFloat32(0.42f), ndFloat32(0.73f), ndFloat32(0.98f), ndFloat32(1.0f))
+	//,m_meshCache()
+	//,m_showCollisionMeshMode(0)
 {
 }
 
@@ -30,26 +29,8 @@ ndDebugDisplayRenderPass::~ndDebugDisplayRenderPass()
 {
 }
 
-void ndDebugDisplayRenderPass::SetDebugDisplayOptions()
-{
-	ndAssert(0);
-	ndDebugOptions options;
-	//options.m_showBodyAABB = m_manager->m_showAABB;
-	//options.m_showBroadPhase = m_manager->m_showScene;
-	//options.m_showBodyFrame = m_manager->m_showBodyFrame;
-	//options.m_showContacts = m_manager->m_showContactPoints;
-	//options.m_showCentreOfMass = m_manager->m_showCenterOfMass;
-	//options.m_showContactsForce = m_manager->m_showNormalForces;
-	//options.m_showJointDebugInfo = m_manager->m_showJointDebugInfo;
-	//options.m_showModelsDebugInfo = m_manager->m_showModelsDebugInfo;
-	//options.m_showStaticMeshCollidingFaces = m_manager->m_showStaticMeshCollidingFaces;
-	//ndRenderPassDebug::SetDebugDisplayOptions(options);
-	//m_showCollisionMeshMode = m_manager->m_showCollisionMeshMode;
-}
-
 void ndDebugDisplayRenderPass::ResetScene()
 {
-	m_meshCache.RemoveAll();
 }
 
 ndDebugDisplayRenderPass::ndDebugMesh* ndDebugDisplayRenderPass::CreateRenderPrimitive(const ndShapeInstance& shapeInstance) const
@@ -164,12 +145,24 @@ void ndDebugDisplayRenderPass::RenderCollisionShape()
 
 void ndDebugDisplayRenderPass::RenderScene()
 {
-	//ndAssert(0);
-	//m_world = m_manager->GetWorld();
-	//ndRenderPassDebug::RenderScene();
-	//
-	//if (m_showCollisionMeshMode)
-	//{
+	// do not call base class
+	if (m_manager->m_renderMode == ndAssetEditor::m_wireframe)
+	{
 	//	RenderCollisionShape();
-	//}
-}	//
+	}
+	else if (m_manager->m_renderMode == ndAssetEditor::m_hiddenSurface)
+	{
+
+	}
+}	
+
+void ndDebugDisplayRenderPass::SetMesh(const ndSharedPtr<ndRenderSceneNode>& entity)
+{
+	m_debugMesh.RemoveAll();
+
+	if (!*entity)
+	{
+		return;
+	}
+
+}

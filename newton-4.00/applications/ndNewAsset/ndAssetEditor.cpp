@@ -305,6 +305,8 @@ void ndAssetEditor::RenderScene()
 
 	//UpdatePhysics(timestep);
 
+	m_colorRenderPass->MakeActive(m_renderMode == m_shaded);
+
 	ndEditorCameraNode* const camera = (ndEditorCameraNode*)*m_renderer->GetCamera();
 	camera->TickUpdate(timestep);
 
@@ -523,6 +525,8 @@ void ndAssetEditor::Run()
 				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 				m_renderer->RemoveSceneNode(m_entity);
 				m_entity = ndSharedPtr<ndRenderSceneNode>(nullptr);
+				ndDebugDisplayRenderPass* const debugRender = (ndDebugDisplayRenderPass*)*m_debugDisplayRenderPass;
+				debugRender->SetMesh(m_entity);
 			}
 
 			if (*m_newModel || *m_newMesh)
@@ -541,6 +545,9 @@ void ndAssetEditor::Run()
 					m_entity = m_newMesh;
 					m_newMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);
 					m_renderer->AddSceneNode(m_entity);
+
+					ndDebugDisplayRenderPass* const debugRender = (ndDebugDisplayRenderPass*)*m_debugDisplayRenderPass;
+					debugRender->SetMesh(m_entity);
 				}
 
 				ndVector p0;
