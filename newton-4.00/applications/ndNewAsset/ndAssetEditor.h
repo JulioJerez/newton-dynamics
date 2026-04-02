@@ -200,12 +200,10 @@ class ndAssetEditor : public ndClassAlloc
 	void UpdatePhysics(ndFloat32 timestep);
 	void SetVisualScene(const ndRenderMeshLoader& loader);
 	
-	void ShowMainMenuBar();
-	void ApplyOptions();
-
 	void OnSubStepPostUpdate(ndFloat32 timestep);
 
 	void ConfigureDockSpace();
+	void ShowMainMenuBar();
 	void ShowMainToolbar();
 	void ShowOutlierPanel();
 	void ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root);
@@ -237,6 +235,7 @@ class ndAssetEditor : public ndClassAlloc
 	ndUndoRedo m_undoRedo;
 
 	bool m_runScene;
+	bool m_showSelectedNode;
 	ndInt32 m_renderMode;
 	
 	friend class ndUndoRedo;

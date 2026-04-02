@@ -193,14 +193,17 @@ void ndDebugDisplayRenderPass::RenderSelectedNode()
 		const ndDebugMesh& debugMesh = ptr->GetInfo();
 		if (debugMesh.m_parent->m_name == seletecName)
 		{
-			const ndMatrix matrix(debugMesh.m_parent->m_primitiveMatrix * debugMesh.m_parent->m_globalMatrix);
-			const ndRenderPrimitive* const primitive = *debugMesh.m_wireFrameShareEdge;
+			if (m_manager->m_showSelectedNode)
+			{
+				const ndMatrix matrix(debugMesh.m_parent->m_primitiveMatrix * debugMesh.m_parent->m_globalMatrix);
+				const ndRenderPrimitive* const primitive = *debugMesh.m_wireFrameShareEdge;
 
-			ndRenderPrimitiveSegment& segment = primitive->m_segments.GetFirst()->GetInfo();
-			ndRenderPrimitiveMaterial* const material = &segment.m_material;
+				ndRenderPrimitiveSegment& segment = primitive->m_segments.GetFirst()->GetInfo();
+				ndRenderPrimitiveMaterial* const material = &segment.m_material;
 
-			material->m_diffuse = m_selectedColor;
-			primitive->Render(m_owner, matrix, m_debugDisplayWireFrameMesh);
+				material->m_diffuse = m_selectedColor;
+				primitive->Render(m_owner, matrix, m_debugDisplayWireFrameMesh);
+			}
 		}
 	}
 }

@@ -46,6 +46,7 @@ ndAssetEditor::ndAssetEditor()
 	:ndClassAlloc()
 	,m_currentPath("")
 	,m_runScene(false)
+	,m_showSelectedNode(true)
 	,m_renderMode(m_shaded)
 {
 	// Setup window
@@ -87,8 +88,6 @@ ndAssetEditor::ndAssetEditor()
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
-	ApplyOptions();
 
 	m_defaultCamera = ndSharedPtr<ndRenderSceneNode>(new ndEditorCameraFlyby(*m_renderer));
 	m_renderer->SetCamera(m_defaultCamera);
@@ -213,24 +212,6 @@ void ndAssetEditor::RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& postUpda
 {
 	m_onPostUpdate = postUpdate;
 }
-
-void ndAssetEditor::ApplyOptions()
-{
-	//m_colorRenderPass->MakeActive(!m_hideVisualMeshes);
-	//m_shadowRenderPass->MakeActive(!m_hideVisualMeshes);
-	//m_transparentRenderPass->MakeActive(!m_hideVisualMeshes);
-	//
-	//ndDebugDisplayRenderPass* const debugDisplay = (ndDebugDisplayRenderPass*)*m_debugDisplayRenderPass;
-	//debugDisplay->SetDebugDisplayOptions();
-}
-
-//bool ndAssetEditor::GetMouseSpeed(ndFloat32& speedX, ndFloat32& speedY) const
-//{
-//	ImVec2 speed(ImGui::GetMouseDragDelta(0, 0.0f));
-//	speedX = speed.x;
-//	speedY = speed.y;
-//	return true;
-//}
 
 ndFloat32 ndAssetEditor::GetMouseWheel() const
 {
@@ -496,6 +477,9 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::RadioButton("shaded", &m_renderMode, m_shaded);
 			ImGui::RadioButton("wireframe", &m_renderMode, m_wireframe);
 			ImGui::RadioButton("hidden Surface", &m_renderMode, m_hiddenSurface);
+
+			ImGui::Separator();
+			ImGui::Checkbox("show selection", &m_showSelectedNode);
 
 			ImGui::EndMenu();
 		}
