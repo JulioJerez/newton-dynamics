@@ -422,7 +422,6 @@ void ndAssetEditor::ShowMainMenuBar()
 		{
 			if (ImGui::MenuItem("New", ""))
 			{
-				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 				m_model = ndSharedPtr<ndMesh>(nullptr);
 			}
 
@@ -511,6 +510,14 @@ void ndAssetEditor::Run()
 	{
 		if (m_renderer->PollEvents())
 		{
+			if (!*m_model && m_entity)
+			{
+				m_undoRedo.Clear();
+				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
+				m_renderer->RemoveSceneNode(m_entity);
+				m_entity = ndSharedPtr<ndRenderSceneNode>(nullptr);
+			}
+
 			if (*m_newModel || *m_newMesh)
 			{
 				if (*m_newModel)
