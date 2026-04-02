@@ -15,13 +15,10 @@
 #include "ndDebugDisplayRenderPass.h"
 
 ndDebugDisplayRenderPass::ndDebugDisplayRenderPass(ndAssetEditor* const owner)
-	//:ndRenderPassDebug(*owner->GetRenderer(), owner->GetWorld())
 	:ndRenderPassDebug(*owner->GetRenderer(), nullptr)
+	,m_meshColor(ndFloat32(1.0f))
+	,m_selectedColor(ndFloat32(0.42f), ndFloat32(0.73f), ndFloat32(0.98f), ndFloat32(1.0f))
 	,m_manager(owner)
-	//,m_awakeColor(ndFloat32(1.0f))
-	//,m_sleepColor(ndFloat32(0.42f), ndFloat32(0.73f), ndFloat32(0.98f), ndFloat32(1.0f))
-	//,m_meshCache()
-	//,m_showCollisionMeshMode(0)
 {
 }
 
@@ -178,7 +175,33 @@ void ndDebugDisplayRenderPass::RenderWireFrame()
 	{
 		const ndDebugMesh& debugMesh = ptr->GetInfo();
 		const ndMatrix matrix(debugMesh.m_parent->m_primitiveMatrix * debugMesh.m_parent->m_globalMatrix);
-		debugMesh.m_wireFrameShareEdge->Render(m_owner, matrix, m_debugDisplayWireFrameMesh);
+		const ndRenderPrimitive* const primitive = *debugMesh.m_wireFrameShareEdge;
+
+		ndRenderPrimitiveSegment& segment = primitive->m_segments.GetFirst()->GetInfo();
+		ndRenderPrimitiveMaterial* const material = &segment.m_material;
+
+		material->m_diffuse = m_meshColor;
+		primitive->Render(m_owner, matrix, m_debugDisplayWireFrameMesh);
+	}
+}
+
+void ndDebugDisplayRenderPass::RenderSelectedNode()
+{
+	const ndString& seletecName = m_manager->m_currentSelection->GetName();
+	for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
+	{
+		const ndDebugMesh& debugMesh = ptr->GetInfo();
+		if (debugMesh.m_parent->m_name == seletecName)
+		{
+			const ndMatrix matrix(debugMesh.m_parent->m_primitiveMatrix * debugMesh.m_parent->m_globalMatrix);
+			const ndRenderPrimitive* const primitive = *debugMesh.m_wireFrameShareEdge;
+
+			ndRenderPrimitiveSegment& segment = primitive->m_segments.GetFirst()->GetInfo();
+			ndRenderPrimitiveMaterial* const material = &segment.m_material;
+
+			material->m_diffuse = m_selectedColor;
+			primitive->Render(m_owner, matrix, m_debugDisplayWireFrameMesh);
+		}
 	}
 }
 
@@ -203,5 +226,10 @@ void ndDebugDisplayRenderPass::RenderScene()
 	{
 		RenderHiddenSurface();
 		RenderWireFrame();
+	}
+
+	if (m_manager->m_currentSelection)
+	{
+		RenderSelectedNode();
 	}
 }
