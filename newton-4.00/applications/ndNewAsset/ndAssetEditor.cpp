@@ -15,6 +15,7 @@
 #include "ndMenuRenderPass.h"
 #include "ndEditorCameraFlyby.h"
 #include "ndHighResolutionTimer.h"
+#include "ndDebugDisplayRenderPass.h"
 
 ndAssetEditor::ButtonKey::ButtonKey (bool state)
 	:m_state(state)
@@ -44,14 +45,8 @@ ndInt32 ndAssetEditor::ButtonKey::UpdatePushButton (bool triggerValue)
 ndAssetEditor::ndAssetEditor()
 	:ndClassAlloc()
 	,m_currentPath("")
-	,m_currentPlugin(0)
-	,m_solverPasses(6)
-	,m_solverSubSteps(2)
-	,m_workerThreads(4)
-	,m_debugDisplayMode(0)
-	,m_showCollisionMeshMode(0)
 	,m_runScene(false)
-	,m_solverMode(ndWorld::ndSimdSoaSolver)
+	,m_renderMode(m_shaded)
 {
 	// Setup window
 	char title[256];
@@ -77,12 +72,14 @@ ndAssetEditor::ndAssetEditor()
 	m_menuRenderPass = ndSharedPtr<ndRenderPass>(new ndMenuRenderPass(this));
 	m_colorRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassColor(*m_renderer));
 	m_shadowRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassShadows(*m_renderer));
+	m_debugDisplayRenderPass = ndSharedPtr<ndRenderPass>(new ndDebugDisplayRenderPass(this));
 	m_environmentRenderPass = ndSharedPtr<ndRenderPass>(new ndRenderPassEnvironment(*m_renderer, m_environmentTexture));
 
 	// add render passes in order of execution
 	m_renderer->AddRenderPass(m_shadowRenderPass);
 	m_renderer->AddRenderPass(m_colorRenderPass);
 	m_renderer->AddRenderPass(m_environmentRenderPass);
+	m_renderer->AddRenderPass(m_debugDisplayRenderPass);
 	m_renderer->AddRenderPass(m_menuRenderPass);
 	
 	//add main directional light
@@ -488,6 +485,16 @@ void ndAssetEditor::ShowMainMenuBar()
 
 		if (ImGui::BeginMenu("Tools"))
 		{
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("Options"))
+		{
+			ImGui::Text("render mode");
+			ImGui::RadioButton("shaded", &m_renderMode, m_shaded);
+			ImGui::RadioButton("wireframe", &m_renderMode, m_wireframe);
+			ImGui::RadioButton("hidden Surface", &m_renderMode, m_hiddenSurface);
+
 			ImGui::EndMenu();
 		}
 

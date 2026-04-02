@@ -11,7 +11,7 @@
 #ifndef __ND_DEBUG_DISPLAY_RENDER_PASS_H__
 #define __ND_DEBUG_DISPLAY_RENDER_PASS_H__
 
-class ndDemoEntityManager;
+class ndAssetEditor;
 
 class ndDebugDisplayRenderPass : public ndRenderPassDebug
 {
@@ -33,7 +33,7 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 		//ndSharedPtr<ndWireFrameDebugMesh> m_wireFrameOpenEdge;
 	};
 
-	ndDebugDisplayRenderPass(ndDemoEntityManager* const owner);
+	ndDebugDisplayRenderPass(ndAssetEditor* const owner);
 	~ndDebugDisplayRenderPass();
 
 	virtual void SetDebugDisplayOptions();
@@ -47,7 +47,7 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 
 	ndVector m_awakeColor;
 	ndVector m_sleepColor;
-	ndWeakPtr<ndDemoEntityManager> m_manager;
+	ndWeakPtr<ndAssetEditor> m_manager;
 	ndTree<ndSharedPtr<ndDebugMesh>, ndShape*> m_meshCache;
 	ndInt32 m_showCollisionMeshMode;
 };
