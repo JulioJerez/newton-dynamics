@@ -29,10 +29,6 @@ ndDebugDisplayRenderPass::~ndDebugDisplayRenderPass()
 {
 }
 
-void ndDebugDisplayRenderPass::ResetScene()
-{
-}
-
 ndDebugDisplayRenderPass::ndDebugMesh* ndDebugDisplayRenderPass::CreateRenderPrimitive(const ndShapeInstance& shapeInstance) const
 {
 	ndSharedPtr<ndShapeInstance>shape(new ndShapeInstance(shapeInstance));
@@ -143,26 +139,46 @@ void ndDebugDisplayRenderPass::RenderCollisionShape()
 	//}
 }
 
+void ndDebugDisplayRenderPass::ResetScene()
+{
+	m_debugMesh.RemoveAll();
+
+	if (!*m_manager->m_model)
+	{
+		return;
+	}
+
+	auto BuildDebugMesh = [this](ndMesh* const node)
+	{
+		ndSharedPtr<ndMeshEffect>& geometry = node->GetMesh();
+		if (*geometry)
+		{
+			ndDebugMesh& entry = m_debugMesh.Append()->GetInfo();
+			ndRenderPrimitive::ndDescriptor descriptor(m_owner);
+			descriptor.m_meshNode = geometry;
+
+			descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugHiddenLines;
+			entry.m_zBuffer = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
+
+			descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugWireFrame;
+			entry.m_wireFrameShareEdge = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
+
+			descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugFlatShaded;
+			entry.m_flatShaded = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
+		}
+	};
+	m_manager->m_model->NodeIterator(BuildDebugMesh);
+}
+
 void ndDebugDisplayRenderPass::RenderScene()
 {
 	// do not call base class
 	if (m_manager->m_renderMode == ndAssetEditor::m_wireframe)
 	{
-	//	RenderCollisionShape();
+		//	RenderCollisionShape();
 	}
 	else if (m_manager->m_renderMode == ndAssetEditor::m_hiddenSurface)
 	{
 
 	}
-}	
-
-void ndDebugDisplayRenderPass::SetMesh(const ndSharedPtr<ndRenderSceneNode>& entity)
-{
-	m_debugMesh.RemoveAll();
-
-	if (!*entity)
-	{
-		return;
-	}
-
 }

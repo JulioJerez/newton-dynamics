@@ -34,8 +34,6 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	ndDebugDisplayRenderPass(ndAssetEditor* const owner);
 	~ndDebugDisplayRenderPass();
 
-	void SetMesh(const ndSharedPtr<ndRenderSceneNode>& entity);
-
 	private:
 	void RenderCollisionShape();
 
@@ -48,7 +46,8 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	ndWeakPtr<ndAssetEditor> m_manager;
 	//ndTree<ndSharedPtr<ndDebugMesh>, ndShape*> m_meshCache;
 	//ndInt32 m_showCollisionMeshMode;
-	ndTree<ndDebugMesh, ndRenderSceneNode*> m_debugMesh;
+	//ndTree<ndDebugMesh, ndRenderSceneNode*> m_debugMesh;
+	ndList<ndDebugMesh> m_debugMesh;
 };
 
 #endif

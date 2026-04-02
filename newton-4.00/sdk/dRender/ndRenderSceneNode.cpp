@@ -144,7 +144,6 @@ const ndRenderSceneNodeInstance* ndRenderSceneNode::GetAsInstance() const
 
 ndRenderSceneNode* ndRenderSceneNode::GetParent() const
 {
-	//const ndRenderSceneNode* ccc = *m_parent;
 	return (ndRenderSceneNode*) *m_parent;
 }
 
@@ -258,17 +257,6 @@ void ndRenderSceneNode::AddChild(const ndSharedPtr<ndRenderSceneNode>& child)
 
 void ndRenderSceneNode::RemoveChild(const ndSharedPtr<ndRenderSceneNode> child)
 {
-	//ndAssert(child->m_parent && (child->m_parent == this));
-	//for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* node = m_children.GetFirst(); node; node = node->GetNext())
-	//{
-	//	ndRenderSceneNode* const childNode = *node->GetInfo();
-	//	if (childNode == *child)
-	//	{
-	//		child->m_parent = nullptr;
-	//		m_children.Remove(node);
-	//		break;
-	//	}
-	//}
 	ndAssert(child->m_selfChildNode);
 	ndAssert(child->m_parent && (child->m_parent == this));
 

@@ -525,8 +525,7 @@ void ndAssetEditor::Run()
 				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 				m_renderer->RemoveSceneNode(m_entity);
 				m_entity = ndSharedPtr<ndRenderSceneNode>(nullptr);
-				ndDebugDisplayRenderPass* const debugRender = (ndDebugDisplayRenderPass*)*m_debugDisplayRenderPass;
-				debugRender->SetMesh(m_entity);
+				m_debugDisplayRenderPass->ResetScene();
 			}
 
 			if (*m_newModel || *m_newMesh)
@@ -545,9 +544,7 @@ void ndAssetEditor::Run()
 					m_entity = m_newMesh;
 					m_newMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);
 					m_renderer->AddSceneNode(m_entity);
-
-					ndDebugDisplayRenderPass* const debugRender = (ndDebugDisplayRenderPass*)*m_debugDisplayRenderPass;
-					debugRender->SetMesh(m_entity);
+					m_debugDisplayRenderPass->ResetScene();
 				}
 
 				ndVector p0;

@@ -84,6 +84,9 @@ class ndRenderSceneNode : public ndContainersFreeListAlloc<ndRenderSceneNode>
 	const ndRenderSceneNode* IteratorNext() const;
 	const ndRenderSceneNode* IteratorFirst() const;
 
+	template <typename Function>
+	void NodeIterator(Function func);
+
 	virtual void Render(const ndRender* const owner, const ndMatrix& parentMatrix, ndRenderPassMode renderMode) const;
 
 	ndMatrix m_matrix;			 // interpolated local matrix
@@ -112,5 +115,23 @@ class ndRenderSceneNode : public ndContainersFreeListAlloc<ndRenderSceneNode>
 	friend class ndRenderPassTransparency;
 	friend class ndRenderSceneNodeInstanceImplement;
 };
+
+template <typename Function>
+void ndRenderSceneNode::NodeIterator(Function func)
+{
+	ndFixSizeArray<ndRenderSceneNode*, 1024> stack;
+	stack.PushBack(this);
+	while (stack.GetCount())
+	{
+		ndRenderSceneNode* const node = stack.Pop();
+		func(node);
+
+		for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* childNode = node->m_children.GetFirst(); childNode; childNode = childNode->GetNext())
+		{
+			ndRenderSceneNode* const child = *childNode->GetInfo();
+			stack.PushBack(child);
+		}
+	}
+}
 
 #endif
