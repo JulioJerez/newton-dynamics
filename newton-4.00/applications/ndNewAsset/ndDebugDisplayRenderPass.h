@@ -26,6 +26,7 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 		{
 		}
 
+		ndWeakPtr<ndRenderSceneNode> m_parent;
 		ndSharedPtr<ndRenderPrimitive> m_zBuffer;
 		ndSharedPtr<ndRenderPrimitive> m_flatShaded;
 		ndSharedPtr<ndRenderPrimitive> m_wireFrameShareEdge;
@@ -35,6 +36,8 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	~ndDebugDisplayRenderPass();
 
 	private:
+	void RenderWireFrame();
+	void RenderHiddenSurface();
 	void RenderCollisionShape();
 
 	virtual void ResetScene() override;
@@ -44,9 +47,6 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	//ndVector m_awakeColor;
 	//ndVector m_sleepColor;
 	ndWeakPtr<ndAssetEditor> m_manager;
-	//ndTree<ndSharedPtr<ndDebugMesh>, ndShape*> m_meshCache;
-	//ndInt32 m_showCollisionMeshMode;
-	//ndTree<ndDebugMesh, ndRenderSceneNode*> m_debugMesh;
 	ndList<ndDebugMesh> m_debugMesh;
 };
 

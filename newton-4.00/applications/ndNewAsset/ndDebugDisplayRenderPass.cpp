@@ -154,6 +154,8 @@ void ndDebugDisplayRenderPass::ResetScene()
 		if (*geometry)
 		{
 			ndDebugMesh& entry = m_debugMesh.Append()->GetInfo();
+			entry.m_parent = ndWeakPtr<ndRenderSceneNode>(m_manager->m_entity->FindByName(node->GetName()));
+
 			ndRenderPrimitive::ndDescriptor descriptor(m_owner);
 			descriptor.m_meshNode = geometry;
 
@@ -170,15 +172,36 @@ void ndDebugDisplayRenderPass::ResetScene()
 	m_manager->m_model->NodeIterator(BuildDebugMesh);
 }
 
+void ndDebugDisplayRenderPass::RenderWireFrame()
+{
+	for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
+	{
+		const ndDebugMesh& debugMesh = ptr->GetInfo();
+		const ndMatrix matrix(debugMesh.m_parent->m_primitiveMatrix * debugMesh.m_parent->m_globalMatrix);
+		debugMesh.m_wireFrameShareEdge->Render(m_owner, matrix, m_debugDisplayWireFrameMesh);
+	}
+}
+
+void ndDebugDisplayRenderPass::RenderHiddenSurface()
+{
+	for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
+	{
+		const ndDebugMesh& debugMesh = ptr->GetInfo();
+		const ndMatrix matrix(debugMesh.m_parent->m_primitiveMatrix * debugMesh.m_parent->m_globalMatrix);
+		debugMesh.m_zBuffer->Render(m_owner, matrix, m_debugDisplaySetZbuffer);
+	}
+}
+
 void ndDebugDisplayRenderPass::RenderScene()
 {
 	// do not call base class
 	if (m_manager->m_renderMode == ndAssetEditor::m_wireframe)
 	{
-		//	RenderCollisionShape();
+		RenderWireFrame();
 	}
 	else if (m_manager->m_renderMode == ndAssetEditor::m_hiddenSurface)
 	{
-
+		RenderHiddenSurface();
+		RenderWireFrame();
 	}
 }
