@@ -46,9 +46,11 @@ ndAssetEditor::ndAssetEditor()
 	:ndClassAlloc()
 	,m_currentPath("")
 	,m_runScene(false)
+	,m_showPivot(true)
 	,m_showSelectedNode(true)
 	,m_showCollisionShape(false)
 	,m_renderMode(m_shaded)
+	,m_gizmosScale(0.5f)
 {
 	// Setup window
 	char title[256];
@@ -480,7 +482,14 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::RadioButton("hidden Surface", &m_renderMode, m_hiddenSurface);
 
 			ImGui::Separator();
+			if (ImGui::DragFloat("gizmo scale", &m_gizmosScale, 0.1f))
+			{
+				m_gizmosScale = ndClamp(m_gizmosScale, ndReal(0.1f), ndReal(2.0f));
+			}
+
+			ImGui::Separator();
 			ImGui::Checkbox("show node", &m_showSelectedNode);
+			ImGui::Checkbox("show pivot", &m_showPivot);
 			ImGui::Checkbox("show collision", &m_showCollisionShape);
 
 			ImGui::EndMenu();

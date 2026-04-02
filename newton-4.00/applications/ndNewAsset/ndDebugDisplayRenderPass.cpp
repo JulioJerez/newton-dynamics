@@ -185,6 +185,32 @@ void ndDebugDisplayRenderPass::RenderWireFrame()
 	}
 }
 
+void ndDebugDisplayRenderPass::DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color)
+{
+	ndPoint line;
+
+	line.m_point = p0;
+	line.m_color = color;
+	m_debugLines.PushBack(line);
+
+	line.m_point = p1;
+	line.m_color = color;
+	m_debugLines.PushBack(line);
+}
+
+void ndDebugDisplayRenderPass::DrawFrame(const ndMatrix& matrix)
+{
+	ndReal debugScale = m_manager->m_gizmosScale;
+	ndVector x(matrix.m_posit + matrix.RotateVector(ndVector(debugScale, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f))));
+	DrawLine(matrix.m_posit, x, ndVector(ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0f)));
+	
+	ndVector y(matrix.m_posit + matrix.RotateVector(ndVector(ndFloat32(0.0f), debugScale, ndFloat32(0.0f), ndFloat32(0.0f))));
+	DrawLine(matrix.m_posit, y, ndVector(ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(1.0f)));
+	
+	ndVector z(matrix.m_posit + matrix.RotateVector(ndVector(ndFloat32(0.0f), ndFloat32(0.0f), debugScale, ndFloat32(0.0f))));
+	DrawLine(matrix.m_posit, z, ndVector(ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(1.0f)));
+}
+
 void ndDebugDisplayRenderPass::RenderSelectedNode()
 {
 	const ndString& seletecName = m_manager->m_currentSelection->GetName();
@@ -204,6 +230,11 @@ void ndDebugDisplayRenderPass::RenderSelectedNode()
 				material->m_diffuse = m_selectedColor;
 				primitive->Render(m_owner, matrix, m_debugDisplayWireFrameMesh);
 			}
+
+			if (m_manager->m_showPivot)
+			{
+				DrawFrame(debugMesh.m_parent->m_globalMatrix);
+			}
 		}
 	}
 }
@@ -220,6 +251,9 @@ void ndDebugDisplayRenderPass::RenderHiddenSurface()
 
 void ndDebugDisplayRenderPass::RenderScene()
 {
+	m_debugLines.SetCount(0);
+	m_debugPoints.SetCount(0);
+
 	// do not call base class
 	if (m_manager->m_renderMode == ndAssetEditor::m_wireframe)
 	{
@@ -234,5 +268,11 @@ void ndDebugDisplayRenderPass::RenderScene()
 	if (m_manager->m_currentSelection)
 	{
 		RenderSelectedNode();
+	}
+
+	if (m_debugLines.GetCount())
+	{
+		const ndMatrix matrix(ndGetIdentityMatrix());
+		m_renderLinesPrimitive->Render(m_owner, matrix, m_debugLineArray);
 	}
 }

@@ -236,9 +236,11 @@ class ndAssetEditor : public ndClassAlloc
 	ndUndoRedo m_undoRedo;
 
 	bool m_runScene;
+	bool m_showPivot;
 	bool m_showSelectedNode;
 	bool m_showCollisionShape;
 	ndInt32 m_renderMode;
+	ndReal m_gizmosScale;
 	
 	friend class ndUndoRedo;
 	friend class ndPhysicsWorld;
