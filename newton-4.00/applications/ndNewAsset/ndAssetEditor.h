@@ -162,11 +162,8 @@ class ndAssetEditor : public ndClassAlloc
 
 	ndInt32 GetWidth() const;
 	ndInt32 GetHeight() const;
-	
-	//ndPhysicsWorld* GetWorld() const;
 	ndSharedPtr<ndRender>& GetRenderer();
 
-	//bool GetMouseSpeed(ndFloat32& posX, ndFloat32& posY) const;
 	ndFloat32 GetMouseWheel() const;
 	bool GetMousePosition (ndFloat32& posX, ndFloat32& posY) const;
 	void SetCameraMatrix (const ndQuaternion& rotation, const ndVector& position);

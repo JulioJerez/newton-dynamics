@@ -5356,3 +5356,37 @@ void ndMeshEffect::DeserializeFromXml(const nd::TiXmlElement* const xmlNode)
 	}
 	BuildFromIndexList(&format);
 }
+
+ndFloat32 ndMeshEffect::RayCast(const ndVector& p0, const ndVector& p1) const
+{
+	ndFastRay ray(p0, p1);
+	ndInt32 mark = IncLRU();
+	ndPolyhedra::Iterator iter(*this);
+
+	ndFloat32 hitParam = ndFloat32(1.2f);
+	for (iter.Begin(); iter; iter++)
+	{
+		ndEdge* const edge = &(*iter);
+		if ((edge->m_mark < mark) && (edge->m_incidentFace > 0))
+		{
+			ndFixSizeArray<ndVector, 64> face;
+			ndFixSizeArray<ndInt32, 64> indices;
+			ndEdge* ptr = edge;
+			do
+			{
+				ndBigVector p(m_points.m_vertex[ptr->m_incidentVertex]);
+				indices.PushBack(indices.GetCount());
+				face.PushBack(p);
+				ptr->m_mark = mark;
+				ptr = ptr->m_next;
+			} while (ptr != edge);
+			ndFloat32 param = ray.PolygonIntersect(hitParam, &face[0], &indices[0], indices.GetCount());
+			if (param < hitParam)
+			{
+				hitParam = param;
+			}
+		}
+	}
+
+	return hitParam;
+}
