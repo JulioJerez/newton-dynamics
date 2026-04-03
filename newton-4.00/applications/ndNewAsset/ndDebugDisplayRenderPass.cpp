@@ -200,7 +200,7 @@ void ndDebugDisplayRenderPass::DrawLine(const ndVector& p0, const ndVector& p1, 
 
 void ndDebugDisplayRenderPass::DrawFrame(const ndMatrix& matrix)
 {
-	ndReal debugScale = m_manager->m_gizmosScale;
+	ndReal debugScale = m_manager->m_gizmoScale;
 	ndVector x(matrix.m_posit + matrix.RotateVector(ndVector(debugScale, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f))));
 	DrawLine(matrix.m_posit, x, ndVector(ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0f)));
 	
@@ -239,14 +239,54 @@ void ndDebugDisplayRenderPass::RenderSelectedNode()
 
 			if (m_manager->m_showCenterOfMass)
 			{
-				const ndSharedPtr<ndMeshBody>& rigidBody = m_manager->m_currentSelection->GetRigidBody();
-				if (rigidBody)
+				const ndSharedPtr<ndMeshBody>& meshRigidBody = m_manager->m_currentSelection->GetRigidBody();
+				if (meshRigidBody)
 				{
 					ndMatrix comMatrix(pivotMatrix);
-					ndVector localcom(rigidBody->m_localCentreOfMass);
+					ndVector localcom(meshRigidBody->m_localCentreOfMass);
 					localcom.m_w = 1.0f;
 					comMatrix.m_posit = pivotMatrix.TransformVector(localcom);
 					DrawFrame(comMatrix);
+				}
+			}
+			if (m_manager->m_showJoints)
+			{
+				const ndSharedPtr<ndMeshJoint>& meshJoint = m_manager->m_currentSelection->GetJoint();
+				if (meshJoint)
+				{
+					ndBodyDynamic body0;
+					ndBodyDynamic body1;
+					body0.SetMatrix(pivotMatrix);
+					body1.SetMatrix(debugMesh.m_parent->GetParent()->m_globalMatrix);
+					body0.SetMassMatrix(ndVector(1.0f));
+					body1.SetMassMatrix(ndVector(1.0f));
+					ndSharedPtr<ndJointBilateralConstraint> joint(meshJoint->CreateObject(&body0, &body1));
+
+					class DebugJoint : public ndConstraintDebugCallback
+					{
+						public:
+						DebugJoint(ndDebugDisplayRenderPass* const self)
+							:ndConstraintDebugCallback()
+							,m_self(self)
+						{
+							SetScale(m_self->m_manager->m_gizmoScale);
+						}
+
+						void DrawPoint(const ndVector& point, const ndVector& color, ndFloat32 thickness = ndFloat32(8.0f))
+						{
+							ndAssert(0);
+						}
+
+						virtual void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32)
+						{
+							m_self->DrawLine(p0, p1, color);
+						}
+
+						ndDebugDisplayRenderPass* m_self;
+					};
+
+					DebugJoint debugCallback(this);
+					joint->DebugJoint(debugCallback);
 				}
 			}
 		}

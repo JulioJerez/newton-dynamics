@@ -47,11 +47,12 @@ ndAssetEditor::ndAssetEditor()
 	,m_currentPath("")
 	,m_runScene(false)
 	,m_showPivot(true)
+	,m_showJoints(false)
 	,m_showCenterOfMass(false)
 	,m_showSelectedNode(true)
 	,m_showCollisionShape(false)
 	,m_renderMode(m_shaded)
-	,m_gizmosScale(0.5f)
+	,m_gizmoScale(0.5f)
 {
 	// Setup window
 	char title[256];
@@ -483,15 +484,16 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::RadioButton("hidden Surface", &m_renderMode, m_hiddenSurface);
 
 			ImGui::Separator();
-			if (ImGui::DragFloat("gizmo scale", &m_gizmosScale, 0.1f))
+			if (ImGui::DragFloat("gizmo scale", &m_gizmoScale, 0.1f))
 			{
-				m_gizmosScale = ndClamp(m_gizmosScale, ndReal(0.1f), ndReal(2.0f));
+				m_gizmoScale = ndClamp(m_gizmoScale, ndReal(0.1f), ndReal(2.0f));
 			}
 
 			ImGui::Separator();
 			ImGui::Checkbox("show node", &m_showSelectedNode);
 			ImGui::Checkbox("show pivot", &m_showPivot);
 			ImGui::Checkbox("show center of mass", &m_showCenterOfMass);
+			ImGui::Checkbox("show Joints", &m_showJoints);
 			//ImGui::Checkbox("show collision", &m_showCollisionShape);
 
 			ImGui::EndMenu();

@@ -237,11 +237,12 @@ class ndAssetEditor : public ndClassAlloc
 
 	bool m_runScene;
 	bool m_showPivot;
+	bool m_showJoints;
 	bool m_showCenterOfMass;
 	bool m_showSelectedNode;
 	bool m_showCollisionShape;
 	ndInt32 m_renderMode;
-	ndReal m_gizmosScale;
+	ndReal m_gizmoScale;
 	
 	friend class ndUndoRedo;
 	friend class ndPhysicsWorld;
