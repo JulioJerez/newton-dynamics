@@ -78,9 +78,9 @@ void ndAssetEditor::ShowOutlierPanel()
 {
 	ImGui::Begin("Oulier Panel");
 
-	if (*m_model)
+	if (*m_mesh)
 	{
-		ShowOutlierExplorer(m_model);
+		ShowOutlierExplorer(m_mesh);
 	}
 
 	ImGui::End();

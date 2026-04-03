@@ -45,6 +45,9 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	virtual void RenderScene() override;
 	ndDebugMesh* CreateRenderPrimitive(const ndShapeInstance& shapeInstance) const;
 
+	void DrawFrame(const ndMatrix& matrix);
+	void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color);
+
 	ndVector m_meshColor;
 	ndVector m_selectedColor;
 	ndWeakPtr<ndAssetEditor> m_manager;

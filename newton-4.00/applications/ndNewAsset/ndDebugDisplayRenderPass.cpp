@@ -140,7 +140,7 @@ void ndDebugDisplayRenderPass::ResetScene()
 {
 	m_debugMesh.RemoveAll();
 
-	if (!*m_manager->m_model)
+	if (!*m_manager->m_mesh)
 	{
 		return;
 	}
@@ -166,7 +166,7 @@ void ndDebugDisplayRenderPass::ResetScene()
 			entry.m_flatShaded = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
 		}
 	};
-	m_manager->m_model->NodeIterator(BuildDebugMesh);
+	m_manager->m_mesh->NodeIterator(BuildDebugMesh);
 }
 
 void ndDebugDisplayRenderPass::RenderWireFrame()
@@ -185,6 +185,32 @@ void ndDebugDisplayRenderPass::RenderWireFrame()
 	}
 }
 
+void ndDebugDisplayRenderPass::DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color)
+{
+	ndPoint line;
+
+	line.m_point = p0;
+	line.m_color = color;
+	m_debugLines.PushBack(line);
+
+	line.m_point = p1;
+	line.m_color = color;
+	m_debugLines.PushBack(line);
+}
+
+void ndDebugDisplayRenderPass::DrawFrame(const ndMatrix& matrix)
+{
+	ndReal debugScale = m_manager->m_gizmoScale;
+	ndVector x(matrix.m_posit + matrix.RotateVector(ndVector(debugScale, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f))));
+	DrawLine(matrix.m_posit, x, ndVector(ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0f)));
+	
+	ndVector y(matrix.m_posit + matrix.RotateVector(ndVector(ndFloat32(0.0f), debugScale, ndFloat32(0.0f), ndFloat32(0.0f))));
+	DrawLine(matrix.m_posit, y, ndVector(ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(1.0f)));
+	
+	ndVector z(matrix.m_posit + matrix.RotateVector(ndVector(ndFloat32(0.0f), ndFloat32(0.0f), debugScale, ndFloat32(0.0f))));
+	DrawLine(matrix.m_posit, z, ndVector(ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(1.0f)));
+}
+
 void ndDebugDisplayRenderPass::RenderSelectedNode()
 {
 	const ndString& seletecName = m_manager->m_currentSelection->GetName();
@@ -193,14 +219,76 @@ void ndDebugDisplayRenderPass::RenderSelectedNode()
 		const ndDebugMesh& debugMesh = ptr->GetInfo();
 		if (debugMesh.m_parent->m_name == seletecName)
 		{
-			const ndMatrix matrix(debugMesh.m_parent->m_primitiveMatrix * debugMesh.m_parent->m_globalMatrix);
-			const ndRenderPrimitive* const primitive = *debugMesh.m_wireFrameShareEdge;
+			const ndMatrix pivotMatrix(debugMesh.m_parent->m_globalMatrix);
+			if (m_manager->m_showSelectedNode)
+			{
+				const ndMatrix gemetryMatrix(debugMesh.m_parent->m_primitiveMatrix * pivotMatrix);
+				const ndRenderPrimitive* const primitive = *debugMesh.m_wireFrameShareEdge;
 
-			ndRenderPrimitiveSegment& segment = primitive->m_segments.GetFirst()->GetInfo();
-			ndRenderPrimitiveMaterial* const material = &segment.m_material;
+				ndRenderPrimitiveSegment& segment = primitive->m_segments.GetFirst()->GetInfo();
+				ndRenderPrimitiveMaterial* const material = &segment.m_material;
 
-			material->m_diffuse = m_selectedColor;
-			primitive->Render(m_owner, matrix, m_debugDisplayWireFrameMesh);
+				material->m_diffuse = m_selectedColor;
+				primitive->Render(m_owner, gemetryMatrix, m_debugDisplayWireFrameMesh);
+			}
+
+			if (m_manager->m_showPivot)
+			{
+				DrawFrame(pivotMatrix);
+			}
+
+			if (m_manager->m_showCenterOfMass)
+			{
+				const ndSharedPtr<ndMeshBody>& meshRigidBody = m_manager->m_currentSelection->GetRigidBody();
+				if (meshRigidBody)
+				{
+					ndMatrix comMatrix(pivotMatrix);
+					ndVector localcom(meshRigidBody->m_localCentreOfMass);
+					localcom.m_w = 1.0f;
+					comMatrix.m_posit = pivotMatrix.TransformVector(localcom);
+					DrawFrame(comMatrix);
+				}
+			}
+			if (m_manager->m_showJoints)
+			{
+				const ndSharedPtr<ndMeshJoint>& meshJoint = m_manager->m_currentSelection->GetJoint();
+				if (meshJoint)
+				{
+					ndBodyDynamic body0;
+					ndBodyDynamic body1;
+					body0.SetMatrix(pivotMatrix);
+					body1.SetMatrix(debugMesh.m_parent->GetParent()->m_globalMatrix);
+					body0.SetMassMatrix(ndVector(1.0f));
+					body1.SetMassMatrix(ndVector(1.0f));
+					ndSharedPtr<ndJointBilateralConstraint> joint(meshJoint->CreateObject(&body0, &body1));
+
+					class DebugJoint : public ndConstraintDebugCallback
+					{
+						public:
+						DebugJoint(ndDebugDisplayRenderPass* const self)
+							:ndConstraintDebugCallback()
+							,m_self(self)
+						{
+							SetScale(m_self->m_manager->m_gizmoScale);
+						}
+
+						void DrawPoint(const ndVector& point, const ndVector& color, ndFloat32 thickness = ndFloat32(8.0f))
+						{
+							ndAssert(0);
+						}
+
+						virtual void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32)
+						{
+							m_self->DrawLine(p0, p1, color);
+						}
+
+						ndDebugDisplayRenderPass* m_self;
+					};
+
+					DebugJoint debugCallback(this);
+					joint->DebugJoint(debugCallback);
+				}
+			}
 		}
 	}
 }
@@ -217,6 +305,15 @@ void ndDebugDisplayRenderPass::RenderHiddenSurface()
 
 void ndDebugDisplayRenderPass::RenderScene()
 {
+	if (m_debugLines.GetCount())
+	{
+		const ndMatrix matrix(ndGetIdentityMatrix());
+		m_renderLinesPrimitive->Render(m_owner, matrix, m_debugLineArray);
+	}
+
+	m_debugLines.SetCount(0);
+	m_debugPoints.SetCount(0);
+
 	// do not call base class
 	if (m_manager->m_renderMode == ndAssetEditor::m_wireframe)
 	{

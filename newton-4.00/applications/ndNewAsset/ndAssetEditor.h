@@ -200,12 +200,10 @@ class ndAssetEditor : public ndClassAlloc
 	void UpdatePhysics(ndFloat32 timestep);
 	void SetVisualScene(const ndRenderMeshLoader& loader);
 	
-	void ShowMainMenuBar();
-	void ApplyOptions();
-
 	void OnSubStepPostUpdate(ndFloat32 timestep);
 
 	void ConfigureDockSpace();
+	void ShowMainMenuBar();
 	void ShowMainToolbar();
 	void ShowOutlierPanel();
 	void ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root);
@@ -216,7 +214,8 @@ class ndAssetEditor : public ndClassAlloc
 	void ShowPropertiesCollisionInfo();
 	void ShowPropertiesRigidBodyInfo();
 		
-	ndSharedPtr<ndMesh> m_model;
+	ndSharedPtr<ndMesh> m_mesh;
+	ndSharedPtr<ndModel> m_model;
 	ndSharedPtr<ndRender> m_renderer;
 	ndSharedPtr<ndRenderSceneNode> m_entity;
 	ndSharedPtr<ndRenderPass> m_menuRenderPass;
@@ -226,8 +225,8 @@ class ndAssetEditor : public ndClassAlloc
 	ndSharedPtr<ndRenderTexture> m_environmentTexture;
 	ndSharedPtr<ndRenderPass> m_debugDisplayRenderPass;
 
-	ndSharedPtr<ndMesh> m_newModel;
-	ndSharedPtr<ndRenderSceneNode> m_newMesh;
+	ndSharedPtr<ndMesh> m_newMesh;
+	ndSharedPtr<ndRenderSceneNode> m_newSceneMesh;
 
 	ndSharedPtr<ndMesh> m_currentSelection;
 	ndSharedPtr<ndRenderSceneNode> m_defaultCamera;
@@ -237,7 +236,13 @@ class ndAssetEditor : public ndClassAlloc
 	ndUndoRedo m_undoRedo;
 
 	bool m_runScene;
+	bool m_showPivot;
+	bool m_showJoints;
+	bool m_showCenterOfMass;
+	bool m_showSelectedNode;
+	bool m_showCollisionShape;
 	ndInt32 m_renderMode;
+	ndReal m_gizmoScale;
 	
 	friend class ndUndoRedo;
 	friend class ndPhysicsWorld;

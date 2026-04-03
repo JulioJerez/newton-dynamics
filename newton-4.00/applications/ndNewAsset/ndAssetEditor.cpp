@@ -46,7 +46,13 @@ ndAssetEditor::ndAssetEditor()
 	:ndClassAlloc()
 	,m_currentPath("")
 	,m_runScene(false)
+	,m_showPivot(true)
+	,m_showJoints(false)
+	,m_showCenterOfMass(false)
+	,m_showSelectedNode(true)
+	,m_showCollisionShape(false)
 	,m_renderMode(m_shaded)
+	,m_gizmoScale(0.5f)
 {
 	// Setup window
 	char title[256];
@@ -87,8 +93,6 @@ ndAssetEditor::ndAssetEditor()
 
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-
-	ApplyOptions();
 
 	m_defaultCamera = ndSharedPtr<ndRenderSceneNode>(new ndEditorCameraFlyby(*m_renderer));
 	m_renderer->SetCamera(m_defaultCamera);
@@ -213,24 +217,6 @@ void ndAssetEditor::RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& postUpda
 {
 	m_onPostUpdate = postUpdate;
 }
-
-void ndAssetEditor::ApplyOptions()
-{
-	//m_colorRenderPass->MakeActive(!m_hideVisualMeshes);
-	//m_shadowRenderPass->MakeActive(!m_hideVisualMeshes);
-	//m_transparentRenderPass->MakeActive(!m_hideVisualMeshes);
-	//
-	//ndDebugDisplayRenderPass* const debugDisplay = (ndDebugDisplayRenderPass*)*m_debugDisplayRenderPass;
-	//debugDisplay->SetDebugDisplayOptions();
-}
-
-//bool ndAssetEditor::GetMouseSpeed(ndFloat32& speedX, ndFloat32& speedY) const
-//{
-//	ImVec2 speed(ImGui::GetMouseDragDelta(0, 0.0f));
-//	speedX = speed.x;
-//	speedY = speed.y;
-//	return true;
-//}
 
 ndFloat32 ndAssetEditor::GetMouseWheel() const
 {
@@ -421,7 +407,7 @@ void ndAssetEditor::ShowMainMenuBar()
 		{
 			if (ImGui::MenuItem("New", ""))
 			{
-				m_model = ndSharedPtr<ndMesh>(nullptr);
+				m_mesh = ndSharedPtr<ndMesh>(nullptr);
 			}
 
 			if (ImGui::MenuItem("Load", ""))
@@ -439,11 +425,11 @@ void ndAssetEditor::ShowMainMenuBar()
 
 			if (ImGui::MenuItem("Save", ""))
 			{
-				if (*m_model)
+				if (*m_mesh)
 				{
 					m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 					ndRenderMeshLoader loader(*m_renderer);
-					loader.m_mesh = m_model;
+					loader.m_mesh = m_mesh;
 					loader.SaveMesh(ndString(m_currentPath));
 				}
 			}
@@ -451,12 +437,12 @@ void ndAssetEditor::ShowMainMenuBar()
 			if (ImGui::MenuItem("Save As ...", ""))
 			{
 				char fileName[2048];
-				if (*m_model && dGetSaveNdFileName(fileName, sizeof(fileName) - 1))
+				if (*m_mesh && dGetSaveNdFileName(fileName, sizeof(fileName) - 1))
 				{
 					m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 					m_currentPath = ndString(fileName);
 					ndRenderMeshLoader loader(*m_renderer);
-					loader.m_mesh = m_model;
+					loader.m_mesh = m_mesh;
 					loader.SaveMesh(ndString(m_currentPath));
 				}
 			}
@@ -497,6 +483,19 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::RadioButton("wireframe", &m_renderMode, m_wireframe);
 			ImGui::RadioButton("hidden Surface", &m_renderMode, m_hiddenSurface);
 
+			ImGui::Separator();
+			if (ImGui::DragFloat("gizmo scale", &m_gizmoScale, 0.1f))
+			{
+				m_gizmoScale = ndClamp(m_gizmoScale, ndReal(0.1f), ndReal(2.0f));
+			}
+
+			ImGui::Separator();
+			ImGui::Checkbox("show node", &m_showSelectedNode);
+			ImGui::Checkbox("show pivot", &m_showPivot);
+			ImGui::Checkbox("show center of mass", &m_showCenterOfMass);
+			ImGui::Checkbox("show Joints", &m_showJoints);
+			//ImGui::Checkbox("show collision", &m_showCollisionShape);
+
 			ImGui::EndMenu();
 		}
 
@@ -507,8 +506,8 @@ void ndAssetEditor::ShowMainMenuBar()
 void ndAssetEditor::SetVisualScene(const ndRenderMeshLoader& loader)
 {
 	m_undoRedo.Clear();
-	m_newModel = loader.m_mesh;
-	m_newMesh = loader.m_renderMesh;
+	m_newMesh = loader.m_mesh;
+	m_newSceneMesh = loader.m_renderMesh;
 }
 
 void ndAssetEditor::Run()
@@ -519,38 +518,39 @@ void ndAssetEditor::Run()
 	{
 		if (m_renderer->PollEvents())
 		{
-			if (!*m_model && m_entity)
+			if (!*m_mesh && m_entity)
 			{
 				m_undoRedo.Clear();
 				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 				m_renderer->RemoveSceneNode(m_entity);
 				m_entity = ndSharedPtr<ndRenderSceneNode>(nullptr);
 				m_debugDisplayRenderPass->ResetScene();
+				m_model = ndSharedPtr<ndModel>(nullptr);
 			}
 
-			if (*m_newModel || *m_newMesh)
+			//if (*m_newMesh || *m_newSceneMesh)
+			if (*m_newMesh)
 			{
-				if (*m_newModel)
+				ndAssert(*m_newSceneMesh);
+				if (*m_entity)
 				{
-					m_model = m_newModel;
-					m_newModel = ndSharedPtr<ndMesh>(nullptr);
+					m_renderer->RemoveSceneNode(m_entity);
 				}
-				if (*m_newMesh)
-				{
-					if (*m_entity)
-					{
-						m_renderer->RemoveSceneNode(m_entity);
-					}
-					m_entity = m_newMesh;
-					m_newMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);
-					m_renderer->AddSceneNode(m_entity);
-					m_debugDisplayRenderPass->ResetScene();
-				}
+
+				m_mesh = m_newMesh;
+				m_entity = m_newSceneMesh;
+				m_model = ndSharedPtr<ndModel>(new ndModelArticulation());
+
+				m_newMesh = ndSharedPtr<ndMesh>(nullptr);
+				m_newSceneMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);
+
+				m_renderer->AddSceneNode(m_entity);
+				m_debugDisplayRenderPass->ResetScene();
 
 				ndVector p0;
 				ndVector p1;
 				const ndMatrix matrix(ndGetIdentityMatrix());
-				m_model->CalculateAabb(matrix, p0, p1);
+				m_mesh->CalculateAabb(matrix, p0, p1);
 				ndVector size(ndVector::m_half * (p1 - p0));
 				ndVector origin(ndVector::m_half * (p1 + p0));
 				ndFloat32 maxSize = ndMax(ndMax(size.m_x, size.m_y), size.m_z);
