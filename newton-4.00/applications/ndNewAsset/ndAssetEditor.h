@@ -19,12 +19,6 @@ class ndDebugDisplayRenderPass;
 class ndAssetEditor : public ndClassAlloc
 {
 	public:
-	enum ndPropertiesState
-	{
-		m_none,
-		m_editNodeFrame,
-	};
-
 	enum ndRenderModes
 	{
 		m_shaded,
@@ -237,7 +231,6 @@ class ndAssetEditor : public ndClassAlloc
 	ndSharedPtr<OnPostUpdate> m_onPostUpdate;
 	ndString m_currentPath;
 	ndUndoRedo m_undoRedo;
-	ndPropertiesState m_propertiesState;
 
 	bool m_runScene;
 	bool m_showPivot;
@@ -245,6 +238,7 @@ class ndAssetEditor : public ndClassAlloc
 	bool m_showCenterOfMass;
 	bool m_showSelectedNode;
 	bool m_showCollisionShape;
+	bool m_relativeTransformProperties;
 	ndInt32 m_renderMode;
 	ndReal m_gizmoScale;
 	

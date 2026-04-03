@@ -46,13 +46,13 @@ ndAssetEditor::ndAssetEditor()
 	:ndClassAlloc()
 	,m_currentPath("")
 	,m_undoRedo()
-	,m_propertiesState(m_none)
 	,m_runScene(false)
 	,m_showPivot(true)
 	,m_showJoints(false)
 	,m_showCenterOfMass(false)
 	,m_showSelectedNode(true)
 	,m_showCollisionShape(false)
+	,m_relativeTransformProperties(true)
 	,m_renderMode(m_shaded)
 	,m_gizmoScale(0.5f)
 {
@@ -497,6 +497,10 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::Checkbox("show center of mass", &m_showCenterOfMass);
 			ImGui::Checkbox("show Joints", &m_showJoints);
 			//ImGui::Checkbox("show collision", &m_showCollisionShape);
+
+			ImGui::Text("global properties");
+			ImGui::Checkbox("relative Transforms", &m_relativeTransformProperties);
+			
 
 			ImGui::EndMenu();
 		}
