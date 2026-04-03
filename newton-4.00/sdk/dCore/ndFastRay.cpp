@@ -24,6 +24,7 @@
 #include "ndVector.h"
 #include "ndFastRay.h"
 
+
 ndFloat32 ndFastRay::PolygonIntersect (const ndVector& faceNormal, ndFloat32 maxT, const ndVector* const vertexBuffer, const ndInt32* const indexArray, ndInt32 indexCount) const
 {
 	ndAssert (m_p0.m_w == ndFloat32 (0.0f));
@@ -62,6 +63,11 @@ ndFloat32 ndFastRay::PolygonIntersect (const ndVector& faceNormal, ndFloat32 max
 	}
 
 	return ndFloat32 (1.2f);
+}
+
+ndFloat32 ndFastRay::PolygonIntersect(ndFloat32 maxT, const ndVector* const vertexBuffer, const ndInt32* const indexArray, ndInt32 indexCount) const
+{
+	return 1.2f;
 }
 
 ndRay ndFastRay::RayDistance(const ndVector& ray_q0, const ndVector& ray_q1) const

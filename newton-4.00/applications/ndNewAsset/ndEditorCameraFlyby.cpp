@@ -150,7 +150,6 @@ void ndEditorCameraFlyby::MouseSelection()
 	const ndVector p0(camera->ScreenToWorld(ndVector(mouseX, mouseY, ndFloat32(0.0f), ndFloat32(0.0f))));
 	const ndVector p1(camera->ScreenToWorld(ndVector(mouseX, mouseY, ndFloat32(1.0f), ndFloat32(0.0f))));
 
-
 	ndFloat32 hitParam = 1.0f;
 	ndSharedPtr<ndMesh> hitNode(nullptr);
 
@@ -158,7 +157,15 @@ void ndEditorCameraFlyby::MouseSelection()
 	{
 		if (node->GetMesh())
 		{
-
+			const ndMatrix matrix(node->GetGeometryMatrix() * node->CalculateGlobalMatrix());
+			const ndVector localP0(matrix.UntransformVector(p0));
+			const ndVector localP1(matrix.UntransformVector(p1));
+			ndFloat32 param = node->GetMesh()->RayCast(localP0, localP1);
+			if (param < hitParam)
+			{
+				hitParam = param;
+				hitNode = (node != *m_editor->m_mesh) ? node->GetSharedPtr() : m_editor->m_mesh;
+			}
 		}
 	};
 	m_editor->m_mesh->NodeIterator(RayCast);
@@ -166,6 +173,7 @@ void ndEditorCameraFlyby::MouseSelection()
 	ndTrace(("pick node\n"));
 	if (hitNode)
 	{
+		
 		ndAssert(0);
 	}
 }
