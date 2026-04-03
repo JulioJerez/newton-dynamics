@@ -100,6 +100,49 @@ class ndUndoRedoTransform : public ndUndoRedoCommand
 };
 
 
+class ndUndoRedoGeometryTransform : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoGeometryTransform(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+		,m_matrix(mesh->GetGeometryMatrix())
+	{
+	}
+
+	virtual class ndUndoRedoGeometryTransform* GetAsUndoRedoGeometryTransform() const
+	{
+		return (ndUndoRedoGeometryTransform*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			ndUndoRedoGeometryTransform* const other = command.GetAsUndoRedoGeometryTransform();
+			if (other)
+			{
+				ndMatrix matrix(m_matrix * other->m_matrix.OrthoInverse());
+				if (matrix.TestIdentity())
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		ndRenderSceneNode* const entNode = GetSceneNode();
+		ndAssert(entNode);
+		m_mesh->SetGeometryMatrix(m_matrix);
+		entNode->SetPrimitiveMatrix(m_matrix);
+	}
+
+	ndMatrix m_matrix;
+};
+
 void ndAssetEditor::ShowPropertiesMeshInfo()
 {
 	if (ImGui::CollapsingHeader("mesh node"))
@@ -226,12 +269,20 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			position[0] = ndReal(matrix.m_posit.m_x);
 			position[1] = ndReal(matrix.m_posit.m_y);
 			position[2] = ndReal(matrix.m_posit.m_z);
-			if (ImGui::DragFloat3("position##1", position))
+			//if (ImGui::DragFloat3("position##1", position))
+			if (ImGui::InputFloat3("posit##1", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
+				ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
+				ndAssert(entNode);
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoGeometryTransform(this, m_currentSelection)));
+
 				matrix.m_posit.m_x = position[0];
 				matrix.m_posit.m_y = position[1];
 				matrix.m_posit.m_z = position[2];
 				m_currentSelection->SetGeometryMatrix(matrix);
+				entNode->SetPrimitiveMatrix(matrix);
+
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoGeometryTransform(this, m_currentSelection)));
 			};
 
 			ndReal euler[3];
@@ -241,11 +292,18 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			euler[0] = ndReal(radians[0]);
 			euler[1] = ndReal(radians[1]);
 			euler[2] = ndReal(radians[2]);
-			if (ImGui::DragFloat3("rotation##1", euler))
+			//if (ImGui::DragFloat3("rotation##1", euler))
+			if (ImGui::InputFloat3("rotation##1", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
+				ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
+				ndAssert(entNode);
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoGeometryTransform(this, m_currentSelection)));
+
 				ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
 				newMatrix.m_posit = matrix.m_posit;
 				m_currentSelection->SetGeometryMatrix(newMatrix);
+				entNode->SetPrimitiveMatrix(matrix);
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoGeometryTransform(this, m_currentSelection)));
 			};
 		}
 	}
