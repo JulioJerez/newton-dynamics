@@ -67,7 +67,20 @@ ndFloat32 ndFastRay::PolygonIntersect (const ndVector& faceNormal, ndFloat32 max
 
 ndFloat32 ndFastRay::PolygonIntersect(ndFloat32 maxT, const ndVector* const vertexBuffer, const ndInt32* const indexArray, ndInt32 indexCount) const
 {
-	return 1.2f;
+	ndVector normal(ndVector::m_zero);
+
+	const ndVector p0(vertexBuffer[indexArray[0]]);
+	for (ndInt32 i = 2; i < indexCount; ++i)
+	{
+		const ndVector e0(vertexBuffer[indexArray[i - 1]] - p0);
+		const ndVector e1(vertexBuffer[indexArray[i]] - p0);
+		const ndVector n(e0.CrossProduct(e1));
+		normal += n;
+	}
+	normal.m_w = ndFloat32(0.0f);
+	normal = normal.Normalize();
+
+	return PolygonIntersect(normal, maxT, vertexBuffer, indexArray, indexCount);
 }
 
 ndRay ndFastRay::RayDistance(const ndVector& ray_q0, const ndVector& ray_q1) const

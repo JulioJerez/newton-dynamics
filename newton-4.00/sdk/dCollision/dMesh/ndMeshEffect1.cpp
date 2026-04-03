@@ -5380,7 +5380,7 @@ ndFloat32 ndMeshEffect::RayCast(const ndVector& p0, const ndVector& p1) const
 				ptr->m_mark = mark;
 				ptr = ptr->m_next;
 			} while (ptr != edge);
-			ndFloat32 param = ray.PolygonIntersect(1.0f, &face[0], &indices[0], indices.GetCount());
+			ndFloat32 param = ray.PolygonIntersect(hitParam, &face[0], &indices[0], indices.GetCount());
 			if (param < hitParam)
 			{
 				hitParam = param;

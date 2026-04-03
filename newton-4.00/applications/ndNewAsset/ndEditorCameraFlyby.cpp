@@ -170,10 +170,8 @@ void ndEditorCameraFlyby::MouseSelection()
 	};
 	m_editor->m_mesh->NodeIterator(RayCast);
 
-	ndTrace(("pick node\n"));
 	if (hitNode)
 	{
-		
-		ndAssert(0);
+		m_editor->m_currentSelection = hitNode;
 	}
 }
