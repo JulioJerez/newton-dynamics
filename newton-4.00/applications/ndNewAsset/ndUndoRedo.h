@@ -19,12 +19,20 @@ class ndAssetEditor;
 class ndUndoRedoCommand : public ndClassAlloc
 {
 	public:
-	ndUndoRedoCommand(const ndSharedPtr<ndMesh>& mesh);
+	ndUndoRedoCommand(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh);
 	virtual ~ndUndoRedoCommand();
 
+	ndRenderSceneNode* GetSceneNode() const;
+
 	virtual void Undo() = 0;
+	virtual bool operator!=(const ndUndoRedoCommand& command) const = 0;
+
+	virtual class ndUndoRedoName* GetAsUndoRedoName() const { return nullptr; }
+	virtual class ndUndoRedoTransform* GetAsUndoRedoTransform() const { return nullptr; }
+	virtual class ndUndoRedoGeometryTransform* GetAsUndoRedoGeometryTransform() const { return nullptr; }
 
 	ndSharedPtr<ndMesh> m_mesh;
+	ndWeakPtr<ndAssetEditor> m_editor;
 };
 
 class ndUndoRedo: public ndList<ndSharedPtr<ndUndoRedoCommand>>

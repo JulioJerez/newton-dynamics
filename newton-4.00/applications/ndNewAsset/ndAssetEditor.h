@@ -238,11 +238,12 @@ class ndAssetEditor : public ndClassAlloc
 	bool m_showCenterOfMass;
 	bool m_showSelectedNode;
 	bool m_showCollisionShape;
+	bool m_relativeTransformProperties;
 	ndInt32 m_renderMode;
 	ndReal m_gizmoScale;
 	
 	friend class ndUndoRedo;
-	friend class ndPhysicsWorld;
+	friend class ndUndoRedoCommand;
 	friend class ndEditorCameraFlyby;
 	friend class ndDebugDisplayRenderPass;
 };
