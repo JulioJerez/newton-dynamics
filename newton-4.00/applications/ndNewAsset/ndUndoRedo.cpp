@@ -13,13 +13,19 @@
 #include "ndUndoRedo.h"
 #include "ndAssetEditor.h"
 
-ndUndoRedoCommand::ndUndoRedoCommand(const ndSharedPtr<ndMesh>& mesh)
+ndUndoRedoCommand::ndUndoRedoCommand(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
 	:m_mesh(mesh)
+	,m_editor(editor)
 {
 }
 
 ndUndoRedoCommand::~ndUndoRedoCommand()
 {
+}
+
+ndRenderSceneNode* ndUndoRedoCommand::GetSceneNode() const
+{
+	return m_editor->m_entity->FindByName(m_mesh->GetName());
 }
 
 ndUndoRedo::ndUndoRedo()
@@ -40,7 +46,7 @@ void ndUndoRedo::Push(const ndSharedPtr<ndUndoRedoCommand>& command)
 	{
 		m_currentCommand = Append(command);
 	}
-	else
+	else if (**m_currentCommand->GetInfo() != **command)
 	{
 		ndAssert(m_currentCommand);
 		while (GetLast() != *m_currentCommand)

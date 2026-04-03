@@ -16,19 +16,89 @@
 class ndUndoRedoName : public ndUndoRedoCommand
 {
 	public:
-	ndUndoRedoName(const ndSharedPtr<ndMesh>& mesh)
-		:ndUndoRedoCommand(mesh)
+	ndUndoRedoName(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
 		,m_name(mesh->GetName())
 	{
+	}
+
+	virtual class ndUndoRedoName* GetAsUndoRedoName() const 
+	{ 
+		return (ndUndoRedoName*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			ndUndoRedoName* const other = command.GetAsUndoRedoName();
+			if (other)
+			{
+				if (m_name == other->m_name)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 	
 	virtual void Undo() override
 	{
+		ndRenderSceneNode* const entNode = GetSceneNode();
+		ndAssert(entNode);
 		m_mesh->SetName(m_name);
+		entNode->m_name = m_name;
 	}
-
 	ndString m_name;
 };
+
+class ndUndoRedoTransform : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoTransform(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+		,m_matrix(mesh->GetMatrix())
+	{
+	}
+
+	virtual class ndUndoRedoTransform* GetAsUndoRedoTransform() const
+	{
+		return (ndUndoRedoTransform*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			ndUndoRedoTransform* const other = command.GetAsUndoRedoTransform();
+			if (other)
+			{
+				ndMatrix matrix(m_matrix * other->m_matrix.OrthoInverse());
+				if (matrix.TestIdentity())
+				{
+					return false;
+				}
+			}
+		}
+		
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		ndRenderSceneNode* const entNode = GetSceneNode();
+		ndAssert(entNode);
+
+		m_mesh->SetMatrix(m_matrix);
+		entNode->SetTransform(m_matrix);
+		entNode->SetTransform(m_matrix);
+	}
+
+	ndMatrix m_matrix;
+};
+
 
 void ndAssetEditor::ShowPropertiesMeshInfo()
 {
@@ -40,14 +110,17 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 		{
 			if (strcmp(m_currentSelection->GetName().GetStr(), nodeName))
 			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoName(m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoName(this, m_currentSelection)));
 				ndString newName(nodeName);
 				while (m_mesh->FindByName(newName))
 				{
 					newName += "_1";
 				}
+				ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
+
 				m_currentSelection->SetName(newName);
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoName(m_currentSelection)));
+				entNode->m_name = newName;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoName(this, m_currentSelection)));
 			}
 		}
 
@@ -55,17 +128,68 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 		{
 			ImGui::SeparatorText("Transform");
 			ndMatrix matrix(m_currentSelection->GetMatrix());
-			ndReal position[3];
-			position[0] = ndReal(matrix.m_posit.m_x);
-			position[1] = ndReal(matrix.m_posit.m_y);
-			position[2] = ndReal(matrix.m_posit.m_z);
-			if (ImGui::DragFloat3("position", position))
+			if (0)
 			{
-				matrix.m_posit.m_x = position[0];
-				matrix.m_posit.m_y = position[1];
-				matrix.m_posit.m_z = position[2];
-				m_currentSelection->SetMatrix(matrix);
-			};
+				ndReal position[3];
+				position[0] = ndReal(matrix.m_posit.m_x);
+				position[1] = ndReal(matrix.m_posit.m_y);
+				position[2] = ndReal(matrix.m_posit.m_z);
+				if (ImGui::DragFloat3("position", position, 0.01f))
+				{
+					if (m_propertiesState != m_editNodeFrame)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoTransform(this, m_currentSelection)));
+					}
+					m_propertiesState = m_editNodeFrame;
+					ndTrace(("%d\n", m_propertiesState))
+
+					const ndVector newPosit(position[0], position[1], position[2], ndFloat32(1.0f));
+					const ndVector delta(newPosit - matrix.m_posit);
+
+					matrix.m_posit += matrix.RotateVector(delta);
+					m_currentSelection->SetMatrix(matrix);
+					ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
+					ndAssert(entNode);
+					entNode->SetTransform(matrix);
+					entNode->SetTransform(matrix);
+				}
+				else if (m_propertiesState == m_editNodeFrame)
+				{
+					m_propertiesState = m_none;
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoTransform(this, m_currentSelection)));
+					ndTrace(("%d\n", m_propertiesState))
+				}
+			}
+			else
+			{
+				ndReal position[3];
+				position[0] = ndReal(0.0f);
+				position[1] = ndReal(0.0f);
+				position[2] = ndReal(0.0f);
+				//if (ImGui::DragFloat3("position", position, 0.01f))
+				if (ImGui::InputFloat3("position", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoTransform(this, m_currentSelection)));
+					//m_propertiesState = m_editNodeFrame;
+					//ndTrace(("%d\n", m_propertiesState))
+
+					const ndVector delta(position[0], position[1], position[2], ndFloat32(1.0f));
+					matrix.m_posit += matrix.RotateVector(delta);
+					m_currentSelection->SetMatrix(matrix);
+					ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
+					ndAssert(entNode);
+					entNode->SetTransform(matrix);
+					entNode->SetTransform(matrix);
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoTransform(this, m_currentSelection)));
+				}
+				//else if (m_propertiesState == m_editNodeFrame)
+				//{
+				//	m_propertiesState = m_none;
+				//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoTransform(this, m_currentSelection)));
+				//	ndTrace(("%d\n", m_propertiesState))
+				//}
+			}
+
 
 			ndReal euler[3];
 			ndVector tmp;
