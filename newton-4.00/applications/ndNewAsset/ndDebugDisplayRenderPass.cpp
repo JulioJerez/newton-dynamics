@@ -272,7 +272,8 @@ void ndDebugDisplayRenderPass::RenderSelectedNode()
 							SetScale(m_self->m_manager->m_gizmoScale);
 						}
 
-						void DrawPoint(const ndVector& point, const ndVector& color, ndFloat32 thickness = ndFloat32(8.0f))
+						//void DrawPoint(const ndVector& point, const ndVector& color, ndFloat32 thickness = ndFloat32(8.0f))
+						void DrawPoint(const ndVector&, const ndVector&, ndFloat32)
 						{
 							ndAssert(0);
 						}

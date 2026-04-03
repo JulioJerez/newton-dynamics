@@ -13,8 +13,9 @@
 #include "ndAssetEditor.h"
 #include "ndEditorCameraFlyby.h"
 
-ndEditorCameraFlyby::ndEditorCameraFlyby(ndRender* const owner)
-	:ndEditorCameraNode(owner)
+//ndEditorCameraFlyby::ndEditorCameraFlyby(ndRender* const owner)
+ndEditorCameraFlyby::ndEditorCameraFlyby(ndAssetEditor* const editor)
+	:ndEditorCameraNode(*editor->GetRenderer())
 	,m_posit(ndVector::m_wOne)
 	,m_yaw(ndFloat32(0.0f))
 	,m_pitch(ndFloat32(0.0f))
@@ -23,6 +24,7 @@ ndEditorCameraFlyby::ndEditorCameraFlyby(ndRender* const owner)
 	,m_mousePosX(ndFloat32(0.0f))
 	,m_mousePosY(ndFloat32(0.0f))
 	,m_frontSpeed(ndFloat32(10.0f))
+	,m_editor(editor)
 {
 }
 
@@ -71,6 +73,12 @@ void ndEditorCameraFlyby::TickUpdate(ndFloat32 timestep)
 				m_pitch += m_pitchRate * timestep;
 			}
 			m_pitch = ndClamp(m_pitch, ndFloat32(-80.0f * ndDegreeToRad), ndFloat32(80.0f * ndDegreeToRad));
+
+			if (!m_mouseClick)
+			{
+				MouseSelection();
+				m_mouseClick = true;
+			}
 		}
 
 		if (ImGui::IsMouseDown(1))
@@ -118,7 +126,46 @@ void ndEditorCameraFlyby::TickUpdate(ndFloat32 timestep)
 		const ndVector lightDir(newCameMatrix.RotateVector(ndVector(-1.0f, 1.0f, 0.f, 0.0f)));
 		renderer->SetSunLight(lightDir, ndVector(0.7f, 0.7f, 0.7f, 0.0f));
 	}
+	else
+	{
+		m_mouseClick = false;
+	}
 
 	m_mousePosX = mouseX;
 	m_mousePosY = mouseY;
+}
+
+void ndEditorCameraFlyby::MouseSelection()
+{
+	if (!*m_editor->m_mesh)
+	{
+		return;
+	}
+
+	ndFloat32 mouseX;
+	ndFloat32 mouseY;
+	m_editor->GetMousePosition(mouseX, mouseY);
+
+	const ndRenderSceneCamera* const camera = FindCameraNode();
+	const ndVector p0(camera->ScreenToWorld(ndVector(mouseX, mouseY, ndFloat32(0.0f), ndFloat32(0.0f))));
+	const ndVector p1(camera->ScreenToWorld(ndVector(mouseX, mouseY, ndFloat32(1.0f), ndFloat32(0.0f))));
+
+
+	ndFloat32 hitParam = 1.0f;
+	ndSharedPtr<ndMesh> hitNode(nullptr);
+
+	auto RayCast = [this, &hitNode, &hitParam, &p0, &p1](ndMesh* const node)
+	{
+		if (node->GetMesh())
+		{
+
+		}
+	};
+	m_editor->m_mesh->NodeIterator(RayCast);
+
+	ndTrace(("pick node\n"));
+	if (hitNode)
+	{
+		ndAssert(0);
+	}
 }

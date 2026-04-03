@@ -5356,3 +5356,8 @@ void ndMeshEffect::DeserializeFromXml(const nd::TiXmlElement* const xmlNode)
 	}
 	BuildFromIndexList(&format);
 }
+
+ndFloat32 ndMeshEffect::RayCast(const ndVector& p0, const ndVector& p1) const
+{
+	return 1.2f;
+}

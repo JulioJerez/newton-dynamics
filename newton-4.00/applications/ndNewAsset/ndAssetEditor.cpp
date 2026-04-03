@@ -94,7 +94,7 @@ ndAssetEditor::ndAssetEditor()
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-	m_defaultCamera = ndSharedPtr<ndRenderSceneNode>(new ndEditorCameraFlyby(*m_renderer));
+	m_defaultCamera = ndSharedPtr<ndRenderSceneNode>(new ndEditorCameraFlyby(this));
 	m_renderer->SetCamera(m_defaultCamera);
 }
 
