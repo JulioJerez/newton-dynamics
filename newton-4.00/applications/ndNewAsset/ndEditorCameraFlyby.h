@@ -16,14 +16,18 @@
 #include "ndNewAssetStdafx.h"
 #include "ndEditorCameraNode.h"
 
+class ndAssetEditor;
 
 class ndEditorCameraFlyby: public ndEditorCameraNode
 {
 	public:
-	ndEditorCameraFlyby(ndRender* const owner);
+	//ndEditorCameraFlyby(ndRender* const owner);
+	ndEditorCameraFlyby(ndAssetEditor* const editor);
 
 	void TickUpdate(ndFloat32 timestep);
 	virtual void SetTransform(const ndQuaternion& rotation, const ndVector& position) override;
+
+	void MouseSelection();
 
 	ndVector m_posit;
 	ndFloat32 m_yaw;
@@ -33,6 +37,8 @@ class ndEditorCameraFlyby: public ndEditorCameraNode
 	ndFloat32 m_mousePosX;
 	ndFloat32 m_mousePosY;
 	ndFloat32 m_frontSpeed;
+	bool m_mouseClick;
+	ndWeakPtr<ndAssetEditor> m_editor;
 };
 
 #endif 
