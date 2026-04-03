@@ -851,11 +851,11 @@ void ndRenderPrimitiveImplement::BuildWireframeDebugMesh(const ndRenderPrimitive
 			indexCount += mesh.GetMaterialIndexCount(geometryHandle, handle);
 		}
 
-		ndArray<ndInt32> indices;
+		ndArray<ndInt32> triangleIndices;
 		ndArray<glPositionNormal> points;
 
 		points.SetCount(vertexCount);
-		indices.SetCount(indexCount);
+		triangleIndices.SetCount(indexCount);
 		mesh.GetVertexChannel(sizeof(glPositionNormal), &points[0].m_posit.m_x);
 		mesh.GetNormalChannel(sizeof(glPositionNormal), &points[0].m_normal.m_x);
 
@@ -869,13 +869,26 @@ void ndRenderPrimitiveImplement::BuildWireframeDebugMesh(const ndRenderPrimitive
 		for (ndInt32 handle = mesh.GetFirstMaterial(geometryHandle); handle != -1; handle = mesh.GetNextMaterial(geometryHandle, handle))
 		{
 			ndInt32 segmentIndexCount = mesh.GetMaterialIndexCount(geometryHandle, handle);
-			mesh.GetMaterialGetIndexStream(geometryHandle, handle, &indices[segmentStart]);
+			mesh.GetMaterialGetIndexStream(geometryHandle, handle, &triangleIndices[segmentStart]);
 			segmentStart += segmentIndexCount;
 		}
 		mesh.MaterialGeometryEnd(geometryHandle);
 
+		ndArray<ndInt32> indices;
+		indices.SetCount(2 * triangleIndices.GetCount());
+		for (ndInt32 i = 0; i < ndInt32(triangleIndices.GetCount()); i += 3)
+		{
+			ndInt32 j0 = 2;
+			for (ndInt32 j1 = 0; j1 < 3; ++j1)
+			{
+				indices[2 * i + j1 * 2 + 0] = triangleIndices[i + j0];
+				indices[2 * i + j1 * 2 + 1] = triangleIndices[i + j1];
+				j0 = j1;
+			}
+		}
+
 		// optimize this mesh for hardware buffers if possible
-		m_indexCount = indexCount;
+		m_indexCount = ndInt32(indices.GetCount());
 		m_vertexCount = ndInt32(points.GetCount());
 
 		glGenVertexArrays(1, &m_vertextArrayBuffer);
