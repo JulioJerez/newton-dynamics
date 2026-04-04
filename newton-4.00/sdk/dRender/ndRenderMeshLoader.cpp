@@ -250,11 +250,12 @@ ndSharedPtr<ndRenderSceneNode> ndRenderMeshLoader::CreateRenderSceneMesh(ndRende
 
 bool ndRenderMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 {
-	if (ndAnimationMeshLoader::LoadMesh(fullPathMeshName))
+	bool ret = ndAnimationMeshLoader::LoadMesh(fullPathMeshName);
+	if (ret)
 	{
 		return MeshToRenderSceneNode(GetPath(fullPathMeshName));
 	}
-	return false;
+	return ret;
 }
 
 bool ndRenderMeshLoader::ImportFbx(const ndString& fbxPathMeshName)

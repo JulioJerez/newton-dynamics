@@ -128,4 +128,14 @@ class ndUrdfFile : public ndClassAlloc
 	ndTree<ndInt32, ndString> m_materialMap;
 };
 #endif
+
+class ndUrdfMeshLoader : public ndRenderMeshLoader
+{
+	public:
+	ndUrdfMeshLoader(ndRender* const renderer);
+	
+	virtual bool Import(const ndString& urdfPathMeshName);
+
+};
+
 #endif

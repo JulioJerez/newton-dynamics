@@ -1432,3 +1432,26 @@ ndModelArticulation* ndUrdfFile::Import(const char* const filePathName)
 }
 
 #endif
+
+
+ndUrdfMeshLoader::ndUrdfMeshLoader(ndRender* const renderer)
+	:ndRenderMeshLoader(renderer)
+{
+}
+
+bool ndUrdfMeshLoader::Import(const ndString& urdfPathMeshName)
+{
+	ndString oldloc = setlocale(LC_ALL, 0);
+	setlocale(LC_ALL, "C");
+
+	nd::TiXmlDocument doc(urdfPathMeshName.GetStr());
+	doc.LoadFile();
+	if (doc.Error())
+	{
+		setlocale(LC_ALL, oldloc.GetStr());
+		return nullptr;
+	}
+
+
+	return false;
+}

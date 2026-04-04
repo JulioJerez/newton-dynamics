@@ -99,6 +99,95 @@ class ndUndoRedoMass : public ndUndoRedoCommand
 	ndFloat32 m_invMass;
 };
 
+class ndUndoRedoLinearStep : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoLinearStep(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		m_linearStep = body->m_maxLinearStep;
+	}
+
+	virtual class ndUndoRedoLinearStep* GetAsUndoRedoLinearStep() const override
+	{
+		return (ndUndoRedoLinearStep*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			ndUndoRedoLinearStep* const other = command.GetAsUndoRedoLinearStep();
+			if (other)
+			{
+				if (m_linearStep == other->m_linearStep)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		body->m_maxLinearStep = m_linearStep;
+	}
+
+	ndFloat32 m_linearStep;
+};
+
+class ndUndoRedoAngleStep : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoAngleStep(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		m_angleStep = body->m_maxAngleStep;
+	}
+
+	virtual class ndUndoRedoAngleStep* GetAsUndoRedoAngleStep() const override
+	{
+		return (ndUndoRedoAngleStep*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			ndUndoRedoAngleStep* const other = command.GetAsUndoRedoAngleStep();
+			if (other)
+			{
+				if (m_angleStep == other->m_angleStep)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		body->m_maxAngleStep = m_angleStep;
+	}
+
+	ndFloat32 m_angleStep;
+};
 
 class ndUndoRedoTransform : public ndUndoRedoCommand
 {
