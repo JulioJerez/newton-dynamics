@@ -22,12 +22,12 @@ class ndUndoRedoName : public ndUndoRedoCommand
 	{
 	}
 
-	virtual class ndUndoRedoName* GetAsUndoRedoName() const 
+	virtual class ndUndoRedoName* GetAsUndoRedoName() const override
 	{ 
 		return (ndUndoRedoName*)this;
 	}
 
-	virtual bool operator!=(const ndUndoRedoCommand& command) const
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
 	{
 		if (*m_mesh == *command.m_mesh)
 		{
@@ -54,6 +54,52 @@ class ndUndoRedoName : public ndUndoRedoCommand
 	ndString m_name;
 };
 
+class ndUndoRedoMass : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoMass(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		m_invMass = body->m_invMass.m_w;
+	}
+
+	virtual class ndUndoRedoMass* GetAsUndoRedoMass() const override
+	{
+		return (ndUndoRedoMass*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			ndUndoRedoMass* const other = command.GetAsUndoRedoMass();
+			if (other)
+			{
+				if (m_invMass == other->m_invMass)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		body->m_invMass = m_invMass;
+	}
+
+	ndFloat32 m_invMass;
+};
+
+
 class ndUndoRedoTransform : public ndUndoRedoCommand
 {
 	public:
@@ -63,12 +109,12 @@ class ndUndoRedoTransform : public ndUndoRedoCommand
 	{
 	}
 
-	virtual class ndUndoRedoTransform* GetAsUndoRedoTransform() const
+	virtual class ndUndoRedoTransform* GetAsUndoRedoTransform() const override
 	{
 		return (ndUndoRedoTransform*)this;
 	}
 
-	virtual bool operator!=(const ndUndoRedoCommand& command) const
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
 	{
 		if (*m_mesh == *command.m_mesh)
 		{
@@ -109,12 +155,12 @@ class ndUndoRedoGeometryTransform : public ndUndoRedoCommand
 	{
 	}
 
-	virtual class ndUndoRedoGeometryTransform* GetAsUndoRedoGeometryTransform() const
+	virtual class ndUndoRedoGeometryTransform* GetAsUndoRedoGeometryTransform() const override
 	{
 		return (ndUndoRedoGeometryTransform*)this;
 	}
 
-	virtual bool operator!=(const ndUndoRedoCommand& command) const
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
 	{
 		if (*m_mesh == *command.m_mesh)
 		{
@@ -314,15 +360,19 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 	if (ImGui::CollapsingHeader("Rigid body"))
 	{
 		ndSharedPtr<ndMeshBody> body (m_currentSelection->GetRigidBody());
+		ndAssert(body->m_classConstructor == ndBodyDynamic::StaticClassName());
 		ndMeshBodyDynamic* const rigidBody = (ndMeshBodyDynamic*)*body;
 
 		// body mass
 		{
 			ndReal scalar = ndReal (ndFloat32 (1.0f) / rigidBody->m_invMass.m_w);
-			if (ImGui::DragFloat("mass", &scalar))
+			//if (ImGui::DragFloat("mass", &scalar))
+			if (ImGui::InputFloat("mass", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMass(this, m_currentSelection)));
 				scalar = ndMax(scalar, ndReal(0.001f));
 				rigidBody->m_invMass.m_w = ndFloat32(1.0f) / scalar;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMass(this, m_currentSelection)));
 			};
 		}
 
