@@ -897,6 +897,8 @@ ndJointBilateralConstraint* ndUrdfMeshLoader::ImportJoint(const nd::TiXmlNode* c
 	childBody->SetMatrix(childMatrix * parentBody->GetMatrix());
 	ndMatrix pivotMatrix(childBody->GetMatrix());
 
+	ndInt32 ret = 0;
+
 	const char* const jointType = ((nd::TiXmlElement*)jointNode)->Attribute("type");
 	if (strcmp(jointType, "fixed") == 0)
 	{
@@ -911,7 +913,7 @@ ndJointBilateralConstraint* ndUrdfMeshLoader::ImportJoint(const nd::TiXmlNode* c
 			ndReal y = ndFloat32(0.0f);
 			ndReal z = ndFloat32(0.0f);
 			const char* const axisPin = axisNode->Attribute("xyz");
-			sscanf(axisPin, "%f %f %f", &x, &y, &z);
+			ret = sscanf(axisPin, "%f %f %f", &x, &y, &z);
 
 			ndMatrix matrix(ndGramSchmidtMatrix(ndVector(x, y, z, ndFloat32(0.0f))));
 			pivotMatrix = matrix * pivotMatrix;
@@ -927,9 +929,9 @@ ndJointBilateralConstraint* ndUrdfMeshLoader::ImportJoint(const nd::TiXmlNode* c
 			const char* const spring = newtonEx->Attribute("springPD");
 			const char* const damper = newtonEx->Attribute("damperPD");
 			const char* const regularizer = newtonEx->Attribute("regularizer");
-			sscanf(spring, "%f", &springPD);
-			sscanf(damper, "%f", &damperPD);
-			sscanf(regularizer, "%f", &regularizerPD);
+			ret = sscanf(spring, "%f", &springPD);
+			ret = sscanf(damper, "%f", &damperPD);
+			ret = sscanf(regularizer, "%f", &regularizerPD);
 
 			ndJointHinge* const hinge = (ndJointHinge*)joint;
 			hinge->SetAsSpringDamper(regularizerPD, springPD, damperPD);
@@ -944,7 +946,7 @@ ndJointBilateralConstraint* ndUrdfMeshLoader::ImportJoint(const nd::TiXmlNode* c
 			ndReal y = ndFloat32(0.0f);
 			ndReal z = ndFloat32(0.0f);
 			const char* const axisPin = axisNode->Attribute("xyz");
-			sscanf(axisPin, "%f %f %f", &x, &y, &z);
+			ret = sscanf(axisPin, "%f %f %f", &x, &y, &z);
 
 			ndMatrix matrix(ndGramSchmidtMatrix(ndVector(x, y, z, ndFloat32(0.0f))));
 			pivotMatrix = matrix * pivotMatrix;
@@ -975,13 +977,13 @@ ndJointBilateralConstraint* ndUrdfMeshLoader::ImportJoint(const nd::TiXmlNode* c
 			ndReal y = ndFloat32(0.0f);
 			ndReal z = ndFloat32(0.0f);
 			const char* const axisPin = axisNode->Attribute("xyz");
-			sscanf(axisPin, "%f %f %f", &x, &y, &z);
+			ret = sscanf(axisPin, "%f %f %f", &x, &y, &z);
 
 			ndMatrix matrix(ndGramSchmidtMatrix(ndVector(x, y, z, ndFloat32(0.0f))));
 			pivotMatrix = matrix * pivotMatrix;
 		}
 
-		ndAssert(0);
+		//ndAssert(0);
 		const nd::TiXmlElement* const newtonEx = (nd::TiXmlElement*)jointNode->FirstChild("newton");
 		if (newtonEx)
 		{
@@ -994,6 +996,10 @@ ndJointBilateralConstraint* ndUrdfMeshLoader::ImportJoint(const nd::TiXmlNode* c
 			{
 				joint = new ndJointHinge(pivotMatrix, childBody, parentBody);
 			}
+		}
+		else
+		{
+			joint = new ndJointHinge(pivotMatrix, childBody, parentBody);
 		}
 
 		const nd::TiXmlElement* const limit = (nd::TiXmlElement*)jointNode->FirstChild("limit");
@@ -1024,15 +1030,15 @@ ndJointBilateralConstraint* ndUrdfMeshLoader::ImportJoint(const nd::TiXmlNode* c
 				ndReal regularizerPD = 0.0f;
 				if (spring)
 				{
-					sscanf(spring, "%f", &springPD);
+					ret = sscanf(spring, "%f", &springPD);
 				}
 				if (damperPD)
 				{
-					sscanf(damper, "%f", &damperPD);
+					ret = sscanf(damper, "%f", &damperPD);
 				}
 				if (regularizerPD)
 				{
-					sscanf(regularizer, "%f", &regularizerPD);
+					ret = sscanf(regularizer, "%f", &regularizerPD);
 				}
 				ndJointHinge* const hinge = (ndJointHinge*)joint;
 				hinge->SetAsSpringDamper(regularizerPD, springPD, damperPD);
@@ -1058,7 +1064,6 @@ ndJointBilateralConstraint* ndUrdfMeshLoader::ImportJoint(const nd::TiXmlNode* c
 		{
 			ndAssert(0);
 		}
-
 	}
 	else
 	{
@@ -1269,9 +1274,27 @@ void ndUrdfMeshLoader::ImportCollision(const nd::TiXmlNode* const linkNode, ndBo
 		ndMatrix matrix(ImportOrigin(node));
 		collision.SetLocalMatrix(collision.GetLocalMatrix() * matrix);
 	}
+	else if (collisions.GetCount() == 0)
+	{
+		// add a place holder shape
+		collision.SetShape(new ndShapeSphere(0.025f));
+	}
 	else
 	{
-		ndAssert(0);
+		//ndShapeCompound* const compound = new ndShapeCompound();
+		//compound->BeginAddRemove();
+		//for (ndInt32 i = 0; i < ndInt32(collisions.GetCount()); ++i)
+		//{
+		//	ndShapeInstance child(GetCollisionShape(collisions[i]));
+		//	compound->AddCollision(&child);
+		//}
+		//compound->EndAddRemove();
+		//collision.SetShape(compound);
+
+		const nd::TiXmlNode* const node = collisions[0];
+		collision.SetShape(GetCollisionShape(node));
+		ndMatrix matrix(ImportOrigin(node));
+		collision.SetLocalMatrix(collision.GetLocalMatrix()* matrix);
 	}
 
 	body->SetCollisionShape(collision);
