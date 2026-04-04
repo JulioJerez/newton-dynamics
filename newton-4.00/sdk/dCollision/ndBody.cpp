@@ -25,7 +25,7 @@
 #include "ndMesh.h"
 #include "ndContact.h"
 #include "ndBodyNotify.h"
-#include "ndMeshComponents.h"
+#include "ndMeshBaseComponents.h"
 
 ndUnsigned32 ndBody::m_uniqueIdCount = 0;
 

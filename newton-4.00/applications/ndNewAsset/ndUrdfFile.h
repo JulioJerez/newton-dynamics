@@ -131,11 +131,54 @@ class ndUrdfFile : public ndClassAlloc
 
 class ndUrdfMeshLoader : public ndRenderMeshLoader
 {
+	class Material
+	{
+		public:
+		Material()
+			:m_color(1.0f, 1.0f, 1.0f, 1.0f)
+		{
+			m_texture[0] = 0;
+		}
+		ndVector m_color;
+		char m_texture[256];
+	};
+
+	class Hierarchy
+	{
+		public:
+		Hierarchy(const nd::TiXmlNode* const link)
+			:m_parent(nullptr)
+			,m_link(link)
+			,m_joint(nullptr)
+			,m_parentLink(nullptr)
+			,m_articulation(nullptr)
+			,m_parentArticulation(nullptr)
+		{
+		}
+
+		Hierarchy* m_parent;
+		const nd::TiXmlNode* m_link;
+		const nd::TiXmlNode* m_joint;
+		const nd::TiXmlNode* m_parentLink;
+		ndModelArticulation::ndNode* m_articulation;
+		ndModelArticulation::ndNode* m_parentArticulation;
+	};
+
 	public:
 	ndUrdfMeshLoader(ndRender* const renderer);
 	
 	virtual bool Import(const ndString& urdfPathMeshName);
 
+	private:
+	ndMatrix ImportOrigin(const nd::TiXmlNode* const parentNode) const;
+	void ImportStlMesh(const char* const pathName, ndMeshEffect* const meshEffect) const;
+	void ImportCollision(const nd::TiXmlNode* const linkNode, ndBodyDynamic* const body);
+	ndJointBilateralConstraint* ImportJoint(const nd::TiXmlNode* const jointNode, ndBodyDynamic* const childBody, ndBodyDynamic* const parentBody);
+
+	ndString m_path;
+	ndArray<Material> m_materials;
+	ndTree<Hierarchy, ndString> m_bodyLinks;
+	ndTree<ndInt32, ndString> m_materialMap;
 };
 
 #endif

@@ -10,17 +10,6 @@
 */
 
 #include "ndNewAssetStdafx.h"
-//#include "ndCoreStdafx.h"
-//#include "ndCollisionStdafx.h"
-//#include "ndMesh.h"
-//#include "ndMeshLoader.h"
-//#include "ndJointHinge.h"
-//#include "ndMeshEffect.h"
-//#include "ndMeshLoader.h"
-//#include "ndJointWheel.h"
-//#include "ndBodyDynamic.h"
-//#include "ndJointSpherical.h"
-//#include "ndMeshComponents.h"
 
 
 #if 0

@@ -25,7 +25,7 @@
 #include "ndContact.h"
 #include "ndShapeCapsule.h"
 #include "ndContactSolver.h"
-#include "ndMeshComponents.h"
+#include "ndMeshBaseComponents.h"
 
 #define DG_CAPSULE_SEGMENTS		10
 #define DG_CAPSULE_CAP_SEGMENTS	12
@@ -507,7 +507,6 @@ ndUnsigned64 ndShapeCapsule::GetHash(ndUnsigned64 hash) const
 	ndShapeInfo info(GetShapeInfo());
 	return info.GetHash(hash);
 }
-
 
 ndSharedPtr<ndMeshCollisionShape> ndShapeCapsule::GetMeshShape() const
 {

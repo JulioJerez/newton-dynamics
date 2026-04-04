@@ -26,6 +26,7 @@
 #include "ndCollision.h"
 #include "ndShapeSphere.h"
 #include "ndShapeCapsule.h"
+#include "ndShapeCylinder.h"
 #include "ndShapeConvexHull.h"
 #include "ndMeshBaseComponents.h"
 #include "ndShapeChamferCylinder.h"
@@ -107,6 +108,26 @@ void ndMeshCollisionShapeCapsule::DeserializeFromXml(const nd::TiXmlElement* con
 }
 
 ndShape* ndMeshCollisionShapeCapsule::CreateObject() const
+{
+	return new ndShapeCapsule(m_radius0, m_radius1, m_height);
+}
+
+void ndMeshCollisionShapeCylinder::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	xmlSaveParam(parent, "constructor", ndShapeCapsule::StaticClassName());
+	xmlSaveParam(parent, "radio0", m_radius0);
+	xmlSaveParam(parent, "radio1", m_radius1);
+	xmlSaveParam(parent, "heigh", m_height);
+}
+
+void ndMeshCollisionShapeCylinder::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	m_radius0 = xmlGetFloat(parent, "radio0");
+	m_radius1 = xmlGetFloat(parent, "radio0");
+	m_height = xmlGetFloat(parent, "heigh");
+}
+
+ndShape* ndMeshCollisionShapeCylinder::CreateObject() const
 {
 	return new ndShapeCapsule(m_radius0, m_radius1, m_height);
 }

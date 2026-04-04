@@ -30,7 +30,7 @@
 #include "ndRayCastNotify.h"
 #include "ndBodyKinematic.h"
 #include "ndShapeCompound.h"
-#include "ndMeshComponents.h"
+#include "ndMeshBaseComponents.h"
 #include "ndJointBilateralConstraint.h"
 
 #define D_MINIMUM_MASS	ndFloat32(1.0e-5f)

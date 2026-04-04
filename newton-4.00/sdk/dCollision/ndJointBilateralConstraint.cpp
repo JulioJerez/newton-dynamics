@@ -22,7 +22,7 @@
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
 #include "ndBodyKinematic.h"
-#include "ndMeshComponents.h"
+#include "ndMeshBaseComponents.h"
 #include "ndJointBilateralConstraint.h"
 
 #define D_VEL_DAMP			 ndFloat32(100.0f)
