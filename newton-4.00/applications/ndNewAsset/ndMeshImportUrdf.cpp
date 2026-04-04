@@ -9,10 +9,11 @@
 * freely
 */
 
-#include "ndCoreStdafx.h"
-#include "ndCollisionStdafx.h"
-#include "ndMesh.h"
-#include "ndMeshLoader.h"
+#include "ndNewAssetStdafx.h"
+//#include "ndCoreStdafx.h"
+//#include "ndCollisionStdafx.h"
+//#include "ndMesh.h"
+//#include "ndMeshLoader.h"
 //#include "ndJointHinge.h"
 //#include "ndMeshEffect.h"
 //#include "ndMeshLoader.h"
@@ -22,6 +23,7 @@
 //#include "ndMeshComponents.h"
 
 
+#if 0
 class ndUrdfMaterial
 {
 	public:
@@ -150,3 +152,5 @@ bool ndMeshLoader::ImportUrdf(const ndString& fullPathMeshName)
 
 	return true;
 }
+
+#endif

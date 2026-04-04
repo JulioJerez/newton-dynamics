@@ -12,8 +12,10 @@
 #ifndef _ND_URDF_FILE_H_
 #define _ND_URDF_FILE_H_
 
-#include "ndModelArticulation.h"
+#include "ndNewAssetStdafx.h"
+//#include "ndModelArticulation.h"
 
+#if 0
 class ndUrdfBodyNotify : public ndBodyNotify
 {
 	public:
@@ -64,7 +66,7 @@ class ndUrdfFile : public ndClassAlloc
 	D_NEWTON_API virtual ~ndUrdfFile();
 
 	D_NEWTON_API virtual ndModelArticulation* Import(const char* const fileName);
-	D_NEWTON_API virtual void Export(const char* const fileName, ndModelArticulation* const model);
+	//D_NEWTON_API virtual void Export(const char* const fileName, ndModelArticulation* const model);
 
 	private:
 	class Hierarchy
@@ -125,5 +127,5 @@ class ndUrdfFile : public ndClassAlloc
 	ndTree<Hierarchy, ndString> m_bodyLinks;
 	ndTree<ndInt32, ndString> m_materialMap;
 };
-
+#endif
 #endif

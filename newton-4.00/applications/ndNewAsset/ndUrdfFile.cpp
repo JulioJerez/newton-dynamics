@@ -9,16 +9,18 @@
 * freely
 */
 
-#include "ndCoreStdafx.h"
-#include "ndNewtonStdafx.h"
+#include "ndNewAssetStdafx.h"
 #include "ndUrdfFile.h"
-#include "ndJointHinge.h"
-#include "ndJointSlider.h"
-#include "ndBodyDynamic.h"
-#include "ndJointFix6dof.h"
-#include "ndIkJointHinge.h"
-#include "ndIkJointSpherical.h"
+//#include "ndCoreStdafx.h"
+//#include "ndNewtonStdafx.h"
+//#include "ndJointHinge.h"
+//#include "ndJointSlider.h"
+//#include "ndBodyDynamic.h"
+//#include "ndJointFix6dof.h"
+//#include "ndIkJointHinge.h"
+//#include "ndIkJointSpherical.h"
 
+#if 0
 ndUrdfFile::ndUrdfFile()
 	:ndClassAlloc()
 {
@@ -1265,58 +1267,58 @@ ndJointBilateralConstraint* ndUrdfFile::ImportJoint(const nd::TiXmlNode* const j
 //}
 
 
-// *******************************************************************************
-// 
-// *******************************************************************************
-void ndUrdfFile::Export(const char* const filePathName, ndModelArticulation* const model)
-{
-	ndAssert(strstr(filePathName, ".urdf"));
-
-	nd::TiXmlDocument* const doc = new nd::TiXmlDocument("");
-	nd::TiXmlDeclaration* const decl = new nd::TiXmlDeclaration("1.0", "", "");
-	doc->LinkEndChild(decl);
-	ndString oldloc(setlocale(LC_ALL, 0));
-
-	nd::TiXmlElement* const rootNode = new nd::TiXmlElement("robot");
-	doc->LinkEndChild(rootNode);
-
-	ExportMakeNamesUnique(model);
-	rootNode->SetAttribute("name", model->GetName().GetStr());
-
-	const ndMatrix modelMatrix(model->GetRoot()->m_body->GetMatrix());
-	model->SetTransform(ndPitchMatrix(ndPi * 0.5f));
-	//model->ConvertToUrdf();
-
-	Surrogate* const surrogate = ExportMakeSurrogate(model);
-	ndAssert(surrogate);
-
-	ExportMaterials(rootNode, surrogate);
-
-	ndFixSizeArray<Surrogate*, 256> stack;
-	stack.PushBack(surrogate);
-
-	while (stack.GetCount())
-	{
-		const Surrogate* const node = stack.Pop();
-		ExportLink(rootNode, node);
-		if (node->GetParent())
-		{
-			ExportJoint(rootNode, node);
-		}
-
-		for (Surrogate* child = node->GetFirstChild(); child; child = child->GetNext())
-		{
-			stack.PushBack(child);
-		}
-	}
-
-	model->SetTransform(modelMatrix);
-
-	delete surrogate;
-	doc->SaveFile(filePathName);
-	setlocale(LC_ALL, oldloc.GetStr());
-	delete doc;
-}
+//// *******************************************************************************
+//// 
+//// *******************************************************************************
+//void ndUrdfFile::Export(const char* const filePathName, ndModelArticulation* const model)
+//{
+//	ndAssert(strstr(filePathName, ".urdf"));
+//
+//	nd::TiXmlDocument* const doc = new nd::TiXmlDocument("");
+//	nd::TiXmlDeclaration* const decl = new nd::TiXmlDeclaration("1.0", "", "");
+//	doc->LinkEndChild(decl);
+//	ndString oldloc(setlocale(LC_ALL, 0));
+//
+//	nd::TiXmlElement* const rootNode = new nd::TiXmlElement("robot");
+//	doc->LinkEndChild(rootNode);
+//
+//	ExportMakeNamesUnique(model);
+//	rootNode->SetAttribute("name", model->GetName().GetStr());
+//
+//	const ndMatrix modelMatrix(model->GetRoot()->m_body->GetMatrix());
+//	model->SetTransform(ndPitchMatrix(ndPi * 0.5f));
+//	//model->ConvertToUrdf();
+//
+//	Surrogate* const surrogate = ExportMakeSurrogate(model);
+//	ndAssert(surrogate);
+//
+//	ExportMaterials(rootNode, surrogate);
+//
+//	ndFixSizeArray<Surrogate*, 256> stack;
+//	stack.PushBack(surrogate);
+//
+//	while (stack.GetCount())
+//	{
+//		const Surrogate* const node = stack.Pop();
+//		ExportLink(rootNode, node);
+//		if (node->GetParent())
+//		{
+//			ExportJoint(rootNode, node);
+//		}
+//
+//		for (Surrogate* child = node->GetFirstChild(); child; child = child->GetNext())
+//		{
+//			stack.PushBack(child);
+//		}
+//	}
+//
+//	model->SetTransform(modelMatrix);
+//
+//	delete surrogate;
+//	doc->SaveFile(filePathName);
+//	setlocale(LC_ALL, oldloc.GetStr());
+//	delete doc;
+//}
 
 // *******************************************************************************
 // 
@@ -1429,3 +1431,4 @@ ndModelArticulation* ndUrdfFile::Import(const char* const filePathName)
 	return model;
 }
 
+#endif
