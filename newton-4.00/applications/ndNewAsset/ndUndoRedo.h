@@ -32,6 +32,7 @@ class ndUndoRedoCommand : public ndClassAlloc
 	virtual class ndUndoRedoTransform* GetAsUndoRedoTransform() const { return nullptr; }
 	virtual class ndUndoRedoAngleStep* GetAsUndoRedoAngleStep() const { return nullptr; }
 	virtual class ndUndoRedoLinearStep* GetAsUndoRedoLinearStep() const { return nullptr; }
+	virtual class ndUndoRedoLinearDamp* GetAsUndoRedoLinearDamp() const { return nullptr; }
 	virtual class ndUndoRedoGeometryTransform* GetAsUndoRedoGeometryTransform() const { return nullptr; }
 
 	ndSharedPtr<ndMesh> m_mesh;

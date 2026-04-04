@@ -1281,6 +1281,7 @@ void ndUrdfMeshLoader::ImportCollision(const nd::TiXmlNode* const linkNode, ndBo
 	}
 	else
 	{
+		ndTrace(("implement support for compound here, for now, just use the first shape\n"));
 		//ndShapeCompound* const compound = new ndShapeCompound();
 		//compound->BeginAddRemove();
 		//for (ndInt32 i = 0; i < ndInt32(collisions.GetCount()); ++i)
@@ -1290,7 +1291,7 @@ void ndUrdfMeshLoader::ImportCollision(const nd::TiXmlNode* const linkNode, ndBo
 		//}
 		//compound->EndAddRemove();
 		//collision.SetShape(compound);
-
+		
 		const nd::TiXmlNode* const node = collisions[0];
 		collision.SetShape(GetCollisionShape(node));
 		ndMatrix matrix(ImportOrigin(node));
