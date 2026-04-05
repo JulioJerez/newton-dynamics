@@ -21,5 +21,8 @@ bool dGetSaveNdFileName(char* const fileName, int maxSize);
 bool dGetImportFbxFileName(char* const fileName, int maxSize);
 bool dGetImportUrdfFileName(char* const fileName, int maxSize);
 
+bool dGetWorkingFileName(const char* const basePath, char* const name, int maxSize);
+
+
 #endif 
 

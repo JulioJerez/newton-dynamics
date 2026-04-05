@@ -11,6 +11,7 @@
 
 #include "ndNewAssetStdafx.h"
 #include "ndUrdfFile.h"
+#include "ndFileBrowser.h"
 
 #if 0
 void ndUrdfFile::ExportMakeNamesUnique(ndModelArticulation* const model)
@@ -1108,9 +1109,7 @@ ndMatrix ndUrdfMeshLoader::ImportOrigin(const nd::TiXmlNode* const parentNode) c
 
 bool ndUrdfMeshLoader::ImportStlMesh(const char* const pathName, ndMeshEffect* const meshEffect) const
 {
-	char meshFile[256];
-	char meshPath[1024];
-
+	char meshFile[1024];
 	const char* meshName = strrchr(pathName, '/');
 	if (!meshName)
 	{
@@ -1120,10 +1119,14 @@ bool ndUrdfMeshLoader::ImportStlMesh(const char* const pathName, ndMeshEffect* c
 	char* ptr = strrchr(meshFile, '.');
 	snprintf(ptr, 32, ".stl");
 
-	snprintf(meshPath, sizeof(meshPath), "%s/%s", m_path.GetStr(), meshFile);
-
-	bool ret = false;
-	FILE* const file = fopen(meshPath, "rb");
+	bool ret = dGetWorkingFileName(m_path.GetStr(), meshFile, sizeof(meshFile) - 1);
+	if (!ret)
+	{
+		ndTrace(("file: %s not found\n", pathName));
+		return false;
+	}
+	ret = true;
+	FILE* const file = fopen(meshFile, "rb");
 	if (file)
 	{
 		size_t readValues = 0;
@@ -1132,22 +1135,22 @@ bool ndUrdfMeshLoader::ImportStlMesh(const char* const pathName, ndMeshEffect* c
 		{
 			buffer[i] = char(fgetc(file));
 		}
-
+	
 		ndInt32 numberOfTriangles;
 		readValues += fread(&numberOfTriangles, 1, 4, file);
 		//ndFloat32 inchToMeters = 0.0254f;
 		ndFloat32 inchToMeters = ndFloat32(1.0f);
-
+	
 		ndReal normal[3];
 		ndReal triangle[3][3];
 		ndUnsigned16 flags;
-
+	
 		for (ndInt32 i = 0; i < numberOfTriangles; ++i)
 		{
 			readValues += fread(normal, 1, sizeof(normal), file);
 			readValues += fread(triangle, 1, sizeof(triangle), file);
 			readValues += fread(&flags, 1, sizeof(flags), file);
-
+	
 			meshEffect->BeginBuildFace();
 			for (ndInt32 j = 0; j < 3; ++j)
 			{
@@ -1157,15 +1160,15 @@ bool ndUrdfMeshLoader::ImportStlMesh(const char* const pathName, ndMeshEffect* c
 			}
 			meshEffect->EndBuildFace();
 		}
-
+	
 		fclose(file);
-
+	
 		ret = true;
 	}
 	else
 	{
 		ret = false;
-		ndTrace(("file: %s not found", meshPath));
+		ndTrace(("file: %s not found\n", pathName));
 	}
 	return ret;
 }
@@ -1253,7 +1256,7 @@ void ndUrdfMeshLoader::ImportCollision(const nd::TiXmlNode* const linkNode, ndBo
 			ndMeshEffect meshEffect;
 			meshEffect.BeginBuild();
 			bool hasFile = ImportStlMesh(meshPathName, &meshEffect);
-			meshEffect.EndBuild();
+			meshEffect.EndBuild(false);
 
 			if (hasFile)
 			{
