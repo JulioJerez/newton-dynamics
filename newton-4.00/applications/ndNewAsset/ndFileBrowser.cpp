@@ -305,9 +305,12 @@ bool dGetWorkingFileName(const char* const basePath, char* const name, int maxSi
 #if (defined(WIN32) || defined(_WIN32))
 
 	ndFixSizeArray<ndString, 32> stack;
-	stack.PushBack(ndString(basePath));
+	ndString path(basePath);
+	path.ToLower();
+	stack.PushBack(path);
 
-	const ndString fileName(name);
+	ndString fileName(name);
+	fileName.ToLower();
 	while (stack.GetCount())
 	{
 		const ndString baseDir(stack.Pop());
@@ -319,13 +322,14 @@ bool dGetWorkingFileName(const char* const basePath, char* const name, int maxSi
 		{
 			do
 			{
-				const ndString thisName(file.cFileName);
+				ndString thisName(file.cFileName);
+				thisName.ToLower();
 				if ((thisName != ".") && (thisName != ".."))
 				{
 					if (file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 					{
 						ndString subDirectory(baseDir);
-						subDirectory += file.cFileName;
+						subDirectory += thisName;
 						subDirectory += "/";
 						stack.PushBack(subDirectory);
 					}

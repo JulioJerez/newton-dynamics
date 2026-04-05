@@ -4352,7 +4352,7 @@ void ndMeshEffect::ApplyTransform(const ndMatrix& matrix)
 
 	ndMatrix invMatix(matrix.Inverse4x4());
 	invMatix.m_posit = ndVector::m_wOne;
-	ndMatrix rotation(invMatix.Transpose4X4());
+	const ndMatrix rotation(invMatix.Transpose4X4());
 	for (ndInt32 i = 0; i < m_attrib.m_normalChannel.GetCount(); ++i)
 	{
 		ndVector n(ndFloat32(m_attrib.m_normalChannel[i].m_x), ndFloat32(m_attrib.m_normalChannel[i].m_y), ndFloat32(m_attrib.m_normalChannel[i].m_z), ndFloat32(0.0f));

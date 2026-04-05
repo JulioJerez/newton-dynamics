@@ -26,13 +26,13 @@ ndSharedPtr<ndRenderTexture> ndRenderTextureCache::GetTexture(const ndString& pa
 
 	snprintf(pngName, sizeof(pngName), "%s", pathname.GetStr());
 	strtolwr(pngName);
-	const char* const fileNameEnd = strstr(pngName, ".png");
-	if (!fileNameEnd)
-	{
-		strcat(pngName, ".png");
-		ndTrace(("subtitute texture %s with %s version\n", pathname.GetStr(), pngName));
-		ndAssert(0);
-	}
+	//const char* const fileNameEnd = strstr(pngName, ".png");
+	//if (!fileNameEnd)
+	//{
+	//	strcat(pngName, ".png");
+	//	ndTrace(("subtitute texture %s with %s version\n", pathname.GetStr(), pngName));
+	//	ndAssert(0);
+	//}
 
 	ndUnsigned64 hash = ndCRC64(pngName);
 	ndNode* node = Find(hash);

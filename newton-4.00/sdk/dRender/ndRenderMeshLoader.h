@@ -28,7 +28,7 @@ class ndRenderMeshLoader : public ndAnimationMeshLoader
 	bool MeshToRenderSceneNode(const ndString& materialBasePath);
 
 	public:
-	ndRender* m_owner;
+	ndWeakPtr<ndRender> m_owner;
 	ndSharedPtr<ndRenderSceneNode> m_renderMesh;
 };
 
