@@ -13,40 +13,8 @@
 #define _ND_URDF_FILE_H_
 
 #include "ndNewAssetStdafx.h"
-//#include "ndModelArticulation.h"
 
 #if 0
-class ndUrdfBodyNotify : public ndBodyNotify
-{
-	public:
-	ndUrdfBodyNotify(ndMeshEffect* const mesh)
-		:ndBodyNotify(ndVector::m_zero)
-		,m_offset(ndGetIdentityMatrix())
-		,m_mesh(mesh)
-	{
-	}
-
-	ndUrdfBodyNotify(const ndUrdfBodyNotify& src)
-		:ndBodyNotify(src)
-		,m_offset(src.m_offset)
-		,m_mesh(src.m_mesh)
-	{
-	}
-
-	ndBodyNotify* Clone() const
-	{
-		return new ndUrdfBodyNotify(*this);
-	}
-
-	ndUrdfBodyNotify* GetAsUrdfBodyNotify()
-	{
-		return this;
-	}
-	
-	ndMatrix m_offset;
-	ndSharedPtr<ndMeshEffect> m_mesh;
-};
-
 class ndUrdfFile : public ndClassAlloc
 {
 	class Material
@@ -62,11 +30,7 @@ class ndUrdfFile : public ndClassAlloc
 	};
 
 	public:
-	D_NEWTON_API ndUrdfFile();
-	D_NEWTON_API virtual ~ndUrdfFile();
-
-	D_NEWTON_API virtual ndModelArticulation* Import(const char* const fileName);
-	//D_NEWTON_API virtual void Export(const char* const fileName, ndModelArticulation* const model);
+	D_NEWTON_API virtual void Export(const char* const fileName, ndModelArticulation* const model);
 
 	private:
 	class Hierarchy
@@ -112,15 +76,6 @@ class ndUrdfFile : public ndClassAlloc
 	void ExportInertia(nd::TiXmlElement* const linkNode, const Surrogate* const link);
 	void ExportMaterials(nd::TiXmlElement* const rootNode, const Surrogate* const link);
 	void ExportCollision(nd::TiXmlElement* const linkNode, const Surrogate* const link);
-	
-	void ImportMaterials(const nd::TiXmlNode* const rootNode);
-	ndBodyDynamic* ImportLink(const nd::TiXmlNode* const linkNode);
-	ndMatrix ImportOrigin(const nd::TiXmlNode* const parentNode) const;
-	void ImportVisual(const nd::TiXmlNode* const linkNode, ndBodyDynamic* const body);
-	void ImportInertia(const nd::TiXmlNode* const linkNode, ndBodyDynamic* const body);
-	void ImportCollision(const nd::TiXmlNode* const linkNode, ndBodyDynamic* const body);
-	void ImportStlMesh(const char* const pathName, ndMeshEffect* const meshEffect) const;
-	ndJointBilateralConstraint* ImportJoint(const nd::TiXmlNode* const jointNode, ndBodyDynamic* const child, ndBodyDynamic* const parent);
 
 	ndString m_path;
 	ndArray<Material> m_materials;
@@ -169,8 +124,10 @@ class ndUrdfMeshLoader : public ndRenderMeshLoader
 
 	private:
 	ndMatrix ImportOrigin(const nd::TiXmlNode* const parentNode) const;
-	bool ImportStlMesh(const char* const pathName, ndMeshEffect* const meshEffect) const;
+	bool ImportStlMesh(const ndMatrix& matrix, const char* const pathName, ndMeshEffect* const meshEffect) const;
+	bool ImportObjMesh(const ndMatrix& matrix, const char* const pathName, ndMeshEffect* const meshEffect) const;
 	void ImportCollision(const nd::TiXmlNode* const linkNode, ndBodyDynamic* const body);
+	void ImportVisual(const nd::TiXmlNode* const linkNode, ndRenderSceneNode* const sceneNode) const;
 	ndJointBilateralConstraint* ImportJoint(const nd::TiXmlNode* const jointNode, ndBodyDynamic* const childBody, ndBodyDynamic* const parentBody);
 
 	ndString m_path;

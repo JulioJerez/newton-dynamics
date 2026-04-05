@@ -444,7 +444,7 @@ void ndRenderShaderOpaqueDiffusedShadowColorBlock::Render(const ndRenderPrimitiv
 		{
 			const ndRenderPrimitiveMaterial* const material = &segment.m_material;
 			const ndRenderTextureImageCommon* const image = (ndRenderTextureImageCommon*)*material->m_texture;
-			ndAssert(image);
+			//ndAssert(image);
 	
 			const glVector4 diffuse(material->m_diffuse);
 			const glVector4 specular(material->m_specular);
@@ -455,7 +455,7 @@ void ndRenderShaderOpaqueDiffusedShadowColorBlock::Render(const ndRenderPrimitiv
 			glUniform3fv(m_reflectionColor, 1, &reflection[0]);
 			glUniform1fv(m_specularAlpha, 1, &material->m_specularPower);
 	
-			glBindTexture(GL_TEXTURE_2D, image->m_texture);
+			glBindTexture(GL_TEXTURE_2D, image ? image->m_texture : 0);
 			glDrawElements(GL_TRIANGLES, segment.m_indexCount, GL_UNSIGNED_INT, (void*)(segment.m_segmentStart * sizeof(GL_UNSIGNED_INT)));
 		}
 	}

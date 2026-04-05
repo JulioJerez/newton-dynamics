@@ -29,7 +29,7 @@ ndRenderMeshLoader::~ndRenderMeshLoader()
 
 bool ndRenderMeshLoader::MeshToRenderSceneNode(const ndString& materialBasePath)
 {
-	m_renderMesh = ndSharedPtr<ndRenderSceneNode>(CreateRenderSceneMesh(m_owner, *m_mesh, materialBasePath));
+	m_renderMesh = ndSharedPtr<ndRenderSceneNode>(CreateRenderSceneMesh(*m_owner, *m_mesh, materialBasePath));
 	return m_renderMesh ? true : false;
 }
 

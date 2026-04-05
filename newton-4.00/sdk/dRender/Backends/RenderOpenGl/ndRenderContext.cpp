@@ -483,19 +483,19 @@ ndSharedPtr<ndRenderTexture> ndRenderContext::LoadTexture(const ndString& pathna
 	char tmp[256];
 	snprintf(tmp, sizeof(tmp), "%s", pathname.GetStr());
 	strtolwr(tmp);
-	const char* const fileNameEnd = strstr(tmp, ".png");
-	if (!fileNameEnd)
-	{
-		strcat(tmp, ".png");
-		ndTrace(("subtitute texture %s with %s version\n", pathname.GetStr(), tmp));
-		ndAssert(0);
-	}
+	//const char* const fileNameEnd = strstr(tmp, ".png");
+	//if (!fileNameEnd)
+	//{
+	//	strcat(tmp, ".png");
+	//	ndTrace(("subtitute texture %s with %s version\n", pathname.GetStr(), tmp));
+	//	ndAssert(0);
+	//}
 
-	ndSharedPtr<ndRenderTexture> texture(nullptr);
-	unsigned width = 0;
-	unsigned height = 0;
+	ndUnsigned32 width = 0;
+	ndUnsigned32 height = 0;
 	unsigned char* pBits = nullptr;
-	unsigned ret = lodepng_decode_file(&pBits, &width, &height, tmp, LCT_RGBA, 8);
+	ndSharedPtr<ndRenderTexture> texture(nullptr);
+	ndUnsigned32 ret = lodepng_decode_file(&pBits, &width, &height, tmp, LCT_RGBA, 8);
 	if (ret)
 	{
 		ndTrace(("file: %s not found, replacing with default texture\n", pathname.GetStr()));
