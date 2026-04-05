@@ -71,7 +71,6 @@
 #include <ndIkSwivelPositionEffector.h>
 
 #include <ndModel.h>
-#include <ndUrdfFile.h>
 #include <ndModelList.h>
 #include <ndModelNotify.h>
 #include <ndModelArticulation.h>

@@ -10,6 +10,7 @@
 */
 
 #include "ndNewAssetStdafx.h"
+#include "ndUrdfFile.h"
 #include "ndAssetEditor.h"
 #include "ndFileBrowser.h"
 #include "ndMenuRenderPass.h"
@@ -417,11 +418,13 @@ void ndAssetEditor::ShowMainMenuBar()
 				char fileName[2048];
 				if (dGetLoadNdFileName(fileName, sizeof(fileName) - 1))
 				{
-					m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
-					m_currentPath = ndString(fileName);
+					const ndString path (fileName);
 					ndRenderMeshLoader loader(*m_renderer);
-					loader.LoadMesh(m_currentPath);
-					SetVisualScene(loader);
+					if (loader.LoadMesh(path))
+					{
+						m_currentPath = path;
+						SetVisualScene(loader);
+					}
 				}
 			}
 
@@ -429,7 +432,6 @@ void ndAssetEditor::ShowMainMenuBar()
 			{
 				if (*m_mesh)
 				{
-					m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 					ndRenderMeshLoader loader(*m_renderer);
 					loader.m_mesh = m_mesh;
 					loader.SaveMesh(ndString(m_currentPath));
@@ -455,11 +457,28 @@ void ndAssetEditor::ShowMainMenuBar()
 				char fileName[2048];
 				if (dGetImportFbxFileName(fileName, sizeof(fileName) - 1))
 				{
-					m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
-					m_currentPath = ndString(fileName);
+					const ndString path(fileName);
 					ndRenderMeshLoader loader(*m_renderer);
-					loader.ImportFbx(m_currentPath);
-					SetVisualScene(loader);
+					if (loader.ImportFbx(path))
+					{
+						m_currentPath = path;
+						SetVisualScene(loader);
+					}
+				}
+			}
+
+			if (ImGui::MenuItem("Import urdf", ""))
+			{
+				char fileName[2048];
+				if (dGetImportUrdfFileName(fileName, sizeof(fileName) - 1))
+				{
+					const ndString path(fileName);
+					ndUrdfMeshLoader loader(*m_renderer);
+					if (loader.Import(path))
+					{
+						m_currentPath = path;
+						SetVisualScene(loader);
+					}
 				}
 			}
 
@@ -514,6 +533,7 @@ void ndAssetEditor::SetVisualScene(const ndRenderMeshLoader& loader)
 	m_undoRedo.Clear();
 	m_newMesh = loader.m_mesh;
 	m_newSceneMesh = loader.m_renderMesh;
+	m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 }
 
 void ndAssetEditor::Run()

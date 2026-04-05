@@ -27,7 +27,7 @@ class ndMeshLoader : public ndClassAlloc
 	D_NEWTON_API virtual bool LoadMesh(const ndString& pathMeshName);
 	D_NEWTON_API virtual void SaveMesh(const ndString& pathMeshName) const;
 
-	D_NEWTON_API virtual bool ImportUrdf(const ndString& pathMeshName);
+	//D_NEWTON_API virtual bool ImportUrdf(const ndString& pathMeshName);
 
 	public:
 	ndSharedPtr<ndMesh> m_mesh;

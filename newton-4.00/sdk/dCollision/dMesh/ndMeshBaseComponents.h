@@ -82,6 +82,18 @@ class ndMeshCollisionShapeCapsule : public ndMeshCollisionShape
 	ndFloat32 m_radius1;
 };
 
+class ndMeshCollisionShapeCylinder : public ndMeshCollisionShape
+{
+	public:
+	D_COLLISION_API virtual ndShape* CreateObject() const override;
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+
+	ndFloat32 m_height;
+	ndFloat32 m_radius0;
+	ndFloat32 m_radius1;
+};
+
 class ndMeshCollisionShapeChamferCylinder : public ndMeshCollisionShape
 {
 	public:
@@ -101,6 +113,16 @@ class ndMeshCollisionShapeConvexHull : public ndMeshCollisionShape
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 
 	ndArray<ndVector> m_points;
+};
+
+class ndMeshCollisionShapeCompound : public ndMeshCollisionShape
+{
+	public:
+	D_COLLISION_API virtual ndShape* CreateObject() const override;
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+
+	ndList<ndSharedPtr<ndMeshShapeInstance>> m_subShapes;
 };
 
 class ndMeshShapeInstance : public ndClassAlloc

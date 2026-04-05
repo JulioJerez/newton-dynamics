@@ -12,8 +12,10 @@
 #ifndef _ND_URDF_FILE_H_
 #define _ND_URDF_FILE_H_
 
-#include "ndModelArticulation.h"
+#include "ndNewAssetStdafx.h"
+//#include "ndModelArticulation.h"
 
+#if 0
 class ndUrdfBodyNotify : public ndBodyNotify
 {
 	public:
@@ -64,7 +66,7 @@ class ndUrdfFile : public ndClassAlloc
 	D_NEWTON_API virtual ~ndUrdfFile();
 
 	D_NEWTON_API virtual ndModelArticulation* Import(const char* const fileName);
-	D_NEWTON_API virtual void Export(const char* const fileName, ndModelArticulation* const model);
+	//D_NEWTON_API virtual void Export(const char* const fileName, ndModelArticulation* const model);
 
 	private:
 	class Hierarchy
@@ -119,6 +121,57 @@ class ndUrdfFile : public ndClassAlloc
 	void ImportCollision(const nd::TiXmlNode* const linkNode, ndBodyDynamic* const body);
 	void ImportStlMesh(const char* const pathName, ndMeshEffect* const meshEffect) const;
 	ndJointBilateralConstraint* ImportJoint(const nd::TiXmlNode* const jointNode, ndBodyDynamic* const child, ndBodyDynamic* const parent);
+
+	ndString m_path;
+	ndArray<Material> m_materials;
+	ndTree<Hierarchy, ndString> m_bodyLinks;
+	ndTree<ndInt32, ndString> m_materialMap;
+};
+#endif
+
+class ndUrdfMeshLoader : public ndRenderMeshLoader
+{
+	class Material
+	{
+		public:
+		Material()
+			:m_color(1.0f, 1.0f, 1.0f, 1.0f)
+		{
+			m_texture[0] = 0;
+		}
+		ndVector m_color;
+		char m_texture[256];
+	};
+
+	class Hierarchy
+	{
+		public:
+		Hierarchy(const nd::TiXmlNode* const link)
+			:m_parent(nullptr)
+			,m_link(link)
+			,m_joint(nullptr)
+			,m_parentLink(nullptr)
+			,m_articulation(nullptr)
+		{
+		}
+
+		Hierarchy* m_parent;
+		const nd::TiXmlNode* m_link;
+		const nd::TiXmlNode* m_joint;
+		const nd::TiXmlNode* m_parentLink;
+		ndModelArticulation::ndNode* m_articulation;
+	};
+
+	public:
+	ndUrdfMeshLoader(ndRender* const renderer);
+	
+	virtual bool Import(const ndString& urdfPathMeshName);
+
+	private:
+	ndMatrix ImportOrigin(const nd::TiXmlNode* const parentNode) const;
+	bool ImportStlMesh(const char* const pathName, ndMeshEffect* const meshEffect) const;
+	void ImportCollision(const nd::TiXmlNode* const linkNode, ndBodyDynamic* const body);
+	ndJointBilateralConstraint* ImportJoint(const nd::TiXmlNode* const jointNode, ndBodyDynamic* const childBody, ndBodyDynamic* const parentBody);
 
 	ndString m_path;
 	ndArray<Material> m_materials;

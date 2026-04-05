@@ -22,12 +22,12 @@ class ndUndoRedoName : public ndUndoRedoCommand
 	{
 	}
 
-	virtual class ndUndoRedoName* GetAsUndoRedoName() const 
+	virtual class ndUndoRedoName* GetAsUndoRedoName() const override
 	{ 
 		return (ndUndoRedoName*)this;
 	}
 
-	virtual bool operator!=(const ndUndoRedoCommand& command) const
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
 	{
 		if (*m_mesh == *command.m_mesh)
 		{
@@ -54,6 +54,186 @@ class ndUndoRedoName : public ndUndoRedoCommand
 	ndString m_name;
 };
 
+class ndUndoRedoMass : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoMass(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		m_invMass = body->m_invMass.m_w;
+	}
+
+	virtual class ndUndoRedoMass* GetAsUndoRedoMass() const override
+	{
+		return (ndUndoRedoMass*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			ndUndoRedoMass* const other = command.GetAsUndoRedoMass();
+			if (other)
+			{
+				if (m_invMass == other->m_invMass)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		body->m_invMass = m_invMass;
+	}
+
+	ndFloat32 m_invMass;
+};
+
+class ndUndoRedoLinearStep : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoLinearStep(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		m_linearStep = body->m_maxLinearStep;
+	}
+
+	virtual class ndUndoRedoLinearStep* GetAsUndoRedoLinearStep() const override
+	{
+		return (ndUndoRedoLinearStep*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			ndUndoRedoLinearStep* const other = command.GetAsUndoRedoLinearStep();
+			if (other)
+			{
+				if (m_linearStep == other->m_linearStep)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		body->m_maxLinearStep = m_linearStep;
+	}
+
+	ndFloat32 m_linearStep;
+};
+
+class ndUndoRedoAngleStep : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoAngleStep(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		m_angleStep = body->m_maxAngleStep;
+	}
+
+	virtual class ndUndoRedoAngleStep* GetAsUndoRedoAngleStep() const override
+	{
+		return (ndUndoRedoAngleStep*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			ndUndoRedoAngleStep* const other = command.GetAsUndoRedoAngleStep();
+			if (other)
+			{
+				if (m_angleStep == other->m_angleStep)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		body->m_maxAngleStep = m_angleStep;
+	}
+
+	ndFloat32 m_angleStep;
+};
+
+class ndUndoRedoLinearDamp : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoLinearDamp(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		m_linearDamp = body->m_intrinsicDamping.m_w;
+	}
+
+	virtual class ndUndoRedoLinearDamp* GetAsUndoRedoLinearDamp() const override
+	{
+		return (ndUndoRedoLinearDamp*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			ndUndoRedoLinearDamp* const other = command.GetAsUndoRedoLinearDamp();
+			if (other)
+			{
+				if (m_linearDamp == other->m_linearDamp)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		body->m_intrinsicDamping.m_w = m_linearDamp;
+	}
+
+	ndFloat32 m_linearDamp;
+};
+
 class ndUndoRedoTransform : public ndUndoRedoCommand
 {
 	public:
@@ -63,12 +243,12 @@ class ndUndoRedoTransform : public ndUndoRedoCommand
 	{
 	}
 
-	virtual class ndUndoRedoTransform* GetAsUndoRedoTransform() const
+	virtual class ndUndoRedoTransform* GetAsUndoRedoTransform() const override
 	{
 		return (ndUndoRedoTransform*)this;
 	}
 
-	virtual bool operator!=(const ndUndoRedoCommand& command) const
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
 	{
 		if (*m_mesh == *command.m_mesh)
 		{
@@ -109,12 +289,12 @@ class ndUndoRedoGeometryTransform : public ndUndoRedoCommand
 	{
 	}
 
-	virtual class ndUndoRedoGeometryTransform* GetAsUndoRedoGeometryTransform() const
+	virtual class ndUndoRedoGeometryTransform* GetAsUndoRedoGeometryTransform() const override
 	{
 		return (ndUndoRedoGeometryTransform*)this;
 	}
 
-	virtual bool operator!=(const ndUndoRedoCommand& command) const
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
 	{
 		if (*m_mesh == *command.m_mesh)
 		{
@@ -314,45 +494,58 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 	if (ImGui::CollapsingHeader("Rigid body"))
 	{
 		ndSharedPtr<ndMeshBody> body (m_currentSelection->GetRigidBody());
+		ndAssert(body->m_classConstructor == ndBodyDynamic::StaticClassName());
 		ndMeshBodyDynamic* const rigidBody = (ndMeshBodyDynamic*)*body;
 
 		// body mass
 		{
 			ndReal scalar = ndReal (ndFloat32 (1.0f) / rigidBody->m_invMass.m_w);
-			if (ImGui::DragFloat("mass", &scalar))
+			//if (ImGui::DragFloat("mass", &scalar))
+			if (ImGui::InputFloat("mass", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMass(this, m_currentSelection)));
 				scalar = ndMax(scalar, ndReal(0.001f));
 				rigidBody->m_invMass.m_w = ndFloat32(1.0f) / scalar;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMass(this, m_currentSelection)));
 			};
 		}
 
 		// body max angular integration step 
 		{
 			ndReal scalar = ndReal(rigidBody->m_maxAngleStep);
-			if (ImGui::DragFloat("angle Step", &scalar))
+			//if (ImGui::DragFloat("angle step", &scalar))
+			if (ImGui::InputFloat("angle step", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoAngleStep(this, m_currentSelection)));
 				scalar = ndClamp(scalar, ndReal(10.0f), ndReal(180.0f));
 				rigidBody->m_maxAngleStep = scalar;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoAngleStep(this, m_currentSelection)));
 			};
 		}
 
 		// body max linear integration step 
 		{
 			ndReal scalar = ndReal(rigidBody->m_maxLinearStep);
-			if (ImGui::DragFloat("linear Step", &scalar))
+			//if (ImGui::DragFloat("linear step", &scalar))
+			if (ImGui::InputFloat("linear step", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLinearStep(this, m_currentSelection)));
 				scalar = ndClamp(scalar, ndReal(0.1f), ndReal(30.0f));
 				rigidBody->m_maxLinearStep = scalar;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLinearStep(this, m_currentSelection)));
 			};
 		}
 
 		// body intrinsic linear damp 
 		{
 			ndReal scalar = ndReal(rigidBody->m_intrinsicDamping.m_w);
-			if (ImGui::DragFloat("linear Damp", &scalar))
+			//if (ImGui::DragFloat("linear Damp", &scalar))
+			if (ImGui::InputFloat("linear damp", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLinearDamp(this, m_currentSelection)));
 				scalar = ndClamp(scalar, ndReal(0.0f), ndReal(1.0f));
 				rigidBody->m_intrinsicDamping.m_w = scalar;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLinearDamp(this, m_currentSelection)));
 			};
 		}
 
@@ -617,7 +810,7 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 		ndSharedPtr<ndMeshJoint> joint (m_currentSelection->GetJoint());
 		if (ImGui::BeginCombo("joints", joint->m_constructor.GetStr()))
 		{
-			auto SetDropdownList = [this, &joint](const char* name)
+			auto SetDropdownList = [this, &joint](const char* const name)
 			{
 				bool selected = strcmp(name, joint->m_constructor.GetStr()) ? false : true;
 				if (ImGui::Selectable(name, selected))

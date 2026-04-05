@@ -15,17 +15,19 @@
 #endif
 
 #include "ndFileBrowser.h"
+#include <ndNewton.h>
 
-static void strtolwr(char* const string)
-{
-	for (char * cp = string; *cp; ++cp)
-	{
-		if ((*cp >= 'A') && (*cp <= 'Z'))
-		{
-			*cp += 'a' - 'A';
-		}
-	}
-}
+
+//static void strtolwr(char* const string)
+//{
+//	for (char * cp = string; *cp; ++cp)
+//	{
+//		if ((*cp >= 'A') && (*cp <= 'Z'))
+//		{
+//			*cp += 'a' - 'A';
+//		}
+//	}
+//}
 
 //bool dGetOpenFileNamePLY(char* const fileName, int maxSize)
 //{
@@ -216,7 +218,6 @@ bool dGetLoadNdFileName(char* const fileName, int maxSize)
 #endif
 }
 
-
 bool dGetImportFbxFileName(char* const fileName, int maxSize)
 {
 #if (defined(WIN32) || defined(_WIN32))
@@ -253,6 +254,97 @@ bool dGetImportFbxFileName(char* const fileName, int maxSize)
 		}
 	}
 	return state;
+#else
+	return false;
+#endif
+}
+
+bool dGetImportUrdfFileName(char* const fileName, int maxSize)
+{
+#if (defined(WIN32) || defined(_WIN32))
+	OPENFILENAME ofn;
+	// open a file name
+	char appPath[256];
+	GetModuleFileNameA(nullptr, appPath, sizeof(appPath));
+	strtolwr(appPath);
+
+	char* const end = strstr(appPath, "applications");
+	end[0] = 0;
+	strcat(appPath, "applications\\ndSandbox");
+
+	ZeroMemory(&ofn, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = nullptr;
+	ofn.lpstrFile = fileName;
+	ofn.lpstrFile[0] = '\0';
+	ofn.nMaxFile = DWORD(maxSize);
+	ofn.lpstrFilter = const_cast<LPSTR>("newton load file *.urdf\0*.urdf\0");
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = const_cast<LPSTR>("Newton Dynamics 4.0 demos");
+	ofn.nMaxFileTitle = 0;
+	ofn.lpstrInitialDir = appPath;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+	bool state = GetOpenFileName(&ofn) ? true : false;
+	if (state)
+	{
+		char* const ext = strrchr(fileName, '.');
+		if (!ext)
+		{
+			strcat(fileName, ".urdf");
+		}
+	}
+	return state;
+#else
+	return false;
+#endif
+}
+
+bool dGetWorkingFileName(const char* const basePath, char* const name, int maxSize)
+{
+#if (defined(WIN32) || defined(_WIN32))
+
+	ndFixSizeArray<ndString, 32> stack;
+	stack.PushBack(ndString(basePath));
+
+	const ndString fileName(name);
+	while (stack.GetCount())
+	{
+		const ndString baseDir(stack.Pop());
+		const ndString directory(baseDir + "*");
+
+		WIN32_FIND_DATA file;
+		HANDLE search_handle = FindFirstFile(directory.GetStr(), &file);
+		if (search_handle != INVALID_HANDLE_VALUE)
+		{
+			do
+			{
+				const ndString thisName(file.cFileName);
+				if ((thisName != ".") && (thisName != ".."))
+				{
+					if (file.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+					{
+						ndString subDirectory(baseDir);
+						subDirectory += file.cFileName;
+						subDirectory += "/";
+						stack.PushBack(subDirectory);
+					}
+					else
+					{
+						if (fileName == thisName)
+						{
+							const ndString filePath(baseDir + fileName);
+							snprintf(name, size_t(maxSize), filePath.GetStr());
+							FindClose(search_handle);
+							return true;
+						}
+					}
+				}
+			} while (FindNextFile(search_handle, &file));
+		}
+		FindClose(search_handle);
+	}
+	return false;
 #else
 	return false;
 #endif

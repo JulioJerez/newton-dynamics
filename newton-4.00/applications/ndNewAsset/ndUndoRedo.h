@@ -27,8 +27,12 @@ class ndUndoRedoCommand : public ndClassAlloc
 	virtual void Undo() = 0;
 	virtual bool operator!=(const ndUndoRedoCommand& command) const = 0;
 
+	virtual class ndUndoRedoMass* GetAsUndoRedoMass() const { return nullptr; }
 	virtual class ndUndoRedoName* GetAsUndoRedoName() const { return nullptr; }
 	virtual class ndUndoRedoTransform* GetAsUndoRedoTransform() const { return nullptr; }
+	virtual class ndUndoRedoAngleStep* GetAsUndoRedoAngleStep() const { return nullptr; }
+	virtual class ndUndoRedoLinearStep* GetAsUndoRedoLinearStep() const { return nullptr; }
+	virtual class ndUndoRedoLinearDamp* GetAsUndoRedoLinearDamp() const { return nullptr; }
 	virtual class ndUndoRedoGeometryTransform* GetAsUndoRedoGeometryTransform() const { return nullptr; }
 
 	ndSharedPtr<ndMesh> m_mesh;

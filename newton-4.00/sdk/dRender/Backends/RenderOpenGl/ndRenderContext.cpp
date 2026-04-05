@@ -492,28 +492,34 @@ ndSharedPtr<ndRenderTexture> ndRenderContext::LoadTexture(const ndString& pathna
 	}
 
 	ndSharedPtr<ndRenderTexture> texture(nullptr);
-	unsigned width;
-	unsigned height;
-	unsigned char* pBits;
+	unsigned width = 0;
+	unsigned height = 0;
+	unsigned char* pBits = nullptr;
 	unsigned ret = lodepng_decode_file(&pBits, &width, &height, tmp, LCT_RGBA, 8);
-	ndAssert(!ret);
-	if (!ret)
+	if (ret)
 	{
-		// from targa legacy reasons, the texture is upsizedown, 
-		// so I have to flip it
-		unsigned* const buffer = (unsigned*)pBits;
-		for (ndInt32 i = 0; i < ndInt32(height / 2); i++)
-		{
-			unsigned* const row0 = &buffer[i * width];
-			unsigned* const row1 = &buffer[(height - 1 - i) * width];
-			for (ndInt32 j = 0; j < ndInt32(width); ++j)
-			{
-				ndSwap(row0[j], row1[j]);
-			}
-		}
-		texture = ndSharedPtr<ndRenderTexture>(new ndRenderTextureImage(pBits, int(width), int(height), ndRenderTexture::m_rgba));
-		lodepng_free(pBits);
+		ndTrace(("file: %s not found, replacing with default texture\n", pathname.GetStr()));
+		width = 1; 
+		height = 1;
+		pBits = (unsigned char*)lodepng_malloc(width * height * 4);
+		memset(pBits, 255, width * height * 4);
 	}
+
+	// from targa legacy reasons, the texture is upsizedown, 
+	// so I have to flip it
+	unsigned* const buffer = (unsigned*)pBits;
+	for (ndInt32 i = 0; i < ndInt32(height / 2); i++)
+	{
+		unsigned* const row0 = &buffer[i * width];
+		unsigned* const row1 = &buffer[(height - 1 - i) * width];
+		for (ndInt32 j = 0; j < ndInt32(width); ++j)
+		{
+			ndSwap(row0[j], row1[j]);
+		}
+	}
+	texture = ndSharedPtr<ndRenderTexture>(new ndRenderTextureImage(pBits, int(width), int(height), ndRenderTexture::m_rgba));
+	lodepng_free(pBits);
+
 	return texture;
 }
 

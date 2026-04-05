@@ -23,7 +23,7 @@
 #include "ndCollisionStdafx.h"
 #include "ndContact.h"
 #include "ndContactSolver.h"
-#include "ndMeshComponents.h"
+#include "ndMeshBaseComponents.h"
 #include "ndShapeChamferCylinder.h"
 
 ndInt32 ndShapeChamferCylinder::m_shapeRefCount = 0;

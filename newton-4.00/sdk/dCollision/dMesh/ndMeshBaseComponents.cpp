@@ -26,6 +26,8 @@
 #include "ndCollision.h"
 #include "ndShapeSphere.h"
 #include "ndShapeCapsule.h"
+#include "ndShapeCylinder.h"
+#include "ndShapeCompound.h"
 #include "ndShapeConvexHull.h"
 #include "ndMeshBaseComponents.h"
 #include "ndShapeChamferCylinder.h"
@@ -111,6 +113,26 @@ ndShape* ndMeshCollisionShapeCapsule::CreateObject() const
 	return new ndShapeCapsule(m_radius0, m_radius1, m_height);
 }
 
+void ndMeshCollisionShapeCylinder::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	xmlSaveParam(parent, "constructor", ndShapeCapsule::StaticClassName());
+	xmlSaveParam(parent, "radio0", m_radius0);
+	xmlSaveParam(parent, "radio1", m_radius1);
+	xmlSaveParam(parent, "heigh", m_height);
+}
+
+void ndMeshCollisionShapeCylinder::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	m_radius0 = xmlGetFloat(parent, "radio0");
+	m_radius1 = xmlGetFloat(parent, "radio0");
+	m_height = xmlGetFloat(parent, "heigh");
+}
+
+ndShape* ndMeshCollisionShapeCylinder::CreateObject() const
+{
+	return new ndShapeCapsule(m_radius0, m_radius1, m_height);
+}
+
 void ndMeshCollisionShapeChamferCylinder::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	xmlSaveParam(parent, "constructor", ndShapeChamferCylinder::StaticClassName());
@@ -144,6 +166,22 @@ void ndMeshCollisionShapeConvexHull::DeserializeFromXml(const nd::TiXmlElement* 
 ndShape* ndMeshCollisionShapeConvexHull::CreateObject() const
 {
 	return new ndShapeConvexHull(ndInt32(m_points.GetCount()), sizeof(ndVector), ndFloat32(0.0f), &m_points[0].m_x);
+}
+
+ndShape* ndMeshCollisionShapeCompound::CreateObject() const
+{
+	ndAssert(0);
+	return nullptr;
+}
+
+void ndMeshCollisionShapeCompound::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndAssert(0);
+}
+
+void ndMeshCollisionShapeCompound::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndAssert(0);
 }
 
 ndMeshShapeInstance::ndMeshShapeInstance()

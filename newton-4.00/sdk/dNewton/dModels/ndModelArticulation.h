@@ -100,6 +100,7 @@ class ndModelArticulation: public ndModel
 	D_NEWTON_API virtual void Serialize(ndMesh* const rootNode) const;
 	D_NEWTON_API virtual void Deserialize(const ndMesh* const rootNode);
 
+	D_NEWTON_API virtual ndMesh* CreateDefaultMesh() const;
 	D_NEWTON_API virtual void SaveNdMesh(const char* const path) const;
 
 	template <typename Function>

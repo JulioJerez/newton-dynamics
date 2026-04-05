@@ -60,6 +60,7 @@ class ndShapeCompound: public ndShape
 	D_COLLISION_API virtual ndTreeArray::ndNode* AddCollision(ndShapeInstance* const part);
 	D_COLLISION_API virtual ndShapeInstance* GetShapeInstance(ndTreeArray::ndNode* const node);
 	D_COLLISION_API virtual void EndAddRemove();
+	D_COLLISION_API ndSharedPtr<ndMeshCollisionShape> GetMeshShape() const override;
 
 	protected:
 	class ndSpliteInfo;

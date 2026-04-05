@@ -107,7 +107,6 @@ ndMesh::ndMesh(const ndShapeInstance& shape, ndUvMapingMode mapping)
 			m_mesh->UniformBoxMapping(0, ndGetIdentityMatrix());
 		}
 	}
-
 }
 
 ndMesh::~ndMesh()

@@ -9,75 +9,11 @@
 * freely
 */
 
-#include "ndCoreStdafx.h"
-#include "ndNewtonStdafx.h"
+#include "ndNewAssetStdafx.h"
 #include "ndUrdfFile.h"
-#include "ndJointHinge.h"
-#include "ndJointSlider.h"
-#include "ndBodyDynamic.h"
-#include "ndJointFix6dof.h"
-#include "ndIkJointHinge.h"
-#include "ndIkJointSpherical.h"
+#include "ndFileBrowser.h"
 
-ndUrdfFile::ndUrdfFile()
-	:ndClassAlloc()
-{
-}
-
-ndUrdfFile::~ndUrdfFile()
-{
-}
-
-// *******************************************************************************
-// 
-// *******************************************************************************
-void ndUrdfFile::ImportMaterials(const nd::TiXmlNode* const rootNode)
-{
-	m_materials.SetCount(0);
-	m_materialMap.RemoveAll();
-	m_materials.PushBack(Material());
-	snprintf(m_materials[0].m_texture, sizeof (m_materials[0].m_texture), "wood_0.png");
-
-	size_t readValues = 0;
-	for (const nd::TiXmlNode* node = rootNode->FirstChild("material"); node; node = node->NextSibling("material"))
-	{
-		const nd::TiXmlElement* const materialNode = (nd::TiXmlElement*)node;
-
-		const char* const name = materialNode->Attribute("name");
-		m_materialMap.Insert(ndInt32(m_materials.GetCount()), name);
-
-		Material material;
-		const nd::TiXmlElement* const color = (nd::TiXmlElement*)node->FirstChild("color");
-		if (color)
-		{
-			ndReal r;
-			ndReal g;
-			ndReal b;
-			ndReal a;
-			const char* const rgba = color->Attribute("rgba");
-			readValues += sscanf(rgba, "%f %f %f %f", &r, &g, &b, &a);
-			material.m_color.m_x = r;
-			material.m_color.m_y = g;
-			material.m_color.m_z = b;
-			material.m_color.m_w = a;
-		}
-		const nd::TiXmlElement* const texture = (nd::TiXmlElement*)node->FirstChild("texture");
-		if (texture)
-		{
-			const char* const texName = texture->Attribute("filename");
-			snprintf(material.m_texture, sizeof (material.m_texture), "%s", texName);
-		}
-		else
-		{
-			snprintf(material.m_texture, sizeof(material.m_texture), "default.png");
-		}
-		m_materials.PushBack(material);
-	}
-}
-
-// *******************************************************************************
-// 
-// *******************************************************************************
+#if 0
 void ndUrdfFile::ExportMakeNamesUnique(ndModelArticulation* const model)
 {
 	ndTree < ndModelArticulation::ndNode*, ndString> filter;
@@ -580,94 +516,6 @@ ndUrdfFile::Surrogate* ndUrdfFile::ExportMakeSurrogate(ndModelArticulation* cons
 // *******************************************************************************
 // 
 // *******************************************************************************
-ndMatrix ndUrdfFile::ImportOrigin(const nd::TiXmlNode* const parentNode) const
-{
-	const nd::TiXmlElement* const origin = (nd::TiXmlElement*)parentNode->FirstChild("origin");
-
-	ndMatrix matrix(ndGetIdentityMatrix());
-	if (origin)
-	{
-		ndReal x = ndFloat32(0.0f);
-		ndReal y = ndFloat32(0.0f);
-		ndReal z = ndFloat32(0.0f);
-		ndReal yaw = ndFloat32(0.0f);
-		ndReal roll = ndFloat32(0.0f);
-		ndReal pitch = ndFloat32(0.0f);
-
-		const char* const xyz = origin->Attribute("xyz");
-		if (xyz)
-		{
-			sscanf(xyz, "%f %f %f", &x, &y, &z);
-		}
-		const char* const rpy = origin->Attribute("rpy");
-		if (rpy)
-		{
-			sscanf(rpy, "%f %f %f", &pitch, &yaw, &roll);
-		}
-
-		matrix = ndPitchMatrix(pitch) * ndYawMatrix(yaw) * ndRollMatrix(roll);
-		matrix.m_posit.m_x = x;
-		matrix.m_posit.m_y = y;
-		matrix.m_posit.m_z = z;
-	}
-	return matrix;
-}
-
-void ndUrdfFile::ImportStlMesh(const char* const pathName, ndMeshEffect* const meshEffect) const
-{
-	char meshFile[256];
-	char meshPath[1024];
-
-	const char* meshName = strrchr(pathName, '/');
-	if (!meshName)
-	{
-		meshName = strrchr(pathName, '\\');
-	}
-	snprintf(meshFile, sizeof (meshFile), "%s", meshName + 1);
-	char* ptr = strrchr(meshFile, '.');
-	snprintf(ptr, 32, ".stl");
-
-	snprintf(meshPath, sizeof (meshPath), "%s/%s", m_path.GetStr(), meshFile);
-
-	FILE* const file = fopen(meshPath, "rb");
-	ndAssert(file);
-	if (file)
-	{
-		size_t readValues = 0;
-		char buffer[256];
-		for (ndInt32 i = 0; i < 80; ++i)
-		{
-			buffer[i] = char(fgetc(file));
-		}
-
-		ndInt32 numberOfTriangles;
-		readValues += fread(&numberOfTriangles, 1, 4, file);
-		ndFloat32 inchToMeters = 0.0254f;
-
-		ndReal normal[3];
-		ndReal triangle[3][3];
-		short flags;
-
-		for (ndInt32 i = 0; i < numberOfTriangles; ++i)
-		{
-			readValues += fread(normal, 1, sizeof(normal), file);
-			readValues += fread(triangle, 1, sizeof(triangle), file);
-			readValues += fread(&flags, 1, sizeof(flags), file);
-
-			meshEffect->BeginBuildFace();
-			for (ndInt32 j = 0; j < 3; ++j)
-			{
-				meshEffect->AddMaterial(0);
-				meshEffect->AddPoint(triangle[j][0] * inchToMeters, triangle[j][1] * inchToMeters, triangle[j][2] * inchToMeters);
-				meshEffect->AddNormal(normal[0], normal[1], normal[2]);
-			}
-			meshEffect->EndBuildFace();
-		}
-
-		fclose(file);
-	}
-}
-
 void ndUrdfFile::ImportVisual(const nd::TiXmlNode* const linkNode, ndBodyDynamic* const body)
 {
 	ndMeshEffect* meshEffect = new ndMeshEffect;
@@ -859,155 +707,6 @@ void ndUrdfFile::ImportVisual(const nd::TiXmlNode* const linkNode, ndBodyDynamic
 	body->SetNotifyCallback(new ndUrdfBodyNotify(meshEffect));
 }
 
-void ndUrdfFile::ImportCollision(const nd::TiXmlNode* const linkNode, ndBodyDynamic* const body)
-{
-	ndArray<const nd::TiXmlNode*> collisions;
-	for (const nd::TiXmlNode* node = linkNode->FirstChild("collision"); node; node = node->NextSibling("collision"))
-	{
-		collisions.PushBack(node);
-	}
-
-	ndShapeInstance collision(new ndShapeNull());
-	auto GetCollisionShape = [this, &collision](const nd::TiXmlNode* const node)
-	{
-		const nd::TiXmlNode* const geometryNode = node->FirstChild("geometry");
-		const nd::TiXmlElement* const shapeNode = (nd::TiXmlElement*)geometryNode->FirstChild();
-		const char* const name = shapeNode->Value();
-
-		ndShape* shape = nullptr;
-
-		if (strcmp(name, "sphere") == 0)
-		{
-			ndFloat64 radius;
-			shapeNode->Attribute("radius", &radius);
-			shape = new ndShapeSphere(ndFloat32(radius));
-		}
-		else if (strcmp(name, "cylinder") == 0)
-		{
-			ndFloat64 length;
-			ndFloat64 radius;
-			shapeNode->Attribute("length", &length);
-			shapeNode->Attribute("radius", &radius);
-
-			nd::TiXmlElement* const newtonExt = (nd::TiXmlElement*)geometryNode->FirstChild("newton");
-			ndInt32 cylinderKind = 0;
-			if (newtonExt)
-			{
-				const char* const surrogateShape = newtonExt->Attribute("replaceWith");
-				if (strcmp(surrogateShape, "capsule") == 0)
-				{
-					cylinderKind = 1;
-				}
-				else if (strcmp(surrogateShape, "wheel") == 0)
-				{
-					cylinderKind = 2;
-				}
-			}
-
-			switch (cylinderKind)
-			{
-				case 0:
-					shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
-					break;
-				case 1:
-					length = length - 2.0f * radius;
-					shape = new ndShapeCapsule(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
-					break;
-				default:
-					ndAssert(0);
-					shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
-			}
-			ndMatrix matrix(ndYawMatrix(ndPi * ndFloat32(0.5f)));
-			collision.SetLocalMatrix(matrix);
-		}
-		else if (strcmp(name, "box") == 0)
-		{
-			ndReal x;
-			ndReal y;
-			ndReal z;
-			const char* const size = shapeNode->Attribute("size");
-			sscanf(size, "%f %f %f", &x, &y, &z);
-			shape = new ndShapeBox(x, y, z);
-		}
-		else
-		{
-			const char* const meshPathName = shapeNode->Attribute("filename");
-
-			ndMeshEffect meshEffect;
-			meshEffect.BeginBuild();
-			ImportStlMesh(meshPathName, &meshEffect);
-			meshEffect.EndBuild();
-
-			ndArray<ndVector> hull;
-			ndInt32 vertexCount = meshEffect.GetVertexCount();
-			ndInt32 stride = meshEffect.GetVertexStrideInByte();
-			const char* vertexPoolBytes = (char*)meshEffect.GetVertexPool();
-			for (ndInt32 i = 0; i < vertexCount; ++i)
-			{
-				const ndFloat64* const vertexPoolFloat = (ndFloat64*)vertexPoolBytes;
-				ndVector point(vertexPoolFloat[0], vertexPoolFloat[1], vertexPoolFloat[2], ndFloat64(0.0f));
-				hull.PushBack(point);
-				vertexPoolBytes += stride;
-			}
-
-			shape = new ndShapeConvexHull(vertexCount, ndInt32(sizeof(ndVector)), 1.0e-6f, &hull[0].m_x, 64);
-		}
-		return shape;
-	};
-
-	if (collisions.GetCount() == 1)
-	{
-		const nd::TiXmlNode* const node = collisions[0];
-		collision.SetShape(GetCollisionShape(node));
-		ndMatrix matrix(ImportOrigin(node));
-		collision.SetLocalMatrix(collision.GetLocalMatrix() * matrix);
-	}
-	else
-	{
-		ndAssert(0);
-	}
-
-	body->SetCollisionShape(collision);
-}
-
-void ndUrdfFile::ImportInertia(const nd::TiXmlNode* const linkNode, ndBodyDynamic* const body)
-{
-	const nd::TiXmlNode* const inertialNode = linkNode->FirstChild("inertial");
-	const nd::TiXmlElement* const massNode = (nd::TiXmlElement*)inertialNode->FirstChild("mass");
-	const nd::TiXmlElement* const inertiaNode = (nd::TiXmlElement*)inertialNode->FirstChild("inertia");
-
-	ndFloat64 xx;
-	ndFloat64 xy;
-	ndFloat64 xz;
-	ndFloat64 yy;
-	ndFloat64 yz;
-	ndFloat64 zz;
-	ndFloat64 mass;
-
-	massNode->Attribute("value", &mass);
-	inertiaNode->Attribute("ixx", &xx);
-	inertiaNode->Attribute("ixy", &xy);
-	inertiaNode->Attribute("ixz", &xz);
-	inertiaNode->Attribute("iyy", &yy);
-	inertiaNode->Attribute("iyz", &yz);
-	inertiaNode->Attribute("izz", &zz);
-
-	ndMatrix inertiaMatrix(ndGetIdentityMatrix());
-	inertiaMatrix[0][0] = ndFloat32(xx);
-	inertiaMatrix[1][1] = ndFloat32(yy);
-	inertiaMatrix[2][2] = ndFloat32(zz);
-
-	inertiaMatrix[0][1] = ndFloat32(xy);
-	inertiaMatrix[1][0] = ndFloat32(xy);
-
-	inertiaMatrix[0][2] = ndFloat32(xz);
-	inertiaMatrix[2][0] = ndFloat32(xz);
-
-	inertiaMatrix[1][2] = ndFloat32(yz);
-	inertiaMatrix[2][1] = ndFloat32(yz);
-
-	body->SetMassMatrix(ndFloat32(mass), body->GetCollisionShape());
-}
 
 ndBodyDynamic* ndUrdfFile::ImportLink(const nd::TiXmlNode* const linkNode)
 {
@@ -1017,184 +716,6 @@ ndBodyDynamic* ndUrdfFile::ImportLink(const nd::TiXmlNode* const linkNode)
 	ImportCollision(linkNode, body);
 	ImportInertia(linkNode, body);
 	return body;
-}
-
-ndJointBilateralConstraint* ndUrdfFile::ImportJoint(const nd::TiXmlNode* const jointNode, ndBodyDynamic* const childBody, ndBodyDynamic* const parentBody)
-{
-	ndJointBilateralConstraint* joint = nullptr;
-	ndMatrix childMatrix(ImportOrigin(jointNode));
-	childBody->SetMatrix(childMatrix * parentBody->GetMatrix());
-	ndMatrix pivotMatrix(childBody->GetMatrix());
-
-	const char* const jointType = ((nd::TiXmlElement*)jointNode)->Attribute("type");
-	if (strcmp(jointType, "fixed") == 0)
-	{
-		joint = new ndJointFix6dof(pivotMatrix, childBody, parentBody);
-	}
-	else if (strcmp(jointType, "continuous") == 0)
-	{
-		const nd::TiXmlElement* const axisNode = (nd::TiXmlElement*)jointNode->FirstChild("axis");
-		if (axisNode)
-		{
-			ndReal x = ndFloat32(0.0f);
-			ndReal y = ndFloat32(0.0f);
-			ndReal z = ndFloat32(0.0f);
-			const char* const axisPin = axisNode->Attribute("xyz");
-			sscanf(axisPin, "%f %f %f", &x, &y, &z);
-
-			ndMatrix matrix(ndGramSchmidtMatrix(ndVector(x, y, z, ndFloat32(0.0f))));
-			pivotMatrix = matrix * pivotMatrix;
-		}
-		joint = new ndJointHinge(pivotMatrix, childBody, parentBody);
-		const nd::TiXmlElement* const newtonEx = (nd::TiXmlElement*)jointNode->FirstChild("newton");
-		if (newtonEx)
-		{
-			ndReal springPD;
-			ndReal damperPD;
-			ndReal regularizerPD;
-
-			const char* const spring = newtonEx->Attribute("springPD");
-			const char* const damper = newtonEx->Attribute("damperPD");
-			const char* const regularizer = newtonEx->Attribute("regularizer");
-			sscanf(spring, "%f", &springPD);
-			sscanf(damper, "%f", &damperPD);
-			sscanf(regularizer, "%f", &regularizerPD);
-
-			ndJointHinge* const hinge = (ndJointHinge*)joint;
-			hinge->SetAsSpringDamper(regularizerPD, springPD, damperPD);
-		}
-	}
-	else if (strcmp(jointType, "prismatic") == 0)
-	{
-		const nd::TiXmlElement* const axisNode = (nd::TiXmlElement*)jointNode->FirstChild("axis");
-		if (axisNode)
-		{
-			ndReal x = ndFloat32(0.0f);
-			ndReal y = ndFloat32(0.0f);
-			ndReal z = ndFloat32(0.0f);
-			const char* const axisPin = axisNode->Attribute("xyz");
-			sscanf(axisPin, "%f %f %f", &x, &y, &z);
-
-			ndMatrix matrix(ndGramSchmidtMatrix(ndVector(x, y, z, ndFloat32(0.0f))));
-			pivotMatrix = matrix * pivotMatrix;
-		}
-		joint = new ndJointSlider(pivotMatrix, childBody, parentBody);
-
-		const nd::TiXmlElement* const limit = (nd::TiXmlElement*)jointNode->FirstChild("limit");
-		if (limit)
-		{
-			ndFloat64 effort = 0.0f;
-			ndFloat64 lower = 0.0f;
-			ndFloat64 upper = 0.0f;
-			limit->Attribute("effort", &effort);
-			limit->Attribute("lower", &lower);
-			limit->Attribute("upper", &upper);
-
-			ndJointSlider* const slider = (ndJointSlider*)joint;
-			slider->SetLimits(ndFloat32(lower), ndFloat32(upper));
-			slider->SetLimitState(true);
-		}
-	}
-	else if (strcmp(jointType, "revolute") == 0)
-	{
-		const nd::TiXmlElement* const axisNode = (nd::TiXmlElement*)jointNode->FirstChild("axis");
-		if (axisNode)
-		{
-			ndReal x = ndFloat32(0.0f);
-			ndReal y = ndFloat32(0.0f);
-			ndReal z = ndFloat32(0.0f);
-			const char* const axisPin = axisNode->Attribute("xyz");
-			sscanf(axisPin, "%f %f %f", &x, &y, &z);
-
-			ndMatrix matrix(ndGramSchmidtMatrix(ndVector(x, y, z, ndFloat32(0.0f))));
-			pivotMatrix = matrix * pivotMatrix;
-		}
-
-		ndAssert(0);
-		const nd::TiXmlElement* const newtonEx = (nd::TiXmlElement*)jointNode->FirstChild("newton");
-		if (newtonEx)
-		{
-			const char* const subJointType = newtonEx->Attribute("replaceWith");
-			if (strcmp(subJointType, "ndIkJointHinge") == 0)
-			{
-				joint = new ndIkJointHinge(pivotMatrix, childBody, parentBody);
-			}
-			else
-			{
-				joint = new ndJointHinge(pivotMatrix, childBody, parentBody);
-			}
-		}
-
-		const nd::TiXmlElement* const limit = (nd::TiXmlElement*)jointNode->FirstChild("limit");
-		if (limit)
-		{
-			ndFloat64 effort = 0.0f;
-			ndFloat64 lower = 0.0f;
-			ndFloat64 upper = 0.0f;
-			limit->Attribute("effort", &effort);
-			limit->Attribute("lower", &lower);
-			limit->Attribute("upper", &upper);
-
-			ndJointHinge* const hinge = (ndJointHinge*)joint;
-			hinge->SetLimits(ndFloat32(lower), ndFloat32(upper));
-			hinge->SetLimitState(true);
-		}
-
-		//const nd::TiXmlElement* const newtonEx = (nd::TiXmlElement*)jointNode->FirstChild("newton");
-		if (newtonEx)
-		{
-			const char* const spring = newtonEx->Attribute("springPD");
-			const char* const damper = newtonEx->Attribute("damperPD");
-			const char* const regularizer = newtonEx->Attribute("regularizer");
-			if (regularizer || damper || spring)
-			{
-				ndReal springPD = 0.0f;
-				ndReal damperPD = 0.0f;
-				ndReal regularizerPD = 0.0f;
-				if (spring)
-				{
-					sscanf(spring, "%f", &springPD);
-				}
-				if (damperPD)
-				{
-					sscanf(damper, "%f", &damperPD);
-				}
-				if (regularizerPD)
-				{
-					sscanf(regularizer, "%f", &regularizerPD);
-				}
-				ndJointHinge* const hinge = (ndJointHinge*)joint;
-				hinge->SetAsSpringDamper(regularizerPD, springPD, damperPD);
-			}
-		}
-	}
-	else if (strcmp(jointType, "floating") == 0)
-	{
-		const nd::TiXmlElement* const newtonEx = (nd::TiXmlElement*)jointNode->FirstChild("newton");
-		if (newtonEx) 
-		{
-			const char* const subJointType = newtonEx->Attribute("replaceWith");
-			if (strcmp(subJointType, "ndIkJointSpherical") == 0)
-			{
-				joint = new ndIkJointSpherical(pivotMatrix, childBody, parentBody);
-			}
-			else
-			{
-				ndAssert(0);
-			}
-		}
-		else
-		{
-			ndAssert(0);
-		}
-
-	}
-	else
-	{
-		ndTrace(("FIX ME urdf load jointType %s\n", jointType));
-	}
-
-	return joint;
 }
 
 //void ndUrdfFile::ApplyCoordinadeRotation(ndModelArticulation* const model, const ndMatrix& rotation)
@@ -1265,131 +786,64 @@ ndJointBilateralConstraint* ndUrdfFile::ImportJoint(const nd::TiXmlNode* const j
 //}
 
 
-// *******************************************************************************
-// 
-// *******************************************************************************
-void ndUrdfFile::Export(const char* const filePathName, ndModelArticulation* const model)
-{
-	ndAssert(strstr(filePathName, ".urdf"));
-
-	nd::TiXmlDocument* const doc = new nd::TiXmlDocument("");
-	nd::TiXmlDeclaration* const decl = new nd::TiXmlDeclaration("1.0", "", "");
-	doc->LinkEndChild(decl);
-	ndString oldloc(setlocale(LC_ALL, 0));
-
-	nd::TiXmlElement* const rootNode = new nd::TiXmlElement("robot");
-	doc->LinkEndChild(rootNode);
-
-	ExportMakeNamesUnique(model);
-	rootNode->SetAttribute("name", model->GetName().GetStr());
-
-	const ndMatrix modelMatrix(model->GetRoot()->m_body->GetMatrix());
-	model->SetTransform(ndPitchMatrix(ndPi * 0.5f));
-	//model->ConvertToUrdf();
-
-	Surrogate* const surrogate = ExportMakeSurrogate(model);
-	ndAssert(surrogate);
-
-	ExportMaterials(rootNode, surrogate);
-
-	ndFixSizeArray<Surrogate*, 256> stack;
-	stack.PushBack(surrogate);
-
-	while (stack.GetCount())
-	{
-		const Surrogate* const node = stack.Pop();
-		ExportLink(rootNode, node);
-		if (node->GetParent())
-		{
-			ExportJoint(rootNode, node);
-		}
-
-		for (Surrogate* child = node->GetFirstChild(); child; child = child->GetNext())
-		{
-			stack.PushBack(child);
-		}
-	}
-
-	model->SetTransform(modelMatrix);
-
-	delete surrogate;
-	doc->SaveFile(filePathName);
-	setlocale(LC_ALL, oldloc.GetStr());
-	delete doc;
-}
+//// *******************************************************************************
+//// 
+//// *******************************************************************************
+//void ndUrdfFile::Export(const char* const filePathName, ndModelArticulation* const model)
+//{
+//	ndAssert(strstr(filePathName, ".urdf"));
+//
+//	nd::TiXmlDocument* const doc = new nd::TiXmlDocument("");
+//	nd::TiXmlDeclaration* const decl = new nd::TiXmlDeclaration("1.0", "", "");
+//	doc->LinkEndChild(decl);
+//	ndString oldloc(setlocale(LC_ALL, 0));
+//
+//	nd::TiXmlElement* const rootNode = new nd::TiXmlElement("robot");
+//	doc->LinkEndChild(rootNode);
+//
+//	ExportMakeNamesUnique(model);
+//	rootNode->SetAttribute("name", model->GetName().GetStr());
+//
+//	const ndMatrix modelMatrix(model->GetRoot()->m_body->GetMatrix());
+//	model->SetTransform(ndPitchMatrix(ndPi * 0.5f));
+//	//model->ConvertToUrdf();
+//
+//	Surrogate* const surrogate = ExportMakeSurrogate(model);
+//	ndAssert(surrogate);
+//
+//	ExportMaterials(rootNode, surrogate);
+//
+//	ndFixSizeArray<Surrogate*, 256> stack;
+//	stack.PushBack(surrogate);
+//
+//	while (stack.GetCount())
+//	{
+//		const Surrogate* const node = stack.Pop();
+//		ExportLink(rootNode, node);
+//		if (node->GetParent())
+//		{
+//			ExportJoint(rootNode, node);
+//		}
+//
+//		for (Surrogate* child = node->GetFirstChild(); child; child = child->GetNext())
+//		{
+//			stack.PushBack(child);
+//		}
+//	}
+//
+//	model->SetTransform(modelMatrix);
+//
+//	delete surrogate;
+//	doc->SaveFile(filePathName);
+//	setlocale(LC_ALL, oldloc.GetStr());
+//	delete doc;
+//}
 
 // *******************************************************************************
 // 
 // *******************************************************************************
 ndModelArticulation* ndUrdfFile::Import(const char* const filePathName)
 {
-	ndAssert(strstr(filePathName, ".urdf"));
-
-	m_path = filePathName;
-	const char* ptr = strrchr(filePathName, '/');
-	if (!ptr)
-	{
-		ptr = strrchr(filePathName, '\\');
-	}
-	m_path = m_path.SubString(0, ndInt32(ptr - filePathName));
-
-	ndString oldloc = setlocale(LC_ALL, 0);
-	setlocale(LC_ALL, "C");
-
-	nd::TiXmlDocument doc(filePathName);
-	doc.LoadFile();
-	if (doc.Error())
-	{
-		setlocale(LC_ALL, oldloc.GetStr());
-		return nullptr;
-	}
-
-	m_materials.SetCount(0);
-	m_bodyLinks.RemoveAll();
-	m_materialMap.RemoveAll();
-
-	const nd::TiXmlElement* const rootNode = doc.RootElement();
-
-	for (const nd::TiXmlNode* node = rootNode->FirstChild("link"); node; node = node->NextSibling("link"))
-	{
-		const nd::TiXmlElement* const linkNode = (nd::TiXmlElement*)node;
-		const char* const name = linkNode->Attribute("name");
-		m_bodyLinks.Insert(Hierarchy(node), name);
-	}
-
-	for (const nd::TiXmlNode* node = rootNode->FirstChild("joint"); node; node = node->NextSibling("joint"))
-	{
-		const nd::TiXmlElement* const jointNode = (nd::TiXmlElement*)node;
-		const nd::TiXmlElement* const childNode = (nd::TiXmlElement*)jointNode->FirstChild("child");
-		const nd::TiXmlElement* const parentNode = (nd::TiXmlElement*)jointNode->FirstChild("parent");
-
-		const char* const childName = childNode->Attribute("link");
-		const char* const parentName = parentNode->Attribute("link");
-
-		ndTree<Hierarchy, ndString>::ndNode* const hierarchyChildNode = m_bodyLinks.Find(childName);
-		ndTree<Hierarchy, ndString>::ndNode* const hierarchyParentNode = m_bodyLinks.Find(parentName);
-
-		Hierarchy& hierachyChild = hierarchyChildNode->GetInfo();
-		Hierarchy& hierachyParent = hierarchyParentNode->GetInfo();
-
-		hierachyChild.m_joint = node;
-		hierachyChild.m_parent = &hierachyParent;
-		hierachyChild.m_parentLink = hierachyParent.m_link;
-	}
-
-	Hierarchy* root = nullptr;
-	ndTree<Hierarchy, ndString>::Iterator iter(m_bodyLinks);
-	for (iter.Begin(); iter; iter++)
-	{
-		Hierarchy& link = iter.GetNode()->GetInfo();
-		if (link.m_parentLink == nullptr)
-		{
-			root = &link;
-			break;
-		}
-	}
-
-	ImportMaterials(rootNode);
 	ndBodyDynamic* const rootBody = ImportLink(root->m_link);
 
 	ndModelArticulation* const model = new ndModelArticulation;
@@ -1429,3 +883,640 @@ ndModelArticulation* ndUrdfFile::Import(const char* const filePathName)
 	return model;
 }
 
+#endif
+
+
+ndUrdfMeshLoader::ndUrdfMeshLoader(ndRender* const renderer)
+	:ndRenderMeshLoader(renderer)
+{
+}
+
+ndJointBilateralConstraint* ndUrdfMeshLoader::ImportJoint(const nd::TiXmlNode* const jointNode, ndBodyDynamic* const childBody, ndBodyDynamic* const parentBody)
+{
+	ndJointBilateralConstraint* joint = nullptr;
+	ndMatrix childMatrix(ImportOrigin(jointNode));
+	childBody->SetMatrix(childMatrix * parentBody->GetMatrix());
+	ndMatrix pivotMatrix(childBody->GetMatrix());
+
+	ndInt32 ret = 0;
+
+	const char* const jointType = ((nd::TiXmlElement*)jointNode)->Attribute("type");
+	if (strcmp(jointType, "fixed") == 0)
+	{
+		joint = new ndJointFix6dof(pivotMatrix, childBody, parentBody);
+	}
+	else if (strcmp(jointType, "continuous") == 0)
+	{
+		const nd::TiXmlElement* const axisNode = (nd::TiXmlElement*)jointNode->FirstChild("axis");
+		if (axisNode)
+		{
+			ndReal x = ndFloat32(0.0f);
+			ndReal y = ndFloat32(0.0f);
+			ndReal z = ndFloat32(0.0f);
+			const char* const axisPin = axisNode->Attribute("xyz");
+			ret = sscanf(axisPin, "%f %f %f", &x, &y, &z);
+
+			ndMatrix matrix(ndGramSchmidtMatrix(ndVector(x, y, z, ndFloat32(0.0f))));
+			pivotMatrix = matrix * pivotMatrix;
+		}
+		joint = new ndJointHinge(pivotMatrix, childBody, parentBody);
+		const nd::TiXmlElement* const newtonEx = (nd::TiXmlElement*)jointNode->FirstChild("newton");
+		if (newtonEx)
+		{
+			ndReal springPD;
+			ndReal damperPD;
+			ndReal regularizerPD;
+
+			const char* const spring = newtonEx->Attribute("springPD");
+			const char* const damper = newtonEx->Attribute("damperPD");
+			const char* const regularizer = newtonEx->Attribute("regularizer");
+			ret = sscanf(spring, "%f", &springPD);
+			ret = sscanf(damper, "%f", &damperPD);
+			ret = sscanf(regularizer, "%f", &regularizerPD);
+
+			ndJointHinge* const hinge = (ndJointHinge*)joint;
+			hinge->SetAsSpringDamper(regularizerPD, springPD, damperPD);
+		}
+	}
+	else if (strcmp(jointType, "prismatic") == 0)
+	{
+		const nd::TiXmlElement* const axisNode = (nd::TiXmlElement*)jointNode->FirstChild("axis");
+		if (axisNode)
+		{
+			ndReal x = ndFloat32(0.0f);
+			ndReal y = ndFloat32(0.0f);
+			ndReal z = ndFloat32(0.0f);
+			const char* const axisPin = axisNode->Attribute("xyz");
+			ret = sscanf(axisPin, "%f %f %f", &x, &y, &z);
+
+			ndMatrix matrix(ndGramSchmidtMatrix(ndVector(x, y, z, ndFloat32(0.0f))));
+			pivotMatrix = matrix * pivotMatrix;
+		}
+		joint = new ndJointSlider(pivotMatrix, childBody, parentBody);
+
+		const nd::TiXmlElement* const limit = (nd::TiXmlElement*)jointNode->FirstChild("limit");
+		if (limit)
+		{
+			ndFloat64 effort = 0.0f;
+			ndFloat64 lower = 0.0f;
+			ndFloat64 upper = 0.0f;
+			limit->Attribute("effort", &effort);
+			limit->Attribute("lower", &lower);
+			limit->Attribute("upper", &upper);
+
+			ndJointSlider* const slider = (ndJointSlider*)joint;
+			slider->SetLimits(ndFloat32(lower), ndFloat32(upper));
+			slider->SetLimitState(true);
+		}
+	}
+	else if (strcmp(jointType, "revolute") == 0)
+	{
+		const nd::TiXmlElement* const axisNode = (nd::TiXmlElement*)jointNode->FirstChild("axis");
+		if (axisNode)
+		{
+			ndReal x = ndFloat32(0.0f);
+			ndReal y = ndFloat32(0.0f);
+			ndReal z = ndFloat32(0.0f);
+			const char* const axisPin = axisNode->Attribute("xyz");
+			ret = sscanf(axisPin, "%f %f %f", &x, &y, &z);
+
+			ndMatrix matrix(ndGramSchmidtMatrix(ndVector(x, y, z, ndFloat32(0.0f))));
+			pivotMatrix = matrix * pivotMatrix;
+		}
+
+		//ndAssert(0);
+		const nd::TiXmlElement* const newtonEx = (nd::TiXmlElement*)jointNode->FirstChild("newton");
+		if (newtonEx)
+		{
+			const char* const subJointType = newtonEx->Attribute("replaceWith");
+			if (strcmp(subJointType, "ndIkJointHinge") == 0)
+			{
+				joint = new ndIkJointHinge(pivotMatrix, childBody, parentBody);
+			}
+			else
+			{
+				joint = new ndJointHinge(pivotMatrix, childBody, parentBody);
+			}
+		}
+		else
+		{
+			joint = new ndJointHinge(pivotMatrix, childBody, parentBody);
+		}
+
+		const nd::TiXmlElement* const limit = (nd::TiXmlElement*)jointNode->FirstChild("limit");
+		if (limit)
+		{
+			ndFloat64 effort = 0.0f;
+			ndFloat64 lower = 0.0f;
+			ndFloat64 upper = 0.0f;
+			limit->Attribute("effort", &effort);
+			limit->Attribute("lower", &lower);
+			limit->Attribute("upper", &upper);
+
+			ndJointHinge* const hinge = (ndJointHinge*)joint;
+			hinge->SetLimits(ndFloat32(lower), ndFloat32(upper));
+			hinge->SetLimitState(true);
+		}
+
+		//const nd::TiXmlElement* const newtonEx = (nd::TiXmlElement*)jointNode->FirstChild("newton");
+		if (newtonEx)
+		{
+			const char* const spring = newtonEx->Attribute("springPD");
+			const char* const damper = newtonEx->Attribute("damperPD");
+			const char* const regularizer = newtonEx->Attribute("regularizer");
+			if (regularizer || damper || spring)
+			{
+				ndReal springPD = 0.0f;
+				ndReal damperPD = 0.0f;
+				ndReal regularizerPD = 0.0f;
+				if (spring)
+				{
+					ret = sscanf(spring, "%f", &springPD);
+				}
+				if (damperPD)
+				{
+					ret = sscanf(damper, "%f", &damperPD);
+				}
+				if (regularizerPD)
+				{
+					ret = sscanf(regularizer, "%f", &regularizerPD);
+				}
+				ndJointHinge* const hinge = (ndJointHinge*)joint;
+				hinge->SetAsSpringDamper(regularizerPD, springPD, damperPD);
+			}
+		}
+	}
+	else if (strcmp(jointType, "floating") == 0)
+	{
+		const nd::TiXmlElement* const newtonEx = (nd::TiXmlElement*)jointNode->FirstChild("newton");
+		if (newtonEx)
+		{
+			const char* const subJointType = newtonEx->Attribute("replaceWith");
+			if (strcmp(subJointType, "ndIkJointSpherical") == 0)
+			{
+				joint = new ndIkJointSpherical(pivotMatrix, childBody, parentBody);
+			}
+			else
+			{
+				ndAssert(0);
+			}
+		}
+		else
+		{
+			ndAssert(0);
+		}
+	}
+	else
+	{
+		ndTrace(("FIX ME urdf load jointType %s\n", jointType));
+	}
+
+	return joint;
+}
+
+ndMatrix ndUrdfMeshLoader::ImportOrigin(const nd::TiXmlNode* const parentNode) const
+{
+	const nd::TiXmlElement* const origin = (nd::TiXmlElement*)parentNode->FirstChild("origin");
+
+	ndMatrix matrix(ndGetIdentityMatrix());
+	if (origin)
+	{
+		ndReal x = ndFloat32(0.0f);
+		ndReal y = ndFloat32(0.0f);
+		ndReal z = ndFloat32(0.0f);
+		ndReal yaw = ndFloat32(0.0f);
+		ndReal roll = ndFloat32(0.0f);
+		ndReal pitch = ndFloat32(0.0f);
+		ndInt32 ret = 0;
+		const char* const xyz = origin->Attribute("xyz");
+		if (xyz)
+		{
+			ret = sscanf(xyz, "%f %f %f", &x, &y, &z);
+		}
+		const char* const rpy = origin->Attribute("rpy");
+		if (rpy)
+		{
+			ret = sscanf(rpy, "%f %f %f", &pitch, &yaw, &roll);
+		}
+
+		matrix = ndPitchMatrix(pitch) * ndYawMatrix(yaw) * ndRollMatrix(roll);
+		matrix.m_posit.m_x = x;
+		matrix.m_posit.m_y = y;
+		matrix.m_posit.m_z = z;
+	}
+	return matrix;
+}
+
+bool ndUrdfMeshLoader::ImportStlMesh(const char* const pathName, ndMeshEffect* const meshEffect) const
+{
+	char meshFile[1024];
+	const char* meshName = strrchr(pathName, '/');
+	if (!meshName)
+	{
+		meshName = strrchr(pathName, '\\');
+	}
+	snprintf(meshFile, sizeof(meshFile), "%s", meshName + 1);
+	char* ptr = strrchr(meshFile, '.');
+	snprintf(ptr, 32, ".stl");
+
+	bool ret = dGetWorkingFileName(m_path.GetStr(), meshFile, sizeof(meshFile) - 1);
+	if (!ret)
+	{
+		ndTrace(("file: %s not found\n", pathName));
+		return false;
+	}
+	ret = true;
+	FILE* const file = fopen(meshFile, "rb");
+	if (file)
+	{
+		size_t readValues = 0;
+		char buffer[256];
+		for (ndInt32 i = 0; i < 80; ++i)
+		{
+			buffer[i] = char(fgetc(file));
+		}
+	
+		ndInt32 numberOfTriangles;
+		readValues += fread(&numberOfTriangles, 1, 4, file);
+		//ndFloat32 inchToMeters = 0.0254f;
+		ndFloat32 inchToMeters = ndFloat32(1.0f);
+	
+		ndReal normal[3];
+		ndReal triangle[3][3];
+		ndUnsigned16 flags;
+	
+		for (ndInt32 i = 0; i < numberOfTriangles; ++i)
+		{
+			readValues += fread(normal, 1, sizeof(normal), file);
+			readValues += fread(triangle, 1, sizeof(triangle), file);
+			readValues += fread(&flags, 1, sizeof(flags), file);
+	
+			meshEffect->BeginBuildFace();
+			for (ndInt32 j = 0; j < 3; ++j)
+			{
+				meshEffect->AddMaterial(0);
+				meshEffect->AddPoint(triangle[j][0] * inchToMeters, triangle[j][1] * inchToMeters, triangle[j][2] * inchToMeters);
+				meshEffect->AddNormal(normal[0], normal[1], normal[2]);
+			}
+			meshEffect->EndBuildFace();
+		}
+	
+		fclose(file);
+	
+		ret = true;
+	}
+	else
+	{
+		ret = false;
+		ndTrace(("file: %s not found\n", pathName));
+	}
+	return ret;
+}
+
+void ndUrdfMeshLoader::ImportCollision(const nd::TiXmlNode* const linkNode, ndBodyDynamic* const body)
+{
+	ndArray<const nd::TiXmlNode*> collisions;
+	for (const nd::TiXmlNode* node = linkNode->FirstChild("collision"); node; node = node->NextSibling("collision"))
+	{
+		collisions.PushBack(node);
+	}
+	if (collisions.GetCount() == 0)
+	{
+		for (const nd::TiXmlNode* node = linkNode->FirstChild("visual"); node; node = node->NextSibling("visual"))
+		{
+			collisions.PushBack(node);
+		}
+	}
+
+	auto GetCollisionShape = [this](const nd::TiXmlNode* const node, ndShapeInstance& collision)
+	{
+		const nd::TiXmlNode* const geometryNode = node->FirstChild("geometry");
+		const nd::TiXmlElement* const shapeNode = (nd::TiXmlElement*)geometryNode->FirstChild();
+		const char* const name = shapeNode->Value();
+
+		ndShape* shape = nullptr;
+
+		if (strcmp(name, "sphere") == 0)
+		{
+			ndFloat64 radius;
+			shapeNode->Attribute("radius", &radius);
+			shape = new ndShapeSphere(ndFloat32(radius));
+		}
+		else if (strcmp(name, "cylinder") == 0)
+		{
+			ndFloat64 length;
+			ndFloat64 radius;
+			shapeNode->Attribute("length", &length);
+			shapeNode->Attribute("radius", &radius);
+
+			nd::TiXmlElement* const newtonExt = (nd::TiXmlElement*)geometryNode->FirstChild("newton");
+			ndInt32 cylinderKind = 0;
+			if (newtonExt)
+			{
+				const char* const surrogateShape = newtonExt->Attribute("replaceWith");
+				if (strcmp(surrogateShape, "capsule") == 0)
+				{
+					cylinderKind = 1;
+				}
+				else if (strcmp(surrogateShape, "wheel") == 0)
+				{
+					cylinderKind = 2;
+				}
+			}
+
+			switch (cylinderKind)
+			{
+				case 0:
+					shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
+					break;
+				case 1:
+					length = length - 2.0f * radius;
+					shape = new ndShapeCapsule(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
+					break;
+				default:
+					ndAssert(0);
+					shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
+			}
+			ndMatrix matrix(ndYawMatrix(ndPi * ndFloat32(0.5f)));
+			collision.SetLocalMatrix(matrix);
+		}
+		else if (strcmp(name, "box") == 0)
+		{
+			ndReal x;
+			ndReal y;
+			ndReal z;
+			ndInt32 ret = 0;
+			const char* const size = shapeNode->Attribute("size");
+			ret = sscanf(size, "%f %f %f", &x, &y, &z);
+			shape = new ndShapeBox(x, y, z);
+		}
+		else
+		{
+			const char* const meshPathName = shapeNode->Attribute("filename");
+			ndMeshEffect meshEffect;
+			meshEffect.BeginBuild();
+			bool hasFile = ImportStlMesh(meshPathName, &meshEffect);
+			meshEffect.EndBuild(false);
+
+			if (hasFile)
+			{
+				ndArray<ndVector> hull;
+				ndInt32 vertexCount = meshEffect.GetVertexCount();
+				ndInt32 stride = meshEffect.GetVertexStrideInByte();
+				const char* vertexPoolBytes = (char*)meshEffect.GetVertexPool();
+				for (ndInt32 i = 0; i < vertexCount; ++i)
+				{
+					const ndFloat64* const vertexPoolFloat = (ndFloat64*)vertexPoolBytes;
+					ndVector point(vertexPoolFloat[0], vertexPoolFloat[1], vertexPoolFloat[2], ndFloat64(0.0f));
+					hull.PushBack(point);
+					vertexPoolBytes += stride;
+				}
+				shape = new ndShapeConvexHull(vertexCount, ndInt32(sizeof(ndVector)), 1.0e-6f, &hull[0].m_x, 128);
+			}
+			else
+			{
+				//ndTrace(("replace %s with a sphere shape as place holder\n", shapeNode->Attribute("filename")));
+				shape = new ndShapeSphere(ndFloat32 (0.025f));
+			}
+		}
+		return shape;
+	};
+
+	ndShapeInstance collision(new ndShapeNull());
+	if (collisions.GetCount() == 0)
+	{
+		// add a place holder shape
+		collision.SetShape(new ndShapeSphere(ndFloat32(0.025f)));
+	}
+	else if (collisions.GetCount() == 1)
+	{
+		const nd::TiXmlNode* const node = collisions[0];
+		collision.SetShape(GetCollisionShape(node, collision));
+		const ndMatrix matrix(ImportOrigin(node));
+		collision.SetLocalMatrix(collision.GetLocalMatrix() * matrix);
+	}
+	else
+	{
+		//ndTrace(("implement support for compound here, for now, just use the first shape\n"));
+		ndShapeCompound* const compound = new ndShapeCompound();
+		compound->BeginAddRemove();
+		for (ndInt32 i = 0; i < ndInt32(collisions.GetCount()); ++i)
+		{
+			const ndMatrix matrix(ImportOrigin(collisions[i]));
+			ndShapeInstance childInstance(new ndShapeNull());
+			childInstance.SetShape(GetCollisionShape(collisions[i], childInstance));
+			childInstance.SetLocalMatrix(childInstance.GetLocalMatrix() * matrix);
+			compound->AddCollision(&childInstance);
+		}
+		compound->EndAddRemove();
+		collision.SetShape(compound);
+	}
+
+	body->SetCollisionShape(collision);
+}
+
+bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
+{
+	//char assetPath[1024];
+	//snprintf(assetPath, sizeof(assetPath) - 1, "%s", urdfPathName.GetStr());
+	//char* meshName = strrchr(assetPath, '/');
+	//if (!meshName)
+	//{
+	//	meshName = strrchr(assetPath, '\\');
+	//}
+	//ndAssert(meshName);
+	//*meshName = 0;
+	//m_path = ndString(assetPath);
+	m_path = GetPath(urdfPathName);
+
+	ndString oldloc = setlocale(LC_ALL, 0);
+	setlocale(LC_ALL, "C");
+
+	nd::TiXmlDocument doc(urdfPathName.GetStr());
+	doc.LoadFile();
+	if (doc.Error())
+	{
+		setlocale(LC_ALL, oldloc.GetStr());
+		return nullptr;
+	}
+
+	// load all the body nodes
+	const nd::TiXmlElement* const rootNode = doc.RootElement();
+	for (const nd::TiXmlNode* node = rootNode->FirstChild("link"); node; node = node->NextSibling("link"))
+	{
+		const nd::TiXmlElement* const linkNode = (nd::TiXmlElement*)node;
+		const char* const name = linkNode->Attribute("name");
+		m_bodyLinks.Insert(Hierarchy(node), name);
+	}
+
+	// load all joints
+	for (const nd::TiXmlNode* node = rootNode->FirstChild("joint"); node; node = node->NextSibling("joint"))
+	{
+		const nd::TiXmlElement* const jointNode = (nd::TiXmlElement*)node;
+		const nd::TiXmlElement* const childNode = (nd::TiXmlElement*)jointNode->FirstChild("child");
+		const nd::TiXmlElement* const parentNode = (nd::TiXmlElement*)jointNode->FirstChild("parent");
+
+		const char* const childName = childNode->Attribute("link");
+		const char* const parentName = parentNode->Attribute("link");
+
+		ndTree<Hierarchy, ndString>::ndNode* const hierarchyChildNode = m_bodyLinks.Find(childName);
+		ndTree<Hierarchy, ndString>::ndNode* const hierarchyParentNode = m_bodyLinks.Find(parentName);
+
+		Hierarchy& hierachyChild = hierarchyChildNode->GetInfo();
+		Hierarchy& hierachyParent = hierarchyParentNode->GetInfo();
+
+		hierachyChild.m_joint = node;
+		hierachyChild.m_parent = &hierachyParent;
+		hierachyChild.m_parentLink = hierachyParent.m_link;
+	}
+
+	// find the root link;
+	Hierarchy* root = nullptr;
+	ndTree<Hierarchy, ndString>::Iterator iter(m_bodyLinks);
+	for (iter.Begin(); iter; iter++)
+	{
+		Hierarchy& link = iter.GetNode()->GetInfo();
+		if (link.m_parentLink == nullptr)
+		{
+			root = &link;
+			break;
+		}
+	}
+	ndAssert(root);
+
+	// impot all materials
+	m_materials.SetCount(0);
+	m_materialMap.RemoveAll();
+	m_materials.PushBack(Material());
+	snprintf(m_materials[0].m_texture, sizeof(m_materials[0].m_texture), "wood_0.png");
+
+	size_t readValues = 0;
+	for (const nd::TiXmlNode* node = rootNode->FirstChild("material"); node; node = node->NextSibling("material"))
+	{
+		const nd::TiXmlElement* const materialNode = (nd::TiXmlElement*)node;
+
+		const char* const name = materialNode->Attribute("name");
+		m_materialMap.Insert(ndInt32(m_materials.GetCount()), name);
+
+		Material material;
+		const nd::TiXmlElement* const color = (nd::TiXmlElement*)node->FirstChild("color");
+		if (color)
+		{
+			ndReal r;
+			ndReal g;
+			ndReal b;
+			ndReal a;
+			const char* const rgba = color->Attribute("rgba");
+			readValues += sscanf(rgba, "%f %f %f %f", &r, &g, &b, &a);
+			material.m_color.m_x = r;
+			material.m_color.m_y = g;
+			material.m_color.m_z = b;
+			material.m_color.m_w = a;
+		}
+		const nd::TiXmlElement* const texture = (nd::TiXmlElement*)node->FirstChild("texture");
+		if (texture)
+		{
+			const char* const texName = texture->Attribute("filename");
+			snprintf(material.m_texture, sizeof(material.m_texture), "%s", texName);
+		}
+		else
+		{
+			snprintf(material.m_texture, sizeof(material.m_texture), "default.png");
+		}
+		m_materials.PushBack(material);
+	}
+
+	auto ImportLink = [this](const nd::TiXmlNode* const linkNode)
+	{
+		ndBodyDynamic* const body = new ndBodyDynamic();
+
+		//ImportVisual(linkNode, body);
+		ImportCollision(linkNode, body);
+
+		ndFloat64 mass = ndFloat64(1.0f);
+		const nd::TiXmlNode* const inertialNode = linkNode->FirstChild("inertial");
+		if (inertialNode)
+		{
+			const nd::TiXmlElement* const massNode = (nd::TiXmlElement*)inertialNode->FirstChild("mass");
+			const nd::TiXmlElement* const inertiaNode = (nd::TiXmlElement*)inertialNode->FirstChild("inertia");
+
+			ndFloat64 xx;
+			ndFloat64 xy;
+			ndFloat64 xz;
+			ndFloat64 yy;
+			ndFloat64 yz;
+			ndFloat64 zz;
+
+			massNode->Attribute("value", &mass);
+			inertiaNode->Attribute("ixx", &xx);
+			inertiaNode->Attribute("ixy", &xy);
+			inertiaNode->Attribute("ixz", &xz);
+			inertiaNode->Attribute("iyy", &yy);
+			inertiaNode->Attribute("iyz", &yz);
+			inertiaNode->Attribute("izz", &zz);
+
+			ndMatrix inertiaMatrix(ndGetIdentityMatrix());
+			inertiaMatrix[0][0] = ndFloat32(xx);
+			inertiaMatrix[1][1] = ndFloat32(yy);
+			inertiaMatrix[2][2] = ndFloat32(zz);
+
+			inertiaMatrix[0][1] = ndFloat32(xy);
+			inertiaMatrix[1][0] = ndFloat32(xy);
+
+			inertiaMatrix[0][2] = ndFloat32(xz);
+			inertiaMatrix[2][0] = ndFloat32(xz);
+
+			inertiaMatrix[1][2] = ndFloat32(yz);
+			inertiaMatrix[2][1] = ndFloat32(yz);
+
+			if (mass < ndFloat32(0.1f))
+			{
+				mass = ndFloat32(0.1f);
+			}
+		}
+		body->SetMassMatrix(ndFloat32(mass), body->GetCollisionShape());
+
+		return body;
+	};
+	
+	ndFixSizeArray<Hierarchy*, 256> stack;
+	stack.PushBack(root);
+
+	ndModelArticulation model;
+	while (stack.GetCount())
+	{
+		Hierarchy* const childNode = stack.Pop();
+		const char* const childName = ((nd::TiXmlElement*)childNode->m_link)->Attribute("name");
+	
+		if (childNode->m_joint)
+		{
+			ndBodyDynamic* const childBody = ImportLink(childNode->m_link);
+			ndBodyDynamic* const parentBody = childNode->m_parent->m_articulation->m_body->GetAsBodyDynamic();
+			ndJointBilateralConstraint* const joint = ImportJoint(childNode->m_joint, childBody, parentBody);
+			childNode->m_articulation = model.AddLimb(childNode->m_parent->m_articulation, joint->GetBody0(), joint);
+		}
+		else
+		{
+			ndBodyDynamic* const rootBody = ImportLink(childNode->m_link);
+			childNode->m_articulation = model.AddRootBody(rootBody);
+		}
+		childNode->m_articulation->m_name = childName;
+	
+		for (iter.Begin(); iter; iter++)
+		{
+			Hierarchy& link = iter.GetNode()->GetInfo();
+			if (link.m_parent == childNode)
+			{
+				stack.PushBack(&link);
+			}
+		}
+	}
+	
+	model.SetTransform(ndPitchMatrix(-ndPi * 0.5f));
+	m_mesh = ndSharedPtr<ndMesh>(model.CreateDefaultMesh());
+	MeshToRenderSceneNode(m_path);
+	
+	setlocale(LC_ALL, oldloc.GetStr());
+
+	return true;
+}
