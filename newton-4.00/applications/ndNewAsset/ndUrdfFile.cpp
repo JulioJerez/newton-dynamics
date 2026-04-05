@@ -1164,7 +1164,7 @@ bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 	if (doc.Error())
 	{
 		setlocale(LC_ALL, oldloc.GetStr());
-		return nullptr;
+		return false;
 	}
 
 	// load all the body nodes
