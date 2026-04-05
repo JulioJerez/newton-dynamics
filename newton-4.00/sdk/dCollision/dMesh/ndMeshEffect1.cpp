@@ -2606,6 +2606,11 @@ void ndMeshEffect::BeginBuild()
 
 void ndMeshEffect::EndBuild(bool fixTjoint)
 {
+	if (m_points.m_vertex.GetCount() == 0)
+	{
+		return;
+	}
+
 	#ifdef _DEBUG
 	for (ndInt32 i = 0; i < m_points.m_vertex.GetCount(); i += 3)
 	{

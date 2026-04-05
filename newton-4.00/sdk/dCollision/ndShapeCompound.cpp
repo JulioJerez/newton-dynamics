@@ -26,6 +26,7 @@
 #include "ndContactSolver.h"
 #include "ndBodyKinematic.h"
 #include "ndShapeCompound.h"
+#include "ndMeshBaseComponents.h"
 
 #define D_MAX_MIN_VOLUME	ndFloat32 (1.0e-3f)
 
@@ -1354,4 +1355,20 @@ ndUnsigned64 ndShapeCompound::GetHash(ndUnsigned64 hash) const
 		crc = childShape->GetHash(crc);
 	}
 	return crc;
+}
+
+ndSharedPtr<ndMeshCollisionShape> ndShapeCompound::GetMeshShape() const
+{
+	ndMeshCollisionShapeCompound* const shape = new ndMeshCollisionShapeCompound;
+	ndShapeCompound* const compoundShape = (ndShapeCompound*)this;
+
+	ndShapeCompound::ndTreeArray::Iterator it(GetTree());
+	for (it.Begin(); it; it++)
+	{
+		const ndShapeInstance* const childInstance = compoundShape->GetShapeInstance(it.GetNode());
+		ndSharedPtr<ndMeshShapeInstance> subMeshShape(new ndMeshShapeInstance);
+		childInstance->Serialize(*subMeshShape);
+		shape->m_subShapes.Append(subMeshShape);
+	}
+	return ndSharedPtr<ndMeshCollisionShape>(shape);
 }

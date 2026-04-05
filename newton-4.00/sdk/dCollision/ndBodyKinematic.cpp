@@ -1094,12 +1094,12 @@ void ndBodyKinematic::SaveNdMesh(const char* const path) const
 void ndBodyKinematic::Serialize(ndSharedPtr<ndMeshBody>& meshBody) const
 {
 	ndBody::Serialize(meshBody);
-	ndMeshBodyKinematic* const kinematicMeshBody = (ndMeshBodyKinematic*)*meshBody;
-	kinematicMeshBody->m_invMass = m_invMass;
-	kinematicMeshBody->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
-	kinematicMeshBody->m_maxLinearStep = m_maxLinearStep;
-	kinematicMeshBody->m_maxAngleStep = m_maxAngleStep * ndRadToDegree;
-	m_shapeInstance.Serialize(&kinematicMeshBody->m_shapeInstance);
+	ndMeshBodyKinematic* const meshKinematicBody = (ndMeshBodyKinematic*)*meshBody;
+	meshKinematicBody->m_invMass = m_invMass;
+	meshKinematicBody->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
+	meshKinematicBody->m_maxLinearStep = m_maxLinearStep;
+	meshKinematicBody->m_maxAngleStep = m_maxAngleStep * ndRadToDegree;
+	m_shapeInstance.Serialize(&meshKinematicBody->m_shapeInstance);
 }
 
 void ndBodyKinematic::Deserialize(const ndMeshBody* const meshBody)

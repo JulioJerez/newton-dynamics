@@ -115,6 +115,16 @@ class ndMeshCollisionShapeConvexHull : public ndMeshCollisionShape
 	ndArray<ndVector> m_points;
 };
 
+class ndMeshCollisionShapeCompound : public ndMeshCollisionShape
+{
+	public:
+	D_COLLISION_API virtual ndShape* CreateObject() const override;
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+
+	ndList<ndSharedPtr<ndMeshShapeInstance>> m_subShapes;
+};
+
 class ndMeshShapeInstance : public ndClassAlloc
 {
 	public:

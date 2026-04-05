@@ -152,7 +152,6 @@ class ndUrdfMeshLoader : public ndRenderMeshLoader
 			,m_joint(nullptr)
 			,m_parentLink(nullptr)
 			,m_articulation(nullptr)
-			,m_parentArticulation(nullptr)
 		{
 		}
 
@@ -161,7 +160,6 @@ class ndUrdfMeshLoader : public ndRenderMeshLoader
 		const nd::TiXmlNode* m_joint;
 		const nd::TiXmlNode* m_parentLink;
 		ndModelArticulation::ndNode* m_articulation;
-		ndModelArticulation::ndNode* m_parentArticulation;
 	};
 
 	public:
@@ -171,7 +169,7 @@ class ndUrdfMeshLoader : public ndRenderMeshLoader
 
 	private:
 	ndMatrix ImportOrigin(const nd::TiXmlNode* const parentNode) const;
-	void ImportStlMesh(const char* const pathName, ndMeshEffect* const meshEffect) const;
+	bool ImportStlMesh(const char* const pathName, ndMeshEffect* const meshEffect) const;
 	void ImportCollision(const nd::TiXmlNode* const linkNode, ndBodyDynamic* const body);
 	ndJointBilateralConstraint* ImportJoint(const nd::TiXmlNode* const jointNode, ndBodyDynamic* const childBody, ndBodyDynamic* const parentBody);
 

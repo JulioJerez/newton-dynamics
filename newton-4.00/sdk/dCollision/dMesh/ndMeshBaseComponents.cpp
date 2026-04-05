@@ -27,6 +27,7 @@
 #include "ndShapeSphere.h"
 #include "ndShapeCapsule.h"
 #include "ndShapeCylinder.h"
+#include "ndShapeCompound.h"
 #include "ndShapeConvexHull.h"
 #include "ndMeshBaseComponents.h"
 #include "ndShapeChamferCylinder.h"
@@ -165,6 +166,22 @@ void ndMeshCollisionShapeConvexHull::DeserializeFromXml(const nd::TiXmlElement* 
 ndShape* ndMeshCollisionShapeConvexHull::CreateObject() const
 {
 	return new ndShapeConvexHull(ndInt32(m_points.GetCount()), sizeof(ndVector), ndFloat32(0.0f), &m_points[0].m_x);
+}
+
+ndShape* ndMeshCollisionShapeCompound::CreateObject() const
+{
+	ndAssert(0);
+	return nullptr;
+}
+
+void ndMeshCollisionShapeCompound::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndAssert(0);
+}
+
+void ndMeshCollisionShapeCompound::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndAssert(0);
 }
 
 ndMeshShapeInstance::ndMeshShapeInstance()
