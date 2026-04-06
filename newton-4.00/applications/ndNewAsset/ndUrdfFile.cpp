@@ -993,8 +993,10 @@ bool ndUrdfMeshLoader::ImportObjMesh(const ndMatrix& matrix, const char* const p
 
 			ndVector n(rotation.RotateVector (ndVector(x, y, z, ndReal(0.0f))));
 			ndAssert(n.m_w == ndFloat32(0.0f));
-			ndAssert(n.DotProduct(n).GetScalar() > ndFloat32(0.0f));
-			n = n.Normalize();
+			if (n.DotProduct(n).GetScalar() > ndFloat32(0.0f))
+			{
+				n = n.Normalize();
+			}
 			normals.PushBack(n);
 		}
 		else if (strcmp(token, "f") == 0)
@@ -1046,12 +1048,14 @@ bool ndUrdfMeshLoader::ImportObjMesh(const ndMatrix& matrix, const char* const p
 void ndUrdfMeshLoader::ImportCollision(const nd::TiXmlNode* const linkNode, ndBodyDynamic* const body)
 {
 	ndArray<const nd::TiXmlNode*> collisions;
+	//bool useVisual = false;
 	for (const nd::TiXmlNode* node = linkNode->FirstChild("collision"); node; node = node->NextSibling("collision"))
 	{
 		collisions.PushBack(node);
 	}
 	if (collisions.GetCount() == 0)
 	{
+		//useVisual = true;
 		for (const nd::TiXmlNode* node = linkNode->FirstChild("visual"); node; node = node->NextSibling("visual"))
 		{
 			collisions.PushBack(node);
@@ -1061,7 +1065,11 @@ void ndUrdfMeshLoader::ImportCollision(const nd::TiXmlNode* const linkNode, ndBo
 	auto GetCollisionShape = [this](const nd::TiXmlNode* const node, ndShapeInstance& collision)
 	{
 		const nd::TiXmlNode* const geometryNode = node->FirstChild("geometry");
-		const nd::TiXmlElement* const shapeNode = (nd::TiXmlElement*)geometryNode->FirstChild();
+		const nd::TiXmlElement* shapeNode = (nd::TiXmlElement*)geometryNode->FirstChild();
+		if (shapeNode->Type() == nd::TiXmlNode::COMMENT)
+		{
+			shapeNode = (nd::TiXmlElement*)shapeNode->NextSibling();
+		}
 		const char* const name = shapeNode->Value();
 
 		ndShape* shape = nullptr;
@@ -1225,6 +1233,18 @@ void ndUrdfMeshLoader::ImportVisual(const nd::TiXmlNode* const linkNode, ndMesh*
 			materialName.ToLower();
 			if (materialName.Size())
 			{
+				const nd::TiXmlNode* const colorNode = materialNode->FirstChild("color");
+				if (colorNode)
+				{
+					ndReal red;
+					ndReal green;
+					ndReal blue;
+					ndReal alpha;
+					const char* const rgba = ((nd::TiXmlElement*)colorNode)->Attribute("rgba");
+					ret = sscanf(rgba, "%f %f %f %f", &red, &green, &blue, &alpha);
+					meshMaterial.m_diffuse = ndVector(red, green, blue, alpha);
+				}
+
 				for (ndInt32 i = 0; i < m_materials.GetCount(); ++i)
 				{
 					const ndString material(m_materials[i].m_name);
@@ -1614,7 +1634,6 @@ bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 			childNode->m_articulation = model.AddRootBody(rootBody);
 			childNode->m_articulation->m_name = childName;
 		}
-		
 
 		for (iter.Begin(); iter; iter++)
 		{
