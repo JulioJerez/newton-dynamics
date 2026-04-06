@@ -1188,17 +1188,6 @@ void ndUrdfMeshLoader::ImportCollision(const nd::TiXmlNode* const linkNode, ndBo
 void ndUrdfMeshLoader::ImportVisual(const nd::TiXmlNode* const linkNode, ndMesh* const meshNode) const
 {
 	ndSharedPtr<ndMeshEffect> meshEffect (new ndMeshEffect);
-	//for (ndInt32 i = 0; i < ndInt32(m_materials.GetCount()); ++i)
-	//{
-	//	ndMeshEffect::ndMaterial meshMaterial;
-	//	meshMaterial.m_diffuse = m_materials[i].m_color;
-	//	//meshMaterial.m_ambient = materials[i].m_color;
-	//	//strcpy(meshMaterial.m_textureName, "wood_0.png");
-	//	//const char* texture = &m_materials[i].m_texture[0];
-	//	//snprintf(meshMaterial.m_textureName, sizeof (meshMaterial.m_textureName), "%s", texture);
-	//	strncpy(meshMaterial.m_textureName, m_materials[i].m_texture, sizeof(meshMaterial.m_textureName));
-	//	meshEffect->GetMaterials().PushBack(meshMaterial);
-	//}
 	
 	auto AddMeshShape = [this, &meshEffect](const nd::TiXmlNode* const node)
 	{
@@ -1317,44 +1306,46 @@ void ndUrdfMeshLoader::ImportVisual(const nd::TiXmlNode* const linkNode, ndMesh*
 			ndAddSubShape debugMesh(*meshEffect, materialIndex);
 			instance.DebugShape(matrix, debugMesh);
 		}
-		//else if (strcmp(name, "cylinder") == 0)
-		//{
-		//	ndFloat64 length;
-		//	ndFloat64 radius;
-		//	shapeNode->Attribute("length", &length);
-		//	shapeNode->Attribute("radius", &radius);
-		//
-		//	nd::TiXmlElement* const newtonExt = (nd::TiXmlElement*)geometryNode->FirstChild("newton");
-		//	ndInt32 cylinderKind = 0;
-		//	if (newtonExt)
-		//	{
-		//		const char* const surrogateShape = newtonExt->Attribute("replaceWith");
-		//		if (strcmp(surrogateShape, "capsule") == 0)
-		//		{
-		//			cylinderKind = 1;
-		//		}
-		//		else if (strcmp(surrogateShape, "wheel") == 0)
-		//		{
-		//			cylinderKind = 2;
-		//		}
-		//	}
-		//
-		//	//shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
-		//	switch (cylinderKind)
-		//	{
-		//	case 0:
-		//		shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
-		//		break;
-		//	case 1:
-		//		length = length - 2.0f * radius;
-		//		shape = new ndShapeCapsule(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
-		//		break;
-		//	default:
-		//		ndAssert(0);
-		//		shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
-		//	}
-		//	localMatrix = ndYawMatrix(ndPi * ndFloat32(0.5f));
-		//}
+		else if (strcmp(name, "cylinder") == 0)
+		{
+			ndFloat64 length;
+			ndFloat64 radius;
+			shapeNode->Attribute("length", &length);
+			shapeNode->Attribute("radius", &radius);
+		
+			nd::TiXmlElement* const newtonExt = (nd::TiXmlElement*)geometryNode->FirstChild("newton");
+			ndInt32 cylinderKind = 0;
+			if (newtonExt)
+			{
+				const char* const surrogateShape = newtonExt->Attribute("replaceWith");
+				if (strcmp(surrogateShape, "capsule") == 0)
+				{
+					cylinderKind = 1;
+				}
+				else if (strcmp(surrogateShape, "wheel") == 0)
+				{
+					cylinderKind = 2;
+				}
+			}
+
+			ndShapeInstance instance(new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length)));
+			switch (cylinderKind)
+			{
+				case 0:
+					//shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
+					instance.SetShape(new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length)));
+					break;
+				case 1:
+					length = length - 2.0f * radius;
+					//shape = new ndShapeCapsule(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
+					instance.SetShape(new ndShapeCapsule(ndFloat32(radius), ndFloat32(radius), ndFloat32(length)));
+					break;
+				default:;
+			}
+			instance.SetLocalMatrix (ndYawMatrix(ndPi * ndFloat32(0.5f)));
+			ndAddSubShape debugMesh(*meshEffect, materialIndex);
+			instance.DebugShape(matrix, debugMesh);
+		}
 		else if (strcmp(name, "box") == 0)
 		{
 			ndReal x;
@@ -1373,8 +1364,9 @@ void ndUrdfMeshLoader::ImportVisual(const nd::TiXmlNode* const linkNode, ndMesh*
 			bool hasFile = ImportObjMesh(matrix, meshPathName, *meshEffect, materialIndex);
 			if (!hasFile)
 			{
-				ImportStlMesh(matrix, meshPathName, *meshEffect, materialIndex);
+				hasFile = ImportStlMesh(matrix, meshPathName, *meshEffect, materialIndex);
 			}
+			return hasFile;
 		}
 		else
 		{
