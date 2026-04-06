@@ -834,7 +834,7 @@ ndMatrix ndUrdfMeshLoader::ImportOrigin(const nd::TiXmlNode* const parentNode) c
 	return matrix;
 }
 
-bool ndUrdfMeshLoader::ImportStlMesh(const ndMatrix& matrix, const char* const pathName, ndMeshEffect* const meshEffect, ndInt32 materialIndex) const
+bool ndUrdfMeshLoader::ImportStlMesh(const ndMatrix& matrix, const char* const pathName, ndMeshEffect* const meshEffect, ndInt32 materialIndex, const ndVector& scale) const
 {
 	char meshFile[1024];
 	const char* meshName = strrchr(pathName, '/');
@@ -886,7 +886,7 @@ bool ndUrdfMeshLoader::ImportStlMesh(const ndMatrix& matrix, const char* const p
 		for (ndInt32 j = 0; j < 3; ++j)
 		{
 			meshEffect->AddMaterial(materialIndex);
-			const ndVector point(matrix.TransformVector(ndVector(triangle[j][0], triangle[j][1], triangle[j][2], ndReal(1.0f))));
+			const ndVector point(matrix.TransformVector(scale * ndVector(triangle[j][0], triangle[j][1], triangle[j][2], ndReal(1.0f))));
 			meshEffect->AddPoint(point.m_x, point.m_y, point.m_z);
 
 			const ndVector n(rotation.RotateVector(ndVector(normal[0], normal[1], normal[2], ndReal(0.0f))));
@@ -899,7 +899,7 @@ bool ndUrdfMeshLoader::ImportStlMesh(const ndMatrix& matrix, const char* const p
 	return true;
 }
 
-bool ndUrdfMeshLoader::ImportObjMesh(const ndMatrix& matrix, const char* const pathName, ndMeshEffect* const meshEffect, ndInt32 materialIndex) const
+bool ndUrdfMeshLoader::ImportObjMesh(const ndMatrix& matrix, const char* const pathName, ndMeshEffect* const meshEffect, ndInt32 materialIndex, const ndVector& scale) const
 {
 	char meshFile[1024];
 	const char* meshName = strrchr(pathName, '/');
@@ -981,7 +981,7 @@ bool ndUrdfMeshLoader::ImportObjMesh(const ndMatrix& matrix, const char* const p
 			ndReal y;
 			ndReal z;
 			readValues = sscanf(line, "%s %f %f %f", token, &x, &y, &z);
-			const ndVector point(matrix.TransformVector(ndVector(x, y, z, ndReal(1.0f))));
+			const ndVector point(matrix.TransformVector(scale * ndVector(x, y, z, ndReal(1.0f))));
 			points.PushBack(point);
 		}
 		else if (strcmp(token, "vn") == 0)
@@ -1066,6 +1066,7 @@ void ndUrdfMeshLoader::ImportCollision(const nd::TiXmlNode* const linkNode, ndBo
 
 		ndShape* shape = nullptr;
 
+		ndInt32 ret = 0;
 		if (strcmp(name, "sphere") == 0)
 		{
 			ndFloat64 radius;
@@ -1115,17 +1116,30 @@ void ndUrdfMeshLoader::ImportCollision(const nd::TiXmlNode* const linkNode, ndBo
 			ndReal x;
 			ndReal y;
 			ndReal z;
-			ndInt32 ret = 0;
+
 			const char* const size = shapeNode->Attribute("size");
 			ret = sscanf(size, "%f %f %f", &x, &y, &z);
 			shape = new ndShapeBox(x, y, z);
 		}
 		else
 		{
+			ndVector scale(1.0f);
+			const char* const scaleNode = shapeNode->Attribute("scale");
+			if (scaleNode)
+			{
+				ndReal x;
+				ndReal y;
+				ndReal z;
+				ret = sscanf(scaleNode, "%f %f %f", &x, &y, &z);
+				scale.m_x = x;
+				scale.m_y = y;
+				scale.m_z = z;
+			}
+
 			const char* const meshPathName = shapeNode->Attribute("filename");
 			ndMeshEffect meshEffect;
 			meshEffect.BeginBuild();
-			bool hasFile = ImportStlMesh(ndGetIdentityMatrix(), meshPathName, &meshEffect, 0);
+			bool hasFile = ImportStlMesh(ndGetIdentityMatrix(), meshPathName, &meshEffect, 0, scale);
 			meshEffect.EndBuild(false);
 
 			if (hasFile)
@@ -1188,17 +1202,6 @@ void ndUrdfMeshLoader::ImportCollision(const nd::TiXmlNode* const linkNode, ndBo
 void ndUrdfMeshLoader::ImportVisual(const nd::TiXmlNode* const linkNode, ndMesh* const meshNode) const
 {
 	ndSharedPtr<ndMeshEffect> meshEffect (new ndMeshEffect);
-	//for (ndInt32 i = 0; i < ndInt32(m_materials.GetCount()); ++i)
-	//{
-	//	ndMeshEffect::ndMaterial meshMaterial;
-	//	meshMaterial.m_diffuse = m_materials[i].m_color;
-	//	//meshMaterial.m_ambient = materials[i].m_color;
-	//	//strcpy(meshMaterial.m_textureName, "wood_0.png");
-	//	//const char* texture = &m_materials[i].m_texture[0];
-	//	//snprintf(meshMaterial.m_textureName, sizeof (meshMaterial.m_textureName), "%s", texture);
-	//	strncpy(meshMaterial.m_textureName, m_materials[i].m_texture, sizeof(meshMaterial.m_textureName));
-	//	meshEffect->GetMaterials().PushBack(meshMaterial);
-	//}
 	
 	auto AddMeshShape = [this, &meshEffect](const nd::TiXmlNode* const node)
 	{
@@ -1317,44 +1320,46 @@ void ndUrdfMeshLoader::ImportVisual(const nd::TiXmlNode* const linkNode, ndMesh*
 			ndAddSubShape debugMesh(*meshEffect, materialIndex);
 			instance.DebugShape(matrix, debugMesh);
 		}
-		//else if (strcmp(name, "cylinder") == 0)
-		//{
-		//	ndFloat64 length;
-		//	ndFloat64 radius;
-		//	shapeNode->Attribute("length", &length);
-		//	shapeNode->Attribute("radius", &radius);
-		//
-		//	nd::TiXmlElement* const newtonExt = (nd::TiXmlElement*)geometryNode->FirstChild("newton");
-		//	ndInt32 cylinderKind = 0;
-		//	if (newtonExt)
-		//	{
-		//		const char* const surrogateShape = newtonExt->Attribute("replaceWith");
-		//		if (strcmp(surrogateShape, "capsule") == 0)
-		//		{
-		//			cylinderKind = 1;
-		//		}
-		//		else if (strcmp(surrogateShape, "wheel") == 0)
-		//		{
-		//			cylinderKind = 2;
-		//		}
-		//	}
-		//
-		//	//shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
-		//	switch (cylinderKind)
-		//	{
-		//	case 0:
-		//		shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
-		//		break;
-		//	case 1:
-		//		length = length - 2.0f * radius;
-		//		shape = new ndShapeCapsule(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
-		//		break;
-		//	default:
-		//		ndAssert(0);
-		//		shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
-		//	}
-		//	localMatrix = ndYawMatrix(ndPi * ndFloat32(0.5f));
-		//}
+		else if (strcmp(name, "cylinder") == 0)
+		{
+			ndFloat64 length;
+			ndFloat64 radius;
+			shapeNode->Attribute("length", &length);
+			shapeNode->Attribute("radius", &radius);
+		
+			nd::TiXmlElement* const newtonExt = (nd::TiXmlElement*)geometryNode->FirstChild("newton");
+			ndInt32 cylinderKind = 0;
+			if (newtonExt)
+			{
+				const char* const surrogateShape = newtonExt->Attribute("replaceWith");
+				if (strcmp(surrogateShape, "capsule") == 0)
+				{
+					cylinderKind = 1;
+				}
+				else if (strcmp(surrogateShape, "wheel") == 0)
+				{
+					cylinderKind = 2;
+				}
+			}
+
+			ndShapeInstance instance(new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length)));
+			switch (cylinderKind)
+			{
+				case 0:
+					//shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
+					instance.SetShape(new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length)));
+					break;
+				case 1:
+					length = length - 2.0f * radius;
+					//shape = new ndShapeCapsule(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
+					instance.SetShape(new ndShapeCapsule(ndFloat32(radius), ndFloat32(radius), ndFloat32(length)));
+					break;
+				default:;
+			}
+			instance.SetLocalMatrix (ndYawMatrix(ndPi * ndFloat32(0.5f)));
+			ndAddSubShape debugMesh(*meshEffect, materialIndex);
+			instance.DebugShape(matrix, debugMesh);
+		}
 		else if (strcmp(name, "box") == 0)
 		{
 			ndReal x;
@@ -1369,12 +1374,26 @@ void ndUrdfMeshLoader::ImportVisual(const nd::TiXmlNode* const linkNode, ndMesh*
 		}
 		else if (strcmp(name, "mesh") == 0)
 		{
+			ndVector scale(1.0f);
+			const char* const scaleNode = shapeNode->Attribute("scale");
+			if (scaleNode)
+			{
+				ndReal x;
+				ndReal y;
+				ndReal z;
+				ret = sscanf(scaleNode, "%f %f %f", &x, &y, &z);
+				scale.m_x = x;
+				scale.m_y = y;
+				scale.m_z = z;
+			}
+
 			const char* const meshPathName = shapeNode->Attribute("filename");
-			bool hasFile = ImportObjMesh(matrix, meshPathName, *meshEffect, materialIndex);
+			bool hasFile = ImportObjMesh(matrix, meshPathName, *meshEffect, materialIndex, scale);
 			if (!hasFile)
 			{
-				ImportStlMesh(matrix, meshPathName, *meshEffect, materialIndex);
+				hasFile = ImportStlMesh(matrix, meshPathName, *meshEffect, materialIndex, scale);
 			}
+			return hasFile;
 		}
 		else
 		{
@@ -1435,12 +1454,16 @@ bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 		ndTree<Hierarchy, ndString>::ndNode* const hierarchyChildNode = m_bodyLinks.Find(childName);
 		ndTree<Hierarchy, ndString>::ndNode* const hierarchyParentNode = m_bodyLinks.Find(parentName);
 
-		Hierarchy& hierachyChild = hierarchyChildNode->GetInfo();
-		Hierarchy& hierachyParent = hierarchyParentNode->GetInfo();
+		// we only support joint that are conncetd to link of the articulation 
+		if (hierarchyChildNode && hierarchyParentNode)
+		{
+			Hierarchy& hierachyChild = hierarchyChildNode->GetInfo();
+			Hierarchy& hierachyParent = hierarchyParentNode->GetInfo();
 
-		hierachyChild.m_joint = node;
-		hierachyChild.m_parent = &hierachyParent;
-		hierachyChild.m_parentLink = hierachyParent.m_link;
+			hierachyChild.m_joint = node;
+			hierachyChild.m_parent = &hierachyParent;
+			hierachyChild.m_parentLink = hierachyParent.m_link;
+		}
 	}
 
 	// find the root link;
@@ -1566,13 +1589,15 @@ bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 			ndBodyDynamic* const parentBody = childNode->m_parent->m_articulation->m_body->GetAsBodyDynamic();
 			ndJointBilateralConstraint* const joint = ImportJoint(childNode->m_joint, childBody, parentBody);
 			childNode->m_articulation = model.AddLimb(childNode->m_parent->m_articulation, joint->GetBody0(), joint);
+			childNode->m_articulation->m_name = childName;
 		}
 		else
 		{
 			ndBodyDynamic* const rootBody = ImportLink(childNode->m_link);
 			childNode->m_articulation = model.AddRootBody(rootBody);
+			childNode->m_articulation->m_name = childName;
 		}
-		childNode->m_articulation->m_name = childName;
+		
 
 		for (iter.Begin(); iter; iter++)
 		{
