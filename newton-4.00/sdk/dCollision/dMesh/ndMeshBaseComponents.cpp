@@ -170,8 +170,17 @@ ndShape* ndMeshCollisionShapeConvexHull::CreateObject() const
 
 ndShape* ndMeshCollisionShapeCompound::CreateObject() const
 {
-	ndAssert(0);
-	return nullptr;
+	ndShapeCompound* const compoundShape = new ndShapeCompound();
+	compoundShape->BeginAddRemove();
+	for (ndList<ndSharedPtr<ndMeshShapeInstance>>::ndNode* node = m_subShapes.GetFirst(); node; node = node->GetNext())
+	{
+		const ndSharedPtr<ndMeshShapeInstance>& subMeshInstancePtr = node->GetInfo();
+		const ndMeshShapeInstance* subMeshInstance = *subMeshInstancePtr;
+		compoundShape->AddCollision(subMeshInstance->CreateObject());
+	}
+	compoundShape->EndAddRemove();
+
+	return compoundShape;
 }
 
 void ndMeshCollisionShapeCompound::SerializeToXml(nd::TiXmlElement* const parent) const
