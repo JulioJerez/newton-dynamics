@@ -300,7 +300,7 @@ bool dGetImportUrdfFileName(char* const fileName, int maxSize)
 #endif
 }
 
-bool dGetWorkingFileName(const char* const basePath, char* const name, int maxSize)
+bool dGetWorkingFileName(const char* const basePath, char* const name, ndInt32 maxSize)
 {
 #if (defined(WIN32) || defined(_WIN32))
 

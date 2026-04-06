@@ -846,7 +846,7 @@ bool ndUrdfMeshLoader::ImportStlMesh(const ndMatrix& matrix, const char* const p
 	char* ptr = strrchr(meshFile, '.');
 	snprintf(ptr, 32, ".stl");
 
-	bool ret = dGetWorkingFileName(m_path.GetStr(), meshFile, sizeof(meshFile) - 1);
+	bool ret = GetWorkingFileName(meshFile, sizeof(meshFile));
 	if (!ret)
 	{
 		ndTrace(("file: %s not found\n", pathName));
@@ -911,7 +911,7 @@ bool ndUrdfMeshLoader::ImportObjMesh(const ndMatrix& matrix, const char* const p
 	char* ptr = strrchr(meshFile, '.');
 	snprintf(ptr, 32, ".obj");
 
-	bool ret = dGetWorkingFileName(m_path.GetStr(), meshFile, sizeof(meshFile) - 1);
+	bool ret = GetWorkingFileName(meshFile, sizeof(meshFile));
 	if (!ret)
 	{
 		return false;
@@ -946,7 +946,7 @@ bool ndUrdfMeshLoader::ImportObjMesh(const ndMatrix& matrix, const char* const p
 			{ 
 				char materialName[1024];
 				readValues = sscanf(line, "%s %s", token, materialName);
-				ret = dGetWorkingFileName(m_path.GetStr(), materialName, sizeof(materialName) - 1);
+				ret = GetWorkingFileName(materialName, sizeof(materialName));
 				if (ret)
 				{
 					FILE* const materialFile = fopen(materialName, "rb");
@@ -1417,9 +1417,26 @@ void ndUrdfMeshLoader::ImportVisual(const nd::TiXmlNode* const linkNode, ndMesh*
 	}
 }
 
+bool ndUrdfMeshLoader::GetWorkingFileName(char* const name, ndInt32 maxSize) const
+{
+	bool ret = dGetWorkingFileName(m_path.GetStr(), name, maxSize - 1);
+	if (!ret)
+	{
+		ret = dGetWorkingFileName(m_searchPath.GetStr(), name, maxSize - 1);
+	}
+	return ret;
+}
+
 bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 {
 	m_path = GetPath(urdfPathName);
+	const char* ptr = strrchr(m_path.GetStr(), '/');
+	if (!ptr)
+	{
+		ptr = strrchr(m_path.GetStr(), '\\');
+	}
+	ndString parentPath(m_path.GetStr(), ndInt32(m_path.Size() - strlen(ptr)));
+	m_searchPath = GetPath(parentPath);
 
 	ndString oldloc = setlocale(LC_ALL, 0);
 	setlocale(LC_ALL, "C");
