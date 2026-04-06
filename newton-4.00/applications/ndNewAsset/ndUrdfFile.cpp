@@ -834,7 +834,7 @@ ndMatrix ndUrdfMeshLoader::ImportOrigin(const nd::TiXmlNode* const parentNode) c
 	return matrix;
 }
 
-bool ndUrdfMeshLoader::ImportStlMesh(const ndMatrix& matrix, const char* const pathName, ndMeshEffect* const meshEffect) const
+bool ndUrdfMeshLoader::ImportStlMesh(const ndMatrix& matrix, const char* const pathName, ndMeshEffect* const meshEffect, ndInt32 materialIndex) const
 {
 	char meshFile[1024];
 	const char* meshName = strrchr(pathName, '/');
@@ -885,7 +885,7 @@ bool ndUrdfMeshLoader::ImportStlMesh(const ndMatrix& matrix, const char* const p
 		meshEffect->BeginBuildFace();
 		for (ndInt32 j = 0; j < 3; ++j)
 		{
-			meshEffect->AddMaterial(0);
+			meshEffect->AddMaterial(materialIndex);
 			const ndVector point(matrix.TransformVector(ndVector(triangle[j][0], triangle[j][1], triangle[j][2], ndReal(1.0f))));
 			meshEffect->AddPoint(point.m_x, point.m_y, point.m_z);
 
@@ -899,7 +899,7 @@ bool ndUrdfMeshLoader::ImportStlMesh(const ndMatrix& matrix, const char* const p
 	return true;
 }
 
-bool ndUrdfMeshLoader::ImportObjMesh(const ndMatrix& matrix, const char* const pathName, ndMeshEffect* const meshEffect) const
+bool ndUrdfMeshLoader::ImportObjMesh(const ndMatrix& matrix, const char* const pathName, ndMeshEffect* const meshEffect, ndInt32 materialIndex) const
 {
 	char meshFile[1024];
 	const char* meshName = strrchr(pathName, '/');
@@ -927,6 +927,7 @@ bool ndUrdfMeshLoader::ImportObjMesh(const ndMatrix& matrix, const char* const p
 
 	ndArray<ndVector> points;
 	ndArray<ndVector> normals;
+	ndArray<ndInt32> materials;
 	ndArray<ndInt32> faceIndices;
 	ndArray<ndInt32> normalIndices;
 
@@ -941,7 +942,38 @@ bool ndUrdfMeshLoader::ImportObjMesh(const ndMatrix& matrix, const char* const p
 		readValues = sscanf(line, "%s", token);
 		if (strcmp(token, "mtllib") == 0)
 		{
+			if (materialIndex == 0)
+			{ 
+				char materialName[1024];
+				readValues = sscanf(line, "%s %s", token, materialName);
+				ret = dGetWorkingFileName(m_path.GetStr(), materialName, sizeof(materialName) - 1);
+				if (ret)
+				{
+					FILE* const materialFile = fopen(materialName, "rb");
+					if (materialFile)
+					{
+						materialIndex = 1;
+						ndMeshEffect::ndMaterial meshMaterial;
+						strncpy(meshMaterial.m_textureName, "default.png", sizeof(meshMaterial.m_textureName));
 
+						while (fgets(line, sizeof(line), materialFile))
+						{
+							readValues = sscanf(line, "%s", token);
+							if (strcmp(token, "Kd") == 0)
+							{
+								ndReal r;
+								ndReal g;
+								ndReal b;
+								readValues = sscanf(line, "%s %f %f %f", token, &r, &g, &b);
+								meshMaterial.m_diffuse = ndVector(r, g, b, ndReal(1.0f));
+							}
+						}
+
+						meshEffect->GetMaterials().PushBack(meshMaterial);
+						fclose(materialFile);
+					}
+				}
+			}
 		}
 		else if(strcmp(token, "v") == 0)
 		{
@@ -980,6 +1012,7 @@ bool ndUrdfMeshLoader::ImportObjMesh(const ndMatrix& matrix, const char* const p
 					ndAssert((normal[i] - 1) < normals.GetCount());
 					faceIndices.PushBack(face[i] - 1);
 					normalIndices.PushBack(normal[i] - 1);
+					materials.PushBack(materialIndex);
 				}
 			}
 			else
@@ -1000,7 +1033,7 @@ bool ndUrdfMeshLoader::ImportObjMesh(const ndMatrix& matrix, const char* const p
 			ndVector point(points[f]);
 			ndVector normal(normals[n]);
 
-			meshEffect->AddMaterial(0);
+			meshEffect->AddMaterial(materials[i + j]);
 			meshEffect->AddPoint(point[0], point[1], point[2]);
 			meshEffect->AddNormal(normal[0], normal[1], normal[2]);
 		}
@@ -1092,7 +1125,7 @@ void ndUrdfMeshLoader::ImportCollision(const nd::TiXmlNode* const linkNode, ndBo
 			const char* const meshPathName = shapeNode->Attribute("filename");
 			ndMeshEffect meshEffect;
 			meshEffect.BeginBuild();
-			bool hasFile = ImportStlMesh(ndGetIdentityMatrix(), meshPathName, &meshEffect);
+			bool hasFile = ImportStlMesh(ndGetIdentityMatrix(), meshPathName, &meshEffect, 0);
 			meshEffect.EndBuild(false);
 
 			if (hasFile)
@@ -1150,6 +1183,219 @@ void ndUrdfMeshLoader::ImportCollision(const nd::TiXmlNode* const linkNode, ndBo
 	}
 
 	body->SetCollisionShape(collision);
+}
+
+void ndUrdfMeshLoader::ImportVisual(const nd::TiXmlNode* const linkNode, ndMesh* const meshNode) const
+{
+	ndSharedPtr<ndMeshEffect> meshEffect (new ndMeshEffect);
+	//for (ndInt32 i = 0; i < ndInt32(m_materials.GetCount()); ++i)
+	//{
+	//	ndMeshEffect::ndMaterial meshMaterial;
+	//	meshMaterial.m_diffuse = m_materials[i].m_color;
+	//	//meshMaterial.m_ambient = materials[i].m_color;
+	//	//strcpy(meshMaterial.m_textureName, "wood_0.png");
+	//	//const char* texture = &m_materials[i].m_texture[0];
+	//	//snprintf(meshMaterial.m_textureName, sizeof (meshMaterial.m_textureName), "%s", texture);
+	//	strncpy(meshMaterial.m_textureName, m_materials[i].m_texture, sizeof(meshMaterial.m_textureName));
+	//	meshEffect->GetMaterials().PushBack(meshMaterial);
+	//}
+	
+	auto AddMeshShape = [this, &meshEffect](const nd::TiXmlNode* const node)
+	{
+		const nd::TiXmlNode* const geometryNode = node->FirstChild("geometry");
+		if (!geometryNode)
+		{
+			return false;
+		}
+
+		ndInt32 ret = 0;
+		ndInt32 materialIndex = 0;
+		const nd::TiXmlNode* const materialNode = node->FirstChild("material");
+		if (materialNode)
+		{
+			materialIndex = 1;
+			ndMeshEffect::ndMaterial meshMaterial;
+			strncpy(meshMaterial.m_textureName, m_materials[0].m_texture, sizeof(meshMaterial.m_textureName));
+			meshEffect->GetMaterials().PushBack(meshMaterial);
+
+			ndString materialName(((nd::TiXmlElement*)materialNode)->Attribute("name"));
+			materialName.ToLower();
+			if (materialName.Size())
+			{
+				for (ndInt32 i = 0; i < m_materials.GetCount(); ++i)
+				{
+					const ndString material(m_materials[i].m_name);
+					if (materialName == material)
+					{
+						meshMaterial.m_diffuse = m_materials[i].m_color;
+						break;
+					}
+				}
+			}
+			else
+			{
+				const nd::TiXmlNode* const colorNode = materialNode->FirstChild("color");
+				if (colorNode)
+				{
+					ndReal red;
+					ndReal green;
+					ndReal blue;
+					ndReal alpha;
+					const char* const rgba = ((nd::TiXmlElement*)colorNode)->Attribute("rgba");
+					ret = sscanf(rgba, "%f %f %f %f", &red, &green, &blue, &alpha);
+					meshMaterial.m_diffuse = ndVector(red, green, blue, alpha);
+				}
+			}
+
+			meshEffect->GetMaterials().PushBack(meshMaterial);
+		}
+		else
+		{
+			materialIndex = 0;
+			ndMeshEffect::ndMaterial meshMaterial;
+			meshMaterial.m_diffuse = m_materials[0].m_color;
+			strncpy(meshMaterial.m_textureName, m_materials[0].m_texture, sizeof(meshMaterial.m_textureName));
+			meshEffect->GetMaterials().PushBack(meshMaterial);
+		}
+
+		const nd::TiXmlElement* const shapeNode = (nd::TiXmlElement*)geometryNode->FirstChild();
+		const char* const name = shapeNode->Value();
+
+		class ndAddSubShape : public ndShapeDebugNotify
+		{
+			public:
+			ndAddSubShape(ndMeshEffect* const meshEffect, ndInt32 materialIndex)
+				:ndShapeDebugNotify()
+				,m_meshEffect(meshEffect)
+				,m_materialIndex(materialIndex)
+			{
+			}
+
+			virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceArray, const ndEdgeType* const) override
+			{
+				ndVector normal(ndVector::m_zero);
+				for (ndInt32 i = 2; i < vertexCount; ++i)
+				{
+					ndVector e0(faceArray[i - 1] - faceArray[0]);
+					ndVector e1(faceArray[i] - faceArray[0]);
+					normal += e0.CrossProduct(e1);
+				}
+				normal.m_w = 0.0f;
+				normal = normal.Normalize();
+
+				for (ndInt32 i = 2; i < vertexCount; ++i)
+				{
+					m_meshEffect->BeginBuildFace();
+
+					m_meshEffect->AddMaterial(m_materialIndex);
+					m_meshEffect->AddPoint(faceArray[0].m_x, faceArray[0].m_y, faceArray[0].m_z);
+					m_meshEffect->AddNormal(normal.m_x, normal.m_y, normal.m_z);
+
+					m_meshEffect->AddMaterial(m_materialIndex);
+					m_meshEffect->AddPoint(faceArray[i-1].m_x, faceArray[i-1].m_y, faceArray[i-1].m_z);
+					m_meshEffect->AddNormal(normal.m_x, normal.m_y, normal.m_z);
+
+					m_meshEffect->AddMaterial(m_materialIndex);
+					m_meshEffect->AddPoint(faceArray[i].m_x, faceArray[i].m_y, faceArray[i].m_z);
+					m_meshEffect->AddNormal(normal.m_x, normal.m_y, normal.m_z);
+
+					m_meshEffect->EndBuildFace();
+				}
+			}
+
+			ndMeshEffect* m_meshEffect;
+			ndInt32 m_materialIndex;
+		};
+
+		const ndMatrix matrix(ImportOrigin(node));
+		if (strcmp(name, "sphere") == 0)
+		{
+			ndFloat64 radius;
+			shapeNode->Attribute("radius", &radius);
+			ndShapeInstance instance(new ndShapeSphere(ndFloat32(radius)));
+
+			ndAddSubShape debugMesh(*meshEffect, materialIndex);
+			instance.DebugShape(matrix, debugMesh);
+		}
+		//else if (strcmp(name, "cylinder") == 0)
+		//{
+		//	ndFloat64 length;
+		//	ndFloat64 radius;
+		//	shapeNode->Attribute("length", &length);
+		//	shapeNode->Attribute("radius", &radius);
+		//
+		//	nd::TiXmlElement* const newtonExt = (nd::TiXmlElement*)geometryNode->FirstChild("newton");
+		//	ndInt32 cylinderKind = 0;
+		//	if (newtonExt)
+		//	{
+		//		const char* const surrogateShape = newtonExt->Attribute("replaceWith");
+		//		if (strcmp(surrogateShape, "capsule") == 0)
+		//		{
+		//			cylinderKind = 1;
+		//		}
+		//		else if (strcmp(surrogateShape, "wheel") == 0)
+		//		{
+		//			cylinderKind = 2;
+		//		}
+		//	}
+		//
+		//	//shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
+		//	switch (cylinderKind)
+		//	{
+		//	case 0:
+		//		shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
+		//		break;
+		//	case 1:
+		//		length = length - 2.0f * radius;
+		//		shape = new ndShapeCapsule(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
+		//		break;
+		//	default:
+		//		ndAssert(0);
+		//		shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
+		//	}
+		//	localMatrix = ndYawMatrix(ndPi * ndFloat32(0.5f));
+		//}
+		else if (strcmp(name, "box") == 0)
+		{
+			ndReal x;
+			ndReal y;
+			ndReal z;
+			const char* const size = shapeNode->Attribute("size");
+			ret = sscanf(size, "%f %f %f", &x, &y, &z);
+			ndShapeInstance instance(new ndShapeBox(x, y, z));
+
+			ndAddSubShape debugMesh(*meshEffect, materialIndex);
+			instance.DebugShape(matrix, debugMesh);
+		}
+		else if (strcmp(name, "mesh") == 0)
+		{
+			const char* const meshPathName = shapeNode->Attribute("filename");
+			bool hasFile = ImportObjMesh(matrix, meshPathName, *meshEffect, materialIndex);
+			if (!hasFile)
+			{
+				ImportStlMesh(matrix, meshPathName, *meshEffect, materialIndex);
+			}
+		}
+		else
+		{
+			ndAssert(0);
+		}
+		return true;
+	};
+	
+	ndInt32 count = 0;
+	meshEffect->BeginBuild();
+	for (const nd::TiXmlNode* node = linkNode->FirstChild("visual"); node; node = node->NextSibling("visual"))
+	{
+		count += AddMeshShape(node) ? 1 : 0;
+	}
+	meshEffect->EndBuild(false);
+	
+	if (count >= 1)
+	{
+		meshNode->SetMesh(meshEffect);
+		meshNode->SetGeometryMatrix(ndGetIdentityMatrix());
+	}
 }
 
 bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
@@ -1213,19 +1459,20 @@ bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 
 	// impot all materials
 	m_materials.SetCount(0);
-	m_materialMap.RemoveAll();
 	m_materials.PushBack(Material());
-	snprintf(m_materials[0].m_texture, sizeof(m_materials[0].m_texture), "wood_0.png");
+	snprintf(m_materials[0].m_name, sizeof(m_materials[0].m_name), "default");
+	snprintf(m_materials[0].m_texture, sizeof(m_materials[0].m_texture), "default.png");
 
 	size_t readValues = 0;
 	for (const nd::TiXmlNode* node = rootNode->FirstChild("material"); node; node = node->NextSibling("material"))
 	{
 		const nd::TiXmlElement* const materialNode = (nd::TiXmlElement*)node;
 
-		const char* const name = materialNode->Attribute("name");
-		m_materialMap.Insert(ndInt32(m_materials.GetCount()), name);
-
 		Material material;
+		ndString name(materialNode->Attribute("name"));
+		name.ToLower();
+		snprintf(material.m_name, sizeof(material.m_name), "%s", name.GetStr());
+
 		const nd::TiXmlElement* const color = (nd::TiXmlElement*)node->FirstChild("color");
 		if (color)
 		{
@@ -1303,7 +1550,7 @@ bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 
 		return body;
 	};
-	
+
 	ndFixSizeArray<Hierarchy*, 256> stack;
 	stack.PushBack(root);
 
@@ -1312,7 +1559,7 @@ bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 	{
 		Hierarchy* const childNode = stack.Pop();
 		const char* const childName = ((nd::TiXmlElement*)childNode->m_link)->Attribute("name");
-	
+
 		if (childNode->m_joint)
 		{
 			ndBodyDynamic* const childBody = ImportLink(childNode->m_link);
@@ -1326,7 +1573,7 @@ bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 			childNode->m_articulation = model.AddRootBody(rootBody);
 		}
 		childNode->m_articulation->m_name = childName;
-	
+
 		for (iter.Begin(); iter; iter++)
 		{
 			Hierarchy& link = iter.GetNode()->GetInfo();
@@ -1336,202 +1583,24 @@ bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 			}
 		}
 	}
-	
+
+	// create a model with defaul visual generated from collision shapes.
 	model.SetTransform(ndPitchMatrix(-ndPi * 0.5f));
 	m_mesh = ndSharedPtr<ndMesh>(model.CreateDefaultMesh());
-	MeshToRenderSceneNode(m_path);
 
-	// replace all the collision visual with actual model visuals
-	auto GenerateVisualMesh = [this](ndRenderSceneNode* const sceneNode)
+	// replace defualt visuals with
+	auto GenerateVisualMesh = [this](ndMesh* const meshNode)
 	{
-		ndTree<Hierarchy, ndString>::ndNode* const node = m_bodyLinks.Find(sceneNode->m_name);
+		ndTree<Hierarchy, ndString>::ndNode* const node = m_bodyLinks.Find(meshNode->GetName());
 		ndAssert(node);
 		const Hierarchy& info = node->GetInfo();
-		ImportVisual(info.m_link, sceneNode);
+		ImportVisual(info.m_link, meshNode);
 	};
-	m_renderMesh->NodeIterator(GenerateVisualMesh);
-	
+	m_mesh->NodeIterator(GenerateVisualMesh);
+
+	MeshToRenderSceneNode(m_path);
+
 	setlocale(LC_ALL, oldloc.GetStr());
 
 	return true;
-}
-
-void ndUrdfMeshLoader::ImportVisual(const nd::TiXmlNode* const linkNode, ndRenderSceneNode* const sceneNode) const
-{
-	ndSharedPtr<ndMeshEffect> meshEffect (new ndMeshEffect);
-	//for (ndInt32 i = 0; i < ndInt32(m_materials.GetCount()); ++i)
-	//{
-	//	ndMeshEffect::ndMaterial meshMaterial;
-	//	meshMaterial.m_diffuse = m_materials[i].m_color;
-	//	//meshMaterial.m_ambient = materials[i].m_color;
-	//	//strcpy(meshMaterial.m_textureName, "wood_0.png");
-	//	//const char* texture = &m_materials[i].m_texture[0];
-	//	//snprintf(meshMaterial.m_textureName, sizeof (meshMaterial.m_textureName), "%s", texture);
-	//	strncpy(meshMaterial.m_textureName, m_materials[i].m_texture, sizeof(meshMaterial.m_textureName));
-	//	meshEffect->GetMaterials().PushBack(meshMaterial);
-	//}
-	
-	auto AddMeshShape = [this, &meshEffect](const nd::TiXmlNode* const node)
-	{
-		const nd::TiXmlNode* const geometryNode = node->FirstChild("geometry");
-		if (!geometryNode)
-		{
-			return false;
-		}
-
-		const nd::TiXmlElement* const shapeNode = (nd::TiXmlElement*)geometryNode->FirstChild();
-		const char* const name = shapeNode->Value();
-
-		class ndAddSubShape : public ndShapeDebugNotify
-		{
-			public:
-			ndAddSubShape(ndMeshEffect* const meshEffect)
-				:ndShapeDebugNotify()
-				,m_meshEffect(meshEffect)
-			{
-			}
-
-			virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceArray, const ndEdgeType* const) override
-			{
-				ndVector normal(ndVector::m_zero);
-				for (ndInt32 i = 2; i < vertexCount; ++i)
-				{
-					ndVector e0(faceArray[i - 1] - faceArray[0]);
-					ndVector e1(faceArray[i] - faceArray[0]);
-					normal += e0.CrossProduct(e1);
-				}
-				normal.m_w = 0.0f;
-				normal = normal.Normalize();
-
-				for (ndInt32 i = 2; i < vertexCount; ++i)
-				{
-					m_meshEffect->BeginBuildFace();
-
-					m_meshEffect->AddMaterial(0);
-					m_meshEffect->AddPoint(faceArray[0].m_x, faceArray[0].m_y, faceArray[0].m_z);
-					m_meshEffect->AddNormal(normal.m_x, normal.m_y, normal.m_z);
-
-					m_meshEffect->AddMaterial(0);
-					m_meshEffect->AddPoint(faceArray[i-1].m_x, faceArray[i-1].m_y, faceArray[i-1].m_z);
-					m_meshEffect->AddNormal(normal.m_x, normal.m_y, normal.m_z);
-
-					m_meshEffect->AddMaterial(0);
-					m_meshEffect->AddPoint(faceArray[i].m_x, faceArray[i].m_y, faceArray[i].m_z);
-					m_meshEffect->AddNormal(normal.m_x, normal.m_y, normal.m_z);
-
-					m_meshEffect->EndBuildFace();
-				}
-			}
-
-			ndMeshEffect* m_meshEffect;
-		};
-
-		const ndMatrix matrix(ImportOrigin(node));
-		if (strcmp(name, "sphere") == 0)
-		{
-			ndFloat64 radius;
-			shapeNode->Attribute("radius", &radius);
-			ndShapeInstance instance(new ndShapeSphere(ndFloat32(radius)));
-
-			ndAddSubShape debugMesh(*meshEffect);
-			instance.DebugShape(matrix, debugMesh);
-		}
-		//else if (strcmp(name, "cylinder") == 0)
-		//{
-		//	ndFloat64 length;
-		//	ndFloat64 radius;
-		//	shapeNode->Attribute("length", &length);
-		//	shapeNode->Attribute("radius", &radius);
-		//
-		//	nd::TiXmlElement* const newtonExt = (nd::TiXmlElement*)geometryNode->FirstChild("newton");
-		//	ndInt32 cylinderKind = 0;
-		//	if (newtonExt)
-		//	{
-		//		const char* const surrogateShape = newtonExt->Attribute("replaceWith");
-		//		if (strcmp(surrogateShape, "capsule") == 0)
-		//		{
-		//			cylinderKind = 1;
-		//		}
-		//		else if (strcmp(surrogateShape, "wheel") == 0)
-		//		{
-		//			cylinderKind = 2;
-		//		}
-		//	}
-		//
-		//	//shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
-		//	switch (cylinderKind)
-		//	{
-		//	case 0:
-		//		shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
-		//		break;
-		//	case 1:
-		//		length = length - 2.0f * radius;
-		//		shape = new ndShapeCapsule(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
-		//		break;
-		//	default:
-		//		ndAssert(0);
-		//		shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
-		//	}
-		//	localMatrix = ndYawMatrix(ndPi * ndFloat32(0.5f));
-		//}
-		else if (strcmp(name, "box") == 0)
-		{
-			ndReal x;
-			ndReal y;
-			ndReal z;
-			const char* const size = shapeNode->Attribute("size");
-			sscanf(size, "%f %f %f", &x, &y, &z);
-			ndShapeInstance instance(new ndShapeBox(x, y, z));
-
-			ndAddSubShape debugMesh(*meshEffect);
-			instance.DebugShape(matrix, debugMesh);
-		}
-		else if (strcmp(name, "mesh") == 0)
-		{
-			const char* const meshPathName = shapeNode->Attribute("filename");
-			bool hasFile = ImportObjMesh(matrix, meshPathName, *meshEffect);
-			if (!hasFile)
-			{
-				ImportStlMesh(matrix, meshPathName, *meshEffect);
-			}
-		}
-		else
-		{
-			ndAssert(0);
-		}
-		return true;
-	};
-	
-	ndInt32 count = 0;
-	meshEffect->BeginBuild();
-	for (const nd::TiXmlNode* node = linkNode->FirstChild("visual"); node; node = node->NextSibling("visual"))
-	{
-		count += AddMeshShape(node) ? 1 : 0;
-	}
-	meshEffect->EndBuild(false);
-	
-	if (count >= 1)
-	{
-		ndArray<ndMeshEffect::ndMaterial>& materials = meshEffect->GetMaterials();
-		materials.PushBack(ndMeshEffect::ndMaterial());
-
-		ndRenderPrimitive::ndDescriptor descriptor((ndRender*)*m_owner);
-		descriptor.m_meshNode = meshEffect;
-		
-		for (ndInt32 j = 0; j < materials.GetCount(); ++j)
-		{
-			const ndString texturePathName(m_path);
-			ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(m_owner->GetTextureCache()->GetTexture(texturePathName));
-			material.m_diffuse = materials[j].m_diffuse;
-			material.m_specular = materials[j].m_specular;
-			material.m_reflection = materials[j].m_reflection;
-			material.m_specularPower = ndReal(materials[j].m_shiness);
-			material.m_opacity = ndReal(materials[j].m_opacity);
-			material.m_castShadows = true;
-		}
-		
-		ndSharedPtr<ndRenderPrimitive> geometry(new ndRenderPrimitive(descriptor));
-		sceneNode->SetPrimitive(geometry);
-		sceneNode->SetPrimitiveMatrix(ndGetIdentityMatrix());
-	}
 }

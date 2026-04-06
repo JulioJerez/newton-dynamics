@@ -92,9 +92,11 @@ class ndUrdfMeshLoader : public ndRenderMeshLoader
 		Material()
 			:m_color(1.0f, 1.0f, 1.0f, 1.0f)
 		{
+			m_name[0] = 0;
 			m_texture[0] = 0;
 		}
 		ndVector m_color;
+		char m_name[256];
 		char m_texture[256];
 	};
 
@@ -124,16 +126,16 @@ class ndUrdfMeshLoader : public ndRenderMeshLoader
 
 	private:
 	ndMatrix ImportOrigin(const nd::TiXmlNode* const parentNode) const;
-	bool ImportStlMesh(const ndMatrix& matrix, const char* const pathName, ndMeshEffect* const meshEffect) const;
-	bool ImportObjMesh(const ndMatrix& matrix, const char* const pathName, ndMeshEffect* const meshEffect) const;
 	void ImportCollision(const nd::TiXmlNode* const linkNode, ndBodyDynamic* const body);
-	void ImportVisual(const nd::TiXmlNode* const linkNode, ndRenderSceneNode* const sceneNode) const;
+	void ImportVisual(const nd::TiXmlNode* const linkNode, ndMesh* const meshNode) const;
 	ndJointBilateralConstraint* ImportJoint(const nd::TiXmlNode* const jointNode, ndBodyDynamic* const childBody, ndBodyDynamic* const parentBody);
+
+	bool ImportStlMesh(const ndMatrix& matrix, const char* const pathName, ndMeshEffect* const meshEffect, ndInt32 materialIndex) const;
+	bool ImportObjMesh(const ndMatrix& matrix, const char* const pathName, ndMeshEffect* const meshEffect, ndInt32 materialIndex) const;
 
 	ndString m_path;
 	ndArray<Material> m_materials;
 	ndTree<Hierarchy, ndString> m_bodyLinks;
-	ndTree<ndInt32, ndString> m_materialMap;
 };
 
 #endif

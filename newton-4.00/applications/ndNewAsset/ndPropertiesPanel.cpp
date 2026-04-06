@@ -692,6 +692,7 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 			SetDropdownList(ndShapeCapsule::StaticClassName());
 			SetDropdownList(ndShapeConvexHull::StaticClassName());
 			SetDropdownList(ndShapeChamferCylinder::StaticClassName());
+			SetDropdownList(ndShapeCompound::StaticClassName());
 
 			ImGui::EndCombo();
 		}
@@ -748,7 +749,14 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 
 			}
 		}
+		else if (strcmp(shape->ClassName(), ndShapeCompound::StaticClassName()) == 0)
+		{
+			ndReal size = 1;
+			if (ImGui::DragFloat("size##1", &size))
+			{
 
+			}
+		}
 		else
 		{
 			ndAssert(0);
