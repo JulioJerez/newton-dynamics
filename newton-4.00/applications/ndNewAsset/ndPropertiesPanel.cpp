@@ -322,7 +322,6 @@ class ndUndoRedoGeometryTransform : public ndUndoRedoCommand
 	ndMatrix m_matrix;
 };
 
-
 class ndUndoRedoCenterOfMass : public ndUndoRedoCommand
 {
 	public:
@@ -363,6 +362,49 @@ class ndUndoRedoCenterOfMass : public ndUndoRedoCommand
 	ndVector m_centerOfMass;
 };
 
+class ndUndoRedoAngularDamp : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoAngularDamp(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		m_angularDamp = body->m_intrinsicDamping;
+	}
+
+	virtual ndUndoRedoAngularDamp* GetAsUndoRedoAngularDamp() const override
+	{
+		return (ndUndoRedoAngularDamp*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			ndUndoRedoAngularDamp* const other = command.GetAsUndoRedoAngularDamp();
+			if (other)
+			{
+				const ndVector comDiff(ndVector::m_triplexMask & (m_angularDamp - other->m_angularDamp));
+				if (comDiff.DotProduct(comDiff).GetScalar() < ndFloat32(1.0e-6f))
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		m_angularDamp.m_w = m_mesh->GetRigidBody()->m_localCentreOfMass.m_w;
+		m_mesh->GetRigidBody()->m_localCentreOfMass = m_angularDamp;
+	}
+
+	ndVector m_angularDamp;
+};
 
 void ndAssetEditor::ShowPropertiesMeshInfo()
 {
@@ -886,7 +928,6 @@ void ndAssetEditor::ShowPropertiesPanel()
 	ImGui::End();
 }
 
-
 void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 {
 	if (ImGui::CollapsingHeader("Rigid body"))
@@ -908,19 +949,6 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			};
 		}
 
-		// body max angular integration step 
-		{
-			ndReal scalar = ndReal(rigidBody->m_maxAngleStep);
-			//if (ImGui::DragFloat("angle step", &scalar))
-			if (ImGui::InputFloat("angle step", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
-			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoAngleStep(this, m_currentSelection)));
-				scalar = ndClamp(scalar, ndReal(10.0f), ndReal(180.0f));
-				rigidBody->m_maxAngleStep = scalar;
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoAngleStep(this, m_currentSelection)));
-			};
-		}
-
 		// body max linear integration step 
 		{
 			ndReal scalar = ndReal(rigidBody->m_maxLinearStep);
@@ -934,6 +962,19 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			};
 		}
 
+		// body max angular integration step 
+		{
+			ndReal scalar = ndReal(rigidBody->m_maxAngleStep);
+			//if (ImGui::DragFloat("angle step", &scalar))
+			if (ImGui::InputFloat("angle step", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoAngleStep(this, m_currentSelection)));
+				scalar = ndClamp(scalar, ndReal(10.0f), ndReal(180.0f));
+				rigidBody->m_maxAngleStep = scalar;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoAngleStep(this, m_currentSelection)));
+			};
+		}
+
 		// body intrinsic linear damp 
 		{
 			ndReal scalar = ndReal(rigidBody->m_intrinsicDamping.m_w);
@@ -944,6 +985,25 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 				scalar = ndClamp(scalar, ndReal(0.0f), ndReal(1.0f));
 				rigidBody->m_intrinsicDamping.m_w = scalar;
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLinearDamp(this, m_currentSelection)));
+			};
+		}
+
+		// body intrinsic angular damp
+		{
+			ndVector vector(rigidBody->m_intrinsicDamping);
+			ndReal real[3];
+			real[0] = ndReal(vector.m_x);
+			real[1] = ndReal(vector.m_y);
+			real[2] = ndReal(vector.m_z);
+			//if (ImGui::DragFloat3("angular damp", real))
+			if (ImGui::InputFloat3("angular damp", real, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoAngularDamp(this, m_currentSelection)));
+				vector.m_x = real[0];
+				vector.m_y = real[1];
+				vector.m_z = real[2];
+				rigidBody->m_intrinsicDamping = vector;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoAngularDamp(this, m_currentSelection)));
 			};
 		}
 
@@ -966,53 +1026,37 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			};
 		}
 
-		// body initial linear velocity
-		{
-			ndVector vector(rigidBody->m_veloc);
-			ndReal real[3];
-			real[0] = ndReal(vector.m_x);
-			real[1] = ndReal(vector.m_y);
-			real[2] = ndReal(vector.m_z);
-			if (ImGui::DragFloat3("veloc", real))
-			{
-				vector.m_x = real[0];
-				vector.m_y = real[1];
-				vector.m_z = real[2];
-				rigidBody->m_veloc = vector;
-			};
-		}
-
-		// body initial angular velocity
-		{
-			ndVector vector(rigidBody->m_omega);
-			ndReal real[3];
-			real[0] = ndReal(vector.m_x);
-			real[1] = ndReal(vector.m_y);
-			real[2] = ndReal(vector.m_z);
-			if (ImGui::DragFloat3("omega", real))
-			{
-				vector.m_x = real[0];
-				vector.m_y = real[1];
-				vector.m_z = real[2];
-				rigidBody->m_omega = vector;
-			};
-		}
-
-		// body intrinsic angular damp
-		{
-			ndVector vector(rigidBody->m_intrinsicDamping);
-			ndReal real[3];
-			real[0] = ndReal(vector.m_x);
-			real[1] = ndReal(vector.m_y);
-			real[2] = ndReal(vector.m_z);
-			if (ImGui::DragFloat3("angular damp", real))
-			{
-				vector.m_x = real[0];
-				vector.m_y = real[1];
-				vector.m_z = real[2];
-				rigidBody->m_intrinsicDamping = vector;
-			};
-		}
+		//// body initial linear velocity
+		//{
+		//	ndVector vector(rigidBody->m_veloc);
+		//	ndReal real[3];
+		//	real[0] = ndReal(vector.m_x);
+		//	real[1] = ndReal(vector.m_y);
+		//	real[2] = ndReal(vector.m_z);
+		//	if (ImGui::DragFloat3("veloc", real))
+		//	{
+		//		vector.m_x = real[0];
+		//		vector.m_y = real[1];
+		//		vector.m_z = real[2];
+		//		rigidBody->m_veloc = vector;
+		//	};
+		//}
+		//
+		//// body initial angular velocity
+		//{
+		//	ndVector vector(rigidBody->m_omega);
+		//	ndReal real[3];
+		//	real[0] = ndReal(vector.m_x);
+		//	real[1] = ndReal(vector.m_y);
+		//	real[2] = ndReal(vector.m_z);
+		//	if (ImGui::DragFloat3("omega", real))
+		//	{
+		//		vector.m_x = real[0];
+		//		vector.m_y = real[1];
+		//		vector.m_z = real[2];
+		//		rigidBody->m_omega = vector;
+		//	};
+		//}
 
 		// body principal axis of inertia
 		{
@@ -1024,7 +1068,8 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			euler[0] = ndReal(radians[0]);
 			euler[1] = ndReal(radians[1]);
 			euler[2] = ndReal(radians[2]);
-			if (ImGui::DragFloat3("inertia axis", euler))
+			//if (ImGui::DragFloat3("inertia axis", euler))
+			if (ImGui::InputFloat3("inertia axis", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				const ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
 				rigidBody->m_inertiaPrincipalAxis = newMatrix;
