@@ -664,6 +664,12 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 							instance->Serialize(&shapeInstance);
 							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
 						}
+						else if (strcmp(name, ndShapeNull::StaticClassName()) == 0)
+						{
+							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionNull());
+							instance->Serialize(&shapeInstance);
+							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
+						}
 						else
 						{
 							ndAssert(0);

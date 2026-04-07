@@ -1760,6 +1760,16 @@ bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 	// replace defualt visuals with
 	auto GenerateVisualMesh = [this](ndMesh* const meshNode)
 	{
+		ndAssert(meshNode->GetRigidBody());
+		if (meshNode->GetRigidBody())
+		{
+			ndMeshBodyDynamic* const body = (ndMeshBodyDynamic*)*m_mesh->GetRigidBody();
+			if (body->m_invMass.m_w == ndFloat32(0.0f))
+			{
+				body->m_invMass.m_w = ndFloat32(1.0f);
+			}
+		}
+
 		ndTree<Hierarchy, ndString>::ndNode* const node = m_bodyLinks.Find(meshNode->GetName());
 		ndAssert(node);
 		const Hierarchy& info = node->GetInfo();

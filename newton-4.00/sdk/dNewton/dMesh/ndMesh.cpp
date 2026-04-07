@@ -507,6 +507,19 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionBox()
 	return shape;
 }
 
+ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionNull()
+{
+	ndSharedPtr<ndMeshEffect> meshEffect = GetMesh();
+	ndAssert(*meshEffect);
+
+	ndVector size;
+	ndMatrix localMatrix(CalculateLocalMatrix(size));
+	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeNull()));
+
+	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
+	return shape;
+}
+
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionSphere()
 {
 	ndSharedPtr<ndMeshEffect> meshEffect = GetMesh();
