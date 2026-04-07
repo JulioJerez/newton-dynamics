@@ -406,6 +406,50 @@ class ndUndoRedoAngularDamp : public ndUndoRedoCommand
 	ndVector m_angularDamp;
 };
 
+class ndUndoRedoInertiaAxis : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoInertiaAxis(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		m_inertiaPrincipalAxis = body->m_inertiaPrincipalAxis;
+	}
+
+	virtual ndUndoRedoInertiaAxis* GetAsUndoRedoInertiaAxis() const override
+	{
+		return (ndUndoRedoInertiaAxis*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			ndUndoRedoInertiaAxis* const other = command.GetAsUndoRedoInertiaAxis();
+			if (other)
+			{
+				const ndVector comDiff(ndVector::m_triplexMask & (m_inertiaPrincipalAxis - other->m_inertiaPrincipalAxis));
+				if (comDiff.DotProduct(comDiff).GetScalar() < ndFloat32(1.0e-6f))
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+		body->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
+	}
+
+	ndVector m_inertiaPrincipalAxis;
+};
+
 void ndAssetEditor::ShowPropertiesMeshInfo()
 {
 	if (ImGui::CollapsingHeader("mesh node"))
@@ -627,6 +671,7 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 					}
 				}
 			};
+			SetDropdownList(ndShapeNull::StaticClassName());
 			SetDropdownList(ndShapeBox::StaticClassName());
 			SetDropdownList(ndShapeSphere::StaticClassName());
 			SetDropdownList(ndShapeCapsule::StaticClassName());
@@ -690,6 +735,14 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 			}
 		}
 		else if (strcmp(shape->ClassName(), ndShapeCompound::StaticClassName()) == 0)
+		{
+			ndReal size = 1;
+			if (ImGui::DragFloat("size##1", &size))
+			{
+
+			}
+		}
+		else if (strcmp(shape->ClassName(), ndShapeNull::StaticClassName()) == 0)
 		{
 			ndReal size = 1;
 			if (ImGui::DragFloat("size##1", &size))
@@ -1026,53 +1079,24 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			};
 		}
 
-		//// body initial linear velocity
-		//{
-		//	ndVector vector(rigidBody->m_veloc);
-		//	ndReal real[3];
-		//	real[0] = ndReal(vector.m_x);
-		//	real[1] = ndReal(vector.m_y);
-		//	real[2] = ndReal(vector.m_z);
-		//	if (ImGui::DragFloat3("veloc", real))
-		//	{
-		//		vector.m_x = real[0];
-		//		vector.m_y = real[1];
-		//		vector.m_z = real[2];
-		//		rigidBody->m_veloc = vector;
-		//	};
-		//}
-		//
-		//// body initial angular velocity
-		//{
-		//	ndVector vector(rigidBody->m_omega);
-		//	ndReal real[3];
-		//	real[0] = ndReal(vector.m_x);
-		//	real[1] = ndReal(vector.m_y);
-		//	real[2] = ndReal(vector.m_z);
-		//	if (ImGui::DragFloat3("omega", real))
-		//	{
-		//		vector.m_x = real[0];
-		//		vector.m_y = real[1];
-		//		vector.m_z = real[2];
-		//		rigidBody->m_omega = vector;
-		//	};
-		//}
-
 		// body principal axis of inertia
 		{
-			ndReal euler[3];
-			ndVector tmp;
-			ndMatrix matrix(rigidBody->m_inertiaPrincipalAxis);
-			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
+			ndVector vector(rigidBody->m_inertiaPrincipalAxis);
+			ndReal real[3];
+			real[0] = ndReal(vector.m_x);
+			real[1] = ndReal(vector.m_y);
+			real[2] = ndReal(vector.m_z);
 
-			euler[0] = ndReal(radians[0]);
-			euler[1] = ndReal(radians[1]);
-			euler[2] = ndReal(radians[2]);
 			//if (ImGui::DragFloat3("inertia axis", euler))
-			if (ImGui::InputFloat3("inertia axis", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			if (ImGui::InputFloat3("inertia axis", real, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				const ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
-				rigidBody->m_inertiaPrincipalAxis = newMatrix;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoInertiaAxis(this, m_currentSelection)));
+				vector.m_x = real[0];
+				vector.m_y = real[1];
+				vector.m_z = real[2];
+				vector.m_w = ndReal(0.0f);
+				rigidBody->m_inertiaPrincipalAxis = vector;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoInertiaAxis(this, m_currentSelection)));
 			};
 		}
 	}

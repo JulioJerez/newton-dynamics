@@ -925,9 +925,11 @@ bool ndUrdfMeshLoader::ImportObjMesh(const ndMatrix& matrix, const char* const p
 	}
 	ndInt32 readValues = 0;
 
+	ndArray<ndVector> uvs;
 	ndArray<ndVector> points;
 	ndArray<ndVector> normals;
 	ndArray<ndInt32> materials;
+	ndArray<ndInt32> uvIndices;
 	ndArray<ndInt32> faceIndices;
 	ndArray<ndInt32> normalIndices;
 
@@ -984,6 +986,14 @@ bool ndUrdfMeshLoader::ImportObjMesh(const ndMatrix& matrix, const char* const p
 			const ndVector point(matrix.TransformVector(scale * ndVector(x, y, z, ndReal(1.0f))));
 			points.PushBack(point);
 		}
+		else if (strcmp(token, "vt") == 0)
+		{
+			ndReal x;
+			ndReal y;
+			readValues = sscanf(line, "%s %f %f", token, &x, &y);
+			const ndVector point(matrix.TransformVector(scale * ndVector(x, y, ndReal(0.0f), ndReal(0.0f))));
+			uvs.PushBack(point);
+		}
 		else if (strcmp(token, "vn") == 0)
 		{
 			ndReal x;
@@ -1001,17 +1011,50 @@ bool ndUrdfMeshLoader::ImportObjMesh(const ndMatrix& matrix, const char* const p
 		}
 		else if (strcmp(token, "f") == 0)
 		{
-			if (normals.GetCount())
+			if ((normals.GetCount() == 0) && (uvs.GetCount() == 0))
 			{
-				ndInt32 face[3];
-				ndInt32 normal[3];
-				readValues = sscanf(line, "%s %d//%d %d//%d %d//%d", token, 
-					&face[0], &normal[0], &face[1], &normal[1], &face[2], &normal[2]);
+				ndAssert(0);
+			}
+			else if ((normals.GetCount() == 0) && uvs.GetCount())
+			{
+				ndAssert(0);
+			}
+			else if (normals.GetCount() && uvs.GetCount())
+			{
+				ndInt32 uv[32];
+				ndInt32 face[32];
+				ndInt32 normal[32];
 
-				for (ndInt32 i = 0; i < 3; ++i)
+				const char* linePtr = line;
+				readValues = sscanf(linePtr, "%s", token);
+				linePtr += strlen(token) + 1;
+
+				ndInt32 count = 0;
+				do
 				{
+					readValues = sscanf(linePtr, "%s", token);
+					readValues = sscanf(token, "%d%*[^0-9]%d%*[^0-9]%d", &face[count], &uv[count], &normal[count]);
+					linePtr += strlen(token) + 1;
+					count++;
+				} while (linePtr[0]);
+
+				for (ndInt32 i = 2; i < count; ++i)
+				{
+					ndAssert((uv[i] - 1) < uvs.GetCount());
 					ndAssert((face[i] - 1) < points.GetCount());
 					ndAssert((normal[i] - 1) < normals.GetCount());
+
+					uvIndices.PushBack(uv[0] - 1);
+					faceIndices.PushBack(face[0] - 1);
+					normalIndices.PushBack(normal[0] - 1);
+					materials.PushBack(materialIndex);
+
+					uvIndices.PushBack(uv[i-1] - 1);
+					faceIndices.PushBack(face[i-1] - 1);
+					normalIndices.PushBack(normal[i-1] - 1);
+					materials.PushBack(materialIndex);
+
+					uvIndices.PushBack(uv[i] - 1);
 					faceIndices.PushBack(face[i] - 1);
 					normalIndices.PushBack(normal[i] - 1);
 					materials.PushBack(materialIndex);
@@ -1019,12 +1062,51 @@ bool ndUrdfMeshLoader::ImportObjMesh(const ndMatrix& matrix, const char* const p
 			}
 			else
 			{
-				ndAssert(0);
+				ndInt32 face[32];
+				ndInt32 normal[32];
+
+				const char* linePtr = line;
+				readValues = sscanf(linePtr, "%s", token);
+				linePtr += strlen(token) + 1;
+
+				ndInt32 count = 0;
+				do
+				{
+					readValues = sscanf(linePtr, "%s", token);
+					readValues = sscanf(token, "%d%*[^0-9]%d", &face[count], &normal[count]);
+					linePtr += strlen(token) + 1;
+					count++;
+				} while (linePtr[0]);
+
+				for (ndInt32 i = 2; i < count; ++i)
+				{
+					ndAssert((face[i] - 1) < points.GetCount());
+					ndAssert((normal[i] - 1) < normals.GetCount());
+
+					uvIndices.PushBack(0);
+					faceIndices.PushBack(face[0] - 1);
+					normalIndices.PushBack(normal[0] - 1);
+					materials.PushBack(materialIndex);
+
+					uvIndices.PushBack(0);
+					faceIndices.PushBack(face[i - 1] - 1);
+					normalIndices.PushBack(normal[i - 1] - 1);
+					materials.PushBack(materialIndex);
+
+					uvIndices.PushBack(0);
+					faceIndices.PushBack(face[i] - 1);
+					normalIndices.PushBack(normal[i] - 1);
+					materials.PushBack(materialIndex);
+				}
 			}
 		}
 	}
 	fclose(file);
 
+	if (uvs.GetCount() == 0)
+	{
+		uvs.PushBack(ndVector::m_zero);
+	}
 	for (ndInt32 i = 0; i < ndInt32(faceIndices.GetCount()); i += 3)
 	{
 		meshEffect->BeginBuildFace();
@@ -1048,14 +1130,12 @@ bool ndUrdfMeshLoader::ImportObjMesh(const ndMatrix& matrix, const char* const p
 void ndUrdfMeshLoader::ImportCollision(const nd::TiXmlNode* const linkNode, ndBodyDynamic* const body)
 {
 	ndArray<const nd::TiXmlNode*> collisions;
-	//bool useVisual = false;
 	for (const nd::TiXmlNode* node = linkNode->FirstChild("collision"); node; node = node->NextSibling("collision"))
 	{
 		collisions.PushBack(node);
 	}
 	if (collisions.GetCount() == 0)
 	{
-		//useVisual = true;
 		for (const nd::TiXmlNode* node = linkNode->FirstChild("visual"); node; node = node->NextSibling("visual"))
 		{
 			collisions.PushBack(node);
@@ -1167,8 +1247,7 @@ void ndUrdfMeshLoader::ImportCollision(const nd::TiXmlNode* const linkNode, ndBo
 			}
 			else
 			{
-				//ndTrace(("replace %s with a sphere shape as place holder\n", shapeNode->Attribute("filename")));
-				shape = new ndShapeSphere(ndFloat32 (0.025f));
+				shape = new ndShapeNull();
 			}
 		}
 		return shape;
@@ -1178,7 +1257,7 @@ void ndUrdfMeshLoader::ImportCollision(const nd::TiXmlNode* const linkNode, ndBo
 	if (collisions.GetCount() == 0)
 	{
 		// add a place holder shape
-		collision.SetShape(new ndShapeSphere(ndFloat32(0.025f)));
+		collision.SetShape(new ndShapeNull());
 	}
 	else if (collisions.GetCount() == 1)
 	{
@@ -1560,12 +1639,12 @@ bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 		m_materials.PushBack(material);
 	}
 
-	auto ImportLink = [this](const nd::TiXmlNode* const linkNode)
+	auto ImportLink = [this](const nd::TiXmlNode* const linkNode, bool isRoot = false)
 	{
 		ndBodyDynamic* const body = new ndBodyDynamic();
 		ImportCollision(linkNode, body);
 
-		ndFloat64 mass = ndFloat64(1.0f);
+		ndFloat64 mass = ndFloat64(0.0f);
 		const nd::TiXmlNode* const inertialNode = linkNode->FirstChild("inertial");
 		if (inertialNode)
 		{
@@ -1601,10 +1680,14 @@ bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 			inertiaMatrix[1][2] = ndFloat32(yz);
 			inertiaMatrix[2][1] = ndFloat32(yz);
 
-			if (mass < ndFloat32(0.1f))
+			if (mass < ndFloat32(0.01f))
 			{
-				mass = ndFloat32(0.1f);
+				mass = ndFloat32(0.01f);
 			}
+		}
+		else if (!isRoot)
+		{
+			mass = ndFloat32(1.0f);
 		}
 		body->SetMassMatrix(ndFloat32(mass), body->GetCollisionShape());
 
@@ -1630,7 +1713,7 @@ bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 		}
 		else
 		{
-			ndBodyDynamic* const rootBody = ImportLink(childNode->m_link);
+			ndBodyDynamic* const rootBody = ImportLink(childNode->m_link, true);
 			childNode->m_articulation = model.AddRootBody(rootBody);
 			childNode->m_articulation->m_name = childName;
 		}
@@ -1648,6 +1731,31 @@ bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 	// create a model with defaul visual generated from collision shapes.
 	model.SetTransform(ndPitchMatrix(-ndPi * 0.5f));
 	m_mesh = ndSharedPtr<ndMesh>(model.CreateDefaultMesh());
+
+	// post process mesh
+	ndAssert(m_mesh->GetRigidBody());
+	if (m_mesh->GetRigidBody())
+	{
+		const ndMeshBodyDynamic* const body = (ndMeshBodyDynamic*)*m_mesh->GetRigidBody();
+		if (body->m_invMass.m_w == ndFloat32 (0.0f))
+		{
+			if (m_mesh->GetChildren().GetCount() == 1)
+			{
+				// remove atachement to a static works
+				ndSharedPtr<ndMesh> childMesh (m_mesh->GetChildren().GetFirst()->GetInfo());
+				ndAssert(childMesh->GetJoint());
+				ndSharedPtr<ndMeshJoint>& joint = childMesh->GetJoint();
+				if (joint->m_constructor == ndJointFix6dof::StaticClassName())
+				{
+					ndMatrix matrix(childMesh->CalculateGlobalMatrix());
+					m_mesh->RemoveChild(childMesh);
+					childMesh->SetMatrix(matrix);
+					childMesh->SetJoint(ndSharedPtr<ndMeshJoint>(nullptr));
+					m_mesh = childMesh;
+				}
+			}
+		}
+	}
 
 	// replace defualt visuals with
 	auto GenerateVisualMesh = [this](ndMesh* const meshNode)

@@ -992,7 +992,9 @@ ndMesh* ndModelArticulation::CreateDefaultMesh() const
 		ndModelArticulation::ndNode* const node = stack.Pop();
 
 		const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
-		ndMesh* const meshNode = new ndMesh(body->GetCollisionShape());
+		const ndShapeInstance& collisionShape = body->GetCollisionShape();
+		bool hasGeometry = ((ndShape*)collisionShape.GetShape())->GetAsShapeNull() ? false : true;
+		ndMesh* const meshNode = hasGeometry ? new ndMesh(collisionShape) : new ndMesh();
 		if (node->m_name.GetStr() && *node->m_name.GetStr())
 		{
 			meshNode->SetName(node->m_name.GetStr());

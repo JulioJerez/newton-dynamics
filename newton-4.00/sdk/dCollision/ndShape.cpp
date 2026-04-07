@@ -181,7 +181,5 @@ ndInt32 ndShape::GetRefCount() const
 
 ndSharedPtr<ndMeshCollisionShape> ndShape::GetMeshShape() const
 {
-	ndExpandTraceMessage("serialize class: %s not Implemented", ClassName());
-	ndAssert(0);
 	return ndSharedPtr<ndMeshCollisionShape> (new ndMeshCollisionShapeNull());
 }

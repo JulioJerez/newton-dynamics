@@ -311,7 +311,7 @@ ndMeshBodyKinematic::ndMeshBodyKinematic()
 	:ndMeshBody()
 	,m_shapeInstance()
 	,m_invMass(ndVector::m_zero)
-	,m_inertiaPrincipalAxis(ndGetIdentityMatrix())
+	,m_inertiaPrincipalAxis(ndVector::m_zero)
 	,m_maxAngleStep(ndFloat32 (45.0f))
 	,m_maxLinearStep(ndFloat32(2.0f))
 {
@@ -322,13 +322,13 @@ void ndMeshBodyKinematic::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	ndMeshBody::SerializeToXml(parent);
 
-	ndVector euler;
-	ndVector axisOfInertia(m_inertiaPrincipalAxis.CalcPitchYawRoll(euler));
-	axisOfInertia = axisOfInertia.Scale(ndRadToDegree);
+	//ndVector euler;
+	//ndVector axisOfInertia(m_inertiaPrincipalAxis.CalcPitchYawRoll(euler));
+	//axisOfInertia = axisOfInertia.Scale(ndRadToDegree);
 
 	xmlSaveParam(parent, "inverseMass", m_invMass.m_w);
 	xmlSaveParam(parent, "inverseDiagonalInertia", m_invMass);
-	xmlSaveParam(parent, "principalAxis", axisOfInertia);
+	xmlSaveParam(parent, "principalAxis", m_inertiaPrincipalAxis);
 	xmlSaveParam(parent, "maxAngleStep", m_maxAngleStep);
 	xmlSaveParam(parent, "maxLinearStep", m_maxLinearStep);
 
@@ -343,11 +343,11 @@ void ndMeshBodyKinematic::DeserializeFromXml(const nd::TiXmlElement* const paren
 
 	m_invMass = xmlGetVector3(parent, "inverseDiagonalInertia");
 	m_invMass.m_w = xmlGetFloat(parent, "inverseMass");
+	m_inertiaPrincipalAxis = xmlGetFloat(parent, "principalAxis");
 
-	ndVector euler(xmlGetVector3(parent, "principalAxis"));
-	euler.Scale(ndDegreeToRad);
-	m_inertiaPrincipalAxis = ndPitchMatrix(euler.m_x) * ndYawMatrix(euler.m_y) * ndRollMatrix(euler.m_z);
-
+	//ndVector euler(xmlGetVector3(parent, "principalAxis"));
+	//euler.Scale(ndDegreeToRad);
+	//m_inertiaPrincipalAxis = ndPitchMatrix(euler.m_x) * ndYawMatrix(euler.m_y) * ndRollMatrix(euler.m_z);
 	m_maxAngleStep = xmlGetFloat(parent, "maxAngleStep");
 	m_maxLinearStep = xmlGetFloat(parent, "maxLinearStep");
 

@@ -3196,8 +3196,6 @@ ndAssert(0);
 
 void ndMeshEffect::PackAttibuteData()
 {
-	//ndStack<ndInt32>attrIndexBuffer(ndInt32(m_attrib.m_pointChannel.GetCount()));
-	//ndInt32* const attrIndexMap = &attrIndexBuffer[0];
 	ndArray<ndInt32>attrIndexMap;
 	attrIndexMap.SetCount(m_attrib.m_pointChannel.GetCount());
 	m_attrib.CompactVertexData(m_points, &attrIndexMap[0], ndFloat32(1.0e-6f));
