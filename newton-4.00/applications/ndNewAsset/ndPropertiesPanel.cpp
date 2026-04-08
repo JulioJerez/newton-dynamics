@@ -652,6 +652,12 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 							instance->Serialize(&shapeInstance);
 							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
 						}
+						else if (strcmp(name, ndShapeCylinder::StaticClassName()) == 0)
+						{
+							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionCylinder());
+							instance->Serialize(&shapeInstance);
+							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
+						}
 						else if (strcmp(name, ndShapeConvexHull::StaticClassName()) == 0)
 						{
 							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionConvex());

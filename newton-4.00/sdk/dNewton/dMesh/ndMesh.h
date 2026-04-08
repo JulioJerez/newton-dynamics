@@ -141,6 +141,7 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionSphere();
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionConvex();
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionCapsule();
+	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionCylinder();
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionChamferCylinder();
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionTree(bool optimize = true);
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionConvexApproximation(bool lowDetail = false);

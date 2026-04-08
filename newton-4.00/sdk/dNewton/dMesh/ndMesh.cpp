@@ -559,6 +559,32 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCapsule()
 	return shape;
 }
 
+ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCylinder()
+{
+	ndSharedPtr<ndMeshEffect> meshEffect = GetMesh();
+	ndAssert(*meshEffect);
+
+	ndVector size;
+	ndMatrix localMatrix(CalculateLocalMatrix(size));
+	if ((size.m_y >= size.m_x) && (size.m_y >= size.m_z))
+	{
+		ndSwap(size.m_x, size.m_y);
+		localMatrix = ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * localMatrix;
+	}
+	else if ((size.m_z >= size.m_x) && (size.m_z >= size.m_y))
+	{
+		ndSwap(size.m_x, size.m_z);
+		localMatrix = ndYawMatrix(ndFloat32(90.0f) * ndDegreeToRad) * localMatrix;
+	}
+
+	ndFloat32 radios = size.m_y;
+	ndFloat32 high = ndFloat32(2.0f) * ndMax(size.m_x - size.m_y, ndFloat32(0.025f));
+
+	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeCylinder(radios, radios, high)));
+	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
+	return shape;
+}
+
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionTire()
 {
 	ndSharedPtr<ndMeshEffect> meshEffect = GetMesh();
@@ -774,6 +800,13 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionFromChildren()
 			subShape->SetLocalMatrix(matrix);
 			shapeArray.PushBack(subShape);
 		}
+		else if (strstr(name, "-cylinder"))
+		{
+			ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
+			const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
+			subShape->SetLocalMatrix(matrix);
+			shapeArray.PushBack(subShape);
+		}
 		else if (strstr(name, "-convexhull"))
 		{
 			ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
@@ -864,6 +897,10 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollision()
 	else if (strstr(name, "-capsule"))
 	{
 		shape = CreateCollisionCapsule();
+	}
+	else if (strstr(name, "-cylinder"))
+	{
+		shape = CreateCollisionCylinder();
 	}
 	else if (strstr(name, "-tire"))
 	{
