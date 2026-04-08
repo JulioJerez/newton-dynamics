@@ -115,7 +115,7 @@ ndShape* ndMeshCollisionShapeCapsule::CreateObject() const
 
 void ndMeshCollisionShapeCylinder::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	xmlSaveParam(parent, "constructor", ndShapeCapsule::StaticClassName());
+	xmlSaveParam(parent, "constructor", ndShapeCylinder::StaticClassName());
 	xmlSaveParam(parent, "radio0", m_radius0);
 	xmlSaveParam(parent, "radio1", m_radius1);
 	xmlSaveParam(parent, "heigh", m_height);
@@ -130,7 +130,7 @@ void ndMeshCollisionShapeCylinder::DeserializeFromXml(const nd::TiXmlElement* co
 
 ndShape* ndMeshCollisionShapeCylinder::CreateObject() const
 {
-	return new ndShapeCapsule(m_radius0, m_radius1, m_height);
+	return new ndShapeCylinder(m_radius0, m_radius1, m_height);
 }
 
 void ndMeshCollisionShapeChamferCylinder::SerializeToXml(nd::TiXmlElement* const parent) const
