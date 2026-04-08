@@ -168,7 +168,7 @@ class ndMeshBodyKinematic : public ndMeshBody
 
 	ndMeshShapeInstance m_shapeInstance;
 	ndVector m_invMass;
-	ndMatrix m_inertiaPrincipalAxis;
+	ndVector m_inertiaPrincipalAxis;
 	ndFloat32 m_maxAngleStep;
 	ndFloat32 m_maxLinearStep;
 };

@@ -130,10 +130,12 @@ class ndUrdfMeshLoader : public ndRenderMeshLoader
 	void ImportVisual(const nd::TiXmlNode* const linkNode, ndMesh* const meshNode) const;
 	ndJointBilateralConstraint* ImportJoint(const nd::TiXmlNode* const jointNode, ndBodyDynamic* const childBody, ndBodyDynamic* const parentBody);
 
+	bool GetWorkingFileName(char* const name, ndInt32 maxSize) const;
 	bool ImportStlMesh(const ndMatrix& matrix, const char* const pathName, ndMeshEffect* const meshEffect, ndInt32 materialIndex, const ndVector& scale) const;
 	bool ImportObjMesh(const ndMatrix& matrix, const char* const pathName, ndMeshEffect* const meshEffect, ndInt32 materialIndex, const ndVector& scale) const;
 
 	ndString m_path;
+	ndString m_searchPath;
 	ndArray<Material> m_materials;
 	ndTree<Hierarchy, ndString> m_bodyLinks;
 };

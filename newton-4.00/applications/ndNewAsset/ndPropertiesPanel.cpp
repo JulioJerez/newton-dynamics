@@ -279,7 +279,6 @@ class ndUndoRedoTransform : public ndUndoRedoCommand
 	ndMatrix m_matrix;
 };
 
-
 class ndUndoRedoGeometryTransform : public ndUndoRedoCommand
 {
 	public:
@@ -321,6 +320,134 @@ class ndUndoRedoGeometryTransform : public ndUndoRedoCommand
 	}
 
 	ndMatrix m_matrix;
+};
+
+class ndUndoRedoCenterOfMass : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoCenterOfMass(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+		,m_centerOfMass(mesh->GetRigidBody()->m_localCentreOfMass)
+	{
+	}
+
+	virtual class ndUndoRedoCenterOfMass* GetAsUndoRedoCenterOfMass() const override
+	{
+		return (ndUndoRedoCenterOfMass*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			ndUndoRedoCenterOfMass* const other = command.GetAsUndoRedoCenterOfMass();
+			if (other)
+			{
+				const ndVector comDiff(m_centerOfMass - other->m_centerOfMass);
+				if (comDiff.DotProduct(comDiff).GetScalar() < ndFloat32(1.0e-6f))
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		m_mesh->GetRigidBody()->m_localCentreOfMass = m_centerOfMass;
+	}
+
+	ndVector m_centerOfMass;
+};
+
+class ndUndoRedoAngularDamp : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoAngularDamp(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		m_angularDamp = body->m_intrinsicDamping;
+	}
+
+	virtual ndUndoRedoAngularDamp* GetAsUndoRedoAngularDamp() const override
+	{
+		return (ndUndoRedoAngularDamp*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			ndUndoRedoAngularDamp* const other = command.GetAsUndoRedoAngularDamp();
+			if (other)
+			{
+				const ndVector comDiff(ndVector::m_triplexMask & (m_angularDamp - other->m_angularDamp));
+				if (comDiff.DotProduct(comDiff).GetScalar() < ndFloat32(1.0e-6f))
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		m_angularDamp.m_w = m_mesh->GetRigidBody()->m_localCentreOfMass.m_w;
+		m_mesh->GetRigidBody()->m_localCentreOfMass = m_angularDamp;
+	}
+
+	ndVector m_angularDamp;
+};
+
+class ndUndoRedoInertiaAxis : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoInertiaAxis(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		m_inertiaPrincipalAxis = body->m_inertiaPrincipalAxis;
+	}
+
+	virtual ndUndoRedoInertiaAxis* GetAsUndoRedoInertiaAxis() const override
+	{
+		return (ndUndoRedoInertiaAxis*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			ndUndoRedoInertiaAxis* const other = command.GetAsUndoRedoInertiaAxis();
+			if (other)
+			{
+				const ndVector comDiff(ndVector::m_triplexMask & (m_inertiaPrincipalAxis - other->m_inertiaPrincipalAxis));
+				if (comDiff.DotProduct(comDiff).GetScalar() < ndFloat32(1.0e-6f))
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+		body->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
+	}
+
+	ndVector m_inertiaPrincipalAxis;
 };
 
 void ndAssetEditor::ShowPropertiesMeshInfo()
@@ -484,328 +611,6 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				m_currentSelection->SetGeometryMatrix(newMatrix);
 				entNode->SetPrimitiveMatrix(matrix);
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoGeometryTransform(this, m_currentSelection)));
-			};
-		}
-	}
-}
-
-void ndAssetEditor::ShowPropertiesRigidBodyInfo()
-{
-	if (ImGui::CollapsingHeader("Rigid body"))
-	{
-		ndSharedPtr<ndMeshBody> body (m_currentSelection->GetRigidBody());
-		ndAssert(body->m_classConstructor == ndBodyDynamic::StaticClassName());
-		ndMeshBodyDynamic* const rigidBody = (ndMeshBodyDynamic*)*body;
-
-		// body mass
-		{
-			ndReal scalar = ndReal (ndFloat32 (1.0f) / rigidBody->m_invMass.m_w);
-			//if (ImGui::DragFloat("mass", &scalar))
-			if (ImGui::InputFloat("mass", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
-			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMass(this, m_currentSelection)));
-				scalar = ndMax(scalar, ndReal(0.001f));
-				rigidBody->m_invMass.m_w = ndFloat32(1.0f) / scalar;
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMass(this, m_currentSelection)));
-			};
-		}
-
-		// body max angular integration step 
-		{
-			ndReal scalar = ndReal(rigidBody->m_maxAngleStep);
-			//if (ImGui::DragFloat("angle step", &scalar))
-			if (ImGui::InputFloat("angle step", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
-			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoAngleStep(this, m_currentSelection)));
-				scalar = ndClamp(scalar, ndReal(10.0f), ndReal(180.0f));
-				rigidBody->m_maxAngleStep = scalar;
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoAngleStep(this, m_currentSelection)));
-			};
-		}
-
-		// body max linear integration step 
-		{
-			ndReal scalar = ndReal(rigidBody->m_maxLinearStep);
-			//if (ImGui::DragFloat("linear step", &scalar))
-			if (ImGui::InputFloat("linear step", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
-			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLinearStep(this, m_currentSelection)));
-				scalar = ndClamp(scalar, ndReal(0.1f), ndReal(30.0f));
-				rigidBody->m_maxLinearStep = scalar;
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLinearStep(this, m_currentSelection)));
-			};
-		}
-
-		// body intrinsic linear damp 
-		{
-			ndReal scalar = ndReal(rigidBody->m_intrinsicDamping.m_w);
-			//if (ImGui::DragFloat("linear Damp", &scalar))
-			if (ImGui::InputFloat("linear damp", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
-			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLinearDamp(this, m_currentSelection)));
-				scalar = ndClamp(scalar, ndReal(0.0f), ndReal(1.0f));
-				rigidBody->m_intrinsicDamping.m_w = scalar;
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLinearDamp(this, m_currentSelection)));
-			};
-		}
-
-		// body center of mass
-		{
-			ndVector vector(rigidBody->m_localCentreOfMass);
-			ndReal real[3];
-			real[0] = ndReal(vector.m_x);
-			real[1] = ndReal(vector.m_y);
-			real[2] = ndReal(vector.m_z);
-			if (ImGui::DragFloat3("com", real))
-			{
-				vector.m_x = real[0];
-				vector.m_y = real[1];
-				vector.m_z = real[2];
-				rigidBody->m_localCentreOfMass = vector;
-			};
-		}
-
-		// body initial linear velocity
-		{
-			ndVector vector(rigidBody->m_veloc);
-			ndReal real[3];
-			real[0] = ndReal(vector.m_x);
-			real[1] = ndReal(vector.m_y);
-			real[2] = ndReal(vector.m_z);
-			if (ImGui::DragFloat3("veloc", real))
-			{
-				vector.m_x = real[0];
-				vector.m_y = real[1];
-				vector.m_z = real[2];
-				rigidBody->m_veloc = vector;
-			};
-		}
-
-		// body initial angular velocity
-		{
-			ndVector vector(rigidBody->m_omega);
-			ndReal real[3];
-			real[0] = ndReal(vector.m_x);
-			real[1] = ndReal(vector.m_y);
-			real[2] = ndReal(vector.m_z);
-			if (ImGui::DragFloat3("omega", real))
-			{
-				vector.m_x = real[0];
-				vector.m_y = real[1];
-				vector.m_z = real[2];
-				rigidBody->m_omega = vector;
-			};
-		}
-
-		// body intrinsic angular damp
-		{
-			ndVector vector(rigidBody->m_intrinsicDamping);
-			ndReal real[3];
-			real[0] = ndReal(vector.m_x);
-			real[1] = ndReal(vector.m_y);
-			real[2] = ndReal(vector.m_z);
-			if (ImGui::DragFloat3("angular damp", real))
-			{
-				vector.m_x = real[0];
-				vector.m_y = real[1];
-				vector.m_z = real[2];
-				rigidBody->m_intrinsicDamping = vector;
-			};
-		}
-
-		// body principal axis of inertia
-		{
-			ndReal euler[3];
-			ndVector tmp;
-			ndMatrix matrix(rigidBody->m_inertiaPrincipalAxis);
-			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
-
-			euler[0] = ndReal(radians[0]);
-			euler[1] = ndReal(radians[1]);
-			euler[2] = ndReal(radians[2]);
-			if (ImGui::DragFloat3("inertia axis", euler))
-			{
-				const ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
-				rigidBody->m_inertiaPrincipalAxis = newMatrix;
-			};
-		}
-	}
-}
-
-void ndAssetEditor::ShowPropertiesCollisionInfo()
-{
-	if (ImGui::CollapsingHeader("Collision shape"))
-	{
-		ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
-		ndMeshBodyKinematic* const rigidBody = (ndMeshBodyKinematic*)*body;
-		ndMeshShapeInstance& shapeInstance = rigidBody->m_shapeInstance;
-
-		ndSharedPtr<ndShape> shape(shapeInstance.m_shape->CreateObject());
-		if (ImGui::BeginCombo("shapes", shape->ClassName()))
-		{
-			auto SetDropdownList = [this, rigidBody, &shape, &shapeInstance](const char* name)
-			{
-				bool selected = strcmp(name, shape->ClassName()) ? false : true;
-				if (ImGui::Selectable(name, selected))
-				{
-					if (strcmp(name, shape->ClassName()))
-					{
-						if (strcmp(name, ndShapeBox::StaticClassName()) == 0)
-						{
-							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionBox());
-							instance->Serialize(&shapeInstance);
-							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
-						}
-						else if (strcmp(name, ndShapeSphere::StaticClassName()) == 0)
-						{
-							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionSphere());
-							instance->Serialize(&shapeInstance);
-							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
-						}
-						else if (strcmp(name, ndShapeCapsule::StaticClassName()) == 0)
-						{
-							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionCapsule());
-							instance->Serialize(&shapeInstance);
-							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
-						}
-						else if (strcmp(name, ndShapeConvexHull::StaticClassName()) == 0)
-						{
-							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionConvex());
-							instance->Serialize(&shapeInstance);
-							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
-						}
-						else if (strcmp(name, ndShapeChamferCylinder::StaticClassName()) == 0)
-						{
-							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionChamferCylinder());
-							instance->Serialize(&shapeInstance);
-							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
-						}
-						else
-						{
-							ndAssert(0);
-						}
-					}
-				}
-			};
-			SetDropdownList(ndShapeBox::StaticClassName());
-			SetDropdownList(ndShapeSphere::StaticClassName());
-			SetDropdownList(ndShapeCapsule::StaticClassName());
-			SetDropdownList(ndShapeConvexHull::StaticClassName());
-			SetDropdownList(ndShapeChamferCylinder::StaticClassName());
-			SetDropdownList(ndShapeCompound::StaticClassName());
-
-			ImGui::EndCombo();
-		}
-
-		if (strcmp(shape->ClassName(), ndShapeBox::StaticClassName()) == 0)
-		{
-			ndReal size[3];
-			size[0] = 1;
-			size[1] = 2;
-			size[2] = 3;
-			if (ImGui::DragFloat3("size##1", size))
-			{
-
-			}
-		}
-		else if (strcmp(shape->ClassName(), ndShapeSphere::StaticClassName()) == 0)
-		{
-			ndReal size = ndReal(1.0f);
-			if (ImGui::DragFloat("radio0##1", &size))
-			{
-
-			}
-		}
-		else if (strcmp(shape->ClassName(), ndShapeCapsule::StaticClassName()) == 0)
-		{
-			ndReal radio0 = ndReal(1.0f);
-			if (ImGui::DragFloat("radio0##1", &radio0))
-			{
-
-			}
-
-			ndReal radio1 = ndReal(2.0f);
-			if (ImGui::DragFloat("radio1##1", &radio1))
-			{
-
-			}
-		}
-		else if (strcmp(shape->ClassName(), ndShapeConvexHull::StaticClassName()) == 0)
-		{
-			ndInt32 points = 100;
-			if (ImGui::DragInt("max point count##1", &points))
-			{
-
-			}
-		}
-		else if (strcmp(shape->ClassName(), ndShapeChamferCylinder::StaticClassName()) == 0)
-		{
-			ndReal size[3];
-			size[0] = 1;
-			size[1] = 2;
-			size[2] = 3;
-			if (ImGui::DragFloat3("size##1", size))
-			{
-
-			}
-		}
-		else if (strcmp(shape->ClassName(), ndShapeCompound::StaticClassName()) == 0)
-		{
-			ndReal size = 1;
-			if (ImGui::DragFloat("size##1", &size))
-			{
-
-			}
-		}
-		else
-		{
-			ndAssert(0);
-		}
-
-		// shaw shape scale
-		{
-			ndVector vector(shapeInstance.m_scale);
-			ndReal real[3];
-			real[0] = ndReal(vector.m_x);
-			real[1] = ndReal(vector.m_y);
-			real[2] = ndReal(vector.m_z);
-			if (ImGui::DragFloat3("scale##1", real))
-			{
-				vector.m_x = ndMax(real[0], ndReal(0.01f));
-				vector.m_y = ndMax(real[1], ndReal(0.01f));
-				vector.m_z = ndMax(real[2], ndReal(0.01f));
-				shapeInstance.m_scale = vector;
-			};
-		}
-
-		// show local transform
-		{
-			//ImGui::SeparatorText("local transform");
-			ndMatrix matrix(shapeInstance.m_localMatrix);
-			ndReal position[3];
-			position[0] = ndReal(matrix.m_posit.m_x);
-			position[1] = ndReal(matrix.m_posit.m_y);
-			position[2] = ndReal(matrix.m_posit.m_z);
-			if (ImGui::DragFloat3("position##2", position))
-			{
-				matrix.m_posit.m_x = position[0];
-				matrix.m_posit.m_y = position[1];
-				matrix.m_posit.m_z = position[2];
-				shapeInstance.m_localMatrix = matrix;
-			};
-
-			ndReal euler[3];
-			ndVector tmp;
-			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
-
-			euler[0] = ndReal(radians[0]);
-			euler[1] = ndReal(radians[1]);
-			euler[2] = ndReal(radians[2]);
-			if (ImGui::DragFloat3("rotation##2", euler))
-			{
-				ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
-				newMatrix.m_posit = matrix.m_posit;
-				shapeInstance.m_localMatrix = newMatrix;
 			};
 		}
 	}
@@ -986,4 +791,350 @@ void ndAssetEditor::ShowPropertiesPanel()
 	}
 
 	ImGui::End();
+}
+
+void ndAssetEditor::ShowPropertiesRigidBodyInfo()
+{
+	if (ImGui::CollapsingHeader("Rigid body"))
+	{
+		ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
+		ndAssert(body->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const rigidBody = (ndMeshBodyDynamic*)*body;
+
+		// body mass
+		{
+			ndReal scalar = ndReal(ndFloat32(1.0f) / rigidBody->m_invMass.m_w);
+			//if (ImGui::DragFloat("mass", &scalar))
+			if (ImGui::InputFloat("mass", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMass(this, m_currentSelection)));
+				scalar = ndMax(scalar, ndReal(0.001f));
+				rigidBody->m_invMass.m_w = ndFloat32(1.0f) / scalar;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMass(this, m_currentSelection)));
+			};
+		}
+
+		// body max linear integration step 
+		{
+			ndReal scalar = ndReal(rigidBody->m_maxLinearStep);
+			//if (ImGui::DragFloat("linear step", &scalar))
+			if (ImGui::InputFloat("linear step", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLinearStep(this, m_currentSelection)));
+				scalar = ndClamp(scalar, ndReal(0.1f), ndReal(30.0f));
+				rigidBody->m_maxLinearStep = scalar;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLinearStep(this, m_currentSelection)));
+			};
+		}
+
+		// body max angular integration step 
+		{
+			ndReal scalar = ndReal(rigidBody->m_maxAngleStep);
+			//if (ImGui::DragFloat("angle step", &scalar))
+			if (ImGui::InputFloat("angle step", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoAngleStep(this, m_currentSelection)));
+				scalar = ndClamp(scalar, ndReal(10.0f), ndReal(180.0f));
+				rigidBody->m_maxAngleStep = scalar;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoAngleStep(this, m_currentSelection)));
+			};
+		}
+
+		// body intrinsic linear damp 
+		{
+			ndReal scalar = ndReal(rigidBody->m_intrinsicDamping.m_w);
+			//if (ImGui::DragFloat("linear Damp", &scalar))
+			if (ImGui::InputFloat("linear damp", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLinearDamp(this, m_currentSelection)));
+				scalar = ndClamp(scalar, ndReal(0.0f), ndReal(1.0f));
+				rigidBody->m_intrinsicDamping.m_w = scalar;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLinearDamp(this, m_currentSelection)));
+			};
+		}
+
+		// body intrinsic angular damp
+		{
+			ndVector vector(rigidBody->m_intrinsicDamping);
+			ndReal real[3];
+			real[0] = ndReal(vector.m_x);
+			real[1] = ndReal(vector.m_y);
+			real[2] = ndReal(vector.m_z);
+			//if (ImGui::DragFloat3("angular damp", real))
+			if (ImGui::InputFloat3("angular damp", real, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoAngularDamp(this, m_currentSelection)));
+				vector.m_x = real[0];
+				vector.m_y = real[1];
+				vector.m_z = real[2];
+				rigidBody->m_intrinsicDamping = vector;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoAngularDamp(this, m_currentSelection)));
+			};
+		}
+
+		// body center of mass
+		{
+			ndVector vector(rigidBody->m_localCentreOfMass);
+			ndReal real[3];
+			real[0] = ndReal(vector.m_x);
+			real[1] = ndReal(vector.m_y);
+			real[2] = ndReal(vector.m_z);
+			//if (ImGui::DragFloat3("com", real))
+			if (ImGui::InputFloat3("com", real, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoCenterOfMass(this, m_currentSelection)));
+				vector.m_x = real[0];
+				vector.m_y = real[1];
+				vector.m_z = real[2];
+				rigidBody->m_localCentreOfMass = vector;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoCenterOfMass(this, m_currentSelection)));
+			};
+		}
+
+		// body principal axis of inertia
+		{
+			ndVector vector(rigidBody->m_inertiaPrincipalAxis);
+			ndReal real[3];
+			real[0] = ndReal(vector.m_x);
+			real[1] = ndReal(vector.m_y);
+			real[2] = ndReal(vector.m_z);
+
+			//if (ImGui::DragFloat3("inertia axis", euler))
+			if (ImGui::InputFloat3("inertia axis", real, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoInertiaAxis(this, m_currentSelection)));
+				vector.m_x = real[0];
+				vector.m_y = real[1];
+				vector.m_z = real[2];
+				vector.m_w = ndReal(0.0f);
+				rigidBody->m_inertiaPrincipalAxis = vector;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoInertiaAxis(this, m_currentSelection)));
+			};
+		}
+	}
+}
+
+void ndAssetEditor::ShowPropertiesCollisionInfo()
+{
+	if (ImGui::CollapsingHeader("Collision shape"))
+	{
+		ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
+		ndMeshBodyKinematic* const rigidBody = (ndMeshBodyKinematic*)*body;
+		ndMeshShapeInstance& shapeInstance = rigidBody->m_shapeInstance;
+
+		ndSharedPtr<ndShape> shape(shapeInstance.m_shape->CreateObject());
+		const char* const className = shape->ClassName();
+		if (ImGui::BeginCombo("shapes", className))
+		{
+			auto SetDropdownList = [this, rigidBody, &shape, &shapeInstance, &className](const char* const name)
+			{
+				bool selected = strcmp(name, className) ? false : true;
+				if (ImGui::Selectable(name, selected))
+				{
+					if (strcmp(name, className))
+					{
+						if (strcmp(name, ndShapeBox::StaticClassName()) == 0)
+						{
+							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionBox());
+							instance->Serialize(&shapeInstance);
+							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
+						}
+						else if (strcmp(name, ndShapeSphere::StaticClassName()) == 0)
+						{
+							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionSphere());
+							instance->Serialize(&shapeInstance);
+							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
+						}
+						else if (strcmp(name, ndShapeCapsule::StaticClassName()) == 0)
+						{
+							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionCapsule());
+							instance->Serialize(&shapeInstance);
+							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
+						}
+						else if (strcmp(name, ndShapeCylinder::StaticClassName()) == 0)
+						{
+							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionCylinder());
+							instance->Serialize(&shapeInstance);
+							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
+						}
+						else if (strcmp(name, ndShapeConvexHull::StaticClassName()) == 0)
+						{
+							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionConvex());
+							instance->Serialize(&shapeInstance);
+							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
+						}
+						else if (strcmp(name, ndShapeChamferCylinder::StaticClassName()) == 0)
+						{
+							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionChamferCylinder());
+							instance->Serialize(&shapeInstance);
+							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
+						}
+						else if (strcmp(name, ndShapeNull::StaticClassName()) == 0)
+						{
+							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionNull());
+							instance->Serialize(&shapeInstance);
+							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
+						}
+						else
+						{
+							ndAssert(0);
+						}
+					}
+				}
+			};
+			SetDropdownList(ndShapeNull::StaticClassName());
+			SetDropdownList(ndShapeBox::StaticClassName());
+			SetDropdownList(ndShapeSphere::StaticClassName());
+			SetDropdownList(ndShapeCapsule::StaticClassName());
+			SetDropdownList(ndShapeCylinder::StaticClassName());
+			SetDropdownList(ndShapeConvexHull::StaticClassName());
+			SetDropdownList(ndShapeChamferCylinder::StaticClassName());
+			SetDropdownList(ndShapeCompound::StaticClassName());
+
+			ImGui::EndCombo();
+		}
+
+		
+		if (strcmp(className, ndShapeBox::StaticClassName()) == 0)
+		{
+			ndReal size[3];
+			size[0] = 1;
+			size[1] = 2;
+			size[2] = 3;
+			if (ImGui::DragFloat3("size##1", size))
+			{
+
+			}
+		}
+		else if (strcmp(className, ndShapeSphere::StaticClassName()) == 0)
+		{
+			ndReal size = ndReal(1.0f);
+			if (ImGui::DragFloat("radio0##1", &size))
+			{
+
+			}
+		}
+		else if (strcmp(className, ndShapeCapsule::StaticClassName()) == 0)
+		{
+			ndReal radio0 = ndReal(1.0f);
+			if (ImGui::DragFloat("radio0##1", &radio0))
+			{
+			}
+
+			ndReal radio1 = ndReal(2.0f);
+			if (ImGui::DragFloat("radio1##1", &radio1))
+			{
+			}
+
+			ndReal length = ndReal(2.0f);
+			if (ImGui::DragFloat("lenght##1", &length))
+			{
+			}
+
+		}
+		else if (strcmp(className, ndShapeCylinder::StaticClassName()) == 0)
+		{
+			ndReal radio0 = ndReal(1.0f);
+			if (ImGui::DragFloat("radio0##2", &radio0))
+			{
+			}
+
+			ndReal radio1 = ndReal(2.0f);
+			if (ImGui::DragFloat("radio1##2", &radio1))
+			{
+			}
+
+			ndReal length = ndReal(2.0f);
+			if (ImGui::DragFloat("lenght##2", &length))
+			{
+			}
+		}
+
+		else if (strcmp(className, ndShapeConvexHull::StaticClassName()) == 0)
+		{
+			ndInt32 points = 100;
+			if (ImGui::DragInt("max point count##1", &points))
+			{
+
+			}
+		}
+		else if (strcmp(className, ndShapeChamferCylinder::StaticClassName()) == 0)
+		{
+			ndReal size[3];
+			size[0] = 1;
+			size[1] = 2;
+			size[2] = 3;
+			if (ImGui::DragFloat3("size##1", size))
+			{
+
+			}
+		}
+		else if (strcmp(className, ndShapeCompound::StaticClassName()) == 0)
+		{
+			ndReal size = 1;
+			if (ImGui::DragFloat("size##1", &size))
+			{
+
+			}
+		}
+		else if (strcmp(className, ndShapeNull::StaticClassName()) == 0)
+		{
+			ndReal size = 1;
+			if (ImGui::DragFloat("size##1", &size))
+			{
+
+			}
+		}
+		else
+		{
+			ndAssert(0);
+		}
+
+		// shaw shape scale
+		{
+			ndVector vector(shapeInstance.m_scale);
+			ndReal real[3];
+			real[0] = ndReal(vector.m_x);
+			real[1] = ndReal(vector.m_y);
+			real[2] = ndReal(vector.m_z);
+			if (ImGui::DragFloat3("scale##1", real))
+			{
+				vector.m_x = ndMax(real[0], ndReal(0.01f));
+				vector.m_y = ndMax(real[1], ndReal(0.01f));
+				vector.m_z = ndMax(real[2], ndReal(0.01f));
+				shapeInstance.m_scale = vector;
+			};
+		}
+
+		// show local transform
+		{
+			//ImGui::SeparatorText("local transform");
+			ndMatrix matrix(shapeInstance.m_localMatrix);
+			ndReal position[3];
+			position[0] = ndReal(matrix.m_posit.m_x);
+			position[1] = ndReal(matrix.m_posit.m_y);
+			position[2] = ndReal(matrix.m_posit.m_z);
+			if (ImGui::DragFloat3("position##2", position))
+			{
+				matrix.m_posit.m_x = position[0];
+				matrix.m_posit.m_y = position[1];
+				matrix.m_posit.m_z = position[2];
+				shapeInstance.m_localMatrix = matrix;
+			};
+
+			ndReal euler[3];
+			ndVector tmp;
+			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
+
+			euler[0] = ndReal(radians[0]);
+			euler[1] = ndReal(radians[1]);
+			euler[2] = ndReal(radians[2]);
+			if (ImGui::DragFloat3("rotation##2", euler))
+			{
+				ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
+				newMatrix.m_posit = matrix.m_posit;
+				shapeInstance.m_localMatrix = newMatrix;
+			};
+		}
+	}
 }

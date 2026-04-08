@@ -1096,7 +1096,10 @@ void ndBodyKinematic::Serialize(ndSharedPtr<ndMeshBody>& meshBody) const
 	ndBody::Serialize(meshBody);
 	ndMeshBodyKinematic* const meshKinematicBody = (ndMeshBodyKinematic*)*meshBody;
 	meshKinematicBody->m_invMass = m_invMass;
-	meshKinematicBody->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
+	ndVector euler;
+	ndVector axisOfInertia(m_inertiaPrincipalAxis.CalcPitchYawRoll(euler));
+
+	meshKinematicBody->m_inertiaPrincipalAxis = axisOfInertia.Scale(ndRadToDegree);
 	meshKinematicBody->m_maxLinearStep = m_maxLinearStep;
 	meshKinematicBody->m_maxAngleStep = m_maxAngleStep * ndRadToDegree;
 	m_shapeInstance.Serialize(&meshKinematicBody->m_shapeInstance);
@@ -1113,7 +1116,8 @@ void ndBodyKinematic::Deserialize(const ndMeshBody* const meshBody)
 	ndSharedPtr<ndShapeInstance> instance (kinematic->m_shapeInstance.CreateObject());
 	SetCollisionShape(**instance);
 
-	m_inertiaPrincipalAxis = kinematic->m_inertiaPrincipalAxis;
+	ndVector euler (kinematic->m_inertiaPrincipalAxis.Scale(ndDegreeToRad));
+	m_inertiaPrincipalAxis = ndPitchMatrix(euler.m_x) * ndYawMatrix(euler.m_y) * ndRollMatrix(euler.m_z);
 	m_maxLinearStep = kinematic->m_maxLinearStep;
 	m_maxAngleStep = kinematic->m_maxAngleStep * ndDegreeToRad;
 }
