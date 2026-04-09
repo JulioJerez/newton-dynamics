@@ -57,52 +57,45 @@ class ndUndoRedoJoint : public ndUndoRedoCommand
 	ndMatrix m_localFrame;
 };
 
+class ndUndoRedoJointChange : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoJointChange(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+		,m_joint(m_mesh->GetJoint())
+	{
+	}
 
-//class ndUndoRedoJoint : public ndUndoRedoCommand
-//{
-//	public:
-//	ndUndoRedoJoint(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
-//		:ndUndoRedoCommand(editor, mesh)
-//	{
-//		ndMeshJoint* const joint = *m_mesh->GetJoint();
-//		ndMatrix matrix(joint->m_localFrame0);
-//
-//		ndVector tmp;
-//		ndVector radians(matrix.CalcPitchYawRoll(tmp));
-//		m_angles = radians;
-//	}
-//
-//	//virtual ndUndoRedoJoint* GetAsUndoRedoUndoRedoJoint() const override
-//	//{
-//	//	return (ndUndoRedoJoint*)this;
-//	//}
-//	//
-//	//virtual bool operator!=(const ndUndoRedoCommand& command) const override
-//	//{
-//	//	if (*m_mesh == *command.m_mesh)
-//	//	{
-//	//		ndUndoRedoJoint* const other = command.GetAsUndoRedoInertiaAxis();
-//	//		if (other)
-//	//		{
-//	//			const ndVector comDiff(ndVector::m_triplexMask & (m_inertiaPrincipalAxis - other->m_inertiaPrincipalAxis));
-//	//			if (comDiff.DotProduct(comDiff).GetScalar() < ndFloat32(1.0e-6f))
-//	//			{
-//	//				return false;
-//	//			}
-//	//		}
-//	//	}
-//	//
-//	//	return true;
-//	//}
-//	//
-//	//virtual void Undo() override
-//	//{
-//	//	ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
-//	//	body->m_inertiaPrincipalAxis = m_angles;
-//	//}
-//
-//	ndVector m_angles;
-//};
+	virtual ndUndoRedoJointChange* GetAsUndoRedoJointChange() const override
+	{
+		return (ndUndoRedoJointChange*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			const ndUndoRedoJointChange* const other = command.GetAsUndoRedoJointChange();
+			if (other)
+			{
+				if (m_joint->m_constructor == other->m_joint->m_constructor)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		m_mesh->SetJoint(m_joint);
+	}
+
+	ndSharedPtr<ndMeshJoint> m_joint;
+};
+
 
 void ndAssetEditor::ShowPropertiesJointInfo()
 {
@@ -159,7 +152,6 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 			};
 		}
 
-
 		if (ImGui::BeginCombo("joints", joint->m_constructor.GetStr()))
 		{
 			auto SetDropdownList = [this, &joint](const char* const name)
@@ -169,43 +161,53 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 				{
 					if (strcmp(name, ndJointHinge::StaticClassName()) == 0)
 					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointChange(this, m_currentSelection)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointHinge());
 						newJoint->SetLocalMatrix0(joint->m_localFrame0);
 						newJoint->SetLocalMatrix1(joint->m_localFrame1);
 						m_currentSelection->SetJoint(newJoint->GetMeshJoint());
 						joint = m_currentSelection->GetJoint();
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointChange(this, m_currentSelection)));
 					}
 					else if (strcmp(name, ndJointSlider::StaticClassName()) == 0)
 					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointChange(this, m_currentSelection)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointSlider());
 						newJoint->SetLocalMatrix0(joint->m_localFrame0);
 						newJoint->SetLocalMatrix1(joint->m_localFrame1);
 						m_currentSelection->SetJoint(newJoint->GetMeshJoint());
 						joint = m_currentSelection->GetJoint();
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointChange(this, m_currentSelection)));
 					}
 					else if (strcmp(name, ndJointDoubleHinge::StaticClassName()) == 0)
 					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointChange(this, m_currentSelection)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointDoubleHinge());
 						newJoint->SetLocalMatrix0(joint->m_localFrame0);
 						newJoint->SetLocalMatrix1(joint->m_localFrame1);
 						m_currentSelection->SetJoint(newJoint->GetMeshJoint());
 						joint = m_currentSelection->GetJoint();
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointChange(this, m_currentSelection)));
 					}
 					else if (strcmp(name, ndJointSpherical::StaticClassName()) == 0)
 					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointChange(this, m_currentSelection)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointSpherical());
 						newJoint->SetLocalMatrix0(joint->m_localFrame0);
 						newJoint->SetLocalMatrix1(joint->m_localFrame1);
 						m_currentSelection->SetJoint(newJoint->GetMeshJoint());
 						joint = m_currentSelection->GetJoint();
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointChange(this, m_currentSelection)));
 					}
 					else if (strcmp(name, ndJointFix6dof::StaticClassName()) == 0)
 					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointChange(this, m_currentSelection)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointFix6dof());
 						newJoint->SetLocalMatrix0(joint->m_localFrame0);
 						newJoint->SetLocalMatrix1(joint->m_localFrame1);
 						m_currentSelection->SetJoint(newJoint->GetMeshJoint());
 						joint = m_currentSelection->GetJoint();
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointChange(this, m_currentSelection)));
 					}
 					else
 					{
@@ -214,8 +216,8 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 				}
 			};
 			SetDropdownList(ndJointFix6dof::StaticClassName());
-			SetDropdownList(ndJointHinge::StaticClassName());
 			SetDropdownList(ndJointSlider::StaticClassName());
+			SetDropdownList(ndJointHinge::StaticClassName());
 			SetDropdownList(ndJointDoubleHinge::StaticClassName());
 			SetDropdownList(ndJointSpherical::StaticClassName());
 			SetDropdownList(ndJointWheel::StaticClassName());
