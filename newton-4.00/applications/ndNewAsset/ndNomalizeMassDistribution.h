@@ -58,7 +58,8 @@ class ndNomalizeMassDistribution : public ndAssetEditor::ndAssetTool
 
 	virtual void Execute() override;
 
-	ndFloat32 m_totalMass;
+	ndReal m_totalMass;
+	ndReal m_inertialRatio;
 };
 
 

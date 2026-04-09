@@ -17,6 +17,7 @@
 ndNomalizeMassDistribution::ndNomalizeMassDistribution(ndAssetEditor* const owner)
 	:ndAssetTool(owner)
 	,m_totalMass(100.0f)
+	,m_inertialRatio(0.25f)
 {
 }
 
@@ -24,7 +25,14 @@ void ndNomalizeMassDistribution::Execute()
 {
 	ImGui::Begin("normalize mass distribution", &m_owner->m_toolActive);
 	
-	ImGui::InputFloat("total mass", &m_totalMass, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue);
+	if (ImGui::InputFloat("total mass", &m_totalMass, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_totalMass = ndMax(m_totalMass, ndReal(1.0f));
+	}
+	if (ImGui::InputFloat("principal Inertia ration", &m_inertialRatio, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_inertialRatio = ndClamp(m_inertialRatio, ndReal(0.1f), ndReal(1.0f));
+	}
 
 	if (ImGui::Button("execute"))
 	{
@@ -51,6 +59,16 @@ void ndNomalizeMassDistribution::Execute()
 				ndMeshBodyKinematic* const kinBody = (ndMeshBodyKinematic*)*body;
 				ndVector inertia(kinBody->m_invMass.Reciproc());
 				inertia = inertia.Scale(ndFloat32(1.0f) / inertia.m_w);
+				ndFloat32 maxInertia = ndMax(inertia.m_x, ndMax(inertia.m_x, inertia.m_z));
+				ndFloat32 minInertia = ndMin(inertia.m_x, ndMin(inertia.m_x, inertia.m_z));
+				if (maxInertia * m_inertialRatio > minInertia)
+				{
+					minInertia = maxInertia * m_inertialRatio;
+					for (ndInt32 i = 0; i < 3; ++i)
+					{
+						inertia[i] = ndMax(inertia[i], minInertia);
+					}
+				}
 
 				ndSharedPtr<ndShapeInstance> instance(kinBody->m_shapeInstance.CreateObject());
 				ndFloat32 v = instance->GetVolume() * kinBody->m_massVolumeWeigh;
