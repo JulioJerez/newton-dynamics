@@ -20,26 +20,31 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	{
 		public:
 		ndDebugMesh()
-			:m_zBuffer()
-			,m_flatShaded()
-			,m_wireFrameShareEdge()
+			:m_zBufferMesh()
+			,m_zBufferShape()
+			,m_wireFrameMesh()
+			,m_flatShadedMesh()
+			,m_wireFrameShape()
 		{
 		}
 
 		ndWeakPtr<ndRenderSceneNode> m_parent;
-		ndSharedPtr<ndRenderPrimitive> m_zBuffer;
-		ndSharedPtr<ndRenderPrimitive> m_flatShaded;
-		ndSharedPtr<ndRenderPrimitive> m_wireFrameShareEdge;
+		ndSharedPtr<ndRenderPrimitive> m_zBufferMesh;
+		ndSharedPtr<ndRenderPrimitive> m_zBufferShape;
+		ndSharedPtr<ndRenderPrimitive> m_wireFrameMesh;
+		ndSharedPtr<ndRenderPrimitive> m_flatShadedMesh;
+		ndSharedPtr<ndRenderPrimitive> m_wireFrameShape;
 	};
 
 	ndDebugDisplayRenderPass(ndAssetEditor* const owner);
 	~ndDebugDisplayRenderPass();
 
 	private:
+	void RenderOptions();
 	void RenderWireFrame();
+	void RenderSelectedNode();
 	void RenderHiddenSurface();
 	void RenderCollisionShape();
-	void RenderSelectedNode();
 
 	virtual void ResetScene() override;
 	virtual void RenderScene() override;
@@ -49,6 +54,7 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color);
 
 	ndVector m_meshColor;
+	ndVector m_shapeColor;
 	ndVector m_selectedColor;
 	ndWeakPtr<ndAssetEditor> m_manager;
 	ndList<ndDebugMesh> m_debugMesh;

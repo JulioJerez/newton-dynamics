@@ -515,7 +515,7 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::Checkbox("show pivot", &m_showPivot);
 			ImGui::Checkbox("show center of mass", &m_showCenterOfMass);
 			ImGui::Checkbox("show Joints", &m_showJoints);
-			//ImGui::Checkbox("show collision", &m_showCollisionShape);
+			ImGui::Checkbox("show collision", &m_showCollisionShape);
 
 			ImGui::Text("global properties");
 			ImGui::Checkbox("relative Transforms", &m_relativeTransformProperties);
@@ -554,7 +554,6 @@ void ndAssetEditor::Run()
 				m_model = ndSharedPtr<ndModel>(nullptr);
 			}
 
-			//if (*m_newMesh || *m_newSceneMesh)
 			if (*m_newMesh)
 			{
 				ndAssert(*m_newSceneMesh);
