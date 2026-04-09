@@ -350,13 +350,14 @@ void ImGui::ShowDemoWindow(bool* p_open)
     ImGui::SetNextWindowPos(ImVec2(main_viewport->WorkPos.x + 650, main_viewport->WorkPos.y + 20), ImGuiCond_FirstUseEver);
     ImGui::SetNextWindowSize(ImVec2(550, 680), ImGuiCond_FirstUseEver);
 
-    // Main body of the Demo window starts here.
-    if (!ImGui::Begin("Dear ImGui Demo", p_open, window_flags))
-    {
-        // Early out if the window is collapsed, as an optimization.
-        ImGui::End();
-        return;
-    }
+    //// Main body of the Demo window starts here.
+    //if (!ImGui::Begin("Dear ImGui Demo", p_open, window_flags))
+    //{
+    //    // Early out if the window is collapsed, as an optimization.
+    //    ImGui::End();
+    //    return;
+    //}
+    ImGui::Begin("Dear ImGui Demo", p_open);
 
     // Most "big" widgets share a common width settings by default. See 'Demo->Layout->Widgets Width' for details.
     // e.g. Use 2/3 of the space for widgets and 1/3 for labels (right align)
