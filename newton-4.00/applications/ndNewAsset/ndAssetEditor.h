@@ -238,7 +238,7 @@ class ndAssetEditor : public ndClassAlloc
 	bool m_showCenterOfMass;
 	bool m_showSelectedNode;
 	bool m_showCollisionShape;
-	bool m_relativeTransformProperties;
+	bool m_showParentRelativeTransform;
 	ndInt32 m_renderMode;
 	ndReal m_gizmoScale;
 	

@@ -49,11 +49,11 @@ ndAssetEditor::ndAssetEditor()
 	,m_undoRedo()
 	,m_runScene(false)
 	,m_showPivot(true)
-	,m_showJoints(false)
+	,m_showJoints(true)
 	,m_showCenterOfMass(false)
 	,m_showSelectedNode(true)
-	,m_showCollisionShape(false)
-	,m_relativeTransformProperties(true)
+	,m_showCollisionShape(true)
+	,m_showParentRelativeTransform(false)
 	,m_renderMode(m_shaded)
 	,m_gizmoScale(0.5f)
 {
@@ -518,8 +518,7 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::Checkbox("show collision", &m_showCollisionShape);
 
 			ImGui::Text("global properties");
-			ImGui::Checkbox("relative Transforms", &m_relativeTransformProperties);
-			
+			ImGui::Checkbox("parent relative Transform", &m_showParentRelativeTransform);
 
 			ImGui::EndMenu();
 		}
