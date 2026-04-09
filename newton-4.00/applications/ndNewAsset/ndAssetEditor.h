@@ -61,98 +61,25 @@ class ndAssetEditor : public ndClassAlloc
 			m_owner->MouseButtonCallback(button, action);
 		}
 	
-		ndAssetEditor* m_owner;
+		ndWeakPtr<ndAssetEditor> m_owner;
 	};
 
-	class ndKeyTrigger
-	{
-		public: 
-		ndKeyTrigger()
-			:m_memory(false)
-		{
-		}
-
-		bool Update(bool value)
-		{
-			bool ret = bool (!m_memory & value);
-			m_memory = value;
-			return ret;
-		}
-
-		bool m_memory;
-	};
-
-	class ndDemoUIpanel : public ndClassAlloc
+	class ndAssetTool: public ndClassAlloc
 	{
 		public:
-		ndDemoUIpanel()
+		ndAssetTool(ndAssetEditor* const owner)
 			:ndClassAlloc()
+			,m_owner(owner)
 		{
 		}
 
-		virtual ~ndDemoUIpanel() 
+		virtual ~ndAssetTool()
 		{
 		}
 
-		virtual void Update(ndAssetEditor* const scene) = 0;
-	};
+		virtual void Execute() = 0;
 
-	class ndDemoHelper: public ndClassAlloc
-	{
-		public:
-		ndDemoHelper()
-			:ndClassAlloc()
-			,m_currentTime(ndGetTimeInMicroseconds())
-		{
-			ResetTime();
-		}
-
-		void ResetTime()
-		{
-			m_currentTime = ndGetTimeInMicroseconds();
-		}
-
-		bool ExpirationTime() const
-		{
-			// stops diplay the legend afte 5 secunds
-			ndUnsigned64 timestep = ndGetTimeInMicroseconds() - m_currentTime;
-			return timestep > 5 * 1024 * 1024;
-		}
-
-		virtual ~ndDemoHelper() {}
-		virtual void PresentHelp(ndAssetEditor* const scene) = 0;
-
-		ndUnsigned64 m_currentTime;
-	};
-
-	class OnPostUpdate : public ndClassAlloc
-	{
-		public:
-		OnPostUpdate()
-			:ndClassAlloc()
-		{
-		}
-
-		virtual ~OnPostUpdate()
-		{
-		}
-
-		virtual void OnDebug(ndAssetEditor* const, bool) {}
-		virtual void Update(ndAssetEditor* const scene, ndFloat32 timestep) = 0;
-	};
-
-	class ButtonKey
-	{
-		public:
-		ButtonKey (bool initialState);
-		ndInt32 UpdateTrigger (bool triggerValue);
-		ndInt32 UpdatePushButton (bool triggerValue);
-		ndInt32 GetPushButtonState() const { return m_state ? 1 : 0;}
-
-		private:
-		bool m_state;
-		bool m_memory0;
-		bool m_memory1;
+		ndWeakPtr<ndAssetEditor> m_owner;
 	};
 
 	ndAssetEditor ();
@@ -187,10 +114,6 @@ class ndAssetEditor : public ndClassAlloc
 
 	void TestImGui();
 	void RenderLayout();
-	void SetDemoHelp(ndSharedPtr<ndDemoHelper>& helper);
-	void SetDemoUIpanel(ndSharedPtr<ndDemoUIpanel>& panel);
-
-	void RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& postUpdate);
 
 	private:
 	void RenderScene();
@@ -225,10 +148,10 @@ class ndAssetEditor : public ndClassAlloc
 	ndSharedPtr<ndMesh> m_newMesh;
 	ndSharedPtr<ndRenderSceneNode> m_newSceneMesh;
 
+	ndSharedPtr<ndAssetTool> m_currentTool;
 	ndSharedPtr<ndMesh> m_currentSelection;
 	ndSharedPtr<ndRenderSceneNode> m_defaultCamera;
 
-	ndSharedPtr<OnPostUpdate> m_onPostUpdate;
 	ndString m_currentPath;
 	ndUndoRedo m_undoRedo;
 
@@ -239,6 +162,9 @@ class ndAssetEditor : public ndClassAlloc
 	bool m_showSelectedNode;
 	bool m_showCollisionShape;
 	bool m_showParentRelativeTransform;
+
+	bool m_toolActive;
+	
 	ndInt32 m_renderMode;
 	ndReal m_gizmoScale;
 	
@@ -246,6 +172,7 @@ class ndAssetEditor : public ndClassAlloc
 	friend class ndUndoRedoCommand;
 	friend class ndEditorCameraFlyby;
 	friend class ndDebugDisplayRenderPass;
+	friend class ndNomalizeMassDistribution;
 };
 
 #endif

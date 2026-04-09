@@ -76,16 +76,6 @@ class ndMeshJointHinge : public ndMeshJoint
 class ndMeshJointDoubleHinge : public ndMeshJoint
 {
 	public:
-	class ndAxis
-	{
-		public:
-		ndFloat32 m_springK;
-		ndFloat32 m_damperC;
-		ndFloat32 m_minLimit;
-		ndFloat32 m_maxLimit;
-		ndFloat32 m_springDamperRegularizer;
-		ndInt8 m_limitState;
-	};
 
 	D_NEWTON_API ndMeshJointDoubleHinge();
 	D_NEWTON_API ndMeshJointDoubleHinge(const ndJointBilateralConstraint* const joint);

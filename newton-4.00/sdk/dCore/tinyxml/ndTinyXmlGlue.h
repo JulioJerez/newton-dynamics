@@ -68,5 +68,6 @@ D_TINY_API void xmlGetFloatArray3(const nd::TiXmlNode* const rootNode, const cha
 D_TINY_API void xmlGetFloatArray3(const nd::TiXmlNode* const rootNode, const char* const name, ndArray<ndTriplexReal>& array);
 D_TINY_API void xmlGetFloat64Array3(const nd::TiXmlNode* const rootNode, const char* const name, ndArray<ndBigVector>& array);
 
+D_TINY_API bool xmlHasAttribute(const nd::TiXmlNode* const rootNode, const char* const name);
 #endif
 

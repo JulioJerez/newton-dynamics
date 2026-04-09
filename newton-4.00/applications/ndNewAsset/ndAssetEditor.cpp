@@ -17,29 +17,7 @@
 #include "ndEditorCameraFlyby.h"
 #include "ndHighResolutionTimer.h"
 #include "ndDebugDisplayRenderPass.h"
-
-ndAssetEditor::ButtonKey::ButtonKey (bool state)
-	:m_state(state)
-	,m_memory0(false)
-	,m_memory1(false)
-{
-}
-
-ndInt32 ndAssetEditor::ButtonKey::UpdateTrigger (bool triggerValue)
-{
-	m_memory0 = m_memory1;
-	m_memory1 = triggerValue;
-	return (!m_memory0 && m_memory1) ? 1 : 0;
-}
-
-ndInt32 ndAssetEditor::ButtonKey::UpdatePushButton (bool triggerValue)
-{
-	if (UpdateTrigger (triggerValue)) 
-	{
-		m_state = ! m_state;
-	}
-	return m_state ? 1 : 0;
-}
+#include "ndNomalizeMassDistribution.h"
 
 // ImGui - standalone example application for Glfw + OpenGL 2, using fixed pipeline
 // If you are new to ImGui, see examples/README.txt and documentation at the top of imgui.cpp.
@@ -54,6 +32,7 @@ ndAssetEditor::ndAssetEditor()
 	,m_showSelectedNode(true)
 	,m_showCollisionShape(true)
 	,m_showParentRelativeTransform(false)
+	,m_toolActive(false)
 	,m_renderMode(m_shaded)
 	,m_gizmoScale(0.5f)
 {
@@ -216,11 +195,6 @@ bool ndAssetEditor::GetMouseKeyState (ndInt32 button) const
 	return io.MouseDown[button];
 }
 
-void ndAssetEditor::RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& postUpdate)
-{
-	m_onPostUpdate = postUpdate;
-}
-
 ndFloat32 ndAssetEditor::GetMouseWheel() const
 {
 	ndFloat32 wheel = ImGui::GetIO().MouseWheel;
@@ -233,18 +207,6 @@ bool ndAssetEditor::GetMousePosition (ndFloat32& posX, ndFloat32& posY) const
 	posX = ndClamp(posit.x, ndReal(-1.0e10f), ndReal(1.0e10f));
 	posY = ndClamp(posit.y, ndReal(-1.0e10f), ndReal(1.0e10f));
 	return true;
-}
-
-//void ndAssetEditor::SetDemoHelp(ndSharedPtr<ndDemoHelper>& helper)
-void ndAssetEditor::SetDemoHelp(ndSharedPtr<ndDemoHelper>&)
-{
-	//m_demoHelper = helper;
-}
-
-//void ndAssetEditor::SetDemoUIpanel(ndSharedPtr<ndDemoUIpanel>& panel)
-void ndAssetEditor::SetDemoUIpanel(ndSharedPtr<ndDemoUIpanel>&)
-{
-	//m_demoUIpanel = panel;
 }
 
 ndInt32 ndAssetEditor::Print (const ndVector&, const char *fmt, ... ) const
@@ -314,6 +276,14 @@ void ndAssetEditor::RenderLayout()
 	ShowMainToolbar();
 	ShowOutlierPanel();
 	ShowPropertiesPanel();
+	if (m_currentTool && *m_mesh)
+	{
+		m_currentTool->Execute();
+		if (!m_toolActive)
+		{
+			m_currentTool = ndSharedPtr<ndAssetTool>(nullptr);
+		}
+	}
 }
 
 void ndAssetEditor::TestImGui()
@@ -494,6 +464,12 @@ void ndAssetEditor::ShowMainMenuBar()
 
 		if (ImGui::BeginMenu("Tools"))
 		{
+			if (ImGui::MenuItem("normalize mass distibution", ""))
+			{
+				m_toolActive = true;
+				m_currentTool = new ndNomalizeMassDistribution(this);
+			}
+
 			ImGui::EndMenu();
 		}
 

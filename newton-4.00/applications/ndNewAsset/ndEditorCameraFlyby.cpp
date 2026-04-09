@@ -42,7 +42,7 @@ void ndEditorCameraFlyby::TickUpdate(ndFloat32 timestep)
 	ndRender* const renderer = GetOwner();
 	ndAssert(renderer);
 	ndAssetEditor::ndRenderCallback* const renderCallback = (ndAssetEditor::ndRenderCallback*)*renderer->GetOwner();
-	ndAssetEditor* const scene = renderCallback->m_owner;
+	ndAssetEditor* const scene = *renderCallback->m_owner;
 	
 	ndFloat32 mouseX;
 	ndFloat32 mouseY;
