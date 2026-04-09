@@ -171,6 +171,7 @@ class ndMeshBodyKinematic : public ndMeshBody
 	ndVector m_inertiaPrincipalAxis;
 	ndFloat32 m_maxAngleStep;
 	ndFloat32 m_maxLinearStep;
+	ndFloat32 m_massVolumeWeigh;
 };
 
 class ndMeshJoint : public ndClassAlloc

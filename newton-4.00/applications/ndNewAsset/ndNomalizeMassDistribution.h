@@ -54,12 +54,11 @@ void ndAssetEditor::ShowMainToolbar()
 class ndNomalizeMassDistribution : public ndAssetEditor::ndAssetTool
 {
 	public:
-	ndNomalizeMassDistribution(ndAssetEditor* const owner)
-		:ndAssetTool(owner)
-	{
-	}
+	ndNomalizeMassDistribution(ndAssetEditor* const owner);
 
 	virtual void Execute() override;
+
+	ndFloat32 m_totalMass;
 };
 
 

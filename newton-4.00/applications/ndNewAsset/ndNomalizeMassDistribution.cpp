@@ -14,55 +14,55 @@
 #include "ndAssetEditor.h"
 #include "ndNomalizeMassDistribution.h"
 
-#if 0
-void ndAssetEditor::ShowMainToolbar()
+ndNomalizeMassDistribution::ndNomalizeMassDistribution(ndAssetEditor* const owner)
+	:ndAssetTool(owner)
+	,m_totalMass(100.0f)
 {
-	ImGui::Begin("Main Toolbar");
-	
-	if (ImGui::Button("undo"))
-	{
-		m_undoRedo.Undo(this);
-	}
-	ImGui::SameLine();
-	if (ImGui::Button("redo"))
-	{
-		m_undoRedo.Redo(this);
-	}
-
-	ImGui::SameLine();
-	if (m_runScene)
-	{
-		if (ImGui::Button("stop"))
-		{
-			m_runScene = false;
-		}
-	}
-	else
-	{
-		if (ImGui::Button("run"))
-		{
-			m_runScene = true;
-		}
-	}
-
-	ImGui::End();
 }
-
-#endif
 
 void ndNomalizeMassDistribution::Execute()
 {
 	ImGui::Begin("normalize mass distribution", &m_owner->m_toolActive);
 	
-	ndReal totalMass = 100.0f;
-	if (ImGui::InputFloat("total mass", &totalMass, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
-	{
-	
-	}
-	ImGui::End();
+	ImGui::InputFloat("total mass", &m_totalMass, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue);
 
-	if (!m_owner->m_toolActive)
+	if (ImGui::Button("execute"))
 	{
-		m_owner->m_currentTool = ndSharedPtr<ndAssetTool>(nullptr);
+		ndFloat32 volume = ndFloat32(0.0f);
+		auto TotalVolume = [this, &volume](ndMesh* const node)
+		{
+			ndSharedPtr<ndMeshBody> body (node->GetRigidBody());
+			if (body)
+			{
+				ndMeshBodyKinematic* const kinBody = (ndMeshBodyKinematic*)*body;
+				ndSharedPtr<ndShapeInstance> instance (kinBody->m_shapeInstance.CreateObject());
+				ndFloat32 v = instance->GetVolume() * kinBody->m_massVolumeWeigh;
+				volume += v;
+			}
+		};
+		m_owner->m_mesh->NodeIterator(TotalVolume);
+
+		ndFloat32 density = m_totalMass / volume;
+		auto SetBodyMass = [this, density](ndMesh* const node)
+		{
+			ndSharedPtr<ndMeshBody> body(node->GetRigidBody());
+			if (body)
+			{
+				ndMeshBodyKinematic* const kinBody = (ndMeshBodyKinematic*)*body;
+				ndVector inertia(kinBody->m_invMass.Reciproc());
+				inertia = inertia.Scale(ndFloat32(1.0f) / inertia.m_w);
+
+				ndSharedPtr<ndShapeInstance> instance(kinBody->m_shapeInstance.CreateObject());
+				ndFloat32 v = instance->GetVolume() * kinBody->m_massVolumeWeigh;
+				ndFloat32 bodyMass = density * v;
+				
+				inertia = inertia.Scale(bodyMass);
+				inertia = inertia.Reciproc();
+				kinBody->m_invMass = inertia;
+			}
+		};
+		m_owner->m_mesh->NodeIterator(SetBodyMass);
 	}
+
+	ImGui::End();
 }

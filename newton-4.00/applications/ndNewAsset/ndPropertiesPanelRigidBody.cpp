@@ -27,6 +27,7 @@ class ndUndoRedoRigidBody : public ndUndoRedoCommand
 		m_linearStep = body->m_maxLinearStep;
 		m_intrisicDamp = body->m_intrinsicDamping;
 		m_centerOfMass = body->m_localCentreOfMass;
+		m_massVolumeWeigh = body->m_massVolumeWeigh;
 		m_inertiaPrincipalAxis = body->m_inertiaPrincipalAxis;
 	}
 
@@ -48,6 +49,7 @@ class ndUndoRedoRigidBody : public ndUndoRedoCommand
 				test = test && (m_inertiaPrincipalAxis - other->m_inertiaPrincipalAxis).DotProduct(m_inertiaPrincipalAxis - other->m_inertiaPrincipalAxis).GetScalar() < 0.0001f;
 				test = test && (m_angleStep == other->m_angleStep);
 				test = test && (m_linearStep == other->m_linearStep);
+				test = test && (m_massVolumeWeigh == other->m_massVolumeWeigh);
 
 				if (test)
 				{
@@ -70,6 +72,7 @@ class ndUndoRedoRigidBody : public ndUndoRedoCommand
 		body->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
 		body->m_maxAngleStep = m_angleStep;
 		body->m_maxLinearStep = m_linearStep;
+		body->m_massVolumeWeigh = m_massVolumeWeigh;
 	}
 
 	ndVector m_inverseMass;
@@ -78,8 +81,8 @@ class ndUndoRedoRigidBody : public ndUndoRedoCommand
 	ndVector m_inertiaPrincipalAxis;
 	ndFloat32 m_angleStep;
 	ndFloat32 m_linearStep;
+	ndFloat32 m_massVolumeWeigh;
 };
-
 
 void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 {
@@ -98,6 +101,15 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
 				scalar = ndMax(scalar, ndReal(0.001f));
 				rigidBody->m_invMass.m_w = ndFloat32(1.0f) / scalar;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+			};
+
+			scalar = ndReal(rigidBody->m_massVolumeWeigh);
+			if (ImGui::InputFloat("mass weigh", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				scalar = ndMax(scalar, ndReal(0.001f));
+				rigidBody->m_massVolumeWeigh = scalar;
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
 			};
 		}

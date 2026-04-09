@@ -276,9 +276,13 @@ void ndAssetEditor::RenderLayout()
 	ShowMainToolbar();
 	ShowOutlierPanel();
 	ShowPropertiesPanel();
-	if (m_currentTool)
+	if (m_currentTool && *m_mesh)
 	{
 		m_currentTool->Execute();
+		if (!m_toolActive)
+		{
+			m_currentTool = ndSharedPtr<ndAssetTool>(nullptr);
+		}
 	}
 }
 
