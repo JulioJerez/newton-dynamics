@@ -176,6 +176,18 @@ class ndMeshBodyKinematic : public ndMeshBody
 class ndMeshJoint : public ndClassAlloc
 {
 	public:
+
+	class ndAxis
+	{
+		public:
+		ndFloat32 m_springK;
+		ndFloat32 m_damperC;
+		ndFloat32 m_minLimit;
+		ndFloat32 m_maxLimit;
+		ndFloat32 m_springDamperRegularizer;
+		ndInt8 m_limitState;
+	};
+
 	D_COLLISION_API ndMeshJoint();
 	D_COLLISION_API ndMeshJoint(const ndJointBilateralConstraint* const joint);
 	D_COLLISION_API virtual ~ndMeshJoint();

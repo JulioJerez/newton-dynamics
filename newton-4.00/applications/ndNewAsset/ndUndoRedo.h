@@ -41,6 +41,7 @@ class ndUndoRedoCommand : public ndClassAlloc
 	virtual class ndUndoRedoJointHinge* GetAsUndoRedoJointHinge() const { return nullptr; }
 	virtual class ndUndoRedoJointSlider* GetAsUndoRedoJointSlider() const { return nullptr; }
 	virtual class ndUndoRedoJointFix6dof* GetAsUndoRedoJointFix6dof() const { return nullptr; }
+	virtual class ndUndoRedoJointDoubleHinge* GetAsUndoRedoJointDoubleHinge() const { return nullptr; }
 
 	ndSharedPtr<ndMesh> m_mesh;
 	ndWeakPtr<ndAssetEditor> m_editor;

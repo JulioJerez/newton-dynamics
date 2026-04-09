@@ -155,12 +155,12 @@ class ndUndoRedoJointHinge : public ndUndoRedoCommand
 	{
 		ndMeshJointHinge* const joint = (ndMeshJointHinge*)*m_mesh->GetJoint();
 
-		m_springK = joint->m_springK;
-		m_damperC = joint->m_damperC;
-		m_minLimit = joint->m_minLimit;
-		m_maxLimit = joint->m_maxLimit;
-		m_limitState = joint->m_limitState;
-		m_springDamperRegularizer = joint->m_springDamperRegularizer;
+		m_axis.m_springK = joint->m_springK;
+		m_axis.m_damperC = joint->m_damperC;
+		m_axis.m_minLimit = joint->m_minLimit;
+		m_axis.m_maxLimit = joint->m_maxLimit;
+		m_axis.m_limitState = joint->m_limitState;
+		m_axis.m_springDamperRegularizer = joint->m_springDamperRegularizer;
 	}
 
 	virtual ndUndoRedoJointHinge* GetAsUndoRedoJointHinge() const override
@@ -175,12 +175,12 @@ class ndUndoRedoJointHinge : public ndUndoRedoCommand
 			const ndUndoRedoJointHinge* const other = command.GetAsUndoRedoJointHinge();
 			if (other)
 			{
-				bool test = other->m_springK == m_springK;
-				test = test && other->m_damperC == m_damperC;
-				test = test && other->m_minLimit == m_minLimit;
-				test = test && other->m_maxLimit == m_maxLimit;
-				test = test && other->m_limitState == m_limitState;
-				test = test && other->m_springDamperRegularizer == m_springDamperRegularizer;
+				bool test = other->m_axis.m_springK == m_axis.m_springK;
+				test = test && other->m_axis.m_damperC == m_axis.m_damperC;
+				test = test && other->m_axis.m_minLimit == m_axis.m_minLimit;
+				test = test && other->m_axis.m_maxLimit == m_axis.m_maxLimit;
+				test = test && other->m_axis.m_limitState == m_axis.m_limitState;
+				test = test && other->m_axis.m_springDamperRegularizer == m_axis.m_springDamperRegularizer;
 				if (test)
 				{
 					return false;
@@ -195,20 +195,15 @@ class ndUndoRedoJointHinge : public ndUndoRedoCommand
 	{
 		ndMeshJointHinge* const joint = (ndMeshJointHinge*)*m_mesh->GetJoint();
 
-		joint->m_springK = m_springK;
-		joint->m_damperC = m_damperC;
-		joint->m_minLimit = m_minLimit;
-		joint->m_maxLimit = m_maxLimit;
-		joint->m_limitState = m_limitState;
-		joint->m_springDamperRegularizer = m_springDamperRegularizer;
+		joint->m_springK = m_axis.m_springK;
+		joint->m_damperC = m_axis.m_damperC;
+		joint->m_minLimit = m_axis.m_minLimit;
+		joint->m_maxLimit = m_axis.m_maxLimit;
+		joint->m_limitState = m_axis.m_limitState;
+		joint->m_springDamperRegularizer = m_axis.m_springDamperRegularizer;
 	}
 
-	ndFloat32 m_springK;
-	ndFloat32 m_damperC;
-	ndFloat32 m_minLimit;
-	ndFloat32 m_maxLimit;
-	ndFloat32 m_springDamperRegularizer;
-	ndInt8 m_limitState;
+	ndMeshJoint::ndAxis m_axis;
 };
 
 class ndUndoRedoJointSlider : public ndUndoRedoCommand
@@ -219,12 +214,12 @@ class ndUndoRedoJointSlider : public ndUndoRedoCommand
 	{
 		ndMeshJointSlider* const joint = (ndMeshJointSlider*)*m_mesh->GetJoint();
 
-		m_springK = joint->m_springK;
-		m_damperC = joint->m_damperC;
-		m_minLimit = joint->m_minLimit;
-		m_maxLimit = joint->m_maxLimit;
-		m_limitState = joint->m_limitState;
-		m_springDamperRegularizer = joint->m_springDamperRegularizer;
+		m_axis.m_springK = joint->m_springK;
+		m_axis.m_damperC = joint->m_damperC;
+		m_axis.m_minLimit = joint->m_minLimit;
+		m_axis.m_maxLimit = joint->m_maxLimit;
+		m_axis.m_limitState = joint->m_limitState;
+		m_axis.m_springDamperRegularizer = joint->m_springDamperRegularizer;
 	}
 
 	virtual ndUndoRedoJointSlider* GetAsUndoRedoJointSlider() const override
@@ -239,12 +234,12 @@ class ndUndoRedoJointSlider : public ndUndoRedoCommand
 			const ndUndoRedoJointSlider* const other = command.GetAsUndoRedoJointSlider();
 			if (other)
 			{
-				bool test = other->m_springK == m_springK;
-				test = test && other->m_damperC == m_damperC;
-				test = test && other->m_minLimit == m_minLimit;
-				test = test && other->m_maxLimit == m_maxLimit;
-				test = test && other->m_limitState == m_limitState;
-				test = test && other->m_springDamperRegularizer == m_springDamperRegularizer;
+				bool test = other->m_axis.m_springK == m_axis.m_springK;
+				test = test && other->m_axis.m_damperC == m_axis.m_damperC;
+				test = test && other->m_axis.m_minLimit == m_axis.m_minLimit;
+				test = test && other->m_axis.m_maxLimit == m_axis.m_maxLimit;
+				test = test && other->m_axis.m_limitState == m_axis.m_limitState;
+				test = test && other->m_axis.m_springDamperRegularizer == m_axis.m_springDamperRegularizer;
 				if (test)
 				{
 					return false;
@@ -259,20 +254,97 @@ class ndUndoRedoJointSlider : public ndUndoRedoCommand
 	{
 		ndMeshJointSlider* const joint = (ndMeshJointSlider*)*m_mesh->GetJoint();
 
-		joint->m_springK = m_springK;
-		joint->m_damperC = m_damperC;
-		joint->m_minLimit = m_minLimit;
-		joint->m_maxLimit = m_maxLimit;
-		joint->m_limitState = m_limitState;
-		joint->m_springDamperRegularizer = m_springDamperRegularizer;
+		joint->m_springK = m_axis.m_springK;
+		joint->m_damperC = m_axis.m_damperC;
+		joint->m_minLimit = m_axis.m_minLimit;
+		joint->m_maxLimit = m_axis.m_maxLimit;
+		joint->m_limitState = m_axis.m_limitState;
+		joint->m_springDamperRegularizer = m_axis.m_springDamperRegularizer;
 	}
 
-	ndFloat32 m_springK;
-	ndFloat32 m_damperC;
-	ndFloat32 m_minLimit;
-	ndFloat32 m_maxLimit;
-	ndFloat32 m_springDamperRegularizer;
-	ndInt8 m_limitState;
+	ndMeshJoint::ndAxis m_axis;
+};
+
+class ndUndoRedoJointDoubleHinge : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoJointDoubleHinge(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+	{
+		ndMeshJointDoubleHinge* const joint = (ndMeshJointDoubleHinge*)*m_mesh->GetJoint();
+
+		m_axis0.m_springK = joint->m_axis0.m_springK;
+		m_axis0.m_damperC = joint->m_axis0.m_damperC;
+		m_axis0.m_minLimit = joint->m_axis0.m_minLimit;
+		m_axis0.m_maxLimit = joint->m_axis0.m_maxLimit;
+		m_axis0.m_limitState = joint->m_axis0.m_limitState;
+		m_axis0.m_springDamperRegularizer = joint->m_axis0.m_springDamperRegularizer;
+
+		m_axis1.m_springK = joint->m_axis1.m_springK;
+		m_axis1.m_damperC = joint->m_axis1.m_damperC;
+		m_axis1.m_minLimit = joint->m_axis1.m_minLimit;
+		m_axis1.m_maxLimit = joint->m_axis1.m_maxLimit;
+		m_axis1.m_limitState = joint->m_axis1.m_limitState;
+		m_axis1.m_springDamperRegularizer = joint->m_axis1.m_springDamperRegularizer;
+	}
+
+	virtual ndUndoRedoJointDoubleHinge* GetAsUndoRedoJointDoubleHinge() const override
+	{
+		return (ndUndoRedoJointDoubleHinge*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			const ndUndoRedoJointDoubleHinge* const other = command.GetAsUndoRedoJointDoubleHinge();
+			if (other)
+			{
+				bool test = other->m_axis0.m_springK == m_axis0.m_springK;
+				test = test && other->m_axis0.m_damperC == m_axis0.m_damperC;
+				test = test && other->m_axis0.m_minLimit == m_axis0.m_minLimit;
+				test = test && other->m_axis0.m_maxLimit == m_axis0.m_maxLimit;
+				test = test && other->m_axis0.m_limitState == m_axis0.m_limitState;
+				test = test && other->m_axis0.m_springDamperRegularizer == m_axis0.m_springDamperRegularizer;
+
+				test = test && other->m_axis1.m_springK == m_axis1.m_springK;
+				test = test && other->m_axis1.m_damperC == m_axis1.m_damperC;
+				test = test && other->m_axis1.m_minLimit == m_axis1.m_minLimit;
+				test = test && other->m_axis1.m_maxLimit == m_axis1.m_maxLimit;
+				test = test && other->m_axis1.m_limitState == m_axis1.m_limitState;
+				test = test && other->m_axis1.m_springDamperRegularizer == m_axis1.m_springDamperRegularizer;
+
+				if (test)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		ndMeshJointDoubleHinge* const joint = (ndMeshJointDoubleHinge*)*m_mesh->GetJoint();
+
+		joint->m_axis0.m_springK = m_axis0.m_springK;
+		joint->m_axis0.m_damperC = m_axis0.m_damperC;
+		joint->m_axis0.m_minLimit = m_axis0.m_minLimit;
+		joint->m_axis0.m_maxLimit = m_axis0.m_maxLimit;
+		joint->m_axis0.m_limitState = m_axis0.m_limitState;
+		joint->m_axis0.m_springDamperRegularizer = m_axis0.m_springDamperRegularizer;
+
+		joint->m_axis1.m_springK = m_axis1.m_springK;
+		joint->m_axis1.m_damperC = m_axis1.m_damperC;
+		joint->m_axis1.m_minLimit = m_axis1.m_minLimit;
+		joint->m_axis1.m_maxLimit = m_axis1.m_maxLimit;
+		joint->m_axis1.m_limitState = m_axis1.m_limitState;
+		joint->m_axis1.m_springDamperRegularizer = m_axis1.m_springDamperRegularizer;
+	}
+
+	ndMeshJoint::ndAxis m_axis0;
+	ndMeshJoint::ndAxis m_axis1;
 };
 
 void ndAssetEditor::ShowPropertiesJointInfo()
@@ -403,42 +475,42 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 		{
 			ndMeshJointSlider* const subJoint = (ndMeshJointSlider*)*joint;
 			ndReal value = subJoint->m_springK;
-			if (ImGui::InputFloat("spring const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			if (ImGui::InputFloat("spring const##1", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointHinge(this, m_currentSelection)));
 				subJoint->m_springK = value;
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointHinge(this, m_currentSelection)));
 			}
 			value = subJoint->m_damperC;
-			if (ImGui::InputFloat("damper const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			if (ImGui::InputFloat("damper const##1", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointHinge(this, m_currentSelection)));
 				subJoint->m_damperC = value;
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointHinge(this, m_currentSelection)));
 			}
 			value = subJoint->m_springDamperRegularizer;
-			if (ImGui::InputFloat("regularizer", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			if (ImGui::InputFloat("regularizer##1", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointHinge(this, m_currentSelection)));
 				subJoint->m_springDamperRegularizer = value;
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointHinge(this, m_currentSelection)));
 			}
 			value = subJoint->m_minLimit;
-			if (ImGui::InputFloat("min limit", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			if (ImGui::InputFloat("min limit##1", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointHinge(this, m_currentSelection)));
 				subJoint->m_minLimit = value;
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointHinge(this, m_currentSelection)));
 			}
 			value = subJoint->m_maxLimit;
-			if (ImGui::InputFloat("max limit", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			if (ImGui::InputFloat("max limit##1", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointHinge(this, m_currentSelection)));
 				subJoint->m_maxLimit = value;
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointHinge(this, m_currentSelection)));
 			}
 			bool limitState = subJoint->m_limitState ? true : false;
-			ImGui::Checkbox("limit State", &limitState);
+			ImGui::Checkbox("limit State##1", &limitState);
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointHinge(this, m_currentSelection)));
 				subJoint->m_limitState = m_showSelectedNode ? 1 : 0;
@@ -447,6 +519,97 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointDoubleHinge::StaticClassName()) == 0)
 		{
+			ndMeshJointDoubleHinge* const subJoint = (ndMeshJointDoubleHinge*)*joint;
+			ImGui::SeparatorText("child pin");
+			{
+				ndReal value = subJoint->m_axis0.m_springK;
+				if (ImGui::InputFloat("spring const##2", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+					subJoint->m_axis0.m_springK = value;
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+				}
+				value = subJoint->m_axis0.m_damperC;
+				if (ImGui::InputFloat("damper const##2", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+					subJoint->m_axis0.m_damperC = value;
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+				}
+				value = subJoint->m_axis0.m_springDamperRegularizer;
+				if (ImGui::InputFloat("regularizer##2", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+					subJoint->m_axis0.m_springDamperRegularizer = value;
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+				}
+				value = subJoint->m_axis0.m_minLimit;
+				if (ImGui::InputFloat("min limit##2", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+					subJoint->m_axis0.m_minLimit = value;
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+				}
+				value = subJoint->m_axis0.m_maxLimit;
+				if (ImGui::InputFloat("max limit##2", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+					subJoint->m_axis0.m_maxLimit = value;
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+				}
+				bool limitState = subJoint->m_axis0.m_limitState ? true : false;
+				ImGui::Checkbox("limit State##2", &limitState);
+				{
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+					subJoint->m_axis0.m_limitState = m_showSelectedNode ? 1 : 0;
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+				}
+			}
+			ImGui::SeparatorText("parent pin");
+			{
+				ndReal value = subJoint->m_axis1.m_springK;
+				if (ImGui::InputFloat("spring const##3", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+					subJoint->m_axis1.m_springK = value;
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+				}
+				value = subJoint->m_axis1.m_damperC;
+				if (ImGui::InputFloat("damper const##3", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+					subJoint->m_axis1.m_damperC = value;
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+				}
+				value = subJoint->m_axis1.m_springDamperRegularizer;
+				if (ImGui::InputFloat("regularizer##3", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+					subJoint->m_axis1.m_springDamperRegularizer = value;
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+				}
+				value = subJoint->m_axis1.m_minLimit;
+				if (ImGui::InputFloat("min limit##3", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+					subJoint->m_axis1.m_minLimit = value;
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+				}
+				value = subJoint->m_axis1.m_maxLimit;
+				if (ImGui::InputFloat("max limit##3", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+					subJoint->m_axis1.m_maxLimit = value;
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+				}
+				bool limitState = subJoint->m_axis1.m_limitState ? true : false;
+				ImGui::Checkbox("limit State##3", &limitState);
+				{
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+					subJoint->m_axis1.m_limitState = m_showSelectedNode ? 1 : 0;
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
+				}
+			}
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointSpherical::StaticClassName()) == 0)
 		{

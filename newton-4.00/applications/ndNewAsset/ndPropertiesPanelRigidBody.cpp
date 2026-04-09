@@ -419,6 +419,25 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			};
 		}
 
+		// body inertia principal inertia
+		{
+			ndVector vector(rigidBody->m_invMass);
+			ndReal real[3];
+			real[0] = ndReal(ndFloat32(1.0f) / vector.m_x);
+			real[1] = ndReal(ndFloat32(1.0f) / vector.m_y);
+			real[2] = ndReal(ndFloat32(1.0f) / vector.m_z);
+
+			if (ImGui::InputFloat3("principal inertia", real, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoInertiaAxis(this, m_currentSelection)));
+				vector.m_x = ndFloat32(1.0f) / real[0];
+				vector.m_y = ndFloat32(1.0f) / real[1];
+				vector.m_z = ndFloat32(1.0f) / real[2];
+				rigidBody->m_invMass = vector;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoInertiaAxis(this, m_currentSelection)));
+			};
+		}
+
 		// body principal axis of inertia
 		{
 			ndVector vector(rigidBody->m_inertiaPrincipalAxis);
@@ -427,7 +446,6 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			real[1] = ndReal(vector.m_y);
 			real[2] = ndReal(vector.m_z);
 
-			//if (ImGui::DragFloat3("inertia axis", euler))
 			if (ImGui::InputFloat3("inertia axis", real, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoInertiaAxis(this, m_currentSelection)));
