@@ -34,7 +34,7 @@ class ndUndoRedoMass : public ndUndoRedoCommand
 	{
 		if (*m_mesh == *command.m_mesh)
 		{
-			ndUndoRedoMass* const other = command.GetAsUndoRedoMass();
+			const ndUndoRedoMass* const other = command.GetAsUndoRedoMass();
 			if (other)
 			{
 				if (m_invMass == other->m_invMass)
@@ -79,7 +79,7 @@ class ndUndoRedoLinearStep : public ndUndoRedoCommand
 	{
 		if (*m_mesh == *command.m_mesh)
 		{
-			ndUndoRedoLinearStep* const other = command.GetAsUndoRedoLinearStep();
+			const ndUndoRedoLinearStep* const other = command.GetAsUndoRedoLinearStep();
 			if (other)
 			{
 				if (m_linearStep == other->m_linearStep)
@@ -124,7 +124,7 @@ class ndUndoRedoAngleStep : public ndUndoRedoCommand
 	{
 		if (*m_mesh == *command.m_mesh)
 		{
-			ndUndoRedoAngleStep* const other = command.GetAsUndoRedoAngleStep();
+			const ndUndoRedoAngleStep* const other = command.GetAsUndoRedoAngleStep();
 			if (other)
 			{
 				if (m_angleStep == other->m_angleStep)
@@ -169,7 +169,7 @@ class ndUndoRedoLinearDamp : public ndUndoRedoCommand
 	{
 		if (*m_mesh == *command.m_mesh)
 		{
-			ndUndoRedoLinearDamp* const other = command.GetAsUndoRedoLinearDamp();
+			const ndUndoRedoLinearDamp* const other = command.GetAsUndoRedoLinearDamp();
 			if (other)
 			{
 				if (m_linearDamp == other->m_linearDamp)
@@ -211,7 +211,7 @@ class ndUndoRedoCenterOfMass : public ndUndoRedoCommand
 	{
 		if (*m_mesh == *command.m_mesh)
 		{
-			ndUndoRedoCenterOfMass* const other = command.GetAsUndoRedoCenterOfMass();
+			const ndUndoRedoCenterOfMass* const other = command.GetAsUndoRedoCenterOfMass();
 			if (other)
 			{
 				const ndVector comDiff(m_centerOfMass - other->m_centerOfMass);
@@ -254,7 +254,7 @@ class ndUndoRedoAngularDamp : public ndUndoRedoCommand
 	{
 		if (*m_mesh == *command.m_mesh)
 		{
-			ndUndoRedoAngularDamp* const other = command.GetAsUndoRedoAngularDamp();
+			const ndUndoRedoAngularDamp* const other = command.GetAsUndoRedoAngularDamp();
 			if (other)
 			{
 				const ndVector comDiff(ndVector::m_triplexMask & (m_angularDamp - other->m_angularDamp));
@@ -298,7 +298,7 @@ class ndUndoRedoInertiaAxis : public ndUndoRedoCommand
 	{
 		if (*m_mesh == *command.m_mesh)
 		{
-			ndUndoRedoInertiaAxis* const other = command.GetAsUndoRedoInertiaAxis();
+			const ndUndoRedoInertiaAxis* const other = command.GetAsUndoRedoInertiaAxis();
 			if (other)
 			{
 				const ndVector comDiff(ndVector::m_triplexMask & (m_inertiaPrincipalAxis - other->m_inertiaPrincipalAxis));

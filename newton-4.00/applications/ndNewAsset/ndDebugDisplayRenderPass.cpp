@@ -69,7 +69,6 @@ void ndDebugDisplayRenderPass::RenderCollisionShape()
 				{
 					primitive->Render(m_owner, pivotMatrix, m_debugDisplaySetZbuffer);
 
-					//ndRenderPrimitiveSegment& segment = primitive->m_segments.GetFirst()->GetInfo();
 					ndRenderPrimitiveSegment& segment = debugMesh.m_wireFrameShape->m_segments.GetFirst()->GetInfo();
 					ndRenderPrimitiveMaterial* const material = &segment.m_material;
 					material->m_diffuse = m_shapeColor;

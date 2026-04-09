@@ -38,6 +38,8 @@ class ndUndoRedoCommand : public ndClassAlloc
 	virtual class ndUndoRedoInertiaAxis* GetAsUndoRedoInertiaAxis() const { return nullptr; }
 	virtual class ndUndoRedoGeometryTransform* GetAsUndoRedoGeometryTransform() const { return nullptr; }
 
+	virtual class ndUndoRedoJoint* GetAsUndoRedoJoint() const { return nullptr; }
+
 
 	ndSharedPtr<ndMesh> m_mesh;
 	ndWeakPtr<ndAssetEditor> m_editor;

@@ -13,11 +13,153 @@
 #include "ndUndoRedo.h"
 #include "ndAssetEditor.h"
 
+class ndUndoRedoJoint : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoJoint(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+		,m_localFrame(m_mesh->GetJoint()->m_localFrame0)
+	{
+	}
+
+	virtual ndUndoRedoJoint* GetAsUndoRedoJoint() const override
+	{
+		return (ndUndoRedoJoint*)this;
+	}
+	
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			const ndUndoRedoJoint* const other = command.GetAsUndoRedoJoint();
+			if (other)
+			{
+				ndMatrix matrix(m_localFrame * other->m_localFrame.OrthoInverse());
+				if (matrix.TestIdentity())
+				{
+					return false;
+				}
+			}
+		}
+	
+		return true;
+	}
+	
+	virtual void Undo() override
+	{
+		ndMeshJoint* const joint = *m_mesh->GetJoint();
+		joint->m_localFrame0 = m_localFrame;
+
+		ndMatrix globalMatrix(m_localFrame * m_mesh->CalculateGlobalMatrix());
+		joint->m_localFrame1 = globalMatrix * m_mesh->GetParent()->CalculateGlobalMatrix().OrthoInverse();
+	}
+
+	ndMatrix m_localFrame;
+};
+
+
+//class ndUndoRedoJoint : public ndUndoRedoCommand
+//{
+//	public:
+//	ndUndoRedoJoint(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+//		:ndUndoRedoCommand(editor, mesh)
+//	{
+//		ndMeshJoint* const joint = *m_mesh->GetJoint();
+//		ndMatrix matrix(joint->m_localFrame0);
+//
+//		ndVector tmp;
+//		ndVector radians(matrix.CalcPitchYawRoll(tmp));
+//		m_angles = radians;
+//	}
+//
+//	//virtual ndUndoRedoJoint* GetAsUndoRedoUndoRedoJoint() const override
+//	//{
+//	//	return (ndUndoRedoJoint*)this;
+//	//}
+//	//
+//	//virtual bool operator!=(const ndUndoRedoCommand& command) const override
+//	//{
+//	//	if (*m_mesh == *command.m_mesh)
+//	//	{
+//	//		ndUndoRedoJoint* const other = command.GetAsUndoRedoInertiaAxis();
+//	//		if (other)
+//	//		{
+//	//			const ndVector comDiff(ndVector::m_triplexMask & (m_inertiaPrincipalAxis - other->m_inertiaPrincipalAxis));
+//	//			if (comDiff.DotProduct(comDiff).GetScalar() < ndFloat32(1.0e-6f))
+//	//			{
+//	//				return false;
+//	//			}
+//	//		}
+//	//	}
+//	//
+//	//	return true;
+//	//}
+//	//
+//	//virtual void Undo() override
+//	//{
+//	//	ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+//	//	body->m_inertiaPrincipalAxis = m_angles;
+//	//}
+//
+//	ndVector m_angles;
+//};
+
 void ndAssetEditor::ShowPropertiesJointInfo()
 {
 	if (ImGui::CollapsingHeader("Constraint joint"))
 	{
 		ndSharedPtr<ndMeshJoint> joint (m_currentSelection->GetJoint());
+
+		// child local frame
+		{
+			ImGui::SeparatorText("child local Frame");
+
+			const ndMatrix matrix(joint->m_localFrame0);
+			ndReal position[3];
+			position[0] = ndReal(matrix.m_posit.m_x);
+			position[1] = ndReal(matrix.m_posit.m_y);
+			position[2] = ndReal(matrix.m_posit.m_z);
+			if (ImGui::DragFloat3("position##2", position))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJoint(this, m_currentSelection)));
+				ndMatrix localFrame0(joint->m_localFrame0);
+				localFrame0.m_posit.m_x = position[0];
+				localFrame0.m_posit.m_y = position[1];
+				localFrame0.m_posit.m_z = position[2];
+
+				ndMatrix globalMatrix(localFrame0 * m_currentSelection->CalculateGlobalMatrix());
+				ndMatrix localFrame1(globalMatrix * m_currentSelection->GetParent()->CalculateGlobalMatrix().OrthoInverse());
+
+				joint->m_localFrame0 = localFrame0;
+				joint->m_localFrame1 = localFrame1;
+
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJoint(this, m_currentSelection)));
+			};
+
+			ndReal euler[3];
+			ndVector tmp;
+			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
+			euler[0] = ndReal(radians[0]);
+			euler[1] = ndReal(radians[1]);
+			euler[2] = ndReal(radians[2]);
+
+			if (ImGui::InputFloat3("rotation##2", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJoint(this, m_currentSelection)));
+				ndMatrix localMatrix0(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
+				localMatrix0.m_posit = joint->m_localFrame0.m_posit;
+				ndMatrix globalMatrix(localMatrix0 * m_currentSelection->CalculateGlobalMatrix());
+				ndMatrix localMatrix1(globalMatrix * m_currentSelection->GetParent()->CalculateGlobalMatrix().OrthoInverse());
+				localMatrix0.m_posit = joint->m_localFrame0.m_posit;
+
+				joint->m_localFrame0 = localMatrix0;
+				joint->m_localFrame1 = localMatrix1;
+
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJoint(this, m_currentSelection)));
+			};
+		}
+
+
 		if (ImGui::BeginCombo("joints", joint->m_constructor.GetStr()))
 		{
 			auto SetDropdownList = [this, &joint](const char* const name)
@@ -79,68 +221,6 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 			SetDropdownList(ndJointWheel::StaticClassName());
 
 			ImGui::EndCombo();
-		}
-
-		// child local frame
-		{
-			ImGui::SeparatorText("child local Frame");
-			ndMatrix matrix(joint->m_localFrame0);
-			ndReal position[3];
-			position[0] = ndReal(matrix.m_posit.m_x);
-			position[1] = ndReal(matrix.m_posit.m_y);
-			position[2] = ndReal(matrix.m_posit.m_z);
-			if (ImGui::DragFloat3("position##2", position))
-			{
-				matrix.m_posit.m_x = position[0];
-				matrix.m_posit.m_y = position[1];
-				matrix.m_posit.m_z = position[2];
-				joint->m_localFrame0 = matrix;
-			};
-
-			ndReal euler[3];
-			ndVector tmp;
-			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
-
-			euler[0] = ndReal(radians[0]);
-			euler[1] = ndReal(radians[1]);
-			euler[2] = ndReal(radians[2]);
-			if (ImGui::DragFloat3("rotation##2", euler))
-			{
-				ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
-				newMatrix.m_posit = matrix.m_posit;
-				joint->m_localFrame0 = newMatrix;
-			};
-		}
-
-		// parent local frame
-		{
-			ImGui::SeparatorText("parent local Frame");
-			ndMatrix matrix(joint->m_localFrame1);
-			ndReal position[3];
-			position[0] = ndReal(matrix.m_posit.m_x);
-			position[1] = ndReal(matrix.m_posit.m_y);
-			position[2] = ndReal(matrix.m_posit.m_z);
-			if (ImGui::DragFloat3("position##3", position))
-			{
-				matrix.m_posit.m_x = position[0];
-				matrix.m_posit.m_y = position[1];
-				matrix.m_posit.m_z = position[2];
-				joint->m_localFrame1 = matrix;
-			};
-
-			ndReal euler[3];
-			ndVector tmp;
-			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
-
-			euler[0] = ndReal(radians[0]);
-			euler[1] = ndReal(radians[1]);
-			euler[2] = ndReal(radians[2]);
-			if (ImGui::DragFloat3("rotation##3", euler))
-			{
-				ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
-				newMatrix.m_posit = matrix.m_posit;
-				joint->m_localFrame1 = newMatrix;
-			};
 		}
 
 		if (strcmp(joint->m_constructor.GetStr(), ndJointHinge::StaticClassName()) == 0)
