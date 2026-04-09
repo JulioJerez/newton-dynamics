@@ -27,15 +27,8 @@ class ndUndoRedoCommand : public ndClassAlloc
 	virtual void Undo() = 0;
 	virtual bool operator!=(const ndUndoRedoCommand& command) const = 0;
 
-	virtual class ndUndoRedoMass* GetAsUndoRedoMass() const { return nullptr; }
+	virtual class ndUndoRedoRigidBody* GetAsUndoRedoRigidBody() const { return nullptr; }
 	virtual class ndUndoRedoMeshNode* GetAsUndoRedoMeshNode() const { return nullptr; }
-	virtual class ndUndoRedoAngleStep* GetAsUndoRedoAngleStep() const { return nullptr; }
-	virtual class ndUndoRedoLinearStep* GetAsUndoRedoLinearStep() const { return nullptr; }
-	virtual class ndUndoRedoLinearDamp* GetAsUndoRedoLinearDamp() const { return nullptr; }
-	virtual class ndUndoRedoAngularDamp* GetAsUndoRedoAngularDamp() const { return nullptr; }
-	virtual class ndUndoRedoCenterOfMass* GetAsUndoRedoCenterOfMass() const { return nullptr; }
-	virtual class ndUndoRedoInertiaAxis* GetAsUndoRedoInertiaAxis() const { return nullptr; }
-
 	virtual class ndUndoRedoJoint* GetAsUndoRedoJoint() const { return nullptr; }
 	virtual class ndUndoRedoJointChange* GetAsUndoRedoJointChange() const { return nullptr; }
 	virtual class ndUndoRedoJointHinge* GetAsUndoRedoJointHinge() const { return nullptr; }
