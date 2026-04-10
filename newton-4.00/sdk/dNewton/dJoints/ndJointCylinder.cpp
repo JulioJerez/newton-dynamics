@@ -12,6 +12,7 @@
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
 #include "ndJointCylinder.h"
+#include "ndMeshComponents.h"
 
 #define D_MAX_SLIDER_RECOVERY_SPEED	ndFloat32 (0.5f)
 #define D_MAX_SLIDER_PENETRATION	ndFloat32 (0.05f)
@@ -22,15 +23,7 @@
 ndJointCylinder::ndJointCylinder()
 	:ndJointBilateralConstraint()
 	,m_rotationAxis()
-	,m_posit(ndFloat32(0.0f))
-	,m_speed(ndFloat32(0.0f))
-	,m_springKPosit(ndFloat32(0.0f))
-	,m_damperCPosit(ndFloat32(0.0f))
-	,m_minLimitPosit(ndFloat32(-1.0e10f))
-	,m_maxLimitPosit(ndFloat32(1.0e10f))
-	,m_offsetPosit(ndFloat32(0.0f))
-	,m_springDamperRegularizerPosit(ndFloat32(0.1f))
-	,m_limitStatePosit(0)
+	,m_positionAxis()
 {
 	m_maxDof = 8;
 }
@@ -38,30 +31,14 @@ ndJointCylinder::ndJointCylinder()
 ndJointCylinder::ndJointCylinder(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(8, child, parent, pinAndPivotFrame)
 	,m_rotationAxis()
-	,m_posit(ndFloat32(0.0f))
-	,m_speed(ndFloat32(0.0f))
-	,m_springKPosit(ndFloat32(0.0f))
-	,m_damperCPosit(ndFloat32(0.0f))
-	,m_minLimitPosit(ndFloat32(-1.0e10f))
-	,m_maxLimitPosit(ndFloat32(1.0e10f))
-	,m_offsetPosit(ndFloat32(0.0f))
-	,m_springDamperRegularizerPosit(ndFloat32(0.1f))
-	,m_limitStatePosit(0)
+	,m_positionAxis()
 {
 }
 
 ndJointCylinder::ndJointCylinder(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(8, child, parent, pinAndPivotInChild)
 	,m_rotationAxis()
-	,m_posit(ndFloat32(0.0f))
-	,m_speed(ndFloat32(0.0f))
-	,m_springKPosit(ndFloat32(0.0f))
-	,m_damperCPosit(ndFloat32(0.0f))
-	,m_minLimitPosit(ndFloat32(-1.0e10f))
-	,m_maxLimitPosit(ndFloat32(1.0e10f))
-	,m_offsetPosit(ndFloat32(0.0f))
-	,m_springDamperRegularizerPosit(ndFloat32(0.1f))
-	,m_limitStatePosit(0)
+	,m_positionAxis()
 {
 	ndMatrix tmp;
 	CalculateLocalMatrix(pinAndPivotInChild, m_localMatrix0, tmp);
@@ -158,30 +135,30 @@ void ndJointCylinder::GetSpringDamperAngle(ndFloat32& regularizer, ndFloat32& sp
 
 ndFloat32 ndJointCylinder::GetPosit() const
 {
-	return m_posit;
+	return m_positionAxis.m_param;
 }
 
 ndFloat32 ndJointCylinder::GetTargetPosit() const
 {
-	return m_offsetPosit;
+	return m_positionAxis.m_targetParam;
 }
 
 void ndJointCylinder::SetTargetPosit(ndFloat32 offset)
 {
-	m_offsetPosit = offset;
+	m_positionAxis.m_targetParam = offset;
 }
 
 bool ndJointCylinder::GetLimitStatePosit() const
 {
-	return m_limitStatePosit ? true : false;
+	return m_positionAxis.m_limitState;
 }
 
 void ndJointCylinder::SetLimitStatePosit(bool state)
 {
-	m_limitStatePosit = state ? 1 : 0;
-	if (m_limitStatePosit)
+	m_positionAxis.m_limitState = state;
+	if (m_positionAxis.m_limitState)
 	{
-		SetLimitsPosit(m_minLimitPosit, m_maxLimitPosit);
+		SetLimitsPosit(m_positionAxis.m_minLimit, m_positionAxis.m_maxLimit);
 	}
 }
 
@@ -201,36 +178,36 @@ void ndJointCylinder::SetLimitsPosit(ndFloat32 minLimit, ndFloat32 maxLimit)
 	}
 #endif
 
-	m_minLimitPosit = minLimit;
-	m_maxLimitPosit = maxLimit;
-	if (m_posit > m_maxLimitPosit)
+	m_positionAxis.m_minLimit = minLimit;
+	m_positionAxis.m_maxLimit = maxLimit;
+	if (m_positionAxis.m_param > m_positionAxis.m_maxLimit)
 	{
-		m_posit = m_maxLimitPosit;
+		m_positionAxis.m_param = m_positionAxis.m_maxLimit;
 	}
-	else if (m_posit < m_minLimitPosit)
+	else if (m_positionAxis.m_param < m_positionAxis.m_minLimit)
 	{
-		m_posit = m_minLimitPosit;
+		m_positionAxis.m_param = m_positionAxis.m_minLimit;
 	}
 }
 
 void ndJointCylinder::GetLimitsPosit(ndFloat32& minLimit, ndFloat32& maxLimit) const
 {
-	minLimit = m_minLimitPosit;
-	maxLimit = m_maxLimitPosit;
+	minLimit = m_positionAxis.m_minLimit;
+	maxLimit = m_positionAxis.m_maxLimit;
 }
 
 void ndJointCylinder::SetAsSpringDamperPosit(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper)
 {
-	m_springKPosit = ndAbs(spring);
-	m_damperCPosit = ndAbs(damper);
-	m_springDamperRegularizerPosit = ndClamp(regularizer, ndFloat32(1.0e-2f), ndFloat32(0.99f));
+	m_positionAxis.m_springK = ndAbs(spring);
+	m_positionAxis.m_damperC = ndAbs(damper);
+	m_positionAxis.m_springDamperRegularizer = ndClamp(regularizer, ndFloat32(1.0e-2f), ndFloat32(0.99f));
 }
 
 void ndJointCylinder::GetSpringDamperPosit(ndFloat32& regularizer, ndFloat32& spring, ndFloat32& damper) const
 {
-	spring = m_springKPosit;
-	damper = m_damperCPosit;
-	regularizer = m_springDamperRegularizerPosit;
+	spring = m_positionAxis.m_springK;
+	damper = m_positionAxis.m_damperC;
+	regularizer = m_positionAxis.m_springDamperRegularizer;
 }
 
 void ndJointCylinder::DebugJoint(ndConstraintDebugCallback& debugCallback) const
@@ -282,9 +259,9 @@ void ndJointCylinder::SubmitSpringDamperAngle(ndConstraintDescritor& desc, const
 void ndJointCylinder::SubmitSpringDamperPosit(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1)
 {
 	// add spring damper row
-	const ndVector p1(matrix1.m_posit + matrix1.m_front.Scale(m_offsetPosit));
+	const ndVector p1(matrix1.m_posit + matrix1.m_front.Scale(m_positionAxis.m_targetParam));
 	AddLinearRowJacobian(desc, matrix0.m_posit, p1, matrix1.m_front);
-	SetMassSpringDamperAcceleration(desc, m_springDamperRegularizerPosit, m_springKPosit, m_damperCPosit);
+	SetMassSpringDamperAcceleration(desc, m_positionAxis.m_springDamperRegularizer, m_positionAxis.m_springK, m_positionAxis.m_damperC);
 }
 
 void ndJointCylinder::ApplyBaseRows(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1)
@@ -298,8 +275,8 @@ void ndJointCylinder::ApplyBaseRows(ndConstraintDescritor& desc, const ndMatrix&
 	const ndVector prel(p0 - p1);
 	const ndVector vrel(veloc0 - veloc1);
 
-	m_speed = vrel.DotProduct(matrix1.m_front).GetScalar();
-	m_posit = prel.DotProduct(matrix1.m_front).GetScalar();
+	m_positionAxis.m_param = prel.DotProduct(matrix1.m_front).GetScalar();
+	m_positionAxis.m_paramSpeed = vrel.DotProduct(matrix1.m_front).GetScalar();
 	const ndVector projectedPoint = p1 + pin.Scale(pin.DotProduct(prel).GetScalar());
 
 	AddLinearRowJacobian(desc, p0, projectedPoint, matrix1[1]);
@@ -373,7 +350,7 @@ void ndJointCylinder::ClearMemory()
 	ndJointBilateralConstraint::ClearMemory();
 
 	UpdateParameters();
-	m_offsetPosit = m_posit;
+	m_positionAxis.m_targetParam = m_positionAxis.m_param;
 	m_rotationAxis.m_targetParam = m_rotationAxis.m_param;
 }
 
@@ -391,8 +368,8 @@ void ndJointCylinder::UpdateParameters()
 	const ndVector prel(p0 - p1);
 	const ndVector vrel(veloc0 - veloc1);
 
-	m_speed = vrel.DotProduct(matrix1.m_front).GetScalar();
-	m_posit = prel.DotProduct(matrix1.m_front).GetScalar();
+	m_positionAxis.m_param = prel.DotProduct(matrix1.m_front).GetScalar();
+	m_positionAxis.m_paramSpeed = vrel.DotProduct(matrix1.m_front).GetScalar();
 
 	const ndVector omega0(m_body0->GetOmega());
 	const ndVector omega1(m_body1->GetOmega());
@@ -405,30 +382,30 @@ void ndJointCylinder::UpdateParameters()
 
 void ndJointCylinder::SubmitLimitsPosit(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1)
 {
-	if (m_limitStatePosit)
+	if (m_rotationAxis.m_limitState)
 	{
-		if ((m_minLimitPosit == ndFloat32(0.0f)) && (m_maxLimitPosit == ndFloat32(0.0f)))
+		if ((m_rotationAxis.m_minLimit == ndFloat32(0.0f)) && (m_rotationAxis.m_maxLimit == ndFloat32(0.0f)))
 		{
 			AddLinearRowJacobian(desc, matrix0.m_posit, matrix1.m_posit, matrix1.m_front);
 		}
 		else
 		{
-			ndFloat32 x = m_posit + m_speed * desc.m_timestep;
-			if (x < m_minLimitPosit)
+			ndFloat32 x = m_rotationAxis.m_param + m_rotationAxis.m_paramSpeed * desc.m_timestep;
+			if (x < m_rotationAxis.m_minLimit)
 			{
-				ndVector p1(matrix1.m_posit + matrix1.m_front.Scale(m_minLimitPosit));
+				ndVector p1(matrix1.m_posit + matrix1.m_front.Scale(m_rotationAxis.m_minLimit));
 				AddLinearRowJacobian(desc, matrix0.m_posit, p1, matrix1.m_front);
 				const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
-				const ndFloat32 penetration = x - m_minLimitPosit;
+				const ndFloat32 penetration = x - m_rotationAxis.m_minLimit;
 				const ndFloat32 recoveringAceel = -desc.m_invTimestep * PenetrationSpeed(-penetration);
 				SetMotorAcceleration(desc, stopAccel - recoveringAceel);
 				SetLowerFriction(desc, ndFloat32(0.0f));
 			}
-			else if (x > m_maxLimitPosit)
+			else if (x > m_rotationAxis.m_maxLimit)
 			{
 				AddLinearRowJacobian(desc, matrix0.m_posit, matrix0.m_posit, matrix1.m_front);
 				const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
-				const ndFloat32 penetration = x - m_maxLimitPosit;
+				const ndFloat32 penetration = x - m_rotationAxis.m_maxLimit;
 				const ndFloat32 recoveringAceel = desc.m_invTimestep * PenetrationSpeed(penetration);
 				SetMotorAcceleration(desc, stopAccel - recoveringAceel);
 				SetHighFriction(desc, ndFloat32(0.0f));
@@ -451,7 +428,7 @@ void ndJointCylinder::JacobianDerivative(ndConstraintDescritor& desc)
 		SubmitSpringDamperAngle(desc, matrix0, matrix1);
 	}
 
-	if (m_springDamperRegularizerPosit && ((m_springKPosit > ndFloat32(0.0f)) || (m_damperCPosit > ndFloat32(0.0f))))
+	if (m_rotationAxis.m_springDamperRegularizer && ((m_rotationAxis.m_springK > ndFloat32(0.0f)) || (m_rotationAxis.m_damperC > ndFloat32(0.0f))))
 	{
 		// spring damper with limits
 		SubmitSpringDamperPosit(desc, matrix0, matrix1);
@@ -459,4 +436,10 @@ void ndJointCylinder::JacobianDerivative(ndConstraintDescritor& desc)
 
 	SubmitLimitsPosit(desc, matrix0, matrix1);
 	SubmitLimitsAngle(desc, matrix0, matrix1);
+}
+
+ndSharedPtr<ndMeshJoint> ndJointCylinder::GetMeshJoint() const
+{
+	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointCylinder(this));
+	return joint;
 }
