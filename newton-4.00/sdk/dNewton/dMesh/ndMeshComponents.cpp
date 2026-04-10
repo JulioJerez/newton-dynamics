@@ -24,6 +24,7 @@
 #include "ndMesh.h"
 #include "ndJointHinge.h"
 #include "ndJointWheel.h"
+#include "ndJointRoller.h"
 #include "ndJointSlider.h"
 #include "ndBodyDynamic.h"
 #include "ndJointFix6dof.h"
@@ -111,23 +112,23 @@ ndMeshJointHinge::ndMeshJointHinge(const ndJointBilateralConstraint* const joint
 void ndMeshJointHinge::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	ndMeshJoint::SerializeToXml(parent);
-	xmlSaveParam(parent, "springK", m_springK);
-	xmlSaveParam(parent, "damperC", m_damperC);
-	xmlSaveParam(parent, "limitState", m_limitState);
-	xmlSaveParam(parent, "minLimit", m_minLimit);
-	xmlSaveParam(parent, "maxLimit", m_maxLimit);
-	xmlSaveParam(parent, "springDamperRegularizer", m_springDamperRegularizer);
+	xmlSaveParam(parent, "springK", m_axis.m_springK);
+	xmlSaveParam(parent, "damperC", m_axis.m_damperC);
+	xmlSaveParam(parent, "limitState", m_axis.m_limitState);
+	xmlSaveParam(parent, "minLimit", m_axis.m_minLimit);
+	xmlSaveParam(parent, "maxLimit", m_axis.m_maxLimit);
+	xmlSaveParam(parent, "springDamperRegularizer", m_axis.m_springDamperRegularizer);
 }
 
 void ndMeshJointHinge::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndMeshJoint::DeserializeFromXml(parent);
-	m_springK = xmlGetFloat(parent, "springK");
-	m_damperC = xmlGetFloat(parent, "damperC");
-	m_minLimit = xmlGetFloat(parent, "minLimit");
-	m_maxLimit = xmlGetFloat(parent, "maxLimit");
-	m_springDamperRegularizer = xmlGetFloat(parent, "springDamperRegularizer");
-	m_limitState = ndInt8(xmlGetInt(parent, "limitState"));
+	m_axis.m_springK = xmlGetFloat(parent, "springK");
+	m_axis.m_damperC = xmlGetFloat(parent, "damperC");
+	m_axis.m_minLimit = xmlGetFloat(parent, "minLimit");
+	m_axis.m_maxLimit = xmlGetFloat(parent, "maxLimit");
+	m_axis.m_springDamperRegularizer = xmlGetFloat(parent, "springDamperRegularizer");
+	m_axis.m_limitState = ndInt8(xmlGetInt(parent, "limitState"));
 }
 
 ndJointBilateralConstraint* ndMeshJointHinge::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
@@ -135,9 +136,9 @@ ndJointBilateralConstraint* ndMeshJointHinge::CreateObject(ndBodyKinematic* cons
 	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
 	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 	ndJointHinge* const joint = new ndJointHinge(pinAndPivotInChild, pinAndPivotInParent, child, parent);
-	joint->SetAsSpringDamper(m_springDamperRegularizer, m_springK, m_damperC);
-	joint->SetLimits(m_minLimit * ndDegreeToRad, m_maxLimit * ndDegreeToRad);
-	joint->SetLimitState(m_limitState ? true : false);
+	joint->SetAsSpringDamper(m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
+	joint->SetLimits(m_axis.m_minLimit * ndDegreeToRad, m_axis.m_maxLimit * ndDegreeToRad);
+	joint->SetLimitState(m_axis.m_limitState ? true : false);
 	return joint;
 }
 
@@ -154,23 +155,23 @@ ndMeshJointSlider::ndMeshJointSlider(const ndJointBilateralConstraint* const joi
 void ndMeshJointSlider::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	ndMeshJoint::SerializeToXml(parent);
-	xmlSaveParam(parent, "springK", m_springK);
-	xmlSaveParam(parent, "damperC", m_damperC);
-	xmlSaveParam(parent, "limitState", m_limitState);
-	xmlSaveParam(parent, "minLimit", m_minLimit);
-	xmlSaveParam(parent, "maxLimit", m_maxLimit);
-	xmlSaveParam(parent, "springDamperRegularizer", m_springDamperRegularizer);
+	xmlSaveParam(parent, "springK", m_axis.m_springK);
+	xmlSaveParam(parent, "damperC", m_axis.m_damperC);
+	xmlSaveParam(parent, "limitState", m_axis.m_limitState);
+	xmlSaveParam(parent, "minLimit", m_axis.m_minLimit);
+	xmlSaveParam(parent, "maxLimit", m_axis.m_maxLimit);
+	xmlSaveParam(parent, "springDamperRegularizer", m_axis.m_springDamperRegularizer);
 }
 
 void ndMeshJointSlider::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndMeshJoint::DeserializeFromXml(parent);
-	m_springK = xmlGetFloat(parent, "springK");
-	m_damperC = xmlGetFloat(parent, "damperC");
-	m_minLimit = xmlGetFloat(parent, "minLimit");
-	m_maxLimit = xmlGetFloat(parent, "maxLimit");
-	m_springDamperRegularizer = xmlGetFloat(parent, "springDamperRegularizer");
-	m_limitState = ndInt8(xmlGetInt(parent, "limitState"));
+	m_axis.m_springK = xmlGetFloat(parent, "springK");
+	m_axis.m_damperC = xmlGetFloat(parent, "damperC");
+	m_axis.m_minLimit = xmlGetFloat(parent, "minLimit");
+	m_axis.m_maxLimit = xmlGetFloat(parent, "maxLimit");
+	m_axis.m_springDamperRegularizer = xmlGetFloat(parent, "springDamperRegularizer");
+	m_axis.m_limitState = ndInt8(xmlGetInt(parent, "limitState"));
 }
 
 ndJointBilateralConstraint* ndMeshJointSlider::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
@@ -178,9 +179,9 @@ ndJointBilateralConstraint* ndMeshJointSlider::CreateObject(ndBodyKinematic* con
 	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
 	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 	ndJointSlider* const joint = new ndJointSlider(pinAndPivotInChild, pinAndPivotInParent, child, parent);
-	joint->SetAsSpringDamper(m_springDamperRegularizer, m_springK, m_damperC);
-	joint->SetLimits(m_minLimit, m_maxLimit);
-	joint->SetLimitState(m_limitState ? true : false);
+	joint->SetAsSpringDamper(m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
+	joint->SetLimits(m_axis.m_minLimit, m_axis.m_maxLimit);
+	joint->SetLimitState(m_axis.m_limitState ? true : false);
 	return joint;
 }
 
@@ -244,7 +245,6 @@ ndJointBilateralConstraint* ndMeshJointDoubleHinge::CreateObject(ndBodyKinematic
 	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 	ndJointDoubleHinge* const joint = new ndJointDoubleHinge(pinAndPivotInChild, pinAndPivotInParent, child, parent);
 
-	//joint->SetAsSpringDamper(m_springDamperRegularizer, m_springK, m_damperC);
 	joint->SetLimitState0(m_axis0.m_limitState ? true : false);
 	joint->SetLimits0(m_axis0.m_minLimit * ndDegreeToRad, m_axis0.m_maxLimit * ndDegreeToRad);
 	joint->SetAsSpringDamper0(m_axis0.m_springDamperRegularizer, m_axis0.m_springK, m_axis0.m_damperC);
@@ -359,5 +359,78 @@ ndJointBilateralConstraint* ndMeshJointWheel::CreateObject(ndBodyKinematic* cons
 	desc.m_steeringAngle = m_steeringAngle;
 	desc.m_handBrakeTorque = m_handBrakeTorque;
 	ndJointWheel* const joint = new ndJointWheel(pinAndPivotInChild, pinAndPivotInParent, child, parent, desc);
+	return joint;
+}
+
+
+
+ndMeshJointRoller::ndMeshJointRoller()
+	:ndMeshJoint()
+{
+}
+
+ndMeshJointRoller::ndMeshJointRoller(const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(joint)
+{
+}
+
+void ndMeshJointRoller::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+
+	nd::TiXmlElement* const axis0 = new nd::TiXmlElement("axis0");
+	parent->LinkEndChild(axis0);
+	xmlSaveParam(axis0, "springK", m_axis0.m_springK);
+	xmlSaveParam(axis0, "damperC", m_axis0.m_damperC);
+	xmlSaveParam(axis0, "limitState", m_axis0.m_limitState);
+	xmlSaveParam(axis0, "minLimit", m_axis0.m_minLimit);
+	xmlSaveParam(axis0, "maxLimit", m_axis0.m_maxLimit);
+	xmlSaveParam(axis0, "springDamperRegularizer", m_axis0.m_springDamperRegularizer);
+
+	nd::TiXmlElement* const axis1 = new nd::TiXmlElement("axis1");
+	parent->LinkEndChild(axis1);
+	xmlSaveParam(axis1, "springK", m_axis1.m_springK);
+	xmlSaveParam(axis1, "damperC", m_axis1.m_damperC);
+	xmlSaveParam(axis1, "limitState", m_axis1.m_limitState);
+	xmlSaveParam(axis1, "minLimit", m_axis1.m_minLimit);
+	xmlSaveParam(axis1, "maxLimit", m_axis1.m_maxLimit);
+	xmlSaveParam(axis1, "springDamperRegularizer", m_axis1.m_springDamperRegularizer);
+}
+
+void ndMeshJointRoller::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndMeshJoint::DeserializeFromXml(parent);
+
+	const nd::TiXmlElement* const xmlAxis0 = (nd::TiXmlElement*)parent->FirstChild("axis0");
+	m_axis0.m_springK = xmlGetFloat(xmlAxis0, "springK");
+	m_axis0.m_damperC = xmlGetFloat(xmlAxis0, "damperC");
+	m_axis0.m_minLimit = xmlGetFloat(xmlAxis0, "minLimit");
+	m_axis0.m_maxLimit = xmlGetFloat(xmlAxis0, "maxLimit");
+	m_axis0.m_springDamperRegularizer = xmlGetFloat(xmlAxis0, "springDamperRegularizer");
+	m_axis0.m_limitState = ndInt8(xmlGetInt(xmlAxis0, "limitState"));
+
+	const nd::TiXmlElement* const xmlAxis1 = (nd::TiXmlElement*)parent->FirstChild("axis1");
+	m_axis1.m_springK = xmlGetFloat(xmlAxis1, "springK");
+	m_axis1.m_damperC = xmlGetFloat(xmlAxis1, "damperC");
+	m_axis1.m_minLimit = xmlGetFloat(xmlAxis1, "minLimit");
+	m_axis1.m_maxLimit = xmlGetFloat(xmlAxis1, "maxLimit");
+	m_axis1.m_springDamperRegularizer = xmlGetFloat(xmlAxis1, "springDamperRegularizer");
+	m_axis1.m_limitState = ndInt8(xmlGetInt(xmlAxis1, "limitState"));
+}
+
+ndJointBilateralConstraint* ndMeshJointRoller::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+{
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
+	ndJointRoller* const joint = new ndJointRoller(pinAndPivotInChild, pinAndPivotInParent, child, parent);
+
+	joint->SetLimitStateAngle(m_axis0.m_limitState ? true : false);
+	joint->SetLimitsAngle(m_axis0.m_minLimit * ndDegreeToRad, m_axis0.m_maxLimit * ndDegreeToRad);
+	joint->SetAsSpringDamperAngle(m_axis0.m_springDamperRegularizer, m_axis0.m_springK, m_axis0.m_damperC);
+
+	joint->SetLimitStatePosit(m_axis1.m_limitState ? true : false);
+	joint->SetLimitsPosit(m_axis1.m_minLimit * ndDegreeToRad, m_axis1.m_maxLimit * ndDegreeToRad);
+	joint->SetAsSpringDamperPosit(m_axis1.m_springDamperRegularizer, m_axis1.m_springK, m_axis1.m_damperC);
+
 	return joint;
 }
