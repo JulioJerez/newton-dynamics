@@ -74,12 +74,12 @@ ndJointCylinder::~ndJointCylinder()
 
 ndFloat32 ndJointCylinder::GetAngle() const
 {
-	return m_rotationAxis.m_angle;
+	return m_rotationAxis.m_param;
 }
 
 ndFloat32 ndJointCylinder::GetOmega() const
 {
-	return m_rotationAxis.m_omega;
+	return m_rotationAxis.m_paramSpeed;
 }
 
 bool ndJointCylinder::GetLimitStateAngle() const
@@ -112,17 +112,17 @@ void ndJointCylinder::SetLimitsAngle(ndFloat32 minLimit, ndFloat32 maxLimit)
 	m_rotationAxis.m_minLimit = minLimit;
 	m_rotationAxis.m_maxLimit = maxLimit;
 
-	if (m_rotationAxis.m_angle > m_rotationAxis.m_maxLimit)
+	if (m_rotationAxis.m_param > m_rotationAxis.m_maxLimit)
 	{
 		//const ndFloat32 deltaAngle = ndAnglesAdd(m_angle, -m_maxLimitAngle);
 		//m_angle = m_maxLimitAngle + deltaAngle;
-		m_rotationAxis.m_angle = m_rotationAxis.m_maxLimit;
+		m_rotationAxis.m_param = m_rotationAxis.m_maxLimit;
 	} 
-	else if (m_rotationAxis.m_angle < m_rotationAxis.m_minLimit)
+	else if (m_rotationAxis.m_param < m_rotationAxis.m_minLimit)
 	{
 		//const ndFloat32 deltaAngle = ndAnglesAdd(m_angle, -m_minLimitAngle);
 		//m_angle = m_minLimitAngle + deltaAngle;
-		m_rotationAxis.m_angle = m_rotationAxis.m_minLimit;
+		m_rotationAxis.m_param = m_rotationAxis.m_minLimit;
 	}
 }
 
@@ -134,12 +134,12 @@ void ndJointCylinder::GetLimitsAngle(ndFloat32& minLimit, ndFloat32& maxLimit) c
 
 ndFloat32 ndJointCylinder::GetOffsetAngle() const
 {
-	return m_rotationAxis.m_targetAngle;
+	return m_rotationAxis.m_targetParam;
 }
 
 void ndJointCylinder::SetOffsetAngle(ndFloat32 angle)
 {
-	m_rotationAxis.m_targetAngle = angle;
+	m_rotationAxis.m_targetParam = angle;
 }
 
 void ndJointCylinder::SetAsSpringDamperAngle(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper)
@@ -275,7 +275,7 @@ void ndJointCylinder::DebugJoint(ndConstraintDebugCallback& debugCallback) const
 void ndJointCylinder::SubmitSpringDamperAngle(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& )
 {
 	// add spring damper row
-	AddAngularRowJacobian(desc, matrix0.m_front, m_rotationAxis.m_targetAngle - m_rotationAxis.m_angle);
+	AddAngularRowJacobian(desc, matrix0.m_front, m_rotationAxis.m_targetParam - m_rotationAxis.m_param);
 	SetMassSpringDamperAcceleration(desc, m_rotationAxis.m_springDamperRegularizer, m_rotationAxis.m_springK, m_rotationAxis.m_damperC);
 }
 
@@ -334,11 +334,11 @@ void ndJointCylinder::SubmitLimitsAngle(ndConstraintDescritor& desc, const ndMat
 	{
 		if ((m_rotationAxis.m_minLimit > (ndFloat32(-1.0f) * ndDegreeToRad)) && (m_rotationAxis.m_maxLimit < (ndFloat32(1.0f) * ndDegreeToRad)))
 		{
-			AddAngularRowJacobian(desc, &matrix1.m_front[0], -m_rotationAxis.m_angle);
+			AddAngularRowJacobian(desc, &matrix1.m_front[0], -m_rotationAxis.m_param);
 		}
 		else
 		{
-			const ndFloat32 angle = m_rotationAxis.m_angle + m_rotationAxis.m_omega * desc.m_timestep;
+			const ndFloat32 angle = m_rotationAxis.m_param + m_rotationAxis.m_paramSpeed * desc.m_timestep;
 			if (angle < m_rotationAxis.m_minLimit)
 			{
 				AddAngularRowJacobian(desc, &matrix0.m_front[0], ndFloat32(0.0f));
@@ -374,7 +374,7 @@ void ndJointCylinder::ClearMemory()
 
 	UpdateParameters();
 	m_offsetPosit = m_posit;
-	m_rotationAxis.m_targetAngle = m_rotationAxis.m_angle;
+	m_rotationAxis.m_targetParam = m_rotationAxis.m_param;
 }
 
 void ndJointCylinder::UpdateParameters()
@@ -398,9 +398,9 @@ void ndJointCylinder::UpdateParameters()
 	const ndVector omega1(m_body1->GetOmega());
 
 	// the joint angle can be determined by getting the angle between any two non parallel vectors
-	const ndFloat32 deltaAngle = ndAnglesAdd(-CalculateAngle(matrix0.m_up, matrix1.m_up, matrix1.m_front), -m_rotationAxis.m_angle);
-	m_rotationAxis.m_angle += deltaAngle;
-	m_rotationAxis.m_omega = matrix1.m_front.DotProduct(omega0 - omega1).GetScalar();
+	const ndFloat32 deltaAngle = ndAnglesAdd(-CalculateAngle(matrix0.m_up, matrix1.m_up, matrix1.m_front), -m_rotationAxis.m_param);
+	m_rotationAxis.m_param += deltaAngle;
+	m_rotationAxis.m_paramSpeed = matrix1.m_front.DotProduct(omega0 - omega1).GetScalar();
 }
 
 void ndJointCylinder::SubmitLimitsPosit(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1)

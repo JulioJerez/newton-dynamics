@@ -36,10 +36,10 @@ class ndJointSlider: public ndJointBilateralConstraint
 	D_NEWTON_API void SetLimits(ndFloat32 minLimit, ndFloat32 maxLimit);
 	D_NEWTON_API void GetLimits(ndFloat32& minLimit, ndFloat32& maxLimit) const;
 
-	D_NEWTON_API ndFloat32 GetMaxForce() const;
-	D_NEWTON_API bool GetMaxForceState() const;
-	D_NEWTON_API void SetMaxForceState(bool state);
-	D_NEWTON_API void SetMaxForce(ndFloat32 force);
+	//D_NEWTON_API ndFloat32 GetMaxForce() const;
+	//D_NEWTON_API bool GetMaxForceState() const;
+	//D_NEWTON_API void SetMaxForceState(bool state);
+	//D_NEWTON_API void SetMaxForce(ndFloat32 force);
 
 	D_NEWTON_API virtual void SetAsSpringDamper(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper);
 	D_NEWTON_API void GetSpringDamper(ndFloat32& regularizer, ndFloat32& spring, ndFloat32& damper) const;
@@ -58,17 +58,18 @@ class ndJointSlider: public ndJointBilateralConstraint
 
 	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const override;
 
-	ndFloat32 m_posit;
-	ndFloat32 m_speed;
-	ndFloat32 m_springK;
-	ndFloat32 m_damperC;
-	ndFloat32 m_minLimit;
-	ndFloat32 m_maxLimit;
-	ndFloat32 m_positOffset;
-	ndFloat32 m_springDamperRegularizer;
+	ndAxisParam m_axis;
+	//ndFloat32 m_posit;
+	//ndFloat32 m_speed;
+	//ndFloat32 m_springK;
+	//ndFloat32 m_damperC;
+	//ndFloat32 m_minLimit;
+	//ndFloat32 m_maxLimit;
+	//ndFloat32 m_positOffset;
+	//ndFloat32 m_springDamperRegularizer;
 	ndFloat32 m_maxForce;
-	ndInt8 m_limitState;
-	ndInt8 m_forceState;
+	//ndInt8 m_limitState;
+	//ndInt8 m_forceState;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 

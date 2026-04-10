@@ -83,26 +83,26 @@ class ndJointBilateralConstraint : public ndConstraint
 	{
 		public:
 		ndAxisParam()
-			:m_angle(ndFloat32(0.0f))
-			,m_omega(ndFloat32(0.0f))
+			:m_param(ndFloat32(0.0f))
+			,m_paramSpeed(ndFloat32(0.0f))
 			,m_springK(ndFloat32(0.0f))
 			,m_damperC(ndFloat32(0.0f))
 			,m_minLimit(ndFloat32(-1.0e10f))
 			,m_maxLimit(ndFloat32(1.0e10f))
-			,m_targetAngle(ndFloat32(0.0f))
+			,m_targetParam(ndFloat32(0.0f))
 			,m_springDamperRegularizer(ndFloat32(0.1f))
 			,m_limitState(false)
 			,m_hitLimits(false)
 		{
 		}
 
-		ndFloat32 m_angle;
-		ndFloat32 m_omega;
+		ndFloat32 m_param;
+		ndFloat32 m_paramSpeed;
 		ndFloat32 m_springK;
 		ndFloat32 m_damperC;
 		ndFloat32 m_minLimit;
 		ndFloat32 m_maxLimit;
-		ndFloat32 m_targetAngle;
+		ndFloat32 m_targetParam;
 		ndFloat32 m_springDamperRegularizer;
 		bool m_limitState;
 		bool m_hitLimits;
