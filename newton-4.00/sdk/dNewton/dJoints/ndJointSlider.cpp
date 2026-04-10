@@ -186,10 +186,9 @@ void ndJointSlider::DebugJoint(ndConstraintDebugCallback& debugCallback) const
 
 	if (m_axis.m_limitState)
 	{
-		ndVector color(ndFloat32(1.0f), ndFloat32(0.5f), ndFloat32(0.0f), ndFloat32(0.0f));
 		ndVector p0(matrix1.m_posit + matrix1.m_front.Scale(m_axis.m_minLimit));
 		ndVector p1(matrix1.m_posit + matrix1.m_front.Scale(m_axis.m_maxLimit));
-		debugCallback.DrawLine(p0, p1, color);
+		debugCallback.DrawLine(p0, p1, m_linearDebugColor);
 	}
 }
 

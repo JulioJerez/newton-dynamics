@@ -275,11 +275,13 @@ ndSharedPtr<ndMeshJoint> ndJointHinge::GetMeshJoint() const
 {
 	ndMeshJointHinge* const joint = new ndMeshJointHinge(this);
 
-	joint->m_axis.m_springK = m_axis.m_springK;
-	joint->m_axis.m_damperC = m_axis.m_damperC;
-	joint->m_axis.m_limitState = m_axis.m_limitState;
-	joint->m_axis.m_minLimit = m_axis.m_minLimit * ndRadToDegree;
-	joint->m_axis.m_maxLimit = m_axis.m_maxLimit * ndRadToDegree;
-	joint->m_axis.m_springDamperRegularizer = m_axis.m_springDamperRegularizer;
+	//joint->m_axis.m_springK = m_axis.m_springK;
+	//joint->m_axis.m_damperC = m_axis.m_damperC;
+	//joint->m_axis.m_limitState = m_axis.m_limitState;
+	////joint->m_axis.m_minLimit = m_axis.m_minLimit * ndRadToDegree;
+	////joint->m_axis.m_maxLimit = m_axis.m_maxLimit * ndRadToDegree;
+	//joint->m_axis.m_minLimit = m_axis.m_minLimit;
+	//joint->m_axis.m_maxLimit = m_axis.m_maxLimit;
+	//joint->m_axis.m_springDamperRegularizer = m_axis.m_springDamperRegularizer;
 	return ndSharedPtr<ndMeshJoint> (joint);
 }

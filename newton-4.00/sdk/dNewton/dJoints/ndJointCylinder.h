@@ -63,17 +63,10 @@ class ndJointCylinder: public ndJointBilateralConstraint
 	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
 	D_NEWTON_API void ApplyBaseRows(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 
-	ndAxisParam m_rotationAxis;
+	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const override;
 
-	ndFloat32 m_posit;
-	ndFloat32 m_speed;
-	ndFloat32 m_springKPosit;
-	ndFloat32 m_damperCPosit;
-	ndFloat32 m_minLimitPosit;
-	ndFloat32 m_maxLimitPosit;
-	ndFloat32 m_offsetPosit;
-	ndFloat32 m_springDamperRegularizerPosit;
-	ndInt8 m_limitStatePosit;
+	ndAxisParam m_rotationAxis;
+	ndAxisParam m_positionAxis;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 
