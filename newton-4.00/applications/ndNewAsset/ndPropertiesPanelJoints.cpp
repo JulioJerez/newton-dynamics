@@ -583,6 +583,67 @@ class ndUndoRedoJointWheel : public ndUndoRedoCommand
 	ndFloat32 m_handBrakeTorque;
 };
 
+class ndUndoRedoJointSpherical : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoJointSpherical(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+	{
+		ndMeshJointSpherical* const joint = (ndMeshJointSpherical*)*m_mesh->GetJoint();
+
+		m_maxConeAngle = joint->m_maxConeAngle;
+		m_axis.m_springK = joint->m_axis.m_springK;
+		m_axis.m_damperC = joint->m_axis.m_damperC;
+		m_axis.m_minLimit = joint->m_axis.m_minLimit;
+		m_axis.m_maxLimit = joint->m_axis.m_maxLimit;
+		m_axis.m_limitState = joint->m_axis.m_limitState;
+		m_axis.m_springDamperRegularizer = joint->m_axis.m_springDamperRegularizer;
+	}
+
+	virtual ndUndoRedoJointSpherical* GetAsUndoRedoJointSpherical() const override
+	{
+		return (ndUndoRedoJointSpherical*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			const ndUndoRedoJointSpherical* const other = command.GetAsUndoRedoJointSpherical();
+			if (other)
+			{
+				bool test = other->m_axis.m_springK == m_axis.m_springK;
+				test = test && other->m_axis.m_damperC == m_axis.m_damperC;
+				test = test && other->m_axis.m_minLimit == m_axis.m_minLimit;
+				test = test && other->m_axis.m_maxLimit == m_axis.m_maxLimit;
+				test = test && other->m_axis.m_limitState == m_axis.m_limitState;
+				test = test && other->m_axis.m_springDamperRegularizer == m_axis.m_springDamperRegularizer;
+				if (test)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		ndMeshJointHinge* const joint = (ndMeshJointHinge*)*m_mesh->GetJoint();
+
+		joint->m_axis.m_springK = m_axis.m_springK;
+		joint->m_axis.m_damperC = m_axis.m_damperC;
+		joint->m_axis.m_minLimit = m_axis.m_minLimit;
+		joint->m_axis.m_maxLimit = m_axis.m_maxLimit;
+		joint->m_axis.m_limitState = m_axis.m_limitState;
+		joint->m_axis.m_springDamperRegularizer = m_axis.m_springDamperRegularizer;
+	}
+
+	ndMeshJoint::ndAxis m_axis;
+	ndFloat32 m_maxConeAngle;
+};
+
 void ndAssetEditor::ShowPropertiesJointInfo()
 {
 	if (ImGui::CollapsingHeader("Constraint joint"))
@@ -1134,7 +1195,49 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointSpherical::StaticClassName()) == 0)
 		{
-			ndAssert(0);
+			ndMeshJointSpherical* const subJoint = (ndMeshJointSpherical*)*joint;
+			ndReal value = subJoint->m_axis.m_springK;
+			if (ImGui::InputFloat("spring const##8", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointSpherical(this, m_currentSelection)));
+				subJoint->m_axis.m_springK = value;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointSpherical(this, m_currentSelection)));
+			}
+			value = subJoint->m_axis.m_damperC;
+			if (ImGui::InputFloat("damper const##8", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointSpherical(this, m_currentSelection)));
+				subJoint->m_axis.m_damperC = value;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointSpherical(this, m_currentSelection)));
+			}
+			value = subJoint->m_axis.m_springDamperRegularizer;
+			if (ImGui::InputFloat("regularizer##8", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointSpherical(this, m_currentSelection)));
+				subJoint->m_axis.m_springDamperRegularizer = value;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointSpherical(this, m_currentSelection)));
+			}
+			value = subJoint->m_axis.m_minLimit;
+			if (ImGui::InputFloat("min twist", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointSpherical(this, m_currentSelection)));
+				subJoint->m_axis.m_minLimit = value;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointSpherical(this, m_currentSelection)));
+			}
+			value = subJoint->m_axis.m_maxLimit;
+			if (ImGui::InputFloat("max twist", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointSpherical(this, m_currentSelection)));
+				subJoint->m_axis.m_maxLimit = value;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointSpherical(this, m_currentSelection)));
+			}
+			bool limitState = subJoint->m_axis.m_limitState ? true : false;
+			if (ImGui::Checkbox("twist limit State", &limitState))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointSpherical(this, m_currentSelection)));
+				subJoint->m_axis.m_limitState = m_showSelectedNode ? 1 : 0;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointSpherical(this, m_currentSelection)));
+			}
 		}
 		else
 		{
