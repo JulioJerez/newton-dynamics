@@ -889,11 +889,11 @@ void ndModelArticulation::SetTransform(const ndMatrix& matrix)
 	{
 		const ndMatrix offset(m_rootNode->m_body->GetMatrix().OrthoInverse() * matrix);
 		auto ApplyTransfrom = [this, &offset](ndModelArticulation::ndNode* const node)
-			{
-				ndSharedPtr<ndBody> body(node->m_body);
-				const ndMatrix matrix(body->GetMatrix() * offset);
-				body->SetMatrix(matrix);
-			};
+		{
+			ndSharedPtr<ndBody> body(node->m_body);
+			const ndMatrix matrix(body->GetMatrix() * offset);
+			body->SetMatrix(matrix);
+		};
 		NodeIterator(ApplyTransfrom);
 	}
 }
