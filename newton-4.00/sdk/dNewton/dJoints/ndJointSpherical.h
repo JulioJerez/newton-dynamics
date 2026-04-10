@@ -33,6 +33,9 @@ class ndJointSpherical: public ndJointBilateralConstraint
 	D_NEWTON_API ndMatrix GetOffsetRotation() const;
 	D_NEWTON_API void SetConeLimit(ndFloat32 maxConeAngle);
 	D_NEWTON_API void SetOffsetRotation(const ndMatrix& rotation);
+
+	D_NEWTON_API bool GetTwistLimitState() const;
+	D_NEWTON_API void SetTwistLimitState(bool state);
 	D_NEWTON_API void SetTwistLimits(ndFloat32 minAngle, ndFloat32 maxAngle);
 	D_NEWTON_API void GetTwistLimits(ndFloat32& minAngle, ndFloat32& maxAngle) const;
 	D_NEWTON_API void SetAsSpringDamper(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper);
@@ -55,14 +58,11 @@ class ndJointSpherical: public ndJointBilateralConstraint
 	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const override;
 
 	ndMatrix m_rotation;
-	ndVector m_omegaParam;
 	ndQuaternion m_rotationParam;
-	ndFloat32 m_springK;
-	ndFloat32 m_damperC;
+	ndVector m_omegaParam;
+	ndAxisParam m_axis;
 	ndFloat32 m_maxConeAngle;
-	ndFloat32 m_minTwistAngle;
-	ndFloat32 m_maxTwistAngle;
-	ndFloat32 m_springDamperRegularizer;
+	bool m_coneLimitState;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif 

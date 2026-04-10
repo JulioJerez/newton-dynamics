@@ -17,14 +17,11 @@
 ndJointSpherical::ndJointSpherical()
 	:ndJointBilateralConstraint()
 	,m_rotation(ndGetIdentityMatrix())
-	,m_omegaParam(ndVector::m_zero)
 	,m_rotationParam()
-	,m_springK(ndFloat32(0.0f))
-	,m_damperC(ndFloat32(0.0f))
+	,m_omegaParam(ndVector::m_zero)
+	,m_axis()
 	,m_maxConeAngle(ndFloat32(1.0e10f))
-	,m_minTwistAngle(-ndFloat32(1.0e10f))
-	,m_maxTwistAngle(ndFloat32(1.0e10f))
-	,m_springDamperRegularizer(ndFloat32(0.0f))
+	,m_coneLimitState(false)
 {
 	m_maxDof = 9;
 }
@@ -32,14 +29,11 @@ ndJointSpherical::ndJointSpherical()
 ndJointSpherical::ndJointSpherical(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(9, child, parent, pinAndPivotFrame)
 	,m_rotation(ndGetIdentityMatrix())
-	,m_omegaParam(ndVector::m_zero)
 	,m_rotationParam()
-	,m_springK(ndFloat32(0.0f))
-	,m_damperC(ndFloat32(0.0f))
+	,m_omegaParam(ndVector::m_zero)
+	,m_axis()
 	,m_maxConeAngle(ndFloat32(1.0e10f))
-	,m_minTwistAngle(-ndFloat32(1.0e10f))
-	,m_maxTwistAngle(ndFloat32(1.0e10f))
-	,m_springDamperRegularizer(ndFloat32(0.0f))
+	,m_coneLimitState(false)
 {
 }
 
@@ -48,14 +42,11 @@ ndJointSpherical::ndJointSpherical(
 	ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(9, child, parent, pinAndPivotInChild, pinAndPivotInParent)
 	,m_rotation(ndGetIdentityMatrix())
-	,m_omegaParam(ndVector::m_zero)
 	,m_rotationParam()
-	,m_springK(ndFloat32(0.0f))
-	,m_damperC(ndFloat32(0.0f))
+	,m_omegaParam(ndVector::m_zero)
+	,m_axis()
 	,m_maxConeAngle(ndFloat32(1.0e10f))
-	,m_minTwistAngle(-ndFloat32(1.0e10f))
-	,m_maxTwistAngle(ndFloat32(1.0e10f))
-	,m_springDamperRegularizer(ndFloat32(0.0f))
+	,m_coneLimitState(false)
 {
 }
 
@@ -82,28 +73,42 @@ void ndJointSpherical::SetOffsetRotation(const ndMatrix& rotation)
 
 void ndJointSpherical::SetAsSpringDamper(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper)
 {
-	m_springK = ndAbs(spring);
-	m_damperC = ndAbs(damper);
-	m_springDamperRegularizer = ndClamp(regularizer, ndFloat32(1.0e-3f), ndFloat32(0.99f));
+	m_axis.m_springK = ndAbs(spring);
+	m_axis.m_damperC = ndAbs(damper);
+	m_axis.m_springDamperRegularizer = ndClamp(regularizer, ndFloat32(1.0e-3f), ndFloat32(0.99f));
 }
 
 void ndJointSpherical::GetSpringDamper(ndFloat32& regularizer, ndFloat32& spring, ndFloat32& damper) const
 {
-	spring = m_springK;
-	damper = m_damperC;
-	regularizer = m_springDamperRegularizer;
+	spring = m_axis.m_springK;
+	damper = m_axis.m_damperC;
+	regularizer = m_axis.m_springDamperRegularizer;
+}
+
+bool ndJointSpherical::GetTwistLimitState() const
+{
+	return m_axis.m_limitState;
+}
+
+void ndJointSpherical::SetTwistLimitState(bool state)
+{
+	m_axis.m_limitState = state;
+	if (m_axis.m_limitState)
+	{
+		SetTwistLimits(m_axis.m_minLimit, m_axis.m_maxLimit);
+	}
 }
 
 void ndJointSpherical::SetTwistLimits(ndFloat32 minAngle, ndFloat32 maxAngle)
 {
-	m_minTwistAngle = ndMin(minAngle, ndFloat32 (0.0f));
-	m_maxTwistAngle = ndMax(maxAngle, ndFloat32(0.0f));
+	m_axis.m_minLimit = ndMin(minAngle, ndFloat32 (0.0f));
+	m_axis.m_maxLimit = ndMax(maxAngle, ndFloat32(0.0f));
 }
 
 void ndJointSpherical::GetTwistLimits(ndFloat32& minAngle, ndFloat32& maxAngle) const
 {
-	minAngle = m_minTwistAngle;
-	maxAngle = m_maxTwistAngle;
+	minAngle = m_axis.m_minLimit;
+	maxAngle = m_axis.m_maxLimit;
 }
 
 ndFloat32 ndJointSpherical::GetConeLimit() const
@@ -113,7 +118,6 @@ ndFloat32 ndJointSpherical::GetConeLimit() const
 
 void ndJointSpherical::SetConeLimit(ndFloat32 maxConeAngle)
 {
-	//m_maxConeAngle = ndClamp (maxConeAngle, ndFloat32 (0.0f), D_BALL_AND_SOCKED_MAX_ANGLE);
 	m_maxConeAngle = ndClamp(maxConeAngle, ndFloat32(0.0f), ndFloat32(1.0e10f));
 }
 
@@ -156,7 +160,8 @@ void ndJointSpherical::DebugJoint(ndConstraintDebugCallback& debugCallback) cons
 	ndVector arch[subdiv + 1];
 	
 	// show twist angle limits
-	ndFloat32 deltaTwist = m_maxTwistAngle - m_minTwistAngle;
+	//ndFloat32 deltaTwist = m_maxTwistAngle - m_axis.m_minTwistAngle;
+	ndFloat32 deltaTwist = m_axis.m_maxLimit - m_axis.m_minLimit;
 	if ((deltaTwist > ndFloat32(1.0e-3f)) && (deltaTwist < ndFloat32 (2.0f) * ndPi))
 	{ 
 		ndMatrix pitchMatrix(matrix1 * coneRotation);
@@ -164,8 +169,8 @@ void ndJointSpherical::DebugJoint(ndConstraintDebugCallback& debugCallback) cons
 	
 		ndVector point(ndFloat32(0.0f), ndFloat32(radius), ndFloat32(0.0f), ndFloat32(0.0f));
 	
-		ndFloat32 angleStep = ndMin(m_maxTwistAngle - m_minTwistAngle, ndFloat32(2.0f * ndPi)) / subdiv;
-		ndFloat32 angle0 = m_minTwistAngle;
+		ndFloat32 angleStep = ndMin(deltaTwist, ndFloat32(2.0f * ndPi)) / subdiv;
+		ndFloat32 angle0 = m_axis.m_minLimit;
 	
 		ndVector color(ndFloat32 (0.4f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f));
 		for (ndInt32 i = 0; i <= subdiv; ++i) 
@@ -229,11 +234,12 @@ void ndJointSpherical::UpdateParameters()
 	const ndVector omega1(m_body1->GetOmega());
 	const ndVector omega(omega0 - omega1);
 	m_omegaParam = matrix1.UnrotateVector(omega);
+	//m_axis.m_paramSpeed = matrix1.UnrotateVector(omega);
 }
 
 void ndJointSpherical::SubmitTwistAngle(const ndVector& pin, ndFloat32 angle, ndConstraintDescritor& desc)
 {
-	if ((m_maxTwistAngle - m_minTwistAngle) < (2.0f * ndDegreeToRad))
+	if ((m_axis.m_maxLimit - m_axis.m_minLimit) < (2.0f * ndDegreeToRad))
 	{
 		AddAngularRowJacobian(desc, pin, -angle);
 		SetLowerFriction(desc, -D_LCP_MAX_VALUE * ndFloat32(0.1f));
@@ -241,20 +247,20 @@ void ndJointSpherical::SubmitTwistAngle(const ndVector& pin, ndFloat32 angle, nd
 	}
 	else
 	{
-		if (angle < m_minTwistAngle)
+		if (angle < m_axis.m_minLimit)
 		{
 			AddAngularRowJacobian(desc, pin, ndFloat32(0.0f));
 			const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
-			const ndFloat32 penetration = angle - m_minTwistAngle;
+			const ndFloat32 penetration = angle - m_axis.m_minLimit;
 			const ndFloat32 recoveringAccel = -desc.m_invTimestep * PenetrationOmega(-penetration);
 			SetMotorAcceleration(desc, stopAccel - recoveringAccel);
 			SetLowerFriction(desc, ndFloat32(0.0f));
 		}
-		else if (angle >= m_maxTwistAngle)
+		else if (angle > m_axis.m_maxLimit)
 		{
 			AddAngularRowJacobian(desc, pin, ndFloat32(0.0f));
 			const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
-			const ndFloat32 penetration = angle - m_maxTwistAngle;
+			const ndFloat32 penetration = angle - m_axis.m_maxLimit;
 			const ndFloat32 recoveringAccel = desc.m_invTimestep * PenetrationOmega(penetration);
 			SetMotorAcceleration(desc, stopAccel - recoveringAccel);
 			SetHighFriction(desc, ndFloat32(0.0f));
@@ -344,7 +350,7 @@ void ndJointSpherical::SubmitSpringDamper(const ndMatrix& matrix0, const ndMatri
 		const ndFloat32 angle = ndFloat32(2.0f) * ndAtan2(dirMag, rotation.m_w);
 
 		AddAngularRowJacobian(desc, basis[0], angle);
-		SetMassSpringDamperAcceleration(desc, m_springDamperRegularizer, m_springK, m_damperC);
+		SetMassSpringDamperAcceleration(desc, m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
 		AddAngularRowJacobian(desc, basis[1], ndFloat32(0.0f));
 		AddAngularRowJacobian(desc, basis[2], ndFloat32(0.0f));
 	}
@@ -352,15 +358,15 @@ void ndJointSpherical::SubmitSpringDamper(const ndMatrix& matrix0, const ndMatri
 	{
 		const ndFloat32 pitchAngle = CalculateAngle(matrix0[1], matrix11[1], matrix11[0]);
 		AddAngularRowJacobian(desc, matrix11[0], pitchAngle);
-		SetMassSpringDamperAcceleration(desc, m_springDamperRegularizer, m_springK, m_damperC);
+		SetMassSpringDamperAcceleration(desc, m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
 			
 		const ndFloat32 yawAngle = CalculateAngle(matrix0[0], matrix11[0], matrix11[1]);
 		AddAngularRowJacobian(desc, matrix11[1], yawAngle);
-		SetMassSpringDamperAcceleration(desc, m_springDamperRegularizer, m_springK, m_damperC);
+		SetMassSpringDamperAcceleration(desc, m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
 			
 		const ndFloat32 rollAngle = CalculateAngle(matrix0[0], matrix11[0], matrix11[2]);
 		AddAngularRowJacobian(desc, matrix11[2], rollAngle);
-		SetMassSpringDamperAcceleration(desc, m_springDamperRegularizer, m_springK, m_damperC);
+		SetMassSpringDamperAcceleration(desc, m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
 	}
 }
 
@@ -385,7 +391,7 @@ void ndJointSpherical::JacobianDerivative(ndConstraintDescritor& desc)
 	ndMatrix matrix1;
 	CalculateGlobalMatrix(matrix0, matrix1);
 	ApplyBaseRows(matrix0, matrix1, desc);
-	if (m_springDamperRegularizer && ((m_springK > ndFloat32(0.0f)) || (m_damperC > ndFloat32(0.0f))))
+	if (m_axis.m_springDamperRegularizer && ((m_axis.m_springK > ndFloat32(0.0f)) || (m_axis.m_damperC > ndFloat32(0.0f))))
 	{
 		SubmitSpringDamper(matrix0, matrix1, desc);
 	}
@@ -397,12 +403,13 @@ ndSharedPtr<ndMeshJoint> ndJointSpherical::GetMeshJoint() const
 {
 	ndMeshJointSpherical* const joint = new ndMeshJointSpherical(this);
 
-	joint->m_rotation = m_rotation;
-	joint->m_springK = m_springK;
-	joint->m_damperC = m_damperC;
+	//joint->m_rotation = m_rotation;
 	joint->m_maxConeAngle = m_maxConeAngle * ndRadToDegree;
-	joint->m_minTwistAngle = m_minTwistAngle * ndRadToDegree;
-	joint->m_maxTwistAngle = m_maxTwistAngle * ndRadToDegree;
-	joint->m_springDamperRegularizer = m_springDamperRegularizer;
+	joint->m_axis.m_springK = m_axis.m_springK;
+	joint->m_axis.m_damperC = m_axis.m_damperC;
+	joint->m_axis.m_minLimit = m_axis.m_minLimit * ndRadToDegree;
+	joint->m_axis.m_maxLimit = m_axis.m_maxLimit * ndRadToDegree;
+	joint->m_axis.m_limitState = m_axis.m_limitState;
+	joint->m_axis.m_springDamperRegularizer = m_axis.m_springDamperRegularizer;
 	return ndSharedPtr<ndMeshJoint>(joint);
 }
