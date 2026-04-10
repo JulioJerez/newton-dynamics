@@ -18,158 +18,9 @@
 #include "ndDemoCameraNodeFollow.h"
 #include "ndHeightFieldPrimitive.h"
 
-#if 0
-
-static void LoadRagdoll(ndDemoEntityManager* const scene, const ndMatrix& location, const char* const name)
-{
-    ndRenderMeshLoader loader(*scene->GetRenderer());
-    loader.LoadMesh(ndGetWorkingFileName(name).GetStr());
-
-    ndSharedPtr<ndModel> model(new ndModelArticulation());
-    model->GetAsModelArticulation()->Deserialize(*loader.m_mesh);
-    model->GetAsModelArticulation()->SetTransform(location);
-
-    auto BindApplicationData = [scene, &loader, &model]()
-    {
-        ndRender* const render = *scene->GetRenderer();
-
-        const ndModelArticulation* const articulation = model->GetAsModelArticulation();
-        const ndMesh* const rootMesh = *loader.m_mesh;
-        for (ndModelArticulation::ndNode* node = articulation->GetRoot()->GetFirstIterator(); node; node = node->GetNextIterator())
-        {
-            // find the mesh node
-            const ndMesh* const meshNode = rootMesh->FindByClosestMatch(node->m_name);
-            ndAssert(meshNode);
-
-            // create a graphic primitive for visualization
-            ndSharedPtr<ndMeshShapeInstance> primitive(meshNode->GetPrimitive());
-            ndRenderPrimitive::ndDescriptor descriptor(render);
-            descriptor.m_collision = ndSharedPtr<ndShapeInstance>(primitive->CreateObject());
-            descriptor.m_mapping = ndRenderPrimitive::m_box;
-            descriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName("wood_0.png")));
-            ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
-
-            const ndMatrix matrix(node->m_body->GetMatrix());
-            ndSharedPtr<ndRenderSceneNode>entity(new ndRenderSceneNode(matrix));
-            entity->SetPrimitiveMatrix(meshNode->GetGeometryMatrix());
-            entity->SetPrimitive(mesh);
-            scene->AddEntity(entity);
-
-            // add a rigid body notification callback
-            ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, entity));
-            ((ndDemoEntityNotify*)*notify)->ResetEntityTransform(matrix);
-            node->m_body->SetNotifyCallback(notify);
-        }
-    };
-    BindApplicationData();
-
-    ndPhysicsWorld* world = scene->GetWorld();
-    world->AddModel(ndSharedPtr<ndModel>(model));
-}
-
-// debugging Dave Gravel ragdoll demo.
-void ndBasicRagdoll(ndDemoEntityManager* const scene)
-{
-    ndSharedPtr<ndBody> floor(BuildFloorBox(scene, ndGetIdentityMatrix(), "blueCheckerboard.png", 0.1f, true));
-
-    ndMatrix location(ndGetIdentityMatrix());
-    location.m_posit.m_x = 0.0f;
-    location.m_posit.m_y = 4.0f;
-    LoadRagdoll(scene, location, "daveRagdoll.nd");
-
-    ndQuaternion rot;
-    ndVector origin(-20.0f, 10.0f, 0.0f, 1.0f);
-    scene->SetCameraMatrix(rot, origin);
-}
-
-#else
 
 namespace ndRagdoll
 {
-	class ndDefinition
-	{
-		public:
-		enum ndjointType
-		{
-			m_root,
-			m_hinge,
-			m_spherical,
-			m_doubleHinge,
-			m_effector
-		};
-
-		struct ndDampData
-		{
-			ndDampData()
-				:m_spring(0.0f)
-				,m_damper(0.25f)
-				,m_regularizer(0.025f)
-			{
-			}
-
-			ndDampData(ndFloat32 spring, ndFloat32 damper, ndFloat32 regularizer)
-				:m_spring(spring)
-				,m_damper(damper)
-				,m_regularizer(regularizer)
-			{
-			}
-
-			ndFloat32 m_spring;
-			ndFloat32 m_damper;
-			ndFloat32 m_regularizer;
-		};
-
-		struct ndJointLimits
-		{
-			ndFloat32 m_minTwistAngle;
-			ndFloat32 m_maxTwistAngle;
-			ndFloat32 m_coneAngle;
-		};
-
-		struct ndOffsetFrameMatrix
-		{
-			ndFloat32 m_pitch;
-			ndFloat32 m_yaw;
-			ndFloat32 m_roll;
-		};
-
-		char m_boneName[32];
-		ndjointType m_limbType;
-		ndFloat32 m_massWeight;
-		ndJointLimits m_jointLimits;
-		ndOffsetFrameMatrix m_frameBasics;
-		ndDampData m_coneSpringData;
-		ndDampData m_twistSpringData;
-	};
-
-	static ndDefinition ragdollDefinition[] =
-	{
-		{ "root", ndDefinition::m_root, 1.0f, {}, {} },
-
-		{ "lowerback", ndDefinition::m_spherical, 1.0f, { -15.0f, 15.0f, 30.0f }, { 0.0f, 0.0f, 0.0f } },
-		{ "upperback", ndDefinition::m_spherical, 1.0f,{ -15.0f, 15.0f, 30.0f },{ 0.0f, 0.0f, 0.0f } },
-		{ "lowerneck", ndDefinition::m_spherical, 1.0f,{ -15.0f, 15.0f, 30.0f },{ 0.0f, 0.0f, 0.0f } },
-		{ "upperneck", ndDefinition::m_spherical, 1.0f,{ -60.0f, 60.0f, 30.0f },{ 0.0f, 0.0f, 0.0f } },
-		
-		{ "lclavicle", ndDefinition::m_spherical, 1.0f, { -60.0f, 60.0f, 80.0f }, { 0.0f, -60.0f, 0.0f } },
-		{ "lhumerus", ndDefinition::m_hinge, 1.0f, { -0.5f, 120.0f, 0.0f }, { 0.0f, 90.0f, 0.0f } },
-		{ "lradius", ndDefinition::m_doubleHinge, 1.0f, { 0.0f, 0.0f, 60.0f }, { 90.0f, 0.0f, 90.0f } },
-		
-		{ "rclavicle", ndDefinition::m_spherical, 1.0f, { -60.0f, 60.0f, 80.0f }, { 0.0f, 60.0f, 0.0f } },
-		{ "rhumerus", ndDefinition::m_hinge, 1.0f, { -0.5f, 120.0f, 0.0f }, { 0.0f, 90.0f, 0.0f } },
-		{ "rradius", ndDefinition::m_doubleHinge, 1.0f, { 0.0f, 0.0f, 60.0f }, { 90.0f, 0.0f, 90.0f } },
-		
-		{ "rhipjoint", ndDefinition::m_spherical, 1.0f, { -45.0f, 45.0f, 80.0f }, { 0.0f, -60.0f, 0.0f } },
-		{ "rfemur", ndDefinition::m_hinge, 1.0f, { -0.5f, 120.0f, 0.0f }, { 0.0f, 90.0f, 0.0f } },
-		{ "rtibia", ndDefinition::m_doubleHinge, 1.0f, { 0.0f, 0.0f, 60.0f }, { 90.0f, 0.0f, 90.0f } },
-		
-		{ "lhipjoint", ndDefinition::m_spherical, 1.0f, { -45.0f, 45.0f, 80.0f }, { 0.0f, 60.0f, 0.0f } },
-		{ "lfemur", ndDefinition::m_hinge, 1.0f, { -0.5f, 120.0f, 0.0f }, { 0.0f, 90.0f, 0.0f } },
-		{ "ltibia", ndDefinition::m_doubleHinge, 1.0f, { 0.0f, 0.0f, 60.0f }, { 90.0f, 0.0f, 90.0f } },
-
-		{ "", ndDefinition::m_root,{},{} },
-	};
-
 	class ndRagDollController : public ndModelNotify
 	{ 
 		public:
@@ -186,217 +37,28 @@ namespace ndRagdoll
 			// for now we just return false (no collision)
 			return false;
 		}
-
-		ndSharedPtr<ndBody> CreateBodyPart(
-			ndDemoEntityManager* const scene,
-			const ndSharedPtr<ndRenderSceneNode>& rootMesh,
-			const ndRenderMeshLoader& loader, 
-			const ndDefinition& definition,
-			ndBodyDynamic* const parentBody)
-		{
-			ndMesh* const mesh(loader.m_mesh->FindByName(definition.m_boneName));
-			ndSharedPtr<ndShapeInstance> shape(mesh->CreateCollisionFromChildren());
 		
-			ndAssert(rootMesh->FindByName(definition.m_boneName));
-			ndSharedPtr<ndRenderSceneNode> bonePart(rootMesh->FindByName(definition.m_boneName)->GetSharedPtr());
-			// create the rigid body that will make this body
-			ndMatrix matrix(bonePart->CalculateGlobalTransform());
-		
-			ndSharedPtr<ndBody> body (new ndBodyDynamic());
-			body->SetMatrix(matrix);
-			body->GetAsBodyDynamic()->SetCollisionShape(**shape);
-			body->GetAsBodyDynamic()->SetMassMatrix(1.0f, **shape);
-			body->SetNotifyCallback(new ndDemoEntityNotify(scene, bonePart, parentBody));
-			return body;
-		}
-
-		ndJointBilateralConstraint* ConnectBodyParts(ndBodyDynamic* const childBody, ndBodyDynamic* const parentBody, const ndDefinition& definition)
-		{
-			ndMatrix matrix(childBody->GetMatrix());
-			ndDefinition::ndOffsetFrameMatrix frameAngle(definition.m_frameBasics);
-			ndMatrix pinAndPivotInGlobalSpace(ndPitchMatrix(frameAngle.m_pitch * ndDegreeToRad) * ndYawMatrix(frameAngle.m_yaw * ndDegreeToRad) * ndRollMatrix(frameAngle.m_roll * ndDegreeToRad) * matrix);
-
-			ndDefinition::ndJointLimits jointLimits(definition.m_jointLimits);
-
-			switch (definition.m_limbType)
-			{
-				case ndDefinition::m_spherical:
-				{
-					ndJointSpherical* const joint = new ndJointSpherical(pinAndPivotInGlobalSpace, childBody, parentBody);
-					joint->SetConeLimit(jointLimits.m_coneAngle * ndDegreeToRad);
-					joint->SetTwistLimits(jointLimits.m_minTwistAngle * ndDegreeToRad, jointLimits.m_maxTwistAngle * ndDegreeToRad);
-					joint->SetAsSpringDamper(definition.m_coneSpringData.m_regularizer, definition.m_coneSpringData.m_spring, definition.m_coneSpringData.m_damper);
-					return joint;
-				}
-
-				case ndDefinition::m_hinge:
-				{
-					ndJointHinge* const joint = new ndJointHinge(pinAndPivotInGlobalSpace, childBody, parentBody);
-					joint->SetLimitState(true);
-					joint->SetLimits(jointLimits.m_minTwistAngle * ndDegreeToRad, jointLimits.m_maxTwistAngle * ndDegreeToRad);
-					joint->SetAsSpringDamper(definition.m_coneSpringData.m_regularizer, definition.m_coneSpringData.m_spring, definition.m_coneSpringData.m_damper);
-					return joint;
-				}
-
-				case ndDefinition::m_doubleHinge:
-				{
-					ndJointDoubleHinge* const joint = new ndJointDoubleHinge(pinAndPivotInGlobalSpace, childBody, parentBody);
-					joint->SetLimitState0(true);
-					joint->SetLimitState1(true);
-					joint->SetLimits0(-30.0f * ndDegreeToRad, 30.0f * ndDegreeToRad);
-					joint->SetLimits1(-45.0f * ndDegreeToRad, 45.0f * ndDegreeToRad);
-					joint->SetAsSpringDamper0(definition.m_coneSpringData.m_regularizer, definition.m_coneSpringData.m_spring, definition.m_coneSpringData.m_damper);
-					joint->SetAsSpringDamper1(definition.m_coneSpringData.m_regularizer, definition.m_coneSpringData.m_spring, definition.m_coneSpringData.m_damper);
-					return joint;
-				}
-
-				default:
-					ndAssert(0);
-			}
-			return nullptr;
-		}
-
-		void CalculateMassDistribution(ndModelArticulation* const ragdoll, ndFloat32 totalMass)
-		{
-			ndFixSizeArray<ndBodyDynamic*, 256> bodyArray;
-			ndFixSizeArray<ndModelArticulation::ndNode*, 256> stack;
-			if (ragdoll->GetRoot())
-			{
-				stack.PushBack(ragdoll->GetRoot());
-				while (stack.GetCount())
-				{
-					ndInt32 index = stack.GetCount() - 1;
-					ndModelArticulation::ndNode* const node = stack[index];
-					stack.SetCount(index);
-
-					bodyArray.PushBack(node->m_body->GetAsBodyDynamic());
-					for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
-					{
-						stack.PushBack(child);
-					}
-				}
-			}
-
-			ndFloat32 totalVolume = 0.0f;
-			for (ndInt32 i = 0; i < bodyArray.GetCount(); ++i)
-			{
-				totalVolume += bodyArray[i]->GetCollisionShape().GetVolume();
-			}
-			ndFloat32 density = totalMass / totalVolume;
-
-			for (ndInt32 i = 0; i < bodyArray.GetCount(); ++i)
-			{
-				ndBodyDynamic* const body = bodyArray[i];
-				ndFloat32 volume = bodyArray[i]->GetCollisionShape().GetVolume();
-				ndFloat32 mass = density * volume;
-				//ndTrace(("mass=%f  volume=%f\n", mass, volume));
-
-				ndVector inertia(body->GetMassMatrix().Scale(mass));
-				body->SetMassMatrix(inertia);
-			}
-		}
-
 		void RagdollBuildScript(ndDemoEntityManager* const scene, const ndRenderMeshLoader& loader, const ndMatrix& location)
 		{
-			//ndSharedPtr<ndRenderSceneNode> entityDuplicate(loader.m_renderMesh->Clone());
-			//entityDuplicate->SetTransform(location);
-			//entityDuplicate->SetTransform(location);
-			//scene->AddEntity(entityDuplicate);
-
-			//ndSharedPtr<ndBody> rootBody(CreateBodyPart(scene, entityDuplicate, loader, ragdollDefinition[0], nullptr));
-			//
-			//ndModelArticulation* const ragdoll = (ndModelArticulation*)GetModel();
-			//ndModelArticulation::ndNode* const modelRootNode = ragdoll->AddRootBody(rootBody);
-            //            ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*modelRootNode->m_body->GetAsBodyKinematic()->GetNotifyCallback();
-			//
-			//struct StackData
-			//{
-			//	ndModelArticulation::ndNode* parentBone;
-			//	ndSharedPtr<ndRenderSceneNode> childEntity;
-			//};
-			//ndFixSizeArray<StackData, 256> stack;
-			//
-			//for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* node = notify->GetUserData()->GetChildren().GetFirst(); node; node = node->GetNext())
-			//{
-			//	StackData data;
-			//	data.parentBone = modelRootNode;
-			//	data.childEntity = node->GetInfo();
-			//	stack.PushBack(data);
-			//}
-			//
-			//while (stack.GetCount())
-			//{
-			//	StackData data(stack.Pop());
-			//
-			//	const char* const name = data.childEntity->m_name.GetStr();
-			//	//ndTrace(("name: %s\n", name));
-			//	for (ndInt32 i = 0; ragdollDefinition[i].m_boneName[0]; ++i)
-			//	{
-			//		const ndDefinition& definition = ragdollDefinition[i];
-			//
-			//		if (!strcmp(definition.m_boneName, name))
-			//		{
-			//			ndBodyDynamic* const parentBody = data.parentBone->m_body->GetAsBodyDynamic();
-			//			ndSharedPtr<ndBody> childBody(CreateBodyPart(scene, entityDuplicate, loader, definition, parentBody));
-			//
-			//			//connect this body part to its parentBody with a rag doll joint
-			//			ndSharedPtr<ndJointBilateralConstraint> joint(ConnectBodyParts(childBody->GetAsBodyDynamic(), parentBody, definition));
-			//
-			//			// add this child body to the rad doll model.
-			//			data.parentBone = ragdoll->AddLimb(data.parentBone, childBody, joint);
-			//			break;
-			//		}
-			//	}
-			//
-			//	for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* node = data.childEntity->GetChildren().GetFirst(); node; node = node->GetNext())
-			//	{
-			//		StackData childData;
-			//		childData.parentBone = data.parentBone;
-			//		childData.childEntity = node->GetInfo();
-			//		stack.PushBack(childData);
-			//	}
-			//}
-			//
-			//CalculateMassDistribution(ragdoll, ndFloat32(100.0f));
-
 			ndSharedPtr<ndRenderSceneNode> visualMesh(loader.m_renderMesh->Clone());
 			visualMesh->SetTransform(location);
 			visualMesh->SetTransform(location);
 			scene->AddEntity(visualMesh);
-
+		
 			GetModel()->GetAsModelArticulation()->Deserialize(*loader.m_mesh);
 			auto BindApplicationData = [this, scene, &visualMesh](ndModelArticulation::ndNode* const node)
 			{
 				ndRenderSceneNode* const visualEntityPtr = visualMesh->FindByClosestMatch(node->m_name);
 				ndAssert(visualEntityPtr);
 				ndSharedPtr<ndRenderSceneNode> visualEntity((visualEntityPtr == *visualMesh) ? visualMesh : visualEntityPtr->GetSharedPtr());
-
+		
 				// add a rigid body with notification callback
 				ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
 				ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
 				node->m_body->SetNotifyCallback(notify);
-
-				//if (node->m_name.Find("body") > -1)
-				//{
-				//	m_topBox = node->m_body;
-				//	node->m_body->GetAsBodyKinematic()->SetMassMatrix(BOX_MASS, node->m_body->GetAsBodyKinematic()->GetCollisionShape());
-				//}
-				//else if (node->m_name.Find("pole") > -1)
-				//{
-				//	m_pole = node->m_body;
-				//	m_poleHinge = node->m_joint;
-				//	node->m_body->GetAsBodyKinematic()->SetMassMatrix(POLE_MASS, node->m_body->GetAsBodyKinematic()->GetCollisionShape());
-				//	((ndJointHinge*)*m_poleHinge)->SetAsSpringDamper(0.5f, 0.0f, 1.0f);
-				//}
-				//else if (node->m_name.Find("roller") > -1)
-				//{
-				//	m_wheel = node->m_body;
-				//	m_wheelRoller = node->m_joint;
-				//	node->m_body->GetAsBodyKinematic()->SetMassMatrix(POLE_MASS, node->m_body->GetAsBodyKinematic()->GetCollisionShape());
-				//}
 			};
 			GetModel()->GetAsModelArticulation()->NodeIterator(BindApplicationData);
-
+		
 		}
 	};
 
@@ -438,7 +100,9 @@ void ndBasicRagdoll (ndDemoEntityManager* const scene)
 	};
 
 	ndRenderMeshLoader loader(*scene->GetRenderer());
-	loader.ImportFbx(ndGetWorkingFileName("ragdoll.fbx"));
+	loader.LoadMesh(ndGetWorkingFileName("daveRagdoll2.nd"));
+	//loader.ImportFbx(ndGetWorkingFileName("ragdoll.fbx"));
+	//loader.ImportFbx(ndGetWorkingFileName("ragdoll.fbx"));
 	//loader.LoadMesh(ndGetWorkingFileName("ragdoll.nd"));
 
 	ndMatrix playerMatrix(PlaceMatrix(scene, 0.0f, 0.0f, 0.0f));
@@ -465,7 +129,6 @@ void ndBasicRagdoll (ndDemoEntityManager* const scene)
 	playerMatrix = ndYawMatrix(angle) * playerMatrix;
 	playerMatrix.m_posit += playerMatrix.m_front.Scale (-5.0f);
 	playerMatrix.m_posit = FindFloor(*scene->GetWorld(), playerMatrix.m_posit, 200.0f);
-	playerMatrix.m_posit.m_y += 1.0f;
+	playerMatrix.m_posit.m_y += 2.0f;
 	scene->SetCameraMatrix(playerMatrix, playerMatrix.m_posit);
 }
-#endif
