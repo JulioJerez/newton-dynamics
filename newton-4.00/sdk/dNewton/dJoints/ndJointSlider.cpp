@@ -19,50 +19,53 @@
 
 ndJointSlider::ndJointSlider()
 	:ndJointBilateralConstraint()
-	,m_posit(ndFloat32(0.0f))
-	,m_speed(ndFloat32(0.0f))
-	,m_springK(ndFloat32(0.0f))
-	,m_damperC(ndFloat32(0.0f))
-	,m_minLimit(ndFloat32(-1.0e10f))
-	,m_maxLimit(ndFloat32(1.0e10f))
-	,m_positOffset(ndFloat32(0.0f))
-	,m_springDamperRegularizer(ndFloat32(0.1f))
+	,m_axis()
+	//,m_posit(ndFloat32(0.0f))
+	//,m_speed(ndFloat32(0.0f))
+	//,m_springK(ndFloat32(0.0f))
+	//,m_damperC(ndFloat32(0.0f))
+	//,m_minLimit(ndFloat32(-1.0e10f))
+	//,m_maxLimit(ndFloat32(1.0e10f))
+	//,m_positOffset(ndFloat32(0.0f))
+	//,m_springDamperRegularizer(ndFloat32(0.1f))
 	,m_maxForce(D_LCP_MAX_VALUE)
-	,m_limitState(0)
-	,m_forceState(0)
+	//,m_limitState(0)
+	//,m_forceState(0)
 {
 	m_maxDof = 7;
 }
 
 ndJointSlider::ndJointSlider(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(7, child, parent, pinAndPivotFrame)
-	,m_posit(ndFloat32 (0.0f))
-	,m_speed(ndFloat32(0.0f))
-	,m_springK(ndFloat32(0.0f))
-	,m_damperC(ndFloat32(0.0f))
-	,m_minLimit(ndFloat32(-1.0e10f))
-	,m_maxLimit(ndFloat32(1.0e10f))
-	,m_positOffset(ndFloat32(0.0f))
-	,m_springDamperRegularizer(ndFloat32(0.1f))
+	,m_axis()
+	//,m_posit(ndFloat32 (0.0f))
+	//,m_speed(ndFloat32(0.0f))
+	//,m_springK(ndFloat32(0.0f))
+	//,m_damperC(ndFloat32(0.0f))
+	//,m_minLimit(ndFloat32(-1.0e10f))
+	//,m_maxLimit(ndFloat32(1.0e10f))
+	//,m_positOffset(ndFloat32(0.0f))
+	//,m_springDamperRegularizer(ndFloat32(0.1f))
 	,m_maxForce(D_LCP_MAX_VALUE)
-	,m_limitState(0)
-	,m_forceState(0)
+	//,m_limitState(0)
+	//,m_forceState(0)
 {
 }
 
 ndJointSlider::ndJointSlider(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(7, child, parent, pinAndPivotInChild)
-	,m_posit(ndFloat32(0.0f))
-	,m_speed(ndFloat32(0.0f))
-	,m_springK(ndFloat32(0.0f))
-	,m_damperC(ndFloat32(0.0f))
-	,m_minLimit(ndFloat32(-1.0e10f))
-	,m_maxLimit(ndFloat32(1.0e10f))
-	,m_positOffset(ndFloat32(0.0f))
-	,m_springDamperRegularizer(ndFloat32(0.1f))
+	,m_axis()
+	//,m_posit(ndFloat32(0.0f))
+	//,m_speed(ndFloat32(0.0f))
+	//,m_springK(ndFloat32(0.0f))
+	//,m_damperC(ndFloat32(0.0f))
+	//,m_minLimit(ndFloat32(-1.0e10f))
+	//,m_maxLimit(ndFloat32(1.0e10f))
+	//,m_positOffset(ndFloat32(0.0f))
+	//,m_springDamperRegularizer(ndFloat32(0.1f))
 	,m_maxForce(D_LCP_MAX_VALUE)
-	,m_limitState(0)
-	,m_forceState(0)
+	//,m_limitState(0)
+	//,m_forceState(0)
 {
 	ndMatrix tmp;
 	CalculateLocalMatrix(pinAndPivotInChild, m_localMatrix0, tmp);
@@ -75,35 +78,35 @@ ndJointSlider::~ndJointSlider()
 
 ndFloat32 ndJointSlider::GetSpeed() const
 {
-	return m_speed;
+	return m_axis.m_paramSpeed;
 }
 
 ndFloat32 ndJointSlider::GetPosit() const
 {
-	return m_posit;
+	return m_axis.m_param;
 }
 
 ndFloat32 ndJointSlider::GetTargetPosit() const
 {
-	return m_positOffset;
+	return m_axis.m_targetParam;
 }
 
 void ndJointSlider::SetTargetPosit(ndFloat32 offset)
 {
-	m_positOffset = offset;
+	m_axis.m_targetParam = offset;
 }
 
 bool ndJointSlider::GetLimitState() const
 {
-	return m_limitState ? true : false;
+	return m_axis.m_limitState;
 }
 
 void ndJointSlider::SetLimitState(bool state)
 {
-	m_limitState = state ? 1 : 0;
-	if (m_limitState)
+	m_axis.m_limitState = state;
+	if (m_axis.m_limitState)
 	{
-		SetLimits(m_minLimit, m_maxLimit);
+		SetLimits(m_axis.m_minLimit, m_axis.m_maxLimit);
 	}
 }
 
@@ -120,56 +123,56 @@ void ndJointSlider::SetLimits(ndFloat32 minLimit, ndFloat32 maxLimit)
 	}
 #endif
 
-	m_minLimit = minLimit;
-	m_maxLimit = maxLimit;
-	if (m_posit > m_maxLimit)
+	m_axis.m_minLimit = minLimit;
+	m_axis.m_maxLimit = maxLimit;
+	if (m_axis.m_param > m_axis.m_maxLimit)
 	{
-		m_posit = m_maxLimit;
+		m_axis.m_param = m_axis.m_maxLimit;
 	}
-	else if (m_posit < m_minLimit)
+	else if (m_axis.m_param < m_axis.m_minLimit)
 	{
-		m_posit = m_minLimit;
+		m_axis.m_param = m_axis.m_minLimit;
 	}
 }
 
 void ndJointSlider::GetLimits(ndFloat32& minLimit, ndFloat32& maxLimit) const
 {
-	minLimit = m_minLimit;
-	maxLimit = m_maxLimit;
+	minLimit = m_axis.m_minLimit;
+	maxLimit = m_axis.m_maxLimit;
 }
 
-bool ndJointSlider::GetMaxForceState() const
-{
-	return m_forceState ? true : false;
-}
-
-void ndJointSlider::SetMaxForceState(bool state)
-{
-	m_forceState = state ? true : false;
-}
-
-ndFloat32 ndJointSlider::GetMaxForce() const
-{
-	return m_maxForce;
-}
-
-void ndJointSlider::SetMaxForce(ndFloat32 force)
-{
-	m_maxForce = ndClamp(force, ndFloat32(0.1f), D_LCP_MAX_VALUE);
-}
+//bool ndJointSlider::GetMaxForceState() const
+//{
+//	return m_forceState ? true : false;
+//}
+//
+//void ndJointSlider::SetMaxForceState(bool state)
+//{
+//	m_forceState = state ? true : false;
+//}
+//
+//ndFloat32 ndJointSlider::GetMaxForce() const
+//{
+//	return m_maxForce;
+//}
+//
+//void ndJointSlider::SetMaxForce(ndFloat32 force)
+//{
+//	m_maxForce = ndClamp(force, ndFloat32(0.1f), D_LCP_MAX_VALUE);
+//}
 
 void ndJointSlider::SetAsSpringDamper(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper)
 {
-	m_springK = ndAbs(spring);
-	m_damperC = ndAbs(damper);
-	m_springDamperRegularizer = ndClamp(regularizer, ND_SPRING_DAMP_MIN_REG, ndFloat32(0.99f));
+	m_axis.m_springK = ndAbs(spring);
+	m_axis.m_damperC = ndAbs(damper);
+	m_axis.m_springDamperRegularizer = ndClamp(regularizer, ND_SPRING_DAMP_MIN_REG, ndFloat32(0.99f));
 }
 
 void ndJointSlider::GetSpringDamper(ndFloat32& regularizer, ndFloat32& spring, ndFloat32& damper) const
 {
-	spring = m_springK;
-	damper = m_damperC;
-	regularizer = m_springDamperRegularizer;
+	spring = m_axis.m_springK;
+	damper = m_axis.m_damperC;
+	regularizer = m_axis.m_springDamperRegularizer;
 }
 
 void ndJointSlider::DebugJoint(ndConstraintDebugCallback& debugCallback) const
@@ -180,6 +183,11 @@ void ndJointSlider::DebugJoint(ndConstraintDebugCallback& debugCallback) const
 
 	debugCallback.DrawFrame(matrix0);
 	debugCallback.DrawFrame(matrix1, 0.5f);
+
+	if (m_axis.m_limitState)
+	{
+
+	}
 }
 
 ndFloat32 ndJointSlider::PenetrationSpeed(ndFloat32 penetration) const
@@ -191,8 +199,8 @@ ndFloat32 ndJointSlider::PenetrationSpeed(ndFloat32 penetration) const
 
 ndInt32 ndJointSlider::GetKinematicState(ndKinematicState* const state) const
 {
-	state->m_posit = m_posit;
-	state->m_velocity = m_speed;
+	state->m_posit = m_axis.m_param;
+	state->m_velocity = m_axis.m_paramSpeed;
 	return 1;
 }
 
@@ -201,7 +209,7 @@ void ndJointSlider::ClearMemory()
 	ndJointBilateralConstraint::ClearMemory();
 
 	UpdateParameters();
-	m_positOffset = m_posit;
+	m_axis.m_targetParam = m_axis.m_param;
 }
 
 void ndJointSlider::UpdateParameters()
@@ -218,36 +226,36 @@ void ndJointSlider::UpdateParameters()
 	const ndVector prel(p0 - p1);
 	const ndVector vrel(veloc0 - veloc1);
 
-	m_speed = vrel.DotProduct(matrix1.m_front).GetScalar();
-	m_posit = prel.DotProduct(matrix1.m_front).GetScalar();
+	m_axis.m_param = prel.DotProduct(matrix1.m_front).GetScalar();
+	m_axis.m_paramSpeed = vrel.DotProduct(matrix1.m_front).GetScalar();
 }
 
 void ndJointSlider::SubmitLimits(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1)
 {
-	if (m_limitState)
+	if (m_axis.m_limitState)
 	{
-		if ((m_minLimit == ndFloat32(0.0f)) && (m_maxLimit == ndFloat32(0.0f)))
+		if ((m_axis.m_minLimit == ndFloat32(0.0f)) && (m_axis.m_maxLimit == ndFloat32(0.0f)))
 		{
 			AddLinearRowJacobian(desc, matrix0.m_posit, matrix1.m_posit, matrix1.m_front);
 		}
 		else
 		{
-			ndFloat32 x = m_posit + m_speed * desc.m_timestep;
-			if (x < m_minLimit)
+			ndFloat32 x = m_axis.m_param + m_axis.m_paramSpeed * desc.m_timestep;
+			if (x < m_axis.m_minLimit)
 			{
-				ndVector p1(matrix1.m_posit + matrix1.m_front.Scale(m_minLimit));
+				ndVector p1(matrix1.m_posit + matrix1.m_front.Scale(m_axis.m_minLimit));
 				AddLinearRowJacobian(desc, matrix0.m_posit, p1, matrix1.m_front);
 				const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
-				const ndFloat32 penetration = x - m_minLimit;
+				const ndFloat32 penetration = x - m_axis.m_minLimit;
 				const ndFloat32 recoveringAceel = -desc.m_invTimestep * PenetrationSpeed(-penetration);
 				SetMotorAcceleration(desc, stopAccel - recoveringAceel);
 				SetLowerFriction(desc, ndFloat32(0.0f));
 			}
-			else if (x > m_maxLimit)
+			else if (x > m_axis.m_maxLimit)
 			{
 				AddLinearRowJacobian(desc, matrix0.m_posit, matrix0.m_posit, matrix1.m_front);
 				const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
-				const ndFloat32 penetration = x - m_maxLimit;
+				const ndFloat32 penetration = x - m_axis.m_maxLimit;
 				const ndFloat32 recoveringAceel = desc.m_invTimestep * PenetrationSpeed(penetration);
 				SetMotorAcceleration(desc, stopAccel - recoveringAceel);
 				SetHighFriction(desc, ndFloat32(0.0f));
@@ -259,14 +267,14 @@ void ndJointSlider::SubmitLimits(ndConstraintDescritor& desc, const ndMatrix& ma
 void ndJointSlider::SubmitSpringDamper(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1)
 {
 	// add spring damper row
-	const ndVector p1(matrix1.m_posit + matrix1.m_front.Scale(m_positOffset));
+	const ndVector p1(matrix1.m_posit + matrix1.m_front.Scale(m_axis.m_targetParam));
 	AddLinearRowJacobian(desc, matrix0.m_posit, p1, matrix1.m_front);
-	SetMassSpringDamperAcceleration(desc, m_springDamperRegularizer, m_springK, m_damperC);
-	if (m_forceState)
-	{
-		SetHighFriction(desc, m_maxForce);
-		SetLowerFriction(desc, -m_maxForce);
-	}
+	SetMassSpringDamperAcceleration(desc, m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
+	//if (m_forceState)
+	//{
+	//	SetHighFriction(desc, m_maxForce);
+	//	SetLowerFriction(desc, -m_maxForce);
+	//}
 }
 
 void ndJointSlider::ApplyBaseRows(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1)
@@ -303,7 +311,7 @@ void ndJointSlider::JacobianDerivative(ndConstraintDescritor& desc)
 	CalculateGlobalMatrix(matrix0, matrix1);
 
 	ApplyBaseRows(desc, matrix0, matrix1);
-	if (m_springDamperRegularizer && ((m_springK > ndFloat32(0.0f)) || (m_damperC > ndFloat32(0.0f))))
+	if (m_axis.m_springDamperRegularizer && ((m_axis.m_springK > ndFloat32(0.0f)) || (m_axis.m_damperC > ndFloat32(0.0f))))
 	{
 		SubmitSpringDamper(desc, matrix0, matrix1);
 	}
