@@ -464,7 +464,7 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointHinge(this, m_currentSelection)));
 			}
 			bool limitState = subJoint->m_limitState ? true : false;
-			ImGui::Checkbox("limit State", &limitState);
+			if (ImGui::Checkbox("limit State", &limitState))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointHinge(this, m_currentSelection)));
 				subJoint->m_limitState = m_showSelectedNode ? 1 : 0;
@@ -510,7 +510,7 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointHinge(this, m_currentSelection)));
 			}
 			bool limitState = subJoint->m_limitState ? true : false;
-			ImGui::Checkbox("limit State##1", &limitState);
+			if (ImGui::Checkbox("limit State##1", &limitState))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointHinge(this, m_currentSelection)));
 				subJoint->m_limitState = m_showSelectedNode ? 1 : 0;
@@ -558,7 +558,7 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
 				}
 				bool limitState = subJoint->m_axis0.m_limitState ? true : false;
-				ImGui::Checkbox("limit State##2", &limitState);
+				if (ImGui::Checkbox("limit State##2", &limitState))
 				{
 					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
 					subJoint->m_axis0.m_limitState = m_showSelectedNode ? 1 : 0;
@@ -603,7 +603,7 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
 				}
 				bool limitState = subJoint->m_axis1.m_limitState ? true : false;
-				ImGui::Checkbox("limit State##3", &limitState);
+				if (ImGui::Checkbox("limit State##3", &limitState))
 				{
 					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointDoubleHinge(this, m_currentSelection)));
 					subJoint->m_axis1.m_limitState = m_showSelectedNode ? 1 : 0;

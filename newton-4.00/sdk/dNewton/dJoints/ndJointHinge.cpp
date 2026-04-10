@@ -128,7 +128,7 @@ void ndJointHinge::DebugJoint(ndConstraintDebugCallback& debugCallback) const
 	debugCallback.DrawFrame(matrix0);
 	debugCallback.DrawFrame(matrix1, 0.5f);
 
-	if (m_axis.m_hitLimits)
+	if (m_axis.m_limitState)
 	{
 		const ndInt32 subdiv = 8;
 		const ndFloat32 radius = debugCallback.m_debugScale * ndFloat32(0.8f);
