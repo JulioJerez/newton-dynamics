@@ -18,7 +18,6 @@
 #include "ndDemoCameraNodeFollow.h"
 #include "ndHeightFieldPrimitive.h"
 
-
 namespace ndRagdoll
 {
 	class ndRagDollController : public ndModelNotify
@@ -32,33 +31,10 @@ namespace ndRagdoll
 		bool OnContactGeneration(const ndBodyKinematic* const, const ndBodyKinematic* const) override
 		{
 			// here the application can use filter to determine what body parts should collide.
-			// this greatly improves performance because since articulated models in general 
-			// do not self collide, but occationaly some parts do collide. 
+			// this greatly improves performance because since articulated models,
+			// in general do not self collide, but occasionally some parts do collide. 
 			// for now we just return false (no collision)
 			return false;
-		}
-		
-		void RagdollBuildScript(ndDemoEntityManager* const scene, const ndRenderMeshLoader& loader, const ndMatrix& location)
-		{
-			ndSharedPtr<ndRenderSceneNode> visualMesh(loader.m_renderMesh->Clone());
-			visualMesh->SetTransform(location);
-			visualMesh->SetTransform(location);
-			scene->AddEntity(visualMesh);
-		
-			GetModel()->GetAsModelArticulation()->Deserialize(*loader.m_mesh);
-			auto BindApplicationData = [this, scene, &visualMesh](ndModelArticulation::ndNode* const node)
-			{
-				ndRenderSceneNode* const visualEntityPtr = visualMesh->FindByClosestMatch(node->m_name);
-				ndAssert(visualEntityPtr);
-				ndSharedPtr<ndRenderSceneNode> visualEntity((visualEntityPtr == *visualMesh) ? visualMesh : visualEntityPtr->GetSharedPtr());
-		
-				// add a rigid body with notification callback
-				ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
-				ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
-				node->m_body->SetNotifyCallback(notify);
-			};
-			GetModel()->GetAsModelArticulation()->NodeIterator(BindApplicationData);
-		
 		}
 	};
 
@@ -71,11 +47,38 @@ namespace ndRagdoll
 		ndSharedPtr<ndModelNotify> controller(new ndRagDollController());
 		model->SetNotifyCallback(controller);
 		
-		ndRagDollController* const ragdollController = (ndRagDollController*)*controller;
-		ragdollController->RagdollBuildScript(scene, loader, location);
+		// create a model arculation from the mesh
+		ndModelArticulation* const ragdoll = model->GetAsModelArticulation();
+		ragdoll->Deserialize(*loader.m_mesh);
+
+		// create a copy of the visual mesh
+		ndSharedPtr<ndRenderSceneNode> visualMesh(loader.m_renderMesh->Clone());
+
+		// bind the graphics model to the physics model,
+		// also apply any application constomization.
+		auto BindApplicationData = [scene, &visualMesh](ndModelArticulation::ndNode* const node)
+		{
+			ndRenderSceneNode* const visualEntityPtr = visualMesh->FindByClosestMatch(node->m_name);
+			ndAssert(visualEntityPtr);
+			ndSharedPtr<ndRenderSceneNode> visualEntity((visualEntityPtr == *visualMesh) ? visualMesh : visualEntityPtr->GetSharedPtr());
+
+			// add a rigid body with notification callback
+			ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
+			ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
+			node->m_body->SetNotifyCallback(notify);
+		};
+		ragdoll->NodeIterator(BindApplicationData);
+
+		// apply the global transforms to the visual mesh and physics model
+		const ndMatrix matrix(ragdoll->GetRoot()->m_body->GetMatrix() * location);
+		visualMesh->SetTransform(matrix);
+		visualMesh->SetTransform(matrix);
+		ragdoll->SetTransform(matrix);
 		
+		// add the visual model to the scene and physics model to the world
 		ndWorld* const world = scene->GetWorld();
 		world->AddModel(model);
+		scene->AddEntity(visualMesh);
 		return controller;
 	}
 }
@@ -95,33 +98,29 @@ void ndBasicRagdoll (ndDemoEntityManager* const scene)
 			:ndMatrix(ndGetIdentityMatrix())
 		{
 			m_posit = FindFloor(*scene->GetWorld(), ndVector(x, y, z, ndFloat32 (1.0f)), 200.0f);
-			m_posit.m_y += ndFloat32(10.0f);
+			m_posit.m_y += ndFloat32(3.0f);
 		}
 	};
 
 	ndRenderMeshLoader loader(*scene->GetRenderer());
 	loader.LoadMesh(ndGetWorkingFileName("daveRagdoll2.nd"));
-	//loader.ImportFbx(ndGetWorkingFileName("ragdoll.fbx"));
-	//loader.ImportFbx(ndGetWorkingFileName("ragdoll.fbx"));
 	//loader.LoadMesh(ndGetWorkingFileName("ragdoll.nd"));
 
 	ndMatrix playerMatrix(PlaceMatrix(scene, 0.0f, 0.0f, 0.0f));
-	ndSharedPtr<ndModelNotify> modelNotity(CreateRagdoll(scene, loader, playerMatrix));
+	CreateRagdoll(scene, loader, playerMatrix);
 
 	{
-#if 0
+#if 1
 		// add few more rag dolls
-		CreateRagdoll(scene, loader, PlaceMatrix(scene, 0.0f, 0.0f, 0.0f));
-		CreateRagdoll(scene, loader, PlaceMatrix(scene, 3.0f, 0.0f, 0.0f));
-		CreateRagdoll(scene, loader, PlaceMatrix(scene, 5.0f, 0.0f, 0.0f));
+		loader.LoadMesh(ndGetWorkingFileName("daveRagdoll1.nd"));
+		
+		CreateRagdoll(scene, loader, PlaceMatrix(scene, 4.0f, 0.0f, -10.0f));
+		//CreateRagdoll(scene, loader, PlaceMatrix(scene, 6.0f, 0.0f, -10.0f));
+		//CreateRagdoll(scene, loader, PlaceMatrix(scene, 8.0f, 0.0f, -10.0f));
 
-		CreateRagdoll(scene, loader, PlaceMatrix(scene, 0.0f, 0.0f, 10.0f));
-		CreateRagdoll(scene, loader, PlaceMatrix(scene, 3.0f, 0.0f, 10.0f));
-		CreateRagdoll(scene, loader, PlaceMatrix(scene, 5.0f, 0.0f, 10.0f));
-
-		CreateRagdoll(scene, loader, PlaceMatrix(scene, 0.0f, 0.0f, -10.0f));
-		CreateRagdoll(scene, loader, PlaceMatrix(scene, 3.0f, 0.0f, -10.0f));
-		CreateRagdoll(scene, loader, PlaceMatrix(scene, 5.0f, 0.0f, -10.0f));
+		//CreateRagdoll(scene, loader, PlaceMatrix(scene, 4.0f, 0.0f, 10.0f));
+		//CreateRagdoll(scene, loader, PlaceMatrix(scene, 6.0f, 0.0f, 10.0f));
+		//CreateRagdoll(scene, loader, PlaceMatrix(scene, 8.0f, 0.0f, 10.0f));
 #endif
 	}
 

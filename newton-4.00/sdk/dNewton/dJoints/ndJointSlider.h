@@ -59,16 +59,8 @@ class ndJointSlider: public ndJointBilateralConstraint
 	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const override;
 
 	ndAxisParam m_axis;
-	//ndFloat32 m_posit;
-	//ndFloat32 m_speed;
-	//ndFloat32 m_springK;
-	//ndFloat32 m_damperC;
-	//ndFloat32 m_minLimit;
-	//ndFloat32 m_maxLimit;
-	//ndFloat32 m_positOffset;
-	//ndFloat32 m_springDamperRegularizer;
+	// do no forget to check this legacy
 	ndFloat32 m_maxForce;
-	//ndInt8 m_limitState;
 	//ndInt8 m_forceState;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 

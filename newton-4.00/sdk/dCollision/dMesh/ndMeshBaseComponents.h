@@ -181,6 +181,16 @@ class ndMeshJoint : public ndClassAlloc
 	class ndAxis
 	{
 		public:
+		ndAxis()
+			:m_springK(ndFloat32(0.0f))
+			,m_damperC(ndFloat32(0.0f))
+			,m_minLimit(ndFloat32(-1.0e10f))
+			,m_maxLimit(ndFloat32(1.0e10f))
+			,m_springDamperRegularizer(ndFloat32(0.0f))
+			,m_limitState(0)
+		{
+		}
+
 		ndFloat32 m_springK;
 		ndFloat32 m_damperC;
 		ndFloat32 m_minLimit;

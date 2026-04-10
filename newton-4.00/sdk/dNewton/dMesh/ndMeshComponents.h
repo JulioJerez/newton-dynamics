@@ -65,12 +65,20 @@ class ndMeshJointHinge : public ndMeshJoint
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
-	ndFloat32 m_springK;
-	ndFloat32 m_damperC;
-	ndFloat32 m_minLimit;
-	ndFloat32 m_maxLimit;
-	ndFloat32 m_springDamperRegularizer;
-	ndInt8 m_limitState;
+	ndAxis m_axis;
+};
+
+class ndMeshJointSlider : public ndMeshJoint
+{
+	public:
+	D_NEWTON_API ndMeshJointSlider();
+	D_NEWTON_API ndMeshJointSlider(const ndJointBilateralConstraint* const joint);
+
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
+
+	ndAxis m_axis;
 };
 
 class ndMeshJointDoubleHinge : public ndMeshJoint
@@ -88,41 +96,19 @@ class ndMeshJointDoubleHinge : public ndMeshJoint
 	ndAxis m_axis1;
 };
 
-class ndMeshJointSlider : public ndMeshJoint
+class ndMeshJointRoller : public ndMeshJoint
 {
 	public:
-	D_NEWTON_API ndMeshJointSlider();
-	D_NEWTON_API ndMeshJointSlider(const ndJointBilateralConstraint* const joint);
+
+	D_NEWTON_API ndMeshJointRoller();
+	D_NEWTON_API ndMeshJointRoller(const ndJointBilateralConstraint* const joint);
 
 	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
-	ndFloat32 m_springK;
-	ndFloat32 m_damperC;
-	ndFloat32 m_minLimit;
-	ndFloat32 m_maxLimit;
-	ndFloat32 m_springDamperRegularizer;
-	ndInt8 m_limitState;
-};
-
-class ndMeshJointSpherical : public ndMeshJoint
-{
-	public:
-	D_NEWTON_API ndMeshJointSpherical();
-	D_NEWTON_API ndMeshJointSpherical(const ndJointBilateralConstraint* const joint);
-
-	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
-	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
-	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
-
-	ndMatrix m_rotation;
-	ndFloat32 m_springK;
-	ndFloat32 m_damperC;
-	ndFloat32 m_maxConeAngle;
-	ndFloat32 m_minTwistAngle;
-	ndFloat32 m_maxTwistAngle;
-	ndFloat32 m_springDamperRegularizer;
+	ndAxis m_axis0;
+	ndAxis m_axis1;
 };
 
 class ndMeshJointWheel : public ndMeshJoint
@@ -144,6 +130,25 @@ class ndMeshJointWheel : public ndMeshJoint
 	ndFloat32 m_brakeTorque;
 	ndFloat32 m_steeringAngle;
 	ndFloat32 m_handBrakeTorque;
+};
+
+class ndMeshJointSpherical : public ndMeshJoint
+{
+	public:
+	D_NEWTON_API ndMeshJointSpherical();
+	D_NEWTON_API ndMeshJointSpherical(const ndJointBilateralConstraint* const joint);
+
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
+
+	ndMatrix m_rotation;
+	ndFloat32 m_springK;
+	ndFloat32 m_damperC;
+	ndFloat32 m_maxConeAngle;
+	ndFloat32 m_minTwistAngle;
+	ndFloat32 m_maxTwistAngle;
+	ndFloat32 m_springDamperRegularizer;
 };
 
 #endif
