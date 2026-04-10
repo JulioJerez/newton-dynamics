@@ -33,6 +33,7 @@ class ndUndoRedoCommand : public ndClassAlloc
 	virtual class ndUndoRedoJoint* GetAsUndoRedoJoint() const { return nullptr; }
 	virtual class ndUndoRedoJointChange* GetAsUndoRedoJointChange() const { return nullptr; }
 
+	virtual class ndUndoRedoJointWheel* GetAsUndoRedoJointWheel() const { return nullptr; }
 	virtual class ndUndoRedoJointHinge* GetAsUndoRedoJointHinge() const { return nullptr; }
 	virtual class ndUndoRedoJointSlider* GetAsUndoRedoJointSlider() const { return nullptr; }
 	virtual class ndUndoRedoJointRoller* GetAsUndoRedoJointRoller() const { return nullptr; }

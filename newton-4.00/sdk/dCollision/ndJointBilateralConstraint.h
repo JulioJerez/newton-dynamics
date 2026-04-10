@@ -32,6 +32,7 @@
 
 class ndMeshJoint;
 
+
 enum ndJointBilateralSolverModel
 {
 	m_jointIterativeSoft,
@@ -189,6 +190,8 @@ class ndJointBilateralConstraint : public ndConstraint
 	ndInt8 m_rowIsMotor;
 	ndInt8 m_hitLimits;
 	ndJointBilateralSolverModel m_solverModel;
+
+	static ndVector m_linearDebugColor;
 	
 	friend class ndWorld;
 	friend class ndIkSolver;

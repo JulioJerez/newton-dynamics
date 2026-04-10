@@ -511,6 +511,78 @@ class ndUndoRedoJointCylinder : public ndUndoRedoCommand
 	ndMeshJoint::ndAxis m_axis1;
 };
 
+class ndUndoRedoJointWheel : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoJointWheel(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+	{
+		ndMeshJointWheel* const joint = (ndMeshJointWheel*)*m_mesh->GetJoint();
+
+		m_brakeTorque = joint->m_brakeTorque;
+		m_steeringAngle = joint->m_steeringAngle;
+		m_handBrakeTorque = joint->m_handBrakeTorque;
+		m_axis.m_springK = joint->m_axis.m_springK;
+		m_axis.m_damperC = joint->m_axis.m_damperC;
+		m_axis.m_minLimit = joint->m_axis.m_minLimit;
+		m_axis.m_maxLimit = joint->m_axis.m_maxLimit;
+		m_axis.m_limitState = 1;
+		m_axis.m_springDamperRegularizer = joint->m_axis.m_springDamperRegularizer;
+
+	}
+
+	virtual ndUndoRedoJointWheel* GetAsUndoRedoJointWheel() const override
+	{
+		return (ndUndoRedoJointWheel*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			const ndUndoRedoJointWheel* const other = command.GetAsUndoRedoJointWheel();
+			if (other)
+			{
+				bool test = other->m_axis.m_springK == m_axis.m_springK;
+				test = test && other->m_axis.m_damperC == m_axis.m_damperC;
+				test = test && other->m_axis.m_minLimit == m_axis.m_minLimit;
+				test = test && other->m_axis.m_maxLimit == m_axis.m_maxLimit;
+				test = test && other->m_axis.m_springDamperRegularizer == m_axis.m_springDamperRegularizer;
+				test = test && other->m_brakeTorque == m_brakeTorque;
+				test = test && other->m_steeringAngle == m_steeringAngle;
+				test = test && other->m_handBrakeTorque == m_handBrakeTorque;
+
+				if (test)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		ndMeshJointWheel* const joint = (ndMeshJointWheel*)*m_mesh->GetJoint();
+
+		joint->m_brakeTorque = m_brakeTorque;
+		joint->m_steeringAngle = m_steeringAngle;
+		joint->m_handBrakeTorque = m_handBrakeTorque;
+		joint->m_axis.m_springK = m_axis.m_springK;
+		joint->m_axis.m_damperC = m_axis.m_damperC;
+		joint->m_axis.m_minLimit = m_axis.m_minLimit;
+		joint->m_axis.m_maxLimit = m_axis.m_maxLimit;
+		joint->m_axis.m_limitState = m_axis.m_limitState;
+		joint->m_axis.m_springDamperRegularizer = m_axis.m_springDamperRegularizer;
+	}
+
+	ndMeshJoint::ndAxis m_axis;
+	ndFloat32 m_brakeTorque;
+	ndFloat32 m_steeringAngle;
+	ndFloat32 m_handBrakeTorque;
+};
+
 void ndAssetEditor::ShowPropertiesJointInfo()
 {
 	if (ImGui::CollapsingHeader("Constraint joint"))
@@ -598,7 +670,32 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 			ImGui::EndCombo();
 		}
 
-		if (strcmp(joint->m_constructor.GetStr(), ndJointHinge::StaticClassName()) == 0)
+		if (strcmp(joint->m_constructor.GetStr(), ndJointFix6dof::StaticClassName()) == 0)
+		{
+			ndMeshJointFix6dof* const subJoint = (ndMeshJointFix6dof*)*joint;
+			ndReal value = subJoint->m_softness;
+			if (ImGui::InputFloat("softness", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointFix6dof(this, m_currentSelection)));
+				subJoint->m_softness = ndMax(value, ndReal(0.0f));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointFix6dof(this, m_currentSelection)));
+			}
+			value = subJoint->m_maxForce;
+			if (ImGui::InputFloat("max Force", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointFix6dof(this, m_currentSelection)));
+				subJoint->m_maxForce = ndMax(value, ndReal(0.0f));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointFix6dof(this, m_currentSelection)));
+			}
+			value = subJoint->m_maxTorque;
+			if (ImGui::InputFloat("max_torque", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointFix6dof(this, m_currentSelection)));
+				subJoint->m_maxTorque = ndMax(value, ndReal(0.0f));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointFix6dof(this, m_currentSelection)));
+			}
+		}
+		else if (strcmp(joint->m_constructor.GetStr(), ndJointHinge::StaticClassName()) == 0)
 		{
 			ndMeshJointHinge* const subJoint = (ndMeshJointHinge*)*joint;
 			ndReal value = subJoint->m_axis.m_springK;
@@ -972,36 +1069,70 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 				}
 			}
 		}
-		else if (strcmp(joint->m_constructor.GetStr(), ndJointFix6dof::StaticClassName()) == 0)
+		else if (strcmp(joint->m_constructor.GetStr(), ndJointWheel::StaticClassName()) == 0)
 		{
-			ndMeshJointFix6dof* const subJoint = (ndMeshJointFix6dof*)*joint;
-			ndReal value = subJoint->m_softness;
-			if (ImGui::InputFloat("sofness", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			ndMeshJointWheel* const subJoint = (ndMeshJointWheel*)*joint;
+			ImGui::SeparatorText("baseFrame");
+
+			ndReal value = subJoint->m_axis.m_springK;
+			if (ImGui::InputFloat("suspension spring", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointFix6dof(this, m_currentSelection)));
-				subJoint->m_softness = ndMax(value, ndReal(0.0f));
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointFix6dof(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointWheel(this, m_currentSelection)));
+				subJoint->m_axis.m_springK = value;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointWheel(this, m_currentSelection)));
 			}
-			value = subJoint->m_maxForce;
-			if (ImGui::InputFloat("max Force", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			value = subJoint->m_axis.m_damperC;
+			if (ImGui::InputFloat("suspension const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointFix6dof(this, m_currentSelection)));
-				subJoint->m_maxForce = ndMax(value, ndReal(0.0f));
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointFix6dof(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointWheel(this, m_currentSelection)));
+				subJoint->m_axis.m_damperC = value;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointWheel(this, m_currentSelection)));
 			}
-			value = subJoint->m_maxTorque;
-			if (ImGui::InputFloat("max_torque", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			value = subJoint->m_axis.m_springDamperRegularizer;
+			if (ImGui::InputFloat("suspension regularizer", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointFix6dof(this, m_currentSelection)));
-				subJoint->m_maxTorque = ndMax(value, ndReal(0.0f));
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointFix6dof(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointWheel(this, m_currentSelection)));
+				subJoint->m_axis.m_springDamperRegularizer = value;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointWheel(this, m_currentSelection)));
+			}
+			value = subJoint->m_axis.m_maxLimit;
+			if (ImGui::InputFloat("lower stop", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointWheel(this, m_currentSelection)));
+				subJoint->m_axis.m_maxLimit = value;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointWheel(this, m_currentSelection)));
+			}
+			value = subJoint->m_axis.m_minLimit;
+			if (ImGui::InputFloat("upper stop", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointWheel(this, m_currentSelection)));
+				subJoint->m_axis.m_minLimit = value;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointWheel(this, m_currentSelection)));
+			}
+			value = subJoint->m_steeringAngle;
+			if (ImGui::InputFloat("steering angle", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointWheel(this, m_currentSelection)));
+				subJoint->m_steeringAngle = value;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointWheel(this, m_currentSelection)));
+			}
+
+			value = subJoint->m_brakeTorque;
+			if (ImGui::InputFloat("brake torque", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointWheel(this, m_currentSelection)));
+				subJoint->m_brakeTorque = value;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointWheel(this, m_currentSelection)));
+			}
+			value = subJoint->m_handBrakeTorque;
+			if (ImGui::InputFloat("hand brake torque", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointWheel(this, m_currentSelection)));
+				subJoint->m_handBrakeTorque = value;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointWheel(this, m_currentSelection)));
 			}
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointSpherical::StaticClassName()) == 0)
-		{
-			ndAssert(0);
-		}
-		else if (strcmp(joint->m_constructor.GetStr(), ndJointWheel::StaticClassName()) == 0)
 		{
 			ndAssert(0);
 		}

@@ -319,30 +319,30 @@ void ndMeshJointWheel::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	ndMeshJoint::SerializeToXml(parent);
 
-	xmlSaveParam(parent, "baseFrame", m_baseFrame);
-	xmlSaveParam(parent, "springK", m_springK);
-	xmlSaveParam(parent, "damperC", m_damperC);
-	xmlSaveParam(parent, "upperStop", m_upperStop);
-	xmlSaveParam(parent, "lowerStop", m_lowerStop);
+	//xmlSaveParam(parent, "baseFrame", m_baseFrame);
+	xmlSaveParam(parent, "springK", m_axis.m_springK);
+	xmlSaveParam(parent, "damperC", m_axis.m_damperC);
+	xmlSaveParam(parent, "upperStop", m_axis.m_minLimit);
+	xmlSaveParam(parent, "lowerStop", m_axis.m_maxLimit);
 	xmlSaveParam(parent, "brakeTorque", m_brakeTorque);
 	xmlSaveParam(parent, "handBrakeTorque", m_handBrakeTorque);
 	xmlSaveParam(parent, "steeringAngle", m_steeringAngle);
-	xmlSaveParam(parent, "springDamperRegularizer", m_regularizer);
+	xmlSaveParam(parent, "springDamperRegularizer", m_axis.m_springDamperRegularizer);
 }
 
 void ndMeshJointWheel::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndMeshJoint::DeserializeFromXml(parent);
 
-	m_baseFrame = xmlGetMatrix(parent, "baseFrame");
-	m_springK = xmlGetFloat(parent, "springK");
-	m_damperC = xmlGetFloat(parent, "damperC");
-	m_upperStop = xmlGetFloat(parent, "upperStop");
-	m_lowerStop = xmlGetFloat(parent, "lowerStop");
+	//m_baseFrame = xmlGetMatrix(parent, "baseFrame");
+	m_axis.m_springK = xmlGetFloat(parent, "springK");
+	m_axis.m_damperC = xmlGetFloat(parent, "damperC");
+	m_axis.m_minLimit = xmlGetFloat(parent, "upperStop");
+	m_axis.m_maxLimit = xmlGetFloat(parent, "lowerStop");
 	m_brakeTorque = xmlGetFloat(parent, "brakeTorque");
 	m_handBrakeTorque = xmlGetFloat(parent, "handBrakeTorque");
 	m_steeringAngle = xmlGetFloat(parent, "steeringAngle");
-	m_regularizer = xmlGetFloat(parent, "springDamperRegularizer");
+	m_axis.m_springDamperRegularizer = xmlGetFloat(parent, "springDamperRegularizer");
 }
 
 ndJointBilateralConstraint* ndMeshJointWheel::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
@@ -351,18 +351,17 @@ ndJointBilateralConstraint* ndMeshJointWheel::CreateObject(ndBodyKinematic* cons
 	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 
 	ndWheelDescriptor desc;
-	desc.m_springK = m_springK;
-	desc.m_damperC = m_damperC;
-	desc.m_upperStop = m_upperStop;
-	desc.m_lowerStop = m_lowerStop;
-	desc.m_regularizer = m_regularizer;
+	desc.m_springK = m_axis.m_springK;
+	desc.m_damperC = m_axis.m_damperC;
+	desc.m_upperStop = m_axis.m_minLimit;
+	desc.m_lowerStop = m_axis.m_maxLimit;
+	desc.m_regularizer = m_axis.m_springDamperRegularizer;
 	desc.m_brakeTorque = m_brakeTorque;
-	desc.m_steeringAngle = m_steeringAngle;
+	desc.m_steeringAngle = m_steeringAngle * ndDegreeToRad;
 	desc.m_handBrakeTorque = m_handBrakeTorque;
 	ndJointWheel* const joint = new ndJointWheel(pinAndPivotInChild, pinAndPivotInParent, child, parent, desc);
 	return joint;
 }
-
 
 ndMeshJointRoller::ndMeshJointRoller()
 	:ndMeshJoint()
