@@ -348,7 +348,7 @@ void ndMeshBodyKinematic::DeserializeFromXml(const nd::TiXmlElement* const paren
 	m_massVolumeWeigh = ndFloat32(1.0f);
 	if (xmlHasAttribute(parent, "massVolumeWeigh"))
 	{
-		m_maxLinearStep = xmlGetFloat(parent, "massVolumeWeigh");
+		m_massVolumeWeigh = xmlGetFloat(parent, "massVolumeWeigh");
 	}
 
 	const nd::TiXmlElement* const xmlShape = (nd::TiXmlElement*)parent->FirstChild("collisionInstance");
