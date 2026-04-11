@@ -96,6 +96,20 @@ class ndMeshJointDoubleHinge : public ndMeshJoint
 	ndAxis m_axis1;
 };
 
+class ndMeshJointPlane : public ndMeshJoint
+{
+	public:
+
+	D_NEWTON_API ndMeshJointPlane();
+	D_NEWTON_API ndMeshJointPlane(const ndJointBilateralConstraint* const joint);
+
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
+
+	ndInt8 m_controlRotation;
+};
+
 class ndMeshJointRoller : public ndMeshJoint
 {
 	public:

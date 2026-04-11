@@ -22,6 +22,7 @@
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
 #include "ndMesh.h"
+#include "ndJointPlane.h"
 #include "ndJointHinge.h"
 #include "ndJointWheel.h"
 #include "ndJointRoller.h"
@@ -275,7 +276,6 @@ void ndMeshJointSpherical::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	ndMeshJoint::SerializeToXml(parent);
 
-	//xmlSaveParam(parent, "rotation", m_rotation);
 	xmlSaveParam(parent, "springK", m_axis.m_springK);
 	xmlSaveParam(parent, "damperC", m_axis.m_damperC);
 	xmlSaveParam(parent, "maxConeAngle", m_maxConeAngle);
@@ -445,6 +445,8 @@ ndJointBilateralConstraint* ndMeshJointRoller::CreateObject(ndBodyKinematic* con
 	return joint;
 }
 
+
+
 ndMeshJointCylinder::ndMeshJointCylinder()
 	:ndMeshJoint()
 {
@@ -513,5 +515,39 @@ ndJointBilateralConstraint* ndMeshJointCylinder::CreateObject(ndBodyKinematic* c
 	joint->SetLimitsPosit(m_axis1.m_minLimit * ndDegreeToRad, m_axis1.m_maxLimit * ndDegreeToRad);
 	joint->SetAsSpringDamperPosit(m_axis1.m_springDamperRegularizer, m_axis1.m_springK, m_axis1.m_damperC);
 
+	return joint;
+}
+
+
+ndMeshJointPlane::ndMeshJointPlane()
+	:ndMeshJoint()
+{
+}
+
+ndMeshJointPlane::ndMeshJointPlane(const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(joint)
+{
+}
+
+void ndMeshJointPlane::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+	xmlSaveParam(parent, "controlRotation", m_controlRotation ? 1 : 0);
+}
+
+void ndMeshJointPlane::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndMeshJoint::DeserializeFromXml(parent);
+
+	m_controlRotation = ndInt8(xmlGetInt(parent, "limitState"));
+}
+
+ndJointBilateralConstraint* ndMeshJointPlane::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+{
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	//const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
+	ndJointPlane* const joint = new ndJointPlane(pinAndPivotInChild.m_posit, pinAndPivotInChild.m_front, child, parent);
+
+	joint->EnableControlRotation(m_controlRotation ? true : false);
 	return joint;
 }
