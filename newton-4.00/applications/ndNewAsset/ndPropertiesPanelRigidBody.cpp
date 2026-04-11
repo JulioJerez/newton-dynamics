@@ -101,6 +101,27 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
 				scalar = ndMax(scalar, ndReal(0.001f));
 				rigidBody->m_invMass.m_w = ndFloat32(1.0f) / scalar;
+
+				ndMeshBodyKinematic* const kinBody = (ndMeshBodyKinematic*)*body;
+				ndSharedPtr<ndShapeInstance> instance(kinBody->m_shapeInstance.CreateObject());
+				ndMatrix inertia (instance->CalculateInertia());
+				ndMatrix diagMass(ndGetIdentityMatrix());
+				for (ndInt32 i = 0; i < 3; ++i)
+				{
+					diagMass[i][i] = scalar;
+				}
+				inertia = diagMass * inertia;
+
+				ndVector eigenValues(inertia.EigenVectors());
+				rigidBody->m_invMass.m_x = ndFloat32(1.0f) / eigenValues[0];
+				rigidBody->m_invMass.m_y = ndFloat32(1.0f) / eigenValues[1];
+				rigidBody->m_invMass.m_z = ndFloat32(1.0f) / eigenValues[2];
+
+				ndVector tmp;
+				ndVector angles(inertia.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
+				angles.m_w = ndFloat32(0.0f);
+				rigidBody->m_inertiaPrincipalAxis = angles;
+
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
 			};
 

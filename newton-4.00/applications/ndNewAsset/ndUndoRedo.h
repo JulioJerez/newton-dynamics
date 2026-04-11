@@ -30,9 +30,10 @@ class ndUndoRedoCommand : public ndClassAlloc
 	virtual class ndUndoRedoRigidBody* GetAsUndoRedoRigidBody() const { return nullptr; }
 	virtual class ndUndoRedoMeshNode* GetAsUndoRedoMeshNode() const { return nullptr; }
 
+	virtual class ndUndoRedoShape* GetAsUndoRedoShape() const { return nullptr; }
+
 	virtual class ndUndoRedoJoint* GetAsUndoRedoJoint() const { return nullptr; }
 	virtual class ndUndoRedoJointChange* GetAsUndoRedoJointChange() const { return nullptr; }
-
 	virtual class ndUndoRedoJointPlane* GetAsUndoRedoJointPlane() const { return nullptr; }
 	virtual class ndUndoRedoJointWheel* GetAsUndoRedoJointWheel() const { return nullptr; }
 	virtual class ndUndoRedoJointHinge* GetAsUndoRedoJointHinge() const { return nullptr; }

@@ -35,6 +35,7 @@ ndJointBilateralConstraint::ndJointBilateralConstraint()
 	,m_worldNode(nullptr)
 	,m_body0Node(nullptr)
 	,m_body1Node(nullptr)
+	,m_usedData(nullptr)
 {
 	m_mark0 = 0;
 	m_mark1 = 0;
@@ -55,6 +56,7 @@ ndJointBilateralConstraint::ndJointBilateralConstraint(ndInt32 maxDof, ndBodyKin
 	,m_worldNode(nullptr)
 	,m_body0Node(nullptr)
 	,m_body1Node(nullptr)
+	,m_usedData(nullptr)
 {
 	m_body0 = body0;
 	m_body1 = body1;
@@ -89,6 +91,7 @@ ndJointBilateralConstraint::ndJointBilateralConstraint(ndInt32 maxDof, ndBodyKin
 	,m_worldNode(nullptr)
 	,m_body0Node(nullptr)
 	,m_body1Node(nullptr)
+	,m_usedData(nullptr)
 {
 	m_body0 = body0;
 	m_body1 = body1;
@@ -138,11 +141,6 @@ void ndJointBilateralConstraint::SetSolverModel(ndJointBilateralSolverModel mode
 	m_solverModel = ndClamp(model, m_jointIterativeSoft, m_jointModesCount);
 }
 
-//ndUnsigned32 ndJointBilateralConstraint::GetRowsCount() const
-//{
-//	return m_maxDof;
-//}
-
 const ndMatrix& ndJointBilateralConstraint::GetLocalMatrix0() const
 {
 	return m_localMatrix0;
@@ -163,6 +161,15 @@ void ndJointBilateralConstraint::SetLocalMatrix1(const ndMatrix& matrix)
 	m_localMatrix1 = matrix;
 }
 
+const ndSharedPtr<ndJointUserData>& ndJointBilateralConstraint::GetUserData() const
+{
+	return m_usedData;
+}
+
+void ndJointBilateralConstraint::SetUserData(ndSharedPtr<ndJointUserData>& usedData)
+{
+	m_usedData = usedData;
+}
 
 ndFloat32 ndJointBilateralConstraint::GetMotorZeroAcceleration(ndConstraintDescritor& desc) const
 {

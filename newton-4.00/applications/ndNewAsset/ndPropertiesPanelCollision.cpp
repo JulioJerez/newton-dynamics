@@ -13,6 +13,57 @@
 #include "ndUndoRedo.h"
 #include "ndAssetEditor.h"
 
+class ndUndoRedoShape : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoShape(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		m_scale = body->m_shapeInstance.m_scale;
+		m_localFrame = body->m_shapeInstance.m_localMatrix;
+	}
+
+	virtual ndUndoRedoShape* GetAsUndoRedoShape() const override
+	{
+		return (ndUndoRedoShape*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			const ndUndoRedoShape* const other = command.GetAsUndoRedoShape();
+			if (other)
+			{
+				bool test = (m_localFrame * other->m_localFrame.OrthoInverse()).TestIdentity();
+				test = test && ((m_scale - other->m_scale).DotProduct(m_scale - other->m_scale).GetScalar() < ndFloat32(-0.001f));
+				if (test)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+
+		body->m_shapeInstance.m_scale = m_scale;
+		body->m_shapeInstance.m_localMatrix = m_localFrame;
+	}
+
+	ndMatrix m_localFrame;
+	ndVector m_scale;
+};
+
+
 void ndAssetEditor::ShowPropertiesCollisionInfo()
 {
 	if (ImGui::CollapsingHeader("Collision shape"))
@@ -188,36 +239,23 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 			ndAssert(0);
 		}
 
-		// shaw shape scale
+		// show local scaled transform
 		{
-			ndVector vector(shapeInstance.m_scale);
-			ndReal real[3];
-			real[0] = ndReal(vector.m_x);
-			real[1] = ndReal(vector.m_y);
-			real[2] = ndReal(vector.m_z);
-			if (ImGui::DragFloat3("scale##1", real))
-			{
-				vector.m_x = ndMax(real[0], ndReal(0.01f));
-				vector.m_y = ndMax(real[1], ndReal(0.01f));
-				vector.m_z = ndMax(real[2], ndReal(0.01f));
-				shapeInstance.m_scale = vector;
-			};
-		}
-
-		// show local transform
-		{
-			//ImGui::SeparatorText("local transform");
+			ImGui::SeparatorText("local transform");
 			ndMatrix matrix(shapeInstance.m_localMatrix);
 			ndReal position[3];
 			position[0] = ndReal(matrix.m_posit.m_x);
 			position[1] = ndReal(matrix.m_posit.m_y);
 			position[2] = ndReal(matrix.m_posit.m_z);
-			if (ImGui::DragFloat3("position##2", position))
+			//if (ImGui::DragFloat3("position##2", position))
+			if (ImGui::InputFloat3("position##2", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
 				matrix.m_posit.m_x = position[0];
 				matrix.m_posit.m_y = position[1];
 				matrix.m_posit.m_z = position[2];
 				shapeInstance.m_localMatrix = matrix;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
 			};
 
 			ndReal euler[3];
@@ -227,11 +265,30 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 			euler[0] = ndReal(radians[0]);
 			euler[1] = ndReal(radians[1]);
 			euler[2] = ndReal(radians[2]);
-			if (ImGui::DragFloat3("rotation##2", euler))
+			//if (ImGui::DragFloat3("rotation##2", euler))
+			if (ImGui::InputFloat3("rotation##2", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
 				ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
 				newMatrix.m_posit = matrix.m_posit;
 				shapeInstance.m_localMatrix = newMatrix;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+			};
+
+			ndVector vector(shapeInstance.m_scale);
+			ndReal real[3];
+			real[0] = ndReal(vector.m_x);
+			real[1] = ndReal(vector.m_y);
+			real[2] = ndReal(vector.m_z);
+			//if (ImGui::DragFloat3("scale##1", real))
+			if (ImGui::InputFloat3("scale##1", real, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+				vector.m_x = ndMax(real[0], ndReal(0.001f));
+				vector.m_y = ndMax(real[1], ndReal(0.001f));
+				vector.m_z = ndMax(real[2], ndReal(0.001f));
+				shapeInstance.m_scale = vector;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
 			};
 		}
 	}

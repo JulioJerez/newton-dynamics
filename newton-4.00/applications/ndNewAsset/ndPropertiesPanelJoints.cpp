@@ -34,8 +34,9 @@ class ndUndoRedoJoint : public ndUndoRedoCommand
 			const ndUndoRedoJoint* const other = command.GetAsUndoRedoJoint();
 			if (other)
 			{
-				ndMatrix matrix(m_localFrame * other->m_localFrame.OrthoInverse());
-				if (matrix.TestIdentity())
+				//ndMatrix matrix(m_localFrame * other->m_localFrame.OrthoInverse());
+				bool test = (m_localFrame * other->m_localFrame.OrthoInverse()).TestIdentity();
+				if (test)
 				{
 					return false;
 				}
