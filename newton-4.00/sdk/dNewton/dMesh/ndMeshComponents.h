@@ -152,9 +152,9 @@ class ndMeshJointSpherical : public ndMeshJoint
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
-	//ndMatrix m_rotation;
 	ndAxis m_axis;
 	ndFloat32 m_maxConeAngle;
+	ndInt8 m_coneAngleState;
 };
 
 #endif

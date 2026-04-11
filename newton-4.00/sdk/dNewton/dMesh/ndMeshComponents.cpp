@@ -259,11 +259,15 @@ ndJointBilateralConstraint* ndMeshJointDoubleHinge::CreateObject(ndBodyKinematic
 
 ndMeshJointSpherical::ndMeshJointSpherical()
 	:ndMeshJoint()
+	,m_maxConeAngle(0.0f)
+	,m_coneAngleState(false)
 {
 }
 
 ndMeshJointSpherical::ndMeshJointSpherical(const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(joint)
+	,m_maxConeAngle(0.0f)
+	,m_coneAngleState(false)
 {
 }
 
@@ -275,6 +279,7 @@ void ndMeshJointSpherical::SerializeToXml(nd::TiXmlElement* const parent) const
 	xmlSaveParam(parent, "springK", m_axis.m_springK);
 	xmlSaveParam(parent, "damperC", m_axis.m_damperC);
 	xmlSaveParam(parent, "maxConeAngle", m_maxConeAngle);
+	xmlSaveParam(parent, "coneLimitState", m_coneAngleState);
 	xmlSaveParam(parent, "minTwistAngle", m_axis.m_minLimit);
 	xmlSaveParam(parent, "maxTwistAngle", m_axis.m_maxLimit);
 	xmlSaveParam(parent, "twistLimitState", m_axis.m_limitState);
@@ -291,6 +296,8 @@ void ndMeshJointSpherical::DeserializeFromXml(const nd::TiXmlElement* const pare
 	m_maxConeAngle = xmlGetFloat(parent, "maxConeAngle");
 	m_axis.m_minLimit = xmlGetFloat(parent, "minTwistAngle");
 	m_axis.m_maxLimit = xmlGetFloat(parent, "maxTwistAngle");
+
+	m_coneAngleState = ndInt8(xmlGetInt(parent, "coneLimitState"));
 	m_axis.m_limitState = ndInt8(xmlGetInt(parent, "twistLimitState"));
 	m_axis.m_springDamperRegularizer = xmlGetFloat(parent, "springDamperRegularizer");
 }
@@ -301,6 +308,8 @@ ndJointBilateralConstraint* ndMeshJointSpherical::CreateObject(ndBodyKinematic* 
 	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 	ndJointSpherical* const joint = new ndJointSpherical(pinAndPivotInChild, pinAndPivotInParent, child, parent);
 	//joint->SetOffsetRotation(m_rotation);
+	joint->SetConeLimitState(m_coneAngleState ? true : false);
+	joint->SetTwistLimitState(m_axis.m_limitState ? true : false);
 	joint->SetAsSpringDamper(m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
 	joint->SetConeLimit(m_maxConeAngle * ndDegreeToRad);
 	joint->SetTwistLimits(m_axis.m_minLimit * ndDegreeToRad, m_axis.m_maxLimit * ndDegreeToRad);

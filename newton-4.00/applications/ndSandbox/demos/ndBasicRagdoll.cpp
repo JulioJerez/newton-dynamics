@@ -126,7 +126,7 @@ void ndBasicRagdoll (ndDemoEntityManager* const scene)
 
 	ndFloat32 angle = ndFloat32(90.0f * ndDegreeToRad);
 	playerMatrix = ndYawMatrix(angle) * playerMatrix;
-	playerMatrix.m_posit += playerMatrix.m_front.Scale (-5.0f);
+	playerMatrix.m_posit += playerMatrix.m_front.Scale (-10.0f);
 	playerMatrix.m_posit = FindFloor(*scene->GetWorld(), playerMatrix.m_posit, 200.0f);
 	playerMatrix.m_posit.m_y += 2.0f;
 	scene->SetCameraMatrix(playerMatrix, playerMatrix.m_posit);
