@@ -572,15 +572,16 @@ void ndBodyKinematic::DetachJoint(ndJointList::ndNode* const node)
 void ndBodyKinematic::SetMassMatrix(ndFloat32 mass, const ndShapeInstance& shapeInstance, bool fullInertia)
 {
 	ndMatrix inertia(shapeInstance.CalculateInertia());
-
 	ndVector origin(inertia.m_posit);
+	SetCentreOfMass(origin);
+
+	ndMatrix diagMass(ndGetIdentityMatrix());
 	for (ndInt32 i = 0; i < 3; ++i)
 	{
-		inertia[i] = inertia[i].Scale(mass);
+		//inertia[i] = inertia[i].Scale(mass);
+		diagMass[i][i] = mass;
 	}
-
-	// although the engine fully supports asymmetric inertia, I will ignore cross inertia for now
-	SetCentreOfMass(origin);
+	inertia = diagMass * inertia;
 
 	if (!fullInertia)
 	{
@@ -591,6 +592,7 @@ void ndBodyKinematic::SetMassMatrix(ndFloat32 mass, const ndShapeInstance& shape
 		inertia[1][1] = eigenValues[1];
 		inertia[2][2] = eigenValues[2];
 	}
+
 	SetMassMatrix(mass, inertia);
 }
 

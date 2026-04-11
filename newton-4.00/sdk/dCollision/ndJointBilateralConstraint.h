@@ -32,7 +32,6 @@
 
 class ndMeshJoint;
 
-
 enum ndJointBilateralSolverModel
 {
 	m_jointIterativeSoft,
@@ -40,6 +39,22 @@ enum ndJointBilateralSolverModel
 	m_jointkinematicCloseLoop,
 	m_jointkinematicAttachment,
 	m_jointModesCount
+};
+
+class ndJointUserData : public ndContainersFreeListAlloc<ndJointUserData>
+{
+	public:
+	ndJointUserData(ndJointBilateralConstraint* const owner)
+		:ndContainersFreeListAlloc<ndJointUserData>()
+		,m_owner(ndWeakPtr<ndJointBilateralConstraint>(owner))
+	{
+	}
+
+	virtual ~ndJointUserData()
+	{
+	}
+
+	ndWeakPtr<ndJointBilateralConstraint> m_owner;
 };
 
 #define D_ADD_IK_INTERFACE()															\
@@ -170,6 +185,9 @@ class ndJointBilateralConstraint : public ndConstraint
 	D_COLLISION_API virtual void SetIkMode(bool mode);
 	D_COLLISION_API virtual void SetIkSetAccel(const ndJacobian& body0Accel, const ndJacobian& body1Accel);
 
+	D_COLLISION_API const ndSharedPtr<ndJointUserData>& GetUserData() const;
+	D_COLLISION_API void SetUserData(ndSharedPtr<ndJointUserData>& usedData);
+
 	protected:
 	ndMatrix m_localMatrix0;
 	ndMatrix m_localMatrix1;
@@ -181,6 +199,8 @@ class ndJointBilateralConstraint : public ndConstraint
 	ndJointList::ndNode* m_worldNode;
 	ndBodyKinematic::ndJointList::ndNode* m_body0Node;
 	ndBodyKinematic::ndJointList::ndNode* m_body1Node;
+
+	ndSharedPtr<ndJointUserData> m_usedData;
 
 	ndFloat32 m_defualtDiagonalRegularizer;
 	ndUnsigned32 m_mark0			: 1;
@@ -201,7 +221,6 @@ class ndJointBilateralConstraint : public ndConstraint
 	friend class ndDynamicsUpdateSoa;
 	friend class ndDynamicsUpdateAvx2;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
-
 
 #endif
 

@@ -183,12 +183,14 @@ ndShape* ndMeshCollisionShapeCompound::CreateObject() const
 	return compoundShape;
 }
 
-void ndMeshCollisionShapeCompound::SerializeToXml(nd::TiXmlElement* const parent) const
+//void ndMeshCollisionShapeCompound::SerializeToXml(nd::TiXmlElement* const parent) const
+void ndMeshCollisionShapeCompound::SerializeToXml(nd::TiXmlElement* const) const
 {
 	ndAssert(0);
 }
 
-void ndMeshCollisionShapeCompound::DeserializeFromXml(const nd::TiXmlElement* const parent)
+//void ndMeshCollisionShapeCompound::DeserializeFromXml(const nd::TiXmlElement* const parent)
+void ndMeshCollisionShapeCompound::DeserializeFromXml(const nd::TiXmlElement* const)
 {
 	ndAssert(0);
 }
