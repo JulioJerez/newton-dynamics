@@ -33,16 +33,20 @@ class ndJointBilateralConstraint;
 class ndMeshCollisionShape : public ndClassAlloc
 {
 	public:
-	D_COLLISION_API ndMeshCollisionShape();
+	D_COLLISION_API ndMeshCollisionShape(const char* const constructor);
 	D_COLLISION_API virtual ~ndMeshCollisionShape();
 
 	D_COLLISION_API virtual ndShape* CreateObject() const = 0;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const = 0;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) = 0;
+
+	ndString m_constructor;
 };
 
 class ndMeshCollisionShapeNull : public ndMeshCollisionShape
 {
+	public:
+	D_COLLISION_API ndMeshCollisionShapeNull();
 	D_COLLISION_API virtual ndShape* CreateObject() const override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
@@ -51,6 +55,7 @@ class ndMeshCollisionShapeNull : public ndMeshCollisionShape
 class ndMeshCollisionShapeSphere : public ndMeshCollisionShape
 {
 	public:
+	D_COLLISION_API ndMeshCollisionShapeSphere();
 	D_COLLISION_API virtual ndShape* CreateObject() const override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
@@ -61,6 +66,7 @@ class ndMeshCollisionShapeSphere : public ndMeshCollisionShape
 class ndMeshCollisionShapeBox : public ndMeshCollisionShape
 {
 	public:
+	D_COLLISION_API ndMeshCollisionShapeBox();
 	D_COLLISION_API virtual ndShape* CreateObject() const override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
@@ -73,6 +79,7 @@ class ndMeshCollisionShapeBox : public ndMeshCollisionShape
 class ndMeshCollisionShapeCapsule : public ndMeshCollisionShape
 {
 	public:
+	D_COLLISION_API ndMeshCollisionShapeCapsule();
 	D_COLLISION_API virtual ndShape* CreateObject() const override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
@@ -85,6 +92,7 @@ class ndMeshCollisionShapeCapsule : public ndMeshCollisionShape
 class ndMeshCollisionShapeCylinder : public ndMeshCollisionShape
 {
 	public:
+	D_COLLISION_API ndMeshCollisionShapeCylinder();
 	D_COLLISION_API virtual ndShape* CreateObject() const override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
@@ -97,6 +105,7 @@ class ndMeshCollisionShapeCylinder : public ndMeshCollisionShape
 class ndMeshCollisionShapeChamferCylinder : public ndMeshCollisionShape
 {
 	public:
+	D_COLLISION_API ndMeshCollisionShapeChamferCylinder();
 	D_COLLISION_API virtual ndShape* CreateObject() const override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
@@ -108,6 +117,7 @@ class ndMeshCollisionShapeChamferCylinder : public ndMeshCollisionShape
 class ndMeshCollisionShapeConvexHull : public ndMeshCollisionShape
 {
 	public:
+	D_COLLISION_API ndMeshCollisionShapeConvexHull();
 	D_COLLISION_API virtual ndShape* CreateObject() const override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
@@ -118,6 +128,7 @@ class ndMeshCollisionShapeConvexHull : public ndMeshCollisionShape
 class ndMeshCollisionShapeCompound : public ndMeshCollisionShape
 {
 	public:
+	D_COLLISION_API ndMeshCollisionShapeCompound();
 	D_COLLISION_API virtual ndShape* CreateObject() const override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;

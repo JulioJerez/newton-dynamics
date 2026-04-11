@@ -63,6 +63,49 @@ class ndUndoRedoShape : public ndUndoRedoCommand
 	ndVector m_scale;
 };
 
+class ndUndoRedoShapeChange : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoShapeChange(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+	{
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+		m_shape = body->m_shapeInstance.m_shape;
+	}
+
+	virtual ndUndoRedoShapeChange* GetAsUndoRedoShapeChange() const override
+	{
+		return (ndUndoRedoShapeChange*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			const ndUndoRedoShapeChange* const other = command.GetAsUndoRedoShapeChange();
+			if (other)
+			{
+				if (m_shape->m_constructor == other->m_shape->m_constructor)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		//m_mesh->SetJoint(m_joint);
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+		body->m_shapeInstance.m_shape = m_shape;
+	}
+
+	ndSharedPtr<ndMeshCollisionShape> m_shape;
+};
 
 void ndAssetEditor::ShowPropertiesCollisionInfo()
 {
