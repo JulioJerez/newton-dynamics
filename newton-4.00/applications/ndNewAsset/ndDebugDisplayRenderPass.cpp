@@ -61,7 +61,15 @@ void ndDebugDisplayRenderPass::RenderCollisionShape()
 		const ndDebugMesh& debugMesh = ptr->GetInfo();
 		if (debugMesh.m_parent->m_name == seletecName)
 		{
-			const ndMatrix pivotMatrix(debugMesh.m_parent->m_globalMatrix);
+			ndSharedPtr<ndMeshBody> body(m_manager->m_currentSelection->GetRigidBody());
+			const ndMeshBodyKinematic* const kinBody = (ndMeshBodyKinematic*)*body;
+			const ndVector scale(kinBody->m_shapeInstance.m_scale);
+			ndMatrix scaleMatrix(ndGetIdentityMatrix());
+			scaleMatrix[0][0] = scale[0];
+			scaleMatrix[1][1] = scale[1];
+			scaleMatrix[2][2] = scale[2];
+			const ndMatrix pivotMatrix(scaleMatrix * kinBody->m_shapeInstance.m_localMatrix * debugMesh.m_parent->m_globalMatrix);
+
 			if (m_manager->m_showSelectedNode)
 			{
 				const ndRenderPrimitive* const primitive = *debugMesh.m_zBufferShape;
