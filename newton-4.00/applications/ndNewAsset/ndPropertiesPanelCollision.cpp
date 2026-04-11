@@ -98,7 +98,6 @@ class ndUndoRedoShapeChange : public ndUndoRedoCommand
 
 	virtual void Undo() override
 	{
-		//m_mesh->SetJoint(m_joint);
 		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
 		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
 		body->m_shapeInstance.m_shape = m_shape;
@@ -124,49 +123,61 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 				bool selected = strcmp(name, className) ? false : true;
 				if (ImGui::Selectable(name, selected))
 				{
+					auto InitNewShape = [this, &shape, &shapeInstance](ndSharedPtr<ndShapeInstance>& instance)
+					{
+						//newJoint->SetLocalMatrix0(joint->m_localFrame0);
+						//newJoint->SetLocalMatrix1(joint->m_localFrame1);
+						//m_currentSelection->SetJoint(newJoint->GetMeshJoint());
+						//joint = m_currentSelection->GetJoint();
+						//m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointChange(this, m_currentSelection)));
+						instance->Serialize(&shapeInstance);
+						shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
+					};
+
 					if (strcmp(name, className))
 					{
 						if (strcmp(name, ndShapeBox::StaticClassName()) == 0)
 						{
+							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
 							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionBox());
-							instance->Serialize(&shapeInstance);
-							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
+							InitNewShape(instance);
 						}
 						else if (strcmp(name, ndShapeSphere::StaticClassName()) == 0)
 						{
+							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
 							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionSphere());
-							instance->Serialize(&shapeInstance);
-							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
+							InitNewShape(instance);
 						}
 						else if (strcmp(name, ndShapeCapsule::StaticClassName()) == 0)
 						{
+							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
 							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionCapsule());
-							instance->Serialize(&shapeInstance);
-							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
+							InitNewShape(instance);
 						}
 						else if (strcmp(name, ndShapeCylinder::StaticClassName()) == 0)
 						{
+							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
 							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionCylinder());
-							instance->Serialize(&shapeInstance);
-							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
+							InitNewShape(instance);
 						}
 						else if (strcmp(name, ndShapeConvexHull::StaticClassName()) == 0)
 						{
+							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
 							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionConvex());
-							instance->Serialize(&shapeInstance);
-							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
+							InitNewShape(instance);
 						}
 						else if (strcmp(name, ndShapeChamferCylinder::StaticClassName()) == 0)
 						{
+							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
 							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionChamferCylinder());
-							instance->Serialize(&shapeInstance);
-							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
+							InitNewShape(instance);
 						}
 						else if (strcmp(name, ndShapeNull::StaticClassName()) == 0)
 						{
+							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
 							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionNull());
-							instance->Serialize(&shapeInstance);
-							shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
+							InitNewShape(instance);
 						}
 						else
 						{
@@ -290,7 +301,6 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 			position[0] = ndReal(matrix.m_posit.m_x);
 			position[1] = ndReal(matrix.m_posit.m_y);
 			position[2] = ndReal(matrix.m_posit.m_z);
-			//if (ImGui::DragFloat3("position##2", position))
 			if (ImGui::InputFloat3("position##2", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
@@ -308,7 +318,6 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 			euler[0] = ndReal(radians[0]);
 			euler[1] = ndReal(radians[1]);
 			euler[2] = ndReal(radians[2]);
-			//if (ImGui::DragFloat3("rotation##2", euler))
 			if (ImGui::InputFloat3("rotation##2", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
@@ -323,7 +332,6 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 			real[0] = ndReal(vector.m_x);
 			real[1] = ndReal(vector.m_y);
 			real[2] = ndReal(vector.m_z);
-			//if (ImGui::DragFloat3("scale##1", real))
 			if (ImGui::InputFloat3("scale##1", real, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
