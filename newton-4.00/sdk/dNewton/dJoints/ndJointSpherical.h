@@ -31,6 +31,8 @@ class ndJointSpherical: public ndJointBilateralConstraint
 
 	D_NEWTON_API ndFloat32 GetConeLimit() const;
 	D_NEWTON_API ndMatrix GetOffsetRotation() const;
+	D_NEWTON_API bool GetConeLimitState() const;
+	D_NEWTON_API void SetConeLimitState(bool state);
 	D_NEWTON_API void SetConeLimit(ndFloat32 maxConeAngle);
 	D_NEWTON_API void SetOffsetRotation(const ndMatrix& rotation);
 
