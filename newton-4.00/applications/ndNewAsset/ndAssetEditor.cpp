@@ -462,17 +462,6 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::EndMenu();
 		}
 
-		if (ImGui::BeginMenu("Tools"))
-		{
-			if (ImGui::MenuItem("normalize mass distibution", ""))
-			{
-				m_toolActive = true;
-				m_currentTool = new ndNomalizeMassDistribution(this);
-			}
-
-			ImGui::EndMenu();
-		}
-
 		if (ImGui::BeginMenu("Options"))
 		{
 			ImGui::Text("render mode");
@@ -495,6 +484,17 @@ void ndAssetEditor::ShowMainMenuBar()
 
 			ImGui::Text("global properties");
 			ImGui::Checkbox("parent relative Transform", &m_showParentRelativeTransform);
+
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("Tools"))
+		{
+			if (ImGui::MenuItem("normalize mass distibution", ""))
+			{
+				m_toolActive = true;
+				m_currentTool = new ndNomalizeMassDistribution(this);
+			}
 
 			ImGui::EndMenu();
 		}

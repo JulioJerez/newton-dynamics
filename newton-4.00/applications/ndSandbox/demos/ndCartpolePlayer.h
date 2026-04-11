@@ -21,8 +21,6 @@ namespace ndCarpolePlayer
 {
 	#define CONTROLLER_NAME_SAC			"cartpoleSac"
 	#define CONTROLLER_NAME_PPO			"cartpolePpo"
-	//#define CART_MASS					ndFloat32(10.0f)
-	//#define POLE_MASS					ndFloat32(5.0f)
 	#define TRAJECTORY_STEPS			(1024 * 4)
 	#define ND_RANDOM_IMPULSE_MOD		256
 	#define ND_RANDOM_IMPULSE_MAGNITUD	ndFloat32 (10.0f)

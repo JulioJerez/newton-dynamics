@@ -20,6 +20,36 @@
 
 namespace ndRagdoll
 {
+	class ndRagDollControl : public ndJointUserData
+	{
+		public:
+		ndRagDollControl(ndJointBilateralConstraint* const owner, ndModelArticulation* const appInterface)
+			:ndJointUserData(owner)
+			,m_model(appInterface)
+		{
+	
+		}
+	
+		virtual void ApplyControl() = 0;
+	
+		ndWeakPtr<ndModelArticulation> m_model;
+	};
+	
+	class ndMakeRagDoll : public ndRagDollControl
+	{
+		public:
+		ndMakeRagDoll(ndJointBilateralConstraint* const owner, ndModelArticulation* const appInterface)
+			:ndRagDollControl(owner, appInterface)
+		{
+		}
+	
+		virtual void ApplyControl() override
+		{
+			// TO DO: apply specialized application contoll here.
+		}
+	};
+
+
 	class ndRagDollController : public ndModelNotify
 	{ 
 		public:
@@ -56,7 +86,7 @@ namespace ndRagdoll
 
 		// bind the graphics model to the physics model,
 		// also apply any application constomization.
-		auto BindApplicationData = [scene, &visualMesh](ndModelArticulation::ndNode* const node)
+		auto BindApplicationData = [scene, &ragdoll, &visualMesh](ndModelArticulation::ndNode* const node)
 		{
 			ndRenderSceneNode* const visualEntityPtr = visualMesh->FindByClosestMatch(node->m_name);
 			ndAssert(visualEntityPtr);
@@ -66,6 +96,12 @@ namespace ndRagdoll
 			ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
 			ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
 			node->m_body->SetNotifyCallback(notify);
+
+			if (node->m_joint)
+			{
+				ndSharedPtr<ndJointUserData> userData(new ndMakeRagDoll(*node->m_joint, ragdoll));
+				node->m_joint->SetUserData(userData);
+			}
 		};
 		ragdoll->NodeIterator(BindApplicationData);
 
