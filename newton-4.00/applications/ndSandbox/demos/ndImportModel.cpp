@@ -34,7 +34,8 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
     scene->AddEntity(sceneMesh);
 
     // set the matrix location to both visual and physic
-    const ndModelArticulation::ndNode* const rootNode = model->GetAsModelArticulation()->GetRoot();
+    ndModelArticulation* const articulation = model->GetAsModelArticulation();
+    const ndModelArticulation::ndNode* const rootNode = articulation->GetRoot();
     const ndMatrix matrix(rootNode ? rootNode->m_body->GetMatrix() * location : location);
     sceneMesh->SetTransform(matrix);
     sceneMesh->SetTransform(matrix);
@@ -42,7 +43,7 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
 
     // Bind application data to the model, 
     // this could be a render mesh or something else. 
-    // For this demo it is ndRenderSceneNode mesh
+    // For this demo we use ndRenderSceneNode mesh
     const ndMesh* const rootMesh = *loader.m_mesh;
     auto BindApplicationData = [scene, rootMesh, &sceneMesh](ndModelArticulation::ndNode* const node)
     {
@@ -60,7 +61,7 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
         ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
         node->m_body->SetNotifyCallback(notify);
     };
-    model->GetAsModelArticulation()->NodeIterator(BindApplicationData);
+    articulation->NodeIterator(BindApplicationData);
 
     return model;
 }
