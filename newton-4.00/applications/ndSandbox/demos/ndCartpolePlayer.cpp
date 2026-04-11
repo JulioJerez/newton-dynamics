@@ -200,13 +200,11 @@ namespace ndCarpolePlayer
 			if (node->m_name.Find("cart") > -1)
 			{ 
 				m_cart = node->m_body;
-				node->m_body->GetAsBodyKinematic()->SetMassMatrix(CART_MASS, node->m_body->GetAsBodyKinematic()->GetCollisionShape());
 			}
 			else if (node->m_name.Find("pole") > -1)
 			{
 				m_pole = node->m_body;
 				m_poleHinge = node->m_joint;
-				node->m_body->GetAsBodyKinematic()->SetMassMatrix(POLE_MASS, node->m_body->GetAsBodyKinematic()->GetCollisionShape());
 			}
 		};
 		model->GetAsModelArticulation()->NodeIterator(BindApplicationData);
@@ -233,8 +231,6 @@ namespace ndCarpolePlayer
 		model->SetNotifyCallback(controller);
 		ndPlaybackController* const playerController = (ndPlaybackController*)(*controller);
 		playerController->CreateArticulatedModel(scene, model, loader.m_mesh, visualMesh);
-
-//model->SaveNdMesh(ndGetWorkingFileName("xxxx.fbx").GetStr());
 
 		char nameExt[256];
 		snprintf(nameExt, sizeof(nameExt) - 1, "%s.dnn", name);

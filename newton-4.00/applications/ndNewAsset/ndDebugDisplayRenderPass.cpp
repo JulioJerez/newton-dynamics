@@ -127,6 +127,8 @@ void ndDebugDisplayRenderPass::ResetScene()
 
 				ndRenderPrimitive::ndDescriptor descriptor(m_owner);
 				descriptor.m_collision = ndSharedPtr<ndShapeInstance>(kinBody->m_shapeInstance.CreateObject());
+				descriptor.m_collision->SetScale(ndVector::m_one);
+				descriptor.m_collision->SetLocalMatrix(ndGetIdentityMatrix());
 
 				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugHiddenLines;
 				entry.m_zBufferShape = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
