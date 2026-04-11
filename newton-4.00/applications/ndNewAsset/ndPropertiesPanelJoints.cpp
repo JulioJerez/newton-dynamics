@@ -592,7 +592,7 @@ class ndUndoRedoJointSpherical : public ndUndoRedoCommand
 		ndMeshJointSpherical* const joint = (ndMeshJointSpherical*)*m_mesh->GetJoint();
 
 		m_maxConeAngle = joint->m_maxConeAngle;
-		m_coneAngleState = joint->m_coneAngleState;
+		m_coneAngleState = joint->m_coneAngleState ? true : false;
 		m_axis.m_springK = joint->m_axis.m_springK;
 		m_axis.m_damperC = joint->m_axis.m_damperC;
 		m_axis.m_minLimit = joint->m_axis.m_minLimit;
@@ -649,6 +649,48 @@ class ndUndoRedoJointSpherical : public ndUndoRedoCommand
 	bool m_coneAngleState;
 };
 
+class ndUndoRedoJointPlane : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoJointPlane(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+	{
+		ndMeshJointPlane* const joint = (ndMeshJointPlane*)*m_mesh->GetJoint();
+		m_controlRotation = joint->m_controlRotation ? true : false;
+	}
+
+	virtual ndUndoRedoJointPlane* GetAsUndoRedoJointPlane() const override
+	{
+		return (ndUndoRedoJointPlane*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			const ndUndoRedoJointPlane* const other = command.GetAsUndoRedoJointPlane();
+			if (other)
+			{
+				bool test = other->m_controlRotation == m_controlRotation;
+				if (test)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		ndMeshJointPlane* const joint = (ndMeshJointPlane*)*m_mesh->GetJoint();
+		joint->m_controlRotation = m_controlRotation;
+	}
+
+	bool m_controlRotation;
+};
+
 void ndAssetEditor::ShowPropertiesJointInfo()
 {
 	if (ImGui::CollapsingHeader("Constraint joint"))
@@ -669,7 +711,6 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 						joint = m_currentSelection->GetJoint();
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointChange(this, m_currentSelection)));
 					};
-
 					if (strcmp(name, ndJointHinge::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointChange(this, m_currentSelection)));
@@ -680,6 +721,12 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointChange(this, m_currentSelection)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointSlider());
+						InitNewJoint(newJoint);
+					}
+					else if (strcmp(name, ndJointPlane::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointChange(this, m_currentSelection)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointPlane());
 						InitNewJoint(newJoint);
 					}
 					else if (strcmp(name, ndJointDoubleHinge::StaticClassName()) == 0)
@@ -726,11 +773,12 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 			};
 			SetDropdownList(ndJointHinge::StaticClassName());
 			SetDropdownList(ndJointSlider::StaticClassName());
+			SetDropdownList(ndJointPlane::StaticClassName());
 			SetDropdownList(ndJointRoller::StaticClassName());
 			SetDropdownList(ndJointCylinder::StaticClassName());
 			SetDropdownList(ndJointDoubleHinge::StaticClassName());
-			SetDropdownList(ndJointSpherical::StaticClassName());
 			SetDropdownList(ndJointWheel::StaticClassName());
+			SetDropdownList(ndJointSpherical::StaticClassName());
 			SetDropdownList(ndJointFix6dof::StaticClassName());
 
 			ImGui::EndCombo();
@@ -1229,7 +1277,7 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 				subJoint->m_maxConeAngle = ndClamp (value, ndReal(0.0), ndReal(180.0f));
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointSpherical(this, m_currentSelection)));
 			}
-			bool limitState = subJoint->m_coneAngleState;
+			bool limitState = subJoint->m_coneAngleState ? true : false;;
 			if (ImGui::Checkbox("cone limit state", &limitState))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointSpherical(this, m_currentSelection)));
@@ -1257,6 +1305,17 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointSpherical(this, m_currentSelection)));
 				subJoint->m_axis.m_limitState = m_showSelectedNode ? 1 : 0;
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointSpherical(this, m_currentSelection)));
+			}
+		}
+		else if (strcmp(joint->m_constructor.GetStr(), ndJointPlane::StaticClassName()) == 0)
+		{
+			ndMeshJointPlane* const subJoint = (ndMeshJointPlane*)*joint;
+			bool limitState = subJoint->m_controlRotation ? true : false;
+			if (ImGui::Checkbox("control rotation", &limitState))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointPlane(this, m_currentSelection)));
+				subJoint->m_controlRotation = limitState ? 1 : 0;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointPlane(this, m_currentSelection)));
 			}
 		}
 		else

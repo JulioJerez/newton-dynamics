@@ -12,6 +12,7 @@
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
 #include "ndJointPlane.h"
+#include "ndMeshComponents.h"
 
 ndJointPlane::ndJointPlane()
 	:ndJointBilateralConstraint()
@@ -76,6 +77,16 @@ void ndJointPlane::UpdateParameters()
 	}
 }
 
+void ndJointPlane::EnableControlRotation(bool state)
+{
+	m_enableControlRotation = state;
+}
+
+bool ndJointPlane::GetEnableControlRotation() const
+{
+	return m_enableControlRotation;
+}
+
 void ndJointPlane::JacobianDerivative(ndConstraintDescritor& desc)
 {
 	ndMatrix matrix0;
@@ -103,3 +114,9 @@ void ndJointPlane::JacobianDerivative(ndConstraintDescritor& desc)
 	}
 }
 
+ndSharedPtr<ndMeshJoint> ndJointPlane::GetMeshJoint() const
+{
+	ndMeshJointPlane* const joint = new ndMeshJointPlane(this);
+
+	return ndSharedPtr<ndMeshJoint>(joint);
+}

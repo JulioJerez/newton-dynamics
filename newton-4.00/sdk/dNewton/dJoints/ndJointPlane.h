@@ -25,12 +25,14 @@ class ndJointPlane: public ndJointBilateralConstraint
 	D_NEWTON_API ndJointPlane (const ndVector& pivot, const ndVector& normal, ndBodyKinematic* const child, ndBodyKinematic* const parent);
 	D_NEWTON_API virtual ~ndJointPlane();
 
-	void EnableControlRotation(bool state);
-	bool GetEnableControlRotation() const;
+	D_NEWTON_API void EnableControlRotation(bool state);
+	D_NEWTON_API bool GetEnableControlRotation() const;
 
 	protected:
 	D_NEWTON_API void UpdateParameters() override;
 	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
+
+	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const override;
 
 	ndFloat32 m_angle;
 	ndFloat32 m_omega;
@@ -42,15 +44,6 @@ class ndJointPlane: public ndJointBilateralConstraint
 	bool m_enableControlRotation;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
-inline void ndJointPlane::EnableControlRotation(bool state)
-{ 
-	m_enableControlRotation = state; 
-}
-
-inline bool ndJointPlane::GetEnableControlRotation() const
-{ 
-	return m_enableControlRotation; 
-}
 
 #endif 
 
