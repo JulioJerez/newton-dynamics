@@ -125,6 +125,19 @@ class ndUndoRedoShapeModified : public ndUndoRedoCommand
 			m_shapeParam.m_y = subJoint->m_y;
 			m_shapeParam.m_z = subJoint->m_z;
 		}
+		else if (strcmp(shape->m_constructor.GetStr(), ndShapeSphere::StaticClassName()) == 0)
+		{
+			const ndMeshCollisionShapeSphere* const subJoint = (ndMeshCollisionShapeSphere*)shape;
+			m_shapeParam.m_x = subJoint->m_radius;
+		}
+		else if (strcmp(shape->m_constructor.GetStr(), ndShapeCapsule::StaticClassName()) == 0)
+		{
+			const ndMeshCollisionShapeCapsule* const subJoint = (ndMeshCollisionShapeCapsule*)shape;
+			m_shapeParam.m_x = subJoint->m_height;
+			m_shapeParam.m_y = subJoint->m_radius0;
+			m_shapeParam.m_z = subJoint->m_radius1;
+		}
+
 		else
 		{
 			ndAssert(0);
@@ -166,6 +179,19 @@ class ndUndoRedoShapeModified : public ndUndoRedoCommand
 			subJoint->m_y = m_shapeParam.m_y;
 			subJoint->m_z = m_shapeParam.m_z;
 		}
+		else if (strcmp(shape->m_constructor.GetStr(), ndShapeSphere::StaticClassName()) == 0)
+		{
+			ndMeshCollisionShapeSphere* const subJoint = (ndMeshCollisionShapeSphere*)shape;
+			subJoint->m_radius = m_shapeParam.m_x;
+		}
+		else if (strcmp(shape->m_constructor.GetStr(), ndShapeCapsule::StaticClassName()) == 0)
+		{
+			ndMeshCollisionShapeCapsule* const subJoint = (ndMeshCollisionShapeCapsule*)shape;
+			subJoint->m_height = m_shapeParam.m_x;
+			subJoint->m_radius0 = m_shapeParam.m_y;
+			subJoint->m_radius1 = m_shapeParam.m_z;
+		}
+
 		else
 		{
 			ndAssert(0);
@@ -295,29 +321,61 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 		}
 		else if (strcmp(className, ndShapeSphere::StaticClassName()) == 0)
 		{
-			ndReal size = ndReal(1.0f);
-			if (ImGui::DragFloat("radio0##1", &size))
-			{
+			ndReal value;
+			ndMeshCollisionShapeSphere* const subJoint = (ndMeshCollisionShapeSphere*)*shapeInstance.m_shape;
 
+			value = subJoint->m_radius;
+			if (ImGui::InputFloat("radius##2", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeModified(this, m_currentSelection)));
+				subJoint->m_radius = value;
+				GetDebugDisplay()->RebuildDebugCollision();
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeModified(this, m_currentSelection)));
 			}
 		}
 		else if (strcmp(className, ndShapeCapsule::StaticClassName()) == 0)
 		{
-			ndReal radio0 = ndReal(1.0f);
-			if (ImGui::DragFloat("radio0##1", &radio0))
-			{
-			}
+			//ndReal radio0 = ndReal(1.0f);
+			//if (ImGui::DragFloat("radio0##1", &radio0))
+			//{
+			//}
+			//
+			//ndReal radio1 = ndReal(2.0f);
+			//if (ImGui::DragFloat("radio1##1", &radio1))
+			//{
+			//}
+			//
+			//ndReal length = ndReal(2.0f);
+			//if (ImGui::DragFloat("lenght##1", &length))
+			//{
+			//}
+			ndReal value;
+			ndMeshCollisionShapeCapsule* const subJoint = (ndMeshCollisionShapeCapsule*)*shapeInstance.m_shape;
 
-			ndReal radio1 = ndReal(2.0f);
-			if (ImGui::DragFloat("radio1##1", &radio1))
+			value = subJoint->m_radius0;
+			if (ImGui::InputFloat("radius1##2", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeModified(this, m_currentSelection)));
+				subJoint->m_radius0 = value;
+				GetDebugDisplay()->RebuildDebugCollision();
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeModified(this, m_currentSelection)));
 			}
-
-			ndReal length = ndReal(2.0f);
-			if (ImGui::DragFloat("lenght##1", &length))
+			value = subJoint->m_radius1;
+			if (ImGui::InputFloat("radius2##2", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeModified(this, m_currentSelection)));
+				subJoint->m_radius1 = value;
+				GetDebugDisplay()->RebuildDebugCollision();
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeModified(this, m_currentSelection)));
 			}
-
+			value = subJoint->m_height;
+			if (ImGui::InputFloat("height##2", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeModified(this, m_currentSelection)));
+				subJoint->m_height = value;
+				GetDebugDisplay()->RebuildDebugCollision();
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeModified(this, m_currentSelection)));
+			}
 		}
 		else if (strcmp(className, ndShapeCylinder::StaticClassName()) == 0)
 		{
