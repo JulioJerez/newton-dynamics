@@ -123,6 +123,7 @@ class ndMeshCollisionShapeConvexHull : public ndMeshCollisionShape
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 
 	ndArray<ndVector> m_points;
+	ndInt32 m_maxPointCount;
 };
 
 class ndMeshCollisionShapeCompound : public ndMeshCollisionShape

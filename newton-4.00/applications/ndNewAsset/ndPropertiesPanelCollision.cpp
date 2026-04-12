@@ -150,7 +150,11 @@ class ndUndoRedoShapeModified : public ndUndoRedoCommand
 			m_shapeParam.m_x = subJoint->m_height;
 			m_shapeParam.m_y = subJoint->m_radius;
 		}
-
+		else if (strcmp(shape->m_constructor.GetStr(), ndShapeConvexHull::StaticClassName()) == 0)
+		{
+			const ndMeshCollisionShapeConvexHull* const subJoint = (ndMeshCollisionShapeConvexHull*)shape;
+			m_shapeParam.m_x = ndFloat32 (subJoint->m_maxPointCount);
+		}
 		else
 		{
 			ndAssert(0);
@@ -217,7 +221,11 @@ class ndUndoRedoShapeModified : public ndUndoRedoCommand
 			subJoint->m_height = m_shapeParam.m_x;
 			subJoint->m_radius = m_shapeParam.m_y;
 		}
-
+		else if (strcmp(shape->m_constructor.GetStr(), ndShapeConvexHull::StaticClassName()) == 0)
+		{
+			ndMeshCollisionShapeConvexHull* const subJoint = (ndMeshCollisionShapeConvexHull*)shape;
+			subJoint->m_maxPointCount = ndInt32 (m_shapeParam.m_x);
+		}
 		else
 		{
 			ndAssert(0);
@@ -447,10 +455,16 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 		}
 		else if (strcmp(className, ndShapeConvexHull::StaticClassName()) == 0)
 		{
-			ndInt32 points = 100;
-			if (ImGui::DragInt("max point count##1", &points))
-			{
+			ndInt32 value;
+			ndMeshCollisionShapeConvexHull* const subJoint = (ndMeshCollisionShapeConvexHull*)*shapeInstance.m_shape;
 
+			value = subJoint->m_maxPointCount;
+			if (ImGui::InputInt("pointCount", &value, 0, 0, ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeModified(this, m_currentSelection)));
+				subJoint->m_maxPointCount = value;
+				GetDebugDisplay()->RebuildDebugCollision();
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeModified(this, m_currentSelection)));
 			}
 		}
 		else if (strcmp(className, ndShapeCompound::StaticClassName()) == 0)
