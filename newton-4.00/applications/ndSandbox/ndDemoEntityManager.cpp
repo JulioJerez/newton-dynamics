@@ -41,7 +41,7 @@
 //#define DEFAULT_SCENE	14		// basic convex approximate compound shapes
 //#define DEFAULT_SCENE	15		// basic model, a nd vehicle prop
 //#define DEFAULT_SCENE	16		// export articulated model
-#define DEFAULT_SCENE	17		// basic rag doll
+//#define DEFAULT_SCENE	17		// basic rag doll
 //#define DEFAULT_SCENE	18		// complex model, implement a complex model with joints
 //#define DEFAULT_SCENE	19		// basics multi body vehicle
 //#define DEFAULT_SCENE	20		// object Placement
@@ -56,7 +56,7 @@
 //#define DEFAULT_SCENE	29		// procedurally animated quadruped spider
 
 // These are the machine learning training demos
-//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// SAC cart pole training
+#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// SAC cart pole training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// SAC double pendulum unicycle training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// PPO cart pole training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 3)	// PPO double pendulum unicycle training
@@ -691,11 +691,11 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_showCenterOfMass = true;
 	//m_showNormalForces = true;
 	//m_showContactPoints = true;
-	m_showJointDebugInfo = true;
+	//m_showJointDebugInfo = true;
 	//m_showModelsDebugInfo = true;
 	//m_showCollisionMeshMode = 1;
 	//m_showCollisionMeshMode = 2;
-	m_showCollisionMeshMode = 3;		// solid wire frame
+	//m_showCollisionMeshMode = 3;		// solid wire frame
 	m_synchronousPhysicsUpdate = true;
 	m_synchronousParticlesUpdate = true;
 	//m_showStaticMeshCollidingFaces = true;
