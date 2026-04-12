@@ -22,10 +22,6 @@ namespace ndUnicyclePlayer
 	#define CONTROLLER_NAME_SAC		"unicycleSac"
 	#define CONTROLLER_NAME_PPO		"unicyclePpo"
 
-	#define BOX_MASS				ndFloat32(10.0f)
-	#define POLE_MASS				ndFloat32(1.0f)
-	#define BALL_MASS				ndFloat32(5.0f)
-
 	#define ND_MAX_LEG_JOINT_ANGLE	(ndFloat32 (45.0f) * ndDegreeToRad)
 
 	#define ND_MAX_WHEEL_ALPHA		(ndFloat32 (100.0f))

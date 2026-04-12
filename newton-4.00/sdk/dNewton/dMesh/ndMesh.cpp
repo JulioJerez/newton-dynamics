@@ -423,8 +423,8 @@ ndMatrix ndMesh::CalculateLocalMatrix(ndVector& sizeOut) const
 	const ndInt32 pointsStride = ndInt32(meshEffect->GetVertexStrideInByte() / sizeof(ndFloat64));
 	const ndFloat64* const pointsBuffer = meshEffect->GetVertexPool();
 
-	// geometry points are for rendering, therfre is can have dumplicate points that 
-	// can skew the covariance matrix
+	// geometry points are for rendering, therefore they may be have duplicate points 
+	// that can skew the covariance matrix
 	ndArray<ndBigVector> uniquePoints;
 	for (ndInt32 i = 0; i < pointsCount; ++i)
 	{
@@ -436,7 +436,7 @@ ndMatrix ndMesh::CalculateLocalMatrix(ndVector& sizeOut) const
 	}
 	ndArray<ndInt32> indexList;
 	indexList.SetCount(pointsCount);
-	const ndInt32 vertexCount = ndVertexListToIndexList(&uniquePoints[0].m_x, ndInt32(sizeof(ndBigVector)), 3, pointsCount, &indexList[0], ndFloat32(1.0e-5f));
+	const ndInt32 vertexCount = ndVertexListToIndexList(&uniquePoints[0].m_x, ndInt32(sizeof(ndBigVector)), 3, pointsCount, &indexList[0], ndFloat32(1.0e-6f));
 	uniquePoints.SetCount(vertexCount);
 
 	ndVector minP(ndFloat32(1.0e10f));
@@ -453,15 +453,35 @@ ndMatrix ndMesh::CalculateLocalMatrix(ndVector& sizeOut) const
 	ndMatrix covariance(ndGetZeroMatrix());
 	for (ndInt32 i = 0; i < vertexCount; ++i)
 	{
-		const ndVector q(uniquePoints[i]);
-		const ndVector p((q - origin) & ndVector::m_triplexMask);
+		const ndVector p((ndVector(uniquePoints[i]) - origin) & ndVector::m_triplexMask);
 		ndAssert(p.m_w == ndFloat32(0.0f));
 		const ndMatrix matrix(ndCovarianceMatrix(p, p));
 		covariance.m_front += matrix.m_front;
 		covariance.m_up += matrix.m_up;
 		covariance.m_right += matrix.m_right;
 	}
+	// since it is an stimate, we can zero out small misallgmnets.
+	for (ndInt32 i = 0; i < 2; ++i)
+	{
+		for (ndInt32 j = i + 1; j < 3; ++j)
+		{
+			if (ndAbs(covariance[i][j]) < ndFloat32 (1.0e-5f))
+			{
+				covariance[i][j] = ndFloat32 (0.0f);
+				covariance[j][i] = ndFloat32(0.0f);
+			}
+		}
+	}
+
+	//const ndMatrix xxxn(covariance);
 	const ndVector eigen(covariance.EigenVectors() & ndVector::m_triplexMask);
+
+	//ndMatrix xxxxx(ndGetIdentityMatrix());
+	//xxxxx[0][0] = eigen[0];
+	//xxxxx[1][1] = eigen[1];
+	//xxxxx[2][2] = eigen[2];
+	//ndMatrix xxxxxxx(covariance.OrthoInverse() * xxxxx * covariance);
+
 	covariance.m_posit = origin;
 	covariance.m_posit.m_w = ndFloat32(1.0f);
 
@@ -527,7 +547,8 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionSphere()
 
 	ndVector size;
 	ndMatrix localMatrix(CalculateLocalMatrix(size));
-	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeSphere(size.m_x)));
+	ndFloat32 radios = ndMax(size.m_x, (ndMax(size.m_y, size.m_z)));
+	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeSphere(radios)));
 
 	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
 	return shape;
@@ -540,19 +561,9 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCapsule()
 
 	ndVector size;
 	ndMatrix localMatrix(CalculateLocalMatrix(size));
-	if ((size.m_y >= size.m_x) && (size.m_y >= size.m_z))
-	{
-		ndSwap(size.m_x, size.m_y);
-		localMatrix = ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * localMatrix;
-	}
-	else if ((size.m_z >= size.m_x) && (size.m_z >= size.m_y))
-	{
-		ndSwap(size.m_x, size.m_z);
-		localMatrix = ndYawMatrix(ndFloat32(90.0f) * ndDegreeToRad) * localMatrix;
-	}
 
-	ndFloat32 radios = size.m_y;
-	ndFloat32 high = ndFloat32(2.0f) * ndMax(size.m_x - size.m_y, ndFloat32(0.025f));
+	ndFloat32 radios = ndMax(size.m_y, size.m_z);
+	ndFloat32 high = ndFloat32(2.0f) * (ndMax (size.m_x - radios, ndFloat32 (0.0f)));
 
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeCapsule(radios, radios, high)));
 	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
@@ -566,21 +577,26 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCylinder()
 
 	ndVector size;
 	ndMatrix localMatrix(CalculateLocalMatrix(size));
-	if ((size.m_y >= size.m_x) && (size.m_y >= size.m_z))
-	{
-		ndSwap(size.m_x, size.m_y);
-		localMatrix = ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * localMatrix;
-	}
-	else if ((size.m_z >= size.m_x) && (size.m_z >= size.m_y))
-	{
-		ndSwap(size.m_x, size.m_z);
-		localMatrix = ndYawMatrix(ndFloat32(90.0f) * ndDegreeToRad) * localMatrix;
-	}
 
-	ndFloat32 radios = size.m_y;
-	ndFloat32 high = ndFloat32(2.0f) * ndMax(size.m_x - size.m_y, ndFloat32(0.025f));
+	ndFloat32 high = ndFloat32(2.0f) * size.m_x;
+	ndFloat32 radios = ndMax(size.m_y, size.m_z);
 
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeCylinder(radios, radios, high)));
+	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
+	return shape;
+}
+
+ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionChamferCylinder()
+{
+	ndSharedPtr<ndMeshEffect> meshEffect = GetMesh();
+	ndAssert(*meshEffect);
+
+	ndVector size;
+	ndMatrix localMatrix(CalculateLocalMatrix(size));
+
+	ndFloat32 width = size.m_x * ndFloat32(2.0f);
+	ndFloat32 radius = ndMax (size.m_z - size.m_x, ndFloat32 (0.0f));
+	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeChamferCylinder(radius, width)));
 	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
 	return shape;
 }
@@ -599,21 +615,6 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionTire()
 	ndVector scale(ndFloat32(4.0f) * width, radius, radius, 0.0f);
 	shape->SetScale(scale);
 
-	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
-	return shape;
-}
-
-ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionChamferCylinder()
-{
-	ndSharedPtr<ndMeshEffect> meshEffect = GetMesh();
-	ndAssert(*meshEffect);
-
-	ndVector size;
-	ndMatrix localMatrix(CalculateLocalMatrix(size));
-
-	ndFloat32 radius = size.m_x - size.m_z;
-	ndFloat32 width = size.m_z * ndFloat32(2.0f);
-	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeChamferCylinder(radius, width)));
 	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
 	return shape;
 }

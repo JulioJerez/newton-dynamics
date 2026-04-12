@@ -33,12 +33,18 @@
 #include "ndShapeChamferCylinder.h"
 #include "ndJointBilateralConstraint.h"
 
-ndMeshCollisionShape::ndMeshCollisionShape()
+ndMeshCollisionShape::ndMeshCollisionShape(const char* const constructor)
 	:ndClassAlloc()
+	,m_constructor(constructor)
 {
 }
 
 ndMeshCollisionShape::~ndMeshCollisionShape()
+{
+}
+
+ndMeshCollisionShapeNull::ndMeshCollisionShapeNull()
+	:ndMeshCollisionShape(ndShapeNull::StaticClassName())
 {
 }
 
@@ -57,6 +63,11 @@ ndShape* ndMeshCollisionShapeNull::CreateObject() const
 	return new ndShapeNull();
 }
 
+ndMeshCollisionShapeSphere::ndMeshCollisionShapeSphere()
+	:ndMeshCollisionShape(ndShapeSphere::StaticClassName())
+{
+}
+
 void ndMeshCollisionShapeSphere::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	xmlSaveParam(parent, "constructor", ndShapeSphere::StaticClassName());
@@ -71,6 +82,11 @@ void ndMeshCollisionShapeSphere::DeserializeFromXml(const nd::TiXmlElement* cons
 ndShape* ndMeshCollisionShapeSphere::CreateObject() const
 {
 	return new ndShapeSphere(m_radius);
+}
+
+ndMeshCollisionShapeBox::ndMeshCollisionShapeBox()
+	:ndMeshCollisionShape(ndShapeBox::StaticClassName())
+{
 }
 
 void ndMeshCollisionShapeBox::SerializeToXml(nd::TiXmlElement* const parent) const
@@ -93,6 +109,12 @@ ndShape* ndMeshCollisionShapeBox::CreateObject() const
 	return new ndShapeBox(m_x, m_y, m_z);
 }
 
+
+ndMeshCollisionShapeCapsule::ndMeshCollisionShapeCapsule()
+	:ndMeshCollisionShape(ndShapeCapsule::StaticClassName())
+{
+}
+
 void ndMeshCollisionShapeCapsule::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	xmlSaveParam(parent, "constructor", ndShapeCapsule::StaticClassName());
@@ -111,6 +133,11 @@ void ndMeshCollisionShapeCapsule::DeserializeFromXml(const nd::TiXmlElement* con
 ndShape* ndMeshCollisionShapeCapsule::CreateObject() const
 {
 	return new ndShapeCapsule(m_radius0, m_radius1, m_height);
+}
+
+ndMeshCollisionShapeCylinder::ndMeshCollisionShapeCylinder()
+	:ndMeshCollisionShape(ndShapeCylinder::StaticClassName())
+{
 }
 
 void ndMeshCollisionShapeCylinder::SerializeToXml(nd::TiXmlElement* const parent) const
@@ -133,6 +160,11 @@ ndShape* ndMeshCollisionShapeCylinder::CreateObject() const
 	return new ndShapeCylinder(m_radius0, m_radius1, m_height);
 }
 
+ndMeshCollisionShapeChamferCylinder::ndMeshCollisionShapeChamferCylinder()
+	:ndMeshCollisionShape(ndShapeChamferCylinder::StaticClassName())
+{
+}
+
 void ndMeshCollisionShapeChamferCylinder::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	xmlSaveParam(parent, "constructor", ndShapeChamferCylinder::StaticClassName());
@@ -151,6 +183,13 @@ ndShape* ndMeshCollisionShapeChamferCylinder::CreateObject() const
 	return new ndShapeChamferCylinder(m_radius, m_height);
 }
 
+ndMeshCollisionShapeConvexHull::ndMeshCollisionShapeConvexHull()
+	:ndMeshCollisionShape(ndShapeConvexHull::StaticClassName())
+	,m_points()
+	,m_maxPointCount(1024)
+{
+}
+
 void ndMeshCollisionShapeConvexHull::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	xmlSaveParam(parent, "constructor", ndShapeConvexHull::StaticClassName());
@@ -161,11 +200,22 @@ void ndMeshCollisionShapeConvexHull::DeserializeFromXml(const nd::TiXmlElement* 
 {
 	m_points.SetCount(0);
 	xmlGetFloatArray3(parent, "pointcloud", m_points);
+	m_maxPointCount = ndInt32 (m_points.GetCount());
 }
 
 ndShape* ndMeshCollisionShapeConvexHull::CreateObject() const
 {
-	return new ndShapeConvexHull(ndInt32(m_points.GetCount()), sizeof(ndVector), ndFloat32(0.0f), &m_points[0].m_x);
+	//return new ndShapeConvexHull(ndInt32(m_points.GetCount()), sizeof(ndVector), ndFloat32(0.0f), &m_points[0].m_x, m_maxPointCount);
+	ndShape* const hull = new ndShapeConvexHull(ndInt32(m_points.GetCount()), sizeof(ndVector), ndFloat32(0.0f), &m_points[0].m_x, m_maxPointCount);
+	ndShapeInfo info(hull->GetShapeInfo());
+	ndMeshCollisionShapeConvexHull* const self = (ndMeshCollisionShapeConvexHull*)this;
+	self->m_maxPointCount = info.m_convexhull.m_vertexCount;
+	return hull;
+}
+
+ndMeshCollisionShapeCompound::ndMeshCollisionShapeCompound()
+	:ndMeshCollisionShape(ndShapeCompound::StaticClassName())
+{
 }
 
 ndShape* ndMeshCollisionShapeCompound::CreateObject() const
@@ -247,6 +297,11 @@ void ndMeshShapeInstance::DeserializeFromXml(const nd::TiXmlElement* const paren
 	else if (strcmp(constructor, ndShapeCapsule::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeCapsule());
+		m_shape->DeserializeFromXml(xmlShape);
+	}
+	else if (strcmp(constructor, ndShapeCylinder::StaticClassName()) == 0)
+	{
+		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeCylinder());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
 	else if (strcmp(constructor, ndShapeChamferCylinder::StaticClassName()) == 0)

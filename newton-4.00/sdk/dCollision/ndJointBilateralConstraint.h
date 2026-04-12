@@ -186,7 +186,7 @@ class ndJointBilateralConstraint : public ndConstraint
 	D_COLLISION_API virtual void SetIkSetAccel(const ndJacobian& body0Accel, const ndJacobian& body1Accel);
 
 	D_COLLISION_API const ndSharedPtr<ndJointUserData>& GetUserData() const;
-	D_COLLISION_API void SetUserData(ndSharedPtr<ndJointUserData>& usedData);
+	D_COLLISION_API void SetUserData(ndSharedPtr<ndJointUserData>& userData);
 
 	protected:
 	ndMatrix m_localMatrix0;
@@ -200,7 +200,7 @@ class ndJointBilateralConstraint : public ndConstraint
 	ndBodyKinematic::ndJointList::ndNode* m_body0Node;
 	ndBodyKinematic::ndJointList::ndNode* m_body1Node;
 
-	ndSharedPtr<ndJointUserData> m_usedData;
+	ndSharedPtr<ndJointUserData> m_userData;
 
 	ndFloat32 m_defualtDiagonalRegularizer;
 	ndUnsigned32 m_mark0			: 1;

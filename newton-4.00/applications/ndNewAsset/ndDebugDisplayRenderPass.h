@@ -39,16 +39,18 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	ndDebugDisplayRenderPass(ndAssetEditor* const owner);
 	~ndDebugDisplayRenderPass();
 
+	void RebuildDebugCollision();
+
 	private:
 	void RenderOptions();
 	void RenderWireFrame();
 	void RenderSelectedNode();
 	void RenderHiddenSurface();
 	void RenderCollisionShape();
-
 	virtual void ResetScene() override;
 	virtual void RenderScene() override;
-	ndDebugMesh* CreateRenderPrimitive(const ndShapeInstance& shapeInstance) const;
+	
+	//ndDebugMesh* CreateRenderPrimitive(const ndShapeInstance& shapeInstance) const;
 
 	void DrawFrame(const ndMatrix& matrix);
 	void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color);

@@ -84,10 +84,14 @@ ndAssetEditor::~ndAssetEditor ()
 {
 }
 
-
 ndSharedPtr<ndRender>& ndAssetEditor::GetRenderer()
 {
 	return m_renderer;
+}
+
+ndDebugDisplayRenderPass* ndAssetEditor::GetDebugDisplay() const
+{
+	return (ndDebugDisplayRenderPass*)*m_debugDisplayRenderPass;
 }
 
 bool ndAssetEditor::GetKeyState(ndInt32 key) const
@@ -462,17 +466,6 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::EndMenu();
 		}
 
-		if (ImGui::BeginMenu("Tools"))
-		{
-			if (ImGui::MenuItem("normalize mass distibution", ""))
-			{
-				m_toolActive = true;
-				m_currentTool = new ndNomalizeMassDistribution(this);
-			}
-
-			ImGui::EndMenu();
-		}
-
 		if (ImGui::BeginMenu("Options"))
 		{
 			ImGui::Text("render mode");
@@ -495,6 +488,17 @@ void ndAssetEditor::ShowMainMenuBar()
 
 			ImGui::Text("global properties");
 			ImGui::Checkbox("parent relative Transform", &m_showParentRelativeTransform);
+
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("Tools"))
+		{
+			if (ImGui::MenuItem("normalize mass distibution", ""))
+			{
+				m_toolActive = true;
+				m_currentTool = new ndNomalizeMassDistribution(this);
+			}
 
 			ImGui::EndMenu();
 		}
