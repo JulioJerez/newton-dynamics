@@ -84,10 +84,14 @@ ndAssetEditor::~ndAssetEditor ()
 {
 }
 
-
 ndSharedPtr<ndRender>& ndAssetEditor::GetRenderer()
 {
 	return m_renderer;
+}
+
+ndDebugDisplayRenderPass* ndAssetEditor::GetDebugDisplay() const
+{
+	return (ndDebugDisplayRenderPass*)*m_debugDisplayRenderPass;
 }
 
 bool ndAssetEditor::GetKeyState(ndInt32 key) const

@@ -547,7 +547,8 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionSphere()
 
 	ndVector size;
 	ndMatrix localMatrix(CalculateLocalMatrix(size));
-	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeSphere(size.m_x)));
+	ndFloat32 radios = ndMax(size.m_x, (ndMax(size.m_y, size.m_z)));
+	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeSphere(radios)));
 
 	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
 	return shape;
@@ -560,19 +561,9 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCapsule()
 
 	ndVector size;
 	ndMatrix localMatrix(CalculateLocalMatrix(size));
-	if ((size.m_y >= size.m_x) && (size.m_y >= size.m_z))
-	{
-		ndSwap(size.m_x, size.m_y);
-		localMatrix = ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * localMatrix;
-	}
-	else if ((size.m_z >= size.m_x) && (size.m_z >= size.m_y))
-	{
-		ndSwap(size.m_x, size.m_z);
-		localMatrix = ndYawMatrix(ndFloat32(90.0f) * ndDegreeToRad) * localMatrix;
-	}
 
-	ndFloat32 radios = size.m_y;
-	ndFloat32 high = ndFloat32(2.0f) * ndMax(size.m_x - size.m_y, ndFloat32(0.025f));
+	ndFloat32 radios = ndMax(size.m_y, size.m_z);
+	ndFloat32 high = ndFloat32(2.0f) * (ndMax (size.m_x - radios, ndFloat32 (0.0f)));
 
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeCapsule(radios, radios, high)));
 	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
@@ -586,21 +577,26 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCylinder()
 
 	ndVector size;
 	ndMatrix localMatrix(CalculateLocalMatrix(size));
-	if ((size.m_y >= size.m_x) && (size.m_y >= size.m_z))
-	{
-		ndSwap(size.m_x, size.m_y);
-		localMatrix = ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * localMatrix;
-	}
-	else if ((size.m_z >= size.m_x) && (size.m_z >= size.m_y))
-	{
-		ndSwap(size.m_x, size.m_z);
-		localMatrix = ndYawMatrix(ndFloat32(90.0f) * ndDegreeToRad) * localMatrix;
-	}
 
-	ndFloat32 radios = size.m_y;
-	ndFloat32 high = ndFloat32(2.0f) * ndMax(size.m_x - size.m_y, ndFloat32(0.025f));
+	ndFloat32 high = ndFloat32(2.0f) * size.m_x;
+	ndFloat32 radios = ndMax(size.m_y, size.m_z);
 
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeCylinder(radios, radios, high)));
+	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
+	return shape;
+}
+
+ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionChamferCylinder()
+{
+	ndSharedPtr<ndMeshEffect> meshEffect = GetMesh();
+	ndAssert(*meshEffect);
+
+	ndVector size;
+	ndMatrix localMatrix(CalculateLocalMatrix(size));
+
+	ndFloat32 width = size.m_x * ndFloat32(2.0f);
+	ndFloat32 radius = ndMax (size.m_z - size.m_x, ndFloat32 (0.0f));
+	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeChamferCylinder(radius, width)));
 	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
 	return shape;
 }
@@ -619,21 +615,6 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionTire()
 	ndVector scale(ndFloat32(4.0f) * width, radius, radius, 0.0f);
 	shape->SetScale(scale);
 
-	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
-	return shape;
-}
-
-ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionChamferCylinder()
-{
-	ndSharedPtr<ndMeshEffect> meshEffect = GetMesh();
-	ndAssert(*meshEffect);
-
-	ndVector size;
-	ndMatrix localMatrix(CalculateLocalMatrix(size));
-
-	ndFloat32 radius = size.m_x - size.m_z;
-	ndFloat32 width = size.m_z * ndFloat32(2.0f);
-	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeChamferCylinder(radius, width)));
 	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
 	return shape;
 }

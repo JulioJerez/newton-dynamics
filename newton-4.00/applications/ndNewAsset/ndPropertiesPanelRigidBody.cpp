@@ -43,10 +43,10 @@ class ndUndoRedoRigidBody : public ndUndoRedoCommand
 			const ndUndoRedoRigidBody* const other = command.GetAsUndoRedoRigidBody();
 			if (other)
 			{
-				bool test = (m_inverseMass - other->m_inverseMass).DotProduct(m_inverseMass - other->m_inverseMass).GetScalar() < 0.0001f;
-				test = test && (m_intrisicDamp - other->m_intrisicDamp).DotProduct(m_intrisicDamp - other->m_intrisicDamp).GetScalar() < 0.0001f;
-				test = test && (m_centerOfMass - other->m_centerOfMass).DotProduct(m_centerOfMass - other->m_centerOfMass).GetScalar() < 0.0001f;
-				test = test && (m_inertiaPrincipalAxis - other->m_inertiaPrincipalAxis).DotProduct(m_inertiaPrincipalAxis - other->m_inertiaPrincipalAxis).GetScalar() < 0.0001f;
+				bool test = (m_inverseMass - other->m_inverseMass).DotProduct(m_inverseMass - other->m_inverseMass).GetScalar() < ndFloat32 (0.0001f);
+				test = test && (m_intrisicDamp - other->m_intrisicDamp).DotProduct(m_intrisicDamp - other->m_intrisicDamp).GetScalar() < ndFloat32 (0.0001f);
+				test = test && (m_centerOfMass - other->m_centerOfMass).DotProduct(m_centerOfMass - other->m_centerOfMass).GetScalar() < ndFloat32 (0.0001f);
+				test = test && (m_inertiaPrincipalAxis - other->m_inertiaPrincipalAxis).DotProduct(m_inertiaPrincipalAxis - other->m_inertiaPrincipalAxis).GetScalar() < ndFloat32(0.0001f);
 				test = test && (m_angleStep == other->m_angleStep);
 				test = test && (m_linearStep == other->m_linearStep);
 				test = test && (m_massVolumeWeigh == other->m_massVolumeWeigh);

@@ -114,6 +114,7 @@ class ndAssetEditor : public ndClassAlloc
 
 	void TestImGui();
 	void RenderLayout();
+	ndDebugDisplayRenderPass* GetDebugDisplay() const;
 
 	private:
 	void RenderScene();

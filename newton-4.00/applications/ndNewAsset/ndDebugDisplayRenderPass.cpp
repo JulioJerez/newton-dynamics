@@ -27,31 +27,31 @@ ndDebugDisplayRenderPass::~ndDebugDisplayRenderPass()
 {
 }
 
-//ndDebugDisplayRenderPass::ndDebugMesh* ndDebugDisplayRenderPass::CreateRenderPrimitive(const ndShapeInstance& shapeInstance) const
-ndDebugDisplayRenderPass::ndDebugMesh* ndDebugDisplayRenderPass::CreateRenderPrimitive(const ndShapeInstance&) const
-{
-	ndAssert(0);
-	return nullptr;
-	//ndSharedPtr<ndShapeInstance>shape(new ndShapeInstance(shapeInstance));
-	//shape->SetLocalMatrix(ndGetIdentityMatrix());
-	//
-	//ndRender* const render = m_owner;
-	//ndDebugMesh* const debugMesh = new ndDebugMesh;
-	//
-	//ndRenderPrimitive::ndDescriptor descriptor(render);
-	//descriptor.m_collision = shape;
-	//
-	//descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugFlatShaded;
-	//debugMesh->m_flatShadedMesh = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
-	//
-	//descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugWireFrame;
-	//debugMesh->m_wireFrameMesh = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
-	//
-	//descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugHiddenLines;
-	//debugMesh->m_zBufferMesh = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
-	//
-	//return debugMesh;
-}
+////ndDebugDisplayRenderPass::ndDebugMesh* ndDebugDisplayRenderPass::CreateRenderPrimitive(const ndShapeInstance& shapeInstance) const
+//ndDebugDisplayRenderPass::ndDebugMesh* ndDebugDisplayRenderPass::CreateRenderPrimitive(const ndShapeInstance&) const
+//{
+//	ndAssert(0);
+//	return nullptr;
+//	//ndSharedPtr<ndShapeInstance>shape(new ndShapeInstance(shapeInstance));
+//	//shape->SetLocalMatrix(ndGetIdentityMatrix());
+//	//
+//	//ndRender* const render = m_owner;
+//	//ndDebugMesh* const debugMesh = new ndDebugMesh;
+//	//
+//	//ndRenderPrimitive::ndDescriptor descriptor(render);
+//	//descriptor.m_collision = shape;
+//	//
+//	//descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugFlatShaded;
+//	//debugMesh->m_flatShadedMesh = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
+//	//
+//	//descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugWireFrame;
+//	//debugMesh->m_wireFrameMesh = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
+//	//
+//	//descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugHiddenLines;
+//	//debugMesh->m_zBufferMesh = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
+//	//
+//	//return debugMesh;
+//}
 
 void ndDebugDisplayRenderPass::RenderCollisionShape()
 {
@@ -83,6 +83,40 @@ void ndDebugDisplayRenderPass::RenderCollisionShape()
 					debugMesh.m_wireFrameShape->Render(m_owner, pivotMatrix, m_debugDisplayWireFrameMesh);
 				}
 			}
+		}
+	}
+}
+
+void ndDebugDisplayRenderPass::RebuildDebugCollision()
+{
+	const ndString& seletecName = m_manager->m_currentSelection->GetName();
+	ndSharedPtr<ndMeshBody> body(m_manager->m_currentSelection->GetRigidBody());
+	ndMeshBodyKinematic* const kinematicBody = (ndMeshBodyKinematic*)*body;
+	for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
+	{
+		ndDebugMesh& debugMesh = ptr->GetInfo();
+		if (debugMesh.m_parent->m_name == seletecName)
+		{
+			const ndMeshShapeInstance shapeInstance = kinematicBody->m_shapeInstance;
+			if (strcmp(shapeInstance.m_shape->m_constructor.GetStr(), ndShapeNull::StaticClassName()) == 0)
+			{
+				debugMesh.m_zBufferShape = ndSharedPtr<ndRenderPrimitive>(nullptr);
+				debugMesh.m_wireFrameShape = ndSharedPtr<ndRenderPrimitive>(nullptr);
+			}
+			else
+			{
+				ndRenderPrimitive::ndDescriptor descriptor(m_owner);
+				descriptor.m_collision = ndSharedPtr<ndShapeInstance>(kinematicBody->m_shapeInstance.CreateObject());
+				descriptor.m_collision->SetScale(ndVector::m_one);
+				descriptor.m_collision->SetLocalMatrix(ndGetIdentityMatrix());
+
+				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugHiddenLines;
+				debugMesh.m_zBufferShape = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
+
+				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugWireFrame;
+				debugMesh.m_wireFrameShape = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
+			}
+			break;
 		}
 	}
 }
