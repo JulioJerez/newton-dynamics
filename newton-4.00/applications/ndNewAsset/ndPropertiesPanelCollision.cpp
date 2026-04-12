@@ -125,11 +125,6 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 				{
 					auto InitNewShape = [this, &shape, &shapeInstance](ndSharedPtr<ndShapeInstance>& instance)
 					{
-						//newJoint->SetLocalMatrix0(joint->m_localFrame0);
-						//newJoint->SetLocalMatrix1(joint->m_localFrame1);
-						//m_currentSelection->SetJoint(newJoint->GetMeshJoint());
-						//joint = m_currentSelection->GetJoint();
-						//m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointChange(this, m_currentSelection)));
 						instance->Serialize(&shapeInstance);
 						shape = ndSharedPtr<ndShape>(shapeInstance.m_shape->CreateObject());
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
@@ -153,12 +148,14 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 						{
 							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
 							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionCapsule());
+							instance->SetLocalMatrix(ndRollMatrix(ndFloat32(90.0f * ndDegreeToRad)) * instance->GetLocalMatrix());
 							InitNewShape(instance);
 						}
 						else if (strcmp(name, ndShapeCylinder::StaticClassName()) == 0)
 						{
 							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
 							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionCylinder());
+							instance->SetLocalMatrix(ndRollMatrix(ndFloat32(90.0f * ndDegreeToRad)) * instance->GetLocalMatrix());
 							InitNewShape(instance);
 						}
 						else if (strcmp(name, ndShapeConvexHull::StaticClassName()) == 0)
@@ -171,6 +168,7 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 						{
 							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
 							ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionChamferCylinder());
+							instance->SetLocalMatrix(ndRollMatrix(ndFloat32(90.0f * ndDegreeToRad)) * instance->GetLocalMatrix());
 							InitNewShape(instance);
 						}
 						else if (strcmp(name, ndShapeNull::StaticClassName()) == 0)

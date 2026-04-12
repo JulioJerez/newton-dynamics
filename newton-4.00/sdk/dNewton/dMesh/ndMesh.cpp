@@ -423,8 +423,8 @@ ndMatrix ndMesh::CalculateLocalMatrix(ndVector& sizeOut) const
 	const ndInt32 pointsStride = ndInt32(meshEffect->GetVertexStrideInByte() / sizeof(ndFloat64));
 	const ndFloat64* const pointsBuffer = meshEffect->GetVertexPool();
 
-	// geometry points are for rendering, therfre is can have dumplicate points that 
-	// can skew the covariance matrix
+	// geometry points are for rendering, therefore they may be have duplicate points 
+	// that can skew the covariance matrix
 	ndArray<ndBigVector> uniquePoints;
 	for (ndInt32 i = 0; i < pointsCount; ++i)
 	{
@@ -436,7 +436,7 @@ ndMatrix ndMesh::CalculateLocalMatrix(ndVector& sizeOut) const
 	}
 	ndArray<ndInt32> indexList;
 	indexList.SetCount(pointsCount);
-	const ndInt32 vertexCount = ndVertexListToIndexList(&uniquePoints[0].m_x, ndInt32(sizeof(ndBigVector)), 3, pointsCount, &indexList[0], ndFloat32(1.0e-5f));
+	const ndInt32 vertexCount = ndVertexListToIndexList(&uniquePoints[0].m_x, ndInt32(sizeof(ndBigVector)), 3, pointsCount, &indexList[0], ndFloat32(1.0e-6f));
 	uniquePoints.SetCount(vertexCount);
 
 	ndVector minP(ndFloat32(1.0e10f));
@@ -453,15 +453,35 @@ ndMatrix ndMesh::CalculateLocalMatrix(ndVector& sizeOut) const
 	ndMatrix covariance(ndGetZeroMatrix());
 	for (ndInt32 i = 0; i < vertexCount; ++i)
 	{
-		const ndVector q(uniquePoints[i]);
-		const ndVector p((q - origin) & ndVector::m_triplexMask);
+		const ndVector p((ndVector(uniquePoints[i]) - origin) & ndVector::m_triplexMask);
 		ndAssert(p.m_w == ndFloat32(0.0f));
 		const ndMatrix matrix(ndCovarianceMatrix(p, p));
 		covariance.m_front += matrix.m_front;
 		covariance.m_up += matrix.m_up;
 		covariance.m_right += matrix.m_right;
 	}
+	// since it is an stimate, we can zero out small misallgmnets.
+	for (ndInt32 i = 0; i < 2; ++i)
+	{
+		for (ndInt32 j = i + 1; j < 3; ++j)
+		{
+			if (ndAbs(covariance[i][j]) < ndFloat32 (1.0e-5f))
+			{
+				covariance[i][j] = ndFloat32 (0.0f);
+				covariance[j][i] = ndFloat32(0.0f);
+			}
+		}
+	}
+
+	//const ndMatrix xxxn(covariance);
 	const ndVector eigen(covariance.EigenVectors() & ndVector::m_triplexMask);
+
+	//ndMatrix xxxxx(ndGetIdentityMatrix());
+	//xxxxx[0][0] = eigen[0];
+	//xxxxx[1][1] = eigen[1];
+	//xxxxx[2][2] = eigen[2];
+	//ndMatrix xxxxxxx(covariance.OrthoInverse() * xxxxx * covariance);
+
 	covariance.m_posit = origin;
 	covariance.m_posit.m_w = ndFloat32(1.0f);
 
