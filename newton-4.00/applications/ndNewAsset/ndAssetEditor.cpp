@@ -12,6 +12,7 @@
 #include "ndNewAssetStdafx.h"
 #include "ndUrdfFile.h"
 #include "ndResizeMesh.h"
+#include "ndRotateMesh.h"
 #include "ndAssetEditor.h"
 #include "ndFileBrowser.h"
 #include "ndMenuRenderPass.h"
@@ -470,6 +471,12 @@ void ndAssetEditor::ShowMainMenuBar()
 			{
 				m_toolActive = true;
 				m_currentTool = new ndResizeMesh(this);
+			}
+
+			if (ImGui::MenuItem("rotate mesh", ""))
+			{
+				m_toolActive = true;
+				m_currentTool = new ndRotateMesh(this);
 			}
 
 			if (ImGui::MenuItem("normalize mass distibution", ""))

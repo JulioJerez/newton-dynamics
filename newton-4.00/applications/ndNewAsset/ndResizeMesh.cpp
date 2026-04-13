@@ -60,7 +60,7 @@ void ndResizeMesh::Execute()
 	size[2] = boxSize.m_z;
 	ImGui::InputFloat3("size##4", size, "%.3f", ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_EnterReturnsTrue);
 
-	if (ImGui::InputFloat("apply acale", &m_scale, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	if (ImGui::InputFloat("apply scale", &m_scale, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_scale = ndClamp(m_scale, ndReal(0.01f), ndReal(100.0f));
 	}

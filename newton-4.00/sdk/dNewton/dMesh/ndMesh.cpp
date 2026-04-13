@@ -767,7 +767,12 @@ void ndMesh::SetRigidBody(ndSharedPtr<ndMeshBody>& rigidBody)
 	m_rigidBody = rigidBody;
 }
 
-ndSharedPtr<ndMeshBody> ndMesh::GetRigidBody() const
+ndSharedPtr<ndMeshBody>& ndMesh::GetRigidBody()
+{
+	return m_rigidBody;
+}
+
+const ndSharedPtr<ndMeshBody>& ndMesh::GetRigidBody() const
 {
 	return m_rigidBody;
 }
