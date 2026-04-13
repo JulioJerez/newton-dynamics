@@ -82,7 +82,6 @@ void ndRotateMesh::Execute()
 					ndVector eulers0 (newIntertia.CalcPitchYawRoll(eulers1));
 					dynBody->m_inertiaPrincipalAxis = eulers0.Scale(ndRadToDegree);
 
-
 					ndMeshShapeInstance& shapeInstance = dynBody->m_shapeInstance;
 					shapeInstance.m_localMatrix = shapeInstance.m_localMatrix * rotation;
 				}

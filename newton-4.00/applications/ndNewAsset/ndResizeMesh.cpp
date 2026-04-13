@@ -95,7 +95,7 @@ void ndResizeMesh::Execute()
 					ndMeshBodyDynamic* const dynBody = (ndMeshBodyDynamic*)*body;
 					dynBody->m_localCentreOfMass = scaleMatrix.RotateVector(dynBody->m_localCentreOfMass);
 
-					// scale the diangonal inertia matrix (assume of box pinciapl axis)
+					// scale the diagonal inertia matrix (assume of box pinciapl axis)
 					ndVector invInertia(dynBody->m_invMass);
 					ndVector inertia(invInertia.Reciproc());
 					ndVector unitInertia2(inertia.Scale(ndFloat32 (1.0f) / inertia.m_w));
@@ -106,6 +106,9 @@ void ndResizeMesh::Execute()
 					scaledInertia.m_w = inertia.m_w;
 					ndVector scaleInvInertia(scaledInertia.Reciproc());
 					dynBody->m_invMass = scaleInvInertia;
+
+					// scale collsion shape;
+					dynBody->m_shapeInstance.m_shape->Scale(m_scale);
 				}
 				ndSharedPtr<ndMeshJoint>& joint(node->GetJoint());
 				if (joint)

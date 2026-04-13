@@ -103,7 +103,7 @@ void ndRenderSceneNode::ClonePrimitives(const ndRenderSceneNode& src)
 void ndRenderSceneNode::ApplyPrimitiveTransforms()
 {
 	ndAssert(*m_primitive);
-	if (m_primitive->IsSKinnedMesh())
+	if (m_primitive->IsSkinnedMesh())
 	{
 		m_primitive->UpdateSkinPaletteMatrix();
 	}

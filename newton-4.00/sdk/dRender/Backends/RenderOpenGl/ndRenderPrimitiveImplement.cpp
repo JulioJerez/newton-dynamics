@@ -241,14 +241,14 @@ bool ndRenderPrimitiveImplement::IsSimpleMesh() const
 	return m_isSimpleMesh;
 }
 
-bool ndRenderPrimitiveImplement::IsSKinnedMesh() const
+bool ndRenderPrimitiveImplement::IsSkinnedMesh() const
 {
 	return m_skinSceneNode ? true : false;
 }
 
 void ndRenderPrimitiveImplement::UpdateSkinPaletteMatrix()
 {
-	if (!IsSKinnedMesh())
+	if (!IsSkinnedMesh())
 	{
 		return;
 	}
@@ -1520,7 +1520,7 @@ void ndRenderPrimitiveImplement::RenderGenerateShadowMaps(const ndRender* const 
 
 	if (castShadow)
 	{
-		if (IsSKinnedMesh())
+		if (IsSkinnedMesh())
 		{
 			m_generateSkinShadowMapsBlock.Render(this, render, lightMatrix);
 		}
@@ -1540,7 +1540,7 @@ void ndRenderPrimitiveImplement::RenderGenerateInstancedShadowMaps(const ndRende
 		castShadow = castShadow && segment.m_material.m_castShadows;
 	}
 
-	if (castShadow && !IsSKinnedMesh())
+	if (castShadow && !IsSkinnedMesh())
 	{
 		m_generateIntanceShadowMapsBlock.Render(this, render, lightMatrix);
 	}
@@ -1576,7 +1576,7 @@ void ndRenderPrimitiveImplement::RenderDirectionalDiffuseColorShadow(const ndRen
 	{
 		return;
 	}
-	if (IsSKinnedMesh())
+	if (IsSkinnedMesh())
 	{
 		m_opaqueDiffusedColorShadowSkinBlock.Render(this, render, modelMatrix);
 	}
