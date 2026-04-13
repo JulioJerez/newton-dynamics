@@ -139,8 +139,7 @@ void ndBasicRagdoll (ndDemoEntityManager* const scene)
 	};
 
 	ndRenderMeshLoader loader(*scene->GetRenderer());
-	loader.LoadMesh(ndGetWorkingFileName("daveRagdoll2.nd"));
-	//loader.LoadMesh(ndGetWorkingFileName("ragdoll.nd"));
+	loader.LoadMesh(ndGetWorkingFileName("basicRagdoll.nd"));
 
 	ndMatrix playerMatrix(PlaceMatrix(scene, 0.0f, 0.0f, 0.0f));
 	CreateRagdoll(scene, loader, playerMatrix);
@@ -150,11 +149,12 @@ void ndBasicRagdoll (ndDemoEntityManager* const scene)
 		// add few more rag dolls
 		loader.LoadMesh(ndGetWorkingFileName("daveRagdoll1.nd"));
 		
-		CreateRagdoll(scene, loader, PlaceMatrix(scene, 4.0f, 0.0f, -10.0f));
+		CreateRagdoll(scene, loader, PlaceMatrix(scene, 4.0f, 0.0f, -8.0f));
 		//CreateRagdoll(scene, loader, PlaceMatrix(scene, 6.0f, 0.0f, -10.0f));
 		//CreateRagdoll(scene, loader, PlaceMatrix(scene, 8.0f, 0.0f, -10.0f));
 
-		//CreateRagdoll(scene, loader, PlaceMatrix(scene, 4.0f, 0.0f, 10.0f));
+		loader.LoadMesh(ndGetWorkingFileName("daveRagdoll2.nd"));
+		CreateRagdoll(scene, loader, PlaceMatrix(scene, -4.0f, 0.0f, -8.0f));
 		//CreateRagdoll(scene, loader, PlaceMatrix(scene, 6.0f, 0.0f, 10.0f));
 		//CreateRagdoll(scene, loader, PlaceMatrix(scene, 8.0f, 0.0f, 10.0f));
 #endif
