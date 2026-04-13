@@ -95,7 +95,6 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 		// body mass
 		{
 			ndReal scalar = ndReal(ndFloat32(1.0f) / rigidBody->m_invMass.m_w);
-			//if (ImGui::DragFloat("mass", &scalar))
 			if (ImGui::InputFloat("mass", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
@@ -138,7 +137,6 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 		// body max linear integration step 
 		{
 			ndReal scalar = ndReal(rigidBody->m_maxLinearStep);
-			//if (ImGui::DragFloat("linear step", &scalar))
 			if (ImGui::InputFloat("linear step", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
@@ -151,7 +149,6 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 		// body max angular integration step 
 		{
 			ndReal scalar = ndReal(rigidBody->m_maxAngleStep);
-			//if (ImGui::DragFloat("angle step", &scalar))
 			if (ImGui::InputFloat("angle step", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
@@ -164,7 +161,6 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 		// body intrinsic linear damp 
 		{
 			ndReal scalar = ndReal(rigidBody->m_intrinsicDamping.m_w);
-			//if (ImGui::DragFloat("linear Damp", &scalar))
 			if (ImGui::InputFloat("linear damp", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
@@ -181,7 +177,6 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			real[0] = ndReal(vector.m_x);
 			real[1] = ndReal(vector.m_y);
 			real[2] = ndReal(vector.m_z);
-			//if (ImGui::DragFloat3("angular damp", real))
 			if (ImGui::InputFloat3("angular damp", real, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
@@ -200,7 +195,6 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			real[0] = ndReal(vector.m_x);
 			real[1] = ndReal(vector.m_y);
 			real[2] = ndReal(vector.m_z);
-			//if (ImGui::DragFloat3("com", real))
 			if (ImGui::InputFloat3("com", real, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));

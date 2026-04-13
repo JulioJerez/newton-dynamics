@@ -34,7 +34,7 @@ ndAssetEditor::ndAssetEditor()
 	,m_showParentRelativeTransform(false)
 	,m_toolActive(false)
 	,m_renderMode(m_shaded)
-	,m_gizmoScale(0.5f)
+	,m_gizmoScale(0.25f)
 {
 	// Setup window
 	char title[256];
@@ -474,9 +474,9 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::RadioButton("hidden Surface", &m_renderMode, m_hiddenSurface);
 
 			ImGui::Separator();
-			if (ImGui::DragFloat("gizmo scale", &m_gizmoScale, 0.1f))
+			if (ImGui::InputFloat("gizmo scale", &m_gizmoScale, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				m_gizmoScale = ndClamp(m_gizmoScale, ndReal(0.1f), ndReal(2.0f));
+				m_gizmoScale = ndClamp(m_gizmoScale, ndReal(1.0f / 32.0f), ndReal(2.0f));
 			}
 
 			ImGui::Separator();

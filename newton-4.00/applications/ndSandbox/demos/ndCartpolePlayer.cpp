@@ -199,20 +199,20 @@ namespace ndCarpolePlayer
 
 			if (node->m_name.Find("cart") > -1)
 			{ 
-				m_cart = node->m_body;
+				m_cart = *node->m_body;
 			}
 			else if (node->m_name.Find("pole") > -1)
 			{
-				m_pole = node->m_body;
-				m_poleHinge = node->m_joint;
+				m_pole = *node->m_body;
+				m_poleHinge = *node->m_joint;
 			}
 		};
 		model->GetAsModelArticulation()->NodeIterator(BindApplicationData);
 
 		ndWorld* const world = scene->GetWorld();
 		const ndMatrix sliderMatrix(model->GetRoot()->m_body->GetMatrix());
-		m_slider = ndSharedPtr<ndJointBilateralConstraint>(new ndJointSlider(sliderMatrix, model->GetRoot()->m_body->GetAsBodyKinematic(), world->GetSentinelBody()));
-		model->AddCloseLoop(m_slider);
+		m_slider = new ndJointSlider(sliderMatrix, model->GetRoot()->m_body->GetAsBodyKinematic(), world->GetSentinelBody());
+		model->AddCloseLoop(ndSharedPtr<ndJointBilateralConstraint>(*m_slider));
 	}
 
 	ndModelArticulation* ndController::CreateModel(ndDemoEntityManager* const scene, const ndMatrix& location, const ndRenderMeshLoader& loader, const char* const name)

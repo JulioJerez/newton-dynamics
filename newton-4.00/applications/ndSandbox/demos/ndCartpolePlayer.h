@@ -90,10 +90,10 @@ namespace ndCarpolePlayer
 
 		static ndModelArticulation* CreateModel(ndDemoEntityManager* const scene, const ndMatrix& location, const ndRenderMeshLoader& loader, const char* const name);
 
-		ndSharedPtr<ndBody> m_cart;
-		ndSharedPtr<ndBody> m_pole;
-		ndSharedPtr<ndJointBilateralConstraint> m_slider;
-		ndSharedPtr<ndJointBilateralConstraint> m_poleHinge;
+		ndWeakPtr<ndBody> m_cart;
+		ndWeakPtr<ndBody> m_pole;
+		ndWeakPtr<ndJointBilateralConstraint> m_slider;
+		ndWeakPtr<ndJointBilateralConstraint> m_poleHinge;
 		ndSharedPtr<ndBrainAgent> m_agent;
 		ndFloat32 m_timestep;
 		ndInt32 m_randomImpulseCounter;

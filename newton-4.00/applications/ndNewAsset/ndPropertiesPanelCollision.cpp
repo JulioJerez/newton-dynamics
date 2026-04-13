@@ -470,7 +470,7 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 		else if (strcmp(className, ndShapeCompound::StaticClassName()) == 0)
 		{
 			ndReal size = 1;
-			if (ImGui::DragFloat("size##1", &size))
+			if (ImGui::InputFloat("mass", &size, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 
 			}

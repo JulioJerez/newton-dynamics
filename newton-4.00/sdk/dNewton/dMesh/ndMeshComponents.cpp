@@ -290,16 +290,18 @@ void ndMeshJointSpherical::DeserializeFromXml(const nd::TiXmlElement* const pare
 {
 	ndMeshJoint::DeserializeFromXml(parent);
 
-	//m_rotation = xmlGetMatrix(parent, "rotation");
 	m_axis.m_springK = xmlGetFloat(parent, "springK");
 	m_axis.m_damperC = xmlGetFloat(parent, "damperC");
 	m_maxConeAngle = xmlGetFloat(parent, "maxConeAngle");
 	m_axis.m_minLimit = xmlGetFloat(parent, "minTwistAngle");
 	m_axis.m_maxLimit = xmlGetFloat(parent, "maxTwistAngle");
 
-	m_coneAngleState = ndInt8(xmlGetInt(parent, "coneLimitState"));
-	m_axis.m_limitState = ndInt8(xmlGetInt(parent, "twistLimitState"));
-	m_axis.m_springDamperRegularizer = xmlGetFloat(parent, "springDamperRegularizer");
+	if (xmlHasAttribute(parent, "coneLimitState"))
+	{
+		m_coneAngleState = ndInt8(xmlGetInt(parent, "coneLimitState"));
+		m_axis.m_limitState = ndInt8(xmlGetInt(parent, "twistLimitState"));
+		m_axis.m_springDamperRegularizer = xmlGetFloat(parent, "springDamperRegularizer");
+	}
 }
 
 ndJointBilateralConstraint* ndMeshJointSpherical::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
@@ -307,7 +309,6 @@ ndJointBilateralConstraint* ndMeshJointSpherical::CreateObject(ndBodyKinematic* 
 	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
 	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 	ndJointSpherical* const joint = new ndJointSpherical(pinAndPivotInChild, pinAndPivotInParent, child, parent);
-	//joint->SetOffsetRotation(m_rotation);
 	joint->SetConeLimitState(m_coneAngleState ? true : false);
 	joint->SetTwistLimitState(m_axis.m_limitState ? true : false);
 	joint->SetAsSpringDamper(m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
@@ -330,7 +331,6 @@ void ndMeshJointWheel::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	ndMeshJoint::SerializeToXml(parent);
 
-	//xmlSaveParam(parent, "baseFrame", m_baseFrame);
 	xmlSaveParam(parent, "springK", m_axis.m_springK);
 	xmlSaveParam(parent, "damperC", m_axis.m_damperC);
 	xmlSaveParam(parent, "upperStop", m_axis.m_minLimit);
@@ -345,7 +345,6 @@ void ndMeshJointWheel::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndMeshJoint::DeserializeFromXml(parent);
 
-	//m_baseFrame = xmlGetMatrix(parent, "baseFrame");
 	m_axis.m_springK = xmlGetFloat(parent, "springK");
 	m_axis.m_damperC = xmlGetFloat(parent, "damperC");
 	m_axis.m_minLimit = xmlGetFloat(parent, "upperStop");
@@ -445,8 +444,6 @@ ndJointBilateralConstraint* ndMeshJointRoller::CreateObject(ndBodyKinematic* con
 	return joint;
 }
 
-
-
 ndMeshJointCylinder::ndMeshJointCylinder()
 	:ndMeshJoint()
 {
@@ -545,7 +542,6 @@ void ndMeshJointPlane::DeserializeFromXml(const nd::TiXmlElement* const parent)
 ndJointBilateralConstraint* ndMeshJointPlane::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
 {
 	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
-	//const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 	ndJointPlane* const joint = new ndJointPlane(pinAndPivotInChild.m_posit, pinAndPivotInChild.m_front, child, parent);
 
 	joint->EnableControlRotation(m_controlRotation ? true : false);

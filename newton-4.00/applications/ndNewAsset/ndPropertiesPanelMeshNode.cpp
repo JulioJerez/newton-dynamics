@@ -116,7 +116,6 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				position[0] = ndReal(matrix.m_posit.m_x);
 				position[1] = ndReal(matrix.m_posit.m_y);
 				position[2] = ndReal(matrix.m_posit.m_z);
-				//if (ImGui::DragFloat3("posit", position, 0.01f))
 				if (ImGui::InputFloat3("posit", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 				{
 					ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
@@ -147,7 +146,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 					entNode->SetTransform(newMatrix);
 				
 					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, m_currentSelection)));
-				};
+				}
 			}
 			else
 			{
@@ -156,14 +155,13 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				position[2] = ndReal(0.0f);
 
 				// this is really nice but creates lots of issues with undo/redo
-				//if (ImGui::DragFloat3("position", position, 0.01f))
 				if (ImGui::InputFloat3("posit", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 				{
 					ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
 					ndAssert(entNode);
 					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, m_currentSelection)));
 
-					const ndVector delta(position[0], position[1], position[2], ndFloat32(1.0f));
+					const ndVector delta(position[0], position[1], position[2], ndFloat32(0.0f));
 					matrix.m_posit += matrix.RotateVector(delta);
 					m_currentSelection->SetMatrix(matrix);
 					entNode->SetTransform(matrix);
@@ -187,7 +185,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 					entNode->SetTransform(newMatrix);
 
 					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, m_currentSelection)));
-				};
+				}
 			}
 		}
 
@@ -200,7 +198,6 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			position[0] = ndReal(matrix.m_posit.m_x);
 			position[1] = ndReal(matrix.m_posit.m_y);
 			position[2] = ndReal(matrix.m_posit.m_z);
-			//if (ImGui::DragFloat3("position##1", position))
 			if (ImGui::InputFloat3("posit##1", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
@@ -223,7 +220,6 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			euler[0] = ndReal(radians[0]);
 			euler[1] = ndReal(radians[1]);
 			euler[2] = ndReal(radians[2]);
-			//if (ImGui::DragFloat3("rotation##1", euler))
 			if (ImGui::InputFloat3("rotation##1", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
