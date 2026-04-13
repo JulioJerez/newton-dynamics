@@ -11,6 +11,7 @@
 
 #include "ndNewAssetStdafx.h"
 #include "ndUrdfFile.h"
+#include "ndResizeMesh.h"
 #include "ndAssetEditor.h"
 #include "ndFileBrowser.h"
 #include "ndMenuRenderPass.h"
@@ -94,26 +95,6 @@ ndDebugDisplayRenderPass* ndAssetEditor::GetDebugDisplay() const
 	return (ndDebugDisplayRenderPass*)*m_debugDisplayRenderPass;
 }
 
-bool ndAssetEditor::GetKeyState(ndInt32 key) const
-{
-	const ImGuiIO& io = ImGui::GetIO();
-	bool state = io.KeysDown[key];
-	return state;
-}
-
-bool ndAssetEditor::AnyKeyDown() const
-{
-	const ImGuiIO& io = ImGui::GetIO();
-	for (ndInt32 i = 0; i < ImGuiKey_COUNT; ++i)
-	{
-		if (io.KeysDown[i])
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
 void ndAssetEditor::CharCallback(ndUnsigned32 ch)
 {
 	ImGuiIO& io = ImGui::GetIO();
@@ -169,24 +150,6 @@ void ndAssetEditor::KeyCallback(ndInt32 key, ndInt32)
 	}
 }
 
-bool ndAssetEditor::IsShiftKeyDown () const
-{
-	const ImGuiIO& io = ImGui::GetIO();
-	const ndInt32 KEY_LEFT_SHIFT = 340;
-	const ndInt32 KEY_RIGHT_SHIFT = 344;
-	bool state = io.KeysDown[KEY_LEFT_SHIFT] || io.KeysDown[KEY_RIGHT_SHIFT];
-	return state;
-}
-
-bool ndAssetEditor::IsControlKeyDown () const
-{
-	ndAssert(0);
-	return 0;
-	//const ImGuiIO& io = ImGui::GetIO();
-	//bool state = io.KeysDown[GLFW_KEY_LEFT_CONTROL] || io.KeysDown[GLFW_KEY_RIGHT_CONTROL];
-	//return state;
-}
-
 bool ndAssetEditor::GetCaptured() const
 {
 	ImGuiIO& io = ImGui::GetIO();
@@ -213,16 +176,25 @@ bool ndAssetEditor::GetMousePosition (ndFloat32& posX, ndFloat32& posY) const
 	return true;
 }
 
-ndInt32 ndAssetEditor::Print (const ndVector&, const char *fmt, ... ) const
-{
-	va_list argptr;
-	char string[1024];
 
-	va_start (argptr, fmt);
-	vsnprintf (string, sizeof (string), fmt, argptr);
-	va_end( argptr );
-	ImGui::Text(string, "");
-	return 0;
+bool ndAssetEditor::GetActiveTool() const
+{
+	return m_toolActive;
+}
+
+void ndAssetEditor::SetActiveTool(bool toolState)
+{
+	m_toolActive = toolState;
+}
+
+ndSharedPtr<ndMesh>& ndAssetEditor::GetMesh()
+{
+	return m_mesh;
+}
+
+const ndSharedPtr<ndMesh>& ndAssetEditor::GetMesh() const
+{
+	return m_mesh;
 }
 
 void ndAssetEditor::SetCameraMatrix (const ndQuaternion& rotation, const ndVector& position)
@@ -494,6 +466,12 @@ void ndAssetEditor::ShowMainMenuBar()
 
 		if (ImGui::BeginMenu("Tools"))
 		{
+			if (ImGui::MenuItem("resize mesh", ""))
+			{
+				m_toolActive = true;
+				m_currentTool = new ndResizeMesh(this);
+			}
+
 			if (ImGui::MenuItem("normalize mass distibution", ""))
 			{
 				m_toolActive = true;
@@ -505,6 +483,11 @@ void ndAssetEditor::ShowMainMenuBar()
 
 		ImGui::EndMainMenuBar();
 	}
+}
+
+const ndString& ndAssetEditor::GetPath() const
+{
+	return m_currentPath;
 }
 
 void ndAssetEditor::SetVisualScene(const ndRenderMeshLoader& loader)
@@ -530,7 +513,7 @@ void ndAssetEditor::Run()
 				m_renderer->RemoveSceneNode(m_entity);
 				m_entity = ndSharedPtr<ndRenderSceneNode>(nullptr);
 				m_debugDisplayRenderPass->ResetScene();
-				m_model = ndSharedPtr<ndModel>(nullptr);
+				//m_model = ndSharedPtr<ndModel>(nullptr);
 			}
 
 			if (*m_newMesh)
@@ -543,7 +526,7 @@ void ndAssetEditor::Run()
 
 				m_mesh = m_newMesh;
 				m_entity = m_newSceneMesh;
-				m_model = ndSharedPtr<ndModel>(new ndModelArticulation());
+				//m_model = ndSharedPtr<ndModel>(new ndModelArticulation());
 
 				m_newMesh = ndSharedPtr<ndMesh>(nullptr);
 				m_newSceneMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);

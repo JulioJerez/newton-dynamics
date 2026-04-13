@@ -164,6 +164,7 @@ class ndMesh : public ndClassAlloc
 	ndSharedPtr<ndMeshJoint> m_joint;
 	ndSharedPtr<ndMeshBody> m_rigidBody;
 	ndList<ndSharedPtr<ndMesh>> m_children;
+	ndSharedPtr<ndMeshLoopJoint> m_loopJoint;
 	ndList<ndSharedPtr<ndMesh>>::ndNode* m_selfChildNode;
 	ndVector m_boneTarget;
 	ndNodeType m_type;

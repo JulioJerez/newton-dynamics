@@ -131,6 +131,12 @@ void ndModelArticulation::NodeIterator(Function func)
 				stack.PushBack(child);
 			}
 		}
+
+		for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* loopNode = m_closeLoops.GetFirst(); loopNode; loopNode = loopNode->GetNext())
+		{
+			ndNode* const node = &loopNode->GetInfo();
+			func(node);
+		}
 	}
 }
 

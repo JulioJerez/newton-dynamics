@@ -12,18 +12,17 @@
 #include "ndNewAssetStdafx.h"
 #include "ndAssetEditor.h"
 
-#ifndef __D_NORMALIZE_MASS_TOOL_H__
-#define __D_NORMALIZE_MASS_TOOL_H__
+#ifndef __D_RESIZE_MESH_H__
+#define __D_RESIZE_MESH_H__
 
-class ndNomalizeMassDistribution : public ndAssetEditor::ndAssetTool
+class ndResizeMesh : public ndAssetEditor::ndAssetTool
 {
 	public:
-	ndNomalizeMassDistribution(ndAssetEditor* const owner);
+	ndResizeMesh(ndAssetEditor* const owner);
 
 	virtual void Execute() override;
 
-	ndReal m_totalMass;
-	ndReal m_inertialRatio;
+	ndReal m_scale;
 };
 
 

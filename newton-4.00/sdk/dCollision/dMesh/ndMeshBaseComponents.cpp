@@ -459,3 +459,53 @@ void ndMeshJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
 	m_localFrame0 = xmlGetMatrix(parent, "localFrame0");
 	m_localFrame1 = xmlGetMatrix(parent, "localFrame1");
 }
+
+void ndMeshJoint::ApplyTransform(const ndMatrix& transform)
+{
+	ndMatrix matrix0(m_localFrame0 * transform);
+	ndMatrix matrix1(m_localFrame1 * transform);
+
+	ndVector scale;
+	ndMatrix stretchAxis;
+	ndMatrix transformMatrix;
+
+	matrix0.PolarDecomposition(transformMatrix, scale, stretchAxis);
+	m_localFrame0 = transformMatrix;
+
+	matrix1.PolarDecomposition(transformMatrix, scale, stretchAxis);
+	m_localFrame1 = transformMatrix;
+}
+
+
+ndMeshLoopJoint::ndMeshLoopJoint()
+	:ndClassAlloc()
+{
+}
+
+ndMeshLoopJoint::ndMeshLoopJoint(const ndJointBilateralConstraint* const joint)
+	:ndClassAlloc()
+//	,ndWeakPtr<ndMesh> m_otherNode;
+//	,m_joint;
+{
+}
+
+ndMeshLoopJoint::~ndMeshLoopJoint()
+{
+
+}
+
+ndJointBilateralConstraint* ndMeshLoopJoint::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+{
+	ndAssert(0);
+	return nullptr;
+}
+
+void ndMeshLoopJoint::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndAssert(0);
+}
+
+void ndMeshLoopJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndAssert(0);
+}

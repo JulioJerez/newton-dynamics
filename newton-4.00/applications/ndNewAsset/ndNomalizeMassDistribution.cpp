@@ -10,7 +10,6 @@
 */
 
 #include "ndNewAssetStdafx.h"
-#include "ndUndoRedo.h"
 #include "ndAssetEditor.h"
 #include "ndNomalizeMassDistribution.h"
 
@@ -23,13 +22,19 @@ ndNomalizeMassDistribution::ndNomalizeMassDistribution(ndAssetEditor* const owne
 
 void ndNomalizeMassDistribution::Execute()
 {
-	ImGui::Begin("normalize mass distribution", &m_owner->m_toolActive);
+	ImGuiWindowFlags flags = ImGuiWindowFlags_None;
+	flags |= ImGuiWindowFlags_NoDocking;
+	flags |= ImGuiWindowFlags_AlwaysAutoResize;
+
+	bool toolActive = m_owner->GetActiveTool();
+	ImGui::Begin("normalize mass distribution", &toolActive, flags);
+	m_owner->SetActiveTool(toolActive);
 	
 	if (ImGui::InputFloat("total mass", &m_totalMass, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_totalMass = ndMax(m_totalMass, ndReal(1.0f));
 	}
-	if (ImGui::InputFloat("principal Inertia ration", &m_inertialRatio, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	if (ImGui::InputFloat("principal Inertia ratio", &m_inertialRatio, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_inertialRatio = ndClamp(m_inertialRatio, ndReal(0.1f), ndReal(1.0f));
 	}
@@ -42,13 +47,13 @@ void ndNomalizeMassDistribution::Execute()
 			ndSharedPtr<ndMeshBody> body (node->GetRigidBody());
 			if (body)
 			{
-				ndMeshBodyKinematic* const kinBody = (ndMeshBodyKinematic*)*body;
-				ndSharedPtr<ndShapeInstance> instance (kinBody->m_shapeInstance.CreateObject());
-				ndFloat32 v = instance->GetVolume() * kinBody->m_massVolumeWeigh;
+				ndMeshBodyDynamic* const dynBody = (ndMeshBodyDynamic*)*body;
+				ndSharedPtr<ndShapeInstance> instance (dynBody->m_shapeInstance.CreateObject());
+				ndFloat32 v = instance->GetVolume() * dynBody->m_massVolumeWeigh;
 				volume += v;
 			}
 		};
-		m_owner->m_mesh->NodeIterator(TotalVolume);
+		m_owner->GetMesh()->NodeIterator(TotalVolume);
 
 		ndFloat32 density = m_totalMass / volume;
 		auto SetBodyMass = [this, density](ndMesh* const node)
@@ -79,7 +84,7 @@ void ndNomalizeMassDistribution::Execute()
 				kinBody->m_invMass = inertia;
 			}
 		};
-		m_owner->m_mesh->NodeIterator(SetBodyMass);
+		m_owner->GetMesh()->NodeIterator(SetBodyMass);
 	}
 
 	ImGui::End();
