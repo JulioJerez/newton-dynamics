@@ -103,7 +103,8 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API const ndSharedPtr<ndMeshEffect>& GetMesh() const;
 	D_NEWTON_API void SetMesh(const ndSharedPtr<ndMeshEffect>& mesh);
 
-	D_NEWTON_API ndSharedPtr<ndMeshBody> GetRigidBody() const;
+	D_NEWTON_API ndSharedPtr<ndMeshBody>& GetRigidBody();
+	D_NEWTON_API const ndSharedPtr<ndMeshBody>& GetRigidBody() const;
 	D_NEWTON_API void SetRigidBody(ndSharedPtr<ndMeshBody>& rigidBody);
 
 	D_NEWTON_API ndSharedPtr<ndMeshJoint>& GetJoint();
@@ -164,6 +165,7 @@ class ndMesh : public ndClassAlloc
 	ndSharedPtr<ndMeshJoint> m_joint;
 	ndSharedPtr<ndMeshBody> m_rigidBody;
 	ndList<ndSharedPtr<ndMesh>> m_children;
+	ndSharedPtr<ndMeshLoopJoint> m_loopJoint;
 	ndList<ndSharedPtr<ndMesh>>::ndNode* m_selfChildNode;
 	ndVector m_boneTarget;
 	ndNodeType m_type;

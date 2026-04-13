@@ -25,6 +25,7 @@
 #include "ndCore.h"
 
 class ndBody;
+class ndMesh;
 class ndMeshEffect;
 class ndShapeInstance;
 class ndBodyKinematic;
@@ -219,10 +220,27 @@ class ndMeshJoint : public ndClassAlloc
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
 
+	D_COLLISION_API virtual void ApplyTransform(const ndMatrix& tranform);
+
+
 	ndMatrix m_localFrame0;
 	ndMatrix m_localFrame1;
 	ndString m_constructor;
 };
 
+class ndMeshLoopJoint : public ndClassAlloc
+{
+	public:
+	D_COLLISION_API ndMeshLoopJoint();
+	D_COLLISION_API ndMeshLoopJoint(const ndJointBilateralConstraint* const joint);
+	D_COLLISION_API virtual ~ndMeshLoopJoint();
+
+	D_COLLISION_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const;
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+
+	ndWeakPtr<ndMesh> m_otherNode;
+	ndSharedPtr<ndMeshJoint> m_joint;
+};
 #endif
 

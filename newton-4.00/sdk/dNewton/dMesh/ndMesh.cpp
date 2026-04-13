@@ -42,6 +42,10 @@ ndMesh::ndMesh()
 	,m_rotation()
 	,m_parent(nullptr)
 	,m_mesh(nullptr)
+	,m_joint(nullptr)
+	,m_rigidBody(nullptr)
+	,m_children()
+	,m_loopJoint(nullptr)
 	,m_selfChildNode(nullptr)
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
@@ -763,7 +767,12 @@ void ndMesh::SetRigidBody(ndSharedPtr<ndMeshBody>& rigidBody)
 	m_rigidBody = rigidBody;
 }
 
-ndSharedPtr<ndMeshBody> ndMesh::GetRigidBody() const
+ndSharedPtr<ndMeshBody>& ndMesh::GetRigidBody()
+{
+	return m_rigidBody;
+}
+
+const ndSharedPtr<ndMeshBody>& ndMesh::GetRigidBody() const
 {
 	return m_rigidBody;
 }

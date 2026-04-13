@@ -27,11 +27,9 @@ class ndAnimationMeshLoader : public ndMeshLoader
 	virtual bool ImportFbx(const ndString& fbxPathMeshName);
 	ndSharedPtr<ndAnimationSequence> ImportFbxAnimation(const ndString& fbxPathAnimName);
 
-	protected:
 	ndString GetPath(const ndString& fullPathName) const;
 	ndString GetName(const ndString& fullPathName) const;
 
-	public:
 	ndTree<ndSharedPtr<ndAnimationSequence>, ndString> m_animationCache;
 };
 

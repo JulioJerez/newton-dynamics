@@ -40,6 +40,7 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	~ndDebugDisplayRenderPass();
 
 	void RebuildDebugCollision();
+	virtual void ResetScene() override;
 
 	private:
 	void RenderOptions();
@@ -47,7 +48,6 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	void RenderSelectedNode();
 	void RenderHiddenSurface();
 	void RenderCollisionShape();
-	virtual void ResetScene() override;
 	virtual void RenderScene() override;
 	
 	//ndDebugMesh* CreateRenderPrimitive(const ndShapeInstance& shapeInstance) const;

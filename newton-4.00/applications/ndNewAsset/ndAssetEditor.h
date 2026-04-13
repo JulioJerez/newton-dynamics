@@ -94,33 +94,32 @@ class ndAssetEditor : public ndClassAlloc
 	ndFloat32 GetMouseWheel() const;
 	bool GetMousePosition (ndFloat32& posX, ndFloat32& posY) const;
 	void SetCameraMatrix (const ndQuaternion& rotation, const ndVector& position);
-	
-	bool AnyKeyDown() const;
-	bool IsShiftKeyDown () const;
-	bool IsControlKeyDown () const;
-	bool GetKeyState(ndInt32 key) const;
 
 	void Terminate();
-
+	bool GetCaptured() const;
 	void CharCallback(ndUnsigned32 ch);
 	void CursorposCallback(ndReal x, ndReal y);
+	bool GetMouseKeyState(ndInt32 button) const;
 	void MouseScrollCallback(ndReal x, ndReal y);
 	void KeyCallback(ndInt32 key, ndInt32 action);
 	void MouseButtonCallback(ndInt32 button, ndInt32 action);
-
-	bool GetCaptured () const;
-	bool GetMouseKeyState (ndInt32 button ) const;
-	ndInt32 Print (const ndVector& color, const char *fmt, ... ) const;
 
 	void TestImGui();
 	void RenderLayout();
 	ndDebugDisplayRenderPass* GetDebugDisplay() const;
 
+	bool GetActiveTool() const;
+	void SetActiveTool(bool toolState);
+
+	ndSharedPtr<ndMesh>& GetMesh();
+	const ndSharedPtr<ndMesh>& GetMesh() const;
+	
+	const ndString& GetPath() const;
+	void SetVisualScene(const ndRenderMeshLoader& loader);
+
 	private:
 	void RenderScene();
 	void UpdatePhysics(ndFloat32 timestep);
-	void SetVisualScene(const ndRenderMeshLoader& loader);
-	
 	void OnSubStepPostUpdate(ndFloat32 timestep);
 
 	void ConfigureDockSpace();
@@ -136,7 +135,7 @@ class ndAssetEditor : public ndClassAlloc
 	void ShowPropertiesRigidBodyInfo();
 		
 	ndSharedPtr<ndMesh> m_mesh;
-	ndSharedPtr<ndModel> m_model;
+	//ndSharedPtr<ndModel> m_model;
 	ndSharedPtr<ndRender> m_renderer;
 	ndSharedPtr<ndRenderSceneNode> m_entity;
 	ndSharedPtr<ndRenderPass> m_menuRenderPass;
@@ -173,7 +172,6 @@ class ndAssetEditor : public ndClassAlloc
 	friend class ndUndoRedoCommand;
 	friend class ndEditorCameraFlyby;
 	friend class ndDebugDisplayRenderPass;
-	friend class ndNomalizeMassDistribution;
 };
 
 #endif
