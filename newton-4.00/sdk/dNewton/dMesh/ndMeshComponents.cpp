@@ -47,6 +47,13 @@ void ndMeshBodyDynamic::SerializeToXml(nd::TiXmlElement* const parent) const
 
 	xmlSaveParam(parent, "intrinsicLinearDamping", m_intrinsicDamping.m_w);
 	xmlSaveParam(parent, "intrinsicAngularDamping", m_intrinsicDamping);
+
+	nd::TiXmlElement* const collidingPair = new nd::TiXmlElement("collidingPairs");
+	parent->LinkEndChild(collidingPair);
+	if (m_collidingPair.GetCount())
+	{
+		ndAssert(0);
+	}
 }
 
 void ndMeshBodyDynamic::DeserializeFromXml(const nd::TiXmlElement* const parent)
@@ -55,6 +62,11 @@ void ndMeshBodyDynamic::DeserializeFromXml(const nd::TiXmlElement* const parent)
 
 	m_intrinsicDamping = xmlGetVector3(parent, "intrinsicAngularDamping");
 	m_intrinsicDamping.m_w = xmlGetFloat(parent, "intrinsicLinearDamping");
+
+	if (xmlHasAttribute(parent, "collidingPairs"))
+	{
+		ndAssert(0);
+	}
 }
 
 ndBody* ndMeshBodyDynamic::CreateObject() const

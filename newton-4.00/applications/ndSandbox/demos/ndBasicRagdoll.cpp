@@ -70,7 +70,7 @@ namespace ndRagdoll
 
 	ndSharedPtr<ndModelNotify> CreateRagdoll(ndDemoEntityManager* const scene, const ndRenderMeshLoader& loader, const ndMatrix& location)
 	{
-		// make a hierchical atriculate model
+		// make a hierchical aticulated model
 		ndSharedPtr<ndModel> model(new ndModelArticulation());
 		
 		// create a ragdoll controller 
@@ -145,7 +145,7 @@ void ndBasicRagdoll (ndDemoEntityManager* const scene)
 	ndMatrix playerMatrix(PlaceMatrix(scene, 0.0f, 0.0f, 0.0f));
 	CreateRagdoll(scene, loader, playerMatrix);
 
-#if 1
+#if 0
 	{
 		// add few more rag dolls
 		loader.LoadMesh(ndGetWorkingFileName("daveRagdoll1.nd"));

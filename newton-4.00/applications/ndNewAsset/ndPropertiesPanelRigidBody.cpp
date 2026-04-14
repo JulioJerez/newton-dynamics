@@ -244,6 +244,24 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
 			};
 		}
+
+		// colliing pairs
+		{
+			ImGui::SeparatorText("colliding pairs");
+			if (ImGui::Button("add body"))
+			{
+				ndTrace(("add body\n"));
+			}
+			if (ImGui::Button("remove body"))
+			{
+				ndTrace(("remove body\n"));
+			}
+
+			const char* items[] = { "Apple", "Banana", "Cherry", "Kiwi", "Mango", "Orange", "Pineapple", "Strawberry", "Watermelon" };
+			static int item_current = 0;
+			ImGui::ListBox(" ##10", &item_current, items, 6);
+
+		}
 	}
 }
 

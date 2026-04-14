@@ -37,7 +37,9 @@ class ndMeshBodyDynamic : public ndMeshBodyKinematic
 	D_NEWTON_API virtual ndBody* CreateObject() const override;
 	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+
 	ndVector m_intrinsicDamping;
+	ndArray<ndSharedPtr<ndMesh>> m_collidingPair;
 };
 
 class ndMeshJointFix6dof : public ndMeshJoint
