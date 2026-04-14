@@ -371,6 +371,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					{
 						m_currentPath = path;
 						SetVisualScene(loader);
+						m_undoRedo.Clear();
 					}
 				}
 			}
@@ -410,6 +411,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					{
 						m_currentPath = path;
 						SetVisualScene(loader);
+						m_undoRedo.Clear();
 					}
 				}
 			}
@@ -425,6 +427,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					{
 						m_currentPath = path;
 						SetVisualScene(loader);
+						m_undoRedo.Clear();
 					}
 				}
 			}
@@ -517,7 +520,7 @@ const ndString& ndAssetEditor::GetPath() const
 
 void ndAssetEditor::SetVisualScene(const ndRenderMeshLoader& loader)
 {
-	m_undoRedo.Clear();
+	//m_undoRedo.Clear();
 	m_newMesh = loader.m_mesh;
 	m_newSceneMesh = loader.m_renderMesh;
 	m_currentSelection = ndSharedPtr<ndMesh>(nullptr);

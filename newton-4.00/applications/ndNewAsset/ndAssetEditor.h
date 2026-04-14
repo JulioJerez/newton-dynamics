@@ -117,7 +117,7 @@ class ndAssetEditor : public ndClassAlloc
 	const ndString& GetPath() const;
 	void SetVisualScene(const ndRenderMeshLoader& loader);
 
-	private:
+	//private:
 	void RenderScene();
 	void UpdatePhysics(ndFloat32 timestep);
 	void OnSubStepPostUpdate(ndFloat32 timestep);
@@ -135,7 +135,6 @@ class ndAssetEditor : public ndClassAlloc
 	void ShowPropertiesRigidBodyInfo();
 		
 	ndSharedPtr<ndMesh> m_mesh;
-	//ndSharedPtr<ndModel> m_model;
 	ndSharedPtr<ndRender> m_renderer;
 	ndSharedPtr<ndRenderSceneNode> m_entity;
 	ndSharedPtr<ndRenderPass> m_menuRenderPass;
