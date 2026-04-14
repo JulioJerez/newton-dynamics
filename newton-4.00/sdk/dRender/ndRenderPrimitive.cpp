@@ -136,9 +136,9 @@ ndRenderPrimitive::~ndRenderPrimitive()
 {
 }
 
-bool ndRenderPrimitive::IsSKinnedMesh() const
+bool ndRenderPrimitive::IsSkinnedMesh() const
 {
-	return m_implement->IsSKinnedMesh();
+	return m_implement->IsSkinnedMesh();
 }
 
 void ndRenderPrimitive::UpdateSkinPaletteMatrix()

@@ -36,7 +36,7 @@ class ndRenderPrimitiveImplement : public ndContainersFreeListAlloc<ndRenderPrim
 	void BuildFromNewtonMeshEffect(const ndRenderPrimitive::ndDescriptor& descriptor);
 
 	bool IsSimpleMesh() const;
-	bool IsSKinnedMesh() const;
+	bool IsSkinnedMesh() const;
 	void UpdateSkinPaletteMatrix();
 	void Render(const ndRender* const render, const ndMatrix& modelViewMatrix, ndRenderPassMode renderMode) const;
 	

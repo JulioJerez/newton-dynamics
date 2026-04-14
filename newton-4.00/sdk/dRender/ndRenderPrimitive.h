@@ -125,7 +125,7 @@ class ndRenderPrimitive : public ndContainersFreeListAlloc<ndRenderPrimitive>
 	ndRenderPrimitive(const ndRenderPrimitive& src, const ndRenderSceneNode* const skeleton);
 	virtual ~ndRenderPrimitive();
 
-	bool IsSKinnedMesh() const;
+	bool IsSkinnedMesh() const;
 	void UpdateSkinPaletteMatrix();
 	void Render(const ndRender* const render, const ndMatrix& modelViewMatrix, ndRenderPassMode renderPassMode) const;
 

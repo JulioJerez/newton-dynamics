@@ -200,7 +200,7 @@ void ndRender::UpdateGlobalMatrices() const
 	{
 		if (*sceneNode->m_primitive)
 		{
-			if (sceneNode->GetAsInstance() || sceneNode->m_primitive->IsSKinnedMesh())
+			if (sceneNode->GetAsInstance() || sceneNode->m_primitive->IsSkinnedMesh())
 			{
 				transformNodes.Append(sceneNode);
 			}

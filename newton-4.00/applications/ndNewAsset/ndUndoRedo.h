@@ -46,6 +46,10 @@ class ndUndoRedoCommand : public ndClassAlloc
 	virtual class ndUndoRedoJointSpherical* GetAsUndoRedoJointSpherical() const { return nullptr; }
 	virtual class ndUndoRedoJointDoubleHinge* GetAsUndoRedoJointDoubleHinge() const { return nullptr; }
 
+	virtual class ndUndoRedoResizeMesh* GetAsUndoRedoResizeMesh() const { return nullptr; }
+	virtual class ndUndoRedoRotateMesh* GetAsUndoRedoResizeRotateMesh() const { return nullptr; }
+	virtual class ndUndoRedoNormalizeMass* GetAsUndoRedoResizeNormalizeMass() const { return nullptr; }
+
 	ndSharedPtr<ndMesh> m_mesh;
 	ndWeakPtr<ndAssetEditor> m_editor;
 };

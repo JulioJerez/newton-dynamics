@@ -26,5 +26,4 @@ class ndNomalizeMassDistribution : public ndAssetEditor::ndAssetTool
 	ndReal m_inertialRatio;
 };
 
-
 #endif

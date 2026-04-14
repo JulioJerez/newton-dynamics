@@ -371,6 +371,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					{
 						m_currentPath = path;
 						SetVisualScene(loader);
+						m_undoRedo.Clear();
 					}
 				}
 			}
@@ -410,6 +411,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					{
 						m_currentPath = path;
 						SetVisualScene(loader);
+						m_undoRedo.Clear();
 					}
 				}
 			}
@@ -425,6 +427,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					{
 						m_currentPath = path;
 						SetVisualScene(loader);
+						m_undoRedo.Clear();
 					}
 				}
 			}
@@ -434,6 +437,24 @@ void ndAssetEditor::ShowMainMenuBar()
 			{
 				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 				m_renderer->Terminate();
+			}
+
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("Objects"))
+		{
+			if (ImGui::Button("create node"))
+			{
+			}
+
+			if (ImGui::Button("create box"))
+			{
+			}
+
+			//ImGui::SeparatorText("");
+			if (ImGui::Button("delete node"))
+			{
 			}
 
 			ImGui::EndMenu();
@@ -499,7 +520,7 @@ const ndString& ndAssetEditor::GetPath() const
 
 void ndAssetEditor::SetVisualScene(const ndRenderMeshLoader& loader)
 {
-	m_undoRedo.Clear();
+	//m_undoRedo.Clear();
 	m_newMesh = loader.m_mesh;
 	m_newSceneMesh = loader.m_renderMesh;
 	m_currentSelection = ndSharedPtr<ndMesh>(nullptr);

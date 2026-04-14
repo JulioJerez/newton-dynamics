@@ -22,6 +22,8 @@ class ndResizeMesh : public ndAssetEditor::ndAssetTool
 
 	virtual void Execute() override;
 
+	void ApplyScale() const;
+
 	ndReal m_scale;
 };
 
