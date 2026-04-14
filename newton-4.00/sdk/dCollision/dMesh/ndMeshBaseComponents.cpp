@@ -48,7 +48,7 @@ ndMeshCollisionShapeNull::ndMeshCollisionShapeNull()
 {
 }
 
-void ndMeshCollisionShapeNull::Scale(ndFloat32)
+void ndMeshCollisionShapeNull::ApplyScale(ndFloat32)
 {
 }
 
@@ -72,7 +72,7 @@ ndMeshCollisionShapeSphere::ndMeshCollisionShapeSphere()
 {
 }
 
-void ndMeshCollisionShapeSphere::Scale(ndFloat32 scale)
+void ndMeshCollisionShapeSphere::ApplyScale(ndFloat32 scale)
 {
 	m_radius *= scale;
 }
@@ -98,7 +98,7 @@ ndMeshCollisionShapeBox::ndMeshCollisionShapeBox()
 {
 }
 
-void ndMeshCollisionShapeBox::Scale(ndFloat32 scale)
+void ndMeshCollisionShapeBox::ApplyScale(ndFloat32 scale)
 {
 	m_x *= scale;
 	m_y *= scale;
@@ -131,7 +131,7 @@ ndMeshCollisionShapeCapsule::ndMeshCollisionShapeCapsule()
 {
 }
 
-void ndMeshCollisionShapeCapsule::Scale(ndFloat32 scale)
+void ndMeshCollisionShapeCapsule::ApplyScale(ndFloat32 scale)
 {
 	m_radius0 *= scale;
 	m_radius1 *= scale;
@@ -163,7 +163,7 @@ ndMeshCollisionShapeCylinder::ndMeshCollisionShapeCylinder()
 {
 }
 
-void ndMeshCollisionShapeCylinder::Scale(ndFloat32 scale)
+void ndMeshCollisionShapeCylinder::ApplyScale(ndFloat32 scale)
 {
 	m_radius0 *= scale;
 	m_radius1 *= scale;
@@ -195,7 +195,7 @@ ndMeshCollisionShapeChamferCylinder::ndMeshCollisionShapeChamferCylinder()
 {
 }
 
-void ndMeshCollisionShapeChamferCylinder::Scale(ndFloat32 scale)
+void ndMeshCollisionShapeChamferCylinder::ApplyScale(ndFloat32 scale)
 {
 	m_height *= scale;
 	m_radius *= scale;
@@ -226,7 +226,7 @@ ndMeshCollisionShapeConvexHull::ndMeshCollisionShapeConvexHull()
 {
 }
 
-void ndMeshCollisionShapeConvexHull::Scale(ndFloat32 scale)
+void ndMeshCollisionShapeConvexHull::ApplyScale(ndFloat32 scale)
 {
 	for (ndInt32 i = 0; i < m_points.GetCount(); ++i)
 	{
@@ -262,7 +262,7 @@ ndMeshCollisionShapeCompound::ndMeshCollisionShapeCompound()
 {
 }
 
-void ndMeshCollisionShapeCompound::Scale(ndFloat32 scale)
+void ndMeshCollisionShapeCompound::ApplyScale(ndFloat32 scale)
 {
 	ndAssert(0);
 }
@@ -310,6 +310,32 @@ ndMeshShapeInstance::ndMeshShapeInstance(const ndShapeInstance& instance)
 	,m_scale(instance.GetScale())
 	,m_shape(instance.GetShape()->GetMeshShape())
 {
+}
+
+void ndMeshShapeInstance::ApplyScale(const ndMatrix& scaleMatrix)
+{
+	//ndMatrix m_localMatrix;
+	//ndMatrix m_alignmentMatrix;
+	ndMatrix scale(ndGetIdentityMatrix());
+	scale[0][0] = m_scale[0];
+	scale[1][1] = m_scale[1];
+	scale[2][2] = m_scale[2];
+
+	const ndMatrix matrix(m_alignmentMatrix * scale * m_localMatrix * scaleMatrix);
+
+	ndVector localScale;
+	ndMatrix stretchAxis;
+	matrix.PolarDecomposition(m_localMatrix, localScale, stretchAxis);
+	if (stretchAxis.TestIdentity())
+	{
+		m_shape->ApplyScale(localScale[0]);
+		m_scale = ndVector::m_one & ndVector::m_triplexMask;
+	}
+	else
+	{
+		m_scale = localScale & ndVector::m_triplexMask;
+		m_alignmentMatrix = stretchAxis;
+	}
 }
 
 void ndMeshShapeInstance::SerializeToXml(nd::TiXmlElement* const parent) const

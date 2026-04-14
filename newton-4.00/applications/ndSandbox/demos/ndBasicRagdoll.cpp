@@ -134,7 +134,7 @@ void ndBasicRagdoll (ndDemoEntityManager* const scene)
 			:ndMatrix(ndGetIdentityMatrix())
 		{
 			m_posit = FindFloor(*scene->GetWorld(), ndVector(x, y, z, ndFloat32 (1.0f)), 200.0f);
-			m_posit.m_y += ndFloat32(3.0f);
+			m_posit.m_y += ndFloat32(1.5f);
 		}
 	};
 
@@ -144,23 +144,23 @@ void ndBasicRagdoll (ndDemoEntityManager* const scene)
 	ndMatrix playerMatrix(PlaceMatrix(scene, 0.0f, 0.0f, 0.0f));
 	CreateRagdoll(scene, loader, playerMatrix);
 
-	{
 #if 1
+	{
 		// add few more rag dolls
 		loader.LoadMesh(ndGetWorkingFileName("daveRagdoll1.nd"));
 		
-		CreateRagdoll(scene, loader, PlaceMatrix(scene, 4.0f, 0.0f, -8.0f));
+		CreateRagdoll(scene, loader, PlaceMatrix(scene, 0.0f, 0.0f, 2.0f));
 		//CreateRagdoll(scene, loader, PlaceMatrix(scene, 6.0f, 0.0f, -10.0f));
 		//CreateRagdoll(scene, loader, PlaceMatrix(scene, 8.0f, 0.0f, -10.0f));
 
 		loader.LoadMesh(ndGetWorkingFileName("daveRagdoll2.nd"));
-		CreateRagdoll(scene, loader, PlaceMatrix(scene, -4.0f, 0.0f, -8.0f));
+		CreateRagdoll(scene, loader, PlaceMatrix(scene, -0.0f, 0.0f, -2.0f));
 		//CreateRagdoll(scene, loader, PlaceMatrix(scene, 6.0f, 0.0f, 10.0f));
 		//CreateRagdoll(scene, loader, PlaceMatrix(scene, 8.0f, 0.0f, 10.0f));
-#endif
 	}
+#endif
 
-	ndFloat32 angle = ndFloat32(90.0f * ndDegreeToRad);
+	ndFloat32 angle = ndFloat32(0.0f * ndDegreeToRad);
 	playerMatrix = ndYawMatrix(angle) * playerMatrix;
 	playerMatrix.m_posit += playerMatrix.m_front.Scale (-10.0f);
 	playerMatrix.m_posit = FindFloor(*scene->GetWorld(), playerMatrix.m_posit, 200.0f);

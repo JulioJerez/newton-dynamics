@@ -108,7 +108,7 @@ void ndResizeMesh::Execute()
 					dynBody->m_invMass = scaleInvInertia;
 
 					// scale collsion shape;
-					dynBody->m_shapeInstance.m_shape->Scale(m_scale);
+					dynBody->m_shapeInstance.ApplyScale(scaleMatrix);
 				}
 				ndSharedPtr<ndMeshJoint>& joint(node->GetJoint());
 				if (joint)
