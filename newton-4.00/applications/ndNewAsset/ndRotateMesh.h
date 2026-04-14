@@ -20,6 +20,8 @@ class ndRotateMesh : public ndAssetEditor::ndAssetTool
 	public:
 	ndRotateMesh(ndAssetEditor* const owner);
 
+	void ApplyRotation();
+
 	virtual void Execute() override;
 	ndReal m_angles[3];
 };

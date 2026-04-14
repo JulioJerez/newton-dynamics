@@ -24,7 +24,7 @@ class ndUndoRedoResizeMesh : public ndUndoRedoCommand
 	{
 	}
 
-	virtual class ndUndoRedoResizeMesh* GetAsUndoRedoResizeMesh() const override
+	virtual ndUndoRedoResizeMesh* GetAsUndoRedoResizeMesh() const override
 	{
 		return (ndUndoRedoResizeMesh*)this;
 	}
@@ -171,9 +171,9 @@ void ndResizeMesh::Execute()
 		if (m_scale != ndReal(1.0f))
 		{
 			m_owner->m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoResizeMesh(*m_owner, m_owner->GetMesh(), ndFloat32 (1.0f) / m_scale)));
-
 			ApplyScale();
 			m_owner->m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoResizeMesh(*m_owner, m_owner->GetMesh(), m_scale)));
+
 			m_scale = ndReal(1.0f);
 		}
 	}
