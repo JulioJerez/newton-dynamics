@@ -57,7 +57,6 @@ class ndUndoRedoResizeMesh : public ndUndoRedoCommand
 	ndFloat32 m_scale;
 };
 
-
 ndResizeMesh::ndResizeMesh(ndAssetEditor* const owner)
 	:ndAssetTool(owner)
 	,m_scale(1.0f)

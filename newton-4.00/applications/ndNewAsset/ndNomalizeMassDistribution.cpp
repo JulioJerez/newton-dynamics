@@ -13,6 +13,73 @@
 #include "ndAssetEditor.h"
 #include "ndNomalizeMassDistribution.h"
 
+class ndUndoRedoNormalizeMass : public ndUndoRedoCommand
+{
+	public:
+	class MassDistibution
+	{
+		public:
+		ndVector m_invMass;
+		ndMeshBodyDynamic* m_body;
+	};
+
+	ndUndoRedoNormalizeMass(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+		:ndUndoRedoCommand(editor, mesh)
+	{
+		auto CollectInertia = [this](ndMesh* const node)
+		{
+			ndSharedPtr<ndMeshBody> body(node->GetRigidBody());
+			if (body)
+			{
+				MassDistibution distribution;
+				distribution.m_body = (ndMeshBodyDynamic*)*body;
+				distribution.m_invMass = distribution.m_body->m_invMass;
+				m_massDitribution.PushBack(distribution);
+			}
+		};
+		mesh->NodeIterator(CollectInertia);
+	}
+
+	virtual ndUndoRedoNormalizeMass* GetAsUndoRedoResizeNormalizeMass() const override
+	{
+		return (ndUndoRedoNormalizeMass*)this;
+	}
+
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+	{
+		if (*m_mesh == *command.m_mesh)
+		{
+			const ndUndoRedoNormalizeMass* const other = command.GetAsUndoRedoResizeNormalizeMass();
+			if (other)
+			{
+				bool test = true;
+				for (ndInt32 i = 0; test && (i < m_massDitribution.GetCount()); ++i)
+				{
+					ndVector diff(m_massDitribution[i].m_invMass - other->m_massDitribution[i].m_invMass);
+					test = test && (diff.DotProduct(diff).GetScalar() < ndFloat32(1.0e-6f));
+				}
+				if (test)
+				{
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	virtual void Undo() override
+	{
+		for (ndInt32 i = 0; i < m_massDitribution.GetCount() ; ++i)
+		{
+			m_massDitribution[i].m_body->m_invMass = m_massDitribution[i].m_invMass;
+		}
+	}
+
+	ndArray<MassDistibution> m_massDitribution;
+};
+
+
 ndNomalizeMassDistribution::ndNomalizeMassDistribution(ndAssetEditor* const owner)
 	:ndAssetTool(owner)
 	,m_totalMass(100.0f)
@@ -41,6 +108,8 @@ void ndNomalizeMassDistribution::Execute()
 
 	if (ImGui::Button("execute"))
 	{
+		m_owner->m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoNormalizeMass(*m_owner, m_owner->GetMesh())));
+
 		ndFloat32 volume = ndFloat32(0.0f);
 		auto TotalVolume = [this, &volume](ndMesh* const node)
 		{
@@ -85,6 +154,7 @@ void ndNomalizeMassDistribution::Execute()
 			}
 		};
 		m_owner->GetMesh()->NodeIterator(SetBodyMass);
+		m_owner->m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoNormalizeMass(*m_owner, m_owner->GetMesh())));
 	}
 
 	ImGui::End();
