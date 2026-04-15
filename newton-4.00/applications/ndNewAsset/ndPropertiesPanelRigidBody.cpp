@@ -293,7 +293,7 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 					};
 					m_mesh->NodeIterator(ListNames);
 
-					if (ImGui::Button("add##15") && (m_addCollingPairCandidateSelection != 1))
+					if (ImGui::Button("add##15") && (m_addCollingPairCandidateSelection != -1))
 					{
 						ndMesh* const otherNode = m_mesh->FindByName(names[m_addCollingPairCandidateSelection]);
 						rigidBody->m_collidingPair.PushBack(ndWeakPtr<ndMesh>(otherNode));

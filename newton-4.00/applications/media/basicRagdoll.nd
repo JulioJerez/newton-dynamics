@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <ndMesh>
-    <name string="root" />
+    <name string="hip" />
     <matrix>
         <posit float3="4.52118e-08 1.08133 0" />
         <angles float3="0 -0 -90" />
@@ -66,9 +66,13 @@
         </collisionInstance>
         <intrinsicLinearDamping float="0" />
         <intrinsicAngularDamping float3="0 0 0" />
+        <collidingPairs>
+            <otherBody string="left_arm" />
+            <otherBody string="right_arm" />
+        </collidingPairs>
     </rigidbody>
     <ndMesh>
-        <name string="unnamed_node_0" />
+        <name string="spine0" />
         <matrix>
             <posit float3="-0.12327 -0.00846689 -0.00117672" />
             <angles float3="0 -0 -6.83019e-06" />
@@ -134,6 +138,12 @@
             </collisionInstance>
             <intrinsicLinearDamping float="0" />
             <intrinsicAngularDamping float3="0 0 0" />
+            <collidingPairs>
+                <otherBody string="left_shoulder" />
+                <otherBody string="right_shoulder" />
+                <otherBody string="left_arm" />
+                <otherBody string="right_arm" />
+            </collidingPairs>
         </rigidbody>
         <joint>
             <constructor string="ndJointSpherical" />
@@ -155,7 +165,7 @@
             <springDamperRegularizer float="0" />
         </joint>
         <ndMesh>
-            <name string="unnamed_node_1" />
+            <name string="spine1" />
             <matrix>
                 <posit float3="-0.123861 -0.00355262 -0.000612628" />
                 <angles float3="0 -0 0" />
@@ -221,6 +231,7 @@
                 </collisionInstance>
                 <intrinsicLinearDamping float="0" />
                 <intrinsicAngularDamping float3="0 0 0" />
+                <collidingPairs />
             </rigidbody>
             <joint>
                 <constructor string="ndJointSpherical" />
@@ -242,7 +253,7 @@
                 <springDamperRegularizer float="0" />
             </joint>
             <ndMesh>
-                <name string="unnamed_node_2" />
+                <name string="right_shoulder" />
                 <matrix>
                     <posit float3="-0.169679 -0.0190871 0.20979" />
                     <angles float3="-2.88605e-13 80 0" />
@@ -310,6 +321,9 @@
                     </collisionInstance>
                     <intrinsicLinearDamping float="0" />
                     <intrinsicAngularDamping float3="0 0 0" />
+                    <collidingPairs>
+                        <otherBody string="spine0" />
+                    </collidingPairs>
                 </rigidbody>
                 <joint>
                     <constructor string="ndJointSpherical" />
@@ -331,7 +345,7 @@
                     <springDamperRegularizer float="0" />
                 </joint>
                 <ndMesh>
-                    <name string="unnamed_node_3" />
+                    <name string="right_arm" />
                     <matrix>
                         <posit float3="-5.96046e-08 0 0.301589" />
                         <angles float3="-150 -90 0" />
@@ -399,6 +413,10 @@
                         </collisionInstance>
                         <intrinsicLinearDamping float="0" />
                         <intrinsicAngularDamping float3="0 0 0" />
+                        <collidingPairs>
+                            <otherBody string="hip" />
+                            <otherBody string="spine0" />
+                        </collidingPairs>
                     </rigidbody>
                     <joint>
                         <constructor string="ndJointHinge" />
@@ -418,7 +436,7 @@
                         <springDamperRegularizer float="0.025" />
                     </joint>
                     <ndMesh>
-                        <name string="unnamed_node_4" />
+                        <name string="right_hand" />
                         <matrix>
                             <posit float3="0.201859 0 0" />
                             <angles float3="-6.83019e-06 1.70755e-06 -4.26887e-07" />
@@ -486,6 +504,7 @@
                             </collisionInstance>
                             <intrinsicLinearDamping float="0" />
                             <intrinsicAngularDamping float3="0 0 0" />
+                            <collidingPairs />
                         </rigidbody>
                         <joint>
                             <constructor string="ndJointDoubleHinge" />
@@ -518,7 +537,7 @@
                 </ndMesh>
             </ndMesh>
             <ndMesh>
-                <name string="unnamed_node_5" />
+                <name string="left_shoulder" />
                 <matrix>
                     <posit float3="-0.178345 -0.0099361 -0.212614" />
                     <angles float3="-7.02089e-05 -80 7.1292e-05" />
@@ -586,6 +605,9 @@
                     </collisionInstance>
                     <intrinsicLinearDamping float="0" />
                     <intrinsicAngularDamping float3="0 0 0" />
+                    <collidingPairs>
+                        <otherBody string="spine0" />
+                    </collidingPairs>
                 </rigidbody>
                 <joint>
                     <constructor string="ndJointSpherical" />
@@ -607,7 +629,7 @@
                     <springDamperRegularizer float="0" />
                 </joint>
                 <ndMesh>
-                    <name string="unnamed_node_6" />
+                    <name string="left_arm" />
                     <matrix>
                         <posit float3="5.96046e-08 3.72529e-09 -0.291908" />
                         <angles float3="150 90 0" />
@@ -675,6 +697,10 @@
                         </collisionInstance>
                         <intrinsicLinearDamping float="0" />
                         <intrinsicAngularDamping float3="0 0 0" />
+                        <collidingPairs>
+                            <otherBody string="hip" />
+                            <otherBody string="spine0" />
+                        </collidingPairs>
                     </rigidbody>
                     <joint>
                         <constructor string="ndJointHinge" />
@@ -694,7 +720,7 @@
                         <springDamperRegularizer float="0.025" />
                     </joint>
                     <ndMesh>
-                        <name string="unnamed_node_7" />
+                        <name string="left_hand" />
                         <matrix>
                             <posit float3="0.201332 1.49012e-08 0" />
                             <angles float3="3.4151e-06 -8.53774e-07 0" />
@@ -762,6 +788,7 @@
                             </collisionInstance>
                             <intrinsicLinearDamping float="0" />
                             <intrinsicAngularDamping float3="0 0 0" />
+                            <collidingPairs />
                         </rigidbody>
                         <joint>
                             <constructor string="ndJointDoubleHinge" />
@@ -794,7 +821,7 @@
                 </ndMesh>
             </ndMesh>
             <ndMesh>
-                <name string="unnamed_node_8" />
+                <name string="neck" />
                 <matrix>
                     <posit float3="-0.21811 0.00946319 -0.000518316" />
                     <angles float3="0 -0 0" />
@@ -862,6 +889,7 @@
                     </collisionInstance>
                     <intrinsicLinearDamping float="0" />
                     <intrinsicAngularDamping float3="0 0 0" />
+                    <collidingPairs />
                 </rigidbody>
                 <joint>
                     <constructor string="ndJointSpherical" />
@@ -883,7 +911,7 @@
                     <springDamperRegularizer float="0" />
                 </joint>
                 <ndMesh>
-                    <name string="unnamed_node_9" />
+                    <name string="head" />
                     <matrix>
                         <posit float3="-0.0936246 -0.00600349 -0.00205715" />
                         <angles float3="0 -0 0" />
@@ -949,6 +977,7 @@
                         </collisionInstance>
                         <intrinsicLinearDamping float="0" />
                         <intrinsicAngularDamping float3="0 0 0" />
+                        <collidingPairs />
                     </rigidbody>
                     <joint>
                         <constructor string="ndJointSpherical" />
@@ -974,7 +1003,7 @@
         </ndMesh>
     </ndMesh>
     <ndMesh>
-        <name string="unnamed_node_10" />
+        <name string="right_leg" />
         <matrix>
             <posit float3="0.108169 0.0374859 0.0966421" />
             <angles float3="-1.83014e-06 15 -7.07113e-06" />
@@ -1042,6 +1071,9 @@
             </collisionInstance>
             <intrinsicLinearDamping float="0" />
             <intrinsicAngularDamping float3="0 0 0" />
+            <collidingPairs>
+                <otherBody string="left_leg" />
+            </collidingPairs>
         </rigidbody>
         <joint>
             <constructor string="ndJointSpherical" />
@@ -1063,7 +1095,7 @@
             <springDamperRegularizer float="0" />
         </joint>
         <ndMesh>
-            <name string="unnamed_node_11" />
+            <name string="right_knee" />
             <matrix>
                 <posit float3="0.427786 -3.72529e-09 0.155701" />
                 <angles float3="-3.24929e-13 -20 -1.21848e-13" />
@@ -1131,6 +1163,9 @@
                 </collisionInstance>
                 <intrinsicLinearDamping float="0" />
                 <intrinsicAngularDamping float3="0 0 0" />
+                <collidingPairs>
+                    <otherBody string="left_knee" />
+                </collidingPairs>
             </rigidbody>
             <joint>
                 <constructor string="ndJointHinge" />
@@ -1150,7 +1185,7 @@
                 <springDamperRegularizer float="0.025" />
             </joint>
             <ndMesh>
-                <name string="unnamed_node_12" />
+                <name string="right_foot" />
                 <matrix>
                     <posit float3="0.432923 7.45058e-09 -8.9407e-08" />
                     <angles float3="-2.03556e-13 -0 -1.27222e-13" />
@@ -1218,6 +1253,7 @@
                     </collisionInstance>
                     <intrinsicLinearDamping float="0" />
                     <intrinsicAngularDamping float3="0 0 0" />
+                    <collidingPairs />
                 </rigidbody>
                 <joint>
                     <constructor string="ndJointDoubleHinge" />
@@ -1250,7 +1286,7 @@
         </ndMesh>
     </ndMesh>
     <ndMesh>
-        <name string="unnamed_node_13" />
+        <name string="left_leg" />
         <matrix>
             <posit float3="0.108169 0.037486 -0.0994042" />
             <angles float3="1.83014e-06 -15 -7.07113e-06" />
@@ -1318,6 +1354,9 @@
             </collisionInstance>
             <intrinsicLinearDamping float="0" />
             <intrinsicAngularDamping float3="0 0 0" />
+            <collidingPairs>
+                <otherBody string="right_leg" />
+            </collidingPairs>
         </rigidbody>
         <joint>
             <constructor string="ndJointSpherical" />
@@ -1339,7 +1378,7 @@
             <springDamperRegularizer float="0" />
         </joint>
         <ndMesh>
-            <name string="unnamed_node_14" />
+            <name string="left_knee" />
             <matrix>
                 <posit float3="0.428145 0 -0.155832" />
                 <angles float3="1.0831e-13 20 -1.21848e-13" />
@@ -1407,6 +1446,9 @@
                 </collisionInstance>
                 <intrinsicLinearDamping float="0" />
                 <intrinsicAngularDamping float3="0 0 0" />
+                <collidingPairs>
+                    <otherBody string="right_knee" />
+                </collidingPairs>
             </rigidbody>
             <joint>
                 <constructor string="ndJointHinge" />
@@ -1426,7 +1468,7 @@
                 <springDamperRegularizer float="0.025" />
             </joint>
             <ndMesh>
-                <name string="unnamed_node_15" />
+                <name string="left_foot" />
                 <matrix>
                     <posit float3="0.43723 0 1.49012e-07" />
                     <angles float3="0 -0 -1.145e-13" />
@@ -1494,6 +1536,7 @@
                     </collisionInstance>
                     <intrinsicLinearDamping float="0" />
                     <intrinsicAngularDamping float3="0 0 0" />
+                    <collidingPairs />
                 </rigidbody>
                 <joint>
                     <constructor string="ndJointDoubleHinge" />
