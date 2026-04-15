@@ -173,16 +173,36 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 	m_mesh = ndSharedPtr<ndMesh>(new ndMesh());
 	stack.PushBack(MeshXmlNodePair(*m_mesh, rootNode));
 
+	// create the hiearchy
 	while (stack.GetCount())
 	{
 		MeshXmlNodePair entry(stack.Pop());
 
 		ndMesh* const mesh = entry.m_mesh;
-
 		mesh->m_name = ndString(xmlGetString(entry.m_xmlNode, "name"));
+
+		for (const nd::TiXmlNode* node = entry.m_xmlNode->FirstChild("ndMesh"); node; node = node->NextSibling("ndMesh"))
+		{
+			const nd::TiXmlElement* const linkNode = (nd::TiXmlElement*)node;
+			ndAssert(strcmp(linkNode->Value(), "ndMesh") == 0);
+
+			ndSharedPtr<ndMesh> child(new ndMesh());
+			entry.m_mesh->AddChild(child);
+			stack.PushBack(MeshXmlNodePair(*child, linkNode));
+		}
+	}
+
+	// populate mesh hierachy
+	stack.PushBack(MeshXmlNodePair(*m_mesh, rootNode));
+	while (stack.GetCount())
+	{
+		MeshXmlNodePair entry(stack.Pop());
+	
+		ndMesh* const mesh = entry.m_mesh;
+		ndAssert (mesh->m_name == ndString(xmlGetString(entry.m_xmlNode, "name")));
 		mesh->m_matrix = xmlGetMatrix(entry.m_xmlNode, "matrix");
 		mesh->m_geometryMatrix = xmlGetMatrix(entry.m_xmlNode, "geometryMatrix");
-
+	
 		nd::TiXmlElement* const xmlNodeType = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("type");
 		ndAssert(xmlNodeType);
 		const char* const nodeType = xmlGetNameAttribute(xmlNodeType, "nodeType");
@@ -207,7 +227,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			ndAssert(0);
 		}
 		ndTriplexReal target(xmlGetTriplexRealAttribute(xmlNodeType, "target"));
-
+	
 		const nd::TiXmlElement* const xmlGeometry = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("geometry");
 		if (xmlGeometry)
 		{
@@ -215,14 +235,14 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			geometry->DeserializeFromXml(xmlGeometry);
 			mesh->SetMesh(geometry);
 		}
-
+	
 		const nd::TiXmlElement* const xmlRigidBody = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("rigidbody");
 		if (xmlRigidBody)
 		{
 			const char* const constructor = xmlGetString(xmlRigidBody, "constructor");
 			if (strcmp(constructor, ndBodyDynamic::StaticClassName()) == 0)
 			{
-				ndSharedPtr<ndMeshBody> rigidBody(new ndMeshBodyDynamic());
+				ndSharedPtr<ndMeshBody> rigidBody(new ndMeshBodyDynamic(mesh));
 				rigidBody->DeserializeFromXml(xmlRigidBody);
 				mesh->SetRigidBody(rigidBody);
 			}
@@ -230,12 +250,12 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			{
 				ndAssert(0);
 				ndAssert(strcmp(constructor, ndBodyKinematic::StaticClassName()) == 0);
-				ndSharedPtr<ndMeshBody> rigidBody(new ndMeshBodyKinematic());
+				ndSharedPtr<ndMeshBody> rigidBody(new ndMeshBodyKinematic(mesh));
 				rigidBody->DeserializeFromXml(xmlRigidBody);
 				mesh->SetRigidBody(rigidBody);
 			}
 		}
-
+	
 		const nd::TiXmlElement* const xmlJoint = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("joint");
 		if (xmlJoint)
 		{
@@ -269,18 +289,18 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			{
 				ndAssert(0);
 			}
-
+	
 			joint->DeserializeFromXml(xmlJoint);
 			mesh->SetJoint(joint);
 		}
-
+	
+		ndList<ndSharedPtr<ndMesh>>::ndNode* childNode = mesh->GetChildren().GetFirst();
 		for (const nd::TiXmlNode* node = entry.m_xmlNode->FirstChild("ndMesh"); node; node = node->NextSibling("ndMesh"))
 		{
 			const nd::TiXmlElement* const linkNode = (nd::TiXmlElement*)node;
 			ndAssert(strcmp(linkNode->Value(), "ndMesh") == 0);
-
-			ndSharedPtr<ndMesh> child(new ndMesh());
-			entry.m_mesh->AddChild(child);
+			ndSharedPtr<ndMesh> child(childNode->GetInfo());
+			childNode = childNode->GetNext();
 			stack.PushBack(MeshXmlNodePair(*child, linkNode));
 		}
 	}

@@ -32,12 +32,14 @@ class ndJointBilateralConstraint;
 class ndMeshBodyDynamic : public ndMeshBodyKinematic
 {
 	public:
-	D_NEWTON_API ndMeshBodyDynamic();
+	D_NEWTON_API ndMeshBodyDynamic(const ndMesh* const owner);
 
 	D_NEWTON_API virtual ndBody* CreateObject() const override;
 	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+
 	ndVector m_intrinsicDamping;
+	ndArray<ndWeakPtr<ndMesh>> m_collidingPair;
 };
 
 class ndMeshJointFix6dof : public ndMeshJoint

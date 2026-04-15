@@ -97,6 +97,8 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API ndMesh* FindByName(const ndString& name) const;
 	D_NEWTON_API ndMesh* FindByClosestMatch(const ndString& name) const;
 
+	D_NEWTON_API ndMesh* GetRoot();
+	D_NEWTON_API const ndMesh* GetRoot() const;
 	D_NEWTON_API ndSharedPtr<ndMesh> GetSharedPtr() const;
 
 	D_NEWTON_API ndSharedPtr<ndMeshEffect>& GetMesh();

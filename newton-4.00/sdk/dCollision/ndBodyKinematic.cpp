@@ -1075,7 +1075,7 @@ void ndBodyKinematic::InitSurrogateBody(ndBodyKinematic* const surrogate) const
 
 void ndBodyKinematic::Serialize(ndMesh* const node) const
 {
-	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBodyKinematic());
+	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBodyKinematic(node));
 	node->SetRigidBody(meshBody);
 	Serialize(meshBody);
 	meshBody->m_classConstructor = ndString(ClassName());

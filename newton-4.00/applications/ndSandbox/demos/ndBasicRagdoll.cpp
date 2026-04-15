@@ -49,28 +49,45 @@ namespace ndRagdoll
 		}
 	};
 
-
 	class ndRagDollController : public ndModelNotify
 	{ 
 		public:
+		class ndFilterPair
+		{
+			public:
+			ndWeakPtr<ndBody> m_body0;
+			ndWeakPtr<ndBody> m_body1;
+		};
+
 		ndRagDollController()
 			:ndModelNotify()
 		{
 		}
 
-		bool OnContactGeneration(const ndBodyKinematic* const, const ndBodyKinematic* const) override
+		bool OnContactGeneration(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1) override
 		{
 			// here the application can use filter to determine what body parts should collide.
 			// this greatly improves performance because since articulated models,
 			// in general do not self collide, but occasionally some parts do collide. 
 			// for now we just return false (no collision)
+			for (ndInt32 i = ndInt32 (m_collisionFilter.GetCount()) - 1; i >= 0; --i)
+			{
+				bool test = (body0 == *m_collisionFilter[i].m_body0) && (body1 == *m_collisionFilter[i].m_body1);
+				test = test || (body1 == *m_collisionFilter[i].m_body0) && (body0 == *m_collisionFilter[i].m_body1);
+				if (test)
+				{
+					return true;
+				}
+			}
 			return false;
 		}
+
+		ndArray<ndFilterPair> m_collisionFilter;
 	};
 
 	ndSharedPtr<ndModelNotify> CreateRagdoll(ndDemoEntityManager* const scene, const ndRenderMeshLoader& loader, const ndMatrix& location)
 	{
-		// make a hierchical atriculate model
+		// make a hierchical aticulated model
 		ndSharedPtr<ndModel> model(new ndModelArticulation());
 		
 		// create a ragdoll controller 
@@ -79,14 +96,16 @@ namespace ndRagdoll
 		
 		// create a model arculation from the mesh
 		ndModelArticulation* const ragdoll = model->GetAsModelArticulation();
-		ragdoll->Deserialize(*loader.m_mesh);
+		const ndMesh* const mesh = *loader.m_mesh;
+		ragdoll->Deserialize(mesh);
 
 		// create a copy of the visual mesh
 		ndSharedPtr<ndRenderSceneNode> visualMesh(loader.m_renderMesh->Clone());
 
 		// bind the graphics model to the physics model,
 		// also apply any application constomization.
-		auto BindApplicationData = [scene, &ragdoll, &visualMesh](ndModelArticulation::ndNode* const node)
+		ndRagDollController* const ragdollController = (ndRagDollController*)*controller;
+		auto BindApplicationData = [scene, mesh, ragdollController, &ragdoll, &visualMesh](ndModelArticulation::ndNode* const node)
 		{
 			ndRenderSceneNode* const visualEntityPtr = visualMesh->FindByClosestMatch(node->m_name);
 			ndAssert(visualEntityPtr);
@@ -96,6 +115,38 @@ namespace ndRagdoll
 			ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
 			ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
 			node->m_body->SetNotifyCallback(notify);
+
+			// get the collision pairs filters
+			if (node->m_body)
+			{
+				const ndMesh* const meshOwner = mesh->FindByName(node->m_name);
+				ndAssert(meshOwner);
+				ndAssert(meshOwner->GetRigidBody());
+
+				const ndMeshBodyDynamic* const rigidBodyInfo = (ndMeshBodyDynamic*)*meshOwner->GetRigidBody();
+
+				ndBody* body0 = *node->m_body;
+				for (ndInt32 i = 0; i < rigidBodyInfo->m_collidingPair.GetCount(); ++i)
+				{
+					const ndString& name = rigidBodyInfo->m_collidingPair[i]->GetName();
+					ndBody* const body1 = *ragdoll->FindByName(name.GetStr())->m_body;
+				
+					bool isPair = false;
+					for (ndInt32 j = 0; !isPair  && (j < ragdollController->m_collisionFilter.GetCount()); ++j)
+					{
+						const ndRagDollController::ndFilterPair& filterPair = ragdollController->m_collisionFilter[j];
+						isPair = isPair || (body0 == *filterPair.m_body0) && (body1 == *filterPair.m_body1);
+						isPair = isPair || (body1 == *filterPair.m_body0) && (body0 == *filterPair.m_body1);
+					}
+					if (!isPair)
+					{
+						ndRagDollController::ndFilterPair newPair;
+						newPair.m_body0 = body0;
+						newPair.m_body1 = body1;
+						ragdollController->m_collisionFilter.PushBack(newPair);
+					}
+				}
+			}
 
 			if (node->m_joint)
 			{
@@ -145,10 +196,11 @@ void ndBasicRagdoll (ndDemoEntityManager* const scene)
 	ndMatrix playerMatrix(PlaceMatrix(scene, 0.0f, 0.0f, 0.0f));
 	CreateRagdoll(scene, loader, playerMatrix);
 
-#if 1
+#if 0
 	{
 		// add few more rag dolls
 		loader.LoadMesh(ndGetWorkingFileName("daveRagdoll1.nd"));
+		//loader.LoadMesh(ndGetWorkingFileName("xxx1.nd"));
 		
 		CreateRagdoll(scene, loader, PlaceMatrix(scene, 0.0f, 0.0f, 2.0f));
 		//CreateRagdoll(scene, loader, PlaceMatrix(scene, 6.0f, 0.0f, -10.0f));

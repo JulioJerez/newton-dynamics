@@ -14,29 +14,6 @@
 
 #include "ndNewAssetStdafx.h"
 
-class ndEditorCameraNode;
-class ndDemoCameraPickBodyJoint : public ndJointKinematicController
-{
-	public:
-	ndDemoCameraPickBodyJoint(ndBodyKinematic* const childBody, ndBodyKinematic* const worldBody, 
-		const ndVector& attachmentPointInGlobalSpace, ndEditorCameraNode* const camera)
-		:ndJointKinematicController(childBody, worldBody, attachmentPointInGlobalSpace)
-		,m_owner(camera)
-	{
-	}
-
-	~ndDemoCameraPickBodyJoint()
-	{
-		if (m_owner)
-		{
-			ndAssert(0);
-			//m_owner->ResetPickBody();
-		}
-	}
-
-	ndWeakPtr<ndEditorCameraNode> m_owner;
-};
-
 class ndEditorCameraNode: public ndRenderSceneNode
 {
 	public:
@@ -46,14 +23,6 @@ class ndEditorCameraNode: public ndRenderSceneNode
 	virtual ndRenderSceneNode* Clone() const;
 	
 	protected:
-	void ResetPickBody();
-	bool UpdatePickBody();
-
-	ndVector m_pickedBodyTargetPosition;
-	ndSharedPtr<ndJointBilateralConstraint> m_pickJoint;
-
-	ndFloat32 m_pickedBodyParam;
-	bool m_pickingMode;
 	bool m_prevMouseState;
 };
 

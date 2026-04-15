@@ -236,7 +236,6 @@ class ndUndoRedoShapeModified : public ndUndoRedoCommand
 	ndVector m_shapeParam;
 };
 
-
 void ndAssetEditor::ShowPropertiesCollisionInfo()
 {
 	if (ImGui::CollapsingHeader("Collision shape"))

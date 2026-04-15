@@ -34,8 +34,8 @@
 #include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
 
-ndMeshBodyDynamic::ndMeshBodyDynamic()
-	:ndMeshBodyKinematic()
+ndMeshBodyDynamic::ndMeshBodyDynamic(const ndMesh* const owner)
+	:ndMeshBodyKinematic(owner)
 	,m_intrinsicDamping(ndVector::m_zero)
 {
 	m_classConstructor = ndString("ndBodyDynamic");
@@ -47,6 +47,14 @@ void ndMeshBodyDynamic::SerializeToXml(nd::TiXmlElement* const parent) const
 
 	xmlSaveParam(parent, "intrinsicLinearDamping", m_intrinsicDamping.m_w);
 	xmlSaveParam(parent, "intrinsicAngularDamping", m_intrinsicDamping);
+
+	nd::TiXmlElement* const collidingPair = new nd::TiXmlElement("collidingPairs");
+	parent->LinkEndChild(collidingPair);
+	for (ndInt32 i = 0; i < m_collidingPair.GetCount(); ++i)
+	{
+		const ndMesh* const node = *m_collidingPair[i];
+		xmlSaveParam(collidingPair, "otherBody", node->GetName().GetStr());
+	}
 }
 
 void ndMeshBodyDynamic::DeserializeFromXml(const nd::TiXmlElement* const parent)
@@ -55,6 +63,19 @@ void ndMeshBodyDynamic::DeserializeFromXml(const nd::TiXmlElement* const parent)
 
 	m_intrinsicDamping = xmlGetVector3(parent, "intrinsicAngularDamping");
 	m_intrinsicDamping.m_w = xmlGetFloat(parent, "intrinsicLinearDamping");
+
+	if (xmlHasAttribute(parent, "collidingPairs"))
+	{
+		const ndMesh* const root = m_owner->GetRoot();
+		const nd::TiXmlElement* const collidingBodies = (nd::TiXmlElement*)parent->FirstChild("collidingPairs");
+		for (const nd::TiXmlNode* node = collidingBodies->FirstChild("otherBody"); node; node = node->NextSibling("otherBody"))
+		{
+			const char* const name = xmlGetNameAttribute((nd::TiXmlElement*)node, "string");
+			ndMesh* const otherNode = root->FindByName(name);
+			ndAssert(otherNode);
+			m_collidingPair.PushBack(ndWeakPtr<ndMesh>(otherNode));
+		}
+	}
 }
 
 ndBody* ndMeshBodyDynamic::CreateObject() const

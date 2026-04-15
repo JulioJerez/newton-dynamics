@@ -13,7 +13,6 @@
 #include "ndAssetEditor.h"
 #include "ndEditorCameraFlyby.h"
 
-//ndEditorCameraFlyby::ndEditorCameraFlyby(ndRender* const owner)
 ndEditorCameraFlyby::ndEditorCameraFlyby(ndAssetEditor* const editor)
 	:ndEditorCameraNode(*editor->GetRenderer())
 	,m_posit(ndVector::m_wOne)
@@ -172,6 +171,11 @@ void ndEditorCameraFlyby::MouseSelection()
 
 	if (hitNode)
 	{
+		m_editor->m_addCollidingBody = false;
+		m_editor->m_removeCollidingBody = false;
 		m_editor->m_currentSelection = hitNode;
+		m_editor->m_addCollingPairSelection = -1;
+		m_editor->m_addCollingPairCandidateSelection = -1;
+		m_editor->m_secundarySelection.SetCount(0);
 	}
 }

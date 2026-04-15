@@ -19,6 +19,7 @@ ndDebugDisplayRenderPass::ndDebugDisplayRenderPass(ndAssetEditor* const owner)
 	,m_meshColor(ndFloat32(1.0f))
 	,m_shapeColor(ndFloat32(1.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(1.0f))
 	,m_selectedColor(ndFloat32(0.42f), ndFloat32(0.73f), ndFloat32(0.98f), ndFloat32(1.0f))
+	,m_secundarySelectedColor(ndFloat32(1.0f), ndFloat32(0.55f), ndFloat32(0.0f), ndFloat32(1.0f))
 	,m_manager(owner)
 {
 }
@@ -225,21 +226,32 @@ void ndDebugDisplayRenderPass::RenderSelectedNode()
 	for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
 	{
 		const ndDebugMesh& debugMesh = ptr->GetInfo();
-		if (debugMesh.m_parent->m_name == seletecName)
+		if (m_manager->m_showSelectedNode)
 		{
-			const ndMatrix pivotMatrix(debugMesh.m_parent->m_globalMatrix);
-			if (m_manager->m_showSelectedNode)
+			const ndRenderPrimitive* const primitive = *debugMesh.m_wireFrameMesh;
+			if (primitive)
 			{
-				const ndRenderPrimitive* const primitive = *debugMesh.m_wireFrameMesh;
-				if (primitive)
+				const ndMatrix pivotMatrix(debugMesh.m_parent->m_globalMatrix);
+				const ndMatrix gemetryMatrix(debugMesh.m_parent->m_primitiveMatrix * pivotMatrix);
+
+				ndRenderPrimitiveSegment& segment = primitive->m_segments.GetFirst()->GetInfo();
+				ndRenderPrimitiveMaterial* const material = &segment.m_material;
+
+				if (debugMesh.m_parent->m_name == seletecName)
 				{
-					const ndMatrix gemetryMatrix(debugMesh.m_parent->m_primitiveMatrix * pivotMatrix);
-
-					ndRenderPrimitiveSegment& segment = primitive->m_segments.GetFirst()->GetInfo();
-					ndRenderPrimitiveMaterial* const material = &segment.m_material;
-
 					material->m_diffuse = m_selectedColor;
 					primitive->Render(m_owner, gemetryMatrix, m_debugDisplayWireFrameMesh);
+				}
+
+				for (ndInt32 i = 0; i < m_manager->m_secundarySelection.GetCount(); ++i)
+				{
+					if (debugMesh.m_parent->m_name == m_manager->m_secundarySelection[i]->GetName())
+					{
+
+						material->m_diffuse = m_secundarySelectedColor;
+						primitive->Render(m_owner, gemetryMatrix, m_debugDisplayWireFrameMesh);
+						break;
+					}
 				}
 			}
 		}
