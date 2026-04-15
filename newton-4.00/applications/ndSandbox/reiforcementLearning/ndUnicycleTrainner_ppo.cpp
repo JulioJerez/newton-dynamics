@@ -280,7 +280,7 @@ void ndUnicycleTrainingPPO(ndDemoEntityManager* const scene)
 	// get the material graph
 	ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
 
-	// oveload the ground friction
+	// overload the ground friction
 	// make sure the ground has enough friction
 	ndMaterial* const defaultMaterial = callback->GetMaterial(ndDemoContactCallback::m_default, ndDemoContactCallback::m_default);
 	ndAssert(defaultMaterial);
@@ -305,7 +305,7 @@ void ndUnicycleTrainingPPO(ndDemoEntityManager* const scene)
 	
 	matrix.m_posit.m_x -= 0.0f;
 	matrix.m_posit.m_y += 1.5f;
-	matrix.m_posit.m_z += -20.0f;
-	ndQuaternion rotation(ndVector(0.0f, 1.0f, 0.0f, 0.0f), -90.0f * ndDegreeToRad);
+	matrix.m_posit.m_z += 20.0f;
+	ndQuaternion rotation(ndVector(0.0f, 1.0f, 0.0f, 0.0f), 90.0f * ndDegreeToRad);
 	scene->SetCameraMatrix(rotation, matrix.m_posit);
 }
