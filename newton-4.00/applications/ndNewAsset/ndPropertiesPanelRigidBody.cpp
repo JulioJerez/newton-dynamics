@@ -254,6 +254,7 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 				m_addCollidingBody = true;
 				m_removeCollidingBody = false;
 			}
+			ImGui::SameLine();
 			if (rigidBody->m_collidingPair.GetCount())
 			{
 				if (ImGui::Button("remove body"))
@@ -304,16 +305,6 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 						otherRigidBody->m_collidingPair.PushBack(ndWeakPtr<ndMesh>(*m_currentSelection));
 					}
 					ImGui::ListBox(" ##10", &m_addCollingPairCandidateSelection, &names[0], names.GetCount());
-					//if (ImGui::ListBox(" ##10", &m_addCollingPairCandidateSelection, &names[0], names.GetCount()))
-					//{
-					//	ndMesh* const otherNode = m_mesh->FindByName(names[item_current]);
-					//	rigidBody->m_collidingPair.PushBack(ndWeakPtr<ndMesh>(otherNode));
-					//
-					//	ndSharedPtr<ndMeshBody> otherBody(otherNode->GetRigidBody());
-					//	ndMeshBodyDynamic* const otherRigidBody = (ndMeshBodyDynamic*)*otherBody;
-					//	ndAssert(otherBody->m_classConstructor == ndBodyDynamic::StaticClassName());
-					//	otherRigidBody->m_collidingPair.PushBack(ndWeakPtr<ndMesh>(*m_currentSelection));
-					//}
 				}
 				ImGui::End();
 			}
