@@ -172,7 +172,7 @@ void ndEditorCameraFlyby::MouseSelection()
 	if (hitNode)
 	{
 		m_editor->m_addCollidingBody = false;
-		m_editor->m_removeCollidingBody = false;
+		//m_editor->m_removeCollidingBody = false;
 		m_editor->m_currentSelection = hitNode;
 		m_editor->m_addCollingPairSelection = -1;
 		m_editor->m_addCollingPairCandidateSelection = -1;

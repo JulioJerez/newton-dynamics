@@ -252,15 +252,45 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			if (ImGui::Button("add body"))
 			{
 				m_addCollidingBody = true;
-				m_removeCollidingBody = false;
+				//m_removeCollidingBody = false;
 			}
-			ImGui::SameLine();
 			if (rigidBody->m_collidingPair.GetCount())
 			{
-				if (ImGui::Button("remove body"))
+				ImGui::SameLine();
+				if (rigidBody->m_collidingPair.GetCount())
 				{
-					m_addCollidingBody = false;
-					m_removeCollidingBody = true;
+					if (ImGui::Button("remove body") && (m_addCollingPairSelection != -1))
+					{
+						ndMesh* const otherNode = m_mesh->FindByName(rigidBody->m_collidingPair[m_addCollingPairSelection]->GetName());
+						ndAssert(otherNode);
+						ndMeshBodyDynamic* const otherBody = (ndMeshBodyDynamic*)*otherNode->GetRigidBody();
+						ndAssert(otherBody->m_classConstructor == ndBodyDynamic::StaticClassName());
+
+						const ndString& name = m_currentSelection->GetName();
+						ndInt32 otherBodyCount = ndInt32(otherBody->m_collidingPair.GetCount()) - 1;
+						for (ndInt32 i = otherBodyCount; i >= 0; --i)
+						{
+							if (otherBody->m_collidingPair[i]->GetName() == name)
+							{
+								otherBody->m_collidingPair[i] = otherBody->m_collidingPair[otherBodyCount];
+								otherBody->m_collidingPair.SetCount(otherBodyCount);
+								break;
+							}
+						}
+
+						ndInt32 count = ndInt32 (rigidBody->m_collidingPair.GetCount()) - 1;
+						rigidBody->m_collidingPair[m_addCollingPairSelection] = rigidBody->m_collidingPair[count];
+						rigidBody->m_collidingPair.SetCount(count);
+
+						m_secundarySelection.SetCount(0);
+						m_addCollingPairSelection = -1;
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("deselect body"))
+					{
+						m_secundarySelection.SetCount(0);
+						m_addCollingPairSelection = -1;
+					}
 				}
 			}
 
