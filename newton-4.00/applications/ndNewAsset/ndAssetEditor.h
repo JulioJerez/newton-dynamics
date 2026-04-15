@@ -150,6 +150,7 @@ class ndAssetEditor : public ndClassAlloc
 	ndSharedPtr<ndAssetTool> m_currentTool;
 	ndSharedPtr<ndMesh> m_currentSelection;
 	ndSharedPtr<ndRenderSceneNode> m_defaultCamera;
+	ndFixSizeArray<ndWeakPtr<ndMesh>, 32> m_secundarySelection;
 
 	ndString m_currentPath;
 	ndUndoRedo m_undoRedo;
@@ -163,6 +164,10 @@ class ndAssetEditor : public ndClassAlloc
 	bool m_showParentRelativeTransform;
 
 	bool m_toolActive;
+	bool m_addCollidingBody;
+	bool m_removeCollidingBody;
+	ndInt32 m_addCollingPairSelection;
+	ndInt32 m_addCollingPairCandidateSelection;
 	
 	ndInt32 m_renderMode;
 	ndReal m_gizmoScale;

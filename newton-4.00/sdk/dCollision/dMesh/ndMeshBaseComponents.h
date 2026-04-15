@@ -167,7 +167,7 @@ class ndMeshShapeInstance : public ndClassAlloc
 class ndMeshBody : public ndClassAlloc
 {
 	public:
-	D_COLLISION_API ndMeshBody();
+	D_COLLISION_API ndMeshBody(const ndMesh* const owner);
 	D_COLLISION_API virtual ~ndMeshBody();
 
 	D_COLLISION_API virtual ndBody* CreateObject() const;
@@ -178,12 +178,13 @@ class ndMeshBody : public ndClassAlloc
 	ndVector m_omega;
 	ndVector m_localCentreOfMass;
 	ndString m_classConstructor;
+	ndWeakPtr<const ndMesh> m_owner;
 };
 
 class ndMeshBodyKinematic : public ndMeshBody
 {
 	public:
-	D_COLLISION_API ndMeshBodyKinematic();
+	D_COLLISION_API ndMeshBodyKinematic(const ndMesh* const owner);
 
 	D_COLLISION_API virtual ndBody* CreateObject() const override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;

@@ -35,6 +35,10 @@ ndAssetEditor::ndAssetEditor()
 	,m_showCollisionShape(true)
 	,m_showParentRelativeTransform(false)
 	,m_toolActive(false)
+	,m_addCollidingBody(false)
+	,m_removeCollidingBody(false)
+	,m_addCollingPairSelection(-1)
+	,m_addCollingPairCandidateSelection(-1)
 	,m_renderMode(m_shaded)
 	,m_gizmoScale(0.25f)
 {
@@ -358,6 +362,9 @@ void ndAssetEditor::ShowMainMenuBar()
 			if (ImGui::MenuItem("New", ""))
 			{
 				m_mesh = ndSharedPtr<ndMesh>(nullptr);
+				m_newMesh = ndSharedPtr<ndMesh>(nullptr);
+				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
+				m_newSceneMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);
 			}
 
 			if (ImGui::MenuItem("Load", ""))

@@ -261,6 +261,26 @@ ndSharedPtr<ndMesh> ndMesh::GetSharedPtr() const
 	return ndSharedPtr<ndMesh>(nullptr);
 }
 
+ndMesh* ndMesh::GetRoot()
+{
+	ndMesh* self = this;
+	while (self->m_parent)
+	{
+		self = *self->m_parent;
+	}
+	return self;
+}
+
+const ndMesh* ndMesh::GetRoot() const
+{
+	const ndMesh* self = this;
+	while (self->m_parent)
+	{
+		self = *self->m_parent;
+	}
+	return self;
+}
+
 ndMesh* ndMesh::FindByName(const ndString& name) const
 {
 	ndMesh* const self = (ndMesh*)this;

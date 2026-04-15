@@ -262,7 +262,8 @@ ndMeshCollisionShapeCompound::ndMeshCollisionShapeCompound()
 {
 }
 
-void ndMeshCollisionShapeCompound::ApplyScale(ndFloat32 scale)
+//void ndMeshCollisionShapeCompound::ApplyScale(ndFloat32 scale)
+void ndMeshCollisionShapeCompound::ApplyScale(ndFloat32)
 {
 	ndAssert(0);
 }
@@ -406,11 +407,12 @@ ndShapeInstance* ndMeshShapeInstance::CreateObject() const
 	return shapeInstance;
 }
 
-ndMeshBody::ndMeshBody()
+ndMeshBody::ndMeshBody(const ndMesh* const owner)
 	:ndClassAlloc()
 	,m_veloc(ndVector::m_zero)
 	,m_omega(ndVector::m_zero)
 	,m_localCentreOfMass(ndVector::m_zero)
+	,m_owner(owner)
 {
 	m_classConstructor = ndString("ndBody");
 }
@@ -439,8 +441,8 @@ ndBody* ndMeshBody::CreateObject() const
 	return nullptr;
 }
 
-ndMeshBodyKinematic::ndMeshBodyKinematic()
-	:ndMeshBody()
+ndMeshBodyKinematic::ndMeshBodyKinematic(const ndMesh* const owner)
+	:ndMeshBody(owner)
 	,m_shapeInstance()
 	,m_invMass(ndVector::m_zero)
 	,m_inertiaPrincipalAxis(ndVector::m_zero)

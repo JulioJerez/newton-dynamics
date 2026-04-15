@@ -34,8 +34,8 @@
 #include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
 
-ndMeshBodyDynamic::ndMeshBodyDynamic()
-	:ndMeshBodyKinematic()
+ndMeshBodyDynamic::ndMeshBodyDynamic(const ndMesh* const owner)
+	:ndMeshBodyKinematic(owner)
 	,m_intrinsicDamping(ndVector::m_zero)
 {
 	m_classConstructor = ndString("ndBodyDynamic");
@@ -50,9 +50,10 @@ void ndMeshBodyDynamic::SerializeToXml(nd::TiXmlElement* const parent) const
 
 	nd::TiXmlElement* const collidingPair = new nd::TiXmlElement("collidingPairs");
 	parent->LinkEndChild(collidingPair);
-	if (m_collidingPair.GetCount())
+	for (ndInt32 i = 0; i < m_collidingPair.GetCount(); ++i)
 	{
-		ndAssert(0);
+		const ndMesh* const node = *m_collidingPair[i];
+		xmlSaveParam(collidingPair, "otherBody", node->GetName().GetStr());
 	}
 }
 
@@ -65,7 +66,15 @@ void ndMeshBodyDynamic::DeserializeFromXml(const nd::TiXmlElement* const parent)
 
 	if (xmlHasAttribute(parent, "collidingPairs"))
 	{
-		ndAssert(0);
+		const ndMesh* const root = m_owner->GetRoot();
+		const nd::TiXmlElement* const collidingBodies = (nd::TiXmlElement*)parent->FirstChild("collidingPairs");
+		for (const nd::TiXmlNode* node = collidingBodies->FirstChild("otherBody"); node; node = node->NextSibling("otherBody"))
+		{
+			const char* const name = xmlGetNameAttribute((nd::TiXmlElement*)node, "string");
+			ndMesh* const otherNode = root->FindByName(name);
+			ndAssert(otherNode);
+			m_collidingPair.PushBack(ndWeakPtr<ndMesh>(otherNode));
+		}
 	}
 }
 

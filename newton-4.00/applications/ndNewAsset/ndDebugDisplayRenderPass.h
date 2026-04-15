@@ -58,6 +58,7 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	ndVector m_meshColor;
 	ndVector m_shapeColor;
 	ndVector m_selectedColor;
+	ndVector m_secundarySelectedColor;
 	ndWeakPtr<ndAssetEditor> m_manager;
 	ndList<ndDebugMesh> m_debugMesh;
 };
