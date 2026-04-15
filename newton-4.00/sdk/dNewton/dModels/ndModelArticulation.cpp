@@ -138,21 +138,21 @@ ndModelArticulation::ndNode* ndModelArticulation::GetRoot() const
 
 void ndModelArticulation::ClearMemory()
 {
-	if (m_rootNode)
+	auto ClearBodies = [](ndModelArticulation::ndNode* node)
 	{
-		for (ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
+		if (node->m_body)
 		{
-			if (*node->m_joint)
-			{
-				node->m_joint->ClearMemory();
-			}
+			ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+			body->SetOmega(ndVector::m_zero);
+			body->SetVelocity(ndVector::m_zero);
+		}
+	};
+	NodeIterator(ClearBodies);
 
-			//ndBodyKinematic::ndJointList& jointList = body->GetJointList();
-			//for (ndBodyKinematic::ndJointList::ndNode* jointNode = jointList.GetFirst(); jointNode; jointNode = jointNode->GetNext())
-			//{
-			//	jointNode->GetInfo()->ClearMemory();
-			//}
-
+	auto ClearJoints = [](ndModelArticulation::ndNode* node)
+	{
+		if (node->m_body)
+		{
 			ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
 			ndBodyKinematic::ndContactMap& contactMap = body->GetContactMap();
 			ndBodyKinematic::ndContactMap::Iterator it(contactMap);
@@ -162,12 +162,13 @@ void ndModelArticulation::ClearMemory()
 				contact->ClearMemory();
 			}
 		}
-	}
 
-	for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
-	{
-		node->GetInfo().m_joint->ClearMemory();
-	}
+		if (*node->m_joint)
+		{
+			node->m_joint->ClearMemory();
+		}
+	};
+	NodeIterator(ClearJoints);
 }
 
 ndModelArticulation::ndNode* ndModelArticulation::AddRootBody(const ndSharedPtr<ndBody>& rootBody)
@@ -898,7 +899,6 @@ void ndModelArticulation::SetTransform(const ndMatrix& matrix)
 	}
 }
 
-
 void ndModelArticulation::Serialize(ndMesh* const rootNode) const
 {
 	ndFixSizeArray<ndModelArticulation::ndNode*, 1024> stack;
@@ -974,7 +974,7 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 		}
 	}
 
-	// TO DO: deserialize loop joints here
+	// TO DO: de-serialize loop joints here
 }
 
 ndMesh* ndModelArticulation::CreateDefaultMesh() const
@@ -1037,58 +1037,6 @@ ndMesh* ndModelArticulation::CreateDefaultMesh() const
 
 void ndModelArticulation::SaveNdMesh(const char* const path) const
 {
-	//ndInt32 nameIndex = 0;
-	//ndMesh* rootMesh = nullptr;
-	//ndFixSizeArray<ndMesh*, 1024> parent;
-	//ndFixSizeArray<ndModelArticulation::ndNode*, 1024> stack;
-	//
-	//parent.PushBack(nullptr);
-	//stack.PushBack(m_rootNode);
-	//while (stack.GetCount())
-	//{
-	//	ndMesh* const parentMesh = parent.Pop();
-	//	ndModelArticulation::ndNode* const node = stack.Pop();
-	//
-	//	const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
-	//	ndMesh* const meshNode = new ndMesh(body->GetCollisionShape());
-	//	if (node->m_name.GetStr() && *node->m_name.GetStr())
-	//	{
-	//		meshNode->SetName(node->m_name.GetStr());
-	//	}
-	//	else
-	//	{
-	//		char name[256];
-	//		snprintf(name, sizeof(name) - 1, "unnamed_node_%d", nameIndex);
-	//		nameIndex++;
-	//		meshNode->SetName(name);
-	//	}
-	//	ndMatrix matrix(node->m_body->GetMatrix());
-	//	if (!rootMesh)
-	//	{
-	//		rootMesh = meshNode;
-	//	}
-	//	else
-	//	{
-	//		matrix = matrix * node->GetParent()->m_body->GetMatrix().OrthoInverse();
-	//		parentMesh->AddChild(ndSharedPtr<ndMesh>(meshNode));
-	//	}
-	//
-	//	meshNode->SetMatrix(matrix);
-	//	node->m_body->Serialize(meshNode);
-	//	if (node->m_joint)
-	//	{
-	//		ndSharedPtr<ndMeshJoint> joint(node->m_joint->GetMeshJoint());
-	//		meshNode->SetJoint(joint);
-	//	}
-	//
-	//	for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
-	//	{
-	//		stack.PushBack(child);
-	//		parent.PushBack(meshNode);
-	//	}
-	//}
-	//
-	//ndAssert(rootMesh);
 	ndSharedPtr<ndMesh> mesh(CreateDefaultMesh());
 	ndMeshLoader loader(mesh);
 	loader.SaveMesh(path);
