@@ -926,15 +926,37 @@ void ndModelArticulation::Serialize(ndMesh* const meshRootNode) const
 	ndModelArticulation* const self = (ndModelArticulation*)this;
 	auto SerializeToMesh = [this, meshRootNode](ndModelArticulation::ndNode* const node)
 	{
-		ndMesh* const meshNode = meshRootNode->FindByClosestMatch(node->m_name);
+		ndMesh* meshNode = meshRootNode->FindByName(node->m_name);
+		//ndMesh* meshNode = meshRootNode->FindByClosestMatch(node->m_name);
+		if (!meshNode)
+		{
+			ndAssert(node->GetParent());
+			meshNode = new ndMesh();
+			ndMesh* parentMeshNode =  meshRootNode->FindByName(node->GetParent()->m_name);
+			parentMeshNode->AddChild(meshNode);
+			meshNode->SetName(node->m_name);
+		}
+
 		if (meshNode)
 		{
 			const ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
+
+			// it is a structural node, it will have a body
 			if (node->m_body)
 			{
-				//const ndShapeInstance& collisionShape = body->GetCollisionShape();
 				body->Serialize(meshNode);
+				if (node->m_joint)
+				{
+					meshNode->SetJoint(node->m_joint->GetMeshJoint());
+				}
 			}
+			else
+			{
+				// no a structure node, maybe a loop joint
+				ndAssert(0);
+			}
+
+
 			 
 			//bool hasGeometry = ((ndShape*)collisionShape.GetShape())->GetAsShapeNull() ? false : true;
 			//ndMesh* const meshNode = hasGeometry ? new ndMesh(collisionShape) : new ndMesh();
