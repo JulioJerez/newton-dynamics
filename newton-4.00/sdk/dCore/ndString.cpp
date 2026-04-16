@@ -529,11 +529,8 @@ ndInt32 ndString::Find (char ch, ndInt32 from) const
 ndInt32 ndString::Find (const char* const subString, ndInt32 subStringLength, ndInt32 from, ndInt32 lenght) const
 {
 	ndAssert (from >= 0);
-	//ndAssert (subStream.m_size >= 0);
-	ndAssert (subStringLength >= 1);
-
 	ndInt32 location = -1;
-	if (m_size) 
+	if (m_size && (subStringLength >= 1))
 	{
 		const ndInt32 str2Size = ndMin (subStringLength, lenght);
 		if (str2Size == 1) 

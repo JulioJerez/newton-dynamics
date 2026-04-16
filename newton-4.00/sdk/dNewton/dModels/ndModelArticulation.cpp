@@ -899,30 +899,77 @@ void ndModelArticulation::SetTransform(const ndMatrix& matrix)
 	}
 }
 
-void ndModelArticulation::Serialize(ndMesh* const rootNode) const
+void ndModelArticulation::Serialize(ndMesh* const meshRootNode) const
 {
-	ndFixSizeArray<ndModelArticulation::ndNode*, 1024> stack;
-	stack.PushBack(m_rootNode);
-	while (stack.GetCount())
+	//ndFixSizeArray<ndModelArticulation::ndNode*, 1024> stack;
+	//stack.PushBack(m_rootNode);
+	//while (stack.GetCount())
+	//{
+	//	ndModelArticulation::ndNode* const node = stack.Pop();
+	//	ndMesh* const meshNode = rootNode->FindByClosestMatch(node->m_name);
+	//	if (meshNode)
+	//	{
+	//		node->m_body->Serialize(meshNode);
+	//		if (node != m_rootNode)
+	//		{
+	//			// TO DO: serialize joint here
+	//		}
+	//	}
+	//
+	//	for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
+	//	{
+	//		stack.PushBack(child);
+	//	}
+	//}
+	// TO DO: serialize loop joints here
+
+	ndModelArticulation* const self = (ndModelArticulation*)this;
+	auto SerializeToMesh = [this, meshRootNode](ndModelArticulation::ndNode* const node)
 	{
-		ndModelArticulation::ndNode* const node = stack.Pop();
-		ndMesh* const meshNode = rootNode->FindByClosestMatch(node->m_name);
+		ndMesh* const meshNode = meshRootNode->FindByClosestMatch(node->m_name);
 		if (meshNode)
 		{
-			node->m_body->Serialize(meshNode);
-			if (node != m_rootNode)
+			const ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
+			if (node->m_body)
 			{
-				// TO DO: serialize joint here
+				//const ndShapeInstance& collisionShape = body->GetCollisionShape();
+				body->Serialize(meshNode);
 			}
+			 
+			//bool hasGeometry = ((ndShape*)collisionShape.GetShape())->GetAsShapeNull() ? false : true;
+			//ndMesh* const meshNode = hasGeometry ? new ndMesh(collisionShape) : new ndMesh();
+			//if (node->m_name.GetStr() && *node->m_name.GetStr())
+			//{
+			//	meshNode->SetName(node->m_name.GetStr());
+			//}
+			//else
+			//{
+			//	char name[256];
+			//	snprintf(name, sizeof(name) - 1, "unnamed_node_%d", nameIndex);
+			//	nameIndex++;
+			//	meshNode->SetName(name);
+			//}
+			//ndMatrix matrix(node->m_body->GetMatrix());
+			//if (!rootMesh)
+			//{
+			//	rootMesh = meshNode;
+			//}
+			//else
+			//{
+			//	matrix = matrix * node->GetParent()->m_body->GetMatrix().OrthoInverse();
+			//	parentMesh->AddChild(ndSharedPtr<ndMesh>(meshNode));
+			//}
+			//
+			//meshNode->SetMatrix(matrix);
+			//node->m_body->Serialize(meshNode);
+			//if (node->m_joint)
+			//{
+			//	ndSharedPtr<ndMeshJoint> joint(node->m_joint->GetMeshJoint());
+			//	meshNode->SetJoint(joint);
+			//}
 		}
-
-		for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
-		{
-			stack.PushBack(child);
-		}
-	}
-
-	// TO DO: serialize loop joints here
+	};
+	self->NodeIterator(SerializeToMesh);
 }
 
 void ndModelArticulation::Deserialize(const ndMesh* const rootNode)

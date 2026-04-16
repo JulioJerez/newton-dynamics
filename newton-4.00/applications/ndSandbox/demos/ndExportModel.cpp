@@ -1562,10 +1562,7 @@ namespace ndExcavator
     };
 #endif
 
-    static void MakeChassis(
-        ndModelArticulation* const articulation,
-        ndSharedPtr<ndMesh>& mesh,
-        ndSharedPtr<ndRenderSceneNode>& visualMeshRoot)
+    void MakeChassis(ndModelArticulation* const articulation, ndSharedPtr<ndMesh>& mesh)
     {
         ndMesh* const chassisMesh = mesh->FindByName("base");
         ndAssert(chassisMesh);
@@ -1574,23 +1571,20 @@ namespace ndExcavator
         ndMatrix matrix(chassisMesh->CalculateGlobalMatrix());
         ndSharedPtr<ndShapeInstance> collision(chassisMesh->CreateCollisionFromChildren());
         
-        //// set a body pat type later usage in the concact filter generatior
-        //SetBodyType(*collision, m_chassis);
-        //
-        // find the visual mesh for thsi body
-        ndRenderSceneNode* const visualMeshNode = visualMeshRoot->FindByName(chassisMesh->GetName());
-        ndSharedPtr<ndRenderSceneNode> visualMesh((visualMeshNode == *visualMeshRoot) ? visualMeshRoot : visualMeshRoot->GetSharedPtr());
+        // find the visual mesh for this body
+        //ndRenderSceneNode* const visualMeshNode = visualMeshRoot->FindByName(chassisMesh->GetName());
+        //ndSharedPtr<ndRenderSceneNode> visualMesh((visualMeshNode == *visualMeshRoot) ? visualMeshRoot : visualMeshRoot->GetSharedPtr());
         
         ndFloat32 chassisMass = ndFloat32(4000.0f);
         
         // create the rigid that represent the chassis
         ndSharedPtr<ndBody> chassisBody(new ndBodyDynamic());
-        //chassisBody->SetNotifyCallback(new ndDemoEntityNotify(m_scene, visualMesh, nullptr));
         chassisBody->SetMatrix(matrix);
         chassisBody->GetAsBodyDynamic()->SetCollisionShape(**collision);
         chassisBody->GetAsBodyDynamic()->SetMassMatrix(chassisMass, **collision);
         
-        articulation->AddRootBody(chassisBody);
+        ndModelArticulation::ndNode* const rootNode = articulation->AddRootBody(chassisBody);
+        rootNode->m_name = chassisMesh->GetName();
         
         //// add the motor
         //AddLocomotion(articulation);
@@ -1607,29 +1601,19 @@ namespace ndExcavator
     }
 
     void MakeModel(ndDemoEntityManager* const scene, const ndMatrix& location)
-    //static ndSharedPtr<ndModelNotify> CreateExcavator(ndDemoEntityManager* const scene, const ndMatrix& location, ndRenderMeshLoader& mesh)
     {
         ndRenderMeshLoader loader(*scene->GetRenderer());
         loader.LoadMesh(ndGetWorkingFileName("excavator.nd"));
 
-        // create a model and set the root transform
-        //ndSharedPtr<ndRenderSceneNode> vehicleMesh(mesh.m_renderMesh->Clone());
-        //ndSharedPtr<ndRenderSceneNode>MeshToRenderSceneNode(ndGetPath(fbxPathMeshName));
-        //ndMatrix matrix(location);
-        //matrix.m_posit = FindFloor(*scene->GetWorld(), matrix.m_posit, 200.0f);
-        //
-        //ndMatrix saveMatrix(mesh.m_mesh->GetMatrix());
-        //mesh.m_mesh->SetMatrix(saveMatrix * matrix);
-        //
         // using a model articulation for this vehicle
         ndModelArticulation* const excavator = new ndModelArticulation();
         ndSharedPtr<ndModel> vehicleModel(excavator);
-        //ndSharedPtr<ndModelNotify> controller(new ndExcavatorController(scene, mesh.m_mesh, vehicleModel, vehicleMesh));
-        //vehicleModel->SetNotifyCallback(controller);
 
-        MakeChassis(excavator, loader.m_mesh, loader.m_renderMesh);
+        // for more readability break construction into sub function
+        MakeChassis(excavator, loader.m_mesh);
 
-        excavator->GetAsModelArticulation()->SaveNdMesh(ndGetWorkingFileName("ndExcavatorPhysics.nd").GetStr());
+        excavator->GetAsModelArticulation()->Serialize(*loader.m_mesh);
+        loader.SaveMesh(ndGetWorkingFileName("ndExcavatorPhysics.nd"));
         
         ndWorld* const world = scene->GetWorld();
         ndSharedPtr<ndModel> testModel(LoadAndBindModel(scene, location, "ndExcavatorPhysics.nd"));
