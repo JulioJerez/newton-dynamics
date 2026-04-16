@@ -585,7 +585,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::SaveTrajectory(ndBrainAgentOnPolicyGr
 		}
 
 		// get max number of step that exclude the terminal state
-		// and contain the Monte Calos steps
+		// and contain the Monte Carlos steps
 		
 		const ndInt32 montecarlosSize = trajectory.GetCount() - ND_ON_POLICY_MONTE_CARLOS_STEPS;
 		for (ndInt32 i = montecarlosSize - 1; i >= 0; --i)
