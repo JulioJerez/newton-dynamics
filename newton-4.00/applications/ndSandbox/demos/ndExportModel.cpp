@@ -965,29 +965,28 @@ namespace ndExcavator
         ndModelArticulation::ndNode* const cabinNode = articulation->AddLimb(rootNode, cabinBody, cabinPivot);
         cabinNode->m_name = "EngineBody";
 
-        //// add arm0.
-        //ndSharedPtr<ndBody> bodyArm0(MakeBodyPart(mesh, visualMeshRoot, cabinBody->GetAsBodyKinematic(), "Boom", 50.0f));
-        //SetBodyType(&bodyArm0->GetAsBodyDynamic()->GetCollisionShape(), m_chassis);
-        //const ndMatrix matrixArm0(ndYawMatrix(ndFloat32(90.0f) * ndDegreeToRad) * bodyArm0->GetMatrix());
-        //ndSharedPtr<ndJointBilateralConstraint> jointArm0(new ndJointHinge(matrixArm0, bodyArm0->GetAsBodyDynamic(), cabinBody->GetAsBodyDynamic()));
-        //ndModelArticulation::ndNode* const armNode0 = articulation->AddLimb(cabinNode, bodyArm0, jointArm0);
-        //
-        //// add arm1.
-        //ndSharedPtr<ndBody> bodyArm1(MakeBodyPart(mesh, visualMeshRoot, bodyArm0->GetAsBodyKinematic(), "arm02", 50.0f));
-        //SetBodyType(&bodyArm1->GetAsBodyDynamic()->GetCollisionShape(), m_chassis);
-        //const ndMatrix matrixArm1(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * bodyArm1->GetMatrix());
-        //ndSharedPtr<ndJointBilateralConstraint> jointArm1(new ndJointHinge(matrixArm1, bodyArm1->GetAsBodyDynamic(), bodyArm0->GetAsBodyDynamic()));
-        //ndModelArticulation::ndNode* const armNode1 = articulation->AddLimb(armNode0, bodyArm1, jointArm1);
-        //
-        //// add bucket
-        //ndSharedPtr<ndBody> bodyBucket(MakeBodyPart(mesh, visualMeshRoot, bodyArm1->GetAsBodyKinematic(), "bucket", 40.0f));
-        //SetBodyType(&bodyBucket->GetAsBodyDynamic()->GetCollisionShape(), m_chassis);
-        //const ndMatrix matrixBucket(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * bodyBucket->GetMatrix());
-        //ndSharedPtr<ndJointBilateralConstraint> jointBucket(new ndJointHinge(matrixBucket, bodyBucket->GetAsBodyDynamic(), bodyArm1->GetAsBodyDynamic()));
-        //articulation->AddLimb(armNode1, bodyBucket, jointBucket);
-        //m_bucketJoint = (ndJointHinge*)*jointBucket;
-        //m_bucketJoint->SetAsSpringDamper(ndFloat32(0.1f), ndFloat32(2000.0f), ndFloat32(50.0f));
-        //
+        // add arm0.
+        ndSharedPtr<ndBody> bodyArm0(MakeBodyPart(mesh, "Boom", 50.0f));
+        const ndMatrix matrixArm0(ndYawMatrix(ndFloat32(90.0f) * ndDegreeToRad) * bodyArm0->GetMatrix());
+        ndSharedPtr<ndJointBilateralConstraint> jointArm0(new ndJointHinge(matrixArm0, bodyArm0->GetAsBodyDynamic(), cabinBody->GetAsBodyDynamic()));
+        ndModelArticulation::ndNode* const armNode0 = articulation->AddLimb(cabinNode, bodyArm0, jointArm0);
+        armNode0->m_name = "Boom";
+        
+        // add arm1.
+        ndSharedPtr<ndBody> bodyArm1(MakeBodyPart(mesh, "arm02", 50.0f));
+        const ndMatrix matrixArm1(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * bodyArm1->GetMatrix());
+        ndSharedPtr<ndJointBilateralConstraint> jointArm1(new ndJointHinge(matrixArm1, bodyArm1->GetAsBodyDynamic(), bodyArm0->GetAsBodyDynamic()));
+        ndModelArticulation::ndNode* const armNode1 = articulation->AddLimb(armNode0, bodyArm1, jointArm1);
+        armNode1->m_name = "arm02";
+        
+        // add bucket
+        ndSharedPtr<ndBody> bodyBucket(MakeBodyPart(mesh, "bucket", 40.0f));
+        const ndMatrix matrixBucket(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * bodyBucket->GetMatrix());
+        ndSharedPtr<ndJointBilateralConstraint> jointBucket(new ndJointHinge(matrixBucket, bodyBucket->GetAsBodyDynamic(), bodyArm1->GetAsBodyDynamic()));
+        ndModelArticulation::ndNode* const bucket = articulation->AddLimb(armNode1, bodyBucket, jointBucket);
+        bucket->m_name = "bucket";
+        ((ndJointHinge*)*jointBucket)->SetAsSpringDamper(ndFloat32(0.1f), ndFloat32(2000.0f), ndFloat32(50.0f));
+        
         //// add an effector to move the arm
         //ndMatrix baseFrame(ndGetIdentityMatrix());
         //baseFrame.m_posit = hingeFrame.m_posit;
