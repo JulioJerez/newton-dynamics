@@ -127,7 +127,7 @@ void ndRotateMesh::ApplyRotation()
 
 	ndRenderMeshLoader loader(*m_owner->GetRenderer());
 	loader.m_mesh = m_owner->GetMesh();
-	loader.m_renderMesh = ndRenderMeshLoader::CreateRenderSceneMesh(*m_owner->GetRenderer(), *loader.m_mesh, loader.GetPath(m_owner->GetPath()));
+	loader.m_renderMesh = ndRenderMeshLoader::CreateRenderSceneMesh(*m_owner->GetRenderer(), *loader.m_mesh, ndGetPath(m_owner->GetPath()));
 	m_owner->SetVisualScene(loader);
 }
 

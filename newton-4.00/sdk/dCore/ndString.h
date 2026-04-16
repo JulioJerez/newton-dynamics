@@ -16,6 +16,10 @@
 #include "ndCoreStdafx.h"
 #include "ndClassAlloc.h"
 
+class ndString;
+D_CORE_API ndString ndGetPath(const ndString& fullPathName);
+D_CORE_API ndString ndGetName(const ndString& fullPathName);
+
 class ndString: public ndClassAlloc
 {
 	class ndStringAllocator;

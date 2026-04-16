@@ -716,3 +716,30 @@ ndInt32 ndString::Distance(const ndString& other) const
 	
 	return currRow[n];
 }
+
+
+ndString ndGetPath(const ndString& fullPathName)
+{
+	const char* ptr = strrchr(fullPathName.GetStr(), '/');
+	if (!ptr)
+	{
+		ptr = strrchr(fullPathName.GetStr(), '\\');
+	}
+	return ndString(fullPathName.GetStr(), ndInt32(fullPathName.Size() - strlen(ptr + 1)));
+}
+
+ndString ndGetName(const ndString& fullPathName)
+{
+	const char* ptr1 = strrchr(fullPathName.GetStr(), '.');
+	const char* ptr0 = strrchr(fullPathName.GetStr(), '/');
+	if (!ptr0)
+	{
+		ptr0 = strrchr(fullPathName.GetStr(), '\\');
+	}
+	ndAssert(ptr0);
+	ndAssert(ptr1);
+	ndInt32 start = ndInt32(fullPathName.Size() - strlen(ptr0 + 1));
+	ndInt32 end = ndInt32(fullPathName.Size() - strlen(ptr1));
+	return fullPathName.SubString(start, end - start);
+}
+
