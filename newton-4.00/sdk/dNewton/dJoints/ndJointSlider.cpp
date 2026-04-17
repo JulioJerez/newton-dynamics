@@ -320,9 +320,9 @@ void ndJointSlider::JacobianDerivative(ndConstraintDescritor& desc)
 	SubmitLimits(desc, matrix0, matrix1);
 }
 
-ndSharedPtr<ndMeshJoint> ndJointSlider::GetMeshJoint() const
+ndSharedPtr<ndMeshJoint> ndJointSlider::GetMeshJoint(const ndMesh* const owner) const
 {
-	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointSlider(this));
+	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointSlider(owner, this));
 
 	return joint;
 }

@@ -15,6 +15,8 @@
 #include "ndNewtonStdafx.h"
 #include "ndJointBilateralConstraint.h"
 
+class ndMeshJoint;
+
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndIkSwivelPositionEffector: public ndJointBilateralConstraint
 {
@@ -81,6 +83,8 @@ class ndIkSwivelPositionEffector: public ndJointBilateralConstraint
 	void SubmitLinearAxis(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 	void SubmitAngularAxis(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 	void SubmitReducedLinearAxis(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
+
+	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
 	ndVector m_restPosition;
 	ndVector m_localTargetPosit;

@@ -35,7 +35,7 @@ void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root)
 		if (ImGui::IsItemClicked())
 		{
 			m_addCollidingBody = false;
-			m_removeCollidingBody = false;
+			//m_removeCollidingBody = false;
 			m_addCollingPairSelection = -1;
 			m_addCollingPairCandidateSelection = -1;
 			m_secundarySelection.SetCount(0);

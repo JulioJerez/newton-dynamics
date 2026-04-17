@@ -178,7 +178,7 @@ class ndJointBilateralConstraint : public ndConstraint
 	D_COLLISION_API void UpdateParameters() override;
 	D_COLLISION_API void ReplaceSentinel(ndBodyKinematic* const sentinel);
 
-	D_COLLISION_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const;
+	D_COLLISION_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const;
 
 	// inverse dynamics interface
 	D_COLLISION_API virtual void ClearMemory() override;

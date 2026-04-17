@@ -37,7 +37,7 @@ class ndJointFix6dof: public ndJointBilateralConstraint
 	D_NEWTON_API void SetMaxForce(ndFloat32 maxForce);
 	D_NEWTON_API void SetMaxTorque(ndFloat32 maxTorque);
 
-	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const override;
+	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
 	protected:
 	D_NEWTON_API void UpdateParameters() override;

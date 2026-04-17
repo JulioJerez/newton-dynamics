@@ -22,6 +22,7 @@
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
 #include "ndBody.h"
+#include "ndMesh.h"
 #include "ndShapeBox.h"
 #include "ndCollision.h"
 #include "ndShapeSphere.h"
@@ -276,23 +277,34 @@ ndShape* ndMeshCollisionShapeCompound::CreateObject() const
 	{
 		const ndSharedPtr<ndMeshShapeInstance>& subMeshInstancePtr = node->GetInfo();
 		const ndMeshShapeInstance* subMeshInstance = *subMeshInstancePtr;
-		compoundShape->AddCollision(subMeshInstance->CreateObject());
+		ndSharedPtr<ndShapeInstance> subIntance(subMeshInstance->CreateObject());
+		compoundShape->AddCollision(*subIntance);
 	}
 	compoundShape->EndAddRemove();
 
 	return compoundShape;
 }
 
-//void ndMeshCollisionShapeCompound::SerializeToXml(nd::TiXmlElement* const parent) const
-void ndMeshCollisionShapeCompound::SerializeToXml(nd::TiXmlElement* const) const
+void ndMeshCollisionShapeCompound::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	ndAssert(0);
+	xmlSaveParam(parent, "constructor", ndShapeCompound::StaticClassName());
+	for (ndList<ndSharedPtr<ndMeshShapeInstance>>::ndNode* node = m_subShapes.GetFirst(); node; node = node->GetNext())
+	{
+		nd::TiXmlElement* const subInstanceNode = new nd::TiXmlElement("collisionInstance");
+		parent->LinkEndChild(subInstanceNode);
+		ndSharedPtr<ndMeshShapeInstance>& subInstance = node->GetInfo();
+		subInstance->SerializeToXml(subInstanceNode);
+	}
 }
 
-//void ndMeshCollisionShapeCompound::DeserializeFromXml(const nd::TiXmlElement* const parent)
-void ndMeshCollisionShapeCompound::DeserializeFromXml(const nd::TiXmlElement* const)
+void ndMeshCollisionShapeCompound::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
-	ndAssert(0);
+	for (const nd::TiXmlNode* node = parent->FirstChild("collisionInstance"); node; node = node->NextSibling("collisionInstance"))
+	{
+		ndSharedPtr<ndMeshShapeInstance> instance(new ndMeshShapeInstance);
+		instance->DeserializeFromXml((nd::TiXmlElement*)node);
+		m_subShapes.Append(instance);
+	}
 }
 
 ndMeshShapeInstance::ndMeshShapeInstance()
@@ -315,8 +327,6 @@ ndMeshShapeInstance::ndMeshShapeInstance(const ndShapeInstance& instance)
 
 void ndMeshShapeInstance::ApplyScale(const ndMatrix& scaleMatrix)
 {
-	//ndMatrix m_localMatrix;
-	//ndMatrix m_alignmentMatrix;
 	ndMatrix scale(ndGetIdentityMatrix());
 	scale[0][0] = m_scale[0];
 	scale[1][1] = m_scale[1];
@@ -388,6 +398,11 @@ void ndMeshShapeInstance::DeserializeFromXml(const nd::TiXmlElement* const paren
 	else if (strcmp(constructor, ndShapeConvexHull::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeConvexHull());
+		m_shape->DeserializeFromXml(xmlShape);
+	}
+	else if (strcmp(constructor, ndShapeCompound::StaticClassName()) == 0)
+	{
+		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeCompound());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
 	else
@@ -496,19 +511,21 @@ ndBody* ndMeshBodyKinematic::CreateObject() const
 	return nullptr;
 }
 
-ndMeshJoint::ndMeshJoint()
+ndMeshJoint::ndMeshJoint(const ndMesh* const owner)
 	:ndClassAlloc()
 	,m_localFrame0(ndGetIdentityMatrix())
 	,m_localFrame1(ndGetIdentityMatrix())
 	,m_constructor("ndJointFix6dof")
+	,m_owner(ndWeakPtr<const ndMesh>(owner))
 {
 }
 
-ndMeshJoint::ndMeshJoint(const ndJointBilateralConstraint* const joint)
+ndMeshJoint::ndMeshJoint(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndClassAlloc()
 	,m_localFrame0(joint->GetLocalMatrix0())
 	,m_localFrame1(joint->GetLocalMatrix1())
 	,m_constructor(joint->ClassName())
+	,m_owner(ndWeakPtr<const ndMesh>(owner))
 {
 }
 
@@ -551,38 +568,4 @@ void ndMeshJoint::ApplyTransform(const ndMatrix& transform)
 
 	matrix1.PolarDecomposition(transformMatrix, scale, stretchAxis);
 	m_localFrame1 = transformMatrix;
-}
-
-
-ndMeshLoopJoint::ndMeshLoopJoint()
-	:ndClassAlloc()
-{
-}
-
-ndMeshLoopJoint::ndMeshLoopJoint(const ndJointBilateralConstraint* const joint)
-	:ndClassAlloc()
-//	,ndWeakPtr<ndMesh> m_otherNode;
-//	,m_joint;
-{
-}
-
-ndMeshLoopJoint::~ndMeshLoopJoint()
-{
-
-}
-
-ndJointBilateralConstraint* ndMeshLoopJoint::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
-{
-	ndAssert(0);
-	return nullptr;
-}
-
-void ndMeshLoopJoint::SerializeToXml(nd::TiXmlElement* const parent) const
-{
-	ndAssert(0);
-}
-
-void ndMeshLoopJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
-{
-	ndAssert(0);
 }

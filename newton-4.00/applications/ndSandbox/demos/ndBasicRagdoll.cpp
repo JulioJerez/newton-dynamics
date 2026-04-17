@@ -20,10 +20,10 @@
 
 namespace ndRagdoll
 {
-	class ndRagDollControl : public ndJointUserData
+	class ndRagDollJointControl : public ndJointUserData
 	{
 		public:
-		ndRagDollControl(ndJointBilateralConstraint* const owner, ndModelArticulation* const appInterface)
+		ndRagDollJointControl(ndJointBilateralConstraint* const owner, ndModelArticulation* const appInterface)
 			:ndJointUserData(owner)
 			,m_model(appInterface)
 		{
@@ -35,11 +35,11 @@ namespace ndRagdoll
 		ndWeakPtr<ndModelArticulation> m_model;
 	};
 	
-	class ndMakeRagDoll : public ndRagDollControl
+	class ndMakeRagDoll : public ndRagDollJointControl
 	{
 		public:
 		ndMakeRagDoll(ndJointBilateralConstraint* const owner, ndModelArticulation* const appInterface)
-			:ndRagDollControl(owner, appInterface)
+			:ndRagDollJointControl(owner, appInterface)
 		{
 		}
 	
@@ -55,8 +55,21 @@ namespace ndRagdoll
 		class ndFilterPair
 		{
 			public:
-			ndWeakPtr<ndBody> m_body0;
-			ndWeakPtr<ndBody> m_body1;
+			ndFilterPair(const ndBody* const body0, const ndBody* const body1)
+				:m_id0(ndMin(body0->GetId(), body1->GetId()))
+				,m_id1(ndMax(body0->GetId(), body1->GetId()))
+			{
+			}
+
+			union
+			{
+				ndUnsigned64 m_id;
+				struct
+				{
+					ndUnsigned32 m_id0;
+					ndUnsigned32 m_id1;
+				};
+			};
 		};
 
 		ndRagDollController()
@@ -66,15 +79,16 @@ namespace ndRagdoll
 
 		bool OnContactGeneration(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1) override
 		{
-			// here the application can use filter to determine what body parts should collide.
-			// this greatly improves performance because since articulated models,
-			// in general do not self collide, but occasionally some parts do collide. 
-			// for now we just return false (no collision)
+			// The application can use filtering here to decide which body parts should collide.
+			// This significantly improves performance by preventing the generation of
+			// unnecessary n^2 contact joints that will never collide. 
+			// In general, articulated models do not self-collide, 
+			// although some parts may occasionally interact. 
+
+			const ndFilterPair code(body0, body1);
 			for (ndInt32 i = ndInt32 (m_collisionFilter.GetCount()) - 1; i >= 0; --i)
 			{
-				bool test = (body0 == *m_collisionFilter[i].m_body0) && (body1 == *m_collisionFilter[i].m_body1);
-				test = test || (body1 == *m_collisionFilter[i].m_body0) && (body0 == *m_collisionFilter[i].m_body1);
-				if (test)
+				if (code.m_id == m_collisionFilter[i].m_id)
 				{
 					return true;
 				}
@@ -125,26 +139,15 @@ namespace ndRagdoll
 
 				const ndMeshBodyDynamic* const rigidBodyInfo = (ndMeshBodyDynamic*)*meshOwner->GetRigidBody();
 
-				ndBody* body0 = *node->m_body;
+				ndBody* const body0 = *node->m_body;
 				for (ndInt32 i = 0; i < rigidBodyInfo->m_collidingPair.GetCount(); ++i)
 				{
 					const ndString& name = rigidBodyInfo->m_collidingPair[i]->GetName();
 					ndBody* const body1 = *ragdoll->FindByName(name.GetStr())->m_body;
 				
-					bool isPair = false;
-					for (ndInt32 j = 0; !isPair  && (j < ragdollController->m_collisionFilter.GetCount()); ++j)
-					{
-						const ndRagDollController::ndFilterPair& filterPair = ragdollController->m_collisionFilter[j];
-						isPair = isPair || (body0 == *filterPair.m_body0) && (body1 == *filterPair.m_body1);
-						isPair = isPair || (body1 == *filterPair.m_body0) && (body0 == *filterPair.m_body1);
-					}
-					if (!isPair)
-					{
-						ndRagDollController::ndFilterPair newPair;
-						newPair.m_body0 = body0;
-						newPair.m_body1 = body1;
-						ragdollController->m_collisionFilter.PushBack(newPair);
-					}
+					// we add all the colliding pairs, kknowing rher will be duplicates.
+					ndRagDollController::ndFilterPair newPair(body0, body1);
+					ragdollController->m_collisionFilter.PushBack(newPair);
 				}
 			}
 
@@ -155,6 +158,24 @@ namespace ndRagdoll
 			}
 		};
 		ragdoll->NodeIterator(BindApplicationData);
+
+		// remove collindg pais duplicated, 
+		// the list is small, we can just do a brute force sercj for duplicates
+		for (ndInt32 i = ndInt32 (ragdollController->m_collisionFilter.GetCount()) - 1; i > 0; --i)
+		{
+			ndRagDollController::ndFilterPair code0(ragdollController->m_collisionFilter[i]);
+			for (ndInt32 j = i - 1; j >= 0; --j)
+			{
+				ndRagDollController::ndFilterPair code1(ragdollController->m_collisionFilter[j]);
+				if (code0.m_id == code1.m_id)
+				{
+					ndInt32 lastIndex = ndInt32 (ragdollController->m_collisionFilter.GetCount()) - 1;
+					ragdollController->m_collisionFilter[j] = ragdollController->m_collisionFilter[lastIndex];
+					ragdollController->m_collisionFilter.SetCount(lastIndex);
+					break;
+				}
+			}
+		}
 
 		// apply the global transforms to the visual mesh and physics model
 		const ndMatrix matrix(ragdoll->GetRoot()->m_body->GetMatrix() * location);

@@ -79,7 +79,7 @@ class ndModelArticulation: public ndModel
 	D_NEWTON_API ndNode* AddLimb(ndNode* const parent, const ndSharedPtr<ndBody>& body, const ndSharedPtr<ndJointBilateralConstraint>& joint);
 
 	D_NEWTON_API const ndList<ndModelArticulation::ndNode, ndContainersFreeListAlloc<ndNode>>& GetCloseLoops() const;
-	D_NEWTON_API void AddCloseLoop(const ndSharedPtr<ndJointBilateralConstraint>& joint, const char* const name = nullptr);
+	D_NEWTON_API void AddCloseLoop(const ndSharedPtr<ndJointBilateralConstraint>& joint, const char* const name = "none");
 
 	D_NEWTON_API virtual void SetSleep(ndFloat32 speed, ndFloat32 angularSpeed, ndFloat32 accel, ndFloat32 alpha) const override;
 
@@ -92,8 +92,8 @@ class ndModelArticulation: public ndModel
 
 	D_NEWTON_API void ClearMemory();
 	D_NEWTON_API void SetTransform(const ndMatrix& matrix);
+	D_NEWTON_API bool IsCloseLoop(const ndNode* const node) const;
 	
-	//D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassDynamics(const ndMatrix& localFrame) const;
 	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassKinematics(const ndMatrix& localFrame) const;
 	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassDynamics(ndIkSolver& solver, const ndMatrix& localFrame, ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS>& extraJoints, ndFloat32 timestep) const;
 	

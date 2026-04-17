@@ -165,7 +165,7 @@ class ndAssetEditor : public ndClassAlloc
 
 	bool m_toolActive;
 	bool m_addCollidingBody;
-	bool m_removeCollidingBody;
+	//bool m_removeCollidingBody;
 	ndInt32 m_addCollingPairSelection;
 	ndInt32 m_addCollingPairCandidateSelection;
 	

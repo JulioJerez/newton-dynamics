@@ -306,7 +306,7 @@ void ndBrainAgentOnPolicyGradient_Agent::Step()
 	const ndBrain* const policy = *GetBrain();
 	ndBrainMemVector actions(m_trajectory.GetActions(entryIndex), policy->GetOutputSize());
 	ndBrainMemVector observation(m_trajectory.GetObservations(entryIndex), owner->m_parameters.m_numberOfObservations);
-	
+
 	GetObservation(&observation[0]);
 	policy->MakePrediction(observation, actions);
 	SampleActions(actions);
@@ -585,7 +585,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::SaveTrajectory(ndBrainAgentOnPolicyGr
 		}
 
 		// get max number of step that exclude the terminal state
-		// and contain the Monte Calos steps
+		// and contain the Monte Carlos steps
 		
 		const ndInt32 montecarlosSize = trajectory.GetCount() - ND_ON_POLICY_MONTE_CARLOS_STEPS;
 		for (ndInt32 i = montecarlosSize - 1; i >= 0; --i)
@@ -606,7 +606,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::SaveTrajectory(ndBrainAgentOnPolicyGr
 			trajectory.SetReward(montecarlosSize-1, trajectory.GetReward(montecarlosSize + ND_ON_POLICY_MONTE_CARLOS_STEPS - 1));
 		}
 		// clip trajectory
-		trajectory.SetCount(montecarlosSize);
+		trajectory.SetCount(ndMin (montecarlosSize, m_parameters.m_maxTrajectorySteps));
 
 		// (Monte Carlo method)
 		// using the Bellman equation to calculate trajectory expected rewards score.

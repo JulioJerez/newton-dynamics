@@ -84,31 +84,6 @@ void ndAnimationMeshLoader::SetTranslationTracks(const ndString& boneName)
 	}
 }
 
-ndString ndAnimationMeshLoader::GetPath(const ndString& fullPathName) const
-{
-	const char* ptr = strrchr(fullPathName.GetStr(), '/');
-	if (!ptr)
-	{
-		ptr = strrchr(fullPathName.GetStr(), '\\');
-	}
-	return ndString (fullPathName.GetStr(), ndInt32(fullPathName.Size() - strlen(ptr + 1)));
-}
-
-ndString ndAnimationMeshLoader::GetName(const ndString& fullPathName) const
-{
-	const char* ptr1 = strrchr(fullPathName.GetStr(), '.');
-	const char* ptr0 = strrchr(fullPathName.GetStr(), '/');
-	if (!ptr0)
-	{
-		ptr0 = strrchr(fullPathName.GetStr(), '\\');
-	}
-	ndAssert(ptr0);
-	ndAssert(ptr1);
-	ndInt32 start = ndInt32(fullPathName.Size() - strlen(ptr0 + 1));
-	ndInt32 end = ndInt32(fullPathName.Size() - strlen(ptr1));
-	return fullPathName.SubString(start, end - start);
-}
-
 bool ndAnimationMeshLoader::ImportFbx(const ndString& fbxPathMeshName)
 {
 	ndFbxMeshLoader loader;
@@ -171,7 +146,7 @@ bool ndAnimationMeshLoader::ImportFbx(const ndString& fbxPathMeshName)
 		if (parent)
 		{
 			ndSharedPtr<ndJointBilateralConstraint> joint(node->CreateJoint());
-			ndSharedPtr<ndMeshJoint> meshJoint(joint->GetMeshJoint());
+			ndSharedPtr<ndMeshJoint> meshJoint(joint->GetMeshJoint(node));
 			node->SetJoint(meshJoint);
 		}
 	};

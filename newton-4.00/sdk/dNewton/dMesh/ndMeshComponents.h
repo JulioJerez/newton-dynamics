@@ -42,11 +42,28 @@ class ndMeshBodyDynamic : public ndMeshBodyKinematic
 	ndArray<ndWeakPtr<ndMesh>> m_collidingPair;
 };
 
+class ndMeshLoopJoint : public ndClassAlloc
+{
+	public:
+	D_NEWTON_API ndMeshLoopJoint();
+	D_NEWTON_API ndMeshLoopJoint(const ndSharedPtr<ndMeshJoint>& joint, ndMesh* const otherNode);
+	D_NEWTON_API virtual ~ndMeshLoopJoint();
+
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const;
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+
+	//ndMatrix m_childLocalFrame;
+	//ndMatrix m_parentLocalFrame;
+	ndSharedPtr<ndMeshJoint> m_joint;
+	ndWeakPtr<ndMesh> m_otherNode;
+};
+
 class ndMeshJointFix6dof : public ndMeshJoint
 {
 	public:
-	D_NEWTON_API ndMeshJointFix6dof();
-	D_NEWTON_API ndMeshJointFix6dof(const ndJointBilateralConstraint* const joint);
+	D_NEWTON_API ndMeshJointFix6dof(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointFix6dof(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
 	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
@@ -60,8 +77,8 @@ class ndMeshJointFix6dof : public ndMeshJoint
 class ndMeshJointHinge : public ndMeshJoint
 {
 	public:
-	D_NEWTON_API ndMeshJointHinge();
-	D_NEWTON_API ndMeshJointHinge(const ndJointBilateralConstraint* const joint);
+	D_NEWTON_API ndMeshJointHinge(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointHinge(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
 	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
@@ -73,8 +90,8 @@ class ndMeshJointHinge : public ndMeshJoint
 class ndMeshJointSlider : public ndMeshJoint
 {
 	public:
-	D_NEWTON_API ndMeshJointSlider();
-	D_NEWTON_API ndMeshJointSlider(const ndJointBilateralConstraint* const joint);
+	D_NEWTON_API ndMeshJointSlider(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointSlider(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
 	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
@@ -87,8 +104,8 @@ class ndMeshJointDoubleHinge : public ndMeshJoint
 {
 	public:
 
-	D_NEWTON_API ndMeshJointDoubleHinge();
-	D_NEWTON_API ndMeshJointDoubleHinge(const ndJointBilateralConstraint* const joint);
+	D_NEWTON_API ndMeshJointDoubleHinge(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointDoubleHinge(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
 	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
@@ -102,8 +119,8 @@ class ndMeshJointPlane : public ndMeshJoint
 {
 	public:
 
-	D_NEWTON_API ndMeshJointPlane();
-	D_NEWTON_API ndMeshJointPlane(const ndJointBilateralConstraint* const joint);
+	D_NEWTON_API ndMeshJointPlane(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointPlane(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
 	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
@@ -116,23 +133,23 @@ class ndMeshJointRoller : public ndMeshJoint
 {
 	public:
 
-	D_NEWTON_API ndMeshJointRoller();
-	D_NEWTON_API ndMeshJointRoller(const ndJointBilateralConstraint* const joint);
+	D_NEWTON_API ndMeshJointRoller(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointRoller(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
 	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
-	ndAxis m_axis0;
-	ndAxis m_axis1;
+	ndAxis m_positAxis;
+	ndAxis m_angleAxis;
 };
 
 class ndMeshJointCylinder : public ndMeshJoint
 {
 	public:
 
-	D_NEWTON_API ndMeshJointCylinder();
-	D_NEWTON_API ndMeshJointCylinder(const ndJointBilateralConstraint* const joint);
+	D_NEWTON_API ndMeshJointCylinder(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointCylinder(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
 	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
@@ -145,8 +162,8 @@ class ndMeshJointCylinder : public ndMeshJoint
 class ndMeshJointWheel : public ndMeshJoint
 {
 	public:
-	D_NEWTON_API ndMeshJointWheel();
-	D_NEWTON_API ndMeshJointWheel(const ndJointBilateralConstraint* const joint);
+	D_NEWTON_API ndMeshJointWheel(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointWheel(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
 	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
@@ -161,8 +178,8 @@ class ndMeshJointWheel : public ndMeshJoint
 class ndMeshJointSpherical : public ndMeshJoint
 {
 	public:
-	D_NEWTON_API ndMeshJointSpherical();
-	D_NEWTON_API ndMeshJointSpherical(const ndJointBilateralConstraint* const joint);
+	D_NEWTON_API ndMeshJointSpherical(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointSpherical(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
 	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
@@ -171,6 +188,33 @@ class ndMeshJointSpherical : public ndMeshJoint
 	ndAxis m_axis;
 	ndFloat32 m_maxConeAngle;
 	ndInt8 m_coneAngleState;
+};
+
+class ndMeshJointIkSwivelPositionEffector : public ndMeshJoint
+{
+	public:
+	D_NEWTON_API ndMeshJointIkSwivelPositionEffector(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointIkSwivelPositionEffector(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
+
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
+
+	ndVector m_restPosition;
+	ndFloat32 m_angularSpring;
+	ndFloat32 m_angularDamper;
+	ndFloat32 m_angularMaxTorque;
+	ndFloat32 m_angularRegularizer;
+
+	ndFloat32 m_linearSpring;
+	ndFloat32 m_linearDamper;
+	ndFloat32 m_linearMaxForce;
+	ndFloat32 m_linearRegularizer;
+	ndFloat32 m_minWorkSpaceRadio;
+	ndFloat32 m_maxWorkSpaceRadio;
+
+	ndInt32 m_rotationOrder;
+	bool m_enableSwivelControl;
 };
 
 #endif

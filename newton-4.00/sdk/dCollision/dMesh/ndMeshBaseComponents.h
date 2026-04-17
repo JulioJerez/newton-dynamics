@@ -223,8 +223,8 @@ class ndMeshJoint : public ndClassAlloc
 		ndInt8 m_limitState;
 	};
 
-	D_COLLISION_API ndMeshJoint();
-	D_COLLISION_API ndMeshJoint(const ndJointBilateralConstraint* const joint);
+	D_COLLISION_API ndMeshJoint(const ndMesh* const owner);
+	D_COLLISION_API ndMeshJoint(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 	D_COLLISION_API virtual ~ndMeshJoint();
 
 	D_COLLISION_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const;
@@ -233,25 +233,11 @@ class ndMeshJoint : public ndClassAlloc
 
 	D_COLLISION_API virtual void ApplyTransform(const ndMatrix& tranform);
 
-
 	ndMatrix m_localFrame0;
 	ndMatrix m_localFrame1;
 	ndString m_constructor;
+	ndWeakPtr<const ndMesh> m_owner;
 };
 
-class ndMeshLoopJoint : public ndClassAlloc
-{
-	public:
-	D_COLLISION_API ndMeshLoopJoint();
-	D_COLLISION_API ndMeshLoopJoint(const ndJointBilateralConstraint* const joint);
-	D_COLLISION_API virtual ~ndMeshLoopJoint();
-
-	D_COLLISION_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const;
-	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
-	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
-
-	ndWeakPtr<ndMesh> m_otherNode;
-	ndSharedPtr<ndMeshJoint> m_joint;
-};
 #endif
 
