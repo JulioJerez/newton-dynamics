@@ -68,7 +68,7 @@ class ndJointWheel : public ndJointBilateralConstraint
 
 	D_NEWTON_API const ndWheelDescriptor& GetInfo() const;
 	D_NEWTON_API void SetInfo(const ndWheelDescriptor& info);
-	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const override;
+	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 	
 	void DebugJoint(ndConstraintDebugCallback& debugCallback) const override;
 

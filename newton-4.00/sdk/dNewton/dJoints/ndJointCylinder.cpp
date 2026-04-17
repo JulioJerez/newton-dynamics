@@ -438,8 +438,8 @@ void ndJointCylinder::JacobianDerivative(ndConstraintDescritor& desc)
 	SubmitLimitsAngle(desc, matrix0, matrix1);
 }
 
-ndSharedPtr<ndMeshJoint> ndJointCylinder::GetMeshJoint() const
+ndSharedPtr<ndMeshJoint> ndJointCylinder::GetMeshJoint(const ndMesh* const owner) const
 {
-	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointCylinder(this));
+	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointCylinder(owner, this));
 	return joint;
 }

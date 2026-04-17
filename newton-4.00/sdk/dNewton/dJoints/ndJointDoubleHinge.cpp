@@ -440,9 +440,9 @@ void ndJointDoubleHinge::JacobianDerivative(ndConstraintDescritor& desc)
 	SubmitLimits(desc, matrix0, matrix1);
 }
 
-ndSharedPtr<ndMeshJoint> ndJointDoubleHinge::GetMeshJoint() const
+ndSharedPtr<ndMeshJoint> ndJointDoubleHinge::GetMeshJoint(const ndMesh* const owner) const
 {
-	ndMeshJointDoubleHinge* const joint = new ndMeshJointDoubleHinge(this);
+	ndMeshJointDoubleHinge* const joint = new ndMeshJointDoubleHinge(owner, this);
 
 	//joint->m_axis0.m_springK = m_axis0.m_springK;
 	//joint->m_axis0.m_damperC = m_axis0.m_damperC;

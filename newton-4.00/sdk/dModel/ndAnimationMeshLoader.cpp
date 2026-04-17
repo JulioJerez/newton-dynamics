@@ -146,7 +146,7 @@ bool ndAnimationMeshLoader::ImportFbx(const ndString& fbxPathMeshName)
 		if (parent)
 		{
 			ndSharedPtr<ndJointBilateralConstraint> joint(node->CreateJoint());
-			ndSharedPtr<ndMeshJoint> meshJoint(joint->GetMeshJoint());
+			ndSharedPtr<ndMeshJoint> meshJoint(joint->GetMeshJoint(node));
 			node->SetJoint(meshJoint);
 		}
 	};

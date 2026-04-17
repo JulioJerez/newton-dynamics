@@ -708,7 +708,7 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 					{
 						newJoint->SetLocalMatrix0(joint->m_localFrame0);
 						newJoint->SetLocalMatrix1(joint->m_localFrame1);
-						m_currentSelection->SetJoint(newJoint->GetMeshJoint());
+						m_currentSelection->SetJoint(newJoint->GetMeshJoint(*m_currentSelection));
 						joint = m_currentSelection->GetJoint();
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoJointChange(this, m_currentSelection)));
 					};

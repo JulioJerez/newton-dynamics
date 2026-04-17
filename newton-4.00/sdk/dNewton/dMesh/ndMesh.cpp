@@ -252,6 +252,21 @@ void ndMesh::SetJoint(const ndSharedPtr<ndMeshJoint>& joint)
 	m_joint = joint;
 }
 
+ndSharedPtr<ndMeshLoopJoint>& ndMesh::GetLoopJoint()
+{
+	return m_loopJoint;
+}
+
+const ndSharedPtr<ndMeshLoopJoint>& ndMesh::GetLoopJoint() const
+{
+	return m_loopJoint;
+}
+
+void ndMesh::SetLoopJoint(const ndSharedPtr<ndMeshLoopJoint>& joint)
+{
+	m_loopJoint = joint;
+}
+
 ndSharedPtr<ndMesh> ndMesh::GetSharedPtr() const
 {
 	if (m_selfChildNode)

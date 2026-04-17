@@ -428,9 +428,9 @@ void ndJointSpherical::JacobianDerivative(ndConstraintDescritor& desc)
 	SubmitLimits(matrix0, matrix1, desc);
 }
 
-ndSharedPtr<ndMeshJoint> ndJointSpherical::GetMeshJoint() const
+ndSharedPtr<ndMeshJoint> ndJointSpherical::GetMeshJoint(const ndMesh* const owner) const
 {
-	ndMeshJointSpherical* const joint = new ndMeshJointSpherical(this);
+	ndMeshJointSpherical* const joint = new ndMeshJointSpherical(owner, this);
 
 	//joint->m_rotation = m_rotation;
 	joint->m_maxConeAngle = m_maxConeAngle * ndRadToDegree;

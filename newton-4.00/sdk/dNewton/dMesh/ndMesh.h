@@ -28,6 +28,7 @@ class ndMeshBody;
 class ndMeshJoint;
 class ndMeshEffect;
 class ndShapeInstance;
+class ndMeshLoopJoint;
 class ndMeshShapeInstance;
 
 class ndMesh : public ndClassAlloc
@@ -111,7 +112,11 @@ class ndMesh : public ndClassAlloc
 
 	D_NEWTON_API ndSharedPtr<ndMeshJoint>& GetJoint();
 	D_NEWTON_API const ndSharedPtr<ndMeshJoint>& GetJoint() const;
-	D_NEWTON_API void SetJoint(const ndSharedPtr<ndMeshJoint>& primitive);
+	D_NEWTON_API void SetJoint(const ndSharedPtr<ndMeshJoint>& joint);
+
+	D_NEWTON_API ndSharedPtr<ndMeshLoopJoint>& GetLoopJoint();
+	D_NEWTON_API const ndSharedPtr<ndMeshLoopJoint>& GetLoopJoint() const;
+	D_NEWTON_API void SetLoopJoint(const ndSharedPtr<ndMeshLoopJoint>& joint);
 
 	D_NEWTON_API const ndString& GetName() const;
 	D_NEWTON_API void SetName(const ndString& name);

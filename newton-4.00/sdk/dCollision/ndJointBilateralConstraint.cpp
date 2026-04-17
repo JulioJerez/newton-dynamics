@@ -616,9 +616,9 @@ void ndJointBilateralConstraint::UpdateParameters()
 	ndTrace(("Fix this joint paremeters\n"));
 }
 
-ndSharedPtr<ndMeshJoint> ndJointBilateralConstraint::GetMeshJoint() const
+ndSharedPtr<ndMeshJoint> ndJointBilateralConstraint::GetMeshJoint(const ndMesh* const owner) const
 {
 	ndExpandTraceMessage("serialize class: %s not Implemented", ClassName());
 	ndAssert(0);
-	return ndSharedPtr<ndMeshJoint>(new ndMeshJoint(this));
+	return ndSharedPtr<ndMeshJoint>(new ndMeshJoint(owner, this));
 }

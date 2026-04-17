@@ -12,6 +12,7 @@
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
 #include "ndIk6DofEffector.h"
+#include "ndMeshComponents.h"
 #include "ndSkeletonContainer.h"
 
 ndIk6DofEffector::ndIk6DofEffector()

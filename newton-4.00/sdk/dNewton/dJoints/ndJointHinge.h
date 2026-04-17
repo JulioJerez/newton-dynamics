@@ -50,7 +50,7 @@ class ndJointHinge: public ndJointBilateralConstraint
 	D_NEWTON_API ndInt32 GetKinematicState(ndKinematicState* const state) const override;
 	D_NEWTON_API void ApplyBaseRows(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 
-	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const override;
+	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
 	ndAxisParam m_axis;
 } D_GCC_NEWTON_CLASS_ALIGN_32;

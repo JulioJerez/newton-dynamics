@@ -282,9 +282,9 @@ void ndJointWheel::JacobianDerivative(ndConstraintDescritor& desc)
 	}
 }
 
-ndSharedPtr<ndMeshJoint> ndJointWheel::GetMeshJoint() const
+ndSharedPtr<ndMeshJoint> ndJointWheel::GetMeshJoint(const ndMesh* const owner) const
 {
-	ndMeshJointWheel* const joint = new ndMeshJointWheel(this);
+	ndMeshJointWheel* const joint = new ndMeshJointWheel(owner, this);
 	
 	//joint->m_baseFrame = m_baseFrame;
 	joint->m_axis.m_springK = m_info.m_springK;

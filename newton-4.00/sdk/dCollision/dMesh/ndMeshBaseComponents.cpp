@@ -22,6 +22,7 @@
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
 #include "ndBody.h"
+#include "ndMesh.h"
 #include "ndShapeBox.h"
 #include "ndCollision.h"
 #include "ndShapeSphere.h"
@@ -510,19 +511,21 @@ ndBody* ndMeshBodyKinematic::CreateObject() const
 	return nullptr;
 }
 
-ndMeshJoint::ndMeshJoint()
+ndMeshJoint::ndMeshJoint(const ndMesh* const owner)
 	:ndClassAlloc()
 	,m_localFrame0(ndGetIdentityMatrix())
 	,m_localFrame1(ndGetIdentityMatrix())
 	,m_constructor("ndJointFix6dof")
+	,m_owner(ndWeakPtr<const ndMesh>(owner))
 {
 }
 
-ndMeshJoint::ndMeshJoint(const ndJointBilateralConstraint* const joint)
+ndMeshJoint::ndMeshJoint(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndClassAlloc()
 	,m_localFrame0(joint->GetLocalMatrix0())
 	,m_localFrame1(joint->GetLocalMatrix1())
 	,m_constructor(joint->ClassName())
+	,m_owner(ndWeakPtr<const ndMesh>(owner))
 {
 }
 
@@ -565,38 +568,4 @@ void ndMeshJoint::ApplyTransform(const ndMatrix& transform)
 
 	matrix1.PolarDecomposition(transformMatrix, scale, stretchAxis);
 	m_localFrame1 = transformMatrix;
-}
-
-
-ndMeshLoopJoint::ndMeshLoopJoint()
-	:ndClassAlloc()
-{
-}
-
-ndMeshLoopJoint::ndMeshLoopJoint(const ndJointBilateralConstraint* const joint)
-	:ndClassAlloc()
-//	,ndWeakPtr<ndMesh> m_otherNode;
-//	,m_joint;
-{
-}
-
-ndMeshLoopJoint::~ndMeshLoopJoint()
-{
-
-}
-
-ndJointBilateralConstraint* ndMeshLoopJoint::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
-{
-	ndAssert(0);
-	return nullptr;
-}
-
-void ndMeshLoopJoint::SerializeToXml(nd::TiXmlElement* const parent) const
-{
-	ndAssert(0);
-}
-
-void ndMeshLoopJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
-{
-	ndAssert(0);
 }

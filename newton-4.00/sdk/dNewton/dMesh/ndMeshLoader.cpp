@@ -22,6 +22,7 @@
 #include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
+#include "ndIkSwivelPositionEffector.h"
 
 ndMeshLoader::ndMeshLoader()
 	:ndClassAlloc()
@@ -122,6 +123,14 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName) const
 			nd::TiXmlElement* const jointNode = new nd::TiXmlElement("joint");
 			entry.m_parentXml->LinkEndChild(jointNode);
 			const ndMeshJoint* const joint = *entry.m_meshNode->m_joint;
+			joint->SerializeToXml(jointNode);
+		}
+
+		if (entry.m_meshNode->m_loopJoint)
+		{
+			nd::TiXmlElement* const jointNode = new nd::TiXmlElement("loopJoint");
+			entry.m_parentXml->LinkEndChild(jointNode);
+			const ndMeshLoopJoint* const joint = *entry.m_meshNode->m_loopJoint;
 			joint->SerializeToXml(jointNode);
 		}
 
@@ -255,43 +264,67 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 				mesh->SetRigidBody(rigidBody);
 			}
 		}
-	
-		const nd::TiXmlElement* const xmlJoint = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("joint");
-		if (xmlJoint)
+
+		auto LoadJoint = [&mesh](const nd::TiXmlElement* const xmlJoint)
 		{
 			const char* const constructor = xmlGetString(xmlJoint, "constructor");
-			ndSharedPtr<ndMeshJoint> joint(new ndMeshJointFix6dof());
+			ndSharedPtr<ndMeshJoint> joint(new ndMeshJointFix6dof(mesh));
 			if (strcmp(constructor, ndJointHinge::StaticClassName()) == 0)
 			{
-				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointHinge());
+				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointHinge(mesh));
 			}
 			else if (strcmp(constructor, ndJointDoubleHinge::StaticClassName()) == 0)
 			{
-				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointDoubleHinge());
+				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointDoubleHinge(mesh));
 			}
 			else if (strcmp(constructor, ndJointSpherical::StaticClassName()) == 0)
 			{
-				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointSpherical());
+				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointSpherical(mesh));
 			}
 			else if (strcmp(constructor, ndJointWheel::StaticClassName()) == 0)
 			{
-				joint= ndSharedPtr<ndMeshJoint>(new ndMeshJointWheel());
+				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointWheel(mesh));
 			}
 			else if (strcmp(constructor, ndJointSlider::StaticClassName()) == 0)
 			{
-				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointSlider());
+				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointSlider(mesh));
 			}
 			else if (strcmp(constructor, ndJointFix6dof::StaticClassName()) == 0)
 			{
-				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointFix6dof());
+				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointFix6dof(mesh));
+			}
+			else if (strcmp(constructor, ndIkSwivelPositionEffector::StaticClassName()) == 0)
+			{
+				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointIkSwivelPositionEffector(mesh));
 			}
 			else
 			{
 				ndAssert(0);
 			}
-	
+
 			joint->DeserializeFromXml(xmlJoint);
-			mesh->SetJoint(joint);
+			return joint;
+		};
+	
+		const nd::TiXmlElement* const xmlJoint = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("joint");
+		if (xmlJoint)
+		{
+			mesh->SetJoint(LoadJoint(xmlJoint));
+		}
+
+		const nd::TiXmlElement* const xmlLoopJoint = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("loopJoint");
+		if (xmlLoopJoint)
+		{
+			const char* const otherNodeMame = xmlGetString(xmlLoopJoint, "otherNode");
+			ndAssert(otherNodeMame);
+			ndMesh* const otherNode = m_mesh->FindByName(otherNodeMame);
+			ndAssert(otherNode);
+
+			const nd::TiXmlElement* const xmlCloseJoint = (nd::TiXmlElement*)xmlLoopJoint->FirstChild("joint");
+			ndAssert(xmlCloseJoint);
+			ndSharedPtr<ndMeshJoint> jointLoadJoint(LoadJoint(xmlCloseJoint));
+			ndSharedPtr<ndMeshLoopJoint> loopJoint(new ndMeshLoopJoint(jointLoadJoint, otherNode));
+			mesh->SetLoopJoint(loopJoint);
 		}
 	
 		ndList<ndSharedPtr<ndMesh>>::ndNode* childNode = mesh->GetChildren().GetFirst();

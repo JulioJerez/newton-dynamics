@@ -33,7 +33,8 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
     scene->AddEntity(sceneMesh);
 
     // set the matrix location to both visual and physic
-    const ndModelArticulation::ndNode* const rootNode = model->GetAsModelArticulation()->GetRoot();
+    ndModelArticulation* const articulation = model->GetAsModelArticulation();
+    const ndModelArticulation::ndNode* const rootNode = articulation->GetRoot();
     const ndMatrix matrix(rootNode ? rootNode->m_body->GetMatrix() * location : location);
     sceneMesh->SetTransform(matrix);
     sceneMesh->SetTransform(matrix);
@@ -43,23 +44,26 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
     // this could be a render mesh or something else. 
     // For this demo it is ndRenderSceneNode mesh
     const ndMesh* const rootMesh = *loader.m_mesh;
-    auto BindApplicationData = [scene, rootMesh, &sceneMesh](ndModelArticulation::ndNode* const node)
+    auto BindApplicationData = [scene, articulation, rootNode, rootMesh, &sceneMesh](ndModelArticulation::ndNode* const node)
     {
-        const ndMesh* const meshNode = rootMesh->FindByClosestMatch(node->m_name);
-        ndAssert(meshNode);
+        if (!articulation->IsCloseLoop(node))
+        {
+            const ndMesh* const meshNode = rootMesh->FindByClosestMatch(node->m_name);
+            ndAssert(meshNode);
 
-        // find the visual node this body control by name. 
-        const ndMatrix matrix(node->m_body->GetMatrix());
-        ndRenderSceneNode* const visualEntityPtr = sceneMesh->FindByClosestMatch(meshNode->GetName()); 
-        ndAssert(visualEntityPtr);
-        ndSharedPtr<ndRenderSceneNode> visualEntity((visualEntityPtr == *sceneMesh) ? sceneMesh : visualEntityPtr->GetSharedPtr());
+            // find the visual node this body control by name. 
+            const ndMatrix matrix(node->m_body->GetMatrix());
+            ndRenderSceneNode* const visualEntityPtr = sceneMesh->FindByClosestMatch(meshNode->GetName());
+            ndAssert(visualEntityPtr);
+            ndSharedPtr<ndRenderSceneNode> visualEntity((visualEntityPtr == *sceneMesh) ? sceneMesh : visualEntityPtr->GetSharedPtr());
 
-        // add a rigid body with notification callback
-        ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
-        ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
-        node->m_body->SetNotifyCallback(notify);
+            // add a rigid body with notification callback
+            ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
+            ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
+            node->m_body->SetNotifyCallback(notify);
+        }
     };
-    model->GetAsModelArticulation()->NodeIterator(BindApplicationData);
+    articulation->NodeIterator(BindApplicationData);
 
     return model;
 }
@@ -987,29 +991,29 @@ namespace ndExcavator
         bucket->m_name = "bucket";
         ((ndJointHinge*)*jointBucket)->SetAsSpringDamper(ndFloat32(0.1f), ndFloat32(2000.0f), ndFloat32(50.0f));
         
-        //// add an effector to move the arm
-        //ndMatrix baseFrame(ndGetIdentityMatrix());
-        //baseFrame.m_posit = hingeFrame.m_posit;
-        //
-        //m_armEffector = new ndIkSwivelPositionEffector(
-        //    baseFrame, rootNode->m_body->GetAsBodyDynamic(),
-        //    matrixBucket.m_posit, bodyArm1->GetAsBodyDynamic());
-        //m_armEffector->SetSwivelMode(false);
-        //ndSharedPtr<ndJointBilateralConstraint> effector(m_armEffector);
-        //articulation->AddCloseLoop(effector);
-        //
-        //// calculate the work space.
-        //ndVector arm1Len(jointBucket->CalculateGlobalMatrix0().m_posit - jointArm1->CalculateGlobalMatrix0().m_posit);
-        //ndVector arm0Len(jointArm1->CalculateGlobalMatrix0().m_posit - jointArm0->CalculateGlobalMatrix0().m_posit);
-        //ndVector cabinLen(jointArm0->CalculateGlobalMatrix0().m_posit - cabinPivot->CalculateGlobalMatrix0().m_posit);
-        //ndFloat32 l1 = ndSqrt(arm1Len.DotProduct(arm1Len).GetScalar());
-        //ndFloat32 l0 = ndSqrt(arm0Len.DotProduct(arm0Len).GetScalar()) + ndSqrt(cabinLen.DotProduct(cabinLen).GetScalar());
-        //ndFloat32 minRadios = (l0 - l1) * ndFloat32(1.1f);
-        //ndFloat32 maxRadios = (l0 + l1) * ndFloat32(0.9f);
-        //m_armEffector->SetWorkSpaceConstraints(minRadios, maxRadios);
-        //
-        //// calculate arm parameters		
-        //ndVector localPosit(m_armEffector->GetLocalTargetPosition());
+        // add an effector to move the arm
+        ndMatrix baseFrame(ndGetIdentityMatrix());
+        baseFrame.m_posit = hingeFrame.m_posit;
+        
+        ndIkSwivelPositionEffector* const armEffector = new ndIkSwivelPositionEffector(
+            baseFrame, rootNode->m_body->GetAsBodyDynamic(),
+            matrixBucket.m_posit, bodyArm1->GetAsBodyDynamic());
+        armEffector->SetSwivelMode(false);
+        ndSharedPtr<ndJointBilateralConstraint> effector(armEffector);
+        articulation->AddCloseLoop(effector, "buckEffector");
+        
+        // calculate the work space.
+        ndVector arm1Len(jointBucket->CalculateGlobalMatrix0().m_posit - jointArm1->CalculateGlobalMatrix0().m_posit);
+        ndVector arm0Len(jointArm1->CalculateGlobalMatrix0().m_posit - jointArm0->CalculateGlobalMatrix0().m_posit);
+        ndVector cabinLen(jointArm0->CalculateGlobalMatrix0().m_posit - cabinPivot->CalculateGlobalMatrix0().m_posit);
+        ndFloat32 l1 = ndSqrt(arm1Len.DotProduct(arm1Len).GetScalar());
+        ndFloat32 l0 = ndSqrt(arm0Len.DotProduct(arm0Len).GetScalar()) + ndSqrt(cabinLen.DotProduct(cabinLen).GetScalar());
+        ndFloat32 minRadios = (l0 - l1) * ndFloat32(1.1f);
+        ndFloat32 maxRadios = (l0 + l1) * ndFloat32(0.9f);
+        armEffector->SetWorkSpaceConstraints(minRadios, maxRadios);
+        
+        // calculate arm parameters		
+        //ndVector localPosit(armEffector->GetLocalTargetPosition());
         //m_armAngle = ndFloat32(0.0f);
         //m_armPosit_y = localPosit.m_y;
         //m_armAngle0 = ndAtan2(localPosit.m_z, localPosit.m_x);
@@ -1020,6 +1024,8 @@ namespace ndExcavator
     {
         ndRenderMeshLoader loader(*scene->GetRenderer());
         loader.LoadMesh(ndGetWorkingFileName("excavator.nd"));
+
+loader.m_mesh->SetMatrix(ndGetIdentityMatrix());
 
         // using a model articulation for this vehicle
         ndModelArticulation* const excavator = new ndModelArticulation();
