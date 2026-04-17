@@ -1110,8 +1110,13 @@ void ndBodyKinematic::Serialize(ndSharedPtr<ndMeshBody>& meshBody) const
 void ndBodyKinematic::Deserialize(const ndMeshBody* const meshBody)
 {
 	ndBody::Deserialize(meshBody);
-
+	
 	ndMeshBodyKinematic* const kinematic = (ndMeshBodyKinematic*)meshBody;
+
+	ndAssert(meshBody->m_owner);
+	const ndMatrix matrix(meshBody->m_owner->CalculateGlobalMatrix());
+	SetMatrix(matrix);
+
 	const ndVector massMatrix (kinematic->m_invMass.Reciproc());
 	SetMassMatrix(massMatrix);
 

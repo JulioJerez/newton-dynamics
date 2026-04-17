@@ -680,7 +680,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_showMeshSkeleton = true;
 	//m_autoSleepMode = false;
 	//m_hidePostUpdate = true;
-	//m_hideVisualMeshes = true;
+	m_hideVisualMeshes = true;
 	//m_solverMode = ndWorld::ndStandardSolver;
 	//m_solverMode = ndWorld::ndSimdSoaSolver;
 	//m_solverMode = ndWorld::ndSimdAvx2Solver;
@@ -693,7 +693,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_showContactPoints = true;
 	//m_showJointDebugInfo = true;
 	//m_showModelsDebugInfo = true;
-	//m_showCollisionMeshMode = 1;
+	m_showCollisionMeshMode = 1;
 	//m_showCollisionMeshMode = 2;
 	//m_showCollisionMeshMode = 3;		// solid wire frame
 	m_synchronousPhysicsUpdate = true;

@@ -871,6 +871,7 @@ namespace ndBasicRagdoll
 
 namespace ndExcavator
 {
+    #define ND_EXCAVATOR_GEAR_GAIN			ndFloat32 (5.0f)
 
     ndSharedPtr<ndBody> MakeBodyPart(ndMesh* const childMesh, ndSharedPtr<ndShapeInstance> collision, ndFloat32 mass)
     {
@@ -900,8 +901,6 @@ namespace ndExcavator
         ndModelArticulation::ndNode* const rootNode = articulation->GetRoot();
 
         ndSharedPtr<ndShapeInstance> motorCollision(new ndShapeInstance(new ndShapeCylinder(ndFloat32(0.25f), ndFloat32(0.25f), ndFloat32(0.75f))));
-        //SetBodyType(*motorCollision, m_chassis);
-
         ndMatrix engineMatrix(rootNode->m_body->GetMatrix());
         engineMatrix = ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * engineMatrix;
         engineMatrix.m_posit.m_y += 1.0f;
@@ -1011,21 +1010,136 @@ namespace ndExcavator
         ndFloat32 minRadios = (l0 - l1) * ndFloat32(1.1f);
         ndFloat32 maxRadios = (l0 + l1) * ndFloat32(0.9f);
         armEffector->SetWorkSpaceConstraints(minRadios, maxRadios);
-        
-        // calculate arm parameters		
-        //ndVector localPosit(armEffector->GetLocalTargetPosition());
-        //m_armAngle = ndFloat32(0.0f);
-        //m_armPosit_y = localPosit.m_y;
-        //m_armAngle0 = ndAtan2(localPosit.m_z, localPosit.m_x);
-        //m_armPosit_x = ndSqrt(localPosit.m_x * localPosit.m_x + localPosit.m_z * localPosit.m_z);
+    }
+
+    ndModelArticulation::ndNode* MakeRollerTire(
+        ndModelArticulation* const articulation,
+        ndSharedPtr<ndMesh>& mesh,
+        const char* const name)
+    {
+        ndMesh* const node = mesh->FindByName(name);
+        ndAssert(node);
+        ndSharedPtr<ndShapeInstance> tireCollision(node->CreateCollisionChamferCylinder());
+        tireCollision->SetLocalMatrix(ndYawMatrix(90.0f * ndDegreeToRad) * tireCollision->GetLocalMatrix());
+
+        ndModelArticulation::ndNode* const rootNode = articulation->GetRoot();
+        ndSharedPtr<ndBody> tireBody(MakeBodyPart(node, tireCollision, ndFloat32(30.0f)));
+
+        const ndMatrix rollerMatrix(ndYawMatrix(90.0f * ndDegreeToRad) * tireBody->GetMatrix());
+        ndSharedPtr<ndJointBilateralConstraint> rollerPivot(new ndJointRoller(rollerMatrix, tireBody->GetAsBodyDynamic(), rootNode->m_body->GetAsBodyDynamic()));
+        ((ndJointRoller*)*rollerPivot)->SetAsSpringDamperPosit(ndFloat32(0.01f), ndFloat32(2000.0f), ndFloat32(50.0f));
+
+        ndModelArticulation::ndNode* const rollerLimb = articulation->AddLimb(rootNode, tireBody, rollerPivot);
+        rollerLimb->m_name = name;
+        return rollerLimb;
+    }
+
+    void LinkTires(ndModelArticulation* const articulation,
+        ndModelArticulation::ndNode* const master, ndModelArticulation::ndNode* const slave)
+    {
+        const ndShapeInstance& slaveShape = slave->m_body->GetAsBodyKinematic()->GetCollisionShape();
+        const ndShapeInstance& masterShape = master->m_body->GetAsBodyKinematic()->GetCollisionShape();
+
+        auto GetRadios = [](const ndShapeInstance& shape)
+        {
+            const ndShapeInfo info(shape.GetShapeInfo());
+            return info.m_chamferCylinder.m_radius + ndFloat32 (0.5) * info.m_chamferCylinder.m_height;
+        };
+        ndFloat32 slaveRadio = GetRadios(slaveShape);
+        ndFloat32 masterRadio = GetRadios(masterShape);
+
+        ndMatrix pinMatrix0;
+        ndMatrix pinMatrix1;
+        const ndJointBilateralConstraint* const joint = *master->m_joint;
+        joint->CalculateGlobalMatrix(pinMatrix0, pinMatrix1);
+
+        ndFloat32 ratio = slaveRadio / masterRadio;
+        ndJointGear* const gear = new ndJointGear(
+            ratio, pinMatrix0[0], slave->m_body->GetAsBodyDynamic(),
+            pinMatrix1[0].Scale(ndFloat32(-1.0f)), master->m_body->GetAsBodyDynamic());
+        ndSharedPtr<ndJointBilateralConstraint> link(gear);
+
+        //articulation->AddCloseLoop(link);
+    }
+
+    void MakeLeftTrack(ndModelArticulation* const articulation, ndSharedPtr<ndMesh>& mesh)
+    {
+        ndModelArticulation::ndNode* const leftTire_0 = MakeRollerTire(articulation, mesh, "leftGear");
+        ndModelArticulation::ndNode* const leftTire_7 = MakeRollerTire(articulation, mesh, "leftFrontRoller");
+        ndAssert(leftTire_0);
+        ndAssert(leftTire_7);
+        LinkTires(articulation, leftTire_0, leftTire_7);
+        MakeRollerTire(articulation, mesh, "leftSupportRoller");
+
+        for (ndInt32 i = 0; i < 3; ++i)
+        {
+            char name[64];
+            snprintf(name, 63, "leftRoller%d", i);
+            ndModelArticulation::ndNode* const rollerTire = MakeRollerTire(articulation, mesh, name);
+            ndAssert(rollerTire);
+            LinkTires(articulation, leftTire_0, rollerTire);
+        }
+
+        //// link traction tire to the engine using a differential gear
+        //ndMatrix engineMatrix;
+        //ndMatrix chassisMatrix;
+        //ndAssert(articulation->FindByName("engine"));
+        //const ndModelArticulation::ndNode* const engineNode = articulation->FindByName("engine");
+        //ndAssert(engineNode);
+        //
+        //ndBodyDynamic* const tire = leftTire_0->m_body->GetAsBodyDynamic();
+        //ndBodyDynamic* const engine = engineNode->m_body->GetAsBodyDynamic();
+        //engineNode->m_joint->CalculateGlobalMatrix(engineMatrix, chassisMatrix);
+        //const ndMatrix tireMatrix(tire->GetMatrix());
+        //
+        //ndSharedPtr<ndJointBilateralConstraint> axel(
+        //    new ndMultiBodyVehicleDifferentialAxle(
+        //        engineMatrix.m_front.Scale(ndFloat32(-1.0f)), engineMatrix.m_up, engine,
+        //        tireMatrix.m_right.Scale(ND_EXCAVATOR_GEAR_GAIN), tire));
+        //articulation->AddCloseLoop(axel);
+    }
+
+    void MakeRightTrack(ndModelArticulation* const articulation, ndSharedPtr<ndMesh>& mesh)
+    {
+        ndModelArticulation::ndNode* const rightTire_0 = MakeRollerTire(articulation, mesh, "rightGear");
+        ndModelArticulation::ndNode* const rightTire_7 = MakeRollerTire(articulation, mesh, "rightFrontRoller");
+        ndAssert(rightTire_0);
+        ndAssert(rightTire_7);
+        LinkTires(articulation, rightTire_0, rightTire_7);
+        MakeRollerTire(articulation, mesh, "rightSupportRoller");
+
+        for (int i = 0; i < 3; ++i)
+        {
+            char name[64];
+            snprintf(name, 63, "rightRoller%d", i);
+            ndModelArticulation::ndNode* const rollerTire = MakeRollerTire(articulation, mesh, name);
+            ndAssert(rollerTire);
+            LinkTires(articulation, rightTire_0, rollerTire);
+        }
+
+        //// link traction tire to the engine using a differential gear
+        //ndAssert(articulation->FindByName("engine"));
+        //const ndModelArticulation::ndNode* const engineNode = articulation->FindByName("engine");
+        //ndAssert(engineNode);
+        //
+        //ndMatrix engineMatrix;
+        //ndMatrix chassisMatrix;
+        //ndBodyDynamic* const tire = rightTire_0->m_body->GetAsBodyDynamic();
+        //ndBodyDynamic* const engine = engineNode->m_body->GetAsBodyDynamic();
+        //engineNode->m_joint->CalculateGlobalMatrix(engineMatrix, chassisMatrix);
+        //const ndMatrix tireMatrix(tire->GetMatrix());
+        //
+        //ndSharedPtr<ndJointBilateralConstraint> axel(
+        //    new ndMultiBodyVehicleDifferentialAxle(
+        //        engineMatrix.m_front.Scale(ndFloat32(1.0f)), engineMatrix.m_up, engine,
+        //        tireMatrix.m_right.Scale(-ND_EXCAVATOR_GEAR_GAIN), tire));
+        //articulation->AddCloseLoop(axel);
     }
 
     void MakeModel(ndDemoEntityManager* const scene, const ndMatrix& location)
     {
         ndRenderMeshLoader loader(*scene->GetRenderer());
         loader.LoadMesh(ndGetWorkingFileName("excavator.nd"));
-
-loader.m_mesh->SetMatrix(ndGetIdentityMatrix());
 
         // using a model articulation for this vehicle
         ndModelArticulation* const excavator = new ndModelArticulation();
@@ -1036,6 +1150,10 @@ loader.m_mesh->SetMatrix(ndGetIdentityMatrix());
 
         // add the cabin and boom mechanism
         MakeCabinAndUpperBody(excavator, loader.m_mesh);
+
+        // add the roller and differential gear system
+        MakeLeftTrack(excavator, loader.m_mesh);
+        MakeRightTrack(excavator, loader.m_mesh);
 
         excavator->GetAsModelArticulation()->Serialize(*loader.m_mesh);
         loader.SaveMesh(ndGetWorkingFileName("ndExcavatorPhysics.nd"));

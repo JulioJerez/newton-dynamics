@@ -140,8 +140,8 @@ class ndMeshJointRoller : public ndMeshJoint
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
-	ndAxis m_axis0;
-	ndAxis m_axis1;
+	ndAxis m_positAxis;
+	ndAxis m_angleAxis;
 };
 
 class ndMeshJointCylinder : public ndMeshJoint

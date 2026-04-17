@@ -443,6 +443,5 @@ void ndJointRoller::JacobianDerivative(ndConstraintDescritor& desc)
 ndSharedPtr<ndMeshJoint> ndJointRoller::GetMeshJoint(const ndMesh* const owner) const
 {
 	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointRoller(owner, this));
-
 	return joint;
 }
