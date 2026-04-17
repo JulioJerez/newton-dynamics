@@ -93,12 +93,6 @@ namespace ndCarpolePlayer
 		const ndMatrix poleMatrix(m_poleHinge->CalculateGlobalMatrix1());
 		m_pole->SetMatrix(poleMatrix);
 
-		m_pole->SetOmega(ndVector::m_zero);
-		m_pole->SetVelocity(ndVector::m_zero);
-
-		m_cart->SetOmega(ndVector::m_zero);
-		m_cart->SetVelocity(ndVector::m_zero);
-
 		GetModel()->GetAsModelArticulation()->ClearMemory();
 	}
 
@@ -109,7 +103,7 @@ namespace ndCarpolePlayer
 		ndFloat32 angle = hinge->GetAngle();
 		ndFloat32 speed = slider->GetSpeed();
 		bool isdead = ndAbs(angle) > (REWARD_MIN_ANGLE * ndFloat32(2.0f));
-		isdead = isdead || (ndAbs(speed) > ndFloat32(3.0f));
+		isdead = isdead || (ndAbs(speed) > REWARD_MAX_SPEED);
 		return isdead;
 	}
 
@@ -119,24 +113,23 @@ namespace ndCarpolePlayer
 		{
 			// a terminal reward of zero should make for smoother MDPs. 
 			// training small networks could be much harder with negative terminal rewards..
-			// return ndBrainFloat(-1.0f);
 			return ndBrainFloat(-1.0f);
 		}
 
 		ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
 		ndJointSlider* const slider = (ndJointSlider*)*m_slider;
 
-		ndFloat32 angle = hinge->GetAngle();
 		ndFloat32 omega = hinge->GetOmega();
-		ndFloat32 speed = slider->GetSpeed();
+		ndFloat32 angle = hinge->GetAngle() / REWARD_MIN_ANGLE;
+		ndFloat32 speed = slider->GetSpeed() / REWARD_MAX_SPEED;
 
-		ndFloat32 invSigma2 = ndFloat32(50.0f);
-		ndFloat32 speedReward = ndExp(-invSigma2 * speed * speed);
+		ndFloat32 invSigma2 = ndFloat32(20.0f);
+		ndFloat32 speedReward = ndExp(-100.0f * speed * speed);
 		ndFloat32 omegaReward = ndExp(-invSigma2 * omega * omega);
 		ndFloat32 angleReward = ndExp(-invSigma2 * angle * angle);
 
-		// make sure the reward is never negative, to avoid the possibility of  
-		// MDP states with negative values.
+		// make sure the reward is never negative, 
+		// to avoid the possibility of MDP states with negative values.
 		ndFloat32 reward = ndFloat32(0.3f) * angleReward + ndFloat32(0.3f) * omegaReward + ndFloat32(0.4f) * speedReward;
 		return ndBrainFloat(reward);
 	}
