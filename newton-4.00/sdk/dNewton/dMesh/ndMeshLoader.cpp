@@ -12,6 +12,7 @@
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
 #include "ndMesh.h"
+#include "ndJointGear.h"
 #include "ndJointHinge.h"
 #include "ndMeshEffect.h"
 #include "ndMeshLoader.h"
@@ -301,6 +302,10 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			else if (strcmp(constructor, ndIkSwivelPositionEffector::StaticClassName()) == 0)
 			{
 				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointIkSwivelPositionEffector(mesh));
+			}
+			else if (strcmp(constructor, ndJointGear::StaticClassName()) == 0)
+			{
+				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointGear(mesh));
 			}
 			else
 			{

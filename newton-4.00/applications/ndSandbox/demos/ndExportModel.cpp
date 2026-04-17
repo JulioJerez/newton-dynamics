@@ -1035,7 +1035,8 @@ namespace ndExcavator
     }
 
     void LinkTires(ndModelArticulation* const articulation,
-        ndModelArticulation::ndNode* const master, ndModelArticulation::ndNode* const slave)
+        ndModelArticulation::ndNode* const master, 
+        ndModelArticulation::ndNode* const slave)
     {
         const ndShapeInstance& slaveShape = slave->m_body->GetAsBodyKinematic()->GetCollisionShape();
         const ndShapeInstance& masterShape = master->m_body->GetAsBodyKinematic()->GetCollisionShape();
@@ -1059,7 +1060,8 @@ namespace ndExcavator
             pinMatrix1[0].Scale(ndFloat32(-1.0f)), master->m_body->GetAsBodyDynamic());
         ndSharedPtr<ndJointBilateralConstraint> link(gear);
 
-        //articulation->AddCloseLoop(link);
+        const ndString name(master->m_name + slave->m_name);
+        articulation->AddCloseLoop(link, name.GetStr());
     }
 
     void MakeLeftTrack(ndModelArticulation* const articulation, ndSharedPtr<ndMesh>& mesh)

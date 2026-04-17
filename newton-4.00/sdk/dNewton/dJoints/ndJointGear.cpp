@@ -12,6 +12,7 @@
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
 #include "ndJointGear.h"
+#include "ndMeshComponents.h"
 
 ndJointGear::ndJointGear()
 	:ndJointBilateralConstraint()
@@ -107,3 +108,8 @@ void ndJointGear::JacobianDerivative(ndConstraintDescritor& desc)
 	SetMotorAcceleration(desc, -w * desc.m_invTimestep);
 }
 
+ndSharedPtr<ndMeshJoint> ndJointGear::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointGear* const joint = new ndMeshJointGear(owner, this);
+	return ndSharedPtr<ndMeshJoint>(joint);
+}
