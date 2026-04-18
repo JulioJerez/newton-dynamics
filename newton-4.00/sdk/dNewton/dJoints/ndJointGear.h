@@ -23,8 +23,8 @@ class ndJointGear: public ndJointBilateralConstraint
 
 	D_NEWTON_API ndJointGear();
 	D_NEWTON_API ndJointGear(ndFloat32 gearRatio,
-		const ndVector& body0Pin, ndBodyKinematic* const body0,
-		const ndVector& body1Pin, ndBodyKinematic* const body1);
+		const ndVector& parentPin, ndBodyKinematic* const parent,
+		const ndVector& childPin, ndBodyKinematic* const child);
 	D_NEWTON_API virtual ~ndJointGear();
 
 	D_NEWTON_API ndFloat32 GetRatio() const;

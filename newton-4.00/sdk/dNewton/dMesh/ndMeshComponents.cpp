@@ -35,6 +35,7 @@
 #include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
 #include "ndIkSwivelPositionEffector.h"
+#include "ndMultiBodyVehicleDifferentialAxle.h"
 
 ndMeshBodyDynamic::ndMeshBodyDynamic(const ndMesh* const owner)
 	:ndMeshBodyKinematic(owner)
@@ -745,5 +746,41 @@ ndJointBilateralConstraint* ndMeshJointGear::CreateObject(ndBodyKinematic* const
 	ndJointGear* const joint = new ndJointGear(m_ratio, 
 		pinAndPivotInChild.m_front, child, 
 		pinAndPivotInParent.m_front, parent);
+	return joint;
+}
+
+ndMeshJointDifferentialAxle::ndMeshJointDifferentialAxle(const ndMesh* const owner)
+	:ndMeshJoint(owner)
+{
+}
+
+ndMeshJointDifferentialAxle::ndMeshJointDifferentialAxle(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(owner, joint)
+{
+	const ndMultiBodyVehicleDifferentialAxle* const subJoint = (ndMultiBodyVehicleDifferentialAxle*)joint;
+	m_gearRatio = subJoint->GetGearRatio();
+}
+
+void ndMeshJointDifferentialAxle::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+	xmlSaveParam(parent, "ratio", m_gearRatio);
+}
+
+void ndMeshJointDifferentialAxle::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndMeshJoint::DeserializeFromXml(parent);
+	m_gearRatio = xmlGetFloat(parent, "ratio");
+}
+
+ndJointBilateralConstraint* ndMeshJointDifferentialAxle::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+{
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
+
+	ndMultiBodyVehicleDifferentialAxle* const joint = new ndMultiBodyVehicleDifferentialAxle(
+		pinAndPivotInParent.m_front, pinAndPivotInParent.m_up, parent,
+		pinAndPivotInChild.m_front.Scale (m_gearRatio), child);
+
 	return joint;
 }

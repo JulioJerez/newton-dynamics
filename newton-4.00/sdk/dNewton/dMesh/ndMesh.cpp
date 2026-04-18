@@ -45,7 +45,7 @@ ndMesh::ndMesh()
 	,m_joint(nullptr)
 	,m_rigidBody(nullptr)
 	,m_children()
-	,m_loopJoint(nullptr)
+	,m_loopJoints()
 	,m_selfChildNode(nullptr)
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
@@ -252,19 +252,19 @@ void ndMesh::SetJoint(const ndSharedPtr<ndMeshJoint>& joint)
 	m_joint = joint;
 }
 
-ndSharedPtr<ndMeshLoopJoint>& ndMesh::GetLoopJoint()
+ndList<ndSharedPtr<ndMeshLoopJoint>>& ndMesh::GetLoopJoints()
 {
-	return m_loopJoint;
+	return m_loopJoints;
 }
 
-const ndSharedPtr<ndMeshLoopJoint>& ndMesh::GetLoopJoint() const
+const ndList<ndSharedPtr<ndMeshLoopJoint>>& ndMesh::GetLoopJoints() const
 {
-	return m_loopJoint;
+	return m_loopJoints;
 }
 
-void ndMesh::SetLoopJoint(const ndSharedPtr<ndMeshLoopJoint>& joint)
+void ndMesh::AddLoopJoint(const ndSharedPtr<ndMeshLoopJoint>& joint)
 {
-	m_loopJoint = joint;
+	m_loopJoints.Append(joint);
 }
 
 ndSharedPtr<ndMesh> ndMesh::GetSharedPtr() const
