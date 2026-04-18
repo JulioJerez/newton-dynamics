@@ -26,6 +26,7 @@ namespace ndCarpolePlayer
 	#define ND_RANDOM_IMPULSE_MAGNITUD	ndFloat32 (10.0f)
 	#define PUSH_ACCEL					ndBrainFloat (-10.0f * DEMO_GRAVITY)
 	#define REWARD_MIN_ANGLE			ndBrainFloat (20.0f * ndDegreeToRad)
+	#define REWARD_MAX_SPEED			ndBrainFloat (10.0f)
 
 	enum ndActionSpace
 	{
