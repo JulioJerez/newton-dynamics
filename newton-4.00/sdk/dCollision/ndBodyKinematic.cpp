@@ -546,7 +546,7 @@ ndBodyKinematic::ndJointList::ndNode* ndBodyKinematic::AttachJoint(ndJointBilate
 		test = test && bodyJoint->IsActive();
 		if (test)
 		{
-			ndTrace(("warning body %d and body %d already connected by a biletaral joint\n", body0->GetId(), body1->GetId()));
+			ndTrace(("warning body %d and body %d already connected by a bileteral joint\n", body0->GetId(), body1->GetId()));
 			ndAssert(0);
 		}
 	}
