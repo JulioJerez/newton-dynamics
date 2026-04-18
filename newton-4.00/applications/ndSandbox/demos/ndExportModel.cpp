@@ -999,7 +999,8 @@ namespace ndExcavator
             matrixBucket.m_posit, bodyArm1->GetAsBodyDynamic());
         armEffector->SetSwivelMode(false);
         ndSharedPtr<ndJointBilateralConstraint> effector(armEffector);
-        articulation->AddCloseLoop(effector, "buckEffector");
+        const ndString name(rootNode->m_name + "_" + bucket->m_name);
+        articulation->AddCloseLoop(effector, name.GetStr());
         
         // calculate the work space.
         ndVector arm1Len(jointBucket->CalculateGlobalMatrix0().m_posit - jointArm1->CalculateGlobalMatrix0().m_posit);
@@ -1035,7 +1036,8 @@ namespace ndExcavator
     }
 
     void LinkTires(ndModelArticulation* const articulation,
-        ndModelArticulation::ndNode* const master, ndModelArticulation::ndNode* const slave)
+        ndModelArticulation::ndNode* const master, 
+        ndModelArticulation::ndNode* const slave)
     {
         const ndShapeInstance& slaveShape = slave->m_body->GetAsBodyKinematic()->GetCollisionShape();
         const ndShapeInstance& masterShape = master->m_body->GetAsBodyKinematic()->GetCollisionShape();
@@ -1059,7 +1061,8 @@ namespace ndExcavator
             pinMatrix1[0].Scale(ndFloat32(-1.0f)), master->m_body->GetAsBodyDynamic());
         ndSharedPtr<ndJointBilateralConstraint> link(gear);
 
-        //articulation->AddCloseLoop(link);
+        const ndString name(master->m_name + "_" + slave->m_name);
+        articulation->AddCloseLoop(link, name.GetStr());
     }
 
     void MakeLeftTrack(ndModelArticulation* const articulation, ndSharedPtr<ndMesh>& mesh)
@@ -1080,23 +1083,25 @@ namespace ndExcavator
             LinkTires(articulation, leftTire_0, rollerTire);
         }
 
-        //// link traction tire to the engine using a differential gear
-        //ndMatrix engineMatrix;
-        //ndMatrix chassisMatrix;
-        //ndAssert(articulation->FindByName("engine"));
-        //const ndModelArticulation::ndNode* const engineNode = articulation->FindByName("engine");
-        //ndAssert(engineNode);
-        //
-        //ndBodyDynamic* const tire = leftTire_0->m_body->GetAsBodyDynamic();
-        //ndBodyDynamic* const engine = engineNode->m_body->GetAsBodyDynamic();
-        //engineNode->m_joint->CalculateGlobalMatrix(engineMatrix, chassisMatrix);
-        //const ndMatrix tireMatrix(tire->GetMatrix());
-        //
-        //ndSharedPtr<ndJointBilateralConstraint> axel(
-        //    new ndMultiBodyVehicleDifferentialAxle(
-        //        engineMatrix.m_front.Scale(ndFloat32(-1.0f)), engineMatrix.m_up, engine,
-        //        tireMatrix.m_right.Scale(ND_EXCAVATOR_GEAR_GAIN), tire));
-        //articulation->AddCloseLoop(axel);
+        // link traction tire to the engine using a differential gear
+        ndMatrix engineMatrix;
+        ndMatrix chassisMatrix;
+        ndAssert(articulation->FindByName("engine"));
+        const ndModelArticulation::ndNode* const engineNode = articulation->FindByName("engine");
+        ndAssert(engineNode);
+        
+        ndBodyDynamic* const tire = leftTire_0->m_body->GetAsBodyDynamic();
+        ndBodyDynamic* const engine = engineNode->m_body->GetAsBodyDynamic();
+        engineNode->m_joint->CalculateGlobalMatrix(engineMatrix, chassisMatrix);
+        const ndMatrix tireMatrix(tire->GetMatrix());
+        
+        ndSharedPtr<ndJointBilateralConstraint> axel(
+            new ndMultiBodyVehicleDifferentialAxle(
+                engineMatrix.m_front.Scale(ndFloat32(-1.0f)), engineMatrix.m_up, engine,
+                tireMatrix.m_right.Scale(ND_EXCAVATOR_GEAR_GAIN), tire));
+
+        const ndString name(engineNode->m_name + "_" + leftTire_0->m_name);
+        articulation->AddCloseLoop(axel, name.GetStr());
     }
 
     void MakeRightTrack(ndModelArticulation* const articulation, ndSharedPtr<ndMesh>& mesh)
@@ -1108,7 +1113,7 @@ namespace ndExcavator
         LinkTires(articulation, rightTire_0, rightTire_7);
         MakeRollerTire(articulation, mesh, "rightSupportRoller");
 
-        for (int i = 0; i < 3; ++i)
+        for (ndInt32 i = 0; i < 3; ++i)
         {
             char name[64];
             snprintf(name, 63, "rightRoller%d", i);
@@ -1117,23 +1122,24 @@ namespace ndExcavator
             LinkTires(articulation, rightTire_0, rollerTire);
         }
 
-        //// link traction tire to the engine using a differential gear
-        //ndAssert(articulation->FindByName("engine"));
-        //const ndModelArticulation::ndNode* const engineNode = articulation->FindByName("engine");
-        //ndAssert(engineNode);
-        //
-        //ndMatrix engineMatrix;
-        //ndMatrix chassisMatrix;
-        //ndBodyDynamic* const tire = rightTire_0->m_body->GetAsBodyDynamic();
-        //ndBodyDynamic* const engine = engineNode->m_body->GetAsBodyDynamic();
-        //engineNode->m_joint->CalculateGlobalMatrix(engineMatrix, chassisMatrix);
-        //const ndMatrix tireMatrix(tire->GetMatrix());
-        //
-        //ndSharedPtr<ndJointBilateralConstraint> axel(
-        //    new ndMultiBodyVehicleDifferentialAxle(
-        //        engineMatrix.m_front.Scale(ndFloat32(1.0f)), engineMatrix.m_up, engine,
-        //        tireMatrix.m_right.Scale(-ND_EXCAVATOR_GEAR_GAIN), tire));
-        //articulation->AddCloseLoop(axel);
+        // link traction tire to the engine using a differential gear
+        ndAssert(articulation->FindByName("engine"));
+        const ndModelArticulation::ndNode* const engineNode = articulation->FindByName("engine");
+        ndAssert(engineNode);
+        
+        ndMatrix engineMatrix;
+        ndMatrix chassisMatrix;
+        ndBodyDynamic* const tire = rightTire_0->m_body->GetAsBodyDynamic();
+        ndBodyDynamic* const engine = engineNode->m_body->GetAsBodyDynamic();
+        engineNode->m_joint->CalculateGlobalMatrix(engineMatrix, chassisMatrix);
+        const ndMatrix tireMatrix(tire->GetMatrix());
+        
+        ndSharedPtr<ndJointBilateralConstraint> axel(
+            new ndMultiBodyVehicleDifferentialAxle(
+                engineMatrix.m_front.Scale(ndFloat32(1.0f)), engineMatrix.m_up, engine,
+                tireMatrix.m_right.Scale(-ND_EXCAVATOR_GEAR_GAIN), tire));
+        const ndString name(engineNode->m_name + "_" + rightTire_0->m_name);
+        articulation->AddCloseLoop(axel, name.GetStr());
     }
 
     void MakeModel(ndDemoEntityManager* const scene, const ndMatrix& location)

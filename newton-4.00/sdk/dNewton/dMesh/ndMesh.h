@@ -114,9 +114,9 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API const ndSharedPtr<ndMeshJoint>& GetJoint() const;
 	D_NEWTON_API void SetJoint(const ndSharedPtr<ndMeshJoint>& joint);
 
-	D_NEWTON_API ndSharedPtr<ndMeshLoopJoint>& GetLoopJoint();
-	D_NEWTON_API const ndSharedPtr<ndMeshLoopJoint>& GetLoopJoint() const;
-	D_NEWTON_API void SetLoopJoint(const ndSharedPtr<ndMeshLoopJoint>& joint);
+	D_NEWTON_API ndList<ndSharedPtr<ndMeshLoopJoint>>& GetLoopJoints();
+	D_NEWTON_API const ndList<ndSharedPtr<ndMeshLoopJoint>>& GetLoopJoints() const;
+	D_NEWTON_API void AddLoopJoint(const ndSharedPtr<ndMeshLoopJoint>& joint);
 
 	D_NEWTON_API const ndString& GetName() const;
 	D_NEWTON_API void SetName(const ndString& name);
@@ -172,7 +172,7 @@ class ndMesh : public ndClassAlloc
 	ndSharedPtr<ndMeshJoint> m_joint;
 	ndSharedPtr<ndMeshBody> m_rigidBody;
 	ndList<ndSharedPtr<ndMesh>> m_children;
-	ndSharedPtr<ndMeshLoopJoint> m_loopJoint;
+	ndList<ndSharedPtr<ndMeshLoopJoint>> m_loopJoints;
 	ndList<ndSharedPtr<ndMesh>>::ndNode* m_selfChildNode;
 	ndVector m_boneTarget;
 	ndNodeType m_type;

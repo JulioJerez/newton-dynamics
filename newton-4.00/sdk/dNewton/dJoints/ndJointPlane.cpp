@@ -117,6 +117,5 @@ void ndJointPlane::JacobianDerivative(ndConstraintDescritor& desc)
 ndSharedPtr<ndMeshJoint> ndJointPlane::GetMeshJoint(const ndMesh* const owner) const
 {
 	ndMeshJointPlane* const joint = new ndMeshJointPlane(owner, this);
-
 	return ndSharedPtr<ndMeshJoint>(joint);
 }

@@ -12,6 +12,7 @@
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
 #include "ndJointGear.h"
+#include "ndMeshComponents.h"
 
 ndJointGear::ndJointGear()
 	:ndJointBilateralConstraint()
@@ -23,9 +24,9 @@ ndJointGear::ndJointGear()
 }
 
 ndJointGear::ndJointGear(ndFloat32 gearRatio,
-	const ndVector& body0Pin, ndBodyKinematic* const body0,
-	const ndVector& body1Pin, ndBodyKinematic* const body1)
-	:ndJointBilateralConstraint(1, body0, body1, ndGetIdentityMatrix())
+	const ndVector& parentPin, ndBodyKinematic* const parent,
+	const ndVector& childPin, ndBodyKinematic* const child)
+	:ndJointBilateralConstraint(1, child, parent, ndGetIdentityMatrix())
 	,m_angle(ndFloat32(0.0f))
 	,m_omega(ndFloat32(0.0f))
 	,m_gearRatio(gearRatio)
@@ -34,13 +35,13 @@ ndJointGear::ndJointGear(ndFloat32 gearRatio,
 	ndMatrix dommyMatrix;
 
 	// calculate the local matrix for body body0
-	ndMatrix pinAndPivot0(ndGramSchmidtMatrix(body0Pin));
-	CalculateLocalMatrix(pinAndPivot0, m_localMatrix0, dommyMatrix);
+	const ndMatrix pinAndPivotChild(ndGramSchmidtMatrix(childPin));
+	CalculateLocalMatrix(pinAndPivotChild, m_localMatrix0, dommyMatrix);
 	m_localMatrix0.m_posit = ndVector::m_wOne;
 
 	// calculate the local matrix for body body1  
-	ndMatrix pinAndPivot1(ndGramSchmidtMatrix(body1Pin));
-	CalculateLocalMatrix(pinAndPivot1, dommyMatrix, m_localMatrix1);
+	const ndMatrix pinAndPivotParent(ndGramSchmidtMatrix(parentPin));
+	CalculateLocalMatrix(pinAndPivotParent, dommyMatrix, m_localMatrix1);
 	m_localMatrix1.m_posit = ndVector::m_wOne;
 
 	// set as kinematic loop
@@ -50,7 +51,6 @@ ndJointGear::ndJointGear(ndFloat32 gearRatio,
 ndJointGear::~ndJointGear()
 {
 }
-
 
 ndFloat32 ndJointGear::GetRatio() const
 {
@@ -96,8 +96,8 @@ void ndJointGear::JacobianDerivative(ndConstraintDescritor& desc)
 	ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
 	ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
 
-	jacobian0.m_angular = matrix0.m_front.Scale(m_gearRatio);
-	jacobian1.m_angular = matrix1.m_front;
+	jacobian0.m_angular = matrix0.m_front;
+	jacobian1.m_angular = matrix1.m_front.Scale(m_gearRatio);
 
 	const ndVector& omega0 = m_body0->GetOmega();
 	const ndVector& omega1 = m_body1->GetOmega();
@@ -107,3 +107,8 @@ void ndJointGear::JacobianDerivative(ndConstraintDescritor& desc)
 	SetMotorAcceleration(desc, -w * desc.m_invTimestep);
 }
 
+ndSharedPtr<ndMeshJoint> ndJointGear::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointGear* const joint = new ndMeshJointGear(owner, this);
+	return ndSharedPtr<ndMeshJoint>(joint);
+}

@@ -22,6 +22,7 @@
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
 #include "ndMesh.h"
+#include "ndJointGear.h"
 #include "ndJointPlane.h"
 #include "ndJointHinge.h"
 #include "ndJointWheel.h"
@@ -34,6 +35,7 @@
 #include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
 #include "ndIkSwivelPositionEffector.h"
+#include "ndMultiBodyVehicleDifferentialAxle.h"
 
 ndMeshBodyDynamic::ndMeshBodyDynamic(const ndMesh* const owner)
 	:ndMeshBodyKinematic(owner)
@@ -102,7 +104,8 @@ ndMeshLoopJoint::~ndMeshLoopJoint()
 {
 }
 
-ndJointBilateralConstraint* ndMeshLoopJoint::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+//ndJointBilateralConstraint* ndMeshLoopJoint::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+ndJointBilateralConstraint* ndMeshLoopJoint::CreateObject(ndBodyKinematic* const, ndBodyKinematic* const) const
 {
 	ndAssert(0);
 	return nullptr;
@@ -117,11 +120,11 @@ void ndMeshLoopJoint::SerializeToXml(nd::TiXmlElement* const parent) const
 	m_joint->SerializeToXml(loopJoint);
 }
 
-void ndMeshLoopJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
+//void ndMeshLoopJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
+void ndMeshLoopJoint::DeserializeFromXml(const nd::TiXmlElement* const)
 {
 	ndAssert(0);
 }
-
 
 ndMeshJointFix6dof::ndMeshJointFix6dof(const ndMesh* const owner)
 	:ndMeshJoint(owner)
@@ -599,39 +602,6 @@ ndJointBilateralConstraint* ndMeshJointCylinder::CreateObject(ndBodyKinematic* c
 	return joint;
 }
 
-
-ndMeshJointPlane::ndMeshJointPlane(const ndMesh* const owner)
-	:ndMeshJoint(owner)
-{
-}
-
-ndMeshJointPlane::ndMeshJointPlane(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
-	:ndMeshJoint(owner, joint)
-{
-}
-
-void ndMeshJointPlane::SerializeToXml(nd::TiXmlElement* const parent) const
-{
-	ndMeshJoint::SerializeToXml(parent);
-	xmlSaveParam(parent, "controlRotation", m_controlRotation ? 1 : 0);
-}
-
-void ndMeshJointPlane::DeserializeFromXml(const nd::TiXmlElement* const parent)
-{
-	ndMeshJoint::DeserializeFromXml(parent);
-
-	m_controlRotation = ndInt8(xmlGetInt(parent, "limitState"));
-}
-
-ndJointBilateralConstraint* ndMeshJointPlane::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
-{
-	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
-	ndJointPlane* const joint = new ndJointPlane(pinAndPivotInChild.m_posit, pinAndPivotInChild.m_front, child, parent);
-
-	joint->EnableControlRotation(m_controlRotation ? true : false);
-	return joint;
-}
-
 ndMeshJointIkSwivelPositionEffector::ndMeshJointIkSwivelPositionEffector(const ndMesh* const owner)
 	:ndMeshJoint(owner)
 {
@@ -713,3 +683,104 @@ ndJointBilateralConstraint* ndMeshJointIkSwivelPositionEffector::CreateObject(nd
 	return joint;
 }
 
+ndMeshJointPlane::ndMeshJointPlane(const ndMesh* const owner)
+	:ndMeshJoint(owner)
+{
+}
+
+ndMeshJointPlane::ndMeshJointPlane(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(owner, joint)
+{
+}
+
+void ndMeshJointPlane::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+	xmlSaveParam(parent, "controlRotation", m_controlRotation ? 1 : 0);
+}
+
+void ndMeshJointPlane::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndMeshJoint::DeserializeFromXml(parent);
+
+	m_controlRotation = ndInt8(xmlGetInt(parent, "limitState"));
+}
+
+ndJointBilateralConstraint* ndMeshJointPlane::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+{
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	ndJointPlane* const joint = new ndJointPlane(pinAndPivotInChild.m_posit, pinAndPivotInChild.m_front, child, parent);
+
+	joint->EnableControlRotation(m_controlRotation ? true : false);
+	return joint;
+}
+
+ndMeshJointGear::ndMeshJointGear(const ndMesh* const owner)
+	:ndMeshJoint(owner)
+{
+}
+
+ndMeshJointGear::ndMeshJointGear(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(owner, joint)
+{
+	const ndJointGear* const subJoint = (ndJointGear*)joint;
+	m_ratio = subJoint->GetRatio();
+}
+
+void ndMeshJointGear::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+	xmlSaveParam(parent, "ratio", m_ratio);
+}
+
+void ndMeshJointGear::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndMeshJoint::DeserializeFromXml(parent);
+	m_ratio = xmlGetFloat(parent, "ratio");
+}
+
+ndJointBilateralConstraint* ndMeshJointGear::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+{
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
+	ndJointGear* const joint = new ndJointGear(m_ratio, 
+		pinAndPivotInChild.m_front, child, 
+		pinAndPivotInParent.m_front, parent);
+	return joint;
+}
+
+ndMeshJointDifferentialAxle::ndMeshJointDifferentialAxle(const ndMesh* const owner)
+	:ndMeshJoint(owner)
+{
+}
+
+ndMeshJointDifferentialAxle::ndMeshJointDifferentialAxle(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(owner, joint)
+{
+	const ndMultiBodyVehicleDifferentialAxle* const subJoint = (ndMultiBodyVehicleDifferentialAxle*)joint;
+	m_gearRatio = subJoint->GetGearRatio();
+}
+
+void ndMeshJointDifferentialAxle::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+	xmlSaveParam(parent, "ratio", m_gearRatio);
+}
+
+void ndMeshJointDifferentialAxle::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndMeshJoint::DeserializeFromXml(parent);
+	m_gearRatio = xmlGetFloat(parent, "ratio");
+}
+
+ndJointBilateralConstraint* ndMeshJointDifferentialAxle::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+{
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
+
+	ndMultiBodyVehicleDifferentialAxle* const joint = new ndMultiBodyVehicleDifferentialAxle(
+		pinAndPivotInParent.m_front, pinAndPivotInParent.m_up, parent,
+		pinAndPivotInChild.m_front.Scale (m_gearRatio), child);
+
+	return joint;
+}

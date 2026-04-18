@@ -932,7 +932,7 @@ void ndModelArticulation::Serialize(ndMesh* const meshRootNode) const
 			ndAssert(meshNode1);
 			ndSharedPtr<ndMeshJoint> joint(node->m_joint->GetMeshJoint(meshNode0));
 			ndSharedPtr<ndMeshLoopJoint> loopJoint(new ndMeshLoopJoint(joint, meshNode1));
-			meshNode0->SetLoopJoint(loopJoint);
+			meshNode0->AddLoopJoint(loopJoint);
 		}
 		else
 		{
@@ -981,7 +981,7 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 		const ndMesh* const meshNode = stack.Pop();
 		ndModelArticulation::ndNode* parent = parentNode.Pop();
 
-		if (meshNode->GetLoopJoint())
+		if (meshNode->GetLoopJoints().GetCount())
 		{
 			loops.PushBack(meshNode);
 		}
@@ -1018,11 +1018,15 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 	for (ndInt32 i = 0; i < loops.GetCount(); ++i)
 	{
 		const ndMesh* const loopMesh = loops[i];
-		const ndSharedPtr<ndMeshLoopJoint>& loopMeshJoint = loopMesh->GetLoopJoint();
-		ndModelArticulation::ndNode* const child = FindByName(loopMesh->GetName().GetStr());
-		ndModelArticulation::ndNode* const parent = FindByName(loopMeshJoint->m_otherNode->GetName().GetStr());
-		ndSharedPtr<ndJointBilateralConstraint> joint(loopMeshJoint->m_joint->CreateObject(child->m_body->GetAsBodyDynamic(), parent->m_body->GetAsBodyDynamic()));
-		AddCloseLoop(joint);
+		const ndList<ndSharedPtr<ndMeshLoopJoint>>& loopList = loopMesh->GetLoopJoints();
+		for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* loopPtr = loopList.GetFirst(); loopPtr; loopPtr = loopPtr->GetNext())
+		{
+			const ndSharedPtr<ndMeshLoopJoint>& loopMeshJoint = loopPtr->GetInfo();
+			ndModelArticulation::ndNode* const child = FindByName(loopMesh->GetName().GetStr());
+			ndModelArticulation::ndNode* const parent = FindByName(loopPtr->GetInfo()->m_otherNode->GetName().GetStr());
+			ndSharedPtr<ndJointBilateralConstraint> joint(loopMeshJoint->m_joint->CreateObject(child->m_body->GetAsBodyDynamic(), parent->m_body->GetAsBodyDynamic()));
+			AddCloseLoop(joint);
+		}
 	}
 }
 
