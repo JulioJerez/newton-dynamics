@@ -29,10 +29,9 @@ class ndMeshJoint;
 class ndMeshEffect;
 class ndShapeInstance;
 class ndMeshLoopJoint;
+class ndCollidingPairs;
 class ndMeshShapeInstance;
 class ndCloseLoopConstraints;
-
-#define ND_MESH_LOOP_JOINTS "__contraintsList__"
 
 class ndMesh : public ndClassAlloc
 {
@@ -119,12 +118,18 @@ class ndMesh : public ndClassAlloc
 
 	D_NEWTON_API virtual ndMesh* GetAsMesh();
 	D_NEWTON_API virtual const ndMesh* GetAsMesh() const;
+	D_NEWTON_API virtual ndCollidingPairs* GetAsCollidingPairs();
+	D_NEWTON_API virtual const ndCollidingPairs* GetAsCollidingPairs() const;
 	D_NEWTON_API virtual ndCloseLoopConstraints* GetAsCloseLoopConstraints();
 	D_NEWTON_API virtual const ndCloseLoopConstraints* GetAsCloseLoopConstraints() const;
 
 	D_NEWTON_API ndCloseLoopConstraints* GetLoopJoints();
 	D_NEWTON_API const ndCloseLoopConstraints* GetLoopJoints() const;
 	D_NEWTON_API void AddLoopJoint(const ndSharedPtr<ndMeshLoopJoint>& joint);
+
+	D_NEWTON_API ndCollidingPairs* GetCollingPairs();
+	D_NEWTON_API const ndCollidingPairs* GetCollingPairs() const;
+	D_NEWTON_API void AddCollidingPair(const ndMesh* const node0, const ndMesh* const node1);
 
 	D_NEWTON_API const ndString& GetName() const;
 	D_NEWTON_API void SetName(const ndString& name);
@@ -237,6 +242,20 @@ class ndCloseLoopConstraints: public ndMesh
 	D_NEWTON_API ndMesh* CreateClone() const override;
 
 	ndList<ndSharedPtr<ndMeshLoopJoint>> m_loopJoints;
+};
+
+class ndCollidingPairs : public ndMesh
+{
+	public:
+	D_NEWTON_API ndCollidingPairs();
+	D_NEWTON_API ndCollidingPairs(const ndMesh& src);
+
+	D_NEWTON_API virtual ndCollidingPairs* GetAsCollidingPairs() override;
+	D_NEWTON_API virtual const ndCollidingPairs* GetAsCollidingPairs() const override;
+
+	D_NEWTON_API ndMesh* CreateClone() const override;
+
+	ndList<ndSharedPtr<ndMeshCollidingPair>> m_collingPairs;
 };
 
 #endif

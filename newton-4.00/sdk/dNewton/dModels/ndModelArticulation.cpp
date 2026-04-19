@@ -261,13 +261,13 @@ void ndModelArticulation::AddCloseLoop(const ndSharedPtr<ndJointBilateralConstra
 	node->GetInfo().m_name = loopName;
 }
 
-ndModelArticulation::ndNode* ndModelArticulation::FindByBody(const ndBody* const body) const
+ndModelArticulation::ndNode* ndModelArticulation::FindByBodyId(ndInt32 bodyId) const
 {
 	if (m_rootNode)
 	{
 		for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
 		{
-			if (*node->m_body == body)
+			if (node->m_body->GetId() == ndUnsigned32(bodyId))
 			{
 				return node;
 			}
@@ -275,6 +275,22 @@ ndModelArticulation::ndNode* ndModelArticulation::FindByBody(const ndBody* const
 	}
 
 	return nullptr;
+}
+
+ndModelArticulation::ndNode* ndModelArticulation::FindByBody(const ndBody* const body) const
+{
+	//if (m_rootNode)
+	//{
+	//	for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
+	//	{
+	//		if (*node->m_body == body)
+	//		{
+	//			return node;
+	//		}
+	//	}
+	//}
+	//return nullptr;
+	return FindByBodyId(ndInt32 (body->GetId()));
 }
 
 ndModelArticulation::ndNode* ndModelArticulation::FindByName(const char* const name) const
@@ -942,9 +958,12 @@ void ndModelArticulation::Serialize(ndMesh* const meshRootNode) const
 			{
 				ndAssert(node->GetParent());
 				meshNode = new ndMesh();
-				ndMesh* parentMeshNode =  meshRootNode->FindByName(node->GetParent()->m_name);
+				ndMesh* parentMeshNode = meshRootNode->FindByName(node->GetParent()->m_name);
 				parentMeshNode->AddChild(meshNode);
+
+				const ndMatrix offsetMatrix(node->m_body->GetMatrix() * node->GetParent()->m_body->GetMatrix().OrthoInverse());
 				meshNode->SetName(node->m_name);
+				meshNode->SetMatrix(offsetMatrix);
 			}
 			const ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
 			if (node->m_body)
@@ -973,7 +992,20 @@ void ndModelArticulation::Serialize(ndMesh* const meshRootNode) const
 			}
 		}
 	};
+	// generate the ndMesh
 	self->NodeIterator(SerializeToMesh);
+
+	// add the colliding pairs
+	for (ndInt32 i = ndInt32(m_collisionPairs.GetCount()) - 1; i >= 0; --i)
+	{
+		const ndNode* const node0 = FindByBodyId(ndInt32(m_collisionPairs[i].m_id0));
+		const ndNode* const node1 = FindByBodyId(ndInt32(m_collisionPairs[i].m_id1));
+		ndAssert(node0);
+		ndAssert(node1);
+		const ndMesh* const meshNode0 = meshRootNode->FindByName(node0->m_name);
+		const ndMesh* const meshNode1 = meshRootNode->FindByName(node1->m_name);
+		meshRootNode->AddCollidingPair(meshNode0, meshNode1);
+	}
 }
 
 void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
@@ -1061,6 +1093,20 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 			AddCloseLoop(loopJoint, name.GetStr());
 		}
 	}
+
+	const ndCollidingPairs* const collingPairs = rootNode->GetCollingPairs();
+	if (collingPairs)
+	{
+		for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* pairPtr = collingPairs->m_collingPairs.GetFirst(); pairPtr; pairPtr = pairPtr->GetNext())
+		{
+			const ndSharedPtr<ndMeshCollidingPair>& pairMesh = pairPtr->GetInfo();
+			ndModelArticulation::ndNode* const reference0 = FindByName(pairMesh->m_childNode->GetName().GetStr());
+			ndModelArticulation::ndNode* const reference1 = FindByName(pairMesh->m_parentNode->GetName().GetStr());
+			ndAssert(reference0);
+			ndAssert(reference1);
+			AddCollidingPair(reference0, reference1);
+		}
+	}
 }
 
 ndMesh* ndModelArticulation::CreateDefaultMesh() const
@@ -1126,4 +1172,51 @@ void ndModelArticulation::SaveNdMesh(const char* const path) const
 	ndSharedPtr<ndMesh> mesh(CreateDefaultMesh());
 	ndMeshLoader loader(mesh);
 	loader.SaveMesh(path);
+}
+
+bool ndModelArticulation::PairCollide(const ndBody* const body0, const ndBody* const body1) const
+{
+	ndInt32 i0 = 0;
+	ndInt32 i1 = ndInt32 (m_collisionPairs.GetCount()) - 1;
+
+	const ndCollindPairs pair(body0, body1);
+	while ((i1 - i0) > 4)
+	{
+		ndInt32 index = (i1 + i0) / 2;
+		if (m_collisionPairs[index].m_id >= pair.m_id)
+		{
+			i1 = index;
+		}
+		else
+		{
+			i0 = index;
+		}
+	}
+
+	for (ndInt32 i = i0; i <= i1; ++i)
+	{
+		if (m_collisionPairs[i].m_id == pair.m_id)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void ndModelArticulation::AddCollidingPair(const ndNode* const node0, const ndNode* const node1)
+{
+	if (PairCollide(*node0->m_body, *node1->m_body))
+	{
+		return;
+	}
+	const ndCollindPairs newPair(*node0->m_body, *node1->m_body);
+
+	m_collisionPairs.PushBack(newPair);
+	ndInt32 index = ndInt32 (m_collisionPairs.GetCount()) - 2;
+	while ((index >= 0) && (m_collisionPairs[index].m_id > newPair.m_id))
+	{
+		m_collisionPairs[index + 1] = m_collisionPairs[index];
+		index--;
+	}
+	m_collisionPairs[index + 1] = newPair;
 }

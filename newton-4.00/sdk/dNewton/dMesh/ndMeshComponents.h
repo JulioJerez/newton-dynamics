@@ -39,7 +39,7 @@ class ndMeshBodyDynamic : public ndMeshBodyKinematic
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 
 	ndVector m_intrinsicDamping;
-	ndArray<ndWeakPtr<ndMesh>> m_collidingPair;
+	ndArray<ndWeakPtr<ndMesh>> m_collidingPair____;
 };
 
 class ndMeshLoopJoint : public ndClassAlloc
@@ -49,7 +49,7 @@ class ndMeshLoopJoint : public ndClassAlloc
 	D_NEWTON_API ndMeshLoopJoint(const ndSharedPtr<ndMeshJoint>& joint, ndMesh* const childReference, ndMesh* const parentReference);
 	D_NEWTON_API virtual ~ndMeshLoopJoint();
 
-	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const;
+	//D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const;
 	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
 

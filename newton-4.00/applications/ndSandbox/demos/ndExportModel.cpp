@@ -18,6 +18,23 @@
 #include "ndDemoCameraNodeFollow.h"
 #include "ndHeightFieldPrimitive.h"
 
+
+class ndModelNotifyTest: public ndModelNotify
+{
+    public:
+    ndModelNotifyTest(ndModelArticulation* const model)
+        :ndModelNotify()
+    {
+        SetModel(model);
+    }
+
+    bool OnContactGeneration(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1)
+    {
+        const ndModelArticulation* const articulation = GetModel()->GetAsModelArticulation();
+        return articulation->PairCollide(body0, body1);
+    }
+};
+
 static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, const ndMatrix& location, const char* const fileName)
 {
     ndMeshLoader loader;
@@ -71,6 +88,8 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
     };
     articulation->NodeIterator(BindApplicationData);
 
+    ndSharedPtr<ndModelNotify> controller(new ndModelNotifyTest(articulation));
+    articulation->SetNotifyCallback(controller);
     return model;
 }
 
@@ -909,7 +928,7 @@ namespace ndExcavator
         ndSharedPtr<ndShapeInstance> motorCollision(new ndShapeInstance(new ndShapeCylinder(ndFloat32(0.25f), ndFloat32(0.25f), ndFloat32(0.75f))));
         ndMatrix engineMatrix(rootNode->m_body->GetMatrix());
         engineMatrix = ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * engineMatrix;
-        engineMatrix.m_posit.m_y += 1.0f;
+        engineMatrix.m_posit.m_y += ndFloat32 (1.0f);
 
         // make engine body
         ndFloat32 mass = ndFloat32(50.0f);
@@ -1092,14 +1111,20 @@ namespace ndExcavator
         articulation->AddCloseLoop(link, name.GetStr());
     }
 
-    void MakeLeftTrack(ndModelArticulation* const articulation, ndSharedPtr<ndMesh>& mesh)
+    ndFixSizeArray<ndModelArticulation::ndNode*, 256> MakeLeftTrack(ndModelArticulation* const articulation, ndSharedPtr<ndMesh>& mesh)
     {
+        ndFixSizeArray<ndModelArticulation::ndNode*, 256> array;
+
         ndModelArticulation::ndNode* const leftTire_0 = MakeRollerTire(articulation, mesh, "leftGear");
         ndModelArticulation::ndNode* const leftTire_7 = MakeRollerTire(articulation, mesh, "leftFrontRoller");
         ndAssert(leftTire_0);
         ndAssert(leftTire_7);
         LinkTires(articulation, leftTire_0, leftTire_7);
-        MakeRollerTire(articulation, mesh, "leftSupportRoller");
+        ndModelArticulation::ndNode* const supportRoller = MakeRollerTire(articulation, mesh, "leftSupportRoller");
+
+        array.PushBack(leftTire_0);
+        array.PushBack(leftTire_7);
+        array.PushBack(supportRoller);
 
         for (ndInt32 i = 0; i < 3; ++i)
         {
@@ -1108,6 +1133,7 @@ namespace ndExcavator
             ndModelArticulation::ndNode* const rollerTire = MakeRollerTire(articulation, mesh, name);
             ndAssert(rollerTire);
             LinkTires(articulation, leftTire_0, rollerTire);
+            array.PushBack(rollerTire);
         }
 
         // link traction tire to the engine using a differential gear
@@ -1129,16 +1155,23 @@ namespace ndExcavator
 
         const ndString name(engineNode->m_name + "_" + leftTire_0->m_name);
         articulation->AddCloseLoop(axel, name.GetStr());
+
+        return array;
     }
 
-    void MakeRightTrack(ndModelArticulation* const articulation, ndSharedPtr<ndMesh>& mesh)
+    ndFixSizeArray<ndModelArticulation::ndNode*, 256> MakeRightTrack(ndModelArticulation* const articulation, ndSharedPtr<ndMesh>& mesh)
     {
+        ndFixSizeArray<ndModelArticulation::ndNode*, 256> array;
         ndModelArticulation::ndNode* const rightTire_0 = MakeRollerTire(articulation, mesh, "rightGear");
         ndModelArticulation::ndNode* const rightTire_7 = MakeRollerTire(articulation, mesh, "rightFrontRoller");
         ndAssert(rightTire_0);
         ndAssert(rightTire_7);
         LinkTires(articulation, rightTire_0, rightTire_7);
-        MakeRollerTire(articulation, mesh, "rightSupportRoller");
+        ndModelArticulation::ndNode* const supportRoller = MakeRollerTire(articulation, mesh, "rightSupportRoller");
+
+        array.PushBack(rightTire_0);
+        array.PushBack(rightTire_7);
+        array.PushBack(supportRoller);
 
         for (ndInt32 i = 0; i < 3; ++i)
         {
@@ -1147,6 +1180,7 @@ namespace ndExcavator
             ndModelArticulation::ndNode* const rollerTire = MakeRollerTire(articulation, mesh, name);
             ndAssert(rollerTire);
             LinkTires(articulation, rightTire_0, rollerTire);
+            array.PushBack(rollerTire);
         }
 
         // link traction tire to the engine using a differential gear
@@ -1167,11 +1201,14 @@ namespace ndExcavator
                 tireMatrix.m_right.Scale(-ND_EXCAVATOR_GEAR_GAIN), tire));
         const ndString name(engineNode->m_name + "_" + rightTire_0->m_name);
         articulation->AddCloseLoop(axel, name.GetStr());
+
+        return array;
     }
 
     void MakeThread(ndModelArticulation* const articulation,
         const char* const sideName,
-        ndSharedPtr<ndMesh>& mesh)
+        ndSharedPtr<ndMesh>& mesh,
+        const ndFixSizeArray<ndModelArticulation::ndNode*, 256>& rollersTrack)
     {
         ndFixSizeArray<ndMesh*, 256> stack;
         ndFixSizeArray<ndMesh*, 256> linkArray;
@@ -1219,9 +1256,18 @@ namespace ndExcavator
         ndSharedPtr<ndJointBilateralConstraint> linkJoint(new ndJointPlane(
             planePivot, planeNornal, linkBody->GetAsBodyDynamic(),
             rootNode->m_body->GetAsBodyDynamic()));
-        
+
+        auto AddCollingPairs = [articulation, &rollersTrack](const ndModelArticulation::ndNode* const trackLink)
+        {
+            for (ndInt32 i = 0; i < rollersTrack.GetCount(); ++i)
+            {
+                articulation->AddCollidingPair(rollersTrack[i], trackLink);
+            }
+        };
+
         ndModelArticulation::ndNode* const firstLink = articulation->AddLimb(rootNode, linkBody, linkJoint);
         firstLink->m_name = linkArray[0]->GetName();
+        AddCollingPairs(firstLink);
         
         // connent all threads planks with hinge joint
         ndFloat32 linkDamper = ndFloat32(5.0f);
@@ -1236,6 +1282,7 @@ namespace ndExcavator
             ndModelArticulation::ndNode* const firstLink1 = articulation->AddLimb(linkNode0, body, joint);
             linkNode0 = firstLink1;
             linkNode0->m_name = linkArray[i]->GetName();
+            AddCollingPairs(linkNode0);
         }
         
         ndMatrix hingeMatrix(ndRollMatrix(90.0f * ndDegreeToRad) * firstLink->m_body->GetMatrix());
@@ -1247,11 +1294,8 @@ namespace ndExcavator
 
     void MakeModel(ndDemoEntityManager* const scene, const ndMatrix& location)
     {
-        //ndRenderMeshLoader loader(*scene->GetRenderer());
         ndMeshLoader loader;
         loader.LoadMesh(ndGetWorkingFileName("excavator.nd"));
-
-//loader.m_mesh->SetMatrix(loader.m_mesh->GetMatrix()*location);
 
         // using a model articulation for this vehicle
         ndModelArticulation* const excavator = new ndModelArticulation();
@@ -1262,22 +1306,26 @@ namespace ndExcavator
 
         // the mesh does not have motor geometry, 
         // so we add the motor is added procedurally
-        //AddEngine(excavator);
+        AddEngine(excavator);
 
         // add the cabin and boom mechanism
-        //MakeCabinAndUpperBody(excavator, loader.m_mesh);
+        MakeCabinAndUpperBody(excavator, loader.m_mesh);
 
-        // add the roller and differential gear system
-        //MakeLeftTrack(excavator, loader.m_mesh);
-        //MakeRightTrack(excavator, loader.m_mesh);
+        // build left track with linked rollers and differential gear system
+        ndFixSizeArray<ndModelArticulation::ndNode*, 256> leftTrack (MakeLeftTrack(excavator, loader.m_mesh));
+        MakeThread(excavator, "leftThread", loader.m_mesh, leftTrack);
 
-        // add the tracks
-        MakeThread(excavator, "leftThread", loader.m_mesh);
-        //MakeThread(excavator, "rightThread", loader.m_mesh);
-
+        // build right track with linked rollers and differential gear system
+        ndFixSizeArray<ndModelArticulation::ndNode*, 256> rightTrack(MakeRightTrack(excavator, loader.m_mesh));
+        MakeThread(excavator, "rightThread", loader.m_mesh, rightTrack);
+        
+        // conver th emodel to and ndMesh      
         excavator->GetAsModelArticulation()->Serialize(*loader.m_mesh);
+
+        // save the model as ndMesh
         loader.SaveMesh(ndGetWorkingFileName("ndExcavatorPhysics.nd"));
         
+        // test model in the scene.
         ndWorld* const world = scene->GetWorld();
         ndSharedPtr<ndModel> testModel(LoadAndBindModel(scene, location, "ndExcavatorPhysics.nd"));
         world->AddModel(testModel);

@@ -593,3 +593,31 @@ ndJointBilateralConstraint* ndMeshJoint::CreateObject(ndBodyKinematic* const, nd
 	ndAssert(0);
 	return nullptr;
 }
+
+ndMeshCollidingPair::ndMeshCollidingPair()
+	:ndClassAlloc()
+{
+	ndAssert(0);
+}
+
+ndMeshCollidingPair::ndMeshCollidingPair(const ndMesh* const node0, const ndMesh* const node1)
+	:ndClassAlloc()
+	,m_childNode((node0->GetName() < node1->GetName()) ? node0 : node1)
+	,m_parentNode((node0->GetName() < node1->GetName()) ? node1 : node0)
+{
+}
+
+ndMeshCollidingPair::~ndMeshCollidingPair()
+{
+}
+
+void ndMeshCollidingPair::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	xmlSaveParam(parent, "reference0", m_childNode->GetName().GetStr());
+	xmlSaveParam(parent, "reference1", m_parentNode->GetName().GetStr());
+}
+
+void ndMeshCollidingPair::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndAssert(0);
+}

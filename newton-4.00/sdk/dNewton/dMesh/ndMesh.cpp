@@ -135,6 +135,16 @@ const ndCloseLoopConstraints* ndMesh::GetAsCloseLoopConstraints() const
 	return nullptr;
 }
 
+ndCollidingPairs* ndMesh::GetAsCollidingPairs()
+{
+	return nullptr;
+}
+
+const ndCollidingPairs* ndMesh::GetAsCollidingPairs() const
+{
+	return nullptr;
+}
+
 
 void ndMesh::AddChild(const ndSharedPtr<ndMesh>& child)
 {
@@ -273,28 +283,70 @@ void ndMesh::SetJoint(const ndSharedPtr<ndMeshJoint>& joint)
 
 ndCloseLoopConstraints* ndMesh::GetLoopJoints()
 {
-	ndMesh* const contrains = GetRoot()->FindByName(ND_MESH_LOOP_JOINTS);
-	return (ndCloseLoopConstraints*)contrains;
+	ndMesh* const mesh = GetRoot()->FindByName(ND_MESH_LOOP_JOINTS);
+	//return (ndCloseLoopConstraints*)mesh;
+	return mesh ? mesh->GetAsCloseLoopConstraints() : nullptr;
 }
 
 const ndCloseLoopConstraints* ndMesh::GetLoopJoints() const 
 {
-	ndMesh* const contrains = GetRoot()->FindByName(ND_MESH_LOOP_JOINTS);
-	return (ndCloseLoopConstraints*)contrains;
+	ndMesh* const mesh = GetRoot()->FindByName(ND_MESH_LOOP_JOINTS);
+	//return (ndCloseLoopConstraints*)mesh;
+	return mesh ? mesh->GetAsCloseLoopConstraints() : nullptr;
 }
 
 void ndMesh::AddLoopJoint(const ndSharedPtr<ndMeshLoopJoint>& joint)
 {
-	ndCloseLoopConstraints* constrains = GetLoopJoints();
-	if (!constrains)
+	ndCloseLoopConstraints* mesh = GetLoopJoints();
+	if (!mesh)
 	{
 		ndMesh* const rootNode = GetRoot();
 		ndAssert(rootNode);
 		ndSharedPtr<ndMesh> loops(new ndCloseLoopConstraints());
 		rootNode->AddChild(loops);
-		constrains = GetLoopJoints();
+		mesh = GetLoopJoints();
 	}
-	constrains->m_loopJoints.Append(joint);
+	mesh->m_loopJoints.Append(joint);
+}
+
+ndCollidingPairs* ndMesh::GetCollingPairs()
+{
+	ndMesh* const mesh = GetRoot()->FindByName(ND_MESH_COLLIDING_PAIRS);
+	return mesh ? mesh->GetAsCollidingPairs() : nullptr;
+}
+
+const ndCollidingPairs* ndMesh::GetCollingPairs() const
+{
+	ndMesh* const mesh = GetRoot()->FindByName(ND_MESH_COLLIDING_PAIRS);
+	return mesh ? mesh->GetAsCollidingPairs() : nullptr;
+}
+
+void ndMesh::AddCollidingPair(const ndMesh* const node0, const ndMesh* const node1)
+{
+	ndAssert(node0 != node1);
+	ndCollidingPairs* mesh = GetCollingPairs();
+	if (!mesh)
+	{
+		ndMesh* const rootNode = GetRoot();
+		ndAssert(rootNode);
+		ndSharedPtr<ndMesh> pairs(new ndCollidingPairs());
+		rootNode->AddChild(pairs);
+		mesh = GetCollingPairs();
+	}
+
+	const ndMesh* const childNode = (node0->m_name < node1->m_name) ? node0 : node1;
+	const ndMesh* const parentNode = (node0->m_name < node1->m_name) ? node1 : node0;
+	for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* node = mesh->m_collingPairs.GetFirst(); node; node = node->GetNext())
+	{
+		ndSharedPtr<ndMeshCollidingPair> pair = node->GetInfo();
+		if ((pair->m_childNode->GetName() == childNode->GetName()) &&
+			(pair->m_parentNode->GetName() == parentNode->GetName()))
+		{
+			return;
+		}
+	}
+	ndSharedPtr<ndMeshCollidingPair> newPair(new ndMeshCollidingPair(node0, node1));
+	mesh->m_collingPairs.Append(newPair);
 }
 
 ndSharedPtr<ndMesh> ndMesh::GetSharedPtr() const
@@ -1058,6 +1110,7 @@ ndCloseLoopConstraints::ndCloseLoopConstraints(const ndMesh& src)
 	,m_loopJoints()
 {
 	ndAssert(0);
+	SetName(ND_MESH_LOOP_JOINTS);
 }
 
 ndCloseLoopConstraints* ndCloseLoopConstraints::GetAsCloseLoopConstraints()
@@ -1076,3 +1129,33 @@ ndMesh* ndCloseLoopConstraints::CreateClone() const
 	return nullptr;
 }
 
+ndCollidingPairs::ndCollidingPairs()
+	:ndMesh()
+	,m_collingPairs()
+{
+	SetName(ND_MESH_COLLIDING_PAIRS);
+}
+
+ndCollidingPairs::ndCollidingPairs(const ndMesh& src)
+	:ndMesh(src)
+	,m_collingPairs()
+{
+	ndAssert(0);
+	SetName(ND_MESH_COLLIDING_PAIRS);
+}
+
+ndMesh* ndCollidingPairs::CreateClone() const
+{
+	ndAssert(0);
+	return nullptr;
+}
+
+ndCollidingPairs* ndCollidingPairs::GetAsCollidingPairs()
+{
+	return this;
+}
+
+const ndCollidingPairs* ndCollidingPairs::GetAsCollidingPairs() const
+{
+	return this;
+}
