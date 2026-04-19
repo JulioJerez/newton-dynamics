@@ -517,6 +517,7 @@ ndMeshJoint::ndMeshJoint(const ndMesh* const owner)
 	,m_localFrame1(ndGetIdentityMatrix())
 	,m_constructor("ndJointFix6dof")
 	,m_owner(ndWeakPtr<const ndMesh>(owner))
+	,m_surrogateParent(ndWeakPtr<const ndMesh>(nullptr))
 {
 }
 
@@ -526,6 +527,7 @@ ndMeshJoint::ndMeshJoint(const ndMesh* const owner, const ndJointBilateralConstr
 	,m_localFrame1(joint->GetLocalMatrix1())
 	,m_constructor(joint->ClassName())
 	,m_owner(ndWeakPtr<const ndMesh>(owner))
+	,m_surrogateParent(ndWeakPtr<const ndMesh>(nullptr))
 {
 }
 
@@ -533,29 +535,9 @@ ndMeshJoint::~ndMeshJoint()
 {
 }
 
-ndJointBilateralConstraint* ndMeshJoint::CreateObject(ndBodyKinematic* const, ndBodyKinematic* const) const
-{
-	ndExpandTraceMessage("ndMesh joint: %s serialization not Implemented", m_constructor.GetStr());
-	ndAssert(0);
-	return nullptr;
-}
-
-void ndMeshJoint::SerializeToXml(nd::TiXmlElement* const parent) const
-{
-	xmlSaveParam(parent, "constructor", m_constructor.GetStr());
-	xmlSaveParam(parent, "localFrame0", m_localFrame0);
-	xmlSaveParam(parent, "localFrame1", m_localFrame1);
-}
-
-void ndMeshJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
-{
-	m_constructor = ndString(xmlGetString(parent, "constructor"));
-	m_localFrame0 = xmlGetMatrix(parent, "localFrame0");
-	m_localFrame1 = xmlGetMatrix(parent, "localFrame1");
-}
-
 void ndMeshJoint::ApplyTransform(const ndMatrix& transform)
 {
+	ndAssert(0);
 	ndMatrix matrix0(m_localFrame0 * transform);
 	ndMatrix matrix1(m_localFrame1 * transform);
 
@@ -568,4 +550,46 @@ void ndMeshJoint::ApplyTransform(const ndMatrix& transform)
 
 	matrix1.PolarDecomposition(transformMatrix, scale, stretchAxis);
 	m_localFrame1 = transformMatrix;
+}
+
+const ndMesh* ndMeshJoint::GetSurrogateParent() const
+{
+	return *m_surrogateParent;
+}
+
+void ndMeshJoint::SetSurrogateParent(const ndMesh* const surrodateParent)
+{
+	m_surrogateParent = ndWeakPtr<const ndMesh>(surrodateParent);
+}
+
+void ndMeshJoint::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	xmlSaveParam(parent, "constructor", m_constructor.GetStr());
+	xmlSaveParam(parent, "localFrame0", m_localFrame0);
+	xmlSaveParam(parent, "localFrame1", m_localFrame1);
+
+	if (m_surrogateParent)
+	{
+		xmlSaveParam(parent, "surrogateParent", m_surrogateParent->GetName().GetStr());
+	}
+}
+
+void ndMeshJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	m_constructor = ndString(xmlGetString(parent, "constructor"));
+	m_localFrame0 = xmlGetMatrix(parent, "localFrame0");
+	m_localFrame1 = xmlGetMatrix(parent, "localFrame1");
+
+	if (xmlHasAttribute(parent, "surrogateParent"))
+	{
+		const char* const name = xmlGetString(parent, "surrogateParent");
+		m_surrogateParent = ndWeakPtr<const ndMesh> (m_owner->GetRoot()->FindByName(name));
+	}
+}
+
+ndJointBilateralConstraint* ndMeshJoint::CreateObject(ndBodyKinematic* const, ndBodyKinematic* const) const
+{
+	ndExpandTraceMessage("ndMesh joint: %s serialization not Implemented", m_constructor.GetStr());
+	ndAssert(0);
+	return nullptr;
 }

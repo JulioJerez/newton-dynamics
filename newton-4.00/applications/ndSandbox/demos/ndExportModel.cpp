@@ -58,7 +58,13 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
             ndSharedPtr<ndRenderSceneNode> visualEntity((visualEntityPtr == *sceneMesh) ? sceneMesh : visualEntityPtr->GetSharedPtr());
 
             // add a rigid body with notification callback
-            ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
+            const ndMesh* parentMeshNode = meshNode->GetParent();
+            while (parentMeshNode && !parentMeshNode->GetRigidBody())
+            {
+                parentMeshNode = parentMeshNode->GetParent();
+            }
+            ndBodyKinematic* const parentBody = parentMeshNode ? articulation->FindByName(parentMeshNode->GetName().GetStr())->m_body->GetAsBodyKinematic() : nullptr;
+
             ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
             node->m_body->SetNotifyCallback(notify);
         }
@@ -929,7 +935,7 @@ namespace ndExcavator
         engineNode->m_name = "engine";
     }
 
-    void MakeChassis(ndModelArticulation* const articulation, ndSharedPtr<ndMesh>& mesh)
+    void AddChassis(ndModelArticulation* const articulation, ndSharedPtr<ndMesh>& mesh)
     {
         ndMesh* const chassisMesh = mesh->FindByName("base");
         ndAssert(chassisMesh);
@@ -945,10 +951,31 @@ namespace ndExcavator
         chassisBody->SetMatrix(matrix);
         chassisBody->GetAsBodyDynamic()->SetCollisionShape(**collision);
         chassisBody->GetAsBodyDynamic()->SetMassMatrix(chassisMass, **collision);
-        
+ 
         ndModelArticulation::ndNode* const rootNode = articulation->AddRootBody(chassisBody);
         rootNode->m_name = chassisMesh->GetName();
-        
+    }
+
+    void AddMotor(ndModelArticulation* const articulation, ndSharedPtr<ndMesh>& mesh)
+    {
+        ndMesh* const chassisMesh = mesh->FindByName("base");
+        ndAssert(chassisMesh);
+
+        // create the collision and the world matrix
+        ndMatrix matrix(chassisMesh->CalculateGlobalMatrix());
+        ndSharedPtr<ndShapeInstance> collision(chassisMesh->CreateCollisionFromChildren());
+
+        ndFloat32 chassisMass = ndFloat32(4000.0f);
+
+        // create the rigid that represent the chassis
+        ndSharedPtr<ndBody> chassisBody(new ndBodyDynamic());
+        chassisBody->SetMatrix(matrix);
+        chassisBody->GetAsBodyDynamic()->SetCollisionShape(**collision);
+        chassisBody->GetAsBodyDynamic()->SetMassMatrix(chassisMass, **collision);
+
+        ndModelArticulation::ndNode* const rootNode = articulation->AddRootBody(chassisBody);
+        rootNode->m_name = chassisMesh->GetName();
+
         // add the motor
         AddEngine(articulation);
     }
@@ -1142,24 +1169,111 @@ namespace ndExcavator
         articulation->AddCloseLoop(axel, name.GetStr());
     }
 
+    void MakeThread(ndModelArticulation* const articulation,
+        const char* const sideName,
+        ndSharedPtr<ndMesh>& mesh)
+    {
+        ndFixSizeArray<ndMesh*, 256> stack;
+        ndFixSizeArray<ndMesh*, 256> linkArray;
+        stack.PushBack(*mesh);
+
+        // get all the thread links in order.
+        while (stack.GetCount())
+        {
+            ndMesh* const node = stack.Pop();
+            if (node->GetName().Find(sideName) != -1)
+            {
+                linkArray.PushBack(node);
+                ndInt32 index = 0;
+                for (ndInt32 i = linkArray.GetCount() - 2; i >= 0; --i)
+                {
+                    if (linkArray[i]->GetName() > node->GetName())
+                    {
+                        linkArray[i + 1] = linkArray[i];
+                        index = i;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                linkArray[index] = node;
+            }
+
+            for (ndList<ndSharedPtr<ndMesh>>::ndNode* child = node->GetChildren().GetFirst(); child; child = child->GetNext())
+            {
+                stack.PushBack(*child->GetInfo());
+            }
+        }
+
+        // make the collision shape. 
+        ndSharedPtr<ndShapeInstance> threadCollision(linkArray[0]->CreateCollisionFromChildren());
+
+        ndFloat32 threadLinkMass = ndFloat32(8.0f);
+        ndModelArticulation::ndNode* const rootNode = articulation->GetRoot();
+        ndSharedPtr<ndBody> linkBody(MakeBodyPart(linkArray[0], threadCollision, threadLinkMass));
+        
+        ndMatrix planeMatrix(linkBody->GetMatrix());
+        ndVector planePivot(planeMatrix.m_posit);
+        ndVector planeNornal(planeMatrix.m_up);
+        ndSharedPtr<ndJointBilateralConstraint> linkJoint(new ndJointPlane(
+            planePivot, planeNornal, linkBody->GetAsBodyDynamic(),
+            rootNode->m_body->GetAsBodyDynamic()));
+        
+        ndModelArticulation::ndNode* const firstLink = articulation->AddLimb(rootNode, linkBody, linkJoint);
+        firstLink->m_name = linkArray[0]->GetName();
+        
+        // connent all threads planks with hinge joint
+        ndFloat32 linkDamper = ndFloat32(5.0f);
+        ndFloat32 linkRegularizer = ndFloat32(0.15f);
+        ndModelArticulation::ndNode* linkNode0 = firstLink;
+        for (ndInt32 i = 1; i < linkArray.GetCount(); ++i)
+        {
+            ndSharedPtr<ndBody> body(MakeBodyPart(linkArray[i], threadCollision, threadLinkMass));
+            ndMatrix hingeMatrix(ndRollMatrix(90.0f * ndDegreeToRad) * body->GetMatrix());
+            ndSharedPtr<ndJointBilateralConstraint> joint(new ndJointHinge(hingeMatrix, body->GetAsBodyKinematic(), linkNode0->m_body->GetAsBodyKinematic()));
+            ((ndJointHinge*)*joint)->SetAsSpringDamper(linkRegularizer, ndFloat32(0.0f), linkDamper);
+            ndModelArticulation::ndNode* const firstLink1 = articulation->AddLimb(linkNode0, body, joint);
+            linkNode0 = firstLink1;
+            linkNode0->m_name = linkArray[i]->GetName();
+        }
+        
+        ndMatrix hingeMatrix(ndRollMatrix(90.0f * ndDegreeToRad) * firstLink->m_body->GetMatrix());
+        ndSharedPtr<ndJointBilateralConstraint> joint(new ndJointHinge(hingeMatrix, linkNode0->m_body->GetAsBodyKinematic(), firstLink->m_body->GetAsBodyKinematic()));
+        ((ndJointHinge*)*joint)->SetAsSpringDamper(linkRegularizer, ndFloat32(0.0f), linkDamper);
+        ndString closeTrack(firstLink->m_name + "_" + linkNode0->m_name);
+        articulation->AddCloseLoop(joint, closeTrack.GetStr());
+    }
+
     void MakeModel(ndDemoEntityManager* const scene, const ndMatrix& location)
     {
-        ndRenderMeshLoader loader(*scene->GetRenderer());
+        //ndRenderMeshLoader loader(*scene->GetRenderer());
+        ndMeshLoader loader;
         loader.LoadMesh(ndGetWorkingFileName("excavator.nd"));
+
+//loader.m_mesh->SetMatrix(loader.m_mesh->GetMatrix()*location);
 
         // using a model articulation for this vehicle
         ndModelArticulation* const excavator = new ndModelArticulation();
         ndSharedPtr<ndModel> vehicleModel(excavator);
 
         // for more readability break construction into sub function
-        MakeChassis(excavator, loader.m_mesh);
+        AddChassis(excavator, loader.m_mesh);
+
+        // the mesh does not have motor geometry, 
+        // so we add the motor is added procedurally
+        //AddEngine(excavator);
 
         // add the cabin and boom mechanism
-        MakeCabinAndUpperBody(excavator, loader.m_mesh);
+        //MakeCabinAndUpperBody(excavator, loader.m_mesh);
 
         // add the roller and differential gear system
-        MakeLeftTrack(excavator, loader.m_mesh);
-        MakeRightTrack(excavator, loader.m_mesh);
+        //MakeLeftTrack(excavator, loader.m_mesh);
+        //MakeRightTrack(excavator, loader.m_mesh);
+
+        // add the tracks
+        MakeThread(excavator, "leftThread", loader.m_mesh);
+        //MakeThread(excavator, "rightThread", loader.m_mesh);
 
         excavator->GetAsModelArticulation()->Serialize(*loader.m_mesh);
         loader.SaveMesh(ndGetWorkingFileName("ndExcavatorPhysics.nd"));
@@ -1186,6 +1300,7 @@ void ndExportModel(ndDemoEntityManager* const scene)
     //ndDaveRagdoll::RagDoll(scene, origin);
 
     origin.m_posit.m_x = 10.0f;
+    origin.m_posit.m_y = 0.0f;
     origin.m_posit.m_z = 0.0f;
     ndExcavator::MakeModel(scene, origin);
 

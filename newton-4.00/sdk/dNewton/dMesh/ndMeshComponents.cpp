@@ -93,10 +93,11 @@ ndMeshLoopJoint::ndMeshLoopJoint()
 {
 }
 
-ndMeshLoopJoint::ndMeshLoopJoint(const ndSharedPtr<ndMeshJoint>& joint, ndMesh* const otherNode)
+ndMeshLoopJoint::ndMeshLoopJoint(const ndSharedPtr<ndMeshJoint>& joint, ndMesh* const childReference, ndMesh* const parentReference)
 	:ndClassAlloc()
+	,m_childNode(ndWeakPtr<ndMesh>(childReference))
+	,m_parentNode(ndWeakPtr<ndMesh>(parentReference))
 	,m_joint(joint)
-	,m_otherNode(otherNode)
 {
 }
 
@@ -113,7 +114,8 @@ ndJointBilateralConstraint* ndMeshLoopJoint::CreateObject(ndBodyKinematic* const
 
 void ndMeshLoopJoint::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	xmlSaveParam(parent, "otherNode", m_otherNode->GetName().GetStr());
+	xmlSaveParam(parent, "childReference", m_childNode->GetName().GetStr());
+	xmlSaveParam(parent, "parentReference", m_parentNode->GetName().GetStr());
 
 	nd::TiXmlElement* const loopJoint = new nd::TiXmlElement("joint");
 	parent->LinkEndChild(loopJoint);
@@ -691,6 +693,9 @@ ndMeshJointPlane::ndMeshJointPlane(const ndMesh* const owner)
 ndMeshJointPlane::ndMeshJointPlane(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
+	const ndJointPlane* const subJoint = (ndJointPlane*)joint;
+
+	m_controlRotation = subJoint->GetEnableControlRotation();
 }
 
 void ndMeshJointPlane::SerializeToXml(nd::TiXmlElement* const parent) const
@@ -703,7 +708,7 @@ void ndMeshJointPlane::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndMeshJoint::DeserializeFromXml(parent);
 
-	m_controlRotation = ndInt8(xmlGetInt(parent, "limitState"));
+	m_controlRotation = ndInt8(xmlGetInt(parent, "controlRotation"));
 }
 
 ndJointBilateralConstraint* ndMeshJointPlane::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const

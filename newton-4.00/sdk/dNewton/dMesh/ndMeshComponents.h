@@ -46,17 +46,16 @@ class ndMeshLoopJoint : public ndClassAlloc
 {
 	public:
 	D_NEWTON_API ndMeshLoopJoint();
-	D_NEWTON_API ndMeshLoopJoint(const ndSharedPtr<ndMeshJoint>& joint, ndMesh* const otherNode);
+	D_NEWTON_API ndMeshLoopJoint(const ndSharedPtr<ndMeshJoint>& joint, ndMesh* const childReference, ndMesh* const parentReference);
 	D_NEWTON_API virtual ~ndMeshLoopJoint();
 
 	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const;
 	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
 
-	//ndMatrix m_childLocalFrame;
-	//ndMatrix m_parentLocalFrame;
+	ndWeakPtr<ndMesh> m_childNode;
+	ndWeakPtr<ndMesh> m_parentNode;
 	ndSharedPtr<ndMeshJoint> m_joint;
-	ndWeakPtr<ndMesh> m_otherNode;
 };
 
 class ndMeshJointFix6dof : public ndMeshJoint
@@ -200,7 +199,6 @@ class ndMeshJointIkSwivelPositionEffector : public ndMeshJoint
 	ndInt32 m_rotationOrder;
 	bool m_enableSwivelControl;
 };
-
 
 class ndMeshJointPlane : public ndMeshJoint
 {

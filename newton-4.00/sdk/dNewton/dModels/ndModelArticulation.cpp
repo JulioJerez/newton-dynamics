@@ -931,8 +931,8 @@ void ndModelArticulation::Serialize(ndMesh* const meshRootNode) const
 			ndAssert(meshNode0);
 			ndAssert(meshNode1);
 			ndSharedPtr<ndMeshJoint> joint(node->m_joint->GetMeshJoint(meshNode0));
-			ndSharedPtr<ndMeshLoopJoint> loopJoint(new ndMeshLoopJoint(joint, meshNode1));
-			meshNode0->AddLoopJoint(loopJoint);
+			ndSharedPtr<ndMeshLoopJoint> loopJoint(new ndMeshLoopJoint(joint, meshNode0, meshNode1));
+			meshNode1->AddLoopJoint(loopJoint);
 		}
 		else
 		{
@@ -952,7 +952,23 @@ void ndModelArticulation::Serialize(ndMesh* const meshRootNode) const
 				body->Serialize(meshNode);
 				if (node->m_joint)
 				{
-					meshNode->SetJoint(node->m_joint->GetMeshJoint(meshNode));
+					ndJointBilateralConstraint* const joint = *node->m_joint;
+					meshNode->SetJoint(joint->GetMeshJoint(meshNode));
+
+					// see if this node has a surrogate body
+					ndMesh* parentMesh = meshNode->GetParent();
+					while (!parentMesh->GetRigidBody())
+					{
+						parentMesh = parentMesh->GetParent();
+					}
+
+					if (parentMesh->GetName() != node->GetParent()->m_name)
+					{
+						// this node has a surrogate parent,
+						const ndMesh* const surrogateMesh = meshRootNode->FindByName(node->GetParent()->m_name);
+						ndAssert(surrogateMesh);
+						meshNode->GetJoint()->SetSurrogateParent(surrogateMesh);
+					}
 				}
 			}
 		}
@@ -970,62 +986,79 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 		m_rootNode = nullptr;
 	}
 
-	ndFixSizeArray<const ndMesh*, 64> loops;
-	ndFixSizeArray<const ndMesh*, 256> stack;
-	ndFixSizeArray<ndModelArticulation::ndNode*, 256> parentNode;
-
-	stack.PushBack(rootNode);
-	parentNode.PushBack(nullptr);
-	while (stack.GetCount())
+	ndFixSizeArray<ndMesh*, 256> sorrugatesNodes;
+	auto BuildHiearchy = [this, &sorrugatesNodes](ndMesh* const meshNode)
 	{
-		const ndMesh* const meshNode = stack.Pop();
-		ndModelArticulation::ndNode* parent = parentNode.Pop();
-
-		if (meshNode->GetLoopJoints().GetCount())
-		{
-			loops.PushBack(meshNode);
-		}
-
 		if (meshNode->GetRigidBody())
-		{
-			ndSharedPtr<ndBody> body(meshNode->GetRigidBody()->CreateObject());
+		{ 
 			if (!m_rootNode)
 			{
+				ndSharedPtr<ndBody> body(meshNode->GetRigidBody()->CreateObject());
 				m_rootNode = AddRootBody(body);
-				parent = m_rootNode;
+				m_rootNode->m_name = meshNode->GetName();
 			}
-			else
+			else 
 			{
-				ndAssert(meshNode->GetJoint());
-				ndBodyKinematic* const childBody = body->GetAsBodyKinematic();
-				ndBodyKinematic* const parentBody = parent->m_body->GetAsBodyKinematic();
-				ndSharedPtr<ndJointBilateralConstraint> joint(meshNode->GetJoint()->CreateObject(childBody, parentBody));
-				parent = AddLimb(parent, body, joint);
+				const ndSharedPtr<ndMeshJoint>& meshJoint = meshNode->GetJoint();
+				if (!meshJoint->GetSurrogateParent())
+				{
+					ndSharedPtr<ndBody> body(meshNode->GetRigidBody()->CreateObject());
+					const ndMesh* parentMesh = meshNode->GetParent();
+					while (!parentMesh->GetRigidBody())
+					{
+						parentMesh = parentMesh->GetParent();
+					}
+					ndModelArticulation::ndNode* const parentNode = FindByName(parentMesh->GetName().GetStr());
+					ndAssert(parentNode);
+					ndBodyKinematic* const childBody = body->GetAsBodyKinematic();
+					ndBodyKinematic* const parentBody = parentNode->m_body->GetAsBodyKinematic();
+					ndSharedPtr<ndJointBilateralConstraint> joint(meshNode->GetJoint()->CreateObject(childBody, parentBody));
+					ndModelArticulation::ndNode* const limbNode = AddLimb(parentNode, body, joint);
+					limbNode->m_name = meshNode->GetName();
+				}
+				else
+				{
+					sorrugatesNodes.PushBack(meshNode);
+				}
 			}
-			parent->m_name = meshNode->GetName();
-			parent->m_body->SetMatrix(meshNode->CalculateGlobalMatrix());
 		}
-	
-		const ndList<ndSharedPtr<ndMesh>>& children = meshNode->GetChildren();
-		for (ndList<ndSharedPtr<ndMesh>>::ndNode* child = children.GetFirst(); child; child = child->GetNext())
+	};
+	((ndMesh*)rootNode)->NodeIterator(BuildHiearchy);
+
+	while (sorrugatesNodes.GetCount())
+	{
+		for (ndInt32 i = sorrugatesNodes.GetCount() - 1; i >= 0; --i)
 		{
-			const ndMesh* const childMesh = *child->GetInfo();
-			parentNode.PushBack(parent);
-			stack.PushBack(childMesh);
+			const ndMesh* const surrogateMeshNode = sorrugatesNodes[i]->GetJoint()->GetSurrogateParent();
+			ndModelArticulation::ndNode* parentNode = FindByName(surrogateMeshNode->GetName().GetStr());
+			if (parentNode)
+			{
+				ndSharedPtr<ndBody> body(sorrugatesNodes[i]->GetRigidBody()->CreateObject());
+				ndBodyKinematic* const childBody = body->GetAsBodyKinematic();
+				ndBodyKinematic* const parentBody = parentNode->m_body->GetAsBodyKinematic();
+				ndSharedPtr<ndJointBilateralConstraint> joint(sorrugatesNodes[i]->GetJoint()->CreateObject(childBody, parentBody));
+				ndModelArticulation::ndNode* const limbNode = AddLimb(parentNode, body, joint);
+				limbNode->m_name = sorrugatesNodes[i]->GetName();
+
+				sorrugatesNodes[i] = sorrugatesNodes[sorrugatesNodes.GetCount() - 1];
+				sorrugatesNodes.SetCount(sorrugatesNodes.GetCount() - 1);
+				break;
+			}
 		}
 	}
 
-	for (ndInt32 i = 0; i < loops.GetCount(); ++i)
+	const ndCloseLoopConstraints* const loops = rootNode->GetLoopJoints();
+	if (loops)
 	{
-		const ndMesh* const loopMesh = loops[i];
-		const ndList<ndSharedPtr<ndMeshLoopJoint>>& loopList = loopMesh->GetLoopJoints();
-		for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* loopPtr = loopList.GetFirst(); loopPtr; loopPtr = loopPtr->GetNext())
+		for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* loopPtr = loops->m_loopJoints.GetFirst(); loopPtr; loopPtr = loopPtr->GetNext())
 		{
 			const ndSharedPtr<ndMeshLoopJoint>& loopMeshJoint = loopPtr->GetInfo();
-			ndModelArticulation::ndNode* const child = FindByName(loopMesh->GetName().GetStr());
-			ndModelArticulation::ndNode* const parent = FindByName(loopPtr->GetInfo()->m_otherNode->GetName().GetStr());
-			ndSharedPtr<ndJointBilateralConstraint> joint(loopMeshJoint->m_joint->CreateObject(child->m_body->GetAsBodyDynamic(), parent->m_body->GetAsBodyDynamic()));
-			AddCloseLoop(joint);
+			ndModelArticulation::ndNode* const child = FindByName(loopMeshJoint->m_childNode->GetName().GetStr());
+			ndModelArticulation::ndNode* const parent = FindByName(loopMeshJoint->m_parentNode->GetName().GetStr());
+			ndSharedPtr<ndJointBilateralConstraint> loopJoint(loopMeshJoint->m_joint->CreateObject(child->m_body->GetAsBodyDynamic(), parent->m_body->GetAsBodyDynamic()));
+
+			ndString name(parent->m_name + "_" + child->m_name);
+			AddCloseLoop(loopJoint, name.GetStr());
 		}
 	}
 }
