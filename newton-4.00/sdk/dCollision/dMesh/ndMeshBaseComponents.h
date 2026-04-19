@@ -31,6 +31,9 @@ class ndShapeInstance;
 class ndBodyKinematic;
 class ndJointBilateralConstraint;
 
+#define ND_MESH_LOOP_JOINTS		"__contraintsList__"
+#define ND_MESH_COLLIDING_PAIRS	"__collingPairsList__"
+
 class ndMeshCollisionShape : public ndClassAlloc
 {
 	public:
@@ -196,6 +199,20 @@ class ndMeshBodyKinematic : public ndMeshBody
 	ndFloat32 m_maxAngleStep;
 	ndFloat32 m_maxLinearStep;
 	ndFloat32 m_massVolumeWeigh;
+};
+
+class ndMeshCollidingPair : public ndClassAlloc
+{
+	public:
+	D_COLLISION_API ndMeshCollidingPair();
+	D_COLLISION_API ndMeshCollidingPair(const ndMesh* const node0, const ndMesh* const node1);
+	D_COLLISION_API virtual ~ndMeshCollidingPair();
+
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+
+	ndWeakPtr<const ndMesh> m_childNode;
+	ndWeakPtr<const ndMesh> m_parentNode;
 };
 
 class ndMeshJoint : public ndClassAlloc

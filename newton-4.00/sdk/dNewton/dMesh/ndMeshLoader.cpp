@@ -143,6 +143,19 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName) const
 			}
 		}
 
+		if (entry.m_meshNode->GetAsCollidingPairs())
+		{
+			const ndCollidingPairs* const collidningPairs = entry.m_meshNode->GetAsCollidingPairs();
+			for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* pairPtr = collidningPairs->m_collingPairs.GetFirst(); pairPtr; pairPtr = pairPtr->GetNext())
+			{
+				nd::TiXmlElement* const pairNode = new nd::TiXmlElement("collindPair");
+				entry.m_parentXml->LinkEndChild(pairNode);
+
+				const ndMeshCollidingPair* const pairEntry = *pairPtr->GetInfo();
+				pairEntry->SerializeToXml(pairNode);
+			}
+		}
+
 		for (ndList<ndSharedPtr<ndMesh>>::ndNode* node = entry.m_meshNode->m_children.GetFirst(); node; node = node->GetNext())
 		{
 			MeshXmlNodePair childPair;
@@ -208,7 +221,11 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			const char* const linkName = xmlGetString(linkNode, "name");
 			if (strcmp(linkName, ND_MESH_LOOP_JOINTS) == 0)
 			{
-				child = ndSharedPtr<ndMesh>(new (ndCloseLoopConstraints));
+				child = ndSharedPtr<ndMesh>(new ndCloseLoopConstraints);
+			}
+			else if (strcmp(linkName, ND_MESH_COLLIDING_PAIRS) == 0)
+			{
+				child = ndSharedPtr<ndMesh>(new ndCollidingPairs);
 			}
 			
 			entry.m_mesh->AddChild(child);
@@ -348,12 +365,12 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			for (const nd::TiXmlNode* node = entry.m_xmlNode->FirstChild("loopJoint"); node; node = node->NextSibling("loopJoint"))
 			{
 				const nd::TiXmlElement* const loopJointNode = (nd::TiXmlElement*)node;
-				const char* const childNodeMame = xmlGetString(loopJointNode, "childReference");
-				const char* const parentNodeMame = xmlGetString(loopJointNode, "parentReference");
-				ndAssert(childNodeMame);
-				ndAssert(parentNodeMame);
-				ndMesh* const childNode = m_mesh->FindByName(childNodeMame);
-				ndMesh* const parentNode = m_mesh->FindByName(parentNodeMame);
+				const char* const childNodeName = xmlGetString(loopJointNode, "childReference");
+				const char* const parentNodeName = xmlGetString(loopJointNode, "parentReference");
+				ndAssert(childNodeName);
+				ndAssert(parentNodeName);
+				ndMesh* const childNode = m_mesh->FindByName(childNodeName);
+				ndMesh* const parentNode = m_mesh->FindByName(parentNodeName);
 				ndAssert(childNode);
 				ndAssert(parentNode);
 				
@@ -362,6 +379,23 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 				ndSharedPtr<ndMeshJoint> jointLoadJoint(LoadJoint(xmlCloseJoint));
 				ndSharedPtr<ndMeshLoopJoint> loopJoint(new ndMeshLoopJoint(jointLoadJoint, childNode, parentNode));
 				m_mesh->AddLoopJoint(loopJoint);
+			}
+		}
+
+		if (mesh->m_name == ND_MESH_COLLIDING_PAIRS)
+		{
+			for (const nd::TiXmlNode* node = entry.m_xmlNode->FirstChild("collindPair"); node; node = node->NextSibling("collindPair"))
+			{
+				const nd::TiXmlElement* const pairNode = (nd::TiXmlElement*)node;
+				const char* const referenceName0 = xmlGetString(pairNode, "reference0");
+				const char* const referenceName1 = xmlGetString(pairNode, "reference1");
+				ndAssert(referenceName0);
+				ndAssert(referenceName1);
+				ndMesh* const referenceNode0 = m_mesh->FindByName(referenceName0);
+				ndMesh* const referenceNode1 = m_mesh->FindByName(referenceName1);
+				ndAssert(referenceNode0);
+				ndAssert(referenceNode1);
+				m_mesh->AddCollidingPair(referenceNode0, referenceNode1);
 			}
 		}
 	

@@ -137,18 +137,18 @@ namespace ndRagdoll
 				ndAssert(meshOwner);
 				ndAssert(meshOwner->GetRigidBody());
 
-				const ndMeshBodyDynamic* const rigidBodyInfo = (ndMeshBodyDynamic*)*meshOwner->GetRigidBody();
-
-				ndBody* const body0 = *node->m_body;
-				for (ndInt32 i = 0; i < rigidBodyInfo->m_collidingPair.GetCount(); ++i)
-				{
-					const ndString& name = rigidBodyInfo->m_collidingPair[i]->GetName();
-					ndBody* const body1 = *ragdoll->FindByName(name.GetStr())->m_body;
-				
-					// we add all the colliding pairs, kknowing rher will be duplicates.
-					ndRagDollController::ndFilterPair newPair(body0, body1);
-					ragdollController->m_collisionFilter.PushBack(newPair);
-				}
+				ndAssert(0);
+				//const ndMeshBodyDynamic* const rigidBodyInfo = (ndMeshBodyDynamic*)*meshOwner->GetRigidBody();
+				//ndBody* const body0 = *node->m_body;
+				//for (ndInt32 i = 0; i < rigidBodyInfo->m_collidingPair.GetCount(); ++i)
+				//{
+				//	const ndString& name = rigidBodyInfo->m_collidingPair[i]->GetName();
+				//	ndBody* const body1 = *ragdoll->FindByName(name.GetStr())->m_body;
+				//
+				//	// we add all the colliding pairs, kknowing rher will be duplicates.
+				//	ndRagDollController::ndFilterPair newPair(body0, body1);
+				//	ragdollController->m_collisionFilter.PushBack(newPair);
+				//}
 			}
 
 			if (node->m_joint)

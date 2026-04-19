@@ -18,6 +18,23 @@
 #include "ndDemoCameraNodeFollow.h"
 #include "ndHeightFieldPrimitive.h"
 
+
+class ndModelNotifyTest: public ndModelNotify
+{
+    public:
+    ndModelNotifyTest(ndModelArticulation* const model)
+        :ndModelNotify()
+    {
+        SetModel(model);
+    }
+
+    bool OnContactGeneration(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1)
+    {
+        const ndModelArticulation* const articulation = GetModel()->GetAsModelArticulation();
+        return articulation->PairCollide(body0, body1);
+    }
+};
+
 static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, const ndMatrix& location, const char* const fileName)
 {
     ndMeshLoader loader;
@@ -71,6 +88,8 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
     };
     articulation->NodeIterator(BindApplicationData);
 
+    ndSharedPtr<ndModelNotify> controller(new ndModelNotifyTest(articulation));
+    articulation->SetNotifyCallback(controller);
     return model;
 }
 
@@ -1290,7 +1309,7 @@ namespace ndExcavator
         AddEngine(excavator);
 
         // add the cabin and boom mechanism
-        //MakeCabinAndUpperBody(excavator, loader.m_mesh);
+        MakeCabinAndUpperBody(excavator, loader.m_mesh);
 
         // build left track with linked rollers and differential gear system
         ndFixSizeArray<ndModelArticulation::ndNode*, 256> leftTrack (MakeLeftTrack(excavator, loader.m_mesh));
