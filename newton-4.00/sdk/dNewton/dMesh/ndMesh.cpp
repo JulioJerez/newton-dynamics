@@ -45,7 +45,6 @@ ndMesh::ndMesh()
 	,m_joint(nullptr)
 	,m_rigidBody(nullptr)
 	,m_children()
-	,m_loopJoints()
 	,m_selfChildNode(nullptr)
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
@@ -116,6 +115,26 @@ ndMesh::ndMesh(const ndShapeInstance& shape, ndUvMapingMode mapping)
 ndMesh::~ndMesh()
 {
 }
+
+ndMesh* ndMesh::GetAsMesh()
+{
+	return this;
+}
+const ndMesh* ndMesh::GetAsMesh() const
+{
+	return this;
+}
+
+ndCloseLoopConstraints* ndMesh::GetAsCloseLoopConstraints()
+{
+	return nullptr;
+}
+
+const ndCloseLoopConstraints* ndMesh::GetAsCloseLoopConstraints() const
+{
+	return nullptr;
+}
+
 
 void ndMesh::AddChild(const ndSharedPtr<ndMesh>& child)
 {
@@ -252,19 +271,30 @@ void ndMesh::SetJoint(const ndSharedPtr<ndMeshJoint>& joint)
 	m_joint = joint;
 }
 
-ndList<ndSharedPtr<ndMeshLoopJoint>>& ndMesh::GetLoopJoints()
+ndCloseLoopConstraints* ndMesh::GetLoopJoints()
 {
-	return m_loopJoints;
+	ndMesh* const contrains = GetRoot()->FindByName(ND_MESH_LOOP_JOINTS);
+	return (ndCloseLoopConstraints*)contrains;
 }
 
-const ndList<ndSharedPtr<ndMeshLoopJoint>>& ndMesh::GetLoopJoints() const
+const ndCloseLoopConstraints* ndMesh::GetLoopJoints() const 
 {
-	return m_loopJoints;
+	ndMesh* const contrains = GetRoot()->FindByName(ND_MESH_LOOP_JOINTS);
+	return (ndCloseLoopConstraints*)contrains;
 }
 
 void ndMesh::AddLoopJoint(const ndSharedPtr<ndMeshLoopJoint>& joint)
 {
-	m_loopJoints.Append(joint);
+	ndCloseLoopConstraints* constrains = GetLoopJoints();
+	if (!constrains)
+	{
+		ndMesh* const rootNode = GetRoot();
+		ndAssert(rootNode);
+		ndSharedPtr<ndMesh> loops(new ndCloseLoopConstraints());
+		rootNode->AddChild(loops);
+		constrains = GetLoopJoints();
+	}
+	constrains->m_loopJoints.Append(joint);
 }
 
 ndSharedPtr<ndMesh> ndMesh::GetSharedPtr() const
@@ -1015,3 +1045,34 @@ ndSharedPtr<ndJointBilateralConstraint> ndMesh::CreateJoint()
 
 	return joint;
 }
+
+ndCloseLoopConstraints::ndCloseLoopConstraints()
+	:ndMesh()
+	,m_loopJoints()
+{
+	SetName(ND_MESH_LOOP_JOINTS);
+}
+
+ndCloseLoopConstraints::ndCloseLoopConstraints(const ndMesh& src)
+	:ndMesh(src)
+	,m_loopJoints()
+{
+	ndAssert(0);
+}
+
+ndCloseLoopConstraints* ndCloseLoopConstraints::GetAsCloseLoopConstraints()
+{
+	return this;
+}
+
+const ndCloseLoopConstraints* ndCloseLoopConstraints::GetAsCloseLoopConstraints() const
+{
+	return this;
+}
+
+ndMesh* ndCloseLoopConstraints::CreateClone() const
+{
+	ndAssert(0);
+	return nullptr;
+}
+

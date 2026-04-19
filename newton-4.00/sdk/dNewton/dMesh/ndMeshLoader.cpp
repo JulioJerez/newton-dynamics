@@ -14,6 +14,7 @@
 #include "ndMesh.h"
 #include "ndJointGear.h"
 #include "ndJointHinge.h"
+#include "ndJointPlane.h"
 #include "ndMeshEffect.h"
 #include "ndMeshLoader.h"
 #include "ndJointWheel.h"
@@ -129,15 +130,14 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName) const
 			joint->SerializeToXml(jointNode);
 		}
 
-		if (entry.m_meshNode->m_loopJoints.GetCount())
+		if (entry.m_meshNode->GetAsCloseLoopConstraints())
 		{
-			nd::TiXmlElement* const loopJointsNode = new nd::TiXmlElement("loopJoints");
-			entry.m_parentXml->LinkEndChild(loopJointsNode);
-			for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* loopPtr = entry.m_meshNode->m_loopJoints.GetFirst(); loopPtr; loopPtr = loopPtr->GetNext())
+			const ndCloseLoopConstraints* const closeLoops = entry.m_meshNode->GetAsCloseLoopConstraints();
+			for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* loopPtr = closeLoops->m_loopJoints.GetFirst(); loopPtr; loopPtr = loopPtr->GetNext())
 			{
 				nd::TiXmlElement* const jointNode = new nd::TiXmlElement("loopJoint");
-				loopJointsNode->LinkEndChild(jointNode);
-
+				entry.m_parentXml->LinkEndChild(jointNode);
+			
 				const ndMeshLoopJoint* const joint = *loopPtr->GetInfo();
 				joint->SerializeToXml(jointNode);
 			}
@@ -176,7 +176,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 		MeshXmlNodePair() {}
 		MeshXmlNodePair(ndMesh* const mesh, const nd::TiXmlElement* const xmlNode)
 			:m_mesh(mesh)
-			, m_xmlNode(xmlNode)
+			,m_xmlNode(xmlNode)
 		{
 		}
 		ndMesh* m_mesh;
@@ -205,6 +205,12 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			ndAssert(strcmp(linkNode->Value(), "ndMesh") == 0);
 
 			ndSharedPtr<ndMesh> child(new ndMesh());
+			const char* const linkName = xmlGetString(linkNode, "name");
+			if (strcmp(linkName, ND_MESH_LOOP_JOINTS) == 0)
+			{
+				child = ndSharedPtr<ndMesh>(new (ndCloseLoopConstraints));
+			}
+			
 			entry.m_mesh->AddChild(child);
 			stack.PushBack(MeshXmlNodePair(*child, linkNode));
 		}
@@ -310,6 +316,10 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			{
 				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointIkSwivelPositionEffector(mesh));
 			}
+			else if (strcmp(constructor, ndJointPlane::StaticClassName()) == 0)
+			{
+				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointPlane(mesh));
+			}
 			else if (strcmp(constructor, ndJointGear::StaticClassName()) == 0)
 			{
 				joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointGear(mesh));
@@ -333,23 +343,25 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			mesh->SetJoint(LoadJoint(xmlJoint));
 		}
 
-		
-		const nd::TiXmlElement* const xmlLoopJoint = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("loopJoints");
-		if (xmlLoopJoint)
+		if (mesh->m_name == ND_MESH_LOOP_JOINTS)
 		{
-			for (const nd::TiXmlNode* node = xmlLoopJoint->FirstChild("loopJoint"); node; node = node->NextSibling("loopJoint"))
+			for (const nd::TiXmlNode* node = entry.m_xmlNode->FirstChild("loopJoint"); node; node = node->NextSibling("loopJoint"))
 			{
 				const nd::TiXmlElement* const loopJointNode = (nd::TiXmlElement*)node;
-				const char* const otherNodeMame = xmlGetString(loopJointNode, "otherNode");
-				ndAssert(otherNodeMame);
-				ndMesh* const otherNode = m_mesh->FindByName(otherNodeMame);
-				ndAssert(otherNode);
+				const char* const childNodeMame = xmlGetString(loopJointNode, "childReference");
+				const char* const parentNodeMame = xmlGetString(loopJointNode, "parentReference");
+				ndAssert(childNodeMame);
+				ndAssert(parentNodeMame);
+				ndMesh* const childNode = m_mesh->FindByName(childNodeMame);
+				ndMesh* const parentNode = m_mesh->FindByName(parentNodeMame);
+				ndAssert(childNode);
+				ndAssert(parentNode);
 				
 				const nd::TiXmlElement* const xmlCloseJoint = (nd::TiXmlElement*)loopJointNode->FirstChild("joint");
 				ndAssert(xmlCloseJoint);
 				ndSharedPtr<ndMeshJoint> jointLoadJoint(LoadJoint(xmlCloseJoint));
-				ndSharedPtr<ndMeshLoopJoint> loopJoint(new ndMeshLoopJoint(jointLoadJoint, otherNode));
-				mesh->AddLoopJoint(loopJoint);
+				ndSharedPtr<ndMeshLoopJoint> loopJoint(new ndMeshLoopJoint(jointLoadJoint, childNode, parentNode));
+				m_mesh->AddLoopJoint(loopJoint);
 			}
 		}
 	

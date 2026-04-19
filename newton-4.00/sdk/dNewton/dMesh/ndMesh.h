@@ -30,6 +30,9 @@ class ndMeshEffect;
 class ndShapeInstance;
 class ndMeshLoopJoint;
 class ndMeshShapeInstance;
+class ndCloseLoopConstraints;
+
+#define ND_MESH_LOOP_JOINTS "__contraintsList__"
 
 class ndMesh : public ndClassAlloc
 {
@@ -75,7 +78,7 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API ndMesh(const ndShapeInstance& src, ndUvMapingMode mapping = m_box);
 
 	D_NEWTON_API virtual ~ndMesh();
-	D_NEWTON_API ndMesh* CreateClone() const;
+	D_NEWTON_API virtual ndMesh* CreateClone() const;
 
 	ndMatrix GetMatrix() const;
 	void SetMatrix(const ndMatrix& matrix);
@@ -114,8 +117,13 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API const ndSharedPtr<ndMeshJoint>& GetJoint() const;
 	D_NEWTON_API void SetJoint(const ndSharedPtr<ndMeshJoint>& joint);
 
-	D_NEWTON_API ndList<ndSharedPtr<ndMeshLoopJoint>>& GetLoopJoints();
-	D_NEWTON_API const ndList<ndSharedPtr<ndMeshLoopJoint>>& GetLoopJoints() const;
+	D_NEWTON_API virtual ndMesh* GetAsMesh();
+	D_NEWTON_API virtual const ndMesh* GetAsMesh() const;
+	D_NEWTON_API virtual ndCloseLoopConstraints* GetAsCloseLoopConstraints();
+	D_NEWTON_API virtual const ndCloseLoopConstraints* GetAsCloseLoopConstraints() const;
+
+	D_NEWTON_API ndCloseLoopConstraints* GetLoopJoints();
+	D_NEWTON_API const ndCloseLoopConstraints* GetLoopJoints() const;
 	D_NEWTON_API void AddLoopJoint(const ndSharedPtr<ndMeshLoopJoint>& joint);
 
 	D_NEWTON_API const ndString& GetName() const;
@@ -172,7 +180,6 @@ class ndMesh : public ndClassAlloc
 	ndSharedPtr<ndMeshJoint> m_joint;
 	ndSharedPtr<ndMeshBody> m_rigidBody;
 	ndList<ndSharedPtr<ndMesh>> m_children;
-	ndList<ndSharedPtr<ndMeshLoopJoint>> m_loopJoints;
 	ndList<ndSharedPtr<ndMesh>>::ndNode* m_selfChildNode;
 	ndVector m_boneTarget;
 	ndNodeType m_type;
@@ -217,6 +224,20 @@ void ndMesh::NodeIterator(Function func)
 		}
 	}
 }
+
+class ndCloseLoopConstraints: public ndMesh
+{
+	public:
+	D_NEWTON_API ndCloseLoopConstraints();
+	D_NEWTON_API ndCloseLoopConstraints(const ndMesh& src);
+
+	D_NEWTON_API virtual ndCloseLoopConstraints* GetAsCloseLoopConstraints() override;
+	D_NEWTON_API virtual const ndCloseLoopConstraints* GetAsCloseLoopConstraints() const override;
+
+	D_NEWTON_API ndMesh* CreateClone() const override;
+
+	ndList<ndSharedPtr<ndMeshLoopJoint>> m_loopJoints;
+};
 
 #endif
 
