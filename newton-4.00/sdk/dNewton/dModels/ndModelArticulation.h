@@ -67,6 +67,26 @@ class ndModelArticulation: public ndModel
 		ndFloat32 m_mass;
 	};
 
+	class ndCollindPairs
+	{
+		public:
+		ndCollindPairs(const ndBody* const body0, const ndBody* const body1)
+			:m_id0(ndMin(body0->GetId(), body1->GetId()))
+			,m_id1(ndMax(body0->GetId(), body1->GetId()))
+		{
+		}
+
+		union
+		{
+			ndUnsigned64 m_id;
+			struct
+			{
+				ndUnsigned32 m_id0;
+				ndUnsigned32 m_id1;
+			};
+		};
+	};
+
 	D_NEWTON_API ndModelArticulation();
 	D_NEWTON_API ndModelArticulation(const ndModelArticulation& src);
 	D_NEWTON_API virtual ~ndModelArticulation();
@@ -93,6 +113,9 @@ class ndModelArticulation: public ndModel
 	D_NEWTON_API void ClearMemory();
 	D_NEWTON_API void SetTransform(const ndMatrix& matrix);
 	D_NEWTON_API bool IsCloseLoop(const ndNode* const node) const;
+
+	D_NEWTON_API void AddCollidingPair(const ndNode* const node0, const ndNode* const node1);
+	D_NEWTON_API bool PairCollide(const ndBody* const body0, const ndBody* const body1) const;
 	
 	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassKinematics(const ndMatrix& localFrame) const;
 	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassDynamics(ndIkSolver& solver, const ndMatrix& localFrame, ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS>& extraJoints, ndFloat32 timestep) const;
@@ -112,6 +135,7 @@ class ndModelArticulation: public ndModel
 	
 	ndString m_name;
 	ndNode* m_rootNode;
+	ndArray<ndCollindPairs> m_collisionPairs;
 	ndList<ndNode, ndContainersFreeListAlloc<ndNode>> m_closeLoops;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 

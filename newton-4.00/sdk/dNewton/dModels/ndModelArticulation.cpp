@@ -1130,3 +1130,50 @@ void ndModelArticulation::SaveNdMesh(const char* const path) const
 	ndMeshLoader loader(mesh);
 	loader.SaveMesh(path);
 }
+
+bool ndModelArticulation::PairCollide(const ndBody* const body0, const ndBody* const body1) const
+{
+	ndInt32 i0 = 0;
+	ndInt32 i1 = ndInt32 (m_collisionPairs.GetCount()) - 1;
+
+	const ndCollindPairs pair(body0, body1);
+	while ((i1 - i0) > 4)
+	{
+		ndInt32 index = (i1 + i0) / 2;
+		if (m_collisionPairs[index].m_id >= pair.m_id)
+		{
+			i0 = index;
+		}
+		else
+		{
+			i1 = index;
+		}
+	}
+
+	for (ndInt32 i = i0; i <= i1; ++i)
+	{
+		if (m_collisionPairs[i].m_id == pair.m_id)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void ndModelArticulation::AddCollidingPair(const ndNode* const node0, const ndNode* const node1)
+{
+	if (PairCollide(*node0->m_body, *node1->m_body))
+	{
+		return;
+	}
+	const ndCollindPairs newPair(*node0->m_body, *node1->m_body);
+
+	m_collisionPairs.PushBack(newPair);
+	ndInt32 index = ndInt32 (m_collisionPairs.GetCount()) - 2;
+	while ((index >= 0) && (m_collisionPairs[index].m_id > newPair.m_id))
+	{
+		m_collisionPairs[index + 1] = m_collisionPairs[index];
+		index--;
+	}
+	m_collisionPairs[index + 1] = newPair;
+}
