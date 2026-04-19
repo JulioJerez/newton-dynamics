@@ -942,9 +942,12 @@ void ndModelArticulation::Serialize(ndMesh* const meshRootNode) const
 			{
 				ndAssert(node->GetParent());
 				meshNode = new ndMesh();
-				ndMesh* parentMeshNode =  meshRootNode->FindByName(node->GetParent()->m_name);
+				ndMesh* parentMeshNode = meshRootNode->FindByName(node->GetParent()->m_name);
 				parentMeshNode->AddChild(meshNode);
+
+				const ndMatrix offsetMatrix(node->m_body->GetMatrix() * node->GetParent()->m_body->GetMatrix().OrthoInverse());
 				meshNode->SetName(node->m_name);
+				meshNode->SetMatrix(offsetMatrix);
 			}
 			const ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
 			if (node->m_body)

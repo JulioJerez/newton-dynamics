@@ -909,7 +909,7 @@ namespace ndExcavator
         ndSharedPtr<ndShapeInstance> motorCollision(new ndShapeInstance(new ndShapeCylinder(ndFloat32(0.25f), ndFloat32(0.25f), ndFloat32(0.75f))));
         ndMatrix engineMatrix(rootNode->m_body->GetMatrix());
         engineMatrix = ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * engineMatrix;
-        engineMatrix.m_posit.m_y += 1.0f;
+        engineMatrix.m_posit.m_y += ndFloat32 (1.0f);
 
         // make engine body
         ndFloat32 mass = ndFloat32(50.0f);
@@ -1262,18 +1262,18 @@ namespace ndExcavator
 
         // the mesh does not have motor geometry, 
         // so we add the motor is added procedurally
-        //AddEngine(excavator);
+        AddEngine(excavator);
 
         // add the cabin and boom mechanism
         //MakeCabinAndUpperBody(excavator, loader.m_mesh);
 
         // add the roller and differential gear system
-        //MakeLeftTrack(excavator, loader.m_mesh);
-        //MakeRightTrack(excavator, loader.m_mesh);
+        MakeLeftTrack(excavator, loader.m_mesh);
+        MakeRightTrack(excavator, loader.m_mesh);
 
         // add the tracks
         MakeThread(excavator, "leftThread", loader.m_mesh);
-        //MakeThread(excavator, "rightThread", loader.m_mesh);
+        MakeThread(excavator, "rightThread", loader.m_mesh);
 
         excavator->GetAsModelArticulation()->Serialize(*loader.m_mesh);
         loader.SaveMesh(ndGetWorkingFileName("ndExcavatorPhysics.nd"));
