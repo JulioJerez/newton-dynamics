@@ -9131,7 +9131,7 @@
         </joint>
     </ndMesh>
     <ndMesh>
-        <name string="__contraintsList__" />
+        <name string="__constraintsList__" />
         <matrix>
             <posit float3="0 0 0" />
             <angles float3="0 -0 0" />

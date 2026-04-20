@@ -682,6 +682,9 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCapsule()
 
 	ndVector size;
 	ndMatrix localMatrix(CalculateLocalMatrix(size));
+	const ndMatrix rotationAligment(ndRollMatrix(ndFloat32(-90.0f) * ndDegreeToRad));
+	localMatrix = rotationAligment * localMatrix;
+	size = rotationAligment.RotateVector(size).Abs();
 
 	ndFloat32 radios = ndMax(size.m_y, size.m_z);
 	ndFloat32 high = ndFloat32(2.0f) * (ndMax (size.m_x - radios, ndFloat32 (0.0f)));
@@ -698,6 +701,9 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCylinder()
 
 	ndVector size;
 	ndMatrix localMatrix(CalculateLocalMatrix(size));
+	const ndMatrix rotationAligment(ndRollMatrix(ndFloat32(90.0f)));
+	localMatrix = rotationAligment * localMatrix;
+	size = rotationAligment.RotateVector(size).Abs();
 
 	ndFloat32 high = ndFloat32(2.0f) * size.m_x;
 	ndFloat32 radios = ndMax(size.m_y, size.m_z);

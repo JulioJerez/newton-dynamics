@@ -1120,59 +1120,36 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 
 ndMesh* ndModelArticulation::CreateDefaultMesh() const
 {
-	ndInt32 nameIndex = 0;
 	ndMesh* rootMesh = nullptr;
-	ndFixSizeArray<ndMesh*, 1024> parent;
-	ndFixSizeArray<ndModelArticulation::ndNode*, 256> stack;
-
-	parent.PushBack(nullptr);
-	stack.PushBack(m_rootNode);
-	while (stack.GetCount())
+	auto BuildDefaultMesh = [this, &rootMesh](ndModelArticulation::ndNode* const node)
 	{
-		ndMesh* const parentMesh = parent.Pop();
-		ndModelArticulation::ndNode* const node = stack.Pop();
+		if (node->m_body)
+		{
+			const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+			const ndShapeInstance& collisionShape = body->GetCollisionShape();
+			bool hasGeometry = ((ndShape*)collisionShape.GetShape())->GetAsShapeNull() ? false : true;
+			ndMesh* const newMesh = hasGeometry ? new ndMesh(collisionShape) : new ndMesh();
 
-		const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
-		const ndShapeInstance& collisionShape = body->GetCollisionShape();
-		bool hasGeometry = ((ndShape*)collisionShape.GetShape())->GetAsShapeNull() ? false : true;
-		ndMesh* const meshNode = hasGeometry ? new ndMesh(collisionShape) : new ndMesh();
-		if (node->m_name.GetStr() && *node->m_name.GetStr())
-		{
-			meshNode->SetName(node->m_name.GetStr());
+			ndMatrix matrix(node->m_body->GetMatrix());
+			if (!rootMesh)
+			{
+				rootMesh = newMesh;
+			}
+			else
+			{
+				ndMesh* const parent = rootMesh->FindByName(node->GetParent()->m_name);
+				ndAssert(parent);
+				parent->AddChild(ndSharedPtr<ndMesh>(newMesh));
+				matrix = matrix * node->GetParent()->m_body->GetMatrix().OrthoInverse();
+			}
+			newMesh->SetName(node->m_name);
+			newMesh->SetMatrix(matrix);
 		}
-		else
-		{
-			char name[256];
-			snprintf(name, sizeof(name) - 1, "unnamed_node_%d", nameIndex);
-			nameIndex++;
-			meshNode->SetName(name);
-		}
-		ndMatrix matrix(node->m_body->GetMatrix());
-		if (!rootMesh)
-		{
-			rootMesh = meshNode;
-		}
-		else
-		{
-			matrix = matrix * node->GetParent()->m_body->GetMatrix().OrthoInverse();
-			parentMesh->AddChild(ndSharedPtr<ndMesh>(meshNode));
-		}
+	};
+	// generate the ndMesh
+	((ndModelArticulation*)this)->NodeIterator(BuildDefaultMesh);
+	Serialize(rootMesh);
 
-		meshNode->SetMatrix(matrix);
-		node->m_body->Serialize(meshNode);
-		if (node->m_joint)
-		{
-			ndSharedPtr<ndMeshJoint> joint(node->m_joint->GetMeshJoint(meshNode));
-			meshNode->SetJoint(joint);
-		}
-
-		for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
-		{
-			stack.PushBack(child);
-			parent.PushBack(meshNode);
-		}
-	}
-	ndAssert(rootMesh);
 	return rootMesh;
 }
 
