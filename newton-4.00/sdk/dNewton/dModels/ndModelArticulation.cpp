@@ -304,6 +304,15 @@ ndModelArticulation::ndNode* ndModelArticulation::FindByName(const char* const n
 				return node;
 			}
 		}
+
+		for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* ptr = m_closeLoops.GetFirst(); ptr; ptr = ptr->GetNext())
+		{
+			ndNode* const node = &ptr->GetInfo();
+			if (strcmp(node->m_name.GetStr(), name) == 0)
+			{
+				return node;
+			}
+		}
 	}
 
 	return nullptr;
