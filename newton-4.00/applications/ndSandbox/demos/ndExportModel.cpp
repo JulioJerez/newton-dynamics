@@ -18,25 +18,24 @@
 #include "ndDemoCameraNodeFollow.h"
 #include "ndHeightFieldPrimitive.h"
 
-
-class ndModelNotifyTest: public ndModelNotify
-{
-    public:
-    ndModelNotifyTest(ndModelArticulation* const model)
-        :ndModelNotify()
-    {
-        SetModel(model);
-    }
-
-    bool OnContactGeneration(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1)
-    {
-        const ndModelArticulation* const articulation = GetModel()->GetAsModelArticulation();
-        return articulation->PairCollide(body0, body1);
-    }
-};
-
 static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, const ndMatrix& location, const char* const fileName)
 {
+    class ndModelNotifyTest : public ndModelNotify
+    {
+        public:
+        ndModelNotifyTest(ndModelArticulation* const model)
+            :ndModelNotify()
+        {
+            SetModel(model);
+        }
+
+        bool OnContactGeneration(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1)
+        {
+            const ndModelArticulation* const articulation = GetModel()->GetAsModelArticulation();
+            return articulation->PairCollide(body0, body1);
+        }
+    };
+
     ndMeshLoader loader;
     loader.LoadMesh(ndGetWorkingFileName(fileName).GetStr());
 
@@ -61,7 +60,7 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
     // this could be a render mesh or something else. 
     // For this demo it is ndRenderSceneNode mesh
     const ndMesh* const rootMesh = *loader.m_mesh;
-    auto BindApplicationData = [scene, articulation, rootNode, rootMesh, &sceneMesh](ndModelArticulation::ndNode* const node)
+    auto BindPhysicsAndGraphics = [scene, articulation, rootNode, rootMesh, &sceneMesh](ndModelArticulation::ndNode* const node)
     {
         if (!articulation->IsCloseLoop(node))
         {
@@ -86,7 +85,7 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
             node->m_body->SetNotifyCallback(notify);
         }
     };
-    articulation->NodeIterator(BindApplicationData);
+    articulation->NodeIterator(BindPhysicsAndGraphics);
 
     ndSharedPtr<ndModelNotify> controller(new ndModelNotifyTest(articulation));
     articulation->SetNotifyCallback(controller);
@@ -1323,11 +1322,11 @@ namespace ndExcavator
         excavator->GetAsModelArticulation()->Serialize(*loader.m_mesh);
 
         // save the model as ndMesh
-        loader.SaveMesh(ndGetWorkingFileName("ndExcavatorPhysics.nd"));
+        loader.SaveMesh(ndGetWorkingFileName("excavatorPhysics.nd"));
         
         // test model in the scene.
         ndWorld* const world = scene->GetWorld();
-        ndSharedPtr<ndModel> testModel(LoadAndBindModel(scene, location, "ndExcavatorPhysics.nd"));
+        ndSharedPtr<ndModel> testModel(LoadAndBindModel(scene, location, "excavatorPhysics.nd"));
         world->AddModel(testModel);
     }
 };
