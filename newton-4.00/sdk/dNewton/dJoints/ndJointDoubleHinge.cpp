@@ -75,7 +75,7 @@ void ndJointDoubleHinge::SetLimits0(ndFloat32 minLimit, ndFloat32 maxLimit)
 	m_axis0.m_maxLimit = maxLimit;
 }
 
-void ndJointDoubleHinge::GetLimits0(ndFloat32& minLimit, ndFloat32& maxLimit)
+void ndJointDoubleHinge::GetLimits0(ndFloat32& minLimit, ndFloat32& maxLimit) const
 {
 	minLimit = m_axis0.m_minLimit;
 	maxLimit = m_axis0.m_maxLimit;
@@ -137,7 +137,7 @@ void ndJointDoubleHinge::SetLimits1(ndFloat32 minLimit, ndFloat32 maxLimit)
 	m_axis1.m_maxLimit = maxLimit;
 }
 
-void ndJointDoubleHinge::GetLimits1(ndFloat32& minLimit, ndFloat32& maxLimit)
+void ndJointDoubleHinge::GetLimits1(ndFloat32& minLimit, ndFloat32& maxLimit) const
 {
 	minLimit = m_axis1.m_minLimit;
 	maxLimit = m_axis1.m_maxLimit;
@@ -443,20 +443,5 @@ void ndJointDoubleHinge::JacobianDerivative(ndConstraintDescritor& desc)
 ndSharedPtr<ndMeshJoint> ndJointDoubleHinge::GetMeshJoint(const ndMesh* const owner) const
 {
 	ndMeshJointDoubleHinge* const joint = new ndMeshJointDoubleHinge(owner, this);
-
-	//joint->m_axis0.m_springK = m_axis0.m_springK;
-	//joint->m_axis0.m_damperC = m_axis0.m_damperC;
-	//joint->m_axis0.m_limitState = m_axis0.m_limitState;
-	//joint->m_axis0.m_minLimit = m_axis0.m_minLimit * ndRadToDegree;
-	//joint->m_axis0.m_maxLimit = m_axis0.m_maxLimit * ndRadToDegree;
-	//joint->m_axis0.m_springDamperRegularizer = m_axis0.m_springDamperRegularizer;
-	//
-	//joint->m_axis1.m_springK = m_axis1.m_springK;
-	//joint->m_axis1.m_damperC = m_axis1.m_damperC;
-	//joint->m_axis1.m_limitState = m_axis1.m_limitState;
-	//joint->m_axis1.m_minLimit = m_axis1.m_minLimit * ndRadToDegree;
-	//joint->m_axis1.m_maxLimit = m_axis1.m_maxLimit * ndRadToDegree;
-	//joint->m_axis1.m_springDamperRegularizer = m_axis1.m_springDamperRegularizer;
-
 	return ndSharedPtr<ndMeshJoint>(joint);
 }

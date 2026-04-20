@@ -160,7 +160,7 @@
             <constructor string="ndBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
-            <com float3="2.90574e-09 9.26262e-08 0.0126848" />
+            <com float3="3.11694e-09 9.53316e-08 0.0126848" />
             <inverseMass float="0.0333333" />
             <inverseDiagonalInertia float3="0.278593 0.278593 0.277613" />
             <principalAxis float3="0 -0 0" />
@@ -190,7 +190,7 @@
             <constructor string="ndJointRoller" />
             <localFrame0>
                 <posit float3="0 0 0" />
-                <angles float3="-3.41943e-12 90 0" />
+                <angles float3="1.40985e-12 90 0" />
             </localFrame0>
             <localFrame1>
                 <posit float3="-1.7247 -0.154319 -1.89254" />
@@ -297,7 +297,7 @@
             <constructor string="ndBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
-            <com float3="-2.70193e-09 -1.46253e-07 -3.80331e-09" />
+            <com float3="-2.10491e-09 -1.46082e-07 -6.51046e-11" />
             <inverseMass float="0.0333333" />
             <inverseDiagonalInertia float3="1.21625 1.21625 1.19654" />
             <principalAxis float3="0 -0 0" />
@@ -327,7 +327,7 @@
             <constructor string="ndJointRoller" />
             <localFrame0>
                 <posit float3="0 0 0" />
-                <angles float3="-3.41943e-12 90 0" />
+                <angles float3="1.40985e-12 90 0" />
             </localFrame0>
             <localFrame1>
                 <posit float3="-0.62696 -0.443735 -1.95102" />
@@ -394,7 +394,7 @@
             <constructor string="ndBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
-            <com float3="-2.70193e-09 -1.46253e-07 -3.80331e-09" />
+            <com float3="-2.10491e-09 -1.46082e-07 -6.51046e-11" />
             <inverseMass float="0.0333333" />
             <inverseDiagonalInertia float3="1.21625 1.21625 1.19654" />
             <principalAxis float3="0 -0 0" />
@@ -424,7 +424,7 @@
             <constructor string="ndJointRoller" />
             <localFrame0>
                 <posit float3="0 0 0" />
-                <angles float3="-3.41943e-12 90 0" />
+                <angles float3="1.40985e-12 90 0" />
             </localFrame0>
             <localFrame1>
                 <posit float3="0.151068 0.303461 -1.95102" />
@@ -491,7 +491,7 @@
             <constructor string="ndBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
-            <com float3="-2.70193e-09 -1.46253e-07 -3.80331e-09" />
+            <com float3="-2.10491e-09 -1.46082e-07 -6.51046e-11" />
             <inverseMass float="0.0333333" />
             <inverseDiagonalInertia float3="1.21625 1.21625 1.19654" />
             <principalAxis float3="0 -0 0" />
@@ -521,7 +521,7 @@
             <constructor string="ndJointRoller" />
             <localFrame0>
                 <posit float3="0 0 0" />
-                <angles float3="-3.41943e-12 90 0" />
+                <angles float3="1.40985e-12 90 0" />
             </localFrame0>
             <localFrame1>
                 <posit float3="0.928707 -0.443735 -1.95102" />
@@ -588,7 +588,7 @@
             <constructor string="ndBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
-            <com float3="5.26192e-06 3.32081e-07 -0.0620499" />
+            <com float3="5.2622e-06 3.28502e-07 -0.0620498" />
             <inverseMass float="0.0333333" />
             <inverseDiagonalInertia float3="0.350203 0.350203 0.362642" />
             <principalAxis float3="0 -0 0" />
@@ -618,7 +618,7 @@
             <constructor string="ndJointRoller" />
             <localFrame0>
                 <posit float3="0 0 0" />
-                <angles float3="-3.41943e-12 90 0" />
+                <angles float3="1.40985e-12 90 0" />
             </localFrame0>
             <localFrame1>
                 <posit float3="1.9853 -0.225807 -1.95102" />
@@ -685,7 +685,7 @@
             <constructor string="ndBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
-            <com float3="-2.70193e-09 -1.46253e-07 -3.80331e-09" />
+            <com float3="-2.10491e-09 -1.46082e-07 -6.51046e-11" />
             <inverseMass float="0.0333333" />
             <inverseDiagonalInertia float3="1.21625 1.21625 1.19654" />
             <principalAxis float3="0 -0 0" />
@@ -715,7 +715,7 @@
             <constructor string="ndJointRoller" />
             <localFrame0>
                 <posit float3="0 0 0" />
-                <angles float3="-3.41943e-12 90 0" />
+                <angles float3="1.40985e-12 90 0" />
             </localFrame0>
             <localFrame1>
                 <posit float3="0.151068 -0.443735 -1.95102" />
@@ -782,7 +782,7 @@
             <constructor string="ndBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
-            <com float3="-2.70193e-09 -1.46253e-07 -3.80331e-09" />
+            <com float3="-2.10491e-09 -1.46082e-07 -6.51046e-11" />
             <inverseMass float="0.0333333" />
             <inverseDiagonalInertia float3="1.21625 1.21625 1.19654" />
             <principalAxis float3="0 -0 0" />
@@ -812,7 +812,7 @@
             <constructor string="ndJointRoller" />
             <localFrame0>
                 <posit float3="0 0 0" />
-                <angles float3="-3.41943e-12 90 0" />
+                <angles float3="1.40985e-12 90 0" />
             </localFrame0>
             <localFrame1>
                 <posit float3="-0.62696 -0.443735 1.94745" />
@@ -879,7 +879,7 @@
             <constructor string="ndBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
-            <com float3="-2.70193e-09 -1.46253e-07 -3.80331e-09" />
+            <com float3="-2.10491e-09 -1.46082e-07 -6.51046e-11" />
             <inverseMass float="0.0333333" />
             <inverseDiagonalInertia float3="1.21625 1.21625 1.19654" />
             <principalAxis float3="0 -0 0" />
@@ -909,7 +909,7 @@
             <constructor string="ndJointRoller" />
             <localFrame0>
                 <posit float3="0 0 0" />
-                <angles float3="-3.41943e-12 90 0" />
+                <angles float3="1.40985e-12 90 0" />
             </localFrame0>
             <localFrame1>
                 <posit float3="0.151068 0.303461 1.94745" />
@@ -976,7 +976,7 @@
             <constructor string="ndBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
-            <com float3="-2.70193e-09 -1.46253e-07 -3.80331e-09" />
+            <com float3="-2.10491e-09 -1.46082e-07 -6.51046e-11" />
             <inverseMass float="0.0333333" />
             <inverseDiagonalInertia float3="1.21625 1.21625 1.19654" />
             <principalAxis float3="0 -0 0" />
@@ -1006,7 +1006,7 @@
             <constructor string="ndJointRoller" />
             <localFrame0>
                 <posit float3="0 0 0" />
-                <angles float3="-3.41943e-12 90 0" />
+                <angles float3="1.40985e-12 90 0" />
             </localFrame0>
             <localFrame1>
                 <posit float3="0.928707 -0.443735 1.94745" />
@@ -1073,7 +1073,7 @@
             <constructor string="ndBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
-            <com float3="5.26192e-06 3.32081e-07 -0.0620499" />
+            <com float3="5.2622e-06 3.28502e-07 -0.0620498" />
             <inverseMass float="0.0333333" />
             <inverseDiagonalInertia float3="0.350203 0.350203 0.362642" />
             <principalAxis float3="0 -0 0" />
@@ -1103,11 +1103,11 @@
             <constructor string="ndJointRoller" />
             <localFrame0>
                 <posit float3="0 0 0" />
-                <angles float3="5.08889e-13 90 0" />
+                <angles float3="2.13733e-12 90 0" />
             </localFrame0>
             <localFrame1>
                 <posit float3="1.9853 -0.225807 1.94745" />
-                <angles float3="179.997 -89.2995 -179.997" />
+                <angles float3="179.997 -89.3 -179.997" />
             </localFrame1>
             <positAxis>
                 <springK float="2000" />
@@ -1170,7 +1170,7 @@
             <constructor string="ndBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
-            <com float3="-2.70193e-09 -1.46253e-07 -3.80331e-09" />
+            <com float3="-2.10491e-09 -1.46082e-07 -6.51046e-11" />
             <inverseMass float="0.0333333" />
             <inverseDiagonalInertia float3="1.21625 1.21625 1.19654" />
             <principalAxis float3="0 -0 0" />
@@ -1200,7 +1200,7 @@
             <constructor string="ndJointRoller" />
             <localFrame0>
                 <posit float3="0 0 0" />
-                <angles float3="-3.41943e-12 90 0" />
+                <angles float3="1.40985e-12 90 0" />
             </localFrame0>
             <localFrame1>
                 <posit float3="0.151068 -0.443735 1.94745" />
@@ -1267,7 +1267,7 @@
             <constructor string="ndBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
-            <com float3="2.90574e-09 9.26262e-08 0.0126848" />
+            <com float3="3.11694e-09 9.53316e-08 0.0126848" />
             <inverseMass float="0.0333333" />
             <inverseDiagonalInertia float3="0.278593 0.278593 0.277613" />
             <principalAxis float3="0 -0 0" />
@@ -1435,7 +1435,7 @@
             <constructor string="ndJointPlane" />
             <localFrame0>
                 <posit float3="0 0 0" />
-                <angles float3="2.72878 -0 90" />
+                <angles float3="2.72877 -0 90" />
             </localFrame0>
             <localFrame1>
                 <posit float3="-0.00744867 0.629861 1.90685" />
@@ -1538,7 +1538,7 @@
             <constructor string="ndBodyDynamic" />
             <veloc float3="0 0 0" />
             <omega float3="0 0 0" />
-            <com float3="7.54979e-07 -5 0" />
+            <com float3="1.56958e-06 -5 0" />
             <inverseMass float="0.0025" />
             <inverseDiagonalInertia float3="0.000575372 0.00142094 0.000666649" />
             <principalAxis float3="0 -0 0" />
@@ -1883,7 +1883,7 @@
                     <massVolumeWeigh float="1" />
                     <collisionInstance>
                         <localMatrix>
-                            <posit float3="1.02864 -0.0248396 -0.182596" />
+                            <posit float3="1.02864 -0.0248397 -0.182596" />
                             <angles float3="-90 90 0" />
                         </localMatrix>
                         <alignmentMatrix>
@@ -1903,11 +1903,11 @@
                     <constructor string="ndJointHinge" />
                     <localFrame0>
                         <posit float3="0 0 0" />
-                        <angles float3="-1.611e-13 -0 90" />
+                        <angles float3="1.03124e-12 -1.62844e-12 90" />
                     </localFrame0>
                     <localFrame1>
                         <posit float3="4.86121 2.77426 0.021839" />
-                        <angles float3="8.65142e-06 -90 0" />
+                        <angles float3="1.79861e-05 -90 0" />
                     </localFrame1>
                     <springK float="0" />
                     <damperC float="0" />
@@ -1969,7 +1969,7 @@
                         <constructor string="ndBodyDynamic" />
                         <veloc float3="0 0 0" />
                         <omega float3="0 0 0" />
-                        <com float3="0.713351 -0.026396 0.571692" />
+                        <com float3="0.71335 -0.0263959 0.571692" />
                         <inverseMass float="0.025" />
                         <inverseDiagonalInertia float3="0.0553917 0.0226054 0.0197718" />
                         <principalAxis float3="0 -0 0" />
@@ -2080,7 +2080,7 @@
                                 </collisionInstance>
                                 <collisionInstance>
                                     <localMatrix>
-                                        <posit float3="0.843432 -0.01533 0.13619" />
+                                        <posit float3="0.843432 -0.0153301 0.13619" />
                                         <angles float3="-90 59.2275 3.13319e-10" />
                                     </localMatrix>
                                     <alignmentMatrix>
@@ -2102,11 +2102,11 @@
                         <constructor string="ndJointHinge" />
                         <localFrame0>
                             <posit float3="0 0 0" />
-                            <angles float3="6.03473e-13 -0 90" />
+                            <angles float3="8.74447e-13 -1.62844e-12 90" />
                         </localFrame0>
                         <localFrame1>
-                            <posit float3="2.3642 4.94719e-05 -0.0483551" />
-                            <angles float3="6.53123e-13 -6.57664e-07 90" />
+                            <posit float3="2.3642 4.94719e-05 -0.0483546" />
+                            <angles float3="1.03124e-12 -6.57665e-07 90" />
                         </localFrame1>
                         <springK float="2000" />
                         <damperC float="50" />
@@ -3113,7 +3113,7 @@
             <constructor string="ndJointPlane" />
             <localFrame0>
                 <posit float3="0 0 0" />
-                <angles float3="2.72878 -0 90" />
+                <angles float3="2.72877 -0 90" />
             </localFrame0>
             <localFrame1>
                 <posit float3="-0.00744925 0.629861 -1.88897" />
@@ -3247,11 +3247,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="-2.22379e-07 -0 90" />
+                    <angles float3="2.62175e-11 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-1.19209e-07 -2.38419e-07 -0.332093" />
-                    <angles float3="12.0414 1.80485e-06 90" />
+                    <posit float3="0 -2.38419e-07 -0.332093" />
+                    <angles float3="12.0414 3.75224e-06 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_00" />
                 <springK float="0" />
@@ -3336,11 +3336,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="2.67935e-07 -0 90" />
+                    <angles float3="2.62171e-11 -0 90" />
                 </localFrame0>
                 <localFrame1>
                     <posit float3="2.38419e-07 -1.19209e-07 -0.322503" />
-                    <angles float3="-0.000101722 -2.60551e-11 90" />
+                    <angles float3="-9.98915e-05 -2.60551e-11 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_01" />
                 <springK float="0" />
@@ -3425,11 +3425,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="2.67935e-07 -0 90" />
+                    <angles float3="2.62171e-11 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-2.38419e-07 1.19209e-07 -0.327675" />
-                    <angles float3="2.67935e-07 1.30276e-11 90" />
+                    <posit float3="0 0 -0.327675" />
+                    <angles float3="2.62171e-11 1.30276e-11 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_02" />
                 <springK float="0" />
@@ -3514,11 +3514,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="2.67935e-07 -0 90" />
+                    <angles float3="2.62171e-11 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-8.34465e-07 0 -0.322501" />
-                    <angles float3="2.67935e-07 -0 90" />
+                    <posit float3="-9.53674e-07 1.19209e-07 -0.322501" />
+                    <angles float3="2.62171e-11 -0 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_03" />
                 <springK float="0" />
@@ -3603,11 +3603,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="2.67935e-07 -0 90" />
+                    <angles float3="2.62171e-11 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="4.76837e-07 -1.19209e-07 -0.315543" />
-                    <angles float3="2.67935e-07 1.30276e-11 90" />
+                    <posit float3="4.76837e-07 0 -0.315543" />
+                    <angles float3="2.62171e-11 1.30276e-11 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_04" />
                 <springK float="0" />
@@ -3692,11 +3692,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="2.67935e-07 -0 90" />
+                    <angles float3="2.62171e-11 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-1.07288e-06 0 -0.322496" />
-                    <angles float3="2.67935e-07 -0 90" />
+                    <posit float3="-1.19209e-06 1.19209e-07 -0.322496" />
+                    <angles float3="2.62171e-11 -0 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_05" />
                 <springK float="0" />
@@ -3781,11 +3781,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="-6.34089e-07 6.51378e-12 90" />
+                    <angles float3="7.55582e-11 1.30276e-11 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="4.76837e-07 1.19209e-07 -0.32768" />
-                    <angles float3="22.2415 1.90796e-05 90" />
+                    <posit float3="4.76837e-07 -2.38419e-07 -0.32768" />
+                    <angles float3="22.2415 2.26129e-05 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_06" />
                 <springK float="0" />
@@ -3870,11 +3870,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="-1.62898e-07 1.62844e-11 90" />
+                    <angles float3="9.52092e-12 8.14222e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-1.43051e-06 0 -0.3225" />
-                    <angles float3="41.7391 3.72763e-05 90" />
+                    <posit float3="-1.43051e-06 2.38419e-07 -0.3225" />
+                    <angles float3="41.7391 4.34907e-05 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_07" />
                 <springK float="0" />
@@ -3959,11 +3959,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="-1.49075e-06 -0 90" />
+                    <angles float3="-6.10729e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="4.76837e-06 1.19209e-07 -0.325957" />
-                    <angles float3="32.7178 6.66991e-07 90.0001" />
+                    <posit float3="4.52995e-06 -1.19209e-07 -0.325957" />
+                    <angles float3="32.7178 5.71239e-06 90.0001" />
                 </localFrame1>
                 <surrogateParent string="leftThread_08" />
                 <springK float="0" />
@@ -4048,11 +4048,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="-3.93943e-06 6.51378e-12 90" />
+                    <angles float3="-5.65228e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="7.15256e-07 -2.38419e-07 -0.322506" />
-                    <angles float3="23.8081 6.5535e-06 90" />
+                    <posit float3="1.19209e-06 -2.38419e-07 -0.322506" />
+                    <angles float3="23.8081 1.03217e-05 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_09" />
                 <springK float="0" />
@@ -4137,11 +4137,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="-1.48809e-06 6.51378e-12 90" />
+                    <angles float3="7.56698e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-5.60284e-06 -1.19209e-07 -0.327676" />
-                    <angles float3="42.6051 1.53518e-05 90" />
+                    <posit float3="-5.72205e-06 1.19209e-07 -0.327676" />
+                    <angles float3="42.6051 2.16709e-05 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_10" />
                 <springK float="0" />
@@ -4226,11 +4226,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-0.00098455 -2.38419e-07 -0.323805" />
-                    <angles float3="7.57597 1.45461e-06 90" />
+                    <posit float3="-0.000984624 -1.19209e-07 -0.323805" />
+                    <angles float3="7.57597 2.6853e-06 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_11" />
                 <springK float="0" />
@@ -4315,11 +4315,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="6.03497e-07 -2.38419e-07 -0.332097" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="6.55651e-07 -2.38419e-07 -0.332096" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_12" />
                 <springK float="0" />
@@ -4404,11 +4404,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-4.03821e-06 0 -0.322966" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="-4.11272e-06 -3.57628e-07 -0.322966" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_13" />
                 <springK float="0" />
@@ -4493,11 +4493,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="4.84288e-07 -2.38419e-07 -0.332098" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="6.55651e-07 -2.38419e-07 -0.332098" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_14" />
                 <springK float="0" />
@@ -4582,11 +4582,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="1.43796e-06 -2.38419e-07 -0.326652" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="1.36346e-06 -2.38419e-07 -0.326652" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_15" />
                 <springK float="0" />
@@ -4671,11 +4671,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="6.03497e-07 -2.38419e-07 -0.332095" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="5.36442e-07 -2.38419e-07 -0.332096" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_16" />
                 <springK float="0" />
@@ -4760,11 +4760,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-3.92646e-06 -3.57628e-07 -0.322971" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="-3.8743e-06 -2.38419e-07 -0.322971" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_17" />
                 <springK float="0" />
@@ -4849,11 +4849,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="4.84288e-07 -2.38419e-07 -0.332096" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="4.17233e-07 -2.38419e-07 -0.332096" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_18" />
                 <springK float="0" />
@@ -4938,11 +4938,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="1.08033e-06 0 -0.319923" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="1.13249e-06 0 -0.319923" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_19" />
                 <springK float="0" />
@@ -5027,11 +5027,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="3.72529e-07 -2.38419e-07 -0.33209" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="2.98023e-07 -2.38419e-07 -0.33209" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_20" />
                 <springK float="0" />
@@ -5116,11 +5116,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-3.80725e-06 -2.38419e-07 -0.322977" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="-3.76254e-06 -2.38419e-07 -0.322976" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_21" />
                 <springK float="0" />
@@ -5205,11 +5205,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="6.03497e-07 -2.38419e-07 -0.332096" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="5.36442e-07 -2.38419e-07 -0.332096" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_22" />
                 <springK float="0" />
@@ -5294,11 +5294,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="5.95509e-06 -6.51378e-12 90" />
+                    <angles float3="6.97578e-11 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="1.19954e-06 -3.57628e-07 -0.32665" />
-                    <angles float3="36.0486 1.19791e-05 90" />
+                    <posit float3="1.37091e-06 -2.38419e-07 -0.32665" />
+                    <angles float3="36.0486 1.74723e-05 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_23" />
                 <springK float="0" />
@@ -5383,11 +5383,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="2.59006e-07 -4.07111e-12 90" />
+                    <angles float3="3.03841e-11 4.88533e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="2.5034e-06 -1.19209e-07 -0.332098" />
-                    <angles float3="42.8286 6.82351e-05 90" />
+                    <posit float3="2.26498e-06 0 -0.332098" />
+                    <angles float3="42.8286 7.45809e-05 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_24" />
                 <springK float="0" />
@@ -5472,11 +5472,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="1.54504e-07 -3.25689e-12 90" />
+                    <angles float3="-1.01083e-10 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-6.91414e-06 0 -0.322969" />
-                    <angles float3="27.2758 3.57937e-06 90" />
+                    <posit float3="-6.91414e-06 -1.19209e-07 -0.322969" />
+                    <angles float3="27.2758 7.85722e-06 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_25" />
                 <springK float="0" />
@@ -5561,11 +5561,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="7.75489e-07 -6.51378e-12 90" />
+                    <angles float3="-1.54299e-10 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="1.66893e-06 0 -0.332095" />
-                    <angles float3="26.7355 3.89204e-06 90" />
+                    <posit float3="2.14577e-06 0 -0.332095" />
+                    <angles float3="26.7355 8.09145e-06 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_26" />
                 <springK float="0" />
@@ -5650,11 +5650,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="-2.02452e-07 1.30276e-11 90" />
+                    <angles float3="-5.94378e-11 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="1.19209e-06 -1.19209e-07 -0.338374" />
-                    <angles float3="36.6599 5.16546e-06 90" />
+                    <posit float3="9.53674e-07 0 -0.338375" />
+                    <angles float3="36.6599 1.07389e-05 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_27" />
                 <springK float="0" />
@@ -5739,11 +5739,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="8.87018e-08 -0 90" />
+                    <angles float3="-5.09903e-11 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="4.76837e-07 0 -0.332092" />
-                    <angles float3="1.94617 2.93823e-07 90" />
+                    <posit float3="3.57628e-07 0 -0.332092" />
+                    <angles float3="1.94617 6.10823e-07 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_28" />
                 <springK float="0" />
@@ -5828,11 +5828,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="9.93385e-08 1.30276e-11 90" />
+                    <angles float3="-5.09904e-11 1.30276e-11 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-8.34465e-07 -1.19209e-07 -0.32298" />
-                    <angles float3="-3.11523e-05 -0 90" />
+                    <posit float3="-8.34465e-07 0 -0.32298" />
+                    <angles float3="-3.07359e-05 -1.30276e-11 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_29" />
                 <springK float="0" />
@@ -5917,11 +5917,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="9.93385e-08 1.30276e-11 90" />
+                    <angles float3="-5.09904e-11 1.30276e-11 90" />
                 </localFrame0>
                 <localFrame1>
                     <posit float3="3.57628e-07 0 -0.332096" />
-                    <angles float3="9.93385e-08 1.30276e-11 90" />
+                    <angles float3="-5.09904e-11 1.30276e-11 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_30" />
                 <springK float="0" />
@@ -6006,11 +6006,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="9.93385e-08 1.30276e-11 90" />
+                    <angles float3="-5.09904e-11 1.30276e-11 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="3.57628e-07 0 -0.330969" />
-                    <angles float3="9.93385e-08 1.30276e-11 90" />
+                    <posit float3="2.38419e-07 1.19209e-07 -0.330969" />
+                    <angles float3="-5.09904e-11 1.30276e-11 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_31" />
                 <springK float="0" />
@@ -6095,11 +6095,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="9.93385e-08 1.30276e-11 90" />
+                    <angles float3="-5.09904e-11 1.30276e-11 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-3.57628e-07 1.19209e-07 -0.332095" />
-                    <angles float3="9.93385e-08 1.30276e-11 90" />
+                    <posit float3="-1.19209e-07 0 -0.332095" />
+                    <angles float3="-5.09904e-11 1.30276e-11 90" />
                 </localFrame1>
                 <surrogateParent string="leftThread_32" />
                 <springK float="0" />
@@ -6196,11 +6196,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="-2.22379e-07 -0 90" />
+                    <angles float3="2.62175e-11 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="8.34465e-07 -2.38419e-07 -0.332099" />
-                    <angles float3="12.0414 1.80485e-06 90" />
+                    <posit float3="7.15256e-07 -2.38419e-07 -0.332099" />
+                    <angles float3="12.0414 3.75224e-06 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_00" />
                 <springK float="0" />
@@ -6285,11 +6285,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="2.67935e-07 -0 90" />
+                    <angles float3="2.62171e-11 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="1.19209e-07 -1.19209e-07 -0.322503" />
-                    <angles float3="-0.000101722 -2.60551e-11 90" />
+                    <posit float3="2.38419e-07 -1.19209e-07 -0.322503" />
+                    <angles float3="-9.98915e-05 -2.60551e-11 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_01" />
                 <springK float="0" />
@@ -6374,11 +6374,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="2.67935e-07 -0 90" />
+                    <angles float3="2.62171e-11 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="0 1.19209e-07 -0.327675" />
-                    <angles float3="2.67935e-07 1.30276e-11 90" />
+                    <posit float3="-2.38419e-07 0 -0.327675" />
+                    <angles float3="2.62171e-11 1.30276e-11 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_02" />
                 <springK float="0" />
@@ -6463,11 +6463,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="2.67935e-07 -0 90" />
+                    <angles float3="2.62171e-11 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-1.43051e-06 0 -0.322499" />
-                    <angles float3="2.67935e-07 -0 90" />
+                    <posit float3="-1.3113e-06 1.19209e-07 -0.322499" />
+                    <angles float3="2.62171e-11 -0 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_03" />
                 <springK float="0" />
@@ -6552,11 +6552,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="2.67935e-07 -0 90" />
+                    <angles float3="2.62171e-11 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="4.76837e-07 -1.19209e-07 -0.315543" />
-                    <angles float3="2.67935e-07 1.30276e-11 90" />
+                    <posit float3="4.76837e-07 0 -0.315543" />
+                    <angles float3="2.62171e-11 1.30276e-11 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_04" />
                 <springK float="0" />
@@ -6641,11 +6641,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="2.67935e-07 -0 90" />
+                    <angles float3="2.62171e-11 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-9.53674e-07 0 -0.322496" />
-                    <angles float3="2.67935e-07 -0 90" />
+                    <posit float3="-9.53674e-07 1.19209e-07 -0.322496" />
+                    <angles float3="2.62171e-11 -0 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_05" />
                 <springK float="0" />
@@ -6730,11 +6730,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="-6.34089e-07 6.51378e-12 90" />
+                    <angles float3="7.55582e-11 1.30276e-11 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="3.57628e-07 1.19209e-07 -0.32768" />
-                    <angles float3="22.2415 1.90796e-05 90" />
+                    <posit float3="4.76837e-07 -2.38419e-07 -0.32768" />
+                    <angles float3="22.2415 2.26129e-05 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_06" />
                 <springK float="0" />
@@ -6819,11 +6819,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="-1.62898e-07 1.62844e-11 90" />
+                    <angles float3="9.52092e-12 8.14222e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-1.19209e-06 0 -0.3225" />
-                    <angles float3="41.7391 3.72763e-05 90" />
+                    <posit float3="-1.43051e-06 2.38419e-07 -0.3225" />
+                    <angles float3="41.7391 4.34907e-05 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_07" />
                 <springK float="0" />
@@ -6908,11 +6908,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="-1.49075e-06 -0 90" />
+                    <angles float3="-6.10729e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="4.52995e-06 1.19209e-07 -0.325957" />
-                    <angles float3="32.7178 6.66991e-07 90.0001" />
+                    <posit float3="4.29153e-06 -1.19209e-07 -0.325957" />
+                    <angles float3="32.7178 5.71239e-06 90.0001" />
                 </localFrame1>
                 <surrogateParent string="rightThread_08" />
                 <springK float="0" />
@@ -6997,11 +6997,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="-3.93943e-06 6.51378e-12 90" />
+                    <angles float3="-5.65228e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
                     <posit float3="7.15256e-07 -2.38419e-07 -0.322505" />
-                    <angles float3="23.8081 6.5535e-06 90" />
+                    <angles float3="23.8081 1.03217e-05 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_09" />
                 <springK float="0" />
@@ -7086,11 +7086,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="-1.48809e-06 6.51378e-12 90" />
+                    <angles float3="7.56698e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-5.72205e-06 -1.19209e-07 -0.327676" />
-                    <angles float3="42.6051 1.53518e-05 90" />
+                    <posit float3="-5.48363e-06 1.19209e-07 -0.327676" />
+                    <angles float3="42.6051 2.16709e-05 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_10" />
                 <springK float="0" />
@@ -7175,11 +7175,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-0.000984564 -2.38419e-07 -0.323805" />
-                    <angles float3="7.57597 1.45461e-06 90" />
+                    <posit float3="-0.000984609 -1.19209e-07 -0.323805" />
+                    <angles float3="7.57597 2.6853e-06 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_11" />
                 <springK float="0" />
@@ -7264,11 +7264,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="6.03497e-07 -2.38419e-07 -0.332097" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="6.55651e-07 -2.38419e-07 -0.332097" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_12" />
                 <springK float="0" />
@@ -7353,11 +7353,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-4.03821e-06 0 -0.322966" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="-4.11272e-06 -3.57628e-07 -0.322966" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_13" />
                 <springK float="0" />
@@ -7442,11 +7442,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="4.84288e-07 -2.38419e-07 -0.332097" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="5.36442e-07 -2.38419e-07 -0.332097" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_14" />
                 <springK float="0" />
@@ -7531,11 +7531,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="1.31875e-06 -2.38419e-07 -0.326651" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="1.36346e-06 -2.38419e-07 -0.326651" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_15" />
                 <springK float="0" />
@@ -7620,11 +7620,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="6.03497e-07 -2.38419e-07 -0.332095" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="5.36442e-07 -2.38419e-07 -0.332096" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_16" />
                 <springK float="0" />
@@ -7709,11 +7709,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-3.92646e-06 -3.57628e-07 -0.322971" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="-3.8743e-06 -2.38419e-07 -0.322971" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_17" />
                 <springK float="0" />
@@ -7798,11 +7798,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="4.84288e-07 -2.38419e-07 -0.332095" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="4.17233e-07 -2.38419e-07 -0.332096" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_18" />
                 <springK float="0" />
@@ -7887,11 +7887,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="9.61125e-07 0 -0.319922" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="1.01328e-06 0 -0.319922" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_19" />
                 <springK float="0" />
@@ -7976,11 +7976,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="6.10948e-07 -2.38419e-07 -0.332094" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="5.36442e-07 -2.38419e-07 -0.332094" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_20" />
                 <springK float="0" />
@@ -8065,11 +8065,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="6.20633e-06 -2.38419e-07 -0.322976" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="6.25104e-06 -2.38419e-07 -0.322976" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_21" />
                 <springK float="0" />
@@ -8154,11 +8154,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="6.03497e-07 -2.38419e-07 -0.332096" />
-                    <angles float3="4.26953e-07 -1.30276e-11 90" />
+                    <posit float3="5.36442e-07 -2.38419e-07 -0.332096" />
+                    <angles float3="6.81035e-11 -6.51378e-12 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_22" />
                 <springK float="0" />
@@ -8243,11 +8243,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="5.95509e-06 -6.51378e-12 90" />
+                    <angles float3="6.97578e-11 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-8.81404e-06 -3.57628e-07 -0.326651" />
-                    <angles float3="36.0486 1.19791e-05 90" />
+                    <posit float3="-8.64267e-06 -2.38419e-07 -0.326651" />
+                    <angles float3="36.0486 1.74723e-05 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_23" />
                 <springK float="0" />
@@ -8332,11 +8332,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="2.59006e-07 -4.07111e-12 90" />
+                    <angles float3="3.03841e-11 4.88533e-12 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-3.93391e-06 -1.19209e-07 -0.33209" />
-                    <angles float3="42.8286 6.82351e-05 90" />
+                    <posit float3="-4.05312e-06 0 -0.33209" />
+                    <angles float3="42.8286 7.45809e-05 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_24" />
                 <springK float="0" />
@@ -8421,11 +8421,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="1.54504e-07 -3.25689e-12 90" />
+                    <angles float3="-1.01083e-10 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="3.33786e-06 0 -0.322968" />
-                    <angles float3="27.2758 3.57937e-06 90" />
+                    <posit float3="3.33786e-06 -1.19209e-07 -0.322968" />
+                    <angles float3="27.2758 7.85722e-06 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_25" />
                 <springK float="0" />
@@ -8510,11 +8510,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="7.75489e-07 -6.51378e-12 90" />
+                    <angles float3="-1.54299e-10 -0 90" />
                 </localFrame0>
                 <localFrame1>
                     <posit float3="1.66893e-06 0 -0.332095" />
-                    <angles float3="26.7355 3.89204e-06 90" />
+                    <angles float3="26.7355 8.09145e-06 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_26" />
                 <springK float="0" />
@@ -8599,11 +8599,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="-2.02452e-07 1.30276e-11 90" />
+                    <angles float3="-5.94378e-11 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="1.43051e-06 -1.19209e-07 -0.338374" />
-                    <angles float3="36.6599 5.16546e-06 90" />
+                    <posit float3="1.19209e-06 0 -0.338374" />
+                    <angles float3="36.6599 1.07389e-05 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_27" />
                 <springK float="0" />
@@ -8688,11 +8688,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="8.87018e-08 -0 90" />
+                    <angles float3="-5.09903e-11 -0 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-8.34465e-07 0 -0.332102" />
-                    <angles float3="1.94617 2.93823e-07 90" />
+                    <posit float3="-7.15256e-07 0 -0.332102" />
+                    <angles float3="1.94617 6.10823e-07 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_28" />
                 <springK float="0" />
@@ -8777,11 +8777,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="9.93385e-08 1.30276e-11 90" />
+                    <angles float3="-5.09904e-11 1.30276e-11 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="1.19209e-07 -1.19209e-07 -0.32297" />
-                    <angles float3="-3.11523e-05 -0 90" />
+                    <posit float3="0 0 -0.32297" />
+                    <angles float3="-3.07359e-05 -1.30276e-11 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_29" />
                 <springK float="0" />
@@ -8866,11 +8866,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="9.93385e-08 1.30276e-11 90" />
+                    <angles float3="-5.09904e-11 1.30276e-11 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="2.38419e-07 0 -0.332096" />
-                    <angles float3="9.93385e-08 1.30276e-11 90" />
+                    <posit float3="3.57628e-07 0 -0.332096" />
+                    <angles float3="-5.09904e-11 1.30276e-11 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_30" />
                 <springK float="0" />
@@ -8955,11 +8955,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="9.93385e-08 1.30276e-11 90" />
+                    <angles float3="-5.09904e-11 1.30276e-11 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="0 0 -0.330971" />
-                    <angles float3="9.93385e-08 1.30276e-11 90" />
+                    <posit float3="2.38419e-07 1.19209e-07 -0.330971" />
+                    <angles float3="-5.09904e-11 1.30276e-11 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_31" />
                 <springK float="0" />
@@ -9044,11 +9044,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="0 0 0" />
-                    <angles float3="9.93385e-08 1.30276e-11 90" />
+                    <angles float3="-5.09904e-11 1.30276e-11 90" />
                 </localFrame0>
                 <localFrame1>
-                    <posit float3="-2.38419e-07 1.19209e-07 -0.332095" />
-                    <angles float3="9.93385e-08 1.30276e-11 90" />
+                    <posit float3="-5.96046e-07 0 -0.332095" />
+                    <angles float3="-5.09904e-11 1.30276e-11 90" />
                 </localFrame1>
                 <surrogateParent string="rightThread_32" />
                 <springK float="0" />
@@ -9113,20 +9113,20 @@
                 <angles float3="90 -0 90" />
             </localFrame1>
             <axis0>
-                <springK float="0" />
-                <damperC float="0" />
+                <springK float="1500" />
+                <damperC float="10" />
                 <limitState int32="0" />
                 <minLimit float="-1e+10" />
                 <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0" />
+                <springDamperRegularizer float="0.1" />
             </axis0>
             <axis1>
-                <springK float="0" />
-                <damperC float="0" />
+                <springK float="1500" />
+                <damperC float="10" />
                 <limitState int32="0" />
                 <minLimit float="-1e+10" />
                 <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0" />
+                <springDamperRegularizer float="0.1" />
             </axis1>
         </joint>
     </ndMesh>
@@ -9147,14 +9147,14 @@
             <joint>
                 <constructor string="ndIkSwivelPositionEffector" />
                 <localFrame0>
-                    <posit float3="2.3642 4.94719e-05 -0.0483551" />
+                    <posit float3="2.3642 4.94719e-05 -0.0483546" />
                     <angles float3="-90 90 0" />
                 </localFrame0>
                 <localFrame1>
                     <posit float3="0.144701 1.15524 0.00884643" />
                     <angles float3="0 -0 0" />
                 </localFrame1>
-                <restPosition float3="5.98817 1.03331 0.278282" />
+                <restPosition float3="5.98816 1.03331 0.278282" />
                 <angularSpring float="1000" />
                 <angularDamper float="50" />
                 <angularMaxTorque float="1e+15" />
@@ -9180,7 +9180,7 @@
                 </localFrame0>
                 <localFrame1>
                     <posit float3="0 0 0" />
-                    <angles float3="1.93788e-11 90 0" />
+                    <angles float3="2.42081e-11 90 0" />
                 </localFrame1>
                 <ratio float="0.874879" />
             </joint>
@@ -9196,7 +9196,7 @@
                 </localFrame0>
                 <localFrame1>
                     <posit float3="0 0 0" />
-                    <angles float3="1.93788e-11 90 0" />
+                    <angles float3="2.42081e-11 90 0" />
                 </localFrame1>
                 <ratio float="0.481398" />
             </joint>
@@ -9212,7 +9212,7 @@
                 </localFrame0>
                 <localFrame1>
                     <posit float3="0 0 0" />
-                    <angles float3="1.93788e-11 90 0" />
+                    <angles float3="2.42081e-11 90 0" />
                 </localFrame1>
                 <ratio float="0.481398" />
             </joint>
@@ -9228,7 +9228,7 @@
                 </localFrame0>
                 <localFrame1>
                     <posit float3="0 0 0" />
-                    <angles float3="1.93788e-11 90 0" />
+                    <angles float3="2.42081e-11 90 0" />
                 </localFrame1>
                 <ratio float="0.481398" />
             </joint>
@@ -9255,12 +9255,12 @@
             <joint>
                 <constructor string="ndJointHinge" />
                 <localFrame0>
-                    <posit float3="-4.76837e-07 2.38419e-07 -0.322973" />
-                    <angles float3="5.77662 9.03487e-07 90" />
+                    <posit float3="-5.96046e-07 2.38419e-07 -0.322973" />
+                    <angles float3="5.77662 1.84302e-06 90" />
                 </localFrame0>
                 <localFrame1>
                     <posit float3="0 0 0" />
-                    <angles float3="-4.62049e-08 -0 90" />
+                    <angles float3="-2.61382e-11 1.30276e-11 90" />
                 </localFrame1>
                 <springK float="0" />
                 <damperC float="5" />
@@ -9281,7 +9281,7 @@
                 </localFrame0>
                 <localFrame1>
                     <posit float3="0 0 0" />
-                    <angles float3="-179.997 -89.2995 -0.00294434" />
+                    <angles float3="-179.997 -89.3 -0.00294438" />
                 </localFrame1>
                 <ratio float="0.874879" />
             </joint>
@@ -9357,11 +9357,11 @@
                 <constructor string="ndJointHinge" />
                 <localFrame0>
                     <posit float3="4.76837e-07 2.38419e-07 -0.322967" />
-                    <angles float3="5.77662 9.03487e-07 90" />
+                    <angles float3="5.77662 1.84302e-06 90" />
                 </localFrame0>
                 <localFrame1>
                     <posit float3="0 0 0" />
-                    <angles float3="-4.62049e-08 -0 90" />
+                    <angles float3="-2.61382e-11 1.30276e-11 90" />
                 </localFrame1>
                 <springK float="0" />
                 <damperC float="5" />
