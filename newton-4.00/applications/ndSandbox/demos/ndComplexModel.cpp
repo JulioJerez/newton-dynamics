@@ -59,6 +59,8 @@ namespace ndExcavator
 			,m_armAngle0(ndFloat32(0.0f))
 			,m_armPosit_x(ndFloat32(0.0f))
 			,m_armPosit_y(ndFloat32(0.0f))
+			,m_engineOmega(ndFloat32(0.0f))
+			,m_engineTurnRateOmega(ndFloat32(0.0f))
 			,m_backTrackingArm(8)
 		{
 			SetModel(model);
@@ -94,19 +96,28 @@ namespace ndExcavator
 			return articulation->PairCollide(body0, body1);
 		}
 
-		// reset the motor matrix to align with the chassis matrix
-		void SetEngineMatrix()
+		void UpdateEngine(ndFloat32 timestep)
 		{
+			// reset the motor matrix to align with the chassis matrix
 			ndJointDoubleHinge* const engine = (ndJointDoubleHinge*)*m_engineNode->m_joint;
 			const ndMatrix matrix(engine->GetLocalMatrix0().OrthoInverse() * engine->GetLocalMatrix1() * engine->GetBody1()->GetMatrix());
-			engine->GetBody0()->SetMatrixNoSleep(matrix);
+			//engine->GetBody0()->SetMatrixNoSleep(matrix);
+
+			// integrate turn rate angle
+			ndFloat32 turnAngle = engine->GetAngle0();
+			engine->SetTargetAngle0(turnAngle + m_engineTurnRateOmega * timestep);
+
+			// integrate the joints angle;
+			ndFloat32 fowardAngle = engine->GetAngle1();
+			ndTrace(("%f %f\n", fowardAngle, m_engineOmega * timestep));
+			engine->SetTargetAngle1(fowardAngle + m_engineOmega * timestep);
 		}
 
 		// update the model physics every sub step.
 		void Update(ndFloat32 timestep) override
 		{
 			ndModelNotify::Update(timestep);
-			SetEngineMatrix();
+			UpdateEngine(timestep);
 		}
 
 		void ApplyBucketControl()
@@ -217,11 +228,51 @@ namespace ndExcavator
 			}
 		}
 
+		void ApplyEngineInputs()
+		{
+			ndBodyDynamic* const engine = m_engineNode->m_body->GetAsBodyDynamic();
+
+			ndRender* const renderer = *m_scene->GetRenderer();
+			ndSharedPtr<ndRenderSceneNode> camera(renderer->GetCamera());
+			if (camera == m_cameraNode)
+			{
+				ndFloat32 turnSign = ndFloat32(1.0f);
+				m_engineOmega = ndFloat32(0.0f);
+				if (m_scene->GetKeyState(ImGuiKey_W))
+				{
+					turnSign = ndFloat32(0.75f);
+					m_engineOmega = -ND_EXCAVATOR_ENGINE_OMEGA;
+					engine->SetSleepState(false);
+				}
+				else if (m_scene->GetKeyState(ImGuiKey_S))
+				{
+					turnSign = ndFloat32(-0.75f);
+					m_engineOmega = ND_EXCAVATOR_ENGINE_OMEGA;
+					engine->SetSleepState(false);
+				}
+
+				m_engineTurnRateOmega = ndFloat32(0.0f);
+				if (m_scene->GetKeyState(ImGuiKey_A))
+				{
+					m_engineTurnRateOmega = -ND_EXCAVATOR_ENGINE_OMEGA * turnSign;
+					engine->SetSleepState(false);
+				}
+				else if (m_scene->GetKeyState(ImGuiKey_D))
+				{
+					m_engineTurnRateOmega = ND_EXCAVATOR_ENGINE_OMEGA * turnSign;
+					engine->SetSleepState(false);
+				}
+			}
+		}
+
 		// apply model control at the step rate 
 		void PostTransformUpdate(ndFloat32) override
 		{
 			// apply aggressive sleep is the model is moving too slow
 			GetModel()->SetSleep(ndFloat32(0.71f), ndFloat32(0.71f), ndFloat32(1.5f), ndFloat32(2.25f));
+
+			// apply engine inputs
+			ApplyEngineInputs();
 
 			// apply the bucke controll
 			ApplyBucketControl();
@@ -249,6 +300,9 @@ namespace ndExcavator
 		ndFloat32 m_armAngle0;
 		ndFloat32 m_armPosit_x;
 		ndFloat32 m_armPosit_y;
+		ndFloat32 m_engineOmega;
+		ndFloat32 m_engineTurnRateOmega;
+
 		ndFixSizeArray<ndVector, 8> m_backTrackingArm;
 	};
 

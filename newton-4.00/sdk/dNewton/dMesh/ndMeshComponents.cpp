@@ -265,6 +265,25 @@ ndMeshJointDoubleHinge::ndMeshJointDoubleHinge(const ndMesh* const owner)
 ndMeshJointDoubleHinge::ndMeshJointDoubleHinge(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
+	const ndJointDoubleHinge* const subJoint = (ndJointDoubleHinge*)joint;
+
+	subJoint->GetSpringDamper0(m_axis0.m_springDamperRegularizer, m_axis0.m_springK, m_axis0.m_damperC);
+	subJoint->GetLimits0(m_axis0.m_minLimit, m_axis0.m_maxLimit);
+	m_axis0.m_limitState = subJoint->GetLimitState0();
+	if (m_axis0.m_limitState)
+	{
+		m_axis0.m_minLimit *= ndRadToDegree;
+		m_axis0.m_maxLimit *= ndRadToDegree;
+	}
+
+	subJoint->GetSpringDamper1(m_axis1.m_springDamperRegularizer, m_axis1.m_springK, m_axis1.m_damperC);
+	subJoint->GetLimits1(m_axis1.m_minLimit, m_axis1.m_maxLimit);
+	m_axis1.m_limitState = subJoint->GetLimitState1();
+	if (m_axis1.m_limitState)
+	{
+		m_axis1.m_minLimit *= ndRadToDegree;
+		m_axis1.m_maxLimit *= ndRadToDegree;
+	}
 }
 
 void ndMeshJointDoubleHinge::SerializeToXml(nd::TiXmlElement* const parent) const
