@@ -1514,7 +1514,7 @@ void ndUrdfMeshLoader::ImportVisual(const nd::TiXmlNode* const linkNode, ndMesh*
 		// this should be optional, but so far all example are faceted.
 		// maybe later I can just add that functionality to the editor.
 		meshEffect->CalculateNormals(ndFloat32(30.0f) * ndDegreeToRad);
-		meshNode->SetMesh(meshEffect);
+		meshNode->SetGeometry(meshEffect);
 		meshNode->SetGeometryMatrix(ndGetIdentityMatrix());
 	}
 }

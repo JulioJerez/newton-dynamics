@@ -113,7 +113,7 @@ bool ndAnimationMeshLoader::ImportFbx(const ndString& fbxPathMeshName)
 				snprintf(collisionshapeName, 255, "collision%d-convexhull", index++);
 				ndSharedPtr<ndMeshEffect> hullMesh(new ndMeshEffect(*subShape));
 
-				convexMesh->SetMesh(hullMesh);
+				convexMesh->SetGeometry(hullMesh);
 				convexMesh->SetMatrix(subShape->GetLocalMatrix());
 				convexMesh->SetNodeType(ndMesh::m_collisionShape);
 				convexMesh->SetName(collisionshapeName);

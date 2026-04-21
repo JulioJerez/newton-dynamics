@@ -127,12 +127,16 @@ class ndAssetEditor : public ndClassAlloc
 	void ShowMainToolbar();
 	void ShowOutlierPanel();
 	void ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root);
+	void ShowOutlierExplorerCloseLoop(const ndSharedPtr<ndMesh>& closeLoop);
+	void ShowOutlierExplorerCollidindPairs(const ndSharedPtr<ndMesh>& closeLoop);
 
 	void ShowPropertiesPanel();
 	void ShowPropertiesMeshInfo();
 	void ShowPropertiesJointInfo();
 	void ShowPropertiesCollisionInfo();
 	void ShowPropertiesRigidBodyInfo();
+
+	void ShowPropertiesJointsLoopInfo();
 		
 	ndSharedPtr<ndMesh> m_mesh;
 	ndSharedPtr<ndRender> m_renderer;
@@ -144,13 +148,16 @@ class ndAssetEditor : public ndClassAlloc
 	ndSharedPtr<ndRenderTexture> m_environmentTexture;
 	ndSharedPtr<ndRenderPass> m_debugDisplayRenderPass;
 
+	ndSharedPtr<ndRenderSceneNode> m_defaultCamera;
+
 	ndSharedPtr<ndMesh> m_newMesh;
 	ndSharedPtr<ndRenderSceneNode> m_newSceneMesh;
 
 	ndSharedPtr<ndAssetTool> m_currentTool;
 	ndSharedPtr<ndMesh> m_currentSelection;
-	ndSharedPtr<ndRenderSceneNode> m_defaultCamera;
-	ndFixSizeArray<ndWeakPtr<ndMesh>, 32> m_secundarySelection;
+	ndSharedPtr<ndMeshLoopJoint> m_currentLoopJointSelection;
+	ndSharedPtr<ndMeshCollidingPair> m_currentCollingPairSelection;
+	//ndFixSizeArray<ndWeakPtr<ndMesh>, 32> m_secundarySelection;
 
 	ndString m_currentPath;
 	ndUndoRedo m_undoRedo;
@@ -164,10 +171,10 @@ class ndAssetEditor : public ndClassAlloc
 	bool m_showParentRelativeTransform;
 
 	bool m_toolActive;
-	bool m_addCollidingBody;
+	//bool m_addCollidingBody;
 	//bool m_removeCollidingBody;
-	ndInt32 m_addCollingPairSelection;
-	ndInt32 m_addCollingPairCandidateSelection;
+	//ndInt32 m_addCollingPairSelection;
+	//ndInt32 m_addCollingPairCandidateSelection;
 	
 	ndInt32 m_renderMode;
 	ndReal m_gizmoScale;

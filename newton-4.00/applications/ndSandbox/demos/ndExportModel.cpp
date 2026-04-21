@@ -1233,20 +1233,6 @@ namespace ndExcavator
             if (node->GetName().Find(sideName) != -1)
             {
                 linkArray.PushBack(node);
-                ndInt32 index = 0;
-                for (ndInt32 i = linkArray.GetCount() - 2; i >= 0; --i)
-                {
-                    if (linkArray[i]->GetName() > node->GetName())
-                    {
-                        linkArray[i + 1] = linkArray[i];
-                        index = i;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                linkArray[index] = node;
             }
 
             for (ndList<ndSharedPtr<ndMesh>>::ndNode* child = node->GetChildren().GetFirst(); child; child = child->GetNext())
@@ -1254,6 +1240,30 @@ namespace ndExcavator
                 stack.PushBack(*child->GetInfo());
             }
         }
+
+        class ndCompareKey
+        {
+            public:
+            ndCompareKey(void*)
+            {
+            }
+
+            ndInt32 Compare(const ndMesh* const elementA, const ndMesh* const elementB) const
+            {
+                const ndString& nameA = elementA->GetName();
+                const ndString& nameB = elementB->GetName();
+                if (nameA > nameB)
+                {
+                    return 1;
+                }
+                if (nameA < nameB)
+                {
+                    return -1;
+                }
+                return 0;
+            }
+        };
+        ndSort<ndMesh*, ndCompareKey>(&linkArray[0], linkArray.GetCount(), nullptr);
 
         // make the collision shape. 
         ndSharedPtr<ndShapeInstance> threadCollision(linkArray[0]->CreateCollisionFromChildren());
@@ -1352,7 +1362,7 @@ void ndExportModel(ndDemoEntityManager* const scene)
     origin.m_posit.m_x = 0.0f;
     origin.m_posit.m_y = 3.0f;
     origin.m_posit.m_z = 2.0f;
-    //add simnple mechanical model
+    //add simple mechanical model
     ndBoxTricycle::BoxTricycle(scene, origin, 100.0f, 0.75f);
 
     // add complex mechanical model

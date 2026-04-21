@@ -48,6 +48,7 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	void RenderSelectedNode();
 	void RenderHiddenSurface();
 	void RenderCollisionShape();
+	void RenderCloseLoopJoints();
 	virtual void RenderScene() override;
 	
 	//ndDebugMesh* CreateRenderPrimitive(const ndShapeInstance& shapeInstance) const;

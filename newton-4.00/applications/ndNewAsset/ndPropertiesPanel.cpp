@@ -17,19 +17,27 @@ void ndAssetEditor::ShowPropertiesPanel()
 {
 	ImGui::Begin("Properties Panel");
 
-	if (*m_currentSelection)
+	if (m_currentSelection)
 	{
 		ShowPropertiesMeshInfo();
-		if (*m_currentSelection->GetRigidBody())
+		if (m_currentSelection->GetRigidBody())
 		{
 			ShowPropertiesRigidBodyInfo();
 			ShowPropertiesCollisionInfo();
 
-			if (*m_currentSelection->GetJoint())
+			if (m_currentSelection->GetJoint())
 			{
 				ShowPropertiesJointInfo();
 			}
 		}
+	}
+	else if (m_currentLoopJointSelection)
+	{
+		ShowPropertiesJointsLoopInfo();
+	}
+	else if (m_currentCollingPairSelection)
+	{
+
 	}
 
 	ImGui::End();

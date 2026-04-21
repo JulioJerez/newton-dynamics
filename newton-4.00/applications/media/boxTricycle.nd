@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <ndMesh>
-    <name string="unnamed_node_0" />
+    <name string="box" />
     <matrix>
         <posit float3="0 0 0" />
         <angles float3="0 -0 0" />
@@ -48,6 +48,7 @@
         <principalAxis float3="0 -0 0" />
         <maxAngleStep float="90" />
         <maxLinearStep float="1" />
+        <massVolumeWeigh float="1" />
         <collisionInstance>
             <localMatrix>
                 <posit float3="0 0 0" />
@@ -69,7 +70,7 @@
         <intrinsicAngularDamping float3="0 0 0" />
     </rigidbody>
     <ndMesh>
-        <name string="unnamed_node_1" />
+        <name string="frontWheel" />
         <matrix>
             <posit float3="0.75 -0.1875 0" />
             <angles float3="-0 90 0" />
@@ -117,6 +118,7 @@
             <principalAxis float3="0 -0 0" />
             <maxAngleStep float="90" />
             <maxLinearStep float="1" />
+            <massVolumeWeigh float="1" />
             <collisionInstance>
                 <localMatrix>
                     <posit float3="0 0 0" />
@@ -146,14 +148,10 @@
                 <posit float3="0.75 -0.1875 0" />
                 <angles float3="-0 90 0" />
             </localFrame1>
-            <baseFrame>
-                <posit float3="0.75 -0.1875 0" />
-                <angles float3="-0 90 0" />
-            </baseFrame>
             <springK float="2000" />
             <damperC float="50" />
-            <upperStop float="0.2" />
-            <lowerStop float="-0.1" />
+            <upperStop float="-0.1" />
+            <lowerStop float="0.2" />
             <brakeTorque float="0" />
             <handBrakeTorque float="0" />
             <steeringAngle float="0" />
@@ -161,7 +159,7 @@
         </joint>
     </ndMesh>
     <ndMesh>
-        <name string="unnamed_node_2" />
+        <name string="rightWheel" />
         <matrix>
             <posit float3="-0.675 -0.1875 0.6" />
             <angles float3="-0 90 0" />
@@ -209,6 +207,7 @@
             <principalAxis float3="0 -0 0" />
             <maxAngleStep float="90" />
             <maxLinearStep float="1" />
+            <massVolumeWeigh float="1" />
             <collisionInstance>
                 <localMatrix>
                     <posit float3="0 0 0" />
@@ -241,13 +240,13 @@
             <springK float="0" />
             <damperC float="0" />
             <limitState int32="0" />
-            <minLimit float="-5.72958e+11" />
-            <maxLimit float="5.72958e+11" />
+            <minLimit float="-1e+10" />
+            <maxLimit float="1e+10" />
             <springDamperRegularizer float="0.1" />
         </joint>
     </ndMesh>
     <ndMesh>
-        <name string="unnamed_node_3" />
+        <name string="leftWheel" />
         <matrix>
             <posit float3="-0.675 -0.1875 -0.6" />
             <angles float3="-0 90 0" />
@@ -295,6 +294,7 @@
             <principalAxis float3="0 -0 0" />
             <maxAngleStep float="90" />
             <maxLinearStep float="1" />
+            <massVolumeWeigh float="1" />
             <collisionInstance>
                 <localMatrix>
                     <posit float3="0 0 0" />
@@ -327,8 +327,8 @@
             <springK float="0" />
             <damperC float="0" />
             <limitState int32="0" />
-            <minLimit float="-5.72958e+11" />
-            <maxLimit float="5.72958e+11" />
+            <minLimit float="-1e+10" />
+            <maxLimit float="1e+10" />
             <springDamperRegularizer float="0.1" />
         </joint>
     </ndMesh>

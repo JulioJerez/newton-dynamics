@@ -134,7 +134,7 @@ void ndDebugDisplayRenderPass::ResetScene()
 	auto BuildDebugMesh = [this](ndMesh* const node)
 	{
 		ndSharedPtr<ndMeshBody> body(node->GetRigidBody());
-		ndSharedPtr<ndMeshEffect>& geometry = node->GetMesh();
+		ndSharedPtr<ndMeshEffect>& geometry = node->GetGeometry();
 
 		if (*geometry || (*body))
 		{
@@ -242,16 +242,36 @@ void ndDebugDisplayRenderPass::RenderSelectedNode()
 					material->m_diffuse = m_selectedColor;
 					primitive->Render(m_owner, gemetryMatrix, m_debugDisplayWireFrameMesh);
 				}
+			}
+		}
+	}
+}
 
-				for (ndInt32 i = 0; i < m_manager->m_secundarySelection.GetCount(); ++i)
+void ndDebugDisplayRenderPass::RenderCloseLoopJoints()
+{
+	for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
+	{
+		const ndDebugMesh& debugMesh = ptr->GetInfo();
+		if (m_manager->m_showSelectedNode)
+		{
+			const ndRenderPrimitive* const primitive = *debugMesh.m_wireFrameMesh;
+			if (primitive)
+			{
+				const ndMatrix pivotMatrix(debugMesh.m_parent->m_globalMatrix);
+				const ndMatrix gemetryMatrix(debugMesh.m_parent->m_primitiveMatrix * pivotMatrix);
+
+				ndRenderPrimitiveSegment& segment = primitive->m_segments.GetFirst()->GetInfo();
+				ndRenderPrimitiveMaterial* const material = &segment.m_material;
+
+				if (m_manager->m_currentLoopJointSelection->m_childNode->GetName() == debugMesh.m_parent->m_name)
 				{
-					if (debugMesh.m_parent->m_name == m_manager->m_secundarySelection[i]->GetName())
-					{
-
-						material->m_diffuse = m_secundarySelectedColor;
-						primitive->Render(m_owner, gemetryMatrix, m_debugDisplayWireFrameMesh);
-						break;
-					}
+					material->m_diffuse = m_secundarySelectedColor;
+					primitive->Render(m_owner, gemetryMatrix, m_debugDisplayWireFrameMesh);
+				}
+				if (m_manager->m_currentLoopJointSelection->m_parentNode->GetName() == debugMesh.m_parent->m_name)
+				{
+					material->m_diffuse = m_secundarySelectedColor;
+					primitive->Render(m_owner, gemetryMatrix, m_debugDisplayWireFrameMesh);
 				}
 			}
 		}
@@ -373,5 +393,9 @@ void ndDebugDisplayRenderPass::RenderScene()
 
 		RenderSelectedNode();
 		RenderOptions();
+	}
+	else if (m_manager->m_currentLoopJointSelection)
+	{
+		RenderCloseLoopJoints();
 	}
 }

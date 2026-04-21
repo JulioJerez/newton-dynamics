@@ -947,6 +947,7 @@ void ndModelArticulation::Serialize(ndMesh* const meshRootNode) const
 	{
 		if (IsCloseLoop(node))
 		{
+			ndCloseLoopConstraints* const loopContainer = meshRootNode->GetLoopJoints();
 			ndNode* const node0 = FindByBody(node->m_joint->GetBody0());
 			ndNode* const node1 = FindByBody(node->m_joint->GetBody1());
 			ndAssert(node0);
@@ -956,8 +957,9 @@ void ndModelArticulation::Serialize(ndMesh* const meshRootNode) const
 			ndAssert(meshNode0);
 			ndAssert(meshNode1);
 			ndSharedPtr<ndMeshJoint> joint(node->m_joint->GetMeshJoint(meshNode0));
-			ndSharedPtr<ndMeshLoopJoint> loopJoint(new ndMeshLoopJoint(joint, meshNode0, meshNode1));
-			meshNode1->AddLoopJoint(loopJoint);
+			ndSharedPtr<ndMeshLoopJoint> loopJoint(new ndMeshLoopJoint(loopContainer, joint, meshNode0, meshNode1));
+			loopJoint->m_name = node->m_name;
+			loopContainer->AddLoopJoint(loopJoint);
 		}
 		else
 		{
