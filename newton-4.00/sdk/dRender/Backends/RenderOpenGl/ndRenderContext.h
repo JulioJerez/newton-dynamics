@@ -72,6 +72,8 @@ class ndRenderContext: public ndClassAlloc
 
 	void EndFrame();
 	void BeginFrame();
+
+	void ClearZBuffer();
 	void ClearFrameBuffer(const ndVector& color);
 	void SetViewport(ndInt32 x, ndInt32 yt, ndInt32 width, ndInt32 height);
 

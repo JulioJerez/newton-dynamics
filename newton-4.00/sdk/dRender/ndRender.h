@@ -75,6 +75,7 @@ class ndRender: public ndClassAlloc
 	void EndRender();
 	void Render();
 
+	void ClearZBuffer();
 	void ClearFrameBuffer(const ndVector& color);
 	void AddRenderPass(const ndSharedPtr<ndRenderPass>& renderPass);
 
@@ -85,10 +86,12 @@ class ndRender: public ndClassAlloc
 	void SetSunLight(const ndVector& direction, const ndVector& intensity);
 
 	ndSharedPtr<ndUserCallback>& GetOwner();
+	ndSharedPtr<ndRenderContext>& GetContext();
 	ndSharedPtr<ndRenderSceneNode>& GetCamera();
-	ndSharedPtr<ndRenderSceneNode> GetCamera() const;
 	ndList<ndSharedPtr<ndRenderSceneNode>>& GetScene();
 	ndSharedPtr<ndRenderTextureCache>& GetTextureCache();
+	const ndSharedPtr<ndRenderContext>& GetContext() const;
+	const ndSharedPtr<ndRenderSceneNode>& GetCamera() const;
 
 	void InterpolateTransforms(ndFloat32 param);
 

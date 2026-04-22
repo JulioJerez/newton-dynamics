@@ -19,76 +19,13 @@ ndDebugDisplayRenderPass::ndDebugDisplayRenderPass(ndAssetEditor* const owner)
 	,m_meshColor(ndFloat32(1.0f))
 	,m_shapeColor(ndFloat32(1.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(1.0f))
 	,m_selectedColor(ndFloat32(0.42f), ndFloat32(0.73f), ndFloat32(0.98f), ndFloat32(1.0f))
-	,m_secundarySelectedColor(ndFloat32(1.0f), ndFloat32(0.55f), ndFloat32(0.0f), ndFloat32(1.0f))
+	,m_loopJointColor(ndFloat32(1.0f), ndFloat32(0.55f), ndFloat32(0.0f), ndFloat32(1.0f))
 	,m_manager(owner)
 {
 }
 
 ndDebugDisplayRenderPass::~ndDebugDisplayRenderPass()
 {
-}
-
-////ndDebugDisplayRenderPass::ndDebugMesh* ndDebugDisplayRenderPass::CreateRenderPrimitive(const ndShapeInstance& shapeInstance) const
-//ndDebugDisplayRenderPass::ndDebugMesh* ndDebugDisplayRenderPass::CreateRenderPrimitive(const ndShapeInstance&) const
-//{
-//	ndAssert(0);
-//	return nullptr;
-//	//ndSharedPtr<ndShapeInstance>shape(new ndShapeInstance(shapeInstance));
-//	//shape->SetLocalMatrix(ndGetIdentityMatrix());
-//	//
-//	//ndRender* const render = m_owner;
-//	//ndDebugMesh* const debugMesh = new ndDebugMesh;
-//	//
-//	//ndRenderPrimitive::ndDescriptor descriptor(render);
-//	//descriptor.m_collision = shape;
-//	//
-//	//descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugFlatShaded;
-//	//debugMesh->m_flatShadedMesh = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
-//	//
-//	//descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugWireFrame;
-//	//debugMesh->m_wireFrameMesh = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
-//	//
-//	//descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugHiddenLines;
-//	//debugMesh->m_zBufferMesh = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
-//	//
-//	//return debugMesh;
-//}
-
-void ndDebugDisplayRenderPass::RenderCollisionShape()
-{
-	if (m_manager->m_currentSelection->GetRigidBody())
-	{
-		const ndString& seletecName = m_manager->m_currentSelection->GetName();
-		for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
-		{
-			const ndDebugMesh& debugMesh = ptr->GetInfo();
-			if ((debugMesh.m_parent->m_name == seletecName))
-			{
-				ndSharedPtr<ndMeshBody> body(m_manager->m_currentSelection->GetRigidBody());
-				const ndMeshBodyKinematic* const kinBody = (ndMeshBodyKinematic*)*body;
-				const ndVector scale(kinBody->m_shapeInstance.m_scale);
-				ndMatrix scaleMatrix(ndGetIdentityMatrix());
-				scaleMatrix[0][0] = scale[0];
-				scaleMatrix[1][1] = scale[1];
-				scaleMatrix[2][2] = scale[2];
-				const ndMatrix pivotMatrix(scaleMatrix * kinBody->m_shapeInstance.m_localMatrix * debugMesh.m_parent->m_globalMatrix);
-
-				if (m_manager->m_showSelectedNode)
-				{
-					const ndRenderPrimitive* const primitive = *debugMesh.m_zBufferShape;
-					if (primitive)
-					{
-						primitive->Render(m_owner, pivotMatrix, m_debugDisplaySetZbuffer);
-
-						ndRenderPrimitiveSegment& segment = debugMesh.m_wireFrameShape->m_segments.GetFirst()->GetInfo();
-						ndRenderPrimitiveMaterial* const material = &segment.m_material;
-						material->m_diffuse = m_shapeColor;
-						debugMesh.m_wireFrameShape->Render(m_owner, pivotMatrix, m_debugDisplayWireFrameMesh);
-					}
-				}
-			}
-		}
-	}
 }
 
 void ndDebugDisplayRenderPass::RebuildDebugCollision()
@@ -250,32 +187,78 @@ void ndDebugDisplayRenderPass::RenderSelectedNode()
 	}
 }
 
+void ndDebugDisplayRenderPass::RenderCollisionShape()
+{
+	if (m_manager->m_currentSelection->GetRigidBody())
+	{
+		const ndString& seletecName = m_manager->m_currentSelection->GetName();
+		for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
+		{
+			const ndDebugMesh& debugMesh = ptr->GetInfo();
+			if ((debugMesh.m_parent->m_name == seletecName))
+			{
+				ndSharedPtr<ndMeshBody> body(m_manager->m_currentSelection->GetRigidBody());
+				const ndMeshBodyKinematic* const kinBody = (ndMeshBodyKinematic*)*body;
+				const ndVector scale(kinBody->m_shapeInstance.m_scale);
+				ndMatrix scaleMatrix(ndGetIdentityMatrix());
+				scaleMatrix[0][0] = scale[0];
+				scaleMatrix[1][1] = scale[1];
+				scaleMatrix[2][2] = scale[2];
+				const ndMatrix pivotMatrix(scaleMatrix * kinBody->m_shapeInstance.m_localMatrix * debugMesh.m_parent->m_globalMatrix);
+
+				if (m_manager->m_showSelectedNode)
+				{
+					const ndRenderPrimitive* const primitive = *debugMesh.m_zBufferShape;
+					if (primitive)
+					{
+						primitive->Render(m_owner, pivotMatrix, m_debugDisplaySetZbuffer);
+
+						ndRenderPrimitiveSegment& segment = debugMesh.m_wireFrameShape->m_segments.GetFirst()->GetInfo();
+						ndRenderPrimitiveMaterial* const material = &segment.m_material;
+						material->m_diffuse = m_shapeColor;
+						debugMesh.m_wireFrameShape->Render(m_owner, pivotMatrix, m_debugDisplayWireFrameMesh);
+					}
+				}
+			}
+		}
+	}
+}
+
 void ndDebugDisplayRenderPass::RenderCloseLoopJoints()
 {
+	const ndMeshLoopJoint* const currentLoopJointSelection = *m_manager->m_currentLoopJointSelection;
 	for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
 	{
 		const ndDebugMesh& debugMesh = ptr->GetInfo();
-		if (m_manager->m_showSelectedNode)
+		const ndRenderPrimitive* const primitive = *debugMesh.m_zBufferShape;
+		if (primitive)
 		{
-			const ndRenderPrimitive* const primitive = *debugMesh.m_wireFrameMesh;
-			if (primitive)
+			ndSharedPtr<ndMeshBody> body(nullptr);
+			if (currentLoopJointSelection->m_childNode->GetName() == debugMesh.m_parent->m_name)
 			{
-				const ndMatrix pivotMatrix(debugMesh.m_parent->m_globalMatrix);
-				const ndMatrix gemetryMatrix(debugMesh.m_parent->m_primitiveMatrix * pivotMatrix);
+				body = currentLoopJointSelection->m_childNode->GetRigidBody();
+			}
+			else if (currentLoopJointSelection->m_parentNode->GetName() == debugMesh.m_parent->m_name)
+			{
+				body = currentLoopJointSelection->m_parentNode->GetRigidBody();
+			}
 
-				ndRenderPrimitiveSegment& segment = primitive->m_segments.GetFirst()->GetInfo();
+			if (body)
+			{
+				const ndMeshBodyKinematic* const kinBody = (ndMeshBodyKinematic*)*body;
+				const ndVector scale(kinBody->m_shapeInstance.m_scale);
+				ndMatrix scaleMatrix(ndGetIdentityMatrix());
+				scaleMatrix[0][0] = scale[0];
+				scaleMatrix[1][1] = scale[1];
+				scaleMatrix[2][2] = scale[2];
+				const ndMatrix pivotMatrix(scaleMatrix * kinBody->m_shapeInstance.m_localMatrix * debugMesh.m_parent->m_globalMatrix);
+
+				primitive->Render(m_owner, pivotMatrix, m_debugDisplaySetZbuffer);
+
+				ndRenderPrimitiveSegment& segment = debugMesh.m_wireFrameShape->m_segments.GetFirst()->GetInfo();
 				ndRenderPrimitiveMaterial* const material = &segment.m_material;
-
-				if (m_manager->m_currentLoopJointSelection->m_childNode->GetName() == debugMesh.m_parent->m_name)
-				{
-					material->m_diffuse = m_secundarySelectedColor;
-					primitive->Render(m_owner, gemetryMatrix, m_debugDisplayWireFrameMesh);
-				}
-				if (m_manager->m_currentLoopJointSelection->m_parentNode->GetName() == debugMesh.m_parent->m_name)
-				{
-					material->m_diffuse = m_secundarySelectedColor;
-					primitive->Render(m_owner, gemetryMatrix, m_debugDisplayWireFrameMesh);
-				}
+				material->m_diffuse = m_loopJointColor;
+				debugMesh.m_wireFrameShape->Render(m_owner, pivotMatrix, m_debugDisplayWireFrameMesh);
 			}
 		}
 	}
@@ -367,6 +350,8 @@ void ndDebugDisplayRenderPass::RenderHiddenSurface()
 
 void ndDebugDisplayRenderPass::RenderScene()
 {
+	m_owner->ClearZBuffer();
+
 	if (m_debugLines.GetCount())
 	{
 		const ndMatrix matrix(ndGetIdentityMatrix());

@@ -472,6 +472,11 @@ void ndRenderContext::SetCollorPassRenderStates()
 	glDepthFunc(GL_LEQUAL);
 }
 
+void ndRenderContext::ClearZBuffer()
+{
+	glClear(GL_DEPTH_BUFFER_BIT);
+}
+
 void ndRenderContext::ClearFrameBuffer(const ndVector& color)
 {
 	glClearColor(GLfloat(color.m_x), GLfloat(color.m_y), GLfloat(color.m_z), GLfloat(color.m_w));
