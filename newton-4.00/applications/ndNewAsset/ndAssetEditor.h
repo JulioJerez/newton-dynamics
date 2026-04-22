@@ -157,7 +157,7 @@ class ndAssetEditor : public ndClassAlloc
 	ndSharedPtr<ndMesh> m_currentSelection;
 	ndSharedPtr<ndMeshLoopJoint> m_currentLoopJointSelection;
 	ndSharedPtr<ndMeshCollidingPair> m_currentCollingPairSelection;
-	//ndFixSizeArray<ndWeakPtr<ndMesh>, 32> m_secundarySelection;
+
 
 	ndString m_currentPath;
 	ndUndoRedo m_undoRedo;

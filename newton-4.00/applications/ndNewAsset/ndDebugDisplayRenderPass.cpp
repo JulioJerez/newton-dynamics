@@ -56,32 +56,35 @@ ndDebugDisplayRenderPass::~ndDebugDisplayRenderPass()
 
 void ndDebugDisplayRenderPass::RenderCollisionShape()
 {
-	const ndString& seletecName = m_manager->m_currentSelection->GetName();
-	for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
+	if (m_manager->m_currentSelection->GetRigidBody())
 	{
-		const ndDebugMesh& debugMesh = ptr->GetInfo();
-		if (debugMesh.m_parent->m_name == seletecName)
+		const ndString& seletecName = m_manager->m_currentSelection->GetName();
+		for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
 		{
-			ndSharedPtr<ndMeshBody> body(m_manager->m_currentSelection->GetRigidBody());
-			const ndMeshBodyKinematic* const kinBody = (ndMeshBodyKinematic*)*body;
-			const ndVector scale(kinBody->m_shapeInstance.m_scale);
-			ndMatrix scaleMatrix(ndGetIdentityMatrix());
-			scaleMatrix[0][0] = scale[0];
-			scaleMatrix[1][1] = scale[1];
-			scaleMatrix[2][2] = scale[2];
-			const ndMatrix pivotMatrix(scaleMatrix * kinBody->m_shapeInstance.m_localMatrix * debugMesh.m_parent->m_globalMatrix);
-
-			if (m_manager->m_showSelectedNode)
+			const ndDebugMesh& debugMesh = ptr->GetInfo();
+			if ((debugMesh.m_parent->m_name == seletecName))
 			{
-				const ndRenderPrimitive* const primitive = *debugMesh.m_zBufferShape;
-				if (primitive)
-				{
-					primitive->Render(m_owner, pivotMatrix, m_debugDisplaySetZbuffer);
+				ndSharedPtr<ndMeshBody> body(m_manager->m_currentSelection->GetRigidBody());
+				const ndMeshBodyKinematic* const kinBody = (ndMeshBodyKinematic*)*body;
+				const ndVector scale(kinBody->m_shapeInstance.m_scale);
+				ndMatrix scaleMatrix(ndGetIdentityMatrix());
+				scaleMatrix[0][0] = scale[0];
+				scaleMatrix[1][1] = scale[1];
+				scaleMatrix[2][2] = scale[2];
+				const ndMatrix pivotMatrix(scaleMatrix * kinBody->m_shapeInstance.m_localMatrix * debugMesh.m_parent->m_globalMatrix);
 
-					ndRenderPrimitiveSegment& segment = debugMesh.m_wireFrameShape->m_segments.GetFirst()->GetInfo();
-					ndRenderPrimitiveMaterial* const material = &segment.m_material;
-					material->m_diffuse = m_shapeColor;
-					debugMesh.m_wireFrameShape->Render(m_owner, pivotMatrix, m_debugDisplayWireFrameMesh);
+				if (m_manager->m_showSelectedNode)
+				{
+					const ndRenderPrimitive* const primitive = *debugMesh.m_zBufferShape;
+					if (primitive)
+					{
+						primitive->Render(m_owner, pivotMatrix, m_debugDisplaySetZbuffer);
+
+						ndRenderPrimitiveSegment& segment = debugMesh.m_wireFrameShape->m_segments.GetFirst()->GetInfo();
+						ndRenderPrimitiveMaterial* const material = &segment.m_material;
+						material->m_diffuse = m_shapeColor;
+						debugMesh.m_wireFrameShape->Render(m_owner, pivotMatrix, m_debugDisplayWireFrameMesh);
+					}
 				}
 			}
 		}
