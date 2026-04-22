@@ -237,10 +237,14 @@ void ndDebugDisplayRenderPass::RenderCloseLoopJoints()
 			if (currentLoopJointSelection->m_childNode->GetName() == debugMesh.m_parent->m_name)
 			{
 				body = currentLoopJointSelection->m_childNode->GetRigidBody();
+				const ndMatrix frame(currentLoopJointSelection->m_joint->m_localFrame0 * debugMesh.m_parent->m_globalMatrix);
+				DrawFrame(frame);
 			}
 			else if (currentLoopJointSelection->m_parentNode->GetName() == debugMesh.m_parent->m_name)
 			{
 				body = currentLoopJointSelection->m_parentNode->GetRigidBody();
+				const ndMatrix frame(currentLoopJointSelection->m_joint->m_localFrame1 * debugMesh.m_parent->m_globalMatrix);
+				DrawFrame(frame);
 			}
 
 			if (body)
@@ -252,7 +256,6 @@ void ndDebugDisplayRenderPass::RenderCloseLoopJoints()
 				scaleMatrix[1][1] = scale[1];
 				scaleMatrix[2][2] = scale[2];
 				const ndMatrix pivotMatrix(scaleMatrix * kinBody->m_shapeInstance.m_localMatrix * debugMesh.m_parent->m_globalMatrix);
-
 				primitive->Render(m_owner, pivotMatrix, m_debugDisplaySetZbuffer);
 
 				ndRenderPrimitiveSegment& segment = debugMesh.m_wireFrameShape->m_segments.GetFirst()->GetInfo();

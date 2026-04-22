@@ -67,7 +67,7 @@ class ndUndoRedoLoopJoint : public ndUndoRedoCommand
 
 void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 {
-	if (ImGui::CollapsingHeader("Loop joints"))
+	if (ImGui::CollapsingHeader("Loop joint"))
 	{
 		char nodeName[256];
 		snprintf(nodeName, sizeof(nodeName) - 1, "%s", m_currentLoopJointSelection->m_name.GetStr());
@@ -276,78 +276,78 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 		if (ImGui::BeginCombo("joint type", joint->m_constructor.GetStr()))
 		{
 			auto SetDropdownList = [this, &joint](const char* const name)
+			{
+				bool selected = strcmp(name, joint->m_constructor.GetStr()) ? false : true;
+				if (ImGui::Selectable(name, selected))
 				{
-					bool selected = strcmp(name, joint->m_constructor.GetStr()) ? false : true;
-					if (ImGui::Selectable(name, selected))
+					auto InitNewJoint = [this, &joint](ndSharedPtr<ndJointBilateralConstraint>& newJoint)
 					{
-						auto InitNewJoint = [this, &joint](ndSharedPtr<ndJointBilateralConstraint>& newJoint)
-							{
-								newJoint->SetLocalMatrix0(joint->m_localFrame0);
-								newJoint->SetLocalMatrix1(joint->m_localFrame1);
-								m_currentLoopJointSelection->m_joint = newJoint->GetMeshJoint(*joint->m_owner);
-								joint = m_currentLoopJointSelection->m_joint;
-								m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-							};
-						if (strcmp(name, ndJointHinge::StaticClassName()) == 0)
-						{
-							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-							ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointHinge());
-							InitNewJoint(newJoint);
-						}
-						else if (strcmp(name, ndJointSlider::StaticClassName()) == 0)
-						{
-							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-							ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointSlider());
-							InitNewJoint(newJoint);
-						}
-						else if (strcmp(name, ndJointPlane::StaticClassName()) == 0)
-						{
-							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-							ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointPlane());
-							InitNewJoint(newJoint);
-						}
-						else if (strcmp(name, ndJointDoubleHinge::StaticClassName()) == 0)
-						{
-							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-							ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointDoubleHinge());
-							InitNewJoint(newJoint);
-						}
-						else if (strcmp(name, ndJointSpherical::StaticClassName()) == 0)
-						{
-							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-							ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointSpherical());
-							InitNewJoint(newJoint);
-						}
-						else if (strcmp(name, ndJointFix6dof::StaticClassName()) == 0)
-						{
-							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-							ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointFix6dof());
-							InitNewJoint(newJoint);
-						}
-						else if (strcmp(name, ndJointRoller::StaticClassName()) == 0)
-						{
-							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-							ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointRoller());
-							InitNewJoint(newJoint);
-						}
-						else if (strcmp(name, ndJointCylinder::StaticClassName()) == 0)
-						{
-							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-							ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointCylinder());
-							InitNewJoint(newJoint);
-						}
-						else if (strcmp(name, ndJointWheel::StaticClassName()) == 0)
-						{
-							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-							ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointWheel());
-							InitNewJoint(newJoint);
-						}
-						else
-						{
-							ndAssert(0);
-						}
+						newJoint->SetLocalMatrix0(joint->m_localFrame0);
+						newJoint->SetLocalMatrix1(joint->m_localFrame1);
+						m_currentLoopJointSelection->m_joint = newJoint->GetMeshJoint(*joint->m_owner);
+						joint = m_currentLoopJointSelection->m_joint;
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+					};
+					if (strcmp(name, ndJointHinge::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointHinge());
+						InitNewJoint(newJoint);
 					}
-				};
+					else if (strcmp(name, ndJointSlider::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointSlider());
+						InitNewJoint(newJoint);
+					}
+					else if (strcmp(name, ndJointPlane::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointPlane());
+						InitNewJoint(newJoint);
+					}
+					else if (strcmp(name, ndJointDoubleHinge::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointDoubleHinge());
+						InitNewJoint(newJoint);
+					}
+					else if (strcmp(name, ndJointSpherical::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointSpherical());
+						InitNewJoint(newJoint);
+					}
+					else if (strcmp(name, ndJointFix6dof::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointFix6dof());
+						InitNewJoint(newJoint);
+					}
+					else if (strcmp(name, ndJointRoller::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointRoller());
+						InitNewJoint(newJoint);
+					}
+					else if (strcmp(name, ndJointCylinder::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointCylinder());
+						InitNewJoint(newJoint);
+					}
+					else if (strcmp(name, ndJointWheel::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointWheel());
+						InitNewJoint(newJoint);
+					}
+					else
+					{
+						ndAssert(0);
+					}
+				}
+			};
 			SetDropdownList(ndJointHinge::StaticClassName());
 			SetDropdownList(ndJointSlider::StaticClassName());
 			SetDropdownList(ndJointPlane::StaticClassName());
