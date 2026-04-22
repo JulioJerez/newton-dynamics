@@ -90,16 +90,22 @@ ndBody* ndMeshBodyDynamic::CreateObject() const
 	return body;
 }
 
-ndMeshLoopJoint::ndMeshLoopJoint()
+ndMeshLoopJoint::ndMeshLoopJoint(const ndCloseLoopConstraints* const owner)
 	:ndClassAlloc()
+	,m_owner(ndWeakPtr<const ndCloseLoopConstraints>(owner))
 {
 }
 
-ndMeshLoopJoint::ndMeshLoopJoint(const ndSharedPtr<ndMeshJoint>& joint, ndMesh* const childReference, ndMesh* const parentReference)
+ndMeshLoopJoint::ndMeshLoopJoint(
+	const ndCloseLoopConstraints* const owner,
+	const ndSharedPtr<ndMeshJoint>& joint, 
+	ndMesh* const childReference, ndMesh* const parentReference)
 	:ndClassAlloc()
+	,m_name(parentReference->GetName() + "-" + childReference->GetName())
 	,m_childNode(ndWeakPtr<ndMesh>(childReference))
 	,m_parentNode(ndWeakPtr<ndMesh>(parentReference))
 	,m_joint(joint)
+	,m_owner(ndWeakPtr<const ndCloseLoopConstraints>(owner))
 {
 }
 
@@ -109,6 +115,7 @@ ndMeshLoopJoint::~ndMeshLoopJoint()
 
 void ndMeshLoopJoint::SerializeToXml(nd::TiXmlElement* const parent) const
 {
+	xmlSaveParam(parent, "name", m_name.GetStr());
 	xmlSaveParam(parent, "childReference", m_childNode->GetName().GetStr());
 	xmlSaveParam(parent, "parentReference", m_parentNode->GetName().GetStr());
 
@@ -117,10 +124,27 @@ void ndMeshLoopJoint::SerializeToXml(nd::TiXmlElement* const parent) const
 	m_joint->SerializeToXml(loopJoint);
 }
 
-//void ndMeshLoopJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
-void ndMeshLoopJoint::DeserializeFromXml(const nd::TiXmlElement* const)
+void ndMeshLoopJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
-	ndAssert(0);
+	const ndString childName (xmlGetString(parent, "childReference"));
+	const ndString parentName (xmlGetString(parent, "parentReference"));
+
+	if (xmlHasAttribute(parent, "name"))
+	{
+		m_name = xmlGetString(parent, "name");
+	}
+	else
+	{
+		ndString name(parentName + "-" + childName);
+		m_name = name;
+	}
+
+	m_childNode = ndWeakPtr<ndMesh>(m_owner->GetRoot()->FindByName(childName));
+	m_parentNode = ndWeakPtr<ndMesh>(m_owner->GetRoot()->FindByName(parentName));
+
+	const nd::TiXmlElement* const xmlJoint = (nd::TiXmlElement*)parent->FirstChild("joint");
+	ndAssert(xmlJoint);
+	m_joint = m_owner->LoadJoint(xmlJoint);
 }
 
 ndMeshJointFix6dof::ndMeshJointFix6dof(const ndMesh* const owner)

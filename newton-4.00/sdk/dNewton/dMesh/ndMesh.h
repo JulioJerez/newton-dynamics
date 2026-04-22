@@ -104,9 +104,9 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API const ndMesh* GetRoot() const;
 	D_NEWTON_API ndSharedPtr<ndMesh> GetSharedPtr() const;
 
-	D_NEWTON_API ndSharedPtr<ndMeshEffect>& GetMesh();
-	D_NEWTON_API const ndSharedPtr<ndMeshEffect>& GetMesh() const;
-	D_NEWTON_API void SetMesh(const ndSharedPtr<ndMeshEffect>& mesh);
+	D_NEWTON_API ndSharedPtr<ndMeshEffect>& GetGeometry();
+	D_NEWTON_API const ndSharedPtr<ndMeshEffect>& GetGeometry() const;
+	D_NEWTON_API void SetGeometry(const ndSharedPtr<ndMeshEffect>& mesh);
 
 	D_NEWTON_API ndSharedPtr<ndMeshBody>& GetRigidBody();
 	D_NEWTON_API const ndSharedPtr<ndMeshBody>& GetRigidBody() const;
@@ -167,8 +167,12 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionTree(bool optimize = true);
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionConvexApproximation(bool lowDetail = false);
 
+	D_NEWTON_API ndSharedPtr<ndMeshJoint> LoadJoint(const nd::TiXmlElement* const xmlJoint) const;
+
 	template <typename Function>
 	void NodeIterator(Function func);
+
+
 
 	protected:
 	ndMatrix CalculateLocalMatrix(ndVector& size) const;

@@ -91,7 +91,7 @@ ndSharedPtr<ndRenderSceneNode> ndRenderMeshLoader::CreateRenderSceneMesh(ndRende
 	
 		if (entity->m_name.Find("-hidden") == -1)
 		{
-			ndSharedPtr<ndMeshEffect> meshEffect(mesh->GetMesh());
+			ndSharedPtr<ndMeshEffect> meshEffect(mesh->GetGeometry());
 			if (*meshEffect)
 			{
 				meshList.Append(EntityMeshPair(entity, mesh));
@@ -116,7 +116,7 @@ ndSharedPtr<ndRenderSceneNode> ndRenderMeshLoader::CreateRenderSceneMesh(ndRende
 		ndAssert(pair.m_mesh);
 		ndAssert(pair.m_entity);
 	
-		ndSharedPtr<ndMeshEffect> meshEffect(pair.m_mesh->GetMesh());
+		ndSharedPtr<ndMeshEffect> meshEffect(pair.m_mesh->GetGeometry());
 		ndArray<ndMeshEffect::ndMaterial>& materials = meshEffect->GetMaterials();
 	
 		ndRenderPrimitive::ndDescriptor descriptor(renderer);

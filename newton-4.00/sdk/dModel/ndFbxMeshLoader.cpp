@@ -308,7 +308,7 @@ void ndFbxMeshLoader::FreezeScale(ndMesh* const mesh)
 		meshNode->SetMatrix(transformMatrix);
 		scaleMatrix = ndMatrix(ndGetIdentityMatrix(), scale, stretchAxis);
 
-		ndSharedPtr<ndMeshEffect> effectMesh (meshNode->GetMesh());
+		ndSharedPtr<ndMeshEffect> effectMesh (meshNode->GetGeometry());
 		if (*effectMesh)
 		{
 			ndVector geometryScale;
@@ -419,7 +419,7 @@ void ndFbxMeshLoader::AlignToWorld(ndMesh* const mesh)
 		//meshNode->m_matrix = entMatrix;
 		meshNode->SetMatrix(entMatrix);
 
-		ndSharedPtr<ndMeshEffect> effectMesh (meshNode->GetMesh());
+		ndSharedPtr<ndMeshEffect> effectMesh (meshNode->GetGeometry());
 		if (*effectMesh)
 		{
 			const ndMatrix meshMatrix(invRotation * meshNode->GetGeometryMatrix() * rotation);
@@ -720,7 +720,7 @@ void ndFbxMeshLoader::ImportMeshNode(ndOfbx::Object* const fbxNode, ndFbx2ndMesh
 
 	ndMatrix pivotMatrix(ofbxMatrix2dMatrix(fbxMesh->getGeometricMatrix()));
 	entity->SetGeometryMatrix(pivotMatrix);
-	entity->SetMesh(meshEffect);
+	entity->SetGeometry(meshEffect);
 }
 
 ndMesh* ndFbxMeshLoader::CreateMeshHierarchy(ndOfbx::IScene* const fbxScene, ndFbx2ndMeshNodeMap& nodeMap)

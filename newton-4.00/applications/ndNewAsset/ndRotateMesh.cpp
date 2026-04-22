@@ -77,7 +77,7 @@ void ndRotateMesh::ApplyRotation()
 
 	auto RotateMesh = [this, &rotation, &invRotation](ndMesh* const node)
 	{
-		ndSharedPtr<ndMeshEffect>& mesh = node->GetMesh();
+		ndSharedPtr<ndMeshEffect>& mesh = node->GetGeometry();
 		if (mesh)
 		{
 			mesh->ApplyTransform(rotation);

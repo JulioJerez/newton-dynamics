@@ -112,6 +112,7 @@ namespace ndBoxTricycle
         ndSharedPtr<ndShapeInstance>shape(new ndShapeInstance(new ndShapeBox(diameter * 2.0f, 0.5f * diameter, 1.5f * diameter)));
         ndSharedPtr<ndBody> rootBody(MakePrimitive(matrix, **shape, mass));
         ndModelArticulation::ndNode* rootNode = carModel->AddRootBody(rootBody);
+        rootNode->m_name = "box";
 
         // add two roller wheels
         {
@@ -126,7 +127,8 @@ namespace ndBoxTricycle
 
                 const ndMatrix rollerPin(rollerMatrix);
                 ndSharedPtr<ndJointBilateralConstraint> rollerAxle(new ndJointHinge(rollerPin, rollerBody->GetAsBodyDynamic(), rootBody->GetAsBodyDynamic()));
-                carModel->AddLimb(rootNode, rollerBody, rollerAxle);
+                ndModelArticulation::ndNode* const wheelNode = carModel->AddLimb(rootNode, rollerBody, rollerAxle);
+                wheelNode->m_name = "leftWheel";
             }
 
             {
@@ -139,7 +141,8 @@ namespace ndBoxTricycle
                 ndSharedPtr<ndBody> rollerBody(MakePrimitive(rollerMatrix, **rollerShape, mass * 0.125f));
                 const ndMatrix rollerPin(rollerMatrix);
                 ndSharedPtr<ndJointBilateralConstraint> rollerAxle(new ndJointHinge(rollerPin, rollerBody->GetAsBodyDynamic(), rootBody->GetAsBodyDynamic()));
-                carModel->AddLimb(rootNode, rollerBody, rollerAxle);
+                ndModelArticulation::ndNode* const wheelNode = carModel->AddLimb(rootNode, rollerBody, rollerAxle);
+                wheelNode->m_name = "rightWheel";
             }
 
             {
@@ -152,7 +155,8 @@ namespace ndBoxTricycle
                 ndWheelDescriptor desc;
                 const ndMatrix rollerPin(rollerMatrix);
                 ndSharedPtr<ndJointBilateralConstraint> wheelAxle(new ndJointWheel(rollerPin, rollerBody->GetAsBodyDynamic(), rootBody->GetAsBodyDynamic(), desc));
-                carModel->AddLimb(rootNode, rollerBody, wheelAxle);
+                ndModelArticulation::ndNode* const wheelNode = carModel->AddLimb(rootNode, rollerBody, wheelAxle);
+                wheelNode->m_name = "frontWheel";
             }
         }
 
@@ -332,56 +336,6 @@ namespace ndDaveRagdoll
         ndMatrix piedRMatrix = m_pied_R_matrixLocal * tibiaRMatrix;
         ndSharedPtr<ndBody> piedRBody = CreateBox(piedRMatrix, 0.13f, 0.4f, 0.75f);
         
-
-        //// === Liste des bodies ===
-        //m_bodypartlist =
-        //{
-        //    bassinBody, colonneBody, headBody,
-        //    epauleLBody, brasLBody, avantbrasLBody, handLBody,
-        //    epauleRBody, brasRBody, avantbrasRBody, handRBody,
-        //    hipLBody, cuisseLBody, tibiaLBody, piedLBody, orteilLBody,
-        //    hipRBody, cuisseRBody, tibiaRBody, piedRBody, orteilRBody
-        //};
-        //
-        //std::vector<ndFloat32> bodypartMassweigh =
-        //{
-        //    3.0f, //bassinBody, 
-        //    2.0f, //colonneBody, 
-        //    0.5f, //headBody,
-        //    1.0f, //epauleLBody, 
-        //    1.0f, //brasLBody, 
-        //    1.0f, //avantbrasLBody, 
-        //    1.0f, //handLBody,
-        //    1.0f, //epauleRBody, 
-        //    1.0f, //brasRBody, 
-        //    1.0f, //avantbrasRBody, 
-        //    1.0f, //handRBody,
-        //    2.0f, //hipLBody, 
-        //    1.0f, //cuisseLBody, 
-        //    1.0f, //tibiaLBody, 
-        //    1.0f, //piedLBody, 
-        //    1.0f, //orteilLBody,
-        //    2.0f, //hipRBody, 
-        //    1.0f, //cuisseRBody, 
-        //    1.0f, //tibiaRBody, 
-        //    1.0f, //piedRBody, 
-        //    1.0f, //orteilRBody
-        //};
-
-        //ndPhysicsWorld* const world = scene->GetWorld();
-        //// === Material ragdoll ===
-        //ndContactCallback* callback = (ndContactCallback*)world->GetContactNotify();
-        //DGRagdollMaterial ragdollMat;
-        //callback->RegisterMaterial(ragdollMat, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_modelPart);
-
-        //for (auto& body : m_bodypartlist)
-        //{
-        //    ndShapeMaterial mat = body->GetAsBodyDynamic()->GetCollisionShape().GetMaterial();
-        //    mat.m_userId = ndDemoContactCallback::m_modelPart;
-        //    body->GetAsBodyDynamic()->GetCollisionShape().SetMaterial(mat);
-        //}
-        //NormalizeMassDistribution(bodypartMassweigh, 80.0f);
-        
         ndModelArticulation::ndNode* nextRootTemp1 = nullptr;
         ndModelArticulation::ndNode* nextRootTemp2 = nullptr;
         ndModelArticulation::ndNode* nextRootTemp3 = nullptr;
@@ -470,7 +424,8 @@ namespace ndDaveRagdoll
         }
 
         // left arm
-        { // epaule_L
+        { 
+            // epaule_L
             ndMatrix tmp1(epauleLBody->GetMatrix());
 
             ndJointHinge* const joint = new ndJointHinge(tmp1, epauleLBody->GetAsBodyKinematic(), colonneBody->GetAsBodyKinematic());
@@ -482,7 +437,8 @@ namespace ndDaveRagdoll
             nextRootTemp1 = model->AddLimb(nextRootTemp3, epauleLBody, jointPtr);
         }
 
-        { // bras_L
+        { 
+            // bras_L
             ndMatrix tmp1(brasLBody->GetMatrix());
 
             ndJointDoubleHinge* const joint = new ndJointDoubleHinge(tmp1, brasLBody->GetAsBodyKinematic(), epauleLBody->GetAsBodyKinematic());
@@ -512,7 +468,8 @@ namespace ndDaveRagdoll
             nextRootTemp1 = model->AddLimb(nextRootTemp1, avantbrasLBody, jointPtr);
         }
 
-        { // hand_L
+        { 
+            // hand_L
             ndMatrix tmp1(handLBody->GetMatrix());
 
             ndJointHinge* const joint = new ndJointHinge(tmp1, handLBody->GetAsBodyKinematic(), avantbrasLBody->GetAsBodyKinematic());
@@ -524,19 +481,21 @@ namespace ndDaveRagdoll
         }
 
         // left leg
-        { // hip_L
+        { 
+            // hip_L
             ndMatrix tmp1(hipLBody->GetMatrix());
 
             ndJointHinge* const joint = new ndJointHinge(tmp1, hipLBody->GetAsBodyKinematic(), bassinBody->GetAsBodyKinematic());
             joint->SetLimitState(true);
             joint->SetLimits(-90.0f * ndDegreeToRad, 90.0f * ndDegreeToRad);
-            joint->SetAsSpringDamper(0.01f, 25.0f, 1.0f);
+            //joint->SetAsSpringDamper(0.01f, 25.0f, 1.0f);
 
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
             nextRootTemp1 = model->AddLimb(modelRootNode, hipLBody, jointPtr);
         }
 
-        { // cuisse_L
+        { 
+            // cuisse_L
             ndMatrix tmp1(cuisseLBody->GetMatrix());
             tmp1.m_up = tmp1.m_right;
             tmp1.m_right = tmp1.m_front.CrossProduct(tmp1.m_up);
@@ -544,17 +503,18 @@ namespace ndDaveRagdoll
             ndJointDoubleHinge* const joint = new ndJointDoubleHinge(tmp1, cuisseLBody->GetAsBodyKinematic(), hipLBody->GetAsBodyKinematic());
             joint->SetLimitState0(true);
             joint->SetLimits0(-120.0f * ndDegreeToRad, 120.0f * ndDegreeToRad);
-            joint->SetAsSpringDamper0(0.005f, 50.0f, 10.0f);
+            //joint->SetAsSpringDamper0(0.005f, 50.0f, 10.0f);
 
             joint->SetLimitState1(true);
             joint->SetLimits1(-10.0f * ndDegreeToRad, 70.0f * ndDegreeToRad);
-            joint->SetAsSpringDamper1(0.005f, 50.0f, 10.0f);
+            //joint->SetAsSpringDamper1(0.005f, 50.0f, 10.0f);
 
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
             nextRootTemp1 = model->AddLimb(nextRootTemp1, cuisseLBody, jointPtr);
         }
 
-        { // tibia_L
+        { 
+            // tibia_L
             ndMatrix tmp1(tibiaLBody->GetMatrix());
             ndSwap(tmp1.m_up, tmp1.m_front);
             tmp1.m_right = tmp1.m_front.CrossProduct(tmp1.m_up);
@@ -562,7 +522,8 @@ namespace ndDaveRagdoll
             ndJointHinge* const joint = new ndJointHinge(tmp1, tibiaLBody->GetAsBodyKinematic(), cuisseLBody->GetAsBodyKinematic());
             joint->SetLimitState(true);
             joint->SetLimits(-5.0f * ndDegreeToRad, 150.0f * ndDegreeToRad);
-            joint->SetAsSpringDamper(0.01f, 2.5f, 0.25f);
+
+            //joint->SetAsSpringDamper(0.01f, 2.5f, 0.25f);
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
             nextRootTemp1 = model->AddLimb(nextRootTemp1, tibiaLBody, jointPtr);
         }
@@ -580,30 +541,50 @@ namespace ndDaveRagdoll
             ndJointDoubleHinge* const joint = new ndJointDoubleHinge(tmp1, piedLBody->GetAsBodyKinematic(), tibiaLBody->GetAsBodyKinematic());
 
             joint->SetLimitState0(true);
-            joint->SetLimits0(-30.0f * ndDegreeToRad, 30.0f * ndDegreeToRad);
+            joint->SetLimits0(-45.0f * ndDegreeToRad, 45.0f * ndDegreeToRad);
             joint->SetAsSpringDamper0(0.01f, 0.0f, 10.0f);
 
             joint->SetLimitState1(true);
-            joint->SetLimits1(-30.0f * ndDegreeToRad, 30.0f * ndDegreeToRad);
+            joint->SetLimits1(-45.0f * ndDegreeToRad, 45.0f * ndDegreeToRad);
             joint->SetAsSpringDamper1(0.01f, 0.0f, 5.0f);
 
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
             nextRootTemp1 = model->AddLimb(nextRootTemp1, piedLBody, jointPtr);
         }
 
+        {
+            // add left leg end effector
+            ndMatrix tmp0(piedLBody->GetMatrix());
+            ndMatrix tmp1(ndRollMatrix(-90.0f * ndDegreeToRad));
+            tmp1.m_posit = hipLBody->GetMatrix().m_posit;
+
+            ndIkSwivelPositionEffector* const effector = new ndIkSwivelPositionEffector(
+                tmp1, bassinBody->GetAsBodyDynamic(),
+                tmp0.m_posit, tibiaLBody->GetAsBodyDynamic());
+
+            effector->SetLinearSpringDamper(ndFloat32(0.001f), ndFloat32(2000.0f), ndFloat32(20.0f));
+            effector->SetAngularSpringDamper(ndFloat32(0.001f), ndFloat32(2000.0f), ndFloat32(20.0f));
+
+            ndSharedPtr<ndJointBilateralConstraint> effectorPtr(effector);
+            model->AddCloseLoop(effectorPtr, "leftLegEffector");
+        }
+
         // right leg
-        { // hip_R
+        { 
+            // hip_R
             ndMatrix tmp1(hipRBody->GetMatrix());
             
             ndJointHinge* const joint = new ndJointHinge(tmp1, hipRBody->GetAsBodyKinematic(), bassinBody->GetAsBodyKinematic());
             joint->SetLimitState(true);
             joint->SetLimits(-90.0f * ndDegreeToRad, 90.0f * ndDegreeToRad);
-            joint->SetAsSpringDamper(0.01f, 25.0f, 1.0f);
+            //joint->SetAsSpringDamper(0.01f, 25.0f, 1.0f);
+
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
             nextRootTemp2 = model->AddLimb(modelRootNode, hipRBody, jointPtr);
         }
 
-        { // cuisse_R
+        { 
+            // cuisse_R
             ndMatrix tmp1(cuisseRBody->GetMatrix());
             tmp1.m_up = tmp1.m_right.Scale (-1.0f);
             tmp1.m_right = tmp1.m_front.CrossProduct(tmp1.m_up);
@@ -611,17 +592,18 @@ namespace ndDaveRagdoll
             ndJointDoubleHinge* const joint = new ndJointDoubleHinge(tmp1, cuisseRBody->GetAsBodyKinematic(), hipRBody->GetAsBodyKinematic());
             joint->SetLimitState0(true);
             joint->SetLimits0(-120.0f * ndDegreeToRad, 120.0f * ndDegreeToRad);
-            joint->SetAsSpringDamper0(0.005f, 50.0f, 10.0f);
+            //joint->SetAsSpringDamper0(0.005f, 50.0f, 10.0f);
 
             joint->SetLimitState1(true);
             joint->SetLimits1(-70.0f * ndDegreeToRad, 10.0f * ndDegreeToRad);
-            joint->SetAsSpringDamper1(0.005f, 50.0f, 10.0f);
+            //joint->SetAsSpringDamper1(0.005f, 50.0f, 10.0f);
 
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
             nextRootTemp2 = model->AddLimb(nextRootTemp2, cuisseRBody, jointPtr);
         }
 
-        { // tibia_R
+        { 
+            // tibia_R
             ndMatrix tmp1(tibiaRBody->GetMatrix());
             ndSwap(tmp1.m_up, tmp1.m_front);
             tmp1.m_right = tmp1.m_front.CrossProduct(tmp1.m_up);
@@ -629,12 +611,14 @@ namespace ndDaveRagdoll
             ndJointHinge* const joint = new ndJointHinge(tmp1, tibiaRBody->GetAsBodyKinematic(), cuisseRBody->GetAsBodyKinematic());
             joint->SetLimitState(true);
             joint->SetLimits(-150.0f * ndDegreeToRad, 5.0f * ndDegreeToRad);
-            joint->SetAsSpringDamper(0.01f, 2.5f, 0.25f);
+            //joint->SetAsSpringDamper(0.01f, 2.5f, 0.25f);
+
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
             nextRootTemp2 = model->AddLimb(nextRootTemp2, tibiaRBody, jointPtr);
         }
 
-        { // pied_R
+        { 
+            // pied_R
             ndMatrix tmp1(piedRBody->GetMatrix());
             tmp1.m_front = tmp1.m_right;
             tmp1.m_right = tmp1.m_front.CrossProduct(tmp1.m_up);
@@ -647,16 +631,44 @@ namespace ndDaveRagdoll
             ndJointDoubleHinge* const joint = new ndJointDoubleHinge(tmp1, piedRBody->GetAsBodyKinematic(), tibiaRBody->GetAsBodyKinematic());
 
             joint->SetLimitState0(true);
-            joint->SetLimits0(-30.0f * ndDegreeToRad, 30.0f * ndDegreeToRad);
+            joint->SetLimits0(-45.0f * ndDegreeToRad, 45.0f * ndDegreeToRad);
             joint->SetAsSpringDamper0(0.01f, 0.0f, 10.0f);
 
             joint->SetLimitState1(true);
-            joint->SetLimits1(-30.0f * ndDegreeToRad, 30.0f * ndDegreeToRad);
+            joint->SetLimits1(-45.0f * ndDegreeToRad, 45.0f * ndDegreeToRad);
             joint->SetAsSpringDamper1(0.01f, 0.0f, 5.0f);
 
             ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
             nextRootTemp2 = model->AddLimb(nextRootTemp2, piedRBody, jointPtr);
         }
+
+        {
+            // add right leg end effector
+            ndMatrix tmp0(piedRBody->GetMatrix());
+            ndMatrix tmp1(ndRollMatrix(-90.0f * ndDegreeToRad));
+            tmp1.m_posit = hipRBody->GetMatrix().m_posit;
+
+            ndIkSwivelPositionEffector* const effector = new ndIkSwivelPositionEffector(
+                tmp1, bassinBody->GetAsBodyDynamic(),
+                tmp0.m_posit, tibiaRBody->GetAsBodyDynamic());
+            effector->SetLinearSpringDamper(ndFloat32(0.001f), ndFloat32(2000.0f), ndFloat32(20.0f));
+            effector->SetAngularSpringDamper(ndFloat32(0.001f), ndFloat32(2000.0f), ndFloat32(20.0f));
+            ndSharedPtr<ndJointBilateralConstraint> effectorPtr(effector);
+            model->AddCloseLoop(effectorPtr, "rightLegEffector");
+        }
+
+        // add names 
+        ndInt32 i = 0;
+        const ndString baseName("unnamed");
+        auto NameNodes = [&i, &baseName](ndModelArticulation::ndNode* const node)
+        {
+            if (node->m_name == "")
+            {
+                node->m_name = baseName + "_" + i;
+                i++;
+            }
+        };
+        model->NodeIterator(NameNodes);
 
         return model;
     }
@@ -849,7 +861,7 @@ namespace ndBasicRagdoll
                     if (!parentNode)
                     {
                         parentNode = ragdoll->AddRootBody(body);
-                        parentNode->m_name = meshNode->GetName();
+                        parentNode->m_name = name;
                     }
                     else
                     {
@@ -860,6 +872,7 @@ namespace ndBasicRagdoll
                         
                         // add this child body to the rad doll model.
                         parentNode = ragdoll->AddLimb(parentNode, body, joint);
+                        parentNode->m_name = name;
                     }
                     break;
                 }
@@ -1220,20 +1233,6 @@ namespace ndExcavator
             if (node->GetName().Find(sideName) != -1)
             {
                 linkArray.PushBack(node);
-                ndInt32 index = 0;
-                for (ndInt32 i = linkArray.GetCount() - 2; i >= 0; --i)
-                {
-                    if (linkArray[i]->GetName() > node->GetName())
-                    {
-                        linkArray[i + 1] = linkArray[i];
-                        index = i;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                linkArray[index] = node;
             }
 
             for (ndList<ndSharedPtr<ndMesh>>::ndNode* child = node->GetChildren().GetFirst(); child; child = child->GetNext())
@@ -1241,6 +1240,30 @@ namespace ndExcavator
                 stack.PushBack(*child->GetInfo());
             }
         }
+
+        class ndCompareKey
+        {
+            public:
+            ndCompareKey(void*)
+            {
+            }
+
+            ndInt32 Compare(const ndMesh* const elementA, const ndMesh* const elementB) const
+            {
+                const ndString& nameA = elementA->GetName();
+                const ndString& nameB = elementB->GetName();
+                if (nameA > nameB)
+                {
+                    return 1;
+                }
+                if (nameA < nameB)
+                {
+                    return -1;
+                }
+                return 0;
+            }
+        };
+        ndSort<ndMesh*, ndCompareKey>(&linkArray[0], linkArray.GetCount(), nullptr);
 
         // make the collision shape. 
         ndSharedPtr<ndShapeInstance> threadCollision(linkArray[0]->CreateCollisionFromChildren());
@@ -1336,24 +1359,27 @@ void ndExportModel(ndDemoEntityManager* const scene)
     ndSharedPtr<ndBody> floor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
 
     ndMatrix origin(ndGetIdentityMatrix());
+    origin.m_posit.m_x = 0.0f;
     origin.m_posit.m_y = 3.0f;
     origin.m_posit.m_z = 2.0f;
-    //ndBoxTricycle::BoxTricycle(scene, origin, 100.0f, 0.75f);
+    //add simple mechanical model
+    ndBoxTricycle::BoxTricycle(scene, origin, 100.0f, 0.75f);
 
-    origin.m_posit.m_z = 0.0f;
-    //ndBasicRagdoll::RagDoll(scene, origin);
-
-    origin.m_posit.m_z = -3.0f;
-    //ndDaveRagdoll::RagDoll(scene, origin);
-
-    origin.m_posit.m_x = 10.0f;
-    origin.m_posit.m_y = 0.0f;
-    origin.m_posit.m_z = 0.0f;
+    // add complex mechanical model
+    origin.m_posit.m_x += 10.0f;
     ndExcavator::MakeModel(scene, origin);
 
+    // add basic ragdoll
+    origin.m_posit.m_z += 5.0f;
+    ndBasicRagdoll::RagDoll(scene, origin);
+
+    // add Dave Gravel rag doll with end effectors
+    origin.m_posit.m_z += -10.0f;
+    ndDaveRagdoll::RagDoll(scene, origin);
+
     ndQuaternion rot;
-    origin.m_posit.m_x -= 8.0f;
-    origin.m_posit.m_y = 2.0f;
+    origin.m_posit.m_x = -15.0f;
+    origin.m_posit.m_y = 3.0f;
     origin.m_posit.m_z = 0.0f;
     scene->SetCameraMatrix(rot, origin.m_posit);
 }

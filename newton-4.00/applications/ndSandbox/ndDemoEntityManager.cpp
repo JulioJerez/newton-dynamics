@@ -40,9 +40,9 @@
 //#define DEFAULT_SCENE	13		// static compound scene collision 
 //#define DEFAULT_SCENE	14		// basic convex approximate compound shapes
 //#define DEFAULT_SCENE	15		// basic model, a nd vehicle prop
-//#define DEFAULT_SCENE	16		// export articulated model
+#define DEFAULT_SCENE	16		// export articulated model
 //#define DEFAULT_SCENE	17		// basic rag doll
-#define DEFAULT_SCENE	18		// complex model, implement a complex model with joints
+//#define DEFAULT_SCENE	18		// complex model, implement a complex model with joints
 //#define DEFAULT_SCENE	19		// basics multi body vehicle
 //#define DEFAULT_SCENE	20		// object Placement
 //#define DEFAULT_SCENE	21		// third person player capsule

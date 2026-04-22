@@ -71,7 +71,7 @@ class ndUndoRedoMeshNode : public ndUndoRedoCommand
 
 void ndAssetEditor::ShowPropertiesMeshInfo()
 {
-	if (ImGui::CollapsingHeader("mesh node"))
+	if (ImGui::CollapsingHeader("Mesh node"))
 	{
 		char nodeName[256];
 		snprintf(nodeName, sizeof(nodeName) - 1, "%s", m_currentSelection->GetName().GetStr());
@@ -190,7 +190,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 		}
 
 		// show geometry node matrix
-		if (*m_currentSelection->GetMesh())
+		if (*m_currentSelection->GetGeometry())
 		{
 			ImGui::SeparatorText("geomtry transform");
 			ndMatrix matrix(m_currentSelection->GetGeometryMatrix());

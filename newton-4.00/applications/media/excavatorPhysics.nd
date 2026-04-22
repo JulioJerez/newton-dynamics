@@ -118,6 +118,1905 @@
         <intrinsicAngularDamping float3="0 0 0" />
     </rigidbody>
     <ndMesh>
+        <name string="__collingPairsList__" />
+        <matrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </matrix>
+        <geometryMatrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </geometryMatrix>
+        <type nodeType="node" target="0 0 0 " />
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_33" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_33" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_33" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_33" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_33" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_33" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_32" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_32" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_32" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_32" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_32" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_32" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_31" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_31" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_31" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_31" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_31" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_31" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_30" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_30" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_30" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_30" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_30" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_30" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_29" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_29" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_29" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_29" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_29" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_29" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_28" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_28" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_28" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_28" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_28" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_28" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_27" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_27" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_27" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_27" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_27" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_27" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_26" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_26" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_26" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_26" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_26" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_26" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_25" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_25" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_25" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_25" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_25" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_25" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_24" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_24" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_24" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_24" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_24" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_24" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_23" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_23" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_23" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_23" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_23" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_23" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_22" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_22" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_22" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_22" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_22" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_22" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_21" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_21" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_21" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_21" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_21" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_21" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_20" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_20" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_20" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_20" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_20" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_20" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_19" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_19" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_19" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_19" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_19" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_19" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_18" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_18" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_18" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_18" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_18" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_18" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_17" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_17" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_17" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_17" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_17" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_17" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_16" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_16" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_16" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_16" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_16" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_16" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_15" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_15" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_15" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_15" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_15" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_15" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_14" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_14" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_14" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_14" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_14" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_14" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_13" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_13" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_13" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_13" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_13" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_13" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_12" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_12" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_12" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_12" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_12" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_12" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_11" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_11" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_11" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_11" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_11" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_11" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_10" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_10" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_10" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_10" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_10" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_10" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_09" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_09" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_09" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_09" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_09" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_09" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_08" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_08" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_08" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_08" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_08" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_08" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_07" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_07" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_07" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_07" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_07" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_07" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_06" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_06" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_06" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_06" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_06" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_06" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_05" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_05" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_05" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_05" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_05" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_05" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_04" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_04" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_04" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_04" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_04" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_04" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_03" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_03" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_03" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_03" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_03" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_03" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_02" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_02" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_02" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_02" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_02" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_02" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_01" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_01" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_01" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_01" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_01" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_01" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller2" />
+            <reference1 string="rightThread_00" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller1" />
+            <reference1 string="rightThread_00" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightRoller0" />
+            <reference1 string="rightThread_00" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightSupportRoller" />
+            <reference1 string="rightThread_00" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightFrontRoller" />
+            <reference1 string="rightThread_00" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="rightGear" />
+            <reference1 string="rightThread_00" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_33" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_33" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_33" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_33" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_33" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_33" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_32" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_32" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_32" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_32" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_32" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_32" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_31" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_31" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_31" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_31" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_31" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_31" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_30" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_30" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_30" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_30" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_30" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_30" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_29" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_29" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_29" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_29" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_29" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_29" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_28" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_28" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_28" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_28" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_28" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_28" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_27" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_27" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_27" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_27" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_27" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_27" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_26" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_26" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_26" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_26" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_26" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_26" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_25" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_25" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_25" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_25" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_25" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_25" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_24" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_24" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_24" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_24" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_24" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_24" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_23" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_23" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_23" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_23" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_23" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_23" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_22" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_22" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_22" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_22" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_22" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_22" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_21" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_21" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_21" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_21" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_21" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_21" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_20" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_20" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_20" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_20" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_20" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_20" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_19" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_19" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_19" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_19" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_19" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_19" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_18" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_18" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_18" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_18" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_18" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_18" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_17" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_17" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_17" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_17" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_17" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_17" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_16" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_16" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_16" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_16" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_16" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_16" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_15" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_15" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_15" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_15" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_15" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_15" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_14" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_14" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_14" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_14" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_14" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_14" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_13" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_13" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_13" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_13" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_13" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_13" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_12" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_12" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_12" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_12" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_12" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_12" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_11" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_11" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_11" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_11" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_11" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_11" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_10" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_10" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_10" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_10" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_10" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_10" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_09" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_09" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_09" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_09" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_09" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_09" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_08" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_08" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_08" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_08" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_08" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_08" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_07" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_07" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_07" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_07" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_07" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_07" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_06" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_06" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_06" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_06" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_06" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_06" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_05" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_05" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_05" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_05" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_05" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_05" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_04" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_04" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_04" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_04" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_04" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_04" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_03" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_03" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_03" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_03" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_03" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_03" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_02" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_02" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_02" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_02" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_02" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_02" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_01" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_01" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_01" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_01" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_01" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_01" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller2" />
+            <reference1 string="leftThread_00" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller1" />
+            <reference1 string="leftThread_00" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftRoller0" />
+            <reference1 string="leftThread_00" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftSupportRoller" />
+            <reference1 string="leftThread_00" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftFrontRoller" />
+            <reference1 string="leftThread_00" />
+        </collindPair>
+        <collindPair>
+            <reference0 string="leftGear" />
+            <reference1 string="leftThread_00" />
+        </collindPair>
+    </ndMesh>
+    <ndMesh>
+        <name string="__constraintsList__" />
+        <matrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </matrix>
+        <geometryMatrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </geometryMatrix>
+        <type nodeType="node" target="0 0 0 " />
+        <loopJoint>
+            <name string="base_bucket" />
+            <childReference string="arm02" />
+            <parentReference string="base" />
+            <joint>
+                <constructor string="ndIkSwivelPositionEffector" />
+                <localFrame0>
+                    <posit float3="2.3642 4.94719e-05 -0.0483546" />
+                    <angles float3="-90 90 0" />
+                </localFrame0>
+                <localFrame1>
+                    <posit float3="0.144701 1.15524 0.00884643" />
+                    <angles float3="0 -0 0" />
+                </localFrame1>
+                <restPosition float3="5.98816 1.03331 0.278282" />
+                <angularSpring float="1000" />
+                <angularDamper float="50" />
+                <angularMaxTorque float="1e+15" />
+                <angularRegularizer float="0.005" />
+                <linearSpring float="1000" />
+                <linearDamper float="50" />
+                <linearMaxForce float="1e+15" />
+                <linearRegularizer float="0.005" />
+                <minWorkSpaceRadio float="4.95474" />
+                <maxWorkSpaceRadio float="8.31033" />
+                <rotationOrder int32="0" />
+                <enableSwivelControl int32="0" />
+            </joint>
+        </loopJoint>
+        <loopJoint>
+            <name string="leftGear_leftFrontRoller" />
+            <childReference string="leftGear" />
+            <parentReference string="leftFrontRoller" />
+            <joint>
+                <constructor string="ndJointGear" />
+                <localFrame0>
+                    <posit float3="0 0 0" />
+                    <angles float3="180 -90 0" />
+                </localFrame0>
+                <localFrame1>
+                    <posit float3="0 0 0" />
+                    <angles float3="2.42081e-11 90 0" />
+                </localFrame1>
+                <ratio float="0.874879" />
+            </joint>
+        </loopJoint>
+        <loopJoint>
+            <name string="leftGear_leftRoller0" />
+            <childReference string="leftGear" />
+            <parentReference string="leftRoller0" />
+            <joint>
+                <constructor string="ndJointGear" />
+                <localFrame0>
+                    <posit float3="0 0 0" />
+                    <angles float3="180 -90 0" />
+                </localFrame0>
+                <localFrame1>
+                    <posit float3="0 0 0" />
+                    <angles float3="2.42081e-11 90 0" />
+                </localFrame1>
+                <ratio float="0.481398" />
+            </joint>
+        </loopJoint>
+        <loopJoint>
+            <name string="leftGear_leftRoller1" />
+            <childReference string="leftGear" />
+            <parentReference string="leftRoller1" />
+            <joint>
+                <constructor string="ndJointGear" />
+                <localFrame0>
+                    <posit float3="0 0 0" />
+                    <angles float3="180 -90 0" />
+                </localFrame0>
+                <localFrame1>
+                    <posit float3="0 0 0" />
+                    <angles float3="2.42081e-11 90 0" />
+                </localFrame1>
+                <ratio float="0.481398" />
+            </joint>
+        </loopJoint>
+        <loopJoint>
+            <name string="leftGear_leftRoller2" />
+            <childReference string="leftGear" />
+            <parentReference string="leftRoller2" />
+            <joint>
+                <constructor string="ndJointGear" />
+                <localFrame0>
+                    <posit float3="0 0 0" />
+                    <angles float3="180 -90 0" />
+                </localFrame0>
+                <localFrame1>
+                    <posit float3="0 0 0" />
+                    <angles float3="2.42081e-11 90 0" />
+                </localFrame1>
+                <ratio float="0.481398" />
+            </joint>
+        </loopJoint>
+        <loopJoint>
+            <name string="engine_leftGear" />
+            <childReference string="leftGear" />
+            <parentReference string="engine" />
+            <joint>
+                <constructor string="ndMultiBodyVehicleDifferentialAxle" />
+                <localFrame0>
+                    <posit float3="0 0 0" />
+                    <angles float3="180 -90 0" />
+                </localFrame0>
+                <localFrame1>
+                    <posit float3="0 0 0" />
+                    <angles float3="90 0 180" />
+                </localFrame1>
+                <ratio float="5" />
+            </joint>
+        </loopJoint>
+        <loopJoint>
+            <name string="leftThread_00_leftThread_33" />
+            <childReference string="leftThread_33" />
+            <parentReference string="leftThread_00" />
+            <joint>
+                <constructor string="ndJointHinge" />
+                <localFrame0>
+                    <posit float3="-5.96046e-07 2.38419e-07 -0.322973" />
+                    <angles float3="5.77662 1.84302e-06 90" />
+                </localFrame0>
+                <localFrame1>
+                    <posit float3="0 0 0" />
+                    <angles float3="-2.61382e-11 1.30276e-11 90" />
+                </localFrame1>
+                <springK float="0" />
+                <damperC float="5" />
+                <limitState int32="0" />
+                <minLimit float="-1e+10" />
+                <maxLimit float="1e+10" />
+                <springDamperRegularizer float="0.15" />
+            </joint>
+        </loopJoint>
+        <loopJoint>
+            <name string="rightGear_rightFrontRoller" />
+            <childReference string="rightGear" />
+            <parentReference string="rightFrontRoller" />
+            <joint>
+                <constructor string="ndJointGear" />
+                <localFrame0>
+                    <posit float3="0 0 0" />
+                    <angles float3="-0 -90 0" />
+                </localFrame0>
+                <localFrame1>
+                    <posit float3="0 0 0" />
+                    <angles float3="-179.997 -89.3 -0.00294438" />
+                </localFrame1>
+                <ratio float="0.874879" />
+            </joint>
+        </loopJoint>
+        <loopJoint>
+            <name string="rightGear_rightRoller0" />
+            <childReference string="rightGear" />
+            <parentReference string="rightRoller0" />
+            <joint>
+                <constructor string="ndJointGear" />
+                <localFrame0>
+                    <posit float3="0 0 0" />
+                    <angles float3="-0 -90 0" />
+                </localFrame0>
+                <localFrame1>
+                    <posit float3="0 0 0" />
+                    <angles float3="180 -90 0" />
+                </localFrame1>
+                <ratio float="0.481398" />
+            </joint>
+        </loopJoint>
+        <loopJoint>
+            <name string="rightGear_rightRoller1" />
+            <childReference string="rightGear" />
+            <parentReference string="rightRoller1" />
+            <joint>
+                <constructor string="ndJointGear" />
+                <localFrame0>
+                    <posit float3="0 0 0" />
+                    <angles float3="-0 -90 0" />
+                </localFrame0>
+                <localFrame1>
+                    <posit float3="0 0 0" />
+                    <angles float3="180 -90 0" />
+                </localFrame1>
+                <ratio float="0.481398" />
+            </joint>
+        </loopJoint>
+        <loopJoint>
+            <name string="rightGear_rightRoller2" />
+            <childReference string="rightGear" />
+            <parentReference string="rightRoller2" />
+            <joint>
+                <constructor string="ndJointGear" />
+                <localFrame0>
+                    <posit float3="0 0 0" />
+                    <angles float3="-0 -90 0" />
+                </localFrame0>
+                <localFrame1>
+                    <posit float3="0 0 0" />
+                    <angles float3="180 -90 0" />
+                </localFrame1>
+                <ratio float="0.481398" />
+            </joint>
+        </loopJoint>
+        <loopJoint>
+            <name string="engine_rightGear" />
+            <childReference string="rightGear" />
+            <parentReference string="engine" />
+            <joint>
+                <constructor string="ndMultiBodyVehicleDifferentialAxle" />
+                <localFrame0>
+                    <posit float3="0 0 0" />
+                    <angles float3="180 90 0" />
+                </localFrame0>
+                <localFrame1>
+                    <posit float3="0 0 0" />
+                    <angles float3="90 -0 0" />
+                </localFrame1>
+                <ratio float="5" />
+            </joint>
+        </loopJoint>
+        <loopJoint>
+            <name string="rightThread_00_rightThread_33" />
+            <childReference string="rightThread_33" />
+            <parentReference string="rightThread_00" />
+            <joint>
+                <constructor string="ndJointHinge" />
+                <localFrame0>
+                    <posit float3="4.76837e-07 2.38419e-07 -0.322967" />
+                    <angles float3="5.77662 1.84302e-06 90" />
+                </localFrame0>
+                <localFrame1>
+                    <posit float3="0 0 0" />
+                    <angles float3="-2.61382e-11 1.30276e-11 90" />
+                </localFrame1>
+                <springK float="0" />
+                <damperC float="5" />
+                <limitState int32="0" />
+                <minLimit float="-1e+10" />
+                <maxLimit float="1e+10" />
+                <springDamperRegularizer float="0.15" />
+            </joint>
+        </loopJoint>
+    </ndMesh>
+    <ndMesh>
         <name string="leftGear" />
         <matrix>
             <posit float3="-1.7247 -0.154319 -1.89254" />
@@ -9129,1891 +11028,5 @@
                 <springDamperRegularizer float="0.1" />
             </axis1>
         </joint>
-    </ndMesh>
-    <ndMesh>
-        <name string="__contraintsList__" />
-        <matrix>
-            <posit float3="0 0 0" />
-            <angles float3="0 -0 0" />
-        </matrix>
-        <geometryMatrix>
-            <posit float3="0 0 0" />
-            <angles float3="0 -0 0" />
-        </geometryMatrix>
-        <type nodeType="node" target="0 0 0 " />
-        <loopJoint>
-            <childReference string="arm02" />
-            <parentReference string="base" />
-            <joint>
-                <constructor string="ndIkSwivelPositionEffector" />
-                <localFrame0>
-                    <posit float3="2.3642 4.94719e-05 -0.0483546" />
-                    <angles float3="-90 90 0" />
-                </localFrame0>
-                <localFrame1>
-                    <posit float3="0.144701 1.15524 0.00884643" />
-                    <angles float3="0 -0 0" />
-                </localFrame1>
-                <restPosition float3="5.98816 1.03331 0.278282" />
-                <angularSpring float="1000" />
-                <angularDamper float="50" />
-                <angularMaxTorque float="1e+15" />
-                <angularRegularizer float="0.005" />
-                <linearSpring float="1000" />
-                <linearDamper float="50" />
-                <linearMaxForce float="1e+15" />
-                <linearRegularizer float="0.005" />
-                <minWorkSpaceRadio float="4.95474" />
-                <maxWorkSpaceRadio float="8.31033" />
-                <rotationOrder int32="0" />
-                <enableSwivelControl int32="0" />
-            </joint>
-        </loopJoint>
-        <loopJoint>
-            <childReference string="leftGear" />
-            <parentReference string="leftFrontRoller" />
-            <joint>
-                <constructor string="ndJointGear" />
-                <localFrame0>
-                    <posit float3="0 0 0" />
-                    <angles float3="180 -90 0" />
-                </localFrame0>
-                <localFrame1>
-                    <posit float3="0 0 0" />
-                    <angles float3="2.42081e-11 90 0" />
-                </localFrame1>
-                <ratio float="0.874879" />
-            </joint>
-        </loopJoint>
-        <loopJoint>
-            <childReference string="leftGear" />
-            <parentReference string="leftRoller0" />
-            <joint>
-                <constructor string="ndJointGear" />
-                <localFrame0>
-                    <posit float3="0 0 0" />
-                    <angles float3="180 -90 0" />
-                </localFrame0>
-                <localFrame1>
-                    <posit float3="0 0 0" />
-                    <angles float3="2.42081e-11 90 0" />
-                </localFrame1>
-                <ratio float="0.481398" />
-            </joint>
-        </loopJoint>
-        <loopJoint>
-            <childReference string="leftGear" />
-            <parentReference string="leftRoller1" />
-            <joint>
-                <constructor string="ndJointGear" />
-                <localFrame0>
-                    <posit float3="0 0 0" />
-                    <angles float3="180 -90 0" />
-                </localFrame0>
-                <localFrame1>
-                    <posit float3="0 0 0" />
-                    <angles float3="2.42081e-11 90 0" />
-                </localFrame1>
-                <ratio float="0.481398" />
-            </joint>
-        </loopJoint>
-        <loopJoint>
-            <childReference string="leftGear" />
-            <parentReference string="leftRoller2" />
-            <joint>
-                <constructor string="ndJointGear" />
-                <localFrame0>
-                    <posit float3="0 0 0" />
-                    <angles float3="180 -90 0" />
-                </localFrame0>
-                <localFrame1>
-                    <posit float3="0 0 0" />
-                    <angles float3="2.42081e-11 90 0" />
-                </localFrame1>
-                <ratio float="0.481398" />
-            </joint>
-        </loopJoint>
-        <loopJoint>
-            <childReference string="leftGear" />
-            <parentReference string="engine" />
-            <joint>
-                <constructor string="ndMultiBodyVehicleDifferentialAxle" />
-                <localFrame0>
-                    <posit float3="0 0 0" />
-                    <angles float3="180 -90 0" />
-                </localFrame0>
-                <localFrame1>
-                    <posit float3="0 0 0" />
-                    <angles float3="90 0 180" />
-                </localFrame1>
-                <ratio float="5" />
-            </joint>
-        </loopJoint>
-        <loopJoint>
-            <childReference string="leftThread_33" />
-            <parentReference string="leftThread_00" />
-            <joint>
-                <constructor string="ndJointHinge" />
-                <localFrame0>
-                    <posit float3="-5.96046e-07 2.38419e-07 -0.322973" />
-                    <angles float3="5.77662 1.84302e-06 90" />
-                </localFrame0>
-                <localFrame1>
-                    <posit float3="0 0 0" />
-                    <angles float3="-2.61382e-11 1.30276e-11 90" />
-                </localFrame1>
-                <springK float="0" />
-                <damperC float="5" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.15" />
-            </joint>
-        </loopJoint>
-        <loopJoint>
-            <childReference string="rightGear" />
-            <parentReference string="rightFrontRoller" />
-            <joint>
-                <constructor string="ndJointGear" />
-                <localFrame0>
-                    <posit float3="0 0 0" />
-                    <angles float3="-0 -90 0" />
-                </localFrame0>
-                <localFrame1>
-                    <posit float3="0 0 0" />
-                    <angles float3="-179.997 -89.3 -0.00294438" />
-                </localFrame1>
-                <ratio float="0.874879" />
-            </joint>
-        </loopJoint>
-        <loopJoint>
-            <childReference string="rightGear" />
-            <parentReference string="rightRoller0" />
-            <joint>
-                <constructor string="ndJointGear" />
-                <localFrame0>
-                    <posit float3="0 0 0" />
-                    <angles float3="-0 -90 0" />
-                </localFrame0>
-                <localFrame1>
-                    <posit float3="0 0 0" />
-                    <angles float3="180 -90 0" />
-                </localFrame1>
-                <ratio float="0.481398" />
-            </joint>
-        </loopJoint>
-        <loopJoint>
-            <childReference string="rightGear" />
-            <parentReference string="rightRoller1" />
-            <joint>
-                <constructor string="ndJointGear" />
-                <localFrame0>
-                    <posit float3="0 0 0" />
-                    <angles float3="-0 -90 0" />
-                </localFrame0>
-                <localFrame1>
-                    <posit float3="0 0 0" />
-                    <angles float3="180 -90 0" />
-                </localFrame1>
-                <ratio float="0.481398" />
-            </joint>
-        </loopJoint>
-        <loopJoint>
-            <childReference string="rightGear" />
-            <parentReference string="rightRoller2" />
-            <joint>
-                <constructor string="ndJointGear" />
-                <localFrame0>
-                    <posit float3="0 0 0" />
-                    <angles float3="-0 -90 0" />
-                </localFrame0>
-                <localFrame1>
-                    <posit float3="0 0 0" />
-                    <angles float3="180 -90 0" />
-                </localFrame1>
-                <ratio float="0.481398" />
-            </joint>
-        </loopJoint>
-        <loopJoint>
-            <childReference string="rightGear" />
-            <parentReference string="engine" />
-            <joint>
-                <constructor string="ndMultiBodyVehicleDifferentialAxle" />
-                <localFrame0>
-                    <posit float3="0 0 0" />
-                    <angles float3="180 90 0" />
-                </localFrame0>
-                <localFrame1>
-                    <posit float3="0 0 0" />
-                    <angles float3="90 -0 0" />
-                </localFrame1>
-                <ratio float="5" />
-            </joint>
-        </loopJoint>
-        <loopJoint>
-            <childReference string="rightThread_33" />
-            <parentReference string="rightThread_00" />
-            <joint>
-                <constructor string="ndJointHinge" />
-                <localFrame0>
-                    <posit float3="4.76837e-07 2.38419e-07 -0.322967" />
-                    <angles float3="5.77662 1.84302e-06 90" />
-                </localFrame0>
-                <localFrame1>
-                    <posit float3="0 0 0" />
-                    <angles float3="-2.61382e-11 1.30276e-11 90" />
-                </localFrame1>
-                <springK float="0" />
-                <damperC float="5" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.15" />
-            </joint>
-        </loopJoint>
-    </ndMesh>
-    <ndMesh>
-        <name string="__collingPairsList__" />
-        <matrix>
-            <posit float3="0 0 0" />
-            <angles float3="0 -0 0" />
-        </matrix>
-        <geometryMatrix>
-            <posit float3="0 0 0" />
-            <angles float3="0 -0 0" />
-        </geometryMatrix>
-        <type nodeType="node" target="0 0 0 " />
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_33" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_33" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_33" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_33" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_33" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_33" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_32" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_32" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_32" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_32" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_32" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_32" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_31" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_31" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_31" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_31" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_31" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_31" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_30" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_30" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_30" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_30" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_30" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_30" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_29" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_29" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_29" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_29" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_29" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_29" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_28" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_28" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_28" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_28" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_28" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_28" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_27" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_27" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_27" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_27" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_27" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_27" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_26" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_26" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_26" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_26" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_26" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_26" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_25" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_25" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_25" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_25" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_25" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_25" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_24" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_24" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_24" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_24" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_24" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_24" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_23" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_23" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_23" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_23" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_23" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_23" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_22" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_22" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_22" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_22" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_22" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_22" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_21" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_21" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_21" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_21" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_21" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_21" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_20" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_20" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_20" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_20" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_20" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_20" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_19" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_19" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_19" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_19" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_19" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_19" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_18" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_18" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_18" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_18" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_18" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_18" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_17" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_17" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_17" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_17" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_17" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_17" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_16" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_16" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_16" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_16" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_16" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_16" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_15" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_15" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_15" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_15" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_15" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_15" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_14" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_14" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_14" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_14" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_14" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_14" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_13" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_13" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_13" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_13" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_13" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_13" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_12" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_12" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_12" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_12" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_12" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_12" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_11" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_11" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_11" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_11" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_11" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_11" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_10" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_10" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_10" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_10" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_10" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_10" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_09" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_09" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_09" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_09" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_09" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_09" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_08" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_08" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_08" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_08" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_08" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_08" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_07" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_07" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_07" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_07" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_07" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_07" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_06" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_06" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_06" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_06" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_06" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_06" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_05" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_05" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_05" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_05" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_05" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_05" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_04" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_04" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_04" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_04" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_04" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_04" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_03" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_03" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_03" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_03" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_03" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_03" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_02" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_02" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_02" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_02" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_02" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_02" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_01" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_01" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_01" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_01" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_01" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_01" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller2" />
-            <reference1 string="rightThread_00" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller1" />
-            <reference1 string="rightThread_00" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightRoller0" />
-            <reference1 string="rightThread_00" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightSupportRoller" />
-            <reference1 string="rightThread_00" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightFrontRoller" />
-            <reference1 string="rightThread_00" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="rightGear" />
-            <reference1 string="rightThread_00" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_33" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_33" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_33" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_33" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_33" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_33" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_32" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_32" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_32" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_32" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_32" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_32" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_31" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_31" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_31" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_31" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_31" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_31" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_30" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_30" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_30" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_30" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_30" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_30" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_29" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_29" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_29" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_29" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_29" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_29" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_28" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_28" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_28" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_28" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_28" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_28" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_27" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_27" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_27" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_27" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_27" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_27" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_26" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_26" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_26" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_26" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_26" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_26" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_25" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_25" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_25" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_25" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_25" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_25" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_24" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_24" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_24" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_24" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_24" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_24" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_23" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_23" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_23" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_23" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_23" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_23" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_22" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_22" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_22" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_22" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_22" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_22" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_21" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_21" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_21" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_21" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_21" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_21" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_20" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_20" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_20" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_20" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_20" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_20" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_19" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_19" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_19" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_19" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_19" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_19" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_18" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_18" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_18" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_18" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_18" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_18" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_17" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_17" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_17" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_17" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_17" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_17" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_16" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_16" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_16" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_16" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_16" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_16" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_15" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_15" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_15" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_15" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_15" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_15" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_14" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_14" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_14" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_14" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_14" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_14" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_13" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_13" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_13" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_13" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_13" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_13" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_12" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_12" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_12" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_12" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_12" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_12" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_11" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_11" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_11" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_11" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_11" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_11" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_10" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_10" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_10" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_10" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_10" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_10" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_09" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_09" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_09" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_09" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_09" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_09" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_08" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_08" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_08" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_08" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_08" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_08" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_07" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_07" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_07" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_07" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_07" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_07" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_06" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_06" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_06" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_06" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_06" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_06" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_05" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_05" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_05" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_05" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_05" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_05" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_04" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_04" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_04" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_04" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_04" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_04" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_03" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_03" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_03" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_03" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_03" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_03" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_02" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_02" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_02" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_02" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_02" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_02" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_01" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_01" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_01" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_01" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_01" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_01" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller2" />
-            <reference1 string="leftThread_00" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller1" />
-            <reference1 string="leftThread_00" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftRoller0" />
-            <reference1 string="leftThread_00" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftSupportRoller" />
-            <reference1 string="leftThread_00" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftFrontRoller" />
-            <reference1 string="leftThread_00" />
-        </collindPair>
-        <collindPair>
-            <reference0 string="leftGear" />
-            <reference1 string="leftThread_00" />
-        </collindPair>
     </ndMesh>
 </ndMesh>

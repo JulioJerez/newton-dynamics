@@ -50,6 +50,8 @@ class ndUndoRedoCommand : public ndClassAlloc
 	virtual class ndUndoRedoRotateMesh* GetAsUndoRedoResizeRotateMesh() const { return nullptr; }
 	virtual class ndUndoRedoNormalizeMass* GetAsUndoRedoResizeNormalizeMass() const { return nullptr; }
 
+	virtual class ndUndoRedoLoopJoint* GetAsUndoRedoLoopJoint() const { return nullptr; }
+
 	ndSharedPtr<ndMesh> m_mesh;
 	ndWeakPtr<ndAssetEditor> m_editor;
 };

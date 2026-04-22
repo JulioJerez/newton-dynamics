@@ -364,7 +364,7 @@ void ndIkSwivelPositionEffector::DebugJoint(ndConstraintDebugCallback& debugCall
 	CalculateGlobalMatrix(matrix0, matrix1);
 
 	//debugCallback.DrawFrame(matrix0);
-	//debugCallback.DrawFrame(matrix1);
+	debugCallback.DrawFrame(matrix1);
 
 	debugCallback.DrawLine(matrix0.m_posit, matrix1.m_posit, ndVector(ndFloat32(0.89f), ndFloat32(0.70f), ndFloat32(0.13f), ndFloat32(1.0f)));
 	

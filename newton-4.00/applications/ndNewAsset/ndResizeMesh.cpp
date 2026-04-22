@@ -77,7 +77,7 @@ void ndResizeMesh::ApplyScale() const
 
 	auto ScaleMesh = [this, &scaleMatrix, &invScaleMatrix](ndMesh* const node)
 	{
-		ndSharedPtr<ndMeshEffect>& mesh = node->GetMesh();
+		ndSharedPtr<ndMeshEffect>& mesh = node->GetGeometry();
 		if (mesh)
 		{
 			mesh->ApplyTransform(scaleMatrix);
@@ -134,7 +134,7 @@ void ndResizeMesh::Execute()
 	ndVector maxBox(ndFloat32(-1.0e10f));
 	auto CalculateAABB = [this, &minBox, &maxBox](ndMesh* const node)
 	{
-		ndSharedPtr<ndMeshEffect>& mesh = node->GetMesh();
+		ndSharedPtr<ndMeshEffect>& mesh = node->GetGeometry();
 		if (mesh)
 		{
 			const ndInt32 vertexcount = mesh->GetVertexCount();

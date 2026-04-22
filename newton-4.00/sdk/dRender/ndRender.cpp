@@ -90,9 +90,19 @@ ndSharedPtr<ndRenderSceneNode>& ndRender::GetCamera()
 	return m_camera;
 }
 
-ndSharedPtr<ndRenderSceneNode> ndRender::GetCamera() const
+const ndSharedPtr<ndRenderSceneNode>& ndRender::GetCamera() const
 {
 	return m_camera;
+}
+
+ndSharedPtr<ndRenderContext>& ndRender::GetContext()
+{
+	return m_context;
+}
+
+const ndSharedPtr<ndRenderContext>& ndRender::GetContext() const
+{
+	return m_context;
 }
 
 ndSharedPtr<ndRenderTextureCache>& ndRender::GetTextureCache()
@@ -149,6 +159,11 @@ void ndRender::AddRenderPass(const ndSharedPtr<ndRenderPass>& renderPass)
 {
 	ndAssert(renderPass->m_owner == this);
 	m_renderPasses.Append(renderPass);
+}
+
+void ndRender::ClearZBuffer()
+{
+	m_context->ClearZBuffer();
 }
 
 void ndRender::ClearFrameBuffer(const ndVector& color)

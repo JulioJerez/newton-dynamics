@@ -154,12 +154,12 @@ void ndEditorCameraFlyby::MouseSelection()
 
 	auto RayCast = [this, &hitNode, &hitParam, &p0, &p1](ndMesh* const node)
 	{
-		if (node->GetMesh())
+		if (node->GetGeometry())
 		{
 			const ndMatrix matrix(node->GetGeometryMatrix() * node->CalculateGlobalMatrix());
 			const ndVector localP0(matrix.UntransformVector(p0));
 			const ndVector localP1(matrix.UntransformVector(p1));
-			ndFloat32 param = node->GetMesh()->RayCast(localP0, localP1);
+			ndFloat32 param = node->GetGeometry()->RayCast(localP0, localP1);
 			if (param < hitParam)
 			{
 				hitParam = param;
@@ -171,11 +171,8 @@ void ndEditorCameraFlyby::MouseSelection()
 
 	if (hitNode)
 	{
-		m_editor->m_addCollidingBody = false;
-		//m_editor->m_removeCollidingBody = false;
 		m_editor->m_currentSelection = hitNode;
-		m_editor->m_addCollingPairSelection = -1;
-		m_editor->m_addCollingPairCandidateSelection = -1;
-		m_editor->m_secundarySelection.SetCount(0);
+		m_editor->m_currentLoopJointSelection = ndSharedPtr<ndMeshLoopJoint>(nullptr);
+		m_editor->m_currentCollingPairSelection = ndSharedPtr<ndMeshCollidingPair>(nullptr);
 	}
 }

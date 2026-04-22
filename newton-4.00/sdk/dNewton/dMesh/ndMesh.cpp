@@ -24,13 +24,21 @@
 #include "VHACD.h"
 #include "ndMesh.h"
 #include "ndCollision.h"
+#include "ndJointGear.h"
+#include "ndJointPlane.h"
+#include "ndMeshEffect.h"
+#include "ndMeshLoader.h"
 #include "ndJointHinge.h"
 #include "ndJointWheel.h"
 #include "ndJointSlider.h"
+#include "ndJointRoller.h"
+#include "ndBodyDynamic.h"
 #include "ndJointFix6dof.h"
 #include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
+#include "ndIkSwivelPositionEffector.h"
+#include "ndMultiBodyVehicleDifferentialAxle.h"
 
 ndMesh::ndMesh()
 	:ndClassAlloc()
@@ -251,17 +259,17 @@ ndMesh* ndMesh::CreateClone() const
 	return new ndMesh(*this);
 }
 
-ndSharedPtr<ndMeshEffect>& ndMesh::GetMesh()
+ndSharedPtr<ndMeshEffect>& ndMesh::GetGeometry()
 {
 	return m_mesh;
 }
 
-const ndSharedPtr<ndMeshEffect>& ndMesh::GetMesh() const
+const ndSharedPtr<ndMeshEffect>& ndMesh::GetGeometry() const
 {
 	return m_mesh;
 }
 
-void ndMesh::SetMesh(const ndSharedPtr<ndMeshEffect>& mesh)
+void ndMesh::SetGeometry(const ndSharedPtr<ndMeshEffect>& mesh)
 {
 	m_mesh = mesh;
 }
@@ -283,57 +291,74 @@ void ndMesh::SetJoint(const ndSharedPtr<ndMeshJoint>& joint)
 
 ndCloseLoopConstraints* ndMesh::GetLoopJoints()
 {
-	ndMesh* const mesh = GetRoot()->FindByName(ND_MESH_LOOP_JOINTS);
-	//return (ndCloseLoopConstraints*)mesh;
-	return mesh ? mesh->GetAsCloseLoopConstraints() : nullptr;
-}
-
-const ndCloseLoopConstraints* ndMesh::GetLoopJoints() const 
-{
-	ndMesh* const mesh = GetRoot()->FindByName(ND_MESH_LOOP_JOINTS);
-	//return (ndCloseLoopConstraints*)mesh;
-	return mesh ? mesh->GetAsCloseLoopConstraints() : nullptr;
-}
-
-void ndMesh::AddLoopJoint(const ndSharedPtr<ndMeshLoopJoint>& joint)
-{
-	ndCloseLoopConstraints* mesh = GetLoopJoints();
+	ndMesh* mesh = GetRoot()->FindByName(ND_MESH_LOOP_JOINTS);
 	if (!mesh)
 	{
 		ndMesh* const rootNode = GetRoot();
 		ndAssert(rootNode);
 		ndSharedPtr<ndMesh> loops(new ndCloseLoopConstraints());
-		rootNode->AddChild(loops);
-		mesh = GetLoopJoints();
+		loops->m_parent = rootNode;
+		loops->m_selfChildNode = rootNode->m_children.Addtop(loops);
+		mesh = loops->GetAsCloseLoopConstraints();
 	}
+	return mesh->GetAsCloseLoopConstraints();
+}
+
+const ndCloseLoopConstraints* ndMesh::GetLoopJoints() const 
+{
+	const ndMesh* mesh = GetRoot()->FindByName(ND_MESH_LOOP_JOINTS);
+	if (!mesh)
+	{
+		ndMesh* const rootNode = ((ndMesh*)this)->GetRoot();
+		ndAssert(rootNode);
+		ndSharedPtr<ndMesh> loops(new ndCloseLoopConstraints());
+		loops->m_parent = rootNode;
+		loops->m_selfChildNode = rootNode->m_children.Addtop(loops);
+		mesh = loops->GetAsCloseLoopConstraints();
+	}
+	return mesh->GetAsCloseLoopConstraints();
+}
+
+void ndMesh::AddLoopJoint(const ndSharedPtr<ndMeshLoopJoint>& joint)
+{
+	ndCloseLoopConstraints* const mesh = GetLoopJoints();
 	mesh->m_loopJoints.Append(joint);
 }
 
 ndCollidingPairs* ndMesh::GetCollingPairs()
 {
-	ndMesh* const mesh = GetRoot()->FindByName(ND_MESH_COLLIDING_PAIRS);
-	return mesh ? mesh->GetAsCollidingPairs() : nullptr;
-}
-
-const ndCollidingPairs* ndMesh::GetCollingPairs() const
-{
-	ndMesh* const mesh = GetRoot()->FindByName(ND_MESH_COLLIDING_PAIRS);
-	return mesh ? mesh->GetAsCollidingPairs() : nullptr;
-}
-
-void ndMesh::AddCollidingPair(const ndMesh* const node0, const ndMesh* const node1)
-{
-	ndAssert(node0 != node1);
-	ndCollidingPairs* mesh = GetCollingPairs();
+	ndMesh* mesh = GetRoot()->FindByName(ND_MESH_COLLIDING_PAIRS);
 	if (!mesh)
 	{
 		ndMesh* const rootNode = GetRoot();
 		ndAssert(rootNode);
 		ndSharedPtr<ndMesh> pairs(new ndCollidingPairs());
-		rootNode->AddChild(pairs);
-		mesh = GetCollingPairs();
+		pairs->m_parent = rootNode;
+		pairs->m_selfChildNode = rootNode->m_children.Addtop(pairs);
+		mesh = pairs->GetCollingPairs();
 	}
+	return mesh->GetAsCollidingPairs();
+}
 
+const ndCollidingPairs* ndMesh::GetCollingPairs() const
+{
+	ndMesh* mesh = GetRoot()->FindByName(ND_MESH_COLLIDING_PAIRS);
+	if (!mesh)
+	{
+		ndMesh* const rootNode = ((ndMesh*)this)->GetRoot();
+		ndAssert(rootNode);
+		ndSharedPtr<ndMesh> pairs(new ndCollidingPairs());
+		pairs->m_parent = rootNode;
+		pairs->m_selfChildNode = rootNode->m_children.Addtop(pairs);
+		mesh = pairs->GetCollingPairs();
+	}
+	return mesh->GetAsCollidingPairs();
+}
+
+void ndMesh::AddCollidingPair(const ndMesh* const node0, const ndMesh* const node1)
+{
+	ndAssert(node0 != node1);
+	ndCollidingPairs* const mesh = GetCollingPairs();
 	const ndMesh* const childNode = (node0->m_name < node1->m_name) ? node0 : node1;
 	const ndMesh* const parentNode = (node0->m_name < node1->m_name) ? node1 : node0;
 	for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* node = mesh->m_collingPairs.GetFirst(); node; node = node->GetNext())
@@ -488,7 +513,7 @@ void ndMesh::ApplyTransform(const ndMatrix& transform)
 		const ndMatrix entMatrix(invTransform * node->m_matrix * transform);
 		node->m_matrix = entMatrix;
 
-		ndSharedPtr<ndMeshEffect> mesh (node->GetMesh());
+		ndSharedPtr<ndMeshEffect> mesh (node->GetGeometry());
 		if (mesh)
 		{
 			const ndMatrix meshMatrix(invTransform * node->GetGeometryMatrix() * transform);
@@ -538,7 +563,7 @@ void ndMesh::ApplyTransform(const ndMatrix& transform)
 
 ndMatrix ndMesh::CalculateLocalMatrix(ndVector& sizeOut) const
 {
-	ndSharedPtr<ndMeshEffect> meshEffect = GetMesh();
+	ndSharedPtr<ndMeshEffect> meshEffect = GetGeometry();
 
 	const ndInt32 pointsCount = meshEffect->GetVertexCount();
 	const ndInt32 pointsStride = ndInt32(meshEffect->GetVertexStrideInByte() / sizeof(ndFloat64));
@@ -617,13 +642,13 @@ void ndMesh::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) c
 	p1 = ndVector(-1.0e10f);
 	auto GetAabb = [&matrix, &p0, &p1](ndMesh* const node)
 	{
-		if (node->GetMesh())
+		if (node->GetGeometry())
 		{
 			const ndMatrix nodeMatrix(node->GetGeometryMatrix() * node->CalculateGlobalMatrix() * matrix);
 
-			ndInt32 count = node->GetMesh()->GetVertexCount();
-			ndInt32 stride = ndInt32(node->GetMesh()->GetVertexStrideInByte() / sizeof (ndFloat64));
-			const ndFloat64* const array = node->GetMesh()->GetVertexPool();
+			ndInt32 count = node->GetGeometry()->GetVertexCount();
+			ndInt32 stride = ndInt32(node->GetGeometry()->GetVertexStrideInByte() / sizeof (ndFloat64));
+			const ndFloat64* const array = node->GetGeometry()->GetVertexPool();
 			for (ndInt32 i = 0; i < count; ++i)
 			{
 				ndVector p(nodeMatrix.TransformVector(ndVector(array[i * stride + 0], array[i * stride + 1], array[i * stride + 2], ndFloat64(0.0f))));
@@ -637,7 +662,7 @@ void ndMesh::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) c
 
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionBox()
 {
-	ndSharedPtr<ndMeshEffect> meshEffect = GetMesh();
+	ndSharedPtr<ndMeshEffect> meshEffect = GetGeometry();
 	ndAssert(*meshEffect);
 	
 	ndVector size;
@@ -650,7 +675,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionBox()
 
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionNull()
 {
-	ndSharedPtr<ndMeshEffect> meshEffect = GetMesh();
+	ndSharedPtr<ndMeshEffect> meshEffect = GetGeometry();
 	ndAssert(*meshEffect);
 
 	ndVector size;
@@ -663,7 +688,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionNull()
 
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionSphere()
 {
-	ndSharedPtr<ndMeshEffect> meshEffect = GetMesh();
+	ndSharedPtr<ndMeshEffect> meshEffect = GetGeometry();
 	ndAssert(*meshEffect);
 
 	ndVector size;
@@ -677,11 +702,14 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionSphere()
 
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCapsule()
 {
-	ndSharedPtr<ndMeshEffect> meshEffect = GetMesh();
+	ndSharedPtr<ndMeshEffect> meshEffect = GetGeometry();
 	ndAssert(*meshEffect);
 
 	ndVector size;
 	ndMatrix localMatrix(CalculateLocalMatrix(size));
+	const ndMatrix rotationAligment(ndRollMatrix(ndFloat32(-90.0f) * ndDegreeToRad));
+	localMatrix = rotationAligment * localMatrix;
+	size = rotationAligment.RotateVector(size).Abs();
 
 	ndFloat32 radios = ndMax(size.m_y, size.m_z);
 	ndFloat32 high = ndFloat32(2.0f) * (ndMax (size.m_x - radios, ndFloat32 (0.0f)));
@@ -693,11 +721,14 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCapsule()
 
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCylinder()
 {
-	ndSharedPtr<ndMeshEffect> meshEffect = GetMesh();
+	ndSharedPtr<ndMeshEffect> meshEffect = GetGeometry();
 	ndAssert(*meshEffect);
 
 	ndVector size;
 	ndMatrix localMatrix(CalculateLocalMatrix(size));
+	const ndMatrix rotationAligment(ndRollMatrix(ndFloat32(90.0f)));
+	localMatrix = rotationAligment * localMatrix;
+	size = rotationAligment.RotateVector(size).Abs();
 
 	ndFloat32 high = ndFloat32(2.0f) * size.m_x;
 	ndFloat32 radios = ndMax(size.m_y, size.m_z);
@@ -709,7 +740,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCylinder()
 
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionChamferCylinder()
 {
-	ndSharedPtr<ndMeshEffect> meshEffect = GetMesh();
+	ndSharedPtr<ndMeshEffect> meshEffect = GetGeometry();
 	ndAssert(*meshEffect);
 
 	ndVector size;
@@ -724,7 +755,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionChamferCylinder()
 
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionTire()
 {
-	ndSharedPtr<ndMeshEffect> meshEffect = GetMesh();
+	ndSharedPtr<ndMeshEffect> meshEffect = GetGeometry();
 	ndAssert(*meshEffect);
 
 	ndVector size;
@@ -835,7 +866,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionTree(bool optimize)
 		ndMesh* node = entBuffer.Pop();
 		ndMatrix matrix(node->m_matrix * matrixBuffer.Pop());
 
-		ndSharedPtr<ndMeshEffect> meshEffect = node->GetMesh();
+		ndSharedPtr<ndMeshEffect> meshEffect = node->GetGeometry();
 		if (*meshEffect)
 		{
 			ndInt32 vertexStride = meshEffect->GetVertexStrideInByte() / ndInt32(sizeof(ndFloat64));
@@ -1158,4 +1189,62 @@ ndCollidingPairs* ndCollidingPairs::GetAsCollidingPairs()
 const ndCollidingPairs* ndCollidingPairs::GetAsCollidingPairs() const
 {
 	return this;
+}
+
+ndSharedPtr<ndMeshJoint> ndMesh::LoadJoint(const nd::TiXmlElement* const xmlJoint) const
+{
+	const ndMesh* mesh = this;
+	const char* const constructor = xmlGetString(xmlJoint, "constructor");
+	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointFix6dof(mesh));
+	if (strcmp(constructor, ndJointHinge::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointHinge(mesh));
+	}
+	else if (strcmp(constructor, ndJointRoller::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointRoller(mesh));
+	}
+	else if (strcmp(constructor, ndJointDoubleHinge::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointDoubleHinge(mesh));
+	}
+	else if (strcmp(constructor, ndJointSpherical::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointSpherical(mesh));
+	}
+	else if (strcmp(constructor, ndJointWheel::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointWheel(mesh));
+	}
+	else if (strcmp(constructor, ndJointSlider::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointSlider(mesh));
+	}
+	else if (strcmp(constructor, ndJointFix6dof::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointFix6dof(mesh));
+	}
+	else if (strcmp(constructor, ndIkSwivelPositionEffector::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointIkSwivelPositionEffector(mesh));
+	}
+	else if (strcmp(constructor, ndJointPlane::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointPlane(mesh));
+	}
+	else if (strcmp(constructor, ndJointGear::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointGear(mesh));
+	}
+	else if (strcmp(constructor, ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointDifferentialAxle(mesh));
+	}
+	else
+	{
+		ndAssert(0);
+	}
+
+	joint->DeserializeFromXml(xmlJoint);
+	return joint;
 }
