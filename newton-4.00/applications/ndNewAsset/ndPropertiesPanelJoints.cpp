@@ -1376,7 +1376,6 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 			}
 			else
 			{
-				//const ndMatrix matrix(joint->m_localFrame0);
 				ndReal position[3];
 				position[0] = ndReal(0.0f);
 				position[1] = ndReal(0.0f);
