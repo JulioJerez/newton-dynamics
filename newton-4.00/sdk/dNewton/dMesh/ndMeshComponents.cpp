@@ -840,6 +840,29 @@ ndMeshJointGear::ndMeshJointGear(const ndMesh* const owner, const ndJointBilater
 	m_ratio = subJoint->GetRatio();
 }
 
+ndMeshJointGear::ndMeshJointGear(const ndMeshJointGear& other)
+	:ndMeshJoint(other)
+	,m_ratio (other.m_ratio)
+{
+}
+
+ndMeshJoint* ndMeshJointGear::Duplicate() const
+{
+	return new ndMeshJointGear(*this);
+}
+
+bool ndMeshJointGear::operator==(const ndMeshJoint& other) const
+{
+	bool test = ndMeshJoint::operator==(other);
+
+	if (test)
+	{
+		const ndMeshJointGear* const otherJoint = (ndMeshJointGear*)&other;
+		test = test && (m_ratio == otherJoint->m_ratio);
+	}
+	return test;
+}
+
 void ndMeshJointGear::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	ndMeshJoint::SerializeToXml(parent);

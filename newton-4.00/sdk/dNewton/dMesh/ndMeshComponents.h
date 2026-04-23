@@ -178,20 +178,45 @@ class ndMeshJointSpherical : public ndMeshJoint
 	ndInt8 m_coneAngleState;
 };
 
-class ndMeshJointIkSwivelPositionEffector : public ndMeshJoint
+class ndMeshJointPlane : public ndMeshJoint
 {
 	public:
-	D_NEWTON_API ndMeshJointIkSwivelPositionEffector(const ndMesh* const owner);
-	D_NEWTON_API ndMeshJointIkSwivelPositionEffector(const ndMeshJointIkSwivelPositionEffector& other);
-	D_NEWTON_API ndMeshJointIkSwivelPositionEffector(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
-
-	D_COLLISION_API virtual ndMeshJoint* Duplicate() const override;
+	D_NEWTON_API ndMeshJointPlane(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointPlane(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
 	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
+	ndInt8 m_controlRotation;
+};
+
+class ndMeshJointDifferentialAxle : public ndMeshJoint
+{
+	public:
+	D_NEWTON_API ndMeshJointDifferentialAxle(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointDifferentialAxle(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
+
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
+
+	ndFloat32 m_gearRatio;
+};
+
+class ndMeshJointIkSwivelPositionEffector : public ndMeshJoint
+{
+	public:
+	D_NEWTON_API ndMeshJointIkSwivelPositionEffector(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointIkSwivelPositionEffector(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
+
+	D_NEWTON_API ndMeshJointIkSwivelPositionEffector(const ndMeshJointIkSwivelPositionEffector& other);
+	D_NEWTON_API virtual ndMeshJoint* Duplicate() const override;
 	D_NEWTON_API virtual bool operator==(const ndMeshJoint& other) const override;
+
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
 
 	ndVector m_restPosition;
@@ -212,43 +237,21 @@ class ndMeshJointIkSwivelPositionEffector : public ndMeshJoint
 	bool m_enableSwivelControl;
 };
 
-class ndMeshJointPlane : public ndMeshJoint
-{
-	public:
-	D_NEWTON_API ndMeshJointPlane(const ndMesh* const owner);
-	D_NEWTON_API ndMeshJointPlane(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
-
-	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
-	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
-	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
-
-	ndInt8 m_controlRotation;
-};
-
 class ndMeshJointGear : public ndMeshJoint
 {
 	public:
 	D_NEWTON_API ndMeshJointGear(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointGear(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 
+	D_NEWTON_API ndMeshJointGear(const ndMeshJointGear& other);
+	D_NEWTON_API virtual ndMeshJoint* Duplicate() const override;
+	D_NEWTON_API virtual bool operator==(const ndMeshJoint& other) const override;
+
 	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
 	ndFloat32 m_ratio;
-};
-
-class ndMeshJointDifferentialAxle : public ndMeshJoint
-{
-	public:
-	D_NEWTON_API ndMeshJointDifferentialAxle(const ndMesh* const owner);
-	D_NEWTON_API ndMeshJointDifferentialAxle(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
-
-	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
-	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
-	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
-
-	ndFloat32 m_gearRatio;
 };
 
 #endif
