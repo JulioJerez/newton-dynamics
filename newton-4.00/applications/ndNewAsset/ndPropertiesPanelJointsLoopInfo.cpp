@@ -317,6 +317,56 @@ void ndAssetEditor::JointsLoopEditSwivelPositionEffector()
 		}
 	}
 
+	ImGui::SeparatorText("rotation order");
+	{
+		char rotationOrder[64];
+		if (joint->m_rotationOrder == ndIkSwivelPositionEffector::m_pitchRollYaw)
+		{
+			snprintf(rotationOrder, sizeof(rotationOrder) - 1, "pitchRollYaw");
+		}
+		else
+		{
+			snprintf(rotationOrder, sizeof(rotationOrder) - 1, "pitchYawRoll");
+		}
+
+		if (ImGui::BeginCombo("##11", rotationOrder))
+		{
+			bool param = (joint->m_rotationOrder == ndIkSwivelPositionEffector::m_pitchRollYaw);
+			if (ImGui::Selectable("pitchRollYaw", param))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+				joint->m_rotationOrder = ndIkSwivelPositionEffector::m_pitchRollYaw;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			}
+			if (ImGui::Selectable("pitchYawRoll", !param))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+				joint->m_rotationOrder = ndIkSwivelPositionEffector::m_pitchYawRoll;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			}
+			ImGui::EndCombo();
+		}
+	}
+
+	ImGui::SeparatorText("work space constraint");
+	{
+		ndReal value = joint->m_minWorkSpaceRadio;
+		if (ImGui::InputFloat("min radios", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			joint->m_minWorkSpaceRadio = ndMax(value, ndReal(0.0f));
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+		}
+
+		value = joint->m_maxWorkSpaceRadio;
+		if (ImGui::InputFloat("max radios", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			joint->m_maxWorkSpaceRadio = ndMax(value, ndReal(0.0f));
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+		}
+	}
+
 	ImGui::SeparatorText("swivel actuator mode");
 	{
 		char swivelMode[64];
