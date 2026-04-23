@@ -617,7 +617,8 @@ void ndMeshCollidingPair::SerializeToXml(nd::TiXmlElement* const parent) const
 	xmlSaveParam(parent, "reference1", m_parentNode->GetName().GetStr());
 }
 
-void ndMeshCollidingPair::DeserializeFromXml(const nd::TiXmlElement* const parent)
+//void ndMeshCollidingPair::DeserializeFromXml(const nd::TiXmlElement* const parent)
+void ndMeshCollidingPair::DeserializeFromXml(const nd::TiXmlElement* const)
 {
 	ndAssert(0);
 }

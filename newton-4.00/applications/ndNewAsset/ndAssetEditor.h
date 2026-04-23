@@ -137,6 +137,8 @@ class ndAssetEditor : public ndClassAlloc
 	void ShowPropertiesRigidBodyInfo();
 
 	void ShowPropertiesJointsLoopInfo();
+
+	void JointsLoopEditSwivelPositionEffector();
 		
 	ndSharedPtr<ndMesh> m_mesh;
 	ndSharedPtr<ndRender> m_renderer;
