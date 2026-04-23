@@ -95,7 +95,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 
 		// show node matrix
 		{
-			if (m_showParentRelativeTransform)
+			if (m_showPreTransform)
 			{
 				ImGui::SeparatorText("parent relative Tranform");
 			}
@@ -111,7 +111,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			ndVector tmp;
 			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
 
-			if (m_showParentRelativeTransform)
+			if (m_showPreTransform)
 			{
 				position[0] = ndReal(matrix.m_posit.m_x);
 				position[1] = ndReal(matrix.m_posit.m_y);

@@ -83,8 +83,8 @@ class ndMatrix : public ndClassAlloc
 		const ndFloat32* const src, ndInt32 srcStrideInBytes, ndInt32 count) const;
 #endif
 	D_CORE_API bool SanityCheck() const;
-	D_CORE_API bool TestIdentity() const;
 	D_CORE_API bool TestSymetric3x3() const;
+	D_CORE_API bool TestIdentity(ndFloat32 tolerance = ndFloat32(0.0f)) const;
 	D_CORE_API bool TestOrthogonal(ndFloat32 tol = ndFloat32 (1.0e-4f)) const;
 
 	D_CORE_API ndMatrix Multiply3X3 (const ndMatrix &B) const;

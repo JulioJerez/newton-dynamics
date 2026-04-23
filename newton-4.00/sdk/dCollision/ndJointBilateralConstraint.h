@@ -106,6 +106,7 @@ class ndJointBilateralConstraint : public ndConstraint
 			,m_minLimit(ndFloat32(-1.0e10f))
 			,m_maxLimit(ndFloat32(1.0e10f))
 			,m_targetParam(ndFloat32(0.0f))
+			,m_maxForce(D_LCP_MAX_VALUE)
 			,m_springDamperRegularizer(ndFloat32(0.1f))
 			,m_limitState(false)
 			,m_hitLimits(false)
@@ -119,6 +120,7 @@ class ndJointBilateralConstraint : public ndConstraint
 		ndFloat32 m_minLimit;
 		ndFloat32 m_maxLimit;
 		ndFloat32 m_targetParam;
+		ndFloat32 m_maxForce;
 		ndFloat32 m_springDamperRegularizer;
 		bool m_limitState;
 		bool m_hitLimits;

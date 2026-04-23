@@ -33,7 +33,7 @@ ndAssetEditor::ndAssetEditor()
 	,m_showCenterOfMass(false)
 	,m_showSelectedNode(true)
 	,m_showCollisionShape(true)
-	,m_showParentRelativeTransform(false)
+	,m_showPreTransform(false)
 	,m_toolActive(false)
 	//,m_addCollidingBody(false)
 	//,m_removeCollidingBody(false)
@@ -488,7 +488,7 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::Checkbox("show collision", &m_showCollisionShape);
 
 			ImGui::Text("global properties");
-			ImGui::Checkbox("parent relative Transform", &m_showParentRelativeTransform);
+			ImGui::Checkbox("parent relative Transform", &m_showPreTransform);
 
 			ImGui::EndMenu();
 		}
