@@ -531,8 +531,34 @@ ndMeshJoint::ndMeshJoint(const ndMesh* const owner, const ndJointBilateralConstr
 {
 }
 
+ndMeshJoint::ndMeshJoint(const ndMeshJoint& other)
+	:ndClassAlloc()
+	,m_localFrame0(other.m_localFrame0)
+	,m_localFrame1(other.m_localFrame1)
+	,m_constructor(other.m_constructor)
+	,m_owner(ndWeakPtr<const ndMesh>(other.m_owner))
+	,m_surrogateParent(ndWeakPtr<const ndMesh>(other.m_surrogateParent))
+{
+}
+
 ndMeshJoint::~ndMeshJoint()
 {
+}
+
+ndMeshJoint* ndMeshJoint::Duplicate() const
+{
+	ndAssert(0);
+	return nullptr;
+}
+
+bool ndMeshJoint::operator==(const ndMeshJoint& other) const
+{
+	bool test = true;
+	test = test && (m_constructor == other.m_constructor);
+	test = test && (m_localFrame0 * other.m_localFrame0.OrthoInverse()).TestIdentity(ndFloat32(1.0e-6f));
+	test = test && (m_localFrame1 * other.m_localFrame1.OrthoInverse()).TestIdentity(ndFloat32(1.0e-6f));
+
+	return test;
 }
 
 void ndMeshJoint::ApplyTransform(const ndMatrix& transform)

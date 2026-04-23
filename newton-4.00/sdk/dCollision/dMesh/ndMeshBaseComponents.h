@@ -240,10 +240,12 @@ class ndMeshJoint : public ndClassAlloc
 		ndInt8 m_limitState;
 	};
 
+	D_COLLISION_API ndMeshJoint(const ndMeshJoint& other);
 	D_COLLISION_API ndMeshJoint(const ndMesh* const owner);
 	D_COLLISION_API ndMeshJoint(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 	D_COLLISION_API virtual ~ndMeshJoint();
 
+	D_COLLISION_API virtual ndMeshJoint* Duplicate() const;
 	D_COLLISION_API const ndMesh* GetSurrogateParent() const;
 	D_COLLISION_API void SetSurrogateParent(const ndMesh* const surrodateParent);
 
@@ -252,6 +254,8 @@ class ndMeshJoint : public ndClassAlloc
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
 
 	D_COLLISION_API virtual void ApplyTransform(const ndMatrix& tranform);
+
+	D_COLLISION_API virtual bool operator==(const ndMeshJoint& other) const;
 
 	ndMatrix m_localFrame0;
 	ndMatrix m_localFrame1;

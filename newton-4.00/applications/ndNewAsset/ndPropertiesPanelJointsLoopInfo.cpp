@@ -18,9 +18,7 @@ class ndUndoRedoLoopJoint : public ndUndoRedoCommand
 	public:
 	ndUndoRedoLoopJoint(ndAssetEditor* const editor)
 		:ndUndoRedoCommand(editor, ndSharedPtr<ndMesh>(nullptr))
-		,m_loopJoint(editor->m_currentLoopJointSelection)
-		,m_name(editor->m_currentLoopJointSelection->m_name)
-		,m_joint(editor->m_currentLoopJointSelection->m_joint)
+		,m_loopJoint(ndSharedPtr<ndMeshLoopJoint>(new ndMeshLoopJoint(**editor->m_currentLoopJointSelection)))
 	{
 	}
 
@@ -36,10 +34,9 @@ class ndUndoRedoLoopJoint : public ndUndoRedoCommand
 			ndUndoRedoLoopJoint* const other = command.GetAsUndoRedoLoopJoint();
 			if (other)
 			{
-				bool test = m_name == other->m_name;
-				test = test && (m_joint->m_constructor == other->m_joint->m_constructor);
-				test = test && (m_joint->m_localFrame0 * other->m_joint->m_localFrame0.OrthoInverse()).TestIdentity();
-				test = test && (m_joint->m_localFrame1 * other->m_joint->m_localFrame1.OrthoInverse()).TestIdentity();
+				const ndMeshLoopJoint* const self = *m_loopJoint;
+				const ndMeshLoopJoint* const otherSelf = *other->m_loopJoint;
+				bool test = (*self == *otherSelf);
 				if (test)
 				{
 					return false;
@@ -53,16 +50,23 @@ class ndUndoRedoLoopJoint : public ndUndoRedoCommand
 	virtual void Undo() override
 	{
 		ndAssert(m_editor->m_currentLoopJointSelection);
+		ndCloseLoopConstraints* const loopContainer = m_editor->m_mesh->GetLoopJoints();
+		ndAssert(loopContainer);
+		for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* node = loopContainer->m_loopJoints.GetFirst(); node; node = node->GetNext())
+		{
+			const ndSharedPtr<ndMeshLoopJoint>& loopJoint = node->GetInfo();
+			if (loopJoint == m_editor->m_currentLoopJointSelection)
+			{
+				ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* const newNode = loopContainer->m_loopJoints.Append(m_loopJoint);
+				loopContainer->m_loopJoints.InsertAfter(node, newNode);
+				loopContainer->m_loopJoints.Remove(node);
+				break;
+			}
+		}
 		m_editor->m_currentLoopJointSelection = m_loopJoint;
-		ndMeshLoopJoint* const loopJoint = *m_loopJoint;
-
-		loopJoint->m_name = m_name;
-		loopJoint->m_joint = m_joint;
 	}
 
 	ndSharedPtr<ndMeshLoopJoint> m_loopJoint;
-	ndString m_name;
-	ndSharedPtr<ndMeshJoint> m_joint;
 };
 
 void ndAssetEditor::ShowLoopJointLocalMatrix()
@@ -88,12 +92,7 @@ void ndAssetEditor::ShowLoopJointLocalMatrix()
 				ndMatrix localFrame0(joint->m_localFrame0);
 				const ndVector delta(position[0], position[1], position[2], ndFloat32(0.0f));
 				localFrame0.m_posit += localFrame0.RotateVector(delta);
-
-				//ndMatrix globalMatrix(localFrame0 * m_currentLoopJointSelection->m_childNode->CalculateGlobalMatrix());
-				//ndMatrix localFrame1(globalMatrix * m_currentLoopJointSelection->m_childNode->GetParent()->CalculateGlobalMatrix().OrthoInverse());
 				joint->m_localFrame0 = localFrame0;
-				//joint->m_localFrame1 = localFrame1;
-
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			}
 
@@ -105,13 +104,7 @@ void ndAssetEditor::ShowLoopJointLocalMatrix()
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 				ndMatrix localMatrix0(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad) * joint->m_localFrame0);
-				//ndMatrix globalMatrix(localMatrix0 * m_currentLoopJointSelection->m_childNode->CalculateGlobalMatrix());
-				//ndMatrix localMatrix1(globalMatrix * m_currentLoopJointSelection->m_childNode->GetParent()->CalculateGlobalMatrix().OrthoInverse());
-				//localMatrix0.m_posit = joint->m_localFrame0.m_posit;
-
 				joint->m_localFrame0 = localMatrix0;
-				//joint->m_localFrame1 = localMatrix1;
-
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			}
 		}
@@ -128,11 +121,7 @@ void ndAssetEditor::ShowLoopJointLocalMatrix()
 				ndMatrix localFrame1(joint->m_localFrame1);
 				const ndVector delta(position[0], position[1], position[2], ndFloat32(0.0f));
 				localFrame1.m_posit += localFrame1.RotateVector(delta);
-
-				//ndMatrix globalMatrix(localFrame0 * m_currentLoopJointSelection->m_childNode->CalculateGlobalMatrix());
-				//ndMatrix localFrame1(globalMatrix * m_currentLoopJointSelection->m_childNode->GetParent()->CalculateGlobalMatrix().OrthoInverse());
 				joint->m_localFrame1 = localFrame1;
-				//joint->m_localFrame1 = localFrame1;
 
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			}
@@ -144,14 +133,6 @@ void ndAssetEditor::ShowLoopJointLocalMatrix()
 			if (ImGui::InputFloat3("rel rotation##1", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-				//ndMatrix localMatrix0(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad) * joint->m_localFrame0);
-				//ndMatrix globalMatrix(localMatrix0 * m_currentLoopJointSelection->m_parentNode->CalculateGlobalMatrix());
-				//ndMatrix localMatrix1(globalMatrix * m_currentLoopJointSelection->m_parentNode->GetParent()->CalculateGlobalMatrix().OrthoInverse());
-				//localMatrix0.m_posit = joint->m_localFrame0.m_posit;
-				//
-				//joint->m_localFrame0 = localMatrix0;
-				//joint->m_localFrame1 = localMatrix1;
-
 				ndMatrix localMatrix1(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad) * joint->m_localFrame1);
 				joint->m_localFrame1 = localMatrix1;
 

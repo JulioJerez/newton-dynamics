@@ -96,6 +96,16 @@ ndMeshLoopJoint::ndMeshLoopJoint(const ndCloseLoopConstraints* const owner)
 {
 }
 
+ndMeshLoopJoint::ndMeshLoopJoint(const ndMeshLoopJoint& other)
+	:ndClassAlloc()
+	,m_name(other.m_name)
+	,m_childNode(other.m_childNode)
+	,m_parentNode(other.m_parentNode)
+	,m_joint(ndSharedPtr<ndMeshJoint>(other.m_joint->Duplicate()))
+	,m_owner(other.m_owner)
+{
+}
+
 ndMeshLoopJoint::ndMeshLoopJoint(
 	const ndCloseLoopConstraints* const owner,
 	const ndSharedPtr<ndMeshJoint>& joint, 
@@ -111,6 +121,17 @@ ndMeshLoopJoint::ndMeshLoopJoint(
 
 ndMeshLoopJoint::~ndMeshLoopJoint()
 {
+}
+
+bool ndMeshLoopJoint::operator==(const ndMeshLoopJoint& other) const
+{
+	bool test = (m_name == other.m_name);
+	test = test && (m_childNode->GetName() == other.m_childNode->GetName());
+	test = test && (m_parentNode->GetName() == other.m_parentNode->GetName());
+	const ndMeshJoint* const self = *m_joint;
+	const ndMeshJoint* const otherSelf = *other.m_joint;
+	test = test && (*self == *otherSelf);
+	return test;
 }
 
 void ndMeshLoopJoint::SerializeToXml(nd::TiXmlElement* const parent) const
@@ -662,6 +683,55 @@ ndMeshJointIkSwivelPositionEffector::ndMeshJointIkSwivelPositionEffector(const n
 	effector->GetWorkSpaceConstraints(m_minWorkSpaceRadio, m_maxWorkSpaceRadio);
 	m_rotationOrder = effector->GetRotationOrder();
 	m_enableSwivelControl = effector->GetSwivelMode();
+}
+
+ndMeshJointIkSwivelPositionEffector::ndMeshJointIkSwivelPositionEffector(const ndMeshJointIkSwivelPositionEffector& other)
+	:ndMeshJoint(other)
+	,m_restPosition(other.m_restPosition)
+	,m_angularSpring(other.m_angularSpring)
+	,m_angularDamper(other.m_angularDamper)
+	,m_angularMaxTorque(other.m_angularMaxTorque)
+	,m_angularRegularizer(other.m_angularRegularizer)
+	,m_linearSpring(other.m_linearSpring)
+	,m_linearDamper(other.m_linearDamper)
+	,m_linearMaxForce(other.m_linearMaxForce)
+	,m_linearRegularizer(other.m_linearRegularizer)
+	,m_minWorkSpaceRadio(other.m_minWorkSpaceRadio)
+	,m_maxWorkSpaceRadio(other.m_maxWorkSpaceRadio)
+	,m_rotationOrder(other.m_rotationOrder)
+	,m_enableSwivelControl(other.m_enableSwivelControl)
+{
+}
+
+ndMeshJoint* ndMeshJointIkSwivelPositionEffector::Duplicate() const
+{
+	return new ndMeshJointIkSwivelPositionEffector(*this);
+}
+
+bool ndMeshJointIkSwivelPositionEffector::operator==(const ndMeshJoint& other) const
+{
+	bool test = ndMeshJoint::operator==(other);
+
+	if (test)
+	{
+		const ndMeshJointIkSwivelPositionEffector* const otherJoint = (ndMeshJointIkSwivelPositionEffector*)&other;
+		test = test && (m_angularSpring == otherJoint->m_angularSpring);
+		test = test && (m_angularDamper == otherJoint->m_angularDamper);
+		test = test && (m_angularMaxTorque == otherJoint->m_angularMaxTorque);
+		test = test && (m_angularRegularizer == otherJoint->m_angularRegularizer);
+
+		test = test && (m_linearSpring == otherJoint->m_linearSpring);
+		test = test && (m_linearDamper == otherJoint->m_linearDamper);
+		test = test && (m_linearMaxForce == otherJoint->m_linearMaxForce);
+		test = test && (m_linearRegularizer == otherJoint->m_linearRegularizer);
+
+		test = test && (m_rotationOrder == otherJoint->m_rotationOrder);
+		test = test && (m_minWorkSpaceRadio == otherJoint->m_minWorkSpaceRadio);
+		test = test && (m_maxWorkSpaceRadio == otherJoint->m_maxWorkSpaceRadio);
+		test = test && (m_enableSwivelControl == otherJoint->m_enableSwivelControl);
+	}
+
+	return test;
 }
 
 void ndMeshJointIkSwivelPositionEffector::SerializeToXml(nd::TiXmlElement* const parent) const
