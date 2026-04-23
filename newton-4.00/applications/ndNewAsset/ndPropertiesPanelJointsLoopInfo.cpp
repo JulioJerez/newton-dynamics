@@ -79,7 +79,7 @@ void ndAssetEditor::ShowLoopJointLocalMatrix()
 	}
 	else
 	{
-		ImGui::SeparatorText("child local Frame");
+		ImGui::SeparatorText("child local frame");
 		{
 			ndReal position[3];
 			position[0] = ndReal(0.0f);
@@ -109,7 +109,7 @@ void ndAssetEditor::ShowLoopJointLocalMatrix()
 			}
 		}
 
-		ImGui::SeparatorText("parent local Frame");
+		ImGui::SeparatorText("parent local frame");
 		{
 			ndReal position[3];
 			position[0] = ndReal(0.0f);
@@ -138,6 +138,57 @@ void ndAssetEditor::ShowLoopJointLocalMatrix()
 
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			}
+		}
+	}
+}
+
+void ndAssetEditor::ShowLoopJointGlobalMatrix()
+{
+	ndSharedPtr<ndMeshJoint> joint(m_currentLoopJointSelection->m_joint);
+
+	if (m_showPreTransform)
+	{
+		ndAssert(0);
+	}
+	else
+	{
+		ImGui::SeparatorText("global frame");
+		ndReal position[3];
+		position[0] = ndReal(0.0f);
+		position[1] = ndReal(0.0f);
+		position[2] = ndReal(0.0f);
+		if (ImGui::InputFloat3("rel position##2", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			ndMatrix localFrame0(joint->m_localFrame0);
+			const ndVector delta(position[0], position[1], position[2], ndFloat32(0.0f));
+			localFrame0.m_posit += localFrame0.RotateVector(delta);
+
+			ndMatrix globalMatrix(localFrame0 * m_currentLoopJointSelection->m_childNode->CalculateGlobalMatrix());
+			ndMatrix localFrame1(globalMatrix * m_currentLoopJointSelection->m_parentNode->CalculateGlobalMatrix().OrthoInverse());
+
+			joint->m_localFrame0 = localFrame0;
+			joint->m_localFrame1 = localFrame1;
+
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+		}
+
+		ndReal euler[3];
+		euler[0] = ndReal(0.0f);
+		euler[1] = ndReal(0.0f);
+		euler[2] = ndReal(0.0f);
+		if (ImGui::InputFloat3("rel rotation##2", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			ndMatrix localMatrix0(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad) * joint->m_localFrame0);
+
+			ndMatrix globalMatrix(localMatrix0 * m_currentLoopJointSelection->m_childNode->CalculateGlobalMatrix());
+			ndMatrix localMatrix1(globalMatrix * m_currentLoopJointSelection->m_parentNode->CalculateGlobalMatrix().OrthoInverse());
+
+			joint->m_localFrame0 = localMatrix0;
+			joint->m_localFrame1 = localMatrix1;
+
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
 	}
 }
@@ -272,6 +323,14 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 		if (strcmp(joint->m_constructor.GetStr(), ndJointGear::StaticClassName()) == 0)
 		{
 			JointsLoopEditGearJoint();
+		}
+		else if (strcmp(joint->m_constructor.GetStr(), ndJointHinge::StaticClassName()) == 0)
+		{
+			JointsLoopEditHingeJoint();
+		}
+		else if (strcmp(joint->m_constructor.GetStr(), ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0)
+		{
+			JointsLoopEditDifferentialAxle();
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndIkSwivelPositionEffector::StaticClassName()) == 0)
 		{
@@ -447,4 +506,26 @@ void ndAssetEditor::JointsLoopEditGearJoint()
 		joint->m_ratio = ndMax(value, ndReal(0.01f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
+}
+
+void ndAssetEditor::JointsLoopEditDifferentialAxle()
+{
+	ShowLoopJointLocalMatrix();
+
+	ndMeshJointDifferentialAxle* const joint = (ndMeshJointDifferentialAxle*)*m_currentLoopJointSelection->m_joint;
+	ndReal value = joint->m_gearRatio;
+	if (ImGui::InputFloat("gear ratio", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+		joint->m_gearRatio = ndMax(value, ndReal(0.01f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	}
+}
+
+void ndAssetEditor::JointsLoopEditHingeJoint()
+{
+	ShowLoopJointGlobalMatrix();
+
+	ndMeshJointHinge* const joint = (ndMeshJointHinge*)*m_currentLoopJointSelection->m_joint;
+	ImGui::SeparatorText("actuator params");
 }

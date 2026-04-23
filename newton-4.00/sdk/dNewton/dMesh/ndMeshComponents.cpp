@@ -225,6 +225,29 @@ ndMeshJointHinge::ndMeshJointHinge(const ndMesh* const owner, const ndJointBilat
 	}
 }
 
+ndMeshJointHinge::ndMeshJointHinge(const ndMeshJointHinge& other)
+	:ndMeshJoint(other)
+	,m_axis(other.m_axis)
+{
+}
+
+ndMeshJoint* ndMeshJointHinge::Duplicate() const
+{
+	return new ndMeshJointHinge(*this);
+}
+
+bool ndMeshJointHinge::operator == (const ndMeshJoint & other) const
+{
+	bool test = ndMeshJoint::operator==(other);
+
+	if (test)
+	{
+		const ndMeshJointHinge* const otherJoint = (ndMeshJointHinge*)&other;
+		test = test && (m_axis == otherJoint->m_axis);
+	}
+	return test;
+}
+
 void ndMeshJointHinge::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	ndMeshJoint::SerializeToXml(parent);
@@ -895,6 +918,29 @@ ndMeshJointDifferentialAxle::ndMeshJointDifferentialAxle(const ndMesh* const own
 {
 	const ndMultiBodyVehicleDifferentialAxle* const subJoint = (ndMultiBodyVehicleDifferentialAxle*)joint;
 	m_gearRatio = subJoint->GetGearRatio();
+}
+
+ndMeshJointDifferentialAxle::ndMeshJointDifferentialAxle(const ndMeshJointDifferentialAxle& other)
+	:ndMeshJoint(other)
+	,m_gearRatio(other.m_gearRatio)
+{
+}
+
+ndMeshJoint* ndMeshJointDifferentialAxle::Duplicate() const
+{
+	return new ndMeshJointDifferentialAxle(*this);
+}
+
+bool ndMeshJointDifferentialAxle::operator==(const ndMeshJoint& other) const
+{
+	bool test = ndMeshJoint::operator==(other);
+
+	if (test)
+	{
+		const ndMeshJointDifferentialAxle* const otherJoint = (ndMeshJointDifferentialAxle*)&other;
+		test = test && (m_gearRatio == otherJoint->m_gearRatio);
+	}
+	return test;
 }
 
 void ndMeshJointDifferentialAxle::SerializeToXml(nd::TiXmlElement* const parent) const

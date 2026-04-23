@@ -232,6 +232,17 @@ class ndMeshJoint : public ndClassAlloc
 		{
 		}
 
+		bool operator==(const ndAxis& other) const
+		{
+			bool test = (m_springK == other.m_springK);
+			test = test && (m_damperC == other.m_damperC);
+			test = test && (m_minLimit == other.m_minLimit);
+			test = test && (m_maxLimit == other.m_maxLimit);
+			test = test && (m_springDamperRegularizer == other.m_springDamperRegularizer);
+			test = test && (m_limitState == other.m_limitState);
+			return test;
+		}
+
 		ndFloat32 m_springK;
 		ndFloat32 m_damperC;
 		ndFloat32 m_minLimit;

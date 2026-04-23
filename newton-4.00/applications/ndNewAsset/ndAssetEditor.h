@@ -139,7 +139,10 @@ class ndAssetEditor : public ndClassAlloc
 	void ShowPropertiesJointsLoopInfo();
 
 	void ShowLoopJointLocalMatrix();
+	void ShowLoopJointGlobalMatrix();
 	void JointsLoopEditGearJoint();
+	void JointsLoopEditHingeJoint();
+	void JointsLoopEditDifferentialAxle();
 	void JointsLoopEditSwivelPositionEffector();
 		
 	ndSharedPtr<ndMesh> m_mesh;
