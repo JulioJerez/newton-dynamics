@@ -1328,7 +1328,7 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 		{
 			ImGui::SeparatorText("child local Frame");
 
-			if (m_showParentRelativeTransform)
+			if (m_showPreTransform)
 			{
 				const ndMatrix matrix(joint->m_localFrame0);
 				ndReal position[3];

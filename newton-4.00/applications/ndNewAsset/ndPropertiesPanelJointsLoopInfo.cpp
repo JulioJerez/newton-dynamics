@@ -65,6 +65,102 @@ class ndUndoRedoLoopJoint : public ndUndoRedoCommand
 	ndSharedPtr<ndMeshJoint> m_joint;
 };
 
+void ndAssetEditor::ShowLoopJointLocalMatrix()
+{
+	ndSharedPtr<ndMeshJoint> joint(m_currentLoopJointSelection->m_joint);
+
+	if (m_showPreTransform)
+	{
+		ndAssert(0);
+	}
+	else
+	{
+		ImGui::SeparatorText("child local Frame");
+		{
+			ndReal position[3];
+			position[0] = ndReal(0.0f);
+			position[1] = ndReal(0.0f);
+			position[2] = ndReal(0.0f);
+			//snprintf(name, sizeof(name) - 1, "rel position%s", labelTag);
+			if (ImGui::InputFloat3("rel position##0", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+				ndMatrix localFrame0(joint->m_localFrame0);
+				const ndVector delta(position[0], position[1], position[2], ndFloat32(0.0f));
+				localFrame0.m_posit += localFrame0.RotateVector(delta);
+
+				//ndMatrix globalMatrix(localFrame0 * m_currentLoopJointSelection->m_childNode->CalculateGlobalMatrix());
+				//ndMatrix localFrame1(globalMatrix * m_currentLoopJointSelection->m_childNode->GetParent()->CalculateGlobalMatrix().OrthoInverse());
+				joint->m_localFrame0 = localFrame0;
+				//joint->m_localFrame1 = localFrame1;
+
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			}
+
+			ndReal euler[3];
+			euler[0] = ndReal(0.0f);
+			euler[1] = ndReal(0.0f);
+			euler[2] = ndReal(0.0f);
+			if (ImGui::InputFloat3("rel rotation##0", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+				ndMatrix localMatrix0(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad) * joint->m_localFrame0);
+				//ndMatrix globalMatrix(localMatrix0 * m_currentLoopJointSelection->m_childNode->CalculateGlobalMatrix());
+				//ndMatrix localMatrix1(globalMatrix * m_currentLoopJointSelection->m_childNode->GetParent()->CalculateGlobalMatrix().OrthoInverse());
+				//localMatrix0.m_posit = joint->m_localFrame0.m_posit;
+
+				joint->m_localFrame0 = localMatrix0;
+				//joint->m_localFrame1 = localMatrix1;
+
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			}
+		}
+
+		ImGui::SeparatorText("parent local Frame");
+		{
+			ndReal position[3];
+			position[0] = ndReal(0.0f);
+			position[1] = ndReal(0.0f);
+			position[2] = ndReal(0.0f);
+			if (ImGui::InputFloat3("rel position##1", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+				ndMatrix localFrame1(joint->m_localFrame1);
+				const ndVector delta(position[0], position[1], position[2], ndFloat32(0.0f));
+				localFrame1.m_posit += localFrame1.RotateVector(delta);
+
+				//ndMatrix globalMatrix(localFrame0 * m_currentLoopJointSelection->m_childNode->CalculateGlobalMatrix());
+				//ndMatrix localFrame1(globalMatrix * m_currentLoopJointSelection->m_childNode->GetParent()->CalculateGlobalMatrix().OrthoInverse());
+				joint->m_localFrame1 = localFrame1;
+				//joint->m_localFrame1 = localFrame1;
+
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			}
+
+			ndReal euler[3];
+			euler[0] = ndReal(0.0f);
+			euler[1] = ndReal(0.0f);
+			euler[2] = ndReal(0.0f);
+			if (ImGui::InputFloat3("rel rotation##1", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+				//ndMatrix localMatrix0(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad) * joint->m_localFrame0);
+				//ndMatrix globalMatrix(localMatrix0 * m_currentLoopJointSelection->m_parentNode->CalculateGlobalMatrix());
+				//ndMatrix localMatrix1(globalMatrix * m_currentLoopJointSelection->m_parentNode->GetParent()->CalculateGlobalMatrix().OrthoInverse());
+				//localMatrix0.m_posit = joint->m_localFrame0.m_posit;
+				//
+				//joint->m_localFrame0 = localMatrix0;
+				//joint->m_localFrame1 = localMatrix1;
+
+				ndMatrix localMatrix1(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad) * joint->m_localFrame1);
+				joint->m_localFrame1 = localMatrix1;
+
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			}
+		}
+	}
+}
+
 void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 {
 	if (ImGui::CollapsingHeader("Loop joint"))
@@ -205,91 +301,9 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 
 void ndAssetEditor::JointsLoopEditSwivelPositionEffector()
 {
+	ShowLoopJointLocalMatrix();
+
 	ndMeshJointIkSwivelPositionEffector* const joint = (ndMeshJointIkSwivelPositionEffector*)*m_currentLoopJointSelection->m_joint;
-	
-	ImGui::SeparatorText("child local Frame");
-	{
-		ndReal position[3];
-		position[0] = ndReal(0.0f);
-		position[1] = ndReal(0.0f);
-		position[2] = ndReal(0.0f);
-		if (ImGui::InputFloat3("rel position##0", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
-		{
-			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-			ndMatrix localFrame0(joint->m_localFrame0);
-			const ndVector delta(position[0], position[1], position[2], ndFloat32(0.0f));
-			localFrame0.m_posit += localFrame0.RotateVector(delta);
-
-			//ndMatrix globalMatrix(localFrame0 * m_currentLoopJointSelection->m_childNode->CalculateGlobalMatrix());
-			//ndMatrix localFrame1(globalMatrix * m_currentLoopJointSelection->m_childNode->GetParent()->CalculateGlobalMatrix().OrthoInverse());
-			joint->m_localFrame0 = localFrame0;
-			//joint->m_localFrame1 = localFrame1;
-
-			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-		}
-
-		ndReal euler[3];
-		euler[0] = ndReal(0.0f);
-		euler[1] = ndReal(0.0f);
-		euler[2] = ndReal(0.0f);
-		if (ImGui::InputFloat3("rel rotation##0", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
-		{
-			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-			ndMatrix localMatrix0(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad) * joint->m_localFrame0);
-			//ndMatrix globalMatrix(localMatrix0 * m_currentLoopJointSelection->m_childNode->CalculateGlobalMatrix());
-			//ndMatrix localMatrix1(globalMatrix * m_currentLoopJointSelection->m_childNode->GetParent()->CalculateGlobalMatrix().OrthoInverse());
-			//localMatrix0.m_posit = joint->m_localFrame0.m_posit;
-
-			joint->m_localFrame0 = localMatrix0;
-			//joint->m_localFrame1 = localMatrix1;
-
-			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-		}
-	}
-
-	ImGui::SeparatorText("parent local Frame");
-	{
-		ndReal position[3];
-		position[0] = ndReal(0.0f);
-		position[1] = ndReal(0.0f);
-		position[2] = ndReal(0.0f);
-		if (ImGui::InputFloat3("rel position##1", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
-		{
-			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-			ndMatrix localFrame1(joint->m_localFrame1);
-			const ndVector delta(position[0], position[1], position[2], ndFloat32(0.0f));
-			localFrame1.m_posit += localFrame1.RotateVector(delta);
-
-			//ndMatrix globalMatrix(localFrame0 * m_currentLoopJointSelection->m_childNode->CalculateGlobalMatrix());
-			//ndMatrix localFrame1(globalMatrix * m_currentLoopJointSelection->m_childNode->GetParent()->CalculateGlobalMatrix().OrthoInverse());
-			joint->m_localFrame1 = localFrame1;
-			//joint->m_localFrame1 = localFrame1;
-
-			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-		}
-
-		ndReal euler[3];
-		euler[0] = ndReal(0.0f);
-		euler[1] = ndReal(0.0f);
-		euler[2] = ndReal(0.0f);
-		if (ImGui::InputFloat3("rel rotation##1", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
-		{
-			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-			//ndMatrix localMatrix0(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad) * joint->m_localFrame0);
-			//ndMatrix globalMatrix(localMatrix0 * m_currentLoopJointSelection->m_parentNode->CalculateGlobalMatrix());
-			//ndMatrix localMatrix1(globalMatrix * m_currentLoopJointSelection->m_parentNode->GetParent()->CalculateGlobalMatrix().OrthoInverse());
-			//localMatrix0.m_posit = joint->m_localFrame0.m_posit;
-			//
-			//joint->m_localFrame0 = localMatrix0;
-			//joint->m_localFrame1 = localMatrix1;
-
-			ndMatrix localMatrix1(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad) * joint->m_localFrame1);
-			joint->m_localFrame1 = localMatrix1;
-
-			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-		}
-	}
-
 	ImGui::SeparatorText("linear actuator");
 	{
 		ndReal value = joint->m_linearSpring;
@@ -320,20 +334,69 @@ void ndAssetEditor::JointsLoopEditSwivelPositionEffector()
 			joint->m_linearMaxForce = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-		//value = joint->m_axis0.m_maxLimit;
-		//if (ImGui::InputFloat("max limit##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
-		//{
-		//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-		//	joint->m_axis0.m_maxLimit = ndMax(value, ndReal(0.0f));
-		//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-		//}
-		//bool limitState = joint->m_axis0.m_limitState ? true : false;
-		//if (ImGui::Checkbox("limit State##5", &limitState))
-		//{
-		//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-		//	joint->m_axis0.m_limitState = m_showSelectedNode ? 1 : 0;
-		//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-		//}
+	}
+
+	ImGui::SeparatorText("swivel actuator mode");
+	{
+		char swivelMode[64];
+		if (joint->m_enableSwivelControl)
+		{
+			snprintf(swivelMode, sizeof(swivelMode) - 1, "true");
+		}
+		else
+		{
+			snprintf(swivelMode, sizeof(swivelMode) - 1, "false");
+		}
+
+		if (ImGui::BeginCombo("##10", swivelMode))
+		{
+			if (ImGui::Selectable("true", joint->m_enableSwivelControl))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+				joint->m_enableSwivelControl = true;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			}
+			if (ImGui::Selectable("false", !joint->m_enableSwivelControl))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+				joint->m_enableSwivelControl = false;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			}
+
+			ImGui::EndCombo();
+		}
+
+		if (joint->m_enableSwivelControl)
+		{
+			ndReal value = joint->m_angularSpring;
+			if (ImGui::InputFloat("spring const##1", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+				joint->m_angularSpring = ndMax(value, ndReal(0.0f));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			}
+			value = joint->m_angularDamper;
+			if (ImGui::InputFloat("damper const##1", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+				joint->m_angularSpring = ndMax(value, ndReal(0.0f));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			}
+			value = joint->m_angularRegularizer;
+			if (ImGui::InputFloat("regularizer#1", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+				joint->m_angularRegularizer = ndMax(value, ndReal(0.0f));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			}
+			value = joint->m_angularMaxTorque;
+			if (ImGui::InputFloat("max torque", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+				joint->m_angularMaxTorque = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			}
+		}
 	}
 
 }

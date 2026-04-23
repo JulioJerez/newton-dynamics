@@ -138,6 +138,7 @@ class ndAssetEditor : public ndClassAlloc
 
 	void ShowPropertiesJointsLoopInfo();
 
+	void ShowLoopJointLocalMatrix();
 	void JointsLoopEditSwivelPositionEffector();
 		
 	ndSharedPtr<ndMesh> m_mesh;
@@ -169,7 +170,7 @@ class ndAssetEditor : public ndClassAlloc
 	bool m_showCenterOfMass;
 	bool m_showSelectedNode;
 	bool m_showCollisionShape;
-	bool m_showParentRelativeTransform;
+	bool m_showPreTransform;
 
 	bool m_toolActive;
 	//bool m_addCollidingBody;

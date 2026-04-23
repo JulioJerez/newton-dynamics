@@ -186,6 +186,7 @@ class ndMeshJointIkSwivelPositionEffector : public ndMeshJoint
 	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
 	ndVector m_restPosition;
+
 	ndFloat32 m_angularSpring;
 	ndFloat32 m_angularDamper;
 	ndFloat32 m_angularMaxTorque;
@@ -195,9 +196,9 @@ class ndMeshJointIkSwivelPositionEffector : public ndMeshJoint
 	ndFloat32 m_linearDamper;
 	ndFloat32 m_linearMaxForce;
 	ndFloat32 m_linearRegularizer;
+
 	ndFloat32 m_minWorkSpaceRadio;
 	ndFloat32 m_maxWorkSpaceRadio;
-
 	ndInt32 m_rotationOrder;
 	bool m_enableSwivelControl;
 };
