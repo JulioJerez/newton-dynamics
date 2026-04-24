@@ -146,6 +146,7 @@ class ndAssetEditor : public ndClassAlloc
 	void JointsLoopEditHingeJoint();
 	void JointsLoopEditPlaneJoint();
 	void JointsLoopEditSliderJoint();
+	void JointsLoopEditRollerJoint();
 	void JointsLoopEditDifferentialAxle();
 	void JointsLoopEditSwivelPositionEffector();
 		
