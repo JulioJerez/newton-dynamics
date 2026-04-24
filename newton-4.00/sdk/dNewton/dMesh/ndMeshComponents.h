@@ -78,18 +78,6 @@ class ndMeshJointFix6dof : public ndMeshJoint
 	ndFloat32 m_maxTorque;
 };
 
-class ndMeshJointSlider : public ndMeshJoint
-{
-	public:
-	D_NEWTON_API ndMeshJointSlider(const ndMesh* const owner);
-	D_NEWTON_API ndMeshJointSlider(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
-
-	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
-	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
-	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
-
-	ndAxis m_axis;
-};
 
 class ndMeshJointDoubleHinge : public ndMeshJoint
 {
@@ -162,7 +150,7 @@ class ndMeshJointSpherical : public ndMeshJoint
 
 	ndAxis m_axis;
 	ndFloat32 m_maxConeAngle;
-	ndInt8 m_coneAngleState;
+	bool m_coneAngleState;
 };
 
 class ndMeshJointPlane : public ndMeshJoint
@@ -260,5 +248,23 @@ class ndMeshJointHinge : public ndMeshJoint
 
 	ndAxis m_axis;
 };
+
+class ndMeshJointSlider : public ndMeshJoint
+{
+	public:
+	D_NEWTON_API ndMeshJointSlider(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointSlider(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
+
+	D_NEWTON_API ndMeshJointSlider(const ndMeshJointSlider& other);
+	D_NEWTON_API virtual ndMeshJoint* Duplicate() const override;
+	D_NEWTON_API virtual bool operator==(const ndMeshJoint& other) const override;
+
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
+
+	ndAxis m_axis;
+};
+
 #endif
 

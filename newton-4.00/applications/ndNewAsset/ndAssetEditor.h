@@ -140,8 +140,10 @@ class ndAssetEditor : public ndClassAlloc
 
 	void ShowLoopJointLocalMatrix();
 	void ShowLoopJointGlobalMatrix();
+
 	void JointsLoopEditGearJoint();
 	void JointsLoopEditHingeJoint();
+	void JointsLoopEditSliderJoint();
 	void JointsLoopEditDifferentialAxle();
 	void JointsLoopEditSwivelPositionEffector();
 		

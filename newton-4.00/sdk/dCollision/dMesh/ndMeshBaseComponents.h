@@ -248,7 +248,7 @@ class ndMeshJoint : public ndClassAlloc
 		ndFloat32 m_minLimit;
 		ndFloat32 m_maxLimit;
 		ndFloat32 m_springDamperRegularizer;
-		ndInt8 m_limitState;
+		bool m_limitState;
 	};
 
 	D_COLLISION_API ndMeshJoint(const ndMeshJoint& other);
