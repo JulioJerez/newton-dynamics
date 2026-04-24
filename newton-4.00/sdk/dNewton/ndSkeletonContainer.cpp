@@ -1159,13 +1159,13 @@ void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* cons
 	const ndFloat32* const matrix = &m_precondinonedMassMatrix11[0];
 	ndAssert(ndTestPSDmatrix(size, stride, matrix));
 
-	ndFloat32* const bScaled = ndAlloca(ndFloat32, stride);
+	ndFloat32* const residual = ndAlloca(ndFloat32, stride);
 
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		const ndInt32 index = normalIndex[i] + i;
 		x[i] /= m_diagonalPreconditioner[i];
-		bScaled[i] = b[i] * m_diagonalPreconditioner[i];
+		residual[i] = b[i] * m_diagonalPreconditioner[i];
 
 		const ndFloat32 coefficient = x[index];
 
@@ -1185,7 +1185,7 @@ void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* cons
 		for (ndInt32 i = 0; i < size; ++i)
 		{
 			const ndFloat32* const row = &matrix[rowBase];
-			ndFloat32 r = bScaled[i];
+			ndFloat32 r = residual[i];
 			for (ndInt32 j = 0; j < size; ++j)
 			{
 				r -= row[j] * x[j];
