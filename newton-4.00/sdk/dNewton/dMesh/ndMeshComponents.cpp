@@ -178,6 +178,33 @@ ndMeshJointFix6dof::ndMeshJointFix6dof(const ndMesh* const owner, const ndJointB
 {
 }
 
+ndMeshJointFix6dof::ndMeshJointFix6dof(const ndMeshJointFix6dof& other)
+	:ndMeshJoint(other)
+	,m_softness(other.m_softness)
+	,m_maxForce(other.m_maxForce)
+	,m_maxTorque(other.m_maxTorque)
+{
+}
+
+ndMeshJoint* ndMeshJointFix6dof::Duplicate() const
+{
+	return new ndMeshJointFix6dof(*this);
+}
+
+bool ndMeshJointFix6dof::operator==(const ndMeshJoint& other) const
+{
+	bool test = ndMeshJoint::operator==(other);
+
+	if (test)
+	{
+		const ndMeshJointFix6dof* const otherJoint = (ndMeshJointFix6dof*)&other;
+		test = test && (m_softness == otherJoint->m_softness);
+		test = test && (m_maxForce == otherJoint->m_maxForce);
+		test = test && (m_maxTorque == otherJoint->m_maxTorque);
+	}
+	return test;
+}
+
 void ndMeshJointFix6dof::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	ndMeshJoint::SerializeToXml(parent);

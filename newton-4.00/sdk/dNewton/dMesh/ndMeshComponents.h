@@ -63,22 +63,6 @@ class ndMeshLoopJoint : public ndClassAlloc
 	ndWeakPtr<const ndCloseLoopConstraints> m_owner;
 };
 
-class ndMeshJointFix6dof : public ndMeshJoint
-{
-	public:
-	D_NEWTON_API ndMeshJointFix6dof(const ndMesh* const owner);
-	D_NEWTON_API ndMeshJointFix6dof(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
-
-	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
-	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
-	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
-
-	ndFloat32 m_softness;
-	ndFloat32 m_maxForce;
-	ndFloat32 m_maxTorque;
-};
-
-
 class ndMeshJointDoubleHinge : public ndMeshJoint
 {
 	public:
@@ -164,6 +148,25 @@ class ndMeshJointPlane : public ndMeshJoint
 	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
 	ndInt8 m_controlRotation;
+};
+
+class ndMeshJointFix6dof : public ndMeshJoint
+{
+	public:
+	D_NEWTON_API ndMeshJointFix6dof(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointFix6dof(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
+
+	D_NEWTON_API ndMeshJointFix6dof(const ndMeshJointFix6dof& other);
+	D_NEWTON_API virtual ndMeshJoint* Duplicate() const override;
+	D_NEWTON_API virtual bool operator==(const ndMeshJoint& other) const override;
+
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
+
+	ndFloat32 m_softness;
+	ndFloat32 m_maxForce;
+	ndFloat32 m_maxTorque;
 };
 
 class ndMeshJointIkSwivelPositionEffector : public ndMeshJoint

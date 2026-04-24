@@ -320,7 +320,11 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 		}
 		ImGui::Text(m_currentLoopJointSelection->m_parentNode->GetName().GetStr());
 
-		if (strcmp(joint->m_constructor.GetStr(), ndJointGear::StaticClassName()) == 0)
+		if (strcmp(joint->m_constructor.GetStr(), ndJointFix6dof::StaticClassName()) == 0)
+		{
+			JointsLoopEditFix6dof();
+		}
+		else if (strcmp(joint->m_constructor.GetStr(), ndJointGear::StaticClassName()) == 0)
 		{
 			JointsLoopEditGearJoint();
 		}
@@ -336,6 +340,7 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 		{
 			JointsLoopEditDifferentialAxle();
 		}
+
 		else if (strcmp(joint->m_constructor.GetStr(), ndIkSwivelPositionEffector::StaticClassName()) == 0)
 		{
 			JointsLoopEditSwivelPositionEffector();
@@ -345,6 +350,20 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 			ndAssert(0);
 		}
 	}
+}
+
+void ndAssetEditor::JointsLoopEditFix6dof()
+{
+	ShowLoopJointLocalMatrix();
+
+	ndMeshJointFix6dof* const joint = (ndMeshJointFix6dof*)*m_currentLoopJointSelection->m_joint;
+	//ndReal value = joint->m_ratio;
+	//if (ImGui::InputFloat("gear ratio", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	//{
+	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	//	joint->m_ratio = ndMax(value, ndReal(0.01f));
+	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	//}
 }
 
 void ndAssetEditor::JointsLoopEditSwivelPositionEffector()
