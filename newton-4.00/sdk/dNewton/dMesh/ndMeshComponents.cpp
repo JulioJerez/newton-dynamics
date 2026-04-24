@@ -1089,10 +1089,16 @@ ndMeshJointSpherical::ndMeshJointSpherical(const ndMesh* const owner)
 
 ndMeshJointSpherical::ndMeshJointSpherical(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
-	,m_maxConeAngle(0.0f)
-	,m_coneAngleState(false)
 {
-	ndAssert(0);
+	const ndJointSpherical* const subJoint = (ndJointSpherical*)joint;
+	subJoint->GetSpringDamper(m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
+	subJoint->GetTwistLimits(m_axis.m_minLimit, m_axis.m_maxLimit);
+	m_axis.m_limitState = subJoint->GetTwistLimitState();
+	m_axis.m_minLimit *= ndRadToDegree;
+	m_axis.m_maxLimit *= ndRadToDegree;
+
+	m_coneAngleState = subJoint->GetConeLimitState();
+	m_maxConeAngle = subJoint->GetConeLimit() * ndRadToDegree;
 }
 
 ndMeshJointSpherical::ndMeshJointSpherical(const ndMeshJointSpherical& other)

@@ -374,6 +374,10 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 		{
 			JointsLoopEditWheelJoint();
 		}
+		else if (strcmp(joint->m_constructor.GetStr(), ndJointSpherical::StaticClassName()) == 0)
+		{
+			JointsLoopEditSpherical();
+		}
 
 		else if (strcmp(joint->m_constructor.GetStr(), ndIkSwivelPositionEffector::StaticClassName()) == 0)
 		{
@@ -1285,4 +1289,74 @@ void ndAssetEditor::JointsLoopEditWheelJoint()
 		joint->m_desc->m_handBrakeTorque = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
+}
+
+void ndAssetEditor::JointsLoopEditSpherical()
+{
+	ShowLoopJointGlobalMatrix();
+
+	ndMeshJointSpherical* const joint = (ndMeshJointSpherical*)*m_currentLoopJointSelection->m_joint;
+
+	ImGui::SeparatorText("actuator params");
+	ndReal value = joint->m_axis.m_springK;
+	if (ImGui::InputFloat("spring const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+		joint->m_axis.m_springK = ndMax(value, ndReal(0.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	}
+	value = joint->m_axis.m_damperC;
+	if (ImGui::InputFloat("damper const##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+		joint->m_axis.m_damperC = ndMax(value, ndReal(0.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	}
+	value = joint->m_axis.m_springDamperRegularizer;
+	if (ImGui::InputFloat("regularizer", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+		joint->m_axis.m_springDamperRegularizer = ndMax(value, ndReal(0.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	}
+
+	ndAssert(0);
+	//value = joint->m_axis.m_upperStop;
+	//if (ImGui::InputFloat("upper stop", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	//{
+	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	//	joint->m_axis.m_upperStop = ndClamp(value, ndReal(0.0f), ndReal(10.0f));
+	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	//}
+	//value = joint->m_axis.m_lowerStop;
+	//if (ImGui::InputFloat("lower stop", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	//{
+	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	//	joint->m_axis.m_lowerStop = ndClamp(value, ndReal(-10.0f), ndReal(0.0f));
+	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	//}
+	//
+	//value = joint->m_axis.m_steeringAngle;
+	//if (ImGui::InputFloat("steering angle", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	//{
+	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	//	joint->m_axis.m_steeringAngle = ndClamp(value, ndReal(0.0f), ndReal(45.0f));
+	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	//}
+	//
+	//value = joint->m_axis.m_brakeTorque;
+	//if (ImGui::InputFloat("brake torque", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	//{
+	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	//	joint->m_axis.m_brakeTorque = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
+	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	//}
+	//
+	//value = joint->m_axis.m_handBrakeTorque;
+	//if (ImGui::InputFloat("hand brake torque", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	//{
+	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	//	joint->m_axis.m_handBrakeTorque = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
+	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	//}
 }

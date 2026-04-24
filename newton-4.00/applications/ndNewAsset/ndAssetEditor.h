@@ -142,6 +142,7 @@ class ndAssetEditor : public ndClassAlloc
 	void ShowLoopJointGlobalMatrix();
 
 	void JointsLoopEditFix6dof();
+	void JointsLoopEditSpherical();
 	void JointsLoopEditGearJoint();
 	void JointsLoopEditHingeJoint();
 	void JointsLoopEditWheelJoint();
