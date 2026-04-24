@@ -27,6 +27,7 @@
 class ndBody;
 class ndMeshEffect;
 class ndShapeInstance;
+class ndWheelDescriptor;
 class ndCloseLoopConstraints;
 class ndJointBilateralConstraint;
 
@@ -266,10 +267,7 @@ class ndMeshJointWheel : public ndMeshJoint
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
-	ndAxis m_axis;
-	ndFloat32 m_brakeTorque;
-	ndFloat32 m_steeringAngle;
-	ndFloat32 m_handBrakeTorque;
+	ndSharedPtr<ndWheelDescriptor> m_desc;
 };
 
 class ndMeshJointSpherical : public ndMeshJoint
