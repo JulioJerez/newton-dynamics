@@ -66,7 +66,6 @@ class ndMeshLoopJoint : public ndClassAlloc
 class ndMeshJointDoubleHinge : public ndMeshJoint
 {
 	public:
-
 	D_NEWTON_API ndMeshJointDoubleHinge(const ndMesh* const owner);
 	D_NEWTON_API ndMeshJointDoubleHinge(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
 

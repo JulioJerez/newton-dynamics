@@ -336,6 +336,10 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 		{
 			JointsLoopEditSliderJoint();
 		}
+		else if (strcmp(joint->m_constructor.GetStr(), ndJointPlane::StaticClassName()) == 0)
+		{
+			JointsLoopEditPlaneJoint();
+		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0)
 		{
 			JointsLoopEditDifferentialAxle();
@@ -432,7 +436,7 @@ void ndAssetEditor::JointsLoopEditSwivelPositionEffector()
 			snprintf(rotationOrder, sizeof(rotationOrder) - 1, "pitchYawRoll");
 		}
 
-		if (ImGui::BeginCombo("##11", rotationOrder))
+		if (ImGui::BeginCombo("order mode##11", rotationOrder))
 		{
 			bool param = (joint->m_rotationOrder == ndIkSwivelPositionEffector::m_pitchRollYaw);
 			if (ImGui::Selectable("pitchRollYaw", param))
@@ -482,7 +486,7 @@ void ndAssetEditor::JointsLoopEditSwivelPositionEffector()
 			snprintf(swivelMode, sizeof(swivelMode) - 1, "false");
 		}
 
-		if (ImGui::BeginCombo("##10", swivelMode))
+		if (ImGui::BeginCombo("swivel on##10", swivelMode))
 		{
 			if (ImGui::Selectable("true", joint->m_enableSwivelControl))
 			{
@@ -601,7 +605,7 @@ void ndAssetEditor::JointsLoopEditHingeJoint()
 		snprintf(enableLimist, sizeof(enableLimist) - 1, "false");
 	}
 
-	if (ImGui::BeginCombo("##10", enableLimist))
+	if (ImGui::BeginCombo("limits on##10", enableLimist))
 	{
 		if (ImGui::Selectable("true", joint->m_axis.m_limitState))
 		{
@@ -676,7 +680,7 @@ void ndAssetEditor::JointsLoopEditSliderJoint()
 		snprintf(enableLimist, sizeof(enableLimist) - 1, "false");
 	}
 
-	if (ImGui::BeginCombo("##10", enableLimist))
+	if (ImGui::BeginCombo("limits on##10", enableLimist))
 	{
 		if (ImGui::Selectable("true", joint->m_axis.m_limitState))
 		{
@@ -709,5 +713,39 @@ void ndAssetEditor::JointsLoopEditSliderJoint()
 			joint->m_axis.m_maxLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
+	}
+}
+
+void ndAssetEditor::JointsLoopEditPlaneJoint()
+{
+	ShowLoopJointGlobalMatrix();
+
+	ndMeshJointPlane* const joint = (ndMeshJointPlane*)*m_currentLoopJointSelection->m_joint;
+
+	char enableLimist[64];
+	if (joint->m_controlRotation)
+	{
+		snprintf(enableLimist, sizeof(enableLimist) - 1, "true");
+	}
+	else
+	{
+		snprintf(enableLimist, sizeof(enableLimist) - 1, "false");
+	}
+
+	if (ImGui::BeginCombo("lock rotation##10", enableLimist))
+	{
+		if (ImGui::Selectable("true", joint->m_controlRotation))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			joint->m_controlRotation = true;
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+		}
+		if (ImGui::Selectable("false", !joint->m_controlRotation))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			joint->m_controlRotation = false;
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+		}
+		ImGui::EndCombo();
 	}
 }
