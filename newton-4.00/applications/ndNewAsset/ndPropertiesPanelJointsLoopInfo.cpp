@@ -224,8 +224,15 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 				{
 					auto InitNewLocalJoint = [this, &joint](ndSharedPtr<ndJointBilateralConstraint>& newJoint)
 					{
-						newJoint->SetLocalMatrix0(joint->m_localFrame0);
-						newJoint->SetLocalMatrix1(joint->m_localFrame1);
+						//newJoint->SetLocalMatrix0(joint->m_localFrame0);
+						//newJoint->SetLocalMatrix1(joint->m_localFrame1);
+						ndMatrix localMatrix0(ndGetIdentityMatrix());
+						ndMatrix localMatrix1(ndGetIdentityMatrix());
+						localMatrix0.m_posit = m_currentLoopJointSelection->m_childNode->GetRigidBody()->m_localCentreOfMass;
+						localMatrix1.m_posit = m_currentLoopJointSelection->m_parentNode->GetRigidBody()->m_localCentreOfMass;
+						newJoint->SetLocalMatrix0(localMatrix0);
+						newJoint->SetLocalMatrix1(localMatrix1);
+
 						m_currentLoopJointSelection->m_joint = newJoint->GetMeshJoint(*joint->m_owner);
 						joint = m_currentLoopJointSelection->m_joint;
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -261,6 +268,12 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointPlane());
 						InitNewGlobalJoint(newJoint);
+					}
+					else if (strcmp(name, ndJointGear::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointGear());
+						InitNewLocalJoint(newJoint);
 					}
 					else if (strcmp(name, ndJointDoubleHinge::StaticClassName()) == 0)
 					{
@@ -747,6 +760,20 @@ void ndAssetEditor::JointsLoopEditSliderJoint()
 			joint->m_axis.m_maxLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
+	}
+}
+
+void ndAssetEditor::JointsLoopEditGear()
+{
+	ShowLoopJointLocalMatrix();
+
+	ndMeshJointGear* const joint = (ndMeshJointGear*)*m_currentLoopJointSelection->m_joint;
+	ndReal value = joint->m_ratio;
+	if (ImGui::InputFloat("spring const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+		joint->m_ratio = ndMax(value, ndReal(0.01f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
 }
 
