@@ -159,10 +159,12 @@ class ndAssetEditor : public ndClassAlloc
 	void JointsLoopEditDoubleHingeJoint();
 	void JointsLoopEditWheelJoint();
 	void JointsLoopEditSpherical();
-
 	void JointsLoopEditGear();
 	void JointsLoopEditDifferentialAxle();
 	void JointsLoopEditSwivelPositionEffector();
+
+	void ShowShapeTransform();
+	void ShowCollisionBox();
 		
 	ndSharedPtr<ndMesh> m_mesh;
 	ndSharedPtr<ndRender> m_renderer;

@@ -40,6 +40,24 @@ ndMeshCollisionShape::ndMeshCollisionShape(const char* const constructor)
 {
 }
 
+ndMeshCollisionShape::ndMeshCollisionShape(const ndMeshCollisionShape& other)
+	:ndClassAlloc()
+	,m_constructor(other.m_constructor)
+{
+}
+
+ndMeshCollisionShape* ndMeshCollisionShape::Duplicate() const
+{
+	ndAssert(0);
+	return nullptr;
+}
+
+bool ndMeshCollisionShape::operator==(const ndMeshCollisionShape& other) const
+{
+	ndAssert(0);
+	return false;
+}
+
 ndMeshCollisionShape::~ndMeshCollisionShape()
 {
 }
@@ -47,6 +65,23 @@ ndMeshCollisionShape::~ndMeshCollisionShape()
 ndMeshCollisionShapeNull::ndMeshCollisionShapeNull()
 	:ndMeshCollisionShape(ndShapeNull::StaticClassName())
 {
+}
+
+ndMeshCollisionShapeNull::ndMeshCollisionShapeNull(const ndMeshCollisionShapeNull& other)
+	:ndMeshCollisionShape(other)
+{
+	ndAssert(0);
+}
+
+ndMeshCollisionShape* ndMeshCollisionShapeNull::Duplicate() const
+{
+	return new ndMeshCollisionShapeNull(*this);
+}
+
+bool ndMeshCollisionShapeNull::operator==(const ndMeshCollisionShape& other) const
+{
+	ndAssert(0);
+	return false;
 }
 
 void ndMeshCollisionShapeNull::ApplyScale(ndFloat32)
@@ -73,6 +108,23 @@ ndMeshCollisionShapeSphere::ndMeshCollisionShapeSphere()
 {
 }
 
+ndMeshCollisionShapeSphere::ndMeshCollisionShapeSphere(const ndMeshCollisionShapeSphere& other)
+	:ndMeshCollisionShape(other)
+{
+	ndAssert(0);
+}
+
+ndMeshCollisionShape* ndMeshCollisionShapeSphere::Duplicate() const
+{
+	return new ndMeshCollisionShapeSphere(*this);
+}
+
+bool ndMeshCollisionShapeSphere::operator==(const ndMeshCollisionShape& other) const
+{
+	ndAssert(0);
+	return false;
+}
+
 void ndMeshCollisionShapeSphere::ApplyScale(ndFloat32 scale)
 {
 	m_radius *= scale;
@@ -97,6 +149,23 @@ ndShape* ndMeshCollisionShapeSphere::CreateObject() const
 ndMeshCollisionShapeBox::ndMeshCollisionShapeBox()
 	:ndMeshCollisionShape(ndShapeBox::StaticClassName())
 {
+}
+
+ndMeshCollisionShapeBox::ndMeshCollisionShapeBox(const ndMeshCollisionShapeBox& other)
+	:ndMeshCollisionShape(other)
+{
+	ndAssert(0);
+}
+
+ndMeshCollisionShape* ndMeshCollisionShapeBox::Duplicate() const
+{
+	return new ndMeshCollisionShapeBox(*this);
+}
+
+bool ndMeshCollisionShapeBox::operator==(const ndMeshCollisionShape& other) const
+{
+	ndAssert(0);
+	return false;
 }
 
 void ndMeshCollisionShapeBox::ApplyScale(ndFloat32 scale)
@@ -126,10 +195,26 @@ ndShape* ndMeshCollisionShapeBox::CreateObject() const
 	return new ndShapeBox(m_x, m_y, m_z);
 }
 
-
 ndMeshCollisionShapeCapsule::ndMeshCollisionShapeCapsule()
 	:ndMeshCollisionShape(ndShapeCapsule::StaticClassName())
 {
+}
+
+ndMeshCollisionShapeCapsule::ndMeshCollisionShapeCapsule(const ndMeshCollisionShapeCapsule& other)
+	:ndMeshCollisionShape(other)
+{
+	ndAssert(0);
+}
+
+ndMeshCollisionShape* ndMeshCollisionShapeCapsule::Duplicate() const
+{
+	return new ndMeshCollisionShapeCapsule(*this);
+}
+
+bool ndMeshCollisionShapeCapsule::operator==(const ndMeshCollisionShape& other) const
+{
+	ndAssert(0);
+	return false;
 }
 
 void ndMeshCollisionShapeCapsule::ApplyScale(ndFloat32 scale)
@@ -164,6 +249,23 @@ ndMeshCollisionShapeCylinder::ndMeshCollisionShapeCylinder()
 {
 }
 
+ndMeshCollisionShapeCylinder::ndMeshCollisionShapeCylinder(const ndMeshCollisionShapeCylinder& other)
+	:ndMeshCollisionShape(other)
+{
+	ndAssert(0);
+}
+
+ndMeshCollisionShape* ndMeshCollisionShapeCylinder::Duplicate() const
+{
+	return new ndMeshCollisionShapeCylinder(*this);
+}
+
+bool ndMeshCollisionShapeCylinder::operator==(const ndMeshCollisionShape& other) const
+{
+	ndAssert(0);
+	return false;
+}
+
 void ndMeshCollisionShapeCylinder::ApplyScale(ndFloat32 scale)
 {
 	m_radius0 *= scale;
@@ -196,6 +298,23 @@ ndMeshCollisionShapeChamferCylinder::ndMeshCollisionShapeChamferCylinder()
 {
 }
 
+ndMeshCollisionShapeChamferCylinder::ndMeshCollisionShapeChamferCylinder(const ndMeshCollisionShapeChamferCylinder& other)
+	:ndMeshCollisionShape(other)
+{
+	ndAssert(0);
+}
+
+ndMeshCollisionShape* ndMeshCollisionShapeChamferCylinder::Duplicate() const
+{
+	return new ndMeshCollisionShapeChamferCylinder(*this);
+}
+
+bool ndMeshCollisionShapeChamferCylinder::operator==(const ndMeshCollisionShape& other) const
+{
+	ndAssert(0);
+	return false;
+}
+
 void ndMeshCollisionShapeChamferCylinder::ApplyScale(ndFloat32 scale)
 {
 	m_height *= scale;
@@ -225,6 +344,23 @@ ndMeshCollisionShapeConvexHull::ndMeshCollisionShapeConvexHull()
 	,m_points()
 	,m_maxPointCount(1024)
 {
+}
+
+ndMeshCollisionShapeConvexHull::ndMeshCollisionShapeConvexHull(const ndMeshCollisionShapeConvexHull& other)
+	:ndMeshCollisionShape(other)
+{
+	ndAssert(0);
+}
+
+ndMeshCollisionShape* ndMeshCollisionShapeConvexHull::Duplicate() const
+{
+	return new ndMeshCollisionShapeConvexHull(*this);
+}
+
+bool ndMeshCollisionShapeConvexHull::operator==(const ndMeshCollisionShape& other) const
+{
+	ndAssert(0);
+	return false;
 }
 
 void ndMeshCollisionShapeConvexHull::ApplyScale(ndFloat32 scale)
@@ -261,6 +397,23 @@ ndShape* ndMeshCollisionShapeConvexHull::CreateObject() const
 ndMeshCollisionShapeCompound::ndMeshCollisionShapeCompound()
 	:ndMeshCollisionShape(ndShapeCompound::StaticClassName())
 {
+}
+
+ndMeshCollisionShapeCompound::ndMeshCollisionShapeCompound(const ndMeshCollisionShapeCompound& other)
+	:ndMeshCollisionShape(other)
+{
+	ndAssert(0);
+}
+
+ndMeshCollisionShape* ndMeshCollisionShapeCompound::Duplicate() const
+{
+	return new ndMeshCollisionShapeCompound(*this);
+}
+
+bool ndMeshCollisionShapeCompound::operator==(const ndMeshCollisionShape& other) const
+{
+	ndAssert(0);
+	return false;
 }
 
 //void ndMeshCollisionShapeCompound::ApplyScale(ndFloat32 scale)
@@ -323,6 +476,22 @@ ndMeshShapeInstance::ndMeshShapeInstance(const ndShapeInstance& instance)
 	,m_scale(instance.GetScale())
 	,m_shape(instance.GetShape()->GetMeshShape())
 {
+}
+
+ndMeshShapeInstance::ndMeshShapeInstance(const ndMeshShapeInstance& other)
+	:ndClassAlloc()
+	,m_localMatrix(other.m_localMatrix)
+	,m_alignmentMatrix(other.m_alignmentMatrix)
+	,m_scale(other.m_scale)
+	,m_shape(ndSharedPtr<ndMeshCollisionShape>(other.m_shape->Duplicate()))
+{
+}
+
+//bool ndMeshShapeInstance::operator == (const ndMeshShapeInstance & other) const
+bool ndMeshShapeInstance::operator == (const ndMeshShapeInstance&) const
+{
+	ndAssert(0);
+	return false;
 }
 
 void ndMeshShapeInstance::ApplyScale(const ndMatrix& scaleMatrix)
