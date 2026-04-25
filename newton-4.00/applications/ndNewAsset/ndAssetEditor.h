@@ -140,6 +140,7 @@ class ndAssetEditor : public ndClassAlloc
 	void JointsEditFix6dof();
 	void JointsEditHingeJoint();
 	void JointsEditSliderJoint();
+	void JointsEditPlaneJoint();
 
 	void ShowPropertiesJointsLoopInfo();
 	void ShowLoopJointLocalMatrix();
@@ -147,12 +148,12 @@ class ndAssetEditor : public ndClassAlloc
 	void JointsLoopEditFix6dof();
 	void JointsLoopEditHingeJoint();
 	void JointsLoopEditSliderJoint();
+	void JointsLoopEditPlaneJoint();
 
 	void JointsLoopEditGear();
 	void JointsLoopEditSpherical();
 	void JointsLoopEditGearJoint();
 	void JointsLoopEditWheelJoint();
-	void JointsLoopEditPlaneJoint();
 	void JointsLoopEditRollerJoint();
 	void JointsLoopEditCylinderJoint();
 	void JointsLoopEditDoubleHingeJoint();
