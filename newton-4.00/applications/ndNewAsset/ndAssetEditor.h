@@ -136,22 +136,31 @@ class ndAssetEditor : public ndClassAlloc
 	void ShowPropertiesCollisionInfo();
 	void ShowPropertiesRigidBodyInfo();
 
-	void ShowPropertiesJointsLoopInfo();
+	void ShowJointGlobalMatrix();
+	void JointsEditFix6dof();
+	void JointsEditHingeJoint();
+	void JointsEditSliderJoint();
+	void JointsEditPlaneJoint();
+	void JointsEditRollerJoint();
+	void JointsEditCylinderJoint();
+	void JointsEditDoubleHingeJoint();
+	void JointsEditWheelJoint();
+	void JointsEditSpherical();
 
+	void ShowPropertiesJointsLoopInfo();
 	void ShowLoopJointLocalMatrix();
 	void ShowLoopJointGlobalMatrix();
-
-	void JointsLoopEditGear();
 	void JointsLoopEditFix6dof();
-	void JointsLoopEditSpherical();
-	void JointsLoopEditGearJoint();
 	void JointsLoopEditHingeJoint();
-	void JointsLoopEditWheelJoint();
-	void JointsLoopEditPlaneJoint();
 	void JointsLoopEditSliderJoint();
+	void JointsLoopEditPlaneJoint();
 	void JointsLoopEditRollerJoint();
 	void JointsLoopEditCylinderJoint();
 	void JointsLoopEditDoubleHingeJoint();
+	void JointsLoopEditWheelJoint();
+	void JointsLoopEditSpherical();
+
+	void JointsLoopEditGear();
 	void JointsLoopEditDifferentialAxle();
 	void JointsLoopEditSwivelPositionEffector();
 		
