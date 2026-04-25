@@ -373,7 +373,7 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointGear::StaticClassName()) == 0)
 		{
-			JointsLoopEditGearJoint();
+			JointsLoopEditGear();
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointPlane::StaticClassName()) == 0)
 		{
@@ -671,20 +671,6 @@ void ndAssetEditor::JointsLoopEditSwivelPositionEffector()
 	}
 }
 
-void ndAssetEditor::JointsLoopEditGearJoint()
-{
-	ShowLoopJointLocalMatrix();
-
-	ndMeshJointGear* const joint = (ndMeshJointGear*)*m_currentLoopJointSelection->m_joint;
-	ndReal value = joint->m_ratio;
-	if (ImGui::InputFloat("gear ratio", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
-	{
-		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-		joint->m_ratio = ndMax(value, ndReal(0.01f));
-		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-	}
-}
-
 void ndAssetEditor::JointsLoopEditDifferentialAxle()
 {
 	ShowLoopJointLocalMatrix();
@@ -771,20 +757,6 @@ void ndAssetEditor::JointsLoopEditSliderJoint()
 			joint->m_axis.m_maxLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-	}
-}
-
-void ndAssetEditor::JointsLoopEditGear()
-{
-	ShowLoopJointLocalMatrix();
-
-	ndMeshJointGear* const joint = (ndMeshJointGear*)*m_currentLoopJointSelection->m_joint;
-	ndReal value = joint->m_ratio;
-	if (ImGui::InputFloat("spring const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
-	{
-		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-		joint->m_ratio = ndMax(value, ndReal(0.01f));
-		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
 }
 
@@ -1431,6 +1403,20 @@ void ndAssetEditor::JointsLoopEditSpherical()
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		joint->m_maxConeAngle = ndClamp(value, ndReal(0.0f), ndReal(180.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	}
+}
+
+void ndAssetEditor::JointsLoopEditGear()
+{
+	ShowLoopJointLocalMatrix();
+
+	ndMeshJointGear* const joint = (ndMeshJointGear*)*m_currentLoopJointSelection->m_joint;
+	ndReal value = joint->m_ratio;
+	if (ImGui::InputFloat("gear ratio", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+		joint->m_ratio = ndMax(value, ndReal(0.01f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
 }
