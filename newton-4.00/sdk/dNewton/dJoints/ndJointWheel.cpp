@@ -285,16 +285,5 @@ void ndJointWheel::JacobianDerivative(ndConstraintDescritor& desc)
 ndSharedPtr<ndMeshJoint> ndJointWheel::GetMeshJoint(const ndMesh* const owner) const
 {
 	ndMeshJointWheel* const joint = new ndMeshJointWheel(owner, this);
-	
-	//joint->m_baseFrame = m_baseFrame;
-	joint->m_axis.m_springK = m_info.m_springK;
-	joint->m_axis.m_damperC = m_info.m_damperC;
-	joint->m_axis.m_maxLimit = m_info.m_upperStop;
-	joint->m_axis.m_minLimit = m_info.m_lowerStop;
-	joint->m_axis.m_springDamperRegularizer = m_info.m_regularizer;
-	joint->m_brakeTorque = m_info.m_brakeTorque;
-	joint->m_steeringAngle = m_info.m_steeringAngle * ndRadToDegree;
-	joint->m_handBrakeTorque = m_info.m_handBrakeTorque;
-
 	return ndSharedPtr<ndMeshJoint>(joint);
 }
