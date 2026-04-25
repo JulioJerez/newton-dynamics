@@ -251,7 +251,13 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 					};
 
-					if (strcmp(name, ndJointHinge::StaticClassName()) == 0)
+					if (strcmp(name, ndJointFix6dof::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointFix6dof());
+						InitNewGlobalJoint(newJoint);
+					}
+					else if (strcmp(name, ndJointHinge::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointHinge());
@@ -275,22 +281,16 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointGear());
 						InitNewLocalJoint(newJoint);
 					}
+					else if (strcmp(name, ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndMultiBodyVehicleDifferentialAxle());
+						InitNewLocalJoint(newJoint);
+					}
 					else if (strcmp(name, ndJointDoubleHinge::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointDoubleHinge());
-						InitNewGlobalJoint(newJoint);
-					}
-					else if (strcmp(name, ndJointSpherical::StaticClassName()) == 0)
-					{
-						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointSpherical());
-						InitNewGlobalJoint(newJoint);
-					}
-					else if (strcmp(name, ndJointFix6dof::StaticClassName()) == 0)
-					{
-						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointFix6dof());
 						InitNewGlobalJoint(newJoint);
 					}
 					else if (strcmp(name, ndJointRoller::StaticClassName()) == 0)
@@ -309,6 +309,18 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointWheel());
+						InitNewGlobalJoint(newJoint);
+					}
+					else if (strcmp(name, ndIkSwivelPositionEffector::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndIkSwivelPositionEffector());
+						InitNewLocalJoint(newJoint);
+					}
+					else if (strcmp(name, ndJointSpherical::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointSpherical());
 						InitNewGlobalJoint(newJoint);
 					}
 					else
@@ -391,7 +403,6 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 		{
 			JointsLoopEditSpherical();
 		}
-
 		else if (strcmp(joint->m_constructor.GetStr(), ndIkSwivelPositionEffector::StaticClassName()) == 0)
 		{
 			JointsLoopEditSwivelPositionEffector();
