@@ -174,6 +174,12 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointDoubleHinge());
 						InitNewGlobalJoint(newJoint);
 					}
+					else if (strcmp(name, ndJointWheel::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointWheel());
+						InitNewGlobalJoint(newJoint);
+					}
 
 					else
 					{
@@ -222,6 +228,10 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointDoubleHinge::StaticClassName()) == 0)
 		{
 			JointsEditDoubleHingeJoint();
+		}
+		else if (strcmp(joint->m_constructor.GetStr(), ndJointWheel::StaticClassName()) == 0)
+		{
+			JointsEditWheelJoint();
 		}
 
 		else
@@ -881,5 +891,74 @@ void ndAssetEditor::JointsEditDoubleHingeJoint()
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
 			}
 		}
+	}
+}
+
+void ndAssetEditor::JointsEditWheelJoint()
+{
+	ShowLoopJointGlobalMatrix();
+
+	ndMeshJointWheel* const joint = (ndMeshJointWheel*)*m_currentSelection->GetJoint();
+
+	ImGui::SeparatorText("actuator params");
+	ndReal value = joint->m_desc->m_springK;
+	if (ImGui::InputFloat("spring const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
+		joint->m_desc->m_springK = ndMax(value, ndReal(0.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
+	}
+	value = joint->m_desc->m_damperC;
+	if (ImGui::InputFloat("damper const##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
+		joint->m_desc->m_damperC = ndMax(value, ndReal(0.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
+	}
+	value = joint->m_desc->m_regularizer;
+	if (ImGui::InputFloat("regularizer", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
+		joint->m_desc->m_regularizer = ndMax(value, ndReal(0.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
+	}
+
+	value = joint->m_desc->m_upperStop;
+	if (ImGui::InputFloat("upper stop", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
+		joint->m_desc->m_upperStop = ndClamp(value, ndReal(0.0f), ndReal(10.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
+	}
+	value = joint->m_desc->m_lowerStop;
+	if (ImGui::InputFloat("lower stop", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
+		joint->m_desc->m_lowerStop = ndClamp(value, ndReal(-10.0f), ndReal(0.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
+	}
+
+	value = joint->m_desc->m_steeringAngle;
+	if (ImGui::InputFloat("steering angle", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
+		joint->m_desc->m_steeringAngle = ndClamp(value, ndReal(0.0f), ndReal(45.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
+	}
+
+	value = joint->m_desc->m_brakeTorque;
+	if (ImGui::InputFloat("brake torque", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
+		joint->m_desc->m_brakeTorque = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
+	}
+
+	value = joint->m_desc->m_handBrakeTorque;
+	if (ImGui::InputFloat("hand brake torque", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
+		joint->m_desc->m_handBrakeTorque = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
 	}
 }
