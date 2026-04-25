@@ -141,6 +141,7 @@ class ndAssetEditor : public ndClassAlloc
 	void JointsEditHingeJoint();
 	void JointsEditSliderJoint();
 	void JointsEditPlaneJoint();
+	void JointsEditRollerJoint();
 
 	void ShowPropertiesJointsLoopInfo();
 	void ShowLoopJointLocalMatrix();
@@ -149,12 +150,12 @@ class ndAssetEditor : public ndClassAlloc
 	void JointsLoopEditHingeJoint();
 	void JointsLoopEditSliderJoint();
 	void JointsLoopEditPlaneJoint();
+	void JointsLoopEditRollerJoint();
 
 	void JointsLoopEditGear();
 	void JointsLoopEditSpherical();
 	void JointsLoopEditGearJoint();
 	void JointsLoopEditWheelJoint();
-	void JointsLoopEditRollerJoint();
 	void JointsLoopEditCylinderJoint();
 	void JointsLoopEditDoubleHingeJoint();
 	void JointsLoopEditDifferentialAxle();
