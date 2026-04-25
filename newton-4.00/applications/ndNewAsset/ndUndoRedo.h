@@ -34,18 +34,6 @@ class ndUndoRedoCommand : public ndClassAlloc
 	virtual class ndUndoRedoShapeChange* GetAsUndoRedoShapeChange() const { return nullptr; }
 	virtual class ndUndoRedoShapeModified* GetAsUndoRedoShapeModified() const { return nullptr; }
 
-	//virtual class ndUndoRedoJoint* GetAsUndoRedoJoint() const { return nullptr; }
-	//virtual class ndUndoRedoJointChange* GetAsUndoRedoJointChange() const { return nullptr; }
-	//virtual class ndUndoRedoJointPlane* GetAsUndoRedoJointPlane() const { return nullptr; }
-	//virtual class ndUndoRedoJointWheel* GetAsUndoRedoJointWheel() const { return nullptr; }
-	//virtual class ndUndoRedoJointHinge* GetAsUndoRedoJointHinge() const { return nullptr; }
-	//virtual class ndUndoRedoJointSlider* GetAsUndoRedoJointSlider() const { return nullptr; }
-	//virtual class ndUndoRedoJointRoller* GetAsUndoRedoJointRoller() const { return nullptr; }
-	//virtual class ndUndoRedoJointFix6dof* GetAsUndoRedoJointFix6dof() const { return nullptr; }
-	//virtual class ndUndoRedoJointCylinder* GetAsUndoRedoJointCylinder() const { return nullptr; }
-	//virtual class ndUndoRedoJointSpherical* GetAsUndoRedoJointSpherical() const { return nullptr; }
-	//virtual class ndUndoRedoJointDoubleHinge* GetAsUndoRedoJointDoubleHinge() const { return nullptr; }
-
 	virtual class ndUndoRedoLoopJoint* GetAsUndoRedoLoopJoint() const { return nullptr; }
 	virtual class ndUndoRedoStructuralJoint* GetAsUndoRedoStructuralJoint() const { return nullptr; }
 

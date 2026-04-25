@@ -363,10 +363,6 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 		{
 			JointsLoopEditFix6dof();
 		}
-		else if (strcmp(joint->m_constructor.GetStr(), ndJointGear::StaticClassName()) == 0)
-		{
-			JointsLoopEditGearJoint();
-		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointHinge::StaticClassName()) == 0)
 		{
 			JointsLoopEditHingeJoint();
@@ -374,6 +370,10 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointSlider::StaticClassName()) == 0)
 		{
 			JointsLoopEditSliderJoint();
+		}
+		else if (strcmp(joint->m_constructor.GetStr(), ndJointGear::StaticClassName()) == 0)
+		{
+			JointsLoopEditGearJoint();
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointPlane::StaticClassName()) == 0)
 		{
