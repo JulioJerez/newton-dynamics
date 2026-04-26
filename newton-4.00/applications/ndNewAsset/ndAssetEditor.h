@@ -167,6 +167,7 @@ class ndAssetEditor : public ndClassAlloc
 	void ShowCollisionBox();
 	void ShowCollisionSphere();
 	void ShowCollisionCapsule();
+	void ShowCollisionCylinder();
 		
 	ndSharedPtr<ndMesh> m_mesh;
 	ndSharedPtr<ndRender> m_renderer;

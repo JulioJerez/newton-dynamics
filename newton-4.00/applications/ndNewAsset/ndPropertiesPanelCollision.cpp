@@ -347,6 +347,10 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 		{
 			ShowCollisionCapsule();
 		}
+		else if (strcmp(contructor.GetStr(), ndShapeCylinder::StaticClassName()) == 0)
+		{
+			ShowCollisionCylinder();
+		}
 
 		else
 		{
@@ -417,6 +421,41 @@ void ndAssetEditor::ShowCollisionCapsule()
 
 	ndReal value;
 	ndMeshCollisionShapeCapsule* const subJoint = (ndMeshCollisionShapeCapsule*)*shapeInstance.m_shape;
+
+	value = subJoint->m_radius0;
+	if (ImGui::InputFloat("radio0", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+		subJoint->m_radius0 = ndMax(value, ndReal(0.01f));
+		GetDebugDisplay()->RebuildDebugCollision();
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+	}
+	value = subJoint->m_radius1;
+	if (ImGui::InputFloat("radois1", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+		subJoint->m_radius1 = ndMax(value, ndReal(0.01f));
+		GetDebugDisplay()->RebuildDebugCollision();
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+	}
+	value = subJoint->m_height;
+	if (ImGui::InputFloat("height", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+		subJoint->m_height = ndMax(value, ndReal(0.01f));
+		GetDebugDisplay()->RebuildDebugCollision();
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+	}
+}
+
+void ndAssetEditor::ShowCollisionCylinder()
+{
+	ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
+	ndMeshBodyKinematic* const rigidBody = (ndMeshBodyKinematic*)*body;
+	ndMeshShapeInstance& shapeInstance = rigidBody->m_shapeInstance;
+
+	ndReal value;
+	ndMeshCollisionShapeCylinder* const subJoint = (ndMeshCollisionShapeCylinder*)*shapeInstance.m_shape;
 
 	value = subJoint->m_radius0;
 	if (ImGui::InputFloat("radio0", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
