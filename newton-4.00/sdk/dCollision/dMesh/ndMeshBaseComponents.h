@@ -201,8 +201,9 @@ class ndMeshShapeInstance : public ndClassAlloc
 	D_COLLISION_API ndMeshShapeInstance(const ndShapeInstance& instance);
 
 	D_COLLISION_API ndMeshShapeInstance(const ndMeshShapeInstance& other);
-	//D_COLLISION_API virtual ndMeshJoint* Duplicate() const override;
+
 	D_COLLISION_API bool operator==(const ndMeshShapeInstance& other) const;
+	D_COLLISION_API ndMeshShapeInstance& operator=(const ndMeshShapeInstance& other);
 
 	D_COLLISION_API ndShapeInstance* CreateObject() const;
 	D_COLLISION_API void ApplyScale(const ndMatrix& scaleMatrix);

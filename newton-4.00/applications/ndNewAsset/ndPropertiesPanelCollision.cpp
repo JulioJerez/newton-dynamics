@@ -21,12 +21,6 @@ class ndUndoRedoShape : public ndUndoRedoCommand
 		:ndUndoRedoCommand(editor, mesh)
 		,m_shapeInstance(((ndMeshBodyKinematic*)*editor->m_currentSelection->GetRigidBody())->m_shapeInstance)
 	{
-		ndAssert(0);
-		//ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
-		//ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
-		//
-		//m_scale = body->m_shapeInstance.m_scale;
-		//m_localFrame = body->m_shapeInstance.m_localMatrix;
 	}
 
 	virtual ndUndoRedoShape* GetAsUndoRedoShape() const override
@@ -41,13 +35,11 @@ class ndUndoRedoShape : public ndUndoRedoCommand
 			const ndUndoRedoShape* const other = command.GetAsUndoRedoShape();
 			if (other)
 			{
-				ndAssert(0);
-				//bool test = (m_localFrame * other->m_localFrame.OrthoInverse()).TestIdentity();
-				//test = test && ((m_scale - other->m_scale).DotProduct(m_scale - other->m_scale).GetScalar() < ndFloat32(-0.001f));
-				//if (test)
-				//{
-				//	return false;
-				//}
+				bool test = (m_shapeInstance == other->m_shapeInstance);
+				if (test)
+				{
+					return false;
+				}
 			}
 		}
 
@@ -56,16 +48,12 @@ class ndUndoRedoShape : public ndUndoRedoCommand
 
 	virtual void Undo() override
 	{
-		ndAssert(0);
-		//ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
-		//ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
-		//
-		//body->m_shapeInstance.m_scale = m_scale;
-		//body->m_shapeInstance.m_localMatrix = m_localFrame;
+		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
+		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
+		body->m_shapeInstance = m_shapeInstance;
+		m_editor->GetDebugDisplay()->RebuildDebugCollision();
 	}
 
-	//ndMatrix m_localFrame;
-	//ndVector m_scale;
 	ndMeshShapeInstance m_shapeInstance;
 };
 
@@ -81,26 +69,7 @@ void ndAssetEditor::ShowShapeTransform()
 	}
 	else
 	{
-		//ndReal euler[3];
-		//euler[0] = ndReal(0.0f);
-		//euler[1] = ndReal(0.0f);
-		//euler[2] = ndReal(0.0f);
-		//if (ImGui::InputFloat3("rel rotation##2", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
-		//{
-		//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-		//	ndMatrix localMatrix0(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad) * joint->m_localFrame0);
-		//
-		//	ndMatrix globalMatrix(localMatrix0 * m_currentLoopJointSelection->m_childNode->CalculateGlobalMatrix());
-		//	ndMatrix localMatrix1(globalMatrix * m_currentLoopJointSelection->m_parentNode->CalculateGlobalMatrix().OrthoInverse());
-		//
-		//	joint->m_localFrame0 = localMatrix0;
-		//	joint->m_localFrame1 = localMatrix1;
-		//
-		//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-		//}
-
 		ImGui::SeparatorText("local transform");
-		//ndMatrix matrix(shapeInstance.m_localMatrix);
 		ndReal position[3];
 		position[0] = ndReal(0.0f);
 		position[1] = ndReal(0.0f);
@@ -115,7 +84,6 @@ void ndAssetEditor::ShowShapeTransform()
 
 		ndReal euler[3];
 		ndVector tmp;
-		//ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
 
 		euler[0] = ndReal(0.0f);
 		euler[1] = ndReal(0.0f);
@@ -160,64 +128,61 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 				bool selected = strcmp(name, className) ? false : true;
 				if (ImGui::Selectable(name, selected))
 				{
-					auto InitNewShape = [this, &shapeInstance](ndSharedPtr<ndShapeInstance>& instance)
+					auto InitNewShape = [this, rigidBody, &shapeInstance](ndSharedPtr<ndShapeInstance>& instance)
 					{
-						ndAssert(0);
-						//instance->Serialize(&shapeInstance);
-						//GetDebugDisplay()->RebuildDebugCollision();
-						//m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
+						ndMeshShapeInstance newInstance(**instance);
+						shapeInstance = newInstance;
+						rigidBody->m_shapeInstance = shapeInstance;
+						GetDebugDisplay()->RebuildDebugCollision();
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
 					};
 
-					//if (strcmp(name, className))
+					if (strcmp(name, ndShapeNull::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+						ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionNull());
+						InitNewShape(instance);
+					}
+					//else if (strcmp(name, ndShapeBox::StaticClassName()) == 0)
 					//{
-					//	if (strcmp(name, ndShapeBox::StaticClassName()) == 0)
-					//	{
-					//		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
-					//		ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionBox());
-					//		InitNewShape(instance);
-					//	}
-					//	else if (strcmp(name, ndShapeSphere::StaticClassName()) == 0)
-					//	{
-					//		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
-					//		ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionSphere());
-					//		InitNewShape(instance);
-					//	}
-					//	else if (strcmp(name, ndShapeCapsule::StaticClassName()) == 0)
-					//	{
-					//		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
-					//		ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionCapsule());
-					//		InitNewShape(instance);
-					//	}
-					//	else if (strcmp(name, ndShapeCylinder::StaticClassName()) == 0)
-					//	{
-					//		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
-					//		ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionCylinder());
-					//		InitNewShape(instance);
-					//	}
-					//	else if (strcmp(name, ndShapeConvexHull::StaticClassName()) == 0)
-					//	{
-					//		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
-					//		ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionConvex());
-					//		InitNewShape(instance);
-					//	}
-					//	else if (strcmp(name, ndShapeChamferCylinder::StaticClassName()) == 0)
-					//	{
-					//		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
-					//		ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionChamferCylinder());
-					//		InitNewShape(instance);
-					//	}
-					//	else if (strcmp(name, ndShapeNull::StaticClassName()) == 0)
-					//	{
-					//		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShapeChange(this, m_currentSelection)));
-					//		ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionNull());
-					//		InitNewShape(instance);
-					//	}
-					//	else
-					//	{
-					//		ndAssert(0);
-					//	}
+					//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+					//	ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionBox());
+					//	InitNewShape(instance);
 					//}
-					ndAssert(0);
+					//else if (strcmp(name, ndShapeSphere::StaticClassName()) == 0)
+					//{
+					//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+					//	ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionSphere());
+					//	InitNewShape(instance);
+					//}
+					//else if (strcmp(name, ndShapeCapsule::StaticClassName()) == 0)
+					//{
+					//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+					//	ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionCapsule());
+					//	InitNewShape(instance);
+					//}
+					//else if (strcmp(name, ndShapeCylinder::StaticClassName()) == 0)
+					//{
+					//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+					//	ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionCylinder());
+					//	InitNewShape(instance);
+					//}
+					//else if (strcmp(name, ndShapeConvexHull::StaticClassName()) == 0)
+					//{
+					//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+					//	ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionConvex());
+					//	InitNewShape(instance);
+					//}
+					//else if (strcmp(name, ndShapeChamferCylinder::StaticClassName()) == 0)
+					//{
+					//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+					//	ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionChamferCylinder());
+					//	InitNewShape(instance);
+					//}
+					else
+					{
+						ndAssert(0);
+					}
 				}
 			};
 			SetDropdownList(ndShapeNull::StaticClassName());

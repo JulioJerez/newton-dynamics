@@ -224,8 +224,6 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 				{
 					auto InitNewLocalJoint = [this, &joint](ndSharedPtr<ndJointBilateralConstraint>& newJoint)
 					{
-						//newJoint->SetLocalMatrix0(joint->m_localFrame0);
-						//newJoint->SetLocalMatrix1(joint->m_localFrame1);
 						ndMatrix localMatrix0(ndGetIdentityMatrix());
 						ndMatrix localMatrix1(ndGetIdentityMatrix());
 						localMatrix0.m_posit = m_currentLoopJointSelection->m_childNode->GetRigidBody()->m_localCentreOfMass;

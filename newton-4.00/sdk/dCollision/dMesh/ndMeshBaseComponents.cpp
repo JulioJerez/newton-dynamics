@@ -54,8 +54,7 @@ ndMeshCollisionShape* ndMeshCollisionShape::Duplicate() const
 
 bool ndMeshCollisionShape::operator==(const ndMeshCollisionShape& other) const
 {
-	ndAssert(0);
-	return false;
+	return m_constructor == other.m_constructor;
 }
 
 ndMeshCollisionShape::~ndMeshCollisionShape()
@@ -70,7 +69,6 @@ ndMeshCollisionShapeNull::ndMeshCollisionShapeNull()
 ndMeshCollisionShapeNull::ndMeshCollisionShapeNull(const ndMeshCollisionShapeNull& other)
 	:ndMeshCollisionShape(other)
 {
-	ndAssert(0);
 }
 
 ndMeshCollisionShape* ndMeshCollisionShapeNull::Duplicate() const
@@ -153,8 +151,10 @@ ndMeshCollisionShapeBox::ndMeshCollisionShapeBox()
 
 ndMeshCollisionShapeBox::ndMeshCollisionShapeBox(const ndMeshCollisionShapeBox& other)
 	:ndMeshCollisionShape(other)
+	,m_x(other.m_x)
+	,m_y(other.m_y) 
+	,m_z(other.m_z)
 {
-	ndAssert(0);
 }
 
 ndMeshCollisionShape* ndMeshCollisionShapeBox::Duplicate() const
@@ -164,7 +164,14 @@ ndMeshCollisionShape* ndMeshCollisionShapeBox::Duplicate() const
 
 bool ndMeshCollisionShapeBox::operator==(const ndMeshCollisionShape& other) const
 {
-	ndAssert(0);
+	bool test = ndMeshCollisionShape::operator==(other);
+	if (test)
+	{
+		const ndMeshCollisionShapeBox* const otherShape = (ndMeshCollisionShapeBox*)&other;
+		test = test && (m_x == otherShape->m_x);
+		test = test && (m_y == otherShape->m_y);
+		test = test && (m_z == otherShape->m_z);
+	}
 	return false;
 }
 
@@ -487,10 +494,21 @@ ndMeshShapeInstance::ndMeshShapeInstance(const ndMeshShapeInstance& other)
 {
 }
 
-//bool ndMeshShapeInstance::operator == (const ndMeshShapeInstance & other) const
-bool ndMeshShapeInstance::operator == (const ndMeshShapeInstance&) const
+ndMeshShapeInstance& ndMeshShapeInstance::operator=(const ndMeshShapeInstance& other)
 {
-	ndAssert(0);
+	m_scale = other.m_scale;
+	m_localMatrix = other.m_localMatrix;
+	m_alignmentMatrix = other.m_alignmentMatrix;
+	m_shape = other.m_shape;
+	return *this;
+}
+
+bool ndMeshShapeInstance::operator == (const ndMeshShapeInstance& other) const
+{
+	bool test = (m_localMatrix * other.m_localMatrix.OrthoInverse()).TestIdentity(ndFloat32 (1.0e-5f));
+	test = test && (m_alignmentMatrix * other.m_alignmentMatrix.OrthoInverse()).TestIdentity(ndFloat32(1.0e-5f));
+	test = test && ((m_scale - other.m_scale).DotProduct(m_scale - other.m_scale)).GetScalar() < ndFloat32 (1.0e-6f);
+	test = test && (**m_shape == **other.m_shape);
 	return false;
 }
 
