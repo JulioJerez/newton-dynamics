@@ -44,6 +44,28 @@ ndMeshBodyDynamic::ndMeshBodyDynamic(const ndMesh* const owner)
 	m_classConstructor = ndString("ndBodyDynamic");
 }
 
+ndMeshBodyDynamic::ndMeshBodyDynamic(const ndMeshBodyDynamic& other)
+	:ndMeshBodyKinematic(other)
+	,m_intrinsicDamping(other.m_intrinsicDamping)
+{
+}
+
+ndMeshBody* ndMeshBodyDynamic::Duplicate() const
+{
+	return new ndMeshBodyDynamic(*this);
+}
+
+bool ndMeshBodyDynamic::operator==(const ndMeshBody& other) const
+{
+	bool test = ndMeshBodyKinematic::operator==(other);
+
+	const ndMeshBodyDynamic* const otherBody = (ndMeshBodyDynamic*)&other;
+
+	ndVector diff(m_intrinsicDamping - otherBody->m_intrinsicDamping);
+	test = test && diff.DotProduct(diff).GetScalar() < ndFloat32(1.0e-6f);
+	return test;
+}
+
 void ndMeshBodyDynamic::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	ndMeshBodyKinematic::SerializeToXml(parent);
