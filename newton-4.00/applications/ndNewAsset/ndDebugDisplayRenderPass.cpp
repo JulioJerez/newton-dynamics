@@ -30,13 +30,13 @@ ndDebugDisplayRenderPass::~ndDebugDisplayRenderPass()
 
 void ndDebugDisplayRenderPass::RebuildDebugCollision()
 {
-	const ndString& seletecName = m_manager->m_currentSelection->GetName();
+	const ndString& selected = m_manager->m_currentSelection->GetName();
 	ndSharedPtr<ndMeshBody> body(m_manager->m_currentSelection->GetRigidBody());
 	ndMeshBodyKinematic* const kinematicBody = (ndMeshBodyKinematic*)*body;
 	for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
 	{
 		ndDebugMesh& debugMesh = ptr->GetInfo();
-		if (debugMesh.m_parent->m_name == seletecName)
+		if (debugMesh.m_parent->m_name == selected)
 		{
 			const ndMeshShapeInstance shapeInstance = kinematicBody->m_shapeInstance;
 			if (strcmp(shapeInstance.m_shape->m_constructor.GetStr(), ndShapeNull::StaticClassName()) == 0)
@@ -122,7 +122,7 @@ void ndDebugDisplayRenderPass::RenderWireFrame()
 	{
 		const ndDebugMesh& debugMesh = ptr->GetInfo();
 		const ndRenderPrimitive* const primitive = *debugMesh.m_wireFrameMesh;
-		if (primitive)
+		if (primitive && primitive->m_segments.GetCount())
 		{
 			const ndMatrix matrix(debugMesh.m_parent->m_primitiveMatrix * debugMesh.m_parent->m_globalMatrix);
 			ndRenderPrimitiveSegment& segment = primitive->m_segments.GetFirst()->GetInfo();
@@ -162,14 +162,14 @@ void ndDebugDisplayRenderPass::DrawFrame(const ndMatrix& matrix)
 
 void ndDebugDisplayRenderPass::RenderSelectedNode()
 {
-	const ndString& seletecName = m_manager->m_currentSelection->GetName();
+	const ndString& selected = m_manager->m_currentSelection->GetName();
 	for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
 	{
 		const ndDebugMesh& debugMesh = ptr->GetInfo();
 		if (m_manager->m_showSelectedNode)
 		{
 			const ndRenderPrimitive* const primitive = *debugMesh.m_wireFrameMesh;
-			if (primitive)
+			if (primitive && primitive->m_segments.GetCount())
 			{
 				const ndMatrix pivotMatrix(debugMesh.m_parent->m_globalMatrix);
 				const ndMatrix gemetryMatrix(debugMesh.m_parent->m_primitiveMatrix * pivotMatrix);
@@ -177,7 +177,7 @@ void ndDebugDisplayRenderPass::RenderSelectedNode()
 				ndRenderPrimitiveSegment& segment = primitive->m_segments.GetFirst()->GetInfo();
 				ndRenderPrimitiveMaterial* const material = &segment.m_material;
 
-				if (debugMesh.m_parent->m_name == seletecName)
+				if (debugMesh.m_parent->m_name == selected)
 				{
 					material->m_diffuse = m_selectedColor;
 					primitive->Render(m_owner, gemetryMatrix, m_debugDisplayWireFrameMesh);
@@ -191,11 +191,11 @@ void ndDebugDisplayRenderPass::RenderCollisionShape()
 {
 	if (m_manager->m_currentSelection->GetRigidBody())
 	{
-		const ndString& seletecName = m_manager->m_currentSelection->GetName();
+		const ndString& selected = m_manager->m_currentSelection->GetName();
 		for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
 		{
 			const ndDebugMesh& debugMesh = ptr->GetInfo();
-			if ((debugMesh.m_parent->m_name == seletecName))
+			if ((debugMesh.m_parent->m_name == selected))
 			{
 				ndSharedPtr<ndMeshBody> body(m_manager->m_currentSelection->GetRigidBody());
 				const ndMeshBodyKinematic* const kinBody = (ndMeshBodyKinematic*)*body;
@@ -209,10 +209,9 @@ void ndDebugDisplayRenderPass::RenderCollisionShape()
 				if (m_manager->m_showSelectedNode)
 				{
 					const ndRenderPrimitive* const primitive = *debugMesh.m_zBufferShape;
-					if (primitive)
+					if (primitive && debugMesh.m_wireFrameShape->m_segments.GetCount())
 					{
 						primitive->Render(m_owner, pivotMatrix, m_debugDisplaySetZbuffer);
-
 						ndRenderPrimitiveSegment& segment = debugMesh.m_wireFrameShape->m_segments.GetFirst()->GetInfo();
 						ndRenderPrimitiveMaterial* const material = &segment.m_material;
 						material->m_diffuse = m_shapeColor;
@@ -231,7 +230,7 @@ void ndDebugDisplayRenderPass::RenderCloseLoopJoints()
 	{
 		const ndDebugMesh& debugMesh = ptr->GetInfo();
 		const ndRenderPrimitive* const primitive = *debugMesh.m_zBufferShape;
-		if (primitive)
+		if (primitive && primitive->m_segments.GetCount())
 		{
 			ndSharedPtr<ndMeshBody> body(nullptr);
 			if (currentLoopJointSelection->m_childNode->GetName() == debugMesh.m_parent->m_name)
@@ -269,11 +268,11 @@ void ndDebugDisplayRenderPass::RenderCloseLoopJoints()
 
 void ndDebugDisplayRenderPass::RenderOptions()
 {
-	const ndString& seletecName = m_manager->m_currentSelection->GetName();
+	const ndString& selected = m_manager->m_currentSelection->GetName();
 	for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
 	{
 		const ndDebugMesh& debugMesh = ptr->GetInfo();
-		if (debugMesh.m_parent->m_name == seletecName)
+		if (debugMesh.m_parent->m_name == selected)
 		{
 			const ndMatrix pivotMatrix(debugMesh.m_parent->m_globalMatrix);
 			if (m_manager->m_showPivot)
