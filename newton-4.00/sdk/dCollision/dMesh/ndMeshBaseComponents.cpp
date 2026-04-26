@@ -40,6 +40,23 @@ ndMeshCollisionShape::ndMeshCollisionShape(const char* const constructor)
 {
 }
 
+ndMeshCollisionShape::ndMeshCollisionShape(const ndMeshCollisionShape& other)
+	:ndClassAlloc()
+	,m_constructor(other.m_constructor)
+{
+}
+
+ndMeshCollisionShape* ndMeshCollisionShape::Duplicate() const
+{
+	ndAssert(0);
+	return nullptr;
+}
+
+bool ndMeshCollisionShape::operator==(const ndMeshCollisionShape& other) const
+{
+	return m_constructor == other.m_constructor;
+}
+
 ndMeshCollisionShape::~ndMeshCollisionShape()
 {
 }
@@ -47,6 +64,22 @@ ndMeshCollisionShape::~ndMeshCollisionShape()
 ndMeshCollisionShapeNull::ndMeshCollisionShapeNull()
 	:ndMeshCollisionShape(ndShapeNull::StaticClassName())
 {
+}
+
+ndMeshCollisionShapeNull::ndMeshCollisionShapeNull(const ndMeshCollisionShapeNull& other)
+	:ndMeshCollisionShape(other)
+{
+}
+
+ndMeshCollisionShape* ndMeshCollisionShapeNull::Duplicate() const
+{
+	return new ndMeshCollisionShapeNull(*this);
+}
+
+bool ndMeshCollisionShapeNull::operator==(const ndMeshCollisionShape& other) const
+{
+	bool test = ndMeshCollisionShape::operator==(other);
+	return test;
 }
 
 void ndMeshCollisionShapeNull::ApplyScale(ndFloat32)
@@ -73,6 +106,28 @@ ndMeshCollisionShapeSphere::ndMeshCollisionShapeSphere()
 {
 }
 
+ndMeshCollisionShapeSphere::ndMeshCollisionShapeSphere(const ndMeshCollisionShapeSphere& other)
+	:ndMeshCollisionShape(other)
+	,m_radius(other.m_radius)
+{
+}
+
+ndMeshCollisionShape* ndMeshCollisionShapeSphere::Duplicate() const
+{
+	return new ndMeshCollisionShapeSphere(*this);
+}
+
+bool ndMeshCollisionShapeSphere::operator==(const ndMeshCollisionShape& other) const
+{
+	bool test = ndMeshCollisionShape::operator==(other);
+	if (test)
+	{
+		const ndMeshCollisionShapeSphere* const otherShape = (ndMeshCollisionShapeSphere*)&other;
+		test = test && (m_radius == otherShape->m_radius);
+	}
+	return false;
+}
+
 void ndMeshCollisionShapeSphere::ApplyScale(ndFloat32 scale)
 {
 	m_radius *= scale;
@@ -97,6 +152,32 @@ ndShape* ndMeshCollisionShapeSphere::CreateObject() const
 ndMeshCollisionShapeBox::ndMeshCollisionShapeBox()
 	:ndMeshCollisionShape(ndShapeBox::StaticClassName())
 {
+}
+
+ndMeshCollisionShapeBox::ndMeshCollisionShapeBox(const ndMeshCollisionShapeBox& other)
+	:ndMeshCollisionShape(other)
+	,m_x(other.m_x)
+	,m_y(other.m_y) 
+	,m_z(other.m_z)
+{
+}
+
+ndMeshCollisionShape* ndMeshCollisionShapeBox::Duplicate() const
+{
+	return new ndMeshCollisionShapeBox(*this);
+}
+
+bool ndMeshCollisionShapeBox::operator==(const ndMeshCollisionShape& other) const
+{
+	bool test = ndMeshCollisionShape::operator==(other);
+	if (test)
+	{
+		const ndMeshCollisionShapeBox* const otherShape = (ndMeshCollisionShapeBox*)&other;
+		test = test && (m_x == otherShape->m_x);
+		test = test && (m_y == otherShape->m_y);
+		test = test && (m_z == otherShape->m_z);
+	}
+	return false;
 }
 
 void ndMeshCollisionShapeBox::ApplyScale(ndFloat32 scale)
@@ -126,10 +207,35 @@ ndShape* ndMeshCollisionShapeBox::CreateObject() const
 	return new ndShapeBox(m_x, m_y, m_z);
 }
 
-
 ndMeshCollisionShapeCapsule::ndMeshCollisionShapeCapsule()
 	:ndMeshCollisionShape(ndShapeCapsule::StaticClassName())
 {
+}
+
+ndMeshCollisionShapeCapsule::ndMeshCollisionShapeCapsule(const ndMeshCollisionShapeCapsule& other)
+	:ndMeshCollisionShape(other)
+	,m_height(other.m_height)
+	,m_radius0(other.m_radius0)
+	,m_radius1(other.m_radius1)
+{
+}
+
+ndMeshCollisionShape* ndMeshCollisionShapeCapsule::Duplicate() const
+{
+	return new ndMeshCollisionShapeCapsule(*this);
+}
+
+bool ndMeshCollisionShapeCapsule::operator==(const ndMeshCollisionShape& other) const
+{
+	bool test = ndMeshCollisionShape::operator==(other);
+	if (test)
+	{
+		const ndMeshCollisionShapeCapsule* const otherShape = (ndMeshCollisionShapeCapsule*)&other;
+		test = test && (m_height == otherShape->m_height);
+		test = test && (m_radius0 == otherShape->m_radius0);
+		test = test && (m_radius1 == otherShape->m_radius1);
+	}
+	return false;
 }
 
 void ndMeshCollisionShapeCapsule::ApplyScale(ndFloat32 scale)
@@ -164,6 +270,32 @@ ndMeshCollisionShapeCylinder::ndMeshCollisionShapeCylinder()
 {
 }
 
+ndMeshCollisionShapeCylinder::ndMeshCollisionShapeCylinder(const ndMeshCollisionShapeCylinder& other)
+	:ndMeshCollisionShape(other)
+	,m_height(other.m_height)
+	,m_radius0(other.m_radius0)
+	,m_radius1(other.m_radius1)
+{
+}
+
+ndMeshCollisionShape* ndMeshCollisionShapeCylinder::Duplicate() const
+{
+	return new ndMeshCollisionShapeCylinder(*this);
+}
+
+bool ndMeshCollisionShapeCylinder::operator==(const ndMeshCollisionShape& other) const
+{
+	bool test = ndMeshCollisionShape::operator==(other);
+	if (test)
+	{
+		const ndMeshCollisionShapeCylinder* const otherShape = (ndMeshCollisionShapeCylinder*)&other;
+		test = test && (m_height == otherShape->m_height);
+		test = test && (m_radius0 == otherShape->m_radius0);
+		test = test && (m_radius1 == otherShape->m_radius1);
+	}
+	return false;
+}
+
 void ndMeshCollisionShapeCylinder::ApplyScale(ndFloat32 scale)
 {
 	m_radius0 *= scale;
@@ -196,6 +328,30 @@ ndMeshCollisionShapeChamferCylinder::ndMeshCollisionShapeChamferCylinder()
 {
 }
 
+ndMeshCollisionShapeChamferCylinder::ndMeshCollisionShapeChamferCylinder(const ndMeshCollisionShapeChamferCylinder& other)
+	:ndMeshCollisionShape(other)
+	,m_height(other.m_height)
+	,m_radius(other.m_radius)
+{
+}
+
+ndMeshCollisionShape* ndMeshCollisionShapeChamferCylinder::Duplicate() const
+{
+	return new ndMeshCollisionShapeChamferCylinder(*this);
+}
+
+bool ndMeshCollisionShapeChamferCylinder::operator==(const ndMeshCollisionShape& other) const
+{
+	bool test = ndMeshCollisionShape::operator==(other);
+	if (test)
+	{
+		const ndMeshCollisionShapeChamferCylinder* const otherShape = (ndMeshCollisionShapeChamferCylinder*)&other;
+		test = test && (m_height == otherShape->m_height);
+		test = test && (m_radius == otherShape->m_radius);
+	}
+	return false;
+}
+
 void ndMeshCollisionShapeChamferCylinder::ApplyScale(ndFloat32 scale)
 {
 	m_height *= scale;
@@ -223,8 +379,43 @@ ndShape* ndMeshCollisionShapeChamferCylinder::CreateObject() const
 ndMeshCollisionShapeConvexHull::ndMeshCollisionShapeConvexHull()
 	:ndMeshCollisionShape(ndShapeConvexHull::StaticClassName())
 	,m_points()
-	,m_maxPointCount(1024)
+	,m_tolarence(ndFloat32 (0.0f))
+	,m_maxPointCount(256)
 {
+}
+
+ndMeshCollisionShapeConvexHull::ndMeshCollisionShapeConvexHull(const ndMeshCollisionShapeConvexHull& other)
+	:ndMeshCollisionShape(other)
+	,m_tolarence(other.m_tolarence)
+	,m_maxPointCount(other.m_maxPointCount)
+{
+	for (ndInt32 i = 0; i < other.m_points.GetCount(); ++i)
+	{
+		m_points.PushBack(other.m_points[i]);
+	}
+}
+
+ndMeshCollisionShape* ndMeshCollisionShapeConvexHull::Duplicate() const
+{
+	return new ndMeshCollisionShapeConvexHull(*this);
+}
+
+bool ndMeshCollisionShapeConvexHull::operator==(const ndMeshCollisionShape& other) const
+{
+	bool test = ndMeshCollisionShape::operator==(other);
+	if (test)
+	{
+		const ndMeshCollisionShapeConvexHull* const otherShape = (ndMeshCollisionShapeConvexHull*)&other;
+		test = test && (m_tolarence == otherShape->m_tolarence);
+		test = test && (m_maxPointCount == otherShape->m_maxPointCount);
+		for (ndInt32 i = 0; test && (i < m_points.GetCount()); ++i)
+		{
+			const ndVector diff(m_points[i] - otherShape->m_points[i]);
+			ndFloat32 err2 = diff.DotProduct(diff & ndVector::m_triplexMask).GetScalar();
+			test = test && (err2 < ndFloat32 (1.0e-6f));
+		}
+	}
+	return false;
 }
 
 void ndMeshCollisionShapeConvexHull::ApplyScale(ndFloat32 scale)
@@ -240,27 +431,70 @@ void ndMeshCollisionShapeConvexHull::SerializeToXml(nd::TiXmlElement* const pare
 {
 	xmlSaveParam(parent, "constructor", ndShapeConvexHull::StaticClassName());
 	xmlSaveParam(parent, "pointcloud", m_points);
+	xmlSaveParam(parent, "tolerance", m_tolarence);
+	xmlSaveParam(parent, "maxPoints", m_maxPointCount);
 }
 
 void ndMeshCollisionShapeConvexHull::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	m_points.SetCount(0);
 	xmlGetFloatArray3(parent, "pointcloud", m_points);
+	m_tolarence = ndFloat32(0.0f);
 	m_maxPointCount = ndInt32 (m_points.GetCount());
+	if (xmlHasAttribute(parent, "tolerance"))
+	{
+		m_maxPointCount = xmlGetInt(parent, "maxPoints");
+		m_tolarence = xmlGetFloat(parent, "tolerance");
+	}
 }
 
 ndShape* ndMeshCollisionShapeConvexHull::CreateObject() const
 {
-	ndShape* const hull = new ndShapeConvexHull(ndInt32(m_points.GetCount()), sizeof(ndVector), ndFloat32(0.0f), &m_points[0].m_x, m_maxPointCount);
+	ndShape* const hull = new ndShapeConvexHull(ndInt32(m_points.GetCount()), sizeof(ndVector), m_tolarence, &m_points[0].m_x, m_maxPointCount);
 	ndShapeInfo info(hull->GetShapeInfo());
-	ndMeshCollisionShapeConvexHull* const self = (ndMeshCollisionShapeConvexHull*)this;
-	self->m_maxPointCount = info.m_convexhull.m_vertexCount;
+	//ndMeshCollisionShapeConvexHull* const self = (ndMeshCollisionShapeConvexHull*)this;
+	//self->m_maxPointCount = info.m_convexhull.m_vertexCount;
 	return hull;
 }
 
 ndMeshCollisionShapeCompound::ndMeshCollisionShapeCompound()
 	:ndMeshCollisionShape(ndShapeCompound::StaticClassName())
 {
+}
+
+ndMeshCollisionShapeCompound::ndMeshCollisionShapeCompound(const ndMeshCollisionShapeCompound& other)
+	:ndMeshCollisionShape(other)
+{
+	for (ndList<ndSharedPtr<ndMeshShapeInstance>>::ndNode* node = other.m_subShapes.GetFirst(); node; node = node->GetNext())
+	{
+		ndSharedPtr<ndMeshShapeInstance>& otherInstance = node->GetInfo();
+		ndSharedPtr<ndMeshShapeInstance> instance (new ndMeshShapeInstance(**otherInstance));
+		m_subShapes.Append(instance);
+	}
+}
+
+ndMeshCollisionShape* ndMeshCollisionShapeCompound::Duplicate() const
+{
+	return new ndMeshCollisionShapeCompound(*this);
+}
+
+bool ndMeshCollisionShapeCompound::operator==(const ndMeshCollisionShape& other) const
+{
+	bool test = ndMeshCollisionShape::operator==(other);
+	if (test)
+	{
+		const ndMeshCollisionShapeCompound* const otherShape = (ndMeshCollisionShapeCompound*)&other;
+		test = test && (m_subShapes.GetCount() == otherShape->m_subShapes.GetCount());
+		ndList<ndSharedPtr<ndMeshShapeInstance>>::ndNode* selftNode = m_subShapes.GetFirst();
+		for (ndList<ndSharedPtr<ndMeshShapeInstance>>::ndNode* node = otherShape->m_subShapes.GetFirst(); node; node = node->GetNext())
+		{
+			const ndSharedPtr<ndMeshShapeInstance>& otherInstance = node->GetInfo();
+			const ndSharedPtr<ndMeshShapeInstance>& selfInstance = selftNode->GetInfo();
+			test = test && (**selfInstance == **otherInstance);
+			selftNode = selftNode->GetNext();
+		}
+	}
+	return false;
 }
 
 //void ndMeshCollisionShapeCompound::ApplyScale(ndFloat32 scale)
@@ -323,6 +557,33 @@ ndMeshShapeInstance::ndMeshShapeInstance(const ndShapeInstance& instance)
 	,m_scale(instance.GetScale())
 	,m_shape(instance.GetShape()->GetMeshShape())
 {
+}
+
+ndMeshShapeInstance::ndMeshShapeInstance(const ndMeshShapeInstance& other)
+	:ndClassAlloc()
+	,m_localMatrix(other.m_localMatrix)
+	,m_alignmentMatrix(other.m_alignmentMatrix)
+	,m_scale(other.m_scale)
+	,m_shape(ndSharedPtr<ndMeshCollisionShape>(other.m_shape->Duplicate()))
+{
+}
+
+ndMeshShapeInstance& ndMeshShapeInstance::operator=(const ndMeshShapeInstance& other)
+{
+	m_scale = other.m_scale;
+	m_localMatrix = other.m_localMatrix;
+	m_alignmentMatrix = other.m_alignmentMatrix;
+	m_shape = other.m_shape;
+	return *this;
+}
+
+bool ndMeshShapeInstance::operator == (const ndMeshShapeInstance& other) const
+{
+	bool test = (m_localMatrix * other.m_localMatrix.OrthoInverse()).TestIdentity(ndFloat32 (1.0e-5f));
+	test = test && (m_alignmentMatrix * other.m_alignmentMatrix.OrthoInverse()).TestIdentity(ndFloat32(1.0e-5f));
+	test = test && ((m_scale - other.m_scale).DotProduct(m_scale - other.m_scale)).GetScalar() < ndFloat32 (1.0e-6f);
+	test = test && (**m_shape == **other.m_shape);
+	return false;
 }
 
 void ndMeshShapeInstance::ApplyScale(const ndMatrix& scaleMatrix)

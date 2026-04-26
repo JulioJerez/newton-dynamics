@@ -38,8 +38,12 @@ class ndMeshCollisionShape : public ndClassAlloc
 {
 	public:
 	D_COLLISION_API ndMeshCollisionShape(const char* const constructor);
-	D_COLLISION_API virtual ~ndMeshCollisionShape();
 
+	D_COLLISION_API ndMeshCollisionShape(const ndMeshCollisionShape& other);
+	D_COLLISION_API virtual ndMeshCollisionShape* Duplicate() const;
+	D_COLLISION_API virtual bool operator==(const ndMeshCollisionShape& other) const;
+
+	D_COLLISION_API virtual ~ndMeshCollisionShape();
 	D_COLLISION_API virtual ndShape* CreateObject() const = 0;
 	D_COLLISION_API virtual void ApplyScale(ndFloat32 scale) = 0;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const = 0;
@@ -52,6 +56,11 @@ class ndMeshCollisionShapeNull : public ndMeshCollisionShape
 {
 	public:
 	D_COLLISION_API ndMeshCollisionShapeNull();
+
+	D_COLLISION_API ndMeshCollisionShapeNull(const ndMeshCollisionShapeNull& other);
+	D_COLLISION_API virtual ndMeshCollisionShape* Duplicate() const override;
+	D_COLLISION_API virtual bool operator==(const ndMeshCollisionShape& other) const override;
+
 	D_COLLISION_API virtual ndShape* CreateObject() const override;
 	D_COLLISION_API virtual void ApplyScale(ndFloat32 scale) override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
@@ -62,6 +71,11 @@ class ndMeshCollisionShapeSphere : public ndMeshCollisionShape
 {
 	public:
 	D_COLLISION_API ndMeshCollisionShapeSphere();
+
+	D_COLLISION_API ndMeshCollisionShapeSphere(const ndMeshCollisionShapeSphere& other);
+	D_COLLISION_API ndMeshCollisionShape* Duplicate() const;
+	D_COLLISION_API virtual bool operator==(const ndMeshCollisionShape& other) const;
+
 	D_COLLISION_API virtual void ApplyScale(ndFloat32 scale) override;
 	D_COLLISION_API virtual ndShape* CreateObject() const override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
@@ -74,6 +88,11 @@ class ndMeshCollisionShapeBox : public ndMeshCollisionShape
 {
 	public:
 	D_COLLISION_API ndMeshCollisionShapeBox();
+
+	D_COLLISION_API ndMeshCollisionShapeBox(const ndMeshCollisionShapeBox& other);
+	D_COLLISION_API ndMeshCollisionShape* Duplicate() const;
+	D_COLLISION_API virtual bool operator==(const ndMeshCollisionShape& other) const;
+
 	D_COLLISION_API virtual ndShape* CreateObject() const override;
 	D_COLLISION_API virtual void ApplyScale(ndFloat32 scale) override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
@@ -88,6 +107,11 @@ class ndMeshCollisionShapeCapsule : public ndMeshCollisionShape
 {
 	public:
 	D_COLLISION_API ndMeshCollisionShapeCapsule();
+
+	D_COLLISION_API ndMeshCollisionShapeCapsule(const ndMeshCollisionShapeCapsule& other);
+	D_COLLISION_API ndMeshCollisionShape* Duplicate() const;
+	D_COLLISION_API virtual bool operator==(const ndMeshCollisionShape& other) const;
+
 	D_COLLISION_API virtual ndShape* CreateObject() const override;
 	D_COLLISION_API virtual void ApplyScale(ndFloat32 scale) override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
@@ -102,6 +126,11 @@ class ndMeshCollisionShapeCylinder : public ndMeshCollisionShape
 {
 	public:
 	D_COLLISION_API ndMeshCollisionShapeCylinder();
+
+	D_COLLISION_API ndMeshCollisionShapeCylinder(const ndMeshCollisionShapeCylinder& other);
+	D_COLLISION_API ndMeshCollisionShape* Duplicate() const;
+	D_COLLISION_API virtual bool operator==(const ndMeshCollisionShape& other) const;
+
 	D_COLLISION_API virtual ndShape* CreateObject() const override;
 	D_COLLISION_API virtual void ApplyScale(ndFloat32 scale) override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
@@ -116,6 +145,11 @@ class ndMeshCollisionShapeChamferCylinder : public ndMeshCollisionShape
 {
 	public:
 	D_COLLISION_API ndMeshCollisionShapeChamferCylinder();
+
+	D_COLLISION_API ndMeshCollisionShapeChamferCylinder(const ndMeshCollisionShapeChamferCylinder& other);
+	D_COLLISION_API ndMeshCollisionShape* Duplicate() const;
+	D_COLLISION_API virtual bool operator==(const ndMeshCollisionShape& other) const;
+
 	D_COLLISION_API virtual ndShape* CreateObject() const override;
 	D_COLLISION_API virtual void ApplyScale(ndFloat32 scale) override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
@@ -129,12 +163,18 @@ class ndMeshCollisionShapeConvexHull : public ndMeshCollisionShape
 {
 	public:
 	D_COLLISION_API ndMeshCollisionShapeConvexHull();
+
+	D_COLLISION_API ndMeshCollisionShapeConvexHull(const ndMeshCollisionShapeConvexHull& other);
+	D_COLLISION_API ndMeshCollisionShape* Duplicate() const;
+	D_COLLISION_API virtual bool operator==(const ndMeshCollisionShape& other) const;
+
 	D_COLLISION_API virtual ndShape* CreateObject() const override;
 	D_COLLISION_API virtual void ApplyScale(ndFloat32 scale) override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 
 	ndArray<ndVector> m_points;
+	ndFloat32 m_tolarence;
 	ndInt32 m_maxPointCount;
 };
 
@@ -142,6 +182,11 @@ class ndMeshCollisionShapeCompound : public ndMeshCollisionShape
 {
 	public:
 	D_COLLISION_API ndMeshCollisionShapeCompound();
+
+	D_COLLISION_API ndMeshCollisionShapeCompound(const ndMeshCollisionShapeCompound& other);
+	D_COLLISION_API ndMeshCollisionShape* Duplicate() const;
+	D_COLLISION_API virtual bool operator==(const ndMeshCollisionShape& other) const;
+
 	D_COLLISION_API virtual ndShape* CreateObject() const override;
 	D_COLLISION_API virtual void ApplyScale(ndFloat32 scale) override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
@@ -155,6 +200,11 @@ class ndMeshShapeInstance : public ndClassAlloc
 	public:
 	D_COLLISION_API ndMeshShapeInstance();
 	D_COLLISION_API ndMeshShapeInstance(const ndShapeInstance& instance);
+
+	D_COLLISION_API ndMeshShapeInstance(const ndMeshShapeInstance& other);
+
+	D_COLLISION_API bool operator==(const ndMeshShapeInstance& other) const;
+	D_COLLISION_API ndMeshShapeInstance& operator=(const ndMeshShapeInstance& other);
 
 	D_COLLISION_API ndShapeInstance* CreateObject() const;
 	D_COLLISION_API void ApplyScale(const ndMatrix& scaleMatrix);
