@@ -330,8 +330,9 @@ ndMeshCollisionShapeChamferCylinder::ndMeshCollisionShapeChamferCylinder()
 
 ndMeshCollisionShapeChamferCylinder::ndMeshCollisionShapeChamferCylinder(const ndMeshCollisionShapeChamferCylinder& other)
 	:ndMeshCollisionShape(other)
+	,m_height(other.m_height)
+	,m_radius(other.m_radius)
 {
-	ndAssert(0);
 }
 
 ndMeshCollisionShape* ndMeshCollisionShapeChamferCylinder::Duplicate() const
@@ -341,7 +342,13 @@ ndMeshCollisionShape* ndMeshCollisionShapeChamferCylinder::Duplicate() const
 
 bool ndMeshCollisionShapeChamferCylinder::operator==(const ndMeshCollisionShape& other) const
 {
-	ndAssert(0);
+	bool test = ndMeshCollisionShape::operator==(other);
+	if (test)
+	{
+		const ndMeshCollisionShapeChamferCylinder* const otherShape = (ndMeshCollisionShapeChamferCylinder*)&other;
+		test = test && (m_height == otherShape->m_height);
+		test = test && (m_radius == otherShape->m_radius);
+	}
 	return false;
 }
 
@@ -372,14 +379,18 @@ ndShape* ndMeshCollisionShapeChamferCylinder::CreateObject() const
 ndMeshCollisionShapeConvexHull::ndMeshCollisionShapeConvexHull()
 	:ndMeshCollisionShape(ndShapeConvexHull::StaticClassName())
 	,m_points()
-	,m_maxPointCount(1024)
+	,m_maxPointCount(256)
 {
 }
 
 ndMeshCollisionShapeConvexHull::ndMeshCollisionShapeConvexHull(const ndMeshCollisionShapeConvexHull& other)
 	:ndMeshCollisionShape(other)
+	,m_maxPointCount(other.m_maxPointCount)
 {
-	ndAssert(0);
+	for (ndInt32 i = 0; i < other.m_points.GetCount(); ++i)
+	{
+		m_points.PushBack(other.m_points[i]);
+	}
 }
 
 ndMeshCollisionShape* ndMeshCollisionShapeConvexHull::Duplicate() const
@@ -389,7 +400,18 @@ ndMeshCollisionShape* ndMeshCollisionShapeConvexHull::Duplicate() const
 
 bool ndMeshCollisionShapeConvexHull::operator==(const ndMeshCollisionShape& other) const
 {
-	ndAssert(0);
+	bool test = ndMeshCollisionShape::operator==(other);
+	if (test)
+	{
+		const ndMeshCollisionShapeConvexHull* const otherShape = (ndMeshCollisionShapeConvexHull*)&other;
+		test = test && (m_maxPointCount == otherShape->m_maxPointCount);
+		for (ndInt32 i = 0; test && (i < m_points.GetCount()); ++i)
+		{
+			const ndVector diff(m_points[i] - otherShape->m_points[i]);
+			ndFloat32 err2 = diff.DotProduct(diff & ndVector::m_triplexMask).GetScalar();
+			test = test && (err2 < ndFloat32 (1.0e-6f));
+		}
+	}
 	return false;
 }
 
