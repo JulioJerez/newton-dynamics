@@ -619,14 +619,7 @@ ndMatrix ndMesh::CalculateLocalMatrix(ndVector& sizeOut) const
 		}
 	}
 
-	//const ndMatrix xxxn(covariance);
 	const ndVector eigen(covariance.EigenVectors() & ndVector::m_triplexMask);
-
-	//ndMatrix xxxxx(ndGetIdentityMatrix());
-	//xxxxx[0][0] = eigen[0];
-	//xxxxx[1][1] = eigen[1];
-	//xxxxx[2][2] = eigen[2];
-	//ndMatrix xxxxxxx(covariance.OrthoInverse() * xxxxx * covariance);
 
 	covariance.m_posit = origin;
 	covariance.m_posit.m_w = ndFloat32(1.0f);
@@ -726,7 +719,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCylinder()
 
 	ndVector size;
 	ndMatrix localMatrix(CalculateLocalMatrix(size));
-	const ndMatrix rotationAligment(ndRollMatrix(ndFloat32(90.0f)));
+	const ndMatrix rotationAligment(ndRollMatrix(ndFloat32(-90.0f) * ndDegreeToRad));
 	localMatrix = rotationAligment * localMatrix;
 	size = rotationAligment.RotateVector(size).Abs();
 
