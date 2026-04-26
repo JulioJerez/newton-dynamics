@@ -339,6 +339,11 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 		{
 			ShowCollisionBox();
 		}
+		else if (strcmp(contructor.GetStr(), ndShapeSphere::StaticClassName()) == 0)
+		{
+			ShowCollisionSphere();
+		}
+
 		else
 		{
 			//ndAssert(0);
@@ -359,7 +364,7 @@ void ndAssetEditor::ShowCollisionBox()
 	if (ImGui::InputFloat("x##2", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
-		subJoint->m_x = value;
+		subJoint->m_x = ndMax (value, ndReal(0.01f));
 		GetDebugDisplay()->RebuildDebugCollision();
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
 	}
@@ -367,7 +372,7 @@ void ndAssetEditor::ShowCollisionBox()
 	if (ImGui::InputFloat("y##2", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
-		subJoint->m_y = value;
+		subJoint->m_y = ndMax(value, ndReal(0.01f));
 		GetDebugDisplay()->RebuildDebugCollision();
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
 	}
@@ -375,7 +380,26 @@ void ndAssetEditor::ShowCollisionBox()
 	if (ImGui::InputFloat("z##2", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
-		subJoint->m_z = value;
+		subJoint->m_z = ndMax(value, ndReal(0.01f));
+		GetDebugDisplay()->RebuildDebugCollision();
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+	}
+}
+
+void ndAssetEditor::ShowCollisionSphere()
+{
+	ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
+	ndMeshBodyKinematic* const rigidBody = (ndMeshBodyKinematic*)*body;
+	ndMeshShapeInstance& shapeInstance = rigidBody->m_shapeInstance;
+
+	ndReal value;
+	ndMeshCollisionShapeSphere* const subJoint = (ndMeshCollisionShapeSphere*)*shapeInstance.m_shape;
+
+	value = subJoint->m_radius;
+	if (ImGui::InputFloat("radios", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+		subJoint->m_radius = ndMax(value, ndReal(0.01f));
 		GetDebugDisplay()->RebuildDebugCollision();
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
 	}
