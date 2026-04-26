@@ -224,7 +224,7 @@
             <limitState int32="1" />
             <minLimit float="-90" />
             <maxLimit float="90" />
-            <springDamperRegularizer float="0.1" />
+            <springDamperRegularizer float="0.001" />
         </joint>
         <ndMesh>
             <name string="unnamed_2" />
@@ -312,7 +312,7 @@
                     <limitState int32="1" />
                     <minLimit float="-120" />
                     <maxLimit float="120" />
-                    <springDamperRegularizer float="0.1" />
+                    <springDamperRegularizer float="0.001" />
                 </axis0>
                 <axis1>
                     <springK float="0" />
@@ -320,7 +320,7 @@
                     <limitState int32="1" />
                     <minLimit float="-70" />
                     <maxLimit float="10" />
-                    <springDamperRegularizer float="0.1" />
+                    <springDamperRegularizer float="0.001" />
                 </axis1>
             </joint>
             <ndMesh>
@@ -408,7 +408,7 @@
                     <limitState int32="1" />
                     <minLimit float="-150" />
                     <maxLimit float="5" />
-                    <springDamperRegularizer float="0.1" />
+                    <springDamperRegularizer float="0.001" />
                 </joint>
                 <ndMesh>
                     <name string="unnamed_4" />
@@ -596,7 +596,7 @@
             <limitState int32="1" />
             <minLimit float="-90" />
             <maxLimit float="90" />
-            <springDamperRegularizer float="0.1" />
+            <springDamperRegularizer float="0.001" />
         </joint>
         <ndMesh>
             <name string="unnamed_6" />
@@ -684,7 +684,7 @@
                     <limitState int32="1" />
                     <minLimit float="-120" />
                     <maxLimit float="120" />
-                    <springDamperRegularizer float="0.1" />
+                    <springDamperRegularizer float="0.001" />
                 </axis0>
                 <axis1>
                     <springK float="0" />
@@ -692,7 +692,7 @@
                     <limitState int32="1" />
                     <minLimit float="-10" />
                     <maxLimit float="70" />
-                    <springDamperRegularizer float="0.1" />
+                    <springDamperRegularizer float="0.001" />
                 </axis1>
             </joint>
             <ndMesh>
@@ -780,7 +780,7 @@
                     <limitState int32="1" />
                     <minLimit float="-5" />
                     <maxLimit float="150" />
-                    <springDamperRegularizer float="0.1" />
+                    <springDamperRegularizer float="0.001" />
                 </joint>
                 <ndMesh>
                     <name string="unnamed_8" />
@@ -1326,7 +1326,7 @@
                             <limitState int32="1" />
                             <minLimit float="-45" />
                             <maxLimit float="65" />
-                            <springDamperRegularizer float="0.1" />
+                            <springDamperRegularizer float="0.001" />
                         </joint>
                     </ndMesh>
                 </ndMesh>
@@ -1688,7 +1688,7 @@
                             <limitState int32="1" />
                             <minLimit float="-45" />
                             <maxLimit float="65" />
-                            <springDamperRegularizer float="0.1" />
+                            <springDamperRegularizer float="0.001" />
                         </joint>
                     </ndMesh>
                 </ndMesh>

@@ -150,8 +150,8 @@
             </localFrame1>
             <springK float="2000" />
             <damperC float="50" />
-            <upperStop float="-0.1" />
-            <lowerStop float="0.2" />
+            <upperStop float="0.2" />
+            <lowerStop float="-0.1" />
             <brakeTorque float="0" />
             <handBrakeTorque float="0" />
             <steeringAngle float="0" />
@@ -240,9 +240,9 @@
             <springK float="0" />
             <damperC float="0" />
             <limitState int32="0" />
-            <minLimit float="-1e+10" />
-            <maxLimit float="1e+10" />
-            <springDamperRegularizer float="0.1" />
+            <minLimit float="-5.72958e+11" />
+            <maxLimit float="5.72958e+11" />
+            <springDamperRegularizer float="0.001" />
         </joint>
     </ndMesh>
     <ndMesh>
@@ -327,9 +327,9 @@
             <springK float="0" />
             <damperC float="0" />
             <limitState int32="0" />
-            <minLimit float="-1e+10" />
-            <maxLimit float="1e+10" />
-            <springDamperRegularizer float="0.1" />
+            <minLimit float="-5.72958e+11" />
+            <maxLimit float="5.72958e+11" />
+            <springDamperRegularizer float="0.001" />
         </joint>
     </ndMesh>
 </ndMesh>

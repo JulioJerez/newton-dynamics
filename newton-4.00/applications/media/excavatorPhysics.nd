@@ -1903,8 +1903,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </loopJoint>
@@ -2010,8 +2010,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </loopJoint>
@@ -2096,20 +2096,20 @@
                 <angles float3="-3.59722e-05 -90 0" />
             </localFrame1>
             <positAxis>
-                <springK float="2000" />
-                <damperC float="50" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.01" />
+                <linearSpringK float="2000" />
+                <linearDamperC float="50" />
+                <linearLimitState int32="0" />
+                <linearMinLimit float="-1e+10" />
+                <linearMaxLimit float="1e+10" />
+                <linearSpringDamperRegularizer float="0.01" />
             </positAxis>
             <angleAxis>
-                <springK float="0" />
-                <damperC float="0" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.1" />
+                <angularSpringK float="0" />
+                <angularDamperC float="0" />
+                <angularLimitState int32="0" />
+                <angularMinLimit float="-5.72958e+11" />
+                <angularMaxLimit float="5.72958e+11" />
+                <angularSpringDamperRegularizer float="0.001" />
             </angleAxis>
         </joint>
         <ndMesh>
@@ -2233,20 +2233,20 @@
                 <angles float3="-3.59722e-05 -90 0" />
             </localFrame1>
             <positAxis>
-                <springK float="2000" />
-                <damperC float="50" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.01" />
+                <linearSpringK float="2000" />
+                <linearDamperC float="50" />
+                <linearLimitState int32="0" />
+                <linearMinLimit float="-1e+10" />
+                <linearMaxLimit float="1e+10" />
+                <linearSpringDamperRegularizer float="0.01" />
             </positAxis>
             <angleAxis>
-                <springK float="0" />
-                <damperC float="0" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.1" />
+                <angularSpringK float="0" />
+                <angularDamperC float="0" />
+                <angularLimitState int32="0" />
+                <angularMinLimit float="-5.72958e+11" />
+                <angularMaxLimit float="5.72958e+11" />
+                <angularSpringDamperRegularizer float="0.001" />
             </angleAxis>
         </joint>
     </ndMesh>
@@ -2330,20 +2330,20 @@
                 <angles float3="-3.59722e-05 -90 0" />
             </localFrame1>
             <positAxis>
-                <springK float="2000" />
-                <damperC float="50" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.01" />
+                <linearSpringK float="2000" />
+                <linearDamperC float="50" />
+                <linearLimitState int32="0" />
+                <linearMinLimit float="-1e+10" />
+                <linearMaxLimit float="1e+10" />
+                <linearSpringDamperRegularizer float="0.01" />
             </positAxis>
             <angleAxis>
-                <springK float="0" />
-                <damperC float="0" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.1" />
+                <angularSpringK float="0" />
+                <angularDamperC float="0" />
+                <angularLimitState int32="0" />
+                <angularMinLimit float="-5.72958e+11" />
+                <angularMaxLimit float="5.72958e+11" />
+                <angularSpringDamperRegularizer float="0.001" />
             </angleAxis>
         </joint>
     </ndMesh>
@@ -2427,20 +2427,20 @@
                 <angles float3="-3.59722e-05 -90 0" />
             </localFrame1>
             <positAxis>
-                <springK float="2000" />
-                <damperC float="50" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.01" />
+                <linearSpringK float="2000" />
+                <linearDamperC float="50" />
+                <linearLimitState int32="0" />
+                <linearMinLimit float="-1e+10" />
+                <linearMaxLimit float="1e+10" />
+                <linearSpringDamperRegularizer float="0.01" />
             </positAxis>
             <angleAxis>
-                <springK float="0" />
-                <damperC float="0" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.1" />
+                <angularSpringK float="0" />
+                <angularDamperC float="0" />
+                <angularLimitState int32="0" />
+                <angularMinLimit float="-5.72958e+11" />
+                <angularMaxLimit float="5.72958e+11" />
+                <angularSpringDamperRegularizer float="0.001" />
             </angleAxis>
         </joint>
     </ndMesh>
@@ -2524,20 +2524,20 @@
                 <angles float3="-3.59722e-05 -90 0" />
             </localFrame1>
             <positAxis>
-                <springK float="2000" />
-                <damperC float="50" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.01" />
+                <linearSpringK float="2000" />
+                <linearDamperC float="50" />
+                <linearLimitState int32="0" />
+                <linearMinLimit float="-1e+10" />
+                <linearMaxLimit float="1e+10" />
+                <linearSpringDamperRegularizer float="0.01" />
             </positAxis>
             <angleAxis>
-                <springK float="0" />
-                <damperC float="0" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.1" />
+                <angularSpringK float="0" />
+                <angularDamperC float="0" />
+                <angularLimitState int32="0" />
+                <angularMinLimit float="-5.72958e+11" />
+                <angularMaxLimit float="5.72958e+11" />
+                <angularSpringDamperRegularizer float="0.001" />
             </angleAxis>
         </joint>
     </ndMesh>
@@ -2621,20 +2621,20 @@
                 <angles float3="-3.59722e-05 -90 0" />
             </localFrame1>
             <positAxis>
-                <springK float="2000" />
-                <damperC float="50" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.01" />
+                <linearSpringK float="2000" />
+                <linearDamperC float="50" />
+                <linearLimitState int32="0" />
+                <linearMinLimit float="-1e+10" />
+                <linearMaxLimit float="1e+10" />
+                <linearSpringDamperRegularizer float="0.01" />
             </positAxis>
             <angleAxis>
-                <springK float="0" />
-                <damperC float="0" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.1" />
+                <angularSpringK float="0" />
+                <angularDamperC float="0" />
+                <angularLimitState int32="0" />
+                <angularMinLimit float="-5.72958e+11" />
+                <angularMaxLimit float="5.72958e+11" />
+                <angularSpringDamperRegularizer float="0.001" />
             </angleAxis>
         </joint>
     </ndMesh>
@@ -2718,20 +2718,20 @@
                 <angles float3="-3.59722e-05 -90 0" />
             </localFrame1>
             <positAxis>
-                <springK float="2000" />
-                <damperC float="50" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.01" />
+                <linearSpringK float="2000" />
+                <linearDamperC float="50" />
+                <linearLimitState int32="0" />
+                <linearMinLimit float="-1e+10" />
+                <linearMaxLimit float="1e+10" />
+                <linearSpringDamperRegularizer float="0.01" />
             </positAxis>
             <angleAxis>
-                <springK float="0" />
-                <damperC float="0" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.1" />
+                <angularSpringK float="0" />
+                <angularDamperC float="0" />
+                <angularLimitState int32="0" />
+                <angularMinLimit float="-5.72958e+11" />
+                <angularMaxLimit float="5.72958e+11" />
+                <angularSpringDamperRegularizer float="0.001" />
             </angleAxis>
         </joint>
     </ndMesh>
@@ -2815,20 +2815,20 @@
                 <angles float3="-3.59722e-05 -90 0" />
             </localFrame1>
             <positAxis>
-                <springK float="2000" />
-                <damperC float="50" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.01" />
+                <linearSpringK float="2000" />
+                <linearDamperC float="50" />
+                <linearLimitState int32="0" />
+                <linearMinLimit float="-1e+10" />
+                <linearMaxLimit float="1e+10" />
+                <linearSpringDamperRegularizer float="0.01" />
             </positAxis>
             <angleAxis>
-                <springK float="0" />
-                <damperC float="0" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.1" />
+                <angularSpringK float="0" />
+                <angularDamperC float="0" />
+                <angularLimitState int32="0" />
+                <angularMinLimit float="-5.72958e+11" />
+                <angularMaxLimit float="5.72958e+11" />
+                <angularSpringDamperRegularizer float="0.001" />
             </angleAxis>
         </joint>
     </ndMesh>
@@ -2912,20 +2912,20 @@
                 <angles float3="-3.59722e-05 -90 0" />
             </localFrame1>
             <positAxis>
-                <springK float="2000" />
-                <damperC float="50" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.01" />
+                <linearSpringK float="2000" />
+                <linearDamperC float="50" />
+                <linearLimitState int32="0" />
+                <linearMinLimit float="-1e+10" />
+                <linearMaxLimit float="1e+10" />
+                <linearSpringDamperRegularizer float="0.01" />
             </positAxis>
             <angleAxis>
-                <springK float="0" />
-                <damperC float="0" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.1" />
+                <angularSpringK float="0" />
+                <angularDamperC float="0" />
+                <angularLimitState int32="0" />
+                <angularMinLimit float="-5.72958e+11" />
+                <angularMaxLimit float="5.72958e+11" />
+                <angularSpringDamperRegularizer float="0.001" />
             </angleAxis>
         </joint>
     </ndMesh>
@@ -3009,20 +3009,20 @@
                 <angles float3="179.997 -89.3 -179.997" />
             </localFrame1>
             <positAxis>
-                <springK float="2000" />
-                <damperC float="50" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.01" />
+                <linearSpringK float="2000" />
+                <linearDamperC float="50" />
+                <linearLimitState int32="0" />
+                <linearMinLimit float="-1e+10" />
+                <linearMaxLimit float="1e+10" />
+                <linearSpringDamperRegularizer float="0.01" />
             </positAxis>
             <angleAxis>
-                <springK float="0" />
-                <damperC float="0" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.1" />
+                <angularSpringK float="0" />
+                <angularDamperC float="0" />
+                <angularLimitState int32="0" />
+                <angularMinLimit float="-5.72958e+11" />
+                <angularMaxLimit float="5.72958e+11" />
+                <angularSpringDamperRegularizer float="0.001" />
             </angleAxis>
         </joint>
     </ndMesh>
@@ -3106,20 +3106,20 @@
                 <angles float3="-3.59722e-05 -90 0" />
             </localFrame1>
             <positAxis>
-                <springK float="2000" />
-                <damperC float="50" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.01" />
+                <linearSpringK float="2000" />
+                <linearDamperC float="50" />
+                <linearLimitState int32="0" />
+                <linearMinLimit float="-1e+10" />
+                <linearMaxLimit float="1e+10" />
+                <linearSpringDamperRegularizer float="0.01" />
             </positAxis>
             <angleAxis>
-                <springK float="0" />
-                <damperC float="0" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.1" />
+                <angularSpringK float="0" />
+                <angularDamperC float="0" />
+                <angularLimitState int32="0" />
+                <angularMinLimit float="-5.72958e+11" />
+                <angularMaxLimit float="5.72958e+11" />
+                <angularSpringDamperRegularizer float="0.001" />
             </angleAxis>
         </joint>
     </ndMesh>
@@ -3203,20 +3203,20 @@
                 <angles float3="-0 90 0" />
             </localFrame1>
             <positAxis>
-                <springK float="2000" />
-                <damperC float="50" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.01" />
+                <linearSpringK float="2000" />
+                <linearDamperC float="50" />
+                <linearLimitState int32="0" />
+                <linearMinLimit float="-1e+10" />
+                <linearMaxLimit float="1e+10" />
+                <linearSpringDamperRegularizer float="0.01" />
             </positAxis>
             <angleAxis>
-                <springK float="0" />
-                <damperC float="0" />
-                <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.1" />
+                <angularSpringK float="0" />
+                <angularDamperC float="0" />
+                <angularLimitState int32="0" />
+                <angularMinLimit float="-5.72958e+11" />
+                <angularMaxLimit float="5.72958e+11" />
+                <angularSpringDamperRegularizer float="0.001" />
             </angleAxis>
         </joint>
         <ndMesh>
@@ -3520,6 +3520,8 @@
                         <shape>
                             <constructor string="ndShapeConvexHull" />
                             <pointcloud count="10" float3Array="0.92423 1.34903 0.743009 1.40019 -0.440713 0.743009 1.40019 -0.440713 -0.743009 -1.40019 1.34903 -0.743009 -1.40019 -1.34903 0.743009 0.92423 1.34903 -0.743009 -1.40019 1.34903 0.743009 1.04321 -1.34903 0.743009 -1.40019 -1.34903 -0.743009 1.04321 -1.34903 -0.743009" />
+                            <tolerance float="0" />
+                            <maxPoints int32="256" />
                         </shape>
                     </collisionInstance>
                 </shape>
@@ -3540,9 +3542,9 @@
             <springK float="0" />
             <damperC float="0" />
             <limitState int32="0" />
-            <minLimit float="-1e+10" />
-            <maxLimit float="1e+10" />
-            <springDamperRegularizer float="0.1" />
+            <minLimit float="-5.72958e+11" />
+            <maxLimit float="5.72958e+11" />
+            <springDamperRegularizer float="0.001" />
         </joint>
         <ndMesh>
             <name string="cabin" />
@@ -3681,6 +3683,8 @@
                             <shape>
                                 <constructor string="ndShapeConvexHull" />
                                 <pointcloud count="8" float3Array="0.442121 1.63257 0.372057 0.149569 -1.91694 0.372058 0.149569 -1.91694 -0.372059 -0.442121 1.97822 -0.372059 -0.442121 1.97822 0.372057 -0.272841 -1.97822 0.372057 0.442121 1.63257 -0.372059 -0.272841 -1.97822 -0.372059" />
+                                <tolerance float="0" />
+                                <maxPoints int32="256" />
                             </shape>
                         </collisionInstance>
                         <collisionInstance>
@@ -3696,6 +3700,8 @@
                             <shape>
                                 <constructor string="ndShapeConvexHull" />
                                 <pointcloud count="8" float3Array="0.442121 1.0842 0.372058 0.129067 -1.40073 0.372058 0.442121 1.0842 -0.372058 -0.442121 1.42984 -0.372058 -0.442121 1.42984 0.372058 -0.136571 -1.42984 -0.372058 0.129067 -1.40073 -0.372058 -0.136571 -1.42984 0.372058" />
+                                <tolerance float="0" />
+                                <maxPoints int32="256" />
                             </shape>
                         </collisionInstance>
                     </shape>
@@ -3716,9 +3722,9 @@
                 <springK float="0" />
                 <damperC float="0" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
-                <springDamperRegularizer float="0.1" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
+                <springDamperRegularizer float="0.001" />
             </joint>
             <ndMesh>
                 <name string="arm02" />
@@ -3793,6 +3799,8 @@
                         <shape>
                             <constructor string="ndShapeConvexHull" />
                             <pointcloud count="10" float3Array="0.396654 1.78974 0.289475 0.0046885 -1.79539 0.299107 0.396654 1.78974 -0.299107 -0.196505 1.79539 -0.299107 -0.396654 1.0311 0.289475 -0.279392 -1.79539 -0.299106 -0.196505 1.79539 0.289475 0.0046885 -1.79539 -0.289474 -0.396654 1.0311 -0.299107 -0.279392 -1.79539 0.289474" />
+                            <tolerance float="0" />
+                            <maxPoints int32="256" />
                         </shape>
                     </collisionInstance>
                     <intrinsicLinearDamping float="0" />
@@ -3811,9 +3819,9 @@
                     <springK float="0" />
                     <damperC float="0" />
                     <limitState int32="0" />
-                    <minLimit float="-1e+10" />
-                    <maxLimit float="1e+10" />
-                    <springDamperRegularizer float="0.1" />
+                    <minLimit float="-5.72958e+11" />
+                    <maxLimit float="5.72958e+11" />
+                    <springDamperRegularizer float="0.001" />
                 </joint>
                 <ndMesh>
                     <name string="bucket" />
@@ -3900,6 +3908,8 @@
                                     <shape>
                                         <constructor string="ndShapeConvexHull" />
                                         <pointcloud count="15" float3Array="-0.29928 0.727206 0.426198 0.35794 -0.727206 -0.442318 0.24554 0.727205 -0.242762 0.35794 0.727205 -0.442318 -0.35794 0.629965 0.442318 0.30758 0.684847 -0.339572 0.17245 -0.727206 -0.146272 0.29795 0.669164 -0.416167 0.30758 0.727205 -0.339572 0.17245 0.727205 -0.146272 0.24554 -0.727206 -0.242772 -0.35794 -0.633775 0.442318 0.30758 -0.727206 -0.339572 -0.29928 -0.727206 0.426198 0.29795 -0.669165 -0.416167" />
+                                        <tolerance float="0" />
+                                        <maxPoints int32="256" />
                                     </shape>
                                 </collisionInstance>
                                 <collisionInstance>
@@ -3915,6 +3925,8 @@
                                     <shape>
                                         <constructor string="ndShapeConvexHull" />
                                         <pointcloud count="23" float3Array="-0.240265 0.699093 0.0805144 0.279395 -0.71296 -0.0554006 0.279395 0.74145 -0.0554006 -0.050845 0.74145 -0.0623446 -0.279395 -0.71296 0.0283384 0.0874749 -0.71296 -0.0805145 -0.279395 0.74145 0.0283384 0.149305 0.68341 -0.0169225 -0.240265 -0.670601 0.0805144 0.166855 -0.71296 -0.078051 0.0874749 0.74145 -0.0805142 -0.112195 -0.71296 -0.0444296 -0.0792249 -0.74145 -0.0483356 -0.268655 -0.74145 0.0282934 0.149305 -0.65492 -0.0169225 0.015305 -0.149281 -0.0748261 0.166855 0.74145 -0.0780507 -0.169925 0.74145 -0.0224376 0.015305 -0.71296 -0.0748262 -0.169925 -0.71296 -0.0224376 0.015305 0.74145 -0.0748259 -0.112195 0.74145 -0.0444286 -0.050845 -0.71296 -0.0623446" />
+                                        <tolerance float="0" />
+                                        <maxPoints int32="256" />
                                     </shape>
                                 </collisionInstance>
                                 <collisionInstance>
@@ -3930,6 +3942,8 @@
                                     <shape>
                                         <constructor string="ndShapeConvexHull" />
                                         <pointcloud count="14" float3Array="0.0248251 0.727205 0.246425 0.0248251 -0.727205 0.246425 0.0529351 0.727205 -0.024768 -0.0320649 0.727205 -0.246425 -0.0529349 0.669165 -0.183719 0.023885 -0.727205 -0.145243 0.0499752 0.727205 0.114863 0.00234509 0.669165 0.170839 0.0529351 -0.727205 -0.024768 0.023885 0.727205 -0.145242 -0.0320649 -0.727205 -0.246425 0.00234509 -0.669165 0.170839 0.0499752 -0.727205 0.114862 -0.0529349 -0.669165 -0.18372" />
+                                        <tolerance float="0" />
+                                        <maxPoints int32="256" />
                                     </shape>
                                 </collisionInstance>
                                 <collisionInstance>
@@ -3945,6 +3959,8 @@
                                     <shape>
                                         <constructor string="ndShapeConvexHull" />
                                         <pointcloud count="8" float3Array="-0.0490348 0.669165 0.108037 0.0490351 -0.727205 -0.032451 0.0109551 0.727205 0.081886 0.0265551 0.669165 -0.108037 -0.0490348 -0.669165 0.108037 0.0490351 0.727205 -0.032451 0.0265551 -0.669165 -0.108037 0.0109551 -0.727205 0.081886" />
+                                        <tolerance float="0" />
+                                        <maxPoints int32="256" />
                                     </shape>
                                 </collisionInstance>
                                 <collisionInstance>
@@ -3960,6 +3976,8 @@
                                     <shape>
                                         <constructor string="ndShapeConvexHull" />
                                         <pointcloud count="42" float3Array="-0.351555 -0.045827 -0.698226 -0.293825 0.045827 -0.720217 -0.293825 -0.045827 -0.720217 -0.232475 0.045827 -0.738133 -0.461025 -0.045827 -0.64745 -0.351555 0.045827 -0.698226 -0.232475 -0.045827 -0.738133 -0.461025 0.045827 -0.64745 -0.014775 -0.045827 -0.753839 -0.0941551 0.045827 -0.756303 -0.014775 0.045827 -0.753839 -0.0941551 -0.045827 -0.756303 -0.166325 0.045827 -0.750615 -0.166325 -0.045827 -0.750615 0.203815 0.045827 -0.688701 0.097765 0.045827 -0.731189 0.203815 -0.045827 -0.688701 0.298265 0.045827 -0.626513 0.097765 -0.045827 -0.731189 0.298265 -0.045827 -0.626513 0.376025 -0.045827 -0.54476 0.431975 -0.045827 -0.443577 0.431975 0.045827 -0.443578 0.376025 0.045827 -0.54476 0.461025 -0.045827 -0.323103 0.461025 0.045827 -0.323103 0.394835 -0.045827 0.0624268 0.432915 -0.045827 -0.0519102 0.458065 -0.045827 -0.183472 0.344475 -0.045827 0.165173 0.344475 0.045827 0.165173 0.432915 0.045827 -0.0519102 0.394835 0.045827 0.0624268 0.458065 0.045827 -0.183472 -0.171105 -0.045827 0.660043 0.209345 -0.045827 0.358473 -0.171105 0.045827 0.660043 0.282435 0.045827 0.261973 -0.106395 -0.045827 0.756303 0.209345 0.045827 0.358473 0.282435 -0.045827 0.261973 -0.106395 0.045827 0.756303" />
+                                        <tolerance float="0" />
+                                        <maxPoints int32="256" />
                                     </shape>
                                 </collisionInstance>
                                 <collisionInstance>
@@ -3975,6 +3993,8 @@
                                     <shape>
                                         <constructor string="ndShapeConvexHull" />
                                         <pointcloud count="42" float3Array="-0.351555 -0.050222 -0.698226 -0.293825 0.050222 -0.720217 -0.293825 -0.050222 -0.720217 -0.232475 0.050222 -0.738133 -0.461025 -0.050222 -0.64745 -0.351555 0.050222 -0.698226 -0.232475 -0.050222 -0.738133 -0.461025 0.050222 -0.64745 -0.014775 -0.050222 -0.753839 -0.0941551 -0.050222 -0.756303 -0.014775 0.050222 -0.753839 -0.166325 0.050222 -0.750615 -0.0941551 0.050222 -0.756303 -0.166325 -0.050222 -0.750615 0.203815 0.050222 -0.688701 0.097765 0.050222 -0.731189 0.203815 -0.050222 -0.688701 0.298265 0.050222 -0.626513 0.097765 -0.050222 -0.731189 0.298265 -0.050222 -0.626513 0.376025 -0.050222 -0.54476 0.431975 -0.050222 -0.443578 0.431975 0.050222 -0.443578 0.376025 0.050222 -0.54476 0.461025 -0.050222 -0.323103 0.461025 0.050222 -0.323103 0.394835 -0.050222 0.0624268 0.432915 -0.050222 -0.0519102 0.458065 -0.050222 -0.183472 0.344475 -0.050222 0.165173 0.344475 0.050222 0.165173 0.432905 0.050222 -0.0519102 0.394835 0.050222 0.0624268 0.458065 0.050222 -0.183472 -0.171105 -0.050222 0.660043 0.209345 -0.050222 0.358473 -0.171105 0.050222 0.660043 0.282435 0.050222 0.261973 -0.106395 -0.050222 0.756303 0.209345 0.050222 0.358473 0.282435 -0.050222 0.261973 -0.106395 0.050222 0.756303" />
+                                        <tolerance float="0" />
+                                        <maxPoints int32="256" />
                                     </shape>
                                 </collisionInstance>
                                 <collisionInstance>
@@ -3990,6 +4010,8 @@
                                     <shape>
                                         <constructor string="ndShapeConvexHull" />
                                         <pointcloud count="10" float3Array="0.0014332 0.230384 0.738088 0.0796913 0.00854491 0.738088 0.0014332 0.230384 -0.738088 -0.0796913 0.247624 -0.738088 -0.0796913 -0.230533 0.738088 -0.0796913 0.247624 0.738088 0.0016826 -0.247624 -0.738088 0.0796913 0.00854491 -0.738088 0.0016826 -0.247624 0.738088 -0.0796913 -0.230533 -0.738088" />
+                                        <tolerance float="0" />
+                                        <maxPoints int32="256" />
                                     </shape>
                                 </collisionInstance>
                             </shape>
@@ -4010,8 +4032,8 @@
                         <springK float="2000" />
                         <damperC float="50" />
                         <limitState int32="0" />
-                        <minLimit float="-1e+10" />
-                        <maxLimit float="1e+10" />
+                        <minLimit float="-5.72958e+11" />
+                        <maxLimit float="5.72958e+11" />
                         <springDamperRegularizer float="0.1" />
                     </joint>
                     <ndMesh>
@@ -5156,8 +5178,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -5245,8 +5267,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -5334,8 +5356,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -5423,8 +5445,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -5512,8 +5534,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -5601,8 +5623,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -5690,8 +5712,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -5779,8 +5801,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -5868,8 +5890,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -5957,8 +5979,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -6046,8 +6068,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -6135,8 +6157,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -6224,8 +6246,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -6313,8 +6335,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -6402,8 +6424,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -6491,8 +6513,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -6580,8 +6602,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -6669,8 +6691,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -6758,8 +6780,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -6847,8 +6869,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -6936,8 +6958,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -7025,8 +7047,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -7114,8 +7136,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -7203,8 +7225,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -7292,8 +7314,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -7381,8 +7403,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -7470,8 +7492,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -7559,8 +7581,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -7648,8 +7670,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -7737,8 +7759,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -7826,8 +7848,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -7915,8 +7937,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -8004,8 +8026,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -8105,8 +8127,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -8194,8 +8216,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -8283,8 +8305,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -8372,8 +8394,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -8461,8 +8483,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -8550,8 +8572,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -8639,8 +8661,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -8728,8 +8750,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -8817,8 +8839,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -8906,8 +8928,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -8995,8 +9017,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -9084,8 +9106,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -9173,8 +9195,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -9262,8 +9284,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -9351,8 +9373,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -9440,8 +9462,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -9529,8 +9551,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -9618,8 +9640,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -9707,8 +9729,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -9796,8 +9818,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -9885,8 +9907,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -9974,8 +9996,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -10063,8 +10085,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -10152,8 +10174,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -10241,8 +10263,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -10330,8 +10352,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -10419,8 +10441,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -10508,8 +10530,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -10597,8 +10619,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -10686,8 +10708,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -10775,8 +10797,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -10864,8 +10886,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -10953,8 +10975,8 @@
                 <springK float="0" />
                 <damperC float="5" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.15" />
             </joint>
         </ndMesh>
@@ -11015,16 +11037,16 @@
                 <springK float="1500" />
                 <damperC float="10" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.1" />
             </axis0>
             <axis1>
                 <springK float="1500" />
                 <damperC float="10" />
                 <limitState int32="0" />
-                <minLimit float="-1e+10" />
-                <maxLimit float="1e+10" />
+                <minLimit float="-5.72958e+11" />
+                <maxLimit float="5.72958e+11" />
                 <springDamperRegularizer float="0.1" />
             </axis1>
         </joint>
