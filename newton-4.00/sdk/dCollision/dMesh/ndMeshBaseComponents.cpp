@@ -214,8 +214,10 @@ ndMeshCollisionShapeCapsule::ndMeshCollisionShapeCapsule()
 
 ndMeshCollisionShapeCapsule::ndMeshCollisionShapeCapsule(const ndMeshCollisionShapeCapsule& other)
 	:ndMeshCollisionShape(other)
+	,m_height(other.m_height)
+	,m_radius0(other.m_radius0)
+	,m_radius1(other.m_radius1)
 {
-	ndAssert(0);
 }
 
 ndMeshCollisionShape* ndMeshCollisionShapeCapsule::Duplicate() const
@@ -225,7 +227,14 @@ ndMeshCollisionShape* ndMeshCollisionShapeCapsule::Duplicate() const
 
 bool ndMeshCollisionShapeCapsule::operator==(const ndMeshCollisionShape& other) const
 {
-	ndAssert(0);
+	bool test = ndMeshCollisionShape::operator==(other);
+	if (test)
+	{
+		const ndMeshCollisionShapeCapsule* const otherShape = (ndMeshCollisionShapeCapsule*)&other;
+		test = test && (m_height == otherShape->m_height);
+		test = test && (m_radius0 == otherShape->m_radius0);
+		test = test && (m_radius1 == otherShape->m_radius1);
+	}
 	return false;
 }
 
@@ -263,8 +272,10 @@ ndMeshCollisionShapeCylinder::ndMeshCollisionShapeCylinder()
 
 ndMeshCollisionShapeCylinder::ndMeshCollisionShapeCylinder(const ndMeshCollisionShapeCylinder& other)
 	:ndMeshCollisionShape(other)
+	,m_height(other.m_height)
+	,m_radius0(other.m_radius0)
+	,m_radius1(other.m_radius1)
 {
-	ndAssert(0);
 }
 
 ndMeshCollisionShape* ndMeshCollisionShapeCylinder::Duplicate() const
@@ -274,7 +285,14 @@ ndMeshCollisionShape* ndMeshCollisionShapeCylinder::Duplicate() const
 
 bool ndMeshCollisionShapeCylinder::operator==(const ndMeshCollisionShape& other) const
 {
-	ndAssert(0);
+	bool test = ndMeshCollisionShape::operator==(other);
+	if (test)
+	{
+		const ndMeshCollisionShapeCylinder* const otherShape = (ndMeshCollisionShapeCylinder*)&other;
+		test = test && (m_height == otherShape->m_height);
+		test = test && (m_radius0 == otherShape->m_radius0);
+		test = test && (m_radius1 == otherShape->m_radius1);
+	}
 	return false;
 }
 
