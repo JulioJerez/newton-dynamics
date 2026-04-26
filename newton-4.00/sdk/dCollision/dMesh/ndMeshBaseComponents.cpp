@@ -379,12 +379,14 @@ ndShape* ndMeshCollisionShapeChamferCylinder::CreateObject() const
 ndMeshCollisionShapeConvexHull::ndMeshCollisionShapeConvexHull()
 	:ndMeshCollisionShape(ndShapeConvexHull::StaticClassName())
 	,m_points()
+	,m_tolarence(ndFloat32 (0.0f))
 	,m_maxPointCount(256)
 {
 }
 
 ndMeshCollisionShapeConvexHull::ndMeshCollisionShapeConvexHull(const ndMeshCollisionShapeConvexHull& other)
 	:ndMeshCollisionShape(other)
+	,m_tolarence(other.m_tolarence)
 	,m_maxPointCount(other.m_maxPointCount)
 {
 	for (ndInt32 i = 0; i < other.m_points.GetCount(); ++i)
@@ -404,6 +406,7 @@ bool ndMeshCollisionShapeConvexHull::operator==(const ndMeshCollisionShape& othe
 	if (test)
 	{
 		const ndMeshCollisionShapeConvexHull* const otherShape = (ndMeshCollisionShapeConvexHull*)&other;
+		test = test && (m_tolarence == otherShape->m_tolarence);
 		test = test && (m_maxPointCount == otherShape->m_maxPointCount);
 		for (ndInt32 i = 0; test && (i < m_points.GetCount()); ++i)
 		{
@@ -428,21 +431,29 @@ void ndMeshCollisionShapeConvexHull::SerializeToXml(nd::TiXmlElement* const pare
 {
 	xmlSaveParam(parent, "constructor", ndShapeConvexHull::StaticClassName());
 	xmlSaveParam(parent, "pointcloud", m_points);
+	xmlSaveParam(parent, "tolerance", m_tolarence);
+	xmlSaveParam(parent, "maxPoints", m_maxPointCount);
 }
 
 void ndMeshCollisionShapeConvexHull::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	m_points.SetCount(0);
 	xmlGetFloatArray3(parent, "pointcloud", m_points);
+	m_tolarence = ndFloat32(0.0f);
 	m_maxPointCount = ndInt32 (m_points.GetCount());
+	if (xmlHasAttribute(parent, "tolerance"))
+	{
+		m_maxPointCount = xmlGetInt(parent, "maxPoints");
+		m_tolarence = xmlGetFloat(parent, "tolerance");
+	}
 }
 
 ndShape* ndMeshCollisionShapeConvexHull::CreateObject() const
 {
-	ndShape* const hull = new ndShapeConvexHull(ndInt32(m_points.GetCount()), sizeof(ndVector), ndFloat32(0.0f), &m_points[0].m_x, m_maxPointCount);
+	ndShape* const hull = new ndShapeConvexHull(ndInt32(m_points.GetCount()), sizeof(ndVector), m_tolarence, &m_points[0].m_x, m_maxPointCount);
 	ndShapeInfo info(hull->GetShapeInfo());
-	ndMeshCollisionShapeConvexHull* const self = (ndMeshCollisionShapeConvexHull*)this;
-	self->m_maxPointCount = info.m_convexhull.m_vertexCount;
+	//ndMeshCollisionShapeConvexHull* const self = (ndMeshCollisionShapeConvexHull*)this;
+	//self->m_maxPointCount = info.m_convexhull.m_vertexCount;
 	return hull;
 }
 

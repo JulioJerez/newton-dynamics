@@ -230,6 +230,10 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 		{
 			ShowCollisionChamferCylinder();
 		}
+		else if (strcmp(contructor.GetStr(), ndShapeConvexHull::StaticClassName()) == 0)
+		{
+			ShowCollisionConvexHull();
+		}
 
 		else
 		{
@@ -384,6 +388,39 @@ void ndAssetEditor::ShowCollisionChamferCylinder()
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
 		subJoint->m_height = ndMax(value, ndReal(0.01f));
+		GetDebugDisplay()->RebuildDebugCollision();
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+	}
+}
+
+void ndAssetEditor::ShowCollisionConvexHull()
+{
+	ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
+	ndMeshBodyKinematic* const rigidBody = (ndMeshBodyKinematic*)*body;
+	ndMeshShapeInstance& shapeInstance = rigidBody->m_shapeInstance;
+
+	//ndReal value;
+	ndMeshCollisionShapeConvexHull* const subJoint = (ndMeshCollisionShapeConvexHull*)*shapeInstance.m_shape;
+
+	if (ImGui::Button("Recalculate"))
+	{
+		ndTrace(("To Do\n"));
+	}
+
+	ndReal value = subJoint->m_tolarence;
+	if (ImGui::InputFloat("radios", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+		subJoint->m_tolarence = ndMax(value, ndReal(0.1f));
+		GetDebugDisplay()->RebuildDebugCollision();
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+	}
+
+	ndInt32 points = subJoint->m_maxPointCount;
+	if (ImGui::InputInt("max points", &points, 1, ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
+		subJoint->m_maxPointCount = ndMax(points, 16);
 		GetDebugDisplay()->RebuildDebugCollision();
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, m_currentSelection)));
 	}
