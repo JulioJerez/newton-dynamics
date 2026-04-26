@@ -22,17 +22,20 @@
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
 #include "ndBodyKinematic.h"
-#include "ndMeshComponents.h"
+#include "ndMeshBaseComponents.h"
 #include "ndJointBilateralConstraint.h"
 
 #define D_VEL_DAMP			 ndFloat32(100.0f)
 #define D_POS_DAMP			 ndFloat32(1500.0f)
+
+ndVector ndJointBilateralConstraint::m_linearDebugColor(ndFloat32(1.0f), ndFloat32(1.0f), ndFloat32(1.0f), ndFloat32(0.0f));
 
 ndJointBilateralConstraint::ndJointBilateralConstraint()
 	:ndConstraint()
 	,m_worldNode(nullptr)
 	,m_body0Node(nullptr)
 	,m_body1Node(nullptr)
+	,m_userData(nullptr)
 {
 	m_mark0 = 0;
 	m_mark1 = 0;
@@ -53,6 +56,7 @@ ndJointBilateralConstraint::ndJointBilateralConstraint(ndInt32 maxDof, ndBodyKin
 	,m_worldNode(nullptr)
 	,m_body0Node(nullptr)
 	,m_body1Node(nullptr)
+	,m_userData(nullptr)
 {
 	m_body0 = body0;
 	m_body1 = body1;
@@ -87,6 +91,7 @@ ndJointBilateralConstraint::ndJointBilateralConstraint(ndInt32 maxDof, ndBodyKin
 	,m_worldNode(nullptr)
 	,m_body0Node(nullptr)
 	,m_body1Node(nullptr)
+	,m_userData(nullptr)
 {
 	m_body0 = body0;
 	m_body1 = body1;
@@ -136,11 +141,6 @@ void ndJointBilateralConstraint::SetSolverModel(ndJointBilateralSolverModel mode
 	m_solverModel = ndClamp(model, m_jointIterativeSoft, m_jointModesCount);
 }
 
-//ndUnsigned32 ndJointBilateralConstraint::GetRowsCount() const
-//{
-//	return m_maxDof;
-//}
-
 const ndMatrix& ndJointBilateralConstraint::GetLocalMatrix0() const
 {
 	return m_localMatrix0;
@@ -161,6 +161,15 @@ void ndJointBilateralConstraint::SetLocalMatrix1(const ndMatrix& matrix)
 	m_localMatrix1 = matrix;
 }
 
+const ndSharedPtr<ndJointUserData>& ndJointBilateralConstraint::GetUserData() const
+{
+	return m_userData;
+}
+
+void ndJointBilateralConstraint::SetUserData(ndSharedPtr<ndJointUserData>& userData)
+{
+	m_userData = userData;
+}
 
 ndFloat32 ndJointBilateralConstraint::GetMotorZeroAcceleration(ndConstraintDescritor& desc) const
 {
@@ -607,9 +616,9 @@ void ndJointBilateralConstraint::UpdateParameters()
 	ndTrace(("Fix this joint paremeters\n"));
 }
 
-ndSharedPtr<ndMeshJoint> ndJointBilateralConstraint::GetMeshJoint() const
+ndSharedPtr<ndMeshJoint> ndJointBilateralConstraint::GetMeshJoint(const ndMesh* const owner) const
 {
 	ndExpandTraceMessage("serialize class: %s not Implemented", ClassName());
 	ndAssert(0);
-	return ndSharedPtr<ndMeshJoint>(new ndMeshJoint(this));
+	return ndSharedPtr<ndMeshJoint>(new ndMeshJoint(owner, this));
 }

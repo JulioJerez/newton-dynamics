@@ -707,22 +707,22 @@ ndMatrix ndMatrix::OrthoInverse() const
 	return inv;
 }
 
-bool ndMatrix::TestIdentity() const
+bool ndMatrix::TestIdentity(ndFloat32 tolerance) const
 {
 	const ndMatrix& me = *this;
 	for (ndInt32 i = 0; i < 4; ++i)
 	{
-		if (me[i][i] != ndFloat32(1.0f))
+		if (ndAbs (me[i][i] - ndFloat32(1.0f)) > tolerance)
 		{
 			return false;
 		}
 		for (ndInt32 j = i + 1; j < 4; ++j)
 		{
-			if (me[i][j] != ndFloat32(0.0f))
+			if (ndAbs (me[i][j]) > tolerance)
 			{
 				return false;
 			}
-			if (me[j][i] != ndFloat32(0.0f))
+			if (ndAbs(me[j][i]) > tolerance)
 			{
 				return false;
 			}

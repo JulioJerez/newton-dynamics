@@ -144,26 +144,63 @@ ndMatrix ndJointWheel::CalculateUpperBumperMatrix() const
 	return matrix;
 }
 
-void ndJointWheel::DebugJoint(ndConstraintDebugCallback& context) const
+void ndJointWheel::DebugJoint(ndConstraintDebugCallback& debugCallback) const
 {
 	ndMatrix matrix0;
 	ndMatrix matrix1;
 	CalculateGlobalMatrix(matrix0, matrix1);
 
 	//draw reference frame
-	context.DrawFrame(matrix1);
+	debugCallback.DrawFrame(matrix0);
 
-	// draw upper bumper
-	ndMatrix upperBumberMatrix(CalculateUpperBumperMatrix());
-	ndMatrix tireBaseFrame(CalculateBaseFrame());
-	context.DrawFrame(tireBaseFrame);
+	//draw reference frame
+	debugCallback.DrawFrame(matrix1);
+	
+	//// draw upper bumper
+	//ndMatrix upperBumberMatrix(CalculateUpperBumperMatrix());
+	//ndMatrix tireBaseFrame(CalculateBaseFrame());
+	//debugCallback.DrawFrame(tireBaseFrame);
 
-	// show tire center of mass;
-	ndBodyKinematic* const tireBody = GetBody0()->GetAsBodyKinematic();
-	ndMatrix tireFrame(tireBody->GetMatrix());
-	context.DrawFrame(tireFrame);
-	upperBumberMatrix.m_posit = tireFrame.m_posit;
-	context.DrawFrame(upperBumberMatrix);
+	//// show tire center of mass;
+	//ndBodyKinematic* const tireBody = GetBody0()->GetAsBodyKinematic();
+	//ndMatrix tireFrame(tireBody->GetMatrix());
+	//context.DrawFrame(tireFrame);
+	//upperBumberMatrix.m_posit = tireFrame.m_posit;
+	//context.DrawFrame(upperBumberMatrix);
+
+	ndVector p0(matrix1.m_posit + matrix1.m_up.Scale(m_info.m_lowerStop));
+	ndVector p1(matrix1.m_posit + matrix1.m_up.Scale(m_info.m_upperStop));
+	debugCallback.DrawLine(p0, p1, m_linearDebugColor);
+
+	if (m_info.m_steeringAngle > ndFloat32 (0.01f))
+	{
+		// show yaw angle limits
+		const int subdiv = 12;
+		ndVector arch[subdiv + 1];
+		const ndFloat32 radius = debugCallback.m_debugScale;
+		ndVector point(ndFloat32(radius), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f));
+
+		ndFloat32 minAngle = -m_info.m_steeringAngle - ndPi * 0.5f;
+		ndFloat32 maxAngle = m_info.m_steeringAngle - ndPi * 0.5f;
+
+		ndFloat32 angleStep = (maxAngle - minAngle) / subdiv;
+		ndFloat32 angle0 = minAngle;
+
+		ndMatrix steeringMatrix(m_baseFrame * m_body1->GetMatrix());
+
+		ndVector color(ndVector(0.0f, 0.5f, 0.0f, 0.0f));
+		for (ndInt32 i = 0; i <= subdiv; ++i)
+		{
+			arch[i] = steeringMatrix.TransformVector(ndYawMatrix(angle0).RotateVector(point));
+			debugCallback.DrawLine(steeringMatrix.m_posit, arch[i], color);
+			angle0 += angleStep;
+		}
+
+		for (ndInt32 i = 0; i < subdiv; ++i)
+		{
+			debugCallback.DrawLine(arch[i], arch[i + 1], color);
+		}
+	}
 }
 
 void ndJointWheel::UpdateParameters()
@@ -245,19 +282,8 @@ void ndJointWheel::JacobianDerivative(ndConstraintDescritor& desc)
 	}
 }
 
-ndSharedPtr<ndMeshJoint> ndJointWheel::GetMeshJoint() const
+ndSharedPtr<ndMeshJoint> ndJointWheel::GetMeshJoint(const ndMesh* const owner) const
 {
-	ndMeshJointWheel* const joint = new ndMeshJointWheel(this);
-	
-	joint->m_baseFrame = m_baseFrame;
-	joint->m_springK = m_info.m_springK;
-	joint->m_damperC = m_info.m_damperC;
-	joint->m_upperStop = m_info.m_upperStop;
-	joint->m_lowerStop = m_info.m_lowerStop;
-	joint->m_regularizer = m_info.m_regularizer;
-	joint->m_brakeTorque = m_info.m_brakeTorque;
-	joint->m_steeringAngle = m_info.m_steeringAngle * ndRadToDegree;
-	joint->m_handBrakeTorque = m_info.m_handBrakeTorque;
-
+	ndMeshJointWheel* const joint = new ndMeshJointWheel(owner, this);
 	return ndSharedPtr<ndMeshJoint>(joint);
 }

@@ -169,9 +169,9 @@ void ndJointFix6dof::SubmitAngularAxis(ndConstraintDescritor& desc, const ndMatr
 	//dTrace(("%f %f\n", coneAngle * dRadToDegree, pitchAngle * dRadToDegree));
 }
 
-ndSharedPtr<ndMeshJoint> ndJointFix6dof::GetMeshJoint() const
+ndSharedPtr<ndMeshJoint> ndJointFix6dof::GetMeshJoint(const ndMesh* const owner) const
 {
-	ndMeshJointFix6dof* const joint = new ndMeshJointFix6dof(this);
+	ndMeshJointFix6dof* const joint = new ndMeshJointFix6dof(owner, this);
 
 	joint->m_softness = m_softness;
 	joint->m_maxForce = m_maxForce;

@@ -2606,6 +2606,11 @@ void ndMeshEffect::BeginBuild()
 
 void ndMeshEffect::EndBuild(bool fixTjoint)
 {
+	if (m_points.m_vertex.GetCount() == 0)
+	{
+		return;
+	}
+
 	#ifdef _DEBUG
 	for (ndInt32 i = 0; i < m_points.m_vertex.GetCount(); i += 3)
 	{
@@ -3191,8 +3196,6 @@ ndAssert(0);
 
 void ndMeshEffect::PackAttibuteData()
 {
-	//ndStack<ndInt32>attrIndexBuffer(ndInt32(m_attrib.m_pointChannel.GetCount()));
-	//ndInt32* const attrIndexMap = &attrIndexBuffer[0];
 	ndArray<ndInt32>attrIndexMap;
 	attrIndexMap.SetCount(m_attrib.m_pointChannel.GetCount());
 	m_attrib.CompactVertexData(m_points, &attrIndexMap[0], ndFloat32(1.0e-6f));
@@ -4347,7 +4350,7 @@ void ndMeshEffect::ApplyTransform(const ndMatrix& matrix)
 
 	ndMatrix invMatix(matrix.Inverse4x4());
 	invMatix.m_posit = ndVector::m_wOne;
-	ndMatrix rotation(invMatix.Transpose4X4());
+	const ndMatrix rotation(invMatix.Transpose4X4());
 	for (ndInt32 i = 0; i < m_attrib.m_normalChannel.GetCount(); ++i)
 	{
 		ndVector n(ndFloat32(m_attrib.m_normalChannel[i].m_x), ndFloat32(m_attrib.m_normalChannel[i].m_y), ndFloat32(m_attrib.m_normalChannel[i].m_z), ndFloat32(0.0f));
@@ -5355,4 +5358,38 @@ void ndMeshEffect::DeserializeFromXml(const nd::TiXmlElement* const xmlNode)
 		format.m_uv0.m_strideInBytes = sizeof(ndTriplexReal);
 	}
 	BuildFromIndexList(&format);
+}
+
+ndFloat32 ndMeshEffect::RayCast(const ndVector& p0, const ndVector& p1) const
+{
+	ndFastRay ray(p0, p1);
+	ndInt32 mark = IncLRU();
+	ndPolyhedra::Iterator iter(*this);
+
+	ndFloat32 hitParam = ndFloat32(1.2f);
+	for (iter.Begin(); iter; iter++)
+	{
+		ndEdge* const edge = &(*iter);
+		if ((edge->m_mark < mark) && (edge->m_incidentFace > 0))
+		{
+			ndFixSizeArray<ndVector, 64> face;
+			ndFixSizeArray<ndInt32, 64> indices;
+			ndEdge* ptr = edge;
+			do
+			{
+				ndBigVector p(m_points.m_vertex[ptr->m_incidentVertex]);
+				indices.PushBack(indices.GetCount());
+				face.PushBack(p);
+				ptr->m_mark = mark;
+				ptr = ptr->m_next;
+			} while (ptr != edge);
+			ndFloat32 param = ray.PolygonIntersect(hitParam, &face[0], &indices[0], indices.GetCount());
+			if (param < hitParam)
+			{
+				hitParam = param;
+			}
+		}
+	}
+
+	return hitParam;
 }

@@ -24,7 +24,7 @@
 #include "ndContact.h"
 #include "ndShapeSphere.h"
 #include "ndContactSolver.h"
-#include "ndMeshComponents.h"
+#include "ndMeshBaseComponents.h"
 
 #define D_SPHERE_EDGE_COUNT 96
 

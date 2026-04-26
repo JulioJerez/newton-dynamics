@@ -50,17 +50,6 @@ class ndMatrix : public ndClassAlloc
 	ndMatrix (const ndFloat32* const array);
 	ndMatrix (const ndVector &front, const ndVector &up, const ndVector &right, const ndVector &posit);
 
-	// please use function ndCalculateMatrix()
-	//D_CORE_API ndMatrix (const ndQuaternion &rotation, const ndVector &position);
-
-	// create a orthonormal normal vector basis, front become m_front vector, and m_up and m_right are mutualiperpendicular to fron and to each other
-	// please use function ndGramSchmidtMatrix
-	//ndMatrix (const ndVector &front);
-
-	// create a covariance Matrix = transpose(p) * q 
-	// please use function ndCovariance
-	//ndMatrix (const ndVector& p, const ndVector& q);
-
 	ndVector& operator[] (ndInt32 i);
 	const ndVector& operator[] (ndInt32 i) const;
 
@@ -73,10 +62,6 @@ class ndMatrix : public ndClassAlloc
 	D_CORE_API ndMatrix OrthoInverse() const;
 	D_CORE_API ndMatrix Transpose3x3 () const;
 	D_CORE_API ndMatrix Transpose4X4 () const;
-	//D_CORE_API ndVector RotateVector (const ndVector &v) const;
-	//D_CORE_API ndVector UnrotateVector (const ndVector &v) const;
-	//D_CORE_API ndVector TransformVector (const ndVector &v) const;
-	//D_CORE_API ndVector UntransformVector (const ndVector &v) const;
 	D_CORE_API ndVector TransformVector1x4(const ndVector& v) const;
 	D_CORE_API ndPlane TransformPlane (const ndPlane &localPlane) const;
 	D_CORE_API ndPlane UntransformPlane (const ndPlane &globalPlane) const;
@@ -98,8 +83,8 @@ class ndMatrix : public ndClassAlloc
 		const ndFloat32* const src, ndInt32 srcStrideInBytes, ndInt32 count) const;
 #endif
 	D_CORE_API bool SanityCheck() const;
-	D_CORE_API bool TestIdentity() const;
 	D_CORE_API bool TestSymetric3x3() const;
+	D_CORE_API bool TestIdentity(ndFloat32 tolerance = ndFloat32(0.0f)) const;
 	D_CORE_API bool TestOrthogonal(ndFloat32 tol = ndFloat32 (1.0e-4f)) const;
 
 	D_CORE_API ndMatrix Multiply3X3 (const ndMatrix &B) const;

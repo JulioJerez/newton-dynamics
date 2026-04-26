@@ -47,6 +47,7 @@ class ndShapeCylinder : public ndShapeConvex
 	D_COLLISION_API virtual ndVector SupportVertex(const ndVector& dir) const override;
 	D_COLLISION_API virtual ndVector SupportVertexSpecial(const ndVector& dir, ndFloat32 skinMargin) const override;
 	D_COLLISION_API virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const override;
+	D_COLLISION_API ndSharedPtr<ndMeshCollisionShape> GetMeshShape() const override;
 
 	virtual ndInt32 CalculatePlaneIntersection(const ndVector& normal, const ndVector& point, ndVector* const contactsOut) const override;
 

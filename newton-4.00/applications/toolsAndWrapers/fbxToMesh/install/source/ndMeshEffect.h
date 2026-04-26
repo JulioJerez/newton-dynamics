@@ -564,6 +564,7 @@ class ndMeshEffect: public ndPolyhedra
 	D_COLLISION_API bool HasOpenEdges() const;
 	D_COLLISION_API void Triangulate();
 	D_COLLISION_API void ConvertToPolygons();
+	D_COLLISION_API ndFloat32 RayCast(const ndVector& p0, const ndVector& p1) const;
 	D_COLLISION_API ndEdge* InsertEdgeVertex(ndEdge* const edge, ndFloat64 param);
 	D_COLLISION_API void AddInterpolatedEdgeAttribute(ndEdge* const edge, ndFloat64 param);
 	D_COLLISION_API void RemoveUnusedVertices(ndInt32* const vertexRemapTable);
