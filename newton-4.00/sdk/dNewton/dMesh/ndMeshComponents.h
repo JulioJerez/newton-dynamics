@@ -35,6 +35,10 @@ class ndMeshBodyDynamic : public ndMeshBodyKinematic
 {
 	public:
 	D_NEWTON_API ndMeshBodyDynamic(const ndMesh* const owner);
+	D_NEWTON_API ndMeshBodyDynamic(const ndMeshBodyDynamic& other);
+
+	D_NEWTON_API virtual ndMeshBody* Duplicate() const override;
+	D_NEWTON_API virtual bool operator==(const ndMeshBody& other) const override;
 
 	D_NEWTON_API virtual ndBody* CreateObject() const override;
 	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;

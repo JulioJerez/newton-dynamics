@@ -693,6 +693,31 @@ ndMeshBody::ndMeshBody(const ndMesh* const owner)
 	m_classConstructor = ndString("ndBody");
 }
 
+ndMeshBody::ndMeshBody(const ndMeshBody& other)
+	:ndClassAlloc()
+	,m_veloc(other.m_veloc)
+	,m_omega(other.m_omega)
+	,m_localCentreOfMass(other.m_localCentreOfMass)
+	,m_classConstructor(other.m_classConstructor)
+	,m_owner(other.m_owner)
+{
+}
+
+ndMeshBody* ndMeshBody::Duplicate() const
+{
+	ndAssert(0);
+	return nullptr;
+}
+
+bool ndMeshBody::operator==(const ndMeshBody& other) const
+{
+	bool test = (m_classConstructor == other.m_classConstructor);
+
+	ndVector diff(m_localCentreOfMass - other.m_localCentreOfMass);
+	test = test && diff.DotProduct(diff & ndVector::m_triplexMask).GetScalar() < ndFloat32(1.0e-6f);
+	return test;
+}
+
 ndMeshBody::~ndMeshBody()
 {
 }
@@ -729,6 +754,43 @@ ndMeshBodyKinematic::ndMeshBodyKinematic(const ndMesh* const owner)
 {
 	m_classConstructor = ndString("ndBodyKinematic");
 }
+
+ndMeshBodyKinematic::ndMeshBodyKinematic(const ndMeshBodyKinematic& other)
+	:ndMeshBody(other)
+	,m_shapeInstance(other.m_shapeInstance)
+	,m_invMass(other.m_invMass)
+	,m_inertiaPrincipalAxis(other.m_inertiaPrincipalAxis)
+	,m_maxAngleStep(other.m_maxAngleStep)
+	,m_maxLinearStep(other.m_maxLinearStep)
+	,m_massVolumeWeigh(other.m_massVolumeWeigh)
+{
+}
+
+ndMeshBody* ndMeshBodyKinematic::Duplicate() const
+{
+	return new ndMeshBodyKinematic(*this);
+}
+
+bool ndMeshBodyKinematic::operator==(const ndMeshBody& other) const
+{
+	bool test = ndMeshBody::operator==(other);
+
+	auto Compare = [](const ndVector& a, const ndVector& b)
+	{
+		ndVector diff(a - b);
+		return diff.DotProduct(diff).GetScalar() < ndFloat32(1.0e-6f);
+	};
+
+	const ndMeshBodyKinematic* const otherBody = (ndMeshBodyKinematic*)&other;
+	test = test && (m_shapeInstance == otherBody->m_shapeInstance);
+	test = test && Compare(m_invMass, otherBody->m_invMass);
+	test = test && Compare(m_inertiaPrincipalAxis & ndVector::m_triplexMask, otherBody->m_inertiaPrincipalAxis & ndVector::m_triplexMask);
+	test = test && (m_maxAngleStep == otherBody->m_maxAngleStep);
+	test = test && (m_maxLinearStep == otherBody->m_maxLinearStep);
+	test = test && (m_massVolumeWeigh == otherBody->m_massVolumeWeigh);
+	return test;
+}
+
 
 void ndMeshBodyKinematic::SerializeToXml(nd::TiXmlElement* const parent) const
 {

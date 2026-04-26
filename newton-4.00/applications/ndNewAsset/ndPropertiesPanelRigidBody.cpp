@@ -18,17 +18,8 @@ class ndUndoRedoRigidBody : public ndUndoRedoCommand
 	public:
 	ndUndoRedoRigidBody(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
 		:ndUndoRedoCommand(editor, mesh)
+		,m_body(ndSharedPtr<ndMeshBody>(new ndMeshBodyDynamic(*((ndMeshBodyDynamic*)m_mesh->GetRigidBody()->Duplicate()))))
 	{
-		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
-		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
-
-		m_inverseMass = body->m_invMass;
-		m_angleStep = body->m_maxAngleStep;
-		m_linearStep = body->m_maxLinearStep;
-		m_intrisicDamp = body->m_intrinsicDamping;
-		m_centerOfMass = body->m_localCentreOfMass;
-		m_massVolumeWeigh = body->m_massVolumeWeigh;
-		m_inertiaPrincipalAxis = body->m_inertiaPrincipalAxis;
 	}
 
 	virtual class ndUndoRedoRigidBody* GetAsUndoRedoRigidBody() const override
@@ -43,14 +34,10 @@ class ndUndoRedoRigidBody : public ndUndoRedoCommand
 			const ndUndoRedoRigidBody* const other = command.GetAsUndoRedoRigidBody();
 			if (other)
 			{
-				bool test = (m_inverseMass - other->m_inverseMass).DotProduct(m_inverseMass - other->m_inverseMass).GetScalar() < ndFloat32 (0.0001f);
-				test = test && (m_intrisicDamp - other->m_intrisicDamp).DotProduct(m_intrisicDamp - other->m_intrisicDamp).GetScalar() < ndFloat32 (0.0001f);
-				test = test && (m_centerOfMass - other->m_centerOfMass).DotProduct(m_centerOfMass - other->m_centerOfMass).GetScalar() < ndFloat32 (0.0001f);
-				test = test && (m_inertiaPrincipalAxis - other->m_inertiaPrincipalAxis).DotProduct(m_inertiaPrincipalAxis - other->m_inertiaPrincipalAxis).GetScalar() < ndFloat32(0.0001f);
-				test = test && (m_angleStep == other->m_angleStep);
-				test = test && (m_linearStep == other->m_linearStep);
-				test = test && (m_massVolumeWeigh == other->m_massVolumeWeigh);
-
+				const ndMeshBody* const self = *m_body;
+				const ndMeshBody* const otherSelf = *other->m_body;
+	
+				bool test = (*self == *otherSelf);
 				if (test)
 				{
 					return false;
@@ -63,27 +50,12 @@ class ndUndoRedoRigidBody : public ndUndoRedoCommand
 
 	virtual void Undo() override
 	{
-		ndAssert(m_mesh->GetRigidBody()->m_classConstructor == ndBodyDynamic::StaticClassName());
-		ndMeshBodyDynamic* const body = ((ndMeshBodyDynamic*)*m_mesh->GetRigidBody());
-
-		body->m_invMass = m_inverseMass;
-		body->m_intrinsicDamping = m_intrisicDamp;
-		body->m_localCentreOfMass = m_centerOfMass;
-		body->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
-		body->m_maxAngleStep = m_angleStep;
-		body->m_maxLinearStep = m_linearStep;
-		body->m_massVolumeWeigh = m_massVolumeWeigh;
+		ndAssert(m_mesh == m_editor->m_currentSelection);
+		m_mesh->SetRigidBody(m_body);
 	}
 
-	ndVector m_inverseMass;
-	ndVector m_intrisicDamp;
-	ndVector m_centerOfMass;
-	ndVector m_inertiaPrincipalAxis;
-	ndFloat32 m_angleStep;
-	ndFloat32 m_linearStep;
-	ndFloat32 m_massVolumeWeigh;
+	ndSharedPtr<ndMeshBody> m_body;
 };
-
 
 void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 {

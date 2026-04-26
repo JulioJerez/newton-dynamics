@@ -221,7 +221,11 @@ class ndMeshBody : public ndClassAlloc
 {
 	public:
 	D_COLLISION_API ndMeshBody(const ndMesh* const owner);
+	D_COLLISION_API ndMeshBody(const ndMeshBody& other);
 	D_COLLISION_API virtual ~ndMeshBody();
+
+	D_COLLISION_API virtual ndMeshBody* Duplicate() const;
+	D_COLLISION_API virtual bool operator==(const ndMeshBody& other) const;
 
 	D_COLLISION_API virtual ndBody* CreateObject() const;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
@@ -238,6 +242,10 @@ class ndMeshBodyKinematic : public ndMeshBody
 {
 	public:
 	D_COLLISION_API ndMeshBodyKinematic(const ndMesh* const owner);
+	D_COLLISION_API ndMeshBodyKinematic(const ndMeshBodyKinematic& other);
+
+	D_COLLISION_API virtual ndMeshBody* Duplicate() const override;
+	D_COLLISION_API virtual bool operator==(const ndMeshBody& other) const override;
 
 	D_COLLISION_API virtual ndBody* CreateObject() const override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
