@@ -78,8 +78,8 @@ ndMeshCollisionShape* ndMeshCollisionShapeNull::Duplicate() const
 
 bool ndMeshCollisionShapeNull::operator==(const ndMeshCollisionShape& other) const
 {
-	ndAssert(0);
-	return false;
+	bool test = ndMeshCollisionShape::operator==(other);
+	return test;
 }
 
 void ndMeshCollisionShapeNull::ApplyScale(ndFloat32)
@@ -108,8 +108,8 @@ ndMeshCollisionShapeSphere::ndMeshCollisionShapeSphere()
 
 ndMeshCollisionShapeSphere::ndMeshCollisionShapeSphere(const ndMeshCollisionShapeSphere& other)
 	:ndMeshCollisionShape(other)
+	,m_radius(other.m_radius)
 {
-	ndAssert(0);
 }
 
 ndMeshCollisionShape* ndMeshCollisionShapeSphere::Duplicate() const
@@ -119,7 +119,12 @@ ndMeshCollisionShape* ndMeshCollisionShapeSphere::Duplicate() const
 
 bool ndMeshCollisionShapeSphere::operator==(const ndMeshCollisionShape& other) const
 {
-	ndAssert(0);
+	bool test = ndMeshCollisionShape::operator==(other);
+	if (test)
+	{
+		const ndMeshCollisionShapeSphere* const otherShape = (ndMeshCollisionShapeSphere*)&other;
+		test = test && (m_radius == otherShape->m_radius);
+	}
 	return false;
 }
 
