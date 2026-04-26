@@ -454,7 +454,12 @@ ndMeshCollisionShapeCompound::ndMeshCollisionShapeCompound()
 ndMeshCollisionShapeCompound::ndMeshCollisionShapeCompound(const ndMeshCollisionShapeCompound& other)
 	:ndMeshCollisionShape(other)
 {
-	ndAssert(0);
+	for (ndList<ndSharedPtr<ndMeshShapeInstance>>::ndNode* node = other.m_subShapes.GetFirst(); node; node = node->GetNext())
+	{
+		ndSharedPtr<ndMeshShapeInstance>& otherInstance = node->GetInfo();
+		ndSharedPtr<ndMeshShapeInstance> instance (new ndMeshShapeInstance(**otherInstance));
+		m_subShapes.Append(instance);
+	}
 }
 
 ndMeshCollisionShape* ndMeshCollisionShapeCompound::Duplicate() const
@@ -464,7 +469,20 @@ ndMeshCollisionShape* ndMeshCollisionShapeCompound::Duplicate() const
 
 bool ndMeshCollisionShapeCompound::operator==(const ndMeshCollisionShape& other) const
 {
-	ndAssert(0);
+	bool test = ndMeshCollisionShape::operator==(other);
+	if (test)
+	{
+		const ndMeshCollisionShapeCompound* const otherShape = (ndMeshCollisionShapeCompound*)&other;
+		test = test && (m_subShapes.GetCount() == otherShape->m_subShapes.GetCount());
+		ndList<ndSharedPtr<ndMeshShapeInstance>>::ndNode* selftNode = m_subShapes.GetFirst();
+		for (ndList<ndSharedPtr<ndMeshShapeInstance>>::ndNode* node = otherShape->m_subShapes.GetFirst(); node; node = node->GetNext())
+		{
+			const ndSharedPtr<ndMeshShapeInstance>& otherInstance = node->GetInfo();
+			const ndSharedPtr<ndMeshShapeInstance>& selfInstance = selftNode->GetInfo();
+			test = test && (**selfInstance == **otherInstance);
+			selftNode = selftNode->GetNext();
+		}
+	}
 	return false;
 }
 

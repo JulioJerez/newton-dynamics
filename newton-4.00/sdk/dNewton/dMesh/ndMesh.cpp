@@ -1013,7 +1013,6 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionFromChildren()
 		}
 	}
 
-	ndAssert(shapeArray.GetCount());
 	if (shapeArray.GetCount() > 1)
 	{
 		ndSharedPtr<ndShapeInstance> compoundInstance(new ndShapeInstance(new ndShapeCompound()));
@@ -1026,6 +1025,10 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionFromChildren()
 		}
 		compound->EndAddRemove();
 		shapeArray[0] = compoundInstance;
+	}
+	else
+	{
+		shapeArray.PushBack(ndSharedPtr<ndShapeInstance>(new ndShapeInstance(new ndShapeCompound())));
 	}
 	return shapeArray[0];
 }
