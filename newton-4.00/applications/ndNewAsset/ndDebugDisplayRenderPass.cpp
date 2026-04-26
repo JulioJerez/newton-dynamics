@@ -353,6 +353,11 @@ void ndDebugDisplayRenderPass::RenderHiddenSurface()
 
 void ndDebugDisplayRenderPass::RenderScene()
 {
+	if (m_manager->m_currentSelection)
+	{
+		RenderSelectedNode();
+	}
+
 	m_owner->ClearZBuffer();
 
 	if (m_debugLines.GetCount())
@@ -382,7 +387,6 @@ void ndDebugDisplayRenderPass::RenderScene()
 			RenderCollisionShape();
 		}
 
-		RenderSelectedNode();
 		RenderOptions();
 	}
 	else if (m_manager->m_currentLoopJointSelection)
