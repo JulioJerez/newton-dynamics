@@ -21,13 +21,15 @@ class ndAssetEditor;
 class ndEditorCameraFlyby: public ndEditorCameraNode
 {
 	public:
-	//ndEditorCameraFlyby(ndRender* const owner);
 	ndEditorCameraFlyby(ndAssetEditor* const editor);
 
 	void TickUpdate(ndFloat32 timestep);
 	virtual void SetTransform(const ndQuaternion& rotation, const ndVector& position) override;
 
 	void MouseSelection();
+
+	void CalculateCameraMatrix();
+	void SetView(ndAssetEditor::ndCameraMode mode);
 
 	ndVector m_posit;
 	ndFloat32 m_yaw;

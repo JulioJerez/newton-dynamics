@@ -57,7 +57,7 @@ class ndUndoRedoShape : public ndUndoRedoCommand
 	ndMeshShapeInstance m_shapeInstance;
 };
 
-void ndAssetEditor::ShowShapeTransform()
+void ndAssetEditor::EditShapeTransform()
 {
 	ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
 	ndMeshBodyKinematic* const rigidBody = (ndMeshBodyKinematic*)*body;
@@ -203,7 +203,7 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 			ImGui::EndCombo();
 		}
 
-		ShowShapeTransform();
+		EditShapeTransform();
 		const ndString& contructor = shapeInstance.m_shape->m_constructor;
 
 		if (strcmp(className, ndShapeNull::StaticClassName()) == 0)
@@ -212,31 +212,31 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 		}
 		else if (strcmp(contructor.GetStr(), ndShapeBox::StaticClassName()) == 0)
 		{
-			ShowCollisionBox();
+			EditCollisionBox();
 		}
 		else if (strcmp(contructor.GetStr(), ndShapeSphere::StaticClassName()) == 0)
 		{
-			ShowCollisionSphere();
+			EditCollisionSphere();
 		}
 		else if (strcmp(contructor.GetStr(), ndShapeCapsule::StaticClassName()) == 0)
 		{
-			ShowCollisionCapsule();
+			EditCollisionCapsule();
 		}
 		else if (strcmp(contructor.GetStr(), ndShapeCylinder::StaticClassName()) == 0)
 		{
-			ShowCollisionCylinder();
+			EditCollisionCylinder();
 		}
 		else if (strcmp(contructor.GetStr(), ndShapeChamferCylinder::StaticClassName()) == 0)
 		{
-			ShowCollisionChamferCylinder();
+			EditCollisionChamferCylinder();
 		}
 		else if (strcmp(contructor.GetStr(), ndShapeConvexHull::StaticClassName()) == 0)
 		{
-			ShowCollisionConvexHull();
+			EditCollisionConvexHull();
 		}
 		else if (strcmp(contructor.GetStr(), ndShapeCompound::StaticClassName()) == 0)
 		{
-			ShowCollisionCompound();
+			EditCollisionCompound();
 		}
 		else
 		{
@@ -245,7 +245,7 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 	}
 }
 
-void ndAssetEditor::ShowCollisionBox()
+void ndAssetEditor::EditCollisionBox()
 {
 	ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
 	ndMeshBodyKinematic* const rigidBody = (ndMeshBodyKinematic*)*body;
@@ -280,7 +280,7 @@ void ndAssetEditor::ShowCollisionBox()
 	}
 }
 
-void ndAssetEditor::ShowCollisionSphere()
+void ndAssetEditor::EditCollisionSphere()
 {
 	ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
 	ndMeshBodyKinematic* const rigidBody = (ndMeshBodyKinematic*)*body;
@@ -299,7 +299,7 @@ void ndAssetEditor::ShowCollisionSphere()
 	}
 }
 
-void ndAssetEditor::ShowCollisionCapsule()
+void ndAssetEditor::EditCollisionCapsule()
 {
 	ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
 	ndMeshBodyKinematic* const rigidBody = (ndMeshBodyKinematic*)*body;
@@ -334,7 +334,7 @@ void ndAssetEditor::ShowCollisionCapsule()
 	}
 }
 
-void ndAssetEditor::ShowCollisionCylinder()
+void ndAssetEditor::EditCollisionCylinder()
 {
 	ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
 	ndMeshBodyKinematic* const rigidBody = (ndMeshBodyKinematic*)*body;
@@ -369,7 +369,7 @@ void ndAssetEditor::ShowCollisionCylinder()
 	}
 }
 
-void ndAssetEditor::ShowCollisionChamferCylinder()
+void ndAssetEditor::EditCollisionChamferCylinder()
 {
 	ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
 	ndMeshBodyKinematic* const rigidBody = (ndMeshBodyKinematic*)*body;
@@ -396,7 +396,7 @@ void ndAssetEditor::ShowCollisionChamferCylinder()
 	}
 }
 
-void ndAssetEditor::ShowCollisionConvexHull()
+void ndAssetEditor::EditCollisionConvexHull()
 {
 	ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
 	ndMeshBodyKinematic* const rigidBody = (ndMeshBodyKinematic*)*body;
@@ -429,7 +429,7 @@ void ndAssetEditor::ShowCollisionConvexHull()
 	}
 }
 
-void ndAssetEditor::ShowCollisionCompound()
+void ndAssetEditor::EditCollisionCompound()
 {
 	ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
 	ndMeshBodyKinematic* const rigidBody = (ndMeshBodyKinematic*)*body;

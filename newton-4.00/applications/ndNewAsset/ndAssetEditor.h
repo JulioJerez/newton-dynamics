@@ -19,6 +19,15 @@ class ndDebugDisplayRenderPass;
 class ndAssetEditor : public ndClassAlloc
 {
 	public:
+	enum ndCameraMode
+	{
+		m_free,
+		m_backView,
+		m_frontView,
+		m_sideLeftView,
+		m_sideRrightView,
+	};
+
 	enum ndRenderModes
 	{
 		m_shaded,
@@ -119,7 +128,6 @@ class ndAssetEditor : public ndClassAlloc
 
 	//private:
 	void RenderScene();
-	void UpdatePhysics(ndFloat32 timestep);
 	void OnSubStepPostUpdate(ndFloat32 timestep);
 
 	void ConfigureDockSpace();
@@ -135,42 +143,43 @@ class ndAssetEditor : public ndClassAlloc
 	void ShowPropertiesJointInfo();
 	void ShowPropertiesCollisionInfo();
 	void ShowPropertiesRigidBodyInfo();
-
-	void ShowJointGlobalMatrix();
-	void JointsEditFix6dof();
-	void JointsEditHingeJoint();
-	void JointsEditSliderJoint();
-	void JointsEditPlaneJoint();
-	void JointsEditRollerJoint();
-	void JointsEditCylinderJoint();
-	void JointsEditDoubleHingeJoint();
-	void JointsEditWheelJoint();
-	void JointsEditSpherical();
-
 	void ShowPropertiesJointsLoopInfo();
-	void ShowLoopJointLocalMatrix();
-	void ShowLoopJointGlobalMatrix();
-	void JointsLoopEditFix6dof();
-	void JointsLoopEditHingeJoint();
-	void JointsLoopEditSliderJoint();
-	void JointsLoopEditPlaneJoint();
-	void JointsLoopEditRollerJoint();
-	void JointsLoopEditCylinderJoint();
-	void JointsLoopEditDoubleHingeJoint();
-	void JointsLoopEditWheelJoint();
-	void JointsLoopEditSpherical();
-	void JointsLoopEditGear();
-	void JointsLoopEditDifferentialAxle();
-	void JointsLoopEditSwivelPositionEffector();
 
-	void ShowShapeTransform();
-	void ShowCollisionBox();
-	void ShowCollisionSphere();
-	void ShowCollisionCapsule();
-	void ShowCollisionCylinder();
-	void ShowCollisionCompound();
-	void ShowCollisionConvexHull();
-	void ShowCollisionChamferCylinder();
+	void EditJointGlobalMatrix();
+	void EditWheelJoint();
+	void EditHingeJoint();
+	void EditPlaneJoint();
+	void EditSliderJoint();
+	void EditRollerJoint();
+	void EditFix6dofJoint();
+	void EditCylinderJoint();
+	void EditSphericalJoint();
+	void EditDoubleHingeJoint();
+
+	void EditLoopJointLocalMatrix();
+	void EditLoopJointGlobalMatrix();
+
+	void EditGearLoopJoint();
+	void EditWheelLoopJoint();
+	void EditHingeLoopJoint();
+	void EditPlaneLoopJoint();
+	void EditSliderLoopJoint();
+	void EditRollerLoopJoint();
+	void EditFix6dofLoopJoint();
+	void EditCylinderLoopJoint();
+	void EditSphericalLoopJoint();
+	void EditDoubleHingeLoopJoint();
+	void EditDifferentialAxleLoopJoint();
+	void EditSwivelPositionEffectorLoopJoint();
+
+	void EditShapeTransform();
+	void EditCollisionBox();
+	void EditCollisionSphere();
+	void EditCollisionCapsule();
+	void EditCollisionCylinder();
+	void EditCollisionCompound();
+	void EditCollisionConvexHull();
+	void EditCollisionChamferCylinder();
 		
 	ndSharedPtr<ndMesh> m_mesh;
 	ndSharedPtr<ndRender> m_renderer;
@@ -195,20 +204,16 @@ class ndAssetEditor : public ndClassAlloc
 	ndString m_currentPath;
 	ndUndoRedo m_undoRedo;
 
-	bool m_runScene;
 	bool m_showPivot;
 	bool m_showJoints;
+	bool m_lockSelection;
+	bool m_showShapePivot;
 	bool m_showCenterOfMass;
 	bool m_showSelectedNode;
 	bool m_showCollisionShape;
 	bool m_showPreTransform;
 
 	bool m_toolActive;
-	//bool m_addCollidingBody;
-	//bool m_removeCollidingBody;
-	//ndInt32 m_addCollingPairSelection;
-	//ndInt32 m_addCollingPairCandidateSelection;
-	
 	ndInt32 m_renderMode;
 	ndReal m_gizmoScale;
 	

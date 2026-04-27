@@ -27,18 +27,15 @@ ndAssetEditor::ndAssetEditor()
 	:ndClassAlloc()
 	,m_currentPath("")
 	,m_undoRedo()
-	,m_runScene(false)
 	,m_showPivot(true)
 	,m_showJoints(true)
+	,m_lockSelection(false)
+	,m_showShapePivot(false)
 	,m_showCenterOfMass(false)
 	,m_showSelectedNode(true)
 	,m_showCollisionShape(true)
 	,m_showPreTransform(false)
 	,m_toolActive(false)
-	//,m_addCollidingBody(false)
-	//,m_removeCollidingBody(false)
-	//,m_addCollingPairSelection(-1)
-	//,m_addCollingPairCandidateSelection(-1)
 	,m_renderMode(m_shaded)
 	,m_gizmoScale(0.25f)
 {
@@ -213,19 +210,6 @@ void ndAssetEditor::OnSubStepPostUpdate(ndFloat32)
 {
 }
 
-void ndAssetEditor::UpdatePhysics(ndFloat32)
-{
-	if (m_runScene)
-	{
-		ndAssert(0);
-		//// update the physics
-		//if (m_world && !m_suspendPhysicsUpdate) 
-		//{
-		//	m_world->AdvanceTime(timestep);
-		//}
-	}
-}
-
 void ndAssetEditor::RenderScene()
 {
 	ndFloat32 timestep = ndGetElapsedSeconds();
@@ -234,8 +218,6 @@ void ndAssetEditor::RenderScene()
 		timestep = 1.0f / 60.0f;
 		ndResetTimer();
 	}
-
-	//UpdatePhysics(timestep);
 
 	m_colorRenderPass->MakeActive(m_renderMode == m_shaded);
 
@@ -483,6 +465,7 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::Separator();
 			ImGui::Checkbox("show node", &m_showSelectedNode);
 			ImGui::Checkbox("show pivot", &m_showPivot);
+			ImGui::Checkbox("show collision pivot", &m_showShapePivot);
 			ImGui::Checkbox("show center of mass", &m_showCenterOfMass);
 			ImGui::Checkbox("show Joints", &m_showJoints);
 			ImGui::Checkbox("show collision", &m_showCollisionShape);
@@ -527,7 +510,6 @@ const ndString& ndAssetEditor::GetPath() const
 
 void ndAssetEditor::SetVisualScene(const ndRenderMeshLoader& loader)
 {
-	//m_undoRedo.Clear();
 	m_newMesh = loader.m_mesh;
 	m_newSceneMesh = loader.m_renderMesh;
 	m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
@@ -548,7 +530,6 @@ void ndAssetEditor::Run()
 				m_renderer->RemoveSceneNode(m_entity);
 				m_entity = ndSharedPtr<ndRenderSceneNode>(nullptr);
 				m_debugDisplayRenderPass->ResetScene();
-				//m_model = ndSharedPtr<ndModel>(nullptr);
 			}
 
 			if (*m_newMesh)
@@ -561,7 +542,6 @@ void ndAssetEditor::Run()
 
 				m_mesh = m_newMesh;
 				m_entity = m_newSceneMesh;
-				//m_model = ndSharedPtr<ndModel>(new ndModelArticulation());
 
 				m_newMesh = ndSharedPtr<ndMesh>(nullptr);
 				m_newSceneMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);
