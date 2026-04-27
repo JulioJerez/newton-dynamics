@@ -280,6 +280,17 @@ void ndDebugDisplayRenderPass::RenderOptions()
 				DrawFrame(pivotMatrix);
 			}
 
+			if (m_manager->m_showShapePivot)
+			{
+				const ndSharedPtr<ndMeshBody>& meshRigidBody = m_manager->m_currentSelection->GetRigidBody();
+				if (meshRigidBody)
+				{
+					ndMeshBodyKinematic* const kinematic = (ndMeshBodyKinematic*)(*meshRigidBody);
+					const ndMatrix shapeMatrix(kinematic->m_shapeInstance.m_localMatrix * pivotMatrix);
+					DrawFrame(shapeMatrix);
+				}
+			}
+
 			if (m_manager->m_showCenterOfMass)
 			{
 				const ndSharedPtr<ndMeshBody>& meshRigidBody = m_manager->m_currentSelection->GetRigidBody();

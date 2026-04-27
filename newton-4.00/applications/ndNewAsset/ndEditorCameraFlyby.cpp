@@ -36,6 +36,20 @@ void ndEditorCameraFlyby::SetTransform(const ndQuaternion& rotation, const ndVec
 	m_posit = position;
 }
 
+void ndEditorCameraFlyby::CalculateCameraMatrix()
+{
+	ndRender* const renderer = GetOwner();
+	ndAssert(renderer);
+
+	const ndMatrix newCameMatrix(ndRollMatrix(m_pitch) * ndYawMatrix(m_yaw));
+	const ndQuaternion newRotation(newCameMatrix);
+	const ndVector newPosit(newCameMatrix.RotateVector(m_posit));
+	ndEditorCameraNode::SetTransform(newRotation, newPosit);
+
+	const ndVector lightDir(newCameMatrix.RotateVector(ndVector(-1.0f, 1.0f, 0.f, 0.0f)));
+	renderer->SetSunLight(lightDir, ndVector(0.7f, 0.7f, 0.7f, 0.0f));
+}
+
 void ndEditorCameraFlyby::TickUpdate(ndFloat32 timestep)
 {
 	ndRender* const renderer = GetOwner();
@@ -73,7 +87,7 @@ void ndEditorCameraFlyby::TickUpdate(ndFloat32 timestep)
 			}
 			m_pitch = ndClamp(m_pitch, ndFloat32(-80.0f * ndDegreeToRad), ndFloat32(80.0f * ndDegreeToRad));
 
-			if (!m_mouseClick)
+			if (!m_mouseClick && !m_editor->m_lockSelection)
 			{
 				MouseSelection();
 				m_mouseClick = true;
@@ -116,14 +130,14 @@ void ndEditorCameraFlyby::TickUpdate(ndFloat32 timestep)
 				m_posit.m_x -= m_frontSpeed * timestep;
 			}
 		}
-
-		const ndMatrix newCameMatrix(ndRollMatrix(m_pitch) * ndYawMatrix(m_yaw));
-		const ndQuaternion newRotation(newCameMatrix);
-		const ndVector newPosit(newCameMatrix.RotateVector(m_posit));
-		ndEditorCameraNode::SetTransform(newRotation, newPosit);
-
-		const ndVector lightDir(newCameMatrix.RotateVector(ndVector(-1.0f, 1.0f, 0.f, 0.0f)));
-		renderer->SetSunLight(lightDir, ndVector(0.7f, 0.7f, 0.7f, 0.0f));
+		//const ndMatrix newCameMatrix(ndRollMatrix(m_pitch) * ndYawMatrix(m_yaw));
+		//const ndQuaternion newRotation(newCameMatrix);
+		//const ndVector newPosit(newCameMatrix.RotateVector(m_posit));
+		//ndEditorCameraNode::SetTransform(newRotation, newPosit);
+		//
+		//const ndVector lightDir(newCameMatrix.RotateVector(ndVector(-1.0f, 1.0f, 0.f, 0.0f)));
+		//renderer->SetSunLight(lightDir, ndVector(0.7f, 0.7f, 0.7f, 0.0f));
+		CalculateCameraMatrix();
 	}
 	else
 	{
@@ -174,5 +188,47 @@ void ndEditorCameraFlyby::MouseSelection()
 		m_editor->m_currentSelection = hitNode;
 		m_editor->m_currentLoopJointSelection = ndSharedPtr<ndMeshLoopJoint>(nullptr);
 		m_editor->m_currentCollingPairSelection = ndSharedPtr<ndMeshCollidingPair>(nullptr);
+	}
+}
+
+void ndEditorCameraFlyby::SetView(ndAssetEditor::ndCameraMode mode)
+{
+	switch (mode)
+	{
+		case ndAssetEditor::m_backView:
+		{
+			m_pitch = 0.0f;
+			m_yaw = 0.0f * ndDegreeToRad;
+			CalculateCameraMatrix();
+			break;
+		}
+
+		case ndAssetEditor::m_frontView:
+		{
+			m_pitch = 0.0f;
+			m_yaw = 180.0f * ndDegreeToRad;
+			CalculateCameraMatrix();
+			break;
+		}
+
+		case ndAssetEditor::m_sideLeftView:
+		{
+			m_pitch = 0.0f;
+			m_yaw = 90.0f * ndDegreeToRad;
+			CalculateCameraMatrix();
+			break;
+		}
+
+		case ndAssetEditor::m_sideRrightView:
+		{
+			m_pitch = 0.0f;
+			m_yaw = -90.0f * ndDegreeToRad;
+			CalculateCameraMatrix();
+			break;
+		}
+
+		case ndAssetEditor::m_free:
+		default:;
+			// do nothing
 	}
 }

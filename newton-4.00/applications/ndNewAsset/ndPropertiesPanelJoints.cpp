@@ -55,7 +55,7 @@ class ndUndoRedoStructuralJoint : public ndUndoRedoCommand
 	ndSharedPtr<ndMeshJoint> m_joint;
 };
 
-void ndAssetEditor::ShowJointGlobalMatrix()
+void ndAssetEditor::EditJointGlobalMatrix()
 {
 	ndSharedPtr<ndMeshJoint> joint(m_currentSelection->GetJoint());
 
@@ -207,40 +207,40 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 
 		if (strcmp(joint->m_constructor.GetStr(), ndJointFix6dof::StaticClassName()) == 0)
 		{
-			JointsEditFix6dof();
+			EditFix6dofJoint();
 
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointHinge::StaticClassName()) == 0)
 		{
-			JointsEditHingeJoint();
+			EditHingeJoint();
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointSlider::StaticClassName()) == 0)
 		{
-			JointsEditSliderJoint();
+			EditSliderJoint();
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointPlane::StaticClassName()) == 0)
 		{
-			JointsEditPlaneJoint();
+			EditPlaneJoint();
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointRoller::StaticClassName()) == 0)
 		{
-			JointsEditRollerJoint();
+			EditRollerJoint();
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointCylinder::StaticClassName()) == 0)
 		{
-			JointsEditCylinderJoint();
+			EditCylinderJoint();
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointDoubleHinge::StaticClassName()) == 0)
 		{
-			JointsEditDoubleHingeJoint();
+			EditDoubleHingeJoint();
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointWheel::StaticClassName()) == 0)
 		{
-			JointsEditWheelJoint();
+			EditWheelJoint();
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointSpherical::StaticClassName()) == 0)
 		{
-			JointsEditSpherical();
+			EditSphericalJoint();
 		}
 		else
 		{
@@ -249,9 +249,9 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 	}
 }
 
-void ndAssetEditor::JointsEditFix6dof()
+void ndAssetEditor::EditFix6dofJoint()
 {
-	ShowLoopJointGlobalMatrix();
+	EditLoopJointGlobalMatrix();
 
 	ndMeshJointFix6dof* const joint = (ndMeshJointFix6dof*)*m_currentSelection->GetJoint();
 
@@ -280,9 +280,9 @@ void ndAssetEditor::JointsEditFix6dof()
 	}
 }
 
-void ndAssetEditor::JointsEditHingeJoint()
+void ndAssetEditor::EditHingeJoint()
 {
-	ShowJointGlobalMatrix();
+	EditJointGlobalMatrix();
 
 	ndMeshJointHinge* const joint = (ndMeshJointHinge*)*m_currentSelection->GetJoint();
 
@@ -355,9 +355,9 @@ void ndAssetEditor::JointsEditHingeJoint()
 	}
 }
 
-void ndAssetEditor::JointsEditSliderJoint()
+void ndAssetEditor::EditSliderJoint()
 {
-	ShowJointGlobalMatrix();
+	EditJointGlobalMatrix();
 
 	ndMeshJointSlider* const joint = (ndMeshJointSlider*)*m_currentSelection->GetJoint();
 
@@ -430,9 +430,9 @@ void ndAssetEditor::JointsEditSliderJoint()
 	}
 }
 
-void ndAssetEditor::JointsEditPlaneJoint()
+void ndAssetEditor::EditPlaneJoint()
 {
-	ShowLoopJointGlobalMatrix();
+	EditLoopJointGlobalMatrix();
 
 	ndMeshJointPlane* const joint = (ndMeshJointPlane*)*m_currentSelection->GetJoint();
 
@@ -464,9 +464,9 @@ void ndAssetEditor::JointsEditPlaneJoint()
 	}
 }
 
-void ndAssetEditor::JointsEditRollerJoint()
+void ndAssetEditor::EditRollerJoint()
 {
-	ShowLoopJointGlobalMatrix();
+	EditLoopJointGlobalMatrix();
 
 	ndMeshJointRoller* const joint = (ndMeshJointRoller*)*m_currentSelection->GetJoint();
 	{
@@ -610,9 +610,9 @@ void ndAssetEditor::JointsEditRollerJoint()
 	}
 }
 
-void ndAssetEditor::JointsEditCylinderJoint()
+void ndAssetEditor::EditCylinderJoint()
 {
-	ShowLoopJointGlobalMatrix();
+	EditLoopJointGlobalMatrix();
 
 	ndMeshJointCylinder* const joint = (ndMeshJointCylinder*)*m_currentSelection->GetJoint();
 	{
@@ -756,9 +756,9 @@ void ndAssetEditor::JointsEditCylinderJoint()
 	}
 }
 
-void ndAssetEditor::JointsEditDoubleHingeJoint()
+void ndAssetEditor::EditDoubleHingeJoint()
 {
-	ShowLoopJointGlobalMatrix();
+	EditLoopJointGlobalMatrix();
 
 	ndMeshJointDoubleHinge* const joint = (ndMeshJointDoubleHinge*)*m_currentSelection->GetJoint();
 	{
@@ -902,9 +902,9 @@ void ndAssetEditor::JointsEditDoubleHingeJoint()
 	}
 }
 
-void ndAssetEditor::JointsEditWheelJoint()
+void ndAssetEditor::EditWheelJoint()
 {
-	ShowLoopJointGlobalMatrix();
+	EditLoopJointGlobalMatrix();
 
 	ndMeshJointWheel* const joint = (ndMeshJointWheel*)*m_currentSelection->GetJoint();
 
@@ -971,9 +971,9 @@ void ndAssetEditor::JointsEditWheelJoint()
 	}
 }
 
-void ndAssetEditor::JointsEditSpherical()
+void ndAssetEditor::EditSphericalJoint()
 {
-	ShowLoopJointGlobalMatrix();
+	EditLoopJointGlobalMatrix();
 
 	ndMeshJointSpherical* const joint = (ndMeshJointSpherical*)*m_currentSelection->GetJoint();
 

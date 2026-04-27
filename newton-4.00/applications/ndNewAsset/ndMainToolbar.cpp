@@ -12,6 +12,7 @@
 #include "ndNewAssetStdafx.h"
 #include "ndUndoRedo.h"
 #include "ndAssetEditor.h"
+#include "ndEditorCameraFlyby.h"
 
 void ndAssetEditor::ShowMainToolbar()
 {
@@ -28,19 +29,51 @@ void ndAssetEditor::ShowMainToolbar()
 	}
 
 	ImGui::SameLine();
-	if (m_runScene)
+	if (m_lockSelection)
 	{
-		if (ImGui::Button("stop"))
+		if (ImGui::Button("unlock selection"))
 		{
-			m_runScene = false;
+			m_lockSelection = false;
 		}
 	}
 	else
 	{
-		if (ImGui::Button("run"))
+		if (ImGui::Button("lock Selection"))
 		{
-			m_runScene = true;
+			m_lockSelection = true;
 		}
+	}
+
+	ImGui::SameLine();
+	struct Names
+	{
+		ndCameraMode m_mode;
+		const char* m_label;
+	};
+	Names names[] = 
+	{
+		{m_free, "free camera" },
+		{m_backView, "back view" },
+		{m_frontView, "front view" },
+		{m_sideLeftView, "left side view" },
+		{m_sideRrightView, "right side view" },
+	};
+
+	static int xxxx = 0;
+	if (ImGui::BeginCombo(" ##1", names[xxxx].m_label, ImGuiComboFlags_MaxSize, 160))
+	{
+		for (ndInt32 i = 0; i < ndInt32 (sizeof(names) / sizeof(names[0])); ++i)
+		{
+			bool isSelected = strcmp(names[i].m_label, names[xxxx].m_label) ? false : true;
+			if (ImGui::Selectable(names[i].m_label, isSelected))
+			{
+				xxxx = i;
+				ndEditorCameraFlyby* const camera = (ndEditorCameraFlyby*)*m_defaultCamera;
+				camera->SetView(names[i].m_mode);
+			}
+		}
+	
+		ImGui::EndCombo();
 	}
 
 	ImGui::End();
