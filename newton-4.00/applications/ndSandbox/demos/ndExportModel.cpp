@@ -1015,7 +1015,7 @@ namespace ndExcavator
     {
         ndModelArticulation::ndNode* const rootNode = articulation->GetRoot();
 
-        ndSharedPtr<ndBody> cabinBody(MakeBodyPart(mesh, "EngineBody", 400.0f));
+        ndSharedPtr<ndBody> cabinBody(MakeBodyPart(mesh, "engineBody", 400.0f));
 
         // set the center of mass of engine
         const ndMatrix hingeFrame(cabinBody->GetMatrix());
@@ -1024,16 +1024,16 @@ namespace ndExcavator
 
         ndSharedPtr<ndJointBilateralConstraint> cabinPivot(new ndJointHinge(hingeFrame, cabinBody->GetAsBodyDynamic(), rootNode->m_body->GetAsBodyDynamic()));
         ndModelArticulation::ndNode* const cabinNode = articulation->AddLimb(rootNode, cabinBody, cabinPivot);
-        cabinNode->m_name = "EngineBody";
+        cabinNode->m_name = "engineBody";
 
-        // add arm0.
-        ndSharedPtr<ndBody> bodyArm0(MakeBodyPart(mesh, "Boom", 50.0f));
+        // add arm01.
+        ndSharedPtr<ndBody> bodyArm0(MakeBodyPart(mesh, "arm01", 50.0f));
         const ndMatrix matrixArm0(ndYawMatrix(ndFloat32(90.0f) * ndDegreeToRad) * bodyArm0->GetMatrix());
         ndSharedPtr<ndJointBilateralConstraint> jointArm0(new ndJointHinge(matrixArm0, bodyArm0->GetAsBodyDynamic(), cabinBody->GetAsBodyDynamic()));
         ndModelArticulation::ndNode* const armNode0 = articulation->AddLimb(cabinNode, bodyArm0, jointArm0);
-        armNode0->m_name = "Boom";
+        armNode0->m_name = "arm01";
         
-        // add arm1.
+        // add arm01.
         ndSharedPtr<ndBody> bodyArm1(MakeBodyPart(mesh, "arm02", 50.0f));
         const ndMatrix matrixArm1(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * bodyArm1->GetMatrix());
         ndSharedPtr<ndJointBilateralConstraint> jointArm1(new ndJointHinge(matrixArm1, bodyArm1->GetAsBodyDynamic(), bodyArm0->GetAsBodyDynamic()));
@@ -1341,7 +1341,7 @@ namespace ndExcavator
         ndFixSizeArray<ndModelArticulation::ndNode*, 256> rightTrack(MakeRightTrack(excavator, loader.m_mesh));
         MakeThread(excavator, "rightThread", loader.m_mesh, rightTrack);
         
-        // conver th emodel to and ndMesh      
+        // convert this physics model model to a ndMesh      
         excavator->GetAsModelArticulation()->Serialize(*loader.m_mesh);
 
         // save the model as ndMesh
@@ -1363,7 +1363,7 @@ void ndExportModel(ndDemoEntityManager* const scene)
     origin.m_posit.m_y = 3.0f;
     origin.m_posit.m_z = 2.0f;
     //add simple mechanical model
-    ndBoxTricycle::BoxTricycle(scene, origin, 100.0f, 0.75f);
+    //ndBoxTricycle::BoxTricycle(scene, origin, 100.0f, 0.75f);
 
     // add complex mechanical model
     origin.m_posit.m_x += 10.0f;
@@ -1371,11 +1371,11 @@ void ndExportModel(ndDemoEntityManager* const scene)
 
     // add basic ragdoll
     origin.m_posit.m_z += 5.0f;
-    ndBasicRagdoll::RagDoll(scene, origin);
+    //ndBasicRagdoll::RagDoll(scene, origin);
 
     // add Dave Gravel rag doll with end effectors
     origin.m_posit.m_z += -10.0f;
-    ndDaveRagdoll::RagDoll(scene, origin);
+    //ndDaveRagdoll::RagDoll(scene, origin);
 
     ndQuaternion rot;
     origin.m_posit.m_x = -15.0f;
