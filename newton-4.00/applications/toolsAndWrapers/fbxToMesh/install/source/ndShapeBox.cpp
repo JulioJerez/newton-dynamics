@@ -25,7 +25,7 @@
 #include "ndContact.h"
 #include "ndShapeBox.h"
 #include "ndContactSolver.h"
-#include "ndMeshComponents.h"
+#include "ndMeshBaseComponents.h"
 
 ndInt32 ndShapeBox::m_initSimplex = 0;
 ndShapeConvex::ndConvexSimplexEdge ndShapeBox::m_edgeArray[24];

@@ -25,7 +25,7 @@
 #include "ndMesh.h"
 #include "ndContact.h"
 #include "ndBodyNotify.h"
-#include "ndMeshComponents.h"
+#include "ndMeshBaseComponents.h"
 
 ndUnsigned32 ndBody::m_uniqueIdCount = 0;
 
@@ -220,7 +220,7 @@ void ndBody::SetMatrix(const ndMatrix& matrix)
 
 void ndBody::Serialize(ndMesh* const node) const
 {
-	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBody());
+	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBody(node));
 	node->SetRigidBody(meshBody);
 	Serialize(meshBody);
 	meshBody->m_classConstructor = ndString(ClassName());

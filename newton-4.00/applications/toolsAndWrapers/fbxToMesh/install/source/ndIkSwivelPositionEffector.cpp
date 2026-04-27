@@ -11,6 +11,7 @@
 
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
+#include "ndMeshComponents.h"
 #include "ndSkeletonContainer.h"
 #include "ndIkSwivelPositionEffector.h"
 
@@ -363,7 +364,7 @@ void ndIkSwivelPositionEffector::DebugJoint(ndConstraintDebugCallback& debugCall
 	CalculateGlobalMatrix(matrix0, matrix1);
 
 	//debugCallback.DrawFrame(matrix0);
-	//debugCallback.DrawFrame(matrix1);
+	debugCallback.DrawFrame(matrix1);
 
 	debugCallback.DrawLine(matrix0.m_posit, matrix1.m_posit, ndVector(ndFloat32(0.89f), ndFloat32(0.70f), ndFloat32(0.13f), ndFloat32(1.0f)));
 	
@@ -453,4 +454,10 @@ void ndIkSwivelPositionEffector::JacobianDerivative(ndConstraintDescritor& desc)
 	{
 		SubmitLinearAxis(desc, matrix0, matrix1);
 	}
+}
+
+ndSharedPtr<ndMeshJoint> ndIkSwivelPositionEffector::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointIkSwivelPositionEffector* const joint = new ndMeshJointIkSwivelPositionEffector(owner, this);
+	return ndSharedPtr<ndMeshJoint>(joint);
 }

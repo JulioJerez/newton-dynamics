@@ -525,15 +525,37 @@ ndInt32 ndString::Find (char ch, ndInt32 from) const
 	return -1;
 }
 
-//dInt32 ndString::Find (const ndString& subStream, dInt32 from) const
+ndInt32 ndString::Compare(const char* const str0, const char* const str1) const
+{
+	if (str0 && str1)
+	{
+		return strcmp(str0, str1);
+	}
+	else if (str0)
+	{
+		return 1;
+	}
+	else if (str1)
+	{
+		return -1;
+	}
+	return 0;
+}
+
+bool ndString::CompareIgnoreCase(const ndString& other) const
+{
+	if (GetStr() && other.GetStr())
+	{
+		return _stricmp(GetStr(), other.GetStr()) ? false : true;
+	}
+	return false;
+}
+
 ndInt32 ndString::Find (const char* const subString, ndInt32 subStringLength, ndInt32 from, ndInt32 lenght) const
 {
 	ndAssert (from >= 0);
-	//ndAssert (subStream.m_size >= 0);
-	ndAssert (subStringLength >= 1);
-
 	ndInt32 location = -1;
-	if (m_size) 
+	if (m_size && (subStringLength >= 1))
 	{
 		const ndInt32 str2Size = ndMin (subStringLength, lenght);
 		if (str2Size == 1) 
@@ -595,7 +617,6 @@ ndInt32 ndString::Find (const char* const subString, ndInt32 subStringLength, nd
 	}
 	return location;
 }
-
 
 void ndString::Replace (ndInt32 start, ndInt32 size, const char* const str, ndInt32 strSize)
 {
@@ -716,3 +737,30 @@ ndInt32 ndString::Distance(const ndString& other) const
 	
 	return currRow[n];
 }
+
+
+ndString ndGetPath(const ndString& fullPathName)
+{
+	const char* ptr = strrchr(fullPathName.GetStr(), '/');
+	if (!ptr)
+	{
+		ptr = strrchr(fullPathName.GetStr(), '\\');
+	}
+	return ndString(fullPathName.GetStr(), ndInt32(fullPathName.Size() - strlen(ptr + 1)));
+}
+
+ndString ndGetName(const ndString& fullPathName)
+{
+	const char* ptr1 = strrchr(fullPathName.GetStr(), '.');
+	const char* ptr0 = strrchr(fullPathName.GetStr(), '/');
+	if (!ptr0)
+	{
+		ptr0 = strrchr(fullPathName.GetStr(), '\\');
+	}
+	ndAssert(ptr0);
+	ndAssert(ptr1);
+	ndInt32 start = ndInt32(fullPathName.Size() - strlen(ptr0 + 1));
+	ndInt32 end = ndInt32(fullPathName.Size() - strlen(ptr1));
+	return fullPathName.SubString(start, end - start);
+}
+

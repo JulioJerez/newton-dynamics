@@ -408,7 +408,7 @@ ndMesh* ndMesh::FindByName(const ndString& name) const
 	ndMesh* const self = (ndMesh*)this;
 	for (ndMesh* node = self->IteratorFirst(); node; node = node->IteratorNext(self))
 	{
-		if (name == node->m_name)
+		if (name.CompareIgnoreCase(node->m_name))
 		{
 			return node;
 		}

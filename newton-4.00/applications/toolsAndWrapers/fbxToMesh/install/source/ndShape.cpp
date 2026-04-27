@@ -23,7 +23,7 @@
 #include "ndCollisionStdafx.h"
 #include "ndMesh.h"
 #include "ndShape.h"
-#include "ndMeshComponents.h"
+#include "ndMeshBaseComponents.h"
 
 ndVector ndShape::m_flushZero(ndFloat32(1.0e-7f));
 
@@ -181,7 +181,5 @@ ndInt32 ndShape::GetRefCount() const
 
 ndSharedPtr<ndMeshCollisionShape> ndShape::GetMeshShape() const
 {
-	ndExpandTraceMessage("serialize class: %s not Implemented", ClassName());
-	ndAssert(0);
 	return ndSharedPtr<ndMeshCollisionShape> (new ndMeshCollisionShapeNull());
 }

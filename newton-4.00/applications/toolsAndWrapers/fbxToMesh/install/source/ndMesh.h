@@ -28,7 +28,10 @@ class ndMeshBody;
 class ndMeshJoint;
 class ndMeshEffect;
 class ndShapeInstance;
+class ndMeshLoopJoint;
+class ndCollidingPairs;
 class ndMeshShapeInstance;
+class ndCloseLoopConstraints;
 
 class ndMesh : public ndClassAlloc
 {
@@ -74,7 +77,7 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API ndMesh(const ndShapeInstance& src, ndUvMapingMode mapping = m_box);
 
 	D_NEWTON_API virtual ~ndMesh();
-	D_NEWTON_API ndMesh* CreateClone() const;
+	D_NEWTON_API virtual ndMesh* CreateClone() const;
 
 	ndMatrix GetMatrix() const;
 	void SetMatrix(const ndMatrix& matrix);
@@ -97,18 +100,36 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API ndMesh* FindByName(const ndString& name) const;
 	D_NEWTON_API ndMesh* FindByClosestMatch(const ndString& name) const;
 
+	D_NEWTON_API ndMesh* GetRoot();
+	D_NEWTON_API const ndMesh* GetRoot() const;
 	D_NEWTON_API ndSharedPtr<ndMesh> GetSharedPtr() const;
 
-	D_NEWTON_API ndSharedPtr<ndMeshEffect>& GetMesh();
-	D_NEWTON_API const ndSharedPtr<ndMeshEffect>& GetMesh() const;
-	D_NEWTON_API void SetMesh(const ndSharedPtr<ndMeshEffect>& mesh);
+	D_NEWTON_API ndSharedPtr<ndMeshEffect>& GetGeometry();
+	D_NEWTON_API const ndSharedPtr<ndMeshEffect>& GetGeometry() const;
+	D_NEWTON_API void SetGeometry(const ndSharedPtr<ndMeshEffect>& mesh);
 
-	D_NEWTON_API ndSharedPtr<ndMeshBody> GetRigidBody() const;
+	D_NEWTON_API ndSharedPtr<ndMeshBody>& GetRigidBody();
+	D_NEWTON_API const ndSharedPtr<ndMeshBody>& GetRigidBody() const;
 	D_NEWTON_API void SetRigidBody(ndSharedPtr<ndMeshBody>& rigidBody);
 
 	D_NEWTON_API ndSharedPtr<ndMeshJoint>& GetJoint();
 	D_NEWTON_API const ndSharedPtr<ndMeshJoint>& GetJoint() const;
-	D_NEWTON_API void SetJoint(const ndSharedPtr<ndMeshJoint>& primitive);
+	D_NEWTON_API void SetJoint(const ndSharedPtr<ndMeshJoint>& joint);
+
+	D_NEWTON_API virtual ndMesh* GetAsMesh();
+	D_NEWTON_API virtual const ndMesh* GetAsMesh() const;
+	D_NEWTON_API virtual ndCollidingPairs* GetAsCollidingPairs();
+	D_NEWTON_API virtual const ndCollidingPairs* GetAsCollidingPairs() const;
+	D_NEWTON_API virtual ndCloseLoopConstraints* GetAsCloseLoopConstraints();
+	D_NEWTON_API virtual const ndCloseLoopConstraints* GetAsCloseLoopConstraints() const;
+
+	D_NEWTON_API ndCloseLoopConstraints* GetLoopJoints();
+	D_NEWTON_API const ndCloseLoopConstraints* GetLoopJoints() const;
+	D_NEWTON_API void AddLoopJoint(const ndSharedPtr<ndMeshLoopJoint>& joint);
+
+	D_NEWTON_API ndCollidingPairs* GetCollingPairs();
+	D_NEWTON_API const ndCollidingPairs* GetCollingPairs() const;
+	D_NEWTON_API void AddCollidingPair(const ndMesh* const node0, const ndMesh* const node1);
 
 	D_NEWTON_API const ndString& GetName() const;
 	D_NEWTON_API void SetName(const ndString& name);
@@ -129,6 +150,7 @@ class ndMesh : public ndClassAlloc
 
 	D_NEWTON_API void ApplyTransform(const ndMatrix& transform);
 	D_NEWTON_API ndMatrix CalculateGlobalMatrix(ndMesh* const parent = nullptr) const;
+	D_NEWTON_API void CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) const;
 
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollision();
 	D_NEWTON_API ndSharedPtr<ndJointBilateralConstraint> CreateJoint();
@@ -136,15 +158,21 @@ class ndMesh : public ndClassAlloc
 
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionBox();
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionTire();
+	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionNull();
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionSphere();
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionConvex();
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionCapsule();
+	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionCylinder();
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionChamferCylinder();
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionTree(bool optimize = true);
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionConvexApproximation(bool lowDetail = false);
 
+	D_NEWTON_API ndSharedPtr<ndMeshJoint> LoadJoint(const nd::TiXmlElement* const xmlJoint) const;
+
 	template <typename Function>
 	void NodeIterator(Function func);
+
+
 
 	protected:
 	ndMatrix CalculateLocalMatrix(ndVector& size) const;
@@ -205,6 +233,34 @@ void ndMesh::NodeIterator(Function func)
 		}
 	}
 }
+
+class ndCloseLoopConstraints: public ndMesh
+{
+	public:
+	D_NEWTON_API ndCloseLoopConstraints();
+	D_NEWTON_API ndCloseLoopConstraints(const ndMesh& src);
+
+	D_NEWTON_API virtual ndCloseLoopConstraints* GetAsCloseLoopConstraints() override;
+	D_NEWTON_API virtual const ndCloseLoopConstraints* GetAsCloseLoopConstraints() const override;
+
+	D_NEWTON_API ndMesh* CreateClone() const override;
+
+	ndList<ndSharedPtr<ndMeshLoopJoint>> m_loopJoints;
+};
+
+class ndCollidingPairs : public ndMesh
+{
+	public:
+	D_NEWTON_API ndCollidingPairs();
+	D_NEWTON_API ndCollidingPairs(const ndMesh& src);
+
+	D_NEWTON_API virtual ndCollidingPairs* GetAsCollidingPairs() override;
+	D_NEWTON_API virtual const ndCollidingPairs* GetAsCollidingPairs() const override;
+
+	D_NEWTON_API ndMesh* CreateClone() const override;
+
+	ndList<ndSharedPtr<ndMeshCollidingPair>> m_collingPairs;
+};
 
 #endif
 

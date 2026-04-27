@@ -15,28 +15,11 @@
 #include "ndNewtonStdafx.h"
 #include "ndJointBilateralConstraint.h"
 
-#define D_MAX_DOUBLE_HINGE_RECOVERY_SPEED	ndFloat32 (0.25f)
-#define D_MAX_DOUBLE_HINGE_PENETRATION		(ndFloat32 (4.0f) * ndDegreeToRad)
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndJointDoubleHinge: public ndJointBilateralConstraint
 {
 	public:
-	class ndAxisParam
-	{
-		public:
-		ndAxisParam();
-		ndFloat32 m_angle;
-		ndFloat32 m_omega;
-		ndFloat32 m_springK;
-		ndFloat32 m_damperC;
-		ndFloat32 m_minLimit;
-		ndFloat32 m_maxLimit;
-		ndFloat32 m_offsetAngle;
-		ndFloat32 m_springDamperRegularizer;
-		ndInt8 m_limitState;
-	};
-
 	D_CLASS_REFLECTION(ndJointDoubleHinge, ndJointBilateralConstraint)
 
 	D_NEWTON_API ndJointDoubleHinge();
@@ -46,23 +29,23 @@ class ndJointDoubleHinge: public ndJointBilateralConstraint
 
 	D_NEWTON_API ndFloat32 GetAngle0() const;
 	D_NEWTON_API ndFloat32 GetOmega0() const;
-	D_NEWTON_API ndFloat32 GetOffsetAngle0() const;
-	D_NEWTON_API void SetOffsetAngle0(ndFloat32 angle);
+	D_NEWTON_API ndFloat32 GetTargetAngle0() const;
+	D_NEWTON_API void SetTargetAngle0(ndFloat32 angle);
 	D_NEWTON_API bool GetLimitState0() const;
 	D_NEWTON_API void SetLimitState0(bool state);
 	D_NEWTON_API void SetLimits0(ndFloat32 minLimit, ndFloat32 maxLimit);
-	D_NEWTON_API void GetLimits0(ndFloat32& minLimit, ndFloat32& maxLimit);
+	D_NEWTON_API void GetLimits0(ndFloat32& minLimit, ndFloat32& maxLimit) const;
 	D_NEWTON_API void SetAsSpringDamper0(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper);
 	D_NEWTON_API void GetSpringDamper0(ndFloat32& regularizer, ndFloat32& spring, ndFloat32& damper) const;
 
 	D_NEWTON_API ndFloat32 GetAngle1() const;
 	D_NEWTON_API ndFloat32 GetOmega1() const;
-	D_NEWTON_API ndFloat32 GetOffsetAngle1() const;
-	D_NEWTON_API void SetOffsetAngle1(ndFloat32 angle);
+	D_NEWTON_API ndFloat32 GetTargetAngle1() const;
+	D_NEWTON_API void SetTargetAngle1(ndFloat32 angle);
 	D_NEWTON_API bool GetLimitState1() const;
 	D_NEWTON_API void SetLimitState1(bool state);
 	D_NEWTON_API void SetLimits1(ndFloat32 minLimit, ndFloat32 maxLimit);
-	D_NEWTON_API void GetLimits1(ndFloat32& minLimit, ndFloat32& maxLimit);
+	D_NEWTON_API void GetLimits1(ndFloat32& minLimit, ndFloat32& maxLimit) const;
 	D_NEWTON_API void SetAsSpringDamper1(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper);
 	D_NEWTON_API void GetSpringDamper1(ndFloat32& regularizer, ndFloat32& spring, ndFloat32& damper) const;
 	D_NEWTON_API void ClearMemory() override;
@@ -78,7 +61,7 @@ class ndJointDoubleHinge: public ndJointBilateralConstraint
 	D_NEWTON_API void SubmitSpringDamper0(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 	D_NEWTON_API void SubmitSpringDamper1(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 
-	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const override;
+	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
 	ndAxisParam m_axis0;
 	ndAxisParam m_axis1;

@@ -30,7 +30,7 @@
 #include "ndRayCastNotify.h"
 #include "ndBodyKinematic.h"
 #include "ndShapeCompound.h"
-#include "ndMeshComponents.h"
+#include "ndMeshBaseComponents.h"
 #include "ndJointBilateralConstraint.h"
 
 #define D_MINIMUM_MASS	ndFloat32(1.0e-5f)
@@ -546,7 +546,7 @@ ndBodyKinematic::ndJointList::ndNode* ndBodyKinematic::AttachJoint(ndJointBilate
 		test = test && bodyJoint->IsActive();
 		if (test)
 		{
-			ndTrace(("warning body %d and body %d already connected by a biletaral joint\n", body0->GetId(), body1->GetId()));
+			ndTrace(("warning body %d and body %d already connected by a bileteral joint\n", body0->GetId(), body1->GetId()));
 			ndAssert(0);
 		}
 	}
@@ -572,15 +572,16 @@ void ndBodyKinematic::DetachJoint(ndJointList::ndNode* const node)
 void ndBodyKinematic::SetMassMatrix(ndFloat32 mass, const ndShapeInstance& shapeInstance, bool fullInertia)
 {
 	ndMatrix inertia(shapeInstance.CalculateInertia());
-
 	ndVector origin(inertia.m_posit);
+	SetCentreOfMass(origin);
+
+	ndMatrix diagMass(ndGetIdentityMatrix());
 	for (ndInt32 i = 0; i < 3; ++i)
 	{
-		inertia[i] = inertia[i].Scale(mass);
+		//inertia[i] = inertia[i].Scale(mass);
+		diagMass[i][i] = mass;
 	}
-
-	// although the engine fully supports asymmetric inertia, I will ignore cross inertia for now
-	SetCentreOfMass(origin);
+	inertia = diagMass * inertia;
 
 	if (!fullInertia)
 	{
@@ -591,6 +592,7 @@ void ndBodyKinematic::SetMassMatrix(ndFloat32 mass, const ndShapeInstance& shape
 		inertia[1][1] = eigenValues[1];
 		inertia[2][2] = eigenValues[2];
 	}
+
 	SetMassMatrix(mass, inertia);
 }
 
@@ -1073,7 +1075,7 @@ void ndBodyKinematic::InitSurrogateBody(ndBodyKinematic* const surrogate) const
 
 void ndBodyKinematic::Serialize(ndMesh* const node) const
 {
-	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBodyKinematic());
+	ndSharedPtr<ndMeshBody> meshBody(new ndMeshBodyKinematic(node));
 	node->SetRigidBody(meshBody);
 	Serialize(meshBody);
 	meshBody->m_classConstructor = ndString(ClassName());
@@ -1094,26 +1096,35 @@ void ndBodyKinematic::SaveNdMesh(const char* const path) const
 void ndBodyKinematic::Serialize(ndSharedPtr<ndMeshBody>& meshBody) const
 {
 	ndBody::Serialize(meshBody);
-	ndMeshBodyKinematic* const kinematicMeshBody = (ndMeshBodyKinematic*)*meshBody;
-	kinematicMeshBody->m_invMass = m_invMass;
-	kinematicMeshBody->m_inertiaPrincipalAxis = m_inertiaPrincipalAxis;
-	kinematicMeshBody->m_maxLinearStep = m_maxLinearStep;
-	kinematicMeshBody->m_maxAngleStep = m_maxAngleStep * ndRadToDegree;
-	m_shapeInstance.Serialize(&kinematicMeshBody->m_shapeInstance);
+	ndMeshBodyKinematic* const meshKinematicBody = (ndMeshBodyKinematic*)*meshBody;
+	meshKinematicBody->m_invMass = m_invMass;
+	ndVector euler;
+	ndVector axisOfInertia(m_inertiaPrincipalAxis.CalcPitchYawRoll(euler));
+
+	meshKinematicBody->m_inertiaPrincipalAxis = axisOfInertia.Scale(ndRadToDegree);
+	meshKinematicBody->m_maxLinearStep = m_maxLinearStep;
+	meshKinematicBody->m_maxAngleStep = m_maxAngleStep * ndRadToDegree;
+	m_shapeInstance.Serialize(&meshKinematicBody->m_shapeInstance);
 }
 
 void ndBodyKinematic::Deserialize(const ndMeshBody* const meshBody)
 {
 	ndBody::Deserialize(meshBody);
-
+	
 	ndMeshBodyKinematic* const kinematic = (ndMeshBodyKinematic*)meshBody;
+
+	ndAssert(meshBody->m_owner);
+	const ndMatrix matrix(meshBody->m_owner->CalculateGlobalMatrix());
+	SetMatrix(matrix);
+
 	const ndVector massMatrix (kinematic->m_invMass.Reciproc());
 	SetMassMatrix(massMatrix);
 
 	ndSharedPtr<ndShapeInstance> instance (kinematic->m_shapeInstance.CreateObject());
 	SetCollisionShape(**instance);
 
-	m_inertiaPrincipalAxis = kinematic->m_inertiaPrincipalAxis;
+	ndVector euler (kinematic->m_inertiaPrincipalAxis.Scale(ndDegreeToRad));
+	m_inertiaPrincipalAxis = ndPitchMatrix(euler.m_x) * ndYawMatrix(euler.m_y) * ndRollMatrix(euler.m_z);
 	m_maxLinearStep = kinematic->m_maxLinearStep;
 	m_maxAngleStep = kinematic->m_maxAngleStep * ndDegreeToRad;
 }

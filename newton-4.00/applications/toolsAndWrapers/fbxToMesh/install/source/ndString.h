@@ -16,6 +16,10 @@
 #include "ndCoreStdafx.h"
 #include "ndClassAlloc.h"
 
+class ndString;
+D_CORE_API ndString ndGetPath(const ndString& fullPathName);
+D_CORE_API ndString ndGetName(const ndString& fullPathName);
+
 class ndString: public ndClassAlloc
 {
 	class ndStringAllocator;
@@ -71,12 +75,15 @@ class ndString: public ndClassAlloc
 	D_CORE_API void LoadFile (FILE* const file);
 	ndString SubString(ndInt32 start = 0, ndInt32 size = 0x7fffffff) const;
 
+	D_CORE_API bool CompareIgnoreCase(const ndString& other) const;
+
 	const char* GetStr () const;
 
 	private:
 	D_CORE_API ndInt32 CalculateSize (const char* const data) const;
-	ndInt32 Compare (const char* const str0, const char* const str1) const;
-	void CopyBuffer (char* const dst, const char* const src, ndInt32 size) const;
+	D_CORE_API ndInt32 Compare (const char* const str0, const char* const str1) const;
+	D_CORE_API void CopyBuffer (char* const dst, const char* const src, ndInt32 size) const;
+
 
 	D_CORE_API ndInt32 Find (const char* const subString, ndInt32 stringSize, ndInt32 from, ndInt32 lenght) const;
 
@@ -160,23 +167,6 @@ inline void ndString::CopyBuffer (char* const dst, const char* const src, ndInt3
 	ndAssert (dst);
 	ndAssert (src);
 	memcpy (dst, src, size_t(size));
-}
-
-inline ndInt32 ndString::Compare (const char* const str0, const char* const str1) const
-{
-	if (str0 && str1)
-	{
-		return strcmp(str0, str1);
-	}
-	else if (str0)
-	{
-		return 1;
-	} 
-	else if (str1)
-	{
-		return -1;
-	}
-	return 0;
 }
 
 inline bool ndString::operator== (const ndString& src) const

@@ -479,16 +479,16 @@ void ndBodyPlayerCapsule::ResolveInterpenetrations(ndBodyPlayerCapsuleContactSol
 	for (ndInt32 j = 0; (j < 8) && (penetration > D_MAX_COLLISION_PENETRATION); ++j) 
 	{
 		SetVelocity(ndVector::m_zero);
-		ndMatrix matrix(GetMatrix());
-		ndVector com(matrix.TransformVector(GetCentreOfMass()));
+		const ndMatrix matrix(GetMatrix());
+		const ndVector com(matrix.TransformVector(GetCentreOfMass()));
 	
 		impulseSolver.Reset(this);
 		for (ndInt32 i = 0; i < contactSolver.m_contactBuffer.GetCount(); ++i)
 		{
-			ndContactPoint* const contact = &contactSolver.m_contactBuffer[i];
-			ndVector point(contact->m_point);
-			ndVector normal(contact->m_normal);
-			ndInt32 index = impulseSolver.AddContactRow(contact, normal, point - com, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0e12f));
+			const ndContactPoint* const contact = &contactSolver.m_contactBuffer[i];
+			const ndVector point(contact->m_point);
+			const ndVector normal(contact->m_normal);
+			const ndInt32 index = impulseSolver.AddContactRow(contact, normal, point - com, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0e12f));
 	
 			ndFloat32 impulse = invTimestep * ndClamp(contact->m_penetration - D_MAX_COLLISION_PENETRATION * ndFloat32(0.5f), ndFloat32(0.0f), ndFloat32(0.5f));
 			impulseSolver.m_rhs[index] = impulse;

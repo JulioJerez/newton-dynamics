@@ -1155,18 +1155,17 @@ void ndSkeletonContainer::CalculateBodyImpulses(ndJacobian* const bodyImpulse, c
 void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* const x, const ndFloat32* const b, const ndFloat32* const low, const ndFloat32* const high, const ndInt32* const normalIndex, ndFloat32 accelTol) const
 {
 	D_TRACKTIME();
-	// better chance for auto vectorization. 
 	const ndFloat32 tol2 = accelTol * accelTol;
 	const ndFloat32* const matrix = &m_precondinonedMassMatrix11[0];
 	ndAssert(ndTestPSDmatrix(size, stride, matrix));
 
-	ndFloat32* const bScaled = ndAlloca(ndFloat32, stride);
+	ndFloat32* const residual = ndAlloca(ndFloat32, stride);
 
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		const ndInt32 index = normalIndex[i] + i;
 		x[i] /= m_diagonalPreconditioner[i];
-		bScaled[i] = b[i] * m_diagonalPreconditioner[i];
+		residual[i] = b[i] * m_diagonalPreconditioner[i];
 
 		const ndFloat32 coefficient = x[index];
 
@@ -1178,7 +1177,6 @@ void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* cons
 
 	const ndInt32 maxIterCount = 64;
 	ndFloat32 error2 = tol2 * ndFloat32(2.0f);
-	//const ndFloat32 sor = ndFloat32(1.0f);
 	const ndFloat32 sor = ndFloat32(1.125f);
 	for (ndInt32 m = maxIterCount; (m >= 0) && (error2 > tol2); --m)
 	{
@@ -1187,7 +1185,7 @@ void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* cons
 		for (ndInt32 i = 0; i < size; ++i)
 		{
 			const ndFloat32* const row = &matrix[rowBase];
-			ndFloat32 r = bScaled[i];
+			ndFloat32 r = residual[i];
 			for (ndInt32 j = 0; j < size; ++j)
 			{
 				r -= row[j] * x[j];
@@ -1227,7 +1225,6 @@ void ndSkeletonContainer::RegularizeLcp() const
 		ndFloat32* const regulatiser = ndAlloca(ndFloat32, size);
 		ndMemSet(regulatiser, ndFloat32(1.01f), size);
 		ndInt32 step = m_auxiliaryRowCount + 1;
-		//ndInt32 passes = 0;
 		ndFloat32 reg = ndFloat32(1.125f);
 		do
 		{

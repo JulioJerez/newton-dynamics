@@ -24,6 +24,7 @@
 #include "ndContact.h"
 #include "ndShapeCylinder.h"
 #include "ndContactSolver.h"
+#include "ndMeshBaseComponents.h"
 
 ndInt32 ndShapeCylinder::m_shapeRefCount = 0;
 ndShapeConvex::ndConvexSimplexEdge ndShapeCylinder::m_edgeArray[D_TAPED_CYLINDER_SEGMENTS * 2 * 3];
@@ -416,4 +417,13 @@ ndUnsigned64 ndShapeCylinder::GetHash(ndUnsigned64 hash) const
 {
 	ndShapeInfo info(GetShapeInfo());
 	return info.GetHash(hash);
+}
+
+ndSharedPtr<ndMeshCollisionShape> ndShapeCylinder::GetMeshShape() const
+{
+	ndMeshCollisionShapeCylinder* const shape = new ndMeshCollisionShapeCylinder;
+	shape->m_radius0 = m_radius0;
+	shape->m_radius1 = m_radius1;
+	shape->m_height = m_height * ndFloat32(2.0f);
+	return ndSharedPtr<ndMeshCollisionShape>(shape);
 }

@@ -525,7 +525,32 @@ ndInt32 ndString::Find (char ch, ndInt32 from) const
 	return -1;
 }
 
-//dInt32 ndString::Find (const ndString& subStream, dInt32 from) const
+ndInt32 ndString::Compare(const char* const str0, const char* const str1) const
+{
+	if (str0 && str1)
+	{
+		return strcmp(str0, str1);
+	}
+	else if (str0)
+	{
+		return 1;
+	}
+	else if (str1)
+	{
+		return -1;
+	}
+	return 0;
+}
+
+bool ndString::CompareIgnoreCase(const ndString& other) const
+{
+	if (GetStr() && other.GetStr())
+	{
+		return _stricmp(GetStr(), other.GetStr()) ? false : true;
+	}
+	return false;
+}
+
 ndInt32 ndString::Find (const char* const subString, ndInt32 subStringLength, ndInt32 from, ndInt32 lenght) const
 {
 	ndAssert (from >= 0);
@@ -592,7 +617,6 @@ ndInt32 ndString::Find (const char* const subString, ndInt32 subStringLength, nd
 	}
 	return location;
 }
-
 
 void ndString::Replace (ndInt32 start, ndInt32 size, const char* const str, ndInt32 strSize)
 {

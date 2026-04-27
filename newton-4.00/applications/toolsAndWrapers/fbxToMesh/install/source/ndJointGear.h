@@ -23,8 +23,8 @@ class ndJointGear: public ndJointBilateralConstraint
 
 	D_NEWTON_API ndJointGear();
 	D_NEWTON_API ndJointGear(ndFloat32 gearRatio,
-		const ndVector& body0Pin, ndBodyKinematic* const body0,
-		const ndVector& body1Pin, ndBodyKinematic* const body1);
+		const ndVector& parentPin, ndBodyKinematic* const parent,
+		const ndVector& childPin, ndBodyKinematic* const child);
 	D_NEWTON_API virtual ~ndJointGear();
 
 	D_NEWTON_API ndFloat32 GetRatio() const;
@@ -33,6 +33,8 @@ class ndJointGear: public ndJointBilateralConstraint
 	protected:
 	D_NEWTON_API void UpdateParameters() override;
 	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
+
+	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
 	ndFloat32 m_angle;
 	ndFloat32 m_omega;

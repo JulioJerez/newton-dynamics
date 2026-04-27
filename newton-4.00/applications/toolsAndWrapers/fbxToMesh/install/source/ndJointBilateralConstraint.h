@@ -41,6 +41,22 @@ enum ndJointBilateralSolverModel
 	m_jointModesCount
 };
 
+class ndJointUserData : public ndContainersFreeListAlloc<ndJointUserData>
+{
+	public:
+	ndJointUserData(ndJointBilateralConstraint* const owner)
+		:ndContainersFreeListAlloc<ndJointUserData>()
+		,m_owner(ndWeakPtr<ndJointBilateralConstraint>(owner))
+	{
+	}
+
+	virtual ~ndJointUserData()
+	{
+	}
+
+	ndWeakPtr<ndJointBilateralConstraint> m_owner;
+};
+
 #define D_ADD_IK_INTERFACE()															\
 virtual void SetIkMode(bool mode) override												\
 {																						\
@@ -77,6 +93,37 @@ class ndJointBilateralConstraint : public ndConstraint
 		public:
 		ndFloat32 m_posit;
 		ndFloat32 m_velocity;
+	};
+
+	class ndAxisParam
+	{
+		public:
+		ndAxisParam()
+			:m_param(ndFloat32(0.0f))
+			,m_paramSpeed(ndFloat32(0.0f))
+			,m_springK(ndFloat32(0.0f))
+			,m_damperC(ndFloat32(0.0f))
+			,m_minLimit(ndFloat32(-1.0e10f))
+			,m_maxLimit(ndFloat32(1.0e10f))
+			,m_targetParam(ndFloat32(0.0f))
+			,m_maxForce(D_LCP_MAX_VALUE)
+			,m_springDamperRegularizer(ndFloat32(1.0e-3f))
+			,m_limitState(false)
+			,m_hitLimits(false)
+		{
+		}
+
+		ndFloat32 m_param;
+		ndFloat32 m_paramSpeed;
+		ndFloat32 m_springK;
+		ndFloat32 m_damperC;
+		ndFloat32 m_minLimit;
+		ndFloat32 m_maxLimit;
+		ndFloat32 m_targetParam;
+		ndFloat32 m_maxForce;
+		ndFloat32 m_springDamperRegularizer;
+		bool m_limitState;
+		bool m_hitLimits;
 	};
 
 	D_COLLISION_API ndJointBilateralConstraint();
@@ -133,12 +180,15 @@ class ndJointBilateralConstraint : public ndConstraint
 	D_COLLISION_API void UpdateParameters() override;
 	D_COLLISION_API void ReplaceSentinel(ndBodyKinematic* const sentinel);
 
-	D_COLLISION_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint() const;
+	D_COLLISION_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const;
 
 	// inverse dynamics interface
 	D_COLLISION_API virtual void ClearMemory() override;
 	D_COLLISION_API virtual void SetIkMode(bool mode);
 	D_COLLISION_API virtual void SetIkSetAccel(const ndJacobian& body0Accel, const ndJacobian& body1Accel);
+
+	D_COLLISION_API const ndSharedPtr<ndJointUserData>& GetUserData() const;
+	D_COLLISION_API void SetUserData(ndSharedPtr<ndJointUserData>& userData);
 
 	protected:
 	ndMatrix m_localMatrix0;
@@ -152,6 +202,8 @@ class ndJointBilateralConstraint : public ndConstraint
 	ndBodyKinematic::ndJointList::ndNode* m_body0Node;
 	ndBodyKinematic::ndJointList::ndNode* m_body1Node;
 
+	ndSharedPtr<ndJointUserData> m_userData;
+
 	ndFloat32 m_defualtDiagonalRegularizer;
 	ndUnsigned32 m_mark0			: 1;
 	ndUnsigned32 m_mark1			: 1;
@@ -160,6 +212,8 @@ class ndJointBilateralConstraint : public ndConstraint
 	ndInt8 m_rowIsMotor;
 	ndInt8 m_hitLimits;
 	ndJointBilateralSolverModel m_solverModel;
+
+	static ndVector m_linearDebugColor;
 	
 	friend class ndWorld;
 	friend class ndIkSolver;
@@ -169,7 +223,6 @@ class ndJointBilateralConstraint : public ndConstraint
 	friend class ndDynamicsUpdateSoa;
 	friend class ndDynamicsUpdateAvx2;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
-
 
 #endif
 
