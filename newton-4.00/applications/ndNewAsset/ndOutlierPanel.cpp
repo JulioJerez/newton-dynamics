@@ -76,9 +76,11 @@ void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root)
 
 	ImGuiTreeNodeFlags isSeleted = (m_currentSelection == root) ? ImGuiTreeNodeFlags_Selected : 0;
 
-	char nodeName[256];
-	snprintf(nodeName, sizeof(nodeName) - 1, "%s", root->GetName().GetStr());
-	if (ImGui::TreeNodeEx(nodeName, options | isSeleted))
+	//char nodeName[256];
+	//snprintf(nodeName, sizeof(nodeName) - 1, "%s", root->GetName().GetStr());
+	ndAssert(root->GetName().Size());
+
+	if (ImGui::TreeNodeEx(root->GetName().GetStr(), options | isSeleted))
 	{
 		if (root->GetAsCloseLoopConstraints())
 		{
@@ -90,11 +92,6 @@ void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root)
 		}
 		else
 		{
-			if (nodeName[0] == 0)
-			{
-				snprintf(nodeName, sizeof(nodeName) - 1, "unnamed");
-			}
-
 			bool isClicked = ImGui::IsItemClicked();
 			if (isClicked)
 			{
@@ -103,7 +100,6 @@ void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root)
 				m_currentSelection = (m_currentSelection != root) ? root : ndSharedPtr<ndMesh>(nullptr);
 			}
 
-			//options = 0;
 			options |= ImGuiTreeNodeFlags_Bullet;
 
 			if (root->GetJoint())

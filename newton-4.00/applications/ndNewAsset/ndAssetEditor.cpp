@@ -449,6 +449,29 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::EndMenu();
 		}
 
+		if (ImGui::BeginMenu("Tools"))
+		{
+			if (ImGui::MenuItem("resize mesh", ""))
+			{
+				m_toolActive = true;
+				m_currentTool = new ndResizeMesh(this);
+			}
+
+			if (ImGui::MenuItem("rotate mesh", ""))
+			{
+				m_toolActive = true;
+				m_currentTool = new ndRotateMesh(this);
+			}
+
+			if (ImGui::MenuItem("normalize mass distibution", ""))
+			{
+				m_toolActive = true;
+				m_currentTool = new ndNomalizeMassDistribution(this);
+			}
+
+			ImGui::EndMenu();
+		}
+
 		if (ImGui::BeginMenu("Options"))
 		{
 			ImGui::Text("render mode");
@@ -476,29 +499,6 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::EndMenu();
 		}
 
-		if (ImGui::BeginMenu("Tools"))
-		{
-			if (ImGui::MenuItem("resize mesh", ""))
-			{
-				m_toolActive = true;
-				m_currentTool = new ndResizeMesh(this);
-			}
-
-			if (ImGui::MenuItem("rotate mesh", ""))
-			{
-				m_toolActive = true;
-				m_currentTool = new ndRotateMesh(this);
-			}
-
-			if (ImGui::MenuItem("normalize mass distibution", ""))
-			{
-				m_toolActive = true;
-				m_currentTool = new ndNomalizeMassDistribution(this);
-			}
-
-			ImGui::EndMenu();
-		}
-
 		ImGui::EndMainMenuBar();
 	}
 }
@@ -510,6 +510,12 @@ const ndString& ndAssetEditor::GetPath() const
 
 void ndAssetEditor::SetVisualScene(const ndRenderMeshLoader& loader)
 {
+	// force the mesh to have a defualt colliding pair list
+	loader.m_mesh->GetCollingPairs();
+
+	// force the mesh to have a default constaring loop list
+	loader.m_mesh->GetLoopJoints();
+
 	m_newMesh = loader.m_mesh;
 	m_newSceneMesh = loader.m_renderMesh;
 	m_currentSelection = ndSharedPtr<ndMesh>(nullptr);

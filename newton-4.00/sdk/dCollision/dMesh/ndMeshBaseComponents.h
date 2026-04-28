@@ -31,8 +31,8 @@ class ndShapeInstance;
 class ndBodyKinematic;
 class ndJointBilateralConstraint;
 
-#define ND_MESH_LOOP_JOINTS		"__constraintsList__"
-#define ND_MESH_COLLIDING_PAIRS	"__collingPairsList__"
+#define ND_MESH_COLLIDING_PAIRS		"__collidingPairs__"
+#define ND_MESH_CONSTRAINT_LOOPS	"__constraintLoops__"
 
 class ndMeshCollisionShape : public ndClassAlloc
 {

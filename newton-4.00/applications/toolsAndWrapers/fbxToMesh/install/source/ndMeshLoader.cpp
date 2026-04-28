@@ -80,7 +80,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 
 			ndSharedPtr<ndMesh> child(new ndMesh());
 			const char* const linkName = xmlGetString(linkNode, "name");
-			if (strcmp(linkName, ND_MESH_LOOP_JOINTS) == 0)
+			if (strcmp(linkName, ND_MESH_CONSTRAINT_LOOPS) == 0)
 			{
 				child = ndSharedPtr<ndMesh>(new ndCloseLoopConstraints);
 			}
@@ -165,7 +165,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			mesh->SetJoint(mesh->LoadJoint(xmlJoint));
 		}
 
-		if (mesh->m_name == ND_MESH_LOOP_JOINTS)
+		if (mesh->m_name == ND_MESH_CONSTRAINT_LOOPS)
 		{
 			for (const nd::TiXmlNode* node = entry.m_xmlNode->FirstChild("loopJoint"); node; node = node->NextSibling("loopJoint"))
 			{
