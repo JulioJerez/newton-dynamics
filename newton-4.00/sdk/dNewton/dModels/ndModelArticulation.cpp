@@ -879,7 +879,7 @@ void ndModelArticulation::Serialize(ndMesh* const meshRootNode) const
 		ndAssert(node1);
 		const ndMesh* const meshNode0 = meshRootNode->FindByName(node0->m_name);
 		const ndMesh* const meshNode1 = meshRootNode->FindByName(node1->m_name);
-		meshRootNode->AddCollidingPair(meshNode0, meshNode1);
+		meshRootNode->SetCollidingSubSelection(meshNode0, meshNode1);
 	}
 }
 
@@ -972,14 +972,14 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 	const ndCollidingPairs* const collingPairs = rootNode->GetCollingPairs();
 	if (collingPairs)
 	{
-		for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* pairPtr = collingPairs->m_collingPairs.GetFirst(); pairPtr; pairPtr = pairPtr->GetNext())
+		for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* pairPtr = collingPairs->m_collidingPairs.GetFirst(); pairPtr; pairPtr = pairPtr->GetNext())
 		{
 			const ndSharedPtr<ndMeshCollidingPair>& pairMesh = pairPtr->GetInfo();
 			ndModelArticulation::ndNode* const reference0 = FindByName(pairMesh->m_childNode->GetName().GetStr());
 			ndModelArticulation::ndNode* const reference1 = FindByName(pairMesh->m_parentNode->GetName().GetStr());
 			ndAssert(reference0);
 			ndAssert(reference1);
-			AddCollidingPair(reference0, reference1);
+			SetCollidingSubSelection(reference0, reference1);
 		}
 	}
 }
@@ -1055,7 +1055,7 @@ bool ndModelArticulation::PairCollide(const ndBody* const body0, const ndBody* c
 	return false;
 }
 
-void ndModelArticulation::AddCollidingPair(const ndNode* const node0, const ndNode* const node1)
+void ndModelArticulation::SetCollidingSubSelection(const ndNode* const node0, const ndNode* const node1)
 {
 	if (PairCollide(*node0->m_body, *node1->m_body))
 	{

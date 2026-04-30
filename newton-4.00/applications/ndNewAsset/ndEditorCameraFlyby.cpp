@@ -185,9 +185,28 @@ void ndEditorCameraFlyby::MouseSelection()
 
 	if (hitNode)
 	{
-		m_editor->m_currentSelection = hitNode;
-		m_editor->m_currentLoopJointSelection = ndSharedPtr<ndMeshLoopJoint>(nullptr);
-		m_editor->m_currentCollingPairSelection = ndSharedPtr<ndMeshCollidingPair>(nullptr);
+		ndAssetEditor::ndSubSelectionMode selectionMode = m_editor->m_subSelection;
+		switch(selectionMode)
+		{ 
+			case ndAssetEditor::m_loopJoint:
+			{
+				ndTrace(("TO DO: m_jointLoop\n"));
+				ndAssert(0);
+				break;
+			}
+		
+			case ndAssetEditor::m_collidingPair:
+			{
+				m_editor->SetCollidingSubSelection(hitNode);
+				break;
+			}
+		
+			case ndAssetEditor::m_none:
+			default:
+			{
+				m_editor->m_currentSelection = hitNode;
+			}
+		}
 	}
 }
 

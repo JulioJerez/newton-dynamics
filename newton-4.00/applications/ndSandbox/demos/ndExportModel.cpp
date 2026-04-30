@@ -1283,7 +1283,7 @@ namespace ndExcavator
         {
             for (ndInt32 i = 0; i < rollersTrack.GetCount(); ++i)
             {
-                articulation->AddCollidingPair(rollersTrack[i], trackLink);
+                articulation->SetCollidingSubSelection(rollersTrack[i], trackLink);
             }
         };
 

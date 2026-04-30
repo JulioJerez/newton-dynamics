@@ -36,6 +36,13 @@ class ndAssetEditor : public ndClassAlloc
 		m_size = 0xffffffff
 	};
 
+	enum ndSubSelectionMode
+	{
+		m_none,
+		m_loopJoint,
+		m_collidingPair,
+	};
+
 	class ndRenderCallback : public ndRender::ndUserCallback
 	{
 		public:
@@ -144,6 +151,7 @@ class ndAssetEditor : public ndClassAlloc
 	void ShowPropertiesCollisionInfo();
 	void ShowPropertiesRigidBodyInfo();
 	void ShowPropertiesJointsLoopInfo();
+	void ShowPropertiesCollidingPairs();
 
 	void EditJointGlobalMatrix();
 	void EditWheelJoint();
@@ -156,21 +164,21 @@ class ndAssetEditor : public ndClassAlloc
 	void EditSphericalJoint();
 	void EditDoubleHingeJoint();
 
-	void EditLoopJointLocalMatrix();
-	void EditLoopJointGlobalMatrix();
+	void EditLoopJointLocalMatrix(ndSharedPtr<ndMeshLoopJoint>& joint);
+	void EditLoopJointGlobalMatrix(ndSharedPtr<ndMeshLoopJoint>& joint);
 
-	void EditGearLoopJoint();
-	void EditWheelLoopJoint();
-	void EditHingeLoopJoint();
-	void EditPlaneLoopJoint();
-	void EditSliderLoopJoint();
-	void EditRollerLoopJoint();
-	void EditFix6dofLoopJoint();
-	void EditCylinderLoopJoint();
-	void EditSphericalLoopJoint();
-	void EditDoubleHingeLoopJoint();
-	void EditDifferentialAxleLoopJoint();
-	void EditSwivelPositionEffectorLoopJoint();
+	void EditGearLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
+	void EditWheelLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
+	void EditHingeLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
+	void EditPlaneLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
+	void EditSliderLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
+	void EditRollerLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
+	void EditFix6dofLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
+	void EditCylinderLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
+	void EditSphericalLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
+	void EditDoubleHingeLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
+	void EditDifferentialAxleLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
+	void EditSwivelPositionEffectorLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 
 	void EditShapeTransform();
 	void EditCollisionBox();
@@ -180,6 +188,9 @@ class ndAssetEditor : public ndClassAlloc
 	void EditCollisionCompound();
 	void EditCollisionConvexHull();
 	void EditCollisionChamferCylinder();
+
+	void AddCollidingPair();
+	void SetCollidingSubSelection(const ndSharedPtr<ndMesh>& node);
 		
 	ndSharedPtr<ndMesh> m_mesh;
 	ndSharedPtr<ndRender> m_renderer;
@@ -198,8 +209,7 @@ class ndAssetEditor : public ndClassAlloc
 
 	ndSharedPtr<ndAssetTool> m_currentTool;
 	ndSharedPtr<ndMesh> m_currentSelection;
-	ndSharedPtr<ndMeshLoopJoint> m_currentLoopJointSelection;
-	ndSharedPtr<ndMeshCollidingPair> m_currentCollingPairSelection;
+	ndSharedPtr<ndMesh> m_currentSubSelection;
 
 	ndString m_currentPath;
 	ndUndoRedo m_undoRedo;
@@ -214,8 +224,12 @@ class ndAssetEditor : public ndClassAlloc
 	bool m_showPreTransform;
 
 	bool m_toolActive;
-	ndInt32 m_renderMode;
 	ndReal m_gizmoScale;
+	ndInt32 m_renderMode;
+	ndInt32 m_closeLoopIndex;
+	ndInt32 m_collidingPairIndex;
+
+	ndSubSelectionMode m_subSelection;
 	
 	friend class ndUndoRedo;
 	friend class ndUndoRedoCommand;
