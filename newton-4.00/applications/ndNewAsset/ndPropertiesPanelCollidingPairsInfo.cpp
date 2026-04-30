@@ -134,6 +134,36 @@ void ndAssetEditor::SetCollidingSubSelection(const ndSharedPtr<ndMesh>& subSelec
 	m_currentSubSelection = subSelection;
 }
 
+void ndAssetEditor::SetLoopJointSelection(const ndSharedPtr<ndMesh>& subSelection)
+{
+	if (subSelection == m_currentSelection)
+	{
+		return;
+	}
+
+	const ndMesh* parent = m_currentSelection->GetParent();
+	while (parent && !parent->GetRigidBody())
+	{
+		parent = parent->GetParent();
+	}
+	if (*subSelection == parent)
+	{
+		return;
+	}
+
+	parent = subSelection->GetParent();
+	while (parent && !parent->GetRigidBody())
+	{
+		parent = parent->GetParent();
+	}
+
+	if (*m_currentSelection == parent)
+	{
+		return;
+	}
+	m_currentSubSelection = subSelection;
+}
+
 void ndAssetEditor::AddCollidingPair()
 {
 	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoCollidingPairs(this)));

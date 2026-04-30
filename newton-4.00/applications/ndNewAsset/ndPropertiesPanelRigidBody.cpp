@@ -218,36 +218,84 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			};
 		}
 
-		// handle adding colliding pairs
-		{
-			if (m_subSelection != m_collidingPair)
-			{
-				if (ImGui::Button("edit colliding pairs"))
-				{
-					m_subSelection = m_collidingPair;
-				}
-			}
-			else
-			{
-				if (ImGui::Button("add pair"))
-				{
-					if (m_currentSubSelection)
-					{
-						ndCollidingPairs* const collidingPairs = m_mesh->GetCollingPairs();
-						ndSharedPtr<ndMeshCollidingPair> pair(new ndMeshCollidingPair(*m_currentSelection, *m_currentSubSelection));
-						collidingPairs->m_collidingPairs.Append(pair);
-						m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
-					}
-				}
+		EditLoopJoints();
+		EditCollidingPair();
+		ImGui::Separator();
+	}
+}
 
-				ImGui::SameLine();
-				if (ImGui::Button("reset colliding pairs"))
-				{
-					m_subSelection = m_none;
-					m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
-				}
+void ndAssetEditor::EditCollidingPair()
+{
+	ImGui::Separator();
+	if (m_subSelection != m_collidingPair)
+	{
+		if (ImGui::Button("edit colliding pairs"))
+		{
+			m_subSelection = m_collidingPair;
+		}
+	}
+	else
+	{
+		if (ImGui::Button("add pair"))
+		{
+			if (m_currentSubSelection)
+			{
+				ndAssert(0);
+				AddCollidingPair();
+				//ndCollidingPairs* const collidingPairs = m_mesh->GetCollingPairs();
+				//ndSharedPtr<ndMeshCollidingPair> pair(new ndMeshCollidingPair(*m_currentSelection, *m_currentSubSelection));
+				//collidingPairs->m_collidingPairs.Append(pair);
+				//m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
 			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("reset colliding pairs"))
+		{
+			m_subSelection = m_none;
+			m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
 		}
 	}
 }
 
+void ndAssetEditor::EditLoopJoints()
+{
+	ImGui::Separator();
+	if (m_subSelection != m_loopJoint)
+	{
+		if (ImGui::Button("edit loop joint"))
+		{
+			m_subSelection = m_loopJoint;
+		}
+	}
+	else
+	{
+		if (ImGui::Button("select secund body"))
+		{
+			if (m_currentSubSelection)
+			{
+				ndCollidingPairs* const collidingPairs = m_mesh->GetCollingPairs();
+				ndSharedPtr<ndMeshCollidingPair> pair(new ndMeshCollidingPair(*m_currentSelection, *m_currentSubSelection));
+				collidingPairs->m_collidingPairs.Append(pair);
+				m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+			}
+		}
+
+		if (ImGui::Button("add loop joints"))
+		{
+			if (m_currentSubSelection)
+			{
+				AddLoopJoint();
+				m_subSelection = m_none;
+				m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+			}
+		}
+
+		//ImGui::SameLine();
+		if (ImGui::Button("reset loop joints"))
+		{
+			m_subSelection = m_none;
+			m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+		}
+	}
+}

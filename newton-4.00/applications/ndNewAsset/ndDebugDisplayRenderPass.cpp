@@ -260,6 +260,13 @@ void ndDebugDisplayRenderPass::RenderCollisionShape()
 				DisplayShape(*m_manager->m_currentSubSelection, m_collidingPairPreviewColor);
 			}
 		}
+		else if (m_manager->m_subSelection == ndAssetEditor::m_loopJoint)
+		{
+			if (m_manager->m_currentSubSelection)
+			{
+				DisplayShape(*m_manager->m_currentSubSelection, m_collidingPairPreviewColor);
+			}
+		}
 	}
 }
 

@@ -190,8 +190,7 @@ void ndEditorCameraFlyby::MouseSelection()
 		{ 
 			case ndAssetEditor::m_loopJoint:
 			{
-				ndTrace(("TO DO: m_jointLoop\n"));
-				ndAssert(0);
+				m_editor->SetLoopJointSelection(hitNode);
 				break;
 			}
 		

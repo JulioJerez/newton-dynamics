@@ -189,7 +189,12 @@ class ndAssetEditor : public ndClassAlloc
 	void EditCollisionConvexHull();
 	void EditCollisionChamferCylinder();
 
+	void AddLoopJoint();
 	void AddCollidingPair();
+
+	void EditLoopJoints();
+	void EditCollidingPair();
+	void SetLoopJointSelection(const ndSharedPtr<ndMesh>& node);
 	void SetCollidingSubSelection(const ndSharedPtr<ndMesh>& node);
 		
 	ndSharedPtr<ndMesh> m_mesh;

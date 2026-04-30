@@ -1489,3 +1489,9 @@ void ndAssetEditor::EditSwivelPositionEffectorLoopJoint(ndSharedPtr<ndMeshLoopJo
 		}
 	}
 }
+
+
+void ndAssetEditor::AddLoopJoint()
+{
+	ndTrace(("Add Loop Joint"));
+}
