@@ -218,118 +218,81 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			};
 		}
 
-		// colliding pairs
-		//{
-		//	ImGui::SeparatorText("colliding pairs");
-		//	if (ImGui::Button("add body"))
-		//	{
-		//		m_addCollidingBody = true;
-		//		//m_removeCollidingBody = false;
-		//	}
-		//	ndAssert(0);
-		//	//if (rigidBody->m_collidingPair.GetCount())
-		//	//{
-		//	//	ImGui::SameLine();
-		//	//	if (rigidBody->m_collidingPair.GetCount())
-		//	//	{
-		//	//		if (ImGui::Button("remove body") && (m_addCollingPairSelection != -1))
-		//	//		{
-		//	//			ndMesh* const otherNode = m_mesh->FindByName(rigidBody->m_collidingPair[m_addCollingPairSelection]->GetName());
-		//	//			ndAssert(otherNode);
-		//	//			ndMeshBodyDynamic* const otherBody = (ndMeshBodyDynamic*)*otherNode->GetRigidBody();
-		//	//			ndAssert(otherBody->m_classConstructor == ndBodyDynamic::StaticClassName());
-		//	//
-		//	//			const ndString& name = m_currentSelection->GetName();
-		//	//			ndInt32 otherBodyCount = ndInt32(otherBody->m_collidingPair.GetCount()) - 1;
-		//	//			for (ndInt32 i = otherBodyCount; i >= 0; --i)
-		//	//			{
-		//	//				if (otherBody->m_collidingPair[i]->GetName() == name)
-		//	//				{
-		//	//					otherBody->m_collidingPair[i] = otherBody->m_collidingPair[otherBodyCount];
-		//	//					otherBody->m_collidingPair.SetCount(otherBodyCount);
-		//	//					break;
-		//	//				}
-		//	//			}
-		//	//
-		//	//			ndInt32 count = ndInt32 (rigidBody->m_collidingPair.GetCount()) - 1;
-		//	//			rigidBody->m_collidingPair[m_addCollingPairSelection] = rigidBody->m_collidingPair[count];
-		//	//			rigidBody->m_collidingPair.SetCount(count);
-		//	//
-		//	//			m_secundarySelection.SetCount(0);
-		//	//			m_addCollingPairSelection = -1;
-		//	//		}
-		//	//		ImGui::SameLine();
-		//	//		if (ImGui::Button("deselect body"))
-		//	//		{
-		//	//			m_secundarySelection.SetCount(0);
-		//	//			m_addCollingPairSelection = -1;
-		//	//		}
-		//	//	}
-		//	//}
-		//
-		//	if (m_addCollidingBody)
-		//	{
-		//		ImGuiWindowFlags flags = ImGuiWindowFlags_None;
-		//		flags |= ImGuiWindowFlags_NoDocking;
-		//		flags |= ImGuiWindowFlags_AlwaysAutoResize;
-		//
-		//		ndAssert(0);
-		//		//ImGui::Begin("add collinding body", &m_addCollidingBody, flags);
-		//		//{
-		//		//	ndFixSizeArray<const char*, 1024> names;
-		//		//	m_secundarySelection.SetCount(0);
-		//		//	auto ListNames = [this, &names, &rigidBody](ndMesh* const node)
-		//		//	{
-		//		//		bool isCandidate = (node != *m_currentSelection);
-		//		//		isCandidate = isCandidate && (node->GetParent() != *m_currentSelection);
-		//		//		for (ndInt32 i = 0; isCandidate && (i < rigidBody->m_collidingPair.GetCount()); ++i)
-		//		//		{
-		//		//			isCandidate = isCandidate && (*rigidBody->m_collidingPair[i] != node);
-		//		//		}
-		//		//		for (ndList<ndSharedPtr<ndMesh>>::ndNode* childNode = m_currentSelection->GetChildren().GetFirst(); isCandidate && childNode; childNode = childNode->GetNext())
-		//		//		{
-		//		//			isCandidate = isCandidate && (*childNode->GetInfo() != node);
-		//		//		}
-		//		//		if (isCandidate)
-		//		//		{
-		//		//			names.PushBack(node->GetName().GetStr());
-		//		//			m_secundarySelection.PushBack(node);
-		//		//		}
-		//		//	};
-		//		//	m_mesh->NodeIterator(ListNames);
-		//		//
-		//		//	ndAssert(0);
-		//		//	//if (ImGui::Button("add##15") && (m_addCollingPairCandidateSelection != -1))
-		//		//	//{
-		//		//	//	ndMesh* const otherNode = m_mesh->FindByName(names[m_addCollingPairCandidateSelection]);
-		//		//	//	rigidBody->m_collidingPair.PushBack(ndWeakPtr<ndMesh>(otherNode));
-		//		//	//	
-		//		//	//	ndSharedPtr<ndMeshBody> otherBody(otherNode->GetRigidBody());
-		//		//	//	ndMeshBodyDynamic* const otherRigidBody = (ndMeshBodyDynamic*)*otherBody;
-		//		//	//	ndAssert(otherBody->m_classConstructor == ndBodyDynamic::StaticClassName());
-		//		//	//	otherRigidBody->m_collidingPair.PushBack(ndWeakPtr<ndMesh>(*m_currentSelection));
-		//		//	//}
-		//		//	//ImGui::ListBox(" ##10", &m_addCollingPairCandidateSelection, &names[0], names.GetCount());
-		//		//}
-		//		ImGui::End();
-		//	}
-		//
-		//	ndAssert(0);
-		//	//if (rigidBody->m_collidingPair.GetCount())
-		//	//{
-		//	//	ndFixSizeArray<const char*, 64> names;
-		//	//	for (ndInt32 i = 0; i < rigidBody->m_collidingPair.GetCount(); ++i)
-		//	//	{
-		//	//		names.PushBack(rigidBody->m_collidingPair[i]->GetName().GetStr());
-		//	//	}
-		//	//	if (ImGui::ListBox(" ##11", &m_addCollingPairSelection, &names[0], names.GetCount()))
-		//	//	{
-		//	//		m_secundarySelection.SetCount(0);
-		//	//		ndMesh* const secundSelection = m_mesh->FindByName(rigidBody->m_collidingPair[m_addCollingPairSelection]->GetName());
-		//	//		m_secundarySelection.PushBack(ndWeakPtr<ndMesh>(secundSelection));
-		//	//	}
-		//	//}
-		//}
+		EditLoopJoints();
+		EditCollidingPair();
+		ImGui::Separator();
 	}
 }
 
+void ndAssetEditor::EditCollidingPair()
+{
+	ImGui::Separator();
+	if (m_subSelection != m_collidingPair)
+	{
+		if (ImGui::Button("edit colliding pairs"))
+		{
+			m_subSelection = m_collidingPair;
+		}
+	}
+	else
+	{
+		if (ImGui::Button("add pair"))
+		{
+			if (m_currentSubSelection)
+			{
+				ndAssert(0);
+				AddCollidingPair();
+			}
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("reset colliding pairs"))
+		{
+			m_subSelection = m_none;
+			m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+		}
+	}
+}
+
+void ndAssetEditor::EditLoopJoints()
+{
+	ImGui::Separator();
+	if (m_subSelection != m_loopJoint)
+	{
+		if (ImGui::Button("edit loop joint"))
+		{
+			m_subSelection = m_loopJoint;
+		}
+	}
+	else
+	{
+		if (ImGui::Button("select secund body"))
+		{
+			if (m_currentSubSelection)
+			{
+				ndAssert(0);
+				//ndCollidingPairs* const collidingPairs = m_mesh->GetCollingPairs();
+				//ndSharedPtr<ndMeshCollidingPair> pair(new ndMeshCollidingPair(*m_currentSelection, *m_currentSubSelection));
+				//collidingPairs->m_collidingPairs.Append(pair);
+				//m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+			}
+		}
+
+		if (ImGui::Button("add loop joints"))
+		{
+			if (m_currentSubSelection)
+			{
+				AddLoopJoint();
+				m_subSelection = m_none;
+				m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+			}
+		}
+
+		//ImGui::SameLine();
+		if (ImGui::Button("reset loop joints"))
+		{
+			m_subSelection = m_none;
+			m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+		}
+	}
+}

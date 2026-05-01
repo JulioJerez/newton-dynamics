@@ -34,8 +34,6 @@
 #define D_MAX_SKELETON_LCP_VALUE		(D_LCP_MAX_VALUE * ndFloat32 (0.25f))
 
 #define ND_DIAGONAL_PRECONDIONER
-//#define D_TIME_CORRECTION_FRACTION		ndFloat32 (0.9f)
-//#define D_MAX_POSIT_ERROR_VIOLATION2	(ndFloat32(0.125f) * ndFloat32(0.125f))
 
 ndSkeletonContainer::ndNode::ndNode()
 	:m_body(nullptr)
@@ -692,7 +690,6 @@ void ndSkeletonContainer::CalculateBufferSizeInBytes()
 void ndSkeletonContainer::CalculateLoopMassMatrixCoefficients(ndFloat32* const diagDamp)
 {
 	D_TRACKTIME();
-	//ndInt32 nonZerosCount = 0;
 	auto CalculateLoopMassMatrixCoefficients = [this, diagDamp](ndInt32 groupId)
 	{
 		const ndInt32 index = groupId;
@@ -810,10 +807,6 @@ void ndSkeletonContainer::CalculateLoopMassMatrixCoefficients(ndFloat32* const d
 	{
 		CalculateLoopMassMatrixCoefficients(index);
 	}
-
-#if 0
-	ndTrace(("non zeros(%d) out of(%d)\n", nonZerosCount, m_auxiliaryRowCount* m_auxiliaryRowCount));
-#endif
 }
 
 void ndSkeletonContainer::SolveForward(ndForcePair* const force, const ndForcePair* const accel, ndInt32 startNode) const
@@ -2000,33 +1993,6 @@ void ndSkeletonContainer::InitMassMatrix(ndFloat32, const ndLeftHandSide* const 
 			auxiliaryCount += node->FactorizeChild(leftHandSide, rightHandSide, bodyMassArray, jointMassArray);
 		}
 		m_nodesOrder[nodeCount - 1]->FactorizeRoot(bodyMassArray, jointMassArray);
-
-#if 0
-		bool hasViolations = ResolveViolations(timestep);
-		if (hasViolations)
-		{
-			ndWorld* const world = GetRoot()->m_body->GetScene()->GetWorld();
-			world->m_solver->RegenerateSkeletonJacobians(this);
-
-			rowCount = 0;
-			auxiliaryCount = 0;
-			for (ndInt32 i = 0; i < nodeCount - 1; ++i)
-			{
-				ndNode* const node = m_nodesOrder[i];
-				rowCount += node->m_joint->m_rowCount;
-				auxiliaryCount += node->FactorizeChild(leftHandSide, rightHandSide, bodyMassArray, jointMassArray);
-			}
-			m_nodesOrder[nodeCount - 1]->FactorizeRoot(bodyMassArray, jointMassArray);
-
-			#if _DEBUG
-				ndForcePair* const jointVeloc = ndAlloca(ndForcePair, nodeCount);
-				ndForcePair* const jointAccel = ndAlloca(ndForcePair, nodeCount);
-				ndFloat32 errors = CalculateCorrectionImpulse(timestep, jointVeloc, jointAccel);
-				ndAssert(errors < D_MAX_POSIT_ERROR_VIOLATION2);
-			#endif
-		}
-
-#endif
 	}
 
 	m_rowCount = rowCount;
@@ -2059,7 +2025,7 @@ void ndSkeletonContainer::InitMassMatrix(ndFloat32, const ndLeftHandSide* const 
 
 		const ndInt32 stride = m_auxiliaryRowCount;
 		const ndInt32 size = m_auxiliaryRowCount - m_blockSize;
-		const ndFloat32* const matrix = &m_massMatrix11[m_blockSize * stride + m_blockSize];
+		ndFloat32* const matrix = &m_massMatrix11[m_blockSize * stride + m_blockSize];
 
 		for (ndInt32 i = 0; i < size; ++i)
 		{
@@ -2107,194 +2073,3 @@ void ndSkeletonContainer::CalculateReactionForces(ndJacobian* const internalForc
 		}
 	}
 }
-
-#if 0
-
-void ndSkeletonContainer::CalculateBodyImpulses(ndJacobian* const bodyImpulse, const ndForcePair* const jointImpulse) const
-{
-	const ndVector zero(ndVector::m_zero);
-	const ndInt32 nodeCount = m_nodeList.GetCount();
-	for (ndInt32 i = 0; i < nodeCount; ++i)
-	{
-		bodyImpulse[i].m_linear = zero;
-		bodyImpulse[i].m_angular = zero;
-	}
-
-	for (ndInt32 i = 0; i < (nodeCount - 1); ++i)
-	{
-		ndNode* const node = m_nodesOrder[i];
-		ndJointBilateralConstraint* const joint = node->m_joint;
-
-		ndJacobian y0;
-		ndJacobian y1;
-		y0.m_linear = zero;
-		y0.m_angular = zero;
-		y1.m_linear = zero;
-		y1.m_angular = zero;
-		ndAssert(i == node->m_index);
-
-		const ndSpatialVector& f = jointImpulse[i].m_joint;
-		const ndInt32 first = joint->m_rowStart;
-		const ndInt32 count = node->m_dof;
-		for (ndInt32 j = 0; j < count; ++j)
-		{
-			const ndInt32 k = node->m_ordinal.m_sourceJacobianIndex[j];
-			const ndLeftHandSide* const row = &m_leftHandSide[first + k];
-
-			const ndVector jointForce = ndFloat32(f[j]);
-			y0.m_linear += row->m_Jt.m_jacobianM0.m_linear * jointForce;
-			y0.m_angular += row->m_Jt.m_jacobianM0.m_angular * jointForce;
-			y1.m_linear += row->m_Jt.m_jacobianM1.m_linear * jointForce;
-			y1.m_angular += row->m_Jt.m_jacobianM1.m_angular * jointForce;
-		}
-
-		const ndInt32 m0 = node->m_index;
-		const ndInt32 m1 = node->m_parent->m_index;
-
-		bodyImpulse[m0].m_linear += y0.m_linear;
-		bodyImpulse[m0].m_angular += y0.m_angular;
-		bodyImpulse[m1].m_linear += y1.m_linear;
-		bodyImpulse[m1].m_angular += y1.m_angular;
-	}
-}
-
-ndFloat32 ndSkeletonContainer::CalculateCorrectionImpulse(ndFloat32 timestep, ndForcePair* const veloc, ndForcePair* const accel) const
-{
-	const ndSpatialVector zero(ndSpatialVector::m_zero);
-
-	ndFloat32 invTimeStep = D_TIME_CORRECTION_FRACTION / timestep;
-	const ndInt32 nodeCount = m_nodeList.GetCount();
-
-	auto CalculateJointVeloc = [this, invTimeStep, &veloc, &accel, &zero](ndInt32 groupId, ndInt32)
-	{
-		ndNode* const node = m_nodesOrder[groupId];
-		ndAssert(node->m_parent);
-		ndAssert(groupId == node->m_index);
-
-		ndForcePair& v = veloc[groupId];
-		ndForcePair& a = accel[groupId];
-		ndAssert(node->m_body);
-		v.m_body = zero;
-		v.m_joint = zero;
-		a.m_body = zero;
-		a.m_joint = zero;
-
-		ndAssert(node->m_joint);
-		ndJointBilateralConstraint* const joint = node->m_joint;
-		ndAssert(joint->IsBilateral());
-
-		//const ndInt32 dof = joint->m_rowCount;
-		const ndInt32 first = joint->m_rowStart;
-
-		const ndInt32 dof = node->m_dof;
-		ndAssert(dof <= D_MAX_OPEN_LOOP_DOF);
-		ndFloat32 maxPenetration2 = ndFloat32(0.0f);
-		for (ndInt32 j = 0; j < dof; ++j)
-		{
-			const ndInt32 k = node->m_ordinal.m_sourceJacobianIndex[j];
-			ndFloat32 positError = m_rightHandSide[first + k].m_positError;
-			ndFloat32 speedError = m_rightHandSide[first + k].m_speedError;
-			maxPenetration2 = ndMax(maxPenetration2, positError * positError);
-			v.m_joint[j] = -invTimeStep * positError;
-			a.m_joint[j] = -invTimeStep * speedError;
-		}
-
-		return maxPenetration2;
-	};
-
-	ndFloat32 maxPositError2 = ndFloat32(0.0f);
-	for (ndInt32 index = 0; index < (nodeCount - 1); ++index)
-	{
-		ndFloat32 penetration2 = CalculateJointVeloc(index, 0);
-		maxPositError2 = ndMax(maxPositError2, penetration2);
-	}
-
-	ndAssert((nodeCount - 1) == m_nodesOrder[nodeCount - 1]->m_index);
-	veloc[nodeCount - 1].m_body = zero;
-	veloc[nodeCount - 1].m_joint = zero;
-	accel[nodeCount - 1].m_body = zero;
-	accel[nodeCount - 1].m_joint = zero;
-	return maxPositError2;
-}
-
-//bool ndSkeletonContainer::ResolveViolations(ndFloat32 timestep)
-bool ndSkeletonContainer::ResolveViolations(ndFloat32)
-{
-return false;
-
-	const ndInt32 nodeCount = m_nodeList.GetCount();
-	ndForcePair* const jointVeloc = ndAlloca(ndForcePair, nodeCount);
-	ndForcePair* const jointAccel = ndAlloca(ndForcePair, nodeCount);
-	ndForcePair* const jointImpulse = ndAlloca(ndForcePair, nodeCount);
-	ndJacobian* const bodyImpulse = ndAlloca(ndJacobian, nodeCount + 1);
-
-	// apply two impulse passes.
-	// the first one to cancel all position violations, 
-	// and the second to cancel all velocity violations.
-	ndFloat32 maxViolation2 = CalculateCorrectionImpulse(timestep, jointVeloc, jointAccel);
-
-	if (maxViolation2 > D_MAX_POSIT_ERROR_VIOLATION2)
-	{
-		ndTrace(("xxx %g\n", maxViolation2));
-		const ndVector vtimestep(timestep);
-		CalculateForce(jointImpulse, jointAccel);
-		CalculateBodyImpulses(bodyImpulse, jointImpulse);
-		for (ndInt32 i = 0; i < nodeCount; ++i)
-		{
-			ndNode* const node = m_nodesOrder[i];
-			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();;
-			ndAssert(body);
-			ndAssert(body->GetInvMass() > ndFloat32(0.0f));
-
-			const ndJacobian& forceTorque = bodyImpulse[i];
-			const ndJacobian velocStep(body->IntegrateForceAndToque(forceTorque.m_linear, forceTorque.m_angular, vtimestep));
-			body->m_veloc += velocStep.m_linear;
-			body->m_omega += velocStep.m_angular;
-		}
-
-		CalculateForce(jointImpulse, jointVeloc);
-		CalculateBodyImpulses(bodyImpulse, jointImpulse);
-
-		//ndInt32 numberOfSteps = 0;
-		//for (ndInt32 i = 0; i < (nodeCount - 1); ++i)
-		//{
-		//
-		//}
-
-		for (ndInt32 i = 0; i < nodeCount; ++i)
-		{
-			ndNode* const node = m_nodesOrder[i];
-			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();;
-			ndAssert(body);
-			ndAssert(body->GetInvMass() > ndFloat32(0.0f));
-
-			const ndVector savedOmega(body->GetOmega());
-			const ndVector savedVeloc(body->GetVelocity());
-
-			const ndJacobian& impulse = bodyImpulse[i];
-			const ndVector veloc(impulse.m_linear.Scale(body->GetInvMass()));
-			const ndVector omega(body->m_invWorldInertiaMatrix.RotateVector(impulse.m_angular));
-
-			body->SetOmega(omega);
-			body->SetVelocity(veloc);
-
-			body->IntegrateVelocity(timestep);
-
-			body->SetOmega(savedOmega);
-			body->SetVelocity(savedVeloc);
-
-			body->UpdateInvInertiaMatrix();
-			body->AddDampingAcceleration(timestep);
-			const ndVector angularMomentum(body->CalculateAngularMomentum());
-			body->m_gyroTorque = body->m_omega.CrossProduct(angularMomentum);
-			body->m_gyroAlpha = body->m_invWorldInertiaMatrix.RotateVector(body->m_gyroTorque);
-
-			body->m_accel = body->m_veloc;
-			body->m_alpha = body->m_omega;
-			body->m_gyroRotation = body->m_rotation;
-		}
-	}
-
-	return maxViolation2 > D_MAX_POSIT_ERROR_VIOLATION2;
-}
-#endif

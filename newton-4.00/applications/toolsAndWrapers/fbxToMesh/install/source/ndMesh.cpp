@@ -291,7 +291,7 @@ void ndMesh::SetJoint(const ndSharedPtr<ndMeshJoint>& joint)
 
 ndCloseLoopConstraints* ndMesh::GetLoopJoints()
 {
-	ndMesh* mesh = GetRoot()->FindByName(ND_MESH_LOOP_JOINTS);
+	ndMesh* mesh = GetRoot()->FindByName(ND_MESH_CONSTRAINT_LOOPS);
 	if (!mesh)
 	{
 		ndMesh* const rootNode = GetRoot();
@@ -306,7 +306,7 @@ ndCloseLoopConstraints* ndMesh::GetLoopJoints()
 
 const ndCloseLoopConstraints* ndMesh::GetLoopJoints() const 
 {
-	const ndMesh* mesh = GetRoot()->FindByName(ND_MESH_LOOP_JOINTS);
+	const ndMesh* mesh = GetRoot()->FindByName(ND_MESH_CONSTRAINT_LOOPS);
 	if (!mesh)
 	{
 		ndMesh* const rootNode = ((ndMesh*)this)->GetRoot();
@@ -1129,7 +1129,7 @@ ndCloseLoopConstraints::ndCloseLoopConstraints()
 	:ndMesh()
 	,m_loopJoints()
 {
-	SetName(ND_MESH_LOOP_JOINTS);
+	SetName(ND_MESH_CONSTRAINT_LOOPS);
 }
 
 ndCloseLoopConstraints::ndCloseLoopConstraints(const ndMesh& src)
@@ -1137,7 +1137,7 @@ ndCloseLoopConstraints::ndCloseLoopConstraints(const ndMesh& src)
 	,m_loopJoints()
 {
 	ndAssert(0);
-	SetName(ND_MESH_LOOP_JOINTS);
+	SetName(ND_MESH_CONSTRAINT_LOOPS);
 }
 
 ndCloseLoopConstraints* ndCloseLoopConstraints::GetAsCloseLoopConstraints()

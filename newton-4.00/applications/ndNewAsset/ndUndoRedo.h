@@ -33,6 +33,7 @@ class ndUndoRedoCommand : public ndClassAlloc
 
 	virtual class ndUndoRedoLoopJoint* GetAsUndoRedoLoopJoint() const { return nullptr; }
 	virtual class ndUndoRedoStructuralJoint* GetAsUndoRedoStructuralJoint() const { return nullptr; }
+	virtual class ndUndoRedoCollidingPairs* GetAsUndoRedoCollidingPairs() const { return nullptr; }
 
 	virtual class ndUndoRedoResizeMesh* GetAsUndoRedoResizeMesh() const { return nullptr; }
 	virtual class ndUndoRedoRotateMesh* GetAsUndoRedoResizeRotateMesh() const { return nullptr; }
@@ -46,6 +47,7 @@ class ndUndoRedo: public ndList<ndSharedPtr<ndUndoRedoCommand>>
 {
 	public:
 	ndUndoRedo();
+	~ndUndoRedo();
 
 	void Clear();
 	void Undo(ndAssetEditor* const owner);

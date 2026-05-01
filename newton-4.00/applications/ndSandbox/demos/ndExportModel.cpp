@@ -1283,7 +1283,7 @@ namespace ndExcavator
         {
             for (ndInt32 i = 0; i < rollersTrack.GetCount(); ++i)
             {
-                articulation->AddCollidingPair(rollersTrack[i], trackLink);
+                articulation->SetCollidingSubSelection(rollersTrack[i], trackLink);
             }
         };
 
@@ -1363,11 +1363,11 @@ void ndExportModel(ndDemoEntityManager* const scene)
     origin.m_posit.m_y = 3.0f;
     origin.m_posit.m_z = 2.0f;
     //add simple mechanical model
-    //ndBoxTricycle::BoxTricycle(scene, origin, 100.0f, 0.75f);
+    ndBoxTricycle::BoxTricycle(scene, origin, 100.0f, 0.75f);
 
     // add complex mechanical model
     origin.m_posit.m_x += 10.0f;
-    ndExcavator::MakeModel(scene, origin);
+    //ndExcavator::MakeModel(scene, origin);
 
     // add basic ragdoll
     origin.m_posit.m_z += 5.0f;

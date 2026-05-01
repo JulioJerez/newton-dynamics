@@ -46,12 +46,11 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	void RenderOptions();
 	void RenderWireFrame();
 	void RenderSelectedNode();
+	void RenderCollisionPair();
 	void RenderHiddenSurface();
 	void RenderCollisionShape();
 	void RenderCloseLoopJoints();
 	virtual void RenderScene() override;
-	
-	//ndDebugMesh* CreateRenderPrimitive(const ndShapeInstance& shapeInstance) const;
 
 	void DrawFrame(const ndMatrix& matrix);
 	void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color);
@@ -60,6 +59,9 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	ndVector m_shapeColor;
 	ndVector m_selectedColor;
 	ndVector m_loopJointColor;
+	ndVector m_collidingPairColor0;
+	ndVector m_collidingPairColor1;
+	ndVector m_collidingPairPreviewColor;
 	ndWeakPtr<ndAssetEditor> m_manager;
 	ndList<ndDebugMesh> m_debugMesh;
 };

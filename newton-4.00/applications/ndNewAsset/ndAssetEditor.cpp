@@ -36,8 +36,11 @@ ndAssetEditor::ndAssetEditor()
 	,m_showCollisionShape(true)
 	,m_showPreTransform(false)
 	,m_toolActive(false)
+	,m_gizmoScale(ndFloat32(0.25f))
 	,m_renderMode(m_shaded)
-	,m_gizmoScale(0.25f)
+	,m_closeLoopIndex(0)
+	,m_collidingPairIndex(0)
+	,m_subSelection(m_none)
 {
 	// Setup window
 	char title[256];
@@ -343,10 +346,12 @@ void ndAssetEditor::ShowMainMenuBar()
 		{
 			if (ImGui::MenuItem("New", ""))
 			{
+				m_subSelection = m_none;
 				m_mesh = ndSharedPtr<ndMesh>(nullptr);
 				m_newMesh = ndSharedPtr<ndMesh>(nullptr);
-				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 				m_newSceneMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);
+				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
+				m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
 			}
 
 			if (ImGui::MenuItem("Load", ""))
@@ -380,11 +385,13 @@ void ndAssetEditor::ShowMainMenuBar()
 				char fileName[2048];
 				if (*m_mesh && dGetSaveNdFileName(fileName, sizeof(fileName) - 1))
 				{
-					m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
+					m_subSelection = m_none;
 					m_currentPath = ndString(fileName);
 					ndRenderMeshLoader loader(*m_renderer);
 					loader.m_mesh = m_mesh;
 					loader.SaveMesh(ndString(m_currentPath));
+					m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
+					m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
 				}
 			}
 
@@ -449,6 +456,29 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::EndMenu();
 		}
 
+		if (ImGui::BeginMenu("Tools"))
+		{
+			if (ImGui::MenuItem("resize mesh", ""))
+			{
+				m_toolActive = true;
+				m_currentTool = new ndResizeMesh(this);
+			}
+
+			if (ImGui::MenuItem("rotate mesh", ""))
+			{
+				m_toolActive = true;
+				m_currentTool = new ndRotateMesh(this);
+			}
+
+			if (ImGui::MenuItem("normalize mass distibution", ""))
+			{
+				m_toolActive = true;
+				m_currentTool = new ndNomalizeMassDistribution(this);
+			}
+
+			ImGui::EndMenu();
+		}
+
 		if (ImGui::BeginMenu("Options"))
 		{
 			ImGui::Text("render mode");
@@ -476,29 +506,6 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::EndMenu();
 		}
 
-		if (ImGui::BeginMenu("Tools"))
-		{
-			if (ImGui::MenuItem("resize mesh", ""))
-			{
-				m_toolActive = true;
-				m_currentTool = new ndResizeMesh(this);
-			}
-
-			if (ImGui::MenuItem("rotate mesh", ""))
-			{
-				m_toolActive = true;
-				m_currentTool = new ndRotateMesh(this);
-			}
-
-			if (ImGui::MenuItem("normalize mass distibution", ""))
-			{
-				m_toolActive = true;
-				m_currentTool = new ndNomalizeMassDistribution(this);
-			}
-
-			ImGui::EndMenu();
-		}
-
 		ImGui::EndMainMenuBar();
 	}
 }
@@ -510,9 +517,17 @@ const ndString& ndAssetEditor::GetPath() const
 
 void ndAssetEditor::SetVisualScene(const ndRenderMeshLoader& loader)
 {
+	// force the mesh to have a defualt colliding pair list
+	loader.m_mesh->GetCollingPairs();
+
+	// force the mesh to have a default constaring loop list
+	loader.m_mesh->GetLoopJoints();
+
+	m_subSelection = m_none;
 	m_newMesh = loader.m_mesh;
 	m_newSceneMesh = loader.m_renderMesh;
 	m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
+	m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
 }
 
 void ndAssetEditor::Run()

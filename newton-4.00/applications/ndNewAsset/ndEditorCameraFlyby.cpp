@@ -148,49 +148,6 @@ void ndEditorCameraFlyby::TickUpdate(ndFloat32 timestep)
 	m_mousePosY = mouseY;
 }
 
-void ndEditorCameraFlyby::MouseSelection()
-{
-	if (!*m_editor->m_mesh)
-	{
-		return;
-	}
-
-	ndFloat32 mouseX;
-	ndFloat32 mouseY;
-	m_editor->GetMousePosition(mouseX, mouseY);
-
-	const ndRenderSceneCamera* const camera = FindCameraNode();
-	const ndVector p0(camera->ScreenToWorld(ndVector(mouseX, mouseY, ndFloat32(0.0f), ndFloat32(0.0f))));
-	const ndVector p1(camera->ScreenToWorld(ndVector(mouseX, mouseY, ndFloat32(1.0f), ndFloat32(0.0f))));
-
-	ndFloat32 hitParam = 1.0f;
-	ndSharedPtr<ndMesh> hitNode(nullptr);
-
-	auto RayCast = [this, &hitNode, &hitParam, &p0, &p1](ndMesh* const node)
-	{
-		if (node->GetGeometry())
-		{
-			const ndMatrix matrix(node->GetGeometryMatrix() * node->CalculateGlobalMatrix());
-			const ndVector localP0(matrix.UntransformVector(p0));
-			const ndVector localP1(matrix.UntransformVector(p1));
-			ndFloat32 param = node->GetGeometry()->RayCast(localP0, localP1);
-			if (param < hitParam)
-			{
-				hitParam = param;
-				hitNode = (node != *m_editor->m_mesh) ? node->GetSharedPtr() : m_editor->m_mesh;
-			}
-		}
-	};
-	m_editor->m_mesh->NodeIterator(RayCast);
-
-	if (hitNode)
-	{
-		m_editor->m_currentSelection = hitNode;
-		m_editor->m_currentLoopJointSelection = ndSharedPtr<ndMeshLoopJoint>(nullptr);
-		m_editor->m_currentCollingPairSelection = ndSharedPtr<ndMeshCollidingPair>(nullptr);
-	}
-}
-
 void ndEditorCameraFlyby::SetView(ndAssetEditor::ndCameraMode mode)
 {
 	switch (mode)
@@ -229,6 +186,66 @@ void ndEditorCameraFlyby::SetView(ndAssetEditor::ndCameraMode mode)
 
 		case ndAssetEditor::m_free:
 		default:;
-			// do nothing
+	}
+}
+
+void ndEditorCameraFlyby::MouseSelection()
+{
+	if (!*m_editor->m_mesh)
+	{
+		return;
+	}
+
+	ndFloat32 mouseX;
+	ndFloat32 mouseY;
+	m_editor->GetMousePosition(mouseX, mouseY);
+
+	const ndRenderSceneCamera* const camera = FindCameraNode();
+	const ndVector p0(camera->ScreenToWorld(ndVector(mouseX, mouseY, ndFloat32(0.0f), ndFloat32(0.0f))));
+	const ndVector p1(camera->ScreenToWorld(ndVector(mouseX, mouseY, ndFloat32(1.0f), ndFloat32(0.0f))));
+
+	ndFloat32 hitParam = 1.0f;
+	ndSharedPtr<ndMesh> hitNode(nullptr);
+
+	auto RayCast = [this, &hitNode, &hitParam, &p0, &p1](ndMesh* const node)
+		{
+			if (node->GetGeometry())
+			{
+				const ndMatrix matrix(node->GetGeometryMatrix() * node->CalculateGlobalMatrix());
+				const ndVector localP0(matrix.UntransformVector(p0));
+				const ndVector localP1(matrix.UntransformVector(p1));
+				ndFloat32 param = node->GetGeometry()->RayCast(localP0, localP1);
+				if (param < hitParam)
+				{
+					hitParam = param;
+					hitNode = (node != *m_editor->m_mesh) ? node->GetSharedPtr() : m_editor->m_mesh;
+				}
+			}
+		};
+	m_editor->m_mesh->NodeIterator(RayCast);
+
+	if (hitNode)
+	{
+		ndAssetEditor::ndSubSelectionMode selectionMode = m_editor->m_subSelection;
+		switch (selectionMode)
+		{
+			case ndAssetEditor::m_loopJoint:
+			{
+				m_editor->SetLoopJointSelection(hitNode);
+				break;
+			}
+
+			case ndAssetEditor::m_collidingPair:
+			{
+				m_editor->SetCollidingSubSelection(hitNode);
+				break;
+			}
+
+			case ndAssetEditor::m_none:
+			default:
+			{
+				m_editor->m_currentSelection = hitNode;
+			}
+		}
 	}
 }

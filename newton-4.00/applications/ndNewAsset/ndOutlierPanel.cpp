@@ -12,31 +12,28 @@
 #include "ndNewAssetStdafx.h"
 #include "ndAssetEditor.h"
 
-void ndAssetEditor::ShowOutlierExplorerCollidindPairs(const ndSharedPtr<ndMesh>& root)
+void ndAssetEditor::ShowOutlierExplorerCollidindPairs(const ndSharedPtr<ndMesh>& node)
 {
-	const ndCollidingPairs* const collidingPairs = root->GetAsCollidingPairs();
+	const ndCollidingPairs* const collidingPairs = node->GetAsCollidingPairs();
+
+	if (ImGui::IsItemClicked())
+	{
+		m_collidingPairIndex = 0;
+	}
 
 	ImGuiTreeNodeFlags options = 0;
 	options |= ImGuiTreeNodeFlags_DefaultOpen;
 	options |= ImGuiTreeNodeFlags_OpenOnArrow;
 
-	for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* ptr = collidingPairs->m_collingPairs.GetFirst(); ptr; ptr = ptr->GetNext())
+	for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* ptr = collidingPairs->m_collidingPairs.GetFirst(); ptr; ptr = ptr->GetNext())
 	{
 		char name[256];
 		ndSharedPtr<ndMeshCollidingPair>& pair = ptr->GetInfo();
-
+		
 		options = ImGuiTreeNodeFlags_Bullet;
-		options = options | ((m_currentCollingPairSelection == pair) ? ImGuiTreeNodeFlags_Selected : 0);
-
 		snprintf(name, sizeof(name) - 1, "%s-%s", pair->m_parentNode->GetName().GetStr(), pair->m_childNode->GetName().GetStr());
 		if (ImGui::TreeNodeEx(name, options))
 		{
-			if (ImGui::IsItemClicked())
-			{
-				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
-				m_currentLoopJointSelection = ndSharedPtr<ndMeshLoopJoint>(nullptr);
-				m_currentCollingPairSelection = pair;
-			}
 			ImGui::TreePop();
 		}
 	}
@@ -44,69 +41,84 @@ void ndAssetEditor::ShowOutlierExplorerCollidindPairs(const ndSharedPtr<ndMesh>&
 
 void ndAssetEditor::ShowOutlierExplorerCloseLoop(const ndSharedPtr<ndMesh>& root)
 {
-	const ndCloseLoopConstraints* closeLoop = root->GetAsCloseLoopConstraints();
+	//const ndCloseLoopConstraints* closeLoop = root->GetAsCloseLoopConstraints();
+	//for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptr = closeLoop->m_loopJoints.GetFirst(); ptr; ptr = ptr->GetNext())
+	//{
+	//	//ndAssert(0);
+	//	//char name[256];
+	//	//ndSharedPtr<ndMeshLoopJoint>& loop = ptr->GetInfo();
+	//	//
+	//	//ImGuiTreeNodeFlags options = ImGuiTreeNodeFlags_Bullet;
+	//	//options = options | ((m_currentLoopJointSelection == loop) ? ImGuiTreeNodeFlags_Selected : 0);
+	//	//
+	//	//snprintf(name, sizeof(name) - 1, "%s", loop->m_name.GetStr());
+	//	//if (ImGui::TreeNodeEx(name, options))
+	//	//{
+	//	//	if (ImGui::IsItemClicked())
+	//	//	{
+	//	//		m_currentLoopJointSelection = loop;
+	//	//		m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
+	//	//		m_currentCollingPairSelection = ndSharedPtr<ndMeshCollidingPair>(nullptr);
+	//	//	}
+	//	//	ImGui::TreePop();
+	//	//}
+	//}
+
+	const ndCloseLoopConstraints* const closeLoop = root->GetAsCloseLoopConstraints();
+
+	if (ImGui::IsItemClicked())
+	{
+		m_closeLoopIndex = 0;
+	}
+
+	ImGuiTreeNodeFlags options = 0;
+	options |= ImGuiTreeNodeFlags_DefaultOpen;
+	options |= ImGuiTreeNodeFlags_OpenOnArrow;
 
 	for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptr = closeLoop->m_loopJoints.GetFirst(); ptr; ptr = ptr->GetNext())
 	{
-		char name[256];
 		ndSharedPtr<ndMeshLoopJoint>& loop = ptr->GetInfo();
-
-		ImGuiTreeNodeFlags options = ImGuiTreeNodeFlags_Bullet;
-		options = options | ((m_currentLoopJointSelection == loop) ? ImGuiTreeNodeFlags_Selected : 0);
-
-		snprintf(name, sizeof(name) - 1, "%s", loop->m_name.GetStr());
-		if (ImGui::TreeNodeEx(name, options))
+		options = ImGuiTreeNodeFlags_Bullet;
+		if (ImGui::TreeNodeEx(loop->m_name.GetStr(), options))
 		{
-			if (ImGui::IsItemClicked())
-			{
-				m_currentLoopJointSelection = loop;
-				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
-				m_currentCollingPairSelection = ndSharedPtr<ndMeshCollidingPair>(nullptr);
-			}
 			ImGui::TreePop();
 		}
 	}
 }
 
-void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root)
+void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& node)
 {
 	ImGuiTreeNodeFlags options = 0;
 	options |= ImGuiTreeNodeFlags_DefaultOpen;
 	options |= ImGuiTreeNodeFlags_OpenOnArrow;
 
-	ImGuiTreeNodeFlags isSeleted = (m_currentSelection == root) ? ImGuiTreeNodeFlags_Selected : 0;
+	ImGuiTreeNodeFlags isSeleted = 0;
+	isSeleted = isSeleted | ((m_currentSelection == node) ? ImGuiTreeNodeFlags_Selected : 0);
+	//isSeleted = isSeleted | ((m_currentLoopJointContainerSelection == node) ? ImGuiTreeNodeFlags_Selected : 0);
+	//isSeleted = isSeleted | ((m_currentCollidingPairContainerSelection == node) ? ImGuiTreeNodeFlags_Selected : 0);
 
-	char nodeName[256];
-	snprintf(nodeName, sizeof(nodeName) - 1, "%s", root->GetName().GetStr());
-	if (ImGui::TreeNodeEx(nodeName, options | isSeleted))
+	ndAssert(node->GetName().Size());
+	if (ImGui::TreeNodeEx(node->GetName().GetStr(), options | isSeleted))
 	{
-		if (root->GetAsCloseLoopConstraints())
+		bool isClicked = ImGui::IsItemClicked();
+		if (isClicked)
 		{
-			ShowOutlierExplorerCloseLoop(root);
+			m_currentSelection = node;
 		}
-		else if (root->GetAsCollidingPairs())
+
+		if (node->GetAsCloseLoopConstraints())
 		{
-			ShowOutlierExplorerCollidindPairs(root);
+			ShowOutlierExplorerCloseLoop(node);
 		}
-		else
+		else if (node->GetAsCollidingPairs())
 		{
-			if (nodeName[0] == 0)
-			{
-				snprintf(nodeName, sizeof(nodeName) - 1, "unnamed");
-			}
-
-			bool isClicked = ImGui::IsItemClicked();
-			if (isClicked)
-			{
-				m_currentLoopJointSelection = ndSharedPtr<ndMeshLoopJoint>(nullptr);
-				m_currentCollingPairSelection = ndSharedPtr<ndMeshCollidingPair>(nullptr);
-				m_currentSelection = (m_currentSelection != root) ? root : ndSharedPtr<ndMesh>(nullptr);
-			}
-
-			//options = 0;
+			ShowOutlierExplorerCollidindPairs(node);
+		}
+		else if (m_currentSelection && m_currentSelection->GetAsMesh())
+		{
 			options |= ImGuiTreeNodeFlags_Bullet;
 
-			if (root->GetJoint())
+			if (node->GetJoint())
 			{
 				if (ImGui::TreeNodeEx("joint", options))
 				{
@@ -114,7 +126,7 @@ void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root)
 				}
 			}
 
-			if (root->GetGeometry())
+			if (node->GetGeometry())
 			{
 				if (ImGui::TreeNodeEx("geometry", options))
 				{
@@ -122,7 +134,7 @@ void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root)
 				}
 			}
 
-			if (root->GetRigidBody())
+			if (node->GetRigidBody())
 			{
 				if (ImGui::TreeNodeEx("rigidBody", options))
 				{
@@ -131,7 +143,7 @@ void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root)
 			}
 		}
 
-		const ndList<ndSharedPtr<ndMesh>>& children = root->GetChildren();
+		const ndList<ndSharedPtr<ndMesh>>& children = node->GetChildren();
 		for (ndList<ndSharedPtr<ndMesh>>::ndNode* child = children.GetFirst(); child; child = child->GetNext())
 		{
 			ndSharedPtr<ndMesh> childMesh(child->GetInfo());

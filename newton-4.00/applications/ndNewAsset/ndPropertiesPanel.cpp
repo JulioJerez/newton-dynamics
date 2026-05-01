@@ -19,25 +19,28 @@ void ndAssetEditor::ShowPropertiesPanel()
 
 	if (m_currentSelection)
 	{
-		ShowPropertiesMeshInfo();
-		if (m_currentSelection->GetRigidBody())
+		if (m_currentSelection->GetAsMesh())
 		{
-			ShowPropertiesRigidBodyInfo();
-			ShowPropertiesCollisionInfo();
-
-			if (m_currentSelection->GetJoint())
+			ShowPropertiesMeshInfo();
+			if (m_currentSelection->GetRigidBody())
 			{
-				ShowPropertiesJointInfo();
+				ShowPropertiesRigidBodyInfo();
+				ShowPropertiesCollisionInfo();
+			
+				if (m_currentSelection->GetJoint())
+				{
+					ShowPropertiesJointInfo();
+				}
 			}
 		}
-	}
-	else if (m_currentLoopJointSelection)
-	{
-		ShowPropertiesJointsLoopInfo();
-	}
-	else if (m_currentCollingPairSelection)
-	{
-
+		else if (m_currentSelection->GetAsCloseLoopConstraints())
+		{
+			ShowPropertiesJointsLoopInfo();
+		}
+		else if (m_currentSelection->GetAsCollidingPairs())
+		{
+			ShowPropertiesCollidingPairs();
+		}
 	}
 
 	ImGui::End();
