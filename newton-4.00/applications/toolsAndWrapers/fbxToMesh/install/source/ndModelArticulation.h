@@ -115,7 +115,7 @@ class ndModelArticulation: public ndModel
 	D_NEWTON_API void SetTransform(const ndMatrix& matrix);
 	D_NEWTON_API bool IsCloseLoop(const ndNode* const node) const;
 
-	D_NEWTON_API void AddCollidingPair(const ndNode* const node0, const ndNode* const node1);
+	D_NEWTON_API void SetCollidingSubSelection(const ndNode* const node0, const ndNode* const node1);
 	D_NEWTON_API bool PairCollide(const ndBody* const body0, const ndBody* const body1) const;
 	
 	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassKinematics(const ndMatrix& localFrame) const;

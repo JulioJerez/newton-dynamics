@@ -129,7 +129,7 @@ class ndMesh : public ndClassAlloc
 
 	D_NEWTON_API ndCollidingPairs* GetCollingPairs();
 	D_NEWTON_API const ndCollidingPairs* GetCollingPairs() const;
-	D_NEWTON_API void AddCollidingPair(const ndMesh* const node0, const ndMesh* const node1);
+	D_NEWTON_API void SetCollidingSubSelection(const ndMesh* const node0, const ndMesh* const node1);
 
 	D_NEWTON_API const ndString& GetName() const;
 	D_NEWTON_API void SetName(const ndString& name);
@@ -171,8 +171,6 @@ class ndMesh : public ndClassAlloc
 
 	template <typename Function>
 	void NodeIterator(Function func);
-
-
 
 	protected:
 	ndMatrix CalculateLocalMatrix(ndVector& size) const;
@@ -240,6 +238,9 @@ class ndCloseLoopConstraints: public ndMesh
 	D_NEWTON_API ndCloseLoopConstraints();
 	D_NEWTON_API ndCloseLoopConstraints(const ndMesh& src);
 
+	D_NEWTON_API virtual ndMesh* GetAsMesh();
+	D_NEWTON_API virtual const ndMesh* GetAsMesh() const;
+
 	D_NEWTON_API virtual ndCloseLoopConstraints* GetAsCloseLoopConstraints() override;
 	D_NEWTON_API virtual const ndCloseLoopConstraints* GetAsCloseLoopConstraints() const override;
 
@@ -254,12 +255,15 @@ class ndCollidingPairs : public ndMesh
 	D_NEWTON_API ndCollidingPairs();
 	D_NEWTON_API ndCollidingPairs(const ndMesh& src);
 
+	D_NEWTON_API virtual ndMesh* GetAsMesh();
+	D_NEWTON_API virtual const ndMesh* GetAsMesh() const;
+
 	D_NEWTON_API virtual ndCollidingPairs* GetAsCollidingPairs() override;
 	D_NEWTON_API virtual const ndCollidingPairs* GetAsCollidingPairs() const override;
 
 	D_NEWTON_API ndMesh* CreateClone() const override;
 
-	ndList<ndSharedPtr<ndMeshCollidingPair>> m_collingPairs;
+	ndList<ndSharedPtr<ndMeshCollidingPair>> m_collidingPairs;
 };
 
 #endif
