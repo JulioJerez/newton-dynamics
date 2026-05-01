@@ -49,7 +49,7 @@ class ndUndoRedoStructuralJoint : public ndUndoRedoCommand
 
 	virtual void Undo() override
 	{
-		ndAssert(m_editor->m_currentSelection);
+		m_mesh->SetJoint(m_joint);
 		m_editor->m_currentSelection->SetJoint(m_joint);
 	}
 	ndSharedPtr<ndMeshJoint> m_joint;
@@ -1048,7 +1048,6 @@ void ndAssetEditor::EditSphericalJoint()
 		joint->m_axis.m_minLimit = ndClamp(value, ndReal(-180.0f), ndReal(0.0f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, m_currentSelection)));
 	}
-
 
 	if (joint->m_coneAngleState)
 	{

@@ -24,13 +24,12 @@ void ndAssetEditor::ShowPropertiesPanel()
 			ShowPropertiesMeshInfo();
 			if (m_currentSelection->GetRigidBody())
 			{
-				ShowPropertiesRigidBodyInfo();
-				ShowPropertiesCollisionInfo();
-			
 				if (m_currentSelection->GetJoint())
 				{
 					ShowPropertiesJointInfo();
 				}
+				ShowPropertiesCollisionInfo();
+				ShowPropertiesRigidBodyInfo();
 			}
 		}
 		else if (m_currentSelection->GetAsCloseLoopConstraints())
