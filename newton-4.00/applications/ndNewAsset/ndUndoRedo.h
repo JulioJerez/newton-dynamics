@@ -47,6 +47,7 @@ class ndUndoRedo: public ndList<ndSharedPtr<ndUndoRedoCommand>>
 {
 	public:
 	ndUndoRedo();
+	~ndUndoRedo();
 
 	void Clear();
 	void Undo(ndAssetEditor* const owner);

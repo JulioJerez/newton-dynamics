@@ -34,6 +34,11 @@ ndUndoRedo::ndUndoRedo()
 {
 }
 
+ndUndoRedo::~ndUndoRedo()
+{
+	Clear();
+}
+
 void ndUndoRedo::Clear()
 {
 	m_currentCommand = ndWeakPtr<ndNode>(nullptr);
