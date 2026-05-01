@@ -84,6 +84,9 @@ ndAssetEditor::ndAssetEditor()
 
 	m_defaultCamera = ndSharedPtr<ndRenderSceneNode>(new ndEditorCameraFlyby(this));
 	m_renderer->SetCamera(m_defaultCamera);
+
+	// make the defualt mesh
+	NewMesh();
 }
 
 ndAssetEditor::~ndAssetEditor ()
@@ -338,6 +341,16 @@ void ndAssetEditor::ConfigureDockSpace()
 	ImGui::End();
 }
 
+void ndAssetEditor::NewMesh()
+{
+	ndRenderMeshLoader loader(*m_renderer);
+	loader.m_mesh = ndSharedPtr<ndMesh>(new ndMesh);
+	loader.m_mesh->SetName("root");
+	loader.m_renderMesh = ndRenderMeshLoader::CreateRenderSceneMesh(*GetRenderer(), *loader.m_mesh, ndString());
+	SetVisualScene(loader);
+	m_undoRedo.Clear();
+}
+
 void ndAssetEditor::ShowMainMenuBar()
 {
 	if (ImGui::BeginMainMenuBar())
@@ -346,12 +359,7 @@ void ndAssetEditor::ShowMainMenuBar()
 		{
 			if (ImGui::MenuItem("New", ""))
 			{
-				m_subSelection = m_none;
-				m_mesh = ndSharedPtr<ndMesh>(nullptr);
-				m_newMesh = ndSharedPtr<ndMesh>(nullptr);
-				m_newSceneMesh = ndSharedPtr<ndRenderSceneNode>(nullptr);
-				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
-				m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+				NewMesh();
 			}
 
 			if (ImGui::MenuItem("Load", ""))

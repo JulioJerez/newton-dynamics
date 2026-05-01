@@ -133,7 +133,7 @@ class ndAssetEditor : public ndClassAlloc
 	const ndString& GetPath() const;
 	void SetVisualScene(const ndRenderMeshLoader& loader);
 
-	//private:
+	void NewMesh();
 	void RenderScene();
 	void OnSubStepPostUpdate(ndFloat32 timestep);
 
