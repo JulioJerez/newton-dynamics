@@ -208,20 +208,20 @@ void ndEditorCameraFlyby::MouseSelection()
 	ndSharedPtr<ndMesh> hitNode(nullptr);
 
 	auto RayCast = [this, &hitNode, &hitParam, &p0, &p1](ndMesh* const node)
+	{
+		if (node->GetGeometry())
 		{
-			if (node->GetGeometry())
+			const ndMatrix matrix(node->GetGeometryMatrix() * node->CalculateGlobalMatrix());
+			const ndVector localP0(matrix.UntransformVector(p0));
+			const ndVector localP1(matrix.UntransformVector(p1));
+			ndFloat32 param = node->GetGeometry()->RayCast(localP0, localP1);
+			if (param < hitParam)
 			{
-				const ndMatrix matrix(node->GetGeometryMatrix() * node->CalculateGlobalMatrix());
-				const ndVector localP0(matrix.UntransformVector(p0));
-				const ndVector localP1(matrix.UntransformVector(p1));
-				ndFloat32 param = node->GetGeometry()->RayCast(localP0, localP1);
-				if (param < hitParam)
-				{
-					hitParam = param;
-					hitNode = (node != *m_editor->m_mesh) ? node->GetSharedPtr() : m_editor->m_mesh;
-				}
+				hitParam = param;
+				hitNode = (node != *m_editor->m_mesh) ? node->GetSharedPtr() : m_editor->m_mesh;
 			}
-		};
+		}
+	};
 	m_editor->m_mesh->NodeIterator(RayCast);
 
 	if (hitNode)
