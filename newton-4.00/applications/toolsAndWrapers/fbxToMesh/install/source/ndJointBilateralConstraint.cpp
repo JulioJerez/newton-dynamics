@@ -32,6 +32,8 @@ ndVector ndJointBilateralConstraint::m_linearDebugColor(ndFloat32(1.0f), ndFloat
 
 ndJointBilateralConstraint::ndJointBilateralConstraint()
 	:ndConstraint()
+	,m_localMatrix0(ndGetIdentityMatrix())
+	,m_localMatrix1(ndGetIdentityMatrix())
 	,m_worldNode(nullptr)
 	,m_body0Node(nullptr)
 	,m_body1Node(nullptr)
