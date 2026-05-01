@@ -651,6 +651,11 @@ void ndMesh::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) c
 		}
 	};
 	((ndMesh*)this)->NodeIterator(GetAabb);
+	if ((p1.m_x - p0.m_x) < ndFloat32(0.0f))
+	{
+		p0 = ndVector::m_zero;
+		p1 = ndVector::m_zero;
+	}
 }
 
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionBox()
