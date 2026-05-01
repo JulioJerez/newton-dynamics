@@ -52,26 +52,6 @@ namespace ndRagdoll
 	class ndRagDollController : public ndModelNotify
 	{ 
 		public:
-		class ndFilterPair
-		{
-			public:
-			ndFilterPair(const ndBody* const body0, const ndBody* const body1)
-				:m_id0(ndMin(body0->GetId(), body1->GetId()))
-				,m_id1(ndMax(body0->GetId(), body1->GetId()))
-			{
-			}
-
-			union
-			{
-				ndUnsigned64 m_id;
-				struct
-				{
-					ndUnsigned32 m_id0;
-					ndUnsigned32 m_id1;
-				};
-			};
-		};
-
 		ndRagDollController()
 			:ndModelNotify()
 		{
@@ -79,24 +59,10 @@ namespace ndRagdoll
 
 		bool OnContactGeneration(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1) override
 		{
-			// The application can use filtering here to decide which body parts should collide.
-			// This significantly improves performance by preventing the generation of
-			// unnecessary n^2 contact joints that will never collide. 
-			// In general, articulated models do not self-collide, 
-			// although some parts may occasionally interact. 
-
-			const ndFilterPair code(body0, body1);
-			for (ndInt32 i = ndInt32 (m_collisionFilter.GetCount()) - 1; i >= 0; --i)
-			{
-				if (code.m_id == m_collisionFilter[i].m_id)
-				{
-					return true;
-				}
-			}
-			return false;
+			// check if the model has self collsion pairs
+			const ndModelArticulation* const articulation = GetModel()->GetAsModelArticulation();
+			return articulation->PairCollide(body0, body1);
 		}
-
-		ndArray<ndFilterPair> m_collisionFilter;
 	};
 
 	ndSharedPtr<ndModelNotify> CreateRagdoll(ndDemoEntityManager* const scene, const ndRenderMeshLoader& loader, const ndMatrix& location)
@@ -130,27 +96,6 @@ namespace ndRagdoll
 			ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
 			node->m_body->SetNotifyCallback(notify);
 
-			// get the collision pairs filters
-			if (node->m_body)
-			{
-				const ndMesh* const meshOwner = mesh->FindByName(node->m_name);
-				ndAssert(meshOwner);
-				ndAssert(meshOwner->GetRigidBody());
-
-				ndAssert(0);
-				//const ndMeshBodyDynamic* const rigidBodyInfo = (ndMeshBodyDynamic*)*meshOwner->GetRigidBody();
-				//ndBody* const body0 = *node->m_body;
-				//for (ndInt32 i = 0; i < rigidBodyInfo->m_collidingPair.GetCount(); ++i)
-				//{
-				//	const ndString& name = rigidBodyInfo->m_collidingPair[i]->GetName();
-				//	ndBody* const body1 = *ragdoll->FindByName(name.GetStr())->m_body;
-				//
-				//	// we add all the colliding pairs, kknowing rher will be duplicates.
-				//	ndRagDollController::ndFilterPair newPair(body0, body1);
-				//	ragdollController->m_collisionFilter.PushBack(newPair);
-				//}
-			}
-
 			if (node->m_joint)
 			{
 				ndSharedPtr<ndJointUserData> userData(new ndMakeRagDoll(*node->m_joint, ragdoll));
@@ -158,24 +103,6 @@ namespace ndRagdoll
 			}
 		};
 		ragdoll->NodeIterator(BindApplicationData);
-
-		// remove collindg pais duplicated, 
-		// the list is small, we can just do a brute force sercj for duplicates
-		for (ndInt32 i = ndInt32 (ragdollController->m_collisionFilter.GetCount()) - 1; i > 0; --i)
-		{
-			ndRagDollController::ndFilterPair code0(ragdollController->m_collisionFilter[i]);
-			for (ndInt32 j = i - 1; j >= 0; --j)
-			{
-				ndRagDollController::ndFilterPair code1(ragdollController->m_collisionFilter[j]);
-				if (code0.m_id == code1.m_id)
-				{
-					ndInt32 lastIndex = ndInt32 (ragdollController->m_collisionFilter.GetCount()) - 1;
-					ragdollController->m_collisionFilter[j] = ragdollController->m_collisionFilter[lastIndex];
-					ragdollController->m_collisionFilter.SetCount(lastIndex);
-					break;
-				}
-			}
-		}
 
 		// apply the global transforms to the visual mesh and physics model
 		const ndMatrix matrix(ragdoll->GetRoot()->m_body->GetMatrix() * location);

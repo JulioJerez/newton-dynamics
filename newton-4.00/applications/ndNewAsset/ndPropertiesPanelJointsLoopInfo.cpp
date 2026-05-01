@@ -1494,6 +1494,11 @@ void ndAssetEditor::EditSwivelPositionEffectorLoopJoint(ndSharedPtr<ndMeshLoopJo
 
 void ndAssetEditor::AddLoopJoint()
 {
+	//ndCollidingPairs* const collidingPairs = m_mesh->GetCollingPairs();
+	//ndSharedPtr<ndMeshCollidingPair> pair(new ndMeshCollidingPair(*m_currentSelection, *m_currentSubSelection));
+	//collidingPairs->m_collidingPairs.Append(pair);
+	//m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+
 	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	ndCloseLoopConstraints* const loops = m_mesh->GetLoopJoints();
 

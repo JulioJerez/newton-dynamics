@@ -18,6 +18,7 @@ void ndAssetEditor::ShowOutlierExplorerCollidindPairs(const ndSharedPtr<ndMesh>&
 
 	if (ImGui::IsItemClicked())
 	{
+		m_subSelection = m_none;
 		m_collidingPairIndex = 0;
 	}
 
@@ -41,34 +42,12 @@ void ndAssetEditor::ShowOutlierExplorerCollidindPairs(const ndSharedPtr<ndMesh>&
 
 void ndAssetEditor::ShowOutlierExplorerCloseLoop(const ndSharedPtr<ndMesh>& root)
 {
-	//const ndCloseLoopConstraints* closeLoop = root->GetAsCloseLoopConstraints();
-	//for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptr = closeLoop->m_loopJoints.GetFirst(); ptr; ptr = ptr->GetNext())
-	//{
-	//	//ndAssert(0);
-	//	//char name[256];
-	//	//ndSharedPtr<ndMeshLoopJoint>& loop = ptr->GetInfo();
-	//	//
-	//	//ImGuiTreeNodeFlags options = ImGuiTreeNodeFlags_Bullet;
-	//	//options = options | ((m_currentLoopJointSelection == loop) ? ImGuiTreeNodeFlags_Selected : 0);
-	//	//
-	//	//snprintf(name, sizeof(name) - 1, "%s", loop->m_name.GetStr());
-	//	//if (ImGui::TreeNodeEx(name, options))
-	//	//{
-	//	//	if (ImGui::IsItemClicked())
-	//	//	{
-	//	//		m_currentLoopJointSelection = loop;
-	//	//		m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
-	//	//		m_currentCollingPairSelection = ndSharedPtr<ndMeshCollidingPair>(nullptr);
-	//	//	}
-	//	//	ImGui::TreePop();
-	//	//}
-	//}
-
 	const ndCloseLoopConstraints* const closeLoop = root->GetAsCloseLoopConstraints();
 
 	if (ImGui::IsItemClicked())
 	{
 		m_closeLoopIndex = 0;
+		m_subSelection = m_none;
 	}
 
 	ImGuiTreeNodeFlags options = 0;
@@ -94,8 +73,6 @@ void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& node)
 
 	ImGuiTreeNodeFlags isSeleted = 0;
 	isSeleted = isSeleted | ((m_currentSelection == node) ? ImGuiTreeNodeFlags_Selected : 0);
-	//isSeleted = isSeleted | ((m_currentLoopJointContainerSelection == node) ? ImGuiTreeNodeFlags_Selected : 0);
-	//isSeleted = isSeleted | ((m_currentCollidingPairContainerSelection == node) ? ImGuiTreeNodeFlags_Selected : 0);
 
 	ndAssert(node->GetName().Size());
 	if (ImGui::TreeNodeEx(node->GetName().GetStr(), options | isSeleted))

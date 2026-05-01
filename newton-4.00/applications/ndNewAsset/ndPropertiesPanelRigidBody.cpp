@@ -229,27 +229,26 @@ void ndAssetEditor::EditCollidingPair()
 	ImGui::Separator();
 	if (m_subSelection != m_collidingPair)
 	{
-		if (ImGui::Button("edit colliding pairs"))
+		if (ImGui::Button("enter colliding pairs"))
 		{
 			m_subSelection = m_collidingPair;
 		}
 	}
 	else
 	{
+		if (ImGui::Button("exit colliding pairs"))
+		{
+			m_subSelection = m_none;
+			m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+		}
+
+		ImGui::SameLine();
 		if (ImGui::Button("add pair"))
 		{
 			if (m_currentSubSelection)
 			{
-				ndAssert(0);
 				AddCollidingPair();
 			}
-		}
-
-		ImGui::SameLine();
-		if (ImGui::Button("reset colliding pairs"))
-		{
-			m_subSelection = m_none;
-			m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
 		}
 	}
 }
@@ -259,26 +258,21 @@ void ndAssetEditor::EditLoopJoints()
 	ImGui::Separator();
 	if (m_subSelection != m_loopJoint)
 	{
-		if (ImGui::Button("edit loop joint"))
+		if (ImGui::Button("enter loop joint"))
 		{
 			m_subSelection = m_loopJoint;
 		}
 	}
 	else
 	{
-		if (ImGui::Button("select secund body"))
+		if (ImGui::Button("exit loop joints"))
 		{
-			if (m_currentSubSelection)
-			{
-				ndAssert(0);
-				//ndCollidingPairs* const collidingPairs = m_mesh->GetCollingPairs();
-				//ndSharedPtr<ndMeshCollidingPair> pair(new ndMeshCollidingPair(*m_currentSelection, *m_currentSubSelection));
-				//collidingPairs->m_collidingPairs.Append(pair);
-				//m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
-			}
+			m_subSelection = m_none;
+			m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
 		}
 
-		if (ImGui::Button("add loop joints"))
+		ImGui::SameLine();
+		if (ImGui::Button("add loop joint"))
 		{
 			if (m_currentSubSelection)
 			{
@@ -286,13 +280,6 @@ void ndAssetEditor::EditLoopJoints()
 				m_subSelection = m_none;
 				m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
 			}
-		}
-
-		//ImGui::SameLine();
-		if (ImGui::Button("reset loop joints"))
-		{
-			m_subSelection = m_none;
-			m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
 		}
 	}
 }
