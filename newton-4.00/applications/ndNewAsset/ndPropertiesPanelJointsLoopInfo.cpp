@@ -17,10 +17,14 @@ class ndUndoRedoLoopJoint : public ndUndoRedoCommand
 {
 	public:
 	ndUndoRedoLoopJoint(ndAssetEditor* const editor)
-		:ndUndoRedoCommand(editor, ndSharedPtr<ndMesh>(nullptr))
-		//,m_loopJoint(ndSharedPtr<ndMeshLoopJoint>(new ndMeshLoopJoint(**editor->m_currentSelection->GetAsCloseLoopConstraints())))
+		:ndUndoRedoCommand(editor, editor->m_mesh->GetLoopJoints()->GetSharedPtr())
 	{
-		ndAssert(0);
+		ndCloseLoopConstraints* const loops = m_mesh->GetLoopJoints();
+		for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptr = loops->m_loopJoints.GetFirst(); ptr; ptr = ptr->GetNext())
+		{
+			ndSharedPtr<ndMeshLoopJoint> copy(new ndMeshLoopJoint(**ptr->GetInfo()));
+			m_loopJoints.Append(copy);
+		}
 	}
 
 	virtual class ndUndoRedoLoopJoint* GetAsUndoRedoLoopJoint() const override
@@ -35,9 +39,17 @@ class ndUndoRedoLoopJoint : public ndUndoRedoCommand
 			ndUndoRedoLoopJoint* const other = command.GetAsUndoRedoLoopJoint();
 			if (other)
 			{
-				const ndMeshLoopJoint* const self = *m_loopJoint;
-				const ndMeshLoopJoint* const otherSelf = *other->m_loopJoint;
-				bool test = (*self == *otherSelf);
+				bool test = m_loopJoints.GetCount() == other->m_loopJoints.GetCount();
+				if (test)
+				{
+					ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* otherPtr = other->m_loopJoints.GetFirst();
+					for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptr = m_loopJoints.GetFirst(); test && ptr; ptr = ptr->GetNext())
+					{
+						const ndMeshLoopJoint* const self = *ptr->GetInfo();
+						const ndMeshLoopJoint* const otherSelf = *otherPtr->GetInfo();
+						test = test && (*self == *otherSelf);
+					}
+				}
 				if (test)
 				{
 					return false;
@@ -50,25 +62,16 @@ class ndUndoRedoLoopJoint : public ndUndoRedoCommand
 
 	virtual void Undo() override
 	{
-		ndAssert(0);
-		//ndAssert(m_editor->m_currentLoopJointSelection);
-		//ndCloseLoopConstraints* const loopContainer = m_editor->m_mesh->GetLoopJoints();
-		//ndAssert(loopContainer);
-		//for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* node = loopContainer->m_loopJoints.GetFirst(); node; node = node->GetNext())
-		//{
-		//	const ndSharedPtr<ndMeshLoopJoint>& loopJoint = node->GetInfo();
-		//	if (loopJoint == m_editor->m_currentLoopJointSelection)
-		//	{
-		//		ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* const newNode = loopContainer->m_loopJoints.Append(m_loopJoint);
-		//		loopContainer->m_loopJoints.InsertAfter(node, newNode);
-		//		loopContainer->m_loopJoints.Remove(node);
-		//		break;
-		//	}
-		//}
-		//m_editor->m_currentLoopJointSelection = m_loopJoint;
+		ndCloseLoopConstraints* const loops = m_mesh->GetLoopJoints();
+		loops->m_loopJoints.RemoveAll();
+		for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* node = m_loopJoints.GetFirst(); node; node = node->GetNext())
+		{
+			ndSharedPtr<ndMeshLoopJoint> copy(new ndMeshLoopJoint(**node->GetInfo()));
+			loops->m_loopJoints.Append(copy);
+		}
 	}
 
-	ndSharedPtr<ndMeshLoopJoint> m_loopJoint;
+	ndList<ndSharedPtr<ndMeshLoopJoint>> m_loopJoints;
 };
 
 void ndAssetEditor::EditLoopJointLocalMatrix(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
@@ -87,7 +90,6 @@ void ndAssetEditor::EditLoopJointLocalMatrix(ndSharedPtr<ndMeshLoopJoint>& loopJ
 			position[0] = ndReal(0.0f);
 			position[1] = ndReal(0.0f);
 			position[2] = ndReal(0.0f);
-			//snprintf(name, sizeof(name) - 1, "rel position%s", labelTag);
 			if (ImGui::InputFloat3("rel position##0", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1490,8 +1492,19 @@ void ndAssetEditor::EditSwivelPositionEffectorLoopJoint(ndSharedPtr<ndMeshLoopJo
 	}
 }
 
-
 void ndAssetEditor::AddLoopJoint()
 {
-	ndTrace(("Add Loop Joint"));
+	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	ndCloseLoopConstraints* const loops = m_mesh->GetLoopJoints();
+
+	ndJointSpherical sphericalJoint;
+	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointSpherical(loops, &sphericalJoint));
+	ndSharedPtr<ndMeshLoopJoint> newLoop (new ndMeshLoopJoint(loops, joint, *m_currentSelection, *m_currentSubSelection));
+
+	char name[256];
+	snprintf(name, sizeof(name) - 1, "%s-%s", m_currentSelection->GetName().GetStr(), m_currentSubSelection->GetName().GetStr());
+	newLoop->m_name = ndString (name);
+
+	loops->m_loopJoints.Append(newLoop);
+	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 }

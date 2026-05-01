@@ -275,8 +275,8 @@ void ndDebugDisplayRenderPass::RenderCloseLoopJoints()
 	ndCloseLoopConstraints* const loops = m_manager->m_currentSelection->GetAsCloseLoopConstraints();;
 	ndAssert(loops);
 
-	ndSharedPtr<ndMeshLoopJoint> loop(nullptr);
 	ndInt32 i = 0;
+	ndSharedPtr<ndMeshLoopJoint> loop(nullptr);
 	for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptr = loops->m_loopJoints.GetFirst(); ptr; ptr = ptr->GetNext())
 	{
 		if (i == m_manager->m_closeLoopIndex)
@@ -287,42 +287,45 @@ void ndDebugDisplayRenderPass::RenderCloseLoopJoints()
 		i++;
 	}
 
-	const ndMeshLoopJoint* const currentLoopJointSelection = *loop;
-	for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
+	if (loop)
 	{
-		const ndDebugMesh& debugMesh = ptr->GetInfo();
-		const ndRenderPrimitive* const primitive = *debugMesh.m_zBufferShape;
-		if (primitive && primitive->m_segments.GetCount())
+		const ndMeshLoopJoint* const currentLoopJointSelection = *loop;
+		for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
 		{
-			ndSharedPtr<ndMeshBody> body(nullptr);
-			if (currentLoopJointSelection->m_childNode->GetName() == debugMesh.m_parent->m_name)
+			const ndDebugMesh& debugMesh = ptr->GetInfo();
+			const ndRenderPrimitive* const primitive = *debugMesh.m_zBufferShape;
+			if (primitive && primitive->m_segments.GetCount())
 			{
-				body = currentLoopJointSelection->m_childNode->GetRigidBody();
-				const ndMatrix frame(currentLoopJointSelection->m_joint->m_localFrame0 * debugMesh.m_parent->m_globalMatrix);
-				DrawFrame(frame);
-			}
-			else if (currentLoopJointSelection->m_parentNode->GetName() == debugMesh.m_parent->m_name)
-			{
-				body = currentLoopJointSelection->m_parentNode->GetRigidBody();
-				const ndMatrix frame(currentLoopJointSelection->m_joint->m_localFrame1 * debugMesh.m_parent->m_globalMatrix);
-				DrawFrame(frame);
-			}
-	
-			if (body)
-			{
-				const ndMeshBodyKinematic* const kinBody = (ndMeshBodyKinematic*)*body;
-				const ndVector scale(kinBody->m_shapeInstance.m_scale);
-				ndMatrix scaleMatrix(ndGetIdentityMatrix());
-				scaleMatrix[0][0] = scale[0];
-				scaleMatrix[1][1] = scale[1];
-				scaleMatrix[2][2] = scale[2];
-				const ndMatrix pivotMatrix(scaleMatrix * kinBody->m_shapeInstance.m_localMatrix * debugMesh.m_parent->m_globalMatrix);
-				primitive->Render(m_owner, pivotMatrix, m_debugDisplaySetZbuffer);
-	
-				ndRenderPrimitiveSegment& segment = debugMesh.m_wireFrameShape->m_segments.GetFirst()->GetInfo();
-				ndRenderPrimitiveMaterial* const material = &segment.m_material;
-				material->m_diffuse = m_loopJointColor;
-				debugMesh.m_wireFrameShape->Render(m_owner, pivotMatrix, m_debugDisplayWireFrameMesh);
+				ndSharedPtr<ndMeshBody> body(nullptr);
+				if (currentLoopJointSelection->m_childNode->GetName() == debugMesh.m_parent->m_name)
+				{
+					body = currentLoopJointSelection->m_childNode->GetRigidBody();
+					const ndMatrix frame(currentLoopJointSelection->m_joint->m_localFrame0 * debugMesh.m_parent->m_globalMatrix);
+					DrawFrame(frame);
+				}
+				else if (currentLoopJointSelection->m_parentNode->GetName() == debugMesh.m_parent->m_name)
+				{
+					body = currentLoopJointSelection->m_parentNode->GetRigidBody();
+					const ndMatrix frame(currentLoopJointSelection->m_joint->m_localFrame1 * debugMesh.m_parent->m_globalMatrix);
+					DrawFrame(frame);
+				}
+
+				if (body)
+				{
+					const ndMeshBodyKinematic* const kinBody = (ndMeshBodyKinematic*)*body;
+					const ndVector scale(kinBody->m_shapeInstance.m_scale);
+					ndMatrix scaleMatrix(ndGetIdentityMatrix());
+					scaleMatrix[0][0] = scale[0];
+					scaleMatrix[1][1] = scale[1];
+					scaleMatrix[2][2] = scale[2];
+					const ndMatrix pivotMatrix(scaleMatrix * kinBody->m_shapeInstance.m_localMatrix * debugMesh.m_parent->m_globalMatrix);
+					primitive->Render(m_owner, pivotMatrix, m_debugDisplaySetZbuffer);
+
+					ndRenderPrimitiveSegment& segment = debugMesh.m_wireFrameShape->m_segments.GetFirst()->GetInfo();
+					ndRenderPrimitiveMaterial* const material = &segment.m_material;
+					material->m_diffuse = m_loopJointColor;
+					debugMesh.m_wireFrameShape->Render(m_owner, pivotMatrix, m_debugDisplayWireFrameMesh);
+				}
 			}
 		}
 	}

@@ -242,10 +242,6 @@ void ndAssetEditor::EditCollidingPair()
 			{
 				ndAssert(0);
 				AddCollidingPair();
-				//ndCollidingPairs* const collidingPairs = m_mesh->GetCollingPairs();
-				//ndSharedPtr<ndMeshCollidingPair> pair(new ndMeshCollidingPair(*m_currentSelection, *m_currentSubSelection));
-				//collidingPairs->m_collidingPairs.Append(pair);
-				//m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
 			}
 		}
 
@@ -274,10 +270,11 @@ void ndAssetEditor::EditLoopJoints()
 		{
 			if (m_currentSubSelection)
 			{
-				ndCollidingPairs* const collidingPairs = m_mesh->GetCollingPairs();
-				ndSharedPtr<ndMeshCollidingPair> pair(new ndMeshCollidingPair(*m_currentSelection, *m_currentSubSelection));
-				collidingPairs->m_collidingPairs.Append(pair);
-				m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+				ndAssert(0);
+				//ndCollidingPairs* const collidingPairs = m_mesh->GetCollingPairs();
+				//ndSharedPtr<ndMeshCollidingPair> pair(new ndMeshCollidingPair(*m_currentSelection, *m_currentSubSelection));
+				//collidingPairs->m_collidingPairs.Append(pair);
+				//m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
 			}
 		}
 

@@ -39,12 +39,15 @@ class ndUndoRedoCollidingPairs : public ndUndoRedoCommand
 			ndUndoRedoCollidingPairs* const other = command.GetAsUndoRedoCollidingPairs();
 			if (other)
 			{
-				bool test = m_collidingPairs.GetCount() == other->m_collidingPairs.GetCount();
-				ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* otherPtr = other->m_collidingPairs.GetFirst();
-				for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* ptr = m_collidingPairs.GetFirst(); test && ptr; ptr = ptr->GetNext())
+				bool test = (m_collidingPairs.GetCount() == other->m_collidingPairs.GetCount());
+				if (test)
 				{
-					test = test && (ptr->GetInfo() == otherPtr->GetInfo());
-					otherPtr = otherPtr->GetNext();
+					ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* otherPtr = other->m_collidingPairs.GetFirst();
+					for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* ptr = m_collidingPairs.GetFirst(); test && ptr; ptr = ptr->GetNext())
+					{
+						test = test && (ptr->GetInfo() == otherPtr->GetInfo());
+						otherPtr = otherPtr->GetNext();
+					}
 				}
 				if (test)
 				{
@@ -161,6 +164,19 @@ void ndAssetEditor::SetLoopJointSelection(const ndSharedPtr<ndMesh>& subSelectio
 	{
 		return;
 	}
+
+	ndCloseLoopConstraints* const loops = m_mesh->GetLoopJoints();
+	for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptr = loops->m_loopJoints.GetFirst(); ptr; ptr = ptr->GetNext())
+	{
+		const ndSharedPtr<ndMeshLoopJoint>& loop = ptr->GetInfo();
+		bool test = (*loop->m_childNode == *m_currentSelection) && (*loop->m_parentNode == *subSelection);
+		test = test || (*loop->m_parentNode == *m_currentSelection) && (*loop->m_childNode == *subSelection);
+		if (test)
+		{
+			return;
+		}
+	}
+
 	m_currentSubSelection = subSelection;
 }
 
