@@ -701,7 +701,8 @@ void ndFbxMeshLoader::ImportMeshNode(ndOfbx::Object* const fbxNode, ndFbx2ndMesh
 			if (clusterIndexCount)
 			{
 				const ndOfbx::Object* const fbxBone = fbxCluster->getLink();
-				ndInt32 hashId = ndInt32(ndCRC64(fbxBone->name) & 0xffffffff);
+				//ndInt32 hashId = ndInt32(ndCRC64(fbxBone->name) & 0xffffffff);
+				ndUnsigned32 hashId = ndUnsigned32(ndCRC64(fbxBone->name) & 0xffffffff);
 				const ndInt32* const indices = fbxCluster->getIndices();
 				const ndFloat64* const weights = fbxCluster->getWeights();
 				for (ndInt32 j = 0; j < clusterIndexCount; ++j)

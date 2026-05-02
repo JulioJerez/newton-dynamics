@@ -205,7 +205,11 @@ class glSkinVertex : public glPositionNormalUV
 {
 	public:
 	glVector4 m_weighs;
-	ndInt32 m_boneIndex[4];
+	union 
+	{
+		GLuint m_boneIndexInt[4];
+		GLfloat m_boneIndexFloat[4];
+	};
 };
 
 #endif 

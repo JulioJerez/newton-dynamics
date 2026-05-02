@@ -311,6 +311,10 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 								//loopJoint->m_joint = newJoint->GetMeshJoint(*joint->m_owner);
 								//joint = m_currentLoopJointSelection->m_joint;
 								//m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+								ndAssert(0);
+								loopJoint->m_joint = newJoint->GetMeshJoint(*loopJoint->m_joint->m_owner);
+								//joint = m_currentLoopJointSelection->m_joint;
+								m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 							};
 							auto InitNewGlobalJoint = [this, &loopJoint](ndSharedPtr<ndJointBilateralConstraint>& newJoint)
 							{
@@ -321,9 +325,10 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 								newJoint->SetLocalMatrix0(localFrame0);
 								newJoint->SetLocalMatrix1(localFrame1);
 			
-								//loopJoint->m_joint = newJoint->GetMeshJoint(*joint->m_owner);
+								ndAssert(0);
+								loopJoint->m_joint = newJoint->GetMeshJoint(*loopJoint->m_joint->m_owner);
 								//joint = m_currentLoopJointSelection->m_joint;
-								//m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+								m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 							};
 			
 							if (strcmp(name, ndJointFix6dof::StaticClassName()) == 0)
