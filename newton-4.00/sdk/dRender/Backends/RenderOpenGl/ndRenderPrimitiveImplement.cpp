@@ -613,7 +613,6 @@ void ndRenderPrimitiveImplement::BuildRenderSkinnedMeshFromMeshEffect(const ndRe
 
 					ndRenderSceneNode* const entity = boneNode->GetInfo();
 					m_skeleton.PushBack(entity);
-					//const ndMatrix boneMatrix(entity->GetTransform().GetMatrix() * parentMatrix.Pop());
 					const ndMatrix boneMatrix(entity->CalculateGlobalTransform());
 					const ndMatrix paletteMatrix(shapeBindMatrix * boneMatrix.OrthoInverse());
 					m_bindingSkinMatrixArray.PushBack(paletteMatrix);
