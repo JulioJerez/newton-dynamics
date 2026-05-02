@@ -120,15 +120,13 @@ class ndPlayerCapsuleController : public ndModelNotify
 
 		virtual ndMatrix CalculateLocalTransform() const override
 		{
-			const ndMatrix camMatrix(m_parent->CalculateGlobalTransform().OrthoInverse());
+			const ndMatrix camMatrix(m_parent ? m_parent->CalculateGlobalTransform().OrthoInverse() : ndGetIdentityMatrix());
 			const ndVector gravity(ndVector::m_triplexMask & m_playerBody->GetNotifyCallback()->GetGravity());
 			const ndVector upDir(gravity.Normalize().Scale(-1.0f));
 			ndMatrix playerMatrix(m_playerBody->GetMatrix());
 			playerMatrix.m_posit += upDir.Scale(2.5f);
 
 			const ndMatrix pitchAngle(ndRollMatrix(m_pitch));
-			//const ndMatrix yawAngle(ndYawMatrix(m_headingAngle));
-			//const ndMatrix matrix(pitchAngle * yawAngle * playerMatrix * camMatrix);
 			const ndMatrix matrix(pitchAngle * playerMatrix * camMatrix);
 			return matrix;
 		}
@@ -163,8 +161,11 @@ class ndPlayerCapsuleController : public ndModelNotify
 		ndDemoEntityNotify* const playerNotify = (ndDemoEntityNotify*)*m_playerBody->GetAsBodyKinematic()->GetNotifyCallback();
 		ndSharedPtr<ndRenderSceneNode> playerMesh(playerNotify->GetUserData());
 		ndRenderSceneNode* const cameraNodePivot = playerMesh->FindByName("cameraPivot");
-		ndAssert(cameraNodePivot);
-		cameraNodePivot->AddChild(m_cameraNode);
+		if (cameraNodePivot)
+		{
+			ndAssert(cameraNodePivot);
+			cameraNodePivot->AddChild(m_cameraNode);
+		}
 	}
 
 	ndSharedPtr<ndRenderSceneNode> GetCamera()
@@ -217,35 +218,39 @@ class ndPlayerCapsuleController : public ndModelNotify
 		ndDemoEntityNotify* const playerNotify = (ndDemoEntityNotify*)*m_playerBody->GetAsBodyKinematic()->GetNotifyCallback();
 		ndSharedPtr<ndRenderSceneNode> playerMesh(playerNotify->GetUserData());
 
-		ndSharedPtr<ndAnimationSequence> runSequence(loader.FindSequence(ndGetWorkingFileName("mocap_run.fbx")));
-		ndSharedPtr<ndAnimationSequence> idleSequence(loader.FindSequence(ndGetWorkingFileName("mocap_idle.fbx")));
-		ndSharedPtr<ndAnimationSequence> walkSequence(loader.FindSequence(ndGetWorkingFileName("mocap_walk.fbx")));
-		ndAssert(*runSequence);
-		ndAssert(*idleSequence);
-		ndAssert(*walkSequence);
-
 		// create bind pose to animation sequences.
-		const ndList<ndAnimationKeyFramesTrack>& tracks = walkSequence->GetTracks();
-		for (ndList<ndAnimationKeyFramesTrack>::ndNode* node = tracks.GetFirst(); node; node = node->GetNext())
+		if (loader.FindSequence(ndGetWorkingFileName("mocap_walk.fbx")))
 		{
-			ndAnimationKeyFramesTrack& track = node->GetInfo();
-			const ndString& name = track.GetName();
-			ndRenderSceneNode* const bone = playerMesh->FindByClosestMatch(name);
-			ndAssert(bone);
+			ndSharedPtr<ndAnimationSequence> walkSequence(loader.FindSequence(ndGetWorkingFileName("mocap_walk.fbx")));
+			ndSharedPtr<ndAnimationSequence> runSequence(loader.FindSequence(ndGetWorkingFileName("mocap_run.fbx")));
+			ndSharedPtr<ndAnimationSequence> idleSequence(loader.FindSequence(ndGetWorkingFileName("mocap_idle.fbx")));
 
-			ndAnimKeyframe keyFrame;
-			keyFrame.m_userData = bone;
-			m_keyFrameOutput.PushBack(keyFrame);
+			ndAssert(*runSequence);
+			ndAssert(*idleSequence);
+			ndAssert(*walkSequence);
+
+			const ndList<ndAnimationKeyFramesTrack>& tracks = walkSequence->GetTracks();
+			for (ndList<ndAnimationKeyFramesTrack>::ndNode* node = tracks.GetFirst(); node; node = node->GetNext())
+			{
+				ndAnimationKeyFramesTrack& track = node->GetInfo();
+				const ndString& name = track.GetName();
+				ndRenderSceneNode* const bone = playerMesh->FindByClosestMatch(name);
+				ndAssert(bone);
+
+				ndAnimKeyframe keyFrame;
+				keyFrame.m_userData = bone;
+				m_keyFrameOutput.PushBack(keyFrame);
+			}
+
+			// create an animation blend tree
+			ndSharedPtr<ndAnimationBlendTreeNode> run(new ndAnimationSequencePlayer(runSequence));
+			ndSharedPtr<ndAnimationBlendTreeNode> idle(new ndAnimationSequencePlayer(idleSequence));
+			ndSharedPtr<ndAnimationBlendTreeNode> walk(new ndAnimationSequencePlayer(walkSequence));
+
+			m_walkRunBlend = ndSharedPtr<ndAnimationBlendTreeNode>(new ndAnimationBlendTransition(walk, run));
+			m_idleWalkBlend = ndSharedPtr<ndAnimationBlendTreeNode>(new ndAnimationBlendTransition(idle, m_walkRunBlend));
+			m_animBlendTree = ndSharedPtr<ndAnimationBlendTreeNode>(m_idleWalkBlend);
 		}
-
-		// create an animation blend tree
-		ndSharedPtr<ndAnimationBlendTreeNode> run(new ndAnimationSequencePlayer(runSequence));
-		ndSharedPtr<ndAnimationBlendTreeNode> idle (new ndAnimationSequencePlayer(idleSequence));
-		ndSharedPtr<ndAnimationBlendTreeNode> walk (new ndAnimationSequencePlayer(walkSequence));
-		
-		m_walkRunBlend = ndSharedPtr<ndAnimationBlendTreeNode>(new ndAnimationBlendTransition(walk, run));
-		m_idleWalkBlend = ndSharedPtr<ndAnimationBlendTreeNode>(new ndAnimationBlendTransition(idle, m_walkRunBlend));
-		m_animBlendTree = ndSharedPtr<ndAnimationBlendTreeNode>(m_idleWalkBlend);
 
 		// make sure that the transform intepolation memories are set on initialization 
 		playerNotify->OnTransform(0.0f, playerNotify->GetBody()->GetMatrix());
@@ -273,44 +278,45 @@ class ndPlayerCapsuleController : public ndModelNotify
 
 		UpdateSkeleton();
 
-		ndFloat32 timestepSign = ndFloat32(1.0f);
-
-		ndAnimationBlendTransition* const walkRunBlender = (ndAnimationBlendTransition*)*m_walkRunBlend;
 		ndAnimationBlendTransition* const idleWalkBlender = (ndAnimationBlendTransition*)*m_idleWalkBlend;
-
-		// run the input mibni state machine
-		if (m_scene->GetKeyState(ImGuiKey_W))
+		if (idleWalkBlender)
 		{
-			idleWalkBlender->SetTransition(1.0f);
-			if (m_scene->GetKeyState(ImGuiKey_LeftShift))
+			ndFloat32 timestepSign = ndFloat32(1.0f);
+			ndAnimationBlendTransition* const walkRunBlender = (ndAnimationBlendTransition*)*m_walkRunBlend;
+			// run the input mini state machine
+			if (m_scene->GetKeyState(ImGuiKey_W))
 			{
-				walkRunBlender->SetTransition(1.0f);
+				idleWalkBlender->SetTransition(1.0f);
+				if (m_scene->GetKeyState(ImGuiKey_LeftShift))
+				{
+					walkRunBlender->SetTransition(1.0f);
+				}
+				else
+				{
+					walkRunBlender->SetTransition(0.0f);
+				}
+			}
+			else if (m_scene->GetKeyState(ImGuiKey_S))
+			{
+				timestepSign = ndFloat32(-1.0f);
+				walkRunBlender->SetTransition(0.0f);
+				idleWalkBlender->SetTransition(1.0f);
 			}
 			else
 			{
 				walkRunBlender->SetTransition(0.0f);
+				idleWalkBlender->SetTransition(0.0f);
 			}
-		}
-		else if (m_scene->GetKeyState(ImGuiKey_S))
-		{
-			timestepSign = ndFloat32(-1.0f);
-			walkRunBlender->SetTransition(0.0f);
-			idleWalkBlender->SetTransition(1.0f);
-		}
-		else
-		{
-			walkRunBlender->SetTransition(0.0f);
-			idleWalkBlender->SetTransition(0.0f);
-		}
 
-		ndVector veloc;
-		m_animBlendTree->Update(timestep * timestepSign);
-		m_animBlendTree->Evaluate(m_keyFrameOutput, veloc);
+			ndVector veloc;
+			m_animBlendTree->Update(timestep * timestepSign);
+			m_animBlendTree->Evaluate(m_keyFrameOutput, veloc);
 
-		player->m_playerInput.m_forwardSpeed = veloc.m_x;
+			player->m_playerInput.m_forwardSpeed = veloc.m_x;
 
-		ndPlayerCamera* const cameraNode = (ndPlayerCamera*)*m_cameraNode;
-		player->m_playerInput.m_heading = cameraNode->CameraHeadingAngle();
+			ndPlayerCamera* const cameraNode = (ndPlayerCamera*)*m_cameraNode;
+			player->m_playerInput.m_heading = cameraNode->CameraHeadingAngle();
+		}
 	}
 
 	// player to be update to a game script, for now only update the animation
