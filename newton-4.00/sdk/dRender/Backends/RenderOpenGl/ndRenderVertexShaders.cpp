@@ -279,3 +279,28 @@ R""""(
 	}
 )"""";
 
+
+const char* ndRenderShaderCache::m_debugFlatShadedColorVertex =
+R""""(
+	#version 450 core
+
+	layout(location = 0) in vec3 in_position;
+	layout(location = 1) in vec3 in_normal;
+	layout(location = 2) in vec3 in_color;
+
+	uniform mat4 viewModelMatrix;
+	uniform mat4 projectionMatrix;
+
+	out vec3 posit;
+	out vec3 normal;
+	out vec3 color;
+
+	void main()
+	{
+		color = in_color;
+		posit = vec3(viewModelMatrix * vec4(in_position, 1.0));
+		normal = vec3(normalize(viewModelMatrix * vec4(in_normal, 0.0)));
+		gl_Position = projectionMatrix * vec4(posit, 1.0);
+	}
+
+)"""";

@@ -303,3 +303,27 @@ R""""(
 	}
 
 )"""";
+
+
+const char* ndRenderShaderCache::m_debugFlatShadedColorPixel =
+R""""(
+	#version 450 core
+
+	uniform vec3 directionalLightDirection;
+
+	in vec3 posit;
+	in vec3 normal;
+	in vec3 color;
+
+	out vec4 pixelColor;
+
+	void main()
+	{
+		vec3 normalDir = normalize (normal);
+
+		// calculate lambert diffuse component
+		vec3 diffuse = color * max (dot (normalDir, directionalLightDirection), 0.0);;
+		pixelColor = vec4(diffuse, 1.0);
+	}
+
+)"""";

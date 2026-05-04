@@ -57,6 +57,7 @@ class ndRenderPrimitiveImplement : public ndContainersFreeListAlloc<ndRenderPrim
 	void RenderGenerateShadowMaps(const ndRender* const render, const ndMatrix& lightMatrix) const;
 	void RenderDebugLineArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
 	void RenderDebugPointArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
+	void RenderDebugTriangleArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
 	void RenderSimplePrimitive(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
 	void RenderDebugShapeSolid(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
 	void RenderDebugShapeWireFrame(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
@@ -100,6 +101,7 @@ class ndRenderPrimitiveImplement : public ndContainersFreeListAlloc<ndRenderPrim
 	ndRenderShaderStaticLinesArrayBlock m_staticLinesArrayBlock;
 	ndRenderShaderDynamicLinesArrayBlock m_dynamicLinesArrayBlock;
 	ndRenderShaderDynamicPointsArrayBlock m_dynamicPointsArrayBlock;
+	ndRenderShaderDynamicTriangleArrayBlock m_dynamicTriangleArrayBlock;
 	ndRenderShaderDebugWireframeDiffuseBlock m_debugWireframeColorBlock;
 	ndRenderShaderDebugFlatShadedDiffusedBlock m_debugFlatShadedColorBlock;
 

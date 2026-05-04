@@ -228,6 +228,7 @@ void ndRenderPrimitiveImplement::InitShaderBlocks()
 {
 	m_staticLinesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
 	m_dynamicLinesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
+	m_dynamicTriangleArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
 	m_generateShadowMapsBlock.GetShaderParameters(*m_context->m_shaderCache);
 	m_transparencyDiffusedBlock.GetShaderParameters(*m_context->m_shaderCache);
 	m_generateSkinShadowMapsBlock.GetShaderParameters(*m_context->m_shaderCache);
@@ -722,27 +723,30 @@ void ndRenderPrimitiveImplement::BuildDebugLineArray(const ndRenderPrimitive::nd
 
 void ndRenderPrimitiveImplement::BuildDebugTriangleArray(const ndRenderPrimitive::ndDescriptor&)
 {
-	ndTrace(("TO DO: %s\n", __FUNCTION__));
-	//glGenVertexArrays(1, &m_vertextArrayBuffer);
-	//glBindVertexArray(m_vertextArrayBuffer);
-	//
-	//glGenBuffers(1, &m_vertexBuffer);
-	//glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
-	//
-	//m_vertexCount = 32 * 1024;
-	//m_vertexSize = sizeof(glPointColor);
-	//glBufferData(GL_ARRAY_BUFFER, GLsizeiptr(m_vertexCount * sizeof(glPointColor)), nullptr, GL_DYNAMIC_DRAW);
-	//
-	//glEnableVertexAttribArray(0);
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glPointColor), (void*)OFFSETOF(glPointColor, m_point));
-	//
-	//glEnableVertexAttribArray(1);
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(glPointColor), (void*)OFFSETOF(glPointColor, m_color));
-	//
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
-	//glBindVertexArray(0);
-	//
+	glGenVertexArrays(1, &m_vertextArrayBuffer);
+	glBindVertexArray(m_vertextArrayBuffer);
+	
+	glGenBuffers(1, &m_vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
+	
+	m_vertexCount = 32 * 1024;
+	m_vertexSize = sizeof(glPositionNormalColor);
+	glBufferData(GL_ARRAY_BUFFER, GLsizeiptr(m_vertexCount * sizeof(glPositionNormalColor)), nullptr, GL_DYNAMIC_DRAW);
+	
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glPositionNormalColor), (void*)OFFSETOF(glPositionNormalColor, m_posit));
+
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(glPositionNormalColor), (void*)OFFSETOF(glPositionNormalColor, m_normal));
+
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(glPositionNormalColor), (void*)OFFSETOF(glPositionNormalColor, m_color));
+	
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	
 	//m_dynamicLinesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
+	m_dynamicTriangleArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
 }
 
 void ndRenderPrimitiveImplement::BuildDebugPointArray(const ndRenderPrimitive::ndDescriptor&)
@@ -1492,6 +1496,10 @@ void ndRenderPrimitiveImplement::Render(const ndRender* const render, const ndMa
 			RenderDebugLineArray(render, modelMatrix);
 			break;
 
+		case m_debugTriangleArray:
+			RenderDebugTriangleArray(render, modelMatrix);
+			break;
+
 		default:
 			ndAssert(0);
 	}
@@ -1520,6 +1528,11 @@ void ndRenderPrimitiveImplement::RenderSimplePrimitive(const ndRender* const ren
 void ndRenderPrimitiveImplement::RenderDebugLineArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const
 {
 	m_dynamicLinesArrayBlock.Render(this, render, modelViewMatrix);
+}
+
+void ndRenderPrimitiveImplement::RenderDebugTriangleArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const
+{
+	m_dynamicTriangleArrayBlock.Render(this, render, modelViewMatrix);
 }
 
 void ndRenderPrimitiveImplement::RenderDebugPointArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const

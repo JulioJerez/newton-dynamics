@@ -188,6 +188,14 @@ class glPositionNormal
 	glVector3 m_normal;
 };
 
+class glPositionNormalColor
+{
+	public:
+	glVector3 m_posit;
+	glVector3 m_normal;
+	glVector3 m_color;
+};
+
 class glPositionUV
 {
 	public:

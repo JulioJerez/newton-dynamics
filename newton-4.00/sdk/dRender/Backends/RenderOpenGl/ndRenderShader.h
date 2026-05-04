@@ -245,4 +245,21 @@ class ndRenderShaderDynamicPointsArrayBlock : public ndRenderShaderBlock
 	GLint m_viewModelProjectionMatrix;
 };
 
+// *********************************************************************
+// 
+// *********************************************************************
+class ndRenderShaderDynamicTriangleArrayBlock : public ndRenderShaderBlock
+{
+	public:
+	virtual void GetShaderParameters(const ndRenderShaderCache* const shaderCache) override;
+	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const override;
+
+	protected:
+	virtual void SetParameters(GLuint shader) override;
+
+	GLint m_directionalLightDirection;
+	GLint m_projectMatrixLocation;
+	GLint m_viewModelMatrixLocation;
+};
+
 #endif

@@ -30,8 +30,6 @@ class ndRenderShaderCache
 	{
 		struct
 		{
-			GLuint m_lineEffect;
-			GLuint m_pointEffect;
 			GLuint m_skyBoxEffect;
 			GLuint m_diffuseEffect;
 			GLuint m_wireFrameEffect;
@@ -44,6 +42,10 @@ class ndRenderShaderCache
 			GLuint m_generateShadowMapsSkinEffect;
 			GLuint m_debugFlatShadedDiffuseEffect;
 			GLuint m_generateInstancedShadowMapsEffect;
+
+			GLuint m_dynamicLinesEffect;
+			GLuint m_dynamicPointEffect;
+			GLuint m_dynamicTrianglesEffect;
 		};
 		GLuint m_shaders[128];
 	};
@@ -55,6 +57,7 @@ class ndRenderShaderCache
 	static const char* m_wireFrameVertexColor;
 	static const char* m_generateShadowMapVertex;
 	static const char* m_directionalDiffuseVertex;
+	static const char* m_debugFlatShadedColorVertex;
 	static const char* m_generateShadowMapSkinVertex;
 	static const char* m_debugFlatShadedDiffuseVertex;
 	static const char* m_directionalDiffuseShadowVertex;
@@ -67,10 +70,10 @@ class ndRenderShaderCache
 	static const char* m_doNothingPixel;
 	static const char* m_wireFramePixel;
 	static const char* m_directionalDiffusePixel;
+	static const char* m_debugFlatShadedColorPixel;
 	static const char* m_debugFlatShadedDiffusePixel;
 	static const char* m_directionalDiffuseShadowPixel;
 	static const char* m_directionalDiffuseTransparentPixel;
-	
 
 	friend class ndRenderContext;
 	friend class ndRenderShaderSetZbufferCleanBlock;

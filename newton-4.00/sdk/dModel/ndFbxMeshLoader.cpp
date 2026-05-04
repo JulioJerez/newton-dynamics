@@ -522,6 +522,25 @@ void ndFbxMeshLoader::CalculateBoneProperties(ndMesh* const entity)
 		}
 	};
 	entity->NodeIterator(CalculateBonesLenth);
+
+	auto SetEndBones = [this](ndMesh* const node)
+	{
+		if (node->GetNodeType() == ndMesh::m_bone)
+		{
+			ndInt32 childrenBones = 0;
+			for (ndList<ndSharedPtr<ndMesh>>::ndNode* childNode = node->GetChildren().GetFirst(); childNode; childNode = childNode->GetNext())
+			{
+				ndMesh* const child = *childNode->GetInfo();
+				childrenBones += (child->GetNodeType() == ndMesh::m_bone) ? 1 : 0;
+			}
+			if (childrenBones == 0)
+			{
+				node->SetNodeType(ndMesh::m_boneEnd);
+			}
+		}
+	};
+	entity->NodeIterator(SetEndBones);
+
 }
 
 void ndFbxMeshLoader::ApplyAllTransforms(ndMesh* const mesh, const ndMatrix& coordinateSystem)
