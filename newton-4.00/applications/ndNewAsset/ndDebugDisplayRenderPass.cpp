@@ -291,33 +291,11 @@ void ndDebugDisplayRenderPass::DrawBone(const ndMesh* const boneNode)
 	points[3] = ndVector(dist, -dist, dist, 1.0f);
 
 	ndInt32 i0 = 3;
+	ndFixSizeArray<ndPointNormalColor, 256> temp;
 	for (ndInt32 i = 0; i < 4; ++i)
 	{
 		{
 			ndVector p0(0.0f, 0.0f, 0.0f, 1.0f);
-			ndVector p1(points[i0]);
-			ndVector p2(points[i]);
-			ndVector e0(p1 - p0);
-			ndVector e1(p2 - p0);
-			ndAssert((e0.DotProduct(e1 & ndVector::m_triplexMask)).GetScalar() > ndFloat32(0.0f));
-			ndVector normal(e0.CrossProduct(e1).Normalize());
-
-			ndPointNormalColor trianglePoint;
-			trianglePoint.m_normal = normal;
-			trianglePoint.m_color = ndVector(0.6f, 0.6f, 0.6f, 1.0f);
-
-			trianglePoint.m_point = p0;
-			m_debugTriangles.PushBack(trianglePoint);
-
-			trianglePoint.m_point = p1;
-			m_debugTriangles.PushBack(trianglePoint);
-
-			trianglePoint.m_point = p2;
-			m_debugTriangles.PushBack(trianglePoint);
-		}
-
-		{
-			ndVector p0(localPoint);
 			ndVector p1(points[i]);
 			ndVector p2(points[i0]);
 			ndVector e0(p1 - p0);
@@ -330,21 +308,48 @@ void ndDebugDisplayRenderPass::DrawBone(const ndMesh* const boneNode)
 			trianglePoint.m_color = ndVector(0.6f, 0.6f, 0.6f, 1.0f);
 
 			trianglePoint.m_point = p0;
-			m_debugTriangles.PushBack(trianglePoint);
-
-			trianglePoint.m_point = p2;
-			m_debugTriangles.PushBack(trianglePoint);
+			temp.PushBack(trianglePoint);
 
 			trianglePoint.m_point = p1;
-			m_debugTriangles.PushBack(trianglePoint);
+			temp.PushBack(trianglePoint);
+
+			trianglePoint.m_point = p2;
+			temp.PushBack(trianglePoint);
+		}
+
+		{
+			ndVector p0(localPoint);
+			ndVector p1(points[i0]);
+			ndVector p2(points[i]);
+			ndVector e0(p1 - p0);
+			ndVector e1(p2 - p0);
+			ndAssert((e0.DotProduct(e1 & ndVector::m_triplexMask)).GetScalar() > ndFloat32(0.0f));
+			ndVector normal(e0.CrossProduct(e1).Normalize());
+			
+			ndPointNormalColor trianglePoint;
+			trianglePoint.m_normal = normal;
+			trianglePoint.m_color = ndVector(0.6f, 0.6f, 0.6f, 1.0f);
+			
+			trianglePoint.m_point = p0;
+			temp.PushBack(trianglePoint);
+			
+			trianglePoint.m_point = p1;
+			temp.PushBack(trianglePoint);
+			
+			trianglePoint.m_point = p2;
+			temp.PushBack(trianglePoint);
 		}
 
 		i0 = i;
 	}
 
 	const ndMatrix boneMatrix(boneNode->CalculateGlobalMatrix());
-	const ndVector target(boneMatrix.TransformVector(boneNode->GetBoneTarget()));
-	DrawLine(boneMatrix.m_posit, target, ndVector::m_wOne);
+	for (ndInt32 i = 0; i < temp.GetCount(); ++i)
+	{
+		temp[i].m_point = boneMatrix.TransformVector(temp[i].m_point);
+		temp[i].m_normal = boneMatrix.RotateVector(temp[i].m_normal);
+		m_debugTriangles.PushBack(temp[i]);
+	}
 }
 
 void ndDebugDisplayRenderPass::DrawFrame(const ndMatrix& matrix)

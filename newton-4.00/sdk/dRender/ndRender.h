@@ -120,10 +120,10 @@ class ndRender: public ndClassAlloc
 	friend class ndRenderContext;
 	friend class ndRenderPassGui;
 	friend class ndRenderPassColor;
+	friend class ndRenderPassDebug;
 	friend class ndRenderPassShadows;
 	friend class ndRenderSceneCamera;
 	friend class ndRenderTextureCache;
-	friend class ndRenderPassDebug;
 	friend class ndRenderPassEnvironment;
 	friend class ndRenderPassTransparency;
 	friend class ndRenderPrimitiveImplement;
@@ -132,6 +132,7 @@ class ndRender: public ndClassAlloc
 	friend class ndRenderShaderDynamicLinesArrayBlock;
 	friend class ndRenderShaderDynamicPointsArrayBlock;
 	friend class ndRenderShaderOpaqueDiffusedColorBlock;
+	friend class ndRenderShaderDynamicTrianglesArrayBlock;
 	friend class ndRenderShaderDebugWireframeDiffuseBlock;
 	friend class ndRenderShaderDebugFlatShadedDiffusedBlock;
 	friend class ndRenderShaderOpaqueDiffusedShadowColorBlock;

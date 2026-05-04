@@ -322,7 +322,8 @@ R""""(
 		vec3 normalDir = normalize (normal);
 
 		// calculate lambert diffuse component
-		vec3 diffuse = color * max (dot (normalDir, directionalLightDirection), 0.0);;
+		vec3 diffuse = color * max (dot (normalDir, directionalLightDirection), 0.0);
+		//diffuse = directionalLightDirection;
 		pixelColor = vec4(diffuse, 1.0);
 	}
 

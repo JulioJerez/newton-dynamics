@@ -101,8 +101,8 @@ class ndRenderPrimitiveImplement : public ndContainersFreeListAlloc<ndRenderPrim
 	ndRenderShaderStaticLinesArrayBlock m_staticLinesArrayBlock;
 	ndRenderShaderDynamicLinesArrayBlock m_dynamicLinesArrayBlock;
 	ndRenderShaderDynamicPointsArrayBlock m_dynamicPointsArrayBlock;
-	ndRenderShaderDynamicTriangleArrayBlock m_dynamicTriangleArrayBlock;
 	ndRenderShaderDebugWireframeDiffuseBlock m_debugWireframeColorBlock;
+	ndRenderShaderDynamicTrianglesArrayBlock m_dynamicTrianglesArrayBlock;
 	ndRenderShaderDebugFlatShadedDiffusedBlock m_debugFlatShadedColorBlock;
 
 	friend class ndRenderSceneNodeInstance;
@@ -113,6 +113,7 @@ class ndRenderPrimitiveImplement : public ndContainersFreeListAlloc<ndRenderPrim
 	friend class ndRenderShaderDynamicLinesArrayBlock;
 	friend class ndRenderShaderDynamicPointsArrayBlock;
 	friend class ndRenderShaderOpaqueDiffusedColorBlock;
+	friend class ndRenderShaderDynamicTrianglesArrayBlock;
 	friend class ndRenderShaderDebugWireframeDiffuseBlock;
 	friend class ndRenderShaderGenerateSkinShadowMapBlock;
 	friend class ndRenderShaderDebugFlatShadedDiffusedBlock;

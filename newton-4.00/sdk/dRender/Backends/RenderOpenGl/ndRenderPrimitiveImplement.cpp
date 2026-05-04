@@ -228,9 +228,9 @@ void ndRenderPrimitiveImplement::InitShaderBlocks()
 {
 	m_staticLinesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
 	m_dynamicLinesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
-	m_dynamicTriangleArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
 	m_generateShadowMapsBlock.GetShaderParameters(*m_context->m_shaderCache);
 	m_transparencyDiffusedBlock.GetShaderParameters(*m_context->m_shaderCache);
+	m_dynamicTrianglesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
 	m_generateSkinShadowMapsBlock.GetShaderParameters(*m_context->m_shaderCache);
 	m_opaqueDiffusedColorShadowBlock.GetShaderParameters(*m_context->m_shaderCache);
 	m_generateIntanceShadowMapsBlock.GetShaderParameters(*m_context->m_shaderCache);
@@ -729,7 +729,7 @@ void ndRenderPrimitiveImplement::BuildDebugTriangleArray(const ndRenderPrimitive
 	glGenBuffers(1, &m_vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
 	
-	m_vertexCount = 32 * 1024;
+	m_vertexCount = 3 * 10 * 1024;
 	m_vertexSize = sizeof(glPositionNormalColor);
 	glBufferData(GL_ARRAY_BUFFER, GLsizeiptr(m_vertexCount * sizeof(glPositionNormalColor)), nullptr, GL_DYNAMIC_DRAW);
 	
@@ -746,7 +746,7 @@ void ndRenderPrimitiveImplement::BuildDebugTriangleArray(const ndRenderPrimitive
 	glBindVertexArray(0);
 	
 	//m_dynamicLinesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
-	m_dynamicTriangleArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
+	m_dynamicTrianglesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
 }
 
 void ndRenderPrimitiveImplement::BuildDebugPointArray(const ndRenderPrimitive::ndDescriptor&)
@@ -1532,7 +1532,7 @@ void ndRenderPrimitiveImplement::RenderDebugLineArray(const ndRender* const rend
 
 void ndRenderPrimitiveImplement::RenderDebugTriangleArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const
 {
-	m_dynamicTriangleArrayBlock.Render(this, render, modelViewMatrix);
+	m_dynamicTrianglesArrayBlock.Render(this, render, modelViewMatrix);
 }
 
 void ndRenderPrimitiveImplement::RenderDebugPointArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const
