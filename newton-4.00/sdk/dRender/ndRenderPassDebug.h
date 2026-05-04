@@ -18,10 +18,18 @@ class ndRenderPrimitive;
 class ndRenderPassDebug : public ndRenderPass
 {
 	public:
-	class ndPoint
+	class ndPointColor
 	{
 		public:
 		ndVector m_point;
+		ndVector m_color;
+	};
+
+	class ndPointNormalColor
+	{
+		public:
+		ndVector m_point;
+		ndVector m_normal;
 		ndVector m_color;
 	};
 
@@ -55,8 +63,9 @@ class ndRenderPassDebug : public ndRenderPass
 	ndRenderPassDebug(ndRender* const owner, ndWorld* const world);
 	~ndRenderPassDebug();
 
-	const ndArray<ndPoint>& GetVertex() const;
-	const ndArray<ndPoint>& GetPoints() const;
+	const ndArray<ndPointColor>& GetLines() const;
+	const ndArray<ndPointColor>& GetPoints() const;
+	const ndArray<ndPointNormalColor>& GetTriangles() const;
 
 	const ndDebugOptions& GetDebugDisplayOptions() const;
 	void SetDebugDisplayOptions(const ndDebugOptions& options);
@@ -78,10 +87,12 @@ class ndRenderPassDebug : public ndRenderPass
 	virtual void RenderScene() override;
 	
 	ndDebugOptions m_options;
-	ndArray<ndPoint> m_debugLines;
-	ndArray<ndPoint> m_debugPoints;
+	ndArray<ndPointColor> m_debugLines;
+	ndArray<ndPointColor> m_debugPoints;
+	ndArray<ndPointNormalColor> m_debugTriangles;
 	ndSharedPtr<ndRenderPrimitive> m_renderLinesPrimitive;
 	ndSharedPtr<ndRenderPrimitive> m_renderPointsPrimitive;
+	ndSharedPtr<ndRenderPrimitive> m_renderTrianglePrimitive;
 
 	ndArray<ndRuntimeLine> m_runtimeLines;
 	ndArray<ndRuntimeLine> m_runtimeRenderLines;

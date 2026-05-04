@@ -51,8 +51,9 @@ class ndConstraintDebugCallback: public ndClassAlloc
 	{
 	}
 
-	virtual void DrawPoint(const ndVector& point, const ndVector& color, ndFloat32 thickness = ndFloat32 (8.0f)) = 0;
-	virtual void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32 thickness = ndFloat32(1.0f)) = 0;
+	virtual void DrawPoint(const ndVector& point, const ndVector& color, ndFloat32 thickness = ndFloat32(8.0f));
+	virtual void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32 thickness = ndFloat32(1.0f));
+	virtual void DrawTriangle(const ndVector& p0, const ndVector& p1, const ndVector& p2, const ndVector& color);
 
 	virtual void SetScale(ndFloat32 scale)
 	{
@@ -81,9 +82,7 @@ class ndConstraintDebugCallback: public ndClassAlloc
 		ndVector p1(matrix.m_posit + matrix.RotateVector(ndVector(m_debugScale * length, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f))));
 		DrawLine(matrix.m_posit, p1, color);
 	}
-		
 	ndFloat32 m_debugScale;
-
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 D_MSV_NEWTON_CLASS_ALIGN_32
@@ -346,6 +345,19 @@ class ndConstraint: public ndContainersFreeListAlloc<ndConstraint>
 	friend class ndDynamicsUpdateSoa;
 	friend class ndDynamicsUpdateAvx2;
 } D_GCC_NEWTON_CLASS_ALIGN_32 ;
+
+
+inline void ndConstraintDebugCallback::DrawPoint(const ndVector&, const ndVector&, ndFloat32)
+{
+}
+
+inline void ndConstraintDebugCallback::DrawLine(const ndVector&, const ndVector&, const ndVector&, ndFloat32)
+{
+}
+
+inline void ndConstraintDebugCallback::DrawTriangle(const ndVector&, const ndVector&, const ndVector&, const ndVector&)
+{
+}
 
 #endif 
 

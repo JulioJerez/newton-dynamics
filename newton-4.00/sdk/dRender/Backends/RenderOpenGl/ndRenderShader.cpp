@@ -863,7 +863,7 @@ void ndRenderShaderDynamicLinesArrayBlock::Render(const ndRenderPrimitiveImpleme
 
 	glBindVertexArray(self->m_vertextArrayBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, self->m_vertexBuffer);
-	const ndArray<ndRenderPassDebug::ndPoint>& points = debugPass->GetVertex();
+	const ndArray<ndRenderPassDebug::ndPointColor>& points = debugPass->GetLines();
 
 	glLineWidth(ndReal(2.0f));
 	for (ndInt32 j = 0; j < points.GetCount(); j += self->m_vertexCount)
@@ -916,7 +916,7 @@ void ndRenderShaderDynamicPointsArrayBlock::Render(const ndRenderPrimitiveImplem
 	
 	glBindVertexArray(self->m_vertextArrayBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, self->m_vertexBuffer);
-	const ndArray<ndRenderPassDebug::ndPoint>& points = debugPass->GetPoints();
+	const ndArray<ndRenderPassDebug::ndPointColor>& points = debugPass->GetPoints();
 	
 	glPointSize(ndReal(4.0f));
 	for (ndInt32 j = 0; j < points.GetCount(); j += self->m_vertexCount)

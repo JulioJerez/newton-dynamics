@@ -49,6 +49,7 @@ class ndRenderPrimitiveImplement : public ndContainersFreeListAlloc<ndRenderPrim
 	void BuildRenderInstanceMesh(const ndRenderPrimitive::ndDescriptor& descriptor);
 	void BuildDebugLineArray(const ndRenderPrimitive::ndDescriptor& descriptor);
 	void BuildDebugPointArray(const ndRenderPrimitive::ndDescriptor& descriptor);
+	void BuildDebugTriangleArray(const ndRenderPrimitive::ndDescriptor& descriptor);
 	void BuildWireframeDebugMesh(const ndRenderPrimitive::ndDescriptor& descriptor);
 	void BuildSetZBufferDebugMesh(const ndRenderPrimitive::ndDescriptor& descriptor);
 

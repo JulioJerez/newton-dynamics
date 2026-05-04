@@ -480,77 +480,48 @@ void ndFbxMeshLoader::AlignToWorld(ndMesh* const mesh)
 
 void ndFbxMeshLoader::CalculateBoneProperties(ndMesh* const entity)
 {
-	ndFixSizeArray<ndMesh*, ND_FBX_MAX_CHILDREN> entBuffer(0);
-	entBuffer.PushBack(entity);
-	while (entBuffer.GetCount())
+	auto InitBoneDistance = [this](ndMesh* const node)
 	{
-		ndMesh* const meshNode = entBuffer.Pop();
-		if (meshNode->GetNodeType() == ndMesh::m_bone)
+		if (node->GetNodeType() != ndMesh::m_bone)
 		{
-			ndMesh* boneChild = nullptr;
-			ndFloat32 closestDist2 = ndFloat32(1.0e10f); 
-			for (ndList<ndSharedPtr<ndMesh>>::ndNode* node = meshNode->GetChildren().GetFirst(); node; node = node->GetNext())
+			ndMesh* const parent = node->GetParent();
+			if (parent && parent->GetNodeType() == ndMesh::m_bone)
 			{
-				ndMesh* const child = *node->GetInfo();
-				ndMesh::ndNodeType type = child->GetNodeType();
-				if ((type == ndMesh::m_bone) || (type == ndMesh::m_boneEnd))
+				if (!node->GetChildren())
 				{
-					ndVector posit(child->GetMatrix().m_posit);
-					if (posit.m_x < ndFloat32(1.0e-4f))
-					{
-						ndFloat32 dist2 = posit.m_y * posit.m_y + posit.m_z * posit.m_z;
-						if (dist2 < closestDist2)
-						{
-							boneChild = child;
-							closestDist2 = dist2;
-						}
-					}
+					node->SetNodeType(ndMesh::m_bone);
 				}
 			}
+		}
+	};
+	entity->NodeIterator(InitBoneDistance);
 
-			if (boneChild)
+	auto CalculateBonesLenth = [this](ndMesh* const node)
+	{
+		if (node->GetNodeType() == ndMesh::m_bone)
+		{
+			const ndMesh* bestChild = nullptr;
+			ndFloat32 closestDist2 = ndFloat32(1.0e20f);
+			for (ndList<ndSharedPtr<ndMesh>>::ndNode* childNode = node->GetChildren().GetFirst(); childNode; childNode = childNode->GetNext())
 			{
-				ndVector posit(boneChild->GetMatrix().m_posit);
-				meshNode->SetBoneTarget(posit);
-			}
-			else if (meshNode->GetChildren().GetCount())
-			{
-				closestDist2 = ndFloat32(1.0e10f);
-				for (ndList<ndSharedPtr<ndMesh>>::ndNode* node = meshNode->GetChildren().GetFirst(); node; node = node->GetNext())
+				ndMesh* const child = *childNode->GetInfo();
+				ndVector posit(child->GetMatrix().m_posit);
+				posit.m_x = ndFloat32(0.0f);
+				posit.m_w = ndFloat32(0.0f);
+				ndFloat32 dist2 = posit.DotProduct(posit).GetScalar();
+				if (dist2 < closestDist2)
 				{
-					ndMesh* const child = *node->GetInfo();
-					ndVector posit(child->GetMatrix().m_posit);
-					if (posit.m_x < ndFloat32(0.0f))
-					{
-						ndFloat32 dist2 = posit.m_y * posit.m_y + posit.m_z * posit.m_z;
-						if (dist2 < closestDist2)
-						{
-							boneChild = child;
-							closestDist2 = dist2;
-						}
-					}
+					bestChild = child;
+					closestDist2 = dist2;
 				}
-				ndAssert(boneChild);
-				ndVector posit(boneChild->GetMatrix().m_posit);
-				meshNode->SetBoneTarget(posit);
-				boneChild->SetNodeType(ndMesh::m_boneEnd);
 			}
-			else
+			if (bestChild)
 			{
-				meshNode->SetNodeType(ndMesh::m_boneEnd);
+				node->SetBoneTarget(bestChild->GetMatrix().m_posit);
 			}
 		}
-		else if (meshNode->GetNodeType() == ndMesh::m_boneEnd)
-		{
-			meshNode->SetBoneTarget(ndVector::m_wOne);
-		}
-
-		for (ndList<ndSharedPtr<ndMesh>>::ndNode* node = meshNode->GetChildren().GetFirst(); node; node = node->GetNext())
-		{
-			ndMesh* const child = *node->GetInfo();
-			entBuffer.PushBack(child);
-		}
-	}
+	};
+	entity->NodeIterator(CalculateBonesLenth);
 }
 
 void ndFbxMeshLoader::ApplyAllTransforms(ndMesh* const mesh, const ndMatrix& coordinateSystem)
@@ -785,8 +756,9 @@ ndMesh* ndFbxMeshLoader::Fbx2ndMesh(ndOfbx::IScene* const fbxScene)
 	for (iter.Begin(); iter; iter++)
 	{
 		ndOfbx::Object* const fbxNode = (ndOfbx::Object*)iter.GetKey();
-		ndOfbx::Object::Type type = fbxNode->getType();
+		ndMesh* const entity = iter.GetNode()->GetInfo();
 
+		ndOfbx::Object::Type type = fbxNode->getType();
 		switch (type)
 		{
 			case ndOfbx::Object::Type::MESH:
@@ -802,7 +774,7 @@ ndMesh* ndFbxMeshLoader::Fbx2ndMesh(ndOfbx::IScene* const fbxScene)
 	
 			case ndOfbx::Object::Type::LIMB_NODE:
 			{
-				ndMesh* const entity = iter.GetNode()->GetInfo();
+				//ndMesh* const entity = iter.GetNode()->GetInfo();
 				entity->SetNodeType(ndMesh::m_bone);
 
 				// there doesn't seems to be any bone information saved in the properies elements.

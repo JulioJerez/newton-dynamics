@@ -22,8 +22,6 @@
 #include "ndRenderPrimitiveImplement.h"
 #include "ndRenderPassShadowsImplement.h"
 
-//#define ND_MAX_SKINNED_BONES	128
-
 ndRenderPrimitiveImplement::ndRenderPrimitiveImplement(ndRenderPrimitive* const owner, const ndRenderPrimitive::ndDescriptor& descriptor)
 	:ndContainersFreeListAlloc<ndRenderPrimitiveImplement>()
 	,m_owner(owner)
@@ -46,6 +44,10 @@ ndRenderPrimitiveImplement::ndRenderPrimitiveImplement(ndRenderPrimitive* const 
 	else if (*descriptor.m_meshNode)
 	{
 		BuildFromNewtonMeshEffect(descriptor);
+	}
+	else if (descriptor.m_meshBuildMode == ndRenderPrimitive::m_debugTriangleArray)
+	{
+		BuildDebugTriangleArray(descriptor);
 	}
 	else if (descriptor.m_meshBuildMode == ndRenderPrimitive::m_debugLineArray)
 	{
@@ -716,6 +718,31 @@ void ndRenderPrimitiveImplement::BuildDebugLineArray(const ndRenderPrimitive::nd
 	glBindVertexArray(0);
 
 	m_dynamicLinesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
+}
+
+void ndRenderPrimitiveImplement::BuildDebugTriangleArray(const ndRenderPrimitive::ndDescriptor&)
+{
+	ndTrace(("TO DO: %s\n", __FUNCTION__));
+	//glGenVertexArrays(1, &m_vertextArrayBuffer);
+	//glBindVertexArray(m_vertextArrayBuffer);
+	//
+	//glGenBuffers(1, &m_vertexBuffer);
+	//glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
+	//
+	//m_vertexCount = 32 * 1024;
+	//m_vertexSize = sizeof(glPointColor);
+	//glBufferData(GL_ARRAY_BUFFER, GLsizeiptr(m_vertexCount * sizeof(glPointColor)), nullptr, GL_DYNAMIC_DRAW);
+	//
+	//glEnableVertexAttribArray(0);
+	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glPointColor), (void*)OFFSETOF(glPointColor, m_point));
+	//
+	//glEnableVertexAttribArray(1);
+	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(glPointColor), (void*)OFFSETOF(glPointColor, m_color));
+	//
+	//glBindBuffer(GL_ARRAY_BUFFER, 0);
+	//glBindVertexArray(0);
+	//
+	//m_dynamicLinesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
 }
 
 void ndRenderPrimitiveImplement::BuildDebugPointArray(const ndRenderPrimitive::ndDescriptor&)
