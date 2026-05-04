@@ -493,6 +493,12 @@ void ndFbxMeshLoader::CalculateBoneProperties(ndMesh* const entity)
 				}
 			}
 		}
+		ndString name(node->GetName());
+		name.ToLower();
+		if (name.Find("camera") != -1)
+		{
+			node->SetNodeType(ndMesh::m_node);
+		}
 	};
 	entity->NodeIterator(InitBoneDistance);
 
@@ -505,14 +511,17 @@ void ndFbxMeshLoader::CalculateBoneProperties(ndMesh* const entity)
 			for (ndList<ndSharedPtr<ndMesh>>::ndNode* childNode = node->GetChildren().GetFirst(); childNode; childNode = childNode->GetNext())
 			{
 				ndMesh* const child = *childNode->GetInfo();
-				ndVector posit(child->GetMatrix().m_posit);
-				posit.m_x = ndFloat32(0.0f);
-				posit.m_w = ndFloat32(0.0f);
-				ndFloat32 dist2 = posit.DotProduct(posit).GetScalar();
-				if (dist2 < closestDist2)
+				if (child->GetNodeType() == ndMesh::m_bone)
 				{
-					bestChild = child;
-					closestDist2 = dist2;
+					ndVector posit(child->GetMatrix().m_posit);
+					posit.m_x = ndFloat32(0.0f);
+					posit.m_w = ndFloat32(0.0f);
+					ndFloat32 dist2 = posit.DotProduct(posit).GetScalar();
+					if (dist2 < closestDist2)
+					{
+						bestChild = child;
+						closestDist2 = dist2;
+					}
 				}
 			}
 			if (bestChild)
@@ -540,7 +549,6 @@ void ndFbxMeshLoader::CalculateBoneProperties(ndMesh* const entity)
 		}
 	};
 	entity->NodeIterator(SetEndBones);
-
 }
 
 void ndFbxMeshLoader::ApplyAllTransforms(ndMesh* const mesh, const ndMatrix& coordinateSystem)
