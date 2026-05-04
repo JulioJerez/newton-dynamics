@@ -302,8 +302,12 @@ ndFixSizeArray<ndDebugDisplayRenderPass::ndPointNormalColor, 256> ndDebugDisplay
 			ndVector p2(points[i0]);
 			ndVector e0(p1 - p0);
 			ndVector e1(p2 - p0);
-			ndAssert((e0.DotProduct(e1 & ndVector::m_triplexMask)).GetScalar() > ndFloat32(0.0f));
-			ndVector normal(e0.CrossProduct(e1).Normalize());
+			ndVector normal(e0.CrossProduct(e1) & ndVector::m_triplexMask);
+			if (normal.DotProduct(normal).GetScalar() < ndFloat32 (1.0e-8f))
+			{
+				normal.m_x = ndFloat32 (1.0f);
+			}
+			normal = normal.Normalize();
 
 			ndPointNormalColor trianglePoint;
 			trianglePoint.m_normal = normal;
@@ -325,8 +329,12 @@ ndFixSizeArray<ndDebugDisplayRenderPass::ndPointNormalColor, 256> ndDebugDisplay
 			ndVector p2(points[i]);
 			ndVector e0(p1 - p0);
 			ndVector e1(p2 - p0);
-			ndAssert((e0.DotProduct(e1 & ndVector::m_triplexMask)).GetScalar() > ndFloat32(0.0f));
-			ndVector normal(e0.CrossProduct(e1).Normalize());
+			ndVector normal(e0.CrossProduct(e1) & ndVector::m_triplexMask);
+			if (normal.DotProduct(normal).GetScalar() < ndFloat32(1.0e-8f))
+			{
+				normal.m_x = ndFloat32(1.0f);
+			}
+			normal = normal.Normalize();
 
 			ndPointNormalColor trianglePoint;
 			trianglePoint.m_normal = normal;

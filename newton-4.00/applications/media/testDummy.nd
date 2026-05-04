@@ -11,6 +11,30 @@
     </geometryMatrix>
     <type nodeType="node" target="0 0 0 " />
     <ndMesh>
+        <name string="__constraintLoops__" />
+        <matrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </matrix>
+        <geometryMatrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </geometryMatrix>
+        <type nodeType="node" target="0 0 0 " />
+    </ndMesh>
+    <ndMesh>
+        <name string="__collidingPairs__" />
+        <matrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </matrix>
+        <geometryMatrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </geometryMatrix>
+        <type nodeType="node" target="0 0 0 " />
+    </ndMesh>
+    <ndMesh>
         <name string="mixamorig8:Hips" />
         <matrix>
             <posit float3="0.00500673 0.957134 1.60361e-05" />
@@ -799,7 +823,7 @@
                 <posit float3="0 0 0" />
                 <angles float3="0 -0 0" />
             </geometryMatrix>
-            <type nodeType="node" target="0 0 0 " />
+            <type nodeType="endBone" target="0 0 0 " />
         </ndMesh>
     </ndMesh>
     <ndMesh>
