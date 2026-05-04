@@ -22,8 +22,6 @@
 #include "ndRenderPrimitiveImplement.h"
 #include "ndRenderPassShadowsImplement.h"
 
-#define ND_MAX_SKINNED_BONES	128
-
 ndRenderPrimitiveImplement::ndRenderPrimitiveImplement(ndRenderPrimitive* const owner, const ndRenderPrimitive::ndDescriptor& descriptor)
 	:ndContainersFreeListAlloc<ndRenderPrimitiveImplement>()
 	,m_owner(owner)
@@ -46,6 +44,10 @@ ndRenderPrimitiveImplement::ndRenderPrimitiveImplement(ndRenderPrimitive* const 
 	else if (*descriptor.m_meshNode)
 	{
 		BuildFromNewtonMeshEffect(descriptor);
+	}
+	else if (descriptor.m_meshBuildMode == ndRenderPrimitive::m_debugTriangleArray)
+	{
+		BuildDebugTriangleArray(descriptor);
 	}
 	else if (descriptor.m_meshBuildMode == ndRenderPrimitive::m_debugLineArray)
 	{
@@ -228,6 +230,7 @@ void ndRenderPrimitiveImplement::InitShaderBlocks()
 	m_dynamicLinesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
 	m_generateShadowMapsBlock.GetShaderParameters(*m_context->m_shaderCache);
 	m_transparencyDiffusedBlock.GetShaderParameters(*m_context->m_shaderCache);
+	m_dynamicTrianglesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
 	m_generateSkinShadowMapsBlock.GetShaderParameters(*m_context->m_shaderCache);
 	m_opaqueDiffusedColorShadowBlock.GetShaderParameters(*m_context->m_shaderCache);
 	m_generateIntanceShadowMapsBlock.GetShaderParameters(*m_context->m_shaderCache);
@@ -588,41 +591,42 @@ void ndRenderPrimitiveImplement::BuildRenderSkinnedMeshFromMeshEffect(const ndRe
 	m_skinSceneNode = (ndRenderSceneNode*)*descriptor.m_skeleton;
 
 	// encode all bone by theier hash name
-	ndTree<ndRenderSceneNode*, ndInt32> boneHashIdMap;
+	ndTree<ndRenderSceneNode*, GLuint> boneHashIdMap;
 	ndRenderSceneNode* const root = descriptor.m_skeleton->GetRoot();
 	for (ndRenderSceneNode* entity = root->IteratorFirst(); entity; entity = entity->IteratorNext())
 	{
-		ndInt32 hash = ndInt32(ndCRC64(entity->m_name.GetStr()) & 0xffffffff);
+		GLuint hash = GLuint(ndCRC64(entity->m_name.GetStr()) & 0xffffffff);
 		boneHashIdMap.Insert(entity, hash);
 	}
 	// build a mapping for bone to index for all bone active in the vertex weigh
-	ndTree<ndInt32, ndInt32> boneToIndexMap;
+	ndTree<GLuint, GLuint> boneToIndexMap;
 	const ndMatrix shapeBindMatrix(descriptor.m_skeleton->CalculateGlobalTransform());
 	for (ndInt32 i = 0; i < vertexCount; ++i)
 	{
+		glSkinVertex& point = points[i];
 		for (ndInt32 j = 0; j < ND_VERTEX_WEIGHT_SIZE; ++j)
 		{
-			if (points[i].m_boneIndex[j] != -1)
+			if (point.m_boneIndexInt[j] != GLuint (-1))
 			{
-				ndTree<ndInt32, ndInt32>::ndNode* vertexMapNode = boneToIndexMap.Find(points[i].m_boneIndex[j]);
+				ndTree<GLuint, GLuint>::ndNode* vertexMapNode = boneToIndexMap.Find(point.m_boneIndexInt[j]);
 				if (!vertexMapNode)
 				{
-					ndTree<ndRenderSceneNode*, ndInt32>::ndNode* const boneNode = boneHashIdMap.Find(points[i].m_boneIndex[j]);
+					ndTree<ndRenderSceneNode*, GLuint>::ndNode* const boneNode = boneHashIdMap.Find(point.m_boneIndexInt[j]);
 					ndAssert(boneNode);
-					vertexMapNode = boneToIndexMap.Insert(ndInt32(m_skeleton.GetCount()), points[i].m_boneIndex[j]);
-
+					vertexMapNode = boneToIndexMap.Insert(GLuint(m_skeleton.GetCount()), point.m_boneIndexInt[j]);
+			
 					ndRenderSceneNode* const entity = boneNode->GetInfo();
 					m_skeleton.PushBack(entity);
-					//const ndMatrix boneMatrix(entity->GetTransform().GetMatrix() * parentMatrix.Pop());
 					const ndMatrix boneMatrix(entity->CalculateGlobalTransform());
 					const ndMatrix paletteMatrix(shapeBindMatrix * boneMatrix.OrthoInverse());
 					m_bindingSkinMatrixArray.PushBack(paletteMatrix);
 				}
-				points[i].m_boneIndex[j] = vertexMapNode->GetInfo();
+				GLuint index = vertexMapNode->GetInfo();
+				point.m_boneIndexFloat[j] = GLfloat(index);
 			}
 			else
 			{
-				points[i].m_boneIndex[j] = 0;
+				point.m_boneIndexFloat[j] = GLfloat(0.0f);
 			}
 		}
 	}
@@ -660,11 +664,6 @@ void ndRenderPrimitiveImplement::BuildRenderSkinnedMeshFromMeshEffect(const ndRe
 	// optimize this mesh for hardware buffers if possible
 	m_indexCount = indexCount;
 	m_vertexCount = ndInt32(points.GetCount());
-
-	//ndAssert(0);
-	//glGenBuffers(1, &m_instanceMatrixBuffer);
-	//glBindBuffer(GL_ARRAY_BUFFER, m_instanceMatrixBuffer);
-	//glBufferData(GL_ARRAY_BUFFER, GLsizeiptr(m_bindingSkinMatrixArray.GetCount() * sizeof(glMatrix)), &m_bindingSkinMatrixArray[0], GL_STATIC_DRAW);
 	
 	glGenBuffers(1, &m_indexBuffer);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer);
@@ -692,7 +691,7 @@ void ndRenderPrimitiveImplement::BuildRenderSkinnedMeshFromMeshEffect(const ndRe
 	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glSkinVertex), (void*)OFFSETOF(glSkinVertex, m_weighs));
 
 	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 4, GL_INT, GL_FALSE, sizeof(glSkinVertex), (void*)OFFSETOF(glSkinVertex, m_boneIndex));
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glSkinVertex), (void*)OFFSETOF(glSkinVertex, m_boneIndexFloat));
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
@@ -720,6 +719,34 @@ void ndRenderPrimitiveImplement::BuildDebugLineArray(const ndRenderPrimitive::nd
 	glBindVertexArray(0);
 
 	m_dynamicLinesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
+}
+
+void ndRenderPrimitiveImplement::BuildDebugTriangleArray(const ndRenderPrimitive::ndDescriptor&)
+{
+	glGenVertexArrays(1, &m_vertextArrayBuffer);
+	glBindVertexArray(m_vertextArrayBuffer);
+	
+	glGenBuffers(1, &m_vertexBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
+	
+	m_vertexCount = 3 * 10 * 1024;
+	m_vertexSize = sizeof(glPositionNormalColor);
+	glBufferData(GL_ARRAY_BUFFER, GLsizeiptr(m_vertexCount * sizeof(glPositionNormalColor)), nullptr, GL_DYNAMIC_DRAW);
+	
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glPositionNormalColor), (void*)OFFSETOF(glPositionNormalColor, m_posit));
+
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(glPositionNormalColor), (void*)OFFSETOF(glPositionNormalColor, m_normal));
+
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(glPositionNormalColor), (void*)OFFSETOF(glPositionNormalColor, m_color));
+	
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+	
+	//m_dynamicLinesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
+	m_dynamicTrianglesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
 }
 
 void ndRenderPrimitiveImplement::BuildDebugPointArray(const ndRenderPrimitive::ndDescriptor&)
@@ -1469,6 +1496,10 @@ void ndRenderPrimitiveImplement::Render(const ndRender* const render, const ndMa
 			RenderDebugLineArray(render, modelMatrix);
 			break;
 
+		case m_debugTriangleArray:
+			RenderDebugTriangleArray(render, modelMatrix);
+			break;
+
 		default:
 			ndAssert(0);
 	}
@@ -1497,6 +1528,11 @@ void ndRenderPrimitiveImplement::RenderSimplePrimitive(const ndRender* const ren
 void ndRenderPrimitiveImplement::RenderDebugLineArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const
 {
 	m_dynamicLinesArrayBlock.Render(this, render, modelViewMatrix);
+}
+
+void ndRenderPrimitiveImplement::RenderDebugTriangleArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const
+{
+	m_dynamicTrianglesArrayBlock.Render(this, render, modelViewMatrix);
 }
 
 void ndRenderPrimitiveImplement::RenderDebugPointArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const

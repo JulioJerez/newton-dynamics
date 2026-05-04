@@ -207,22 +207,45 @@ void ndEditorCameraFlyby::MouseSelection()
 	ndFloat32 hitParam = 1.0f;
 	ndSharedPtr<ndMesh> hitNode(nullptr);
 
-	auto RayCast = [this, &hitNode, &hitParam, &p0, &p1](ndMesh* const node)
+	if (m_editor->m_raycastBones)
 	{
-		if (node->GetGeometry())
+		// bone selection mode.
+		auto RayCast = [this, &hitNode, &hitParam, &p0, &p1](ndMesh* const node)
 		{
-			const ndMatrix matrix(node->GetGeometryMatrix() * node->CalculateGlobalMatrix());
-			const ndVector localP0(matrix.UntransformVector(p0));
-			const ndVector localP1(matrix.UntransformVector(p1));
-			ndFloat32 param = node->GetGeometry()->RayCast(localP0, localP1);
-			if (param < hitParam)
+			if (node->GetGeometry())
 			{
-				hitParam = param;
-				hitNode = (node != *m_editor->m_mesh) ? node->GetSharedPtr() : m_editor->m_mesh;
+				const ndMatrix matrix(node->GetGeometryMatrix() * node->CalculateGlobalMatrix());
+				const ndVector localP0(matrix.UntransformVector(p0));
+				const ndVector localP1(matrix.UntransformVector(p1));
+				ndFloat32 param = node->GetGeometry()->RayCast(localP0, localP1);
+				if (param < hitParam)
+				{
+					hitParam = param;
+					hitNode = (node != *m_editor->m_mesh) ? node->GetSharedPtr() : m_editor->m_mesh;
+				}
 			}
-		}
-	};
-	m_editor->m_mesh->NodeIterator(RayCast);
+		};
+		//m_editor->m_mesh->NodeIterator(RayCast);
+	}
+	else
+	{
+		auto RayCast = [this, &hitNode, &hitParam, &p0, &p1](ndMesh* const node)
+		{
+			if (node->GetGeometry())
+			{
+				const ndMatrix matrix(node->GetGeometryMatrix() * node->CalculateGlobalMatrix());
+				const ndVector localP0(matrix.UntransformVector(p0));
+				const ndVector localP1(matrix.UntransformVector(p1));
+				ndFloat32 param = node->GetGeometry()->RayCast(localP0, localP1);
+				if (param < hitParam)
+				{
+					hitParam = param;
+					hitNode = (node != *m_editor->m_mesh) ? node->GetSharedPtr() : m_editor->m_mesh;
+				}
+			}
+		};
+		m_editor->m_mesh->NodeIterator(RayCast);
+	}
 
 	if (hitNode)
 	{

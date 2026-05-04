@@ -32,7 +32,7 @@ class ndRenderPassDebug::ndCallback : public ndConstraintDebugCallback
 
 	void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32) override
 	{
-		ndPoint line;
+		ndPointColor line;
 
 		line.m_point = p0;
 		line.m_color = color;
@@ -41,6 +41,31 @@ class ndRenderPassDebug::ndCallback : public ndConstraintDebugCallback
 		line.m_point = p1;
 		line.m_color = color;
 		m_owner->m_debugLines.PushBack(line);
+	}
+
+	void DrawTriangle(const ndVector& p0, const ndVector& p1, const ndVector& p2, const ndVector& color) override
+	{
+		ndPointNormalColor point;
+
+		ndVector e0(p1 - p0);
+		ndVector e1(p2 - p0);
+		ndAssert((e0.DotProduct(e1 & ndVector::m_triplexMask)).GetScalar() > ndFloat32(0.0f));
+		ndVector normal(e0.CrossProduct(e1).Normalize());
+
+		point.m_point = p0;
+		point.m_point = normal;
+		point.m_color = color;
+		m_owner->m_debugTriangles.PushBack(point);
+
+		point.m_point = p1;
+		point.m_point = normal;
+		point.m_color = color;
+		m_owner->m_debugTriangles.PushBack(point);
+
+		point.m_point = p2;
+		point.m_point = normal;
+		point.m_color = color;
+		m_owner->m_debugTriangles.PushBack(point);
 	}
 
 	void DrawBox(const ndVector& p0, const ndVector& p1, const ndVector& color)
@@ -104,6 +129,9 @@ ndRenderPassDebug::ndRenderPassDebug(ndRender* const owner, ndWorld* const world
 
 	descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugLineArray;
 	m_renderLinesPrimitive = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
+
+	descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugTriangleArray;
+	m_renderTrianglePrimitive = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
 }
 
 ndRenderPassDebug::~ndRenderPassDebug()
@@ -111,16 +139,20 @@ ndRenderPassDebug::~ndRenderPassDebug()
 	m_owner->m_cachedDebugPass = nullptr;
 }
 
-const ndArray<ndRenderPassDebug::ndPoint>& ndRenderPassDebug::GetPoints() const
+const ndArray<ndRenderPassDebug::ndPointColor>& ndRenderPassDebug::GetPoints() const
 {
 	return m_debugPoints;
 }
 
-const ndArray<ndRenderPassDebug::ndPoint>& ndRenderPassDebug::GetVertex() const
+const ndArray<ndRenderPassDebug::ndPointColor>& ndRenderPassDebug::GetLines() const
 {
 	return m_debugLines;
 }
 
+const ndArray<ndRenderPassDebug::ndPointNormalColor>& ndRenderPassDebug::GetTriangles() const
+{
+	return m_debugTriangles;
+}
 void ndRenderPassDebug::SetDebugDisplayOptions(const ndDebugOptions& options)
 {
 	m_options = options;
@@ -256,7 +288,7 @@ void ndRenderPassDebug::GenerateContacts()
 			for (ndContactPointList::ndNode* contactPointsNode = contactPoints.GetFirst(); contactPointsNode; contactPointsNode = contactPointsNode->GetNext())
 			{
 				const ndContactPoint& contactPoint = contactPointsNode->GetInfo();
-				ndPoint point;
+				ndPointColor point;
 				point.m_point = contactPoint.m_point;
 				point.m_color = color;
 				m_debugPoints.PushBack(point);
@@ -284,7 +316,8 @@ void ndRenderPassDebug::GenerateContactForce()
 			for (ndContactPointList::ndNode* contactPointsNode = contactPoints.GetFirst(); contactPointsNode; contactPointsNode = contactPointsNode->GetNext())
 			{
 				const ndContactMaterial& contactPoint = contactPointsNode->GetInfo();
-				ndPoint point;
+				ndPointColor point;
+
 				point.m_point = contactPoint.m_point;
 				point.m_color = contactColor;
 				m_debugPoints.PushBack(point);
@@ -325,6 +358,7 @@ void ndRenderPassDebug::RenderScene()
 
 	m_debugLines.SetCount(0);
 	m_debugPoints.SetCount(0);
+	m_debugTriangles.SetCount(0);
 
 	if (m_options.m_showContacts)
 	{
@@ -370,7 +404,7 @@ void ndRenderPassDebug::RenderScene()
 		ndScopeSpinLock lock(m_runtimeLineLock);
 		for (ndInt32 i = 0; i < m_runtimeRenderLines.GetCount(); ++i)
 		{
-			ndPoint line;
+			ndPointColor line;
 			line.m_point = m_runtimeRenderLines[i].m_p0;
 			line.m_color = m_runtimeRenderLines[i].m_color;
 			m_debugLines.PushBack(line);

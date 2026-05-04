@@ -26,6 +26,7 @@ enum ndRenderPassMode
 	m_transparencyFrontface,
 	m_debugLineArray,
 	m_debugPointArray,
+	m_debugTriangleArray,
 	m_debugDisplaySolidMesh,
 	m_debugDisplaySetZbuffer,
 	m_debugDisplayWireFrameMesh,
@@ -87,8 +88,9 @@ class ndRenderPrimitive : public ndContainersFreeListAlloc<ndRenderPrimitive>
 		m_debugFlatShaded,
 		m_debugWireFrame,
 		m_debugHiddenLines,
-		m_debugLineArray,
 		m_debugPointArray,
+		m_debugLineArray,
+		m_debugTriangleArray,
 	};
 
 	enum ndUvMapingMode

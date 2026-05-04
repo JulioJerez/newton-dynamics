@@ -49,6 +49,7 @@ class ndRenderPrimitiveImplement : public ndContainersFreeListAlloc<ndRenderPrim
 	void BuildRenderInstanceMesh(const ndRenderPrimitive::ndDescriptor& descriptor);
 	void BuildDebugLineArray(const ndRenderPrimitive::ndDescriptor& descriptor);
 	void BuildDebugPointArray(const ndRenderPrimitive::ndDescriptor& descriptor);
+	void BuildDebugTriangleArray(const ndRenderPrimitive::ndDescriptor& descriptor);
 	void BuildWireframeDebugMesh(const ndRenderPrimitive::ndDescriptor& descriptor);
 	void BuildSetZBufferDebugMesh(const ndRenderPrimitive::ndDescriptor& descriptor);
 
@@ -56,6 +57,7 @@ class ndRenderPrimitiveImplement : public ndContainersFreeListAlloc<ndRenderPrim
 	void RenderGenerateShadowMaps(const ndRender* const render, const ndMatrix& lightMatrix) const;
 	void RenderDebugLineArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
 	void RenderDebugPointArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
+	void RenderDebugTriangleArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
 	void RenderSimplePrimitive(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
 	void RenderDebugShapeSolid(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
 	void RenderDebugShapeWireFrame(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
@@ -100,6 +102,7 @@ class ndRenderPrimitiveImplement : public ndContainersFreeListAlloc<ndRenderPrim
 	ndRenderShaderDynamicLinesArrayBlock m_dynamicLinesArrayBlock;
 	ndRenderShaderDynamicPointsArrayBlock m_dynamicPointsArrayBlock;
 	ndRenderShaderDebugWireframeDiffuseBlock m_debugWireframeColorBlock;
+	ndRenderShaderDynamicTrianglesArrayBlock m_dynamicTrianglesArrayBlock;
 	ndRenderShaderDebugFlatShadedDiffusedBlock m_debugFlatShadedColorBlock;
 
 	friend class ndRenderSceneNodeInstance;
@@ -110,6 +113,7 @@ class ndRenderPrimitiveImplement : public ndContainersFreeListAlloc<ndRenderPrim
 	friend class ndRenderShaderDynamicLinesArrayBlock;
 	friend class ndRenderShaderDynamicPointsArrayBlock;
 	friend class ndRenderShaderOpaqueDiffusedColorBlock;
+	friend class ndRenderShaderDynamicTrianglesArrayBlock;
 	friend class ndRenderShaderDebugWireframeDiffuseBlock;
 	friend class ndRenderShaderGenerateSkinShadowMapBlock;
 	friend class ndRenderShaderDebugFlatShadedDiffusedBlock;

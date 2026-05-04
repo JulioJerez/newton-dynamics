@@ -188,6 +188,14 @@ class glPositionNormal
 	glVector3 m_normal;
 };
 
+class glPositionNormalColor
+{
+	public:
+	glVector3 m_posit;
+	glVector3 m_normal;
+	glVector3 m_color;
+};
+
 class glPositionUV
 {
 	public:
@@ -205,7 +213,11 @@ class glSkinVertex : public glPositionNormalUV
 {
 	public:
 	glVector4 m_weighs;
-	ndInt32 m_boneIndex[4];
+	union 
+	{
+		GLuint m_boneIndexInt[4];
+		GLfloat m_boneIndexFloat[4];
+	};
 };
 
 #endif 

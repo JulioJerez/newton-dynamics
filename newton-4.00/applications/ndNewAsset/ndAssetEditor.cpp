@@ -35,6 +35,7 @@ ndAssetEditor::ndAssetEditor()
 	,m_showSelectedNode(true)
 	,m_showCollisionShape(true)
 	,m_showPreTransform(false)
+	,m_raycastBones(true)
 	,m_toolActive(false)
 	,m_gizmoScale(ndFloat32(0.25f))
 	,m_renderMode(m_shaded)
@@ -507,6 +508,7 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::Checkbox("show center of mass", &m_showCenterOfMass);
 			ImGui::Checkbox("show Joints", &m_showJoints);
 			ImGui::Checkbox("show collision", &m_showCollisionShape);
+			ImGui::Checkbox("show mesh skeleton", &m_showSelectedNode);
 
 			ImGui::Text("global properties");
 			ImGui::Checkbox("parent relative Transform", &m_showPreTransform);

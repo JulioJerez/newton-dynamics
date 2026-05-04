@@ -44,6 +44,7 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 
 	private:
 	void RenderOptions();
+	void RenderSkeleton();
 	void RenderWireFrame();
 	void RenderSelectedNode();
 	void RenderCollisionPair();
@@ -54,6 +55,10 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 
 	void DrawFrame(const ndMatrix& matrix);
 	void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color);
+	void DrawBone(const ndMesh* boneNode);
+
+	void RenderMeshSelection();
+	void RenderBoneSelection();
 
 	ndVector m_meshColor;
 	ndVector m_shapeColor;
