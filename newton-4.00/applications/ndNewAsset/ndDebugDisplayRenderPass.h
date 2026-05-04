@@ -57,6 +57,7 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color);
 
 	void DrawBone(const ndMesh* const boneNode);
+	void DrawSelectedBone(const ndMesh* const boneNode);
 	ndFixSizeArray<ndPointNormalColor, 256> GenerateBone(const ndMesh* const boneNode);
 
 	void RenderMeshSelection();

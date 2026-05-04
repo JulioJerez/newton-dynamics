@@ -91,7 +91,6 @@ void ndDebugDisplayRenderPass::RenderBoneSelection()
 	m_owner->ClearZBuffer();
 	RenderSkeleton();
 
-
 	//if (m_manager->m_renderMode == ndAssetEditor::m_wireframe)
 	//{
 	//	RenderWireFrame();
@@ -102,49 +101,52 @@ void ndDebugDisplayRenderPass::RenderBoneSelection()
 	//	RenderWireFrame();
 	//}
 
-	//if (m_manager->m_currentSelection)
-	//{
-	//	//if (m_manager->m_currentSelection->GetAsMesh())
-	//	//{
-	//	//	RenderSelectedNode();
-	//	//}
-	//
-	//	if (m_debugLines.GetCount())
-	//	{
-	//		const ndMatrix matrix(ndGetIdentityMatrix());
-	//		m_renderLinesPrimitive->Render(m_owner, matrix, m_debugLineArray);
-	//	}
-	//
-	//	// do not call base class
-	//	if (m_manager->m_renderMode == ndAssetEditor::m_wireframe)
-	//	{
-	//		RenderWireFrame();
-	//	}
-	//	else if (m_manager->m_renderMode == ndAssetEditor::m_hiddenSurface)
-	//	{
-	//		RenderHiddenSurface();
-	//		RenderWireFrame();
-	//	}
-	//
-	//	if (m_manager->m_currentSelection->GetAsMesh())
-	//	{
-	//		if (m_manager->m_showCollisionShape)
-	//		{
-	//			RenderCollisionShape();
-	//		}
-	//
-	//		RenderOptions();
-	//	}
-	//	else if (m_manager->m_currentSelection->GetAsCloseLoopConstraints())
-	//	{
-	//		RenderCloseLoopJoints();
-	//	}
-	//	else if (m_manager->m_currentSelection->GetAsCollidingPairs())
-	//	{
-	//		RenderCollisionPair();
-	//	}
-	//}
-
+	if (m_manager->m_currentSelection)
+	{
+		if (m_manager->m_currentSelection->GetNodeType() == ndMesh::m_bone)
+		{
+			DrawSelectedBone(*m_manager->m_currentSelection);
+		}
+		//if (m_manager->m_currentSelection->GetAsMesh())
+		//{
+		//	RenderSelectedNode();
+		//}
+		//
+		//if (m_debugLines.GetCount())
+		//{
+		//	const ndMatrix matrix(ndGetIdentityMatrix());
+		//	m_renderLinesPrimitive->Render(m_owner, matrix, m_debugLineArray);
+		//}
+		//
+		//// do not call base class
+		//if (m_manager->m_renderMode == ndAssetEditor::m_wireframe)
+		//{
+		//	RenderWireFrame();
+		//}
+		//else if (m_manager->m_renderMode == ndAssetEditor::m_hiddenSurface)
+		//{
+		//	RenderHiddenSurface();
+		//	RenderWireFrame();
+		//}
+		//
+		//if (m_manager->m_currentSelection->GetAsMesh())
+		//{
+		//	if (m_manager->m_showCollisionShape)
+		//	{
+		//		RenderCollisionShape();
+		//	}
+		//
+		//	RenderOptions();
+		//}
+		//else if (m_manager->m_currentSelection->GetAsCloseLoopConstraints())
+		//{
+		//	RenderCloseLoopJoints();
+		//}
+		//else if (m_manager->m_currentSelection->GetAsCollidingPairs())
+		//{
+		//	RenderCollisionPair();
+		//}
+	}
 
 	if (m_debugPoints.GetCount())
 	{
@@ -360,6 +362,11 @@ void ndDebugDisplayRenderPass::DrawBone(const ndMesh* const boneNode)
 	{
 		m_debugTriangles.PushBack(bone[i]);
 	}
+}
+
+void ndDebugDisplayRenderPass::DrawSelectedBone(const ndMesh* const boneNode)
+{
+	ndFixSizeArray<ndPointNormalColor, 256> bone(GenerateBone(boneNode));
 
 	for (ndInt32 i = 0; i < bone.GetCount(); i += 3)
 	{
@@ -369,11 +376,11 @@ void ndDebugDisplayRenderPass::DrawBone(const ndMesh* const boneNode)
 			ndPointColor line;
 
 			line.m_point = bone[i + j0].m_point;
-			line.m_color = ndVector (1.0f, 0.0f, 0.0f, 1.0f);
+			line.m_color = m_selectedColor;
 			m_debugLines.PushBack(line);
 
 			line.m_point = bone[i + j1].m_point;
-			line.m_color = ndVector(1.0f, 0.0f, 0.0f, 1.0f);
+			line.m_color = m_selectedColor;
 			m_debugLines.PushBack(line);
 
 			j0 = j1;
@@ -738,9 +745,6 @@ void ndDebugDisplayRenderPass::RenderSkeleton()
 		ndMesh::ndNodeType type = node->GetNodeType();
 		if (type == ndMesh::m_bone)
 		{
-			//const ndMatrix boneMatrix(node->CalculateGlobalMatrix());
-			//ndVector endPosit(boneMatrix.TransformVector(node->GetBoneTarget()));
-			//DrawLine(boneMatrix.m_posit, endPosit, ndVector::m_wOne);
 			DrawBone(node);
 		}
 	};
