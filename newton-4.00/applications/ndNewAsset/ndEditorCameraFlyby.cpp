@@ -203,32 +203,46 @@ void ndEditorCameraFlyby::MouseSelection()
 	const ndRenderSceneCamera* const camera = FindCameraNode();
 	const ndVector p0(camera->ScreenToWorld(ndVector(mouseX, mouseY, ndFloat32(0.0f), ndFloat32(0.0f))));
 	const ndVector p1(camera->ScreenToWorld(ndVector(mouseX, mouseY, ndFloat32(1.0f), ndFloat32(0.0f))));
-
-	ndFloat32 hitParam = 1.0f;
+	
 	ndSharedPtr<ndMesh> hitNode(nullptr);
-
 	if (m_editor->m_raycastBones)
 	{
 		// bone selection mode.
-		auto RayCast = [this, &hitNode, &hitParam, &p0, &p1](ndMesh* const node)
+		ndFloat32 hitParam = ndFloat32(1.0e20f);
+		auto BoneCast = [this, &hitNode, &hitParam, &p0, &p1](ndMesh* const node)
 		{
-			if (node->GetGeometry())
+			if (node->GetNodeType() == ndMesh::m_bone)
 			{
-				const ndMatrix matrix(node->GetGeometryMatrix() * node->CalculateGlobalMatrix());
-				const ndVector localP0(matrix.UntransformVector(p0));
-				const ndVector localP1(matrix.UntransformVector(p1));
-				ndFloat32 param = node->GetGeometry()->RayCast(localP0, localP1);
-				if (param < hitParam)
+				const ndMatrix boneMatrix(node->CalculateGlobalMatrix());
+				const ndVector target(boneMatrix.TransformVector(node->GetBoneTarget()));
+
+				ndBigVector p0Out;
+				ndBigVector p1Out;
+				ndRayToRayDistance(
+					ndBigVector(boneMatrix.m_posit), 
+					ndBigVector(target), 
+					ndBigVector(p0), ndBigVector(p1), 
+					p0Out, p1Out);
+
+				ndBigVector dist(p1Out - p0Out);
+				ndFloat32 dist2 = ndFloat32(dist.DotProduct(dist).GetScalar());
+				if (dist2 < hitParam)
 				{
-					hitParam = param;
-					hitNode = (node != *m_editor->m_mesh) ? node->GetSharedPtr() : m_editor->m_mesh;
+					hitParam = dist2;
+					hitNode = node->GetSharedPtr();
 				}
 			}
 		};
-		//m_editor->m_mesh->NodeIterator(RayCast);
+		m_editor->m_mesh->NodeIterator(BoneCast);
+		ndFloat32 maxDist = ndFloat32(0.1f);
+		if (hitParam > (maxDist * maxDist))
+		{
+			hitNode = ndSharedPtr<ndMesh> (nullptr);
+		}
 	}
 	else
 	{
+		ndFloat32 hitParam = ndFloat32(1.0f);
 		auto RayCast = [this, &hitNode, &hitParam, &p0, &p1](ndMesh* const node)
 		{
 			if (node->GetGeometry())
