@@ -508,7 +508,7 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::Checkbox("show center of mass", &m_showCenterOfMass);
 			ImGui::Checkbox("show Joints", &m_showJoints);
 			ImGui::Checkbox("show collision", &m_showCollisionShape);
-			ImGui::Checkbox("show mesh skeleton", &m_showSelectedNode);
+			ImGui::Checkbox("show mesh skeleton", &m_raycastBones);
 
 			ImGui::Text("global properties");
 			ImGui::Checkbox("parent relative Transform", &m_showPreTransform);

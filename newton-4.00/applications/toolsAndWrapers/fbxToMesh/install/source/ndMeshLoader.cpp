@@ -130,6 +130,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			ndAssert(0);
 		}
 		ndTriplexReal target(xmlGetTriplexRealAttribute(xmlNodeType, "target"));
+		mesh->SetBoneTarget(ndVector(target.m_x, target.m_y, target.m_z, ndReal(1.0f)));
 	
 		const nd::TiXmlElement* const xmlGeometry = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("geometry");
 		if (xmlGeometry)
