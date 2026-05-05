@@ -18,10 +18,9 @@ class ndUndoRedoMeshNode : public ndUndoRedoCommand
 	public:
 	ndUndoRedoMeshNode(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
 		:ndUndoRedoCommand(editor, mesh)
-		,m_name(mesh->GetName())
-		,m_matrix(mesh->GetMatrix())
-		,m_geometryMatrix(mesh->GetGeometryMatrix())
+		,m_copy(editor->m_mesh->CreateClone())
 	{
+		ndAssert(0);
 	}
 
 	virtual class ndUndoRedoMeshNode* GetAsUndoRedoMeshNode() const override
@@ -31,18 +30,20 @@ class ndUndoRedoMeshNode : public ndUndoRedoCommand
 
 	virtual bool operator!=(const ndUndoRedoCommand& command) const override
 	{
+		ndAssert(0);
 		if (*m_mesh == *command.m_mesh)
 		{
 			ndUndoRedoMeshNode* const other = command.GetAsUndoRedoMeshNode();
 			if (other)
 			{
-				bool test = m_name == other->m_name;
-				test = test && (m_matrix * other->m_matrix.OrthoInverse()).TestIdentity();
-				test = test && (m_geometryMatrix * other->m_geometryMatrix.OrthoInverse()).TestIdentity();
-				if (test)
-				{
-					return false;
-				}
+				ndAssert(0);
+				//bool test = m_name == other->m_name;
+				//test = test && (m_matrix * other->m_matrix.OrthoInverse()).TestIdentity();
+				//test = test && (m_geometryMatrix * other->m_geometryMatrix.OrthoInverse()).TestIdentity();
+				//if (test)
+				//{
+				//	return false;
+				//}
 			}
 		}
 
@@ -51,22 +52,24 @@ class ndUndoRedoMeshNode : public ndUndoRedoCommand
 	
 	virtual void Undo() override
 	{
-		ndRenderSceneNode* const entNode = GetSceneNode();
-		ndAssert(entNode);
-
-		m_mesh->SetName(m_name);
-		m_mesh->SetMatrix(m_matrix);
-		m_mesh->SetGeometryMatrix(m_geometryMatrix);
-
-		entNode->m_name = m_name;
-		entNode->SetTransform(m_matrix);
-		entNode->SetTransform(m_matrix);
-		entNode->SetPrimitiveMatrix(m_geometryMatrix);
+		ndAssert(0);
+		//ndRenderSceneNode* const entNode = GetSceneNode();
+		//ndAssert(entNode);
+		//
+		//m_mesh->SetName(m_name);
+		//m_mesh->SetMatrix(m_matrix);
+		//m_mesh->SetGeometryMatrix(m_geometryMatrix);
+		//
+		//entNode->m_name = m_name;
+		//entNode->SetTransform(m_matrix);
+		//entNode->SetTransform(m_matrix);
+		//entNode->SetPrimitiveMatrix(m_geometryMatrix);
 	}
 
-	ndString m_name;
-	ndMatrix m_matrix;
-	ndMatrix m_geometryMatrix;
+	ndSharedPtr<ndMesh> m_copy;
+	//ndString m_name;
+	//ndMatrix m_matrix;
+	//ndMatrix m_geometryMatrix;
 };
 
 void ndAssetEditor::ShowPropertiesMeshInfo()

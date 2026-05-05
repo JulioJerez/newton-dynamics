@@ -69,6 +69,17 @@ class ndMesh : public ndClassAlloc
 			,m_lenght(ndFloat32 (0.0f))
 		{
 		}
+
+		ndCurve(const ndCurve& src)
+			:ndList<ndCurveValue>()
+			,m_lenght(src.m_lenght)
+		{
+			for (ndNode* ptr = src.GetFirst(); ptr; ptr = ptr->GetNext())
+			{
+				Append(ptr->GetInfo());
+			}
+		}
+
 		ndReal m_lenght;
 	};
 
@@ -85,8 +96,8 @@ class ndMesh : public ndClassAlloc
 	ndMatrix GetGeometryMatrix() const;
 	void SetGeometryMatrix(const ndMatrix& matrix);
 
-	D_NEWTON_API void AddChild(const ndSharedPtr<ndMesh>& child);
 	D_NEWTON_API void RemoveChild(const ndSharedPtr<ndMesh>& child);
+	D_NEWTON_API void AddChild(const ndSharedPtr<ndMesh>& child, bool addToEnd = true);
 
 	D_NEWTON_API ndMesh* GetParent();
 	D_NEWTON_API const ndMesh* GetParent() const;
@@ -236,7 +247,7 @@ class ndCloseLoopConstraints: public ndMesh
 {
 	public:
 	D_NEWTON_API ndCloseLoopConstraints();
-	D_NEWTON_API ndCloseLoopConstraints(const ndMesh& src);
+	D_NEWTON_API ndCloseLoopConstraints(const ndCloseLoopConstraints& src);
 
 	D_NEWTON_API virtual ndMesh* GetAsMesh();
 	D_NEWTON_API virtual const ndMesh* GetAsMesh() const;
@@ -253,7 +264,7 @@ class ndCollidingPairs : public ndMesh
 {
 	public:
 	D_NEWTON_API ndCollidingPairs();
-	D_NEWTON_API ndCollidingPairs(const ndMesh& src);
+	D_NEWTON_API ndCollidingPairs(const ndCollidingPairs& src);
 
 	D_NEWTON_API virtual ndMesh* GetAsMesh();
 	D_NEWTON_API virtual const ndMesh* GetAsMesh() const;
