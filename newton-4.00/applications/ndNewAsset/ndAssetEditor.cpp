@@ -348,7 +348,7 @@ void ndAssetEditor::NewMesh()
 	loader.m_mesh = ndSharedPtr<ndMesh>(new ndMesh);
 	loader.m_mesh->SetName("root");
 	loader.m_renderMesh = ndRenderMeshLoader::CreateRenderSceneMesh(*GetRenderer(), *loader.m_mesh, ndString());
-	SetVisualScene(loader);
+	SetVisualScene(loader.m_mesh, loader.m_renderMesh);
 	m_undoRedo.Clear();
 }
 
@@ -373,7 +373,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					if (loader.LoadMesh(path))
 					{
 						m_currentPath = path;
-						SetVisualScene(loader);
+						SetVisualScene(loader.m_mesh, loader.m_renderMesh);
 						m_undoRedo.Clear();
 					}
 				}
@@ -399,8 +399,8 @@ void ndAssetEditor::ShowMainMenuBar()
 					ndRenderMeshLoader loader(*m_renderer);
 					loader.m_mesh = m_mesh;
 					loader.SaveMesh(ndString(m_currentPath));
-					m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
-					m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+					m_currentSelection = ndWeakPtr<ndMesh>(nullptr);
+					m_currentSubSelection = ndWeakPtr<ndMesh>(nullptr);
 				}
 			}
 
@@ -415,7 +415,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					if (loader.ImportFbx(path))
 					{
 						m_currentPath = path;
-						SetVisualScene(loader);
+						SetVisualScene(loader.m_mesh, loader.m_renderMesh);
 						m_undoRedo.Clear();
 					}
 				}
@@ -431,7 +431,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					if (loader.Import(path))
 					{
 						m_currentPath = path;
-						SetVisualScene(loader);
+						SetVisualScene(loader.m_mesh, loader.m_renderMesh);
 						m_undoRedo.Clear();
 					}
 				}
@@ -440,7 +440,7 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::Separator();
 			if (ImGui::MenuItem("Exit", ""))
 			{
-				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
+				m_currentSelection = ndWeakPtr<ndMesh>(nullptr);
 				m_renderer->Terminate();
 			}
 
@@ -479,6 +479,12 @@ void ndAssetEditor::ShowMainMenuBar()
 				m_currentTool = new ndRotateMesh(this);
 			}
 
+			if (ImGui::MenuItem("rotate bones", ""))
+			{
+				m_toolActive = true;
+				m_currentTool = new ndRotateBones(this);
+			}
+
 			if (ImGui::MenuItem("normalize mass distibution", ""))
 			{
 				m_toolActive = true;
@@ -508,7 +514,7 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::Checkbox("show center of mass", &m_showCenterOfMass);
 			ImGui::Checkbox("show Joints", &m_showJoints);
 			ImGui::Checkbox("show collision", &m_showCollisionShape);
-			ImGui::Checkbox("show mesh skeleton", &m_showSelectedNode);
+			ImGui::Checkbox("show mesh skeleton", &m_raycastBones);
 
 			ImGui::Text("global properties");
 			ImGui::Checkbox("parent relative Transform", &m_showPreTransform);
@@ -525,19 +531,28 @@ const ndString& ndAssetEditor::GetPath() const
 	return m_currentPath;
 }
 
-void ndAssetEditor::SetVisualScene(const ndRenderMeshLoader& loader)
+void ndAssetEditor::SetVisualScene(const ndSharedPtr<ndMesh>& mesh, const ndSharedPtr<ndRenderSceneNode>& renderMesh)
 {
 	// force the mesh to have a defualt colliding pair list
-	loader.m_mesh->GetCollingPairs();
+	mesh->GetCollingPairs();
 
-	// force the mesh to have a default constaring loop list
-	loader.m_mesh->GetLoopJoints();
+	// force the mesh to have a default constraint loop list
+	mesh->GetLoopJoints();
+
+	m_newMesh = mesh;
+	m_newSceneMesh = renderMesh;
 
 	m_subSelection = m_none;
-	m_newMesh = loader.m_mesh;
-	m_newSceneMesh = loader.m_renderMesh;
-	m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
-	m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+	m_currentSelection = ndWeakPtr<ndMesh>(nullptr);
+	m_currentSubSelection = ndWeakPtr<ndMesh>(nullptr);
+
+	ndInt32 bonesNumber = 0;
+	auto BonesCount = [&bonesNumber](ndMesh* const node)
+	{
+		bonesNumber += (node->GetNodeType() == ndMesh::m_bone) ? 1 : 0;
+	};
+	m_newMesh->NodeIterator(BonesCount);
+	m_raycastBones = (bonesNumber != 0);
 }
 
 void ndAssetEditor::Run()
@@ -551,7 +566,7 @@ void ndAssetEditor::Run()
 			if (!*m_mesh && m_entity)
 			{
 				m_undoRedo.Clear();
-				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
+				m_currentSelection = ndWeakPtr<ndMesh>(nullptr);
 				m_renderer->RemoveSceneNode(m_entity);
 				m_entity = ndSharedPtr<ndRenderSceneNode>(nullptr);
 				m_debugDisplayRenderPass->ResetScene();

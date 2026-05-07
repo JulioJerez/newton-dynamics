@@ -352,13 +352,39 @@ void ndRenderPassDebug::SwapRuntimeLinesBuffers()
 	m_runtimeLines.Swap(m_runtimeRenderLines);
 }
 
+void ndRenderPassDebug::ClearDynamicPrimitives()
+{
+	m_debugLines.SetCount(0);
+	m_debugPoints.SetCount(0);
+	m_debugTriangles.SetCount(0);
+}
+
+void ndRenderPassDebug::RenderDynamicPrimitives()
+{
+	if (m_debugPoints.GetCount())
+	{
+		const ndMatrix matrix(ndGetIdentityMatrix());
+		m_renderPointsPrimitive->Render(m_owner, matrix, m_debugPointArray);
+	}
+
+	if (m_debugLines.GetCount())
+	{
+		const ndMatrix matrix(ndGetIdentityMatrix());
+		m_renderLinesPrimitive->Render(m_owner, matrix, m_debugLineArray);
+	}
+
+	if (m_debugTriangles.GetCount())
+	{
+		const ndMatrix matrix(ndGetIdentityMatrix());
+		m_renderTrianglePrimitive->Render(m_owner, matrix, m_debugTriangleArray);
+	}
+}
+
 void ndRenderPassDebug::RenderScene()
 {
 	ndAssert(m_world);
 
-	m_debugLines.SetCount(0);
-	m_debugPoints.SetCount(0);
-	m_debugTriangles.SetCount(0);
+	ClearDynamicPrimitives();
 
 	if (m_options.m_showContacts)
 	{
@@ -393,12 +419,6 @@ void ndRenderPassDebug::RenderScene()
 		GenerateModelsDebug();
 	}
 
-	if (m_debugPoints.GetCount())
-	{
-		const ndMatrix matrix(ndGetIdentityMatrix());
-		m_renderPointsPrimitive->Render(m_owner, matrix, m_debugPointArray);
-	}
-
 	if (m_options.m_showStaticMeshCollidingFaces)
 	{
 		ndScopeSpinLock lock(m_runtimeLineLock);
@@ -414,9 +434,5 @@ void ndRenderPassDebug::RenderScene()
 		}
 	}
 
-	if (m_debugLines.GetCount())
-	{
-		const ndMatrix matrix(ndGetIdentityMatrix());
-		m_renderLinesPrimitive->Render(m_owner, matrix, m_debugLineArray);
-	}
+	RenderDynamicPrimitives();
 }

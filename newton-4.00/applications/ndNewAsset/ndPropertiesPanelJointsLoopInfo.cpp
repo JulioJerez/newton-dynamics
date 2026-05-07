@@ -17,9 +17,9 @@ class ndUndoRedoLoopJoint : public ndUndoRedoCommand
 {
 	public:
 	ndUndoRedoLoopJoint(ndAssetEditor* const editor)
-		:ndUndoRedoCommand(editor, editor->m_mesh->GetLoopJoints()->GetSharedPtr())
+		:ndUndoRedoCommand(editor, editor->m_mesh->GetLoopJoints())
 	{
-		ndCloseLoopConstraints* const loops = m_mesh->GetLoopJoints();
+		ndCloseLoopConstraints* const loops = m_selectedNode->GetLoopJoints();
 		for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptr = loops->m_loopJoints.GetFirst(); ptr; ptr = ptr->GetNext())
 		{
 			ndSharedPtr<ndMeshLoopJoint> copy(new ndMeshLoopJoint(**ptr->GetInfo()));
@@ -34,7 +34,7 @@ class ndUndoRedoLoopJoint : public ndUndoRedoCommand
 
 	virtual bool operator!=(const ndUndoRedoCommand& command) const override
 	{
-		if (*m_mesh == *command.m_mesh)
+		if (*m_selectedNode == *command.m_selectedNode)
 		{
 			ndUndoRedoLoopJoint* const other = command.GetAsUndoRedoLoopJoint();
 			if (other)
@@ -62,7 +62,7 @@ class ndUndoRedoLoopJoint : public ndUndoRedoCommand
 
 	virtual void Undo() override
 	{
-		ndCloseLoopConstraints* const loops = m_mesh->GetLoopJoints();
+		ndCloseLoopConstraints* const loops = m_selectedNode->GetLoopJoints();
 		loops->m_loopJoints.RemoveAll();
 		for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* node = m_loopJoints.GetFirst(); node; node = node->GetNext())
 		{

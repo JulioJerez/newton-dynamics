@@ -268,20 +268,20 @@ void ndEditorCameraFlyby::MouseSelection()
 		{
 			case ndAssetEditor::m_loopJoint:
 			{
-				m_editor->SetLoopJointSelection(hitNode);
+				m_editor->SetLoopJointSelection(*hitNode);
 				break;
 			}
 
 			case ndAssetEditor::m_collidingPair:
 			{
-				m_editor->SetCollidingSubSelection(hitNode);
+				m_editor->SetCollidingSubSelection(*hitNode);
 				break;
 			}
 
 			case ndAssetEditor::m_none:
 			default:
 			{
-				m_editor->m_currentSelection = hitNode;
+				m_editor->m_currentSelection = *hitNode;
 			}
 		}
 	}

@@ -12,62 +12,53 @@
 #include "ndNewAssetStdafx.h"
 #include "ndUndoRedo.h"
 #include "ndAssetEditor.h"
+#include "ndDebugDisplayRenderPass.h"
 
-class ndUndoRedoMeshNode : public ndUndoRedoCommand
+ndUndoRedoMeshNode::ndUndoRedoMeshNode(ndAssetEditor* const editor, const ndMesh* const selectedNode)
+	:ndUndoRedoCommand(editor, selectedNode)
+	,m_copy(editor->m_mesh->CreateClone())
 {
-	public:
-	ndUndoRedoMeshNode(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
-		:ndUndoRedoCommand(editor, mesh)
-		,m_name(mesh->GetName())
-		,m_matrix(mesh->GetMatrix())
-		,m_geometryMatrix(mesh->GetGeometryMatrix())
-	{
-	}
+	m_selectedNode = m_copy->FindByName(m_selectedNodeName);
+}
 
-	virtual class ndUndoRedoMeshNode* GetAsUndoRedoMeshNode() const override
-	{ 
-		return (ndUndoRedoMeshNode*)this;
-	}
+ndUndoRedoMeshNode* ndUndoRedoMeshNode::GetAsUndoRedoMeshNode() const
+{ 
+	return (ndUndoRedoMeshNode*)this;
+}
 
-	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+bool ndUndoRedoMeshNode::operator!=(const ndUndoRedoCommand& command) const
+{
+	if (*m_selectedNode == *command.m_selectedNode)
 	{
-		if (*m_mesh == *command.m_mesh)
+		ndUndoRedoMeshNode* const other = command.GetAsUndoRedoMeshNode();
+		if (other)
 		{
-			ndUndoRedoMeshNode* const other = command.GetAsUndoRedoMeshNode();
-			if (other)
+			bool test = true;
+			auto CompareNodes = [this, &test, other](ndMesh* node)
 			{
-				bool test = m_name == other->m_name;
-				test = test && (m_matrix * other->m_matrix.OrthoInverse()).TestIdentity();
-				test = test && (m_geometryMatrix * other->m_geometryMatrix.OrthoInverse()).TestIdentity();
-				if (test)
-				{
-					return false;
-				}
+				const ndMesh* const otherNode = other->m_copy->FindByName(node->GetName());
+				test = test && (otherNode ? true : false);
+				test = test && (*node == *otherNode);
+			};
+			m_copy->NodeIterator(CompareNodes);
+			
+			if (test)
+			{
+				return false;
 			}
 		}
-
-		return true;
 	}
+
+	return true;
+}
 	
-	virtual void Undo() override
-	{
-		ndRenderSceneNode* const entNode = GetSceneNode();
-		ndAssert(entNode);
+void ndUndoRedoMeshNode::Undo()
+{
+	ndSharedPtr<ndRenderSceneNode> visualMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*m_editor->GetRenderer(), *m_copy, ndGetPath(m_editor->GetPath())));
 
-		m_mesh->SetName(m_name);
-		m_mesh->SetMatrix(m_matrix);
-		m_mesh->SetGeometryMatrix(m_geometryMatrix);
-
-		entNode->m_name = m_name;
-		entNode->SetTransform(m_matrix);
-		entNode->SetTransform(m_matrix);
-		entNode->SetPrimitiveMatrix(m_geometryMatrix);
-	}
-
-	ndString m_name;
-	ndMatrix m_matrix;
-	ndMatrix m_geometryMatrix;
-};
+	m_editor->SetVisualScene(m_copy, visualMesh);
+	m_editor->m_currentSelection = m_selectedNode;
+}
 
 void ndAssetEditor::ShowPropertiesMeshInfo()
 {
@@ -79,7 +70,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 		{
 			if (strcmp(m_currentSelection->GetName().GetStr(), nodeName))
 			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				ndString newName(nodeName);
 				while (m_mesh->FindByName(newName))
 				{
@@ -89,7 +80,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 
 				m_currentSelection->SetName(newName);
 				entNode->m_name = newName;
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			}
 		}
 
@@ -120,14 +111,14 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				{
 					ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
 					ndAssert(entNode);
-					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, m_currentSelection)));
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				
 					matrix.m_posit = ndVector(position[0], position[1], position[2], ndFloat32(1.0f));
 					m_currentSelection->SetMatrix(matrix);
 					entNode->SetTransform(matrix);
 					entNode->SetTransform(matrix);
 				
-					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, m_currentSelection)));
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				}
 				
 				euler[0] = ndReal(radians[0]);
@@ -137,7 +128,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				{
 					ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
 					ndAssert(entNode);
-					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, m_currentSelection)));
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				
 					ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
 					newMatrix.m_posit = matrix.m_posit;
@@ -145,7 +136,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 					entNode->SetTransform(newMatrix);
 					entNode->SetTransform(newMatrix);
 				
-					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, m_currentSelection)));
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				}
 			}
 			else
@@ -159,7 +150,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				{
 					ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
 					ndAssert(entNode);
-					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, m_currentSelection)));
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 
 					const ndVector delta(position[0], position[1], position[2], ndFloat32(0.0f));
 					matrix.m_posit += matrix.RotateVector(delta);
@@ -167,7 +158,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 					entNode->SetTransform(matrix);
 					entNode->SetTransform(matrix);
 
-					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, m_currentSelection)));
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				}
 
 				euler[0] = ndReal(0.0f);
@@ -177,14 +168,14 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				{
 					ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
 					ndAssert(entNode);
-					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, m_currentSelection)));
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 
 					const ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad) * matrix);
 					m_currentSelection->SetMatrix(newMatrix);
 					entNode->SetTransform(newMatrix);
 					entNode->SetTransform(newMatrix);
 
-					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, m_currentSelection)));
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				}
 			}
 		}
@@ -202,7 +193,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			{
 				ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
 				ndAssert(entNode);
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 
 				matrix.m_posit.m_x = position[0];
 				matrix.m_posit.m_y = position[1];
@@ -210,7 +201,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				m_currentSelection->SetGeometryMatrix(matrix);
 				entNode->SetPrimitiveMatrix(matrix);
 
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			};
 
 			ndReal euler[3];
@@ -224,13 +215,13 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			{
 				ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
 				ndAssert(entNode);
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 
 				ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
 				newMatrix.m_posit = matrix.m_posit;
 				m_currentSelection->SetGeometryMatrix(newMatrix);
 				entNode->SetPrimitiveMatrix(matrix);
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			};
 		}
 	}

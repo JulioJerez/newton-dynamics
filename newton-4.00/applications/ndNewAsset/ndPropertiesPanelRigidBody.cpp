@@ -16,9 +16,9 @@
 class ndUndoRedoRigidBody : public ndUndoRedoCommand
 {
 	public:
-	ndUndoRedoRigidBody(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
-		:ndUndoRedoCommand(editor, mesh)
-		,m_body(ndSharedPtr<ndMeshBody>(new ndMeshBodyDynamic(*((ndMeshBodyDynamic*)m_mesh->GetRigidBody()->Duplicate()))))
+	ndUndoRedoRigidBody(ndAssetEditor* const editor, const ndMesh* const selectedNode)
+		:ndUndoRedoCommand(editor, selectedNode)
+		,m_body(ndSharedPtr<ndMeshBody>(new ndMeshBodyDynamic(*((ndMeshBodyDynamic*)selectedNode->GetRigidBody()->Duplicate()))))
 	{
 	}
 
@@ -29,7 +29,7 @@ class ndUndoRedoRigidBody : public ndUndoRedoCommand
 
 	virtual bool operator!=(const ndUndoRedoCommand& command) const override
 	{
-		if (*m_mesh == *command.m_mesh)
+		if (*m_selectedNode == *command.m_selectedNode)
 		{
 			const ndUndoRedoRigidBody* const other = command.GetAsUndoRedoRigidBody();
 			if (other)
@@ -50,8 +50,8 @@ class ndUndoRedoRigidBody : public ndUndoRedoCommand
 
 	virtual void Undo() override
 	{
-		ndAssert(m_mesh == m_editor->m_currentSelection);
-		m_mesh->SetRigidBody(m_body);
+		ndAssert(m_selectedNode == m_editor->m_currentSelection);
+		m_selectedNode->SetRigidBody(m_body);
 	}
 
 	ndSharedPtr<ndMeshBody> m_body;
@@ -70,7 +70,7 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			ndReal scalar = ndReal(ndFloat32(1.0f) / rigidBody->m_invMass.m_w);
 			if (ImGui::InputFloat("mass", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 				scalar = ndMax(scalar, ndReal(0.001f));
 				rigidBody->m_invMass.m_w = ndFloat32(1.0f) / scalar;
 
@@ -94,16 +94,16 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 				angles.m_w = ndFloat32(0.0f);
 				rigidBody->m_inertiaPrincipalAxis = angles;
 
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 			};
 
 			scalar = ndReal(rigidBody->m_massVolumeWeigh);
 			if (ImGui::InputFloat("mass weigh", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 				scalar = ndMax(scalar, ndReal(0.001f));
 				rigidBody->m_massVolumeWeigh = scalar;
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 			};
 		}
 
@@ -112,10 +112,10 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			ndReal scalar = ndReal(rigidBody->m_maxLinearStep);
 			if (ImGui::InputFloat("linear step", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 				scalar = ndClamp(scalar, ndReal(0.1f), ndReal(30.0f));
 				rigidBody->m_maxLinearStep = scalar;
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 			};
 		}
 
@@ -124,10 +124,10 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			ndReal scalar = ndReal(rigidBody->m_maxAngleStep);
 			if (ImGui::InputFloat("angle step", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 				scalar = ndClamp(scalar, ndReal(10.0f), ndReal(180.0f));
 				rigidBody->m_maxAngleStep = scalar;
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 			};
 		}
 
@@ -136,10 +136,10 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			ndReal scalar = ndReal(rigidBody->m_intrinsicDamping.m_w);
 			if (ImGui::InputFloat("linear damp", &scalar, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 				scalar = ndClamp(scalar, ndReal(0.0f), ndReal(1.0f));
 				rigidBody->m_intrinsicDamping.m_w = scalar;
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 			};
 		}
 
@@ -152,12 +152,12 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			real[2] = ndReal(vector.m_z);
 			if (ImGui::InputFloat3("angular damp", real, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 				vector.m_x = real[0];
 				vector.m_y = real[1];
 				vector.m_z = real[2];
 				rigidBody->m_intrinsicDamping = vector;
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 			};
 		}
 
@@ -170,12 +170,12 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 			real[2] = ndReal(vector.m_z);
 			if (ImGui::InputFloat3("com", real, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 				vector.m_x = real[0];
 				vector.m_y = real[1];
 				vector.m_z = real[2];
 				rigidBody->m_localCentreOfMass = vector;
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 			};
 		}
 
@@ -189,12 +189,12 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 
 			if (ImGui::InputFloat3("principal inertia", real, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 				vector.m_x = ndFloat32(1.0f) / real[0];
 				vector.m_y = ndFloat32(1.0f) / real[1];
 				vector.m_z = ndFloat32(1.0f) / real[2];
 				rigidBody->m_invMass = vector;
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 			};
 		}
 
@@ -208,13 +208,13 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 
 			if (ImGui::InputFloat3("inertia axis", real, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 				vector.m_x = real[0];
 				vector.m_y = real[1];
 				vector.m_z = real[2];
 				vector.m_w = ndReal(0.0f);
 				rigidBody->m_inertiaPrincipalAxis = vector;
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, m_currentSelection)));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 			};
 		}
 
@@ -239,7 +239,7 @@ void ndAssetEditor::EditCollidingPair()
 		if (ImGui::Button("exit colliding pairs"))
 		{
 			m_subSelection = m_none;
-			m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+			m_currentSubSelection = ndWeakPtr<ndMesh>(nullptr);
 		}
 
 		ImGui::SameLine();
@@ -268,7 +268,7 @@ void ndAssetEditor::EditLoopJoints()
 		if (ImGui::Button("exit loop joints"))
 		{
 			m_subSelection = m_none;
-			m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+			m_currentSubSelection = ndWeakPtr<ndMesh>(nullptr);
 		}
 
 		ImGui::SameLine();
@@ -278,7 +278,7 @@ void ndAssetEditor::EditLoopJoints()
 			{
 				AddLoopJoint();
 				m_subSelection = m_none;
-				m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+				m_currentSubSelection = ndWeakPtr<ndMesh>(nullptr);
 			}
 		}
 	}

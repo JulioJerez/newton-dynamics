@@ -28,1350 +28,1274 @@
 //#include "dgCollisionConvexHull.h"
 
 
-// based of the paper Hierarchical Approximate Convex Decomposition by Khaled Mamou 
-// with his permission to adapt his algorithm to be more efficient.
-// also making some addition to his heuristic for better convex clusters selections
-// for the details http://kmamou.blogspot.com/
-
 #if 0
-#define DG_CONCAVITY_SCALE				ndFloat64 (100.0f)
-#define DG_CONCAVITY_PERIMETER_HANDICAP	ndFloat64 (0.5f)
-
-class dgHACDEdge
+void ndMeshEffect::ClipMesh (const dMatrix& matrix, const ndMeshEffect* const clipMesh, ndMeshEffect** const back, ndMeshEffect** const front) const
 {
-	public:
-	dgHACDEdge ()
-		:m_mark(0)
-		,m_proxyListNode(nullptr)
-		,m_backFaceHandicap(dFloat64 (1.0))
-	{
-	}
-	~dgHACDEdge ()
-	{
+	dAssert (0);
+/*
+	ndMeshEffect clipper (*clipMesh);
+	clipper.TransformMesh (matrix);
+
+	ndMeshEffect* backMeshSource = nullptr;
+	ndMeshEffect* frontMeshSource = nullptr;
+	ndMeshEffect* backMeshClipper = nullptr;
+	ndMeshEffect* frontMeshClipper = nullptr;
+
+	ClipMesh (&clipper, &backMeshSource, &frontMeshSource);
+	if (backMeshSource && frontMeshSource) {
+		clipper.ClipMesh (this, &backMeshClipper, &frontMeshClipper);
+		if (backMeshSource && frontMeshSource) {
+
+			ndMeshEffect* backMesh;
+			ndMeshEffect* frontMesh;
+
+			backMesh = new (GetAllocator()) ndMeshEffect (GetAllocator(), true);
+			frontMesh = new (GetAllocator()) ndMeshEffect (GetAllocator(), true);
+
+			backMesh->BeginPolygon();
+			frontMesh->BeginPolygon();
+
+			backMesh->MergeFaces(backMeshSource);
+			backMesh->MergeFaces(backMeshClipper);
+
+			frontMesh->MergeFaces(frontMeshSource);
+			frontMesh->ReverseMergeFaces(backMeshClipper);
+
+			backMesh->EndPolygon(ndFloat64 (1.0e-5f));
+			frontMesh->EndPolygon(ndFloat64 (1.0e-5f));
+
+			*back = backMesh;
+			*front = frontMesh;
+		}
 	}
 
-	dInt32 m_mark;
-	void* m_proxyListNode;
-	dFloat64 m_backFaceHandicap;
-};
+	if (backMeshClipper) {
+		delete backMeshClipper;
+	}
 
-class dHACDClusterFace
+	if (frontMeshClipper) {
+		delete frontMeshClipper;
+	}
+
+	if (backMeshSource) {
+		delete backMeshSource;
+	}
+
+	if (frontMeshSource) {
+		delete frontMeshSource;
+	}
+*/
+}
+
+
+ndMeshEffect* ndMeshEffect::Union (const dMatrix& matrix, const ndMeshEffect* const clipperMesh) const
 {
-	public:
-	dHACDClusterFace()
-		:m_edge(nullptr)
-		,m_area(dFloat64(0.0f))
-	{
-	}
-	~dHACDClusterFace()
-	{
-	}
+	dAssert (0);
+	return nullptr;
+/*
+	ndMeshEffect copy (*this);
+	ndMeshEffect clipper (*clipperMesh);
+	clipper.TransformMesh (matrix);
 
-	dEdge* m_edge;
-	dFloat64 m_area;
-	dBigVector m_normal;
-};
+	dgBooleanMeshClipper::ClipMeshesAndColorize (&copy, &clipper);
 
-class dgHACDCluster: public dList<dHACDClusterFace>
+	ndMeshEffect* const mesh = new (GetAllocator()) ndMeshEffect (GetAllocator());
+	mesh->BeginFace();
+	dgBooleanMeshClipper::CopyPoints(mesh, &copy);
+	dgBooleanMeshClipper::AddExteriorFaces (mesh, &copy);
+
+	dgBooleanMeshClipper::AddExteriorFaces (mesh, &clipper);
+	mesh->EndFace ();
+	mesh->RepairTJoints();
+	mesh->RemoveUnusedVertices(nullptr);
+	return mesh;
+*/
+}
+
+ndMeshEffect* ndMeshEffect::Difference (const dMatrix& matrix, const ndMeshEffect* const clipperMesh) const
 {
-	public:
-	dgHACDCluster ()
-		:dList<dHACDClusterFace>(nullptr)
-		,m_color(0)
-		,m_hierachicalClusterIndex(0)
-		,m_area(dFloat64 (0.0f))
-		,m_concavity(dFloat64 (0.0f))
-	{
-	}
+/*
+	ndMeshEffect copy (*this);
+	ndMeshEffect clipper (*clipperMesh);
+	clipper.TransformMesh (matrix);
 
-	bool IsCoplanar(const dBigPlane& plane, const ndMeshEffect& mesh, dFloat64 tolerance) const
+	dgBooleanMeshClipper::ClipMeshesAndColorize (&copy, &clipper);
+
+	ndMeshEffect* const mesh = new (GetAllocator()) ndMeshEffect (GetAllocator());
+	mesh->BeginFace();
+	dgBooleanMeshClipper::CopyPoints(mesh, &copy);
+	dgBooleanMeshClipper::AddExteriorFaces (mesh, &copy);
+	dgBooleanMeshClipper::AddInteriorFacesInvertWinding (mesh, &clipper);
+	mesh->EndFace ();
+	mesh->RepairTJoints();
+	mesh->RemoveUnusedVertices(nullptr);
+	return mesh;
+*/
+
+	dAssert (0);
+	return nullptr;
+}
+
+
+class dgBooleanMeshClipper: public ndMeshEffect::dMeshBVH
+{
+	class dgPoint: public dBigVector
 	{
-		const dBigVector* const points = (dBigVector*) mesh.GetVertexPool();
-		for (dNode* node = GetFirst(); node; node = node->GetNext()) {
-			const dHACDClusterFace& info = node->GetInfo();
-			dEdge* ptr = info.m_edge;
+		public:
+		dgPoint()
+			:dBigVector(dFloat32 (0.0f))
+			,m_links(nullptr)
+			,m_lru(0)
+		{
+			dAssert (0);
+		}
+
+		dgPoint(const dBigVector& point, dgMemoryAllocator* const allocator)
+			:dBigVector(point)
+			,m_links(allocator)
+			,m_lru(0)
+		{
+		}
+		
+		dList<dTree<dgPoint, dFloat64>::dNode*> m_links;
+		dInt32 m_lru;
+	};
+
+	class dgCurvesNetwork: public dTree<dgPoint, dFloat64>
+	{
+		public:
+		dgCurvesNetwork ()
+			:dTree<dgPoint, dFloat64>(nullptr)
+		{
+			dAssert (0);
+		}
+
+		dgCurvesNetwork (dgMemoryAllocator* const allocator)
+			:dTree<dgPoint, dFloat64>(allocator)
+		{
+		}
+
+		dNode* AddVertex(const dBigVector& point, dgMemoryAllocator* const allocator)
+		{
+			dFloat64 key = ((point.m_z * dFloat64 (1024.0f) + point.m_y) * dFloat64 (1024.0f)) + point.m_x;
+			dNode* node = Find(key);
+			if (!node) {
+				dgPoint entry (point, allocator);
+				node = Insert(entry, key);
+			}
+			return node;
+		}
+
+/*
+		dgCurvesNetwork(dgBooleanMeshClipper* const BVHmeshA, dgBooleanMeshClipper* const BVHmeshB)
+			:dTree<dgPoint, dFloat64>(BVHmeshA->m_mesh->GetAllocator())
+//			,m_meshA(BVHmeshA->m_mesh)
+//			,m_meshB(BVHmeshB->m_mesh)
+//			,m_pointBaseA(m_meshA->GetVertexCount()) 
+//			,m_pointBaseB(m_meshB->GetVertexCount()) 
+//			,m_lru(0)
+		{
+		}
+*/
+/*
+		dgHugeVector CalculateFaceNormal (const ndMeshEffect* const mesh, ndEdge* const face)
+		{
+			dgHugeVector plane(dgGoogol::m_zero, dgGoogol::m_zero, dgGoogol::m_zero, dgGoogol::m_zero);
+			ndEdge* edge = face;
+			dgHugeVector p0(mesh->GetVertex(edge->m_incidentVertex));
+			edge = edge->m_next;
+			dgHugeVector p1(mesh->GetVertex(edge->m_incidentVertex));
+			dgHugeVector p1p0(p1 - p0);
+			edge = edge->m_next;
 			do {
-				const dBigVector& p = points[ptr->m_incidentVertex];
-				dFloat64 dist = fabs(plane.Evalue(p));
-				if (dist > tolerance) {
+				dgHugeVector p2(mesh->GetVertex(edge->m_incidentVertex));
+				dgHugeVector p2p0(p2 - p0);
+				plane += p2p0 * p1p0;
+				p1p0 = p2p0;
+				edge = edge->m_next;
+			} while (edge != face);
+
+			plane.m_w = dgGoogol::m_zero - (plane % p0);
+			return plane;
+		}
+
+
+		bool IsPointInFace (const dgHugeVector& point, const ndMeshEffect* const mesh, ndEdge* const face, const dgHugeVector& normal) const 
+		{
+			ndEdge* edge = face;
+
+			dTrace (("%f %f %f\n", dFloat64 (point.m_x), dFloat64 (point.m_y), dFloat64 (point.m_z)));
+			do {
+				dBigVector p1(mesh->GetVertex(edge->m_incidentVertex));
+				dTrace (("%f %f %f\n", dFloat64 (p1.m_x), dFloat64 (p1.m_y), dFloat64 (p1.m_z)));
+				edge = edge->m_next;
+			} while (edge != face);
+
+			dgHugeVector p0(mesh->GetVertex(face->m_incidentVertex));
+			do {
+				dgHugeVector p1(mesh->GetVertex(edge->m_twin->m_incidentVertex));
+				dgHugeVector p1p0(p1 - p0);
+				dgHugeVector q1p0(point - p0);
+				dgGoogol side (q1p0 % (normal * p1p0));
+				if (side >= dgGoogol::m_zero) {
 					return false;
 				}
-				ptr = ptr->m_next;
-			} while (ptr != info.m_edge);
+				p0 = p1;
+				edge = edge->m_next;
+			} while (edge != face);
+
+			return true;
 		}
+
+		dFloat64 ClipEdgeFace(const ndMeshEffect* const meshEdge, ndEdge* const edge, const ndMeshEffect* const meshFace, ndEdge* const face, const dgHugeVector& plane)
+		{
+			dgHugeVector p0 (meshEdge->GetVertex(edge->m_incidentVertex));
+			dgHugeVector p1 (meshEdge->GetVertex(edge->m_twin->m_incidentVertex));
+			
+			dgGoogol test0 (plane.EvaluePlane(p0));
+			dgGoogol test1 (plane.EvaluePlane(p1));
+
+			if ((test0 * test1) > dgGoogol::m_zero) {
+				// both point are in one side
+				return -1.0f;
+			}
+
+			if ((test0 * test1) < dgGoogol::m_zero) {
+				//point on different size, clip the line
+				dgHugeVector p1p0 (p1 - p0);
+				dgGoogol param = dgGoogol::m_zero - plane.EvaluePlane(p0) / (plane % p1p0);
+				dgHugeVector p (p0 + p1p0.Scale (param));
+				if (IsPointInFace (p, meshFace, face, plane)) {
+					return param;
+				}
+				return -1.0f;
+			} else {
+				dAssert (0);
+				//special cases;
+			}
+			
+			return -1.0f;
+		}
+
+		void AddPoint (ndMeshEffect* const edgeOwnerMesh, ndEdge* const edgeStart, ndMeshEffect* const faceOwnerMesh, ndEdge* const face, const dgHugeVector& plane, dNode** nodes, dInt32& index)
+		{
+			ndEdge* edge = edgeStart;
+			do {
+				dFloat64 param = ClipEdgeFace(edgeOwnerMesh, edge, faceOwnerMesh, face, plane);
+				if (param > 0.0f) {
+					dgPoint point(edgeOwnerMesh, edge, param, faceOwnerMesh, face);
+					dNode* node = Find(dgNodeKey(edge, param));
+					if (!node) {
+						node = Insert(point, dgNodeKey(edge, param));
+					}
+					nodes[index] = node;
+					index ++;
+				}
+				edge = edge->m_next;
+			} while (edge != edgeStart);
+
+		}
+
+		void ClipMeshesFaces(ndEdge* const faceA, ndEdge* const faceB)
+		{
+			dAssert (m_meshA->FindEdge(faceA->m_incidentVertex, faceA->m_twin->m_incidentVertex) == faceA);
+			dAssert (m_meshB->FindEdge(faceB->m_incidentVertex, faceB->m_twin->m_incidentVertex) == faceB);
+
+			dgHugeVector planeA (CalculateFaceNormal (m_meshA, faceA));
+			dgHugeVector planeB (CalculateFaceNormal (m_meshB, faceB));
+
+			dInt32 index = 0;
+			dNode* nodes[16];
+			AddPoint (m_meshA, faceA, m_meshB, faceB, planeB, nodes, index);
+			AddPoint (m_meshB, faceB, m_meshA, faceA, planeA, nodes, index);
+			dAssert ((index == 0) || (index == 2));
+			if (index == 2) {
+				dgPoint& pointA = nodes[0]->GetInfo();
+				dgPoint& pointB = nodes[1]->GetInfo();
+				pointA.m_links.Append(nodes[1]);
+				pointB.m_links.Append(nodes[0]);
+			}
+		}
+
+		void GetCurve (dList<dNode*>& curve, dNode* const node)
+		{
+			dInt32 stack = 1;
+			dNode* pool[64];
+
+			pool[0] = node;
+			while (stack) {
+				stack --;
+				dNode* const ptr = pool[stack];
+				dgPoint& point = ptr->GetInfo();
+				if (point.m_lru != m_lru) {
+					point.m_lru = m_lru;
+					curve.Append(ptr);
+					for (dList<dTree<dgPoint, dgNodeKey>::dNode*>::dNode* ptrPoint = point.m_links.GetFirst(); ptrPoint; ptrPoint = ptrPoint->GetNext()) {
+						dNode* const nextnode = ptrPoint->GetInfo();
+						dgPoint& nextPoint = nextnode->GetInfo();
+						if (nextPoint.m_lru != m_lru) {
+							pool[stack] = nextnode;
+							stack ++;
+						}
+					}
+				}
+			}
+		}
+
+		void EmbedCurveToSingleFace (dList<dNode*>& curve, ndMeshEffect* const mesh)
+		{
+			ndEdge* const face = curve.GetFirst()->GetInfo()->GetInfo().m_face;
+
+			dInt32 indexBase = mesh->GetVertexCount();
+			dInt32 indexAttribBase = mesh->GetPropertiesCount();
+
+			for (dList<dNode*>::dNode* node = curve.GetFirst(); node; node = node->GetNext()) {
+				dgPoint& point = node->GetInfo()->GetInfo();
+				dAssert (point.m_face == face);
+				ndMeshEffect::dgVertexAtribute attribute(mesh->InterpolateVertex(point.m_posit, face));
+				mesh->AddVertex(point.m_posit);
+				mesh->AddAtribute(attribute);
+			}
+
+			dList<ndEdge*> list(GetAllocator());
+			dInt32 i0 = curve.GetCount() - 1;
+			for (dInt32 i = 0; i < curve.GetCount(); ++i) {
+				ndEdge* const edge = mesh->AddHalfEdge(indexBase + i0, indexBase + i);
+				ndEdge* const twin = mesh->AddHalfEdge(indexBase + i, indexBase + i0);
+
+				edge->m_incidentFace = 1;
+				twin->m_incidentFace = 1;
+				edge->m_userData = indexAttribBase + i0;
+				twin->m_userData = indexAttribBase + i;
+				twin->m_twin = edge;
+				edge->m_twin = twin;
+				i0 = i;
+				list.Append(edge);
+			}
+
+			ndEdge* closestEdge = nullptr;
+			dFloat64 dist2 = dFloat64 (1.0e10f);
+			dBigVector p(mesh->GetVertex(face->m_incidentVertex));
+
+			list.Append(list.GetFirst()->GetInfo());
+			list.Addtop(list.GetLast()->GetInfo());
+			for (dList<ndEdge*>::dNode* node = list.GetFirst()->GetNext(); node != list.GetLast(); node = node->GetNext()) {
+				ndEdge* const edge = node->GetInfo();
+
+				ndEdge* const prev = node->GetPrev()->GetInfo();
+				edge->m_prev = prev;
+				prev->m_next = edge;
+				edge->m_twin->m_next = prev->m_twin;
+				prev->m_twin->m_prev = edge->m_twin;
+
+				ndEdge* const next = node->GetNext()->GetInfo();
+				edge->m_next = next;
+				next->m_prev = edge;
+				edge->m_twin->m_prev = next->m_twin;
+				next->m_twin->m_next = edge->m_twin;
+
+				dBigVector dist(mesh->GetVertex(edge->m_incidentVertex) - p);
+				dFloat64 err2 = dist % dist;
+				if (err2 < dist2) {
+					closestEdge = edge;
+					dist2 = err2;
+				}
+			}
+
+			dBigVector faceNormal (mesh->FaceNormal(face, mesh->GetVertexPool(), mesh->GetVertexStrideInByte()));
+			dBigVector clipNormal (mesh->FaceNormal(closestEdge, mesh->GetVertexPool(), mesh->GetVertexStrideInByte()));
+			if ((clipNormal % faceNormal) > dFloat64(0.0f)) {
+				closestEdge = closestEdge->m_twin->m_next;
+			}
+			ndEdge* const glueEdge = mesh->ConnectVertex (closestEdge, face);
+			dAssert (glueEdge);
+			mesh->PolygonizeFace(glueEdge, mesh->GetVertexPool(), sizeof (dBigVector));
+		}
+
+		void EmbedCurveToMulipleFaces (dList<dNode*>& curve, ndMeshEffect* const mesh)
+		{
+			for (dList<dNode*>::dNode* node = curve.GetFirst(); node; node = node->GetNext()) {
+				dgPoint& point = node->GetInfo()->GetInfo();
+				if (point.m_edgeOwnerMesh == mesh) {
+					ndEdge* const edge = point.m_edge;
+					dBigVector p0 (mesh->GetVertex(edge->m_incidentVertex));
+					dBigVector p1 (mesh->GetVertex(edge->m_twin->m_incidentVertex));
+					ndVector p1p0 (p1 - p0);
+					ndVector qp0 (point.m_posit - p0);
+					dFloat64 param = (qp0 % p1p0) / (p1p0 % p1p0);
+					dAssert (param >= dFloat64 (0.0f));
+					dAssert (param <= dFloat64 (1.0f));
+					ndEdge* const newEdge = mesh->InsertEdgeVertex (edge, param);
+				}
+//				mesh->AddVertex(point.m_posit);
+//				mesh->AddAtribute(attribute);
+			}
+		}
+
+
+		void AddCurveToMesh (dList<dNode*>& curve, ndMeshEffect* const mesh)
+		{
+			bool isIscribedInFace = true; 
+			ndEdge* const face = curve.GetFirst()->GetInfo()->GetInfo().m_face;
+			for (dList<dNode*>::dNode* node = curve.GetFirst(); isIscribedInFace && node; node = node->GetNext()) {
+				dgPoint& point = node->GetInfo()->GetInfo();
+				isIscribedInFace = isIscribedInFace && (point.m_face == face);
+				isIscribedInFace = isIscribedInFace && (point.m_faceOwnerMesh == mesh);
+			}
+
+			if (isIscribedInFace) {
+				EmbedCurveToSingleFace (curve, mesh);
+			} else {
+				EmbedCurveToMulipleFaces (curve, mesh);
+			}
+		}
+
+		void Colorize()
+		{
+			m_lru ++;
+			Iterator iter (*this);
+			for (iter.Begin(); iter; iter ++) {
+				dgPoint& point = iter.GetNode()->GetInfo();
+				if (point.m_lru != m_lru) {
+					dList<dNode*> curve (GetAllocator());
+					GetCurve (curve, iter.GetNode());
+					AddCurveToMesh (curve, m_meshB);
+					AddCurveToMesh (curve, m_meshA);
+				}
+			}
+
+			m_meshA->SaveOFF("xxxA0.off");
+			m_meshB->SaveOFF("xxxB0.off");
+		}
+
+		ndMeshEffect* m_meshA;
+		ndMeshEffect* m_meshB;
+		dInt32 m_pointBaseA;
+		dInt32 m_pointBaseB;
+		dInt32 m_lru;
+*/
+	};
+
+	class dgClippedFace: public ndMeshEffect
+	{
+		public:
+		dgClippedFace ()
+			:ndMeshEffect()
+			,m_curveNetwork()
+		{
+			dAssert (0);
+		}
+
+		dgClippedFace (dgMemoryAllocator* const allocator)
+			:ndMeshEffect(allocator)
+			,m_curveNetwork(allocator)
+		{
+		}
+
+		dgClippedFace (const dgClippedFace& copy)
+			:ndMeshEffect(copy)
+			,m_curveNetwork(copy.m_curveNetwork)
+		{
+		}
+
+		void InitFace(ndMeshEffect* const mesh, dEdge* const face)
+		{
+			dInt32 indexCount = 0;
+			dInt32 faceIndex[256];
+			dInt64 faceDataIndex[256];
+			BeginFace ();
+			dEdge* ptr = face;
+			do {
+				dAssert (0);
+				//const ndMeshEffect::dgVertexAtribute& point =  mesh->GetAttribute(dInt32 (ptr->m_userData));
+				//AddPoint (&point.m_vertex.m_x, dInt32 (point.m_material));
+				faceIndex[indexCount] = indexCount;
+				faceDataIndex[indexCount] = indexCount;
+				indexCount ++;
+				ptr = ptr->m_next;
+			} while (ptr != face);
+			AddFace (indexCount, faceIndex, faceDataIndex);
+			EndFace ();
+		}
+
+
+		void AddSegment (const dBigVector& plane, const dBigVector* const segment)
+		{
+			dAssert (0);
+/*
+			dgCurvesNetwork::dNode* const node0 = m_curveNetwork.AddVertex (segment[0], GetAllocator());
+			dgCurvesNetwork::dNode* const node1 = m_curveNetwork.AddVertex (segment[1], GetAllocator());
+
+			dgPoint& pointA = node0->GetInfo();
+			dgPoint& pointB = node1->GetInfo();
+			pointA.m_links.Append(node1);
+			pointB.m_links.Append(node0);
+*/
+		}
+
+		dgCurvesNetwork m_curveNetwork;
+	};
+
+	class dgClipppedFaces: public dTree<dgClippedFace, dEdge*>
+	{
+		public:
+		dgClipppedFaces(ndMeshEffect* const mesh)
+			:dTree<dgClippedFace, dEdge*>(mesh->GetAllocator())
+			,m_parentMesh (mesh)
+		{
+		}
+
+		void ClipMeshesFaces(dEdge* const faceA, const ndMeshEffect* const meshB, dEdge* const faceB, const dBigVector& planeB, const dBigVector* const segment)
+		{
+			dNode* node = Find (faceA);
+			if (!node) {
+				dgClippedFace tmp (m_parentMesh->GetAllocator());
+				node = Insert (tmp, faceA);
+				dgClippedFace& faceHead = node->GetInfo();
+				faceHead.InitFace (m_parentMesh, faceA);
+			}
+			dAssert (node);
+			dgClippedFace& faceHead = node->GetInfo();
+			faceHead.AddSegment(planeB, segment);
+		}
+
+		ndMeshEffect* m_parentMesh;
+	};
+	
+
+	public:
+	dgBooleanMeshClipper(ndMeshEffect* const mesh)
+		:dMeshBVH(mesh)
+		,m_clippedFaces(mesh)
+	{
+		dMeshBVH::Build();
+	}
+
+	~dgBooleanMeshClipper()
+	{
+	}
+
+/*
+	dFloat64 IntersetionSegment(const ndMeshEffect* const meshEdge, dEdge* const edge, const ndMeshEffect* const meshFace, dEdge* const face, const dgHugeVector& plane)
+	{
+		dgHugeVector p0 (meshEdge->GetVertex(edge->m_incidentVertex));
+		dgHugeVector p1 (meshEdge->GetVertex(edge->m_twin->m_incidentVertex));
+			
+		dgGoogol test0 (plane.EvaluePlane(p0));
+		dgGoogol test1 (plane.EvaluePlane(p1));
+
+		if ((test0 * test1) > dgGoogol::m_zero) {
+			// both point are in one side
+			return -1.0f;
+		}
+
+		if ((test0 * test1) < dgGoogol::m_zero) {
+			//point on different size, clip the line
+			dgHugeVector p1p0 (p1 - p0);
+			dgGoogol param = dgGoogol::m_zero - plane.EvaluePlane(p0) / (plane % p1p0);
+			dgHugeVector p (p0 + p1p0.Scale (param));
+			if (IsPointInFace (p, meshFace, face, plane)) {
+				return param;
+			}
+			return -1.0f;
+		} else {
+			dAssert (0);
+			//special cases;
+		}
+			
+		return -1.0f;
+	}
+*/
+
+	static dgHugeVector CalculateFaceNormal (const ndMeshEffect* const mesh, dEdge* const face)
+	{
+		dgHugeVector plane(dgGoogol::m_zero, dgGoogol::m_zero, dgGoogol::m_zero, dgGoogol::m_zero);
+		dEdge* edge = face;
+		dgHugeVector p0(mesh->GetVertex(edge->m_incidentVertex));
+		edge = edge->m_next;
+		dgHugeVector p1(mesh->GetVertex(edge->m_incidentVertex));
+		dgHugeVector p1p0(p1 - p0);
+		edge = edge->m_next;
+		do {
+			dgHugeVector p2(mesh->GetVertex(edge->m_incidentVertex));
+			dgHugeVector p2p0(p2 - p0);
+			plane += p1p0.CrossProduct(p2p0);
+			p1p0 = p2p0;
+			edge = edge->m_next;
+		} while (edge != face);
+
+		dAssert(plane.m_w == dgGoogol(0.0));
+		plane.m_w = dgGoogol::m_zero - plane.DotProduct(p0).GetScalar();
+		return plane;
+	}
+
+	static bool IsPointInFace (const dgHugeVector& point, const ndMeshEffect* const mesh, dEdge* const face, const dgHugeVector& normal)
+	{
+		dEdge* edge = face;
+		dgHugeVector p0(mesh->GetVertex(face->m_incidentVertex));
+		do {
+			dgHugeVector p1(mesh->GetVertex(edge->m_twin->m_incidentVertex));
+			dgHugeVector p1p0(p1 - p0);
+			dgHugeVector q1p0(point - p0);
+			dAssert(p1p0.m_w == dgGoogol(0.0));
+			dgGoogol side (q1p0.DotProduct(p1p0.CrossProduct(normal)).GetScalar());
+			if (side >= dgGoogol::m_zero) {
+				return false;
+			}
+			p0 = p1;
+			edge = edge->m_next;
+		} while (edge != face);
+
 		return true;
 	}
 
-
-	dInt32 m_color;
-	dInt32 m_hierachicalClusterIndex;
-	dFloat64 m_area;
-	dFloat64 m_concavity;
-};
-
-
-class dgHACDClusterGraph: public dGraph<dgHACDCluster, dgHACDEdge> 
-{
-	public:
-	class dgHACDConveHull: public dConvexHull3d
+	static bool ClipEdgeFace(dBigVector& point, const ndMeshEffect* const meshEdge, dEdge* const edgeSrc, const ndMeshEffect* const meshFace, dEdge* const face, const dgHugeVector& plane)
 	{
-		class dgConvexHullRayCastData
-		{
-			public:
-			dFloat64 m_normalProjection;
-			dConvexHull3DFace* m_face;
-		};
+		const dEdge* const edge = (edgeSrc->m_incidentVertex < edgeSrc->m_twin->m_incidentVertex) ? edgeSrc : edgeSrc->m_twin;
+		dgHugeVector p0 (meshEdge->GetVertex(edge->m_incidentVertex));
+		dgHugeVector p1 (meshEdge->GetVertex(edge->m_twin->m_incidentVertex));
+			
+		dgGoogol test0 (plane.EvaluePlane(p0));
+		dgGoogol test1 (plane.EvaluePlane(p1));
 
-		public: 
-		dgHACDConveHull (const dgHACDConveHull& hull)
-			:dConvexHull3d(hull)
-			,m_mark(1)
-		{
+		if ((test0 * test1) > dgGoogol::m_zero) {
+			// both point are in one side
+			return false;
 		}
 
-		dgHACDConveHull (dgMemoryAllocator* const allocator, const dBigVector* const points, dInt32 count)
-			:dConvexHull3d(allocator, &points[0].m_x, sizeof (dBigVector),count, dFloat64 (0.0f))
-			,m_mark(1)
-		{
+		if ((test0 * test1) < dgGoogol::m_zero) {
+			//point on different size, clip the line
+			dgHugeVector p1p0 (p1 - p0);
+			dAssert(p1p0.m_w == dgGoogol(0.0));
+			dgGoogol param = dgGoogol::m_zero - plane.EvaluePlane(p0) / plane.DotProduct(p1p0).GetScalar();
+			dgHugeVector p (p0 + p1p0.Scale (param));
+			if (IsPointInFace (p, meshFace, face, plane)) {
+				point = dBigVector(p.m_x, p.m_y, p.m_z, p.m_w);
+				return true;
+			}
+			return false;
+		} else {
+			dAssert (0);
+			//special cases;
 		}
+			
+		return false;
+	}
 
-
-		dFloat64 CalculateTriangleConcavity(const dBigVector& normal, dInt32 i0, dInt32 i1, dInt32 i2, const dBigVector* const points)
-		{
-			dUnsigned32 head = 1;
-			dUnsigned32 tail = 0;
-			dBigVector pool[1<<8][3];
-
-			pool[0][0] = points[i0];
-			pool[0][1] = points[i1];
-			pool[0][2] = points[i2];
-
-			const dFloat64 rayLength = dFloat64(4.0f) * GetDiagonal();
-			const dBigVector step(normal.Scale(rayLength));
-
-			dFloat64 concavity = dFloat32(0.0f);
-			dFloat64 minArea = dFloat32(0.125f);
-			dFloat64 minArea2 = minArea * minArea * 0.5f;
-
-			dInt32 maxCount = 4;
-			dUnsigned32 mask = (sizeof (pool) / (3 * sizeof (pool[0][0]))) - 1;
-
-			dConvexHull3DFace* firstGuess = nullptr;
-			while ((tail != head) && (maxCount >= 0)) {
-				maxCount --;
-				dBigVector p0(pool[tail][0]);
-				dBigVector p1(pool[tail][1]);
-				dBigVector p2(pool[tail][2]);
-				p0.m_w = dFloat32 (0.0f);
-				p1.m_w = dFloat32 (0.0f);
-				p2.m_w = dFloat32 (0.0f);
-
-				tail = (tail + 1) & mask;
-
-				dBigVector q1((p0 + p1 + p2).Scale(dFloat64(1.0f / 3.0f)));
-				dBigVector q0(q1 + step);
-
-				dFloat64 param = RayCast(q0, q1, &firstGuess);
-				if (param > dFloat64(1.0f)) {
-					param = dFloat64(1.0f);
-				}
-				dBigVector dq(step.Scale(dFloat32(1.0f) - param));
-				dAssert(dq.m_w == dFloat32(0.0f));
-				dFloat64 lenght2 = sqrt (dq.DotProduct(dq).GetScalar());
-				if (lenght2 > concavity) {
-					concavity = lenght2;
-				}
-
-				if (((head + 1) & mask) != tail) {
-					dBigVector edge10(p1 - p0);
-					dBigVector edge20(p2 - p0);
-					dBigVector n(edge10.CrossProduct(edge20));
-					dAssert(n.m_w == dFloat32(0.0f));
-					dFloat64 area2 = n.DotProduct(n).GetScalar();
-					if (area2 > minArea2) {
-						dBigVector p01((p0 + p1).Scale(dFloat64(0.5f)));
-						dBigVector p12((p1 + p2).Scale(dFloat64(0.5f)));
-						dBigVector p20((p2 + p0).Scale(dFloat64(0.5f)));
-
-						pool[head][0] = p0;
-						pool[head][1] = p01;
-						pool[head][2] = p20;
-						head = (head + 1) & mask;
-
-						if (((head + 1) & mask) != tail) {
-							pool[head][0] = p1;
-							pool[head][1] = p12;
-							pool[head][2] = p01;
-							head = (head + 1) & mask;
-
-							if (((head + 1) & mask) != tail)	{
-								pool[head][0] = p2;
-								pool[head][1] = p20;
-								pool[head][2] = p12;
-								head = (head + 1) & mask;
-							}
-						}
-					}
-				}
-			}
-			return concavity;
-		}
-
-
-
-		dFloat64 FaceRayCast (const dConvexHull3DFace* const face, const dBigVector& origin, const dBigVector& dist, dFloat64& normalProjection) const
-		{
-			dInt32 i0 = face->m_index[0];
-			dInt32 i1 = face->m_index[1];
-			dInt32 i2 = face->m_index[2];
-
-			const dBigVector& p0 = m_points[i0];
-			dBigVector normal ((m_points[i1] - p0).CrossProduct(m_points[i2] - p0));
-
-			//dFloat64 N = (origin - p0) % normal;
-			dAssert(normal.m_w == dFloat32(0.0f));
-			dFloat64 N = normal.DotProduct(origin - p0).GetScalar();
-			dFloat64 D = normal.DotProduct(dist).GetScalar();
-
-			if (fabs(D) < dFloat64 (1.0e-16f)) { // 
-				normalProjection = dFloat32 (0.0);
-				if (N > dFloat64 (0.0f)) {
-					return dFloat32 (-1.0e30);
-				} else {
-
-					return dFloat32 (1.0e30);
-				}
-			}
-			normalProjection = D;
-			return - N / D;
-		}
-
-		dConvexHull3DFace* ClosestFaceVertexToPoint (const dBigVector& point)
-		{
-			// note, for this function to be effective point should be an already close point to the Hull.
-			// for example casting the point to the OBB or the AABB of the full is a good first guess. 
-			dConvexHull3DFace* closestFace = &GetFirst()->GetInfo();	
-			dInt8 pool[256 * (sizeof (dConvexHull3DFace*) + sizeof (dFloat64))];
-			dUpHeap<dConvexHull3DFace*,dFloat64> heap (pool, sizeof (pool));
-
-			for (dInt32 i = 0; i < 3; ++i) {
-				dBigVector dist (m_points[closestFace->m_index[i]] - point);
-				dAssert(dist.m_w == dFloat32(0.0f));
-				heap.Push(closestFace, dist.DotProduct(dist).GetScalar());
-			}
-
-			m_mark ++;	
-			dFloat64 minDist = heap.Value();
-			while (heap.GetCount()) {
-				dConvexHull3DFace* const face = heap[0];	
-				if (heap.Value() < minDist) {
-					minDist = heap.Value();
-					closestFace = face;
-				}
-				heap.Pop();
-				//face->m_mark = m_mark;
-				face->SetMark(m_mark);
-				for (dInt32 i = 0; i < 3; ++i) {
-					dConvexHull3DFace* twin = &face->GetTwin(i)->GetInfo();	
-					if (twin->GetMark() != m_mark) {
-						dBigVector dist (m_points[twin->m_index[i]] - point);
-						// use hysteresis to prevent stops at a local minimal, but at the same time fast descend
-						dAssert(dist.m_w == dFloat32(0.0f));
-						dFloat64 dist2 = dist.DotProduct(dist).GetScalar();
-						if (dist2 < (minDist * dFloat64 (1.001f))) {
-							heap.Push(twin, dist2);
-						}
-					}
-				}
-			}
-
-			return closestFace;
-		}
-
-
-		// this version have input sensitive complexity (approximately  log2)
-		// when casting parallel rays and using the last face as initial guess this version has const time complexity 
-		dFloat64 RayCast (const dBigVector& localP0, const dBigVector& localP1, dConvexHull3DFace** firstFaceGuess)
-		{
-			dConvexHull3DFace* face = &GetFirst()->GetInfo();
-			if (firstFaceGuess && *firstFaceGuess) {
-				face = *firstFaceGuess;
-			} else {
-				if (GetCount() > 32) {
-					dVector q0 (localP0);
-					dVector q1 (localP1);
-					if (dRayBoxClip (q0, q1, m_aabbP0, m_aabbP1)) {
-						face = ClosestFaceVertexToPoint (q0);
-					}
-				}
-			}
-
-			m_mark ++;	
-			face->SetMark (m_mark);
-			dInt8 pool[256 * (sizeof (dgConvexHullRayCastData) + sizeof (dFloat64))];
-			dDownHeap<dgConvexHullRayCastData,dFloat64> heap (pool, sizeof (pool));
-
-			dFloat64 t0 = dFloat64 (-1.0e20);			//for the maximum entering segment parameter;
-			dFloat64 t1 = dFloat64 ( 1.0e20);			//for the minimum leaving segment parameter;
-			dBigVector dS (localP1 - localP0);		// is the segment direction vector;
-			dgConvexHullRayCastData data;
-			data.m_face = face;
-			dFloat64 t = FaceRayCast (face, localP0, dS, data.m_normalProjection);
-			if (data.m_normalProjection >= dFloat32 (0.0f)) {
-				t = dFloat64 (-1.0e30);
-			}
-
-			heap.Push (data, t);
-			while (heap.GetCount()) {
-				dgConvexHullRayCastData data1 (heap[0]);
-				t = heap.Value();
-				dConvexHull3DFace* const face1 = data1.m_face;
-				dFloat64 normalDistProjection = data1.m_normalProjection;
-				heap.Pop();
-				bool foundThisBestFace = true;
-				if (normalDistProjection < dFloat64 (0.0f)) {
-					if (t > t0) {
-						t0 = t;
-					}
-					if (t0 > t1) {
-						return dFloat64 (1.2f);
-					}
-				} else {
-					foundThisBestFace = false;
-				}
-
-				for (dInt32 i = 0; i < 3; ++i) {
-					dConvexHull3DFace* const face2 = &face1->GetTwin(i)->GetInfo();
-
-					if (face2->GetMark() != m_mark) {
-						face2->SetMark (m_mark);
-						dgConvexHullRayCastData data2;
-						data2.m_face = face2;
-						t = FaceRayCast (face2, localP0, dS, data2.m_normalProjection);
-						if (data2.m_normalProjection >= dFloat32 (0.0)) {
-							t = dFloat64 (-1.0e30);
-						} else if (t > t0) {
-							foundThisBestFace = false;
-						} else if (fabs (t - t0) < dFloat64 (1.0e-10f)) {
-							return dConvexHull3d::RayCast (localP0, localP1);
-						}
-						if ((heap.GetCount() + 2)>= heap.GetMaxCount()) {
-							// remove t values that are old and way outside interval [0.0, 1.0]  
-							for (dInt32 j = heap.GetCount() - 1; j >= 0; j--) {
-								dFloat64 val = heap.Value(j);
-								if ((val < dFloat64 (-100.0f)) || (val > dFloat64 (100.0f))) {
-									heap.Remove(j);
-								}
-							}
-						}
-						heap.Push (data2, t);
-					}
-				}
-				if (foundThisBestFace) {
-					if ((t0 >= dFloat64 (0.0f)) && (t0 <= dFloat64 (1.0f))) {
-						if (firstFaceGuess) {
-							*firstFaceGuess = face1;
-						}
-						return t0;
-					}
-					break;
-				}
-			}
-			return dFloat64 (1.2f);
-		}
-
-
-		dInt32 m_mark;
-	};
-
-	class dgHACDConvacityLookAheadTree
+	static void CalculateIntersection (const ndMeshEffect* const edgeOwnerMesh, dEdge* const edgeStart, const ndMeshEffect* const faceOwnerMesh, dEdge* const face, const dgHugeVector& facePlane, dBigVector* const data, dInt32& index)
 	{
-		public:
-		DG_CLASS_ALLOCATOR(allocator)
-
-			dgHACDConvacityLookAheadTree (dgMemoryAllocator* const allocator, dEdge* const face, dFloat64 concavity)
-			:m_concavity(concavity)	
-			,m_faceList (allocator)
-			,m_left (nullptr)
-			,m_right (nullptr)
-		{
-			m_faceList.Append(face);
-		}
-
-
-		dgHACDConvacityLookAheadTree (dgMemoryAllocator* const allocator, dgHACDConvacityLookAheadTree* const leftChild, dgHACDConvacityLookAheadTree* const rightChild, dFloat64 concavity)
-			:m_concavity(concavity)	
-			,m_faceList (allocator)
-			,m_left (leftChild)
-			,m_right (rightChild)
-		{
-			dAssert (leftChild);
-			dAssert (rightChild);
-
-			dFloat64 concavityTest = m_concavity - dFloat64 (1.0e-5f);
-			if ((((m_left->m_faceList.GetCount() == 1) || (m_right->m_faceList.GetCount() == 1))) ||
-				((concavityTest <= m_left->m_concavity) && (concavityTest <= m_right->m_concavity))) {
-					//The the parent has lower concavity this mean that the two do no add more detail, 
-					//the can be deleted and replaced the parent node
-					// for example the two children can be two convex strips that are part of a larger convex piece
-					// but each part has a non zero concavity, while the convex part has a lower concavity 
-					m_faceList.Merge (m_left->m_faceList);
-					m_faceList.Merge (m_right->m_faceList);
-
-					delete m_left;
-					delete m_right;
-					m_left = nullptr;
-					m_right = nullptr;
-			} else {
-				for (dList<dEdge*>::dNode* node = m_left->m_faceList.GetFirst(); node; node = node->GetNext()) {
-					m_faceList.Append(node->GetInfo());
-				}
-				for (dList<dEdge*>::dNode* node = m_right->m_faceList.GetFirst(); node; node = node->GetNext()) {
-					m_faceList.Append(node->GetInfo());
-				}
+		dEdge* edge = edgeStart;
+		do {
+			bool isCleipped = ClipEdgeFace(data[index], edgeOwnerMesh, edge, faceOwnerMesh, face, facePlane);
+			if (isCleipped) {
+				index ++;
 			}
-		}
+			edge = edge->m_next;
+		} while (edge != edgeStart);
+	}
 
-		~dgHACDConvacityLookAheadTree ()
-		{
-			if (m_left) {
-				dAssert (m_right);
-				delete m_left;
-				delete m_right;
-			}
-		}
-
-		dInt32 GetNodesCount () const
-		{
-			dInt32 count = 0;
-			dInt32 stack = 1;
-			const dgHACDConvacityLookAheadTree* pool[1024];
-			pool[0] = this;
-			while (stack) {
-				stack --;
-				count ++;
-				const dgHACDConvacityLookAheadTree* const root = pool[stack];
-				if (root->m_left) {
-					dAssert (root->m_right);
-					pool[stack] = root->m_left;
-					stack ++;
-					dAssert (stack < sizeof (pool)/sizeof (pool[0]));
-					pool[stack] = root->m_right;
-					stack ++;
-					dAssert (stack < sizeof (pool)/sizeof (pool[0]));
-				}
-			}
-			return count;
-		}
-
-		void ReduceByCount (dInt32 count, dDownHeap<dgHACDConvacityLookAheadTree*, dFloat64>& approximation)
-		{
-			if (count < 1) {
-				count = 1;
-			}
-
-			approximation.Flush();
-			dgHACDConvacityLookAheadTree* tmp = this;
-			approximation.Push(tmp, m_concavity);
-			while ((approximation.GetCount() < count) && (approximation.Value() >= dFloat32 (0.0f))) {
-				dgHACDConvacityLookAheadTree* worseCluster = approximation[0];
-				dFloat64 concavity = approximation.Value();
-				if (!worseCluster->m_left && (concavity >= dFloat32 (0.0f))) {
-					dAssert (!worseCluster->m_right);
-					approximation.Pop();
-					approximation.Push(worseCluster, concavity - dFloat64 (1.0e10f));
-				} else {
-					dAssert (worseCluster->m_left);
-					dAssert (worseCluster->m_right);
-					approximation.Pop();
-					approximation.Push(worseCluster->m_left, worseCluster->m_left->m_concavity);
-					approximation.Push(worseCluster->m_right, worseCluster->m_right->m_concavity);
-				}
-			}
-		}
-
-
-		void ReduceByConcavity (dFloat64 concavity, dDownHeap<dgHACDConvacityLookAheadTree*, dFloat64>& approximation)
-		{
-			approximation.Flush();
-			dgHACDConvacityLookAheadTree* tmp = this;
-
-			approximation.Push(tmp, m_concavity);
-			while (approximation.Value() > concavity) {
-				dgHACDConvacityLookAheadTree* worseCluster = approximation[0];
-				if (!worseCluster->m_left && approximation.Value() >= dFloat32 (0.0f)) {
-					approximation.Pop();
-					approximation.Push(worseCluster, dFloat32 (-1.0f));
-				} else {
-					dAssert (worseCluster->m_left);
-					dAssert (worseCluster->m_right);
-					approximation.Pop();
-					approximation.Push(worseCluster->m_left, worseCluster->m_left->m_concavity);
-					approximation.Push(worseCluster->m_right, worseCluster->m_right->m_concavity);
-				}
-			}
-		}
-
-		dFloat64 m_concavity; 
-		dList<dEdge*> m_faceList;
-		dgHACDConvacityLookAheadTree* m_left;
-		dgHACDConvacityLookAheadTree* m_right;
-	};
-
-	class dgPairProxy
+	static void ClipMeshesFaces(dgBooleanMeshClipper& bvhMeshA, dEdge* const faceA, dgBooleanMeshClipper& bvhMeshB, dEdge* const faceB)
 	{
-		public:
-		dgPairProxy()
-			:m_nodeA(nullptr)
-			,m_nodeB(nullptr)
-			,m_hierachicalClusterIndexA(0)
-			,m_hierachicalClusterIndexB(0)
-			,m_area(dFloat64(0.0f))
-		{
+		const ndMeshEffect* const meshA = bvhMeshA.m_mesh;
+		const ndMeshEffect* const meshB = bvhMeshB.m_mesh;
+		dAssert (meshA->FindEdge(faceA->m_incidentVertex, faceA->m_twin->m_incidentVertex) == faceA);
+		dAssert (meshB->FindEdge(faceB->m_incidentVertex, faceB->m_twin->m_incidentVertex) == faceB);
+
+		dgHugeVector planeA (CalculateFaceNormal (meshA, faceA));
+		dgHugeVector planeB (CalculateFaceNormal (meshB, faceB));
+
+		dBigVector points[16];
+		dInt32 pointCount = 0;
+		CalculateIntersection (meshA, faceA, meshB, faceB, planeB, points, pointCount);
+		CalculateIntersection (meshB, faceB, meshA, faceA, planeA, points, pointCount);
+		dAssert ((pointCount == 0) || (pointCount == 2));
+		if (pointCount == 2) {
+			dBigVector facePlaneA (planeA.m_x, planeA.m_y, planeA.m_z, planeA.m_w);
+			dBigVector facePlaneB (planeB.m_x, planeB.m_y, planeB.m_z, planeB.m_w);
+
+			bvhMeshA.m_clippedFaces.ClipMeshesFaces(faceA, meshB, faceB, facePlaneB, points);
+			bvhMeshB.m_clippedFaces.ClipMeshesFaces(faceB, meshA, faceA, facePlaneA, points);
 		}
+	}
 
-		~dgPairProxy()
-		{
-		}
-
-		dNode* m_nodeA;
-		dNode* m_nodeB;
-		dInt32 m_hierachicalClusterIndexA;
-		dInt32 m_hierachicalClusterIndexB;
-		dFloat64 m_area;
-		dFloat64 m_distanceConcavity;
-	};
-
-
-	class dgBackFaceFinder: public ndMeshEffect::dMeshBVH
+	static void ClipMeshesAndColorize(ndMeshEffect* const meshA, ndMeshEffect* const meshB)
 	{
-		public:
-		dgBackFaceFinder(ndMeshEffect* const mesh, dgHACDClusterGraph* const graph)
-			:ndMeshEffect::dMeshBVH(mesh)
-			,m_clusterA(nullptr)
-			,m_graph(graph)
-		{
-			for (dNode* clusterNode = graph->GetFirst(); clusterNode; clusterNode = clusterNode->GetNext()) {
-				dgHACDCluster& cluster = clusterNode->GetInfo().m_nodeData;
-				dHACDClusterFace& face = cluster.GetFirst()->GetInfo();
-				dEdge* const edge = face.m_edge;
-				AddFaceNode(edge, &cluster);
-			}
-		}
-
-		//dFloat64 RayFaceIntersect (const dgMeshBVHNode* const face, const dBigVector& p0, const dBigVector& p1, bool doublesided) const
-		dFloat64 RayFaceIntersect (const dgMeshBVHNode* const face, const dBigVector& p0, const dBigVector& p1, void* const userData) const
-		{
-			dgHACDCluster* const clusterFace = (dgHACDCluster*) face->m_userData;
-
-			dFloat64 param = dFloat32 (100.0f);
-			if (clusterFace->m_color != m_clusterA->m_color) {
-				param = ndMeshEffect::dMeshBVH::RayFaceIntersect (face, p1, p0, nullptr);
-				if ((param >= dFloat32 (0.0f)) && (param <= dFloat32(1.0f))) {
-					param = dFloat32 (1.0f) - param;
-				}
-			}
-			return param;
-		}
-
-		void CastBackFace (dNode* const clusterNodeA, const dBigVector& p0, const dBigVector& p1, const dBigVector& p2, dFloat32 distanceThreshold)
-		{
-			dAssert(0);
-			/*
-			dBigVector origin ((p0 + p1 + p2).Scale (dFloat32 (1.0f/3.0f)));
-
-			dFloat32 rayDistance = distanceThreshold * dFloat32 (2.0f);
-
-
-			m_clusterA = &clusterNodeA->GetInfo().m_nodeData;
-			dHACDClusterFace& faceA = m_clusterA->GetFirst()->GetInfo();
-			dBigVector end (origin - faceA.m_normal.Scale (rayDistance));
-
-			dFloat64 paramOut;
-			//dgMeshBVHNode* const node = FaceRayCast (origin, end, paramOut, false);
-
-			dgMeshBVHNode* node;
-			FaceRayCast (origin, end, paramOut, &node);
-
-			if (node) {
-				dgHACDCluster* const clusterB = (dgHACDCluster*) node->m_userData;
-				dAssert (clusterB->m_color != m_clusterA->m_color);
-				dFloat64 distance = rayDistance * paramOut;
-
-				if (distance < distanceThreshold) {
-					dHACDClusterFace& faceB = clusterB->GetFirst()->GetInfo();
-					dEdge* const edgeB = faceB.m_edge;
-
-					
-					bool isAdjacent = false;
-					dEdge* ptrA = faceA.m_edge;
-					do {
-						dEdge* ptrB = edgeB;
-						do {
-							if (ptrB->m_twin == ptrA) {
-								ptrA = faceA.m_edge->m_prev;
-								isAdjacent = true;
-								break;
-							}
-							ptrB = ptrB->m_next;
-						} while (ptrB != edgeB);
-
-						ptrA = ptrA->m_next;
-					} while (ptrA != faceA.m_edge);
-
-					if (!isAdjacent) {
-						isAdjacent = false;
-						dgHACDClusterGraph::dNode* const clusterNodeB = m_graph->GetNodeFromNodeData (clusterB);
-						for (dgGraphNode<dgHACDCluster, dgHACDEdge>::dNode* edgeNode = clusterNodeA->GetInfo().GetFirst(); edgeNode; edgeNode = edgeNode->GetNext()) {
-							if (edgeNode->GetInfo().m_node == clusterNodeB) {
-								isAdjacent = true;
-								break;
-							}
-						}
-
-						if (!isAdjacent) {
-							dgGraphNode<dgHACDCluster, dgHACDEdge>::dNode* const edgeNodeAB = clusterNodeA->GetInfo().AddEdge (clusterNodeB);
-							dgGraphNode<dgHACDCluster, dgHACDEdge>::dNode* const edgeNodeBA = clusterNodeB->GetInfo().AddEdge (clusterNodeA);
-
-							dgHACDEdge& edgeAB = edgeNodeAB->GetInfo().m_edgeData;
-							dgHACDEdge& edgeBA = edgeNodeBA->GetInfo().m_edgeData;
-							edgeAB.m_backFaceHandicap = DG_CONCAVITY_PERIMETER_HANDICAP;
-							edgeBA.m_backFaceHandicap = DG_CONCAVITY_PERIMETER_HANDICAP;
-						}
-					}
-				}
-			}
-*/
-		}
-
-		
-		dgHACDCluster* m_clusterA;
-		dgHACDClusterGraph* m_graph;
-	};
-
-    dgHACDClusterGraph(ndMeshEffect& mesh, dFloat32 backFaceDistanceFactor, dgReportProgress reportProgressCallback, void* const reportProgressUserData)
-		:dGraph<dgHACDCluster, dgHACDEdge> (mesh.GetAllocator())
-		,m_mark(0)
-		,m_faceCount(0)
-		,m_vertexMark(0)
-		,m_progress(0)
-		,m_concavityTreeIndex(0)
-		,m_invFaceCount(dFloat32 (1.0f))
-		,m_diagonal(dFloat64(1.0f))
-		,m_vertexMarks(nullptr)
-		,m_vertexPool(nullptr)
-		,m_proxyList(mesh.GetAllocator())
-		,m_concavityTreeArray(nullptr)
-		,m_convexProximation(mesh.GetAllocator())
-		,m_priorityHeap (mesh.GetCount() * 2 + 2048, mesh.GetAllocator())
-        ,m_reportProgressCallback(reportProgressCallback)
-        ,m_reportProgressUserData(reportProgressUserData)
-	{
-		m_faceCount = mesh.GetTotalFaceCount();
-
-		dgMemoryAllocator* const allocator = mesh.GetAllocator();
-		m_invFaceCount = dFloat32 (1.0f) / (m_faceCount);
-
-		// init some auxiliary structures
-		dInt32 vertexCount = mesh.GetVertexCount();
-		m_vertexMarks = (dInt32*) dgMallocStack(vertexCount * sizeof(dInt32));
-		m_vertexPool = (dBigVector*) dgMallocStack(vertexCount * sizeof(dBigVector));
-		memset(m_vertexMarks, 0, vertexCount * sizeof(dInt32));
-
-		m_concavityTreeIndex = m_faceCount + 1;
-		m_concavityTreeArray = (dgHACDConvacityLookAheadTree**) dgMallocStack(2 * m_concavityTreeIndex * sizeof(dgHACDConvacityLookAheadTree*));
-		memset(m_concavityTreeArray, 0, 2 * m_concavityTreeIndex * sizeof(dgHACDConvacityLookAheadTree*));
-
-		// scan the mesh and and add a node for each face
-		dInt32 color = 1;
-		ndMeshEffect::Iterator iter(mesh);
-
-		dInt32 meshMask = mesh.IncLRU();
-		const dBigVector* const points = (dBigVector*) mesh.GetVertexPool();
-		for (iter.Begin(); iter; iter++) {
-			dEdge* const edge = &(*iter);
-			if ((edge->m_mark != meshMask) && (edge->m_incidentFace > 0)) {
-
-				dNode* const clusterNode = AddNode ();
-				dgHACDCluster& cluster = clusterNode->GetInfo().m_nodeData;
-				cluster.SetAllocator(mesh.GetAllocator());
-
-				dFloat64 perimeter = dFloat64(0.0f);
-				dEdge* ptr = edge;
-				do {
-					dBigVector p1p0(points[ptr->m_incidentVertex] - points[ptr->m_prev->m_incidentVertex]);
-					dAssert(p1p0.m_w == dFloat32(0.0f));
-					perimeter += sqrt(p1p0.DotProduct(p1p0).GetScalar());
-					ptr->m_incidentFace = color;
-					ptr->m_userData = ndUnsigned64 (clusterNode);
-					ptr->m_mark = meshMask;
-					ptr = ptr->m_next;
-				} while (ptr != edge);
-
-				dBigVector normal (mesh.FaceNormal(edge, &points[0][0], sizeof(dBigVector)));
-				dFloat64 mag = sqrt(normal.DotProduct(normal).GetScalar());
-
-				cluster.m_color = color;
-				cluster.m_hierachicalClusterIndex = color;
-				cluster.m_area = dFloat64(0.5f) * mag;
-				cluster.m_concavity = CalculateConcavityMetric (dFloat64 (0.0f), cluster.m_area, perimeter, 1, 0);
-
-				dHACDClusterFace& face = cluster.Append()->GetInfo();
-				face.m_edge = edge;
-				face.m_area = dFloat64(0.5f) * mag;
-				face.m_normal = normal.Scale(dFloat64(1.0f) / mag);
-
-				m_concavityTreeArray[color] = new (allocator) dgHACDConvacityLookAheadTree (allocator, edge, dFloat64 (0.0f));
-
-				color ++;
-			}
-		}
-
-		// add all link adjacent faces links
-		for (dNode* clusterNode = GetFirst(); clusterNode; clusterNode = clusterNode->GetNext()) {
-
-			dgHACDCluster& cluster = clusterNode->GetInfo().m_nodeData;
-			dHACDClusterFace& face = cluster.GetFirst()->GetInfo();
-			dEdge* const edge = face.m_edge;
-			dEdge* ptr = edge; 
-			do {
-				if (ptr->m_twin->m_incidentFace > 0) {
-					dAssert (ptr->m_twin->m_userData);
-					dNode* const twinClusterNode = (dNode*) ptr->m_twin->m_userData;
-					dAssert (twinClusterNode);
-
-					bool doubleEdge = false;
-					for (dgGraphNode<dgHACDCluster, dgHACDEdge>::dNode* edgeNode = clusterNode->GetInfo().GetFirst(); edgeNode; edgeNode = edgeNode->GetNext()) {
-						if (edgeNode->GetInfo().m_node == twinClusterNode) {
-							doubleEdge = true;
-							break;
-						}
-					}
-					if (!doubleEdge) {
-						clusterNode->GetInfo().AddEdge (twinClusterNode);
-					}
-				}
-				ptr = ptr->m_next;
-			} while (ptr != edge);
-		}
-
-		Trace();
 		dAssert (0);
 /*
-		// add links to back faces
-		dBigVector minAABB;
-		dBigVector maxAABB;
-		mesh.CalculateAABB (minAABB, maxAABB);
-		maxAABB -= minAABB;
-		dAssert(maxAABB.m_w == dFloat32(0.0f));
-		dFloat32 rayDiagonalLength = dFloat32 (sqrt (maxAABB.DotProduct(maxAABB).GetScalar()));
-		m_diagonal = rayDiagonalLength;
+		dgBooleanMeshClipper BVHmeshA(meshA);
+		dgBooleanMeshClipper BVHmeshB(meshB);
 
-		dgBackFaceFinder backFaces(&mesh, this);
-		dFloat32 distanceThreshold = rayDiagonalLength * backFaceDistanceFactor;
-		dAssert (distanceThreshold >= dFloat32 (0.0f));
-		for (dNode* clusterNodeA = GetFirst(); clusterNodeA; clusterNodeA = clusterNodeA->GetNext()) {
+		dInt32 stack = 1;
+		
+		dgMeshBVHNode* stackPool[2 * DG_MESH_EFFECT_BVH_STACK_DEPTH][2];
 
-			dgHACDCluster& clusterA = clusterNodeA->GetInfo().m_nodeData;
-			dHACDClusterFace& faceA = clusterA.GetFirst()->GetInfo();
-			dEdge* const edgeA = faceA.m_edge;
-			dEdge* ptr = edgeA;
+		stackPool[0][0] = BVHmeshA.m_rootNode;
+		stackPool[0][1] = BVHmeshB.m_rootNode;
+		while (stack) {
+			stack --;
+			dgMeshBVHNode* const nodeA = stackPool[stack][0];
+			dgMeshBVHNode* const nodeB = stackPool[stack][1];
+			if (dgOverlapTest (nodeA->m_p0, nodeA->m_p1, nodeB->m_p0, nodeB->m_p1)) {
+				if (nodeA->m_face && nodeB->m_face) {
+					ClipMeshesFaces(BVHmeshA, nodeA->m_face, BVHmeshB, nodeB->m_face);
+				} else if (nodeA->m_face) {
+					stackPool[stack][0] = nodeA;
+					stackPool[stack][1] = nodeB->m_left;
+					stack++;
+					dAssert(stack < sizeof (stackPool) / sizeof (stackPool[0]));
 
-			dBigVector p0 (points[ptr->m_incidentVertex]);
-			dBigVector p1 (points[ptr->m_next->m_incidentVertex]);
-			ptr = ptr->m_next->m_next;
-			do {
-				dBigVector p2 (points[ptr->m_incidentVertex]);
-				dBigVector p01 ((p0 + p1).Scale (dFloat32 (0.5f)));
-				dBigVector p12 ((p1 + p2).Scale (dFloat32 (0.5f)));
-				dBigVector p20 ((p2 + p0).Scale (dFloat32 (0.5f)));
+					stackPool[stack][0] = nodeA;
+					stackPool[stack][1] = nodeB->m_right;
+					stack++;
+					dAssert(stack < sizeof (stackPool) / sizeof (stackPool[0]));
+					
+				} else if (nodeB->m_face) {
+					stackPool[stack][0] = nodeA->m_left;
+					stackPool[stack][1] = nodeB;
+					stack++;
+					dAssert(stack < sizeof (stackPool) / sizeof (stackPool[0]));
 
-				backFaces.CastBackFace (clusterNodeA, p0, p01, p20, distanceThreshold);
-				backFaces.CastBackFace (clusterNodeA, p1, p12, p01, distanceThreshold);
-				backFaces.CastBackFace (clusterNodeA, p2, p20, p12, distanceThreshold);
-				backFaces.CastBackFace (clusterNodeA, p01, p12, p20, distanceThreshold);
+					stackPool[stack][0] = nodeA->m_right;
+					stackPool[stack][1] = nodeB;
+					stack++;
+					dAssert(stack < sizeof (stackPool) / sizeof (stackPool[0]));
 
-				p1 = p2;
-				ptr = ptr->m_next;
-			} while (ptr != edgeA);
+				} else {
+					stackPool[stack][0] = nodeA->m_left;
+					stackPool[stack][1] = nodeB->m_left;
+					stack ++;
+					dAssert (stack < sizeof (stackPool) / sizeof (stackPool[0]));
+
+					stackPool[stack][0] = nodeA->m_left;
+					stackPool[stack][1] = nodeB->m_right;
+					stack++;
+					dAssert(stack < sizeof (stackPool) / sizeof (stackPool[0]));
+
+					stackPool[stack][0] = nodeA->m_right;
+					stackPool[stack][1] = nodeB->m_left;
+					stack++;
+					dAssert(stack < sizeof (stackPool) / sizeof (stackPool[0]));
+
+					stackPool[stack][0] = nodeA->m_right;
+					stackPool[stack][1] = nodeB->m_right;
+					stack++;
+					dAssert(stack < sizeof (stackPool) / sizeof (stackPool[0]));
+				}
+			}
 		}
 */
-		Trace();
-	}
-
-	~dgHACDClusterGraph ()
-	{
-		for (dInt32 i = 0; i < m_faceCount * 2; ++i) {
-			if (m_concavityTreeArray[i]) {
-				delete m_concavityTreeArray[i];
-			}
-		}
-
-		dgFreeStack(m_concavityTreeArray);
-		dgFreeStack(m_vertexPool);
-		dgFreeStack(m_vertexMarks);
-	}
-
-
-
-
-	void Trace() const
-	{
-#if 0
-		for (dNode* clusterNodeA = GetFirst(); clusterNodeA; clusterNodeA = clusterNodeA->GetNext()) {
-			dgHACDCluster& clusterA = clusterNodeA->GetInfo().m_nodeData;
-			//dHACDClusterFace& faceA = clusterA.GetFirst()->GetInfo();
-			//dEdge* const edgeA = faceA.m_edge;
-
-			dTrace (("cluster node: %d\n", clusterA.m_color));
-			dTrace (("            links: "));
-			for (dgGraphNode<dgHACDCluster, dgHACDEdge>::dNode* edgeNodeA = clusterNodeA->GetInfo().GetFirst(); edgeNodeA; edgeNodeA = edgeNodeA->GetNext()) {
-				dNode* const clusterNodeB = edgeNodeA->GetInfo().m_node;
-				dgHACDCluster& clusterB = clusterNodeB->GetInfo().m_nodeData;
-				dTrace (("%d ", clusterB.m_color));
-			}
-			dTrace (("\n"));
-		}
-		dTrace (("\n"));
-#endif
-	}
-
-
-	// you can insert callback here to print the progress as it collapse clusters
-	bool ReportProgress ()
-	{
-		bool state = true;
-		m_progress ++;
-		if (m_reportProgressCallback) {
-			ndFloat32 progress = ndFloat32(m_progress) * m_invFaceCount;
-			state = m_reportProgressCallback (progress * ndFloat32 (0.5f) + 0.5f, m_reportProgressUserData);
-		}
-		return state;
-	}
-
-	ndMeshEffect* CreatePartitionMesh (ndMeshEffect& mesh, ndInt32 maxVertexPerHull)
-	{
-		dgMemoryAllocator* const allocator = mesh.GetAllocator();
-		ndMeshEffect* const convexPartionMesh = new (allocator) ndMeshEffect(allocator);
-
-		dgArray<ndBigVector> convexVertexBuffer(mesh.m_points.m_vertex, mesh.m_points.m_vertex.m_count);
-		const ndBigVector* const points = (ndBigVector*) mesh.GetVertexPool();
-
-		ndInt32 layer = 0;
-		convexPartionMesh->BeginBuild();
-		for (ndList<dgHACDConvacityLookAheadTree*>::ndNode* clusterNode = m_convexProximation.GetFirst(); clusterNode; clusterNode = clusterNode->GetNext()) 
-		{
-			dgHACDConvacityLookAheadTree* const cluster = clusterNode->GetInfo();
-
-			ndInt32 vertexCount = 0;
-			for (ndList<ndEdge*>::ndNode* faceNode = cluster->m_faceList.GetFirst(); faceNode; faceNode = faceNode->GetNext()) 
-			{
-				ndEdge* const edge = faceNode->GetInfo();
-				ndEdge* ptr = edge;
-				do {
-					ndInt32 index = ptr->m_incidentVertex;
-					convexVertexBuffer[vertexCount] = points[index];
-					vertexCount++;
-					ptr = ptr->m_next;
-				} while (ptr != edge);
-			}
-
-			//dConvexHull3d convexHull(allocator, &convexVertexBuffer[0].m_x, sizeof(ndBigVector), vertexCount, 0.0, maxVertexPerHull);
-			ndMeshEffect convexMesh(allocator, &convexVertexBuffer[0].m_x, vertexCount, sizeof(ndBigVector), ndFloat64(0.0f));
-			if (convexMesh.GetCount()) 
-			{
-				for (ndInt32 i = 0; i < convexMesh.m_points.m_vertex.m_count; ++i) 
-				{
-					convexMesh.m_points.m_layers[i] = layer;
-				}
-				convexPartionMesh->MergeFaces(&convexMesh);
-				layer++;
-			}
-		}
-		convexPartionMesh->EndBuild(1.0e-5f);
-
-		m_progress = m_faceCount - 1;
-		ReportProgress();
-		return convexPartionMesh;
-	}
-
-	ndFloat64 ConcavityByFaceMedian (ndInt32 faceCountA, ndInt32 faceCountB) const
-	{
-		ndFloat64 faceCountCost = DG_CONCAVITY_SCALE * ndFloat64 (0.1f) * (faceCountA + faceCountB) * m_invFaceCount;
-		return faceCountCost;
-	}
-
-	ndFloat64 CalculateConcavityMetric (ndFloat64 convexConcavity, ndFloat64 area, ndFloat64 perimeter, ndInt32 faceCountA, ndInt32 faceCountB) const 
-	{
-		ndFloat64 edgeCost = perimeter * perimeter / (ndFloat64(4.0f * ndPi) * area);
-		return convexConcavity * DG_CONCAVITY_SCALE + edgeCost + ConcavityByFaceMedian (faceCountA, faceCountB);
-	}
-
-	void SubmitInitialEdgeCosts (ndMeshEffect& mesh) 
-	{
-		m_mark ++;
-		for (ndNode* clusterNodeA = GetFirst(); clusterNodeA; clusterNodeA = clusterNodeA->GetNext()) {
-			// call the progress callback
-			for (dgGraphNode<dgHACDCluster, dgHACDEdge>::ndNode* edgeNodeAB = clusterNodeA->GetInfo().GetFirst(); edgeNodeAB; edgeNodeAB = edgeNodeAB->GetNext()) {
-				dgHACDEdge& edgeAB = edgeNodeAB->GetInfo().m_edgeData;
-				ndFloat64 weight = edgeAB.m_backFaceHandicap; 
-				if (edgeAB.m_mark != m_mark) {
-					edgeAB.m_mark = m_mark;
-					ndNode* const clusterNodeB = edgeNodeAB->GetInfo().m_node;
-					for (dgGraphNode<dgHACDCluster, dgHACDEdge>::ndNode* edgeNodeBA = clusterNodeB->GetInfo().GetFirst(); edgeNodeBA; edgeNodeBA = edgeNodeBA->GetNext()) {
-						ndNode* const clusterNode = edgeNodeBA->GetInfo().m_node;
-						if (clusterNode == clusterNodeA) {
-							dgHACDEdge& edgeBA = edgeNodeBA->GetInfo().m_edgeData;
-							edgeBA.m_mark = m_mark;
-							ndAssert (!edgeAB.m_proxyListNode);
-							ndAssert (!edgeBA.m_proxyListNode);
-
-							ndAssert (edgeBA.m_backFaceHandicap == weight);
-							ndList<dgPairProxy>::ndNode* const proxyNode = SubmitEdgeCost (mesh, clusterNodeA, clusterNodeB, weight * edgeBA.m_backFaceHandicap);
-							edgeAB.m_proxyListNode = proxyNode;
-							edgeBA.m_proxyListNode = proxyNode;
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	ndInt32 CopyVertexToPool(const ndMeshEffect& mesh, const dgHACDCluster& cluster, ndInt32 start)
-	{
-		ndInt32 count = start;
-
-		const ndBigVector* const points = (ndBigVector*) mesh.GetVertexPool();
-		for (ndList<dHACDClusterFace>::ndNode* node = cluster.GetFirst(); node; node = node->GetNext()) {
-			const dHACDClusterFace& clusterFace = node->GetInfo();
-			ndEdge* edge = clusterFace.m_edge;
-			do {
-				ndInt32 index = edge->m_incidentVertex;
-				if (m_vertexMarks[index] != m_vertexMark) {
-					m_vertexMarks[index] = m_vertexMark;
-					m_vertexPool[count] = points[index];
-					count++;
-				}
-				edge = edge->m_next;
-			} while (edge != clusterFace.m_edge);
-		}
-		return count;
-	}
-
-
-	void MarkInteriorClusterEdges (ndMeshEffect& mesh, ndInt32 mark, const dgHACDCluster& cluster, ndInt32 colorA, ndInt32 colorB) const
-	{
-		ndAssert (colorA != colorB);
-		for (ndList<dHACDClusterFace>::ndNode* node = cluster.GetFirst(); node; node = node->GetNext()) {
-			dHACDClusterFace& clusterFace = node->GetInfo();
-			ndEdge* edge = clusterFace.m_edge;
-			do {
-				if ((edge->m_twin->m_incidentFace == colorA) || (edge->m_twin->m_incidentFace == colorB)) {
-					edge->m_mark = mark;
-					edge->m_twin->m_mark = mark;
-				}
-				edge = edge->m_next;
-			} while (edge != clusterFace.m_edge);
-		}
-	}
-
-	ndFloat64 CalculateClusterPerimeter (ndMeshEffect& mesh, ndInt32 mark, const dgHACDCluster& cluster, ndInt32 colorA, ndInt32 colorB) const
-	{
-		ndAssert (colorA != colorB);
-		ndFloat64 perimeter = ndFloat64 (0.0f);
-		const ndBigVector* const points = (ndBigVector*) mesh.GetVertexPool();
-		for (ndList<dHACDClusterFace>::ndNode* node = cluster.GetFirst(); node; node = node->GetNext()) {
-			dHACDClusterFace& clusterFace = node->GetInfo();
-			ndEdge* edge = clusterFace.m_edge;
-			do {
-				if (!((edge->m_twin->m_incidentFace == colorA) || (edge->m_twin->m_incidentFace == colorB))) {
-					ndBigVector p1p0(points[edge->m_twin->m_incidentVertex] - points[edge->m_incidentVertex]);
-					ndAssert(p1p0.m_w == ndFloat32(0.0f));
-					perimeter += sqrt(p1p0.DotProduct(p1p0).GetScalar());
-				}
-				edge = edge->m_next;
-			} while (edge != clusterFace.m_edge);
-		}
-
-		return perimeter;
-	}
-
-	void HeapCollectGarbage () 
-	{
-		if ((m_priorityHeap.GetCount() + 20) > m_priorityHeap.GetMaxCount()) {
-			for (ndInt32 i = m_priorityHeap.GetCount() - 1; i >= 0; i--) {
-				ndList<dgPairProxy>::ndNode* const emptyNode = m_priorityHeap[i];
-				dgPairProxy& emptyPair = emptyNode->GetInfo();
-				if ((emptyPair.m_nodeA == nullptr) && (emptyPair.m_nodeB == nullptr)) {
-					m_priorityHeap.Remove(i);
-				}
-			}
-		}
-	}
-
-
-	ndFloat64 CalculateConcavity(dgHACDConveHull& hull, const ndMeshEffect& mesh, const dgHACDCluster& cluster)
-	{
-		ndFloat64 concavity = ndFloat32(0.0f);
-
-		const ndBigVector* const points = (ndBigVector*) mesh.GetVertexPool();
-		for (ndList<dHACDClusterFace>::ndNode* node = cluster.GetFirst(); node; node = node->GetNext()) {
-			dHACDClusterFace& clusterFace = node->GetInfo();
-			ndEdge* edge = clusterFace.m_edge;
-			ndInt32 i0 = edge->m_incidentVertex;
-			ndInt32 i1 = edge->m_next->m_incidentVertex;
-			for (ndEdge* ptr = edge->m_next->m_next; ptr != edge; ptr = ptr->m_next) {
-				ndInt32 i2 = ptr->m_incidentVertex;
-				ndFloat64 val = hull.CalculateTriangleConcavity(clusterFace.m_normal, i0, i1, i2, points);
-				if (val > concavity) {
-					concavity = val;
-				}
-				i1 = i2;
-			}
-		}
-
-		return concavity;
-	}
-
-	ndFloat64 CalculateConcavity (dgHACDConveHull& hull, ndMeshEffect& mesh, dgHACDCluster& clusterA, dgHACDCluster& clusterB)
-	{
-		return ndMax(CalculateConcavity(hull, mesh, clusterA), CalculateConcavity(hull, mesh, clusterB));
-	}
-
-
-	ndList<dgPairProxy>::ndNode* SubmitEdgeCost (ndMeshEffect& mesh, ndNode* const clusterNodeA, ndNode* const clusterNodeB, ndFloat64 perimeterHandicap)
-	{
-		dgHACDCluster& clusterA = clusterNodeA->GetInfo().m_nodeData;
-		dgHACDCluster& clusterB = clusterNodeB->GetInfo().m_nodeData;
-		const ndBigVector* const points = (ndBigVector*) mesh.GetVertexPool();
-
-		bool flatStrip = true;
-		ndFloat64 tol = ndFloat64 (1.0e-5f) * m_diagonal;
-		dHACDClusterFace& clusterFaceA = clusterA.GetFirst()->GetInfo();
-		ndAssert(clusterFaceA.m_normal.m_w == ndFloat32(0.0f));
-		ndBigPlane plane(clusterFaceA.m_normal, - points[clusterFaceA.m_edge->m_incidentVertex].DotProduct(clusterFaceA.m_normal).GetScalar());
-
-		if (clusterA.GetCount() > 1) {
-			flatStrip = clusterA.IsCoplanar(plane, mesh, tol);
-		}
-
-		if (flatStrip) {
-			flatStrip = clusterB.IsCoplanar(plane, mesh, tol);
-		}
-
-		ndList<dgPairProxy>::ndNode* pairNode = nullptr;
-		if (!flatStrip) {
-			m_vertexMark ++;
-			ndInt32 vertexCount = CopyVertexToPool(mesh, clusterA, 0);
-			vertexCount = CopyVertexToPool(mesh, clusterB, vertexCount);
-
-			dgHACDConveHull convexHull(mesh.GetAllocator(), m_vertexPool, vertexCount);
-
-			if (convexHull.GetVertexCount()) {
-				ndInt32 mark = mesh.IncLRU();
-				MarkInteriorClusterEdges (mesh, mark, clusterA, clusterA.m_color, clusterB.m_color);
-				MarkInteriorClusterEdges (mesh, mark, clusterB, clusterA.m_color, clusterB.m_color);
-
-				ndFloat64 area = clusterA.m_area + clusterB.m_area;
-				ndFloat64 perimeter = CalculateClusterPerimeter (mesh, mark, clusterA, clusterA.m_color, clusterB.m_color) +
-									  CalculateClusterPerimeter (mesh, mark, clusterB, clusterA.m_color, clusterB.m_color);
-				ndFloat64 concavity = CalculateConcavity (convexHull, mesh, clusterA, clusterB);
-
-				if (concavity < ndFloat64(1.0e-3f)) {
-					concavity = ndFloat64(0.0f);
-				}
-
-				// see if the heap will overflow
-				HeapCollectGarbage ();
-
-				// add a new pair to the heap
-				ndList<dgPairProxy>::ndNode* pairNode1 = m_proxyList.Append();
-				dgPairProxy& pair = pairNode1->GetInfo();
-				pair.m_nodeA = clusterNodeA;
-				pair.m_nodeB = clusterNodeB;
-				pair.m_distanceConcavity = concavity;
-				pair.m_hierachicalClusterIndexA = clusterA.m_hierachicalClusterIndex;
-				pair.m_hierachicalClusterIndexB = clusterB.m_hierachicalClusterIndex;
-
-				pair.m_area = area;
-				ndFloat64 cost = CalculateConcavityMetric (concavity, area * perimeterHandicap, perimeter * perimeterHandicap, clusterA.GetCount(), clusterB.GetCount());
-				m_priorityHeap.Push(pairNode1, cost);
-
-				return pairNode1;
-			}
-		}
-		return pairNode;
-	}
-
-
-	bool CollapseEdge (ndList<dgPairProxy>::ndNode* const pairNode, ndMeshEffect& mesh, ndFloat64 concavity)
-	{
-		ndNode* adjacentNodes[1024];
-		dgPairProxy& pair = pairNode->GetInfo();
-
-		dgMemoryAllocator* const allocator = mesh.GetAllocator();
-
-		bool continueColapsing = true;
-		ndAssert((pair.m_nodeA && pair.m_nodeB) || (!pair.m_nodeA && !pair.m_nodeB));
-		if (pair.m_nodeA && pair.m_nodeB && continueColapsing) {
-			// call the progress callback
-			continueColapsing = ReportProgress();
-
-			ndNode* const clusterNodeA = pair.m_nodeA;
-			ndNode* const clusterNodeB = pair.m_nodeB;
-			ndAssert (clusterNodeA != clusterNodeB);
-
-			dgHACDCluster& clusterA = clusterNodeA->GetInfo().m_nodeData;
-			dgHACDCluster& clusterB = clusterNodeB->GetInfo().m_nodeData;
-
-			ndAssert (&clusterA != &clusterB);
-			ndAssert(clusterA.m_color != clusterB.m_color);
-
-			dgHACDConvacityLookAheadTree* const leftTree = m_concavityTreeArray[pair.m_hierachicalClusterIndexA];
-			dgHACDConvacityLookAheadTree* const rightTree = m_concavityTreeArray[pair.m_hierachicalClusterIndexB];
-			ndAssert (leftTree);
-			ndAssert (rightTree);
-			m_concavityTreeArray[pair.m_hierachicalClusterIndexA] = nullptr;
-			m_concavityTreeArray[pair.m_hierachicalClusterIndexB] = nullptr;
-			ndAssert (m_concavityTreeIndex < (2 * (m_faceCount + 1)));
-
-			ndFloat64 treeConcavity = pair.m_distanceConcavity;
-//			 ndAssert (treeConcavity < 0.1);
-			m_concavityTreeArray[m_concavityTreeIndex] = new (allocator) dgHACDConvacityLookAheadTree (allocator, leftTree, rightTree, treeConcavity);
-			clusterA.m_hierachicalClusterIndex = m_concavityTreeIndex;
-			clusterB.m_hierachicalClusterIndex = m_concavityTreeIndex;
-			m_concavityTreeIndex ++;
-
-			// merge two clusters
-			while (clusterB.GetCount()) {
-
-				dgHACDCluster::ndNode* const nodeB = clusterB.GetFirst();
-				clusterB.Unlink(nodeB);
+		dAssert (0);
+//		network.Colorize();
 	
-				// now color code all faces of the merged cluster
-				dHACDClusterFace& faceB = nodeB->GetInfo();
-				ndEdge* ptr = faceB.m_edge;
-				do {
-					ptr->m_incidentFace = clusterA.m_color;
-					ptr = ptr->m_next;
-				} while (ptr != faceB.m_edge);
-				clusterA.Append(nodeB);
-			}
-			clusterA.m_area = pair.m_area;
-			clusterA.m_concavity = concavity;
 
-			// invalidate all proxies that are still in the heap
-			ndInt32 adjacentCount = 1;
-			adjacentNodes[0] = clusterNodeA;
-			for (dgGraphNode<dgHACDCluster, dgHACDEdge>::ndNode* edgeNodeAB = clusterNodeA->GetInfo().GetFirst(); edgeNodeAB; edgeNodeAB = edgeNodeAB->GetNext()) {
-				dgHACDEdge& edgeAB = edgeNodeAB->GetInfo().m_edgeData;
-				ndList<dgPairProxy>::ndNode* const proxyNode = (ndList<dgPairProxy>::ndNode*) edgeAB.m_proxyListNode;
-				if (proxyNode) {
-					dgPairProxy& pairProxy = proxyNode->GetInfo();
-					ndAssert ((edgeNodeAB->GetInfo().m_node == pairProxy.m_nodeA) || (edgeNodeAB->GetInfo().m_node == pairProxy.m_nodeB));
-					pairProxy.m_nodeA = nullptr;
-					pairProxy.m_nodeB = nullptr;
-					edgeAB.m_proxyListNode = nullptr;
-				}
+/*
+		dInt32 baseAttibuteCountB = BVHmeshB.m_mesh->GetPropertiesCount();
 
-				adjacentNodes[adjacentCount] = edgeNodeAB->GetInfo().m_node;
-				adjacentCount ++;
-				ndAssert (adjacentCount < sizeof (adjacentNodes)/ sizeof (adjacentNodes[0]));
-			}
+		BVHmeshA.m_mesh->SaveOFF("xxxA0.off");
+		BVHmeshB.m_mesh->SaveOFF("xxxB0.off");
 
-			for (dgGraphNode<dgHACDCluster, dgHACDEdge>::ndNode* edgeNodeBA = clusterNodeB->GetInfo().GetFirst(); edgeNodeBA; edgeNodeBA = edgeNodeBA->GetNext()) {
-				dgHACDEdge& edgeBA = edgeNodeBA->GetInfo().m_edgeData;
-				ndList<dgPairProxy>::ndNode* const proxyNode = (ndList<dgPairProxy>::ndNode*) edgeBA.m_proxyListNode;
-				if (proxyNode) {
-					dgPairProxy& pairProxy = proxyNode->GetInfo();
-					pairProxy.m_nodeA = nullptr;
-					pairProxy.m_nodeB = nullptr;
-					edgeBA.m_proxyListNode = nullptr;
-				}
+		// edge-face, edge-edge and edge-vertex intersections until not more intersections are found 
+		for (bool intersectionFound = true; intersectionFound;) {
+			intersectionFound = false;
 
-				bool alreadyLinked = false;
-				ndNode* const node = edgeNodeBA->GetInfo().m_node;
-				for (ndInt32 i = 0; i < adjacentCount; ++i) {
-					if (node == adjacentNodes[i]) {
-						alreadyLinked = true;
-						break;
-					}
-				}
-				if (!alreadyLinked) {
-					clusterNodeA->GetInfo().AddEdge (node);
-					node->GetInfo().AddEdge (clusterNodeA);
-				}
-			}
-			DeleteNode (clusterNodeB);
+			intersectionFound |= BVHmeshA.CalculateEdgeFacesIntersetions(BVHmeshB);
+			intersectionFound |= BVHmeshB.CalculateEdgeFacesIntersetions(BVHmeshA);
 
-			// submit all new costs for each edge connecting this new node to any other node 
-			for (dgGraphNode<dgHACDCluster, dgHACDEdge>::ndNode* edgeNodeAB = clusterNodeA->GetInfo().GetFirst(); edgeNodeAB; edgeNodeAB = edgeNodeAB->GetNext()) {
-				dgHACDEdge& edgeAB = edgeNodeAB->GetInfo().m_edgeData;
-				ndFloat64 weigh = edgeAB.m_backFaceHandicap;
-				ndNode* const clusterNodeB1 = edgeNodeAB->GetInfo().m_node;
-				for (dgGraphNode<dgHACDCluster, dgHACDEdge>::ndNode* edgeNodeBA = clusterNodeB1->GetInfo().GetFirst(); edgeNodeBA; edgeNodeBA = edgeNodeBA->GetNext()) {
-					ndNode* const clusterNode = edgeNodeBA->GetInfo().m_node;
-					if (clusterNode == clusterNodeA) {
-						dgHACDEdge& edgeBA = edgeNodeBA->GetInfo().m_edgeData;
-						ndList<dgPairProxy>::ndNode* const proxyNode = SubmitEdgeCost (mesh, clusterNodeA, clusterNodeB1, weigh * edgeBA.m_backFaceHandicap);
-						if (proxyNode) {
-							edgeBA.m_proxyListNode = proxyNode;
-							edgeAB.m_proxyListNode = proxyNode;
-						}
-						break;
-					}
-				}
-			}
+			intersectionFound |= BVHmeshA.CalculateVertexFacesIntersetions(BVHmeshB);
+			intersectionFound |= BVHmeshB.CalculateVertexFacesIntersetions(BVHmeshA);
+
+
+			BVHmeshA.m_mesh->SaveOFF("xxxA1.off");
+			BVHmeshB.m_mesh->SaveOFF("xxxB1.off");
+
+			intersectionFound |= BVHmeshA.CalculateEdgeEdgeIntersetions(BVHmeshB);
+
+			BVHmeshA.m_mesh->SaveOFF("xxxA2.off");
+			BVHmeshB.m_mesh->SaveOFF("xxxB2.off");
+
+			intersectionFound |= BVHmeshA.CalculateEdgeVertexIntersetions(BVHmeshB);
+			intersectionFound |= BVHmeshB.CalculateEdgeVertexIntersetions(BVHmeshA);
+
+			BVHmeshA.m_mesh->SaveOFF("xxxA3.off");
+			BVHmeshB.m_mesh->SaveOFF("xxxB3.off");
 		}
-		m_proxyList.Remove(pairNode);
-
-		return continueColapsing;
+*/		
 	}
 
-	bool CollapseClusters (ndMeshEffect& mesh, ndFloat64 maxConcavity___, ndInt32 maxClustesCount)
-	{
-		bool collapseEdgeState = true;
-		while (m_priorityHeap.GetCount() && collapseEdgeState) {
-			ndFloat64 concavity =  m_priorityHeap.Value();
-			ndList<dgPairProxy>::ndNode* const pairNode = m_priorityHeap[0];
-			m_priorityHeap.Pop();
-			collapseEdgeState = CollapseEdge (pairNode, mesh, concavity);
-		}
-
-		if (collapseEdgeState) {
-			ndInt32 treeCounts = 0;
-			for (ndInt32 i = 0; i < m_concavityTreeIndex; ++i) {
-				if (m_concavityTreeArray[i]) {
-					m_concavityTreeArray[treeCounts] = m_concavityTreeArray[i];
-					m_concavityTreeArray[i] = nullptr;
-					treeCounts ++;
-				}
-			}
-
-			if (treeCounts > 1) {
-				for (ndInt32 i = 0; i < treeCounts; ++i) {
-					ndAssert (m_concavityTreeArray[i]);
-					if (m_concavityTreeArray[i]->m_faceList.GetCount()==1) {
-						delete m_concavityTreeArray[i];
-						m_concavityTreeArray[i] = m_concavityTreeArray[treeCounts-1];
-						m_concavityTreeArray[treeCounts-1]= nullptr;
-						treeCounts --;
-						i--;
-					}
-				}
-
-
-				ndFloat32 largeConcacvity = 10000;
-				while (treeCounts > 1)	 {
-					dgHACDConvacityLookAheadTree* const leftTree = m_concavityTreeArray[treeCounts-1];
-					dgHACDConvacityLookAheadTree* const rightTree = m_concavityTreeArray[treeCounts-2];
-					m_concavityTreeArray[treeCounts-1] = nullptr;
-					m_concavityTreeArray[treeCounts-2] = new (mesh.GetAllocator()) dgHACDConvacityLookAheadTree (mesh.GetAllocator(), leftTree, rightTree, largeConcacvity);
-					largeConcacvity *= 2;
-					treeCounts --;
-				}
-
-			}
-
-			dgHACDConvacityLookAheadTree* const tree = m_concavityTreeArray[0];
-			if (tree) {
-				ndDownHeap<dgHACDConvacityLookAheadTree*, ndFloat64> approximation(maxClustesCount * 2, mesh.GetAllocator());
-
-				tree->ReduceByCount (maxClustesCount, approximation);
-				//tree->ReduceByConcavity (maxConcavity, approximation);
-
-//while ((approximation.Value() + ndFloat64 (1.0e10f)) > 1.0e-5) {
-//approximation.Pop();
-//}
-
-				while (approximation.GetCount()) {
-					m_convexProximation.Append(approximation[0]);
-					approximation.Pop();
-				}
-			}
-		}
-		return collapseEdgeState;
-	}
-
-
-	ndInt32 m_mark;
-	ndInt32 m_faceCount;
-	ndInt32 m_vertexMark;
-	ndInt32 m_progress;
-	ndInt32 m_concavityTreeIndex;
-	ndFloat32 m_invFaceCount;
-	ndFloat64 m_diagonal;
-	ndInt32* m_vertexMarks;
-	ndBigVector* m_vertexPool;
-	ndList<dgPairProxy> m_proxyList;
-	dgHACDConvacityLookAheadTree** m_concavityTreeArray;	
-	ndList<dgHACDConvacityLookAheadTree*> m_convexProximation;
-	ndUpHeap<ndList<dgPairProxy>::ndNode*, ndFloat64> m_priorityHeap;
-	dgReportProgress m_reportProgressCallback;
-    void* m_reportProgressUserData;
+	dgClipppedFaces m_clippedFaces;
 };
 
-ndMeshEffect* ndMeshEffect::CreateConvexApproximation(ndFloat32 maxConcavity, ndFloat32 backFaceDistanceFactor, ndInt32 maxHullsCount, ndInt32 maxVertexPerHull, dgReportProgress reportProgressCallback, void* const progressReportUserData) const
+
+
+ndMeshEffect* ndMeshEffect::Intersection (const dMatrix& matrix, const ndMeshEffect* const clipperMesh) const
 {
-	//	dgMeshEffect triangleMesh(*this);
-	if (maxHullsCount <= 1) {
-		maxHullsCount = 1;
-	}
-	if (maxConcavity <= ndFloat32 (1.0e-5f)) {
-		maxConcavity = ndFloat32 (1.0e-5f);
-	}
+	ndMeshEffect copy (*this);
+	ndMeshEffect clipper (*clipperMesh);
+	clipper.TransformMesh (matrix);
 
-	if (maxVertexPerHull < 4) {
-		maxVertexPerHull = 4;
-	}
-	backFaceDistanceFactor = ndClamp(backFaceDistanceFactor, ndFloat32 (1.0e-6f), ndFloat32 (1.0f));
+	dgBooleanMeshClipper::ClipMeshesAndColorize (&copy, &clipper);
+/*
+	ndMeshEffect* const mesh = new (GetAllocator()) ndMeshEffect (GetAllocator());
+	mesh->BeginFace();
+	dgBooleanMeshClipper::CopyPoints(mesh, &copy);
+	dgBooleanMeshClipper::AddInteriorFaces (mesh, &copy);
+	dgBooleanMeshClipper::AddInteriorFaces (mesh, &clipper);
+	mesh->EndFace ();
+	mesh->RepairTJoints();
+	mesh->RemoveUnusedVertices(nullptr);
 
-	ndMeshEffect* partition = nullptr;
+	return mesh;
+*/
 
-	// make a copy of the mesh
-	ndMeshEffect mesh(*this);
-	mesh.m_attrib.m_materialChannel.Clear();
-	mesh.m_attrib.m_normalChannel.Clear();
-	mesh.m_attrib.m_binormalChannel.Clear();
-	mesh.m_attrib.m_colorChannel.Clear();
-	mesh.m_attrib.m_uv0Channel.Clear();
-	mesh.m_attrib.m_uv1Channel.Clear();
-	mesh.Triangulate ();
-
-	mesh.UnpackAttibuteData();
-	mesh.PackAttibuteData();
-	mesh.UnpackPoints();
-	bool state = mesh.Optimize (&mesh.m_points.m_vertex[0].m_x, sizeof (ndBigVector), reportProgressCallback, progressReportUserData, ndFloat32 (1.0e-3f), 1500);
-	// optimized override userdata
-	ndPolyhedra::Iterator iter(mesh);
-	for (iter.Begin(); iter; iter++) {
-		ndEdge* const edge = &iter.GetNode()->GetInfo();
-		if (edge->m_incidentFace > 0) {
-			edge->m_userData = edge->m_incidentVertex;
-		}
-	}
-	mesh.PackPoints(ndFloat32 (1.0e-24f));
-	if (state) {
-		mesh.DeleteDegenerateFaces (&mesh.m_points.m_vertex[0].m_x, sizeof (ndBigVector), ndFloat32 (1.0e-12f));
-		mesh.RepairTJoints();
-		mesh.ConvertToPolygons();
-		//mesh.SaveOFF ("xxxxxx.off");
-
-		// create a general connectivity graph    
-		dgHACDClusterGraph graph (mesh, backFaceDistanceFactor, reportProgressCallback, progressReportUserData);
-
-		// calculate initial edge costs
-		graph.SubmitInitialEdgeCosts (mesh);
-
-		// collapse the graph
-		if (graph.CollapseClusters (mesh, maxConcavity, maxHullsCount)) {
-			// Create Partition Mesh
-			partition = graph.CreatePartitionMesh (mesh, maxVertexPerHull);
-		}
-	}
-
-	return partition;
+	dAssert (0);
+	return nullptr;
 }
 
 #endif
+
+// return 0 if the the shape was clipped
+// return 1 if the shape is the positive size of the plane
+// return -1 if the shape is the negative size of the plane
+// return -2 if function fail
+//ndInt32 ndMeshEffect::PlaneClip(const ndMeshEffect& convexMesh, const ndEdge* const convexFace)
+ndInt32 ndMeshEffect::PlaneClip(const ndMeshEffect&, const ndEdge* const)
+{
+ndAssert(0);
+return 0;
+#if 0
+	ndAssert(convexFace->m_incidentFace > 0);
+
+	ndBigVector normal(convexMesh.FaceNormal(convexFace, &convexMesh.m_points.m_vertex[0].m_x, sizeof(ndBigVector)));
+	ndFloat64 mag2 = normal.DotProduct(normal).GetScalar();
+	if (mag2 < ndFloat64(1.0e-30))
+	{
+		ndAssert(0);
+		return -2;
+	}
+
+	normal = normal.Normalize();
+	ndBigVector origin(convexMesh.m_points.m_vertex[convexFace->m_incidentVertex]);
+	ndBigPlane plane(normal, -origin.DotProduct(normal).GetScalar());
+
+	ndAssert(!HasOpenEdges());
+
+	ndInt32 pointCount = GetVertexCount();
+	ndStack <ndFloat64> testPool(2 * pointCount + 1024);
+	ndFloat64* const test = &testPool[0];
+	for (ndInt32 i = 0; i < pointCount; ++i)
+	{
+		test[i] = plane.Evalue(m_points.m_vertex[i]);
+		if (fabs(test[i]) < ndFloat32(1.0e-5f))
+		{
+			test[i] = ndFloat32(0.0f);
+		}
+	}
+
+	ndInt32 positive = 0;
+	ndInt32 negative = 0;
+	ndPolyhedra::Iterator iter(*this);
+	for (iter.Begin(); iter && !(positive && negative); iter++)
+	{
+		ndEdge* const edge = &(*iter);
+		positive += test[edge->m_incidentVertex] > ndFloat32(0.0f);
+		negative += test[edge->m_incidentVertex] < ndFloat32(0.0f);
+	}
+	if (positive && !negative)
+	{
+		return 1;
+	}
+
+	ndInt32 retValue = -1;
+	if (positive && negative)
+	{
+		retValue = 0;
+		const ndEdge* e0 = convexFace;
+		const ndEdge* e1 = e0->m_next;
+		const ndEdge* e2 = e1->m_next;
+
+		ndMatrix matrix;
+		ndBigVector p1(convexMesh.m_points.m_vertex[e1->m_incidentVertex]);
+
+		ndBigVector xDir(p1 - origin);
+		ndAssert(xDir.m_w == ndFloat32(0.0f));
+		ndAssert(xDir.DotProduct(xDir).GetScalar() > ndFloat32(0.0f));
+		matrix[2] = ndVector(normal);
+		matrix[0] = ndVector(xDir.Scale(ndFloat64(1.0f) / sqrt(xDir.DotProduct(xDir).GetScalar())));
+		matrix[1] = matrix[2].CrossProduct(matrix[0]);
+		matrix[3] = ndVector(origin);
+		matrix[3][3] = ndFloat32(1.0f);
+
+		ndVector q0(matrix.UntransformVector(ndVector(convexMesh.m_points.m_vertex[e0->m_incidentVertex])));
+		ndVector q1(matrix.UntransformVector(ndVector(convexMesh.m_points.m_vertex[e1->m_incidentVertex])));
+		ndVector q2(matrix.UntransformVector(ndVector(convexMesh.m_points.m_vertex[e2->m_incidentVertex])));
+
+		ndVector p10(q1 - q0);
+		ndVector p20(q2 - q0);
+		ndVector faceNormal(matrix.UnrotateVector(ndVector(normal)));
+		ndAssert(faceNormal.m_w == ndFloat32(0.0f));
+		ndFloat32 areaInv = faceNormal.DotProduct(p10.CrossProduct(p20)).GetScalar();
+		if (e2->m_next != e0)
+		{
+			const ndEdge* edge = e2;
+			ndVector r1(q2);
+			ndVector q10(p20);
+			do
+			{
+				ndVector r2(matrix.UntransformVector(ndVector(convexMesh.m_points.m_vertex[edge->m_next->m_incidentVertex])));
+				ndVector q20(r2 - q0);
+				ndFloat32 areaInv1 = faceNormal.DotProduct(q10.CrossProduct(q20)).GetScalar();
+				if (areaInv1 > areaInv)
+				{
+					e1 = edge;
+					e2 = edge->m_next;
+					q1 = r1;
+					q2 = r2;
+					areaInv = areaInv1;
+				}
+				r1 = r2;
+				q10 = q20;
+				edge = edge->m_next;
+			} while (edge->m_next != e0);
+		}
+
+		ndAssert(areaInv > ndFloat32(0.0f));
+		areaInv = ndFloat32(1.0f) / areaInv;
+
+		ndVector uv0[3];
+		ndVector uv1[3];
+		memset(uv0, 0, sizeof(uv0));
+		memset(uv1, 0, sizeof(uv1));
+		if (m_attrib.m_uv0Channel.GetCount() && convexMesh.m_attrib.m_uv0Channel.GetCount())
+		{
+			uv0[0] = ndVector(ndFloat32(convexMesh.m_attrib.m_uv0Channel[ndInt32(e0->m_userData)].m_u), ndFloat32(convexMesh.m_attrib.m_uv0Channel[ndInt32(e0->m_userData)].m_v), ndFloat32(0.0f), ndFloat32(0.0f));
+			uv0[1] = ndVector(ndFloat32(convexMesh.m_attrib.m_uv0Channel[ndInt32(e1->m_userData)].m_u), ndFloat32(convexMesh.m_attrib.m_uv0Channel[ndInt32(e1->m_userData)].m_v), ndFloat32(0.0f), ndFloat32(0.0f));
+			uv0[2] = ndVector(ndFloat32(convexMesh.m_attrib.m_uv0Channel[ndInt32(e2->m_userData)].m_u), ndFloat32(convexMesh.m_attrib.m_uv0Channel[ndInt32(e2->m_userData)].m_v), ndFloat32(0.0f), ndFloat32(0.0f));
+		}
+
+		if (m_attrib.m_uv1Channel.GetCount() && convexMesh.m_attrib.m_uv1Channel.GetCount())
+		{
+			uv1[0] = ndVector(ndFloat32(convexMesh.m_attrib.m_uv1Channel[ndInt32(e0->m_userData)].m_u), ndFloat32(convexMesh.m_attrib.m_uv1Channel[ndInt32(e0->m_userData)].m_v), ndFloat32(0.0f), ndFloat32(0.0f));
+			uv1[1] = ndVector(ndFloat32(convexMesh.m_attrib.m_uv1Channel[ndInt32(e1->m_userData)].m_u), ndFloat32(convexMesh.m_attrib.m_uv1Channel[ndInt32(e1->m_userData)].m_v), ndFloat32(0.0f), ndFloat32(0.0f));
+			uv1[2] = ndVector(ndFloat32(convexMesh.m_attrib.m_uv1Channel[ndInt32(e2->m_userData)].m_u), ndFloat32(convexMesh.m_attrib.m_uv1Channel[ndInt32(e2->m_userData)].m_v), ndFloat32(0.0f), ndFloat32(0.0f));
+		}
+
+		for (iter.Begin(); iter; iter++)
+		{
+			ndEdge* const edge = &(*iter);
+
+			ndFloat64 side0 = test[edge->m_prev->m_incidentVertex];
+			ndFloat64 side1 = test[edge->m_incidentVertex];
+
+			if ((side0 < ndFloat32(0.0f)) && (side1 > ndFloat64(0.0f)))
+			{
+				ndBigVector dp(m_points.m_vertex[edge->m_incidentVertex] - m_points.m_vertex[edge->m_prev->m_incidentVertex]);
+				ndAssert(dp.m_w == ndFloat32(0.0f));
+				ndFloat64 param = -side0 / plane.DotProduct(dp).GetScalar();
+
+				ndEdge* const splitEdge = InsertEdgeVertex(edge->m_prev, param);
+				test[splitEdge->m_next->m_incidentVertex] = ndFloat64(0.0f);
+			}
+		}
+
+		ndInt32 colorMark = IncLRU();
+		for (iter.Begin(); iter; iter++)
+		{
+			ndEdge* const edge = &(*iter);
+			ndFloat64 side0 = test[edge->m_incidentVertex];
+			ndFloat64 side1 = test[edge->m_next->m_incidentVertex];
+
+			if ((side0 > ndFloat32(0.0f)) || (side1 > ndFloat64(0.0f)))
+			{
+				edge->m_mark = colorMark;
+			}
+		}
+
+		for (iter.Begin(); iter; iter++)
+		{
+			ndEdge* const edge = &(*iter);
+			ndFloat64 side0 = test[edge->m_incidentVertex];
+			ndFloat64 side1 = test[edge->m_next->m_incidentVertex];
+			if ((side0 == ndFloat32(0.0f)) && (side1 == ndFloat64(0.0f)))
+			{
+				ndEdge* ptr = edge->m_next;
+				do
+				{
+					if (ptr->m_mark == colorMark)
+					{
+						edge->m_mark = colorMark;
+						break;
+					}
+					ptr = ptr->m_next;
+				} while (ptr != edge);
+			}
+		}
+
+		for (iter.Begin(); iter; iter++)
+		{
+			ndEdge* const edge = &(*iter);
+			if ((edge->m_mark == colorMark) && (edge->m_next->m_mark < colorMark))
+			{
+				ndEdge* const startEdge = edge->m_next;
+				ndEdge* end = startEdge;
+				do
+				{
+					if (end->m_mark == colorMark)
+					{
+						break;
+					}
+
+					end = end->m_next;
+				} while (end != startEdge);
+				ndAssert(end != startEdge);
+				ndEdge* const devideEdge = ConnectVertex(startEdge, end);
+				ndAssert(devideEdge);
+				ndAssert(devideEdge->m_next->m_mark != colorMark);
+				ndAssert(devideEdge->m_prev->m_mark != colorMark);
+				ndAssert(devideEdge->m_twin->m_next->m_mark == colorMark);
+				ndAssert(devideEdge->m_twin->m_prev->m_mark == colorMark);
+				devideEdge->m_mark = colorMark - 1;
+				devideEdge->m_twin->m_mark = colorMark;
+			}
+		}
+
+		ndInt32 mark = IncLRU();
+		ndList<ndEdge*> faceList;
+		for (iter.Begin(); iter; iter++)
+		{
+			ndEdge* const face = &(*iter);
+			if ((face->m_mark >= colorMark) && (face->m_mark != mark))
+			{
+				faceList.Append(face);
+				ndEdge* edge = face;
+				do
+				{
+					edge->m_mark = mark;
+					edge = edge->m_next;
+				} while (edge != face);
+			}
+		}
+
+		for (ndList<ndEdge*>::ndNode* node = faceList.GetFirst(); node; node = node->GetNext())
+		{
+			ndEdge* const face = node->GetInfo();
+			DeleteFace(face);
+		}
+
+		mark = IncLRU();
+		faceList.RemoveAll();
+		for (iter.Begin(); iter; iter++)
+		{
+			ndEdge* const face = &(*iter);
+			if ((face->m_mark != mark) && (face->m_incidentFace < 0))
+			{
+				faceList.Append(face);
+				ndEdge* edge = face;
+				do
+				{
+					edge->m_mark = mark;
+					edge = edge->m_next;
+				} while (edge != face);
+			}
+		}
+
+		const ndInt32 capAttribute = convexMesh.m_attrib.m_materialChannel.GetCount() ? convexMesh.m_attrib.m_materialChannel[ndInt32(convexFace->m_userData)] : 0;
+		for (ndList<ndEdge*>::ndNode* node = faceList.GetFirst(); node; node = node->GetNext())
+		{
+			ndEdge* const face = node->GetInfo();
+
+			ndEdge* edge = face;
+			do
+			{
+				edge->m_incidentFace = 1;
+				edge->m_userData = ndUnsigned64(m_attrib.m_pointChannel.GetCount());
+
+				m_attrib.m_pointChannel.PushBack(edge->m_incidentVertex);
+				if (m_attrib.m_normalChannel.GetCount())
+				{
+					m_attrib.m_normalChannel.PushBack(ndNormal(ndReal(normal.m_x), ndReal(normal.m_y), ndReal(normal.m_z)));
+				}
+
+				if (m_attrib.m_binormalChannel.GetCount())
+				{
+					ndAssert(0);
+				}
+
+				if (m_attrib.m_colorChannel.GetCount())
+				{
+					ndAssert(0);
+				}
+
+				if (m_attrib.m_materialChannel.GetCount())
+				{
+					m_attrib.m_materialChannel.PushBack(capAttribute);
+				}
+
+				//ndVector p (matrix.UntransformVector (attibute.m_vertex));
+				ndVector p(matrix.UntransformVector(m_points.m_vertex[edge->m_incidentVertex]));
+				ndVector p_p0(p - q0);
+				ndVector p_p1(p - q1);
+				ndVector p_p2(p - q2);
+				ndAssert(faceNormal.m_w == ndFloat32(0.0f));
+				ndFloat32 alpha0 = faceNormal.DotProduct(p_p1.CrossProduct(p_p2)).GetScalar() * areaInv;
+				ndFloat32 alpha1 = faceNormal.DotProduct(p_p2.CrossProduct(p_p0)).GetScalar() * areaInv;
+				ndFloat32 alpha2 = faceNormal.DotProduct(p_p0.CrossProduct(p_p1)).GetScalar() * areaInv;
+
+				//alpha0 = 0.0f;
+				//alpha1 = 0.0f;
+				//alpha2 = 0.0;
+				if (m_attrib.m_uv0Channel.GetCount() && convexMesh.m_attrib.m_uv0Channel.GetCount())
+				{
+					ndUV uv(
+						uv0[0].m_x * alpha0 + uv0[1].m_x * alpha1 + uv0[2].m_x * alpha2,
+						uv0[0].m_y * alpha0 + uv0[1].m_y * alpha1 + uv0[2].m_y * alpha2);
+					m_attrib.m_uv0Channel.PushBack(uv);
+				}
+
+				if (m_attrib.m_uv1Channel.GetCount() && convexMesh.m_attrib.m_uv1Channel.GetCount())
+				{
+					ndUV uv(
+						uv1[0].m_x * alpha0 + uv1[1].m_x * alpha1 + uv1[2].m_x * alpha2,
+						uv1[0].m_y * alpha0 + uv1[1].m_y * alpha1 + uv1[2].m_y * alpha2);
+					m_attrib.m_uv1Channel.PushBack(uv);
+				}
+
+				edge = edge->m_next;
+			} while (edge != face);
+		}
+	}
+
+	return retValue;
+#endif
+}
+ndMeshEffect* ndMeshEffect::ConvexMeshIntersection(const ndMeshEffect* const convexMeshSrc) const
+{
+	ndMeshEffect convexMesh(*convexMeshSrc);
+	convexMesh.ConvertToPolygons();
+	ndMeshEffect* const convexIntersection = new ndMeshEffect(*this);
+	
+	ndInt32 mark = convexMesh.IncLRU();
+	ndPolyhedra::Iterator iter(convexMesh);
+	
+	for (iter.Begin(); iter; iter++) 
+	{
+		ndEdge* const convexFace = &(*iter);
+		if ((convexFace->m_incidentFace > 0) && (convexFace->m_mark != mark)) 
+		{
+			ndEdge* ptr = convexFace;
+			do 
+			{
+				ptr->m_mark = mark;
+				ptr = ptr->m_next;
+			} while (ptr != convexFace);
+
+			ndInt32 clipCode = convexIntersection->PlaneClip(convexMesh, convexFace);
+			if (clipCode > 0)
+			{
+				delete convexIntersection;
+				return nullptr;
+			}
+		}
+	}
+	
+	if (!convexIntersection->GetVertexCount()) 
+	{
+		delete convexIntersection;
+		return nullptr;
+	}
+
+	convexIntersection->RemoveUnusedVertices(nullptr);
+	return convexIntersection;
+}
+
+//ndMeshEffect* ndMeshEffect::InverseConvexMeshIntersection(const ndMeshEffect* const convexMeshSrc) const
+ndMeshEffect* ndMeshEffect::InverseConvexMeshIntersection(const ndMeshEffect* const) const
+{
+	ndAssert(0);
+	return 0;
+#if 0
+	ndMeshEffect concaveMesh(*convexMeshSrc);
+	concaveMesh.ConvertToPolygons();
+
+	ndMeshEffect convexMesh(concaveMesh);
+	ndMeshEffect* intersection = new ndMeshEffect(*this);
+
+	ndMeshEffect* const mergedOutput = new ndMeshEffect;
+	mergedOutput->BeginBuild();
+
+	ndInt32 layer = 0;
+	for (ndInt32 i = 0; i < intersection->m_points.m_vertex.GetCount(); ++i)
+	{
+		intersection->m_points.m_layers[i] = layer;
+	}
+	
+	concaveMesh.FlipWinding();
+	ndInt32 mark = concaveMesh.IncLRU();
+	ndPolyhedra::Iterator iter(concaveMesh);
+	for (iter.Begin(); iter; iter++)
+	{
+		ndEdge* const concaveFace = &(*iter);
+		if ((concaveFace->m_incidentFace > 0) && (concaveFace->m_mark != mark))
+		{
+			ndEdge* ptr = concaveFace;
+			do
+			{
+				ptr->m_mark = mark;
+				ptr = ptr->m_next;
+			} while (ptr != concaveFace);
+
+			ndMeshEffect clipTest (*intersection);
+			ndInt32 clipCode = clipTest.PlaneClip(concaveMesh, concaveFace);
+			if (clipCode <= 0)
+			{
+				clipTest.Triangulate();
+				mergedOutput->MergeFaces(&clipTest);
+
+				layer++;
+				if (clipCode < 0)
+				{
+					break;
+				}
+
+				convexMesh.RemoveAll();
+				convexMesh.BeginFace();
+
+				ptr = concaveFace;
+				ndInt32 count = 0;
+				ndInt32 vetexIndex[256];
+				ndInt64 attribIndex[256];
+				do
+				{
+					vetexIndex[count] = ptr->m_incidentVertex;
+					attribIndex[count] = ndInt64(ptr->m_userData);
+					count++;
+					ptr = ptr->m_prev;
+				} while (ptr != concaveFace);
+				ndEdge* const edge = convexMesh.AddFace(count, vetexIndex, attribIndex);
+				convexMesh.EndFace();
+
+				ndMeshEffect clipTest1(*intersection);
+				delete intersection;
+				clipTest1.PlaneClip(convexMesh, edge);
+				intersection = new ndMeshEffect(clipTest1);
+				
+				for (ndInt32 i = 0; i < intersection->m_points.m_vertex.GetCount(); ++i)
+				{
+					intersection->m_points.m_layers[i] = layer;
+				}
+			}
+		}
+	}
+	
+	delete intersection;
+	mergedOutput->EndBuild(false);
+
+	if (!layer)
+	{
+		delete mergedOutput;
+		return nullptr;
+	}
+	mergedOutput->RemoveUnusedVertices(nullptr);
+	return mergedOutput;
+#endif
+}
+

@@ -887,7 +887,6 @@ bool ndMeshJoint::operator==(const ndMeshJoint& other) const
 
 void ndMeshJoint::ApplyTransform(const ndMatrix& transform)
 {
-	ndAssert(0);
 	ndMatrix matrix0(m_localFrame0 * transform);
 	ndMatrix matrix1(m_localFrame1 * transform);
 

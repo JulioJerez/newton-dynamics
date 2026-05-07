@@ -85,6 +85,9 @@ class ndRenderPassDebug : public ndRenderPass
 	void GenerateCenterOfMass();
 	void GenerateContactForce();
 	virtual void RenderScene() override;
+
+	void ClearDynamicPrimitives();
+	void RenderDynamicPrimitives();
 	
 	ndDebugOptions m_options;
 	ndArray<ndPointColor> m_debugLines;
