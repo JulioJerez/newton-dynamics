@@ -47,10 +47,6 @@ void ndDebugDisplayRenderPass::RenderMeshSelection()
 			m_renderLinesPrimitive->Render(m_owner, matrix, m_debugLineArray);
 		}
 
-		m_debugLines.SetCount(0);
-		m_debugPoints.SetCount(0);
-		m_debugTriangles.SetCount(0);
-
 		// do not call base class
 		if (m_manager->m_renderMode == ndAssetEditor::m_wireframe)
 		{
@@ -84,12 +80,7 @@ void ndDebugDisplayRenderPass::RenderMeshSelection()
 
 void ndDebugDisplayRenderPass::RenderBoneSelection()
 {
-	m_debugLines.SetCount(0);
-	m_debugPoints.SetCount(0);
-	m_debugTriangles.SetCount(0);
-
 	m_owner->ClearZBuffer();
-	RenderSkeleton();
 
 	//if (m_manager->m_renderMode == ndAssetEditor::m_wireframe)
 	//{
@@ -147,27 +138,12 @@ void ndDebugDisplayRenderPass::RenderBoneSelection()
 		}
 	}
 
-	if (m_debugPoints.GetCount())
-	{
-		const ndMatrix matrix(ndGetIdentityMatrix());
-		m_renderPointsPrimitive->Render(m_owner, matrix, m_debugLineArray);
-	}
-	
-	if (m_debugLines.GetCount())
-	{
-		const ndMatrix matrix(ndGetIdentityMatrix());
-		m_renderLinesPrimitive->Render(m_owner, matrix, m_debugLineArray);
-	}
-
-	if (m_debugTriangles.GetCount())
-	{
-		const ndMatrix matrix(ndGetIdentityMatrix());
-		m_renderTrianglePrimitive->Render(m_owner, matrix, m_debugTriangleArray);
-	}
+	RenderSkeleton();
 }
 
 void ndDebugDisplayRenderPass::RenderScene()
 {
+	ClearDynamicPrimitives();
 	if (m_manager->m_raycastBones)
 	{
 		RenderBoneSelection();
@@ -176,6 +152,7 @@ void ndDebugDisplayRenderPass::RenderScene()
 	{
 		RenderMeshSelection();
 	}
+	RenderDynamicPrimitives();
 }
 
 void ndDebugDisplayRenderPass::RebuildDebugCollision()
@@ -286,12 +263,15 @@ ndFixSizeArray<ndDebugDisplayRenderPass::ndPointNormalColor, 256> ndDebugDisplay
 
 	ndFloat32 dist = localPoint.m_x * ndFloat32(0.1f);
 	ndVector points[32];
-	points[0] = ndVector(dist, dist, dist, 1.0f);
-	points[1] = ndVector(dist, dist, -dist, 1.0f);
-	points[2] = ndVector(dist, -dist, -dist, 1.0f);
-	points[3] = ndVector(dist, -dist, dist, 1.0f);
+	points[0] = ndVector(dist, dist, dist, ndFloat32(1.0f));
+	points[1] = ndVector(dist, dist, -dist, ndFloat32(1.0f));
+	points[2] = ndVector(dist, -dist, -dist, ndFloat32(1.0f));
+	points[3] = ndVector(dist, -dist, dist, ndFloat32(1.0f));
 
 	ndInt32 i0 = 3;
+	ndVector testPoint(ndVector::m_wOne);
+	testPoint.m_x = dist;
+
 	ndFixSizeArray<ndPointNormalColor, 256> temp;
 	for (ndInt32 i = 0; i < 4; ++i)
 	{
@@ -307,6 +287,12 @@ ndFixSizeArray<ndDebugDisplayRenderPass::ndPointNormalColor, 256> ndDebugDisplay
 				normal.m_x = ndFloat32 (1.0f);
 			}
 			normal = normal.Normalize();
+
+			if (normal.DotProduct(testPoint - p0).GetScalar() > ndFloat32 (0.0f))
+			{
+				ndSwap(p1, p2);
+				normal = normal * ndVector::m_negOne;
+			}
 
 			ndPointNormalColor trianglePoint;
 			trianglePoint.m_normal = normal;
@@ -334,6 +320,12 @@ ndFixSizeArray<ndDebugDisplayRenderPass::ndPointNormalColor, 256> ndDebugDisplay
 				normal.m_x = ndFloat32(1.0f);
 			}
 			normal = normal.Normalize();
+
+			if (normal.DotProduct(testPoint - p0).GetScalar() > ndFloat32(0.0f))
+			{
+				ndSwap(p1, p2);
+				normal = normal * ndVector::m_negOne;
+			}
 
 			ndPointNormalColor trianglePoint;
 			trianglePoint.m_normal = normal;

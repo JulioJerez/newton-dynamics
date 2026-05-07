@@ -538,6 +538,14 @@ void ndAssetEditor::SetVisualScene(const ndRenderMeshLoader& loader)
 	m_newSceneMesh = loader.m_renderMesh;
 	m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 	m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+
+	ndInt32 bonesNumber = 0;
+	auto BonesCount = [&bonesNumber](ndMesh* const node)
+	{
+		bonesNumber += (node->GetNodeType() == ndMesh::m_bone) ? 1 : 0;
+	};
+	m_newMesh->NodeIterator(BonesCount);
+	m_raycastBones = (bonesNumber != 0);
 }
 
 void ndAssetEditor::Run()
