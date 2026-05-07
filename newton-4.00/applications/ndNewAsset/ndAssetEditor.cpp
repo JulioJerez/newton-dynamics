@@ -348,7 +348,7 @@ void ndAssetEditor::NewMesh()
 	loader.m_mesh = ndSharedPtr<ndMesh>(new ndMesh);
 	loader.m_mesh->SetName("root");
 	loader.m_renderMesh = ndRenderMeshLoader::CreateRenderSceneMesh(*GetRenderer(), *loader.m_mesh, ndString());
-	SetVisualScene(loader);
+	SetVisualScene(loader.m_mesh, loader.m_renderMesh);
 	m_undoRedo.Clear();
 }
 
@@ -373,7 +373,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					if (loader.LoadMesh(path))
 					{
 						m_currentPath = path;
-						SetVisualScene(loader);
+						SetVisualScene(loader.m_mesh, loader.m_renderMesh);
 						m_undoRedo.Clear();
 					}
 				}
@@ -415,7 +415,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					if (loader.ImportFbx(path))
 					{
 						m_currentPath = path;
-						SetVisualScene(loader);
+						SetVisualScene(loader.m_mesh, loader.m_renderMesh);
 						m_undoRedo.Clear();
 					}
 				}
@@ -431,7 +431,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					if (loader.Import(path))
 					{
 						m_currentPath = path;
-						SetVisualScene(loader);
+						SetVisualScene(loader.m_mesh, loader.m_renderMesh);
 						m_undoRedo.Clear();
 					}
 				}
@@ -477,6 +477,12 @@ void ndAssetEditor::ShowMainMenuBar()
 			{
 				m_toolActive = true;
 				m_currentTool = new ndRotateMesh(this);
+			}
+
+			if (ImGui::MenuItem("rotate bones", ""))
+			{
+				m_toolActive = true;
+				m_currentTool = new ndRotateBones(this);
 			}
 
 			if (ImGui::MenuItem("normalize mass distibution", ""))
@@ -525,17 +531,18 @@ const ndString& ndAssetEditor::GetPath() const
 	return m_currentPath;
 }
 
-void ndAssetEditor::SetVisualScene(const ndRenderMeshLoader& loader)
+void ndAssetEditor::SetVisualScene(const ndSharedPtr<ndMesh>& mesh, const ndSharedPtr<ndRenderSceneNode>& renderMesh)
 {
 	// force the mesh to have a defualt colliding pair list
-	loader.m_mesh->GetCollingPairs();
+	mesh->GetCollingPairs();
 
-	// force the mesh to have a default constaring loop list
-	loader.m_mesh->GetLoopJoints();
+	// force the mesh to have a default constraint loop list
+	mesh->GetLoopJoints();
+
+	m_newMesh = mesh;
+	m_newSceneMesh = renderMesh;
 
 	m_subSelection = m_none;
-	m_newMesh = loader.m_mesh;
-	m_newSceneMesh = loader.m_renderMesh;
 	m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
 	m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
 

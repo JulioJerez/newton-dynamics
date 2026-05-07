@@ -35,12 +35,19 @@ class ndUndoRedoCommand : public ndClassAlloc
 	virtual class ndUndoRedoStructuralJoint* GetAsUndoRedoStructuralJoint() const { return nullptr; }
 	virtual class ndUndoRedoCollidingPairs* GetAsUndoRedoCollidingPairs() const { return nullptr; }
 
-	virtual class ndUndoRedoResizeMesh* GetAsUndoRedoResizeMesh() const { return nullptr; }
-	virtual class ndUndoRedoRotateMesh* GetAsUndoRedoResizeRotateMesh() const { return nullptr; }
-	virtual class ndUndoRedoNormalizeMass* GetAsUndoRedoResizeNormalizeMass() const { return nullptr; }
-
 	ndSharedPtr<ndMesh> m_mesh;
 	ndWeakPtr<ndAssetEditor> m_editor;
+};
+
+class ndUndoRedoMeshNode : public ndUndoRedoCommand
+{
+	public:
+	ndUndoRedoMeshNode(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh);
+	class ndUndoRedoMeshNode* GetAsUndoRedoMeshNode() const override;
+	virtual bool operator!=(const ndUndoRedoCommand& command) const override;
+	virtual void Undo() override;
+
+	ndSharedPtr<ndMesh> m_copy;
 };
 
 class ndUndoRedo: public ndList<ndSharedPtr<ndUndoRedoCommand>>
@@ -53,7 +60,7 @@ class ndUndoRedo: public ndList<ndSharedPtr<ndUndoRedoCommand>>
 	void Undo(ndAssetEditor* const owner);
 	void Redo(ndAssetEditor* const owner);
 	void Push(const ndSharedPtr<ndUndoRedoCommand>& command);
-	
+
 	ndWeakPtr<ndNode> m_currentCommand;
 };
 

@@ -81,6 +81,11 @@ void ndDebugDisplayRenderPass::RenderMeshSelection()
 void ndDebugDisplayRenderPass::RenderBoneSelection()
 {
 	m_owner->ClearZBuffer();
+	RenderSkeleton();
+
+	RenderDynamicPrimitives();
+	ClearDynamicPrimitives();
+	m_owner->ClearZBuffer();
 
 	//if (m_manager->m_renderMode == ndAssetEditor::m_wireframe)
 	//{
@@ -137,8 +142,6 @@ void ndDebugDisplayRenderPass::RenderBoneSelection()
 			RenderCollisionPair();
 		}
 	}
-
-	RenderSkeleton();
 }
 
 void ndDebugDisplayRenderPass::RenderScene()

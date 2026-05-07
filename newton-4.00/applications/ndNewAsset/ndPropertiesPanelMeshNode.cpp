@@ -12,65 +12,50 @@
 #include "ndNewAssetStdafx.h"
 #include "ndUndoRedo.h"
 #include "ndAssetEditor.h"
+#include "ndDebugDisplayRenderPass.h"
 
-class ndUndoRedoMeshNode : public ndUndoRedoCommand
+ndUndoRedoMeshNode::ndUndoRedoMeshNode(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
+	:ndUndoRedoCommand(editor, mesh)
+	,m_copy(editor->m_mesh->CreateClone())
 {
-	public:
-	ndUndoRedoMeshNode(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
-		:ndUndoRedoCommand(editor, mesh)
-		,m_copy(editor->m_mesh->CreateClone())
-	{
-		ndAssert(0);
-	}
+}
 
-	virtual class ndUndoRedoMeshNode* GetAsUndoRedoMeshNode() const override
-	{ 
-		return (ndUndoRedoMeshNode*)this;
-	}
+ndUndoRedoMeshNode* ndUndoRedoMeshNode::GetAsUndoRedoMeshNode() const
+{ 
+	return (ndUndoRedoMeshNode*)this;
+}
 
-	virtual bool operator!=(const ndUndoRedoCommand& command) const override
+bool ndUndoRedoMeshNode::operator!=(const ndUndoRedoCommand& command) const
+{
+	if (*m_mesh == *command.m_mesh)
 	{
-		ndAssert(0);
-		if (*m_mesh == *command.m_mesh)
+		ndUndoRedoMeshNode* const other = command.GetAsUndoRedoMeshNode();
+		if (other)
 		{
-			ndUndoRedoMeshNode* const other = command.GetAsUndoRedoMeshNode();
-			if (other)
+			bool test = true;
+			auto CompareNodes = [this, &test, other](ndMesh* node)
 			{
-				ndAssert(0);
-				//bool test = m_name == other->m_name;
-				//test = test && (m_matrix * other->m_matrix.OrthoInverse()).TestIdentity();
-				//test = test && (m_geometryMatrix * other->m_geometryMatrix.OrthoInverse()).TestIdentity();
-				//if (test)
-				//{
-				//	return false;
-				//}
+				const ndMesh* const otherNode = other->m_copy->FindByName(node->GetName());
+				test = test && (otherNode ? true : false);
+				test = test && (*node == *otherNode);
+			};
+			m_copy->NodeIterator(CompareNodes);
+			
+			if (test)
+			{
+				return false;
 			}
 		}
-
-		return true;
 	}
+
+	return true;
+}
 	
-	virtual void Undo() override
-	{
-		ndAssert(0);
-		//ndRenderSceneNode* const entNode = GetSceneNode();
-		//ndAssert(entNode);
-		//
-		//m_mesh->SetName(m_name);
-		//m_mesh->SetMatrix(m_matrix);
-		//m_mesh->SetGeometryMatrix(m_geometryMatrix);
-		//
-		//entNode->m_name = m_name;
-		//entNode->SetTransform(m_matrix);
-		//entNode->SetTransform(m_matrix);
-		//entNode->SetPrimitiveMatrix(m_geometryMatrix);
-	}
-
-	ndSharedPtr<ndMesh> m_copy;
-	//ndString m_name;
-	//ndMatrix m_matrix;
-	//ndMatrix m_geometryMatrix;
-};
+void ndUndoRedoMeshNode::Undo()
+{
+	ndSharedPtr<ndRenderSceneNode> visualMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*m_editor->GetRenderer(), *m_copy, ndGetPath(m_editor->GetPath())));
+	m_editor->SetVisualScene(m_copy, visualMesh);
+}
 
 void ndAssetEditor::ShowPropertiesMeshInfo()
 {

@@ -131,7 +131,7 @@ class ndAssetEditor : public ndClassAlloc
 	const ndSharedPtr<ndMesh>& GetMesh() const;
 	
 	const ndString& GetPath() const;
-	void SetVisualScene(const ndRenderMeshLoader& loader);
+	void SetVisualScene(const ndSharedPtr<ndMesh>& mesh, const ndSharedPtr<ndRenderSceneNode>& renderMesh);
 
 	void NewMesh();
 	void RenderScene();
