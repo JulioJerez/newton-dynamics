@@ -1760,7 +1760,7 @@ bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 		}
 	}
 
-	// replace defualt visuals with
+	// replace default visuals with
 	auto GenerateVisualMesh = [this](ndMesh* const meshNode)
 	{
 		ndAssert(meshNode->GetRigidBody());
