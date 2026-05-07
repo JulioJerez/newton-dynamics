@@ -17,9 +17,9 @@ class ndUndoRedoCollidingPairs : public ndUndoRedoCommand
 {
 	public:
 	ndUndoRedoCollidingPairs(ndAssetEditor* const editor)
-		:ndUndoRedoCommand(editor, editor->GetMesh()->GetCollingPairs()->GetSharedPtr())
+		:ndUndoRedoCommand(editor, *editor->GetMesh()->GetCollingPairs()->GetSharedPtr())
 	{
-		ndCollidingPairs* const collidingPairs = m_mesh->GetAsCollidingPairs();
+		ndCollidingPairs* const collidingPairs = m_selectedNode->GetAsCollidingPairs();
 		ndAssert(collidingPairs);
 		for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* ptr = collidingPairs->m_collidingPairs.GetFirst(); ptr; ptr = ptr->GetNext())
 		{
@@ -34,7 +34,7 @@ class ndUndoRedoCollidingPairs : public ndUndoRedoCommand
 
 	virtual bool operator!=(const ndUndoRedoCommand& command) const override
 	{
-		if (*m_mesh == *command.m_mesh)
+		if (*m_selectedNode == *command.m_selectedNode)
 		{
 			ndUndoRedoCollidingPairs* const other = command.GetAsUndoRedoCollidingPairs();
 			if (other)
@@ -61,7 +61,7 @@ class ndUndoRedoCollidingPairs : public ndUndoRedoCommand
 
 	virtual void Undo() override
 	{
-		ndCollidingPairs* const collidingPairs = m_mesh->GetCollingPairs();
+		ndCollidingPairs* const collidingPairs = m_selectedNode->GetCollingPairs();
 		collidingPairs->m_collidingPairs.RemoveAll();
 		for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* ptr = m_collidingPairs.GetFirst(); ptr; ptr = ptr->GetNext())
 		{
@@ -111,9 +111,9 @@ void ndAssetEditor::ShowPropertiesCollidingPairs()
 	}
 }
 
-void ndAssetEditor::SetCollidingSubSelection(const ndSharedPtr<ndMesh>& subSelection)
+void ndAssetEditor::SetCollidingSubSelection(const ndMesh* const subSelection)
 {
-	if (subSelection == m_currentSelection)
+	if (subSelection == *m_currentSelection)
 	{
 		return;
 	}
@@ -127,19 +127,19 @@ void ndAssetEditor::SetCollidingSubSelection(const ndSharedPtr<ndMesh>& subSelec
 		{
 			const ndMesh* const subMeshSelection = (*pair->m_childNode == selection) ? *pair->m_parentNode : *pair->m_childNode;
 			ndAssert(subMeshSelection);
-			if (subMeshSelection == *subSelection)
+			if (subMeshSelection == subSelection)
 			{
 				return;
 			}
 		}
 	}
 
-	m_currentSubSelection = subSelection;
+	m_currentSubSelection = ndWeakPtr<ndMesh>((ndMesh*)subSelection);
 }
 
-void ndAssetEditor::SetLoopJointSelection(const ndSharedPtr<ndMesh>& subSelection)
+void ndAssetEditor::SetLoopJointSelection(const ndMesh* const subSelection)
 {
-	if (subSelection == m_currentSelection)
+	if (subSelection == *m_currentSelection)
 	{
 		return;
 	}
@@ -149,7 +149,7 @@ void ndAssetEditor::SetLoopJointSelection(const ndSharedPtr<ndMesh>& subSelectio
 	{
 		parent = parent->GetParent();
 	}
-	if (*subSelection == parent)
+	if (subSelection == parent)
 	{
 		return;
 	}
@@ -169,15 +169,15 @@ void ndAssetEditor::SetLoopJointSelection(const ndSharedPtr<ndMesh>& subSelectio
 	for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptr = loops->m_loopJoints.GetFirst(); ptr; ptr = ptr->GetNext())
 	{
 		const ndSharedPtr<ndMeshLoopJoint>& loop = ptr->GetInfo();
-		bool test = (*loop->m_childNode == *m_currentSelection) && (*loop->m_parentNode == *subSelection);
-		test = test || (*loop->m_parentNode == *m_currentSelection) && (*loop->m_childNode == *subSelection);
+		bool test = (*loop->m_childNode == *m_currentSelection) && (*loop->m_parentNode == subSelection);
+		test = test || (*loop->m_parentNode == *m_currentSelection) && (*loop->m_childNode == subSelection);
 		if (test)
 		{
 			return;
 		}
 	}
 
-	m_currentSubSelection = subSelection;
+	m_currentSubSelection = ndWeakPtr<ndMesh>((ndMesh*)subSelection);
 }
 
 void ndAssetEditor::AddCollidingPair()
@@ -187,7 +187,7 @@ void ndAssetEditor::AddCollidingPair()
 	ndCollidingPairs* const collidingPairs = m_mesh->GetCollingPairs();
 	ndSharedPtr<ndMeshCollidingPair> pair(new ndMeshCollidingPair(*m_currentSelection, *m_currentSubSelection));
 	collidingPairs->m_collidingPairs.Append(pair);
-	m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+	m_currentSubSelection = ndWeakPtr<ndMesh>(nullptr);
 
 	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoCollidingPairs(this)));
 }

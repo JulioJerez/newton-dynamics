@@ -399,8 +399,8 @@ void ndAssetEditor::ShowMainMenuBar()
 					ndRenderMeshLoader loader(*m_renderer);
 					loader.m_mesh = m_mesh;
 					loader.SaveMesh(ndString(m_currentPath));
-					m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
-					m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+					m_currentSelection = ndWeakPtr<ndMesh>(nullptr);
+					m_currentSubSelection = ndWeakPtr<ndMesh>(nullptr);
 				}
 			}
 
@@ -440,7 +440,7 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::Separator();
 			if (ImGui::MenuItem("Exit", ""))
 			{
-				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
+				m_currentSelection = ndWeakPtr<ndMesh>(nullptr);
 				m_renderer->Terminate();
 			}
 
@@ -543,8 +543,8 @@ void ndAssetEditor::SetVisualScene(const ndSharedPtr<ndMesh>& mesh, const ndShar
 	m_newSceneMesh = renderMesh;
 
 	m_subSelection = m_none;
-	m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
-	m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
+	m_currentSelection = ndWeakPtr<ndMesh>(nullptr);
+	m_currentSubSelection = ndWeakPtr<ndMesh>(nullptr);
 
 	ndInt32 bonesNumber = 0;
 	auto BonesCount = [&bonesNumber](ndMesh* const node)
@@ -566,7 +566,7 @@ void ndAssetEditor::Run()
 			if (!*m_mesh && m_entity)
 			{
 				m_undoRedo.Clear();
-				m_currentSelection = ndSharedPtr<ndMesh>(nullptr);
+				m_currentSelection = ndWeakPtr<ndMesh>(nullptr);
 				m_renderer->RemoveSceneNode(m_entity);
 				m_entity = ndSharedPtr<ndRenderSceneNode>(nullptr);
 				m_debugDisplayRenderPass->ResetScene();

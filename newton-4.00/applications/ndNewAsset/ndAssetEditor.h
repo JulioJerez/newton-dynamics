@@ -194,8 +194,8 @@ class ndAssetEditor : public ndClassAlloc
 
 	void EditLoopJoints();
 	void EditCollidingPair();
-	void SetLoopJointSelection(const ndSharedPtr<ndMesh>& node);
-	void SetCollidingSubSelection(const ndSharedPtr<ndMesh>& node);
+	void SetLoopJointSelection(const ndMesh* const node);
+	void SetCollidingSubSelection(const ndMesh* const node);
 		
 	ndSharedPtr<ndMesh> m_mesh;
 	ndSharedPtr<ndRender> m_renderer;
@@ -213,8 +213,8 @@ class ndAssetEditor : public ndClassAlloc
 	ndSharedPtr<ndRenderSceneNode> m_newSceneMesh;
 
 	ndSharedPtr<ndAssetTool> m_currentTool;
-	ndSharedPtr<ndMesh> m_currentSelection;
-	ndSharedPtr<ndMesh> m_currentSubSelection;
+	ndWeakPtr<ndMesh> m_currentSelection;
+	ndWeakPtr<ndMesh> m_currentSubSelection;
 
 	ndString m_currentPath;
 	ndUndoRedo m_undoRedo;

@@ -19,7 +19,7 @@ class ndAssetEditor;
 class ndUndoRedoCommand : public ndClassAlloc
 {
 	public:
-	ndUndoRedoCommand(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh);
+	ndUndoRedoCommand(ndAssetEditor* const editor, const ndMesh* const selectedNode);
 	virtual ~ndUndoRedoCommand();
 
 	ndRenderSceneNode* GetSceneNode() const;
@@ -35,14 +35,16 @@ class ndUndoRedoCommand : public ndClassAlloc
 	virtual class ndUndoRedoStructuralJoint* GetAsUndoRedoStructuralJoint() const { return nullptr; }
 	virtual class ndUndoRedoCollidingPairs* GetAsUndoRedoCollidingPairs() const { return nullptr; }
 
-	ndSharedPtr<ndMesh> m_mesh;
+	ndString m_selectedNodeName;
+	ndWeakPtr<ndMesh> m_selectedNode;
 	ndWeakPtr<ndAssetEditor> m_editor;
 };
 
 class ndUndoRedoMeshNode : public ndUndoRedoCommand
 {
 	public:
-	ndUndoRedoMeshNode(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh);
+	//ndUndoRedoMeshNode(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh);
+	ndUndoRedoMeshNode(ndAssetEditor* const editor, const ndMesh* const selectedNode);
 	class ndUndoRedoMeshNode* GetAsUndoRedoMeshNode() const override;
 	virtual bool operator!=(const ndUndoRedoCommand& command) const override;
 	virtual void Undo() override;

@@ -67,8 +67,14 @@ void ndResizeMesh::ApplyScale() const
 	};
 	m_owner->GetMesh()->NodeIterator(ScalePhysics);
 
+	ndAssert(0);
+	//ndSharedPtr<ndRenderSceneNode> newScenMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*m_owner->GetRenderer(), *m_owner->GetMesh(), ndGetPath(m_owner->GetPath())));
+	//m_owner->SetVisualScene(m_owner->GetMesh(), newScenMesh);
+
+	ndWeakPtr<ndMesh> selection(*m_owner->m_currentSelection);
 	ndSharedPtr<ndRenderSceneNode> newScenMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*m_owner->GetRenderer(), *m_owner->GetMesh(), ndGetPath(m_owner->GetPath())));
 	m_owner->SetVisualScene(m_owner->GetMesh(), newScenMesh);
+	m_owner->m_currentSelection = selection;
 }
 
 void ndResizeMesh::Execute()
@@ -120,9 +126,9 @@ void ndResizeMesh::Execute()
 	{
 		if (m_scale != ndReal(1.0f))
 		{
-			m_owner->m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(*m_owner, m_owner->m_currentSelection)));
+			m_owner->m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(*m_owner, *m_owner->m_currentSelection)));
 			ApplyScale();
-			m_owner->m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(*m_owner, m_owner->m_currentSelection)));
+			m_owner->m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(*m_owner, *m_owner->m_currentSelection)));
 
 			m_scale = ndReal(1.0f);
 		}

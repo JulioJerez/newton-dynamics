@@ -41,7 +41,7 @@ void ndNomalizeMassDistribution::Execute()
 
 	if (ImGui::Button("execute"))
 	{
-		m_owner->m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(*m_owner, m_owner->m_currentSelection)));
+		m_owner->m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(*m_owner, *m_owner->m_currentSelection)));
 
 		ndFloat32 volume = ndFloat32(0.0f);
 		auto TotalVolume = [this, &volume](ndMesh* const node)
@@ -87,7 +87,7 @@ void ndNomalizeMassDistribution::Execute()
 			}
 		};
 		m_owner->GetMesh()->NodeIterator(SetBodyMass);
-		m_owner->m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(*m_owner, m_owner->m_currentSelection)));
+		m_owner->m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(*m_owner, *m_owner->m_currentSelection)));
 	}
 
 	ImGui::End();

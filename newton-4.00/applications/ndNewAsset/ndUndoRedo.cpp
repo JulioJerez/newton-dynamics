@@ -13,8 +13,9 @@
 #include "ndUndoRedo.h"
 #include "ndAssetEditor.h"
 
-ndUndoRedoCommand::ndUndoRedoCommand(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh)
-	:m_mesh(mesh)
+ndUndoRedoCommand::ndUndoRedoCommand(ndAssetEditor* const editor, const ndMesh* const selectedNode)
+	:m_selectedNodeName(selectedNode ? selectedNode->GetName(): "___noSelection___")
+	,m_selectedNode((ndMesh*)selectedNode)
 	,m_editor(editor)
 {
 }
@@ -25,7 +26,7 @@ ndUndoRedoCommand::~ndUndoRedoCommand()
 
 ndRenderSceneNode* ndUndoRedoCommand::GetSceneNode() const
 {
-	return m_editor->m_entity->FindByName(m_mesh->GetName());
+	return m_editor->m_entity->FindByName(m_selectedNodeName);
 }
 
 ndUndoRedo::ndUndoRedo()
@@ -70,8 +71,10 @@ void ndUndoRedo::Redo(ndAssetEditor* const owner)
 		if (m_currentCommand->GetNext())
 		{
 			m_currentCommand = m_currentCommand->GetNext();
-			m_currentCommand->GetInfo()->Undo();
-			owner->m_currentSelection = m_currentCommand->GetInfo()->m_mesh;
+
+			ndUndoRedoCommand* const command = *m_currentCommand->GetInfo();
+			command->Undo();
+			owner->m_currentSelection = command->m_selectedNode ? command->m_selectedNode->GetRoot()->FindByName(m_currentCommand->GetInfo()->m_selectedNodeName) : ndWeakPtr<ndMesh>(nullptr);
 		}
 	}
 }
@@ -84,8 +87,9 @@ void ndUndoRedo::Undo(ndAssetEditor* const owner)
 		if (m_currentCommand->GetPrev())
 		{
 			m_currentCommand = m_currentCommand->GetPrev();
-			m_currentCommand->GetInfo()->Undo();
-			owner->m_currentSelection = m_currentCommand->GetInfo()->m_mesh;
+			ndUndoRedoCommand* const command = *m_currentCommand->GetInfo();
+			command->Undo();
+			owner->m_currentSelection = command->m_selectedNode ? command->m_selectedNode->GetRoot()->FindByName(m_currentCommand->GetInfo()->m_selectedNodeName) : ndWeakPtr<ndMesh>(nullptr);
 		}
 	}
 }
