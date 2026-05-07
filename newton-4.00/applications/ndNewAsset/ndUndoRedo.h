@@ -52,10 +52,8 @@ class ndUndoRedo: public ndList<ndSharedPtr<ndUndoRedoCommand>>
 	void Clear();
 	void Undo(ndAssetEditor* const owner);
 	void Redo(ndAssetEditor* const owner);
-	
 	void Push(const ndSharedPtr<ndUndoRedoCommand>& command);
 	
-	//ndSharedPtr<ndUndoRedo::ndNode> m_currentCommand;
 	ndWeakPtr<ndNode> m_currentCommand;
 };
 

@@ -90,6 +90,8 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API virtual ~ndMesh();
 	D_NEWTON_API virtual ndMesh* CreateClone() const;
 
+	D_NEWTON_API virtual bool operator==(const ndMesh& other) const;
+
 	ndMatrix GetMatrix() const;
 	void SetMatrix(const ndMatrix& matrix);
 
@@ -160,6 +162,8 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API const ndCurve& GetRotationCurve() const;
 
 	D_NEWTON_API void ApplyTransform(const ndMatrix& transform);
+	D_NEWTON_API void ApplyBonesRotation(const ndMatrix& rotation);
+	D_NEWTON_API void ApplyCoordinateRotation(const ndMatrix& rotation);
 	D_NEWTON_API ndMatrix CalculateGlobalMatrix(ndMesh* const parent = nullptr) const;
 	D_NEWTON_API void CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) const;
 
@@ -255,7 +259,8 @@ class ndCloseLoopConstraints: public ndMesh
 	D_NEWTON_API virtual ndCloseLoopConstraints* GetAsCloseLoopConstraints() override;
 	D_NEWTON_API virtual const ndCloseLoopConstraints* GetAsCloseLoopConstraints() const override;
 
-	D_NEWTON_API ndMesh* CreateClone() const override;
+	D_NEWTON_API virtual ndMesh* CreateClone() const override;
+	D_NEWTON_API virtual bool operator==(const ndMesh& other) const override;
 
 	ndList<ndSharedPtr<ndMeshLoopJoint>> m_loopJoints;
 };
@@ -272,7 +277,8 @@ class ndCollidingPairs : public ndMesh
 	D_NEWTON_API virtual ndCollidingPairs* GetAsCollidingPairs() override;
 	D_NEWTON_API virtual const ndCollidingPairs* GetAsCollidingPairs() const override;
 
-	D_NEWTON_API ndMesh* CreateClone() const override;
+	D_NEWTON_API virtual ndMesh* CreateClone() const override;
+	D_NEWTON_API virtual bool operator==(const ndMesh& other) const override;
 
 	ndList<ndSharedPtr<ndMeshCollidingPair>> m_collidingPairs;
 };
