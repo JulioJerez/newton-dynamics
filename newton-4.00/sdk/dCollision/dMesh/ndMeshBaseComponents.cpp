@@ -991,3 +991,49 @@ void ndMeshCollidingPair::DeserializeFromXml(const nd::TiXmlElement* const)
 {
 	ndAssert(0);
 }
+
+ndMeshTransformModifier::ndMeshTransformModifier(const ndMeshTransformModifier& other)
+	:ndClassAlloc()
+	,m_owner(other.m_owner)
+	,m_constructor(other.m_constructor)
+{
+	ndAssert(0);
+}
+
+ndMeshTransformModifier::ndMeshTransformModifier(const ndMesh* const owner)
+	:ndClassAlloc()
+	,m_owner(m_owner)
+	,m_constructor("none")
+{
+	ndAssert(0);
+}
+
+ndMeshTransformModifier::~ndMeshTransformModifier()
+{
+}
+
+ndMeshTransformModifier* ndMeshTransformModifier::Duplicate() const
+{
+	ndAssert(0);
+	return nullptr;
+}
+
+void ndMeshTransformModifier::DuplicateFixDependencies(const ndMesh* const otherRoot)
+{
+	ndAssert(0);
+}
+
+void ndMeshTransformModifier::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndAssert(0);
+}
+void ndMeshTransformModifier::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndAssert(0);
+}
+
+bool ndMeshTransformModifier::operator==(const ndMeshJoint& other) const
+{
+	ndAssert(0);
+	return false;
+}

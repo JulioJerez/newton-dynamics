@@ -335,5 +335,25 @@ class ndMeshJoint : public ndClassAlloc
 	ndWeakPtr<const ndMesh> m_surrogateParent;
 };
 
+class ndMeshTransformModifier : public ndClassAlloc
+{
+	public:
+	D_COLLISION_API ndMeshTransformModifier(const ndMesh* const owner);
+	D_COLLISION_API ndMeshTransformModifier(const ndMeshTransformModifier& other);
+	D_COLLISION_API virtual ~ndMeshTransformModifier();
+
+	D_COLLISION_API virtual ndMeshTransformModifier* Duplicate() const;
+	D_COLLISION_API virtual void DuplicateFixDependencies(const ndMesh* const otherRoot);
+
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+
+	D_COLLISION_API virtual bool operator==(const ndMeshJoint& other) const;
+
+	ndWeakPtr<const ndMesh> m_owner;
+	ndString m_constructor;
+};
+
+
 #endif
 
