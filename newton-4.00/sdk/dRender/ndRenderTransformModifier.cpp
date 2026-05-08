@@ -10,6 +10,7 @@
 */
 
 #include "ndRenderStdafx.h"
+#include "ndRenderSceneNode.h"
 #include "ndRenderTransformModifier.h"
 
 class ndRenderSceneNode;
@@ -33,4 +34,12 @@ ndRenderTransformModifierLockAtNode::ndRenderTransformModifierLockAtNode(ndRende
 
 void ndRenderTransformModifierLockAtNode::Update()
 {
+	const ndMatrix frameMatrix(m_owner->m_matrix * m_owner->GetParent()->m_globalMatrix);
+	const ndVector point(frameMatrix.UntransformVector(m_target->m_globalMatrix.m_posit) & ndVector::m_triplexMask);
+	const ndVector dir (point.Normalize());
+
+	const ndMatrix yawMatrix(ndYawMatrix(ndAsin(-dir.m_z)));
+	const ndMatrix rollMatrix(ndRollMatrix(ndAtan2(dir.m_y, dir.m_x)));
+
+	m_owner->m_globalMatrix = yawMatrix * rollMatrix * frameMatrix;
 }

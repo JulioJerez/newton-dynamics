@@ -38,7 +38,7 @@ class ndFbxMeshLoader : public ndClassAlloc
 	void AlignToWorld(ndMesh* const entity);
 	void OptimizeCurve(ndMesh::ndCurve& curve);
 	void OptimizeAnimation(ndMesh* const model);
-	ndMesh* Fbx2ndMesh(ndOfbx::IScene* const fbxScene);
+	ndMesh* FbxToMesh(ndOfbx::IScene* const fbxScene);
 	void CalculateBoneProperties(ndMesh* const entity);
 	void OptimizeRotationCurve(ndMesh::ndCurve& curve);
 	ndMatrix ofbxMatrix2dMatrix(const ndOfbx::Matrix& fbxMatrix);

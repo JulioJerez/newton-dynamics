@@ -454,6 +454,13 @@ namespace ndExcavator
 				ndSharedPtr<ndRenderTransformModifier> modifier(new ndRenderTransformModifierLockAtNode(node, target));
 				node->SetTransformModifier(modifier);
 			}
+
+			if (node->m_name == "hydrolic_003")
+			{
+				ndRenderSceneNode* const target = node->GetRoot()->FindByName("hydrolickBoom002");
+				ndSharedPtr<ndRenderTransformModifier> modifier(new ndRenderTransformModifierLockAtNode(node, target));
+				node->SetTransformModifier(modifier);
+			}
 		};
 		sceneMesh->NodeIterator(AddGraphicsModiers);
 		

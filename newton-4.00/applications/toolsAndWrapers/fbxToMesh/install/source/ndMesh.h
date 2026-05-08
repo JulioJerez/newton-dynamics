@@ -69,6 +69,17 @@ class ndMesh : public ndClassAlloc
 			,m_lenght(ndFloat32 (0.0f))
 		{
 		}
+
+		ndCurve(const ndCurve& src)
+			:ndList<ndCurveValue>()
+			,m_lenght(src.m_lenght)
+		{
+			for (ndNode* ptr = src.GetFirst(); ptr; ptr = ptr->GetNext())
+			{
+				Append(ptr->GetInfo());
+			}
+		}
+
 		ndReal m_lenght;
 	};
 
@@ -78,12 +89,18 @@ class ndMesh : public ndClassAlloc
 
 	D_NEWTON_API virtual ~ndMesh();
 	D_NEWTON_API virtual ndMesh* CreateClone() const;
+	D_NEWTON_API virtual void CreateCloneFixDependencies();
 
-	ndMatrix GetMatrix() const;
-	void SetMatrix(const ndMatrix& matrix);
+	D_NEWTON_API virtual bool operator==(const ndMesh& other) const;
 
-	ndMatrix GetGeometryMatrix() const;
-	void SetGeometryMatrix(const ndMatrix& matrix);
+	D_NEWTON_API ndMatrix GetMatrix() const;
+	D_NEWTON_API void SetMatrix(const ndMatrix& matrix);
+
+	D_NEWTON_API ndMatrix GetGeometryMatrix() const;
+	D_NEWTON_API void SetGeometryMatrix(const ndMatrix& matrix);
+
+	D_NEWTON_API ndMatrix GetBasePoseMatrix() const;
+	D_NEWTON_API void SetBasePoseMatrix(const ndMatrix& matrix);
 
 	D_NEWTON_API void AddChild(const ndSharedPtr<ndMesh>& child);
 	D_NEWTON_API void RemoveChild(const ndSharedPtr<ndMesh>& child);
@@ -149,6 +166,8 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API const ndCurve& GetRotationCurve() const;
 
 	D_NEWTON_API void ApplyTransform(const ndMatrix& transform);
+	D_NEWTON_API void ApplyBonesRotation(const ndMatrix& rotation);
+	D_NEWTON_API void ApplyCoordinateRotation(const ndMatrix& rotation);
 	D_NEWTON_API ndMatrix CalculateGlobalMatrix(ndMesh* const parent = nullptr) const;
 	D_NEWTON_API void CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) const;
 
@@ -176,6 +195,7 @@ class ndMesh : public ndClassAlloc
 	ndMatrix CalculateLocalMatrix(ndVector& size) const;
 
 	ndMatrix m_matrix;
+	ndMatrix m_basePoseMatrix;
 	ndMatrix m_geometryMatrix;
 
 	ndString m_name;
@@ -194,26 +214,6 @@ class ndMesh : public ndClassAlloc
 	friend class ndMeshFile;
 	friend class ndMeshLoader;
 };
-
-inline ndMatrix ndMesh::GetMatrix() const
-{
-	return m_matrix;
-}
-
-inline void ndMesh::SetMatrix(const ndMatrix& matrix)
-{
-	m_matrix = matrix;
-}
-
-inline ndMatrix ndMesh::GetGeometryMatrix() const
-{
-	return m_geometryMatrix;
-}
-
-inline void ndMesh::SetGeometryMatrix(const ndMatrix& matrix)
-{
-	m_geometryMatrix = matrix;
-}
 
 template <typename Function>
 void ndMesh::NodeIterator(Function func)
@@ -236,7 +236,7 @@ class ndCloseLoopConstraints: public ndMesh
 {
 	public:
 	D_NEWTON_API ndCloseLoopConstraints();
-	D_NEWTON_API ndCloseLoopConstraints(const ndMesh& src);
+	D_NEWTON_API ndCloseLoopConstraints(const ndCloseLoopConstraints& src);
 
 	D_NEWTON_API virtual ndMesh* GetAsMesh();
 	D_NEWTON_API virtual const ndMesh* GetAsMesh() const;
@@ -244,7 +244,9 @@ class ndCloseLoopConstraints: public ndMesh
 	D_NEWTON_API virtual ndCloseLoopConstraints* GetAsCloseLoopConstraints() override;
 	D_NEWTON_API virtual const ndCloseLoopConstraints* GetAsCloseLoopConstraints() const override;
 
-	D_NEWTON_API ndMesh* CreateClone() const override;
+	D_NEWTON_API virtual void CreateCloneFixDependencies() override;
+	D_NEWTON_API virtual ndMesh* CreateClone() const override;
+	D_NEWTON_API virtual bool operator==(const ndMesh& other) const override;
 
 	ndList<ndSharedPtr<ndMeshLoopJoint>> m_loopJoints;
 };
@@ -253,7 +255,7 @@ class ndCollidingPairs : public ndMesh
 {
 	public:
 	D_NEWTON_API ndCollidingPairs();
-	D_NEWTON_API ndCollidingPairs(const ndMesh& src);
+	D_NEWTON_API ndCollidingPairs(const ndCollidingPairs& src);
 
 	D_NEWTON_API virtual ndMesh* GetAsMesh();
 	D_NEWTON_API virtual const ndMesh* GetAsMesh() const;
@@ -261,7 +263,9 @@ class ndCollidingPairs : public ndMesh
 	D_NEWTON_API virtual ndCollidingPairs* GetAsCollidingPairs() override;
 	D_NEWTON_API virtual const ndCollidingPairs* GetAsCollidingPairs() const override;
 
-	D_NEWTON_API ndMesh* CreateClone() const override;
+	D_NEWTON_API virtual void CreateCloneFixDependencies() override;
+	D_NEWTON_API virtual ndMesh* CreateClone() const override;
+	D_NEWTON_API virtual bool operator==(const ndMesh& other) const override;
 
 	ndList<ndSharedPtr<ndMeshCollidingPair>> m_collidingPairs;
 };

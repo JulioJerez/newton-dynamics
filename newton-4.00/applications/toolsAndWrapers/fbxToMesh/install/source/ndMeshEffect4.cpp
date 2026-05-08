@@ -19,1612 +19,2038 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
+// algorithm from paper: Non-Distorted Texture Mapping Using Angle Based Flattening
+// by: A. Sheffer and E. de Sturler
+// http://www.math.vt.edu/people/sturler/Publications/UIUCDCS-R-2001-2257.pdf
+// 
+// also improvement from paper: ABF++: Fast and Robust Angle Based Flattening
+// http://hal.archives-ouvertes.fr/docs/00/10/56/89/PDF/abf_plus_plus_temp.pdf
+// by: Alla Sheffer, Bruno Lévy, Inria Lorraine, Maxim Mogilnitsky and Alexander Bogomyakov
+//
+// also looking at paper
+// Least Squares Conformal Maps for Automatic Texture Atlas Generation
+// http://www.cs.jhu.edu/~misha/Fall09/Levy02.pdf
+// by Bruno Lévy Sylvain Petitjean Nicolas Ray Jérome Maillot
+// for automatic seam and atlas generation 
+
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
+#include "ndStack.h"
+#include "ndMatrix.h"
 #include "ndMeshEffect.h"
-//#include "dgBody.h"
 //#include "dgWorld.h"
 //#include "ndMeshEffect.h"
-//#include "dgCollisionConvexHull.h"
-
 
 #if 0
+#define dgABF_MAX_ITERATIONS		5
+#define dgABF_TOL2					ndFloat64 (1.0e-12)
+#define dgABF_LINEAR_SOLVER_TOL		ndFloat64 (1.0e-14)
+#define dgABF_PI					ndFloat64 (3.1415926535)
 
-#if 0
-#define DG_BUILD_HIERACHICAL_HACD
+#define dgABF_UV_TOL2				ndFloat64 (1.0e-8)
 
-#define DG_CONCAVITY_MAX_THREADS	  8
-#define DG_CONCAVITY_SCALE ndFloat64 (100.0f)
-
-
-
-
-class dgHACDEdge
-{
-	public:
-	dgHACDEdge ()
-		:m_mark(0)
-		,m_proxyListNode(nullptr)
-		,m_backFaceHandicap(dFloat64 (1.0))
-	{
-	}
-	~dgHACDEdge ()
-	{
-	}
-
-	dInt32 m_mark;
-	void* m_proxyListNode;
-	dFloat64 m_backFaceHandicap;
-};
-
-class dHACDClusterFace
-{
-	public:
-	dHACDClusterFace()
-		:m_edge(nullptr)
-		,m_area(dFloat64(0.0f))
-	{
-	}
-	~dHACDClusterFace()
-	{
-	}
-
-	dEdge* m_edge;
-	dFloat64 m_area;
-	dBigVector m_normal;
-};
-
-
-class dgHACDCluster: public dList<dHACDClusterFace>
-{
-	public:
-	dgHACDCluster ()
-		:dList<dHACDClusterFace>(nullptr)
-		,m_color(0)
-		,m_hierachicalClusterIndex(0)
-		,m_area(dFloat64 (0.0f))
-		,m_concavity(dFloat64 (0.0f))
-	{
-	}
-
-	bool IsCoplanar(const dBigPlane& plane, const dgMeshEffect& mesh, dFloat64 tolerance) const
-	{
-		const dBigVector* const points = (dBigVector*) mesh.GetVertexPool();
-		for (dNode* node = GetFirst(); node; node = node->GetNext()) {
-			const dHACDClusterFace& info = node->GetInfo();
-			dEdge* ptr = info.m_edge;
-			do {
-				const dBigVector& p = points[ptr->m_incidentVertex];
-				dFloat64 dist = fabs(plane.Evalue(p));
-				if (dist > tolerance) {
-					return false;
-				}
-				ptr = ptr->m_next;
-			} while (ptr != info.m_edge);
-		}
-		return true;
-	}
-
-
-	dInt32 m_color;
-	dInt32 m_hierachicalClusterIndex;
-	dFloat64 m_area;
-	dFloat64 m_concavity;
-};
-
-
-class dgHACDClusterGraph
-	:public dGraph<dgHACDCluster, dgHACDEdge> 
-	,public dgAABBPolygonSoup 
-{
-	public:
-
-	class dgHACDConveHull: public dConvexHull3d
-	{
-		class dgConvexHullRayCastData
-		{
-			public:
-			dFloat64 m_normalProjection;
-			dConvexHull3DFace* m_face;
-		};
-
-		public: 
-		dgHACDConveHull (const dgHACDConveHull& hull)
-			:dConvexHull3d(hull)
-			,m_mark(1)
-		{
-		}
-
-		dgHACDConveHull (dgMemoryAllocator* const allocator, const dBigVector* const points, dInt32 count)
-			:dConvexHull3d(allocator, &points[0].m_x, sizeof (dBigVector),count, dFloat64 (0.0f))
-			,m_mark(1)
-		{
-
-		}
-
-		dFloat64 CalculateTriangleConcavity(const dBigVector& normal, dInt32 i0, dInt32 i1, dInt32 i2, const dBigVector* const points)
-		{
-			dUnsigned32 head = 1;
-			dUnsigned32 tail = 0;
-			dBigVector pool[1<<8][3];
-
-			pool[0][0] = points[i0];
-			pool[0][1] = points[i1];
-			pool[0][2] = points[i2];
-
-			const dBigVector step(normal.Scale(dFloat64(4.0f) * GetDiagonal()));
-
-			dFloat64 concavity = dFloat32(0.0f);
-			dFloat64 minArea = dFloat32(0.125f);
-			dFloat64 minArea2 = minArea * minArea * 0.5f;
-
-			dInt32 maxCount = 4;
-			dUnsigned32 mask = (sizeof (pool) / (3 * sizeof (pool[0][0]))) - 1;
-
-			dConvexHull3DFace* firstGuess = nullptr;
-			while ((tail != head) && (maxCount >= 0)) {
-				maxCount --;
-				dBigVector p0(pool[tail][0]);
-				dBigVector p1(pool[tail][1]);
-				dBigVector p2(pool[tail][2]);
-				tail = (tail + 1) & mask;
-
-				dBigVector q1((p0 + p1 + p2).Scale(dFloat64(1.0f / 3.0f)));
-				dBigVector q0(q1 + step);
-
-				//dFloat64 param = convexHull.RayCast(q0, q1, &firstGuess);
-				dFloat64 param = FastRayCast(q0, q1, &firstGuess);
-				if (param > dFloat64(1.0f)) {
-					param = dFloat64(1.0f);
-				}
-				dBigVector dq(step.Scale(dFloat32(1.0f) - param));
-				dFloat64 lenght2 = sqrt (dq % dq);
-				//ndAssert (lenght2 < GetDiagonal());
-				if (lenght2 > concavity) {
-					concavity = lenght2;
-				}
-
-				if (((head + 1) & mask) != tail) {
-					dBigVector edge10(p1 - p0);
-					dBigVector edge20(p2 - p0);
-					dBigVector n(edge10 * edge20);
-					dFloat64 area2 = n % n;
-					if (area2 > minArea2) {
-						dBigVector p01((p0 + p1).Scale(dFloat64(0.5f)));
-						dBigVector p12((p1 + p2).Scale(dFloat64(0.5f)));
-						dBigVector p20((p2 + p0).Scale(dFloat64(0.5f)));
-
-						pool[head][0] = p0;
-						pool[head][1] = p01;
-						pool[head][2] = p20;
-						head = (head + 1) & mask;
-
-						if (((head + 1) & mask) != tail) {
-							pool[head][0] = p1;
-							pool[head][1] = p12;
-							pool[head][2] = p01;
-							head = (head + 1) & mask;
-
-							if (((head + 1) & mask) != tail)	{
-								pool[head][0] = p2;
-								pool[head][1] = p20;
-								pool[head][2] = p12;
-								head = (head + 1) & mask;
-							}
-						}
-					}
-				}
-			}
-			return concavity;
-		}
-
-
-
-		dFloat64 FaceRayCast (const dConvexHull3DFace* const face, const dBigVector& origin, const dBigVector& dist, dFloat64& normalProjection) const
-		{
-			dInt32 i0 = face->m_index[0];
-			dInt32 i1 = face->m_index[1];
-			dInt32 i2 = face->m_index[2];
-
-			const dBigVector& p0 = m_points[i0];
-			dBigVector normal ((m_points[i1] - p0) * (m_points[i2] - p0));
-
-			dFloat64 N = (origin - p0) % normal;
-			dFloat64 D = dist % normal;
-
-			if (fabs(D) < dFloat64 (1.0e-16f)) { // 
-				normalProjection = dFloat32 (0.0);
-				if (N > dFloat64 (0.0f)) {
-					return dFloat32 (-1.0e30);
-				} else {
-
-					return dFloat32 (1.0e30);
-				}
-			}
-			normalProjection = D;
-			return - N / D;
-		}
-
-		dConvexHull3DFace* ClosestFaceVertexToPoint (const dBigVector& point)
-		{
-			// note, for this function to be effective point should be an already close point to the Hull.
-			// for example casting the point to the OBB or the AABB of the full is a good first guess. 
-			dConvexHull3DFace* closestFace = &GetFirst()->GetInfo();	
-			dInt8 pool[256 * (sizeof (dConvexHull3DFace*) + sizeof (dFloat64))];
-			dUpHeap<dConvexHull3DFace*,dFloat64> heap (pool, sizeof (pool));
-
-			for (dInt32 i = 0; i < 3; ++i) {
-				dBigVector dist (m_points[closestFace->m_index[i]] - point);
-				heap.Push(closestFace, dist % dist);
-			}
-
-			m_mark ++;	
-			dFloat64 minDist = heap.Value();
-			while (heap.GetCount()) {
-				dConvexHull3DFace* const face = heap[0];	
-				if (heap.Value() < minDist) {
-					minDist = heap.Value();
-					closestFace = face;
-				}
-				heap.Pop();
-				//face->m_mark = m_mark;
-				face->SetMark(m_mark);
-				for (dInt32 i = 0; i < 3; ++i) {
-					//const dConvexHull3DFace* twin = &face->m_twin[i]->GetInfo();	
-					dConvexHull3DFace* twin = &face->GetTwin(i)->GetInfo();	
-					//if (twin->m_mark != m_mark) {
-					if (twin->GetMark() != m_mark) {
-						dBigVector dist (m_points[twin->m_index[i]] - point);
-						// use hysteresis to prevent stops at a local minimal, but at the same time fast descend
-						dFloat64 dist2 = dist % dist;
-						if (dist2 < (minDist * dFloat64 (1.001f))) {
-							heap.Push(twin, dist2);
-						}
-					}
-				}
-			}
-
-			return closestFace;
-		}
-
-
-		// this version have input sensitive complexity (approximately  log2)
-		// when casting parallel rays and using the last face as initial guess this version has const time complexity 
-		dFloat64 RayCast (const dBigVector& localP0, const dBigVector& localP1, dConvexHull3DFace** firstFaceGuess)
-		{
-			dConvexHull3DFace* face = &GetFirst()->GetInfo();
-			if (firstFaceGuess && *firstFaceGuess) {
-				face = *firstFaceGuess;
-			} else {
-				if (GetCount() > 32) {
-					dVector q0 (localP0);
-					dVector q1 (localP1);
-					if (dRayBoxClip (q0, q1, m_aabbP0, m_aabbP1)) {
-						face = ClosestFaceVertexToPoint (q0);
-					}
-				}
-			}
-
-			m_mark ++;	
-			//face->m_mark = m_mark;
-			face->SetMark (m_mark);
-			dInt8 pool[256 * (sizeof (dgConvexHullRayCastData) + sizeof (dFloat64))];
-			dDownHeap<dgConvexHullRayCastData,dFloat64> heap (pool, sizeof (pool));
-
-			dFloat64 t0 = dFloat64 (-1.0e20);			//for the maximum entering segment parameter;
-			dFloat64 t1 = dFloat64 ( 1.0e20);			//for the minimum leaving segment parameter;
-			dBigVector dS (localP1 - localP0);		// is the segment direction vector;
-			dgConvexHullRayCastData data;
-			data.m_face = face;
-			dFloat64 t = FaceRayCast (face, localP0, dS, data.m_normalProjection);
-			if (data.m_normalProjection >= dFloat32 (0.0)) {
-				t = dFloat64 (-1.0e30);
-			}
-
-			heap.Push (data, t);
-			while (heap.GetCount()) {
-				dgConvexHullRayCastData data (heap[0]);
-				dFloat64 t = heap.Value();
-				dConvexHull3DFace* face = data.m_face;
-				dFloat64 normalDistProjection = data.m_normalProjection;
-				heap.Pop();
-				bool foundThisBestFace = true;
-				if (normalDistProjection < dFloat64 (0.0f)) {
-					if (t > t0) {
-						t0 = t;
-					}
-					if (t0 > t1) {
-						return dFloat64 (1.2f);
-					}
-				} else {
-					foundThisBestFace = false;
-				}
-
-				for (dInt32 i = 0; i < 3; ++i) {
-					//dConvexHull3DFace* const face1 = &face->m_twin[i]->GetInfo();
-					dConvexHull3DFace* const face1 = &face->GetTwin(i)->GetInfo();
-
-					//if (face1->m_mark != m_mark) {
-					if (face1->GetMark() != m_mark) {
-						//face1->m_mark = m_mark;
-						face1->SetMark (m_mark);
-						dgConvexHullRayCastData data;
-						data.m_face = face1;
-						dFloat64 t = FaceRayCast (face1, localP0, dS, data.m_normalProjection);
-						if (data.m_normalProjection >= dFloat32 (0.0)) {
-							t = dFloat64 (-1.0e30);
-						} else if (t > t0) {
-							foundThisBestFace = false;
-						} else if (fabs (t - t0) < dFloat64 (1.0e-10f)) {
-							return dConvexHull3d::RayCast (localP0, localP1);
-						}
-						if ((heap.GetCount() + 2)>= heap.GetMaxCount()) {
-							// remove t values that are old and way outside interval [0.0, 1.0]  
-							for (dInt32 i = heap.GetCount() - 1; i >= 0; i--) {
-								dFloat64 val = heap.Value(i);
-								if ((val < dFloat64 (-100.0f)) || (val > dFloat64 (100.0f))) {
-									heap.Remove(i);
-								}
-							}
-						}
-						heap.Push (data, t);
-					}
-				}
-				if (foundThisBestFace) {
-					if ((t0 >= dFloat64 (0.0f)) && (t0 <= dFloat64 (1.0f))) {
-						if (firstFaceGuess) {
-							*firstFaceGuess = face;
-						}
-						return t0;
-					}
-					break;
-				}
-			}
-
-			return dFloat64 (1.2f);
-
-		}
-
-		dFloat64 FastRayCast (const dBigVector& localP0, const dBigVector& localP1, dConvexHull3DFace** guess)
-		{
-#if 0
-	#ifdef _DEBUG
-			dFloat64 t0 = dConvexHull3d::RayCast (localP0, localP1);
-			dFloat64 t1 = RayCast (localP0, localP1, guess);
-			dAssert (fabs(t0 - t1) < dFloat64 (1.0e-5f));
-	#endif
+#if 1
+	#define DG_DEBUG_UV	ndTrace 
+#else
+	#define DG_DEBUG_UV	
 #endif
 
-			//return dConvexHull3d::RayCast (localP0, localP1);
-			return RayCast (localP0, localP1, guess);
-		}
 
-		ndInt32 m_mark;
-	};
-
-	class dgHACDConvacityLookAheadTree
+class dgTriangleAnglesToUV: public dgSymmetricConjugateGradientSolver<ndFloat64>
+{
+	public:
+	dgTriangleAnglesToUV (ndMeshEffect* const mesh, ndInt32 material, dgReportProgress progressReportCallback, void* const userData, const ndFloat64* const pinnedPoint, ndFloat64* const triangleAnglesVector = nullptr)
+		:m_hessianCoLumnIndex (mesh->GetAllocator())
+		,m_hessianCoLumnValue(mesh->GetAllocator())
+		,m_mesh(mesh)
+		,m_triangleAngles(triangleAnglesVector)
+		,m_pinnedPoints(pinnedPoint)
+		,m_trianglesCount(0)
+		,m_matrixElementCount(0)
+		,m_allocated(false)
 	{
-		public:
-		DG_CLASS_ALLOCATOR(allocator)
-
-			dgHACDConvacityLookAheadTree (dgMemoryAllocator* const allocator, ndEdge* const face, ndFloat64 concavity)
-			:m_concavity(concavity)	
-			,m_faceList (allocator)
-			,m_left (nullptr)
-			,m_right (nullptr)
-		{
-			m_faceList.Append(face);
-		}
-
-
-		dgHACDConvacityLookAheadTree (dgMemoryAllocator* const allocator, dgHACDConvacityLookAheadTree* const leftChild, dgHACDConvacityLookAheadTree* const rightChild, ndFloat64 concavity)
-			:m_concavity(concavity)	
-			,m_faceList (allocator)
-			,m_left (leftChild)
-			,m_right (rightChild)
-		{
-			ndAssert (leftChild);
-			ndAssert (rightChild);
-
-			ndFloat64 concavityTest = m_concavity - ndFloat64 (1.0e-5f);
-			//if ((m_left->m_faceList.GetCount() == 1) || (m_right->m_faceList.GetCount() == 1)) {
-			if ((((m_left->m_faceList.GetCount() == 1) || (m_right->m_faceList.GetCount() == 1))) ||
-				((concavityTest <= m_left->m_concavity) && (concavityTest <= m_right->m_concavity))) {
-					//The the parent has lower concavity this mean that the two do no add more detail, 
-					//the can be deleted and replaced the parent node
-					// for example the two children can be two convex strips that are part of a larger convex piece
-					// but each part has a non zero concavity, while the convex part has a lower concavity 
-					m_faceList.Merge (m_left->m_faceList);
-					m_faceList.Merge (m_right->m_faceList);
-
-					delete m_left;
-					delete m_right;
-					m_left = nullptr;
-					m_right = nullptr;
-			} else {
-				for (ndList<ndEdge*>::ndNode* node = m_left->m_faceList.GetFirst(); node; node = node->GetNext()) {
-					m_faceList.Append(node->GetInfo());
-				}
-				for (ndList<ndEdge*>::ndNode* node = m_right->m_faceList.GetFirst(); node; node = node->GetNext()) {
-					m_faceList.Append(node->GetInfo());
-				}
-			}
-		}
-
-		~dgHACDConvacityLookAheadTree ()
-		{
-			if (m_left) {
-				ndAssert (m_right);
-				delete m_left;
-				delete m_right;
-			}
-		}
-
-		ndInt32 GetNodesCount () const
-		{
-			ndInt32 count = 0;
-			ndInt32 stack = 1;
-			const dgHACDConvacityLookAheadTree* pool[1024];
-			pool[0] = this;
-			while (stack) {
-				stack --;
-				count ++;
-				const dgHACDConvacityLookAheadTree* const root = pool[stack];
-				if (root->m_left) {
-					ndAssert (root->m_right);
-					pool[stack] = root->m_left;
-					stack ++;
-					ndAssert (stack < sizeof (pool)/sizeof (pool[0]));
-					pool[stack] = root->m_right;
-					stack ++;
-					ndAssert (stack < sizeof (pool)/sizeof (pool[0]));
-				}
-			}
-			return count;
-		}
-
-		void ReduceByCount (ndInt32 count, ndDownHeap<dgHACDConvacityLookAheadTree*, ndFloat64>& approximation)
-		{
-			if (count < 1) {
-				count = 1;
-			}
-//			ndInt32 nodesCount = GetNodesCount();
-
-			approximation.Flush();
-			dgHACDConvacityLookAheadTree* tmp = this;
-			approximation.Push(tmp, m_concavity);
-//			nodesCount --;
-			//while (nodesCount && (approximation.GetCount() < count) && (approximation.Value() >= ndFloat32 (0.0f))) {
-			while ((approximation.GetCount() < count) && (approximation.Value() >= ndFloat32 (0.0f))) {
-				dgHACDConvacityLookAheadTree* worseCluster = approximation[0];
-				if (!worseCluster->m_left && approximation.Value() >= ndFloat32 (0.0f)) {
-					approximation.Pop();
-					approximation.Push(worseCluster, ndFloat32 (-1.0f));
-				} else {
-					ndAssert (worseCluster->m_left);
-					ndAssert (worseCluster->m_right);
-					approximation.Pop();
-					approximation.Push(worseCluster->m_left, worseCluster->m_left->m_concavity);
-					approximation.Push(worseCluster->m_right, worseCluster->m_right->m_concavity);
-//					nodesCount -= 2;
-				}
-			}
-		}
-
-
-		void ReduceByConcavity (ndFloat64 concavity, ndDownHeap<dgHACDConvacityLookAheadTree*, ndFloat64>& approximation)
-		{
-			approximation.Flush();
-			dgHACDConvacityLookAheadTree* tmp = this;
-
-			approximation.Push(tmp, m_concavity);
-			while (approximation.Value() > concavity) {
-				dgHACDConvacityLookAheadTree* worseCluster = approximation[0];
-				if (!worseCluster->m_left && approximation.Value() >= ndFloat32 (0.0f)) {
-					approximation.Pop();
-					approximation.Push(worseCluster, ndFloat32 (-1.0f));
-				} else {
-					ndAssert (worseCluster->m_left);
-					ndAssert (worseCluster->m_right);
-					approximation.Pop();
-					approximation.Push(worseCluster->m_left, worseCluster->m_left->m_concavity);
-					approximation.Push(worseCluster->m_right, worseCluster->m_right->m_concavity);
-				}
-			}
-		}
-
-		ndFloat64 m_concavity; 
-		ndList<ndEdge*> m_faceList;
-		dgHACDConvacityLookAheadTree* m_left;
-		dgHACDConvacityLookAheadTree* m_right;
-	};
-
-	class dgPairProxy
-	{
-		public:
-		dgPairProxy()
-			:m_nodeA(nullptr)
-			,m_nodeB(nullptr)
-			,m_hierachicalClusterIndexA(0)
-			,m_hierachicalClusterIndexB(0)
-			,m_area(ndFloat64(0.0f))
-		{
-		}
-
-		~dgPairProxy()
-		{
-		}
-
-		ndNode* m_nodeA;
-		ndNode* m_nodeB;
-		ndInt32 m_hierachicalClusterIndexA;
-		ndInt32 m_hierachicalClusterIndexB;
-		ndFloat64 m_area;
-		ndFloat64 m_distanceConcavity;
-	};
-
-	class dgHACDRayCasterContext: public ndFastRay
-	{
-		public:
-		dgHACDRayCasterContext (const ndVector& l0, const ndVector& l1, dgHACDClusterGraph* const me, ndInt32 mycolor)
-			:ndFastRay (l0, l1)
-			,m_myColor(mycolor)
-			,m_colorHit(-1)
-			,m_param (1.0f) 
-			,m_me (me) 
-		{
-		}
-
-		ndInt32 m_myColor;
-		ndInt32 m_colorHit;
-		ndFloat32 m_param;
-		dgHACDClusterGraph* m_me;
-	};
-
-
-	dgHACDClusterGraph(ndMeshEffect& mesh, ndFloat32 backFaceDistanceFactor, dgReportProgress reportProgressCallback)
-		:dGraph<dgHACDCluster, dgHACDEdge> (mesh.GetAllocator())
-		,ndAabbPolygonSoup()
-		,m_mark(0)
-		,m_faceCount(0)
-		,m_vertexMark(0)
-		,m_progress(0)
-		,m_cancavityTreeIndex(0)
-		,m_invFaceCount(ndFloat32 (1.0f))
-		,m_vertexMarks(nullptr)
-		,m_diagonal(ndFloat64(1.0f))
-		,m_vertexPool(nullptr)
-		,m_proxyList(mesh.GetAllocator())
-		,m_concavityTreeArray(nullptr)
-		,m_convexProximation(mesh.GetAllocator())
-		,m_priorityHeap (mesh.GetCount() + 2048, mesh.GetAllocator())
-		,m_reportProgressCallback (reportProgressCallback)
-		,m_parallerConcavityCalculator(mesh.GetAllocator())
-	{
-		
-		m_parallerConcavityCalculator.SetThreadsCount(DG_CONCAVITY_MAX_THREADS);
-
-		// precondition the mesh for better approximation
-		mesh.ConvertToPolygons();
-
-		m_faceCount = mesh.GetTotalFaceCount();
-
-		dgMemoryAllocator* const allocator = mesh.GetAllocator();
-		m_invFaceCount = ndFloat32 (1.0f) / (m_faceCount);
-
-		// init some auxiliary structures
-		ndInt32 vertexCount = mesh.GetVertexCount();
-		m_vertexMarks =  (ndInt32*) dgMallocStack(vertexCount * sizeof(ndInt32));
-		m_vertexPool =  (ndBigVector*) dgMallocStack(vertexCount * sizeof(ndBigVector));
-		memset(m_vertexMarks, 0, vertexCount * sizeof(ndInt32));
-
-		m_cancavityTreeIndex = m_faceCount + 1;
-		m_concavityTreeArray = (dgHACDConvacityLookAheadTree**) dgMallocStack(2 * m_cancavityTreeIndex * sizeof(dgHACDConvacityLookAheadTree*));
-		memset(m_concavityTreeArray, 0, 2 * m_cancavityTreeIndex * sizeof(dgHACDConvacityLookAheadTree*));
-
-		// scan the mesh and and add a node for each face
-		ndInt32 color = 1;
-		ndMeshEffect::Iterator iter(mesh);
-
-		ndInt32 meshMask = mesh.IncLRU();
-		const ndBigVector* const points = (ndBigVector*) mesh.GetVertexPool();
-		for (iter.Begin(); iter; iter++) {
-			ndEdge* const edge = &(*iter);
-			if ((edge->m_mark != meshMask) && (edge->m_incidentFace > 0)) {
-
-				// call the progress callback
-				//ReportProgress();
-
-				ndNode* const clusterNode = AddNode ();
-				dgHACDCluster& cluster = clusterNode->GetInfo().m_nodeData;
-				cluster.SetAllocator(mesh.GetAllocator());
-
-				ndFloat64 perimeter = ndFloat64(0.0f);
-				ndEdge* ptr = edge;
+		ndInt32 mark = m_mesh->IncLRU();
+		ndMeshEffect::Iterator iter (*m_mesh);
+		for (iter.Begin(); iter; iter ++) {
+			ndEdge* const edge = &iter.GetNode()->GetInfo();
+			if ((edge->m_incidentFace > 0) && (edge->m_mark != mark)) {
+				ndEdge *ptr = edge;
 				do {
-					ndBigVector p1p0(points[ptr->m_incidentVertex] - points[ptr->m_prev->m_incidentVertex]);
-					perimeter += sqrt(p1p0 % p1p0);
-					ptr->m_incidentFace = color;
-					ptr->m_userData = ndUnsigned64 (clusterNode);
-					ptr->m_mark = meshMask;
+					ptr->m_mark = mark;
 					ptr = ptr->m_next;
 				} while (ptr != edge);
-
-				ndBigVector normal = mesh.FaceNormal(edge, &points[0][0], sizeof(ndBigVector));
-				ndFloat64 mag = sqrt(normal % normal);
-
-				cluster.m_color = color;
-				cluster.m_hierachicalClusterIndex = color;
-				cluster.m_area = ndFloat64(0.5f) * mag;
-				cluster.m_concavity = CalculateConcavityMetric (ndFloat64 (0.0f), cluster.m_area, perimeter, 1, 0);
-
-				dHACDClusterFace& face = cluster.Append()->GetInfo();
-				face.m_edge = edge;
-				face.m_area = ndFloat64(0.5f) * mag;
-				face.m_normal = normal.Scale(ndFloat64(1.0f) / mag);
-
-				//m_concavityTreeArray[color] = new (allocator) dgHACDConvacityLookAheadTree (allocator, edge, cluster.m_concavity);
-				m_concavityTreeArray[color] = new (allocator) dgHACDConvacityLookAheadTree (allocator, edge, ndFloat64 (0.0f));
-
-				color ++;
+				m_trianglesCount ++;
+				ndAssert (edge->m_next->m_next->m_next == edge);
 			}
 		}
 
-		// add all link adjacent faces links
-		for (ndNode* clusterNode = GetFirst(); clusterNode; clusterNode = clusterNode->GetNext()) {
+		m_triangles = (ndEdge**) m_mesh->GetAllocator()->MallocLow (m_trianglesCount * sizeof (ndEdge*));
 
-			// call the progress callback
-			//ReportProgress();
+		ndInt32 count = 0;
+		mark = m_mesh->IncLRU();
+		for (iter.Begin(); iter; iter ++) {
+			ndEdge* const edge = &iter.GetNode()->GetInfo();
+			if ((edge->m_incidentFace > 0) && (edge->m_mark != mark)) {
+				ndEdge *ptr = edge;
+				do {
+					ptr->m_incidentFace = count + 1;
+					ptr->m_mark = mark;
+					ptr = ptr->m_next;
+				} while (ptr != edge);
+				m_triangles[count] = ptr;
+				count ++;
+				ndAssert (count <= m_trianglesCount);
+			}
+		}
 
-			dgHACDCluster& cluster = clusterNode->GetInfo().m_nodeData;
-			dHACDClusterFace& face = cluster.GetFirst()->GetInfo();
-			ndEdge* const edge = face.m_edge;
-			ndEdge* ptr = edge; 
-			do {
-				if (ptr->m_twin->m_incidentFace > 0) {
-					ndAssert (ptr->m_twin->m_userData);
-					ndNode* const twinClusterNode = (ndNode*) ptr->m_twin->m_userData;
-					ndAssert (twinClusterNode);
+		if (!m_triangleAngles) {
+			ndAssert (0);
+			AnglesFromUV ();
+		}
+		
+		m_uvArray = (ndFloat64*) m_mesh->GetAllocator()->MallocLow (2 * m_mesh->GetVertexCount() * sizeof (ndFloat64));
+		mark = m_mesh->IncLRU();
+		for (iter.Begin(); iter; iter ++) {
+			ndEdge* const edge = &iter.GetNode()->GetInfo();
+			if (edge->m_mark != mark) {
+				ndEdge* ptr = edge;
+				ndEdge* uvEdge = edge;
+				do {
+					if ((uvEdge->m_incidentFace < 0) && (ptr->m_incidentFace > 0)) {
+						uvEdge = ptr;
+					}
+					ptr->m_mark = mark;
+					ptr = ptr->m_twin->m_next;
+				} while (ptr != edge);
+				ndAssert (0);
+/*
+				ndInt32 index = ndInt32 (uvEdge->m_userData);
+				ndMeshEffect::dgVertexAtribute& attribute = m_mesh->GetAttribute (index);
+				m_uvArray[index * 2 + 0] = attribute.m_u0;
+				m_uvArray[index * 2 + 1] = attribute.m_v0;
+*/
+			}
+		}
 
-					bool doubleEdge = false;
-					for (dgGraphNode<dgHACDCluster, dgHACDEdge>::ndNode* edgeNode = clusterNode->GetInfo().GetFirst(); edgeNode; edgeNode = edgeNode->GetNext()) {
-						if (edgeNode->GetInfo().m_node == twinClusterNode) {
-							doubleEdge = true;
-							break;
+		m_sinTable = (ndFloat64*) m_mesh->GetAllocator()->MallocLow (3 * m_trianglesCount * sizeof (ndFloat64));
+		m_cosTable = (ndFloat64*) m_mesh->GetAllocator()->MallocLow (3 * m_trianglesCount * sizeof (ndFloat64));
+
+		// pre-compute sin cos tables
+		for (ndInt32 i = 0; i < m_trianglesCount * 3; ++i) {
+			m_sinTable[i] = sin (m_triangleAngles[i]);
+			m_cosTable[i] = cos (m_triangleAngles[i]);
+		}
+
+		m_vertexEdge = (ndEdge**) m_mesh->GetAllocator()->MallocLow (m_mesh->GetVertexCount() * sizeof (ndEdge*));
+		mark = m_mesh->IncLRU();
+		for (iter.Begin(); iter; iter ++) {
+			ndEdge* const vertex = &iter.GetNode()->GetInfo();
+			if (vertex->m_mark != mark) {
+				ndInt32 index = vertex->m_incidentVertex;
+				m_vertexEdge[index] = vertex;
+				ndEdge* ptr = vertex;
+				do {
+					ptr->m_mark = mark;
+					ptr = ptr->m_twin->m_next					;
+				} while (ptr != vertex);
+			}
+		}
+
+		m_gradients = (ndFloat64*) m_mesh->GetAllocator()->MallocLow (2 * m_mesh->GetVertexCount() * sizeof (ndFloat64));
+		m_diagonal = (ndFloat64*) m_mesh->GetAllocator()->MallocLow (2 * m_mesh->GetVertexCount() * sizeof (ndFloat64));
+
+		LagrangeOptimization();
+
+		ndAssert (0);
+/*
+		ndStack<ndMeshEffect::dgVertexAtribute>attribArray (m_mesh->GetCount());
+//		ndInt32 attribCount = m_mesh->EnumerateAttributeArray (&attribArray[0]);
+		mark = m_mesh->IncLRU();
+		for (iter.Begin(); iter; iter ++) {
+			ndEdge* const edge = &iter.GetNode()->GetInfo();
+			if (edge->m_mark != mark) {
+				ndInt32 vertexIndex = edge->m_incidentVertex;
+				ndEdge* const vertexEdge = m_vertexEdge[vertexIndex];
+				ndFloat64 u = m_uvArray[vertexIndex * 2 + 0];
+				ndFloat64 v = m_uvArray[vertexIndex * 2 + 1];
+				ndEdge* ptr = vertexEdge;
+				do {
+					if (ptr->m_incidentFace > 0) {
+						ndInt32 index = ndInt32 (ptr->m_userData);
+						ndMeshEffect::dgVertexAtribute& attribute = m_mesh->GetAttribute (index);
+						attribute.m_u0 = u;
+						attribute.m_v0 = v;
+						attribute.m_material = material;
+					}
+					ptr->m_mark = mark;
+					ptr = ptr->m_twin->m_next;
+				} while (ptr != vertexEdge);
+			}
+		}
+*/
+		ndAssert (0);
+		//m_mesh->ApplyAttributeArray(&attribArray[0], attribCount);
+	}
+
+	~dgTriangleAnglesToUV()
+	{
+		m_mesh->GetAllocator()->FreeLow (m_diagonal);
+		m_mesh->GetAllocator()->FreeLow (m_gradients);
+		m_mesh->GetAllocator()->FreeLow (m_vertexEdge);
+		m_mesh->GetAllocator()->FreeLow (m_sinTable);
+		m_mesh->GetAllocator()->FreeLow (m_cosTable);
+		m_mesh->GetAllocator()->FreeLow (m_uvArray);
+		m_mesh->GetAllocator()->FreeLow (m_triangles);
+
+		if (m_allocated) {
+			m_mesh->GetAllocator()->FreeLow (m_triangleAngles);
+		}
+	}
+
+/*
+	void GenerateUVCoordinates ()
+	{
+		m_mesh->SaveOFF("xxx.off");
+
+		ndStack<dInt8> attibuteUsed (m_attibuteCount);
+		memset (&attibuteUsed[0], 0, attibuteUsed.GetSizeInBytes());
+		ndInt32 mark = m_mesh->IncLRU();
+		for (ndInt32 i = 0; i < m_triangleCount; ++i) {
+			ndEdge* const face = m_betaEdge[i * 3];
+			if (face->m_mark != mark) {
+				ndEdge* ptr = face;
+				do {
+					if (ptr->m_incidentFace > 0) {
+						ndInt32 index = ndInt32 (ptr->m_userData);
+						attibuteUsed[index] = 1;
+						m_uvArray[index].m_u0 = ndFloat32 (0.0f);
+						m_uvArray[index].m_v0 = ndFloat32 (0.0f);
+					}
+					ptr = ptr->m_twin->m_next;
+				} while (ptr != face);
+
+				ndEdge* const twinFace = face->m_twin;
+				const ndBigVector& p0 = m_mesh->GetVertex(face->m_incidentVertex);
+				const ndBigVector& p1 = m_mesh->GetVertex(twinFace->m_incidentVertex);
+				ndBigVector p10 (p1 - p0);
+				ndFloat64 e0length = sqrt (p10 % p10);
+
+				ptr = twinFace;
+				do {
+					if (ptr->m_incidentFace > 0) {
+						ndInt32 index = ndInt32 (ptr->m_userData);
+						attibuteUsed[index] = 1;
+						m_uvArray[index].m_u0 = e0length;
+						m_uvArray[index].m_v0 = ndFloat32 (0.0f);
+					}
+					ptr = ptr->m_twin->m_next;
+				} while (ptr != twinFace);
+
+				dList<ndEdge*> stack(m_mesh->GetAllocator());
+				stack.Append(face);
+				while (stack.GetCount()) {
+					dList<ndEdge*>::dNode* const node = stack.GetFirst();
+					ndEdge* const face = node->GetInfo();
+					stack.Remove (node);
+					if (face->m_mark != mark) {
+						ndInt32 uvIndex2 = ndInt32 (face->m_prev->m_userData);
+						if (!attibuteUsed[uvIndex2]) {
+
+							ndInt32 uvIndex0 = ndInt32 (face->m_userData);
+							ndInt32 uvIndex1 = ndInt32 (face->m_next->m_userData);
+
+							ndInt32 edgeIndex0 = GetAlphaLandaIndex (face);
+							ndInt32 edgeIndex1 = GetAlphaLandaIndex (face->m_next);
+							ndInt32 edgeIndex2 = GetAlphaLandaIndex (face->m_prev);
+
+							ndFloat64 refAngleCos = cos (m_variables[edgeIndex0]);
+							ndFloat64 refAngleSin = sin (m_variables[edgeIndex0]);
+							ndFloat64 scale = sin (m_variables[edgeIndex1]) / sin (m_variables[edgeIndex2]);
+
+							ndFloat64 du = (m_uvArray[uvIndex1].m_u0 - m_uvArray[uvIndex0].m_u0) * scale;
+							ndFloat64 dv = (m_uvArray[uvIndex1].m_v0 - m_uvArray[uvIndex0].m_v0) * scale;
+							ndFloat64 u = m_uvArray[uvIndex0].m_u0 + du * refAngleCos - dv * refAngleSin; 
+							ndFloat64 v = m_uvArray[uvIndex0].m_v0 + du * refAngleSin + dv * refAngleCos; 
+
+							ndEdge* ptr = face->m_prev;
+							do {
+								if (ptr->m_incidentFace > 0) {
+									ndInt32 index = ndInt32 (ptr->m_userData);
+									attibuteUsed[index] = 1;
+									m_uvArray[index].m_u0 = u;
+									m_uvArray[index].m_v0 = v;
+								}
+								ptr = ptr->m_twin->m_next;
+							} while (ptr != face->m_prev);
+						}
+
+						face->m_mark = mark;
+						face->m_next->m_mark = mark;
+						face->m_prev->m_mark = mark;
+
+						if (face->m_next->m_twin->m_incidentFace > 0) {
+							stack.Append(face->m_next->m_twin);
+						}
+
+						if (face->m_prev->m_twin->m_incidentFace > 0) {
+							stack.Append(face->m_prev->m_twin);
 						}
 					}
-					if (!doubleEdge) {
-						clusterNode->GetInfo().AddEdge (twinClusterNode);
-					}
 				}
-				ptr = ptr->m_next;
+			}
+		}
+	}
+*/
+
+	ndInt32 GetAlphaLandaIndex (const ndEdge* const edge) const
+	{
+		return edge->m_incidentFace - 1;
+	}
+
+	void AnglesFromUV ()
+	{
+		m_allocated = true;
+		m_triangleAngles = (ndFloat64*) m_mesh->GetAllocator()->MallocLow (3 * m_trianglesCount * sizeof (ndFloat64));
+
+		// calculate initial beta angle for each triangle
+		for (ndInt32 i = 0; i < m_trianglesCount; ++i) {
+			ndEdge* const edge = m_triangles[i];
+
+			const ndBigVector& p0 = m_mesh->GetVertex(edge->m_incidentVertex);
+			const ndBigVector& p1 = m_mesh->GetVertex(edge->m_next->m_incidentVertex);
+			const ndBigVector& p2 = m_mesh->GetVertex(edge->m_prev->m_incidentVertex);
+
+			ndBigVector e10 (p1 - p0);
+			ndBigVector e20 (p2 - p0);
+			ndBigVector e12 (p2 - p1);
+			ndAssert(e10.m_w == ndFloat32(0.0f));
+			ndAssert(e20.m_w == ndFloat32(0.0f));
+			ndAssert(e12.m_w == ndFloat32(0.0f));
+
+			e10 = e10.Scale (ndFloat64 (1.0) / sqrt (e10.DotProduct(e10).GetScalar()));
+			e20 = e20.Scale (ndFloat64 (1.0) / sqrt (e20.DotProduct(e20).GetScalar()));
+			e12 = e20.Scale (ndFloat64 (1.0) / sqrt (e12.DotProduct(e12).GetScalar()));
+
+			m_triangleAngles[i * 3 + 0] = acos (ndClamp(e10.DotProduct(e20).GetScalar(), ndFloat64 (-1.0f), ndFloat64 (1.0f)));
+			m_triangleAngles[i * 3 + 1] = acos (ndClamp(e10.DotProduct(e20).GetScalar(), ndFloat64 (-1.0f), ndFloat64 (1.0f)));
+			m_triangleAngles[i * 3 + 2] = dgABF_PI - m_triangleAngles[i * 3 + 0] - m_triangleAngles[i * 3 + 1];
+		}
+	}
+
+/*
+	// objective function
+	f[u2_,v2_,u3_,v3_,u4_,v4_,u5_,v5_,u6_,v6_] := 
+		(cos[a0] * sin[b0] * (u1 - u0) + sin[a0] * sin[b0] * (v1 - v0) - sin[c0] * (u6 - u0)) ^ 2 +
+		(cos[a0] * sin[b0] * (v1 - v0) + sin[a0] * sin[b0] * (u1 - u0) - sin[c0] * (v6 - v0)) ^ 2 + 
+		(cos[a1] * sin[b1] * (u2 - u0) + sin[a1] * sin[b1] * (v2 - v0) - sin[c1] * (u1 - u0)) ^ 2 +
+		(cos[a1] * sin[b1] * (v2 - v0) + sin[a1] * sin[b1] * (u2 - u0) - sin[c1] * (v1 - v0)) ^ 2 + 
+		(cos[a2] * sin[b2] * (u5 - u0) + sin[a2] * sin[b2] * (v5 - v0) - sin[c2] * (u2 - u0)) ^ 2 +
+		(cos[a2] * sin[b2] * (v5 - v0) + sin[a2] * sin[b2] * (u5 - u0) - sin[c2] * (v2 - v0)) ^ 2 + 
+		(cos[a3] * sin[b3] * (u2 - u1) + sin[a3] * sin[b3] * (v2 - v1) - sin[c3] * (u3 - u1)) ^ 2 +
+		(cos[a3] * sin[b3] * (v2 - v1) + sin[a3] * sin[b3] * (u2 - u1) - sin[c3] * (v3 - v1)) ^ 2 + 
+		(cos[a4] * sin[b4] * (u3 - u1) + sin[a4] * sin[b4] * (v3 - v1) - sin[c4] * (u4 - u1)) ^ 2 +
+		(cos[a4] * sin[b4] * (v3 - v1) + sin[a4] * sin[b4] * (u3 - u1) - sin[c4] * (v4 - v1)) ^ 2 + 
+		(cos[a5] * sin[b5] * (u4 - u1) + sin[a5] * sin[b5] * (v4 - v1) - sin[c5] * (u6 - u1)) ^ 2 +
+		(cos[a5] * sin[b5] * (v4 - v1) + sin[a5] * sin[b5] * (u4 - u1) - sin[c5] * (v6 - v1)) ^ 2 + 
+		(cos[a6] * sin[b6] * (u4 - u2) + sin[a6] * sin[b6] * (v4 - v2) - sin[c6] * (u3 - u2)) ^ 2 +
+		(cos[a6] * sin[b6] * (v4 - v2) + sin[a6] * sin[b6] * (u4 - u2) - sin[c6] * (v3 - v2)) ^ 2 + 
+		(cos[a7] * sin[b7] * (u5 - u2) + sin[a7] * sin[b7] * (v5 - v2) - sin[c7] * (u4 - u2)) ^ 2 +
+		(cos[a7] * sin[b7] * (v5 - v2) + sin[a7] * sin[b7] * (u5 - u2) - sin[c7] * (v4 - v2)) ^ 2 + 
+		(cos[a8] * sin[b8] * (u5 - u4) + sin[a8] * sin[b8] * (v5 - v4) - sin[c8] * (u6 - u4)) ^ 2 +
+		(cos[a8] * sin[b8] * (v5 - v4) + sin[a8] * sin[b8] * (u5 - u4) - sin[c8] * (v6 - v4)) ^ 2
+*/
+	void TraceObjectiveFunction() const
+	{
+		DG_DEBUG_UV (("f["));
+		for (ndInt32 i = 2; i < m_mesh->GetVertexCount(); ++i) {
+			DG_DEBUG_UV (("u%d_,v%d_", i, i));
+			if (i != (m_mesh->GetVertexCount() - 1)) {
+				DG_DEBUG_UV ((","));
+			}
+		}
+		DG_DEBUG_UV (("] := \n"));
+
+		for (ndInt32 i = 0; i < m_trianglesCount; ++i) {
+			ndEdge* const face = m_triangles[i];
+
+			ndInt32 v0 = face->m_incidentVertex;
+			ndInt32 v1 = face->m_next->m_incidentVertex;
+			ndInt32 v2 = face->m_prev->m_incidentVertex;
+			(void)(v0);
+			(void)(v1);
+			(void)(v2);
+			DG_DEBUG_UV (("(cos[a%d] * sin[b%d] * (u%d - u%d) + sin[a%d] * sin[b%d] * (v%d - v%d) - sin[c%d] * (u%d - u%d)) ^ 2 +\n", i, i, v1, v0, i, i, v1, v0, i, v2, v0));
+			DG_DEBUG_UV (("(cos[a%d] * sin[b%d] * (v%d - v%d) + sin[a%d] * sin[b%d] * (u%d - u%d) - sin[c%d] * (v%d - v%d)) ^ 2", i, i, v1, v0, i, i, v1, v0, i, v2, v0));
+			if (i != (m_trianglesCount - 1)) {
+				DG_DEBUG_UV ((" + \n"));
+			} else {
+				DG_DEBUG_UV (("\n"));
+			}
+		}
+	}
+
+	ndFloat64 CalculateExpression_U_face (const ndEdge* const face) const
+	{
+		ndInt32 faceIndex = GetAlphaLandaIndex (face);
+		ndEdge* const faceStartEdge = m_triangles[faceIndex];
+
+		ndInt32 uvIndex0 = ndInt32 (faceStartEdge->m_incidentVertex);
+		ndInt32 uvIndex1 = ndInt32 (faceStartEdge->m_next->m_incidentVertex);
+		ndInt32 uvIndex2 = ndInt32 (faceStartEdge->m_prev->m_incidentVertex);
+
+		ndInt32 alphaIndex0 = faceIndex * 3;
+		ndInt32 alphaIndex1 = faceIndex * 3 + 1;
+		ndInt32 alphaIndex2 = faceIndex * 3 + 2;
+
+		DG_DEBUG_UV (("("));
+		DG_DEBUG_UV (("cos(a%d) * sin(b%d) * (u%d - u%d) + ", faceIndex, faceIndex, uvIndex1, uvIndex0));
+		DG_DEBUG_UV (("sin(a%d) * sin(b%d) * (v%d - v%d) + ", faceIndex, faceIndex, uvIndex1, uvIndex0));
+		DG_DEBUG_UV (("sin(c%d) * (u%d - u%d)", faceIndex, uvIndex2, uvIndex0));
+		DG_DEBUG_UV ((")"));
+
+		ndFloat64 gradient = m_cosTable[alphaIndex0] * m_sinTable[alphaIndex1] * (m_uvArray[uvIndex1 * 2] - m_uvArray[uvIndex0 * 2]) + 
+							 m_sinTable[alphaIndex0] * m_sinTable[alphaIndex1] * (m_uvArray[uvIndex1 * 2 + 1] - m_uvArray[uvIndex0 * 2 + 1]) +
+							 m_sinTable[alphaIndex2] * (m_uvArray[uvIndex2 * 2] - m_uvArray[uvIndex0 * 2]);
+		return gradient;
+	}
+
+	ndFloat64 CalculateExpression_V_face (const ndEdge* const face) const
+	{
+		ndInt32 faceIndex = GetAlphaLandaIndex (face);
+		ndEdge* const faceStartEdge = m_triangles[faceIndex];
+
+		ndInt32 uvIndex0 = ndInt32 (faceStartEdge->m_incidentVertex);
+		ndInt32 uvIndex1 = ndInt32 (faceStartEdge->m_next->m_incidentVertex);
+		ndInt32 uvIndex2 = ndInt32 (faceStartEdge->m_prev->m_incidentVertex);
+
+		ndInt32 alphaIndex0 = faceIndex * 3;
+		ndInt32 alphaIndex1 = faceIndex * 3 + 1;
+		ndInt32 alphaIndex2 = faceIndex * 3 + 2;
+
+		DG_DEBUG_UV (("("));
+		DG_DEBUG_UV (("cos(a%d) * sin(b%d) * (v%d - v%d) + ", faceIndex, faceIndex, uvIndex1, uvIndex0));
+		DG_DEBUG_UV (("sin(a%d) * sin(b%d) * (u%d - u%d) + ", faceIndex, faceIndex, uvIndex1, uvIndex0));
+		DG_DEBUG_UV (("sin(c%d) * (v%d - v%d)", faceIndex, uvIndex2, uvIndex0));
+		DG_DEBUG_UV ((")"));
+
+		ndFloat64 gradient = m_cosTable[alphaIndex0] * m_sinTable[alphaIndex1] * (m_uvArray[uvIndex1 * 2 + 1] - m_uvArray[uvIndex0 * 2 + 1]) + 
+							 m_sinTable[alphaIndex0] * m_sinTable[alphaIndex1] * (m_uvArray[uvIndex1 * 2] - m_uvArray[uvIndex0 * 2]) +
+							 m_sinTable[alphaIndex2] * (m_uvArray[uvIndex2 * 2 + 1] - m_uvArray[uvIndex0 * 2 + 1]);
+		return gradient;
+	}
+
+
+	ndFloat64 CalculateGradient_U_Coefficent (const ndEdge* const edge, bool u) const
+	{
+		DG_DEBUG_UV (("("));
+		ndInt32 faceIndex = GetAlphaLandaIndex (edge);
+		ndEdge* const faceStartEdge = m_triangles[faceIndex];
+
+		ndFloat64 gradient = ndFloat64 (0.0f);
+
+		ndInt32 alphaIndex0 = faceIndex * 3;
+		ndInt32 alphaIndex1 = faceIndex * 3 + 1;
+		ndInt32 alphaIndex2 = faceIndex * 3 + 2;
+		if (faceStartEdge == edge) {
+			if (u) {
+				DG_DEBUG_UV ((" - cos(a%d) * sin(b%d) - sin(c%d)", faceIndex, faceIndex, faceIndex));
+				gradient = - m_cosTable[alphaIndex0] * m_sinTable[alphaIndex1] - m_sinTable[alphaIndex2];
+			} else {
+				DG_DEBUG_UV ((" - sin(a%d) * sin(b%d) - sin(c%d)", faceIndex, faceIndex, faceIndex));
+				gradient = - m_sinTable[alphaIndex0] * m_sinTable[alphaIndex1] - m_sinTable[alphaIndex2];
+			}
+		} else if (faceStartEdge->m_next == edge) {
+			if (u) {
+				DG_DEBUG_UV (("cos(a%d) * sin(b%d)", faceIndex, faceIndex));
+				gradient = m_cosTable[alphaIndex0] * m_sinTable[alphaIndex1];
+			} else {
+				DG_DEBUG_UV (("sin(a%d) * sin(b%d)", faceIndex, faceIndex));
+				gradient = m_sinTable[alphaIndex0] * m_sinTable[alphaIndex1];
+			}
+		} else {
+			ndAssert (faceStartEdge->m_prev == edge);
+			if (u) {
+				DG_DEBUG_UV ((" - sin(c%d)", faceIndex));
+				gradient = -m_sinTable[alphaIndex2];
+			} else {
+				DG_DEBUG_UV (("0"));
+			}
+		}
+		DG_DEBUG_UV ((")"));
+		return gradient;
+	}
+
+	ndFloat64 CalculateGradient_V_Coefficent (const ndEdge* const edge, bool u) const
+	{
+		DG_DEBUG_UV (("("));
+		ndInt32 faceIndex = GetAlphaLandaIndex (edge);
+		ndEdge* const faceStartEdge = m_triangles[faceIndex];
+
+		ndInt32 alphaIndex0 = faceIndex * 3;
+		ndInt32 alphaIndex1 = faceIndex * 3 + 1;
+		ndInt32 alphaIndex2 = faceIndex * 3 + 2;
+
+		ndFloat64 gradient = ndFloat64 (0.0f);
+		if (faceStartEdge == edge) {
+			if (!u) {
+				DG_DEBUG_UV ((" - cos(a%d) * sin(b%d) - sin(c%d)", faceIndex, faceIndex, faceIndex));
+				gradient = - m_cosTable[alphaIndex0] * m_sinTable[alphaIndex1] - m_sinTable[alphaIndex2];
+			} else {
+				DG_DEBUG_UV ((" - sin(a%d) * sin(b%d) - sin(c%d)", faceIndex, faceIndex, faceIndex));
+				gradient = - m_sinTable[alphaIndex0] * m_sinTable[alphaIndex1] - m_sinTable[alphaIndex2];
+			}
+		} else if (faceStartEdge->m_next == edge) {
+			if (!u) {
+				DG_DEBUG_UV (("cos(a%d) * sin(b%d)", faceIndex, faceIndex));
+				gradient = m_cosTable[alphaIndex0] * m_sinTable[alphaIndex1];
+			} else {
+				DG_DEBUG_UV (("sin(a%d) * sin(b%d)", faceIndex, faceIndex));
+				gradient = m_sinTable[alphaIndex0] * m_sinTable[alphaIndex1];
+			}
+		} else {
+			ndAssert (faceStartEdge->m_prev == edge);
+			if (!u) {
+				DG_DEBUG_UV ((" - sin(c%d)", faceIndex));
+				gradient = -m_sinTable[alphaIndex2];
+			} else {
+				DG_DEBUG_UV (("0"));
+			}
+		}
+		DG_DEBUG_UV ((")"));
+		return gradient;
+	}
+
+
+	ndFloat64 CalculateHessianExpression_U_V (const ndEdge* const face) const
+	{
+		ndInt32 faceIndex = GetAlphaLandaIndex (face);
+		//ndEdge* const faceStartEdge = m_triangles[faceIndex];
+		//ndInt32 uvIndex0 = ndInt32 (faceStartEdge->m_incidentVertex);
+		//ndInt32 uvIndex1 = ndInt32 (faceStartEdge->m_next->m_incidentVertex);
+		//ndInt32 uvIndex2 = ndInt32 (faceStartEdge->m_prev->m_incidentVertex);
+		ndInt32 alphaIndex0 = faceIndex * 3;
+		ndInt32 alphaIndex1 = faceIndex * 3 + 1;
+		//ndInt32 alphaIndex2 = faceIndex * 3 + 2;
+		DG_DEBUG_UV (("( - sin(a%d) * sin(b%d))", faceIndex, faceIndex));
+		return - m_sinTable[alphaIndex0] * m_sinTable[alphaIndex1];
+	}
+
+
+	ndFloat64 CalculateHessianExpression_V_V (const ndEdge* const face) const
+	{
+		ndInt32 faceIndex = GetAlphaLandaIndex (face);
+		//ndEdge* const faceStartEdge = m_triangles[faceIndex];
+		//ndInt32 uvIndex0 = ndInt32 (faceStartEdge->m_incidentVertex);
+		//ndInt32 uvIndex1 = ndInt32 (faceStartEdge->m_next->m_incidentVertex);
+		//ndInt32 uvIndex2 = ndInt32 (faceStartEdge->m_prev->m_incidentVertex);
+
+		ndInt32 alphaIndex0 = faceIndex * 3;
+		ndInt32 alphaIndex1 = faceIndex * 3 + 1;
+		ndInt32 alphaIndex2 = faceIndex * 3 + 2;
+		DG_DEBUG_UV (("(- cos(a%d) * sin(b%d) - sin(c%d))", faceIndex, faceIndex, faceIndex));
+		return - m_cosTable[alphaIndex0] * m_sinTable[alphaIndex1] - m_sinTable[alphaIndex2];
+	}
+
+
+	void CalculateGradientU (ndInt32 vertexIndex)
+	{
+		// calculate U Gradient derivative
+		const ndEdge* const vertex = m_vertexEdge[vertexIndex];
+		DG_DEBUG_UV (("du%d =\n", vertexIndex));
+		ndFloat64 gradient = ndFloat64 (0.0f);
+		const ndEdge* ptr = vertex;
+		do {
+			if (ptr->m_incidentFace > 0) {
+				DG_DEBUG_UV (("2 * "));
+				ndAssert (ptr->m_incidentVertex == vertexIndex);
+				ndFloat64 a = CalculateGradient_U_Coefficent (ptr, true) ;
+				DG_DEBUG_UV ((" * "));
+				gradient += a * CalculateExpression_U_face (ptr);
+				DG_DEBUG_UV ((" +\n"));
+
+				DG_DEBUG_UV (("2 * "));
+				a = CalculateGradient_U_Coefficent (ptr, false);
+				DG_DEBUG_UV ((" * "));
+				gradient += a * CalculateExpression_V_face (ptr);
+				DG_DEBUG_UV ((" +\n"));
+			}
+			ptr = ptr->m_twin->m_next;
+		} while (ptr != vertex);
+		m_gradients[2 * vertexIndex] = - gradient;
+		DG_DEBUG_UV (("\n"));
+
+		// calculate diagonal derivative
+		DG_DEBUG_UV (("H(u%d,u%d) =\n", vertexIndex, vertexIndex));
+		ndFloat64 diagonal = ndFloat64 (0.0f);
+		ptr = vertex;
+		do {
+			if (ptr->m_incidentFace > 0) {
+				DG_DEBUG_UV (("2 * "));
+				ndAssert (ptr->m_incidentVertex == vertexIndex);
+				ndFloat64 diag = CalculateGradient_U_Coefficent (ptr, true);
+				diagonal += diag * diag;
+				DG_DEBUG_UV (("^2 +\n"));
+
+				DG_DEBUG_UV (("2 * "));
+				diag = CalculateGradient_U_Coefficent (ptr, false);
+				diagonal += diag * diag;
+				DG_DEBUG_UV (("^2 +\n"));
+			}
+			ptr = ptr->m_twin->m_next;
+		} while (ptr != vertex);
+		ndAssert (diagonal > ndFloat32 (0.0f));
+
+		m_hessianCoLumnValue[m_matrixElementCount] = diagonal;
+		m_hessianCoLumnIndex[m_matrixElementCount] = vertexIndex * 2 + 0;
+		m_matrixElementCount ++;
+		m_diagonal[2 * vertexIndex] = diagonal;
+		DG_DEBUG_UV (("\n"));
+
+		// calculate of diagonal UiVi derivative
+		DG_DEBUG_UV (("H(u%d,v%d) =\n", vertexIndex, vertexIndex));
+		ndFloat64 hessianUV = ndFloat64 (0.0);
+		ptr = vertex;
+		do {
+			if (ptr->m_incidentFace > 0) {
+				DG_DEBUG_UV (("2 * "));
+				ndAssert (ptr->m_incidentVertex == vertexIndex);
+				ndFloat64 a = CalculateGradient_U_Coefficent (ptr, true);
+				DG_DEBUG_UV ((" * "));
+				hessianUV += a * CalculateHessianExpression_U_V (ptr);
+				DG_DEBUG_UV ((" +\n"));
+
+				DG_DEBUG_UV (("2 * "));
+				a = CalculateGradient_U_Coefficent (ptr, false);
+				DG_DEBUG_UV ((" * "));
+				hessianUV += a * CalculateHessianExpression_V_V (ptr);
+				DG_DEBUG_UV ((" +\n"));
+			}
+			ptr = ptr->m_twin->m_next;
+		} while (ptr != vertex);
+
+		m_hessianCoLumnValue[m_matrixElementCount] = hessianUV;
+		m_hessianCoLumnIndex[m_matrixElementCount] = vertexIndex * 2 + 1;
+		m_matrixElementCount ++;
+		DG_DEBUG_UV (("\n"));
+
+
+/*
+		// calculate off diagonal partial derivatives
+		ptr = vertex;
+		do {
+			// derivative respect to U(i, j)
+			ndInt32 vertexIndex2 = ptr->m_twin->m_incidentVertex;
+			DG_DEBUG_UV (("H(u%d,u%d) =\n", vertexIndex, vertexIndex2));
+			if (ptr->m_incidentFace > 0) {
+				DG_DEBUG_UV (("2 * "));
+				ndAssert (ptr->m_incidentVertex == vertexIndex);
+				ndFloat64 a = CalculateGradient_U_Coefficent (ptr, true);
+				DG_DEBUG_UV ((" * "));
+//				gradient += diag * TraceExpression_U_face (ptr);
+				DG_DEBUG_UV ((" +\n"));
+
+				DG_DEBUG_UV (("2 * "));
+				a = CalculateGradient_U_Coefficent (ptr, false);
+				DG_DEBUG_UV ((" * "));
+//				gradient += diag * TraceExpression_V_face (ptr);
+				DG_DEBUG_UV ((" +\n"));
+			}
+
+			if (ptr->m_twin->m_incidentFace > 0) {
+				DG_DEBUG_UV (("2 * "));
+				ndAssert (ptr->m_incidentVertex == vertexIndex);
+				ndFloat64 a = CalculateGradient_U_Coefficent (ptr->m_twin->m_next, true);
+				DG_DEBUG_UV ((" * "));
+				//				gradient += diag * TraceExpression_U_face (ptr);
+				DG_DEBUG_UV ((" +\n"));
+
+				DG_DEBUG_UV (("2 * "));
+				a = CalculateGradient_U_Coefficent (ptr->m_twin->m_next, false);
+				DG_DEBUG_UV ((" * "));
+				//				gradient += diag * TraceExpression_V_face (ptr);
+				DG_DEBUG_UV ((" +\n"));
+			}
+
+			// derivative respect to V(i, j)
+			DG_DEBUG_UV (("H(u%d,v%d) =\n", vertexIndex, vertexIndex2));
+			if (ptr->m_incidentFace > 0) {
+
+				DG_DEBUG_UV (("2 * "));
+				ndAssert (ptr->m_incidentVertex == vertexIndex);
+				ndFloat64 a = CalculateGradient_U_Coefficent (ptr, true);
+				DG_DEBUG_UV ((" * "));
+				//				gradient += diag * TraceExpression_U_face (ptr);
+				DG_DEBUG_UV ((" +\n"));
+
+				DG_DEBUG_UV (("2 * "));
+				a = CalculateGradient_U_Coefficent (ptr, false);
+				DG_DEBUG_UV ((" * "));
+				//				gradient += diag * TraceExpression_V_face (ptr);
+				DG_DEBUG_UV ((" +\n"));
+
+			}
+
+			if (ptr->m_twin->m_incidentFace > 0) {
+
+				DG_DEBUG_UV (("2 * "));
+				ndAssert (ptr->m_incidentVertex == vertexIndex);
+				ndFloat64 a = CalculateGradient_U_Coefficent (ptr->m_twin->m_next, true);
+				DG_DEBUG_UV ((" * "));
+				//				gradient += diag * TraceExpression_U_face (ptr);
+				DG_DEBUG_UV ((" +\n"));
+
+				DG_DEBUG_UV (("2 * "));
+				a = CalculateGradient_U_Coefficent (ptr->m_twin->m_next, false);
+				DG_DEBUG_UV ((" * "));
+				//				gradient += diag * TraceExpression_V_face (ptr);
+				DG_DEBUG_UV ((" +\n"));
+
+			}
+
+			DG_DEBUG_UV (("\n"));
+			ptr = ptr->m_twin->m_next;
+		} while (ptr != vertex);
+*/
+	}
+
+
+	void CalculateGradientV (ndInt32 vertexIndex)
+	{
+		// calculate U Gradient derivative
+		const ndEdge* const vertex = m_vertexEdge[vertexIndex];
+		DG_DEBUG_UV (("dv%d =\n", vertexIndex));
+			
+		ndFloat64 gradient = ndFloat64 (0.0f);
+		const ndEdge* ptr = vertex;
+		do {
+			if (ptr->m_incidentFace > 0) {
+				DG_DEBUG_UV (("2 * "));
+				ndAssert (ptr->m_incidentVertex == vertexIndex);
+				ndFloat64 a = CalculateGradient_V_Coefficent (ptr, true);
+				DG_DEBUG_UV ((" * "));
+				gradient += a * CalculateExpression_U_face (ptr);
+				DG_DEBUG_UV ((" +\n"));
+
+				DG_DEBUG_UV (("2 * "));
+				a = CalculateGradient_V_Coefficent (ptr, false);
+				DG_DEBUG_UV ((" * "));
+				gradient += a * CalculateExpression_V_face (ptr);
+				DG_DEBUG_UV ((" +\n"));
+			}
+			ptr = ptr->m_twin->m_next;
+		} while (ptr != vertex);
+		m_gradients[2 * vertexIndex + 1] = - gradient;
+		DG_DEBUG_UV (("\n"));
+
+
+		// calculate diagonal derivative
+		DG_DEBUG_UV (("H(v%d,v%d) =\n", vertexIndex, vertexIndex));
+		ndFloat64 diagonal = ndFloat64 (0.0f);
+		ptr = vertex;
+		do {
+			if (ptr->m_incidentFace > 0) {
+				DG_DEBUG_UV (("2 * "));
+				ndAssert (ptr->m_incidentVertex == vertexIndex);
+				ndFloat64 diag = CalculateGradient_V_Coefficent (ptr, true);
+				diagonal += diag * diag;
+				DG_DEBUG_UV (("^2 +\n"));
+
+				DG_DEBUG_UV (("2 * "));
+				diag = CalculateGradient_V_Coefficent (ptr, false);
+				diagonal += diag * diag;
+				DG_DEBUG_UV (("^2 +\n"));
+			}
+			ptr = ptr->m_twin->m_next;
+		} while (ptr != vertex);
+		ndAssert (diagonal > ndFloat32 (0.0f));
+
+		m_hessianCoLumnValue[m_matrixElementCount] = diagonal;
+		m_hessianCoLumnIndex[m_matrixElementCount] = vertexIndex * 2 + 1;
+		m_matrixElementCount ++;
+		m_diagonal[2 * vertexIndex + 1] = diagonal;
+		DG_DEBUG_UV (("\n"));
+
+
+
+
+
+	}
+
+
+
+	void CalculateGradientVectorAndHessianMatrix ()
+	{
+		// trace objective function
+//		TraceObjectiveFunction();
+
+		// trace gradients
+		DG_DEBUG_UV (("\n"));
+		ndInt32 count = m_mesh->GetVertexCount();
+		for (ndInt32 i = 0; i < count; ++i) {
+			CalculateGradientU (i);
+			CalculateGradientV (i);
+		}
+		DG_DEBUG_UV (("\n"));
+	}
+
+	void InversePrecoditionerTimeVector (ndFloat64* const out, const ndFloat64* const v) const
+	{
+		const ndInt32 count = m_mesh->GetVertexCount();
+		for (ndInt32 i = 0; i < count; ++i) {
+			out[2 * i + 0] = m_pinnedPoints[i] * v[i * 2 + 0] / m_diagonal[2 * i + 0];
+			out[2 * i + 1] = m_pinnedPoints[i] * v[i * 2 + 1] / m_diagonal[2 * i + 1];
+		}
+	}
+
+	void MatrixTimeVector (ndFloat64* const out, const ndFloat64* const v) const
+	{
+/*
+		const ndInt32 count = m_mesh->GetVertexCount();
+		for (ndInt32 i = 0; i < count; ++i) {
+			ndEdge* const vertex = m_vertexEdge[i];
+			ndAssert (vertex->m_incidentVertex == i);
+			out[i * 2 + 0] = m_diagonal[2 * i + 0] * v[2 * i + 0];
+			out[i * 2 + 1] = m_diagonal[2 * i + 1] * v[2 * i + 1];
+		}
+		DG_DEBUG_UV (("\n"));
+		ndInt32 count = m_mesh->GetVertexCount();
+		for (ndInt32 i = 0; count; ++i) {
+			CalculateHessianDiagonalUU (i);
+		}
+		DG_DEBUG_UV (("\n"));
+*/
+	}
+
+	void LagrangeOptimization()
+	{
+		CalculateGradientVectorAndHessianMatrix ();
+		ndStack<ndFloat64> r0(2 * m_mesh->GetVertexCount());
+		ndStack<ndFloat64> z0(2 * m_mesh->GetVertexCount());
+		ndStack<ndFloat64> p0(2 * m_mesh->GetVertexCount());
+		ndStack<ndFloat64> q0(2 * m_mesh->GetVertexCount());
+		SetBuffers(&r0[0], &z0[0], &p0[0], &q0[0]);
+		Solve(2 * m_mesh->GetVertexCount(), dgABF_UV_TOL2, m_uvArray, m_gradients);
+		SetBuffers(nullptr, nullptr, nullptr, nullptr);
+	}
+
+	dgArray<ndInt32> m_hessianCoLumnIndex;
+	dgArray<ndFloat64> m_hessianCoLumnValue;
+	ndMeshEffect* m_mesh;
+	ndEdge** m_triangles;
+	ndEdge** m_vertexEdge;
+	ndFloat64* m_uvArray;
+	ndFloat64* m_sinTable;
+	ndFloat64* m_cosTable;
+	ndFloat64* m_gradients;
+	ndFloat64* m_diagonal;
+	ndFloat64* m_triangleAngles;
+	const ndFloat64* m_pinnedPoints;
+
+	ndInt32 m_trianglesCount;
+	ndInt32 m_matrixElementCount;
+	bool m_allocated;
+};
+
+class dgAngleBasedFlatteningMapping: public dgSymmetricConjugateGradientSolver<ndFloat64>
+{
+	public: 
+	dgAngleBasedFlatteningMapping (ndMeshEffect* const mesh, ndInt32 material, dgReportProgress progressReportCallback, void* const userData)
+		:m_mesh(mesh)
+		,m_progressReportUserData(userData)
+		,m_progressReportCallback(progressReportCallback)
+	{
+ndAssert (0);
+/*
+		AllocVectors();
+		InitEdgeVector();
+		CalculateInitialAngles ();
+		LagrangeOptimization();
+
+		ndEdge* const face = m_betaEdge[0];
+		ndEdge* ptr = face;
+		do {
+			if (ptr->m_incidentFace > 0) {
+				ndInt32 index = ndInt32 (ptr->m_userData);
+				ndMeshEffect::dgVertexAtribute& attribute = m_mesh->GetAttribute (index);
+				attribute.m_u0 = ndFloat32 (0.0f);
+				attribute.m_v0 = ndFloat32 (0.0f);
+			}
+			ptr = ptr->m_twin->m_next;
+		} while (ptr != face);
+
+		ndEdge* const twinFace = face->m_twin;
+		const ndBigVector& p0 = m_mesh->GetVertex(face->m_incidentVertex);
+		const ndBigVector& p1 = m_mesh->GetVertex(twinFace->m_incidentVertex);
+		ndBigVector p10 (p1 - p0);
+		ndAssert(p10.m_w == ndFloat32(0.0f));
+		ndFloat64 e0length = sqrt (p10.DotProduct(p10).GetScalar());
+
+		ptr = twinFace;
+		do {
+			if (ptr->m_incidentFace > 0) {
+				ndInt32 index = ndInt32 (ptr->m_userData);
+				ndMeshEffect::dgVertexAtribute& attribute = m_mesh->GetAttribute (index);
+				attribute.m_u0 = e0length;
+				attribute.m_v0 = ndFloat32 (0.0f);
+			}
+			ptr = ptr->m_twin->m_next;
+		} while (ptr != twinFace);
+
+		DeleteAuxiliaryVectors();
+
+		m_deltaVariables[0] = 0.0f;
+		m_deltaVariables[1] = 0.0f;
+		for (ndInt32 i = 2; i < m_totalVariablesCount; ++i) {
+			m_deltaVariables[i] = 1.0f;
+		}
+		dgTriangleAnglesToUV anglesToUV (mesh, material, progressReportCallback, userData, m_deltaVariables, m_variables);
+*/
+	}
+
+	~dgAngleBasedFlatteningMapping()
+	{
+		m_mesh->GetAllocator()->FreeLow (m_variables);
+		m_mesh->GetAllocator()->FreeLow (m_deltaVariables);
+	}
+
+
+	void AllocVectors()
+	{
+		CalculateNumberOfVariables();
+		ndInt32 vertexCount = m_mesh->GetVertexCount();
+
+		// alloc intermediate vectors
+		m_betaEdge = (ndEdge**) m_mesh->GetAllocator()->MallocLow(m_anglesCount * sizeof (ndEdge*));
+		m_interiorIndirectMap = (ndInt32*) m_mesh->GetAllocator()->MallocLow (vertexCount * sizeof (ndInt32));
+		m_beta = (ndFloat64*) m_mesh->GetAllocator()->MallocLow (m_anglesCount * sizeof (ndFloat64));
+		m_weight= (ndFloat64*) m_mesh->GetAllocator()->MallocLow (m_anglesCount * sizeof (ndFloat64));
+		m_sinTable = (ndFloat64*) m_mesh->GetAllocator()->MallocLow (m_anglesCount * sizeof (ndFloat64));
+		m_cosTable = (ndFloat64*) m_mesh->GetAllocator()->MallocLow (m_anglesCount * sizeof (ndFloat64));
+		m_gradients = (ndFloat64*) m_mesh->GetAllocator()->MallocLow (m_totalVariablesCount * sizeof (ndFloat64));
+		
+		// allocate angle and internal vertex vector
+		m_variables = (ndFloat64*) m_mesh->GetAllocator()->MallocLow (m_totalVariablesCount * sizeof (ndFloat64));
+		m_deltaVariables = (ndFloat64*) m_mesh->GetAllocator()->MallocLow (m_totalVariablesCount * sizeof (ndFloat64));
+	}
+
+	void DeleteAuxiliaryVectors()
+	{
+		// delete intermediate vectors
+		m_mesh->GetAllocator()->FreeLow (m_betaEdge);
+		m_mesh->GetAllocator()->FreeLow (m_interiorIndirectMap);
+		m_mesh->GetAllocator()->FreeLow (m_sinTable);
+		m_mesh->GetAllocator()->FreeLow (m_cosTable);
+		m_mesh->GetAllocator()->FreeLow (m_beta);
+		m_mesh->GetAllocator()->FreeLow (m_weight);
+		m_mesh->GetAllocator()->FreeLow (m_gradients);
+		
+		m_beta = nullptr;
+		m_weight = nullptr;
+		m_betaEdge = nullptr;
+		m_sinTable = nullptr;
+		m_cosTable = nullptr;
+		m_gradients = nullptr;
+		m_interiorIndirectMap = nullptr;
+	}
+
+
+	void CalculateNumberOfVariables()
+	{
+		//m_mesh->SaveOFF("xxx.off");
+		m_anglesCount = 0;
+		m_triangleCount = 0;
+		m_interiorVertexCount = 0;
+
+		ndInt32 mark = m_mesh->IncLRU();
+		ndMeshEffect::Iterator iter (*m_mesh);
+		for (iter.Begin(); iter; iter ++) {
+			ndEdge* const edge = &iter.GetNode()->GetInfo();
+			if ((edge->m_incidentFace > 0) && (edge->m_mark != mark)) {
+				ndEdge *ptr = edge;
+				do {
+					m_anglesCount ++;
+					ptr->m_mark = mark;
+					ptr = ptr->m_next;
+				} while (ptr != edge);
+				m_triangleCount ++;
+				ndAssert (edge->m_next->m_next->m_next == edge);
+			}
+		}
+
+		mark = m_mesh->IncLRU();
+		for (iter.Begin(); iter; iter ++) {
+			ndEdge* const edge = &iter.GetNode()->GetInfo();
+			if ((edge->m_incidentFace > 0) && (edge->m_mark != mark)) {
+				bool isInterior = true;
+				ndEdge *ptr = edge;
+				do {
+					isInterior &= (ptr->m_incidentFace > 0);
+					ptr->m_mark = mark;
+					ptr = ptr->m_twin->m_next;
+				} while (ptr != edge);
+				m_interiorVertexCount += isInterior ? 1 : 0;
+			}
+		}
+		m_totalVariablesCount = m_anglesCount + m_triangleCount + 2 * m_interiorVertexCount;
+	}
+
+	void InitEdgeVector()
+	{
+		ndInt32 count = 0;
+		ndInt32 mark = m_mesh->IncLRU();
+		ndMeshEffect::Iterator iter (*m_mesh);
+		for (iter.Begin(); iter; iter ++) {
+			ndEdge* const edge = &iter.GetNode()->GetInfo();
+			if ((edge->m_incidentFace > 0) && (edge->m_mark != mark)) {
+				ndEdge *ptr = edge;
+				do {
+					ptr->m_mark = mark;
+					m_betaEdge[count] = ptr;
+					ptr->m_incidentFace = count + 1;
+					count ++;
+					ndAssert (count <= m_anglesCount);
+					ptr = ptr->m_next;
+				} while (ptr != edge);
+			}
+		}
+
+		count = 0;
+		mark = m_mesh->IncLRU();		
+		memset (m_interiorIndirectMap, -1, m_mesh->GetVertexCount() * sizeof (m_interiorIndirectMap[0]));
+		for (iter.Begin(); iter; iter ++) {
+			ndEdge* const edge = &iter.GetNode()->GetInfo();
+			if ((edge->m_incidentFace > 0) && (edge->m_mark != mark)) {
+
+				bool isInterior = true;
+				ndEdge* ptr = edge;
+				do {
+					isInterior &= (ptr->m_incidentFace > 0);
+					ptr->m_mark = mark;
+					ptr = ptr->m_twin->m_next;
+				} while (ptr != edge);
+				if (isInterior) {
+					m_interiorIndirectMap[edge->m_incidentVertex] = m_anglesCount + m_triangleCount + count;
+					count ++;
+				}
+			}
+		}
+	}
+
+	ndInt32 GetAlphaLandaIndex (const ndEdge* const edge) const
+	{
+		return edge->m_incidentFace - 1;
+	}
+
+	ndInt32 GetTriangleIndex (const ndInt32 alphaIndex) const
+	{
+		return alphaIndex / 3 + m_anglesCount;
+	}
+
+	ndInt32 GetTriangleIndex (const ndEdge* const edge) const
+	{
+		return GetAlphaLandaIndex(edge) / 3 + m_anglesCount;
+	}
+
+	ndInt32 GetInteriorVertex(const ndEdge* const edge) const
+	{
+		return m_interiorIndirectMap[edge->m_incidentVertex];
+	}
+
+	void CalculateInitialAngles ()
+	{
+		// calculate initial beta angle for each triangle
+		for (ndInt32 i = 0; i < m_anglesCount; ++i) {
+			ndEdge* const edge = m_betaEdge[i];
+
+			const ndBigVector& p0 = m_mesh->GetVertex(edge->m_incidentVertex);
+			const ndBigVector& p1 = m_mesh->GetVertex(edge->m_next->m_incidentVertex);
+			const ndBigVector& p2 = m_mesh->GetVertex(edge->m_prev->m_incidentVertex);
+
+			ndBigVector e10 (p1 - p0);
+			ndBigVector e20 (p2 - p0);
+
+			e10 = e10.Scale (ndFloat64 (1.0) / sqrt (e10.DotProduct(e10).GetScalar()));
+			e20 = e20.Scale (ndFloat64 (1.0) / sqrt (e20.DotProduct(e20).GetScalar()));
+			ndAssert(e10.m_w == ndFloat32(0.0f));
+			ndAssert(e20.m_w == ndFloat32(0.0f));
+
+			m_beta[i] = acos (ndClamp(e10.DotProduct(e20).GetScalar(), ndFloat64 (-1.0f), ndFloat64 (1.0f)));
+			ndAssert (m_beta[i] > ndFloat64 (0.0f));
+		}
+
+		#ifdef _DEBUG
+		for (ndInt32 i = 0; i < m_triangleCount; ++i) {
+			ndInt32 i0 = i * 3 + 0;
+			ndInt32 i1 = i * 3 + 1;
+			ndInt32 i2 = i * 3 + 2;
+			ndAssert (fabs (m_beta[i0] + m_beta[i1] + m_beta[i2] - dgABF_PI) < ndFloat64 (1.0e-6f));
+		}
+		#endif
+
+		// for each interior vertex apply the scale factor
+		ndInt32 mark = m_mesh->IncLRU();
+		for (ndInt32 i = 0; i < m_anglesCount; ++i) {
+			ndEdge* const edge = m_betaEdge[i];
+			if ((edge->m_mark != mark) && (GetInteriorVertex(edge) >= 0)) {
+				ndFloat64 scale = ndFloat64 (0.0f);
+				ndEdge* ptr = edge; 
+				do {
+					ndInt32 index = GetAlphaLandaIndex (ptr);
+					ndAssert (index >= 0);
+					ndAssert (index <= m_anglesCount);
+					scale += m_beta[index];
+					ptr->m_mark = mark;
+					ptr = ptr->m_twin->m_next;
+				} while (ptr != edge);
+				ndAssert (scale > ndFloat32 (0.0f));
+
+				scale = ndFloat64 (2.0f) * dgABF_PI / scale;
+				ptr = edge;
+				do {
+					ndInt32 index = GetAlphaLandaIndex (ptr);
+					ndAssert (index >= 0);
+					ndAssert (index <= m_anglesCount);
+					m_beta[index] *= scale;
+					ptr = ptr->m_twin->m_next;
+				} while (ptr != edge);
+			}
+		}
+
+		// initialized each alpha lambda to the beta angle and also calcual ethe derivatoe coeficent (2.0 / (betai * betai)) 
+		for (ndInt32 i = 0; i < m_anglesCount; ++i) {
+			ndAssert (m_beta[i] > ndFloat64 (0.0f));
+			m_variables[i] = m_beta[i];
+			m_weight[i] = ndFloat64 (2.0f) / (m_beta[i] * m_beta[i]);
+		}
+	}
+
+	// angular derivative component
+	// (wi * (xi - bi) + T0
+	// where wi = 2.0 / (bi ^ 2)
+	ndFloat64 CalculateAngularGradientDerivative (ndInt32 alphaIndex) const
+	{
+		ndFloat64 gradient = (m_variables[alphaIndex] - m_beta[alphaIndex]) * m_weight[alphaIndex] + m_variables[GetTriangleIndex(alphaIndex)];
+		ndAssert (fabs(gradient) < ndFloat64(1.0e10f));
+		return gradient;
+	}
+
+	// Vi if the the edge is an interior vertex
+	ndFloat64 CalculateInteriorVertexGradient (ndInt32 alphaIndex) const
+	{
+		ndInt32 index = GetInteriorVertex(m_betaEdge[alphaIndex]);
+		ndFloat64 gradient = (index != -1) ? m_variables[index] : ndFloat32 (0.0f);
+		ndAssert (fabs(gradient) < ndFloat64(1.0e10f));
+		return gradient;
+	}
+
+	// Wj * cos(alpha) * sum (alphai) for eadh previsu or next interior incdent vertex
+	ndFloat64 CalculatePlanarityGradient (ndInt32 alphaIndex) const
+	{
+		ndFloat64 gradient = ndFloat64 (0.0f);
+
+		ndEdge* const incidentEdge = m_betaEdge[alphaIndex];
+
+		if (GetInteriorVertex (incidentEdge->m_next) != -1) {
+			ndEdge* const edge = m_betaEdge[GetAlphaLandaIndex(incidentEdge->m_next)];
+			ndFloat64 product = m_cosTable[GetAlphaLandaIndex(edge->m_prev)];
+			ndEdge* ptr = edge->m_twin->m_next;
+			do {
+				product *= m_sinTable[GetAlphaLandaIndex(ptr->m_prev)];
+				ptr = ptr->m_twin->m_next;
 			} while (ptr != edge);
+			ndInt32 interiorVertexIndex = GetInteriorVertex (incidentEdge->m_next) + m_interiorVertexCount;
+			gradient -= m_variables[interiorVertexIndex] * product;
 		}
 
-		Trace();
+		if (GetInteriorVertex (incidentEdge->m_prev) != -1) {
+			ndEdge* const edge = m_betaEdge[GetAlphaLandaIndex(incidentEdge->m_prev)];
+			ndFloat64 product = m_cosTable[GetAlphaLandaIndex(edge->m_next)];
+			ndEdge* ptr = edge->m_twin->m_next;
+			do {
+				product *= m_sinTable[GetAlphaLandaIndex(ptr->m_next)];
+				ptr = ptr->m_twin->m_next;
+			} while (ptr != edge);
+			ndInt32 interiorVertexIndex = GetInteriorVertex (incidentEdge->m_prev) + m_interiorVertexCount;
+			gradient += m_variables[interiorVertexIndex] * product;
+		}
+		ndAssert (fabs(gradient) < ndFloat64(1.0e10f));
+		return gradient;
+	}
 
-		// add links to back faces
-		ndPolygonSoupBuilder builder (mesh.GetAllocator());
-		ndVector polygon[64];
-		ndInt32 indexList[64];
-
-		ndMatrix matrix (ndGetIdentityMatrix());
-		for (ndInt32 i = 0; i < sizeof (polygon) / sizeof (polygon[0]); ++i) {
-			indexList[i] = i;
+	// sample of the Gradient Vector according to Mathematic to a generic mesh, this can be generalize for and arbitrary mesh topology
+	// x0 - x14 are the planar angles in 2d
+	// b0 - b14 are the mesh angles in 3d.
+	// T0 - T4 are the triangle lambdas
+	// V0 - V1 interior vertex lambdas
+	// W0 - W1 interior vertex wheel lambdas 
+	//
+    // Gradient derivatives: 
+	//0   (2 (-b0 + x0))/b0^2 + T0 + W2 Cos[x0] Sin[x5] Sin[x9] 
+	//1   (2 (-b1 + x1))/b1^2 + T0 - W2 Cos[x1] Sin[x10] Sin[x3] 
+	//2   (2 (-b2 + x2))/b2^2 + T0 + V2  
+	//3   (2 (-b3 + x3))/b3^2 + T1 - W2 Cos[x3] Sin[x1] Sin[x10] + W3 Cos[x3] Sin[x11] Sin[x12] Sin[x8] 
+	//4   (2 (-b4 + x4))/b4^2 + T1 + V2 - W3 Cos[x4] Sin[x13] Sin[x6] Sin[x9] 
+	//5   (2 (-b5 + x5))/b5^2 + T1 + V3 + W2 Cos[x5] Sin[x0] Sin[x9] 
+	//6   (2 (-b6 + x6))/b6^2 + T2 - W3 Cos[x6] Sin[x13] Sin[x4] Sin[x9] 
+	//7   (2 (-b7 + x7))/b7^2 + T2 + V3 
+	//8   (2 (-b8 + x8))/b8^2 + T2 + W3 Cos[x8] Sin[x11] Sin[x12] Sin[x3] 
+	//9   (2 (-b09 + x09))/b09^2 + T3 + W2 Cos[x9] Sin[x0] Sin[x5] - W3 Cos[x9] Sin[x13] Sin[x4] Sin[x6] 
+	//10  (2 (-b10 + x10))/b10^2 + T3 + V3 - W2 Cos[x10] Sin[x1] Sin[x3] 
+	//11  (2 (-b11 + x11))/b11^2 + T3 + V2 + W3 Cos[x11] Sin[x12] Sin[x3] Sin[x8] 
+	//12  (2 (-b12 + x12))/b12^2 + T4 + W3 Cos[x12] Sin[x11] Sin[x3] Sin[x8] 
+	//13  (2 (-b13 + x13))/b13^2 + T4 - W3 Cos[x13] Sin[x4] Sin[x6] Sin[x9] 
+	//14  (2 (-b14 + x14))/b14^2 + T4 + V3 
+	//
+	//15  x0 + x1 + x2 - pi
+	//16  x3 + x4 + x5 - pi 
+	//17  x6 + x7 + x8 - pi  
+	//18  x10 + x11 + x9 - pi 
+	//19  x12 + x13 + x14 - pi 
+	//
+	//20  x11 + x2 + x4 - 2 pi 
+	//21  x10 + x14 + x5 + x7 - 2 pi 
+	//
+	//22  Sin[x0] Sin[x5] Sin[x9] - Sin[x1] Sin[x10] Sin[x3] 
+	//23  Sin[x11] Sin[x12] Sin[x3] Sin[x8] - Sin[x13] Sin[x4] Sin[x6] Sin[x9]
+	ndFloat64 CalculateGradientVector ()
+	{
+		// pre-compute sin cos tables
+		for (ndInt32 i = 0; i < m_anglesCount; ++i) {
+			m_sinTable[i] = sin (m_variables[i]);
+			m_cosTable[i] = cos (m_variables[i]);
 		}
 
-		ndBigVector minAABB;
-		ndBigVector maxAABB;
-		mesh.CalculateAABB (minAABB, maxAABB);
-		maxAABB -= minAABB;
-		ndFloat32 rayDiagonalLength = ndFloat32 (sqrt (maxAABB % maxAABB));
-		m_diagonal = rayDiagonalLength;
+		ndFloat64 gradientNorm = ndFloat64 (0.0f);
 
-		builder.Begin();
-		ndTree<ndNode*,ndInt32> clusterMap (GetAllocator());
-		for (ndNode* clusterNode = GetFirst(); clusterNode; clusterNode = clusterNode->GetNext()) {
+		// calculate gradients due to the difference between a matching edge angle and it projected angle msu be mminimal Wei * (Xei - Bei) ^ e = minimal
+		for (ndInt32 i = 0; i < m_anglesCount; ++i) {
+			ndFloat64 gradient = CalculateAngularGradientDerivative (i) + CalculateInteriorVertexGradient (i) + CalculatePlanarityGradient (i);
+			m_gradients[i] = -gradient;
+			gradientNorm += gradient * gradient;
+		}
 
-			// call the progress callback
-			//ReportProgress();
+		// calculate gradient due to the equality that the sum on the internal angle of a triangle must add to 180 degree. (Xt0 + Xt1 + Xt2 - pi) = 0
+		for (ndInt32 i = 0; i < m_triangleCount; ++i) {
+			ndFloat64 gradient = m_variables[i * 3 + 0] + m_variables[i * 3 + 1] + m_variables[i * 3 + 2] - dgABF_PI;
+			m_gradients[m_anglesCount + i] = -gradient;
+			gradientNorm += gradient * gradient;
+		}
 
-			dgHACDCluster& cluster = clusterNode->GetInfo().m_nodeData;
-			clusterMap.Insert(clusterNode, cluster.m_color);
-			dHACDClusterFace& face = cluster.GetFirst()->GetInfo();
-			ndEdge* const edge = face.m_edge;
-			ndInt32 count = 0;
+		// calculate the gradient due to the equality that the sum of all the angle incident to and interior vertex must be 3060 degree sum (Xvi) - 2 * pi = 0 
+		ndInt32 mark = m_mesh->IncLRU();
+		for (ndInt32 i = 0; i < m_anglesCount; ++i) {
+			ndEdge* const edge = m_betaEdge[i];
+
+			if ((edge->m_mark != mark) && GetInteriorVertex(edge) != -1) {
+				ndInt32 vertexIndex = GetInteriorVertex(edge);
+				ndFloat64 gradient = - ndFloat64 (2.0f) * dgABF_PI;
+
+				ndEdge* ptr = edge; 
+				do {
+					ndInt32 index = GetAlphaLandaIndex(ptr);
+					gradient += m_variables[index];
+					ptr->m_mark = mark;
+					ptr = ptr->m_twin->m_next;
+				} while (ptr != edge);
+				m_gradients[vertexIndex] = - gradient;
+				gradientNorm += gradient * gradient;
+			}
+		}
+
+		// calculate the gradient due to the equality that the difference of the product of the sin of the angle to the
+		// incident to an interior vertex must be zero product (sin (Xvi + 1) - product (sin (Xvi - 1)  = 0 
+		mark = m_mesh->IncLRU();
+		for (ndInt32 i = 0; i < m_anglesCount; ++i) {
+			ndEdge* const edge = m_betaEdge[i];
+
+			ndInt32 vertexIndex = GetInteriorVertex(edge);
+			if ((edge->m_mark != mark) && (vertexIndex != -1)) {
+				vertexIndex += m_interiorVertexCount;
+				ndFloat64 partialProdut0 =  ndFloat64 (1.0f);
+				ndFloat64 partialProdut1 =  ndFloat64 (1.0f);
+				ndEdge* ptr = edge; 
+				do {
+					ndInt32 index0 = GetAlphaLandaIndex(ptr->m_next);
+					ndInt32 index1 = GetAlphaLandaIndex(ptr->m_prev);
+					partialProdut0 *= m_sinTable[index0];
+					partialProdut1 *= m_sinTable[index1];
+					ptr->m_mark = mark;
+					ptr = ptr->m_twin->m_next;
+				} while (ptr != edge);
+				ndFloat64 gradient = partialProdut0 - partialProdut1;
+				m_gradients[vertexIndex] = - gradient;
+				gradientNorm += gradient * gradient;
+			}
+		}
+
+		return gradientNorm;
+	}
+
+	// the Hessian matrix is compose of these second partial derivatives
+	// these derivatives are too complex and make the solver to spend too much time, 
+	// [0][0]  2/b0^2 - W2 Sin[x0] Sin[x5] Sin[x9], 0, 0, 0, 0, W2 Cos[x0] Cos[x5] Sin[x9], 0, 0, 0, W2 Cos[x0] Cos[x9] Sin[x5], 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, Cos[x0] Sin[x5] Sin[x9], 0, 
+	// [0][[1] {0, 2/b1^2 + W2 Sin[x1] Sin[x10] Sin[x3], 0, -W2 Cos[x1] Cos[x3] Sin[x10], 0, 0, 0, 0, 0, 0, -W2 Cos[x1] Cos[x10] Sin[x3], 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, -Cos[x1] Sin[x10] Sin[x3], 0}, 
+	// ...
+
+	// the optimize version of the algorithms assume that the second derivatives are linear, therefore all sine terms are neglected, I will do the same
+	// [ 0][0-n]  2/b0^2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,  Cos[x0] Sin[x5] Sin[x9], 0 
+	// [ 1][0-n]  0, 2/b1^2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, -Cos[x1] Sin[x10] Sin[x3], 0 
+	// [ 2][0-n]  0, 0, 2/b2^2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0 
+	// [ 3][0-n]  0, 0, 0, 2/b3^2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, -Cos[x3] Sin[x1] Sin[x10], Cos[x3] Sin[x11] Sin[x12] Sin[x8] 
+	// [ 4][0-n]  0, 0, 0, 0, 2/b4^2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -Cos[x4] Sin[x13] Sin[x6] Sin[x9]}	
+	// [ 5][0-n]  0, 0, 0, 0, 0, 2/b5^2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, Cos[x5] Sin[x0] Sin[x9], 0 
+	// [ 6][0-n]  0, 0, 0, 0, 0, 0, 2/b6^2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, -Cos[x6] Sin[x13] Sin[x4] Sin[x9] 
+	// [ 7][0-n]  0, 0, 0, 0, 0, 0, 0, 2/b7^2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0
+	// [ 8][0-n]  0, 0, 0, 0, 0, 0, 0, 0, 2/b8^2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, Cos[x8] Sin[x11] Sin[x12] Sin[x3] 
+	// [ 9][0-n]  0, 0, 0, 0, 0, 0, 0, 0, 0, 2/b9^2,  0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, Cos[x9] Sin[x0] Sin[x5], -Cos[x9] Sin[x13] Sin[x4] Sin[x6]
+	// [10][0-n]  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2/b10^2, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, -Cos[x10] Sin[x1] Sin[x3], 0}, 
+	// [11][0-n]  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2/b11^2, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, Cos[x11] Sin[x12] Sin[x3] Sin[x8]
+	// [12][0-n]  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2/b12^2, 0, 0, 0, 0, 0, 0, 1,	0, 0, 0, Cos[x12] Sin[x11] Sin[x3] Sin[x8]
+	// [13][0-n]  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2/b13^2, 0, 0, 0, 0, 0, 1, 0, 0, 0, -Cos[x13] Sin[x4] Sin[x6] Sin[x9]
+	// [14][0-n]  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2/b14^2, 0, 0, 0, 0, 1, 0, 1, 0, 0
+
+	// [15][0-n]  1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	// [16][0-n]  0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	// [17][0-n]  0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	// [18][0-n]  0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	// [19][0-n]  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+	// [20][0-n]  0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	// [21][0-n]  0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0
+
+	// [22][0-n]  Cos[x0] Sin[x5] Sin[x9], -Cos[x1] Sin[x10] Sin[x3], 0, -Cos[x3] Sin[x1] Sin[x10], 0, Cos[x5] Sin[x0] Sin[x9], 0, 0, 0, Cos[x9] Sin[x0] Sin[x5], -Cos[x10] Sin[x1] Sin[x3], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	// [23][0-n]  0, 0, 0, Cos[x3] Sin[x11] Sin[x12] Sin[x8], -Cos[x4] Sin[x13] Sin[x6] Sin[x9], 0, -Cos[x6] Sin[x13] Sin[x4] Sin[x9], 0, Cos[x8] Sin[x11] Sin[x12] Sin[x3], -Cos[x9] Sin[x13] Sin[x4] Sin[x6], 0, Cos[x11] Sin[x12] Sin[x3] Sin[x8], Cos[x12] Sin[x11] Sin[x3] Sin[x8], -Cos[x13] Sin[x4] Sin[x6] Sin[x9], 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+	void MatrixTimeVector (ndFloat64* const out, const ndFloat64* const v) const
+	{
+		for (ndInt32 i = 0; i < m_interiorVertexCount; ++i) {
+			out[i + m_anglesCount + m_triangleCount] = ndFloat64 (0.0f);
+			out[i + m_anglesCount + m_triangleCount + m_interiorVertexCount] = ndFloat64 (0.0f);
+		}
+
+		for (ndInt32 i = 0; i < m_anglesCount; ++i) {
+			out[i] = m_weight[i] * v[i];
+
+			ndEdge* const edge = m_betaEdge[i];
+			ndInt32 vertexIndex = GetInteriorVertex(edge);
+			if (vertexIndex >= 0) {
+				out[i] += v[vertexIndex];
+				out[vertexIndex] += v[i];
+			}
+		}
+
+		for (ndInt32 i = 0; i < m_triangleCount; ++i) {
+			ndInt32 j = i * 3;
+			out[j + 0] += v[i + m_anglesCount];
+			out[j + 1] += v[i + m_anglesCount];
+			out[j + 2] += v[i + m_anglesCount];
+			out[i + m_anglesCount] = v[j + 0] + v[j + 1] +  v[j + 2];
+		}
+
+		for (ndInt32 i = 0; i < m_anglesCount; ++i) {
+			{
+				ndEdge* const edge = m_betaEdge[i]->m_prev;
+				ndInt32 vertexIndex = GetInteriorVertex(edge);
+				if (vertexIndex >= 0) {
+					ndInt32 index = GetAlphaLandaIndex(edge->m_next);
+					ndFloat64 product = m_cosTable[index];
+					ndEdge* ptr = edge->m_twin->m_next; 
+					do {
+						ndInt32 m = GetAlphaLandaIndex(ptr->m_next);
+						product *= m_sinTable[m];
+						ptr = ptr->m_twin->m_next;
+					} while (ptr != edge);
+					out[i] += v[vertexIndex + m_interiorVertexCount] * product;
+					out[vertexIndex + m_interiorVertexCount] += product * v[i];
+				}
+			}
+
+			{
+				ndEdge* const edge = m_betaEdge[i]->m_next;
+				ndInt32 vertexIndex = GetInteriorVertex(edge);
+				if (vertexIndex >= 0) {
+					ndInt32 index = GetAlphaLandaIndex(edge->m_prev);
+					ndFloat64 product = m_cosTable[index];
+					ndEdge* ptr = edge->m_twin->m_next; 
+					do {
+						ndInt32 m = GetAlphaLandaIndex(ptr->m_prev);
+						product *= m_sinTable[m];
+						ptr = ptr->m_twin->m_next;
+					} while (ptr != edge);
+					out[i] -= v[vertexIndex + m_interiorVertexCount] * product;
+					out[vertexIndex + m_interiorVertexCount] -= product * v[i];
+				}
+			}
+		}
+	}
+
+	void InversePrecoditionerTimeVector (ndFloat64* const out, const ndFloat64* const v) const
+	{
+		for (ndInt32 i = 0; i < m_anglesCount; ++i) {
+			out[i] = v[i] / m_weight[i];
+		}
+		for (ndInt32 i = 0; i < m_triangleCount; ++i) {
+			out[i + m_anglesCount] = v[i + m_anglesCount];
+		}
+
+		for (ndInt32 i = 0; i < m_interiorVertexCount; ++i) {
+			out[i + m_anglesCount + m_triangleCount] = v[i + m_anglesCount + m_triangleCount];
+			out[i + m_anglesCount + m_triangleCount + m_interiorVertexCount] = v[i + m_anglesCount + m_triangleCount + m_interiorVertexCount];
+		}
+
+		m_progressNum ++;
+		if (m_progressReportCallback) {
+			if ((m_progressNum & 127) == 127) {
+				m_continueExecution = m_progressReportCallback (ndMin (ndFloat32 (m_progressNum) / m_progressDen, ndFloat32 (1.0f)), m_progressReportUserData);
+			}
+		}
+	}
+
+	void LagrangeOptimization()
+	{
+		memset (m_deltaVariables, 0, m_totalVariablesCount * sizeof (ndFloat64));
+		memset (&m_variables[m_anglesCount], 0, m_triangleCount * sizeof (ndFloat64));	
+
+		for (ndInt32 i = 0; i < m_interiorVertexCount; ++i) {
+			m_variables[i + m_anglesCount + m_triangleCount] = ndFloat32 (1.0f);
+			m_variables[i + m_anglesCount + m_triangleCount + m_interiorVertexCount] = ndFloat32 (1.0f);
+		}
+		
+		m_progressNum = 0;
+		m_continueExecution = true;
+
+/*
+		ndStack<ndFloat64> r0(2 * m_mesh->GetVertexCount());
+		ndStack<ndFloat64> z0(2 * m_mesh->GetVertexCount());
+		ndStack<ndFloat64> p0(2 * m_mesh->GetVertexCount());
+		ndStack<ndFloat64> q0(2 * m_mesh->GetVertexCount());
+		SetBuffers(&r0[0], &z0[0], &p0[0], &q0[0]);
+		ndFloat64 gradientNorm = CalculateGradientVector ();
+		for (ndInt32 iter = 0; (iter < dgABF_MAX_ITERATIONS) && (gradientNorm > dgABF_TOL2) && m_continueExecution; iter++) {
+			m_progressDen = m_progressNum + m_totalVariablesCount;
+			Solve(m_totalVariablesCount, dgABF_LINEAR_SOLVER_TOL, m_deltaVariables, m_gradients);
+			for (ndInt32 i = 0; i < m_totalVariablesCount; ++i) {
+				m_variables[i] += m_deltaVariables[i];
+			}
+			gradientNorm = CalculateGradientVector ();
+		}
+		SetBuffers(nullptr, nullptr, nullptr, nullptr);
+*/
+
+#ifdef _DEBUG
+		// calculate gradient due to the equality that the sum on the internal angle of a triangle must add to 180 degree. (Xt0 + Xt1 + Xt2 - pi) = 0
+//		for (ndInt32 i = 0; i < m_triangleCount; ++i) {
+//			ndFloat64 gradient = m_variables[i * 3 + 0] + m_variables[i * 3 + 1] + m_variables[i * 3 + 2] - dgABF_PI;
+//			ndAssert (fabs (gradient) < ndFloat64 (1.0e-2f));
+//		}
+#endif
+	}
+
+	ndMeshEffect* m_mesh;
+	ndEdge** m_betaEdge;
+	ndInt32* m_interiorIndirectMap;
+
+	ndFloat64* m_beta;
+	ndFloat64* m_weight;
+	ndFloat64* m_sinTable;
+	ndFloat64* m_cosTable;
+	ndFloat64* m_variables;
+	ndFloat64* m_gradients;
+	ndFloat64* m_deltaVariables;
+
+	ndInt32 m_anglesCount;
+	ndInt32 m_triangleCount;
+	ndInt32 m_interiorVertexCount;
+	ndInt32 m_totalVariablesCount;
+
+	void* m_progressReportUserData;
+	dgReportProgress m_progressReportCallback;
+	mutable ndInt32 m_progressNum;
+	mutable ndInt32 m_progressDen;
+	mutable bool m_continueExecution;
+};	
+
+
+/*
+void ndMeshEffect::ClearAttributeArray ()
+{
+	ndAssert(0);
+
+    ndStack<dgVertexAtribute>attribArray (m_pointCount);
+
+    memset (&attribArray[0], 0, m_pointCount * sizeof (dgVertexAtribute));
+    ndInt32 mark = IncLRU();
+    dPolyhedra::Iterator iter (*this);	
+    for(iter.Begin(); iter; iter ++){
+        ndEdge* const edge = &(*iter);
+        if (edge->m_mark < mark){
+            ndEdge* ptr = edge;
+
+            ndInt32 index = ptr->m_incidentVertex;
+            dgVertexAtribute& attrib = attribArray[index];
+            attrib.m_vertex = m_points[index];
+            do {
+                ptr->m_mark = mark;
+                ptr->m_userData = index;
+                ptr = ptr->m_twin->m_next;
+            } while (ptr !=  edge);
+
+        }
+    }
+    ApplyAttributeArray (&attribArray[0], m_pointCount);
+}
+*/
+
+
+
+void ndMeshEffect::CylindricalMapping (ndInt32 cylinderMaterial, ndInt32 capMaterial, const ndMatrix& uvalignment)
+{
+	ndBigVector origin (GetOrigin());
+	ndStack<ndBigVector> buffer(m_points.m_vertex.m_count);
+	ndBigVector pMin(ndFloat64(1.0e10f), ndFloat64(1.0e10f), ndFloat64(1.0e10f), ndFloat64(0.0f));
+	ndBigVector pMax(ndFloat64(-1.0e10f), ndFloat64(-1.0e10f), ndFloat64(-1.0e10f), ndFloat64(0.0f));
+
+	for (ndInt32 i = 0; i < m_points.m_vertex.m_count; ++i) {
+		buffer[i] = uvalignment.RotateVector (m_points.m_vertex[i] - origin);
+		const ndBigVector& tmp = buffer[i];
+		pMin.m_x = ndMin (pMin.m_x, tmp.m_x);
+		pMax.m_x = ndMax (pMax.m_x, tmp.m_x);
+		pMin.m_y = ndMin (pMin.m_y, tmp.m_y);
+		pMax.m_y = ndMax (pMax.m_y, tmp.m_y);
+		pMin.m_z = ndMin (pMin.m_z, tmp.m_z);
+		pMax.m_z = ndMax (pMax.m_z, tmp.m_z);
+	}
+
+	ndStack<ndBigVector>cylinder (m_points.m_vertex.m_count);
+    ndBigVector scale (ndFloat64 (1.0f)/ (pMax.m_x - pMin.m_x), ndFloat64 (1.0f)/ (pMax.m_y - pMin.m_y), ndFloat64 (1.0f)/ (pMax.m_z - pMin.m_z), ndFloat64 (0.0f));
+    for (ndInt32 i = 0; i < m_points.m_vertex.m_count; ++i) {
+		ndBigVector point (buffer[i]);
+		ndFloat64 u = (point.m_x - pMin.m_x) * scale.m_x;
+
+		ndAssert(point.m_w == ndFloat32(0.0f));
+		ndAssert(point.DotProduct(point).GetScalar() > ndFloat32 (0.0f));
+		point = point.Normalize();
+		ndFloat64 v = ndAtan2 (point.m_y, point.m_z);
+
+		v = v + ndPi;
+		cylinder[i].m_x = u;
+		cylinder[i].m_y = v;
+    }
+
+	UnpackAttibuteData();
+	m_attrib.m_uv0Channel.Reserve(m_attrib.m_pointChannel.m_count);
+	m_attrib.m_materialChannel.Reserve(m_attrib.m_pointChannel.m_count);
+
+    ndPolyhedra::Iterator iter (*this);	
+    for(iter.Begin(); iter; iter ++){
+        ndEdge* const edge = &(*iter);
+		ndAttibuteFormat::ndUV uv;
+		uv.m_u = ndFloat32(cylinder[edge->m_incidentVertex].m_x);
+		uv.m_v = ndFloat32(cylinder[edge->m_incidentVertex].m_y);
+		m_attrib.m_uv0Channel[ndInt32(edge->m_userData)] = uv;
+		m_attrib.m_materialChannel[ndInt32(edge->m_userData)] = cylinderMaterial;
+    }
+
+    ndInt32 mark = IncLRU ();
+    for(iter.Begin(); iter; iter ++){
+        ndEdge* const edge = &(*iter);
+        if ((edge->m_incidentFace > 0) && (edge->m_mark != mark)) {
+			ndAttibuteFormat::ndUV uvRef(m_attrib.m_uv0Channel[ndInt32(edge->m_userData)]);
+			ndFloat32 UVrefSin = ndSin(uvRef.m_v);
+			ndFloat32 UVrefCos = ndCos(uvRef.m_v);
+			ndEdge* ptr = edge;
+            do {
+				ptr->m_mark = mark;
+				ndAttibuteFormat::ndUV uv(m_attrib.m_uv0Channel[ndInt32(ptr->m_userData)]);
+				ndFloat32 sinAngle = UVrefCos * ndSin(uv.m_v) - UVrefSin * ndCos(uv.m_v);
+				ndFloat32 cosAngle = UVrefCos * ndCos(uv.m_v) + UVrefSin * ndSin(uv.m_v);
+				ndFloat32 deltaAngle = ndAtan2(sinAngle, cosAngle);
+				uv.m_v = (uvRef.m_v + deltaAngle) / dPi2;
+				m_attrib.m_uv0Channel[ndInt32(ptr->m_userData)] = uv;
+                ptr = ptr->m_next;
+            } while (ptr != edge);
+        }
+    }
+
+    // apply cap mapping
+    mark = IncLRU ();
+    for(iter.Begin(); iter; iter ++){
+        ndEdge* const edge = &(*iter);
+		if ((edge->m_incidentFace > 0) && (edge->m_mark != mark)) {
+			ndVector p0(buffer[edge->m_incidentVertex]);
+			ndVector p1(buffer[edge->m_next->m_incidentVertex]);
+
+			ndVector e1(p1 - p0);
+			ndBigVector normal(ndFloat32(0.0f));
+			for (ndEdge* ptr = edge->m_next; ptr != edge; ptr = ptr->m_next) {
+				ndVector p2(buffer[ptr->m_next->m_incidentVertex]);
+				ndBigVector e2(p2 - p0);
+				normal += e1.CrossProduct(e2);
+				e1 = e2;
+			}
+			normal = normal.Normalize();
+			if (ndAbs(normal.m_x) > ndFloat32 (0.99f)) {
+				ndEdge* ptr = edge;
+				do {
+					ndAttibuteFormat::ndUV uv;
+					ndVector p(buffer[ptr->m_incidentVertex]);
+					uv.m_u = ndFloat32((p.m_y - pMin.m_y) * scale.m_y);
+					uv.m_v = ndFloat32((p.m_z - pMin.m_z) * scale.m_z);
+					m_attrib.m_uv0Channel[ndInt32(ptr->m_userData)] = uv;
+					m_attrib.m_materialChannel[ndInt32(ptr->m_userData)] = capMaterial;
+					ptr = ptr->m_next;
+				} while (ptr != edge);
+			}
+
 			ndEdge* ptr = edge;
 			do {
-				polygon[count] = points[ptr->m_incidentVertex];
-				count ++;
-				ptr = ptr->m_prev;
+				ptr->m_mark = mark;
+				ptr = ptr->m_next;
 			} while (ptr != edge);
 
-			builder.AddMesh(&polygon[0].m_x, count, sizeof (ndVector), 1, &count, indexList, &cluster.m_color, matrix);
 		}
-		builder.End(false);
-		Create (builder, false);
-
-
-		ndFloat32 distanceThreshold = rayDiagonalLength * backFaceDistanceFactor;
-		for (ndNode* clusterNodeA = GetFirst(); clusterNodeA; clusterNodeA = clusterNodeA->GetNext()) {
-
-			// call the progress callback
-			//ReportProgress();
-			dgHACDCluster& clusterA = clusterNodeA->GetInfo().m_nodeData;
-			dHACDClusterFace& faceA = clusterA.GetFirst()->GetInfo();
-			ndEdge* const edgeA = faceA.m_edge;
-			ndEdge* ptr = edgeA;
-
-			ndVector p0 (points[ptr->m_incidentVertex]);
-			ndVector p1 (points[ptr->m_next->m_incidentVertex]);
-			ptr = ptr->m_next->m_next;
-			do {
-				ndVector p2 (points[ptr->m_incidentVertex]);
-				ndVector p01 ((p0 + p1).Scale (ndFloat32 (0.5f)));
-				ndVector p12 ((p1 + p2).Scale (ndFloat32 (0.5f)));
-				ndVector p20 ((p2 + p0).Scale (ndFloat32 (0.5f)));
-
-				CastBackFace (clusterNodeA, p0, p01, p20, distanceThreshold, clusterMap);
-				CastBackFace (clusterNodeA, p1, p12, p01, distanceThreshold, clusterMap);
-				CastBackFace (clusterNodeA, p2, p20, p12, distanceThreshold, clusterMap);
-				CastBackFace (clusterNodeA, p01, p12, p20, distanceThreshold, clusterMap);
-
-				p1 = p2;
-				ptr = ptr->m_next;
-			} while (ptr != edgeA);
-		}
-
-		Trace();
-	}
-
-	~dgHACDClusterGraph ()
-	{
-		for (ndInt32 i = 0; i < m_faceCount * 2; ++i) {
-			if (m_concavityTreeArray[i]) {
-				delete m_concavityTreeArray[i];
-			}
-		}
-
-		dgFreeStack(m_concavityTreeArray);
-		dgFreeStack(m_vertexPool);
-		dgFreeStack(m_vertexMarks);
-	}
-
-
-	void CastBackFace (
-		ndNode* const clusterNodeA,
-		const ndVector& p0, 
-		const ndVector& p1, 
-		const ndVector& p2,
-		ndFloat32 distanceThreshold,
-		ndTree<ndNode*,ndInt32>& clusterMap)
-	{
-		ndVector origin ((p0 + p1 + p2).Scale (ndFloat32 (1.0f/3.0f)));
-
-		ndFloat32 rayDistance = distanceThreshold * ndFloat32 (2.0f);
-
-		dgHACDCluster& clusterA = clusterNodeA->GetInfo().m_nodeData;
-		dHACDClusterFace& faceA = clusterA.GetFirst()->GetInfo();
-		ndVector end (origin - ndVector (faceA.m_normal).Scale (rayDistance));
-
-		dgHACDRayCasterContext ray (origin, end, this, clusterA.m_color);
-		ForAllSectorsRayHit(ray, RayHit, &ray);
-
-		if (ray.m_colorHit != -1) {
-			ndAssert (ray.m_colorHit != ray.m_myColor);
-			ndFloat32 distance = rayDistance * ray.m_param;
-
-			if (distance < distanceThreshold) {
-
-				ndAssert (ray.m_colorHit != clusterA.m_color);
-				ndAssert (clusterMap.Find(ray.m_colorHit));
-				ndNode* const clusterNodeB = clusterMap.Find(ray.m_colorHit)->GetInfo();
-				dgHACDCluster& clusterB = clusterNodeB->GetInfo().m_nodeData;
-
-				dHACDClusterFace& faceB = clusterB.GetFirst()->GetInfo();
-				ndEdge* const edgeB = faceB.m_edge;
-
-				bool isAdjacent = false;
-				ndEdge* ptrA = faceA.m_edge;
-				do {
-					ndEdge* ptrB = edgeB;
-					do {
-						if (ptrB->m_twin == ptrA) {
-							ptrA = faceA.m_edge->m_prev;
-							isAdjacent = true;
-							break;
-						}
-						ptrB = ptrB->m_next;
-					} while (ptrB != edgeB);
-
-					ptrA = ptrA->m_next;
-				} while (ptrA != faceA.m_edge);
-
-				if (!isAdjacent) {
-
-					isAdjacent = false;
-					for (dgGraphNode<dgHACDCluster, dgHACDEdge>::ndNode* edgeNode = clusterNodeA->GetInfo().GetFirst(); edgeNode; edgeNode = edgeNode->GetNext()) {
-						if (edgeNode->GetInfo().m_node == clusterNodeB) {
-							isAdjacent = true;
-							break;
-						}
-					}
-
-					if (!isAdjacent) {
-
-						dgGraphNode<dgHACDCluster, dgHACDEdge>::ndNode* const edgeNodeAB = clusterNodeA->GetInfo().AddEdge (clusterNodeB);
-						dgGraphNode<dgHACDCluster, dgHACDEdge>::ndNode* const edgeNodeBA = clusterNodeB->GetInfo().AddEdge (clusterNodeA);
-
-						dgHACDEdge& edgeAB = edgeNodeAB->GetInfo().m_edgeData;
-						dgHACDEdge& edgeBA = edgeNodeBA->GetInfo().m_edgeData;
-						edgeAB.m_backFaceHandicap = ndFloat64 (0.5f);
-						edgeBA.m_backFaceHandicap = ndFloat64 (0.5f);
-					}
-				}
-			}
-		}
-	}
-
-
-	void Trace() const
-	{
-		/*
-		for (ndNode* clusterNodeA = GetFirst(); clusterNodeA; clusterNodeA = clusterNodeA->GetNext()) {
-		dgHACDCluster& clusterA = clusterNodeA->GetInfo().m_nodeData;
-		//dHACDClusterFace& faceA = clusterA.GetFirst()->GetInfo();
-		//ndEdge* const edgeA = faceA.m_edge;
-
-		dTrace (("cluster node: %d\n", clusterA.m_color));
-		dTrace (("            links: "));
-		for (dgGraphNode<dgHACDCluster, dgHACDEdge>::ndNode* edgeNodeA = clusterNodeA->GetInfo().GetFirst(); edgeNodeA; edgeNodeA = edgeNodeA->GetNext()) {
-		ndNode* const clusterNodeB = edgeNodeA->GetInfo().m_node;
-		dgHACDCluster& clusterB = clusterNodeB->GetInfo().m_nodeData;
-		dTrace (("%d ", clusterB.m_color));
-		}
-		dTrace (("\n"));
-		}
-		dTrace (("\n"));
-		*/
-	}
-
-
-	// you can insert cal callback here  to print the progress as it collapse clusters
-	void ReportProgress ()
-	{
-		m_progress ++;
-		if (m_reportProgressCallback) {
-			ndFloat32 progress = ndFloat32(m_progress) * m_invFaceCount;
-			m_reportProgressCallback (progress);
-		}
-	}
-
-	ndMeshEffect* CreatePatitionMesh (ndMeshEffect& mesh, ndInt32 maxVertexPerHull)
-	{
-		dgMemoryAllocator* const allocator = mesh.GetAllocator();
-		ndMeshEffect* const convexPartionMesh = new (allocator) ndMeshEffect(allocator, true);
-
-		ndMeshEffect::dgVertexAtribute polygon[256];
-		memset(polygon, 0, sizeof(polygon));
-		dgArray<ndBigVector> convexVertexBuffer(mesh.GetCount(), GetAllocator());
-		const ndBigVector* const points = (ndBigVector*) mesh.GetVertexPool();
-
-		convexPartionMesh->BeginBuild();
-		ndFloat64 layer = ndFloat64 (0.0f);
-		for (ndList<dgHACDConvacityLookAheadTree*>::ndNode* clusterNode = m_convexProximation.GetFirst(); clusterNode; clusterNode = clusterNode->GetNext()) {
-			dgHACDConvacityLookAheadTree* const cluster = clusterNode->GetInfo();
-
-			ndInt32 vertexCount = 0;
-			for (ndList<ndEdge*>::ndNode* faceNode = cluster->m_faceList.GetFirst(); faceNode; faceNode = faceNode->GetNext()) {
-				ndEdge* const edge = faceNode->GetInfo();
-				ndEdge* ptr = edge;
-				do {
-					ndInt32 index = ptr->m_incidentVertex;
-					convexVertexBuffer[vertexCount] = points[index];
-					vertexCount++;
-					ptr = ptr->m_next;
-				} while (ptr != edge);
-			}
-			ndConvexHull3d convexHull(allocator, &convexVertexBuffer[0].m_x, sizeof(ndBigVector), vertexCount, 0.0, maxVertexPerHull);
-			if (convexHull.GetCount()) {
-				const ndBigVector* const vertex = convexHull.GetVertexPool();
-				for (ndConvexHull3d::ndNode* node = convexHull.GetFirst(); node; node = node->GetNext()) {
-					const ndConvexHull3dFace* const face = &node->GetInfo();
-
-					ndInt32 i0 = face->m_index[0];
-					ndInt32 i1 = face->m_index[1];
-					ndInt32 i2 = face->m_index[2];
-
-					polygon[0].m_vertex = vertex[i0];
-					polygon[0].m_vertex.m_w = layer;
-
-					polygon[1].m_vertex = vertex[i1];
-					polygon[1].m_vertex.m_w = layer;
-
-					polygon[2].m_vertex = vertex[i2];
-					polygon[2].m_vertex.m_w = layer;
-
-					convexPartionMesh->AddPolygon(3, &polygon[0].m_vertex.m_x, sizeof(ndMeshEffect::dgVertexAtribute), 0);
-				}
-				layer += ndFloat64 (1.0f);
-			}
-		}
-		convexPartionMesh->EndBuild(1.0e-5f);
-
-		m_progress = m_faceCount - 1;
-		ReportProgress();
-
-		return convexPartionMesh;
-	}
-
-
-
-	static ndFloat32 RayHit (void* const context, const ndFloat32* const polygon, ndInt32 strideInBytes, const ndInt32* const indexArray, ndInt32 indexCount)
-	{
-		dgHACDRayCasterContext& me = *((dgHACDRayCasterContext*) context);
-		ndVector normal (&polygon[indexArray[indexCount] * (strideInBytes / sizeof (ndFloat32))]);
-		ndFloat32 t = me.PolygonIntersect (normal, polygon, strideInBytes, indexArray, indexCount);
-		if (t < me.m_param) {
-			ndInt32 faceColor = me.m_me->GetTagId(indexArray);
-			if (faceColor != me.m_myColor) {
-				me.m_param = t;
-				me.m_colorHit = faceColor;
-			}
-		}
-		return t;
-	}
-
-
-	ndFloat64 ConcavityByFaceMedian (ndInt32 faceCountA, ndInt32 faceCountB) const
-	{
-		ndFloat64 faceCountCost = DG_CONCAVITY_SCALE * ndFloat64 (0.1f) * (faceCountA + faceCountB) * m_invFaceCount;
-		//faceCountCost *= 0;
-		return faceCountCost;
-	}
-
-	ndFloat64 CalculateConcavityMetric (ndFloat64 convexConcavity, ndFloat64 area, ndFloat64 perimeter, ndInt32 faceCountA, ndInt32 faceCountB) const 
-	{
-		ndFloat64 edgeCost = perimeter * perimeter / (ndFloat64(4.0f * ndPi) * area);
-		return convexConcavity * DG_CONCAVITY_SCALE + edgeCost + ConcavityByFaceMedian (faceCountA, faceCountB);
-	}
-
-	void SubmitInitialEdgeCosts (ndMeshEffect& mesh) 
-	{
-		m_mark ++;
-		for (ndNode* clusterNodeA = GetFirst(); clusterNodeA; clusterNodeA = clusterNodeA->GetNext()) {
-			// call the progress callback
-			//ReportProgress();
-
-			for (dgGraphNode<dgHACDCluster, dgHACDEdge>::ndNode* edgeNodeAB = clusterNodeA->GetInfo().GetFirst(); edgeNodeAB; edgeNodeAB = edgeNodeAB->GetNext()) {
-				dgHACDEdge& edgeAB = edgeNodeAB->GetInfo().m_edgeData;
-				ndFloat64 weight = edgeAB.m_backFaceHandicap; 
-				if (edgeAB.m_mark != m_mark) {
-					edgeAB.m_mark = m_mark;
-					ndNode* const clusterNodeB = edgeNodeAB->GetInfo().m_node;
-					for (dgGraphNode<dgHACDCluster, dgHACDEdge>::ndNode* edgeNodeBA = clusterNodeB->GetInfo().GetFirst(); edgeNodeBA; edgeNodeBA = edgeNodeBA->GetNext()) {
-						ndNode* const clusterNode = edgeNodeBA->GetInfo().m_node;
-						if (clusterNode == clusterNodeA) {
-							dgHACDEdge& edgeBA = edgeNodeBA->GetInfo().m_edgeData;
-							edgeBA.m_mark = m_mark;
-							ndAssert (!edgeAB.m_proxyListNode);
-							ndAssert (!edgeBA.m_proxyListNode);
-
-							ndList<dgPairProxy>::ndNode* const proxyNode = SubmitEdgeCost (mesh, clusterNodeA, clusterNodeB, weight * edgeBA.m_backFaceHandicap);
-							edgeAB.m_proxyListNode = proxyNode;
-							edgeBA.m_proxyListNode = proxyNode;
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	ndInt32 CopyVertexToPool(const ndMeshEffect& mesh, const dgHACDCluster& cluster, ndInt32 start)
-	{
-		ndInt32 count = start;
-
-		const ndBigVector* const points = (ndBigVector*) mesh.GetVertexPool();
-		for (ndList<dHACDClusterFace>::ndNode* node = cluster.GetFirst(); node; node = node->GetNext()) {
-			const dHACDClusterFace& clusterFace = node->GetInfo();
-			ndEdge* edge = clusterFace.m_edge;
-			do {
-				ndInt32 index = edge->m_incidentVertex;
-				if (m_vertexMarks[index] != m_vertexMark) {
-					m_vertexMarks[index] = m_vertexMark;
-					m_vertexPool[count] = points[index];
-					count++;
-				}
-				edge = edge->m_next;
-			} while (edge != clusterFace.m_edge);
-		}
-		return count;
-	}
-
-
-	void MarkInteriorClusterEdges (ndMeshEffect& mesh, ndInt32 mark, const dgHACDCluster& cluster, ndInt32 colorA, ndInt32 colorB) const
-	{
-		ndAssert (colorA != colorB);
-		for (ndList<dHACDClusterFace>::ndNode* node = cluster.GetFirst(); node; node = node->GetNext()) {
-			dHACDClusterFace& clusterFace = node->GetInfo();
-			ndEdge* edge = clusterFace.m_edge;
-			do {
-				if ((edge->m_twin->m_incidentFace == colorA) || (edge->m_twin->m_incidentFace == colorB)) {
-					edge->m_mark = mark;
-					edge->m_twin->m_mark = mark;
-				}
-				edge = edge->m_next;
-			} while (edge != clusterFace.m_edge);
-		}
-	}
-
-	ndFloat64 CalculateClusterPerimeter (ndMeshEffect& mesh, ndInt32 mark, const dgHACDCluster& cluster, ndInt32 colorA, ndInt32 colorB) const
-	{
-		ndAssert (colorA != colorB);
-		ndFloat64 perimeter = ndFloat64 (0.0f);
-		const ndBigVector* const points = (ndBigVector*) mesh.GetVertexPool();
-		for (ndList<dHACDClusterFace>::ndNode* node = cluster.GetFirst(); node; node = node->GetNext()) {
-			dHACDClusterFace& clusterFace = node->GetInfo();
-			ndEdge* edge = clusterFace.m_edge;
-			do {
-				if (!((edge->m_twin->m_incidentFace == colorA) || (edge->m_twin->m_incidentFace == colorB))) {
-					ndBigVector p1p0(points[edge->m_twin->m_incidentVertex] - points[edge->m_incidentVertex]);
-					perimeter += sqrt(p1p0 % p1p0);
-				}
-				edge = edge->m_next;
-			} while (edge != clusterFace.m_edge);
-		}
-
-		return perimeter;
-	}
-
-	void HeapCollectGarbage () 
-	{
-		if ((m_priorityHeap.GetCount() + 20) > m_priorityHeap.GetMaxCount()) {
-			for (ndInt32 i = m_priorityHeap.GetCount() - 1; i >= 0; i--) {
-				ndList<dgPairProxy>::ndNode* const emptyNode = m_priorityHeap[i];
-				dgPairProxy& emptyPair = emptyNode->GetInfo();
-				if ((emptyPair.m_nodeA == nullptr) && (emptyPair.m_nodeB == nullptr)) {
-					m_priorityHeap.Remove(i);
-				}
-			}
-		}
-	}
-
-
-	ndFloat64 CalculateConcavity(dgHACDConveHull& hull, const ndMeshEffect& mesh, const dgHACDCluster& cluster)
-	{
-		ndFloat64 concavity = ndFloat32(0.0f);
-
-		const ndBigVector* const points = (ndBigVector*) mesh.GetVertexPool();
-		for (ndList<dHACDClusterFace>::ndNode* node = cluster.GetFirst(); node; node = node->GetNext()) {
-			dHACDClusterFace& clusterFace = node->GetInfo();
-			ndEdge* edge = clusterFace.m_edge;
-			ndInt32 i0 = edge->m_incidentVertex;
-			ndInt32 i1 = edge->m_next->m_incidentVertex;
-			for (ndEdge* ptr = edge->m_next->m_next; ptr != edge; ptr = ptr->m_next) {
-				ndInt32 i2 = ptr->m_incidentVertex;
-				ndFloat64 val = hull.CalculateTriangleConcavity(clusterFace.m_normal, i0, i1, i2, points);
-				if (val > concavity) {
-					concavity = val;
-				}
-				i1 = i2;
-			}
-		}
-
-		return concavity;
-	}
-
-	ndFloat64 CalculateConcavitySingleThread (dgHACDConveHull& hull, ndMeshEffect& mesh, dgHACDCluster& clusterA, dgHACDCluster& clusterB)
-	{
-		return ndMax(CalculateConcavity(hull, mesh, clusterA), CalculateConcavity(hull, mesh, clusterB));
-	}
-
-
-	class dgConvexHullRayCastContext
-	{
-		public: 
-		dgConvexHullRayCastContext (dgHACDConveHull& hull, ndMeshEffect& mesh, dgThreadHive* const manager)
-			:m_atomicLock(0)
-			,m_mesh(&mesh)
-			,m_cluster(nullptr)
-			,m_threadManager(manager)
-			,m_faceNode(nullptr)
-		{
-			for(ndInt32 i = 0; i < DG_CONCAVITY_MAX_THREADS; ++i) {
-				hullArray[i] = new (mesh.GetAllocator()) dgHACDConveHull (hull);
-			}
-		}
-
-		~dgConvexHullRayCastContext ()
-		{
-			for(ndInt32 i = 0; i < DG_CONCAVITY_MAX_THREADS; ++i) {
-				delete hullArray[i];
-			}
-		}
-
-		void SetCluster (dgHACDCluster& cluster)
-		{
-			m_cluster = &cluster;
-			m_node = m_cluster->GetFirst();
-			memset (m_concavity, 0, sizeof (m_concavity));
-		}
-
-		ndFloat64 GetConcavity() const 
-		{
-			ndFloat64 concavity = ndFloat32(0.0f);
-			for (ndInt32 i = 0; i < DG_CONCAVITY_MAX_THREADS; ++i) {	
-				if (concavity < m_concavity[i]) {
-					concavity = m_concavity[i];
-				}
-			}
-			return concavity;
-		}
-
-
-		static void RayCastKernel (void* const context, ndInt32 threadID)
-		{
-			dgConvexHullRayCastContext* const data = (dgConvexHullRayCastContext*) context;
-			const ndBigVector* const points = (ndBigVector*) data->m_mesh->GetVertexPool();
-			
-			data->m_threadManager->GetIndirectLock(&data->m_atomicLock, threadID);
-			ndList<dHACDClusterFace>::ndNode* node = data->m_node;
-			if (node) {
-				data->m_node = node->GetNext();
-			}
-			data->m_threadManager->ReleaseIndirectLock (&data->m_atomicLock);
-			for (; node;) {
-
-				dHACDClusterFace& clusterFace = node->GetInfo();
-				ndEdge* edge = clusterFace.m_edge;
-				ndInt32 i0 = edge->m_incidentVertex;
-				ndInt32 i1 = edge->m_next->m_incidentVertex;
-				for (ndEdge* ptr = edge->m_next->m_next; ptr != edge; ptr = ptr->m_next) {
-					ndInt32 i2 = ptr->m_incidentVertex;
-					ndFloat64 val = data->hullArray[threadID]->CalculateTriangleConcavity(clusterFace.m_normal, i0, i1, i2, points);
-					if (val > data->m_concavity[threadID]) {
-						data->m_concavity[threadID] = val;
-					}
-					i1 = i2;
-				}
-
-				data->m_threadManager->GetIndirectLock(&data->m_atomicLock, threadID);
-				node = data->m_node;
-				if (node) {
-					data->m_node = node->GetNext();;
-				}
-				data->m_threadManager->ReleaseIndirectLock (&data->m_atomicLock);
-			}
-		}
-
-
-		ndInt32 m_atomicLock;
-		ndMeshEffect* m_mesh;
-		dgHACDCluster* m_cluster;
-		dgThreadHive* m_threadManager;
-		ndList<dHACDClusterFace>::ndNode* m_node;
-
-		ndList<dHACDClusterFace>::ndNode* m_faceNode;
-		ndFloat64 m_concavity[DG_CONCAVITY_MAX_THREADS];
-		dgHACDConveHull* hullArray[DG_CONCAVITY_MAX_THREADS];		
-	};
-
-
-	ndFloat64 CalculateConcavityMultiThread (dgHACDConveHull& hull, ndMeshEffect& mesh, dgHACDCluster& clusterA, dgHACDCluster& clusterB)
-	{
-		dgConvexHullRayCastContext data (hull, mesh, &m_parallerConcavityCalculator);
-
-		ndInt32 threadsCount = m_parallerConcavityCalculator.GetThreadCount();	
-		data.SetCluster (clusterA);
-		for (ndInt32 i = 0; i < threadsCount; ++i) {		
-			m_parallerConcavityCalculator.QueueJob(dgConvexHullRayCastContext::RayCastKernel, &data);
-		}
-		m_parallerConcavityCalculator.SynchronizationBarrier();
-		ndFloat64 concavity = data.GetConcavity();
-
-		data.SetCluster (clusterB);
-		for (ndInt32 i = 0; i < threadsCount; ++i) {		
-			m_parallerConcavityCalculator.QueueJob(dgConvexHullRayCastContext::RayCastKernel, &data);
-		}
-		m_parallerConcavityCalculator.SynchronizationBarrier();
-		
-		concavity = ndMax(concavity, data.GetConcavity());
-		//ndFloat64 xxx = CalculateConcavitySingleThread (hull, mesh, clusterA, clusterB);
-		//ndAssert (fabs(concavity - xxx) < ndFloat64 (1.0e-5f));
-		return concavity;
-	}
-
-	ndList<dgPairProxy>::ndNode* SubmitEdgeCost (ndMeshEffect& mesh, ndNode* const clusterNodeA, ndNode* const clusterNodeB, ndFloat64 perimeterHandicap)
-	{
-		dgHACDCluster& clusterA = clusterNodeA->GetInfo().m_nodeData;
-		dgHACDCluster& clusterB = clusterNodeB->GetInfo().m_nodeData;
-		const ndBigVector* const points = (ndBigVector*) mesh.GetVertexPool();
-
-		bool flatStrip = true;
-		ndFloat64 tol = ndFloat64 (1.0e-5f) * m_diagonal;
-		dHACDClusterFace& clusterFaceA = clusterA.GetFirst()->GetInfo();
-		ndBigPlane plane(clusterFaceA.m_normal, -(points[clusterFaceA.m_edge->m_incidentVertex] % clusterFaceA.m_normal));
-
-		if (clusterA.GetCount() > 1) {
-			flatStrip = clusterA.IsCoplanar(plane, mesh, tol);
-		}
-
-		if (flatStrip) {
-			flatStrip = clusterB.IsCoplanar(plane, mesh, tol);
-		}
-
-		ndList<dgPairProxy>::ndNode* pairNode = nullptr;
-		if (!flatStrip) {
-			m_vertexMark ++;
-			ndInt32 vertexCount = CopyVertexToPool(mesh, clusterA, 0);
-			vertexCount = CopyVertexToPool(mesh, clusterB, vertexCount);
-
-			dgHACDConveHull convexHull(mesh.GetAllocator(), m_vertexPool, vertexCount);
-
-			if (convexHull.GetVertexCount()) {
-				ndInt32 mark = mesh.IncLRU();
-				MarkInteriorClusterEdges (mesh, mark, clusterA, clusterA.m_color, clusterB.m_color);
-				MarkInteriorClusterEdges (mesh, mark, clusterB, clusterA.m_color, clusterB.m_color);
-
-				ndFloat64 area = clusterA.m_area + clusterB.m_area;
-				ndFloat64 perimeter = CalculateClusterPerimeter (mesh, mark, clusterA, clusterA.m_color, clusterB.m_color) +
-									  CalculateClusterPerimeter (mesh, mark, clusterB, clusterA.m_color, clusterB.m_color);
-
-	
-				ndFloat64 concavity = ndFloat64 (0.0f);
-				if ((convexHull.GetCount() > 128) && ((clusterA.GetCount() > 256) || (clusterB.GetCount() > 256))) { 
-					concavity = CalculateConcavityMultiThread (convexHull, mesh, clusterA, clusterB);
-				} else {
-					concavity = CalculateConcavitySingleThread (convexHull, mesh, clusterA, clusterB);
-				}
-
-				if (concavity < ndFloat64(1.0e-3f)) {
-					concavity = ndFloat64(0.0f);
-				}
-
-				// see if the heap will overflow
-				HeapCollectGarbage ();
-
-				// add a new pair to the heap
-				ndList<dgPairProxy>::ndNode* pairNode = m_proxyList.Append();
-				dgPairProxy& pair = pairNode->GetInfo();
-				pair.m_nodeA = clusterNodeA;
-				pair.m_nodeB = clusterNodeB;
-				pair.m_distanceConcavity = concavity;
-				pair.m_hierachicalClusterIndexA = clusterA.m_hierachicalClusterIndex;
-				pair.m_hierachicalClusterIndexB = clusterB.m_hierachicalClusterIndex;
-
-				pair.m_area = area;
-				ndFloat64 cost = CalculateConcavityMetric (concavity, area, perimeter * perimeterHandicap, clusterA.GetCount(), clusterB.GetCount());
-				m_priorityHeap.Push(pairNode, cost);
-
-				return pairNode;
-			}
-		}
-		return pairNode;
-	}
-
-
-	void CollapseEdge (ndList<dgPairProxy>::ndNode* const pairNode, ndMeshEffect& mesh, ndFloat64 concavity)
-	{
-		ndNode* adjacentNodes[1024];
-		dgPairProxy& pair = pairNode->GetInfo();
-
-		dgMemoryAllocator* const allocator = mesh.GetAllocator();
-
-
-		ndAssert((pair.m_nodeA && pair.m_nodeB) || (!pair.m_nodeA && !pair.m_nodeB));
-		if (pair.m_nodeA && pair.m_nodeB) {
-			// call the progress callback
-			ReportProgress();
-
-			ndNode* const clusterNodeA = pair.m_nodeA;
-			ndNode* const clusterNodeB = pair.m_nodeB;
-			ndAssert (clusterNodeA != clusterNodeB);
-
-			dgHACDCluster& clusterA = clusterNodeA->GetInfo().m_nodeData;
-			dgHACDCluster& clusterB = clusterNodeB->GetInfo().m_nodeData;
-
-			ndAssert (&clusterA != &clusterB);
-			ndAssert(clusterA.m_color != clusterB.m_color);
-
-			dgHACDConvacityLookAheadTree* const leftTree = m_concavityTreeArray[pair.m_hierachicalClusterIndexA];
-			dgHACDConvacityLookAheadTree* const rightTree = m_concavityTreeArray[pair.m_hierachicalClusterIndexB];
-			ndAssert (leftTree);
-			ndAssert (rightTree);
-			m_concavityTreeArray[pair.m_hierachicalClusterIndexA] = nullptr;
-			m_concavityTreeArray[pair.m_hierachicalClusterIndexB] = nullptr;
-			ndAssert (m_cancavityTreeIndex < (2 * (m_faceCount + 1)));
-
-			ndFloat64 treeConcavity = pair.m_distanceConcavity;
-//			 ndAssert (treeConcavity < 0.1);
-			m_concavityTreeArray[m_cancavityTreeIndex] = new (allocator) dgHACDConvacityLookAheadTree (allocator, leftTree, rightTree, treeConcavity);
-			clusterA.m_hierachicalClusterIndex = m_cancavityTreeIndex;
-			clusterB.m_hierachicalClusterIndex = m_cancavityTreeIndex;
-			m_cancavityTreeIndex ++;
-
-			// merge two clusters
-			while (clusterB.GetCount()) {
-
-				dgHACDCluster::ndNode* const nodeB = clusterB.GetFirst();
-				clusterB.Unlink(nodeB);
-	
-				// now color code all faces of the merged cluster
-				dHACDClusterFace& faceB = nodeB->GetInfo();
-				ndEdge* ptr = faceB.m_edge;
-				do {
-					ptr->m_incidentFace = clusterA.m_color;
-					ptr = ptr->m_next;
-				} while (ptr != faceB.m_edge);
-				clusterA.Append(nodeB);
-			}
-			clusterA.m_area = pair.m_area;
-			clusterA.m_concavity = concavity;
-
-			// invalidate all proxies that are still in the heap
-			ndInt32 adjacentCount = 1;
-			adjacentNodes[0] = clusterNodeA;
-			for (dgGraphNode<dgHACDCluster, dgHACDEdge>::ndNode* edgeNodeAB = clusterNodeA->GetInfo().GetFirst(); edgeNodeAB; edgeNodeAB = edgeNodeAB->GetNext()) {
-				dgHACDEdge& edgeAB = edgeNodeAB->GetInfo().m_edgeData;
-				ndList<dgPairProxy>::ndNode* const proxyNode = (ndList<dgPairProxy>::ndNode*) edgeAB.m_proxyListNode;
-				if (proxyNode) {
-					dgPairProxy& pairProxy = proxyNode->GetInfo();
-					ndAssert ((edgeNodeAB->GetInfo().m_node == pairProxy.m_nodeA) || (edgeNodeAB->GetInfo().m_node == pairProxy.m_nodeB));
-					pairProxy.m_nodeA = nullptr;
-					pairProxy.m_nodeB = nullptr;
-					edgeAB.m_proxyListNode = nullptr;
-				}
-
-				adjacentNodes[adjacentCount] = edgeNodeAB->GetInfo().m_node;
-				adjacentCount ++;
-				ndAssert (adjacentCount < sizeof (adjacentNodes)/ sizeof (adjacentNodes[0]));
-			}
-
-			for (dgGraphNode<dgHACDCluster, dgHACDEdge>::ndNode* edgeNodeBA = clusterNodeB->GetInfo().GetFirst(); edgeNodeBA; edgeNodeBA = edgeNodeBA->GetNext()) {
-				dgHACDEdge& edgeBA = edgeNodeBA->GetInfo().m_edgeData;
-				ndList<dgPairProxy>::ndNode* const proxyNode = (ndList<dgPairProxy>::ndNode*) edgeBA.m_proxyListNode;
-				if (proxyNode) {
-					dgPairProxy& pairProxy = proxyNode->GetInfo();
-					pairProxy.m_nodeA = nullptr;
-					pairProxy.m_nodeB = nullptr;
-					edgeBA.m_proxyListNode = nullptr;
-				}
-
-				bool alreadyLinked = false;
-				ndNode* const node = edgeNodeBA->GetInfo().m_node;
-				for (ndInt32 i = 0; i < adjacentCount; ++i) {
-					if (node == adjacentNodes[i]) {
-						alreadyLinked = true;
-						break;
-					}
-				}
-				if (!alreadyLinked) {
-					clusterNodeA->GetInfo().AddEdge (node);
-					node->GetInfo().AddEdge (clusterNodeA);
-				}
-			}
-			DeleteNode (clusterNodeB);
-
-			// submit all new costs for each edge connecting this new node to any other node 
-			for (dgGraphNode<dgHACDCluster, dgHACDEdge>::ndNode* edgeNodeAB = clusterNodeA->GetInfo().GetFirst(); edgeNodeAB; edgeNodeAB = edgeNodeAB->GetNext()) {
-				dgHACDEdge& edgeAB = edgeNodeAB->GetInfo().m_edgeData;
-				ndNode* const clusterNodeB = edgeNodeAB->GetInfo().m_node;
-				ndFloat64 weigh = edgeAB.m_backFaceHandicap;
-				for (dgGraphNode<dgHACDCluster, dgHACDEdge>::ndNode* edgeNodeBA = clusterNodeB->GetInfo().GetFirst(); edgeNodeBA; edgeNodeBA = edgeNodeBA->GetNext()) {
-					ndNode* const clusterNode = edgeNodeBA->GetInfo().m_node;
-					if (clusterNode == clusterNodeA) {
-						dgHACDEdge& edgeBA = edgeNodeBA->GetInfo().m_edgeData;
-						ndList<dgPairProxy>::ndNode* const proxyNode = SubmitEdgeCost (mesh, clusterNodeA, clusterNodeB, weigh * edgeBA.m_backFaceHandicap);
-						if (proxyNode) {
-							edgeBA.m_proxyListNode = proxyNode;
-							edgeAB.m_proxyListNode = proxyNode;
-						}
-						break;
-					}
-				}
-			}
-		}
-		m_proxyList.Remove(pairNode);
-	}
-
-#ifdef DG_BUILD_HIERACHICAL_HACD
-	void CollapseClusters (ndMeshEffect& mesh, ndFloat64 maxConcavity, ndInt32 maxClustesCount)
-	{
-
-		maxConcavity *= (m_diagonal * DG_CONCAVITY_SCALE);
-		while (m_priorityHeap.GetCount()) {
-			ndFloat64 concavity =  m_priorityHeap.Value();
-			ndList<dgPairProxy>::ndNode* const pairNode = m_priorityHeap[0];
-			m_priorityHeap.Pop();
-			CollapseEdge (pairNode, mesh, concavity);
-
-//if (m_progress == 24)
-//break;
-
-		}
-
-
-
-		ndInt32 treeCounts = 0;
-		for (ndInt32 i = 0; i < m_cancavityTreeIndex; ++i) {
-			if (m_concavityTreeArray[i]) {
-				m_concavityTreeArray[treeCounts] = m_concavityTreeArray[i];
-				m_concavityTreeArray[i] = nullptr;
-				treeCounts ++;
-			}
-		}
-
-		if (treeCounts > 1) {
-
-			for (ndInt32 i = 0; i < treeCounts; ++i) {
-				if (m_concavityTreeArray[i]->m_faceList.GetCount()==1) {
-					delete m_concavityTreeArray[i];
-					m_concavityTreeArray[i] = m_concavityTreeArray[treeCounts-1];
-					m_concavityTreeArray[treeCounts-1]= nullptr;
-					treeCounts --;
-					i--;
-				}
-			}
-
-
-			ndFloat32 C = 10000;
-			while (treeCounts > 1)	 {
-				dgHACDConvacityLookAheadTree* const leftTree = m_concavityTreeArray[treeCounts-1];
-				dgHACDConvacityLookAheadTree* const rightTree = m_concavityTreeArray[treeCounts-2];
-				m_concavityTreeArray[treeCounts-1] = nullptr;
-				m_concavityTreeArray[treeCounts-2] = new (mesh.GetAllocator()) dgHACDConvacityLookAheadTree (mesh.GetAllocator(), leftTree, rightTree, C);
-				C *= 2;
-				treeCounts --;
-			}
-
-		}
-
-		dgHACDConvacityLookAheadTree* const tree = m_concavityTreeArray[0];
-		ndDownHeap<dgHACDConvacityLookAheadTree*, ndFloat64> approximation(maxClustesCount * 2, mesh.GetAllocator());
-
-		tree->ReduceByCount (maxClustesCount, approximation);
-		//		tree->ReduceByConcavity (maxConcavity, approximation);
-
-		while (approximation.GetCount()) {
-			m_convexProximation.Append(approximation[0]);
-			approximation.Pop();
-		}
-	}
-#else 
-	void CollapseClusters (ndMeshEffect& mesh, ndFloat64 maxConcavity, ndInt32 maxClustesCount)
-	{
-		maxConcavity *= (m_diagonal * DG_CONCAVITY_SCALE);
-
-		bool terminate = false;
-		while (m_priorityHeap.GetCount() && !terminate) {
-			ndFloat64 concavity =  m_priorityHeap.Value();
-			ndList<dgPairProxy>::ndNode* const pairNode = m_priorityHeap[0];
-			if ((concavity < maxConcavity) && (GetCount() < maxClustesCount)) {
-				terminate  = true;
-			} else {
-				m_priorityHeap.Pop();
-				CollapseEdge (pairNode, mesh, concavity);
-			}
-		}
-	}
-#endif
-
-	ndInt32 m_mark;
-	ndInt32 m_faceCount;
-	ndInt32 m_vertexMark;
-	ndInt32 m_progress;
-	ndInt32 m_cancavityTreeIndex;
-	ndInt32* m_vertexMarks;
-	ndFloat32 m_invFaceCount;
-	ndFloat64 m_diagonal;
-	ndBigVector* m_vertexPool;
-	ndList<dgPairProxy> m_proxyList;
-	dgHACDConvacityLookAheadTree** m_concavityTreeArray;	
-	ndList<dgHACDConvacityLookAheadTree*> m_convexProximation;
-	ndUpHeap<ndList<dgPairProxy>::ndNode*, ndFloat64> m_priorityHeap;
-	dgReportProgress m_reportProgressCallback;
-	dgThreadHive m_parallerConcavityCalculator;
-};
-
-#endif
-
-ndMeshEffect* ndMeshEffect::CreateSimplification(ndInt32 maxVertexCount, dgReportProgress reportProgressCallback, void* const reportPrgressUserData) const
+    }
+	PackAttibuteData();
+}
+
+void ndMeshEffect::AngleBaseFlatteningMapping (ndInt32 material, dgReportProgress progressReportCallback, void* const userData)
 {
-	if (GetVertexCount() <= maxVertexCount) {
-		return new (GetAllocator()) ndMeshEffect(*this); 
-	}
-ndAssert (0);
-return new (GetAllocator()) ndMeshEffect(*this); 
-/*
-	//	ndMeshEffect triangleMesh(*this);
-	if (maxHullsCount <= 1) {
-		maxHullsCount = 1;
-	}
-	if (maxConcavity <= ndFloat32 (1.0e-5f)) {
-		maxConcavity = ndFloat32 (1.0e-5f);
-	}
+	dgSetPrecisionDouble presicion;
 
-	if (maxVertexPerHull < 4) {
-		maxVertexPerHull = 4;
-	}
-	ClampValue(backFaceDistanceFactor, ndFloat32 (0.01f), ndFloat32 (1.0f));
+	ndMeshEffect tmp (*this);
 
-	if (reportProgressCallback) {
-		reportProgressCallback (0.0f);
-	}
+	ndBigVector minBox;
+	ndBigVector maxBox;
+	tmp.CalculateAABB(minBox, maxBox);
 
+	ndBigVector size (maxBox - minBox);
+	ndFloat32 scale = ndFloat32 (1.0 / ndMax (size.m_x, size.m_y, size.m_z));
 
-	// make a copy of the mesh
-	ndMeshEffect mesh(*this);
-	mesh.ClearAttributeArray();
+	ndMatrix matrix (ndGetIdentityMatrix());
+	matrix[0][0] = scale;
+	matrix[1][1] = scale;
+	matrix[2][2] = scale;
+	tmp.ApplyTransform(matrix);
 
-
-	ndInt32 faceCount = mesh.GetTotalFaceCount();
-	if (faceCount  > meshSimplicationMaxFaceCount) {
-		mesh.Triangulate();
-
-		dPolyhedra polygon(GetAllocator());
-		ndInt32 mark = mesh.IncLRU();
-		polygon.BeginFace();
-		dPolyhedra::Iterator iter (mesh);
-		for (iter.Begin(); iter; iter ++){
-			ndEdge* const face = &(*iter);
-
-			if ((face->m_mark != mark) && (face->m_incidentFace > 0)) {
-				ndInt32	index[DG_MESH_EFFECT_POINT_SPLITED];
-
-				ndEdge* ptr = face;
-				ndInt32 indexCount = 0;
-				do {
-					index[indexCount] = ptr->m_incidentVertex;
-					ptr->m_mark = mark;
-					indexCount ++;
-					ptr = ptr->m_next;
-				} while (ptr != face);
-				polygon.AddFace(indexCount, index);
-			}
-		}
-		polygon.EndFace();
-
-		polygon.Optimize(&mesh.m_points[0].m_x, sizeof (ndFloat64), 1000.0f, meshSimplicationMaxFaceCount);
-
-		mesh.RemoveAll();
-		
-		mark = polygon.IncLRU();
-		mesh.BeginFace();
-		dPolyhedra::Iterator iter1 (polygon);
-		for (iter1.Begin(); iter1; iter1 ++){
-			ndEdge* const face = &(*iter1);
-			if ((face->m_mark != mark) && (face->m_incidentFace > 0)) {
-				ndInt32	index[DG_MESH_EFFECT_POINT_SPLITED];
-				ndEdge* ptr = face;
-				ndInt32 indexCount = 0;
-				do {
-					ptr->m_mark = mark;
-					index[indexCount] = ndInt32 (ptr->m_incidentVertex);
-					indexCount ++;
-					ptr = ptr->m_next;
-				} while (ptr != face);
-				mesh.AddFace(indexCount, index);
-			}
-		}
-		mesh.EndFace();
-
-		faceCount = mesh.GetTotalFaceCount();
-		mesh.ClearAttributeArray();
-	}
-
-	// create a general connectivity graph    
-	dgHACDClusterGraph graph (mesh, backFaceDistanceFactor, reportProgressCallback);
-
-	// calculate initial edge costs
-	graph.SubmitInitialEdgeCosts (mesh);
-
-	// collapse the graph
-	graph.CollapseClusters (mesh, maxConcavity, maxHullsCount);
-
-	// Create Partition Mesh
-	return graph.CreatePatitionMesh (mesh, maxVertexPerHull);
-*/
+	dgAngleBasedFlatteningMapping angleBadedFlattening (&tmp, material, progressReportCallback, userData);
 }
 
 #endif
+
+
+void ndMeshEffect::CalculateNormals(ndFloat64 angleInRadians)
+{
+	ndEdge* edgeBuffer[256];
+	ndBigVector faceNormal[256];
+
+	UnpackAttibuteData();
+	m_attrib.m_normalChannel.Resize(m_attrib.m_pointChannel.GetCount());
+	m_attrib.m_normalChannel.SetCount(m_attrib.m_pointChannel.GetCount());
+	m_attrib.m_normalChannel.m_isValid = true;
+
+	ndInt32 mark = IncLRU();
+	ndPolyhedra::Iterator iter(*this);
+	ndFloat32 smoothValue = ndCos(angleInRadians);
+
+	ndTree<ndInt32, ndEdge*> normalsMap;
+	for (iter.Begin(); iter; iter++) 
+	{
+		ndEdge* const edge = &(*iter);
+		if ((edge->m_mark < mark) && (edge->m_incidentFace > 0)) 
+		{
+			ndInt32 edgeIndex = 0;
+			normalsMap.RemoveAll();
+			ndEdge* edgePtr = edge;
+			do 
+			{
+				ndVector normal(FaceNormal(edgePtr, &m_points.m_vertex[0].m_x, sizeof(ndBigVector)));
+				ndAssert(normal.m_w == ndFloat32(0.0f));
+				normal = normal.Scale(ndFloat32(1.0f) / ndFloat32(sqrt(normal.DotProduct(normal).GetScalar()) + ndFloat32(1.0e-16f)));
+				faceNormal[edgeIndex] = normal;
+				normalsMap.Insert(edgeIndex, edgePtr);
+				edgeIndex++;
+				edgePtr = edgePtr->m_twin->m_next;
+			} while (edgePtr != edge);
+
+			ndEdge* startEdge = edge;
+			ndVector normal0(faceNormal[normalsMap.Find(startEdge)->GetInfo()]);
+			for (ndEdge* ptr = edge->m_prev->m_twin; (ptr->m_mark != mark) && (ptr != edge) && (ptr->m_incidentFace > 0); ptr = ptr->m_prev->m_twin) 
+			{
+				const ndVector& normal1(faceNormal[normalsMap.Find(ptr)->GetInfo()]);
+				ndAssert(normal0.m_w == ndFloat32(0.0f));
+				ndFloat32 dot = normal0.DotProduct(normal1).GetScalar();
+				if (dot < smoothValue) 
+				{
+					break;
+				}
+				startEdge = ptr;
+				normal0 = normal1;
+			}
+
+			ndInt32 attribCount = 1;
+			edgeBuffer[0] = startEdge;
+			normal0 = faceNormal[normalsMap.Find(startEdge)->GetInfo()];
+			ndVector normal(normal0);
+			for (ndEdge* ptr = startEdge->m_twin->m_next; (ptr->m_mark != mark) && (ptr != startEdge) && (ptr->m_incidentFace > 0); ptr = ptr->m_twin->m_next) 
+			{
+				const ndVector& normal1(faceNormal[normalsMap.Find(ptr)->GetInfo()]);
+				ndAssert(normal0.m_w == ndFloat32(0.0f));
+				ndFloat32 dot = normal0.DotProduct(normal1).GetScalar();
+				if (dot < smoothValue) 
+				{
+					break;
+				}
+				edgeBuffer[attribCount] = ptr;
+				attribCount++;
+				normal += normal1;
+				normal0 = normal1;
+			}
+
+			ndAssert(normal.m_w == ndFloat32(0.0f));
+			normal = normal.Scale(ndFloat32(1.0f) / ndFloat32(sqrt(normal.DotProduct(normal).GetScalar()) + ndFloat32(1.0e-16f)));
+			ndNormal n(normal.m_x, normal.m_y, normal.m_z);
+			for (ndInt32 i = 0; i < attribCount; ++i) 
+			{
+				edgeBuffer[i]->m_mark = mark;
+				ndInt32 index = ndInt32(edgeBuffer[i]->m_userData);
+				m_attrib.m_normalChannel[index] = n;
+			}
+		}
+	}
+	PackAttibuteData();
+}
+
+ndBigVector ndMeshEffect::GetOrigin()const
+{
+	ndBigVector origin(ndFloat64(0.0f), ndFloat64(0.0f), ndFloat64(0.0f), ndFloat64(0.0f));
+	for (ndInt32 i = 0; i < m_points.m_vertex.GetCount(); ++i) 
+	{
+		origin += m_points.m_vertex[i];
+	}
+	return origin.Scale(ndFloat64(1.0f) / ndInt32(m_points.m_vertex.GetCount()));
+}
+
+void ndMeshEffect::BoxMapping(ndInt32 front, ndInt32 side, ndInt32 top, const ndMatrix& textureMatrix)
+{
+	ndBigVector origin(GetOrigin());
+	ndStack<ndBigVector> buffer(ndInt32(m_points.m_vertex.GetCount()));
+	ndBigVector pMin(ndFloat64(1.0e10f), ndFloat64(1.0e10f), ndFloat64(1.0e10f), ndFloat64(0.0f));
+	ndBigVector pMax(ndFloat64(-1.0e10f), ndFloat64(-1.0e10f), ndFloat64(-1.0e10f), ndFloat64(0.0f));
+
+	for (ndInt32 i = 0; i < m_points.m_vertex.GetCount(); ++i)
+	{
+		buffer[i] = textureMatrix.RotateVector(m_points.m_vertex[i] - origin);
+		const ndBigVector& tmp = buffer[i];
+		pMin.m_x = ndMin(pMin.m_x, tmp.m_x);
+		pMax.m_x = ndMax(pMax.m_x, tmp.m_x);
+		pMin.m_y = ndMin(pMin.m_y, tmp.m_y);
+		pMax.m_y = ndMax(pMax.m_y, tmp.m_y);
+		pMin.m_z = ndMin(pMin.m_z, tmp.m_z);
+		pMax.m_z = ndMax(pMax.m_z, tmp.m_z);
+	}
+	ndInt32 materialArray[3];
+
+	ndBigVector dist(pMax);
+	dist[0] = ndMax(ndFloat64(1.0e-3f), dist[0]);
+	dist[1] = ndMax(ndFloat64(1.0e-3f), dist[1]);
+	dist[2] = ndMax(ndFloat64(1.0e-3f), dist[2]);
+	ndBigVector scale(ndFloat64(0.5f) / dist[0], ndFloat64(0.5f) / dist[1], ndFloat64(0.5f) / dist[2], ndFloat64(0.0f));
+
+	UnpackAttibuteData();
+	m_attrib.m_uv0Channel.SetCount(m_attrib.m_pointChannel.GetCount());
+	m_attrib.m_materialChannel.SetCount(m_attrib.m_pointChannel.GetCount());
+	m_attrib.m_uv0Channel.m_isValid = true;
+	m_attrib.m_materialChannel.m_isValid = true;
+
+	materialArray[0] = front;
+	materialArray[1] = side;
+	materialArray[2] = top;
+
+	ndInt32 mark = IncLRU();
+	ndPolyhedra::Iterator iter(*this);
+	for (iter.Begin(); iter; iter++) 
+	{
+		ndEdge* const edge = &(*iter);
+		if ((edge->m_mark < mark) && (edge->m_incidentFace > 0)) 
+		{
+			const ndBigVector& p0 = buffer[edge->m_incidentVertex];
+			const ndBigVector& p1 = buffer[edge->m_next->m_incidentVertex];
+			const ndBigVector& p2 = buffer[edge->m_prev->m_incidentVertex];
+
+			edge->m_mark = mark;
+			edge->m_next->m_mark = mark;
+			edge->m_prev->m_mark = mark;
+
+			ndBigVector e0(p1 - p0);
+			ndBigVector e1(p2 - p0);
+			ndBigVector n(e0.CrossProduct(e1));
+
+			ndInt32 index = 0;
+			ndFloat64 maxProjection = ndFloat32(0.0f);
+
+			for (ndInt32 i = 0; i < 3; ++i) 
+			{
+				ndFloat64 proj = fabs(n[i]);
+				if (proj > maxProjection) 
+				{
+					index = i;
+					maxProjection = proj;
+				}
+			}
+
+			ndInt32 u = (index + 1) % 3;
+			ndInt32 v = (u + 1) % 3;
+			if (index == 1) 
+			{
+				ndSwap(u, v);
+			}
+			ndEdge* ptr = edge;
+			do 
+			{
+				ndVector p(scale * buffer[ptr->m_incidentVertex] - ndFloat32(0.5f));
+				ndUV uv(p[u], p[v]);
+				m_attrib.m_uv0Channel[ndInt32(ptr->m_userData)] = uv;
+				m_attrib.m_materialChannel[ndInt32(ptr->m_userData)] = materialArray[index];
+				ptr = ptr->m_next;
+			} while (ptr != edge);
+		}
+	}
+	PackAttibuteData();
+}
+
+void ndMeshEffect::UniformBoxMapping(ndInt32 material, const ndMatrix& textureMatrix)
+{
+	UnpackAttibuteData();
+
+	m_attrib.m_uv0Channel.Resize(m_attrib.m_pointChannel.GetCount());
+	m_attrib.m_uv0Channel.SetCount(m_attrib.m_pointChannel.GetCount());
+
+	m_attrib.m_materialChannel.Resize(m_attrib.m_pointChannel.GetCount());
+	m_attrib.m_materialChannel.SetCount(m_attrib.m_pointChannel.GetCount());
+
+	m_attrib.m_uv0Channel.m_isValid = true;
+	m_attrib.m_materialChannel.m_isValid = true;
+
+	ndInt32 mark = IncLRU();
+	for (ndInt32 i = 0; i < 3; ++i) 
+	{
+		ndMatrix rotationMatrix(ndGetIdentityMatrix());
+		if (i == 1) 
+		{
+			rotationMatrix = ndYawMatrix(ndFloat32(90.0f * ndDegreeToRad));
+		}
+		else if (i == 2) 
+		{
+			rotationMatrix = ndPitchMatrix(ndFloat32(90.0f * ndDegreeToRad));
+		}
+
+		ndPolyhedra::Iterator iter(*this);
+
+		for (iter.Begin(); iter; iter++) 
+		{
+			ndEdge* const edge = &(*iter);
+			if ((edge->m_mark < mark) && (edge->m_incidentFace > 0)) 
+			{
+				ndBigVector n(FaceNormal(edge, &m_points.m_vertex[0].m_x, sizeof(ndBigVector)));
+				ndVector normal(rotationMatrix.RotateVector(ndVector(n.Normalize())));
+				normal.m_x = ndAbs(normal.m_x);
+				normal.m_y = ndAbs(normal.m_y);
+				normal.m_z = ndAbs(normal.m_z);
+				if ((normal.m_z >= (normal.m_x - ndFloat32(1.0e-4f))) && (normal.m_z >= (normal.m_y - ndFloat32(1.0e-4f)))) 
+				{
+					ndEdge* ptr = edge;
+					do 
+					{
+						ptr->m_mark = mark;
+						ndVector point(rotationMatrix.RotateVector(m_points.m_vertex[ptr->m_incidentVertex]));
+						ndVector p(textureMatrix.TransformVector(point));
+						ndUV uv(p.m_x, p.m_y);
+						m_attrib.m_uv0Channel[ndInt32(ptr->m_userData)] = uv;
+						m_attrib.m_materialChannel[ndInt32(ptr->m_userData)] = material;
+
+						ptr = ptr->m_next;
+					} while (ptr != edge);
+				}
+			}
+		}
+	}
+
+	PackAttibuteData();
+}
+
+void ndMeshEffect::SphericalMapping(ndInt32 material, const ndMatrix& textureMatrix)
+{
+	ndBigVector origin(GetOrigin());
+	ndStack<ndBigVector>sphere(ndInt32(m_points.m_vertex.GetCount()));
+	for (ndInt32 i = 0; i < m_points.m_vertex.GetCount(); ++i)
+	{
+		ndBigVector geoPoint(m_points.m_vertex[i] - origin);
+		ndAssert(geoPoint.m_w == ndFloat32(0.0f));
+		ndVector point(textureMatrix.RotateVector(geoPoint.Normalize()));
+		point.m_x = ndClamp(point.m_x, ndFloat32(-1.0f + 1.0e-6f), ndFloat32(1.0f - 1.0e-6f));
+
+		ndFloat64 v = ndClamp(ndAsin(point.m_x) / ndPi + ndFloat64(0.5f), ndFloat64(0.0f), ndFloat64(1.0f));
+		ndFloat64 u = ndClamp(ndAtan2(point.m_y, point.m_z) / (ndFloat32(2.0f) * ndPi) + ndFloat64(0.5f), ndFloat64(0.0f), ndFloat64(1.0f));
+		sphere[i].m_x = u;
+		sphere[i].m_y = v;
+	}
+
+	UnpackAttibuteData();
+
+	m_attrib.m_uv0Channel.Resize(m_attrib.m_pointChannel.GetCount());
+	m_attrib.m_uv0Channel.SetCount(m_attrib.m_pointChannel.GetCount());
+
+	m_attrib.m_materialChannel.Resize(m_attrib.m_pointChannel.GetCount());
+	m_attrib.m_materialChannel.SetCount(m_attrib.m_pointChannel.GetCount());
+
+	m_attrib.m_uv0Channel.m_isValid = true;
+	m_attrib.m_materialChannel.m_isValid = true;
+
+	ndPolyhedra::Iterator iter(*this);
+	for (iter.Begin(); iter; iter++) 
+	{
+		ndEdge* const edge = &(*iter);
+		ndUV uv(ndFloat32(sphere[edge->m_incidentVertex].m_x), ndFloat32(sphere[edge->m_incidentVertex].m_y));
+		m_attrib.m_uv0Channel[ndInt32(edge->m_userData)] = uv;
+		m_attrib.m_materialChannel[ndInt32(edge->m_userData)] = material;
+	}
+
+	ndInt32 mark = IncLRU();
+	for (iter.Begin(); iter; iter++) 
+	{
+		ndEdge* const edge = &(*iter);
+		if ((edge->m_incidentFace > 0) && (edge->m_mark != mark)) 
+		{
+			ndUV uvRef(m_attrib.m_uv0Channel[ndInt32(edge->m_userData)]);
+			ndFloat32 angle0 = uvRef.m_u * ndPi * ndFloat32(2.0f);
+			ndFloat32 UVrefSin = ndSin(angle0);
+			ndFloat32 UVrefCos = ndCos(angle0);
+			ndEdge* ptr = edge;
+			do 
+			{
+				ptr->m_mark = mark;
+				ndUV uv(m_attrib.m_uv0Channel[ndInt32(ptr->m_userData)]);
+				ndFloat32 angle1 = uv.m_u * ndPi * ndFloat32(2.0f);
+				ndFloat32 sinAngle = ndSin(angle1) * UVrefCos - ndCos(angle1) * UVrefSin;
+				ndFloat32 cosAngle = ndCos(angle1) * UVrefCos + ndSin(angle1) * UVrefSin;
+				ndFloat32 deltaAngle = ndAtan2(sinAngle, cosAngle);
+				uv.m_u = ndReal (uvRef.m_u + deltaAngle / (ndFloat32 (2.0f) * ndPi));
+				m_attrib.m_uv0Channel[ndInt32(ptr->m_userData)] = uv;
+				ptr = ptr->m_next;
+			} while (ptr != edge);
+		}
+	}
+
+	PackAttibuteData();
+}
+
+
+void ndMeshEffect::CylindricalMapping(ndInt32 material, const ndMatrix& textureMatrix)
+{
+	ndBigVector origin(GetOrigin());
+	ndStack<ndBigVector>buffer(ndInt32(m_points.m_vertex.GetCount()));
+
+	ndBigVector pMin(ndFloat64(1.0e10f), ndFloat64(1.0e10f), ndFloat64(1.0e10f), ndFloat64(0.0f));
+	ndBigVector pMax(ndFloat64(-1.0e10f), ndFloat64(-1.0e10f), ndFloat64(-1.0e10f), ndFloat64(0.0f));
+	for (ndInt32 i = 0; i < m_points.m_vertex.GetCount(); ++i)
+	{
+		buffer[i] = textureMatrix.RotateVector(m_points.m_vertex[i] - origin);
+		const ndBigVector& tmp = buffer[i];
+		pMin = pMin.GetMin(tmp);
+		pMax = pMax.GetMax(tmp);
+	}
+
+	UnpackAttibuteData();
+	
+	m_attrib.m_uv0Channel.Resize(m_attrib.m_pointChannel.GetCount());
+	m_attrib.m_uv0Channel.SetCount(m_attrib.m_pointChannel.GetCount());
+	
+	m_attrib.m_materialChannel.Resize(m_attrib.m_pointChannel.GetCount());
+	m_attrib.m_materialChannel.SetCount(m_attrib.m_pointChannel.GetCount());
+	
+	m_attrib.m_uv0Channel.m_isValid = true;
+	m_attrib.m_materialChannel.m_isValid = true;
+
+	ndBigVector dist(pMax - pMin);
+	dist[0] = ndMax(ndFloat64(1.0e-3f), dist[0]);
+	dist[1] = ndMax(ndFloat64(1.0e-3f), dist[1]);
+	dist[2] = ndMax(ndFloat64(1.0e-3f), dist[2]);
+	ndBigVector scale(ndFloat64(1.0f) / dist[0], ndFloat64(1.0f) / dist[1], ndFloat64(1.0f) / dist[2], ndFloat64(0.0f));
+	
+	ndInt32 mark = IncLRU();
+	ndPolyhedra::Iterator iter(*this);
+	for (iter.Begin(); iter; iter++)
+	{
+		ndEdge* const edge = &(*iter);
+		if ((edge->m_mark < mark) && (edge->m_incidentFace > 0))
+		{
+			const ndBigVector& p0 = buffer[edge->m_incidentVertex];
+			const ndBigVector& p1 = buffer[edge->m_next->m_incidentVertex];
+			const ndBigVector& p2 = buffer[edge->m_prev->m_incidentVertex];
+
+			ndBigVector e0(p1 - p0);
+			ndBigVector e1(p2 - p0);
+			ndBigVector n(e0.CrossProduct(e1).Normalize());
+			if (ndAbs(n.m_x) > ndFloat32 (0.85f))
+			{
+				ndEdge* ptr = edge;
+				do
+				{
+					ndVector p(scale * buffer[ptr->m_incidentVertex] - ndFloat32(0.5f));
+					ndUV uv(p.m_y, p.m_z);
+					m_attrib.m_uv0Channel[ndInt32(ptr->m_userData)] = uv;
+					m_attrib.m_materialChannel[ndInt32(ptr->m_userData)] = material;
+					ptr->m_mark = mark;
+					ptr = ptr->m_next;
+				} while (ptr != edge);
+			}
+			else
+			{
+				ndFixSizeArray<ndUV, 256> aliasUV;
+				ndEdge* ptr = edge;
+
+				ndInt32 neg = 0;
+				ndInt32 pos = 0;
+				do
+				{
+					ndVector p(buffer[ptr->m_incidentVertex]);
+					ndFloat32 u = ndFloat32(scale.m_x * p.m_x - ndFloat32(0.5f));
+					ndFloat32 v = ndAtan2(p.m_y, p.m_z) / ndPi;
+					ndUV uv(u, v);
+					aliasUV.PushBack(uv);
+
+					neg += (v < ndFloat32(0.0f)) ? 1 : 0;
+					pos += (v > ndFloat32(0.0f)) ? 1 : 0;
+
+					ptr->m_mark = mark;
+					ptr = ptr->m_next;
+				} while (ptr != edge);
+
+				if ((neg != 0) && (pos != 0))
+				{
+					for (ndInt32 i = 0; i < aliasUV.GetCount(); ++i)
+					{
+						if (aliasUV[i].m_v < ndFloat32(-0.5f))
+						{
+							aliasUV[i].m_v += ndFloat32(2.0f);
+						}
+					}
+				}
+
+				ndInt32 index = 0;
+				do
+				{
+					ndUV uv(aliasUV[index]);
+					uv.m_v *= ndFloat32(0.5f);
+					ndSwap(uv.m_u, uv.m_v);
+
+					m_attrib.m_uv0Channel[ndInt32(ptr->m_userData)] = uv;
+					m_attrib.m_materialChannel[ndInt32(ptr->m_userData)] = material;
+					ptr = ptr->m_next;
+					index++;
+				} while (ptr != edge);
+			}
+		}
+	}
+	
+	PackAttibuteData();
+}
