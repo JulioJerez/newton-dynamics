@@ -92,11 +92,14 @@ class ndMesh : public ndClassAlloc
 
 	D_NEWTON_API virtual bool operator==(const ndMesh& other) const;
 
-	ndMatrix GetMatrix() const;
-	void SetMatrix(const ndMatrix& matrix);
+	D_NEWTON_API ndMatrix GetMatrix() const;
+	D_NEWTON_API void SetMatrix(const ndMatrix& matrix);
 
-	ndMatrix GetGeometryMatrix() const;
-	void SetGeometryMatrix(const ndMatrix& matrix);
+	D_NEWTON_API ndMatrix GetGeometryMatrix() const;
+	D_NEWTON_API void SetGeometryMatrix(const ndMatrix& matrix);
+
+	D_NEWTON_API ndMatrix GetBasePoseMatrix() const;
+	D_NEWTON_API void SetBasePoseMatrix(const ndMatrix& matrix);
 
 	D_NEWTON_API void RemoveChild(const ndSharedPtr<ndMesh>& child);
 	D_NEWTON_API void AddChild(const ndSharedPtr<ndMesh>& child, bool addToEnd = true);
@@ -191,6 +194,7 @@ class ndMesh : public ndClassAlloc
 	ndMatrix CalculateLocalMatrix(ndVector& size) const;
 
 	ndMatrix m_matrix;
+	ndMatrix m_basePoseMatrix;
 	ndMatrix m_geometryMatrix;
 
 	ndString m_name;
@@ -209,26 +213,6 @@ class ndMesh : public ndClassAlloc
 	friend class ndMeshFile;
 	friend class ndMeshLoader;
 };
-
-inline ndMatrix ndMesh::GetMatrix() const
-{
-	return m_matrix;
-}
-
-inline void ndMesh::SetMatrix(const ndMatrix& matrix)
-{
-	m_matrix = matrix;
-}
-
-inline ndMatrix ndMesh::GetGeometryMatrix() const
-{
-	return m_geometryMatrix;
-}
-
-inline void ndMesh::SetGeometryMatrix(const ndMatrix& matrix)
-{
-	m_geometryMatrix = matrix;
-}
 
 template <typename Function>
 void ndMesh::NodeIterator(Function func)

@@ -40,6 +40,7 @@ void ndResizeMesh::ApplyScale() const
 		ndSharedPtr<ndMeshBody>& body(node->GetRigidBody());
 		if (body)
 		{
+			ndAssert(0);
 			// scale center of mass
 			ndMeshBodyDynamic* const dynBody = (ndMeshBodyDynamic*)*body;
 			dynBody->m_localCentreOfMass = scaleMatrix.RotateVector(dynBody->m_localCentreOfMass);
@@ -66,10 +67,6 @@ void ndResizeMesh::ApplyScale() const
 		}
 	};
 	m_owner->GetMesh()->NodeIterator(ScalePhysics);
-
-	ndAssert(0);
-	//ndSharedPtr<ndRenderSceneNode> newScenMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*m_owner->GetRenderer(), *m_owner->GetMesh(), ndGetPath(m_owner->GetPath())));
-	//m_owner->SetVisualScene(m_owner->GetMesh(), newScenMesh);
 
 	ndWeakPtr<ndMesh> selection(*m_owner->m_currentSelection);
 	ndSharedPtr<ndRenderSceneNode> newScenMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*m_owner->GetRenderer(), *m_owner->GetMesh(), ndGetPath(m_owner->GetPath())));

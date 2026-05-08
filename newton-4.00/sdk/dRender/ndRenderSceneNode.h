@@ -90,8 +90,9 @@ class ndRenderSceneNode : public ndContainersFreeListAlloc<ndRenderSceneNode>
 	virtual void Render(const ndRender* const owner, const ndMatrix& parentMatrix, ndRenderPassMode renderMode) const;
 
 	ndMatrix m_matrix;			 // interpolated local matrix
+	ndMatrix m_basePoseMatrix;	 // matrix for skin meh binding 
 	ndMatrix m_globalMatrix;	 // world space matrix calculated each frame for rendering
-	ndMatrix m_primitiveMatrix;  // 
+	ndMatrix m_primitiveMatrix;   
 	ndTransform m_transform0;
 	ndTransform m_transform1;
 	ndString m_name;

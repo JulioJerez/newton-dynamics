@@ -34,6 +34,7 @@ void ndRotateMesh::ApplyRotation()
 		ndSharedPtr<ndMeshBody>& body(node->GetRigidBody());
 		if (body)
 		{
+			ndAssert(0);
 			// scale center of mass
 			ndMeshBodyDynamic* const dynBody = (ndMeshBodyDynamic*)*body;
 			dynBody->m_localCentreOfMass = rotation.RotateVector(dynBody->m_localCentreOfMass);
@@ -130,6 +131,7 @@ void ndRotateBones::ApplyRotation()
 			ndSharedPtr<ndMeshBody>& body(node->GetRigidBody());
 			if (body)
 			{
+				ndAssert(0);
 				// scale center of mass
 				ndMeshBodyDynamic* const dynBody = (ndMeshBodyDynamic*)*body;
 				dynBody->m_localCentreOfMass = invRotation.RotateVector(dynBody->m_localCentreOfMass);
