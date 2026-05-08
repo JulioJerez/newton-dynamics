@@ -16,6 +16,7 @@
 
 class ndRender;
 class ndRenderSceneCamera;
+class ndRenderTransformModifier;
 class ndRenderSceneNodeInstance;
 class ndRenderPassShadowsImplement;
 
@@ -79,6 +80,8 @@ class ndRenderSceneNode : public ndContainersFreeListAlloc<ndRenderSceneNode>
 	ndTransform GetTransform() const;
 	void SetTransform(const ndTransform& transform);
 
+	void SetTransformModifier(const ndSharedPtr<ndRenderTransformModifier>& modifier);
+
 	ndRenderSceneNode* IteratorNext();
 	ndRenderSceneNode* IteratorFirst();
 	const ndRenderSceneNode* IteratorNext() const;
@@ -106,6 +109,7 @@ class ndRenderSceneNode : public ndContainersFreeListAlloc<ndRenderSceneNode>
 	ndWeakPtr<ndRenderSceneNode> m_parent;
 	ndSharedPtr<ndRenderPrimitive> m_primitive;
 	ndList<ndSharedPtr<ndRenderSceneNode>> m_children;
+	ndSharedPtr<ndRenderTransformModifier> m_transformModifier;
 	ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* m_sceneHandle;
 	ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* m_selfChildNode;
 

@@ -14,6 +14,7 @@
 #include "ndRenderTexture.h"
 #include "ndRenderPrimitive.h"
 #include "ndRenderSceneNode.h"
+#include "ndRenderTransformModifier.h"
 #include "ndRenderPrimitiveImplement.h"
 
 #define ND_STACK_DEPTH 512
@@ -344,6 +345,11 @@ ndTransform ndRenderSceneNode::GetTransform() const
 void ndRenderSceneNode::SetTransform(const ndTransform& transform)
 {
 	SetTransform(transform.m_rotation, transform.m_position);
+}
+
+void ndRenderSceneNode::SetTransformModifier(const ndSharedPtr<ndRenderTransformModifier>& modifier)
+{
+	m_transformModifier = modifier;
 }
 
 void ndRenderSceneNode::InterpolateTransforms(ndFloat32 param)

@@ -445,6 +445,17 @@ namespace ndExcavator
 			}
 		};
 		excavator->NodeIterator(BindPhysicsAndGraphics);
+
+		auto AddGraphicsModiers = [](ndRenderSceneNode* const node)
+		{
+			if (node->m_name == "hydrolickBoom002")
+			{
+				ndRenderSceneNode* const target = node->GetRoot()->FindByName("hydrolic_003");
+				ndSharedPtr<ndRenderTransformModifier> modifier(new ndRenderTransformModifierLockAtNode(node, target));
+				node->SetTransformModifier(modifier);
+			}
+		};
+		sceneMesh->NodeIterator(AddGraphicsModiers);
 		
 		// using a model articulation for this vehicle
 		ndSharedPtr<ndModelNotify> controller(new ExcavatorController(scene, excavator, sceneMesh));
@@ -486,7 +497,7 @@ void ndComplexModel(ndDemoEntityManager* const scene)
 	ndMatrix matrix1(ndGetIdentityMatrix());
 	matrix1.m_posit.m_x += 10.0f;
 	matrix1.m_posit.m_z += 10.0f;
-	AddPlanks(scene, matrix1, 10.0f, 4);
+	//AddPlanks(scene, matrix1, 10.0f, 4);
 	
 	ExcavatorController* const playerController = (ExcavatorController*)*controller;
 	ndRender* const renderer = *scene->GetRenderer();
