@@ -225,6 +225,7 @@ class ndMeshBody : public ndClassAlloc
 	D_COLLISION_API virtual ~ndMeshBody();
 
 	D_COLLISION_API virtual ndMeshBody* Duplicate() const;
+	D_COLLISION_API virtual void DuplicateFixDependencies(const ndMesh* const otherRoot);
 	D_COLLISION_API virtual bool operator==(const ndMeshBody& other) const;
 
 	D_COLLISION_API virtual ndBody* CreateObject() const;
@@ -276,7 +277,6 @@ class ndMeshCollidingPair : public ndClassAlloc
 class ndMeshJoint : public ndClassAlloc
 {
 	public:
-
 	class ndAxis
 	{
 		public:
@@ -315,6 +315,8 @@ class ndMeshJoint : public ndClassAlloc
 	D_COLLISION_API virtual ~ndMeshJoint();
 
 	D_COLLISION_API virtual ndMeshJoint* Duplicate() const;
+	D_COLLISION_API virtual void DuplicateFixDependencies(const ndMesh* const otherRoot);
+
 	D_COLLISION_API const ndMesh* GetSurrogateParent() const;
 	D_COLLISION_API void SetSurrogateParent(const ndMesh* const surrodateParent);
 

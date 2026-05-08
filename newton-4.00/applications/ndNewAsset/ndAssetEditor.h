@@ -196,6 +196,8 @@ class ndAssetEditor : public ndClassAlloc
 	void EditCollidingPair();
 	void SetLoopJointSelection(const ndMesh* const node);
 	void SetCollidingSubSelection(const ndMesh* const node);
+
+	void ApplyNodeTransform(const ndMatrix& matrix, ndRenderSceneNode* const entNode);
 		
 	ndSharedPtr<ndMesh> m_mesh;
 	ndSharedPtr<ndRender> m_renderer;

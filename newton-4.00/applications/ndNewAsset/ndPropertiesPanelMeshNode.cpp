@@ -61,6 +61,34 @@ void ndUndoRedoMeshNode::Undo()
 	m_editor->m_currentSelection = m_selectedNode;
 }
 
+void ndAssetEditor::ApplyNodeTransform(const ndMatrix& matrix, ndRenderSceneNode* const entNode)
+{
+	const ndMatrix localMatrix(m_currentSelection->GetMatrix() * matrix.OrthoInverse());
+	m_currentSelection->SetMatrix(matrix);
+	entNode->SetTransform(matrix);
+	entNode->SetTransform(matrix);
+	if (m_transformPivotOnly)
+	{
+		const ndMatrix geoMatrix(m_currentSelection->GetGeometryMatrix() * localMatrix);
+		entNode->SetPrimitiveMatrix(geoMatrix);
+		m_currentSelection->SetGeometryMatrix(geoMatrix);
+
+		for (ndList<ndSharedPtr<ndMesh>>::ndNode* childPtr = m_currentSelection->GetChildren().GetFirst(); childPtr; childPtr = childPtr->GetNext())
+		{
+			ndMesh* const child = *childPtr->GetInfo();
+			child->SetMatrix(child->GetMatrix() * localMatrix);
+		}
+
+		for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* childPtr = entNode->GetChildren().GetFirst(); childPtr; childPtr = childPtr->GetNext())
+		{
+			ndRenderSceneNode* const child = *childPtr->GetInfo();
+			const ndMatrix counterMatrix(child->GetMatrix() * localMatrix);
+			child->SetTransform(counterMatrix);
+			child->SetTransform(counterMatrix);
+		}
+	}
+}
+
 void ndAssetEditor::ShowPropertiesMeshInfo()
 {
 	if (ImGui::CollapsingHeader("Mesh node"))
@@ -116,9 +144,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				
 					matrix.m_posit = ndVector(position[0], position[1], position[2], ndFloat32(1.0f));
-					m_currentSelection->SetMatrix(matrix);
-					entNode->SetTransform(matrix);
-					entNode->SetTransform(matrix);
+					ApplyNodeTransform(matrix, entNode);
 				
 					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				}
@@ -134,9 +160,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				
 					ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
 					newMatrix.m_posit = matrix.m_posit;
-					m_currentSelection->SetMatrix(newMatrix);
-					entNode->SetTransform(newMatrix);
-					entNode->SetTransform(newMatrix);
+					ApplyNodeTransform(newMatrix, entNode);
 				
 					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				}
@@ -147,7 +171,6 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				position[1] = ndReal(0.0f);
 				position[2] = ndReal(0.0f);
 
-				// this is really nice but creates lots of issues with undo/redo
 				if (ImGui::InputFloat3("posit", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 				{
 					ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
@@ -156,9 +179,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 
 					const ndVector delta(position[0], position[1], position[2], ndFloat32(0.0f));
 					matrix.m_posit += matrix.RotateVector(delta);
-					m_currentSelection->SetMatrix(matrix);
-					entNode->SetTransform(matrix);
-					entNode->SetTransform(matrix);
+					ApplyNodeTransform(matrix, entNode);
 
 					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				}
@@ -173,9 +194,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 
 					const ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad) * matrix);
-					m_currentSelection->SetMatrix(newMatrix);
-					entNode->SetTransform(newMatrix);
-					entNode->SetTransform(newMatrix);
+					ApplyNodeTransform(newMatrix, entNode);
 
 					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				}

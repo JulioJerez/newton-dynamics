@@ -89,6 +89,7 @@ class ndMesh : public ndClassAlloc
 
 	D_NEWTON_API virtual ~ndMesh();
 	D_NEWTON_API virtual ndMesh* CreateClone() const;
+	D_NEWTON_API virtual void CreateCloneFixDependencies();
 
 	D_NEWTON_API virtual bool operator==(const ndMesh& other) const;
 
@@ -101,8 +102,8 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API ndMatrix GetBasePoseMatrix() const;
 	D_NEWTON_API void SetBasePoseMatrix(const ndMatrix& matrix);
 
+	D_NEWTON_API void AddChild(const ndSharedPtr<ndMesh>& child);
 	D_NEWTON_API void RemoveChild(const ndSharedPtr<ndMesh>& child);
-	D_NEWTON_API void AddChild(const ndSharedPtr<ndMesh>& child, bool addToEnd = true);
 
 	D_NEWTON_API ndMesh* GetParent();
 	D_NEWTON_API const ndMesh* GetParent() const;
@@ -243,6 +244,7 @@ class ndCloseLoopConstraints: public ndMesh
 	D_NEWTON_API virtual ndCloseLoopConstraints* GetAsCloseLoopConstraints() override;
 	D_NEWTON_API virtual const ndCloseLoopConstraints* GetAsCloseLoopConstraints() const override;
 
+	D_NEWTON_API virtual void CreateCloneFixDependencies() override;
 	D_NEWTON_API virtual ndMesh* CreateClone() const override;
 	D_NEWTON_API virtual bool operator==(const ndMesh& other) const override;
 
@@ -261,6 +263,7 @@ class ndCollidingPairs : public ndMesh
 	D_NEWTON_API virtual ndCollidingPairs* GetAsCollidingPairs() override;
 	D_NEWTON_API virtual const ndCollidingPairs* GetAsCollidingPairs() const override;
 
+	D_NEWTON_API virtual void CreateCloneFixDependencies() override;
 	D_NEWTON_API virtual ndMesh* CreateClone() const override;
 	D_NEWTON_API virtual bool operator==(const ndMesh& other) const override;
 

@@ -709,6 +709,12 @@ ndMeshBody* ndMeshBody::Duplicate() const
 	return nullptr;
 }
 
+void ndMeshBody::DuplicateFixDependencies(const ndMesh* const otherRoot)
+{
+	m_owner = otherRoot->FindByName(m_owner->GetName());
+	ndAssert(m_owner);
+}
+
 bool ndMeshBody::operator==(const ndMeshBody& other) const
 {
 	bool test = (m_classConstructor == other.m_classConstructor);
@@ -873,6 +879,20 @@ ndMeshJoint* ndMeshJoint::Duplicate() const
 {
 	ndAssert(0);
 	return nullptr;
+}
+
+void ndMeshJoint::DuplicateFixDependencies(const ndMesh* const otherRoot)
+{
+	m_owner = otherRoot->FindByName(m_owner->GetName());
+	ndAssert(m_owner);
+
+	if (m_surrogateParent)
+	{
+		const ndMesh* const root = m_owner->GetRoot();
+		ndMesh* const surrogateParent = root->FindByName(m_surrogateParent->GetName());
+		ndAssert(surrogateParent);
+		m_surrogateParent = ndWeakPtr<const ndMesh>(surrogateParent);
+	}
 }
 
 bool ndMeshJoint::operator==(const ndMeshJoint& other) const
