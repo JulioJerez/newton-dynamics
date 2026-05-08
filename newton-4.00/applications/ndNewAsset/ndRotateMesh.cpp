@@ -77,6 +77,7 @@ void ndRotateMesh::ApplyRotation()
 	ndSharedPtr<ndRenderSceneNode> newScenMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*m_owner->GetRenderer(), *m_owner->GetMesh(), ndGetPath(m_owner->GetPath())));
 	m_owner->SetVisualScene(m_owner->GetMesh(), newScenMesh);
 	m_owner->m_currentSelection = selection;
+	m_owner->m_initCamera = false;
 }
 
 void ndRotateMesh::Execute()
@@ -175,6 +176,7 @@ void ndRotateBones::ApplyRotation()
 	ndSharedPtr<ndRenderSceneNode> newScenMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*m_owner->GetRenderer(), *m_owner->GetMesh(), ndGetPath(m_owner->GetPath())));
 	m_owner->SetVisualScene(m_owner->GetMesh(), newScenMesh);
 	m_owner->m_currentSelection = selection;
+	m_owner->m_initCamera = false;
 }
 
 void ndRotateBones::Execute()

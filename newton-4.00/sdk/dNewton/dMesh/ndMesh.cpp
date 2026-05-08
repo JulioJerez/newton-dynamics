@@ -171,7 +171,7 @@ ndMesh::~ndMesh()
 {
 }
 
-inline ndMatrix ndMesh::GetMatrix() const
+ndMatrix ndMesh::GetMatrix() const
 {
 	return m_matrix;
 }

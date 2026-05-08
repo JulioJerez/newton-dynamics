@@ -56,6 +56,7 @@ void ndUndoRedoMeshNode::Undo()
 {
 	ndSharedPtr<ndRenderSceneNode> visualMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*m_editor->GetRenderer(), *m_copy, ndGetPath(m_editor->GetPath())));
 
+	m_editor->m_initCamera = false;
 	m_editor->SetVisualScene(m_copy, visualMesh);
 	m_editor->m_currentSelection = m_selectedNode;
 }
