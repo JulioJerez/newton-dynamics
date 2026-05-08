@@ -228,8 +228,9 @@ class ndAssetEditor : public ndClassAlloc
 	bool m_showCollisionShape;
 	bool m_showPreTransform;
 
-	bool m_raycastBones;
 	bool m_toolActive;
+	bool m_initCamera;
+	bool m_raycastBones;
 	bool m_transformPivotOnly;
 
 	ndReal m_gizmoScale;

@@ -35,8 +35,9 @@ ndAssetEditor::ndAssetEditor()
 	,m_showSelectedNode(true)
 	,m_showCollisionShape(true)
 	,m_showPreTransform(false)
-	,m_raycastBones(true)
 	,m_toolActive(false)
+	,m_initCamera(false)
+	,m_raycastBones(true)
 	,m_transformPivotOnly(false)
 	,m_gizmoScale(ndFloat32(0.25f))
 	,m_renderMode(m_shaded)
@@ -590,17 +591,21 @@ void ndAssetEditor::Run()
 				m_renderer->AddSceneNode(m_entity);
 				m_debugDisplayRenderPass->ResetScene();
 
-				ndVector p0;
-				ndVector p1;
-				const ndMatrix matrix(ndGetIdentityMatrix());
-				m_mesh->CalculateAabb(matrix, p0, p1);
-				ndVector size(ndVector::m_half * (p1 - p0));
-				ndVector origin(ndVector::m_half * (p1 + p0));
-				ndFloat32 maxSize = ndMax(ndMax(size.m_x, size.m_y), size.m_z);
-				origin.m_x -= maxSize * 4.0f;
-				ndQuaternion rot;
+				if (m_initCamera)
+				{
+					ndVector p0;
+					ndVector p1;
+					const ndMatrix matrix(ndGetIdentityMatrix());
+					m_mesh->CalculateAabb(matrix, p0, p1);
+					ndVector size(ndVector::m_half * (p1 - p0));
+					ndVector origin(ndVector::m_half * (p1 + p0));
+					ndFloat32 maxSize = ndMax(ndMax(size.m_x, size.m_y), size.m_z);
+					origin.m_x -= maxSize * 4.0f;
+					ndQuaternion rot;
 
-				SetCameraMatrix(rot, origin);
+					SetCameraMatrix(rot, origin);
+				}
+				m_initCamera = true;
 			}
 
 			RenderScene();
