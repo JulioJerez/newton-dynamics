@@ -416,7 +416,6 @@ void ndFbxMeshLoader::AlignToWorld(ndMesh* const mesh)
 		ndMesh* const meshNode = entBuffer.Pop();
 
 		const ndMatrix entMatrix(invRotation * meshNode->GetMatrix() * rotation);
-		//meshNode->m_matrix = entMatrix;
 		meshNode->SetMatrix(entMatrix);
 
 		ndSharedPtr<ndMeshEffect> effectMesh (meshNode->GetGeometry());
@@ -557,6 +556,12 @@ void ndFbxMeshLoader::ApplyAllTransforms(ndMesh* const mesh, const ndMatrix& coo
 	ApplyTransform(mesh, coordinateSystem);
 	AlignToWorld(mesh);
 	CalculateBoneProperties(mesh);
+
+	auto SetPoseTransform = [](ndMesh* const node)
+	{
+		node->SetBasePoseMatrix(node->GetMatrix());
+	};
+	mesh->NodeIterator(SetPoseTransform);
 }
 
 void ndFbxMeshLoader::ImportMeshNode(ndOfbx::Object* const fbxNode, ndFbx2ndMeshNodeMap& nodeMap)
@@ -695,12 +700,21 @@ void ndFbxMeshLoader::ImportMeshNode(ndOfbx::Object* const fbxNode, ndFbx2ndMesh
 		for (ndInt32 i = 0; i < clusterCount; ++i)
 		{
 			const ndOfbx::Cluster* const fbxCluster = skin->getCluster(i);
+
+			//// overide the pose matrix in case it was saved diffrent
+			//ndMatrix globalPoseMatrix(ofbxMatrix2dMatrix(fbxCluster->getTransformLinkMatrix()));
+			//ndMesh* const bone = nodeMap.Find(fbxCluster->getLink())->GetInfo();
+			//ndMatrix posetLocalMatrix(globalPoseMatrix * bone->GetParent()->CalculateGlobalMatrix().Inverse4x4);
+			//bone->SetBasePoseMatrix(posetLocalMatrix);
+
+			const ndOfbx::Object* const fbxBone = fbxCluster->getLink();
+			ndUnsigned32 hashId = ndUnsigned32(ndCRC64(fbxBone->name) & 0xffffffff);
+
 			ndInt32 clusterIndexCount = fbxCluster->getIndicesCount();
 			if (clusterIndexCount)
 			{
-				const ndOfbx::Object* const fbxBone = fbxCluster->getLink();
-				//ndInt32 hashId = ndInt32(ndCRC64(fbxBone->name) & 0xffffffff);
-				ndUnsigned32 hashId = ndUnsigned32(ndCRC64(fbxBone->name) & 0xffffffff);
+				//const ndOfbx::Object* const fbxBone = fbxCluster->getLink();
+				//ndUnsigned32 hashId = ndUnsigned32(ndCRC64(fbxBone->name) & 0xffffffff);
 				const ndInt32* const indices = fbxCluster->getIndices();
 				const ndFloat64* const weights = fbxCluster->getWeights();
 				for (ndInt32 j = 0; j < clusterIndexCount; ++j)
@@ -759,6 +773,7 @@ ndMesh* ndFbxMeshLoader::CreateMeshHierarchy(ndOfbx::IScene* const fbxScene, ndF
 		ndMatrix localMatrix(ofbxMatrix2dMatrix(data.m_fbxNode->getLocalTransform()));
 		node->SetName(data.m_fbxNode->name);
 		node->SetMatrix(localMatrix);
+		//node->SetBasePoseMatrix(localMatrix);
 	
 		nodeMap.Insert(*node, data.m_fbxNode);
 		{
@@ -774,7 +789,7 @@ ndMesh* ndFbxMeshLoader::CreateMeshHierarchy(ndOfbx::IScene* const fbxScene, ndF
 	return mesh;
 }
 
-ndMesh* ndFbxMeshLoader::Fbx2ndMesh(ndOfbx::IScene* const fbxScene)
+ndMesh* ndFbxMeshLoader::FbxToMesh(ndOfbx::IScene* const fbxScene)
 {
 	ndFbx2ndMeshNodeMap nodeMap;
 	ndMesh* const mesh = CreateMeshHierarchy(fbxScene, nodeMap);
@@ -1223,7 +1238,7 @@ ndSharedPtr<ndMesh> ndFbxMeshLoader::LoadMesh(const char* const fullPathName, bo
 
 	const ndMatrix convertMatrix(GetCoordinateSystemMatrix(*fbxScene));
 
-	ndSharedPtr<ndMesh> mesh(Fbx2ndMesh(*fbxScene));
+	ndSharedPtr<ndMesh> mesh(FbxToMesh(*fbxScene));
 	if (loadAnimation)
 	{
 		LoadAnimation(*fbxScene, *mesh);

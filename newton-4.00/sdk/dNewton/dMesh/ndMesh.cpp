@@ -43,6 +43,7 @@
 ndMesh::ndMesh()
 	:ndClassAlloc()
 	,m_matrix(ndGetIdentityMatrix())
+	,m_basePoseMatrix(ndGetIdentityMatrix())
 	,m_geometryMatrix(ndGetIdentityMatrix())
 	,m_name()
 	,m_scale()
@@ -62,6 +63,7 @@ ndMesh::ndMesh()
 ndMesh::ndMesh(const ndShapeInstance& shape, ndUvMapingMode mapping)
 	:ndClassAlloc()
 	,m_matrix(ndGetIdentityMatrix())
+	,m_basePoseMatrix(ndGetIdentityMatrix())
 	,m_geometryMatrix(ndGetIdentityMatrix())
 	,m_name("node")
 	,m_scale()
@@ -117,6 +119,7 @@ ndMesh::ndMesh(const ndShapeInstance& shape, ndUvMapingMode mapping)
 ndMesh::ndMesh(const ndMesh& src)
 	:ndClassAlloc()
 	,m_matrix(src.m_matrix)
+	,m_basePoseMatrix(src.m_basePoseMatrix)
 	,m_geometryMatrix(src.m_geometryMatrix)
 	,m_name(src.m_name)
 	,m_scale(src.m_scale)
@@ -166,6 +169,36 @@ ndMesh::ndMesh(const ndMesh& src)
 
 ndMesh::~ndMesh()
 {
+}
+
+inline ndMatrix ndMesh::GetMatrix() const
+{
+	return m_matrix;
+}
+
+void ndMesh::SetMatrix(const ndMatrix& matrix)
+{
+	m_matrix = matrix;
+}
+
+ndMatrix ndMesh::GetGeometryMatrix() const
+{
+	return m_geometryMatrix;
+}
+
+void ndMesh::SetGeometryMatrix(const ndMatrix& matrix)
+{
+	m_geometryMatrix = matrix;
+}
+
+ndMatrix ndMesh::GetBasePoseMatrix() const
+{
+	return m_basePoseMatrix;
+}
+
+void ndMesh::SetBasePoseMatrix(const ndMatrix& matrix)
+{
+	m_basePoseMatrix = matrix;
 }
 
 ndMesh* ndMesh::GetAsMesh()
@@ -573,18 +606,35 @@ void ndMesh::ApplyTransform(const ndMatrix& transform)
 
 	ndFixSizeArray<ndMesh*, 1024> stack;
 	ndFixSizeArray<ndMatrix, 1024> matrix;
+	ndFixSizeArray<ndMatrix, 1024> basePoseMatrix;
 
 	stack.PushBack(this);
 	matrix.PushBack(transform);
+	basePoseMatrix.PushBack(transform);
 	while (stack.GetCount())
 	{
 		ndMesh* const node = stack.Pop();
 		ndMatrix parentMatrix(matrix.Pop());
-		ndMatrix newTransform(node->GetMatrix() * parentMatrix);
+		ndMatrix parentBasePoseMatrix(basePoseMatrix.Pop());
+		{
+			ndVector scale;
+			ndMatrix axis;
+			ndMatrix orthoMatrix;
+			ndMatrix newBasePoseTransform(node->GetBasePoseMatrix() * parentBasePoseMatrix);
+			newBasePoseTransform.PolarDecomposition(orthoMatrix, scale, axis);
+			node->SetBasePoseMatrix(orthoMatrix);
+
+			ndMatrix scaleMatrix(ndGetIdentityMatrix());
+			scaleMatrix[0][0] = scale[0];
+			scaleMatrix[1][1] = scale[1];
+			scaleMatrix[2][2] = scale[2];
+			parentBasePoseMatrix = axis * scaleMatrix;
+		}
 
 		ndVector scale;
 		ndMatrix axis;
 		ndMatrix orthoMatrix;
+		ndMatrix newTransform(node->GetMatrix() * parentMatrix);
 		newTransform.PolarDecomposition(orthoMatrix, scale, axis);
 		node->SetMatrix(orthoMatrix);
 		
@@ -660,6 +710,7 @@ void ndMesh::ApplyTransform(const ndMatrix& transform)
 			ndMesh* const child = *childNode->GetInfo();
 			stack.PushBack(child);
 			matrix.PushBack(parentMatrix);
+			basePoseMatrix.PushBack(parentBasePoseMatrix);
 		}
 	}
 }
@@ -677,6 +728,7 @@ void ndMesh::ApplyBonesRotation(const ndMatrix& rotation)
 			const ndMatrix geoMatrix(node->GetGeometryMatrix());
 			const ndMatrix rotatedMatrix(rotation * matrix);
 			node->SetMatrix(rotatedMatrix);
+			node->SetBasePoseMatrix(rotation * node->GetBasePoseMatrix());
 
 			const ndMatrix rotatedGeoMatrix(geoMatrix * invRotation);
 			node->SetGeometryMatrix(rotatedGeoMatrix);
@@ -736,6 +788,7 @@ void ndMesh::ApplyBonesRotation(const ndMatrix& rotation)
 			{
 				ndMesh* const child = *childNode->GetInfo();
 				child->SetMatrix(child->GetMatrix() * invRotation);
+				child->SetBasePoseMatrix(child->GetBasePoseMatrix() * invRotation);
 			}
 		}
 	};
@@ -750,12 +803,16 @@ void ndMesh::ApplyCoordinateRotation(const ndMatrix& rotation)
 	auto CoordinateRotation = [&rotation, &invRotation](ndMesh* const node)
 	{
 		const ndMatrix matrix(node->m_matrix);
+		const ndMatrix basePoseMatrix(node->m_basePoseMatrix);
 		const ndMatrix geoMatrix(node->GetGeometryMatrix());
+
 		const ndMatrix rotatedMatrix(invRotation * matrix * rotation);
 		const ndMatrix rotatedGeoMatrix(invRotation * geoMatrix * rotation);
+		const ndMatrix rotatedBasePoseMatrix(invRotation * basePoseMatrix * rotation);
 
 		node->SetMatrix(rotatedMatrix);
 		node->SetGeometryMatrix(rotatedGeoMatrix);
+		node->SetBasePoseMatrix(rotatedBasePoseMatrix);
 		node->SetBoneTarget(rotation.TransformVector(node->GetBoneTarget()));
 
 		ndSharedPtr<ndMeshEffect> mesh(node->GetGeometry());

@@ -102,6 +102,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			ndVector tmp;
 			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
 
+			ImGui::Checkbox("transform pivot only", &m_transformPivotOnly);
 			if (m_showPreTransform)
 			{
 				position[0] = ndReal(matrix.m_posit.m_x);

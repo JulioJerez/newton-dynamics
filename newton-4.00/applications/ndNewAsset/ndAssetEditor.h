@@ -230,6 +230,8 @@ class ndAssetEditor : public ndClassAlloc
 
 	bool m_raycastBones;
 	bool m_toolActive;
+	bool m_transformPivotOnly;
+
 	ndReal m_gizmoScale;
 	ndInt32 m_renderMode;
 	ndInt32 m_closeLoopIndex;

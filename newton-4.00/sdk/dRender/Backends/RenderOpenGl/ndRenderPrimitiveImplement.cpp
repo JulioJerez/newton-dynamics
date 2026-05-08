@@ -600,7 +600,20 @@ void ndRenderPrimitiveImplement::BuildRenderSkinnedMeshFromMeshEffect(const ndRe
 	}
 	// build a mapping for bone to index for all bone active in the vertex weigh
 	ndTree<GLuint, GLuint> boneToIndexMap;
-	const ndMatrix shapeBindMatrix(descriptor.m_skeleton->CalculateGlobalTransform());
+
+	auto CalculateBasePoseMatrix = [](const ndRenderSceneNode* node)
+	{
+		ndMatrix matrix(node->m_basePoseMatrix);
+		for (const ndRenderSceneNode* parent = node->GetParent(); parent; parent = parent->GetParent())
+		{
+			const ndMatrix parentMatrix(parent->m_basePoseMatrix);
+			matrix = matrix * parentMatrix;
+		}
+		return matrix;
+	};
+
+	//const ndMatrix shapeBindMatrix(descriptor.m_skeleton->CalculateGlobalTransform());
+	const ndMatrix shapeBindMatrix(CalculateBasePoseMatrix(*descriptor.m_skeleton));
 	for (ndInt32 i = 0; i < vertexCount; ++i)
 	{
 		glSkinVertex& point = points[i];
@@ -617,7 +630,8 @@ void ndRenderPrimitiveImplement::BuildRenderSkinnedMeshFromMeshEffect(const ndRe
 			
 					ndRenderSceneNode* const entity = boneNode->GetInfo();
 					m_skeleton.PushBack(entity);
-					const ndMatrix boneMatrix(entity->CalculateGlobalTransform());
+					//const ndMatrix boneMatrix(entity->CalculateGlobalTransform());
+					const ndMatrix boneMatrix(CalculateBasePoseMatrix(entity));
 					const ndMatrix paletteMatrix(shapeBindMatrix * boneMatrix.OrthoInverse());
 					m_bindingSkinMatrixArray.PushBack(paletteMatrix);
 				}

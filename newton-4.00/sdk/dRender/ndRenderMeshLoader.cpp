@@ -88,6 +88,7 @@ ndSharedPtr<ndRenderSceneNode> ndRenderMeshLoader::CreateRenderSceneMesh(ndRende
 			entity = childNode;
 		}
 		entity->m_name = mesh->GetName();
+		entity->m_basePoseMatrix = mesh->GetBasePoseMatrix();
 	
 		if (entity->m_name.Find("-hidden") == -1)
 		{

@@ -105,6 +105,11 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 		ndAssert (mesh->m_name == ndString(xmlGetString(entry.m_xmlNode, "name")));
 		mesh->m_matrix = xmlGetMatrix(entry.m_xmlNode, "matrix");
 		mesh->m_geometryMatrix = xmlGetMatrix(entry.m_xmlNode, "geometryMatrix");
+		mesh->m_basePoseMatrix = mesh->m_matrix;
+		if (xmlHasAttribute(entry.m_xmlNode, "basePoseMatrix"))
+		{
+			mesh->m_basePoseMatrix = xmlGetMatrix(entry.m_xmlNode, "basePoseMatrix");
+		}
 	
 		nd::TiXmlElement* const xmlNodeType = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("type");
 		ndAssert(xmlNodeType);
@@ -248,6 +253,7 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName) const
 		MeshXmlNodePair entry(stack.Pop());
 		xmlSaveParam(entry.m_parentXml, "name", entry.m_meshNode->m_name.GetStr());
 		xmlSaveParam(entry.m_parentXml, "matrix", entry.m_meshNode->m_matrix);
+		xmlSaveParam(entry.m_parentXml, "basePoseMatrix", entry.m_meshNode->m_basePoseMatrix);
 		xmlSaveParam(entry.m_parentXml, "geometryMatrix", entry.m_meshNode->m_geometryMatrix);
 
 		nd::TiXmlElement* const xmlNodeType = new nd::TiXmlElement("type");
