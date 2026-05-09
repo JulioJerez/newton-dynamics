@@ -63,7 +63,7 @@ void ndAssetEditor::EditShapeTransform()
 	ndMeshBodyKinematic* const rigidBody = (ndMeshBodyKinematic*)*body;
 	ndMeshShapeInstance& shapeInstance = rigidBody->m_shapeInstance;
 
-	if (m_showPreTransform)
+	if (m_showTransformValues)
 	{
 		ndAssert(0);
 	}

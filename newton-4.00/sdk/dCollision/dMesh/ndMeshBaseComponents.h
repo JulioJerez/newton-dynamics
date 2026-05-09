@@ -338,7 +338,7 @@ class ndMeshJoint : public ndClassAlloc
 class ndMeshTransformModifier : public ndClassAlloc
 {
 	public:
-	D_COLLISION_API ndMeshTransformModifier(const ndMesh* const owner);
+	D_COLLISION_API ndMeshTransformModifier(const ndMesh* const owner, const ndMesh* const target);
 	D_COLLISION_API ndMeshTransformModifier(const ndMeshTransformModifier& other);
 	D_COLLISION_API virtual ~ndMeshTransformModifier();
 
@@ -351,9 +351,8 @@ class ndMeshTransformModifier : public ndClassAlloc
 	D_COLLISION_API virtual bool operator==(const ndMeshJoint& other) const;
 
 	ndWeakPtr<const ndMesh> m_owner;
+	ndWeakPtr<const ndMesh> m_target;
 	ndString m_constructor;
 };
 
-
 #endif
-

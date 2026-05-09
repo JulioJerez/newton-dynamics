@@ -59,7 +59,7 @@ void ndAssetEditor::EditJointGlobalMatrix()
 {
 	ndSharedPtr<ndMeshJoint> joint(m_currentSelection->GetJoint());
 
-	if (m_showPreTransform)
+	if (m_showTransformValues)
 	{
 		ndAssert(0);
 	}

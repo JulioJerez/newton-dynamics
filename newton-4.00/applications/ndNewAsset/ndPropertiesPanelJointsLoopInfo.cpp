@@ -78,7 +78,7 @@ void ndAssetEditor::EditLoopJointLocalMatrix(ndSharedPtr<ndMeshLoopJoint>& loopJ
 {
 	ndSharedPtr<ndMeshJoint> joint(loopJoint->m_joint);
 
-	if (m_showPreTransform)
+	if (m_showTransformValues)
 	{
 		ndAssert(0);
 	}
@@ -150,7 +150,7 @@ void ndAssetEditor::EditLoopJointGlobalMatrix(ndSharedPtr<ndMeshLoopJoint>& loop
 {
 	ndSharedPtr<ndMeshJoint> joint(loopJoint->m_joint);
 
-	if (m_showPreTransform)
+	if (m_showTransformValues)
 	{
 		ndAssert(0);
 	}

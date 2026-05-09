@@ -995,14 +995,16 @@ void ndMeshCollidingPair::DeserializeFromXml(const nd::TiXmlElement* const)
 ndMeshTransformModifier::ndMeshTransformModifier(const ndMeshTransformModifier& other)
 	:ndClassAlloc()
 	,m_owner(other.m_owner)
+	,m_target(other.m_target)
 	,m_constructor(other.m_constructor)
 {
 	ndAssert(0);
 }
 
-ndMeshTransformModifier::ndMeshTransformModifier(const ndMesh* const owner)
+ndMeshTransformModifier::ndMeshTransformModifier(const ndMesh* const owner, const ndMesh* const target)
 	:ndClassAlloc()
-	,m_owner(m_owner)
+	,m_owner(owner)
+	,m_target(target)
 	,m_constructor("none")
 {
 	ndAssert(0);

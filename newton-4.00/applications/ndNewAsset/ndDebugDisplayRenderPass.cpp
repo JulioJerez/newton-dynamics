@@ -643,6 +643,12 @@ void ndDebugDisplayRenderPass::RenderOptions()
 		{
 			DrawFrame(pivotMatrix);
 		}
+
+		if (m_manager->m_geometryPivot)
+		{
+			const ndMatrix geometryPivot(sceneNode->GetPrimitiveMatrix() * pivotMatrix);
+			DrawFrame(geometryPivot);
+		}
 	
 		if (m_manager->m_showShapePivot)
 		{

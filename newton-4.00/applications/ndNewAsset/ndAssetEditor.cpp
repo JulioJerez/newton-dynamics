@@ -34,10 +34,11 @@ ndAssetEditor::ndAssetEditor()
 	,m_showCenterOfMass(false)
 	,m_showSelectedNode(true)
 	,m_showCollisionShape(true)
-	,m_showPreTransform(false)
+	,m_showTransformValues(false)
 	,m_toolActive(false)
 	,m_initCamera(false)
 	,m_raycastBones(true)
+	,m_geometryPivot(false)
 	,m_transformPivotOnly(false)
 	,m_gizmoScale(ndFloat32(0.25f))
 	,m_renderMode(m_shaded)
@@ -506,20 +507,18 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::Separator();
 			if (ImGui::InputFloat("gizmo scale", &m_gizmoScale, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
-				m_gizmoScale = ndClamp(m_gizmoScale, ndReal(1.0f / 32.0f), ndReal(2.0f));
+				m_gizmoScale = ndClamp(m_gizmoScale, ndReal(1.0f / 32.0f), ndReal(10.0f));
 			}
 
 			ImGui::Separator();
 			ImGui::Checkbox("show node", &m_showSelectedNode);
-			ImGui::Checkbox("show pivot", &m_showPivot);
+			ImGui::Checkbox("show node pivot", &m_showPivot);
+			ImGui::Checkbox("show geometry pivot", &m_geometryPivot);
 			ImGui::Checkbox("show collision pivot", &m_showShapePivot);
 			ImGui::Checkbox("show center of mass", &m_showCenterOfMass);
 			ImGui::Checkbox("show Joints", &m_showJoints);
 			ImGui::Checkbox("show collision", &m_showCollisionShape);
 			ImGui::Checkbox("show mesh skeleton", &m_raycastBones);
-
-			ImGui::Text("global properties");
-			ImGui::Checkbox("parent relative Transform", &m_showPreTransform);
 
 			ImGui::EndMenu();
 		}
