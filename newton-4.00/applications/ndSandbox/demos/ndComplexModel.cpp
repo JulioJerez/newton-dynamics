@@ -448,16 +448,18 @@ namespace ndExcavator
 
 		auto AddGraphicsModiers = [](ndRenderSceneNode* const node)
 		{
-			if (node->m_name == "hydrolickBoom002")
+			if (node->m_name == "hydraulicBoom_001")
 			{
 				ndRenderSceneNode* const target = node->GetRoot()->FindByName("hydrolic_003");
+				ndAssert(target);
 				ndSharedPtr<ndRenderTransformModifier> modifier(new ndRenderTransformModifierLockAtNode(node, target));
 				node->SetTransformModifier(modifier);
 			}
 
 			if (node->m_name == "hydrolic_003")
 			{
-				ndRenderSceneNode* const target = node->GetRoot()->FindByName("hydrolickBoom002");
+				ndRenderSceneNode* const target = node->GetRoot()->FindByName("hydraulicBoom_001");
+				ndAssert(target);
 				ndSharedPtr<ndRenderTransformModifier> modifier(new ndRenderTransformModifierLockAtNode(node, target));
 				node->SetTransformModifier(modifier);
 			}

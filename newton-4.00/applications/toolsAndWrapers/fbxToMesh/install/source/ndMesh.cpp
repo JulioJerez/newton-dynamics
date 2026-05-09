@@ -55,6 +55,7 @@ ndMesh::ndMesh()
 	,m_rigidBody(nullptr)
 	,m_children()
 	,m_selfChildNode(nullptr)
+	,m_transformModifier(nullptr)
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
 {
@@ -72,6 +73,7 @@ ndMesh::ndMesh(const ndShapeInstance& shape, ndUvMapingMode mapping)
 	,m_parent(nullptr)
 	,m_mesh(new ndMeshEffect(shape))
 	,m_selfChildNode(nullptr)
+	,m_transformModifier(nullptr)
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
 {
@@ -130,42 +132,15 @@ ndMesh::ndMesh(const ndMesh& src)
 	,m_joint(src.m_joint ? ndSharedPtr<ndMeshJoint>(src.m_joint->Duplicate()) : ndSharedPtr<ndMeshJoint>(nullptr))
 	,m_rigidBody(src.m_rigidBody ? ndSharedPtr<ndMeshBody>(src.m_rigidBody->Duplicate()) : ndSharedPtr<ndMeshBody>(nullptr))
 	,m_selfChildNode(nullptr)
+	,m_transformModifier(src.m_transformModifier ? ndSharedPtr<ndMeshTransformModifier>(src.m_transformModifier->Duplicate()) : ndSharedPtr<ndMeshTransformModifier>(nullptr))
 	,m_boneTarget(src.m_boneTarget)
 	,m_type(src.m_type)
 {
-	//for (ndList<ndSharedPtr<ndMesh>>::ndNode* ptr = src.GetChildren().GetLast(); ptr; ptr = ptr->GetPrev())
 	for (ndList<ndSharedPtr<ndMesh>>::ndNode* ptr = src.GetChildren().GetFirst(); ptr; ptr = ptr->GetNext())
 	{
 		const ndSharedPtr<ndMesh>& child = ptr->GetInfo();
 		ndSharedPtr<ndMesh> childMesh (child->CreateClone());
 		AddChild(childMesh);
-
-		//if (childMesh->GetAsCollidingPairs())
-		//{
-		//	const ndMesh* const root = childMesh->GetRoot();
-		//	ndCollidingPairs* const pairList = childMesh->GetAsCollidingPairs();
-		//	for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* ptrLoops = pairList->m_collidingPairs.GetFirst(); ptrLoops; ptrLoops = ptrLoops->GetNext())
-		//	{
-		//		ndSharedPtr<ndMeshCollidingPair>& loop = ptrLoops->GetInfo();
-		//		ndMesh* const childReference = root->FindByName(loop->m_childNode->GetName());
-		//		ndMesh* const parentdReference = root->FindByName(loop->m_parentNode->GetName());
-		//		loop->m_childNode = childReference;
-		//		loop->m_parentNode = parentdReference;
-		//	}
-		//}
-		//else if (childMesh->GetAsCloseLoopConstraints())
-		//{
-		//	const ndMesh* const root = childMesh->GetRoot();
-		//	ndCloseLoopConstraints* const loopList = childMesh->GetAsCloseLoopConstraints();
-		//	for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptrLoops = loopList->m_loopJoints.GetFirst(); ptrLoops; ptrLoops = ptrLoops->GetNext())
-		//	{
-		//		ndSharedPtr<ndMeshLoopJoint>& loop = ptrLoops->GetInfo();
-		//		ndMesh* const childReference = root->FindByName(loop->m_childNode->GetName());
-		//		ndMesh* const parentdReference = root->FindByName(loop->m_parentNode->GetName());
-		//		loop->m_childNode = childReference;
-		//		loop->m_parentNode = parentdReference;
-		//	}
-		//}
 	}
 }
 
@@ -344,6 +319,11 @@ void ndMesh::CreateCloneFixDependencies()
 	if (m_joint)
 	{
 		m_joint->DuplicateFixDependencies(myRoot);
+	}
+
+	if (m_transformModifier)
+	{
+		m_transformModifier->DuplicateFixDependencies(myRoot);
 	}
 
 	for (ndList<ndSharedPtr<ndMesh>>::ndNode* ptr = GetChildren().GetFirst(); ptr; ptr = ptr->GetNext())

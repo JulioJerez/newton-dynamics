@@ -208,6 +208,7 @@ class ndMesh : public ndClassAlloc
 	ndSharedPtr<ndMeshBody> m_rigidBody;
 	ndList<ndSharedPtr<ndMesh>> m_children;
 	ndList<ndSharedPtr<ndMesh>>::ndNode* m_selfChildNode;
+	ndSharedPtr<ndMeshTransformModifier> m_transformModifier;
 	ndVector m_boneTarget;
 	ndNodeType m_type;
 

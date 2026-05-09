@@ -107,7 +107,6 @@ class ndMeshEffect: public ndPolyhedra
 		dgFitnessList m_fitness;
 		friend class ndMeshEffect;
 	};
-
 	
 	ndMeshEffect(dMemoryAllocator___* const allocator);
 	ndMeshEffect(dgCollisionInstance* const collision);
@@ -157,13 +156,7 @@ class ndMeshEffect: public ndPolyhedra
 	bool HasVertexColorChannel() const;
 	
 	dgCollisionInstance* CreateCollisionTree(dgWorld* const world, dInt32 shapeID) const;
-	ndMeshEffect* CreateSimplification (dInt32 maxVertexCount, dgReportProgress reportProgressCallback, void* const userData) const;
-	ndMeshEffect* CreateConvexApproximation (dFloat32 maxConcavity, dFloat32 backFaceDistanceFactor, dInt32 maxHullOutputCount, dInt32 maxVertexPerHull, dgReportProgress reportProgressCallback, void* const userData) const;
-
-	ndMeshEffect* CreateTetrahedraIsoSurface() const;
 	void CreateTetrahedraLinearBlendSkinWeightsChannel (const ndMeshEffect* const tetrahedraMesh);
-
-	
 	static ndMeshEffect* CreateFromSerialization (dMemoryAllocator___* const allocator, dgDeserialize deserialization, void* const userData);
 
 	void LoadOffMesh (const char* const filename);
@@ -601,44 +594,6 @@ class ndMeshEffect: public ndPolyhedra
 	ndInt32 m_vertexBaseCount;
 	ndInt32 m_constructionIndex;
 };
-
-#if 0
-
-inline dInt32 ndMeshEffect::GetVertexBaseCount() const
-{
-	return m_vertexBaseCount;
-}
-
-inline void ndMeshEffect::SetVertexBaseCount(dInt32 count)
-{
-	m_vertexBaseCount = count;
-}
-
-
-inline const dInt32* ndMeshEffect::GetIndexToVertexMap() const
-{
-	return &m_attrib.m_pointChannel[0];
-}
-
-inline dBigVector ndMeshEffect::GetVertex (dInt32 index) const
-{
-	dAssert(index >= 0);
-	dAssert(index < m_points.m_vertex.m_count);
-	return m_points.m_vertex[index];
-}
-
-inline bool ndMeshEffect::HasLayersChannel() const
-{
-	return m_points.m_layers.m_count != 0;
-}
-
-inline dInt32 ndMeshEffect::GetVertexLayer(dInt32 index) const
-{
-	dAssert(index >= 0);
-	dAssert(index < m_points.m_vertex.m_count);
-	return (m_points.m_layers.m_count) ? m_points.m_layers[index] : 0;
-}
-#endif
 
 inline ndFloat64 ndMeshEffect::QuantizeCoordinade(ndFloat64 x) const
 {
