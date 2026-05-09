@@ -1405,7 +1405,7 @@
                     </ndMesh>
                 </ndMesh>
                 <ndMesh>
-                    <name string="-hidden-convexhull001" />
+                    <name string="-hidden-convexhull003" />
                     <matrix>
                         <posit float3="0.816715 -0.0296556 -0.0706725" />
                         <angles float3="-90 90 0" />

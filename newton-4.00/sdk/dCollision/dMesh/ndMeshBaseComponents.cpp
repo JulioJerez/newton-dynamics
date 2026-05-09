@@ -992,22 +992,18 @@ void ndMeshCollidingPair::DeserializeFromXml(const nd::TiXmlElement* const)
 	ndAssert(0);
 }
 
-ndMeshTransformModifier::ndMeshTransformModifier(const ndMeshTransformModifier& other)
-	:ndClassAlloc()
-	,m_owner(other.m_owner)
-	,m_target(other.m_target)
-	,m_constructor(other.m_constructor)
-{
-	ndAssert(0);
-}
-
 ndMeshTransformModifier::ndMeshTransformModifier(const ndMesh* const owner, const ndMesh* const target)
 	:ndClassAlloc()
 	,m_owner(owner)
 	,m_target(target)
-	,m_constructor("none")
 {
-	ndAssert(0);
+}
+
+ndMeshTransformModifier::ndMeshTransformModifier(const ndMeshTransformModifier& other)
+	:ndClassAlloc()
+	,m_owner(other.m_owner)
+	,m_target(other.m_target)
+{
 }
 
 ndMeshTransformModifier::~ndMeshTransformModifier()
@@ -1022,19 +1018,58 @@ ndMeshTransformModifier* ndMeshTransformModifier::Duplicate() const
 
 void ndMeshTransformModifier::DuplicateFixDependencies(const ndMesh* const otherRoot)
 {
-	ndAssert(0);
+	m_owner = otherRoot->FindByName(m_owner->GetName());
+	ndAssert(m_owner);
+
+	if (m_target)
+	{
+		m_target = otherRoot->FindByName(m_target->GetName());
+		ndAssert(m_target);
+	}
 }
 
 void ndMeshTransformModifier::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	ndAssert(0);
 }
+
 void ndMeshTransformModifier::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndAssert(0);
 }
 
-bool ndMeshTransformModifier::operator==(const ndMeshJoint& other) const
+bool ndMeshTransformModifier::operator==(const ndMeshTransformModifier& other) const
+{
+	ndAssert(0);
+	return false;
+}
+
+ndMeshTransformModifierLookAt::ndMeshTransformModifierLookAt(const ndMesh* const owner, const ndMesh* const target)
+	:ndMeshTransformModifier(owner, target)
+{
+}
+
+ndMeshTransformModifierLookAt::ndMeshTransformModifierLookAt(const ndMeshTransformModifierLookAt& other)
+	:ndMeshTransformModifier(other)
+{
+}
+
+ndMeshTransformModifier* ndMeshTransformModifierLookAt::Duplicate() const
+{
+	return new ndMeshTransformModifierLookAt(*this);
+}
+
+void ndMeshTransformModifierLookAt::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndAssert(0);
+}
+
+void ndMeshTransformModifierLookAt::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndAssert(0);
+}
+
+bool ndMeshTransformModifierLookAt::operator==(const ndMeshTransformModifier& other) const
 {
 	ndAssert(0);
 	return false;

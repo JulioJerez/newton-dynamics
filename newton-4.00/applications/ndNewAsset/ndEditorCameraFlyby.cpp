@@ -278,6 +278,12 @@ void ndEditorCameraFlyby::MouseSelection()
 				break;
 			}
 
+			case ndAssetEditor::m_transformModifier:
+			{
+				m_editor->SetModifierSubSelection(*hitNode);
+				break;
+			}
+
 			case ndAssetEditor::m_none:
 			default:
 			{

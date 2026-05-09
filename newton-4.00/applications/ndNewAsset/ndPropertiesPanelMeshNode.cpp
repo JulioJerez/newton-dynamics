@@ -59,6 +59,21 @@ void ndUndoRedoMeshNode::Undo()
 	m_editor->m_initCamera = false;
 	m_editor->SetVisualScene(m_copy, visualMesh);
 	m_editor->m_currentSelection = m_selectedNode;
+	if (m_editor->m_currentSelection)
+	{
+		ndSharedPtr<ndMeshTransformModifier> modifier(m_editor->m_currentSelection->GetModifier());
+		if (modifier)
+		{
+			if (modifier->m_target)
+			{
+				m_editor->m_subSelection = ndAssetEditor::m_transformModifier;
+			}
+			else
+			{
+				m_editor->m_subSelection = ndAssetEditor::m_none;
+			}
+		}
+	}
 }
 
 void ndAssetEditor::ApplyNodeTransform(const ndMatrix& matrix, ndRenderSceneNode* const entNode)
@@ -117,15 +132,6 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 
 		// show node matrix
 		{
-			//if (m_showTransformValues)
-			//{
-			//	ImGui::SeparatorText("parent relative Tranform");
-			//}
-			//else
-			//{
-			//	ImGui::SeparatorText("child relative Tranform");
-			//}
-
 			ndReal position[3];
 			ndMatrix matrix(m_currentSelection->GetMatrix());
 
@@ -202,87 +208,156 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			}
 		}
 
-		// show geometry node matrix
-		if (*m_currentSelection->GetGeometry())
+		// show geometry matrix
 		{
-			ImGui::SeparatorText("geomtry transform");
-			if (m_showTransformValues)
+			if (*m_currentSelection->GetGeometry())
 			{
-				ndMatrix matrix(m_currentSelection->GetGeometryMatrix());
-				ndReal position[3];
-				position[0] = ndReal(matrix.m_posit.m_x);
-				position[1] = ndReal(matrix.m_posit.m_y);
-				position[2] = ndReal(matrix.m_posit.m_z);
-				if (ImGui::InputFloat3("posit##1", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+				ImGui::SeparatorText("geomtry transform");
+				if (m_showTransformValues)
 				{
-					ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
-					ndAssert(entNode);
-					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+					ndMatrix matrix(m_currentSelection->GetGeometryMatrix());
+					ndReal position[3];
+					position[0] = ndReal(matrix.m_posit.m_x);
+					position[1] = ndReal(matrix.m_posit.m_y);
+					position[2] = ndReal(matrix.m_posit.m_z);
+					if (ImGui::InputFloat3("posit##1", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+					{
+						ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
+						ndAssert(entNode);
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 
-					matrix.m_posit.m_x = position[0];
-					matrix.m_posit.m_y = position[1];
-					matrix.m_posit.m_z = position[2];
-					m_currentSelection->SetGeometryMatrix(matrix);
-					entNode->SetPrimitiveMatrix(matrix);
+						matrix.m_posit.m_x = position[0];
+						matrix.m_posit.m_y = position[1];
+						matrix.m_posit.m_z = position[2];
+						m_currentSelection->SetGeometryMatrix(matrix);
+						entNode->SetPrimitiveMatrix(matrix);
 
-					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+					}
+
+					ndReal euler[3];
+					ndVector tmp;
+					ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
+
+					euler[0] = ndReal(radians[0]);
+					euler[1] = ndReal(radians[1]);
+					euler[2] = ndReal(radians[2]);
+					if (ImGui::InputFloat3("rotation##1", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+					{
+						ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
+						ndAssert(entNode);
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+
+						ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
+						newMatrix.m_posit = matrix.m_posit;
+						m_currentSelection->SetGeometryMatrix(newMatrix);
+						entNode->SetPrimitiveMatrix(matrix);
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+					}
 				}
-
-				ndReal euler[3];
-				ndVector tmp;
-				ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
-
-				euler[0] = ndReal(radians[0]);
-				euler[1] = ndReal(radians[1]);
-				euler[2] = ndReal(radians[2]);
-				if (ImGui::InputFloat3("rotation##1", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+				else
 				{
-					ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
-					ndAssert(entNode);
-					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+					ndMatrix matrix(m_currentSelection->GetGeometryMatrix());
+					ndReal position[3];
+					position[0] = ndReal(0.0f);
+					position[1] = ndReal(0.0f);
+					position[2] = ndReal(0.0f);
+					if (ImGui::InputFloat3("posit##1", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+					{
+						ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
+						ndAssert(entNode);
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 
-					ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
-					newMatrix.m_posit = matrix.m_posit;
-					m_currentSelection->SetGeometryMatrix(newMatrix);
-					entNode->SetPrimitiveMatrix(matrix);
-					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+						const ndVector delta(position[0], position[1], position[2], ndFloat32(0.0f));
+						matrix.m_posit += matrix.RotateVector(delta);
+						m_currentSelection->SetGeometryMatrix(matrix);
+						entNode->SetPrimitiveMatrix(matrix);
+
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+					};
+
+					ndReal euler[3];
+					euler[0] = ndReal(0.0f);
+					euler[1] = ndReal(0.0f);
+					euler[2] = ndReal(0.0f);
+					if (ImGui::InputFloat3("rotation##1", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+					{
+						ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
+						ndAssert(entNode);
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+
+						const ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad) * matrix);
+						m_currentSelection->SetGeometryMatrix(newMatrix);
+						entNode->SetPrimitiveMatrix(newMatrix);
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+					}
 				}
 			}
-			else
+		}
+
+		if (!m_currentSelection->GetRigidBody())
+		{ 
+			ndSharedPtr<ndMeshTransformModifier> modifier(m_currentSelection->GetModifier());
+			char name[256];
+			snprintf(name, sizeof(name) - 1, "none");
+			if (modifier)
 			{
-				ndMatrix matrix(m_currentSelection->GetGeometryMatrix());
-				ndReal position[3];
-				position[0] = ndReal(0.0f);
-				position[1] = ndReal(0.0f);
-				position[2] = ndReal(0.0f);
-				if (ImGui::InputFloat3("posit##1", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+				snprintf(name, sizeof(name) - 1, "%s", modifier->ClassName());
+			}
+
+			ImGui::SeparatorText("modifier type");
+			if (ImGui::BeginCombo(" ##10", name))
+			{
+				auto SetDropdownList = [this, &modifier](const char* const name)
 				{
-					ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
-					ndAssert(entNode);
-					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
-
-					const ndVector delta(position[0], position[1], position[2], ndFloat32(0.0f));
-					matrix.m_posit += matrix.RotateVector(delta);
-					m_currentSelection->SetGeometryMatrix(matrix);
-					entNode->SetPrimitiveMatrix(matrix);
-
-					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+					const char* const selectedName = modifier ? modifier->ClassName() : "none";
+					bool selected = strcmp(name, selectedName) ? false : true;
+					if (ImGui::Selectable(name, selected))
+					{
+						if (strcmp(name, "none") == 0)
+						{
+							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+							m_subSelection = m_none;
+							m_currentSelection->SetModifier(ndSharedPtr<ndMeshTransformModifier>(nullptr));
+							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+						}
+						else if (strcmp(name, ndMeshTransformModifierLookAt::StaticClassName()) == 0)
+						{
+							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+							m_subSelection = m_transformModifier;
+							modifier = ndSharedPtr<ndMeshTransformModifier>(new ndMeshTransformModifierLookAt(*m_currentSelection, nullptr));
+							m_currentSelection->SetModifier(modifier);
+							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+						}
+						else
+						{
+							ndAssert(0);
+						}
+					}
 				};
 
-				ndReal euler[3];
-				euler[0] = ndReal(0.0f);
-				euler[1] = ndReal(0.0f);
-				euler[2] = ndReal(0.0f);
-				if (ImGui::InputFloat3("rotation##1", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
-				{
-					ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
-					ndAssert(entNode);
-					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				SetDropdownList("none");
+				SetDropdownList(ndMeshTransformModifierLookAt::StaticClassName());
 
-					const ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad) * matrix);
-					m_currentSelection->SetGeometryMatrix(newMatrix);
-					entNode->SetPrimitiveMatrix(newMatrix);
-					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				ImGui::EndCombo();
+			}
+
+			char targetName[256];
+			snprintf(targetName, sizeof(nodeName) - 1, "no target");
+			if (modifier && modifier->m_target)
+			{
+				snprintf(targetName, sizeof(nodeName) - 1, modifier->m_target->GetName().GetStr());
+			}
+			ImGui::Text(targetName);
+
+			if (m_subSelection == m_transformModifier)
+			{
+				if (ImGui::Button("exit select target"))
+				{
+					if (modifier && modifier->m_target)
+					{
+						m_subSelection = m_none;
+					}
 				}
 			}
 		}

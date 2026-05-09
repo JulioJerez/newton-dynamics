@@ -762,7 +762,6 @@ void ndAssetEditor::EditCylinderJoint()
 
 void ndAssetEditor::EditDoubleHingeJoint()
 {
-	//EditLoopJointGlobalMatrix();
 	EditJointGlobalMatrix();
 
 	ndMeshJointDoubleHinge* const joint = (ndMeshJointDoubleHinge*)*m_currentSelection->GetJoint();

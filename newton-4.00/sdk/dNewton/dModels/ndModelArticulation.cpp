@@ -963,10 +963,10 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 		}
 	}
 
-	const ndCollidingPairs* const collingPairs = rootNode->GetCollingPairs();
-	if (collingPairs)
+	const ndCollidingPairs* const collidingPairs = rootNode->GetCollingPairs();
+	if (collidingPairs)
 	{
-		for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* pairPtr = collingPairs->m_collidingPairs.GetFirst(); pairPtr; pairPtr = pairPtr->GetNext())
+		for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* pairPtr = collidingPairs->m_collidingPairs.GetFirst(); pairPtr; pairPtr = pairPtr->GetNext())
 		{
 			const ndSharedPtr<ndMeshCollidingPair>& pairMesh = pairPtr->GetInfo();
 			ndModelArticulation::ndNode* const reference0 = FindByName(pairMesh->m_childNode->GetName().GetStr());

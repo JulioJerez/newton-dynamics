@@ -348,11 +348,28 @@ class ndMeshTransformModifier : public ndClassAlloc
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
 
-	D_COLLISION_API virtual bool operator==(const ndMeshJoint& other) const;
+	D_COLLISION_API virtual bool operator==(const ndMeshTransformModifier& other) const;
 
 	ndWeakPtr<const ndMesh> m_owner;
 	ndWeakPtr<const ndMesh> m_target;
-	ndString m_constructor;
+
+	D_BASE_CLASS_REFLECTION(ndMeshTransformModifier);
+};
+
+class ndMeshTransformModifierLookAt : public ndMeshTransformModifier
+{
+	public:
+	D_COLLISION_API ndMeshTransformModifierLookAt(const ndMesh* const owner, const ndMesh* const target);
+	D_COLLISION_API ndMeshTransformModifierLookAt(const ndMeshTransformModifierLookAt& other);
+
+	D_COLLISION_API virtual ndMeshTransformModifier* Duplicate() const;
+
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+
+	D_COLLISION_API virtual bool operator==(const ndMeshTransformModifier& other) const;
+
+	D_CLASS_REFLECTION(ndMeshTransformModifierLookAt, ndMeshTransformModifier)
 };
 
 #endif

@@ -388,6 +388,21 @@ void ndMesh::SetJoint(const ndSharedPtr<ndMeshJoint>& joint)
 	m_joint = joint;
 }
 
+ndSharedPtr<ndMeshTransformModifier>& ndMesh::GetModifier()
+{
+	return m_transformModifier;
+}
+
+const ndSharedPtr<ndMeshTransformModifier>& ndMesh::GetModifier() const
+{
+	return m_transformModifier;
+}
+
+void ndMesh::SetModifier(const ndSharedPtr<ndMeshTransformModifier>& modifier)
+{
+	m_transformModifier = modifier;
+}
+
 ndCloseLoopConstraints* ndMesh::GetLoopJoints()
 {
 	ndMesh* mesh = GetRoot()->FindByName(ND_MESH_CONSTRAINT_LOOPS);

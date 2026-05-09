@@ -133,6 +133,10 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API const ndSharedPtr<ndMeshJoint>& GetJoint() const;
 	D_NEWTON_API void SetJoint(const ndSharedPtr<ndMeshJoint>& joint);
 
+	D_NEWTON_API ndSharedPtr<ndMeshTransformModifier>& GetModifier();
+	D_NEWTON_API const ndSharedPtr<ndMeshTransformModifier>& GetModifier() const;
+	D_NEWTON_API void SetModifier(const ndSharedPtr<ndMeshTransformModifier>& modifier);
+
 	D_NEWTON_API virtual ndMesh* GetAsMesh();
 	D_NEWTON_API virtual const ndMesh* GetAsMesh() const;
 	D_NEWTON_API virtual ndCollidingPairs* GetAsCollidingPairs();

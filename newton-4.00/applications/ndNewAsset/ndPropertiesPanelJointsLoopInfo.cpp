@@ -201,39 +201,6 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 {
 	if (ImGui::CollapsingHeader("Loop joint"))
 	{
-#if 0
-		char nodeName[256];
-		snprintf(nodeName, sizeof(nodeName) - 1, "%s", m_currentLoopJointSelection->m_name.GetStr());
-		if (ImGui::InputText("Name", nodeName, sizeof(nodeName) - 1, ImGuiInputTextFlags_EnterReturnsTrue))
-		{
-			if (strcmp(m_currentLoopJointSelection->m_name.GetStr(), nodeName))
-			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-				ndString newName(nodeName);
-				while (m_mesh->FindByName(newName))
-				{
-					newName += "_1";
-				}
-				m_currentLoopJointSelection->m_name = newName;
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-			}
-		}
-		ImGui::SeparatorText("");
-		if (ImGui::Button("pickBody0"))
-		{
-			ndTrace(("select body 0\n"));
-		}
-		ImGui::Text(m_currentLoopJointSelection->m_childNode->GetName().GetStr());
-
-		ImGui::SeparatorText("");
-		if (ImGui::Button("pickBody1"))
-		{
-			ndTrace(("select body 1\n"));
-		}
-	}
-}
-#endif
-
 		ndCloseLoopConstraints* const loops = m_currentSelection->GetAsCloseLoopConstraints();
 
 		auto FindJoint = [this, loops]()
@@ -244,10 +211,6 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 				if (i == m_closeLoopIndex)
 				{
 					return ptr;
-					//m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoCollidingPairs(this)));
-					//collidingPairs->m_collidingPairs.Remove(ptr);
-					//m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoCollidingPairs(this)));
-					//break;
 				}
 				i++;
 			}
@@ -270,7 +233,6 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 				ndSharedPtr<ndMeshLoopJoint>& loopJoint = loopJointNode->GetInfo();
 
 				ImGui::NewLine();
-				//ImGui::Separator();
 				ImGui::Text(loopJoint->m_name.GetStr());
 
 				if (ImGui::Button("remove selected"))
@@ -1499,11 +1461,6 @@ void ndAssetEditor::EditSwivelPositionEffectorLoopJoint(ndSharedPtr<ndMeshLoopJo
 
 void ndAssetEditor::AddLoopJoint()
 {
-	//ndCollidingPairs* const collidingPairs = m_mesh->GetCollingPairs();
-	//ndSharedPtr<ndMeshCollidingPair> pair(new ndMeshCollidingPair(*m_currentSelection, *m_currentSubSelection));
-	//collidingPairs->m_collidingPairs.Append(pair);
-	//m_currentSubSelection = ndSharedPtr<ndMesh>(nullptr);
-
 	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	ndCloseLoopConstraints* const loops = m_mesh->GetLoopJoints();
 

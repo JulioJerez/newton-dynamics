@@ -41,6 +41,7 @@ class ndAssetEditor : public ndClassAlloc
 		m_none,
 		m_loopJoint,
 		m_collidingPair,
+		m_transformModifier,
 	};
 
 	class ndRenderCallback : public ndRender::ndUserCallback
@@ -196,6 +197,7 @@ class ndAssetEditor : public ndClassAlloc
 	void EditCollidingPair();
 	void SetLoopJointSelection(const ndMesh* const node);
 	void SetCollidingSubSelection(const ndMesh* const node);
+	void SetModifierSubSelection(const ndMesh* const node);
 
 	void ApplyNodeTransform(const ndMatrix& matrix, ndRenderSceneNode* const entNode);
 		
