@@ -361,10 +361,8 @@ class ndMeshTransformModifierLookAt : public ndMeshTransformModifier
 	public:
 	D_COLLISION_API ndMeshTransformModifierLookAt(const ndMesh* const owner, const ndMesh* const target);
 	D_COLLISION_API ndMeshTransformModifierLookAt(const ndMeshTransformModifierLookAt& other);
-
 	D_COLLISION_API virtual ndMeshTransformModifier* Duplicate() const;
 
-	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
 
 	D_COLLISION_API virtual bool operator==(const ndMeshTransformModifier& other) const;

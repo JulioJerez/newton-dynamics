@@ -1030,7 +1030,13 @@ void ndMeshTransformModifier::DuplicateFixDependencies(const ndMesh* const other
 
 void ndMeshTransformModifier::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	ndAssert(0);
+	xmlSaveParam(parent, "constructor", ClassName());
+	xmlSaveParam(parent, "owner", m_owner->GetName().GetStr());
+	ndAssert(m_target);
+	if (m_target)
+	{
+		xmlSaveParam(parent, "target", m_target->GetName().GetStr());
+	}
 }
 
 void ndMeshTransformModifier::DeserializeFromXml(const nd::TiXmlElement* const parent)
@@ -1057,11 +1063,6 @@ ndMeshTransformModifierLookAt::ndMeshTransformModifierLookAt(const ndMeshTransfo
 ndMeshTransformModifier* ndMeshTransformModifierLookAt::Duplicate() const
 {
 	return new ndMeshTransformModifierLookAt(*this);
-}
-
-void ndMeshTransformModifierLookAt::SerializeToXml(nd::TiXmlElement* const parent) const
-{
-	ndAssert(0);
 }
 
 void ndMeshTransformModifierLookAt::DeserializeFromXml(const nd::TiXmlElement* const parent)
