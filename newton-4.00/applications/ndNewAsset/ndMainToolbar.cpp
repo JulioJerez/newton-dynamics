@@ -78,18 +78,18 @@ void ndAssetEditor::ShowMainToolbar()
 	ImGui::SameLine();
 
 	ndRenderSceneCamera* const camera = ((ndEditorCameraFlyby*)*m_defaultCamera)->GetCamera();
-	if (camera->m_perpectiveMode)
+	if (camera->m_perspectiveMode)
 	{
-		if (ImGui::Button("perpective"))
+		if (ImGui::Button("perspective"))
 		{
-			camera->m_perpectiveMode = false;
+			camera->m_perspectiveMode = false;
 		}
 	}
 	else
 	{
 		if (ImGui::Button("orthographic"))
 		{
-			camera->m_perpectiveMode = true;
+			camera->m_perspectiveMode = true;
 		}
 	}
 
