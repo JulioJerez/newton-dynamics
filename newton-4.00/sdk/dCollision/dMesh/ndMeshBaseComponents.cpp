@@ -709,9 +709,9 @@ ndMeshBody* ndMeshBody::Duplicate() const
 	return nullptr;
 }
 
-void ndMeshBody::DuplicateFixDependencies(const ndMesh* const otherRoot)
+void ndMeshBody::DuplicateFixDependencies(const ndMesh* const root)
 {
-	m_owner = otherRoot->FindByName(m_owner->GetName());
+	m_owner = root->FindByName(m_owner->GetName());
 	ndAssert(m_owner);
 }
 
@@ -881,14 +881,14 @@ ndMeshJoint* ndMeshJoint::Duplicate() const
 	return nullptr;
 }
 
-void ndMeshJoint::DuplicateFixDependencies(const ndMesh* const otherRoot)
+void ndMeshJoint::DuplicateFixDependencies(const ndMesh* const root)
 {
-	m_owner = otherRoot->FindByName(m_owner->GetName());
+	m_owner = root->FindByName(m_owner->GetName());
 	ndAssert(m_owner);
 
 	if (m_surrogateParent)
 	{
-		const ndMesh* const root = m_owner->GetRoot();
+		//const ndMesh* const root = m_owner->GetRoot();
 		ndMesh* const surrogateParent = root->FindByName(m_surrogateParent->GetName());
 		ndAssert(surrogateParent);
 		m_surrogateParent = ndWeakPtr<const ndMesh>(surrogateParent);
@@ -1016,14 +1016,14 @@ ndMeshTransformModifier* ndMeshTransformModifier::Duplicate() const
 	return nullptr;
 }
 
-void ndMeshTransformModifier::DuplicateFixDependencies(const ndMesh* const otherRoot)
+void ndMeshTransformModifier::DuplicateFixDependencies(const ndMesh* const root)
 {
-	m_owner = otherRoot->FindByName(m_owner->GetName());
+	m_owner = root->FindByName(m_owner->GetName());
 	ndAssert(m_owner);
 
 	if (m_target)
 	{
-		m_target = otherRoot->FindByName(m_target->GetName());
+		m_target = root->FindByName(m_target->GetName());
 		ndAssert(m_target);
 	}
 }
@@ -1137,11 +1137,14 @@ bool ndMeshTransformModifierTwoLinksIK::operator==(const ndMeshTransformModifier
 	return test;
 }
 
-void ndMeshTransformModifierTwoLinksIK::DuplicateFixDependencies(const ndMesh* const otherRoot)
+void ndMeshTransformModifierTwoLinksIK::DuplicateFixDependencies(const ndMesh* const root)
 {
-	ndMeshTransformModifier::DuplicateFixDependencies(otherRoot);
-	m_childLink = otherRoot->FindByName(m_childLink->GetName());
-	ndAssert(m_childLink);
+	ndMeshTransformModifier::DuplicateFixDependencies(root);
+	if (m_childLink)
+	{
+		m_childLink = root->FindByName(m_childLink->GetName());
+		ndAssert(m_childLink);
+	}
 }
 
 ndFixSizeArray<const ndMesh*, 256> ndMeshTransformModifierTwoLinksIK::GetAffectedNodes() const
