@@ -95,7 +95,10 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 	}
 
 	// populate mesh hierachy
-	const ndCloseLoopConstraints* const loopJointList = m_mesh->GetLoopJoints();
+	ndList<MeshXmlNodePair> modifiers;
+	const nd::TiXmlElement* m_xmlPair = nullptr;
+	const nd::TiXmlElement* m_xmlLoops = nullptr;
+
 	stack.PushBack(MeshXmlNodePair(*m_mesh, rootNode));
 	while (stack.GetCount())
 	{
@@ -105,6 +108,11 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 		ndAssert (mesh->m_name == ndString(xmlGetString(entry.m_xmlNode, "name")));
 		mesh->m_matrix = xmlGetMatrix(entry.m_xmlNode, "matrix");
 		mesh->m_geometryMatrix = xmlGetMatrix(entry.m_xmlNode, "geometryMatrix");
+		mesh->m_basePoseMatrix = mesh->m_matrix;
+		if (xmlHasAttribute(entry.m_xmlNode, "basePoseMatrix"))
+		{
+			mesh->m_basePoseMatrix = xmlGetMatrix(entry.m_xmlNode, "basePoseMatrix");
+		}
 	
 		nd::TiXmlElement* const xmlNodeType = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("type");
 		ndAssert(xmlNodeType);
@@ -166,32 +174,20 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			mesh->SetJoint(mesh->LoadJoint(xmlJoint));
 		}
 
+		const nd::TiXmlElement* const xmlModifier = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("modifier");
+		if (xmlModifier)
+		{
+			modifiers.Append(entry);
+		}
+
 		if (mesh->m_name == ND_MESH_CONSTRAINT_LOOPS)
 		{
-			for (const nd::TiXmlNode* node = entry.m_xmlNode->FirstChild("loopJoint"); node; node = node->NextSibling("loopJoint"))
-			{
-				const nd::TiXmlElement* const xmlLoopJointNode = (nd::TiXmlElement*)node;
-				ndSharedPtr<ndMeshLoopJoint> loopJoint(new ndMeshLoopJoint(loopJointList));
-				loopJoint->DeserializeFromXml(xmlLoopJointNode);
-				m_mesh->AddLoopJoint(loopJoint);
-			}
+			m_xmlLoops = entry.m_xmlNode;
 		}
 
 		if (mesh->m_name == ND_MESH_COLLIDING_PAIRS)
 		{
-			for (const nd::TiXmlNode* node = entry.m_xmlNode->FirstChild("collindPair"); node; node = node->NextSibling("collindPair"))
-			{
-				const nd::TiXmlElement* const pairNode = (nd::TiXmlElement*)node;
-				const char* const referenceName0 = xmlGetString(pairNode, "reference0");
-				const char* const referenceName1 = xmlGetString(pairNode, "reference1");
-				ndAssert(referenceName0);
-				ndAssert(referenceName1);
-				ndMesh* const referenceNode0 = m_mesh->FindByName(referenceName0);
-				ndMesh* const referenceNode1 = m_mesh->FindByName(referenceName1);
-				ndAssert(referenceNode0);
-				ndAssert(referenceNode1);
-				m_mesh->SetCollidingSubSelection(referenceNode0, referenceNode1);
-			}
+			m_xmlPair = entry.m_xmlNode;
 		}
 	
 		ndList<ndSharedPtr<ndMesh>>::ndNode* childNode = mesh->GetChildren().GetLast();
@@ -202,6 +198,42 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			ndSharedPtr<ndMesh> child(childNode->GetInfo());
 			stack.PushBack(MeshXmlNodePair(*child, linkNode));
 			childNode = childNode->GetPrev();
+		}
+	}
+
+	for (ndList<MeshXmlNodePair>::ndNode* ptr = modifiers.GetFirst(); ptr; ptr = ptr->GetNext())
+	{
+		MeshXmlNodePair entry(ptr->GetInfo());
+		const nd::TiXmlElement* const xmlModifier = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("modifier");
+		entry.m_mesh->SetModifier(entry.m_mesh->LoadModifier(xmlModifier));
+	}
+
+	if (m_xmlPair)
+	{
+		for (const nd::TiXmlNode* node = m_xmlPair->FirstChild("collindPair"); node; node = node->NextSibling("collindPair"))
+		{
+			const nd::TiXmlElement* const pairNode = (nd::TiXmlElement*)node;
+			const char* const referenceName0 = xmlGetString(pairNode, "reference0");
+			const char* const referenceName1 = xmlGetString(pairNode, "reference1");
+			ndAssert(referenceName0);
+			ndAssert(referenceName1);
+			ndMesh* const referenceNode0 = m_mesh->FindByName(referenceName0);
+			ndMesh* const referenceNode1 = m_mesh->FindByName(referenceName1);
+			ndAssert(referenceNode0);
+			ndAssert(referenceNode1);
+			m_mesh->SetCollidingSubSelection(referenceNode0, referenceNode1);
+		}
+	}
+
+	if (m_xmlLoops)
+	{
+		const ndCloseLoopConstraints* const loopJointList = m_mesh->GetLoopJoints();
+		for (const nd::TiXmlNode* node = m_xmlLoops->FirstChild("loopJoint"); node; node = node->NextSibling("loopJoint"))
+		{
+			const nd::TiXmlElement* const xmlLoopJointNode = (nd::TiXmlElement*)node;
+			ndSharedPtr<ndMeshLoopJoint> loopJoint(new ndMeshLoopJoint(loopJointList));
+			loopJoint->DeserializeFromXml(xmlLoopJointNode);
+			m_mesh->AddLoopJoint(loopJoint);
 		}
 	}
 
@@ -248,6 +280,7 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName) const
 		MeshXmlNodePair entry(stack.Pop());
 		xmlSaveParam(entry.m_parentXml, "name", entry.m_meshNode->m_name.GetStr());
 		xmlSaveParam(entry.m_parentXml, "matrix", entry.m_meshNode->m_matrix);
+		xmlSaveParam(entry.m_parentXml, "basePoseMatrix", entry.m_meshNode->m_basePoseMatrix);
 		xmlSaveParam(entry.m_parentXml, "geometryMatrix", entry.m_meshNode->m_geometryMatrix);
 
 		nd::TiXmlElement* const xmlNodeType = new nd::TiXmlElement("type");
@@ -294,6 +327,14 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName) const
 			entry.m_parentXml->LinkEndChild(jointNode);
 			const ndMeshJoint* const joint = *entry.m_meshNode->m_joint;
 			joint->SerializeToXml(jointNode);
+		}
+
+		if (entry.m_meshNode->m_transformModifier)
+		{
+			nd::TiXmlElement* const modifierNode = new nd::TiXmlElement("modifier");
+			entry.m_parentXml->LinkEndChild(modifierNode);
+			const ndMeshTransformModifier* const modifier = *entry.m_meshNode->m_transformModifier;
+			modifier->SerializeToXml(modifierNode);
 		}
 
 		if (entry.m_meshNode->GetAsCloseLoopConstraints())

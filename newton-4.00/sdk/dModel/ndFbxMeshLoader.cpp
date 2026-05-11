@@ -320,7 +320,7 @@ void ndFbxMeshLoader::FreezeScale(ndMesh* const mesh)
 			meshNode->SetGeometryMatrix(geometryTransformMatrix);
 			geometryMatrix = ndMatrix(ndGetIdentityMatrix(), geometryScale, geometryStretchAxis);
 
-			effectMesh->ApplyTransform(scaleMatrix);
+			effectMesh->ApplyTransform(geometryMatrix);
 		}
 
 		ndMesh::ndCurve& scaleCurve = meshNode->GetScaleCurve();
@@ -556,7 +556,7 @@ void ndFbxMeshLoader::ApplyAllTransforms(ndMesh* const mesh, const ndMatrix& coo
 	ApplyTransform(mesh, coordinateSystem);
 	AlignToWorld(mesh);
 	CalculateBoneProperties(mesh);
-
+	
 	auto SetPoseTransform = [](ndMesh* const node)
 	{
 		node->SetBasePoseMatrix(node->GetMatrix());

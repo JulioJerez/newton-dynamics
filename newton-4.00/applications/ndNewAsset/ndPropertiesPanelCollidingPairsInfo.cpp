@@ -137,6 +137,18 @@ void ndAssetEditor::SetCollidingSubSelection(const ndMesh* const subSelection)
 	m_currentSubSelection = ndWeakPtr<ndMesh>((ndMesh*)subSelection);
 }
 
+void ndAssetEditor::SetModifierSubSelection(const ndMesh* const subSelection)
+{
+	if (subSelection == *m_currentSelection)
+	{
+		return;
+	}
+	m_currentSubSelection = ndWeakPtr<ndMesh>((ndMesh*)subSelection);
+	ndSharedPtr<ndMeshTransformModifier> modifier(m_currentSelection->GetModifier());
+	ndAssert(modifier);
+	modifier->m_target = ndWeakPtr<const ndMesh>((ndMesh*)subSelection);
+}
+
 void ndAssetEditor::SetLoopJointSelection(const ndMesh* const subSelection)
 {
 	if (subSelection == *m_currentSelection)

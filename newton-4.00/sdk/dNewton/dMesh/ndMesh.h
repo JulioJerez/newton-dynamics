@@ -89,6 +89,7 @@ class ndMesh : public ndClassAlloc
 
 	D_NEWTON_API virtual ~ndMesh();
 	D_NEWTON_API virtual ndMesh* CreateClone() const;
+	D_NEWTON_API virtual void CreateCloneFixDependencies();
 
 	D_NEWTON_API virtual bool operator==(const ndMesh& other) const;
 
@@ -101,8 +102,8 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API ndMatrix GetBasePoseMatrix() const;
 	D_NEWTON_API void SetBasePoseMatrix(const ndMatrix& matrix);
 
+	D_NEWTON_API void AddChild(const ndSharedPtr<ndMesh>& child);
 	D_NEWTON_API void RemoveChild(const ndSharedPtr<ndMesh>& child);
-	D_NEWTON_API void AddChild(const ndSharedPtr<ndMesh>& child, bool addToEnd = true);
 
 	D_NEWTON_API ndMesh* GetParent();
 	D_NEWTON_API const ndMesh* GetParent() const;
@@ -131,6 +132,10 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API ndSharedPtr<ndMeshJoint>& GetJoint();
 	D_NEWTON_API const ndSharedPtr<ndMeshJoint>& GetJoint() const;
 	D_NEWTON_API void SetJoint(const ndSharedPtr<ndMeshJoint>& joint);
+
+	D_NEWTON_API ndSharedPtr<ndMeshTransformModifier>& GetModifier();
+	D_NEWTON_API const ndSharedPtr<ndMeshTransformModifier>& GetModifier() const;
+	D_NEWTON_API void SetModifier(const ndSharedPtr<ndMeshTransformModifier>& modifier);
 
 	D_NEWTON_API virtual ndMesh* GetAsMesh();
 	D_NEWTON_API virtual const ndMesh* GetAsMesh() const;
@@ -186,6 +191,7 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionConvexApproximation(bool lowDetail = false);
 
 	D_NEWTON_API ndSharedPtr<ndMeshJoint> LoadJoint(const nd::TiXmlElement* const xmlJoint) const;
+	D_NEWTON_API ndSharedPtr<ndMeshTransformModifier> LoadModifier(const nd::TiXmlElement* const xmlModifier) const;
 
 	template <typename Function>
 	void NodeIterator(Function func);
@@ -207,6 +213,7 @@ class ndMesh : public ndClassAlloc
 	ndSharedPtr<ndMeshBody> m_rigidBody;
 	ndList<ndSharedPtr<ndMesh>> m_children;
 	ndList<ndSharedPtr<ndMesh>>::ndNode* m_selfChildNode;
+	ndSharedPtr<ndMeshTransformModifier> m_transformModifier;
 	ndVector m_boneTarget;
 	ndNodeType m_type;
 
@@ -243,6 +250,7 @@ class ndCloseLoopConstraints: public ndMesh
 	D_NEWTON_API virtual ndCloseLoopConstraints* GetAsCloseLoopConstraints() override;
 	D_NEWTON_API virtual const ndCloseLoopConstraints* GetAsCloseLoopConstraints() const override;
 
+	D_NEWTON_API virtual void CreateCloneFixDependencies() override;
 	D_NEWTON_API virtual ndMesh* CreateClone() const override;
 	D_NEWTON_API virtual bool operator==(const ndMesh& other) const override;
 
@@ -261,6 +269,7 @@ class ndCollidingPairs : public ndMesh
 	D_NEWTON_API virtual ndCollidingPairs* GetAsCollidingPairs() override;
 	D_NEWTON_API virtual const ndCollidingPairs* GetAsCollidingPairs() const override;
 
+	D_NEWTON_API virtual void CreateCloneFixDependencies() override;
 	D_NEWTON_API virtual ndMesh* CreateClone() const override;
 	D_NEWTON_API virtual bool operator==(const ndMesh& other) const override;
 

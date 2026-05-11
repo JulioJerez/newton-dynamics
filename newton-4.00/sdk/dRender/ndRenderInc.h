@@ -38,6 +38,7 @@
 #include <ndRenderPassEnvironment.h>
 #include <ndRenderPassTransparency.h>
 #include <ndRenderSceneNodeInstance.h>
+#include <ndRenderTransformModifier.h>
 
 #endif 
 

@@ -43,7 +43,6 @@ class ndUndoRedoCommand : public ndClassAlloc
 class ndUndoRedoMeshNode : public ndUndoRedoCommand
 {
 	public:
-	//ndUndoRedoMeshNode(ndAssetEditor* const editor, const ndSharedPtr<ndMesh>& mesh);
 	ndUndoRedoMeshNode(ndAssetEditor* const editor, const ndMesh* const selectedNode);
 	class ndUndoRedoMeshNode* GetAsUndoRedoMeshNode() const override;
 	virtual bool operator!=(const ndUndoRedoCommand& command) const override;

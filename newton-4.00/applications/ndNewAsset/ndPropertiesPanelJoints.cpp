@@ -59,7 +59,7 @@ void ndAssetEditor::EditJointGlobalMatrix()
 {
 	ndSharedPtr<ndMeshJoint> joint(m_currentSelection->GetJoint());
 
-	if (m_showPreTransform)
+	if (m_showTransformValues)
 	{
 		ndAssert(0);
 	}
@@ -208,7 +208,6 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 		if (strcmp(joint->m_constructor.GetStr(), ndJointFix6dof::StaticClassName()) == 0)
 		{
 			EditFix6dofJoint();
-
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointHinge::StaticClassName()) == 0)
 		{
@@ -251,7 +250,6 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 
 void ndAssetEditor::EditFix6dofJoint()
 {
-	//EditLoopJointGlobalMatrix();
 	EditJointGlobalMatrix();
 
 	ndMeshJointFix6dof* const joint = (ndMeshJointFix6dof*)*m_currentSelection->GetJoint();
@@ -762,7 +760,6 @@ void ndAssetEditor::EditCylinderJoint()
 
 void ndAssetEditor::EditDoubleHingeJoint()
 {
-	//EditLoopJointGlobalMatrix();
 	EditJointGlobalMatrix();
 
 	ndMeshJointDoubleHinge* const joint = (ndMeshJointDoubleHinge*)*m_currentSelection->GetJoint();

@@ -71,9 +71,10 @@ void ndDebugDisplayRenderPass::RenderMeshSelection()
 		{
 			RenderCloseLoopJoints();
 		}
-		else if (m_manager->m_currentSelection->GetAsCollidingPairs())
+		else if (m_manager->m_subSelection == ndAssetEditor::m_transformModifier)
 		{
-			RenderCollisionPair();
+			ndAssert(0);
+			//RenderCollisionPair();
 		}
 	}
 }
@@ -405,26 +406,49 @@ void ndDebugDisplayRenderPass::DrawFrame(const ndMatrix& matrix)
 
 void ndDebugDisplayRenderPass::RenderSelectedNode()
 {
-	const ndString& selected = m_manager->m_currentSelection->GetName();
-	for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
+	auto RenderNode = [this](const ndMesh* const node, const ndVector& color)
 	{
-		const ndDebugMesh& debugMesh = ptr->GetInfo();
-		if (m_manager->m_showSelectedNode)
+		const ndString& selected = node->GetName();
+		for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
 		{
-			const ndRenderPrimitive* const primitive = *debugMesh.m_wireFrameMesh;
-			if (primitive && primitive->m_segments.GetCount())
+			const ndDebugMesh& debugMesh = ptr->GetInfo();
+			if (m_manager->m_showSelectedNode)
 			{
-				const ndMatrix pivotMatrix(debugMesh.m_parent->m_globalMatrix);
-				const ndMatrix gemetryMatrix(debugMesh.m_parent->m_primitiveMatrix * pivotMatrix);
-
-				ndRenderPrimitiveSegment& segment = primitive->m_segments.GetFirst()->GetInfo();
-				ndRenderPrimitiveMaterial* const material = &segment.m_material;
-
-				if (debugMesh.m_parent->m_name == selected)
+				const ndRenderPrimitive* const primitive = *debugMesh.m_wireFrameMesh;
+				if (primitive && primitive->m_segments.GetCount())
 				{
-					material->m_diffuse = m_selectedColor;
-					primitive->Render(m_owner, gemetryMatrix, m_debugDisplayWireFrameMesh);
+					const ndMatrix pivotMatrix(debugMesh.m_parent->m_globalMatrix);
+					const ndMatrix gemetryMatrix(debugMesh.m_parent->m_primitiveMatrix * pivotMatrix);
+
+					ndRenderPrimitiveSegment& segment = primitive->m_segments.GetFirst()->GetInfo();
+					ndRenderPrimitiveMaterial* const material = &segment.m_material;
+
+					if (debugMesh.m_parent->m_name == selected)
+					{
+						material->m_diffuse = color;
+						primitive->Render(m_owner, gemetryMatrix, m_debugDisplayWireFrameMesh);
+					}
 				}
+			}
+		}
+	};
+
+	RenderNode(*m_manager->m_currentSelection, m_selectedColor);
+
+	//if (m_manager->m_subSelection == ndAssetEditor::m_transformModifier)
+	{
+		ndSharedPtr<ndMeshTransformModifier> modifier(m_manager->m_currentSelection->GetModifier());
+		if (modifier)
+		{
+			if (modifier->m_target)
+			{
+				RenderNode(*modifier->m_target, m_collidingPairColor1);
+			}
+
+			ndFixSizeArray<const ndMesh*, 256> subNodes(modifier->GetAffectedNodes());
+			for (ndInt32 i = 0; i < subNodes.GetCount(); ++i)
+			{
+				RenderNode(subNodes[i], m_collidingPairColor1);
 			}
 		}
 	}
@@ -477,33 +501,53 @@ void ndDebugDisplayRenderPass::RenderCollisionShape()
 		const ndVector color (selection->GetAsMesh() ? m_collidingPairColor0 : m_shapeColor);
 		DisplayShape(selection, color);
 	
-		if (m_manager->m_subSelection == ndAssetEditor::m_collidingPair)
+		switch (m_manager->m_subSelection)
 		{
-			const ndCollidingPairs* const collidingPairs = m_manager->m_mesh->GetCollingPairs();
-			ndAssert(collidingPairs);
-			for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* node = collidingPairs->m_collidingPairs.GetFirst(); node; node = node->GetNext())
+			case ndAssetEditor::m_collidingPair:
 			{
-				const ndSharedPtr<ndMeshCollidingPair>& self = node->GetInfo();
-				if (*self->m_childNode == *m_manager->m_currentSelection)
+				const ndCollidingPairs* const collidingPairs = m_manager->m_mesh->GetCollingPairs();
+				ndAssert(collidingPairs);
+				for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* node = collidingPairs->m_collidingPairs.GetFirst(); node; node = node->GetNext())
 				{
-					DisplayShape(*self->m_parentNode, m_collidingPairColor1);
+					const ndSharedPtr<ndMeshCollidingPair>& self = node->GetInfo();
+					if (*self->m_childNode == *m_manager->m_currentSelection)
+					{
+						DisplayShape(*self->m_parentNode, m_collidingPairColor1);
+					}
+					else if (*self->m_parentNode == *m_manager->m_currentSelection)
+					{
+						DisplayShape(*self->m_childNode, m_collidingPairColor1);
+					}
 				}
-				else if (*self->m_parentNode == *m_manager->m_currentSelection)
+
+				if (m_manager->m_currentSubSelection)
 				{
-					DisplayShape(*self->m_childNode, m_collidingPairColor1);
+					DisplayShape(*m_manager->m_currentSubSelection, m_collidingPairPreviewColor);
 				}
+				break;
+			}
+			case ndAssetEditor::m_loopJoint:
+			{
+				if (m_manager->m_currentSubSelection)
+				{
+					DisplayShape(*m_manager->m_currentSubSelection, m_collidingPairPreviewColor);
+				}
+				break;
 			}
 
-			if (m_manager->m_currentSubSelection)
+			case ndAssetEditor::m_transformModifier:
 			{
-				DisplayShape(*m_manager->m_currentSubSelection, m_collidingPairPreviewColor);
+				//ndAssert(0);
+				if (m_manager->m_currentSubSelection)
+				{
+					DisplayShape(*m_manager->m_currentSubSelection, m_collidingPairPreviewColor);
+				}
+				break;
 			}
-		}
-		else if (m_manager->m_subSelection == ndAssetEditor::m_loopJoint)
-		{
-			if (m_manager->m_currentSubSelection)
+
+			default:;
 			{
-				DisplayShape(*m_manager->m_currentSubSelection, m_collidingPairPreviewColor);
+
 			}
 		}
 	}
@@ -626,88 +670,106 @@ void ndDebugDisplayRenderPass::RenderCollisionPair()
 	}
 }
 
-
 void ndDebugDisplayRenderPass::RenderOptions()
 {
-	const ndString& selected = m_manager->m_currentSelection->GetName();
-	//for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
-	//{
-	//	const ndDebugMesh& debugMesh = ptr->GetInfo();
-	//	if (debugMesh.m_parent->m_name == selected)
-	
-	ndRenderSceneNode* const sceneNode = m_manager->m_entity->FindByName(selected);
-	if (sceneNode)
+	auto RenderOptions = [this](const ndMesh* const node)
 	{
-		const ndMatrix pivotMatrix(sceneNode->m_globalMatrix);
-		if (m_manager->m_showPivot)
+		const ndString& selected = node->GetName();
+		ndRenderSceneNode* const sceneNode = m_manager->m_entity->FindByName(selected);
+		if (sceneNode)
 		{
-			DrawFrame(pivotMatrix);
-		}
-	
-		if (m_manager->m_showShapePivot)
-		{
-			const ndSharedPtr<ndMeshBody>& meshRigidBody = m_manager->m_currentSelection->GetRigidBody();
-			if (meshRigidBody)
+			const ndMatrix pivotMatrix(sceneNode->m_globalMatrix);
+			if (m_manager->m_showPivot)
 			{
-				ndMeshBodyKinematic* const kinematic = (ndMeshBodyKinematic*)(*meshRigidBody);
-				const ndMatrix shapeMatrix(kinematic->m_shapeInstance.m_localMatrix * pivotMatrix);
-				DrawFrame(shapeMatrix);
+				DrawFrame(pivotMatrix);
 			}
-		}
-	
-		if (m_manager->m_showCenterOfMass)
-		{
-			const ndSharedPtr<ndMeshBody>& meshRigidBody = m_manager->m_currentSelection->GetRigidBody();
-			if (meshRigidBody)
+
+			if (m_manager->m_geometryPivot)
 			{
-				ndMatrix comMatrix(pivotMatrix);
-				ndVector localcom(meshRigidBody->m_localCentreOfMass);
-				localcom.m_w = 1.0f;
-				comMatrix.m_posit = pivotMatrix.TransformVector(localcom);
-				DrawFrame(comMatrix);
+				const ndMatrix geometryPivot(sceneNode->GetPrimitiveMatrix() * pivotMatrix);
+				DrawFrame(geometryPivot);
 			}
-		}
-		if (m_manager->m_showJoints)
-		{
-			const ndSharedPtr<ndMeshJoint>& meshJoint = m_manager->m_currentSelection->GetJoint();
-			if (meshJoint)
+
+			if (m_manager->m_showShapePivot)
 			{
-				ndBodyDynamic body0;
-				ndBodyDynamic body1;
-				body0.SetMatrix(pivotMatrix);
-				//body1.SetMatrix(debugMesh.m_parent->GetParent()->m_globalMatrix);
-				body1.SetMatrix(sceneNode->GetParent()->m_globalMatrix);
-				body0.SetMassMatrix(ndVector(1.0f));
-				body1.SetMassMatrix(ndVector(1.0f));
-				ndSharedPtr<ndJointBilateralConstraint> joint(meshJoint->CreateObject(&body0, &body1));
-	
-				class DebugJoint : public ndConstraintDebugCallback
+				const ndSharedPtr<ndMeshBody>& meshRigidBody = m_manager->m_currentSelection->GetRigidBody();
+				if (meshRigidBody)
 				{
-					public:
-					DebugJoint(ndDebugDisplayRenderPass* const self)
-						:ndConstraintDebugCallback()
-						,m_self(self)
-					{
-						SetScale(m_self->m_manager->m_gizmoScale);
-					}
-	
-					//void DrawPoint(const ndVector& point, const ndVector& color, ndFloat32 thickness = ndFloat32(8.0f))
-					void DrawPoint(const ndVector&, const ndVector&, ndFloat32)
-					{
-						ndAssert(0);
-					}
-	
-					virtual void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32)
-					{
-						m_self->DrawLine(p0, p1, color);
-					}
-	
-					ndDebugDisplayRenderPass* m_self;
-				};
-	
-				DebugJoint debugCallback(this);
-				joint->DebugJoint(debugCallback);
+					ndMeshBodyKinematic* const kinematic = (ndMeshBodyKinematic*)(*meshRigidBody);
+					const ndMatrix shapeMatrix(kinematic->m_shapeInstance.m_localMatrix * pivotMatrix);
+					DrawFrame(shapeMatrix);
+				}
 			}
+
+			if (m_manager->m_showCenterOfMass)
+			{
+				const ndSharedPtr<ndMeshBody>& meshRigidBody = m_manager->m_currentSelection->GetRigidBody();
+				if (meshRigidBody)
+				{
+					ndMatrix comMatrix(pivotMatrix);
+					ndVector localcom(meshRigidBody->m_localCentreOfMass);
+					localcom.m_w = 1.0f;
+					comMatrix.m_posit = pivotMatrix.TransformVector(localcom);
+					DrawFrame(comMatrix);
+				}
+			}
+			if (m_manager->m_showJoints)
+			{
+				const ndSharedPtr<ndMeshJoint>& meshJoint = m_manager->m_currentSelection->GetJoint();
+				if (meshJoint)
+				{
+					ndBodyDynamic body0;
+					ndBodyDynamic body1;
+					body0.SetMatrix(pivotMatrix);
+					body1.SetMatrix(sceneNode->GetParent()->m_globalMatrix);
+					body0.SetMassMatrix(ndVector(1.0f));
+					body1.SetMassMatrix(ndVector(1.0f));
+					ndSharedPtr<ndJointBilateralConstraint> joint(meshJoint->CreateObject(&body0, &body1));
+
+					class DebugJoint : public ndConstraintDebugCallback
+					{
+						public:
+						DebugJoint(ndDebugDisplayRenderPass* const self)
+							:ndConstraintDebugCallback()
+							,m_self(self)
+						{
+							SetScale(m_self->m_manager->m_gizmoScale);
+						}
+
+						void DrawPoint(const ndVector&, const ndVector&, ndFloat32)
+						{
+							ndAssert(0);
+						}
+
+						virtual void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32)
+						{
+							m_self->DrawLine(p0, p1, color);
+						}
+
+						ndDebugDisplayRenderPass* m_self;
+					};
+
+					DebugJoint debugCallback(this);
+					joint->DebugJoint(debugCallback);
+				}
+			}
+		}
+	};
+	RenderOptions(*m_manager->m_currentSelection);
+
+	//if (m_manager->m_subSelection == ndAssetEditor::m_transformModifier)
+	ndSharedPtr<ndMeshTransformModifier> modifier(m_manager->m_currentSelection->GetModifier());
+	if (modifier)
+	{
+		if (modifier->m_target)
+		{
+			RenderOptions(*modifier->m_target);
+		}
+
+		ndFixSizeArray<const ndMesh*, 256> subNodes(modifier->GetAffectedNodes());
+		for (ndInt32 i = 0; i < subNodes.GetCount(); ++i)
+		{
+			RenderOptions(subNodes[i]);
 		}
 	}
 }

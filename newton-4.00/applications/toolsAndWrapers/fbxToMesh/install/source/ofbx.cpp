@@ -3672,16 +3672,13 @@ Matrix Object::getGlobalTransform() const
 	const Object* parent = getParent();
 	if (!parent) return evalLocal(getLocalTranslation(), getLocalRotation());
 
-	//return parent->getGlobalTransform() * evalLocal(getLocalTranslation(), getLocalRotation());
 	return evalLocal(getLocalTranslation(), getLocalRotation()) * parent->getGlobalTransform();
 }
-
 
 Matrix Object::getLocalTransform() const
 {
 	return evalLocal(getLocalTranslation(), getLocalRotation(), getLocalScaling());
 }
-
 
 Object* Object::resolveObjectLinkReverse(Object::Type type) const
 {

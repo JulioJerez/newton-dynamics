@@ -27,6 +27,7 @@
 #include "ndRenderSceneNode.h"
 #include "ndRenderSceneCamera.h"
 #include "ndRenderTextureCache.h"
+#include "ndRenderTransformModifier.h"
 
 ndRender::ndRender(ndSharedPtr<ndUserCallback>& owner, ndInt32 width, ndInt32 height, const char* const title)
 	:ndClassAlloc()
@@ -222,6 +223,7 @@ void ndRender::UpdateGlobalMatrices() const
 		}
 	};
 
+	ndFixSizeArray<ndRenderTransformModifier*, 256> modifiers;
 	for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* rootSceneNode = m_scene.GetFirst(); rootSceneNode; rootSceneNode = rootSceneNode->GetNext())
 	{
 		stackList.RemoveAll();
@@ -242,6 +244,11 @@ void ndRender::UpdateGlobalMatrices() const
 		{
 			ndRenderSceneNode* const sceneNode = stackList.GetLast()->GetInfo();
 
+			if (sceneNode->m_transformModifier)
+			{
+				modifiers.PushBack(*sceneNode->m_transformModifier);
+			}
+
 			AddNode(sceneNode);
 			stackList.Remove(stackList.GetLast());
 			sceneNode->m_globalMatrix = sceneNode->m_matrix * sceneNode->m_parent->m_globalMatrix;
@@ -257,6 +264,11 @@ void ndRender::UpdateGlobalMatrices() const
 			ndRenderSceneNode* const meshNode = node->GetInfo();
 			meshNode->ApplyPrimitiveTransforms();
 		}
+	}
+
+	for (ndInt32 i = 0; i < modifiers.GetCount(); ++i)
+	{
+		modifiers[i]->Update();
 	}
 }
 

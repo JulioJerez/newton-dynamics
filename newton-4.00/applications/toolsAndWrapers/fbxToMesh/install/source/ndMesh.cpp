@@ -43,6 +43,7 @@
 ndMesh::ndMesh()
 	:ndClassAlloc()
 	,m_matrix(ndGetIdentityMatrix())
+	,m_basePoseMatrix(ndGetIdentityMatrix())
 	,m_geometryMatrix(ndGetIdentityMatrix())
 	,m_name()
 	,m_scale()
@@ -54,20 +55,16 @@ ndMesh::ndMesh()
 	,m_rigidBody(nullptr)
 	,m_children()
 	,m_selfChildNode(nullptr)
+	,m_transformModifier(nullptr)
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
 {
 }
 
-ndMesh::ndMesh(const ndMesh&)
-	:ndClassAlloc()
-{
-	ndAssert(0);
-}
-
 ndMesh::ndMesh(const ndShapeInstance& shape, ndUvMapingMode mapping)
 	:ndClassAlloc()
 	,m_matrix(ndGetIdentityMatrix())
+	,m_basePoseMatrix(ndGetIdentityMatrix())
 	,m_geometryMatrix(ndGetIdentityMatrix())
 	,m_name("node")
 	,m_scale()
@@ -76,6 +73,7 @@ ndMesh::ndMesh(const ndShapeInstance& shape, ndUvMapingMode mapping)
 	,m_parent(nullptr)
 	,m_mesh(new ndMeshEffect(shape))
 	,m_selfChildNode(nullptr)
+	,m_transformModifier(nullptr)
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
 {
@@ -120,8 +118,64 @@ ndMesh::ndMesh(const ndShapeInstance& shape, ndUvMapingMode mapping)
 	}
 }
 
+ndMesh::ndMesh(const ndMesh& src)
+	:ndClassAlloc()
+	,m_matrix(src.m_matrix)
+	,m_basePoseMatrix(src.m_basePoseMatrix)
+	,m_geometryMatrix(src.m_geometryMatrix)
+	,m_name(src.m_name)
+	,m_scale(src.m_scale)
+	,m_posit(src.m_posit)
+	,m_rotation(src.m_rotation)
+	,m_parent(nullptr)
+	,m_mesh(src.m_mesh ? ndSharedPtr<ndMeshEffect>(new ndMeshEffect (**src.m_mesh)) : ndSharedPtr<ndMeshEffect>(nullptr))
+	,m_joint(src.m_joint ? ndSharedPtr<ndMeshJoint>(src.m_joint->Duplicate()) : ndSharedPtr<ndMeshJoint>(nullptr))
+	,m_rigidBody(src.m_rigidBody ? ndSharedPtr<ndMeshBody>(src.m_rigidBody->Duplicate()) : ndSharedPtr<ndMeshBody>(nullptr))
+	,m_selfChildNode(nullptr)
+	,m_transformModifier(src.m_transformModifier ? ndSharedPtr<ndMeshTransformModifier>(src.m_transformModifier->Duplicate()) : ndSharedPtr<ndMeshTransformModifier>(nullptr))
+	,m_boneTarget(src.m_boneTarget)
+	,m_type(src.m_type)
+{
+	for (ndList<ndSharedPtr<ndMesh>>::ndNode* ptr = src.GetChildren().GetFirst(); ptr; ptr = ptr->GetNext())
+	{
+		const ndSharedPtr<ndMesh>& child = ptr->GetInfo();
+		ndSharedPtr<ndMesh> childMesh (child->CreateClone());
+		AddChild(childMesh);
+	}
+}
+
 ndMesh::~ndMesh()
 {
+}
+
+ndMatrix ndMesh::GetMatrix() const
+{
+	return m_matrix;
+}
+
+void ndMesh::SetMatrix(const ndMatrix& matrix)
+{
+	m_matrix = matrix;
+}
+
+ndMatrix ndMesh::GetGeometryMatrix() const
+{
+	return m_geometryMatrix;
+}
+
+void ndMesh::SetGeometryMatrix(const ndMatrix& matrix)
+{
+	m_geometryMatrix = matrix;
+}
+
+ndMatrix ndMesh::GetBasePoseMatrix() const
+{
+	return m_basePoseMatrix;
+}
+
+void ndMesh::SetBasePoseMatrix(const ndMatrix& matrix)
+{
+	m_basePoseMatrix = matrix;
 }
 
 ndMesh* ndMesh::GetAsMesh()
@@ -152,7 +206,6 @@ const ndCollidingPairs* ndMesh::GetAsCollidingPairs() const
 {
 	return nullptr;
 }
-
 
 void ndMesh::AddChild(const ndSharedPtr<ndMesh>& child)
 {
@@ -254,9 +307,55 @@ void ndMesh::SetName(const ndString& name)
 	m_name = name;
 }
 
+void ndMesh::CreateCloneFixDependencies()
+{
+	const ndMesh* const myRoot = GetRoot();
+
+	if (m_rigidBody)
+	{
+		m_rigidBody->DuplicateFixDependencies(myRoot);
+	}
+
+	if (m_joint)
+	{
+		m_joint->DuplicateFixDependencies(myRoot);
+	}
+
+	if (m_transformModifier)
+	{
+		m_transformModifier->DuplicateFixDependencies(myRoot);
+	}
+
+	for (ndList<ndSharedPtr<ndMesh>>::ndNode* ptr = GetChildren().GetFirst(); ptr; ptr = ptr->GetNext())
+	{
+		ndMesh* const child = *ptr->GetInfo();
+		child->CreateCloneFixDependencies();
+	}
+}
+
 ndMesh* ndMesh::CreateClone() const
 {
-	return new ndMesh(*this);
+	ndMesh* const copy = new ndMesh(*this);
+	if (!m_parent)
+	{
+		copy->CreateCloneFixDependencies();
+	}
+
+	return copy;
+}
+
+bool ndMesh::operator==(const ndMesh& other) const
+{
+	bool test = m_name == other.m_name;
+	test = test && (m_matrix * other.m_matrix.OrthoInverse()).TestIdentity();
+	test = test && (m_geometryMatrix * other.m_geometryMatrix.OrthoInverse()).TestIdentity();
+	test = test && (m_type * other.m_type);
+	test = test && (m_parent * other.m_parent);
+
+	const ndVector target(m_boneTarget - other.m_boneTarget);
+	test = test && (target.DotProduct(target).GetScalar() < ndFloat32(1.0e-6f));
+
+	return test;
 }
 
 ndSharedPtr<ndMeshEffect>& ndMesh::GetGeometry()
@@ -287,6 +386,21 @@ const ndSharedPtr<ndMeshJoint>& ndMesh::GetJoint() const
 void ndMesh::SetJoint(const ndSharedPtr<ndMeshJoint>& joint)
 {
 	m_joint = joint;
+}
+
+ndSharedPtr<ndMeshTransformModifier>& ndMesh::GetModifier()
+{
+	return m_transformModifier;
+}
+
+const ndSharedPtr<ndMeshTransformModifier>& ndMesh::GetModifier() const
+{
+	return m_transformModifier;
+}
+
+void ndMesh::SetModifier(const ndSharedPtr<ndMeshTransformModifier>& modifier)
+{
+	m_transformModifier = modifier;
 }
 
 ndCloseLoopConstraints* ndMesh::GetLoopJoints()
@@ -507,18 +621,67 @@ void ndMesh::ApplyTransform(const ndMatrix& transform)
 		return matrix;
 	};
 
-	const ndMatrix invTransform(transform.Inverse4x4());
-	for (ndMesh* node = IteratorFirst(); node; node = node->IteratorNext(this))
+	ndFixSizeArray<ndMesh*, 1024> stack;
+	ndFixSizeArray<ndMatrix, 1024> matrix;
+	ndFixSizeArray<ndMatrix, 1024> basePoseMatrix;
+
+	stack.PushBack(this);
+	matrix.PushBack(transform);
+	basePoseMatrix.PushBack(transform);
+	while (stack.GetCount())
 	{
-		const ndMatrix entMatrix(invTransform * node->m_matrix * transform);
-		node->m_matrix = entMatrix;
+		ndMesh* const node = stack.Pop();
+		ndMatrix parentMatrix(matrix.Pop());
+		ndMatrix parentBasePoseMatrix(basePoseMatrix.Pop());
+		{
+			ndVector scale;
+			ndMatrix axis;
+			ndMatrix orthoMatrix;
+			ndMatrix newBasePoseTransform(node->GetBasePoseMatrix() * parentBasePoseMatrix);
+			newBasePoseTransform.PolarDecomposition(orthoMatrix, scale, axis);
+			node->SetBasePoseMatrix(orthoMatrix);
+
+			ndMatrix scaleMatrix(ndGetIdentityMatrix());
+			scaleMatrix[0][0] = scale[0];
+			scaleMatrix[1][1] = scale[1];
+			scaleMatrix[2][2] = scale[2];
+			parentBasePoseMatrix = axis * scaleMatrix;
+		}
+
+		ndVector scale;
+		ndMatrix axis;
+		ndMatrix orthoMatrix;
+		ndMatrix newTransform(node->GetMatrix() * parentMatrix);
+		newTransform.PolarDecomposition(orthoMatrix, scale, axis);
+		node->SetMatrix(orthoMatrix);
+		
+		ndMatrix scaleMatrix(ndGetIdentityMatrix());
+		scaleMatrix[0][0] = scale[0];
+		scaleMatrix[1][1] = scale[1];
+		scaleMatrix[2][2] = scale[2];
+		parentMatrix = axis * scaleMatrix;
+
+		// calculate geomtry transform
+		ndMatrix newTransformGeo(node->GetGeometryMatrix() * parentMatrix);
+
+		ndVector scaleGeo;
+		ndMatrix axisGeo;
+		ndMatrix orthoMatrixGeo;
+		newTransformGeo.PolarDecomposition(orthoMatrixGeo, scaleGeo, axisGeo);
+		node->SetGeometryMatrix(orthoMatrixGeo);
+
+		ndMatrix scaleMatrixGeo(ndGetIdentityMatrix());
+		scaleMatrixGeo[0][0] = scaleGeo[0];
+		scaleMatrixGeo[1][1] = scaleGeo[1];
+		scaleMatrixGeo[2][2] = scaleGeo[2];
+		newTransformGeo = axisGeo * scaleMatrixGeo;
+
+		node->SetBoneTarget(newTransformGeo.TransformVector(node->GetBoneTarget()));
 
 		ndSharedPtr<ndMeshEffect> mesh (node->GetGeometry());
 		if (mesh)
 		{
-			const ndMatrix meshMatrix(invTransform * node->GetGeometryMatrix() * transform);
-			node->SetGeometryMatrix(meshMatrix);
-			mesh->ApplyTransform(transform);
+			mesh->ApplyTransform(newTransformGeo);
 		}
 
 		ndMesh::ndCurve& positCurve = node->GetPositCurve();
@@ -527,38 +690,205 @@ void ndMesh::ApplyTransform(const ndMatrix& transform)
 		{
 			ndMesh::ndCurve::ndNode* positNode = node->GetPositCurve().GetFirst();
 			ndMesh::ndCurve::ndNode* rotationNode = node->GetRotationCurve().GetFirst();
-
+		
 			ndMesh::ndCurveValue scaleValue;
-			scaleValue.m_x = 1.0f;
-			scaleValue.m_y = 1.0f;
-			scaleValue.m_z = 1.0f;
+			scaleValue.m_x = ndFloat32(1.0f);
+			scaleValue.m_y = ndFloat32(1.0f);
+			scaleValue.m_z = ndFloat32(1.0f);
 			for (ndInt32 i = 0; i < positCurve.GetCount(); ++i)
 			{
 				ndMesh::ndCurveValue& positValue = positNode->GetInfo();
 				ndMesh::ndCurveValue& rotationValue = rotationNode->GetInfo();
-
+		
 				ndVector animScale;
 				ndMatrix stretchAxis;
 				ndMatrix animTransformMatrix;
-				ndMatrix keyframe(invTransform * GetKeyframe(scaleValue, positValue, rotationValue) * transform);
+				ndMatrix keyframe(GetKeyframe(scaleValue, positValue, rotationValue) * parentMatrix);
 				keyframe.PolarDecomposition(animTransformMatrix, animScale, stretchAxis);
-
+		
 				ndVector euler0;
 				ndVector euler(animTransformMatrix.CalcPitchYawRoll(euler0));
-
+		
 				rotationValue.m_x = ndReal (euler.m_x);
 				rotationValue.m_y = ndReal (euler.m_y);
 				rotationValue.m_z = ndReal (euler.m_z);
-
+		
 				positValue.m_x = ndReal (animTransformMatrix.m_posit.m_x);
 				positValue.m_y = ndReal (animTransformMatrix.m_posit.m_y);
 				positValue.m_z = ndReal (animTransformMatrix.m_posit.m_z);
-
+		
 				positNode = positNode->GetNext();
 				rotationNode = rotationNode->GetNext();
 			}
 		}
+
+		for (ndList<ndSharedPtr<ndMesh>>::ndNode* childNode = node->GetChildren().GetFirst(); childNode; childNode = childNode->GetNext())
+		{
+			ndMesh* const child = *childNode->GetInfo();
+			stack.PushBack(child);
+			matrix.PushBack(parentMatrix);
+			basePoseMatrix.PushBack(parentBasePoseMatrix);
+		}
 	}
+}
+
+void ndMesh::ApplyBonesRotation(const ndMatrix& rotation)
+{
+	ndAssert(rotation.TestOrthogonal());
+	const ndMatrix invRotation(rotation.OrthoInverse());
+
+	auto BoneRotation = [&rotation, &invRotation](ndMesh* const node)
+	{
+		if ((node->GetNodeType() == ndMesh::m_bone) || ((node->GetNodeType() == ndMesh::m_boneEnd)))
+		{
+			const ndMatrix matrix(node->m_matrix);
+			const ndMatrix geoMatrix(node->GetGeometryMatrix());
+			const ndMatrix rotatedMatrix(rotation * matrix);
+			node->SetMatrix(rotatedMatrix);
+			node->SetBasePoseMatrix(rotation * node->GetBasePoseMatrix());
+
+			const ndMatrix rotatedGeoMatrix(geoMatrix * invRotation);
+			node->SetGeometryMatrix(rotatedGeoMatrix);
+			node->SetBoneTarget(invRotation.TransformVector(node->GetBoneTarget()));
+
+			ndMesh::ndCurve& positCurve = node->GetPositCurve();
+			ndMesh::ndCurve& rotationCurve = node->GetRotationCurve();
+			if (positCurve.GetCount() || rotationCurve.GetCount())
+			{
+				ndMesh::ndCurve::ndNode* positNode = node->GetPositCurve().GetFirst();
+				ndMesh::ndCurve::ndNode* rotationNode = node->GetRotationCurve().GetFirst();
+
+				ndMesh::ndCurveValue scaleValue;
+				scaleValue.m_x = 1.0f;
+				scaleValue.m_y = 1.0f;
+				scaleValue.m_z = 1.0f;
+
+				auto GetKeyframe = [](const ndCurveValue& scale, const ndCurveValue& position, const ndCurveValue& rotation)
+				{
+					ndMatrix scaleMatrix(ndGetIdentityMatrix());
+					scaleMatrix[0][0] = scale.m_x;
+					scaleMatrix[1][1] = scale.m_y;
+					scaleMatrix[2][2] = scale.m_z;
+					ndMatrix matrix(scaleMatrix * ndPitchMatrix(rotation.m_x) * ndYawMatrix(rotation.m_y) * ndRollMatrix(rotation.m_z));
+					matrix.m_posit = ndVector(position.m_x, position.m_y, position.m_z, 1.0f);
+					return matrix;
+				};
+
+				for (ndInt32 i = 0; i < positCurve.GetCount(); ++i)
+				{
+					ndMesh::ndCurveValue& positValue = positNode->GetInfo();
+					ndMesh::ndCurveValue& rotationValue = rotationNode->GetInfo();
+
+					//ndVector animScale;
+					//ndMatrix stretchAxis;
+					//ndMatrix animTransformMatrix;
+					ndMatrix keyframe(GetKeyframe(scaleValue, positValue, rotationValue) * invRotation);
+					//keyframe.PolarDecomposition(animTransformMatrix, animScale, stretchAxis);
+
+					ndVector euler0;
+					ndVector euler(keyframe.CalcPitchYawRoll(euler0));
+
+					rotationValue.m_x = ndReal(euler.m_x);
+					rotationValue.m_y = ndReal(euler.m_y);
+					rotationValue.m_z = ndReal(euler.m_z);
+
+					positValue.m_x = ndReal(keyframe.m_posit.m_x);
+					positValue.m_y = ndReal(keyframe.m_posit.m_y);
+					positValue.m_z = ndReal(keyframe.m_posit.m_z);
+
+					positNode = positNode->GetNext();
+					rotationNode = rotationNode->GetNext();
+				}
+			}
+
+			for (ndList<ndSharedPtr<ndMesh>>::ndNode* childNode = node->GetChildren().GetFirst(); childNode; childNode = childNode->GetNext())
+			{
+				ndMesh* const child = *childNode->GetInfo();
+				child->SetMatrix(child->GetMatrix() * invRotation);
+				child->SetBasePoseMatrix(child->GetBasePoseMatrix() * invRotation);
+			}
+		}
+	};
+	NodeIterator(BoneRotation);
+}
+
+void ndMesh::ApplyCoordinateRotation(const ndMatrix& rotation)
+{
+	ndAssert(rotation.TestOrthogonal());
+	const ndMatrix invRotation(rotation.OrthoInverse());
+
+	auto CoordinateRotation = [&rotation, &invRotation](ndMesh* const node)
+	{
+		const ndMatrix matrix(node->m_matrix);
+		const ndMatrix basePoseMatrix(node->m_basePoseMatrix);
+		const ndMatrix geoMatrix(node->GetGeometryMatrix());
+
+		const ndMatrix rotatedMatrix(invRotation * matrix * rotation);
+		const ndMatrix rotatedGeoMatrix(invRotation * geoMatrix * rotation);
+		const ndMatrix rotatedBasePoseMatrix(invRotation * basePoseMatrix * rotation);
+
+		node->SetMatrix(rotatedMatrix);
+		node->SetGeometryMatrix(rotatedGeoMatrix);
+		node->SetBasePoseMatrix(rotatedBasePoseMatrix);
+		node->SetBoneTarget(rotation.TransformVector(node->GetBoneTarget()));
+
+		ndSharedPtr<ndMeshEffect> mesh(node->GetGeometry());
+		if (mesh)
+		{
+			mesh->ApplyTransform(rotation);
+		}
+		
+		ndMesh::ndCurve& positCurve = node->GetPositCurve();
+		ndMesh::ndCurve& rotationCurve = node->GetRotationCurve();
+		if (positCurve.GetCount() || rotationCurve.GetCount())
+		{
+			ndMesh::ndCurve::ndNode* positNode = node->GetPositCurve().GetFirst();
+			ndMesh::ndCurve::ndNode* rotationNode = node->GetRotationCurve().GetFirst();
+		
+			ndMesh::ndCurveValue scaleValue;
+			scaleValue.m_x = 1.0f;
+			scaleValue.m_y = 1.0f;
+			scaleValue.m_z = 1.0f;
+
+			auto GetKeyframe = [](const ndCurveValue& scale, const ndCurveValue& position, const ndCurveValue& rotation)
+			{
+				ndMatrix scaleMatrix(ndGetIdentityMatrix());
+				scaleMatrix[0][0] = scale.m_x;
+				scaleMatrix[1][1] = scale.m_y;
+				scaleMatrix[2][2] = scale.m_z;
+				ndMatrix matrix(scaleMatrix * ndPitchMatrix(rotation.m_x) * ndYawMatrix(rotation.m_y) * ndRollMatrix(rotation.m_z));
+				matrix.m_posit = ndVector(position.m_x, position.m_y, position.m_z, 1.0f);
+				return matrix;
+			};
+
+			for (ndInt32 i = 0; i < positCurve.GetCount(); ++i)
+			{
+				ndMesh::ndCurveValue& positValue = positNode->GetInfo();
+				ndMesh::ndCurveValue& rotationValue = rotationNode->GetInfo();
+		
+				ndVector animScale;
+				ndMatrix stretchAxis;
+				ndMatrix animTransformMatrix;
+				ndMatrix keyframe(invRotation * GetKeyframe(scaleValue, positValue, rotationValue) * rotation);
+				keyframe.PolarDecomposition(animTransformMatrix, animScale, stretchAxis);
+		
+				ndVector euler0;
+				ndVector euler(animTransformMatrix.CalcPitchYawRoll(euler0));
+		
+				rotationValue.m_x = ndReal(euler.m_x);
+				rotationValue.m_y = ndReal(euler.m_y);
+				rotationValue.m_z = ndReal(euler.m_z);
+		
+				positValue.m_x = ndReal(animTransformMatrix.m_posit.m_x);
+				positValue.m_y = ndReal(animTransformMatrix.m_posit.m_y);
+				positValue.m_z = ndReal(animTransformMatrix.m_posit.m_z);
+		
+				positNode = positNode->GetNext();
+				rotationNode = rotationNode->GetNext();
+			}
+		}
+	};
+	NodeIterator(CoordinateRotation);
 }
 
 ndMatrix ndMesh::CalculateLocalMatrix(ndVector& sizeOut) const
@@ -1137,12 +1467,21 @@ ndCloseLoopConstraints::ndCloseLoopConstraints()
 	SetName(ND_MESH_CONSTRAINT_LOOPS);
 }
 
-ndCloseLoopConstraints::ndCloseLoopConstraints(const ndMesh& src)
+ndCloseLoopConstraints::ndCloseLoopConstraints(const ndCloseLoopConstraints& src)
 	:ndMesh(src)
 	,m_loopJoints()
 {
-	ndAssert(0);
-	SetName(ND_MESH_CONSTRAINT_LOOPS);
+	const ndMesh* const root = src.GetRoot();
+	for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptr = src.m_loopJoints.GetFirst(); ptr; ptr = ptr->GetNext())
+	{
+		ndSharedPtr<ndMeshLoopJoint>& srcLoop = ptr->GetInfo();
+
+		const ndSharedPtr<ndMeshJoint> joint(srcLoop->m_joint->Duplicate());
+		ndMesh* const childReference = root->FindByName(srcLoop->m_childNode->GetName());
+		ndMesh* const parentdReference = root->FindByName(srcLoop->m_parentNode->GetName());
+		ndSharedPtr<ndMeshLoopJoint> loopJoint(new ndMeshLoopJoint(this, joint, childReference, parentdReference));
+		m_loopJoints.Append(loopJoint);
+	}
 }
 
 ndMesh* ndCloseLoopConstraints::GetAsMesh()
@@ -1167,8 +1506,35 @@ const ndCloseLoopConstraints* ndCloseLoopConstraints::GetAsCloseLoopConstraints(
 
 ndMesh* ndCloseLoopConstraints::CreateClone() const
 {
+	const ndCloseLoopConstraints* const self = GetAsCloseLoopConstraints();
+	ndAssert(self);
+	return new ndCloseLoopConstraints(*self);
+}
+
+void ndCloseLoopConstraints::CreateCloneFixDependencies()
+{
+	ndMesh::CreateCloneFixDependencies();
+
+	const ndMesh* const root = GetRoot();
+	ndCloseLoopConstraints* const loopList = GetAsCloseLoopConstraints();
+	for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptrLoops = loopList->m_loopJoints.GetFirst(); ptrLoops; ptrLoops = ptrLoops->GetNext())
+	{
+		ndSharedPtr<ndMeshLoopJoint>& loop = ptrLoops->GetInfo();
+		ndMesh* const childReference = root->FindByName(loop->m_childNode->GetName());
+		ndMesh* const parentdReference = root->FindByName(loop->m_parentNode->GetName());
+		ndAssert(childReference);
+		ndAssert(parentdReference);
+		loop->m_childNode = childReference;
+		loop->m_parentNode = parentdReference;
+		loop->m_joint->DuplicateFixDependencies(root);
+	}
+}
+
+bool ndCloseLoopConstraints::operator==(const ndMesh& other) const
+{
+	bool test = ndMesh::operator==(other);
 	ndAssert(0);
-	return nullptr;
+	return test;
 }
 
 ndCollidingPairs::ndCollidingPairs()
@@ -1178,18 +1544,52 @@ ndCollidingPairs::ndCollidingPairs()
 	SetName(ND_MESH_COLLIDING_PAIRS);
 }
 
-ndCollidingPairs::ndCollidingPairs(const ndMesh& src)
+ndCollidingPairs::ndCollidingPairs(const ndCollidingPairs& src)
 	:ndMesh(src)
 	,m_collidingPairs()
 {
-	ndAssert(0);
-	SetName(ND_MESH_COLLIDING_PAIRS);
+	const ndMesh* const root = src.GetRoot();
+	for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* ptr = src.m_collidingPairs.GetFirst(); ptr; ptr = ptr->GetNext())
+	{
+		ndSharedPtr<ndMeshCollidingPair>& srcPair = ptr->GetInfo();
+
+		ndMesh* const childReference = root->FindByName(srcPair->m_childNode->GetName());
+		ndMesh* const parentdReference = root->FindByName(srcPair->m_parentNode->GetName());
+		ndSharedPtr<ndMeshCollidingPair> pair(new ndMeshCollidingPair(childReference, parentdReference));
+		m_collidingPairs.Append(pair);
+	}
 }
 
 ndMesh* ndCollidingPairs::CreateClone() const
 {
+	const ndCollidingPairs* const self = GetAsCollidingPairs();
+	ndAssert(self);
+	return new ndCollidingPairs(*self);
+}
+
+void ndCollidingPairs::CreateCloneFixDependencies()
+{
+	ndMesh::CreateCloneFixDependencies();
+
+	const ndMesh* const root = GetRoot();
+	ndCollidingPairs* const pairList = GetAsCollidingPairs();
+	for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* ptrLoops = pairList->m_collidingPairs.GetFirst(); ptrLoops; ptrLoops = ptrLoops->GetNext())
+	{
+		ndSharedPtr<ndMeshCollidingPair>& loop = ptrLoops->GetInfo();
+		ndMesh* const childReference = root->FindByName(loop->m_childNode->GetName());
+		ndMesh* const parentdReference = root->FindByName(loop->m_parentNode->GetName());
+		ndAssert(childReference);
+		ndAssert(parentdReference);
+		loop->m_childNode = childReference;
+		loop->m_parentNode = parentdReference;
+	}
+}
+
+bool ndCollidingPairs::operator==(const ndMesh& other) const
+{
+	bool test = ndMesh::operator==(other);
 	ndAssert(0);
-	return nullptr;
+	return test;
 }
 
 ndMesh* ndCollidingPairs::GetAsMesh()
@@ -1268,4 +1668,27 @@ ndSharedPtr<ndMeshJoint> ndMesh::LoadJoint(const nd::TiXmlElement* const xmlJoin
 
 	joint->DeserializeFromXml(xmlJoint);
 	return joint;
+}
+
+ndSharedPtr<ndMeshTransformModifier> ndMesh::LoadModifier(const nd::TiXmlElement* const xmlModifier) const
+{
+	ndSharedPtr<ndMeshTransformModifier> modifier(nullptr);
+
+	const char* const constructor = xmlGetString(xmlModifier, "constructor");
+	if (strcmp(constructor, ndMeshTransformModifierLookAt::StaticClassName()) == 0)
+	{
+		modifier = ndSharedPtr<ndMeshTransformModifier>(new ndMeshTransformModifierLookAt(this, nullptr));
+		modifier->DeserializeFromXml(xmlModifier);
+	}
+	else if (strcmp(constructor, ndMeshTransformModifierTwoLinksIK::StaticClassName()) == 0)
+	{
+		modifier = ndSharedPtr<ndMeshTransformModifier>(new ndMeshTransformModifierTwoLinksIK(this, nullptr));
+		modifier->DeserializeFromXml(xmlModifier);
+	}
+	else
+	{
+		ndAssert(0);
+	}
+
+	return modifier;
 }

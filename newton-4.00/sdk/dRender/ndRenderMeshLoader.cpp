@@ -16,6 +16,7 @@
 #include "ndRenderSceneNode.h"
 #include "ndRenderMeshLoader.h"
 #include "ndRenderTextureCache.h"
+//#include "ndRenderTransformModifier.h"
 
 ndRenderMeshLoader::ndRenderMeshLoader(ndRender* const renderer)
 	:ndAnimationMeshLoader()
@@ -68,6 +69,9 @@ ndSharedPtr<ndRenderSceneNode> ndRenderMeshLoader::CreateRenderSceneMesh(ndRende
 	parentEntityList.Append(ndSharedPtr<ndRenderSceneNode>(nullptr));
 
 	ndSharedPtr<ndRenderSceneNode> renderMesh(nullptr);
+
+	ndFixSizeArray<const ndMesh*, 256> modifiersMesh;
+	ndFixSizeArray<ndRenderSceneNode*, 256> modifiersSceneNode;
 	while (effectNodeList.GetCount())
 	{
 		const ndMesh* const mesh = effectNodeList.Pop();
@@ -97,6 +101,12 @@ ndSharedPtr<ndRenderSceneNode> ndRenderMeshLoader::CreateRenderSceneMesh(ndRende
 			{
 				meshList.Append(EntityMeshPair(entity, mesh));
 			}
+		}
+
+		if (mesh->GetModifier())
+		{
+			modifiersMesh.PushBack(mesh);
+			modifiersSceneNode.PushBack(*entity);
 		}
 	
 		for (ndList<ndSharedPtr<ndMesh>>::ndNode* childNode = mesh->GetChildren().GetFirst(); childNode; childNode = childNode->GetNext())
@@ -139,6 +149,35 @@ ndSharedPtr<ndRenderSceneNode> ndRenderMeshLoader::CreateRenderSceneMesh(ndRende
 		ndSharedPtr<ndRenderPrimitive> geometry(new ndRenderPrimitive(descriptor));
 		pair.m_entity->SetPrimitive(geometry);
 	}
+
+	//for (ndInt32 i = 0; i < modifiersSceneNode.GetCount(); ++i)
+	//{
+	//	ndSharedPtr<ndMeshTransformModifier> modifier(modifiersMesh[i]->GetModifier());
+	//	ndAssert(modifier->m_owner);
+	//	ndAssert(modifier->m_target);
+	//	ndRenderSceneNode* const owner = renderMesh->FindByName(modifier->m_owner->GetName());
+	//	ndRenderSceneNode* const target = renderMesh->FindByName(modifier->m_target->GetName());
+	//	ndAssert(owner);
+	//	ndAssert(target);
+	//	ndAssert(owner == modifiersSceneNode[i]);
+	//
+	//	if (strcmp(modifier->ClassName(), ndMeshTransformModifierLookAt::StaticClassName()) == 0)
+	//	{
+	//		ndSharedPtr<ndRenderTransformModifier> renderModifier(new ndRenderTransformModifierLookAtNode(owner, target));
+	//		modifiersSceneNode[i]->SetTransformModifier(renderModifier);
+	//	}
+	//	else if (strcmp(modifier->ClassName(), ndMeshTransformModifierTwoLinksIK::StaticClassName()) == 0)
+	//	{
+	//		ndAssert(0);
+	//		//ndSharedPtr<ndRenderTransformModifier> renderModifier(new ndRenderTransformModifierLookAtNode(owner, target));
+	//		//modifiersSceneNode[i]->SetTransformModifier(renderModifier);
+	//	}
+	//	else
+	//	{
+	//		ndAssert(0);
+	//	}
+	//}
+
 	return renderMesh;
 }
 

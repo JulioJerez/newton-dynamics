@@ -290,5 +290,15 @@ class ndMovingAverage: public ndFixSizeArray<ndReal, size>
 	ndInt32 m_index;
 };
 
+
+class TwoLinksIK
+{
+	public:
+	TwoLinksIK() {}
+	D_CORE_API TwoLinksIK(ndFloat32 x, ndFloat32 y, ndFloat32 l0, ndFloat32 l1, ndFloat32 sign);
+
+	ndFloat32 m_angle0;
+	ndFloat32 m_angle1;
+};
 #endif
 

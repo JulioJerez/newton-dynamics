@@ -225,6 +225,7 @@ class ndMeshBody : public ndClassAlloc
 	D_COLLISION_API virtual ~ndMeshBody();
 
 	D_COLLISION_API virtual ndMeshBody* Duplicate() const;
+	D_COLLISION_API virtual void DuplicateFixDependencies(const ndMesh* const otherRoot);
 	D_COLLISION_API virtual bool operator==(const ndMeshBody& other) const;
 
 	D_COLLISION_API virtual ndBody* CreateObject() const;
@@ -276,7 +277,6 @@ class ndMeshCollidingPair : public ndClassAlloc
 class ndMeshJoint : public ndClassAlloc
 {
 	public:
-
 	class ndAxis
 	{
 		public:
@@ -315,6 +315,8 @@ class ndMeshJoint : public ndClassAlloc
 	D_COLLISION_API virtual ~ndMeshJoint();
 
 	D_COLLISION_API virtual ndMeshJoint* Duplicate() const;
+	D_COLLISION_API virtual void DuplicateFixDependencies(const ndMesh* const otherRoot);
+
 	D_COLLISION_API const ndMesh* GetSurrogateParent() const;
 	D_COLLISION_API void SetSurrogateParent(const ndMesh* const surrodateParent);
 
@@ -333,5 +335,57 @@ class ndMeshJoint : public ndClassAlloc
 	ndWeakPtr<const ndMesh> m_surrogateParent;
 };
 
-#endif
+class ndMeshTransformModifier : public ndClassAlloc
+{
+	public:
+	D_COLLISION_API ndMeshTransformModifier(const ndMesh* const owner, const ndMesh* const target);
+	D_COLLISION_API ndMeshTransformModifier(const ndMeshTransformModifier& other);
+	D_COLLISION_API virtual ~ndMeshTransformModifier();
 
+	D_COLLISION_API virtual ndMeshTransformModifier* Duplicate() const;
+	D_COLLISION_API virtual void DuplicateFixDependencies(const ndMesh* const otherRoot);
+
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+	D_COLLISION_API virtual ndFixSizeArray<const ndMesh*, 256> GetAffectedNodes() const;
+
+	D_COLLISION_API virtual bool operator==(const ndMeshTransformModifier& other) const;
+
+	ndWeakPtr<const ndMesh> m_owner;
+	ndWeakPtr<const ndMesh> m_target;
+
+	D_BASE_CLASS_REFLECTION(ndMeshTransformModifier);
+};
+
+class ndMeshTransformModifierLookAt : public ndMeshTransformModifier
+{
+	public:
+	D_COLLISION_API ndMeshTransformModifierLookAt(const ndMesh* const owner, const ndMesh* const target);
+	D_COLLISION_API ndMeshTransformModifierLookAt(const ndMeshTransformModifierLookAt& other);
+	D_COLLISION_API virtual ndMeshTransformModifier* Duplicate() const;
+	D_COLLISION_API virtual bool operator==(const ndMeshTransformModifier& other) const;
+
+	D_CLASS_REFLECTION(ndMeshTransformModifierLookAt, ndMeshTransformModifier)
+};
+
+class ndMeshTransformModifierTwoLinksIK : public ndMeshTransformModifier
+{
+	public:
+	D_COLLISION_API ndMeshTransformModifierTwoLinksIK(const ndMesh* const owner, const ndMesh* const target);
+	D_COLLISION_API ndMeshTransformModifierTwoLinksIK(const ndMeshTransformModifierTwoLinksIK& other);
+	D_COLLISION_API virtual ndMeshTransformModifier* Duplicate() const;
+
+	D_COLLISION_API virtual void DuplicateFixDependencies(const ndMesh* const otherRoot) override;
+	D_COLLISION_API virtual ndFixSizeArray<const ndMesh*, 256> GetAffectedNodes() const override;
+	D_COLLISION_API virtual bool operator==(const ndMeshTransformModifier& other) const override;
+
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+
+	D_CLASS_REFLECTION(ndMeshTransformModifierTwoLinksIK, ndMeshTransformModifier)
+
+	ndWeakPtr<const ndMesh> m_childLink;
+	ndFloat32 m_solutionSign;
+};
+
+#endif

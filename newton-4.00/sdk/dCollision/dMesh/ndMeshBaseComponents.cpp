@@ -709,6 +709,12 @@ ndMeshBody* ndMeshBody::Duplicate() const
 	return nullptr;
 }
 
+void ndMeshBody::DuplicateFixDependencies(const ndMesh* const otherRoot)
+{
+	m_owner = otherRoot->FindByName(m_owner->GetName());
+	ndAssert(m_owner);
+}
+
 bool ndMeshBody::operator==(const ndMeshBody& other) const
 {
 	bool test = (m_classConstructor == other.m_classConstructor);
@@ -875,6 +881,20 @@ ndMeshJoint* ndMeshJoint::Duplicate() const
 	return nullptr;
 }
 
+void ndMeshJoint::DuplicateFixDependencies(const ndMesh* const otherRoot)
+{
+	m_owner = otherRoot->FindByName(m_owner->GetName());
+	ndAssert(m_owner);
+
+	if (m_surrogateParent)
+	{
+		const ndMesh* const root = m_owner->GetRoot();
+		ndMesh* const surrogateParent = root->FindByName(m_surrogateParent->GetName());
+		ndAssert(surrogateParent);
+		m_surrogateParent = ndWeakPtr<const ndMesh>(surrogateParent);
+	}
+}
+
 bool ndMeshJoint::operator==(const ndMeshJoint& other) const
 {
 	bool test = true;
@@ -970,4 +990,163 @@ void ndMeshCollidingPair::SerializeToXml(nd::TiXmlElement* const parent) const
 void ndMeshCollidingPair::DeserializeFromXml(const nd::TiXmlElement* const)
 {
 	ndAssert(0);
+}
+
+ndMeshTransformModifier::ndMeshTransformModifier(const ndMesh* const owner, const ndMesh* const target)
+	:ndClassAlloc()
+	,m_owner(owner)
+	,m_target(target)
+{
+}
+
+ndMeshTransformModifier::ndMeshTransformModifier(const ndMeshTransformModifier& other)
+	:ndClassAlloc()
+	,m_owner(other.m_owner)
+	,m_target(other.m_target)
+{
+}
+
+ndMeshTransformModifier::~ndMeshTransformModifier()
+{
+}
+
+ndMeshTransformModifier* ndMeshTransformModifier::Duplicate() const
+{
+	ndAssert(0);
+	return nullptr;
+}
+
+void ndMeshTransformModifier::DuplicateFixDependencies(const ndMesh* const otherRoot)
+{
+	m_owner = otherRoot->FindByName(m_owner->GetName());
+	ndAssert(m_owner);
+
+	if (m_target)
+	{
+		m_target = otherRoot->FindByName(m_target->GetName());
+		ndAssert(m_target);
+	}
+}
+
+ndFixSizeArray<const ndMesh*, 256> ndMeshTransformModifier::GetAffectedNodes() const
+{
+	return ndFixSizeArray<const ndMesh*, 256>(0);
+}
+
+void ndMeshTransformModifier::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	xmlSaveParam(parent, "constructor", ClassName());
+	xmlSaveParam(parent, "owner", m_owner->GetName().GetStr());
+	if (m_target)
+	{
+		xmlSaveParam(parent, "target", m_target->GetName().GetStr());
+	}
+}
+
+void ndMeshTransformModifier::DeserializeFromXml(const nd::TiXmlElement* const xmlModifier)
+{
+	const ndMesh* const root = m_owner->GetRoot();
+	const char* const ownerName = xmlGetString(xmlModifier, "owner");
+	m_owner = root->FindByName(ownerName);
+	ndAssert(m_owner);
+	m_target = nullptr;
+	if (xmlHasAttribute(xmlModifier, "target"))
+	{
+		const char* const targetName = xmlGetString(xmlModifier, "target");
+		m_target = root->FindByName(targetName);
+	}
+	if (!m_target)
+	{
+		ndTrace(("modifier has not target\n"));
+	}
+}
+
+//bool ndMeshTransformModifier::operator==(const ndMeshTransformModifier& other) const
+bool ndMeshTransformModifier::operator==(const ndMeshTransformModifier&) const
+{
+	ndAssert(0);
+	return false;
+}
+
+ndMeshTransformModifierLookAt::ndMeshTransformModifierLookAt(const ndMesh* const owner, const ndMesh* const target)
+	:ndMeshTransformModifier(owner, target)
+{
+}
+
+ndMeshTransformModifierLookAt::ndMeshTransformModifierLookAt(const ndMeshTransformModifierLookAt& other)
+	:ndMeshTransformModifier(other)
+{
+}
+
+ndMeshTransformModifier* ndMeshTransformModifierLookAt::Duplicate() const
+{
+	return new ndMeshTransformModifierLookAt(*this);
+}
+
+bool ndMeshTransformModifierLookAt::operator==(const ndMeshTransformModifier& other) const
+{
+	bool test = ndMeshTransformModifier::operator==(other);
+	return test;
+}
+
+ndMeshTransformModifierTwoLinksIK::ndMeshTransformModifierTwoLinksIK(const ndMesh* const owner, const ndMesh* const target)
+	:ndMeshTransformModifier(owner, target)
+	,m_childLink(nullptr)
+	,m_solutionSign(ndFloat32 (-1.0f))
+{
+	if (owner->GetChildren().GetFirst())
+	{
+		m_childLink = *owner->GetChildren().GetFirst()->GetInfo();
+	}
+}
+
+ndMeshTransformModifierTwoLinksIK::ndMeshTransformModifierTwoLinksIK(const ndMeshTransformModifierTwoLinksIK& other)
+	:ndMeshTransformModifier(other)
+	,m_childLink(other.m_childLink)
+	,m_solutionSign(other.m_solutionSign)
+{
+}
+
+ndMeshTransformModifier* ndMeshTransformModifierTwoLinksIK::Duplicate() const
+{
+	return new ndMeshTransformModifierTwoLinksIK(*this);
+}
+
+void ndMeshTransformModifierTwoLinksIK::DeserializeFromXml(const nd::TiXmlElement* const xmlModifier)
+{
+	ndMeshTransformModifier::DeserializeFromXml(xmlModifier);
+
+	const ndMesh* const root = m_owner->GetRoot();
+	const char* const linkName = xmlGetString(xmlModifier, "child");
+	m_solutionSign = xmlGetFloat(xmlModifier, "solutionSign");
+
+	m_childLink = root->FindByName(linkName);
+	ndAssert(m_childLink);
+}
+
+void ndMeshTransformModifierTwoLinksIK::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshTransformModifier::SerializeToXml(parent);
+	xmlSaveParam(parent, "child", m_childLink->GetName().GetStr());
+	xmlSaveParam(parent, "solutionSign", m_solutionSign);
+}
+
+bool ndMeshTransformModifierTwoLinksIK::operator==(const ndMeshTransformModifier& other) const
+{
+	bool test = ndMeshTransformModifier::operator==(other);
+	return test;
+}
+
+void ndMeshTransformModifierTwoLinksIK::DuplicateFixDependencies(const ndMesh* const otherRoot)
+{
+	ndMeshTransformModifier::DuplicateFixDependencies(otherRoot);
+	m_childLink = otherRoot->FindByName(m_childLink->GetName());
+	ndAssert(m_childLink);
+}
+
+ndFixSizeArray<const ndMesh*, 256> ndMeshTransformModifierTwoLinksIK::GetAffectedNodes() const
+{
+	ndFixSizeArray<const ndMesh*, 256> array(0);
+	array.PushBack(*m_childLink);
+	return array;
 }

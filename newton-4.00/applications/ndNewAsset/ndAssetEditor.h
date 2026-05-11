@@ -41,6 +41,7 @@ class ndAssetEditor : public ndClassAlloc
 		m_none,
 		m_loopJoint,
 		m_collidingPair,
+		m_transformModifier,
 	};
 
 	class ndRenderCallback : public ndRender::ndUserCallback
@@ -189,6 +190,8 @@ class ndAssetEditor : public ndClassAlloc
 	void EditCollisionConvexHull();
 	void EditCollisionChamferCylinder();
 
+	void EditMeshTransformModifierTwoLinksIK();
+
 	void AddLoopJoint();
 	void AddCollidingPair();
 
@@ -196,6 +199,9 @@ class ndAssetEditor : public ndClassAlloc
 	void EditCollidingPair();
 	void SetLoopJointSelection(const ndMesh* const node);
 	void SetCollidingSubSelection(const ndMesh* const node);
+	void SetModifierSubSelection(const ndMesh* const node);
+
+	void ApplyNodeTransform(const ndMatrix& matrix, ndRenderSceneNode* const entNode);
 		
 	ndSharedPtr<ndMesh> m_mesh;
 	ndSharedPtr<ndRender> m_renderer;
@@ -226,11 +232,12 @@ class ndAssetEditor : public ndClassAlloc
 	bool m_showCenterOfMass;
 	bool m_showSelectedNode;
 	bool m_showCollisionShape;
-	bool m_showPreTransform;
+	bool m_showTransformValues;
 
 	bool m_toolActive;
 	bool m_initCamera;
 	bool m_raycastBones;
+	bool m_geometryPivot;
 	bool m_transformPivotOnly;
 
 	ndReal m_gizmoScale;
