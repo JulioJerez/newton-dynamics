@@ -13,6 +13,9 @@
 #include "ndAssetEditor.h"
 #include "ndEditorCameraFlyby.h"
 
+#define D_ZOOM_FACTOR		ndFloat32 (10.0f)
+#define D_PANNING_FACTOR	ndFloat32 (10.0f)
+
 ndEditorCameraFlyby::ndEditorCameraFlyby(ndAssetEditor* const editor)
 	:ndEditorCameraNode(*editor->GetRenderer())
 	,m_posit(ndVector::m_wOne)
@@ -22,7 +25,8 @@ ndEditorCameraFlyby::ndEditorCameraFlyby(ndAssetEditor* const editor)
 	,m_pitchRate(ndFloat32(0.2f * 60.0f))
 	,m_mousePosX(ndFloat32(0.0f))
 	,m_mousePosY(ndFloat32(0.0f))
-	,m_frontSpeed(ndFloat32(10.0f))
+	,m_panningSpeed(D_PANNING_FACTOR)
+	,m_mouseClick(false)
 	,m_editor(editor)
 {
 }
@@ -56,6 +60,9 @@ void ndEditorCameraFlyby::TickUpdate(ndFloat32 timestep)
 	ndAssert(renderer);
 	ndAssetEditor::ndRenderCallback* const renderCallback = (ndAssetEditor::ndRenderCallback*)*renderer->GetOwner();
 	ndAssetEditor* const scene = *renderCallback->m_owner;
+
+	ndRenderSceneCamera* const camera = GetCamera();
+	ndAssert(camera);
 	
 	ndFloat32 mouseX;
 	ndFloat32 mouseY;
@@ -101,20 +108,20 @@ void ndEditorCameraFlyby::TickUpdate(ndFloat32 timestep)
 
 			if (pan_x < 0.0f)
 			{
-				m_posit.m_z += m_frontSpeed * timestep;
+				m_posit.m_z += m_panningSpeed * timestep;
 			}
 			else if (pan_x > 0.0f)
 			{
-				m_posit.m_z -= m_frontSpeed * timestep;
+				m_posit.m_z -= m_panningSpeed * timestep;
 			}
 
 			if (pan_y > 0.0f)
 			{
-				m_posit.m_y += m_frontSpeed * timestep;
+				m_posit.m_y += m_panningSpeed * timestep;
 			}
 			else if (pan_y < 0.0f)
 			{
-				m_posit.m_y -= m_frontSpeed * timestep;
+				m_posit.m_y -= m_panningSpeed * timestep;
 			}
 		}
 
@@ -123,20 +130,17 @@ void ndEditorCameraFlyby::TickUpdate(ndFloat32 timestep)
 			ndFloat32 zoom = mouseY - m_mousePosY;
 			if (zoom > 0.0f)
 			{
-				m_posit.m_x += m_frontSpeed * timestep;
+				ndFloat32 factor = ndFloat32(1.0f) + D_ZOOM_FACTOR * timestep;
+				ndFloat32 zoomFactor = camera->m_zoom * factor;
+				camera->m_zoom = ndClamp (zoomFactor, ndFloat32(0.01f), ndFloat32(100.f));
 			}
 			else if (zoom < 0.0f)
 			{
-				m_posit.m_x -= m_frontSpeed * timestep;
+				ndFloat32 factor = ndFloat32(1.0f) + D_ZOOM_FACTOR * timestep;
+				ndFloat32 zoomFactor = camera->m_zoom / factor;
+				camera->m_zoom = ndClamp(zoomFactor, ndFloat32(0.01f), ndFloat32(100.f));
 			}
 		}
-		//const ndMatrix newCameMatrix(ndRollMatrix(m_pitch) * ndYawMatrix(m_yaw));
-		//const ndQuaternion newRotation(newCameMatrix);
-		//const ndVector newPosit(newCameMatrix.RotateVector(m_posit));
-		//ndEditorCameraNode::SetTransform(newRotation, newPosit);
-		//
-		//const ndVector lightDir(newCameMatrix.RotateVector(ndVector(-1.0f, 1.0f, 0.f, 0.0f)));
-		//renderer->SetSunLight(lightDir, ndVector(0.7f, 0.7f, 0.7f, 0.0f));
 		CalculateCameraMatrix();
 	}
 	else

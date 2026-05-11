@@ -25,6 +25,7 @@ class ndRenderSceneCamera : public ndRenderSceneNode
 	virtual void SetMatrix(const ndQuaternion& rotation, const ndVector& position) override;
 
 	void SetViewMatrix(ndInt32 width, ndInt32 height);
+	ndMatrix CreateOrthoMatrix(ndFloat32 aspect, ndFloat32 front, ndFloat32 back) const;
 	ndMatrix CreatePerspectiveMatrix(ndFloat32 fov, ndFloat32 aspect, ndFloat32 front, ndFloat32 back) const;
 	ndMatrix CreateLookAtMatrix(const ndVector& eyepoint, const ndVector& eyepointTarget, const ndVector& normUp) const;
 	ndMatrix CreateMatrixFromFrustum(ndFloat32 left, ndFloat32 right, ndFloat32 bottom, ndFloat32 top, ndFloat32 front, ndFloat32 back) const;
@@ -43,7 +44,9 @@ class ndRenderSceneCamera : public ndRenderSceneNode
 	ndFloat32 m_frontPlane;
 	ndFloat32 m_yaw;
 	ndFloat32 m_pitch;
+	ndFloat32 m_zoom;
 	ndInt32 m_viewport[4];
+	bool m_perpectiveMode;
 	static ndMatrix m_worldToOpenGl;
 
 	friend class ndRenderPassShadowsImplement;

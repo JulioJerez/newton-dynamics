@@ -19,11 +19,13 @@ class ndEditorCameraNode: public ndRenderSceneNode
 	public:
 	ndEditorCameraNode(ndRender* const owner);
 
+	ndRenderSceneCamera* GetCamera() const;
 	virtual void TickUpdate(ndFloat32 timestep) = 0;
 	virtual ndRenderSceneNode* Clone() const;
 	
 	protected:
 	bool m_prevMouseState;
+	ndWeakPtr<ndRenderSceneCamera> m_camera;
 };
 
 #endif 
