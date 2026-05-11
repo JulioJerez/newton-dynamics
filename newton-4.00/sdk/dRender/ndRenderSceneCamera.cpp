@@ -29,11 +29,13 @@ ndRenderSceneCamera::ndRenderSceneCamera(ndRender* const owner)
 	,m_invViewMatrix(ndGetIdentityMatrix())
 	,m_projectionMatrix(ndGetIdentityMatrix())
 	,m_invProjectionMatrix(ndGetIdentityMatrix())
-	,m_fov(D_RENDER_CAMERA_ANGLE* ndDegreeToRad)
+	,m_fov(D_RENDER_CAMERA_ANGLE * ndDegreeToRad)
 	,m_backPlane(ndFloat32(1000.0f))
 	,m_frontPlane(ndFloat32(0.1f))
 	,m_yaw(ndFloat32(0.0f))
 	,m_pitch(ndFloat32(0.0f))
+	,m_zoom(ndFloat32(1.0f))
+	,m_perpectiveMode(true)
 {
 	m_owner = owner;
 }
@@ -52,13 +54,13 @@ ndMatrix ndRenderSceneCamera::CreateMatrixFromFrustum(ndFloat32 left, ndFloat32 
 {
 	ndMatrix projectionMatrix(ndGetIdentityMatrix());
 
-	projectionMatrix[0][0] = ndFloat32(2.0f) * front / (right - left);
+	projectionMatrix[0][0] = m_zoom * ndFloat32(2.0f) * front / (right - left);
 	projectionMatrix[0][1] = ndFloat32(0.0f);
 	projectionMatrix[0][2] = ndFloat32(0.0f);
 	projectionMatrix[0][3] = ndFloat32(0.0f);
 
 	projectionMatrix[1][0] = ndFloat32(0.0f);
-	projectionMatrix[1][1] = ndFloat32(2.0f) * front / (top - bottom);
+	projectionMatrix[1][1] = m_zoom * ndFloat32(2.0f) * front / (top - bottom);
 	projectionMatrix[1][2] = ndFloat32(0.0f);
 	projectionMatrix[1][3] = ndFloat32(0.0f);
 
@@ -73,6 +75,22 @@ ndMatrix ndRenderSceneCamera::CreateMatrixFromFrustum(ndFloat32 left, ndFloat32 
 	projectionMatrix[3][3] = ndFloat32(0.0f);
 
 	return projectionMatrix;
+}
+
+ndMatrix ndRenderSceneCamera::CreateOrthoMatrix(ndFloat32 aspect, ndFloat32 front, ndFloat32 back) const
+{
+	//fov = ndClamp(fov, ndFloat32(0.0f), ndPi);
+	//ndFloat32 y = front * ndTan(fov * ndFloat32(0.5f));
+	//ndFloat32 x = y * aspect;
+	//ndMatrix xxxx(CreateMatrixFromFrustum(-x, x, -y, y, front, back));
+
+	ndMatrix projectionMatrix(ndGetIdentityMatrix());
+	projectionMatrix[0][0] = m_zoom;
+	projectionMatrix[1][1] = m_zoom * aspect;
+	projectionMatrix[2][2] = -ndFloat32(2.0f) / (back - front);
+	projectionMatrix[3][2] = -(back + front) / (back - front);
+
+	return m_worldToOpenGl * projectionMatrix;
 }
 
 ndMatrix ndRenderSceneCamera::CreatePerspectiveMatrix(ndFloat32 fov, ndFloat32 aspect, ndFloat32 front, ndFloat32 back) const
@@ -108,7 +126,9 @@ void ndRenderSceneCamera::SetViewMatrix(ndInt32 width, ndInt32 height)
 	m_invViewMatrix = m_viewMatrix.OrthoInverse();
 	
 	// calculate projection matrix
-	m_projectionMatrix = CreatePerspectiveMatrix(m_fov, ndFloat32(width) / ndFloat32(height), m_frontPlane, m_backPlane);
+	m_projectionMatrix = m_perpectiveMode ?
+		CreatePerspectiveMatrix(m_fov, ndFloat32(width) / ndFloat32(height), m_frontPlane, m_backPlane) :
+		CreateOrthoMatrix(ndFloat32(width) / ndFloat32(height), m_frontPlane, m_backPlane);
 	m_invProjectionMatrix = m_projectionMatrix.Inverse4x4();
 	m_invViewProjectionMatrix = m_invViewMatrix * m_projectionMatrix;
 	

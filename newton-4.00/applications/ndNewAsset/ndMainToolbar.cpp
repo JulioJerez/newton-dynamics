@@ -59,21 +59,38 @@ void ndAssetEditor::ShowMainToolbar()
 		{m_sideRrightView, "right side view" },
 	};
 
-	static int xxxx = 0;
-	if (ImGui::BeginCombo(" ##1", names[xxxx].m_label, ImGuiComboFlags_MaxSize, 160))
+	if (ImGui::BeginCombo(" ##1", names[m_cameraMode].m_label, ImGuiComboFlags_MaxSize, 160))
 	{
 		for (ndInt32 i = 0; i < ndInt32 (sizeof(names) / sizeof(names[0])); ++i)
 		{
-			bool isSelected = strcmp(names[i].m_label, names[xxxx].m_label) ? false : true;
+			bool isSelected = strcmp(names[i].m_label, names[m_cameraMode].m_label) ? false : true;
 			if (ImGui::Selectable(names[i].m_label, isSelected))
 			{
-				xxxx = i;
+				m_cameraMode = i;
 				ndEditorCameraFlyby* const camera = (ndEditorCameraFlyby*)*m_defaultCamera;
 				camera->SetView(names[i].m_mode);
 			}
 		}
 	
 		ImGui::EndCombo();
+	}
+
+	ImGui::SameLine();
+
+	ndRenderSceneCamera* const camera = ((ndEditorCameraFlyby*)*m_defaultCamera)->GetCamera();
+	if (camera->m_perpectiveMode)
+	{
+		if (ImGui::Button("perpective"))
+		{
+			camera->m_perpectiveMode = false;
+		}
+	}
+	else
+	{
+		if (ImGui::Button("orthographic"))
+		{
+			camera->m_perpectiveMode = true;
+		}
 	}
 
 	ImGui::End();

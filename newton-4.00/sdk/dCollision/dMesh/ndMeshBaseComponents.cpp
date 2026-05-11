@@ -1150,3 +1150,41 @@ ndFixSizeArray<const ndMesh*, 256> ndMeshTransformModifierTwoLinksIK::GetAffecte
 	array.PushBack(*m_childLink);
 	return array;
 }
+
+ndMeshTransformModifierUserDefined::ndMeshTransformModifierUserDefined(const ndMesh* const owner)
+	:ndMeshTransformModifier(owner, nullptr)
+	,m_userConstructor("unnamed")
+{
+}
+
+ndMeshTransformModifierUserDefined::ndMeshTransformModifierUserDefined(const ndMeshTransformModifierUserDefined& other)
+	:ndMeshTransformModifier(other)
+	,m_userConstructor(other.m_userConstructor)
+{
+}
+
+ndMeshTransformModifier* ndMeshTransformModifierUserDefined::Duplicate() const
+{
+	return new ndMeshTransformModifierUserDefined(*this);
+}
+
+bool ndMeshTransformModifierUserDefined::operator==(const ndMeshTransformModifier& other) const
+{
+	const ndMeshTransformModifierUserDefined* const otherUser = (ndMeshTransformModifierUserDefined*)&other;
+	bool test = ndMeshTransformModifier::operator==(other);
+	return test && (m_userConstructor == otherUser->m_userConstructor);
+}
+
+void ndMeshTransformModifierUserDefined::DeserializeFromXml(const nd::TiXmlElement* const xmlModifier)
+{
+	ndMeshTransformModifier::DeserializeFromXml(xmlModifier);
+
+	m_userConstructor = ndString (xmlGetString(xmlModifier, "constructor"));
+}
+
+void ndMeshTransformModifierUserDefined::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshTransformModifier::SerializeToXml(parent);
+	xmlSaveParam(parent, "constructor", m_userConstructor.GetStr());
+}
+

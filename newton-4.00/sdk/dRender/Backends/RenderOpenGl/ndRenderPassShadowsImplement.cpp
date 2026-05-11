@@ -211,7 +211,6 @@ void ndRenderPassShadowsImplement::RenderScene(const ndRenderSceneCamera* const 
 			cameraTestPoint.m_x = m_farFrustumPlanes[i];
 			const ndVector cameraPoint(cameraProjection.TransformVector1x4(cameraTestPoint));
 			m_cameraSpaceSplits[i] = GLfloat(ndFloat32(0.5f) * cameraPoint.m_z / cameraPoint.m_w + ndFloat32(0.5f));
-			//m_cameraSpaceSplits[i] = GLfloat(cameraPoint.m_z / cameraPoint.m_w);
 
 			tileMatrix[3][0] = viewPortTile.m_x;
 			tileMatrix[3][1] = viewPortTile.m_y;

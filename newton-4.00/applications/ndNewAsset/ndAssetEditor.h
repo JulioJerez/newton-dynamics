@@ -191,6 +191,7 @@ class ndAssetEditor : public ndClassAlloc
 	void EditCollisionChamferCylinder();
 
 	void EditMeshTransformModifierTwoLinksIK();
+	void EditMeshTransformModifierUserDefined();
 
 	void AddLoopJoint();
 	void AddCollidingPair();
@@ -242,8 +243,10 @@ class ndAssetEditor : public ndClassAlloc
 
 	ndReal m_gizmoScale;
 	ndInt32 m_renderMode;
+	ndInt32 m_cameraMode;
 	ndInt32 m_closeLoopIndex;
 	ndInt32 m_collidingPairIndex;
+	
 
 	ndSubSelectionMode m_subSelection;
 	

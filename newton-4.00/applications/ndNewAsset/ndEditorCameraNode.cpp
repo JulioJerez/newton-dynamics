@@ -19,6 +19,7 @@ ndEditorCameraNode::ndEditorCameraNode(ndRender* const owner)
 	m_owner = owner;
 	m_name = ndString("__PlayerCamera__");
 	ndSharedPtr<ndRenderSceneNode> camera(new ndRenderSceneCamera(owner));
+	m_camera = camera->GetAsCamera();
 	AddChild(camera);
 }
 
@@ -28,3 +29,7 @@ ndRenderSceneNode* ndEditorCameraNode::Clone() const
 	return nullptr;
 }
 
+ndRenderSceneCamera* ndEditorCameraNode::GetCamera() const
+{
+	return (ndRenderSceneCamera*)*m_camera;
+}

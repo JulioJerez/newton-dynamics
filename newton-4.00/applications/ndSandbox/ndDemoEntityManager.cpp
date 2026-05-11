@@ -357,7 +357,6 @@ static void SimpleRegressionBrainStressTest()
 	}
 
 	ndSetRandSeed(42);
-	//ndInt32 inputSize = 1;
 	ndInt32 minibatchSize = 32;
 	ndInt32 numberOfEpochs = 10;
 	ndSharedPtr<ndBrain> brain(new ndBrain);
@@ -636,10 +635,6 @@ ndDemoEntityManager::ndDemoEntityManager()
 	snprintf(title, sizeof(title), "Newton Dynamics %d.%.2i sandbox demos", D_NEWTON_ENGINE_MAJOR_VERSION, D_NEWTON_ENGINE_MINOR_VERSION);
 	m_renderer = ndSharedPtr<ndRender>(new ndRender(callbacks, 1280, 768, title));
 
-	//char fontPathName[2048];
-	//char* const name = "calibri.ttf";
-	//char* const name = "courbd.ttf";
-	//const char* const name = "Cousine-Regular.ttf";
 	const ndString fontPathName(ndGetWorkingFileName("Cousine-Regular.ttf"));
 	m_renderer->InitImGui(fontPathName.GetStr());
 
@@ -953,13 +948,11 @@ void ndDemoEntityManager::SetLastLoadMesh(const ndString& name)
 
 void ndDemoEntityManager::AddEntity(const ndSharedPtr<ndRenderSceneNode>& entity)
 {
-	//ndScopeSpinLock lock(m_addDeleteLock);
 	m_renderer->AddSceneNode(entity);
 }
 
 void ndDemoEntityManager::RemoveEntity (const ndSharedPtr<ndRenderSceneNode>& entity)
 {
-	//ndScopeSpinLock lock(m_addDeleteLock);
 	m_renderer->RemoveSceneNode(entity);
 }
 
@@ -1019,7 +1012,6 @@ void ndDemoEntityManager::ApplyOptions()
 
 void ndDemoEntityManager::ShowMainMenuBar()
 {
-	//ndMenuSelection menuSelection = m_none;
 	if (ImGui::BeginMainMenuBar())
 	{
 		if (ImGui::BeginMenu("File")) 
@@ -1030,11 +1022,6 @@ void ndDemoEntityManager::ShowMainMenuBar()
 			{
 				m_currentScene = LOAD_MESH_INDEX;
 			}
-
-			//if (ImGui::MenuItem("import ply file", "")) 
-			//{
-			//	//mainMenu = 4;
-			//}
 
 			if (ImGui::MenuItem("Exit", "")) 
 			{
@@ -1109,10 +1096,8 @@ void ndDemoEntityManager::ShowMainMenuBar()
 
 			ImGui::Separator();
 			ImGui::Checkbox("hide visual meshes", &m_hideVisualMeshes);
-			//ImGui::Checkbox("show mesh skeleton", &m_showMeshSkeleton);
 
 			ImGui::Separator();
-			//ImGui::RadioButton("show UI", &m_showUI);
 			ImGui::RadioButton("hide collision Mesh", &m_showCollisionMeshMode, 0);
 			ImGui::RadioButton("show solid collision", &m_showCollisionMeshMode, 1);
 			ImGui::RadioButton("show wire frame collision", &m_showCollisionMeshMode, 2);
@@ -1128,10 +1113,6 @@ void ndDemoEntityManager::ShowMainMenuBar()
 			ImGui::Checkbox("show joints debug info", &m_showJointDebugInfo);
 			ImGui::Checkbox("show models debug info", &m_showModelsDebugInfo);
 			ImGui::Checkbox("show colliding faces", &m_showStaticMeshCollidingFaces);
-
-			//ImGui::Checkbox("show ray cast hit point", &m_showRaycastHit);
-			//ImGui::Checkbox("show concave edges", &m_showConcaveEdge);
-			
 
 			ApplyOptions();
 	

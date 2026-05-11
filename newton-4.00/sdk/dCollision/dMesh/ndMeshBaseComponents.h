@@ -388,4 +388,20 @@ class ndMeshTransformModifierTwoLinksIK : public ndMeshTransformModifier
 	ndFloat32 m_solutionSign;
 };
 
+class ndMeshTransformModifierUserDefined : public ndMeshTransformModifier
+{
+	public:
+	D_COLLISION_API ndMeshTransformModifierUserDefined(const ndMesh* const owner);
+	D_COLLISION_API ndMeshTransformModifierUserDefined(const ndMeshTransformModifierUserDefined& other);
+	D_COLLISION_API virtual ndMeshTransformModifier* Duplicate() const;
+
+	D_COLLISION_API virtual bool operator==(const ndMeshTransformModifier& other) const override;
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+
+	D_CLASS_REFLECTION(ndMeshTransformModifierUserDefined, ndMeshTransformModifier)
+
+	ndString m_userConstructor;
+};
+
 #endif
