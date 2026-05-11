@@ -318,7 +318,16 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 						{
 							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 							m_subSelection = m_none;
-							m_currentSelection->SetModifier(ndSharedPtr<ndMeshTransformModifier>(nullptr));
+							modifier = ndSharedPtr<ndMeshTransformModifier>(nullptr);
+							m_currentSelection->SetModifier(modifier);
+							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+						}
+						else if (strcmp(name, ndMeshTransformModifierUserDefined::StaticClassName()) == 0)
+						{
+							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+							m_subSelection = m_transformModifier;
+							modifier = ndSharedPtr<ndMeshTransformModifier>(new ndMeshTransformModifierUserDefined(*m_currentSelection));
+							m_currentSelection->SetModifier(modifier);
 							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 						}
 						else if (strcmp(name, ndMeshTransformModifierLookAt::StaticClassName()) == 0)
@@ -345,6 +354,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				};
 
 				SetDropdownList("none");
+				SetDropdownList(ndMeshTransformModifierUserDefined::StaticClassName());
 				SetDropdownList(ndMeshTransformModifierLookAt::StaticClassName());
 				SetDropdownList(ndMeshTransformModifierTwoLinksIK::StaticClassName());
 
@@ -370,9 +380,16 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				}
 			}
 
-			if (modifier && strcmp(modifier->ClassName(), ndMeshTransformModifierTwoLinksIK::StaticClassName()) == 0)
+			if (modifier)
 			{
-				EditMeshTransformModifierTwoLinksIK();
+				if (strcmp(modifier->ClassName(), ndMeshTransformModifierTwoLinksIK::StaticClassName()) == 0)
+				{
+					EditMeshTransformModifierTwoLinksIK();
+				}
+				else if (strcmp(modifier->ClassName(), ndMeshTransformModifierUserDefined::StaticClassName()) == 0)
+				{
+					EditMeshTransformModifierUserDefined();
+				}
 			}
 		}
 	}
@@ -407,4 +424,19 @@ void ndAssetEditor::EditMeshTransformModifierTwoLinksIK()
 
 		ImGui::EndCombo();
 	}
+}
+
+void ndAssetEditor::EditMeshTransformModifierUserDefined()
+{
+	ndMeshTransformModifierUserDefined* const modifier = (ndMeshTransformModifierUserDefined*)*m_currentSelection->GetModifier();
+
+	char constructor[256];
+	snprintf(constructor, sizeof(constructor) - 1, "%s", modifier->m_userConstructor.GetStr());
+	if (ImGui::InputText("constructor", constructor, sizeof(constructor) - 1, ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+		modifier->m_userConstructor = ndString(constructor);
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+	}
+
 }
