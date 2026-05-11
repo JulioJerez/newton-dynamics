@@ -1669,3 +1669,26 @@ ndSharedPtr<ndMeshJoint> ndMesh::LoadJoint(const nd::TiXmlElement* const xmlJoin
 	joint->DeserializeFromXml(xmlJoint);
 	return joint;
 }
+
+ndSharedPtr<ndMeshTransformModifier> ndMesh::LoadModifier(const nd::TiXmlElement* const xmlModifier) const
+{
+	ndSharedPtr<ndMeshTransformModifier> modifier(nullptr);
+
+	const char* const constructor = xmlGetString(xmlModifier, "constructor");
+	if (strcmp(constructor, ndMeshTransformModifierLookAt::StaticClassName()) == 0)
+	{
+		modifier = ndSharedPtr<ndMeshTransformModifier>(new ndMeshTransformModifierLookAt(this, nullptr));
+		modifier->DeserializeFromXml(xmlModifier);
+	}
+	else if (strcmp(constructor, ndMeshTransformModifierTwoLinksIK::StaticClassName()) == 0)
+	{
+		modifier = ndSharedPtr<ndMeshTransformModifier>(new ndMeshTransformModifierTwoLinksIK(this, nullptr));
+		modifier->DeserializeFromXml(xmlModifier);
+	}
+	else
+	{
+		ndAssert(0);
+	}
+
+	return modifier;
+}

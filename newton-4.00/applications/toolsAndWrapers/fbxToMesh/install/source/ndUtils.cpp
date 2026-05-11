@@ -387,3 +387,12 @@ ndInt32 ndVertexListToIndexList(ndReal* const vertexList, ndInt32 strideInBytes,
 
 	return count;
 }
+
+TwoLinksIK::TwoLinksIK(ndFloat32 x, ndFloat32 y, ndFloat32 l0, ndFloat32 l1, ndFloat32 sign)
+{
+	ndFloat32 cosAngle1 = (x * x + y * y - l0 * l0 - l1 * l1) / (ndFloat32(2.0f) * l0 * l1);
+	ndFloat32 sinAngle1 = sign * ndSqrt (ndFloat32 (1.0f) - cosAngle1 * cosAngle1);
+
+	m_angle1 = ndAtan2(sinAngle1, cosAngle1);
+	m_angle0 = ndAtan2(y, x) - ndAtan2(l1 * sinAngle1, l0 + l1 * cosAngle1);
+}

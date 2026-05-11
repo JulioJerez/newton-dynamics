@@ -434,12 +434,22 @@ void ndDebugDisplayRenderPass::RenderSelectedNode()
 	};
 
 	RenderNode(*m_manager->m_currentSelection, m_selectedColor);
-	if (m_manager->m_subSelection == ndAssetEditor::m_transformModifier)
+
+	//if (m_manager->m_subSelection == ndAssetEditor::m_transformModifier)
 	{
 		ndSharedPtr<ndMeshTransformModifier> modifier(m_manager->m_currentSelection->GetModifier());
-		if (modifier && modifier->m_target)
+		if (modifier)
 		{
-			RenderNode(*modifier->m_target, m_collidingPairColor1);
+			if (modifier->m_target)
+			{
+				RenderNode(*modifier->m_target, m_collidingPairColor1);
+			}
+
+			ndFixSizeArray<const ndMesh*, 256> subNodes(modifier->GetAffectedNodes());
+			for (ndInt32 i = 0; i < subNodes.GetCount(); ++i)
+			{
+				RenderNode(subNodes[i], m_collidingPairColor1);
+			}
 		}
 	}
 }
@@ -527,7 +537,11 @@ void ndDebugDisplayRenderPass::RenderCollisionShape()
 
 			case ndAssetEditor::m_transformModifier:
 			{
-				ndAssert(0);
+				//ndAssert(0);
+				if (m_manager->m_currentSubSelection)
+				{
+					DisplayShape(*m_manager->m_currentSubSelection, m_collidingPairPreviewColor);
+				}
 				break;
 			}
 
@@ -660,7 +674,6 @@ void ndDebugDisplayRenderPass::RenderOptions()
 {
 	auto RenderOptions = [this](const ndMesh* const node)
 	{
-		//const ndString& selected = m_manager->m_currentSelection->GetName();
 		const ndString& selected = node->GetName();
 		ndRenderSceneNode* const sceneNode = m_manager->m_entity->FindByName(selected);
 		if (sceneNode)
@@ -723,7 +736,6 @@ void ndDebugDisplayRenderPass::RenderOptions()
 							SetScale(m_self->m_manager->m_gizmoScale);
 						}
 
-						//void DrawPoint(const ndVector& point, const ndVector& color, ndFloat32 thickness = ndFloat32(8.0f))
 						void DrawPoint(const ndVector&, const ndVector&, ndFloat32)
 						{
 							ndAssert(0);
@@ -744,12 +756,20 @@ void ndDebugDisplayRenderPass::RenderOptions()
 		}
 	};
 	RenderOptions(*m_manager->m_currentSelection);
-	if (m_manager->m_subSelection == ndAssetEditor::m_transformModifier)
+
+	//if (m_manager->m_subSelection == ndAssetEditor::m_transformModifier)
+	ndSharedPtr<ndMeshTransformModifier> modifier(m_manager->m_currentSelection->GetModifier());
+	if (modifier)
 	{
-		ndSharedPtr<ndMeshTransformModifier> modifier(m_manager->m_currentSelection->GetModifier());
-		if (modifier && modifier->m_target)
+		if (modifier->m_target)
 		{
 			RenderOptions(*modifier->m_target);
+		}
+
+		ndFixSizeArray<const ndMesh*, 256> subNodes(modifier->GetAffectedNodes());
+		for (ndInt32 i = 0; i < subNodes.GetCount(); ++i)
+		{
+			RenderOptions(subNodes[i]);
 		}
 	}
 }

@@ -25,14 +25,34 @@ class ndRenderTransformModifier: public ndClassAlloc
 	ndWeakPtr<ndRenderSceneNode> m_owner;
 };
 
-class ndRenderTransformModifierLockAtNode: public ndRenderTransformModifier
+class ndRenderTransformModifierLookAtNode: public ndRenderTransformModifier
 {
 	public:
-	ndRenderTransformModifierLockAtNode(ndRenderSceneNode* const owner, ndRenderSceneNode* const target);
+	ndRenderTransformModifierLookAtNode(ndRenderSceneNode* const owner, ndRenderSceneNode* const target);
 
 	virtual void Update() override;
 
 	ndWeakPtr<ndRenderSceneNode> m_target;
 };
 
+class ndRenderTransformModifierTwoLinksIK : public ndRenderTransformModifier
+{
+	public:
+	ndRenderTransformModifierTwoLinksIK(
+		ndRenderSceneNode* const owner, 
+		ndRenderSceneNode* const linkChild,
+		ndRenderSceneNode* const target, 
+		ndFloat32 solutionSign);
+
+	virtual void Update() override;
+
+	ndWeakPtr<ndRenderSceneNode> m_target;
+	ndWeakPtr<ndRenderSceneNode> m_linkChild;
+
+	ndFloat32 m_l0;
+	ndFloat32 m_l1;
+	ndFloat32 m_sign;
+	TwoLinksIK m_initialAngle;
+
+};
 #endif

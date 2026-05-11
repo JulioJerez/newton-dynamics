@@ -347,6 +347,7 @@ class ndMeshTransformModifier : public ndClassAlloc
 
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+	D_COLLISION_API virtual ndFixSizeArray<const ndMesh*, 256> GetAffectedNodes() const;
 
 	D_COLLISION_API virtual bool operator==(const ndMeshTransformModifier& other) const;
 
@@ -362,12 +363,29 @@ class ndMeshTransformModifierLookAt : public ndMeshTransformModifier
 	D_COLLISION_API ndMeshTransformModifierLookAt(const ndMesh* const owner, const ndMesh* const target);
 	D_COLLISION_API ndMeshTransformModifierLookAt(const ndMeshTransformModifierLookAt& other);
 	D_COLLISION_API virtual ndMeshTransformModifier* Duplicate() const;
-
-	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
-
 	D_COLLISION_API virtual bool operator==(const ndMeshTransformModifier& other) const;
 
 	D_CLASS_REFLECTION(ndMeshTransformModifierLookAt, ndMeshTransformModifier)
+};
+
+class ndMeshTransformModifierTwoLinksIK : public ndMeshTransformModifier
+{
+	public:
+	D_COLLISION_API ndMeshTransformModifierTwoLinksIK(const ndMesh* const owner, const ndMesh* const target);
+	D_COLLISION_API ndMeshTransformModifierTwoLinksIK(const ndMeshTransformModifierTwoLinksIK& other);
+	D_COLLISION_API virtual ndMeshTransformModifier* Duplicate() const;
+
+	D_COLLISION_API virtual void DuplicateFixDependencies(const ndMesh* const otherRoot) override;
+	D_COLLISION_API virtual ndFixSizeArray<const ndMesh*, 256> GetAffectedNodes() const override;
+	D_COLLISION_API virtual bool operator==(const ndMeshTransformModifier& other) const override;
+
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+
+	D_CLASS_REFLECTION(ndMeshTransformModifierTwoLinksIK, ndMeshTransformModifier)
+
+	ndWeakPtr<const ndMesh> m_childLink;
+	ndFloat32 m_solutionSign;
 };
 
 #endif

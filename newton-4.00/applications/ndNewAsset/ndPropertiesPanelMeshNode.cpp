@@ -329,6 +329,14 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 							m_currentSelection->SetModifier(modifier);
 							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 						}
+						else if (strcmp(name, ndMeshTransformModifierTwoLinksIK::StaticClassName()) == 0)
+						{
+							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+							m_subSelection = m_transformModifier;
+							modifier = ndSharedPtr<ndMeshTransformModifier>(new ndMeshTransformModifierTwoLinksIK(*m_currentSelection, nullptr));
+							m_currentSelection->SetModifier(modifier);
+							m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+						}
 						else
 						{
 							ndAssert(0);
@@ -338,6 +346,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 
 				SetDropdownList("none");
 				SetDropdownList(ndMeshTransformModifierLookAt::StaticClassName());
+				SetDropdownList(ndMeshTransformModifierTwoLinksIK::StaticClassName());
 
 				ImGui::EndCombo();
 			}
@@ -360,7 +369,42 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 					}
 				}
 			}
+
+			if (modifier && strcmp(modifier->ClassName(), ndMeshTransformModifierTwoLinksIK::StaticClassName()) == 0)
+			{
+				EditMeshTransformModifierTwoLinksIK();
+			}
 		}
 	}
 }
 
+void ndAssetEditor::EditMeshTransformModifierTwoLinksIK()
+{
+	ndMeshTransformModifierTwoLinksIK* const modifier = (ndMeshTransformModifierTwoLinksIK*)*m_currentSelection->GetModifier();
+
+	ndReal sign = ndReal(modifier->m_solutionSign);
+	if (ImGui::InputFloat("solution sign", &sign, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+		modifier->m_solutionSign = sign;
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+	}
+
+	if (ImGui::BeginCombo("select child Link", modifier->m_childLink->GetName().GetStr()))
+	{
+		for (ndList<ndSharedPtr<ndMesh>>::ndNode* ptr = m_currentSelection->GetChildren().GetFirst(); ptr; ptr = ptr->GetNext())
+		{
+			const ndMesh* const child = *ptr->GetInfo();
+			bool selected = (child->GetName() == modifier->m_childLink->GetName());
+			if (ImGui::Selectable(child->GetName().GetStr(), selected))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				modifier->m_childLink = child;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				break;
+			}
+		}
+
+		ImGui::EndCombo();
+	}
+}

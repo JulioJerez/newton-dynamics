@@ -446,25 +446,39 @@ namespace ndExcavator
 		};
 		excavator->NodeIterator(BindPhysicsAndGraphics);
 
-		auto AddGraphicsModiers = [](ndRenderSceneNode* const node)
+		// a more explicit way to add the visual modifier
+		auto AddGraphicsModiers = [sceneMesh](ndMesh* const node)
 		{
-			if (node->m_name == "hydraulicBoom_001")
+			ndSharedPtr<ndMeshTransformModifier> modifier(node->GetModifier());
+			if (modifier)
 			{
-				ndRenderSceneNode* const target = node->GetRoot()->FindByName("hydrolic_003");
+				ndAssert(modifier->m_owner);
+				ndAssert(modifier->m_target);
+				ndRenderSceneNode* const owner = sceneMesh->FindByName(modifier->m_owner->GetName());
+				ndRenderSceneNode* const target = sceneMesh->FindByName(modifier->m_target->GetName());
+				ndAssert(owner);
 				ndAssert(target);
-				ndSharedPtr<ndRenderTransformModifier> modifier(new ndRenderTransformModifierLockAtNode(node, target));
-				node->SetTransformModifier(modifier);
-			}
 
-			if (node->m_name == "hydrolic_003")
-			{
-				ndRenderSceneNode* const target = node->GetRoot()->FindByName("hydraulicBoom_001");
-				ndAssert(target);
-				ndSharedPtr<ndRenderTransformModifier> modifier(new ndRenderTransformModifierLockAtNode(node, target));
-				node->SetTransformModifier(modifier);
+				if (strcmp(modifier->ClassName(), ndMeshTransformModifierLookAt::StaticClassName()) == 0)
+				{
+					ndSharedPtr<ndRenderTransformModifier> renderModifier(new ndRenderTransformModifierLookAtNode(owner, target));
+					owner->SetTransformModifier(renderModifier);
+				}
+				else if (strcmp(modifier->ClassName(), ndMeshTransformModifierTwoLinksIK::StaticClassName()) == 0)
+				{
+					const ndMeshTransformModifierTwoLinksIK* const modifierIk = (ndMeshTransformModifierTwoLinksIK*) *modifier;
+					ndRenderSceneNode* const link = sceneMesh->FindByName(modifierIk->m_childLink->GetName());
+					ndAssert(link);
+					ndSharedPtr<ndRenderTransformModifier> renderModifier(new ndRenderTransformModifierTwoLinksIK(owner, link, target, modifierIk->m_solutionSign));
+					owner->SetTransformModifier(renderModifier);
+				}
+				else
+				{
+					ndAssert(0);
+				}
 			}
 		};
-		sceneMesh->NodeIterator(AddGraphicsModiers);
+		loader.m_mesh->NodeIterator(AddGraphicsModiers);
 		
 		// using a model articulation for this vehicle
 		ndSharedPtr<ndModelNotify> controller(new ExcavatorController(scene, excavator, sceneMesh));
@@ -506,7 +520,7 @@ void ndComplexModel(ndDemoEntityManager* const scene)
 	ndMatrix matrix1(ndGetIdentityMatrix());
 	matrix1.m_posit.m_x += 10.0f;
 	matrix1.m_posit.m_z += 10.0f;
-	//AddPlanks(scene, matrix1, 10.0f, 4);
+	AddPlanks(scene, matrix1, 10.0f, 4);
 	
 	ExcavatorController* const playerController = (ExcavatorController*)*controller;
 	ndRender* const renderer = *scene->GetRenderer();

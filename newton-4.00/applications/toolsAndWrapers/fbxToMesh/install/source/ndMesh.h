@@ -191,6 +191,7 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API ndSharedPtr<ndShapeInstance> CreateCollisionConvexApproximation(bool lowDetail = false);
 
 	D_NEWTON_API ndSharedPtr<ndMeshJoint> LoadJoint(const nd::TiXmlElement* const xmlJoint) const;
+	D_NEWTON_API ndSharedPtr<ndMeshTransformModifier> LoadModifier(const nd::TiXmlElement* const xmlModifier) const;
 
 	template <typename Function>
 	void NodeIterator(Function func);

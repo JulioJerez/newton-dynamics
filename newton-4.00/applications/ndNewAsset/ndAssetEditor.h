@@ -190,6 +190,8 @@ class ndAssetEditor : public ndClassAlloc
 	void EditCollisionConvexHull();
 	void EditCollisionChamferCylinder();
 
+	void EditMeshTransformModifierTwoLinksIK();
+
 	void AddLoopJoint();
 	void AddCollidingPair();
 

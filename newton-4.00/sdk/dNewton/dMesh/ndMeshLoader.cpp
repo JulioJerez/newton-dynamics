@@ -205,27 +205,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 	{
 		MeshXmlNodePair entry(ptr->GetInfo());
 		const nd::TiXmlElement* const xmlModifier = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("modifier");
-
-		const char* const constructor = xmlGetString(xmlModifier, "constructor");
-		const char* const ownerName = xmlGetString(xmlModifier, "owner");
-		const ndMesh* const owner = m_mesh->FindByName(ownerName);
-		const ndMesh* target = nullptr;
-		if (xmlHasAttribute(xmlModifier, "target"))
-		{
-			const char* const targetName = xmlGetString(xmlModifier, "target");
-			target = m_mesh->FindByName(targetName);
-		}
-
-		if (strcmp(constructor, ndMeshTransformModifierLookAt::StaticClassName()) == 0)
-		{
-			ndSharedPtr<ndMeshTransformModifier> modifier(new ndMeshTransformModifierLookAt(owner, target));
-			entry.m_mesh->SetModifier(modifier);
-		}
-		else
-		{
-			ndAssert(0);
-		}
-
+		entry.m_mesh->SetModifier(entry.m_mesh->LoadModifier(xmlModifier));
 	}
 
 	if (m_xmlPair)
