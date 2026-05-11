@@ -144,22 +144,8 @@ void ndAssetEditor::MouseButtonCallback(ndInt32 button, ndInt32 action)
 	}
 }
 
-void ndAssetEditor::KeyCallback(ndInt32 key, ndInt32)
+void ndAssetEditor::KeyCallback(ndInt32, ndInt32)
 {
-	if (key == ImGuiKey_F1)
-	{
-		ndAssert(0);
-		//// reload the demo. 
-		//const ndTransform transform(m_renderer->GetCamera()->GetTransform());
-		//LoadDemo(m_lastCurrentScene);
-		//m_renderer->GetCamera()->SetTransform(transform);
-		//m_renderer->GetCamera()->SetTransform(transform);
-	}
-	else if (key == ImGuiKey_F10)
-	{
-		// set debug tracer here;
-		//ndAssert(0);
-	}
 }
 
 bool ndAssetEditor::GetCaptured() const
@@ -351,7 +337,10 @@ void ndAssetEditor::NewMesh()
 	loader.m_mesh = ndSharedPtr<ndMesh>(new ndMesh);
 	loader.m_mesh->SetName("root");
 	loader.m_renderMesh = ndRenderMeshLoader::CreateRenderSceneMesh(*GetRenderer(), *loader.m_mesh, ndString());
+
+	m_currentPath = "unknown";
 	SetVisualScene(loader.m_mesh, loader.m_renderMesh);
+
 	m_undoRedo.Clear();
 }
 
@@ -554,6 +543,10 @@ void ndAssetEditor::SetVisualScene(const ndSharedPtr<ndMesh>& mesh, const ndShar
 	};
 	m_newMesh->NodeIterator(BonesCount);
 	m_raycastBones = (bonesNumber != 0);
+
+	char title[256];
+	snprintf(title, sizeof(title) - 1, "Newton Dynamics %d.%.2i ->model path: %s", D_NEWTON_ENGINE_MAJOR_VERSION, D_NEWTON_ENGINE_MINOR_VERSION, m_currentPath.GetStr());
+	m_renderer->SetTitle(title);
 }
 
 void ndAssetEditor::Run()
