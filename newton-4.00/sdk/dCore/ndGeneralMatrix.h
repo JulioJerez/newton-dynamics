@@ -26,6 +26,7 @@
 #include "ndCoreStdafx.h"
 #include "ndTypes.h"
 #include "ndUtils.h"
+#include "ndSharedPtr.h"
 #include "ndGeneralVector.h"
 
 #define D_LCP_MAX_VALUE ndFloat32 (1.0e15f)
