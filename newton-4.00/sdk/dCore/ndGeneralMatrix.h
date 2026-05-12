@@ -147,17 +147,31 @@ template<class T>
 bool ndTestPSDmatrix(ndInt32 size, ndInt32 stride, const T* const matrix)
 {
 	ndAssert(size);
-	ndInt32 srcRow = 0;
-	ndInt32 dstRow = 0;
-	T* const copy = ndAlloca(T, size * size);
-	for (ndInt32 i = 0; i < size; ++i) 
+	const ndInt32 maxSize = (512 * 512) / (size * ndInt32(sizeof(T)));
+	auto Cholestky = [size, stride, matrix](T* const copy)
 	{
-		ndMemCpy(&copy[dstRow], &matrix[srcRow], ndInt64(size));
+		ndInt32 srcRow = 0;
+		ndInt32 dstRow = 0;
+		for (ndInt32 i = 0; i < size; ++i)
+		{
+			ndMemCpy(&copy[dstRow], &matrix[srcRow], ndInt64(size));
 
-		dstRow += size;
-		srcRow += stride;
+			dstRow += size;
+			srcRow += stride;
+		}
+		return ndCholeskyFactorization(size, size, copy);
+	};
+	if (size < maxSize)
+	{
+		T* const copy = ndAlloca(T, size * size);
+		return Cholestky(copy);
 	}
-	return ndCholeskyFactorization(size, size, copy);
+	else
+	{
+		ndSharedPtr<T> copyPtr (new T[size_t(size * size)]);
+		T* const copy = *copyPtr;
+		return Cholestky(copy);
+	}
 }
 
 template<class T>

@@ -249,20 +249,6 @@ ndSharedPtr<ndBody> AddConvexHull(ndDemoEntityManager* const scene, const ndMatr
 // ************************************************************************
 // add array of some primitive to the scene
 // ************************************************************************
-void AddPlanks(ndDemoEntityManager* const scene, const ndMatrix& location, ndFloat32 mass, ndInt32 count)
-{
-	ndMatrix matrix(location);
-
-	for (ndInt32 i = 0; i < count; ++i)
-	{
-		for (ndInt32 j = 0; j < count; ++j)
-		{
-			//matrix.m_posit = location.m_posit + ndVector(((ndFloat32)i - 2) * 5.0f, 0.0f, ((ndFloat32)j - 2) * 5.0f, 0.0f);
-			ndSharedPtr<ndBody> body (AddBox(scene, matrix, mass, 4.0f, 0.25f, 3.0f));
-		}
-	}
-}
-
 void AddCapsuleStacks(ndDemoEntityManager* const scene, const ndMatrix& location, ndFloat32 mass, ndFloat32 radius0, ndFloat32 radius1, ndFloat32 high, ndInt32 rows_x, ndInt32 rows_z, ndInt32 columHigh)
 {
 	ndSharedPtr<ndShapeInstance>shape(new ndShapeInstance(new ndShapeCapsule(radius0, radius1, high)));
@@ -310,4 +296,57 @@ void AddCapsuleStacks(ndDemoEntityManager* const scene, const ndMatrix& location
 
 	ndRenderSceneNodeInstance* const instanceRoot = (ndRenderSceneNodeInstance*)*root;
 	instanceRoot->Finalize();
+}
+
+void AddPlanks(ndDemoEntityManager* const scene, const ndMatrix& location, ndFloat32 mass, ndInt32 count)
+{
+	ndMatrix matrix(location);
+
+	for (ndInt32 i = 0; i < count; ++i)
+	{
+		for (ndInt32 j = 0; j < count; ++j)
+		{
+			ndSharedPtr<ndBody> body(AddBox(scene, matrix, mass, 4.0f, 0.25f, 3.0f));
+		}
+	}
+}
+
+void AddLumberYard(ndDemoEntityManager* const scene, const ndMatrix& location, ndFloat32 mass, ndInt32 count)
+{
+	ndMatrix matrix(location);
+
+	matrix.m_posit.m_x -= 0.75f;
+	matrix.m_posit.m_z -= 3.0f;
+	ndSharedPtr<ndBody> body(AddBox(scene, matrix, mass, 0.2f, 1.5f, 0.2f));
+
+	matrix.m_posit.m_x += 1.5f;
+	AddBox(scene, matrix, mass, 0.2f, 1.5f, 0.2f);
+
+	matrix.m_posit.m_z += 6.0f;
+	AddBox(scene, matrix, mass, 0.2f, 1.5f, 0.2f);
+
+	matrix.m_posit.m_x -= 1.5f;
+	AddBox(scene, matrix, mass, 0.2f, 1.5f, 0.2f);
+
+	matrix.m_posit = location.m_posit;
+	AddBox(scene, matrix, mass, 1.6f, 0.2f, 7.0f, "wood_3.png");
+
+	for (ndInt32 i = 0; i < count; ++i)
+	{
+		matrix = location;
+		matrix.m_posit.m_z -= 3.0f + 0.2f;
+		for (ndInt32 j = 0; j < 4; ++j)
+		{
+			AddBox(scene, matrix, mass, 3.0f, 0.2f, 0.2f, "wood_2.png");
+			matrix.m_posit.m_z += 2.0f;
+		}
+
+		matrix = location;
+		matrix.m_posit.m_x -= 0.75f + 0.2f;
+		for (ndInt32 j = 0; j < 5; ++j)
+		{
+			AddBox(scene, matrix, mass, 0.2f, 0.2f, 7.0f, "wood_1.png");
+			matrix.m_posit.m_x += 0.5f;
+		}
+	}
 }
