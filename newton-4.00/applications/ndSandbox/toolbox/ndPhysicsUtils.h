@@ -41,6 +41,7 @@ ndSharedPtr<ndBody> AddCylinder(ndDemoEntityManager* const scene, const ndMatrix
 ndSharedPtr<ndBody> AddConvexHull(ndDemoEntityManager* const scene, const ndMatrix& origin, ndFloat32 mass, ndFloat32 radius, ndFloat32 high, ndInt32 segments, const char* const textName = "wood_0.png");
 
 void AddPlanks(ndDemoEntityManager* const scene, const ndMatrix& origin, ndFloat32 mass, ndInt32 count);
+void AddLumberYard(ndDemoEntityManager* const scene, const ndMatrix& origin, ndFloat32 mass, ndInt32 count);
 void AddCapsuleStacks(ndDemoEntityManager* const scene, const ndMatrix& origin, ndFloat32 mass, ndFloat32 radius0, ndFloat32 radius1, ndFloat32 high, ndInt32 rows_x, ndInt32 rows_z, ndInt32 columHigh);
 
 #endif

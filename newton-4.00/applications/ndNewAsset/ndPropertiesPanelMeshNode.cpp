@@ -371,11 +371,17 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 
 			if (m_subSelection == m_transformModifier)
 			{
-				if (ImGui::Button("exit select target"))
+				if (modifier)
 				{
-					if (modifier && modifier->m_target)
+					if (strcmp(modifier->ClassName(), ndMeshTransformModifierUserDefined::StaticClassName()) != 0)
 					{
-						m_subSelection = m_none;
+						if (ImGui::Button("exit select target"))
+						{
+							if (modifier->m_target)
+							{
+								m_subSelection = m_none;
+							}
+						}
 					}
 				}
 			}

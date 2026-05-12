@@ -35,7 +35,7 @@ ndRenderSceneCamera::ndRenderSceneCamera(ndRender* const owner)
 	,m_yaw(ndFloat32(0.0f))
 	,m_pitch(ndFloat32(0.0f))
 	,m_zoom(ndFloat32(1.0f))
-	,m_perpectiveMode(true)
+	,m_perspectiveMode(true)
 {
 	m_owner = owner;
 }
@@ -126,7 +126,7 @@ void ndRenderSceneCamera::SetViewMatrix(ndInt32 width, ndInt32 height)
 	m_invViewMatrix = m_viewMatrix.OrthoInverse();
 	
 	// calculate projection matrix
-	m_projectionMatrix = m_perpectiveMode ?
+	m_projectionMatrix = m_perspectiveMode ?
 		CreatePerspectiveMatrix(m_fov, ndFloat32(width) / ndFloat32(height), m_frontPlane, m_backPlane) :
 		CreateOrthoMatrix(ndFloat32(width) / ndFloat32(height), m_frontPlane, m_backPlane);
 	m_invProjectionMatrix = m_projectionMatrix.Inverse4x4();

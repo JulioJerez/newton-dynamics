@@ -46,7 +46,7 @@ class ndRenderSceneCamera : public ndRenderSceneNode
 	ndFloat32 m_pitch;
 	ndFloat32 m_zoom;
 	ndInt32 m_viewport[4];
-	bool m_perpectiveMode;
+	bool m_perspectiveMode;
 	static ndMatrix m_worldToOpenGl;
 
 	friend class ndRenderPassShadowsImplement;

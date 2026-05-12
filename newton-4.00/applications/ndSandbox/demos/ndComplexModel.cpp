@@ -517,11 +517,19 @@ void ndComplexModel(ndDemoEntityManager* const scene)
 	ndMatrix matrix(ndGetIdentityMatrix());
 	ndSharedPtr<ndModelNotify> controller (CreateExcavator(scene, matrix));
 	
+	const ndInt32 stacks = 3;
 	ndMatrix matrix1(ndGetIdentityMatrix());
-	matrix1.m_posit.m_x += 10.0f;
-	matrix1.m_posit.m_z += 10.0f;
-	AddPlanks(scene, matrix1, 10.0f, 4);
-	
+	for (ndInt32 i = 0; i < stacks; ++i)
+	{
+		for (ndInt32 j = 0; j < stacks; ++j)
+		{
+			matrix1.m_posit.m_x = 20.0f + ndFloat32(i - stacks / 2) * 12.0f;
+			matrix1.m_posit.m_z = ndFloat32(j - stacks / 2) * 12.0f;
+			//AddPlanks(scene, matrix1, 10.0f, 4);
+			AddLumberYard(scene, matrix1, 4.0f, 10);
+		}
+	}
+
 	ExcavatorController* const playerController = (ExcavatorController*)*controller;
 	ndRender* const renderer = *scene->GetRenderer();
 	renderer->SetCamera(playerController->GetCamera());
