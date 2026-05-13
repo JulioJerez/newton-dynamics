@@ -523,7 +523,7 @@ void ndComplexModel(ndDemoEntityManager* const scene)
 	{
 		for (ndInt32 j = 0; j < stacks; ++j)
 		{
-			matrix1.m_posit.m_x = 20.0f + ndFloat32(i - stacks / 2) * 12.0f;
+			matrix1.m_posit.m_x = 25.0f + ndFloat32(i - stacks / 2) * 12.0f;
 			matrix1.m_posit.m_z = ndFloat32(j - stacks / 2) * 12.0f;
 			//AddPlanks(scene, matrix1, 10.0f, 4);
 			AddLumberYard(scene, matrix1, 4.0f, 10);
