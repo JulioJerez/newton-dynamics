@@ -88,6 +88,13 @@ void ndAssetEditor::ApplyNodeTransform(const ndMatrix& matrix, ndRenderSceneNode
 		entNode->SetPrimitiveMatrix(geoMatrix);
 		m_currentSelection->SetGeometryMatrix(geoMatrix);
 
+		if (m_currentSelection->GetRigidBody())
+		{
+			ndMeshBodyKinematic* const body = (ndMeshBodyKinematic*)*m_currentSelection->GetRigidBody();
+			ndMeshShapeInstance& shapeInstance = body->m_shapeInstance;
+			shapeInstance.m_localMatrix = shapeInstance.m_localMatrix * localMatrix;
+		}
+
 		for (ndList<ndSharedPtr<ndMesh>>::ndNode* childPtr = m_currentSelection->GetChildren().GetFirst(); childPtr; childPtr = childPtr->GetNext())
 		{
 			ndMesh* const child = *childPtr->GetInfo();
