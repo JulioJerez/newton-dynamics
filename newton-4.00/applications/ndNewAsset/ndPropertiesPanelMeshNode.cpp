@@ -206,6 +206,38 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				}
 			}
+
+			if (m_subSelection == m_none)
+			{
+				if (ImGui::Button("align to target"))
+				{
+					m_subSelection = m_alignToTarget;
+				}
+			}
+			else if (m_subSelection == m_alignToTarget)
+			{
+				if (ImGui::Button("pick to target"))
+				{
+					m_subSelection = m_none;
+
+					ndMatrix selectionMatrix(m_currentSelection->CalculateGlobalMatrix());
+					ndMatrix targetMatrix(m_currentSubSelection->CalculateGlobalMatrix());
+					ndVector dir(targetMatrix.m_posit - selectionMatrix.m_posit);
+					ndMatrix alignMatrix(ndGramSchmidtMatrix(dir));
+					ndMatrix localRotation(alignMatrix * selectionMatrix.OrthoInverse() * m_currentSelection->GetMatrix());
+					localRotation.m_posit = m_currentSelection->GetMatrix().m_posit;
+					
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+					ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
+					ndAssert(entNode);
+					bool savedState = m_transformPivotOnly;
+					m_transformPivotOnly = true;
+					ApplyNodeTransform(localRotation, entNode);
+					m_transformPivotOnly = savedState;
+					m_currentSubSelection = ndWeakPtr<ndMesh>(nullptr);
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				}
+			}
 		}
 
 		// show geometry matrix
@@ -378,28 +410,6 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				{
 					if (strcmp(modifier->ClassName(), ndMeshTransformModifierUserDefined::StaticClassName()) != 0)
 					{
-						if (ImGui::Button("align to target"))
-						{
-							if (m_currentSubSelection)
-							{
-								ndMatrix matrix(m_currentSelection->CalculateGlobalMatrix());
-								ndMatrix targetMatrix(m_currentSubSelection->CalculateGlobalMatrix());
-								ndVector dir(targetMatrix.m_posit - matrix.m_posit);
-								ndMatrix alignMatrix(ndGramSchmidtMatrix(dir));
-								ndMatrix localRotation(alignMatrix * matrix.OrthoInverse() * m_currentSelection->GetMatrix());
-								localRotation.m_posit = m_currentSelection->GetMatrix().m_posit;
-
-								m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
-								ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
-								ndAssert(entNode);
-								bool savedState = m_transformPivotOnly;
-								m_transformPivotOnly = true;
-								ApplyNodeTransform(localRotation, entNode);
-								m_transformPivotOnly = savedState;
-								m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
-							}
-						}
-
 						if (ImGui::Button("exit select target"))
 						{
 							if (modifier->m_target)

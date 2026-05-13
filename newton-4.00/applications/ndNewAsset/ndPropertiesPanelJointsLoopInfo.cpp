@@ -508,7 +508,7 @@ void ndAssetEditor::EditHingeLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 		if (ImGui::InputFloat("min limit", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-			joint->m_axis.m_minLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
+			joint->m_axis.m_minLimit = ndClamp(value, ndReal(-D_LCP_MAX_VALUE), ndReal(0.0f));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
 		value = ndReal(joint->m_axis.m_maxLimit);
@@ -598,7 +598,7 @@ void ndAssetEditor::EditSliderLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 		if (ImGui::InputFloat("min limit", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-			joint->m_axis.m_minLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
+			joint->m_axis.m_minLimit = ndClamp(value, ndReal(-D_LCP_MAX_VALUE), ndReal(0.0f));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
 		value = ndReal(joint->m_axis.m_maxLimit);
@@ -708,7 +708,7 @@ void ndAssetEditor::EditRollerLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 			if (ImGui::InputFloat("min limit", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-				joint->m_linearAxis.m_minLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
+				joint->m_linearAxis.m_minLimit = ndClamp(value, ndReal(-D_LCP_MAX_VALUE), ndReal(0.0f));
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			}
 			value = ndReal(joint->m_linearAxis.m_maxLimit);
@@ -855,7 +855,7 @@ void ndAssetEditor::EditCylinderLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoin
 			if (ImGui::InputFloat("min limit", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-				joint->m_linearAxis.m_minLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
+				joint->m_linearAxis.m_minLimit = ndClamp(value, ndReal(-D_LCP_MAX_VALUE), ndReal(0.0f));
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			}
 			value = ndReal(joint->m_linearAxis.m_maxLimit);
@@ -1002,7 +1002,7 @@ void ndAssetEditor::EditDoubleHingeLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJ
 			if (ImGui::InputFloat("min limit", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-				joint->m_axis0.m_minLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
+				joint->m_axis0.m_minLimit = ndClamp(value, ndReal(-D_LCP_MAX_VALUE), ndReal(0.0f));
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			}
 			value = ndReal(joint->m_axis0.m_maxLimit);
