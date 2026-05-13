@@ -289,6 +289,11 @@ void ndBasicStacks (ndDemoEntityManager* const scene)
 	origin.m_z -= 10.0f;
 	BuildCapsuleStack(scene, 10.0f, origin, ndVector(0.25f, 0.25f, 2.0f, 0.0f), 20);
 
+	ndMatrix matrix(ndGetIdentityMatrix());
+	matrix.m_posit = origin;
+	matrix.m_posit.m_z -= 10.0f;
+	AddLumberYard(scene, matrix, 10.0f, 10);
+
 	origin = ndVector::m_wOne;
 	origin.m_x -= 3.0f;
 	origin.m_y += 5.0f;

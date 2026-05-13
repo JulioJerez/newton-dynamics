@@ -453,21 +453,21 @@ void ndAssetEditor::EditHingeLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 	ndMeshJointHinge* const joint = (ndMeshJointHinge*)*loopJoint->m_joint;
 
 	ImGui::SeparatorText("actuator params");
-	ndReal value = joint->m_axis.m_springK;
+	ndReal value = ndReal(joint->m_axis.m_springK);
 	if (ImGui::InputFloat("spring const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		joint->m_axis.m_springK = ndMax(value, ndReal(0.0f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
-	value = joint->m_axis.m_damperC;
+	value = ndReal(joint->m_axis.m_damperC);
 	if (ImGui::InputFloat("damper const##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		joint->m_axis.m_damperC = ndMax(value, ndReal(0.0f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
-	value = joint->m_axis.m_springDamperRegularizer;
+	value = ndReal(joint->m_axis.m_springDamperRegularizer);
 	if (ImGui::InputFloat("regularizer", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -504,14 +504,14 @@ void ndAssetEditor::EditHingeLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 
 	if (joint->m_axis.m_limitState)
 	{
-		value = joint->m_axis.m_minLimit;
+		value = ndReal(joint->m_axis.m_minLimit);
 		if (ImGui::InputFloat("min limit", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			joint->m_axis.m_minLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-		value = joint->m_axis.m_maxLimit;
+		value = ndReal(joint->m_axis.m_maxLimit);
 		if (ImGui::InputFloat("max limit", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -527,7 +527,7 @@ void ndAssetEditor::EditDifferentialAxleLoopJoint(ndSharedPtr<ndMeshLoopJoint>& 
 
 	ndMeshJointDifferentialAxle* const joint = (ndMeshJointDifferentialAxle*)*loopJoint->m_joint;
 
-	ndReal value = joint->m_gearRatio;
+	ndReal value = ndReal(joint->m_gearRatio);
 	if (ImGui::InputFloat("gear ratio", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -543,21 +543,21 @@ void ndAssetEditor::EditSliderLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 	ndMeshJointSlider* const joint = (ndMeshJointSlider*)*loopJoint->m_joint;
 
 	ImGui::SeparatorText("actuator params");
-	ndReal value = joint->m_axis.m_springK;
+	ndReal value = ndReal(joint->m_axis.m_springK);
 	if (ImGui::InputFloat("spring const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		joint->m_axis.m_springK = ndMax(value, ndReal(0.0f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
-	value = joint->m_axis.m_damperC;
+	value = ndReal(joint->m_axis.m_damperC);
 	if (ImGui::InputFloat("damper const##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		joint->m_axis.m_damperC = ndMax(value, ndReal(0.0f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
-	value = joint->m_axis.m_springDamperRegularizer;
+	value = ndReal(joint->m_axis.m_springDamperRegularizer);
 	if (ImGui::InputFloat("regularizer", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -594,14 +594,14 @@ void ndAssetEditor::EditSliderLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 
 	if (joint->m_axis.m_limitState)
 	{
-		value = joint->m_axis.m_minLimit;
+		value = ndReal(joint->m_axis.m_minLimit);
 		if (ImGui::InputFloat("min limit", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			joint->m_axis.m_minLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-		value = joint->m_axis.m_maxLimit;
+		value = ndReal(joint->m_axis.m_maxLimit);
 		if (ImGui::InputFloat("max limit", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -653,21 +653,21 @@ void ndAssetEditor::EditRollerLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 
 	{
 		ImGui::SeparatorText("linear actuator params");
-		ndReal value = joint->m_linearAxis.m_springK;
+		ndReal value = ndReal(joint->m_linearAxis.m_springK);
 		if (ImGui::InputFloat("spring const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			joint->m_linearAxis.m_springK = ndMax(value, ndReal(0.0f));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-		value = joint->m_linearAxis.m_damperC;
+		value = ndReal(joint->m_linearAxis.m_damperC);
 		if (ImGui::InputFloat("damper const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			joint->m_linearAxis.m_damperC = ndMax(value, ndReal(0.0f));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-		value = joint->m_linearAxis.m_springDamperRegularizer;
+		value = ndReal(joint->m_linearAxis.m_springDamperRegularizer);
 		if (ImGui::InputFloat("regularizer", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -704,14 +704,14 @@ void ndAssetEditor::EditRollerLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 
 		if (joint->m_linearAxis.m_limitState)
 		{
-			value = joint->m_linearAxis.m_minLimit;
+			value = ndReal(joint->m_linearAxis.m_minLimit);
 			if (ImGui::InputFloat("min limit", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 				joint->m_linearAxis.m_minLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			}
-			value = joint->m_linearAxis.m_maxLimit;
+			value = ndReal(joint->m_linearAxis.m_maxLimit);
 			if (ImGui::InputFloat("max limit", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -723,21 +723,21 @@ void ndAssetEditor::EditRollerLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 
 	{
 		ImGui::SeparatorText("angular actuator params");
-		ndReal value = joint->m_angularAxis.m_springK;
+		ndReal value = ndReal(joint->m_angularAxis.m_springK);
 		if (ImGui::InputFloat("spring const##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			joint->m_angularAxis.m_springK = ndMax(value, ndReal(0.0f));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-		value = joint->m_angularAxis.m_damperC;
+		value = ndReal(joint->m_angularAxis.m_damperC);
 		if (ImGui::InputFloat("damper const##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			joint->m_angularAxis.m_damperC = ndMax(value, ndReal(0.0f));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-		value = joint->m_angularAxis.m_springDamperRegularizer;
+		value = ndReal(joint->m_angularAxis.m_springDamperRegularizer);
 		if (ImGui::InputFloat("regularizer##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -774,14 +774,14 @@ void ndAssetEditor::EditRollerLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 
 		if (joint->m_angularAxis.m_limitState)
 		{
-			value = joint->m_angularAxis.m_minLimit;
+			value = ndReal(joint->m_angularAxis.m_minLimit);
 			if (ImGui::InputFloat("min limit##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 				joint->m_angularAxis.m_minLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			}
-			value = joint->m_angularAxis.m_maxLimit;
+			value = ndReal(joint->m_angularAxis.m_maxLimit);
 			if (ImGui::InputFloat("max limit##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -800,21 +800,21 @@ void ndAssetEditor::EditCylinderLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoin
 
 	{
 		ImGui::SeparatorText("linear actuator params");
-		ndReal value = joint->m_linearAxis.m_springK;
+		ndReal value = ndReal(joint->m_linearAxis.m_springK);
 		if (ImGui::InputFloat("spring const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			joint->m_linearAxis.m_springK = ndMax(value, ndReal(0.0f));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-		value = joint->m_linearAxis.m_damperC;
+		value = ndReal(joint->m_linearAxis.m_damperC);
 		if (ImGui::InputFloat("damper const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			joint->m_linearAxis.m_damperC = ndMax(value, ndReal(0.0f));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-		value = joint->m_linearAxis.m_springDamperRegularizer;
+		value = ndReal(joint->m_linearAxis.m_springDamperRegularizer);
 		if (ImGui::InputFloat("regularizer", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -851,14 +851,14 @@ void ndAssetEditor::EditCylinderLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoin
 
 		if (joint->m_linearAxis.m_limitState)
 		{
-			value = joint->m_linearAxis.m_minLimit;
+			value = ndReal(joint->m_linearAxis.m_minLimit);
 			if (ImGui::InputFloat("min limit", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 				joint->m_linearAxis.m_minLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			}
-			value = joint->m_linearAxis.m_maxLimit;
+			value = ndReal(joint->m_linearAxis.m_maxLimit);
 			if (ImGui::InputFloat("max limit", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -870,21 +870,21 @@ void ndAssetEditor::EditCylinderLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoin
 
 	{
 		ImGui::SeparatorText("angular actuator params");
-		ndReal value = joint->m_angularAxis.m_springK;
+		ndReal value = ndReal(joint->m_angularAxis.m_springK);
 		if (ImGui::InputFloat("spring const##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			joint->m_angularAxis.m_springK = ndMax(value, ndReal(0.0f));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-		value = joint->m_angularAxis.m_damperC;
+		value = ndReal(joint->m_angularAxis.m_damperC);
 		if (ImGui::InputFloat("damper const##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			joint->m_angularAxis.m_damperC = ndMax(value, ndReal(0.0f));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-		value = joint->m_angularAxis.m_springDamperRegularizer;
+		value = ndReal(joint->m_angularAxis.m_springDamperRegularizer);
 		if (ImGui::InputFloat("regularizer##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -921,14 +921,14 @@ void ndAssetEditor::EditCylinderLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoin
 
 		if (joint->m_angularAxis.m_limitState)
 		{
-			value = joint->m_angularAxis.m_minLimit;
+			value = ndReal(joint->m_angularAxis.m_minLimit);
 			if (ImGui::InputFloat("min limit##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 				joint->m_angularAxis.m_minLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			}
-			value = joint->m_angularAxis.m_maxLimit;
+			value = ndReal(joint->m_angularAxis.m_maxLimit);
 			if (ImGui::InputFloat("max limit##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -947,21 +947,21 @@ void ndAssetEditor::EditDoubleHingeLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJ
 
 	{
 		ImGui::SeparatorText("actuator0 params");
-		ndReal value = joint->m_axis0.m_springK;
+		ndReal value = ndReal(joint->m_axis0.m_springK);
 		if (ImGui::InputFloat("spring const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			joint->m_axis0.m_springK = ndMax(value, ndReal(0.0f));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-		value = joint->m_axis0.m_damperC;
+		value = ndReal(joint->m_axis0.m_damperC);
 		if (ImGui::InputFloat("damper const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			joint->m_axis0.m_damperC = ndMax(value, ndReal(0.0f));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-		value = joint->m_axis0.m_springDamperRegularizer;
+		value = ndReal(joint->m_axis0.m_springDamperRegularizer);
 		if (ImGui::InputFloat("regularizer", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -998,14 +998,14 @@ void ndAssetEditor::EditDoubleHingeLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJ
 
 		if (joint->m_axis0.m_limitState)
 		{
-			value = joint->m_axis0.m_minLimit;
+			value = ndReal(joint->m_axis0.m_minLimit);
 			if (ImGui::InputFloat("min limit", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 				joint->m_axis0.m_minLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			}
-			value = joint->m_axis0.m_maxLimit;
+			value = ndReal(joint->m_axis0.m_maxLimit);
 			if (ImGui::InputFloat("max limit", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1017,21 +1017,21 @@ void ndAssetEditor::EditDoubleHingeLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJ
 
 	{
 		ImGui::SeparatorText("angular actuator params");
-		ndReal value = joint->m_axis1.m_springK;
+		ndReal value = ndReal(joint->m_axis1.m_springK);
 		if (ImGui::InputFloat("spring const##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			joint->m_axis1.m_springK = ndMax(value, ndReal(0.0f));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-		value = joint->m_axis1.m_damperC;
+		value = ndReal(joint->m_axis1.m_damperC);
 		if (ImGui::InputFloat("damper const##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			joint->m_axis1.m_damperC = ndMax(value, ndReal(0.0f));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-		value = joint->m_axis1.m_springDamperRegularizer;
+		value = ndReal(joint->m_axis1.m_springDamperRegularizer);
 		if (ImGui::InputFloat("regularizer##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1068,14 +1068,14 @@ void ndAssetEditor::EditDoubleHingeLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJ
 
 		if (joint->m_axis1.m_limitState)
 		{
-			value = joint->m_axis1.m_minLimit;
+			value = ndReal(joint->m_axis1.m_minLimit);
 			if (ImGui::InputFloat("min limit##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 				joint->m_axis1.m_minLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			}
-			value = joint->m_axis1.m_maxLimit;
+			value = ndReal(joint->m_axis1.m_maxLimit);
 			if (ImGui::InputFloat("max limit##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1093,21 +1093,21 @@ void ndAssetEditor::EditWheelLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 	ndMeshJointWheel* const joint = (ndMeshJointWheel*)*loopJoint->m_joint;
 
 	ImGui::SeparatorText("actuator params");
-	ndReal value = joint->m_desc->m_springK;
+	ndReal value = ndReal(joint->m_desc->m_springK);
 	if (ImGui::InputFloat("spring const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		joint->m_desc->m_springK = ndMax(value, ndReal(0.0f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
-	value = joint->m_desc->m_damperC;
+	value = ndReal(joint->m_desc->m_damperC);
 	if (ImGui::InputFloat("damper const##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		joint->m_desc->m_damperC = ndMax(value, ndReal(0.0f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
-	value = joint->m_desc->m_regularizer;
+	value = ndReal(joint->m_desc->m_regularizer);
 	if (ImGui::InputFloat("regularizer", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1115,14 +1115,14 @@ void ndAssetEditor::EditWheelLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
 
-	value = joint->m_desc->m_upperStop;
+	value = ndReal(joint->m_desc->m_upperStop);
 	if (ImGui::InputFloat("upper stop", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		joint->m_desc->m_upperStop = ndClamp(value, ndReal(0.0f), ndReal(10.0f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
-	value = joint->m_desc->m_lowerStop;
+	value = ndReal(joint->m_desc->m_lowerStop);
 	if (ImGui::InputFloat("lower stop", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1130,7 +1130,7 @@ void ndAssetEditor::EditWheelLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
 
-	value = joint->m_desc->m_steeringAngle;
+	value = ndReal(joint->m_desc->m_steeringAngle);
 	if (ImGui::InputFloat("steering angle", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1138,7 +1138,7 @@ void ndAssetEditor::EditWheelLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
 
-	value = joint->m_desc->m_brakeTorque;
+	value = ndReal(joint->m_desc->m_brakeTorque);
 	if (ImGui::InputFloat("brake torque", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1146,7 +1146,7 @@ void ndAssetEditor::EditWheelLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
 
-	value = joint->m_desc->m_handBrakeTorque;
+	value = ndReal(joint->m_desc->m_handBrakeTorque);
 	if (ImGui::InputFloat("hand brake torque", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1162,21 +1162,21 @@ void ndAssetEditor::EditSphericalLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoi
 	ndMeshJointSpherical* const joint = (ndMeshJointSpherical*)*loopJoint->m_joint;
 
 	ImGui::SeparatorText("actuator params");
-	ndReal value = joint->m_axis.m_springK;
+	ndReal value = ndReal(joint->m_axis.m_springK);
 	if (ImGui::InputFloat("spring const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		joint->m_axis.m_springK = ndMax(value, ndReal(0.0f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
-	value = joint->m_axis.m_damperC;
+	value = ndReal(joint->m_axis.m_damperC);
 	if (ImGui::InputFloat("damper const##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		joint->m_axis.m_damperC = ndMax(value, ndReal(0.0f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
-	value = joint->m_axis.m_springDamperRegularizer;
+	value = ndReal(joint->m_axis.m_springDamperRegularizer);
 	if (ImGui::InputFloat("regularizer", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1211,14 +1211,14 @@ void ndAssetEditor::EditSphericalLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoi
 		ImGui::EndCombo();
 	}
 
-	value = joint->m_axis.m_maxLimit;
+	value = ndReal(joint->m_axis.m_maxLimit);
 	if (ImGui::InputFloat("max twist", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		joint->m_axis.m_maxLimit = ndClamp(value, ndReal(0.0f), ndReal(180.0f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
-	value = joint->m_axis.m_minLimit;
+	value = ndReal(joint->m_axis.m_minLimit);
 	if (ImGui::InputFloat("min twist", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1252,7 +1252,7 @@ void ndAssetEditor::EditSphericalLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoi
 		ImGui::EndCombo();
 	}
 
-	value = joint->m_maxConeAngle;
+	value = ndReal(joint->m_maxConeAngle);
 	if (ImGui::InputFloat("cone angle", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1267,7 +1267,7 @@ void ndAssetEditor::EditGearLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 
 	ndMeshJointGear* const joint = (ndMeshJointGear*)*loopJoint->m_joint;
 
-	ndReal value = joint->m_ratio;
+	ndReal value = ndReal(joint->m_ratio);
 	if (ImGui::InputFloat("gear ratio", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1282,7 +1282,7 @@ void ndAssetEditor::EditFix6dofLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint
 
 	ndMeshJointFix6dof* const joint = (ndMeshJointFix6dof*)*loopJoint->m_joint;
 
-	ndReal value = joint->m_softness;
+	ndReal value = ndReal(joint->m_softness);
 	if (ImGui::InputFloat("softness", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1290,7 +1290,7 @@ void ndAssetEditor::EditFix6dofLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
 
-	value = joint->m_maxForce;
+	value = ndReal(joint->m_maxForce);
 	if (ImGui::InputFloat("max force", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1298,7 +1298,7 @@ void ndAssetEditor::EditFix6dofLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
 
-	value = joint->m_maxTorque;
+	value = ndReal(joint->m_maxTorque);
 	if (ImGui::InputFloat("max torque", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1315,28 +1315,28 @@ void ndAssetEditor::EditSwivelPositionEffectorLoopJoint(ndSharedPtr<ndMeshLoopJo
 
 	ImGui::SeparatorText("linear actuator");
 	{
-		ndReal value = joint->m_linearSpring;
+		ndReal value = ndReal(joint->m_linearSpring);
 		if (ImGui::InputFloat("spring const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			joint->m_linearSpring = ndMax(value, ndReal(0.0f));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-		value = joint->m_linearDamper;
+		value = ndReal(joint->m_linearDamper);
 		if (ImGui::InputFloat("damper const##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			joint->m_linearDamper = ndMax(value, ndReal(0.0f));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-		value = joint->m_linearRegularizer;
+		value = ndReal(joint->m_linearRegularizer);
 		if (ImGui::InputFloat("regularizer", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			joint->m_linearRegularizer = ndMax(value, ndReal(0.0f));
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
-		value = joint->m_linearMaxForce;
+		value = ndReal(joint->m_linearMaxForce);
 		if (ImGui::InputFloat("max force", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1378,7 +1378,7 @@ void ndAssetEditor::EditSwivelPositionEffectorLoopJoint(ndSharedPtr<ndMeshLoopJo
 
 	ImGui::SeparatorText("work space constraint");
 	{
-		ndReal value = joint->m_minWorkSpaceRadio;
+		ndReal value = ndReal(joint->m_minWorkSpaceRadio);
 		if (ImGui::InputFloat("min radios", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1386,7 +1386,7 @@ void ndAssetEditor::EditSwivelPositionEffectorLoopJoint(ndSharedPtr<ndMeshLoopJo
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 		}
 
-		value = joint->m_maxWorkSpaceRadio;
+		value = ndReal(joint->m_maxWorkSpaceRadio);
 		if (ImGui::InputFloat("max radios", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -1427,28 +1427,28 @@ void ndAssetEditor::EditSwivelPositionEffectorLoopJoint(ndSharedPtr<ndMeshLoopJo
 
 		if (joint->m_enableSwivelControl)
 		{
-			ndReal value = joint->m_angularSpring;
+			ndReal value = ndReal(joint->m_angularSpring);
 			if (ImGui::InputFloat("spring const##1", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 				joint->m_angularSpring = ndMax(value, ndReal(0.0f));
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			}
-			value = joint->m_angularDamper;
+			value = ndReal(joint->m_angularDamper);
 			if (ImGui::InputFloat("damper const##1", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 				joint->m_angularSpring = ndMax(value, ndReal(0.0f));
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			}
-			value = joint->m_angularRegularizer;
+			value = ndReal(joint->m_angularRegularizer);
 			if (ImGui::InputFloat("regularizer#1", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 				joint->m_angularRegularizer = ndMax(value, ndReal(0.0f));
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			}
-			value = joint->m_angularMaxTorque;
+			value = ndReal(joint->m_angularMaxTorque);
 			if (ImGui::InputFloat("max torque", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
