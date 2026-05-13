@@ -136,12 +136,14 @@ namespace ndExcavator
 				if ((mouseY - m_mouseY) > ndFloat32(0.001f))
 				{
 					m_bucketJoint->GetBody0()->SetSleepState(false);
-					m_bucketJoint->SetTargetAngle(m_bucketJoint->GetTargetAngle() + bucketAngleStep);
+					ndFloat32 angle = ndMin(m_bucketJoint->GetTargetAngle() + bucketAngleStep, ndFloat32(130.0f) * ndDegreeToRad);
+					m_bucketJoint->SetTargetAngle(angle);
 				}
 				else if ((mouseY - m_mouseY) < ndFloat32(-0.001f))
 				{
 					m_bucketJoint->GetBody0()->SetSleepState(false);
-					m_bucketJoint->SetTargetAngle(m_bucketJoint->GetTargetAngle() - bucketAngleStep);
+					ndFloat32 angle = ndMax (m_bucketJoint->GetTargetAngle() - bucketAngleStep, ndFloat32 (-80.0f) * ndDegreeToRad);
+					m_bucketJoint->SetTargetAngle(angle);
 				}
 			}
 		}
