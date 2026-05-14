@@ -125,11 +125,15 @@ void ndJointHinge::DebugJoint(ndConstraintDebugCallback& debugCallback) const
 	ndMatrix matrix1;
 	CalculateGlobalMatrix(matrix0, matrix1);
 
-	debugCallback.DrawFrame(matrix0);
-	debugCallback.DrawFrame(matrix1, 0.5f);
-
+	debugCallback.DrawFrame(matrix0, ndFloat32(0.5f));
+	debugCallback.DrawFrame(matrix1);
 	if (m_axis.m_limitState)
 	{
+		ndVector arrowColor(ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(1.0f));
+		ndMatrix arrowMatrix(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * matrix0);
+		arrowMatrix.m_posit += arrowMatrix.RotateVector(ndVector(debugCallback.GetScale(), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f)));
+		debugCallback.DrawArrow(arrowMatrix, arrowColor, ndFloat32(0.125f));
+
 		const ndInt32 subdiv = 8;
 		const ndFloat32 radius = debugCallback.m_debugScale * ndFloat32(0.8f);
 		ndVector arch[subdiv + 1];
