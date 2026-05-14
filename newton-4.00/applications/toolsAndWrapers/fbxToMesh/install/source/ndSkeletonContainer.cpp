@@ -573,6 +573,7 @@ void ndSkeletonContainer::AddCloseLoopJoint(ndConstraint* const joint)
 	{
 		m_transientLoopingJoints.PushBack(joint->GetAsBilateral());
 	}
+	//ndTrace (("%d %d\n", m_transientLoopingContacts.GetCount(), m_transientLoopingJoints.GetCount()))
 }
 
 void ndSkeletonContainer::ClearCloseLoopJoints()
@@ -1239,8 +1240,8 @@ void ndSkeletonContainer::RegularizeLcp() const
 	ndFloat32* const matrix = &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize];
 	if (!ndTestPSDmatrix(size, m_auxiliaryRowCount, matrix))
 	{
-		ndFloat32* const regulatiser = ndAlloca(ndFloat32, size);
-		ndMemSet(regulatiser, ndFloat32(1.01f), size);
+		ndFloat32* const regularizer = ndAlloca(ndFloat32, size);
+		ndMemSet(regularizer, ndFloat32(1.01f), size);
 		ndInt32 step = m_auxiliaryRowCount + 1;
 		ndFloat32 reg = ndFloat32(1.125f);
 		do
@@ -1312,15 +1313,21 @@ void ndSkeletonContainer::AddExtraContacts()
 		}
 	}
 
-	ndInt32 numberOfLayers = 5;
-	for (ndInt32 j = numberOfLayers - 1; j >= 0; --j)
+	ndInt32 extraRows = 0;
+	for (ndInt32 i = ndInt32(m_transientLoopingContacts.GetCount()) - 1; i >= 0; --i)
+	{
+		extraRows += m_transientLoopingContacts[i]->GetRowsCount();
+	}
+	const ndInt32 numberOfLayers = 5;
+	const ndInt32 maxExtraRows = 300;
+	for (ndInt32 j = numberOfLayers - 1; (extraRows < maxExtraRows) && j >= 0; --j)
 	{
 		ndFixSizeArray<ndBodyKinematic*, 1024> layer;
 		for (ndInt32 i = queue.GetCount() - 1; i >= 0; --i)
 		{
 			layer.PushBack(queue.Pop());
 		}
-		for (ndInt32 i = layer.GetCount() - 1; i >= 0; --i)
+		for (ndInt32 i = layer.GetCount() - 1; (extraRows < maxExtraRows) && (i >= 0); --i)
 		{
 			ndBodyKinematic* const body = layer.Pop();
 			ndAssert(!body->m_equilibrium);
@@ -1332,6 +1339,7 @@ void ndSkeletonContainer::AddExtraContacts()
 				{
 					contact->m_skeletonExtraContact = 1;
 					AddCloseLoopJoint(contact);
+					extraRows += contact->GetRowsCount();
 					ndBodyKinematic* const child = (contact->GetBody0() == body) ? contact->GetBody1() : contact->GetBody0();
 					if (child->GetInvMass() > ndFloat32(0.0f))
 					{
