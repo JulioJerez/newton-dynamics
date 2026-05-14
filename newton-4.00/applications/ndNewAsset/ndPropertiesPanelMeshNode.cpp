@@ -137,6 +137,36 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 		ImGui::Checkbox("override transform", &m_showTransformValues);
 		ImGui::Checkbox("transform pivot only", &m_transformPivotOnly);
 
+		if (ImGui::Button("add node"))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+
+			ndSharedPtr<ndMesh> childMesh(new ndMesh());
+			ndInt32 i = 1;
+			ndString name("unnamed");
+			while (m_mesh->FindByName(name))
+			{
+				name += "_";
+				name += i;
+				i++;
+			}
+			childMesh->SetName(name);
+			m_currentSelection->AddChild(childMesh);
+
+			ndSharedPtr<ndRenderSceneNode> childSceneNode(new ndRenderSceneNode(ndGetIdentityMatrix()));
+			childSceneNode->m_name = name;
+			ndRenderSceneNode* const parentSceneNode = m_entity->FindByName(m_currentSelection->GetName());
+			parentSceneNode->AddChild(childSceneNode);
+
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+		}
+
+		if (ImGui::Button("delete node"))
+		{
+			ndTrace(("xxxx1\n"));
+		}
+
+
 		// show node matrix
 		{
 			ndReal position[3];
