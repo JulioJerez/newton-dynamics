@@ -738,13 +738,17 @@ ndInt32 ndString::Distance(const ndString& other) const
 	return currRow[n];
 }
 
-
 ndString ndGetPath(const ndString& fullPathName)
 {
 	const char* ptr = strrchr(fullPathName.GetStr(), '/');
 	if (!ptr)
 	{
 		ptr = strrchr(fullPathName.GetStr(), '\\');
+	}
+	const char* const dummy = "/";
+	if (!ptr)
+	{
+		ptr = dummy;
 	}
 	return ndString(fullPathName.GetStr(), ndInt32(fullPathName.Size() - strlen(ptr + 1)));
 }
