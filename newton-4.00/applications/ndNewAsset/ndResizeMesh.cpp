@@ -110,9 +110,9 @@ void ndResizeMesh::Execute()
 	ndVector boxSize(maxBox - minBox);
 
 	ndReal size[3];
-	size[0] = boxSize.m_x;
-	size[1] = boxSize.m_y;
-	size[2] = boxSize.m_z;
+	size[0] = ndReal(boxSize.m_x);
+	size[1] = ndReal(boxSize.m_y);
+	size[2] = ndReal(boxSize.m_z);
 	ImGui::InputFloat3("size##4", size, "%.3f", ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_EnterReturnsTrue);
 
 	if (ImGui::InputFloat("apply scale", &m_scale, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))

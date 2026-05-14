@@ -435,21 +435,25 @@ void ndDebugDisplayRenderPass::RenderSelectedNode()
 
 	RenderNode(*m_manager->m_currentSelection, m_selectedColor);
 
-	//if (m_manager->m_subSelection == ndAssetEditor::m_transformModifier)
+	ndSharedPtr<ndMeshTransformModifier> modifier(m_manager->m_currentSelection->GetModifier());
+	if (modifier)
 	{
-		ndSharedPtr<ndMeshTransformModifier> modifier(m_manager->m_currentSelection->GetModifier());
-		if (modifier)
+		if (modifier->m_target)
 		{
-			if (modifier->m_target)
-			{
-				RenderNode(*modifier->m_target, m_collidingPairColor1);
-			}
+			RenderNode(*modifier->m_target, m_collidingPairColor1);
+		}
 
-			ndFixSizeArray<const ndMesh*, 256> subNodes(modifier->GetAffectedNodes());
-			for (ndInt32 i = 0; i < subNodes.GetCount(); ++i)
-			{
-				RenderNode(subNodes[i], m_collidingPairColor1);
-			}
+		ndFixSizeArray<const ndMesh*, 256> subNodes(modifier->GetAffectedNodes());
+		for (ndInt32 i = 0; i < subNodes.GetCount(); ++i)
+		{
+			RenderNode(subNodes[i], m_collidingPairColor1);
+		}
+	}
+	if (m_manager->m_subSelection == ndAssetEditor::m_alignToTarget)
+	{
+		if (m_manager->m_currentSubSelection)
+		{
+			RenderNode(*m_manager->m_currentSubSelection, m_collidingPairColor1);
 		}
 	}
 }
@@ -757,7 +761,6 @@ void ndDebugDisplayRenderPass::RenderOptions()
 	};
 	RenderOptions(*m_manager->m_currentSelection);
 
-	//if (m_manager->m_subSelection == ndAssetEditor::m_transformModifier)
 	ndSharedPtr<ndMeshTransformModifier> modifier(m_manager->m_currentSelection->GetModifier());
 	if (modifier)
 	{
@@ -770,6 +773,14 @@ void ndDebugDisplayRenderPass::RenderOptions()
 		for (ndInt32 i = 0; i < subNodes.GetCount(); ++i)
 		{
 			RenderOptions(subNodes[i]);
+		}
+	}
+
+	if (m_manager->m_subSelection == ndAssetEditor::m_alignToTarget)
+	{
+		if (m_manager->m_currentSubSelection)
+		{
+			RenderOptions(*m_manager->m_currentSubSelection);
 		}
 	}
 }

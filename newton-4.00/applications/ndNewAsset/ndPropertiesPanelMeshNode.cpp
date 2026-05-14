@@ -88,6 +88,13 @@ void ndAssetEditor::ApplyNodeTransform(const ndMatrix& matrix, ndRenderSceneNode
 		entNode->SetPrimitiveMatrix(geoMatrix);
 		m_currentSelection->SetGeometryMatrix(geoMatrix);
 
+		if (m_currentSelection->GetRigidBody())
+		{
+			ndMeshBodyKinematic* const body = (ndMeshBodyKinematic*)*m_currentSelection->GetRigidBody();
+			ndMeshShapeInstance& shapeInstance = body->m_shapeInstance;
+			shapeInstance.m_localMatrix = shapeInstance.m_localMatrix * localMatrix;
+		}
+
 		for (ndList<ndSharedPtr<ndMesh>>::ndNode* childPtr = m_currentSelection->GetChildren().GetFirst(); childPtr; childPtr = childPtr->GetNext())
 		{
 			ndMesh* const child = *childPtr->GetInfo();
@@ -203,6 +210,38 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 					const ndMatrix newMatrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad) * matrix);
 					ApplyNodeTransform(newMatrix, entNode);
 
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				}
+			}
+
+			if (m_subSelection == m_none)
+			{
+				if (ImGui::Button("align to target"))
+				{
+					m_subSelection = m_alignToTarget;
+				}
+			}
+			else if (m_subSelection == m_alignToTarget)
+			{
+				if (ImGui::Button("pick to target"))
+				{
+					m_subSelection = m_none;
+
+					ndMatrix selectionMatrix(m_currentSelection->CalculateGlobalMatrix());
+					ndMatrix targetMatrix(m_currentSubSelection->CalculateGlobalMatrix());
+					ndVector dir(targetMatrix.m_posit - selectionMatrix.m_posit);
+					ndMatrix alignMatrix(ndGramSchmidtMatrix(dir));
+					ndMatrix localRotation(alignMatrix * selectionMatrix.OrthoInverse() * m_currentSelection->GetMatrix());
+					localRotation.m_posit = m_currentSelection->GetMatrix().m_posit;
+					
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+					ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
+					ndAssert(entNode);
+					bool savedState = m_transformPivotOnly;
+					m_transformPivotOnly = true;
+					ApplyNodeTransform(localRotation, entNode);
+					m_transformPivotOnly = savedState;
+					m_currentSubSelection = ndWeakPtr<ndMesh>(nullptr);
 					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				}
 			}
@@ -354,9 +393,12 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				};
 
 				SetDropdownList("none");
-				SetDropdownList(ndMeshTransformModifierUserDefined::StaticClassName());
 				SetDropdownList(ndMeshTransformModifierLookAt::StaticClassName());
-				SetDropdownList(ndMeshTransformModifierTwoLinksIK::StaticClassName());
+				if (m_currentSelection->GetChildren().GetCount())
+				{
+					SetDropdownList(ndMeshTransformModifierTwoLinksIK::StaticClassName());
+				}
+				SetDropdownList(ndMeshTransformModifierUserDefined::StaticClassName());
 
 				ImGui::EndCombo();
 			}
@@ -401,6 +443,20 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 	}
 }
 
+void ndAssetEditor::EditMeshTransformModifierUserDefined()
+{
+	ndMeshTransformModifierUserDefined* const modifier = (ndMeshTransformModifierUserDefined*)*m_currentSelection->GetModifier();
+
+	char constructor[256];
+	snprintf(constructor, sizeof(constructor) - 1, "%s", modifier->m_userConstructor.GetStr());
+	if (ImGui::InputText("constructor", constructor, sizeof(constructor) - 1, ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+		modifier->m_userConstructor = ndString(constructor);
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+	}
+}
+
 void ndAssetEditor::EditMeshTransformModifierTwoLinksIK()
 {
 	ndMeshTransformModifierTwoLinksIK* const modifier = (ndMeshTransformModifierTwoLinksIK*)*m_currentSelection->GetModifier();
@@ -430,19 +486,4 @@ void ndAssetEditor::EditMeshTransformModifierTwoLinksIK()
 
 		ImGui::EndCombo();
 	}
-}
-
-void ndAssetEditor::EditMeshTransformModifierUserDefined()
-{
-	ndMeshTransformModifierUserDefined* const modifier = (ndMeshTransformModifierUserDefined*)*m_currentSelection->GetModifier();
-
-	char constructor[256];
-	snprintf(constructor, sizeof(constructor) - 1, "%s", modifier->m_userConstructor.GetStr());
-	if (ImGui::InputText("constructor", constructor, sizeof(constructor) - 1, ImGuiInputTextFlags_EnterReturnsTrue))
-	{
-		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
-		modifier->m_userConstructor = ndString(constructor);
-		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
-	}
-
 }

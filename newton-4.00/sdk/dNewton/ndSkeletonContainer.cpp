@@ -573,8 +573,7 @@ void ndSkeletonContainer::AddCloseLoopJoint(ndConstraint* const joint)
 	{
 		m_transientLoopingJoints.PushBack(joint->GetAsBilateral());
 	}
-
-	ndTrace (("%d %d\n", m_transientLoopingContacts.GetCount(), m_transientLoopingJoints.GetCount()))
+	//ndTrace (("%d %d\n", m_transientLoopingContacts.GetCount(), m_transientLoopingJoints.GetCount()))
 }
 
 void ndSkeletonContainer::ClearCloseLoopJoints()

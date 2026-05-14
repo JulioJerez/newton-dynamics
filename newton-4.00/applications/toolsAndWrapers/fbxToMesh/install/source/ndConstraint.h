@@ -55,33 +55,12 @@ class ndConstraintDebugCallback: public ndClassAlloc
 	virtual void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32 thickness = ndFloat32(1.0f));
 	virtual void DrawTriangle(const ndVector& p0, const ndVector& p1, const ndVector& p2, const ndVector& color);
 
-	virtual void SetScale(ndFloat32 scale)
-	{
-		m_debugScale = scale;
-	}
+	ndFloat32 GetScale() const;
+	void SetScale(ndFloat32 scale);
 
-	virtual ndFloat32 GetScale() const
-	{
-		return m_debugScale;
-	}
+	D_COLLISION_API void DrawFrame(const ndMatrix& matrix, ndFloat32 intensity = ndFloat32(1.0f));
+	D_COLLISION_API void DrawArrow(const ndMatrix& origin, const ndVector& color, ndFloat32 length);
 
-	virtual void DrawFrame(const ndMatrix& matrix, ndFloat32 intensity = ndFloat32 (1.0f))
-	{
-		ndVector x(matrix.m_posit + matrix.RotateVector(ndVector(m_debugScale, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f))));
-		DrawLine(matrix.m_posit, x, ndVector(intensity, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0f)));
-
-		ndVector y(matrix.m_posit + matrix.RotateVector(ndVector(ndFloat32(0.0f), m_debugScale, ndFloat32(0.0f), ndFloat32(0.0f))));
-		DrawLine(matrix.m_posit, y, ndVector(ndFloat32(0.0f), intensity, ndFloat32(0.0f), ndFloat32(1.0f)));
-
-		ndVector z(matrix.m_posit + matrix.RotateVector(ndVector(ndFloat32(0.0f), ndFloat32(0.0f), m_debugScale, ndFloat32(0.0f))));
-		DrawLine(matrix.m_posit, z, ndVector(ndFloat32(0.0f), ndFloat32(0.0f), intensity, ndFloat32(1.0f)));
-	}
-
-	virtual void DrawArrow(const ndMatrix& matrix, const ndVector& color, ndFloat32 length)
-	{
-		ndVector p1(matrix.m_posit + matrix.RotateVector(ndVector(m_debugScale * length, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f))));
-		DrawLine(matrix.m_posit, p1, color);
-	}
 	ndFloat32 m_debugScale;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
@@ -357,6 +336,16 @@ inline void ndConstraintDebugCallback::DrawLine(const ndVector&, const ndVector&
 
 inline void ndConstraintDebugCallback::DrawTriangle(const ndVector&, const ndVector&, const ndVector&, const ndVector&)
 {
+}
+
+inline void ndConstraintDebugCallback::SetScale(ndFloat32 scale)
+{
+	m_debugScale = scale;
+}
+
+inline ndFloat32 ndConstraintDebugCallback::GetScale() const
+{
+	return m_debugScale;
 }
 
 #endif 

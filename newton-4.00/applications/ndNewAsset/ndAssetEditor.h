@@ -41,6 +41,7 @@ class ndAssetEditor : public ndClassAlloc
 		m_none,
 		m_loopJoint,
 		m_collidingPair,
+		m_alignToTarget,
 		m_transformModifier,
 	};
 
@@ -246,8 +247,6 @@ class ndAssetEditor : public ndClassAlloc
 	ndInt32 m_cameraMode;
 	ndInt32 m_closeLoopIndex;
 	ndInt32 m_collidingPairIndex;
-	
-
 	ndSubSelectionMode m_subSelection;
 	
 	friend class ndUndoRedo;

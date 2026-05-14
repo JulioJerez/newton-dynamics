@@ -136,12 +136,14 @@ namespace ndExcavator
 				if ((mouseY - m_mouseY) > ndFloat32(0.001f))
 				{
 					m_bucketJoint->GetBody0()->SetSleepState(false);
-					m_bucketJoint->SetTargetAngle(m_bucketJoint->GetTargetAngle() + bucketAngleStep);
+					ndFloat32 angle = ndMin(m_bucketJoint->GetTargetAngle() + bucketAngleStep, ndFloat32(130.0f) * ndDegreeToRad);
+					m_bucketJoint->SetTargetAngle(angle);
 				}
 				else if ((mouseY - m_mouseY) < ndFloat32(-0.001f))
 				{
 					m_bucketJoint->GetBody0()->SetSleepState(false);
-					m_bucketJoint->SetTargetAngle(m_bucketJoint->GetTargetAngle() - bucketAngleStep);
+					ndFloat32 angle = ndMax (m_bucketJoint->GetTargetAngle() - bucketAngleStep, ndFloat32 (-80.0f) * ndDegreeToRad);
+					m_bucketJoint->SetTargetAngle(angle);
 				}
 			}
 		}
@@ -523,7 +525,7 @@ void ndComplexModel(ndDemoEntityManager* const scene)
 	{
 		for (ndInt32 j = 0; j < stacks; ++j)
 		{
-			matrix1.m_posit.m_x = 20.0f + ndFloat32(i - stacks / 2) * 12.0f;
+			matrix1.m_posit.m_x = 25.0f + ndFloat32(i - stacks / 2) * 12.0f;
 			matrix1.m_posit.m_z = ndFloat32(j - stacks / 2) * 12.0f;
 			//AddPlanks(scene, matrix1, 10.0f, 4);
 			AddLumberYard(scene, matrix1, 4.0f, 10);

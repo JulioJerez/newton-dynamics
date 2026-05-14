@@ -288,6 +288,12 @@ void ndEditorCameraFlyby::MouseSelection()
 				break;
 			}
 
+			case ndAssetEditor::m_alignToTarget:
+			{
+				m_editor->m_currentSubSelection = ndWeakPtr<ndMesh>(*hitNode);
+				break;
+			}
+
 			case ndAssetEditor::m_none:
 			default:
 			{

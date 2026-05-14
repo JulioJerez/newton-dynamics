@@ -27,6 +27,43 @@
 #include "ndConstraint.h"
 #include "ndBodyKinematic.h"
 
+void ndConstraintDebugCallback::DrawFrame(const ndMatrix& matrix, ndFloat32 intensity)
+{
+	ndVector x(matrix.m_posit + matrix.RotateVector(ndVector(m_debugScale, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f))));
+	DrawLine(matrix.m_posit, x, ndVector(intensity, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0f)));
+
+	ndVector y(matrix.m_posit + matrix.RotateVector(ndVector(ndFloat32(0.0f), m_debugScale, ndFloat32(0.0f), ndFloat32(0.0f))));
+	DrawLine(matrix.m_posit, y, ndVector(ndFloat32(0.0f), intensity, ndFloat32(0.0f), ndFloat32(1.0f)));
+
+	ndVector z(matrix.m_posit + matrix.RotateVector(ndVector(ndFloat32(0.0f), ndFloat32(0.0f), m_debugScale, ndFloat32(0.0f))));
+	DrawLine(matrix.m_posit, z, ndVector(ndFloat32(0.0f), ndFloat32(0.0f), intensity, ndFloat32(1.0f)));
+}
+
+void ndConstraintDebugCallback::DrawArrow(const ndMatrix& origin, const ndVector& color, ndFloat32 length)
+{
+	ndVector height(ndVector::m_wOne);
+	ndVector base(ndVector::m_wOne);
+	base.m_y = ndFloat32(0.5f * length * m_debugScale);
+	height.m_x = ndFloat32(length * m_debugScale);
+
+	ndInt32 segments = 12;
+	ndMatrix matrix(ndGetIdentityMatrix());
+	ndMatrix pitchMatrix(ndPitchMatrix (ndPi * ndFloat32(2.0f) / ndFloat32(segments)));
+
+	height = origin.TransformVector(height);
+	ndVector p0(origin.TransformVector(base));
+	for (ndInt32 i = 0; i <= segments; ++i)
+	{
+		matrix = matrix * pitchMatrix;
+		ndVector p1(origin.TransformVector(matrix.TransformVector(base)));
+		
+		DrawLine(p0, p1, color);
+		DrawLine(p0, height, color);
+
+		p0 = p1;
+	}
+}
+
 void ndForceImpactPair::Clear()
 {
 	m_force = ndFloat32(ndFloat32(0.0f));
@@ -134,16 +171,6 @@ ndUnsigned32 ndConstraint::GetRowsCount() const
 {
 	return m_maxDof;
 }
-
-//ndBodyKinematic* ndConstraint::GetBody0() const
-//{
-//	return m_body0;
-//}
-//
-//ndBodyKinematic* ndConstraint::GetBody1() const
-//{
-//	return m_body1;
-//}
 
 void ndConstraint::DebugJoint(ndConstraintDebugCallback&) const
 {
