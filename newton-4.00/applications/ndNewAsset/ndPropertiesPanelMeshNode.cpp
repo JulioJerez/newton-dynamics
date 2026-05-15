@@ -161,11 +161,25 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 		}
 
+		ImGui::SameLine();
 		if (ImGui::Button("delete node"))
 		{
 			ndTrace(("xxxx1\n"));
 		}
 
+		if (!m_currentSelection->GetRigidBody())
+		{
+			if (ImGui::Button("add body"))
+			{
+				AddRigidBody();
+			}
+
+			ImGui::SameLine();
+			if (ImGui::Button("delete body"))
+			{
+				ndTrace(("xxxx3\n"));
+			}
+		}
 
 		// show node matrix
 		{
@@ -515,5 +529,25 @@ void ndAssetEditor::EditMeshTransformModifierTwoLinksIK()
 		}
 
 		ImGui::EndCombo();
+	}
+}
+
+void ndAssetEditor::AddRigidBody()
+{
+	ndMeshBodyDynamic* const rigidBody = new ndMeshBodyDynamic(*m_currentSelection);
+	rigidBody->m_invMass = ndFloat32(1.0f);
+	rigidBody->m_shapeInstance.m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeNull());
+	
+	m_currentSelection->SetRigidBody(ndSharedPtr<ndMeshBody>(rigidBody));
+	
+	const ndMesh* parentBody = m_currentSelection->GetParent();
+	if (parentBody && !parentBody->GetRigidBody())
+	{
+		parentBody = parentBody->GetParent();
+	}
+	if (parentBody)
+	{
+		ndMeshJointFix6dof* const joint = new ndMeshJointFix6dof(*m_currentSelection);
+		m_currentSelection->SetJoint(ndSharedPtr<ndMeshJoint>(joint));
 	}
 }
