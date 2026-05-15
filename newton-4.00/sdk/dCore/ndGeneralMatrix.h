@@ -145,11 +145,17 @@ bool ndCholeskyFactorization(ndInt32 size, ndInt32 stride, T* const psdMatrix)
 }
 
 template<class T>
+bool ndCholeskyBlockFactorization(ndInt32 size, ndInt32 stride, T* const psdMatrix)
+{
+	return ndCholeskyFactorization(size, stride, psdMatrix);
+}
+
+template<class T>
 bool ndTestPSDmatrix(ndInt32 size, ndInt32 stride, const T* const matrix)
 {
 	ndAssert(size);
 	const ndInt32 maxSize = (512 * 512) / (size * ndInt32(sizeof(T)));
-	auto Cholestky = [size, stride, matrix](T* const copy)
+	auto Cholesky = [size, stride, matrix](T* const copy)
 	{
 		ndInt32 srcRow = 0;
 		ndInt32 dstRow = 0;
@@ -160,18 +166,19 @@ bool ndTestPSDmatrix(ndInt32 size, ndInt32 stride, const T* const matrix)
 			dstRow += size;
 			srcRow += stride;
 		}
-		return ndCholeskyFactorization(size, size, copy);
+		//return ndCholeskyFactorization(size, size, copy);
+		return ndCholeskyBlockFactorization(size, size, copy);
 	};
 	if (size < maxSize)
 	{
 		T* const copy = ndAlloca(T, size * size);
-		return Cholestky(copy);
+		return Cholesky(copy);
 	}
 	else
 	{
 		ndSharedPtr<T> copyPtr (new T[size_t(size * size)]);
 		T* const copy = *copyPtr;
-		return Cholestky(copy);
+		return Cholesky(copy);
 	}
 }
 
