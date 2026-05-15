@@ -1238,7 +1238,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionTree(bool optimize)
 	return shape;
 }
 
-void ndMesh::SetRigidBody(ndSharedPtr<ndMeshBody>& rigidBody)
+void ndMesh::SetRigidBody(const ndSharedPtr<ndMeshBody>& rigidBody)
 {
 	m_rigidBody = rigidBody;
 }

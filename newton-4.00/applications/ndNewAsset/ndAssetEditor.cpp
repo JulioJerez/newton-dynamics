@@ -36,7 +36,7 @@ ndAssetEditor::ndAssetEditor()
 	,m_showCollisionShape(true)
 	,m_showTransformValues(false)
 	,m_toolActive(false)
-	,m_initCamera(false)
+	,m_initCamera(true)
 	,m_raycastBones(true)
 	,m_geometryPivot(false)
 	,m_transformPivotOnly(false)
@@ -592,8 +592,8 @@ void ndAssetEditor::Run()
 					m_mesh->CalculateAabb(matrix, p0, p1);
 					ndVector size(ndVector::m_half * (p1 - p0));
 					ndVector origin(ndVector::m_half * (p1 + p0));
-					ndFloat32 maxSize = ndMax(ndMax(size.m_x, size.m_y), size.m_z);
-					origin.m_x -= maxSize * 4.0f;
+					ndFloat32 maxSize = ndMax (ndMax(ndMax(size.m_x, size.m_y), size.m_z), ndFloat32 (2.0f));
+					origin.m_x -= maxSize * ndFloat32 (4.0f);
 					ndQuaternion rot;
 
 					SetCameraMatrix(rot, origin);

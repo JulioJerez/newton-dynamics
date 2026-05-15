@@ -204,6 +204,8 @@ class ndAssetEditor : public ndClassAlloc
 	void SetModifierSubSelection(const ndMesh* const node);
 
 	void ApplyNodeTransform(const ndMatrix& matrix, ndRenderSceneNode* const entNode);
+
+	void AddRigidBody();
 		
 	ndSharedPtr<ndMesh> m_mesh;
 	ndSharedPtr<ndRender> m_renderer;

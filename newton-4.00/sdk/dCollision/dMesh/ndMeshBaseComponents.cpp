@@ -685,8 +685,6 @@ ndShapeInstance* ndMeshShapeInstance::CreateObject() const
 
 ndMeshBody::ndMeshBody(const ndMesh* const owner)
 	:ndClassAlloc()
-	,m_veloc(ndVector::m_zero)
-	,m_omega(ndVector::m_zero)
 	,m_localCentreOfMass(ndVector::m_wOne)
 	,m_owner(owner)
 {
@@ -695,8 +693,6 @@ ndMeshBody::ndMeshBody(const ndMesh* const owner)
 
 ndMeshBody::ndMeshBody(const ndMeshBody& other)
 	:ndClassAlloc()
-	,m_veloc(other.m_veloc)
-	,m_omega(other.m_omega)
 	,m_localCentreOfMass(other.m_localCentreOfMass)
 	,m_classConstructor(other.m_classConstructor)
 	,m_owner(other.m_owner)
@@ -730,15 +726,11 @@ ndMeshBody::~ndMeshBody()
 
 void ndMeshBody::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	xmlSaveParam(parent, "veloc", m_veloc);
-	xmlSaveParam(parent, "omega", m_omega);
 	xmlSaveParam(parent, "com", m_localCentreOfMass);
 }
 
 void ndMeshBody::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
-	m_veloc = xmlGetVector3(parent, "veloc");
-	m_omega = xmlGetVector3(parent, "omega");
 	m_localCentreOfMass = xmlGetVector3(parent, "com");
 	m_localCentreOfMass.m_w = ndFloat32(1.0f);
 }

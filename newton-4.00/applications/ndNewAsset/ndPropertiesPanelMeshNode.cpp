@@ -137,6 +137,56 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 		ImGui::Checkbox("override transform", &m_showTransformValues);
 		ImGui::Checkbox("transform pivot only", &m_transformPivotOnly);
 
+		if (ImGui::Button("add node"))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+
+			ndSharedPtr<ndMesh> childMesh(new ndMesh());
+			ndInt32 i = 1;
+			ndString name("unnamed");
+			while (m_mesh->FindByName(name))
+			{
+				name += "_";
+				name += i;
+				i++;
+			}
+			childMesh->SetName(name);
+			m_currentSelection->AddChild(childMesh);
+
+			ndSharedPtr<ndRenderSceneNode> childSceneNode(new ndRenderSceneNode(ndGetIdentityMatrix()));
+			childSceneNode->m_name = name;
+			ndRenderSceneNode* const parentSceneNode = m_entity->FindByName(m_currentSelection->GetName());
+			parentSceneNode->AddChild(childSceneNode);
+
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("delete node"))
+		{
+			ndTrace(("xxxx1\n"));
+		}
+
+		if (!m_currentSelection->GetRigidBody())
+		{
+			if (ImGui::Button("add body"))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				AddRigidBody();
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+			}
+		}
+		else
+		{
+			if (ImGui::Button("delete body"))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				m_currentSelection->SetJoint(ndSharedPtr<ndMeshJoint>(nullptr));
+				m_currentSelection->SetRigidBody(ndSharedPtr<ndMeshBody>(nullptr));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+			}
+		}
+
 		// show node matrix
 		{
 			ndReal position[3];
@@ -485,5 +535,25 @@ void ndAssetEditor::EditMeshTransformModifierTwoLinksIK()
 		}
 
 		ImGui::EndCombo();
+	}
+}
+
+void ndAssetEditor::AddRigidBody()
+{
+	ndMeshBodyDynamic* const rigidBody = new ndMeshBodyDynamic(*m_currentSelection);
+	rigidBody->m_invMass = ndFloat32(1.0f);
+	rigidBody->m_shapeInstance.m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeNull());
+	
+	m_currentSelection->SetRigidBody(ndSharedPtr<ndMeshBody>(rigidBody));
+	
+	const ndMesh* parentBody = m_currentSelection->GetParent();
+	if (parentBody && !parentBody->GetRigidBody())
+	{
+		parentBody = parentBody->GetParent();
+	}
+	if (parentBody)
+	{
+		ndMeshJointFix6dof* const joint = new ndMeshJointFix6dof(*m_currentSelection);
+		m_currentSelection->SetJoint(ndSharedPtr<ndMeshJoint>(joint));
 	}
 }

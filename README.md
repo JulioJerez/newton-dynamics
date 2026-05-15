@@ -1,8 +1,8 @@
 ![emscripten logo](https://github.com/JulioJerez/newton-dynamics/blob/dliw/newton-dynamics/newtonLogo/newtonLogo.png)
 
-Newton Dynamics is a realistic, cross-platform rigidbodies physics simulation library. 
-It integrates easily into games and game engines or realtime any interactive simulation application, delivering a balance between top performance along with high accuracy and stability.
-With ongoing development and a permissive license, Newton Dynamics is an excellent choice for a wide range of projects, from scientific simulations to full-scale game engines.
+Newton Dynamics is a realistic, cross-platform rigid body physics simulation library designed for realtime interactive applications and game engines. 
+It offers easy integration, combining high performance with accuracy and stability. 
+Backed by active development and a permissive license, Newton Dynamics is well suited for everything from scientific simulations to large-scale game engine development.
 
 * Links to older repository can be found at: <https://github.com/MADEAPPS/newton-dynamics>
 * Links to **demos**, **tutorial**, **FAQ**, etc: <https://github.com/MADEAPPS/newton-dynamics/wiki>
@@ -18,7 +18,8 @@ Compiling Newton
 Cmake generate varius Visual Studio solutions for: build sdk, demos, wrappers and ulities 
 
 * Newton Core and packages: [sdk/projects/](sdk/projects/)
-* demo sandbox: [applications/demosSandbox/projects/](applications/demosSandbox/projects/)
+* assets tool: [applications/ndNewAsset/](applications/ndNewAsset/)
+* demo sandbox: [applications/ndSandbox/](applications/ndSandbox/)
 
 ## OSX
 Cmake XCode for SDK, 

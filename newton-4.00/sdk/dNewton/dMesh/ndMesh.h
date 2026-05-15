@@ -127,7 +127,7 @@ class ndMesh : public ndClassAlloc
 
 	D_NEWTON_API ndSharedPtr<ndMeshBody>& GetRigidBody();
 	D_NEWTON_API const ndSharedPtr<ndMeshBody>& GetRigidBody() const;
-	D_NEWTON_API void SetRigidBody(ndSharedPtr<ndMeshBody>& rigidBody);
+	D_NEWTON_API void SetRigidBody(const ndSharedPtr<ndMeshBody>& rigidBody);
 
 	D_NEWTON_API ndSharedPtr<ndMeshJoint>& GetJoint();
 	D_NEWTON_API const ndSharedPtr<ndMeshJoint>& GetJoint() const;
