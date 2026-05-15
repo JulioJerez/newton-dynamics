@@ -171,13 +171,19 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 		{
 			if (ImGui::Button("add body"))
 			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				AddRigidBody();
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			}
-
-			ImGui::SameLine();
+		}
+		else
+		{
 			if (ImGui::Button("delete body"))
 			{
-				ndTrace(("xxxx3\n"));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				m_currentSelection->SetJoint(ndSharedPtr<ndMeshJoint>(nullptr));
+				m_currentSelection->SetRigidBody(ndSharedPtr<ndMeshBody>(nullptr));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			}
 		}
 
