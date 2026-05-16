@@ -132,6 +132,8 @@ class ndWorld: public ndClassAlloc
 	D_NEWTON_API virtual void CollisionUpdate();
 	D_NEWTON_API virtual void WorkerUpdate(ndInt32 threadIndex);
 
+	void* GetScratchBuffer(ndInt32 threadIndex, ndInt32 sizeInBytes);
+
 	private:
 	void ThreadFunction();
 	
@@ -147,9 +149,6 @@ class ndWorld: public ndClassAlloc
 	D_NEWTON_API virtual void OnSubStepPostUpdate(ndFloat32 timestep);
 
 	private:
-	//void RemoveBody(ndSharedPtr<ndBody>& body);
-	//void RemoveJoint(ndSharedPtr<ndJointBilateralConstraint>& joint);
-
 	class dgSolverProgressiveSleepEntry
 	{
 		public:
@@ -198,6 +197,7 @@ class ndWorld: public ndClassAlloc
 	ndInt32 m_solverIterations;
 	bool m_inUpdate;
 	bool m_collisionUpdate;
+	ndArray<ndUnsigned8> m_threadLocalBuffers[D_MAX_THREADS_COUNT];
 	
 	friend class ndScene;
 	friend class ndIkSolver;

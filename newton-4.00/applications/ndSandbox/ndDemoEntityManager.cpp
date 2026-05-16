@@ -245,8 +245,10 @@ static void Test0__()
 		x0[i] = ndFloat32(i) + 1.0f;
 		x1[i] = ndFloat32(i) - 1.0f;
 	}
-	ndAssert(ndTestPSDmatrix(6, stride, &A[0][0]));
 
+	ndFixSizeArray<ndFixSizeArray<ndFloat32, 6>, 6> scratch(6);
+	ndAssert(ndTestPSDmatrixNew(6, stride, &A[0][0], &scratch[0][0]));
+		
 	ndMatrixTimeVector<ndFloat32>(A.GetCount(), stride, &A[0][0], &x0[0], &B[0]);
 
 	ndConjugateGradient<ndFloat32> cgd(true);

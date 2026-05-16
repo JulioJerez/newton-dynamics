@@ -697,7 +697,10 @@ ndVector ndBodyPlayerCapsuleImpulseSolver::CalculateImpulse()
 		}
 	}
 
-	ndAssert(ndTestPSDmatrix(m_rowCount, D_PLAYER_MAX_ROWS, &massMatrix[0][0]));
+#if defined(_DEBUG)
+	ndFloat32 scratch[D_PLAYER_MAX_ROWS][D_PLAYER_MAX_ROWS];
+	ndAssert(ndTestPSDmatrixNew(m_rowCount, D_PLAYER_MAX_ROWS, &massMatrix[0][0], &scratch[0][0]));
+#endif
 	for (ndInt32 i = 0; i < m_rowCount; ++i)
 	{
 		ndAssert(m_normalIndex[i] <= 0);

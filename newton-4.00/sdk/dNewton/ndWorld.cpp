@@ -1090,3 +1090,10 @@ void ndWorld::OnAddModel(ndModel* const) const
 void ndWorld::OnRemoveModel(ndModel* const) const
 {
 }
+
+void* ndWorld::GetScratchBuffer(ndInt32 threadIndex, ndInt32 sizeInBytes)
+{
+	ndArray<ndUnsigned8>& buffer = m_threadLocalBuffers[threadIndex];
+	buffer.SetCount(sizeInBytes);
+	return &buffer[0];
+}

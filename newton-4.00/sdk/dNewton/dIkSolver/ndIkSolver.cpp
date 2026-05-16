@@ -257,9 +257,8 @@ bool ndIkSolver::IsSleeping(ndSkeletonContainer* const skeleton) const
 	return skeleton->m_isResting ? true : false;
 }
 
-void ndIkSolver::BuildMassMatrix()
+void ndIkSolver::BuildMassMatrix(ndInt32 threadId)
 {
-
 	m_bodies.SetCount(0);
 	m_contacts.SetCount(0);
 	m_leftHandSide.SetCount(0);
@@ -504,10 +503,10 @@ void ndIkSolver::BuildMassMatrix()
 		GetJacobianDerivatives(contact);
 		BuildJacobianMatrix(contact);
 	}
-	m_skeleton->InitMassMatrix(m_timestep, &m_leftHandSide[0], &m_rightHandSide[0]);
+	m_skeleton->InitMassMatrix(m_timestep, &m_leftHandSide[0], &m_rightHandSide[0], threadId);
 }
 
-void ndIkSolver::SolverBegin(ndSkeletonContainer* const skeleton, ndJointBilateralConstraint* const* joints, ndInt32 jointCount, ndWorld* const world, ndFloat32 timestep)
+void ndIkSolver::SolverBegin(ndSkeletonContainer* const skeleton, ndJointBilateralConstraint* const* joints, ndInt32 jointCount, ndWorld* const world, ndFloat32 timestep, ndInt32 threadId)
 {
 	m_world = ndWeakPtr<ndWorld>(world);
 	m_skeleton = ndWeakPtr<ndSkeletonContainer>(skeleton);
@@ -529,7 +528,7 @@ void ndIkSolver::SolverBegin(ndSkeletonContainer* const skeleton, ndJointBilater
 			joint->SetIkMode(true);
 		}
 
-		BuildMassMatrix();
+		BuildMassMatrix(threadId);
 	}
 }
 

@@ -147,7 +147,7 @@ ndSetAllocators::ndSetAllocators()
 	ndMemFreeCallback free;
 	ndMemAllocCallback alloc;
 
-	ApplicationMemoryLeakTracker& tracker = ApplicationMemoryLeakTracker::GetLeakTracker();
+	ApplicationMemoryLeakTracker::GetLeakTracker();
 	ndMemory::GetMemoryAllocators(alloc, free);
 	if (alloc != PhysicsAlloc) 
 	{

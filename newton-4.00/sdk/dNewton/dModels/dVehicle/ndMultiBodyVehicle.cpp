@@ -304,7 +304,11 @@ void ndMultiBodyVehicle::FinalizeBuild()
 	}
 
 	ndInt32 stride = ndInt32 (&massMatrix[1][0] - &massMatrix[0][0]);
-	ndAssert(ndTestPSDmatrix(jointArray.GetCount(), stride, &massMatrix[0][0]));
+
+	ndAssert(ndTestPSDmatrixNew(
+		jointArray.GetCount(), stride, 
+		&massMatrix[0][0], 
+		(ndFloat32*)GetWorld()->GetScratchBuffer(0, stride* stride* ndInt32(sizeof(ndFloat32)))));
 
 	ndFixSizeArray<ndFloat32, 64> force;
 	force.SetCount(jointArray.GetCount());

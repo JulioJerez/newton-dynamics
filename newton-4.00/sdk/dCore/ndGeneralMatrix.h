@@ -114,13 +114,16 @@ bool ndCholeskyFactorizationAddRow(ndInt32 stride, ndInt32 n, T* const matrix, T
 
 	T diag = rowN[n] - s;
 	#ifdef D_NEWTON_USE_DOUBLE
-		if (diag < T(1.0e-12f))
-	#else
-		if (diag < T(1.0e-6f))
-	#endif
+	if (diag < T(1.0e-12f))
 	{
 		return false;
 	}
+	#else
+	if (diag < T(1.0e-6f))
+	{
+		return false;
+	}
+	#endif
 
 	rowN[n] = T(sqrt(diag));
 	invDiagonalOut[n] = T(1.0f) / rowN[n];
@@ -180,6 +183,26 @@ bool ndTestPSDmatrix(ndInt32 size, ndInt32 stride, const T* const matrix)
 		T* const copy = *copyPtr;
 		return Cholesky(copy);
 	}
+}
+
+template<class T>
+bool ndTestPSDmatrixNew(ndInt32 size, ndInt32 stride, const T* const matrix, T* const scrathBuffer)
+{
+	ndAssert(size);
+	auto Cholesky = [size, stride, matrix, scrathBuffer]()
+	{
+		ndInt32 srcRow = 0;
+		ndInt32 dstRow = 0;
+		for (ndInt32 i = 0; i < size; ++i)
+		{
+			ndMemCpy(&scrathBuffer[dstRow], &matrix[srcRow], ndInt64(size));
+
+			dstRow += size;
+			srcRow += stride;
+		}
+		return ndCholeskyBlockFactorization(size, size, scrathBuffer);
+	};
+	return Cholesky();
 }
 
 template<class T>
