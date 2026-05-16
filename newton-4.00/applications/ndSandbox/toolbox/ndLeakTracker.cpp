@@ -41,6 +41,7 @@ class ApplicationMemoryLeakTracker: public ndTree<ndInt64, void*, ndLeakTrackerA
 		,m_allocIndex(1)
 		,m_startTracking(true)
 	{
+		//tracker.m_startTracking = true;
 	}
 
 	~ApplicationMemoryLeakTracker()
@@ -129,7 +130,7 @@ void* operator new (size_t size)
 			tracker.m_startTracking = false;
 		}
 	}
-	//void* const ptr = ndMemory::Malloc(size);
+
 	ndIntPtr ptr;
 	ptr.m_ptr = ndMemory::Malloc(size);
 	ndAssert((ndUnsigned64(ptr.m_int) & (0x1f)) == 0);
@@ -147,7 +148,6 @@ ndSetAllocators::ndSetAllocators()
 	ndMemAllocCallback alloc;
 
 	ApplicationMemoryLeakTracker& tracker = ApplicationMemoryLeakTracker::GetLeakTracker();
-	tracker.m_startTracking = true;
 	ndMemory::GetMemoryAllocators(alloc, free);
 	if (alloc != PhysicsAlloc) 
 	{
