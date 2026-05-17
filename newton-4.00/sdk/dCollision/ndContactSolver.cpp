@@ -1953,6 +1953,9 @@ inline ndMinkFace* ndContactSolver::NewFace()
 			return nullptr;
 		}
 	}
+	face->m_twin[0] = nullptr;
+	face->m_twin[1] = nullptr;
+	face->m_twin[2] = nullptr;
 	return face;
 }
 
@@ -1960,6 +1963,7 @@ inline ndMinkFace* ndContactSolver::AddFace(ndInt32 v0, ndInt32 v1, ndInt32 v2)
 {
 	ndMinkFace* const face = NewFace();
 	face->m_mark = 0;
+	face->m_alive = 1;
 	face->m_vertex[0] = ndInt16(v0);
 	face->m_vertex[1] = ndInt16(v1);
 	face->m_vertex[2] = ndInt16(v2);
