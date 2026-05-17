@@ -1994,6 +1994,7 @@ inline void ndContactSolver::DeleteFace(ndMinkFace* const face)
 	m_freeFace = freeFace;
 }
 
+//#pragma optimize( "", off )
 ndInt32 ndContactSolver::CalculateIntersectingPlane(ndInt32 count)
 {
 	ndAssert(count >= 1);
