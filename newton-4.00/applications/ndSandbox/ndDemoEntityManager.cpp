@@ -222,11 +222,6 @@ static void Test0__()
 
 	ndFloat32 data[] = { 1.0f, -2.0f, 1.0f, 2.5f, 3.0f, -1.0f };
 	ndInt32 stride = ndInt32 (&A[1][0] - &A[0][0]);
-	//ndCovarianceMatrix<ndFloat32>(6, stride, &A[0][0], data, data);
-	//for (ndInt32 i = 0; i < A.GetCount(); ++i)
-	//{
-	//	A[i][i] *= 1.001f;
-	//}
 	ndFloat32 t = ndFloat32(0.99f);
 	A[0][0] = t;
 	for (ndInt32 i = 1; i < A.GetCount(); ++i)
@@ -246,11 +241,29 @@ static void Test0__()
 		x1[i] = ndFloat32(i) - 1.0f;
 	}
 
-	ndFixSizeArray<ndFixSizeArray<ndFloat32, 6>, 6> scratch(6);
-	ndAssert(ndTestPSDmatrixNew(6, stride, &A[0][0], &scratch[0][0]));
+	//ndFixSizeArray<ndFloat32, 1000> scratch(1000);
+	//ndAssert(ndTestPSDmatrix(6, stride, &A[0][0], &scratch[0]));
+
+	A[5][0] = 0.2f;
+	A[0][5] = 0.2f;
+	A[3][0] = 0.1f;
+	A[0][3] = 0.1f;
+
+	ndFloat32 C[6][6];
+	ndFloat32 D[6][6];
+	for (ndInt32 i = 0; i < A.GetCount(); ++i)
+	{
+		A[i][i] *= 1.2f;
+		for (ndInt32 j = 0; j < A.GetCount(); ++j)
+		{
+			C[i][j] = A[i][j];
+			D[i][j] = D[i][j];
+		}
+	}
+	ndAssert (ndCholeskyFactorization(6, 6, &C[0][0]));
+	//ndCholeskyTiledFactorization(D.GetCount(), D.GetCount(), &D[0][0]);
 		
 	ndMatrixTimeVector<ndFloat32>(A.GetCount(), stride, &A[0][0], &x0[0], &B[0]);
-
 	ndConjugateGradient<ndFloat32> cgd(true);
 	cgd.Solve(A.GetCount(), stride, ndFloat32(1.0e-5f), &x1[0], &B[0], &A[0][0]);
 
@@ -702,10 +715,10 @@ ndDemoEntityManager::ndDemoEntityManager()
 	ApplyOptions();
 
 #if 0
-	//Test0__();
+	Test0__();
 	//Test1__();
 	//SimpleRegressionBrainStressTest();
-	ndHandWrittenDigits();
+	//ndHandWrittenDigits();
 	//ndCifar10ImageClassification();
 #endif
 

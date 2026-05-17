@@ -253,6 +253,6 @@ bool ndConstraint::CheckBlockMatrixPSD(const ndLeftHandSide* const bigMatrix, co
 	}
 
 	ndFloat32 scratch[D_CONSTRAINT_MAX_ROWS][D_CONSTRAINT_MAX_ROWS];
-	bool test = !count || ndTestPSDmatrixNew(count, D_CONSTRAINT_MAX_ROWS, &matrix[0][0], &scratch[0][0]);
+	bool test = !count || ndTestPSDmatrix(count, D_CONSTRAINT_MAX_ROWS, &matrix[0][0], &scratch[0][0]);
 	return test;
 }

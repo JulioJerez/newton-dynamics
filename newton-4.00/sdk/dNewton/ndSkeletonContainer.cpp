@@ -1112,7 +1112,7 @@ void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* cons
 	const ndFloat32 tol2 = accelTol * accelTol;
 	const ndFloat32* const matrix = &m_precondinonedMassMatrix11[0];
 
-	ndAssert(ndTestPSDmatrixNew(size, stride, matrix, GetScratchBuffer(stride * stride)));
+	ndAssert(ndTestPSDmatrix(size, stride, matrix, GetScratchBuffer(stride * stride)));
 
 	ndFloat32* const residual = ndAlloca(ndFloat32, stride);
 
@@ -1247,7 +1247,7 @@ void ndSkeletonContainer::RegularizeLcp() const
 	ndFloat32* const matrix = &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize];
 
 	ndFloat32* const buffer = GetScratchBuffer(m_auxiliaryRowCount * m_auxiliaryRowCount);
-	if (!ndTestPSDmatrixNew(size, m_auxiliaryRowCount, matrix, &buffer[0]))
+	if (!ndTestPSDmatrix(size, m_auxiliaryRowCount, matrix, &buffer[0]))
 	{
 		ndFloat32* const regularizer = ndAlloca(ndFloat32, size);
 		ndMemSet(regularizer, ndFloat32(1.01f), size);
@@ -1262,7 +1262,7 @@ void ndSkeletonContainer::RegularizeLcp() const
 				base -= step;
 			}
 			reg *= ndFloat32(1.125f);
-		} while (!ndTestPSDmatrixNew(size, m_auxiliaryRowCount, matrix, &buffer[0]));
+		} while (!ndTestPSDmatrix(size, m_auxiliaryRowCount, matrix, &buffer[0]));
 	}
 }
 
@@ -1827,7 +1827,7 @@ void ndSkeletonContainer::InitLoopMassMatrix()
 			InitMassMatrixBoundedBlock(index);
 		}
 
-		ndAssert(!boundedSize || ndTestPSDmatrixNew(m_auxiliaryRowCount - m_blockSize, m_auxiliaryRowCount, &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize], GetScratchBuffer(m_auxiliaryRowCount * m_auxiliaryRowCount)));
+		ndAssert(!boundedSize || ndTestPSDmatrix(m_auxiliaryRowCount - m_blockSize, m_auxiliaryRowCount, &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize], GetScratchBuffer(m_auxiliaryRowCount * m_auxiliaryRowCount)));
 	}
 
 	if (m_transientLoopingContacts.GetCount() || m_transientLoopingJoints.GetCount())
