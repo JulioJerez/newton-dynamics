@@ -257,11 +257,13 @@ static void Test0__()
 		for (ndInt32 j = 0; j < A.GetCount(); ++j)
 		{
 			C[i][j] = A[i][j];
-			D[i][j] = D[i][j];
+			D[i][j] = A[i][j];
 		}
 	}
-	ndAssert (ndCholeskyFactorization(6, 6, &C[0][0]));
-	//ndCholeskyTiledFactorization(D.GetCount(), D.GetCount(), &D[0][0]);
+	ndAssert(ndCholeskyFactorization(6, 6, &C[0][0]));
+	ndAssert(ndCholeskyTiledFactorization(6, 6, &D[0][0]));
+
+	ndCholeskyTiledFactorization(6, 6, &D[0][0]);
 		
 	ndMatrixTimeVector<ndFloat32>(A.GetCount(), stride, &A[0][0], &x0[0], &B[0]);
 	ndConjugateGradient<ndFloat32> cgd(true);
