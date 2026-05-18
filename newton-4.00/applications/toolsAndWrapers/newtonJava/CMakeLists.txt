@@ -61,11 +61,7 @@ if (MSVC OR MINGW)
 #	target_link_libraries(${projectName} ${Python_LIBRARIES})
 endif()
 
-if (NEWTON_BUILD_CREATE_SUB_PROJECTS)
-	target_link_libraries (${projectName} ndNewton ndCollision ndCore)
-else()
-	target_link_libraries (${projectName} ndNewton)
-endif()
+target_link_libraries (${projectName} ndNewton)
 
 if (NEWTON_ENABLE_CUDA_SOLVER)
 	target_link_libraries (${projectName} ndSolverCuda)

@@ -19,7 +19,6 @@ option("NEWTON_ENABLE_OPENCL_SDK" "enable opencl compute" ON)
 option("NEWTON_DOUBLE_PRECISION" "generate double precision" OFF)
 option("NEWTON_SCALAR_VECTOR_CLASS" "generate simd vector class" OFF)
 option("NEWTON_STATIC_RUNTIME_LIBRARIES" "use windows static libraries" OFF)
-option("NEWTON_BUILD_CREATE_SUB_PROJECTS" "generate independent subproject" OFF)
 option("NEWTON_USE_DEFAULT_NEW_AND_DELETE" "overload new and delete when building dll" OFF)
 option("NEWTON_BUILD_TESTS" "tutorials test (required newton static libraries option" OFF)
 
