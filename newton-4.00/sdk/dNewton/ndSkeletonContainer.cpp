@@ -1243,6 +1243,8 @@ void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* cons
 
 void ndSkeletonContainer::RegularizeLcp() const
 {
+	// note: this can be elimtaed if we just
+	// regularize the diagonal unconditionally.
 	ndInt32 size = m_auxiliaryRowCount - m_blockSize;
 	ndFloat32* const matrix = &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize];
 
@@ -1325,7 +1327,9 @@ void ndSkeletonContainer::AddExtraContacts()
 	ndInt32 extraRows = 0;
 	for (ndInt32 i = ndInt32(m_transientLoopingContacts.GetCount()) - 1; i >= 0; --i)
 	{
-		extraRows += m_transientLoopingContacts[i]->GetRowsCount();
+		//ndUnsigned32 rows = m_transientLoopingContacts[i]->GetRowsCount();
+		const ndInt32 rows = m_transientLoopingContacts[i]->m_rowCount;
+		extraRows += rows;
 	}
 	const ndInt32 numberOfLayers = 5;
 	const ndInt32 maxExtraRows = 300;
@@ -1348,7 +1352,8 @@ void ndSkeletonContainer::AddExtraContacts()
 				{
 					contact->m_skeletonExtraContact = 1;
 					AddCloseLoopJoint(contact);
-					extraRows += contact->GetRowsCount();
+					//extraRows += contact->GetRowsCount();
+					extraRows += contact->m_rowCount;
 					ndBodyKinematic* const child = (contact->GetBody0() == body) ? contact->GetBody1() : contact->GetBody0();
 					if (child->GetInvMass() > ndFloat32(0.0f))
 					{
