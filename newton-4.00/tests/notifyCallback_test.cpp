@@ -9,8 +9,7 @@
 * freely
 */
 
-#include <cstdio>
-#include "ndNewton.h"
+#include <ndNewtonInc.h>
 #include <gtest/gtest.h>
 
 class ndApplyFixForce : public ndBodyNotify

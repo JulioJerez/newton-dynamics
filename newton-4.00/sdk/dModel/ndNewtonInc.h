@@ -22,10 +22,7 @@
 #ifndef _ND_NEWTON_INC_H__
 #define _ND_NEWTON_INC_H__
 
-#include <ofbx.h>
-#include <VHACD.h>
 #include <ndNewton.h>
-#include <ndModelInc.h>
 
 #endif 
 

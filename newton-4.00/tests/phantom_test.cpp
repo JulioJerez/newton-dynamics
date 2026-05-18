@@ -10,8 +10,7 @@
 * freely
 */
 
-#include <cstdio>
-#include "ndNewton.h"
+#include <ndNewtonInc.h>
 #include <gtest/gtest.h>
 
 constexpr ndFloat32 TIME_STEP = (1.0f / 60.0f);
