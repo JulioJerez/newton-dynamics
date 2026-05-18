@@ -88,67 +88,114 @@ void ndCovarianceMatrix(ndInt32 size, ndInt32 stride, T* const matrix, const T* 
 	}
 }
 
-template<class T>
-bool ndCholeskyFactorizationAddRow(ndInt32 stride, ndInt32 n, T* const matrix, T* const invDiagonalOut)
-{
-	T* const rowN = &matrix[stride * n];
-
-	ndInt32 base = 0;
-	for (ndInt32 j = 0; j < n; ++j) 
-	{
-		T s(0.0f);
-		T* const rowJ = &matrix[base];
-		for (ndInt32 k = 0; k < j; ++k) 
-		{
-			s += rowN[k] * rowJ[k];
-		}
-		rowJ[n] = T(0.0f);
-		rowN[j] = invDiagonalOut[j] * (rowN[j] - s);
-		base += stride;
-	}
-
-	T s(0.0f);
-	const T* const rowJ = &matrix[base];
-	for (ndInt32 k = 0; k < n; ++k)
-	{
-		s += rowN[k] * rowJ[k];
-	}
-
-	T diag = rowN[n] - s;
-	#ifdef D_NEWTON_USE_DOUBLE
-	if (diag < T(1.0e-12f))
-	{
-		return false;
-	}
-	#else
-	if (diag < T(1.0e-6f))
-	{
-		return false;
-	}
-	#endif
-
-	rowN[n] = T(sqrt(diag));
-	invDiagonalOut[n] = T(1.0f) / rowN[n];
-	return true;
-}
+//template<class T>
+//bool ndCholeskyFactorizationAddRow(ndInt32 stride, ndInt32 n, T* const matrix, T* const invDiagonalOut)
+//{
+//	T* const rowN = &matrix[stride * n];
+//
+//	ndInt32 base = 0;
+//	for (ndInt32 j = 0; j < n; ++j) 
+//	{
+//		T s(0.0f);
+//		T* const rowJ = &matrix[base];
+//		for (ndInt32 k = 0; k < j; ++k) 
+//		{
+//			s += rowN[k] * rowJ[k];
+//		}
+//		rowJ[n] = T(0.0f);
+//		rowN[j] = invDiagonalOut[j] * (rowN[j] - s);
+//		base += stride;
+//	}
+//
+//	T s(0.0f);
+//	const T* const rowJ = &matrix[base];
+//	for (ndInt32 k = 0; k < n; ++k)
+//	{
+//		s += rowN[k] * rowJ[k];
+//	}
+//
+//	T diag = rowN[n] - s;
+//	#ifdef D_NEWTON_USE_DOUBLE
+//	if (diag < T(1.0e-12f))
+//	{
+//		return false;
+//	}
+//	#else
+//	if (diag < T(1.0e-6f))
+//	{
+//		return false;
+//	}
+//	#endif
+//
+//	rowN[n] = T(sqrt(diag));
+//	invDiagonalOut[n] = T(1.0f) / rowN[n];
+//	return true;
+//}
+//
+//template<class T>
+//bool ndCholeskyFactorization(ndInt32 size, ndInt32 stride, T* const psdMatrix)
+//{
+//	ndAssert(size);
+//	bool state = true;
+//	T* const invDiagonal = ndAlloca(T, size);
+//
+//	ndAssert(psdMatrix[0] > T(0.0f));
+//	psdMatrix[0] = T(sqrt(psdMatrix[0]));
+//	invDiagonal[0] = T(1.0f) / psdMatrix[0];
+//	for (ndInt32 i = 1; (i < size) && state; ++i) 
+//	{
+//		state = state && ndCholeskyFactorizationAddRow(stride, i, psdMatrix, invDiagonal);
+//	}
+//	return state;
+//}
 
 template<class T>
 bool ndCholeskyFactorization(ndInt32 size, ndInt32 stride, T* const psdMatrix)
 {
-	ndAssert(size);
-	bool state = true;
 	T* const invDiagonal = ndAlloca(T, size);
-
-	ndAssert(psdMatrix[0] > T(0.0f));
-	psdMatrix[0] = T(sqrt(psdMatrix[0]));
-	invDiagonal[0] = T(1.0f) / psdMatrix[0];
-	for (ndInt32 i = 1; (i < size) && state; ++i) 
+	for (ndInt32 i = 0; i < size; ++i)
 	{
-		state = state && ndCholeskyFactorizationAddRow(stride, i, psdMatrix, invDiagonal);
+		T* const row_i = &psdMatrix[stride * i];
+		for (ndInt32 j = 0; j <= i; ++j)
+		{
+			T diag (row_i[j]);
+			const T* const row_j = &psdMatrix[stride * j];
+			for (ndInt32 k = 0; k < j; ++k)
+			{
+				diag -= row_i[k] * row_j[k];
+			}
+
+			if (j < i)
+			{
+				row_i[j] = diag * invDiagonal[j];
+			}
+			else
+			{
+				#ifdef D_NEWTON_USE_DOUBLE
+				if (diag < T(1.0e-12f))
+				{
+					return false;
+				}
+				#else
+				if (diag < T(1.0e-6f))
+				{
+					return false;
+				}
+				#endif
+
+				diag = T(sqrt(diag));
+				row_i[i] = diag;
+				invDiagonal[i] = T(1.0f) / diag;
+			}
+		}
 	}
-	return state;
+	return true;
 }
 
+// this is a good candidate for parallezation, 
+// however, is far slower than I expected. 
+// my only hope is that is has a bug, but as it stands
+// now, it is abpu fourt time slwore that the  row base version
 template<class T>
 bool ndCholeskyTiledFactorization(ndInt32 size, ndInt32 stride, T* const psdMatrix)
 {
@@ -490,7 +537,7 @@ bool ndTestPSDmatrix(ndInt32 size, ndInt32 stride, const T* const matrix, T* con
 			dstRow += size;
 			srcRow += stride;
 		}
-		//if (size > 32)
+		//if (size > 256)
 		if (0)
 		{
 			return ndCholeskyTiledFactorization(size, size, scrathBuffer);
