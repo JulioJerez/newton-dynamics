@@ -9,11 +9,12 @@
  * freely
  */
 
-#include "ndNewton.h"
+#include <ndNewtonInc.h>
 #include <gtest/gtest.h>
 
 /* Baseline test: create and destroy an empty Newton world. */
-TEST(HelloNewton, CreateWorld) {
+TEST(HelloNewton, CreateWorld) 
+{
   ndWorld world;
   world.SetSubSteps(2);
   world.Update(1.0f / 60.0f);

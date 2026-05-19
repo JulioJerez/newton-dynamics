@@ -222,11 +222,6 @@ static void Test0__()
 
 	ndFloat32 data[] = { 1.0f, -2.0f, 1.0f, 2.5f, 3.0f, -1.0f };
 	ndInt32 stride = ndInt32 (&A[1][0] - &A[0][0]);
-	//ndCovarianceMatrix<ndFloat32>(6, stride, &A[0][0], data, data);
-	//for (ndInt32 i = 0; i < A.GetCount(); ++i)
-	//{
-	//	A[i][i] *= 1.001f;
-	//}
 	ndFloat32 t = ndFloat32(0.99f);
 	A[0][0] = t;
 	for (ndInt32 i = 1; i < A.GetCount(); ++i)
@@ -245,10 +240,26 @@ static void Test0__()
 		x0[i] = ndFloat32(i) + 1.0f;
 		x1[i] = ndFloat32(i) - 1.0f;
 	}
-	ndAssert(ndTestPSDmatrix(6, stride, &A[0][0]));
 
-	ndMatrixTimeVector<ndFloat32>(A.GetCount(), stride, &A[0][0], &x0[0], &B[0]);
+	//ndFixSizeArray<ndFloat32, 1000> scratch(1000);
+	//ndAssert(ndTestPSDmatrix(6, stride, &A[0][0], &scratch[0]));
 
+	A[5][0] = 0.2f;
+	A[0][5] = 0.2f;
+	A[3][0] = 0.1f;
+	A[0][3] = 0.1f;
+
+	ndFloat32 C[6][6];
+	ndFloat32 D[6][6];
+	for (ndInt32 i = 0; i < A.GetCount(); ++i)
+	{
+		A[i][i] *= 1.2f;
+		for (ndInt32 j = 0; j < A.GetCount(); ++j)
+		{
+			C[i][j] = A[i][j];
+			D[i][j] = A[i][j];
+		}
+	}
 	ndConjugateGradient<ndFloat32> cgd(true);
 	cgd.Solve(A.GetCount(), stride, ndFloat32(1.0e-5f), &x1[0], &B[0], &A[0][0]);
 
@@ -261,6 +272,62 @@ static void Test0__()
 	A[1][0] = 1.0f;
 	A[1][1] = 9.0f;
 	cgd.Solve(2, stride, ndFloat32(1.0e-5f), &x1[0], &B[0], &A[0][0]);
+}
+
+static void TestTiledCholesky()
+{
+	//const ndInt32 size = 9;
+	const ndInt32 size = 128;
+
+	ndArray<ndFloat32> A;
+	ndArray<ndFloat32> B;
+	ndArray<ndFloat32> C;
+	A.SetCount(size * size);
+	B.SetCount(size * size);
+	C.SetCount(size * size);
+
+	auto Element = [size](ndArray<ndFloat32>& matrix, ndInt32 i, ndInt32 j)
+	{
+		return &matrix[i * size + j];
+	};
+
+	for (ndInt32 i = 0; i < size; ++i)
+	{
+		*Element(A, i, i) = 1.0f;
+		*Element(B, i, i) = 1.0f;
+		for (ndInt32 j = 0; j < i; ++j)
+		{
+			*Element(A, i, j) = 1.0f;
+			*Element(A, j, i) = 0.0f;
+
+			*Element(B, i, j) = 0.0f;
+			*Element(B, j, i) = 1.0f;
+		}
+	}
+	ndMatrixTimeMatrix<ndFloat32>(size, &A[0], &B[0], &C[0]);
+
+	for (ndInt32 i = 0; i < size; ++i)
+	{
+		for (ndInt32 j = 0; j < size; ++j)
+		{
+			*Element(A, i, j) = *Element(B, i, j);
+		}
+	}
+	bool test0 = false;
+	bool test1 = false;
+	ndUnsigned64 t0 = ndGetTimeInMicroseconds();
+	test0 = ndCholeskyFactorization(size, size, &A[0]);
+	ndUnsigned64 t1 = ndGetTimeInMicroseconds();
+	test1 = ndCholeskyTiledFactorization(size, size, &C[0]);
+	ndUnsigned64 t2 = ndGetTimeInMicroseconds();
+
+	ndUnsigned64 t10 = t1 - t0;
+	ndUnsigned64 t21 = t2 - t1;
+	ndExpandTraceMessage("row Cholesky(%d)\n", ndInt32 (t10));
+	ndExpandTraceMessage("tiled Cholesky(%d)\n", ndInt32(t21));
+	
+	ndAssert(test0);
+	ndAssert(test1);
 }
 
 static ndInt32 Fibonacci(ndInt32 n)
@@ -281,7 +348,7 @@ static ndInt32 Fibonacci(ndInt32 n)
 	return b;
 }
 
-static void Test1__()
+static void Test2__()
 {
 	//ndFloat32 A[2][2];
 	//ndFloat32 x[2];
@@ -701,9 +768,10 @@ ndDemoEntityManager::ndDemoEntityManager()
 
 #if 0
 	//Test0__();
-	//Test1__();
+	//Test2__();
+	TestTiledCholesky();
 	//SimpleRegressionBrainStressTest();
-	ndHandWrittenDigits();
+	//ndHandWrittenDigits();
 	//ndCifar10ImageClassification();
 #endif
 

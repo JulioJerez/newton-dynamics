@@ -1099,13 +1099,20 @@ void ndSkeletonContainer::UpdateForces(ndJacobian* const internalForces, const n
 	}
 }
 
+ndFloat32* ndSkeletonContainer::GetScratchBuffer(ndInt32 size) const
+{
+	ndWorld* const world = m_skeleton->m_body->GetScene()->GetWorld();
+	return (ndFloat32*)world->GetScratchBuffer(m_threadId, size * ndInt32(sizeof (ndFloat32)));
+}
+
 #ifdef ND_DIAGONAL_PRECONDIONER
 void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* const x, const ndFloat32* const b, const ndFloat32* const low, const ndFloat32* const high, const ndInt32* const normalIndex, ndFloat32 accelTol) const
 {
 	D_TRACKTIME();
 	const ndFloat32 tol2 = accelTol * accelTol;
 	const ndFloat32* const matrix = &m_precondinonedMassMatrix11[0];
-	ndAssert(ndTestPSDmatrix(size, stride, matrix));
+
+	ndAssert(ndTestPSDmatrix(size, stride, matrix, GetScratchBuffer(stride * stride)));
 
 	ndFloat32* const residual = ndAlloca(ndFloat32, stride);
 
@@ -1236,9 +1243,12 @@ void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* cons
 
 void ndSkeletonContainer::RegularizeLcp() const
 {
+	// note: this can be eliminated if I just regularize the diagonal unconditionally.
 	ndInt32 size = m_auxiliaryRowCount - m_blockSize;
 	ndFloat32* const matrix = &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize];
-	if (!ndTestPSDmatrix(size, m_auxiliaryRowCount, matrix))
+
+	ndFloat32* const buffer = GetScratchBuffer(m_auxiliaryRowCount * m_auxiliaryRowCount);
+	if (!ndTestPSDmatrix(size, m_auxiliaryRowCount, matrix, &buffer[0]))
 	{
 		ndFloat32* const regularizer = ndAlloca(ndFloat32, size);
 		ndMemSet(regularizer, ndFloat32(1.01f), size);
@@ -1253,7 +1263,7 @@ void ndSkeletonContainer::RegularizeLcp() const
 				base -= step;
 			}
 			reg *= ndFloat32(1.125f);
-		} while (!ndTestPSDmatrix(size, m_auxiliaryRowCount, matrix));
+		} while (!ndTestPSDmatrix(size, m_auxiliaryRowCount, matrix, &buffer[0]));
 	}
 }
 
@@ -1316,10 +1326,11 @@ void ndSkeletonContainer::AddExtraContacts()
 	ndInt32 extraRows = 0;
 	for (ndInt32 i = ndInt32(m_transientLoopingContacts.GetCount()) - 1; i >= 0; --i)
 	{
-		extraRows += m_transientLoopingContacts[i]->GetRowsCount();
+		const ndInt32 rows = m_transientLoopingContacts[i]->m_rowCount;
+		extraRows += rows;
 	}
 	const ndInt32 numberOfLayers = 5;
-	const ndInt32 maxExtraRows = 300;
+	const ndInt32 maxExtraRows = 256;
 	for (ndInt32 j = numberOfLayers - 1; (extraRows < maxExtraRows) && j >= 0; --j)
 	{
 		ndFixSizeArray<ndBodyKinematic*, 1024> layer;
@@ -1339,7 +1350,7 @@ void ndSkeletonContainer::AddExtraContacts()
 				{
 					contact->m_skeletonExtraContact = 1;
 					AddCloseLoopJoint(contact);
-					extraRows += contact->GetRowsCount();
+					extraRows += contact->m_rowCount;
 					ndBodyKinematic* const child = (contact->GetBody0() == body) ? contact->GetBody1() : contact->GetBody0();
 					if (child->GetInvMass() > ndFloat32(0.0f))
 					{
@@ -1817,7 +1828,8 @@ void ndSkeletonContainer::InitLoopMassMatrix()
 		{
 			InitMassMatrixBoundedBlock(index);
 		}
-		ndAssert(!boundedSize || ndTestPSDmatrix(m_auxiliaryRowCount - m_blockSize, m_auxiliaryRowCount, &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize]));
+
+		ndAssert(!boundedSize || ndTestPSDmatrix(m_auxiliaryRowCount - m_blockSize, m_auxiliaryRowCount, &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize], GetScratchBuffer(m_auxiliaryRowCount * m_auxiliaryRowCount)));
 	}
 
 	if (m_transientLoopingContacts.GetCount() || m_transientLoopingJoints.GetCount())
@@ -1976,7 +1988,7 @@ void ndSkeletonContainer::SolveAuxiliary(ndJacobian* const internalForces, const
 	AddForces(1);
 }
 
-void ndSkeletonContainer::InitMassMatrix(ndFloat32, const ndLeftHandSide* const leftHandSide, ndRightHandSide* const rightHandSide)
+void ndSkeletonContainer::InitMassMatrix(ndFloat32, const ndLeftHandSide* const leftHandSide, ndRightHandSide* const rightHandSide, ndInt32 threadIndex)
 {
 	D_TRACKTIME();
 	if (m_isResting)
@@ -1986,6 +1998,8 @@ void ndSkeletonContainer::InitMassMatrix(ndFloat32, const ndLeftHandSide* const 
 
 	ndInt32 rowCount = 0;
 	ndInt32 auxiliaryCount = 0;
+
+	m_threadId = threadIndex;
 	m_leftHandSide = leftHandSide;
 	m_rightHandSide = rightHandSide;
 
@@ -2060,11 +2074,12 @@ void ndSkeletonContainer::InitMassMatrix(ndFloat32, const ndLeftHandSide* const 
 	}
 }
 
-void ndSkeletonContainer::CalculateReactionForces(ndJacobian* const internalForces)
+void ndSkeletonContainer::CalculateReactionForces(ndJacobian* const internalForces, ndInt32 threadId)
 {
 	if (!m_isResting)
 	{
 		D_TRACKTIME();
+		m_threadId = threadId;
 		const ndInt32 nodeCount = m_nodeList.GetCount();
 		ndForcePair* const force = ndAlloca(ndForcePair, nodeCount);
 		ndForcePair* const accel = ndAlloca(ndForcePair, nodeCount);

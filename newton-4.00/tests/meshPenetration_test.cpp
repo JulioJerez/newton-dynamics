@@ -13,8 +13,7 @@
 // Regression test: dynamic boxes stacked above a flat static mesh ground
 // should not penetrate through the mesh after settling under gravity.
 
-#include <cstdio>
-#include "ndNewton.h"
+#include <ndNewtonInc.h>
 #include <gtest/gtest.h>
 
 // Build a flat static mesh ground at Y=0 using two triangles (a quad).

@@ -139,10 +139,6 @@ else(UNIX)
 	message ("adding required posit system libraries")
 	target_link_libraries (${projectName} PUBLIC glatter glfw dl GL X11 pthread ${X11_Xcursor_LIBRARIES} ${X11_Xinerama_LIBRARIES})
 endif()
-
-if (NEWTON_BUILD_CREATE_SUB_PROJECTS)
-	target_link_libraries (${projectName} PUBLIC ndCollision ndCore)
-endif()
  
 if (NEWTON_BUILD_PROFILER)
 	target_link_libraries (${projectName} PUBLIC dProfiler)

@@ -39,7 +39,6 @@ class ndMinkFace
 	ndInt16 m_vertex[3];
 	ndInt8 m_mark;
 	ndInt8 m_alive;
-	//} D_GCC_NEWTON_CLASS_ALIGN_32 ;
 };
 
 #define D_MAX_CONTATCS					128

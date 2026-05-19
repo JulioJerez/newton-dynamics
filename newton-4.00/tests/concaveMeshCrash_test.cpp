@@ -14,8 +14,7 @@
 // with inward-facing normals) triggers a debug assertion in
 // ndShapeConvexPolygon::GenerateConvexCap() at the dot-product threshold check.
 
-#include <cstdio>
-#include "ndNewton.h"
+#include <ndNewtonInc.h>
 #include <gtest/gtest.h>
 
 // Build a static body whose collision is an inverted box (normals point inward).

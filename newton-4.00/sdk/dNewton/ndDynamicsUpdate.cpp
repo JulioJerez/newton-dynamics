@@ -1346,7 +1346,7 @@ void ndDynamicsUpdate::InitSkeletons()
 			const ndArray<ndLeftHandSide>& leftHandSide = m_leftHandSide;
 
 			ndSkeletonContainer* const skeleton = activeSkeletons[groupId];
-			skeleton->InitMassMatrix(m_timestep, &leftHandSide[0], &rightHandSide[0]);
+			skeleton->InitMassMatrix(m_timestep, &leftHandSide[0], &rightHandSide[0], groupId);
 		});
 
 		const ndInt32 count = ndInt32(activeSkeletons.GetCount());
@@ -1369,7 +1369,7 @@ void ndDynamicsUpdate::UpdateSkeletons()
 		ndJacobian* const internalForces = &GetInternalForces()[0];
 	
 		ndSkeletonContainer* const skeleton = activeSkeletons[groupId];
-		skeleton->CalculateReactionForces(internalForces);
+		skeleton->CalculateReactionForces(internalForces, groupId);
 	});
 
 	const ndInt32 count = ndInt32(activeSkeletons.GetCount());

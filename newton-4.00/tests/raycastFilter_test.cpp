@@ -10,8 +10,8 @@
 * freely
 */
 
-#include <cstdio>
-#include "ndNewton.h"
+
+#include <ndNewtonInc.h>
 #include <gtest/gtest.h>
 
 using ClientNodePtr = std::shared_ptr<class ClientNode>;

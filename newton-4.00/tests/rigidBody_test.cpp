@@ -9,8 +9,7 @@
 * freely
 */
 
-#include <cstdio>
-#include "ndNewton.h"
+#include <ndNewtonInc.h>
 #include <gtest/gtest.h>
 
 /* Return pointer to dynamic unit sphere. */

@@ -232,11 +232,12 @@ class ndSkeletonContainer
 	void InitLoopMassMatrix();
 	void ConditionMassMatrix() const;
 	void RebuildMassMatrix(const ndFloat32* const diagDamp) const;
-	void CalculateReactionForces(ndJacobian* const internalForces);
+	void CalculateReactionForces(ndJacobian* const internalForces, ndInt32 threadId);
 	void CalculateJointAccel(const ndJacobian* const internalForces, ndForcePair* const accel) const;
-	void InitMassMatrix(ndFloat32 timestep, const ndLeftHandSide* const matrixRow, ndRightHandSide* const rightHandSide);
 	void SolveAuxiliary(ndJacobian* const internalForces, const ndForcePair* const accel, ndForcePair* const force) const;
+	void InitMassMatrix(ndFloat32 timestep, const ndLeftHandSide* const matrixRow, ndRightHandSide* const rightHandSide, ndInt32 threadIndex);
 
+	ndFloat32* GetScratchBuffer(ndInt32 size) const;
 	class ndBodyForceIndexPair
 	{
 		public:
@@ -282,6 +283,7 @@ class ndSkeletonContainer
 	ndInt32 m_loopRowCount;
 	ndInt32 m_auxiliaryRowCount;
 	ndInt32 m_isResting;
+	ndInt32 m_threadId;
 
 	friend class ndWorld;
 	friend class ndIkSolver;

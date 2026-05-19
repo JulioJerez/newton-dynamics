@@ -9,7 +9,7 @@
  * freely
  */
 
-#include "ndNewton.h"
+#include <ndNewtonInc.h>
 #include <gtest/gtest.h>
 
 class csBodyNotify : public ndBodyNotify 

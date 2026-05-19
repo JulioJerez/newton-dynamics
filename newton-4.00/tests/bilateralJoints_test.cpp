@@ -9,7 +9,7 @@
  * freely
  */
 
-#include "ndNewton.h"
+#include <ndNewtonInc.h>
 #include <gtest/gtest.h>
 
 /* Baseline test: create and destroy an empty Newton world. */
