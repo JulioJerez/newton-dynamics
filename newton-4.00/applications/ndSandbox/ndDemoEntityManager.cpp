@@ -32,7 +32,7 @@
 //#define DEFAULT_SCENE	5		// basic Trigger
 //#define DEFAULT_SCENE	6		// basic Particles
 //#define DEFAULT_SCENE	7		// conservation of momentum 
-//#define DEFAULT_SCENE	8		// basic joints
+#define DEFAULT_SCENE	8		// basic joints
 //#define DEFAULT_SCENE	9		// static mesh collision 
 //#define DEFAULT_SCENE	10		// basic height field collision
 //#define DEFAULT_SCENE	11		// basic user height field 2d collision
@@ -42,7 +42,7 @@
 //#define DEFAULT_SCENE	15		// basic model, a nd vehicle prop
 //#define DEFAULT_SCENE	16		// export articulated model
 //#define DEFAULT_SCENE	17		// basic rag doll
-#define DEFAULT_SCENE	18		// complex model, implement a complex model with joints
+//#define DEFAULT_SCENE	18		// complex model, implement a complex model with joints
 //#define DEFAULT_SCENE	19		// basics multi body vehicle
 //#define DEFAULT_SCENE	20		// object Placement
 //#define DEFAULT_SCENE	21		// third person player capsule

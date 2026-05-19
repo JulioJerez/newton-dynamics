@@ -692,7 +692,7 @@ void ndWorld::UpdateSkeletons()
 								{
 									if (!skeleton)
 									{
-										skeleton = m_skeletonList.CreateContatiner(childBody, skeletonsId);
+										skeleton = m_skeletonList.CreateContatiner(this, childBody, skeletonsId);
 										skeletonsId++;
 									}
 			
@@ -741,7 +741,7 @@ void ndWorld::UpdateSkeletons()
 				{
 					// the root node is not static and has children, 
 					// them add the first children to this root
-					skeleton = m_skeletonList.CreateContatiner(rootBody, skeletonsId);
+					skeleton = m_skeletonList.CreateContatiner(this, rootBody, skeletonsId);
 					skeletonsId++;
 			
 					for (ndBodyKinematic::ndJointList::ndNode* jointNode = rootBody->m_jointList.GetFirst(); jointNode; jointNode = jointNode->GetNext())

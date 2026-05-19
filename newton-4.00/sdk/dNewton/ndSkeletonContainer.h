@@ -205,8 +205,8 @@ class ndSkeletonContainer
 
 	void Clear();
 	void CheckSleepState();
-	void Init(ndBodyKinematic* const rootBody, ndInt32 id);
 	ndNode* AddChild(ndJointBilateralConstraint* const joint, ndNode* const parent);
+	void Init(const ndWorld* const owner, ndBodyKinematic* const rootBody, ndInt32 id);
 	void Finalize(ndInt32 loopJoints, ndJointBilateralConstraint** const loopJointArray);
 
 	void AddExtraContacts();
@@ -254,7 +254,8 @@ class ndSkeletonContainer
 		ndBodyForceIndexPair* m_index;
 		ndInt32 m_spansCount;
 	};
-		
+
+	ndWeakPtr<ndWorld> m_owner;
 	ndNode* m_skeleton;
 	ndNode** m_nodesOrder;
 	ndNode** m_nodesFactorizationOrder;

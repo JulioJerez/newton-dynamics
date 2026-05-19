@@ -364,7 +364,8 @@ void ndSkeletonContainer::ndNode::BodyJacobianTimeMassForward(const ndForcePair&
 }
 
 ndSkeletonContainer::ndSkeletonContainer()
-	:m_skeleton(nullptr)
+	:m_owner(nullptr)
+	,m_skeleton(nullptr)
 	,m_nodesOrder(nullptr)
 	,m_rightHandSide(nullptr)
 	,m_leftHandSide(nullptr)
@@ -441,9 +442,10 @@ void ndSkeletonContainer::Clear()
 	m_transientLoopingContacts.SetCount(0);
 }
 
-void ndSkeletonContainer::Init(ndBodyKinematic* const rootBody, ndInt32 id)
+void ndSkeletonContainer::Init(const ndWorld* const owner, ndBodyKinematic* const rootBody, ndInt32 id)
 {
 	m_id = id;
+	m_owner = ndWeakPtr<ndWorld>((ndWorld*)owner);
 	m_skeleton = &m_nodeList.Append()->GetInfo();
 	m_skeleton->m_body = rootBody;
 	if (rootBody->GetInvMass() != ndFloat32(0.0f))
@@ -1095,8 +1097,8 @@ void ndSkeletonContainer::UpdateForces(ndJacobian* const internalForces, const n
 
 ndFloat32* ndSkeletonContainer::GetScratchBuffer(ndInt32 size) const
 {
-	ndWorld* const world = m_skeleton->m_body->GetScene()->GetWorld();
-	return (ndFloat32*)world->GetScratchBuffer(m_threadId, size * ndInt32(sizeof (ndFloat32)));
+	ndAssert(m_owner);
+	return (ndFloat32*)m_owner->GetScratchBuffer(m_threadId, size * ndInt32(sizeof (ndFloat32)));
 }
 
 void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* const x, const ndFloat32* const b, const ndFloat32* const low, const ndFloat32* const high, const ndInt32* const normalIndex, ndFloat32 accelTol) const
