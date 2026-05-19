@@ -233,13 +233,16 @@ class ndSkeletonContainer
 	// support
 	void InitLoopMassMatrix();
 	void ConditionMassMatrix() const;
+	ndFloat32* GetScratchBuffer(ndInt32 size) const;
 	void RebuildMassMatrix(const ndFloat32* const diagDamp) const;
 	void CalculateReactionForces(ndJacobian* const internalForces, ndInt32 threadId);
 	void CalculateJointAccel(const ndJacobian* const internalForces, ndForcePair* const accel) const;
 	void SolveAuxiliary(ndJacobian* const internalForces, const ndForcePair* const accel, ndForcePair* const force) const;
 	void InitMassMatrix(ndFloat32 timestep, const ndLeftHandSide* const matrixRow, ndRightHandSide* const rightHandSide, ndInt32 threadIndex);
 
-	ndFloat32* GetScratchBuffer(ndInt32 size) const;
+	// parallel interface
+	void InitMassMatrix(ndThreadPool& threadPool, ndFloat32 timestep, const ndLeftHandSide* const matrixRow, ndRightHandSide* const rightHandSide);
+	
 	class ndBodyForceIndexPair
 	{
 		public:

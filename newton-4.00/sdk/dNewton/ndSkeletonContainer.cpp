@@ -389,6 +389,7 @@ ndSkeletonContainer::ndSkeletonContainer()
 	,m_loopRowCount(0)
 	,m_auxiliaryRowCount(0)
 	,m_isResting(0)
+	,m_threadId(0)
 {
 	m_auxiliaryMemoryBuffer.SetCount(1024 * 8);
 	m_auxiliaryMemoryBuffer.SetCount(0);

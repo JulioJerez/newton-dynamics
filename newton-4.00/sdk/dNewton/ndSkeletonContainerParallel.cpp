@@ -21,5 +21,10 @@
 
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
-#include "ndSort.h"
-#include "ndJointBilateralConstraint.h"
+//#include "ndSort.h"
+#include "ndSkeletonContainer.h"
+
+void ndSkeletonContainer::InitMassMatrix(ndThreadPool& threadPool, ndFloat32 timestep, const ndLeftHandSide* const matrixRow, ndRightHandSide* const rightHandSide)
+{
+	InitMassMatrix(timestep, matrixRow, rightHandSide, 0);
+}
