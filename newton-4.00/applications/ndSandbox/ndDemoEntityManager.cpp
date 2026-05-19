@@ -260,12 +260,6 @@ static void Test0__()
 			D[i][j] = A[i][j];
 		}
 	}
-	ndAssert(ndCholeskyFactorization(6, 6, &C[0][0]));
-	ndAssert(ndCholeskyTiledFactorization(6, 6, &D[0][0]));
-
-	ndCholeskyTiledFactorization(6, 6, &D[0][0]);
-		
-	ndMatrixTimeVector<ndFloat32>(A.GetCount(), stride, &A[0][0], &x0[0], &B[0]);
 	ndConjugateGradient<ndFloat32> cgd(true);
 	cgd.Solve(A.GetCount(), stride, ndFloat32(1.0e-5f), &x1[0], &B[0], &A[0][0]);
 
@@ -278,6 +272,62 @@ static void Test0__()
 	A[1][0] = 1.0f;
 	A[1][1] = 9.0f;
 	cgd.Solve(2, stride, ndFloat32(1.0e-5f), &x1[0], &B[0], &A[0][0]);
+}
+
+static void TestTiledCholesky()
+{
+	//const ndInt32 size = 9;
+	const ndInt32 size = 128;
+
+	ndArray<ndFloat32> A;
+	ndArray<ndFloat32> B;
+	ndArray<ndFloat32> C;
+	A.SetCount(size * size);
+	B.SetCount(size * size);
+	C.SetCount(size * size);
+
+	auto Element = [size](ndArray<ndFloat32>& matrix, ndInt32 i, ndInt32 j)
+	{
+		return &matrix[i * size + j];
+	};
+
+	for (ndInt32 i = 0; i < size; ++i)
+	{
+		*Element(A, i, i) = 1.0f;
+		*Element(B, i, i) = 1.0f;
+		for (ndInt32 j = 0; j < i; ++j)
+		{
+			*Element(A, i, j) = 1.0f;
+			*Element(A, j, i) = 0.0f;
+
+			*Element(B, i, j) = 0.0f;
+			*Element(B, j, i) = 1.0f;
+		}
+	}
+	ndMatrixTimeMatrix<ndFloat32>(size, &A[0], &B[0], &C[0]);
+
+	for (ndInt32 i = 0; i < size; ++i)
+	{
+		for (ndInt32 j = 0; j < size; ++j)
+		{
+			*Element(A, i, j) = *Element(B, i, j);
+		}
+	}
+	bool test0 = false;
+	bool test1 = false;
+	ndUnsigned64 t0 = ndGetTimeInMicroseconds();
+	test0 = ndCholeskyFactorization(size, size, &A[0]);
+	ndUnsigned64 t1 = ndGetTimeInMicroseconds();
+	test1 = ndCholeskyTiledFactorization(size, size, &C[0]);
+	ndUnsigned64 t2 = ndGetTimeInMicroseconds();
+
+	ndUnsigned64 t10 = t1 - t0;
+	ndUnsigned64 t21 = t2 - t1;
+	ndExpandTraceMessage("row Cholesky(%d)\n", ndInt32 (t10));
+	ndExpandTraceMessage("tiled Cholesky(%d)\n", ndInt32(t21));
+	
+	ndAssert(test0);
+	ndAssert(test1);
 }
 
 static ndInt32 Fibonacci(ndInt32 n)
@@ -298,7 +348,7 @@ static ndInt32 Fibonacci(ndInt32 n)
 	return b;
 }
 
-static void Test1__()
+static void Test2__()
 {
 	//ndFloat32 A[2][2];
 	//ndFloat32 x[2];
@@ -717,8 +767,9 @@ ndDemoEntityManager::ndDemoEntityManager()
 	ApplyOptions();
 
 #if 0
-	Test0__();
-	//Test1__();
+	//Test0__();
+	//Test2__();
+	TestTiledCholesky();
 	//SimpleRegressionBrainStressTest();
 	//ndHandWrittenDigits();
 	//ndCifar10ImageClassification();
