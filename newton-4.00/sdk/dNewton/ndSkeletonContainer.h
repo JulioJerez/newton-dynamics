@@ -27,7 +27,9 @@
 class ndIkSolver;
 class ndJointBilateralConstraint;
 
-#define D_INV_IK_MAX_LINKS	256
+#define D_INV_IK_MAX_LINKS				256
+#define D_MAX_SKELETON_OPEN_LOOP_DOF	6
+#define D_MAX_SKELETON_LCP_VALUE		(D_LCP_MAX_VALUE * ndFloat32 (0.25f))
 
 class ndSkeletonContainer 
 {

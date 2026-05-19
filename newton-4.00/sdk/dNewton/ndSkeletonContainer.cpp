@@ -21,7 +21,6 @@
 
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
-#include "ndSort.h"
 #include "ndWorld.h"
 #include "ndContact.h"
 #include "ndIkSolver.h"
@@ -29,11 +28,6 @@
 #include "ndDynamicsUpdate.h"
 #include "ndSkeletonContainer.h"
 #include "ndJointBilateralConstraint.h"
-
-#define D_MAX_OPEN_LOOP_DOF				6
-#define D_MAX_SKELETON_LCP_VALUE		(D_LCP_MAX_VALUE * ndFloat32 (0.25f))
-
-#define ND_DIAGONAL_PRECONDIONER
 
 ndSkeletonContainer::ndNode::ndNode()
 	:m_body(nullptr)
@@ -262,7 +256,7 @@ ndInt32 ndSkeletonContainer::ndNode::FactorizeChild(const ndLeftHandSide* const 
 		}
 	}
 	ndAssert(m_dof >= 0);
-	m_dof = ndMin(m_dof, ndInt8(D_MAX_OPEN_LOOP_DOF));
+	m_dof = ndMin(m_dof, ndInt8(D_MAX_SKELETON_OPEN_LOOP_DOF));
 
 	ndInt32 boundedDof = m_joint->m_rowCount - m_dof;
 	GetJacobians(leftHandSide, rightHandSide, jointMassArray);
@@ -1105,7 +1099,6 @@ ndFloat32* ndSkeletonContainer::GetScratchBuffer(ndInt32 size) const
 	return (ndFloat32*)world->GetScratchBuffer(m_threadId, size * ndInt32(sizeof (ndFloat32)));
 }
 
-#ifdef ND_DIAGONAL_PRECONDIONER
 void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* const x, const ndFloat32* const b, const ndFloat32* const low, const ndFloat32* const high, const ndInt32* const normalIndex, ndFloat32 accelTol) const
 {
 	D_TRACKTIME();
@@ -1170,76 +1163,7 @@ void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* cons
 		x[i] *= m_diagonalPreconditioner[i];
 	}
 }
-#else
 
-// experiment with tridiagonal precondiotiner
-// much harder to get it right,
-// and no sure if it will be faster. 
-void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* const x, const ndFloat32* const b, const ndFloat32* const low, const ndFloat32* const high, const ndInt32* const normalIndex, ndFloat32 accelTol) const
-{
-	D_TRACKTIME();
-	const ndFloat32 tol2 = accelTol * accelTol;
-	const ndFloat32* const matrix = &m_precondinonedMassMatrix11[0];
-	ndAssert(ndTestPSDmatrix(size, stride, matrix));
-
-	ndFloat32* const residual = ndAlloca(ndFloat32, stride);
-
-	for (ndInt32 i = 0; i < size; ++i)
-	{
-		const ndInt32 index = normalIndex[i] + i;
-		x[i] /= m_diagonalPreconditioner[i];
-		residual[i] = b[i] * m_diagonalPreconditioner[i];
-
-		const ndFloat32 coefficient = x[index];
-
-		const ndFloat32 l = low[i] * coefficient;
-		const ndFloat32 h = high[i] * coefficient;
-
-		x[i] = ndClamp(x[i], l, h);
-	}
-
-	const ndInt32 maxIterCount = 64;
-	ndFloat32 error2 = tol2 * ndFloat32(2.0f);
-	const ndFloat32 sor = ndFloat32(1.125f);
-	for (ndInt32 m = maxIterCount; (m >= 0) && (error2 > tol2); --m)
-	{
-		ndInt32 rowBase = 0;
-		error2 = ndFloat32(0.0f);
-		for (ndInt32 i = 0; i < size; ++i)
-		{
-			const ndFloat32* const row = &matrix[rowBase];
-			ndFloat32 r = residual[i];
-			for (ndInt32 j = 0; j < size; ++j)
-			{
-				r -= row[j] * x[j];
-			}
-
-			const ndInt32 index = normalIndex[i] + i;
-			const ndFloat32 coefficient = x[index];
-			const ndFloat32 l = low[i] * coefficient;
-			const ndFloat32 h = high[i] * coefficient;
-			const ndFloat32 x0 = x[i];
-			const ndFloat32 x1 = x0 + r;
-			const ndFloat32 x2 = x0 + (x1 - x0) * sor;
-			const ndFloat32 f = ndClamp(x2, l, h);
-			ndAssert(ndCheckFloat(f));
-
-			const ndFloat32 dx = f - x0;
-			const ndFloat32 dr = dx * row[i];
-			error2 += dr * dr;
-			x[i] = f;
-
-			rowBase += stride;
-		}
-	}
-
-	for (ndInt32 i = 0; i < size; ++i)
-	{
-		x[i] *= m_diagonalPreconditioner[i];
-	}
-}
-
-#endif
 
 void ndSkeletonContainer::RegularizeLcp() const
 {
