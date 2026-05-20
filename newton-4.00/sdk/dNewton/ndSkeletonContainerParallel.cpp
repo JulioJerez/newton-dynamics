@@ -379,7 +379,6 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 		auxiliaryIndexCount += scans[scans.GetCount() - 1];
 	}
 
-	//ndAssert(primaryIndex == primaryCount);
 	ndAssert(auxiliaryIndexCount == m_auxiliaryRowCount);
 	ndAssert(m_frictionIndex[primaryCount] == m_auxiliaryRowCount);
 
@@ -409,10 +408,9 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 	ndMemSet(m_massMatrix10, ndFloat32(0.0f), primaryCount * m_auxiliaryRowCount);
 	ndMemSet(m_massMatrix11, ndFloat32(0.0f), m_auxiliaryRowCount * m_auxiliaryRowCount);
 
-#if 1
 	ParallelCalculateLoopMassMatrixCoefficients(diagDamp);
-	ConditionMassMatrix();
-	RebuildMassMatrix(diagDamp);
+	ParallelConditionMassMatrix();
+	ParallelRebuildMassMatrix(diagDamp);
 
 	if (m_blockSize)
 	{
@@ -552,10 +550,241 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 	}
 	SortIndexArray(0);
 	SortIndexArray(1);
-#endif
 }
 
 void ndSkeletonContainer::ParallelCalculateLoopMassMatrixCoefficients(ndFloat32* const diagDamp)
 {
-	CalculateLoopMassMatrixCoefficients(diagDamp);
+	D_TRACKTIME();
+	auto CalculateLoopMassMatrixCoefficients = ndMakeObject::ndFunction([this, diagDamp](ndInt32 groupId, ndInt32)
+	{
+		const ndInt32 index = groupId;
+		const ndVector8 zero(ndVector8::m_zero);
+
+		const ndInt32 primaryCount = m_rowCount - m_auxiliaryRowCount;
+		const ndInt32 ii = m_matrixRowsIndex[primaryCount + index];
+		const ndLeftHandSide* const row_i = &m_leftHandSide[ii];
+		const ndRightHandSide* const rhs_i = &m_rightHandSide[ii];
+
+		const ndVector8& JtM0 = (ndVector8&)row_i->m_Jt.m_jacobianM0;
+		const ndVector8& JtM1 = (ndVector8&)row_i->m_Jt.m_jacobianM1;
+		const ndVector8& JMinvM0 = (ndVector8&)row_i->m_JMinv.m_jacobianM0;
+		const ndVector8& JMinvM1 = (ndVector8&)row_i->m_JMinv.m_jacobianM1;
+		const ndVector8 element(JMinvM0 * JtM0 + JMinvM1 * JtM1);
+
+		// I know I am doubling the matrix regularizer, but this makes the solution more robust.
+		ndFloat32* const matrixRow11 = &m_massMatrix11[m_auxiliaryRowCount * index];
+		ndFloat32 diagonal = element.AddHorizontal() + rhs_i->m_diagDamp * ndFloat32(2.0f);
+		ndAssert(matrixRow11[index] == ndFloat32(0.0f));
+		matrixRow11[index] = diagonal;
+		diagDamp[index] = diagonal * ndFloat32(4.0e-3f);
+
+		const ndInt32 m0_i = m_pairs[primaryCount + index].m_m0;
+		const ndInt32 m1_i = m_pairs[primaryCount + index].m_m1;
+		for (ndInt32 j = index + 1; j < m_auxiliaryRowCount; ++j)
+		{
+			const ndInt32 jj = m_matrixRowsIndex[primaryCount + j];
+			const ndLeftHandSide* const row_j = &m_leftHandSide[jj];
+
+			const ndInt32 k = primaryCount + j;
+			const ndInt32 m0_j = m_pairs[k].m_m0;
+			const ndInt32 m1_j = m_pairs[k].m_m1;
+
+			bool hasEffect = false;
+			ndVector8 acc(zero);
+			if (m0_i == m0_j)
+			{
+				hasEffect = true;
+				acc = acc.MulAdd(JMinvM0, (ndVector8&)row_j->m_Jt.m_jacobianM0);
+			}
+			else if (m0_i == m1_j)
+			{
+				hasEffect = true;
+				acc = acc.MulAdd(JMinvM0, (ndVector8&)row_j->m_Jt.m_jacobianM1);
+			}
+
+			if (m1_i == m1_j)
+			{
+				hasEffect = true;
+				acc = acc.MulAdd(JMinvM1, (ndVector8&)row_j->m_Jt.m_jacobianM1);
+			}
+			else if (m1_i == m0_j)
+			{
+				hasEffect = true;
+				acc = acc.MulAdd(JMinvM1, (ndVector8&)row_j->m_Jt.m_jacobianM0);
+			}
+
+			if (hasEffect)
+			{
+				ndFloat32 offDiagValue = acc.AddHorizontal();
+				if (ndAbs(offDiagValue) > ndFloat32(0.0f))
+				{
+					ndAssert(matrixRow11[j] == ndFloat32(0.0f));
+					matrixRow11[j] = offDiagValue;
+					m_massMatrix11[j * m_auxiliaryRowCount + index] = offDiagValue;
+				}
+			}
+		}
+
+		ndFloat32* const matrixRow10 = &m_massMatrix10[primaryCount * index];
+		for (ndInt32 j = 0; j < primaryCount; ++j)
+		{
+			const ndInt32 jj = m_matrixRowsIndex[j];
+			const ndLeftHandSide* const row_j = &m_leftHandSide[jj];
+
+			const ndInt32 m0_j = m_pairs[j].m_m0;
+			const ndInt32 m1_j = m_pairs[j].m_m1;
+
+			bool hasEffect = false;
+			ndVector8 acc(zero);
+			if (m0_i == m0_j)
+			{
+				hasEffect = true;
+				acc = acc.MulAdd(JMinvM0, (ndVector8&)row_j->m_Jt.m_jacobianM0);
+			}
+			else if (m0_i == m1_j)
+			{
+				hasEffect = true;
+				acc = acc.MulAdd(JMinvM0, (ndVector8&)row_j->m_Jt.m_jacobianM1);
+			}
+
+			if (m1_i == m1_j)
+			{
+				hasEffect = true;
+				acc = acc.MulAdd(JMinvM1, (ndVector8&)row_j->m_Jt.m_jacobianM1);
+			}
+			else if (m1_i == m0_j)
+			{
+				hasEffect = true;
+				acc = acc.MulAdd(JMinvM1, (ndVector8&)row_j->m_Jt.m_jacobianM0);
+			}
+
+			if (hasEffect)
+			{
+				ndFloat32 val = acc.AddHorizontal();
+				ndAssert(matrixRow10[j] == ndFloat32(0.0f));
+				matrixRow10[j] = val;
+			}
+		}
+	});
+	//for (ndInt32 index = 0; index < m_auxiliaryRowCount; ++index)
+	//{
+	//	CalculateLoopMassMatrixCoefficients(index, 0);
+	//}
+	ndScene* const scene = m_owner->GetScene();
+	scene->ParallelExecute(CalculateLoopMassMatrixCoefficients, m_auxiliaryRowCount, 4);
+}
+
+void ndSkeletonContainer::ParallelConditionMassMatrix() const
+{
+	D_TRACKTIME();
+	//auto ConditionMassMatrix = [this](ndInt32 groupId)
+	auto ConditionMassMatrix = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	{
+		ndInt32 entry0 = 0;
+		const ndInt32 nodeCount = m_nodeList.GetCount();
+		const ndInt32 primaryCount = m_rowCount - m_auxiliaryRowCount;
+
+		const ndSpatialVector zero(ndSpatialVector::m_zero);
+		ndForcePair* const forcePair = ndAlloca(ndForcePair, nodeCount);
+
+		ndInt32 startjoint = nodeCount;
+		const ndFloat32* const matrixRow10 = &m_massMatrix10[groupId * primaryCount];
+		for (ndInt32 j = 0; j < nodeCount - 1; ++j)
+		{
+			const ndNode* const node = m_nodesOrder[j];
+			const ndInt32 index = node->m_index;
+			forcePair[index].m_body = zero;
+			ndSpatialVector& a = forcePair[index].m_joint;
+
+			const ndInt32 count = node->m_dof;
+			for (ndInt32 k = 0; k < count; ++k)
+			{
+				const ndFloat32 value = matrixRow10[entry0];
+				a[k] = value;
+				startjoint = (value == 0.0f) ? startjoint : ndMin(startjoint, index);
+				entry0++;
+			}
+		}
+
+		startjoint = (startjoint == nodeCount) ? 0 : startjoint;
+		ndAssert(startjoint < nodeCount);
+		forcePair[nodeCount - 1].m_body = zero;
+		forcePair[nodeCount - 1].m_joint = zero;
+		SolveForward(forcePair, forcePair, startjoint);
+		SolveBackward(forcePair);
+
+		ndInt32 entry1 = 0;
+		ndFloat32* const deltaForcePtr = &m_deltaForce[groupId * primaryCount];
+		for (ndInt32 j = 0; j < nodeCount - 1; ++j)
+		{
+			const ndNode* const node = m_nodesOrder[j];
+			const ndInt32 index = node->m_index;
+			const ndSpatialVector& f = forcePair[index].m_joint;
+			const ndInt32 count = node->m_dof;
+			for (ndInt32 k = 0; k < count; ++k)
+			{
+				deltaForcePtr[entry1] = ndFloat32(f[k]);
+				entry1++;
+			}
+		}
+	});
+	//for (ndInt32 index = 0; index < m_auxiliaryRowCount; ++index)
+	//{
+	//	ConditionMassMatrix(index, 0);
+	//}
+	ndScene* const scene = m_owner->GetScene();
+	scene->ParallelExecute(ConditionMassMatrix, m_auxiliaryRowCount, 4);
+}
+
+void ndSkeletonContainer::ParallelRebuildMassMatrix(const ndFloat32* const diagDamp) const
+{
+	D_TRACKTIME();
+	//auto RebuildMassMatrix = [this, diagDamp](ndInt32 groupId)
+	auto RebuildMassMatrix = ndMakeObject::ndFunction([this, diagDamp](ndInt32 groupId, ndInt32)
+	{
+		const ndInt32 primaryCount = m_rowCount - m_auxiliaryRowCount;
+		const ndFloat32* const matrixRow10 = &m_massMatrix10[groupId * primaryCount];
+		ndFloat32* const matrixRow11 = &m_massMatrix11[groupId * m_auxiliaryRowCount];
+
+		ndInt32 indexCount = 0;
+		ndInt16* const indexList = ndAlloca(ndInt16, primaryCount);
+		for (ndInt32 k = 0; k < primaryCount; ++k)
+		{
+			indexList[indexCount] = ndInt16(k);
+			indexCount += (matrixRow10[k] != ndFloat32(0.0f)) ? 1 : 0;
+		}
+
+		for (ndInt32 j = groupId; j < m_auxiliaryRowCount; ++j)
+		{
+			ndFloat32 offDiagonal = matrixRow11[j];
+			const ndFloat32* const row10 = &m_deltaForce[j * primaryCount];
+			for (ndInt32 k = 0; k < indexCount; ++k)
+			{
+				ndInt32 index = indexList[k];
+				offDiagonal += matrixRow10[index] * row10[index];
+			}
+			matrixRow11[j] = offDiagonal;
+			m_massMatrix11[j * m_auxiliaryRowCount + groupId] = offDiagonal;
+		}
+
+		matrixRow11[groupId] = ndMax(matrixRow11[groupId], diagDamp[groupId]);
+	});
+	//for (ndInt32 index = 0; index < m_auxiliaryRowCount; ++index)
+	//{
+	//	RebuildMassMatrix(index, 0);
+	//}
+	ndScene* const scene = m_owner->GetScene();
+	scene->ParallelExecute(RebuildMassMatrix, m_auxiliaryRowCount, 4);
+
+#if 0
+	ndInt32 nonZeroCount = 0;
+	for (ndInt32 i = 0; i < m_auxiliaryRowCount; ++i)
+	{
+		for (ndInt32 j = i + 1; j < m_auxiliaryRowCount; ++j)
+		{
+			nonZeroCount += (m_massMatrix11[i * m_auxiliaryRowCount + j] != ndFloat32(0.0f)) ? 1 : 0;
+		}
+	}
+	ndTrace(("not zero %d %d\n", nonZeroCount * 2 + m_auxiliaryRowCount, m_auxiliaryRowCount * m_auxiliaryRowCount));
+#endif
 }

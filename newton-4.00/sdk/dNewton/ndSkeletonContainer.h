@@ -242,6 +242,8 @@ class ndSkeletonContainer
 
 	// parallel interface
 	void ParallelInitLoopMassMatrix();
+	void ParallelConditionMassMatrix() const;
+	void ParallelRebuildMassMatrix(const ndFloat32* const diagDamp) const;
 	void ParallelCalculateLoopMassMatrixCoefficients(ndFloat32* const diagDamp);
 	void ParallelInitMassMatrix(const ndLeftHandSide* const matrixRow, ndRightHandSide* const rightHandSide);
 		

@@ -200,7 +200,6 @@ template <typename Function>
 void ndThreadPool::ParallelExecute(const Function& function, ndInt32 workGroupCount, ndInt32 groupsPerThreads)
 {
 	const ndInt32 threadCount = GetThreadCount();
-	//if ((threadCount <= 1) || (m_isInUpdate == 0))
 	if (threadCount <= 1)
 	{
 		// in single threaded, just execute all jobs in the main thread
