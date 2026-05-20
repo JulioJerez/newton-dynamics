@@ -192,10 +192,9 @@ bool ndCholeskyFactorization(ndInt32 size, ndInt32 stride, T* const psdMatrix)
 	return true;
 }
 
-// this is a good candidate for parallezation, 
-// however, is far slower than I expected. 
-// my only hope is that is has a bug, but as it stands
-// now, it is abpu fourt time slwore that the  row base version
+// in single thread is much faster until the size is about 300 x 300
+// which make umpractical for rigibody physics.
+// however this is a good candidate for parallezation 
 template<class T>
 bool ndCholeskyTiledFactorization(ndInt32 size, ndInt32 stride, T* const psdMatrix)
 {

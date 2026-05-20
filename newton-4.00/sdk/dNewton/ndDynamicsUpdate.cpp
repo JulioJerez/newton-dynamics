@@ -1368,8 +1368,9 @@ void ndDynamicsUpdate::InitSkeletons()
 		{
 			bool test = ((start + 1) == activeSkeletons.GetCount());
 			test = test || ((start < activeSkeletons.GetCount()) && (activeSkeletons[start]->m_nodeList.GetCount() >= 2 * activeSkeletons[start + 1]->m_nodeList.GetCount()));
-
 			test = test && (scene->GetThreadCount() > 1);
+			test = test && activeSkeletons[start]->m_multicore;
+
 			return test;
 		};
 		while (DoInParallel())

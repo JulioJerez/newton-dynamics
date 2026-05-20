@@ -390,6 +390,7 @@ ndSkeletonContainer::ndSkeletonContainer()
 	,m_auxiliaryRowCount(0)
 	,m_isResting(0)
 	,m_threadId(0)
+	,m_multicore(true)
 {
 	m_auxiliaryMemoryBuffer.SetCount(1024 * 8);
 	m_auxiliaryMemoryBuffer.SetCount(0);
@@ -419,6 +420,11 @@ ndSkeletonContainer::~ndSkeletonContainer()
 ndInt32 ndSkeletonContainer::GetId() const
 {
 	return m_id;
+}
+
+void ndSkeletonContainer::SetMulticoreSolver(bool hint)
+{
+	m_multicore = hint;
 }
 
 ndSkeletonContainer::ndNode* ndSkeletonContainer::GetRoot() const
@@ -1166,7 +1172,6 @@ void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* cons
 		x[i] *= m_diagonalPreconditioner[i];
 	}
 }
-
 
 void ndSkeletonContainer::RegularizeLcp() const
 {

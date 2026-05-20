@@ -73,6 +73,7 @@ ndModelArticulation::ndModelArticulation()
 	,m_name("")
 	,m_rootNode(nullptr)
 	,m_closeLoops()
+	,m_solveMulticore(true)
 {
 }
 
@@ -416,6 +417,11 @@ void ndModelArticulation::OnRemoveFromWorld()
 			}
 		}
 	}
+}
+
+void ndModelArticulation::SetMulticoreHint(bool hint)
+{
+	m_solveMulticore = hint;
 }
 
 void ndModelArticulation::SetSleep(ndFloat32 speed, ndFloat32 angularSpeed, ndFloat32 accel, ndFloat32 alpha) const

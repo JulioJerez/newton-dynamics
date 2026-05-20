@@ -101,6 +101,7 @@ class ndModelArticulation: public ndModel
 	D_NEWTON_API const ndList<ndModelArticulation::ndNode, ndContainersFreeListAlloc<ndNode>>& GetCloseLoops() const;
 	D_NEWTON_API void AddCloseLoop(const ndSharedPtr<ndJointBilateralConstraint>& joint, const char* const name = "none");
 
+	D_NEWTON_API virtual void SetMulticoreHint(bool hint) override;
 	D_NEWTON_API virtual void SetSleep(ndFloat32 speed, ndFloat32 angularSpeed, ndFloat32 accel, ndFloat32 alpha) const override;
 
 	D_NEWTON_API const ndString& GetName() const;
@@ -138,6 +139,7 @@ class ndModelArticulation: public ndModel
 	ndNode* m_rootNode;
 	ndArray<ndCollindPairs> m_collisionPairs;
 	ndList<ndNode, ndContainersFreeListAlloc<ndNode>> m_closeLoops;
+	bool m_solveMulticore;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 template <typename Function>

@@ -39,6 +39,7 @@ class ndSkeletonContainer
 	D_NEWTON_API ndSkeletonContainer();
 	D_NEWTON_API ~ndSkeletonContainer();
 	D_NEWTON_API ndInt32 GetId() const;
+	D_NEWTON_API void SetMulticoreSolver(bool hint);
 
 	const ndNodeList& GetNodeList() const;
 	ndInt32 FindBoneIndex(const ndBodyKinematic* const body) const;
@@ -242,10 +243,13 @@ class ndSkeletonContainer
 
 	// parallel interface
 	void ParallelInitLoopMassMatrix();
+	void ParallelRegularizeLcp() const;
 	void ParallelConditionMassMatrix() const;
 	void ParallelRebuildMassMatrix(const ndFloat32* const diagDamp) const;
 	void ParallelCalculateLoopMassMatrixCoefficients(ndFloat32* const diagDamp);
 	void ParallelInitMassMatrix(const ndLeftHandSide* const matrixRow, ndRightHandSide* const rightHandSide);
+
+	bool ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, ndFloat32* const psdMatrix) const;
 		
 	class ndBodyForceIndexPair
 	{
@@ -294,6 +298,7 @@ class ndSkeletonContainer
 	ndInt32 m_auxiliaryRowCount;
 	ndInt32 m_isResting;
 	ndInt32 m_threadId;
+	bool m_multicore;
 
 	friend class ndWorld;
 	friend class ndIkSolver;

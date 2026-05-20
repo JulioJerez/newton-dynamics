@@ -835,6 +835,16 @@ void ndWorld::UpdateSkeletons()
 	for (ndInt32 i = 0; i < m_activeSkeletons.GetCount(); ++i)
 	{
 		ndSkeletonContainer* const skeleton = m_activeSkeletons[i];
+		//const ndInt32 nodes = skeleton->m_nodeList.GetCount() - 1;
+		//for (ndInt32 j = 0; j < nodes; ++j)
+		const ndSkeletonContainer::ndNode* const node = skeleton->m_nodesOrder[0];
+		ndAssert(node->m_body);
+		ndAssert(node->m_body->GetInvMass() > ndFloat32 (0.0f));
+		const ndModel* const model = node->m_body->GetAsBodyKinematic()->GetModel();
+		if (model)
+		{
+			skeleton->SetMulticoreSolver(model->GetMulticoreHint());
+		}
 		skeleton->ClearCloseLoopJoints();
 	}
 

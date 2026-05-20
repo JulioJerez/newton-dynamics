@@ -464,7 +464,7 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 			}
 		}
 
-		auto InitMassMatrixBoundedBlock = [this, boundedSize, diagDamp](ndInt32 groupId)
+		auto InitMassMatrixBoundedBlock = ndMakeObject::ndFunction([this, boundedSize, diagDamp](ndInt32 groupId, ndInt32)
 		{
 			ndFixSizeArray<ndFloat32, 1024> acc(m_blockSize);
 			ndAssert(m_blockSize <= acc.GetCapacity());
@@ -484,19 +484,19 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 			const ndFloat32* const row1 = &m_massMatrix11[(m_blockSize + groupId) * m_auxiliaryRowCount];
 			ndFloat32 elem = row1[m_blockSize + groupId] + ndDotProduct(m_blockSize, &acc[0], row1);
 			arow[groupId] = elem + diagDamp[m_blockSize + groupId];
-		};
-
-		for (ndInt32 index = 0; index < boundedSize; ++index)
-		{
-			InitMassMatrixBoundedBlock(index);
-		}
+		});
+		//for (ndInt32 index = 0; index < boundedSize; ++index)
+		//{
+		//	InitMassMatrixBoundedBlock(index, 0);
+		//}
+		scene->ParallelExecute(InitMassMatrixBoundedBlock, boundedSize, 4);
 
 		ndAssert(!boundedSize || ndTestPSDmatrix(m_auxiliaryRowCount - m_blockSize, m_auxiliaryRowCount, &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize], GetScratchBuffer(m_auxiliaryRowCount * m_auxiliaryRowCount)));
 	}
 
 	if (m_transientLoopingContacts.GetCount() || m_transientLoopingJoints.GetCount())
 	{
-		RegularizeLcp();
+		ParallelRegularizeLcp();
 	}
 
 	auto SortIndexArray = [this](ndInt32 groupId)
@@ -787,4 +787,437 @@ void ndSkeletonContainer::ParallelRebuildMassMatrix(const ndFloat32* const diagD
 	}
 	ndTrace(("not zero %d %d\n", nonZeroCount * 2 + m_auxiliaryRowCount, m_auxiliaryRowCount * m_auxiliaryRowCount));
 #endif
+}
+
+void ndSkeletonContainer::ParallelRegularizeLcp() const
+{
+	// note: this can be eliminated if I just regularize the diagonal unconditionally.
+	ndAssert(m_threadId == 0);
+	ndInt32 size = m_auxiliaryRowCount - m_blockSize;
+	if (size < 128)
+	{
+		RegularizeLcp();
+		return;
+	}
+
+	//ndFloat32* const buffer = GetScratchBuffer(m_auxiliaryRowCount * m_auxiliaryRowCount);
+	ndFloat32* const matrix = &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize];
+
+	if (!ParallelTestPSDmatrix(size, m_auxiliaryRowCount, matrix))
+	{
+		ndFloat32* const regularizer = ndAlloca(ndFloat32, size);
+		ndMemSet(regularizer, ndFloat32(1.01f), size);
+		ndInt32 step = m_auxiliaryRowCount + 1;
+		ndFloat32 reg = ndFloat32(1.125f);
+		do
+		{
+			ndFloat32* base = &m_massMatrix11[m_auxiliaryRowCount * m_auxiliaryRowCount - 1];
+			for (ndInt32 i = size - 1; i >= 0; --i)
+			{
+				*base = *base * reg;
+				base -= step;
+			}
+			reg *= ndFloat32(1.125f);
+		} while (!ParallelTestPSDmatrix(size, m_auxiliaryRowCount, matrix));
+	}
+}
+
+//void ndSkeletonContainer::ParallelTileCholesky() const;
+//template<class T>
+//bool ndCholeskyTiledFactorization(ndInt32 size, ndInt32 stride, T* const psdMatrix)
+bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, ndFloat32* const psdMatrix) const
+{
+#if 0
+	class CholeskyTile
+	{
+	public:
+		void Clear()
+		{
+			for (ndInt32 i = 0; i < __CholeskyTiledBlockSize__; ++i)
+			{
+				for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
+				{
+					m_element[i][j] = T(0.0f);
+				}
+			}
+		}
+		T m_element[__CholeskyTiledBlockSize__][__CholeskyTiledBlockSize__];
+	};
+	CholeskyTile* const invDiagonalTiles = (CholeskyTile*)ndAlloca(CholeskyTile, (stride + __CholeskyTiledBlockSize__ - 1) / __CholeskyTiledBlockSize__);
+
+	auto GetTile = [stride, psdMatrix](ndInt32 row, ndInt32 column)
+		{
+			CholeskyTile tile;
+			const T* const src = &psdMatrix[(row * stride + column) * __CholeskyTiledBlockSize__];
+			for (ndInt32 i = 0; i < __CholeskyTiledBlockSize__; ++i)
+			{
+				const T* const ptr = &src[i * stride];
+				for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
+				{
+					tile.m_element[i][j] = ptr[j];
+				}
+			}
+			return tile;
+		};
+
+	auto StoreTile = [stride, psdMatrix](const CholeskyTile& tile, ndInt32 row, ndInt32 column)
+		{
+			T* const dst = &psdMatrix[(row * stride + column) * __CholeskyTiledBlockSize__];
+			for (ndInt32 i = 0; i < __CholeskyTiledBlockSize__; ++i)
+			{
+				T* const ptr = &dst[i * stride];
+				for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
+				{
+					ptr[j] = tile.m_element[i][j];
+				}
+			}
+		};
+
+	auto InverseTile = [](CholeskyTile& inverse, CholeskyTile& tile)
+		{
+			for (ndInt32 i = 0; i < __CholeskyTiledBlockSize__; ++i)
+			{
+				for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
+				{
+					inverse.m_element[i][j] = T(0.0f);
+				}
+				inverse.m_element[i][i] = T(1.0f);
+			}
+
+			for (ndInt32 i = 0; i < __CholeskyTiledBlockSize__; ++i)
+			{
+				ndAssert(tile.m_element[i][i] > T(0.0f));
+				const T invPivot = T(1.0f) / tile.m_element[i][i];
+				for (ndInt32 j = 0; j <= i; ++j)
+				{
+					tile.m_element[i][j] *= invPivot;
+					inverse.m_element[i][j] *= invPivot;
+				}
+
+				for (ndInt32 j = i + 1; j < __CholeskyTiledBlockSize__; ++j)
+				{
+					const T pivot = tile.m_element[j][i];
+					for (ndInt32 k = 0; k <= j; ++k)
+					{
+						tile.m_element[j][k] -= tile.m_element[i][k] * pivot;
+						inverse.m_element[j][k] -= inverse.m_element[i][k] * pivot;
+					}
+				}
+			}
+		};
+
+	auto DebugIndentity = [](const CholeskyTile& A, const CholeskyTile& B)
+		{
+			CholeskyTile tile;
+			bool pass = true;
+			ndMatrixTimeMatrix(__CholeskyTiledBlockSize__, &A.m_element[0][0], &B.m_element[0][0], &tile.m_element[0][0]);
+			for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
+			{
+				T error = tile.m_element[j][j] - T(1.0f);
+				pass = pass && (ndAbs(error) < T(1.0e-6f));
+				for (ndInt32 k = j + 1; k < __CholeskyTiledBlockSize__; ++k)
+				{
+					pass = pass && (ndAbs(tile.m_element[j][k]) < T(1.0e-6f));
+					pass = pass && (ndAbs(tile.m_element[k][j]) < T(1.0e-6f));
+				}
+			}
+			return pass;
+		};
+
+	auto CalculateOffDiagonalTile = [stride, psdMatrix](const CholeskyTile& tile, const CholeskyTile& invDiagonal, const ndInt32 row, ndInt32 column)
+		{
+			T* const dst = &psdMatrix[(row * stride + column) * __CholeskyTiledBlockSize__];
+			for (ndInt32 i = 0; i < __CholeskyTiledBlockSize__; ++i)
+			{
+				T* const ptr = &dst[i * stride];
+				for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
+				{
+					T acc(0.0f);
+					for (ndInt32 k = 0; k < __CholeskyTiledBlockSize__; ++k)
+					{
+						acc += tile.m_element[i][k] * invDiagonal.m_element[j][k];
+					}
+					ptr[j] = acc;
+				}
+			}
+		};
+
+	auto MultAddTile = [stride, psdMatrix](CholeskyTile& tile, ndInt32 row, ndInt32 column, ndInt32 m)
+		{
+			const T* const tileA = &psdMatrix[(row * stride + m) * __CholeskyTiledBlockSize__];
+			const T* const tileB = &psdMatrix[(column * stride + m) * __CholeskyTiledBlockSize__];
+
+			for (ndInt32 i = 0; i < __CholeskyTiledBlockSize__; ++i)
+			{
+				const T* const srcA = &tileA[i * stride];
+				for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
+				{
+					T acc(0.0f);
+					const T* const srcB = &tileB[j * stride];
+					for (ndInt32 k = 0; k < __CholeskyTiledBlockSize__; ++k)
+					{
+						acc += srcA[k] * srcB[k];
+					}
+					tile.m_element[i][j] -= acc;
+				}
+			}
+		};
+
+	auto TileCholesky = [](CholeskyTile& tile)
+		{
+			T invDiag[__CholeskyTiledBlockSize__];
+			for (ndInt32 i = 0; i < __CholeskyTiledBlockSize__; ++i)
+			{
+				for (ndInt32 j = 0; j <= i; ++j)
+				{
+					T diag = tile.m_element[i][j];
+					for (ndInt32 k = 0; k < j; ++k)
+					{
+						diag -= tile.m_element[i][k] * tile.m_element[j][k];
+					}
+
+					if (j < i)
+					{
+						tile.m_element[j][i] = T(0.0f);
+						tile.m_element[i][j] = diag * invDiag[j];
+					}
+					else
+					{
+#ifdef D_NEWTON_USE_DOUBLE
+						if (diag < T(1.0e-12f))
+						{
+							return false;
+						}
+#else
+						if (diag < T(1.0e-6f))
+						{
+							return false;
+						}
+#endif
+
+						diag = T(sqrt(diag));
+						tile.m_element[i][i] = diag;
+						invDiag[i] = T(1.0f) / diag;
+					}
+				}
+			}
+			return true;
+		};
+
+	const ndInt32 maxSize = size / __CholeskyTiledBlockSize__;
+	for (ndInt32 i = 0; i < maxSize; ++i)
+	{
+		for (ndInt32 j = 0; j <= i; ++j)
+		{
+			CholeskyTile tile(GetTile(i, j));
+			for (ndInt32 k = 0; k < j; ++k)
+			{
+				MultAddTile(tile, i, j, k);
+			}
+
+			if (j < i)
+			{
+				const CholeskyTile& invDiagonal = invDiagonalTiles[j];
+				CalculateOffDiagonalTile(tile, invDiagonal, i, j);
+			}
+			else
+			{
+				bool state = TileCholesky(tile);
+				if (!state)
+				{
+					return false;
+				}
+
+				StoreTile(tile, i, i);
+				CholeskyTile& invTile = invDiagonalTiles[i];
+
+				InverseTile(invTile, tile);
+				ndAssert(DebugIndentity(GetTile(i, i), invTile));
+			}
+		}
+	}
+
+	if (size > (maxSize * __CholeskyTiledBlockSize__))
+	{
+		const ndInt32 residual = size - maxSize * __CholeskyTiledBlockSize__;
+		auto GetResidualTile = [residual, stride, psdMatrix](ndInt32 row, ndInt32 column)
+			{
+				CholeskyTile tile;
+				tile.Clear();
+
+				const T* const src = &psdMatrix[(row * stride + column) * __CholeskyTiledBlockSize__];
+				if (row != column)
+				{
+					for (ndInt32 i = 0; i < residual; ++i)
+					{
+						const T* const ptr = &src[i * stride];
+						for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
+						{
+							tile.m_element[i][j] = ptr[j];
+						}
+					}
+				}
+				else
+				{
+					for (ndInt32 i = 0; i < residual; ++i)
+					{
+						const T* const ptr = &src[i * stride];
+						for (ndInt32 j = 0; j < residual; ++j)
+						{
+							tile.m_element[i][j] = ptr[j];
+						}
+					}
+				}
+				return tile;
+			};
+
+		auto StoreResidualTile = [residual, stride, psdMatrix](const CholeskyTile& tile, ndInt32 row, ndInt32 column)
+			{
+				T* const dst = &psdMatrix[(row * stride + column) * __CholeskyTiledBlockSize__];
+				for (ndInt32 i = 0; i < residual; ++i)
+				{
+					T* const ptr = &dst[i * stride];
+					for (ndInt32 j = 0; j < residual; ++j)
+					{
+						ptr[j] = tile.m_element[i][j];
+					}
+				}
+			};
+
+		auto MultAddResidualTile = [residual, stride, psdMatrix](CholeskyTile& tile, ndInt32 row, ndInt32 column, ndInt32 m)
+			{
+				const T* const tileA = &psdMatrix[(row * stride + m) * __CholeskyTiledBlockSize__];
+				const T* const tileB = &psdMatrix[(column * stride + m) * __CholeskyTiledBlockSize__];
+
+				const ndInt32 columnWidth = (row != column) ? __CholeskyTiledBlockSize__ : residual;
+				for (ndInt32 i = 0; i < residual; ++i)
+				{
+					const T* const srcA = &tileA[i * stride];
+					for (ndInt32 j = 0; j < columnWidth; ++j)
+					{
+						T acc(0.0f);
+						const T* const srcB = &tileB[j * stride];
+						for (ndInt32 k = 0; k < __CholeskyTiledBlockSize__; ++k)
+						{
+							acc += srcA[k] * srcB[k];
+						}
+						tile.m_element[i][j] -= acc;
+					}
+				}
+			};
+
+		auto CalculateOffDiagonalResidualTile = [residual, stride, psdMatrix](const CholeskyTile& tile, const CholeskyTile& invDiagonal, const ndInt32 row, ndInt32 column)
+			{
+				T* const dst = &psdMatrix[(row * stride + column) * __CholeskyTiledBlockSize__];
+				for (ndInt32 i = 0; i < residual; ++i)
+				{
+					T* const ptr = &dst[i * stride];
+					for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
+					{
+						T acc(0.0f);
+						for (ndInt32 k = 0; k < __CholeskyTiledBlockSize__; ++k)
+						{
+							acc += tile.m_element[i][k] * invDiagonal.m_element[j][k];
+						}
+						ptr[j] = acc;
+					}
+				}
+			};
+
+		auto TileResidualCholesky = [residual](CholeskyTile& tile)
+			{
+				T invDiag[__CholeskyTiledBlockSize__];
+				for (ndInt32 i = 0; i < residual; ++i)
+				{
+					for (ndInt32 j = 0; j <= i; ++j)
+					{
+						T diag = tile.m_element[i][j];
+						for (ndInt32 k = 0; k < j; ++k)
+						{
+							diag -= tile.m_element[i][k] * tile.m_element[j][k];
+						}
+
+						if (j < i)
+						{
+							tile.m_element[j][i] = T(0.0f);
+							tile.m_element[i][j] = diag * invDiag[j];
+						}
+						else
+						{
+#ifdef D_NEWTON_USE_DOUBLE
+							if (diag < T(1.0e-12f))
+							{
+								return false;
+							}
+#else
+							if (diag < T(1.0e-6f))
+							{
+								return false;
+							}
+#endif
+
+							diag = T(sqrt(diag));
+							tile.m_element[i][i] = diag;
+							invDiag[i] = T(1.0f) / diag;
+						}
+					}
+				}
+				return true;
+			};
+
+		const ndInt32 i = maxSize;
+		for (ndInt32 j = 0; j <= i; ++j)
+		{
+			CholeskyTile tile(GetResidualTile(i, j));
+			for (ndInt32 k = 0; k < j; ++k)
+			{
+				MultAddResidualTile(tile, i, j, k);
+			}
+
+			if (j < i)
+			{
+				const CholeskyTile& invDiagonal = invDiagonalTiles[j];
+				CalculateOffDiagonalResidualTile(tile, invDiagonal, i, j);
+			}
+			else
+			{
+				bool state = TileResidualCholesky(tile);
+				if (!state)
+				{
+					return false;
+				}
+				StoreResidualTile(tile, i, i);
+			}
+		}
+	}
+#endif
+
+	// make a copy of the source matrix
+	ndFloat32* const buffer = GetScratchBuffer(size * size);
+	auto MakeCopy = ndMakeObject::ndFunction([this, size, stride, buffer, psdMatrix](ndInt32 groupId, ndInt32)
+	{
+		ndFloat32* const dstRow = &buffer[size * groupId];
+		const ndFloat32* const srcRow = &psdMatrix[stride * groupId];
+		for (ndInt32 i = 0; i < size; ++i)
+		{	
+			dstRow[i] = srcRow[i];
+		}
+	});
+	ndScene* const scene = m_owner->GetScene();
+	scene->ParallelExecute(MakeCopy, size, 4);
+
+	const ndInt32 maxSize = size / __CholeskyTiledBlockSize__;
+	for (ndInt32 i = 0; i < maxSize; ++i)
+	{
+		for (ndInt32 j = 0; j <= i; ++j)
+		{
+		}
+	}
+
+	if (size > (maxSize * __CholeskyTiledBlockSize__))
+	{
+		//ndAssert(0);
+	}
+	RegularizeLcp();
+	return true;
 }
