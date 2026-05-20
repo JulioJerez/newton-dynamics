@@ -31,7 +31,7 @@
 
 #define D_LCP_MAX_VALUE ndFloat32 (1.0e15f)
 
-#define __CholeskyTiledBlockSize__  32
+#define __CholeskyTiledBlockSize__  (1<<5)
 
 //*************************************************************
 //
@@ -213,7 +213,6 @@ bool ndCholeskyTiledFactorization(ndInt32 size, ndInt32 stride, T* const psdMatr
 		}
 		T m_element[__CholeskyTiledBlockSize__][__CholeskyTiledBlockSize__];
 	};
-	CholeskyTile* const invDiagonalTiles = (CholeskyTile*)ndAlloca(CholeskyTile, (stride + __CholeskyTiledBlockSize__ - 1) / __CholeskyTiledBlockSize__);
 
 	auto GetTile = [stride, psdMatrix](ndInt32 row, ndInt32 column)
 	{
@@ -375,6 +374,7 @@ bool ndCholeskyTiledFactorization(ndInt32 size, ndInt32 stride, T* const psdMatr
 	};
 
 	const ndInt32 maxSize = size / __CholeskyTiledBlockSize__;
+	CholeskyTile* const invDiagonalTiles = (CholeskyTile*)ndAlloca(CholeskyTile, maxSize + 1);
 	for (ndInt32 i = 0; i < maxSize; ++i)
 	{
 		for (ndInt32 j = 0; j <= i; ++j)
