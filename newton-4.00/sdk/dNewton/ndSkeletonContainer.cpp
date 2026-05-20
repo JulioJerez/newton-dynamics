@@ -1772,7 +1772,7 @@ void ndSkeletonContainer::InitLoopMassMatrix()
 			CompareKey(void* const)
 			{
 			}
-
+	
 			ndInt32 Compare(const ndBodyForceIndexPair& elementA, const ndBodyForceIndexPair& elementB) const
 			{
 				ndInt32 indexA = (elementA.m_bodyIndex << 16) + elementA.m_forceIndex;
@@ -1790,7 +1790,7 @@ void ndSkeletonContainer::InitLoopMassMatrix()
 		};
 		ndBodyForcePtr& bodyForceRemap = groupId ? m_bodyForceRemap1 : m_bodyForceRemap0;
 		ndSort<ndBodyForceIndexPair, CompareKey>(bodyForceRemap.m_index, m_rowCount, nullptr);
-
+	
 		ndInt32 spanIndex = 0;
 		for (ndInt32 i = 0; i < m_rowCount; ++i)
 		{
@@ -1845,7 +1845,6 @@ void ndSkeletonContainer::SolveAuxiliary(ndJacobian* const internalForces, const
 	ndAssert(primaryIndex == primaryCount);
 
 	ndVector8* const internalForcesArray = (ndVector8*)internalForces;
-	//auto SolveAuxiliary_1 = [this, primaryCount, u, f, b, low, high, internalForcesArray](ndInt32 groupId)
 	auto SolveAuxiliary = [this, primaryCount, u, f, b, low, high, internalForcesArray](ndInt32 groupId)
 	{
 		const ndInt32 index = m_matrixRowsIndex[primaryCount + groupId];
@@ -1915,7 +1914,7 @@ void ndSkeletonContainer::SolveAuxiliary(ndJacobian* const internalForces, const
 	AddForces(1);
 }
 
-void ndSkeletonContainer::InitMassMatrix(ndFloat32, const ndLeftHandSide* const leftHandSide, ndRightHandSide* const rightHandSide, ndInt32 threadIndex)
+void ndSkeletonContainer::InitMassMatrix(const ndLeftHandSide* const leftHandSide, ndRightHandSide* const rightHandSide, ndInt32 threadIndex)
 {
 	D_TRACKTIME();
 	if (m_isResting)

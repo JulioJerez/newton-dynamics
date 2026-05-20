@@ -1367,7 +1367,7 @@ void ndDynamicsUpdate::InitSkeletons()
 		auto DoInParallel = [scene, &start, &activeSkeletons]()
 		{
 			bool test = ((start + 1) == activeSkeletons.GetCount());
-			test = test || (activeSkeletons[start]->m_nodeList.GetCount() >= 2 * activeSkeletons[start + 1]->m_nodeList.GetCount());
+			test = test || ((start < activeSkeletons.GetCount()) && (activeSkeletons[start]->m_nodeList.GetCount() >= 2 * activeSkeletons[start + 1]->m_nodeList.GetCount()));
 
 			test = test && (scene->GetThreadCount() > 1);
 			return test;
@@ -1378,7 +1378,7 @@ void ndDynamicsUpdate::InitSkeletons()
 			const ndArray<ndLeftHandSide>& leftHandSide = m_leftHandSide;
 
 			ndSkeletonContainer* const skeleton = activeSkeletons[start];
-			skeleton->InitMassMatrix(*scene, m_timestep, &leftHandSide[0], &rightHandSide[0]);
+			skeleton->ParallelInitMassMatrix(&leftHandSide[0], &rightHandSide[0]);
 			start++;
 		}
 
@@ -1389,7 +1389,7 @@ void ndDynamicsUpdate::InitSkeletons()
 			const ndArray<ndLeftHandSide>& leftHandSide = m_leftHandSide;
 
 			ndSkeletonContainer* const skeleton = activeSkeletons[start + groupId];
-			skeleton->InitMassMatrix(m_timestep, &leftHandSide[0], &rightHandSide[0], groupId);
+			skeleton->InitMassMatrix(&leftHandSide[0], &rightHandSide[0], groupId);
 		});
 
 		const ndInt32 count = ndInt32(activeSkeletons.GetCount() - start);

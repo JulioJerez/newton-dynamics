@@ -230,7 +230,7 @@ class ndSkeletonContainer
 	void CalculateJointAccelImmediate(ndForcePair* const accel) const;
 	void SolveAuxiliaryImmediate(ndFixSizeArray<ndBodyKinematic*, D_INV_IK_MAX_LINKS>& bodyArray, ndForcePair* const force) const;
 
-	// support
+	// low level support
 	void InitLoopMassMatrix();
 	void ConditionMassMatrix() const;
 	ndFloat32* GetScratchBuffer(ndInt32 size) const;
@@ -238,11 +238,13 @@ class ndSkeletonContainer
 	void CalculateReactionForces(ndJacobian* const internalForces, ndInt32 threadId);
 	void CalculateJointAccel(const ndJacobian* const internalForces, ndForcePair* const accel) const;
 	void SolveAuxiliary(ndJacobian* const internalForces, const ndForcePair* const accel, ndForcePair* const force) const;
-	void InitMassMatrix(ndFloat32 timestep, const ndLeftHandSide* const matrixRow, ndRightHandSide* const rightHandSide, ndInt32 threadIndex);
+	void InitMassMatrix(const ndLeftHandSide* const matrixRow, ndRightHandSide* const rightHandSide, ndInt32 threadIndex);
 
 	// parallel interface
-	void InitMassMatrix(ndThreadPool& threadPool, ndFloat32 timestep, const ndLeftHandSide* const matrixRow, ndRightHandSide* const rightHandSide);
-	
+	void ParallelInitLoopMassMatrix();
+	void ParallelCalculateLoopMassMatrixCoefficients(ndFloat32* const diagDamp);
+	void ParallelInitMassMatrix(const ndLeftHandSide* const matrixRow, ndRightHandSide* const rightHandSide);
+		
 	class ndBodyForceIndexPair
 	{
 		public:
