@@ -1010,11 +1010,11 @@ void ndSkeletonContainer::FactorizeMatrix(ndInt32 size, ndInt32 stride, ndFloat3
 
 void ndSkeletonContainer::CalculateJointAccel(const ndJacobian* const internalForces, ndForcePair* const accel) const
 {
-	const ndSpatialVector zero(ndSpatialVector::m_zero);
-
+	D_TRACKTIME();
 	const ndInt32 nodeCount = m_nodeList.GetCount();
 	const ndVector8* const internalForcesArray = (ndVector8*)internalForces;
 
+	const ndSpatialVector zero(ndSpatialVector::m_zero);
 	auto CalculateJointAccel = [this, internalForcesArray, accel, &zero](ndInt32 groupId)
 	{
 		ndNode* const node = m_nodesOrder[groupId];

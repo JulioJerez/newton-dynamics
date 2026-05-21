@@ -246,10 +246,15 @@ class ndSkeletonContainer
 	void ParallelRegularizeLcp() const;
 	void ParallelConditionMassMatrix() const;
 	void ParallelRebuildMassMatrix(const ndFloat32* const diagDamp) const;
+	void ParallelCalculateReactionForces(ndJacobian* const internalForces);
 	void ParallelCalculateLoopMassMatrixCoefficients(ndFloat32* const diagDamp);
-	void ParallelInitMassMatrix(const ndLeftHandSide* const matrixRow, ndRightHandSide* const rightHandSide);
-
 	bool ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, ndFloat32* const psdMatrix) const;
+	void ParallelCalculateJointAccel(const ndJacobian* const internalForces, ndForcePair* const accel) const;
+	void ParallelInitMassMatrix(const ndLeftHandSide* const matrixRow, ndRightHandSide* const rightHandSide);
+	void ParallelSolveAuxiliary(ndJacobian* const internalForces, const ndForcePair* const accel, ndForcePair* const force) const;
+
+
+
 		
 	class ndBodyForceIndexPair
 	{
