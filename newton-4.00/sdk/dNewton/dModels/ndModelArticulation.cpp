@@ -274,17 +274,6 @@ ndModelArticulation::ndNode* ndModelArticulation::FindByBodyId(ndInt32 bodyId) c
 
 ndModelArticulation::ndNode* ndModelArticulation::FindByBody(const ndBody* const body) const
 {
-	//if (m_rootNode)
-	//{
-	//	for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
-	//	{
-	//		if (*node->m_body == body)
-	//		{
-	//			return node;
-	//		}
-	//	}
-	//}
-	//return nullptr;
 	return FindByBodyId(ndInt32 (body->GetId()));
 }
 
@@ -304,7 +293,6 @@ ndModelArticulation::ndNode* ndModelArticulation::FindByName(const char* const n
 		for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* ptr = m_closeLoops.GetFirst(); ptr; ptr = ptr->GetNext())
 		{
 			ndNode* const node = &ptr->GetInfo();
-			//if (strcmp(node->m_name.GetStr(), name) == 0)
 			if (node->m_name.CompareIgnoreCase(name))
 			{
 				return node;
@@ -321,7 +309,6 @@ ndModelArticulation::ndNode* ndModelArticulation::FindLoopByName(const char* con
 	{
 		for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
 		{
-			//if (strcmp(node->GetInfo().m_name.GetStr(), name) == 0)
 			if (node->GetInfo().m_name.CompareIgnoreCase(name))
 			{
 				return &node->GetInfo();
