@@ -823,6 +823,9 @@ void ndSkeletonContainer::ParallelRegularizeLcp() const
 bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, ndFloat32* const psdMatrix) const
 {
 	// make a copy of the source matrix
+	#define ND_SKELETON_TILE_COUNT	4
+	#define ND_SKELETON_TILE_SIZE	(ND_SIMD8_WORK_GROUP_SIZE * ND_SKELETON_TILE_COUNT)
+
 	const ndInt32 bufferStride = ndInt32 (((size * sizeof(ndFloat32) + 32 - 1) & -32) / sizeof(ndFloat32));
 	ndFloat32* const buffer = GetScratchBuffer(bufferStride * size);
 	auto MakeCopy = ndMakeObject::ndFunction([this, size, stride, psdMatrix, buffer, bufferStride](ndInt32 groupId, ndInt32)
@@ -843,27 +846,27 @@ bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, nd
 		public:
 		void Clear()
 		{
-			for (ndInt32 i = 0; i < __CholeskyTiledBlockSize__; ++i)
+			ndVector8* const row = (ndVector8*)&m_element[0][0];
+			for (ndInt32 i = 0; i < ND_SKELETON_TILE_SIZE * ND_SKELETON_TILE_COUNT; ++i)
 			{
-				for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
-				{
-					m_element[i][j] = ndFloat32(0.0f);
-				}
+				row[i] = ndVector8::m_zero;
 			}
 		}
-		ndFloat32 m_element[__CholeskyTiledBlockSize__][__CholeskyTiledBlockSize__];
+
+		ndFloat32 m_element[ND_SKELETON_TILE_SIZE][ND_SKELETON_TILE_SIZE];
 	} D_GCC_NEWTON_CLASS_ALIGN_32;
 
 	auto GetTile = [buffer, size, bufferStride](ndInt32 row, ndInt32 column)
 	{
 		CholeskyTile tile;
-		const ndFloat32* const src = &buffer[(row * bufferStride + column) * __CholeskyTiledBlockSize__];
-		for (ndInt32 i = 0; i < __CholeskyTiledBlockSize__; ++i)
+		const ndFloat32* const bufferPtr = &buffer[(row * bufferStride + column) * ND_SKELETON_TILE_SIZE];
+		for (ndInt32 i = 0; i < ND_SKELETON_TILE_SIZE; ++i)
 		{
-			const ndFloat32* const ptr = &src[i * bufferStride];
-			for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
+			const ndVector8* const src = (ndVector8*)&bufferPtr[i * bufferStride];
+			ndVector8* const dst = (ndVector8*)&tile.m_element[i][0];
+			for (ndInt32 j = 0; j < ND_SKELETON_TILE_COUNT; ++j)
 			{
-				tile.m_element[i][j] = ptr[j];
+				dst[j] = src[j];
 			}
 		}
 		return tile;
@@ -871,21 +874,22 @@ bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, nd
 
 	auto StoreTile = [buffer, size, bufferStride](const CholeskyTile& tile, ndInt32 row, ndInt32 column)
 	{
-		ndFloat32* const dst = &buffer[(row * bufferStride + column) * __CholeskyTiledBlockSize__];
-		for (ndInt32 i = 0; i < __CholeskyTiledBlockSize__; ++i)
+		ndFloat32* const bufferPtr = &buffer[(row * bufferStride + column) * ND_SKELETON_TILE_SIZE];
+		for (ndInt32 i = 0; i < ND_SKELETON_TILE_SIZE; ++i)
 		{
-			ndFloat32* const ptr = &dst[i * bufferStride];
-			for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
+			ndVector8* const dst = (ndVector8*)&bufferPtr[i * bufferStride];
+			const ndVector8* const src = (ndVector8*)&tile.m_element[i][0];
+			for (ndInt32 j = 0; j < ND_SKELETON_TILE_COUNT; ++j)
 			{
-				ptr[j] = tile.m_element[i][j];
+				dst[j] = src[j];
 			}
 		}
 	};
 
 	auto TileCholesky = [](CholeskyTile& tile)
 	{
-		ndFloat32 invDiag[__CholeskyTiledBlockSize__];
-		for (ndInt32 i = 0; i < __CholeskyTiledBlockSize__; ++i)
+		ndFloat32 invDiag[ND_SKELETON_TILE_SIZE];
+		for (ndInt32 i = 0; i < ND_SKELETON_TILE_SIZE; ++i)
 		{
 			for (ndInt32 j = 0; j <= i; ++j)
 			{
@@ -924,16 +928,16 @@ bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, nd
 
 	auto InverseTile = [](CholeskyTile& inverse, CholeskyTile& tile)
 	{
-		for (ndInt32 i = 0; i < __CholeskyTiledBlockSize__; ++i)
+		for (ndInt32 i = 0; i < ND_SKELETON_TILE_SIZE; ++i)
 		{
-			for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
+			for (ndInt32 j = 0; j < ND_SKELETON_TILE_SIZE; ++j)
 			{
 				inverse.m_element[i][j] = ndFloat32(0.0f);
 			}
 			inverse.m_element[i][i] = ndFloat32(1.0f);
 		}
 
-		for (ndInt32 i = 0; i < __CholeskyTiledBlockSize__; ++i)
+		for (ndInt32 i = 0; i < ND_SKELETON_TILE_SIZE; ++i)
 		{
 			ndAssert(tile.m_element[i][i] > ndFloat32(0.0f));
 			const ndFloat32 invPivot = ndFloat32(1.0f) / tile.m_element[i][i];
@@ -943,7 +947,7 @@ bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, nd
 				inverse.m_element[i][j] *= invPivot;
 			}
 
-			for (ndInt32 j = i + 1; j < __CholeskyTiledBlockSize__; ++j)
+			for (ndInt32 j = i + 1; j < ND_SKELETON_TILE_SIZE; ++j)
 			{
 				const ndFloat32 pivot = tile.m_element[j][i];
 				for (ndInt32 k = 0; k <= j; ++k)
@@ -957,14 +961,14 @@ bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, nd
 
 	auto CalculateOffDiagonalTile = [buffer, bufferStride](const CholeskyTile& tile, const CholeskyTile& invDiagonal, const ndInt32 row, ndInt32 column)
 	{
-		ndFloat32* const dst = &buffer[(row * bufferStride + column) * __CholeskyTiledBlockSize__];
-		for (ndInt32 i = 0; i < __CholeskyTiledBlockSize__; ++i)
+		ndFloat32* const dst = &buffer[(row * bufferStride + column) * ND_SKELETON_TILE_SIZE];
+		for (ndInt32 i = 0; i < ND_SKELETON_TILE_SIZE; ++i)
 		{
 			ndFloat32* const ptr = &dst[i * bufferStride];
-			for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
+			for (ndInt32 j = 0; j < ND_SKELETON_TILE_SIZE; ++j)
 			{
 				ndFloat32 acc(0.0f);
-				for (ndInt32 k = 0; k < __CholeskyTiledBlockSize__; ++k)
+				for (ndInt32 k = 0; k < ND_SKELETON_TILE_SIZE; ++k)
 				{
 					acc += tile.m_element[i][k] * invDiagonal.m_element[j][k];
 				}
@@ -975,17 +979,17 @@ bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, nd
 
 	auto MultAddTile = [buffer, size, bufferStride](CholeskyTile& tile, ndInt32 row, ndInt32 column, ndInt32 m)
 	{
-		const ndFloat32* const tileA = &buffer[(row * bufferStride + m) * __CholeskyTiledBlockSize__];
-		const ndFloat32* const tileB = &buffer[(column * bufferStride + m) * __CholeskyTiledBlockSize__];
+		const ndFloat32* const tileA = &buffer[(row * bufferStride + m) * ND_SKELETON_TILE_SIZE];
+		const ndFloat32* const tileB = &buffer[(column * bufferStride + m) * ND_SKELETON_TILE_SIZE];
 
-		for (ndInt32 i = 0; i < __CholeskyTiledBlockSize__; ++i)
+		for (ndInt32 i = 0; i < ND_SKELETON_TILE_SIZE; ++i)
 		{
 			const ndFloat32* const srcA = &tileA[i * bufferStride];
-			for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
+			for (ndInt32 j = 0; j < ND_SKELETON_TILE_SIZE; ++j)
 			{
 				ndFloat32 acc(0.0f);
 				const ndFloat32* const srcB = &tileB[j * bufferStride];
-				for (ndInt32 k = 0; k < __CholeskyTiledBlockSize__; ++k)
+				for (ndInt32 k = 0; k < ND_SKELETON_TILE_SIZE; ++k)
 				{
 					acc += srcA[k] * srcB[k];
 				}
@@ -998,12 +1002,12 @@ bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, nd
 	{
 		CholeskyTile tile;
 		bool pass = true;
-		ndMatrixTimeMatrix(__CholeskyTiledBlockSize__, &A.m_element[0][0], &B.m_element[0][0], &tile.m_element[0][0]);
-		for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
+		ndMatrixTimeMatrix(ND_SKELETON_TILE_SIZE, &A.m_element[0][0], &B.m_element[0][0], &tile.m_element[0][0]);
+		for (ndInt32 j = 0; j < ND_SKELETON_TILE_SIZE; ++j)
 		{
 			ndFloat32 error = tile.m_element[j][j] - ndFloat32(1.0f);
 			pass = pass && (ndAbs(error) < ndFloat32(1.0e-6f));
-			for (ndInt32 k = j + 1; k < __CholeskyTiledBlockSize__; ++k)
+			for (ndInt32 k = j + 1; k < ND_SKELETON_TILE_SIZE; ++k)
 			{
 				pass = pass && (ndAbs(tile.m_element[j][k]) < ndFloat32(1.0e-6f));
 				pass = pass && (ndAbs(tile.m_element[k][j]) < ndFloat32(1.0e-6f));
@@ -1012,7 +1016,7 @@ bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, nd
 		return pass;
 	};
 
-	const ndInt32 maxSize = size / __CholeskyTiledBlockSize__;
+	const ndInt32 maxSize = size / ND_SKELETON_TILE_SIZE;
 	CholeskyTile* const invDiagonalTiles = (CholeskyTile*)ndAlloca(CholeskyTile, maxSize + 1);
 
 	for (ndInt32 i = 0; i < maxSize; ++i)
@@ -1047,24 +1051,26 @@ bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, nd
 		}
 	}
 
-	if (size > (maxSize * __CholeskyTiledBlockSize__))
+	if (size > (maxSize * ND_SKELETON_TILE_SIZE))
 	{
-		const ndInt32 residual = size - maxSize * __CholeskyTiledBlockSize__;
+		const ndInt32 residual = size - maxSize * ND_SKELETON_TILE_SIZE;
 
 		auto GetResidualTile = [buffer, size, bufferStride, residual](ndInt32 row, ndInt32 column)
 		{
 			CholeskyTile tile;
 			tile.Clear();
 
-			const ndFloat32* const src = &buffer[(row * bufferStride + column) * __CholeskyTiledBlockSize__];
+			const ndFloat32* const bufferSrc = &buffer[(row * bufferStride + column) * ND_SKELETON_TILE_SIZE];
 			if (row != column)
 			{
 				for (ndInt32 i = 0; i < residual; ++i)
 				{
-					const ndFloat32* const ptr = &src[i * bufferStride];
-					for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
+					//const ndFloat32* const ptr = &src[i * bufferStride];
+					ndVector8* const dst = (ndVector8*)&tile.m_element[i];
+					const ndVector8* const src = (ndVector8*) &bufferSrc[i * bufferStride];
+					for (ndInt32 j = 0; j < ND_SKELETON_TILE_COUNT; ++j)
 					{
-						tile.m_element[i][j] = ptr[j];
+						dst[j] = src[j];
 					}
 				}
 			}
@@ -1072,10 +1078,10 @@ bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, nd
 			{
 				for (ndInt32 i = 0; i < residual; ++i)
 				{
-					const ndFloat32* const ptr = &src[i * bufferStride];
+					const ndFloat32* const src = &bufferSrc[i * bufferStride];
 					for (ndInt32 j = 0; j < residual; ++j)
 					{
-						tile.m_element[i][j] = ptr[j];
+						tile.m_element[i][j] = src[j];
 					}
 				}
 			}
@@ -1084,14 +1090,14 @@ bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, nd
 
 		auto CalculateOffDiagonalResidualTile = [buffer, size, bufferStride, residual](const CholeskyTile& tile, const CholeskyTile& invDiagonal, const ndInt32 row, ndInt32 column)
 		{
-			ndFloat32* const dst = &buffer[(row * bufferStride + column) * __CholeskyTiledBlockSize__];
+			ndFloat32* const dst = &buffer[(row * bufferStride + column) * ND_SKELETON_TILE_SIZE];
 			for (ndInt32 i = 0; i < residual; ++i)
 			{
 				ndFloat32* const ptr = &dst[i * bufferStride];
-				for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
+				for (ndInt32 j = 0; j < ND_SKELETON_TILE_SIZE; ++j)
 				{
 					ndFloat32 acc(0.0f);
-					for (ndInt32 k = 0; k < __CholeskyTiledBlockSize__; ++k)
+					for (ndInt32 k = 0; k < ND_SKELETON_TILE_SIZE; ++k)
 					{
 						acc += tile.m_element[i][k] * invDiagonal.m_element[j][k];
 					}
@@ -1102,10 +1108,10 @@ bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, nd
 
 		auto MultAddResidualTile = [buffer, size, bufferStride, residual](CholeskyTile& tile, ndInt32 row, ndInt32 column, ndInt32 m)
 		{
-			const ndFloat32* const tileA = &buffer[(row * bufferStride + m) * __CholeskyTiledBlockSize__];
-			const ndFloat32* const tileB = &buffer[(column * bufferStride + m) * __CholeskyTiledBlockSize__];
+			const ndFloat32* const tileA = &buffer[(row * bufferStride + m) * ND_SKELETON_TILE_SIZE];
+			const ndFloat32* const tileB = &buffer[(column * bufferStride + m) * ND_SKELETON_TILE_SIZE];
 
-			const ndInt32 columnWidth = (row != column) ? __CholeskyTiledBlockSize__ : residual;
+			const ndInt32 columnWidth = (row != column) ? ND_SKELETON_TILE_SIZE : residual;
 			for (ndInt32 i = 0; i < residual; ++i)
 			{
 				const ndFloat32* const srcA = &tileA[i * bufferStride];
@@ -1113,7 +1119,7 @@ bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, nd
 				{
 					ndFloat32 acc(0.0f);
 					const ndFloat32* const srcB = &tileB[j * bufferStride];
-					for (ndInt32 k = 0; k < __CholeskyTiledBlockSize__; ++k)
+					for (ndInt32 k = 0; k < ND_SKELETON_TILE_SIZE; ++k)
 					{
 						acc += srcA[k] * srcB[k];
 					}
@@ -1124,7 +1130,7 @@ bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, nd
 
 		auto TileResidualCholesky = [residual](CholeskyTile& tile)
 		{
-			ndFloat32 invDiag[__CholeskyTiledBlockSize__];
+			ndFloat32 invDiag[ND_SKELETON_TILE_SIZE];
 			for (ndInt32 i = 0; i < residual; ++i)
 			{
 				for (ndInt32 j = 0; j <= i; ++j)
@@ -1165,7 +1171,7 @@ bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, nd
 
 		auto StoreResidualTile = [buffer, size, bufferStride, residual](const CholeskyTile& tile, ndInt32 row, ndInt32 column)
 		{
-			ndFloat32* const dst = &buffer[(row * bufferStride + column) * __CholeskyTiledBlockSize__];
+			ndFloat32* const dst = &buffer[(row * bufferStride + column) * ND_SKELETON_TILE_SIZE];
 			for (ndInt32 i = 0; i < residual; ++i)
 			{
 				ndFloat32* const ptr = &dst[i * bufferStride];
