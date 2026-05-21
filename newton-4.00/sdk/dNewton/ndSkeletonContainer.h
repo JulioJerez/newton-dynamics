@@ -27,7 +27,9 @@
 class ndIkSolver;
 class ndJointBilateralConstraint;
 
-#define D_INV_IK_MAX_LINKS	256
+#define D_INV_IK_MAX_LINKS				256
+#define D_MAX_SKELETON_OPEN_LOOP_DOF	6
+#define D_MAX_SKELETON_LCP_VALUE		(D_LCP_MAX_VALUE * ndFloat32 (0.25f))
 
 class ndSkeletonContainer 
 {
@@ -37,6 +39,7 @@ class ndSkeletonContainer
 	D_NEWTON_API ndSkeletonContainer();
 	D_NEWTON_API ~ndSkeletonContainer();
 	D_NEWTON_API ndInt32 GetId() const;
+	D_NEWTON_API void SetMulticoreSolver(bool hint);
 
 	const ndNodeList& GetNodeList() const;
 	ndInt32 FindBoneIndex(const ndBodyKinematic* const body) const;
@@ -203,8 +206,8 @@ class ndSkeletonContainer
 
 	void Clear();
 	void CheckSleepState();
-	void Init(ndBodyKinematic* const rootBody, ndInt32 id);
 	ndNode* AddChild(ndJointBilateralConstraint* const joint, ndNode* const parent);
+	void Init(const ndWorld* const owner, ndBodyKinematic* const rootBody, ndInt32 id);
 	void Finalize(ndInt32 loopJoints, ndJointBilateralConstraint** const loopJointArray);
 
 	void AddExtraContacts();
@@ -228,16 +231,31 @@ class ndSkeletonContainer
 	void CalculateJointAccelImmediate(ndForcePair* const accel) const;
 	void SolveAuxiliaryImmediate(ndFixSizeArray<ndBodyKinematic*, D_INV_IK_MAX_LINKS>& bodyArray, ndForcePair* const force) const;
 
-	// support
+	// low level support
 	void InitLoopMassMatrix();
 	void ConditionMassMatrix() const;
+	ndFloat32* GetScratchBuffer(ndInt32 size) const;
 	void RebuildMassMatrix(const ndFloat32* const diagDamp) const;
 	void CalculateReactionForces(ndJacobian* const internalForces, ndInt32 threadId);
 	void CalculateJointAccel(const ndJacobian* const internalForces, ndForcePair* const accel) const;
 	void SolveAuxiliary(ndJacobian* const internalForces, const ndForcePair* const accel, ndForcePair* const force) const;
-	void InitMassMatrix(ndFloat32 timestep, const ndLeftHandSide* const matrixRow, ndRightHandSide* const rightHandSide, ndInt32 threadIndex);
+	void InitMassMatrix(const ndLeftHandSide* const matrixRow, ndRightHandSide* const rightHandSide, ndInt32 threadIndex);
 
-	ndFloat32* GetScratchBuffer(ndInt32 size) const;
+	// parallel interface
+	void ParallelInitLoopMassMatrix();
+	void ParallelRegularizeLcp() const;
+	void ParallelConditionMassMatrix() const;
+	void ParallelRebuildMassMatrix(const ndFloat32* const diagDamp) const;
+	void ParallelCalculateReactionForces(ndJacobian* const internalForces);
+	void ParallelCalculateLoopMassMatrixCoefficients(ndFloat32* const diagDamp);
+	bool ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, ndFloat32* const psdMatrix) const;
+	void ParallelCalculateJointAccel(const ndJacobian* const internalForces, ndForcePair* const accel) const;
+	void ParallelInitMassMatrix(const ndLeftHandSide* const matrixRow, ndRightHandSide* const rightHandSide);
+	void ParallelSolveAuxiliary(ndJacobian* const internalForces, const ndForcePair* const accel, ndForcePair* const force) const;
+
+
+
+		
 	class ndBodyForceIndexPair
 	{
 		public:
@@ -252,7 +270,8 @@ class ndSkeletonContainer
 		ndBodyForceIndexPair* m_index;
 		ndInt32 m_spansCount;
 	};
-		
+
+	ndWeakPtr<ndWorld> m_owner;
 	ndNode* m_skeleton;
 	ndNode** m_nodesOrder;
 	ndNode** m_nodesFactorizationOrder;
@@ -284,6 +303,7 @@ class ndSkeletonContainer
 	ndInt32 m_auxiliaryRowCount;
 	ndInt32 m_isResting;
 	ndInt32 m_threadId;
+	bool m_multicore;
 
 	friend class ndWorld;
 	friend class ndIkSolver;

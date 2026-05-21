@@ -1326,7 +1326,7 @@ void ndDynamicsUpdate::InitSkeletons()
 {
 	D_TRACKTIME();
 	ndScene* const scene = m_world->GetScene();
-	const ndArray<ndSkeletonContainer*>& activeSkeletons = m_world->m_activeSkeletons;
+	ndArray<ndSkeletonContainer*>& activeSkeletons = m_world->m_activeSkeletons;
 
 	if (activeSkeletons.GetCount())
 	{
@@ -1339,17 +1339,61 @@ void ndDynamicsUpdate::InitSkeletons()
 			}
 		}
 
-		auto InitSkeletons = ndMakeObject::ndFunction([this, &activeSkeletons](ndInt32 groupId, ndInt32)
+		class ndCompareSkeletons
+		{
+			public:
+			ndCompareSkeletons(void*)
+			{
+			}
+
+			ndInt32 Compare(const ndSkeletonContainer* const elementA, const ndSkeletonContainer* const elementB) const
+			{
+				const ndInt32 rowsA = elementA->m_nodeList.GetCount();
+				const ndInt32 rowsB = elementB->m_nodeList.GetCount();
+				if (rowsA < rowsB)
+				{
+					return 1;
+				}
+				if (rowsA > rowsB)
+				{
+					return -1;
+				}
+				return 0;
+			}
+		};
+
+		ndInt32 start = 0;
+		ndSort<ndSkeletonContainer*, ndCompareSkeletons>(&activeSkeletons[0], ndInt32(activeSkeletons.GetCount()), nullptr);
+		auto DoInParallel = [scene, &start, &activeSkeletons]()
+		{
+			bool test = ((start + 1) == activeSkeletons.GetCount());
+			test = test || ((start < activeSkeletons.GetCount()) && (activeSkeletons[start]->m_nodeList.GetCount() >= 2 * activeSkeletons[start + 1]->m_nodeList.GetCount()));
+			test = test && (scene->GetThreadCount() > 1);
+			test = test && activeSkeletons[start]->m_multicore;
+
+			return test;
+		};
+		while (DoInParallel())
+		{
+			ndArray<ndRightHandSide>& rightHandSide = m_rightHandSide;
+			const ndArray<ndLeftHandSide>& leftHandSide = m_leftHandSide;
+
+			ndSkeletonContainer* const skeleton = activeSkeletons[start];
+			skeleton->ParallelInitMassMatrix(&leftHandSide[0], &rightHandSide[0]);
+			start++;
+		}
+
+		auto InitSkeletons = ndMakeObject::ndFunction([this, start, &activeSkeletons](ndInt32 groupId, ndInt32)
 		{
 			D_TRACKTIME_NAMED(InitSkeletons);
 			ndArray<ndRightHandSide>& rightHandSide = m_rightHandSide;
 			const ndArray<ndLeftHandSide>& leftHandSide = m_leftHandSide;
 
-			ndSkeletonContainer* const skeleton = activeSkeletons[groupId];
-			skeleton->InitMassMatrix(m_timestep, &leftHandSide[0], &rightHandSide[0], groupId);
+			ndSkeletonContainer* const skeleton = activeSkeletons[start + groupId];
+			skeleton->InitMassMatrix(&leftHandSide[0], &rightHandSide[0], groupId);
 		});
 
-		const ndInt32 count = ndInt32(activeSkeletons.GetCount());
+		const ndInt32 count = ndInt32(activeSkeletons.GetCount() - start);
 		if (count)
 		{
 			scene->ParallelExecute(InitSkeletons, count, 1);
@@ -1363,16 +1407,35 @@ void ndDynamicsUpdate::UpdateSkeletons()
 	ndScene* const scene = m_world->GetScene();
 	const ndArray<ndSkeletonContainer*>& activeSkeletons = m_world->m_activeSkeletons;
 
-	auto UpdateSkeletons = ndMakeObject::ndFunction([this, &activeSkeletons](ndInt32 groupId, ndInt32)
+	ndInt32 start = 0;
+	auto DoInParallel = [scene, &start, &activeSkeletons]()
+	{
+		bool test = ((start + 1) == activeSkeletons.GetCount());
+		test = test || ((start < activeSkeletons.GetCount()) && (activeSkeletons[start]->m_nodeList.GetCount() >= 2 * activeSkeletons[start + 1]->m_nodeList.GetCount()));
+		test = test && (scene->GetThreadCount() > 1);
+		test = test && activeSkeletons[start]->m_multicore;
+
+		return test;
+	};
+
+	ndJacobian* const internalForces = &GetInternalForces()[0];
+	while (DoInParallel())
+	{
+		ndSkeletonContainer* const skeleton = activeSkeletons[start];
+		skeleton->ParallelCalculateReactionForces(internalForces);
+		start++;
+	}
+
+	auto UpdateSkeletons = ndMakeObject::ndFunction([this, &activeSkeletons, start](ndInt32 groupId, ndInt32)
 	{
 		D_TRACKTIME_NAMED(UpdateSkeletons);
 		ndJacobian* const internalForces = &GetInternalForces()[0];
 	
-		ndSkeletonContainer* const skeleton = activeSkeletons[groupId];
+		ndSkeletonContainer* const skeleton = activeSkeletons[start + groupId];
 		skeleton->CalculateReactionForces(internalForces, groupId);
 	});
 
-	const ndInt32 count = ndInt32(activeSkeletons.GetCount());
+	const ndInt32 count = ndInt32(activeSkeletons.GetCount() - start);
 	if (count)
 	{
 		scene->ParallelExecute(UpdateSkeletons, count, 1);

@@ -50,6 +50,9 @@ class ndModel: public ndContainersFreeListAlloc<ndModel>
 
 	D_COLLISION_API ndSharedPtr<ndModelNotify>& GetNotifyCallback();
 	D_COLLISION_API void SetNotifyCallback(const ndSharedPtr<ndModelNotify>& notifyCallback);
+
+	D_COLLISION_API virtual void SetMulticoreHint(bool){};
+	D_COLLISION_API virtual bool GetMulticoreHint() const { return true;}
 	D_COLLISION_API virtual void SetSleep(ndFloat32, ndFloat32, ndFloat32, ndFloat32) const {}
 
 	protected:
@@ -59,7 +62,6 @@ class ndModel: public ndContainersFreeListAlloc<ndModel>
 	ndWorld* m_world;
 
 	private:
-	//ndModelList::ndNode* m_worldNode;
 	ndWeakPtr<ndModelList::ndNode> m_worldNode;
 	ndSharedPtr<ndModelNotify> m_notifyCallback;
 

@@ -36,11 +36,11 @@ class ndSkeletonList: public ndList<ndSkeletonContainer, ndContainersFreeListAll
 	{
 	}
 
-	ndSkeletonContainer* CreateContatiner(ndBodyKinematic* const rootBody, ndInt32 id)
+	ndSkeletonContainer* CreateContatiner(const ndWorld* const owner, ndBodyKinematic* const rootBody, ndInt32 id)
 	{
 		ndNode* const node = Append();
 		ndSkeletonContainer* const container = &node->GetInfo();
-		container->Init(rootBody, id);
+		container->Init(owner, rootBody, id);
 		return container;
 	}
 

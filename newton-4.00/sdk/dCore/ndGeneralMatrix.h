@@ -31,7 +31,7 @@
 
 #define D_LCP_MAX_VALUE ndFloat32 (1.0e15f)
 
-#define __CholeskyTiledBlockSize__  32
+#define __CholeskyTiledBlockSize__  (1<<5)
 
 //*************************************************************
 //
@@ -192,10 +192,9 @@ bool ndCholeskyFactorization(ndInt32 size, ndInt32 stride, T* const psdMatrix)
 	return true;
 }
 
-// this is a good candidate for parallezation, 
-// however, is far slower than I expected. 
-// my only hope is that is has a bug, but as it stands
-// now, it is abpu fourt time slwore that the  row base version
+// in single thread is much faster until the size is about 300 x 300
+// which make umpractical for rigibody physics.
+// however this is a good candidate for parallezation 
 template<class T>
 bool ndCholeskyTiledFactorization(ndInt32 size, ndInt32 stride, T* const psdMatrix)
 {
@@ -214,7 +213,6 @@ bool ndCholeskyTiledFactorization(ndInt32 size, ndInt32 stride, T* const psdMatr
 		}
 		T m_element[__CholeskyTiledBlockSize__][__CholeskyTiledBlockSize__];
 	};
-	CholeskyTile* const invDiagonalTiles = (CholeskyTile*)ndAlloca(CholeskyTile, (stride + __CholeskyTiledBlockSize__ - 1) / __CholeskyTiledBlockSize__);
 
 	auto GetTile = [stride, psdMatrix](ndInt32 row, ndInt32 column)
 	{
@@ -376,6 +374,7 @@ bool ndCholeskyTiledFactorization(ndInt32 size, ndInt32 stride, T* const psdMatr
 	};
 
 	const ndInt32 maxSize = size / __CholeskyTiledBlockSize__;
+	CholeskyTile* const invDiagonalTiles = (CholeskyTile*)ndAlloca(CholeskyTile, maxSize + 1);
 	for (ndInt32 i = 0; i < maxSize; ++i)
 	{
 		for (ndInt32 j = 0; j <= i; ++j)

@@ -692,7 +692,7 @@ void ndWorld::UpdateSkeletons()
 								{
 									if (!skeleton)
 									{
-										skeleton = m_skeletonList.CreateContatiner(childBody, skeletonsId);
+										skeleton = m_skeletonList.CreateContatiner(this, childBody, skeletonsId);
 										skeletonsId++;
 									}
 			
@@ -741,7 +741,7 @@ void ndWorld::UpdateSkeletons()
 				{
 					// the root node is not static and has children, 
 					// them add the first children to this root
-					skeleton = m_skeletonList.CreateContatiner(rootBody, skeletonsId);
+					skeleton = m_skeletonList.CreateContatiner(this, rootBody, skeletonsId);
 					skeletonsId++;
 			
 					for (ndBodyKinematic::ndJointList::ndNode* jointNode = rootBody->m_jointList.GetFirst(); jointNode; jointNode = jointNode->GetNext())
@@ -835,6 +835,16 @@ void ndWorld::UpdateSkeletons()
 	for (ndInt32 i = 0; i < m_activeSkeletons.GetCount(); ++i)
 	{
 		ndSkeletonContainer* const skeleton = m_activeSkeletons[i];
+		//const ndInt32 nodes = skeleton->m_nodeList.GetCount() - 1;
+		//for (ndInt32 j = 0; j < nodes; ++j)
+		const ndSkeletonContainer::ndNode* const node = skeleton->m_nodesOrder[0];
+		ndAssert(node->m_body);
+		ndAssert(node->m_body->GetInvMass() > ndFloat32 (0.0f));
+		const ndModel* const model = node->m_body->GetAsBodyKinematic()->GetModel();
+		if (model)
+		{
+			skeleton->SetMulticoreSolver(model->GetMulticoreHint());
+		}
 		skeleton->ClearCloseLoopJoints();
 	}
 
