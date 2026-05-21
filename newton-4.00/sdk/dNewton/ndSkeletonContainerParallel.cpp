@@ -1341,7 +1341,7 @@ void ndSkeletonContainer::ParallelSolveAuxiliary(ndJacobian* const internalForce
 
 	const ndInt32* const normalIndex = &m_frictionIndex[primaryCount];
 	u[m_auxiliaryRowCount] = ndFloat32(1.0f);
-	SolveBlockLcp(m_auxiliaryRowCount, m_blockSize, u, b, low, high, normalIndex, ndFloat32(0.5f));
+	ParallelSolveBlockLcp(m_auxiliaryRowCount, m_blockSize, u, b, low, high, normalIndex, ndFloat32(0.5f));
 
 	for (ndInt32 i = 0; i < m_auxiliaryRowCount; ++i)
 	{
@@ -1401,4 +1401,45 @@ void ndSkeletonContainer::ParallelSolveAuxiliary(ndJacobian* const internalForce
 	//	AddForcesBody1(i, 0);
 	//}
 	scene->ParallelExecute(AddForcesBody1, m_bodyForceRemap1.m_spansCount, 4);
+}
+
+void ndSkeletonContainer::ParallelSolveBlockLcp(ndInt32 size, ndInt32 blockSize, ndFloat32* const x, ndFloat32* const b, const ndFloat32* const low, const ndFloat32* const high, const ndInt32* const normalIndex, ndFloat32 accelTol) const
+{
+	if (blockSize)
+	{
+		ndSolveCholesky(blockSize, size, m_massMatrix11, x, b);
+		if (blockSize != size)
+		{
+			ndInt32 base = blockSize * size;
+			for (ndInt32 i = blockSize; i < size; ++i)
+			{
+				b[i] -= ndDotProduct(blockSize, &m_massMatrix11[base], x);
+				base += size;
+			}
+
+			const ndInt32 boundedSize = size - blockSize;
+			SolveLcp(size, boundedSize, &x[blockSize], &b[blockSize], &low[blockSize], &high[blockSize], &normalIndex[blockSize], accelTol);
+
+			auto AddRows = ndMakeObject::ndFunction([this, x, size, blockSize, boundedSize](ndInt32 groupId, ndInt32)
+			{
+				ndFloat32 acc = ndFloat32(0.0f);
+				const ndFloat32* const row = &m_massMatrix11[groupId * size + blockSize];
+				for (ndInt32 i = 0; i < boundedSize; ++i)
+				{
+					acc += x[blockSize + i] * row[i];
+				}
+				x[groupId] += acc;
+			});
+			//for (ndInt32 i = 0; i < blockSize; ++i)
+			//{
+			//	AddRows(i, 0);
+			//}
+			ndScene* const scene = m_owner->GetScene();
+			scene->ParallelExecute(AddRows, blockSize, 4);
+		}
+	}
+	else
+	{
+		SolveLcp(size, size, x, b, low, high, normalIndex, accelTol);
+	}
 }

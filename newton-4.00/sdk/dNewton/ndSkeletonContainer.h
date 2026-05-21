@@ -252,10 +252,8 @@ class ndSkeletonContainer
 	void ParallelCalculateJointAccel(const ndJacobian* const internalForces, ndForcePair* const accel) const;
 	void ParallelInitMassMatrix(const ndLeftHandSide* const matrixRow, ndRightHandSide* const rightHandSide);
 	void ParallelSolveAuxiliary(ndJacobian* const internalForces, const ndForcePair* const accel, ndForcePair* const force) const;
-
-
-
-		
+	void ParallelSolveBlockLcp(ndInt32 size, ndInt32 blockSize, ndFloat32* const x, ndFloat32* const b, const ndFloat32* const low, const ndFloat32* const high, const ndInt32* const normalIndex, ndFloat32 accelTol) const;
+	
 	class ndBodyForceIndexPair
 	{
 		public:
