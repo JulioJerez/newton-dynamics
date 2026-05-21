@@ -107,6 +107,7 @@ class ndDynamicsUpdate : public ndClassAlloc
 	void IntegrateBodiesVelocity();
 	void CalculateJointsAcceleration();
 	void IntegrateUnconstrainedBodies();
+	bool CanSkeletonMulticore(ndInt32 index) const;
 
 	void DetermineSleepStates();
 	void GetJacobianDerivatives(ndConstraint* const joint);
