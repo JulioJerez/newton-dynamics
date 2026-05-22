@@ -1939,7 +1939,8 @@ void ndSkeletonContainer::BuildSparseMatrix()
 	ndUnsigned16* const sparseMatrix = m_sparseMatrix;
 	ndFloat32* const matrix = &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize];
 
-	const ndInt32 sparseFactor = (size + 2)/ 3;
+	const ndInt32 sparseFactor = ndInt32(ndFloat32(size) * D_SPARSE_SKELETON_MATRIX_FACTOR);
+	ndAssert(sparseFactor > 0);
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		ndInt32 floatsCount = 0;
@@ -1958,7 +1959,7 @@ void ndSkeletonContainer::BuildSparseMatrix()
 			sparseRow[0] = ndUnsigned16 (floatsCount);
 			for (ndInt32 j = 0; j < floatsCount; ++j)
 			{
-				ndInt32 index = sparseRow[j + 1];
+				const ndInt32 index = sparseRow[j + 1];
 				row[j] = row[index];
 			}
 		}

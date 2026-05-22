@@ -758,7 +758,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_showCollisionMeshMode = 1;
 	//m_showCollisionMeshMode = 2;
 	//m_showCollisionMeshMode = 3;		// solid wire frame
-	m_synchronousPhysicsUpdate = true;
+	m_synchronousPhysicsUpdate = false;
 	m_synchronousParticlesUpdate = true;
 	//m_showStaticMeshCollidingFaces = true;
 

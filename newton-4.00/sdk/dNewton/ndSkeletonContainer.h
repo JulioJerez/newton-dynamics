@@ -29,6 +29,7 @@ class ndJointBilateralConstraint;
 
 #define D_INV_IK_MAX_LINKS				256
 #define D_MAX_SKELETON_OPEN_LOOP_DOF	6
+#define D_SPARSE_SKELETON_MATRIX_FACTOR	ndFloat32 (0.5f)
 #define D_MAX_SKELETON_LCP_VALUE		(D_LCP_MAX_VALUE * ndFloat32 (0.25f))
 
 class ndSkeletonContainer 
@@ -243,6 +244,7 @@ class ndSkeletonContainer
 	void InitMassMatrix(const ndLeftHandSide* const matrixRow, ndRightHandSide* const rightHandSide, ndInt32 threadIndex);
 
 	// parallel interface
+	void ParallelBuildSparseMatrix();
 	void ParallelInitLoopMassMatrix();
 	void ParallelRegularizeLcp() const;
 	void ParallelConditionMassMatrix() const;
