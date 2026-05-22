@@ -49,6 +49,7 @@ ndDynamicsUpdate::ndDynamicsUpdate(ndWorld* const world)
 	,m_invTimestepRK(ndFloat32(0.0f))
 	,m_solverPasses(0)
 	,m_activeJointCount(0)
+	,m_parallelSkeleton(0)
 	,m_unConstrainedBodyCount(0)
 {
 }
@@ -1155,9 +1156,6 @@ void ndDynamicsUpdate::IntegrateBodiesVelocity()
 
 		ndAssert(body);
 		ndAssert(body->m_isConstrained);
-		// no necessary anymore because the virtual function handle it.
-		//ndAssert(body->GetAsBodyDynamic()); 
-
 		const ndInt32 index = body->m_index;
 		const ndJacobian& forceAndTorque = internalForces[index];
 		const ndVector force(body->GetForce() + forceAndTorque.m_linear);
@@ -1202,11 +1200,6 @@ void ndDynamicsUpdate::UpdateForceFeedback()
 		ndConstraint* const joint = jointArray[groupId];
 		const ndInt32 rows = joint->m_rowCount;
 		const ndInt32 first = joint->m_rowStart;
-
-		//ndVector force0(zero);
-		//ndVector force1(zero);
-		//ndVector torque0(zero);
-		//ndVector torque1(zero);
 		ndVector16 forceTorque(ndVector16::m_zero);
 
 		for (ndInt32 k = 0; k < rows; ++k)
@@ -1341,6 +1334,7 @@ void ndDynamicsUpdate::InitSkeletons()
 	ndScene* const scene = m_world->GetScene();
 	ndArray<ndSkeletonContainer*>& activeSkeletons = m_world->m_activeSkeletons;
 
+	m_parallelSkeleton = 0;
 	if (activeSkeletons.GetCount())
 	{
 		for (ndInt32 i = ndInt32(activeSkeletons.GetCount()) - 1; i >= 0; --i)
@@ -1358,11 +1352,11 @@ void ndDynamicsUpdate::InitSkeletons()
 			ndCompareSkeletons(void*)
 			{
 			}
-
+		
 			ndInt32 Compare(const ndSkeletonContainer* const elementA, const ndSkeletonContainer* const elementB) const
 			{
-				const ndInt32 rowsA = elementA->m_nodeList.GetCount();
-				const ndInt32 rowsB = elementB->m_nodeList.GetCount();
+				const ndInt32 rowsA = elementA->m_nodeList.GetCount() + (elementA->m_multicore << 15);
+				const ndInt32 rowsB = elementB->m_nodeList.GetCount() + (elementB->m_multicore << 15);
 				if (rowsA < rowsB)
 				{
 					return 1;
@@ -1374,34 +1368,40 @@ void ndDynamicsUpdate::InitSkeletons()
 				return 0;
 			}
 		};
-
 		ndSort<ndSkeletonContainer*, ndCompareSkeletons>(&activeSkeletons[0], ndInt32(activeSkeletons.GetCount()), nullptr);
 
-		ndInt32 start = 0;
-		while (CanSkeletonMulticore(start))
+		for (ndInt32 i = ndInt32(activeSkeletons.GetCount()) - 1; i >= 0; --i)
+		{
+			if (CanSkeletonMulticore(m_parallelSkeleton))
+			{
+				ndSwap(activeSkeletons[i], activeSkeletons[m_parallelSkeleton]);
+				m_parallelSkeleton++;
+			}
+		}
+
+		for (ndInt32 i = 0; i < m_parallelSkeleton; ++i)
 		{
 			ndArray<ndRightHandSide>& rightHandSide = m_rightHandSide;
 			const ndArray<ndLeftHandSide>& leftHandSide = m_leftHandSide;
 
-			ndSkeletonContainer* const skeleton = activeSkeletons[start];
+			ndSkeletonContainer* const skeleton = activeSkeletons[i];
 			skeleton->ParallelInitMassMatrix(&leftHandSide[0], &rightHandSide[0]);
-			start++;
 		}
 
-		auto InitSkeletons = ndMakeObject::ndFunction([this, start, &activeSkeletons](ndInt32 groupId, ndInt32)
+		auto InitSkeletons = ndMakeObject::ndFunction([this, &activeSkeletons](ndInt32 groupId, ndInt32)
 		{
 			D_TRACKTIME_NAMED(InitSkeletons);
 			ndArray<ndRightHandSide>& rightHandSide = m_rightHandSide;
 			const ndArray<ndLeftHandSide>& leftHandSide = m_leftHandSide;
 
-			ndSkeletonContainer* const skeleton = activeSkeletons[start + groupId];
+			ndSkeletonContainer* const skeleton = activeSkeletons[m_parallelSkeleton + groupId];
 			skeleton->InitMassMatrix(&leftHandSide[0], &rightHandSide[0], groupId);
 		});
 
-		const ndInt32 count = ndInt32(activeSkeletons.GetCount() - start);
-		if (count)
+		const ndInt32 skelCount = ndInt32(activeSkeletons.GetCount() - m_parallelSkeleton);
+		if (skelCount)
 		{
-			scene->ParallelExecute(InitSkeletons, count, 1);
+			scene->ParallelExecute(InitSkeletons, skelCount, 1);
 		}
 	}
 }
@@ -1412,28 +1412,26 @@ void ndDynamicsUpdate::UpdateSkeletons()
 	ndScene* const scene = m_world->GetScene();
 	const ndArray<ndSkeletonContainer*>& activeSkeletons = m_world->m_activeSkeletons;
 
-	ndInt32 start = 0;
 	ndJacobian* const internalForces = &GetInternalForces()[0];
-	while (CanSkeletonMulticore(start))
+	for (ndInt32 i = 0; i < m_parallelSkeleton; ++i)
 	{
-		ndSkeletonContainer* const skeleton = activeSkeletons[start];
+		ndSkeletonContainer* const skeleton = activeSkeletons[i];
 		skeleton->ParallelCalculateReactionForces(internalForces);
-		start++;
 	}
 
-	auto UpdateSkeletons = ndMakeObject::ndFunction([this, &activeSkeletons, start](ndInt32 groupId, ndInt32)
+	auto UpdateSkeletons = ndMakeObject::ndFunction([this, &activeSkeletons](ndInt32 groupId, ndInt32)
 	{
 		D_TRACKTIME_NAMED(UpdateSkeletons);
 		ndJacobian* const internalForces = &GetInternalForces()[0];
 	
-		ndSkeletonContainer* const skeleton = activeSkeletons[start + groupId];
+		ndSkeletonContainer* const skeleton = activeSkeletons[m_parallelSkeleton + groupId];
 		skeleton->CalculateReactionForces(internalForces, groupId);
 	});
 
-	const ndInt32 count = ndInt32(activeSkeletons.GetCount() - start);
-	if (count)
+	const ndInt32 skelCount = ndInt32(activeSkeletons.GetCount() - m_parallelSkeleton);
+	if (skelCount)
 	{
-		scene->ParallelExecute(UpdateSkeletons, count, 1);
+		scene->ParallelExecute(UpdateSkeletons, skelCount, 1);
 	}
 }
 
