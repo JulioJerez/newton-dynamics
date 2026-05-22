@@ -75,6 +75,7 @@ ndModelArticulation::ndModelArticulation()
 	,m_closeLoops()
 	,m_solveMulticore(true)
 {
+	//m_solveMulticore = false;
 }
 
 ndModelArticulation::ndModelArticulation(const ndModelArticulation& src)
@@ -404,6 +405,11 @@ void ndModelArticulation::OnRemoveFromWorld()
 			}
 		}
 	}
+}
+
+bool ndModelArticulation::GetMulticoreHint() const
+{
+	return m_solveMulticore;
 }
 
 void ndModelArticulation::SetMulticoreHint(bool hint)

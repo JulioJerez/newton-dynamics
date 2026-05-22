@@ -4487,6 +4487,7 @@ ndInt32 ndContactSolver::ConvexToConvexContactsContinue()
 			// they are not considered to be colliding because the motion will 
 			// move them apart get the closet point and the normal at contact point
 			m_timestep = ndFloat32(1.0e10f);
+			closestPoint1 = m_closestPoint1;
 			m_separatingVector = m_separatingVector * ndVector::m_negOne;
 			break;
 		}

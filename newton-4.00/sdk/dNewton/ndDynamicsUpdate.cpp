@@ -1322,6 +1322,19 @@ void ndDynamicsUpdate::DetermineSleepStates()
 	}
 }
 
+bool ndDynamicsUpdate::CanSkeletonMulticore(ndInt32 index) const
+{
+	ndScene* const scene = m_world->GetScene();
+	ndArray<ndSkeletonContainer*>& activeSkeletons = m_world->m_activeSkeletons;
+	bool test = ((index + 1) == activeSkeletons.GetCount());
+	test = test || ((index < activeSkeletons.GetCount()) && (activeSkeletons[index]->m_nodeList.GetCount() >= 2 * activeSkeletons[index + 1]->m_nodeList.GetCount()));
+	test = test && (scene->GetThreadCount() > 1);
+	test = test && activeSkeletons[index]->m_multicore;
+	test = test && (activeSkeletons[index]->m_nodeList.GetCount() >= 64);
+
+	return test;
+}
+
 void ndDynamicsUpdate::InitSkeletons()
 {
 	D_TRACKTIME();
@@ -1362,18 +1375,10 @@ void ndDynamicsUpdate::InitSkeletons()
 			}
 		};
 
-		ndInt32 start = 0;
 		ndSort<ndSkeletonContainer*, ndCompareSkeletons>(&activeSkeletons[0], ndInt32(activeSkeletons.GetCount()), nullptr);
-		auto DoInParallel = [scene, &start, &activeSkeletons]()
-		{
-			bool test = ((start + 1) == activeSkeletons.GetCount());
-			test = test || ((start < activeSkeletons.GetCount()) && (activeSkeletons[start]->m_nodeList.GetCount() >= 2 * activeSkeletons[start + 1]->m_nodeList.GetCount()));
-			test = test && (scene->GetThreadCount() > 1);
-			test = test && activeSkeletons[start]->m_multicore;
 
-			return test;
-		};
-		while (DoInParallel())
+		ndInt32 start = 0;
+		while (CanSkeletonMulticore(start))
 		{
 			ndArray<ndRightHandSide>& rightHandSide = m_rightHandSide;
 			const ndArray<ndLeftHandSide>& leftHandSide = m_leftHandSide;
@@ -1408,18 +1413,8 @@ void ndDynamicsUpdate::UpdateSkeletons()
 	const ndArray<ndSkeletonContainer*>& activeSkeletons = m_world->m_activeSkeletons;
 
 	ndInt32 start = 0;
-	auto DoInParallel = [scene, &start, &activeSkeletons]()
-	{
-		bool test = ((start + 1) == activeSkeletons.GetCount());
-		test = test || ((start < activeSkeletons.GetCount()) && (activeSkeletons[start]->m_nodeList.GetCount() >= 2 * activeSkeletons[start + 1]->m_nodeList.GetCount()));
-		test = test && (scene->GetThreadCount() > 1);
-		test = test && activeSkeletons[start]->m_multicore;
-
-		return test;
-	};
-
 	ndJacobian* const internalForces = &GetInternalForces()[0];
-	while (DoInParallel())
+	while (CanSkeletonMulticore(start))
 	{
 		ndSkeletonContainer* const skeleton = activeSkeletons[start];
 		skeleton->ParallelCalculateReactionForces(internalForces);

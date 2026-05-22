@@ -92,19 +92,23 @@ void ndSkeletonContainer::ParallelInitMassMatrix(const ndLeftHandSide* const mat
 			m_diagonalPreconditioner[i] = ndFloat32(1.0f) / diagSqrt;
 		}
 
-		ndFloat32* const preconditionMatrix = &m_precondinonedMassMatrix11[0];
-		auto Precondition = ndMakeObject::ndFunction([this, stride, size, matrix, preconditionMatrix](ndInt32 groupId, ndInt32)
+		auto Precondition = ndMakeObject::ndFunction([this, stride, size, matrix](ndInt32 groupId, ndInt32)
 		{
-			const ndFloat32* const srcRow = &matrix[groupId * stride];
-			ndFloat32 diagonal = m_diagonalPreconditioner[groupId];
-			ndFloat32* const dstRow = &preconditionMatrix[groupId * stride];
-			for (ndInt32 j = 0; j < size; ++j)
+			ndFloat32* const row = &matrix[groupId * stride];
+			const ndFloat32 diagonal = m_diagonalPreconditioner[groupId];
+			row[groupId] = ndFloat32(1.0f);
+			for (ndInt32 j = groupId + 1; j < size; ++j)
 			{
-				dstRow[j] = diagonal * srcRow[j] * m_diagonalPreconditioner[j];
+				const ndFloat32 offDiagonal = diagonal * row[j] * m_diagonalPreconditioner[j];
+				row[j] = offDiagonal;
+				matrix[j * stride + groupId] = offDiagonal;
 			}
 		});
 		ndScene* const scene = m_owner->GetScene();
 		scene->ParallelExecute(Precondition, size, 4);
+
+		ndAssert(ndTestPSDmatrix(size, stride, matrix, GetScratchBuffer(stride * stride)));
+		BuildSparseMatrix();
 	}
 }
 
@@ -126,13 +130,10 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 
 	m_pairs = ndAlignedPtr(ndNodePair, &m_bodyForceRemap1.m_indexSpan[m_rowCount]);
 	m_diagonalPreconditioner = ndAlignedPtr(ndFloat32, &m_pairs[m_rowCount]);
-	m_precondinonedMassMatrix11 = ndAlignedPtr(ndFloat32, &m_diagonalPreconditioner[m_rowCount]);
-
-	m_massMatrix11 = ndAlignedPtr(ndFloat32, &m_precondinonedMassMatrix11[m_auxiliaryRowCount * m_auxiliaryRowCount]);
+	m_massMatrix11 = ndAlignedPtr(ndFloat32, &m_diagonalPreconditioner[m_rowCount]);
 	m_massMatrix10 = ndAlignedPtr(ndFloat32, &m_massMatrix11[m_auxiliaryRowCount * m_auxiliaryRowCount]);
-	m_deltaForce = ndAlignedPtr(ndFloat32, &m_massMatrix10[m_auxiliaryRowCount * primaryCount]);
-
-	ndInt32* const boundRow = ndAlloca(ndInt32, m_auxiliaryRowCount);
+	m_sparseMatrix = ndAlignedPtr(ndUnsigned16, &m_massMatrix10[m_auxiliaryRowCount * primaryCount]);
+	m_deltaForce = ndAlignedPtr(ndFloat32, &m_sparseMatrix[m_auxiliaryRowCount * (m_auxiliaryRowCount + 1)]);
 
 	m_blockSize = 0;
 	ndScene* const scene = m_owner->GetScene();
@@ -155,7 +156,7 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 		}
 		scans.PushBack(sum);
 
-		auto SubmmitRows = ndMakeObject::ndFunction([this, &scans, boundRow](ndInt32 groupId, ndInt32)
+		auto SubmmitRows = ndMakeObject::ndFunction([this, &scans](ndInt32 groupId, ndInt32)
 		{
 			const ndNode* const node = m_nodesOrder[groupId];
 			ndJointBilateralConstraint* const joint = node->m_joint;
@@ -182,6 +183,7 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 	ndAssert(scans[scans.GetCount() - 1] == primaryCount);
 
 	ndInt32 auxiliaryIndexCount = 0;
+	ndInt32* const boundRow = ndAlloca(ndInt32, m_auxiliaryRowCount);
 	{
 		scans.SetCount(0);
 		const ndInt32 nodeCount = m_nodeList.GetCount() - 1;
@@ -1343,12 +1345,36 @@ void ndSkeletonContainer::ParallelSolveAuxiliary(ndJacobian* const internalForce
 	u[m_auxiliaryRowCount] = ndFloat32(1.0f);
 	ParallelSolveBlockLcp(m_auxiliaryRowCount, m_blockSize, u, b, low, high, normalIndex, ndFloat32(0.5f));
 
+	//for (ndInt32 i = 0; i < m_auxiliaryRowCount; ++i)
+	//{
+	//	const ndFloat32 s = u[i];
+	//	f[primaryCount + i] = s;
+	//	ndScaleAdd(primaryCount, f, &m_deltaForce[i * primaryCount], s);
+	//}
+
+	for (ndInt32 i = 0; i < m_auxiliaryRowCount; ++i)
+	{
+		f[primaryCount + i] = u[i];
+	}
+	ndInt32 threads = scene->GetThreadCount();
+	ndInt32 stride = primaryCount / threads;
+	auto AddForces = ndMakeObject::ndFunction([this, u, f, threads, stride, primaryCount](ndInt32 groupId, ndInt32)
+	{
+		const ndInt32 base = stride * groupId;
+		const ndInt32 count = groupId == (threads - 1) ? primaryCount - stride * groupId : stride;
+		ndFloat32* const dst = &f[base];
+		const ndFloat32* const src = &m_deltaForce[base];
 	for (ndInt32 i = 0; i < m_auxiliaryRowCount; ++i)
 	{
 		const ndFloat32 s = u[i];
-		f[primaryCount + i] = s;
-		ndScaleAdd(primaryCount, f, &m_deltaForce[i * primaryCount], s);
+			ndScaleAdd(count, dst, &src[i * primaryCount], s);
 	}
+	});
+	//for (ndInt32 i = 0; i < threads; ++i)
+	//{
+	//	AddForces(i, 0);
+	//}
+	scene->ParallelExecute(AddForces, threads, 1);
 
 	auto AddForcesBody0 = ndMakeObject::ndFunction([this, f, internalForcesArray](ndInt32 groupId, ndInt32)
 	{
