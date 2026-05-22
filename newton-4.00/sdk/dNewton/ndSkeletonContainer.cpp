@@ -2022,34 +2022,37 @@ void ndSkeletonContainer::InitMassMatrix(const ndLeftHandSide* const leftHandSid
 	{
 		InitLoopMassMatrix();
 
-		const ndInt32 stride = m_auxiliaryRowCount;
 		const ndInt32 size = m_auxiliaryRowCount - m_blockSize;
-		ndFloat32* const matrix = &m_massMatrix11[m_blockSize * stride + m_blockSize];
-
-		for (ndInt32 i = 0; i < size; ++i)
+		if (size)
 		{
-			ndFloat32 diagSqrt = ndSqrt(matrix[i * stride + i]);
-			m_diagonalPreconditioner[i] = ndFloat32(1.0f) / diagSqrt;
-		}
+			const ndInt32 stride = m_auxiliaryRowCount;
+			ndFloat32* const matrix = &m_massMatrix11[m_blockSize * stride + m_blockSize];
 
-		auto Precondition = [this, stride, size, matrix](ndInt32 groupId)
-		{
-			ndFloat32* const row = &matrix[groupId * stride];
-			const ndFloat32 diagonal = m_diagonalPreconditioner[groupId];
-			row[groupId] = ndFloat32(1.0f);
-			for (ndInt32 j = groupId + 1; j < size; ++j)
+			for (ndInt32 i = 0; i < size; ++i)
 			{
-				const ndFloat32 offDiagonal = diagonal * row[j] * m_diagonalPreconditioner[j];
-				row[j] = offDiagonal;
-				matrix[j * stride + groupId] = offDiagonal;
+				ndFloat32 diagSqrt = ndSqrt(matrix[i * stride + i]);
+				m_diagonalPreconditioner[i] = ndFloat32(1.0f) / diagSqrt;
 			}
-		};
-		for (ndInt32 i = 0; i < size; ++i)
-		{
-			Precondition(i);
+
+			auto Precondition = [this, stride, size, matrix](ndInt32 groupId)
+			{
+				ndFloat32* const row = &matrix[groupId * stride];
+				const ndFloat32 diagonal = m_diagonalPreconditioner[groupId];
+				row[groupId] = ndFloat32(1.0f);
+				for (ndInt32 j = groupId + 1; j < size; ++j)
+				{
+					const ndFloat32 offDiagonal = diagonal * row[j] * m_diagonalPreconditioner[j];
+					row[j] = offDiagonal;
+					matrix[j * stride + groupId] = offDiagonal;
+				}
+			};
+			for (ndInt32 i = 0; i < size; ++i)
+			{
+				Precondition(i);
+			}
+			ndAssert(ndTestPSDmatrix(size, stride, matrix, GetScratchBuffer(stride * stride)));
+			BuildSparseMatrix();
 		}
-		ndAssert(ndTestPSDmatrix(size, stride, matrix, GetScratchBuffer(stride * stride)));
-		BuildSparseMatrix();
 	}
 }
 
