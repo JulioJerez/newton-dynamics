@@ -376,7 +376,7 @@ ndSkeletonContainer::ndSkeletonContainer()
 	,m_massMatrix10(nullptr)
 	,m_deltaForce(nullptr)
 	,m_diagonalPreconditioner(nullptr)
-	,m_precondinonedMassMatrix11(nullptr)
+	,m_sparseMatrix(nullptr)
 	,m_nodeList()
 	,m_transientLoopingContacts()
 	,m_transientLoopingJoints()
@@ -686,6 +686,7 @@ void ndSkeletonContainer::CalculateBufferSizeInBytes()
 	size += sizeof(ndFloat32) * auxiliaryRowCount * auxiliaryRowCount;
 	size += sizeof(ndFloat32) * auxiliaryRowCount * (rowCount - auxiliaryRowCount);
 	size += sizeof(ndFloat32) * auxiliaryRowCount * (rowCount - auxiliaryRowCount);
+	size += sizeof(ndUnsigned16) * auxiliaryRowCount * (auxiliaryRowCount + 1);
 
 	size = (size + 32 * 16) & -32;
 	m_auxiliaryMemoryBuffer.SetCount(size + 1024);
@@ -1112,10 +1113,6 @@ void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* cons
 {
 	D_TRACKTIME();
 	const ndFloat32 tol2 = accelTol * accelTol;
-	const ndFloat32* const matrix = &m_precondinonedMassMatrix11[0];
-
-	ndAssert(ndTestPSDmatrix(size, stride, matrix, GetScratchBuffer(stride * stride)));
-
 	ndFloat32* const residual = ndAlloca(ndFloat32, stride);
 
 	for (ndInt32 i = 0; i < size; ++i)
@@ -1135,6 +1132,7 @@ void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* cons
 	const ndInt32 maxIterCount = 64;
 	ndFloat32 error2 = tol2 * ndFloat32(2.0f);
 	const ndFloat32 sor = ndFloat32(1.125f);
+	const ndFloat32* const matrix = &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize];
 	for (ndInt32 m = maxIterCount; (m >= 0) && (error2 > tol2); --m)
 	{
 		ndInt32 rowBase = 0;
@@ -1523,17 +1521,16 @@ void ndSkeletonContainer::InitLoopMassMatrix()
 
 	m_pairs = ndAlignedPtr(ndNodePair, &m_bodyForceRemap1.m_indexSpan[m_rowCount]);
 	m_diagonalPreconditioner = ndAlignedPtr(ndFloat32, &m_pairs[m_rowCount]);
-	m_precondinonedMassMatrix11 = ndAlignedPtr(ndFloat32, &m_diagonalPreconditioner[m_rowCount]);
-
-	m_massMatrix11 = ndAlignedPtr(ndFloat32, &m_precondinonedMassMatrix11[m_auxiliaryRowCount * m_auxiliaryRowCount]);
+	m_massMatrix11 = ndAlignedPtr(ndFloat32, &m_diagonalPreconditioner[m_rowCount]);
 	m_massMatrix10 = ndAlignedPtr(ndFloat32, &m_massMatrix11[m_auxiliaryRowCount * m_auxiliaryRowCount]);
-	m_deltaForce = ndAlignedPtr(ndFloat32, &m_massMatrix10[m_auxiliaryRowCount * primaryCount]);
-
-	ndInt32* const boundRow = ndAlloca(ndInt32, m_auxiliaryRowCount);
+	m_sparseMatrix = ndAlignedPtr(ndUnsigned16, &m_massMatrix10[m_auxiliaryRowCount * primaryCount]);
+	//m_deltaForce = ndAlignedPtr(ndFloat32, &m_massMatrix10[m_auxiliaryRowCount * primaryCount]);
+	m_deltaForce = ndAlignedPtr(ndFloat32, &m_sparseMatrix[m_auxiliaryRowCount * (m_auxiliaryRowCount + 1)]);
 
 	m_blockSize = 0;
 	ndInt32 primaryIndex = 0;
 	ndInt32 auxiliaryIndex = 0;
+	ndInt32* const boundRow = ndAlloca(ndInt32, m_auxiliaryRowCount);
 	{
 		const ndInt32 nodeCount = m_nodeList.GetCount() - 1;
 		for (ndInt32 i = 0; i < nodeCount; ++i)
@@ -1919,6 +1916,47 @@ void ndSkeletonContainer::SolveAuxiliary(ndJacobian* const internalForces, const
 	AddForces(1);
 }
 
+void ndSkeletonContainer::BuildSparseMatrix()
+{
+	return;
+	const ndInt32 size = m_auxiliaryRowCount - m_blockSize;
+
+	ndUnsigned16* const sparseMatrix = m_sparseMatrix;
+	ndFloat32* const matrix = &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize];
+
+	ndInt32 xxxxx = 0;
+	ndInt32 xxxxx1 = 0;
+	const ndInt32 sparseFactor = (size + 2)/ 3;
+	for (ndInt32 i = 0; i < size; ++i)
+	{
+		ndInt32 floatsCount = 0;
+		ndFloat32* const row = &matrix[i * m_auxiliaryRowCount];
+		ndUnsigned16* const sparseRow = &sparseMatrix[i * (m_auxiliaryRowCount + 1)];
+		sparseRow[0] = 0;
+		for (ndInt32 j = 0; j < size; ++j)
+		{
+			sparseRow[floatsCount + 1] = ndUnsigned16(j);
+			const ndInt32 isfloat = ndAbs(row[j]) > ndFloat32(1.0e-10f) ? 1 : 0;
+			floatsCount += isfloat;
+			xxxxx += isfloat;
+		}
+
+		if (floatsCount <= sparseFactor)
+		{
+			xxxxx1++;
+			sparseRow[0] = ndUnsigned16 (floatsCount);
+			for (ndInt32 j = 0; j < floatsCount; ++j)
+			{
+				ndInt32 index = sparseRow[j + 1];
+				//row[j] = row[index];
+			}
+			ndTrace(("(%d %d)\n", floatsCount, size));
+		}
+	}
+	ndTrace(("sparseRows(%d, %d) float(%d) zeros(%d) \n", xxxxx1, size, size * size, size * size - xxxxx));
+	ndTrace(("\n"));
+}
+
 void ndSkeletonContainer::InitMassMatrix(const ndLeftHandSide* const leftHandSide, ndRightHandSide* const rightHandSide, ndInt32 threadIndex)
 {
 	D_TRACKTIME();
@@ -1986,22 +2024,24 @@ void ndSkeletonContainer::InitMassMatrix(const ndLeftHandSide* const leftHandSid
 			m_diagonalPreconditioner[i] = ndFloat32(1.0f) / diagSqrt;
 		}
 
-		ndFloat32* const preconditionMatrix = &m_precondinonedMassMatrix11[0];
-		auto Precondition = [this, stride, size, matrix, preconditionMatrix](ndInt32 groupId)
+		auto Precondition = [this, stride, size, matrix](ndInt32 groupId)
 		{
-			const ndFloat32* const srcRow = &matrix[groupId * stride];
-			ndFloat32* const dstRow = &preconditionMatrix[groupId * stride];
-			ndFloat32 diagonal = m_diagonalPreconditioner[groupId];
-			for (ndInt32 j = 0; j < size; ++j)
+			ndFloat32* const row = &matrix[groupId * stride];
+			const ndFloat32 diagonal = m_diagonalPreconditioner[groupId];
+			row[groupId] = ndFloat32(1.0f);
+			for (ndInt32 j = groupId + 1; j < size; ++j)
 			{
-				dstRow[j] = diagonal * srcRow[j] * m_diagonalPreconditioner[j];
+				const ndFloat32 offDiagonal = diagonal * row[j] * m_diagonalPreconditioner[j];
+				row[j] = offDiagonal;
+				matrix[j * stride + groupId] = offDiagonal;
 			}
 		};
-
 		for (ndInt32 i = 0; i < size; ++i)
 		{
 			Precondition(i);
 		}
+		ndAssert(ndTestPSDmatrix(size, stride, matrix, GetScratchBuffer(stride * stride)));
+		BuildSparseMatrix();
 	}
 }
 

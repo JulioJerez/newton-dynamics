@@ -232,6 +232,7 @@ class ndSkeletonContainer
 	void SolveAuxiliaryImmediate(ndFixSizeArray<ndBodyKinematic*, D_INV_IK_MAX_LINKS>& bodyArray, ndForcePair* const force) const;
 
 	// low level support
+	void BuildSparseMatrix();
 	void InitLoopMassMatrix();
 	void ConditionMassMatrix() const;
 	ndFloat32* GetScratchBuffer(ndInt32 size) const;
@@ -284,7 +285,7 @@ class ndSkeletonContainer
 	ndFloat32* m_massMatrix10;
 	ndFloat32* m_deltaForce;
 	ndFloat32* m_diagonalPreconditioner;
-	ndFloat32* m_precondinonedMassMatrix11;
+	ndUnsigned16* m_sparseMatrix;
 
 	ndNodeList m_nodeList;
 	ndArray<ndUnsigned32> m_factorizeSpans;
