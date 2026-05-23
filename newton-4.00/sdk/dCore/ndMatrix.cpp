@@ -748,8 +748,9 @@ bool ndMatrix::TestOrthogonal(ndFloat32 tol) const
 	ndFloat32 b = m_up.DotProduct(m_up).GetScalar();
 	ndFloat32 c = m_front.DotProduct(m_front).GetScalar();
 	ndFloat32 d = n.DotProduct(m_right).GetScalar();
-	bool ret = (m_front[3] == ndFloat32(0.0f)) &&
+	bool ret = 
 		(m_up[3] == ndFloat32(0.0f)) &&
+		(m_front[3] == ndFloat32(0.0f)) &&
 		(m_right[3] == ndFloat32(0.0f)) &&
 		(m_posit[3] == ndFloat32(1.0f)) &&
 		(ndAbs(a - ndFloat32(1.0f)) < tol) &&
