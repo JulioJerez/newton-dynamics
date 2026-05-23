@@ -1638,11 +1638,10 @@ void ndScene::CalculateContacts()
 {
 	D_TRACKTIME();
 	m_activeConstraintArray.SetCount(0);
-	ndScopeSpinLock lock(m_contactArray.GetLock());
-	const ndInt32 contactCount = ndInt32(m_contactArray.GetCount() + m_newPairs.GetCount());
-	m_contactArray.SetCount(contactCount);
+	const ndInt32 contactCount = ndInt32(m_newPairs.GetCount() + m_contactArray.GetCount());
 	if (contactCount)
 	{
+		// calculate all new and old contact points in the temp buffer
 		ndContact** const tmpJointsArray = (ndContact**)&m_scratchBuffer[0];
 
 		auto CalculateContactPoints = ndMakeObject::ndFunction([this, tmpJointsArray](ndInt32 groupId, ndInt32 threadIndex)
@@ -1656,9 +1655,7 @@ void ndScene::CalculateContacts()
 				CalculateContacts(threadIndex, contact);
 			}
 		});
-		const ndInt32 jointCount = ndInt32(m_contactArray.GetCount());
-		//ParallelExecute(CalculateContactPoints, jointCount, OptimalGroupBatch(jointCount));
-		ParallelExecute(CalculateContactPoints, jointCount, 8);
+		ParallelExecute(CalculateContactPoints, contactCount, 8);
 	}
 }
 
@@ -1693,6 +1690,7 @@ void ndScene::DeleteDeadContacts()
 	ndUnsigned32 prefixScan[5];
 
 	ndScopeSpinLock lock(m_contactArray.GetLock());
+	m_contactArray.SetCount(m_newPairs.GetCount() + m_contactArray.GetCount());
 	if (m_contactArray.GetCount())
 	{
 		D_TRACKTIME();

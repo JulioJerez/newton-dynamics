@@ -91,6 +91,7 @@ ndMatrix FindFloor(const ndWorld& world, const ndMatrix& origin, const ndShapeIn
 	};
 
 	ndMatrix matrix(origin);
+	ndAssert(matrix.TestOrthogonal());
 	matrix.m_posit.m_y += dist * ndFloat32 (0.5f);
 	ndFindFloorConvexCast castShape(world, matrix, shape, dist);
 	matrix.m_posit = castShape.m_floor;
@@ -317,7 +318,7 @@ void AddLumberYard(ndDemoEntityManager* const scene, const ndMatrix& location, n
 
 	matrix.m_posit.m_x -= 0.75f;
 	matrix.m_posit.m_z -= 3.0f;
-	ndSharedPtr<ndBody> body(AddBox(scene, matrix, mass, 0.2f, 1.5f, 0.2f));
+	AddBox(scene, matrix, mass, 0.2f, 1.5f, 0.2f);
 
 	matrix.m_posit.m_x += 1.5f;
 	AddBox(scene, matrix, mass, 0.2f, 1.5f, 0.2f);

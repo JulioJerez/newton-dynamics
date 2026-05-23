@@ -274,7 +274,7 @@ void ndBasicStacks (ndDemoEntityManager* const scene)
 		origin.m_x += 4.0f;
 	}
 
-	origin = ndVector::m_zero;
+	origin = ndVector::m_wOne;
 	origin.m_x -= 2.0f;
 	origin.m_z -= 3.0f;
 	BuildSphereColumn(scene, 10.0f, origin, ndVector(0.5f, 0.5f, 0.5f, 0.0f), 20);
