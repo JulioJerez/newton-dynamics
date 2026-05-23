@@ -283,3 +283,4 @@ void ndAssetEditor::EditLoopJoints()
 		}
 	}
 }
+

@@ -199,6 +199,7 @@ class ndAssetEditor : public ndClassAlloc
 
 	void EditLoopJoints();
 	void EditCollidingPair();
+	void MakeVisualGeometry();
 	void SetLoopJointSelection(const ndMesh* const node);
 	void SetCollidingSubSelection(const ndMesh* const node);
 	void SetModifierSubSelection(const ndMesh* const node);

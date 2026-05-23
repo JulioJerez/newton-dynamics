@@ -1445,12 +1445,10 @@ void ndUrdfMeshLoader::ImportVisual(const nd::TiXmlNode* const linkNode, ndMesh*
 			switch (cylinderKind)
 			{
 				case 0:
-					//shape = new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
 					instance.SetShape(new ndShapeCylinder(ndFloat32(radius), ndFloat32(radius), ndFloat32(length)));
 					break;
 				case 1:
 					length = length - 2.0f * radius;
-					//shape = new ndShapeCapsule(ndFloat32(radius), ndFloat32(radius), ndFloat32(length));
 					instance.SetShape(new ndShapeCapsule(ndFloat32(radius), ndFloat32(radius), ndFloat32(length)));
 					break;
 				default:;
@@ -1731,7 +1729,7 @@ bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 		}
 	}
 
-	// create a model with defaul visual generated from collision shapes.
+	// create a model with default visual generated from collision shapes.
 	model.SetTransform(ndPitchMatrix(-ndPi * 0.5f));
 	m_mesh = ndSharedPtr<ndMesh>(model.CreateDefaultMesh());
 

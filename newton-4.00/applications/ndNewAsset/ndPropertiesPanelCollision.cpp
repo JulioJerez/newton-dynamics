@@ -65,7 +65,50 @@ void ndAssetEditor::EditShapeTransform()
 
 	if (m_showTransformValues)
 	{
-		ndAssert(0);
+		ImGui::SeparatorText("local transform");
+		ndReal position[3];
+		position[0] = ndReal(shapeInstance.m_localMatrix.m_posit.m_x);
+		position[1] = ndReal(shapeInstance.m_localMatrix.m_posit.m_y);
+		position[2] = ndReal(shapeInstance.m_localMatrix.m_posit.m_z);
+		if (ImGui::InputFloat3("position##2", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
+			const ndVector delta(position[0], position[1], position[2], ndFloat32(0.0f));
+			shapeInstance.m_localMatrix.m_posit = delta;
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
+		};
+
+		ndReal euler[3];
+		ndVector tmp;
+		const ndVector angle(shapeInstance.m_localMatrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
+
+		euler[0] = ndReal(angle.m_x);
+		euler[1] = ndReal(angle.m_y);
+		euler[2] = ndReal(angle.m_z);
+		if (ImGui::InputFloat3("rotation##2", euler, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
+			ndMatrix matrix(ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad));
+			matrix.m_posit = shapeInstance.m_localMatrix.m_posit;
+			shapeInstance.m_localMatrix = matrix;
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
+		};
+
+		ndVector vector(shapeInstance.m_scale);
+		ndReal real[3];
+		real[0] = ndReal(vector.m_x);
+		real[1] = ndReal(vector.m_y);
+		real[2] = ndReal(vector.m_z);
+		if (ImGui::InputFloat3("scale##1", real, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
+			vector.m_x = ndMax(real[0], ndReal(0.001f));
+			vector.m_y = ndMax(real[1], ndReal(0.001f));
+			vector.m_z = ndMax(real[2], ndReal(0.001f));
+			shapeInstance.m_scale = vector;
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
+		};
+
 	}
 	else
 	{
@@ -421,6 +464,7 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 			ImGui::EndCombo();
 		}
 
+		MakeVisualGeometry();
 		EditShapeTransform();
 		const ndString& contructor = shapeInstance.m_shape->m_constructor;
 
@@ -460,5 +504,37 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 		{
 			//ndAssert(0);
 		}
+	}
+}
+
+void ndAssetEditor::MakeVisualGeometry()
+{
+	ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
+	ndAssert(body->m_classConstructor == ndBodyDynamic::StaticClassName());
+	ndMeshBodyDynamic* const rigidBody = (ndMeshBodyDynamic*)*body;
+	const ndMeshShapeInstance& shapeInstance = rigidBody->m_shapeInstance;
+	if (strcmp (shapeInstance.m_shape->m_constructor.GetStr(), ndShapeNull::StaticClassName()) == 0)
+	{
+		return;
+	}
+
+	ImGui::Separator();
+	if (ImGui::Button("build visual mesh"))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
+
+		ndSharedPtr<ndShapeInstance> instance (shapeInstance.CreateObject());
+		ndSharedPtr<ndMesh> tmpMesh(new ndMesh(**instance));
+		m_currentSelection->SetGeometry(tmpMesh->GetGeometry());
+		m_currentSelection->SetGeometryMatrix(tmpMesh->GetGeometryMatrix());
+
+		ndRenderSceneNode* const visualMesh = m_entity->FindByName(m_currentSelection->GetName());
+		ndSharedPtr<ndRenderSceneNode> tmpVisualMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*m_renderer, *tmpMesh, ndGetWorkingFileName("")));
+		visualMesh->SetPrimitive(tmpVisualMesh->GetPrimitive());
+		visualMesh->SetPrimitiveMatrix(tmpVisualMesh->GetPrimitiveMatrix());
+		
+		GetDebugDisplay()->RebuildVisualDebugMesh();
+
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
 	}
 }
