@@ -158,6 +158,8 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			ndRenderSceneNode* const parentSceneNode = m_entity->FindByName(m_currentSelection->GetName());
 			parentSceneNode->AddChild(childSceneNode);
 
+			m_currentSelection = *childMesh;
+
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 		}
 
