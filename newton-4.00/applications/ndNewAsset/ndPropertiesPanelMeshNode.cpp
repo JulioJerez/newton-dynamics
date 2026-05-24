@@ -171,7 +171,31 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 		{
 			if (ImGui::Button("clone node"))
 			{
-				ndTrace(("xxxx2\n"));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				ndSharedPtr<ndMesh> clone(m_currentSelection->CreateClone());
+
+				ndRenderSceneNode* const selectedVisualMesh = m_entity->FindByName(m_currentSelection->GetName());
+				ndAssert(selectedVisualMesh);
+				ndSharedPtr<ndRenderSceneNode> cloneVisualMesh(selectedVisualMesh->Clone());
+
+				auto Rename = [this, &cloneVisualMesh](ndMesh* const node)
+				{
+					ndString name(node->GetName());
+					ndRenderSceneNode* const cloneMesh = cloneVisualMesh->FindByName(name);
+					while (m_mesh->FindByName(name))
+					{
+						name += "_";
+					}
+					node->SetName(name);
+					cloneMesh->m_name = name;
+				};
+				clone->NodeIterator(Rename);
+				m_currentSelection->GetParent()->AddChild(clone);
+				selectedVisualMesh->GetParent()->AddChild(cloneVisualMesh);
+
+				m_debugDisplayRenderPass->ResetScene();
+				m_currentSelection = *clone;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			}
 		}
 
