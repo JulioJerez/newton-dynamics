@@ -690,6 +690,11 @@ void ndMeshShapeInstance::DeserializeFromXml(const nd::TiXmlElement* const paren
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeCylinder());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
+	else if (strcmp(constructor, ndShapeWheel::StaticClassName()) == 0)
+	{
+		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeWheel());
+		m_shape->DeserializeFromXml(xmlShape);
+	}
 	else if (strcmp(constructor, ndShapeChamferCylinder::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeChamferCylinder());

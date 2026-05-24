@@ -116,7 +116,10 @@ namespace ndBoxTricycle
 
         // add two roller wheels
         {
-            ndSharedPtr<ndShapeInstance>rollerShape(new ndShapeInstance(new ndShapeChamferCylinder(0.25f * diameter, 0.25f * diameter)));
+            //ndSharedPtr<ndShapeInstance>rollerShape(new ndShapeInstance(new ndShapeChamferCylinder(0.25f * diameter, 0.25f * diameter)));
+            ndSharedPtr<ndShapeInstance>rollerShape(new ndShapeInstance(new ndShapeWheel()));
+            const ndVector scale(0.5f * diameter, 0.4f * diameter, 0.4f * diameter, 0.0f);
+            rollerShape->SetScale(scale);
             {
                 // add a roller
                 ndMatrix rollerMatrix(ndYawMatrix(90.0f * ndDegreeToRad) * matrix);

@@ -167,6 +167,14 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			ndTrace(("xxxx1\n"));
 		}
 
+		if (m_currentSelection->GetParent())
+		{
+			if (ImGui::Button("clone node"))
+			{
+				ndTrace(("xxxx2\n"));
+			}
+		}
+
 		if (!m_currentSelection->GetRigidBody())
 		{
 			if (ImGui::Button("add body"))

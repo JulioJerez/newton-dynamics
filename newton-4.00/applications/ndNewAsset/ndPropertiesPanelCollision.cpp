@@ -442,7 +442,7 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 					else if (strcmp(name, ndShapeWheel::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
-						ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionTire());
+						ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionWheel());
 						InitNewShape(instance);
 					}
 					else if (strcmp(name, ndShapeConvexHull::StaticClassName()) == 0)

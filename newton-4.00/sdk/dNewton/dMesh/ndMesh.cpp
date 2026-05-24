@@ -1072,14 +1072,13 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionChamferCylinder()
 	return shape;
 }
 
-ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionTire()
+ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionWheel()
 {
 	ndVector size;
 	ndMatrix localMatrix(CalculateLocalMatrix(size));
 
 	ndFloat32 width = size.m_x;
 	ndFloat32 radius = size.m_y;
-	//ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeChamferCylinder(ndFloat32(0.75f), ndFloat32(0.5f))));
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeWheel()));
 	ndVector scale(ndFloat32(4.0f) * width, radius, radius, 0.0f);
 	shape->SetScale(scale);
@@ -1382,7 +1381,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollision()
 	}
 	else if (strstr(name, "-tire"))
 	{
-		shape = CreateCollisionTire();
+		shape = CreateCollisionWheel();
 	}
 	else if (strstr(name, "-convexhull"))
 	{
