@@ -40,6 +40,7 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	~ndDebugDisplayRenderPass();
 
 	void RebuildDebugCollision();
+	void RebuildVisualDebugMesh();
 	virtual void ResetScene() override;
 
 	private:

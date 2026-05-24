@@ -107,7 +107,8 @@ ndMultiBodyVehicleTorsionBar* ndMultiBodyVehicle::AddTorsionBar(ndBodyKinematic*
 ndMultiBodyVehicle::ndMultiBodyVehicle(ndFloat32 gravityMagnitud)
 	:ndModelArticulation()
 	,m_localFrame(ndGetIdentityMatrix())
-	,m_tireShape(new ndShapeChamferCylinder(ndFloat32(0.75f), ndFloat32(0.5f)))
+	//,m_tireShape(new ndShapeChamferCylinder(ndFloat32(0.75f), ndFloat32(0.5f)))
+	,m_tireShape(new ndShapeWheel())
 	,m_downForce()
 {
 	m_iniliazed = false;
@@ -344,17 +345,17 @@ void ndMultiBodyVehicle::SetLocalFrame(const ndMatrix& localframe)
 
 ndBodyDynamic* ndMultiBodyVehicle::GetChassis() const
 {
-	return m_chassis;
+	return (ndBodyDynamic*)*m_chassis;
 }
 
 ndMultiBodyVehicleMotor* ndMultiBodyVehicle::GetMotor() const
 {
-	return m_motor;
+	return (ndMultiBodyVehicleMotor*)*m_motor;
 }
 
 ndMultiBodyVehicleGearBox* ndMultiBodyVehicle::GetGearBox() const
 {
-	return m_gearBox;
+	return (ndMultiBodyVehicleGearBox*)*m_gearBox;
 }
 
 const ndList<ndMultiBodyVehicleTireJoint*>& ndMultiBodyVehicle::GetTireList() const
@@ -441,7 +442,7 @@ ndMultiBodyVehicleTireJoint* ndMultiBodyVehicle::AddTire(const ndMultiBodyVehicl
 	inertia.m_z = maxInertia;
 	tireBody->SetMassMatrix(inertia);
 
-	ndSharedPtr<ndJointBilateralConstraint> tireJoint (new ndMultiBodyVehicleTireJoint(matrix, tireBody, m_chassis, desc, this));
+	ndSharedPtr<ndJointBilateralConstraint> tireJoint (new ndMultiBodyVehicleTireJoint(matrix, tireBody, *m_chassis, desc, this));
 	AddTire(tire, tireJoint);
 	return m_tireList.GetLast()->GetInfo();
 }
@@ -504,7 +505,7 @@ ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 ma
 {
 	ndAssert(m_chassis);
 	ndSharedPtr<ndBody> differentialBody (CreateInternalBodyPart(mass, radius));
-	ndSharedPtr<ndJointBilateralConstraint> differentialJoint(new ndMultiBodyVehicleDifferential(differentialBody->GetAsBodyDynamic(), m_chassis, slipOmegaLock));
+	ndSharedPtr<ndJointBilateralConstraint> differentialJoint(new ndMultiBodyVehicleDifferential(differentialBody->GetAsBodyDynamic(), *m_chassis, slipOmegaLock));
 	AddDifferential(differentialBody, differentialJoint);
 	
 	m_iniliazed = false;
@@ -525,7 +526,7 @@ ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 ma
 {
 	ndAssert(m_chassis);
 	ndSharedPtr<ndBody> differentialBody(CreateInternalBodyPart(mass, radius));
-	ndSharedPtr<ndJointBilateralConstraint> differentialJoint(new ndMultiBodyVehicleDifferential(differentialBody->GetAsBodyKinematic(), m_chassis, slipOmegaLock));
+	ndSharedPtr<ndJointBilateralConstraint> differentialJoint(new ndMultiBodyVehicleDifferential(differentialBody->GetAsBodyKinematic(), *m_chassis, slipOmegaLock));
 	AddDifferential(differentialBody, differentialJoint);
 
 	m_iniliazed = false;
@@ -549,7 +550,7 @@ ndMultiBodyVehicleMotor* ndMultiBodyVehicle::AddMotor(ndFloat32 mass, ndFloat32 
 	ndSharedPtr<ndBody> motorBody (CreateInternalBodyPart(mass, radius));
 	ndSharedPtr<ndJointBilateralConstraint> motorJoint(new ndMultiBodyVehicleMotor(motorBody->GetAsBodyKinematic(), this));
 	AddMotor(motorBody, motorJoint);
-	return m_motor;
+	return *m_motor;
 }
 
 ndMultiBodyVehicleGearBox* ndMultiBodyVehicle::AddGearBox(ndMultiBodyVehicleDifferential* const differential)
@@ -558,7 +559,7 @@ ndMultiBodyVehicleGearBox* ndMultiBodyVehicle::AddGearBox(ndMultiBodyVehicleDiff
 	m_iniliazed = false;
 	ndSharedPtr<ndJointBilateralConstraint> gearBox(new ndMultiBodyVehicleGearBox(m_motor->GetBody0(), differential->GetBody0(), this));
 	AddGearBox(gearBox);
-	return m_gearBox;
+	return *m_gearBox;
 }
 
 bool ndMultiBodyVehicle::IsSleeping() const
@@ -694,7 +695,7 @@ void ndMultiBodyVehicle::Debug(ndConstraintDebugCallback&) const
 	}
 
 	// draw vehicle coordinade system;
-	const ndBodyKinematic* const chassis = m_chassis;
+	const ndBodyKinematic* const chassis = *m_chassis;
 	ndAssert(chassis);
 	const ndMatrix chassisMatrix(chassis->GetMatrix());
 
@@ -800,7 +801,7 @@ void ndMultiBodyVehicle::AddGearBox(const ndSharedPtr<ndJointBilateralConstraint
 void ndMultiBodyVehicle::ApplyStabilityControl()
 {
 	ndAssert(m_chassis);
-	const ndBodyKinematic* const chassis = m_chassis;
+	const ndBodyKinematic* const chassis = *m_chassis;
 	const ndVector veloc(chassis->GetVelocity());
 	const ndMatrix chassisMatrix(chassis->GetMatrix());
 

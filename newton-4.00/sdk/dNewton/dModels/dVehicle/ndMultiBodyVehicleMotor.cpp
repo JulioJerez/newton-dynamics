@@ -42,7 +42,7 @@ ndMultiBodyVehicleMotor::ndMultiBodyVehicleMotor()
 }
 
 ndMultiBodyVehicleMotor::ndMultiBodyVehicleMotor(ndBodyKinematic* const motor, ndMultiBodyVehicle* const vehicelModel)
-	:ndJointBilateralConstraint(3, motor, vehicelModel->m_chassis, motor->GetMatrix())
+	:ndJointBilateralConstraint(3, motor, *vehicelModel->m_chassis, motor->GetMatrix())
 	,m_vehicle(vehicelModel)
 	,m_omega(ndFloat32(0.0f))
 	,m_maxOmega(ndFloat32(100.0f))

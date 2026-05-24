@@ -39,7 +39,6 @@ class ndShapeChamferCylinder: public ndShapeConvex
 	virtual ndShapeChamferCylinder* GetAsShapeChamferCylinder() override { return this; }
 
 	protected:
-
 	D_COLLISION_API void Init(ndFloat32 radius, ndFloat32 height);
 
 	D_COLLISION_API virtual ndShapeInfo GetShapeInfo() const override;
@@ -51,10 +50,9 @@ class ndShapeChamferCylinder: public ndShapeConvex
 	D_COLLISION_API virtual ndVector SupportVertexSpecial(const ndVector& dir, ndFloat32 skinMargin) const override;
 	D_COLLISION_API virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const override;
 	D_COLLISION_API ndSharedPtr<ndMeshCollisionShape> GetMeshShape() const override;
+	D_COLLISION_API virtual ndInt32 CalculatePlaneIntersection(const ndVector& normal, const ndVector& point, ndVector* const contactsOut) const override;
 
-	virtual ndInt32 CalculatePlaneIntersection(const ndVector& normal, const ndVector& point, ndVector* const contactsOut) const override;
-
-	private:
+	protected:
 	ndFloat32 m_height;
 	ndFloat32 m_radius;
 
@@ -63,6 +61,23 @@ class ndShapeChamferCylinder: public ndShapeConvex
 	static ndConvexSimplexEdge m_edgeArray[];
 	static ndVector m_shapesDirs[];
 	static ndVector m_yzMask;
+} D_GCC_NEWTON_CLASS_ALIGN_32;
+
+D_MSV_NEWTON_CLASS_ALIGN_32
+class ndShapeWheel: public ndShapeChamferCylinder
+{
+	public:
+	D_CLASS_REFLECTION(ndShapeWheel, ndShapeChamferCylinder)
+	ndShapeWheel()
+		:ndShapeChamferCylinder(ndFloat32(0.75f), ndFloat32(0.5f))
+	{
+	}
+
+	D_COLLISION_API ndSharedPtr<ndMeshCollisionShape> GetMeshShape() const
+	{
+		return ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeWheel());
+	}
+
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif 

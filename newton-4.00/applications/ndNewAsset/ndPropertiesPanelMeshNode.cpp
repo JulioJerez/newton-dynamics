@@ -167,12 +167,21 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			ndTrace(("xxxx1\n"));
 		}
 
+		if (m_currentSelection->GetParent())
+		{
+			if (ImGui::Button("clone node"))
+			{
+				ndTrace(("xxxx2\n"));
+			}
+		}
+
 		if (!m_currentSelection->GetRigidBody())
 		{
 			if (ImGui::Button("add body"))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				AddRigidBody();
+				m_debugDisplayRenderPass->ResetScene();
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			}
 		}
@@ -183,6 +192,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				m_currentSelection->SetJoint(ndSharedPtr<ndMeshJoint>(nullptr));
 				m_currentSelection->SetRigidBody(ndSharedPtr<ndMeshBody>(nullptr));
+				m_debugDisplayRenderPass->ResetScene();
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			}
 		}

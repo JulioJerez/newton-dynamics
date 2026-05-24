@@ -133,11 +133,12 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	bool CoulombFrictionCircleTireModel(ndMultiBodyVehicleTireJoint* const tire, ndContactMaterial& contactPoint) const;
 
 	ndMatrix m_localFrame;
-	ndBodyDynamic* m_chassis;
-	ndMultiBodyVehicleMotor* m_motor;
-	ndShapeChamferCylinder* m_tireShape;
-	ndMultiBodyVehicleGearBox* m_gearBox;
-	ndMultiBodyVehicleTorsionBar* m_torsionBar;
+	ndWeakPtr<ndBodyDynamic> m_chassis;
+	ndWeakPtr<ndMultiBodyVehicleMotor> m_motor;
+	ndShapeWheel* m_tireShape;
+	//ndShapeChamferCylinder* m_tireShape;
+	ndWeakPtr<ndMultiBodyVehicleGearBox> m_gearBox;
+	ndWeakPtr<ndMultiBodyVehicleTorsionBar> m_torsionBar;
 	ndList<ndMultiBodyVehicleTireJoint*> m_tireList;
 	ndList<ndMultiBodyVehicleDifferential*> m_differentialList;
 
