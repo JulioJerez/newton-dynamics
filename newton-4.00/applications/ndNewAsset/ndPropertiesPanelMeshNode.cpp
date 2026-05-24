@@ -79,6 +79,16 @@ void ndUndoRedoMeshNode::Undo()
 void ndAssetEditor::ApplyNodeTransform(const ndMatrix& matrix, ndRenderSceneNode* const entNode)
 {
 	const ndMatrix localMatrix(m_currentSelection->GetMatrix() * matrix.OrthoInverse());
+	ndSharedPtr<ndMeshJoint> joint(m_currentSelection->GetJoint());
+	if (joint)
+	{
+		const ndMatrix parentMatrix(m_currentSelection->GetParent()->GetMatrix());
+		joint->m_localFrame1 =
+			joint->m_localFrame1 * parentMatrix *
+			m_currentSelection->GetMatrix().OrthoInverse() *
+			matrix * parentMatrix.OrthoInverse();
+	}
+
 	m_currentSelection->SetMatrix(matrix);
 	entNode->SetTransform(matrix);
 	entNode->SetTransform(matrix);

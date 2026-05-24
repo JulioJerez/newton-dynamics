@@ -248,6 +248,22 @@ void ndJointRoller::DebugJoint(ndConstraintDebugCallback& debugCallback) const
 			debugCallback.DrawLine(arch[i], arch[i + 1], color);
 		}
 	}
+
+	if (m_positionAxis.m_limitState)
+	{
+		const ndVector arrowColor(ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(1.0f));
+
+		ndVector p0(matrix1.m_posit + matrix1.m_up.Scale(m_positionAxis.m_minLimit));
+		ndVector p1(matrix1.m_posit + matrix1.m_up.Scale(m_positionAxis.m_maxLimit));
+		debugCallback.DrawLine(p0, p1, arrowColor);
+		
+		ndMatrix arrowMatrix(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * matrix1);
+		arrowMatrix.m_posit = p0;
+		debugCallback.DrawArrow(arrowMatrix, arrowColor, ndFloat32(0.125f));
+
+		arrowMatrix.m_posit = p1;
+		debugCallback.DrawArrow(arrowMatrix, arrowColor, ndFloat32(-0.125f));
+	}
 }
 
 void ndJointRoller::SubmitSpringDamperAngle(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& )

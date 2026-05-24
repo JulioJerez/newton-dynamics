@@ -59,7 +59,8 @@ void ndAssetEditor::EditJointGlobalMatrix()
 {
 	ndSharedPtr<ndMeshJoint> joint(m_currentSelection->GetJoint());
 
-	if (m_parentSpaceTransform)
+	//if (m_parentSpaceTransform)
+	if (0)
 	{
 		ndAssert(0);
 	}
