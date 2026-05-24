@@ -31,54 +31,6 @@ ndDebugDisplayRenderPass::~ndDebugDisplayRenderPass()
 {
 }
 
-void ndDebugDisplayRenderPass::RenderMeshSelection()
-{
-	if (m_manager->m_currentSelection)
-	{
-		if (m_manager->m_currentSelection->GetAsMesh())
-		{
-			RenderSelectedNode();
-		}
-		m_owner->ClearZBuffer();
-
-		if (m_debugLines.GetCount())
-		{
-			const ndMatrix matrix(ndGetIdentityMatrix());
-			m_renderLinesPrimitive->Render(m_owner, matrix, m_debugLineArray);
-		}
-
-		// do not call base class
-		if (m_manager->m_renderMode == ndAssetEditor::m_wireframe)
-		{
-			RenderWireFrame();
-		}
-		else if (m_manager->m_renderMode == ndAssetEditor::m_hiddenSurface)
-		{
-			RenderHiddenSurface();
-			RenderWireFrame();
-		}
-
-		if (m_manager->m_currentSelection->GetAsMesh())
-		{
-			if (m_manager->m_showCollisionShape)
-			{
-				RenderCollisionShape();
-			}
-
-			RenderOptions();
-		}
-		else if (m_manager->m_currentSelection->GetAsCloseLoopConstraints())
-		{
-			RenderCloseLoopJoints();
-		}
-		else if (m_manager->m_subSelection == ndAssetEditor::m_transformModifier)
-		{
-			ndAssert(0);
-			//RenderCollisionPair();
-		}
-	}
-}
-
 void ndDebugDisplayRenderPass::RenderBoneSelection()
 {
 	m_owner->ClearZBuffer();
@@ -132,6 +84,7 @@ void ndDebugDisplayRenderPass::RenderBoneSelection()
 		//	{
 		//		RenderCollisionShape();
 		//	}
+			m_owner->ClearZBuffer();
 			RenderOptions();
 		}
 		else if (m_manager->m_currentSelection->GetAsCloseLoopConstraints())
@@ -859,4 +812,53 @@ void ndDebugDisplayRenderPass::RenderSkeleton()
 		}
 	};
 	m_manager->m_mesh->NodeIterator(ForEachMesh);
+}
+
+void ndDebugDisplayRenderPass::RenderMeshSelection()
+{
+	if (m_manager->m_currentSelection)
+	{
+		if (m_manager->m_currentSelection->GetAsMesh())
+		{
+			RenderSelectedNode();
+		}
+		m_owner->ClearZBuffer();
+
+		if (m_debugLines.GetCount())
+		{
+			const ndMatrix matrix(ndGetIdentityMatrix());
+			m_renderLinesPrimitive->Render(m_owner, matrix, m_debugLineArray);
+		}
+
+		// do not call base class
+		if (m_manager->m_renderMode == ndAssetEditor::m_wireframe)
+		{
+			RenderWireFrame();
+		}
+		else if (m_manager->m_renderMode == ndAssetEditor::m_hiddenSurface)
+		{
+			RenderHiddenSurface();
+			RenderWireFrame();
+		}
+
+		if (m_manager->m_currentSelection->GetAsMesh())
+		{
+			if (m_manager->m_showCollisionShape)
+			{
+				RenderCollisionShape();
+			}
+
+			m_owner->ClearZBuffer();
+			RenderOptions();
+		}
+		else if (m_manager->m_currentSelection->GetAsCloseLoopConstraints())
+		{
+			RenderCloseLoopJoints();
+		}
+		else if (m_manager->m_subSelection == ndAssetEditor::m_transformModifier)
+		{
+			ndAssert(0);
+			//RenderCollisionPair();
+		}
+	}
 }

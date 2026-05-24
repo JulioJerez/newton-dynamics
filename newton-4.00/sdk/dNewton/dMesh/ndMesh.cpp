@@ -1079,7 +1079,8 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionTire()
 
 	ndFloat32 width = size.m_x;
 	ndFloat32 radius = size.m_y;
-	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeChamferCylinder(ndFloat32(0.75f), ndFloat32(0.5f))));
+	//ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeChamferCylinder(ndFloat32(0.75f), ndFloat32(0.5f))));
+	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeWheel()));
 	ndVector scale(ndFloat32(4.0f) * width, radius, radius, 0.0f);
 	shape->SetScale(scale);
 

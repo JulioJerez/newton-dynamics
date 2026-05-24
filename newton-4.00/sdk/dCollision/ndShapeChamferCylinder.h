@@ -39,7 +39,6 @@ class ndShapeChamferCylinder: public ndShapeConvex
 	virtual ndShapeChamferCylinder* GetAsShapeChamferCylinder() override { return this; }
 
 	protected:
-
 	D_COLLISION_API void Init(ndFloat32 radius, ndFloat32 height);
 
 	D_COLLISION_API virtual ndShapeInfo GetShapeInfo() const override;
@@ -63,6 +62,23 @@ class ndShapeChamferCylinder: public ndShapeConvex
 	static ndConvexSimplexEdge m_edgeArray[];
 	static ndVector m_shapesDirs[];
 	static ndVector m_yzMask;
+} D_GCC_NEWTON_CLASS_ALIGN_32;
+
+D_MSV_NEWTON_CLASS_ALIGN_32
+class ndShapeWheel: public ndShapeChamferCylinder
+{
+	public:
+	D_CLASS_REFLECTION(ndShapeWheel, ndShapeChamferCylinder)
+	ndShapeWheel()
+		:ndShapeChamferCylinder(ndFloat32(0.75f), ndFloat32(0.5f))
+	{
+	}
+
+	D_COLLISION_API ndSharedPtr<ndMeshCollisionShape> GetMeshShape() const
+	{
+		return ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeWheel());
+	}
+
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif 

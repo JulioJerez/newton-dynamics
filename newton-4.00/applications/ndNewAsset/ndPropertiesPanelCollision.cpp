@@ -306,6 +306,11 @@ void ndAssetEditor::EditCollisionChamferCylinder()
 	}
 }
 
+void ndAssetEditor::EditCollisionWheel()
+{
+	// do nothing
+}
+
 void ndAssetEditor::EditCollisionConvexHull()
 {
 	ndSharedPtr<ndMeshBody> body(m_currentSelection->GetRigidBody());
@@ -381,9 +386,9 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 		ndMeshBodyKinematic* const rigidBody = (ndMeshBodyKinematic*)*body;
 		ndMeshShapeInstance& shapeInstance = rigidBody->m_shapeInstance;
 
-		const char* const className = shapeInstance.m_shape->m_constructor.GetStr();
-		if (ImGui::BeginCombo("shapes", className))
+		if (ImGui::BeginCombo("shapes", shapeInstance.m_shape->m_constructor.GetStr()))
 		{
+			const char* const className = shapeInstance.m_shape->m_constructor.GetStr();
 			auto SetDropdownList = [this, rigidBody, &shapeInstance, &className](const char* const name)
 			{
 				bool selected = strcmp(name, className) ? false : true;
@@ -434,6 +439,12 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 						ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionChamferCylinder());
 						InitNewShape(instance);
 					}
+					else if (strcmp(name, ndShapeWheel::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
+						ndSharedPtr<ndShapeInstance> instance(m_currentSelection->CreateCollisionTire());
+						InitNewShape(instance);
+					}
 					else if (strcmp(name, ndShapeConvexHull::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
@@ -458,6 +469,7 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 			SetDropdownList(ndShapeCapsule::StaticClassName());
 			SetDropdownList(ndShapeCylinder::StaticClassName());
 			SetDropdownList(ndShapeChamferCylinder::StaticClassName());
+			SetDropdownList(ndShapeWheel::StaticClassName());
 			SetDropdownList(ndShapeConvexHull::StaticClassName());
 			SetDropdownList(ndShapeCompound::StaticClassName());
 
@@ -467,8 +479,9 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 		MakeVisualGeometry();
 		EditShapeTransform();
 		const ndString& contructor = shapeInstance.m_shape->m_constructor;
+		//const char* const className = shapeInstance.m_shape->m_constructor.GetStr();
 
-		if (strcmp(className, ndShapeNull::StaticClassName()) == 0)
+		if (strcmp(contructor.GetStr(), ndShapeNull::StaticClassName()) == 0)
 		{
 			// null shape does nothing
 		}
@@ -491,6 +504,10 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 		else if (strcmp(contructor.GetStr(), ndShapeChamferCylinder::StaticClassName()) == 0)
 		{
 			EditCollisionChamferCylinder();
+		}
+		else if (strcmp(contructor.GetStr(), ndShapeWheel::StaticClassName()) == 0)
+		{
+			EditCollisionWheel();
 		}
 		else if (strcmp(contructor.GetStr(), ndShapeConvexHull::StaticClassName()) == 0)
 		{

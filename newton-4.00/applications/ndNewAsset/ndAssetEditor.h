@@ -184,6 +184,7 @@ class ndAssetEditor : public ndClassAlloc
 
 	void EditShapeTransform();
 	void EditCollisionBox();
+	void EditCollisionWheel();
 	void EditCollisionSphere();
 	void EditCollisionCapsule();
 	void EditCollisionCylinder();

@@ -376,6 +376,45 @@ ndShape* ndMeshCollisionShapeChamferCylinder::CreateObject() const
 	return new ndShapeChamferCylinder(m_radius, m_height);
 }
 
+ndMeshCollisionShapeWheel::ndMeshCollisionShapeWheel()
+	:ndMeshCollisionShape(ndShapeWheel::StaticClassName())
+{
+}
+
+ndMeshCollisionShapeWheel::ndMeshCollisionShapeWheel(const ndMeshCollisionShapeWheel& other)
+	:ndMeshCollisionShape(other)
+{
+}
+
+ndMeshCollisionShape* ndMeshCollisionShapeWheel::Duplicate() const
+{
+	return new ndMeshCollisionShapeWheel(*this);
+}
+
+bool ndMeshCollisionShapeWheel::operator==(const ndMeshCollisionShape& other) const
+{
+	bool test = ndMeshCollisionShape::operator==(other);
+	return test;
+}
+
+void ndMeshCollisionShapeWheel::ApplyScale(ndFloat32)
+{
+}
+
+void ndMeshCollisionShapeWheel::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	xmlSaveParam(parent, "constructor", ndShapeWheel::StaticClassName());
+}
+
+void ndMeshCollisionShapeWheel::DeserializeFromXml(const nd::TiXmlElement* const)
+{
+}
+
+ndShape* ndMeshCollisionShapeWheel::CreateObject() const
+{
+	return new ndShapeWheel();
+}
+
 ndMeshCollisionShapeConvexHull::ndMeshCollisionShapeConvexHull()
 	:ndMeshCollisionShape(ndShapeConvexHull::StaticClassName())
 	,m_points()

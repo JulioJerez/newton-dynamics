@@ -159,6 +159,21 @@ class ndMeshCollisionShapeChamferCylinder : public ndMeshCollisionShape
 	ndFloat32 m_radius;
 };
 
+class ndMeshCollisionShapeWheel : public ndMeshCollisionShape
+{
+	public:
+	D_COLLISION_API ndMeshCollisionShapeWheel();
+
+	D_COLLISION_API ndMeshCollisionShapeWheel(const ndMeshCollisionShapeWheel& other);
+	D_COLLISION_API ndMeshCollisionShape* Duplicate() const;
+	D_COLLISION_API virtual bool operator==(const ndMeshCollisionShape& other) const;
+
+	D_COLLISION_API virtual ndShape* CreateObject() const override;
+	D_COLLISION_API virtual void ApplyScale(ndFloat32 scale) override;
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+};
+
 class ndMeshCollisionShapeConvexHull : public ndMeshCollisionShape
 {
 	public:
