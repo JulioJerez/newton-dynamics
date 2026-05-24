@@ -133,8 +133,11 @@ void ndDebugDisplayRenderPass::RebuildVisualDebugMesh()
 			{
 				ndRenderPrimitive::ndDescriptor descriptor(m_owner);
 				descriptor.m_collision = ndSharedPtr<ndShapeInstance>(kinematicBody->m_shapeInstance.CreateObject());
-				descriptor.m_collision->SetScale(ndVector::m_one);
-				descriptor.m_collision->SetLocalMatrix(ndGetIdentityMatrix());
+				//descriptor.m_collision->SetScale(ndVector::m_one);
+				//descriptor.m_collision->SetLocalMatrix(ndGetIdentityMatrix());
+				descriptor.m_collision->SetScale(kinematicBody->m_shapeInstance.m_scale);
+				descriptor.m_collision->SetLocalMatrix(kinematicBody->m_shapeInstance.m_localMatrix);
+				descriptor.m_collision->m_alignmentMatrix = kinematicBody->m_shapeInstance.m_alignmentMatrix;
 
 				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugWireFrame;
 				debugMesh.m_wireFrameMesh = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));

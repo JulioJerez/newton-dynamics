@@ -430,7 +430,8 @@ ndShapeInstance& ndShapeInstance::operator=(const ndShapeInstance& instance)
 void ndShapeInstance::DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& debugCallback) const
 {
 	debugCallback.m_instance = this;
-	m_shape->DebugShape(GetScaledTransform(matrix), debugCallback);
+	const ndMatrix scaleMatrix(GetScaledTransform(matrix));
+	m_shape->DebugShape(scaleMatrix, debugCallback);
 }
 
 ndShapeInfo ndShapeInstance::GetShapeInfo() const

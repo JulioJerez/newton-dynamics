@@ -73,7 +73,7 @@ void ndAssetEditor::EditShapeTransform()
 		if (ImGui::InputFloat3("position##2", position, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
-			const ndVector delta(position[0], position[1], position[2], ndFloat32(0.0f));
+			const ndVector delta(position[0], position[1], position[2], ndFloat32(1.0f));
 			shapeInstance.m_localMatrix.m_posit = delta;
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
 		};
