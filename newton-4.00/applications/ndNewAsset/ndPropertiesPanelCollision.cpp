@@ -63,7 +63,7 @@ void ndAssetEditor::EditShapeTransform()
 	ndMeshBodyKinematic* const rigidBody = (ndMeshBodyKinematic*)*body;
 	ndMeshShapeInstance& shapeInstance = rigidBody->m_shapeInstance;
 
-	if (m_showTransformValues)
+	if (m_parentSpaceTransform)
 	{
 		ImGui::SeparatorText("local transform");
 		ndReal position[3];

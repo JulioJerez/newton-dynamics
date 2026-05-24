@@ -193,7 +193,7 @@ void ndDebugDisplayRenderPass::ResetScene()
 		ndSharedPtr<ndMeshBody> body(node->GetRigidBody());
 		ndSharedPtr<ndMeshEffect>& geometry = node->GetGeometry();
 
-		if (*geometry || (*body))
+		if (*geometry || *body)
 		{
 			ndDebugMesh& entry = m_debugMesh.Append()->GetInfo();
 			entry.m_parent = ndWeakPtr<ndRenderSceneNode>(m_manager->m_entity->FindByName(node->GetName()));
@@ -670,7 +670,16 @@ void ndDebugDisplayRenderPass::RenderOptions()
 			const ndMatrix pivotMatrix(sceneNode->m_globalMatrix);
 			if (m_manager->m_showPivot)
 			{
-				DrawFrame(pivotMatrix);
+				if (m_manager->m_parentSpaceTransform && sceneNode->GetParent())
+				{
+					ndMatrix matrix (sceneNode->GetParent()->m_matrix);
+					matrix.m_posit = matrix.TransformVector(sceneNode->m_matrix.m_posit);
+					DrawFrame(matrix);
+				}
+				else
+				{
+					DrawFrame(pivotMatrix);
+				}
 			}
 
 			if (m_manager->m_geometryPivot)
@@ -858,7 +867,7 @@ void ndDebugDisplayRenderPass::RenderMeshSelection()
 		else if (m_manager->m_subSelection == ndAssetEditor::m_transformModifier)
 		{
 			ndAssert(0);
-			//RenderCollisionPair();
+			RenderCollisionPair();
 		}
 	}
 }

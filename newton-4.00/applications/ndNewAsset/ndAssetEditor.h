@@ -238,13 +238,13 @@ class ndAssetEditor : public ndClassAlloc
 	bool m_showCenterOfMass;
 	bool m_showSelectedNode;
 	bool m_showCollisionShape;
-	bool m_showTransformValues;
 
 	bool m_toolActive;
 	bool m_initCamera;
 	bool m_raycastBones;
 	bool m_geometryPivot;
 	bool m_transformPivotOnly;
+	bool m_parentSpaceTransform;
 
 	ndReal m_gizmoScale;
 	ndInt32 m_renderMode;
