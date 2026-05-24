@@ -155,22 +155,6 @@ void ndJointWheel::DebugJoint(ndConstraintDebugCallback& debugCallback) const
 
 	//draw reference frame
 	debugCallback.DrawFrame(matrix1);
-	
-	//// draw upper bumper
-	//ndMatrix upperBumberMatrix(CalculateUpperBumperMatrix());
-	//ndMatrix tireBaseFrame(CalculateBaseFrame());
-	//debugCallback.DrawFrame(tireBaseFrame);
-
-	//// show tire center of mass;
-	//ndBodyKinematic* const tireBody = GetBody0()->GetAsBodyKinematic();
-	//ndMatrix tireFrame(tireBody->GetMatrix());
-	//context.DrawFrame(tireFrame);
-	//upperBumberMatrix.m_posit = tireFrame.m_posit;
-	//context.DrawFrame(upperBumberMatrix);
-
-	ndVector p0(matrix1.m_posit + matrix1.m_up.Scale(m_info.m_lowerStop));
-	ndVector p1(matrix1.m_posit + matrix1.m_up.Scale(m_info.m_upperStop));
-	debugCallback.DrawLine(p0, p1, m_linearDebugColor);
 
 	if (m_info.m_steeringAngle > ndFloat32 (0.01f))
 	{
@@ -200,6 +184,22 @@ void ndJointWheel::DebugJoint(ndConstraintDebugCallback& debugCallback) const
 		{
 			debugCallback.DrawLine(arch[i], arch[i + 1], color);
 		}
+	}
+
+	// draw bumper limits
+	{
+		const ndVector arrowColor(ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(1.0f));
+	
+		ndVector p0(matrix1.m_posit + matrix1.m_up.Scale(m_info.m_lowerStop));
+		ndVector p1(matrix1.m_posit + matrix1.m_up.Scale(m_info.m_upperStop));
+		debugCallback.DrawLine(p0, p1, arrowColor);
+
+		ndMatrix arrowMatrix(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * matrix1);
+		arrowMatrix.m_posit = p0;
+		debugCallback.DrawArrow(arrowMatrix, arrowColor, ndFloat32(0.125f));
+
+		arrowMatrix.m_posit = p1;
+		debugCallback.DrawArrow(arrowMatrix, arrowColor, ndFloat32(-0.125f));
 	}
 }
 
