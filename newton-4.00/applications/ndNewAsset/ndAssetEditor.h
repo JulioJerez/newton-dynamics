@@ -208,6 +208,7 @@ class ndAssetEditor : public ndClassAlloc
 	void ApplyNodeTransform(const ndMatrix& matrix, ndRenderSceneNode* const entNode);
 
 	void AddRigidBody();
+	void SelectCurrentNode(ndSharedPtr<ndMesh> node);
 		
 	ndSharedPtr<ndMesh> m_mesh;
 	ndSharedPtr<ndRender> m_renderer;

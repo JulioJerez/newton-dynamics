@@ -65,6 +65,43 @@ void ndAssetEditor::ShowOutlierExplorerCloseLoop(const ndSharedPtr<ndMesh>& root
 	}
 }
 
+void ndAssetEditor::SelectCurrentNode(ndSharedPtr<ndMesh> node)
+{
+	ndAssetEditor::ndSubSelectionMode selectionMode = m_subSelection;
+	switch (selectionMode)
+	{
+		case ndAssetEditor::m_loopJoint:
+		{
+			SetLoopJointSelection(*node);
+			break;
+		}
+
+		case ndAssetEditor::m_collidingPair:
+		{
+			SetCollidingSubSelection(*node);
+			break;
+		}
+
+		case ndAssetEditor::m_transformModifier:
+		{
+			SetModifierSubSelection(*node);
+			break;
+		}
+
+		case ndAssetEditor::m_alignToTarget:
+		{
+			m_currentSubSelection = ndWeakPtr<ndMesh>(*node);
+			break;
+		}
+
+		case ndAssetEditor::m_none:
+		default:
+		{
+			m_currentSelection = *node;
+		}
+	}
+}
+
 void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& node)
 {
 	ImGuiTreeNodeFlags options = 0;
@@ -80,7 +117,8 @@ void ndAssetEditor::ShowOutlierExplorer(const ndSharedPtr<ndMesh>& node)
 		bool isClicked = ImGui::IsItemClicked();
 		if (isClicked)
 		{
-			m_currentSelection = ndWeakPtr<ndMesh>((ndMesh*)*node);
+			//m_currentSelection = ndWeakPtr<ndMesh>((ndMesh*)*node);
+			SelectCurrentNode(node);
 		}
 
 		if (node->GetAsCloseLoopConstraints())
