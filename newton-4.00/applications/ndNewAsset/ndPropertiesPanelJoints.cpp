@@ -765,7 +765,7 @@ void ndAssetEditor::EditDoubleHingeJoint()
 
 	ndMeshJointDoubleHinge* const joint = (ndMeshJointDoubleHinge*)*m_currentSelection->GetJoint();
 	{
-		ImGui::SeparatorText("actuator0 params");
+		ImGui::SeparatorText("actuator 0 params");
 		ndReal value = ndReal(joint->m_axis0.m_springK);
 		if (ImGui::InputFloat("spring const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
@@ -835,7 +835,7 @@ void ndAssetEditor::EditDoubleHingeJoint()
 	}
 
 	{
-		ImGui::SeparatorText("angular actuator params");
+		ImGui::SeparatorText("actuator 1 params");
 		ndReal value = ndReal(joint->m_axis1.m_springK);
 		if (ImGui::InputFloat("spring const##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
@@ -975,7 +975,6 @@ void ndAssetEditor::EditWheelJoint()
 
 void ndAssetEditor::EditSphericalJoint()
 {
-	//EditLoopJointGlobalMatrix();
 	EditJointGlobalMatrix();
 
 	ndMeshJointSpherical* const joint = (ndMeshJointSpherical*)*m_currentSelection->GetJoint();
