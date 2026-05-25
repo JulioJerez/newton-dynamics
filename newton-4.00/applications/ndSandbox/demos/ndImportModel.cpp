@@ -152,7 +152,7 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
     if (cameraPivotNode)
     {
         ndVector cameraPivot(ndVector::m_zero);
-        camera = ndSharedPtr<ndRenderSceneNode>(new ndDemoCameraNodeFollow(renderer, cameraPivot, -3.0f));
+        camera = ndSharedPtr<ndRenderSceneNode>(new ndDemoCameraNodeFollow(renderer, cameraPivot, -4.0f));
         cameraPivotNode->AddChild(camera);
     }
 
