@@ -19,6 +19,53 @@
 #include "ndDemoCameraNodeFollow.h"
 #include "ndHeightFieldPrimitive.h"
 
+class ndVanillaController : public ndModelNotify
+{
+    public:
+    ndVanillaController(
+        ndDemoEntityManager* const scene,
+        ndModelArticulation* const model)
+        :ndModelNotify()
+        ,m_scene(scene)
+        ,m_motor(model->FindByName("motor"))
+        ,m_engineOmega(ndFloat32 (0.0f))
+        ,m_engineTurnRateOmega(ndFloat32(0.0f))
+    {
+        ndAssert(m_motor);
+    }
+
+    void UpdateEngine(ndFloat32 timestep)
+    {
+        // reset the motor matrix to align with the chassis matrix
+        ndJointDoubleHinge* const engine = (ndJointDoubleHinge*)*m_motor->m_joint;
+        const ndMatrix matrix(engine->GetLocalMatrix0().OrthoInverse() * engine->GetLocalMatrix1() * engine->GetBody1()->GetMatrix());
+        engine->GetBody0()->SetMatrixNoSleep(matrix);
+
+
+        // integrate turn rate angle
+        ndFloat32 turnAngle = engine->GetAngle0();
+        engine->SetTargetAngle0(turnAngle + m_engineTurnRateOmega * timestep);
+
+        // integrate the joints angle;
+        ndFloat32 fowardAngle = engine->GetAngle1();
+        engine->SetTargetAngle1(fowardAngle + m_engineOmega * timestep);
+    }
+
+
+    void Update(ndFloat32 timestep) override
+    {
+        ndAssert(0);
+        ndModelNotify::Update(timestep);
+        //UpdateEngine(timestep);
+    }
+
+
+    ndWeakPtr<ndDemoEntityManager> m_scene;
+    ndWeakPtr<ndModelArticulation::ndNode> m_motor;
+    ndFloat32 m_engineOmega;
+    ndFloat32 m_engineTurnRateOmega;
+};
+
 static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, const ndMatrix& location, const char* const pathFileName)
 {
     ndMeshLoader loader;
@@ -41,25 +88,41 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
     sceneMesh->SetTransform(matrix);
     model->GetAsModelArticulation()->SetTransform(matrix);
 
+    // bind a camera to the the cemara pivot if it has one
+    ndSharedPtr<ndRenderSceneNode> cameraPivotNode(sceneMesh->FindByName("cameraPivot")->GetSharedPtr());
+    if (cameraPivotNode)
+    {
+        ndVector cameraPivot(ndVector::m_zero);
+        ndSharedPtr<ndRenderSceneNode> camera(new ndDemoCameraNodeFollow(renderer, cameraPivot, -3.0f));
+        cameraPivotNode->AddChild(camera);
+    }
+
     // Bind application data to the model, 
     // this could be a render mesh or something else. 
     // For this demo we use ndRenderSceneNode mesh
     const ndMesh* const rootMesh = *loader.m_mesh;
-    auto BindApplicationData = [scene, rootMesh, &sceneMesh](ndModelArticulation::ndNode* const node)
+    auto BindApplicationData = [scene, articulation, rootMesh, &sceneMesh](ndModelArticulation::ndNode* const node)
     {
-        const ndMesh* const meshNode = rootMesh->FindByClosestMatch(node->m_name);
-        ndAssert(meshNode);
+        if (articulation->IsCloseLoop(node))
+        {
+            ndTrace(("do somthing\n"));
+        }
+        else
+        { 
+            const ndMesh* const meshNode = rootMesh->FindByClosestMatch(node->m_name);
+            ndAssert(meshNode);
 
-        // find the visual node this body control by name. 
-        const ndMatrix matrix(node->m_body->GetMatrix());
-        ndRenderSceneNode* const visualEntityPtr = sceneMesh->FindByClosestMatch(meshNode->GetName());
-        ndAssert(visualEntityPtr);
-        ndSharedPtr<ndRenderSceneNode> visualEntity((visualEntityPtr == *sceneMesh) ? sceneMesh : visualEntityPtr->GetSharedPtr());
+            // find the visual node this body control by name. 
+            const ndMatrix matrix(node->m_body->GetMatrix());
+            ndRenderSceneNode* const visualEntityPtr = sceneMesh->FindByClosestMatch(meshNode->GetName());
+            ndAssert(visualEntityPtr);
+            ndSharedPtr<ndRenderSceneNode> visualEntity((visualEntityPtr == *sceneMesh) ? sceneMesh : visualEntityPtr->GetSharedPtr());
 
-        // add a rigid body with notification callback
-        ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
-        ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
-        node->m_body->SetNotifyCallback(notify);
+            // add a rigid body with notification callback
+            ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
+            ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
+            node->m_body->SetNotifyCallback(notify);
+        }
     };
     articulation->NodeIterator(BindApplicationData);
 
