@@ -33,7 +33,6 @@ class ndQuaternion: public ndVector
 	public:
 	ndQuaternion(); 
 	ndQuaternion(const ndVector& quat);
-	//ndQuaternion(const ndQuaternion& quat);
 	D_CORE_API ndQuaternion (const ndMatrix& matrix);
 	ndQuaternion (ndFloat32 q0, ndFloat32 q1, ndFloat32 q2, ndFloat32 q3);
 	D_CORE_API ndQuaternion (const ndVector &unit_Axis, ndFloat32 angle);
@@ -55,7 +54,6 @@ class ndQuaternion: public ndVector
 };
 
 inline ndQuaternion::ndQuaternion()
-	//:ndVector(ndVector::m_wOne)
 	:ndVector(ndFloat32 (0.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0f))
 {
 }
@@ -64,11 +62,6 @@ inline ndQuaternion::ndQuaternion(const ndVector& quat)
 	:ndVector(quat)
 {
 }
-
-//inline ndQuaternion::ndQuaternion(const ndQuaternion& quat)
-//	:ndVector(quat)
-//{
-//}
 
 inline ndQuaternion::ndQuaternion(ndFloat32 q0, ndFloat32 q1, ndFloat32 q2, ndFloat32 q3)
 	:ndVector(q0, q1, q2, q3)
@@ -83,13 +76,11 @@ inline ndQuaternion ndQuaternion::Inverse () const
 
 inline ndQuaternion ndQuaternion::operator+ (const ndQuaternion &q) const
 {
-	//return ndQuaternion (m_x + q.m_x, m_y + q.m_y, m_z + q.m_z, m_w + q.m_w);
 	return ndVector::operator+(q);
 }
 
 inline ndQuaternion ndQuaternion::operator- (const ndQuaternion &q) const
 {
-	//return ndQuaternion (m_x - q.m_x, m_y - q.m_y, m_z - q.m_z, m_w - q.m_w);
 	return ndVector::operator-(q);
 }
 
