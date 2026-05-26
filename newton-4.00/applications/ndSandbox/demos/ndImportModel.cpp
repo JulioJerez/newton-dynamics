@@ -29,12 +29,21 @@ class ndVanillaController : public ndModelNotify
         ,m_scene(scene)
         ,m_cameraNode(*camera)
         ,m_motor(model->FindByName("motor"))
-        ,m_frontWheel(model->FindByName("frontWheel"))
         ,m_steerAngle(ndFloat32(0.0f))
         ,m_engineOmega(ndFloat32 (0.0f))
     {
         ndAssert(m_motor);
         SetModel(model);
+
+        // find the wheels
+        auto FindWheels = [this](ndModelArticulation::ndNode* const node)
+        {
+            if (node->m_joint && (strcmp(node->m_joint->ClassName(), ndJointWheel::StaticClassName()) == 0))
+            {
+                m_wheels.Append((ndJointWheel*)*node->m_joint);
+            }
+        };
+        model->NodeIterator(FindWheels);
     }
 
     void UpdateEngine(ndFloat32 timestep)
@@ -51,10 +60,10 @@ class ndVanillaController : public ndModelNotify
             engine->SetTargetAngle1(fowardAngle + m_engineOmega * timestep);
         }
 
-        if (m_frontWheel)
+        for (ndList<ndWeakPtr<ndJointWheel>>::ndNode* node = m_wheels.GetFirst(); node; node = node->GetNext())
         {
-            ndJointWheel* const frontWheel = (ndJointWheel*)*m_frontWheel->m_joint;
-            frontWheel->UpdateTireSteeringAngleMatrix();
+            ndJointWheel* const wheel = *node->GetInfo();
+            wheel->UpdateTireSteeringAngleMatrix();
         }
     }
 
@@ -88,7 +97,7 @@ class ndVanillaController : public ndModelNotify
                 }
             }
 
-            if (m_frontWheel)
+            if (m_wheels.GetCount())
             {
                 // very simplistic steering system
                 m_steerAngle = ndFloat32(0.0f);
@@ -101,16 +110,19 @@ class ndVanillaController : public ndModelNotify
                     m_steerAngle = ndFloat32(-1.0f);
                 }
 
-                ndJointWheel* const frontWheel = (ndJointWheel*)*m_frontWheel->m_joint;
-                ndFloat32 angle0 = frontWheel->GetSteering();
-                ndFloat32 filter = ndFloat32(15.0f * timestep);
-                ndFloat32 angle = angle0 + (m_steerAngle - angle0) * filter;
-                
-                if (ndAbs(angle0 - angle) > ndFloat32(1.0e-3f))
+                for (ndList<ndWeakPtr<ndJointWheel>>::ndNode* node = m_wheels.GetFirst(); node; node = node->GetNext())
                 {
-                    ndBodyDynamic* const wheel = m_frontWheel->m_body->GetAsBodyDynamic();
-                    wheel->SetSleepState(false);
-                    frontWheel->SetSteering(angle);
+                    ndJointWheel* const wheel = *node->GetInfo();
+                    ndFloat32 angle0 = wheel->GetSteering();
+                    ndFloat32 filter = ndFloat32(15.0f * timestep);
+                    ndFloat32 angle = angle0 + (m_steerAngle - angle0) * filter;
+
+                    if (ndAbs(angle0 - angle) > ndFloat32(1.0e-3f))
+                    {
+                        ndBodyDynamic* const wheelBody = wheel->GetBody0()->GetAsBodyDynamic();
+                        wheelBody->SetSleepState(false);
+                        wheel->SetSteering(angle);
+                    }
                 }
             }
         }
@@ -119,7 +131,7 @@ class ndVanillaController : public ndModelNotify
     ndWeakPtr<ndDemoEntityManager> m_scene;
     ndWeakPtr<ndRenderSceneNode> m_cameraNode;
     ndWeakPtr<ndModelArticulation::ndNode> m_motor;
-    ndWeakPtr<ndModelArticulation::ndNode> m_frontWheel;
+    ndList<ndWeakPtr<ndJointWheel>> m_wheels;
     ndFloat32 m_steerAngle;
     ndFloat32 m_engineOmega;
 };

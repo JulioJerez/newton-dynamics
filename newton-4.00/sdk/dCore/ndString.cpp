@@ -738,33 +738,35 @@ ndInt32 ndString::Distance(const ndString& other) const
 	return currRow[n];
 }
 
-ndString ndGetPath(const ndString& fullPathName)
+//ndString ndGetPath(const ndString& fullPathName)
+ndString ndString::GetPath() const
 {
-	const char* ptr = strrchr(fullPathName.GetStr(), '/');
+	const char* ptr = strrchr(GetStr(), '/');
 	if (!ptr)
 	{
-		ptr = strrchr(fullPathName.GetStr(), '\\');
+		ptr = strrchr(GetStr(), '\\');
 	}
 	const char* const dummy = "/";
 	if (!ptr)
 	{
 		ptr = dummy;
 	}
-	return ndString(fullPathName.GetStr(), ndInt32(fullPathName.Size() - strlen(ptr + 1)));
+	return ndString(GetStr(), ndInt32(Size() - strlen(ptr + 1)));
 }
 
-ndString ndGetName(const ndString& fullPathName)
+//ndString ndGetName(const ndString& fullPathName)
+ndString ndString::GetName() const
 {
-	const char* ptr1 = strrchr(fullPathName.GetStr(), '.');
-	const char* ptr0 = strrchr(fullPathName.GetStr(), '/');
+	const char* ptr1 = strrchr(GetStr(), '.');
+	const char* ptr0 = strrchr(GetStr(), '/');
 	if (!ptr0)
 	{
-		ptr0 = strrchr(fullPathName.GetStr(), '\\');
+		ptr0 = strrchr(GetStr(), '\\');
 	}
 	ndAssert(ptr0);
 	ndAssert(ptr1);
-	ndInt32 start = ndInt32(fullPathName.Size() - strlen(ptr0 + 1));
-	ndInt32 end = ndInt32(fullPathName.Size() - strlen(ptr1));
-	return fullPathName.SubString(start, end - start);
+	ndInt32 start = ndInt32(Size() - strlen(ptr0 + 1));
+	ndInt32 end = ndInt32(Size() - strlen(ptr1));
+	return SubString(start, end - start);
 }
 

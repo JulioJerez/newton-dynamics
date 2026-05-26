@@ -54,7 +54,7 @@ bool ndUndoRedoMeshNode::operator!=(const ndUndoRedoCommand& command) const
 	
 void ndUndoRedoMeshNode::Undo()
 {
-	ndSharedPtr<ndRenderSceneNode> visualMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*m_editor->GetRenderer(), *m_copy, ndGetPath(m_editor->GetPath())));
+	ndSharedPtr<ndRenderSceneNode> visualMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*m_editor->GetRenderer(), *m_copy, m_editor->GetPath().GetPath()));
 
 	m_editor->m_initCamera = false;
 	m_editor->SetVisualScene(m_copy, visualMesh);

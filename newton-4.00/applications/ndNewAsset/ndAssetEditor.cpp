@@ -398,22 +398,6 @@ void ndAssetEditor::ShowMainMenuBar()
 			}
 
 			ImGui::Separator();
-			if (ImGui::MenuItem("Import fbx", ""))
-			{
-				char fileName[2048];
-				if (dGetImportFbxFileName(fileName, sizeof(fileName) - 1))
-				{
-					const ndString path(fileName);
-					ndRenderMeshLoader loader(*m_renderer);
-					if (loader.ImportFbx(path))
-					{
-						m_currentPath = path;
-						SetVisualScene(loader.m_mesh, loader.m_renderMesh);
-						m_undoRedo.Clear();
-					}
-				}
-			}
-
 			if (ImGui::MenuItem("Import urdf", ""))
 			{
 				char fileName[2048];
@@ -422,6 +406,44 @@ void ndAssetEditor::ShowMainMenuBar()
 					const ndString path(fileName);
 					ndUrdfMeshLoader loader(*m_renderer);
 					if (loader.Import(path))
+					{
+						m_currentPath = path;
+						SetVisualScene(loader.m_mesh, loader.m_renderMesh);
+						m_undoRedo.Clear();
+					}
+				}
+			}
+
+			if (ImGui::MenuItem("Import fbx (blender)", ""))
+			{
+				char fileName[2048];
+				if (dGetImportFbxFileName(fileName, sizeof(fileName) - 1))
+				{
+					const ndString path(fileName);
+					ndRenderMeshLoader loader(*m_renderer);
+					if (loader.ImportFbx(path))
+					{
+						const ndMatrix blenderRotation(ndRollMatrix(ndFloat32(-90.0f) * ndDegreeToRad));
+						ndMesh* const mesh = *loader.m_mesh;
+						ndAssert(mesh);
+						mesh->ApplyPivotsRotation(blenderRotation);
+						loader.m_renderMesh = ndSharedPtr<ndRenderSceneNode>(ndRenderMeshLoader::CreateRenderSceneMesh(*GetRenderer(), mesh, path.GetPath()));
+
+						m_currentPath = path;
+						SetVisualScene(loader.m_mesh, loader.m_renderMesh);
+						m_undoRedo.Clear();
+					}
+				}
+			}
+
+			if (ImGui::MenuItem("Import fbx (autodesk)", ""))
+			{
+				char fileName[2048];
+				if (dGetImportFbxFileName(fileName, sizeof(fileName) - 1))
+				{
+					const ndString path(fileName);
+					ndRenderMeshLoader loader(*m_renderer);
+					if (loader.ImportFbx(path))
 					{
 						m_currentPath = path;
 						SetVisualScene(loader.m_mesh, loader.m_renderMesh);
@@ -469,6 +491,12 @@ void ndAssetEditor::ShowMainMenuBar()
 			{
 				m_toolActive = true;
 				m_currentTool = new ndRotateMesh(this);
+			}
+
+			if (ImGui::MenuItem("rotate pivots", ""))
+			{
+				m_toolActive = true;
+				m_currentTool = new ndRotatePivots(this);
 			}
 
 			if (ImGui::MenuItem("rotate bones", ""))
