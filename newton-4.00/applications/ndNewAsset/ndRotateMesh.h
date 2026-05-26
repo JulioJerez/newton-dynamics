@@ -26,6 +26,17 @@ class ndRotateMesh : public ndAssetEditor::ndAssetTool
 	ndReal m_angles[3];
 };
 
+class ndRotatePivots : public ndAssetEditor::ndAssetTool
+{
+	public:
+	ndRotatePivots(ndAssetEditor* const owner);
+
+	void ApplyRotation();
+
+	virtual void Execute() override;
+	ndReal m_angles[3];
+};
+
 class ndRotateBones : public ndAssetEditor::ndAssetTool
 {
 	public:

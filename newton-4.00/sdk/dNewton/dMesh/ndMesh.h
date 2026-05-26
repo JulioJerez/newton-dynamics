@@ -171,6 +171,7 @@ class ndMesh : public ndClassAlloc
 
 	D_NEWTON_API void ApplyTransform(const ndMatrix& transform);
 	D_NEWTON_API void ApplyBonesRotation(const ndMatrix& rotation);
+	D_NEWTON_API void ApplyPivotsRotation(const ndMatrix& rotation);
 	D_NEWTON_API void ApplyCoordinateRotation(const ndMatrix& rotation);
 	D_NEWTON_API ndMatrix CalculateGlobalMatrix(ndMesh* const parent = nullptr) const;
 	D_NEWTON_API void CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) const;

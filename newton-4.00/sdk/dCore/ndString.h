@@ -17,8 +17,6 @@
 #include "ndClassAlloc.h"
 
 class ndString;
-D_CORE_API ndString ndGetPath(const ndString& fullPathName);
-D_CORE_API ndString ndGetName(const ndString& fullPathName);
 
 class ndString: public ndClassAlloc
 {
@@ -72,12 +70,15 @@ class ndString: public ndClassAlloc
 	ndInt32 Capacity() const;
 	D_CORE_API void Expand (ndInt32 size);
 
-	D_CORE_API void LoadFile (FILE* const file);
+	D_CORE_API ndString GetPath() const;
+	D_CORE_API ndString GetName() const;
+	D_CORE_API void LoadFile(FILE* const file);
+
 	ndString SubString(ndInt32 start = 0, ndInt32 size = 0x7fffffff) const;
 
 	D_CORE_API bool CompareIgnoreCase(const ndString& other) const;
 
-	const char* GetStr () const;
+	const char* GetStr() const;
 
 	private:
 	D_CORE_API ndInt32 CalculateSize (const char* const data) const;

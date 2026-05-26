@@ -737,6 +737,7 @@ void ndMesh::ApplyBonesRotation(const ndMatrix& rotation)
 	ndAssert(rotation.TestOrthogonal());
 	const ndMatrix invRotation(rotation.OrthoInverse());
 
+	ndAssert(0);
 	auto BoneRotation = [&rotation, &invRotation](ndMesh* const node)
 	{
 		if ((node->GetNodeType() == ndMesh::m_bone) || ((node->GetNodeType() == ndMesh::m_boneEnd)))
@@ -779,12 +780,7 @@ void ndMesh::ApplyBonesRotation(const ndMatrix& rotation)
 					ndMesh::ndCurveValue& positValue = positNode->GetInfo();
 					ndMesh::ndCurveValue& rotationValue = rotationNode->GetInfo();
 
-					//ndVector animScale;
-					//ndMatrix stretchAxis;
-					//ndMatrix animTransformMatrix;
 					ndMatrix keyframe(GetKeyframe(scaleValue, positValue, rotationValue) * invRotation);
-					//keyframe.PolarDecomposition(animTransformMatrix, animScale, stretchAxis);
-
 					ndVector euler0;
 					ndVector euler(keyframe.CalcPitchYawRoll(euler0));
 
@@ -810,6 +806,126 @@ void ndMesh::ApplyBonesRotation(const ndMatrix& rotation)
 		}
 	};
 	NodeIterator(BoneRotation);
+}
+
+void ndMesh::ApplyPivotsRotation(const ndMatrix& rotation)
+{
+	ndAssert(rotation.TestOrthogonal());
+	const ndMatrix invRotation(rotation.OrthoInverse());
+
+	auto PivotRotation = [&rotation, &invRotation](ndMesh* const node)
+	{
+		auto ApplyChildTransforms = [&rotation, &invRotation](ndMesh* const node)
+		{
+			node->SetBasePoseMatrix(rotation * node->GetBasePoseMatrix());
+
+			const ndMatrix geoMatrix(node->GetGeometryMatrix());
+			const ndMatrix rotatedGeoMatrix(geoMatrix * invRotation);
+			node->SetGeometryMatrix(rotatedGeoMatrix);
+			node->SetBoneTarget(invRotation.TransformVector(node->GetBoneTarget()));
+
+			ndMesh::ndCurve& positCurve = node->GetPositCurve();
+			ndMesh::ndCurve& rotationCurve = node->GetRotationCurve();
+			if (positCurve.GetCount() || rotationCurve.GetCount())
+			{
+				ndMesh::ndCurve::ndNode* positNode = node->GetPositCurve().GetFirst();
+				ndMesh::ndCurve::ndNode* rotationNode = node->GetRotationCurve().GetFirst();
+
+				ndMesh::ndCurveValue scaleValue;
+				scaleValue.m_x = 1.0f;
+				scaleValue.m_y = 1.0f;
+				scaleValue.m_z = 1.0f;
+
+				auto GetKeyframe = [](const ndCurveValue& scale, const ndCurveValue& position, const ndCurveValue& rotation)
+				{
+					ndMatrix scaleMatrix(ndGetIdentityMatrix());
+					scaleMatrix[0][0] = scale.m_x;
+					scaleMatrix[1][1] = scale.m_y;
+					scaleMatrix[2][2] = scale.m_z;
+					ndMatrix matrix(scaleMatrix * ndPitchMatrix(rotation.m_x) * ndYawMatrix(rotation.m_y) * ndRollMatrix(rotation.m_z));
+					matrix.m_posit = ndVector(position.m_x, position.m_y, position.m_z, 1.0f);
+					return matrix;
+				};
+
+				for (ndInt32 i = 0; i < positCurve.GetCount(); ++i)
+				{
+					ndMesh::ndCurveValue& positValue = positNode->GetInfo();
+					ndMesh::ndCurveValue& rotationValue = rotationNode->GetInfo();
+
+					ndMatrix keyframe(GetKeyframe(scaleValue, positValue, rotationValue) * invRotation);
+					ndVector euler0;
+					ndVector euler(keyframe.CalcPitchYawRoll(euler0));
+
+					rotationValue.m_x = ndReal(euler.m_x);
+					rotationValue.m_y = ndReal(euler.m_y);
+					rotationValue.m_z = ndReal(euler.m_z);
+
+					positValue.m_x = ndReal(keyframe.m_posit.m_x);
+					positValue.m_y = ndReal(keyframe.m_posit.m_y);
+					positValue.m_z = ndReal(keyframe.m_posit.m_z);
+
+					positNode = positNode->GetNext();
+					rotationNode = rotationNode->GetNext();
+				}
+			}
+
+			ndSharedPtr<ndMeshBody>& body(node->GetRigidBody());
+			if (body)
+			{
+				// scale center of mass
+				ndMeshBodyDynamic* const dynBody = (ndMeshBodyDynamic*)*body;
+				dynBody->m_localCentreOfMass = invRotation.RotateVector(dynBody->m_localCentreOfMass);
+
+				// scale the diagonal inertia matrix (assume of box pinciapl axis)
+				ndVector invInertia(dynBody->m_invMass);
+				ndVector inertia(invInertia.Reciproc());
+				ndMatrix diagonalInertia(ndGetIdentityMatrix());
+				diagonalInertia[0][0] = inertia[0];
+				diagonalInertia[1][1] = inertia[1];
+				diagonalInertia[2][2] = inertia[2];
+
+				ndVector inertiaAxis(dynBody->m_inertiaPrincipalAxis.Scale(ndDegreeToRad));
+				ndMatrix axisAngles(ndPitchMatrix(inertiaAxis[0]) * ndYawMatrix(inertiaAxis[1]) * ndRollMatrix(inertiaAxis[2]));
+				ndMatrix newRotation(axisAngles * invRotation);
+				ndMatrix newIntertia(newRotation.OrthoInverse() * diagonalInertia * newRotation);
+
+				ndVector eigenValues(newIntertia.EigenVectors());
+				eigenValues.m_w = inertia.m_w;
+				ndVector newEigenValues(eigenValues.Reciproc());
+				dynBody->m_invMass = newEigenValues;
+
+				ndVector eulers1;
+				ndVector eulers0(newIntertia.CalcPitchYawRoll(eulers1));
+				dynBody->m_inertiaPrincipalAxis = eulers0.Scale(ndRadToDegree);
+
+				ndMeshShapeInstance& shapeInstance = dynBody->m_shapeInstance;
+				shapeInstance.m_localMatrix = shapeInstance.m_localMatrix * invRotation;
+
+				ndSharedPtr<ndMeshJoint>& joint(node->GetJoint());
+				if (joint)
+				{
+					joint->m_localFrame0 = rotation * joint->m_localFrame0 * invRotation;
+					joint->m_localFrame1 = rotation * joint->m_localFrame1 * invRotation;
+				}
+			}
+		};
+
+		if (!node->GetParent())
+		{
+			const ndMatrix matrix(node->m_matrix);
+			const ndMatrix rotatedMatrix(rotation * matrix);
+			node->SetMatrix(rotatedMatrix);
+			ApplyChildTransforms(node);
+		}
+		else
+		{
+			const ndMatrix matrix(node->m_matrix);
+			const ndMatrix rotatedMatrix(rotation * matrix * invRotation);
+			node->SetMatrix(rotatedMatrix);
+			ApplyChildTransforms(node);
+		}
+	};
+	NodeIterator(PivotRotation);
 }
 
 void ndMesh::ApplyCoordinateRotation(const ndMatrix& rotation)
@@ -885,6 +1001,46 @@ void ndMesh::ApplyCoordinateRotation(const ndMatrix& rotation)
 		
 				positNode = positNode->GetNext();
 				rotationNode = rotationNode->GetNext();
+			}
+		}
+		
+		ndSharedPtr<ndMeshBody>& body(node->GetRigidBody());
+		if (body)
+		{
+			// scale center of mass
+			ndMeshBodyDynamic* const dynBody = (ndMeshBodyDynamic*)*body;
+			dynBody->m_localCentreOfMass = rotation.RotateVector(dynBody->m_localCentreOfMass);
+
+			// scale the diagonal inertia matrix (assume of box pinciapl axis)
+			ndVector invInertia(dynBody->m_invMass);
+			ndVector inertia(invInertia.Reciproc());
+			ndMatrix diagonalInertia(ndGetIdentityMatrix());
+			diagonalInertia[0][0] = inertia[0];
+			diagonalInertia[1][1] = inertia[1];
+			diagonalInertia[2][2] = inertia[2];
+
+			ndVector inertiaAxis(dynBody->m_inertiaPrincipalAxis.Scale(ndDegreeToRad));
+			ndMatrix axisAngles(ndPitchMatrix(inertiaAxis[0]) * ndYawMatrix(inertiaAxis[1]) * ndRollMatrix(inertiaAxis[2]));
+			ndMatrix newRotation(axisAngles * invRotation);
+			ndMatrix newIntertia(newRotation.OrthoInverse() * diagonalInertia * newRotation);
+
+			ndVector eigenValues(newIntertia.EigenVectors());
+			eigenValues.m_w = inertia.m_w;
+			ndVector newEigenValues(eigenValues.Reciproc());
+			dynBody->m_invMass = newEigenValues;
+
+			ndVector eulers1;
+			ndVector eulers0(newIntertia.CalcPitchYawRoll(eulers1));
+			dynBody->m_inertiaPrincipalAxis = eulers0.Scale(ndRadToDegree);
+
+			ndMeshShapeInstance& shapeInstance = dynBody->m_shapeInstance;
+			shapeInstance.m_localMatrix = shapeInstance.m_localMatrix * invRotation;
+
+			ndSharedPtr<ndMeshJoint>& joint(node->GetJoint());
+			if (joint)
+			{
+				joint->m_localFrame0 = invRotation * joint->m_localFrame0 * rotation;
+				joint->m_localFrame1 = invRotation * joint->m_localFrame1 * rotation;
 			}
 		}
 	};

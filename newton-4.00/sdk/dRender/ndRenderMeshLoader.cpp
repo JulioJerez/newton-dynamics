@@ -186,7 +186,7 @@ bool ndRenderMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 	bool ret = ndAnimationMeshLoader::LoadMesh(fullPathMeshName);
 	if (ret)
 	{
-		return MeshToRenderSceneNode(ndGetPath(fullPathMeshName));
+		return MeshToRenderSceneNode(fullPathMeshName.GetPath());
 	}
 	return ret;
 }
@@ -195,7 +195,7 @@ bool ndRenderMeshLoader::ImportFbx(const ndString& fbxPathMeshName)
 {
 	if (ndAnimationMeshLoader::ImportFbx(fbxPathMeshName))
 	{
-		return MeshToRenderSceneNode(ndGetPath(fbxPathMeshName));
+		return MeshToRenderSceneNode(fbxPathMeshName.GetPath());
 	}
 	return false;
 }
