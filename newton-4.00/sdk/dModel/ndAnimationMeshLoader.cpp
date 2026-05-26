@@ -90,17 +90,18 @@ bool ndAnimationMeshLoader::ImportFbx(const ndString& fbxPathMeshName)
 	m_mesh = ndSharedPtr<ndMesh>(loader.LoadMesh(fbxPathMeshName.GetStr(), false));
 
 	ndInt32 index = 0;
-	ndArray<ndVector> hullPoints;
-	for (ndMesh* childMesh = m_mesh->IteratorFirst(); childMesh; childMesh = childMesh->IteratorNext(*m_mesh))
+	auto VhacdToCompound = [&index](ndMesh* const node)
 	{
-		ndString name (childMesh->GetName());
+		ndString name(node->GetName());
+		name.ToLower();
 		ndInt32 vhacd = name.Find("-vhacd");
 		if (vhacd != -1)
 		{
 			// remove the -vhacd from name
-			name.Replace (vhacd, 6, "-compound", 9);
-			childMesh->SetName(name);
-			ndSharedPtr<ndShapeInstance>compoundShapeInstance(childMesh->CreateCollisionConvexApproximation());
+			name = node->GetName();
+			name.Replace(vhacd, 6, "-compound", 9);
+			node->SetName(name);
+			ndSharedPtr<ndShapeInstance>compoundShapeInstance(node->CreateCollisionConvexApproximation());
 			ndShapeCompound* const compoundShape = compoundShapeInstance->GetShape()->GetAsShapeCompound();
 			ndShapeCompound::ndTreeArray::Iterator it(compoundShape->GetTree());
 			for (it.Begin(); it; it++)
@@ -117,10 +118,11 @@ bool ndAnimationMeshLoader::ImportFbx(const ndString& fbxPathMeshName)
 				convexMesh->SetMatrix(subShape->GetLocalMatrix());
 				convexMesh->SetNodeType(ndMesh::m_collisionShape);
 				convexMesh->SetName(collisionshapeName);
-				childMesh->AddChild(convexMesh);
+				node->AddChild(convexMesh);
 			}
 		}
-	}
+	};
+	m_mesh->NodeIterator(VhacdToCompound);
 
 	auto BindApplicationData = [](ndMesh* const node)
 	{
@@ -134,20 +136,23 @@ bool ndAnimationMeshLoader::ImportFbx(const ndString& fbxPathMeshName)
 			{
 				instance = node->CreateCollisionFromChildren();
 			}
-
+			
 			ndBodyDynamic body;
 			body.SetCollisionShape(**instance);
 			body.SetMassMatrix(ndFloat32 (1.0f), **instance);
 			body.Serialize(node);
-		}
 
-		ndMesh* parent = node->GetParent();
-		for (; parent && !(*parent->GetRigidBody()); parent = parent->GetParent());
-		if (parent)
-		{
-			ndSharedPtr<ndJointBilateralConstraint> joint(node->CreateJoint());
-			ndSharedPtr<ndMeshJoint> meshJoint(joint->GetMeshJoint(node));
-			node->SetJoint(meshJoint);
+			const ndMesh* parentBody = node->GetParent();
+			if (parentBody && !parentBody->GetRigidBody())
+			{
+				parentBody = parentBody->GetParent();
+			}
+			if (parentBody)
+			{
+				ndSharedPtr<ndJointBilateralConstraint> joint(node->CreateJoint());
+				ndSharedPtr<ndMeshJoint> meshJoint(joint->GetMeshJoint(node));
+				node->SetJoint(meshJoint);
+			}
 		}
 	};
 	m_mesh->NodeIterator(BindApplicationData);
