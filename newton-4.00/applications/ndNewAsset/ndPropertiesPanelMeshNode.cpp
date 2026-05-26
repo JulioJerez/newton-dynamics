@@ -79,6 +79,16 @@ void ndUndoRedoMeshNode::Undo()
 void ndAssetEditor::ApplyNodeTransform(const ndMatrix& matrix, ndRenderSceneNode* const entNode)
 {
 	const ndMatrix localMatrix(m_currentSelection->GetMatrix() * matrix.OrthoInverse());
+	ndSharedPtr<ndMeshJoint> joint(m_currentSelection->GetJoint());
+	if (joint)
+	{
+		const ndMatrix parentMatrix(m_currentSelection->GetParent()->GetMatrix());
+		joint->m_localFrame1 =
+			joint->m_localFrame1 * parentMatrix *
+			m_currentSelection->GetMatrix().OrthoInverse() *
+			matrix * parentMatrix.OrthoInverse();
+	}
+
 	m_currentSelection->SetMatrix(matrix);
 	entNode->SetTransform(matrix);
 	entNode->SetTransform(matrix);
@@ -134,7 +144,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			}
 		}
-		ImGui::Checkbox("override transform", &m_showTransformValues);
+		ImGui::Checkbox("parent space transform", &m_parentSpaceTransform);
 		ImGui::Checkbox("transform pivot only", &m_transformPivotOnly);
 
 		if (ImGui::Button("add node"))
@@ -158,6 +168,8 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			ndRenderSceneNode* const parentSceneNode = m_entity->FindByName(m_currentSelection->GetName());
 			parentSceneNode->AddChild(childSceneNode);
 
+			m_currentSelection = *childMesh;
+
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 		}
 
@@ -171,7 +183,31 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 		{
 			if (ImGui::Button("clone node"))
 			{
-				ndTrace(("xxxx2\n"));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				ndSharedPtr<ndMesh> clone(m_currentSelection->CreateClone());
+
+				ndRenderSceneNode* const selectedVisualMesh = m_entity->FindByName(m_currentSelection->GetName());
+				ndAssert(selectedVisualMesh);
+				ndSharedPtr<ndRenderSceneNode> cloneVisualMesh(selectedVisualMesh->Clone());
+
+				auto Rename = [this, &cloneVisualMesh](ndMesh* const node)
+				{
+					ndString name(node->GetName());
+					ndRenderSceneNode* const cloneMesh = cloneVisualMesh->FindByName(name);
+					while (m_mesh->FindByName(name))
+					{
+						name += "_";
+					}
+					node->SetName(name);
+					cloneMesh->m_name = name;
+				};
+				clone->NodeIterator(Rename);
+				m_currentSelection->GetParent()->AddChild(clone);
+				selectedVisualMesh->GetParent()->AddChild(cloneVisualMesh);
+
+				m_debugDisplayRenderPass->ResetScene();
+				m_currentSelection = *clone;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			}
 		}
 
@@ -207,7 +243,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
 
 			ImGui::SeparatorText("mode transform");
-			if (m_showTransformValues)
+			if (m_parentSpaceTransform)
 			{
 				position[0] = ndReal(matrix.m_posit.m_x);
 				position[1] = ndReal(matrix.m_posit.m_y);
@@ -312,7 +348,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			if (*m_currentSelection->GetGeometry())
 			{
 				ImGui::SeparatorText("geomtry transform");
-				if (m_showTransformValues)
+				if (m_parentSpaceTransform)
 				{
 					ndMatrix matrix(m_currentSelection->GetGeometryMatrix());
 					ndReal position[3];

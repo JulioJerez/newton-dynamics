@@ -22,7 +22,6 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 		ndDebugMesh()
 			:m_zBuffer()
 			,m_flatShaded()
-			//,m_wireFrameOpenEdge()
 			,m_wireFrameShareEdge()
 		{
 		}
@@ -30,7 +29,6 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 		ndSharedPtr<ndRenderPrimitive> m_zBuffer;
 		ndSharedPtr<ndRenderPrimitive> m_flatShaded;
 		ndSharedPtr<ndRenderPrimitive> m_wireFrameShareEdge;
-		//ndSharedPtr<ndWireFrameDebugMesh> m_wireFrameOpenEdge;
 	};
 
 	ndDebugDisplayRenderPass(ndDemoEntityManager* const owner);

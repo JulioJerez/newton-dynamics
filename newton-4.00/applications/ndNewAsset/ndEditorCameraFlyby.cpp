@@ -267,38 +267,39 @@ void ndEditorCameraFlyby::MouseSelection()
 
 	if (hitNode)
 	{
-		ndAssetEditor::ndSubSelectionMode selectionMode = m_editor->m_subSelection;
-		switch (selectionMode)
-		{
-			case ndAssetEditor::m_loopJoint:
-			{
-				m_editor->SetLoopJointSelection(*hitNode);
-				break;
-			}
-
-			case ndAssetEditor::m_collidingPair:
-			{
-				m_editor->SetCollidingSubSelection(*hitNode);
-				break;
-			}
-
-			case ndAssetEditor::m_transformModifier:
-			{
-				m_editor->SetModifierSubSelection(*hitNode);
-				break;
-			}
-
-			case ndAssetEditor::m_alignToTarget:
-			{
-				m_editor->m_currentSubSelection = ndWeakPtr<ndMesh>(*hitNode);
-				break;
-			}
-
-			case ndAssetEditor::m_none:
-			default:
-			{
-				m_editor->m_currentSelection = *hitNode;
-			}
-		}
+		//ndAssetEditor::ndSubSelectionMode selectionMode = m_editor->m_subSelection;
+		//switch (selectionMode)
+		//{
+		//	case ndAssetEditor::m_loopJoint:
+		//	{
+		//		m_editor->SetLoopJointSelection(*hitNode);
+		//		break;
+		//	}
+		//
+		//	case ndAssetEditor::m_collidingPair:
+		//	{
+		//		m_editor->SetCollidingSubSelection(*hitNode);
+		//		break;
+		//	}
+		//
+		//	case ndAssetEditor::m_transformModifier:
+		//	{
+		//		m_editor->SetModifierSubSelection(*hitNode);
+		//		break;
+		//	}
+		//
+		//	case ndAssetEditor::m_alignToTarget:
+		//	{
+		//		m_editor->m_currentSubSelection = ndWeakPtr<ndMesh>(*hitNode);
+		//		break;
+		//	}
+		//
+		//	case ndAssetEditor::m_none:
+		//	default:
+		//	{
+		//		m_editor->m_currentSelection = *hitNode;
+		//	}
+		//}
+		m_editor->SelectCurrentNode(hitNode);
 	}
 }

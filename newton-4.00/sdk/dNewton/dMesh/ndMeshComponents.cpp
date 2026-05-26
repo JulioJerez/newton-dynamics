@@ -169,12 +169,19 @@ void ndMeshLoopJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
 
 ndMeshJointFix6dof::ndMeshJointFix6dof(const ndMesh* const owner)
 	:ndMeshJoint(owner)
+	,m_softness(ndFloat32(0.0f))
+	,m_maxForce(D_MAX_BOUND)
+	,m_maxTorque(D_MAX_BOUND)
 {
 }
 
 ndMeshJointFix6dof::ndMeshJointFix6dof(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
+	const ndJointFix6dof* const fixJoint = (ndJointFix6dof*)joint;
+	m_softness = fixJoint->GetRegularizer();
+	m_maxForce = fixJoint->GetMaxForce();
+	m_maxTorque = fixJoint->GetMaxTorque();
 }
 
 ndMeshJointFix6dof::ndMeshJointFix6dof(const ndMeshJointFix6dof& other)

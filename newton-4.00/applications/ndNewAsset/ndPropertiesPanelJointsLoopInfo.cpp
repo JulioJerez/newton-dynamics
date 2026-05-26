@@ -78,7 +78,7 @@ void ndAssetEditor::EditLoopJointLocalMatrix(ndSharedPtr<ndMeshLoopJoint>& loopJ
 {
 	ndSharedPtr<ndMeshJoint> joint(loopJoint->m_joint);
 
-	if (m_showTransformValues)
+	if (m_parentSpaceTransform)
 	{
 		ndAssert(0);
 	}
@@ -150,7 +150,7 @@ void ndAssetEditor::EditLoopJointGlobalMatrix(ndSharedPtr<ndMeshLoopJoint>& loop
 {
 	ndSharedPtr<ndMeshJoint> joint(loopJoint->m_joint);
 
-	if (m_showTransformValues)
+	if (m_parentSpaceTransform)
 	{
 		ndAssert(0);
 	}
@@ -269,13 +269,7 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 								localMatrix1.m_posit = loopJoint->m_parentNode->GetRigidBody()->m_localCentreOfMass;
 								newJoint->SetLocalMatrix0(localMatrix0);
 								newJoint->SetLocalMatrix1(localMatrix1);
-			
-								//loopJoint->m_joint = newJoint->GetMeshJoint(*joint->m_owner);
-								//joint = m_currentLoopJointSelection->m_joint;
-								//m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-								ndAssert(0);
 								loopJoint->m_joint = newJoint->GetMeshJoint(*loopJoint->m_joint->m_owner);
-								//joint = m_currentLoopJointSelection->m_joint;
 								m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 							};
 							auto InitNewGlobalJoint = [this, &loopJoint](ndSharedPtr<ndJointBilateralConstraint>& newJoint)

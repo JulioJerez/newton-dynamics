@@ -34,12 +34,12 @@ ndAssetEditor::ndAssetEditor()
 	,m_showCenterOfMass(false)
 	,m_showSelectedNode(true)
 	,m_showCollisionShape(true)
-	,m_showTransformValues(false)
 	,m_toolActive(false)
 	,m_initCamera(true)
 	,m_raycastBones(true)
 	,m_geometryPivot(false)
 	,m_transformPivotOnly(false)
+	,m_parentSpaceTransform(false)
 	,m_gizmoScale(ndFloat32(0.25f))
 	,m_renderMode(m_shaded)
 	,m_cameraMode(0)
@@ -440,23 +440,22 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::EndMenu();
 		}
 
-		if (ImGui::BeginMenu("Objects"))
-		{
-			if (ImGui::Button("create node"))
-			{
-			}
-
-			if (ImGui::Button("create box"))
-			{
-			}
-
-			//ImGui::SeparatorText("");
-			if (ImGui::Button("delete node"))
-			{
-			}
-
-			ImGui::EndMenu();
-		}
+		//if (ImGui::BeginMenu("Objects"))
+		//{
+		//	if (ImGui::Button("create node"))
+		//	{
+		//	}
+		//
+		//	if (ImGui::Button("create box"))
+		//	{
+		//	}
+		//
+		//	if (ImGui::Button("delete node"))
+		//	{
+		//	}
+		//
+		//	ImGui::EndMenu();
+		//}
 
 		if (ImGui::BeginMenu("Tools"))
 		{

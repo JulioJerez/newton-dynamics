@@ -20,14 +20,6 @@
 ndJointSlider::ndJointSlider()
 	:ndJointBilateralConstraint()
 	,m_axis()
-	//,m_posit(ndFloat32(0.0f))
-	//,m_speed(ndFloat32(0.0f))
-	//,m_springK(ndFloat32(0.0f))
-	//,m_damperC(ndFloat32(0.0f))
-	//,m_minLimit(ndFloat32(-1.0e10f))
-	//,m_maxLimit(ndFloat32(1.0e10f))
-	//,m_positOffset(ndFloat32(0.0f))
-	//,m_springDamperRegularizer(ndFloat32(0.1f))
 	,m_maxForce(D_LCP_MAX_VALUE)
 	//,m_limitState(0)
 	//,m_forceState(0)
@@ -38,14 +30,6 @@ ndJointSlider::ndJointSlider()
 ndJointSlider::ndJointSlider(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(7, child, parent, pinAndPivotFrame)
 	,m_axis()
-	//,m_posit(ndFloat32 (0.0f))
-	//,m_speed(ndFloat32(0.0f))
-	//,m_springK(ndFloat32(0.0f))
-	//,m_damperC(ndFloat32(0.0f))
-	//,m_minLimit(ndFloat32(-1.0e10f))
-	//,m_maxLimit(ndFloat32(1.0e10f))
-	//,m_positOffset(ndFloat32(0.0f))
-	//,m_springDamperRegularizer(ndFloat32(0.1f))
 	,m_maxForce(D_LCP_MAX_VALUE)
 	//,m_limitState(0)
 	//,m_forceState(0)
@@ -55,14 +39,6 @@ ndJointSlider::ndJointSlider(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* 
 ndJointSlider::ndJointSlider(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(7, child, parent, pinAndPivotInChild)
 	,m_axis()
-	//,m_posit(ndFloat32(0.0f))
-	//,m_speed(ndFloat32(0.0f))
-	//,m_springK(ndFloat32(0.0f))
-	//,m_damperC(ndFloat32(0.0f))
-	//,m_minLimit(ndFloat32(-1.0e10f))
-	//,m_maxLimit(ndFloat32(1.0e10f))
-	//,m_positOffset(ndFloat32(0.0f))
-	//,m_springDamperRegularizer(ndFloat32(0.1f))
 	,m_maxForce(D_LCP_MAX_VALUE)
 	//,m_limitState(0)
 	//,m_forceState(0)
@@ -186,9 +162,18 @@ void ndJointSlider::DebugJoint(ndConstraintDebugCallback& debugCallback) const
 
 	if (m_axis.m_limitState)
 	{
+		const ndVector arrowColor(ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0f));
 		ndVector p0(matrix1.m_posit + matrix1.m_front.Scale(m_axis.m_minLimit));
 		ndVector p1(matrix1.m_posit + matrix1.m_front.Scale(m_axis.m_maxLimit));
-		debugCallback.DrawLine(p0, p1, m_linearDebugColor);
+		debugCallback.DrawLine(p0, p1, arrowColor);
+
+		//ndMatrix arrowMatrix(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * matrix0);
+		ndMatrix arrowMatrix(matrix1);
+		arrowMatrix.m_posit = p0;
+		debugCallback.DrawArrow(arrowMatrix, arrowColor, ndFloat32(0.125f));
+
+		arrowMatrix.m_posit = p1;
+		debugCallback.DrawArrow(arrowMatrix, arrowColor, ndFloat32(-0.125f));
 	}
 }
 

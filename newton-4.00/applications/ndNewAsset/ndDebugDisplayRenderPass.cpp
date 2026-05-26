@@ -133,8 +133,11 @@ void ndDebugDisplayRenderPass::RebuildVisualDebugMesh()
 			{
 				ndRenderPrimitive::ndDescriptor descriptor(m_owner);
 				descriptor.m_collision = ndSharedPtr<ndShapeInstance>(kinematicBody->m_shapeInstance.CreateObject());
-				descriptor.m_collision->SetScale(ndVector::m_one);
-				descriptor.m_collision->SetLocalMatrix(ndGetIdentityMatrix());
+				//descriptor.m_collision->SetScale(ndVector::m_one);
+				//descriptor.m_collision->SetLocalMatrix(ndGetIdentityMatrix());
+				descriptor.m_collision->SetScale(kinematicBody->m_shapeInstance.m_scale);
+				descriptor.m_collision->SetLocalMatrix(kinematicBody->m_shapeInstance.m_localMatrix);
+				descriptor.m_collision->m_alignmentMatrix = kinematicBody->m_shapeInstance.m_alignmentMatrix;
 
 				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugWireFrame;
 				debugMesh.m_wireFrameMesh = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
@@ -193,7 +196,7 @@ void ndDebugDisplayRenderPass::ResetScene()
 		ndSharedPtr<ndMeshBody> body(node->GetRigidBody());
 		ndSharedPtr<ndMeshEffect>& geometry = node->GetGeometry();
 
-		if (*geometry || (*body))
+		if (*geometry || *body)
 		{
 			ndDebugMesh& entry = m_debugMesh.Append()->GetInfo();
 			entry.m_parent = ndWeakPtr<ndRenderSceneNode>(m_manager->m_entity->FindByName(node->GetName()));
@@ -562,6 +565,8 @@ void ndDebugDisplayRenderPass::RenderCloseLoopJoints()
 	if (loop)
 	{
 		const ndMeshLoopJoint* const currentLoopJointSelection = *loop;
+
+		// draw Geometry
 		for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
 		{
 			const ndDebugMesh& debugMesh = ptr->GetInfo();
@@ -572,16 +577,11 @@ void ndDebugDisplayRenderPass::RenderCloseLoopJoints()
 				if (currentLoopJointSelection->m_childNode->GetName() == debugMesh.m_parent->m_name)
 				{
 					body = currentLoopJointSelection->m_childNode->GetRigidBody();
-					const ndMatrix frame(currentLoopJointSelection->m_joint->m_localFrame0 * debugMesh.m_parent->m_globalMatrix);
-					DrawFrame(frame);
 				}
 				else if (currentLoopJointSelection->m_parentNode->GetName() == debugMesh.m_parent->m_name)
 				{
 					body = currentLoopJointSelection->m_parentNode->GetRigidBody();
-					const ndMatrix frame(currentLoopJointSelection->m_joint->m_localFrame1 * debugMesh.m_parent->m_globalMatrix);
-					DrawFrame(frame);
 				}
-
 				if (body)
 				{
 					const ndMeshBodyKinematic* const kinBody = (ndMeshBodyKinematic*)*body;
@@ -597,6 +597,29 @@ void ndDebugDisplayRenderPass::RenderCloseLoopJoints()
 					ndRenderPrimitiveMaterial* const material = &segment.m_material;
 					material->m_diffuse = m_loopJointColor;
 					debugMesh.m_wireFrameShape->Render(m_owner, pivotMatrix, m_debugDisplayWireFrameMesh);
+				}
+			}
+		}
+
+		// draw Gizmo
+		m_owner->ClearZBuffer();
+		for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
+		{
+			const ndDebugMesh& debugMesh = ptr->GetInfo();
+			const ndRenderPrimitive* const primitive = *debugMesh.m_zBufferShape;
+			if (primitive && primitive->m_segments.GetCount())
+			{
+				if (currentLoopJointSelection->m_childNode->GetName() == debugMesh.m_parent->m_name)
+				{
+					const ndSharedPtr<ndMeshBody> body (currentLoopJointSelection->m_childNode->GetRigidBody());
+					const ndMatrix frame(currentLoopJointSelection->m_joint->m_localFrame0 * debugMesh.m_parent->m_globalMatrix);
+					DrawFrame(frame);
+				}
+				else if (currentLoopJointSelection->m_parentNode->GetName() == debugMesh.m_parent->m_name)
+				{
+					const ndSharedPtr<ndMeshBody> body(currentLoopJointSelection->m_parentNode->GetRigidBody());
+					const ndMatrix frame(currentLoopJointSelection->m_joint->m_localFrame1 * debugMesh.m_parent->m_globalMatrix);
+					DrawFrame(frame);
 				}
 			}
 		}
@@ -670,7 +693,16 @@ void ndDebugDisplayRenderPass::RenderOptions()
 			const ndMatrix pivotMatrix(sceneNode->m_globalMatrix);
 			if (m_manager->m_showPivot)
 			{
-				DrawFrame(pivotMatrix);
+				if (m_manager->m_parentSpaceTransform && sceneNode->GetParent())
+				{
+					ndMatrix matrix (sceneNode->GetParent()->m_matrix);
+					matrix.m_posit = matrix.TransformVector(sceneNode->m_matrix.m_posit);
+					DrawFrame(matrix);
+				}
+				else
+				{
+					DrawFrame(pivotMatrix);
+				}
 			}
 
 			if (m_manager->m_geometryPivot)
@@ -853,12 +885,14 @@ void ndDebugDisplayRenderPass::RenderMeshSelection()
 		}
 		else if (m_manager->m_currentSelection->GetAsCloseLoopConstraints())
 		{
+			//m_owner->ClearZBuffer();
 			RenderCloseLoopJoints();
 		}
 		else if (m_manager->m_subSelection == ndAssetEditor::m_transformModifier)
 		{
 			ndAssert(0);
-			//RenderCollisionPair();
+			//m_owner->ClearZBuffer();
+			RenderCollisionPair();
 		}
 	}
 }

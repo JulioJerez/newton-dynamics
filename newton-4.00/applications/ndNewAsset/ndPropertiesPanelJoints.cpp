@@ -59,7 +59,8 @@ void ndAssetEditor::EditJointGlobalMatrix()
 {
 	ndSharedPtr<ndMeshJoint> joint(m_currentSelection->GetJoint());
 
-	if (m_showTransformValues)
+	//if (m_parentSpaceTransform)
+	if (0)
 	{
 		ndAssert(0);
 	}
@@ -764,7 +765,7 @@ void ndAssetEditor::EditDoubleHingeJoint()
 
 	ndMeshJointDoubleHinge* const joint = (ndMeshJointDoubleHinge*)*m_currentSelection->GetJoint();
 	{
-		ImGui::SeparatorText("actuator0 params");
+		ImGui::SeparatorText("actuator 0 params");
 		ndReal value = ndReal(joint->m_axis0.m_springK);
 		if (ImGui::InputFloat("spring const", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
@@ -834,7 +835,7 @@ void ndAssetEditor::EditDoubleHingeJoint()
 	}
 
 	{
-		ImGui::SeparatorText("angular actuator params");
+		ImGui::SeparatorText("actuator 1 params");
 		ndReal value = ndReal(joint->m_axis1.m_springK);
 		if (ImGui::InputFloat("spring const##5", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
@@ -906,9 +907,7 @@ void ndAssetEditor::EditDoubleHingeJoint()
 
 void ndAssetEditor::EditWheelJoint()
 {
-	//EditLoopJointGlobalMatrix();
 	EditJointGlobalMatrix();
-
 	ndMeshJointWheel* const joint = (ndMeshJointWheel*)*m_currentSelection->GetJoint();
 
 	ImGui::SeparatorText("actuator params");
@@ -949,11 +948,11 @@ void ndAssetEditor::EditWheelJoint()
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 	}
 
-	value = ndReal(joint->m_desc->m_steeringAngle);
+	value = ndReal(joint->m_desc->m_steeringAngle * ndRadToDegree);
 	if (ImGui::InputFloat("steering angle", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
-		joint->m_desc->m_steeringAngle = ndClamp(value, ndReal(0.0f), ndReal(45.0f));
+		joint->m_desc->m_steeringAngle = ndDegreeToRad * ndClamp(value, ndReal(0.0f), ndReal(45.0f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 	}
 
@@ -976,7 +975,6 @@ void ndAssetEditor::EditWheelJoint()
 
 void ndAssetEditor::EditSphericalJoint()
 {
-	//EditLoopJointGlobalMatrix();
 	EditJointGlobalMatrix();
 
 	ndMeshJointSpherical* const joint = (ndMeshJointSpherical*)*m_currentSelection->GetJoint();
