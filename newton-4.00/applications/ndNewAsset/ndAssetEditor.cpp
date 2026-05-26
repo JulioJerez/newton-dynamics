@@ -440,23 +440,22 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::EndMenu();
 		}
 
-		if (ImGui::BeginMenu("Objects"))
-		{
-			if (ImGui::Button("create node"))
-			{
-			}
-
-			if (ImGui::Button("create box"))
-			{
-			}
-
-			//ImGui::SeparatorText("");
-			if (ImGui::Button("delete node"))
-			{
-			}
-
-			ImGui::EndMenu();
-		}
+		//if (ImGui::BeginMenu("Objects"))
+		//{
+		//	if (ImGui::Button("create node"))
+		//	{
+		//	}
+		//
+		//	if (ImGui::Button("create box"))
+		//	{
+		//	}
+		//
+		//	if (ImGui::Button("delete node"))
+		//	{
+		//	}
+		//
+		//	ImGui::EndMenu();
+		//}
 
 		if (ImGui::BeginMenu("Tools"))
 		{
