@@ -695,8 +695,10 @@ void ndDebugDisplayRenderPass::RenderOptions()
 			{
 				if (m_manager->m_parentSpaceTransform && sceneNode->GetParent())
 				{
-					ndMatrix matrix (sceneNode->GetParent()->m_matrix);
-					matrix.m_posit = matrix.TransformVector(sceneNode->m_matrix.m_posit);
+					//ndMatrix matrix (sceneNode->GetParent()->m_matrix);
+					//matrix.m_posit = matrix.TransformVector(sceneNode->m_matrix.m_posit);
+					ndMatrix matrix(sceneNode->GetParent()->m_globalMatrix);
+					matrix.m_posit = pivotMatrix.m_posit;
 					DrawFrame(matrix);
 				}
 				else

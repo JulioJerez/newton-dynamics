@@ -1244,11 +1244,6 @@ ndSharedPtr<ndMesh> ndFbxMeshLoader::LoadMesh(const char* const fullPathName, bo
 		LoadAnimation(*fbxScene, *mesh);
 	}
 	ApplyAllTransforms(*mesh, convertMatrix);
-	if (fbxScene->isBlenderExport())
-	{
-		const ndMatrix autodeskToBlender(ndRollMatrix(ndFloat32(-90.0f) * ndDegreeToRad));
-		mesh->ApplyPivotsRotation(autodeskToBlender);
-	}
 
 	if (loadAnimation)
 	{
@@ -1259,6 +1254,12 @@ ndSharedPtr<ndMesh> ndFbxMeshLoader::LoadMesh(const char* const fullPathName, bo
 		ndSharedPtr<ndMesh> child (mesh->GetChildren().GetFirst()->GetInfo());
 		mesh->RemoveChild(child);
 		mesh = child;
+	}
+
+	if (fbxScene->isBlenderExport())
+	{
+		const ndMatrix autodeskToBlender(ndRollMatrix(ndFloat32(-90.0f) * ndDegreeToRad));
+		mesh->ApplyPivotsRotation(autodeskToBlender);
 	}
 	return mesh;
 }
