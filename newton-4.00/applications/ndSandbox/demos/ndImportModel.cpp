@@ -32,7 +32,6 @@ class ndVanillaController : public ndModelNotify
         ,m_steerAngle(ndFloat32(0.0f))
         ,m_engineOmega(ndFloat32 (0.0f))
     {
-        ndAssert(m_motor);
         SetModel(model);
 
         // find the wheels
@@ -160,7 +159,7 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
 
     // bind a camera to the the cemara pivot if it has one
     ndSharedPtr<ndRenderSceneNode> camera(nullptr);
-    ndSharedPtr<ndRenderSceneNode> cameraPivotNode(sceneMesh->FindByName("cameraPivot")->GetSharedPtr());
+    ndRenderSceneNode* const cameraPivotNode = sceneMesh->FindByName("cameraPivot");
     if (cameraPivotNode)
     {
         ndVector cameraPivot(ndVector::m_zero);

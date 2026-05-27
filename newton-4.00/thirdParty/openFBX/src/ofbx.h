@@ -506,6 +506,8 @@ namespace ndOfbx
 		virtual DataView getEmbeddedData(int index) const = 0;
 		virtual DataView getEmbeddedFilename(int index) const = 0;
 
+		virtual bool isBlenderExport() const = 0;
+
 		virtual ~IScene() {}
 	};
 

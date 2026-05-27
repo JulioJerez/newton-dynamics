@@ -1255,5 +1255,11 @@ ndSharedPtr<ndMesh> ndFbxMeshLoader::LoadMesh(const char* const fullPathName, bo
 		mesh->RemoveChild(child);
 		mesh = child;
 	}
+
+	if (fbxScene->isBlenderExport())
+	{
+		const ndMatrix autodeskToBlender(ndRollMatrix(ndFloat32(-90.0f) * ndDegreeToRad));
+		mesh->ApplyPivotsRotation(autodeskToBlender);
+	}
 	return mesh;
 }

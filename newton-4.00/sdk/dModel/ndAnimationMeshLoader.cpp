@@ -50,8 +50,6 @@ ndSharedPtr<ndAnimationSequence> ndAnimationMeshLoader::ImportFbxAnimation(const
 
 ndSharedPtr<ndAnimationSequence> ndAnimationMeshLoader::GetAnimationSequence(const ndString& pathAnimName)
 {
-	//ndAssert(0);
-	//return ndSharedPtr<ndAnimationSequence>(nullptr);
 	return ImportFbxAnimation(pathAnimName);
 }
 
@@ -158,4 +156,3 @@ bool ndAnimationMeshLoader::ImportFbx(const ndString& fbxPathMeshName)
 	m_mesh->NodeIterator(BindApplicationData);
 	return m_mesh;
 }
-
