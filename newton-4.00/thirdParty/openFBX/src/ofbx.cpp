@@ -1649,6 +1649,11 @@ struct Scene : IScene
 		return m_videos[size_t(index)].filename;
 	}
 
+	bool isBlenderExport() const override
+	{
+		return m_blenderExport;
+	}
+
 	const AnimationStack* getAnimationStack(int index) const override
 	{
 		assert(index >= 0);
@@ -1709,6 +1714,7 @@ struct Scene : IScene
 	std::vector<u8> m_data;
 	std::vector<TakeInfo> m_take_infos;
 	std::vector<Video> m_videos;
+	bool m_blenderExport;
 	Allocator m_allocator;
 };
 
@@ -3078,7 +3084,6 @@ static float getFramerateFromTimeMode(FrameRate time_mode, float custom_frame_ra
 	return -1;
 }
 
-
 static void parseGlobalSettings(const Element& root, Scene* scene)
 {
 	for (Element* settings = root.child; settings; settings = settings->sibling)
@@ -3141,6 +3146,51 @@ static void parseGlobalSettings(const Element& root, Scene* scene)
 	}
 }
 
+static void parseHeaderExtension(const Element& root, Scene* scene)
+{
+	scene->m_blenderExport = false;
+	for (Element* settings = root.child; settings; settings = settings->sibling)
+	{
+		if (settings->id == "FBXHeaderExtension")
+		{
+			//for (Element* props70 = settings->child; props70; props70 = props70->sibling)
+			for (Element* sceneInfo = settings->child; sceneInfo; sceneInfo = sceneInfo->sibling)
+			{
+				//if (props70->id == "Properties70")
+				if (sceneInfo->id == "SceneInfo")
+				{
+					//for (Element* node = sceneInfo->child; node; node = node->sibling)
+					for (Element* props70 = sceneInfo->child; props70; props70 = props70->sibling)
+					{
+						if (props70->id == "Properties70")
+						{
+							for (Element* node = props70->child; node; node = node->sibling)
+							{
+								if (node->first_property && node->first_property->value == "Original|ApplicationVendor")
+								{ 
+									IElementProperty* prop = node->getProperty(4); 
+									if (prop)
+									{
+										DataView value = prop->getValue(); 
+										if (value == "Blender Foundation")
+										{
+											scene->m_blenderExport = true;
+											break;
+										}
+
+									}
+								}
+							}
+							break;
+						}
+					}
+					break;
+				}
+			}
+			break;
+		}
+	}
+}
 
 struct ParseGeometryJob {
 	const Element* element;
@@ -3807,6 +3857,7 @@ IScene* load(const u8* data, int size, u64 flags, JobProcessor job_processor, vo
 	{
 		return nullptr;
 	}
+	parseHeaderExtension(*root.getValue(), scene.get());
 	parseGlobalSettings(*root.getValue(), scene.get());
 
 	return scene.release();

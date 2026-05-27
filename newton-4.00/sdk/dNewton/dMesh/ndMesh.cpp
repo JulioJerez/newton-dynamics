@@ -1051,6 +1051,11 @@ ndMatrix ndMesh::CalculateLocalMatrix(ndVector& sizeOut) const
 {
 	const ndSharedPtr<ndMeshEffect>& meshEffect = GetGeometry();
 
+#if 0
+	ndMatrix rotation(GetGeometryMatrix() * CalculateGlobalMatrix());
+	//ndMatrix rotation(ndGetIdentityMatrix());
+	rotation.m_posit = ndVector::m_wOne;
+
 	sizeOut.m_x = ndFloat32(0.5f);
 	sizeOut.m_y = ndFloat32(0.5f);
 	sizeOut.m_z = ndFloat32(0.5f);
@@ -1064,18 +1069,18 @@ ndMatrix ndMesh::CalculateLocalMatrix(ndVector& sizeOut) const
 
 		// geometry points are for rendering, therefore they may be have duplicate points 
 		// that can skew the covariance matrix
-		ndArray<ndBigVector> uniquePoints;
+		ndArray<ndVector> uniquePoints;
 		for (ndInt32 i = 0; i < pointsCount; ++i)
 		{
-			ndFloat64 x = ndFloat32(pointsBuffer[i * pointsStride + 0]);
-			ndFloat64 y = ndFloat32(pointsBuffer[i * pointsStride + 1]);
-			ndFloat64 z = ndFloat32(pointsBuffer[i * pointsStride + 2]);
-			const ndBigVector p(x, y, z, ndFloat64(0.0f));
-			uniquePoints.PushBack(p);
+			ndFloat32 x = ndFloat32(pointsBuffer[i * pointsStride + 0]);
+			ndFloat32 y = ndFloat32(pointsBuffer[i * pointsStride + 1]);
+			ndFloat32 z = ndFloat32(pointsBuffer[i * pointsStride + 2]);
+			const ndBigVector p(x, y, z, ndFloat32(0.0f));
+			uniquePoints.PushBack(rotation.RotateVector(p));
 		}
 		ndArray<ndInt32> indexList;
 		indexList.SetCount(pointsCount);
-		const ndInt32 vertexCount = ndVertexListToIndexList(&uniquePoints[0].m_x, ndInt32(sizeof(ndBigVector)), 3, pointsCount, &indexList[0], ndFloat32(1.0e-6f));
+		const ndInt32 vertexCount = ndVertexListToIndexList(&uniquePoints[0].m_x, ndInt32(sizeof(ndVector)), 3, pointsCount, &indexList[0], ndFloat32(1.0e-6f));
 		uniquePoints.SetCount(vertexCount);
 
 		ndVector minP(ndFloat32(1.0e10f));
@@ -1122,6 +1127,44 @@ ndMatrix ndMesh::CalculateLocalMatrix(ndVector& sizeOut) const
 		sizeOut.m_w = ndFloat32(0.0f);
 	}
 	return covariance;
+#endif
+
+	sizeOut.m_x = ndFloat32(0.5f);
+	sizeOut.m_y = ndFloat32(0.5f);
+	sizeOut.m_z = ndFloat32(0.5f);
+	sizeOut.m_w = ndFloat32(0.0f);
+
+	ndMatrix matrix(GetGeometryMatrix());
+	if (meshEffect)
+	{
+		const ndInt32 pointsCount = meshEffect->GetVertexCount();
+		const ndInt32 pointsStride = ndInt32(meshEffect->GetVertexStrideInByte() / sizeof(ndFloat64));
+		const ndFloat64* const pointsBuffer = meshEffect->GetVertexPool();
+
+		ndVector minP(ndFloat32(1.0e10f));
+		ndVector maxP(ndFloat32(-1.0e10f));
+		for (ndInt32 i = 0; i < pointsCount; ++i)
+		{
+			ndFloat32 x = ndFloat32(pointsBuffer[i * pointsStride + 0]);
+			ndFloat32 y = ndFloat32(pointsBuffer[i * pointsStride + 1]);
+			ndFloat32 z = ndFloat32(pointsBuffer[i * pointsStride + 2]);
+			const ndVector locaPoint(x, y, z, ndFloat32(1.0f));
+			const ndVector point(matrix.TransformVector(locaPoint));
+			minP = minP.GetMin(point);
+			maxP = maxP.GetMax(point);
+		}
+		const ndVector size(ndVector::m_half * (maxP - minP));
+		const ndVector origin(ndVector::m_half * (maxP + minP));
+
+		sizeOut.m_x = size.m_x;
+		sizeOut.m_y = size.m_y;
+		sizeOut.m_z = size.m_z;
+
+		matrix = ndGetIdentityMatrix();
+		matrix.m_posit = origin;
+		matrix.m_posit.m_w = ndFloat32(1.0f);
+	}
+	return matrix;
 }
 
 void ndMesh::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) const
@@ -1188,15 +1231,12 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCapsule()
 {
 	ndVector size;
 	ndMatrix localMatrix(CalculateLocalMatrix(size));
-	const ndMatrix rotationAligment(ndRollMatrix(ndFloat32(-90.0f) * ndDegreeToRad));
-	localMatrix = rotationAligment * localMatrix;
-	size = rotationAligment.RotateVector(size).Abs();
 
 	ndFloat32 radios = ndMax(size.m_y, size.m_z);
 	ndFloat32 high = ndFloat32(2.0f) * (ndMax (size.m_x - radios, ndFloat32 (0.0f)));
 
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeCapsule(radios, radios, high)));
-	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
+	shape->SetLocalMatrix(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * localMatrix * m_geometryMatrix);
 	return shape;
 }
 
@@ -1204,15 +1244,12 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCylinder()
 {
 	ndVector size;
 	ndMatrix localMatrix(CalculateLocalMatrix(size));
-	const ndMatrix rotationAligment(ndRollMatrix(ndFloat32(-90.0f) * ndDegreeToRad));
-	localMatrix = rotationAligment * localMatrix;
-	size = rotationAligment.RotateVector(size).Abs();
 
 	ndFloat32 high = ndFloat32(2.0f) * size.m_x;
 	ndFloat32 radios = ndMax(size.m_y, size.m_z);
 
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeCylinder(radios, radios, high)));
-	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
+	shape->SetLocalMatrix(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * localMatrix * m_geometryMatrix);
 	return shape;
 }
 
@@ -1224,11 +1261,11 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionChamferCylinder()
 	ndFloat32 width = size.m_x * ndFloat32(2.0f);
 	ndFloat32 radius = ndMax (size.m_z - size.m_x, ndFloat32 (0.0f));
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeChamferCylinder(radius, width)));
-	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
+	shape->SetLocalMatrix(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * localMatrix * m_geometryMatrix);
 	return shape;
 }
 
-ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionWheel()
+ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionTire()
 {
 	ndVector size;
 	ndMatrix localMatrix(CalculateLocalMatrix(size));
@@ -1238,8 +1275,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionWheel()
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeWheel()));
 	ndVector scale(ndFloat32(4.0f) * width, radius, radius, 0.0f);
 	shape->SetScale(scale);
-
-	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
+	shape->SetLocalMatrix(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * localMatrix * m_geometryMatrix);
 	return shape;
 }
 
@@ -1535,9 +1571,14 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollision()
 	{
 		shape = CreateCollisionCylinder();
 	}
+	else if (strstr(name, "-chamferedCylinder"))
+	{
+		shape = CreateCollisionChamferCylinder();
+	}
+	
 	else if (strstr(name, "-tire"))
 	{
-		shape = CreateCollisionWheel();
+		shape = CreateCollisionTire();
 	}
 	else if (strstr(name, "-convexhull"))
 	{

@@ -158,4 +158,3 @@ bool ndAnimationMeshLoader::ImportFbx(const ndString& fbxPathMeshName)
 	m_mesh->NodeIterator(BindApplicationData);
 	return m_mesh;
 }
-

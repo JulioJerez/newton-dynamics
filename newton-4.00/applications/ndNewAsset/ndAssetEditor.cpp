@@ -423,12 +423,6 @@ void ndAssetEditor::ShowMainMenuBar()
 					ndRenderMeshLoader loader(*m_renderer);
 					if (loader.ImportFbx(path))
 					{
-						const ndMatrix blenderRotation(ndRollMatrix(ndFloat32(-90.0f) * ndDegreeToRad));
-						ndMesh* const mesh = *loader.m_mesh;
-						ndAssert(mesh);
-						mesh->ApplyPivotsRotation(blenderRotation);
-						loader.m_renderMesh = ndSharedPtr<ndRenderSceneNode>(ndRenderMeshLoader::CreateRenderSceneMesh(*GetRenderer(), mesh, path.GetPath()));
-
 						m_currentPath = path;
 						SetVisualScene(loader.m_mesh, loader.m_renderMesh);
 						m_undoRedo.Clear();
