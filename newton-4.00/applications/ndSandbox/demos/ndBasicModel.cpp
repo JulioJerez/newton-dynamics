@@ -125,7 +125,8 @@ class ndBackGroundVehicleController : public ndModelNotify
 				// it only generates one contact at the contact patch.
 				// this is faster and generates beter behavior.
 				ndSharedPtr<ndShapeInstance> tireShape(child->CreateCollision());
-				tireShape->SetLocalMatrix(tireShape->GetLocalMatrix() * child->GetMatrix());
+				//tireShape->SetLocalMatrix(tireShape->GetLocalMatrix() * child->GetMatrix());
+				tireShape->SetLocalMatrix(child->GetMatrix());
 				compoundShape->AddCollision(*tireShape);
 			}
 			renderChildren = renderChildren->GetNext();
@@ -319,7 +320,6 @@ void ndBasicModel(ndDemoEntityManager* const scene)
 	scene->SetDemoHelp(demoHelper);
 
 	ndRenderMeshLoader vmwLoaderRedPaint(*scene->GetRenderer());
-	//vmwLoaderRedPaint.ImportFbx(ndGetWorkingFileName("vmwRed.fbx"));
 	vmwLoaderRedPaint.LoadMesh(ndGetWorkingFileName("vmwRed.nd"));
 	ndSharedPtr<ndModelNotify> controller(ndBackGroundVehicleController::CreateAiVehicleProp(scene, ndVector::m_wOne, vmwLoaderRedPaint));
 
@@ -327,7 +327,6 @@ void ndBasicModel(ndDemoEntityManager* const scene)
 	{
 		// add an array of vehicles 
 		ndRenderMeshLoader vmwLoaderGreenPaint(*scene->GetRenderer());
-		//vmwLoaderGreenPaint.ImportFbx(ndGetWorkingFileName("vmwGreen.fbx"));
 		vmwLoaderGreenPaint.LoadMesh(ndGetWorkingFileName("vmwGreen.nd"));
 
 		const ndInt32 count = 5;

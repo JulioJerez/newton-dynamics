@@ -398,6 +398,22 @@ void ndAssetEditor::ShowMainMenuBar()
 			}
 
 			ImGui::Separator();
+			if (ImGui::MenuItem("Import fbx", ""))
+			{
+				char fileName[2048];
+				if (dGetImportFbxFileName(fileName, sizeof(fileName) - 1))
+				{
+					const ndString path(fileName);
+					ndRenderMeshLoader loader(*m_renderer);
+					if (loader.ImportFbx(path))
+					{
+						m_currentPath = path;
+						SetVisualScene(loader.m_mesh, loader.m_renderMesh);
+						m_undoRedo.Clear();
+					}
+				}
+			}
+
 			if (ImGui::MenuItem("Import urdf", ""))
 			{
 				char fileName[2048];
@@ -406,38 +422,6 @@ void ndAssetEditor::ShowMainMenuBar()
 					const ndString path(fileName);
 					ndUrdfMeshLoader loader(*m_renderer);
 					if (loader.Import(path))
-					{
-						m_currentPath = path;
-						SetVisualScene(loader.m_mesh, loader.m_renderMesh);
-						m_undoRedo.Clear();
-					}
-				}
-			}
-
-			if (ImGui::MenuItem("Import fbx (blender)", ""))
-			{
-				char fileName[2048];
-				if (dGetImportFbxFileName(fileName, sizeof(fileName) - 1))
-				{
-					const ndString path(fileName);
-					ndRenderMeshLoader loader(*m_renderer);
-					if (loader.ImportFbx(path))
-					{
-						m_currentPath = path;
-						SetVisualScene(loader.m_mesh, loader.m_renderMesh);
-						m_undoRedo.Clear();
-					}
-				}
-			}
-
-			if (ImGui::MenuItem("Import fbx (autodesk)", ""))
-			{
-				char fileName[2048];
-				if (dGetImportFbxFileName(fileName, sizeof(fileName) - 1))
-				{
-					const ndString path(fileName);
-					ndRenderMeshLoader loader(*m_renderer);
-					if (loader.ImportFbx(path))
 					{
 						m_currentPath = path;
 						SetVisualScene(loader.m_mesh, loader.m_renderMesh);

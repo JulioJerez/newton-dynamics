@@ -82,7 +82,6 @@ class ndObjectPlacementCamera : public ndDemoCameraNode
 		ndDemoEntityManager* const scene = renderCallback->m_owner;
 
 		ndRenderMeshLoader loader(*scene->GetRenderer());
-		//loader.ImportFbx(ndGetWorkingFileName("tpot.fbx"));
 		loader.LoadMesh(ndGetWorkingFileName("tpot.nd"));
 		m_castingShape = loader.m_mesh->CreateCollision();
 

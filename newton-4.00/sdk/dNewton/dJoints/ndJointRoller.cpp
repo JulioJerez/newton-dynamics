@@ -26,6 +26,11 @@ ndJointRoller::ndJointRoller()
 	,m_positionAxis()
 {
 	m_maxDof = 8;
+	m_positionAxis.m_springK = ndFloat32(2000.0f);
+	m_positionAxis.m_damperC = ndFloat32(50.0f);
+	m_positionAxis.m_maxLimit = ndFloat32(0.2f);
+	m_positionAxis.m_minLimit = ndFloat32(-0.1f);
+	m_positionAxis.m_springDamperRegularizer = ndFloat32(0.02f);
 }
 
 ndJointRoller::ndJointRoller(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
@@ -33,6 +38,11 @@ ndJointRoller::ndJointRoller(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* 
 	,m_rotationAxis()
 	,m_positionAxis()
 {
+	m_positionAxis.m_springK = ndFloat32(2000.0f);
+	m_positionAxis.m_damperC = ndFloat32(50.0f);
+	m_positionAxis.m_maxLimit = ndFloat32(0.2f);
+	m_positionAxis.m_minLimit = ndFloat32(-0.1f);
+	m_positionAxis.m_springDamperRegularizer = ndFloat32(0.02f);
 }
 
 ndJointRoller::ndJointRoller(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent)
@@ -41,6 +51,11 @@ ndJointRoller::ndJointRoller(const ndMatrix& pinAndPivotInChild, const ndMatrix&
 	,m_positionAxis()
 {
 	ndMatrix tmp;
+	m_positionAxis.m_springK = ndFloat32(2000.0f);
+	m_positionAxis.m_damperC = ndFloat32(50.0f);
+	m_positionAxis.m_maxLimit = ndFloat32(0.2f);
+	m_positionAxis.m_minLimit = ndFloat32(-0.1f);
+	m_positionAxis.m_springDamperRegularizer = ndFloat32(0.02f);
 	CalculateLocalMatrix(pinAndPivotInChild, m_localMatrix0, tmp);
 	CalculateLocalMatrix(pinAndPivotInParent, tmp, m_localMatrix1);
 }

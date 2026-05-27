@@ -25,7 +25,7 @@
 #define MACHINE_LEARNING_BASE	100
 
 //#define DEFAULT_SCENE	0		// basic collision only
-#define DEFAULT_SCENE	1		// basic rigidbody
+//#define DEFAULT_SCENE	1		// basic rigidbody
 //#define DEFAULT_SCENE	2		// basic Stacks 
 //#define DEFAULT_SCENE	3		// basic friction
 //#define DEFAULT_SCENE	4		// basic sliding platform
@@ -39,7 +39,7 @@
 //#define DEFAULT_SCENE	12		// basic user marching cube 3d collision
 //#define DEFAULT_SCENE	13		// static compound scene collision 
 //#define DEFAULT_SCENE	14		// basic convex approximate compound shapes
-//#define DEFAULT_SCENE	15		// basic model, a nd vehicle prop
+#define DEFAULT_SCENE	15		// basic model, and ai vehicle prop
 //#define DEFAULT_SCENE	16		// export articulated model
 //#define DEFAULT_SCENE	17		// basic rag doll
 //#define DEFAULT_SCENE	18		// complex model, implement a complex model with joints

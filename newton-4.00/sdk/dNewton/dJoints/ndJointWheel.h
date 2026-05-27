@@ -23,7 +23,7 @@ class ndWheelDescriptor
 		,m_damperC(ndFloat32(50.0f))
 		,m_upperStop(ndFloat32(0.2f))
 		,m_lowerStop(ndFloat32(-0.1f))
-		,m_regularizer(ndFloat32(0.1f))
+		,m_regularizer(ndFloat32(0.02f))
 		,m_brakeTorque(ndFloat32(0.0f))
 		,m_steeringAngle(ndFloat32(0.0f))
 		,m_handBrakeTorque(ndFloat32(0.0f))

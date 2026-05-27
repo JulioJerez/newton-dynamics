@@ -5,6 +5,10 @@
         <posit float3="0 0 0" />
         <angles float3="0 -0 0" />
     </matrix>
+    <basePoseMatrix>
+        <posit float3="0 0 0" />
+        <angles float3="0 -0 0" />
+    </basePoseMatrix>
     <geometryMatrix>
         <posit float3="0 0 0" />
         <angles float3="0 -0 0" />
@@ -16,7 +20,7 @@
             <indices count="6" intArray="2 0 1 1 3 2" />
         </vertices>
         <normal>
-            <normals count="1" float3Array="0 1 0" />
+            <normals count="1" float3Array="-0 1 -0" />
             <indices count="6" intArray="0 0 0 0 0 0" />
         </normal>
         <uvs>
@@ -38,4 +42,36 @@
             <faceIndexCount count="2" intArray="3 3" />
         </faces>
     </geometry>
+    <ndMesh>
+        <name string="__constraintLoops__" />
+        <matrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </matrix>
+        <basePoseMatrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </basePoseMatrix>
+        <geometryMatrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </geometryMatrix>
+        <type nodeType="node" target="0 0 0 " />
+    </ndMesh>
+    <ndMesh>
+        <name string="__collidingPairs__" />
+        <matrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </matrix>
+        <basePoseMatrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </basePoseMatrix>
+        <geometryMatrix>
+            <posit float3="0 0 0" />
+            <angles float3="0 -0 0" />
+        </geometryMatrix>
+        <type nodeType="node" target="0 0 0 " />
+    </ndMesh>
 </ndMesh>
