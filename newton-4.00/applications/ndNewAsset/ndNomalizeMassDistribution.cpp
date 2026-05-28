@@ -66,8 +66,8 @@ void ndNomalizeMassDistribution::Execute()
 				ndMeshBodyKinematic* const kinBody = (ndMeshBodyKinematic*)*body;
 				ndVector inertia(kinBody->m_invMass.Reciproc());
 				inertia = inertia.Scale(ndFloat32(1.0f) / inertia.m_w);
-				ndFloat32 maxInertia = ndMax(inertia.m_x, ndMax(inertia.m_x, inertia.m_z));
-				ndFloat32 minInertia = ndMin(inertia.m_x, ndMin(inertia.m_x, inertia.m_z));
+				ndFloat32 maxInertia = ndMax(inertia.m_x, ndMax(inertia.m_y, inertia.m_z));
+				ndFloat32 minInertia = ndMin(inertia.m_x, ndMin(inertia.m_y, inertia.m_z));
 				if (maxInertia * m_inertialRatio > minInertia)
 				{
 					minInertia = maxInertia * m_inertialRatio;
