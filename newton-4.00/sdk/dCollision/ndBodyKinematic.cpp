@@ -977,7 +977,7 @@ void ndBodyKinematic::IntegrateExternalForce(ndFloat32 timestep)
 		const ndVector gyroTorque(m_omega.CrossProduct(angularMomentum));
 		const ndVector localTorque(matrix.UnrotateVector(torque - gyroTorque));
 		// and solving for alpha we get the angular acceleration at t + dt
-		
+		// and we use that acceleration to integrate the angular velocity at time t
 		// derivative at half time step. (similar to midpoint Euler so that it does not loses too much energy)
 		const ndVector dw(localOmega.Scale(ndFloat32(0.5f) * timestep));
 		
