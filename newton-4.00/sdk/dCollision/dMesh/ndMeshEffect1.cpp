@@ -3339,15 +3339,13 @@ ndMeshEffect* ndMeshEffect::GetNextLayer(ndInt32 mark)
 
 ndShapeInstance* ndMeshEffect::CreateConvexCollision(ndFloat64 tolerance) const
 {
-	ndStack<ndVector> poolPtr(ndInt32(m_points.m_vertex.GetCount()) * 2);
-	ndVector* const pool = &poolPtr[0];
+	ndArray<ndVector> pool;
 	
 	ndBigVector minBox;
 	ndBigVector maxBox;
 	CalculateAABB(minBox, maxBox);
 	ndVector com((minBox + maxBox) * ndVector::m_half);
 	
-	ndInt32 count = 0;
 	ndInt32 mark = IncLRU();
 	ndPolyhedra::Iterator iter(*this);
 	for (iter.Begin(); iter; iter++) 
@@ -3362,12 +3360,8 @@ ndShapeInstance* ndMeshEffect::CreateConvexCollision(ndFloat64 tolerance) const
 				ptr = ptr->m_twin->m_next;
 			} while (ptr != vertex);
 	
-			if (count < ndInt32(poolPtr.GetElementsCount())) 
-			{
-				const ndBigVector p(m_points.m_vertex[vertex->m_incidentVertex]);
-				pool[count] = ndVector(p) - com;
-				count++;
-			}
+			const ndBigVector p(m_points.m_vertex[vertex->m_incidentVertex]);
+			pool.PushBack(ndVector(p) - com);
 		}
 	}
 	
@@ -3375,7 +3369,7 @@ ndShapeInstance* ndMeshEffect::CreateConvexCollision(ndFloat64 tolerance) const
 	matrix.m_posit += matrix.RotateVector(com);
 	matrix.m_posit.m_w = ndFloat32(1.0f);
 	
-	ndShapeConvexHull* const collision = new ndShapeConvexHull(count, sizeof(ndVector), ndFloat32(tolerance), &pool[0].m_x);
+	ndShapeConvexHull* const collision = new ndShapeConvexHull(ndInt32(pool.GetCount()), sizeof(ndVector), ndFloat32(tolerance), &pool[0].m_x);
 	if (!collision->GetConvexVertexCount()) 
 	{
 		delete collision;
