@@ -616,10 +616,14 @@ void ndFbxMeshLoader::ImportMeshNode(ndOfbx::Object* const fbxNode, ndFbx2ndMesh
 			{
 				faceMaterialArray[faceIndex] = defaultMaterialId;
 			}
-			else
+			else if (geom->getMaterials())
 			{
 				ndInt32 fbxMatIndex = geom->getMaterials()[faceIndex];
 				faceMaterialArray[faceIndex] = fbxMatIndex;
+			}
+			else
+			{
+				faceMaterialArray[faceIndex] = 0;
 			}
 			count = 0;
 			faceIndex++;
