@@ -235,32 +235,35 @@ void ndJointRoller::DebugJoint(ndConstraintDebugCallback& debugCallback) const
 	debugCallback.DrawFrame(matrix0);
 	debugCallback.DrawFrame(matrix1);
 
-	const ndInt32 subdiv = 8;
-	const ndFloat32 radius = debugCallback.m_debugScale;
-	ndVector arch[subdiv + 1];
-
-	ndFloat32 deltaTwist = m_rotationAxis.m_maxLimit - m_rotationAxis.m_minLimit;
-	if ((deltaTwist > ndFloat32(1.0e-3f)) && (deltaTwist <= ndFloat32(2.0f) * ndPi))
+	if (m_rotationAxis.m_limitState)
 	{
-		ndMatrix pitchMatrix(matrix1);
-		pitchMatrix.m_posit = matrix1.m_posit;
+		const ndInt32 subdiv = 8;
+		const ndFloat32 radius = debugCallback.m_debugScale;
+		ndVector arch[subdiv + 1];
 
-		ndVector point(ndFloat32(0.0f), ndFloat32(radius), ndFloat32(0.0f), ndFloat32(0.0f));
-
-		ndFloat32 angleStep = ndMin(deltaTwist, ndFloat32(2.0f * ndPi)) / subdiv;
-		ndFloat32 angle0 = m_rotationAxis.m_minLimit;
-
-		ndVector color(ndFloat32(0.4f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f));
-		for (ndInt32 i = 0; i <= subdiv; ++i)
+		ndFloat32 deltaTwist = m_rotationAxis.m_maxLimit - m_rotationAxis.m_minLimit;
+		if ((deltaTwist > ndFloat32(1.0e-3f)) && (deltaTwist <= ndFloat32(2.0f) * ndPi))
 		{
-			arch[i] = pitchMatrix.TransformVector(ndPitchMatrix(angle0).RotateVector(point));
-			debugCallback.DrawLine(pitchMatrix.m_posit, arch[i], color);
-			angle0 += angleStep;
-		}
+			ndMatrix pitchMatrix(matrix1);
+			pitchMatrix.m_posit = matrix1.m_posit;
 
-		for (ndInt32 i = 0; i < subdiv; ++i)
-		{
-			debugCallback.DrawLine(arch[i], arch[i + 1], color);
+			ndVector point(ndFloat32(0.0f), ndFloat32(radius), ndFloat32(0.0f), ndFloat32(0.0f));
+
+			ndFloat32 angleStep = ndMin(deltaTwist, ndFloat32(2.0f * ndPi)) / subdiv;
+			ndFloat32 angle0 = m_rotationAxis.m_minLimit;
+
+			ndVector color(ndFloat32(0.4f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f));
+			for (ndInt32 i = 0; i <= subdiv; ++i)
+			{
+				arch[i] = pitchMatrix.TransformVector(ndPitchMatrix(angle0).RotateVector(point));
+				debugCallback.DrawLine(pitchMatrix.m_posit, arch[i], color);
+				angle0 += angleStep;
+			}
+
+			for (ndInt32 i = 0; i < subdiv; ++i)
+			{
+				debugCallback.DrawLine(arch[i], arch[i + 1], color);
+			}
 		}
 	}
 
