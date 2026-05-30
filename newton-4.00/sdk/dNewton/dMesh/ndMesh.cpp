@@ -1051,92 +1051,24 @@ ndMatrix ndMesh::CalculateLocalMatrix(ndVector& sizeOut) const
 {
 	const ndSharedPtr<ndMeshEffect>& meshEffect = GetGeometry();
 
-#if 0
-	ndMatrix rotation(GetGeometryMatrix() * CalculateGlobalMatrix());
-	//ndMatrix rotation(ndGetIdentityMatrix());
-	rotation.m_posit = ndVector::m_wOne;
-
 	sizeOut.m_x = ndFloat32(0.5f);
 	sizeOut.m_y = ndFloat32(0.5f);
 	sizeOut.m_z = ndFloat32(0.5f);
 	sizeOut.m_w = ndFloat32(0.0f);
-	ndMatrix covariance(ndGetIdentityMatrix());
-	if (meshEffect)
+
+	ndMatrix localAxis(ndGetIdentityMatrix());
+	if (GetRigidBody())
 	{
-		const ndInt32 pointsCount = meshEffect->GetVertexCount();
-		const ndInt32 pointsStride = ndInt32(meshEffect->GetVertexStrideInByte() / sizeof(ndFloat64));
-		const ndFloat64* const pointsBuffer = meshEffect->GetVertexPool();
-
-		// geometry points are for rendering, therefore they may be have duplicate points 
-		// that can skew the covariance matrix
-		ndArray<ndVector> uniquePoints;
-		for (ndInt32 i = 0; i < pointsCount; ++i)
-		{
-			ndFloat32 x = ndFloat32(pointsBuffer[i * pointsStride + 0]);
-			ndFloat32 y = ndFloat32(pointsBuffer[i * pointsStride + 1]);
-			ndFloat32 z = ndFloat32(pointsBuffer[i * pointsStride + 2]);
-			const ndBigVector p(x, y, z, ndFloat32(0.0f));
-			uniquePoints.PushBack(rotation.RotateVector(p));
-		}
-		ndArray<ndInt32> indexList;
-		indexList.SetCount(pointsCount);
-		const ndInt32 vertexCount = ndVertexListToIndexList(&uniquePoints[0].m_x, ndInt32(sizeof(ndVector)), 3, pointsCount, &indexList[0], ndFloat32(1.0e-6f));
-		uniquePoints.SetCount(vertexCount);
-
-		ndVector minP(ndFloat32(1.0e10f));
-		ndVector maxP(ndFloat32(-1.0e10f));
-		for (ndInt32 i = 0; i < vertexCount; ++i)
-		{
-			const ndVector p(uniquePoints[i]);
-			minP = minP.GetMin(p);
-			maxP = maxP.GetMax(p);
-		}
-
-		covariance = ndGetZeroMatrix();
-		ndVector size(ndVector::m_half * (maxP - minP));
-		ndVector origin(ndVector::m_half * (maxP + minP));
-		
-		for (ndInt32 i = 0; i < vertexCount; ++i)
-		{
-			const ndVector p((ndVector(uniquePoints[i]) - origin) & ndVector::m_triplexMask);
-			ndAssert(p.m_w == ndFloat32(0.0f));
-			const ndMatrix matrix(ndCovarianceMatrix(p, p));
-			covariance.m_front += matrix.m_front;
-			covariance.m_up += matrix.m_up;
-			covariance.m_right += matrix.m_right;
-		}
-		// since it is an stimate, we can zero out small misallgmnets.
-		for (ndInt32 i = 0; i < 2; ++i)
-		{
-			for (ndInt32 j = i + 1; j < 3; ++j)
-			{
-				if (ndAbs(covariance[i][j]) < ndFloat32(1.0e-5f))
-				{
-					covariance[i][j] = ndFloat32(0.0f);
-					covariance[j][i] = ndFloat32(0.0f);
-				}
-			}
-		}
-
-		const ndVector eigen(covariance.EigenVectors() & ndVector::m_triplexMask);
-
-		covariance.m_posit = origin;
-		covariance.m_posit.m_w = ndFloat32(1.0f);
-
-		sizeOut = size;
-		sizeOut.m_w = ndFloat32(0.0f);
+		const ndMeshBodyKinematic* const body = (ndMeshBodyKinematic*)*GetRigidBody();
+		localAxis = body->m_shapeInstance.m_localMatrix;
+		localAxis.m_posit = ndVector::m_wOne;
 	}
-	return covariance;
-#endif
-
-	sizeOut.m_x = ndFloat32(0.5f);
-	sizeOut.m_y = ndFloat32(0.5f);
-	sizeOut.m_z = ndFloat32(0.5f);
-	sizeOut.m_w = ndFloat32(0.0f);
-
-	ndMatrix matrix(GetGeometryMatrix());
+	//ndMatrix matrix(GetGeometryMatrix());
+	//ndMatrix matrix(GetGeometryMatrix() * localAxis.OrthoInverse());
+	ndMatrix matrix(localAxis);
 	if (meshEffect)
 	{
+		const ndMatrix transform(GetGeometryMatrix() * localAxis.OrthoInverse());
 		const ndInt32 pointsCount = meshEffect->GetVertexCount();
 		const ndInt32 pointsStride = ndInt32(meshEffect->GetVertexStrideInByte() / sizeof(ndFloat64));
 		const ndFloat64* const pointsBuffer = meshEffect->GetVertexPool();
@@ -1149,7 +1081,7 @@ ndMatrix ndMesh::CalculateLocalMatrix(ndVector& sizeOut) const
 			ndFloat32 y = ndFloat32(pointsBuffer[i * pointsStride + 1]);
 			ndFloat32 z = ndFloat32(pointsBuffer[i * pointsStride + 2]);
 			const ndVector locaPoint(x, y, z, ndFloat32(1.0f));
-			const ndVector point(matrix.TransformVector(locaPoint));
+			const ndVector point(transform.TransformVector(locaPoint));
 			minP = minP.GetMin(point);
 			maxP = maxP.GetMax(point);
 		}
@@ -1159,8 +1091,7 @@ ndMatrix ndMesh::CalculateLocalMatrix(ndVector& sizeOut) const
 		sizeOut.m_x = size.m_x;
 		sizeOut.m_y = size.m_y;
 		sizeOut.m_z = size.m_z;
-
-		matrix = ndGetIdentityMatrix();
+		
 		matrix.m_posit = origin;
 		matrix.m_posit.m_w = ndFloat32(1.0f);
 	}
@@ -1202,7 +1133,6 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionBox()
 	ndMatrix localMatrix(CalculateLocalMatrix(size));
 	size = size.Scale(ndFloat32(2.0f));
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeBox(size.m_x, size.m_y, size.m_z)));
-	//shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
 	shape->SetLocalMatrix(localMatrix);
 	return shape;
 }
@@ -1223,8 +1153,6 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionSphere()
 	ndMatrix localMatrix(CalculateLocalMatrix(size));
 	ndFloat32 radios = ndMax(size.m_x, (ndMax(size.m_y, size.m_z)));
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeSphere(radios)));
-
-	//shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
 	shape->SetLocalMatrix(localMatrix);
 	return shape;
 }
@@ -1238,7 +1166,6 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCapsule()
 	ndFloat32 high = ndFloat32(2.0f) * (ndMax (size.m_x - radios, ndFloat32 (0.0f)));
 
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeCapsule(radios, radios, high)));
-	//shape->SetLocalMatrix(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * localMatrix * m_geometryMatrix);
 	shape->SetLocalMatrix(localMatrix);
 	return shape;
 }
@@ -1252,7 +1179,6 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCylinder()
 	ndFloat32 radios = ndMax(size.m_y, size.m_z);
 
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeCylinder(radios, radios, high)));
-	//shape->SetLocalMatrix(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * localMatrix * m_geometryMatrix);
 	shape->SetLocalMatrix(localMatrix);
 	return shape;
 }
@@ -1265,7 +1191,6 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionChamferCylinder()
 	ndFloat32 width = size.m_x * ndFloat32(2.0f);
 	ndFloat32 radius = ndMax (size.m_z - size.m_x, ndFloat32 (0.0f));
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeChamferCylinder(radius, width)));
-	//shape->SetLocalMatrix(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * localMatrix * m_geometryMatrix);
 	shape->SetLocalMatrix(localMatrix);
 	return shape;
 }
@@ -1280,7 +1205,6 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionTire()
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeWheel()));
 	ndVector scale(ndFloat32(4.0f) * width, radius, radius, 0.0f);
 	shape->SetScale(scale);
-	//shape->SetLocalMatrix(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * localMatrix * m_geometryMatrix);
 	shape->SetLocalMatrix(localMatrix);
 	return shape;
 }
