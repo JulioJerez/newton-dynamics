@@ -242,7 +242,7 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			ndVector tmp;
 			ndVector radians(matrix.CalcPitchYawRoll(tmp).Scale(ndRadToDegree));
 
-			ImGui::SeparatorText("mode transform");
+			ImGui::SeparatorText("node transform");
 			if (m_parentSpaceTransform)
 			{
 				position[0] = ndReal(matrix.m_posit.m_x);

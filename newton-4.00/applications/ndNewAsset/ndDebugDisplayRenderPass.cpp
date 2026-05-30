@@ -693,11 +693,9 @@ void ndDebugDisplayRenderPass::RenderOptions()
 			const ndMatrix pivotMatrix(sceneNode->m_globalMatrix);
 			if (m_manager->m_showPivot)
 			{
-				if (m_manager->m_parentSpaceTransform && sceneNode->GetParent())
+				if (m_manager->m_parentSpaceTransform)
 				{
-					//ndMatrix matrix (sceneNode->GetParent()->m_matrix);
-					//matrix.m_posit = matrix.TransformVector(sceneNode->m_matrix.m_posit);
-					ndMatrix matrix(sceneNode->GetParent()->m_globalMatrix);
+					ndMatrix matrix(sceneNode->m_matrix);
 					matrix.m_posit = pivotMatrix.m_posit;
 					DrawFrame(matrix);
 				}
@@ -892,7 +890,6 @@ void ndDebugDisplayRenderPass::RenderMeshSelection()
 		}
 		else if (m_manager->m_subSelection == ndAssetEditor::m_transformModifier)
 		{
-			ndAssert(0);
 			//m_owner->ClearZBuffer();
 			RenderCollisionPair();
 		}

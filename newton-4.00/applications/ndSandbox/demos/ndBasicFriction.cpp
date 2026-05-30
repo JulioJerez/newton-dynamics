@@ -17,16 +17,16 @@
 #include "ndContactCallback.h"
 #include "ndDemoEntityManager.h"
 
-class FrictionMaterial : public ndApplicationMaterial
+class ndFrictionMaterial : public ndApplicationMaterial
 {
 	public:
-	FrictionMaterial()
+	ndFrictionMaterial()
 		:ndApplicationMaterial()
 		,m_soundSpeed(10.0f)
 	{
 	}
 
-	FrictionMaterial(const FrictionMaterial& src)
+	ndFrictionMaterial(const ndFrictionMaterial& src)
 		:ndApplicationMaterial(src)
 		,m_soundSpeed(10.0f)
 	{
@@ -34,7 +34,7 @@ class FrictionMaterial : public ndApplicationMaterial
 
 	ndApplicationMaterial* Clone() const
 	{
-		return new FrictionMaterial(*this);
+		return new ndFrictionMaterial(*this);
 	}
 
 	virtual void OnContactCallback(const ndContact* const joint, ndFloat32) const
@@ -71,7 +71,7 @@ static void BuildFrictionRamp(ndDemoEntityManager* const scene)
 {
 	ndPhysicsWorld* const world = scene->GetWorld();
 	
-	FrictionMaterial material;
+	ndFrictionMaterial material;
 	ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
 	callback->RegisterMaterial(material, ndDemoContactCallback::m_frictionTest, ndDemoContactCallback::m_default);
 	
