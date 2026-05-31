@@ -215,6 +215,7 @@ class ndMesh : public ndClassAlloc
 	ndList<ndSharedPtr<ndMesh>> m_children;
 	ndList<ndSharedPtr<ndMesh>>::ndNode* m_selfChildNode;
 	ndSharedPtr<ndMeshTransformModifier> m_transformModifier;
+	ndList<ndSharedPtr<ndMeshCustomProperty>> m_customProperties;
 	ndVector m_boneTarget;
 	ndNodeType m_type;
 

@@ -56,6 +56,7 @@ ndMesh::ndMesh()
 	,m_children()
 	,m_selfChildNode(nullptr)
 	,m_transformModifier(nullptr)
+	,m_customProperties()
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
 {
@@ -74,6 +75,7 @@ ndMesh::ndMesh(const ndShapeInstance& shape, ndUvMapingMode mapping)
 	,m_mesh(new ndMeshEffect(shape))
 	,m_selfChildNode(nullptr)
 	,m_transformModifier(nullptr)
+	,m_customProperties()
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
 {
@@ -133,9 +135,19 @@ ndMesh::ndMesh(const ndMesh& src)
 	,m_rigidBody(src.m_rigidBody ? ndSharedPtr<ndMeshBody>(src.m_rigidBody->Duplicate()) : ndSharedPtr<ndMeshBody>(nullptr))
 	,m_selfChildNode(nullptr)
 	,m_transformModifier(src.m_transformModifier ? ndSharedPtr<ndMeshTransformModifier>(src.m_transformModifier->Duplicate()) : ndSharedPtr<ndMeshTransformModifier>(nullptr))
+	,m_customProperties()
 	,m_boneTarget(src.m_boneTarget)
 	,m_type(src.m_type)
 {
+	if (src.m_customProperties)
+	{
+		for (ndList<ndSharedPtr<ndMeshCustomProperty>>::ndNode* node = src.m_customProperties.GetFirst(); node; node = node->GetNext())
+		{
+			ndMeshCustomProperty* const property = *node->GetInfo();
+			m_customProperties.Append(ndSharedPtr<ndMeshCustomProperty>(property->Duplicate()));
+		}
+	}
+
 	for (ndList<ndSharedPtr<ndMesh>>::ndNode* ptr = src.GetChildren().GetFirst(); ptr; ptr = ptr->GetNext())
 	{
 		const ndSharedPtr<ndMesh>& child = ptr->GetInfo();
