@@ -154,6 +154,7 @@ class ndAssetEditor : public ndClassAlloc
 	void ShowPropertiesRigidBodyInfo();
 	void ShowPropertiesJointsLoopInfo();
 	void ShowPropertiesCollidingPairs();
+	void ShowPropertiesCustomProperties();
 
 	void EditJointGlobalMatrix();
 	void EditWheelJoint();
@@ -252,6 +253,7 @@ class ndAssetEditor : public ndClassAlloc
 	ndInt32 m_cameraMode;
 	ndInt32 m_closeLoopIndex;
 	ndInt32 m_collidingPairIndex;
+	ndInt32 m_customPropertyIndex;
 	ndSubSelectionMode m_subSelection;
 	
 	friend class ndUndoRedo;

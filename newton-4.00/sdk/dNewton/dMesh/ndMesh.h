@@ -111,6 +111,9 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API ndList<ndSharedPtr<ndMesh>>& GetChildren();
 	D_NEWTON_API const ndList<ndSharedPtr<ndMesh>>& GetChildren() const;
 
+	D_NEWTON_API ndList<ndSharedPtr<ndMeshCustomProperty>>& GetCustomProperties();
+	D_NEWTON_API const ndList<ndSharedPtr<ndMeshCustomProperty>>& GetCustomProperties() const;
+
 	D_NEWTON_API ndMesh* IteratorFirst();
 	D_NEWTON_API ndMesh* IteratorNext(const ndMesh* const root);
 

@@ -20,6 +20,7 @@ void ndAssetEditor::ShowOutlierExplorerCollidindPairs(const ndSharedPtr<ndMesh>&
 	{
 		m_subSelection = m_none;
 		m_collidingPairIndex = 0;
+		m_customPropertyIndex = 0;
 	}
 
 	ImGuiTreeNodeFlags options = 0;

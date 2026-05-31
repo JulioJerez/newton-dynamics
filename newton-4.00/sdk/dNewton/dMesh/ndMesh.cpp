@@ -258,6 +258,17 @@ const ndList<ndSharedPtr<ndMesh>>& ndMesh::GetChildren() const
 	return m_children;
 }
 
+ndList<ndSharedPtr<ndMeshCustomProperty>>& ndMesh::GetCustomProperties()
+{
+	return m_customProperties;
+}
+
+const ndList<ndSharedPtr<ndMeshCustomProperty>>& ndMesh::GetCustomProperties() const
+{
+	return m_customProperties;
+}
+
+
 ndMesh::ndNodeType ndMesh::GetNodeType() const
 {
 	return m_type;
