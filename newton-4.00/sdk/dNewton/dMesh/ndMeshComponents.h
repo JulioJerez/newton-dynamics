@@ -55,6 +55,7 @@ class ndMeshLoopJoint : public ndClassAlloc
 	D_NEWTON_API ndMeshLoopJoint(const ndCloseLoopConstraints* const owner, const ndSharedPtr<ndMeshJoint>& joint, ndMesh* const childReference, ndMesh* const parentReference);
 	D_NEWTON_API virtual ~ndMeshLoopJoint();
 	
+	D_NEWTON_API void UpdateName();
 	D_NEWTON_API bool operator==(const ndMeshLoopJoint& other) const;
 
 	//D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const;

@@ -240,10 +240,9 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 					ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptr = FindJoint();
 					if (ptr)
 					{
-						ndAssert(0);
-						//m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoCollidingPairs(this)));
-						//collidingPairs->m_collidingPairs.Remove(ptr);
-						//m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoCollidingPairs(this)));
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+						loops->m_loopJoints.Remove(ptr);
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 					}
 
 					m_closeLoopIndex = 0;
@@ -1462,10 +1461,11 @@ void ndAssetEditor::AddLoopJoint()
 	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointSpherical(loops, &sphericalJoint));
 	ndSharedPtr<ndMeshLoopJoint> newLoop (new ndMeshLoopJoint(loops, joint, *m_currentSelection, *m_currentSubSelection));
 
-	char name[256];
-	snprintf(name, sizeof(name) - 1, "%s-%s", m_currentSelection->GetName().GetStr(), m_currentSubSelection->GetName().GetStr());
-	newLoop->m_name = ndString (name);
+	//char name[256];
+	//snprintf(name, sizeof(name) - 1, "%s-%s", m_currentSelection->GetName().GetStr(), m_currentSubSelection->GetName().GetStr());
+	//newLoop->m_name = ndString ("");
 
 	loops->m_loopJoints.Append(newLoop);
+	newLoop->UpdateName();
 	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 }

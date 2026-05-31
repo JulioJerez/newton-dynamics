@@ -32,7 +32,7 @@ void ndAssetEditor::ShowOutlierExplorerCollidindPairs(const ndSharedPtr<ndMesh>&
 		ndSharedPtr<ndMeshCollidingPair>& pair = ptr->GetInfo();
 		
 		options = ImGuiTreeNodeFlags_Bullet;
-		snprintf(name, sizeof(name) - 1, "%s-%s", pair->m_parentNode->GetName().GetStr(), pair->m_childNode->GetName().GetStr());
+		snprintf(name, sizeof(name) - 1, "%s_%s", pair->m_parentNode->GetName().GetStr(), pair->m_childNode->GetName().GetStr());
 		if (ImGui::TreeNodeEx(name, options))
 		{
 			ImGui::TreePop();

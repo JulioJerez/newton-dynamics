@@ -1631,6 +1631,15 @@ const ndCloseLoopConstraints* ndCloseLoopConstraints::GetAsCloseLoopConstraints(
 	return this;
 }
 
+void ndCloseLoopConstraints::UpdateNames()
+{
+	for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptrLoops = m_loopJoints.GetFirst(); ptrLoops; ptrLoops = ptrLoops->GetNext())
+	{
+		ndSharedPtr<ndMeshLoopJoint>& loop = ptrLoops->GetInfo();
+		loop->UpdateName();
+	}
+}
+
 ndMesh* ndCloseLoopConstraints::CreateClone() const
 {
 	const ndCloseLoopConstraints* const self = GetAsCloseLoopConstraints();
@@ -1643,8 +1652,9 @@ void ndCloseLoopConstraints::CreateCloneFixDependencies()
 	ndMesh::CreateCloneFixDependencies();
 
 	const ndMesh* const root = GetRoot();
-	ndCloseLoopConstraints* const loopList = GetAsCloseLoopConstraints();
-	for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptrLoops = loopList->m_loopJoints.GetFirst(); ptrLoops; ptrLoops = ptrLoops->GetNext())
+	//ndCloseLoopConstraints* const loopList = GetAsCloseLoopConstraints();
+	//for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptrLoops = loopList->m_loopJoints.GetFirst(); ptrLoops; ptrLoops = ptrLoops->GetNext())
+	for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptrLoops = m_loopJoints.GetFirst(); ptrLoops; ptrLoops = ptrLoops->GetNext())
 	{
 		ndSharedPtr<ndMeshLoopJoint>& loop = ptrLoops->GetInfo();
 		ndMesh* const childReference = root->FindByName(loop->m_childNode->GetName());
@@ -1699,16 +1709,16 @@ void ndCollidingPairs::CreateCloneFixDependencies()
 	ndMesh::CreateCloneFixDependencies();
 
 	const ndMesh* const root = GetRoot();
-	ndCollidingPairs* const pairList = GetAsCollidingPairs();
-	for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* ptrLoops = pairList->m_collidingPairs.GetFirst(); ptrLoops; ptrLoops = ptrLoops->GetNext())
+	//ndCollidingPairs* const pairList = GetAsCollidingPairs();
+	for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* ptrLoops = m_collidingPairs.GetFirst(); ptrLoops; ptrLoops = ptrLoops->GetNext())
 	{
-		ndSharedPtr<ndMeshCollidingPair>& loop = ptrLoops->GetInfo();
-		ndMesh* const childReference = root->FindByName(loop->m_childNode->GetName());
-		ndMesh* const parentdReference = root->FindByName(loop->m_parentNode->GetName());
+		ndSharedPtr<ndMeshCollidingPair>& pair = ptrLoops->GetInfo();
+		ndMesh* const childReference = root->FindByName(pair->m_childNode->GetName());
+		ndMesh* const parentdReference = root->FindByName(pair->m_parentNode->GetName());
 		ndAssert(childReference);
 		ndAssert(parentdReference);
-		loop->m_childNode = childReference;
-		loop->m_parentNode = parentdReference;
+		pair->m_childNode = childReference;
+		pair->m_parentNode = parentdReference;
 	}
 }
 
@@ -1732,6 +1742,14 @@ const ndMesh* ndCollidingPairs::GetAsMesh() const
 ndCollidingPairs* ndCollidingPairs::GetAsCollidingPairs()
 {
 	return this;
+}
+
+void ndCollidingPairs::UpdateNames()
+{
+	//for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* ptrLoops = m_collidingPairs.GetFirst(); ptrLoops; ptrLoops = ptrLoops->GetNext())
+	//{
+	//	//ndSharedPtr<ndMeshCollidingPair>& pair = ptrLoops->GetInfo();
+	//}
 }
 
 const ndCollidingPairs* ndCollidingPairs::GetAsCollidingPairs() const

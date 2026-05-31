@@ -100,7 +100,7 @@ void ndAssetEditor::ShowPropertiesCollidingPairs()
 		{
 			char name[256];
 			ndSharedPtr<ndMeshCollidingPair>& pair = ptr->GetInfo();
-			snprintf(name, sizeof(name) - 1, "%s-%s", pair->m_parentNode->GetName().GetStr(), pair->m_childNode->GetName().GetStr());
+			snprintf(name, sizeof(name) - 1, "%s_%s", pair->m_parentNode->GetName().GetStr(), pair->m_childNode->GetName().GetStr());
 			ndList<ndString>::ndNode* const nameNode = nameList.Append(ndString(name));
 			names.PushBack(nameNode->GetInfo().GetStr());
 		}

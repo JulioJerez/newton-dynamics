@@ -110,16 +110,23 @@ ndMeshLoopJoint::ndMeshLoopJoint(
 	const ndSharedPtr<ndMeshJoint>& joint, 
 	ndMesh* const childReference, ndMesh* const parentReference)
 	:ndClassAlloc()
-	,m_name(parentReference->GetName() + "-" + childReference->GetName())
+	//,m_name(parentReference->GetName() + "_" + childReference->GetName())
+	,m_name()
 	,m_childNode(ndWeakPtr<ndMesh>(childReference))
 	,m_parentNode(ndWeakPtr<ndMesh>(parentReference))
 	,m_joint(joint)
 	,m_owner(ndWeakPtr<const ndCloseLoopConstraints>(owner))
 {
+	UpdateName();
 }
 
 ndMeshLoopJoint::~ndMeshLoopJoint()
 {
+}
+
+void ndMeshLoopJoint::UpdateName()
+{
+	m_name = ndString (m_parentNode->GetName() + "_" + m_childNode->GetName());
 }
 
 bool ndMeshLoopJoint::operator==(const ndMeshLoopJoint& other) const
@@ -155,8 +162,7 @@ void ndMeshLoopJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
 	}
 	else
 	{
-		ndString name(parentName + "-" + childName);
-		m_name = name;
+		m_name = parentName + " " + childName;
 	}
 
 	m_childNode = ndWeakPtr<ndMesh>(m_owner->GetRoot()->FindByName(childName));

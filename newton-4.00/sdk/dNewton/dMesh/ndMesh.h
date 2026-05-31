@@ -251,6 +251,8 @@ class ndCloseLoopConstraints: public ndMesh
 	D_NEWTON_API virtual ndCloseLoopConstraints* GetAsCloseLoopConstraints() override;
 	D_NEWTON_API virtual const ndCloseLoopConstraints* GetAsCloseLoopConstraints() const override;
 
+	D_NEWTON_API void UpdateNames();
+
 	D_NEWTON_API virtual void CreateCloneFixDependencies() override;
 	D_NEWTON_API virtual ndMesh* CreateClone() const override;
 	D_NEWTON_API virtual bool operator==(const ndMesh& other) const override;
@@ -267,6 +269,7 @@ class ndCollidingPairs : public ndMesh
 	D_NEWTON_API virtual ndMesh* GetAsMesh();
 	D_NEWTON_API virtual const ndMesh* GetAsMesh() const;
 
+	D_NEWTON_API void UpdateNames();
 	D_NEWTON_API virtual ndCollidingPairs* GetAsCollidingPairs() override;
 	D_NEWTON_API virtual const ndCollidingPairs* GetAsCollidingPairs() const override;
 
