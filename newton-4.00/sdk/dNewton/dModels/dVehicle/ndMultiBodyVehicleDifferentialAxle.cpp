@@ -89,14 +89,10 @@ void ndMultiBodyVehicleDifferentialAxle::JacobianDerivative(ndConstraintDescrito
 	ndMatrix matrix1;
 	CalculateGlobalMatrix(matrix0, matrix1);
 
-	//AddAngularRowJacobian(desc, matrix1.m_right, ndFloat32(0.0f));
 	AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
 
 	ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
 	ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
-
-	//jacobian0.m_angular = matrix0.m_front + matrix0.m_up;
-	//jacobian1.m_angular = matrix1.m_front.Scale(m_gearRatio);
 	jacobian0.m_angular = matrix0.m_front.Scale(m_gearRatio);
 	jacobian1.m_angular = matrix1.m_front + matrix1.m_up;
 
@@ -104,7 +100,6 @@ void ndMultiBodyVehicleDifferentialAxle::JacobianDerivative(ndConstraintDescrito
 	const ndVector& omega1 = m_body1->GetOmega();
 
 	const ndVector relOmega(omega0 * jacobian0.m_angular + omega1 * jacobian1.m_angular);
-	//ndFloat32 w = (relOmega.m_x + relOmega.m_y + relOmega.m_z) * ndFloat32(0.5f);
 	ndFloat32 w = relOmega.AddHorizontal().GetScalar() * ndFloat32(0.5f);
 	SetMotorAcceleration(desc, -w * desc.m_invTimestep);
 }
