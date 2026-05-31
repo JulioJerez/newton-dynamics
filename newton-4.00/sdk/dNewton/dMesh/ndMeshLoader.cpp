@@ -337,6 +337,22 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName) const
 			modifier->SerializeToXml(modifierNode);
 		}
 
+		if (entry.m_meshNode->m_customProperties.GetCount())
+		{
+			nd::TiXmlElement* const customProperties = new nd::TiXmlElement("customProperties");
+			entry.m_parentXml->LinkEndChild(customProperties);
+
+			const ndList<ndSharedPtr<ndMeshCustomProperty>>& propsList = entry.m_meshNode->m_customProperties;
+			for (ndList<ndSharedPtr<ndMeshCustomProperty>>::ndNode* ptr = propsList.GetFirst(); ptr; ptr = ptr->GetNext())
+			{
+				nd::TiXmlElement* const properties = new nd::TiXmlElement("property");
+				customProperties->LinkEndChild(properties);
+
+				const ndMeshCustomProperty* const property = *ptr->GetInfo();
+				property->SerializeToXml(properties);
+			}
+		}
+
 		if (entry.m_meshNode->GetAsCloseLoopConstraints())
 		{
 			const ndCloseLoopConstraints* const closeLoops = entry.m_meshNode->GetAsCloseLoopConstraints();

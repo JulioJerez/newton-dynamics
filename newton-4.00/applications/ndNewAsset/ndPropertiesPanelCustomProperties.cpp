@@ -588,13 +588,11 @@ void ndAssetEditor::ShowPropertiesCustomProperties()
 			if (newPropType != oldPropType)
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				ndMeshCustomProperty* const newPropertyPtr = newPropType ? (ndMeshCustomProperty*)new ndMeshCustomPropertyString() : (ndMeshCustomProperty*)new ndMeshCustomPropertyFloat();
+				ndSharedPtr<ndMeshCustomProperty> newProperty(newPropertyPtr);
+				newProperty->m_name = node->GetInfo()->m_name;
 
-				ndMeshCustomProperty* const propertyPtr = newPropType ? (ndMeshCustomProperty*)new ndMeshCustomPropertyString() : (ndMeshCustomProperty*)new ndMeshCustomPropertyFloat();
-				ndSharedPtr<ndMeshCustomProperty> property(propertyPtr);
-				property->m_name = node->GetInfo()->m_name;
-
-				node->GetInfo() = property;
-
+				node->GetInfo() = newProperty;
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			}
 
@@ -605,6 +603,29 @@ void ndAssetEditor::ShowPropertiesCustomProperties()
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				node->GetInfo()->m_name = ndString(propName);
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+			}
+
+			if (newPropType)
+			{
+				ndMeshCustomPropertyString* const stringProp = (ndMeshCustomPropertyString*)*node->GetInfo();
+				snprintf(propName, sizeof(propName) - 1, "%s", stringProp->m_value.GetStr());
+				if (ImGui::InputText("value", propName, sizeof(propName) - 1, ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+					stringProp->m_value = ndString(propName);
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				}
+			}
+			else
+			{
+				ndMeshCustomPropertyFloat* const floatProp = (ndMeshCustomPropertyFloat*)*node->GetInfo();
+				ndReal value = floatProp->m_value;
+				if (ImGui::InputFloat("value", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+					floatProp->m_value = value;
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				}
 			}
 		}
 

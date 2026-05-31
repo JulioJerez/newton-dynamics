@@ -1251,7 +1251,8 @@ bool ndMeshCustomProperty::operator==(const ndMeshCustomProperty& other) const
 
 void ndMeshCustomProperty::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	ndAssert(0);
+	xmlSaveParam(parent, "className", ClassName());
+	xmlSaveParam(parent, "variableName", m_name.GetStr());
 }
 
 void ndMeshCustomProperty::DeserializeFromXml(const nd::TiXmlElement* const parent)
@@ -1286,7 +1287,8 @@ ndMeshCustomProperty* ndMeshCustomPropertyFloat::Duplicate() const
 
 void ndMeshCustomPropertyFloat::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	ndAssert(0);
+	ndMeshCustomProperty::SerializeToXml(parent);
+	xmlSaveParam(parent, "value", m_value);
 }
 
 void ndMeshCustomPropertyFloat::DeserializeFromXml(const nd::TiXmlElement* const parent)
@@ -1321,7 +1323,8 @@ ndMeshCustomProperty* ndMeshCustomPropertyString::Duplicate() const
 
 void ndMeshCustomPropertyString::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	ndAssert(0);
+	ndMeshCustomProperty::SerializeToXml(parent);
+	xmlSaveParam(parent, "value", m_value.GetStr());
 }
 
 void ndMeshCustomPropertyString::DeserializeFromXml(const nd::TiXmlElement* const parent)
