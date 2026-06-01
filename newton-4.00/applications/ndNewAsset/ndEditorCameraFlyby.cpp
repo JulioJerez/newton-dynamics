@@ -249,7 +249,7 @@ void ndEditorCameraFlyby::MouseSelection()
 		ndFloat32 hitParam = ndFloat32(1.0f);
 		auto RayCast = [this, &hitNode, &hitParam, &p0, &p1](ndMesh* const node)
 		{
-			if (node->GetGeometry())
+			if (node->GetIsVisible() && node->GetGeometry())
 			{
 				const ndMatrix matrix(node->GetGeometryMatrix() * node->CalculateGlobalMatrix());
 				const ndVector localP0(matrix.UntransformVector(p0));
@@ -267,39 +267,6 @@ void ndEditorCameraFlyby::MouseSelection()
 
 	if (hitNode)
 	{
-		//ndAssetEditor::ndSubSelectionMode selectionMode = m_editor->m_subSelection;
-		//switch (selectionMode)
-		//{
-		//	case ndAssetEditor::m_loopJoint:
-		//	{
-		//		m_editor->SetLoopJointSelection(*hitNode);
-		//		break;
-		//	}
-		//
-		//	case ndAssetEditor::m_collidingPair:
-		//	{
-		//		m_editor->SetCollidingSubSelection(*hitNode);
-		//		break;
-		//	}
-		//
-		//	case ndAssetEditor::m_transformModifier:
-		//	{
-		//		m_editor->SetModifierSubSelection(*hitNode);
-		//		break;
-		//	}
-		//
-		//	case ndAssetEditor::m_alignToTarget:
-		//	{
-		//		m_editor->m_currentSubSelection = ndWeakPtr<ndMesh>(*hitNode);
-		//		break;
-		//	}
-		//
-		//	case ndAssetEditor::m_none:
-		//	default:
-		//	{
-		//		m_editor->m_currentSelection = *hitNode;
-		//	}
-		//}
 		m_editor->SelectCurrentNode(hitNode);
 	}
 }

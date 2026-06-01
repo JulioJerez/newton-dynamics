@@ -137,6 +137,20 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 		{
 			ndAssert(0);
 		}
+
+		if (xmlHasAttribute(entry.m_xmlNode, "visible"))
+		{
+			mesh->m_isVisible = xmlGetInt(entry.m_xmlNode, "visible") ? true : false;
+		}
+		else if (mesh->GetNodeType() == ndMesh::m_collisionShape)
+		{
+			mesh->m_isVisible = false;
+		}
+		else if (mesh->GetName().Find("-hidden") != -1)
+		{
+			mesh->m_isVisible = false;
+		}
+
 		ndTriplexReal target(xmlGetTriplexRealAttribute(xmlNodeType, "target"));
 		mesh->SetBoneTarget(ndVector(target.m_x, target.m_y, target.m_z, ndReal(1.0f)));
 	
@@ -307,6 +321,7 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName) const
 		xmlSaveParam(entry.m_parentXml, "matrix", entry.m_meshNode->m_matrix);
 		xmlSaveParam(entry.m_parentXml, "basePoseMatrix", entry.m_meshNode->m_basePoseMatrix);
 		xmlSaveParam(entry.m_parentXml, "geometryMatrix", entry.m_meshNode->m_geometryMatrix);
+		xmlSaveAttribute(entry.m_parentXml, "visible", entry.m_meshNode->m_isVisible ? 1 : 0);
 
 		nd::TiXmlElement* const xmlNodeType = new nd::TiXmlElement("type");
 		entry.m_parentXml->LinkEndChild(xmlNodeType);
