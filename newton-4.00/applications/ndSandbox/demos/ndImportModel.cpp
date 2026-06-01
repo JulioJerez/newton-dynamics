@@ -23,6 +23,7 @@ class ndVanillaController : public ndModelNotify
 {
     public:
     ndVanillaController(ndDemoEntityManager* const scene,
+        const ndMesh* const mesh,
         ndSharedPtr<ndRenderSceneNode>& camera,
         ndModelArticulation* const model)
         :ndModelNotify()
@@ -31,8 +32,21 @@ class ndVanillaController : public ndModelNotify
         ,m_motor(model->FindByName("motor"))
         ,m_steerAngle(ndFloat32(0.0f))
         ,m_engineOmega(ndFloat32 (0.0f))
+        ,m_engineMaxOmega(ndFloat32(50.0f))
     {
         SetModel(model);
+
+        //bind Motor speed.
+        const ndMesh* const motorMesh = mesh->FindByName("motor");
+        ndAssert(motorMesh);
+        if (motorMesh)
+        {
+            const ndMeshCustomPropertyFloat* const speed = (ndMeshCustomPropertyFloat*)motorMesh->GetCustomPropertyByName("speed");
+            if (speed)
+            {
+                m_engineMaxOmega = speed->m_value;
+            }
+        }
 
         // find the wheels
         auto FindWheels = [this](ndModelArticulation::ndNode* const node)
@@ -83,15 +97,14 @@ class ndVanillaController : public ndModelNotify
                 // very simplistic moter power system
                 ndBodyDynamic* const engine = m_motor->m_body->GetAsBodyDynamic();
                 m_engineOmega = ndFloat32(0.0f);
-                const ndFloat32 engineOmega = ndFloat32(30.0f);
                 if (m_scene->GetKeyState(ImGuiKey_W))
                 {
-                    m_engineOmega = -engineOmega;
+                    m_engineOmega = -m_engineMaxOmega;
                     engine->SetSleepState(false);
                 }
                 else if (m_scene->GetKeyState(ImGuiKey_S))
                 {
-                    m_engineOmega = engineOmega;
+                    m_engineOmega = m_engineMaxOmega;
                     engine->SetSleepState(false);
                 }
             }
@@ -133,6 +146,7 @@ class ndVanillaController : public ndModelNotify
     ndList<ndWeakPtr<ndJointWheel>> m_wheels;
     ndFloat32 m_steerAngle;
     ndFloat32 m_engineOmega;
+    ndFloat32 m_engineMaxOmega;
 };
 
 static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, const ndMatrix& location, const char* const pathFileName)
@@ -200,7 +214,7 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
     };
     articulation->NodeIterator(BindApplicationData);
 
-    ndSharedPtr<ndModelNotify> controller(new ndVanillaController(scene, camera, articulation));
+    ndSharedPtr<ndModelNotify> controller(new ndVanillaController(scene, *loader.m_mesh, camera, articulation));
     model->SetNotifyCallback(controller);
 
     return model;
