@@ -387,7 +387,8 @@ namespace ndExcavator
 			contact.RotateTangentDirections(matrix.m_front);
 		}
 
-		bool OnAabbOverlap(const ndContact* const contact, ndFloat32 timestep, const ndShapeInstance& instanceShape0, const ndShapeInstance& instanceShape1) const override
+		//bool OnAabbOverlap(const ndContact* const contact, ndFloat32 timestep, const ndShapeInstance& instanceShape0, const ndShapeInstance& instanceShape1) const override
+		bool OnAabbOverlap(const ndContact* const, ndFloat32, const ndShapeInstance&, const ndShapeInstance&) const override
 		{
 			//ndAssert(0);
 			return true;

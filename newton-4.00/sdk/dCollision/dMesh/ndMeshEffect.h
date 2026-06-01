@@ -47,94 +47,12 @@ class ndIndexArray
 class ndMeshEffect: public ndPolyhedra
 {
 #if 0
-	public:
-	class dMeshBVH
-	{
-		public:
-		class dgMeshBVHNode
-		{
-			public:
-			dgMeshBVHNode (const ndMeshEffect* const mesh, dEdge* const face, void* const userData);
-			dgMeshBVHNode (dgMeshBVHNode* const left, dgMeshBVHNode* const right);
-			~dgMeshBVHNode ();
-			void SetBox (const dVector& p0, const dVector& p1);
-
-			DG_CLASS_ALLOCATOR(allocator)
-			dVector m_p0;
-			dVector m_p1;
-
-			dFloat32 m_area;
-			dEdge* m_face;
-			void* m_userData;
-			dgMeshBVHNode* m_left;
-			dgMeshBVHNode* m_right;
-			dgMeshBVHNode* m_parent;
-		};
-
-		class dgFitnessList: public dTree <dgMeshBVHNode*, dgMeshBVHNode*>
-		{
-			public:
-			dgFitnessList (dMemoryAllocator___* const allocator);
-			dFloat64 TotalCost () const;
-		};
-
-		
-		dMeshBVH (const ndMeshEffect* const mesh);
-		virtual ~dMeshBVH();
-
-		virtual void Build ();
-		virtual void Cleanup ();
-		
-		void FaceRayCast (const dBigVector& l0, const dBigVector& l1, void* const userData) const;
-		void GetOverlapNodes (dList<dgMeshBVHNode*>& overlapNodes, const dBigVector& p0, const dBigVector& p1) const;
-
-		protected:
-		virtual dgMeshBVHNode* CreateLeafNode (dEdge* const face, void* const userData) = 0;
-
-		dgMeshBVHNode* AddFaceNode (dEdge* const face, void* const userData);
-		void RemoveNode (dgMeshBVHNode* const treeNode);
-		void ImproveNodeFitness ();
-		void ImproveNodeFitness (dgMeshBVHNode* const node);
-		dFloat32 CalculateSurfaceArea (dgMeshBVHNode* const node0, dgMeshBVHNode* const node1, dVector& minBox, dVector& maxBox) const;
-		virtual bool SanityCheck() const;
-
-		virtual dFloat64 RayFaceIntersect (const dgMeshBVHNode* const face, const dBigVector& p0, const dBigVector& p1, void* const userData) const;
-//		virtual dFloat64 VertexRayCast (const dBigVector& l0, const dBigVector& l1) const;
-//		virtual bool RayRayIntersect (dEdge* const edge, const ndMeshEffect* const otherMesh, dEdge* const otherEdge, dFloat64& param, dFloat64& otherParam) const;
-		
-		const ndMeshEffect* m_mesh;
-		dgMeshBVHNode* m_rootNode;
-		dgFitnessList m_fitness;
-		friend class ndMeshEffect;
-	};
-	
-	ndMeshEffect(dMemoryAllocator___* const allocator);
-	ndMeshEffect(dgCollisionInstance* const collision);
-	ndMeshEffect(const ndMeshEffect& source);
-	ndMeshEffect (dMemoryAllocator___* const allocator, dgDeserialize deserialization, void* const userData);
-
-	// create from OFF or PLY file format
-	ndMeshEffect(dMemoryAllocator___* const allocator, const char* const fileName);
-
-	// Create a convex hull Mesh form point cloud
-	ndMeshEffect (dMemoryAllocator___* const allocator, const dFloat64* const vertexCloud, dInt32 count, dInt32 strideInByte, dFloat64 distTol);
-
-	// create a planar Mesh
-	ndMeshEffect(dMemoryAllocator___* const allocator, const dMatrix& planeMatrix, dFloat32 witdth, dFloat32 breadth, dInt32 material, const dMatrix& textureMatrix0, const dMatrix& textureMatrix1);
-
-	void Trace () const;
-	void CylindricalMapping (dInt32 cylinderMaterial, dInt32 capMaterial, const dMatrix& uvalignment);
 	void AngleBaseFlatteningMapping (dInt32 cylinderMaterial, dgReportProgress progressReportCallback, void* const userData);
-
 	ndMeshEffect* Union (const dMatrix& matrix, const ndMeshEffect* const clipper) const;
 	ndMeshEffect* Difference (const dMatrix& matrix, const ndMeshEffect* const clipper) const;
 	ndMeshEffect* Intersection (const dMatrix& matrix, const ndMeshEffect* const clipper) const;
 	void ClipMesh (const dMatrix& matrix, const ndMeshEffect* const clipper, ndMeshEffect** const top, ndMeshEffect** const bottom) const;
-
 	//bool PlaneClip (const dBigPlane& plane);
-
-	
-	
 	dInt32 GetVertexBaseCount() const;
 	void SetVertexBaseCount(dInt32 count);
 	
@@ -148,13 +66,6 @@ class ndMeshEffect: public ndPolyhedra
 	void OptimizeAttibutes();
 	const dInt32* GetIndexToVertexMap() const;
 
-	bool HasLayersChannel() const;
-	bool HasNormalChannel() const;
-	bool HasBinormalChannel() const;
-	bool HasUV0Channel() const;
-	bool HasUV1Channel() const;
-	bool HasVertexColorChannel() const;
-	
 	dgCollisionInstance* CreateCollisionTree(dgWorld* const world, dInt32 shapeID) const;
 	void CreateTetrahedraLinearBlendSkinWeightsChannel (const ndMeshEffect* const tetrahedraMesh);
 	static ndMeshEffect* CreateFromSerialization (dMemoryAllocator___* const allocator, dgDeserialize deserialization, void* const userData);
@@ -179,7 +90,6 @@ class ndMeshEffect: public ndPolyhedra
 
 	void* GetFirstEdge () const;
 	void* GetNextEdge (const void* const edge) const;
-//	void* FindEdge (dInt32 v0, dInt32 v1) const;
 	void GetEdgeIndex (const void* const edge, dInt32& v0, dInt32& v1) const;
 //	void GetEdgeAttributeIndex (const void* edge, dInt32& v0, dInt32& v1) const;
 
@@ -199,8 +109,6 @@ class ndMeshEffect: public ndPolyhedra
 	protected:
 	dBigVector GetOrigin ()const;
 	dInt32 CalculateMaxAttributes () const;
-//	void ReverseMergeFaces (ndMeshEffect* const source);
-	
 #endif
 
 	enum ndChannelType
@@ -595,16 +503,6 @@ class ndMeshEffect: public ndPolyhedra
 	ndInt32 m_constructionIndex;
 };
 
-inline ndFloat64 ndMeshEffect::QuantizeCoordinade(ndFloat64 x) const
-{
-	ndInt32 exp;
-	ndFloat64 mantissa = frexp(x, &exp);
-	mantissa = DG_MESH_EFFECT_PRECISION_SCALE_INV * floor (mantissa * DG_MESH_EFFECT_PRECISION_SCALE);
-
-	ndFloat64 x1 = ldexp(mantissa, exp);
-	return x1;
-}
-
 template<class T, ndMeshEffect::ndChannelType type>
 ndMeshEffect::ndChannel<T, type>::ndChannel()
 	:ndArray<T>()
@@ -771,64 +669,6 @@ inline ndInt32 ndMeshEffect::ndAttibuteFormat::GetCount() const
 	return ndInt32(m_pointChannel.GetCount());
 }
 
-inline ndInt32 ndMeshEffect::GetPropertiesCount() const
-{
-	return ndInt32(m_attrib.m_pointChannel.GetCount());
-}
-
-inline void ndMeshEffect::SetName(const ndString& name)
-{
-	m_name = name;
-}
-
-inline const ndString& ndMeshEffect::GetName() const
-{
-	return m_name;
-}
-
-inline ndArray<ndMeshEffect::ndMaterial>& ndMeshEffect::GetMaterials()
-{
-	return m_materials;
-}
-
-inline const ndArray<ndMeshEffect::ndMaterial>& ndMeshEffect::GetMaterials() const
-{
-	return m_materials;
-}
-
-inline ndInt32 ndMeshEffect::GetVertexCount() const
-{
-	return ndInt32(m_points.m_vertex.GetCount());
-}
-
-inline ndInt32 ndMeshEffect::GetVertexStrideInByte() const
-{
-	return sizeof(ndBigVector);
-}
-
-inline const ndFloat64* ndMeshEffect::GetVertexPool() const
-{
-	return &m_points.m_vertex[0].m_x;
-}
-
-inline ndInt32 ndMeshEffect::GetFaceMaterial(ndEdge* const faceEdge) const
-{
-	return ndInt32(m_attrib.m_materialChannel.GetCount() ? m_attrib.m_materialChannel[ndInt32(faceEdge->m_userData)] : 0);
-}
-
-inline ndMeshEffect* ndMeshEffect::GetFirstLayer()
-{
-	return GetNextLayer(IncLRU());
-}
-
-inline ndMeshEffect* ndMeshEffect::GetNextLayer(ndMeshEffect* const layerSegment)
-{
-	if (!layerSegment) 
-	{
-		return nullptr;
-	}
-	return GetNextLayer(layerSegment->IncLRU() - 1);
-}
 
 inline ndArray<ndMeshEffect::ndVertexWeight>& ndMeshEffect::GetVertexWeights()
 {

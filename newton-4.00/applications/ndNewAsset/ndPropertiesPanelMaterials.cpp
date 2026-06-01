@@ -14,10 +14,16 @@
 #include "ndAssetEditor.h"
 #include "ndDebugDisplayRenderPass.h"
 
-void ndAssetEditor::ShowPropertiesCustomProperties()
+void ndAssetEditor::ShowPropertiesMaterials()
 {
-	if (ImGui::CollapsingHeader("Custom properties"))
+	if (!(m_currentSelection && m_currentSelection->GetGeometry()))
 	{
+		return;
+	}
+
+	if (ImGui::CollapsingHeader("Render materials"))
+	{
+#if 0
 		ndList<ndSharedPtr<ndMeshCustomProperty>>& propsList = m_currentSelection->GetCustomProperties();
 		auto FindSelected = [this, &propsList]()
 		{
@@ -121,5 +127,32 @@ void ndAssetEditor::ShowPropertiesCustomProperties()
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			}
 		}
+#endif
+
+		ndFixSizeArray<const char*, 1024> names;
+		ndArray<ndMeshEffect::ndMaterial>& materialsArray = m_currentSelection->GetGeometry()->GetMaterials();
+		for (ndInt32 i = 0; i < ndInt32 (materialsArray.GetCount()); ++i)
+		{
+			names.PushBack(materialsArray[i].m_name);
+		}
+
+		ImGui::ListBox(" ##10", &m_materialIndex, &names[0], names.GetCount(), 4);
+
+		char propName[256];
+		snprintf(propName, sizeof(propName) - 1, "%s", names[m_materialIndex]);
+		if (ImGui::InputText("material name", propName, sizeof(propName) - 1, ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+			strncpy(materialsArray[m_currentSelection].m_name, propName, sizeof(materialsArray[m_currentSelection].m_name) - 1);
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+		}
+
+		//ndVector m_ambient;
+		//ndVector m_diffuse;
+		//ndVector m_specular;
+		//ndVector m_reflection;
+		//ndFloat32 m_opacity;
+		//ndFloat32 m_shiness;
+
 	}
 }
