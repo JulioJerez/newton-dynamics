@@ -135,17 +135,45 @@ void ndAssetEditor::ShowPropertiesMaterials()
 		{
 			names.PushBack(materialsArray[i].m_name);
 		}
-
 		ImGui::ListBox(" ##10", &m_materialIndex, &names[0], names.GetCount(), 4);
 
-		char propName[256];
-		snprintf(propName, sizeof(propName) - 1, "%s", names[m_materialIndex]);
-		if (ImGui::InputText("material name", propName, sizeof(propName) - 1, ImGuiInputTextFlags_EnterReturnsTrue))
+		ndMeshEffect::ndMaterial& material = materialsArray[m_materialIndex];
+
+		char tmpName[256];
+		snprintf(tmpName, sizeof(tmpName) - 1, "%s", material.m_name);
+		if (ImGui::InputText("material name", tmpName, sizeof(tmpName) - 1, ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
-			strncpy(materialsArray[m_currentSelection].m_name, propName, sizeof(materialsArray[m_currentSelection].m_name) - 1);
+			strncpy(material.m_name, tmpName, sizeof(materialsArray[m_currentSelection].m_name) - 1);
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 		}
+
+		auto EditMaterialVectorParam = [this](const char* const label, ndVector& param)
+		{
+			ndReal real[3];
+			real[0] = ndReal(param.m_x);
+			real[1] = ndReal(param.m_y);
+			real[2] = ndReal(param.m_z);
+			if (ImGui::InputFloat3(label, real, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				param.m_x = ndFloat32(real[0]);
+				param.m_y = ndFloat32(real[1]);
+				param.m_z = ndFloat32(real[2]);
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+			};
+		};
+
+		auto EditMaterialFloatParam = [this](const char* const label, ndFloat32& param)
+		{
+			ndReal real = param;
+			if (ImGui::InputFloat(label, &real, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				param = ndFloat32(real);
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+			};
+		};
 
 		//ndVector m_ambient;
 		//ndVector m_diffuse;
@@ -153,6 +181,20 @@ void ndAssetEditor::ShowPropertiesMaterials()
 		//ndVector m_reflection;
 		//ndFloat32 m_opacity;
 		//ndFloat32 m_shiness;
+		//char m_textureName[32];
+		EditMaterialVectorParam("ambient", material.m_ambient);
+		EditMaterialVectorParam("diffuse", material.m_diffuse);
+		EditMaterialVectorParam("specular", material.m_specular);
+		EditMaterialVectorParam("reflection", material.m_reflection);
+		EditMaterialFloatParam("opacity", material.m_opacity);
+		EditMaterialFloatParam("shiness", material.m_shiness);
 
+		snprintf(tmpName, sizeof(tmpName) - 1, "%s", material.m_textureName);
+		if (ImGui::InputText("texture", tmpName, sizeof(tmpName) - 1, ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+			strncpy(material.m_textureName, tmpName, sizeof(materialsArray[m_currentSelection].m_name) - 1);
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+		}
 	}
 }
