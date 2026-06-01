@@ -180,6 +180,31 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 			modifiers.Append(entry);
 		}
 
+		const nd::TiXmlElement* const xmlCustomProp = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("customProperties");
+		if (xmlCustomProp)
+		{
+			for (const nd::TiXmlNode* xmpProperty = xmlCustomProp->FirstChild("property"); xmpProperty; xmpProperty = xmpProperty->NextSibling("property"))
+			{
+				const char* const constructor = xmlGetString(xmpProperty, "className");
+				if (strcmp(constructor, ndMeshCustomPropertyFloat::StaticClassName()) == 0)
+				{
+					ndMeshCustomPropertyFloat* const property = new ndMeshCustomPropertyFloat;
+					property->DeserializeFromXml((nd::TiXmlElement*)xmpProperty);
+					mesh->m_customProperties.Append(ndSharedPtr<ndMeshCustomProperty>(property));
+				}
+				else if (strcmp(constructor, ndMeshCustomPropertyString::StaticClassName()) == 0)
+				{
+					ndMeshCustomPropertyString* const property = new ndMeshCustomPropertyString;
+					property->DeserializeFromXml((nd::TiXmlElement*)xmpProperty);
+					mesh->m_customProperties.Append(ndSharedPtr<ndMeshCustomProperty>(property));
+				}
+				else
+				{
+					ndAssert(0);
+				}
+			}
+		}
+
 		if (mesh->m_name == ND_MESH_CONSTRAINT_LOOPS)
 		{
 			m_xmlLoops = entry.m_xmlNode;
@@ -335,6 +360,22 @@ void ndMeshLoader::SaveMesh(const ndString& fullPathName) const
 			entry.m_parentXml->LinkEndChild(modifierNode);
 			const ndMeshTransformModifier* const modifier = *entry.m_meshNode->m_transformModifier;
 			modifier->SerializeToXml(modifierNode);
+		}
+
+		if (entry.m_meshNode->m_customProperties.GetCount())
+		{
+			nd::TiXmlElement* const customProperties = new nd::TiXmlElement("customProperties");
+			entry.m_parentXml->LinkEndChild(customProperties);
+
+			const ndList<ndSharedPtr<ndMeshCustomProperty>>& propsList = entry.m_meshNode->m_customProperties;
+			for (ndList<ndSharedPtr<ndMeshCustomProperty>>::ndNode* ptr = propsList.GetFirst(); ptr; ptr = ptr->GetNext())
+			{
+				nd::TiXmlElement* const properties = new nd::TiXmlElement("property");
+				customProperties->LinkEndChild(properties);
+
+				const ndMeshCustomProperty* const property = *ptr->GetInfo();
+				property->SerializeToXml(properties);
+			}
 		}
 
 		if (entry.m_meshNode->GetAsCloseLoopConstraints())

@@ -34,6 +34,56 @@ class ndJointBilateralConstraint;
 #define ND_MESH_COLLIDING_PAIRS		"__collidingPairs__"
 #define ND_MESH_CONSTRAINT_LOOPS	"__constraintLoops__"
 
+class ndMeshCustomProperty : public ndClassAlloc
+{
+	public:
+	D_COLLISION_API ndMeshCustomProperty();
+	D_COLLISION_API ndMeshCustomProperty(const ndMeshCustomProperty& other);
+	D_COLLISION_API virtual ~ndMeshCustomProperty();
+
+	D_COLLISION_API virtual ndMeshCustomProperty* Duplicate() const = 0;
+	D_COLLISION_API virtual bool operator==(const ndMeshCustomProperty& other) const;
+
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
+
+	D_BASE_CLASS_REFLECTION(ndMeshCustomProperty)
+
+	ndString m_name;
+};
+
+class ndMeshCustomPropertyFloat : public ndMeshCustomProperty
+{
+	public:
+	D_COLLISION_API ndMeshCustomPropertyFloat();
+	D_COLLISION_API ndMeshCustomPropertyFloat(const ndMeshCustomPropertyFloat& other);
+
+	D_COLLISION_API virtual ndMeshCustomProperty* Duplicate() const override;
+	D_COLLISION_API virtual bool operator==(const ndMeshCustomProperty& other) const override;
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+
+	D_CLASS_REFLECTION(ndMeshCustomPropertyFloat, ndMeshCustomProperty)
+
+	ndReal m_value;
+};
+
+class ndMeshCustomPropertyString : public ndMeshCustomProperty
+{
+	public:
+	D_COLLISION_API ndMeshCustomPropertyString();
+	D_COLLISION_API ndMeshCustomPropertyString(const ndMeshCustomPropertyString& other);
+
+	D_COLLISION_API virtual ndMeshCustomProperty* Duplicate() const override;
+	D_COLLISION_API virtual bool operator==(const ndMeshCustomProperty& other) const override;
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+
+	D_CLASS_REFLECTION(ndMeshCustomPropertyString, ndMeshCustomProperty)
+
+	ndString m_value;
+};
+
 class ndMeshCollisionShape : public ndClassAlloc
 {
 	public:

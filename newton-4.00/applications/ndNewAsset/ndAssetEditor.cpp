@@ -45,6 +45,7 @@ ndAssetEditor::ndAssetEditor()
 	,m_cameraMode(0)
 	,m_closeLoopIndex(0)
 	,m_collidingPairIndex(0)
+	,m_customPropertyIndex(0)
 	,m_subSelection(m_none)
 {
 	// Setup window

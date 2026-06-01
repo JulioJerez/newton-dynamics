@@ -140,6 +140,9 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				ndRenderSceneNode* const entNode = m_entity->FindByName(m_currentSelection->GetName());
 
 				m_currentSelection->SetName(newName);
+				m_currentSelection->GetLoopJoints()->UpdateNames();
+				m_currentSelection->GetCollingPairs()->UpdateNames();
+				
 				entNode->m_name = newName;
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			}

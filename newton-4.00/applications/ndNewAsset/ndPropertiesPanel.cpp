@@ -22,6 +22,8 @@ void ndAssetEditor::ShowPropertiesPanel()
 		if (m_currentSelection->GetAsMesh())
 		{
 			ShowPropertiesMeshInfo();
+			ShowPropertiesCustomProperties();
+
 			if (m_currentSelection->GetRigidBody())
 			{
 				if (m_currentSelection->GetJoint())

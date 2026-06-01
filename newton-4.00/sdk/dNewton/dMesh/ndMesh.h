@@ -111,6 +111,10 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API ndList<ndSharedPtr<ndMesh>>& GetChildren();
 	D_NEWTON_API const ndList<ndSharedPtr<ndMesh>>& GetChildren() const;
 
+	D_NEWTON_API ndList<ndSharedPtr<ndMeshCustomProperty>>& GetCustomProperties();
+	D_NEWTON_API const ndList<ndSharedPtr<ndMeshCustomProperty>>& GetCustomProperties() const;
+	D_NEWTON_API ndMeshCustomProperty* GetCustomPropertyByName(const char* const name) const;
+
 	D_NEWTON_API ndMesh* IteratorFirst();
 	D_NEWTON_API ndMesh* IteratorNext(const ndMesh* const root);
 
@@ -215,6 +219,7 @@ class ndMesh : public ndClassAlloc
 	ndList<ndSharedPtr<ndMesh>> m_children;
 	ndList<ndSharedPtr<ndMesh>>::ndNode* m_selfChildNode;
 	ndSharedPtr<ndMeshTransformModifier> m_transformModifier;
+	ndList<ndSharedPtr<ndMeshCustomProperty>> m_customProperties;
 	ndVector m_boneTarget;
 	ndNodeType m_type;
 
@@ -251,6 +256,8 @@ class ndCloseLoopConstraints: public ndMesh
 	D_NEWTON_API virtual ndCloseLoopConstraints* GetAsCloseLoopConstraints() override;
 	D_NEWTON_API virtual const ndCloseLoopConstraints* GetAsCloseLoopConstraints() const override;
 
+	D_NEWTON_API void UpdateNames();
+
 	D_NEWTON_API virtual void CreateCloneFixDependencies() override;
 	D_NEWTON_API virtual ndMesh* CreateClone() const override;
 	D_NEWTON_API virtual bool operator==(const ndMesh& other) const override;
@@ -267,6 +274,7 @@ class ndCollidingPairs : public ndMesh
 	D_NEWTON_API virtual ndMesh* GetAsMesh();
 	D_NEWTON_API virtual const ndMesh* GetAsMesh() const;
 
+	D_NEWTON_API void UpdateNames();
 	D_NEWTON_API virtual ndCollidingPairs* GetAsCollidingPairs() override;
 	D_NEWTON_API virtual const ndCollidingPairs* GetAsCollidingPairs() const override;
 
