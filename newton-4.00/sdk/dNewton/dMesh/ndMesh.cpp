@@ -1333,7 +1333,8 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionConvexApproximation(bool low
 	}
 	compoundShape->EndAddRemove();
 	
-	compoundShapeInstance->SetLocalMatrix(ndGetIdentityMatrix());
+	//compoundShapeInstance->SetLocalMatrix(ndGetIdentityMatrix());
+	compoundShapeInstance->SetLocalMatrix(compoundShapeInstance->GetLocalMatrix() * m_geometryMatrix);
 	
 	return compoundShapeInstance;
 }
