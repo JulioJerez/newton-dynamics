@@ -113,6 +113,7 @@ class ndMesh : public ndClassAlloc
 
 	D_NEWTON_API ndList<ndSharedPtr<ndMeshCustomProperty>>& GetCustomProperties();
 	D_NEWTON_API const ndList<ndSharedPtr<ndMeshCustomProperty>>& GetCustomProperties() const;
+	D_NEWTON_API ndMeshCustomProperty* GetCustomPropertyByName(const char* const name) const;
 
 	D_NEWTON_API ndMesh* IteratorFirst();
 	D_NEWTON_API ndMesh* IteratorNext(const ndMesh* const root);

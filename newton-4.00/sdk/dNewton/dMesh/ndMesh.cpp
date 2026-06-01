@@ -268,6 +268,20 @@ const ndList<ndSharedPtr<ndMeshCustomProperty>>& ndMesh::GetCustomProperties() c
 	return m_customProperties;
 }
 
+ndMeshCustomProperty* ndMesh::GetCustomPropertyByName(const char* const name) const
+{
+	const ndString stringName(name);
+	for (ndList<ndSharedPtr<ndMeshCustomProperty>>::ndNode* ptr = m_customProperties.GetFirst(); ptr; ptr = ptr->GetNext())
+	{
+		ndMeshCustomProperty* const property = *ptr->GetInfo();
+		if (property->m_name.CompareIgnoreCase(stringName))
+		{
+			return property;
+		}
+	}
+
+	return nullptr;
+}
 
 ndMesh::ndNodeType ndMesh::GetNodeType() const
 {

@@ -1257,7 +1257,7 @@ void ndMeshCustomProperty::SerializeToXml(nd::TiXmlElement* const parent) const
 
 void ndMeshCustomProperty::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
-	ndAssert(0);
+	m_name = ndString(xmlGetString(parent, "variableName"));
 }
 
 //
@@ -1293,7 +1293,8 @@ void ndMeshCustomPropertyFloat::SerializeToXml(nd::TiXmlElement* const parent) c
 
 void ndMeshCustomPropertyFloat::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
-	ndAssert(0);
+	ndMeshCustomProperty::DeserializeFromXml(parent);
+	m_value = xmlGetFloat(parent, "value");
 }
 
 //
@@ -1329,5 +1330,6 @@ void ndMeshCustomPropertyString::SerializeToXml(nd::TiXmlElement* const parent) 
 
 void ndMeshCustomPropertyString::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
-	ndAssert(0);
+	ndMeshCustomProperty::DeserializeFromXml(parent);
+	m_value = ndString(xmlGetString(parent, "value"));
 }

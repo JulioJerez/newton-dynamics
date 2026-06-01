@@ -507,5 +507,12 @@
             <angles float3="0 -0 0" />
         </geometryMatrix>
         <type nodeType="node" target="0 0 0 " />
+        <customProperties>
+            <property>
+                <className string="ndMeshCustomPropertyFloat" />
+                <variableName string="cameraDistance" />
+                <value float="5" />
+            </property>
+        </customProperties>
     </ndMesh>
 </ndMesh>

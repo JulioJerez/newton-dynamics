@@ -163,7 +163,11 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
     if (cameraPivotNode)
     {
         ndVector cameraPivot(ndVector::m_zero);
-        camera = ndSharedPtr<ndRenderSceneNode>(new ndDemoCameraNodeFollow(renderer, cameraPivot, -4.0f));
+        const ndMesh* const cameraPivotMesh = loader.m_mesh->FindByName("cameraPivot");
+        ndAssert(cameraPivotMesh);
+        ndMeshCustomPropertyFloat* const property = (ndMeshCustomPropertyFloat*)cameraPivotMesh->GetCustomPropertyByName("cameraDistance");
+        ndFloat32 dist = property ? -ndAbs(property->m_value) : ndFloat32 (-5.0f);
+        camera = ndSharedPtr<ndRenderSceneNode>(new ndDemoCameraNodeFollow(renderer, cameraPivot, dist));
         cameraPivotNode->AddChild(camera);
     }
 
