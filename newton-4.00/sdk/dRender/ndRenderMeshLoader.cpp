@@ -94,13 +94,17 @@ ndSharedPtr<ndRenderSceneNode> ndRenderMeshLoader::CreateRenderSceneMesh(ndRende
 		entity->m_name = mesh->GetName();
 		entity->m_basePoseMatrix = mesh->GetBasePoseMatrix();
 	
-		if (entity->m_name.Find("-hidden") == -1)
+		ndSharedPtr<ndMeshEffect> meshEffect(mesh->GetGeometry());
+		if (*meshEffect)
 		{
-			ndSharedPtr<ndMeshEffect> meshEffect(mesh->GetGeometry());
-			if (*meshEffect)
-			{
-				meshList.Append(EntityMeshPair(entity, mesh));
-			}
+			meshList.Append(EntityMeshPair(entity, mesh));
+		}
+
+		ndMesh::ndNodeType type = mesh->GetNodeType();
+		//if (mesh->GetHidden()  (type == ndMesh::m_collisionShape) || (entity->m_name.Find("-hidden") != -1))
+		if (!mesh->GetIsVisible() || (type == ndMesh::m_collisionShape) || (entity->m_name.Find("-hidden") != -1))
+		{
+			entity->m_isVisible = false;
 		}
 
 		if (mesh->GetModifier())
@@ -111,12 +115,8 @@ ndSharedPtr<ndRenderSceneNode> ndRenderMeshLoader::CreateRenderSceneMesh(ndRende
 	
 		for (ndList<ndSharedPtr<ndMesh>>::ndNode* childNode = mesh->GetChildren().GetFirst(); childNode; childNode = childNode->GetNext())
 		{
-			ndMesh::ndNodeType type = childNode->GetInfo()->GetNodeType();
-			if (type != ndMesh::m_collisionShape)
-			{
-				parentEntityList.Append(entity);
-				effectNodeList.PushBack(*childNode->GetInfo());
-			}
+			parentEntityList.Append(entity);
+			effectNodeList.PushBack(*childNode->GetInfo());
 		}
 	}
 	
@@ -149,34 +149,6 @@ ndSharedPtr<ndRenderSceneNode> ndRenderMeshLoader::CreateRenderSceneMesh(ndRende
 		ndSharedPtr<ndRenderPrimitive> geometry(new ndRenderPrimitive(descriptor));
 		pair.m_entity->SetPrimitive(geometry);
 	}
-
-	//for (ndInt32 i = 0; i < modifiersSceneNode.GetCount(); ++i)
-	//{
-	//	ndSharedPtr<ndMeshTransformModifier> modifier(modifiersMesh[i]->GetModifier());
-	//	ndAssert(modifier->m_owner);
-	//	ndAssert(modifier->m_target);
-	//	ndRenderSceneNode* const owner = renderMesh->FindByName(modifier->m_owner->GetName());
-	//	ndRenderSceneNode* const target = renderMesh->FindByName(modifier->m_target->GetName());
-	//	ndAssert(owner);
-	//	ndAssert(target);
-	//	ndAssert(owner == modifiersSceneNode[i]);
-	//
-	//	if (strcmp(modifier->ClassName(), ndMeshTransformModifierLookAt::StaticClassName()) == 0)
-	//	{
-	//		ndSharedPtr<ndRenderTransformModifier> renderModifier(new ndRenderTransformModifierLookAtNode(owner, target));
-	//		modifiersSceneNode[i]->SetTransformModifier(renderModifier);
-	//	}
-	//	else if (strcmp(modifier->ClassName(), ndMeshTransformModifierTwoLinksIK::StaticClassName()) == 0)
-	//	{
-	//		ndAssert(0);
-	//		//ndSharedPtr<ndRenderTransformModifier> renderModifier(new ndRenderTransformModifierLookAtNode(owner, target));
-	//		//modifiersSceneNode[i]->SetTransformModifier(renderModifier);
-	//	}
-	//	else
-	//	{
-	//		ndAssert(0);
-	//	}
-	//}
 
 	return renderMesh;
 }

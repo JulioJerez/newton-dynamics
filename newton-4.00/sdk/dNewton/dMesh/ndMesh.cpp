@@ -59,6 +59,7 @@ ndMesh::ndMesh()
 	,m_customProperties()
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
+	,m_isVisible(true)
 {
 }
 
@@ -78,6 +79,7 @@ ndMesh::ndMesh(const ndShapeInstance& shape, ndUvMapingMode mapping)
 	,m_customProperties()
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
+	,m_isVisible(true)
 {
 	switch (mapping)
 	{
@@ -138,6 +140,7 @@ ndMesh::ndMesh(const ndMesh& src)
 	,m_customProperties()
 	,m_boneTarget(src.m_boneTarget)
 	,m_type(src.m_type)
+	,m_isVisible(src.m_isVisible)
 {
 	if (src.m_customProperties)
 	{
@@ -291,6 +294,16 @@ ndMesh::ndNodeType ndMesh::GetNodeType() const
 void ndMesh::SetNodeType(ndNodeType type)
 {
 	m_type = type;
+}
+
+bool ndMesh::GetIsVisible() const
+{
+	return m_isVisible;
+}
+
+void ndMesh::SetIsVisible(bool flag)
+{
+	m_isVisible = flag;
 }
 
 ndVector ndMesh::GetBoneTarget() const
@@ -1320,7 +1333,8 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionConvexApproximation(bool low
 	}
 	compoundShape->EndAddRemove();
 	
-	compoundShapeInstance->SetLocalMatrix(ndGetIdentityMatrix());
+	//compoundShapeInstance->SetLocalMatrix(ndGetIdentityMatrix());
+	compoundShapeInstance->SetLocalMatrix(compoundShapeInstance->GetLocalMatrix() * m_geometryMatrix);
 	
 	return compoundShapeInstance;
 }

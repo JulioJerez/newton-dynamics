@@ -150,6 +150,7 @@ class ndAssetEditor : public ndClassAlloc
 	void ShowPropertiesPanel();
 	void ShowPropertiesMeshInfo();
 	void ShowPropertiesJointInfo();
+	void ShowPropertiesMaterials();
 	void ShowPropertiesCollisionInfo();
 	void ShowPropertiesRigidBodyInfo();
 	void ShowPropertiesJointsLoopInfo();
@@ -251,6 +252,7 @@ class ndAssetEditor : public ndClassAlloc
 	ndReal m_gizmoScale;
 	ndInt32 m_renderMode;
 	ndInt32 m_cameraMode;
+	ndInt32 m_materialIndex;
 	ndInt32 m_closeLoopIndex;
 	ndInt32 m_collidingPairIndex;
 	ndInt32 m_customPropertyIndex;

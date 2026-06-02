@@ -150,6 +150,18 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 		ImGui::Checkbox("parent space transform", &m_parentSpaceTransform);
 		ImGui::Checkbox("transform pivot only", &m_transformPivotOnly);
 
+		bool isVisible = m_currentSelection->GetIsVisible();
+		if (ImGui::Checkbox("visible", &isVisible))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+			m_currentSelection->SetIsVisible(isVisible);
+			ndRenderSceneNode* const visual = m_entity->FindByName(m_currentSelection->GetName());
+			ndAssert(visual);
+			visual->m_isVisible = isVisible;
+
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+		}
+
 		if (ImGui::Button("add node"))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));

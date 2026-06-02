@@ -19,6 +19,7 @@ void ndAssetEditor::ShowOutlierExplorerCollidindPairs(const ndSharedPtr<ndMesh>&
 	if (ImGui::IsItemClicked())
 	{
 		m_subSelection = m_none;
+		m_materialIndex = 0;
 		m_collidingPairIndex = 0;
 		m_customPropertyIndex = 0;
 	}

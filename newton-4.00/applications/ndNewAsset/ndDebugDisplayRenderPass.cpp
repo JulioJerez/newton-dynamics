@@ -400,7 +400,8 @@ void ndDebugDisplayRenderPass::RenderSelectedNode()
 		for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
 		{
 			const ndDebugMesh& debugMesh = ptr->GetInfo();
-			if (m_manager->m_showSelectedNode)
+			ndAssert(debugMesh.m_parent);
+			if (m_manager->m_showSelectedNode && (debugMesh.m_parent->m_name == selected))
 			{
 				const ndRenderPrimitive* const primitive = *debugMesh.m_wireFrameMesh;
 				if (primitive && primitive->m_segments.GetCount())
@@ -411,11 +412,9 @@ void ndDebugDisplayRenderPass::RenderSelectedNode()
 					ndRenderPrimitiveSegment& segment = primitive->m_segments.GetFirst()->GetInfo();
 					ndRenderPrimitiveMaterial* const material = &segment.m_material;
 
-					if (debugMesh.m_parent->m_name == selected)
-					{
-						material->m_diffuse = color;
-						primitive->Render(m_owner, gemetryMatrix, m_debugDisplayWireFrameMesh);
-					}
+					material->m_diffuse = color;
+					primitive->Render(m_owner, gemetryMatrix, m_debugDisplayWireFrameMesh);
+					break;
 				}
 			}
 		}

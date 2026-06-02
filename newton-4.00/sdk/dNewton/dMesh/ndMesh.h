@@ -162,6 +162,9 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API ndNodeType GetNodeType() const;
 	D_NEWTON_API void SetNodeType(ndNodeType type);
 
+	D_NEWTON_API bool GetIsVisible() const;
+	D_NEWTON_API void SetIsVisible(bool flag);
+
 	D_NEWTON_API ndVector GetBoneTarget() const;
 	D_NEWTON_API void SetBoneTarget(const ndVector& target);
 
@@ -222,6 +225,7 @@ class ndMesh : public ndClassAlloc
 	ndList<ndSharedPtr<ndMeshCustomProperty>> m_customProperties;
 	ndVector m_boneTarget;
 	ndNodeType m_type;
+	bool m_isVisible;
 
 	friend class ndMeshFile;
 	friend class ndMeshLoader;

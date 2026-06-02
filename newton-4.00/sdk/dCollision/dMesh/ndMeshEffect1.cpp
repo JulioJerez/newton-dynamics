@@ -1012,6 +1012,75 @@ void ndMeshEffect::Init()
 {
 }
 
+ndFloat64 ndMeshEffect::QuantizeCoordinade(ndFloat64 x) const
+{
+	ndInt32 exp;
+	ndFloat64 mantissa = frexp(x, &exp);
+	mantissa = DG_MESH_EFFECT_PRECISION_SCALE_INV * floor(mantissa * DG_MESH_EFFECT_PRECISION_SCALE);
+
+	ndFloat64 x1 = ldexp(mantissa, exp);
+	return x1;
+}
+
+ndInt32 ndMeshEffect::GetPropertiesCount() const
+{
+	return ndInt32(m_attrib.m_pointChannel.GetCount());
+}
+
+void ndMeshEffect::SetName(const ndString& name)
+{
+	m_name = name;
+}
+
+const ndString& ndMeshEffect::GetName() const
+{
+	return m_name;
+}
+
+ndArray<ndMeshEffect::ndMaterial>& ndMeshEffect::GetMaterials()
+{
+	return m_materials;
+}
+
+const ndArray<ndMeshEffect::ndMaterial>& ndMeshEffect::GetMaterials() const
+{
+	return m_materials;
+}
+
+ndInt32 ndMeshEffect::GetVertexCount() const
+{
+	return ndInt32(m_points.m_vertex.GetCount());
+}
+
+ndInt32 ndMeshEffect::GetVertexStrideInByte() const
+{
+	return sizeof(ndBigVector);
+}
+
+const ndFloat64* ndMeshEffect::GetVertexPool() const
+{
+	return &m_points.m_vertex[0].m_x;
+}
+
+ndInt32 ndMeshEffect::GetFaceMaterial(ndEdge* const faceEdge) const
+{
+	return ndInt32(m_attrib.m_materialChannel.GetCount() ? m_attrib.m_materialChannel[ndInt32(faceEdge->m_userData)] : 0);
+}
+
+ndMeshEffect* ndMeshEffect::GetFirstLayer()
+{
+	return GetNextLayer(IncLRU());
+}
+
+ndMeshEffect* ndMeshEffect::GetNextLayer(ndMeshEffect* const layerSegment)
+{
+	if (!layerSegment)
+	{
+		return nullptr;
+	}
+	return GetNextLayer(layerSegment->IncLRU() - 1);
+}
+
 bool ndMeshEffect::Sanity() const
 {
 	#ifdef  _DEBUG
