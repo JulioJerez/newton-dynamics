@@ -221,11 +221,16 @@ void xmlSaveParam(nd::TiXmlElement* const rootNode, const char* const name, cons
 
 void xmlSaveParam(nd::TiXmlElement* const rootNode, const char* const name, const ndArray<ndReal>& array)
 {
-	ndStack<char> buffer(ndInt32(array.GetCount() * 4 * 12 + 256));
-	char* ptr = &buffer[0];
+	ndArray<char> buffer;
 	for (ndInt32 i = 0; i < array.GetCount(); ++i)
 	{
-		ptr = FloatToString(ptr, 256, array[i]);
+		char text[256];
+		FloatToString(text, 256, array[i]);
+
+		ndInt32 size = ndInt32(strlen(text));
+		ndInt32 start = ndInt32(buffer.GetCount());
+		buffer.SetCount(start + size);
+		ndMemCpy(&buffer[start], text, size);
 	}
 	CleanWhiteSpace(&buffer[0]);
 
@@ -238,13 +243,19 @@ void xmlSaveParam(nd::TiXmlElement* const rootNode, const char* const name, cons
 
 void xmlSaveParam(nd::TiXmlElement* const rootNode, const char* const name, const ndArray<ndInt32>& array)
 {
-	ndStack<char> buffer(ndInt32 (array.GetCount() * 24 + 256));
-	char* ptr = &buffer[0];
+	ndArray<char> buffer;
 	for (ndInt32 i = 0; i < array.GetCount(); ++i)
 	{
-		snprintf(ptr, 256, "%d ", array[i]);
-		ptr += strlen(ptr);
+		char text[256];
+		ndInt32 value = array[i];
+		snprintf(text, 256, "%d ", value);
+
+		ndInt32 size = ndInt32 (strlen(text));
+		ndInt32 start = ndInt32 (buffer.GetCount());
+		buffer.SetCount(start + size);
+		ndMemCpy(&buffer[start], text, size);
 	}
+	buffer.PushBack(0);
 	CleanWhiteSpace(&buffer[0]);
 
 	nd::TiXmlElement* const node = new nd::TiXmlElement(name);
@@ -256,14 +267,19 @@ void xmlSaveParam(nd::TiXmlElement* const rootNode, const char* const name, cons
 
 void xmlSaveParam(nd::TiXmlElement* const rootNode, const char* const name, const ndArray<ndInt64>& array)
 {
-	ndStack<char> buffer(ndInt32(array.GetCount() * 24 + 256));
-	char* ptr = &buffer[0];
+	ndArray<char> buffer;
 	for (ndInt32 i = 0; i < array.GetCount(); ++i)
 	{
+		char text[256];
 		long long int value = array[i];
-		snprintf(ptr, 256, "%lld ", value);
-		ptr += strlen(ptr);
+		snprintf(text, 256, "%lld ", value);
+
+		ndInt32 size = ndInt32(strlen(text));
+		ndInt32 start = ndInt32(buffer.GetCount());
+		buffer.SetCount(start + size);
+		ndMemCpy(&buffer[start], text, size);
 	}
+	buffer.PushBack(0);
 	CleanWhiteSpace(&buffer[0]);
 
 	nd::TiXmlElement* const node = new nd::TiXmlElement(name);
@@ -275,15 +291,22 @@ void xmlSaveParam(nd::TiXmlElement* const rootNode, const char* const name, cons
 
 void xmlSaveParam(nd::TiXmlElement* const rootNode, const char* const name, const ndArray<ndVector>& array)
 {
-	ndStack<char> buffer(ndInt32(array.GetCount() * 4 * 12 + 256));
-	char* ptr = &buffer[0];
+	ndArray<char> buffer;
 	for (ndInt32 i = 0; i < array.GetCount(); ++i)
 	{
+		char text[256];
+		char* ptr = &text[0];
 		for (ndInt32 j = 0; j < 3; ++j)
 		{
 			ptr = FloatToString(ptr, 256, array[i][j]);
 		}
+
+		ndInt32 size = ndInt32(strlen(text));
+		ndInt32 start = ndInt32(buffer.GetCount());
+		buffer.SetCount(start + size);
+		ndMemCpy(&buffer[start], text, size);
 	}
+	buffer.PushBack(0);
 	CleanWhiteSpace(&buffer[0]);
 
 	nd::TiXmlElement* const node = new nd::TiXmlElement(name);
@@ -295,14 +318,21 @@ void xmlSaveParam(nd::TiXmlElement* const rootNode, const char* const name, cons
 
 void xmlSaveParam(nd::TiXmlElement* const rootNode, const char* const name, const ndArray<ndTriplexReal>& array)
 {
-	ndStack<char> buffer(ndInt32(array.GetCount() * 4 * 12 + 256));
-	char* ptr = &buffer[0];
+	ndArray<char> buffer;
 	for (ndInt32 i = 0; i < array.GetCount(); ++i)
 	{
+		char text[256];
+		char* ptr = &text[0];
 		ptr = FloatToString(ptr, 256, array[i].m_x);
 		ptr = FloatToString(ptr, 256, array[i].m_y);
 		ptr = FloatToString(ptr, 256, array[i].m_z);
+
+		ndInt32 size = ndInt32(strlen(text));
+		ndInt32 start = ndInt32(buffer.GetCount());
+		buffer.SetCount(start + size);
+		ndMemCpy(&buffer[start], text, size);
 	}
+	buffer.PushBack(0);
 	CleanWhiteSpace(&buffer[0]);
 
 	nd::TiXmlElement* const node = new nd::TiXmlElement(name);
