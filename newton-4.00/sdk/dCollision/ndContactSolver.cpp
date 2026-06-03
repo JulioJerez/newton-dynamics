@@ -578,7 +578,7 @@ ndBigVector ndContactSolver::ReduceTetrahedrum(ndInt32& indexOut)
 					m_hullSum[1] = m_hullSum[3];
 					m_hullDiff[1] = m_hullDiff[3];
 				}
-				else if (u1 + u2 + u3 > ndFloat64(1.0f)) 
+				else if ((u1 + u2 + u3) > ndFloat64(1.0f)) 
 				{
 					m_hullSum[0] = m_hullSum[3];
 					m_hullDiff[0] = m_hullDiff[3];
@@ -2525,15 +2525,15 @@ ndInt32 ndContactSolver::ConvexToConvexContactsDiscrete()
 
 	ndInt32 count = 0;
 	bool colliding = CalculateClosestPoints();
-	ndFloat32 penetration = m_separatingVector.DotProduct(m_closestPoint1 - m_closestPoint0).GetScalar() - m_skinMargin - D_PENETRATION_TOL;
-	m_separationDistance = penetration;
+	ndFloat32 separationDistance = m_separatingVector.DotProduct(m_closestPoint1 - m_closestPoint0).GetScalar() - m_skinMargin - D_PENETRATION_TOL;
+	m_separationDistance = separationDistance;
 	if (m_intersectionTestOnly)
 	{
-		count = (penetration <= ndFloat32(0.0f)) ? 1 : 0;
+		count = (separationDistance <= ndFloat32(0.0f)) ? 1 : 0;
 	}
 	else if (colliding)
 	{
-		if (penetration <= ndFloat32(1.0e-5f))
+		if (separationDistance <= ndFloat32(1.0e-5f))
 		{
 			if (ndInt8 (m_instance0.GetCollisionMode()) & ndInt8(m_instance1.GetCollisionMode()))
 			{
@@ -2571,7 +2571,7 @@ ndInt32 ndContactSolver::ConvexToConvexContactsDiscrete()
 				contactOut[i].m_body1 = body1;
 				contactOut[i].m_shapeInstance0 = instance0;
 				contactOut[i].m_shapeInstance1 = instance1;
-				contactOut[i].m_penetration = -penetration;
+				contactOut[i].m_penetration = -separationDistance;
 			}
 		}
 	}
