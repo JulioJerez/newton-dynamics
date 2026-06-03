@@ -38,7 +38,6 @@ class ndVanillaController : public ndModelNotify
 
         //bind Motor speed.
         const ndMesh* const motorMesh = mesh->FindByName("motor");
-        ndAssert(motorMesh);
         if (motorMesh)
         {
             const ndMeshCustomPropertyFloat* const speed = (ndMeshCustomPropertyFloat*)motorMesh->GetCustomPropertyByName("speed");
