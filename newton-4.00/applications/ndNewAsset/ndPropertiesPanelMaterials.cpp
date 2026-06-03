@@ -56,6 +56,7 @@ void ndAssetEditor::ShowPropertiesMaterials()
 				param.m_y = ndFloat32(real[1]);
 				param.m_z = ndFloat32(real[2]);
 
+				m_initCamera = false;
 				ndWeakPtr<ndMesh> currentSelection(m_currentSelection);
 				ndSharedPtr<ndRenderSceneNode> visualMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*GetRenderer(), *m_mesh, GetPath().GetPath()));
 				SetVisualScene(m_mesh, visualMesh);
@@ -73,6 +74,7 @@ void ndAssetEditor::ShowPropertiesMaterials()
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 				param = ndFloat32(real);
 
+				m_initCamera = false;
 				ndWeakPtr<ndMesh> currentSelection(m_currentSelection);
 				ndSharedPtr<ndRenderSceneNode> visualMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*GetRenderer(), *m_mesh, GetPath().GetPath()));
 				SetVisualScene(m_mesh, visualMesh);
@@ -102,6 +104,7 @@ void ndAssetEditor::ShowPropertiesMaterials()
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			strncpy(material.m_textureName, tmpName, sizeof(materialsArray[m_currentSelection].m_name) - 1);
 
+			m_initCamera = false;
 			ndWeakPtr<ndMesh> currentSelection(m_currentSelection);
 			ndSharedPtr<ndRenderSceneNode> visualMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*GetRenderer(), *m_mesh, GetPath().GetPath()));
 			SetVisualScene(m_mesh, visualMesh);
