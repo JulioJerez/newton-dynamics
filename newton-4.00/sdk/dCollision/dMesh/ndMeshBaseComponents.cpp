@@ -1294,7 +1294,7 @@ void ndMeshCustomPropertyFloat::SerializeToXml(nd::TiXmlElement* const parent) c
 void ndMeshCustomPropertyFloat::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndMeshCustomProperty::DeserializeFromXml(parent);
-	m_value = xmlGetFloat(parent, "value");
+	m_value = ndReal (xmlGetFloat(parent, "value"));
 }
 
 //

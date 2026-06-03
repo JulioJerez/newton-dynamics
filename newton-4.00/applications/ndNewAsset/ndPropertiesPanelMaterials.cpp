@@ -68,7 +68,7 @@ void ndAssetEditor::ShowPropertiesMaterials()
 
 		auto EditMaterialFloatParam = [this](const char* const label, ndFloat32& param)
 		{
-			ndReal real = param;
+			ndReal real = ndReal(param);
 			if (ImGui::InputFloat(label, &real, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
