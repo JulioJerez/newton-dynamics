@@ -31,8 +31,9 @@ class ndVanillaController : public ndModelNotify
         ,m_cameraNode(*camera)
         ,m_motor(model->FindByName("motor"))
         ,m_steerAngle(ndFloat32(0.0f))
-        ,m_engineOmega(ndFloat32 (0.0f))
-        ,m_engineMaxOmega(ndFloat32(50.0f))
+        ,m_engineDrag(ndFloat32(0.1f))
+        ,m_engineTorque(ndFloat32 (0.0f))
+        ,m_engineMaxTorque(ndFloat32(1000.0f))
     {
         SetModel(model);
 
@@ -40,10 +41,16 @@ class ndVanillaController : public ndModelNotify
         const ndMesh* const motorMesh = mesh->FindByName("motor");
         if (motorMesh)
         {
-            const ndMeshCustomPropertyFloat* const speed = (ndMeshCustomPropertyFloat*)motorMesh->GetCustomPropertyByName("speed");
-            if (speed)
+            const ndMeshCustomPropertyFloat* const maxTorque = (ndMeshCustomPropertyFloat*)motorMesh->GetCustomPropertyByName("torque");
+            if (maxTorque)
             {
-                m_engineMaxOmega = speed->m_value;
+                m_engineMaxTorque = maxTorque->m_value;
+            }
+
+            const ndMeshCustomPropertyFloat* const maxOmega = (ndMeshCustomPropertyFloat*)motorMesh->GetCustomPropertyByName("omega");
+            if (maxOmega)
+            {
+                m_engineDrag = m_engineMaxTorque / (maxOmega->m_value * maxOmega->m_value);
             }
         }
 
@@ -58,18 +65,37 @@ class ndVanillaController : public ndModelNotify
         model->NodeIterator(FindWheels);
     }
 
-    void UpdateEngine(ndFloat32 timestep)
+    void UpdateEngine(ndFloat32)
     {
         // reset the motor matrix to align with the chassis matrix
         if (m_motor)
         {
-            ndJointDoubleHinge* const engine = (ndJointDoubleHinge*)*m_motor->m_joint;
-            const ndMatrix matrix(engine->GetLocalMatrix0().OrthoInverse() * engine->GetLocalMatrix1() * engine->GetBody1()->GetMatrix());
-            engine->GetBody0()->SetMatrixNoSleep(matrix);
+            // very simple electric motor.
+            ndMatrix engineMatrix;
+            ndMatrix chassisMatrix;
 
-            // integrate the joints angle;
-            ndFloat32 fowardAngle = engine->GetAngle1();
-            engine->SetTargetAngle1(fowardAngle + m_engineOmega * timestep);
+            ndJointDoubleHinge* const engineJoint = (ndJointDoubleHinge*)*m_motor->m_joint;
+            ndBodyDynamic* const engineBody = m_motor->m_body->GetAsBodyDynamic();
+            ndBodyDynamic* const chassisBody = m_motor->GetParent()->m_body->GetAsBodyDynamic();
+
+            engineJoint->CalculateGlobalMatrix(engineMatrix, chassisMatrix);
+            engineBody->SetMatrixNoSleep(engineJoint->GetLocalMatrix0().OrthoInverse() * chassisMatrix);
+
+            const ndVector veloc(chassisBody->GetVelocityAtPoint(chassisMatrix.m_posit));
+            engineBody->SetVelocityNoSleep(veloc);
+
+            const ndVector engineOmega(engineBody->GetOmega());
+            const ndVector chassisOmega(chassisBody->GetOmega());
+            const ndVector wy(chassisMatrix.m_up.Scale(chassisMatrix.m_up.DotProduct(engineOmega).GetScalar()));
+            const ndVector wx(chassisMatrix.m_front.Scale(chassisMatrix.m_front.DotProduct(engineOmega).GetScalar()));
+            const ndVector wz(chassisMatrix.m_right.Scale(chassisMatrix.m_right.DotProduct(chassisOmega).GetScalar()));
+            engineBody->SetOmegaNoSleep(wx + wy + wz);
+
+            ndFloat32 omega = chassisMatrix.m_up.DotProduct(engineOmega).GetScalar();
+            ndFloat32 torqueMag = m_engineTorque - m_engineDrag * omega * omega * ndSign(omega);
+
+            const ndVector torque(engineMatrix.m_up.Scale(torqueMag));
+            engineBody->SetTorque(torque);
         }
 
         for (ndList<ndWeakPtr<ndJointWheel>>::ndNode* node = m_wheels.GetFirst(); node; node = node->GetNext())
@@ -77,6 +103,27 @@ class ndVanillaController : public ndModelNotify
             ndJointWheel* const wheel = *node->GetInfo();
             wheel->UpdateTireSteeringAngleMatrix();
         }
+
+//#ifdef _DEBUG
+#if 0
+        ndInt32 xxx = 0;
+        static ndInt32 xxxxx1 = 0;
+        xxxxx1++;
+        if (xxxxx1 > 200)
+        {
+            for (ndList<ndWeakPtr<ndJointWheel>>::ndNode* node = m_wheels.GetFirst(); node; node = node->GetNext())
+            {
+                ndJointWheel* const wheel = *node->GetInfo();
+                const ndBodyKinematic* const body = wheel->GetBody0()->GetAsBodyKinematic();
+                xxx += (body->GetContactMap().GetCount() != 0) ? 1 : 0;
+            }
+            if (xxx != m_wheels.GetCount())
+            {
+                ndTrace(("collsion miss\n"));
+            }
+        }
+#endif
+
     }
 
     void Update(ndFloat32 timestep) override
@@ -95,15 +142,15 @@ class ndVanillaController : public ndModelNotify
             {
                 // very simplistic moter power system
                 ndBodyDynamic* const engine = m_motor->m_body->GetAsBodyDynamic();
-                m_engineOmega = ndFloat32(0.0f);
+                m_engineTorque = ndFloat32(0.0f);
                 if (m_scene->GetKeyState(ImGuiKey_W))
                 {
-                    m_engineOmega = -m_engineMaxOmega;
+                    m_engineTorque = m_engineMaxTorque;
                     engine->SetSleepState(false);
                 }
                 else if (m_scene->GetKeyState(ImGuiKey_S))
                 {
-                    m_engineOmega = m_engineMaxOmega;
+                    m_engineTorque = -m_engineMaxTorque;
                     engine->SetSleepState(false);
                 }
             }
@@ -144,8 +191,9 @@ class ndVanillaController : public ndModelNotify
     ndWeakPtr<ndModelArticulation::ndNode> m_motor;
     ndList<ndWeakPtr<ndJointWheel>> m_wheels;
     ndFloat32 m_steerAngle;
-    ndFloat32 m_engineOmega;
-    ndFloat32 m_engineMaxOmega;
+    ndFloat32 m_engineDrag;
+    ndFloat32 m_engineTorque;
+    ndFloat32 m_engineMaxTorque;
 };
 
 static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, const ndMatrix& location, const char* const pathFileName)
