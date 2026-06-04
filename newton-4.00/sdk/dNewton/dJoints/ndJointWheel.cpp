@@ -188,18 +188,18 @@ void ndJointWheel::DebugJoint(ndConstraintDebugCallback& debugCallback) const
 
 	// draw bumper limits
 	{
-		const ndVector arrowColor(ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(1.0f));
+		const ndVector lineColor(ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(1.0f));
 	
 		ndVector p0(matrix1.m_posit + matrix1.m_up.Scale(m_info.m_lowerStop));
 		ndVector p1(matrix1.m_posit + matrix1.m_up.Scale(m_info.m_upperStop));
-		debugCallback.DrawLine(p0, p1, arrowColor);
+		debugCallback.DrawLine(p0, p1, lineColor);
 
 		ndMatrix arrowMatrix(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * matrix1);
 		arrowMatrix.m_posit = p0;
-		debugCallback.DrawArrow(arrowMatrix, arrowColor, ndFloat32(0.125f));
+		debugCallback.DrawArrow(arrowMatrix, m_arrowDebugColor, ndFloat32(0.125f));
 
 		arrowMatrix.m_posit = p1;
-		debugCallback.DrawArrow(arrowMatrix, arrowColor, ndFloat32(-0.125f));
+		debugCallback.DrawArrow(arrowMatrix, m_arrowDebugColor, ndFloat32(-0.125f));
 	}
 }
 

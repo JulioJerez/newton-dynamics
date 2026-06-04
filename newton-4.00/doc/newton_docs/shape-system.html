@@ -669,7 +669,7 @@ for (iter.Begin(); iter; iter++)
             <h2>6. Static Mesh Shapes</h2>
             <p>
                 Static mesh shapes are for non-moving geometry like terrain and level architecture.
-                They cannot be used with dynamic bodies.
+                if assigned to a dynamic body, the body is considered to be static.
             </p>
 
             <h3>ndShapeHeightfield</h3>
@@ -781,8 +781,8 @@ public:
 
             <div class="note">
                 <strong>Note:</strong> Static mesh shapes are designed for non-moving geometry
-                and should be assigned to bodies with zero/infinite mass. Using them with
-                moving dynamic bodies will cause undefined behavior.
+                and should be assigned to bodies with zero/infinite mass.
+                Using them with moving dynamic bodies will make the solver consider the body static.
             </div>
         </section>
 
