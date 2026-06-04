@@ -149,35 +149,38 @@ void ndDebugDisplayRenderPass::RebuildVisualDebugMesh()
 
 void ndDebugDisplayRenderPass::RebuildDebugCollision()
 {
-	const ndString& selected = m_manager->m_currentSelection->GetName();
-	ndAssert(m_manager->m_currentSelection->GetRigidBody());
-	ndSharedPtr<ndMeshBody> body(m_manager->m_currentSelection->GetRigidBody());
-	ndMeshBodyKinematic* const kinematicBody = (ndMeshBodyKinematic*)*body;
-	for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
+	if (m_manager->m_currentSelection)
 	{
-		ndDebugMesh& debugMesh = ptr->GetInfo();
-		if (debugMesh.m_parent->m_name == selected)
+		const ndString& selected = m_manager->m_currentSelection->GetName();
+		ndAssert(m_manager->m_currentSelection->GetRigidBody());
+		ndSharedPtr<ndMeshBody> body(m_manager->m_currentSelection->GetRigidBody());
+		ndMeshBodyKinematic* const kinematicBody = (ndMeshBodyKinematic*)*body;
+		for (ndList<ndDebugMesh>::ndNode* ptr = m_debugMesh.GetFirst(); ptr; ptr = ptr->GetNext())
 		{
-			const ndMeshShapeInstance shapeInstance = kinematicBody->m_shapeInstance;
-			if (strcmp(shapeInstance.m_shape->m_constructor.GetStr(), ndShapeNull::StaticClassName()) == 0)
+			ndDebugMesh& debugMesh = ptr->GetInfo();
+			if (debugMesh.m_parent->m_name == selected)
 			{
-				debugMesh.m_zBufferShape = ndSharedPtr<ndRenderPrimitive>(nullptr);
-				debugMesh.m_wireFrameShape = ndSharedPtr<ndRenderPrimitive>(nullptr);
-			}
-			else
-			{
-				ndRenderPrimitive::ndDescriptor descriptor(m_owner);
-				descriptor.m_collision = ndSharedPtr<ndShapeInstance>(kinematicBody->m_shapeInstance.CreateObject());
-				descriptor.m_collision->SetScale(ndVector::m_one);
-				descriptor.m_collision->SetLocalMatrix(ndGetIdentityMatrix());
+				const ndMeshShapeInstance shapeInstance = kinematicBody->m_shapeInstance;
+				if (strcmp(shapeInstance.m_shape->m_constructor.GetStr(), ndShapeNull::StaticClassName()) == 0)
+				{
+					debugMesh.m_zBufferShape = ndSharedPtr<ndRenderPrimitive>(nullptr);
+					debugMesh.m_wireFrameShape = ndSharedPtr<ndRenderPrimitive>(nullptr);
+				}
+				else
+				{
+					ndRenderPrimitive::ndDescriptor descriptor(m_owner);
+					descriptor.m_collision = ndSharedPtr<ndShapeInstance>(kinematicBody->m_shapeInstance.CreateObject());
+					descriptor.m_collision->SetScale(ndVector::m_one);
+					descriptor.m_collision->SetLocalMatrix(ndGetIdentityMatrix());
 
-				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugHiddenLines;
-				debugMesh.m_zBufferShape = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
+					descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugHiddenLines;
+					debugMesh.m_zBufferShape = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
 
-				descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugWireFrame;
-				debugMesh.m_wireFrameShape = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
+					descriptor.m_meshBuildMode = ndRenderPrimitive::m_debugWireFrame;
+					debugMesh.m_wireFrameShape = ndSharedPtr<ndRenderPrimitive>(new ndRenderPrimitive(descriptor));
+				}
+				break;
 			}
-			break;
 		}
 	}
 }
