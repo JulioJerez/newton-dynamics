@@ -66,7 +66,7 @@ void ndAssetEditor::EditJointGlobalMatrix()
 	}
 	else
 	{
-		ImGui::SeparatorText("global frame");
+		ImGui::SeparatorText("joint frame");
 		ndReal position[3];
 		position[0] = ndReal(0.0f);
 		position[1] = ndReal(0.0f);
