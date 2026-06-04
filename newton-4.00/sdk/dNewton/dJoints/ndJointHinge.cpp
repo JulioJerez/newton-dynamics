@@ -129,10 +129,10 @@ void ndJointHinge::DebugJoint(ndConstraintDebugCallback& debugCallback) const
 	debugCallback.DrawFrame(matrix1);
 	if (m_axis.m_limitState)
 	{
-		ndVector arrowColor(ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(1.0f));
+		//ndVector arrowColor(ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(1.0f));
 		ndMatrix arrowMatrix(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad) * matrix0);
 		arrowMatrix.m_posit += arrowMatrix.RotateVector(ndVector(debugCallback.GetScale(), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f)));
-		debugCallback.DrawArrow(arrowMatrix, arrowColor, ndFloat32(0.125f));
+		debugCallback.DrawArrow(arrowMatrix, m_arrowDebugColor, ndFloat32(0.125f));
 
 		const ndInt32 subdiv = 8;
 		const ndFloat32 radius = debugCallback.m_debugScale * ndFloat32(0.8f);

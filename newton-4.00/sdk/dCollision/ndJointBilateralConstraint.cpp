@@ -28,7 +28,7 @@
 #define D_VEL_DAMP			 ndFloat32(100.0f)
 #define D_POS_DAMP			 ndFloat32(1500.0f)
 
-ndVector ndJointBilateralConstraint::m_linearDebugColor(ndFloat32(1.0f), ndFloat32(1.0f), ndFloat32(1.0f), ndFloat32(0.0f));
+ndVector ndJointBilateralConstraint::m_arrowDebugColor(ndFloat32(1.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(1.0f));
 
 ndJointBilateralConstraint::ndJointBilateralConstraint()
 	:ndConstraint()

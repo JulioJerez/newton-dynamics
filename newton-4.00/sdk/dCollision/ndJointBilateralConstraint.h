@@ -213,7 +213,7 @@ class ndJointBilateralConstraint : public ndConstraint
 	ndInt8 m_hitLimits;
 	ndJointBilateralSolverModel m_solverModel;
 
-	static ndVector m_linearDebugColor;
+	static ndVector m_arrowDebugColor;
 	
 	friend class ndWorld;
 	friend class ndIkSolver;

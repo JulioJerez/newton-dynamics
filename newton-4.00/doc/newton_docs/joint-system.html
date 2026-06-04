@@ -412,7 +412,7 @@ world.AddJoint(jointPtr);
 <pre><code>// Remove by shared pointer
 world.RemoveJoint(jointPtr);
 
-// Or simply release the shared pointer - joint is removed automatically</code></pre>
+// when the joint has no more refrences, it is automatically deleted</code></pre>
 
             <h3>Two-Frame Construction</h3>
             <p>For precise control, specify separate frames for each body:</p>
@@ -743,7 +743,7 @@ slider-&gt;SetTargetPosit(0.5f);  // Target 0.5 meters</code></pre>
             <div class="tip">
                 <strong>Tuning Tips:</strong>
                 <ul>
-                    <li>Start with regularizer = 0.1, increase if unstable</li>
+                    <li>Start with regularizer = 0.01, decrease if too soft</li>
                     <li>Spring should match expected loads (force = spring * displacement)</li>
                     <li>Damper around 10-20% of spring for critical damping</li>
                     <li>Higher damping = slower response, less oscillation</li>
