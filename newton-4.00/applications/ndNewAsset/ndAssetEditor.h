@@ -24,8 +24,8 @@ class ndAssetEditor : public ndClassAlloc
 		m_free,
 		m_backView,
 		m_frontView,
-		m_sideLeftView,
-		m_sideRrightView,
+		m_leftSideView,
+		m_rightSideView,
 	};
 
 	enum ndRenderModes
@@ -43,6 +43,7 @@ class ndAssetEditor : public ndClassAlloc
 		m_collidingPair,
 		m_alignToTarget,
 		m_transformModifier,
+		m_selectCustomProNode,
 	};
 
 	class ndRenderCallback : public ndRender::ndUserCallback
@@ -204,8 +205,9 @@ class ndAssetEditor : public ndClassAlloc
 	void EditCollidingPair();
 	void MakeVisualGeometry();
 	void SetLoopJointSelection(const ndMesh* const node);
-	void SetCollidingSubSelection(const ndMesh* const node);
 	void SetModifierSubSelection(const ndMesh* const node);
+	void SetCollidingSubSelection(const ndMesh* const node);
+	void SetCustomPropertySelection(const ndMesh* const node);
 
 	void ApplyNodeTransform(const ndMatrix& matrix, ndRenderSceneNode* const entNode);
 

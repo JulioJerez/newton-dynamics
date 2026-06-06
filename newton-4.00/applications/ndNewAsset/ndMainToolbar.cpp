@@ -55,8 +55,8 @@ void ndAssetEditor::ShowMainToolbar()
 		{m_free, "free camera" },
 		{m_backView, "back view" },
 		{m_frontView, "front view" },
-		{m_sideLeftView, "left side view" },
-		{m_sideRrightView, "right side view" },
+		{m_leftSideView, "left side view" },
+		{m_rightSideView, "right side view" },
 	};
 
 	if (ImGui::BeginCombo(" ##1", names[m_cameraMode].m_label, ImGuiComboFlags_MaxSize, 160))

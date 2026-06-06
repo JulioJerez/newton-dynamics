@@ -1228,15 +1228,17 @@ void ndMeshTransformModifierUserDefined::SerializeToXml(nd::TiXmlElement* const 
 }
 
 //
-ndMeshCustomProperty::ndMeshCustomProperty()
+ndMeshCustomProperty::ndMeshCustomProperty(ndMesh* const owner)
 	:ndClassAlloc()
 	,m_name("unnamed")
+	,m_owner(owner)
 {
 }
 
-ndMeshCustomProperty::ndMeshCustomProperty(const ndMeshCustomProperty& other)
+ndMeshCustomProperty::ndMeshCustomProperty(ndMesh* const owner, const ndMeshCustomProperty& other)
 	:ndClassAlloc()
 	,m_name(other.m_name)
+	,m_owner(owner)
 {
 }
 
@@ -1246,7 +1248,9 @@ ndMeshCustomProperty::~ndMeshCustomProperty()
 
 bool ndMeshCustomProperty::operator==(const ndMeshCustomProperty& other) const
 {
-	return m_name == other.m_name;
+	bool test = m_name == other.m_name;
+	test = test && (m_owner->GetName() == other.m_owner->GetName());
+	return test;
 }
 
 void ndMeshCustomProperty::SerializeToXml(nd::TiXmlElement* const parent) const
@@ -1261,14 +1265,14 @@ void ndMeshCustomProperty::DeserializeFromXml(const nd::TiXmlElement* const pare
 }
 
 //
-ndMeshCustomPropertyFloat::ndMeshCustomPropertyFloat()
-	:ndMeshCustomProperty()
+ndMeshCustomPropertyFloat::ndMeshCustomPropertyFloat(ndMesh* const owner)
+	:ndMeshCustomProperty(owner)
 	,m_value(0.0f)
 {
 }
 
-ndMeshCustomPropertyFloat::ndMeshCustomPropertyFloat(const ndMeshCustomPropertyFloat& other)
-	:ndMeshCustomProperty(other)
+ndMeshCustomPropertyFloat::ndMeshCustomPropertyFloat(ndMesh* const owner, const ndMeshCustomPropertyFloat& other)
+	:ndMeshCustomProperty(owner, other)
 	,m_value(other.m_value)
 {
 }
@@ -1280,9 +1284,9 @@ bool ndMeshCustomPropertyFloat::operator==(const ndMeshCustomProperty& other) co
 	return test && (m_value == otherProp->m_value);
 }
 
-ndMeshCustomProperty* ndMeshCustomPropertyFloat::Duplicate() const
+ndMeshCustomProperty* ndMeshCustomPropertyFloat::Duplicate(ndMesh* const owner) const
 {
-	return new ndMeshCustomPropertyFloat(*this);
+	return new ndMeshCustomPropertyFloat(owner, *this);
 }
 
 void ndMeshCustomPropertyFloat::SerializeToXml(nd::TiXmlElement* const parent) const
@@ -1298,14 +1302,14 @@ void ndMeshCustomPropertyFloat::DeserializeFromXml(const nd::TiXmlElement* const
 }
 
 //
-ndMeshCustomPropertyString::ndMeshCustomPropertyString()
-	:ndMeshCustomProperty()
+ndMeshCustomPropertyString::ndMeshCustomPropertyString(ndMesh* const owner)
+	:ndMeshCustomProperty(owner)
 	,m_value("")
 {
 }
 
-ndMeshCustomPropertyString::ndMeshCustomPropertyString(const ndMeshCustomPropertyString& other)
-	:ndMeshCustomProperty(other)
+ndMeshCustomPropertyString::ndMeshCustomPropertyString(ndMesh* const owner, const ndMeshCustomPropertyString& other)
+	:ndMeshCustomProperty(owner, other)
 	,m_value(other.m_value)
 {
 }
@@ -1317,9 +1321,9 @@ bool ndMeshCustomPropertyString::operator==(const ndMeshCustomProperty& other) c
 	return test && (m_value == otherProp->m_value);
 }
 
-ndMeshCustomProperty* ndMeshCustomPropertyString::Duplicate() const
+ndMeshCustomProperty* ndMeshCustomPropertyString::Duplicate(ndMesh* const owner) const
 {
-	return new ndMeshCustomPropertyString(*this);
+	return new ndMeshCustomPropertyString(owner, *this);
 }
 
 void ndMeshCustomPropertyString::SerializeToXml(nd::TiXmlElement* const parent) const
@@ -1332,4 +1336,49 @@ void ndMeshCustomPropertyString::DeserializeFromXml(const nd::TiXmlElement* cons
 {
 	ndMeshCustomProperty::DeserializeFromXml(parent);
 	m_value = ndString(xmlGetString(parent, "value"));
+}
+
+//
+ndMeshCustomPropertyNode::ndMeshCustomPropertyNode(ndMesh* const owner)
+	:ndMeshCustomProperty(owner)
+	,m_value(nullptr)
+{
+}
+
+ndMeshCustomPropertyNode::ndMeshCustomPropertyNode(ndMesh* const owner, const ndMeshCustomPropertyNode& other)
+	:ndMeshCustomProperty(owner, other)
+	,m_value(other.m_value)
+{
+}
+
+bool ndMeshCustomPropertyNode::operator==(const ndMeshCustomProperty& other) const
+{
+	bool test = ndMeshCustomProperty::operator==(other);
+	//const ndMeshCustomPropertyNode* const otherProp = (ndMeshCustomPropertyNode*)&other;
+	//return test && (m_value == otherProp->m_value);
+	return test;
+}
+
+ndMeshCustomProperty* ndMeshCustomPropertyNode::Duplicate(ndMesh* const owner) const
+{
+	return new ndMeshCustomPropertyNode(owner, *this);
+}
+
+void ndMeshCustomPropertyNode::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshCustomProperty::SerializeToXml(parent);
+	if (m_value)
+	{
+		xmlSaveParam(parent, "value", m_value->GetName().GetStr());
+	}
+}
+
+void ndMeshCustomPropertyNode::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndMeshCustomProperty::DeserializeFromXml(parent);
+	if (xmlHasAttribute(parent, "value"))
+	{
+		const char* const name = xmlGetString(parent, "value");
+		m_value = ndWeakPtr<ndMesh>(m_owner->GetRoot()->FindByName(name));
+	}
 }

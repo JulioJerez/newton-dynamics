@@ -146,8 +146,9 @@ ndMesh::ndMesh(const ndMesh& src)
 	{
 		for (ndList<ndSharedPtr<ndMeshCustomProperty>>::ndNode* node = src.m_customProperties.GetFirst(); node; node = node->GetNext())
 		{
-			ndMeshCustomProperty* const property = *node->GetInfo();
-			m_customProperties.Append(ndSharedPtr<ndMeshCustomProperty>(property->Duplicate()));
+			ndMeshCustomProperty* const srcProperty = *node->GetInfo();
+			ndMeshCustomProperty* const newProperty = srcProperty->Duplicate(this);
+			m_customProperties.Append(ndSharedPtr<ndMeshCustomProperty>(newProperty));
 		}
 	}
 

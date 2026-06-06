@@ -192,6 +192,15 @@ void ndAssetEditor::SetLoopJointSelection(const ndMesh* const subSelection)
 	m_currentSubSelection = ndWeakPtr<ndMesh>((ndMesh*)subSelection);
 }
 
+void ndAssetEditor::SetCustomPropertySelection(const ndMesh* const subSelection)
+{
+	if (subSelection == *m_currentSelection)
+	{
+		return;
+	}
+	m_currentSubSelection = ndWeakPtr<ndMesh>((ndMesh*)subSelection);
+}
+
 void ndAssetEditor::AddCollidingPair()
 {
 	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoCollidingPairs(this)));
