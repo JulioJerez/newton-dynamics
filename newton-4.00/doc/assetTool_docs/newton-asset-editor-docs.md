@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Newton Asset Editor is a desktop tool for creating and editing physics-ready 3D assets for the Newton Game Dynamics engine. It allows you to import meshes, configure rigid bodies, define collision shapes, set up joints, manage loop constraints, and export assets in Newton's native format (`.nd`) or URDF.
+The Newton Asset Editor is a desktop tool for creating and editing physics-ready 3D assets for the Newton Game Dynamics engine. It allows you to import meshes, configure rigid bodies, define collision shapes, set up joints, manage loop constraints, and export assets in Newton's native format (`.nd`).
 
 The editor uses an ImGui-based interface with dockable panels. The main window is divided into:
 
