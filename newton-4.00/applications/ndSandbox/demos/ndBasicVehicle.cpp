@@ -401,14 +401,42 @@ namespace ndMotorVehicle
 #endif
 		ndMeshLoader loader;
 		loader.LoadMesh(ndGetWorkingFileName(modelName));
+		const ndMesh* const mesh = *loader.m_mesh;
 
 		ndPhysicsWorld* const world = scene->GetWorld();
 		ndSharedPtr<ndModel> vehicleModel(new ndMultiBodyVehicle());
 		ndMultiBodyVehicle* const vehicle = vehicleModel->GetAsMultiBodyVehicle();
-		vehicle->Deserialize(*loader.m_mesh);
+		vehicle->Deserialize(mesh);
 
 		ndRender* const renderer = *scene->GetRenderer();
 		ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *loader.m_mesh, ndGetWorkingFileName("")));
+
+		auto BindApplicationData = [scene, mesh, vehicle, &sceneMesh](ndModelArticulation::ndNode* const node)
+		{
+			if (vehicle->IsCloseLoop(node))
+			{
+				ndTrace(("do somthing\n"));
+			}
+			else
+			{
+				const ndMesh* const meshNode = mesh->FindByClosestMatch(node->m_name);
+				ndAssert(meshNode);
+
+				// find the visual node this body control by name. 
+				const ndMatrix matrix(node->m_body->GetMatrix());
+				ndRenderSceneNode* const visualEntityPtr = sceneMesh->FindByClosestMatch(meshNode->GetName());
+				ndAssert(visualEntityPtr);
+				ndSharedPtr<ndRenderSceneNode> visualEntity((visualEntityPtr == *sceneMesh) ? sceneMesh : visualEntityPtr->GetSharedPtr());
+
+				// add a rigid body with notification callback
+				ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
+				ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
+				node->m_body->SetNotifyCallback(notify);
+			}
+		};
+		vehicle->NodeIterator(BindApplicationData);
+
+
 		scene->AddEntity(sceneMesh);
 		world->AddModel(vehicleModel);
 
