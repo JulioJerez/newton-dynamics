@@ -218,7 +218,8 @@ Changing any value immediately rebuilds the visual render scene.
 
 ### Custom Properties
 
-Each node can carry a list of typed custom properties (float or string). Use **new property** to add one and **delete selected** to remove it. The property name and value are editable inline.
+Each node can carry a list of typed custom properties (float, string or refrence to othe node). 
+Use **new property** to add one and **delete selected** to remove it. The property name and value are editable inline.
 
 ---
 
