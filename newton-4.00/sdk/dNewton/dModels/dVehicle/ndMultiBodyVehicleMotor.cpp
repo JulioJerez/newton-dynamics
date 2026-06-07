@@ -96,23 +96,23 @@ void ndMultiBodyVehicleMotor::SetFrictionLoss(ndFloat32 newtonMeters)
 
 void ndMultiBodyVehicleMotor::SetMaxRpm(ndFloat32 redLineRpm)
 {
-	m_maxOmega = ndMax(redLineRpm / dRadPerSecToRpm, ndFloat32 (0.0f));
+	m_maxOmega = ndMax(redLineRpm / ndRadPerSecToRpm, ndFloat32 (0.0f));
 }
 
 void ndMultiBodyVehicleMotor::SetOmegaAccel(ndFloat32 rpmStep)
 {
-	m_omegaStep = ndAbs(rpmStep / dRadPerSecToRpm);
+	m_omegaStep = ndAbs(rpmStep / ndRadPerSecToRpm);
 }
 
 void ndMultiBodyVehicleMotor::SetTorqueAndRpm(ndFloat32 newtonMeters, ndFloat32 rpm)
 {
 	m_engineTorque = ndMax(newtonMeters, ndFloat32(0.0f));
-	m_targetOmega = ndClamp(rpm / dRadPerSecToRpm, ndFloat32(0.0f), m_maxOmega);
+	m_targetOmega = ndClamp(rpm / ndRadPerSecToRpm, ndFloat32(0.0f), m_maxOmega);
 }
 
 ndFloat32 ndMultiBodyVehicleMotor::GetRpm() const
 {
-	return m_omega * dRadPerSecToRpm;
+	return m_omega * ndRadPerSecToRpm;
 }
 
 ndFloat32 ndMultiBodyVehicleMotor::CalculateAcceleration(ndConstraintDescritor& desc)

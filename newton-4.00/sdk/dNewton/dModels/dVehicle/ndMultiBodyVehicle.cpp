@@ -21,10 +21,10 @@
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
 #include "ndWorld.h"
+#include "ndJointHinge.h"
 #include "ndBodyDynamic.h"
 #include "ndBodyKinematic.h"
 #include "ndMultiBodyVehicle.h"
-#include "ndJointHinge.h"
 #include "ndMultiBodyVehicleMotor.h"
 #include "ndMultiBodyVehicleGearBox.h"
 #include "ndMultiBodyVehicleTireJoint.h"
@@ -40,8 +40,159 @@
 #define D_MAX_STEERING_RATE				ndFloat32(0.03f)
 #define D_MAX_SIZE_SLIP_RATE			ndFloat32(2.0f)
 
+ndVehicleDectriptor::ndEngineTorqueCurve::ndEngineTorqueCurve()
+{
+	// take from the data sheet of a 2005 dodge viper, 
+	// some values are missing so I have to improvise them
+	ndFloat32 idleTorquePoundFoot = ndFloat32 (100.0f);
+	ndFloat32 idleRmp = ndFloat32(800.0f);
+	ndFloat32 horsePower = ndFloat32(400.0f);
+	ndFloat32 rpm0 = ndFloat32(5000.0f);
+	ndFloat32 rpm1 = ndFloat32(6200.0f);
+	ndFloat32 horsePowerAtRedLine = ndFloat32(100.0f);
+	ndFloat32 redLineRpm = ndFloat32(8000.0f);
+	Init(idleTorquePoundFoot, idleRmp,
+		horsePower, rpm0, rpm1, horsePowerAtRedLine, redLineRpm);
+}
+
+void ndVehicleDectriptor::ndEngineTorqueCurve::Init(
+	ndFloat32 idleTorquePoundFoot, ndFloat32 idleRmp,
+	ndFloat32 horsePower, ndFloat32 rpm0, ndFloat32 rpm1,
+	ndFloat32 horsePowerAtRedLine, ndFloat32 redLineRpm)
+{
+	m_torqueCurve[0] = ndTorqueTap(ndFloat32(0.0f), idleTorquePoundFoot);
+	m_torqueCurve[1] = ndTorqueTap(idleRmp, idleTorquePoundFoot);
+
+	ndFloat32 power = horsePower * ndFloat32(746.0f);
+	ndFloat32 omegaInRadPerSec = rpm0 * ndFloat32(0.105f);
+	ndFloat32 torqueInPoundFood = (power / omegaInRadPerSec) / ndFloat32(1.36f);
+	m_torqueCurve[2] = ndTorqueTap(rpm0, torqueInPoundFood);
+
+	power = horsePower * ndFloat32(746.0f);
+	omegaInRadPerSec = rpm1 * ndFloat32(0.105f);
+	torqueInPoundFood = (power / omegaInRadPerSec) / ndFloat32(1.36f);
+	m_torqueCurve[3] = ndTorqueTap(rpm1, torqueInPoundFood);
+
+	power = horsePowerAtRedLine * ndFloat32(746.0f);
+	omegaInRadPerSec = redLineRpm * ndFloat32(0.105f);
+	torqueInPoundFood = (power / omegaInRadPerSec) / ndFloat32(1.36f);
+	m_torqueCurve[4] = ndTorqueTap(redLineRpm, torqueInPoundFood);
+}
+
+ndFloat32 ndVehicleDectriptor::ndEngineTorqueCurve::GetIdleRadPerSec() const
+{
+	return m_torqueCurve[1].m_radPerSeconds;
+}
+
+ndFloat32 ndVehicleDectriptor::ndEngineTorqueCurve::GetLowGearShiftRadPerSec() const
+{
+	return m_torqueCurve[2].m_radPerSeconds;
+}
+
+ndFloat32 ndVehicleDectriptor::ndEngineTorqueCurve::GetHighGearShiftRadPerSec() const
+{
+	return m_torqueCurve[3].m_radPerSeconds;
+}
+
+ndFloat32 ndVehicleDectriptor::ndEngineTorqueCurve::GetRedLineRadPerSec() const
+{
+	const int maxIndex = sizeof(m_torqueCurve) / sizeof(m_torqueCurve[0]);
+	return m_torqueCurve[maxIndex - 1].m_radPerSeconds;
+}
+
+ndFloat32 ndVehicleDectriptor::ndEngineTorqueCurve::GetTorque(ndFloat32 omegaInRadPerSeconds) const
+{
+	const int maxIndex = sizeof(m_torqueCurve) / sizeof(m_torqueCurve[0]);
+	omegaInRadPerSeconds = ndClamp(omegaInRadPerSeconds, ndFloat32(0.0f), m_torqueCurve[maxIndex - 1].m_radPerSeconds);
+
+	for (ndInt32 i = 1; i < maxIndex; ++i)
+	{
+		if (omegaInRadPerSeconds <= m_torqueCurve[i].m_radPerSeconds)
+		{
+			ndFloat32 omega0 = m_torqueCurve[i - 0].m_radPerSeconds;
+			ndFloat32 omega1 = m_torqueCurve[i - 1].m_radPerSeconds;
+
+			ndFloat32 torque0 = m_torqueCurve[i - 0].m_torqueInNewtonMeters;
+			ndFloat32 torque1 = m_torqueCurve[i - 1].m_torqueInNewtonMeters;
+
+			ndFloat32 torque = torque0 + (omegaInRadPerSeconds - omega0) * (torque1 - torque0) / (omega1 - omega0);
+			return torque;
+		}
+	}
+
+	return m_torqueCurve[maxIndex - 1].m_torqueInNewtonMeters;
+}
+
+ndVehicleDectriptor::ndVehicleDectriptor(const char* const name)
+	:m_comDisplacement(ndVector::m_zero)
+{
+	strncpy(m_name, name, sizeof(m_name) - 1);
+
+	ndFloat32 idleTorquePoundFoot = ndFloat32(100.0f);
+	ndFloat32 idleRmp = ndFloat32(900.0f);
+	ndFloat32 horsePower = ndFloat32(400.0f);
+	ndFloat32 rpm0 = ndFloat32(5000.0f);
+	ndFloat32 rpm1 = ndFloat32(6200.0f);
+	ndFloat32 horsePowerAtRedLine = ndFloat32(100.0f);
+	ndFloat32 redLineRpm = ndFloat32(8000.0f);
+	m_engine.Init(idleTorquePoundFoot, idleRmp, horsePower, rpm0, rpm1, horsePowerAtRedLine, redLineRpm);
+
+	//m_chassisMass = ndFloat32(1000.0f);
+	m_chassisAngularDrag = ndFloat32(0.25f);
+	m_transmission.m_gearsCount = 4;
+	m_transmission.m_neutral = ndFloat32(0.0f);
+	m_transmission.m_reverseRatio = ndFloat32(-3.0f);
+	m_transmission.m_crownGearRatio = ndFloat32(10.0f);
+
+	m_transmission.m_forwardRatios[0] = ndFloat32(3.0f);
+	m_transmission.m_forwardRatios[1] = ndFloat32(1.5f);
+	m_transmission.m_forwardRatios[2] = ndFloat32(1.1f);
+	m_transmission.m_forwardRatios[3] = ndFloat32(0.8f);
+
+	m_transmission.m_torqueConverter = ndFloat32(2000.0f);
+	m_transmission.m_idleClutchTorque = ndFloat32(200.0f);
+	m_transmission.m_lockedClutchTorque = ndFloat32(1.0e6f);
+	m_transmission.m_gearShiftDelayTicks = 180;
+	m_transmission.m_manual = false;
+
+	m_frontTire.m_mass = ndFloat32(20.0f);
+	m_frontTire.m_springK = ndFloat32(1000.0f);
+	m_frontTire.m_damperC = ndFloat32(20.0f);
+	m_frontTire.m_regularizer = ndFloat32(0.1f);
+	m_frontTire.m_lowerStop = ndFloat32(-0.05f);
+	m_frontTire.m_upperStop = ndFloat32(0.2f);
+	m_frontTire.m_verticalOffset = ndFloat32(0.0f);
+	m_frontTire.m_brakeTorque = ndFloat32(1500.0f);
+	m_frontTire.m_handBrakeTorque = ndFloat32(1500.0f);
+	m_frontTire.m_steeringAngle = ndFloat32(35.0f) * ndDegreeToRad;
+
+	m_rearTire.m_mass = ndFloat32(20.0f);
+	m_rearTire.m_springK = ndFloat32(1000.0f);
+	m_rearTire.m_damperC = ndFloat32(20.0f);
+	m_rearTire.m_regularizer = ndFloat32(0.1f);
+	m_rearTire.m_lowerStop = ndFloat32(-0.05f);
+	m_rearTire.m_upperStop = ndFloat32(0.2f);
+	m_rearTire.m_steeringAngle = ndFloat32(0.0f);
+	m_rearTire.m_verticalOffset = ndFloat32(0.0f);
+	m_rearTire.m_brakeTorque = ndFloat32(1500.0f);
+	m_rearTire.m_handBrakeTorque = ndFloat32(1000.0f);
+
+	m_motorMass = ndFloat32(20.0f);
+	m_motorRadius = ndFloat32(0.25f);
+
+	m_differentialMass = ndFloat32(20.0f);
+	m_differentialRadius = ndFloat32(0.25f);
+	m_slipDifferentialRmpLock = ndFloat32(30.0f);
+
+	m_torsionBarSpringK = ndFloat32(100.0f);
+	m_torsionBarDamperC = ndFloat32(10.0f);
+	m_torsionBarRegularizer = ndFloat32(0.15f);
+	m_torsionBarType = m_noWheelAxle;
+
+	m_differentialType = m_rearWheelDrive;
+}
+
 ndMultiBodyVehicle::ndDownForce::ndDownForce()
-//	:m_gravity(ndFloat32(-10.0f))
 	:m_suspensionStiffnessModifier(ndFloat32(1.0f))
 {
 	m_downForceTable[0].m_speed = ndFloat32(0.0f) * ndFloat32(0.27f);
@@ -1322,5 +1473,8 @@ void ndMultiBodyVehicle::Deserialize(const ndMesh* const rootNode)
 {
 	ndModelArticulation::Deserialize(rootNode);
 	ndAssert(m_rootNode);
+
+	ndSharedPtr<ndVehicleDectriptor> desc(new ndVehicleDectriptor("defualt"));
+
 	AddChassis(m_rootNode->m_body);
 }

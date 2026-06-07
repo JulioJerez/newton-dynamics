@@ -329,21 +329,21 @@ namespace ndMotorVehicle
 		{
 		case ndVehicleDectriptor::m_rearWheelDrive:
 		{
-			differential = vehicle->AddDifferential(configuration.m_differentialMass, configuration.m_differentialRadius, rl_tire, rr_tire, configuration.m_slipDifferentialRmpLock / dRadPerSecToRpm);
+			differential = vehicle->AddDifferential(configuration.m_differentialMass, configuration.m_differentialRadius, rl_tire, rr_tire, configuration.m_slipDifferentialRmpLock / ndRadPerSecToRpm);
 			break;
 		}
 
 		case ndVehicleDectriptor::m_frontWheelDrive:
 		{
-			differential = vehicle->AddDifferential(configuration.m_differentialMass, configuration.m_differentialRadius, fl_tire, fr_tire, configuration.m_slipDifferentialRmpLock / dRadPerSecToRpm);
+			differential = vehicle->AddDifferential(configuration.m_differentialMass, configuration.m_differentialRadius, fl_tire, fr_tire, configuration.m_slipDifferentialRmpLock / ndRadPerSecToRpm);
 			break;
 		}
 
 		case ndVehicleDectriptor::m_fourWheeldrive:
 		{
-			ndMultiBodyVehicleDifferential* const rearDifferential = vehicle->AddDifferential(configuration.m_differentialMass, configuration.m_differentialRadius, rl_tire, rr_tire, configuration.m_slipDifferentialRmpLock / dRadPerSecToRpm);
-			ndMultiBodyVehicleDifferential* const frontDifferential = vehicle->AddDifferential(configuration.m_differentialMass, configuration.m_differentialRadius, fl_tire, fr_tire, configuration.m_slipDifferentialRmpLock / dRadPerSecToRpm);
-			differential = vehicle->AddDifferential(configuration.m_differentialMass, configuration.m_differentialRadius, rearDifferential, frontDifferential, configuration.m_slipDifferentialRmpLock / dRadPerSecToRpm);
+			ndMultiBodyVehicleDifferential* const rearDifferential = vehicle->AddDifferential(configuration.m_differentialMass, configuration.m_differentialRadius, rl_tire, rr_tire, configuration.m_slipDifferentialRmpLock / ndRadPerSecToRpm);
+			ndMultiBodyVehicleDifferential* const frontDifferential = vehicle->AddDifferential(configuration.m_differentialMass, configuration.m_differentialRadius, fl_tire, fr_tire, configuration.m_slipDifferentialRmpLock / ndRadPerSecToRpm);
+			differential = vehicle->AddDifferential(configuration.m_differentialMass, configuration.m_differentialRadius, rearDifferential, frontDifferential, configuration.m_slipDifferentialRmpLock / ndRadPerSecToRpm);
 			break;
 		}
 
@@ -356,12 +356,12 @@ namespace ndMotorVehicle
 
 		// 4- add a motor
 		ndMultiBodyVehicleMotor* const motor = vehicle->AddMotor(configuration.m_motorMass, configuration.m_motorRadius);
-		motor->SetMaxRpm(configuration.m_engine.GetRedLineRadPerSec() * dRadPerSecToRpm);
+		motor->SetMaxRpm(configuration.m_engine.GetRedLineRadPerSec() * ndRadPerSecToRpm);
 		motor->SetFrictionLoss(configuration.m_engine.GetTorque(0.0f) * 0.5f);
 
 		// 5- add the gear box
 		ndMultiBodyVehicleGearBox* const gearBox = vehicle->AddGearBox(differential);
-		gearBox->SetIdleOmega(configuration.m_engine.GetIdleRadPerSec() * dRadPerSecToRpm);
+		gearBox->SetIdleOmega(configuration.m_engine.GetIdleRadPerSec() * ndRadPerSecToRpm);
 
 		//switch (configuration.m_torsionBarType)
 		//{

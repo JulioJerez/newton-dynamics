@@ -56,7 +56,7 @@ ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox(ndBodyKinematic* const moto
 
 void ndMultiBodyVehicleGearBox::SetIdleOmega(ndFloat32 rpm)
 {
-	m_idleOmega = ndMax(rpm / dRadPerSecToRpm, ndFloat32(0.0f));
+	m_idleOmega = ndMax(rpm / ndRadPerSecToRpm, ndFloat32(0.0f));
 }
 
 void ndMultiBodyVehicleGearBox::SetClutchTorque(ndFloat32 torqueInNewtonMeters)
