@@ -107,7 +107,6 @@ ndMultiBodyVehicleTorsionBar* ndMultiBodyVehicle::AddTorsionBar(ndBodyKinematic*
 ndMultiBodyVehicle::ndMultiBodyVehicle(ndFloat32 gravityMagnitud)
 	:ndModelArticulation()
 	,m_localFrame(ndGetIdentityMatrix())
-	//,m_tireShape(new ndShapeChamferCylinder(ndFloat32(0.75f), ndFloat32(0.5f)))
 	,m_tireShape(new ndShapeWheel())
 	,m_downForce()
 {
@@ -124,12 +123,12 @@ ndMultiBodyVehicle::ndMultiBodyVehicle(ndFloat32 gravityMagnitud)
 	m_gravityMagnitud = -ndAbs(gravityMagnitud);
 	ndAssert(ndAbs(m_gravityMagnitud) > ndFloat32 (0.0f));
 
-	m_tireShape->AddRef();
+	//m_tireShape->AddRef();
 }
 
 ndMultiBodyVehicle::~ndMultiBodyVehicle()
 {
-	m_tireShape->Release();
+	//m_tireShape->Release();
 }
 
 void ndMultiBodyVehicle::FinalizeBuild()
@@ -480,7 +479,7 @@ ndMultiBodyVehicleTireJoint* ndMultiBodyVehicle::AddAxleTire(const ndMultiBodyVe
 
 ndShapeInstance ndMultiBodyVehicle::CreateTireShape(ndFloat32 radius, ndFloat32 width) const
 {
-	ndShapeInstance tireCollision(m_tireShape);
+	ndShapeInstance tireCollision((ndShape*)*m_tireShape);
 	ndVector scale(ndFloat32 (2.0f) * width, radius, radius, 0.0f);
 	tireCollision.SetScale(scale);
 	return tireCollision;

@@ -59,9 +59,9 @@ class ndTireFrictionModel
 	D_NEWTON_API void SetPacejkaCurves(const ndPacejkaTireModel& longitudinal, const ndPacejkaTireModel& lateral);
 	D_NEWTON_API void GetPacejkaCurves(ndFrictionModel pacejkaStockModel, ndPacejkaTireModel& longitudinal, ndPacejkaTireModel& lateral) const;
 
+	ndFrictionModel m_frictionModel;
 	ndPacejkaTireModel m_lateralPacejka;
 	ndPacejkaTireModel m_longitudinalPacejka;
-	ndFrictionModel m_frictionModel;
 };
 
 class ndMultiBodyVehicleTireJointInfo : public ndWheelDescriptor, public ndTireFrictionModel
@@ -100,7 +100,7 @@ class ndMultiBodyVehicleTireJoint: public ndJointWheel
 	protected:
 	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
 
-	ndMultiBodyVehicle* m_vehicle;
+	ndWeakPtr<ndMultiBodyVehicle> m_vehicle;
 	ndTireFrictionModel m_frictionModel;
 	ndFloat32 m_lateralSlip;
 	ndFloat32 m_longitudinalSlip;

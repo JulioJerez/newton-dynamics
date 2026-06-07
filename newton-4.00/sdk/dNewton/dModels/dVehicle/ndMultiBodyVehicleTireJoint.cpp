@@ -31,8 +31,8 @@ ndTireFrictionModel::ndTireFrictionModel()
 
 void ndTireFrictionModel::SetPacejkaCurves(const ndPacejkaTireModel& longitudinal, const ndPacejkaTireModel& lateral)
 {
-	m_frictionModel = m_pacejkaCustom;
 	m_lateralPacejka = lateral;
+	m_frictionModel = m_pacejkaCustom;
 	m_longitudinalPacejka = longitudinal;
 }
 

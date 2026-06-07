@@ -67,7 +67,6 @@ class ndMultiBodyVehicle : public ndModelArticulation
 		private:
 		ndFloat32 CalculateFactor(const ndSpeedForcePair* const entry) const;
 	
-		//ndFloat32 m_gravity;
 		ndFloat32 m_suspensionStiffnessModifier;
 		ndSpeedForcePair m_downForceTable[5];
 		friend class ndMultiBodyVehicle;
@@ -138,8 +137,7 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	ndMatrix m_localFrame;
 	ndWeakPtr<ndBodyDynamic> m_chassis;
 	ndWeakPtr<ndMultiBodyVehicleMotor> m_motor;
-	ndShapeWheel* m_tireShape;
-	//ndShapeChamferCylinder* m_tireShape;
+	ndSharedPtr<ndShapeWheel> m_tireShape;
 	ndWeakPtr<ndMultiBodyVehicleGearBox> m_gearBox;
 	ndWeakPtr<ndMultiBodyVehicleTorsionBar> m_torsionBar;
 	ndList<ndMultiBodyVehicleTireJoint*> m_tireList;
