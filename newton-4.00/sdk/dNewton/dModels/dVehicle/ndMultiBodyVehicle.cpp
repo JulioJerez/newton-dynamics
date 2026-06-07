@@ -400,7 +400,7 @@ void ndMultiBodyVehicle::AddTire(const ndSharedPtr<ndBody>& tireBody, const ndSh
 		ndAssert(tireJoint->GetBody1() == GetRoot()->m_body->GetAsBody());
 		AddLimb(GetRoot(), tireBody, tireJoint);
 	}
-	tireBody->GetAsBodyDynamic()->SetDebugMaxLinearAndAngularIntegrationStep(ndFloat32(2.0f * 360.0f) * ndDegreeToRad, ndFloat32(10.0f));
+	tireBody->GetAsBodyDynamic()->SetMaxLinearAndAngularIntegrationStep(ndFloat32(2.0f * 360.0f) * ndDegreeToRad, ndFloat32(10.0f));
 }
 
 void ndMultiBodyVehicle::AddMotor(const ndSharedPtr<ndBody>& motorBody, const ndSharedPtr<ndJointBilateralConstraint>& motorJoint)
@@ -416,7 +416,7 @@ void ndMultiBodyVehicle::AddMotor(const ndSharedPtr<ndBody>& motorBody, const nd
 		ndAssert(motorJoint->GetBody1() == GetRoot()->m_body->GetAsBody());
 		AddLimb(GetRoot(), motorBody, motorJoint);
 	}
-	motorBody->GetAsBodyDynamic()->SetDebugMaxLinearAndAngularIntegrationStep(ndFloat32(2.0f * 360.0f) * ndDegreeToRad, ndFloat32(10.0f));
+	motorBody->GetAsBodyDynamic()->SetMaxLinearAndAngularIntegrationStep(ndFloat32(2.0f * 360.0f) * ndDegreeToRad, ndFloat32(10.0f));
 }
 
 ndMultiBodyVehicleTireJoint* ndMultiBodyVehicle::AddTire(const ndMultiBodyVehicleTireJointInfo& desc, const ndSharedPtr<ndBody>& tire)
@@ -473,7 +473,7 @@ ndMultiBodyVehicleTireJoint* ndMultiBodyVehicle::AddAxleTire(const ndMultiBodyVe
 	ndAssert(parentNode);
 	AddLimb(parentNode, tire, tireJoint);
 
-	tireBody->SetDebugMaxLinearAndAngularIntegrationStep(ndFloat32(2.0f * 360.0f) * ndDegreeToRad, ndFloat32(10.0f));
+	tireBody->SetMaxLinearAndAngularIntegrationStep(ndFloat32(2.0f * 360.0f) * ndDegreeToRad, ndFloat32(10.0f));
 	return m_tireList.GetLast()->GetInfo();
 }
 
@@ -496,7 +496,7 @@ ndBodyKinematic* ndMultiBodyVehicle::CreateInternalBodyPart(ndFloat32 mass, ndFl
 	body->SetMatrix(matrix);
 	body->SetCollisionShape(diffCollision);
 	body->SetMassMatrix(mass, diffCollision);
-	body->SetDebugMaxLinearAndAngularIntegrationStep(ndFloat32(2.0f * 360.0f) * ndDegreeToRad, ndFloat32(10.0f));
+	body->SetMaxLinearAndAngularIntegrationStep(ndFloat32(2.0f * 360.0f) * ndDegreeToRad, ndFloat32(10.0f));
 	return body;
 }
 
@@ -775,7 +775,7 @@ void ndMultiBodyVehicle::AddDifferential(const ndSharedPtr<ndBody>& differential
 		ndAssert(differentialJoint->GetBody1() == GetRoot()->m_body->GetAsBody());
 		AddLimb(GetRoot(), differentialBody, differentialJoint);
 	}
-	differentialBody->GetAsBodyDynamic()->SetDebugMaxLinearAndAngularIntegrationStep(ndFloat32(2.0f * 360.0f) * ndDegreeToRad, ndFloat32(10.0f));
+	differentialBody->GetAsBodyDynamic()->SetMaxLinearAndAngularIntegrationStep(ndFloat32(2.0f * 360.0f) * ndDegreeToRad, ndFloat32(10.0f));
 }
 
 void ndMultiBodyVehicle::AddDifferentialAxle(const ndSharedPtr<ndJointBilateralConstraint>& differentialAxleJoint)
