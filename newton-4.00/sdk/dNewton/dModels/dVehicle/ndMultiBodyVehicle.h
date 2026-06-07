@@ -84,6 +84,9 @@ class ndMultiBodyVehicle : public ndModelArticulation
 
 	D_NEWTON_API ndMultiBodyVehicle* GetAsMultiBodyVehicle() override;
 
+	D_NEWTON_API virtual void Serialize(ndMesh* const rootNode) const override;
+	D_NEWTON_API virtual void Deserialize(const ndMesh* const rootNode) override;
+
 	D_NEWTON_API ndBodyDynamic* GetChassis() const;
 	D_NEWTON_API ndMultiBodyVehicleMotor* GetMotor() const;
 	D_NEWTON_API ndMultiBodyVehicleGearBox* GetGearBox() const;
@@ -147,7 +150,7 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	ndFloat32 m_maxSideslipRate;
 	ndFloat32 m_maxSideslipAngle;
 	ndFloat32 m_gravityMagnitud;
-	bool m_iniliazed;
+	bool m_initialized;
 
 	friend class ndMultiBodyVehicleMotor;
 	friend class ndMultiBodyVehicleTireJoint;

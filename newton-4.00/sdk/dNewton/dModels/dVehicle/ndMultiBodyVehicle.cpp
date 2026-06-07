@@ -111,7 +111,7 @@ ndMultiBodyVehicle::ndMultiBodyVehicle(ndFloat32 gravityMagnitud)
 	,m_tireShape(new ndShapeWheel())
 	,m_downForce()
 {
-	m_iniliazed = false;
+	m_initialized = false;
 	m_motor = nullptr;
 	m_gearBox = nullptr;
 	m_chassis = nullptr;
@@ -327,7 +327,7 @@ void ndMultiBodyVehicle::FinalizeBuild()
 	}
 
 	SetTransform(savedMatrix);
-	m_iniliazed = true;
+	m_initialized = true;
 }
 
 const ndMatrix& ndMultiBodyVehicle::GetLocalFrame() const
@@ -377,7 +377,7 @@ ndFloat32 ndMultiBodyVehicle::GetSpeed() const
 
 void ndMultiBodyVehicle::AddChassis(const ndSharedPtr<ndBody>& chassis)
 {
-	m_iniliazed = false;
+	m_initialized = false;
 	m_chassis = chassis->GetAsBodyDynamic();
 	ndAssert(m_chassis);
 
@@ -390,7 +390,7 @@ void ndMultiBodyVehicle::AddChassis(const ndSharedPtr<ndBody>& chassis)
 
 void ndMultiBodyVehicle::AddTire(const ndSharedPtr<ndBody>& tireBody, const ndSharedPtr<ndJointBilateralConstraint>& tireJoint)
 {
-	m_iniliazed = false;
+	m_initialized = false;
 	ndAssert(!strcmp(tireJoint->ClassName(), "ndMultiBodyVehicleTireJoint"));
 	m_tireList.Append((ndMultiBodyVehicleTireJoint*) *tireJoint);
 
@@ -406,7 +406,7 @@ void ndMultiBodyVehicle::AddTire(const ndSharedPtr<ndBody>& tireBody, const ndSh
 
 void ndMultiBodyVehicle::AddMotor(const ndSharedPtr<ndBody>& motorBody, const ndSharedPtr<ndJointBilateralConstraint>& motorJoint)
 {
-	m_iniliazed = false;
+	m_initialized = false;
 	ndAssert(!strcmp(motorJoint->ClassName(), "ndMultiBodyVehicleMotor"));
 	m_motor = (ndMultiBodyVehicleMotor*)*motorJoint;
 
@@ -431,7 +431,7 @@ ndMultiBodyVehicleTireJoint* ndMultiBodyVehicle::AddTire(const ndMultiBodyVehicl
 	ndMatrix matrix(tireFrame * m_localFrame * chassiMatrix);
 	matrix.m_posit = tire->GetMatrix().m_posit;
 
-	m_iniliazed = false;
+	m_initialized = false;
 	ndBodyDynamic* const tireBody = tire->GetAsBodyDynamic();
 
 	// make tire inertia spherical
@@ -451,7 +451,7 @@ ndMultiBodyVehicleTireJoint* ndMultiBodyVehicle::AddAxleTire(const ndMultiBodyVe
 {
 	ndAssert(m_chassis);
 
-	m_iniliazed = false;
+	m_initialized = false;
 	ndMatrix tireFrame(ndGetIdentityMatrix());
 	tireFrame.m_front = ndVector(0.0f, 0.0f, 1.0f, 0.0f);
 	tireFrame.m_up = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
@@ -508,7 +508,7 @@ ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 ma
 	ndSharedPtr<ndJointBilateralConstraint> differentialJoint(new ndMultiBodyVehicleDifferential(differentialBody->GetAsBodyDynamic(), *m_chassis, slipOmegaLock));
 	AddDifferential(differentialBody, differentialJoint);
 	
-	m_iniliazed = false;
+	m_initialized = false;
 	const ndVector pin(differentialBody->GetMatrix().RotateVector(differentialJoint->GetLocalMatrix0().m_front));
 	const ndVector upPin(differentialBody->GetMatrix().RotateVector(differentialJoint->GetLocalMatrix0().m_up));
 	const ndVector drivePin(leftTire->GetBody0()->GetMatrix().RotateVector(leftTire->GetLocalMatrix0().m_front));
@@ -529,7 +529,7 @@ ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 ma
 	ndSharedPtr<ndJointBilateralConstraint> differentialJoint(new ndMultiBodyVehicleDifferential(differentialBody->GetAsBodyKinematic(), *m_chassis, slipOmegaLock));
 	AddDifferential(differentialBody, differentialJoint);
 
-	m_iniliazed = false;
+	m_initialized = false;
 	const ndVector pin(differentialBody->GetMatrix().RotateVector(differentialJoint->GetLocalMatrix0().m_front));
 	const ndVector upPin(differentialBody->GetMatrix().RotateVector(differentialJoint->GetLocalMatrix0().m_up));
 	const ndVector drivePin(leftDifferential->GetBody0()->GetMatrix().RotateVector(leftDifferential->GetLocalMatrix0().m_front.Scale(ndFloat32(-1.0f))));
@@ -546,7 +546,7 @@ ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 ma
 ndMultiBodyVehicleMotor* ndMultiBodyVehicle::AddMotor(ndFloat32 mass, ndFloat32 radius)
 {
 	ndAssert(m_chassis);
-	m_iniliazed = false;
+	m_initialized = false;
 	ndSharedPtr<ndBody> motorBody (CreateInternalBodyPart(mass, radius));
 	ndSharedPtr<ndJointBilateralConstraint> motorJoint(new ndMultiBodyVehicleMotor(motorBody->GetAsBodyKinematic(), this));
 	AddMotor(motorBody, motorJoint);
@@ -556,7 +556,7 @@ ndMultiBodyVehicleMotor* ndMultiBodyVehicle::AddMotor(ndFloat32 mass, ndFloat32 
 ndMultiBodyVehicleGearBox* ndMultiBodyVehicle::AddGearBox(ndMultiBodyVehicleDifferential* const differential)
 {
 	ndAssert(m_motor);
-	m_iniliazed = false;
+	m_initialized = false;
 	ndSharedPtr<ndJointBilateralConstraint> gearBox(new ndMultiBodyVehicleGearBox(m_motor->GetBody0(), differential->GetBody0(), this));
 	AddGearBox(gearBox);
 	return *m_gearBox;
@@ -1296,7 +1296,7 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 
 void ndMultiBodyVehicle::Update(ndFloat32 timestep)
 {
-	if (!m_iniliazed)
+	if (!m_initialized)
 	{
 		FinalizeBuild();
 	}
@@ -1311,4 +1311,17 @@ void ndMultiBodyVehicle::Update(ndFloat32 timestep)
 void ndMultiBodyVehicle::PostUpdate(ndFloat32)
 {
 	ApplyAlignmentAndBalancing();
+}
+
+//void ndMultiBodyVehicle::Serialize(ndMesh* const rootNode) const
+void ndMultiBodyVehicle::Serialize(ndMesh* const) const
+{
+	ndAssert(0);
+}
+
+void ndMultiBodyVehicle::Deserialize(const ndMesh* const rootNode)
+{
+	ndModelArticulation::Deserialize(rootNode);
+	ndAssert(m_rootNode);
+	AddChassis(m_rootNode->m_body);
 }
