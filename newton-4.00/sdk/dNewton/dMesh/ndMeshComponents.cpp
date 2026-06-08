@@ -34,6 +34,7 @@
 #include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
+#include "ndMultiBodyVehicleGearBox.h"
 #include "ndIkSwivelPositionEffector.h"
 #include "ndMultiBodyVehicleDifferential.h"
 #include "ndMultiBodyVehicleDifferentialAxle.h"
@@ -601,6 +602,72 @@ ndJointBilateralConstraint* ndMeshJointDifferentialAxle::CreateObject(ndBodyKine
 		pinAndPivotInChild.m_front.Scale(m_gearRatio), child);
 
 	return joint;
+}
+
+ndMeshJointVehicleGearBox::ndMeshJointVehicleGearBox(const ndMesh* const owner)
+	:ndMeshJoint(owner)
+{
+	ndAssert(0);
+}
+
+ndMeshJointVehicleGearBox::ndMeshJointVehicleGearBox(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(owner, joint)
+{
+	ndAssert(0);
+	const ndMultiBodyVehicleGearBox* const subJoint = (ndMultiBodyVehicleGearBox*)joint;
+	//m_gearRatio = subJoint->GetGearRatio();
+}
+
+ndMeshJointVehicleGearBox::ndMeshJointVehicleGearBox(const ndMeshJointVehicleGearBox& other)
+	:ndMeshJoint(other)
+{
+	ndAssert(0);
+}
+
+ndMeshJoint* ndMeshJointVehicleGearBox::Duplicate() const
+{
+	return new ndMeshJointVehicleGearBox(*this);
+}
+
+bool ndMeshJointVehicleGearBox::operator==(const ndMeshJoint& other) const
+{
+	bool test = ndMeshJoint::operator==(other);
+
+	if (test)
+	{
+		ndAssert(0);
+		//const ndMeshJointDifferentialAxle* const otherJoint = (ndMeshJointDifferentialAxle*)&other;
+		//test = test && (m_gearRatio == otherJoint->m_gearRatio);
+	}
+	return test;
+}
+
+void ndMeshJointVehicleGearBox::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndAssert(0);
+	ndMeshJoint::SerializeToXml(parent);
+	//xmlSaveParam(parent, "ratio", m_gearRatio);
+}
+
+void ndMeshJointVehicleGearBox::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndAssert(0);
+	ndMeshJoint::DeserializeFromXml(parent);
+	//m_gearRatio = xmlGetFloat(parent, "ratio");
+}
+
+ndJointBilateralConstraint* ndMeshJointVehicleGearBox::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+{
+	ndAssert(0);
+	return nullptr;
+	//const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	//const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
+	//
+	//ndMultiBodyVehicleDifferentialAxle* const joint = new ndMultiBodyVehicleDifferentialAxle(
+	//	pinAndPivotInParent.m_front, pinAndPivotInParent.m_up, parent,
+	//	pinAndPivotInChild.m_front.Scale(m_gearRatio), child);
+	//
+	//return joint;
 }
 
 

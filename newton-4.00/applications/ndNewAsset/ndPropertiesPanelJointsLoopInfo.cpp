@@ -406,6 +406,10 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 				{
 					EditDifferentialAxleLoopJoint(loopJoint);
 				}
+				else if (strcmp(joint->m_constructor.GetStr(), ndMultiBodyVehicleGearBox::StaticClassName()) == 0)
+				{
+					EditGearBoxLoopJoint(loopJoint);
+				}
 				else if (strcmp(joint->m_constructor.GetStr(), ndJointRoller::StaticClassName()) == 0)
 				{
 					EditRollerLoopJoint(loopJoint);
@@ -527,6 +531,22 @@ void ndAssetEditor::EditDifferentialAxleLoopJoint(ndSharedPtr<ndMeshLoopJoint>& 
 		joint->m_gearRatio = ndMax(value, ndReal(0.01f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
+}
+
+void ndAssetEditor::EditGearBoxLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
+{
+	ndAssert(0);
+	//EditLoopJointLocalMatrix(loopJoint);
+	//
+	//ndMeshJointDifferentialAxle* const joint = (ndMeshJointDifferentialAxle*)*loopJoint->m_joint;
+	//
+	//ndReal value = ndReal(joint->m_gearRatio);
+	//if (ImGui::InputFloat("gear ratio", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	//{
+	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	//	joint->m_gearRatio = ndMax(value, ndReal(0.01f));
+	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	//}
 }
 
 void ndAssetEditor::EditSliderLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)

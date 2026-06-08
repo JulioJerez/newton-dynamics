@@ -37,6 +37,7 @@
 #include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
+#include "ndMultiBodyVehicleGearBox.h"
 #include "ndIkSwivelPositionEffector.h"
 #include "ndMultiBodyVehicleDifferentialAxle.h"
 
@@ -1656,6 +1657,10 @@ ndSharedPtr<ndMeshJoint> ndMesh::LoadJoint(const nd::TiXmlElement* const xmlJoin
 	else if (strcmp(constructor, ndJointGear::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointGear(mesh));
+	}
+	else if (strcmp(constructor, ndMultiBodyVehicleGearBox::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMultiBodyVehicleGearBox(mesh));
 	}
 	else if (strcmp(constructor, ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0)
 	{

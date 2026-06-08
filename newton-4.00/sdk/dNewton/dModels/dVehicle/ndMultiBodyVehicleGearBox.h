@@ -47,6 +47,7 @@ class ndMultiBodyVehicleGearBox : public ndJointGear
 
 	protected:
 	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
+	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
 	ndFloat32 m_idleOmega;
 	ndFloat32 m_clutchTorque;

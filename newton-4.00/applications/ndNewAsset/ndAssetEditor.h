@@ -180,6 +180,7 @@ class ndAssetEditor : public ndClassAlloc
 	void EditSliderLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditRollerLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditFix6dofLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
+	void EditGearBoxLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditCylinderLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditSphericalLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditDoubleHingeLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);

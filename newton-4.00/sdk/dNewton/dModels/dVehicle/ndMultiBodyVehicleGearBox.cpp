@@ -21,8 +21,8 @@
 
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
-
 #include "ndJointWheel.h"
+#include "ndMeshComponents.h"
 #include "ndMultiBodyVehicle.h"
 #include "ndMultiBodyVehicleMotor.h"
 #include "ndMultiBodyVehicleGearBox.h"
@@ -128,3 +128,9 @@ void ndMultiBodyVehicleGearBox::JacobianDerivative(ndConstraintDescritor& desc)
 	}
 }
 
+ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleGearBox::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointVehicleGearBox* const joint = new ndMeshJointVehicleGearBox(owner, this);
+	ndAssert(0);
+	return ndSharedPtr<ndMeshJoint>(joint);
+}
