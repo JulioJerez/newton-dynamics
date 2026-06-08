@@ -124,7 +124,6 @@ ndFloat32 ndVehicleDectriptor::ndEngineTorqueCurve::GetTorque(ndFloat32 omegaInR
 }
 
 ndVehicleDectriptor::ndVehicleDectriptor(const char* const name)
-	:m_comDisplacement(ndVector::m_zero)
 {
 	strncpy(m_name, name, sizeof(m_name) - 1);
 
@@ -139,6 +138,7 @@ ndVehicleDectriptor::ndVehicleDectriptor(const char* const name)
 
 	//m_chassisMass = ndFloat32(1000.0f);
 	m_chassisAngularDrag = ndFloat32(0.25f);
+
 	m_transmission.m_gearsCount = 4;
 	m_transmission.m_neutral = ndFloat32(0.0f);
 	m_transmission.m_reverseRatio = ndFloat32(-3.0f);
@@ -155,25 +155,21 @@ ndVehicleDectriptor::ndVehicleDectriptor(const char* const name)
 	m_transmission.m_gearShiftDelayTicks = 180;
 	m_transmission.m_manual = false;
 
-	m_frontTire.m_mass = ndFloat32(20.0f);
 	m_frontTire.m_springK = ndFloat32(1000.0f);
 	m_frontTire.m_damperC = ndFloat32(20.0f);
 	m_frontTire.m_regularizer = ndFloat32(0.1f);
 	m_frontTire.m_lowerStop = ndFloat32(-0.05f);
 	m_frontTire.m_upperStop = ndFloat32(0.2f);
-	m_frontTire.m_verticalOffset = ndFloat32(0.0f);
 	m_frontTire.m_brakeTorque = ndFloat32(1500.0f);
 	m_frontTire.m_handBrakeTorque = ndFloat32(1500.0f);
 	m_frontTire.m_steeringAngle = ndFloat32(35.0f) * ndDegreeToRad;
 
-	m_rearTire.m_mass = ndFloat32(20.0f);
 	m_rearTire.m_springK = ndFloat32(1000.0f);
 	m_rearTire.m_damperC = ndFloat32(20.0f);
 	m_rearTire.m_regularizer = ndFloat32(0.1f);
 	m_rearTire.m_lowerStop = ndFloat32(-0.05f);
 	m_rearTire.m_upperStop = ndFloat32(0.2f);
 	m_rearTire.m_steeringAngle = ndFloat32(0.0f);
-	m_rearTire.m_verticalOffset = ndFloat32(0.0f);
 	m_rearTire.m_brakeTorque = ndFloat32(1500.0f);
 	m_rearTire.m_handBrakeTorque = ndFloat32(1000.0f);
 
@@ -273,13 +269,10 @@ ndMultiBodyVehicle::ndMultiBodyVehicle(ndFloat32 gravityMagnitud)
 
 	m_gravityMagnitud = -ndAbs(gravityMagnitud);
 	ndAssert(ndAbs(m_gravityMagnitud) > ndFloat32 (0.0f));
-
-	//m_tireShape->AddRef();
 }
 
 ndMultiBodyVehicle::~ndMultiBodyVehicle()
 {
-	//m_tireShape->Release();
 }
 
 void ndMultiBodyVehicle::FinalizeBuild()
@@ -551,7 +544,7 @@ void ndMultiBodyVehicle::AddTire(const ndSharedPtr<ndBody>& tireBody, const ndSh
 		ndAssert(tireJoint->GetBody1() == GetRoot()->m_body->GetAsBody());
 		AddLimb(GetRoot(), tireBody, tireJoint);
 	}
-	tireBody->GetAsBodyDynamic()->SetMaxLinearAndAngularIntegrationStep(ndFloat32(2.0f * 360.0f) * ndDegreeToRad, ndFloat32(10.0f));
+	tireBody->GetAsBodyDynamic()->SetMaxLinearAndAngularIntegrationStep(ndFloat32(360.0f) * ndDegreeToRad, ndFloat32(10.0f));
 }
 
 void ndMultiBodyVehicle::AddMotor(const ndSharedPtr<ndBody>& motorBody, const ndSharedPtr<ndJointBilateralConstraint>& motorJoint)
@@ -1474,7 +1467,48 @@ void ndMultiBodyVehicle::Deserialize(const ndMesh* const rootNode)
 	ndModelArticulation::Deserialize(rootNode);
 	ndAssert(m_rootNode);
 
+	// get the defualt vehicle descritor.
 	ndSharedPtr<ndVehicleDectriptor> desc(new ndVehicleDectriptor("defualt"));
 
+	// set the chassis and apply some angular drag
 	AddChassis(m_rootNode->m_body);
+	m_chassis->SetAngularDamping(ndVector(desc->m_chassisAngularDrag));
+
+	//ndVector com(m_chassis->GetCentreOfMass());
+	//const ndMatrix localFrame(GetLocalFrame());
+
+	// 2- each tire
+	// create the tire as a normal rigid body
+	// and attach them to the chassis with a tire joints
+	//ndMultiBodyVehicleTireJointInfo rr_tireConfiguration(desc->m_rearTire);
+	//ndMultiBodyVehicleTireJointInfo rl_tireConfiguration(desc->m_rearTire);
+	//ndSharedPtr<ndBody> rr_tire_body(notifyCallback->CreateTireBody(scene, chassis, rr_tireConfiguration, "rr_tire"));
+	//ndSharedPtr<ndBody> rl_tire_body(notifyCallback->CreateTireBody(scene, chassis, rl_tireConfiguration, "rl_tire"));
+	//ndMultiBodyVehicleTireJoint* const rr_tire = vehicle->AddTire(rr_tireConfiguration, rr_tire_body);
+	//ndMultiBodyVehicleTireJoint* const rl_tire = vehicle->AddTire(rl_tireConfiguration, rl_tire_body);
+
+	auto FindTires = [this](ndNode* const node)
+	{
+		if (node->m_joint)
+		{
+			if (strcmp(node->m_joint->ClassName(), ndJointWheel::StaticClassName()) == 0)
+			{
+				ndMultiBodyVehicleTireJoint* const src = (ndMultiBodyVehicleTireJoint*)*node->m_joint;
+				ndSharedPtr<ndJointBilateralConstraint> surrugate(new ndMultiBodyVehicleTireJoint(src, this));
+				node->m_joint = surrugate;
+			}
+
+			if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0)
+			{
+				AddTire(node->m_body, node->m_joint);
+			}
+
+			// collect the differentials
+			if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleDifferential::StaticClassName()) == 0)
+			{
+				AddDifferential(node->m_body, node->m_joint);
+			}
+		}
+	};
+	NodeIterator(FindTires);
 }

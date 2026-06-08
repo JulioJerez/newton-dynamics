@@ -96,6 +96,7 @@ class ndJointWheel : public ndJointBilateralConstraint
 	D_CLASS_REFLECTION(ndJointWheel, ndJointBilateralConstraint)
 
 	D_NEWTON_API ndJointWheel();
+	D_NEWTON_API ndJointWheel(const ndJointWheel& wheel);
 	D_NEWTON_API ndJointWheel(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent, const ndWheelDescriptor& desc);
 	D_NEWTON_API ndJointWheel(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent, const ndWheelDescriptor& desc);
 	D_NEWTON_API virtual ~ndJointWheel();
@@ -129,11 +130,11 @@ class ndJointWheel : public ndJointBilateralConstraint
 	ndWheelDescriptor m_info;
 	ndFloat32 m_posit;
 	ndFloat32 m_speed;
-	ndFloat32 m_regularizer;
 	ndFloat32 m_normalizedBrake;
 	ndFloat32 m_normalizedSteering;
 	ndFloat32 m_normalizedSteering0;
 	ndFloat32 m_normalizedHandBrake;
+	ndFloat32 m_variableRateRegularizer;
 	bool m_isApplyingBrakes;
 
 	friend class ndMultiBodyVehicle;

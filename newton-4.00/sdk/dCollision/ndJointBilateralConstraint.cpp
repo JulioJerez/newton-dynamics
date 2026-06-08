@@ -127,6 +127,35 @@ ndJointBilateralConstraint::ndJointBilateralConstraint(ndInt32 maxDof, ndBodyKin
 	ndMemSet(m_motorAcceleration, ndFloat32(0.0f), sizeof(m_motorAcceleration) / sizeof(m_motorAcceleration[0]));
 }
 
+ndJointBilateralConstraint::ndJointBilateralConstraint(const ndJointBilateralConstraint& joint)
+	:ndConstraint()
+	,m_localMatrix0(joint.m_localMatrix0)
+	,m_localMatrix1(joint.m_localMatrix1)
+	,m_worldNode(nullptr)
+	,m_body0Node(nullptr)
+	,m_body1Node(nullptr)
+	,m_userData(nullptr)
+{
+	m_body0 = joint.m_body0;
+	m_body1 = joint.m_body1;
+	ndAssert(m_body0 && m_body1);
+	ndAssert(m_body0 != m_body1);
+
+	m_mark0 = 0;
+	m_mark1 = 0;
+	m_hitLimits = 0;
+	m_rowIsMotor = 0;
+	m_isInSkeleton = 0;
+	m_enableCollision = 0;
+	m_maxDof = joint.m_maxDof;
+
+	m_solverModel = m_jointkinematicOpenLoop;
+	m_defualtDiagonalRegularizer = ndFloat32(0.0f);
+
+	ndMemSet(m_jointForce, ndForceImpactPair(), sizeof(m_jointForce) / sizeof(m_jointForce[0]));
+	ndMemSet(m_motorAcceleration, ndFloat32(0.0f), sizeof(m_motorAcceleration) / sizeof(m_motorAcceleration[0]));
+}
+
 ndJointBilateralConstraint::~ndJointBilateralConstraint()
 {
 }

@@ -21,11 +21,12 @@
 
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
+#include "ndMeshComponents.h"
 #include "ndMultiBodyVehicleDifferential.h"
 
 ndMultiBodyVehicleDifferential::ndMultiBodyVehicleDifferential()
 	:ndJointBilateralConstraint()
-	,m_limitedSlipOmega(0.0f)
+	,m_limitedSlipOmega(D_MINIMUM_SLIP_OMEGA)
 {
 	m_maxDof = 2;
 }
@@ -54,8 +55,6 @@ void ndMultiBodyVehicleDifferential::AlignMatrix()
 	ndMatrix matrix1;
 	CalculateGlobalMatrix(matrix0, matrix1);
 
-	//matrix1.m_posit += matrix1.m_up.Scale(1.0f);
-
 	m_body0->SetMatrixNoSleep(matrix1);
 	m_body0->SetVelocityNoSleep(m_body1->GetVelocity());
 
@@ -67,6 +66,11 @@ void ndMultiBodyVehicleDifferential::AlignMatrix()
 		matrix1.m_right.Scale(matrix1.m_right.DotProduct(omega1).GetScalar()));
 
 	m_body0->SetOmegaNoSleep(omega);
+}
+
+void ndMultiBodyVehicleDifferential::UpdateParameters()
+{
+	// for now do nothing
 }
 
 void ndMultiBodyVehicleDifferential::JacobianDerivative(ndConstraintDescritor& desc)
@@ -106,3 +110,9 @@ void ndMultiBodyVehicleDifferential::JacobianDerivative(ndConstraintDescritor& d
 	}
 }
 
+ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleDifferential::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointDifferential* const joint = new ndMeshJointDifferential(owner, this);
+	joint->m_limitedSlipOmega = m_limitedSlipOmega;
+	return ndSharedPtr<ndMeshJoint>(joint);
+}

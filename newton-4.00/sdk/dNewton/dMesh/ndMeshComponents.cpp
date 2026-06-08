@@ -35,6 +35,7 @@
 #include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
 #include "ndIkSwivelPositionEffector.h"
+#include "ndMultiBodyVehicleDifferential.h"
 #include "ndMultiBodyVehicleDifferentialAxle.h"
 
 ndMeshBodyDynamic::ndMeshBodyDynamic(const ndMesh* const owner)
@@ -488,6 +489,61 @@ ndJointBilateralConstraint* ndMeshJointGear::CreateObject(ndBodyKinematic* const
 	return joint;
 }
 
+ndMeshJointDifferential::ndMeshJointDifferential(const ndMesh* const owner)
+	:ndMeshJoint(owner)
+{
+}
+
+ndMeshJointDifferential::ndMeshJointDifferential(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(owner, joint)
+{
+	const ndMultiBodyVehicleDifferential* const subJoint = (ndMultiBodyVehicleDifferential*)joint;
+	m_limitedSlipOmega = subJoint->GetSlipOmega();
+}
+
+ndMeshJointDifferential::ndMeshJointDifferential(const ndMeshJointDifferential& other)
+	:ndMeshJoint(other)
+	,m_limitedSlipOmega(other.m_limitedSlipOmega)
+{
+}
+
+ndMeshJoint* ndMeshJointDifferential::Duplicate() const
+{
+	return new ndMeshJointDifferential(*this);
+}
+
+bool ndMeshJointDifferential::operator==(const ndMeshJoint& other) const
+{
+	bool test = ndMeshJoint::operator==(other);
+
+	if (test)
+	{
+		const ndMeshJointDifferential* const otherJoint = (ndMeshJointDifferential*)&other;
+		test = test && (m_limitedSlipOmega == otherJoint->m_limitedSlipOmega);
+	}
+	return test;
+}
+
+void ndMeshJointDifferential::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+	xmlSaveParam(parent, "slipOmega", m_limitedSlipOmega);
+}
+
+void ndMeshJointDifferential::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndMeshJoint::DeserializeFromXml(parent);
+	m_limitedSlipOmega = xmlGetFloat(parent, "slipOmega");
+}
+
+ndJointBilateralConstraint* ndMeshJointDifferential::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+{
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
+	ndMultiBodyVehicleDifferential* const joint = new ndMultiBodyVehicleDifferential(child, parent, m_limitedSlipOmega);
+	return joint;
+}
+
 ndMeshJointDifferentialAxle::ndMeshJointDifferentialAxle(const ndMesh* const owner)
 	:ndMeshJoint(owner)
 {
@@ -502,7 +558,7 @@ ndMeshJointDifferentialAxle::ndMeshJointDifferentialAxle(const ndMesh* const own
 
 ndMeshJointDifferentialAxle::ndMeshJointDifferentialAxle(const ndMeshJointDifferentialAxle& other)
 	:ndMeshJoint(other)
-	,m_gearRatio(other.m_gearRatio)
+	, m_gearRatio(other.m_gearRatio)
 {
 }
 
@@ -542,10 +598,11 @@ ndJointBilateralConstraint* ndMeshJointDifferentialAxle::CreateObject(ndBodyKine
 
 	ndMultiBodyVehicleDifferentialAxle* const joint = new ndMultiBodyVehicleDifferentialAxle(
 		pinAndPivotInParent.m_front, pinAndPivotInParent.m_up, parent,
-		pinAndPivotInChild.m_front.Scale (m_gearRatio), child);
+		pinAndPivotInChild.m_front.Scale(m_gearRatio), child);
 
 	return joint;
 }
+
 
 ndMeshJointSlider::ndMeshJointSlider(const ndMesh* const owner)
 	:ndMeshJoint(owner)

@@ -25,11 +25,32 @@ ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint()
 	ndAssert(0);
 }
 
-ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent, const ndMultiBodyVehicleTireJointInfo& info, ndMultiBodyVehicle* const vehicle)
+ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent, const ndMultiBodyVehicleTireJointInfo& info, ndMultiBodyVehicle* const owner)
 	:ndJointWheel(pinAndPivotFrame, child, parent, info)
-	,m_vehicle(vehicle)
-	,m_frictionModel(info)
+	,m_vehicle(owner)
+	,m_frictionModel()
 	,m_lateralSlip(ndFloat32 (0.0f))
+	,m_longitudinalSlip(ndFloat32(0.0f))
+	,m_normalizedAligningTorque(ndFloat32(0.0f))
+{
+}
+
+ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint(const ndMultiBodyVehicleTireJoint& joint)
+	:ndJointWheel(joint)
+	,m_vehicle(ndWeakPtr<ndMultiBodyVehicle>(nullptr))
+	,m_frictionModel(joint.m_frictionModel)
+	,m_lateralSlip(ndFloat32(0.0f))
+	,m_longitudinalSlip(ndFloat32(0.0f))
+	,m_normalizedAligningTorque(ndFloat32(0.0f))
+{
+	ndAssert(0);
+}
+
+ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint(const ndJointWheel* const joint, ndMultiBodyVehicle* const owner)
+	:ndJointWheel(*joint)
+	,m_vehicle(ndWeakPtr<ndMultiBodyVehicle>(owner))
+	,m_frictionModel()
+	,m_lateralSlip(ndFloat32(0.0f))
 	,m_longitudinalSlip(ndFloat32(0.0f))
 	,m_normalizedAligningTorque(ndFloat32(0.0f))
 {
@@ -66,7 +87,7 @@ const ndTireFrictionModel& ndMultiBodyVehicleTireJoint::GetFrictionModel() const
 
 void ndMultiBodyVehicleTireJoint::JacobianDerivative(ndConstraintDescritor& desc)
 {
-	m_regularizer = m_info.m_regularizer * m_vehicle->m_downForce.m_suspensionStiffnessModifier;
+	m_variableRateRegularizer = m_info.m_regularizer * m_vehicle->m_downForce.m_suspensionStiffnessModifier;
 	ndJointWheel::JacobianDerivative(desc);
 }
 

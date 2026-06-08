@@ -35,7 +35,7 @@ class ndMultiBodyVehicleGearBox;
 class ndMultiBodyVehicleTireJoint;
 class ndMultiBodyVehicleTorsionBar;
 class ndMultiBodyVehicleDifferential;
-class ndMultiBodyVehicleTireJointInfo;
+//class ndMultiBodyVehicleTireJointInfo;
 class ndMultiBodyVehicleDifferentialAxle;
 
 class ndMultiBodyVehicleTireJointInfo : public ndWheelDescriptor, public ndTireFrictionModel
@@ -130,13 +130,6 @@ class ndVehicleDectriptor: public ndClassAlloc
 		bool m_manual;
 	};
 
-	class ndTireDefinition : public ndMultiBodyVehicleTireJointInfo
-	{
-		public:
-		ndFloat32 m_mass;
-		ndFloat32 m_verticalOffset;
-	};
-
 	enum ndDifferentialType
 	{
 		m_rearWheelDrive,
@@ -155,15 +148,14 @@ class ndVehicleDectriptor: public ndClassAlloc
 
 	ndVehicleDectriptor(const char* const name);
 
-	ndVector m_comDisplacement;
+	//ndVector m_comDisplacement;
 	char m_name[32];
-
 	//ndFloat32 m_chassisMass;
 	ndFloat32 m_chassisAngularDrag;
 	ndEngineTorqueCurve m_engine;
 	ndGearBox m_transmission;
-	ndTireDefinition m_frontTire;
-	ndTireDefinition m_rearTire;
+	ndMultiBodyVehicleTireJointInfo m_frontTire;
+	ndMultiBodyVehicleTireJointInfo m_rearTire;
 	ndFloat32 m_motorMass;
 	ndFloat32 m_motorRadius;
 

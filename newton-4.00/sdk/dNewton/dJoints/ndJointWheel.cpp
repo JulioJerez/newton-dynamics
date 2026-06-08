@@ -62,21 +62,21 @@ void ndTireFrictionModel::GetPacejkaCurves(ndFrictionModel pacejkaStockModel, nd
 {
 	switch (pacejkaStockModel)
 	{
-	case m_pacejkaSport:
-		lateral = pacejkaSportLateral;
-		longitudinal = pacejkaSportLongitudinal;
-		break;
+		case m_pacejkaSport:
+			lateral = pacejkaSportLateral;
+			longitudinal = pacejkaSportLongitudinal;
+			break;
 
-	case ndTireFrictionModel::m_pacejkaTruck:
-		lateral = pacejkaTruckLateral;
-		longitudinal = pacejkaTruckLongitudinal;
-		break;
+		case ndTireFrictionModel::m_pacejkaTruck:
+			lateral = pacejkaTruckLateral;
+			longitudinal = pacejkaTruckLongitudinal;
+			break;
 
-	case ndTireFrictionModel::m_pacejkaUtility:
-	default:
-		lateral = pacejkaUtilityLateral;
-		longitudinal = pacejkaUtilityLongitudinal;
-		break;
+		case ndTireFrictionModel::m_pacejkaUtility:
+		default:
+			lateral = pacejkaUtilityLateral;
+			longitudinal = pacejkaUtilityLongitudinal;
+			break;
 	}
 }
 
@@ -101,13 +101,13 @@ void ndTireFrictionModel::PlotPacejkaCurves(const char* const name) const
 
 ndTireFrictionModel::ndPacejkaTireModel::ndPacejkaTireModel()
 	:m_b(ndFloat32(0.5f))
-	, m_c(ndFloat32(1.65f))
-	, m_d(ndFloat32(1.0f))
-	, m_e(ndFloat32(0.8f))
-	, m_sv(ndFloat32(0.0f))
-	, m_sh(ndFloat32(0.0f))
-	, m_normalizingPhi(ndFloat32(1.0f))
-	, m_norminalNormalForce(ndFloat32(1000.0f))
+	,m_c(ndFloat32(1.65f))
+	,m_d(ndFloat32(1.0f))
+	,m_e(ndFloat32(0.8f))
+	,m_sv(ndFloat32(0.0f))
+	,m_sh(ndFloat32(0.0f))
+	,m_normalizingPhi(ndFloat32(1.0f))
+	,m_norminalNormalForce(ndFloat32(1000.0f))
 {
 	// set some defualt values, longitudinal force for a classic tire form Giancalr Genta book.
 	CalculateMaxPhi();
@@ -115,13 +115,13 @@ ndTireFrictionModel::ndPacejkaTireModel::ndPacejkaTireModel()
 
 ndTireFrictionModel::ndPacejkaTireModel::ndPacejkaTireModel(ndFloat32 B, ndFloat32 C, ndFloat32 D, ndFloat32 E, ndFloat32 Sv, ndFloat32 Sh)
 	:m_b(B)
-	, m_c(C)
-	, m_d(1.0f)
-	, m_e(E)
-	, m_sv(Sv)
-	, m_sh(Sh)
-	, m_normalizingPhi(ndFloat32(1.0f))
-	, m_norminalNormalForce(D)
+	,m_c(C)
+	,m_d(1.0f)
+	,m_e(E)
+	,m_sv(Sv)
+	,m_sh(Sh)
+	,m_normalizingPhi(ndFloat32(1.0f))
+	,m_norminalNormalForce(D)
 {
 	CalculateMaxPhi();
 }
@@ -159,11 +159,11 @@ ndJointWheel::ndJointWheel()
 	,m_info()
 	,m_posit(ndFloat32(0.0f))
 	,m_speed(ndFloat32(0.0f))
-	,m_regularizer(m_info.m_regularizer)
 	,m_normalizedBrake(ndFloat32(0.0f))
 	,m_normalizedSteering(ndFloat32(0.0f))
 	,m_normalizedSteering0(ndFloat32(0.0f))
 	,m_normalizedHandBrake(ndFloat32(0.0f))
+	,m_variableRateRegularizer(m_info.m_regularizer)
 	,m_isApplyingBrakes(false)
 {
 	m_maxDof = 7;
@@ -175,11 +175,11 @@ ndJointWheel::ndJointWheel(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* co
 	,m_info(info)
 	,m_posit(ndFloat32 (0.0f))
 	,m_speed(ndFloat32(0.0f))
-	,m_regularizer(info.m_regularizer)
 	,m_normalizedBrake(ndFloat32(0.0f))
 	,m_normalizedSteering(ndFloat32(0.0f))
 	,m_normalizedSteering0(ndFloat32(0.0f))
 	,m_normalizedHandBrake(ndFloat32(0.0f))
+	,m_variableRateRegularizer(info.m_regularizer)
 	,m_isApplyingBrakes(false)
 {
 }
@@ -190,12 +190,27 @@ ndJointWheel::ndJointWheel(const ndMatrix& pinAndPivotInChild, const ndMatrix& p
 	,m_info(desc)
 	,m_posit(ndFloat32(0.0f))
 	,m_speed(ndFloat32(0.0f))
-	,m_regularizer(desc.m_regularizer)
 	,m_normalizedBrake(ndFloat32(0.0f))
 	,m_normalizedSteering(ndFloat32(0.0f))
 	,m_normalizedSteering0(ndFloat32(0.0f))
 	,m_normalizedHandBrake(ndFloat32(0.0f))
+	,m_variableRateRegularizer(desc.m_regularizer)
 	,m_isApplyingBrakes(false)
+{
+}
+
+ndJointWheel::ndJointWheel(const ndJointWheel& wheel)
+	:ndJointBilateralConstraint(wheel)
+	,m_baseFrame(wheel.m_baseFrame)
+	,m_info(wheel.m_info)
+	,m_posit(wheel.m_posit)
+	,m_speed(wheel.m_speed)
+	,m_normalizedBrake(wheel.m_normalizedBrake)
+	,m_normalizedSteering(wheel.m_normalizedSteering)
+	,m_normalizedSteering0(wheel.m_normalizedSteering0)
+	,m_normalizedHandBrake(wheel.m_normalizedHandBrake)
+	,m_variableRateRegularizer(wheel.m_variableRateRegularizer)
+	,m_isApplyingBrakes(wheel.m_isApplyingBrakes)
 {
 }
 
@@ -377,7 +392,7 @@ void ndJointWheel::JacobianDerivative(ndConstraintDescritor& desc)
 	AddAngularRowJacobian(desc, matrix1.m_up, angle0);
 	AddAngularRowJacobian(desc, matrix1.m_right, angle1);
 	AddLinearRowJacobian(desc, matrix0.m_posit, matrix1.m_posit, matrix1.m_up);
-	SetMassSpringDamperAcceleration(desc, m_regularizer, m_info.m_springK, m_info.m_damperC);
+	SetMassSpringDamperAcceleration(desc, m_variableRateRegularizer, m_info.m_springK, m_info.m_damperC);
 
 	m_isApplyingBrakes = false;
 	const ndFloat32 brakeFrictionTorque = ndMax(m_normalizedBrake * m_info.m_brakeTorque, m_normalizedHandBrake * m_info.m_handBrakeTorque);

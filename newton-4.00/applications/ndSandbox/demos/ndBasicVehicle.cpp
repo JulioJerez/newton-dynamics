@@ -504,7 +504,8 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	//ndSharedPtr<ndModel> vehicle3 (CreateBasicVehicle(scene, monterTruckDesc1, ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 6.0f, 0.0f)), (ndVehicleUI*)*vehicleUI));
 
 	//CreateBasicVehicle(ndDemoEntityManager* const scene, const char* const modelName, const ndMatrix& matrix)
-	ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossa.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f))));
+	//ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossa.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f))));
+	//ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "xxx.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f))));
 
 	//world->AddModel(vehicle1);
 	//world->AddModel(vehicle2);
