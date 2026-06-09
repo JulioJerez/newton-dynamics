@@ -297,7 +297,8 @@ void ndMultiBodyVehicle::FinalizeBuild()
 	SetTransform(ndGetIdentityMatrix());
 
 	bodyId.PushBack(0);
-	bodyArray.PushBack(GetWorld()->GetSentinelBody());
+	ndBodySentinel sentinelBody;
+	bodyArray.PushBack(&sentinelBody);
 	invMass.PushBack(ndFloat32 (0.0f));
 	invInertia.PushBack(ndGetZeroMatrix());
 
@@ -449,10 +450,10 @@ void ndMultiBodyVehicle::FinalizeBuild()
 
 	ndInt32 stride = ndInt32 (&massMatrix[1][0] - &massMatrix[0][0]);
 
-	ndAssert(ndTestPSDmatrix(
-		jointArray.GetCount(), stride, 
-		&massMatrix[0][0], 
-		(ndFloat32*)GetWorld()->GetScratchBuffer(0, stride* stride* ndInt32(sizeof(ndFloat32)))));
+#ifdef _DEBUG
+	ndFloat32* const buffer = ndAlloca(ndFloat32, stride * stride + 1024);
+	ndAssert(ndTestPSDmatrix(jointArray.GetCount(), stride, &massMatrix[0][0], buffer));
+#endif
 
 	ndFixSizeArray<ndFloat32, 64> force;
 	force.SetCount(jointArray.GetCount());
@@ -1503,7 +1504,11 @@ void ndMultiBodyVehicle::Deserialize(const ndMesh* const rootNode)
 				AddTire(node->m_body, node->m_joint);
 			}
 
-			// collect the differentials
+			if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleMotor::StaticClassName()) == 0)
+			{
+				AddMotor(node->m_body, node->m_joint);
+			}
+
 			if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleDifferential::StaticClassName()) == 0)
 			{
 				AddDifferential(node->m_body, node->m_joint);
@@ -1512,46 +1517,9 @@ void ndMultiBodyVehicle::Deserialize(const ndMesh* const rootNode)
 			if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleGearBox::StaticClassName()) == 0)
 			{
 				AddGearBox(node->m_joint);
-				const ndBodyKinematic* const body0 = node->m_joint->GetBody0()->GetAsBodyKinematic();
-				const ndBodyKinematic* const body1 = node->m_joint->GetBody1()->GetAsBodyKinematic();
-
-				const ndNode* const node0 = FindByBody(body0);
-				const ndNode* const node1 = FindByBody(body1);
-				if (strcmp(node0->m_joint->ClassName(), ndMultiBodyVehicleDifferential::StaticClassName()) == 0)
-				{
-
-				}
-				else
-				{
-					ndAssert(strcmp(node1->m_joint->ClassName(), ndMultiBodyVehicleDifferential::StaticClassName()) == 0);
-				}
-
 			}
 		}
 	};
 	NodeIterator(FindTires);
-
-	//// find root differential
-	//ndTree<ndInt32, const ndMultiBodyVehicleDifferential*> visited;
-	//for (ndList<ndMultiBodyVehicleDifferential*>::ndNode* node = differentials.GetFirst(); node; node = node->GetNext())
-	//{
-	//	bool foundMatch = false;
-	//	const ndBodyKinematic* const body0 = node->GetInfo()->GetBody0();
-	//	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); !foundMatch && tireNode; tireNode = tireNode->GetNext())
-	//	{
-	//		const ndBodyKinematic* const body1 = tireNode->GetInfo()->GetBody0();
-	//		for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* trainNode = m_closeLoops.GetFirst(); trainNode; trainNode = trainNode->GetNext())
-	//		{
-	//			ndJointBilateralConstraint* const axleJoint = *trainNode->GetInfo().m_joint;
-	//			bool test = (body0 == axleJoint->GetBody0()) && (body1 == axleJoint->GetBody1());
-	//			test = test || (body1 == axleJoint->GetBody0()) && (body0 == axleJoint->GetBody1());
-	//			if (test)
-	//			{
-	//				foundMatch = true;
-	//				visited.Insert(0, node->GetInfo());
-	//				break;
-	//			}
-	//		}
-	//	}
-	//}
+	FinalizeBuild();
 }

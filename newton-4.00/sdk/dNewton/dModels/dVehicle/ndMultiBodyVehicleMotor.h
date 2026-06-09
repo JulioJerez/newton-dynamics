@@ -50,6 +50,7 @@ class ndMultiBodyVehicleMotor: public ndJointBilateralConstraint
 
 	private:
 	void AlignMatrix();
+	void UpdateParameters() override;
 	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
 	D_NEWTON_API ndFloat32 CalculateAcceleration(ndConstraintDescritor& desc);
 	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;

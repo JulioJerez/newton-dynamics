@@ -250,12 +250,10 @@ class ndBodyKinematic : public ndBody
 	friend class ndJointBilateralConstraint;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
-
 class ndBodySentinel : public ndBodyKinematic
 {
 	ndBodySentinel* GetAsBodySentinel() { return this; }
 };
-
 
 #endif 
 
