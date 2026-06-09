@@ -249,6 +249,7 @@ class ndVehicleCommonNotify : public ndModelNotify
 	void Update(ndFloat32 timestep) override;
 	void PostUpdate(ndFloat32 timestep) override;
 
+	bool m_sleepingState;
 };
 
 #endif

@@ -719,6 +719,7 @@ ndVehicleCommonNotify::ndVehicleCommonNotify(const ndVehicleDectriptor&, ndMulti
 	//,m_inputs()
 	//,m_desc(desc)
 	//,m_driverState(m_parked)
+	,m_sleepingState(false)
 {
 	SetModel(vehicle);
 	//m_ui = ui;
@@ -731,23 +732,23 @@ ndVehicleCommonNotify::ndVehicleCommonNotify(const ndVehicleDectriptor&, ndMulti
 
 void ndVehicleCommonNotify::Update(ndFloat32 timestep)
 {
-	//ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
-	//m_sleepingState = true;
+	m_sleepingState = true;
+	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
+	
 	//if (m_isPlayer || (vehicle && !vehicle->IsSleeping()))
-	//{
-	//	m_sleepingState = false;
+	if (vehicle && !vehicle->IsSleeping())
+	{
+		m_sleepingState = false;
 	//	ApplyInputs(timestep);
-	//	vehicle->Update(timestep);
-	//}
-	ndModelNotify::Update(timestep);
+		vehicle->Update(timestep);
+	}
 }
 
 void ndVehicleCommonNotify::PostUpdate(ndFloat32 timestep)
 {
 	ndModelNotify::PostUpdate(timestep);
 	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
-	//if (vehicle && !m_sleepingState)
-	if (vehicle)
+	if (vehicle && !m_sleepingState)
 	{
 		vehicle->PostUpdate(timestep);
 	}
