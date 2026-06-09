@@ -743,7 +743,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_autoSleepMode = false;
 	//m_hidePostUpdate = true;
 	//m_hideVisualMeshes = true;
-	//m_solverMode = ndWorld::ndStandardSolver;
+	m_solverMode = ndWorld::ndStandardSolver;
 	//m_solverMode = ndWorld::ndSimdSoaSolver;
 	//m_solverMode = ndWorld::ndSimdAvx2Solver;
 	//m_solverPasses = 4;
