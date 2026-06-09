@@ -106,6 +106,6 @@ void ndMultiBodyVehicleDifferentialAxle::JacobianDerivative(ndConstraintDescrito
 
 ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleDifferentialAxle::GetMeshJoint(const ndMesh* const owner) const
 {
-	ndMeshJointDifferentialAxle* const joint = new ndMeshJointDifferentialAxle(owner, this);
+	ndMeshJointVehicleDifferentialAxle* const joint = new ndMeshJointVehicleDifferentialAxle(owner, this);
 	return ndSharedPtr<ndMeshJoint>(joint);
 }

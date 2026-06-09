@@ -96,6 +96,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 
 	// populate mesh hierachy
 	ndList<MeshXmlNodePair> modifiers;
+	ndList<MeshXmlNodePair> customProps;
 	const nd::TiXmlElement* m_xmlPair = nullptr;
 	const nd::TiXmlElement* m_xmlLoops = nullptr;
 
@@ -202,15 +203,20 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 				const char* const constructor = xmlGetString(xmpProperty, "className");
 				if (strcmp(constructor, ndMeshCustomPropertyFloat::StaticClassName()) == 0)
 				{
-					ndMeshCustomPropertyFloat* const property = new ndMeshCustomPropertyFloat;
+					ndMeshCustomPropertyFloat* const property = new ndMeshCustomPropertyFloat(mesh);
 					property->DeserializeFromXml((nd::TiXmlElement*)xmpProperty);
 					mesh->m_customProperties.Append(ndSharedPtr<ndMeshCustomProperty>(property));
 				}
 				else if (strcmp(constructor, ndMeshCustomPropertyString::StaticClassName()) == 0)
 				{
-					ndMeshCustomPropertyString* const property = new ndMeshCustomPropertyString;
+					ndMeshCustomPropertyString* const property = new ndMeshCustomPropertyString(mesh);
 					property->DeserializeFromXml((nd::TiXmlElement*)xmpProperty);
 					mesh->m_customProperties.Append(ndSharedPtr<ndMeshCustomProperty>(property));
+				}
+				else if (strcmp(constructor, ndMeshCustomPropertyNode::StaticClassName()) == 0)
+				{
+					MeshXmlNodePair propEntry(entry.m_mesh, (nd::TiXmlElement*)xmpProperty);
+					customProps.Append(propEntry);
 				}
 				else
 				{
@@ -245,6 +251,15 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 		MeshXmlNodePair entry(ptr->GetInfo());
 		const nd::TiXmlElement* const xmlModifier = (nd::TiXmlElement*)entry.m_xmlNode->FirstChild("modifier");
 		entry.m_mesh->SetModifier(entry.m_mesh->LoadModifier(xmlModifier));
+	}
+
+	for (ndList<MeshXmlNodePair>::ndNode* ptr = customProps.GetFirst(); ptr; ptr = ptr->GetNext())
+	{
+		MeshXmlNodePair entry(ptr->GetInfo());
+		const nd::TiXmlNode* const xmpProperty = entry.m_xmlNode;
+		ndMeshCustomPropertyNode* const property = new ndMeshCustomPropertyNode(entry.m_mesh);
+		property->DeserializeFromXml((nd::TiXmlElement*)xmpProperty);
+		entry.m_mesh->m_customProperties.Append(ndSharedPtr<ndMeshCustomProperty>(property));
 	}
 
 	if (m_xmlPair)

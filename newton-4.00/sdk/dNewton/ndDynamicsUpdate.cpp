@@ -1212,20 +1212,12 @@ void ndDynamicsUpdate::UpdateForceFeedback()
 			rhs->m_jointFeebackForce->m_impact = rhs->m_maxImpact * timestepRK;
 
 			const ndVector16 f(rhs->m_force);
-			//force0 += lhs->m_Jt.m_jacobianM0.m_linear * f;
-			//torque0 += lhs->m_Jt.m_jacobianM0.m_angular * f;
-			//force1 += lhs->m_Jt.m_jacobianM1.m_linear * f;
-			//torque1 += lhs->m_Jt.m_jacobianM1.m_angular * f;
 			forceTorque = forceTorque.MulAdd((ndVector16&)lhs->m_Jt.m_jacobianM0, f);
 		}
 		joint->m_forceBody0 = forceTorque.m_low.GetLow();
 		joint->m_torqueBody0 = forceTorque.m_low.GetHigh();
 		joint->m_forceBody1 = forceTorque.m_high.GetLow();
 		joint->m_torqueBody1 = forceTorque.m_high.GetHigh();
-		//joint->m_forceTorqueBody0.m_linear = forceTorque.m_low.GetLow();
-		//joint->m_forceTorqueBody0.m_angular = forceTorque.m_low.GetHigh();
-		//joint->m_forceTorqueBody1.m_linear = forceTorque.m_high.GetLow();
-		//joint->m_forceTorqueBody1.m_angular = forceTorque.m_high.GetHigh();
 		joint->UpdateParameters();
 	});
 

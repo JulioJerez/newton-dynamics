@@ -4173,6 +4173,7 @@ public:
      * This is the minimum of the maximum sizes of all devices in the context.
      */
     #undef max
+    #undef min      // found by laxx18 thanks
     size_type max_size() const noexcept
     {
         size_type maxSize = std::numeric_limits<size_type>::max() / sizeof(T);

@@ -23,6 +23,7 @@
 #include "ndNewtonStdafx.h"
 #include "ndJointWheel.h"
 #include "ndBodyDynamic.h"
+#include "ndMeshComponents.h"
 #include "ndMultiBodyVehicle.h"
 #include "ndMultiBodyVehicleMotor.h"
 #include "ndMultiBodyVehicleGearBox.h"
@@ -38,7 +39,6 @@ ndMultiBodyVehicleMotor::ndMultiBodyVehicleMotor()
 	,m_internalFriction(ndFloat32(100.0f))
 {
 	m_maxDof = 3;
-	ndAssert(0);
 }
 
 ndMultiBodyVehicleMotor::ndMultiBodyVehicleMotor(ndBodyKinematic* const motor, ndMultiBodyVehicle* const vehicelModel)
@@ -70,6 +70,11 @@ void ndMultiBodyVehicleMotor::SetVehicleOwner(ndMultiBodyVehicle* const vehicle)
 	m_vehicle = vehicle;
 }
 
+void ndMultiBodyVehicleMotor::UpdateParameters()
+{
+	ndTrace(("do nothing for now\n"));
+}
+
 void ndMultiBodyVehicleMotor::AlignMatrix()
 {
 	ndMatrix matrix0;
@@ -96,23 +101,28 @@ void ndMultiBodyVehicleMotor::SetFrictionLoss(ndFloat32 newtonMeters)
 
 void ndMultiBodyVehicleMotor::SetMaxRpm(ndFloat32 redLineRpm)
 {
-	m_maxOmega = ndMax(redLineRpm / dRadPerSecToRpm, ndFloat32 (0.0f));
+	m_maxOmega = ndMax(redLineRpm / ndRadPerSecToRpm, ndFloat32 (0.0f));
+}
+
+ndFloat32 ndMultiBodyVehicleMotor::GetMaxRpm() const
+{
+	return m_maxOmega * ndRadPerSecToRpm;
 }
 
 void ndMultiBodyVehicleMotor::SetOmegaAccel(ndFloat32 rpmStep)
 {
-	m_omegaStep = ndAbs(rpmStep / dRadPerSecToRpm);
+	m_omegaStep = ndAbs(rpmStep / ndRadPerSecToRpm);
 }
 
 void ndMultiBodyVehicleMotor::SetTorqueAndRpm(ndFloat32 newtonMeters, ndFloat32 rpm)
 {
 	m_engineTorque = ndMax(newtonMeters, ndFloat32(0.0f));
-	m_targetOmega = ndClamp(rpm / dRadPerSecToRpm, ndFloat32(0.0f), m_maxOmega);
+	m_targetOmega = ndClamp(rpm / ndRadPerSecToRpm, ndFloat32(0.0f), m_maxOmega);
 }
 
 ndFloat32 ndMultiBodyVehicleMotor::GetRpm() const
 {
-	return m_omega * dRadPerSecToRpm;
+	return m_omega * ndRadPerSecToRpm;
 }
 
 ndFloat32 ndMultiBodyVehicleMotor::CalculateAcceleration(ndConstraintDescritor& desc)
@@ -150,7 +160,6 @@ void ndMultiBodyVehicleMotor::JacobianDerivative(ndConstraintDescritor& desc)
 	
 	// add rotor joint acceleration
 	AddAngularRowJacobian(desc, matrix0.m_front * ndVector::m_negOne, ndFloat32(0.0f));
-	
 	const ndFloat32 accel = CalculateAcceleration(desc);
 	const ndFloat32 torque = ndMax(m_engineTorque, m_internalFriction);
 	SetMotorAcceleration(desc, accel);
@@ -164,4 +173,16 @@ void ndMultiBodyVehicleMotor::JacobianDerivative(ndConstraintDescritor& desc)
 		//ndJacobian& chassisJacobian = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
 		//chassisJacobian.m_angular = ndVector::m_zero;
 	}
+}
+
+ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleMotor::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointVehicleMotor* const joint = new ndMeshJointVehicleMotor(owner, this);
+	//joint->m_omega = ndReal(m_omega);
+	joint->m_maxOmega = ndReal(m_maxOmega);
+	//joint->m_omegaStep = ndReal(m_omegaStep);
+	//joint->m_targetOmega = ndReal(m_targetOmega);
+	//joint->m_engineTorque = ndReal(m_engineTorque);
+	//joint->m_internalFriction = ndReal(m_internalFriction);
+	return ndSharedPtr<ndMeshJoint>(joint);
 }

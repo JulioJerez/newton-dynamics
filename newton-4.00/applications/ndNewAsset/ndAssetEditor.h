@@ -24,8 +24,8 @@ class ndAssetEditor : public ndClassAlloc
 		m_free,
 		m_backView,
 		m_frontView,
-		m_sideLeftView,
-		m_sideRrightView,
+		m_leftSideView,
+		m_rightSideView,
 	};
 
 	enum ndRenderModes
@@ -43,6 +43,7 @@ class ndAssetEditor : public ndClassAlloc
 		m_collidingPair,
 		m_alignToTarget,
 		m_transformModifier,
+		m_selectCustomProNode,
 	};
 
 	class ndRenderCallback : public ndRender::ndUserCallback
@@ -161,12 +162,14 @@ class ndAssetEditor : public ndClassAlloc
 	void EditWheelJoint();
 	void EditHingeJoint();
 	void EditPlaneJoint();
+	void EditMotorJoint();
 	void EditSliderJoint();
 	void EditRollerJoint();
 	void EditFix6dofJoint();
 	void EditCylinderJoint();
 	void EditSphericalJoint();
 	void EditDoubleHingeJoint();
+	void EditDifferentialJoint();
 
 	void EditLoopJointLocalMatrix(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditLoopJointGlobalMatrix(ndSharedPtr<ndMeshLoopJoint>& joint);
@@ -178,6 +181,7 @@ class ndAssetEditor : public ndClassAlloc
 	void EditSliderLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditRollerLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditFix6dofLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
+	void EditGearBoxLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditCylinderLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditSphericalLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditDoubleHingeLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
@@ -204,8 +208,9 @@ class ndAssetEditor : public ndClassAlloc
 	void EditCollidingPair();
 	void MakeVisualGeometry();
 	void SetLoopJointSelection(const ndMesh* const node);
-	void SetCollidingSubSelection(const ndMesh* const node);
 	void SetModifierSubSelection(const ndMesh* const node);
+	void SetCollidingSubSelection(const ndMesh* const node);
+	void SetCustomPropertySelection(const ndMesh* const node);
 
 	void ApplyNodeTransform(const ndMatrix& matrix, ndRenderSceneNode* const entNode);
 

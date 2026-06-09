@@ -391,7 +391,7 @@ ndFloat32 ndBodyKinematic::GetMaxAngularStep() const
 	return m_maxAngleStep;
 }
 
-void ndBodyKinematic::SetDebugMaxLinearAndAngularIntegrationStep(ndFloat32 angleInRadian, ndFloat32 stepInUnitPerSeconds)
+void ndBodyKinematic::SetMaxLinearAndAngularIntegrationStep(ndFloat32 angleInRadian, ndFloat32 stepInUnitPerSeconds)
 {
 	m_maxLinearStep = ndMax(ndAbs(stepInUnitPerSeconds), ndFloat32(1.0f));
 	m_maxAngleStep = ndMax(ndAbs(angleInRadian), ndFloat32(90.0f) * ndDegreeToRad);

@@ -25,6 +25,7 @@
 #include "ndNewtonStdafx.h"
 #include "ndModel.h"
 #include "ndIkSolver.h"
+#include "ndJointWheel.h"
 #include "ndModelArticulation.h"
 
 class ndWorld;
@@ -34,10 +35,138 @@ class ndMultiBodyVehicleGearBox;
 class ndMultiBodyVehicleTireJoint;
 class ndMultiBodyVehicleTorsionBar;
 class ndMultiBodyVehicleDifferential;
-class ndMultiBodyVehicleTireJointInfo;
 class ndMultiBodyVehicleDifferentialAxle;
 
-#define dRadPerSecToRpm ndFloat32(9.55f)
+//class ndMultiBodyVehicleTireJointInfo : public ndWheelDescriptor, public ndTireFrictionModel
+//{
+//	public:
+//	ndMultiBodyVehicleTireJointInfo()
+//		:ndWheelDescriptor()
+//		,ndTireFrictionModel()
+//	{
+//	}
+//
+//	ndMultiBodyVehicleTireJointInfo(const ndWheelDescriptor& info, const ndTireFrictionModel& frictionModel)
+//		:ndWheelDescriptor(info)
+//		,ndTireFrictionModel(frictionModel)
+//	{
+//	}
+//};
+
+class ndVehicleDectriptor: public ndClassAlloc
+{
+	public:
+	class ndTorqueTap
+	{
+		public:
+		ndTorqueTap() {}
+		ndTorqueTap(ndFloat32 rpm, ndFloat32 torqueInPoundFeet)
+			:m_radPerSeconds(rpm * ndFloat32 (0.105f))
+			,m_torqueInNewtonMeters(torqueInPoundFeet * ndFloat32 (1.36f))
+		{
+		}
+		ndFloat32 m_radPerSeconds;
+		ndFloat32 m_torqueInNewtonMeters;
+	};
+
+	class ndEngineTorqueCurve
+	{
+		public:
+		ndEngineTorqueCurve();
+
+		void Init(ndFloat32 idleTorquePoundFoot, ndFloat32 idleRmp,
+			ndFloat32 horsePower, ndFloat32 rpm0, ndFloat32 rpm1,
+			ndFloat32 horsePowerAtRedLine, ndFloat32 redLineRpm);
+
+		ndFloat32 GetIdleRadPerSec() const;
+		ndFloat32 GetRedLineRadPerSec() const;
+		ndFloat32 GetLowGearShiftRadPerSec() const;
+		ndFloat32 GetHighGearShiftRadPerSec() const;
+		ndFloat32 GetTorque(ndFloat32 omegaInRadPerSeconds) const;
+
+		ndTorqueTap m_torqueCurve[5];
+	};
+
+	class ndGearBox
+	{
+		public:
+		ndGearBox()
+			:m_gearsCount(4)
+			,m_manual(false)
+		{
+			m_neutral = ndFloat32 (0.0f);
+			m_reverseRatio = ndFloat32(-3.0f);
+			m_crownGearRatio = ndFloat32(10.0f);
+
+			m_forwardRatios[0] = ndFloat32 (3.0f);
+			m_forwardRatios[1] = ndFloat32 (1.5f);
+			m_forwardRatios[2] = ndFloat32 (1.1f);
+			m_forwardRatios[3] = ndFloat32 (0.8f);
+
+			m_torqueConverter = ndFloat32(2000.0f);
+			m_idleClutchTorque = ndFloat32(200.0f);
+			m_lockedClutchTorque = ndFloat32(1.0e6f);
+			m_gearShiftDelayTicks = 300;
+		}
+
+		union
+		{
+			struct
+			{
+				ndFloat32 m_forwardRatios[5];
+				ndFloat32 m_reverseRatio;
+				ndFloat32 m_neutral;
+			};
+			ndFloat32 m_ratios[8];
+		};
+
+		ndFloat32 m_idleClutchTorque;
+		ndFloat32 m_lockedClutchTorque;
+		ndFloat32 m_crownGearRatio;
+		ndFloat32 m_torqueConverter;
+		ndInt32 m_gearsCount;
+		ndInt32 m_gearShiftDelayTicks;
+		bool m_manual;
+	};
+
+	enum ndDifferentialType
+	{
+		m_rearWheelDrive,
+		m_frontWheelDrive,
+		m_fourWheeldrive,
+		m_eightWheeldrive,
+	};
+
+	enum ndTorsionBarType
+	{
+		m_noWheelAxle,
+		m_rearWheelAxle,
+		m_frontWheelAxle,
+		m_fourWheelAxle,
+	};
+
+	D_NEWTON_API ndVehicleDectriptor();
+
+	ndString m_name;
+	ndFloat32 m_chassisAngularDrag;
+	ndEngineTorqueCurve m_engine;
+	ndGearBox m_transmission;
+	ndTireFrictionModel m_tireFrictionModel;
+	//ndMultiBodyVehicleTireJointInfo m_frontTire;
+	//ndMultiBodyVehicleTireJointInfo m_rearTire;
+	ndFloat32 m_motorMass;
+	ndFloat32 m_motorRadius;
+
+	ndFloat32 m_differentialMass;
+	ndFloat32 m_differentialRadius;
+	ndFloat32 m_slipDifferentialRmpLock;
+	ndDifferentialType m_differentialType;
+
+	ndFloat32 m_torsionBarSpringK;
+	ndFloat32 m_torsionBarDamperC;
+	ndFloat32 m_torsionBarRegularizer;
+	ndTorsionBarType m_torsionBarType;
+};
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndMultiBodyVehicle : public ndModelArticulation
@@ -67,7 +196,6 @@ class ndMultiBodyVehicle : public ndModelArticulation
 		private:
 		ndFloat32 CalculateFactor(const ndSpeedForcePair* const entry) const;
 	
-		//ndFloat32 m_gravity;
 		ndFloat32 m_suspensionStiffnessModifier;
 		ndSpeedForcePair m_downForceTable[5];
 		friend class ndMultiBodyVehicle;
@@ -78,6 +206,8 @@ class ndMultiBodyVehicle : public ndModelArticulation
 
 	D_NEWTON_API ndMultiBodyVehicle(ndFloat32 gravityMagnitud = ndFloat32 (10.0f));
 	D_NEWTON_API virtual ~ndMultiBodyVehicle ();
+
+	D_NEWTON_API void ConvertToMotorVehicle(const ndVehicleDectriptor& vehicleDescritor);
 
 	D_NEWTON_API const ndMatrix& GetLocalFrame() const;
 	D_NEWTON_API void SetLocalFrame(const ndMatrix& localframe);
@@ -104,8 +234,8 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	D_NEWTON_API void AddGearBox(const ndSharedPtr<ndJointBilateralConstraint>& gearBoxJoint);
 	D_NEWTON_API void AddDifferentialAxle(const ndSharedPtr<ndJointBilateralConstraint>& differentialAxleJoint);
 
-	D_NEWTON_API ndMultiBodyVehicleTireJoint* AddTire(const ndMultiBodyVehicleTireJointInfo& desc, const ndSharedPtr<ndBody>& tire);
-	D_NEWTON_API ndMultiBodyVehicleTireJoint* AddAxleTire(const ndMultiBodyVehicleTireJointInfo& desc, const ndSharedPtr<ndBody>& tire, const ndSharedPtr<ndBody>& axleBody);
+	//D_NEWTON_API ndMultiBodyVehicleTireJoint* AddTire(const ndMultiBodyVehicleTireJointInfo& desc, const ndSharedPtr<ndBody>& tire);
+	//D_NEWTON_API ndMultiBodyVehicleTireJoint* AddAxleTire(const ndMultiBodyVehicleTireJointInfo& desc, const ndSharedPtr<ndBody>& tire, const ndSharedPtr<ndBody>& axleBody);
 	D_NEWTON_API ndMultiBodyVehicleDifferential* AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleTireJoint* const leftTire, ndMultiBodyVehicleTireJoint* const rightTire, ndFloat32 slipOmegaLock);
 	D_NEWTON_API ndMultiBodyVehicleDifferential* AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleDifferential* const leftDifferential, ndMultiBodyVehicleDifferential* const rightDifferential, ndFloat32 slipOmegaLock);
 
@@ -135,23 +265,22 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	ndMatrix m_localFrame;
 	ndWeakPtr<ndBodyDynamic> m_chassis;
 	ndWeakPtr<ndMultiBodyVehicleMotor> m_motor;
-	ndShapeWheel* m_tireShape;
-	//ndShapeChamferCylinder* m_tireShape;
+	ndSharedPtr<ndShapeWheel> m_tireShape;
 	ndWeakPtr<ndMultiBodyVehicleGearBox> m_gearBox;
 	ndWeakPtr<ndMultiBodyVehicleTorsionBar> m_torsionBar;
 	ndList<ndMultiBodyVehicleTireJoint*> m_tireList;
 	ndList<ndMultiBodyVehicleDifferential*> m_differentialList;
 
 	ndDownForce m_downForce;
+	ndVehicleDectriptor m_descriptor;
 	ndFloat32 m_steeringRate;
 	ndFloat32 m_maxSideslipRate;
 	ndFloat32 m_maxSideslipAngle;
 	ndFloat32 m_gravityMagnitud;
-	bool m_iniliazed;
+	bool m_initialized;
 
 	friend class ndMultiBodyVehicleMotor;
 	friend class ndMultiBodyVehicleTireJoint;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
-
 
 #endif

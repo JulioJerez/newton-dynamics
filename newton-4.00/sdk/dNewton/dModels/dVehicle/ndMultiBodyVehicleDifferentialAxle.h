@@ -41,12 +41,10 @@ class ndMultiBodyVehicleDifferentialAxle : public ndJointBilateralConstraint
 
 	protected:
 	D_NEWTON_API void UpdateParameters() override;
-	void JacobianDerivative(ndConstraintDescritor& desc) override;
-	void DebugJoint(ndConstraintDebugCallback&) const override {}
-
+	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
+	D_NEWTON_API void DebugJoint(ndConstraintDebugCallback&) const override {}
 	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
-	//ndFloat32 m_angle;
 	ndFloat32 m_omega;
 	ndFloat32 m_gearRatio;
 

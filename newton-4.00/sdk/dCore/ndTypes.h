@@ -237,10 +237,11 @@ typedef double ndFloat64;
 	typedef float ndFloat32;
 #endif
 	
-#define ndPi	 		ndFloat32 (3.141592f)
-#define ndEpsilon	  	ndFloat32 (1.0e-5f)
-#define ndDegreeToRad	ndFloat32 (ndPi / 180.0f)
-#define ndRadToDegree  	ndFloat32 (180.0f / ndPi)
+#define ndPi	 			ndFloat32 (3.141592f)
+#define ndEpsilon	  		ndFloat32 (1.0e-5f)
+#define ndDegreeToRad		ndFloat32 (ndPi / 180.0f)
+#define ndRadToDegree  		ndFloat32 (180.0f / ndPi)
+#define ndRadPerSecToRpm	ndFloat32 (9.55f)
 
 extern D_CORE_API ndFloat32 ndExp_VS_Fix(ndReal x);
 

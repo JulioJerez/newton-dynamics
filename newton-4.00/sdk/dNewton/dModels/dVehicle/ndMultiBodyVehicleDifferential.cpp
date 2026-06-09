@@ -21,11 +21,12 @@
 
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
+#include "ndMeshComponents.h"
 #include "ndMultiBodyVehicleDifferential.h"
 
 ndMultiBodyVehicleDifferential::ndMultiBodyVehicleDifferential()
 	:ndJointBilateralConstraint()
-	,m_limitedSlipOmega(0.0f)
+	,m_limitedSlipOmega(D_MINIMUM_SLIP_OMEGA)
 {
 	m_maxDof = 2;
 }
@@ -54,8 +55,6 @@ void ndMultiBodyVehicleDifferential::AlignMatrix()
 	ndMatrix matrix1;
 	CalculateGlobalMatrix(matrix0, matrix1);
 
-	//matrix1.m_posit += matrix1.m_up.Scale(1.0f);
-
 	m_body0->SetMatrixNoSleep(matrix1);
 	m_body0->SetVelocityNoSleep(m_body1->GetVelocity());
 
@@ -69,13 +68,18 @@ void ndMultiBodyVehicleDifferential::AlignMatrix()
 	m_body0->SetOmegaNoSleep(omega);
 }
 
+void ndMultiBodyVehicleDifferential::UpdateParameters()
+{
+	// for now do nothing
+}
+
 void ndMultiBodyVehicleDifferential::JacobianDerivative(ndConstraintDescritor& desc)
 {
 	ndMatrix matrix0;
 	ndMatrix matrix1;
 	CalculateGlobalMatrix(matrix0, matrix1);
 
-	//one rows to restrict rotation around around the parent coordinate system
+	//one rows to restrict rotation around the parent coordinate system
 	const ndFloat32 angle = CalculateAngle(matrix0.m_front, matrix1.m_front, matrix1.m_right);
 	AddAngularRowJacobian(desc, matrix1.m_right, angle);
 
@@ -106,3 +110,9 @@ void ndMultiBodyVehicleDifferential::JacobianDerivative(ndConstraintDescritor& d
 	}
 }
 
+ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleDifferential::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointVehicleDifferential* const joint = new ndMeshJointVehicleDifferential(owner, this);
+	joint->m_limitedSlipOmega = ndReal (m_limitedSlipOmega);
+	return ndSharedPtr<ndMeshJoint>(joint);
+}

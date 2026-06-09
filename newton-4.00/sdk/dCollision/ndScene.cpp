@@ -239,7 +239,6 @@ ndBodyKinematic* ndScene::GetSentinelBody() const
 	return m_sentinelBody;
 }
 
-
 void ndScene::Sync()
 {
 	ndThreadPool::Sync();

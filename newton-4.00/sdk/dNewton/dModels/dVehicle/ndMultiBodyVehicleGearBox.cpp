@@ -21,8 +21,8 @@
 
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
-
 #include "ndJointWheel.h"
+#include "ndMeshComponents.h"
 #include "ndMultiBodyVehicle.h"
 #include "ndMultiBodyVehicleMotor.h"
 #include "ndMultiBodyVehicleGearBox.h"
@@ -35,7 +35,7 @@ ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox()
 {
 }
 
-ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox(ndBodyKinematic* const motor, ndBodyKinematic* const differential, ndMultiBodyVehicle* const, bool reverseSpin)
+ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox(ndBodyKinematic* const motor, ndBodyKinematic* const differential, bool reverseSpin)
 	:ndJointGear(ndFloat32(1.0f), motor->GetMatrix().m_front, differential, motor->GetMatrix().m_front, motor)
 	,m_idleOmega(ndFloat32(1.0f))
 	,m_clutchTorque(ndFloat32(1.0e5f))
@@ -56,7 +56,7 @@ ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox(ndBodyKinematic* const moto
 
 void ndMultiBodyVehicleGearBox::SetIdleOmega(ndFloat32 rpm)
 {
-	m_idleOmega = ndMax(rpm / dRadPerSecToRpm, ndFloat32(0.0f));
+	m_idleOmega = ndMax(rpm / ndRadPerSecToRpm, ndFloat32(0.0f));
 }
 
 void ndMultiBodyVehicleGearBox::SetClutchTorque(ndFloat32 torqueInNewtonMeters)
@@ -128,3 +128,8 @@ void ndMultiBodyVehicleGearBox::JacobianDerivative(ndConstraintDescritor& desc)
 	}
 }
 
+ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleGearBox::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointVehicleGearBox* const joint = new ndMeshJointVehicleGearBox(owner, this);
+	return ndSharedPtr<ndMeshJoint>(joint);
+}

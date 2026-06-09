@@ -207,23 +207,6 @@ class ndMeshJointGear : public ndMeshJoint
 	ndFloat32 m_ratio;
 };
 
-class ndMeshJointDifferentialAxle : public ndMeshJoint
-{
-	public:
-	D_NEWTON_API ndMeshJointDifferentialAxle(const ndMesh* const owner);
-	D_NEWTON_API ndMeshJointDifferentialAxle(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
-
-	D_NEWTON_API ndMeshJointDifferentialAxle(const ndMeshJointDifferentialAxle& other);
-	D_NEWTON_API virtual ndMeshJoint* Duplicate() const override;
-	D_NEWTON_API virtual bool operator==(const ndMeshJoint& other) const override;
-
-	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
-	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
-	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
-
-	ndFloat32 m_gearRatio;
-};
-
 class ndMeshJointHinge : public ndMeshJoint
 {
 	public:
@@ -292,6 +275,81 @@ class ndMeshJointSpherical : public ndMeshJoint
 	ndAxis m_axis;
 	ndFloat32 m_maxConeAngle;
 	bool m_coneAngleState;
+};
+
+class ndMeshJointVehicleDifferentialAxle : public ndMeshJoint
+{
+	public:
+	D_NEWTON_API ndMeshJointVehicleDifferentialAxle(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointVehicleDifferentialAxle(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
+
+	D_NEWTON_API ndMeshJointVehicleDifferentialAxle(const ndMeshJointVehicleDifferentialAxle& other);
+	D_NEWTON_API virtual ndMeshJoint* Duplicate() const override;
+	D_NEWTON_API virtual bool operator==(const ndMeshJoint& other) const override;
+
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
+
+	ndFloat32 m_gearRatio;
+};
+
+class ndMeshJointVehicleDifferential : public ndMeshJoint
+{
+	public:
+	D_NEWTON_API ndMeshJointVehicleDifferential(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointVehicleDifferential(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
+	D_NEWTON_API ndMeshJointVehicleDifferential(const ndMeshJointVehicleDifferential& other);
+
+	D_NEWTON_API virtual ndMeshJoint* Duplicate() const override;
+	D_NEWTON_API virtual bool operator==(const ndMeshJoint& other) const override;
+
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
+
+	ndReal m_limitedSlipOmega;
+};
+
+class ndMeshJointVehicleGearBox : public ndMeshJoint
+{
+	public:
+	D_NEWTON_API ndMeshJointVehicleGearBox(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointVehicleGearBox(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
+	D_NEWTON_API ndMeshJointVehicleGearBox(const ndMeshJointVehicleGearBox& other);
+
+	D_NEWTON_API virtual ndMeshJoint* Duplicate() const override;
+	D_NEWTON_API virtual bool operator==(const ndMeshJoint& other) const override;
+
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
+
+	ndReal m_idleOmega;
+	ndReal m_clutchTorque;
+	ndReal m_driveTrainResistanceTorque;
+};
+
+class ndMeshJointVehicleMotor : public ndMeshJoint
+{
+	public:
+	D_NEWTON_API ndMeshJointVehicleMotor(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointVehicleMotor(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
+	D_NEWTON_API ndMeshJointVehicleMotor(const ndMeshJointVehicleMotor& other);
+
+	D_NEWTON_API virtual ndMeshJoint* Duplicate() const override;
+	D_NEWTON_API virtual bool operator==(const ndMeshJoint& other) const override;
+
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
+
+	//ndReal m_omega;
+	ndReal m_maxOmega;
+	//ndReal m_omegaStep;
+	//ndReal m_targetOmega;
+	//ndReal m_engineTorque;
+	//ndReal m_internalFriction;
 };
 
 #endif

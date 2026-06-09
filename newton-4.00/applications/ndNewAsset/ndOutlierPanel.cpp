@@ -72,6 +72,12 @@ void ndAssetEditor::SelectCurrentNode(ndSharedPtr<ndMesh> node)
 	ndAssetEditor::ndSubSelectionMode selectionMode = m_subSelection;
 	switch (selectionMode)
 	{
+		case ndAssetEditor::m_none:
+		{
+			m_currentSelection = *node;
+			break;
+		}
+
 		case ndAssetEditor::m_loopJoint:
 		{
 			SetLoopJointSelection(*node);
@@ -90,15 +96,21 @@ void ndAssetEditor::SelectCurrentNode(ndSharedPtr<ndMesh> node)
 			break;
 		}
 
+		case ndAssetEditor::m_selectCustomProNode:
+		{
+			SetCustomPropertySelection(*node);
+			break;
+		}
+
 		case ndAssetEditor::m_alignToTarget:
 		{
 			m_currentSubSelection = ndWeakPtr<ndMesh>(*node);
 			break;
 		}
 
-		case ndAssetEditor::m_none:
 		default:
 		{
+			ndAssert(0);
 			m_currentSelection = *node;
 		}
 	}

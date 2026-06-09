@@ -175,6 +175,18 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointDoubleHinge());
 						InitNewGlobalJoint(newJoint);
 					}
+					else if (strcmp(name, ndMultiBodyVehicleMotor::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndMultiBodyVehicleMotor());
+						InitNewGlobalJoint(newJoint);
+					}
+					else if (strcmp(name, ndMultiBodyVehicleDifferential::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndMultiBodyVehicleDifferential());
+						InitNewGlobalJoint(newJoint);
+					}
 					else if (strcmp(name, ndJointWheel::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
@@ -202,6 +214,8 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 			SetDropdownList(ndJointDoubleHinge::StaticClassName());
 			SetDropdownList(ndJointWheel::StaticClassName());
 			SetDropdownList(ndJointSpherical::StaticClassName());
+			SetDropdownList(ndMultiBodyVehicleMotor::StaticClassName());
+			SetDropdownList(ndMultiBodyVehicleDifferential::StaticClassName());
 
 			ImGui::EndCombo();
 		}
@@ -233,6 +247,14 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointDoubleHinge::StaticClassName()) == 0)
 		{
 			EditDoubleHingeJoint();
+		}
+		else if (strcmp(joint->m_constructor.GetStr(), ndMultiBodyVehicleDifferential::StaticClassName()) == 0)
+		{
+			EditDifferentialJoint();
+		}
+		else if (strcmp(joint->m_constructor.GetStr(), ndMultiBodyVehicleMotor::StaticClassName()) == 0)
+		{
+			EditMotorJoint();
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointWheel::StaticClassName()) == 0)
 		{
@@ -1074,6 +1096,36 @@ void ndAssetEditor::EditSphericalJoint()
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 		joint->m_maxConeAngle = ndClamp(value, ndReal(0.0f), ndReal(180.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+	}
+}
+
+void ndAssetEditor::EditDifferentialJoint()
+{
+	EditJointGlobalMatrix();
+
+	ndMeshJointVehicleDifferential* const joint = (ndMeshJointVehicleDifferential*)*m_currentSelection->GetJoint();
+
+	ndReal value = ndReal(joint->m_limitedSlipOmega);
+	if (ImGui::InputFloat("limited slip omega", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+		joint->m_limitedSlipOmega = ndMax(value, ndReal(0.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+	}
+}
+
+void ndAssetEditor::EditMotorJoint()
+{
+	EditJointGlobalMatrix();
+
+	ndMeshJointVehicleMotor* const joint = (ndMeshJointVehicleMotor*)*m_currentSelection->GetJoint();
+	
+	ndReal value = ndReal(joint->m_maxOmega);
+	if (ImGui::InputFloat("limited slip omega", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+		joint->m_maxOmega = ndMax(value, ndReal(0.0f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 	}
 }

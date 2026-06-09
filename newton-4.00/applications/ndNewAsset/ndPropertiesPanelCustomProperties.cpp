@@ -42,40 +42,73 @@ void ndAssetEditor::ShowPropertiesCustomProperties()
 			}
 			ImGui::ListBox(" ##10", &m_customPropertyIndex, &names[0], names.GetCount(), 4);
 
-			ndList<ndSharedPtr<ndMeshCustomProperty>>::ndNode* const node = FindSelected();
-			ndAssert(node);
-			ndInt32 oldPropType = (strcmp(node->GetInfo()->ClassName(), ndMeshCustomPropertyFloat::StaticClassName()) == 0) ? 0 : 1;
+			ndList<ndSharedPtr<ndMeshCustomProperty>>::ndNode* const propNode = FindSelected();
+			ndAssert(propNode);
+			ndInt32 oldPropType = 0;
+			if (strcmp(propNode->GetInfo()->ClassName(), ndMeshCustomPropertyString::StaticClassName()) == 0)
+			{
+				oldPropType = 1;
+			}
+			else if (strcmp(propNode->GetInfo()->ClassName(), ndMeshCustomPropertyNode::StaticClassName()) == 0)
+			{
+				oldPropType = 2;
+			}
 			ndInt32 newPropType = oldPropType;
 
 			ImGui::RadioButton("float property", &newPropType, 0);
 			ImGui::RadioButton("string property", &newPropType, 1);
+			ImGui::RadioButton("node property", &newPropType, 2);
 
 			ImGui::Text("type:");
 			ImGui::SameLine();
-			ImGui::Text(node->GetInfo()->ClassName());
+			ImGui::Text(propNode->GetInfo()->ClassName());
 			if (newPropType != oldPropType)
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
-				ndMeshCustomProperty* const newPropertyPtr = newPropType ? (ndMeshCustomProperty*)new ndMeshCustomPropertyString() : (ndMeshCustomProperty*)new ndMeshCustomPropertyFloat();
-				ndSharedPtr<ndMeshCustomProperty> newProperty(newPropertyPtr);
-				newProperty->m_name = node->GetInfo()->m_name;
 
-				node->GetInfo() = newProperty;
+				ndMeshCustomProperty* newPropertyPtr = nullptr;
+				if (newPropType == 0)
+				{
+					newPropertyPtr = (ndMeshCustomProperty*)new ndMeshCustomPropertyFloat(*m_currentSelection);
+				}
+				else if (newPropType == 1)
+				{
+					newPropertyPtr = (ndMeshCustomProperty*)new ndMeshCustomPropertyString(*m_currentSelection);
+				}
+				else
+				{
+					newPropertyPtr = (ndMeshCustomProperty*)new ndMeshCustomPropertyNode(*m_currentSelection);
+				}
+				ndSharedPtr<ndMeshCustomProperty> newProperty(newPropertyPtr);
+				newProperty->m_name = propNode->GetInfo()->m_name;
+				
+				propNode->GetInfo() = newProperty;
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			}
 
 			char propName[256];
-			snprintf(propName, sizeof(propName) - 1, "%s", node->GetInfo()->m_name.GetStr());
+			snprintf(propName, sizeof(propName) - 1, "%s", propNode->GetInfo()->m_name.GetStr());
 			if (ImGui::InputText("prop name", propName, sizeof(propName) - 1, ImGuiInputTextFlags_EnterReturnsTrue))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
-				node->GetInfo()->m_name = ndString(propName);
+				propNode->GetInfo()->m_name = ndString(propName);
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			}
 
-			if (newPropType)
+			if (newPropType == 0)
 			{
-				ndMeshCustomPropertyString* const stringProp = (ndMeshCustomPropertyString*)*node->GetInfo();
+				ndMeshCustomPropertyFloat* const floatProp = (ndMeshCustomPropertyFloat*)*propNode->GetInfo();
+				ndReal value = floatProp->m_value;
+				if (ImGui::InputFloat("value", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+				{
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+					floatProp->m_value = value;
+					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				}
+			}
+			else if (newPropType == 1)
+			{
+				ndMeshCustomPropertyString* const stringProp = (ndMeshCustomPropertyString*)*propNode->GetInfo();
 				snprintf(propName, sizeof(propName) - 1, "%s", stringProp->m_value.GetStr());
 				if (ImGui::InputText("value", propName, sizeof(propName) - 1, ImGuiInputTextFlags_EnterReturnsTrue))
 				{
@@ -86,13 +119,43 @@ void ndAssetEditor::ShowPropertiesCustomProperties()
 			}
 			else
 			{
-				ndMeshCustomPropertyFloat* const floatProp = (ndMeshCustomPropertyFloat*)*node->GetInfo();
-				ndReal value = floatProp->m_value;
-				if (ImGui::InputFloat("value", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+				ndMeshCustomPropertyNode* const prop = (ndMeshCustomPropertyNode*)*propNode->GetInfo();
+				if (m_subSelection != m_selectCustomProNode)
 				{
-					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
-					floatProp->m_value = value;
-					m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+					snprintf(propName, sizeof(propName) - 1, "(null)");
+					if (*prop->m_value)
+					{
+						snprintf(propName, sizeof(propName) - 1, "%s", prop->m_value->GetName().GetStr());
+					}
+
+					ImGui::Text("target: ");
+					ImGui::SameLine();
+					ImGui::Text(propName);
+
+					if (ImGui::Button("select target node"))
+					{
+						m_subSelection = m_selectCustomProNode;
+					}
+				}
+				else
+				{
+					snprintf(propName, sizeof(propName) - 1, "(null)");
+					if (*m_currentSubSelection)
+					{
+						snprintf(propName, sizeof(propName) - 1, "%s", m_currentSubSelection->GetName().GetStr());
+					}
+
+					ImGui::Text("target: ");
+					ImGui::SameLine();
+					ImGui::Text(propName);
+
+					if (ImGui::Button("exit target node"))
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+						m_subSelection = m_none;
+						prop->m_value = ndWeakPtr<ndMesh>(m_currentSubSelection);
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+					}
 				}
 			}
 		}
@@ -101,7 +164,8 @@ void ndAssetEditor::ShowPropertiesCustomProperties()
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 
-			ndSharedPtr<ndMeshCustomProperty> property (new ndMeshCustomPropertyFloat());
+			m_customPropertyIndex = m_currentSelection->GetCustomProperties().GetCount();
+			ndSharedPtr<ndMeshCustomProperty> property (new ndMeshCustomPropertyFloat(*m_currentSelection));
 			m_currentSelection->GetCustomProperties().Append(property);
 		
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));

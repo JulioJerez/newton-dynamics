@@ -34,7 +34,7 @@ class ndMultiBodyVehicleGearBox : public ndJointGear
 	D_CLASS_REFLECTION(ndMultiBodyVehicleGearBox, ndJointGear)
 
 	D_NEWTON_API ndMultiBodyVehicleGearBox();
-	D_NEWTON_API ndMultiBodyVehicleGearBox(ndBodyKinematic* const motor, ndBodyKinematic* const differential, ndMultiBodyVehicle* const chassis, bool reverseSpin = false);
+	D_NEWTON_API ndMultiBodyVehicleGearBox(ndBodyKinematic* const motor, ndBodyKinematic* const differential, bool reverseSpin = false);
 
 	D_NEWTON_API void SetIdleOmega(ndFloat32 rpm);
 	D_NEWTON_API void SetClutchTorque(ndFloat32 torqueInNewtonMeters);
@@ -43,11 +43,11 @@ class ndMultiBodyVehicleGearBox : public ndJointGear
 	D_NEWTON_API ndFloat32 GetIdleOmega() const;
 	D_NEWTON_API ndFloat32 GetClutchTorque() const;
 	D_NEWTON_API ndFloat32 GetInternalTorqueLoss() const;
-	void DebugJoint(ndConstraintDebugCallback&) const override {}
+	D_NEWTON_API void DebugJoint(ndConstraintDebugCallback&) const override {}
 
 	protected:
-
-	void JacobianDerivative(ndConstraintDescritor& desc) override;
+	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
+	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
 	ndFloat32 m_idleOmega;
 	ndFloat32 m_clutchTorque;

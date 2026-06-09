@@ -107,7 +107,7 @@ class ndBodyKinematic : public ndBody
 	D_COLLISION_API void SetAutoSleep(bool state);
 	D_COLLISION_API ndFloat32 GetMaxLinearStep() const;
 	D_COLLISION_API ndFloat32 GetMaxAngularStep() const;
-	D_COLLISION_API void SetDebugMaxLinearAndAngularIntegrationStep(ndFloat32 angleInRadian, ndFloat32 stepInUnitPerSeconds);
+	D_COLLISION_API void SetMaxLinearAndAngularIntegrationStep(ndFloat32 angleInRadian, ndFloat32 stepInUnitPerSeconds);
 
 	D_COLLISION_API virtual ndFloat32 GetLinearDamping() const;
 	D_COLLISION_API virtual void SetLinearDamping(ndFloat32 linearDamp);
@@ -250,12 +250,10 @@ class ndBodyKinematic : public ndBody
 	friend class ndJointBilateralConstraint;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
-
 class ndBodySentinel : public ndBodyKinematic
 {
 	ndBodySentinel* GetAsBodySentinel() { return this; }
 };
-
 
 #endif 
 

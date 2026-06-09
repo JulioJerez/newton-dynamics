@@ -25,7 +25,7 @@
 #define MACHINE_LEARNING_BASE	100
 
 //#define DEFAULT_SCENE	0		// basic collision only
-#define DEFAULT_SCENE	1		// basic rigidbody
+//#define DEFAULT_SCENE	1		// basic rigidbody
 //#define DEFAULT_SCENE	2		// basic Stacks 
 //#define DEFAULT_SCENE	3		// basic friction
 //#define DEFAULT_SCENE	4		// basic sliding platform
@@ -43,7 +43,7 @@
 //#define DEFAULT_SCENE	16		// export articulated model
 //#define DEFAULT_SCENE	17		// basic rag doll
 //#define DEFAULT_SCENE	18		// complex model, implement a complex model with joints
-//#define DEFAULT_SCENE	19		// basics multi body vehicle
+#define DEFAULT_SCENE	19		// basics multi body vehicle
 //#define DEFAULT_SCENE	20		// object Placement
 //#define DEFAULT_SCENE	21		// third person player capsule
 //#define DEFAULT_SCENE	22		// player capsule in a planet

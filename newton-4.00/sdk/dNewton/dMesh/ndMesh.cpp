@@ -37,7 +37,10 @@
 #include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
+#include "ndMultiBodyVehicleMotor.h"
+#include "ndMultiBodyVehicleGearBox.h"
 #include "ndIkSwivelPositionEffector.h"
+#include "ndMultiBodyVehicleDifferential.h"
 #include "ndMultiBodyVehicleDifferentialAxle.h"
 
 ndMesh::ndMesh()
@@ -146,8 +149,9 @@ ndMesh::ndMesh(const ndMesh& src)
 	{
 		for (ndList<ndSharedPtr<ndMeshCustomProperty>>::ndNode* node = src.m_customProperties.GetFirst(); node; node = node->GetNext())
 		{
-			ndMeshCustomProperty* const property = *node->GetInfo();
-			m_customProperties.Append(ndSharedPtr<ndMeshCustomProperty>(property->Duplicate()));
+			ndMeshCustomProperty* const srcProperty = *node->GetInfo();
+			ndMeshCustomProperty* const newProperty = srcProperty->Duplicate(this);
+			m_customProperties.Append(ndSharedPtr<ndMeshCustomProperty>(newProperty));
 		}
 	}
 
@@ -1853,9 +1857,21 @@ ndSharedPtr<ndMeshJoint> ndMesh::LoadJoint(const nd::TiXmlElement* const xmlJoin
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointGear(mesh));
 	}
+	else if (strcmp(constructor, ndMultiBodyVehicleDifferential::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointVehicleDifferential(mesh));
+	}
+	else if (strcmp(constructor, ndMultiBodyVehicleMotor::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointVehicleMotor(mesh));
+	}
 	else if (strcmp(constructor, ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0)
 	{
-		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointDifferentialAxle(mesh));
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointVehicleDifferentialAxle(mesh));
+	}
+	else if (strcmp(constructor, ndMultiBodyVehicleGearBox::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointVehicleGearBox(mesh));
 	}
 	else
 	{

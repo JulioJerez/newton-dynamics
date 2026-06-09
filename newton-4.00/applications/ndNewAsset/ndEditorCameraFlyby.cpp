@@ -172,7 +172,7 @@ void ndEditorCameraFlyby::SetView(ndAssetEditor::ndCameraMode mode)
 			break;
 		}
 
-		case ndAssetEditor::m_sideLeftView:
+		case ndAssetEditor::m_leftSideView:
 		{
 			m_pitch = 0.0f;
 			m_yaw = 90.0f * ndDegreeToRad;
@@ -180,7 +180,7 @@ void ndEditorCameraFlyby::SetView(ndAssetEditor::ndCameraMode mode)
 			break;
 		}
 
-		case ndAssetEditor::m_sideRrightView:
+		case ndAssetEditor::m_rightSideView:
 		{
 			m_pitch = 0.0f;
 			m_yaw = -90.0f * ndDegreeToRad;

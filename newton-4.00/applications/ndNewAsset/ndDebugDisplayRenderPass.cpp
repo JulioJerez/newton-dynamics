@@ -438,9 +438,13 @@ void ndDebugDisplayRenderPass::RenderSelectedNode()
 			RenderNode(subNodes[i], m_collidingPairColor1);
 		}
 	}
-	if (m_manager->m_subSelection == ndAssetEditor::m_alignToTarget)
-	{
-		if (m_manager->m_currentSubSelection)
+	if (m_manager->m_currentSubSelection)
+	{ 
+		if (m_manager->m_subSelection == ndAssetEditor::m_alignToTarget)
+		{
+			RenderNode(*m_manager->m_currentSubSelection, m_collidingPairColor1);
+		}
+		if (m_manager->m_subSelection == ndAssetEditor::m_selectCustomProNode)
 		{
 			RenderNode(*m_manager->m_currentSubSelection, m_collidingPairColor1);
 		}
