@@ -35,24 +35,23 @@ class ndMultiBodyVehicleGearBox;
 class ndMultiBodyVehicleTireJoint;
 class ndMultiBodyVehicleTorsionBar;
 class ndMultiBodyVehicleDifferential;
-//class ndMultiBodyVehicleTireJointInfo;
 class ndMultiBodyVehicleDifferentialAxle;
 
-class ndMultiBodyVehicleTireJointInfo : public ndWheelDescriptor, public ndTireFrictionModel
-{
-	public:
-	ndMultiBodyVehicleTireJointInfo()
-		:ndWheelDescriptor()
-		,ndTireFrictionModel()
-	{
-	}
-
-	ndMultiBodyVehicleTireJointInfo(const ndWheelDescriptor& info, const ndTireFrictionModel& frictionModel)
-		:ndWheelDescriptor(info)
-		,ndTireFrictionModel(frictionModel)
-	{
-	}
-};
+//class ndMultiBodyVehicleTireJointInfo : public ndWheelDescriptor, public ndTireFrictionModel
+//{
+//	public:
+//	ndMultiBodyVehicleTireJointInfo()
+//		:ndWheelDescriptor()
+//		,ndTireFrictionModel()
+//	{
+//	}
+//
+//	ndMultiBodyVehicleTireJointInfo(const ndWheelDescriptor& info, const ndTireFrictionModel& frictionModel)
+//		:ndWheelDescriptor(info)
+//		,ndTireFrictionModel(frictionModel)
+//	{
+//	}
+//};
 
 class ndVehicleDectriptor: public ndClassAlloc
 {
@@ -146,16 +145,15 @@ class ndVehicleDectriptor: public ndClassAlloc
 		m_fourWheelAxle,
 	};
 
-	ndVehicleDectriptor(const char* const name);
+	D_NEWTON_API ndVehicleDectriptor();
 
-	//ndVector m_comDisplacement;
-	char m_name[32];
-	//ndFloat32 m_chassisMass;
+	ndString m_name;
 	ndFloat32 m_chassisAngularDrag;
 	ndEngineTorqueCurve m_engine;
 	ndGearBox m_transmission;
-	ndMultiBodyVehicleTireJointInfo m_frontTire;
-	ndMultiBodyVehicleTireJointInfo m_rearTire;
+	ndTireFrictionModel m_tireFrictionModel;
+	//ndMultiBodyVehicleTireJointInfo m_frontTire;
+	//ndMultiBodyVehicleTireJointInfo m_rearTire;
 	ndFloat32 m_motorMass;
 	ndFloat32 m_motorRadius;
 
@@ -209,13 +207,12 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	D_NEWTON_API ndMultiBodyVehicle(ndFloat32 gravityMagnitud = ndFloat32 (10.0f));
 	D_NEWTON_API virtual ~ndMultiBodyVehicle ();
 
+	D_NEWTON_API void ConvertToMotorVehicle(const ndVehicleDectriptor& vehicleDescritor);
+
 	D_NEWTON_API const ndMatrix& GetLocalFrame() const;
 	D_NEWTON_API void SetLocalFrame(const ndMatrix& localframe);
 
 	D_NEWTON_API ndMultiBodyVehicle* GetAsMultiBodyVehicle() override;
-
-	D_NEWTON_API virtual void Serialize(ndMesh* const rootNode) const override;
-	D_NEWTON_API virtual void Deserialize(const ndMesh* const rootNode) override;
 
 	D_NEWTON_API ndBodyDynamic* GetChassis() const;
 	D_NEWTON_API ndMultiBodyVehicleMotor* GetMotor() const;
@@ -237,8 +234,8 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	D_NEWTON_API void AddGearBox(const ndSharedPtr<ndJointBilateralConstraint>& gearBoxJoint);
 	D_NEWTON_API void AddDifferentialAxle(const ndSharedPtr<ndJointBilateralConstraint>& differentialAxleJoint);
 
-	D_NEWTON_API ndMultiBodyVehicleTireJoint* AddTire(const ndMultiBodyVehicleTireJointInfo& desc, const ndSharedPtr<ndBody>& tire);
-	D_NEWTON_API ndMultiBodyVehicleTireJoint* AddAxleTire(const ndMultiBodyVehicleTireJointInfo& desc, const ndSharedPtr<ndBody>& tire, const ndSharedPtr<ndBody>& axleBody);
+	//D_NEWTON_API ndMultiBodyVehicleTireJoint* AddTire(const ndMultiBodyVehicleTireJointInfo& desc, const ndSharedPtr<ndBody>& tire);
+	//D_NEWTON_API ndMultiBodyVehicleTireJoint* AddAxleTire(const ndMultiBodyVehicleTireJointInfo& desc, const ndSharedPtr<ndBody>& tire, const ndSharedPtr<ndBody>& axleBody);
 	D_NEWTON_API ndMultiBodyVehicleDifferential* AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleTireJoint* const leftTire, ndMultiBodyVehicleTireJoint* const rightTire, ndFloat32 slipOmegaLock);
 	D_NEWTON_API ndMultiBodyVehicleDifferential* AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleDifferential* const leftDifferential, ndMultiBodyVehicleDifferential* const rightDifferential, ndFloat32 slipOmegaLock);
 
@@ -275,6 +272,7 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	ndList<ndMultiBodyVehicleDifferential*> m_differentialList;
 
 	ndDownForce m_downForce;
+	ndVehicleDectriptor m_descriptor;
 	ndFloat32 m_steeringRate;
 	ndFloat32 m_maxSideslipRate;
 	ndFloat32 m_maxSideslipAngle;

@@ -25,15 +25,15 @@ ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint()
 	ndAssert(0);
 }
 
-ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent, const ndMultiBodyVehicleTireJointInfo& info, ndMultiBodyVehicle* const owner)
-	:ndJointWheel(pinAndPivotFrame, child, parent, info)
-	,m_vehicle(owner)
-	,m_frictionModel()
-	,m_lateralSlip(ndFloat32 (0.0f))
-	,m_longitudinalSlip(ndFloat32(0.0f))
-	,m_normalizedAligningTorque(ndFloat32(0.0f))
-{
-}
+//ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent, const ndMultiBodyVehicleTireJointInfo& info, ndMultiBodyVehicle* const owner)
+//	:ndJointWheel(pinAndPivotFrame, child, parent, info)
+//	,m_vehicle(owner)
+//	,m_frictionModel()
+//	,m_lateralSlip(ndFloat32 (0.0f))
+//	,m_longitudinalSlip(ndFloat32(0.0f))
+//	,m_normalizedAligningTorque(ndFloat32(0.0f))
+//{
+//}
 
 ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint(const ndMultiBodyVehicleTireJoint& joint)
 	:ndJointWheel(joint)
@@ -65,10 +65,10 @@ void ndMultiBodyVehicleTireJoint::SetVehicleOwner(ndMultiBodyVehicle* const vehi
 	m_vehicle = vehicle;
 }
 
-ndMultiBodyVehicleTireJointInfo ndMultiBodyVehicleTireJoint::GetInfo() const
-{
-	return ndMultiBodyVehicleTireJointInfo (ndJointWheel::GetInfo(), m_frictionModel);
-}
+//ndMultiBodyVehicleTireJointInfo ndMultiBodyVehicleTireJoint::GetInfo() const
+//{
+//	return ndMultiBodyVehicleTireJointInfo (ndJointWheel::GetInfo(), m_frictionModel);
+//}
 
 ndFloat32 ndMultiBodyVehicleTireJoint::GetSideSlip() const
 {

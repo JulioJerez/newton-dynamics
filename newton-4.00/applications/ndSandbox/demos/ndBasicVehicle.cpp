@@ -13,6 +13,7 @@
 #include "ndPhysicsUtils.h"
 #include "ndPhysicsWorld.h"
 #include "ndMakeStaticMap.h"
+#include "ndVehicleCommon.h"
 #include "ndDemoEntityNotify.h"
 #include "ndDemoEntityManager.h"
 #include "ndDemoCameraNodeFollow.h"
@@ -404,9 +405,18 @@ namespace ndMotorVehicle
 		const ndMesh* const mesh = *loader.m_mesh;
 
 		ndPhysicsWorld* const world = scene->GetWorld();
+
+		// we first load the model as like any other arcilated model
 		ndSharedPtr<ndModel> vehicleModel(new ndMultiBodyVehicle());
 		ndMultiBodyVehicle* const vehicle = vehicleModel->GetAsMultiBodyVehicle();
 		vehicle->Deserialize(mesh);
+
+		// the vehicle descriptor specify the kind of vehicle 
+		// we configure it then we convert the model to multibody vehicle.
+		ndVehicleDectriptor defaultDesc;
+		defaultDesc.m_name = "testarossa";
+		defaultDesc.m_tireFrictionModel.SetPacejkaCurves(ndTireFrictionModel::m_pacejkaSport);
+		vehicle->ConvertToMotorVehicle(defaultDesc);
 
 		ndRender* const renderer = *scene->GetRenderer();
 		ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *loader.m_mesh, ndGetWorkingFileName("")));
@@ -436,6 +446,10 @@ namespace ndMotorVehicle
 		};
 		vehicle->NodeIterator(BindApplicationData);
 
+		//add the notification to bind to the application.
+		//ndSharedPtr<ndModelNotify> controller(new ndVehicleCommonNotify(scene, *loader.m_mesh, camera, articulation));
+		ndSharedPtr<ndModelNotify> controller(new ndVehicleCommonNotify(defaultDesc, vehicle));
+		vehicle->SetNotifyCallback(controller);
 
 		scene->AddEntity(sceneMesh);
 		world->AddModel(vehicleModel);
