@@ -939,35 +939,42 @@ void ndBodyKinematic::IntegrateExternalForce(ndFloat32 timestep)
 		const ndVector accel(GetForce().Scale(m_invMass.m_w));
 		const ndVector torque(GetTorque());
 
-		// using simple backward Euler or implicit integration, this is. 
-		// f'(t + dt) = (f(t + dt) - f(t)) / dt  
-		
-		// therefore: 
-		// f(t + dt) = f(t) + f'(t + dt) * dt
-		
-		// approximate f'(t + dt) by expanding the Taylor of f(w + dt)
-		// f(w + dt) = f(w) + f'(w) * dt + f''(w) * dt^2 / 2! + ....
-		
-		// assume dt^2 is negligible, therefore we can truncate the expansion to
-		// f(w + dt) ~= f(w) + f'(w) * dt
-		
-		// calculating dw as the  f'(w) = d(wx, wy, wz) | dt
-		// dw/dt = a = (Tl - (wl x (wl * Il)) * Il^-1
-		
-		// expanding f(w) 
-		// f'(wx) = Ix * ax = Tx - (Iz - Iy) * wy * wz 
-		// f'(wy) = Iy * ay = Ty - (Ix - Iz) * wz * wx
-		// f'(wz) = Iz * az = Tz - (Iy - Ix) * wx * wy
+		// Implicit (backward Euler) integration:
+		//     f'(t + dt) = (f(t + dt) - f(t)) / dt
 		//
-		// calculation the expansion 
-		// Ix * ax = (Tx - (Iz - Iy) * wy * wz) - ((Iz - Iy) * wy * az + (Iz - Iy) * ay * wz) * dt
-		// Iy * ay = (Ty - (Ix - Iz) * wz * wx) - ((Ix - Iz) * wz * ax + (Ix - Iz) * az * wx) * dt
-		// Iz * az = (Tz - (Iy - Ix) * wx * wy) - ((Iy - Ix) * wx * ay + (Iy - Ix) * ax * wy) * dt   
+		// Rearranging:
+		//     f(t + dt) = f(t) + f'(t + dt) * dt
 		//
-		// factorizing a we get
+		// To approximate f'(t + dt), use a first-order Taylor expansion:
+		//     f(w + dt) = f(w) + f'(w) * dt + O(dt²)
+		//
+		// Assuming dt² terms are negligible:
+		//     f(w + dt) ~= f(w) + f'(w) * dt
+		//
+		// Angular acceleration is obtained from Euler's rigid-body equation:
+		//     dw/dt = a = inv(I) * (T - w × (I * w))
+		//
+		// Expanded component form:
+		//     Ix * ax = Tx - (Iz - Iy) * wy * wz
+		//     Iy * ay = Ty - (Ix - Iz) * wz * wx
+		//     Iz * az = Tz - (Iy - Ix) * wx * wy
+		//
+		// Applying the first-order expansion:
+		//     Ix * ax = (Tx - (Iz - Iy) * wy * wz)
+		//             - ((Iz - Iy) * wy * az + (Iz - Iy) * ay * wz) * dt
+		//
+		//     Iy * ay = (Ty - (Ix - Iz) * wz * wx)
+		//             - ((Ix - Iz) * wz * ax + (Ix - Iz) * az * wx) * dt
+		//
+		//     Iz * az = (Tz - (Iy - Ix) * wx * wy)
+		//             - ((Iy - Ix) * wx * ay + (Iy - Ix) * ax * wy) * dt
+		//
+		// Grouping terms yields a linear system in (ax, ay, az):
 		// Ix * ax + (Iz - Iy) * dwy * az + (Iz - Iy) * dwz * ay = Tx - (Iz - Iy) * wy * wz
 		// Iy * ay + (Ix - Iz) * dwz * ax + (Ix - Iz) * dwx * az = Ty - (Ix - Iz) * wz * wx
 		// Iz * az + (Iy - Ix) * dwx * ay + (Iy - Ix) * dwy * ax = Tz - (Iy - Ix) * wx * wy
+		//
+		// Solving this system provides the implicit angular acceleration update.
 		
 		const ndMatrix matrix(m_inertiaPrincipalAxis * m_matrix);
 
