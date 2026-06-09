@@ -272,8 +272,9 @@ ndMultiBodyVehicle::ndMultiBodyVehicle(ndFloat32 gravityMagnitud)
 	ndAssert(ndAbs(m_gravityMagnitud) > ndFloat32 (0.0f));
 }
 
-ndMultiBodyVehicle::~ndMultiBodyVehicle()
+ndVehicleDectriptor& ndMultiBodyVehicle::GetDescriptor()
 {
+	return m_descriptor;
 }
 
 const ndMatrix& ndMultiBodyVehicle::GetLocalFrame() const

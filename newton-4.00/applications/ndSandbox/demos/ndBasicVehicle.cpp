@@ -448,7 +448,7 @@ namespace ndMotorVehicle
 
 		//add the notification to bind to the application.
 		//ndSharedPtr<ndModelNotify> controller(new ndVehicleCommonNotify(scene, *loader.m_mesh, camera, articulation));
-		ndSharedPtr<ndModelNotify> controller(new ndVehicleCommonNotify(defaultDesc, vehicle));
+		ndSharedPtr<ndModelNotify> controller(new ndVehicleCommonNotify(vehicle));
 		vehicle->SetNotifyCallback(controller);
 
 		scene->AddEntity(sceneMesh);
