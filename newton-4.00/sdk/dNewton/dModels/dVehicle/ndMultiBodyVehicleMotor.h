@@ -40,7 +40,9 @@ class ndMultiBodyVehicleMotor: public ndJointBilateralConstraint
 	D_NEWTON_API void SetVehicleOwner(ndMultiBodyVehicle* const vehicle);
 
 	D_NEWTON_API ndFloat32 GetRpm() const;
+	D_NEWTON_API ndFloat32 GetMaxRpm() const;
 	D_NEWTON_API void SetMaxRpm(ndFloat32 redLineRpm);
+
 	D_NEWTON_API void SetOmegaAccel(ndFloat32 rpmStep);
 	D_NEWTON_API void SetFrictionLoss(ndFloat32 newtonMeters);
 	D_NEWTON_API void SetTorqueAndRpm(ndFloat32 newtonMeters, ndFloat32 rpm);
@@ -48,11 +50,12 @@ class ndMultiBodyVehicleMotor: public ndJointBilateralConstraint
 
 	private:
 	void AlignMatrix();
-	void JacobianDerivative(ndConstraintDescritor& desc) override;
-	ndFloat32 CalculateAcceleration(ndConstraintDescritor& desc);
+	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
+	D_NEWTON_API ndFloat32 CalculateAcceleration(ndConstraintDescritor& desc);
+	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
 	protected:
-	ndMultiBodyVehicle* m_vehicle;
+	ndWeakPtr<ndMultiBodyVehicle> m_vehicle;
 	ndFloat32 m_omega;
 	ndFloat32 m_maxOmega;
 	ndFloat32 m_omegaStep;

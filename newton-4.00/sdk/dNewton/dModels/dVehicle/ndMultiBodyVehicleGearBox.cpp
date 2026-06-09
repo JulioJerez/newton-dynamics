@@ -35,7 +35,7 @@ ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox()
 {
 }
 
-ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox(ndBodyKinematic* const motor, ndBodyKinematic* const differential, ndMultiBodyVehicle* const, bool reverseSpin)
+ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox(ndBodyKinematic* const motor, ndBodyKinematic* const differential, bool reverseSpin)
 	:ndJointGear(ndFloat32(1.0f), motor->GetMatrix().m_front, differential, motor->GetMatrix().m_front, motor)
 	,m_idleOmega(ndFloat32(1.0f))
 	,m_clutchTorque(ndFloat32(1.0e5f))
@@ -131,6 +131,5 @@ void ndMultiBodyVehicleGearBox::JacobianDerivative(ndConstraintDescritor& desc)
 ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleGearBox::GetMeshJoint(const ndMesh* const owner) const
 {
 	ndMeshJointVehicleGearBox* const joint = new ndMeshJointVehicleGearBox(owner, this);
-	ndAssert(0);
 	return ndSharedPtr<ndMeshJoint>(joint);
 }

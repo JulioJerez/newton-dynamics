@@ -700,7 +700,7 @@ ndMultiBodyVehicleGearBox* ndMultiBodyVehicle::AddGearBox(ndMultiBodyVehicleDiff
 {
 	ndAssert(m_motor);
 	m_initialized = false;
-	ndSharedPtr<ndJointBilateralConstraint> gearBox(new ndMultiBodyVehicleGearBox(m_motor->GetBody0(), differential->GetBody0(), this));
+	ndSharedPtr<ndJointBilateralConstraint> gearBox(new ndMultiBodyVehicleGearBox(m_motor->GetBody0(), differential->GetBody0()));
 	AddGearBox(gearBox);
 	return *m_gearBox;
 }
@@ -1511,7 +1511,21 @@ void ndMultiBodyVehicle::Deserialize(const ndMesh* const rootNode)
 
 			if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleGearBox::StaticClassName()) == 0)
 			{
-				ndAssert(0);
+				AddGearBox(node->m_joint);
+				const ndBodyKinematic* const body0 = node->m_joint->GetBody0()->GetAsBodyKinematic();
+				const ndBodyKinematic* const body1 = node->m_joint->GetBody1()->GetAsBodyKinematic();
+
+				const ndNode* const node0 = FindByBody(body0);
+				const ndNode* const node1 = FindByBody(body1);
+				if (strcmp(node0->m_joint->ClassName(), ndMultiBodyVehicleDifferential::StaticClassName()) == 0)
+				{
+
+				}
+				else
+				{
+					ndAssert(strcmp(node1->m_joint->ClassName(), ndMultiBodyVehicleDifferential::StaticClassName()) == 0);
+				}
+
 			}
 		}
 	};

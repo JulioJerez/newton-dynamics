@@ -162,6 +162,7 @@ class ndAssetEditor : public ndClassAlloc
 	void EditWheelJoint();
 	void EditHingeJoint();
 	void EditPlaneJoint();
+	void EditMotorJoint();
 	void EditSliderJoint();
 	void EditRollerJoint();
 	void EditFix6dofJoint();

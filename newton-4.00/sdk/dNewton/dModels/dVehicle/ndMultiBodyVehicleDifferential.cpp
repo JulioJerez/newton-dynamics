@@ -79,7 +79,7 @@ void ndMultiBodyVehicleDifferential::JacobianDerivative(ndConstraintDescritor& d
 	ndMatrix matrix1;
 	CalculateGlobalMatrix(matrix0, matrix1);
 
-	//one rows to restrict rotation around around the parent coordinate system
+	//one rows to restrict rotation around the parent coordinate system
 	const ndFloat32 angle = CalculateAngle(matrix0.m_front, matrix1.m_front, matrix1.m_right);
 	AddAngularRowJacobian(desc, matrix1.m_right, angle);
 
@@ -112,7 +112,7 @@ void ndMultiBodyVehicleDifferential::JacobianDerivative(ndConstraintDescritor& d
 
 ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleDifferential::GetMeshJoint(const ndMesh* const owner) const
 {
-	ndMeshJointDifferential* const joint = new ndMeshJointDifferential(owner, this);
-	joint->m_limitedSlipOmega = m_limitedSlipOmega;
+	ndMeshJointVehicleDifferential* const joint = new ndMeshJointVehicleDifferential(owner, this);
+	joint->m_limitedSlipOmega = ndReal (m_limitedSlipOmega);
 	return ndSharedPtr<ndMeshJoint>(joint);
 }

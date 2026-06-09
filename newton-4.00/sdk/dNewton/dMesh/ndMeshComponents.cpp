@@ -34,6 +34,7 @@
 #include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
+#include "ndMultiBodyVehicleMotor.h"
 #include "ndMultiBodyVehicleGearBox.h"
 #include "ndIkSwivelPositionEffector.h"
 #include "ndMultiBodyVehicleDifferential.h"
@@ -490,109 +491,54 @@ ndJointBilateralConstraint* ndMeshJointGear::CreateObject(ndBodyKinematic* const
 	return joint;
 }
 
-ndMeshJointDifferential::ndMeshJointDifferential(const ndMesh* const owner)
+ndMeshJointVehicleDifferentialAxle::ndMeshJointVehicleDifferentialAxle(const ndMesh* const owner)
 	:ndMeshJoint(owner)
 {
 }
 
-ndMeshJointDifferential::ndMeshJointDifferential(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
-	:ndMeshJoint(owner, joint)
-{
-	const ndMultiBodyVehicleDifferential* const subJoint = (ndMultiBodyVehicleDifferential*)joint;
-	m_limitedSlipOmega = subJoint->GetSlipOmega();
-}
-
-ndMeshJointDifferential::ndMeshJointDifferential(const ndMeshJointDifferential& other)
-	:ndMeshJoint(other)
-	,m_limitedSlipOmega(other.m_limitedSlipOmega)
-{
-}
-
-ndMeshJoint* ndMeshJointDifferential::Duplicate() const
-{
-	return new ndMeshJointDifferential(*this);
-}
-
-bool ndMeshJointDifferential::operator==(const ndMeshJoint& other) const
-{
-	bool test = ndMeshJoint::operator==(other);
-
-	if (test)
-	{
-		const ndMeshJointDifferential* const otherJoint = (ndMeshJointDifferential*)&other;
-		test = test && (m_limitedSlipOmega == otherJoint->m_limitedSlipOmega);
-	}
-	return test;
-}
-
-void ndMeshJointDifferential::SerializeToXml(nd::TiXmlElement* const parent) const
-{
-	ndMeshJoint::SerializeToXml(parent);
-	xmlSaveParam(parent, "slipOmega", m_limitedSlipOmega);
-}
-
-void ndMeshJointDifferential::DeserializeFromXml(const nd::TiXmlElement* const parent)
-{
-	ndMeshJoint::DeserializeFromXml(parent);
-	m_limitedSlipOmega = xmlGetFloat(parent, "slipOmega");
-}
-
-ndJointBilateralConstraint* ndMeshJointDifferential::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
-{
-	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
-	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
-	ndMultiBodyVehicleDifferential* const joint = new ndMultiBodyVehicleDifferential(child, parent, m_limitedSlipOmega);
-	return joint;
-}
-
-ndMeshJointDifferentialAxle::ndMeshJointDifferentialAxle(const ndMesh* const owner)
-	:ndMeshJoint(owner)
-{
-}
-
-ndMeshJointDifferentialAxle::ndMeshJointDifferentialAxle(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
+ndMeshJointVehicleDifferentialAxle::ndMeshJointVehicleDifferentialAxle(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
 	const ndMultiBodyVehicleDifferentialAxle* const subJoint = (ndMultiBodyVehicleDifferentialAxle*)joint;
 	m_gearRatio = subJoint->GetGearRatio();
 }
 
-ndMeshJointDifferentialAxle::ndMeshJointDifferentialAxle(const ndMeshJointDifferentialAxle& other)
+ndMeshJointVehicleDifferentialAxle::ndMeshJointVehicleDifferentialAxle(const ndMeshJointVehicleDifferentialAxle& other)
 	:ndMeshJoint(other)
-	, m_gearRatio(other.m_gearRatio)
+	,m_gearRatio(other.m_gearRatio)
 {
 }
 
-ndMeshJoint* ndMeshJointDifferentialAxle::Duplicate() const
+ndMeshJoint* ndMeshJointVehicleDifferentialAxle::Duplicate() const
 {
-	return new ndMeshJointDifferentialAxle(*this);
+	return new ndMeshJointVehicleDifferentialAxle(*this);
 }
 
-bool ndMeshJointDifferentialAxle::operator==(const ndMeshJoint& other) const
+bool ndMeshJointVehicleDifferentialAxle::operator==(const ndMeshJoint& other) const
 {
 	bool test = ndMeshJoint::operator==(other);
 
 	if (test)
 	{
-		const ndMeshJointDifferentialAxle* const otherJoint = (ndMeshJointDifferentialAxle*)&other;
+		const ndMeshJointVehicleDifferentialAxle* const otherJoint = (ndMeshJointVehicleDifferentialAxle*)&other;
 		test = test && (m_gearRatio == otherJoint->m_gearRatio);
 	}
 	return test;
 }
 
-void ndMeshJointDifferentialAxle::SerializeToXml(nd::TiXmlElement* const parent) const
+void ndMeshJointVehicleDifferentialAxle::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	ndMeshJoint::SerializeToXml(parent);
 	xmlSaveParam(parent, "ratio", m_gearRatio);
 }
 
-void ndMeshJointDifferentialAxle::DeserializeFromXml(const nd::TiXmlElement* const parent)
+void ndMeshJointVehicleDifferentialAxle::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndMeshJoint::DeserializeFromXml(parent);
 	m_gearRatio = xmlGetFloat(parent, "ratio");
 }
 
-ndJointBilateralConstraint* ndMeshJointDifferentialAxle::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+ndJointBilateralConstraint* ndMeshJointVehicleDifferentialAxle::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
 {
 	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
 	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
@@ -606,22 +552,27 @@ ndJointBilateralConstraint* ndMeshJointDifferentialAxle::CreateObject(ndBodyKine
 
 ndMeshJointVehicleGearBox::ndMeshJointVehicleGearBox(const ndMesh* const owner)
 	:ndMeshJoint(owner)
+	,m_idleOmega(ndReal(1.0f))
+	,m_clutchTorque(ndReal(1.0f))
+	,m_driveTrainResistanceTorque(ndReal(1.0f))
 {
-	ndAssert(0);
 }
 
 ndMeshJointVehicleGearBox::ndMeshJointVehicleGearBox(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
-	ndAssert(0);
 	const ndMultiBodyVehicleGearBox* const subJoint = (ndMultiBodyVehicleGearBox*)joint;
-	//m_gearRatio = subJoint->GetGearRatio();
+	m_idleOmega = ndReal(subJoint->GetIdleOmega());
+	m_clutchTorque = ndReal(subJoint->GetClutchTorque());
+	m_driveTrainResistanceTorque = ndReal(subJoint->GetInternalTorqueLoss());
 }
 
 ndMeshJointVehicleGearBox::ndMeshJointVehicleGearBox(const ndMeshJointVehicleGearBox& other)
 	:ndMeshJoint(other)
+	,m_idleOmega(other.m_idleOmega)
+	,m_clutchTorque(other.m_clutchTorque)
+	,m_driveTrainResistanceTorque(other.m_driveTrainResistanceTorque)
 {
-	ndAssert(0);
 }
 
 ndMeshJoint* ndMeshJointVehicleGearBox::Duplicate() const
@@ -635,41 +586,38 @@ bool ndMeshJointVehicleGearBox::operator==(const ndMeshJoint& other) const
 
 	if (test)
 	{
-		ndAssert(0);
-		//const ndMeshJointDifferentialAxle* const otherJoint = (ndMeshJointDifferentialAxle*)&other;
-		//test = test && (m_gearRatio == otherJoint->m_gearRatio);
+		const ndMeshJointVehicleGearBox* const otherJoint = (ndMeshJointVehicleGearBox*)&other;
+		test = test && (m_idleOmega == otherJoint->m_idleOmega);
+		test = test && (m_clutchTorque == otherJoint->m_clutchTorque);
+		test = test && (m_driveTrainResistanceTorque == otherJoint->m_driveTrainResistanceTorque);
 	}
 	return test;
 }
 
 void ndMeshJointVehicleGearBox::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	ndAssert(0);
 	ndMeshJoint::SerializeToXml(parent);
-	//xmlSaveParam(parent, "ratio", m_gearRatio);
+	xmlSaveParam(parent, "idleOmega", m_idleOmega);
+	xmlSaveParam(parent, "clutchTorque", m_clutchTorque);
+	xmlSaveParam(parent, "internalResitance", m_driveTrainResistanceTorque);
 }
 
 void ndMeshJointVehicleGearBox::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
-	ndAssert(0);
 	ndMeshJoint::DeserializeFromXml(parent);
-	//m_gearRatio = xmlGetFloat(parent, "ratio");
+	m_idleOmega = ndReal(xmlGetFloat(parent, "idleOmega"));
+	m_clutchTorque = ndReal(xmlGetFloat(parent, "clutchTorque"));
+	m_driveTrainResistanceTorque = ndReal(xmlGetFloat(parent, "internalResitance"));
 }
 
 ndJointBilateralConstraint* ndMeshJointVehicleGearBox::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
 {
-	ndAssert(0);
-	return nullptr;
-	//const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
-	//const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
-	//
-	//ndMultiBodyVehicleDifferentialAxle* const joint = new ndMultiBodyVehicleDifferentialAxle(
-	//	pinAndPivotInParent.m_front, pinAndPivotInParent.m_up, parent,
-	//	pinAndPivotInChild.m_front.Scale(m_gearRatio), child);
-	//
-	//return joint;
-}
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 
+	ndMultiBodyVehicleGearBox* const joint = new ndMultiBodyVehicleGearBox(child, parent);
+	return joint;
+}
 
 ndMeshJointSlider::ndMeshJointSlider(const ndMesh* const owner)
 	:ndMeshJoint(owner)
@@ -1306,5 +1254,131 @@ ndJointBilateralConstraint* ndMeshJointSpherical::CreateObject(ndBodyKinematic* 
 	joint->SetAsSpringDamper(m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
 	joint->SetConeLimit(m_maxConeAngle * ndDegreeToRad);
 	joint->SetTwistLimits(m_axis.m_minLimit * ndDegreeToRad, m_axis.m_maxLimit * ndDegreeToRad);
+	return joint;
+}
+
+ndMeshJointVehicleDifferential::ndMeshJointVehicleDifferential(const ndMesh* const owner)
+	:ndMeshJoint(owner)
+{
+}
+
+ndMeshJointVehicleDifferential::ndMeshJointVehicleDifferential(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(owner, joint)
+{
+	const ndMultiBodyVehicleDifferential* const subJoint = (ndMultiBodyVehicleDifferential*)joint;
+	m_limitedSlipOmega = ndReal(subJoint->GetSlipOmega());
+}
+
+ndMeshJointVehicleDifferential::ndMeshJointVehicleDifferential(const ndMeshJointVehicleDifferential& other)
+	:ndMeshJoint(other)
+	,m_limitedSlipOmega(other.m_limitedSlipOmega)
+{
+}
+
+ndMeshJoint* ndMeshJointVehicleDifferential::Duplicate() const
+{
+	return new ndMeshJointVehicleDifferential(*this);
+}
+
+bool ndMeshJointVehicleDifferential::operator==(const ndMeshJoint& other) const
+{
+	bool test = ndMeshJoint::operator==(other);
+
+	if (test)
+	{
+		const ndMeshJointVehicleDifferential* const otherJoint = (ndMeshJointVehicleDifferential*)&other;
+		test = test && (m_limitedSlipOmega == otherJoint->m_limitedSlipOmega);
+	}
+	return test;
+}
+
+void ndMeshJointVehicleDifferential::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+	xmlSaveParam(parent, "slipOmega", m_limitedSlipOmega);
+}
+
+void ndMeshJointVehicleDifferential::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndMeshJoint::DeserializeFromXml(parent);
+	m_limitedSlipOmega = ndReal(xmlGetFloat(parent, "slipOmega"));
+}
+
+ndJointBilateralConstraint* ndMeshJointVehicleDifferential::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+{
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
+	ndMultiBodyVehicleDifferential* const joint = new ndMultiBodyVehicleDifferential(child, parent, m_limitedSlipOmega);
+	return joint;
+}
+
+
+ndMeshJointVehicleMotor::ndMeshJointVehicleMotor(const ndMesh* const owner)
+	:ndMeshJoint(owner)
+	,m_maxOmega(ndReal(1000.0f))
+{
+}
+
+ndMeshJointVehicleMotor::ndMeshJointVehicleMotor(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(owner, joint)
+	//,m_omega(ndReal(0.0f))
+	,m_maxOmega(ndReal(1000.0f))
+	//,m_omegaStep(ndReal(16.0f))
+	//,m_targetOmega(ndReal(0.0f))
+	//,m_engineTorque(ndReal(0.0f))
+	//,m_internalFriction(ndReal(100.0f))
+{
+}
+
+ndMeshJointVehicleMotor::ndMeshJointVehicleMotor(const ndMeshJointVehicleMotor& other)
+	:ndMeshJoint(other)
+	//,m_omega(other.m_omega)
+	,m_maxOmega(other.m_maxOmega)
+	//,m_omegaStep(other.m_omegaStep)
+	//,m_targetOmega(other.m_targetOmega)
+	//,m_engineTorque(other.m_engineTorque)
+	//,m_internalFriction(other.m_internalFriction)
+{
+}
+
+ndMeshJoint* ndMeshJointVehicleMotor::Duplicate() const
+{
+	return new ndMeshJointVehicleMotor(*this);
+}
+
+bool ndMeshJointVehicleMotor::operator==(const ndMeshJoint& other) const
+{
+	bool test = ndMeshJoint::operator==(other);
+	if (test)
+	{
+		const ndMeshJointVehicleMotor* const otherJoint = (ndMeshJointVehicleMotor*)&other;
+		//test = test && (m_omega == otherJoint->m_omega);
+		test = test && (m_maxOmega == otherJoint->m_maxOmega);
+		//test = test && (m_omegaStep == otherJoint->m_omegaStep);
+		//test = test && (m_targetOmega == otherJoint->m_targetOmega);
+		//test = test && (m_engineTorque == otherJoint->m_engineTorque);
+		//test = test && (m_internalFriction == otherJoint->m_internalFriction);
+	}
+	return test;
+}
+
+void ndMeshJointVehicleMotor::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+	xmlSaveParam(parent, "maxOmega", m_maxOmega);
+}
+
+void ndMeshJointVehicleMotor::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndMeshJoint::DeserializeFromXml(parent);
+	m_maxOmega = ndReal(xmlGetFloat(parent, "maxOmega"));
+}
+
+ndJointBilateralConstraint* ndMeshJointVehicleMotor::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+{
+	//const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	//const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
+	ndMultiBodyVehicleMotor* const joint = new ndMultiBodyVehicleMotor(child, parent);
+	joint->SetMaxRpm(m_maxOmega);
 	return joint;
 }
