@@ -534,11 +534,9 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 
 		static int xxxxx;
 		xxxxx++;
-		if (xxxxx > 500)
+		if (xxxxx > 1000)
 		{
 			throttle = 1.0f;
-		//	desiredOmega *= 4.0f;
-		//	torqueFromCurve *= 10.0f;
 		}
 
 		ndFloat32 currentOmega = motor->GetRpm() / ndRadPerSecToRpm;
