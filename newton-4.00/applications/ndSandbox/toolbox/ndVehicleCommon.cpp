@@ -531,17 +531,21 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 	auto ApplyControls = [this, vehicle, &desc, motor, &axis, &buttons]()
 	{
 		ndFloat32 throttle = axis[ndGameControllerInputs::m_gasPedal];
+
+		static int xxxxx;
+		xxxxx++;
+		if (xxxxx > 500)
+		{
+			throttle = 1.0f;
+		//	desiredOmega *= 4.0f;
+		//	torqueFromCurve *= 10.0f;
+		}
+
 		ndFloat32 currentOmega = motor->GetRpm() / ndRadPerSecToRpm;
 		ndFloat32 desiredOmega = ndMax(desc.m_engine.GetIdleRadPerSec(), throttle * desc.m_engine.GetRedLineRadPerSec());
 		ndFloat32 torqueFromCurve = desc.m_engine.GetTorque(currentOmega);
 
-		static int xxxxx;
-		xxxxx++;
-		if (xxxxx > 1000)
-		{
-			torqueFromCurve *= 2.0f;
-		}
-		ndTrace(("t(%f) w(%f) g(%f)\n", torqueFromCurve, desiredOmega, vehicle->GetGearBox()->GetRatio()))
+		ndTrace(("torque(%f) wmotor(%f) wtarget(%f) g(%f)\n", torqueFromCurve, currentOmega, desiredOmega, vehicle->GetGearBox()->GetRatio()))
 
 		motor->SetTorqueAndRpm(torqueFromCurve, desiredOmega * ndRadPerSecToRpm);
 		vehicle->GetChassis()->SetSleepState(false);

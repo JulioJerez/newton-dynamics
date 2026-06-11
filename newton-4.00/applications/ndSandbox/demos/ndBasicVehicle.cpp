@@ -272,6 +272,31 @@ static void TestPlayerCapsuleInteraction(ndDemoEntityManager* const, const ndMat
 
 namespace ndMotorVehicle
 {
+	class ndVehicleDectriptorSuperCar : public ndVehicleDectriptor
+	{
+		public:
+		ndVehicleDectriptorSuperCar()
+			:ndVehicleDectriptor()
+		{
+			m_name = "supercar";
+			ndFloat32 idleTorquePoundFoot = ndFloat32(300.0f);
+			ndFloat32 idleRmp = ndFloat32(700.0f);
+			ndFloat32 horsePower = ndFloat32(400.0f);
+			ndFloat32 rpm0 = ndFloat32(5000.0f);
+			ndFloat32 rpm1 = ndFloat32(6200.0f);
+			ndFloat32 horsePowerAtRedLine = ndFloat32(100.0f);
+			ndFloat32 redLineRpm = ndFloat32(8000.0f);
+			m_engine.Init(idleTorquePoundFoot, idleRmp,
+				horsePower, rpm0, rpm1, horsePowerAtRedLine, redLineRpm);
+
+			m_tireFrictionModel.SetPacejkaCurves(ndTireFrictionModel::m_pacejkaSport);
+			m_tireFrictionModel.m_lateralPacejka.m_d = ndFloat32 (0.4f);
+
+			// plot the curve to check it is a value form
+			//m_tireFrictionModel.PlotPacejkaCurves("supercar");
+		}
+	};
+
 	ndSharedPtr<ndModel> CreateBasicVehicle(ndDemoEntityManager* const scene, const char* const modelName, const ndMatrix& matrix)
 	{
 		ndMeshLoader loader;
@@ -287,10 +312,11 @@ namespace ndMotorVehicle
 
 		// the vehicle descriptor specify the kind of vehicle 
 		// we configure it then we convert the model to multibody vehicle.
-		ndVehicleDectriptor defaultDesc;
-		defaultDesc.m_name = "testarossa";
-		defaultDesc.m_tireFrictionModel.SetPacejkaCurves(ndTireFrictionModel::m_pacejkaSport);
-		vehicle->ConvertToMotorVehicle(defaultDesc);
+		//ndVehicleDectriptor defaultDesc;
+		//defaultDesc.m_name = "testarossa";
+		//defaultDesc.m_tireFrictionModel.SetPacejkaCurves(ndTireFrictionModel::m_pacejkaSport);
+		ndVehicleDectriptorSuperCar superCar;
+		vehicle->ConvertToMotorVehicle(superCar);
 
 		ndRender* const renderer = *scene->GetRenderer();
 		ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *loader.m_mesh, ndGetWorkingFileName("")));
@@ -299,7 +325,7 @@ namespace ndMotorVehicle
 		{
 			if (vehicle->IsCloseLoop(node))
 			{
-				ndTrace(("do somthing\n"));
+				ndTrace(("do something\n"));
 			}
 			else
 			{
@@ -400,19 +426,11 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	//ndSharedPtr<ndUIEntity> vehicleUI(new ndVehicleUI(scene));
 	//scene->Set2DDisplayRenderFunction(vehicleUI);
 	
-	//ndSharedPtr<ndModel> vehicle0 (CreateBasicVehicle(scene, viperDesc, ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -12.0f, 0.0f)), (ndVehicleUI*)*vehicleUI));
+	ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f))));
 	//ndSharedPtr<ndModel> vehicle1 (CreateBasicVehicle(scene, jeepDesc, ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f,  -6.0f, 0.0f)), (ndVehicleUI*)*vehicleUI));
 	//ndSharedPtr<ndModel> vehicle2 (CreateBasicVehicle(scene, monterTruckDesc0, ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f)), (ndVehicleUI*)*vehicleUI));
 	//ndSharedPtr<ndModel> vehicle3 (CreateBasicVehicle(scene, monterTruckDesc1, ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 6.0f, 0.0f)), (ndVehicleUI*)*vehicleUI));
 
-	//CreateBasicVehicle(ndDemoEntityManager* const scene, const char* const modelName, const ndMatrix& matrix)
-	//ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossa.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f))));
-	ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "xxx.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f))));
-
-	//world->AddModel(vehicle1);
-	//world->AddModel(vehicle2);
-	//world->AddModel(vehicle3);
-	//
 	////test removing model from world
 	////vehicle1->RemoveBodiesAndJointsFromWorld();
 	////world->RemoveModel(*vehicle1);
