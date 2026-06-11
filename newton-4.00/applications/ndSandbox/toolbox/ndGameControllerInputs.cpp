@@ -268,11 +268,11 @@ void ndGameControllerInputs::GetXboxJoystickInputs(ndDemoEntityManager* const sc
 		for (ndInt32 i = 0; i < unmappedButtons.GetCount(); ++i)
 		{
 			ndInt32 index = buttonMapping[i];
-			if (m_buttons[index] != unmappedButtons[i])
-			{
-				ndTrace(("%d %d\n", index, i));
-				index *= 1;
-			}
+			//if (m_buttons[index] != unmappedButtons[i])
+			//{
+			//	ndTrace(("%d %d\n", index, i));
+			//	index *= 1;
+			//}
 			m_buttons[index] = unmappedButtons[i];
 		}
 	}

@@ -525,10 +525,8 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 
 	ndPhysicsWorld* const world = (ndPhysicsWorld*)vehicle->GetWorld();
 	ndDemoEntityManager* const scene = world->GetManager();
-	ndMultiBodyVehicleGearBox* const gearBox = vehicle->GetGearBox();
 
-	ndAssert(gearBox);
-
+	m_inputs.Update(scene);
 	const ndVehicleDectriptor& desc = vehicle->GetDescriptor();
 	auto ApplyControls = [this, vehicle, &desc, motor, &axis, &buttons]()
 	{
@@ -536,6 +534,15 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 		ndFloat32 currentOmega = motor->GetRpm() / ndRadPerSecToRpm;
 		ndFloat32 desiredOmega = ndMax(desc.m_engine.GetIdleRadPerSec(), throttle * desc.m_engine.GetRedLineRadPerSec());
 		ndFloat32 torqueFromCurve = desc.m_engine.GetTorque(currentOmega);
+
+		static int xxxxx;
+		xxxxx++;
+		if (xxxxx > 1000)
+		{
+			torqueFromCurve *= 2.0f;
+		}
+		ndTrace(("t(%f) w(%f) g(%f)\n", torqueFromCurve, desiredOmega, vehicle->GetGearBox()->GetRatio()))
+
 		motor->SetTorqueAndRpm(torqueFromCurve, desiredOmega * ndRadPerSecToRpm);
 		vehicle->GetChassis()->SetSleepState(false);
 		motor->GetBody0()->SetSleepState(false);
@@ -552,9 +559,11 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			tire->GetBody0()->SetSleepState(false);
 		}
 	};
-
-	m_inputs.Update(scene);
 	ApplyControls();
+
+	ndMultiBodyVehicleGearBox* const gearBox = vehicle->GetGearBox();
+	ndAssert(gearBox);
+
 	switch (m_driverState)
 	{
 		case m_parked:
