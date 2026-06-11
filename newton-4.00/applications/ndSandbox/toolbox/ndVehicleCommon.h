@@ -199,25 +199,17 @@ class ndVehicleCommonNotify : public ndModelNotify
 
 #endif
 
-	enum ndInputAxis
-	{
-		m_steeringWheel = ndGameControllerInputs::m_azis_00,
-		m_gasPedal = ndGameControllerInputs::m_azis_01,
-		m_brakePedal = ndGameControllerInputs::m_azis_02,
-		m_clutch = ndGameControllerInputs::m_azis_03,
-	};
-
-	enum ndInputButtons
-	{
-		m_ignitionButton = ndGameControllerInputs::m_button_00,
-		m_upGearButton = ndGameControllerInputs::m_button_01,
-		m_downGearButton = ndGameControllerInputs::m_button_02,
-		m_handBreakButton = ndGameControllerInputs::m_button_03,
-		m_neutralGearButton = ndGameControllerInputs::m_button_04,
-		m_reverseGearButton = ndGameControllerInputs::m_button_05,
-		m_automaticGearBoxButton = ndGameControllerInputs::m_button_06,
-		m_playerButton = ndGameControllerInputs::m_button_08,
-	};
+	//enum ndInputButtons
+	//{
+	//	m_ignitionButton = ndGameControllerInputs::m_button_00,
+	//	m_upGearButton = ndGameControllerInputs::m_button_01,
+	//	m_downGearButton = ndGameControllerInputs::m_button_02,
+	//	m_handBreakButton = ndGameControllerInputs::m_button_03,
+	//	m_neutralGearButton = ndGameControllerInputs::m_button_04,
+	//	m_reverseGearButton = ndGameControllerInputs::m_button_05,
+	//	m_automaticGearBoxButton = ndGameControllerInputs::m_button_06,
+	//	m_playerButton = ndGameControllerInputs::m_button_08,
+	//};
 
 	enum ndDriveState
 	{
@@ -237,6 +229,7 @@ class ndVehicleCommonNotify : public ndModelNotify
 
 	void Update(ndFloat32 timestep) override;
 	void PostUpdate(ndFloat32 timestep) override;
+	void PostTransformUpdate(ndFloat32 timestep) override;
 
 	ndGameControllerInputs m_inputs;
 

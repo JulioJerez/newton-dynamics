@@ -924,13 +924,6 @@ bool ndDemoEntityManager::GetMouseKeyState (ndInt32 button) const
 	return io.MouseDown[button];
 }
 
-bool ndDemoEntityManager::JoystickDetected() const
-{
-	ndAssert(0);
-	return 0;
-	//return glfwJoystickPresent(0) ? true : false;
-}
-
 void ndDemoEntityManager::GetJoystickAxis(ndFixSizeArray<ndFloat32, 8>&)
 {
 	ndAssert(0);

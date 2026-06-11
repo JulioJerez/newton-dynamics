@@ -72,7 +72,7 @@ void ndMultiBodyVehicleMotor::SetVehicleOwner(ndMultiBodyVehicle* const vehicle)
 
 void ndMultiBodyVehicleMotor::UpdateParameters()
 {
-	ndTrace(("do nothing for now\n"));
+	//ndTrace(("do nothing for now\n"));
 }
 
 void ndMultiBodyVehicleMotor::AlignMatrix()

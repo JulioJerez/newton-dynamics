@@ -201,14 +201,6 @@ class ndVehicleCommonNotify : public ndModelNotify
 		m_automaticGearBoxButton = ndGameControllerInputs::m_button_06,
 		m_playerButton = ndGameControllerInputs::m_button_08,
 	};
-
-	enum ndInputAxis
-	{
-		m_steeringWheel = ndGameControllerInputs::m_azis_00,
-		m_gasPedal = ndGameControllerInputs::m_azis_01,
-		m_brakePedal = ndGameControllerInputs::m_azis_02,
-		m_clutch = ndGameControllerInputs::m_azis_03,
-	};
 	
 	ndVehicleCommonNotify(const ndVehicleDectriptor& desc, ndMultiBodyVehicle* const vehicle, ndVehicleUI* const ui);
 	

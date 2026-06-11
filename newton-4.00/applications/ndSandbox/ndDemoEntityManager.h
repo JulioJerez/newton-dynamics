@@ -179,7 +179,7 @@ class ndDemoEntityManager : public ndClassAlloc
 	
 	bool AnyKeyDown() const;
 	bool IsShiftKeyDown () const;
-	bool JoystickDetected() const;
+
 	bool IsControlKeyDown () const;
 	bool GetKeyState(ndInt32 key) const;
 	void GetJoystickAxis (ndFixSizeArray<ndFloat32, 8>& axisValues);
