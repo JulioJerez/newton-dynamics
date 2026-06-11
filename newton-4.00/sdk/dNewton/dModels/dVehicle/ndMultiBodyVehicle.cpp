@@ -272,8 +272,9 @@ ndMultiBodyVehicle::ndMultiBodyVehicle(ndFloat32 gravityMagnitud)
 	ndAssert(ndAbs(m_gravityMagnitud) > ndFloat32 (0.0f));
 }
 
-ndMultiBodyVehicle::~ndMultiBodyVehicle()
+ndVehicleDectriptor& ndMultiBodyVehicle::GetDescriptor()
 {
+	return m_descriptor;
 }
 
 const ndMatrix& ndMultiBodyVehicle::GetLocalFrame() const
@@ -1094,34 +1095,50 @@ bool ndMultiBodyVehicle::CoulombFrictionCircleTireModel(ndMultiBodyVehicleTireJo
 
 bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tire, ndContactMaterial& contactPoint) const
 {
-	// from Wikipedia the Pacejka equation is write as, but it does not include phi.
-	//F = D * sin(C * atan(Bx * (1 - E) + E * atan(Bx)))
-
-	// From Giancarlo Genta, page 60: side and verticla shit are introduced to allow the formula 
-	// to be used even when the vehicle is at rest.
+	// According to Wikipedia, the Pacejka equation is written as:
+	//
+	// F = D * sin(C * atan(Bx * (1 - E) + E * atan(Bx)))
+	//
+	// However, this form does not include the parameter phi.
+	//
+	// According to Giancarlo Genta (p. 60), horizontal and vertical shifts are introduced
+	// to allow the formula to be used even when the vehicle is at rest:
+	//
 	// F = D * sin(C * atan(Bx * (1 - E) * (phi + Sh) + E * atan(Bx * (phi + Sh)))) + Sv
-	// My main issue with this formula is the difficulty in determining the parameters 
+	//
+	// My main difficulty with this formulation is determining the parameters
 	// C, D, E, Bx, phi, Sh, and Sv for each force and moment.
-	// Genta's book provides five tables of coefficients for five different vehicles, 
-	// but nowhere does it clearly relate those coefficients to the a1 trought a13
-	// to the Magic Formula parameters B, C, D, and E. 
-	// Instead you have to get them form a diffren example
-	// The closest reference I’ve found is this paper: 
+	//
+	// Genta's book provides five tables of coefficients for five different vehicles,
+	// but it never clearly explains how those coefficients (a1 through a13) relate
+	// to the Magic Formula parameters B, C, D, and E.
+	// Instead, the reader must infer the relationship from other examples.
+	//
+	// The closest reference I have found that discusses this mapping is:
 	// http://www-cdr.stanford.edu/dynamic/bywire/tires.pdf
-
-	// Regarding the Pacejka implementation:
-	// In Genta’s book, from pages 60 to 78, the unit handling is extremely inconsistent, 
-	// to the point where the results become meaningless, in my opinion.
-	// I’ve attempted to implement this model for decades, 
-	// but have never been able to achieve correct results.
-	// Currently, I’m comparing it to the Brush model, which appears to be more reasonable.
-	// foe example the force extarec for Pacejka are independet of the normal force onteh tire
-	// instead is use the paremeter D, 
-	// to me this violates common sence, Imagine a pick truck, 
-	// on this formual the loteral forces will be the same regaless of the truck load.
-
-	const ndBodyKinematic* const tireBody = tire->GetBody0()->GetAsBodyDynamic();
-	const ndBodyKinematic* const otherBody = (contactPoint.m_body0 == tireBody) ? ((ndBodyKinematic*)contactPoint.m_body1)->GetAsBodyDynamic() : ((ndBodyKinematic*)contactPoint.m_body0)->GetAsBodyDynamic();
+	//
+	// Regarding the Pacejka implementation in general:
+	//
+	// From pages 60 through 78 of Genta's book, the treatment of units appears
+	// highly inconsistent. In several cases, this makes it difficult to interpret
+	// the results with confidence.
+	//
+	// I have attempted to implement this model on multiple occasions over the years,
+	// but have never been able to obtain results that I consider physically correct.
+	// At present, I am comparing it against the Brush tire model, which appears
+	// to produce more reasonable behavior.
+	//
+	// For example, in the Pacejka formulation the generated forces do not appear
+	// to depend directly on the tire normal load. Instead, the load dependence is
+	// embedded in parameter D.
+	//
+	// Conceptually, this seems questionable. Consider a pickup truck carrying
+	// significantly different payloads: one would expect the available lateral
+	// tire forces to vary with the tire load. If D is held constant, the model
+	// predicts identical lateral force characteristics regardless of vehicle load,
+	// which does not align with physical intuition.
+	const ndBodyKinematic* const tireBody = tire->GetBody0()->GetAsBodyKinematic();
+	const ndBodyKinematic* const otherBody = (contactPoint.m_body0 == tireBody) ? contactPoint.m_body1 : contactPoint.m_body0;
 
 	const ndVector longitudDir(contactPoint.m_dir0);
 	const ndVector contactVeloc0(tireBody->GetVelocity());

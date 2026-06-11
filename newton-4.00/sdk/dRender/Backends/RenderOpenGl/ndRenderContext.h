@@ -77,6 +77,11 @@ class ndRenderContext: public ndClassAlloc
 	void ClearFrameBuffer(const ndVector& color);
 	void SetViewport(ndInt32 x, ndInt32 yt, ndInt32 width, ndInt32 height);
 
+	bool HasGameController() const;
+	const char* GameControllerName() const;
+	const ndFixSizeArray<ndFloat32, 8>& GameControllerAxis() const;
+	const ndFixSizeArray<ndInt8, 32>& GameControllerButtons() const;
+
 	private:
 	void LoadFont(const char* const fontPathName);
 	ndSharedPtr<ndRenderTexture> LoadTexture(const ndString& pathname);
@@ -89,6 +94,8 @@ class ndRenderContext: public ndClassAlloc
 	void SetCollorPassRenderStates();
 
 	void SetViewport();
+	void UpdateJoystick();
+
 	static void ErrorCallback(ndInt32 error, const char* const description);
 	static void ResizeWindowsCallback(GLFWwindow* window, int x, int y);
 
@@ -110,12 +117,16 @@ class ndRenderContext: public ndClassAlloc
 	ndSharedPtr<ndRenderShaderCache> m_shaderCache;
 	GLint m_defaultFont;
 	ndInt32 m_prevKey;
-	bool m_imGuiEnabled;
-	bool m_mousePressed[3];
 	ndInt32 m_viewport_x0;
 	ndInt32 m_viewport_y0;
 	ndInt32 m_viewport_width;
 	ndInt32 m_viewport_heigh;
+	bool m_hasJoystick;
+	bool m_imGuiEnabled;
+	bool m_mousePressed[3];
+	const char* m_joystickName;
+	ndFixSizeArray<ndFloat32, 8> m_joystickAxis;
+	ndFixSizeArray<ndInt8, 32> m_joystickButtons;
 
 	friend class ndRenderTexture;
 	friend class ndRenderPassGui;

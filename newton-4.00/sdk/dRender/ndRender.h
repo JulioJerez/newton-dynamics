@@ -82,6 +82,7 @@ class ndRender: public ndClassAlloc
 	void AddSceneNode(const ndSharedPtr<ndRenderSceneNode>& entity);
 	void RemoveSceneNode(const ndSharedPtr<ndRenderSceneNode>& entity);
 
+	void InterpolateTransforms(ndFloat32 param);
 	void SetCamera(const ndSharedPtr<ndRenderSceneNode>& camera);
 	void SetSunLight(const ndVector& direction, const ndVector& intensity);
 
@@ -93,7 +94,10 @@ class ndRender: public ndClassAlloc
 	const ndSharedPtr<ndRenderContext>& GetContext() const;
 	const ndSharedPtr<ndRenderSceneNode>& GetCamera() const;
 
-	void InterpolateTransforms(ndFloat32 param);
+	bool HasGameController() const;
+	const char* GameControllerName() const;
+	const ndFixSizeArray<ndFloat32, 8>& GameControllerAxis() const;
+	const ndFixSizeArray<ndInt8, 32>& GameControllerButtons() const;
 
 	private:
 	void RemoveDefferedEntities();

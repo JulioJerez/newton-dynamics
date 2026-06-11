@@ -37,22 +37,6 @@ class ndMultiBodyVehicleTorsionBar;
 class ndMultiBodyVehicleDifferential;
 class ndMultiBodyVehicleDifferentialAxle;
 
-//class ndMultiBodyVehicleTireJointInfo : public ndWheelDescriptor, public ndTireFrictionModel
-//{
-//	public:
-//	ndMultiBodyVehicleTireJointInfo()
-//		:ndWheelDescriptor()
-//		,ndTireFrictionModel()
-//	{
-//	}
-//
-//	ndMultiBodyVehicleTireJointInfo(const ndWheelDescriptor& info, const ndTireFrictionModel& frictionModel)
-//		:ndWheelDescriptor(info)
-//		,ndTireFrictionModel(frictionModel)
-//	{
-//	}
-//};
-
 class ndVehicleDectriptor: public ndClassAlloc
 {
 	public:
@@ -72,17 +56,17 @@ class ndVehicleDectriptor: public ndClassAlloc
 	class ndEngineTorqueCurve
 	{
 		public:
-		ndEngineTorqueCurve();
+		D_NEWTON_API ndEngineTorqueCurve();
 
-		void Init(ndFloat32 idleTorquePoundFoot, ndFloat32 idleRmp,
+		D_NEWTON_API void Init(ndFloat32 idleTorquePoundFoot, ndFloat32 idleRmp,
 			ndFloat32 horsePower, ndFloat32 rpm0, ndFloat32 rpm1,
 			ndFloat32 horsePowerAtRedLine, ndFloat32 redLineRpm);
 
-		ndFloat32 GetIdleRadPerSec() const;
-		ndFloat32 GetRedLineRadPerSec() const;
-		ndFloat32 GetLowGearShiftRadPerSec() const;
-		ndFloat32 GetHighGearShiftRadPerSec() const;
-		ndFloat32 GetTorque(ndFloat32 omegaInRadPerSeconds) const;
+		D_NEWTON_API ndFloat32 GetIdleRadPerSec() const;
+		D_NEWTON_API ndFloat32 GetRedLineRadPerSec() const;
+		D_NEWTON_API ndFloat32 GetLowGearShiftRadPerSec() const;
+		D_NEWTON_API ndFloat32 GetHighGearShiftRadPerSec() const;
+		D_NEWTON_API ndFloat32 GetTorque(ndFloat32 omegaInRadPerSeconds) const;
 
 		ndTorqueTap m_torqueCurve[5];
 	};
@@ -152,8 +136,6 @@ class ndVehicleDectriptor: public ndClassAlloc
 	ndEngineTorqueCurve m_engine;
 	ndGearBox m_transmission;
 	ndTireFrictionModel m_tireFrictionModel;
-	//ndMultiBodyVehicleTireJointInfo m_frontTire;
-	//ndMultiBodyVehicleTireJointInfo m_rearTire;
 	ndFloat32 m_motorMass;
 	ndFloat32 m_motorRadius;
 
@@ -205,9 +187,9 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	D_CLASS_REFLECTION(ndMultiBodyVehicle, ndModelArticulation)
 
 	D_NEWTON_API ndMultiBodyVehicle(ndFloat32 gravityMagnitud = ndFloat32 (10.0f));
-	D_NEWTON_API virtual ~ndMultiBodyVehicle ();
-
 	D_NEWTON_API void ConvertToMotorVehicle(const ndVehicleDectriptor& vehicleDescritor);
+
+	D_NEWTON_API ndVehicleDectriptor& GetDescriptor();
 
 	D_NEWTON_API const ndMatrix& GetLocalFrame() const;
 	D_NEWTON_API void SetLocalFrame(const ndMatrix& localframe);

@@ -13,8 +13,8 @@
 #define __ND_VEHICLE_COMMON_UTIL__
 
 #include "ndSandboxStdafx.h"
-//#include "ndDemoEntityNotify.h"
-//#include "ndGameControlerInputs.h"
+#include "ndDemoEntityNotify.h"
+#include "ndGameControlerInputs.h"
 
 //class ndVehicleCommon;
 //
@@ -178,41 +178,9 @@ class ndVehicleCommonNotify : public ndModelNotify
 {
 	public:
 #if 0
-	enum ndDriveState
-	{
-		m_parked,
-		m_idle,
-		m_driveReverse,
-		m_driveForward,
-		m_driveShitGearUp,
-		m_driveShitGearDown,
-		m_driveForwardGearDelay,
-		m_driveReverseFromForward,
-	};
 
-	enum ndInputButtons
-	{
-		m_ignitionButton = ndGameControllerInputs::m_button_00,
-		m_upGearButton = ndGameControllerInputs::m_button_01,
-		m_downGearButton = ndGameControllerInputs::m_button_02,
-		m_handBreakButton = ndGameControllerInputs::m_button_03,
-		m_neutralGearButton = ndGameControllerInputs::m_button_04,
-		m_reverseGearButton = ndGameControllerInputs::m_button_05,
-		m_automaticGearBoxButton = ndGameControllerInputs::m_button_06,
-		m_playerButton = ndGameControllerInputs::m_button_08,
-	};
-
-	enum ndInputAxis
-	{
-		m_steeringWheel = ndGameControllerInputs::m_azis_00,
-		m_gasPedal = ndGameControllerInputs::m_azis_01,
-		m_brakePedal = ndGameControllerInputs::m_azis_02,
-		m_clutch = ndGameControllerInputs::m_azis_03,
-	};
-	
 	ndVehicleCommonNotify(const ndVehicleDectriptor& desc, ndMultiBodyVehicle* const vehicle, ndVehicleUI* const ui);
-	
-	virtual void ApplyInputs(ndFloat32 timestep);
+
 
 	void Debug(ndConstraintDebugCallback& context) const override;
 	void Update(ndFloat32 timestep) override;
@@ -227,9 +195,44 @@ class ndVehicleCommonNotify : public ndModelNotify
 	void SetCamera(ndDemoEntityManager* const manager, ndFloat32 timestep);
 	static void UpdateCameraCallback(ndDemoEntityManager* const manager, void* const context, ndFloat32 timestep);
 
-	ndGameControllerInputs m_inputs;
-	ndVehicleDectriptor m_desc;
 	ndVehicleUI* m_ui;
+
+#endif
+
+	//enum ndInputButtons
+	//{
+	//	m_ignitionButton = ndGameControllerInputs::m_button_00,
+	//	m_upGearButton = ndGameControllerInputs::m_button_01,
+	//	m_downGearButton = ndGameControllerInputs::m_button_02,
+	//	m_handBreakButton = ndGameControllerInputs::m_button_03,
+	//	m_neutralGearButton = ndGameControllerInputs::m_button_04,
+	//	m_reverseGearButton = ndGameControllerInputs::m_button_05,
+	//	m_automaticGearBoxButton = ndGameControllerInputs::m_button_06,
+	//	m_playerButton = ndGameControllerInputs::m_button_08,
+	//};
+
+	enum ndDriveState
+	{
+		m_parked,
+		m_idle,
+		m_driveReverse,
+		m_driveForward,
+		m_driveShitGearUp,
+		m_driveShitGearDown,
+		m_driveForwardGearDelay,
+		m_driveReverseFromForward,
+	};
+
+	ndVehicleCommonNotify(ndMultiBodyVehicle* const vehicle);
+
+	virtual void ApplyInputs(ndFloat32 timestep);
+
+	void Update(ndFloat32 timestep) override;
+	void PostUpdate(ndFloat32 timestep) override;
+	void PostTransformUpdate(ndFloat32 timestep) override;
+
+	ndGameControllerInputs m_inputs;
+
 	ndInt32 m_currentGear;
 	ndInt32 m_autoGearShiftTimer;
 	ndDemoEntityManager::ndKeyTrigger m_parking;
@@ -239,16 +242,10 @@ class ndVehicleCommonNotify : public ndModelNotify
 	ndDemoEntityManager::ndKeyTrigger m_forwardGearUp;
 	ndDemoEntityManager::ndKeyTrigger m_forwardGearDown;
 	ndDemoEntityManager::ndKeyTrigger m_manualTransmission;
+
+	ndDriveState m_driverState;
 	bool m_isPlayer;
 	bool m_sleepingState;
-	ndDriveState m_driverState;
-#endif
-
-	ndVehicleCommonNotify(const ndVehicleDectriptor& desc, ndMultiBodyVehicle* const vehicle);
-
-	void Update(ndFloat32 timestep) override;
-	void PostUpdate(ndFloat32 timestep) override;
-
 };
 
 #endif

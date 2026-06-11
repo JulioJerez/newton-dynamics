@@ -540,13 +540,15 @@ void ndAssetEditor::ShowMainMenuBar()
 
 			ImGui::Separator();
 			ImGui::Checkbox("show node", &m_showSelectedNode);
-			ImGui::Checkbox("show node pivot", &m_showPivot);
-			ImGui::Checkbox("show geometry pivot", &m_geometryPivot);
-			ImGui::Checkbox("show collision pivot", &m_showShapePivot);
-			ImGui::Checkbox("show center of mass", &m_showCenterOfMass);
-			ImGui::Checkbox("show Joints", &m_showJoints);
 			ImGui::Checkbox("show collision", &m_showCollisionShape);
 			ImGui::Checkbox("show mesh skeleton", &m_raycastBones);
+
+			ImGui::Separator();
+			ImGui::Checkbox("show node gizmo", &m_showPivot);
+			ImGui::Checkbox("show Joints gizmo", &m_showJoints);
+			ImGui::Checkbox("show geometry gizmo", &m_geometryPivot);
+			ImGui::Checkbox("show collision gizmo", &m_showShapePivot);
+			ImGui::Checkbox("show center of mass gizmo", &m_showCenterOfMass);
 
 			ImGui::EndMenu();
 		}

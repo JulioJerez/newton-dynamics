@@ -743,7 +743,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_autoSleepMode = false;
 	//m_hidePostUpdate = true;
 	//m_hideVisualMeshes = true;
-	//m_solverMode = ndWorld::ndStandardSolver;
+	m_solverMode = ndWorld::ndStandardSolver;
 	//m_solverMode = ndWorld::ndSimdSoaSolver;
 	//m_solverMode = ndWorld::ndSimdAvx2Solver;
 	//m_solverPasses = 4;
@@ -922,13 +922,6 @@ bool ndDemoEntityManager::GetMouseKeyState (ndInt32 button) const
 {
 	ImGuiIO& io = ImGui::GetIO();
 	return io.MouseDown[button];
-}
-
-bool ndDemoEntityManager::JoystickDetected() const
-{
-	ndAssert(0);
-	return 0;
-	//return glfwJoystickPresent(0) ? true : false;
 }
 
 void ndDemoEntityManager::GetJoystickAxis(ndFixSizeArray<ndFloat32, 8>&)

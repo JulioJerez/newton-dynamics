@@ -233,7 +233,15 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 				ndSharedPtr<ndMeshLoopJoint>& loopJoint = loopJointNode->GetInfo();
 
 				ImGui::NewLine();
-				ImGui::Text(loopJoint->m_name.GetStr());
+				ImGui::Text("child: ");
+				ImGui::SameLine();
+				ImGui::Text(loopJoint->m_childNode->GetName().GetStr());
+				if (loopJoint->m_parentNode)
+				{
+					ImGui::Text("parent:");
+					ImGui::SameLine();
+					ImGui::Text(loopJoint->m_parentNode->GetName().GetStr());
+				}
 
 				if (ImGui::Button("remove selected"))
 				{

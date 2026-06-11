@@ -146,6 +146,26 @@ void ndRender::Terminate()
 	m_context->Terminate();
 }
 
+bool ndRender::HasGameController() const
+{
+	return m_context->HasGameController();
+}
+
+const char* ndRender::GameControllerName() const
+{
+	return m_context->GameControllerName();
+}
+
+const ndFixSizeArray<ndFloat32, 8>& ndRender::GameControllerAxis() const
+{
+	return m_context->GameControllerAxis();
+}
+
+const ndFixSizeArray<ndInt8, 32>& ndRender::GameControllerButtons() const
+{
+	return m_context->GameControllerButtons();
+}
+
 bool ndRender::PollEvents() const
 {
 	return m_context->PollEvents();

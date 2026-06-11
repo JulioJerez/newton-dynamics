@@ -36,7 +36,7 @@ ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox()
 }
 
 ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox(ndBodyKinematic* const motor, ndBodyKinematic* const differential, bool reverseSpin)
-	:ndJointGear(ndFloat32(1.0f), motor->GetMatrix().m_front, differential, motor->GetMatrix().m_front, motor)
+	:ndJointGear(ndFloat32(1.0f), differential->GetMatrix().m_front, differential, motor->GetMatrix().m_front, motor)
 	,m_idleOmega(ndFloat32(1.0f))
 	,m_clutchTorque(ndFloat32(1.0e5f))
 	,m_driveTrainResistanceTorque(ndFloat32(1000.0f))
@@ -50,6 +50,18 @@ ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox(ndBodyKinematic* const moto
 	SetLocalMatrix0(matrix0);
 	SetLocalMatrix1(matrix1);
 
+	SetRatio(ndFloat32(0.0f));
+	SetSolverModel(m_jointkinematicCloseLoop);
+}
+
+ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox(ndFloat32 gearRatio,
+	const ndVector& motorPin, ndBodyKinematic* const motor,
+	const ndVector& differentialPin, ndBodyKinematic* const differential)
+	:ndJointGear(gearRatio, differentialPin, differential, motorPin, motor)
+	,m_idleOmega(ndFloat32(1.0f))
+	,m_clutchTorque(ndFloat32(1.0e5f))
+	,m_driveTrainResistanceTorque(ndFloat32(1000.0f))
+{
 	SetRatio(ndFloat32(0.0f));
 	SetSolverModel(m_jointkinematicCloseLoop);
 }
@@ -96,35 +108,37 @@ void ndMultiBodyVehicleGearBox::JacobianDerivative(ndConstraintDescritor& desc)
 		
 		AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
 		
+		//ndFloat32 gearRatio = ndFloat32(1.0f) / m_gearRatio;
+
 		ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
 		ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
-		
-		ndFloat32 gearRatio = ndFloat32(1.0f) / m_gearRatio;
-		
-		jacobian0.m_angular = matrix0.m_front;
-		jacobian1.m_angular = matrix1.m_front.Scale(gearRatio);
+		jacobian0.m_angular = matrix0.m_front.Scale(m_gearRatio);
+		jacobian1.m_angular = matrix1.m_front;
 		
 		const ndVector& omega0 = m_body0->GetOmega();
 		const ndVector& omega1 = m_body1->GetOmega();
-		const ndFloat32 idleOmega = m_idleOmega * gearRatio * ndFloat32(0.95f);
-		
+		//const ndFloat32 idleOmega = m_idleOmega * gearRatio * ndFloat32(0.95f);
+		//const ndFloat32 idleOmega = m_idleOmega * ndFloat32(0.95f);
+
 		ndFloat32 w0 = omega0.DotProduct(jacobian0.m_angular).GetScalar();
-		ndFloat32 w1 = omega1.DotProduct(jacobian1.m_angular).GetScalar() + idleOmega;
-		w1 = (gearRatio > ndFloat32(0.0f)) ? ndMin(w1, ndFloat32(0.0f)) : ndMax(w1, ndFloat32(0.0f));
+		ndFloat32 w1 = omega1.DotProduct(jacobian1.m_angular).GetScalar();
+		//ndFloat32 w0 = omega0.DotProduct(jacobian0.m_angular).GetScalar() + idleOmega;
+		//w1 = (gearRatio > ndFloat32(0.0f)) ? ndMin(w1, ndFloat32(0.0f)) : ndMax(w1, ndFloat32(0.0f));
+		//w0 = (m_gearRatio > ndFloat32(0.0f)) ? ndMin(w0, ndFloat32(0.0f)) : ndMax(w0, ndFloat32(0.0f));
 		
 		const ndFloat32 w = (w0 + w1) * ndFloat32(0.5f);
 		SetMotorAcceleration(desc, -w * desc.m_invTimestep);
 		
-		if (m_gearRatio > ndFloat32 (0.0f))
-		{
-			SetHighFriction(desc, m_clutchTorque);
-			SetLowerFriction(desc, -m_driveTrainResistanceTorque);
-		}
-		else
-		{
-			SetHighFriction(desc, m_driveTrainResistanceTorque);
-			SetLowerFriction(desc, -m_clutchTorque);
-		}
+		//if (m_gearRatio > ndFloat32 (0.0f))
+		//{
+		//	SetHighFriction(desc, m_clutchTorque);
+		//	SetLowerFriction(desc, -m_driveTrainResistanceTorque);
+		//}
+		//else
+		//{
+		//	SetHighFriction(desc, m_driveTrainResistanceTorque);
+		//	SetLowerFriction(desc, -m_clutchTorque);
+		//}
 	}
 }
 

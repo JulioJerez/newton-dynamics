@@ -615,7 +615,8 @@ ndJointBilateralConstraint* ndMeshJointVehicleGearBox::CreateObject(ndBodyKinema
 	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
 	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 
-	ndMultiBodyVehicleGearBox* const joint = new ndMultiBodyVehicleGearBox(child, parent);
+	//ndMultiBodyVehicleGearBox* const joint = new ndMultiBodyVehicleGearBox(child, parent);
+	ndMultiBodyVehicleGearBox* const joint = new ndMultiBodyVehicleGearBox(ndFloat32 (1.0f), pinAndPivotInChild.m_front, child, pinAndPivotInParent.m_front, parent);
 	return joint;
 }
 

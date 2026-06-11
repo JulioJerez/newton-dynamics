@@ -18,29 +18,6 @@ class ndDemoEntityManager;
 class ndGameControllerInputs
 {
 	public:
-	enum ndAxis
-	{
-		m_azis_00,
-		m_azis_01,
-		m_azis_02,
-		m_azis_03,
-		m_axisCount,
-	};
-
-	enum ndButtons
-	{
-		m_button_00 = 0,
-		m_button_01,
-		m_button_02,
-		m_button_03,
-		m_button_04,
-		m_button_05,
-		m_button_06,
-		m_button_07,
-		m_button_08,
-		m_buttonCount
-	};
-
 	ndFixSizeArray<char, 32> m_buttons;
 	ndFixSizeArray<ndFloat32, 8> m_axis;
 

@@ -18,31 +18,27 @@ class ndDemoEntityManager;
 class ndGameControllerInputs
 {
 	public:
-	enum ndAxis
+	enum ndInputAxis
 	{
-		m_azis_00,
-		m_azis_01,
-		m_azis_02,
-		m_azis_03,
-		m_axisCount,
+		m_steeringWheel,
+		m_gasPedal,
+		m_brakePedal,
+		m_clutch,
 	};
 
-	enum ndButtons
+	enum ndInputButtons
 	{
-		m_button_00 = 0,
-		m_button_01,
-		m_button_02,
-		m_button_03,
-		m_button_04,
-		m_button_05,
-		m_button_06,
-		m_button_07,
-		m_button_08,
-		m_buttonCount
+		m_ignitionButton,
+		m_upGearButton,
+		m_downGearButton,
+		m_handBreakButton,
+		m_neutralGearButton,
+		m_reverseGearButton,
+		m_parkGearButton,
+		m_automaticGearBoxButton,
+		m_changeCamera,
+		m_changePlayer,
 	};
-
-	ndFixSizeArray<char, 32> m_buttons;
-	ndFixSizeArray<ndFloat32, 8> m_axis;
 
 	ndGameControllerInputs();
 	~ndGameControllerInputs();
@@ -54,7 +50,11 @@ class ndGameControllerInputs
 	void GetXboxJoystickInputs(ndDemoEntityManager* const scene);
 	void GetWheelJoystickInputs(ndDemoEntityManager* const scene);
 
+	ndFixSizeArray<char, 32> m_buttons;
+	ndFixSizeArray<ndFloat32, 8> m_axis;
 	ndFloat32 m_keyBoardSteerAngle;
+
+	friend class ndVehicleCommonNotify;
 };
 
 
