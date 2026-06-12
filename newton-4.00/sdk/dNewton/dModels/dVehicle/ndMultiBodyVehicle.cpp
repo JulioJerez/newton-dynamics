@@ -1483,7 +1483,6 @@ void ndMultiBodyVehicle::FinalizeBuild()
 	m_initialized = true;
 }
 
-//void ndMultiBodyVehicle::Deserialize(const ndMesh* const rootNode)
 void ndMultiBodyVehicle::ConvertToMotorVehicle(const ndVehicleDectriptor& vehicleDescritor)
 {
 	m_descriptor = vehicleDescritor;
