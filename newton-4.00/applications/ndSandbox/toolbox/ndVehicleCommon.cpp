@@ -534,9 +534,10 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 
 		static int xxxxx;
 		xxxxx++;
-		if (xxxxx > 1000)
+		if (xxxxx > 500)
 		{
 			throttle = 1.0f;
+			//vehicle->GetGearBox()->SetRatio(0.1f);
 		}
 
 		ndFloat32 currentOmega = motor->GetRpm() / ndRadPerSecToRpm;

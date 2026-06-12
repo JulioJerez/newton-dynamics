@@ -96,26 +96,27 @@ ndFloat32 ndVehicleDectriptor::ndEngineTorqueCurve::GetHighGearShiftRadPerSec() 
 
 ndFloat32 ndVehicleDectriptor::ndEngineTorqueCurve::GetRedLineRadPerSec() const
 {
-	const int maxIndex = sizeof(m_torqueCurve) / sizeof(m_torqueCurve[0]);
-	return m_torqueCurve[maxIndex - 1].m_radPerSeconds;
+	const ndInt32 maxIndex = sizeof(m_torqueCurve) / sizeof(m_torqueCurve[0]);
+	const ndFloat32 omega = m_torqueCurve[maxIndex - 1].m_radPerSeconds;
+	return omega;
 }
 
 ndFloat32 ndVehicleDectriptor::ndEngineTorqueCurve::GetTorque(ndFloat32 omegaInRadPerSeconds) const
 {
-	const int maxIndex = sizeof(m_torqueCurve) / sizeof(m_torqueCurve[0]);
+	const ndInt32 maxIndex = sizeof(m_torqueCurve) / sizeof(m_torqueCurve[0]);
 	omegaInRadPerSeconds = ndClamp(omegaInRadPerSeconds, ndFloat32(0.0f), m_torqueCurve[maxIndex - 1].m_radPerSeconds);
 
 	for (ndInt32 i = 1; i < maxIndex; ++i)
 	{
 		if (omegaInRadPerSeconds <= m_torqueCurve[i].m_radPerSeconds)
 		{
-			ndFloat32 omega0 = m_torqueCurve[i - 0].m_radPerSeconds;
-			ndFloat32 omega1 = m_torqueCurve[i - 1].m_radPerSeconds;
+			const ndFloat32 omega0 = m_torqueCurve[i - 0].m_radPerSeconds;
+			const ndFloat32 omega1 = m_torqueCurve[i - 1].m_radPerSeconds;
 
-			ndFloat32 torque0 = m_torqueCurve[i - 0].m_torqueInNewtonMeters;
-			ndFloat32 torque1 = m_torqueCurve[i - 1].m_torqueInNewtonMeters;
+			const ndFloat32 torque0 = m_torqueCurve[i - 0].m_torqueInNewtonMeters;
+			const ndFloat32 torque1 = m_torqueCurve[i - 1].m_torqueInNewtonMeters;
 
-			ndFloat32 torque = torque0 + (omegaInRadPerSeconds - omega0) * (torque1 - torque0) / (omega1 - omega0);
+			const ndFloat32 torque = torque0 + (omegaInRadPerSeconds - omega0) * (torque1 - torque0) / (omega1 - omega0);
 			return torque;
 		}
 	}
@@ -507,7 +508,9 @@ ndMultiBodyVehicleGearBox* ndMultiBodyVehicle::AddGearBox(ndMultiBodyVehicleDiff
 {
 	ndAssert(m_motor);
 	m_initialized = false;
-	ndSharedPtr<ndJointBilateralConstraint> gearBox(new ndMultiBodyVehicleGearBox(m_motor->GetBody0(), differential->GetBody0()));
+	const ndMatrix motorPinMatrix(m_motor->GetLocalMatrix0() * m_motor->GetBody0()->GetMatrix());
+	const ndMatrix differentialPinMatrix(differential->GetLocalMatrix0() * differential->GetBody0()->GetMatrix());
+	ndSharedPtr<ndJointBilateralConstraint> gearBox(new ndMultiBodyVehicleGearBox(ndFloat32 (1.0f), motorPinMatrix.m_front, m_motor->GetBody0(), differentialPinMatrix.m_front, differential->GetBody0()));
 	AddGearBox(gearBox);
 	return *m_gearBox;
 }

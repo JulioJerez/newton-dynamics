@@ -163,8 +163,8 @@ void ndMultiBodyVehicleMotor::JacobianDerivative(ndConstraintDescritor& desc)
 	const ndFloat32 accel = CalculateAcceleration(desc);
 	const ndFloat32 torque = ndMax(m_engineTorque, m_internalFriction);
 	SetMotorAcceleration(desc, accel);
-	SetHighFriction(desc, torque);
-	SetLowerFriction(desc, -m_internalFriction);
+	//SetHighFriction(desc, torque);
+	//SetLowerFriction(desc, -m_internalFriction);
 	SetDiagonalRegularizer(desc, ndFloat32(0.001f));
 	
 	// add torque coupling to chassis.

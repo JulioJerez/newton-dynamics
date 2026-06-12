@@ -35,24 +35,24 @@ ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox()
 {
 }
 
-ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox(ndBodyKinematic* const motor, ndBodyKinematic* const differential, bool reverseSpin)
-	:ndJointGear(ndFloat32(1.0f), differential->GetMatrix().m_front, differential, motor->GetMatrix().m_front, motor)
-	,m_idleOmega(ndFloat32(1.0f))
-	,m_clutchTorque(ndFloat32(1.0e5f))
-	,m_driveTrainResistanceTorque(ndFloat32(1000.0f))
-{
-	ndMatrix matrix0(ndGetIdentityMatrix());
-	ndMatrix matrix1(ndGetIdentityMatrix());
-	if (reverseSpin)
-	{
-		matrix0 = ndYawMatrix(ndPi);
-	}
-	SetLocalMatrix0(matrix0);
-	SetLocalMatrix1(matrix1);
-
-	SetRatio(ndFloat32(0.0f));
-	SetSolverModel(m_jointkinematicCloseLoop);
-}
+//ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox(ndBodyKinematic* const motor, ndBodyKinematic* const differential, bool reverseSpin)
+//	:ndJointGear(ndFloat32(1.0f), differential->GetMatrix().m_front, differential, motor->GetMatrix().m_front, motor)
+//	,m_idleOmega(ndFloat32(1.0f))
+//	,m_clutchTorque(ndFloat32(1.0e5f))
+//	,m_driveTrainResistanceTorque(ndFloat32(1000.0f))
+//{
+//	ndMatrix matrix0(ndGetIdentityMatrix());
+//	ndMatrix matrix1(ndGetIdentityMatrix());
+//	if (reverseSpin)
+//	{
+//		matrix0 = ndYawMatrix(ndPi);
+//	}
+//	SetLocalMatrix0(matrix0);
+//	SetLocalMatrix1(matrix1);
+//
+//	SetRatio(ndFloat32(0.0f));
+//	SetSolverModel(m_jointkinematicCloseLoop);
+//}
 
 ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox(ndFloat32 gearRatio,
 	const ndVector& motorPin, ndBodyKinematic* const motor,
@@ -107,13 +107,11 @@ void ndMultiBodyVehicleGearBox::JacobianDerivative(ndConstraintDescritor& desc)
 		CalculateGlobalMatrix(matrix0, matrix1);
 		
 		AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
-		
-		//ndFloat32 gearRatio = ndFloat32(1.0f) / m_gearRatio;
 
 		ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
 		ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
-		jacobian0.m_angular = matrix0.m_front.Scale(m_gearRatio);
-		jacobian1.m_angular = matrix1.m_front;
+		jacobian0.m_angular = matrix0.m_front;
+		jacobian1.m_angular = matrix1.m_front.Scale(m_gearRatio);
 		
 		const ndVector& omega0 = m_body0->GetOmega();
 		const ndVector& omega1 = m_body1->GetOmega();
