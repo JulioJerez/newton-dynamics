@@ -54,6 +54,12 @@ ndJointSpherical::~ndJointSpherical()
 {
 }
 
+ndSharedPtr<ndMeshJoint> ndJointSpherical::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointSpherical* const joint = new ndMeshJointSpherical(owner, this);
+	return ndSharedPtr<ndMeshJoint>(joint);
+}
+
 ndFloat32 ndJointSpherical::PenetrationOmega(ndFloat32 penetration) const
 {
 	ndFloat32 param = ndClamp(penetration, ndFloat32(0.0f), D_MAX_SPHERICAL_PENETRATION) / D_MAX_SPHERICAL_PENETRATION;
@@ -428,8 +434,3 @@ void ndJointSpherical::JacobianDerivative(ndConstraintDescritor& desc)
 	SubmitLimits(matrix0, matrix1, desc);
 }
 
-ndSharedPtr<ndMeshJoint> ndJointSpherical::GetMeshJoint(const ndMesh* const owner) const
-{
-	ndMeshJointSpherical* const joint = new ndMeshJointSpherical(owner, this);
-	return ndSharedPtr<ndMeshJoint>(joint);
-}

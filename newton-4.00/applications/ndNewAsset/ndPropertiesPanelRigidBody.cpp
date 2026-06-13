@@ -175,6 +175,9 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 				vector.m_y = real[1];
 				vector.m_z = real[2];
 				rigidBody->m_localCentreOfMass = vector;
+
+				// do not recalculate inertia since the user 
+				// can just set the value which provides more control.
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoRigidBody(this, *m_currentSelection)));
 			};
 		}

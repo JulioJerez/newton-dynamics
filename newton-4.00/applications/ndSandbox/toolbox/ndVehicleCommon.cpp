@@ -25,6 +25,9 @@ ndVehicleCommonNotify::ndVehicleCommonNotify(ndMultiBodyVehicle* const vehicle)
 	,m_sleepingState(false)
 {
 	SetModel(vehicle);
+	const ndVehicleDectriptor& desc = vehicle->GetDescriptor();
+	//m_currentGear = sizeof(desc.m_transmission.m_forwardRatios) / sizeof(desc.m_transmission.m_forwardRatios[0]) + 1;
+	m_currentGear = sizeof(desc.m_transmission.m_forwardRatios) / sizeof(desc.m_transmission.m_forwardRatios[0]) + 1;
 }
 
 void ndVehicleCommonNotify::Update(ndFloat32 timestep)
@@ -82,19 +85,22 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 	{
 		ndFloat32 throttle = axis[ndGameControllerInputs::m_gasPedal];
 
-		static int xxxxx;
-		xxxxx++;
-		if (xxxxx > 500)
-		{
-			throttle = 1.0f;
-			//vehicle->GetGearBox()->SetRatio(0.1f);
-		}
+		//static int xxxxx;
+		//xxxxx++;
+		//if (xxxxx > 500)
+		//{
+		//	throttle = 1.0f;
+		//}
 
 		ndFloat32 currentOmega = motor->GetRpm() / ndRadPerSecToRpm;
 		ndFloat32 desiredOmega = ndMax(desc.m_engine.GetIdleRadPerSec(), throttle * desc.m_engine.GetRedLineRadPerSec());
 		ndFloat32 torqueFromCurve = desc.m_engine.GetTorque(currentOmega);
 
-		ndTrace(("torque(%f) wmotor(%f) wtarget(%f) g(%f)\n", torqueFromCurve, currentOmega, desiredOmega, vehicle->GetGearBox()->GetRatio()))
+		//ndTrace(("torque(%f) wmotor(%f) wtarget(%f) g(%f)\n", torqueFromCurve, currentOmega, desiredOmega, vehicle->GetGearBox()->GetRatio()));
+		//if (torqueFromCurve > 500)
+		//{
+		//	torqueFromCurve = desc.m_engine.GetTorque(currentOmega);
+		//}
 
 		motor->SetTorqueAndRpm(torqueFromCurve, desiredOmega * ndRadPerSecToRpm);
 		vehicle->GetChassis()->SetSleepState(false);

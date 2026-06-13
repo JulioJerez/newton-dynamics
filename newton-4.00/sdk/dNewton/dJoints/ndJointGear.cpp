@@ -52,6 +52,11 @@ ndJointGear::~ndJointGear()
 {
 }
 
+ndSharedPtr<ndMeshJoint> ndJointGear::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointGear* const joint = new ndMeshJointGear(owner, this);
+	return ndSharedPtr<ndMeshJoint>(joint);
+}
 ndFloat32 ndJointGear::GetRatio() const
 {
 	return m_gearRatio;
@@ -107,8 +112,3 @@ void ndJointGear::JacobianDerivative(ndConstraintDescritor& desc)
 	SetMotorAcceleration(desc, -w * desc.m_invTimestep);
 }
 
-ndSharedPtr<ndMeshJoint> ndJointGear::GetMeshJoint(const ndMesh* const owner) const
-{
-	ndMeshJointGear* const joint = new ndMeshJointGear(owner, this);
-	return ndSharedPtr<ndMeshJoint>(joint);
-}

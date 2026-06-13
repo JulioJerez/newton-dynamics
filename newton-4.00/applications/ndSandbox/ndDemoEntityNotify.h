@@ -54,6 +54,7 @@ class ndDemoEntityNotify : public ndModelBodyNotify
 	ndTransform m_transform;
 	ndMatrix m_bindMatrix;
 	ndFloat32 m_capSpeed;
+	ndFloat32 m_capOmega;
 	bool m_bodyIsInWorld;
 };
 #endif

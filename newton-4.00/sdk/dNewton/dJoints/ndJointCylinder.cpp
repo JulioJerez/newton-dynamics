@@ -49,6 +49,12 @@ ndJointCylinder::~ndJointCylinder()
 {
 }
 
+ndSharedPtr<ndMeshJoint> ndJointCylinder::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointCylinder(owner, this));
+	return joint;
+}
+
 ndFloat32 ndJointCylinder::GetAngle() const
 {
 	return m_rotationAxis.m_param;
@@ -438,8 +444,3 @@ void ndJointCylinder::JacobianDerivative(ndConstraintDescritor& desc)
 	SubmitLimitsAngle(desc, matrix0, matrix1);
 }
 
-ndSharedPtr<ndMeshJoint> ndJointCylinder::GetMeshJoint(const ndMesh* const owner) const
-{
-	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointCylinder(owner, this));
-	return joint;
-}

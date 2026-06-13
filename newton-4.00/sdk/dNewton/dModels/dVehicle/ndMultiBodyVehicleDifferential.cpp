@@ -38,6 +38,13 @@ ndMultiBodyVehicleDifferential::ndMultiBodyVehicleDifferential(ndBodyKinematic* 
 	ndAssert(slipOmegaLock >= 0.0f);
 }
 
+ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleDifferential::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointVehicleDifferential* const joint = new ndMeshJointVehicleDifferential(owner, this);
+	joint->m_limitedSlipOmega = ndReal(m_limitedSlipOmega);
+	return ndSharedPtr<ndMeshJoint>(joint);
+}
+
 ndFloat32 ndMultiBodyVehicleDifferential::GetSlipOmega() const
 {
 	return m_limitedSlipOmega;
@@ -47,7 +54,6 @@ void ndMultiBodyVehicleDifferential::SetSlipOmega(ndFloat32 omega)
 {
 	m_limitedSlipOmega = ndMax(D_MINIMUM_SLIP_OMEGA, ndAbs(omega));
 }
-
 
 void ndMultiBodyVehicleDifferential::AlignMatrix()
 {
@@ -66,6 +72,16 @@ void ndMultiBodyVehicleDifferential::AlignMatrix()
 		matrix1.m_right.Scale(matrix1.m_right.DotProduct(omega1).GetScalar()));
 
 	m_body0->SetOmegaNoSleep(omega);
+}
+
+void ndMultiBodyVehicleDifferential::DebugJoint(ndConstraintDebugCallback& debugCallback) const
+{
+	ndMatrix matrix0;
+	ndMatrix matrix1;
+	CalculateGlobalMatrix(matrix0, matrix1);
+
+	debugCallback.DrawFrame(matrix0);
+	debugCallback.DrawFrame(matrix1);
 }
 
 void ndMultiBodyVehicleDifferential::UpdateParameters()
@@ -108,11 +124,4 @@ void ndMultiBodyVehicleDifferential::JacobianDerivative(ndConstraintDescritor& d
 			SetLowerFriction(desc, ndFloat32(0.0f));
 		}
 	}
-}
-
-ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleDifferential::GetMeshJoint(const ndMesh* const owner) const
-{
-	ndMeshJointVehicleDifferential* const joint = new ndMeshJointVehicleDifferential(owner, this);
-	joint->m_limitedSlipOmega = ndReal (m_limitedSlipOmega);
-	return ndSharedPtr<ndMeshJoint>(joint);
 }

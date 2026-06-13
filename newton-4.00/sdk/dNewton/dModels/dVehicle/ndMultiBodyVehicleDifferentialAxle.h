@@ -36,7 +36,6 @@ class ndMultiBodyVehicleDifferentialAxle : public ndJointBilateralConstraint
 		const ndVector& parentPin, const ndVector& parentUpPin, ndBodyKinematic* const differentialBody0,
 		const ndVector& childPin, ndBodyKinematic* const child);
 
-	D_NEWTON_API ndFloat32 GetGearRatio() const;
 	D_NEWTON_API ndFloat32 GetGearOmega() const;
 
 	protected:
@@ -46,8 +45,6 @@ class ndMultiBodyVehicleDifferentialAxle : public ndJointBilateralConstraint
 	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
 	ndFloat32 m_omega;
-	ndFloat32 m_gearRatio;
-
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif

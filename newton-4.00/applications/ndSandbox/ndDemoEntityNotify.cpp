@@ -18,7 +18,8 @@ ndDemoEntityNotify::ndDemoEntityNotify(ndDemoEntityManager* const manager, const
 	,m_manager(manager)
 	,m_entity(entity)
 	,m_transform()
-	,m_capSpeed(ndFloat32 (100.0f))
+	,m_capSpeed(40.0f)
+	,m_capOmega(100.0f)
 	,m_bodyIsInWorld(false)
 {
 	if (!parentBody)
@@ -49,7 +50,8 @@ ndDemoEntityNotify::ndDemoEntityNotify(const ndDemoEntityNotify& notify)
 	,m_manager(notify.m_manager)
 	,m_entity(notify.m_entity)
 	,m_transform()
-	,m_capSpeed(100.0f)
+	,m_capSpeed(40.0f)
+	,m_capOmega(100.0f)
 	,m_bodyIsInWorld(false)
 {
 	if (notify.GetParentBody())
@@ -78,9 +80,9 @@ void ndDemoEntityNotify::OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 tim
 		ndVector omega(body->GetOmega());
 		ndVector veloc(body->GetVelocity());
 		ndFloat32 omega2(omega.DotProduct(omega).GetScalar());
-		if (omega2 > m_capSpeed * m_capSpeed)
+		if (omega2 > m_capOmega * m_capOmega)
 		{
-			omega = omega.Normalize().Scale(m_capSpeed);
+			omega = omega.Normalize().Scale(m_capOmega);
 			body->SetOmega(omega);
 		}
 

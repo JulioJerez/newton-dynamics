@@ -218,6 +218,12 @@ ndJointWheel::~ndJointWheel()
 {
 }
 
+ndSharedPtr<ndMeshJoint> ndJointWheel::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointWheel* const joint = new ndMeshJointWheel(owner, this);
+	return ndSharedPtr<ndMeshJoint>(joint);
+}
+
 const ndWheelDescriptor& ndJointWheel::GetInfo() const
 {
 	return m_info;
@@ -436,8 +442,3 @@ void ndJointWheel::JacobianDerivative(ndConstraintDescritor& desc)
 	}
 }
 
-ndSharedPtr<ndMeshJoint> ndJointWheel::GetMeshJoint(const ndMesh* const owner) const
-{
-	ndMeshJointWheel* const joint = new ndMeshJointWheel(owner, this);
-	return ndSharedPtr<ndMeshJoint>(joint);
-}

@@ -43,6 +43,12 @@ ndJointDoubleHinge::~ndJointDoubleHinge()
 {
 }
 
+ndSharedPtr<ndMeshJoint> ndJointDoubleHinge::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointDoubleHinge* const joint = new ndMeshJointDoubleHinge(owner, this);
+	return ndSharedPtr<ndMeshJoint>(joint);
+}
+
 ndFloat32 ndJointDoubleHinge::GetAngle0() const
 {
 	return m_axis0.m_param;
@@ -440,8 +446,3 @@ void ndJointDoubleHinge::JacobianDerivative(ndConstraintDescritor& desc)
 	SubmitLimits(desc, matrix0, matrix1);
 }
 
-ndSharedPtr<ndMeshJoint> ndJointDoubleHinge::GetMeshJoint(const ndMesh* const owner) const
-{
-	ndMeshJointDoubleHinge* const joint = new ndMeshJointDoubleHinge(owner, this);
-	return ndSharedPtr<ndMeshJoint>(joint);
-}

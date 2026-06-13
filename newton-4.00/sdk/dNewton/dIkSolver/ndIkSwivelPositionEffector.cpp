@@ -87,6 +87,12 @@ ndIkSwivelPositionEffector::~ndIkSwivelPositionEffector()
 {
 }
 
+ndSharedPtr<ndMeshJoint> ndIkSwivelPositionEffector::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointIkSwivelPositionEffector* const joint = new ndMeshJointIkSwivelPositionEffector(owner, this);
+	return ndSharedPtr<ndMeshJoint>(joint);
+}
+
 ndIkSwivelPositionEffector::ndRotationOrder ndIkSwivelPositionEffector::GetRotationOrder() const
 {
 	return m_rotationOrder;
@@ -456,8 +462,3 @@ void ndIkSwivelPositionEffector::JacobianDerivative(ndConstraintDescritor& desc)
 	}
 }
 
-ndSharedPtr<ndMeshJoint> ndIkSwivelPositionEffector::GetMeshJoint(const ndMesh* const owner) const
-{
-	ndMeshJointIkSwivelPositionEffector* const joint = new ndMeshJointIkSwivelPositionEffector(owner, this);
-	return ndSharedPtr<ndMeshJoint>(joint);
-}

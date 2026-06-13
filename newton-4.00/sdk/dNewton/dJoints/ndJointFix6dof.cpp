@@ -43,6 +43,16 @@ ndJointFix6dof::~ndJointFix6dof()
 {
 }
 
+ndSharedPtr<ndMeshJoint> ndJointFix6dof::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointFix6dof* const joint = new ndMeshJointFix6dof(owner, this);
+
+	joint->m_softness = m_softness;
+	joint->m_maxForce = m_maxForce;
+	joint->m_maxTorque = m_maxTorque;
+	return ndSharedPtr<ndMeshJoint>(joint);
+}
+
 void ndJointFix6dof::SetAsSoftJoint(bool)
 {
 	ndAssert(0);
@@ -84,36 +94,6 @@ void ndJointFix6dof::SetMaxTorque(ndFloat32 maxTorque)
 
 void ndJointFix6dof::UpdateParameters()
 {
-}
-
-void ndJointFix6dof::JacobianDerivative(ndConstraintDescritor& desc)
-{
-	ndMatrix matrix0;
-	ndMatrix matrix1;
-
-	ndAssert(IsActive());
-	// calculate the position of the pivot point and the Jacobian direction vectors, in global space. 
-	CalculateGlobalMatrix(matrix0, matrix1);
-
-	for (ndInt32 i = 0; i < 3; ++i)
-	{
-		AddLinearRowJacobian(desc, matrix0.m_posit, matrix1.m_posit, matrix1[i]);
-		SetLowerFriction(desc, -m_maxForce);
-		SetHighFriction(desc, m_maxForce);
-		SetDiagonalRegularizer(desc, m_softness);
-	}
-
-	ndFloat32 cosAngle = matrix1.m_front.DotProduct(matrix0.m_front).GetScalar();
-	if (cosAngle >= ndFloat32(0.998f)) 
-	{
-		// about 3.5 degree deviation, consider small angular approximation  
-		SubmitAngularAxisCartisianApproximation(desc, matrix0, matrix1);
-	}
-	else 
-	{
-		// beyond 3.5 degree need to decompose the relative matrix into an orthonormal basics 
-		SubmitAngularAxis(desc, matrix0, matrix1);
-	}
 }
 
 void ndJointFix6dof::SubmitAngularAxisCartisianApproximation(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1)
@@ -169,12 +149,32 @@ void ndJointFix6dof::SubmitAngularAxis(ndConstraintDescritor& desc, const ndMatr
 	//dTrace(("%f %f\n", coneAngle * dRadToDegree, pitchAngle * dRadToDegree));
 }
 
-ndSharedPtr<ndMeshJoint> ndJointFix6dof::GetMeshJoint(const ndMesh* const owner) const
+void ndJointFix6dof::JacobianDerivative(ndConstraintDescritor& desc)
 {
-	ndMeshJointFix6dof* const joint = new ndMeshJointFix6dof(owner, this);
+	ndMatrix matrix0;
+	ndMatrix matrix1;
 
-	joint->m_softness = m_softness;
-	joint->m_maxForce = m_maxForce;
-	joint->m_maxTorque = m_maxTorque;
-	return ndSharedPtr<ndMeshJoint>(joint);
+	ndAssert(IsActive());
+	// calculate the position of the pivot point and the Jacobian direction vectors, in global space. 
+	CalculateGlobalMatrix(matrix0, matrix1);
+
+	for (ndInt32 i = 0; i < 3; ++i)
+	{
+		AddLinearRowJacobian(desc, matrix0.m_posit, matrix1.m_posit, matrix1[i]);
+		SetLowerFriction(desc, -m_maxForce);
+		SetHighFriction(desc, m_maxForce);
+		SetDiagonalRegularizer(desc, m_softness);
+	}
+
+	ndFloat32 cosAngle = matrix1.m_front.DotProduct(matrix0.m_front).GetScalar();
+	if (cosAngle >= ndFloat32(0.998f))
+	{
+		// about 3.5 degree deviation, consider small angular approximation  
+		SubmitAngularAxisCartisianApproximation(desc, matrix0, matrix1);
+	}
+	else
+	{
+		// beyond 3.5 degree need to decompose the relative matrix into an orthonormal basics 
+		SubmitAngularAxis(desc, matrix0, matrix1);
+	}
 }
