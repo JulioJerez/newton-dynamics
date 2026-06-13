@@ -40,9 +40,21 @@ class ndGameControllerInputs
 		m_changePlayer,
 	};
 
+	static const char* m_buttonNames[];
+
 	ndGameControllerInputs();
 	~ndGameControllerInputs();
 	void Update(ndDemoEntityManager* const scene);
+
+	const ndFixSizeArray<bool, 32>& GetButtons() const
+	{
+		return m_buttons;
+	}
+
+	const ndFixSizeArray<ndFloat32, 8>& GetAxis() const
+	{
+		return m_axis;
+	}
 
 	private:
 	bool GetKeyboardInputs(ndDemoEntityManager* const scene);
@@ -50,11 +62,11 @@ class ndGameControllerInputs
 	void GetXboxJoystickInputs(ndDemoEntityManager* const scene);
 	void GetWheelJoystickInputs(ndDemoEntityManager* const scene);
 
-	ndFixSizeArray<char, 32> m_buttons;
+	ndFixSizeArray<bool, 32> m_buttons;
 	ndFixSizeArray<ndFloat32, 8> m_axis;
 	ndFloat32 m_keyBoardSteerAngle;
 
-	friend class ndVehicleCommonNotify;
+	//friend class ndVehicleCommonNotify;
 };
 
 

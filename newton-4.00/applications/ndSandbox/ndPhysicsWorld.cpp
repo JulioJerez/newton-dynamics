@@ -16,6 +16,7 @@
 #include "ndContactCallback.h"
 #include "ndDemoEntityNotify.h"
 #include "ndDemoEntityManager.h"
+#include "ndGameControllerInputs.h"
 #include "ndDebugDisplayRenderPass.h"
 #include "ndArchimedesBuoyancyVolume.h"
 
@@ -144,6 +145,19 @@ void ndPhysicsWorld::OnSubStepPostUpdate(ndFloat32 timestep)
 {
 	ndWorld::OnSubStepPostUpdate(timestep);
 	m_manager->OnSubStepPostUpdate(timestep);
+	m_manager->GetGameController()->Update(m_manager);
+
+#if 1
+	const ndFixSizeArray<bool, 32>& buttons = m_manager->GetGameController()->GetButtons();
+	for (ndInt32 i = 0; i < buttons.GetCount(); ++i)
+	{
+		if (buttons[i])
+		{
+			ndTrace(("%d %s\n", i, m_manager->GetGameController()->m_buttonNames[i]));
+		}
+	}
+#endif
+
 }
 
 void ndPhysicsWorld::OnAddBody(ndBody* const body) const

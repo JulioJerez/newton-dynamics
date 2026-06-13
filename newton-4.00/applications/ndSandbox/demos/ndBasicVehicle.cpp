@@ -16,15 +16,15 @@
 #include "ndVehicleCommon.h"
 #include "ndDemoEntityNotify.h"
 #include "ndDemoEntityManager.h"
+#include "ndGameControllerInputs.h"
 #include "ndDemoCameraNodeFollow.h"
 #include "ndHeightFieldPrimitive.h"
-
 
 namespace ndMotorVehicle
 {
 	class ndVehicleDectriptorSuperCar : public ndVehicleDectriptor
 	{
-	public:
+		public:
 		ndVehicleDectriptorSuperCar()
 			:ndVehicleDectriptor()
 		{
@@ -130,6 +130,33 @@ namespace ndMotorVehicle
 		sceneMesh->SetTransform(matrix);
 		return vehicleModel;
 	}
+
+	class VehicleDriver : public ndDemoEntityManager::OnPostUpdate
+	{
+		public:
+		VehicleDriver()
+			:OnPostUpdate()
+			,m_changeCamera(false)
+		{
+		}
+
+		void OnDebug(ndDemoEntityManager* const, bool)
+		{
+		}
+
+		virtual void Update(ndDemoEntityManager* const manager, ndFloat32)
+		{
+			const ndSharedPtr<ndGameControllerInputs>& gameController = manager->GetGameController();
+			const ndFixSizeArray<bool, 32>& buttons = gameController->GetButtons();
+			bool changeCamera = buttons[ndGameControllerInputs::m_changeCamera];
+			if (changeCamera && !m_changeCamera)
+			{
+				manager->ChangeActiveCamera();
+			}
+			m_changeCamera = changeCamera;
+		}
+		bool m_changeCamera;
+	};
 };
 
 using namespace ndMotorVehicle;
@@ -151,10 +178,6 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	};
 
 	ndPhysicsWorld* const world = scene->GetWorld();
-	//ndMatrix sceneLocation(ndGetIdentityMatrix());
-	//sceneLocation.m_posit.m_x = -200.0f;
-	//sceneLocation.m_posit.m_z = -200.0f;
-
 	ndVector location(0.0f, 2.0f, 0.0f, 1.0f);
 	
 	ndMatrix matrix(ndGetIdentityMatrix());
@@ -197,10 +220,15 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	//notifyCallback->SetAsPlayer(scene);
 	//matrix.m_posit.m_x += 5.0f;
 	////TestPlayerCapsuleInteraction(scene, matrix);
-	//
+	
 	//matrix.m_posit.m_x += 40.0f;
 	//matrix.m_posit.m_z += 5.0f;
 	//AddPlanks(scene, matrix, 60.0f, 5);
+
+	// create the trainer agent
+	ndSharedPtr<ndDemoEntityManager::OnPostUpdate> driver(new VehicleDriver());
+	scene->RegisterPostUpdate(driver);
+
 
 	ndQuaternion rot;
 	ndVector origin(-10.0f, 2.0f, -0.0f, 1.0f);

@@ -10,14 +10,12 @@
 */
 
 #include "ndSandboxStdafx.h"
-
 #include "ndVehicleCommon.h"
 #include "ndPhysicsWorld.h"
-
+#include "ndGameControllerInputs.h"
 
 ndVehicleCommonNotify::ndVehicleCommonNotify(ndMultiBodyVehicle* const vehicle)
 	:ndModelNotify()
-	,m_inputs()
 	,m_currentGear(0)
 	,m_autoGearShiftTimer(0)
 	,m_driverState(m_parked)
@@ -73,13 +71,14 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 		return;
 	}
 
-	ndFixSizeArray<ndFloat32, 8>& axis = m_inputs.m_axis;
-	ndFixSizeArray<char, 32>& buttons = m_inputs.m_buttons;
-
 	ndPhysicsWorld* const world = (ndPhysicsWorld*)vehicle->GetWorld();
 	ndDemoEntityManager* const scene = world->GetManager();
+	const ndSharedPtr<ndGameControllerInputs>& gameController = scene->GetGameController();
 
-	m_inputs.Update(scene);
+	const ndFixSizeArray<ndFloat32, 8>& axis = gameController->GetAxis();
+	const ndFixSizeArray<bool, 32>& buttons = gameController->GetButtons();
+
+	//m_inputs.Update(scene);
 	const ndVehicleDectriptor& desc = vehicle->GetDescriptor();
 	auto ApplyControls = [this, vehicle, &desc, motor, &axis, &buttons]()
 	{
