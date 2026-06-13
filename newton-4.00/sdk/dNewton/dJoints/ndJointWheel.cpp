@@ -40,21 +40,21 @@ void ndTireFrictionModel::SetPacejkaCurves(ndFrictionModel pacejkaStockModel)
 {
 	switch (pacejkaStockModel)
 	{
-	case m_pacejkaSport:
-		SetPacejkaCurves(pacejkaSportLongitudinal, pacejkaSportLateral);
-		m_frictionModel = pacejkaStockModel;
-		break;
+		case m_pacejkaSport:
+			SetPacejkaCurves(pacejkaSportLongitudinal, pacejkaSportLateral);
+			m_frictionModel = pacejkaStockModel;
+			break;
 
-	case ndTireFrictionModel::m_pacejkaTruck:
-		SetPacejkaCurves(pacejkaTruckLongitudinal, pacejkaTruckLateral);
-		m_frictionModel = pacejkaStockModel;
-		break;
+		case ndTireFrictionModel::m_pacejkaTruck:
+			SetPacejkaCurves(pacejkaTruckLongitudinal, pacejkaTruckLateral);
+			m_frictionModel = pacejkaStockModel;
+			break;
 
-	case ndTireFrictionModel::m_pacejkaUtility:
-	default:
-		SetPacejkaCurves(pacejkaUtilityLongitudinal, pacejkaUtilityLateral);
-		m_frictionModel = pacejkaStockModel;
-		break;
+		case ndTireFrictionModel::m_pacejkaUtility:
+		default:
+			SetPacejkaCurves(pacejkaUtilityLongitudinal, pacejkaUtilityLateral);
+			m_frictionModel = pacejkaStockModel;
+			break;
 	}
 }
 
