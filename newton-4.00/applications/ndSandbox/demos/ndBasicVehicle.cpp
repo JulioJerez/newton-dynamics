@@ -198,9 +198,9 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	//matrix.m_posit.m_x += 5.0f;
 	////TestPlayerCapsuleInteraction(scene, matrix);
 	//
-	//matrix.m_posit.m_x += 40.0f;
-	//matrix.m_posit.m_z += 5.0f;
-	//AddPlanks(scene, matrix, 60.0f, 5);
+	matrix.m_posit.m_x += 40.0f;
+	matrix.m_posit.m_z += 5.0f;
+	AddPlanks(scene, matrix, 60.0f, 5);
 
 	ndQuaternion rot;
 	ndVector origin(-10.0f, 2.0f, -0.0f, 1.0f);
