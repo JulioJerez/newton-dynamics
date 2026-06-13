@@ -22,6 +22,16 @@
 
 namespace ndMotorVehicle
 {
+	class ndPlacementMatrix : public ndMatrix
+	{
+		public:
+		ndPlacementMatrix(const ndMatrix base, const ndVector& offset)
+			:ndMatrix(base)
+		{
+			m_posit += offset;
+		}
+	};
+
 	class ndVehicleDectriptorSuperCar : public ndVehicleDectriptor
 	{
 		public:
@@ -131,10 +141,10 @@ namespace ndMotorVehicle
 		return vehicleModel;
 	}
 
-	class VehicleDriver : public ndDemoEntityManager::OnPostUpdate
+	class SceneNavigation : public ndDemoEntityManager::OnPostUpdate
 	{
 		public:
-		VehicleDriver()
+		SceneNavigation()
 			:OnPostUpdate()
 			,m_changeCamera(false)
 		{
@@ -167,16 +177,6 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	//ndSharedPtr<ndBody> bodyFloor(BuildCompoundScene(scene, ndGetIdentityMatrix()));
 	ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true));
 
-	class ndPlacementMatrix : public ndMatrix
-	{
-		public:
-		ndPlacementMatrix(const ndMatrix base, const ndVector& offset)
-			:ndMatrix(base)
-		{
-			m_posit += offset;
-		}
-	};
-
 	ndPhysicsWorld* const world = scene->GetWorld();
 	ndVector location(0.0f, 2.0f, 0.0f, 1.0f);
 	
@@ -198,37 +198,25 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	//callback->RegisterMaterial(material, ndDemoContactCallback::m_vehicleTirePart, ndDemoContactCallback::m_modelPart);
 	//callback->RegisterMaterial(material, ndDemoContactCallback::m_vehicleTirePart, ndDemoContactCallback::m_vehicleTirePart);
 	//callback->RegisterMaterial(material, ndDemoContactCallback::m_vehicleTirePart, ndDemoContactCallback::m_default);
-	//
-	//// add a model for general controls
-	//ndSharedPtr<ndModel> controls(new ndVehicleSelector());
-	//world->AddModel(controls);
-	//
-	//ndSharedPtr<ndUIEntity> vehicleUI(new ndVehicleUI(scene));
-	//scene->Set2DDisplayRenderFunction(vehicleUI);
 	
 	ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f))));
 	//ndSharedPtr<ndModel> vehicle1 (CreateBasicVehicle(scene, jeepDesc, ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f,  -6.0f, 0.0f)), (ndVehicleUI*)*vehicleUI));
 	//ndSharedPtr<ndModel> vehicle2 (CreateBasicVehicle(scene, monterTruckDesc0, ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f)), (ndVehicleUI*)*vehicleUI));
 	//ndSharedPtr<ndModel> vehicle3 (CreateBasicVehicle(scene, monterTruckDesc1, ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 6.0f, 0.0f)), (ndVehicleUI*)*vehicleUI));
 
-	////test removing model from world
-	////vehicle1->RemoveBodiesAndJointsFromWorld();
-	////world->RemoveModel(*vehicle1);
-	//
 	//ndSharedPtr<ndModel> vehicle(vehicle0);
 	//ndVehicleCommonNotify* const notifyCallback = (ndVehicleCommonNotify*)*vehicle->GetNotifyCallback();
 	//notifyCallback->SetAsPlayer(scene);
 	//matrix.m_posit.m_x += 5.0f;
 	////TestPlayerCapsuleInteraction(scene, matrix);
 	
-	//matrix.m_posit.m_x += 40.0f;
-	//matrix.m_posit.m_z += 5.0f;
-	//AddPlanks(scene, matrix, 60.0f, 5);
+	matrix.m_posit.m_x += 40.0f;
+	matrix.m_posit.m_z += 5.0f;
+	AddPlanks(scene, matrix, 60.0f, 5);
 
-	// create the trainer agent
-	ndSharedPtr<ndDemoEntityManager::OnPostUpdate> driver(new VehicleDriver());
+	// add a scene navigation post update
+	ndSharedPtr<ndDemoEntityManager::OnPostUpdate> driver(new SceneNavigation());
 	scene->RegisterPostUpdate(driver);
-
 
 	ndQuaternion rot;
 	ndVector origin(-10.0f, 2.0f, -0.0f, 1.0f);
