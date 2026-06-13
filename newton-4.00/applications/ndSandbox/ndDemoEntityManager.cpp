@@ -19,6 +19,7 @@
 #include "ndDemoEntityManager.h"
 #include "ndHighResolutionTimer.h"
 #include "ndDemoCameraNodeFlyby.h"
+#include "ndGameControllerInputs.h"
 #include "ndDebugDisplayRenderPass.h"
 
 #define LOAD_MESH_INDEX			200
@@ -152,8 +153,6 @@ ndDemoEntityManager::ndDemos ndDemoEntityManager::m_demosSelection[] =
 	{ "biped PPO player controller", ndBipedPlayer_PPO},
 	
 	{ "procedural animated quad spider", ndQuadSpiderAnimated},
-
-	
 
 #if 0
 	{ "basic particle fluid", ndBasicParticleFluid},
@@ -657,6 +656,9 @@ ndDemoEntityManager::ndDemoEntityManager()
 	,m_environmentTexture(nullptr)
 	,m_demoHelper(nullptr)
 	,m_demoUIpanel(nullptr)
+	,m_defaultCamera(nullptr)
+	,m_onPostUpdate(nullptr)
+	,m_gameController(nullptr)
 	,m_lastModelName("")
 	,m_currentScene(DEFAULT_SCENE)
 	,m_lastCurrentScene(DEFAULT_SCENE)
@@ -704,6 +706,9 @@ ndDemoEntityManager::ndDemoEntityManager()
 
 	const ndString fontPathName(ndGetWorkingFileName("Cousine-Regular.ttf"));
 	m_renderer->InitImGui(fontPathName.GetStr());
+
+	// add a game controller if any
+	m_gameController = ndSharedPtr<ndGameControllerInputs>(new ndGameControllerInputs());
 
 	// load the environment texture
 	ndFixSizeArray<ndString, 6> environmentTexturePath;
@@ -783,15 +788,15 @@ ndDemoEntityManager::~ndDemoEntityManager ()
 	Cleanup ();
 
 	// destroy the empty world
-	if (m_world) 
-	{
-		delete m_world;
-	}
+	//if (m_world) 
+	//{
+	//	delete m_world;
+	//}
 }
 
 ndPhysicsWorld* ndDemoEntityManager::GetWorld() const
 {
-	return m_world;
+	return (ndPhysicsWorld*)*m_world;
 }
 
 ndSharedPtr<ndRender>& ndDemoEntityManager::GetRenderer()
@@ -1007,6 +1012,11 @@ void ndDemoEntityManager::SetLastLoadMesh(const ndString& name)
 	m_lastModelName = name;
 }
 
+const ndSharedPtr<ndGameControllerInputs>& ndDemoEntityManager::GetGameController() const
+{
+	return m_gameController;
+}
+
 void ndDemoEntityManager::AddEntity(const ndSharedPtr<ndRenderSceneNode>& entity)
 {
 	m_renderer->AddSceneNode(entity);
@@ -1033,11 +1043,11 @@ void ndDemoEntityManager::Cleanup ()
 	{
 		// get serialization call back before destroying the world
 		m_world->CleanUp();
-		delete m_world;
+		m_world = ndSharedPtr<ndPhysicsWorld>(nullptr);
 	}
 	
 	// create the newton world
-	m_world = new ndPhysicsWorld(this);
+	m_world = ndSharedPtr<ndPhysicsWorld>(new ndPhysicsWorld(this));
 	ApplyMenuOptions();
 }
 
@@ -1391,13 +1401,8 @@ void ndDemoEntityManager::SetDemoUIpanel(ndSharedPtr<ndDemoUIpanel>& panel)
 	m_demoUIpanel = panel;
 }
 
-void ndDemoEntityManager::SetNextActiveCamera()
+void ndDemoEntityManager::ChangeActiveCamera()
 {
-	if (!m_nextActiveCamera.Update(GetKeyState(ImGuiKey_C) ? true : false))
-	{
-		return;
-	}
-
 	ndFixSizeArray<const ndRenderSceneCamera*, 256> cameraPallete;
 	cameraPallete.PushBack(m_defaultCamera->FindCameraNode());
 
@@ -1420,7 +1425,7 @@ void ndDemoEntityManager::SetNextActiveCamera()
 			ndInt32 j = (i + 1) % cameraPallete.GetCount();
 			if (j == 0)
 			{
-				const ndTransform tranform (currentCamera->CalculateGlobalTransform());
+				const ndTransform tranform(currentCamera->CalculateGlobalTransform());
 				m_defaultCamera->SetTransform(tranform);
 				m_defaultCamera->SetTransform(tranform);
 				m_renderer->SetCamera(m_defaultCamera);
@@ -1433,6 +1438,14 @@ void ndDemoEntityManager::SetNextActiveCamera()
 			}
 			break;
 		}
+	}
+}
+
+void ndDemoEntityManager::SetNextActiveCamera()
+{
+	if (m_nextActiveCamera.Update(GetKeyState(ImGuiKey_C) ? true : false))
+	{
+		ChangeActiveCamera();
 	}
 }
 

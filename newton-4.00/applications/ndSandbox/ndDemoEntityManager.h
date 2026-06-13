@@ -13,6 +13,9 @@
 
 class ndPhysicsWorld;
 class ndDebugDisplayRenderPass;
+//#include "ndGameControllerInputs.h"
+
+class ndGameControllerInputs;
 
 class ndDemoEntityManager : public ndClassAlloc
 {
@@ -202,11 +205,14 @@ class ndDemoEntityManager : public ndClassAlloc
 	void SetDemoHelp(ndSharedPtr<ndDemoHelper>& helper);
 	void SetDemoUIpanel(ndSharedPtr<ndDemoUIpanel>& panel);
 
+	void ChangeActiveCamera();
 	void SetNextActiveCamera();
 	void RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& postUpdate);
 
 	const ndString& GetLastLoadMesh() const;
 	void SetLastLoadMesh(const ndString& name);
+
+	const ndSharedPtr<ndGameControllerInputs>& GetGameController() const;
 
 	private:
 	void Cleanup();
@@ -228,7 +234,8 @@ class ndDemoEntityManager : public ndClassAlloc
 
 	void TestImGui();
 	
-	ndPhysicsWorld* m_world;
+	//ndPhysicsWorld* m_world;
+	ndSharedPtr<ndPhysicsWorld> m_world;
 	ndSharedPtr<ndRender> m_renderer;
 	ndSharedPtr<ndRenderPass> m_menuRenderPass;
 	ndSharedPtr<ndRenderPass> m_colorRenderPass;
@@ -241,8 +248,8 @@ class ndDemoEntityManager : public ndClassAlloc
 	ndSharedPtr<ndDemoHelper> m_demoHelper;
 	ndSharedPtr<ndDemoUIpanel> m_demoUIpanel;
 	ndSharedPtr<ndRenderSceneNode> m_defaultCamera;
-
 	ndSharedPtr<OnPostUpdate> m_onPostUpdate;
+	ndSharedPtr<ndGameControllerInputs> m_gameController;
 
 	ndString m_lastModelName;
 	ndInt32 m_currentScene;

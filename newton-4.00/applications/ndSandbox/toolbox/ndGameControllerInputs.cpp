@@ -11,7 +11,22 @@
 
 #include "ndSandboxStdafx.h"
 #include "ndDemoEntityManager.h"
-#include "ndGameControlerInputs.h"
+#include "ndGameControllerInputs.h"
+
+const char* ndGameControllerInputs::m_buttonNames[] =
+{
+	{"ignitionButton"},
+	{"upGearButton"},
+	{"downGearButton"},
+	{"handBreakButton"},
+	{"neutralGearButton"},
+	{"reverseGearButton"},
+	{"parkGearButton"},
+	{"automaticGearBoxButton"},
+	{"changeCamera"},
+	{"changePlayer"}
+};
+
 
 ndGameControllerInputs::ndGameControllerInputs()
 	:m_keyBoardSteerAngle(0.0f)
@@ -59,7 +74,7 @@ bool ndGameControllerInputs::GetKeyboardInputs(ndDemoEntityManager* const scene)
 	m_axis[ndGameControllerInputs::m_brakePedal] = ndFloat32(scene->GetKeyState('S') ? 1.0f : 0.0f);
 	m_axis[ndGameControllerInputs::m_clutch] = ndFloat32(0.0f);
 	
-	char ret = false;
+	bool ret = false;
 	for (ndInt32 i = 0; i < m_buttons.GetCount(); ++i)
 	{
 		ret = ret | m_buttons[i];
@@ -246,24 +261,16 @@ void ndGameControllerInputs::GetXboxJoystickInputs(ndDemoEntityManager* const sc
 			buttonMapping.PushBack(buttonMapping.GetCapacity() - 1);
 		}
 
-		//m_handBreakButton,
-		//m_neutralGearButton,
-		//m_reverseGearButton,
-		//m_parkGearButton,
-		//m_automaticGearBoxButton,
-		//m_changeCamera,
-		//m_changePlayer,
-
-		buttonMapping[5] = ndGameControllerInputs::m_handBreakButton;
-		buttonMapping[10] = ndGameControllerInputs::ndGameControllerInputs::m_upGearButton;
-		buttonMapping[12] = ndGameControllerInputs::ndGameControllerInputs::m_downGearButton;
-		buttonMapping[4] = ndGameControllerInputs::ndGameControllerInputs::m_neutralGearButton;
-		buttonMapping[7] = ndGameControllerInputs::ndGameControllerInputs::m_ignitionButton;
-		buttonMapping[6] = ndGameControllerInputs::ndGameControllerInputs::m_reverseGearButton;
 		buttonMapping[0] = ndGameControllerInputs::ndGameControllerInputs::m_automaticGearBoxButton;
 		buttonMapping[1] = ndGameControllerInputs::ndGameControllerInputs::m_parkGearButton;
 		buttonMapping[2] = ndGameControllerInputs::ndGameControllerInputs::m_changeCamera;
 		buttonMapping[3] = ndGameControllerInputs::ndGameControllerInputs::m_changePlayer;
+		buttonMapping[4] = ndGameControllerInputs::ndGameControllerInputs::m_handBreakButton;
+		buttonMapping[5] = ndGameControllerInputs::ndGameControllerInputs::m_reverseGearButton;
+		buttonMapping[6] = ndGameControllerInputs::ndGameControllerInputs::m_neutralGearButton;
+		buttonMapping[7] = ndGameControllerInputs::ndGameControllerInputs::m_ignitionButton;
+		buttonMapping[10] = ndGameControllerInputs::ndGameControllerInputs::m_upGearButton;
+		buttonMapping[12] = ndGameControllerInputs::ndGameControllerInputs::m_downGearButton;
 
 		for (ndInt32 i = 0; i < unmappedButtons.GetCount(); ++i)
 		{
@@ -273,7 +280,7 @@ void ndGameControllerInputs::GetXboxJoystickInputs(ndDemoEntityManager* const sc
 			//	ndTrace(("%d %d\n", index, i));
 			//	index *= 1;
 			//}
-			m_buttons[index] = unmappedButtons[i];
+			m_buttons[index] = unmappedButtons[i] ? true : false;
 		}
 	}
 

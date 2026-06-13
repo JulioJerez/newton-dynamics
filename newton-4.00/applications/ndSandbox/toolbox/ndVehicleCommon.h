@@ -14,7 +14,7 @@
 
 #include "ndSandboxStdafx.h"
 #include "ndDemoEntityNotify.h"
-#include "ndGameControlerInputs.h"
+//#include "ndGameControllerInputs.h"
 
 class ndVehicleCommonNotify : public ndModelNotify
 {
@@ -39,7 +39,7 @@ class ndVehicleCommonNotify : public ndModelNotify
 	void PostUpdate(ndFloat32 timestep) override;
 	void PostTransformUpdate(ndFloat32 timestep) override;
 
-	ndGameControllerInputs m_inputs;
+	//ndGameControllerInputs m_inputs;
 
 	ndInt32 m_currentGear;
 	ndInt32 m_autoGearShiftTimer;
