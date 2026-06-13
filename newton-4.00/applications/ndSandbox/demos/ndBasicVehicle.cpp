@@ -69,38 +69,38 @@ namespace ndMotorVehicle
 		ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *loader.m_mesh, ndGetWorkingFileName("")));
 
 		auto BindApplicationData = [scene, mesh, vehicle, &sceneMesh](ndModelArticulation::ndNode* const node)
+		{
+			if (vehicle->IsCloseLoop(node))
 			{
-				if (vehicle->IsCloseLoop(node))
-				{
-					ndTrace(("do something\n"));
-				}
-				else
-				{
-					const ndMesh* const meshNode = mesh->FindByClosestMatch(node->m_name);
-					ndAssert(meshNode);
+				ndTrace(("do something\n"));
+			}
+			else
+			{
+				const ndMesh* const meshNode = mesh->FindByClosestMatch(node->m_name);
+				ndAssert(meshNode);
 
-					// find the visual node this body control by name. 
-					const ndMatrix matrix(node->m_body->GetMatrix());
-					ndRenderSceneNode* const visualEntityPtr = sceneMesh->FindByClosestMatch(meshNode->GetName());
-					ndAssert(visualEntityPtr);
-					ndSharedPtr<ndRenderSceneNode> visualEntity((visualEntityPtr == *sceneMesh) ? sceneMesh : visualEntityPtr->GetSharedPtr());
+				// find the visual node this body control by name. 
+				const ndMatrix matrix(node->m_body->GetMatrix());
+				ndRenderSceneNode* const visualEntityPtr = sceneMesh->FindByClosestMatch(meshNode->GetName());
+				ndAssert(visualEntityPtr);
+				ndSharedPtr<ndRenderSceneNode> visualEntity((visualEntityPtr == *sceneMesh) ? sceneMesh : visualEntityPtr->GetSharedPtr());
 
-					// add a rigid body with notification callback
-					ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
-					ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
-					if (node->m_joint)
+				// add a rigid body with notification callback
+				ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
+				ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
+				if (node->m_joint)
+				{
+					if ((strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleMotor::StaticClassName()) == 0) ||
+						(strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleDifferential::StaticClassName()) == 0) ||
+						(strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0))
 					{
-						if ((strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleMotor::StaticClassName()) == 0) ||
-							(strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleDifferential::StaticClassName()) == 0) ||
-							(strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0))
-						{
-							// fast moving wheel
-							ndDemoEntityNotify* const fastNotify = (ndDemoEntityNotify*)*notify;
-							fastNotify->m_capOmega = ndFloat32(10000.0f);
-						}
+						// fast moving wheel
+						ndDemoEntityNotify* const fastNotify = (ndDemoEntityNotify*)*notify;
+						fastNotify->m_capOmega = ndFloat32(10000.0f);
 					}
-					node->m_body->SetNotifyCallback(notify);
 				}
+				node->m_body->SetNotifyCallback(notify);
+			}
 		};
 		vehicle->NodeIterator(BindApplicationData);
 
