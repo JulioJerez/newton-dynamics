@@ -26,61 +26,56 @@
 
 ndMultiBodyVehicleDifferentialAxle::ndMultiBodyVehicleDifferentialAxle()
 	:ndJointBilateralConstraint()
-	,m_omega(ndFloat32(0.0f))
-	,m_gearRatio(ndFloat32(1.0f))
 {
 	m_maxDof = 1;
 }
 
 ndMultiBodyVehicleDifferentialAxle::ndMultiBodyVehicleDifferentialAxle(
-	const ndVector& parentPin, const ndVector& parentUpPin, ndBodyKinematic* const differentialBody,
-	const ndVector& childPin, ndBodyKinematic* const child)
-	:ndJointBilateralConstraint(1, child, differentialBody, ndGetIdentityMatrix())
-	,m_omega(ndFloat32(0.0f))
+	const ndVector& differentialPin, const ndVector& differentialUpPin, ndBodyKinematic* const differentialBody,
+	const ndVector& parentPin, ndBodyKinematic* const parent)
+	:ndJointBilateralConstraint(1, differentialBody, parent, ndGetIdentityMatrix())
+	,m_omega(ndFloat32 (0.0f))
 {
 	ndMatrix temp;
-	ndVector parentFront((parentPin & ndVector::m_triplexMask).Normalize());
-	ndVector parentUp((parentUpPin & ndVector::m_triplexMask).Normalize());
+	ndMatrix matrix0(differentialPin, differentialUpPin, differentialPin.CrossProduct(differentialUpPin), ndVector::m_wOne);
+	ndMatrix matrix1(ndGramSchmidtMatrix(parentPin));
+	matrix0.m_posit = differentialBody->GetMatrix().m_posit;
+	matrix1.m_posit = parent->GetMatrix().m_posit;
 
-	m_gearRatio = ndSqrt (childPin.DotProduct(childPin & ndVector::m_triplexMask).GetScalar());
+	ndAssert(matrix0.TestOrthogonal());
+	ndAssert(matrix1.TestOrthogonal());
 
-	ndMatrix childMatrix(ndGramSchmidtMatrix(childPin));
-	ndMatrix parentMatrix(parentFront, parentUp, parentFront.CrossProduct(parentUp), ndVector::m_wOne);
-	ndAssert(parentMatrix.TestOrthogonal());
-
-	childMatrix.m_posit = child->GetMatrix().m_posit;
-	parentMatrix.m_posit = differentialBody->GetMatrix().m_posit;
-
-	CalculateLocalMatrix(childMatrix, m_localMatrix0, temp);
-	CalculateLocalMatrix(parentMatrix, temp, m_localMatrix1);
+	CalculateLocalMatrix(matrix0, m_localMatrix0, temp);
+	CalculateLocalMatrix(matrix1, temp, m_localMatrix1);
 	SetSolverModel(m_jointkinematicCloseLoop);
+}
+
+ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleDifferentialAxle::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointVehicleDifferentialAxle* const joint = new ndMeshJointVehicleDifferentialAxle(owner, this);
+	return ndSharedPtr<ndMeshJoint>(joint);
 }
 
 void ndMultiBodyVehicleDifferentialAxle::UpdateParameters()
 {
-	ndMatrix matrix0;
-	ndMatrix matrix1;
-	CalculateGlobalMatrix(matrix0, matrix1);
-
-	const ndVector jacobian1 (matrix1.m_front + matrix1.m_up);
-	const ndVector jacobian0 (matrix0.m_front.Scale(m_gearRatio));
-
-	const ndVector& omega0 = m_body0->GetOmega();
-	const ndVector& omega1 = m_body1->GetOmega();
-
-	const ndVector relOmega(omega0 * jacobian0 + omega1 * jacobian1);
-	//m_omega = relOmega.m_x + relOmega.m_y + relOmega.m_z;
-	m_omega = relOmega.AddHorizontal().GetScalar();
-}
-
-ndFloat32 ndMultiBodyVehicleDifferentialAxle::GetGearRatio() const
-{
-	return m_gearRatio;
+	// do nothing;
+	//ndMatrix matrix0;
+	//ndMatrix matrix1;
+	//CalculateGlobalMatrix(matrix0, matrix1);
+	//
+	//const ndVector jacobian0(matrix0.m_front);
+	//const ndVector jacobian1(matrix1.m_front + matrix1.m_up);
+	//const ndVector& omega0 = m_body0->GetOmega();
+	//const ndVector& omega1 = m_body1->GetOmega();
+	//
+	//const ndVector relOmega(omega0 * jacobian0 + omega1 * jacobian1);
+	//m_omega = relOmega.AddHorizontal().GetScalar();
 }
 
 ndFloat32 ndMultiBodyVehicleDifferentialAxle::GetGearOmega() const
 {
-	return m_omega;
+	//return m_omega;
+	return 0.0f;
 }
 
 void ndMultiBodyVehicleDifferentialAxle::JacobianDerivative(ndConstraintDescritor& desc)
@@ -89,23 +84,20 @@ void ndMultiBodyVehicleDifferentialAxle::JacobianDerivative(ndConstraintDescrito
 	ndMatrix matrix1;
 	CalculateGlobalMatrix(matrix0, matrix1);
 
-	AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
+	//AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
+	AddAngularRowJacobian(desc, matrix1.m_right, ndFloat32(0.0f));
 
-	ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
 	ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
-	jacobian0.m_angular = matrix0.m_front.Scale(m_gearRatio);
-	jacobian1.m_angular = matrix1.m_front + matrix1.m_up;
+	ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
+
+	jacobian1.m_angular = matrix1.m_front;
+	jacobian0.m_angular = matrix0.m_front + matrix0.m_up;
 
 	const ndVector& omega0 = m_body0->GetOmega();
 	const ndVector& omega1 = m_body1->GetOmega();
 
 	const ndVector relOmega(omega0 * jacobian0.m_angular + omega1 * jacobian1.m_angular);
-	ndFloat32 w = relOmega.AddHorizontal().GetScalar() * ndFloat32(0.5f);
+	const ndFloat32 w = relOmega.AddHorizontal().GetScalar() * ndFloat32(0.5f);
 	SetMotorAcceleration(desc, -w * desc.m_invTimestep);
 }
 
-ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleDifferentialAxle::GetMeshJoint(const ndMesh* const owner) const
-{
-	ndMeshJointVehicleDifferentialAxle* const joint = new ndMeshJointVehicleDifferentialAxle(owner, this);
-	return ndSharedPtr<ndMeshJoint>(joint);
-}

@@ -52,6 +52,13 @@ ndJointSlider::~ndJointSlider()
 {
 }
 
+ndSharedPtr<ndMeshJoint> ndJointSlider::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointSlider(owner, this));
+
+	return joint;
+}
+
 ndFloat32 ndJointSlider::GetSpeed() const
 {
 	return m_axis.m_paramSpeed;
@@ -304,9 +311,3 @@ void ndJointSlider::JacobianDerivative(ndConstraintDescritor& desc)
 	SubmitLimits(desc, matrix0, matrix1);
 }
 
-ndSharedPtr<ndMeshJoint> ndJointSlider::GetMeshJoint(const ndMesh* const owner) const
-{
-	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointSlider(owner, this));
-
-	return joint;
-}

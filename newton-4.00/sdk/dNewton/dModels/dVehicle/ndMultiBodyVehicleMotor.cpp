@@ -65,6 +65,13 @@ ndMultiBodyVehicleMotor::ndMultiBodyVehicleMotor(ndBodyKinematic* const motor, n
 {
 }
 
+ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleMotor::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointVehicleMotor* const joint = new ndMeshJointVehicleMotor(owner, this);
+	joint->m_maxOmega = ndReal(m_maxOmega);
+	return ndSharedPtr<ndMeshJoint>(joint);
+}
+
 void ndMultiBodyVehicleMotor::SetVehicleOwner(ndMultiBodyVehicle* const vehicle)
 {
 	m_vehicle = vehicle;
@@ -160,6 +167,7 @@ void ndMultiBodyVehicleMotor::JacobianDerivative(ndConstraintDescritor& desc)
 	
 	// add rotor joint acceleration
 	AddAngularRowJacobian(desc, matrix0.m_front * ndVector::m_negOne, ndFloat32(0.0f));
+
 	const ndFloat32 accel = CalculateAcceleration(desc);
 	const ndFloat32 torque = ndMax(m_engineTorque, m_internalFriction);
 	SetMotorAcceleration(desc, accel);
@@ -173,16 +181,4 @@ void ndMultiBodyVehicleMotor::JacobianDerivative(ndConstraintDescritor& desc)
 		//ndJacobian& chassisJacobian = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
 		//chassisJacobian.m_angular = ndVector::m_zero;
 	}
-}
-
-ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleMotor::GetMeshJoint(const ndMesh* const owner) const
-{
-	ndMeshJointVehicleMotor* const joint = new ndMeshJointVehicleMotor(owner, this);
-	//joint->m_omega = ndReal(m_omega);
-	joint->m_maxOmega = ndReal(m_maxOmega);
-	//joint->m_omegaStep = ndReal(m_omegaStep);
-	//joint->m_targetOmega = ndReal(m_targetOmega);
-	//joint->m_engineTorque = ndReal(m_engineTorque);
-	//joint->m_internalFriction = ndReal(m_internalFriction);
-	return ndSharedPtr<ndMeshJoint>(joint);
 }

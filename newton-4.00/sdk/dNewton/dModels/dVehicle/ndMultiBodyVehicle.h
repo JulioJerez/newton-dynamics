@@ -80,7 +80,7 @@ class ndVehicleDectriptor: public ndClassAlloc
 		{
 			m_neutral = ndFloat32 (0.0f);
 			m_reverseRatio = ndFloat32(-3.0f);
-			m_crownGearRatio = ndFloat32(10.0f);
+			m_crownGearRatio = ndFloat32(5.0f);
 
 			m_forwardRatios[0] = ndFloat32 (3.0f);
 			m_forwardRatios[1] = ndFloat32 (1.5f);
@@ -136,11 +136,11 @@ class ndVehicleDectriptor: public ndClassAlloc
 	ndEngineTorqueCurve m_engine;
 	ndGearBox m_transmission;
 	ndTireFrictionModel m_tireFrictionModel;
-	ndFloat32 m_motorMass;
-	ndFloat32 m_motorRadius;
+	//ndFloat32 m_motorMass;
+	//ndFloat32 m_motorRadius;
+	//ndFloat32 m_differentialMass;
+	//ndFloat32 m_differentialRadius;
 
-	ndFloat32 m_differentialMass;
-	ndFloat32 m_differentialRadius;
 	ndFloat32 m_slipDifferentialRmpLock;
 	ndDifferentialType m_differentialType;
 
@@ -216,7 +216,7 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	D_NEWTON_API void AddGearBox(const ndSharedPtr<ndJointBilateralConstraint>& gearBoxJoint);
 	D_NEWTON_API void AddDifferentialAxle(const ndSharedPtr<ndJointBilateralConstraint>& differentialAxleJoint);
 
-	//D_NEWTON_API ndMultiBodyVehicleTireJoint* AddTire(const ndMultiBodyVehicleTireJointInfo& desc, const ndSharedPtr<ndBody>& tire);
+	D_NEWTON_API ndMultiBodyVehicleTireJoint* AddTire(const ndWheelDescriptor& desc, const ndSharedPtr<ndBody>& tire);
 	//D_NEWTON_API ndMultiBodyVehicleTireJoint* AddAxleTire(const ndMultiBodyVehicleTireJointInfo& desc, const ndSharedPtr<ndBody>& tire, const ndSharedPtr<ndBody>& axleBody);
 	D_NEWTON_API ndMultiBodyVehicleDifferential* AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleTireJoint* const leftTire, ndMultiBodyVehicleTireJoint* const rightTire, ndFloat32 slipOmegaLock);
 	D_NEWTON_API ndMultiBodyVehicleDifferential* AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleDifferential* const leftDifferential, ndMultiBodyVehicleDifferential* const rightDifferential, ndFloat32 slipOmegaLock);

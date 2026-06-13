@@ -64,6 +64,12 @@ ndJointRoller::~ndJointRoller()
 {
 }
 
+ndSharedPtr<ndMeshJoint> ndJointRoller::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointRoller(owner, this));
+	return joint;
+}
+
 ndFloat32 ndJointRoller::GetAngle() const
 {
 	return m_rotationAxis.m_param;
@@ -474,8 +480,3 @@ void ndJointRoller::JacobianDerivative(ndConstraintDescritor& desc)
 	SubmitLimitsAngle(desc, matrix0, matrix1);
 }
 
-ndSharedPtr<ndMeshJoint> ndJointRoller::GetMeshJoint(const ndMesh* const owner) const
-{
-	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointRoller(owner, this));
-	return joint;
-}

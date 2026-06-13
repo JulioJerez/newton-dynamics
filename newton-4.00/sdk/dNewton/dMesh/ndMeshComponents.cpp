@@ -499,13 +499,10 @@ ndMeshJointVehicleDifferentialAxle::ndMeshJointVehicleDifferentialAxle(const ndM
 ndMeshJointVehicleDifferentialAxle::ndMeshJointVehicleDifferentialAxle(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
-	const ndMultiBodyVehicleDifferentialAxle* const subJoint = (ndMultiBodyVehicleDifferentialAxle*)joint;
-	m_gearRatio = subJoint->GetGearRatio();
 }
 
 ndMeshJointVehicleDifferentialAxle::ndMeshJointVehicleDifferentialAxle(const ndMeshJointVehicleDifferentialAxle& other)
 	:ndMeshJoint(other)
-	,m_gearRatio(other.m_gearRatio)
 {
 }
 
@@ -517,25 +514,22 @@ ndMeshJoint* ndMeshJointVehicleDifferentialAxle::Duplicate() const
 bool ndMeshJointVehicleDifferentialAxle::operator==(const ndMeshJoint& other) const
 {
 	bool test = ndMeshJoint::operator==(other);
-
-	if (test)
-	{
-		const ndMeshJointVehicleDifferentialAxle* const otherJoint = (ndMeshJointVehicleDifferentialAxle*)&other;
-		test = test && (m_gearRatio == otherJoint->m_gearRatio);
-	}
+	//if (test)
+	//{
+	//	const ndMeshJointVehicleDifferentialAxle* const otherJoint = (ndMeshJointVehicleDifferentialAxle*)&other;
+	//	test = test && (m_gearRatio == otherJoint->m_gearRatio);
+	//}
 	return test;
 }
 
 void ndMeshJointVehicleDifferentialAxle::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	ndMeshJoint::SerializeToXml(parent);
-	xmlSaveParam(parent, "ratio", m_gearRatio);
 }
 
 void ndMeshJointVehicleDifferentialAxle::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndMeshJoint::DeserializeFromXml(parent);
-	m_gearRatio = xmlGetFloat(parent, "ratio");
 }
 
 ndJointBilateralConstraint* ndMeshJointVehicleDifferentialAxle::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
@@ -544,8 +538,8 @@ ndJointBilateralConstraint* ndMeshJointVehicleDifferentialAxle::CreateObject(ndB
 	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 
 	ndMultiBodyVehicleDifferentialAxle* const joint = new ndMultiBodyVehicleDifferentialAxle(
-		pinAndPivotInParent.m_front, pinAndPivotInParent.m_up, parent,
-		pinAndPivotInChild.m_front.Scale(m_gearRatio), child);
+		pinAndPivotInChild.m_front, pinAndPivotInChild.m_up, child,
+		pinAndPivotInParent.m_front, parent);
 
 	return joint;
 }

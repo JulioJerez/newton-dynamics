@@ -19,11 +19,11 @@ class ndWheelDescriptor
 {
 	public:
 	ndWheelDescriptor()
-		:m_springK(ndFloat32(2000.0f))
-		,m_damperC(ndFloat32(50.0f))
+		:m_springK(ndFloat32(1000.0f))
+		,m_damperC(ndFloat32(20.0f))
 		,m_upperStop(ndFloat32(0.2f))
 		,m_lowerStop(ndFloat32(-0.1f))
-		,m_regularizer(ndFloat32(0.02f))
+		,m_regularizer(ndFloat32(0.1f))
 		,m_brakeTorque(ndFloat32(0.0f))
 		,m_steeringAngle(ndFloat32(0.0f))
 		,m_handBrakeTorque(ndFloat32(0.0f))
@@ -84,9 +84,9 @@ class ndTireFrictionModel
 	D_NEWTON_API void SetPacejkaCurves(const ndPacejkaTireModel& longitudinal, const ndPacejkaTireModel& lateral);
 	D_NEWTON_API void GetPacejkaCurves(ndFrictionModel pacejkaStockModel, ndPacejkaTireModel& longitudinal, ndPacejkaTireModel& lateral) const;
 
-	ndFrictionModel m_frictionModel;
 	ndPacejkaTireModel m_lateralPacejka;
 	ndPacejkaTireModel m_longitudinalPacejka;
+	ndFrictionModel m_frictionModel;
 };
 
 D_MSV_NEWTON_CLASS_ALIGN_32

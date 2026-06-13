@@ -1,9 +1,9 @@
 /* Copyright (c) <2003-2022> <Newton Game Dynamics>
-* 
+*
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
 * arising from the use of this software.
-* 
+*
 * Permission is granted to anyone to use this software for any purpose,
 * including commercial applications, and to alter it and redistribute it
 * freely
@@ -19,262 +19,12 @@
 #include "ndDemoCameraNodeFollow.h"
 #include "ndHeightFieldPrimitive.h"
 
-#if 0
-class ndVehicleDectriptorViper : public ndVehicleDectriptor
-{
-	public:
-	ndVehicleDectriptorViper()
-		:ndVehicleDectriptor("viper.fbx")
-	{
-		ndFloat32 idleTorquePoundFoot = 300.0f;
-		ndFloat32 idleRmp = 700.0f;
-		ndFloat32 horsePower = 400.0f;
-		ndFloat32 rpm0 = 5000.0f;
-		ndFloat32 rpm1 = 6200.0f;
-		ndFloat32 horsePowerAtRedLine = 100.0f;
-		ndFloat32 redLineRpm = 8000.0f;
-		m_engine.Init(idleTorquePoundFoot, idleRmp, 
-					  horsePower, rpm0, rpm1, horsePowerAtRedLine, redLineRpm);
-
-		m_comDisplacement = ndVector(0.0f, -0.5f, 0.0f, 0.0f);
-
-		m_frontTire.m_mass = 25.0f;
-		m_frontTire.m_handBrakeTorque = 0.0f;
-
-		m_rearTire.m_mass = 25.0f;
-		m_rearTire.m_handBrakeTorque = 100000.0f;
-
-		// Get a stock pacejka curve set and modified a litle for dramatic driving
-		ndTireFrictionModel::ndPacejkaTireModel lateral;
-		ndTireFrictionModel::ndPacejkaTireModel longitudinal;
-		m_frontTire.GetPacejkaCurves(ndTireFrictionModel::m_pacejkaSport, longitudinal, lateral);
-		lateral.m_d = 0.4f;
-
-		// override the tire cuves.
-		m_rearTire.SetPacejkaCurves(longitudinal, lateral);
-		m_frontTire.SetPacejkaCurves(longitudinal, lateral);
-
-		// plot the curve to check it is a value form
-		m_frontTire.PlotPacejkaCurves("sportTireModel");
-	}
-};
-
-class ndVehicleDectriptorJeep : public ndVehicleDectriptor
-{
-	public:
-	ndVehicleDectriptorJeep()
-		:ndVehicleDectriptor("jeep.fbx")
-	{
-		ndFloat32 idleTorquePoundFoot = 200.0f;
-		ndFloat32 idleRmp = 800.0f;
-		ndFloat32 horsePower = 400.0f;
-		ndFloat32 rpm0 = 5000.0f;
-		ndFloat32 rpm1 = 6200.0f;
-		ndFloat32 horsePowerAtRedLine = 400.0f;
-		ndFloat32 redLineRpm = 8000.0f;
-		m_engine.Init(idleTorquePoundFoot, idleRmp, 
-					  horsePower, rpm0, rpm1, horsePowerAtRedLine, redLineRpm);
-
-		m_comDisplacement = ndVector(0.0f, -0.65f, 0.0f, 0.0f);
-
-		m_chassisMass = 1000.0f;
-		m_frontTire.m_mass = 25.0f;
-		m_frontTire.m_verticalOffset = 0.0f;
-		m_frontTire.m_steeringAngle = 35.0f * ndDegreeToRad;
-		m_frontTire.m_springK = 800.0f;
-		m_frontTire.m_damperC = 50.0f;
-		m_frontTire.m_regularizer = 0.1f;
-		m_frontTire.m_lowerStop = -0.05f;
-		m_frontTire.m_upperStop = 0.4f;
-		m_frontTire.m_brakeTorque = 1500.0f;
-		m_frontTire.m_handBrakeTorque = 0.0f;
-
-		m_rearTire.m_mass = 25.0f;
-		m_rearTire.m_verticalOffset = 0.0f;
-		m_rearTire.m_steeringAngle = 0.0f;
-		m_rearTire.m_springK = 800.0f;
-		m_rearTire.m_damperC = 50.0f;
-		m_rearTire.m_regularizer = 0.1f;
-		m_rearTire.m_lowerStop = -0.05f;
-		m_rearTire.m_upperStop = 0.4f;
-		m_rearTire.m_brakeTorque = 3000.0f;
-		m_rearTire.m_handBrakeTorque = 100000.0f;
-		m_torsionBarType = m_fourWheelAxle;
-		m_differentialType = m_fourWheeldrive;
-
-		// Get a stock pacejka curve set and modified a litle for dramatic driving
-		ndTireFrictionModel::ndPacejkaTireModel lateral;
-		ndTireFrictionModel::ndPacejkaTireModel longitudinal;
-		m_frontTire.GetPacejkaCurves(ndTireFrictionModel::m_pacejkaSport, longitudinal, lateral);
-		lateral.m_d = 0.5f;
-
-		// override the tire cuves.
-		m_rearTire.SetPacejkaCurves(longitudinal, lateral);
-		m_frontTire.SetPacejkaCurves(longitudinal, lateral);
-
-		// plot the curve to check it is a value form
-		m_frontTire.PlotPacejkaCurves("sportTireModel");
-	}
-};
-
-class ndVehicleDectriptorMonsterTruck0: public ndVehicleDectriptor
-{
-	public:
-	ndVehicleDectriptorMonsterTruck0()
-		:ndVehicleDectriptor("monsterTruck0.fbx")
-	{
-		ndFloat32 idleTorquePoundFoot = 250.0f;
-		ndFloat32 idleRmp = 800.0f;
-		ndFloat32 horsePower = 400.0f;
-		ndFloat32 rpm0 = 5000.0f;
-		ndFloat32 rpm1 = 6200.0f;
-		ndFloat32 horsePowerAtRedLine = 150.0f;
-		ndFloat32 redLineRpm = 8000.0f;
-		m_engine.Init(idleTorquePoundFoot, idleRmp, 
-					  horsePower, rpm0, rpm1, horsePowerAtRedLine, redLineRpm);
-
-		m_chassisMass = 1000.0f;
-		m_comDisplacement = ndVector(0.0f, -0.6f, 0.0f, 0.0f);
-
-		//m_frontTire.m_mass = 150.0f;
-		m_frontTire.m_mass = 100.0f;
-		m_frontTire.m_verticalOffset = 0.0f;
-		m_frontTire.m_steeringAngle = 35.0f * ndDegreeToRad;
-		m_frontTire.m_springK = 500.0f;
-		m_frontTire.m_damperC = 20.0f;
-		m_frontTire.m_regularizer = 0.05f;
-		m_frontTire.m_lowerStop = -0.05f;
-		m_frontTire.m_upperStop = 0.4f;
-		m_frontTire.m_brakeTorque = 1000.0f;
-		m_frontTire.m_handBrakeTorque = 0.0f;
-
-		m_rearTire.m_mass = 150.0f;
-		m_rearTire.m_mass = 100.0f;
-		m_rearTire.m_verticalOffset = 0.0f;
-		m_rearTire.m_steeringAngle = 0.0f;
-		m_rearTire.m_springK = 500.0f;
-		m_rearTire.m_damperC = 20.0f;
-		m_rearTire.m_regularizer = 0.05f;
-		m_rearTire.m_lowerStop = -0.05f;
-		m_rearTire.m_upperStop = 0.4f;
-		m_rearTire.m_brakeTorque = 5000.0f;
-		m_rearTire.m_handBrakeTorque = 100000.0f;
-		m_torsionBarType = m_fourWheelAxle;
-		m_differentialType = m_fourWheeldrive;
-
-		// Get a stock pacejka curve set and modified a litle for dramatic driving
-		ndTireFrictionModel::ndPacejkaTireModel lateral;
-		ndTireFrictionModel::ndPacejkaTireModel longitudinal;
-		m_frontTire.GetPacejkaCurves(ndTireFrictionModel::m_pacejkaUtility, longitudinal, lateral);
-		lateral.m_d = 0.25f;
-
-		// override the tire cuves.
-		m_rearTire.SetPacejkaCurves(longitudinal, lateral);
-		m_frontTire.SetPacejkaCurves(longitudinal, lateral);
-
-		// plot the curve to check it is a value form
-		m_frontTire.PlotPacejkaCurves("utilityVehicleTireModel");
-	}
-};
-
-class ndVehicleDectriptorMonsterTruck1 : public ndVehicleDectriptor
-{
-	public:
-	ndVehicleDectriptorMonsterTruck1()
-		:ndVehicleDectriptor("monsterTruck1.fbx")
-	{
-		// reset gear box ratios
-		m_transmission.m_gearsCount = 4;
-		m_transmission.m_forwardRatios[0] = 2.5f;
-		m_transmission.m_forwardRatios[1] = 1.5f;
-		m_transmission.m_forwardRatios[2] = 1.1f;
-		m_transmission.m_forwardRatios[3] = 0.8f;
-		m_transmission.m_crownGearRatio = 20.0f;
-
-		m_comDisplacement = ndVector(0.0f, -1.3f, 0.0f, 0.0f);
-		
-		ndFloat32 idleTorquePoundFoot = 300.0f;
-		ndFloat32 idleRmp = 800.0f;
-		ndFloat32 horsePower = 600.0f;
-		ndFloat32 rpm0 = 5000.0f;
-		ndFloat32 rpm1 = 6200.0f;
-		ndFloat32 horsePowerAtRedLine = 150.0f;
-		ndFloat32 redLineRpm = 8000.0f;
-		m_engine.Init(idleTorquePoundFoot, idleRmp,
-			horsePower, rpm0, rpm1, horsePowerAtRedLine, redLineRpm);
-
-		m_frontTire.m_mass = 100.0f;
-		m_frontTire.m_verticalOffset = 0.0f;
-		m_frontTire.m_steeringAngle = 35.0f * ndDegreeToRad;
-		m_frontTire.m_springK = 500.0f;
-		m_frontTire.m_damperC = 50.0f;
-		m_frontTire.m_regularizer = 0.2f;
-		m_frontTire.m_lowerStop = -0.05f;
-		m_frontTire.m_upperStop = 0.4f;
-		m_frontTire.m_brakeTorque = 10000.0f;
-		m_frontTire.m_handBrakeTorque = 0.0f;
-
-		m_rearTire.m_mass = 100.0f;
-		m_rearTire.m_verticalOffset = 0.0f;
-		m_rearTire.m_steeringAngle = 0.0f;
-		m_rearTire.m_springK = 500.0f;
-		m_rearTire.m_damperC = 50.0f;
-		m_rearTire.m_regularizer = 0.2f;
-		m_rearTire.m_lowerStop = -0.05f;
-		m_rearTire.m_upperStop = 0.4f;
-		m_rearTire.m_brakeTorque = 10000.0f;
-		m_rearTire.m_handBrakeTorque = 50000.0f;
-		m_torsionBarType = m_fourWheelAxle;
-		m_differentialType = m_fourWheeldrive;
-
-		ndTireFrictionModel::ndPacejkaTireModel lateral;
-		ndTireFrictionModel::ndPacejkaTireModel longitudinal;
-		m_frontTire.GetPacejkaCurves(ndTireFrictionModel::m_pacejkaUtility, longitudinal, lateral);
-		lateral.m_d = 0.3f;
-
-		// override the tire cuves.
-		m_rearTire.SetPacejkaCurves(longitudinal, lateral);
-		m_frontTire.SetPacejkaCurves(longitudinal, lateral);
-
-		// plot the curve to check it is a value form
-		m_frontTire.PlotPacejkaCurves("utilityVehicleTireModel");
-	}
-};
-
-static ndVehicleDectriptorJeep jeepDesc;
-static ndVehicleDectriptorViper viperDesc;
-static ndVehicleDectriptorMonsterTruck0 monterTruckDesc0;
-static ndVehicleDectriptorMonsterTruck1 monterTruckDesc1;
-
-static ndDemoEntity* LoadVehicleMeshModel(ndDemoEntityManager* const scene, const char* const filename)
-{
-	ndRenderMeshLoader loader;
-	ndDemoEntity* const vehicleEntity = loader.ImportFbx(filename, scene);
-	return vehicleEntity;
-}
-
-//static void TestPlayerCapsuleInteraction(ndDemoEntityManager* const scene, const ndMatrix& location)
-static void TestPlayerCapsuleInteraction(ndDemoEntityManager* const, const ndMatrix&)
-{
-	//ndMatrix localAxis(ndGetIdentityMatrix());
-	//localAxis[0] = ndVector(0.0, 1.0f, 0.0f, 0.0f);
-	//localAxis[1] = ndVector(1.0, 0.0f, 0.0f, 0.0f);
-	//localAxis[2] = localAxis[0].CrossProduct(localAxis[1]);
-	//
-	//ndFloat32 height = 1.9f;
-	//ndFloat32 radio = 0.5f;
-	//ndFloat32 mass = 100.0f;
-	//ndDemoEntity* const entity = ndDemoEntity::LoadFbx("walker.fbx", scene);
-	//new ndBasicPlayerCapsule(scene, entity, localAxis, location, mass, radio, height, height / 4.0f);
-	//delete entity;
-}
-#endif
 
 namespace ndMotorVehicle
 {
 	class ndVehicleDectriptorSuperCar : public ndVehicleDectriptor
 	{
-		public:
+	public:
 		ndVehicleDectriptorSuperCar()
 			:ndVehicleDectriptor()
 		{
@@ -290,7 +40,7 @@ namespace ndMotorVehicle
 				horsePower, rpm0, rpm1, horsePowerAtRedLine, redLineRpm);
 
 			m_tireFrictionModel.SetPacejkaCurves(ndTireFrictionModel::m_pacejkaSport);
-			m_tireFrictionModel.m_lateralPacejka.m_d = ndFloat32 (0.4f);
+			m_tireFrictionModel.m_lateralPacejka.m_d = ndFloat32(0.4f);
 
 			// plot the curve to check it is a value form
 			//m_tireFrictionModel.PlotPacejkaCurves("supercar");
@@ -312,9 +62,6 @@ namespace ndMotorVehicle
 
 		// the vehicle descriptor specify the kind of vehicle 
 		// we configure it then we convert the model to multibody vehicle.
-		//ndVehicleDectriptor defaultDesc;
-		//defaultDesc.m_name = "testarossa";
-		//defaultDesc.m_tireFrictionModel.SetPacejkaCurves(ndTireFrictionModel::m_pacejkaSport);
 		ndVehicleDectriptorSuperCar superCar;
 		vehicle->ConvertToMotorVehicle(superCar);
 
@@ -322,27 +69,38 @@ namespace ndMotorVehicle
 		ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *loader.m_mesh, ndGetWorkingFileName("")));
 
 		auto BindApplicationData = [scene, mesh, vehicle, &sceneMesh](ndModelArticulation::ndNode* const node)
-		{
-			if (vehicle->IsCloseLoop(node))
 			{
-				ndTrace(("do something\n"));
-			}
-			else
-			{
-				const ndMesh* const meshNode = mesh->FindByClosestMatch(node->m_name);
-				ndAssert(meshNode);
+				if (vehicle->IsCloseLoop(node))
+				{
+					ndTrace(("do something\n"));
+				}
+				else
+				{
+					const ndMesh* const meshNode = mesh->FindByClosestMatch(node->m_name);
+					ndAssert(meshNode);
 
-				// find the visual node this body control by name. 
-				const ndMatrix matrix(node->m_body->GetMatrix());
-				ndRenderSceneNode* const visualEntityPtr = sceneMesh->FindByClosestMatch(meshNode->GetName());
-				ndAssert(visualEntityPtr);
-				ndSharedPtr<ndRenderSceneNode> visualEntity((visualEntityPtr == *sceneMesh) ? sceneMesh : visualEntityPtr->GetSharedPtr());
+					// find the visual node this body control by name. 
+					const ndMatrix matrix(node->m_body->GetMatrix());
+					ndRenderSceneNode* const visualEntityPtr = sceneMesh->FindByClosestMatch(meshNode->GetName());
+					ndAssert(visualEntityPtr);
+					ndSharedPtr<ndRenderSceneNode> visualEntity((visualEntityPtr == *sceneMesh) ? sceneMesh : visualEntityPtr->GetSharedPtr());
 
-				// add a rigid body with notification callback
-				ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
-				ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
-				node->m_body->SetNotifyCallback(notify);
-			}
+					// add a rigid body with notification callback
+					ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
+					ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
+					if (node->m_joint)
+					{
+						if ((strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleMotor::StaticClassName()) == 0) ||
+							(strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleDifferential::StaticClassName()) == 0) ||
+							(strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0))
+						{
+							// fast moving wheel
+							ndDemoEntityNotify* const fastNotify = (ndDemoEntityNotify*)*notify;
+							fastNotify->m_capOmega = ndFloat32(10000.0f);
+						}
+					}
+					node->m_body->SetNotifyCallback(notify);
+				}
 		};
 		vehicle->NodeIterator(BindApplicationData);
 
@@ -361,7 +119,6 @@ namespace ndMotorVehicle
 		}
 
 		//add the notification to bind to the application.
-		//ndSharedPtr<ndModelNotify> controller(new ndVehicleCommonNotify(scene, *loader.m_mesh, camera, articulation));
 		ndSharedPtr<ndModelNotify> controller(new ndVehicleCommonNotify(vehicle));
 		vehicle->SetNotifyCallback(controller);
 
