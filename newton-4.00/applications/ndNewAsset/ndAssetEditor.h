@@ -144,9 +144,9 @@ class ndAssetEditor : public ndClassAlloc
 	void ShowMainMenuBar();
 	void ShowMainToolbar();
 	void ShowOutlierPanel();
-	void ShowOutlierExplorer(const ndSharedPtr<ndMesh>& root);
+	void ShowOutlinerExplorer(const ndSharedPtr<ndMesh>& root);
 	void ShowOutlierExplorerCloseLoop(const ndSharedPtr<ndMesh>& closeLoop);
-	void ShowOutlierExplorerCollidindPairs(const ndSharedPtr<ndMesh>& closeLoop);
+	void ShowOutlinerExplorerCollidindPairs(const ndSharedPtr<ndMesh>& closeLoop);
 
 	void ShowPropertiesPanel();
 	void ShowPropertiesMeshInfo();

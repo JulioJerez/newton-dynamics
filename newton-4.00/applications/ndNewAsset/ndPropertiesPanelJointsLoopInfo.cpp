@@ -1314,7 +1314,7 @@ void ndAssetEditor::EditGearLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 	if (ImGui::InputFloat("gear ratio", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-		joint->m_ratio = ndMax(value, ndReal(0.01f));
+		joint->m_ratio = value;
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
 }

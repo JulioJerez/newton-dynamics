@@ -62,6 +62,7 @@ ndMesh::ndMesh()
 	,m_customProperties()
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
+	,m_assetToolFlags(0)
 	,m_isVisible(true)
 {
 }
@@ -82,6 +83,7 @@ ndMesh::ndMesh(const ndShapeInstance& shape, ndUvMapingMode mapping)
 	,m_customProperties()
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
+	,m_assetToolFlags(0)
 	,m_isVisible(true)
 {
 	switch (mapping)
@@ -143,6 +145,7 @@ ndMesh::ndMesh(const ndMesh& src)
 	,m_customProperties()
 	,m_boneTarget(src.m_boneTarget)
 	,m_type(src.m_type)
+	,m_assetToolFlags(src.m_assetToolFlags)
 	,m_isVisible(src.m_isVisible)
 {
 	if (src.m_customProperties)
@@ -308,6 +311,16 @@ bool ndMesh::GetIsVisible() const
 void ndMesh::SetIsVisible(bool flag)
 {
 	m_isVisible = flag;
+}
+
+ndInt32 ndMesh::GetToolFlags() const
+{
+	return m_assetToolFlags;
+}
+
+void ndMesh::SetToolFlags(ndInt32 flags)
+{
+	m_assetToolFlags = flags;
 }
 
 ndVector ndMesh::GetBoneTarget() const
