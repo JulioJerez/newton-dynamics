@@ -80,7 +80,7 @@ void ndAssetEditor::EditLoopJointLocalMatrix(ndSharedPtr<ndMeshLoopJoint>& loopJ
 
 	if (m_parentSpaceTransform)
 	{
-		ndAssert(0);
+		//ndAssert(0);
 	}
 	else
 	{
