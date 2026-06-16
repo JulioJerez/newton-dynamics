@@ -73,33 +73,19 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 
 	ndPhysicsWorld* const world = (ndPhysicsWorld*)vehicle->GetWorld();
 	ndDemoEntityManager* const scene = world->GetManager();
-	const ndSharedPtr<ndGameControllerInputs>& gameController = scene->GetGameController();
 
+	const ndSharedPtr<ndGameControllerInputs>& gameController = scene->GetGameController();
 	const ndFixSizeArray<ndFloat32, 8>& axis = gameController->GetAxis();
 	const ndFixSizeArray<bool, 32>& buttons = gameController->GetButtons();
 
-	//m_inputs.Update(scene);
 	const ndVehicleDectriptor& desc = vehicle->GetDescriptor();
 	auto ApplyControls = [this, vehicle, &desc, motor, &axis, &buttons]()
 	{
 		ndFloat32 throttle = axis[ndGameControllerInputs::m_gasPedal];
 
-		//static int xxxxx;
-		//xxxxx++;
-		//if (xxxxx > 500)
-		//{
-		//	throttle = 1.0f;
-		//}
-
 		ndFloat32 currentOmega = motor->GetRpm() / ndRadPerSecToRpm;
 		ndFloat32 desiredOmega = ndMax(desc.m_engine.GetIdleRadPerSec(), throttle * desc.m_engine.GetRedLineRadPerSec());
 		ndFloat32 torqueFromCurve = desc.m_engine.GetTorque(currentOmega);
-
-		//ndTrace(("torque(%f) wmotor(%f) wtarget(%f) g(%f)\n", torqueFromCurve, currentOmega, desiredOmega, vehicle->GetGearBox()->GetRatio()));
-		//if (torqueFromCurve > 500)
-		//{
-		//	torqueFromCurve = desc.m_engine.GetTorque(currentOmega);
-		//}
 
 		motor->SetTorqueAndRpm(torqueFromCurve, desiredOmega * ndRadPerSecToRpm);
 		vehicle->GetChassis()->SetSleepState(false);

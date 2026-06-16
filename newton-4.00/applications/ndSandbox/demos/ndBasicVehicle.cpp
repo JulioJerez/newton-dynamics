@@ -146,26 +146,16 @@ namespace ndMotorVehicle
 		public:
 		SceneNavigation()
 			:OnPostUpdate()
-			,m_changeCamera(false)
 		{
 		}
 
-		void OnDebug(ndDemoEntityManager* const, bool)
+		void OnDebug(ndDemoEntityManager* const, bool) override
 		{
 		}
 
-		virtual void Update(ndDemoEntityManager* const manager, ndFloat32)
+		virtual void Update(ndDemoEntityManager* const, ndFloat32) override
 		{
-			const ndSharedPtr<ndGameControllerInputs>& gameController = manager->GetGameController();
-			const ndFixSizeArray<bool, 32>& buttons = gameController->GetButtons();
-			bool changeCamera = buttons[ndGameControllerInputs::m_changeCamera];
-			if (changeCamera && !m_changeCamera)
-			{
-				manager->ChangeActiveCamera();
-			}
-			m_changeCamera = changeCamera;
 		}
-		bool m_changeCamera;
 	};
 };
 
