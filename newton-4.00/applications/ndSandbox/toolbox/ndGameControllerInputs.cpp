@@ -177,10 +177,71 @@ void ndGameControllerInputs::GetJoystickInputs(ndDemoEntityManager* const)
 	//m_axis[m_azis_02] = brake * brake;
 }
 
-//void ndGameControllerInputs::GetWheelJoystickInputs(ndDemoEntityManager* const scene)
-void ndGameControllerInputs::GetWheelJoystickInputs(ndDemoEntityManager* const)
+void ndGameControllerInputs::GetXboxJoystickInputs(ndDemoEntityManager* const scene)
 {
-	ndAssert(0);
+	ndSharedPtr<ndRender>& render = scene->GetRenderer();
+	// remap buttons
+	{
+		ndFixSizeArray<int, 32> buttonMapping;
+		const ndFixSizeArray<ndInt8, 32>& unmappedButtons = render->GameControllerButtons();
+		for (ndInt32 i = 0; i < unmappedButtons.GetCount(); ++i)
+		{
+			buttonMapping.PushBack(buttonMapping.GetCapacity() - 1);
+		}
+
+		buttonMapping[0] = ndGameControllerInputs::ndGameControllerInputs::m_automaticGearBoxButton;
+		buttonMapping[1] = ndGameControllerInputs::ndGameControllerInputs::m_parkGearButton;
+		buttonMapping[2] = ndGameControllerInputs::ndGameControllerInputs::m_changeCamera;
+		buttonMapping[3] = ndGameControllerInputs::ndGameControllerInputs::m_changePlayer;
+		buttonMapping[4] = ndGameControllerInputs::ndGameControllerInputs::m_handBreakButton;
+		buttonMapping[5] = ndGameControllerInputs::ndGameControllerInputs::m_reverseGearButton;
+		buttonMapping[6] = ndGameControllerInputs::ndGameControllerInputs::m_neutralGearButton;
+		buttonMapping[7] = ndGameControllerInputs::ndGameControllerInputs::m_ignitionButton;
+		buttonMapping[10] = ndGameControllerInputs::ndGameControllerInputs::m_upGearButton;
+		buttonMapping[12] = ndGameControllerInputs::ndGameControllerInputs::m_downGearButton;
+
+		for (ndInt32 i = 0; i < unmappedButtons.GetCount(); ++i)
+		{
+			ndInt32 index = buttonMapping[i];
+			//if (m_buttons[index] != unmappedButtons[i])
+			//{
+			//	ndTrace(("%d %d\n", index, i));
+			//	index *= 1;
+			//}
+			m_buttons[index] = unmappedButtons[i] ? true : false;
+		}
+	}
+
+	// remap game pad axis
+	{
+		ndFixSizeArray<int, 8> axisMapping;
+		const ndFixSizeArray<ndFloat32, 8>& unmappedAxis = render->GameControllerAxis();
+		for (ndInt32 i = 0; i < unmappedAxis.GetCount(); i++)
+		{
+			axisMapping.PushBack(unmappedAxis.GetCapacity() - 1);
+		}
+		axisMapping[0] = m_steeringWheel;
+		axisMapping[4] = m_brakePedal;
+		axisMapping[5] = m_gasPedal;
+
+		for (ndInt32 i = 0; i < unmappedAxis.GetCount(); i++)
+		{
+			ndInt32 index = axisMapping[i];
+			m_axis[index] = unmappedAxis[i];
+		}
+
+		m_axis[m_steeringWheel] = -m_axis[m_steeringWheel] * m_axis[m_steeringWheel] * m_axis[m_steeringWheel];
+		ndFloat32 gas = (m_axis[m_gasPedal] + ndFloat32(1.0f)) * ndFloat32(0.5f);
+		m_axis[m_gasPedal] = gas * gas;
+
+		ndFloat32 brake = (m_axis[m_brakePedal] + ndFloat32(1.0f)) * ndFloat32(0.5f);
+		m_axis[m_brakePedal] = brake * brake;
+		m_axis[m_clutch] = ndFloat32(0.0f);
+	}
+}
+
+void ndGameControllerInputs::GetWheelJoystickInputs(ndDemoEntityManager* const scene)
+{
 	//// logitech g920 mapping
 	//ndFixSizeArray<char, 32> unmappedButtons;
 	//ndFixSizeArray<ndFloat32, 8> unmappedAxis;
@@ -247,41 +308,38 @@ void ndGameControllerInputs::GetWheelJoystickInputs(ndDemoEntityManager* const)
 	//m_axis[m_azis_01] = (1.0f - m_axis[m_azis_01]) * 0.5f;
 	//m_axis[m_azis_02] = ndFloat32 (1.0f) - ndClamp(m_axis[m_azis_02], ndFloat32(0.0f), ndFloat32(1.0f));
 	//m_axis[m_azis_03] = ndFloat32(0.0f);
-}
 
-void ndGameControllerInputs::GetXboxJoystickInputs(ndDemoEntityManager* const scene)
-{
 	ndSharedPtr<ndRender>& render = scene->GetRenderer();
 	// remap buttons
 	{
-		ndFixSizeArray<int, 32> buttonMapping;
-		const ndFixSizeArray<ndInt8, 32>& unmappedButtons = render->GameControllerButtons();
-		for (ndInt32 i = 0; i < unmappedButtons.GetCount(); ++i)
-		{
-			buttonMapping.PushBack(buttonMapping.GetCapacity() - 1);
-		}
-
-		buttonMapping[0] = ndGameControllerInputs::ndGameControllerInputs::m_automaticGearBoxButton;
-		buttonMapping[1] = ndGameControllerInputs::ndGameControllerInputs::m_parkGearButton;
-		buttonMapping[2] = ndGameControllerInputs::ndGameControllerInputs::m_changeCamera;
-		buttonMapping[3] = ndGameControllerInputs::ndGameControllerInputs::m_changePlayer;
-		buttonMapping[4] = ndGameControllerInputs::ndGameControllerInputs::m_handBreakButton;
-		buttonMapping[5] = ndGameControllerInputs::ndGameControllerInputs::m_reverseGearButton;
-		buttonMapping[6] = ndGameControllerInputs::ndGameControllerInputs::m_neutralGearButton;
-		buttonMapping[7] = ndGameControllerInputs::ndGameControllerInputs::m_ignitionButton;
-		buttonMapping[10] = ndGameControllerInputs::ndGameControllerInputs::m_upGearButton;
-		buttonMapping[12] = ndGameControllerInputs::ndGameControllerInputs::m_downGearButton;
-
-		for (ndInt32 i = 0; i < unmappedButtons.GetCount(); ++i)
-		{
-			ndInt32 index = buttonMapping[i];
-			//if (m_buttons[index] != unmappedButtons[i])
-			//{
-			//	ndTrace(("%d %d\n", index, i));
-			//	index *= 1;
-			//}
-			m_buttons[index] = unmappedButtons[i] ? true : false;
-		}
+		//ndFixSizeArray<int, 32> buttonMapping;
+		//const ndFixSizeArray<ndInt8, 32>& unmappedButtons = render->GameControllerButtons();
+		//for (ndInt32 i = 0; i < unmappedButtons.GetCount(); ++i)
+		//{
+		//	buttonMapping.PushBack(buttonMapping.GetCapacity() - 1);
+		//}
+		//
+		//buttonMapping[0] = ndGameControllerInputs::ndGameControllerInputs::m_automaticGearBoxButton;
+		//buttonMapping[1] = ndGameControllerInputs::ndGameControllerInputs::m_parkGearButton;
+		//buttonMapping[2] = ndGameControllerInputs::ndGameControllerInputs::m_changeCamera;
+		//buttonMapping[3] = ndGameControllerInputs::ndGameControllerInputs::m_changePlayer;
+		//buttonMapping[4] = ndGameControllerInputs::ndGameControllerInputs::m_handBreakButton;
+		//buttonMapping[5] = ndGameControllerInputs::ndGameControllerInputs::m_reverseGearButton;
+		//buttonMapping[6] = ndGameControllerInputs::ndGameControllerInputs::m_neutralGearButton;
+		//buttonMapping[7] = ndGameControllerInputs::ndGameControllerInputs::m_ignitionButton;
+		//buttonMapping[10] = ndGameControllerInputs::ndGameControllerInputs::m_upGearButton;
+		//buttonMapping[12] = ndGameControllerInputs::ndGameControllerInputs::m_downGearButton;
+		//
+		//for (ndInt32 i = 0; i < unmappedButtons.GetCount(); ++i)
+		//{
+		//	ndInt32 index = buttonMapping[i];
+		//	//if (m_buttons[index] != unmappedButtons[i])
+		//	//{
+		//	//	ndTrace(("%d %d\n", index, i));
+		//	//	index *= 1;
+		//	//}
+		//	m_buttons[index] = unmappedButtons[i] ? true : false;
+		//}
 	}
 
 	// remap game pad axis
@@ -293,8 +351,9 @@ void ndGameControllerInputs::GetXboxJoystickInputs(ndDemoEntityManager* const sc
 			axisMapping.PushBack(unmappedAxis.GetCapacity() - 1);
 		}
 		axisMapping[0] = m_steeringWheel;
-		axisMapping[4] = m_brakePedal;
-		axisMapping[5] = m_gasPedal;
+		axisMapping[1] = m_gasPedal;
+		axisMapping[2] = m_brakePedal;
+		axisMapping[3] = m_clutch;
 
 		for (ndInt32 i = 0; i < unmappedAxis.GetCount(); i++)
 		{
@@ -302,12 +361,9 @@ void ndGameControllerInputs::GetXboxJoystickInputs(ndDemoEntityManager* const sc
 			m_axis[index] = unmappedAxis[i];
 		}
 
-		m_axis[m_steeringWheel] = -m_axis[m_steeringWheel] * m_axis[m_steeringWheel] * m_axis[m_steeringWheel];
-		ndFloat32 gas = (m_axis[m_gasPedal] + ndFloat32(1.0f)) * ndFloat32(0.5f);
-		m_axis[m_gasPedal] = gas * gas;
-
-		ndFloat32 brake = (m_axis[m_brakePedal] + ndFloat32(1.0f)) * ndFloat32(0.5f);
-		m_axis[m_brakePedal] = brake * brake;
-		m_axis[m_clutch] = ndFloat32(0.0f);
+		m_axis[m_steeringWheel] = -m_axis[m_steeringWheel] * ndFloat32 (2.0f);
+		m_axis[m_gasPedal] = (ndFloat32(1.0f) - m_axis[m_gasPedal]) * ndFloat32 (0.5f);
+		m_axis[m_brakePedal] = ndFloat32 (1.0f) - ndClamp(m_axis[m_brakePedal], ndFloat32(0.0f), ndFloat32(1.0f));
+		m_axis[m_clutch] = ndFloat32(1.0f) - ndClamp(m_axis[m_clutch], ndFloat32(0.0f), ndFloat32(1.0f));
 	}
 }

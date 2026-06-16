@@ -121,7 +121,6 @@ class ndRenderContext: public ndClassAlloc
 	ndInt32 m_viewport_y0;
 	ndInt32 m_viewport_width;
 	ndInt32 m_viewport_heigh;
-	bool m_hasJoystick;
 	bool m_imGuiEnabled;
 	bool m_mousePressed[3];
 	const char* m_joystickName;

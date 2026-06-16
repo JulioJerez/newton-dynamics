@@ -32,9 +32,8 @@ ndRenderContext::ndRenderContext(ndRender* const owner, ndInt32 width, ndInt32 h
 	,m_shaderCache(nullptr)
 	,m_defaultFont(0)
 	,m_prevKey(0)
-	,m_hasJoystick(false)
 	,m_imGuiEnabled(false)
-	,m_joystickName(nullptr)
+	,m_joystickName("")
 {
 	glfwSetErrorCallback(ErrorCallback);
 	glfwInit();
@@ -257,30 +256,6 @@ void ndRenderContext::SetInputCallbacks()
 	glfwSetCursorPosCallback(m_mainFrame, CursorposCallback);
 	glfwSetWindowMaximizeCallback(m_mainFrame, WindowMaximize);
 	glfwSetMouseButtonCallback(m_mainFrame, MouseButtonCallback);
-
-	m_hasJoystick = glfwJoystickPresent(0) ? true : false;
-	if (m_hasJoystick)
-	{
-		m_joystickName = glfwGetJoystickName(0);
-
-		ndInt32 axisCount = 0;
-		m_joystickAxis.SetCount(0);
-		const ndReal* const axis = glfwGetJoystickAxes(0, &axisCount);
-		axisCount = ndMin(axisCount, m_joystickAxis.GetCapacity());
-		for (ndInt32 i = 0; i < axisCount; ++i)
-		{
-			m_joystickAxis.PushBack(axis[i]);
-		}
-
-		ndInt32 buttonsCount = 0;
-		m_joystickButtons.SetCount(0);
-		const unsigned char* const buttons = glfwGetJoystickButtons(0, &buttonsCount);
-		buttonsCount = ndMin(buttonsCount, m_joystickButtons.GetCapacity());
-		for (ndInt32 i = 0; i < buttonsCount; ++i)
-		{
-			m_joystickButtons.PushBack(char(buttons[i]));
-		}
-	}
 }
 
 void ndRenderContext::ErrorCallback(ndInt32 error, const char* description)
@@ -401,8 +376,33 @@ void ndRenderContext::BeginFrame()
 		SetViewport();
 	}
 
-	if (m_hasJoystick)
+	bool hasJoystick = glfwJoystickPresent(0) ? true : false;
+	if (hasJoystick)
 	{
+		const char* const joystickName = glfwGetJoystickName(0);
+		if (strcmp(joystickName, m_joystickName) != 0)
+		{
+			m_joystickName = glfwGetJoystickName(0);
+
+			ndInt32 axisCount = 0;
+			m_joystickAxis.SetCount(0);
+			const ndReal* const axis = glfwGetJoystickAxes(0, &axisCount);
+			axisCount = ndMin(axisCount, m_joystickAxis.GetCapacity());
+			for (ndInt32 i = 0; i < axisCount; ++i)
+			{
+				m_joystickAxis.PushBack(axis[i]);
+			}
+
+			ndInt32 buttonsCount = 0;
+			m_joystickButtons.SetCount(0);
+			const unsigned char* const buttons = glfwGetJoystickButtons(0, &buttonsCount);
+			buttonsCount = ndMin(buttonsCount, m_joystickButtons.GetCapacity());
+			for (ndInt32 i = 0; i < buttonsCount; ++i)
+			{
+				m_joystickButtons.PushBack(char(buttons[i]));
+			}
+		}
+
 		UpdateJoystick();
 	}
 }
@@ -417,7 +417,7 @@ void ndRenderContext::EndFrame()
 
 bool ndRenderContext::HasGameController() const
 {
-	return m_hasJoystick;
+	return glfwJoystickPresent(0) ? true : false;;
 }
 
 const char* ndRenderContext::GameControllerName() const
