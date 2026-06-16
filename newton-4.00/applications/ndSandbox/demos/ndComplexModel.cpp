@@ -18,7 +18,6 @@
 #include "ndDemoCameraNodeFollow.h"
 #include "ndHeightFieldPrimitive.h"
 
-//#define ND_EXCAVATOR_GEAR_GAIN			ndFloat32 (5.0f)
 #define ND_EXCAVATOR_ENGINE_OMEGA		ndFloat32 (100.0f)
 #define ND_EXCAVATOR_CAMERA_DISTANCE	ndFloat32 (-15.0f)
 
@@ -107,13 +106,13 @@ namespace ndExcavator
 			const ndMatrix matrix(engine->GetLocalMatrix0().OrthoInverse() * engine->GetLocalMatrix1() * engine->GetBody1()->GetMatrix());
 			engine->GetBody0()->SetMatrixNoSleep(matrix);
 
-			// integrate turn rate angle
-			ndFloat32 turnAngle = engine->GetAngle0();
-			engine->SetTargetAngle0(turnAngle + m_engineTurnRateOmega * timestep);
+			//integrate forward motion angle;
+			ndFloat32 fowardAngle = engine->GetAngle0();
+			engine->SetTargetAngle0(fowardAngle + m_engineOmega * timestep);
 
-			// integrate the joints angle;
-			ndFloat32 fowardAngle = engine->GetAngle1();
-			engine->SetTargetAngle1(fowardAngle + m_engineOmega * timestep);
+			// integrate turn rate angle
+			ndFloat32 turnAngle = engine->GetAngle1();
+			engine->SetTargetAngle1(turnAngle + m_engineTurnRateOmega * timestep);
 		}
 
 		// update the model physics every sub step.
@@ -580,7 +579,8 @@ void ndComplexModel(ndDemoEntityManager* const scene)
 	ndMatrix matrix(ndGetIdentityMatrix());
 	ndSharedPtr<ndModelNotify> controller(CreateExcavator(scene, matrix));
 
-	const ndInt32 stacks = 3;
+	const ndInt32 stacks = 1;
+	//const ndInt32 stacks = 3; //need multi threaded for this
 	ndMatrix matrix1(ndGetIdentityMatrix());
 	for (ndInt32 i = 0; i < stacks; ++i)
 	{

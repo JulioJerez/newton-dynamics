@@ -786,12 +786,6 @@ ndDemoEntityManager::ndDemoEntityManager()
 ndDemoEntityManager::~ndDemoEntityManager ()
 {
 	Cleanup ();
-
-	// destroy the empty world
-	//if (m_world) 
-	//{
-	//	delete m_world;
-	//}
 }
 
 ndPhysicsWorld* ndDemoEntityManager::GetWorld() const
@@ -927,74 +921,6 @@ bool ndDemoEntityManager::GetMouseKeyState (ndInt32 button) const
 {
 	ImGuiIO& io = ImGui::GetIO();
 	return io.MouseDown[button];
-}
-
-void ndDemoEntityManager::GetJoystickAxis(ndFixSizeArray<ndFloat32, 8>&)
-{
-	ndAssert(0);
-	//if (JoystickDetected())
-	//{
-	//	bool isInitialized = false;
-	//	static ndFixSizeArray<ndFloat32, 8> initialValues;
-	//	if (!initialValues.GetCount())
-	//	{
-	//		ndInt32 axisCount = 0;
-	//		const float* const axis = glfwGetJoystickAxes(0, &axisCount);
-	//		axisCount = ndMin(axisCount, axisValues.GetCapacity());
-	//		for (ndInt32 i = 0; i < axisCount; ++i)
-	//		{
-	//			initialValues.PushBack(axis[i]);
-	//		}
-	//	}
-	//	
-	//	if (!isInitialized)
-	//	{
-	//		ndInt32 axisCount = 0;
-	//		const float* const axis = glfwGetJoystickAxes(0, &axisCount);
-	//		for (ndInt32 i = 0; i < axisCount; ++i)
-	//		{
-	//			ndFloat32 diff = ndAbs(axis[i] - initialValues[i]);
-	//			isInitialized = isInitialized || (diff != ndFloat32(0.0f));
-	//		}
-	//	}
-	//
-	//	axisValues.SetCount(0);
-	//	for (ndInt32 i = 0; i < axisValues.GetCapacity(); ++i)
-	//	{
-	//		axisValues.PushBack(ndFloat32 (1.0f));
-	//	}
-	//	axisValues[0] = 0.0f;
-	//
-	//	if (isInitialized)
-	//	{
-	//		ndInt32 axisCount = 0;
-	//		const float* const axis = glfwGetJoystickAxes(0, &axisCount);
-	//		axisCount = ndMin(axisCount, axisValues.GetCapacity());
-	//
-	//		axisValues.SetCount(0);
-	//		for (ndInt32 i = 0; i < axisCount; ++i)
-	//		{
-	//			axisValues.PushBack(axis[i]);
-	//		}
-	//	}
-	//}
-}
-
-void ndDemoEntityManager::GetJoystickButtons(ndFixSizeArray<char, 32>&)
-{
-	ndAssert(0);
-	//if (JoystickDetected())
-	//{
-	//	ndInt32 buttonsCount = 0;
-	//	axisbuttons.SetCount(0);
-	//	const unsigned char* const buttons = glfwGetJoystickButtons(0, &buttonsCount);
-	//	buttonsCount = ndMin(buttonsCount, axisbuttons.GetCapacity());
-	//
-	//	for (ndInt32 i = 0; i < buttonsCount; ++i)
-	//	{
-	//		axisbuttons.PushBack(char(buttons[i]));
-	//	}
-	//}
 }
 
 void ndDemoEntityManager::RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& postUpdate)

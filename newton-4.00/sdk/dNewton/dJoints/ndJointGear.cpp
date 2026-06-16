@@ -57,6 +57,7 @@ ndSharedPtr<ndMeshJoint> ndJointGear::GetMeshJoint(const ndMesh* const owner) co
 	ndMeshJointGear* const joint = new ndMeshJointGear(owner, this);
 	return ndSharedPtr<ndMeshJoint>(joint);
 }
+
 ndFloat32 ndJointGear::GetRatio() const
 {
 	return m_gearRatio;
@@ -93,22 +94,25 @@ void ndJointGear::JacobianDerivative(ndConstraintDescritor& desc)
 	ndMatrix matrix0;
 	ndMatrix matrix1;
 
-	// calculate the position of the pivot point and the Jacobian direction vectors, in global space. 
-	CalculateGlobalMatrix(matrix0, matrix1);
+	if (ndAbs(m_gearRatio) > ndFloat32(1.0e-3f))
+	{
+		// calculate the position of the pivot point and the Jacobian direction vectors, in global space. 
+		CalculateGlobalMatrix(matrix0, matrix1);
 
-	AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
+		AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
 
-	ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
-	ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
+		ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
+		ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
 
-	jacobian0.m_angular = matrix0.m_front;
-	jacobian1.m_angular = matrix1.m_front.Scale(m_gearRatio);
+		jacobian0.m_angular = matrix0.m_front;
+		jacobian1.m_angular = matrix1.m_front.Scale(m_gearRatio);
 
-	const ndVector& omega0 = m_body0->GetOmega();
-	const ndVector& omega1 = m_body1->GetOmega();
+		const ndVector& omega0 = m_body0->GetOmega();
+		const ndVector& omega1 = m_body1->GetOmega();
 
-	const ndVector relOmega(omega0 * jacobian0.m_angular + omega1 * jacobian1.m_angular);
-	const ndFloat32 w = relOmega.AddHorizontal().GetScalar() * ndFloat32(0.5f);
-	SetMotorAcceleration(desc, -w * desc.m_invTimestep);
+		const ndVector relOmega(omega0 * jacobian0.m_angular + omega1 * jacobian1.m_angular);
+		const ndFloat32 w = relOmega.AddHorizontal().GetScalar() * ndFloat32(0.5f);
+		SetMotorAcceleration(desc, -w * desc.m_invTimestep);
+	}
 }
 

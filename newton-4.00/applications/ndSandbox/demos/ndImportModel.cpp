@@ -78,34 +78,6 @@ class ndVanillaController : public ndModelNotify
             ndBodyDynamic* const engineBody = m_motor->m_body->GetAsBodyDynamic();
             ndBodyDynamic* const chassisBody = m_motor->GetParent()->m_body->GetAsBodyDynamic();
 
-
-//#ifdef _DEBUG
-#if 0
-            static ndInt32 xxxxx1 = 0;
-            xxxxx1++;
-            if (xxxxx1 > 200)
-            {
-                ndInt32 xxx = 0;
-                for (ndList<ndWeakPtr<ndJointWheel>>::ndNode* node = m_wheels.GetFirst(); node; node = node->GetNext())
-                {
-                    ndJointWheel* const wheel = *node->GetInfo();
-                    const ndBodyKinematic* const body = wheel->GetBody0()->GetAsBodyKinematic();
-                    xxx += (body->GetContactMap().GetCount() != 0) ? 1 : 0;
-                }
-                if (xxx != m_wheels.GetCount())
-                {
-                    ndTrace(("collsion miss\n"));
-                }
-
-                m_engineTorque = m_engineMaxTorque;
-                ndVector accel(chassisBody->GetAccel());
-                ndVector alpha(chassisBody->GetAlpha());
-                ndTrace (("acel(%f %f %f) alpha(%f %f %f)\n", 
-                    accel.m_x, accel.m_y, accel.m_w, 
-                    alpha.m_x, alpha.m_y, alpha.m_w))
-            }
-#endif
-
             engineJoint->CalculateGlobalMatrix(engineMatrix, chassisMatrix);
             engineBody->SetMatrixNoSleep(engineJoint->GetLocalMatrix0().OrthoInverse() * chassisMatrix);
 
@@ -122,7 +94,8 @@ class ndVanillaController : public ndModelNotify
             ndFloat32 omega = chassisMatrix.m_up.DotProduct(engineOmega).GetScalar();
             ndFloat32 torqueMag = m_engineTorque - m_engineDrag * omega * omega * ndSign(omega);
 
-            const ndVector torque(engineMatrix.m_up.Scale(torqueMag));
+            //const ndVector torque(engineMatrix.m_up.Scale(torqueMag));
+            const ndVector torque(engineMatrix.m_front.Scale(torqueMag));
             engineBody->SetTorque(torque);
 
             for (ndList<ndWeakPtr<ndJointWheel>>::ndNode* node = m_wheels.GetFirst(); node; node = node->GetNext())
@@ -263,6 +236,23 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
             // add a rigid body with notification callback
             ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
             ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
+
+            if (node->m_body)
+            {
+                ndDemoEntityNotify* const fastNotify = (ndDemoEntityNotify*)*notify;
+                fastNotify->m_capSpeed = ndFloat32(30.0f);
+            }
+
+            if (node->m_joint)
+            {
+                if ((strcmp(node->m_joint->ClassName(), ndJointWheel::StaticClassName()) == 0) ||
+                    (strcmp(node->m_joint->ClassName(), ndJointDoubleHinge::StaticClassName()) == 0))
+                {
+                    // fast moving wheel
+                    ndDemoEntityNotify* const fastNotify = (ndDemoEntityNotify*)*notify;
+                    fastNotify->m_capOmega = ndFloat32(1000.0f);
+                }
+            }
             node->m_body->SetNotifyCallback(notify);
         }
     };

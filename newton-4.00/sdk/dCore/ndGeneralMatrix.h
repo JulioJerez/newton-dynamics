@@ -578,7 +578,7 @@ bool ndTestPSDmatrix(ndInt32 size, ndInt32 stride, const T* const matrix, T* con
 			dstRow += size;
 			srcRow += stride;
 		}
-		if (size >= 256)
+		if (size >= (4 * __CholeskyTiledBlockSize__))
 		{
 			return ndCholeskyTiledFactorization(size, size, scrathBuffer);
 		}

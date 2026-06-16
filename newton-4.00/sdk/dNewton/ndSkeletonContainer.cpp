@@ -1146,19 +1146,19 @@ void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* cons
 			const ndUnsigned16* const sparceRow = &sparseMatrix[sparseRowBase];
 			ndFloat32 r = residual[i];
 			const ndInt32 sparceCount = sparceRow[0];
-			if (!sparceCount)
-			{
-				for (ndInt32 j = 0; j < size; ++j)
-				{
-					r -= row[j] * x[j];
-				}
-			}
-			else
+			if (sparceCount)
 			{
 				for (ndInt32 j = 0; j < sparceCount; ++j)
 				{
 					const ndInt32 index = sparceRow[j + 1];
 					r -= row[j] * x[index];
+				}
+			}
+			else
+			{
+				for (ndInt32 j = 0; j < size; ++j)
+				{
+					r -= row[j] * x[j];
 				}
 			}
 

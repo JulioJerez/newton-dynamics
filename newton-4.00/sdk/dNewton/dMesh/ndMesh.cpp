@@ -62,6 +62,7 @@ ndMesh::ndMesh()
 	,m_customProperties()
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
+	,m_assetToolFlags(0)
 	,m_isVisible(true)
 {
 }
@@ -82,6 +83,7 @@ ndMesh::ndMesh(const ndShapeInstance& shape, ndUvMapingMode mapping)
 	,m_customProperties()
 	,m_boneTarget(ndVector::m_wOne)
 	,m_type(m_node)
+	,m_assetToolFlags(0)
 	,m_isVisible(true)
 {
 	switch (mapping)
@@ -143,6 +145,7 @@ ndMesh::ndMesh(const ndMesh& src)
 	,m_customProperties()
 	,m_boneTarget(src.m_boneTarget)
 	,m_type(src.m_type)
+	,m_assetToolFlags(src.m_assetToolFlags)
 	,m_isVisible(src.m_isVisible)
 {
 	if (src.m_customProperties)
@@ -308,6 +311,16 @@ bool ndMesh::GetIsVisible() const
 void ndMesh::SetIsVisible(bool flag)
 {
 	m_isVisible = flag;
+}
+
+ndInt32 ndMesh::GetToolFlags() const
+{
+	return m_assetToolFlags;
+}
+
+void ndMesh::SetToolFlags(ndInt32 flags)
+{
+	m_assetToolFlags = flags;
 }
 
 ndVector ndMesh::GetBoneTarget() const
@@ -1117,8 +1130,6 @@ ndMatrix ndMesh::CalculateLocalMatrix(ndVector& sizeOut) const
 		localAxis = body->m_shapeInstance.m_localMatrix;
 		localAxis.m_posit = ndVector::m_wOne;
 	}
-	//ndMatrix matrix(GetGeometryMatrix());
-	//ndMatrix matrix(GetGeometryMatrix() * localAxis.OrthoInverse());
 	ndMatrix matrix(localAxis);
 	if (meshEffect)
 	{
@@ -1337,7 +1348,6 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionConvexApproximation(bool low
 	}
 	compoundShape->EndAddRemove();
 	
-	//compoundShapeInstance->SetLocalMatrix(ndGetIdentityMatrix());
 	compoundShapeInstance->SetLocalMatrix(compoundShapeInstance->GetLocalMatrix() * m_geometryMatrix);
 	
 	return compoundShapeInstance;
@@ -1857,6 +1867,10 @@ ndSharedPtr<ndMeshJoint> ndMesh::LoadJoint(const nd::TiXmlElement* const xmlJoin
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointGear(mesh));
 	}
+	else if (strcmp(constructor, ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointVehicleDifferentialAxle(mesh));
+	}
 	else if (strcmp(constructor, ndMultiBodyVehicleDifferential::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointVehicleDifferential(mesh));
@@ -1864,10 +1878,6 @@ ndSharedPtr<ndMeshJoint> ndMesh::LoadJoint(const nd::TiXmlElement* const xmlJoin
 	else if (strcmp(constructor, ndMultiBodyVehicleMotor::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointVehicleMotor(mesh));
-	}
-	else if (strcmp(constructor, ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0)
-	{
-		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointVehicleDifferentialAxle(mesh));
 	}
 	else if (strcmp(constructor, ndMultiBodyVehicleGearBox::StaticClassName()) == 0)
 	{

@@ -147,7 +147,7 @@ void ndPhysicsWorld::OnSubStepPostUpdate(ndFloat32 timestep)
 	m_manager->OnSubStepPostUpdate(timestep);
 	m_manager->GetGameController()->Update(m_manager);
 
-#if 1
+#if 0
 	const ndFixSizeArray<bool, 32>& buttons = m_manager->GetGameController()->GetButtons();
 	for (ndInt32 i = 0; i < buttons.GetCount(); ++i)
 	{

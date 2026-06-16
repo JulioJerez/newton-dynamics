@@ -201,6 +201,11 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			}
 			if (m_reverseGear.Update(buttons[ndGameControllerInputs::m_reverseGearButton] ? true : false))
 			{
+				m_currentGear = sizeof(desc.m_transmission.m_forwardRatios) / sizeof(desc.m_transmission.m_forwardRatios[0]);
+				ndFloat32 reverseGearRatio = desc.m_transmission.m_ratios[m_currentGear];
+				ndFloat32 gearGain = desc.m_transmission.m_crownGearRatio * reverseGearRatio;
+				gearBox->SetRatio(gearGain);
+
 				m_driverState = m_driveReverseFromForward;
 			}
 			if (m_reverseGear.Update(buttons[ndGameControllerInputs::m_neutralGearButton] ? true : false))
