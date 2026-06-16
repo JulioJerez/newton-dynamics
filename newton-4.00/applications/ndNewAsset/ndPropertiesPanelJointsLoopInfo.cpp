@@ -537,14 +537,14 @@ void ndAssetEditor::EditDifferentialAxleLoopJoint(ndSharedPtr<ndMeshLoopJoint>& 
 {
 	EditLoopJointLocalMatrix(loopJoint);
 
-	//ndMeshJointVehicleDifferentialAxle* const joint = (ndMeshJointVehicleDifferentialAxle*)*loopJoint->m_joint;
-	//ndReal value = ndReal(joint->m_gearRatio);
-	//if (ImGui::InputFloat("gear ratio", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
-	//{
-	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-	//	joint->m_gearRatio = ndMax(value, ndReal(0.01f));
-	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-	//}
+	ndMeshJointVehicleDifferentialAxle* const joint = (ndMeshJointVehicleDifferentialAxle*)*loopJoint->m_joint;
+	ndReal value = ndReal(joint->m_gearRatio);
+	if (ImGui::InputFloat("gear ratio", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+		joint->m_gearRatio = value;
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	}
 }
 
 void ndAssetEditor::EditGearBoxLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)

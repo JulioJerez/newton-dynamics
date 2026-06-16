@@ -440,7 +440,7 @@ void ndJointDoubleHinge::JacobianDerivative(ndConstraintDescritor& desc)
 	if (m_axis1.m_springDamperRegularizer && ((m_axis1.m_springK > ndFloat32(0.0f)) || (m_axis1.m_damperC > ndFloat32(0.0f))))
 	{
 		// spring damper with limits
-		//SubmitSpringDamper1(desc, matrix0, matrix1);
+		SubmitSpringDamper1(desc, matrix0, matrix1);
 	}
 
 	SubmitLimits(desc, matrix0, matrix1);

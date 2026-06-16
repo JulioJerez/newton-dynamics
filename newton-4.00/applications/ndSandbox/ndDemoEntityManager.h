@@ -12,10 +12,8 @@
 #define __DEMO_MAIN_FRAME_H__
 
 class ndPhysicsWorld;
-class ndDebugDisplayRenderPass;
-//#include "ndGameControllerInputs.h"
-
 class ndGameControllerInputs;
+class ndDebugDisplayRenderPass;
 
 class ndDemoEntityManager : public ndClassAlloc
 {
@@ -182,14 +180,10 @@ class ndDemoEntityManager : public ndClassAlloc
 	
 	bool AnyKeyDown() const;
 	bool IsShiftKeyDown () const;
-
 	bool IsControlKeyDown () const;
 	bool GetKeyState(ndInt32 key) const;
-	void GetJoystickAxis (ndFixSizeArray<ndFloat32, 8>& axisValues);
-	void GetJoystickButtons (ndFixSizeArray<char, 32>& axisbuttons);
 
 	void Terminate();
-
 	void CharCallback(ndUnsigned32 ch);
 	void CursorposCallback(ndReal x, ndReal y);
 	void MouseScrollCallback(ndReal x, ndReal y);
@@ -234,7 +228,6 @@ class ndDemoEntityManager : public ndClassAlloc
 
 	void TestImGui();
 	
-	//ndPhysicsWorld* m_world;
 	ndSharedPtr<ndPhysicsWorld> m_world;
 	ndSharedPtr<ndRender> m_renderer;
 	ndSharedPtr<ndRenderPass> m_menuRenderPass;

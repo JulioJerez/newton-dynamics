@@ -1163,11 +1163,10 @@ namespace ndExcavator
         engineNode->m_joint->CalculateGlobalMatrix(engineMatrix, chassisMatrix);
         const ndMatrix tireMatrix(tire->GetMatrix());
         
-        ndSharedPtr<ndJointBilateralConstraint> axel(
-            new ndMultiBodyVehicleDifferentialAxle(
-                engineMatrix.m_front.Scale(ndFloat32(-1.0f)), engineMatrix.m_up, engine,
-                tireMatrix.m_right.Scale(ND_EXCAVATOR_GEAR_GAIN), tire));
-
+        ndMultiBodyVehicleDifferentialAxle* const axelJoint = 
+            new ndMultiBodyVehicleDifferentialAxle(engineMatrix, engine, tireMatrix.m_right, tire);
+        ndSharedPtr<ndJointBilateralConstraint> axel(axelJoint);
+        axelJoint->SetGearRatio(ND_EXCAVATOR_GEAR_GAIN);
         const ndString name(engineNode->m_name + "_" + leftTire_0->m_name);
         articulation->AddCloseLoop(axel, name.GetStr());
 
@@ -1210,10 +1209,10 @@ namespace ndExcavator
         engineNode->m_joint->CalculateGlobalMatrix(engineMatrix, chassisMatrix);
         const ndMatrix tireMatrix(tire->GetMatrix());
         
-        ndSharedPtr<ndJointBilateralConstraint> axel(
-            new ndMultiBodyVehicleDifferentialAxle(
-                engineMatrix.m_front.Scale(ndFloat32(1.0f)), engineMatrix.m_up, engine,
-                tireMatrix.m_right.Scale(-ND_EXCAVATOR_GEAR_GAIN), tire));
+        ndMultiBodyVehicleDifferentialAxle* const axelJoint =
+            new ndMultiBodyVehicleDifferentialAxle(ndPitchMatrix(180 * ndDegreeToRad) * engineMatrix, engine, tireMatrix.m_right, tire);
+        ndSharedPtr<ndJointBilateralConstraint> axel(axelJoint);
+        axelJoint->SetGearRatio(ND_EXCAVATOR_GEAR_GAIN);
         const ndString name(engineNode->m_name + "_" + rightTire_0->m_name);
         articulation->AddCloseLoop(axel, name.GetStr());
 
@@ -1366,7 +1365,7 @@ void ndExportModel(ndDemoEntityManager* const scene)
     origin.m_posit.m_y = 3.0f;
     origin.m_posit.m_z = 2.0f;
     //add simple mechanical model
-    ndBoxTricycle::BoxTricycle(scene, origin, 100.0f, 0.75f);
+    //ndBoxTricycle::BoxTricycle(scene, origin, 100.0f, 0.75f);
 
     // add complex mechanical model
     origin.m_posit.m_x += 10.0f;

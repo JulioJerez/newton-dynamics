@@ -57,6 +57,7 @@ ndSharedPtr<ndMeshJoint> ndJointGear::GetMeshJoint(const ndMesh* const owner) co
 	ndMeshJointGear* const joint = new ndMeshJointGear(owner, this);
 	return ndSharedPtr<ndMeshJoint>(joint);
 }
+
 ndFloat32 ndJointGear::GetRatio() const
 {
 	return m_gearRatio;

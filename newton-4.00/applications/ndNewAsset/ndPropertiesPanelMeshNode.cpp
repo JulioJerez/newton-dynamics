@@ -79,19 +79,30 @@ void ndUndoRedoMeshNode::Undo()
 void ndAssetEditor::ApplyNodeTransform(const ndMatrix& matrix, ndRenderSceneNode* const entNode)
 {
 	const ndMatrix localMatrix(m_currentSelection->GetMatrix() * matrix.OrthoInverse());
-	ndSharedPtr<ndMeshJoint> joint(m_currentSelection->GetJoint());
-	if (joint)
+
+	entNode->SetTransform(matrix);
+	entNode->SetTransform(matrix);
+	m_currentSelection->SetMatrix(matrix);
+	if (m_currentSelection->GetJoint())
 	{
-		const ndMatrix parentMatrix(m_currentSelection->GetParent()->GetMatrix());
-		joint->m_localFrame1 =
-			joint->m_localFrame1 * parentMatrix *
-			m_currentSelection->GetMatrix().OrthoInverse() *
-			matrix * parentMatrix.OrthoInverse();
+		ndMeshJoint* const joint = *m_currentSelection->GetJoint();
+		if (joint->m_surrogateParent)
+	{
+			const ndMesh* const parentNode = *joint->m_surrogateParent;
+		const ndMatrix parentMatrix(parentNode->CalculateGlobalMatrix());
+		const ndMatrix matrix1(joint->m_localFrame1 * parentMatrix);
+		const ndMatrix matrix0(joint->m_localFrame0 * m_currentSelection->CalculateGlobalMatrix());
+		const ndMatrix offsetMatrix(matrix1 * matrix0.OrthoInverse());
+		const ndMatrix newMatrix1(offsetMatrix * matrix * m_currentSelection->GetParent()->CalculateGlobalMatrix());
+		joint->m_localFrame1 = newMatrix1 * parentMatrix.OrthoInverse();
+	}
+		else
+		{
+			const ndMatrix globalFrame(joint->m_localFrame0 * m_currentSelection->CalculateGlobalMatrix());
+			joint->m_localFrame1 = globalFrame * m_currentSelection->GetParent()->CalculateGlobalMatrix().OrthoInverse();
+		}
 	}
 
-	m_currentSelection->SetMatrix(matrix);
-	entNode->SetTransform(matrix);
-	entNode->SetTransform(matrix);
 	if (m_transformPivotOnly)
 	{
 		const ndMatrix geoMatrix(m_currentSelection->GetGeometryMatrix() * localMatrix);

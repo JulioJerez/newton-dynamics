@@ -106,16 +106,13 @@ namespace ndExcavator
 			const ndMatrix matrix(engine->GetLocalMatrix0().OrthoInverse() * engine->GetLocalMatrix1() * engine->GetBody1()->GetMatrix());
 			engine->GetBody0()->SetMatrixNoSleep(matrix);
 
-			// integrate the motion angle;
-			m_engineOmega = ND_EXCAVATOR_ENGINE_OMEGA;
+			//integrate forward motion angle;
 			ndFloat32 fowardAngle = engine->GetAngle0();
 			engine->SetTargetAngle0(fowardAngle + m_engineOmega * timestep);
 
 			// integrate turn rate angle
-			//m_engineTurnRateOmega = -ND_EXCAVATOR_ENGINE_OMEGA;
-
 			ndFloat32 turnAngle = engine->GetAngle1();
-			//engine->SetTargetAngle1(turnAngle + m_engineTurnRateOmega * timestep);
+			engine->SetTargetAngle1(turnAngle + m_engineTurnRateOmega * timestep);
 		}
 
 		// update the model physics every sub step.
@@ -248,13 +245,13 @@ namespace ndExcavator
 				if (m_scene->GetKeyState(ImGuiKey_W))
 				{
 					turnSign = ndFloat32(0.75f);
-					m_engineOmega = ND_EXCAVATOR_ENGINE_OMEGA;
+					m_engineOmega = -ND_EXCAVATOR_ENGINE_OMEGA;
 					engine->SetSleepState(false);
 				}
 				else if (m_scene->GetKeyState(ImGuiKey_S))
 				{
 					turnSign = ndFloat32(-0.75f);
-					m_engineOmega = -ND_EXCAVATOR_ENGINE_OMEGA;
+					m_engineOmega = ND_EXCAVATOR_ENGINE_OMEGA;
 					engine->SetSleepState(false);
 				}
 
@@ -582,7 +579,8 @@ void ndComplexModel(ndDemoEntityManager* const scene)
 	ndMatrix matrix(ndGetIdentityMatrix());
 	ndSharedPtr<ndModelNotify> controller(CreateExcavator(scene, matrix));
 
-	const ndInt32 stacks = 3;
+	const ndInt32 stacks = 1;
+	//const ndInt32 stacks = 3; //need multi threaded for this
 	ndMatrix matrix1(ndGetIdentityMatrix());
 	for (ndInt32 i = 0; i < stacks; ++i)
 	{
@@ -590,7 +588,7 @@ void ndComplexModel(ndDemoEntityManager* const scene)
 		{
 			matrix1.m_posit.m_x = 25.0f + ndFloat32(i - stacks / 2) * 12.0f;
 			matrix1.m_posit.m_z = ndFloat32(j - stacks / 2) * 12.0f;
-			//AddLumberYard(scene, matrix1, 4.0f, 10);
+			AddLumberYard(scene, matrix1, 4.0f, 10);
 		}
 	}
 

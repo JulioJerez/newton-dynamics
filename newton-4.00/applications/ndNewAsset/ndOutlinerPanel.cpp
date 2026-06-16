@@ -183,11 +183,9 @@ void ndAssetEditor::ShowOutlinerExplorer(const ndSharedPtr<ndMesh>& node)
 				ShowOutlinerExplorer(childMesh);
 			}
 		}
-
 		ImGui::TreePop();
 	}
 }
-
 
 void ndAssetEditor::ShowOutlierPanel()
 {
