@@ -27,6 +27,7 @@
 #include "ndIkSolver.h"
 #include "ndJointWheel.h"
 #include "ndModelArticulation.h"
+#include "ndMultiBodyVehicleTireJoint.h"
 
 class ndWorld;
 class ndBodyDynamic;

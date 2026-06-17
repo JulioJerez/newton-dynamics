@@ -337,7 +337,7 @@ void ndMultiBodyVehicle::AddTire(const ndSharedPtr<ndBody>& tireBody, const ndSh
 	body->SetMassMatrix(inertia);
 
 	// set friction model.
-	tireJoint->m_frictionModel = m_descriptor.m_tireFrictionModel;
+	tireJoint->SetFrictionModel(m_descriptor.m_tireFrictionModel);
 
 	ndNode* const node = FindByBody(body);
 	ndAssert(!node || ((node->m_body->GetAsBody() == body) && ((*node->m_joint == tireJoint))));

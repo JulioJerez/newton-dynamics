@@ -168,21 +168,23 @@ class ndAssetEditor : public ndClassAlloc
 	void EditFix6dofJoint();
 	void EditCylinderJoint();
 	void EditSphericalJoint();
+	void EditMotorWheelJoint();
 	void EditDoubleHingeJoint();
 	void EditDifferentialJoint();
 
 	void EditLoopJointLocalMatrix(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditLoopJointGlobalMatrix(ndSharedPtr<ndMeshLoopJoint>& joint);
 
+
+	//void EditWheelLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
+	//void EditPlaneLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
+	//void EditRollerLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
+	//void EditCylinderLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditGearLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
-	void EditWheelLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditHingeLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
-	void EditPlaneLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditSliderLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
-	void EditRollerLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditFix6dofLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditGearBoxLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
-	void EditCylinderLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditSphericalLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditDoubleHingeLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditDifferentialAxleLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);

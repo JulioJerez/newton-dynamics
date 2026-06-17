@@ -37,6 +37,7 @@
 #include "ndMultiBodyVehicleMotor.h"
 #include "ndMultiBodyVehicleGearBox.h"
 #include "ndIkSwivelPositionEffector.h"
+#include "ndMultiBodyVehicleTireJoint.h"
 #include "ndMultiBodyVehicleDifferential.h"
 #include "ndMultiBodyVehicleDifferentialAxle.h"
 
@@ -1247,8 +1248,6 @@ void ndMeshJointVehicleMotor::DeserializeFromXml(const nd::TiXmlElement* const p
 
 ndJointBilateralConstraint* ndMeshJointVehicleMotor::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
 {
-	//const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
-	//const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 	ndMultiBodyVehicleMotor* const joint = new ndMultiBodyVehicleMotor(child, parent);
 	joint->SetMaxRpm(m_maxOmega);
 	return joint;
@@ -1380,5 +1379,64 @@ ndJointBilateralConstraint* ndMeshJointVehicleDifferentialAxle::CreateObject(ndB
 	ndMultiBodyVehicleDifferentialAxle* const joint = new ndMultiBodyVehicleDifferentialAxle(
 		pinAndPivotInChild, child, pinAndPivotInParent.m_front, parent);
 	joint->SetGearRatio(m_gearRatio);
+	return joint;
+}
+
+ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMesh* const owner)
+	:ndMeshJointWheel(owner)
+	,m_frictionModel(m_pacejkaUtility)
+{
+}
+
+ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
+	:ndMeshJointWheel(owner, joint)
+	,m_frictionModel(m_pacejkaUtility)
+{
+}
+
+ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMeshJointVehicleTireJoint& other)
+	:ndMeshJointWheel(other)
+	,m_frictionModel(other.m_frictionModel)
+{
+}
+
+ndMeshJoint* ndMeshJointVehicleTireJoint::Duplicate() const
+{
+	return new ndMeshJointVehicleTireJoint(*this);
+}
+
+bool ndMeshJointVehicleTireJoint::operator==(const ndMeshJoint& other) const
+{
+	bool test = ndMeshJoint::operator==(other);
+	if (test)
+	{
+		const ndMeshJointVehicleTireJoint* const otherJoint = (ndMeshJointVehicleTireJoint*)&other;
+		test = test && (m_frictionModel == otherJoint->m_frictionModel);
+	}
+	return test;
+}
+
+void ndMeshJointVehicleTireJoint::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+	xmlSaveParam(parent, "frictionModel", ndTireFrictionModel::GetLabel(ndTireFrictionModel::ndFrictionModel(m_frictionModel)));
+}
+
+void ndMeshJointVehicleTireJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndMeshJoint::DeserializeFromXml(parent);
+	const char* const modelLabel = xmlGetString(parent, "frictionModel");
+	m_frictionModel = ndFrictionModel(ndTireFrictionModel::GetModel(modelLabel));
+}
+
+ndJointBilateralConstraint* ndMeshJointVehicleTireJoint::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+{
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	//const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
+	ndMultiBodyVehicleTireJoint* const joint = new ndMultiBodyVehicleTireJoint(pinAndPivotInChild, child, parent, **m_desc, nullptr);
+
+	ndTireFrictionModel frictionModel;
+	frictionModel.SetPacejkaCurves(ndTireFrictionModel::ndFrictionModel(m_frictionModel));
+	joint->SetFrictionModel(frictionModel);
 	return joint;
 }
