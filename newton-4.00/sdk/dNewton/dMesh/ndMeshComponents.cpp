@@ -1418,13 +1418,13 @@ bool ndMeshJointVehicleTireJoint::operator==(const ndMeshJoint& other) const
 
 void ndMeshJointVehicleTireJoint::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	ndMeshJoint::SerializeToXml(parent);
+	ndMeshJointWheel::SerializeToXml(parent);
 	xmlSaveParam(parent, "frictionModel", ndTireFrictionModel::GetLabel(ndTireFrictionModel::ndFrictionModel(m_frictionModel)));
 }
 
 void ndMeshJointVehicleTireJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
-	ndMeshJoint::DeserializeFromXml(parent);
+	ndMeshJointWheel::DeserializeFromXml(parent);
 	const char* const modelLabel = xmlGetString(parent, "frictionModel");
 	m_frictionModel = ndFrictionModel(ndTireFrictionModel::GetModel(modelLabel));
 }

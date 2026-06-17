@@ -49,8 +49,8 @@ namespace ndMotorVehicle
 			m_engine.Init(idleTorquePoundFoot, idleRmp,
 				horsePower, rpm0, rpm1, horsePowerAtRedLine, redLineRpm);
 
-			m_tireFrictionModel.SetPacejkaCurves(ndTireFrictionModel::m_pacejkaSport);
-			m_tireFrictionModel.m_lateralPacejka.m_d = ndFloat32(0.4f);
+			//m_tireFrictionModel.SetPacejkaCurves(ndTireFrictionModel::m_pacejkaSport);
+			//m_tireFrictionModel.m_lateralPacejka.m_d = ndFloat32(0.4f);
 
 			// plot the curve to check it is a value form
 			//m_tireFrictionModel.PlotPacejkaCurves("supercar");

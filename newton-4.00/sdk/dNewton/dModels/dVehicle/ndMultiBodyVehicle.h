@@ -136,7 +136,7 @@ class ndVehicleDectriptor: public ndClassAlloc
 	ndFloat32 m_chassisAngularDrag;
 	ndEngineTorqueCurve m_engine;
 	ndGearBox m_transmission;
-	ndTireFrictionModel m_tireFrictionModel;
+	//ndTireFrictionModel m_tireFrictionModel;
 	//ndFloat32 m_motorMass;
 	//ndFloat32 m_motorRadius;
 	//ndFloat32 m_differentialMass;

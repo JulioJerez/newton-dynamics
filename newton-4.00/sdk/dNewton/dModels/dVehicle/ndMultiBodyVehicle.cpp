@@ -325,7 +325,7 @@ void ndMultiBodyVehicle::AddTire(const ndSharedPtr<ndBody>& tireBody, const ndSh
 	ndAssert(!strcmp(joint->ClassName(), "ndMultiBodyVehicleTireJoint"));
 	ndMultiBodyVehicleTireJoint* const tireJoint = (ndMultiBodyVehicleTireJoint*) * joint;
 	m_tireList.Append(tireJoint);
-	ndAssert(tireJoint->m_vehicle);
+	tireJoint->SetVehicleOwner(this);
 
 	// make the inertial spherical
 	ndBodyKinematic* const body = tireBody->GetAsBodyKinematic();
@@ -337,7 +337,7 @@ void ndMultiBodyVehicle::AddTire(const ndSharedPtr<ndBody>& tireBody, const ndSh
 	body->SetMassMatrix(inertia);
 
 	// set friction model.
-	tireJoint->SetFrictionModel(m_descriptor.m_tireFrictionModel);
+	//tireJoint->SetFrictionModel(m_descriptor.m_tireFrictionModel);
 
 	ndNode* const node = FindByBody(body);
 	ndAssert(!node || ((node->m_body->GetAsBody() == body) && ((*node->m_joint == tireJoint))));
@@ -1501,34 +1501,27 @@ void ndMultiBodyVehicle::ConvertToMotorVehicle(const ndVehicleDectriptor& vehicl
 	};
 	NodeIterator(SetChassisAndMotor);
 
-	auto SetTires = [this](ndNode* const node)
+	auto AddStructureParts = [this](ndNode* const node)
 	{
 		if (node->m_joint)
 		{
-			if (strcmp(node->m_joint->ClassName(), ndJointWheel::StaticClassName()) == 0)
-			{
-				ndMultiBodyVehicleTireJoint* const src = (ndMultiBodyVehicleTireJoint*)*node->m_joint;
-				ndSharedPtr<ndJointBilateralConstraint> surrugate(new ndMultiBodyVehicleTireJoint(src, this));
-				node->m_joint = surrugate;
-			}
-
 			if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0)
 			{
 				AddTire(node->m_body, node->m_joint);
 			} 
-		}
-	};
-	NodeIterator(SetTires);
-
-	auto SetDriveTrain = [this](ndNode* const node)
-	{
-		if (node->m_joint)
-		{
-			if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleDifferential::StaticClassName()) == 0)
+			else if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleDifferential::StaticClassName()) == 0)
 			{
 				AddDifferential(node->m_body, node->m_joint);
 			}
-			else if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleGearBox::StaticClassName()) == 0)
+		}
+	};
+	NodeIterator(AddStructureParts);
+
+	auto AddDriveTrain = [this](ndNode* const node)
+	{
+		if (node->m_joint)
+		{
+			if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleGearBox::StaticClassName()) == 0)
 			{
 				AddGearBox(node->m_joint);
 			}
@@ -1538,7 +1531,7 @@ void ndMultiBodyVehicle::ConvertToMotorVehicle(const ndVehicleDectriptor& vehicl
 			}
 		}
 	};
-	NodeIterator(SetDriveTrain);
+	NodeIterator(AddDriveTrain);
 
 	FinalizeBuild();
 }
