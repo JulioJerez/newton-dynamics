@@ -157,7 +157,6 @@ void ndPhysicsWorld::OnSubStepPostUpdate(ndFloat32 timestep)
 		}
 	}
 #endif
-
 }
 
 void ndPhysicsWorld::OnAddBody(ndBody* const body) const
