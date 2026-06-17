@@ -908,7 +908,7 @@ void ndMultiBodyVehicle::ApplyStabilityControl()
 					if (tire->GetBody0()->GetId() == 4)
 					{
 						ndTrace(("applyBreakControl: "));
-						tire->SetHandBreak(0.02f);
+						tire->SetHandBrake(0.02f);
 					}
 				}
 				else
@@ -916,7 +916,7 @@ void ndMultiBodyVehicle::ApplyStabilityControl()
 					if (tire->GetBody0()->GetId() == 3)
 					{
 						ndTrace(("applyBreakControl: "));
-						tire->SetHandBreak(0.02f);
+						tire->SetHandBrake(0.02f);
 					}
 				}
 			}

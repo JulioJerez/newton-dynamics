@@ -97,9 +97,9 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 		for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = vehicle->GetTireList().GetFirst(); node; node = node->GetNext())
 		{
 			ndMultiBodyVehicleTireJoint* const tire = node->GetInfo();
-			tire->SetBreak(brake);
+			tire->SetBrake(brake);
 			tire->SetSteering(steerAngle);
-			tire->SetHandBreak(handBrake);
+			tire->SetHandBrake(handBrake);
 			tire->GetBody0()->SetSleepState(false);
 		}
 	};
@@ -117,7 +117,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = vehicle->GetTireList().GetFirst(); node; node = node->GetNext())
 			{
 				ndMultiBodyVehicleTireJoint* const tire = node->GetInfo();
-				tire->SetHandBreak(ndFloat32(1.0f));
+				tire->SetHandBrake(ndFloat32(1.0f));
 			}
 
 			if (m_ignition.Update(buttons[ndGameControllerInputs::m_ignitionButton] ? true : false))

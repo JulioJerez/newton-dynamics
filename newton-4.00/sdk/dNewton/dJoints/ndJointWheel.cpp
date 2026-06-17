@@ -120,12 +120,12 @@ ndFloat32 ndJointWheel::GetHandBreak() const
 	return m_normalizedHandBrake;
 }
 
-void ndJointWheel::SetBreak(ndFloat32 normalizedBrake)
+void ndJointWheel::SetBrake(ndFloat32 normalizedBrake)
 {
 	m_normalizedBrake = ndClamp (normalizedBrake, ndFloat32 (0.0f), ndFloat32 (1.0f));
 }
 
-void ndJointWheel::SetHandBreak(ndFloat32 normalizedBrake)
+void ndJointWheel::SetHandBrake(ndFloat32 normalizedBrake)
 {
 	m_normalizedHandBrake = ndClamp(normalizedBrake, ndFloat32(0.0f), ndFloat32(1.0f));
 }

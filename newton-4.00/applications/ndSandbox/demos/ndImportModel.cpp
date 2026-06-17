@@ -127,12 +127,10 @@ class ndVanillaController : public ndModelNotify
                 const ndFixSizeArray<ndFloat32, 8>& axis = gameController->GetAxis();
 
                 ndFloat32 throttle = axis[ndGameControllerInputs::m_gasPedal];
-                ndFloat32 brake = axis[ndGameControllerInputs::m_brakePedal];
-                //ndTrace(("%f %f\n", throttle, brake));
 
+                //ndTrace(("%f %f\n", throttle, brake));
                 m_engineTorque = throttle * m_engineMaxTorque;
-                m_engineTorque -= brake * m_engineMaxTorque;
-                if ((ndAbs(throttle) > 0.1f) || (ndAbs(brake) > 0.1f))
+                if (ndAbs(throttle) > 0.1f)
                 {
                     engine->SetSleepState(false);
                 }
@@ -144,6 +142,7 @@ class ndVanillaController : public ndModelNotify
                 const ndFixSizeArray<ndFloat32, 8>& axis = gameController->GetAxis();
 
                 // very simplistic steering system
+                ndFloat32 brake = axis[ndGameControllerInputs::m_brakePedal];
                 ndFloat32 steeringParam = axis[ndGameControllerInputs::m_steeringWheel];
                 m_steerAngle = steeringParam * ndFloat32 (1.0f);
 
@@ -158,8 +157,14 @@ class ndVanillaController : public ndModelNotify
                     {
                         ndBodyDynamic* const wheelBody = wheel->GetBody0()->GetAsBodyDynamic();
                         wheelBody->SetSleepState(false);
-                        wheel->SetSteering(angle);
                     }
+                    if (ndAbs(brake) > ndFloat32 (0.1f))
+                    {
+                        ndBodyDynamic* const wheelBody = wheel->GetBody0()->GetAsBodyDynamic();
+                        wheelBody->SetSleepState(false);
+                    }
+                    wheel->SetBrake(brake);
+                    wheel->SetSteering(angle);
                 }
             }
         }

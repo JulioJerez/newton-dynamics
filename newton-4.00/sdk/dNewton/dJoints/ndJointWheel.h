@@ -58,8 +58,8 @@ class ndJointWheel : public ndJointBilateralConstraint
 	D_NEWTON_API ndFloat32 GetSteering() const;
 	D_NEWTON_API ndFloat32 GetHandBreak() const;
 
-	D_NEWTON_API void SetBreak(ndFloat32 normalizedTorque);
-	D_NEWTON_API void SetHandBreak(ndFloat32 normalizedTorque);
+	D_NEWTON_API void SetBrake(ndFloat32 normalizedTorque);
+	D_NEWTON_API void SetHandBrake(ndFloat32 normalizedTorque);
 	D_NEWTON_API void SetSteering(ndFloat32 normalidedSteering);
 	
 	D_NEWTON_API void UpdateTireSteeringAngleMatrix();
