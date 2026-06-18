@@ -1187,29 +1187,22 @@ ndJointBilateralConstraint* ndMeshJointVehicleDifferential::CreateObject(ndBodyK
 
 ndMeshJointVehicleMotor::ndMeshJointVehicleMotor(const ndMesh* const owner)
 	:ndMeshJoint(owner)
-	,m_maxOmega(ndReal(1000.0f))
+	,m_engineCurve()
 {
 }
 
 ndMeshJointVehicleMotor::ndMeshJointVehicleMotor(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
-	//,m_omega(ndReal(0.0f))
-	,m_maxOmega(ndReal(1000.0f))
-	//,m_omegaStep(ndReal(16.0f))
-	//,m_targetOmega(ndReal(0.0f))
-	//,m_engineTorque(ndReal(0.0f))
-	//,m_internalFriction(ndReal(100.0f))
+	,m_engineCurve()
 {
+	const ndMultiBodyVehicleMotor* const motor = (ndMultiBodyVehicleMotor*)joint;
+	ndAssert(strcmp(motor->ClassName(), ndMultiBodyVehicleMotor::StaticClassName()) == 0);
+	m_engineCurve = motor->GetCurve();
 }
 
 ndMeshJointVehicleMotor::ndMeshJointVehicleMotor(const ndMeshJointVehicleMotor& other)
 	:ndMeshJoint(other)
-	//,m_omega(other.m_omega)
-	,m_maxOmega(other.m_maxOmega)
-	//,m_omegaStep(other.m_omegaStep)
-	//,m_targetOmega(other.m_targetOmega)
-	//,m_engineTorque(other.m_engineTorque)
-	//,m_internalFriction(other.m_internalFriction)
+	,m_engineCurve(other.m_engineCurve)
 {
 }
 
@@ -1225,7 +1218,8 @@ bool ndMeshJointVehicleMotor::operator==(const ndMeshJoint& other) const
 	{
 		const ndMeshJointVehicleMotor* const otherJoint = (ndMeshJointVehicleMotor*)&other;
 		//test = test && (m_omega == otherJoint->m_omega);
-		test = test && (m_maxOmega == otherJoint->m_maxOmega);
+		ndTrace(("to do: Fix this %s", __FUNCTION__));
+		test = test && (m_engineCurve.m_frictionLoss == otherJoint->m_engineCurve.m_frictionLoss);
 		//test = test && (m_omegaStep == otherJoint->m_omegaStep);
 		//test = test && (m_targetOmega == otherJoint->m_targetOmega);
 		//test = test && (m_engineTorque == otherJoint->m_engineTorque);
@@ -1237,19 +1231,18 @@ bool ndMeshJointVehicleMotor::operator==(const ndMeshJoint& other) const
 void ndMeshJointVehicleMotor::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	ndMeshJoint::SerializeToXml(parent);
-	xmlSaveParam(parent, "maxOmega", m_maxOmega);
+
 }
 
 void ndMeshJointVehicleMotor::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndMeshJoint::DeserializeFromXml(parent);
-	m_maxOmega = ndReal(xmlGetFloat(parent, "maxOmega"));
 }
 
 ndJointBilateralConstraint* ndMeshJointVehicleMotor::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
 {
 	ndMultiBodyVehicleMotor* const joint = new ndMultiBodyVehicleMotor(child, parent);
-	joint->SetMaxRpm(m_maxOmega);
+	joint->SetCurve(m_engineCurve);
 	return joint;
 }
 

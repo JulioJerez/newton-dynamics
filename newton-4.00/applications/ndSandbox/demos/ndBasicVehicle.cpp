@@ -38,6 +38,7 @@ namespace ndMotorVehicle
 		ndBasicVehicleDectriptor()
 			:ndVehicleDectriptor()
 			,m_pacejkaScale (ndFloat32 (0.4f))
+			,m_curve()
 		{
 			//ndTireFrictionModel xxxx;
 			//xxxx.SetPacejkaCurves(ndTireFrictionModel::m_pacejkaSport);
@@ -50,6 +51,7 @@ namespace ndMotorVehicle
 			//m_tireFrictionModel.PlotPacejkaCurves("supercar");
 		}
 		ndFloat32 m_pacejkaScale;
+		ndMultiBodyVehicleMotor::ndEngineTorqueCurve m_curve;
 	};
 
 	class ndVehicleDectriptorSuperCar : public ndBasicVehicleDectriptor
@@ -66,9 +68,11 @@ namespace ndMotorVehicle
 			ndFloat32 rpm1 = ndFloat32(6200.0f);
 			ndFloat32 horsePowerAtRedLine = ndFloat32(100.0f);
 			ndFloat32 redLineRpm = ndFloat32(8000.0f);
-			m_engine.Init(idleTorquePoundFoot, idleRmp,
+			m_curve.Init(idleTorquePoundFoot, idleRmp,
 				horsePower, rpm0, rpm1, horsePowerAtRedLine, redLineRpm);
 		}
+
+		ndMultiBodyVehicleMotor::ndEngineTorqueCurve m_curve;
 	};
 
 	ndSharedPtr<ndModel> CreateBasicVehicle(ndDemoEntityManager* const scene, const char* const modelName, const ndMatrix& matrix)
@@ -128,6 +132,12 @@ namespace ndMotorVehicle
 						ndTireFrictionModel frictionMode(joint->GetFrictionModel());
 						frictionMode.m_lateralPacejka.m_d = superCar.m_pacejkaScale;
 						joint->SetFrictionModel(frictionMode);
+					}
+					if ((strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleMotor::StaticClassName()) == 0))
+					{
+						//override the default trque rpm curve, if desired
+						//ndMultiBodyVehicleMotor* const motor = (ndMultiBodyVehicleMotor*)*node->m_joint;
+						//motor->SetCurve(superCar.m_curve);
 					}
 				}
 				node->m_body->SetNotifyCallback(notify);

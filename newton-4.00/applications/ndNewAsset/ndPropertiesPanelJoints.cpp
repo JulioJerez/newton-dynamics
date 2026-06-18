@@ -1160,12 +1160,48 @@ void ndAssetEditor::EditMotorJoint()
 	EditJointGlobalMatrix();
 
 	ndMeshJointVehicleMotor* const joint = (ndMeshJointVehicleMotor*)*m_currentSelection->GetJoint();
-	
-	ndReal value = ndReal(joint->m_maxOmega);
-	if (ImGui::InputFloat("limited slip omega", &value, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	ndMultiBodyVehicleMotor::ndEngineTorqueCurve& engineCurve = joint->m_engineCurve;
+	ndInt32 numberOfPoints = engineCurve.m_torqueCurve.GetCount();
+	if (ImGui::InputInt("number of points", &numberOfPoints, 0, ImGuiInputTextFlags_EnterReturnsTrue))
 	{
-		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
-		joint->m_maxOmega = ndMax(value, ndReal(0.0f));
-		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+		numberOfPoints = ndClamp(numberOfPoints, 5, engineCurve.m_torqueCurve.GetCapacity());
+		if (numberOfPoints != engineCurve.m_torqueCurve.GetCount())
+		{
+			ndAssert(0);
+		}
+	}
+
+	for (ndInt32 i = 0; i < engineCurve.m_torqueCurve.GetCount(); ++i)
+	{
+		ndMultiBodyVehicleMotor::ndTorqueTap& tap = engineCurve.m_torqueCurve[i];
+		ndReal rpm = tap.m_radPerSeconds * ndRadPerSecToRpm;
+		if (ImGui::InputFloat("rpm", &rpm, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			ndTrace(("xxx0\n"));
+		}
+		ndReal torque = tap.m_torqueInNewtonMeters;
+		if (ImGui::InputFloat("torque", &torque, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			ndTrace(("xxx1\n"));
+		}
+		ImGui::Separator();
+	}
+
+	ndReal fuel = engineCurve.m_omegaStep;
+	if (ImGui::InputFloat("fuel Injector", &fuel, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		ndTrace(("xxx2\n"));
+	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+	//	joint->m_maxOmega = ndMax(value, ndReal(0.0f));
+	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+	}
+
+	ndReal loss = engineCurve.m_frictionLoss;
+	if (ImGui::InputFloat("internal Loss", &loss, 0.0, 0.0, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		ndTrace(("xxx3\n"));
+		//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+		//	joint->m_maxOmega = ndMax(value, ndReal(0.0f));
+		//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 	}
 }

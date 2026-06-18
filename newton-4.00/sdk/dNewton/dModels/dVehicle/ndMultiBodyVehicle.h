@@ -27,6 +27,7 @@
 #include "ndIkSolver.h"
 #include "ndJointWheel.h"
 #include "ndModelArticulation.h"
+#include "ndMultiBodyVehicleMotor.h"
 #include "ndMultiBodyVehicleTireJoint.h"
 
 class ndWorld;
@@ -41,37 +42,6 @@ class ndMultiBodyVehicleDifferentialAxle;
 class ndVehicleDectriptor: public ndClassAlloc
 {
 	public:
-	class ndTorqueTap
-	{
-		public:
-		ndTorqueTap() {}
-		ndTorqueTap(ndFloat32 rpm, ndFloat32 torqueInPoundFeet)
-			:m_radPerSeconds(rpm * ndFloat32 (0.105f))
-			,m_torqueInNewtonMeters(torqueInPoundFeet * ndFloat32 (1.36f))
-		{
-		}
-		ndFloat32 m_radPerSeconds;
-		ndFloat32 m_torqueInNewtonMeters;
-	};
-
-	class ndEngineTorqueCurve
-	{
-		public:
-		D_NEWTON_API ndEngineTorqueCurve();
-
-		D_NEWTON_API void Init(ndFloat32 idleTorquePoundFoot, ndFloat32 idleRmp,
-			ndFloat32 horsePower, ndFloat32 rpm0, ndFloat32 rpm1,
-			ndFloat32 horsePowerAtRedLine, ndFloat32 redLineRpm);
-
-		D_NEWTON_API ndFloat32 GetIdleRadPerSec() const;
-		D_NEWTON_API ndFloat32 GetRedLineRadPerSec() const;
-		D_NEWTON_API ndFloat32 GetLowGearShiftRadPerSec() const;
-		D_NEWTON_API ndFloat32 GetHighGearShiftRadPerSec() const;
-		D_NEWTON_API ndFloat32 GetTorque(ndFloat32 omegaInRadPerSeconds) const;
-
-		ndTorqueTap m_torqueCurve[5];
-	};
-
 	class ndGearBox
 	{
 		public:
@@ -134,13 +104,7 @@ class ndVehicleDectriptor: public ndClassAlloc
 
 	ndString m_name;
 	ndFloat32 m_chassisAngularDrag;
-	ndEngineTorqueCurve m_engine;
 	ndGearBox m_transmission;
-	//ndTireFrictionModel m_tireFrictionModel;
-	//ndFloat32 m_motorMass;
-	//ndFloat32 m_motorRadius;
-	//ndFloat32 m_differentialMass;
-	//ndFloat32 m_differentialRadius;
 
 	ndFloat32 m_slipDifferentialRmpLock;
 	ndDifferentialType m_differentialType;

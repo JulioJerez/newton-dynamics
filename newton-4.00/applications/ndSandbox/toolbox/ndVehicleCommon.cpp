@@ -82,11 +82,12 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 	auto ApplyControls = [this, vehicle, &desc, motor, &axis, &buttons]()
 	{
 		ndFloat32 throttle = axis[ndGameControllerInputs::m_gasPedal];
-
+		
+		const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& engineCurve = motor->GetCurve();
 		ndFloat32 currentOmega = motor->GetRpm() / ndRadPerSecToRpm;
-		ndFloat32 desiredOmega = ndMax(desc.m_engine.GetIdleRadPerSec(), throttle * desc.m_engine.GetRedLineRadPerSec());
-		ndFloat32 torqueFromCurve = desc.m_engine.GetTorque(currentOmega);
-
+		ndFloat32 desiredOmega = ndMax(engineCurve.GetIdleRadPerSec(), throttle * engineCurve.GetRedLineRadPerSec());
+		ndFloat32 torqueFromCurve = engineCurve.GetTorque(currentOmega);
+		
 		motor->SetTorqueAndRpm(torqueFromCurve, desiredOmega * ndRadPerSecToRpm);
 		vehicle->GetChassis()->SetSleepState(false);
 		motor->GetBody0()->SetSleepState(false);
