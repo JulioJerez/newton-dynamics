@@ -1271,7 +1271,7 @@ void ndMultiBodyVehicle::Update(ndFloat32 timestep)
 {
 	if (!m_initialized)
 	{
-		FinalizeBuild();
+		CalculateSprungWeight();
 	}
 
 	// apply down force
@@ -1284,207 +1284,6 @@ void ndMultiBodyVehicle::Update(ndFloat32 timestep)
 void ndMultiBodyVehicle::PostUpdate(ndFloat32)
 {
 	ApplyAlignmentAndBalancing();
-}
-
-void ndMultiBodyVehicle::FinalizeBuild()
-{
-	struct ndIndexPair
-	{
-		ndInt32 m_m0;
-		ndInt32 m_m1;
-	};
-	const ndInt32 buffersCapacity = 128;
-	ndFixSizeArray<ndNode*, buffersCapacity> stack;
-	ndFixSizeArray<ndInt32, buffersCapacity> bodyId;
-	ndFixSizeArray<ndFloat32, buffersCapacity> invMass;
-	ndFixSizeArray<ndFloat32, buffersCapacity> rhsAccel;
-	ndFixSizeArray<ndMatrix, buffersCapacity> invInertia;
-	ndFixSizeArray<ndIndexPair, buffersCapacity> jointArray;
-	ndFixSizeArray<ndJacobianPair, buffersCapacity> jacobianArray;
-	ndFixSizeArray<const ndBodyKinematic*, buffersCapacity> bodyArray;
-	ndFixSizeArray<ndMultiBodyVehicleTireJoint*, buffersCapacity> tireArray;
-
-	const ndVector upDir(m_localFrame.m_up.Scale(ndFloat32(1.0f)));
-	const ndMatrix savedMatrix(GetRoot()->m_body->GetMatrix());
-	SetTransform(ndGetIdentityMatrix());
-
-	bodyId.PushBack(0);
-	ndBodySentinel sentinelBody;
-	bodyArray.PushBack(&sentinelBody);
-	invMass.PushBack(ndFloat32(0.0f));
-	invInertia.PushBack(ndGetZeroMatrix());
-
-	ndInt32 bodyIndex = 1;
-
-	// get all jacobians
-	stack.PushBack(GetRoot());
-	while (stack.GetCount())
-	{
-		ndNode* const node = stack.Pop();
-
-		const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
-		bodyArray.PushBack(body);
-		bodyId.PushBack(bodyIndex);
-		invMass.PushBack(body->GetInvMass());
-		invInertia.PushBack(body->CalculateInvInertiaMatrix());
-
-		if (node->m_joint)
-		{
-			ndJointBilateralConstraint* const joint = *node->m_joint;
-
-			auto FindParentId = [joint, &bodyArray, &bodyId]()
-			{
-				const ndBodyKinematic* const parentBody = joint->GetBody1()->GetAsBodyKinematic();
-				for (ndInt32 i = bodyArray.GetCount() - 1; i >= 0; --i)
-				{
-					if (bodyArray[i] == parentBody)
-					{
-						return bodyId[i];
-					}
-				}
-				ndAssert(0);
-				return -1;
-			};
-
-			ndInt32 m0 = bodyIndex;
-			ndInt32 m1 = FindParentId();
-
-			const ndVector com0(bodyArray[m0]->GetMatrix().TransformVector(bodyArray[m0]->GetCentreOfMass()));
-			const ndVector com1(bodyArray[m1]->GetMatrix().TransformVector(bodyArray[m1]->GetCentreOfMass()));
-			const ndVector r0(joint->CalculateGlobalMatrix0().m_posit - com0);
-			const ndVector r1(joint->CalculateGlobalMatrix1().m_posit - com1);
-
-			ndJacobianPair jacobianPair;
-			jacobianPair.m_jacobianM0.m_linear = upDir.Scale(ndFloat32(-1.0f));
-			jacobianPair.m_jacobianM0.m_angular = jacobianPair.m_jacobianM0.m_linear.CrossProduct(r0);
-
-			jacobianPair.m_jacobianM1.m_linear = upDir;
-			jacobianPair.m_jacobianM1.m_angular = jacobianPair.m_jacobianM1.m_linear.CrossProduct(r1);
-
-			jacobianArray.PushBack(jacobianPair);
-
-			ndIndexPair pair;
-			pair.m_m0 = m0;
-			pair.m_m1 = m1;
-			jointArray.PushBack(pair);
-			rhsAccel.PushBack(ndFloat32(0.0f));
-			tireArray.PushBack(nullptr);
-
-			if (!strcmp(joint->ClassName(), "ndMultiBodyVehicleTireJoint"))
-			{
-				pair.m_m0 = m0;
-				pair.m_m1 = 0;
-
-				jacobianPair.m_jacobianM0.m_linear = upDir.Scale(ndFloat32(-1.0f));
-				jacobianPair.m_jacobianM0.m_angular = ndVector::m_zero;
-				jacobianPair.m_jacobianM1.m_linear = ndVector::m_zero;
-				jacobianPair.m_jacobianM1.m_angular = ndVector::m_zero;
-
-				jointArray.PushBack(pair);
-				jacobianArray.PushBack(jacobianPair);
-				rhsAccel.PushBack(m_gravityMagnitud);
-				tireArray.PushBack((ndMultiBodyVehicleTireJoint*)joint);
-			}
-		}
-
-		bodyIndex++;
-		for (ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
-		{
-			stack.PushBack(child);
-		}
-	}
-
-	// build Mass Matrix
-	ndFixSizeArray<ndFixSizeArray<ndFloat32, buffersCapacity>, buffersCapacity> massMatrix(64);
-
-	ndJacobian zeroJacobian;
-	zeroJacobian.m_linear = ndVector::m_zero;
-	zeroJacobian.m_angular = ndVector::m_zero;
-
-	massMatrix.SetCount(jointArray.GetCount());
-	for (ndInt32 i = 0; i < jointArray.GetCount(); ++i)
-	{
-		massMatrix[i].SetCount(jointArray.GetCount());
-	}
-
-	ndFixSizeArray<ndJacobian, buffersCapacity> Jt;
-	ndFixSizeArray<ndJacobian, buffersCapacity> JinvMass;
-	for (ndInt32 i = 0; i < bodyId.GetCount(); ++i)
-	{
-		Jt.PushBack(zeroJacobian);
-		JinvMass.PushBack(zeroJacobian);
-	}
-
-	for (ndInt32 i = 0; i < jointArray.GetCount(); ++i)
-	{
-		ndInt32 m0 = jointArray[i].m_m0;
-		ndInt32 m1 = jointArray[i].m_m1;
-
-		const ndJacobian& J01invMass(jacobianArray[i].m_jacobianM0);
-		const ndJacobian& J10invMass(jacobianArray[i].m_jacobianM1);
-
-		JinvMass[m0].m_linear = J01invMass.m_linear.Scale(invMass[m0]);
-		JinvMass[m0].m_angular = J01invMass.m_angular.Scale(invMass[m0]);
-		JinvMass[m1].m_linear = J10invMass.m_linear.Scale(invMass[m1]);
-		JinvMass[m1].m_angular = J10invMass.m_angular.Scale(invMass[m1]);
-
-		ndVector diagDot(
-			JinvMass[m0].m_linear * jacobianArray[i].m_jacobianM0.m_linear +
-			JinvMass[m0].m_angular * jacobianArray[i].m_jacobianM0.m_angular +
-			JinvMass[m1].m_linear * jacobianArray[i].m_jacobianM1.m_linear +
-			JinvMass[m1].m_angular * jacobianArray[i].m_jacobianM1.m_angular);
-		ndFloat32 diagonal = diagDot.AddHorizontal().GetScalar() * ndFloat32(1.0005f);
-		massMatrix[i][i] = diagonal;
-
-		for (ndInt32 j = i + 1; j < jointArray.GetCount(); ++j)
-		{
-			ndInt32 n0 = jointArray[j].m_m0;
-			ndInt32 n1 = jointArray[j].m_m1;
-			Jt[n0] = jacobianArray[j].m_jacobianM0;
-			Jt[n1] = jacobianArray[j].m_jacobianM1;
-
-			ndVector sum(ndVector::m_zero);
-			for (ndInt32 k = 0; k < bodyId.GetCount(); ++k)
-			{
-				sum += JinvMass[k].m_linear * Jt[k].m_linear + JinvMass[k].m_angular * Jt[k].m_angular;
-			}
-			ndFloat32 offDiag = sum.AddHorizontal().GetScalar();
-			massMatrix[i][j] = offDiag;
-			massMatrix[j][i] = offDiag;
-
-			Jt[n0] = zeroJacobian;
-			Jt[n1] = zeroJacobian;
-		}
-
-		JinvMass[m0] = zeroJacobian;
-		JinvMass[m1] = zeroJacobian;
-	}
-
-	const ndInt32 stride = ndInt32(&massMatrix[1][0] - &massMatrix[0][0]);
-
-#ifdef _DEBUG
-	ndArray<ndFloat32> buffer;
-	buffer.SetCount(stride * stride);
-	ndAssert(ndTestPSDmatrix(jointArray.GetCount(), stride, &massMatrix[0][0], &buffer[0]));
-#endif
-
-	ndFixSizeArray<ndFloat32, buffersCapacity> force;
-	force.SetCount(jointArray.GetCount());
-	ndCholeskyFactorization(jointArray.GetCount(), stride, &massMatrix[0][0]);
-	ndSolveCholesky(jointArray.GetCount(), stride, &massMatrix[0][0], &force[0], &rhsAccel[0]);
-
-	for (ndInt32 i = 0; i < tireArray.GetCount(); ++i)
-	{
-		ndMultiBodyVehicleTireJoint* const tire = tireArray[i];
-		if (tire)
-		{
-			tire->m_frictionModel.m_lateralPacejka.m_norminalNormalForce = ndAbs(force[i]);
-			tire->m_frictionModel.m_longitudinalPacejka.m_norminalNormalForce = ndAbs(force[i]);
-		}
-	}
-
-	SetTransform(savedMatrix);
-	m_initialized = true;
 }
 
 void ndMultiBodyVehicle::ConvertToMotorVehicle(const ndVehicleDectriptor& vehicleDescritor)
@@ -1533,5 +1332,229 @@ void ndMultiBodyVehicle::ConvertToMotorVehicle(const ndVehicleDectriptor& vehicl
 	};
 	NodeIterator(AddDriveTrain);
 
-	FinalizeBuild();
+	CalculateSprungWeight();
+}
+
+void ndMultiBodyVehicle::CalculateSprungWeight()
+{
+	const ndMatrix savedMatrix(GetRoot()->m_body->GetMatrix());
+	SetTransform(ndGetIdentityMatrix());
+
+	const ndInt32 buffersCapacity = 128;
+	ndFixSizeArray<ndInt32, buffersCapacity> pairM0;
+	ndFixSizeArray<ndInt32, buffersCapacity> pairM1;
+	ndFixSizeArray<ndInt32, buffersCapacity> bodyIndex;
+	ndFixSizeArray<ndFloat32, buffersCapacity> rhsAccel;
+	ndFixSizeArray<ndBodyDynamic*, buffersCapacity> bodyArray;
+	ndFixSizeArray<ndJacobianPair, buffersCapacity> jacobianArray;
+	ndFixSizeArray<ndMultiBodyVehicleTireJoint*, buffersCapacity> tireArray;
+
+	ndBodyDynamic emptyBody;
+	bodyIndex.PushBack(0);
+	bodyArray.PushBack(&emptyBody);
+	auto GetStructuralJacobians = [&bodyArray, &bodyIndex, &jacobianArray, &rhsAccel, &tireArray, &pairM0, &pairM1](ndNode* const node)
+	{
+		if (node->m_body)
+		{
+			bodyIndex.PushBack(bodyIndex.GetCount());
+			bodyArray.PushBack(node->m_body->GetAsBodyDynamic());
+			node->m_body->GetAsBodyDynamic()->UpdateInvInertiaMatrix();
+
+			if (node->m_joint)
+			{
+				const ndBodyDynamic* const body0 = node->m_body->GetAsBodyDynamic();
+				const ndBodyDynamic* const body1 = node->GetParent()->m_body->GetAsBodyDynamic();
+				const ndJointBilateralConstraint* const joint = *node->m_joint;
+				const ndVector com0(body0->GetMatrix().TransformVector(body0->GetCentreOfMass()));
+				const ndVector com1(body1->GetMatrix().TransformVector(body1->GetCentreOfMass()));
+				const ndVector r0(joint->CalculateGlobalMatrix0().m_posit - com0);
+				const ndVector r1(joint->CalculateGlobalMatrix1().m_posit - com1);
+
+				ndMatrix matrix(ndGetIdentityMatrix());
+				matrix.m_posit = com0;
+
+				auto FindParentId = [&bodyArray, &bodyIndex](const ndBodyDynamic* const body)
+				{
+					for (ndInt32 i = bodyArray.GetCount() - 1; i >= 0; --i)
+					{
+						if (bodyArray[i] == body)
+						{
+							return bodyIndex[i];
+						}
+					}
+					ndAssert(0);
+					return -1;
+				};
+
+				ndInt32 m0 = bodyIndex[bodyIndex.GetCount() - 1];
+				ndInt32 m1 = FindParentId(body1);
+				for (ndInt32 i = 0; i < 3; ++i)
+				{
+					ndJacobianPair jacobianPair;
+					jacobianPair.m_jacobianM0.m_linear = matrix[i].Scale(ndFloat32(-1.0f));
+					jacobianPair.m_jacobianM0.m_angular = jacobianPair.m_jacobianM0.m_linear.CrossProduct(r0);
+					jacobianPair.m_jacobianM1.m_linear = matrix[i];
+					jacobianPair.m_jacobianM1.m_angular = jacobianPair.m_jacobianM1.m_linear.CrossProduct(r1);
+					rhsAccel.PushBack(ndFloat32(0.0f));
+					jacobianArray.PushBack(jacobianPair);
+					pairM0.PushBack(m0);
+					pairM1.PushBack(m1);
+
+					jacobianPair.m_jacobianM0.m_linear = ndVector::m_zero;
+					jacobianPair.m_jacobianM0.m_angular = matrix[i].Scale(ndFloat32(-1.0f));
+					jacobianPair.m_jacobianM1.m_linear = ndVector::m_zero;
+					jacobianPair.m_jacobianM1.m_angular = matrix[i];
+					rhsAccel.PushBack(ndFloat32(0.0f));
+					jacobianArray.PushBack(jacobianPair);
+					pairM0.PushBack(m0);
+					pairM1.PushBack(m1);
+				}
+				if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0)
+				{
+					tireArray.PushBack((ndMultiBodyVehicleTireJoint*)joint);
+				}
+			}
+		}
+	};
+	NodeIterator(GetStructuralJacobians);
+	ndInt32 tireStart = rhsAccel.GetCount();
+
+	const ndInt32 count = ndMin(tireArray.GetCount(), 4);
+	const ndMatrix rotation(ndYawMatrix(90.0f * ndDegreeToRad));
+	ndVector pin(ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f));
+	for (ndInt32 i = 0; i < count; ++i)
+	{
+		ndFloat32 dist = ndFloat32 (-1.0e10f);
+		for (ndInt32 j = i; j < tireArray.GetCount(); ++j)
+		{
+			const ndMultiBodyVehicleTireJoint* const joint = tireArray[j];
+			const ndBodyDynamic* const body = joint->GetBody0()->GetAsBodyDynamic();
+			const ndVector origin(body->GetMatrix().m_posit);
+			ndFloat32 project = origin.DotProduct(pin).GetScalar();
+			if (project > dist)
+			{
+				dist = project;
+				ndSwap(tireArray[i], tireArray[j]);
+			}
+		}
+		pin = rotation.RotateVector(pin);
+	}
+	tireArray.SetCount(count);
+
+	const ndVector upDir(m_localFrame.m_up.Scale(ndFloat32(1.0f)));
+	for (ndInt32 i = 0; i < tireArray.GetCount(); ++i)
+	{
+		const ndMultiBodyVehicleTireJoint* const joint = tireArray[i];
+		const ndBodyDynamic* const body = joint->GetBody0()->GetAsBodyDynamic();
+
+		auto FindParentId = [&bodyArray, &bodyIndex](const ndBodyDynamic* const body)
+		{
+			for (ndInt32 i = bodyArray.GetCount() - 1; i >= 0; --i)
+			{
+				if (bodyArray[i] == body)
+				{
+					return bodyIndex[i];
+				}
+			}
+			ndAssert(0);
+			return -1;
+		};
+		ndInt32 m0 = FindParentId(body);
+		ndInt32 m1 = 0;
+		ndJacobianPair jacobianPair;
+		jacobianPair.m_jacobianM0.m_linear = upDir;
+		jacobianPair.m_jacobianM0.m_angular = ndVector::m_zero;
+		jacobianPair.m_jacobianM1.m_linear = upDir.Scale(ndFloat32(-1.0f));
+		jacobianPair.m_jacobianM1.m_angular = ndVector::m_zero;
+
+		pairM0.PushBack(m0);
+		pairM1.PushBack(m1);
+		rhsAccel.PushBack(-m_gravityMagnitud);
+		jacobianArray.PushBack(jacobianPair);
+	}
+
+	const ndInt32 stride = rhsAccel.GetCount();
+
+	// build Mass Matrix
+	ndFixSizeArray<ndJacobian, buffersCapacity> Jt;
+	ndFixSizeArray<ndJacobian, buffersCapacity> JinvMass;
+	ndFixSizeArray<ndFloat32, buffersCapacity * buffersCapacity> massMatrix(stride * stride);
+
+	ndJacobian zeroJacobian;
+	zeroJacobian.m_linear = ndVector::m_zero;
+	zeroJacobian.m_angular = ndVector::m_zero;
+	for (ndInt32 i = 0; i < rhsAccel.GetCount(); ++i)
+	{
+		Jt.PushBack(zeroJacobian);
+		JinvMass.PushBack(zeroJacobian);
+	}
+
+	for (ndInt32 i = 0; i < stride; ++i)
+	{
+		ndInt32 m0 = pairM0[i];
+		ndInt32 m1 = pairM1[i];
+
+		ndFloat32 invMass0 = bodyArray[m0]->GetInvMass();
+		ndFloat32 invMass1 = bodyArray[m1]->GetInvMass();
+		const ndMatrix& invInertia0 = bodyArray[m0]->GetInvInertiaMatrix();
+		const ndMatrix& invInertia1 = bodyArray[m1]->GetInvInertiaMatrix();
+
+		const ndJacobian& J01invMass(jacobianArray[i].m_jacobianM0);
+		const ndJacobian& J10invMass(jacobianArray[i].m_jacobianM1);
+
+		JinvMass[m0].m_linear = J01invMass.m_linear.Scale(invMass0);
+		JinvMass[m1].m_linear = J10invMass.m_linear.Scale(invMass1);
+		JinvMass[m0].m_angular = invInertia0.RotateVector(J01invMass.m_angular);
+		JinvMass[m1].m_angular = invInertia1.RotateVector(J10invMass.m_angular);
+
+		ndVector diagDot(
+			JinvMass[m0].m_linear * jacobianArray[i].m_jacobianM0.m_linear +
+			JinvMass[m0].m_angular * jacobianArray[i].m_jacobianM0.m_angular +
+			JinvMass[m1].m_linear * jacobianArray[i].m_jacobianM1.m_linear +
+			JinvMass[m1].m_angular * jacobianArray[i].m_jacobianM1.m_angular);
+		ndFloat32 diagonal = diagDot.AddHorizontal().GetScalar() * ndFloat32(1.001f);
+		massMatrix[i * stride + i] = diagonal;
+
+		for (ndInt32 j = i + 1; j < stride; ++j)
+		{
+			ndInt32 n0 = pairM0[j];
+			ndInt32 n1 = pairM1[j];
+			Jt[n0] = jacobianArray[j].m_jacobianM0;
+			Jt[n1] = jacobianArray[j].m_jacobianM1;
+
+			ndVector sum(ndVector::m_zero);
+			for (ndInt32 k = 0; k < stride; ++k)
+			{
+				sum += JinvMass[k].m_linear * Jt[k].m_linear + JinvMass[k].m_angular * Jt[k].m_angular;
+			}
+			ndFloat32 offDiag = sum.AddHorizontal().GetScalar();
+			massMatrix[i * stride + j] = offDiag;
+			massMatrix[j * stride + i] = offDiag;
+
+			Jt[n0] = zeroJacobian;
+			Jt[n1] = zeroJacobian;
+		}
+		JinvMass[m0] = zeroJacobian;
+		JinvMass[m1] = zeroJacobian;
+	}
+#ifdef _DEBUG
+	ndArray<ndFloat32> buffer;
+	buffer.SetCount(stride * stride);
+	ndAssert(ndTestPSDmatrix(stride, stride, &massMatrix[0], &buffer[0]));
+#endif
+
+	ndFixSizeArray<ndFloat32, buffersCapacity> force(stride);
+	ndCholeskyFactorization(rhsAccel.GetCount(), rhsAccel.GetCount(), &massMatrix[0]);
+	ndSolveCholesky(stride, stride, &massMatrix[0], &force[0], &rhsAccel[0]);
+
+	for (ndInt32 i = 0; i < tireArray.GetCount(); ++i)
+	{
+		ndFloat32 stiffness = ndAbs(force[tireStart + i]);
+		ndMultiBodyVehicleTireJoint* const tire = tireArray[i];
+		tire->m_frictionModel.m_lateralPacejka.m_norminalNormalForce = stiffness;
+		tire->m_frictionModel.m_longitudinalPacejka.m_norminalNormalForce = stiffness;
+	}
+
+	m_initialized = true;
+	SetTransform(savedMatrix);
 }

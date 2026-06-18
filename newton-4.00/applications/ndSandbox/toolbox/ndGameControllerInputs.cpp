@@ -118,63 +118,6 @@ void ndGameControllerInputs::Update(ndDemoEntityManager* const scene)
 void ndGameControllerInputs::GetJoystickInputs(ndDemoEntityManager* const)
 {
 	ndAssert(0);
-	//static ndFixSizeArray<int, 8> axisMapping;
-	//static ndFixSizeArray<int, 32> buttonMapping;
-	//
-	//ndFixSizeArray<char, 32> unmappedButtons;
-	//ndFixSizeArray<ndFloat32, 8> unmappedAxis;
-	//
-	//scene->GetJoystickAxis(unmappedAxis);
-	//scene->GetJoystickButtons(unmappedButtons);
-	//
-	//if (!buttonMapping.GetCount())
-	//{
-	//	for (ndInt32 i = 0; i < buttonMapping.GetCapacity(); ++i)
-	//	{
-	//		buttonMapping.PushBack(m_buttonCount);
-	//	}
-	//
-	//	buttonMapping[0] = m_button_00;		//m_handBreakButton
-	//	buttonMapping[3] = m_button_01;		//m_upGearButton
-	//	buttonMapping[2] = m_button_02;		//m_downGearButton
-	//	buttonMapping[5] = m_button_03;		//m_neutralGearButton
-	//	buttonMapping[10] = m_button_04;	//m_ignitionButton
-	//	buttonMapping[4] = m_button_05;		//m_reverseGearButton
-	//	buttonMapping[11] = m_button_06;	//m_automaticGearBoxButton
-	//	buttonMapping[1] = m_button_07;		//m_parkingButton
-	//	buttonMapping[8] = m_button_08;		//m_playerButton
-	//}
-	//
-	//m_buttons.SetCount(m_buttonCount);
-	//for (ndInt32 i = 0; i < unmappedButtons.GetCount(); ++i)
-	//{
-	//	ndInt32 j = buttonMapping[i];
-	//	m_buttons[j] = unmappedButtons[i];
-	//}
-	//
-	//if (!axisMapping.GetCount())
-	//{
-	//	for (ndInt32 i = 0; i < axisMapping.GetCapacity(); ++i)
-	//	{
-	//		axisMapping.PushBack(m_axisCount);
-	//	}
-	//	axisMapping[0] = m_azis_00;
-	//	axisMapping[1] = m_azis_01;
-	//}
-	//
-	//m_axis.SetCount(m_axisCount);
-	//for (ndInt32 i = 0; i < axisMapping.GetCount(); i++)
-	//{
-	//	m_axis[axisMapping[i]] = unmappedAxis[i];
-	//}
-	//
-	//m_axis[m_azis_00] = -m_axis[m_azis_00] * m_axis[m_azis_00] * m_axis[m_azis_00];
-	//
-	//ndFloat32 gas = ndMin (m_axis[m_azis_01], ndFloat32 (0.0f));
-	//ndFloat32 brake = ndMax(m_axis[m_azis_01], ndFloat32(0.0f));
-	//
-	//m_axis[m_azis_01] = gas * gas;
-	//m_axis[m_azis_02] = brake * brake;
 }
 
 void ndGameControllerInputs::GetXboxJoystickInputs(ndDemoEntityManager* const scene)
@@ -219,13 +162,24 @@ void ndGameControllerInputs::GetXboxJoystickInputs(ndDemoEntityManager* const sc
 		axisMapping[4] = m_brakePedal;
 		axisMapping[5] = m_gasPedal;
 
+		ndFloat32 savedSteering = m_axis[m_steeringWheel];
 		for (ndInt32 i = 0; i < unmappedAxis.GetCount(); i++)
 		{
 			ndInt32 index = axisMapping[i];
 			m_axis[index] = unmappedAxis[i];
 		}
 
-		m_axis[m_steeringWheel] = -m_axis[m_steeringWheel] * m_axis[m_steeringWheel] * m_axis[m_steeringWheel];
+		const ndFloat32 steering2 = m_axis[m_steeringWheel] * m_axis[m_steeringWheel];
+		const ndFloat32 newSteering = -m_axis[m_steeringWheel] * steering2;
+		if ((newSteering > ndAbs(savedSteering)) || (newSteering < -ndAbs(savedSteering)))
+		{
+			m_axis[m_steeringWheel] = savedSteering + (newSteering - savedSteering) * ndFloat32(0.02f);
+		}
+		else
+		{
+			m_axis[m_steeringWheel] = savedSteering + (newSteering - savedSteering) * ndFloat32(0.1f);
+		}
+
 		ndFloat32 gas = (m_axis[m_gasPedal] + ndFloat32(1.0f)) * ndFloat32(0.5f);
 		m_axis[m_gasPedal] = gas * gas;
 

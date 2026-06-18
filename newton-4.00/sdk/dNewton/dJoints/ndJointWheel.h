@@ -19,8 +19,8 @@ class ndWheelDescriptor
 {
 	public:
 	ndWheelDescriptor()
-		:m_springK(ndFloat32(1000.0f))
-		,m_damperC(ndFloat32(20.0f))
+		:m_springK(ndFloat32(1500.0f))
+		,m_damperC(ndFloat32(30.0f))
 		,m_upperStop(ndFloat32(0.2f))
 		,m_lowerStop(ndFloat32(-0.1f))
 		,m_regularizer(ndFloat32(0.1f))

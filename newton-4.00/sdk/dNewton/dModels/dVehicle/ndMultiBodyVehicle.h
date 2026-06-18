@@ -232,9 +232,9 @@ class ndMultiBodyVehicle : public ndModelArticulation
 #endif
 
 	private:
-	void FinalizeBuild();
 	void ApplyTireModel();
 	void ApplyStabilityControl();
+	void CalculateSprungWeight();
 	void ApplyAlignmentAndBalancing();
 	void ApplyAerodynamics(ndFloat32 timestep);
 	void ApplyTireModel(ndFixSizeArray<ndTireContactPair, 128>& tireContacts);

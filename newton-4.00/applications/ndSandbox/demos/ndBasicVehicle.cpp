@@ -32,11 +32,31 @@ namespace ndMotorVehicle
 		}
 	};
 
-	class ndVehicleDectriptorSuperCar : public ndVehicleDectriptor
+	class ndBasicVehicleDectriptor : public ndVehicleDectriptor
+	{
+		public:
+		ndBasicVehicleDectriptor()
+			:ndVehicleDectriptor()
+			,m_pacejkaScale (ndFloat32 (0.4f))
+		{
+			//ndTireFrictionModel xxxx;
+			//xxxx.SetPacejkaCurves(ndTireFrictionModel::m_pacejkaSport);
+			//xxxx.PlotPacejkaCurves("supercar0");
+			//xxxx.m_lateralPacejka.m_d = ndFloat32(0.4f);
+			//xxxx.PlotPacejkaCurves("supercar1");
+
+			//m_tireFrictionModel.m_lateralPacejka.m_d = ndFloat32(0.4f);
+			// plot the curve to check it is a value form
+			//m_tireFrictionModel.PlotPacejkaCurves("supercar");
+		}
+		ndFloat32 m_pacejkaScale;
+	};
+
+	class ndVehicleDectriptorSuperCar : public ndBasicVehicleDectriptor
 	{
 		public:
 		ndVehicleDectriptorSuperCar()
-			:ndVehicleDectriptor()
+			:ndBasicVehicleDectriptor()
 		{
 			m_name = "supercar";
 			ndFloat32 idleTorquePoundFoot = ndFloat32(300.0f);
@@ -48,12 +68,6 @@ namespace ndMotorVehicle
 			ndFloat32 redLineRpm = ndFloat32(8000.0f);
 			m_engine.Init(idleTorquePoundFoot, idleRmp,
 				horsePower, rpm0, rpm1, horsePowerAtRedLine, redLineRpm);
-
-			//m_tireFrictionModel.SetPacejkaCurves(ndTireFrictionModel::m_pacejkaSport);
-			//m_tireFrictionModel.m_lateralPacejka.m_d = ndFloat32(0.4f);
-
-			// plot the curve to check it is a value form
-			//m_tireFrictionModel.PlotPacejkaCurves("supercar");
 		}
 	};
 
@@ -78,7 +92,7 @@ namespace ndMotorVehicle
 		ndRender* const renderer = *scene->GetRenderer();
 		ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *loader.m_mesh, ndGetWorkingFileName("")));
 
-		auto BindApplicationData = [scene, mesh, vehicle, &sceneMesh](ndModelArticulation::ndNode* const node)
+		auto BindApplicationData = [scene, mesh, vehicle, &sceneMesh, &superCar](ndModelArticulation::ndNode* const node)
 		{
 			if (vehicle->IsCloseLoop(node))
 			{
@@ -107,6 +121,13 @@ namespace ndMotorVehicle
 						// fast moving wheel
 						ndDemoEntityNotify* const fastNotify = (ndDemoEntityNotify*)*notify;
 						fastNotify->m_capOmega = ndFloat32(10000.0f);
+					}
+					if ((strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0))
+					{
+						ndMultiBodyVehicleTireJoint* const joint = (ndMultiBodyVehicleTireJoint*)*node->m_joint;
+						ndTireFrictionModel frictionMode(joint->GetFrictionModel());
+						frictionMode.m_lateralPacejka.m_d = superCar.m_pacejkaScale;
+						joint->SetFrictionModel(frictionMode);
 					}
 				}
 				node->m_body->SetNotifyCallback(notify);
