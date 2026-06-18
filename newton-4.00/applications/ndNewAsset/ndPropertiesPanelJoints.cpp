@@ -193,6 +193,12 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointWheel());
 						InitNewGlobalJoint(newJoint);
 					}
+					else if (strcmp(name, ndMultiBodyVehicleTireJoint::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndMultiBodyVehicleTireJoint());
+						InitNewGlobalJoint(newJoint);
+					}
 					else if (strcmp(name, ndJointSpherical::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
@@ -215,6 +221,7 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 			SetDropdownList(ndJointWheel::StaticClassName());
 			SetDropdownList(ndJointSpherical::StaticClassName());
 			SetDropdownList(ndMultiBodyVehicleMotor::StaticClassName());
+			SetDropdownList(ndMultiBodyVehicleTireJoint::StaticClassName());
 			SetDropdownList(ndMultiBodyVehicleDifferential::StaticClassName());
 
 			ImGui::EndCombo();
@@ -259,6 +266,10 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointWheel::StaticClassName()) == 0)
 		{
 			EditWheelJoint();
+		}
+		else if (strcmp(joint->m_constructor.GetStr(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0)
+		{
+			EditMotorWheelJoint();
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointSpherical::StaticClassName()) == 0)
 		{
@@ -992,6 +1003,35 @@ void ndAssetEditor::EditWheelJoint()
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 		joint->m_desc->m_handBrakeTorque = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+	}
+}
+
+void ndAssetEditor::EditMotorWheelJoint()
+{
+	ndAssetEditor::EditWheelJoint();
+
+	ndMeshJointVehicleTireJoint* const joint = (ndMeshJointVehicleTireJoint*)*m_currentSelection->GetJoint();
+	if (ImGui::BeginCombo("friction Model", ndTireFrictionModel::GetLabel(ndTireFrictionModel::ndFrictionModel(joint->m_frictionModel))))
+	{
+		auto SetDropdownList = [this, joint](const char* const name)
+		{
+			const char* const frictionModel = ndTireFrictionModel::GetLabel(ndTireFrictionModel::ndFrictionModel(joint->m_frictionModel));
+			bool selected = strcmp(name, frictionModel) ? false : true;
+			if (ImGui::Selectable(name, selected))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+				joint->m_frictionModel = ndMeshJointVehicleTireJoint::ndFrictionModel(ndTireFrictionModel::GetModel(name));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+			}
+		};
+
+		SetDropdownList(ndTireFrictionModel::GetLabel(ndTireFrictionModel::m_coulomb));
+		SetDropdownList(ndTireFrictionModel::GetLabel(ndTireFrictionModel::m_pacejkaSport));
+		SetDropdownList(ndTireFrictionModel::GetLabel(ndTireFrictionModel::m_pacejkaTruck));
+		SetDropdownList(ndTireFrictionModel::GetLabel(ndTireFrictionModel::m_pacejkaUtility));
+		SetDropdownList(ndTireFrictionModel::GetLabel(ndTireFrictionModel::m_pacejkaCustom));
+		SetDropdownList(ndTireFrictionModel::GetLabel(ndTireFrictionModel::m_coulombCicleOfFriction));
+		ImGui::EndCombo();
 	}
 }
 

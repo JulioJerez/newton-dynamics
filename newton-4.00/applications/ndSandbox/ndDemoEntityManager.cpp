@@ -694,6 +694,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	,m_showStaticMeshCollidingFaces(false)
 	,m_showRaycastHit(false)
 	,m_profilerMode(false)
+	,m_changeCamera(false)
 	,m_nextActiveCamera()
 	,m_solverMode(ndWorld::ndSimdSoaSolver)
 {
@@ -1369,7 +1370,16 @@ void ndDemoEntityManager::ChangeActiveCamera()
 
 void ndDemoEntityManager::SetNextActiveCamera()
 {
-	if (m_nextActiveCamera.Update(GetKeyState(ImGuiKey_C) ? true : false))
+	bool changeCamera = GetKeyState(ImGuiKey_C) ? true : false;
+	if (!changeCamera)
+	{
+		const ndFixSizeArray<bool, 32>& buttons = m_gameController->GetButtons();
+		bool controlChangeCamera = buttons[ndGameControllerInputs::m_changeCamera];
+		changeCamera = controlChangeCamera && !m_changeCamera;
+		m_changeCamera = controlChangeCamera;
+	}
+
+	if (m_nextActiveCamera.Update(changeCamera))
 	{
 		ChangeActiveCamera();
 	}

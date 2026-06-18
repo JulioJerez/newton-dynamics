@@ -157,13 +157,12 @@ void ndPhysicsWorld::OnSubStepPostUpdate(ndFloat32 timestep)
 		}
 	}
 #endif
-
 }
 
 void ndPhysicsWorld::OnAddBody(ndBody* const body) const
 {
 	ndWorld::OnAddBody(body);
-	ndTrace(("adding a body %d from world\n", body->GetId()));
+	ndTrace(("adding a body %d to world\n", body->GetId()));
 
 	ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*body->GetNotifyCallback();
 	if (notify)

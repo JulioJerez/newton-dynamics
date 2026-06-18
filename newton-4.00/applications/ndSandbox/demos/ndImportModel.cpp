@@ -18,6 +18,7 @@
 #include "ndDemoEntityManager.h"
 #include "ndDemoCameraNodeFollow.h"
 #include "ndHeightFieldPrimitive.h"
+#include "ndGameControllerInputs.h"
 
 class ndVanillaController : public ndModelNotify
 {
@@ -94,7 +95,6 @@ class ndVanillaController : public ndModelNotify
             ndFloat32 omega = chassisMatrix.m_up.DotProduct(engineOmega).GetScalar();
             ndFloat32 torqueMag = m_engineTorque - m_engineDrag * omega * omega * ndSign(omega);
 
-            //const ndVector torque(engineMatrix.m_up.Scale(torqueMag));
             const ndVector torque(engineMatrix.m_front.Scale(torqueMag));
             engineBody->SetTorque(torque);
 
@@ -122,31 +122,29 @@ class ndVanillaController : public ndModelNotify
             {
                 // very simplistic moter power system
                 ndBodyDynamic* const engine = m_motor->m_body->GetAsBodyDynamic();
-                m_engineTorque = ndFloat32(0.0f);
-                if (m_scene->GetKeyState(ImGuiKey_W))
+
+                const ndSharedPtr<ndGameControllerInputs>& gameController = m_scene->GetGameController();
+                const ndFixSizeArray<ndFloat32, 8>& axis = gameController->GetAxis();
+
+                ndFloat32 throttle = axis[ndGameControllerInputs::m_gasPedal];
+
+                //ndTrace(("%f %f\n", throttle, brake));
+                m_engineTorque = throttle * m_engineMaxTorque;
+                if (ndAbs(throttle) > 0.1f)
                 {
-                    m_engineTorque = m_engineMaxTorque;
-                    engine->SetSleepState(false);
-                }
-                else if (m_scene->GetKeyState(ImGuiKey_S))
-                {
-                    m_engineTorque = -m_engineMaxTorque;
                     engine->SetSleepState(false);
                 }
             }
 
             if (m_wheels.GetCount())
             {
+                const ndSharedPtr<ndGameControllerInputs>& gameController = m_scene->GetGameController();
+                const ndFixSizeArray<ndFloat32, 8>& axis = gameController->GetAxis();
+
                 // very simplistic steering system
-                m_steerAngle = ndFloat32(0.0f);
-                if (m_scene->GetKeyState(ImGuiKey_A))
-                {
-                    m_steerAngle = ndFloat32(1.0f);
-                }
-                else if (m_scene->GetKeyState(ImGuiKey_D))
-                {
-                    m_steerAngle = ndFloat32(-1.0f);
-                }
+                ndFloat32 brake = axis[ndGameControllerInputs::m_brakePedal];
+                ndFloat32 steeringParam = axis[ndGameControllerInputs::m_steeringWheel];
+                m_steerAngle = steeringParam * ndFloat32 (1.0f);
 
                 for (ndList<ndWeakPtr<ndJointWheel>>::ndNode* node = m_wheels.GetFirst(); node; node = node->GetNext())
                 {
@@ -159,8 +157,14 @@ class ndVanillaController : public ndModelNotify
                     {
                         ndBodyDynamic* const wheelBody = wheel->GetBody0()->GetAsBodyDynamic();
                         wheelBody->SetSleepState(false);
-                        wheel->SetSteering(angle);
                     }
+                    if (ndAbs(brake) > ndFloat32 (0.1f))
+                    {
+                        ndBodyDynamic* const wheelBody = wheel->GetBody0()->GetAsBodyDynamic();
+                        wheelBody->SetSleepState(false);
+                    }
+                    wheel->SetBrake(brake);
+                    wheel->SetSteering(angle);
                 }
             }
         }
@@ -241,6 +245,7 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
             {
                 ndDemoEntityNotify* const fastNotify = (ndDemoEntityNotify*)*notify;
                 fastNotify->m_capSpeed = ndFloat32(30.0f);
+                node->m_body->GetAsBodyDynamic()->SetMaxLinearAndAngularIntegrationStep(node->m_body->GetAsBodyDynamic()->GetMaxAngularStep(), ndFloat32(10.0f));
             }
 
             if (node->m_joint)
@@ -250,7 +255,8 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
                 {
                     // fast moving wheel
                     ndDemoEntityNotify* const fastNotify = (ndDemoEntityNotify*)*notify;
-                    fastNotify->m_capOmega = ndFloat32(1000.0f);
+                    fastNotify->m_capOmega = ndFloat32(100.0f);
+                    node->m_body->GetAsBodyDynamic()->SetMaxLinearAndAngularIntegrationStep(ndFloat32(360.0f) * ndDegreeToRad, node->m_body->GetAsBodyDynamic()->GetMaxLinearStep());
                 }
             }
             node->m_body->SetNotifyCallback(notify);

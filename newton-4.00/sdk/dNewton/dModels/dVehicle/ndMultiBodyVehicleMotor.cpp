@@ -168,17 +168,14 @@ void ndMultiBodyVehicleMotor::JacobianDerivative(ndConstraintDescritor& desc)
 	// add rotor joint acceleration
 	AddAngularRowJacobian(desc, matrix0.m_front * ndVector::m_negOne, ndFloat32(0.0f));
 
+	// de coupling chassis.
+	ndJacobian& chassisJacobian = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
+	chassisJacobian.m_angular = ndVector::m_zero;
+
 	const ndFloat32 accel = CalculateAcceleration(desc);
 	const ndFloat32 torque = ndMax(m_engineTorque, m_internalFriction);
 	SetMotorAcceleration(desc, accel);
 	SetHighFriction(desc, torque);
 	SetLowerFriction(desc, -m_internalFriction);
 	SetDiagonalRegularizer(desc, ndFloat32(0.001f));
-	
-	// add torque coupling to chassis.
-	if (m_vehicle && m_vehicle->m_gearBox && (ndAbs(m_vehicle->m_gearBox->GetRatio()) > ndFloat32(0.0f)))
-	{
-		//ndJacobian& chassisJacobian = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
-		//chassisJacobian.m_angular = ndVector::m_zero;
-	}
 }

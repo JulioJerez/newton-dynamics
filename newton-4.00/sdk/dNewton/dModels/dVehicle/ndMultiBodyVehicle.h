@@ -27,6 +27,7 @@
 #include "ndIkSolver.h"
 #include "ndJointWheel.h"
 #include "ndModelArticulation.h"
+#include "ndMultiBodyVehicleTireJoint.h"
 
 class ndWorld;
 class ndBodyDynamic;
@@ -135,7 +136,7 @@ class ndVehicleDectriptor: public ndClassAlloc
 	ndFloat32 m_chassisAngularDrag;
 	ndEngineTorqueCurve m_engine;
 	ndGearBox m_transmission;
-	ndTireFrictionModel m_tireFrictionModel;
+	//ndTireFrictionModel m_tireFrictionModel;
 	//ndFloat32 m_motorMass;
 	//ndFloat32 m_motorRadius;
 	//ndFloat32 m_differentialMass;
@@ -231,9 +232,9 @@ class ndMultiBodyVehicle : public ndModelArticulation
 #endif
 
 	private:
-	void FinalizeBuild();
 	void ApplyTireModel();
 	void ApplyStabilityControl();
+	void CalculateSprungWeight();
 	void ApplyAlignmentAndBalancing();
 	void ApplyAerodynamics(ndFloat32 timestep);
 	void ApplyTireModel(ndFixSizeArray<ndTireContactPair, 128>& tireContacts);

@@ -351,5 +351,32 @@ class ndMeshJointVehicleDifferentialAxle : public ndMeshJoint
 
 	ndReal m_gearRatio;
 };
+
+class ndMeshJointVehicleTireJoint : public ndMeshJointWheel
+{
+	public:
+	enum ndFrictionModel
+	{
+		m_coulomb,
+		m_pacejkaSport,
+		m_pacejkaTruck,
+		m_pacejkaUtility,
+		m_pacejkaCustom,
+		m_coulombCicleOfFriction,
+	};
+
+	D_NEWTON_API ndMeshJointVehicleTireJoint(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointVehicleTireJoint(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
+	D_NEWTON_API ndMeshJointVehicleTireJoint(const ndMeshJointVehicleTireJoint& other);
+
+	D_NEWTON_API virtual ndMeshJoint* Duplicate() const override;
+	D_NEWTON_API virtual bool operator==(const ndMeshJoint& other) const override;
+
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
+
+	ndFrictionModel m_frictionModel;
+};
 #endif
 

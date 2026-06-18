@@ -265,7 +265,6 @@ class ndDemoEntityManager : public ndClassAlloc
 	bool m_helperLegend;
 	bool m_autoSleepMode;
 	bool m_showScene;
-	//bool m_showConcaveEdge;
 	bool m_hideVisualMeshes;
 	bool m_showNormalForces;
 	bool m_showCenterOfMass;
@@ -281,6 +280,7 @@ class ndDemoEntityManager : public ndClassAlloc
 	bool m_showStaticMeshCollidingFaces;
 	bool m_showRaycastHit;
 	bool m_profilerMode;
+	bool m_changeCamera;
 	ndKeyTrigger m_nextActiveCamera;
 	
 	ndWorld::ndSolverModes m_solverMode;
