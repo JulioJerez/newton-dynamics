@@ -24,8 +24,9 @@ ndVehicleCommonNotify::ndVehicleCommonNotify(ndMultiBodyVehicle* const vehicle)
 {
 	SetModel(vehicle);
 	const ndVehicleDectriptor& desc = vehicle->GetDescriptor();
+
+	ndAssert(0);
 	//m_currentGear = sizeof(desc.m_transmission.m_forwardRatios) / sizeof(desc.m_transmission.m_forwardRatios[0]) + 1;
-	m_currentGear = sizeof(desc.m_transmission.m_forwardRatios) / sizeof(desc.m_transmission.m_forwardRatios[0]) + 1;
 }
 
 void ndVehicleCommonNotify::Update(ndFloat32 timestep)
@@ -83,32 +84,34 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 	{
 		ndFloat32 throttle = axis[ndGameControllerInputs::m_gasPedal];
 		
-		const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& engineCurve = motor->GetCurve();
-		ndFloat32 currentOmega = motor->GetRpm() / ndRadPerSecToRpm;
-		ndFloat32 desiredOmega = ndMax(engineCurve.GetIdleRadPerSec(), throttle * engineCurve.GetRedLineRadPerSec());
-		ndFloat32 torqueFromCurve = engineCurve.GetTorque(currentOmega);
-		
-		motor->SetTorqueAndRpm(torqueFromCurve, desiredOmega * ndRadPerSecToRpm);
-		vehicle->GetChassis()->SetSleepState(false);
-		motor->GetBody0()->SetSleepState(false);
-		
-		ndFloat32 brake = axis[ndGameControllerInputs::m_brakePedal];
-		ndFloat32 steerAngle = axis[ndGameControllerInputs::m_steeringWheel];
-		ndFloat32 handBrake = buttons[ndGameControllerInputs::m_handBreakButton] ? ndFloat32(1.0f) : ndFloat32(0.0f);
-		for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = vehicle->GetTireList().GetFirst(); node; node = node->GetNext())
-		{
-			ndMultiBodyVehicleTireJoint* const tire = node->GetInfo();
-			tire->SetBrake(brake);
-			tire->SetSteering(steerAngle);
-			tire->SetHandBrake(handBrake);
-			tire->GetBody0()->SetSleepState(false);
-		}
+		ndAssert(0);
+		//const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& engineCurve = motor->GetCurve();
+		//ndFloat32 currentOmega = motor->GetRpm() / ndRadPerSecToRpm;
+		//ndFloat32 desiredOmega = ndMax(engineCurve.GetIdleRadPerSec(), throttle * engineCurve.GetRedLineRadPerSec());
+		//ndFloat32 torqueFromCurve = engineCurve.GetTorque(currentOmega);
+		//
+		//motor->SetTorqueAndRpm(torqueFromCurve, desiredOmega * ndRadPerSecToRpm);
+		//vehicle->GetChassis()->SetSleepState(false);
+		//motor->GetBody0()->SetSleepState(false);
+		//
+		//ndFloat32 brake = axis[ndGameControllerInputs::m_brakePedal];
+		//ndFloat32 steerAngle = axis[ndGameControllerInputs::m_steeringWheel];
+		//ndFloat32 handBrake = buttons[ndGameControllerInputs::m_handBreakButton] ? ndFloat32(1.0f) : ndFloat32(0.0f);
+		//for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = vehicle->GetTireList().GetFirst(); node; node = node->GetNext())
+		//{
+		//	ndMultiBodyVehicleTireJoint* const tire = node->GetInfo();
+		//	tire->SetBrake(brake);
+		//	tire->SetSteering(steerAngle);
+		//	tire->SetHandBrake(handBrake);
+		//	tire->GetBody0()->SetSleepState(false);
+		//}
 	};
 	ApplyControls();
 
 	ndMultiBodyVehicleGearBox* const gearBox = vehicle->GetGearBox();
 	ndAssert(gearBox);
-
+	ndAssert(0);
+#if 0
 	switch (m_driverState)
 	{
 		case m_parked:
@@ -292,4 +295,6 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			ndAssert(0);
 		}
 	}
+
+#endif
 }

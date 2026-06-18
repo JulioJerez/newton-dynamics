@@ -47,21 +47,6 @@ ndVehicleDectriptor::ndVehicleDectriptor()
 {
 	m_chassisAngularDrag = ndFloat32(0.25f);
 
-	m_transmission.m_gearsCount = 4;
-	m_transmission.m_neutral = ndFloat32(0.0f);
-	m_transmission.m_reverseRatio = ndFloat32(-3.0f);
-	m_transmission.m_crownGearRatio = ndFloat32(10.0f);
-
-	m_transmission.m_forwardRatios[0] = ndFloat32(3.0f);
-	m_transmission.m_forwardRatios[1] = ndFloat32(1.5f);
-	m_transmission.m_forwardRatios[2] = ndFloat32(1.1f);
-	m_transmission.m_forwardRatios[3] = ndFloat32(0.8f);
-
-	m_transmission.m_torqueConverter = ndFloat32(2000.0f);
-	m_transmission.m_idleClutchTorque = ndFloat32(200.0f);
-	m_transmission.m_lockedClutchTorque = ndFloat32(1.0e6f);
-	m_transmission.m_gearShiftDelayTicks = 180;
-	m_transmission.m_manual = false;
 	m_slipDifferentialRmpLock = ndFloat32(30.0f);
 
 	m_torsionBarSpringK = ndFloat32(100.0f);

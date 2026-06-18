@@ -27,37 +27,56 @@
 #include "ndMultiBodyVehicleMotor.h"
 #include "ndMultiBodyVehicleGearBox.h"
 
+
+ndMultiBodyVehicleGearBox::ndGearBox::ndGearBox()
+	:m_manual(false)
+{
+	m_crownGearRatio = ndFloat32(10.0f);
+	m_torqueConverter = ndFloat32(2000.0f);
+	m_idleClutchTorque = ndFloat32(200.0f);
+	m_lockedClutchTorque = ndFloat32(1.0e6f);
+	m_gearShiftDelayTicks = 180;
+
+	m_gearRatios.SetCount(m_firstGear);
+	m_gearRatios[m_revertGear] = ndReal(-3.0f);
+	m_gearRatios[m_neutralGear] = ndReal(0.0f);
+	m_gearRatios.PushBack(ndReal(3.0f));
+	m_gearRatios.PushBack(ndReal(1.5f));
+	m_gearRatios.PushBack(ndReal(1.1f));
+	m_gearRatios.PushBack(ndReal(0.8f));
+}
+
+bool ndMultiBodyVehicleGearBox::ndGearBox::operator==(const ndGearBox& other) const
+{
+	bool test = m_crownGearRatio == other.m_crownGearRatio;
+	test = test && (m_idleClutchTorque == other.m_idleClutchTorque);
+	test = test && (m_lockedClutchTorque == other.m_lockedClutchTorque);
+	test = test && (m_torqueConverter == other.m_torqueConverter);
+	test = test && (m_gearShiftDelayTicks == other.m_gearShiftDelayTicks);
+	test = test && (m_manual == other.m_manual);
+	test = test && (m_gearRatios.GetCount() == other.m_gearRatios.GetCount());
+	for (ndInt32 i = 0; test && (i < m_gearRatios.GetCount()); ++i)
+	{
+		test = test && (m_gearRatios[i] == other.m_gearRatios[i]);
+	}
+
+	return test;
+}
+
 ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox()
 	:ndJointGear()
+	,m_gearBox()
 	,m_idleOmega(ndFloat32(1.0f))
 	,m_clutchTorque(ndFloat32(1.0e5f))
 	,m_driveTrainResistanceTorque(ndFloat32(1000.0f))
 {
 }
 
-//ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox(ndBodyKinematic* const motor, ndBodyKinematic* const differential, bool reverseSpin)
-//	:ndJointGear(ndFloat32(1.0f), differential->GetMatrix().m_front, differential, motor->GetMatrix().m_front, motor)
-//	,m_idleOmega(ndFloat32(1.0f))
-//	,m_clutchTorque(ndFloat32(1.0e5f))
-//	,m_driveTrainResistanceTorque(ndFloat32(1000.0f))
-//{
-//	ndMatrix matrix0(ndGetIdentityMatrix());
-//	ndMatrix matrix1(ndGetIdentityMatrix());
-//	if (reverseSpin)
-//	{
-//		matrix0 = ndYawMatrix(ndPi);
-//	}
-//	SetLocalMatrix0(matrix0);
-//	SetLocalMatrix1(matrix1);
-//
-//	SetRatio(ndFloat32(0.0f));
-//	SetSolverModel(m_jointkinematicCloseLoop);
-//}
-
 ndMultiBodyVehicleGearBox::ndMultiBodyVehicleGearBox(ndFloat32 gearRatio,
 	const ndVector& motorPin, ndBodyKinematic* const motor,
 	const ndVector& differentialPin, ndBodyKinematic* const differential)
 	:ndJointGear(gearRatio, differentialPin, differential, motorPin, motor)
+	,m_gearBox()
 	,m_idleOmega(ndFloat32(1.0f))
 	,m_clutchTorque(ndFloat32(1.0e5f))
 	,m_driveTrainResistanceTorque(ndFloat32(1000.0f))
@@ -72,8 +91,19 @@ ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleGearBox::GetMeshJoint(const ndMesh* c
 	return ndSharedPtr<ndMeshJoint>(joint);
 }
 
+const ndMultiBodyVehicleGearBox::ndGearBox& ndMultiBodyVehicleGearBox::GetGearBox() const
+{
+	return m_gearBox;
+}
+
+void ndMultiBodyVehicleGearBox::SetGearBox(const ndGearBox& gearBox)
+{
+	m_gearBox = gearBox;
+}
+
 void ndMultiBodyVehicleGearBox::SetIdleOmega(ndFloat32 rpm)
 {
+	ndAssert(0);
 	m_idleOmega = ndMax(rpm / ndRadPerSecToRpm, ndFloat32(0.0f));
 }
 
@@ -114,7 +144,6 @@ void ndMultiBodyVehicleGearBox::JacobianDerivative(ndConstraintDescritor& desc)
 		
 		AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
 
-		//const ndFloat32 gearRatio = ndFloat32(1.0f) / m_gearRatio;
 		const ndFloat32 gearRatio = m_gearRatio;
 		ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
 		ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;

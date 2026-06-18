@@ -42,48 +42,6 @@ class ndMultiBodyVehicleDifferentialAxle;
 class ndVehicleDectriptor: public ndClassAlloc
 {
 	public:
-	class ndGearBox
-	{
-		public:
-		ndGearBox()
-			:m_gearsCount(4)
-			,m_manual(false)
-		{
-			m_neutral = ndFloat32 (0.0f);
-			m_reverseRatio = ndFloat32(-3.0f);
-			m_crownGearRatio = ndFloat32(5.0f);
-
-			m_forwardRatios[0] = ndFloat32 (3.0f);
-			m_forwardRatios[1] = ndFloat32 (1.5f);
-			m_forwardRatios[2] = ndFloat32 (1.1f);
-			m_forwardRatios[3] = ndFloat32 (0.8f);
-
-			m_torqueConverter = ndFloat32(2000.0f);
-			m_idleClutchTorque = ndFloat32(200.0f);
-			m_lockedClutchTorque = ndFloat32(1.0e6f);
-			m_gearShiftDelayTicks = 300;
-		}
-
-		union
-		{
-			struct
-			{
-				ndFloat32 m_forwardRatios[5];
-				ndFloat32 m_reverseRatio;
-				ndFloat32 m_neutral;
-			};
-			ndFloat32 m_ratios[8];
-		};
-
-		ndFloat32 m_idleClutchTorque;
-		ndFloat32 m_lockedClutchTorque;
-		ndFloat32 m_crownGearRatio;
-		ndFloat32 m_torqueConverter;
-		ndInt32 m_gearsCount;
-		ndInt32 m_gearShiftDelayTicks;
-		bool m_manual;
-	};
-
 	enum ndDifferentialType
 	{
 		m_rearWheelDrive,
@@ -104,7 +62,6 @@ class ndVehicleDectriptor: public ndClassAlloc
 
 	ndString m_name;
 	ndFloat32 m_chassisAngularDrag;
-	ndGearBox m_transmission;
 
 	ndFloat32 m_slipDifferentialRmpLock;
 	ndDifferentialType m_differentialType;

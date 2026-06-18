@@ -31,37 +31,25 @@ D_MSV_NEWTON_CLASS_ALIGN_32
 class ndMultiBodyVehicleMotor: public ndJointBilateralConstraint
 {
 	public:
-	class ndTorqueTap
-	{
-		public:
-		ndTorqueTap() {}
-		ndTorqueTap(ndFloat32 rpm, ndFloat32 torqueInPoundFeet)
-			:m_radPerSeconds(rpm* ndFloat32(0.105f))
-			,m_torqueInNewtonMeters(torqueInPoundFeet* ndFloat32(1.36f))
-		{
-		}
-		ndReal m_radPerSeconds;
-		ndReal m_torqueInNewtonMeters;
-	};
-
 	class ndEngineTorqueCurve
 	{
 		public:
 		D_NEWTON_API ndEngineTorqueCurve();
-
 		D_NEWTON_API void Init(ndFloat32 idleTorquePoundFoot, ndFloat32 idleRmp,
 			ndFloat32 horsePower, ndFloat32 rpm0, ndFloat32 rpm1,
 			ndFloat32 horsePowerAtRedLine, ndFloat32 redLineRpm);
 
-		D_NEWTON_API ndFloat32 GetIdleRadPerSec() const;
-		D_NEWTON_API ndFloat32 GetRedLineRadPerSec() const;
-		D_NEWTON_API ndFloat32 GetLowGearShiftRadPerSec() const;
-		D_NEWTON_API ndFloat32 GetHighGearShiftRadPerSec() const;
-		D_NEWTON_API ndFloat32 GetTorque(ndFloat32 omegaInRadPerSeconds) const;
-
+		D_NEWTON_API ndFloat32 GetIdleRpm() const;
+		D_NEWTON_API ndFloat32 GetRedLineRpm() const;
+		D_NEWTON_API ndFloat32 GetLowGearShiftRpm() const;
+		D_NEWTON_API ndFloat32 GetHighGearShiftRpm() const;
+		D_NEWTON_API ndFloat32 GetTorque(ndFloat32 rpm) const;
 		D_NEWTON_API void SetOmegaAccel(ndFloat32 rpmStep);
 
-		ndFixSizeArray<ndTorqueTap, 16> m_torqueCurve;
+		D_NEWTON_API bool operator==(const ndEngineTorqueCurve& other) const;
+
+		ndFixSizeArray<ndReal, 16> m_rpms;
+		ndFixSizeArray<ndReal, 16> m_torques;
 		ndReal m_omegaStep;
 		ndReal m_frictionLoss;
 	};

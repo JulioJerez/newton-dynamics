@@ -31,13 +31,37 @@ D_MSV_NEWTON_CLASS_ALIGN_32
 class ndMultiBodyVehicleGearBox : public ndJointGear
 {
 	public: 
+	class ndGearBox
+	{
+		public:
+		enum Gear
+		{
+			m_revertGear,
+			m_neutralGear,
+			m_firstGear,
+		};
+
+		D_NEWTON_API ndGearBox();
+		D_NEWTON_API bool operator==(const ndGearBox& other) const;
+
+		ndFixSizeArray<ndReal, 8> m_gearRatios;
+		ndReal m_crownGearRatio;
+		ndReal m_idleClutchTorque;
+		ndReal m_lockedClutchTorque;
+		ndReal m_torqueConverter;
+		ndInt32 m_gearShiftDelayTicks;
+		bool m_manual;
+	};
+
 	D_CLASS_REFLECTION(ndMultiBodyVehicleGearBox, ndJointGear)
 
 	D_NEWTON_API ndMultiBodyVehicleGearBox();
-	//D_NEWTON_API ndMultiBodyVehicleGearBox(ndBodyKinematic* const motor, ndBodyKinematic* const differential, bool reverseSpin = false);
 	D_NEWTON_API ndMultiBodyVehicleGearBox(ndFloat32 gearRatio,
 		const ndVector& motorPin, ndBodyKinematic* const motor,
 		const ndVector& differentialPin, ndBodyKinematic* const differential);
+
+	D_NEWTON_API const ndGearBox& GetGearBox() const;
+	D_NEWTON_API void SetGearBox(const ndGearBox& gearBox);
 
 	D_NEWTON_API void SetIdleOmega(ndFloat32 rpm);
 	D_NEWTON_API void SetClutchTorque(ndFloat32 torqueInNewtonMeters);
@@ -52,6 +76,7 @@ class ndMultiBodyVehicleGearBox : public ndJointGear
 	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
 	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
+	ndGearBox m_gearBox;
 	ndFloat32 m_idleOmega;
 	ndFloat32 m_clutchTorque;
 	ndFloat32 m_driveTrainResistanceTorque;
