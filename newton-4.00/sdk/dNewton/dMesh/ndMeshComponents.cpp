@@ -1339,18 +1339,24 @@ ndJointBilateralConstraint* ndMeshJointVehicleDifferentialAxle::CreateObject(ndB
 ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMesh* const owner)
 	:ndMeshJointWheel(owner)
 	,m_frictionModel(m_pacejkaUtility)
+	,m_lateralStiffness(ndReal (1.0f))
+	,m_longitudinalStiffness(ndReal(1.0f))
 {
 }
 
 ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJointWheel(owner, joint)
 	,m_frictionModel(m_pacejkaUtility)
+	,m_lateralStiffness(ndReal(1.0f))
+	,m_longitudinalStiffness(ndReal(1.0f))
 {
 }
 
 ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMeshJointVehicleTireJoint& other)
 	:ndMeshJointWheel(other)
 	,m_frictionModel(other.m_frictionModel)
+	,m_lateralStiffness(other.m_lateralStiffness)
+	,m_longitudinalStiffness(other.m_longitudinalStiffness)
 {
 }
 
@@ -1366,6 +1372,8 @@ bool ndMeshJointVehicleTireJoint::operator==(const ndMeshJoint& other) const
 	{
 		const ndMeshJointVehicleTireJoint* const otherJoint = (ndMeshJointVehicleTireJoint*)&other;
 		test = test && (m_frictionModel == otherJoint->m_frictionModel);
+		test = test && (m_lateralStiffness == otherJoint->m_lateralStiffness);
+		test = test && (m_longitudinalStiffness == otherJoint->m_longitudinalStiffness);
 	}
 	return test;
 }
@@ -1374,6 +1382,8 @@ void ndMeshJointVehicleTireJoint::SerializeToXml(nd::TiXmlElement* const parent)
 {
 	ndMeshJointWheel::SerializeToXml(parent);
 	xmlSaveParam(parent, "frictionModel", ndTireFrictionModel::GetLabel(ndTireFrictionModel::ndFrictionModel(m_frictionModel)));
+	xmlSaveParam(parent, "lateralStiffness", m_lateralStiffness);
+	xmlSaveParam(parent, "longitudinalStiffness", m_longitudinalStiffness);
 }
 
 void ndMeshJointVehicleTireJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
@@ -1381,6 +1391,9 @@ void ndMeshJointVehicleTireJoint::DeserializeFromXml(const nd::TiXmlElement* con
 	ndMeshJointWheel::DeserializeFromXml(parent);
 	const char* const modelLabel = xmlGetString(parent, "frictionModel");
 	m_frictionModel = ndFrictionModel(ndTireFrictionModel::GetModel(modelLabel));
+
+	m_lateralStiffness = ndReal(xmlGetFloat(parent, "lateralStiffness"));
+	m_longitudinalStiffness = ndReal(xmlGetFloat(parent, "longitudinalStiffness"));
 }
 
 ndJointBilateralConstraint* ndMeshJointVehicleTireJoint::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
@@ -1392,6 +1405,8 @@ ndJointBilateralConstraint* ndMeshJointVehicleTireJoint::CreateObject(ndBodyKine
 	ndTireFrictionModel frictionModel;
 	frictionModel.SetPacejkaCurves(ndTireFrictionModel::ndFrictionModel(m_frictionModel));
 	joint->SetFrictionModel(frictionModel);
+	joint->SetStiffness(m_lateralStiffness, m_longitudinalStiffness);
+
 	return joint;
 }
 

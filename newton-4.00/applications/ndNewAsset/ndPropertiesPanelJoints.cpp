@@ -1033,6 +1033,22 @@ void ndAssetEditor::EditMotorWheelJoint()
 		SetDropdownList(ndTireFrictionModel::GetLabel(ndTireFrictionModel::m_coulombCicleOfFriction));
 		ImGui::EndCombo();
 	}
+
+	ndReal value = ndReal(joint->m_longitudinalStiffness);
+	if (ImGui::InputFloat("longitudinalStiffness", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+		joint->m_longitudinalStiffness = ndClamp(value, ndReal(0.0f), ndReal(1.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+	}
+
+	value = ndReal(joint->m_lateralStiffness);
+	if (ImGui::InputFloat("lateralStiffness", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+		joint->m_lateralStiffness = ndClamp(value, ndReal(0.0f), ndReal(1.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+	}
 }
 
 void ndAssetEditor::EditSphericalJoint()
