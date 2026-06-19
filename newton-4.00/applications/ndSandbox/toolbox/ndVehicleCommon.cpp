@@ -58,6 +58,16 @@ void ndVehicleCommonNotify::PostTransformUpdate(ndFloat32 timestep)
 	}
 }
 
+void ndVehicleCommonNotify::Debug(ndConstraintDebugCallback& callback) const
+{
+	ndModelNotify::Debug(callback);
+	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
+	if (vehicle)
+	{
+		vehicle->Debug(callback);
+	}
+}
+
 void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 {
 	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();

@@ -37,7 +37,6 @@ namespace ndMotorVehicle
 		public:
 		ndBasicVehicleDectriptor()
 			:ndVehicleDectriptor()
-			,m_pacejkaScale (ndFloat32 (0.4f))
 			,m_curve()
 		{
 			//ndTireFrictionModel xxxx;
@@ -50,7 +49,6 @@ namespace ndMotorVehicle
 			// plot the curve to check it is a value form
 			//m_tireFrictionModel.PlotPacejkaCurves("supercar");
 		}
-		ndFloat32 m_pacejkaScale;
 		ndMultiBodyVehicleMotor::ndEngineTorqueCurve m_curve;
 	};
 
@@ -128,10 +126,11 @@ namespace ndMotorVehicle
 					}
 					if ((strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0))
 					{
-						ndMultiBodyVehicleTireJoint* const joint = (ndMultiBodyVehicleTireJoint*)*node->m_joint;
-						ndTireFrictionModel frictionMode(joint->GetFrictionModel());
-						frictionMode.m_lateralPacejka.m_d = superCar.m_pacejkaScale;
-						joint->SetFrictionModel(frictionMode);
+						//override the friction model if desired
+						//ndMultiBodyVehicleTireJoint* const joint = (ndMultiBodyVehicleTireJoint*)*node->m_joint;
+						//ndTireFrictionModel frictionMode(joint->GetFrictionModel());
+						//frictionMode.m_lateralPacejka.m_d = superCar.m_pacejkaScale;
+						//joint->SetFrictionModel(frictionMode);
 					}
 					if ((strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleMotor::StaticClassName()) == 0))
 					{
