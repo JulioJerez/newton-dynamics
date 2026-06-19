@@ -232,6 +232,7 @@ void xmlSaveParam(nd::TiXmlElement* const rootNode, const char* const name, cons
 		buffer.SetCount(start + size);
 		ndMemCpy(&buffer[start], text, size);
 	}
+	buffer.PushBack(0);
 	CleanWhiteSpace(&buffer[0]);
 
 	nd::TiXmlElement* const node = new nd::TiXmlElement(name);
@@ -464,7 +465,7 @@ void xmlGetRealArray(const nd::TiXmlNode* const rootNode, const char* const name
 	ndInt32 count;
 	element->Attribute("count", &count);
 
-	const char* const data = element->Attribute("float3Array");
+	const char* const data = element->Attribute("floatArray");
 	ndAssert(data);
 
 	ndParseXmlData parseData(data);

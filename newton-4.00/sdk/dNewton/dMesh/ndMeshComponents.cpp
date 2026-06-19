@@ -1187,29 +1187,22 @@ ndJointBilateralConstraint* ndMeshJointVehicleDifferential::CreateObject(ndBodyK
 
 ndMeshJointVehicleMotor::ndMeshJointVehicleMotor(const ndMesh* const owner)
 	:ndMeshJoint(owner)
-	,m_maxOmega(ndReal(1000.0f))
+	,m_engineCurve()
 {
 }
 
 ndMeshJointVehicleMotor::ndMeshJointVehicleMotor(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
-	//,m_omega(ndReal(0.0f))
-	,m_maxOmega(ndReal(1000.0f))
-	//,m_omegaStep(ndReal(16.0f))
-	//,m_targetOmega(ndReal(0.0f))
-	//,m_engineTorque(ndReal(0.0f))
-	//,m_internalFriction(ndReal(100.0f))
+	,m_engineCurve()
 {
+	const ndMultiBodyVehicleMotor* const motor = (ndMultiBodyVehicleMotor*)joint;
+	ndAssert(strcmp(motor->ClassName(), ndMultiBodyVehicleMotor::StaticClassName()) == 0);
+	m_engineCurve = motor->GetCurve();
 }
 
 ndMeshJointVehicleMotor::ndMeshJointVehicleMotor(const ndMeshJointVehicleMotor& other)
 	:ndMeshJoint(other)
-	//,m_omega(other.m_omega)
-	,m_maxOmega(other.m_maxOmega)
-	//,m_omegaStep(other.m_omegaStep)
-	//,m_targetOmega(other.m_targetOmega)
-	//,m_engineTorque(other.m_engineTorque)
-	//,m_internalFriction(other.m_internalFriction)
+	,m_engineCurve(other.m_engineCurve)
 {
 }
 
@@ -1224,12 +1217,7 @@ bool ndMeshJointVehicleMotor::operator==(const ndMeshJoint& other) const
 	if (test)
 	{
 		const ndMeshJointVehicleMotor* const otherJoint = (ndMeshJointVehicleMotor*)&other;
-		//test = test && (m_omega == otherJoint->m_omega);
-		test = test && (m_maxOmega == otherJoint->m_maxOmega);
-		//test = test && (m_omegaStep == otherJoint->m_omegaStep);
-		//test = test && (m_targetOmega == otherJoint->m_targetOmega);
-		//test = test && (m_engineTorque == otherJoint->m_engineTorque);
-		//test = test && (m_internalFriction == otherJoint->m_internalFriction);
+		test = test && (m_engineCurve == otherJoint->m_engineCurve);
 	}
 	return test;
 }
@@ -1237,88 +1225,54 @@ bool ndMeshJointVehicleMotor::operator==(const ndMeshJoint& other) const
 void ndMeshJointVehicleMotor::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	ndMeshJoint::SerializeToXml(parent);
-	xmlSaveParam(parent, "maxOmega", m_maxOmega);
+	ndArray<ndReal> tmp;
+
+	tmp.SetCount(0);
+	for (ndInt32 i = 0; i < m_engineCurve.m_rpms.GetCount(); ++i)
+	{
+		tmp.PushBack(m_engineCurve.m_rpms[i]);
+	}
+	xmlSaveParam(parent, "rpms", tmp);
+
+	tmp.SetCount(0);
+	for (ndInt32 i = 0; i < m_engineCurve.m_torques.GetCount(); ++i)
+	{
+		tmp.PushBack(m_engineCurve.m_torques[i]);
+	}
+	xmlSaveParam(parent, "torques", tmp);
+
+	xmlSaveParam(parent, "fuelInjection", m_engineCurve.m_omegaStep);
+	xmlSaveParam(parent, "frictionLoss", m_engineCurve.m_frictionLoss);
 }
 
 void ndMeshJointVehicleMotor::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndMeshJoint::DeserializeFromXml(parent);
-	m_maxOmega = ndReal(xmlGetFloat(parent, "maxOmega"));
+	ndArray<ndReal> tmp;
+
+	tmp.SetCount(0);
+	xmlGetRealArray(parent, "rpms", tmp);
+	m_engineCurve.m_rpms.SetCount(0);
+	for (ndInt32 i = 0; i < tmp.GetCount(); ++i)
+	{
+		m_engineCurve.m_rpms.PushBack(tmp[i]);
+	}
+
+	tmp.SetCount(0);
+	xmlGetRealArray(parent, "torques", tmp);
+	m_engineCurve.m_torques.SetCount(0);
+	for (ndInt32 i = 0; i < tmp.GetCount(); ++i)
+	{
+		m_engineCurve.m_torques.PushBack(tmp[i]);
+	}
+	m_engineCurve.m_omegaStep = ndReal(xmlGetFloat(parent, "fuelInjection"));
+	m_engineCurve.m_frictionLoss = ndReal(xmlGetFloat(parent, "frictionLoss"));
 }
 
 ndJointBilateralConstraint* ndMeshJointVehicleMotor::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
 {
 	ndMultiBodyVehicleMotor* const joint = new ndMultiBodyVehicleMotor(child, parent);
-	joint->SetMaxRpm(m_maxOmega);
-	return joint;
-}
-
-ndMeshJointVehicleGearBox::ndMeshJointVehicleGearBox(const ndMesh* const owner)
-	:ndMeshJoint(owner)
-	,m_idleOmega(ndReal(1.0f))
-	,m_clutchTorque(ndReal(1.0f))
-	,m_driveTrainResistanceTorque(ndReal(1.0f))
-{
-}
-
-ndMeshJointVehicleGearBox::ndMeshJointVehicleGearBox(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
-	:ndMeshJoint(owner, joint)
-{
-	const ndMultiBodyVehicleGearBox* const subJoint = (ndMultiBodyVehicleGearBox*)joint;
-	m_idleOmega = ndReal(subJoint->GetIdleOmega());
-	m_clutchTorque = ndReal(subJoint->GetClutchTorque());
-	m_driveTrainResistanceTorque = ndReal(subJoint->GetInternalTorqueLoss());
-}
-
-ndMeshJointVehicleGearBox::ndMeshJointVehicleGearBox(const ndMeshJointVehicleGearBox& other)
-	:ndMeshJoint(other)
-	,m_idleOmega(other.m_idleOmega)
-	,m_clutchTorque(other.m_clutchTorque)
-	,m_driveTrainResistanceTorque(other.m_driveTrainResistanceTorque)
-{
-}
-
-ndMeshJoint* ndMeshJointVehicleGearBox::Duplicate() const
-{
-	return new ndMeshJointVehicleGearBox(*this);
-}
-
-bool ndMeshJointVehicleGearBox::operator==(const ndMeshJoint& other) const
-{
-	bool test = ndMeshJoint::operator==(other);
-
-	if (test)
-	{
-		const ndMeshJointVehicleGearBox* const otherJoint = (ndMeshJointVehicleGearBox*)&other;
-		test = test && (m_idleOmega == otherJoint->m_idleOmega);
-		test = test && (m_clutchTorque == otherJoint->m_clutchTorque);
-		test = test && (m_driveTrainResistanceTorque == otherJoint->m_driveTrainResistanceTorque);
-	}
-	return test;
-}
-
-void ndMeshJointVehicleGearBox::SerializeToXml(nd::TiXmlElement* const parent) const
-{
-	ndMeshJoint::SerializeToXml(parent);
-	xmlSaveParam(parent, "idleOmega", m_idleOmega);
-	xmlSaveParam(parent, "clutchTorque", m_clutchTorque);
-	xmlSaveParam(parent, "internalResitance", m_driveTrainResistanceTorque);
-}
-
-void ndMeshJointVehicleGearBox::DeserializeFromXml(const nd::TiXmlElement* const parent)
-{
-	ndMeshJoint::DeserializeFromXml(parent);
-	m_idleOmega = ndReal(xmlGetFloat(parent, "idleOmega"));
-	m_clutchTorque = ndReal(xmlGetFloat(parent, "clutchTorque"));
-	m_driveTrainResistanceTorque = ndReal(xmlGetFloat(parent, "internalResitance"));
-}
-
-ndJointBilateralConstraint* ndMeshJointVehicleGearBox::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
-{
-	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
-	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
-
-	ndMultiBodyVehicleGearBox* const joint = new ndMultiBodyVehicleGearBox(ndFloat32 (1.0f), pinAndPivotInChild.m_front, child, pinAndPivotInParent.m_front, parent);
+	joint->SetCurve(m_engineCurve);
 	return joint;
 }
 
@@ -1367,7 +1321,7 @@ void ndMeshJointVehicleDifferentialAxle::DeserializeFromXml(const nd::TiXmlEleme
 	ndMeshJoint::DeserializeFromXml(parent);
 	if (xmlHasAttribute(parent, "ratio"))
 	{
-		m_gearRatio = xmlGetFloat(parent, "ratio");
+		m_gearRatio = ndReal(xmlGetFloat(parent, "ratio"));
 	}
 }
 
@@ -1385,18 +1339,24 @@ ndJointBilateralConstraint* ndMeshJointVehicleDifferentialAxle::CreateObject(ndB
 ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMesh* const owner)
 	:ndMeshJointWheel(owner)
 	,m_frictionModel(m_pacejkaUtility)
+	,m_lateralStiffness(ndReal (1.0f))
+	,m_longitudinalStiffness(ndReal(1.0f))
 {
 }
 
 ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJointWheel(owner, joint)
 	,m_frictionModel(m_pacejkaUtility)
+	,m_lateralStiffness(ndReal(1.0f))
+	,m_longitudinalStiffness(ndReal(1.0f))
 {
 }
 
 ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMeshJointVehicleTireJoint& other)
 	:ndMeshJointWheel(other)
 	,m_frictionModel(other.m_frictionModel)
+	,m_lateralStiffness(other.m_lateralStiffness)
+	,m_longitudinalStiffness(other.m_longitudinalStiffness)
 {
 }
 
@@ -1412,6 +1372,8 @@ bool ndMeshJointVehicleTireJoint::operator==(const ndMeshJoint& other) const
 	{
 		const ndMeshJointVehicleTireJoint* const otherJoint = (ndMeshJointVehicleTireJoint*)&other;
 		test = test && (m_frictionModel == otherJoint->m_frictionModel);
+		test = test && (m_lateralStiffness == otherJoint->m_lateralStiffness);
+		test = test && (m_longitudinalStiffness == otherJoint->m_longitudinalStiffness);
 	}
 	return test;
 }
@@ -1420,6 +1382,8 @@ void ndMeshJointVehicleTireJoint::SerializeToXml(nd::TiXmlElement* const parent)
 {
 	ndMeshJointWheel::SerializeToXml(parent);
 	xmlSaveParam(parent, "frictionModel", ndTireFrictionModel::GetLabel(ndTireFrictionModel::ndFrictionModel(m_frictionModel)));
+	xmlSaveParam(parent, "lateralStiffness", m_lateralStiffness);
+	xmlSaveParam(parent, "longitudinalStiffness", m_longitudinalStiffness);
 }
 
 void ndMeshJointVehicleTireJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
@@ -1427,6 +1391,9 @@ void ndMeshJointVehicleTireJoint::DeserializeFromXml(const nd::TiXmlElement* con
 	ndMeshJointWheel::DeserializeFromXml(parent);
 	const char* const modelLabel = xmlGetString(parent, "frictionModel");
 	m_frictionModel = ndFrictionModel(ndTireFrictionModel::GetModel(modelLabel));
+
+	m_lateralStiffness = ndReal(xmlGetFloat(parent, "lateralStiffness"));
+	m_longitudinalStiffness = ndReal(xmlGetFloat(parent, "longitudinalStiffness"));
 }
 
 ndJointBilateralConstraint* ndMeshJointVehicleTireJoint::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
@@ -1438,5 +1405,96 @@ ndJointBilateralConstraint* ndMeshJointVehicleTireJoint::CreateObject(ndBodyKine
 	ndTireFrictionModel frictionModel;
 	frictionModel.SetPacejkaCurves(ndTireFrictionModel::ndFrictionModel(m_frictionModel));
 	joint->SetFrictionModel(frictionModel);
+	joint->SetStiffness(m_lateralStiffness, m_longitudinalStiffness);
+
+	return joint;
+}
+
+ndMeshJointVehicleGearBox::ndMeshJointVehicleGearBox(const ndMesh* const owner)
+	:ndMeshJoint(owner)
+	,m_gearBox()
+{
+}
+
+ndMeshJointVehicleGearBox::ndMeshJointVehicleGearBox(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(owner, joint)
+	,m_gearBox()
+{
+	ndAssert(0);
+	const ndMultiBodyVehicleGearBox* const subJoint = (ndMultiBodyVehicleGearBox*)joint;
+	m_gearBox = subJoint->GetGearBox();
+}
+
+ndMeshJointVehicleGearBox::ndMeshJointVehicleGearBox(const ndMeshJointVehicleGearBox& other)
+	:ndMeshJoint(other)
+	,m_gearBox(other.m_gearBox)
+{
+}
+
+ndMeshJoint* ndMeshJointVehicleGearBox::Duplicate() const
+{
+	return new ndMeshJointVehicleGearBox(*this);
+}
+
+bool ndMeshJointVehicleGearBox::operator==(const ndMeshJoint& other) const
+{
+	bool test = ndMeshJoint::operator==(other);
+
+	if (test)
+	{
+		const ndMeshJointVehicleGearBox* const otherJoint = (ndMeshJointVehicleGearBox*)&other;
+		test = test && (m_gearBox == otherJoint->m_gearBox);
+	}
+	return test;
+}
+
+void ndMeshJointVehicleGearBox::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+
+	ndArray<ndReal> tmp;
+	tmp.SetCount(0);
+	for (ndInt32 i = 0; i < m_gearBox.m_gearRatios.GetCount(); ++i)
+	{
+		tmp.PushBack(m_gearBox.m_gearRatios[i]);
+	}
+	xmlSaveParam(parent, "ratios", tmp);
+
+	xmlSaveParam(parent, "crownGearRatio", m_gearBox.m_crownGearRatio);
+	xmlSaveParam(parent, "idleClutchTorque", m_gearBox.m_idleClutchTorque);
+	xmlSaveParam(parent, "lockedClutchTorque", m_gearBox.m_lockedClutchTorque);
+	xmlSaveParam(parent, "torqueConverter", m_gearBox.m_torqueConverter);
+	xmlSaveParam(parent, "gearShiftDelayTicks", m_gearBox.m_gearShiftDelayTicks);
+	xmlSaveParam(parent, "autoTransmission", m_gearBox.m_manual ? 0 : 1);
+}
+
+void ndMeshJointVehicleGearBox::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndMeshJoint::DeserializeFromXml(parent);
+	
+	ndArray<ndReal> tmp;
+
+	xmlGetRealArray(parent, "ratios", tmp);
+	m_gearBox.m_gearRatios.SetCount(0);
+	for (ndInt32 i = 0; i < tmp.GetCount(); ++i)
+	{
+		m_gearBox.m_gearRatios.PushBack(tmp[i]);
+	}
+
+	m_gearBox.m_crownGearRatio = ndReal(xmlGetFloat(parent, "crownGearRatio"));
+	m_gearBox.m_idleClutchTorque = ndReal(xmlGetFloat(parent, "idleClutchTorque"));
+	m_gearBox.m_lockedClutchTorque = ndReal(xmlGetFloat(parent, "lockedClutchTorque"));
+	m_gearBox.m_torqueConverter = ndReal(xmlGetFloat(parent, "torqueConverter"));
+	m_gearBox.m_gearShiftDelayTicks = xmlGetInt(parent, "gearShiftDelayTicks");
+	m_gearBox.m_manual = xmlGetInt(parent, "autoTransmission") ? false : true;
+}
+
+ndJointBilateralConstraint* ndMeshJointVehicleGearBox::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+{
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
+
+	ndMultiBodyVehicleGearBox* const joint = new ndMultiBodyVehicleGearBox(ndFloat32(1.0f), pinAndPivotInChild.m_front, child, pinAndPivotInParent.m_front, parent);
+	joint->SetGearBox(m_gearBox);
 	return joint;
 }

@@ -24,6 +24,9 @@
 
 #include "ndNewtonStdafx.h"
 
+#include "ndMultiBodyVehicleMotor.h"
+#include "ndMultiBodyVehicleGearBox.h"
+
 class ndBody;
 class ndMeshEffect;
 class ndShapeInstance;
@@ -294,47 +297,6 @@ class ndMeshJointVehicleDifferential : public ndMeshJoint
 	ndReal m_limitedSlipOmega;
 };
 
-class ndMeshJointVehicleGearBox : public ndMeshJoint
-{
-	public:
-	D_NEWTON_API ndMeshJointVehicleGearBox(const ndMesh* const owner);
-	D_NEWTON_API ndMeshJointVehicleGearBox(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
-	D_NEWTON_API ndMeshJointVehicleGearBox(const ndMeshJointVehicleGearBox& other);
-
-	D_NEWTON_API virtual ndMeshJoint* Duplicate() const override;
-	D_NEWTON_API virtual bool operator==(const ndMeshJoint& other) const override;
-
-	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
-	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
-	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
-
-	ndReal m_idleOmega;
-	ndReal m_clutchTorque;
-	ndReal m_driveTrainResistanceTorque;
-};
-
-class ndMeshJointVehicleMotor : public ndMeshJoint
-{
-	public:
-	D_NEWTON_API ndMeshJointVehicleMotor(const ndMesh* const owner);
-	D_NEWTON_API ndMeshJointVehicleMotor(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
-	D_NEWTON_API ndMeshJointVehicleMotor(const ndMeshJointVehicleMotor& other);
-
-	D_NEWTON_API virtual ndMeshJoint* Duplicate() const override;
-	D_NEWTON_API virtual bool operator==(const ndMeshJoint& other) const override;
-
-	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
-	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
-	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
-
-	//ndReal m_omega;
-	ndReal m_maxOmega;
-	//ndReal m_omegaStep;
-	//ndReal m_targetOmega;
-	//ndReal m_engineTorque;
-	//ndReal m_internalFriction;
-};
-
 class ndMeshJointVehicleDifferentialAxle : public ndMeshJoint
 {
 	public:
@@ -377,6 +339,42 @@ class ndMeshJointVehicleTireJoint : public ndMeshJointWheel
 	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
 	ndFrictionModel m_frictionModel;
+	ndReal m_lateralStiffness;
+	ndReal m_longitudinalStiffness;
 };
-#endif
 
+class ndMeshJointVehicleMotor : public ndMeshJoint
+{
+	public:
+	D_NEWTON_API ndMeshJointVehicleMotor(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointVehicleMotor(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
+	D_NEWTON_API ndMeshJointVehicleMotor(const ndMeshJointVehicleMotor& other);
+
+	D_NEWTON_API virtual ndMeshJoint* Duplicate() const override;
+	D_NEWTON_API virtual bool operator==(const ndMeshJoint& other) const override;
+
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
+
+	ndMultiBodyVehicleMotor::ndEngineTorqueCurve m_engineCurve;
+};
+
+class ndMeshJointVehicleGearBox : public ndMeshJoint
+{
+	public:
+	D_NEWTON_API ndMeshJointVehicleGearBox(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointVehicleGearBox(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
+	D_NEWTON_API ndMeshJointVehicleGearBox(const ndMeshJointVehicleGearBox& other);
+
+	D_NEWTON_API virtual ndMeshJoint* Duplicate() const override;
+	D_NEWTON_API virtual bool operator==(const ndMeshJoint& other) const override;
+
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
+
+	ndMultiBodyVehicleGearBox::ndGearBox m_gearBox;
+};
+
+#endif

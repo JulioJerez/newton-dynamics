@@ -28,15 +28,137 @@
 #include "ndMultiBodyVehicleMotor.h"
 #include "ndMultiBodyVehicleGearBox.h"
 
+ndMultiBodyVehicleMotor::ndEngineTorqueCurve::ndEngineTorqueCurve()
+{
+	// take from the data sheet of a 2005 dodge viper, 
+	// some values are missing so I have to improvise them
+	//ndFloat32 idleTorquePoundFoot = ndFloat32(100.0f);
+	//ndFloat32 idleRmp = ndFloat32(800.0f);
+	//ndFloat32 horsePower = ndFloat32(400.0f);
+	//ndFloat32 rpm0 = ndFloat32(5000.0f);
+	//ndFloat32 rpm1 = ndFloat32(6200.0f);
+	//ndFloat32 horsePowerAtRedLine = ndFloat32(100.0f);
+	//ndFloat32 redLineRpm = ndFloat32(8000.0f);
+
+	ndFloat32 idleTorquePoundFoot = ndFloat32(100.0f);
+	ndFloat32 idleRmp = ndFloat32(900.0f);
+	ndFloat32 horsePower = ndFloat32(400.0f);
+	ndFloat32 rpm0 = ndFloat32(5000.0f);
+	ndFloat32 rpm1 = ndFloat32(6200.0f);
+	ndFloat32 horsePowerAtRedLine = ndFloat32(100.0f);
+	ndFloat32 redLineRpm = ndFloat32(8000.0f);
+
+	Init(idleTorquePoundFoot, idleRmp,
+		horsePower, rpm0, rpm1, horsePowerAtRedLine, redLineRpm);
+}
+
+void ndMultiBodyVehicleMotor::ndEngineTorqueCurve::Init(
+	ndFloat32 idleTorquePoundFoot, ndFloat32 idleRmp,
+	ndFloat32 horsePower, ndFloat32 rpm0, ndFloat32 rpm1,
+	ndFloat32 horsePowerAtRedLine, ndFloat32 redLineRpm)
+{
+	m_rpms.SetCount(5);
+	m_torques.SetCount(5);
+
+	m_rpms[0] = ndReal(0.0f);
+	m_torques[0] = ndReal(idleTorquePoundFoot);
+
+	m_rpms[1] = ndReal(idleRmp);
+	m_torques[1] = ndReal(idleTorquePoundFoot);
+
+	ndFloat32 power = horsePower * ndFloat32(746.0f);
+	ndFloat32 omegaInRadPerSec = rpm0 * ndFloat32(0.105f);
+	ndFloat32 torqueInPoundFood = (power / omegaInRadPerSec) / ndFloat32(1.36f);
+
+	m_rpms[2] = ndReal(rpm0);
+	m_torques[2] = ndReal (torqueInPoundFood);
+
+	power = horsePower * ndFloat32(746.0f);
+	omegaInRadPerSec = rpm1 / ndRadPerSecToRpm;
+	torqueInPoundFood = (power / omegaInRadPerSec) / ndFloat32(1.36f);
+	m_rpms[3] = ndReal(rpm1);
+	m_torques[3] = ndReal(torqueInPoundFood);
+
+	power = horsePowerAtRedLine * ndFloat32(746.0f);
+	omegaInRadPerSec = redLineRpm / ndRadPerSecToRpm;
+	torqueInPoundFood = (power / omegaInRadPerSec) / ndFloat32(1.36f);
+	m_rpms[4] = ndReal(redLineRpm);
+	m_torques[4] = ndReal(torqueInPoundFood);
+	m_torques[4] = ndReal(torqueInPoundFood);
+
+	m_omegaStep = ndFloat32(8.0f);
+	m_frictionLoss = ndReal(GetTorque(ndFloat32(0.0f)) * ndFloat32(0.5f));
+}
+
+bool ndMultiBodyVehicleMotor::ndEngineTorqueCurve::operator==(const ndEngineTorqueCurve& other) const
+{
+	bool test = m_omegaStep == other.m_omegaStep;
+	test = test && (m_frictionLoss == other.m_frictionLoss);
+	test = test && (m_rpms.GetCount() == other.m_rpms.GetCount());
+	test = test && (m_torques.GetCount() == other.m_torques.GetCount());
+
+	for (ndInt32 i = 0; test && i < m_rpms.GetCount(); ++i)
+	{
+		test = test && (m_rpms[i] == other.m_rpms[i]);
+		test = test && (m_torques[i] == other.m_torques[i]);
+	}
+	return test;
+}
+
+void ndMultiBodyVehicleMotor::ndEngineTorqueCurve::SetOmegaAccel(ndFloat32 rpmStep)
+{
+	m_omegaStep = ndReal (ndAbs(rpmStep / ndRadPerSecToRpm));
+}
+
+ndFloat32 ndMultiBodyVehicleMotor::ndEngineTorqueCurve::GetIdleRpm() const
+{
+	return m_rpms[1];
+}
+
+ndFloat32 ndMultiBodyVehicleMotor::ndEngineTorqueCurve::GetLowGearShiftRpm() const
+{
+	return m_rpms[2];
+}
+
+ndFloat32 ndMultiBodyVehicleMotor::ndEngineTorqueCurve::GetHighGearShiftRpm() const
+{
+	return m_rpms[3];
+}
+
+ndFloat32 ndMultiBodyVehicleMotor::ndEngineTorqueCurve::GetRedLineRpm() const
+{
+	const ndFloat32 rpm = m_rpms[m_rpms.GetCount() - 1];
+	return rpm;
+}
+
+ndFloat32 ndMultiBodyVehicleMotor::ndEngineTorqueCurve::GetTorque(ndFloat32 rpm) const
+{
+	rpm = ndClamp(rpm, ndFloat32(0.0f), ndFloat32(m_rpms[m_rpms.GetCount() - 1]));
+	for (ndInt32 i = 1; i < m_rpms.GetCount(); ++i)
+	{
+		if (rpm <= m_rpms[i])
+		{
+			const ndFloat32 rpm0 = m_rpms[i - 0];
+			const ndFloat32 rpm1 = m_rpms[i - 1];
+
+			const ndFloat32 torque0 = m_torques[i - 0];
+			const ndFloat32 torque1 = m_torques[i - 1];
+
+			const ndFloat32 torque = torque0 + (rpm - rpm0) * (torque1 - torque0) / (rpm1 - rpm0);
+			return torque;
+		}
+	}
+	return m_torques[m_torques.GetCount() - 1];
+}
+
+
 ndMultiBodyVehicleMotor::ndMultiBodyVehicleMotor()
 	:ndJointBilateralConstraint()
 	,m_vehicle(nullptr)
+	,m_engineCurve()
 	,m_omega(ndFloat32(0.0f))
-	,m_maxOmega(ndFloat32(100.0f))
-	,m_omegaStep(ndFloat32(16.0f))
 	,m_targetOmega(ndFloat32(0.0f))
 	,m_engineTorque(ndFloat32(0.0f))
-	,m_internalFriction(ndFloat32(100.0f))
 {
 	m_maxDof = 3;
 }
@@ -45,11 +167,8 @@ ndMultiBodyVehicleMotor::ndMultiBodyVehicleMotor(ndBodyKinematic* const motor, n
 	:ndJointBilateralConstraint(3, motor, *vehicelModel->m_chassis, motor->GetMatrix())
 	,m_vehicle(vehicelModel)
 	,m_omega(ndFloat32(0.0f))
-	,m_maxOmega(ndFloat32(100.0f))
-	,m_omegaStep(ndFloat32(16.0f))
 	,m_targetOmega(ndFloat32(0.0f))
 	,m_engineTorque(ndFloat32(0.0f))
-	,m_internalFriction(ndFloat32(100.0f))
 {
 }
 
@@ -57,18 +176,16 @@ ndMultiBodyVehicleMotor::ndMultiBodyVehicleMotor(ndBodyKinematic* const motor, n
 	:ndJointBilateralConstraint(3, motor, chassis, motor->GetMatrix())
 	,m_vehicle(nullptr)
 	,m_omega(ndFloat32(0.0f))
-	,m_maxOmega(ndFloat32(100.0f))
-	,m_omegaStep(ndFloat32(16.0f))
 	,m_targetOmega(ndFloat32(0.0f))
 	,m_engineTorque(ndFloat32(0.0f))
-	,m_internalFriction(ndFloat32(100.0f))
 {
 }
 
 ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleMotor::GetMeshJoint(const ndMesh* const owner) const
 {
 	ndMeshJointVehicleMotor* const joint = new ndMeshJointVehicleMotor(owner, this);
-	joint->m_maxOmega = ndReal(m_maxOmega);
+	ndAssert(0);
+	//joint->m_maxOmega = ndReal(m_maxOmega);
 	return ndSharedPtr<ndMeshJoint>(joint);
 }
 
@@ -101,30 +218,39 @@ void ndMultiBodyVehicleMotor::AlignMatrix()
 	m_body0->SetOmegaNoSleep(omega);
 }
 
-void ndMultiBodyVehicleMotor::SetFrictionLoss(ndFloat32 newtonMeters)
-{
-	m_internalFriction = ndAbs(newtonMeters);
-}
-
-void ndMultiBodyVehicleMotor::SetMaxRpm(ndFloat32 redLineRpm)
-{
-	m_maxOmega = ndMax(redLineRpm / ndRadPerSecToRpm, ndFloat32 (0.0f));
-}
+//void ndMultiBodyVehicleMotor::SetFrictionLoss(ndFloat32 newtonMeters)
+//{
+//	m_internalFriction = ndAbs(newtonMeters);
+//}
+//void ndMultiBodyVehicleMotor::SetMaxRpm(ndFloat32 redLineRpm)
+//{
+//	m_maxOmega = ndMax(redLineRpm / ndRadPerSecToRpm, ndFloat32 (0.0f));
+//}
+//void ndMultiBodyVehicleMotor::SetOmegaAccel(ndFloat32 rpmStep)
+//{
+//	m_omegaStep = ndAbs(rpmStep / ndRadPerSecToRpm);
+//}
 
 ndFloat32 ndMultiBodyVehicleMotor::GetMaxRpm() const
 {
-	return m_maxOmega * ndRadPerSecToRpm;
+	//return m_engineCurve.m_omega[m_engineCurve.m_omega.GetCount() - 1] * ndRadPerSecToRpm;
+	return m_engineCurve.m_rpms[m_engineCurve.m_rpms.GetCount() - 1];
 }
 
-void ndMultiBodyVehicleMotor::SetOmegaAccel(ndFloat32 rpmStep)
+const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& ndMultiBodyVehicleMotor::GetCurve() const
 {
-	m_omegaStep = ndAbs(rpmStep / ndRadPerSecToRpm);
+	return m_engineCurve;
+}
+
+void ndMultiBodyVehicleMotor::SetCurve(const ndEngineTorqueCurve& curve)
+{
+	m_engineCurve = curve;
 }
 
 void ndMultiBodyVehicleMotor::SetTorqueAndRpm(ndFloat32 newtonMeters, ndFloat32 rpm)
 {
 	m_engineTorque = ndMax(newtonMeters, ndFloat32(0.0f));
-	m_targetOmega = ndClamp(rpm / ndRadPerSecToRpm, ndFloat32(0.0f), m_maxOmega);
+	m_targetOmega = ndClamp(rpm, ndFloat32(0.0f), GetMaxRpm()) / ndRadPerSecToRpm;
 }
 
 ndFloat32 ndMultiBodyVehicleMotor::GetRpm() const
@@ -147,7 +273,8 @@ ndFloat32 ndMultiBodyVehicleMotor::CalculateAcceleration(ndConstraintDescritor& 
 	}
 
 	m_omega = currentOmega;
-	ndFloat32 omegaStep = ndClamp(m_targetOmega - m_omega, -m_omegaStep, m_omegaStep);
+	ndFloat32 gasStep = m_engineCurve.m_omegaStep;
+	ndFloat32 omegaStep = ndClamp(m_targetOmega - m_omega, -gasStep, gasStep);
 	ndFloat32 accel = omegaStep * desc.m_invTimestep;
 	return accel;
 }
@@ -173,9 +300,9 @@ void ndMultiBodyVehicleMotor::JacobianDerivative(ndConstraintDescritor& desc)
 	chassisJacobian.m_angular = ndVector::m_zero;
 
 	const ndFloat32 accel = CalculateAcceleration(desc);
-	const ndFloat32 torque = ndMax(m_engineTorque, m_internalFriction);
+	const ndFloat32 torque = ndMax(m_engineTorque, ndFloat32(m_engineCurve.m_frictionLoss));
 	SetMotorAcceleration(desc, accel);
 	SetHighFriction(desc, torque);
-	SetLowerFriction(desc, -m_internalFriction);
+	SetLowerFriction(desc, -m_engineCurve.m_frictionLoss);
 	SetDiagonalRegularizer(desc, ndFloat32(0.001f));
 }

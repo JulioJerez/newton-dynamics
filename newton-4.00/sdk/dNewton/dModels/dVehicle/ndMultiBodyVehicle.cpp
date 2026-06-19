@@ -40,126 +40,12 @@
 #define D_MAX_STEERING_RATE				ndFloat32(0.03f)
 #define D_MAX_SIZE_SLIP_RATE			ndFloat32(2.0f)
 
-ndVehicleDectriptor::ndEngineTorqueCurve::ndEngineTorqueCurve()
-{
-	// take from the data sheet of a 2005 dodge viper, 
-	// some values are missing so I have to improvise them
-	ndFloat32 idleTorquePoundFoot = ndFloat32 (100.0f);
-	ndFloat32 idleRmp = ndFloat32(800.0f);
-	ndFloat32 horsePower = ndFloat32(400.0f);
-	ndFloat32 rpm0 = ndFloat32(5000.0f);
-	ndFloat32 rpm1 = ndFloat32(6200.0f);
-	ndFloat32 horsePowerAtRedLine = ndFloat32(100.0f);
-	ndFloat32 redLineRpm = ndFloat32(8000.0f);
-	Init(idleTorquePoundFoot, idleRmp,
-		horsePower, rpm0, rpm1, horsePowerAtRedLine, redLineRpm);
-}
-
-void ndVehicleDectriptor::ndEngineTorqueCurve::Init(
-	ndFloat32 idleTorquePoundFoot, ndFloat32 idleRmp,
-	ndFloat32 horsePower, ndFloat32 rpm0, ndFloat32 rpm1,
-	ndFloat32 horsePowerAtRedLine, ndFloat32 redLineRpm)
-{
-	m_torqueCurve[0] = ndTorqueTap(ndFloat32(0.0f), idleTorquePoundFoot);
-	m_torqueCurve[1] = ndTorqueTap(idleRmp, idleTorquePoundFoot);
-
-	ndFloat32 power = horsePower * ndFloat32(746.0f);
-	ndFloat32 omegaInRadPerSec = rpm0 * ndFloat32(0.105f);
-	ndFloat32 torqueInPoundFood = (power / omegaInRadPerSec) / ndFloat32(1.36f);
-	m_torqueCurve[2] = ndTorqueTap(rpm0, torqueInPoundFood);
-
-	power = horsePower * ndFloat32(746.0f);
-	omegaInRadPerSec = rpm1 * ndFloat32(0.105f);
-	torqueInPoundFood = (power / omegaInRadPerSec) / ndFloat32(1.36f);
-	m_torqueCurve[3] = ndTorqueTap(rpm1, torqueInPoundFood);
-
-	power = horsePowerAtRedLine * ndFloat32(746.0f);
-	omegaInRadPerSec = redLineRpm * ndFloat32(0.105f);
-	torqueInPoundFood = (power / omegaInRadPerSec) / ndFloat32(1.36f);
-	m_torqueCurve[4] = ndTorqueTap(redLineRpm, torqueInPoundFood);
-}
-
-ndFloat32 ndVehicleDectriptor::ndEngineTorqueCurve::GetIdleRadPerSec() const
-{
-	return m_torqueCurve[1].m_radPerSeconds;
-}
-
-ndFloat32 ndVehicleDectriptor::ndEngineTorqueCurve::GetLowGearShiftRadPerSec() const
-{
-	return m_torqueCurve[2].m_radPerSeconds;
-}
-
-ndFloat32 ndVehicleDectriptor::ndEngineTorqueCurve::GetHighGearShiftRadPerSec() const
-{
-	return m_torqueCurve[3].m_radPerSeconds;
-}
-
-ndFloat32 ndVehicleDectriptor::ndEngineTorqueCurve::GetRedLineRadPerSec() const
-{
-	const ndInt32 maxIndex = sizeof(m_torqueCurve) / sizeof(m_torqueCurve[0]);
-	const ndFloat32 omega = m_torqueCurve[maxIndex - 1].m_radPerSeconds;
-	return omega;
-}
-
-ndFloat32 ndVehicleDectriptor::ndEngineTorqueCurve::GetTorque(ndFloat32 omegaInRadPerSeconds) const
-{
-	const ndInt32 maxIndex = sizeof(m_torqueCurve) / sizeof(m_torqueCurve[0]);
-	omegaInRadPerSeconds = ndClamp(omegaInRadPerSeconds, ndFloat32(0.0f), m_torqueCurve[maxIndex - 1].m_radPerSeconds);
-
-	for (ndInt32 i = 1; i < maxIndex; ++i)
-	{
-		if (omegaInRadPerSeconds <= m_torqueCurve[i].m_radPerSeconds)
-		{
-			const ndFloat32 omega0 = m_torqueCurve[i - 0].m_radPerSeconds;
-			const ndFloat32 omega1 = m_torqueCurve[i - 1].m_radPerSeconds;
-
-			const ndFloat32 torque0 = m_torqueCurve[i - 0].m_torqueInNewtonMeters;
-			const ndFloat32 torque1 = m_torqueCurve[i - 1].m_torqueInNewtonMeters;
-
-			const ndFloat32 torque = torque0 + (omegaInRadPerSeconds - omega0) * (torque1 - torque0) / (omega1 - omega0);
-			return torque;
-		}
-	}
-
-	return m_torqueCurve[maxIndex - 1].m_torqueInNewtonMeters;
-}
 
 ndVehicleDectriptor::ndVehicleDectriptor()
 	:ndClassAlloc()
 	,m_name ("default")
 {
-	ndFloat32 idleTorquePoundFoot = ndFloat32(100.0f);
-	ndFloat32 idleRmp = ndFloat32(900.0f);
-	ndFloat32 horsePower = ndFloat32(400.0f);
-	ndFloat32 rpm0 = ndFloat32(5000.0f);
-	ndFloat32 rpm1 = ndFloat32(6200.0f);
-	ndFloat32 horsePowerAtRedLine = ndFloat32(100.0f);
-	ndFloat32 redLineRpm = ndFloat32(8000.0f);
-	m_engine.Init(idleTorquePoundFoot, idleRmp, horsePower, rpm0, rpm1, horsePowerAtRedLine, redLineRpm);
-
 	m_chassisAngularDrag = ndFloat32(0.25f);
-
-	m_transmission.m_gearsCount = 4;
-	m_transmission.m_neutral = ndFloat32(0.0f);
-	m_transmission.m_reverseRatio = ndFloat32(-3.0f);
-	m_transmission.m_crownGearRatio = ndFloat32(10.0f);
-
-	m_transmission.m_forwardRatios[0] = ndFloat32(3.0f);
-	m_transmission.m_forwardRatios[1] = ndFloat32(1.5f);
-	m_transmission.m_forwardRatios[2] = ndFloat32(1.1f);
-	m_transmission.m_forwardRatios[3] = ndFloat32(0.8f);
-
-	m_transmission.m_torqueConverter = ndFloat32(2000.0f);
-	m_transmission.m_idleClutchTorque = ndFloat32(200.0f);
-	m_transmission.m_lockedClutchTorque = ndFloat32(1.0e6f);
-	m_transmission.m_gearShiftDelayTicks = 180;
-	m_transmission.m_manual = false;
-
-	//m_chassisMass = ndFloat32(1000.0f);
-	//m_motorMass = ndFloat32(20.0f);
-	//m_motorRadius = ndFloat32(0.25f);
-	//m_differentialMass = ndFloat32(20.0f);
-	//m_differentialRadius = ndFloat32(0.25f);
 
 	m_slipDifferentialRmpLock = ndFloat32(30.0f);
 
@@ -382,7 +268,7 @@ void ndMultiBodyVehicle::AddMotor(const ndSharedPtr<ndBody>& motorBody, const nd
 	ndAssert(!strcmp(motorJoint->ClassName(), "ndMultiBodyVehicleMotor"));
 	m_motor = (ndMultiBodyVehicleMotor*)*motorJoint;
 	m_motor->m_vehicle = this;
-
+	
 	ndNode* const node = FindByBody(*motorBody);
 	ndAssert(!node || ((node->m_body->GetAsBody() == *motorBody) && ((*node->m_joint == *motorJoint))));
 	if (!node)
@@ -390,11 +276,8 @@ void ndMultiBodyVehicle::AddMotor(const ndSharedPtr<ndBody>& motorBody, const nd
 		ndAssert(motorJoint->GetBody1() == GetRoot()->m_body->GetAsBody());
 		AddLimb(GetRoot(), motorBody, motorJoint);
 	}
-	m_motor->SetMaxRpm(m_descriptor.m_engine.GetRedLineRadPerSec() * ndRadPerSecToRpm);
-	m_motor->SetFrictionLoss(m_descriptor.m_engine.GetTorque(ndFloat32(0.0f)) * ndFloat32(0.5f));
 	motorBody->GetAsBodyDynamic()->SetMaxLinearAndAngularIntegrationStep(ndFloat32(2.0f * 360.0f) * ndDegreeToRad, ndFloat32(10.0f));
 }
-
 
 //ndMultiBodyVehicleTireJoint* ndMultiBodyVehicle::AddAxleTire(const ndMultiBodyVehicleTireJointInfo& desc, const ndSharedPtr<ndBody>& tire, const ndSharedPtr<ndBody>& axleBody)
 //{
@@ -1102,48 +985,47 @@ bool ndMultiBodyVehicle::CoulombFrictionCircleTireModel(ndMultiBodyVehicleTireJo
 
 bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tire, ndContactMaterial& contactPoint) const
 {
-	// According to Wikipedia, the Pacejka equation is written as:
+	// According to Wikipedia, the Pacejka Magic Formula is typically written as:
 	//
 	// F = D * sin(C * atan(Bx * (1 - E) + E * atan(Bx)))
 	//
-	// However, this form does not include the parameter phi.
+	// This form does not include the parameter phi.
 	//
-	// According to Giancarlo Genta (p. 60), horizontal and vertical shifts are introduced
-	// to allow the formula to be used even when the vehicle is at rest:
+	// Giancarlo Genta introduces horizontal and vertical shifts to extend the model
+	// to operating conditions near zero slip:
 	//
-	// F = D * sin(C * atan(Bx * (1 - E) * (phi + Sh) + E * atan(Bx * (phi + Sh)))) + Sv
+	// F = D * sin(C * atan(Bx * (1 - E) * (φ + Sh) + E * atan(Bx * (phi + Sh)))) + Sv
 	//
-	// My main difficulty with this formulation is determining the parameters
-	// C, D, E, Bx, phi, Sh, and Sv for each force and moment.
+	// My primary challenge with this formulation is determining the values of
+	// C, D, E, Bx, phi, Sh, and Sv for each force and moment component.
 	//
-	// Genta's book provides five tables of coefficients for five different vehicles,
-	// but it never clearly explains how those coefficients (a1 through a13) relate
-	// to the Magic Formula parameters B, C, D, and E.
-	// Instead, the reader must infer the relationship from other examples.
+	// Genta provides tables of coefficients (a1 through a13) for several example
+	// vehicles, but does not clearly explain how these coefficients map to the
+	// Magic Formula parameters B, C, D, and E. The relationship must largely be
+	// inferred from the surrounding examples and equations.
 	//
-	// The closest reference I have found that discusses this mapping is:
+	// The most useful reference I have found on this topic is:
 	// http://www-cdr.stanford.edu/dynamic/bywire/tires.pdf
 	//
-	// Regarding the Pacejka implementation in general:
+	// More generally, I have struggled with Pacejka implementations because the
+	// treatment of units in Genta's discussion (pp. 60–78) appears inconsistent in
+	// several places, making it difficult to verify that the implementation is
+	// producing physically meaningful results.
 	//
-	// From pages 60 through 78 of Genta's book, the treatment of units appears
-	// highly inconsistent. In several cases, this makes it difficult to interpret
-	// the results with confidence.
+	// I have attempted to implement the model multiple times over the years, 
+	// but have never been fully satisfied with the results. 
+	// Currently, I am comparing it against the Brush tire model, 
+	// which seems to produce more intuitive behavior.
 	//
-	// I have attempted to implement this model on multiple occasions over the years,
-	// but have never been able to obtain results that I consider physically correct.
-	// At present, I am comparing it against the Brush tire model, which appears
-	// to produce more reasonable behavior.
+	// One aspect that concerns me is that tire forces do not appear to depend
+	// explicitly on normal load. 
+	// Instead, load sensitivity is incorporated through parameter D.
 	//
-	// For example, in the Pacejka formulation the generated forces do not appear
-	// to depend directly on the tire normal load. Instead, the load dependence is
-	// embedded in parameter D.
-	//
-	// Conceptually, this seems questionable. Consider a pickup truck carrying
-	// significantly different payloads: one would expect the available lateral
-	// tire forces to vary with the tire load. If D is held constant, the model
-	// predicts identical lateral force characteristics regardless of vehicle load,
-	// which does not align with physical intuition.
+	// Conceptually, this seems counterintuitive. For example, a pickup truck with
+	// a heavy payload should exhibit different lateral force characteristics than
+	// the same vehicle when unloaded. If D remains constant, the model predicts
+	// identical behavior regardless of tire load, which does not appear physically
+	// realistic.
 	const ndBodyKinematic* const tireBody = tire->GetBody0()->GetAsBodyKinematic();
 	const ndBodyKinematic* const otherBody = (contactPoint.m_body0 == tireBody) ? contactPoint.m_body1 : contactPoint.m_body0;
 
@@ -1265,25 +1147,6 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	ndUnsigned32 newFlags = contactPoint.m_material.m_flags | m_override0Friction | m_override1Friction;
 	contactPoint.m_material.m_flags = newFlags;
 	return true;
-}
-
-void ndMultiBodyVehicle::Update(ndFloat32 timestep)
-{
-	if (!m_initialized)
-	{
-		CalculateSprungWeight();
-	}
-
-	// apply down force
-	ApplyAerodynamics(timestep);
-
-	// apply tire model
-	ApplyTireModel();
-}
-
-void ndMultiBodyVehicle::PostUpdate(ndFloat32)
-{
-	ApplyAlignmentAndBalancing();
 }
 
 void ndMultiBodyVehicle::ConvertToMotorVehicle(const ndVehicleDectriptor& vehicleDescritor)
@@ -1557,4 +1420,22 @@ void ndMultiBodyVehicle::CalculateSprungWeight()
 
 	m_initialized = true;
 	SetTransform(savedMatrix);
+}
+void ndMultiBodyVehicle::Update(ndFloat32 timestep)
+{
+	if (!m_initialized)
+	{
+		CalculateSprungWeight();
+	}
+
+	// apply down force
+	ApplyAerodynamics(timestep);
+
+	// apply tire model
+	ApplyTireModel();
+}
+
+void ndMultiBodyVehicle::PostUpdate(ndFloat32)
+{
+	ApplyAlignmentAndBalancing();
 }
