@@ -755,7 +755,7 @@ ndMesh* ndFbxMeshLoader::CreateMeshHierarchy(ndOfbx::IScene* const fbxScene, ndF
 	const ndOfbx::GlobalSettings& globalSettings = *fbxScene->getGlobalSettings();
 	if (globalSettings.UpAxis == UpVector_AxisY)
 	{
-		mesh->SetMatrix(ndPitchMatrix(90.0f * ndDegreeToRad));
+		mesh->SetMatrix(ndPitchMatrix(ndFloat32(90.0f) * ndDegreeToRad));
 	}
 	
 	{
