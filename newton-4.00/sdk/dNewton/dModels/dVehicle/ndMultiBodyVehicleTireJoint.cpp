@@ -169,7 +169,7 @@ ndTireFrictionModel::ndPacejkaTireModel::ndPacejkaTireModel()
 ndTireFrictionModel::ndPacejkaTireModel::ndPacejkaTireModel(ndFloat32 B, ndFloat32 C, ndFloat32 D, ndFloat32 E, ndFloat32 Sv, ndFloat32 Sh)
 	:m_b(B)
 	,m_c(C)
-	,m_d(1.0f)
+	,m_d(ndFloat32(1.0f))
 	,m_e(E)
 	,m_sv(Sv)
 	,m_sh(Sh)
@@ -305,7 +305,7 @@ void ndMultiBodyVehicleTireJoint::SetFrictionModel(const ndTireFrictionModel& mo
 
 void ndMultiBodyVehicleTireJoint::JacobianDerivative(ndConstraintDescritor& desc)
 {
-	m_variableRateRegularizer = m_info.m_regularizer * m_vehicle->m_downForce.m_suspensionStiffnessModifier;
+	m_variableRateRegularizer = m_info.m_regularizer * m_vehicle ? m_vehicle->m_downForce.m_suspensionStiffnessModifier : ndFloat32 (1.0f);
 	ndJointWheel::JacobianDerivative(desc);
 }
 
