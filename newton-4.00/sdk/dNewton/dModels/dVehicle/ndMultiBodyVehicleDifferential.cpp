@@ -98,6 +98,8 @@ void ndMultiBodyVehicleDifferential::JacobianDerivative(ndConstraintDescritor& d
 	//one rows to restrict rotation around the parent coordinate system
 	const ndFloat32 angle = CalculateAngle(matrix0.m_front, matrix1.m_front, matrix1.m_right);
 	AddAngularRowJacobian(desc, matrix1.m_right, angle);
+	ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
+	jacobian0.m_angular = ndVector::m_zero;
 
 	const ndVector omega0(m_body0->GetOmega());
 	const ndVector omega1(m_body1->GetOmega());
