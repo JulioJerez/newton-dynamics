@@ -39,15 +39,6 @@ namespace ndMotorVehicle
 			:ndVehicleDectriptor()
 			,m_curve()
 		{
-			//ndTireFrictionModel xxxx;
-			//xxxx.SetPacejkaCurves(ndTireFrictionModel::m_pacejkaSport);
-			//xxxx.PlotPacejkaCurves("supercar0");
-			//xxxx.m_lateralPacejka.m_d = ndFloat32(0.4f);
-			//xxxx.PlotPacejkaCurves("supercar1");
-
-			//m_tireFrictionModel.m_lateralPacejka.m_d = ndFloat32(0.4f);
-			// plot the curve to check it is a value form
-			//m_tireFrictionModel.PlotPacejkaCurves("supercar");
 		}
 		ndMultiBodyVehicleMotor::ndEngineTorqueCurve m_curve;
 	};
@@ -131,6 +122,10 @@ namespace ndMotorVehicle
 						//ndTireFrictionModel frictionMode(joint->GetFrictionModel());
 						//frictionMode.m_lateralPacejka.m_d = superCar.m_pacejkaScale;
 						//joint->SetFrictionModel(frictionMode);
+
+						// plot the curve to check it is a value form
+						//m_tireFrictionModel.PlotPacejkaCurves(modelName);
+
 					}
 					if ((strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleMotor::StaticClassName()) == 0))
 					{
@@ -219,7 +214,8 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	//callback->RegisterMaterial(material, ndDemoContactCallback::m_vehicleTirePart, ndDemoContactCallback::m_vehicleTirePart);
 	//callback->RegisterMaterial(material, ndDemoContactCallback::m_vehicleTirePart, ndDemoContactCallback::m_default);
 	
-	ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f))));
+	//ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f))));
+	ndSharedPtr<ndModel> vehicle1(CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 3.0f, 0.0f))));
 	//ndSharedPtr<ndModel> vehicle1 (CreateBasicVehicle(scene, jeepDesc, ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f,  -6.0f, 0.0f)), (ndVehicleUI*)*vehicleUI));
 	//ndSharedPtr<ndModel> vehicle2 (CreateBasicVehicle(scene, monterTruckDesc0, ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f)), (ndVehicleUI*)*vehicleUI));
 	//ndSharedPtr<ndModel> vehicle3 (CreateBasicVehicle(scene, monterTruckDesc1, ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 6.0f, 0.0f)), (ndVehicleUI*)*vehicleUI));

@@ -305,7 +305,7 @@ void ndMultiBodyVehicleTireJoint::SetFrictionModel(const ndTireFrictionModel& mo
 
 void ndMultiBodyVehicleTireJoint::JacobianDerivative(ndConstraintDescritor& desc)
 {
-	m_variableRateRegularizer = m_info.m_regularizer * m_vehicle->m_downForce.m_suspensionStiffnessModifier;
+	m_variableRateRegularizer = m_info.m_regularizer * m_vehicle ? m_vehicle->m_downForce.m_suspensionStiffnessModifier : ndFloat32 (1.0f);
 	ndJointWheel::JacobianDerivative(desc);
 }
 
