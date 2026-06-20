@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Physics Properties — Newton Asset Editor</title>
+<style>
+  :root {
+    --bg: #0d0f14; --surface: #161a22; --surface2: #1c2130;
+    --border: #252a35; --accent: #4f9cf9; --accent2: #a78bfa;
+    --text: #e2e8f0; --muted: #6b7280; --heading: #f8fafc;
+    --code-bg: #1e2330; --warning: #fbbf24; --success: #34d399; --danger: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.65; }
+  header { border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; gap: 1rem; height: 60px; position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  .logo { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); text-decoration: none; }
+  nav { margin-left: auto; display: flex; gap: 1.5rem; }
+  nav a { color: var(--muted); text-decoration: none; font-size: 0.875rem; }
+  nav a:hover, nav a.active { color: var(--text); }
+  .layout { display: flex; min-height: calc(100vh - 60px); }
+  .sidebar { width: 240px; flex-shrink: 0; border-right: 1px solid var(--border); padding: 2rem 1.25rem; position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto; }
+  .sidebar h4 { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.75rem; }
+  .sidebar ul { list-style: none; margin-bottom: 2rem; }
+  .sidebar li a { display: block; padding: 0.35rem 0.75rem; font-size: 0.875rem; color: var(--muted); text-decoration: none; border-radius: 6px; }
+  .sidebar li a:hover { background: var(--surface); color: var(--text); }
+  .sidebar li a.active { background: rgba(79,156,249,0.1); color: var(--accent); }
+  .content { flex: 1; padding: 3rem 3rem 5rem; max-width: 860px; }
+  .breadcrumb { font-size: 0.8rem; color: var(--muted); margin-bottom: 2rem; }
+  .breadcrumb a { color: var(--muted); text-decoration: none; }
+  h1 { font-size: 2.5rem; font-weight: 800; color: var(--heading); letter-spacing: -0.02em; margin-bottom: 0.75rem; }
+  .lead { font-size: 1.1rem; color: var(--muted); margin-bottom: 3rem; }
+  h2 { font-size: 1.35rem; font-weight: 700; color: var(--heading); margin: 2.5rem 0 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  h3 { font-size: 1.05rem; font-weight: 600; color: var(--heading); margin: 1.75rem 0 0.6rem; }
+  p { margin-bottom: 1rem; font-size: 0.95rem; }
+  ul, ol { margin: 0 0 1rem 1.5rem; font-size: 0.9rem; }
+  li { margin-bottom: 0.35rem; }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; background: var(--code-bg); color: var(--accent); padding: 0.15rem 0.4rem; border-radius: 4px; border: 1px solid var(--border); }
+  .info-box { border: 1px solid rgba(79,156,249,0.3); background: rgba(79,156,249,0.06); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.25rem 0; font-size: 0.875rem; }
+  .info-box strong { color: var(--accent); }
+  .warn-box { border: 1px solid rgba(251,191,36,0.3); background: rgba(251,191,36,0.06); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.25rem 0; font-size: 0.875rem; }
+  .warn-box strong { color: var(--warning); }
+  table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: 0.875rem; }
+  th { text-align: left; padding: 0.6rem 1rem; background: var(--surface); color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
+  td { padding: 0.65rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  .shape-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem; margin: 1.25rem 0; }
+  .shape-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; }
+  .shape-card .icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
+  .shape-card h5 { font-size: 0.85rem; font-weight: 600; color: var(--heading); margin-bottom: 0.3rem; }
+  .shape-card p { font-size: 0.78rem; color: var(--muted); margin: 0; }
+  .joint-tag { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 4px; background: rgba(167,139,250,0.12); color: var(--accent2); border: 1px solid rgba(167,139,250,0.25); margin: 0.1rem; }
+  .section-callout { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1rem 1.25rem; margin: 1.25rem 0; font-size: 0.875rem; }
+  .section-callout strong { color: var(--heading); }
+</style>
+</head>
+<body>
+<header>
+  <a href="index.html" class="logo">Newton Asset Editor</a>
+  <nav>
+    <a href="interface.html">Interface</a>
+    <a href="camera.html">Camera</a>
+    <a href="physics.html" class="active">Physics</a>
+    <a href="tools.html">Tools</a>
+    <a href="undo-redo.html">Undo/Redo</a>
+    <a href="file-formats.html">File Formats</a>
+  </nav>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <h4>On this page</h4>
+    <ul>
+      <li><a href="#mesh-node" class="active">Mesh Node</a></li>
+      <li><a href="#rigid-body">Rigid Body</a></li>
+      <li><a href="#collision">Collision Shapes</a></li>
+      <li><a href="#joints">Structural Joints</a></li>
+      <li><a href="#loop-joints">Loop Joints</a></li>
+      <li><a href="#colliding-pairs">Colliding Pairs</a></li>
+      <li><a href="#materials">Materials</a></li>
+      <li><a href="#custom-props">Custom Properties</a></li>
+    </ul>
+  </aside>
+
+  <main class="content">
+    <div class="breadcrumb"><a href="index.html">Docs</a> / Physics Properties</div>
+    <h1>Physics Properties</h1>
+    <p class="lead">The Properties Panel exposes all physics data for the currently selected node. Each section is independently collapsible.</p>
+
+    <h2 id="mesh-node">Mesh Node</h2>
+    <p>Always shown when a mesh node is selected. Controls the node's name, transform, visibility, and modifier.</p>
+    <table>
+      <tr><th>Field</th><th>Description</th></tr>
+      <tr><td>Name</td><td>Editable text. Must be unique in the scene — the editor auto-appends <code>_1</code> if a conflict is detected.</td></tr>
+      <tr><td>Parent space transform</td><td>When checked, position/rotation inputs show absolute local values. When unchecked, inputs are relative <em>increments</em> applied on Enter.</td></tr>
+      <tr><td>Transform pivot only</td><td>Moves only the node's pivot, shifting geometry and children in the opposite direction to compensate. Useful for re-centering origins.</td></tr>
+      <tr><td>Visible</td><td>Hides the node from ray-cast selection and rendering.</td></tr>
+      <tr><td>Add node</td><td>Appends a new child mesh node with a generated unique name.</td></tr>
+      <tr><td>Clone node</td><td>Deep-copies the selected node and all its children. Renames clones by appending <code>_</code>.</td></tr>
+      <tr><td>Add body / Delete body</td><td>Attaches or removes a <code>ndMeshBodyDynamic</code>. Adding also creates a default <code>Fix6dof</code> joint to the nearest parent body.</td></tr>
+    </table>
+
+    <h3>Node Transform</h3>
+    <p>Two sub-sections appear: <em>node transform</em> (the pivot matrix) and, if geometry exists, <em>geometry transform</em> (the geometry sub-pivot offset).</p>
+    <p>Both support two modes set by <strong>Parent space transform</strong>:</p>
+    <ul>
+      <li><strong>On:</strong> Shows current absolute Euler angles and position. Edits set exact values.</li>
+      <li><strong>Off:</strong> Shows zeros. Entering a value applies a relative delta on Enter, then resets back to zero.</li>
+    </ul>
+
+    <h3>Align to Target</h3>
+    <p>Click <strong>align to target</strong> to enter alignment mode, then click another node in the viewport. When you click <strong>pick to target</strong>, the selected node's pivot rotates so its X-axis points toward the target. Only the pivot is moved (equivalent to <em>Transform pivot only</em> being on).</p>
+
+    <h3>Modifier</h3>
+    <p>Nodes without a rigid body can have a transform modifier that drives their matrix from external logic:</p>
+    <table>
+      <tr><th>Modifier</th><th>Description</th></tr>
+      <tr><td>none</td><td>No modifier — node is purely static.</td></tr>
+      <tr><td>LookAt</td><td>Rotates the node to face a selected target node each frame.</td></tr>
+      <tr><td>TwoLinksIK</td><td>Two-bone IK chain targeting another node. Requires at least one child. Configure the <em>solution sign</em> (±1) and which child is the mid-link.</td></tr>
+      <tr><td>UserDefined</td><td>Stores a custom constructor string consumed by runtime code.</td></tr>
+    </table>
+
+    <h2 id="rigid-body">Rigid Body</h2>
+    <p>Shown only when the selected node has an attached rigid body.</p>
+    <table>
+      <tr><th>Field</th><th>Description</th></tr>
+      <tr><td>mass</td><td>Total mass in kg. Editing this recalculates inertia from the current collision shape.</td></tr>
+      <tr><td>mass weigh</td><td>Volume-weighting scalar used by the <em>Normalize Mass Distribution</em> tool. Default 1.0.</td></tr>
+      <tr><td>linear step</td><td>Maximum linear displacement per substep for continuous collision. Range 0.1 – 30.</td></tr>
+      <tr><td>angle step</td><td>Maximum angular displacement per substep in degrees. Range 10 – 180.</td></tr>
+      <tr><td>linear damp</td><td>Intrinsic linear velocity damping, 0 – 1.</td></tr>
+      <tr><td>angular damp</td><td>Per-axis angular velocity damping (XYZ), 0 – 1.</td></tr>
+      <tr><td>com</td><td>Local centre-of-mass offset from the node pivot, in local space.</td></tr>
+      <tr><td>principal inertia</td><td>Inertia along each principal axis in kg·m². Entered as direct values (not reciprocals).</td></tr>
+      <tr><td>inertia axis</td><td>Euler angles (degrees) of the principal inertia frame relative to the body frame.</td></tr>
+    </table>
+
+    <div class="warn-box">
+      <strong>Note on inertia:</strong> When you edit <em>mass</em>, inertia is automatically recalculated using the collision shape geometry. If you edit <em>principal inertia</em> or <em>inertia axis</em> directly, those values are stored as-is — useful for tuning but they will be overwritten next time you change mass.
+    </div>
+
+    <h2 id="collision">Collision Shapes</h2>
+    <p>Select the shape type from the <em>Collision shape</em> dropdown. Changing shape type creates a new default instance.</p>
+
+    <div class="shape-grid">
+      <div class="shape-card">
+        <div class="icon">📦</div>
+        <h5>Box</h5>
+        <p>Defined by X, Y, Z half-extents. Min dimension 0.01.</p>
+      </div>
+      <div class="shape-card">
+        <div class="icon">⚽</div>
+        <h5>Sphere</h5>
+        <p>Single radius. Min 0.01.</p>
+      </div>
+      <div class="shape-card">
+        <div class="icon">💊</div>
+        <h5>Capsule</h5>
+        <p>Two radii (radius0, radius1) plus height. Min 0.01.</p>
+      </div>
+      <div class="shape-card">
+        <div class="icon">🔵</div>
+        <h5>Cylinder</h5>
+        <p>Two radii plus height. Allows tapered cylinders.</p>
+      </div>
+      <div class="shape-card">
+        <div class="icon">🔶</div>
+        <h5>Chamfer Cylinder</h5>
+        <p>Cylinder with rounded edges. Radius + height.</p>
+      </div>
+      <div class="shape-card">
+        <div class="icon">🔩</div>
+        <h5>Wheel</h5>
+        <p>Vehicle tire shape. No editable parameters in this panel.</p>
+      </div>
+      <div class="shape-card">
+        <div class="icon">🔷</div>
+        <h5>Convex Hull</h5>
+        <p>Built from mesh vertices. Tolerance and max point count are editable.</p>
+      </div>
+      <div class="shape-card">
+        <div class="icon">🧩</div>
+        <h5>Compound</h5>
+        <p>Multiple sub-shapes. Sub-shape count is read-only here.</p>
+      </div>
+      <div class="shape-card">
+        <div class="icon">⬜</div>
+        <h5>Null</h5>
+        <p>No collision. Use for kinematic markers or invisible joints.</p>
+      </div>
+    </div>
+
+    <h3>Shape Transform</h3>
+    <p>Below the shape selector, <em>Shape Transform</em> controls position, rotation, and scale of the shape within the body. These are stored as the shape instance's local matrix and scale vector.</p>
+
+    <h3>Build Visual Mesh</h3>
+    <p>Clicking <strong>build visual mesh</strong> regenerates the render geometry from the current collision shape. This overwrites the existing geometry on the node. Useful for keeping visual and collision meshes synchronized after you edit the shape parameters.</p>
+
+    <h2 id="joints">Structural Joints</h2>
+    <p>Shown when a node has both a rigid body and a parent body. A joint constrains the degrees of freedom between parent and child.</p>
+    <p>Available joint types:</p>
+    <div>
+      <span class="joint-tag">Fix6dof</span>
+      <span class="joint-tag">Hinge</span>
+      <span class="joint-tag">Slider</span>
+      <span class="joint-tag">Plane</span>
+      <span class="joint-tag">Roller</span>
+      <span class="joint-tag">Cylinder</span>
+      <span class="joint-tag">Double Hinge</span>
+      <span class="joint-tag">Wheel</span>
+      <span class="joint-tag">Spherical</span>
+      <span class="joint-tag">Motor</span>
+      <span class="joint-tag">Vehicle Tire</span>
+      <span class="joint-tag">Differential</span>
+    </div>
+
+    <h3>Common joint parameters</h3>
+    <table>
+      <tr><th>Parameter</th><th>Description</th></tr>
+      <tr><td>Joint frame (rel position / rel rotation)</td><td>Incremental offset applied to the joint's local frame in global space. Both parent and child frames update to stay consistent.</td></tr>
+      <tr><td>spring const</td><td>Spring stiffness of the actuator. 0 = no spring.</td></tr>
+      <tr><td>damper const</td><td>Damping coefficient. 0 = no damping.</td></tr>
+      <tr><td>regularizer</td><td>Constraint softness / compliance parameter.</td></tr>
+      <tr><td>limits on</td><td>Toggle (true/false). Enables angular/linear limit enforcement.</td></tr>
+      <tr><td>min / max limit</td><td>Limit angles in radians or linear distances. Hinge/slider min must be ≤ 0, max ≥ 0.</td></tr>
+    </table>
+
+    <h3>Wheel joint extra parameters</h3>
+    <table>
+      <tr><th>Parameter</th><th>Description</th></tr>
+      <tr><td>upper stop / lower stop</td><td>Suspension travel limits (m).</td></tr>
+      <tr><td>steering angle</td><td>Maximum steering angle in degrees, clamped 0 – 45.</td></tr>
+      <tr><td>brake torque / hand brake torque</td><td>Braking torques in N·m.</td></tr>
+    </table>
+
+    <h2 id="loop-joints">Loop Joints</h2>
+    <p>Loop joints connect two non-parent-child bodies, forming closed kinematic loops (e.g. a gear, a four-bar linkage). They live in the <em>loop joints container</em> node rather than on the child body.</p>
+
+    <div class="section-callout">
+      <strong>How to add a loop joint:</strong><br>
+      1. Select one body node.<br>
+      2. Click <strong>enter loop joint</strong> in the Rigid Body section.<br>
+      3. Click the second body in the viewport or outliner.<br>
+      4. Click <strong>add loop joint</strong>. A Spherical joint is created by default.<br>
+      5. Click <strong>exit loop joints</strong> to leave the mode.
+    </div>
+
+    <p>Available loop joint types:</p>
+    <div>
+      <span class="joint-tag">Fix6dof</span>
+      <span class="joint-tag">Hinge</span>
+      <span class="joint-tag">Slider</span>
+      <span class="joint-tag">Double Hinge</span>
+      <span class="joint-tag">Spherical</span>
+      <span class="joint-tag">Gear</span>
+      <span class="joint-tag">Swivel Position Effector</span>
+      <span class="joint-tag">Gear Box</span>
+      <span class="joint-tag">Differential Axle</span>
+    </div>
+
+    <h3>Gear joint</h3>
+    <p>A single <em>gear ratio</em> scalar. Positive ratios rotate in the same direction; negative ratios reverse direction.</p>
+
+    <h3>Gear Box joint</h3>
+    <p>Vehicle gear box with a full gear-ratio array (forward + reverse), crown gear ratio, idle/locked clutch torques, torque converter, and gear-shift delay in ticks.</p>
+
+    <h3>Swivel Position Effector</h3>
+    <p>IK end effector with separate linear spring/damper/regularizer/max-force for positioning and optional angular spring for swivel control. Workspace radii and rotation order (pitchRollYaw / pitchYawRoll) are also configurable.</p>
+
+    <h2 id="colliding-pairs">Colliding Pairs</h2>
+    <p>Pairs of bodies that are explicitly <em>allowed</em> to collide even though they share a joint connection. By default, bodies connected by a joint do not collide with each other.</p>
+
+    <div class="section-callout">
+      <strong>How to add a colliding pair:</strong><br>
+      1. Select a body node.<br>
+      2. Click <strong>enter colliding pairs</strong> in the Rigid Body section.<br>
+      3. Click the second body.<br>
+      4. Click <strong>add pair</strong>.<br>
+      5. Click <strong>exit colliding pairs</strong>.
+    </div>
+
+    <p>The Colliding Pairs list is visible in the Outliner as a container node. You can also remove individual pairs with <strong>remove colliding pair</strong>.</p>
+
+    <h2 id="materials">Render Materials</h2>
+    <p>Shown when the node has geometry. Lists all materials on the mesh; select one from the list to edit.</p>
+    <table>
+      <tr><th>Field</th><th>Description</th></tr>
+      <tr><td>material name</td><td>Identifier used for texture lookups.</td></tr>
+      <tr><td>ambient / diffuse / specular / reflection</td><td>RGB color vectors for PBR-style rendering.</td></tr>
+      <tr><td>opacity</td><td>0.0 = transparent, 1.0 = fully opaque.</td></tr>
+      <tr><td>shiness</td><td>Specular exponent / roughness.</td></tr>
+      <tr><td>texture</td><td>Texture filename (searched in the media path).</td></tr>
+    </table>
+    <div class="warn-box"><strong>Note:</strong> Editing any material parameter rebuilds the visual scene. The camera position is preserved but the current selection is restored by name.</div>
+
+    <h2 id="custom-props">Custom Properties</h2>
+    <p>Arbitrary key-value data attached to a node, consumed by game-runtime code. Three types:</p>
+    <table>
+      <tr><th>Type</th><th>Value</th></tr>
+      <tr><td>Float property</td><td>A single <code>ndReal</code> number.</td></tr>
+      <tr><td>String property</td><td>An arbitrary text string.</td></tr>
+      <tr><td>Node property</td><td>A weak reference to another scene node (select via the viewport).</td></tr>
+    </table>
+    <p>Use <strong>new property</strong> to add, and <strong>delete selected</strong> to remove. The property name is editable for all types.</p>
+  </main>
+</div>
+</body>
+</html>

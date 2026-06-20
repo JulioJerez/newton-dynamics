@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interface Overview — Newton Asset Editor</title>
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #161a22;
+    --surface2: #1c2130;
+    --border: #252a35;
+    --accent: #4f9cf9;
+    --accent2: #a78bfa;
+    --text: #e2e8f0;
+    --muted: #6b7280;
+    --heading: #f8fafc;
+    --code-bg: #1e2330;
+    --warning: #fbbf24;
+    --success: #34d399;
+    --danger: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.65; }
+
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex; align-items: center; gap: 1rem; height: 60px;
+    position: sticky; top: 0; background: var(--bg); z-index: 100;
+  }
+  .logo { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); text-decoration: none; }
+  nav { margin-left: auto; display: flex; gap: 1.5rem; }
+  nav a { color: var(--muted); text-decoration: none; font-size: 0.875rem; transition: color 0.15s; }
+  nav a:hover, nav a.active { color: var(--text); }
+
+  .layout { display: flex; min-height: calc(100vh - 60px); }
+
+  .sidebar {
+    width: 240px; flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    padding: 2rem 1.25rem;
+    position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto;
+  }
+
+  .sidebar h4 {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 0.75rem;
+  }
+
+  .sidebar ul { list-style: none; margin-bottom: 2rem; }
+  .sidebar li a {
+    display: block; padding: 0.35rem 0.75rem;
+    font-size: 0.875rem; color: var(--muted); text-decoration: none;
+    border-radius: 6px; transition: background 0.1s, color 0.1s;
+  }
+  .sidebar li a:hover { background: var(--surface); color: var(--text); }
+  .sidebar li a.active { background: rgba(79,156,249,0.1); color: var(--accent); }
+
+  .content { flex: 1; padding: 3rem 3rem 5rem; max-width: 820px; }
+
+  .breadcrumb { font-size: 0.8rem; color: var(--muted); margin-bottom: 2rem; }
+  .breadcrumb a { color: var(--muted); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--text); }
+
+  h1 { font-size: 2.5rem; font-weight: 800; color: var(--heading); letter-spacing: -0.02em; margin-bottom: 0.75rem; }
+  .lead { font-size: 1.1rem; color: var(--muted); margin-bottom: 3rem; }
+
+  h2 { font-size: 1.35rem; font-weight: 700; color: var(--heading); margin: 2.5rem 0 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  h3 { font-size: 1.05rem; font-weight: 600; color: var(--heading); margin: 1.75rem 0 0.6rem; }
+
+  p { margin-bottom: 1rem; color: var(--text); font-size: 0.95rem; }
+
+  code {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.82rem; background: var(--code-bg);
+    color: var(--accent); padding: 0.15rem 0.4rem;
+    border-radius: 4px; border: 1px solid var(--border);
+  }
+
+  .panel-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+    line-height: 1.8;
+    overflow-x: auto;
+  }
+
+  .panel-diagram .hl { color: var(--accent); }
+  .panel-diagram .hl2 { color: var(--accent2); }
+  .panel-diagram .hl3 { color: var(--success); }
+
+  .info-box {
+    border: 1px solid rgba(79,156,249,0.3);
+    background: rgba(79,156,249,0.06);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
+    font-size: 0.875rem;
+  }
+  .info-box strong { color: var(--accent); }
+
+  .warn-box {
+    border: 1px solid rgba(251,191,36,0.3);
+    background: rgba(251,191,36,0.06);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1.25rem 0;
+    font-size: 0.875rem;
+  }
+  .warn-box strong { color: var(--warning); }
+
+  table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: 0.875rem; }
+  th { text-align: left; padding: 0.6rem 1rem; background: var(--surface); color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
+  td { padding: 0.65rem 1rem; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td code { font-size: 0.8rem; }
+
+  .menu-item {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.1rem 0.5rem;
+    color: var(--text);
+    margin: 0 0.15rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <a href="index.html" class="logo">Newton Asset Editor</a>
+  <nav>
+    <a href="interface.html" class="active">Interface</a>
+    <a href="camera.html">Camera</a>
+    <a href="physics.html">Physics</a>
+    <a href="tools.html">Tools</a>
+    <a href="undo-redo.html">Undo/Redo</a>
+    <a href="file-formats.html">File Formats</a>
+  </nav>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <h4>On this page</h4>
+    <ul>
+      <li><a href="#overview" class="active">Overview</a></li>
+      <li><a href="#menu-bar">Menu Bar</a></li>
+      <li><a href="#toolbar">Main Toolbar</a></li>
+      <li><a href="#outliner">Outliner Panel</a></li>
+      <li><a href="#properties">Properties Panel</a></li>
+      <li><a href="#viewport">Viewport</a></li>
+      <li><a href="#options">Render Options</a></li>
+    </ul>
+  </aside>
+
+  <main class="content">
+    <div class="breadcrumb"><a href="index.html">Docs</a> / Interface Overview</div>
+    <h1>Interface Overview</h1>
+    <p class="lead">The editor is organized into dockable panels surrounding a 3D viewport. All panels are built with ImGui and can be freely repositioned.</p>
+
+    <h2 id="overview">Layout</h2>
+    <p>When you launch the editor you see four persistent areas:</p>
+
+    <div class="panel-diagram">
+┌─────────────────────────────────────────────────────────┐
+│  <span class="hl">Menu Bar</span>   File · Tools · Options                          │
+├──────────────────────────────────────────────────────────┤
+│  <span class="hl2">Main Toolbar</span>  undo · redo · lock · camera · projection    │
+├───────────────────┬──────────────────────────────────────┤
+│                   │                                       │
+│  <span class="hl">Outliner Panel</span>  │         <span class="hl3">3D Viewport</span>                    │
+│                   │                                       │
+│  scene hierarchy  │  (rendered scene + gizmos)            │
+│                   │                                       │
+├───────────────────┴──────────────────────────────────────┤
+│  <span class="hl2">Properties Panel</span>  — context-sensitive for selection      │
+└─────────────────────────────────────────────────────────-┘
+    </div>
+
+    <div class="info-box"><strong>Tip:</strong> Panels can be detached and re-docked using ImGui's docking system. Drag any panel title bar to reposition it.</div>
+
+    <h2 id="menu-bar">Menu Bar</h2>
+
+    <h3>File</h3>
+    <table>
+      <tr><th>Item</th><th>Description</th></tr>
+      <tr><td><span class="menu-item">New</span></td><td>Clears the current scene and creates a blank root node. Resets undo history.</td></tr>
+      <tr><td><span class="menu-item">Load</span></td><td>Opens a <code>.nd</code> file. Replaces the current scene.</td></tr>
+      <tr><td><span class="menu-item">Save</span></td><td>Writes the current scene back to the existing path.</td></tr>
+      <tr><td><span class="menu-item">Save As…</span></td><td>Prompts for a new path and saves. Also resets the current selection.</td></tr>
+      <tr><td><span class="menu-item">Import fbx</span></td><td>Imports an FBX file using name-suffix conventions to auto-create physics (see <a href="file-formats.html">File Formats</a>).</td></tr>
+      <tr><td><span class="menu-item">Import urdf</span></td><td>Imports a URDF robot description file, reconstructing links, joints, and collision shapes.</td></tr>
+      <tr><td><span class="menu-item">Exit</span></td><td>Closes the editor.</td></tr>
+    </table>
+
+    <h3>Tools</h3>
+    <p>Opens modal tool windows. Each tool shows a floating panel you can close with the × button or by clicking <strong>execute</strong>.</p>
+    <table>
+      <tr><th>Tool</th><th>What it does</th></tr>
+      <tr><td><span class="menu-item">resize mesh</span></td><td>Uniformly scales all geometry and collision by a factor.</td></tr>
+      <tr><td><span class="menu-item">rotate mesh</span></td><td>Rotates the entire mesh coordinate system by pitch/yaw/roll.</td></tr>
+      <tr><td><span class="menu-item">rotate pivots</span></td><td>Rotates node pivot matrices without moving geometry.</td></tr>
+      <tr><td><span class="menu-item">rotate bones</span></td><td>Rotates bones and updates their inertia tensors accordingly.</td></tr>
+      <tr><td><span class="menu-item">normalize mass distribution</span></td><td>Distributes a target total mass across all bodies by volume.</td></tr>
+    </table>
+
+    <h3>Options</h3>
+    <p>Persistent display toggles stored in the editor state:</p>
+    <table>
+      <tr><th>Option</th><th>Effect</th></tr>
+      <tr><td>Render mode</td><td>Switch between <strong>shaded</strong>, <strong>wireframe</strong>, and <strong>hidden surface</strong> display.</td></tr>
+      <tr><td>Gizmo scale</td><td>Numeric input — scales all gizmo arrows drawn in the viewport. Default 0.25.</td></tr>
+      <tr><td>Show node</td><td>Highlights the selected mesh in the viewport.</td></tr>
+      <tr><td>Show collision</td><td>Draws collision shape outlines over the mesh.</td></tr>
+      <tr><td>Show mesh skeleton</td><td>When on, clicking in the viewport selects bones instead of geometry.</td></tr>
+      <tr><td>Show node gizmo</td><td>Draws the node's local X/Y/Z axis frame at the pivot.</td></tr>
+      <tr><td>Show Joints gizmo</td><td>Draws joint frames using <code>DebugJoint</code>.</td></tr>
+      <tr><td>Show geometry gizmo</td><td>Draws the geometry sub-pivot frame.</td></tr>
+      <tr><td>Show collision gizmo</td><td>Draws the collision shape's local matrix frame.</td></tr>
+      <tr><td>Show center of mass gizmo</td><td>Draws the center-of-mass origin.</td></tr>
+    </table>
+
+    <h2 id="toolbar">Main Toolbar</h2>
+    <p>A horizontal panel pinned below the menu bar. Contains quick-access buttons.</p>
+    <table>
+      <tr><th>Control</th><th>Description</th></tr>
+      <tr><td><code>undo</code> / <code>redo</code></td><td>Steps backward or forward through the undo stack. See <a href="undo-redo.html">Undo/Redo</a>.</td></tr>
+      <tr><td>Lock / Unlock selection</td><td>Prevents mouse-clicks in the viewport from changing the selection. Useful when editing properties.</td></tr>
+      <tr><td>Camera mode dropdown</td><td>Preset views: <strong>free camera</strong>, <strong>back</strong>, <strong>front</strong>, <strong>left side</strong>, <strong>right side</strong>.</td></tr>
+      <tr><td>Perspective / Orthographic</td><td>Toggles the camera projection mode. Label shows the <em>current</em> mode; click to switch.</td></tr>
+    </table>
+
+    <h2 id="outliner">Outliner Panel</h2>
+    <p>Displays the full scene hierarchy as a collapsible tree. Every node in the <code>ndMesh</code> tree appears here.</p>
+    <ul style="margin: 0 0 1rem 1.5rem; font-size: 0.9rem; color: var(--text);">
+      <li style="margin-bottom:0.4rem"><strong>Click a node</strong> to select it. The Properties Panel updates immediately.</li>
+      <li style="margin-bottom:0.4rem"><strong>Collapse all</strong> button collapses the entire tree except the root, helping with large rigs.</li>
+      <li style="margin-bottom:0.4rem">Special container nodes — <em>Loop Joints</em> and <em>Colliding Pairs</em> — appear as children of the root and expand to show their contents.</li>
+      <li style="margin-bottom:0.4rem">Mesh nodes with rigid bodies show sub-items: <em>joint</em>, <em>geometry</em>, <em>rigidBody</em>.</li>
+    </ul>
+    <div class="warn-box"><strong>Note:</strong> The currently selected node is highlighted in the Outliner. If <em>Lock Selection</em> is active, clicking in the outliner will still change the selection.</div>
+
+    <h2 id="properties">Properties Panel</h2>
+    <p>Shows collapsible sections relevant to the selected node type.</p>
+    <table>
+      <tr><th>Selection type</th><th>Sections shown</th></tr>
+      <tr><td>Mesh node with no body</td><td>Mesh node, Render materials, Custom properties</td></tr>
+      <tr><td>Mesh node with rigid body</td><td>All of the above + Constraint joint (if joint exists) + Collision shape + Rigid body</td></tr>
+      <tr><td>Loop joints container</td><td>Loop joint section listing all loop constraints</td></tr>
+      <tr><td>Colliding pairs container</td><td>Colliding Pairs section listing all excluded pairs</td></tr>
+    </table>
+    <p>For full details on each section see <a href="physics.html">Physics Properties</a>.</p>
+
+    <h2 id="viewport">Viewport</h2>
+    <p>The central 3D view. Rendering uses multiple passes in order:</p>
+    <ol style="margin: 0 0 1rem 1.5rem; font-size: 0.9rem; color: var(--text);">
+      <li style="margin-bottom:0.4rem"><strong>Shadow pass</strong> — generates shadow maps</li>
+      <li style="margin-bottom:0.4rem"><strong>Color pass</strong> — shaded geometry (active only in Shaded mode)</li>
+      <li style="margin-bottom:0.4rem"><strong>Environment pass</strong> — cube-mapped background</li>
+      <li style="margin-bottom:0.4rem"><strong>Debug display pass</strong> — gizmos, wireframes, selection highlights, collision shapes</li>
+      <li style="margin-bottom:0.4rem"><strong>Menu pass</strong> — all ImGui panels rendered on top</li>
+    </ol>
+    <p>Mouse interaction in the viewport fires a ray-cast to select geometry or bones depending on the <em>Show mesh skeleton</em> toggle.</p>
+
+    <h2 id="options">Render Options Quick Reference</h2>
+    <div class="info-box">
+      <strong>Shaded mode</strong> renders full PBR shading and environment reflections.<br>
+      <strong>Wireframe mode</strong> draws only mesh edges in a neutral color.<br>
+      <strong>Hidden Surface mode</strong> renders a z-buffer pass first, then overlays wireframe edges — useful for seeing topology through solid surfaces.
+    </div>
+  </main>
+</div>
+
+</body>
+</html>
