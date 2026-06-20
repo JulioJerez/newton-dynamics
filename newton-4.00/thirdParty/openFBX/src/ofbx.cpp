@@ -3168,7 +3168,7 @@ static void parseHeaderExtension(const Element& root, Scene* scene)
 							{
 								if (node->first_property && node->first_property->value == "Original|ApplicationVendor")
 								{ 
-									IElementProperty* prop = node->getProperty(4); 
+									IElementProperty* const prop = node->getProperty(4); 
 									if (prop)
 									{
 										DataView value = prop->getValue(); 
@@ -3177,7 +3177,6 @@ static void parseHeaderExtension(const Element& root, Scene* scene)
 											scene->m_blenderExport = true;
 											break;
 										}
-
 									}
 								}
 							}
