@@ -136,6 +136,7 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	D_NEWTON_API void AddDifferential(const ndSharedPtr<ndBody>& differentialBody, const ndSharedPtr<ndJointBilateralConstraint>& differentialJoint);
 
 	D_NEWTON_API void AddGearBox(const ndSharedPtr<ndJointBilateralConstraint>& gearBoxJoint);
+	D_NEWTON_API void AddTorsionBar(const ndSharedPtr<ndJointBilateralConstraint>& torsionBar);
 	D_NEWTON_API void AddDifferentialAxle(const ndSharedPtr<ndJointBilateralConstraint>& differentialAxleJoint);
 
 	D_NEWTON_API ndMultiBodyVehicleTireJoint* AddTire(const ndWheelDescriptor& desc, const ndSharedPtr<ndBody>& tire);
@@ -146,11 +147,6 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	D_NEWTON_API virtual void Update(ndFloat32 timestep);
 	D_NEWTON_API virtual void PostUpdate(ndFloat32 timestep);
 	D_NEWTON_API virtual void Debug(ndConstraintDebugCallback& context) const;
-
-#if 0
-	D_NEWTON_API ndMultiBodyVehicleTorsionBar* AddTorsionBar(ndBodyKinematic* const sentinel);
-	D_NEWTON_API ndMultiBodyVehicle* GetAsMultiBodyVehicle();
-#endif
 
 	private:
 	void ApplyTireModel();
@@ -171,7 +167,6 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	ndWeakPtr<ndMultiBodyVehicleMotor> m_motor;
 	ndSharedPtr<ndShapeWheel> m_tireShape;
 	ndWeakPtr<ndMultiBodyVehicleGearBox> m_gearBox;
-	ndWeakPtr<ndMultiBodyVehicleTorsionBar> m_torsionBar;
 	ndList<ndMultiBodyVehicleTireJoint*> m_tireList;
 	ndList<ndMultiBodyVehicleDifferential*> m_differentialList;
 
