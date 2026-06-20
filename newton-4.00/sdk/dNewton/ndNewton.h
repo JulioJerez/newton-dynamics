@@ -60,6 +60,7 @@
 #include <ndJointFollowPath.h>
 #include <ndJointDoubleHinge.h>
 #include <ndJointFixDistance.h>
+#include <ndJointSlidingHinge.h>
 #include <ndJointDryRollingFriction.h>
 #include <ndJointKinematicController.h>
 
