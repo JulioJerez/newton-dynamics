@@ -36,14 +36,17 @@ class ndMultiBodyVehicleTorsionBar : public ndJointBilateralConstraint
 
 	D_NEWTON_API void SetTorsionTorque(ndFloat32 springK, ndFloat32 damperC, ndFloat32 springDamperRegularizer);
 	D_NEWTON_API void GetTorsionTorque(ndFloat32& springK, ndFloat32& damperC, ndFloat32& springDamperRegularizer) const;
-	void DebugJoint(ndConstraintDebugCallback&) const override {}
+	D_NEWTON_API void DebugJoint(ndConstraintDebugCallback&) const override;
 
 	protected:
 	D_NEWTON_API void UpdateParameters() override;
 	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
 	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
+	ndMatrix localReferenceFrame;
 	ndAxisParam m_axis;
+	ndWeakPtr<ndBodyKinematic> m_referenceBody;
+	friend class ndMultiBodyVehicle;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif

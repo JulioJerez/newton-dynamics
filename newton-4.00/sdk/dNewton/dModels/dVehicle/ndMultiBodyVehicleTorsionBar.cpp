@@ -30,7 +30,9 @@
 
 ndMultiBodyVehicleTorsionBar::ndMultiBodyVehicleTorsionBar()
 	:ndJointBilateralConstraint()
+	,localReferenceFrame(ndGetIdentityMatrix())
 	,m_axis()
+	,m_referenceBody(nullptr)
 {
 	m_maxDof = 1;
 	m_axis.m_damperC = ndFloat32(20.0f);
@@ -43,7 +45,9 @@ ndMultiBodyVehicleTorsionBar::ndMultiBodyVehicleTorsionBar()
 ndMultiBodyVehicleTorsionBar::ndMultiBodyVehicleTorsionBar(const ndMatrix& matrix0, ndBodyDynamic* const body0,
 	const ndMatrix& matrix1, ndBodyDynamic* const body1)
 	:ndJointBilateralConstraint(1, body0, body1, matrix0, matrix1)
+	,localReferenceFrame(ndGetIdentityMatrix())
 	,m_axis()
+	,m_referenceBody(nullptr)
 {
 	m_axis.m_damperC = ndFloat32(20.0f);
 	m_axis.m_springK = ndFloat32(2000.0f);
@@ -70,6 +74,23 @@ void ndMultiBodyVehicleTorsionBar::UpdateParameters()
 	// do nothing for now;
 }
 
+void ndMultiBodyVehicleTorsionBar::DebugJoint(ndConstraintDebugCallback& debugCallback) const
+{
+	if (m_referenceBody)
+	{
+		ndMatrix matrix0;
+		ndMatrix matrix1;
+		CalculateGlobalMatrix(matrix0, matrix1);
+		ndMatrix frame0(localReferenceFrame * m_referenceBody->GetMatrix());
+		ndMatrix frame1(frame0);
+		frame0.m_posit = matrix0.m_posit;
+		frame1.m_posit = matrix1.m_posit;
+
+		debugCallback.DrawFrame(frame0);
+		debugCallback.DrawFrame(frame1);
+	}
+}
+
 void ndMultiBodyVehicleTorsionBar::SetTorsionTorque(ndFloat32 springK, ndFloat32 damperC, ndFloat32 springDamperRegularizer)
 {
 	m_axis.m_springK = ndAbs(springK);
@@ -86,14 +107,18 @@ void ndMultiBodyVehicleTorsionBar::GetTorsionTorque(ndFloat32& springK, ndFloat3
 
 void ndMultiBodyVehicleTorsionBar::JacobianDerivative(ndConstraintDescritor& desc)
 {
-	ndMatrix matrix0;
-	ndMatrix matrix1;
-	
-	// calculate the position of the pivot point and the Jacobian direction vectors, in global space. 
-	CalculateGlobalMatrix(matrix0, matrix1);
+	if (m_referenceBody)
+	{
+		ndMatrix matrix0;
+		ndMatrix matrix1;
+		// calculate the position of the pivot point and the Jacobian direction vectors, in global space. 
+		CalculateGlobalMatrix(matrix0, matrix1);
 
-	const ndVector p0(matrix0.m_posit);
-	const ndVector p1(matrix1.m_posit);
-	AddLinearRowJacobian(desc, p0, p1, matrix0.m_front);
-	SetMassSpringDamperAcceleration(desc, m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
+		const ndMatrix frame(localReferenceFrame * m_referenceBody->GetMatrix());
+
+		const ndVector p0(matrix0.m_posit);
+		const ndVector p1(matrix1.m_posit);
+		AddLinearRowJacobian(desc, p0, p1, frame.m_front);
+		SetMassSpringDamperAcceleration(desc, m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
+	}
 }
