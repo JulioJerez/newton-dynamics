@@ -562,15 +562,29 @@ void ndAssetEditor::EditDifferentialTorsionBarJoint(ndSharedPtr<ndMeshLoopJoint>
 {
 	EditLoopJointLocalMatrix(loopJoint);
 
-	ndAssert(0);
-	//ndMeshJointVehicleTorsionBar* const joint = (ndMeshJointVehicleTorsionBar*)*loopJoint->m_joint;
-	//ndReal value = ndReal(joint->m_gearRatio);
-	//if (ImGui::InputFloat("gear ratio", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
-	//{
-	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-	//	joint->m_gearRatio = value;
-	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-	//}
+	ndMeshJointVehicleTorsionBar* const joint = (ndMeshJointVehicleTorsionBar*)*loopJoint->m_joint;
+	ImGui::SeparatorText("actuator params");
+	ndReal value = ndReal(joint->m_axis.m_springK);
+	if (ImGui::InputFloat("spring const", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+		joint->m_axis.m_springK = ndMax(value, ndReal(0.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	}
+	value = ndReal(joint->m_axis.m_damperC);
+	if (ImGui::InputFloat("damper const##5", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+		joint->m_axis.m_damperC = ndMax(value, ndReal(0.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	}
+	value = ndReal(joint->m_axis.m_springDamperRegularizer);
+	if (ImGui::InputFloat("regularizer", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+		joint->m_axis.m_springDamperRegularizer = ndMax(value, ndReal(0.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	}
 }
 
 void ndAssetEditor::EditGearBoxLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)

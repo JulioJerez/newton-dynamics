@@ -37,10 +37,6 @@ ndMultiBodyVehicleTorsionBar::ndMultiBodyVehicleTorsionBar()
 	m_axis.m_damperC = ndFloat32(20.0f);
 	m_axis.m_springDamperRegularizer = ndFloat32(0.01f);
 
-	//const ndBodyKinematic* const chassis = vehicle->m_chassis;
-	//ndAssert(chassis);
-	//const ndMatrix worldMatrix(vehicle->m_localFrame * chassis->GetMatrix());
-	//CalculateLocalMatrix(worldMatrix, m_localMatrix0, m_localMatrix1);
 	SetSolverModel(m_jointkinematicCloseLoop);
 }
 
@@ -61,6 +57,14 @@ ndMultiBodyVehicleTorsionBar::ndMultiBodyVehicleTorsionBar()
 ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleTorsionBar::GetMeshJoint(const ndMesh* const owner) const
 {
 	ndMeshJointVehicleTorsionBar* const joint = new ndMeshJointVehicleTorsionBar(owner, this);
+
+	// align the transform
+	const ndMatrix alignmnt(ndRollMatrix(ndFloat32(90.0f) * ndDegreeToRad));
+	const ndMatrix localTrasform0(alignmnt * GetLocalMatrix0());
+	const ndMatrix localTrasform1(alignmnt * GetLocalMatrix1());
+	joint->m_localFrame0 = localTrasform0;
+	joint->m_localFrame1 = localTrasform1;
+
 	return ndSharedPtr<ndMeshJoint>(joint);
 }
 

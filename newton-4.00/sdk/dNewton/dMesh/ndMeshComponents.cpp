@@ -1445,17 +1445,22 @@ ndJointBilateralConstraint* ndMeshJointVehicleDifferentialAxle::CreateObject(ndB
 	return joint;
 }
 
-
 ndMeshJointVehicleTorsionBar::ndMeshJointVehicleTorsionBar(const ndMesh* const owner)
 	:ndMeshJoint(owner)
 	,m_axis()
 {
+	m_axis.m_springK = ndFloat32(2000.0f);
+	m_axis.m_damperC = ndFloat32(20.0f);
+	m_axis.m_springDamperRegularizer = ndFloat32(0.01f);
 }
 
 ndMeshJointVehicleTorsionBar::ndMeshJointVehicleTorsionBar(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 	,m_axis()
 {
+	m_axis.m_springK = ndFloat32(2000.0f);
+	m_axis.m_damperC = ndFloat32(20.0f);
+	m_axis.m_springDamperRegularizer = ndFloat32(0.01f);
 }
 
 ndMeshJointVehicleTorsionBar::ndMeshJointVehicleTorsionBar(const ndMeshJointVehicleTorsionBar& other)
@@ -1474,9 +1479,8 @@ bool ndMeshJointVehicleTorsionBar::operator==(const ndMeshJoint& other) const
 	bool test = ndMeshJoint::operator==(other);
 	if (test)
 	{
-		ndAssert(0);
-		//const ndMeshJointVehicleTorsionBar* const otherJoint = (ndMeshJointVehicleTorsionBar*)&other;
-		//test = test && (m_gearRatio == otherJoint->m_gearRatio);
+		const ndMeshJointVehicleTorsionBar* const otherJoint = (ndMeshJointVehicleTorsionBar*)&other;
+		test = test && (m_axis == otherJoint->m_axis);
 	}
 	return test;
 }
@@ -1484,18 +1488,19 @@ bool ndMeshJointVehicleTorsionBar::operator==(const ndMeshJoint& other) const
 void ndMeshJointVehicleTorsionBar::SerializeToXml(nd::TiXmlElement* const parent) const
 {
 	ndMeshJoint::SerializeToXml(parent);
-	ndAssert(0);
-	//xmlSaveParam(parent, "ratio", m_gearRatio);
+
+	xmlSaveParam(parent, "springConst", m_axis.m_springK);
+	xmlSaveParam(parent, "damperConst", m_axis.m_damperC);
+	xmlSaveParam(parent, "regularizer", m_axis.m_springDamperRegularizer);
 }
 
 void ndMeshJointVehicleTorsionBar::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndMeshJoint::DeserializeFromXml(parent);
-	ndAssert(0);
-	//if (xmlHasAttribute(parent, "ratio"))
-	//{
-	//	m_gearRatio = ndReal(xmlGetFloat(parent, "ratio"));
-	//}
+
+	m_axis.m_springK = xmlGetFloat(parent, "springConst");
+	m_axis.m_damperC = xmlGetFloat(parent, "damperConst");
+	m_axis.m_springDamperRegularizer = xmlGetFloat(parent, "regularizer");
 }
 
 ndJointBilateralConstraint* ndMeshJointVehicleTorsionBar::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
@@ -1510,7 +1515,6 @@ ndJointBilateralConstraint* ndMeshJointVehicleTorsionBar::CreateObject(ndBodyKin
 	//return joint;
 	return nullptr;
 }
-
 
 ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMesh* const owner)
 	:ndMeshJointWheel(owner)
