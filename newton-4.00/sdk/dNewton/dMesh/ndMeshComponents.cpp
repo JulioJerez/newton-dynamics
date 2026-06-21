@@ -564,11 +564,13 @@ ndJointBilateralConstraint* ndMeshJointSlider::CreateObject(ndBodyKinematic* con
 
 ndMeshJointHinge::ndMeshJointHinge(const ndMesh* const owner)
 	:ndMeshJoint(owner)
+	,m_axis()
 {
 }
 
 ndMeshJointHinge::ndMeshJointHinge(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
+	,m_axis()
 {
 	const ndJointHinge* const subJoint = (ndJointHinge*)joint;
 	subJoint->GetSpringDamper(m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
@@ -1442,6 +1444,73 @@ ndJointBilateralConstraint* ndMeshJointVehicleDifferentialAxle::CreateObject(ndB
 	joint->SetGearRatio(m_gearRatio);
 	return joint;
 }
+
+
+ndMeshJointVehicleTorsionBar::ndMeshJointVehicleTorsionBar(const ndMesh* const owner)
+	:ndMeshJoint(owner)
+	,m_axis()
+{
+}
+
+ndMeshJointVehicleTorsionBar::ndMeshJointVehicleTorsionBar(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(owner, joint)
+	,m_axis()
+{
+}
+
+ndMeshJointVehicleTorsionBar::ndMeshJointVehicleTorsionBar(const ndMeshJointVehicleTorsionBar& other)
+	:ndMeshJoint(other)
+	,m_axis(other.m_axis)
+{
+}
+
+ndMeshJoint* ndMeshJointVehicleTorsionBar::Duplicate() const
+{
+	return new ndMeshJointVehicleTorsionBar(*this);
+}
+
+bool ndMeshJointVehicleTorsionBar::operator==(const ndMeshJoint& other) const
+{
+	bool test = ndMeshJoint::operator==(other);
+	if (test)
+	{
+		ndAssert(0);
+		//const ndMeshJointVehicleTorsionBar* const otherJoint = (ndMeshJointVehicleTorsionBar*)&other;
+		//test = test && (m_gearRatio == otherJoint->m_gearRatio);
+	}
+	return test;
+}
+
+void ndMeshJointVehicleTorsionBar::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+	ndAssert(0);
+	//xmlSaveParam(parent, "ratio", m_gearRatio);
+}
+
+void ndMeshJointVehicleTorsionBar::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndMeshJoint::DeserializeFromXml(parent);
+	ndAssert(0);
+	//if (xmlHasAttribute(parent, "ratio"))
+	//{
+	//	m_gearRatio = ndReal(xmlGetFloat(parent, "ratio"));
+	//}
+}
+
+ndJointBilateralConstraint* ndMeshJointVehicleTorsionBar::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+{
+	ndAssert(0);
+	//const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	//const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
+	//
+	//ndMultiBodyVehicleDifferentialAxle* const joint = new ndMultiBodyVehicleDifferentialAxle(
+	//	pinAndPivotInChild, child, pinAndPivotInParent.m_front, parent);
+	//joint->SetGearRatio(m_gearRatio);
+	//return joint;
+	return nullptr;
+}
+
 
 ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMesh* const owner)
 	:ndMeshJointWheel(owner)
