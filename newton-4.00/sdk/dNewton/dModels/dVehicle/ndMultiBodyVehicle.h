@@ -106,6 +106,12 @@ class ndMultiBodyVehicle : public ndModelArticulation
 		friend class ndMultiBodyVehicleTireJoint;
 	};
 
+	enum DebugFlags
+	{
+		m_wheel = 1<<0,
+		m_torsionBar = 1 << 1,
+	};
+
 	D_CLASS_REFLECTION(ndMultiBodyVehicle, ndModelArticulation)
 
 	D_NEWTON_API ndMultiBodyVehicle(ndFloat32 gravityMagnitud = ndFloat32 (10.0f));
@@ -121,6 +127,9 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	D_NEWTON_API ndBodyDynamic* GetChassis() const;
 	D_NEWTON_API ndMultiBodyVehicleMotor* GetMotor() const;
 	D_NEWTON_API ndMultiBodyVehicleGearBox* GetGearBox() const;
+	
+	D_NEWTON_API DebugFlags GetDebugFlags() const;
+	D_NEWTON_API void SetDebugFlags(DebugFlags flags);
 	
 	D_NEWTON_API const ndList<ndMultiBodyVehicleTireJoint*>& GetTireList() const;
 
@@ -176,6 +185,8 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	ndFloat32 m_maxSideslipRate;
 	ndFloat32 m_maxSideslipAngle;
 	ndFloat32 m_gravityMagnitud;
+
+	DebugFlags m_debugFlags;
 	bool m_initialized;
 
 	friend class ndMultiBodyVehicleMotor;

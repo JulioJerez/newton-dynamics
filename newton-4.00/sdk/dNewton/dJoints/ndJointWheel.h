@@ -87,6 +87,7 @@ class ndJointWheel : public ndJointBilateralConstraint
 	ndFloat32 m_normalizedHandBrake;
 	ndFloat32 m_variableRateRegularizer;
 	bool m_isApplyingBrakes;
+	ndFixSizeArray<ndInt32, 3> m_angularJacobians;
 
 	friend class ndMultiBodyVehicle;
 } D_GCC_NEWTON_CLASS_ALIGN_32;

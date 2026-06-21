@@ -307,5 +307,12 @@ void ndMultiBodyVehicleTireJoint::JacobianDerivative(ndConstraintDescritor& desc
 {
 	m_variableRateRegularizer = m_info.m_regularizer * (m_vehicle ? m_vehicle->m_downForce.m_suspensionStiffnessModifier : ndFloat32 (1.0f));
 	ndJointWheel::JacobianDerivative(desc);
+
+	const ndVector zero(ndVector::m_zero);
+	for (ndInt32 i = m_angularJacobians.GetCount() - 1; i >= 0; --i)
+	{
+		ndJacobian& jacobian = desc.m_jacobian[m_angularJacobians[i]].m_jacobianM1;
+		jacobian.m_angular = zero;
+	}
 }
 

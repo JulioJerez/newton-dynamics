@@ -129,6 +129,16 @@ ndMultiBodyVehicle::ndMultiBodyVehicle(ndFloat32 gravityMagnitud)
 	ndAssert(ndAbs(m_gravityMagnitud) > ndFloat32 (0.0f));
 }
 
+ndMultiBodyVehicle::DebugFlags ndMultiBodyVehicle::GetDebugFlags() const
+{
+	return m_debugFlags;
+}
+
+void ndMultiBodyVehicle::SetDebugFlags(DebugFlags flags)
+{
+	m_debugFlags = flags;
+}
+
 ndVehicleDectriptor& ndMultiBodyVehicle::GetDescriptor()
 {
 	return m_descriptor;
@@ -414,6 +424,15 @@ void ndMultiBodyVehicle::AddDifferentialAxle(const ndSharedPtr<ndJointBilateralC
 void ndMultiBodyVehicle::AddTorsionBar(const ndSharedPtr<ndJointBilateralConstraint>& torsionBar)
 {
 	ndMultiBodyVehicleTorsionBar* const joint = (ndMultiBodyVehicleTorsionBar*)*torsionBar;
+
+	const ndNode* const wheelNode = FindByBody(joint->GetBody0());
+	if (wheelNode)
+	{
+		const ndMatrix matrix (joint->CalculateGlobalMatrix0());
+		joint->m_referenceBody = wheelNode->GetParent()->m_body->GetAsBodyKinematic();
+		joint->localReferenceFrame = matrix * joint->m_referenceBody->GetMatrix().OrthoInverse();
+	}
+
 	ndNode* const node = FindLoopByJoint(joint);
 	if (!node)
 	{
@@ -591,53 +610,75 @@ void ndMultiBodyVehicle::Debug(ndConstraintDebugCallback& context) const
 	context.DrawLine(p0, p2, ndVector(1.0f, 1.0f, 0.0f, 0.0f));
 	context.DrawLine(p0, p1, ndVector(1.0f, 0.0f, 0.0f, 0.0f));
 	
-	// draw tires info
-	ndFloat32 scale = ndFloat32(3.0f);
-	const ndVector forceColor(ndFloat32(0.8f), ndFloat32(0.8f), ndFloat32(0.8f), ndFloat32(0.0f));
-	const ndVector lateralColor(ndFloat32(0.3f), ndFloat32(0.7f), ndFloat32(0.0f), ndFloat32(0.0f));
-	const ndVector longitudinalColor(ndFloat32(0.7f), ndFloat32(0.3f), ndFloat32(0.0f), ndFloat32(0.0f));
-	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = m_tireList.GetFirst(); node; node = node->GetNext())
+	//// draw tires info
+	//ndFloat32 scale = ndFloat32(3.0f);
+	//const ndVector forceColor(ndFloat32(0.8f), ndFloat32(0.8f), ndFloat32(0.8f), ndFloat32(0.0f));
+	//const ndVector lateralColor(ndFloat32(0.3f), ndFloat32(0.7f), ndFloat32(0.0f), ndFloat32(0.0f));
+	//const ndVector longitudinalColor(ndFloat32(0.7f), ndFloat32(0.3f), ndFloat32(0.0f), ndFloat32(0.0f));
+	//for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = m_tireList.GetFirst(); node; node = node->GetNext())
+	//{
+	//	ndMultiBodyVehicleTireJoint* const tireJoint = node->GetInfo();
+	//	ndBodyKinematic* const tireBody = tireJoint->GetBody0()->GetAsBodyDynamic();
+	//
+	//	tireJoint->DebugJoint(context);
+	//
+	//	// draw tire forces
+	//	const ndBodyKinematic::ndContactMap& contactMap = tireBody->GetContactMap();
+	//	ndFloat32 tireGravities = scale / (kinematics.m_mass * m_gravityMagnitud);
+	//	ndBodyKinematic::ndContactMap::Iterator it(contactMap);
+	//	for (it.Begin(); it; it++)
+	//	{
+	//		ndContact* const contact = *it;
+	//		if (contact->IsActive())
+	//		{
+	//			const ndContactPointList& contactPoints = contact->GetContactPoints();
+	//			for (ndContactPointList::ndNode* contactNode = contactPoints.GetFirst(); contactNode; contactNode = contactNode->GetNext())
+	//			{
+	//				const ndContactMaterial& contactPoint = contactNode->GetInfo();
+	//				ndMatrix frame(contactPoint.m_normal, contactPoint.m_dir0, contactPoint.m_dir1, contactPoint.m_point);
+	//
+	//				ndVector localPosit(m_localFrame.UntransformVector(chassisMatrix.UntransformVector(contactPoint.m_point)));
+	//				ndFloat32 offset = (localPosit.m_z > ndFloat32(0.0f)) ? ndFloat32(0.2f) : ndFloat32(-0.2f);
+	//				frame.m_posit += contactPoint.m_dir0.Scale(offset);
+	//				frame.m_posit += contactPoint.m_normal.Scale(0.1f);
+	//
+	//				// normal force
+	//				ndFloat32 normalForce = -tireGravities * contactPoint.m_normal_Force.m_force;
+	//				context.DrawLine(frame.m_posit, frame.m_posit + contactPoint.m_normal.Scale(normalForce), forceColor);
+	//
+	//				// lateral force
+	//				ndFloat32 lateralForce = -tireGravities * contactPoint.m_dir0_Force.m_force;
+	//				context.DrawLine(frame.m_posit, frame.m_posit + contactPoint.m_dir0.Scale(lateralForce), lateralColor);
+	//
+	//				// longitudinal force
+	//				ndFloat32 longitudinalForce = tireGravities * contactPoint.m_dir1_Force.m_force;
+	//				context.DrawLine(frame.m_posit, frame.m_posit + contactPoint.m_dir1.Scale(longitudinalForce), longitudinalColor);
+	//			}
+	//		}
+	//	}
+	//}
+
+	auto DrawJoints = [this, &context](ndNode* const node)
 	{
-		ndMultiBodyVehicleTireJoint* const tireJoint = node->GetInfo();
-		ndBodyKinematic* const tireBody = tireJoint->GetBody0()->GetAsBodyDynamic();
-	
-		tireJoint->DebugJoint(context);
-	
-		// draw tire forces
-		const ndBodyKinematic::ndContactMap& contactMap = tireBody->GetContactMap();
-		ndFloat32 tireGravities = scale / (kinematics.m_mass * m_gravityMagnitud);
-		ndBodyKinematic::ndContactMap::Iterator it(contactMap);
-		for (it.Begin(); it; it++)
+		if (node->m_joint)
 		{
-			ndContact* const contact = *it;
-			if (contact->IsActive())
+			if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0)
 			{
-				const ndContactPointList& contactPoints = contact->GetContactPoints();
-				for (ndContactPointList::ndNode* contactNode = contactPoints.GetFirst(); contactNode; contactNode = contactNode->GetNext())
+				if (m_debugFlags & m_wheel)
 				{
-					const ndContactMaterial& contactPoint = contactNode->GetInfo();
-					ndMatrix frame(contactPoint.m_normal, contactPoint.m_dir0, contactPoint.m_dir1, contactPoint.m_point);
-	
-					ndVector localPosit(m_localFrame.UntransformVector(chassisMatrix.UntransformVector(contactPoint.m_point)));
-					ndFloat32 offset = (localPosit.m_z > ndFloat32(0.0f)) ? ndFloat32(0.2f) : ndFloat32(-0.2f);
-					frame.m_posit += contactPoint.m_dir0.Scale(offset);
-					frame.m_posit += contactPoint.m_normal.Scale(0.1f);
-	
-					// normal force
-					ndFloat32 normalForce = -tireGravities * contactPoint.m_normal_Force.m_force;
-					context.DrawLine(frame.m_posit, frame.m_posit + contactPoint.m_normal.Scale(normalForce), forceColor);
-	
-					// lateral force
-					ndFloat32 lateralForce = -tireGravities * contactPoint.m_dir0_Force.m_force;
-					context.DrawLine(frame.m_posit, frame.m_posit + contactPoint.m_dir0.Scale(lateralForce), lateralColor);
-	
-					// longitudinal force
-					ndFloat32 longitudinalForce = tireGravities * contactPoint.m_dir1_Force.m_force;
-					context.DrawLine(frame.m_posit, frame.m_posit + contactPoint.m_dir1.Scale(longitudinalForce), longitudinalColor);
+					node->m_joint->DebugJoint(context);
+				}
+			}
+			else if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleTorsionBar::StaticClassName()) == 0)
+			{
+				if (m_debugFlags & m_torsionBar)
+				{
+					node->m_joint->DebugJoint(context);
 				}
 			}
 		}
-	}
+	};
+	((ndMultiBodyVehicle*)this)->NodeIterator(DrawJoints);
 }
 
 void ndMultiBodyVehicle::ApplyStabilityControl()
@@ -1424,6 +1465,9 @@ void ndMultiBodyVehicle::ConvertToMotorVehicle(const ndVehicleDectriptor& vehicl
 		}
 	};
 	NodeIterator(AddDriveTrain);
+
+	m_debugFlags = m_wheel;
+	//m_debugFlags = m_torsionBar;
 
 	CalculateSprungWeight();
 }

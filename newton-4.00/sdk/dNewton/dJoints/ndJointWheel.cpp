@@ -254,10 +254,16 @@ void ndJointWheel::JacobianDerivative(ndConstraintDescritor& desc)
 	const ndFloat32 angle0 = CalculateAngle(matrix0.m_front, matrix1.m_front, matrix1.m_up);
 	const ndFloat32 angle1 = CalculateAngle(matrix0.m_front, matrix1.m_front, matrix1.m_right);
 
+	m_angularJacobians.SetCount(0);
 	AddLinearRowJacobian(desc, p0, projectedPoint, matrix1[0]);
 	AddLinearRowJacobian(desc, p0, projectedPoint, matrix1[2]);
+
+	m_angularJacobians.PushBack(desc.m_rowsCount);
 	AddAngularRowJacobian(desc, matrix1.m_up, angle0);
+
+	m_angularJacobians.PushBack(desc.m_rowsCount);
 	AddAngularRowJacobian(desc, matrix1.m_right, angle1);
+
 	AddLinearRowJacobian(desc, matrix0.m_posit, matrix1.m_posit, matrix1.m_up);
 	SetMassSpringDamperAcceleration(desc, m_variableRateRegularizer, m_info.m_springK, m_info.m_damperC);
 
@@ -266,16 +272,13 @@ void ndJointWheel::JacobianDerivative(ndConstraintDescritor& desc)
 	if (brakeFrictionTorque > ndFloat32(0.0f))
 	{
 		m_isApplyingBrakes = true;
+		m_angularJacobians.PushBack(desc.m_rowsCount);
 		AddAngularRowJacobian(desc, matrix1.m_front, ndFloat32(0.0f));
 		const ndVector tireOmega(m_body0->GetOmega());
 		const ndVector chassisOmega(m_body1->GetOmega());
 
 		ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
 		ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
-
-		// no hacks please
-		//const ndFloat32 brakesToChassisInfluence = ndFloat32 (0.125f);
-		//jacobian1.m_angular = jacobian1.m_angular.Scale(brakesToChassisInfluence);
 
 		ndFloat32 w0 = tireOmega.DotProduct(jacobian0.m_angular).GetScalar();
 		ndFloat32 w1 = chassisOmega.DotProduct(jacobian1.m_angular).GetScalar();
