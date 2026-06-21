@@ -1190,15 +1190,20 @@ void ndAssetEditor::EditMotorJoint()
 
 	for (ndInt32 i = 0; i < engineCurve.m_rpms.GetCount(); ++i)
 	{
+		char labelName[256];
+
 		ndReal rpm = engineCurve.m_rpms[i];
-		if (ImGui::InputFloat("rpm", &rpm, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		snprintf(labelName, sizeof(labelName) - 1, "rpm%d", i);
+		if (ImGui::InputFloat(labelName, &rpm, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 			engineCurve.m_rpms[i] = rpm;
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 		}
+
 		ndReal torque = engineCurve.m_torques[i];
-		if (ImGui::InputFloat("torque", &torque, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		snprintf(labelName, sizeof(labelName) - 1, "torque%d", i);
+		if (ImGui::InputFloat(labelName, &torque, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 			engineCurve.m_torques[i] = torque;

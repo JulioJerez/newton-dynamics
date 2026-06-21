@@ -38,6 +38,7 @@
 #include "ndMultiBodyVehicleGearBox.h"
 #include "ndIkSwivelPositionEffector.h"
 #include "ndMultiBodyVehicleTireJoint.h"
+#include "ndMultiBodyVehicleTorsionBar.h"
 #include "ndMultiBodyVehicleDifferential.h"
 #include "ndMultiBodyVehicleDifferentialAxle.h"
 
@@ -564,11 +565,13 @@ ndJointBilateralConstraint* ndMeshJointSlider::CreateObject(ndBodyKinematic* con
 
 ndMeshJointHinge::ndMeshJointHinge(const ndMesh* const owner)
 	:ndMeshJoint(owner)
+	,m_axis()
 {
 }
 
 ndMeshJointHinge::ndMeshJointHinge(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
+	,m_axis()
 {
 	const ndJointHinge* const subJoint = (ndJointHinge*)joint;
 	subJoint->GetSpringDamper(m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
@@ -1440,6 +1443,75 @@ ndJointBilateralConstraint* ndMeshJointVehicleDifferentialAxle::CreateObject(ndB
 	ndMultiBodyVehicleDifferentialAxle* const joint = new ndMultiBodyVehicleDifferentialAxle(
 		pinAndPivotInChild, child, pinAndPivotInParent.m_front, parent);
 	joint->SetGearRatio(m_gearRatio);
+	return joint;
+}
+
+ndMeshJointVehicleTorsionBar::ndMeshJointVehicleTorsionBar(const ndMesh* const owner)
+	:ndMeshJoint(owner)
+	,m_axis()
+{
+	m_axis.m_springK = ndFloat32(2000.0f);
+	m_axis.m_damperC = ndFloat32(20.0f);
+	m_axis.m_springDamperRegularizer = ndFloat32(0.01f);
+}
+
+ndMeshJointVehicleTorsionBar::ndMeshJointVehicleTorsionBar(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
+	:ndMeshJoint(owner, joint)
+	,m_axis()
+{
+	m_axis.m_springK = ndFloat32(2000.0f);
+	m_axis.m_damperC = ndFloat32(20.0f);
+	m_axis.m_springDamperRegularizer = ndFloat32(0.01f);
+}
+
+ndMeshJointVehicleTorsionBar::ndMeshJointVehicleTorsionBar(const ndMeshJointVehicleTorsionBar& other)
+	:ndMeshJoint(other)
+	,m_axis(other.m_axis)
+{
+}
+
+ndMeshJoint* ndMeshJointVehicleTorsionBar::Duplicate() const
+{
+	return new ndMeshJointVehicleTorsionBar(*this);
+}
+
+bool ndMeshJointVehicleTorsionBar::operator==(const ndMeshJoint& other) const
+{
+	bool test = ndMeshJoint::operator==(other);
+	if (test)
+	{
+		const ndMeshJointVehicleTorsionBar* const otherJoint = (ndMeshJointVehicleTorsionBar*)&other;
+		test = test && (m_axis == otherJoint->m_axis);
+	}
+	return test;
+}
+
+void ndMeshJointVehicleTorsionBar::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshJoint::SerializeToXml(parent);
+
+	xmlSaveParam(parent, "springConst", m_axis.m_springK);
+	xmlSaveParam(parent, "damperConst", m_axis.m_damperC);
+	xmlSaveParam(parent, "regularizer", m_axis.m_springDamperRegularizer);
+}
+
+void ndMeshJointVehicleTorsionBar::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndMeshJoint::DeserializeFromXml(parent);
+
+	m_axis.m_springK = xmlGetFloat(parent, "springConst");
+	m_axis.m_damperC = xmlGetFloat(parent, "damperConst");
+	m_axis.m_springDamperRegularizer = xmlGetFloat(parent, "regularizer");
+}
+
+ndJointBilateralConstraint* ndMeshJointVehicleTorsionBar::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
+{
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
+	
+	ndMultiBodyVehicleTorsionBar* const joint = new ndMultiBodyVehicleTorsionBar(
+		pinAndPivotInChild, child->GetAsBodyDynamic(), pinAndPivotInParent, parent->GetAsBodyDynamic());
+	joint->SetTorsionTorque(m_axis.m_springK, m_axis.m_damperC, m_axis.m_springDamperRegularizer);
 	return joint;
 }
 

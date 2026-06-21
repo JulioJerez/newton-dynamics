@@ -266,20 +266,20 @@ void ndJointWheel::JacobianDerivative(ndConstraintDescritor& desc)
 	if (brakeFrictionTorque > ndFloat32(0.0f))
 	{
 		m_isApplyingBrakes = true;
-		const ndFloat32 brakesToChassisInfluence = ndFloat32 (0.125f);
-
 		AddAngularRowJacobian(desc, matrix1.m_front, ndFloat32(0.0f));
 		const ndVector tireOmega(m_body0->GetOmega());
 		const ndVector chassisOmega(m_body1->GetOmega());
 
 		ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
 		ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
-		jacobian1.m_angular = jacobian1.m_angular.Scale(brakesToChassisInfluence);
+
+		// no hacks please
+		//const ndFloat32 brakesToChassisInfluence = ndFloat32 (0.125f);
+		//jacobian1.m_angular = jacobian1.m_angular.Scale(brakesToChassisInfluence);
 
 		ndFloat32 w0 = tireOmega.DotProduct(jacobian0.m_angular).GetScalar();
 		ndFloat32 w1 = chassisOmega.DotProduct(jacobian1.m_angular).GetScalar();
 		ndFloat32 wRel = (w0 + w1) * ndFloat32 (0.35f);
-		//ndTrace(("(%d: %f)\n", m_body0->GetId(), wRel));
 		SetMotorAcceleration(desc, -wRel * desc.m_invTimestep);
 		SetHighFriction(desc, brakeFrictionTorque);
 		SetLowerFriction(desc, -brakeFrictionTorque);

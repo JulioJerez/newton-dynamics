@@ -109,17 +109,6 @@ ndFloat32 ndMultiBodyVehicle::ndDownForce::GetDownforceFactor(ndFloat32 speed) c
 	return downForceFactor;
 }
 
-#if 0
-ndMultiBodyVehicleTorsionBar* ndMultiBodyVehicle::AddTorsionBar(ndBodyKinematic* const)
-{
-	ndAssert(0);
-	return nullptr;
-
-	//m_torsionBar = ndSharedPtr<ndMultiBodyVehicleTorsionBar>(new ndMultiBodyVehicleTorsionBar(this, sentinel));
-	//return *m_torsionBar;
-}
-#endif
-
 ndMultiBodyVehicle::ndMultiBodyVehicle(ndFloat32 gravityMagnitud)
 	:ndModelArticulation()
 	,m_localFrame(ndGetIdentityMatrix())
@@ -131,7 +120,6 @@ ndMultiBodyVehicle::ndMultiBodyVehicle(ndFloat32 gravityMagnitud)
 	m_motor = nullptr;
 	m_gearBox = nullptr;
 	m_chassis = nullptr;
-	m_torsionBar = nullptr;
 
 	m_steeringRate = D_MAX_STEERING_RATE;
 	m_maxSideslipRate = D_MAX_SIZE_SLIP_RATE;
@@ -420,6 +408,16 @@ void ndMultiBodyVehicle::AddDifferentialAxle(const ndSharedPtr<ndJointBilateralC
 	if (!node)
 	{
 		AddCloseLoop(differentialAxleJoint);
+	}
+}
+
+void ndMultiBodyVehicle::AddTorsionBar(const ndSharedPtr<ndJointBilateralConstraint>& torsionBar)
+{
+	ndMultiBodyVehicleTorsionBar* const joint = (ndMultiBodyVehicleTorsionBar*)*torsionBar;
+	ndNode* const node = FindLoopByJoint(joint);
+	if (!node)
+	{
+		AddCloseLoop(torsionBar);
 	}
 }
 
@@ -1418,6 +1416,10 @@ void ndMultiBodyVehicle::ConvertToMotorVehicle(const ndVehicleDectriptor& vehicl
 			else if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0)
 			{
 				AddDifferentialAxle(node->m_joint);
+			}
+			else if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleTorsionBar::StaticClassName()) == 0)
+			{
+				AddTorsionBar(node->m_joint);
 			}
 		}
 	};

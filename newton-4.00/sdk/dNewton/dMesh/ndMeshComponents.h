@@ -332,6 +332,23 @@ class ndMeshJointVehicleDifferentialAxle : public ndMeshJoint
 	ndReal m_gearRatio;
 };
 
+class ndMeshJointVehicleTorsionBar : public ndMeshJoint
+{
+	public:
+	D_NEWTON_API ndMeshJointVehicleTorsionBar(const ndMesh* const owner);
+	D_NEWTON_API ndMeshJointVehicleTorsionBar(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
+
+	D_NEWTON_API ndMeshJointVehicleTorsionBar(const ndMeshJointVehicleTorsionBar& other);
+	D_NEWTON_API virtual ndMeshJoint* Duplicate() const override;
+	D_NEWTON_API virtual bool operator==(const ndMeshJoint& other) const override;
+
+	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
+
+	ndAxis m_axis;
+};
+
 class ndMeshJointVehicleTireJoint : public ndMeshJointWheel
 {
 	public:
