@@ -91,6 +91,11 @@ ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleGearBox::GetMeshJoint(const ndMesh* c
 	return ndSharedPtr<ndMeshJoint>(joint);
 }
 
+ndMultiBodyVehicleGearBox::ndGearBox& ndMultiBodyVehicleGearBox::GetGearBox()
+{
+	return m_gearBox;
+}
+
 const ndMultiBodyVehicleGearBox::ndGearBox& ndMultiBodyVehicleGearBox::GetGearBox() const
 {
 	return m_gearBox;
@@ -156,7 +161,6 @@ void ndMultiBodyVehicleGearBox::JacobianDerivative(ndConstraintDescritor& desc)
 
 		ndFloat32 w0 = omega0.DotProduct(jacobian0.m_angular).GetScalar();
 		ndFloat32 w1 = omega1.DotProduct(jacobian1.m_angular).GetScalar() + idleOmega;
-		//w1 = (gearRatio > ndFloat32(0.0f)) ? ndMin(w1, ndFloat32(0.0f)) : ndMax(w1, ndFloat32(0.0f));
 		
 		const ndFloat32 w = (w0 + w1) * ndFloat32(0.5f);
 		SetMotorAcceleration(desc, -w * desc.m_invTimestep);

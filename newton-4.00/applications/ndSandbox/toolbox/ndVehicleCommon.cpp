@@ -86,23 +86,34 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 	const ndFixSizeArray<bool, 32>& buttons = gameController->GetButtons();
 
 	const ndVehicleDectriptor& desc = vehicle->GetDescriptor();
-	auto ApplyControls = [this, vehicle, &desc, motor, &axis, &buttons]()
+	auto ApplyControls = [this, vehicle, &desc, &axis, &buttons]()
 	{
 		ndFloat32 throttle = axis[ndGameControllerInputs::m_gasPedal];
 		
+		ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
 		const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& engineCurve = motor->GetCurve();
-		//ndFloat32 currentOmega = motor->GetRpm() / ndRadPerSecToRpm;
 		ndFloat32 currentRpm = motor->GetRpm();
 		ndFloat32 desiredRpm = ndMax(engineCurve.GetIdleRpm(), throttle * engineCurve.GetRedLineRpm());
 		ndFloat32 torqueFromCurve = engineCurve.GetTorque(currentRpm);
 		
-		motor->SetTorqueAndRpm(torqueFromCurve, desiredRpm);
-		vehicle->GetChassis()->SetSleepState(false);
-		motor->GetBody0()->SetSleepState(false);
-		
 		ndFloat32 brake = axis[ndGameControllerInputs::m_brakePedal];
 		ndFloat32 steerAngle = axis[ndGameControllerInputs::m_steeringWheel];
 		ndFloat32 handBrake = buttons[ndGameControllerInputs::m_handBreakButton] ? ndFloat32(1.0f) : ndFloat32(0.0f);
+
+		ndMultiBodyVehicleGearBox* const gearJoint = vehicle->GetGearBox();
+		ndMultiBodyVehicleGearBox::ndGearBox& gearBox = gearJoint->GetGearBox();
+		gearJoint->SetClutchTorque(gearBox.m_lockedClutchTorque);
+		if ((handBrake > ndFloat32(0.1f)) || (brake > ndFloat32(0.1f)))
+		{
+			// apply clucth or torque converted here
+			// for now just inore the torque
+			gearJoint->SetClutchTorque(gearBox.m_torqueConverter);
+		}
+
+		motor->SetTorqueAndRpm(torqueFromCurve, desiredRpm);
+		vehicle->GetChassis()->SetSleepState(false);
+		motor->GetBody0()->SetSleepState(false);
+
 		for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = vehicle->GetTireList().GetFirst(); node; node = node->GetNext())
 		{
 			ndMultiBodyVehicleTireJoint* const tire = node->GetInfo();

@@ -60,6 +60,7 @@ class ndMultiBodyVehicleGearBox : public ndJointGear
 		const ndVector& motorPin, ndBodyKinematic* const motor,
 		const ndVector& differentialPin, ndBodyKinematic* const differential);
 
+	D_NEWTON_API ndGearBox& GetGearBox();
 	D_NEWTON_API const ndGearBox& GetGearBox() const;
 	D_NEWTON_API void SetGearBox(const ndGearBox& gearBox);
 

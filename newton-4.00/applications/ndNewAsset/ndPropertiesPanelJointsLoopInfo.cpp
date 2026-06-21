@@ -602,7 +602,9 @@ void ndAssetEditor::EditGearBoxLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint
 	for (ndInt32 i = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear; i < gearBox.m_gearRatios.GetCount(); ++i)
 	{
 		ndReal ratio = gearBox.m_gearRatios[i];
-		if (ImGui::InputFloat("gear", &ratio, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		char label[256];
+		snprintf(label, sizeof(label) - 1, "gear%d", i);
+		if (ImGui::InputFloat(label, &ratio, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 			gearBox.m_gearRatios[i] = ratio;
