@@ -23,20 +23,20 @@
 #include "ndNewtonStdafx.h"
 #include "ndWorld.h"
 #include "ndBodyDynamic.h"
+#include "ndMeshComponents.h"
 #include "ndMultiBodyVehicle.h"
 #include "ndMultiBodyVehicleMotor.h"
 #include "ndMultiBodyVehicleTorsionBar.h"
 
-
 ndMultiBodyVehicleTorsionBar::ndMultiBodyVehicleTorsionBar()
 	:ndJointBilateralConstraint()
-	//,m_axles()
-	//,m_springK(ndFloat32(10.0f))
-	//,m_damperC(ndFloat32(1.0f))
-	//,m_springDamperRegularizer(ndFloat32(0.1f))
+	,m_axis()
 {
-	ndAssert(0);
-	m_maxDof = 2;
+	m_maxDof = 1;
+	m_axis.m_springK = ndFloat32(2000.0f);
+	m_axis.m_damperC = ndFloat32(20.0f);
+	m_axis.m_springDamperRegularizer = ndFloat32(0.01f);
+
 	//const ndBodyKinematic* const chassis = vehicle->m_chassis;
 	//ndAssert(chassis);
 	//const ndMatrix worldMatrix(vehicle->m_localFrame * chassis->GetMatrix());
@@ -58,31 +58,30 @@ ndMultiBodyVehicleTorsionBar::ndMultiBodyVehicleTorsionBar()
 //	SetSolverModel(m_jointkinematicCloseLoop);
 //}
 
-//void ndMultiBodyVehicleTorsionBar::SetTorsionTorque(ndFloat32 springK, ndFloat32 damperC, ndFloat32 springDamperRegularizer)
-//{
-//	m_springK = ndAbs(springK);
-//	m_damperC = ndAbs(damperC);
-//	m_springDamperRegularizer = ndClamp (springDamperRegularizer, ND_SPRING_DAMP_MIN_REG, ndFloat32(0.99f));
-//}
-//
-//void ndMultiBodyVehicleTorsionBar::GetTorsionTorque(ndFloat32& springK, ndFloat32& damperC, ndFloat32& springDamperRegularizer) const
-//{
-//	springK = m_springK;
-//	damperC = m_damperC;
-//	springDamperRegularizer = m_springDamperRegularizer;
-//}
-//
-//void ndMultiBodyVehicleTorsionBar::AddAxel(const ndBodyKinematic* const leftTire, const ndBodyKinematic* const rightTire)
-//{
-//	if (m_axles.GetCount() < m_axles.GetCapacity())
-//	{
-//		ndAxles axle;
-//		axle.m_axleAngle = ndFloat32(0.0f);
-//		axle.m_leftTire = leftTire;
-//		axle.m_rightTire = rightTire;
-//		m_axles.PushBack(axle);
-//	}
-//}
+ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleTorsionBar::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointVehicleTorsionBar* const joint = new ndMeshJointVehicleTorsionBar(owner, this);
+	return ndSharedPtr<ndMeshJoint>(joint);
+}
+
+void ndMultiBodyVehicleTorsionBar::UpdateParameters()
+{
+	// do nothing for now;
+}
+
+void ndMultiBodyVehicleTorsionBar::SetTorsionTorque(ndFloat32 springK, ndFloat32 damperC, ndFloat32 springDamperRegularizer)
+{
+	m_axis.m_springK = ndAbs(springK);
+	m_axis.m_damperC = ndAbs(damperC);
+	m_axis.m_springDamperRegularizer = ndClamp (springDamperRegularizer, ND_SPRING_DAMP_MIN_REG, ndFloat32(0.99f));
+}
+
+void ndMultiBodyVehicleTorsionBar::GetTorsionTorque(ndFloat32& springK, ndFloat32& damperC, ndFloat32& springDamperRegularizer) const
+{
+	springK = m_axis.m_springK;
+	damperC = m_axis.m_damperC;
+	springDamperRegularizer = m_axis.m_springDamperRegularizer;
+}
 
 //void ndMultiBodyVehicleTorsionBar::JacobianDerivative(ndConstraintDescritor& desc)
 void ndMultiBodyVehicleTorsionBar::JacobianDerivative(ndConstraintDescritor&)

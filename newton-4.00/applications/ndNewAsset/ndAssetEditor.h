@@ -188,6 +188,7 @@ class ndAssetEditor : public ndClassAlloc
 	void EditSphericalLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditDoubleHingeLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditDifferentialAxleLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
+	void EditDifferentialTorsionBarJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditSwivelPositionEffectorLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 
 	void EditShapeTransform();

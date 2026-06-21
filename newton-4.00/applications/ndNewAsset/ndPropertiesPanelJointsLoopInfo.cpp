@@ -336,6 +336,12 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 								ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndMultiBodyVehicleDifferentialAxle());
 								InitNewLocalJoint(newJoint);
 							}
+							else if (strcmp(name, ndMultiBodyVehicleTorsionBar::StaticClassName()) == 0)
+							{
+								m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+								ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndMultiBodyVehicleTorsionBar());
+								InitNewLocalJoint(newJoint);
+							}
 							else if (strcmp(name, ndJointDoubleHinge::StaticClassName()) == 0)
 							{
 								m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
@@ -387,6 +393,7 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 					SetDropdownList(ndJointGear::StaticClassName());
 					SetDropdownList(ndIkSwivelPositionEffector::StaticClassName());
 					SetDropdownList(ndMultiBodyVehicleGearBox::StaticClassName());
+					SetDropdownList(ndMultiBodyVehicleTorsionBar::StaticClassName());
 					SetDropdownList(ndMultiBodyVehicleDifferentialAxle::StaticClassName());
 					//SetDropdownList(ndJointWheel::StaticClassName());
 					//SetDropdownList(ndJointPlane::StaticClassName());
@@ -416,6 +423,10 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 				else if (strcmp(joint->m_constructor.GetStr(), ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0)
 				{
 					EditDifferentialAxleLoopJoint(loopJoint);
+				}
+				else if (strcmp(joint->m_constructor.GetStr(), ndMultiBodyVehicleTorsionBar::StaticClassName()) == 0)
+				{
+					EditDifferentialTorsionBarJoint(loopJoint);
 				}
 				else if (strcmp(joint->m_constructor.GetStr(), ndMultiBodyVehicleGearBox::StaticClassName()) == 0)
 				{
@@ -545,6 +556,21 @@ void ndAssetEditor::EditDifferentialAxleLoopJoint(ndSharedPtr<ndMeshLoopJoint>& 
 		joint->m_gearRatio = value;
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
+}
+
+void ndAssetEditor::EditDifferentialTorsionBarJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
+{
+	EditLoopJointLocalMatrix(loopJoint);
+
+	ndAssert(0);
+	//ndMeshJointVehicleTorsionBar* const joint = (ndMeshJointVehicleTorsionBar*)*loopJoint->m_joint;
+	//ndReal value = ndReal(joint->m_gearRatio);
+	//if (ImGui::InputFloat("gear ratio", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	//{
+	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	//	joint->m_gearRatio = value;
+	//	m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+	//}
 }
 
 void ndAssetEditor::EditGearBoxLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)

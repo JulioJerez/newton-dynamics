@@ -25,48 +25,24 @@
 #include "ndNewtonStdafx.h"
 #include "ndJointGear.h"
 
-//class ndMultiBodyVehicle;
-
-
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndMultiBodyVehicleTorsionBar : public ndJointBilateralConstraint
 {
 	public:
-	//class ndAxles
-	//{
-	//	public:
-	//	ndAxles()
-	//		:m_leftTire(nullptr)
-	//		,m_rightTire(nullptr)
-	//		,m_axleAngle(ndFloat32(0.0f))
-	//	{
-	//	}
-	//	const ndBodyKinematic* m_leftTire;
-	//	const ndBodyKinematic* m_rightTire;
-	//	ndFloat32 m_axleAngle;
-	//};
-
 	D_CLASS_REFLECTION(ndMultiBodyVehicleTorsionBar, ndJointBilateralConstraint)
 	D_NEWTON_API ndMultiBodyVehicleTorsionBar();
 	//D_NEWTON_API ndMultiBodyVehicleTorsionBar(const ndMultiBodyVehicle* const chassis, ndBodyKinematic* const fixedbody);
 
-	//D_NEWTON_API const ndFixSizeArray<ndAxles, 2>& GetAxels() const;
-	//D_NEWTON_API void AddAxel(const ndBodyKinematic* const leftTire, const ndBodyKinematic* const rightTire);
-	//D_NEWTON_API void SetTorsionTorque(ndFloat32 springK, ndFloat32 damperC, ndFloat32 springDamperRegularizer);
-	//D_NEWTON_API void GetTorsionTorque(ndFloat32& springK, ndFloat32& damperC, ndFloat32& springDamperRegularizer) const;
-	//void DebugJoint(ndConstraintDebugCallback&) const {}
+	D_NEWTON_API void SetTorsionTorque(ndFloat32 springK, ndFloat32 damperC, ndFloat32 springDamperRegularizer);
+	D_NEWTON_API void GetTorsionTorque(ndFloat32& springK, ndFloat32& damperC, ndFloat32& springDamperRegularizer) const;
+	void DebugJoint(ndConstraintDebugCallback&) const override {}
 
 	protected:
+	D_NEWTON_API void UpdateParameters() override;
 	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
-
-	//ndFixSizeArray<ndAxles, 2> m_axles;
-	//ndFloat32 m_springK;
-	//ndFloat32 m_damperC;
-	//ndFloat32 m_springDamperRegularizer;
+	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
 	ndAxisParam m_axis;
-	//friend class ndMultiBodyVehicle;
-
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif

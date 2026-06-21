@@ -62,7 +62,7 @@ ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleDifferentialAxle::GetMeshJoint(const 
 
 void ndMultiBodyVehicleDifferentialAxle::UpdateParameters()
 {
-	// do nothing;
+	// do nothing for now;
 	//ndMatrix matrix0;
 	//ndMatrix matrix1;
 	//CalculateGlobalMatrix(matrix0, matrix1);
