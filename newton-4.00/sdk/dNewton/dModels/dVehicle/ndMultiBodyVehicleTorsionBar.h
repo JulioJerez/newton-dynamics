@@ -31,7 +31,8 @@ class ndMultiBodyVehicleTorsionBar : public ndJointBilateralConstraint
 	public:
 	D_CLASS_REFLECTION(ndMultiBodyVehicleTorsionBar, ndJointBilateralConstraint)
 	D_NEWTON_API ndMultiBodyVehicleTorsionBar();
-	//D_NEWTON_API ndMultiBodyVehicleTorsionBar(const ndMultiBodyVehicle* const chassis, ndBodyKinematic* const fixedbody);
+	D_NEWTON_API ndMultiBodyVehicleTorsionBar(const ndMatrix& matrix0, ndBodyDynamic* const body0,
+											  const ndMatrix& matrix1, ndBodyDynamic* const body1);
 
 	D_NEWTON_API void SetTorsionTorque(ndFloat32 springK, ndFloat32 damperC, ndFloat32 springDamperRegularizer);
 	D_NEWTON_API void GetTorsionTorque(ndFloat32& springK, ndFloat32& damperC, ndFloat32& springDamperRegularizer) const;

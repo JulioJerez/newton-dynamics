@@ -38,6 +38,7 @@
 #include "ndMultiBodyVehicleGearBox.h"
 #include "ndIkSwivelPositionEffector.h"
 #include "ndMultiBodyVehicleTireJoint.h"
+#include "ndMultiBodyVehicleTorsionBar.h"
 #include "ndMultiBodyVehicleDifferential.h"
 #include "ndMultiBodyVehicleDifferentialAxle.h"
 
@@ -1505,15 +1506,13 @@ void ndMeshJointVehicleTorsionBar::DeserializeFromXml(const nd::TiXmlElement* co
 
 ndJointBilateralConstraint* ndMeshJointVehicleTorsionBar::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
 {
-	ndAssert(0);
-	//const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
-	//const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
-	//
-	//ndMultiBodyVehicleDifferentialAxle* const joint = new ndMultiBodyVehicleDifferentialAxle(
-	//	pinAndPivotInChild, child, pinAndPivotInParent.m_front, parent);
-	//joint->SetGearRatio(m_gearRatio);
-	//return joint;
-	return nullptr;
+	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
+	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
+	
+	ndMultiBodyVehicleTorsionBar* const joint = new ndMultiBodyVehicleTorsionBar(
+		pinAndPivotInChild, child->GetAsBodyDynamic(), pinAndPivotInParent, parent->GetAsBodyDynamic());
+	joint->SetTorsionTorque(m_axis.m_springK, m_axis.m_damperC, m_axis.m_springDamperRegularizer);
+	return joint;
 }
 
 ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMesh* const owner)
