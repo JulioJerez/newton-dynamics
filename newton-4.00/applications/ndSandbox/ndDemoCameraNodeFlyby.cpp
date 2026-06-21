@@ -50,39 +50,39 @@ void ndDemoCameraNodeFlyby::TickUpdate(ndFloat32 timestep)
 	// slow down the Camera if we have a Body
 	ndFloat32 slowDownFactor = scene->IsShiftKeyDown() ? 0.5f / 10.0f : 0.5f;
 	
-	ndMatrix targetMatrix(m_transform1.GetMatrix());
+	ndMatrix cameraMatrix(m_transform1.GetMatrix());
 	
 	// do camera translation
 	if (scene->GetKeyState(ImGuiKey_W))
 	{
-		targetMatrix.m_posit += targetMatrix.m_front.Scale(m_frontSpeed * timestep * slowDownFactor);
+		cameraMatrix.m_posit += cameraMatrix.m_front.Scale(m_frontSpeed * timestep * slowDownFactor);
 	}
 	if (scene->GetKeyState(ImGuiKey_S))
 	{
-		targetMatrix.m_posit -= targetMatrix.m_front.Scale(m_frontSpeed * timestep * slowDownFactor);
+		cameraMatrix.m_posit -= cameraMatrix.m_front.Scale(m_frontSpeed * timestep * slowDownFactor);
 	}
 	if (scene->GetKeyState(ImGuiKey_A))
 	{
-		targetMatrix.m_posit -= targetMatrix.m_right.Scale(m_sidewaysSpeed * timestep * slowDownFactor);
+		cameraMatrix.m_posit -= cameraMatrix.m_right.Scale(m_sidewaysSpeed * timestep * slowDownFactor);
 	}
 	if (scene->GetKeyState(ImGuiKey_D))
 	{
-		targetMatrix.m_posit += targetMatrix.m_right.Scale(m_sidewaysSpeed * timestep * slowDownFactor);
+		cameraMatrix.m_posit += cameraMatrix.m_right.Scale(m_sidewaysSpeed * timestep * slowDownFactor);
 	}
 	
 	if (scene->GetKeyState(ImGuiKey_Q))
 	{
-		targetMatrix.m_posit -= targetMatrix.m_up.Scale(m_sidewaysSpeed * timestep * slowDownFactor);
+		cameraMatrix.m_posit -= cameraMatrix.m_up.Scale(m_sidewaysSpeed * timestep * slowDownFactor);
 	}
 	
 	if (scene->GetKeyState(ImGuiKey_E))
 	{
-		targetMatrix.m_posit += targetMatrix.m_up.Scale(m_sidewaysSpeed * timestep * slowDownFactor);
+		cameraMatrix.m_posit += cameraMatrix.m_up.Scale(m_sidewaysSpeed * timestep * slowDownFactor);
 	}
 
-	ndMatrix matrix(ndRollMatrix(m_pitch) * ndYawMatrix(m_yaw));
-	ndQuaternion newRotation(matrix);
-	ndDemoCameraNode::SetTransform(newRotation, targetMatrix.m_posit);
+	const ndMatrix matrix(ndRollMatrix(m_pitch) * ndYawMatrix(m_yaw));
+	const ndQuaternion newRotation(matrix);
+	ndDemoCameraNode::SetTransform(newRotation, cameraMatrix.m_posit);
 
 	bool mouseState = !scene->GetCaptured() && (scene->GetMouseKeyState(0) && !scene->GetMouseKeyState(1));
 	// do camera rotation, only if we do not have anything picked

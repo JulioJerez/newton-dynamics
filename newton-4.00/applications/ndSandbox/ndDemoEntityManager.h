@@ -240,7 +240,8 @@ class ndDemoEntityManager : public ndClassAlloc
 
 	ndSharedPtr<ndDemoHelper> m_demoHelper;
 	ndSharedPtr<ndDemoUIpanel> m_demoUIpanel;
-	ndSharedPtr<ndRenderSceneNode> m_defaultCamera;
+	ndSharedPtr<ndRenderSceneNode> m_flyByCamera;
+	ndSharedPtr<ndRenderSceneNode> m_lookAtTargetCamera;
 	ndSharedPtr<OnPostUpdate> m_onPostUpdate;
 	ndSharedPtr<ndGameControllerInputs> m_gameController;
 
