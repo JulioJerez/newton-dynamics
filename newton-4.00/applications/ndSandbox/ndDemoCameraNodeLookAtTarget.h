@@ -9,28 +9,19 @@
 * freely
 */
 
-#ifndef __DEMO_CAMERA_NODE_FLYBY_H__
-#define __DEMO_CAMERA_NODE_FLYBY_H__
+#ifndef __DEMO_CAMERA_NODE_LOOKAT_TARGET_H__
+#define __DEMO_CAMERA_NODE_LOOKAT_TARGET_H__
 
 #include "ndSandboxStdafx.h"
-#include "ndDemoCameraNode.h"
+#include "ndDemoCameraNodeFlyby.h"
 
-class ndDemoCameraNodeFlyby: public ndDemoCameraNode
+class ndDemoCameraNodeLookAtTarget: public ndDemoCameraNodeFlyby
 {
 	public:
-	ndDemoCameraNodeFlyby(ndRender* const owner);
-
+	ndDemoCameraNodeLookAtTarget(ndRender* const owner);
 	virtual void TickUpdate(ndFloat32 timestep) override;
-	virtual void SetTransform(const ndQuaternion& rotation, const ndVector& position) override;
 
-	ndFloat32 m_yaw;
-	ndFloat32 m_roll;
-	ndFloat32 m_yawRate;
-	ndFloat32 m_rollRate;
-	ndFloat32 m_mousePosX;
-	ndFloat32 m_mousePosY;
-	ndFloat32 m_frontSpeed;
-	ndFloat32 m_sidewaysSpeed;
+	ndSharedPtr<ndRenderSceneNode> m_target;
 };
 
 #endif 

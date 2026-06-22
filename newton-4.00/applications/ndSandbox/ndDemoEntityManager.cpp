@@ -21,6 +21,7 @@
 #include "ndDemoCameraNodeFlyby.h"
 #include "ndGameControllerInputs.h"
 #include "ndDebugDisplayRenderPass.h"
+#include "ndDemoCameraNodeLookAtTarget.h"
 
 #define LOAD_MESH_INDEX			200
 #define MACHINE_LEARNING_BASE	100
@@ -656,7 +657,8 @@ ndDemoEntityManager::ndDemoEntityManager()
 	,m_environmentTexture(nullptr)
 	,m_demoHelper(nullptr)
 	,m_demoUIpanel(nullptr)
-	,m_defaultCamera(nullptr)
+	,m_flyByCamera(nullptr)
+	,m_lookAtTargetCamera(nullptr)
 	,m_onPostUpdate(nullptr)
 	,m_gameController(nullptr)
 	,m_lastModelName("")
@@ -1153,13 +1155,16 @@ void ndDemoEntityManager::LoadDemo(ndInt32 menuIndex)
 	m_demoUIpanel = ndSharedPtr<ndDemoUIpanel>(nullptr);
 
 	ndTransform savedTransform;
-	if (m_defaultCamera)
+	if (m_flyByCamera)
 	{
-		savedTransform = m_defaultCamera->GetTransform();
+		savedTransform = m_flyByCamera->GetTransform();
 	}
-	m_defaultCamera = ndSharedPtr<ndRenderSceneNode>(new ndDemoCameraNodeFlyby(*m_renderer));
-	m_defaultCamera->SetTransform(savedTransform);
-	m_renderer->SetCamera(m_defaultCamera);
+	m_flyByCamera = ndSharedPtr<ndRenderSceneNode>(new ndDemoCameraNodeFlyby(*m_renderer));
+	m_flyByCamera->SetTransform(savedTransform);
+	m_renderer->SetCamera(m_flyByCamera);
+
+	m_lookAtTargetCamera = ndSharedPtr<ndRenderSceneNode>(new ndDemoCameraNodeLookAtTarget(*m_renderer));
+	m_lookAtTargetCamera->SetTransform(savedTransform);
 
 	if (menuIndex == LOAD_MESH_INDEX)
 	{
@@ -1331,8 +1336,9 @@ void ndDemoEntityManager::SetDemoUIpanel(ndSharedPtr<ndDemoUIpanel>& panel)
 void ndDemoEntityManager::ChangeActiveCamera()
 {
 	ndFixSizeArray<const ndRenderSceneCamera*, 256> cameraPallete;
-	cameraPallete.PushBack(m_defaultCamera->FindCameraNode());
-
+	cameraPallete.PushBack(m_flyByCamera->FindCameraNode());
+	cameraPallete.PushBack(m_lookAtTargetCamera->FindCameraNode());
+	
 	ndList<ndSharedPtr<ndRenderSceneNode>>& scene = m_renderer->GetScene();
 	for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* sceneNode = scene.GetFirst(); sceneNode; sceneNode = sceneNode->GetNext())
 	{
@@ -1343,7 +1349,7 @@ void ndDemoEntityManager::ChangeActiveCamera()
 			cameraPallete.PushBack(cameraNode);
 		}
 	}
-
+	
 	const ndRenderSceneCamera* const currentCamera = m_renderer->GetCamera()->FindCameraNode();
 	for (ndInt32 i = 0; i < cameraPallete.GetCount(); ++i)
 	{
@@ -1353,9 +1359,16 @@ void ndDemoEntityManager::ChangeActiveCamera()
 			if (j == 0)
 			{
 				const ndTransform tranform(currentCamera->CalculateGlobalTransform());
-				m_defaultCamera->SetTransform(tranform);
-				m_defaultCamera->SetTransform(tranform);
-				m_renderer->SetCamera(m_defaultCamera);
+				m_flyByCamera->SetTransform(tranform);
+				m_flyByCamera->SetTransform(tranform);
+				m_renderer->SetCamera(m_flyByCamera);
+			}
+			else if (j == 1)
+			{
+				const ndTransform tranform(currentCamera->CalculateGlobalTransform());
+				m_lookAtTargetCamera->SetTransform(tranform);
+				m_lookAtTargetCamera->SetTransform(tranform);
+				m_renderer->SetCamera(m_lookAtTargetCamera);
 			}
 			else
 			{
