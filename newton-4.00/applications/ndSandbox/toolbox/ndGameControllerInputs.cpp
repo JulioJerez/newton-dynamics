@@ -204,8 +204,8 @@ void ndGameControllerInputs::GetWheelJoystickInputs(ndDemoEntityManager* const s
 		
 		buttonMapping[2] = ndGameControllerInputs::ndGameControllerInputs::m_changeCamera;
 		buttonMapping[3] = ndGameControllerInputs::ndGameControllerInputs::m_changePlayer;
-		buttonMapping[7] = ndGameControllerInputs::ndGameControllerInputs::m_handBreakButton;
-		buttonMapping[8] = ndGameControllerInputs::ndGameControllerInputs::m_reverseGearButton;
+		buttonMapping[7] = ndGameControllerInputs::ndGameControllerInputs::m_reverseGearButton;
+		buttonMapping[8] = ndGameControllerInputs::ndGameControllerInputs::m_handBreakButton;
 		buttonMapping[9] = ndGameControllerInputs::ndGameControllerInputs::m_neutralGearButton;
 		buttonMapping[6] = ndGameControllerInputs::ndGameControllerInputs::m_ignitionButton;
 		buttonMapping[4] = ndGameControllerInputs::ndGameControllerInputs::m_upGearButton;
