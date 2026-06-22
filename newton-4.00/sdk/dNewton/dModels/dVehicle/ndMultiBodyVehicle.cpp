@@ -1137,7 +1137,7 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	const ndFloat32 sprungWeight = frictionModel.m_sprungWeight;
 	const ndFloat32 pacekaAmplitud = sprungWeight * isotropicMaterialFriction;
 #else
-	const ndFloat32 hackStiffness = ndFloat32(4.0f);
+	const ndFloat32 hackStiffness = ndFloat32(5.0f);
 	const ndFloat32 sprungWeight = contactPoint.m_normal_Force.GetInitialGuess() + ndFloat32 (1.0f);
 	const ndFloat32 pacekaAmplitud = sprungWeight * hackStiffness * isotropicMaterialFriction;
 #endif
