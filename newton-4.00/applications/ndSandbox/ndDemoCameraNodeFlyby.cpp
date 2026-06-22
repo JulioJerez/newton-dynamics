@@ -18,9 +18,9 @@
 ndDemoCameraNodeFlyby::ndDemoCameraNodeFlyby(ndRender* const owner)
 	:ndDemoCameraNode(owner)
 	,m_yaw(ndFloat32(0.0f))
-	,m_pitch(ndFloat32(0.0f))
+	,m_roll(ndFloat32(0.0f))
 	,m_yawRate(ndFloat32(0.02f))
-	,m_pitchRate(ndFloat32(0.02f))
+	,m_rollRate(ndFloat32(0.02f))
 	,m_mousePosX(ndFloat32(0.0f))
 	,m_mousePosY(ndFloat32(0.0f))
 	,m_frontSpeed(ndFloat32(15.0f))
@@ -32,7 +32,7 @@ void ndDemoCameraNodeFlyby::SetTransform(const ndQuaternion& rotation, const ndV
 {
 	ndDemoCameraNode::SetTransform(rotation, position);
 	const ndMatrix matrix(GetTransform().GetMatrix());
-	m_pitch = ndAsin(matrix.m_front.m_y);
+	m_roll = ndAsin(matrix.m_front.m_y);
 	m_yaw = ndAtan2(-matrix.m_front.m_z, matrix.m_front.m_x);
 }
 
@@ -80,7 +80,7 @@ void ndDemoCameraNodeFlyby::TickUpdate(ndFloat32 timestep)
 		cameraMatrix.m_posit += cameraMatrix.m_up.Scale(m_sidewaysSpeed * timestep * slowDownFactor);
 	}
 
-	const ndMatrix matrix(ndRollMatrix(m_pitch) * ndYawMatrix(m_yaw));
+	const ndMatrix matrix(ndRollMatrix(m_roll) * ndYawMatrix(m_yaw));
 	const ndQuaternion newRotation(matrix);
 	ndDemoCameraNode::SetTransform(newRotation, cameraMatrix.m_posit);
 
@@ -104,13 +104,13 @@ void ndDemoCameraNodeFlyby::TickUpdate(ndFloat32 timestep)
 	
 			if (mouseSpeedY > 0.0f)
 			{
-				m_pitch -= m_pitchRate;
+				m_roll -= m_rollRate;
 			}
 			else if (mouseSpeedY < 0.0f)
 			{
-				m_pitch += m_pitchRate;
+				m_roll += m_rollRate;
 			}
-			m_pitch = ndClamp(m_pitch, ndFloat32(-80.0f * ndDegreeToRad), ndFloat32(80.0f * ndDegreeToRad));
+			m_roll = ndClamp(m_roll, ndFloat32(-80.0f * ndDegreeToRad), ndFloat32(80.0f * ndDegreeToRad));
 		}
 	}
 	

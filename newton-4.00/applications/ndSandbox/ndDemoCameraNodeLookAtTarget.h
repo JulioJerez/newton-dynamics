@@ -20,6 +20,8 @@ class ndDemoCameraNodeLookAtTarget: public ndDemoCameraNodeFlyby
 	public:
 	ndDemoCameraNodeLookAtTarget(ndRender* const owner);
 	virtual void TickUpdate(ndFloat32 timestep) override;
+
+	ndSharedPtr<ndRenderSceneNode> m_target;
 };
 
 #endif 

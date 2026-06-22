@@ -24,9 +24,9 @@ class ndDemoCameraNodeFlyby: public ndDemoCameraNode
 	virtual void SetTransform(const ndQuaternion& rotation, const ndVector& position) override;
 
 	ndFloat32 m_yaw;
-	ndFloat32 m_pitch;
+	ndFloat32 m_roll;
 	ndFloat32 m_yawRate;
-	ndFloat32 m_pitchRate;
+	ndFloat32 m_rollRate;
 	ndFloat32 m_mousePosX;
 	ndFloat32 m_mousePosY;
 	ndFloat32 m_frontSpeed;

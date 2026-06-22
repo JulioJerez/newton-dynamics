@@ -16,92 +16,39 @@
 #include "ndDemoCameraNodeLookAtTarget.h"
 
 ndDemoCameraNodeLookAtTarget::ndDemoCameraNodeLookAtTarget(ndRender* const owner)
-	:ndDemoCameraNodeFlyby(owner)
+     :ndDemoCameraNodeFlyby(owner)
+	,m_target(nullptr)
 {
 }
 
 void ndDemoCameraNodeLookAtTarget::TickUpdate(ndFloat32 timestep)
 {
-	// calculate pitch and Yaw.
+	if (!(*m_target))
+	{
+		ndList<ndSharedPtr<ndRenderSceneNode>>& scene = m_owner->GetScene();
+		for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* sceneNode = scene.GetFirst(); sceneNode; sceneNode = sceneNode->GetNext())
+		{
+			ndSharedPtr<ndRenderSceneNode>& node = sceneNode->GetInfo();
+			const ndRenderSceneCamera* const cameraNode = node->FindCameraNode();
+			if (cameraNode)
+			{
+				m_target = node;
+				break;
+			}
+		}
+	}
 
+	// calculate pitch and Yaw.
+	if (*m_target)
+	{
+		const ndMatrix originMatrix(GetTransform().GetMatrix());
+		const ndMatrix targetMatrix(m_target->GetTransform().GetMatrix());
+		const ndVector offset((targetMatrix.m_posit - originMatrix.m_posit).Normalize());
+		ndFloat32 yaw = ndAtan2 (-offset.m_z, offset.m_x);
+		m_yaw += ndAnglesSub(yaw, m_yaw);
+		m_roll = ndAsin(ndClamp (offset.m_y, ndFloat32 (-0.98f), ndFloat32(0.98f)));
+	}
+	 
 	// do normal update
 	ndDemoCameraNodeFlyby::TickUpdate(timestep);
-	//ndRender* const renderer = GetOwner();
-	//ndAssert(renderer);
-	//ndDemoEntityManager::ndRenderCallback* const renderCallback = (ndDemoEntityManager::ndRenderCallback*)*renderer->GetOwner();
-	//ndDemoEntityManager* const scene = renderCallback->m_owner;
-	//
-	//ndFloat32 mouseX;
-	//ndFloat32 mouseY;
-	//scene->GetMousePosition(mouseX, mouseY);
-	//
-	//// slow down the Camera if we have a Body
-	//ndFloat32 slowDownFactor = scene->IsShiftKeyDown() ? 0.5f / 10.0f : 0.5f;
-	//
-	//ndMatrix targetMatrix(m_transform1.GetMatrix());
-	//
-	//// do camera translation
-	//if (scene->GetKeyState(ImGuiKey_W))
-	//{
-	//	targetMatrix.m_posit += targetMatrix.m_front.Scale(m_frontSpeed * timestep * slowDownFactor);
-	//}
-	//if (scene->GetKeyState(ImGuiKey_S))
-	//{
-	//	targetMatrix.m_posit -= targetMatrix.m_front.Scale(m_frontSpeed * timestep * slowDownFactor);
-	//}
-	//if (scene->GetKeyState(ImGuiKey_A))
-	//{
-	//	targetMatrix.m_posit -= targetMatrix.m_right.Scale(m_sidewaysSpeed * timestep * slowDownFactor);
-	//}
-	//if (scene->GetKeyState(ImGuiKey_D))
-	//{
-	//	targetMatrix.m_posit += targetMatrix.m_right.Scale(m_sidewaysSpeed * timestep * slowDownFactor);
-	//}
-	//
-	//if (scene->GetKeyState(ImGuiKey_Q))
-	//{
-	//	targetMatrix.m_posit -= targetMatrix.m_up.Scale(m_sidewaysSpeed * timestep * slowDownFactor);
-	//}
-	//
-	//if (scene->GetKeyState(ImGuiKey_E))
-	//{
-	//	targetMatrix.m_posit += targetMatrix.m_up.Scale(m_sidewaysSpeed * timestep * slowDownFactor);
-	//}
-	//
-	//const ndMatrix matrix(ndRollMatrix(m_pitch) * ndYawMatrix(m_yaw));
-	//const ndQuaternion newRotation(matrix);
-	//ndDemoCameraNode::SetTransform(newRotation, targetMatrix.m_posit);
-	//
-	//bool mouseState = !scene->GetCaptured() && (scene->GetMouseKeyState(0) && !scene->GetMouseKeyState(1));
-	//// do camera rotation, only if we do not have anything picked
-	//if (!UpdatePickBody() && mouseState)
-	//{
-	//	ndFloat32 mouseSpeedX = mouseX - m_mousePosX;
-	//	ndFloat32 mouseSpeedY = mouseY - m_mousePosY;
-	//
-	//	if (ImGui::IsMouseDown(0))
-	//	{
-	//		if (mouseSpeedX > 0.0f)
-	//		{
-	//			m_yaw = ndAnglesAdd(m_yaw, -m_yawRate);
-	//		}
-	//		else if (mouseSpeedX < 0.0f)
-	//		{
-	//			m_yaw = ndAnglesAdd(m_yaw, m_yawRate);
-	//		}
-	//
-	//		if (mouseSpeedY > 0.0f)
-	//		{
-	//			m_pitch -= m_pitchRate;
-	//		}
-	//		else if (mouseSpeedY < 0.0f)
-	//		{
-	//			m_pitch += m_pitchRate;
-	//		}
-	//		m_pitch = ndClamp(m_pitch, ndFloat32(-80.0f * ndDegreeToRad), ndFloat32(80.0f * ndDegreeToRad));
-	//	}
-	//}
-	//
-	//m_mousePosX = mouseX;
-	//m_mousePosY = mouseY;
 }
