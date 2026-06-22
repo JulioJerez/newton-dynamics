@@ -220,9 +220,6 @@ void ndMultiBodyVehicle::AddTire(const ndSharedPtr<ndBody>& tireBody, const ndSh
 	inertia.m_z = maxInertia;
 	body->SetMassMatrix(inertia);
 
-	// set friction model.
-	//tireJoint->SetFrictionModel(m_descriptor.m_tireFrictionModel);
-
 	ndNode* const node = FindByBody(body);
 	ndAssert(!node || ((node->m_body->GetAsBody() == body) && ((*node->m_joint == tireJoint))));
 	if (!node)
@@ -515,12 +512,6 @@ bool ndMultiBodyVehicle::CalculateNormalizedAlgniningTorque(ndMultiBodyVehicleTi
 	ndVector p1(x1, y1, ndFloat32(0.0f), ndFloat32(0.0f));
 	ndVector p0(-a, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f));
 
-	//static int xxxx;
-	//xxxx++;
-	//if (xxxx % 1000 == 0)
-	//{
-	//	ndTrace(("aligning torque\n"));
-	//}
 	//ndFloat32 alignTorque = ndFloat32(0.0f);
 	//ndFloat32 sign = ndSign(alignTorque);
 	//tire->m_normalizedAligningTorque = sign * ndMax(ndAbs(alignTorque), ndAbs(tire->m_normalizedAligningTorque));
@@ -683,6 +674,7 @@ void ndMultiBodyVehicle::Debug(ndConstraintDebugCallback& context) const
 
 void ndMultiBodyVehicle::ApplyStabilityControl()
 {
+#if 0
 	ndAssert(m_chassis);
 	const ndBodyKinematic* const chassis = *m_chassis;
 	const ndVector veloc(chassis->GetVelocity());
@@ -756,7 +748,6 @@ void ndMultiBodyVehicle::ApplyStabilityControl()
 			// betaRate = lateralAcceleration / longitudinalSpeed + yawRate;
 			ndFloat32 betaRate = localAccel.m_z / localVeloc.m_x + localOmega.m_y;
 
-			//ndTrace(("%d: betaRate %f = %f + %f\n", xxxxx, betaRate, localAccel.m_z / localVeloc.m_x, localOmega.m_y));
 			if (ndAbs(betaRate) > m_maxSideslipRate)
 			{
 				ndFloat32 targetSteering = (betaRate > m_maxSideslipRate) ? ndFloat32(1.0f) : ndFloat32(-1.0f);
@@ -825,7 +816,6 @@ void ndMultiBodyVehicle::ApplyStabilityControl()
 				const ndVector tireTorque(hubPosit.CrossProduct(tire->GetForceBody1()));
 				const ndVector locaTorque(m_localFrame.UnrotateVector(vehicleMatrix.UnrotateVector(tireTorque)));
 
-				ndVector xxx(tire->GetForceBody1());
 				ndVector force1(m_localFrame.UnrotateVector(hubMatrix.UnrotateVector(tire->GetForceBody1())));
 				ndVector force0(tire->GetForceBody0());
 
@@ -847,11 +837,9 @@ void ndMultiBodyVehicle::ApplyStabilityControl()
 				}
 			}
 		}
-		ndTrace(("%d: betaRate %f = %f - %f;  YawRate = %f\n", xxxxx, betaRate, localAccel.m_z / localVeloc.m_x, localOmega.m_y, localAlpha.m_y));
 	}
 #endif
-
-	//xxxxx++;
+#endif
 }
 
 void ndMultiBodyVehicle::ApplyTireModel(ndFixSizeArray<ndTireContactPair, 128>& tireContacts)
@@ -905,9 +893,6 @@ void ndMultiBodyVehicle::ApplyTireModel(ndFixSizeArray<ndTireContactPair, 128>& 
 
 	if (tireContacts.GetCount() && (tireContacts.GetCount() == savedContactCount))
 	{
-		//ndTrace (("frame:%d ", xxxxx))
-		//xxxxx++;
-
 		for (ndInt32 i = tireContacts.GetCount() - 1; i >= 0 ; --i)
 		{
 			ndContact* const contact = tireContacts[i].m_contact;
@@ -946,7 +931,6 @@ void ndMultiBodyVehicle::ApplyTireModel(ndFixSizeArray<ndTireContactPair, 128>& 
 			}
 		}
 		//ApplyStabilityControl();
-		//ndTrace(("\n"));
 	}
 }
 
