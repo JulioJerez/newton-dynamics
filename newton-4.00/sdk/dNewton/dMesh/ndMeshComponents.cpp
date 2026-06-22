@@ -161,7 +161,7 @@ void ndMeshLoopJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
 	const ndString childName (xmlGetString(parent, "childReference"));
 	const ndString parentName (xmlGetString(parent, "parentReference"));
 
-	if (xmlHasAttribute(parent, "name"))
+	if (xmlHasParam(parent, "name"))
 	{
 		m_name = xmlGetString(parent, "name");
 	}
@@ -1219,7 +1219,7 @@ void ndMeshJointSpherical::DeserializeFromXml(const nd::TiXmlElement* const pare
 	m_axis.m_minLimit = xmlGetFloat(parent, "minTwistAngle");
 	m_axis.m_maxLimit = xmlGetFloat(parent, "maxTwistAngle");
 
-	if (xmlHasAttribute(parent, "coneLimitState"))
+	if (xmlHasParam(parent, "coneLimitState"))
 	{
 		m_coneAngleState = xmlGetInt(parent, "coneLimitState") ? true : false;
 		m_axis.m_limitState = xmlGetInt(parent, "twistLimitState") ? true : false;
@@ -1429,7 +1429,7 @@ void ndMeshJointVehicleDifferentialAxle::SerializeToXml(nd::TiXmlElement* const 
 void ndMeshJointVehicleDifferentialAxle::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndMeshJoint::DeserializeFromXml(parent);
-	if (xmlHasAttribute(parent, "ratio"))
+	if (xmlHasParam(parent, "ratio"))
 	{
 		m_gearRatio = ndReal(xmlGetFloat(parent, "ratio"));
 	}

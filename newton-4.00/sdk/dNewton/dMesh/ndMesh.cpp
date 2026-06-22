@@ -1448,6 +1448,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionFromChildren()
 			const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
 			subShape->SetLocalMatrix(matrix);
 			shapeArray.PushBack(subShape);
+			meshNode->m_isVisible = false;
 		}
 		else if (strstr(name, "-box"))
 		{
@@ -1455,6 +1456,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionFromChildren()
 			const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
 			subShape->SetLocalMatrix(matrix);
 			shapeArray.PushBack(subShape);
+			meshNode->m_isVisible = false;
 		}
 		else if (strstr(name, "-capsule"))
 		{
@@ -1462,6 +1464,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionFromChildren()
 			const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
 			subShape->SetLocalMatrix(matrix);
 			shapeArray.PushBack(subShape);
+			meshNode->m_isVisible = false;
 		}
 		else if (strstr(name, "-cylinder"))
 		{
@@ -1469,6 +1472,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionFromChildren()
 			const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
 			subShape->SetLocalMatrix(matrix);
 			shapeArray.PushBack(subShape);
+			meshNode->m_isVisible = false;
 		}
 		else if (strstr(name, "-convexhull"))
 		{
@@ -1476,6 +1480,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionFromChildren()
 			const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
 			subShape->SetLocalMatrix(matrix);
 			shapeArray.PushBack(subShape);
+			meshNode->m_isVisible = false;
 		}
 		else if (strstr(name, "-vhacd"))
 		{

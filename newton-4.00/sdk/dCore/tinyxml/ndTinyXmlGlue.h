@@ -31,6 +31,7 @@
 D_TINY_API void xmlResetClassId();
 D_TINY_API nd::TiXmlElement* xmlCreateClassNode(nd::TiXmlElement* const parent, const char* const className, const char* const name);
 
+D_TINY_API bool xmlHasAttribute(const nd::TiXmlElement* const rootNode, const char* const name);
 D_TINY_API ndInt32 xmlGetIntAttribute(const nd::TiXmlElement* const rootNode, const char* const name);
 D_TINY_API ndReal xmlGetRealAttribute(const nd::TiXmlElement* const rootNode, const char* const name);
 D_TINY_API const char* xmlGetNameAttribute(const nd::TiXmlElement* const rootNode, const char* const name);
@@ -68,6 +69,6 @@ D_TINY_API void xmlGetFloatArray3(const nd::TiXmlNode* const rootNode, const cha
 D_TINY_API void xmlGetFloatArray3(const nd::TiXmlNode* const rootNode, const char* const name, ndArray<ndTriplexReal>& array);
 D_TINY_API void xmlGetFloat64Array3(const nd::TiXmlNode* const rootNode, const char* const name, ndArray<ndBigVector>& array);
 
-D_TINY_API bool xmlHasAttribute(const nd::TiXmlNode* const rootNode, const char* const name);
+D_TINY_API bool xmlHasParam(const nd::TiXmlNode* const rootNode, const char* const name);
 #endif
 

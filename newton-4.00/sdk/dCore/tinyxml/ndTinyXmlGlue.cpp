@@ -106,6 +106,11 @@ nd::TiXmlElement* xmlCreateClassNode(nd::TiXmlElement* const parent, const char*
 	return node;
 }
 
+bool xmlHasAttribute(const nd::TiXmlElement* const rootNode, const char* name)
+{
+	return rootNode->Attribute(name) ? true : false;
+}
+
 ndInt32 xmlGetIntAttribute(const nd::TiXmlElement* const rootNode, const char* const name)
 {
 	ndInt32 i;
@@ -538,7 +543,7 @@ void xmlGetFloat64Array3(const nd::TiXmlNode* const rootNode, const char* const 
 	}
 }
 
-D_TINY_API bool xmlHasAttribute(const nd::TiXmlNode* const rootNode, const char* const name)
+D_TINY_API bool xmlHasParam(const nd::TiXmlNode* const rootNode, const char* const name)
 {
 	const nd::TiXmlElement* const element = (nd::TiXmlElement*)rootNode->FirstChild(name);
 	return element ? true : false;

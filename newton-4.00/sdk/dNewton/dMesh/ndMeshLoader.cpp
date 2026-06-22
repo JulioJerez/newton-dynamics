@@ -110,7 +110,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 		mesh->m_matrix = xmlGetMatrix(entry.m_xmlNode, "matrix");
 		mesh->m_geometryMatrix = xmlGetMatrix(entry.m_xmlNode, "geometryMatrix");
 		mesh->m_basePoseMatrix = mesh->m_matrix;
-		if (xmlHasAttribute(entry.m_xmlNode, "basePoseMatrix"))
+		if (xmlHasParam(entry.m_xmlNode, "basePoseMatrix"))
 		{
 			mesh->m_basePoseMatrix = xmlGetMatrix(entry.m_xmlNode, "basePoseMatrix");
 		}
@@ -141,7 +141,7 @@ bool ndMeshLoader::LoadMesh(const ndString& fullPathMeshName)
 
 		if (xmlHasAttribute(entry.m_xmlNode, "visible"))
 		{
-			mesh->m_isVisible = xmlGetInt(entry.m_xmlNode, "visible") ? true : false;
+			mesh->m_isVisible = xmlGetIntAttribute(entry.m_xmlNode, "visible") ? true : false;
 		}
 		else if (mesh->GetNodeType() == ndMesh::m_collisionShape)
 		{

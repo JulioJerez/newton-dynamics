@@ -480,7 +480,7 @@ void ndMeshCollisionShapeConvexHull::DeserializeFromXml(const nd::TiXmlElement* 
 	xmlGetFloatArray3(parent, "pointcloud", m_points);
 	m_tolarence = ndFloat32(0.0f);
 	m_maxPointCount = ndInt32 (m_points.GetCount());
-	if (xmlHasAttribute(parent, "tolerance"))
+	if (xmlHasParam(parent, "tolerance"))
 	{
 		m_maxPointCount = xmlGetInt(parent, "maxPoints");
 		m_tolarence = xmlGetFloat(parent, "tolerance");
@@ -861,7 +861,7 @@ void ndMeshBodyKinematic::DeserializeFromXml(const nd::TiXmlElement* const paren
 	m_maxLinearStep = xmlGetFloat(parent, "maxLinearStep");
 
 	m_massVolumeWeigh = ndFloat32(1.0f);
-	if (xmlHasAttribute(parent, "massVolumeWeigh"))
+	if (xmlHasParam(parent, "massVolumeWeigh"))
 	{
 		m_massVolumeWeigh = xmlGetFloat(parent, "massVolumeWeigh");
 	}
@@ -985,7 +985,7 @@ void ndMeshJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
 	m_localFrame0 = xmlGetMatrix(parent, "localFrame0");
 	m_localFrame1 = xmlGetMatrix(parent, "localFrame1");
 
-	if (xmlHasAttribute(parent, "surrogateParent"))
+	if (xmlHasParam(parent, "surrogateParent"))
 	{
 		const char* const name = xmlGetString(parent, "surrogateParent");
 		m_surrogateParent = ndWeakPtr<const ndMesh> (m_owner->GetRoot()->FindByName(name));
@@ -1086,7 +1086,7 @@ void ndMeshTransformModifier::DeserializeFromXml(const nd::TiXmlElement* const x
 	m_owner = root->FindByName(ownerName);
 	ndAssert(m_owner);
 	m_target = nullptr;
-	if (xmlHasAttribute(xmlModifier, "target"))
+	if (xmlHasParam(xmlModifier, "target"))
 	{
 		const char* const targetName = xmlGetString(xmlModifier, "target");
 		m_target = root->FindByName(targetName);
@@ -1376,7 +1376,7 @@ void ndMeshCustomPropertyNode::SerializeToXml(nd::TiXmlElement* const parent) co
 void ndMeshCustomPropertyNode::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndMeshCustomProperty::DeserializeFromXml(parent);
-	if (xmlHasAttribute(parent, "value"))
+	if (xmlHasParam(parent, "value"))
 	{
 		const char* const name = xmlGetString(parent, "value");
 		m_value = ndWeakPtr<ndMesh>(m_owner->GetRoot()->FindByName(name));
