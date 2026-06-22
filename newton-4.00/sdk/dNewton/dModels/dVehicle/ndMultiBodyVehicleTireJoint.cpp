@@ -15,17 +15,18 @@
 #include "ndMultiBodyVehicle.h"
 #include "ndMultiBodyVehicleTireJoint.h"
 
-static ndTireFrictionModel::ndPacejkaTireModel pacejkaSportLateral(ndFloat32(0.2f), ndFloat32(1.5f), ndFloat32(1000.0f), ndFloat32(-0.1f), ndFloat32(0.0f), ndFloat32(0.01f));
-static ndTireFrictionModel::ndPacejkaTireModel pacejkaSportLongitudinal(ndFloat32(0.5f), ndFloat32(1.65f), ndFloat32(1000.0f), ndFloat32(0.8f), ndFloat32(0.0f), ndFloat32(0.0f));
+static ndTireFrictionModel::ndPacejkaTireModel pacejkaSportLateral(ndFloat32(0.2f), ndFloat32(1.5f), ndFloat32(-0.1f), ndFloat32(0.0f), ndFloat32(0.01f));
+static ndTireFrictionModel::ndPacejkaTireModel pacejkaSportLongitudinal(ndFloat32(0.5f), ndFloat32(1.65f), ndFloat32(0.8f), ndFloat32(0.0f), ndFloat32(0.0f));
 
-static ndTireFrictionModel::ndPacejkaTireModel pacejkaUtilityLateral(ndFloat32(0.14f), ndFloat32(1.35f), ndFloat32(1000.0f), ndFloat32(-0.5f), ndFloat32(0.0f), ndFloat32(0.01f));
-static ndTireFrictionModel::ndPacejkaTireModel pacejkaUtilityLongitudinal(ndFloat32(0.2f), ndFloat32(1.4), ndFloat32(1000.0f), ndFloat32(-9.8f), ndFloat32(0.0f), ndFloat32(0.0f));
+static ndTireFrictionModel::ndPacejkaTireModel pacejkaUtilityLateral(ndFloat32(0.14f), ndFloat32(1.35f), ndFloat32(-0.5f), ndFloat32(0.0f), ndFloat32(0.01f));
+static ndTireFrictionModel::ndPacejkaTireModel pacejkaUtilityLongitudinal(ndFloat32(0.2f), ndFloat32(1.4), ndFloat32(-9.8f), ndFloat32(0.0f), ndFloat32(0.0f));
 
-static ndTireFrictionModel::ndPacejkaTireModel pacejkaTruckLateral(ndFloat32(0.01f), ndFloat32(2.85f), ndFloat32(1000.0f), ndFloat32(1.42f), ndFloat32(0.0f), ndFloat32(0.01f));
-static ndTireFrictionModel::ndPacejkaTireModel pacejkaTruckLongitudinal(ndFloat32(0.5f), ndFloat32(1.65f), ndFloat32(1000.0f), ndFloat32(0.8f), ndFloat32(0.0f), ndFloat32(0.0f));
+static ndTireFrictionModel::ndPacejkaTireModel pacejkaTruckLateral(ndFloat32(0.01f), ndFloat32(2.85f), ndFloat32(1.42f), ndFloat32(0.0f), ndFloat32(0.01f));
+static ndTireFrictionModel::ndPacejkaTireModel pacejkaTruckLongitudinal(ndFloat32(0.5f), ndFloat32(1.65f), ndFloat32(0.8f), ndFloat32(0.0f), ndFloat32(0.0f));
 
 ndTireFrictionModel::ndTireFrictionModel()
 	:m_frictionModel(m_pacejkaUtility)
+	,m_sprungWeight(ndFloat32 (1000.0f))
 {
 	SetPacejkaCurves(m_pacejkaUtility);
 }
@@ -138,7 +139,7 @@ void ndTireFrictionModel::PlotPacejkaCurves(const char* const name) const
 	FILE* outFile;
 	char nameExt[256];
 
-	// write as execcl format
+	// write as exel format
 	snprintf(nameExt, size_t(nameExt) - 1, "%s.csv", name);
 
 	outFile = fopen(nameExt, "wb");
@@ -160,13 +161,12 @@ ndTireFrictionModel::ndPacejkaTireModel::ndPacejkaTireModel()
 	,m_sv(ndFloat32(0.0f))
 	,m_sh(ndFloat32(0.0f))
 	,m_normalizingPhi(ndFloat32(1.0f))
-	,m_norminalNormalForce(ndFloat32(1000.0f))
 {
 	// set some defualt values, longitudinal force for a classic tire form Giancalr Genta book.
 	CalculateMaxPhi();
 }
 
-ndTireFrictionModel::ndPacejkaTireModel::ndPacejkaTireModel(ndFloat32 B, ndFloat32 C, ndFloat32 D, ndFloat32 E, ndFloat32 Sv, ndFloat32 Sh)
+ndTireFrictionModel::ndPacejkaTireModel::ndPacejkaTireModel(ndFloat32 B, ndFloat32 C, ndFloat32 E, ndFloat32 Sv, ndFloat32 Sh)
 	:m_b(B)
 	,m_c(C)
 	,m_d(ndFloat32(1.0f))
@@ -174,19 +174,18 @@ ndTireFrictionModel::ndPacejkaTireModel::ndPacejkaTireModel(ndFloat32 B, ndFloat
 	,m_sv(Sv)
 	,m_sh(Sh)
 	,m_normalizingPhi(ndFloat32(1.0f))
-	,m_norminalNormalForce(D)
 {
 	CalculateMaxPhi();
 }
 
 void ndTireFrictionModel::ndPacejkaTireModel::CalculateMaxPhi()
 {
-	// claculate Max sizeSlipParam
+	// calculate max sideSlipParam
 	ndFloat32 maxPhi = ndFloat32(0.0f);
 	ndFloat32 maxForce = ndFloat32(0.0f);
 	for (ndFloat32 phi = ndFloat32(0.0f); phi < ndFloat32(20.0f); phi += ndFloat32(0.001f))
 	{
-		ndFloat32 force = Evaluate(phi, ndFloat32(1.0f));
+		ndFloat32 force = Evaluate(phi, ndFloat32(1000.0f));
 		if (force >= maxForce)
 		{
 			maxPhi = phi;
@@ -196,14 +195,14 @@ void ndTireFrictionModel::ndPacejkaTireModel::CalculateMaxPhi()
 	m_normalizingPhi = maxPhi;
 }
 
-ndFloat32 ndTireFrictionModel::ndPacejkaTireModel::Evaluate(ndFloat32 phi, ndFloat32 frictionCoefficient) const
+ndFloat32 ndTireFrictionModel::ndPacejkaTireModel::Evaluate(ndFloat32 phi, ndFloat32 sprungWeight) const
 {
 	ndFloat32 displacedPhi = phi + m_sh;
 	ndFloat32 EaTang = m_e * ndAtan(m_b * displacedPhi);
 	ndFloat32 BEarg = m_b * (ndFloat32(1.0f) - m_e) * displacedPhi;
 	ndFloat32 Carg = m_c * ndAtan(BEarg + EaTang);
-	ndFloat32 f = m_d * ndSin(Carg) + m_sv;
-	return frictionCoefficient * m_norminalNormalForce * f;
+	ndFloat32 unitForce = m_d * ndSin(Carg) + m_sv;
+	return sprungWeight * unitForce;
 }
 
 ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint()

@@ -160,7 +160,7 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	private:
 	void ApplyTireModel();
 	void ApplyStabilityControl();
-	void CalculateSprungWeight();
+	void CalculateRestSprungWeight();
 	void ApplyAlignmentAndBalancing();
 	void ApplyAerodynamics(ndFloat32 timestep);
 	void ApplyTireModel(ndFixSizeArray<ndTireContactPair, 128>& tireContacts);

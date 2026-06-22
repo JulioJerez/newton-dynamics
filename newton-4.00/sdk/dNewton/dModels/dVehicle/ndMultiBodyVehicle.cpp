@@ -40,6 +40,8 @@
 #define D_MAX_STEERING_RATE				ndFloat32(0.03f)
 #define D_MAX_SIZE_SLIP_RATE			ndFloat32(2.0f)
 
+//#define D_PACEJKA_USE_REST_SPRUNG_WEIGHT
+#define D_CONVERT_PACEJKA_FORCES_TO_FRICTION_COEFFICIENT
 
 ndVehicleDectriptor::ndVehicleDectriptor()
 	:ndClassAlloc()
@@ -219,9 +221,6 @@ void ndMultiBodyVehicle::AddTire(const ndSharedPtr<ndBody>& tireBody, const ndSh
 	inertia.m_y = maxInertia;
 	inertia.m_z = maxInertia;
 	body->SetMassMatrix(inertia);
-
-	// set friction model.
-	//tireJoint->SetFrictionModel(m_descriptor.m_tireFrictionModel);
 
 	ndNode* const node = FindByBody(body);
 	ndAssert(!node || ((node->m_body->GetAsBody() == body) && ((*node->m_joint == tireJoint))));
@@ -515,12 +514,6 @@ bool ndMultiBodyVehicle::CalculateNormalizedAlgniningTorque(ndMultiBodyVehicleTi
 	ndVector p1(x1, y1, ndFloat32(0.0f), ndFloat32(0.0f));
 	ndVector p0(-a, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f));
 
-	//static int xxxx;
-	//xxxx++;
-	//if (xxxx % 1000 == 0)
-	//{
-	//	ndTrace(("aligning torque\n"));
-	//}
 	//ndFloat32 alignTorque = ndFloat32(0.0f);
 	//ndFloat32 sign = ndSign(alignTorque);
 	//tire->m_normalizedAligningTorque = sign * ndMax(ndAbs(alignTorque), ndAbs(tire->m_normalizedAligningTorque));
@@ -756,7 +749,6 @@ void ndMultiBodyVehicle::ApplyStabilityControl()
 			// betaRate = lateralAcceleration / longitudinalSpeed + yawRate;
 			ndFloat32 betaRate = localAccel.m_z / localVeloc.m_x + localOmega.m_y;
 
-			//ndTrace(("%d: betaRate %f = %f + %f\n", xxxxx, betaRate, localAccel.m_z / localVeloc.m_x, localOmega.m_y));
 			if (ndAbs(betaRate) > m_maxSideslipRate)
 			{
 				ndFloat32 targetSteering = (betaRate > m_maxSideslipRate) ? ndFloat32(1.0f) : ndFloat32(-1.0f);
@@ -825,7 +817,6 @@ void ndMultiBodyVehicle::ApplyStabilityControl()
 				const ndVector tireTorque(hubPosit.CrossProduct(tire->GetForceBody1()));
 				const ndVector locaTorque(m_localFrame.UnrotateVector(vehicleMatrix.UnrotateVector(tireTorque)));
 
-				ndVector xxx(tire->GetForceBody1());
 				ndVector force1(m_localFrame.UnrotateVector(hubMatrix.UnrotateVector(tire->GetForceBody1())));
 				ndVector force0(tire->GetForceBody0());
 
@@ -847,11 +838,8 @@ void ndMultiBodyVehicle::ApplyStabilityControl()
 				}
 			}
 		}
-		ndTrace(("%d: betaRate %f = %f - %f;  YawRate = %f\n", xxxxx, betaRate, localAccel.m_z / localVeloc.m_x, localOmega.m_y, localAlpha.m_y));
 	}
 #endif
-
-	//xxxxx++;
 }
 
 void ndMultiBodyVehicle::ApplyTireModel(ndFixSizeArray<ndTireContactPair, 128>& tireContacts)
@@ -905,9 +893,6 @@ void ndMultiBodyVehicle::ApplyTireModel(ndFixSizeArray<ndTireContactPair, 128>& 
 
 	if (tireContacts.GetCount() && (tireContacts.GetCount() == savedContactCount))
 	{
-		//ndTrace (("frame:%d ", xxxxx))
-		//xxxxx++;
-
 		for (ndInt32 i = tireContacts.GetCount() - 1; i >= 0 ; --i)
 		{
 			ndContact* const contact = tireContacts[i].m_contact;
@@ -946,7 +931,6 @@ void ndMultiBodyVehicle::ApplyTireModel(ndFixSizeArray<ndTireContactPair, 128>& 
 			}
 		}
 		//ApplyStabilityControl();
-		//ndTrace(("\n"));
 	}
 }
 
@@ -1037,7 +1021,7 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	// Giancarlo Genta introduces horizontal and vertical shifts to extend the model
 	// to operating conditions near zero slip:
 	//
-	// F = D * sin(C * atan(Bx * (1 - E) * (φ + Sh) + E * atan(Bx * (phi + Sh)))) + Sv
+	// F = D * sin(C * atan(Bx * (1 - E) * (phi + Sh) + E * atan(Bx * (phi + Sh)))) + Sv
 	//
 	// My primary challenge with this formulation is determining the values of
 	// C, D, E, Bx, phi, Sh, and Sv for each force and moment component.
@@ -1113,7 +1097,6 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 
 	//now apply the combine effect, according to Genta book page 76
 	const ndTireFrictionModel& frictionModel = tire->m_frictionModel;
-	
 
 	// ----- Combined‑force calculation notes -----
 	//
@@ -1133,7 +1116,7 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 #if 1
 	// Until a better reference turns up, Method 1 remains the least‑bad
 	// option I’ve found stable in practice, if not theoretically satisfying,  
-	// therefre I am going with that. 
+	// therefore I am going with that. 
 	// I still find the lateral force some what too strong.
 
 	//I am assuming sv and sv to be zero.
@@ -1147,22 +1130,29 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 		// this is the vanishing phi
 		return true;
 	}
-	ndFloat32 phi = ndSqrt(phi2);
+	const ndFloat32 phi = ndSqrt(phi2);
 
-	const ndFloat32 frictionCoefficient_x = contactPoint.m_material.m_staticFriction0;
-	const ndFloat32 frictionCoefficient_z = contactPoint.m_material.m_staticFriction1;
-	ndFloat32 pure_fz = LateralForce(frictionModel.m_lateralPacejka, sideSlipAngleInRadians, frictionCoefficient_z * tire->m_lateralStiffness);
-	ndFloat32 pure_fx = LongitudinalForce(frictionModel.m_longitudinalPacejka, longitudialSlip, frictionCoefficient_x * tire->m_longitudinalStiffness);
+	const ndFloat32 isotropicMaterialFriction = contactPoint.m_material.m_staticFriction0;
+#ifdef D_PACEJKA_USE_REST_SPRUNG_WEIGHT
+	const ndFloat32 sprungWeight = frictionModel.m_sprungWeight;
+	const ndFloat32 pacekaAmplitud = sprungWeight * isotropicMaterialFriction;
+#else
+	const ndFloat32 hackStiffness = ndFloat32(4.0f);
+	const ndFloat32 sprungWeight = contactPoint.m_normal_Force.GetInitialGuess() + ndFloat32 (1.0f);
+	const ndFloat32 pacekaAmplitud = sprungWeight * hackStiffness * isotropicMaterialFriction;
+#endif
+	const ndFloat32 pure_fz = LateralForce(frictionModel.m_lateralPacejka, sideSlipAngleInRadians, tire->m_lateralStiffness * pacekaAmplitud);
+	const ndFloat32 pure_fx = LongitudinalForce(frictionModel.m_longitudinalPacejka, longitudialSlip, tire->m_longitudinalStiffness * pacekaAmplitud);
 
-	ndFloat32 fx = pure_fx * phi_x / phi;
-	ndFloat32 fz = pure_fz * phi_z / phi;
+	const ndFloat32 fx = pure_fx * phi_x / phi;
+	const ndFloat32 fz = pure_fz * phi_z / phi;
 #else
 
 	// This is the second method that the slips and the use a 
-	// normalized dimnetion less slip for both lateral and longitudinal
-	// with not explanation as to how teh Pacekka equation can be call 
-	// with these dimnation lesst values.
-	// to me, this seem like nonsence, unless lots of details that are omitted in the book.
+	// normalized dimension less slip for both lateral and longitudinal
+	// with not explanation as to how the Pacekka equation can be called 
+	// with these dimension less values.
+	// to me, this seems like nonsence, unless lots of details that are omitted in the book.
 	const ndFloat32 dimensionLessPhi_x = longitudialSlip / frictionModel.m_longitudinalPacejka.m_normalizingPhi;
 	const ndFloat32 dimensionLessPhi_z = sideSlipAngleInRadians / (frictionModel.m_lateralPacejka.m_normalizingPhi * ndDegreeToRad * 0.5f);
 
@@ -1172,27 +1162,44 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	const ndFloat32 modifiedPhi_x = longitudialSlip * dimensionLessCombined_phi;
 	const ndFloat32 modifiedPhiInRadians_z = sideSlipAngleInRadians * dimensionLessCombined_phi;
 
-	const ndFloat32 frictionCoefficient = contactPoint.m_material.m_staticFriction0;
-	ndFloat32 pureFz = LateralForce(frictionModel.m_lateralPacejka, modifiedPhiInRadians_z, frictionCoefficient * tire->m_lateralStiffness);
-	ndFloat32 pureFx = LongitudinalForce(frictionModel.m_longitudinalPacejka, modifiedPhi_x, frictionCoefficient * tire->m_longitudinalStiffness);
+	const ndFloat32 sprungWeight = frictionModel.m_sprungWeight * contactPoint.m_material.m_staticFriction0;
+	//const ndFloat32 frictionCoefficient = contactPoint.m_material.m_staticFriction0;
+	ndFloat32 pureFz = LateralForce(frictionModel.m_lateralPacejka, modifiedPhiInRadians_z, sprungWeight * tire->m_lateralStiffness);
+	ndFloat32 pureFx = LongitudinalForce(frictionModel.m_longitudinalPacejka, modifiedPhi_x, sprungWeight * tire->m_longitudinalStiffness);
 
 	// after we calculate the compensated longitudinal and lateral forces,
 	// they have to be scaled back
 	ndFloat32 fx = pureFx * dimensionLessPhi_x / dimensionLessCombined_phi;
 	ndFloat32 fz = pureFz * dimensionLessPhi_z / dimensionLessCombined_phi;
-
 #endif
-	
-	contactPoint.m_material.m_staticFriction1 = ndAbs(fz);
-	contactPoint.m_material.m_dynamicFriction1 = ndAbs(fz);
+
+#ifdef D_CONVERT_PACEJKA_FORCES_TO_FRICTION_COEFFICIENT	
+	// this method should be more relistic, because it uses the 
+	// actual tire sprung weight from previos time step. 
+	// however the lag seems to make the vehicle more unresponsive.
+	// and it needs to be compensated with higher stiffness.
+	ndFloat32 lateralFrictionCoefficient = ndAbs(fz) / sprungWeight;
+	ndFloat32 longitudinalFrictionCoefficient = ndAbs(fx) / sprungWeight;
+	contactPoint.m_material.m_staticFriction0 = longitudinalFrictionCoefficient;
+	contactPoint.m_material.m_dynamicFriction0 = longitudinalFrictionCoefficient;
+	contactPoint.m_material.m_staticFriction1 = lateralFrictionCoefficient;
+	contactPoint.m_material.m_dynamicFriction1 = lateralFrictionCoefficient;
+
+#else
+	// using the calculated forces as if they are the final solver calculation.
+	// make the vehicle very reponsive, but I really don't like that 
+	// the lateral and longitudinal forces use the rest tire sprung weight.
 	contactPoint.m_material.m_staticFriction0 = ndAbs(fx);
 	contactPoint.m_material.m_dynamicFriction0 = ndAbs(fx);
+	contactPoint.m_material.m_staticFriction1 = ndAbs(fz);
+	contactPoint.m_material.m_dynamicFriction1 = ndAbs(fz);
 	ndUnsigned32 newFlags = contactPoint.m_material.m_flags | m_override0Friction | m_override1Friction;
 	contactPoint.m_material.m_flags = newFlags;
+#endif
 	return true;
 }
 
-void ndMultiBodyVehicle::CalculateSprungWeight()
+void ndMultiBodyVehicle::CalculateRestSprungWeight()
 {
 	const ndMatrix savedMatrix(GetRoot()->m_body->GetMatrix());
 	SetTransform(ndGetIdentityMatrix());
@@ -1406,10 +1413,11 @@ void ndMultiBodyVehicle::CalculateSprungWeight()
 
 	for (ndInt32 i = 0; i < tireArray.GetCount(); ++i)
 	{
-		ndFloat32 stiffness = ndAbs(force[tireStart + i]);
+		ndFloat32 sprungWeight = ndAbs(force[tireStart + i]);
 		ndMultiBodyVehicleTireJoint* const tire = tireArray[i];
-		tire->m_frictionModel.m_lateralPacejka.m_norminalNormalForce = stiffness;
-		tire->m_frictionModel.m_longitudinalPacejka.m_norminalNormalForce = stiffness;
+		//tire->m_frictionModel.m_lateralPacejka.m_norminalNormalForce = stiffness;
+		//tire->m_frictionModel.m_longitudinalPacejka.m_norminalNormalForce = stiffness;
+		tire->m_frictionModel.m_sprungWeight = sprungWeight;
 	}
 
 	m_initialized = true;
@@ -1469,14 +1477,14 @@ void ndMultiBodyVehicle::ConvertToMotorVehicle(const ndVehicleDectriptor& vehicl
 	m_debugFlags = m_wheel;
 	//m_debugFlags = m_torsionBar;
 
-	CalculateSprungWeight();
+	CalculateRestSprungWeight();
 }
 
 void ndMultiBodyVehicle::Update(ndFloat32 timestep)
 {
 	if (!m_initialized)
 	{
-		CalculateSprungWeight();
+		CalculateRestSprungWeight();
 	}
 
 	// apply down force

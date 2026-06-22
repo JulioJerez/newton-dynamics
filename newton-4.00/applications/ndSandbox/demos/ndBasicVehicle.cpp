@@ -117,15 +117,11 @@ namespace ndMotorVehicle
 					}
 					if ((strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0))
 					{
-						//override the friction model if desired
+						////costumize friction model if desired
+						////plot the curve to check it is a value form
 						//ndMultiBodyVehicleTireJoint* const joint = (ndMultiBodyVehicleTireJoint*)*node->m_joint;
 						//ndTireFrictionModel frictionMode(joint->GetFrictionModel());
-						//frictionMode.m_lateralPacejka.m_d = superCar.m_pacejkaScale;
-						//joint->SetFrictionModel(frictionMode);
-
-						// plot the curve to check it is a value form
-						//m_tireFrictionModel.PlotPacejkaCurves(modelName);
-
+						//frictionMode.PlotPacejkaCurves(node->m_name.GetStr());
 					}
 					if ((strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleMotor::StaticClassName()) == 0))
 					{
