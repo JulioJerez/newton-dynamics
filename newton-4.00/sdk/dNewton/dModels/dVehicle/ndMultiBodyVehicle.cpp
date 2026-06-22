@@ -1174,10 +1174,10 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 #endif
 
 #ifdef D_CONVERT_PACEJKA_FORCES_TO_FRICTION_COEFFICIENT	
-	// this method shouldd be more relistic, beacause it used the 
-	// actual tire sprung from the previos time step. 
-	// howver the lag seem to make the vehicle more unresponsive.
-	// and need to be compesated with hight stiffness.
+	// this method should be more relistic, because it uses the 
+	// actual tire sprung weight from previos time step. 
+	// however the lag seems to make the vehicle more unresponsive.
+	// and it needs to be compensated with higher stiffness.
 	ndFloat32 lateralFrictionCoefficient = ndAbs(fz) / sprungWeight;
 	ndFloat32 longitudinalFrictionCoefficient = ndAbs(fx) / sprungWeight;
 	contactPoint.m_material.m_staticFriction0 = longitudinalFrictionCoefficient;
