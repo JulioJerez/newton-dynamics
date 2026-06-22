@@ -22,7 +22,8 @@ class ndTireFrictionModel
 	{
 		public:
 		D_NEWTON_API ndPacejkaTireModel();
-		D_NEWTON_API ndPacejkaTireModel(ndFloat32 B, ndFloat32 C, ndFloat32 D, ndFloat32 E, ndFloat32 Sv, ndFloat32 Sh);
+		//D_NEWTON_API ndPacejkaTireModel(ndFloat32 B, ndFloat32 C, ndFloat32 D, ndFloat32 E, ndFloat32 Sv, ndFloat32 Sh);
+		D_NEWTON_API ndPacejkaTireModel(ndFloat32 B, ndFloat32 C, ndFloat32 E, ndFloat32 Sv, ndFloat32 Sh);
 
 		private:
 		void CalculateMaxPhi();
@@ -36,7 +37,6 @@ class ndTireFrictionModel
 		ndFloat32 m_sv;
 		ndFloat32 m_sh;
 		ndFloat32 m_normalizingPhi;
-		ndFloat32 m_norminalNormalForce;
 
 		friend class ndMultiBodyVehicle;
 		friend class ndTireFrictionModel;
@@ -64,6 +64,7 @@ class ndTireFrictionModel
 	ndPacejkaTireModel m_lateralPacejka;
 	ndPacejkaTireModel m_longitudinalPacejka;
 	ndFrictionModel m_frictionModel;
+	ndFloat32 m_sprungWeight;
 };
 
 D_MSV_NEWTON_CLASS_ALIGN_32
