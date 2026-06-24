@@ -251,6 +251,14 @@ FbxMesh* CreateGeometry(const ndMesh* const node, FbxScene* const fbxScene, FbxN
 	ndSharedPtr<ndMeshEffect> geometry(node->GetGeometry());
 	ndAssert(*geometry);
 
+	// specify uv per polygon vertex.
+	FbxLayer* fbxLayer = fbxMesh->GetLayer(0);
+	if (fbxLayer == nullptr)
+	{
+		fbxMesh->CreateLayer();
+		fbxLayer = fbxMesh->GetLayer(0);
+	}
+
 	ndFixSizeArray<ndInt32, 32> fbxMaterialIndex;
 	const ndArray<ndMeshEffect::ndMaterial>& materials = geometry->GetMaterials();
 	for (ndInt32 i = 0; i < ndInt32(materials.GetCount()); ++i)
@@ -337,8 +345,6 @@ FbxMesh* CreateGeometry(const ndMesh* const node, FbxScene* const fbxScene, FbxN
 		//}
 	}
 
-
-
 	const ndInt32 controlPointCount = geometry->GetVertexCount();
 	fbxMesh->InitControlPoints(controlPointCount);
 	ndInt32 stride = geometry->GetVertexStrideInByte() / sizeof (ndFloat64);
@@ -356,22 +362,25 @@ FbxMesh* CreateGeometry(const ndMesh* const node, FbxScene* const fbxScene, FbxN
 		vertex[i].Set(p.m_x, p.m_y, p.m_z);
 	}
 
-	for (ndInt32 i = 0; i < ndInt32 (materials.GetCount()); ++i)
 	{
+		// add all the faces
 		FbxGeometryElementMaterial* const fbxMaterialElement = fbxMesh->CreateElementMaterial();
-		fbxMaterialElement->SetMappingMode(FbxGeometryElement::eAllSame);
+		//fbxMaterialElement->SetMappingMode(FbxGeometryElement::eAllSame);
+		fbxMaterialElement->SetMappingMode(FbxGeometryElement::eByPolygon);
 		fbxMaterialElement->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
-		fbxMaterialElement->GetIndexArray().Add(i);
+		//fbxMaterialElement->GetIndexArray().Add(i);
+		fbxLayer->SetMaterials(fbxMaterialElement);
 
 		ndInt32 mark = geometry->IncLRU();
 		ndMeshEffect::Iterator iter(**geometry);
 		for (iter.Begin(); iter; iter++)
 		{
 			ndEdge* const face = &iter.GetNode()->GetInfo();
-			ndInt32 id = materialId[face->m_userData];
-			if ((id == i) && (face->m_mark != mark) && (face->m_incidentFace > 0))
+
+			ndInt32 materialIndex = materialId[face->m_userData];
+			if ((face->m_mark != mark) && (face->m_incidentFace > 0))
 			{
-				fbxMesh->BeginPolygon(fbxMaterialIndex[i]);
+				fbxMesh->BeginPolygon(materialIndex);
 				ndEdge* edgePtr = face;
 				do
 				{
@@ -385,13 +394,11 @@ FbxMesh* CreateGeometry(const ndMesh* const node, FbxScene* const fbxScene, FbxN
 			face->m_mark = mark;
 		}
 	}
-	
-	// do not export normals, let the app calculate it
-	
-	// specify uv per polygon vertex.
-	FbxGeometryElementUV* const uvElement = fbxMesh->CreateElementUV("UVSet1");
+
+	FbxGeometryElementUV* const uvElement = fbxMesh->CreateElementUV("UVChannel_1");
 	uvElement->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
 	uvElement->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
+	fbxLayer->SetUVs(uvElement);
 
 	const ndMeshEffect::ndChannel<ndMeshEffect::ndUV, ndMeshEffect::m_uv0>& uvArray = vertexAtributes.m_uv0Channel;
 	for (ndInt32 i = 0; i < uvArray.GetCount(); ++i)
@@ -399,15 +406,14 @@ FbxMesh* CreateGeometry(const ndMesh* const node, FbxScene* const fbxScene, FbxN
 		ndMeshEffect::ndUV uv(uvArray[i]);
 		uvElement->GetDirectArray().Add(FbxVector2(uv.m_u, uv.m_v));
 	}
-	for (ndInt32 i = 0; i < ndInt32(materials.GetCount()); ++i)
 	{
+		//add uv maping
 		ndInt32 mark = geometry->IncLRU();
 		ndMeshEffect::Iterator iter(**geometry);
 		for (iter.Begin(); iter; iter++)
 		{
 			ndEdge* const face = &iter.GetNode()->GetInfo();
-			ndInt32 id = materialId[face->m_userData];
-			if ((id == i) && (face->m_mark != mark) && (face->m_incidentFace > 0))
+			if ((face->m_mark != mark) && (face->m_incidentFace > 0))
 			{
 				ndEdge* edgePtr = face;
 				do
@@ -421,6 +427,8 @@ FbxMesh* CreateGeometry(const ndMesh* const node, FbxScene* const fbxScene, FbxN
 			face->m_mark = mark;
 		}
 	}
+
+	// skip normals, let the app calculate it
 
 	return fbxMesh;
 }
