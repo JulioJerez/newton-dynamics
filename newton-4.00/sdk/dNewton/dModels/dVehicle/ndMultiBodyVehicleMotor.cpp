@@ -256,6 +256,16 @@ ndFloat32 ndMultiBodyVehicleMotor::GetRpm() const
 	return m_omega * ndRadPerSecToRpm;
 }
 
+void ndMultiBodyVehicleMotor::DebugJoint(ndConstraintDebugCallback& debugCallback) const
+{
+	ndMatrix matrix0;
+	ndMatrix matrix1;
+	CalculateGlobalMatrix(matrix0, matrix1);
+
+	debugCallback.DrawFrame(matrix0);
+	debugCallback.DrawFrame(matrix1);
+}
+
 ndFloat32 ndMultiBodyVehicleMotor::CalculateAcceleration(ndConstraintDescritor& desc)
 {
 	const ndVector& motorOmega = m_body0->GetOmega();

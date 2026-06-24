@@ -25,7 +25,7 @@
 #include "ndNewtonStdafx.h"
 #include "ndJointBilateralConstraint.h"
 
-#define D_MINIMUM_SLIP_OMEGA ndFloat32 (2.0f)
+#define D_MINIMUM_SLIP_OMEGA ndFloat32 (4.0f)
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndMultiBodyVehicleDifferential : public ndJointBilateralConstraint
@@ -41,9 +41,9 @@ class ndMultiBodyVehicleDifferential : public ndJointBilateralConstraint
 
 	protected:
 	void AlignMatrix();
-	void DebugJoint(ndConstraintDebugCallback&) const override;
-	D_NEWTON_API void UpdateParameters() override;
+	void UpdateParameters() override;
 	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
+	D_NEWTON_API void DebugJoint(ndConstraintDebugCallback& callback) const override;
 	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
 	ndFloat32 m_limitedSlipOmega;
