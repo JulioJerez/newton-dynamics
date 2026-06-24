@@ -476,10 +476,9 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 			ImGui::EndCombo();
 		}
 
-		MakeVisualGeometry();
 		EditShapeTransform();
+		MakeVisualGeometry();
 		const ndString& contructor = shapeInstance.m_shape->m_constructor;
-		//const char* const className = shapeInstance.m_shape->m_constructor.GetStr();
 
 		if (strcmp(contructor.GetStr(), ndShapeNull::StaticClassName()) == 0)
 		{
@@ -535,7 +534,6 @@ void ndAssetEditor::MakeVisualGeometry()
 		return;
 	}
 
-	ImGui::Separator();
 	if (ImGui::Button("build visual mesh"))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));

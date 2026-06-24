@@ -1241,8 +1241,8 @@ ndSharedPtr<ndMesh> ndFbxMeshLoader::LoadMesh(const char* const fullPathName, bo
 	ndSharedPtr<ndOfbx::IScene> fbxScene(ndOfbx::load(&content[0], ndInt32(file_size), (ndOfbx::u64)ndOfbx::LoadFlags::TRIANGULATE));
 	if (!(*fbxScene))
 	{
-		ndAssert(0);
 		ndTrace(("file: %s not found", fullPathName));
+		ndAssert(0);
 		return ndSharedPtr<ndMesh>(nullptr);
 	}
 

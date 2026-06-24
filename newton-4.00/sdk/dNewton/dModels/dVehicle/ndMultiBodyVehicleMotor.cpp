@@ -184,8 +184,6 @@ ndMultiBodyVehicleMotor::ndMultiBodyVehicleMotor(ndBodyKinematic* const motor, n
 ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleMotor::GetMeshJoint(const ndMesh* const owner) const
 {
 	ndMeshJointVehicleMotor* const joint = new ndMeshJointVehicleMotor(owner, this);
-	ndAssert(0);
-	//joint->m_maxOmega = ndReal(m_maxOmega);
 	return ndSharedPtr<ndMeshJoint>(joint);
 }
 
