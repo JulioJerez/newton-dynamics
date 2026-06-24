@@ -37,6 +37,7 @@
 #include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
+#include "ndJointSlidingHinge.h"
 #include "ndMultiBodyVehicleMotor.h"
 #include "ndMultiBodyVehicleGearBox.h"
 #include "ndIkSwivelPositionEffector.h"
@@ -1573,7 +1574,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollision()
 	{
 		shape = CreateCollisionCylinder();
 	}
-	else if (strstr(name, "-chamferedCylinder"))
+	else if (strstr(name, "-chamferedcylinder"))
 	{
 		shape = CreateCollisionChamferCylinder();
 	}
@@ -1630,6 +1631,10 @@ ndSharedPtr<ndJointBilateralConstraint> ndMesh::CreateJoint()
 	else if (strstr(name, "-doublehinge"))
 	{
 		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointDoubleHinge());
+	}
+	else if (strstr(name, "-slidinghinge"))
+	{
+		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointSlidingHinge());
 	}
 	else if (strstr(name, "-plane"))
 	{

@@ -86,32 +86,33 @@ void ndAnimationMeshLoader::SetTranslationTracks(const ndString& boneName)
 //
 // Node name suffixes are used to automatically create
 // default physics bodies and constraints.
+// 
+// for mesh runtine manipulation:
+// -hidden 
 //
 // Rigid body:
 // -rb Creates a rigid body with a default mass of 1.0
 //
 // Collision shapes:
 // -box
+// -tire
+// -mesh
+// -vhacd
 // -sphere
 // -capsule
 // -cylinder
-// -chamferedCylinder
-// -tire
-// -convexHull
-// -mesh
-// -vhacd
-//
+// -convexhull					
+// -chamferedcylinder
+
 // Constraint joints (created with default parameters):
 // -hinge
-// -slider
-// -roller
 // -plane
 // -wheel
+// -slider
+// -roller
 // -spherical
 // -cylindrical
-
-// for mesh runtine manipulation:
-// -hidden 
+// -slidinghinge
 
 bool ndAnimationMeshLoader::ImportFbx(const ndString& fbxPathMeshName)
 {

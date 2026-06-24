@@ -66,10 +66,8 @@ ndJointSlidingHinge::~ndJointSlidingHinge()
 
 ndSharedPtr<ndMeshJoint> ndJointSlidingHinge::GetMeshJoint(const ndMesh* const owner) const
 {
-	ndAssert(0);
-	//ndSharedPtr<ndMeshJoint> joint(new ndMeshJointRoller(owner, this));
-	//return joint;
-	return nullptr;
+	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointSlidingHinge(owner, this));
+	return joint;
 }
 
 ndFloat32 ndJointSlidingHinge::GetAngle() const
