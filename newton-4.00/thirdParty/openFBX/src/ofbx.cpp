@@ -2454,7 +2454,7 @@ static void splat(std::vector<T>* out,
 	{
 		//  v0  v1 ...
 		// uv0 uv1 ...
-		//assert(indices.empty());
+		assert(indices.empty());
 
 		out->resize(original_indices.size());
 
