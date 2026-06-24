@@ -33,6 +33,7 @@
 #include "ndJointSlider.h"
 #include "ndJointRoller.h"
 #include "ndBodyDynamic.h"
+#include "ndJointCylinder.h"
 #include "ndJointFix6dof.h"
 #include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
@@ -1843,9 +1844,17 @@ ndSharedPtr<ndMeshJoint> ndMesh::LoadJoint(const nd::TiXmlElement* const xmlJoin
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointHinge(mesh));
 	}
+	else if (strcmp(constructor, ndJointCylinder::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointCylinder(mesh));
+	}
 	else if (strcmp(constructor, ndJointRoller::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointRoller(mesh));
+	}
+	else if (strcmp(constructor, ndJointSlidingHinge::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointSlidingHinge(mesh));
 	}
 	else if (strcmp(constructor, ndJointDoubleHinge::StaticClassName()) == 0)
 	{

@@ -175,6 +175,12 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointDoubleHinge());
 						InitNewGlobalJoint(newJoint);
 					}
+					else if (strcmp(name, ndJointSlidingHinge::StaticClassName()) == 0)
+					{
+						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+						ndSharedPtr<ndJointBilateralConstraint> newJoint(new ndJointSlidingHinge());
+						InitNewGlobalJoint(newJoint);
+					}
 					else if (strcmp(name, ndMultiBodyVehicleMotor::StaticClassName()) == 0)
 					{
 						m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
@@ -212,12 +218,13 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 				}
 			};
 			SetDropdownList(ndJointFix6dof::StaticClassName());
+			SetDropdownList(ndJointPlane::StaticClassName());
 			SetDropdownList(ndJointHinge::StaticClassName());
 			SetDropdownList(ndJointSlider::StaticClassName());
-			SetDropdownList(ndJointPlane::StaticClassName());
 			SetDropdownList(ndJointRoller::StaticClassName());
 			SetDropdownList(ndJointCylinder::StaticClassName());
 			SetDropdownList(ndJointDoubleHinge::StaticClassName());
+			SetDropdownList(ndJointSlidingHinge::StaticClassName());
 			SetDropdownList(ndJointWheel::StaticClassName());
 			SetDropdownList(ndJointSpherical::StaticClassName());
 			SetDropdownList(ndMultiBodyVehicleMotor::StaticClassName());
@@ -254,6 +261,10 @@ void ndAssetEditor::ShowPropertiesJointInfo()
 		else if (strcmp(joint->m_constructor.GetStr(), ndJointDoubleHinge::StaticClassName()) == 0)
 		{
 			EditDoubleHingeJoint();
+		}
+		else if (strcmp(joint->m_constructor.GetStr(), ndJointSlidingHinge::StaticClassName()) == 0)
+		{
+			EditSlidingHingeJoint();
 		}
 		else if (strcmp(joint->m_constructor.GetStr(), ndMultiBodyVehicleDifferential::StaticClassName()) == 0)
 		{
@@ -465,7 +476,6 @@ void ndAssetEditor::EditSliderJoint()
 
 void ndAssetEditor::EditPlaneJoint()
 {
-	//EditLoopJointGlobalMatrix();
 	EditJointGlobalMatrix();
 
 	ndMeshJointPlane* const joint = (ndMeshJointPlane*)*m_currentSelection->GetJoint();
@@ -500,7 +510,6 @@ void ndAssetEditor::EditPlaneJoint()
 
 void ndAssetEditor::EditRollerJoint()
 {
-	//EditLoopJointGlobalMatrix();
 	EditJointGlobalMatrix();
 
 	ndMeshJointRoller* const joint = (ndMeshJointRoller*)*m_currentSelection->GetJoint();
@@ -645,9 +654,154 @@ void ndAssetEditor::EditRollerJoint()
 	}
 }
 
+void ndAssetEditor::EditSlidingHingeJoint()
+{
+	EditJointGlobalMatrix();
+
+	ndMeshJointSlidingHinge* const joint = (ndMeshJointSlidingHinge*)*m_currentSelection->GetJoint();
+	{
+		ImGui::SeparatorText("linear actuator params");
+		ndReal value = ndReal(joint->m_linearAxis.m_springK);
+		if (ImGui::InputFloat("spring const", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+			joint->m_linearAxis.m_springK = ndMax(value, ndReal(0.0f));
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+		}
+		value = ndReal(joint->m_linearAxis.m_damperC);
+		if (ImGui::InputFloat("damper const", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+			joint->m_linearAxis.m_damperC = ndMax(value, ndReal(0.0f));
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+		}
+		value = ndReal(joint->m_linearAxis.m_springDamperRegularizer);
+		if (ImGui::InputFloat("regularizer", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+			joint->m_linearAxis.m_springDamperRegularizer = ndMax(value, ndReal(0.0f));
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+		}
+
+		char enableLimist[64];
+		if (joint->m_linearAxis.m_limitState)
+		{
+			snprintf(enableLimist, sizeof(enableLimist) - 1, "true");
+		}
+		else
+		{
+			snprintf(enableLimist, sizeof(enableLimist) - 1, "false");
+		}
+
+		if (ImGui::BeginCombo("limits on##10", enableLimist))
+		{
+			if (ImGui::Selectable("true", joint->m_linearAxis.m_limitState))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+				joint->m_linearAxis.m_limitState = true;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+			}
+			if (ImGui::Selectable("false", !joint->m_linearAxis.m_limitState))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+				joint->m_linearAxis.m_limitState = false;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+			}
+			ImGui::EndCombo();
+		}
+
+		if (joint->m_linearAxis.m_limitState)
+		{
+			value = ndReal(joint->m_linearAxis.m_minLimit);
+			if (ImGui::InputFloat("min limit", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+				joint->m_linearAxis.m_minLimit = ndClamp(value, ndReal(-D_LCP_MAX_VALUE), ndReal(0.0f));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+			}
+			value = ndReal(joint->m_linearAxis.m_maxLimit);
+			if (ImGui::InputFloat("max limit", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+				joint->m_linearAxis.m_maxLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+			}
+		}
+	}
+
+	{
+		ImGui::SeparatorText("angular actuator params");
+		ndReal value = ndReal(joint->m_angularAxis.m_springK);
+		if (ImGui::InputFloat("spring const##5", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+			joint->m_angularAxis.m_springK = ndMax(value, ndReal(0.0f));
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+		}
+		value = ndReal(joint->m_angularAxis.m_damperC);
+		if (ImGui::InputFloat("damper const##5", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+			joint->m_angularAxis.m_damperC = ndMax(value, ndReal(0.0f));
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+		}
+		value = ndReal(joint->m_angularAxis.m_springDamperRegularizer);
+		if (ImGui::InputFloat("regularizer##5", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+			joint->m_angularAxis.m_springDamperRegularizer = ndMax(value, ndReal(0.0f));
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+		}
+
+		char enableLimist[64];
+		if (joint->m_angularAxis.m_limitState)
+		{
+			snprintf(enableLimist, sizeof(enableLimist) - 1, "true");
+		}
+		else
+		{
+			snprintf(enableLimist, sizeof(enableLimist) - 1, "false");
+		}
+
+		if (ImGui::BeginCombo("limits on##5", enableLimist))
+		{
+			if (ImGui::Selectable("true", joint->m_angularAxis.m_limitState))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+				joint->m_angularAxis.m_limitState = true;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+			}
+			if (ImGui::Selectable("false", !joint->m_angularAxis.m_limitState))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+				joint->m_angularAxis.m_limitState = false;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+			}
+			ImGui::EndCombo();
+		}
+
+		if (joint->m_angularAxis.m_limitState)
+		{
+			value = ndReal(joint->m_angularAxis.m_minLimit);
+			if (ImGui::InputFloat("min limit##5", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+				joint->m_angularAxis.m_minLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+			}
+			value = ndReal(joint->m_angularAxis.m_maxLimit);
+			if (ImGui::InputFloat("max limit##5", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+				joint->m_angularAxis.m_maxLimit = ndClamp(value, ndReal(0.0f), ndReal(D_LCP_MAX_VALUE));
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+			}
+		}
+	}
+}
+
 void ndAssetEditor::EditCylinderJoint()
 {
-	//EditLoopJointGlobalMatrix();
 	EditJointGlobalMatrix();
 
 	ndMeshJointCylinder* const joint = (ndMeshJointCylinder*)*m_currentSelection->GetJoint();

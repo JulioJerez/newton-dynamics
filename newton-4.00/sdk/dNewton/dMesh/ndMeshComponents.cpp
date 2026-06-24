@@ -34,6 +34,7 @@
 #include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
+#include "ndJointSlidingHinge.h"
 #include "ndMultiBodyVehicleMotor.h"
 #include "ndMultiBodyVehicleGearBox.h"
 #include "ndIkSwivelPositionEffector.h"
@@ -962,13 +963,15 @@ ndJointBilateralConstraint* ndMeshJointRoller::CreateObject(ndBodyKinematic* con
 
 ndMeshJointSlidingHinge::ndMeshJointSlidingHinge(const ndMesh* const owner)
 	:ndMeshJoint(owner)
+	,m_linearAxis()
+	,m_angularAxis()
 {
 }
 
 ndMeshJointSlidingHinge::ndMeshJointSlidingHinge(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
-	const ndJointRoller* const subJoint = (ndJointRoller*)joint;
+	const ndJointSlidingHinge* const subJoint = (ndJointSlidingHinge*)joint;
 
 	subJoint->GetSpringDamperPosit(m_linearAxis.m_springDamperRegularizer, m_linearAxis.m_springK, m_linearAxis.m_damperC);
 	subJoint->GetLimitsPosit(m_linearAxis.m_minLimit, m_linearAxis.m_maxLimit);

@@ -239,16 +239,16 @@
     <ndMesh visible="1">
         <name string="bed-rb-compound-slidingHinge" />
         <matrix>
-            <posit float3="0 0 0" />
-            <angles float3="-8.14222e-13 -7.84844e-20 2.03556e-13" />
+            <posit float3="-0.272 8.53853e-08 3.892" />
+            <angles float3="-3.34082e-19 8.14222e-13 90" />
         </matrix>
         <basePoseMatrix>
             <posit float3="0 0 0" />
             <angles float3="-8.14222e-13 -7.84844e-20 2.03556e-13" />
         </basePoseMatrix>
         <geometryMatrix>
-            <posit float3="0 0 0" />
-            <angles float3="0 -0 0" />
+            <posit float3="5.57065e-15 -0.272 -3.892" />
+            <angles float3="0 1.15708e-26 -90" />
         </geometryMatrix>
         <type nodeType="node" target="0 0 0 " />
         <geometry>
@@ -290,8 +290,8 @@
             <massVolumeWeigh float="1" />
             <collisionInstance>
                 <localMatrix>
-                    <posit float3="0 0 0" />
-                    <angles float3="0 -0 0" />
+                    <posit float3="5.57065e-15 -0.272 -3.892" />
+                    <angles float3="0 1.15708e-26 -90" />
                 </localMatrix>
                 <alignmentMatrix>
                     <posit float3="0 0 0" />
@@ -363,8 +363,8 @@
                 <angles float3="0 -0 0" />
             </localFrame0>
             <localFrame1>
-                <posit float3="0 0 0" />
-                <angles float3="-8.14222e-13 -9.70628e-20 2.03556e-13" />
+                <posit float3="-0.272 8.53906e-08 3.892" />
+                <angles float3="0 8.14222e-13 90" />
             </localFrame1>
             <positAxis>
                 <linearSpringK float="2000" />
@@ -372,11 +372,11 @@
                 <linearLimitState int32="0" />
                 <linearMinLimit float="-0.1" />
                 <linearMaxLimit float="0.2" />
-                <linearSpringDamperRegularizer float="0.02" />
+                <linearSpringDamperRegularizer float="0.001" />
             </positAxis>
             <angleAxis>
-                <angularSpringK float="0" />
-                <angularDamperC float="0" />
+                <angularSpringK float="2000" />
+                <angularDamperC float="50" />
                 <angularLimitState int32="0" />
                 <angularMinLimit float="-5.72958" />
                 <angularMaxLimit float="11.4592" />
@@ -386,8 +386,8 @@
         <ndMesh visible="0">
             <name string="flatbedCollision000-convexhull" />
             <matrix>
-                <posit float3="0 0 0" />
-                <angles float3="-8.14222e-13 -7.84844e-20 2.03556e-13" />
+                <posit float3="5.57065e-15 -0.272 -3.892" />
+                <angles float3="-8.14222e-13 -7.84844e-20 -90" />
             </matrix>
             <basePoseMatrix>
                 <posit float3="0 0 0" />
@@ -430,8 +430,8 @@
         <ndMesh visible="0">
             <name string="flatbedCollision001-convexhull" />
             <matrix>
-                <posit float3="0 0 0" />
-                <angles float3="-8.14222e-13 -7.84844e-20 2.03556e-13" />
+                <posit float3="5.57065e-15 -0.272 -3.892" />
+                <angles float3="-8.14222e-13 -7.84844e-20 -90" />
             </matrix>
             <basePoseMatrix>
                 <posit float3="0 0 0" />
@@ -474,8 +474,8 @@
         <ndMesh visible="0">
             <name string="flatbedCollision002-convexhull" />
             <matrix>
-                <posit float3="0 0 0" />
-                <angles float3="-8.14222e-13 -7.84844e-20 2.03556e-13" />
+                <posit float3="5.57065e-15 -0.272 -3.892" />
+                <angles float3="-8.14222e-13 -7.84844e-20 -90" />
             </matrix>
             <basePoseMatrix>
                 <posit float3="0 0 0" />
