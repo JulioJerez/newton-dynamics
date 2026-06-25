@@ -45,12 +45,21 @@ void ndEditorCameraFlyby::CalculateCameraMatrix()
 	ndRender* const renderer = GetOwner();
 	ndAssert(renderer);
 
-	const ndMatrix newCameMatrix(ndRollMatrix(m_pitch) * ndYawMatrix(m_yaw));
-	const ndQuaternion newRotation(newCameMatrix);
-	const ndVector newPosit(newCameMatrix.RotateVector(m_posit));
-	ndEditorCameraNode::SetTransform(newRotation, newPosit);
+	// calculate offset;
+	ndMatrix offset(ndGetIdentityMatrix());
+	if (!m_editor->m_orbitRootNode && m_editor->m_currentSelection)
+	{
+		const ndMatrix matrix(m_editor->m_currentSelection->CalculateGlobalMatrix());
+		offset.m_posit = matrix.m_posit;
+		offset = offset.OrthoInverse();
+	}
+	const ndMatrix rotation(ndRollMatrix(m_pitch) * ndYawMatrix(m_yaw));
+	ndMatrix posit(ndGetIdentityMatrix());
+	posit.m_posit = m_posit;
+	const ndMatrix cameraMatrix(offset * posit * rotation * offset.OrthoInverse());
+	ndEditorCameraNode::SetTransform(cameraMatrix, cameraMatrix.m_posit);
 
-	const ndVector lightDir(newCameMatrix.RotateVector(ndVector(-1.0f, 1.0f, 0.f, 0.0f)));
+	const ndVector lightDir(cameraMatrix.RotateVector(ndVector(-1.0f, 1.0f, 0.f, 0.0f)));
 	renderer->SetSunLight(lightDir, ndVector(0.7f, 0.7f, 0.7f, 0.0f));
 }
 

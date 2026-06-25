@@ -26,11 +26,19 @@ ndJointSlidingHinge::ndJointSlidingHinge()
 	,m_positionAxis()
 {
 	m_maxDof = 8;
+	m_positionAxis.m_limitState = false;
 	m_positionAxis.m_springK = ndFloat32(2000.0f);
 	m_positionAxis.m_damperC = ndFloat32(50.0f);
 	m_positionAxis.m_maxLimit = ndFloat32(0.2f);
 	m_positionAxis.m_minLimit = ndFloat32(-0.1f);
-	m_positionAxis.m_springDamperRegularizer = ndFloat32(0.02f);
+	m_positionAxis.m_springDamperRegularizer = ndFloat32(0.001f);
+
+	m_rotationAxis.m_limitState = false;
+	m_rotationAxis.m_springK = ndFloat32(2000.0f);
+	m_rotationAxis.m_damperC = ndFloat32(50.0f);
+	m_rotationAxis.m_maxLimit = ndFloat32(0.2f);
+	m_rotationAxis.m_minLimit = ndFloat32(-0.1f);
+	m_rotationAxis.m_springDamperRegularizer = ndFloat32(0.001f);
 }
 
 ndJointSlidingHinge::ndJointSlidingHinge(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
@@ -38,11 +46,19 @@ ndJointSlidingHinge::ndJointSlidingHinge(const ndMatrix& pinAndPivotFrame, ndBod
 	,m_rotationAxis()
 	,m_positionAxis()
 {
+	m_positionAxis.m_limitState = false;
 	m_positionAxis.m_springK = ndFloat32(2000.0f);
 	m_positionAxis.m_damperC = ndFloat32(50.0f);
 	m_positionAxis.m_maxLimit = ndFloat32(0.2f);
 	m_positionAxis.m_minLimit = ndFloat32(-0.1f);
-	m_positionAxis.m_springDamperRegularizer = ndFloat32(0.02f);
+	m_positionAxis.m_springDamperRegularizer = ndFloat32(0.001f);
+
+	m_rotationAxis.m_limitState = false;
+	m_rotationAxis.m_springK = ndFloat32(2000.0f);
+	m_rotationAxis.m_damperC = ndFloat32(50.0f);
+	m_rotationAxis.m_maxLimit = ndFloat32(0.2f);
+	m_rotationAxis.m_minLimit = ndFloat32(-0.1f);
+	m_rotationAxis.m_springDamperRegularizer = ndFloat32(0.001f);
 }
 
 ndJointSlidingHinge::ndJointSlidingHinge(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent)
@@ -66,10 +82,8 @@ ndJointSlidingHinge::~ndJointSlidingHinge()
 
 ndSharedPtr<ndMeshJoint> ndJointSlidingHinge::GetMeshJoint(const ndMesh* const owner) const
 {
-	ndAssert(0);
-	//ndSharedPtr<ndMeshJoint> joint(new ndMeshJointRoller(owner, this));
-	//return joint;
-	return nullptr;
+	ndSharedPtr<ndMeshJoint> joint(new ndMeshJointSlidingHinge(owner, this));
+	return joint;
 }
 
 ndFloat32 ndJointSlidingHinge::GetAngle() const

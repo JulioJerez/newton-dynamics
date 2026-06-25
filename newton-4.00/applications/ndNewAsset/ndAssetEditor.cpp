@@ -30,6 +30,7 @@ ndAssetEditor::ndAssetEditor()
 	,m_showPivot(true)
 	,m_showJoints(true)
 	,m_lockSelection(false)
+	,m_orbitRootNode(true)
 	,m_showShapePivot(false)
 	,m_showCenterOfMass(false)
 	,m_showSelectedNode(true)
@@ -418,23 +419,24 @@ void ndAssetEditor::ShowMainMenuBar()
 					//
 					// Collision shapes:
 					// -box
+					// -tire
+					// -mesh
+					// -vhacd
 					// -sphere
 					// -capsule
 					// -cylinder
-					// -chamferedCylinder
-					// -tire
-					// -convexHull
-					// -mesh
-					// -vhacd
-					//
+					// -convexhull					
+					// -chamferedcylinder
+
 					// Constraint joints (created with default parameters):
 					// -hinge
-					// -slider
-					// -roller
 					// -plane
 					// -wheel
+					// -slider
+					// -roller
 					// -spherical
 					// -cylindrical
+					// -slidingHinge
 
 					// for mesh runtine manipulation:
 					// -hidden 
@@ -636,6 +638,7 @@ void ndAssetEditor::Run()
 					origin.m_x -= maxSize * ndFloat32 (4.0f);
 					ndQuaternion rot;
 
+					m_orbitRootNode = true;
 					SetCameraMatrix(rot, origin);
 				}
 				m_initCamera = true;

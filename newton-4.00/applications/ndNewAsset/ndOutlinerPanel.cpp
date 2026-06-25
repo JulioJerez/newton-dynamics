@@ -11,6 +11,7 @@
 
 #include "ndNewAssetStdafx.h"
 #include "ndAssetEditor.h"
+#include "ndEditorCameraFlyby.h"
 
 void ndAssetEditor::ShowOutlinerExplorerCollidindPairs(const ndSharedPtr<ndMesh>& node)
 {
@@ -136,6 +137,8 @@ void ndAssetEditor::ShowOutlinerExplorer(const ndSharedPtr<ndMesh>& node)
 		if (isClicked)
 		{
 			SelectCurrentNode(node);
+			ndEditorCameraFlyby* const camera = (ndEditorCameraFlyby*)*m_defaultCamera;
+			camera->CalculateCameraMatrix();
 		}
 
 		if (!(node->GetToolFlags() & 1))

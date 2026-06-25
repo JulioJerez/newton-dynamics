@@ -69,13 +69,13 @@ class ndMultiBodyVehicleMotor: public ndJointBilateralConstraint
 	D_NEWTON_API void SetCurve(const ndEngineTorqueCurve& curve);
 
 	D_NEWTON_API virtual void SetTorqueAndRpm(ndFloat32 newtonMeters, ndFloat32 rpm);
-	void DebugJoint(ndConstraintDebugCallback&) const override {}
 
 	private:
 	void AlignMatrix();
 	void UpdateParameters() override;
 	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
 	D_NEWTON_API ndFloat32 CalculateAcceleration(ndConstraintDescritor& desc);
+	D_NEWTON_API void DebugJoint(ndConstraintDebugCallback& callback) const override;
 	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
 	protected:

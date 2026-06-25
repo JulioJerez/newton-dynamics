@@ -34,6 +34,7 @@
 #include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
+#include "ndJointSlidingHinge.h"
 #include "ndMultiBodyVehicleMotor.h"
 #include "ndMultiBodyVehicleGearBox.h"
 #include "ndIkSwivelPositionEffector.h"
@@ -161,7 +162,7 @@ void ndMeshLoopJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
 	const ndString childName (xmlGetString(parent, "childReference"));
 	const ndString parentName (xmlGetString(parent, "parentReference"));
 
-	if (xmlHasAttribute(parent, "name"))
+	if (xmlHasParam(parent, "name"))
 	{
 		m_name = xmlGetString(parent, "name");
 	}
@@ -962,13 +963,15 @@ ndJointBilateralConstraint* ndMeshJointRoller::CreateObject(ndBodyKinematic* con
 
 ndMeshJointSlidingHinge::ndMeshJointSlidingHinge(const ndMesh* const owner)
 	:ndMeshJoint(owner)
+	,m_linearAxis()
+	,m_angularAxis()
 {
 }
 
 ndMeshJointSlidingHinge::ndMeshJointSlidingHinge(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
-	const ndJointRoller* const subJoint = (ndJointRoller*)joint;
+	const ndJointSlidingHinge* const subJoint = (ndJointSlidingHinge*)joint;
 
 	subJoint->GetSpringDamperPosit(m_linearAxis.m_springDamperRegularizer, m_linearAxis.m_springK, m_linearAxis.m_damperC);
 	subJoint->GetLimitsPosit(m_linearAxis.m_minLimit, m_linearAxis.m_maxLimit);
@@ -1219,7 +1222,7 @@ void ndMeshJointSpherical::DeserializeFromXml(const nd::TiXmlElement* const pare
 	m_axis.m_minLimit = xmlGetFloat(parent, "minTwistAngle");
 	m_axis.m_maxLimit = xmlGetFloat(parent, "maxTwistAngle");
 
-	if (xmlHasAttribute(parent, "coneLimitState"))
+	if (xmlHasParam(parent, "coneLimitState"))
 	{
 		m_coneAngleState = xmlGetInt(parent, "coneLimitState") ? true : false;
 		m_axis.m_limitState = xmlGetInt(parent, "twistLimitState") ? true : false;
@@ -1429,7 +1432,7 @@ void ndMeshJointVehicleDifferentialAxle::SerializeToXml(nd::TiXmlElement* const 
 void ndMeshJointVehicleDifferentialAxle::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndMeshJoint::DeserializeFromXml(parent);
-	if (xmlHasAttribute(parent, "ratio"))
+	if (xmlHasParam(parent, "ratio"))
 	{
 		m_gearRatio = ndReal(xmlGetFloat(parent, "ratio"));
 	}
@@ -1599,7 +1602,6 @@ ndMeshJointVehicleGearBox::ndMeshJointVehicleGearBox(const ndMesh* const owner, 
 	:ndMeshJoint(owner, joint)
 	,m_gearBox()
 {
-	ndAssert(0);
 	const ndMultiBodyVehicleGearBox* const subJoint = (ndMultiBodyVehicleGearBox*)joint;
 	m_gearBox = subJoint->GetGearBox();
 }

@@ -33,6 +33,18 @@ void ndAssetEditor::ShowPropertiesCustomProperties()
 
 		if (propsList.GetCount())
 		{
+			ndList<ndSharedPtr<ndMeshCustomProperty>>::ndNode* const propNode = FindSelected();
+			ndAssert(propNode);
+
+			char propName[256];
+			snprintf(propName, sizeof(propName) - 1, "%s", propNode->GetInfo()->m_name.GetStr());
+			if (ImGui::InputText("prop name", propName, sizeof(propName) - 1, ImGuiInputTextFlags_EnterReturnsTrue))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				propNode->GetInfo()->m_name = ndString(propName);
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+			}
+
 			ndList<ndString> nameList;
 			ndFixSizeArray<const char*, 1024> names;
 			for (ndList<ndSharedPtr<ndMeshCustomProperty>>::ndNode* ptr = propsList.GetFirst(); ptr; ptr = ptr->GetNext())
@@ -42,8 +54,6 @@ void ndAssetEditor::ShowPropertiesCustomProperties()
 			}
 			ImGui::ListBox(" ##10", &m_customPropertyIndex, &names[0], names.GetCount(), 4);
 
-			ndList<ndSharedPtr<ndMeshCustomProperty>>::ndNode* const propNode = FindSelected();
-			ndAssert(propNode);
 			ndInt32 oldPropType = 0;
 			if (strcmp(propNode->GetInfo()->ClassName(), ndMeshCustomPropertyString::StaticClassName()) == 0)
 			{
@@ -83,15 +93,6 @@ void ndAssetEditor::ShowPropertiesCustomProperties()
 				newProperty->m_name = propNode->GetInfo()->m_name;
 				
 				propNode->GetInfo() = newProperty;
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
-			}
-
-			char propName[256];
-			snprintf(propName, sizeof(propName) - 1, "%s", propNode->GetInfo()->m_name.GetStr());
-			if (ImGui::InputText("prop name", propName, sizeof(propName) - 1, ImGuiInputTextFlags_EnterReturnsTrue))
-			{
-				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
-				propNode->GetInfo()->m_name = ndString(propName);
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			}
 

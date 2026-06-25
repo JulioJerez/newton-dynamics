@@ -3065,8 +3065,10 @@ void ndMeshEffect::ApplyTransform(const ndMatrix& matrix)
 		ndVector n(ndFloat32(m_attrib.m_normalChannel[i].m_x), ndFloat32(m_attrib.m_normalChannel[i].m_y), ndFloat32(m_attrib.m_normalChannel[i].m_z), ndFloat32(0.0f));
 		n = rotation.RotateVector(n);
 		ndAssert(n.m_w == ndFloat32(0.0f));
-		ndAssert(n.DotProduct(n).GetScalar() > ndFloat32(0.0f));
-		n = n.Normalize();
+		if (n.DotProduct(n).GetScalar() > ndFloat32(0.0f))
+		{
+			n = n.Normalize();
+		}
 		m_attrib.m_normalChannel[i] = ndNormal(n.m_x, n.m_y, n.m_z);
 	}
 
@@ -3075,8 +3077,10 @@ void ndMeshEffect::ApplyTransform(const ndMatrix& matrix)
 		ndVector n(ndFloat32(m_attrib.m_binormalChannel[i].m_x), ndFloat32(m_attrib.m_binormalChannel[i].m_y), ndFloat32(m_attrib.m_binormalChannel[i].m_z), ndFloat32(0.0f));
 		n = rotation.RotateVector(n);
 		ndAssert(n.m_w == ndFloat32(0.0f));
-		ndAssert(n.DotProduct(n).GetScalar() > ndFloat32(0.0f));
-		n = n.Normalize();
+		if (n.DotProduct(n).GetScalar() > ndFloat32(0.0f))
+		{
+			n = n.Normalize();
+		}
 		m_attrib.m_binormalChannel[i] = ndNormal(n.m_x, n.m_y, n.m_z);
 	}
 

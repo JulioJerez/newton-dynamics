@@ -184,8 +184,6 @@ ndMultiBodyVehicleMotor::ndMultiBodyVehicleMotor(ndBodyKinematic* const motor, n
 ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleMotor::GetMeshJoint(const ndMesh* const owner) const
 {
 	ndMeshJointVehicleMotor* const joint = new ndMeshJointVehicleMotor(owner, this);
-	ndAssert(0);
-	//joint->m_maxOmega = ndReal(m_maxOmega);
 	return ndSharedPtr<ndMeshJoint>(joint);
 }
 
@@ -256,6 +254,16 @@ void ndMultiBodyVehicleMotor::SetTorqueAndRpm(ndFloat32 newtonMeters, ndFloat32 
 ndFloat32 ndMultiBodyVehicleMotor::GetRpm() const
 {
 	return m_omega * ndRadPerSecToRpm;
+}
+
+void ndMultiBodyVehicleMotor::DebugJoint(ndConstraintDebugCallback& debugCallback) const
+{
+	ndMatrix matrix0;
+	ndMatrix matrix1;
+	CalculateGlobalMatrix(matrix0, matrix1);
+
+	debugCallback.DrawFrame(matrix0);
+	debugCallback.DrawFrame(matrix1);
 }
 
 ndFloat32 ndMultiBodyVehicleMotor::CalculateAcceleration(ndConstraintDescritor& desc)

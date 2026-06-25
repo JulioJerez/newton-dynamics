@@ -76,7 +76,6 @@ void ndAssetEditor::ShowMainToolbar()
 	}
 
 	ImGui::SameLine();
-
 	ndRenderSceneCamera* const camera = ((ndEditorCameraFlyby*)*m_defaultCamera)->GetCamera();
 	if (camera->m_perspectiveMode)
 	{
@@ -90,6 +89,22 @@ void ndAssetEditor::ShowMainToolbar()
 		if (ImGui::Button("orthographic"))
 		{
 			camera->m_perspectiveMode = true;
+		}
+	}
+
+	ImGui::SameLine();
+	if (m_orbitRootNode)
+	{
+		if (ImGui::Button("orbitRoot"))
+		{
+			m_orbitRootNode = false;
+		}
+	}
+	else
+	{
+		if (ImGui::Button("orbitSelection"))
+		{
+			m_orbitRootNode = true;
 		}
 	}
 

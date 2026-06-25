@@ -123,7 +123,7 @@ void ndAssetEditor::EditShapeTransform()
 			const ndVector delta(position[0], position[1], position[2], ndFloat32(0.0f));
 			shapeInstance.m_localMatrix.m_posit += shapeInstance.m_localMatrix.RotateVector(delta);
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
-		};
+		}
 
 		ndReal euler[3];
 		ndVector tmp;
@@ -136,7 +136,7 @@ void ndAssetEditor::EditShapeTransform()
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
 			shapeInstance.m_localMatrix = ndPitchMatrix(euler[0] * ndDegreeToRad) * ndYawMatrix(euler[1] * ndDegreeToRad) * ndRollMatrix(euler[2] * ndDegreeToRad) * shapeInstance.m_localMatrix;
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
-		};
+		}
 
 		ndVector vector(shapeInstance.m_scale);
 		ndReal real[3];
@@ -151,7 +151,15 @@ void ndAssetEditor::EditShapeTransform()
 			vector.m_z = ndMax(real[2], ndReal(0.001f));
 			shapeInstance.m_scale = vector;
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
-		};
+		}
+	}
+
+	bool collidable = shapeInstance.m_collidable;
+	if (ImGui::Checkbox("collidable", &collidable))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
+		shapeInstance.m_collidable = collidable;
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
 	}
 }
 
@@ -476,10 +484,9 @@ void ndAssetEditor::ShowPropertiesCollisionInfo()
 			ImGui::EndCombo();
 		}
 
-		MakeVisualGeometry();
 		EditShapeTransform();
+		MakeVisualGeometry();
 		const ndString& contructor = shapeInstance.m_shape->m_constructor;
-		//const char* const className = shapeInstance.m_shape->m_constructor.GetStr();
 
 		if (strcmp(contructor.GetStr(), ndShapeNull::StaticClassName()) == 0)
 		{
@@ -535,7 +542,6 @@ void ndAssetEditor::MakeVisualGeometry()
 		return;
 	}
 
-	ImGui::Separator();
 	if (ImGui::Button("build visual mesh"))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));

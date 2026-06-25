@@ -33,10 +33,12 @@
 #include "ndJointSlider.h"
 #include "ndJointRoller.h"
 #include "ndBodyDynamic.h"
+#include "ndJointCylinder.h"
 #include "ndJointFix6dof.h"
 #include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
+#include "ndJointSlidingHinge.h"
 #include "ndMultiBodyVehicleMotor.h"
 #include "ndMultiBodyVehicleGearBox.h"
 #include "ndIkSwivelPositionEffector.h"
@@ -1125,17 +1127,17 @@ ndMatrix ndMesh::CalculateLocalMatrix(ndVector& sizeOut) const
 	sizeOut.m_z = ndFloat32(0.5f);
 	sizeOut.m_w = ndFloat32(0.0f);
 
-	ndMatrix localAxis(ndGetIdentityMatrix());
-	if (GetRigidBody())
-	{
-		const ndMeshBodyKinematic* const body = (ndMeshBodyKinematic*)*GetRigidBody();
-		localAxis = body->m_shapeInstance.m_localMatrix;
-		localAxis.m_posit = ndVector::m_wOne;
-	}
-	ndMatrix matrix(localAxis);
+	//ndMatrix localAxis(ndGetIdentityMatrix());
+	//if (GetRigidBody())
+	//{
+	//	const ndMeshBodyKinematic* const body = (ndMeshBodyKinematic*)*GetRigidBody();
+	//	localAxis = body->m_shapeInstance.m_localMatrix;
+	//	localAxis.m_posit = ndVector::m_wOne;
+	//}
+	ndMatrix matrix(ndGetIdentityMatrix());
 	if (meshEffect)
 	{
-		const ndMatrix transform(GetGeometryMatrix() * localAxis.OrthoInverse());
+		const ndMatrix transform(GetGeometryMatrix());
 		const ndInt32 pointsCount = meshEffect->GetVertexCount();
 		const ndInt32 pointsStride = ndInt32(meshEffect->GetVertexStrideInByte() / sizeof(ndFloat64));
 		const ndFloat64* const pointsBuffer = meshEffect->GetVertexPool();
@@ -1197,7 +1199,7 @@ void ndMesh::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) c
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionBox()
 {
 	ndVector size;
-	ndMatrix localMatrix(CalculateLocalMatrix(size));
+	const ndMatrix localMatrix(CalculateLocalMatrix(size));
 	size = size.Scale(ndFloat32(2.0f));
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeBox(size.m_x, size.m_y, size.m_z)));
 	shape->SetLocalMatrix(localMatrix);
@@ -1207,7 +1209,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionBox()
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionNull()
 {
 	ndVector size;
-	ndMatrix localMatrix(CalculateLocalMatrix(size));
+	const ndMatrix localMatrix(CalculateLocalMatrix(size));
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeNull()));
 
 	shape->SetLocalMatrix(localMatrix * m_geometryMatrix);
@@ -1217,7 +1219,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionNull()
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionSphere()
 {
 	ndVector size;
-	ndMatrix localMatrix(CalculateLocalMatrix(size));
+	const ndMatrix localMatrix(CalculateLocalMatrix(size));
 	ndFloat32 radios = ndMax(size.m_x, (ndMax(size.m_y, size.m_z)));
 	ndSharedPtr<ndShapeInstance> shape(new ndShapeInstance(new ndShapeSphere(radios)));
 	shape->SetLocalMatrix(localMatrix);
@@ -1227,7 +1229,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionSphere()
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCapsule()
 {
 	ndVector size;
-	ndMatrix localMatrix(CalculateLocalMatrix(size));
+	const ndMatrix localMatrix(CalculateLocalMatrix(size));
 
 	ndFloat32 radios = ndMax(size.m_y, size.m_z);
 	ndFloat32 high = ndFloat32(2.0f) * (ndMax (size.m_x - radios, ndFloat32 (0.0f)));
@@ -1240,7 +1242,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCapsule()
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCylinder()
 {
 	ndVector size;
-	ndMatrix localMatrix(CalculateLocalMatrix(size));
+	const ndMatrix localMatrix(CalculateLocalMatrix(size));
 
 	ndFloat32 high = ndFloat32(2.0f) * size.m_x;
 	ndFloat32 radios = ndMax(size.m_y, size.m_z);
@@ -1253,7 +1255,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionCylinder()
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionChamferCylinder()
 {
 	ndVector size;
-	ndMatrix localMatrix(CalculateLocalMatrix(size));
+	const ndMatrix localMatrix(CalculateLocalMatrix(size));
 
 	ndFloat32 width = size.m_x * ndFloat32(2.0f);
 	ndFloat32 radius = ndMax (size.m_z - size.m_x, ndFloat32 (0.0f));
@@ -1265,7 +1267,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionChamferCylinder()
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionTire()
 {
 	ndVector size;
-	ndMatrix localMatrix(CalculateLocalMatrix(size));
+	const ndMatrix localMatrix(CalculateLocalMatrix(size));
 
 	ndFloat32 width = size.m_x;
 	ndFloat32 radius = size.m_y;
@@ -1448,6 +1450,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionFromChildren()
 			const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
 			subShape->SetLocalMatrix(matrix);
 			shapeArray.PushBack(subShape);
+			meshNode->m_isVisible = false;
 		}
 		else if (strstr(name, "-box"))
 		{
@@ -1455,6 +1458,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionFromChildren()
 			const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
 			subShape->SetLocalMatrix(matrix);
 			shapeArray.PushBack(subShape);
+			meshNode->m_isVisible = false;
 		}
 		else if (strstr(name, "-capsule"))
 		{
@@ -1462,6 +1466,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionFromChildren()
 			const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
 			subShape->SetLocalMatrix(matrix);
 			shapeArray.PushBack(subShape);
+			meshNode->m_isVisible = false;
 		}
 		else if (strstr(name, "-cylinder"))
 		{
@@ -1469,6 +1474,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionFromChildren()
 			const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
 			subShape->SetLocalMatrix(matrix);
 			shapeArray.PushBack(subShape);
+			meshNode->m_isVisible = false;
 		}
 		else if (strstr(name, "-convexhull"))
 		{
@@ -1476,6 +1482,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionFromChildren()
 			const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
 			subShape->SetLocalMatrix(matrix);
 			shapeArray.PushBack(subShape);
+			meshNode->m_isVisible = false;
 		}
 		else if (strstr(name, "-vhacd"))
 		{
@@ -1568,7 +1575,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollision()
 	{
 		shape = CreateCollisionCylinder();
 	}
-	else if (strstr(name, "-chamferedCylinder"))
+	else if (strstr(name, "-chamferedcylinder"))
 	{
 		shape = CreateCollisionChamferCylinder();
 	}
@@ -1625,6 +1632,10 @@ ndSharedPtr<ndJointBilateralConstraint> ndMesh::CreateJoint()
 	else if (strstr(name, "-doublehinge"))
 	{
 		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointDoubleHinge());
+	}
+	else if (strstr(name, "-slidinghinge"))
+	{
+		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointSlidingHinge());
 	}
 	else if (strstr(name, "-plane"))
 	{
@@ -1833,9 +1844,17 @@ ndSharedPtr<ndMeshJoint> ndMesh::LoadJoint(const nd::TiXmlElement* const xmlJoin
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointHinge(mesh));
 	}
+	else if (strcmp(constructor, ndJointCylinder::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointCylinder(mesh));
+	}
 	else if (strcmp(constructor, ndJointRoller::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointRoller(mesh));
+	}
+	else if (strcmp(constructor, ndJointSlidingHinge::StaticClassName()) == 0)
+	{
+		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointSlidingHinge(mesh));
 	}
 	else if (strcmp(constructor, ndJointDoubleHinge::StaticClassName()) == 0)
 	{
