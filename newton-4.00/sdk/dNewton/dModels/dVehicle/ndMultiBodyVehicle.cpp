@@ -266,9 +266,8 @@ void ndMultiBodyVehicle::AddMotor(const ndSharedPtr<ndBody>& motorBody, const nd
 	m_motor = (ndMultiBodyVehicleMotor*)*motorJoint;
 	m_motor->m_vehicle = this;
 
-	// make internal body parts non colidable
-	ndShapeInstance& collision = motorBody->GetAsBodyKinematic()->GetCollisionShape();
-	collision.SetCollisionMode(false);
+	// make internal body parts non collidable
+	//ndShapeInstance& collision = motorBody->GetAsBodyKinematic()->GetCollisionShape();
 	
 	ndNode* const node = FindByBody(*motorBody);
 	ndAssert(!node || ((node->m_body->GetAsBody() == *motorBody) && ((*node->m_joint == *motorJoint))));
@@ -352,9 +351,9 @@ void ndMultiBodyVehicle::AddDifferential(const ndSharedPtr<ndBody>& differential
 	ndMultiBodyVehicleDifferential* const joint = (ndMultiBodyVehicleDifferential*)*differentialJoint;
 	m_differentialList.Append(joint);
 
-	// make internal body parts non colidable
-	ndShapeInstance& collision = differentialBody->GetAsBodyKinematic()->GetCollisionShape();
-	collision.SetCollisionMode(false);
+	// make internal body parts non collidable
+	//ndShapeInstance& collision = differentialBody->GetAsBodyKinematic()->GetCollisionShape();
+	//collision.SetCollisionMode(false);
 
 	ndNode* const node = FindByBody(*differentialBody);
 	ndAssert(!node || ((node->m_body->GetAsBody() == *differentialBody) && ((*node->m_joint == *differentialJoint))));
@@ -1415,8 +1414,6 @@ void ndMultiBodyVehicle::CalculateRestSprungWeight()
 	{
 		ndFloat32 sprungWeight = ndAbs(force[tireStart + i]);
 		ndMultiBodyVehicleTireJoint* const tire = tireArray[i];
-		//tire->m_frictionModel.m_lateralPacejka.m_norminalNormalForce = stiffness;
-		//tire->m_frictionModel.m_longitudinalPacejka.m_norminalNormalForce = stiffness;
 		tire->m_frictionModel.m_sprungWeight = sprungWeight;
 	}
 

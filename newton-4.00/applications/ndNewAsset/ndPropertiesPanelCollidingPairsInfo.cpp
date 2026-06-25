@@ -181,8 +181,16 @@ void ndAssetEditor::SetLoopJointSelection(const ndMesh* const subSelection)
 	for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptr = loops->m_loopJoints.GetFirst(); ptr; ptr = ptr->GetNext())
 	{
 		const ndSharedPtr<ndMeshLoopJoint>& loop = ptr->GetInfo();
-		bool test = (*loop->m_childNode == *m_currentSelection) && (*loop->m_parentNode == subSelection);
-		test = test || (*loop->m_parentNode == *m_currentSelection) && (*loop->m_childNode == subSelection);
+
+		//bool test = (*loop->m_childNode == *m_currentSelection) && (*loop->m_parentNode == subSelection);
+		//test = test || (*loop->m_parentNode == *m_currentSelection) && (*loop->m_childNode == subSelection);
+
+		bool test0 = (*loop->m_childNode == *m_currentSelection);
+		bool test1 = (*loop->m_parentNode == *m_currentSelection);
+		test0 = test0 && (*loop->m_parentNode == subSelection);
+		test1 = test1 && (*loop->m_childNode == subSelection);
+		bool test = test0 || test1;
+
 		if (test)
 		{
 			return;

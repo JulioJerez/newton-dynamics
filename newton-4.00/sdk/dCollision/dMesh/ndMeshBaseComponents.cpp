@@ -46,6 +46,10 @@ ndMeshCollisionShape::ndMeshCollisionShape(const ndMeshCollisionShape& other)
 {
 }
 
+ndMeshCollisionShape::~ndMeshCollisionShape()
+{
+}
+
 ndMeshCollisionShape* ndMeshCollisionShape::Duplicate() const
 {
 	ndAssert(0);
@@ -54,21 +58,30 @@ ndMeshCollisionShape* ndMeshCollisionShape::Duplicate() const
 
 bool ndMeshCollisionShape::operator==(const ndMeshCollisionShape& other) const
 {
-	return m_constructor == other.m_constructor;
+	bool test = m_constructor == other.m_constructor;
+	return test;
 }
 
-ndMeshCollisionShape::~ndMeshCollisionShape()
+void ndMeshCollisionShape::SerializeToXml(nd::TiXmlElement* const parent) const
 {
+	xmlSaveParam(parent, "constructor", m_constructor.GetStr());
+}
+
+void ndMeshCollisionShape::DeserializeFromXml(const nd::TiXmlElement* const)
+{
+	// TODO: check the constructor label
 }
 
 ndMeshCollisionShapeNull::ndMeshCollisionShapeNull()
 	:ndMeshCollisionShape(ndShapeNull::StaticClassName())
 {
+	m_constructor = ndShapeNull::StaticClassName();
 }
 
 ndMeshCollisionShapeNull::ndMeshCollisionShapeNull(const ndMeshCollisionShapeNull& other)
 	:ndMeshCollisionShape(other)
 {
+	m_constructor = ndShapeNull::StaticClassName();
 }
 
 ndMeshCollisionShape* ndMeshCollisionShapeNull::Duplicate() const
@@ -88,12 +101,12 @@ void ndMeshCollisionShapeNull::ApplyScale(ndFloat32)
 
 void ndMeshCollisionShapeNull::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	xmlSaveParam(parent, "constructor", ndShapeNull::StaticClassName());
+	ndMeshCollisionShape::SerializeToXml(parent);
 }
 
-void ndMeshCollisionShapeNull::DeserializeFromXml(const nd::TiXmlElement* const)
+void ndMeshCollisionShapeNull::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
-	// do nothing
+	ndMeshCollisionShape::DeserializeFromXml(parent);
 }
 
 ndShape* ndMeshCollisionShapeNull::CreateObject() const
@@ -135,12 +148,13 @@ void ndMeshCollisionShapeSphere::ApplyScale(ndFloat32 scale)
 
 void ndMeshCollisionShapeSphere::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	xmlSaveParam(parent, "constructor", ndShapeSphere::StaticClassName());
+	ndMeshCollisionShape::SerializeToXml(parent);
 	xmlSaveParam(parent, "radius", m_radius);
 }
 
 void ndMeshCollisionShapeSphere::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
+	ndMeshCollisionShape::DeserializeFromXml(parent);
 	m_radius = xmlGetFloat(parent, "radius");
 }
 
@@ -189,7 +203,7 @@ void ndMeshCollisionShapeBox::ApplyScale(ndFloat32 scale)
 
 void ndMeshCollisionShapeBox::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	xmlSaveParam(parent, "constructor", ndShapeBox::StaticClassName());
+	ndMeshCollisionShape::SerializeToXml(parent);
 	xmlSaveParam(parent, "x", m_x);
 	xmlSaveParam(parent, "y", m_y);
 	xmlSaveParam(parent, "z", m_z);
@@ -197,6 +211,7 @@ void ndMeshCollisionShapeBox::SerializeToXml(nd::TiXmlElement* const parent) con
 
 void ndMeshCollisionShapeBox::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
+	ndMeshCollisionShape::DeserializeFromXml(parent);
 	m_x = xmlGetFloat(parent, "x");
 	m_y = xmlGetFloat(parent, "y");
 	m_z = xmlGetFloat(parent, "z");
@@ -247,7 +262,7 @@ void ndMeshCollisionShapeCapsule::ApplyScale(ndFloat32 scale)
 
 void ndMeshCollisionShapeCapsule::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	xmlSaveParam(parent, "constructor", ndShapeCapsule::StaticClassName());
+	ndMeshCollisionShape::SerializeToXml(parent);
 	xmlSaveParam(parent, "radio0", m_radius0);
 	xmlSaveParam(parent, "radio1", m_radius1);
 	xmlSaveParam(parent, "heigh", m_height);
@@ -255,6 +270,7 @@ void ndMeshCollisionShapeCapsule::SerializeToXml(nd::TiXmlElement* const parent)
 
 void ndMeshCollisionShapeCapsule::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
+	ndMeshCollisionShape::DeserializeFromXml(parent);
 	m_radius0 = xmlGetFloat(parent, "radio0");
 	m_radius1 = xmlGetFloat(parent, "radio0");
 	m_height = xmlGetFloat(parent, "heigh");
@@ -305,7 +321,7 @@ void ndMeshCollisionShapeCylinder::ApplyScale(ndFloat32 scale)
 
 void ndMeshCollisionShapeCylinder::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	xmlSaveParam(parent, "constructor", ndShapeCylinder::StaticClassName());
+	ndMeshCollisionShape::SerializeToXml(parent);
 	xmlSaveParam(parent, "radio0", m_radius0);
 	xmlSaveParam(parent, "radio1", m_radius1);
 	xmlSaveParam(parent, "heigh", m_height);
@@ -313,6 +329,7 @@ void ndMeshCollisionShapeCylinder::SerializeToXml(nd::TiXmlElement* const parent
 
 void ndMeshCollisionShapeCylinder::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
+	ndMeshCollisionShape::DeserializeFromXml(parent);
 	m_radius0 = xmlGetFloat(parent, "radio0");
 	m_radius1 = xmlGetFloat(parent, "radio0");
 	m_height = xmlGetFloat(parent, "heigh");
@@ -360,13 +377,14 @@ void ndMeshCollisionShapeChamferCylinder::ApplyScale(ndFloat32 scale)
 
 void ndMeshCollisionShapeChamferCylinder::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	xmlSaveParam(parent, "constructor", ndShapeChamferCylinder::StaticClassName());
+	ndMeshCollisionShape::SerializeToXml(parent);
 	xmlSaveParam(parent, "radio", m_radius);
 	xmlSaveParam(parent, "heigh", m_height);
 }
 
 void ndMeshCollisionShapeChamferCylinder::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
+	ndMeshCollisionShape::DeserializeFromXml(parent);
 	m_height = xmlGetFloat(parent, "heigh");
 	m_radius = xmlGetFloat(parent, "radio");
 }
@@ -403,11 +421,12 @@ void ndMeshCollisionShapeWheel::ApplyScale(ndFloat32)
 
 void ndMeshCollisionShapeWheel::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	xmlSaveParam(parent, "constructor", ndShapeWheel::StaticClassName());
+	ndMeshCollisionShape::SerializeToXml(parent);
 }
 
-void ndMeshCollisionShapeWheel::DeserializeFromXml(const nd::TiXmlElement* const)
+void ndMeshCollisionShapeWheel::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
+	ndMeshCollisionShape::DeserializeFromXml(parent);
 }
 
 ndShape* ndMeshCollisionShapeWheel::CreateObject() const
@@ -468,7 +487,7 @@ void ndMeshCollisionShapeConvexHull::ApplyScale(ndFloat32 scale)
 
 void ndMeshCollisionShapeConvexHull::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	xmlSaveParam(parent, "constructor", ndShapeConvexHull::StaticClassName());
+	ndMeshCollisionShape::SerializeToXml(parent);
 	xmlSaveParam(parent, "pointcloud", m_points);
 	xmlSaveParam(parent, "tolerance", m_tolarence);
 	xmlSaveParam(parent, "maxPoints", m_maxPointCount);
@@ -476,6 +495,7 @@ void ndMeshCollisionShapeConvexHull::SerializeToXml(nd::TiXmlElement* const pare
 
 void ndMeshCollisionShapeConvexHull::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
+	ndMeshCollisionShape::DeserializeFromXml(parent);
 	m_points.SetCount(0);
 	xmlGetFloatArray3(parent, "pointcloud", m_points);
 	m_tolarence = ndFloat32(0.0f);
@@ -560,7 +580,7 @@ ndShape* ndMeshCollisionShapeCompound::CreateObject() const
 
 void ndMeshCollisionShapeCompound::SerializeToXml(nd::TiXmlElement* const parent) const
 {
-	xmlSaveParam(parent, "constructor", ndShapeCompound::StaticClassName());
+	ndMeshCollisionShape::SerializeToXml(parent);
 	for (ndList<ndSharedPtr<ndMeshShapeInstance>>::ndNode* node = m_subShapes.GetFirst(); node; node = node->GetNext())
 	{
 		nd::TiXmlElement* const subInstanceNode = new nd::TiXmlElement("collisionInstance");
@@ -572,6 +592,7 @@ void ndMeshCollisionShapeCompound::SerializeToXml(nd::TiXmlElement* const parent
 
 void ndMeshCollisionShapeCompound::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
+	ndMeshCollisionShape::DeserializeFromXml(parent);
 	for (const nd::TiXmlNode* node = parent->FirstChild("collisionInstance"); node; node = node->NextSibling("collisionInstance"))
 	{
 		ndSharedPtr<ndMeshShapeInstance> instance(new ndMeshShapeInstance);
@@ -586,6 +607,7 @@ ndMeshShapeInstance::ndMeshShapeInstance()
 	,m_alignmentMatrix(ndGetIdentityMatrix())
 	,m_scale(ndVector::m_one)
 	,m_shape(nullptr)
+	,m_collidable(true)
 {
 }
 
@@ -595,6 +617,7 @@ ndMeshShapeInstance::ndMeshShapeInstance(const ndShapeInstance& instance)
 	,m_alignmentMatrix(instance.GetAlignmentMatrix())
 	,m_scale(instance.GetScale())
 	,m_shape(instance.GetShape()->GetMeshShape())
+	,m_collidable(instance.GetCollisionMode())
 {
 }
 
@@ -604,6 +627,7 @@ ndMeshShapeInstance::ndMeshShapeInstance(const ndMeshShapeInstance& other)
 	,m_alignmentMatrix(other.m_alignmentMatrix)
 	,m_scale(other.m_scale)
 	,m_shape(ndSharedPtr<ndMeshCollisionShape>(other.m_shape->Duplicate()))
+	,m_collidable(other.m_collidable)
 {
 }
 
@@ -622,7 +646,8 @@ bool ndMeshShapeInstance::operator == (const ndMeshShapeInstance& other) const
 	test = test && (m_alignmentMatrix * other.m_alignmentMatrix.OrthoInverse()).TestIdentity(ndFloat32(1.0e-5f));
 	test = test && ((m_scale - other.m_scale).DotProduct(m_scale - other.m_scale)).GetScalar() < ndFloat32 (1.0e-6f);
 	test = test && (**m_shape == **other.m_shape);
-	return false;
+	test = test && (m_collidable == other.m_collidable);
+	return test;
 }
 
 void ndMeshShapeInstance::ApplyScale(const ndMatrix& scaleMatrix)
@@ -654,6 +679,7 @@ void ndMeshShapeInstance::SerializeToXml(nd::TiXmlElement* const parent) const
 	xmlSaveParam(parent, "localMatrix", m_localMatrix);
 	xmlSaveParam(parent, "alignmentMatrix", m_alignmentMatrix);
 	xmlSaveParam(parent, "scale", m_scale);
+	xmlSaveParam(parent, "collidable", m_collidable ? 1 : 0);
 
 	nd::TiXmlElement* const shapeNode = new nd::TiXmlElement("shape");
 	parent->LinkEndChild(shapeNode);
@@ -666,6 +692,10 @@ void ndMeshShapeInstance::DeserializeFromXml(const nd::TiXmlElement* const paren
 	m_localMatrix = xmlGetMatrix(parent, "localMatrix");
 	m_alignmentMatrix = xmlGetMatrix(parent, "alignmentMatrix");
 	m_scale = xmlGetVector3(parent, "scale");
+	if (xmlHasParam(parent, "collidable"))
+	{
+		m_collidable = xmlGetInt(parent, "collidable") ? true : false;
+	}
 
 	const nd::TiXmlElement* const xmlShape = (nd::TiXmlElement*)parent->FirstChild("shape");
 	ndAssert(xmlShape);
@@ -724,6 +754,7 @@ ndShapeInstance* ndMeshShapeInstance::CreateObject() const
 	shapeInstance->SetLocalMatrix(m_localMatrix);
 	shapeInstance->SetScale(m_scale);
 	shapeInstance->m_alignmentMatrix = m_alignmentMatrix;
+	shapeInstance->SetCollisionMode(m_collidable);
 	return shapeInstance;
 }
 
@@ -832,7 +863,6 @@ bool ndMeshBodyKinematic::operator==(const ndMeshBody& other) const
 	test = test && (m_massVolumeWeigh == otherBody->m_massVolumeWeigh);
 	return test;
 }
-
 
 void ndMeshBodyKinematic::SerializeToXml(nd::TiXmlElement* const parent) const
 {
