@@ -30,6 +30,7 @@ ndAssetEditor::ndAssetEditor()
 	,m_showPivot(true)
 	,m_showJoints(true)
 	,m_lockSelection(false)
+	,m_orbitRootNode(true)
 	,m_showShapePivot(false)
 	,m_showCenterOfMass(false)
 	,m_showSelectedNode(true)
@@ -637,6 +638,7 @@ void ndAssetEditor::Run()
 					origin.m_x -= maxSize * ndFloat32 (4.0f);
 					ndQuaternion rot;
 
+					m_orbitRootNode = true;
 					SetCameraMatrix(rot, origin);
 				}
 				m_initCamera = true;
