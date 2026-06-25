@@ -1602,7 +1602,6 @@ ndMeshJointVehicleGearBox::ndMeshJointVehicleGearBox(const ndMesh* const owner, 
 	:ndMeshJoint(owner, joint)
 	,m_gearBox()
 {
-	ndAssert(0);
 	const ndMultiBodyVehicleGearBox* const subJoint = (ndMultiBodyVehicleGearBox*)joint;
 	m_gearBox = subJoint->GetGearBox();
 }
