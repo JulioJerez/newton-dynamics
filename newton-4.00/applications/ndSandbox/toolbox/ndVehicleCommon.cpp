@@ -72,8 +72,9 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 {
 	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
 	ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
+	ndMultiBodyVehicleGearBox* const gearJoint = vehicle->GetGearBox();
 
-	if (!(m_isPlayer && motor))
+	if (!(m_isPlayer && motor && gearJoint))
 	{
 		return;
 	}
@@ -125,15 +126,15 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 	};
 	ApplyControls();
 
-	ndMultiBodyVehicleGearBox* const gearBoxJoint = vehicle->GetGearBox();
-	ndAssert(gearBoxJoint);
-	const ndMultiBodyVehicleGearBox::ndGearBox& gearBox = gearBoxJoint->GetGearBox();
+	//ndMultiBodyVehicleGearBox* const gearBoxJoint = vehicle->GetGearBox();
+	//ndAssert(gearBoxJoint);
+	const ndMultiBodyVehicleGearBox::ndGearBox& gearBox = gearJoint->GetGearBox();
 
 	switch (m_driverState)
 	{
 		case m_parked:
 		{
-			gearBoxJoint->SetRatio(0.0f);
+			gearJoint->SetRatio(0.0f);
 			motor->SetTorqueAndRpm(0.0f, 0.0f);
 			for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = vehicle->GetTireList().GetFirst(); node; node = node->GetNext())
 			{
@@ -158,7 +159,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			if (m_forwardGearUp.Update(buttons[ndGameControllerInputs::m_upGearButton] ? true : false))
 			{
 				// set neutral gear
-				gearBoxJoint->SetRatio(0.0f);
+				gearJoint->SetRatio(0.0f);
 				m_driverState = m_driveForward;
 				m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear;
 			}
@@ -166,7 +167,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			if (m_forwardGearUp.Update(buttons[ndGameControllerInputs::m_downGearButton] ? true : false))
 			{
 				// set neutral gear
-				gearBoxJoint->SetRatio(0.0f);
+				gearJoint->SetRatio(0.0f);
 				m_driverState = m_driveForward;
 				m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear;
 			}
@@ -176,7 +177,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_revertGear;
 				ndFloat32 reverseGearRatio = gearBox.m_gearRatios[m_currentGear];
 				ndFloat32 gearGain = gearBox.m_crownGearRatio * reverseGearRatio;
-				gearBoxJoint->SetRatio(gearGain);
+				gearJoint->SetRatio(gearGain);
 				m_driverState = m_driveReverse;
 			}
 
@@ -187,12 +188,12 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 		{
 			if (m_ignition.Update(buttons[ndGameControllerInputs::m_ignitionButton] ? true : false))
 			{
-				gearBoxJoint->SetRatio(0.0f);
+				gearJoint->SetRatio(0.0f);
 				m_driverState = m_idle;
 			}
 			if (m_reverseGear.Update(buttons[ndGameControllerInputs::m_neutralGearButton] ? true : false))
 			{
-				gearBoxJoint->SetRatio(0.0f);
+				gearJoint->SetRatio(0.0f);
 				m_driverState = m_idle;
 			}
 			break;
@@ -202,7 +203,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 		{
 			if (m_ignition.Update(buttons[ndGameControllerInputs::m_ignitionButton] ? true : false))
 			{
-				gearBoxJoint->SetRatio(0.0f);
+				gearJoint->SetRatio(0.0f);
 				m_driverState = m_idle;
 			}
 			if (m_reverseGear.Update(buttons[ndGameControllerInputs::m_reverseGearButton] ? true : false))
@@ -210,12 +211,12 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_revertGear;
 				ndFloat32 reverseGearRatio = gearBox.m_gearRatios[m_currentGear];
 				ndFloat32 gearGain = gearBox.m_crownGearRatio * reverseGearRatio;
-				gearBoxJoint->SetRatio(gearGain);
+				gearJoint->SetRatio(gearGain);
 				m_driverState = m_driveReverseFromForward;
 			}
 			if (m_reverseGear.Update(buttons[ndGameControllerInputs::m_neutralGearButton] ? true : false))
 			{
-				gearBoxJoint->SetRatio(0.0f);
+				gearJoint->SetRatio(0.0f);
 				m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear;
 				m_driverState = m_driveForwardGearDelay;
 			}
@@ -233,13 +234,13 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 
 		case m_driveReverseFromForward:
 		{
-			ndFloat32 gearRatio = gearBoxJoint->GetRatio();
+			ndFloat32 gearRatio = gearJoint->GetRatio();
 			if (gearRatio == ndFloat32(0.0f))
 			{
 				m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_revertGear;
 				ndFloat32 reverseGearRatio = gearBox.m_gearRatios[m_currentGear];
 				ndFloat32 gearGain = gearBox.m_crownGearRatio * reverseGearRatio;
-				gearBoxJoint->SetRatio(gearGain);
+				gearJoint->SetRatio(gearGain);
 				m_driverState = m_driveReverse;
 			}
 			else
@@ -265,7 +266,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				}
 			}
 			ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
-			gearBoxJoint->SetRatio(gearGain);
+			gearJoint->SetRatio(gearGain);
 			
 			m_driverState = m_driveForwardGearDelay;
 			m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
@@ -289,7 +290,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				}
 			}
 			ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
-			gearBoxJoint->SetRatio(gearGain);
+			gearJoint->SetRatio(gearGain);
 			
 			m_driverState = m_driveForwardGearDelay;
 			m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
