@@ -279,15 +279,20 @@ bool ndCholeskyTiledFactorization(ndInt32 size, ndInt32 stride, T* const psdMatr
 	{
 		CholeskyTile tile;
 		bool pass = true;
+		#ifdef D_NEWTON_USE_DOUBLE
+		const T tol =  T(1.0e-10f);
+		#else
+		const T tol = T(1.0e-5f);
+		#endif
 		ndMatrixTimeMatrix(__CholeskyTiledBlockSize__, &A.m_element[0][0], &B.m_element[0][0], &tile.m_element[0][0]);
-		for (ndInt32 j = 0; j < __CholeskyTiledBlockSize__; ++j)
+		for (ndInt32 j = 0; pass && (j < __CholeskyTiledBlockSize__); ++j)
 		{
 			T error = tile.m_element[j][j] - T(1.0f);
-			pass = pass && (ndAbs(error) < T(1.0e-6f));
-			for (ndInt32 k = j + 1; k < __CholeskyTiledBlockSize__; ++k)
+			pass = pass && (ndAbs(error) < tol);
+			for (ndInt32 k = j + 1; pass && (k < __CholeskyTiledBlockSize__); ++k)
 			{
-				pass = pass && (ndAbs(tile.m_element[j][k]) < T(1.0e-6f));
-				pass = pass && (ndAbs(tile.m_element[k][j]) < T(1.0e-6f));
+				pass = pass && (ndAbs(tile.m_element[j][k]) < tol);
+				pass = pass && (ndAbs(tile.m_element[k][j]) < tol);
 			}
 		}
 		return pass;
