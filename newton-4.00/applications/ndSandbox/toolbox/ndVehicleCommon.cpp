@@ -19,10 +19,20 @@ ndVehicleCommonNotify::ndVehicleCommonNotify(ndMultiBodyVehicle* const vehicle)
 	,m_currentGear(ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear)
 	,m_autoGearShiftTimer(0)
 	,m_driverState(m_parked)
-	,m_isPlayer(true)
+	,m_isPlayer(false)
 	,m_sleepingState(false)
 {
 	SetModel(vehicle);
+}
+
+bool ndVehicleCommonNotify::GetPlaterState() const
+{
+	return m_isPlayer;
+}
+
+void ndVehicleCommonNotify::SetPlaterState(bool state)
+{
+	m_isPlayer = state;
 }
 
 void ndVehicleCommonNotify::Update(ndFloat32 timestep)

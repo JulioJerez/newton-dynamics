@@ -243,7 +243,6 @@ const ndRenderSceneCamera* ndRenderSceneNode::FindCameraNode() const
 			return camera;
 		}
 	}
-	ndAssert(0);
 	return nullptr;
 }
 
