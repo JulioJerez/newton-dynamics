@@ -190,8 +190,8 @@ namespace ndMotorVehicle
 						vehicleArray.PushBack(vehicle);
 					}
 				}
-				// check if the camera is attach to a vehicle
 
+				// check if the camera is attach to a vehicle
 				const ndRenderSceneCamera* const currentCamera = manager->GetRenderer()->GetCamera()->FindCameraNode();
 				for (ndInt32 i = 0; i < vehicleArray.GetCount(); ++i)
 				{
@@ -207,22 +207,54 @@ namespace ndMotorVehicle
 					{
 						if (cameraNode == currentCamera)
 						{
-							modelNotifyCallback->SetPlaterState(true);
+							modelNotifyCallback->SetAsPlayer(true);
 						}
 						else
 						{
-							modelNotifyCallback->SetPlaterState(false);
+							modelNotifyCallback->SetAsPlayer(false);
 						}
 					}
 					else
 					{
-						modelNotifyCallback->SetPlaterState(false);
+						modelNotifyCallback->SetAsPlayer(false);
+					}
+				}
+			}
+
+			const ndFixSizeArray<bool, 32>& buttons = manager->GetGameController()->GetButtons();
+			if (m_changePlayer.Update(buttons[ndGameControllerInputs::m_changePlayer] ? true : false))
+			{
+				ndFixSizeArray<ndMultiBodyVehicle*, 256> vehicleArray;
+				const ndModelList& models = manager->GetWorld()->GetModelList();
+
+				// get the vehicle array
+				for (ndModelList::ndNode* node = models.GetFirst(); node; node = node->GetNext())
+				{
+					ndMultiBodyVehicle* const vehicle = node->GetInfo()->GetAsMultiBodyVehicle();
+					if (vehicle)
+					{
+						vehicleArray.PushBack(vehicle);
 					}
 				}
 
-				// iterate of the scene and 
+				for (ndInt32 i = 0; i < vehicleArray.GetCount(); ++i)
+				{
+					ndInt32 i0 = ((i - 1) >= 0) ? i - 1 : vehicleArray.GetCount() - 1;
+					ndMultiBodyVehicle* const vehicle = vehicleArray[i0];
+					ndVehicleCommonNotify* const modelNotify = (ndVehicleCommonNotify*)*vehicle->GetNotifyCallback();
+					if (modelNotify->GetPlayerState())
+					{
+						modelNotify->SetAsPlayer(false);
+						ndMultiBodyVehicle* const nextVehicle = vehicleArray[i];
+						ndVehicleCommonNotify* const nextModelNotify = (ndVehicleCommonNotify*)*nextVehicle->GetNotifyCallback();
+						nextModelNotify->SetAsPlayer(true);
+						break;
+					}
+				}
 			}
 		}
+
+		ndDemoEntityManager::ndKeyTrigger m_changePlayer;
 	};
 
 	//void AddMaterial(ndDemoEntityManager* const scene)
@@ -264,13 +296,13 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	matrix.m_posit.m_y += 0.5f;
 	
 	ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f))));
-	ndSharedPtr<ndModel> vehicle1(CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f))));
-	ndSharedPtr<ndModel> vehicle2(CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f))));
-	ndSharedPtr<ndModel> vehicle3(CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 5.0f, 0.0f))));
-	ndSharedPtr<ndModel> vehicle4(CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 10.0f, 0.0f))));
+	//ndSharedPtr<ndModel> vehicle1(CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f))));
+	//ndSharedPtr<ndModel> vehicle2(CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f))));
+	//ndSharedPtr<ndModel> vehicle3(CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 5.0f, 0.0f))));
+	//ndSharedPtr<ndModel> vehicle4(CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 10.0f, 0.0f))));
 
-	ndVehicleCommonNotify* const notifyCallback = (ndVehicleCommonNotify*)*vehicle4->GetNotifyCallback();
-	notifyCallback->SetPlaterState(true);
+	//ndVehicleCommonNotify* const notifyCallback = (ndVehicleCommonNotify*)*vehicle4->GetNotifyCallback();
+	//notifyCallback->SetAsPlayer(true);
 	
 	matrix.m_posit.m_x += 40.0f;
 	matrix.m_posit.m_z += 5.0f;

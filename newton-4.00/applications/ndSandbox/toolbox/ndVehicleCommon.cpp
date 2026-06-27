@@ -20,17 +20,16 @@ ndVehicleCommonNotify::ndVehicleCommonNotify(ndMultiBodyVehicle* const vehicle)
 	,m_autoGearShiftTimer(0)
 	,m_driverState(m_parked)
 	,m_isPlayer(false)
-	,m_sleepingState(false)
 {
 	SetModel(vehicle);
 }
 
-bool ndVehicleCommonNotify::GetPlaterState() const
+bool ndVehicleCommonNotify::GetPlayerState() const
 {
 	return m_isPlayer;
 }
 
-void ndVehicleCommonNotify::SetPlaterState(bool state)
+void ndVehicleCommonNotify::SetAsPlayer(bool state)
 {
 	m_isPlayer = state;
 }
@@ -38,8 +37,7 @@ void ndVehicleCommonNotify::SetPlaterState(bool state)
 void ndVehicleCommonNotify::Update(ndFloat32 timestep)
 {
 	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
-	//if (m_isPlayer || (vehicle && !vehicle->IsSleeping()))
-	if (vehicle && !vehicle->IsSleeping())
+	if (m_isPlayer || (vehicle && !vehicle->IsSleeping()))
 	{
 		vehicle->Update(timestep);
 	}
@@ -49,7 +47,7 @@ void ndVehicleCommonNotify::PostUpdate(ndFloat32 timestep)
 {
 	ndModelNotify::PostUpdate(timestep);
 	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
-	if (vehicle && !m_sleepingState)
+	if (vehicle)
 	{
 		vehicle->PostUpdate(timestep);
 	}
@@ -57,13 +55,10 @@ void ndVehicleCommonNotify::PostUpdate(ndFloat32 timestep)
 
 void ndVehicleCommonNotify::PostTransformUpdate(ndFloat32 timestep)
 {
-	m_sleepingState = true;
 	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
 
-	//if (m_isPlayer || (vehicle && !vehicle->IsSleeping()))
-	if (vehicle && !vehicle->IsSleeping())
+	if (m_isPlayer || (vehicle && !vehicle->IsSleeping()))
 	{
-		m_sleepingState = false;
 		ApplyInputs(timestep);
 	}
 }
@@ -84,7 +79,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 	ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
 	ndMultiBodyVehicleGearBox* const gearJoint = vehicle->GetGearBox();
 
-	if (!(m_isPlayer && motor && gearJoint))
+	if (!(motor && gearJoint))
 	{
 		return;
 	}
@@ -106,10 +101,16 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 		ndFloat32 currentRpm = motor->GetRpm();
 		ndFloat32 desiredRpm = ndMax(engineCurve.GetIdleRpm(), throttle * engineCurve.GetRedLineRpm());
 		ndFloat32 torqueFromCurve = engineCurve.GetTorque(currentRpm);
-		
 		ndFloat32 brake = axis[ndGameControllerInputs::m_brakePedal];
 		ndFloat32 steerAngle = axis[ndGameControllerInputs::m_steeringWheel];
 		ndFloat32 handBrake = buttons[ndGameControllerInputs::m_handBreakButton] ? ndFloat32(1.0f) : ndFloat32(0.0f);
+
+		if (!m_isPlayer)
+		{
+			brake = ndFloat32(1.0f);
+			handBrake = ndFloat32(1.0f);
+			desiredRpm = ndFloat32(0.0f);
+		}
 
 		ndMultiBodyVehicleGearBox* const gearJoint = vehicle->GetGearBox();
 		ndMultiBodyVehicleGearBox::ndGearBox& gearBox = gearJoint->GetGearBox();
@@ -120,10 +121,12 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			// for now just inore the torque
 			gearJoint->SetClutchTorque(gearBox.m_torqueConverter);
 		}
-
 		motor->SetTorqueAndRpm(torqueFromCurve, desiredRpm);
-		vehicle->GetChassis()->SetSleepState(false);
-		motor->GetBody0()->SetSleepState(false);
+
+		//bool sleepState = !m_isPlayer;
+		//vehicle->GetChassis()->GetSleepState();
+		//vehicle->GetChassis()->SetSleepState(sleepState);
+		//motor->GetBody0()->SetSleepState(sleepState);
 
 		for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = vehicle->GetTireList().GetFirst(); node; node = node->GetNext())
 		{
@@ -131,15 +134,17 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			tire->SetBrake(brake);
 			tire->SetSteering(steerAngle);
 			tire->SetHandBrake(handBrake);
-			tire->GetBody0()->SetSleepState(false);
+			//tire->GetBody0()->SetSleepState(sleepState);
 		}
 	};
 	ApplyControls();
 
-	//ndMultiBodyVehicleGearBox* const gearBoxJoint = vehicle->GetGearBox();
-	//ndAssert(gearBoxJoint);
-	const ndMultiBodyVehicleGearBox::ndGearBox& gearBox = gearJoint->GetGearBox();
+	if (!m_isPlayer)
+	{
+		return;
+	}
 
+	const ndMultiBodyVehicleGearBox::ndGearBox& gearBox = gearJoint->GetGearBox();
 	switch (m_driverState)
 	{
 		case m_parked:
@@ -149,6 +154,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = vehicle->GetTireList().GetFirst(); node; node = node->GetNext())
 			{
 				ndMultiBodyVehicleTireJoint* const tire = node->GetInfo();
+				tire->SetBrake(ndFloat32(1.0f));
 				tire->SetHandBrake(ndFloat32(1.0f));
 			}
 
