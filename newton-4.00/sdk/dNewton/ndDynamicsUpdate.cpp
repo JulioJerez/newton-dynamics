@@ -1332,7 +1332,7 @@ void ndDynamicsUpdate::InitSkeletons()
 		for (ndInt32 i = ndInt32(activeSkeletons.GetCount()) - 1; i >= 0; --i)
 		{
 			ndSkeletonContainer* const skeleton = activeSkeletons[i];
-			if (skeleton->m_transientLoopingContacts.GetCount())
+			if (!skeleton->m_isResting && skeleton->m_transientLoopingContacts.GetCount())
 			{
 				skeleton->AddExtraContacts();
 			}
@@ -1377,7 +1377,10 @@ void ndDynamicsUpdate::InitSkeletons()
 			const ndArray<ndLeftHandSide>& leftHandSide = m_leftHandSide;
 
 			ndSkeletonContainer* const skeleton = activeSkeletons[i];
-			skeleton->ParallelInitMassMatrix(&leftHandSide[0], &rightHandSide[0]);
+			if (!skeleton->m_isResting)
+			{
+				skeleton->ParallelInitMassMatrix(&leftHandSide[0], &rightHandSide[0]);
+			}
 		}
 
 		auto InitSkeletons = ndMakeObject::ndFunction([this, &activeSkeletons](ndInt32 groupId, ndInt32)
@@ -1387,7 +1390,10 @@ void ndDynamicsUpdate::InitSkeletons()
 			const ndArray<ndLeftHandSide>& leftHandSide = m_leftHandSide;
 
 			ndSkeletonContainer* const skeleton = activeSkeletons[m_parallelSkeleton + groupId];
-			skeleton->InitMassMatrix(&leftHandSide[0], &rightHandSide[0], groupId);
+			if (!skeleton->m_isResting)
+			{
+				skeleton->InitMassMatrix(&leftHandSide[0], &rightHandSide[0], groupId);
+			}
 		});
 
 		const ndInt32 skelCount = ndInt32(activeSkeletons.GetCount() - m_parallelSkeleton);
@@ -1408,7 +1414,10 @@ void ndDynamicsUpdate::UpdateSkeletons()
 	for (ndInt32 i = 0; i < m_parallelSkeleton; ++i)
 	{
 		ndSkeletonContainer* const skeleton = activeSkeletons[i];
-		skeleton->ParallelCalculateReactionForces(internalForces);
+		if (!skeleton->m_isResting)
+		{
+			skeleton->ParallelCalculateReactionForces(internalForces);
+		}
 	}
 
 	auto UpdateSkeletons = ndMakeObject::ndFunction([this, &activeSkeletons](ndInt32 groupId, ndInt32)
@@ -1417,7 +1426,10 @@ void ndDynamicsUpdate::UpdateSkeletons()
 		ndJacobian* const internalForces = &GetInternalForces()[0];
 	
 		ndSkeletonContainer* const skeleton = activeSkeletons[m_parallelSkeleton + groupId];
-		skeleton->CalculateReactionForces(internalForces, groupId);
+		if (!skeleton->m_isResting)
+		{
+			skeleton->CalculateReactionForces(internalForces, groupId);
+		}
 	});
 
 	const ndInt32 skelCount = ndInt32(activeSkeletons.GetCount() - m_parallelSkeleton);
