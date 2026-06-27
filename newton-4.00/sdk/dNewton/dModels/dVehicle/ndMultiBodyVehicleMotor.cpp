@@ -216,19 +216,6 @@ void ndMultiBodyVehicleMotor::AlignMatrix()
 	m_body0->SetOmegaNoSleep(omega);
 }
 
-//void ndMultiBodyVehicleMotor::SetFrictionLoss(ndFloat32 newtonMeters)
-//{
-//	m_internalFriction = ndAbs(newtonMeters);
-//}
-//void ndMultiBodyVehicleMotor::SetMaxRpm(ndFloat32 redLineRpm)
-//{
-//	m_maxOmega = ndMax(redLineRpm / ndRadPerSecToRpm, ndFloat32 (0.0f));
-//}
-//void ndMultiBodyVehicleMotor::SetOmegaAccel(ndFloat32 rpmStep)
-//{
-//	m_omegaStep = ndAbs(rpmStep / ndRadPerSecToRpm);
-//}
-
 ndFloat32 ndMultiBodyVehicleMotor::GetMaxRpm() const
 {
 	//return m_engineCurve.m_omega[m_engineCurve.m_omega.GetCount() - 1] * ndRadPerSecToRpm;
@@ -292,6 +279,8 @@ void ndMultiBodyVehicleMotor::JacobianDerivative(ndConstraintDescritor& desc)
 	ndMatrix matrix0;
 	ndMatrix matrix1;
 	CalculateGlobalMatrix(matrix0, matrix1);
+
+	m_body0->GetAsBodyDynamic()->SetForce(ndVector::m_zero);
 	
 	// two rows to restrict rotation around around the parent coordinate system
 	const ndFloat32 angle0 = CalculateAngle(matrix0.m_front, matrix1.m_front, matrix1.m_up);

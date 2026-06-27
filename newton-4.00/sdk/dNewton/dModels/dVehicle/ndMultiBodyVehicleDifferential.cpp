@@ -21,6 +21,7 @@
 
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
+#include "ndBodyDynamic.h"
 #include "ndMeshComponents.h"
 #include "ndMultiBodyVehicleDifferential.h"
 
@@ -94,6 +95,8 @@ void ndMultiBodyVehicleDifferential::JacobianDerivative(ndConstraintDescritor& d
 	ndMatrix matrix0;
 	ndMatrix matrix1;
 	CalculateGlobalMatrix(matrix0, matrix1);
+
+	m_body0->GetAsBodyDynamic()->SetForce(ndVector::m_zero);
 
 	//one rows to restrict rotation around the parent coordinate system
 	const ndFloat32 angle = CalculateAngle(matrix0.m_front, matrix1.m_front, matrix1.m_right);
