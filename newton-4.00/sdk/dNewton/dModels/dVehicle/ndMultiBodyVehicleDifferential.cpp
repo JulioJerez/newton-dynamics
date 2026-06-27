@@ -96,7 +96,9 @@ void ndMultiBodyVehicleDifferential::JacobianDerivative(ndConstraintDescritor& d
 	ndMatrix matrix1;
 	CalculateGlobalMatrix(matrix0, matrix1);
 
-	m_body0->GetAsBodyDynamic()->SetForce(ndVector::m_zero);
+	ndBodyDynamic* const selfBody = m_body0->GetAsBodyDynamic();
+	selfBody->SetForce(ndVector::m_zero);
+	selfBody->SaveExternalForces();
 
 	//one rows to restrict rotation around the parent coordinate system
 	const ndFloat32 angle = CalculateAngle(matrix0.m_front, matrix1.m_front, matrix1.m_right);

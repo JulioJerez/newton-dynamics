@@ -72,12 +72,12 @@ class ndBodyDynamic: public ndBodyKinematic
 
 	D_NEWTON_API ndVector GetForce() const override;
 	D_NEWTON_API ndVector GetTorque() const override;
+	D_NEWTON_API void SaveExternalForces();
 
 	D_NEWTON_API virtual void Serialize(ndMesh* const node) const override;
 	D_NEWTON_API virtual void Deserialize(const ndMeshBody* const meshBody) override;
 	
 	private:
-	void SaveExternalForces();
 	virtual void SetAcceleration(const ndVector& accel, const ndVector& alpha) override;
 
 	D_NEWTON_API virtual void IntegrateGyroSubstep(const ndVector& timestep) override;
