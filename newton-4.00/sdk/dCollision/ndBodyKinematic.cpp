@@ -296,6 +296,14 @@ void ndBodyKinematic::SetAccel(const ndJacobian& accel)
 	SetAlpha(accel.m_angular);
 }
 
+void ndBodyKinematic::ForceEquilibrium()
+{
+	m_equilibrium = 1;
+	m_equilibrium0 = 1;
+	m_isJointFence0 = 1;
+	m_isJointFence1 = 1;
+}
+
 void ndBodyKinematic::PrepareStep(ndInt32 index)
 {
 	m_index = index;
@@ -473,7 +481,6 @@ void ndBodyKinematic::SetAcceleration(const ndVector&, const ndVector&)
 	m_accel = ndVector::m_zero;
 	m_alpha = ndVector::m_zero;
 }
-
 
 void ndBodyKinematic::SetSleepState(bool state)
 {

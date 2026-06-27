@@ -1484,6 +1484,20 @@ void ndMultiBodyVehicle::Update(ndFloat32 timestep)
 		CalculateRestSprungWeight();
 	}
 
+	// reset forces of assesories attached to chassis
+	if (m_motor)
+	{
+		ndBodyDynamic* const selfBody = m_motor->GetBody0()->GetAsBodyDynamic();
+		selfBody->SetForce(ndVector::m_zero);
+		selfBody->ForceEquilibrium();
+	}
+	for (ndList<ndMultiBodyVehicleDifferential*>::ndNode* node = m_differentialList.GetFirst(); node; node = node->GetNext())
+	{
+		ndBodyDynamic* const selfBody = node->GetInfo()->GetBody0()->GetAsBodyDynamic();
+		selfBody->SetForce(ndVector::m_zero);
+		selfBody->ForceEquilibrium();
+	}
+
 	// apply down force
 	ApplyAerodynamics(timestep);
 
