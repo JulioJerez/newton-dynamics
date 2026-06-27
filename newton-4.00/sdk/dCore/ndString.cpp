@@ -738,7 +738,6 @@ ndInt32 ndString::Distance(const ndString& other) const
 	return currRow[n];
 }
 
-//ndString ndGetPath(const ndString& fullPathName)
 ndString ndString::GetPath() const
 {
 	const char* ptr = strrchr(GetStr(), '/');
@@ -754,7 +753,6 @@ ndString ndString::GetPath() const
 	return ndString(GetStr(), ndInt32(Size() - strlen(ptr + 1)));
 }
 
-//ndString ndGetName(const ndString& fullPathName)
 ndString ndString::GetName() const
 {
 	const char* ptr1 = strrchr(GetStr(), '.');
@@ -770,3 +768,14 @@ ndString ndString::GetName() const
 	return SubString(start, end - start);
 }
 
+ndString ndString::GetExtension() const
+{
+	const char* ptr = strrchr(GetStr(), '.');
+	if (!ptr)
+	{
+		ptr = GetStr() + Size() - 1;
+	}
+	ndInt32 start = ndInt32(Size() - strlen(ptr + 1));
+	ndInt32 end = Size();
+	return SubString(start, end - start);
+}

@@ -101,6 +101,7 @@ void ndAnimationMeshLoader::SetTranslationTracks(const ndString& boneName)
 // -sphere
 // -capsule
 // -cylinder
+// -compound
 // -convexhull					
 // -chamferedcylinder
 

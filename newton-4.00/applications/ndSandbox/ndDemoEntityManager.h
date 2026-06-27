@@ -201,6 +201,8 @@ class ndDemoEntityManager : public ndClassAlloc
 
 	void ChangeActiveCamera();
 	void SetNextActiveCamera();
+	bool CameraChanged() const;
+
 	void RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& postUpdate);
 
 	const ndString& GetLastLoadMesh() const;

@@ -1062,6 +1062,11 @@ const ndFloat64* ndMeshEffect::GetVertexPool() const
 	return &m_points.m_vertex[0].m_x;
 }
 
+const ndMeshEffect::ndAttibuteFormat& ndMeshEffect::GetVertexAtributes() const
+{
+	return m_attrib;
+}
+
 ndInt32 ndMeshEffect::GetFaceMaterial(ndEdge* const faceEdge) const
 {
 	return ndInt32(m_attrib.m_materialChannel.GetCount() ? m_attrib.m_materialChannel[ndInt32(faceEdge->m_userData)] : 0);

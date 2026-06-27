@@ -1444,91 +1444,94 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionFromChildren()
 		tmpName.ToLower();
 		const char* const name = tmpName.GetStr();
 
-		if (strstr(name, "-sphere"))
+		if (!strstr(name, "-rb"))
 		{
-			ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
-			const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
-			subShape->SetLocalMatrix(matrix);
-			shapeArray.PushBack(subShape);
-			meshNode->m_isVisible = false;
-		}
-		else if (strstr(name, "-box"))
-		{
-			ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
-			const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
-			subShape->SetLocalMatrix(matrix);
-			shapeArray.PushBack(subShape);
-			meshNode->m_isVisible = false;
-		}
-		else if (strstr(name, "-capsule"))
-		{
-			ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
-			const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
-			subShape->SetLocalMatrix(matrix);
-			shapeArray.PushBack(subShape);
-			meshNode->m_isVisible = false;
-		}
-		else if (strstr(name, "-cylinder"))
-		{
-			ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
-			const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
-			subShape->SetLocalMatrix(matrix);
-			shapeArray.PushBack(subShape);
-			meshNode->m_isVisible = false;
-		}
-		else if (strstr(name, "-convexhull"))
-		{
-			ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
-			const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
-			subShape->SetLocalMatrix(matrix);
-			shapeArray.PushBack(subShape);
-			meshNode->m_isVisible = false;
-		}
-		else if (strstr(name, "-vhacd"))
-		{
-			ndAssert(0);
-			//ndArray<ndInt32> indices;
-			//ndDemoMesh* const mesh = (ndDemoMesh*)*node->GetInfo()->GetMesh();
-			//ndAssert(mesh);
-			//mesh->GetVertexArray(points);
-			//mesh->GetIndexArray(indices);
-			//
-			//ndArray<ndTriplex> meshPoints;
-			//for (ndInt32 i = 0; i < points.GetCount(); ++i)
-			//{
-			//	ndTriplex p;
-			//	p.m_x = points[i].m_x;
-			//	p.m_y = points[i].m_y;
-			//	p.m_z = points[i].m_z;
-			//	meshPoints.PushBack(p);
-			//}
-			//nd_::VHACD::IVHACD* const interfaceVHACD = nd_::VHACD::CreateVHACD();
-			//
-			//nd_::VHACD::IVHACD::Parameters paramsVHACD;
-			////paramsVHACD.m_concavityToVolumeWeigh = 1.0;
-			//paramsVHACD.m_concavityToVolumeWeigh = 0.5f;
-			//interfaceVHACD->Compute(&meshPoints[0].m_x, uint32_t(points.GetCount()),
-			//	(uint32_t*)&indices[0], uint32_t(indices.GetCount()) / 3, paramsVHACD);
-			//
-			//ndInt32 hullCount = ndInt32(interfaceVHACD->GetNConvexHulls());
-			//ndArray<ndVector> convexMeshPoints;
-			//for (ndInt32 i = 0; i < hullCount; ++i)
-			//{
-			//	nd_::VHACD::IVHACD::ConvexHull ch;
-			//	interfaceVHACD->GetConvexHull(uint32_t(i), ch);
-			//	convexMeshPoints.SetCount(ndInt32(ch.m_nPoints));
-			//	for (ndInt32 j = 0; j < ndInt32(ch.m_nPoints); ++j)
-			//	{
-			//		ndVector p(ndFloat32(ch.m_points[j * 3 + 0]), ndFloat32(ch.m_points[j * 3 + 1]), ndFloat32(ch.m_points[j * 3 + 2]), ndFloat32(0.0f));
-			//		convexMeshPoints[j] = p;
-			//	}
-			//	shapeArray.PushBack(new ndShapeInstance(new ndShapeConvexHull(ndInt32(convexMeshPoints.GetCount()), sizeof(ndVector), 0.01f, &convexMeshPoints[0].m_x)));
-			//	const ndMatrix matrix(node->GetInfo()->GetMeshMatrix() * node->GetInfo()->GetCurrentMatrix());
-			//	shapeArray[shapeArray.GetCount() - 1]->SetLocalMatrix(matrix);
-			//}
-			//
-			//interfaceVHACD->Clean();
-			//interfaceVHACD->Release();
+			if (strstr(name, "-sphere"))
+			{
+				ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
+				const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
+				subShape->SetLocalMatrix(matrix);
+				shapeArray.PushBack(subShape);
+				meshNode->m_isVisible = false;
+			}
+			else if (strstr(name, "-box"))
+			{
+				ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
+				const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
+				subShape->SetLocalMatrix(matrix);
+				shapeArray.PushBack(subShape);
+				meshNode->m_isVisible = false;
+			}
+			else if (strstr(name, "-capsule"))
+			{
+				ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
+				const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
+				subShape->SetLocalMatrix(matrix);
+				shapeArray.PushBack(subShape);
+				meshNode->m_isVisible = false;
+			}
+			else if (strstr(name, "-cylinder"))
+			{
+				ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
+				const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
+				subShape->SetLocalMatrix(matrix);
+				shapeArray.PushBack(subShape);
+				meshNode->m_isVisible = false;
+			}
+			else if (strstr(name, "-convexhull"))
+			{
+				ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
+				const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
+				subShape->SetLocalMatrix(matrix);
+				shapeArray.PushBack(subShape);
+				meshNode->m_isVisible = false;
+			}
+			else if (strstr(name, "-vhacd"))
+			{
+				ndAssert(0);
+				//ndArray<ndInt32> indices;
+				//ndDemoMesh* const mesh = (ndDemoMesh*)*node->GetInfo()->GetMesh();
+				//ndAssert(mesh);
+				//mesh->GetVertexArray(points);
+				//mesh->GetIndexArray(indices);
+				//
+				//ndArray<ndTriplex> meshPoints;
+				//for (ndInt32 i = 0; i < points.GetCount(); ++i)
+				//{
+				//	ndTriplex p;
+				//	p.m_x = points[i].m_x;
+				//	p.m_y = points[i].m_y;
+				//	p.m_z = points[i].m_z;
+				//	meshPoints.PushBack(p);
+				//}
+				//nd_::VHACD::IVHACD* const interfaceVHACD = nd_::VHACD::CreateVHACD();
+				//
+				//nd_::VHACD::IVHACD::Parameters paramsVHACD;
+				////paramsVHACD.m_concavityToVolumeWeigh = 1.0;
+				//paramsVHACD.m_concavityToVolumeWeigh = 0.5f;
+				//interfaceVHACD->Compute(&meshPoints[0].m_x, uint32_t(points.GetCount()),
+				//	(uint32_t*)&indices[0], uint32_t(indices.GetCount()) / 3, paramsVHACD);
+				//
+				//ndInt32 hullCount = ndInt32(interfaceVHACD->GetNConvexHulls());
+				//ndArray<ndVector> convexMeshPoints;
+				//for (ndInt32 i = 0; i < hullCount; ++i)
+				//{
+				//	nd_::VHACD::IVHACD::ConvexHull ch;
+				//	interfaceVHACD->GetConvexHull(uint32_t(i), ch);
+				//	convexMeshPoints.SetCount(ndInt32(ch.m_nPoints));
+				//	for (ndInt32 j = 0; j < ndInt32(ch.m_nPoints); ++j)
+				//	{
+				//		ndVector p(ndFloat32(ch.m_points[j * 3 + 0]), ndFloat32(ch.m_points[j * 3 + 1]), ndFloat32(ch.m_points[j * 3 + 2]), ndFloat32(0.0f));
+				//		convexMeshPoints[j] = p;
+				//	}
+				//	shapeArray.PushBack(new ndShapeInstance(new ndShapeConvexHull(ndInt32(convexMeshPoints.GetCount()), sizeof(ndVector), 0.01f, &convexMeshPoints[0].m_x)));
+				//	const ndMatrix matrix(node->GetInfo()->GetMeshMatrix() * node->GetInfo()->GetCurrentMatrix());
+				//	shapeArray[shapeArray.GetCount() - 1]->SetLocalMatrix(matrix);
+				//}
+				//
+				//interfaceVHACD->Clean();
+				//interfaceVHACD->Release();
+			}
 		}
 	}
 

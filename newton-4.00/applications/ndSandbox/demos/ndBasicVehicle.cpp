@@ -174,10 +174,74 @@ namespace ndMotorVehicle
 		{
 		}
 
-		virtual void Update(ndDemoEntityManager* const, ndFloat32) override
+		virtual void Update(ndDemoEntityManager* const manager, ndFloat32) override
 		{
+			if (manager->CameraChanged())
+			{
+				ndFixSizeArray<ndMultiBodyVehicle*, 256> vehicleArray;
+				const ndModelList& models = manager->GetWorld()->GetModelList();
+
+				// get the vehicle array
+				for (ndModelList::ndNode* node = models.GetFirst(); node; node = node->GetNext())
+				{
+					ndMultiBodyVehicle* const vehicle = node->GetInfo()->GetAsMultiBodyVehicle();
+					if (vehicle)
+					{
+						vehicleArray.PushBack(vehicle);
+					}
+				}
+				// check if the camera is attach to a vehicle
+
+				const ndRenderSceneCamera* const currentCamera = manager->GetRenderer()->GetCamera()->FindCameraNode();
+				for (ndInt32 i = 0; i < vehicleArray.GetCount(); ++i)
+				{
+					ndMultiBodyVehicle* const vehicle = vehicleArray[i];
+					ndVehicleCommonNotify* const modelNotifyCallback = (ndVehicleCommonNotify*)*vehicle->GetNotifyCallback();
+
+					ndSharedPtr<ndBodyNotify>& notify = vehicle->GetRoot()->m_body->GetNotifyCallback();
+					ndAssert(strcmp(notify->ClassName(), ndDemoEntityNotify::StaticClassName()) == 0);
+					const ndDemoEntityNotify* const vehicleNotify = (ndDemoEntityNotify*)*notify;
+					const ndRenderSceneNode* const visual = *vehicleNotify->m_entity;
+					const ndRenderSceneCamera* const cameraNode = visual->FindCameraNode();
+					if (cameraNode)
+					{
+						if (cameraNode == currentCamera)
+						{
+							modelNotifyCallback->SetPlaterState(true);
+						}
+						else
+						{
+							modelNotifyCallback->SetPlaterState(false);
+						}
+					}
+					else
+					{
+						modelNotifyCallback->SetPlaterState(false);
+					}
+				}
+
+				// iterate of the scene and 
+			}
 		}
 	};
+
+	//void AddMaterial(ndDemoEntityManager* const scene)
+	void AddMaterial(ndDemoEntityManager* const)
+	{
+		//ndVehicleMaterial material;
+		//material.m_restitution = 0.1f;
+		//material.m_staticFriction0 = 0.8f;
+		//material.m_staticFriction1 = 0.8f;
+		//material.m_dynamicFriction0 = 0.8f;
+		//material.m_dynamicFriction1 = 0.8f;
+		//
+		//ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
+		//callback->RegisterMaterial(material, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_default);
+		//callback->RegisterMaterial(material, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_modelPart);
+		//callback->RegisterMaterial(material, ndDemoContactCallback::m_vehicleTirePart, ndDemoContactCallback::m_modelPart);
+		//callback->RegisterMaterial(material, ndDemoContactCallback::m_vehicleTirePart, ndDemoContactCallback::m_vehicleTirePart);
+		//callback->RegisterMaterial(material, ndDemoContactCallback::m_vehicleTirePart, ndDemoContactCallback::m_default);
+	}
 };
 
 using namespace ndMotorVehicle;
@@ -190,35 +254,23 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 
 	ndPhysicsWorld* const world = scene->GetWorld();
 	ndVector location(0.0f, 2.0f, 0.0f, 1.0f);
+
+	// add a vehicle material
+	AddMaterial(scene);
 	
 	ndMatrix matrix(ndGetIdentityMatrix());
 	ndVector floor(FindFloor(*world, location, 100.0f));
 	matrix.m_posit = floor;
 	matrix.m_posit.m_y += 0.5f;
 	
-	//ndVehicleMaterial material;
-	//material.m_restitution = 0.1f;
-	//material.m_staticFriction0 = 0.8f;
-	//material.m_staticFriction1 = 0.8f;
-	//material.m_dynamicFriction0 = 0.8f;
-	//material.m_dynamicFriction1 = 0.8f;
-	//
-	//ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
-	//callback->RegisterMaterial(material, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_default);
-	//callback->RegisterMaterial(material, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_modelPart);
-	//callback->RegisterMaterial(material, ndDemoContactCallback::m_vehicleTirePart, ndDemoContactCallback::m_modelPart);
-	//callback->RegisterMaterial(material, ndDemoContactCallback::m_vehicleTirePart, ndDemoContactCallback::m_vehicleTirePart);
-	//callback->RegisterMaterial(material, ndDemoContactCallback::m_vehicleTirePart, ndDemoContactCallback::m_default);
-	
-	//ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f))));
-	//ndSharedPtr<ndModel> vehicle1(CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 3.0f, 0.0f))));
-	ndSharedPtr<ndModel> vehicle2(CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 6.0f, 0.0f))));
+	ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f))));
+	ndSharedPtr<ndModel> vehicle1(CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f))));
+	ndSharedPtr<ndModel> vehicle2(CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f))));
+	ndSharedPtr<ndModel> vehicle3(CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 5.0f, 0.0f))));
+	ndSharedPtr<ndModel> vehicle4(CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 10.0f, 0.0f))));
 
-	//ndSharedPtr<ndModel> vehicle(vehicle0);
-	//ndVehicleCommonNotify* const notifyCallback = (ndVehicleCommonNotify*)*vehicle->GetNotifyCallback();
-	//notifyCallback->SetAsPlayer(scene);
-	//matrix.m_posit.m_x += 5.0f;
-	////TestPlayerCapsuleInteraction(scene, matrix);
+	ndVehicleCommonNotify* const notifyCallback = (ndVehicleCommonNotify*)*vehicle4->GetNotifyCallback();
+	notifyCallback->SetPlaterState(true);
 	
 	matrix.m_posit.m_x += 40.0f;
 	matrix.m_posit.m_z += 5.0f;

@@ -1381,6 +1381,11 @@ void ndDemoEntityManager::ChangeActiveCamera()
 	}
 }
 
+bool ndDemoEntityManager::CameraChanged() const
+{
+	return m_changeCamera;
+}
+
 void ndDemoEntityManager::SetNextActiveCamera()
 {
 	bool changeCamera = GetKeyState(ImGuiKey_C) ? true : false;

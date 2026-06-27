@@ -111,6 +111,7 @@ class ndMeshEffect: public ndPolyhedra
 	dInt32 CalculateMaxAttributes () const;
 #endif
 
+	public:
 	enum ndChannelType
 	{
 		m_vertex,
@@ -140,7 +141,6 @@ class ndMeshEffect: public ndPolyhedra
 		bool m_isValid;
 	};
 
-	public:
 	class ndUV
 	{
 		public:
@@ -405,7 +405,9 @@ class ndMeshEffect: public ndPolyhedra
 
 	D_COLLISION_API ndInt32 GetVertexCount() const;
 	D_COLLISION_API ndInt32 GetVertexStrideInByte() const;
+
 	D_COLLISION_API const ndFloat64* GetVertexPool() const;
+	D_COLLISION_API const ndAttibuteFormat& GetVertexAtributes() const;
 
 	D_COLLISION_API ndInt32 GetFaceMaterial(ndEdge* const faceEdge) const;
 	D_COLLISION_API ndInt32 GenerateVertexFormat(ndMeshVertexFormat& format, ndArray<ndUnsigned8>& buffer) const;

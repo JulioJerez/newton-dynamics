@@ -39,6 +39,9 @@ class ndVehicleCommonNotify : public ndModelNotify
 	void PostTransformUpdate(ndFloat32 timestep) override;
 	void Debug(ndConstraintDebugCallback&) const override;
 
+	bool GetPlaterState() const;
+	void SetPlaterState(bool state);
+
 	ndInt32 m_currentGear;
 	ndInt32 m_autoGearShiftTimer;
 	ndDemoEntityManager::ndKeyTrigger m_parking;
