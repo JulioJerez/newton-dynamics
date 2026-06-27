@@ -178,8 +178,6 @@ class ndBodyKinematic : public ndBody
 	D_COLLISION_API virtual void Serialize(ndMesh* const node) const override;
 	D_COLLISION_API virtual void Deserialize(const ndMeshBody* const meshBody) override;
 
-	D_COLLISION_API void ForceEquilibrium();
-
 	protected:
 	D_COLLISION_API virtual void AttachContact(ndContact* const contact) override;
 	D_COLLISION_API virtual void DetachContact(ndContact* const contact) override;

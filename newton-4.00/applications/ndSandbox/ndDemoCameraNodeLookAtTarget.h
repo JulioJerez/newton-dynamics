@@ -21,6 +21,8 @@ class ndDemoCameraNodeLookAtTarget: public ndDemoCameraNodeFlyby
 	ndDemoCameraNodeLookAtTarget(ndRender* const owner);
 	virtual void TickUpdate(ndFloat32 timestep) override;
 
+	void SetTarget(ndSharedPtr<ndRenderSceneNode>& target);
+
 	ndSharedPtr<ndRenderSceneNode> m_target;
 };
 

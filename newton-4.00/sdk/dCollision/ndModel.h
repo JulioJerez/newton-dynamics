@@ -25,7 +25,6 @@
 #include "ndCoreStdafx.h"
 #include "ndModelList.h"
 
-class ndModelBase;
 class ndModelNotify;
 class ndMultiBodyVehicle;
 class ndModelArticulation;

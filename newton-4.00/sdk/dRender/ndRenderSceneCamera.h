@@ -22,6 +22,8 @@ class ndRenderSceneCamera : public ndRenderSceneNode
 	virtual ndRenderSceneCamera* GetAsCamera() override;
 	virtual const ndRenderSceneCamera* GetAsCamera() const override;
 
+	virtual bool IsActive() const;
+	virtual void SetActiveState(bool state);
 	virtual void SetMatrix(const ndQuaternion& rotation, const ndVector& position) override;
 
 	void SetViewMatrix(ndInt32 width, ndInt32 height);
@@ -46,6 +48,7 @@ class ndRenderSceneCamera : public ndRenderSceneNode
 	ndFloat32 m_pitch;
 	ndFloat32 m_zoom;
 	ndInt32 m_viewport[4];
+	bool m_isActive;
 	bool m_perspectiveMode;
 	static ndMatrix m_worldToOpenGl;
 

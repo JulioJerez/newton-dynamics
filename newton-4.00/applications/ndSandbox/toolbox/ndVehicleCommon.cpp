@@ -110,6 +110,12 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			brake = ndFloat32(1.0f);
 			handBrake = ndFloat32(1.0f);
 			desiredRpm = ndFloat32(0.0f);
+			torqueFromCurve = ndFloat32(0.0f);
+
+			m_driverState = m_parked;
+			ndMultiBodyVehicleGearBox* const gearJoint = vehicle->GetGearBox();
+			gearJoint->SetRatio(ndFloat32(0.0f));
+			m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear;
 		}
 
 		ndMultiBodyVehicleGearBox* const gearJoint = vehicle->GetGearBox();
@@ -118,15 +124,10 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 		if ((handBrake > ndFloat32(0.1f)) || (brake > ndFloat32(0.1f)))
 		{
 			// apply clucth or torque converted here
-			// for now just inore the torque
+			// for now just ignore the torque
 			gearJoint->SetClutchTorque(gearBox.m_torqueConverter);
 		}
 		motor->SetTorqueAndRpm(torqueFromCurve, desiredRpm);
-
-		//bool sleepState = !m_isPlayer;
-		//vehicle->GetChassis()->GetSleepState();
-		//vehicle->GetChassis()->SetSleepState(sleepState);
-		//motor->GetBody0()->SetSleepState(sleepState);
 
 		for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = vehicle->GetTireList().GetFirst(); node; node = node->GetNext())
 		{
@@ -134,7 +135,20 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			tire->SetBrake(brake);
 			tire->SetSteering(steerAngle);
 			tire->SetHandBrake(handBrake);
-			//tire->GetBody0()->SetSleepState(sleepState);
+		}
+
+		bool aweakeVehicle = false;
+		for (ndInt32 i = 0; i < axis.GetCount(); i ++)
+		{
+			aweakeVehicle = aweakeVehicle || (ndAbs(axis[i]) > ndFloat32(0.01f));
+		}
+		for (ndInt32 i = 0; i < buttons.GetCount(); i++)
+		{
+			aweakeVehicle = aweakeVehicle || buttons[i];
+		}
+		if (aweakeVehicle)
+		{
+			vehicle->GetRoot()->m_body->GetAsBodyDynamic()->SetSleepState(false);
 		}
 	};
 	ApplyControls();

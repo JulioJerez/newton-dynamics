@@ -201,7 +201,10 @@ class ndDemoEntityManager : public ndClassAlloc
 
 	void ChangeActiveCamera();
 	void SetNextActiveCamera();
+
 	bool CameraChanged() const;
+	ndSharedPtr<ndRenderSceneNode>& GetLookAtCamera();
+	ndSharedPtr<ndRenderSceneNode>& GetDefualtCamera();
 
 	void RegisterPostUpdate(const ndSharedPtr<OnPostUpdate>& postUpdate);
 

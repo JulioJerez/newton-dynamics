@@ -164,10 +164,11 @@ void ndPhysicsWorld::OnAddBody(ndBody* const body) const
 	ndWorld::OnAddBody(body);
 	ndTrace(("adding a body %d to world\n", body->GetId()));
 
-	ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*body->GetNotifyCallback();
-	if (notify)
+	ndBodyNotify* const notify = *body->GetNotifyCallback();
+	if (notify->IsType(ndDemoEntityNotify::StaticClassName()))
 	{
-		notify->OnBodyAddedToWorld();
+		ndDemoEntityNotify* const entNotify = (ndDemoEntityNotify*)notify;
+		entNotify->OnBodyAddedToWorld();
 	}
 }
 
@@ -175,10 +176,11 @@ void ndPhysicsWorld::OnRemoveBody(ndBody* const body) const
 {
 	ndWorld::OnRemoveBody(body);
 	ndTrace(("removing a body %d from world\n", body->GetId()));
-	ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*body->GetNotifyCallback();
-	if (notify)
+	ndBodyNotify* const notify = *body->GetNotifyCallback();
+	if (notify->IsType(ndDemoEntityNotify::StaticClassName()))
 	{
-		notify->OnBodyRemovedFromWorld();
+		ndDemoEntityNotify* const entNotify = (ndDemoEntityNotify*)notify;
+		entNotify->OnBodyRemovedFromWorld();
 	}
 }
 
@@ -237,7 +239,7 @@ void ndPhysicsWorld::PreUpdate(ndFloat32 timestep)
 	for (ndInt32 i = ndInt32(view.GetCount()) - 2; i >= 0; --i)
 	{
 		ndBodyKinematic* const body = view[i];
-		ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*body->GetNotifyCallback();
+		ndBodyNotify* const notify = *body->GetNotifyCallback();
 		if (notify)
 		{
 			notify->OnPreUpdate(timestep);
@@ -246,6 +248,12 @@ void ndPhysicsWorld::PreUpdate(ndFloat32 timestep)
 
 	ndRenderPassDebug* const debugRenderPass = m_manager->GetDebugRenderPass();
 	debugRenderPass->ClearRuntimeLines();
+}
+
+void ndPhysicsWorld::SetCamera(ndSharedPtr<ndRenderSceneNode>& camera)
+{
+	ndScopeSpinLock Lock(m_lock);
+	m_manager->GetRenderer()->SetCamera(camera);
 }
 
 void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
@@ -270,11 +278,12 @@ void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
 		ndBodyKinematic* const body = view[i];
 		if (!body->GetSleepState())
 		{
-			ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*body->GetNotifyCallback();
-			if (notify)
+			ndBodyNotify* const notify = *body->GetNotifyCallback();
+			if (notify->IsType(ndDemoEntityNotify::StaticClassName()))
 			{
-				notify->OnPostUpdate(timestep);
-				notify->m_entity->SetTransform(notify->m_transform.m_rotation, notify->m_transform.m_position);
+				ndDemoEntityNotify* const entityNotify = (ndDemoEntityNotify*)notify;
+				entityNotify->OnPostUpdate(timestep);
+				entityNotify->m_entity->SetTransform(entityNotify->m_transform.m_rotation, entityNotify->m_transform.m_position);
 			}
 		}
 	}
@@ -282,6 +291,7 @@ void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
 	ndDemoCameraNode* const camera = (ndDemoCameraNode*)*m_manager->m_renderer->GetCamera();
 	ndAssert(camera);
 	camera->TickUpdate(timestep);
+	ndAssert(camera);
 
 	// remove all pending objects
 	m_deadModels.RemovePendingItems();
@@ -325,11 +335,15 @@ void ndPhysicsWorld::DefferedRemoveBody(ndSharedPtr<ndBody> body)
 					if (m_deadBodies.Insert(0, bodyNode))
 					{
 						ndBodyKinematic* const pivotBody = bodyNode->GetAsBodyKinematic();
-						ndDemoEntityNotify* const notify = (ndDemoEntityNotify*)*body->GetNotifyCallback();
-						ndSharedPtr<ndRenderSceneNode> visualEntity(notify->GetUserData());
-						if (*visualEntity)
+						ndBodyNotify* const notify = *body->GetNotifyCallback();
+						if (notify->IsType(ndDemoEntityNotify::StaticClassName()))
 						{
-							DefferedRemoveSceneNode(visualEntity);
+							ndDemoEntityNotify* const entNotify = (ndDemoEntityNotify*)notify;
+							ndSharedPtr<ndRenderSceneNode> visualEntity(entNotify->GetUserData());
+							if (*visualEntity)
+							{
+								DefferedRemoveSceneNode(visualEntity);
+							}
 						}
 
 						const ndBodyKinematic::ndJointList& joints = pivotBody->GetJointList();

@@ -35,6 +35,7 @@ ndRenderSceneCamera::ndRenderSceneCamera(ndRender* const owner)
 	,m_yaw(ndFloat32(0.0f))
 	,m_pitch(ndFloat32(0.0f))
 	,m_zoom(ndFloat32(1.0f))
+	,m_isActive(true)
 	,m_perspectiveMode(true)
 {
 	m_owner = owner;
@@ -162,6 +163,16 @@ void ndRenderSceneCamera::SetViewMatrix(ndInt32 width, ndInt32 height)
 void ndRenderSceneCamera::SetMatrix(const ndQuaternion& rotation, const ndVector& position)
 {
 	ndRenderSceneNode::SetMatrix(rotation, position);
+}
+
+bool ndRenderSceneCamera::IsActive() const
+{
+	return m_isActive;
+}
+
+void ndRenderSceneCamera::SetActiveState(bool state)
+{
+	m_isActive = state;
 }
 
 ndVector ndRenderSceneCamera::ScreenToWorld(const ndVector& screenPoint) const
