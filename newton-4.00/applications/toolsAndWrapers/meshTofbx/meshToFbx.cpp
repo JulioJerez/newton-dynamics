@@ -120,7 +120,6 @@ public:
 		return m_x * A.m_x + m_y * A.m_y + m_z * A.m_z + m_w * A.m_w;
 	}
 
-
 	inline exportVector Normalize() const
 	{
 		const exportVector& me = *this;
@@ -467,8 +466,9 @@ bool CreateScene(ndMesh* const model, FbxManager* const sdkManager, FbxScene* co
 	fbxScene->SetSceneInfo(sceneInfo);
 
 	FbxGlobalSettings& globalSettings = fbxScene->GetGlobalSettings();
-	globalSettings.SetSystemUnit(100.0f);
-	globalSettings.SetOriginalSystemUnit(100.0f);
+	FbxSystemUnit systemUnits (globalSettings.GetSystemUnit());
+	globalSettings.SetSystemUnit(100.0f * systemUnits.GetScaleFactor());
+	globalSettings.SetOriginalSystemUnit(100.0f * systemUnits.GetScaleFactor());
 
 	FbxNode* const fbxSceneRootNode = fbxScene->GetRootNode();
 	FbxNode* const fbxModelRootNode = CreateSkeleton(model, fbxScene);

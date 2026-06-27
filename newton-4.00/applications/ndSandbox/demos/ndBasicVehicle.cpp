@@ -264,11 +264,12 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	matrix.m_posit.m_y += 0.5f;
 	
 	ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f))));
-	//ndSharedPtr<ndModel> vehicle1(CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f))));
+	ndSharedPtr<ndModel> vehicle1(CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f))));
 	ndSharedPtr<ndModel> vehicle2(CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f))));
 	ndSharedPtr<ndModel> vehicle3(CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 5.0f, 0.0f))));
+	ndSharedPtr<ndModel> vehicle4(CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 10.0f, 0.0f))));
 
-	ndVehicleCommonNotify* const notifyCallback = (ndVehicleCommonNotify*)*vehicle2->GetNotifyCallback();
+	ndVehicleCommonNotify* const notifyCallback = (ndVehicleCommonNotify*)*vehicle4->GetNotifyCallback();
 	notifyCallback->SetPlaterState(true);
 	
 	matrix.m_posit.m_x += 40.0f;

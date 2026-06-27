@@ -72,6 +72,7 @@ class ndString: public ndClassAlloc
 
 	D_CORE_API ndString GetPath() const;
 	D_CORE_API ndString GetName() const;
+	D_CORE_API ndString GetExtension() const;
 	D_CORE_API void LoadFile(FILE* const file);
 
 	ndString SubString(ndInt32 start = 0, ndInt32 size = 0x7fffffff) const;
