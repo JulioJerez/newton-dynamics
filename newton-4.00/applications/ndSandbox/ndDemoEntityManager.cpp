@@ -1574,4 +1574,3 @@ void ndDemoEntityManager::Run()
 		}
 	}
 }
-

@@ -172,6 +172,18 @@ namespace ndMotorVehicle
 		{
 		}
 
+		void DrawCircle(ndReal x, ndReal y, ndReal radius)
+		{
+			ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
+
+			// Calculate a dynamic center point offset from your canvas space
+			ImVec2 dynamic_center = ImVec2(canvas_pos.x + x, canvas_pos.y + y);
+
+			// Safely draw your shape relative to the layout window
+			ndInt32 color = 64;
+			ImGui::GetWindowDrawList()->AddCircleFilled(dynamic_center, radius, IM_COL32(color, color, color, 255), 0);
+		}
+
 		virtual void Update(ndDemoEntityManager* const) override
 		{
 			if (m_vehicle)
@@ -180,8 +192,10 @@ namespace ndMotorVehicle
 				const ndMultiBodyVehicle* const vehicle = m_vehicle->GetAsMultiBodyVehicle();
 				const ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
 
+				// draw engine rpm
 				ndFloat32 rpm = motor->GetRpm();
-				ImGui::Text("rmp %f", rpm);
+				ImGui::Text("  rmp %04d", ndInt32 (rpm));
+				DrawCircle(60.0f, 50.0f, 50.0f);
 			}
 		}
 
