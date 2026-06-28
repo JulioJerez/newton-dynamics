@@ -739,7 +739,7 @@ dgInt32 dgCollisionConvexPolygon::CalculateContactToConvexHullDescrete(const dgW
 		dgVector boxP0;
 		dgVector boxP1;
 		hull->CalcAABB (hullMatrix, boxP0, boxP1);
-		dgVector origin (dgVector::m_half * (boxP1 + boxP1));
+		dgVector origin (dgVector::m_half * (boxP0 + boxP1));
 
 		if (!BeamClipping(origin, convexSphapeUmbra, parentMesh)) {
 			return 0;
