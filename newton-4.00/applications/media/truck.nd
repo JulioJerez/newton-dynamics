@@ -345,7 +345,7 @@
                     <angles float3="0 -0 0" />
                 </localFrame1>
                 <ratios count="6" floatArray="-3 0 3 1.5 1.1 0.8" />
-                <crownGearRatio float="-20" />
+                <crownGearRatio float="-15" />
                 <idleClutchTorque float="200" />
                 <lockedClutchTorque float="1e+06" />
                 <torqueConverter float="2000" />

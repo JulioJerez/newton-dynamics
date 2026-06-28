@@ -64,6 +64,8 @@ class ndMultiBodyVehicleMotor: public ndJointBilateralConstraint
 
 	D_NEWTON_API ndFloat32 GetRpm() const;
 	D_NEWTON_API ndFloat32 GetMaxRpm() const;
+	D_NEWTON_API ndFloat32 GetTopSpeed() const;
+	D_NEWTON_API void SetTopSpeed(ndFloat32 topSpeed);
 
 	D_NEWTON_API const ndEngineTorqueCurve& GetCurve() const;
 	D_NEWTON_API void SetCurve(const ndEngineTorqueCurve& curve);
@@ -82,6 +84,7 @@ class ndMultiBodyVehicleMotor: public ndJointBilateralConstraint
 	ndWeakPtr<ndMultiBodyVehicle> m_vehicle;
 	ndEngineTorqueCurve m_engineCurve;
 	ndFloat32 m_omega;
+	ndFloat32 m_topSpeed;
 	ndFloat32 m_targetOmega;
 	ndFloat32 m_engineTorque;
 

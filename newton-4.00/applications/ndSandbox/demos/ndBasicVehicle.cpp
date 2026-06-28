@@ -221,17 +221,15 @@ namespace ndMotorVehicle
 				const ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
 
 				// draw engine rpm
-				ndReal rpm = motor->GetRpm();
+				ndReal rpm = ndReal(motor->GetRpm());
 				ImGui::Text("  rmp %04d", ndInt32 (rpm));
 				DrawDial(60.0f, 50.0f, 50.0f, rpm, ndReal(motor->GetMaxRpm()));
 
 				ImGui::SameLine();
 				ndReal speed = ndReal(vehicle->GetSpeed() * 3.6f);
 				ImGui::Text("  kmh %03d", ndInt32(speed));
-				DrawDial(160.0f, 50.0f, 50.0f, speed, ndReal(120.0f));
+				DrawDial(160.0f, 50.0f, 50.0f, speed, ndReal(motor->GetTopSpeed() * 3.6f));
 
-				//const ndMultiBodyVehicleGearBox* const gearJoint = vehicle->GetGearBox();
-				//ndMultiBodyVehicleGearBox::ndGearBox& gearBox = GetGearBox();
 				const ndSharedPtr<ndModelNotify>& notify = vehicle->GetNotifyCallback();
 				const ndVehicleCommonNotify* const controller = (ndVehicleCommonNotify*)*notify;
 

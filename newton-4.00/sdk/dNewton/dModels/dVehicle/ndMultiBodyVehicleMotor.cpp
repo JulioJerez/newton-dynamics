@@ -157,6 +157,7 @@ ndMultiBodyVehicleMotor::ndMultiBodyVehicleMotor()
 	,m_vehicle(nullptr)
 	,m_engineCurve()
 	,m_omega(ndFloat32(0.0f))
+	,m_topSpeed(ndFloat32(40.0f))
 	,m_targetOmega(ndFloat32(0.0f))
 	,m_engineTorque(ndFloat32(0.0f))
 {
@@ -167,6 +168,7 @@ ndMultiBodyVehicleMotor::ndMultiBodyVehicleMotor(ndBodyKinematic* const motor, n
 	:ndJointBilateralConstraint(3, motor, *vehicelModel->m_chassis, motor->GetMatrix())
 	,m_vehicle(vehicelModel)
 	,m_omega(ndFloat32(0.0f))
+	,m_topSpeed(ndFloat32(40.0f))
 	,m_targetOmega(ndFloat32(0.0f))
 	,m_engineTorque(ndFloat32(0.0f))
 {
@@ -176,6 +178,7 @@ ndMultiBodyVehicleMotor::ndMultiBodyVehicleMotor(ndBodyKinematic* const motor, n
 	:ndJointBilateralConstraint(3, motor, chassis, motor->GetMatrix())
 	,m_vehicle(nullptr)
 	,m_omega(ndFloat32(0.0f))
+	,m_topSpeed(ndFloat32(40.0f))
 	,m_targetOmega(ndFloat32(0.0f))
 	,m_engineTorque(ndFloat32(0.0f))
 {
@@ -218,8 +221,17 @@ void ndMultiBodyVehicleMotor::AlignMatrix()
 
 ndFloat32 ndMultiBodyVehicleMotor::GetMaxRpm() const
 {
-	//return m_engineCurve.m_omega[m_engineCurve.m_omega.GetCount() - 1] * ndRadPerSecToRpm;
 	return m_engineCurve.m_rpms[m_engineCurve.m_rpms.GetCount() - 1];
+}
+
+ndFloat32 ndMultiBodyVehicleMotor::GetTopSpeed() const
+{
+	return m_topSpeed;
+}
+
+void ndMultiBodyVehicleMotor::SetTopSpeed(ndFloat32 topSpeed)
+{
+	m_topSpeed = ndMax (ndAbs(topSpeed), ndFloat32(10.0f));
 }
 
 const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& ndMultiBodyVehicleMotor::GetCurve() const
