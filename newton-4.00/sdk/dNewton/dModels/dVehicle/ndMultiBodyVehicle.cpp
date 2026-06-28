@@ -1517,8 +1517,6 @@ void ndMultiBodyVehicle::Update(ndFloat32 timestep)
 		for (ndList<ndMultiBodyVehicleDifferential*>::ndNode* node = m_differentialList.GetFirst(); node; node = node->GetNext())
 		{
 			ndBodyDynamic* const selfBody = node->GetInfo()->GetBody0()->GetAsBodyDynamic();
-			//selfBody->SetForce(ndVector::m_zero);
-			//selfBody->ForceEquilibrium();
 			ndSharedPtr<ndBodyNotify> notify(new ndComponentNotify());
 			selfBody->SetNotifyCallback(notify);
 		}

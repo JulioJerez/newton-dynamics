@@ -78,6 +78,12 @@ ndSharedPtr<ndModelNotify>& ndModel::GetNotifyCallback()
 	return m_notifyCallback;
 }
 
+const ndSharedPtr<ndModelNotify>& ndModel::GetNotifyCallback() const
+{
+	return m_notifyCallback;
+}
+
+
 void ndModel::SetNotifyCallback(const ndSharedPtr<ndModelNotify>& notifyCallback)
 {
 	if (*m_notifyCallback)

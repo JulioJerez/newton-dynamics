@@ -163,11 +163,138 @@ namespace ndMotorVehicle
 		return vehicleModel;
 	}
 
+	class ndDashboard : public ndDemoEntityManager::ndDemoUIpanel
+	{
+		public:
+		ndDashboard()
+			:ndDemoUIpanel()
+			,m_vehicle(nullptr)
+		{
+		}
+
+		void DrawDial(ndReal originX, ndReal originY, ndReal radius, ndReal value, ndReal range)
+		{
+			ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
+
+			// Calculate a dynamic center point offset from your canvas space
+			ImVec2 dynamic_center = ImVec2(canvas_pos.x + originX, canvas_pos.y + originY);
+
+			// Safely draw your shape relative to the layout window
+			ndInt32 color = 64;
+			ImDrawList* const drawList = ImGui::GetWindowDrawList();
+			drawList->AddCircleFilled(dynamic_center, radius, IM_COL32(color, color, color, 255), 0);
+
+			ImVec2 needle[] =
+			{
+				{0.0f, 0.1f}, 
+				{-0.1f, 0.0f}, 
+				{0.0f, -0.1f}, 
+				{1.0f, 0.0f},
+				{0.0f, 0.1f},
+			};
+
+			ndFloat32 scale = radius * 0.9f;
+			const ndInt32 size = sizeof(needle) / sizeof(needle[0]);
+
+			ndFloat32 angleRange = 300.0f;
+			ndFloat32 initialAngle = -240.0f;
+			ndFloat32 angle = ndDegreeToRad * (initialAngle + value * angleRange / range);
+			ndReal sinAngle = ndReal(ndSin(angle));
+			ndReal cosAngle = ndReal(ndCos(angle));
+
+			for (ndInt32 i = 0; i < size; ++i)
+			{
+				ndReal x = needle[i][0] * cosAngle - needle[i][1] * sinAngle;
+				ndReal y = needle[i][0] * sinAngle + needle[i][1] * cosAngle;
+				needle[i][0] = x * scale + dynamic_center.x;
+				needle[i][1] = y * scale + dynamic_center.y;
+			}
+			drawList->AddConvexPolyFilled(needle, size, IM_COL32(255, 255, 0, 255));
+		}
+
+		virtual void Update(ndDemoEntityManager* const) override
+		{
+			if (m_vehicle)
+			{
+				ndVector color(1.0f, 1.0f, 0.0f, 0.0f);
+				const ndMultiBodyVehicle* const vehicle = m_vehicle->GetAsMultiBodyVehicle();
+				const ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
+
+				// draw engine rpm
+				ndReal rpm = ndReal(motor->GetRpm());
+				ImGui::Text("  rmp %04d", ndInt32 (rpm));
+				DrawDial(60.0f, 50.0f, 50.0f, rpm, ndReal(motor->GetMaxRpm()));
+
+				ImGui::SameLine();
+				ndReal speed = ndReal(vehicle->GetSpeed() * 3.6f);
+				ImGui::Text("  kmh %03d", ndInt32(speed));
+				DrawDial(160.0f, 50.0f, 50.0f, speed, ndReal(motor->GetTopSpeed() * 3.6f));
+
+				const ndSharedPtr<ndModelNotify>& notify = vehicle->GetNotifyCallback();
+				const ndVehicleCommonNotify* const controller = (ndVehicleCommonNotify*)*notify;
+
+				ImGui::NewLine();
+				ImGui::NewLine();
+				ImGui::NewLine();
+				ImGui::NewLine();
+				ImGui::NewLine();
+
+				ImGui::Text("transmission: manual");
+				if (controller->m_driverState == ndVehicleCommonNotify::m_parked)
+				{
+					ImGui::Text("current gear: parked");
+				}
+				else
+				{
+					switch (controller->m_currentGear)
+					{
+						case ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear:
+						{
+							ImGui::Text("current gear: neutral");
+							break;
+						}
+
+						case ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear:
+						{
+							ImGui::Text("current gear: first");
+							break;
+						}
+
+						case ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear + 1:
+						{
+							ImGui::Text("current gear: secund");
+							break;
+						}
+
+						case ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear + 2:
+						{
+							ImGui::Text("current gear: third");
+							break;
+						}
+
+						case ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear + 3:
+						{
+							ImGui::Text("current gear: fourth");
+							break;
+						}
+
+						default:;
+							ndAssert(0);
+					}
+				}
+			}
+		}
+
+		ndWeakPtr<ndModel> m_vehicle;
+	};
+
 	class SceneNavigation : public ndDemoEntityManager::OnPostUpdate
 	{
 		public:
-		SceneNavigation()
+		SceneNavigation(ndSharedPtr<ndDemoEntityManager::ndDemoUIpanel>& dashboard)
 			:OnPostUpdate()
+			,m_dashboard(*dashboard)
+			,m_changePlayer()
 		{
 		}
 
@@ -203,8 +330,6 @@ namespace ndMotorVehicle
 						ndRenderSceneNode* const visualNode = *vehicleNotify->m_entity;
 						ndRenderSceneCamera* const cameraNode = visualNode->FindCameraNode();
 						cameraNode->SetActiveState(false);
-						//ndSharedPtr<ndRenderSceneNode> cameraPtr(cameraNode->GetSharedPtr());
-						//manager->GetWorld()->SetCamera(cameraPtr);
 					}
 				}
 			
@@ -235,9 +360,14 @@ namespace ndMotorVehicle
 				// set this vehicle as the target
 				ndDemoCameraNodeLookAtTarget* const lookAtCamera = (ndDemoCameraNodeLookAtTarget*)*manager->GetLookAtCamera();
 				lookAtCamera->SetTarget(vehicleNotify->m_entity);
+
+				// set the dashboard 
+				ndDashboard* const dashboard = (ndDashboard*)*m_dashboard;
+				dashboard->m_vehicle = vehicle;
 			}
 		}
 
+		ndWeakPtr<ndDemoEntityManager::ndDemoUIpanel> m_dashboard;
 		ndDemoEntityManager::ndKeyTrigger m_changePlayer;
 	};
 
@@ -279,18 +409,23 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	matrix.m_posit = floor;
 	matrix.m_posit.m_y += 0.5f;
 	
-	ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f))));
-	ndSharedPtr<ndModel> vehicle1(CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f))));
+	//ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f))));
+	//ndSharedPtr<ndModel> vehicle1(CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f))));
 	ndSharedPtr<ndModel> vehicle2(CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f))));
-	ndSharedPtr<ndModel> vehicle3(CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 5.0f, 0.0f))));
-	ndSharedPtr<ndModel> vehicle4(CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 10.0f, 0.0f))));
+	//ndSharedPtr<ndModel> vehicle3(CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 5.0f, 0.0f))));
+	//ndSharedPtr<ndModel> vehicle4(CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 10.0f, 0.0f))));
 	
 	matrix.m_posit.m_x += 40.0f;
 	matrix.m_posit.m_z += 5.0f;
 	AddPlanks(scene, matrix, 60.0f, 5);
 
+
+	// set a ui paner to see vehicle state
+	ndSharedPtr<ndDemoEntityManager::ndDemoUIpanel> dashboard(new ndDashboard());
+	scene->SetDemoUIpanel(dashboard);
+
 	// add a scene navigation post update
-	ndSharedPtr<ndDemoEntityManager::OnPostUpdate> driver(new SceneNavigation());
+	ndSharedPtr<ndDemoEntityManager::OnPostUpdate> driver(new SceneNavigation(dashboard));
 	scene->RegisterPostUpdate(driver);
 
 	ndQuaternion rot;

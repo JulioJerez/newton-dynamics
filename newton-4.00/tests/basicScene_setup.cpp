@@ -12,38 +12,36 @@
 #include <ndNewtonInc.h>
 #include <gtest/gtest.h>
 
-TEST(Extremes, OrbitalDistances)
+TEST(Collisions, BasicSceneSetUp)
 {
+	// instance a world
 	ndWorld world;
-	ndShapeInstance shapeinst(new ndShapeSphere(ndFloat32(0.5f)));
 
 	ndMatrix matrix(ndGetIdentityMatrix());
 
-	ndShapeInstance planetshape(new ndShapeSphere(ndFloat32(6357000)));
-
-	ndBodyKinematic* staticbody = new ndBodyKinematic();
-	staticbody->SetCollisionShape(planetshape);
+	// make a floor box
+	ndShapeInstance shapeinst(new ndShapeBox(ndFloat32(100.0f), ndFloat32(0.5f), ndFloat32(100.0f)));
+	ndBodyDynamic* staticbody = new ndBodyDynamic();
+	staticbody->SetCollisionShape(shapeinst);
 	staticbody->SetMatrix(matrix);
-	staticbody->SetMassMatrix(ndFloat32(5.9722e+24), planetshape);
 	ndSharedPtr<ndBody> staticPtr(staticbody);
 	world.AddBody(staticPtr);
 
-	matrix.m_posit.m_y = 6357000 + 1021140;
-
-	ndBodyDynamic* movingbody = new ndBodyDynamic();
+	// make a dynamics sphere
+	matrix.m_posit.m_y += 10.0f;
+	ndShapeInstance sphereinst(new ndShapeSphere(ndFloat32(0.5f)));
+	ndBodyDynamic* const movingbody = new ndBodyDynamic();
 	movingbody->SetNotifyCallback(new ndBodyNotify(ndBigVector(ndFloat32(0), ndFloat32(-9.81f), ndFloat32(0), ndFloat32(0))));
-	movingbody->SetCollisionShape(shapeinst);
+	movingbody->SetCollisionShape(sphereinst);
 	movingbody->SetMatrix(matrix);
-	movingbody->SetMassMatrix(ndFloat32(10), shapeinst);
-	movingbody->SetMaxLinearAndAngularIntegrationStep(ndPi, 2.0f);
+	movingbody->SetMassMatrix(ndFloat32(10), sphereinst);
 	ndSharedPtr<ndBody> movingPtr(movingbody);
 	world.AddBody(movingPtr);
 
-	for (int i = 0; i < 480; i++)
+	// iterate the world, unti the end
+	for (int i = 0; i < 480; i++) 
 	{
 		world.Update(1.0f / 60.0f);
 		world.Sync();
 	}
-
-	world.CleanUp();
 }
