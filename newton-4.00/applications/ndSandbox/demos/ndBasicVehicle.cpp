@@ -172,16 +172,44 @@ namespace ndMotorVehicle
 		{
 		}
 
-		void DrawCircle(ndReal x, ndReal y, ndReal radius)
+		void DrawDial(ndReal originX, ndReal originY, ndReal radius, ndReal value, ndReal range)
 		{
 			ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
 
 			// Calculate a dynamic center point offset from your canvas space
-			ImVec2 dynamic_center = ImVec2(canvas_pos.x + x, canvas_pos.y + y);
+			ImVec2 dynamic_center = ImVec2(canvas_pos.x + originX, canvas_pos.y + originY);
 
 			// Safely draw your shape relative to the layout window
 			ndInt32 color = 64;
-			ImGui::GetWindowDrawList()->AddCircleFilled(dynamic_center, radius, IM_COL32(color, color, color, 255), 0);
+			ImDrawList* const drawList = ImGui::GetWindowDrawList();
+			drawList->AddCircleFilled(dynamic_center, radius, IM_COL32(color, color, color, 255), 0);
+
+			ImVec2 needle[] =
+			{
+				{0.0f, 0.1f}, 
+				{-0.1f, 0.0f}, 
+				{0.0f, -0.1f}, 
+				{1.0f, 0.0f},
+				{0.0f, 0.1f},
+			};
+
+			ndFloat32 scale = radius * 0.9f;
+			const ndInt32 size = sizeof(needle) / sizeof(needle[0]);
+
+			ndFloat32 angleRange = 300.0f;
+			ndFloat32 initialAngle = -240.0f;
+			ndFloat32 angle = ndDegreeToRad * (initialAngle + value * angleRange / range);
+			ndReal sinAngle = ndReal(ndSin(angle));
+			ndReal cosAngle = ndReal(ndCos(angle));
+
+			for (ndInt32 i = 0; i < size; ++i)
+			{
+				ndReal x = needle[i][0] * cosAngle - needle[i][1] * sinAngle;
+				ndReal y = needle[i][0] * sinAngle + needle[i][1] * cosAngle;
+				needle[i][0] = x * scale + dynamic_center.x;
+				needle[i][1] = y * scale + dynamic_center.y;
+			}
+			drawList->AddConvexPolyFilled(needle, size, IM_COL32(255, 255, 0, 255));
 		}
 
 		virtual void Update(ndDemoEntityManager* const) override
@@ -193,9 +221,64 @@ namespace ndMotorVehicle
 				const ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
 
 				// draw engine rpm
-				ndFloat32 rpm = motor->GetRpm();
+				ndReal rpm = motor->GetRpm();
 				ImGui::Text("  rmp %04d", ndInt32 (rpm));
-				DrawCircle(60.0f, 50.0f, 50.0f);
+				DrawDial(60.0f, 50.0f, 50.0f, rpm, ndReal(motor->GetMaxRpm()));
+
+				//const ndMultiBodyVehicleGearBox* const gearJoint = vehicle->GetGearBox();
+				//ndMultiBodyVehicleGearBox::ndGearBox& gearBox = GetGearBox();
+				const ndSharedPtr<ndModelNotify>& notify = vehicle->GetNotifyCallback();
+				const ndVehicleCommonNotify* const controller = (ndVehicleCommonNotify*)*notify;
+
+				ImGui::NewLine();
+				ImGui::NewLine();
+				ImGui::NewLine();
+				ImGui::NewLine();
+				ImGui::NewLine();
+
+				ImGui::Text("transmission: manual");
+				if (controller->m_driverState == ndVehicleCommonNotify::m_parked)
+				{
+					ImGui::Text("current gear: parked");
+				}
+				else
+				{
+					switch (controller->m_currentGear)
+					{
+						case ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear:
+						{
+							ImGui::Text("current gear: neutral");
+							break;
+						}
+
+						case ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear:
+						{
+							ImGui::Text("current gear: first");
+							break;
+						}
+
+						case ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear + 1:
+						{
+							ImGui::Text("current gear: secund");
+							break;
+						}
+
+						case ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear + 2:
+						{
+							ImGui::Text("current gear: third");
+							break;
+						}
+
+						case ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear + 3:
+						{
+							ImGui::Text("current gear: fourth");
+							break;
+						}
+
+						default:;
+							ndAssert(0);
+					}
+				}
 			}
 		}
 

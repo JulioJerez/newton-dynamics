@@ -27,7 +27,6 @@ const char* ndGameControllerInputs::m_buttonNames[] =
 	{"changePlayer"}
 };
 
-
 ndGameControllerInputs::ndGameControllerInputs()
 	:m_keyBoardSteerAngle(0.0f)
 {
@@ -52,7 +51,6 @@ bool ndGameControllerInputs::GetKeyboardInputs(ndDemoEntityManager* const scene)
 	{
 		return false;
 	}
-	//m_buttons.SetCount(m_buttonCount);
 	m_buttons[ndGameControllerInputs::m_handBreakButton] = scene->GetKeyState(' ');
 	m_buttons[ndGameControllerInputs::m_upGearButton] = scene->GetKeyState('>') || scene->GetKeyState('.');
 	m_buttons[ndGameControllerInputs::m_downGearButton] = scene->GetKeyState('<') || scene->GetKeyState(',');
@@ -64,7 +62,6 @@ bool ndGameControllerInputs::GetKeyboardInputs(ndDemoEntityManager* const scene)
 	m_buttons[ndGameControllerInputs::m_changeCamera] = scene->GetKeyState('C');
 	m_buttons[ndGameControllerInputs::m_changePlayer] = scene->GetKeyState('K');
 	
-	//m_axis.SetCount(m_axisCount);
 	ndFloat32 steerAngle = ndFloat32(scene->GetKeyState('A')) - ndFloat32(scene->GetKeyState('D'));
 	m_keyBoardSteerAngle += (steerAngle - m_keyBoardSteerAngle) * 0.10f;
 	m_keyBoardSteerAngle = (m_keyBoardSteerAngle < (1.0e-4f)) ? (m_keyBoardSteerAngle > (-1.0e-4f) ? 0.0f : m_keyBoardSteerAngle) : m_keyBoardSteerAngle;

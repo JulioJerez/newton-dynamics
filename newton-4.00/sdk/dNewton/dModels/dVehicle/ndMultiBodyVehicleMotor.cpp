@@ -300,7 +300,7 @@ void ndMultiBodyVehicleMotor::JacobianDerivative(ndConstraintDescritor& desc)
 	chassisJacobian.m_angular = ndVector::m_zero;
 
 	const ndFloat32 accel = CalculateAcceleration(desc);
-	const ndFloat32 torque = ndMax(m_engineTorque, ndFloat32(m_engineCurve.m_frictionLoss));
+	const ndFloat32 torque = m_engineTorque;
 	SetMotorAcceleration(desc, accel);
 	SetHighFriction(desc, torque);
 	SetLowerFriction(desc, -m_engineCurve.m_frictionLoss);

@@ -48,6 +48,7 @@ class ndModel: public ndContainersFreeListAlloc<ndModel>
 	D_COLLISION_API virtual ndModelArticulation* GetAsModelArticulation();
 
 	D_COLLISION_API ndSharedPtr<ndModelNotify>& GetNotifyCallback();
+	D_COLLISION_API const ndSharedPtr<ndModelNotify>& GetNotifyCallback() const;
 	D_COLLISION_API void SetNotifyCallback(const ndSharedPtr<ndModelNotify>& notifyCallback);
 
 	D_COLLISION_API virtual void SetMulticoreHint(bool){};

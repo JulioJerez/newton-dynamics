@@ -191,7 +191,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				// set neutral gear
 				gearJoint->SetRatio(0.0f);
 				m_driverState = m_driveForward;
-				m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear;
+				//m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear;
 			}
 
 			if (m_forwardGearUp.Update(buttons[ndGameControllerInputs::m_downGearButton] ? true : false))
@@ -199,7 +199,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				// set neutral gear
 				gearJoint->SetRatio(0.0f);
 				m_driverState = m_driveForward;
-				m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear;
+				//m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear;
 			}
 
 			else if (m_reverseGear.Update(buttons[ndGameControllerInputs::m_reverseGearButton] ? true : false))
@@ -210,6 +210,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				gearJoint->SetRatio(gearGain);
 				m_driverState = m_driveReverse;
 			}
+			m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear;
 
 			break;
 		}
