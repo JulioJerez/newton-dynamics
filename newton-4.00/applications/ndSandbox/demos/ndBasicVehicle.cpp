@@ -163,11 +163,38 @@ namespace ndMotorVehicle
 		return vehicleModel;
 	}
 
+	class ndDashboard : public ndDemoEntityManager::ndDemoUIpanel
+	{
+		public:
+		ndDashboard()
+			:ndDemoUIpanel()
+			,m_vehicle(nullptr)
+		{
+		}
+
+		virtual void Update(ndDemoEntityManager* const) override
+		{
+			if (m_vehicle)
+			{
+				ndVector color(1.0f, 1.0f, 0.0f, 0.0f);
+				const ndMultiBodyVehicle* const vehicle = m_vehicle->GetAsMultiBodyVehicle();
+				const ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
+
+				ndFloat32 rpm = motor->GetRpm();
+				ImGui::Text("rmp %f", rpm);
+			}
+		}
+
+		ndWeakPtr<ndModel> m_vehicle;
+	};
+
 	class SceneNavigation : public ndDemoEntityManager::OnPostUpdate
 	{
 		public:
-		SceneNavigation()
+		SceneNavigation(ndSharedPtr<ndDemoEntityManager::ndDemoUIpanel>& dashboard)
 			:OnPostUpdate()
+			,m_dashboard(*dashboard)
+			,m_changePlayer()
 		{
 		}
 
@@ -203,8 +230,6 @@ namespace ndMotorVehicle
 						ndRenderSceneNode* const visualNode = *vehicleNotify->m_entity;
 						ndRenderSceneCamera* const cameraNode = visualNode->FindCameraNode();
 						cameraNode->SetActiveState(false);
-						//ndSharedPtr<ndRenderSceneNode> cameraPtr(cameraNode->GetSharedPtr());
-						//manager->GetWorld()->SetCamera(cameraPtr);
 					}
 				}
 			
@@ -235,9 +260,14 @@ namespace ndMotorVehicle
 				// set this vehicle as the target
 				ndDemoCameraNodeLookAtTarget* const lookAtCamera = (ndDemoCameraNodeLookAtTarget*)*manager->GetLookAtCamera();
 				lookAtCamera->SetTarget(vehicleNotify->m_entity);
+
+				// set the dashboard 
+				ndDashboard* const dashboard = (ndDashboard*)*m_dashboard;
+				dashboard->m_vehicle = vehicle;
 			}
 		}
 
+		ndWeakPtr<ndDemoEntityManager::ndDemoUIpanel> m_dashboard;
 		ndDemoEntityManager::ndKeyTrigger m_changePlayer;
 	};
 
@@ -279,18 +309,23 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	matrix.m_posit = floor;
 	matrix.m_posit.m_y += 0.5f;
 	
-	ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f))));
-	ndSharedPtr<ndModel> vehicle1(CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f))));
+	//ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f))));
+	//ndSharedPtr<ndModel> vehicle1(CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f))));
 	ndSharedPtr<ndModel> vehicle2(CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f))));
-	ndSharedPtr<ndModel> vehicle3(CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 5.0f, 0.0f))));
-	ndSharedPtr<ndModel> vehicle4(CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 10.0f, 0.0f))));
+	//ndSharedPtr<ndModel> vehicle3(CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 5.0f, 0.0f))));
+	//ndSharedPtr<ndModel> vehicle4(CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 10.0f, 0.0f))));
 	
 	matrix.m_posit.m_x += 40.0f;
 	matrix.m_posit.m_z += 5.0f;
 	AddPlanks(scene, matrix, 60.0f, 5);
 
+
+	// set a ui paner to see vehicle state
+	ndSharedPtr<ndDemoEntityManager::ndDemoUIpanel> dashboard(new ndDashboard());
+	scene->SetDemoUIpanel(dashboard);
+
 	// add a scene navigation post update
-	ndSharedPtr<ndDemoEntityManager::OnPostUpdate> driver(new SceneNavigation());
+	ndSharedPtr<ndDemoEntityManager::OnPostUpdate> driver(new SceneNavigation(dashboard));
 	scene->RegisterPostUpdate(driver);
 
 	ndQuaternion rot;
