@@ -593,7 +593,7 @@ ndInt32 ndShapeConvexPolygon::CalculateContactToConvexHullDescrete(ndContactSolv
 		ndVector boxP0;
 		ndVector boxP1;
 		hull->CalculateAabb(hullMatrix, boxP0, boxP1);
-		ndVector origin(ndVector::m_half * (boxP1 + boxP1));
+		ndVector origin(ndVector::m_half * (boxP0 + boxP1));
 
 		if (!BeamClipping(origin, convexSphapeUmbra))
 		{
