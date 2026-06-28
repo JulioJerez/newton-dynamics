@@ -1343,8 +1343,8 @@ void ndDemoEntityManager::ChangeActiveCamera()
 	for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* sceneNode = scene.GetFirst(); sceneNode; sceneNode = sceneNode->GetNext())
 	{
 		ndSharedPtr<ndRenderSceneNode>& node = sceneNode->GetInfo();
-		const ndRenderSceneCamera* cameraNode = node->FindCameraNode();
-		if (cameraNode)
+		const ndRenderSceneCamera* const cameraNode = node->FindCameraNode();
+		if (cameraNode && cameraNode->IsActive())
 		{
 			cameraPallete.PushBack(cameraNode);
 		}
@@ -1384,6 +1384,16 @@ void ndDemoEntityManager::ChangeActiveCamera()
 bool ndDemoEntityManager::CameraChanged() const
 {
 	return m_changeCamera;
+}
+
+ndSharedPtr<ndRenderSceneNode>& ndDemoEntityManager::GetLookAtCamera()
+{
+	return m_lookAtTargetCamera;
+}
+
+ndSharedPtr<ndRenderSceneNode>& ndDemoEntityManager::GetDefualtCamera()
+{
+	return m_flyByCamera;
 }
 
 void ndDemoEntityManager::SetNextActiveCamera()

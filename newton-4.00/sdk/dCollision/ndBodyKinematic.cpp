@@ -474,7 +474,6 @@ void ndBodyKinematic::SetAcceleration(const ndVector&, const ndVector&)
 	m_alpha = ndVector::m_zero;
 }
 
-
 void ndBodyKinematic::SetSleepState(bool state)
 {
 	m_equilibrium = ndUnsigned8 (state ? 1 : 0);

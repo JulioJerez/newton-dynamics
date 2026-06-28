@@ -39,8 +39,8 @@ class ndVehicleCommonNotify : public ndModelNotify
 	void PostTransformUpdate(ndFloat32 timestep) override;
 	void Debug(ndConstraintDebugCallback&) const override;
 
-	bool GetPlaterState() const;
-	void SetPlaterState(bool state);
+	bool GetPlayerState() const;
+	void SetAsPlayer(bool state);
 
 	ndInt32 m_currentGear;
 	ndInt32 m_autoGearShiftTimer;
@@ -54,7 +54,6 @@ class ndVehicleCommonNotify : public ndModelNotify
 
 	ndDriveState m_driverState;
 	bool m_isPlayer;
-	bool m_sleepingState;
 };
 
 #endif

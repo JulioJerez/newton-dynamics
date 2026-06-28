@@ -112,6 +112,8 @@ class ndMultiBodyVehicle : public ndModelArticulation
 		m_torsionBar = 1 << 1,
 	};
 
+	class ndComponentNotify;
+
 	D_CLASS_REFLECTION(ndMultiBodyVehicle, ndModelArticulation)
 
 	D_NEWTON_API ndMultiBodyVehicle(ndFloat32 gravityMagnitud = ndFloat32 (10.0f));

@@ -101,6 +101,8 @@ class ndPhysicsWorld: public ndWorld
 	void DefferedRemoveBody(ndSharedPtr<ndBody> body);
 	void DefferedRemoveSceneNode(ndSharedPtr<ndRenderSceneNode> entity);
 
+	void SetCamera(ndSharedPtr<ndRenderSceneNode>& camera);
+
 	private:
 	void UpdateTransforms() override;
 	void PreUpdate(ndFloat32 timestep) override;

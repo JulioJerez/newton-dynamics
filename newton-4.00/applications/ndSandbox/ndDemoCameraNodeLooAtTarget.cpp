@@ -21,22 +21,27 @@ ndDemoCameraNodeLookAtTarget::ndDemoCameraNodeLookAtTarget(ndRender* const owner
 {
 }
 
+void ndDemoCameraNodeLookAtTarget::SetTarget(ndSharedPtr<ndRenderSceneNode>& target)
+{
+	m_target = target;
+}
+
 void ndDemoCameraNodeLookAtTarget::TickUpdate(ndFloat32 timestep)
 {
-	if (!(*m_target))
-	{
-		ndList<ndSharedPtr<ndRenderSceneNode>>& scene = m_owner->GetScene();
-		for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* sceneNode = scene.GetFirst(); sceneNode; sceneNode = sceneNode->GetNext())
-		{
-			ndSharedPtr<ndRenderSceneNode>& node = sceneNode->GetInfo();
-			const ndRenderSceneCamera* const cameraNode = node->FindCameraNode();
-			if (cameraNode)
-			{
-				m_target = node;
-				break;
-			}
-		}
-	}
+	//if (!(*m_target))
+	//{
+	//	ndList<ndSharedPtr<ndRenderSceneNode>>& scene = m_owner->GetScene();
+	//	for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* sceneNode = scene.GetFirst(); sceneNode; sceneNode = sceneNode->GetNext())
+	//	{
+	//		ndSharedPtr<ndRenderSceneNode>& node = sceneNode->GetInfo();
+	//		const ndRenderSceneCamera* const cameraNode = node->FindCameraNode();
+	//		if (cameraNode)
+	//		{
+	//			m_target = node;
+	//			break;
+	//		}
+	//	}
+	//}
 
 	// calculate pitch and Yaw.
 	if (*m_target)

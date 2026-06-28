@@ -321,6 +321,10 @@ class ndTriplexReal
 	virtual const char* SuperClassName() const	\
 	{											\
 		return #Class;							\
+	}											\
+	virtual bool IsType(const char* const name) const		\
+	{														\
+		return (strcmp(#Class, name) == 0) ? true : false;	\
 	}
 
 #define D_CLASS_REFLECTION(Class,SuperClass)			\
@@ -335,6 +339,14 @@ class ndTriplexReal
 	virtual const char* SuperClassName() const override	\
 	{													\
 		return #SuperClass;								\
+	}													\
+	virtual bool IsType(const char* const name) const override	\
+	{																\
+		if (strcmp(#Class, name) == 0)								\
+		{															\
+			return true;											\
+		}															\
+		return SuperClass::IsType(name);							\
 	}
 
 #endif

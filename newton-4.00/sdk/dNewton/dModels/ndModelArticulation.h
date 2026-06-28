@@ -34,7 +34,7 @@ D_MSV_NEWTON_CLASS_ALIGN_32
 class ndModelArticulation: public ndModel
 {
 	public: 
-	D_CLASS_REFLECTION(ndModelArticulation, ndModelBase)
+	D_CLASS_REFLECTION(ndModelArticulation, ndModel)
 
 	class ndNode : public ndNodeHierarchy<ndNode>
 	{

@@ -111,6 +111,33 @@ ndFloat32 ndMultiBodyVehicle::ndDownForce::GetDownforceFactor(ndFloat32 speed) c
 	return downForceFactor;
 }
 
+class ndMultiBodyVehicle::ndComponentNotify : public ndBodyNotify
+{
+	public:
+	D_CLASS_REFLECTION(ndComponentNotify, ndBodyNotify)
+
+	ndComponentNotify(const ndComponentNotify& src)
+		:ndBodyNotify(src)
+	{
+	}
+
+	ndComponentNotify()
+		:ndBodyNotify(ndVector::m_zero)
+	{
+	}
+
+	ndBodyNotify* Clone() const override
+	{
+		return new ndComponentNotify(*this);
+	}
+
+	void OnApplyExternalForce(ndInt32, ndFloat32) override
+	{
+		ndBodyDynamic* const selfBody = GetBody()->GetAsBodyDynamic();
+		selfBody->SetForce(ndVector::m_zero);
+	}
+};
+
 ndMultiBodyVehicle::ndMultiBodyVehicle(ndFloat32 gravityMagnitud)
 	:ndModelArticulation()
 	,m_localFrame(ndGetIdentityMatrix())
@@ -265,9 +292,6 @@ void ndMultiBodyVehicle::AddMotor(const ndSharedPtr<ndBody>& motorBody, const nd
 	ndAssert(!strcmp(motorJoint->ClassName(), "ndMultiBodyVehicleMotor"));
 	m_motor = (ndMultiBodyVehicleMotor*)*motorJoint;
 	m_motor->m_vehicle = this;
-
-	// make internal body parts non collidable
-	//ndShapeInstance& collision = motorBody->GetAsBodyKinematic()->GetCollisionShape();
 	
 	ndNode* const node = FindByBody(*motorBody);
 	ndAssert(!node || ((node->m_body->GetAsBody() == *motorBody) && ((*node->m_joint == *motorJoint))));
@@ -1474,7 +1498,7 @@ void ndMultiBodyVehicle::ConvertToMotorVehicle(const ndVehicleDectriptor& vehicl
 	m_debugFlags = m_wheel;
 	//m_debugFlags = m_torsionBar;
 
-	CalculateRestSprungWeight();
+	//CalculateRestSprungWeight();
 }
 
 void ndMultiBodyVehicle::Update(ndFloat32 timestep)
@@ -1482,6 +1506,22 @@ void ndMultiBodyVehicle::Update(ndFloat32 timestep)
 	if (!m_initialized)
 	{
 		CalculateRestSprungWeight();
+
+		// reset forces of assesories attached to chassis
+		if (m_motor)
+		{
+			ndBodyDynamic* const selfBody = m_motor->GetBody0()->GetAsBodyDynamic();
+			ndSharedPtr<ndBodyNotify> notify(new ndComponentNotify());
+			selfBody->SetNotifyCallback(notify);
+		}
+		for (ndList<ndMultiBodyVehicleDifferential*>::ndNode* node = m_differentialList.GetFirst(); node; node = node->GetNext())
+		{
+			ndBodyDynamic* const selfBody = node->GetInfo()->GetBody0()->GetAsBodyDynamic();
+			//selfBody->SetForce(ndVector::m_zero);
+			//selfBody->ForceEquilibrium();
+			ndSharedPtr<ndBodyNotify> notify(new ndComponentNotify());
+			selfBody->SetNotifyCallback(notify);
+		}
 	}
 
 	// apply down force

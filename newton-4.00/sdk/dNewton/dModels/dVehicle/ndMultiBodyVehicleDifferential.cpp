@@ -21,6 +21,7 @@
 
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
+#include "ndBodyDynamic.h"
 #include "ndMeshComponents.h"
 #include "ndMultiBodyVehicleDifferential.h"
 

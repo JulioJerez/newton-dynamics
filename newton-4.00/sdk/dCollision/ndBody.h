@@ -114,7 +114,6 @@ class ndBody : public ndContainersFreeListAlloc<ndBody>
 	virtual ndContact* FindContact(const ndBody* const) const { return nullptr; }
 	D_COLLISION_API virtual void Serialize(ndSharedPtr<ndMeshBody>& body) const;
 
-
 	ndMatrix m_matrix;
 	ndQuaternion m_rotation;
 	ndVector m_veloc;
