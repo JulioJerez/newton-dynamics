@@ -176,7 +176,6 @@ class ndAssetEditor : public ndClassAlloc
 	void EditLoopJointLocalMatrix(ndSharedPtr<ndMeshLoopJoint>& joint);
 	void EditLoopJointGlobalMatrix(ndSharedPtr<ndMeshLoopJoint>& joint);
 
-
 	//void EditWheelLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	//void EditPlaneLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);
 	//void EditRollerLoopJoint(ndSharedPtr<ndMeshLoopJoint>& joint);

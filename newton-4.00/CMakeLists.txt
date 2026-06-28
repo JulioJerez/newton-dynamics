@@ -58,7 +58,6 @@ else()
     set (X86 FALSE)
 endif()
 
-#if (X86 OR NEWTON_SCALAR_VECTOR_CLASS) 
 if (NEWTON_SCALAR_VECTOR_CLASS) 
 	add_definitions(-DD_SCALAR_VECTOR_CLASS)
 endif()
