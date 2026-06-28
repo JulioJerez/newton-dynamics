@@ -225,6 +225,11 @@ namespace ndMotorVehicle
 				ImGui::Text("  rmp %04d", ndInt32 (rpm));
 				DrawDial(60.0f, 50.0f, 50.0f, rpm, ndReal(motor->GetMaxRpm()));
 
+				ImGui::SameLine();
+				ndReal speed = ndReal(vehicle->GetSpeed() * 3.6f);
+				ImGui::Text("  kmh %03d", ndInt32(speed));
+				DrawDial(160.0f, 50.0f, 50.0f, speed, ndReal(120.0f));
+
 				//const ndMultiBodyVehicleGearBox* const gearJoint = vehicle->GetGearBox();
 				//ndMultiBodyVehicleGearBox::ndGearBox& gearBox = GetGearBox();
 				const ndSharedPtr<ndModelNotify>& notify = vehicle->GetNotifyCallback();
