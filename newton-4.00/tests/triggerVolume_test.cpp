@@ -61,7 +61,7 @@ TEST(StaticTrigger, TriggerCollision)
 	movingbody->SetCollisionShape(shapeinst);
 	movingbody->SetMatrix(matrix);
 	movingbody->SetMassMatrix(ndFloat32(10), shapeinst);
-	movingbody->SetDebugMaxLinearAndAngularIntegrationStep(ndPi, ndFloat32(2.0f));
+	movingbody->SetMaxLinearAndAngularIntegrationStep(ndPi, ndFloat32(2.0f));
 	ndSharedPtr<ndBody> movingPtr(movingbody);
 	world.AddBody(movingPtr);
 
