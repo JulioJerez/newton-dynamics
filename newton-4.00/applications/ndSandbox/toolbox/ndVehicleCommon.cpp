@@ -247,6 +247,14 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				gearJoint->SetRatio(gearGain);
 			}
 
+			if (m_reverseGear.Update(buttons[ndGameControllerInputs::m_reverseGearButton] ? true : false))
+			{
+				m_driverState = m_driveReverse;
+				m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_revertGear;
+				ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+				gearJoint->SetRatio(gearGain);
+			}
+
 			break;
 		}
 
@@ -319,7 +327,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				gearJoint->SetRatio(0.0f);
 				m_driverState = m_idle;
 			}
-			if (m_reverseGear.Update(buttons[ndGameControllerInputs::m_neutralGearButton] ? true : false))
+			if (m_neutralGear.Update(buttons[ndGameControllerInputs::m_neutralGearButton] ? true : false))
 			{
 				gearJoint->SetRatio(0.0f);
 				m_driverState = m_idle;
@@ -357,131 +365,20 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 		}
 
 		// manual tranmission state machine
-		//case m_driveReverse:
-		//{
-		//	if (m_ignition.Update(buttons[ndGameControllerInputs::m_ignitionButton] ? true : false))
-		//	{
-		//		gearJoint->SetRatio(0.0f);
-		//		m_driverState = m_idle;
-		//	}
-		//	if (m_reverseGear.Update(buttons[ndGameControllerInputs::m_neutralGearButton] ? true : false))
-		//	{
-		//		gearJoint->SetRatio(0.0f);
-		//		m_driverState = m_idle;
-		//	}
-		//	break;
-		//}
-		//
-		//case m_driveForward:
-		//{
-		//	if (m_ignition.Update(buttons[ndGameControllerInputs::m_ignitionButton] ? true : false))
-		//	{
-		//		gearJoint->SetRatio(0.0f);
-		//		m_driverState = m_idle;
-		//	}
-		//	if (m_reverseGear.Update(buttons[ndGameControllerInputs::m_reverseGearButton] ? true : false))
-		//	{
-		//		m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_revertGear;
-		//		ndFloat32 reverseGearRatio = gearBox.m_gearRatios[m_currentGear];
-		//		ndFloat32 gearGain = gearBox.m_crownGearRatio * reverseGearRatio;
-		//		gearJoint->SetRatio(gearGain);
-		//		m_driverState = m_driveReverseFromForward;
-		//	}
-		//	if (m_reverseGear.Update(buttons[ndGameControllerInputs::m_neutralGearButton] ? true : false))
-		//	{
-		//		gearJoint->SetRatio(0.0f);
-		//		m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear;
-		//		m_driverState = m_driveForwardGearDelay;
-		//	}
-		//
-		//	if (m_forwardGearUp.Update(buttons[ndGameControllerInputs::m_upGearButton] ? true : false))
-		//	{
-		//		m_driverState = m_driveShitGearUp;
-		//	}
-		//	if (m_forwardGearUp.Update(buttons[ndGameControllerInputs::m_downGearButton] ? true : false))
-		//	{
-		//		m_driverState = m_driveShitGearDown;
-		//	}
-		//	break;
-		//}
-		//
-		//case m_driveReverseFromForward:
-		//{
-		//	ndFloat32 gearRatio = gearJoint->GetRatio();
-		//	if (gearRatio == ndFloat32(0.0f))
-		//	{
-		//		m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_revertGear;
-		//		ndFloat32 reverseGearRatio = gearBox.m_gearRatios[m_currentGear];
-		//		ndFloat32 gearGain = gearBox.m_crownGearRatio * reverseGearRatio;
-		//		gearJoint->SetRatio(gearGain);
-		//		m_driverState = m_driveReverse;
-		//	}
-		//	else
-		//	{
-		//		m_driverState = m_driveForward;
-		//	}
-		//	break;
-		//}
-		//
-		//case m_driveShitGearUp:
-		//{
-		//	ndInt32 neutralGearIndex = ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear;
-		//	if (m_currentGear == neutralGearIndex)
-		//	{
-		//		m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
-		//	}
-		//	else
-		//	{
-		//		m_currentGear++;
-		//		if (m_currentGear >= gearBox.m_gearRatios.GetCount())
-		//		{
-		//			m_currentGear = gearBox.m_gearRatios.GetCount() - 1;
-		//		}
-		//	}
-		//	ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
-		//	gearJoint->SetRatio(gearGain);
-		//
-		//	m_driverState = m_driveForwardGearDelay;
-		//	m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
-		//	break;
-		//}
-		//
-		//case m_driveShitGearDown:
-		//{
-		//	ndInt32 neutralGearIndex = ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear;
-		//	if (m_currentGear == neutralGearIndex)
-		//	{
-		//		m_currentGear = 0;
-		//		m_currentGear = gearBox.m_gearRatios.GetCount() - 1;
-		//	}
-		//	else
-		//	{
-		//		m_currentGear--;
-		//		if (m_currentGear <= ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear)
-		//		{
-		//			m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
-		//		}
-		//	}
-		//	ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
-		//	gearJoint->SetRatio(gearGain);
-		//
-		//	m_driverState = m_driveForwardGearDelay;
-		//	m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
-		//	break;
-		//}
-		//
-		//case m_driveForwardGearDelay:
-		//{
-		//	m_autoGearShiftTimer--;
-		//	if (m_autoGearShiftTimer <= 0)
-		//	{
-		//		m_driverState = m_driveForward;
-		//	}
-		//	break;
-		//}
-
 		case m_driveForward:
 		{
+			if (m_ignition.Update(buttons[ndGameControllerInputs::m_ignitionButton] ? true : false))
+			{
+				gearJoint->SetRatio(0.0f);
+				m_driverState = m_idle;
+			}
+
+			if (m_neutralGear.Update(buttons[ndGameControllerInputs::m_neutralGearButton] ? true : false))
+			{
+				gearJoint->SetRatio(0.0f);
+				m_driverState = m_idle;
+			}
+
 			if (m_forwardGearUp.Update(buttons[ndGameControllerInputs::m_upGearButton] ? true : false))
 			{
 				m_driverState = m_driveShitGearUp;
@@ -493,6 +390,55 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
 			}
 
+			if (m_reverseGear.Update(buttons[ndGameControllerInputs::m_reverseGearButton] ? true : false))
+			{
+				if (ndAbs(vehicle->GetSpeed()) < ndFloat32(1.0f))
+				{
+					m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_revertGear;
+					ndFloat32 reverseGearRatio = gearBox.m_gearRatios[m_currentGear];
+					ndFloat32 gearGain = gearBox.m_crownGearRatio * reverseGearRatio;
+					gearJoint->SetRatio(gearGain);
+					m_driverState = m_driveReverse;
+				}
+			}
+			break;
+		}
+
+		case m_driveReverse:
+		{
+			if (m_ignition.Update(buttons[ndGameControllerInputs::m_ignitionButton] ? true : false))
+			{
+				gearJoint->SetRatio(0.0f);
+				m_driverState = m_idle;
+			}
+			if (m_neutralGear.Update(buttons[ndGameControllerInputs::m_neutralGearButton] ? true : false))
+			{
+				gearJoint->SetRatio(0.0f);
+				m_driverState = m_idle;
+			}
+			if (m_forwardGearUp.Update(buttons[ndGameControllerInputs::m_upGearButton] ? true : false))
+			{
+				if (ndAbs(vehicle->GetSpeed()) < ndFloat32(1.0f))
+				{
+					m_driverState = m_driveShitGearUp;
+					m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
+					ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+					m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks - 1;
+					gearJoint->SetRatio(gearGain);
+				}
+			}
+			if (m_manualTransmission.Update(buttons[ndGameControllerInputs::m_automaticGearBoxButton] ? true : false))
+			{
+				if (ndAbs(vehicle->GetSpeed()) < ndFloat32(1.0f))
+				{
+					m_transmission = m_automatic;
+					m_driverState = m_driveAutoGear;
+					m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
+					ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+					m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks - 1;
+					gearJoint->SetRatio(gearGain);
+				}
+			}
 			break;
 		}
 
