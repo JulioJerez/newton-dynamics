@@ -33,7 +33,7 @@ class ndVehicleCommonNotify : public ndModelNotify
 	ndVehicleCommonNotify(ndMultiBodyVehicle* const vehicle);
 
 	virtual void ApplyInputs(ndFloat32 timestep);
-
+	
 	void Update(ndFloat32 timestep) override;
 	void PostUpdate(ndFloat32 timestep) override;
 	void PostTransformUpdate(ndFloat32 timestep) override;
@@ -41,6 +41,9 @@ class ndVehicleCommonNotify : public ndModelNotify
 
 	bool GetPlayerState() const;
 	void SetAsPlayer(bool state);
+
+	void ManualTransmissionUpdate();
+	void AutomaticTransmissionUpdate();
 
 	ndInt32 m_currentGear;
 	ndInt32 m_autoGearShiftTimer;
@@ -51,6 +54,8 @@ class ndVehicleCommonNotify : public ndModelNotify
 	ndDemoEntityManager::ndKeyTrigger m_forwardGearUp;
 	ndDemoEntityManager::ndKeyTrigger m_forwardGearDown;
 	ndDemoEntityManager::ndKeyTrigger m_manualTransmission;
+
+	ndInt32 m_transmission;
 
 	ndDriveState m_driverState;
 	bool m_isPlayer;

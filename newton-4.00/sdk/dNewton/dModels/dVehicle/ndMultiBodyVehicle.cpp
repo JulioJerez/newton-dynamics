@@ -147,12 +147,10 @@ class ndMultiBodyVehicle::ndMotorNotify : public ndMultiBodyVehicle::ndComponent
 	ndMotorNotify(ndMultiBodyVehicle* const owner)
 		:ndComponentNotify(owner)
 	{
+		// add some drag after the engine reach pick rpm
 		const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& curve = owner->m_motor->GetCurve();
-		//ndFloat32 rpm0 = curve.GetRedLineRpm();
-		//ndFloat32 rpm1 = curve.GetPickTorqueRpm();
 		ndFloat32 rpm = curve.GetPickTorqueRpm();
 		ndFloat32 torque = curve.GetTorque(rpm);
-		//ndFloat32 omega = ndFloat32(0.5f) * (rpm0 + rpm1) * ndRpmToRadPerSec;
 		ndFloat32 omega = rpm * ndRpmToRadPerSec;
 		m_dragCoeff = torque / (omega * omega);
 	}

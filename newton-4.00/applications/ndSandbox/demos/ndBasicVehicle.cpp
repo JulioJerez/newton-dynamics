@@ -239,7 +239,15 @@ namespace ndMotorVehicle
 				ImGui::NewLine();
 				ImGui::NewLine();
 
-				ImGui::Text("transmission: manual");
+				if ((controller->m_transmission & 1) == 0)
+				{
+					ImGui::Text("transmission: manual");
+				}
+				else
+				{
+					ImGui::Text("transmission: automatic");
+				}
+
 				if (controller->m_driverState == ndVehicleCommonNotify::m_parked)
 				{
 					ImGui::Text("current gear: parked");
@@ -285,7 +293,6 @@ namespace ndMotorVehicle
 			}
 		}
 
-		//ndWeakPtr<ndModel> m_vehicle;
 		ndSharedPtr<ndModel> m_vehicle;
 	};
 
