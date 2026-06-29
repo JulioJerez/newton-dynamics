@@ -131,6 +131,12 @@ ndFloat32 ndMultiBodyVehicleMotor::ndEngineTorqueCurve::GetRedLineRpm() const
 	return rpm;
 }
 
+ndFloat32 ndMultiBodyVehicleMotor::ndEngineTorqueCurve::GetPickTorqueRpm() const
+{
+	const ndFloat32 rpm = m_rpms[m_rpms.GetCount() - 2];
+	return rpm;
+}
+
 ndFloat32 ndMultiBodyVehicleMotor::ndEngineTorqueCurve::GetTorque(ndFloat32 rpm) const
 {
 	rpm = ndClamp(rpm, ndFloat32(0.0f), ndFloat32(m_rpms[m_rpms.GetCount() - 1]));

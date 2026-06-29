@@ -1383,4 +1383,13 @@ void ndAssetEditor::EditMotorJoint()
 		engineCurve.m_frictionLoss = loss;
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 	}
+
+	ndReal topSpeed = joint->m_topSpeed;
+	if (ImGui::InputFloat("stop speed", &topSpeed, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+		joint->m_topSpeed = ndMax(topSpeed, ndReal (10.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+	}
+
 }

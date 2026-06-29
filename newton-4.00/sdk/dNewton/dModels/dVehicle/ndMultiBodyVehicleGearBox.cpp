@@ -162,7 +162,8 @@ void ndMultiBodyVehicleGearBox::JacobianDerivative(ndConstraintDescritor& desc)
 		ndFloat32 w0 = omega0.DotProduct(jacobian0.m_angular).GetScalar();
 		ndFloat32 w1 = omega1.DotProduct(jacobian1.m_angular).GetScalar() + idleOmega;
 		
-		const ndFloat32 w = (w0 + w1) * ndFloat32(0.5f);
+		//const ndFloat32 w = (w0 + w1) * ndFloat32(0.5f);
+		const ndFloat32 w = w0 + w1;
 		SetMotorAcceleration(desc, -w * desc.m_invTimestep);
 		
 		if (m_gearRatio > ndFloat32 (0.0f))

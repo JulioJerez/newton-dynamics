@@ -116,7 +116,6 @@ ndMeshLoopJoint::ndMeshLoopJoint(
 	const ndSharedPtr<ndMeshJoint>& joint, 
 	ndMesh* const childReference, ndMesh* const parentReference)
 	:ndClassAlloc()
-	//,m_name(parentReference->GetName() + "_" + childReference->GetName())
 	,m_name()
 	,m_childNode(ndWeakPtr<ndMesh>(childReference))
 	,m_parentNode(ndWeakPtr<ndMesh>(parentReference))
@@ -190,6 +189,7 @@ ndMeshJointFix6dof::ndMeshJointFix6dof(const ndMesh* const owner)
 ndMeshJointFix6dof::ndMeshJointFix6dof(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
+	ndAssert(joint->IsType(ndJointFix6dof::StaticClassName()));
 	const ndJointFix6dof* const fixJoint = (ndJointFix6dof*)joint;
 	m_softness = fixJoint->GetRegularizer();
 	m_maxForce = fixJoint->GetMaxForce();
@@ -258,6 +258,7 @@ ndMeshJointIkSwivelPositionEffector::ndMeshJointIkSwivelPositionEffector(const n
 ndMeshJointIkSwivelPositionEffector::ndMeshJointIkSwivelPositionEffector(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
+	ndAssert(joint->IsType(ndIkSwivelPositionEffector::StaticClassName()));
 	const ndIkSwivelPositionEffector* const effector = (ndIkSwivelPositionEffector*)joint;
 	m_restPosition = effector->GetRestPosit();
 
@@ -388,8 +389,8 @@ ndMeshJointPlane::ndMeshJointPlane(const ndMesh* const owner)
 ndMeshJointPlane::ndMeshJointPlane(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
+	ndAssert(joint->IsType(ndJointPlane::StaticClassName()));
 	const ndJointPlane* const subJoint = (ndJointPlane*)joint;
-
 	m_controlRotation = subJoint->GetEnableControlRotation();
 }
 
@@ -439,6 +440,7 @@ ndJointBilateralConstraint* ndMeshJointPlane::CreateObject(ndBodyKinematic* cons
 
 ndMeshJointGear::ndMeshJointGear(const ndMesh* const owner)
 	:ndMeshJoint(owner)
+	,m_ratio(ndReal(1.0f))
 {
 }
 
@@ -446,7 +448,7 @@ ndMeshJointGear::ndMeshJointGear(const ndMesh* const owner, const ndJointBilater
 	:ndMeshJoint(owner, joint)
 {
 	const ndJointGear* const subJoint = (ndJointGear*)joint;
-	m_ratio = subJoint->GetRatio();
+	m_ratio = ndReal (subJoint->GetRatio());
 }
 
 ndMeshJointGear::ndMeshJointGear(const ndMeshJointGear& other)
@@ -481,7 +483,7 @@ void ndMeshJointGear::SerializeToXml(nd::TiXmlElement* const parent) const
 void ndMeshJointGear::DeserializeFromXml(const nd::TiXmlElement* const parent)
 {
 	ndMeshJoint::DeserializeFromXml(parent);
-	m_ratio = xmlGetFloat(parent, "ratio");
+	m_ratio = ndReal(xmlGetFloat(parent, "ratio"));
 }
 
 ndJointBilateralConstraint* ndMeshJointGear::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
@@ -574,6 +576,7 @@ ndMeshJointHinge::ndMeshJointHinge(const ndMesh* const owner, const ndJointBilat
 	:ndMeshJoint(owner, joint)
 	,m_axis()
 {
+	ndAssert(joint->IsType(ndJointHinge::StaticClassName()));
 	const ndJointHinge* const subJoint = (ndJointHinge*)joint;
 	subJoint->GetSpringDamper(m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
 	subJoint->GetLimits(m_axis.m_minLimit, m_axis.m_maxLimit);
@@ -647,6 +650,7 @@ ndMeshJointDoubleHinge::ndMeshJointDoubleHinge(const ndMesh* const owner)
 ndMeshJointDoubleHinge::ndMeshJointDoubleHinge(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
+	ndAssert(joint->IsType(ndJointDoubleHinge::StaticClassName()));
 	const ndJointDoubleHinge* const subJoint = (ndJointDoubleHinge*)joint;
 
 	subJoint->GetSpringDamper0(m_axis0.m_springDamperRegularizer, m_axis0.m_springK, m_axis0.m_damperC);
@@ -756,6 +760,7 @@ ndMeshJointCylinder::ndMeshJointCylinder(const ndMesh* const owner)
 ndMeshJointCylinder::ndMeshJointCylinder(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
+	ndAssert(joint->IsType(ndJointCylinder::StaticClassName()));
 	const ndJointCylinder* const subJoint = (ndJointCylinder*)joint;
 
 	subJoint->GetSpringDamperPosit(m_linearAxis.m_springDamperRegularizer, m_linearAxis.m_springK, m_linearAxis.m_damperC);
@@ -863,6 +868,7 @@ ndMeshJointRoller::ndMeshJointRoller(const ndMesh* const owner)
 ndMeshJointRoller::ndMeshJointRoller(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
+	ndAssert(joint->IsType(ndJointRoller::StaticClassName()));
 	const ndJointRoller* const subJoint = (ndJointRoller*)joint;
 
 	subJoint->GetSpringDamperPosit(m_linearAxis.m_springDamperRegularizer, m_linearAxis.m_springK, m_linearAxis.m_damperC);
@@ -971,6 +977,7 @@ ndMeshJointSlidingHinge::ndMeshJointSlidingHinge(const ndMesh* const owner)
 ndMeshJointSlidingHinge::ndMeshJointSlidingHinge(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
+	ndAssert(joint->IsType(ndJointSlidingHinge::StaticClassName()));
 	const ndJointSlidingHinge* const subJoint = (ndJointSlidingHinge*)joint;
 
 	subJoint->GetSpringDamperPosit(m_linearAxis.m_springDamperRegularizer, m_linearAxis.m_springK, m_linearAxis.m_damperC);
@@ -986,8 +993,8 @@ ndMeshJointSlidingHinge::ndMeshJointSlidingHinge(const ndMesh* const owner, cons
 
 ndMeshJointSlidingHinge::ndMeshJointSlidingHinge(const ndMeshJointSlidingHinge& other)
 	:ndMeshJoint(other)
-	, m_linearAxis(other.m_linearAxis)
-	, m_angularAxis(other.m_angularAxis)
+	,m_linearAxis(other.m_linearAxis)
+	,m_angularAxis(other.m_angularAxis)
 {
 }
 
@@ -1080,6 +1087,7 @@ ndMeshJointWheel::ndMeshJointWheel(const ndMesh* const owner, const ndJointBilat
 	:ndMeshJoint(owner, joint)
 	,m_desc(new ndWheelDescriptor)
 {
+	ndAssert(joint->IsType(ndJointWheel::StaticClassName()));
 	const ndJointWheel* const subJoint = (ndJointWheel*)joint;
 	**m_desc = subJoint->GetInfo();
 }
@@ -1160,6 +1168,7 @@ ndMeshJointSpherical::ndMeshJointSpherical(const ndMesh* const owner)
 ndMeshJointSpherical::ndMeshJointSpherical(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
+	ndAssert(joint->IsType(ndJointSpherical::StaticClassName()));
 	const ndJointSpherical* const subJoint = (ndJointSpherical*)joint;
 	subJoint->GetSpringDamper(m_axis.m_springDamperRegularizer, m_axis.m_springK, m_axis.m_damperC);
 	subJoint->GetTwistLimits(m_axis.m_minLimit, m_axis.m_maxLimit);
@@ -1251,6 +1260,7 @@ ndMeshJointVehicleDifferential::ndMeshJointVehicleDifferential(const ndMesh* con
 ndMeshJointVehicleDifferential::ndMeshJointVehicleDifferential(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 {
+	ndAssert(joint->IsType(ndMultiBodyVehicleDifferential::StaticClassName()));
 	const ndMultiBodyVehicleDifferential* const subJoint = (ndMultiBodyVehicleDifferential*)joint;
 	m_limitedSlipOmega = ndReal(subJoint->GetSlipOmega());
 }
@@ -1301,21 +1311,26 @@ ndJointBilateralConstraint* ndMeshJointVehicleDifferential::CreateObject(ndBodyK
 ndMeshJointVehicleMotor::ndMeshJointVehicleMotor(const ndMesh* const owner)
 	:ndMeshJoint(owner)
 	,m_engineCurve()
+	,m_topSpeed(40.0f)
 {
 }
 
 ndMeshJointVehicleMotor::ndMeshJointVehicleMotor(const ndMesh* const owner, const ndJointBilateralConstraint* const joint)
 	:ndMeshJoint(owner, joint)
 	,m_engineCurve()
+	,m_topSpeed(ndReal(40.0f))
 {
+	joint->IsType(ndMultiBodyVehicleMotor::StaticClassName());
 	const ndMultiBodyVehicleMotor* const motor = (ndMultiBodyVehicleMotor*)joint;
-	ndAssert(strcmp(motor->ClassName(), ndMultiBodyVehicleMotor::StaticClassName()) == 0);
+	motor->IsType(ndMultiBodyVehicleMotor::StaticClassName());
 	m_engineCurve = motor->GetCurve();
+	m_topSpeed = ndReal(motor->GetTopSpeed());
 }
 
 ndMeshJointVehicleMotor::ndMeshJointVehicleMotor(const ndMeshJointVehicleMotor& other)
 	:ndMeshJoint(other)
 	,m_engineCurve(other.m_engineCurve)
+	,m_topSpeed(other.m_topSpeed)
 {
 }
 
@@ -1354,6 +1369,7 @@ void ndMeshJointVehicleMotor::SerializeToXml(nd::TiXmlElement* const parent) con
 	}
 	xmlSaveParam(parent, "torques", tmp);
 
+	xmlSaveParam(parent, "topSpeed", m_topSpeed);
 	xmlSaveParam(parent, "fuelInjection", m_engineCurve.m_omegaStep);
 	xmlSaveParam(parent, "frictionLoss", m_engineCurve.m_frictionLoss);
 }
@@ -1380,6 +1396,10 @@ void ndMeshJointVehicleMotor::DeserializeFromXml(const nd::TiXmlElement* const p
 	}
 	m_engineCurve.m_omegaStep = ndReal(xmlGetFloat(parent, "fuelInjection"));
 	m_engineCurve.m_frictionLoss = ndReal(xmlGetFloat(parent, "frictionLoss"));
+	if (xmlHasParam(parent, "topSpeed"))
+	{
+		m_topSpeed = ndReal(xmlGetFloat(parent, "topSpeed"));
+	}
 }
 
 ndJointBilateralConstraint* ndMeshJointVehicleMotor::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
@@ -1462,6 +1482,8 @@ ndMeshJointVehicleTorsionBar::ndMeshJointVehicleTorsionBar(const ndMesh* const o
 	:ndMeshJoint(owner, joint)
 	,m_axis()
 {
+	ndAssert(0);
+	ndAssert(joint->IsType(ndMultiBodyVehicleTorsionBar::StaticClassName()));
 	m_axis.m_springK = ndFloat32(2000.0f);
 	m_axis.m_damperC = ndFloat32(20.0f);
 	m_axis.m_springDamperRegularizer = ndFloat32(0.01f);
@@ -1602,6 +1624,7 @@ ndMeshJointVehicleGearBox::ndMeshJointVehicleGearBox(const ndMesh* const owner, 
 	:ndMeshJoint(owner, joint)
 	,m_gearBox()
 {
+	ndAssert(joint->IsType(ndMultiBodyVehicleGearBox::StaticClassName()));
 	const ndMultiBodyVehicleGearBox* const subJoint = (ndMultiBodyVehicleGearBox*)joint;
 	m_gearBox = subJoint->GetGearBox();
 }

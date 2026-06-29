@@ -41,6 +41,7 @@ class ndMultiBodyVehicleMotor: public ndJointBilateralConstraint
 
 		D_NEWTON_API ndFloat32 GetIdleRpm() const;
 		D_NEWTON_API ndFloat32 GetRedLineRpm() const;
+		D_NEWTON_API ndFloat32 GetPickTorqueRpm() const;
 		D_NEWTON_API ndFloat32 GetLowGearShiftRpm() const;
 		D_NEWTON_API ndFloat32 GetHighGearShiftRpm() const;
 		D_NEWTON_API ndFloat32 GetTorque(ndFloat32 rpm) const;

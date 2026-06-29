@@ -112,6 +112,7 @@ class ndMultiBodyVehicle : public ndModelArticulation
 		m_torsionBar = 1 << 1,
 	};
 
+	class ndMotorNotify;
 	class ndComponentNotify;
 
 	D_CLASS_REFLECTION(ndMultiBodyVehicle, ndModelArticulation)

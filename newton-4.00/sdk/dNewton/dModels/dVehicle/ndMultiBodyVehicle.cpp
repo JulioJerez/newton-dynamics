@@ -116,13 +116,14 @@ class ndMultiBodyVehicle::ndComponentNotify : public ndBodyNotify
 	public:
 	D_CLASS_REFLECTION(ndComponentNotify, ndBodyNotify)
 
-	ndComponentNotify(const ndComponentNotify& src)
-		:ndBodyNotify(src)
+	ndComponentNotify(ndMultiBodyVehicle* const owner)
+		:ndBodyNotify(ndVector::m_zero)
+		,m_owner(owner)
 	{
 	}
 
-	ndComponentNotify()
-		:ndBodyNotify(ndVector::m_zero)
+	ndComponentNotify(const ndComponentNotify& src)
+		:ndBodyNotify(src)
 	{
 	}
 
@@ -136,6 +137,39 @@ class ndMultiBodyVehicle::ndComponentNotify : public ndBodyNotify
 		ndBodyDynamic* const selfBody = GetBody()->GetAsBodyDynamic();
 		selfBody->SetForce(ndVector::m_zero);
 	}
+
+	ndWeakPtr<ndMultiBodyVehicle> m_owner;
+};
+
+class ndMultiBodyVehicle::ndMotorNotify : public ndMultiBodyVehicle::ndComponentNotify
+{
+	public:
+	ndMotorNotify(ndMultiBodyVehicle* const owner)
+		:ndComponentNotify(owner)
+	{
+		const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& curve = owner->m_motor->GetCurve();
+		//ndFloat32 rpm0 = curve.GetRedLineRpm();
+		//ndFloat32 rpm1 = curve.GetPickTorqueRpm();
+		ndFloat32 rpm = curve.GetPickTorqueRpm();
+		ndFloat32 torque = curve.GetTorque(rpm);
+		//ndFloat32 omega = ndFloat32(0.5f) * (rpm0 + rpm1) * ndRpmToRadPerSec;
+		ndFloat32 omega = rpm * ndRpmToRadPerSec;
+		m_dragCoeff = torque / (omega * omega);
+	}
+
+	void OnApplyExternalForce(ndInt32, ndFloat32) override
+	{
+		ndComponentNotify::OnApplyExternalForce(0, ndFloat32(0.0f));
+
+		ndBodyDynamic* const selfBody = GetBody()->GetAsBodyDynamic();
+		ndMatrix axis (m_owner->GetMotor()->CalculateGlobalMatrix0());
+		ndFloat32 omega = axis.m_front.DotProduct(selfBody->GetOmega()).GetScalar();
+		ndAssert(omega < ndFloat32(0.1f));
+		ndVector torque(axis.m_front.Scale(m_dragCoeff * omega * omega));
+		selfBody->SetTorque(torque);
+	}
+
+	ndFloat32 m_dragCoeff;
 };
 
 ndMultiBodyVehicle::ndMultiBodyVehicle(ndFloat32 gravityMagnitud)
@@ -1497,8 +1531,6 @@ void ndMultiBodyVehicle::ConvertToMotorVehicle(const ndVehicleDectriptor& vehicl
 
 	m_debugFlags = m_wheel;
 	//m_debugFlags = m_torsionBar;
-
-	//CalculateRestSprungWeight();
 }
 
 void ndMultiBodyVehicle::Update(ndFloat32 timestep)
@@ -1511,13 +1543,13 @@ void ndMultiBodyVehicle::Update(ndFloat32 timestep)
 		if (m_motor)
 		{
 			ndBodyDynamic* const selfBody = m_motor->GetBody0()->GetAsBodyDynamic();
-			ndSharedPtr<ndBodyNotify> notify(new ndComponentNotify());
+			ndSharedPtr<ndBodyNotify> notify(new ndMotorNotify(this));
 			selfBody->SetNotifyCallback(notify);
 		}
 		for (ndList<ndMultiBodyVehicleDifferential*>::ndNode* node = m_differentialList.GetFirst(); node; node = node->GetNext())
 		{
 			ndBodyDynamic* const selfBody = node->GetInfo()->GetBody0()->GetAsBodyDynamic();
-			ndSharedPtr<ndBodyNotify> notify(new ndComponentNotify());
+			ndSharedPtr<ndBodyNotify> notify(new ndComponentNotify(this));
 			selfBody->SetNotifyCallback(notify);
 		}
 	}
