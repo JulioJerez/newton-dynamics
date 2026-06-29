@@ -104,7 +104,7 @@ ndFloat32 ndMultiBodyVehicle::ndDownForce::GetDownforceFactor(ndFloat32 speed) c
 		}
 	}
 
-	index = ndMin(index, ndInt32 (sizeof(m_downForceTable) / sizeof(m_downForceTable[0])) - 2);
+	index = ndMin(index, ndInt32(sizeof(m_downForceTable) / sizeof(m_downForceTable[0])) - 2);
 	ndFloat32 deltaSpeed = speed - m_downForceTable[index].m_speed;
 	ndFloat32 downForceFactor = m_downForceTable[index].m_forceFactor + m_downForceTable[index + 1].m_aerodynamicDownforceConstant * deltaSpeed * deltaSpeed;
 	//return downForceFactor * m_gravity;
@@ -113,12 +113,12 @@ ndFloat32 ndMultiBodyVehicle::ndDownForce::GetDownforceFactor(ndFloat32 speed) c
 
 class ndMultiBodyVehicle::ndComponentNotify : public ndBodyNotify
 {
-	public:
+public:
 	D_CLASS_REFLECTION(ndComponentNotify, ndBodyNotify)
 
-	ndComponentNotify(ndMultiBodyVehicle* const owner)
+		ndComponentNotify(ndMultiBodyVehicle* const owner)
 		:ndBodyNotify(ndVector::m_zero)
-		,m_owner(owner)
+		, m_owner(owner)
 	{
 	}
 
@@ -143,13 +143,13 @@ class ndMultiBodyVehicle::ndComponentNotify : public ndBodyNotify
 
 class ndMultiBodyVehicle::ndMotorNotify : public ndMultiBodyVehicle::ndComponentNotify
 {
-	public:
+public:
 	ndMotorNotify(ndMultiBodyVehicle* const owner)
 		:ndComponentNotify(owner)
 	{
 		// add some drag after the engine reach pick rpm
 		const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& curve = owner->m_motor->GetCurve();
-		ndFloat32 rpm = curve.GetPickTorqueRpm();
+		ndFloat32 rpm = curve.GetPickPowerRpm();
 		ndFloat32 torque = curve.GetTorque(rpm);
 		ndFloat32 omega = rpm * ndRpmToRadPerSec;
 		m_dragCoeff = torque / (omega * omega);
@@ -160,10 +160,18 @@ class ndMultiBodyVehicle::ndMotorNotify : public ndMultiBodyVehicle::ndComponent
 		ndComponentNotify::OnApplyExternalForce(0, ndFloat32(0.0f));
 
 		ndBodyDynamic* const selfBody = GetBody()->GetAsBodyDynamic();
-		ndMatrix axis (m_owner->GetMotor()->CalculateGlobalMatrix0());
-		ndFloat32 omega = axis.m_front.DotProduct(selfBody->GetOmega()).GetScalar();
-		ndAssert(omega < ndFloat32(0.1f));
-		ndVector torque(axis.m_front.Scale(m_dragCoeff * omega * omega));
+		const ndMatrix axis(m_owner->GetMotor()->CalculateGlobalMatrix0());
+		const ndVector omega(selfBody->GetOmega());
+		ndFloat32 omegaSpeed = axis.m_front.DotProduct(selfBody->GetOmega()).GetScalar();
+		if (omegaSpeed > ndFloat32 (1.0e-4f))
+		{
+			const ndVector clampOmega(omega - axis.m_front.Scale(omegaSpeed));
+			selfBody->SetOmega(clampOmega);
+			omegaSpeed = axis.m_front.DotProduct(clampOmega).GetScalar();
+		}
+		ndAssert(omegaSpeed <= ndFloat32(0.01f));
+
+		ndVector torque(axis.m_front.Scale(m_dragCoeff * omegaSpeed * omegaSpeed));
 		selfBody->SetTorque(torque);
 	}
 

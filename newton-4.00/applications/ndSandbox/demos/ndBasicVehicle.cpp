@@ -239,7 +239,7 @@ namespace ndMotorVehicle
 				ImGui::NewLine();
 				ImGui::NewLine();
 
-				if ((controller->m_transmission & 1) == 0)
+				if (controller->m_transmission == ndVehicleCommonNotify::m_manual)
 				{
 					ImGui::Text("transmission: manual");
 				}
@@ -256,6 +256,12 @@ namespace ndMotorVehicle
 				{
 					switch (controller->m_currentGear)
 					{
+						case ndMultiBodyVehicleGearBox::ndGearBox::m_revertGear:
+						{
+							ImGui::Text("current gear: reverse");
+							break;
+						}
+
 						case ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear:
 						{
 							ImGui::Text("current gear: neutral");

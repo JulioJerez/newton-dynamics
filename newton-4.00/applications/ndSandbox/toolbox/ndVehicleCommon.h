@@ -24,10 +24,20 @@ class ndVehicleCommonNotify : public ndModelNotify
 		m_idle,
 		m_driveReverse,
 		m_driveForward,
+		m_driveAutoGear,
+		m_driveAutoReverse,
+		m_driveAutoShitGearUp,
+		m_driveAutoShitGearDown,
 		m_driveShitGearUp,
 		m_driveShitGearDown,
 		m_driveForwardGearDelay,
 		m_driveReverseFromForward,
+	};
+
+	enum ndTransmissionMode
+	{
+		m_manual,
+		m_automatic
 	};
 
 	ndVehicleCommonNotify(ndMultiBodyVehicle* const vehicle);
@@ -42,9 +52,6 @@ class ndVehicleCommonNotify : public ndModelNotify
 	bool GetPlayerState() const;
 	void SetAsPlayer(bool state);
 
-	void ManualTransmissionUpdate();
-	void AutomaticTransmissionUpdate();
-
 	ndInt32 m_currentGear;
 	ndInt32 m_autoGearShiftTimer;
 	ndDemoEntityManager::ndKeyTrigger m_parking;
@@ -54,10 +61,8 @@ class ndVehicleCommonNotify : public ndModelNotify
 	ndDemoEntityManager::ndKeyTrigger m_forwardGearUp;
 	ndDemoEntityManager::ndKeyTrigger m_forwardGearDown;
 	ndDemoEntityManager::ndKeyTrigger m_manualTransmission;
-
-	ndInt32 m_transmission;
-
 	ndDriveState m_driverState;
+	ndTransmissionMode m_transmission;
 	bool m_isPlayer;
 };
 
