@@ -1,0 +1,16 @@
+{
+    "robots": [
+        {
+            "name": "Atlas",
+            "type": "humanoid robot",
+            "manufacturer": "Boston Dynamics",
+            "xacro-generated": false,
+            "urdf": [
+                "urdf/atlas.urdf"
+            ],
+            "variant": null,
+            "source-link": "https://se.mathworks.com/matlabcentral/fileexchange/98714-robotics-system-toolbox-robot-library-data",
+            "id": 10
+        }
+    ]
+}
