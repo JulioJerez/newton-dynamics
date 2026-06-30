@@ -261,6 +261,18 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 		// automatic transmission state machine
 		case m_driveAutoGear:
 		{
+			if (m_ignition.Update(buttons[ndGameControllerInputs::m_ignitionButton] ? true : false))
+			{
+				gearJoint->SetRatio(0.0f);
+				m_driverState = m_idle;
+			}
+
+			if (m_neutralGear.Update(buttons[ndGameControllerInputs::m_neutralGearButton] ? true : false))
+			{
+				gearJoint->SetRatio(0.0f);
+				m_driverState = m_idle;
+			}
+
 			if (m_manualTransmission.Update(buttons[ndGameControllerInputs::m_automaticGearBoxButton] ? true : false))
 			{
 				m_transmission = m_manual;
