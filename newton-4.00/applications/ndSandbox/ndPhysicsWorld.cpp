@@ -12,6 +12,7 @@
 #include "ndSandboxStdafx.h"
 
 #include "ndPhysicsWorld.h"
+#include "ndSoundManager.h"
 #include "ndDemoCameraNode.h"
 #include "ndContactCallback.h"
 #include "ndDemoEntityNotify.h"
@@ -263,9 +264,13 @@ void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
 	if (m_manager->m_onPostUpdate)
 	{
 		m_manager->m_onPostUpdate->Update(m_manager, timestep);
-		//m_manager->m_onPostUpdate->OnDebug(m_manager, m_manager->m_hidePostUpdate);
 		m_manager->m_onPostUpdate->OnDebug(m_manager, false);
 	}
+
+	// update sound manager
+	const ndVector listenerVeloc(ndVector::m_zero);
+	const ndMatrix listenerMatrix(m_manager->GetRenderer()->GetCamera()->CalculateGlobalMatrix());
+	m_manager->m_soundManager.Update(listenerMatrix, listenerVeloc);
 
 	ndScopeSpinLock Lock(m_lock);
 
