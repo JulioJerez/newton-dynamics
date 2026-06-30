@@ -38,17 +38,35 @@ class ndSoundManager::Implementation : public ndClassAlloc
 		:ndClassAlloc()
 	{
 		m_device = alcOpenDevice(nullptr);
+
+		if (m_device)
+		{
+			m_context = alcCreateContext(m_device, NULL);
+			alcMakeContextCurrent(m_context);
+		}
+		// Check for EAX 2.0 support
+		m_extension = alIsExtensionPresent("EAX2.0");
+		// Generate Buffers
+		alGetError(); // clear error code
 	}
 
 	virtual ~Implementation()
 	{
 		if (m_device)
 		{
+			ndAssert(m_context == alcGetCurrentContext());
+			ndAssert(m_device = alcGetContextsDevice(m_context));
+			//Device = alcGetContextsDevice(Context);
+			//ndAssert(m_context == alcGetCurrentContext())
+			alcMakeContextCurrent(nullptr);
+			alcDestroyContext(m_context);
 			alcCloseDevice(m_device);
 		}
 	}
 
 	ALCdevice* m_device;
+	ALCcontext* m_context;
+	ALboolean m_extension;
 };
 #endif
 
