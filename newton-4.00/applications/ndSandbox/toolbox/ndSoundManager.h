@@ -14,6 +14,22 @@
 
 #include "ndSandboxStdafx.h"
 
+class ndSoundBuffer : public ndClassAlloc
+{
+	class Implementation;
+	public:
+	ndSoundBuffer(const char* const waveFileName);
+	~ndSoundBuffer();
+
+	void Play();
+	void Stop();
+	bool IsLooping() const;
+	void SetLooping(bool state);
+
+	private:
+	Implementation* m_implementation;
+};
+
 class ndSoundManager : public ndClassAlloc
 {
 	class Implementation;
