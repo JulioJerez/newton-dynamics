@@ -15,6 +15,8 @@ class ndPhysicsWorld;
 class ndGameControllerInputs;
 class ndDebugDisplayRenderPass;
 
+#include "ndSoundManager.h"
+
 class ndDemoEntityManager : public ndClassAlloc
 {
 	public:
@@ -288,8 +290,10 @@ class ndDemoEntityManager : public ndClassAlloc
 	bool m_profilerMode;
 	bool m_changeCamera;
 	ndKeyTrigger m_nextActiveCamera;
-	
 	ndWorld::ndSolverModes m_solverMode;
+
+	ndSoundManager m_soundManager;
+
 	static ndDemos m_demosSelection[];
 	static ndDemos m_machineLearning[];
 
