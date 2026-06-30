@@ -15,6 +15,8 @@
 #include "ndSandboxStdafx.h"
 #include "ndDemoEntityNotify.h"
 
+class ndDemoEntityManager;
+
 class ndVehicleCommonNotify : public ndModelNotify
 {
 	public:
@@ -40,7 +42,7 @@ class ndVehicleCommonNotify : public ndModelNotify
 		m_automatic
 	};
 
-	ndVehicleCommonNotify(ndMultiBodyVehicle* const vehicle);
+	ndVehicleCommonNotify(ndDemoEntityManager* const scene, ndMultiBodyVehicle* const vehicle);
 
 	virtual void ApplyInputs(ndFloat32 timestep);
 	
@@ -63,6 +65,9 @@ class ndVehicleCommonNotify : public ndModelNotify
 	ndDemoEntityManager::ndKeyTrigger m_manualTransmission;
 	ndDriveState m_driverState;
 	ndTransmissionMode m_transmission;
+
+	ndSharedPtr<ndSoundBuffer> m_engineSound;
+
 	bool m_isPlayer;
 };
 

@@ -941,6 +941,11 @@ void ndDemoEntityManager::SetLastLoadMesh(const ndString& name)
 	m_lastModelName = name;
 }
 
+ndSoundManager& ndDemoEntityManager::GetSoundManager()
+{
+	return m_soundManager;
+}
+
 const ndSharedPtr<ndGameControllerInputs>& ndDemoEntityManager::GetGameController() const
 {
 	return m_gameController;
@@ -975,6 +980,8 @@ void ndDemoEntityManager::Cleanup ()
 		m_world = ndSharedPtr<ndPhysicsWorld>(nullptr);
 	}
 	
+	m_soundManager.ClearSounds();
+
 	// create the newton world
 	m_world = ndSharedPtr<ndPhysicsWorld>(new ndPhysicsWorld(this));
 	ApplyMenuOptions();

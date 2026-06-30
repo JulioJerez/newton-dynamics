@@ -12,9 +12,10 @@
 #include "ndSandboxStdafx.h"
 #include "ndVehicleCommon.h"
 #include "ndPhysicsWorld.h"
+#include "ndDemoEntityManager.h"
 #include "ndGameControllerInputs.h"
 
-ndVehicleCommonNotify::ndVehicleCommonNotify(ndMultiBodyVehicle* const vehicle)
+ndVehicleCommonNotify::ndVehicleCommonNotify(ndDemoEntityManager* const scene, ndMultiBodyVehicle* const vehicle)
 	:ndModelNotify()
 	,m_currentGear(ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear)
 	,m_autoGearShiftTimer(0)
@@ -23,6 +24,11 @@ ndVehicleCommonNotify::ndVehicleCommonNotify(ndMultiBodyVehicle* const vehicle)
 	,m_isPlayer(false)
 {
 	SetModel(vehicle);
+
+	m_engineSound = scene->GetSoundManager().AddSound("diesel_engine.wav");
+
+	m_engineSound->SetLooping(true);
+	m_engineSound->Play();
 }
 
 bool ndVehicleCommonNotify::GetPlayerState() const
@@ -477,4 +483,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			ndAssert(0);
 		}
 	}
+
+	m_engineSound->SetVelocity(vehicle->GetRoot()->m_body->GetVelocity());
+	m_engineSound->SetPosition(vehicle->GetRoot()->m_body->GetMatrix().m_posit);
 }

@@ -213,6 +213,7 @@ class ndDemoEntityManager : public ndClassAlloc
 	const ndString& GetLastLoadMesh() const;
 	void SetLastLoadMesh(const ndString& name);
 
+	ndSoundManager& GetSoundManager();
 	const ndSharedPtr<ndGameControllerInputs>& GetGameController() const;
 
 	private:

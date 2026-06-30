@@ -27,6 +27,9 @@ class ndSoundBuffer : public ndClassAlloc
 	bool IsLooping() const;
 	void SetLooping(bool state);
 
+	void SetPosition(const ndVector& posit);
+	void SetVelocity(const ndVector& veloc);
+
 	private:
 	ndSoundBuffer(ndSoundManager* const manager, const char* const waveFileName);
 	Implementation* m_implementation;
@@ -49,6 +52,7 @@ class ndSoundManager : public ndClassAlloc
 
 	private:
 	Implementation* m_implementation;
+	friend class ndSoundBuffer;
 };
 
 #endif
