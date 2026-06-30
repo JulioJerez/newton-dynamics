@@ -25,8 +25,7 @@ ndVehicleCommonNotify::ndVehicleCommonNotify(ndDemoEntityManager* const scene, n
 {
 	SetModel(vehicle);
 
-	m_engineSound = scene->GetSoundManager().AddSound("diesel_engine.wav");
-
+	m_engineSound = scene->GetSoundManager()->AddSound("diesel_engine.wav");
 	m_engineSound->SetLooping(true);
 	m_engineSound->Play();
 }

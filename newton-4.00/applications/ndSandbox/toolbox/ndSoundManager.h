@@ -15,6 +15,7 @@
 #include "ndSandboxStdafx.h"
 
 class ndSoundManager;
+class ndDemoEntityManager;
 
 class ndSoundBuffer : public ndClassAlloc
 {
@@ -27,11 +28,13 @@ class ndSoundBuffer : public ndClassAlloc
 	bool IsLooping() const;
 	void SetLooping(bool state);
 
+	ndVector GetPosition() const;
+	ndVector GetVelocity() const;
 	void SetPosition(const ndVector& posit);
 	void SetVelocity(const ndVector& veloc);
 
 	private:
-	ndSoundBuffer(ndSoundManager* const manager, const char* const waveFileName);
+	ndSoundBuffer(ndSharedPtr<ndSoundManager>& owner, const char* const waveFileName);
 	Implementation* m_implementation;
 	friend class ndSoundManager;
 };
@@ -41,14 +44,14 @@ class ndSoundManager : public ndClassAlloc
 	class Implementation;
 	public:
 
-	ndSoundManager();
+	ndSoundManager(ndDemoEntityManager* const owner);
 	virtual ~ndSoundManager();
 
 	void ClearSounds();
 	void RemoveSound(ndSharedPtr<ndSoundBuffer>& sound);
 	ndSharedPtr<ndSoundBuffer> AddSound(const char* const waveFileName);
 
-	void Update(const ndMatrix& listenerPosit, const ndVector& veloc);
+	void Update(const ndMatrix& listenerMatrix, const ndVector& veloc);
 
 	private:
 	Implementation* m_implementation;

@@ -11,6 +11,7 @@
 
 #include "ndSandboxStdafx.h"
 #include "ndSoundManager.h"
+#include "ndDemoEntityManager.h"
 
 #if !defined (ND_OPEN_AL)
 
@@ -129,27 +130,29 @@ class ndSoundManager::Implementation : public ndClassAlloc
 class ndSoundManager::Implementation: public ndClassAlloc
 {
 	public:
-	Implementation();
+	Implementation(ndDemoEntityManager* const owner);
 	virtual ~Implementation();
 	bool LoadWaveFile(ALuint buffer, const char* const waveFileName) const;
 	void Update(const ndMatrix& listenerPosit, const ndVector& listenerVeloc);
 
-	ndSharedPtr<ndSoundBuffer> AddSound(ndSoundManager* const manager, const char* const waveFileName);
+	ndSharedPtr<ndSoundBuffer> AddSound(const char* const waveFileName);
 	void RemoveSound(ndSharedPtr<ndSoundBuffer>& sound);
 	void ClearSounds();
 
+	ndWeakPtr<ndDemoEntityManager> m_owner;
 	ALCdevice* m_device;
 	ALCcontext* m_context;
 	ALboolean m_extension;
 	ndTree<ALuint, ndString> m_buffersCache;
-	ndList<ndSharedPtr<ndSoundBuffer>> m_soundScene;
-	static ndMatrix m_coodinateSystem;
+	ndList<ndWeakPtr<ndSoundBuffer>> m_soundScene;
+	static ndMatrix m_newtonToOpenAl;
+	static ndMatrix m_openAlToNewton;
 };
 
 class ndSoundBuffer::Implementation : public ndClassAlloc
 {
 	public:
-	Implementation(ndSoundManager* const owner, const char* const waveFileName);
+	Implementation(ndSharedPtr<ndSoundManager>& owner, const char* const waveFileName);
 	virtual ~Implementation();
 
 	void Play();
@@ -158,40 +161,38 @@ class ndSoundBuffer::Implementation : public ndClassAlloc
 
 	bool IsLooping() const;
 	void SetLooping(bool state);
+	ndVector GetPosition() const;
+	ndVector GetVelocity() const;
 	void SetPosition(const ndVector& posit);
 	void SetVelocity(const ndVector& veloc);
 
-	ndWeakPtr<ndSoundManager> m_manager;
-	ndList<ndSharedPtr<ndSoundBuffer>>::ndNode* m_sceneNode;
+	ndSharedPtr<ndSoundManager> m_manager;
+	ndList<ndWeakPtr<ndSoundBuffer>>::ndNode* m_sceneNode;
 	ALuint m_source;
 	bool m_isLooping;
 };
 
-ndMatrix ndSoundManager::Implementation::m_coodinateSystem(ndYawMatrix(ndFloat32(90.0f)* ndDegreeToRad));
+ndMatrix ndSoundManager::Implementation::m_newtonToOpenAl(ndYawMatrix(ndFloat32(90.0f)* ndDegreeToRad));
+ndMatrix ndSoundManager::Implementation::m_openAlToNewton(ndYawMatrix(ndFloat32(-90.0f)* ndDegreeToRad));
 
-ndSoundBuffer::Implementation::Implementation(ndSoundManager* const owner, const char* const waveFileName)
-//Implementation(ndSoundManager* const owner, ALuint buffer)
+ndSoundBuffer::Implementation::Implementation(ndSharedPtr<ndSoundManager>& owner, const char* const waveFileName)
 	:ndClassAlloc()
-	, m_manager(owner)
-	, m_sceneNode(nullptr)
-	, m_isLooping(false)
+	,m_manager(owner)
+	,m_sceneNode(nullptr)
+	,m_isLooping(false)
 {
 	ndTree<ALuint, ndString>::ndNode* const resource = m_manager->m_implementation->m_buffersCache.Find(waveFileName);
 	ndAssert(resource);
 	ALuint buffer = resource->GetInfo();
-	//// generate buffer
-	//alGenBuffers(1, &m_buffer);
-	//ndAssert(alGetError() == AL_NO_ERROR);
-	//LoadWaveFile(waveFileName);
-
+	
 	// Generate Source
 	alGenSources(1, &m_source);
 	ndAssert(alGetError() == AL_NO_ERROR);
-
+	
 	// bind buffer to source
 	alSourcei(m_source, AL_BUFFER, ALint(buffer));
 	ndAssert(alGetError() == AL_NO_ERROR);
-
+	
 	// Explicitly ensure the sound is relative to the world, not the listener
 	alSourcei(m_source, AL_SOURCE_RELATIVE, AL_FALSE);
 }
@@ -199,6 +200,18 @@ ndSoundBuffer::Implementation::Implementation(ndSoundManager* const owner, const
 ndSoundBuffer::Implementation::~Implementation()
 {
 	// delete source
+	if (m_sceneNode)
+	{
+		for (ndList<ndWeakPtr<ndSoundBuffer>>::ndNode* node = m_manager->m_implementation->m_soundScene.GetFirst(); node; node = node->GetNext())
+		{
+			if (node == m_sceneNode)
+			{
+				m_manager->m_implementation->m_soundScene.Remove(node);
+				m_sceneNode = nullptr;
+				break;
+			}
+		}
+	}
 	alDeleteSources(1, &m_source);
 	ndAssert(alGetError() == AL_NO_ERROR);
 }
@@ -239,7 +252,7 @@ void ndSoundBuffer::Implementation::SetPosition(const ndVector& posit)
 {
 	if (m_source)
 	{
-		const ndVector alPosit(ndSoundManager::Implementation::m_coodinateSystem.RotateVector(posit));
+		const ndVector alPosit(ndSoundManager::Implementation::m_newtonToOpenAl.RotateVector(posit));
 		alSource3f(m_source, AL_POSITION, ALfloat(alPosit.m_x), ALfloat(alPosit.m_y), ALfloat(alPosit.m_z));
 	}
 }
@@ -248,13 +261,37 @@ void ndSoundBuffer::Implementation::SetVelocity(const ndVector& veloc)
 {
 	if (m_source)
 	{
-		const ndVector alVeloc(ndSoundManager::Implementation::m_coodinateSystem.RotateVector(veloc));
+		const ndVector alVeloc(ndSoundManager::Implementation::m_newtonToOpenAl.RotateVector(veloc));
 		alSource3f(m_source, AL_POSITION, ALfloat(alVeloc.m_x), ALfloat(alVeloc.m_y), ALfloat(alVeloc.m_z));
 	}
 }
 
-ndSoundManager::Implementation::Implementation()
+ndVector ndSoundBuffer::Implementation::GetPosition() const
+{
+	ndVector posit(ndVector::m_wOne);
+	if (m_source)
+	{
+		ALfloat x;
+		ALfloat y;
+		ALfloat z;
+		alGetSource3f(m_source, AL_POSITION, &x, &y, &z);
+		ndVector p(ndFloat32(x), ndFloat32(y), ndFloat32(z), ndFloat32(1.0f));
+		posit = ndSoundManager::Implementation::m_openAlToNewton.TransformVector(p);
+	}
+	return posit;
+}
+
+ndVector ndSoundBuffer::Implementation::GetVelocity() const
+{
+	ndVector veloc(ndVector::m_wOne);
+
+	return veloc;
+}
+
+
+ndSoundManager::Implementation::Implementation(ndDemoEntityManager* const owner)
 	:ndClassAlloc()
+	,m_owner(owner)
 	,m_device(nullptr)
 	,m_context(nullptr)
 	,m_extension(false)
@@ -352,13 +389,13 @@ bool ndSoundManager::Implementation::LoadWaveFile(ALuint buffer, const char* con
 	return true;
 }
 
-void ndSoundManager::Implementation::Update(const ndMatrix& listenerPosit, const ndVector& listenerVeloc)
+void ndSoundManager::Implementation::Update(const ndMatrix& listenerMatrix, const ndVector& listenerVeloc)
 {
 	ALfloat posit[3];
 	ALfloat veloc[3];
 	ALfloat orientation[6];
-	const ndMatrix alMatrix(m_coodinateSystem * listenerPosit);
-	const ndVector alVeloc(m_coodinateSystem.RotateVector(listenerVeloc));
+	const ndMatrix alMatrix(listenerMatrix * m_newtonToOpenAl);
+	const ndVector alVeloc(m_newtonToOpenAl.RotateVector(listenerVeloc));
 
 	veloc[0] = ALfloat(alVeloc.m_x);
 	veloc[1] = ALfloat(alVeloc.m_y);
@@ -386,15 +423,24 @@ void ndSoundManager::Implementation::Update(const ndMatrix& listenerPosit, const
 	alListenerfv(AL_ORIENTATION, orientation);
 	ndAssert(alGetError() == AL_NO_ERROR);
 
-	// update all positionalsounds in teh scene
-	for (ndList<ndSharedPtr<ndSoundBuffer>>::ndNode* node = m_soundScene.GetFirst(); node; node = node->GetNext())
+	ALfloat x;
+	ALfloat y;
+	ALfloat z;
+	alGetListener3f(AL_POSITION, &x, &y, &z);
+	ndVector p0(m_openAlToNewton.RotateVector(ndVector(x, y, z, 1.0f)));
+
+	// update all positional sounds in teh scene
+	for (ndList<ndWeakPtr<ndSoundBuffer>>::ndNode* node = m_soundScene.GetFirst(); node; node = node->GetNext())
 	{
-		ndSharedPtr<ndSoundBuffer>& sound = node->GetInfo();
+		ndWeakPtr<ndSoundBuffer>& sound = node->GetInfo();
 		sound->m_implementation->Update();
+
+		ndVector p1 (sound->GetPosition());
+		ndVector p2(sound->GetPosition());
 	}
 }
 
-ndSharedPtr<ndSoundBuffer> ndSoundManager::Implementation::AddSound(ndSoundManager* const manager, const char* const waveFileName)
+ndSharedPtr<ndSoundBuffer> ndSoundManager::Implementation::AddSound(const char* const waveFileName)
 {
 	const ndString name(waveFileName);
 	ndTree<ALuint, ndString>::ndNode* resource = m_buffersCache.Find(name);
@@ -408,33 +454,44 @@ ndSharedPtr<ndSoundBuffer> ndSoundManager::Implementation::AddSound(ndSoundManag
 		resource = m_buffersCache.Insert(buffer, name);
 	}
 
+	ndSharedPtr<ndSoundManager> manager (m_owner->GetSoundManager());
+	ndAssert(*manager);
 	ndSharedPtr<ndSoundBuffer> sound(new ndSoundBuffer(manager, waveFileName));
-	sound->m_implementation->m_sceneNode = m_soundScene.Append(sound);
+	sound->m_implementation->m_sceneNode = m_soundScene.Append(*sound);
 	return sound;
 }
 
 void ndSoundManager::Implementation::RemoveSound(ndSharedPtr<ndSoundBuffer>& sound)
 {
-	sound->Stop();
-	ndAssert(sound->m_implementation->m_sceneNode);
-	m_soundScene.Remove(sound->m_implementation->m_sceneNode);
+	ndAssert(0);
+	//sound->Stop();
+	//ndAssert(sound->m_implementation->m_sceneNode);
+	//m_soundScene.Remove(sound->m_implementation->m_sceneNode);
 }
 
 void ndSoundManager::Implementation::ClearSounds()
 {
-	while (m_soundScene.GetCount())
-	{
-		ndSoundManager* const manager = *m_soundScene.GetLast()->GetInfo()->m_implementation->m_manager;
-		ndAssert(manager);
-		manager->RemoveSound(m_soundScene.GetLast()->GetInfo());
-	}
-
+	ndAssert(m_soundScene.GetCount() == 0);
+	//while (m_soundScene.GetCount())
+	//{
+	//	ndList<ndWeakPtr<ndSoundBuffer>>::ndNode* const node = m_soundScene.GetLast();
+	//	ndSoundBuffer* const sound = *node->GetInfo();
+	//	sound
+	//
+	//	//manager->RemoveSound(m_soundScene.GetLast()->GetInfo());
+	//}
+	
 	while (m_buffersCache.GetCount())
 	{
 		// delete buffer
 		ndTree<ALuint, ndString>::ndNode* const node = m_buffersCache.GetRoot();;
 		ALuint buffer = node->GetInfo();
 		alDeleteBuffers(1, &buffer);
+		//int xxxx = alGetError();
+		//if (xxxx)
+		//{
+		//	xxxx *= 1;
+		//}
 		ndAssert(alGetError() == AL_NO_ERROR);
 		m_buffersCache.Remove(node);
 	}
@@ -442,9 +499,9 @@ void ndSoundManager::Implementation::ClearSounds()
 
 #endif
 
-ndSoundBuffer::ndSoundBuffer(ndSoundManager* const manager, const char* const waveFileName)
+ndSoundBuffer::ndSoundBuffer(ndSharedPtr<ndSoundManager>& owner, const char* const waveFileName)
 	:ndClassAlloc()
-	,m_implementation(new Implementation(manager, waveFileName))
+	,m_implementation(new Implementation(owner, waveFileName))
 {
 }
 
@@ -483,17 +540,20 @@ void ndSoundBuffer::SetVelocity(const ndVector& veloc)
 	m_implementation->SetVelocity(veloc);
 }
 
-ndSoundManager::ndSoundManager()
-	:ndClassAlloc()
-	,m_implementation(new Implementation())
+ndVector ndSoundBuffer::GetPosition() const
 {
-	//ndSharedPtr<ndSoundBuffer> test0(AddSound("diesel_engine.wav"));
-	//ndSharedPtr<ndSoundBuffer> test(AddSound("diesel_engine.wav"));
-	//test->SetLooping(true);
-	//test->Play();
-	//Sleep(10000);
-	//test->Stop();
-	//RemoveSound(test0);
+	return m_implementation->GetPosition();
+}
+
+ndVector ndSoundBuffer::GetVelocity() const
+{
+	return m_implementation->GetVelocity();
+}
+
+ndSoundManager::ndSoundManager(ndDemoEntityManager* const owner)
+	:ndClassAlloc()
+	,m_implementation(new Implementation(owner))
+{
 }
 
 ndSoundManager::~ndSoundManager()
@@ -502,14 +562,14 @@ ndSoundManager::~ndSoundManager()
 	delete m_implementation;
 }
 
-void ndSoundManager::Update(const ndMatrix& listenerPosit, const ndVector& veloc)
+void ndSoundManager::Update(const ndMatrix& listenerMatrix, const ndVector& listenerVeloc)
 {
-	m_implementation->Update(listenerPosit, veloc);
+	m_implementation->Update(listenerMatrix, listenerVeloc);
 }
 
 ndSharedPtr<ndSoundBuffer> ndSoundManager::AddSound(const char* const waveFileName)
 {
-	ndSharedPtr<ndSoundBuffer> sound (m_implementation->AddSound(this, waveFileName));
+	ndSharedPtr<ndSoundBuffer> sound (m_implementation->AddSound(waveFileName));
 	return sound;
 }
 

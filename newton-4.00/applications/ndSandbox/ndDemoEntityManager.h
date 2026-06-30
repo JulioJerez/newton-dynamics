@@ -213,7 +213,7 @@ class ndDemoEntityManager : public ndClassAlloc
 	const ndString& GetLastLoadMesh() const;
 	void SetLastLoadMesh(const ndString& name);
 
-	ndSoundManager& GetSoundManager();
+	ndSharedPtr<ndSoundManager> GetSoundManager();
 	const ndSharedPtr<ndGameControllerInputs>& GetGameController() const;
 
 	private:
@@ -251,6 +251,8 @@ class ndDemoEntityManager : public ndClassAlloc
 	ndSharedPtr<ndRenderSceneNode> m_flyByCamera;
 	ndSharedPtr<ndRenderSceneNode> m_lookAtTargetCamera;
 	ndSharedPtr<OnPostUpdate> m_onPostUpdate;
+
+	ndSharedPtr<ndSoundManager> m_soundManager;
 	ndSharedPtr<ndGameControllerInputs> m_gameController;
 
 	ndString m_lastModelName;
@@ -292,8 +294,6 @@ class ndDemoEntityManager : public ndClassAlloc
 	bool m_changeCamera;
 	ndKeyTrigger m_nextActiveCamera;
 	ndWorld::ndSolverModes m_solverMode;
-
-	ndSoundManager m_soundManager;
 
 	static ndDemos m_demosSelection[];
 	static ndDemos m_machineLearning[];
