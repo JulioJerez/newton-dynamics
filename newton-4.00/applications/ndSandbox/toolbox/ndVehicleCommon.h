@@ -66,7 +66,7 @@ class ndVehicleCommonNotify : public ndModelNotify
 	ndDriveState m_driverState;
 	ndTransmissionMode m_transmission;
 
-	ndSharedPtr<ndSoundBuffer> m_engineSound;
+	ndSharedPtr<ndSoundSource> m_engineSound;
 
 	bool m_isPlayer;
 };

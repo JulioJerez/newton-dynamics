@@ -14,14 +14,30 @@
 
 #include "ndSandboxStdafx.h"
 
+class ndSoundSource;
 class ndSoundManager;
 class ndDemoEntityManager;
 
-class ndSoundBuffer : public ndClassAlloc
+class ndSoundSourceNotify : public ndClassAlloc
 {
-	class Implementation;
 	public:
-	virtual ~ndSoundBuffer();
+	ndSoundSourceNotify()
+		:ndClassAlloc()
+	{
+	}
+
+	virtual ~ndSoundSourceNotify()
+	{
+	}
+
+	virtual void Update(ndSoundSource* const source) = 0;
+};
+
+class ndSoundSource : public ndClassAlloc
+{
+	public:
+	class Implementation;
+	virtual ~ndSoundSource();
 
 	void Play();
 	void Stop();
@@ -33,29 +49,32 @@ class ndSoundBuffer : public ndClassAlloc
 	void SetPosition(const ndVector& posit);
 	void SetVelocity(const ndVector& veloc);
 
-	private:
-	ndSoundBuffer(ndSharedPtr<ndSoundManager>& owner, const char* const waveFileName);
+	ndSharedPtr<ndSoundSourceNotify> GetNotify() const;
+	void SetNotify(ndSharedPtr<ndSoundSourceNotify> notify);
+
+	protected:
+	ndSoundSource(ndSharedPtr<ndSoundManager>& owner, const char* const waveFileName);
 	Implementation* m_implementation;
 	friend class ndSoundManager;
 };
 
 class ndSoundManager : public ndClassAlloc
 {
-	class Implementation;
 	public:
-
+	class Implementation;
 	ndSoundManager(ndDemoEntityManager* const owner);
 	virtual ~ndSoundManager();
 
 	void ClearSounds();
-	void RemoveSound(ndSharedPtr<ndSoundBuffer>& sound);
-	ndSharedPtr<ndSoundBuffer> AddSound(const char* const waveFileName);
+	void RemoveSound(ndSharedPtr<ndSoundSource>& sound);
+	ndSharedPtr<ndSoundSource> AddSound(const char* const waveFileName);
 
 	void Update(const ndMatrix& listenerMatrix, const ndVector& veloc);
 
-	private:
+	protected:
 	Implementation* m_implementation;
-	friend class ndSoundBuffer;
+	friend class ndSoundSource;
+	friend class ndOpenAlSource;
 };
 
 #endif

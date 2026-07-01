@@ -15,6 +15,31 @@
 #include "ndDemoEntityManager.h"
 #include "ndGameControllerInputs.h"
 
+class ndUpdateVehicleSound : public ndSoundSourceNotify
+{
+	public:
+	ndUpdateVehicleSound(ndVehicleCommonNotify* const vehicle)
+		:ndSoundSourceNotify()
+		,m_vehicle(vehicle)
+	{
+	}
+
+	virtual void Update(ndSoundSource* const source)
+	{
+		ndMultiBodyVehicle* const vehicle = m_vehicle->GetModel()->GetAsMultiBodyVehicle();
+
+		// set the position and velocity
+		const ndBodyKinematic* const chassis = vehicle->GetRoot()->m_body->GetAsBodyKinematic();
+		source->SetVelocity(chassis->GetVelocity());
+		source->SetPosition(chassis->GetMatrix().m_posit);
+
+		//ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
+	}
+
+	ndWeakPtr<ndVehicleCommonNotify> m_vehicle;
+};
+
+
 ndVehicleCommonNotify::ndVehicleCommonNotify(ndDemoEntityManager* const scene, ndMultiBodyVehicle* const vehicle)
 	:ndModelNotify()
 	,m_currentGear(ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear)
@@ -28,6 +53,9 @@ ndVehicleCommonNotify::ndVehicleCommonNotify(ndDemoEntityManager* const scene, n
 	m_engineSound = scene->GetSoundManager()->AddSound("diesel_engine.wav");
 	m_engineSound->SetLooping(true);
 	m_engineSound->Play();
+
+	ndSharedPtr<ndSoundSourceNotify> notify(new ndUpdateVehicleSound(this));
+	m_engineSound->SetNotify(notify);
 }
 
 bool ndVehicleCommonNotify::GetPlayerState() const
@@ -81,7 +109,7 @@ void ndVehicleCommonNotify::Debug(ndConstraintDebugCallback& callback) const
 
 void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 {
-	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
+	ndMultiBodyVehicle* const vehicle = GetModel()->GetAsMultiBodyVehicle();
 	ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
 	ndMultiBodyVehicleGearBox* const gearJoint = vehicle->GetGearBox();
 
@@ -482,7 +510,4 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			ndAssert(0);
 		}
 	}
-
-	m_engineSound->SetVelocity(vehicle->GetRoot()->m_body->GetVelocity());
-	m_engineSound->SetPosition(vehicle->GetRoot()->m_body->GetMatrix().m_posit);
 }
