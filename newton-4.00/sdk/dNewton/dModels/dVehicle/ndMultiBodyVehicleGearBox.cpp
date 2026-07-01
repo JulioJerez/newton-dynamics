@@ -159,21 +159,40 @@ void ndMultiBodyVehicleGearBox::JacobianDerivative(ndConstraintDescritor& desc)
 		const ndVector& omega1 = m_body1->GetOmega();
 		const ndFloat32 idleOmega = m_idleOmega * gearRatio * ndFloat32(0.95f);
 
-		ndFloat32 w0 = omega0.DotProduct(jacobian0.m_angular).GetScalar();
-		ndFloat32 w1 = omega1.DotProduct(jacobian1.m_angular).GetScalar() + idleOmega;
-		
-		const ndFloat32 w = (w0 + w1) * ndFloat32(0.5f);
+		const ndFloat32 w0 = omega0.DotProduct(jacobian0.m_angular).GetScalar();
+		const ndFloat32 w1 = omega1.DotProduct(jacobian1.m_angular).GetScalar() + idleOmega;
+		const ndFloat32 w = w0 + w1;
 		SetMotorAcceleration(desc, -w * desc.m_invTimestep);
 		
-		if (m_gearRatio > ndFloat32 (0.0f))
+		if (m_gearBox.m_crownGearRatio > 0)
 		{
-			SetHighFriction(desc, m_clutchTorque);
-			SetLowerFriction(desc, -m_driveTrainResistanceTorque);
+			ndAssert(0);
+			if (m_gearRatio > ndFloat32(0.0f))
+			{
+				SetHighFriction(desc, m_clutchTorque);
+				SetLowerFriction(desc, -m_driveTrainResistanceTorque);
+			}
+			else
+			{
+				//SetHighFriction(desc, m_driveTrainResistanceTorque);
+				//SetLowerFriction(desc, -m_clutchTorque);
+
+				SetHighFriction(desc, m_clutchTorque);
+				//SetLowerFriction(desc, -0.01f);
+			}
 		}
 		else
 		{
-			SetHighFriction(desc, m_driveTrainResistanceTorque);
-			SetLowerFriction(desc, -m_clutchTorque);
+			if (m_gearRatio > ndFloat32(0.0f))
+			{
+				SetHighFriction(desc, m_driveTrainResistanceTorque);
+				SetLowerFriction(desc, -m_clutchTorque);
+			}
+			else
+			{
+				SetHighFriction(desc, m_clutchTorque);
+				SetLowerFriction(desc, -m_driveTrainResistanceTorque);
+			}
 		}
 	}
 }

@@ -242,6 +242,7 @@ typedef double ndFloat64;
 #define ndDegreeToRad		ndFloat32 (ndPi / 180.0f)
 #define ndRadToDegree  		ndFloat32 (180.0f / ndPi)
 #define ndRadPerSecToRpm	ndFloat32 (9.55f)
+#define ndRpmToRadPerSec	ndFloat32 (1.0f / 9.55f)
 
 extern D_CORE_API ndFloat32 ndExp_VS_Fix(ndReal x);
 

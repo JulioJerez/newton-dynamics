@@ -660,6 +660,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	,m_flyByCamera(nullptr)
 	,m_lookAtTargetCamera(nullptr)
 	,m_onPostUpdate(nullptr)
+	,m_soundManager(nullptr)
 	,m_gameController(nullptr)
 	,m_lastModelName("")
 	,m_currentScene(DEFAULT_SCENE)
@@ -710,7 +711,8 @@ ndDemoEntityManager::ndDemoEntityManager()
 	const ndString fontPathName(ndGetWorkingFileName("Cousine-Regular.ttf"));
 	m_renderer->InitImGui(fontPathName.GetStr());
 
-	// add a game controller if any
+	// add a game controller and a sound manager
+	m_soundManager = ndSharedPtr<ndSoundManager>(new ndSoundManager(this));
 	m_gameController = ndSharedPtr<ndGameControllerInputs>(new ndGameControllerInputs());
 
 	// load the environment texture
@@ -941,6 +943,11 @@ void ndDemoEntityManager::SetLastLoadMesh(const ndString& name)
 	m_lastModelName = name;
 }
 
+ndSharedPtr<ndSoundManager> ndDemoEntityManager::GetSoundManager()
+{
+	return m_soundManager;
+}
+
 const ndSharedPtr<ndGameControllerInputs>& ndDemoEntityManager::GetGameController() const
 {
 	return m_gameController;
@@ -965,6 +972,10 @@ void ndDemoEntityManager::Cleanup ()
 	}
 
 	m_renderer->ResetScene();
+
+	// clear all the helpers
+	m_demoHelper = ndSharedPtr<ndDemoHelper>(nullptr);
+	m_demoUIpanel = ndSharedPtr<ndDemoUIpanel>(nullptr);
 	RegisterPostUpdate(ndSharedPtr<OnPostUpdate>(nullptr));
 	
 	// destroy the Newton world
@@ -975,6 +986,8 @@ void ndDemoEntityManager::Cleanup ()
 		m_world = ndSharedPtr<ndPhysicsWorld>(nullptr);
 	}
 	
+	m_soundManager->ClearSounds();
+
 	// create the newton world
 	m_world = ndSharedPtr<ndPhysicsWorld>(new ndPhysicsWorld(this));
 	ApplyMenuOptions();

@@ -117,17 +117,25 @@ ndFloat32 ndMultiBodyVehicleMotor::ndEngineTorqueCurve::GetIdleRpm() const
 
 ndFloat32 ndMultiBodyVehicleMotor::ndEngineTorqueCurve::GetLowGearShiftRpm() const
 {
-	return m_rpms[2];
+	const ndFloat32 range = (m_rpms[3] - m_rpms[2]);
+	return m_rpms[2] + ndFloat32 (0.2f) * range;
 }
 
 ndFloat32 ndMultiBodyVehicleMotor::ndEngineTorqueCurve::GetHighGearShiftRpm() const
 {
-	return m_rpms[3];
+	const ndFloat32 range = (m_rpms[3] - m_rpms[2]);
+	return m_rpms[2] + ndFloat32(0.8f) * range;
 }
 
 ndFloat32 ndMultiBodyVehicleMotor::ndEngineTorqueCurve::GetRedLineRpm() const
 {
 	const ndFloat32 rpm = m_rpms[m_rpms.GetCount() - 1];
+	return rpm;
+}
+
+ndFloat32 ndMultiBodyVehicleMotor::ndEngineTorqueCurve::GetPickPowerRpm() const
+{
+	const ndFloat32 rpm = m_rpms[m_rpms.GetCount() - 2];
 	return rpm;
 }
 

@@ -225,7 +225,7 @@ class ndMeshJointGear : public ndMeshJoint
 	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
-	ndFloat32 m_ratio;
+	ndReal m_ratio;
 };
 
 class ndMeshJointHinge : public ndMeshJoint
@@ -393,6 +393,7 @@ class ndMeshJointVehicleMotor : public ndMeshJoint
 	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
 
 	ndMultiBodyVehicleMotor::ndEngineTorqueCurve m_engineCurve;
+	ndReal m_topSpeed;
 };
 
 class ndMeshJointVehicleGearBox : public ndMeshJoint

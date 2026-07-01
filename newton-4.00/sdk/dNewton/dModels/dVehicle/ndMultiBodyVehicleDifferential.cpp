@@ -127,4 +127,9 @@ void ndMultiBodyVehicleDifferential::JacobianDerivative(ndConstraintDescritor& d
 			SetLowerFriction(desc, ndFloat32(0.0f));
 		}
 	}
+	else
+	{
+		AddAngularRowJacobian(desc, matrix1.m_up, ndFloat32(0.0f));
+		SetMassSpringDamperAcceleration(desc, ndFloat32(0.1f), ndFloat32(0.0f), ndFloat32(5.0f));
+	}
 }

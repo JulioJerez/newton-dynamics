@@ -151,7 +151,7 @@ namespace ndMotorVehicle
 		}
 
 		//add the notification to bind to the application.
-		ndSharedPtr<ndModelNotify> controller(new ndVehicleCommonNotify(vehicle));
+		ndSharedPtr<ndModelNotify> controller(new ndVehicleCommonNotify(scene, vehicle));
 		vehicle->SetNotifyCallback(controller);
 
 		scene->AddEntity(sceneMesh);
@@ -172,50 +172,50 @@ namespace ndMotorVehicle
 		{
 		}
 
-		void DrawDial(ndReal originX, ndReal originY, ndReal radius, ndReal value, ndReal range)
-		{
-			ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
-
-			// Calculate a dynamic center point offset from your canvas space
-			ImVec2 dynamic_center = ImVec2(canvas_pos.x + originX, canvas_pos.y + originY);
-
-			// Safely draw your shape relative to the layout window
-			ndInt32 color = 64;
-			ImDrawList* const drawList = ImGui::GetWindowDrawList();
-			drawList->AddCircleFilled(dynamic_center, radius, IM_COL32(color, color, color, 255), 0);
-
-			ImVec2 needle[] =
-			{
-				{0.0f, 0.1f}, 
-				{-0.1f, 0.0f}, 
-				{0.0f, -0.1f}, 
-				{1.0f, 0.0f},
-				{0.0f, 0.1f},
-			};
-
-			ndFloat32 scale = radius * 0.9f;
-			const ndInt32 size = sizeof(needle) / sizeof(needle[0]);
-
-			ndFloat32 angleRange = 300.0f;
-			ndFloat32 initialAngle = -240.0f;
-			ndFloat32 angle = ndDegreeToRad * (initialAngle + value * angleRange / range);
-			ndReal sinAngle = ndReal(ndSin(angle));
-			ndReal cosAngle = ndReal(ndCos(angle));
-
-			for (ndInt32 i = 0; i < size; ++i)
-			{
-				ndReal x = needle[i][0] * cosAngle - needle[i][1] * sinAngle;
-				ndReal y = needle[i][0] * sinAngle + needle[i][1] * cosAngle;
-				needle[i][0] = x * scale + dynamic_center.x;
-				needle[i][1] = y * scale + dynamic_center.y;
-			}
-			drawList->AddConvexPolyFilled(needle, size, IM_COL32(255, 255, 0, 255));
-		}
-
 		virtual void Update(ndDemoEntityManager* const) override
 		{
 			if (m_vehicle)
 			{
+				auto DrawDial = [](ndReal originX, ndReal originY, ndReal radius, ndReal value, ndReal range, ndUnsigned32 color)
+				{
+					ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
+
+					// Calculate a dynamic center point offset from your canvas space
+					ImVec2 dynamic_center = ImVec2(canvas_pos.x + originX, canvas_pos.y + originY);
+
+					// Safely draw your shape relative to the layout window
+					ndInt32 plateColor = 64;
+					ImDrawList* const drawList = ImGui::GetWindowDrawList();
+					drawList->AddCircleFilled(dynamic_center, radius, IM_COL32(plateColor, plateColor, plateColor, 255), 0);
+
+					ImVec2 needle[] =
+					{
+						{0.0f, 0.1f},
+						{-0.1f, 0.0f},
+						{0.0f, -0.1f},
+						{1.0f, 0.0f},
+						{0.0f, 0.1f},
+					};
+
+					ndFloat32 scale = radius * 0.9f;
+					const ndInt32 size = sizeof(needle) / sizeof(needle[0]);
+
+					ndFloat32 angleRange = 300.0f;
+					ndFloat32 initialAngle = -240.0f;
+					ndFloat32 angle = ndDegreeToRad * (initialAngle + value * angleRange / range);
+					ndReal sinAngle = ndReal(ndSin(angle));
+					ndReal cosAngle = ndReal(ndCos(angle));
+
+					for (ndInt32 i = 0; i < size; ++i)
+					{
+						ndReal x = needle[i][0] * cosAngle - needle[i][1] * sinAngle;
+						ndReal y = needle[i][0] * sinAngle + needle[i][1] * cosAngle;
+						needle[i][0] = ndReal(x * scale + dynamic_center.x);
+						needle[i][1] = ndReal(y * scale + dynamic_center.y);
+					}
+					drawList->AddConvexPolyFilled(needle, size, color);
+				};
+
 				ndVector color(1.0f, 1.0f, 0.0f, 0.0f);
 				const ndMultiBodyVehicle* const vehicle = m_vehicle->GetAsMultiBodyVehicle();
 				const ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
@@ -223,12 +223,12 @@ namespace ndMotorVehicle
 				// draw engine rpm
 				ndReal rpm = ndReal(motor->GetRpm());
 				ImGui::Text("  rmp %04d", ndInt32 (rpm));
-				DrawDial(60.0f, 50.0f, 50.0f, rpm, ndReal(motor->GetMaxRpm()));
+				DrawDial(60.0f, 50.0f, 50.0f, rpm, ndReal(motor->GetMaxRpm()), IM_COL32(180, 0, 0, 255));
 
 				ImGui::SameLine();
 				ndReal speed = ndReal(vehicle->GetSpeed() * 3.6f);
 				ImGui::Text("  kmh %03d", ndInt32(speed));
-				DrawDial(160.0f, 50.0f, 50.0f, speed, ndReal(motor->GetTopSpeed() * 3.6f));
+				DrawDial(160.0f, 50.0f, 50.0f, speed, ndReal(motor->GetTopSpeed() * 3.6f), IM_COL32(180, 180, 0, 255));
 
 				const ndSharedPtr<ndModelNotify>& notify = vehicle->GetNotifyCallback();
 				const ndVehicleCommonNotify* const controller = (ndVehicleCommonNotify*)*notify;
@@ -239,7 +239,15 @@ namespace ndMotorVehicle
 				ImGui::NewLine();
 				ImGui::NewLine();
 
-				ImGui::Text("transmission: manual");
+				if (controller->m_transmission == ndVehicleCommonNotify::m_manual)
+				{
+					ImGui::Text("transmission: manual");
+				}
+				else
+				{
+					ImGui::Text("transmission: automatic");
+				}
+
 				if (controller->m_driverState == ndVehicleCommonNotify::m_parked)
 				{
 					ImGui::Text("current gear: parked");
@@ -248,6 +256,12 @@ namespace ndMotorVehicle
 				{
 					switch (controller->m_currentGear)
 					{
+						case ndMultiBodyVehicleGearBox::ndGearBox::m_revertGear:
+						{
+							ImGui::Text("current gear: reverse");
+							break;
+						}
+
 						case ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear:
 						{
 							ImGui::Text("current gear: neutral");
@@ -285,7 +299,7 @@ namespace ndMotorVehicle
 			}
 		}
 
-		ndWeakPtr<ndModel> m_vehicle;
+		ndSharedPtr<ndModel> m_vehicle;
 	};
 
 	class SceneNavigation : public ndDemoEntityManager::OnPostUpdate
@@ -308,7 +322,7 @@ namespace ndMotorVehicle
 			const ndFixSizeArray<bool, 32>& buttons = manager->GetGameController()->GetButtons();
 			if (m_changePlayer.Update(buttons[ndGameControllerInputs::m_changePlayer] ? true : false))
 			{
-				ndFixSizeArray<ndMultiBodyVehicle*, 256> vehicleArray;
+				ndFixSizeArray<ndModelList::ndNode*, 256> vehicleArray;
 				const ndModelList& models = manager->GetWorld()->GetModelList();
 			
 				// get the vehicle array
@@ -323,7 +337,7 @@ namespace ndMotorVehicle
 						{
 							currentPlayerIndex = vehicleArray.GetCount();
 						}
-						vehicleArray.PushBack(vehicle);
+						vehicleArray.PushBack(node);
 
 						ndSharedPtr<ndBodyNotify>& notify = vehicle->GetRoot()->m_body->GetNotifyCallback();
 						ndDemoEntityNotify* const vehicleNotify = (ndDemoEntityNotify*)*notify;
@@ -334,13 +348,13 @@ namespace ndMotorVehicle
 				}
 			
 				// make this vehicle inactive
-				ndMultiBodyVehicle* const currentVehicle = vehicleArray[currentPlayerIndex];
+				ndMultiBodyVehicle* const currentVehicle = vehicleArray[currentPlayerIndex]->GetInfo()->GetAsMultiBodyVehicle();
 				ndVehicleCommonNotify* const currentModelNotify = (ndVehicleCommonNotify*)*currentVehicle->GetNotifyCallback();
 				currentModelNotify->SetAsPlayer(false);
 
 				// activate next vehicle
 				ndInt32 nextPlayerIndex = (currentPlayerIndex + 1) % vehicleArray.GetCount();
-				ndMultiBodyVehicle* const vehicle = vehicleArray[nextPlayerIndex];
+				ndMultiBodyVehicle* const vehicle = vehicleArray[nextPlayerIndex]->GetInfo()->GetAsMultiBodyVehicle();
 				ndVehicleCommonNotify* const modelNotify = (ndVehicleCommonNotify*)*vehicle->GetNotifyCallback();
 				modelNotify->SetAsPlayer(true);
 
@@ -363,7 +377,7 @@ namespace ndMotorVehicle
 
 				// set the dashboard 
 				ndDashboard* const dashboard = (ndDashboard*)*m_dashboard;
-				dashboard->m_vehicle = vehicle;
+				dashboard->m_vehicle = vehicleArray[nextPlayerIndex]->GetInfo();
 			}
 		}
 

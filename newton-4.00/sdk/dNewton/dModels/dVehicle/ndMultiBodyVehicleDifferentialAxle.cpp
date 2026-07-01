@@ -109,6 +109,7 @@ void ndMultiBodyVehicleDifferentialAxle::JacobianDerivative(ndConstraintDescrito
 	const ndVector& omega1 = m_body1->GetOmega();
 
 	const ndVector relOmega(omega0 * jacobian0.m_angular + omega1 * jacobian1.m_angular);
-	ndFloat32 w = relOmega.AddHorizontal().GetScalar() * ndFloat32(0.5f);
+	//ndFloat32 w = relOmega.AddHorizontal().GetScalar() * ndFloat32(0.5f);
+	ndFloat32 w = relOmega.AddHorizontal().GetScalar();
 	SetMotorAcceleration(desc, -w * desc.m_invTimestep);
 }

@@ -13,6 +13,8 @@ cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
 set (projectName "ndSandbox")
 message (${projectName})
 
+option("NEWTON_BUILD_SANDBOX_DEMOS_OPEN_AL" "enable sound" OFF)
+
 # source and header files
 if (APPLE) 
 	file(GLOB CPP_SOURCE 
@@ -68,6 +70,11 @@ else()
 	include_directories(../../thirdParty/glfw/)
 	include_directories(../../thirdParty/glfw/include/)
 	include_directories(../../thirdParty/glatter/include/glatter/)
+endif()
+
+if (NEWTON_BUILD_SANDBOX_DEMOS_OPEN_AL AND MSVC)
+	add_definitions(-DND_OPEN_AL)
+	include_directories(openal/include)
 endif()
 
 set (openclSDKPath ${CMAKE_SOURCE_DIR}/thirdParty/opencl/OpenCL-SDK-v2024.10.24-Win-x64)
@@ -149,6 +156,10 @@ if(MSVC OR MINGW)
 		target_link_libraries (${projectName} PUBLIC ${openclSDKPath}/lib/OpenCL.lib)
 	endif()
 
+	if(NEWTON_BUILD_SANDBOX_DEMOS_OPEN_AL AND MSVC)
+		target_link_libraries (${projectName} PUBLIC ${CMAKE_SOURCE_DIR}/applications/ndSandbox/openal/libs/Win64/OpenAL32.lib)
+	endif()
+
 	if(MSVC)
 		target_link_options(${projectName} PUBLIC "/DEBUG")
 	elseif(MINGW)
@@ -175,5 +186,8 @@ endif()
 install(DIRECTORY ../media DESTINATION "${PROJECT_BINARY_DIR}/applications")
 
 if (MSVC)
+	install(DIRECTORY openal/bin/Win64/ DESTINATION "${PROJECT_BINARY_DIR}/applications/${projectName}/$<CONFIG>")
+	install(DIRECTORY openal/router/Win64/ DESTINATION "${PROJECT_BINARY_DIR}/applications/${projectName}/$<CONFIG>")
+
 	set_target_properties(${projectName} PROPERTIES FOLDER "demos")
 endif()
