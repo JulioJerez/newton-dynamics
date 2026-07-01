@@ -27,13 +27,13 @@ class ndUpdateVehicleSound : public ndSoundSourceNotify
 	virtual void Update(ndSoundSource* const source)
 	{
 		ndMultiBodyVehicle* const vehicle = m_vehicle->GetModel()->GetAsMultiBodyVehicle();
+		ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
 
 		// set the position and velocity
 		const ndBodyKinematic* const chassis = vehicle->GetRoot()->m_body->GetAsBodyKinematic();
 		source->SetVelocity(chassis->GetVelocity());
 		source->SetPosition(chassis->GetMatrix().m_posit);
 
-		//ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
 	}
 
 	ndWeakPtr<ndVehicleCommonNotify> m_vehicle;

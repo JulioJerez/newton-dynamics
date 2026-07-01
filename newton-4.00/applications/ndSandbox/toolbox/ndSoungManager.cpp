@@ -75,8 +75,21 @@ class ndSoundSource::Implementation : public ndClassAlloc
 		}
 	}
 
-	virtual void Play() {}
-	virtual void Stop() {}
+	virtual void Play() 
+	{ 
+		m_isPlayig = true;
+	}
+
+	virtual void Stop() 
+	{
+		m_isPlayig = false;
+	}
+
+	virtual bool IsPlaying() const
+	{
+		return m_isPlayig;
+	}
+
 	virtual bool IsLooping() const 
 	{ 
 		return m_isLooping;
@@ -126,6 +139,16 @@ class ndSoundSource::Implementation : public ndClassAlloc
 		m_volume = ndClamp(volume, ndFloat32(0.0f), ndFloat32(1.0f));
 	}
 
+	virtual ndFloat32 GetPitch() const
+	{
+		return m_pitch;
+	}
+
+	virtual void SetPitch(ndFloat32 ptich)
+	{
+		m_pitch = ndAbs(ptich);
+	}
+
 	ndSharedPtr<ndSoundSourceNotify> GetNotify() const
 	{
 		return m_notify;
@@ -142,7 +165,9 @@ class ndSoundSource::Implementation : public ndClassAlloc
 	ndSharedPtr<ndSoundSourceNotify> m_notify;
 	ndList<ndWeakPtr<ndSoundSource>>::ndNode* m_sceneNode;
 
+	ndFloat32 m_pitch;
 	ndFloat32 m_volume;
+	bool m_isPlayig;
 	bool m_isLooping;
 };
 
@@ -197,9 +222,11 @@ class ndOpenAlSource: public ndSoundSource::Implementation
 
 	virtual void Play() override;
 	virtual void Stop() override;
+	virtual bool IsPlaying() const override;
 
 	virtual bool IsLooping() const override;
 	virtual void SetLooping(bool state) override;
+	virtual void SetPitch(ndFloat32 pitch) override;
 	virtual void SetVolume(ndFloat32 volume) override;
 	virtual void SetPosition(const ndVector& posit) override;
 	virtual void SetVelocity(const ndVector& veloc) override;
@@ -252,6 +279,7 @@ bool ndOpenAlSource::IsLooping() const
 
 void ndOpenAlSource::Play()
 {
+	Implementation::Play();
 	if (m_source)
 	{
 		alSourcePlay(m_source);
@@ -260,10 +288,23 @@ void ndOpenAlSource::Play()
 
 void ndOpenAlSource::Stop()
 {
+	Implementation::Play();
 	if (m_source)
 	{
 		alSourceStop(m_source);
 	}
+}
+
+bool ndOpenAlSource::IsPlaying() const
+{ 
+	bool playing = Implementation::IsPlaying();
+	if (m_source)
+	{
+		ALint sourceState;
+		alGetSourcei(m_source, AL_SOURCE_STATE, &sourceState);
+		playing = sourceState ? true : false;
+	}
+	return playing;
 }
 
 void ndOpenAlSource::SetPosition(const ndVector& posit)
@@ -291,7 +332,16 @@ void ndOpenAlSource::SetVolume(ndFloat32 volume)
 	Implementation::SetVolume(volume);
 	if (m_source)
 	{
-		alSourcef(m_source, AL_GAIN, ALfloat(volume));
+		alSourcef(m_source, AL_GAIN, ALfloat(m_volume));
+	}
+}
+
+void ndOpenAlSource::SetPitch(ndFloat32 pitch)
+{
+	Implementation::SetVolume(pitch);
+	if (m_source)
+	{
+		alSourcef(m_source, AL_PITCH, m_pitch);
 	}
 }
 
@@ -508,6 +558,11 @@ void ndSoundSource::Stop()
 	m_implementation->Stop();
 }
 
+bool ndSoundSource::IsPlaying() const
+{
+	return m_implementation->IsPlaying();
+}
+
 void ndSoundSource::SetLooping(bool state)
 {
 	m_implementation->SetLooping(state);
@@ -558,6 +613,15 @@ void ndSoundSource::SetVolume(ndFloat32 volume)
 	m_implementation->SetVolume(volume);
 }
 
+ndFloat32 ndSoundSource::GetPitch() const
+{
+	return m_implementation->GetPitch();
+}
+
+void ndSoundSource::SetPitch(ndFloat32 pitch)
+{
+	m_implementation->SetPitch(pitch);
+}
 
 ndSoundManager::ndSoundManager(ndDemoEntityManager* const owner)
 	:ndClassAlloc()

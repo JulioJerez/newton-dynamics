@@ -41,8 +41,13 @@ class ndSoundSource : public ndClassAlloc
 
 	void Play();
 	void Stop();
+	bool IsPlaying() const;
+
 	bool IsLooping() const;
 	void SetLooping(bool state);
+
+	ndFloat32 GetPitch() const;
+	void SetPitch(ndFloat32 pitch);
 
 	ndFloat32 GetVolume() const;
 	void SetVolume(ndFloat32 volume);
