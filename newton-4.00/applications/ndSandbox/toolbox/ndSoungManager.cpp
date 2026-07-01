@@ -283,6 +283,7 @@ void ndOpenAlSource::Play()
 	if (m_source)
 	{
 		alSourcePlay(m_source);
+		ndAssert(alGetError() == AL_NO_ERROR);
 	}
 }
 
@@ -292,6 +293,7 @@ void ndOpenAlSource::Stop()
 	if (m_source)
 	{
 		alSourceStop(m_source);
+		ndAssert(alGetError() == AL_NO_ERROR);
 	}
 }
 
@@ -302,7 +304,8 @@ bool ndOpenAlSource::IsPlaying() const
 	{
 		ALint sourceState;
 		alGetSourcei(m_source, AL_SOURCE_STATE, &sourceState);
-		playing = sourceState ? true : false;
+		ndAssert(alGetError() == AL_NO_ERROR);
+		playing = (sourceState == AL_PLAYING) ? true : false;
 	}
 	return playing;
 }
