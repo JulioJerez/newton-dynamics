@@ -95,10 +95,12 @@ class ndSoundSource::Implementation : public ndClassAlloc
 			m_notify->Update(*m_sceneNode->GetInfo());
 		}
 	}
+
 	ndVector GetPosition() const 
 	{
 		return m_posit;
 	}
+
 	ndVector GetVelocity() const 
 	{ 
 		return m_veloc;
@@ -108,9 +110,20 @@ class ndSoundSource::Implementation : public ndClassAlloc
 	{ 
 		m_posit = posit;
 	}
+
 	virtual void SetVelocity(const ndVector& veloc) 
 	{ 
 		m_veloc = veloc;
+	}
+
+	ndFloat32 GetVolume() const
+	{
+		return m_volume;
+	}
+
+	virtual void SetVolume(ndFloat32 volume)
+	{
+		m_volume = ndClamp(volume, ndFloat32(0.0f), ndFloat32(1.0f));
 	}
 
 	ndSharedPtr<ndSoundSourceNotify> GetNotify() const
@@ -128,6 +141,8 @@ class ndSoundSource::Implementation : public ndClassAlloc
 	ndSharedPtr<ndSoundManager> m_manager;
 	ndSharedPtr<ndSoundSourceNotify> m_notify;
 	ndList<ndWeakPtr<ndSoundSource>>::ndNode* m_sceneNode;
+
+	ndFloat32 m_volume;
 	bool m_isLooping;
 };
 
@@ -185,6 +200,7 @@ class ndOpenAlSource: public ndSoundSource::Implementation
 
 	virtual bool IsLooping() const override;
 	virtual void SetLooping(bool state) override;
+	virtual void SetVolume(ndFloat32 volume) override;
 	virtual void SetPosition(const ndVector& posit) override;
 	virtual void SetVelocity(const ndVector& veloc) override;
 
@@ -212,6 +228,9 @@ ndOpenAlSource::ndOpenAlSource(ndSharedPtr<ndSoundManager>& owner, const char* c
 	
 	// Explicitly ensure the sound is relative to the world, not the listener
 	alSourcei(m_source, AL_SOURCE_RELATIVE, AL_FALSE);
+
+	// set the volume
+	SetVolume(ndFloat32(1.0f));
 }
 
 ndOpenAlSource::~ndOpenAlSource()
@@ -264,6 +283,15 @@ void ndOpenAlSource::SetVelocity(const ndVector& veloc)
 	{
 		const ndVector alVeloc(ndOpenAlManager::m_newtonToOpenAl.RotateVector(veloc));
 		alSource3f(m_source, AL_VELOCITY, ALfloat(alVeloc.m_x), ALfloat(alVeloc.m_y), ALfloat(alVeloc.m_z));
+	}
+}
+
+void ndOpenAlSource::SetVolume(ndFloat32 volume)
+{
+	Implementation::SetVolume(volume);
+	if (m_source)
+	{
+		alSourcef(m_source, AL_GAIN, ALfloat(volume));
 	}
 }
 
@@ -399,11 +427,6 @@ void ndOpenAlManager::Update(const ndMatrix& listenerMatrix, const ndVector& lis
 	// Orientation ...
 	alListenerfv(AL_ORIENTATION, orientation);
 	ndAssert(alGetError() == AL_NO_ERROR);
-
-	ALfloat x;
-	ALfloat y;
-	ALfloat z;
-	alGetListener3f(AL_POSITION, &x, &y, &z);
 	Implementation::Update(listenerMatrix, listenerVeloc);
 }
 
@@ -524,6 +547,17 @@ void ndSoundSource::SetNotify(ndSharedPtr<ndSoundSourceNotify> notify)
 {
 	m_implementation->SetNotify(notify);
 }
+
+ndFloat32 ndSoundSource::GetVolume() const
+{
+	return m_implementation->GetVolume();
+}
+
+void ndSoundSource::SetVolume(ndFloat32 volume)
+{
+	m_implementation->SetVolume(volume);
+}
+
 
 ndSoundManager::ndSoundManager(ndDemoEntityManager* const owner)
 	:ndClassAlloc()

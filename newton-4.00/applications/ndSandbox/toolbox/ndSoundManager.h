@@ -44,6 +44,9 @@ class ndSoundSource : public ndClassAlloc
 	bool IsLooping() const;
 	void SetLooping(bool state);
 
+	ndFloat32 GetVolume() const;
+	void SetVolume(ndFloat32 volume);
+
 	ndVector GetPosition() const;
 	ndVector GetVelocity() const;
 	void SetPosition(const ndVector& posit);
