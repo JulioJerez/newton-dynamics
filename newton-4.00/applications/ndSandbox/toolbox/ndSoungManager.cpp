@@ -18,13 +18,36 @@ class ndSoundManager::Implementation : public ndClassAlloc
 	public:
 	Implementation(ndDemoEntityManager* const owner)
 		:ndClassAlloc()
+		,m_matrix(ndGetIdentityMatrix())
+		,m_velocity(ndVector::m_wOne)
 		,m_owner(owner)
 	{
 	}
 
 	virtual ~Implementation() {}
 
-	virtual void Update(const ndMatrix&, const ndVector&);
+	virtual void Update();
+
+	ndMatrix GetMatrix() const
+	{
+		return m_matrix;
+	}
+
+	void SetMatrix(const ndMatrix& matrix)
+	{
+		m_matrix = matrix;
+	}
+
+	ndVector GetVelocity() const
+	{
+		return m_velocity;
+	}
+
+	void SetVelocity(const ndVector& velocity)
+	{
+		m_velocity = velocity;
+	}
+
 	virtual ndSharedPtr<ndSoundSource> AddSound(const char* const waveFileName);
 	virtual void RemoveSound(ndSharedPtr<ndSoundSource>&) { ndAssert(0); }
 	virtual void ClearSounds()
@@ -41,6 +64,8 @@ class ndSoundManager::Implementation : public ndClassAlloc
 		}
 	}
 
+	ndMatrix m_matrix;
+	ndVector m_velocity;
 	ndWeakPtr<ndDemoEntityManager> m_owner;
 	ndList<ndWeakPtr<ndSoundSource>> m_soundScene;
 };
@@ -180,7 +205,7 @@ ndSharedPtr<ndSoundSource> ndSoundManager::Implementation::AddSound(const char* 
 	return sound;
 }
 
-void ndSoundManager::Implementation::Update(const ndMatrix&, const ndVector&) 
+void ndSoundManager::Implementation::Update() 
 { 
 	// update all positional sounds in the scene
 	for (ndList<ndWeakPtr<ndSoundSource>>::ndNode* node = m_soundScene.GetFirst(); node; node = node->GetNext())
@@ -200,7 +225,7 @@ class ndOpenAlManager: public ndSoundManager::Implementation
 	ndOpenAlManager(ndDemoEntityManager* const owner);
 	virtual ~ndOpenAlManager();
 
-	virtual void Update(const ndMatrix& listenerPosit, const ndVector& listenerVeloc) override;
+	virtual void Update() override;
 	virtual ndSharedPtr<ndSoundSource> AddSound(const char* const waveFileName) override;
 	virtual void RemoveSound(ndSharedPtr<ndSoundSource>& sound) override;
 	virtual void ClearSounds() override;
@@ -211,7 +236,6 @@ class ndOpenAlManager: public ndSoundManager::Implementation
 	ALboolean m_extension;
 	ndTree<ALuint, ndString> m_buffersCache;
 	static ndMatrix m_newtonToOpenAl;
-	static ndMatrix m_openAlToNewton;
 };
 
 class ndOpenAlSource: public ndSoundSource::Implementation
@@ -235,7 +259,6 @@ class ndOpenAlSource: public ndSoundSource::Implementation
 };
 
 ndMatrix ndOpenAlManager::m_newtonToOpenAl(ndYawMatrix(ndFloat32(90.0f)* ndDegreeToRad));
-ndMatrix ndOpenAlManager::m_openAlToNewton(ndYawMatrix(ndFloat32(-90.0f)* ndDegreeToRad));
 
 ndOpenAlSource::ndOpenAlSource(ndSharedPtr<ndSoundManager>& owner, const char* const waveFileName)
 	:ndSoundSource::Implementation(owner)
@@ -317,6 +340,7 @@ void ndOpenAlSource::SetPosition(const ndVector& posit)
 	{
 		const ndVector alPosit(ndOpenAlManager::m_newtonToOpenAl.RotateVector(posit));
 		alSource3f(m_source, AL_POSITION, ALfloat(alPosit.m_x), ALfloat(alPosit.m_y), ALfloat(alPosit.m_z));
+		ndAssert(alGetError() == AL_NO_ERROR);
 	}
 }
 
@@ -327,6 +351,7 @@ void ndOpenAlSource::SetVelocity(const ndVector& veloc)
 	{
 		const ndVector alVeloc(ndOpenAlManager::m_newtonToOpenAl.RotateVector(veloc));
 		alSource3f(m_source, AL_VELOCITY, ALfloat(alVeloc.m_x), ALfloat(alVeloc.m_y), ALfloat(alVeloc.m_z));
+		ndAssert(alGetError() == AL_NO_ERROR);
 	}
 }
 
@@ -336,15 +361,17 @@ void ndOpenAlSource::SetVolume(ndFloat32 volume)
 	if (m_source)
 	{
 		alSourcef(m_source, AL_GAIN, ALfloat(m_volume));
+		ndAssert(alGetError() == AL_NO_ERROR);
 	}
 }
 
 void ndOpenAlSource::SetPitch(ndFloat32 pitch)
 {
-	Implementation::SetVolume(pitch);
+	Implementation::SetPitch(pitch);
 	if (m_source)
 	{
 		alSourcef(m_source, AL_PITCH, m_pitch);
+		ndAssert(alGetError() == AL_NO_ERROR);
 	}
 }
 
@@ -447,13 +474,13 @@ bool ndOpenAlManager::LoadWaveFile(ALuint buffer, const char* const waveFileName
 	return true;
 }
 
-void ndOpenAlManager::Update(const ndMatrix& listenerMatrix, const ndVector& listenerVeloc)
+void ndOpenAlManager::Update()
 {
 	ALfloat posit[3];
 	ALfloat veloc[3];
 	ALfloat orientation[6];
-	const ndMatrix alMatrix(listenerMatrix * m_newtonToOpenAl);
-	const ndVector alVeloc(m_newtonToOpenAl.RotateVector(listenerVeloc));
+	const ndMatrix alMatrix(m_matrix * m_newtonToOpenAl);
+	const ndVector alVeloc(m_newtonToOpenAl.RotateVector(m_velocity));
 
 	veloc[0] = ALfloat(alVeloc.m_x);
 	veloc[1] = ALfloat(alVeloc.m_y);
@@ -480,7 +507,7 @@ void ndOpenAlManager::Update(const ndMatrix& listenerMatrix, const ndVector& lis
 	// Orientation ...
 	alListenerfv(AL_ORIENTATION, orientation);
 	ndAssert(alGetError() == AL_NO_ERROR);
-	Implementation::Update(listenerMatrix, listenerVeloc);
+	Implementation::Update();
 }
 
 ndSharedPtr<ndSoundSource> ndOpenAlManager::AddSound(const char* const waveFileName)
@@ -645,9 +672,9 @@ ndSoundManager::~ndSoundManager()
 	delete m_implementation;
 }
 
-void ndSoundManager::Update(const ndMatrix& listenerMatrix, const ndVector& listenerVeloc)
+void ndSoundManager::Update()
 {
-	m_implementation->Update(listenerMatrix, listenerVeloc);
+	m_implementation->Update();
 }
 
 ndSharedPtr<ndSoundSource> ndSoundManager::AddSound(const char* const waveFileName)
@@ -666,3 +693,22 @@ void ndSoundManager::ClearSounds()
 	m_implementation->ClearSounds();
 }
 
+ndMatrix ndSoundManager::GetMatrix() const
+{
+	return m_implementation->GetMatrix();;
+}
+
+ndVector ndSoundManager::GetVelocity() const
+{
+	return m_implementation->GetVelocity();
+}
+
+void ndSoundManager::SetMatrix(const ndMatrix& matrix)
+{
+	m_implementation->SetMatrix(matrix);
+}
+
+void ndSoundManager::SetVelocity(const ndVector& velocity)
+{
+	m_implementation->SetVelocity(velocity);
+}

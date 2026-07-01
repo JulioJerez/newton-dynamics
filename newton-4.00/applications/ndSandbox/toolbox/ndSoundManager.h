@@ -77,7 +77,13 @@ class ndSoundManager : public ndClassAlloc
 	void RemoveSound(ndSharedPtr<ndSoundSource>& sound);
 	ndSharedPtr<ndSoundSource> AddSound(const char* const waveFileName);
 
-	void Update(const ndMatrix& listenerMatrix, const ndVector& veloc);
+	ndMatrix GetMatrix() const;
+	void SetMatrix(const ndMatrix& matrix);
+
+	ndVector GetVelocity() const;
+	void SetVelocity(const ndVector& velocity);
+
+	void Update();
 
 	protected:
 	Implementation* m_implementation;

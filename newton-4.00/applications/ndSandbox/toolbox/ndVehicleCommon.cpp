@@ -15,10 +15,10 @@
 #include "ndDemoEntityManager.h"
 #include "ndGameControllerInputs.h"
 
-class ndUpdateVehicleSound : public ndSoundSourceNotify
+class ndVehicleEngineSound : public ndSoundSourceNotify
 {
 	public:
-	ndUpdateVehicleSound(ndVehicleCommonNotify* const vehicle)
+	ndVehicleEngineSound(ndVehicleCommonNotify* const vehicle)
 		:ndSoundSourceNotify()
 		,m_vehicle(vehicle)
 	{
@@ -30,10 +30,27 @@ class ndUpdateVehicleSound : public ndSoundSourceNotify
 		ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
 
 		// set the position and velocity
-		const ndBodyKinematic* const chassis = vehicle->GetRoot()->m_body->GetAsBodyKinematic();
-		source->SetVelocity(chassis->GetVelocity());
-		source->SetPosition(chassis->GetMatrix().m_posit);
-
+		ndFloat32 rpm = ndAbs(motor->GetRpm());
+		if (rpm < ndFloat32 (10.0f))
+		{
+			source->Stop();
+		}
+		else if (!source->IsPlaying())
+		{
+			source->Play();
+		}
+		else
+		{
+ 			const ndBodyKinematic* const chassis = vehicle->GetRoot()->m_body->GetAsBodyKinematic();
+			source->SetVelocity(chassis->GetVelocity());
+			source->SetPosition(chassis->GetMatrix().m_posit);
+			
+			const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& torqueCurve = motor->GetCurve();
+			ndFloat32 ideRpm = torqueCurve.GetIdleRpm();
+			ndFloat32 maxRpm = torqueCurve.GetPickPowerRpm();
+			ndFloat32 pitch = ndFloat32(1.0f) + (rpm - ideRpm) / (maxRpm - ideRpm);
+			source->SetPitch(ndClamp (pitch, ndFloat32(1.0f), ndFloat32(2.0f)));
+		}
 	}
 
 	ndWeakPtr<ndVehicleCommonNotify> m_vehicle;
@@ -52,9 +69,8 @@ ndVehicleCommonNotify::ndVehicleCommonNotify(ndDemoEntityManager* const scene, n
 
 	m_engineSound = scene->GetSoundManager()->AddSound("diesel_engine.wav");
 	m_engineSound->SetLooping(true);
-	m_engineSound->Play();
 
-	ndSharedPtr<ndSoundSourceNotify> notify(new ndUpdateVehicleSound(this));
+	ndSharedPtr<ndSoundSourceNotify> notify(new ndVehicleEngineSound(this));
 	m_engineSound->SetNotify(notify);
 }
 

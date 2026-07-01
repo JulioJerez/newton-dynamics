@@ -268,9 +268,12 @@ void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
 	}
 
 	// update sound manager
-	const ndVector listenerVeloc(ndVector::m_zero);
 	const ndMatrix listenerMatrix(m_manager->GetRenderer()->GetCamera()->CalculateGlobalMatrix());
-	m_manager->m_soundManager->Update(listenerMatrix, listenerVeloc);
+	const ndMatrix oldListenerMatrix(m_manager->m_soundManager->GetMatrix());
+	const ndVector listenerVeloc((listenerMatrix.m_posit - oldListenerMatrix.m_posit).Scale(ndFloat32(1.0f / timestep)));
+	m_manager->m_soundManager->SetMatrix(listenerMatrix);
+	m_manager->m_soundManager->SetVelocity(listenerVeloc);
+	m_manager->m_soundManager->Update();
 
 	ndScopeSpinLock Lock(m_lock);
 

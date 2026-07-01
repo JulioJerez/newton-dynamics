@@ -176,7 +176,7 @@ namespace ndMotorVehicle
 		{
 			if (m_vehicle)
 			{
-				auto DrawDial = [](ndReal originX, ndReal originY, ndReal radius, ndReal value, ndReal range)
+				auto DrawDial = [](ndReal originX, ndReal originY, ndReal radius, ndReal value, ndReal range, ndUnsigned32 color)
 				{
 					ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
 
@@ -184,9 +184,9 @@ namespace ndMotorVehicle
 					ImVec2 dynamic_center = ImVec2(canvas_pos.x + originX, canvas_pos.y + originY);
 
 					// Safely draw your shape relative to the layout window
-					ndInt32 color = 64;
+					ndInt32 plateColor = 64;
 					ImDrawList* const drawList = ImGui::GetWindowDrawList();
-					drawList->AddCircleFilled(dynamic_center, radius, IM_COL32(color, color, color, 255), 0);
+					drawList->AddCircleFilled(dynamic_center, radius, IM_COL32(plateColor, plateColor, plateColor, 255), 0);
 
 					ImVec2 needle[] =
 					{
@@ -213,7 +213,7 @@ namespace ndMotorVehicle
 						needle[i][0] = ndReal(x * scale + dynamic_center.x);
 						needle[i][1] = ndReal(y * scale + dynamic_center.y);
 					}
-					drawList->AddConvexPolyFilled(needle, size, IM_COL32(255, 255, 0, 255));
+					drawList->AddConvexPolyFilled(needle, size, color);
 				};
 
 				ndVector color(1.0f, 1.0f, 0.0f, 0.0f);
@@ -223,12 +223,12 @@ namespace ndMotorVehicle
 				// draw engine rpm
 				ndReal rpm = ndReal(motor->GetRpm());
 				ImGui::Text("  rmp %04d", ndInt32 (rpm));
-				DrawDial(60.0f, 50.0f, 50.0f, rpm, ndReal(motor->GetMaxRpm()));
+				DrawDial(60.0f, 50.0f, 50.0f, rpm, ndReal(motor->GetMaxRpm()), IM_COL32(180, 0, 0, 255));
 
 				ImGui::SameLine();
 				ndReal speed = ndReal(vehicle->GetSpeed() * 3.6f);
 				ImGui::Text("  kmh %03d", ndInt32(speed));
-				DrawDial(160.0f, 50.0f, 50.0f, speed, ndReal(motor->GetTopSpeed() * 3.6f));
+				DrawDial(160.0f, 50.0f, 50.0f, speed, ndReal(motor->GetTopSpeed() * 3.6f), IM_COL32(180, 180, 0, 255));
 
 				const ndSharedPtr<ndModelNotify>& notify = vehicle->GetNotifyCallback();
 				const ndVehicleCommonNotify* const controller = (ndVehicleCommonNotify*)*notify;
