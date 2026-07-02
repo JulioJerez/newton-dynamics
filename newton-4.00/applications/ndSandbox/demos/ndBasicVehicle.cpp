@@ -33,6 +33,47 @@ namespace ndMotorVehicle
 		}
 	};
 
+	class ndVehicleEngineSound : public ndSoundSourceNotify
+	{
+		public:
+		ndVehicleEngineSound(ndMultiBodyVehicle* const vehicle)
+			:ndSoundSourceNotify()
+			,m_vehicle(vehicle)
+		{
+		}
+
+		virtual void Update(ndSoundSource* const source)
+		{
+			//ndMultiBodyVehicle* const vehicle = m_vehicle->GetModel()->GetAsMultiBodyVehicle();
+			ndMultiBodyVehicleMotor* const motor = m_vehicle->GetMotor();
+
+			// set the position and velocity
+			ndFloat32 rpm = ndAbs(motor->GetRpm());
+			if (rpm < ndFloat32(10.0f))
+			{
+				source->Stop();
+			}
+			else if (!source->IsPlaying())
+			{
+				source->Play();
+			}
+			else
+			{
+				const ndBodyKinematic* const chassis = m_vehicle->GetRoot()->m_body->GetAsBodyKinematic();
+				source->SetVelocity(chassis->GetVelocity());
+				source->SetPosition(chassis->GetMatrix().m_posit);
+
+				const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& torqueCurve = motor->GetCurve();
+				ndFloat32 ideRpm = torqueCurve.GetIdleRpm();
+				ndFloat32 maxRpm = torqueCurve.GetPickPowerRpm();
+				ndFloat32 pitch = ndFloat32(1.0f) + (rpm - ideRpm) / (maxRpm - ideRpm);
+				source->SetPitch(ndClamp(pitch, ndFloat32(1.0f), ndFloat32(2.0f)));
+			}
+		}
+
+		ndWeakPtr<ndMultiBodyVehicle> m_vehicle;
+	};
+
 	class ndBasicVehicleDectriptor : public ndVehicleDectriptor
 	{
 		public:
@@ -86,7 +127,8 @@ namespace ndMotorVehicle
 		ndRender* const renderer = *scene->GetRenderer();
 		ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *loader.m_mesh, ndGetWorkingFileName("")));
 
-		auto BindApplicationData = [scene, mesh, vehicle, &sceneMesh, &superCar](ndModelArticulation::ndNode* const node)
+		ndSharedPtr<ndSoundSource> engineSound;
+		auto BindApplicationData = [scene, mesh, vehicle, &sceneMesh, &superCar, &engineSound](ndModelArticulation::ndNode* const node)
 		{
 			if (vehicle->IsCloseLoop(node))
 			{
@@ -96,6 +138,15 @@ namespace ndMotorVehicle
 			{
 				const ndMesh* const meshNode = mesh->FindByClosestMatch(node->m_name);
 				ndAssert(meshNode);
+
+				if (meshNode->GetName() == "engine")
+				{
+					engineSound = scene->GetSoundManager()->AddSound("diesel_engine.wav");
+					engineSound->SetLooping(true);
+
+					ndSharedPtr<ndSoundSourceNotify> notify(new ndVehicleEngineSound(vehicle));
+					engineSound->SetNotify(notify);
+				}
 
 				// find the visual node this body control by name. 
 				const ndMatrix matrix(node->m_body->GetMatrix());
@@ -150,8 +201,8 @@ namespace ndMotorVehicle
 			cameraPivotNode->AddChild(camera);
 		}
 
-		//add the notification to bind to the application.
-		ndSharedPtr<ndModelNotify> controller(new ndVehicleCommonNotify(scene, vehicle));
+		//add the notification for binding to the application.
+		ndSharedPtr<ndModelNotify> controller(new ndVehicleCommonNotify(scene, vehicle, engineSound));
 		vehicle->SetNotifyCallback(controller);
 
 		scene->AddEntity(sceneMesh);

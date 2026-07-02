@@ -42,7 +42,7 @@ class ndVehicleCommonNotify : public ndModelNotify
 		m_automatic
 	};
 
-	ndVehicleCommonNotify(ndDemoEntityManager* const scene, ndMultiBodyVehicle* const vehicle);
+	ndVehicleCommonNotify(ndDemoEntityManager* const scene, ndMultiBodyVehicle* const vehicle, ndSharedPtr<ndSoundSource> engineSound);
 
 	virtual void ApplyInputs(ndFloat32 timestep);
 	
@@ -65,9 +65,7 @@ class ndVehicleCommonNotify : public ndModelNotify
 	ndDemoEntityManager::ndKeyTrigger m_manualTransmission;
 	ndDriveState m_driverState;
 	ndTransmissionMode m_transmission;
-
 	ndSharedPtr<ndSoundSource> m_engineSound;
-
 	bool m_isPlayer;
 };
 

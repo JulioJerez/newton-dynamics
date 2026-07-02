@@ -15,63 +15,16 @@
 #include "ndDemoEntityManager.h"
 #include "ndGameControllerInputs.h"
 
-class ndVehicleEngineSound : public ndSoundSourceNotify
-{
-	public:
-	ndVehicleEngineSound(ndVehicleCommonNotify* const vehicle)
-		:ndSoundSourceNotify()
-		,m_vehicle(vehicle)
-	{
-	}
-
-	virtual void Update(ndSoundSource* const source)
-	{
-		ndMultiBodyVehicle* const vehicle = m_vehicle->GetModel()->GetAsMultiBodyVehicle();
-		ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
-
-		// set the position and velocity
-		ndFloat32 rpm = ndAbs(motor->GetRpm());
-		if (rpm < ndFloat32 (10.0f))
-		{
-			source->Stop();
-		}
-		else if (!source->IsPlaying())
-		{
-			source->Play();
-		}
-		else
-		{
- 			const ndBodyKinematic* const chassis = vehicle->GetRoot()->m_body->GetAsBodyKinematic();
-			source->SetVelocity(chassis->GetVelocity());
-			source->SetPosition(chassis->GetMatrix().m_posit);
-			
-			const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& torqueCurve = motor->GetCurve();
-			ndFloat32 ideRpm = torqueCurve.GetIdleRpm();
-			ndFloat32 maxRpm = torqueCurve.GetPickPowerRpm();
-			ndFloat32 pitch = ndFloat32(1.0f) + (rpm - ideRpm) / (maxRpm - ideRpm);
-			source->SetPitch(ndClamp (pitch, ndFloat32(1.0f), ndFloat32(2.0f)));
-		}
-	}
-
-	ndWeakPtr<ndVehicleCommonNotify> m_vehicle;
-};
-
-
-ndVehicleCommonNotify::ndVehicleCommonNotify(ndDemoEntityManager* const scene, ndMultiBodyVehicle* const vehicle)
+ndVehicleCommonNotify::ndVehicleCommonNotify(ndDemoEntityManager* const scene, ndMultiBodyVehicle* const vehicle, ndSharedPtr<ndSoundSource> engineSound)
 	:ndModelNotify()
 	,m_currentGear(ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear)
 	,m_autoGearShiftTimer(0)
 	,m_driverState(m_parked)
 	,m_transmission(m_manual)
+	,m_engineSound(engineSound)
 	,m_isPlayer(false)
 {
 	SetModel(vehicle);
-
-	m_engineSound = scene->GetSoundManager()->AddSound("diesel_engine.wav");
-	m_engineSound->SetLooping(true);
-
-	ndSharedPtr<ndSoundSourceNotify> notify(new ndVehicleEngineSound(this));
-	m_engineSound->SetNotify(notify);
 }
 
 bool ndVehicleCommonNotify::GetPlayerState() const
