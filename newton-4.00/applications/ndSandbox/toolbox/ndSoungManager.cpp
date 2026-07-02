@@ -86,6 +86,11 @@ class ndSoundSource::Implementation : public ndClassAlloc
 
 	virtual ~Implementation() 
 	{ 
+		ClearSource();
+	}
+
+	virtual void ClearSource()
+	{
 		if (m_sceneNode)
 		{
 			for (ndList<ndWeakPtr<ndSoundSource>>::ndNode* node = m_manager->m_implementation->m_soundScene.GetFirst(); node; node = node->GetNext())
@@ -94,6 +99,7 @@ class ndSoundSource::Implementation : public ndClassAlloc
 				{
 					m_manager->m_implementation->m_soundScene.Remove(node);
 					m_sceneNode = nullptr;
+					m_manager = ndSharedPtr<ndSoundManager>(nullptr);
 					break;
 				}
 			}
@@ -244,6 +250,7 @@ class ndOpenAlSource: public ndSoundSource::Implementation
 	ndOpenAlSource(ndSharedPtr<ndSoundManager>& owner, const char* const waveFileName);
 	virtual ~ndOpenAlSource();
 
+	virtual void ClearSource() override;
 	virtual void Play() override;
 	virtual void Stop() override;
 	virtual bool IsPlaying() const override;
@@ -285,8 +292,18 @@ ndOpenAlSource::ndOpenAlSource(ndSharedPtr<ndSoundManager>& owner, const char* c
 
 ndOpenAlSource::~ndOpenAlSource()
 {
-	alDeleteSources(1, &m_source);
-	ndAssert(alGetError() == AL_NO_ERROR);
+	ClearSource();
+}
+
+void ndOpenAlSource::ClearSource()
+{
+	ndSoundSource::Implementation::ClearSource();
+	if (m_source)
+	{
+		alDeleteSources(1, &m_source);
+		ndAssert(alGetError() == AL_NO_ERROR);
+		m_source = 0;
+	}
 }
 
 void ndOpenAlSource::SetLooping(bool state)
@@ -528,28 +545,15 @@ ndSharedPtr<ndSoundSource> ndOpenAlManager::AddSound(const char* const waveFileN
 
 void ndOpenAlManager::RemoveSound(ndSharedPtr<ndSoundSource>& sound)
 {
-	ndAssert(0);
-	//sound->Stop();
-	//ndAssert(sound->m_implementation->m_sceneNode);
-	//m_soundScene.Remove(sound->m_implementation->m_sceneNode);
+	sound->Stop();
+	sound->m_implementation->ClearSource();
 }
 
 void ndOpenAlManager::ClearSounds()
 {
-	//ndAssert(0);
-	//ndAssert(m_soundScene.GetCount() == 0);
-	//while (m_soundScene.GetCount())
-	//{
-	//	ndList<ndWeakPtr<ndSoundSource>>::ndNode* const node = m_soundScene.GetLast();
-	//	ndSoundSource* const sound = *node->GetInfo();
-	//	sound
-	//
-	//	//manager->RemoveSound(m_soundScene.GetLast()->GetInfo());
-	//}
 	Implementation::ClearSounds();
 	while (m_buffersCache.GetCount())
 	{
-		// delete buffer
 		ndTree<ALuint, ndString>::ndNode* const node = m_buffersCache.GetRoot();;
 		ALuint buffer = node->GetInfo();
 		alDeleteBuffers(1, &buffer);

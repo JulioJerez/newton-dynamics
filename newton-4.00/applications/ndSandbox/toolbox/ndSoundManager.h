@@ -64,6 +64,7 @@ class ndSoundSource : public ndClassAlloc
 	ndSoundSource(ndSharedPtr<ndSoundManager>& owner, const char* const waveFileName);
 	Implementation* m_implementation;
 	friend class ndSoundManager;
+	friend class ndOpenAlManager;
 };
 
 class ndSoundManager : public ndClassAlloc
