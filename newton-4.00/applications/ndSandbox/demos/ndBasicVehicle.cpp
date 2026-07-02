@@ -141,11 +141,15 @@ namespace ndMotorVehicle
 
 				if (meshNode->GetName() == "engine")
 				{
-					engineSound = scene->GetSoundManager()->AddSound("diesel_engine.wav");
-					engineSound->SetLooping(true);
+					ndMeshCustomPropertyString* const property = (ndMeshCustomPropertyString*)meshNode->GetCustomPropertyByName("engineSound");
+					if (property)
+					{
+						engineSound = scene->GetSoundManager()->AddSound(property->m_value.GetStr());
+						engineSound->SetLooping(true);
 
-					ndSharedPtr<ndSoundSourceNotify> notify(new ndVehicleEngineSound(vehicle));
-					engineSound->SetNotify(notify);
+						ndSharedPtr<ndSoundSourceNotify> notify(new ndVehicleEngineSound(vehicle));
+						engineSound->SetNotify(notify);
+					}
 				}
 
 				// find the visual node this body control by name. 
