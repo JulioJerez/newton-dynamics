@@ -15,13 +15,12 @@
 #include "ndDemoEntityManager.h"
 #include "ndGameControllerInputs.h"
 
-ndVehicleCommonNotify::ndVehicleCommonNotify(ndDemoEntityManager* const scene, ndMultiBodyVehicle* const vehicle, ndSharedPtr<ndSoundSource> engineSound)
+ndVehicleCommonNotify::ndVehicleCommonNotify(ndMultiBodyVehicle* const vehicle)
 	:ndModelNotify()
 	,m_currentGear(ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear)
 	,m_autoGearShiftTimer(0)
 	,m_driverState(m_parked)
 	,m_transmission(m_manual)
-	,m_engineSound(engineSound)
 	,m_isPlayer(false)
 {
 	SetModel(vehicle);
@@ -378,7 +377,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			break;
 		}
 
-		// manual tranmission state machine
+		// manual transmission state machine
 		case m_driveForward:
 		{
 			if (m_ignition.Update(buttons[ndGameControllerInputs::m_ignitionButton] ? true : false))
@@ -392,6 +391,16 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				gearJoint->SetRatio(0.0f);
 				m_driverState = m_idle;
 			}
+
+			if (m_manualTransmission.Update(buttons[ndGameControllerInputs::m_automaticGearBoxButton] ? true : false))
+			{
+				m_transmission = m_automatic;
+				m_driverState = m_driveAutoGear;
+				m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
+				ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+				gearJoint->SetRatio(gearGain);
+			}
+
 
 			if (m_forwardGearUp.Update(buttons[ndGameControllerInputs::m_upGearButton] ? true : false))
 			{

@@ -74,6 +74,18 @@ namespace ndMotorVehicle
 		ndWeakPtr<ndMultiBodyVehicle> m_vehicle;
 	};
 
+	class ndVehicleController : public ndVehicleCommonNotify
+	{
+		public:
+		ndVehicleController(ndMultiBodyVehicle* const vehicle, ndSharedPtr<ndSoundSource> engineSound)
+			:ndVehicleCommonNotify(vehicle)
+			,m_engineSound(engineSound)
+		{
+		}
+
+		ndSharedPtr<ndSoundSource> m_engineSound;
+	};
+
 	class ndBasicVehicleDectriptor : public ndVehicleDectriptor
 	{
 		public:
@@ -206,7 +218,7 @@ namespace ndMotorVehicle
 		}
 
 		//add the notification for binding to the application.
-		ndSharedPtr<ndModelNotify> controller(new ndVehicleCommonNotify(scene, vehicle, engineSound));
+		ndSharedPtr<ndModelNotify> controller(new ndVehicleController(vehicle, engineSound));
 		vehicle->SetNotifyCallback(controller);
 
 		scene->AddEntity(sceneMesh);

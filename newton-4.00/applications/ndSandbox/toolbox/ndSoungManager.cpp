@@ -93,16 +93,9 @@ class ndSoundSource::Implementation : public ndClassAlloc
 	{
 		if (m_sceneNode)
 		{
-			for (ndList<ndWeakPtr<ndSoundSource>>::ndNode* node = m_manager->m_implementation->m_soundScene.GetFirst(); node; node = node->GetNext())
-			{
-				if (node == m_sceneNode)
-				{
-					m_manager->m_implementation->m_soundScene.Remove(node);
-					m_sceneNode = nullptr;
-					m_manager = ndSharedPtr<ndSoundManager>(nullptr);
-					break;
-				}
-			}
+			m_manager->m_implementation->m_soundScene.Remove(m_sceneNode);
+			m_sceneNode = nullptr;
+			m_manager = ndSharedPtr<ndSoundManager>(nullptr);
 		}
 	}
 
