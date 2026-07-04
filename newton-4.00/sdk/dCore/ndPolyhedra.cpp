@@ -1099,7 +1099,12 @@ ndEdge* ndPolyhedra::FindEarTip (ndEdge* const face, const ndFloat64* const pool
 	{
 		ndBigVector p2 (ndBigVector::m_triplexMask & ndBigVector(&pool [ptr->m_next->m_incidentVertex * stride]));
 		ndBigVector d1 (p2 - p1);
-		ndFloat64 val1 = ndFloat64 (1.0f) / sqrt (d1.DotProduct(d1).GetScalar());
+		ndFloat64 mag2 = d1.DotProduct(d1).GetScalar();
+		if (mag2 < ndFloat64(1.0e-12f))
+		{
+			mag2 = ndFloat64(1.0e-12f);
+		}
+		ndFloat64 val1 = ndFloat64 (1.0f) / sqrt (mag2);
 		if (val1 < ndFloat64 (1.0e-10f)) 
 		{
 			val1 = ndFloat64 (1.0e-10f);

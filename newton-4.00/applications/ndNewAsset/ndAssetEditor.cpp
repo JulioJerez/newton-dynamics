@@ -420,7 +420,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					// Collision shapes:
 					// -box
 					// -tire
-					// -mesh
+					// -tree
 					// -vhacd
 					// -sphere
 					// -capsule

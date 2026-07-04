@@ -326,8 +326,8 @@ class ndMeshEffect: public ndPolyhedra
 		ndVector m_reflection;
 		ndFloat32 m_opacity;
 		ndFloat32 m_shiness;
-		char m_name[32];
-		char m_textureName[32];
+		char m_name[40];
+		char m_textureName[40];
 	};
 
 	class ndMeshVertexFormat

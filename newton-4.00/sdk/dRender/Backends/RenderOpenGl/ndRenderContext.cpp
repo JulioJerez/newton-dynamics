@@ -559,22 +559,20 @@ void ndRenderContext::ClearFrameBuffer(const ndVector& color)
 
 ndSharedPtr<ndRenderTexture> ndRenderContext::LoadTexture(const ndString& pathname)
 {
-	char tmp[256];
-	snprintf(tmp, sizeof(tmp), "%s", pathname.GetStr());
-	strtolwr(tmp);
-	//const char* const fileNameEnd = strstr(tmp, ".png");
-	//if (!fileNameEnd)
-	//{
-	//	strcat(tmp, ".png");
-	//	ndTrace(("subtitute texture %s with %s version\n", pathname.GetStr(), tmp));
-	//	ndAssert(0);
-	//}
+	ndString tmp(pathname);
+	tmp.ToLower();
+	ndInt32 index = tmp.FindReverse(".png");
+	if (index == -1)
+	{
+		tmp = tmp.GetPath() + tmp.GetName() + ".png";
+		ndTrace(("subtitute texture %s with %s version\n", pathname.GetStr(), tmp.GetStr()));
+	}
 
 	ndUnsigned32 width = 0;
 	ndUnsigned32 height = 0;
 	unsigned char* pBits = nullptr;
 	ndSharedPtr<ndRenderTexture> texture(nullptr);
-	ndUnsigned32 ret = lodepng_decode_file(&pBits, &width, &height, tmp, LCT_RGBA, 8);
+	ndUnsigned32 ret = lodepng_decode_file(&pBits, &width, &height, tmp.GetStr(), LCT_RGBA, 8);
 	if (ret)
 	{
 		ndTrace(("file: %s not found, replacing with default texture\n", pathname.GetStr()));

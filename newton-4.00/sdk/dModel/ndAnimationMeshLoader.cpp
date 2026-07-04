@@ -96,13 +96,13 @@ void ndAnimationMeshLoader::SetTranslationTracks(const ndString& boneName)
 // Collision shapes:
 // -box
 // -tire
-// -mesh
+// -tree
 // -vhacd
 // -sphere
 // -capsule
 // -cylinder
 // -compound
-// -convexhull					
+// -convexhull
 // -chamferedcylinder
 
 // Constraint joints (created with default parameters):
