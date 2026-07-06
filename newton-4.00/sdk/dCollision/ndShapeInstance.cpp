@@ -415,14 +415,34 @@ ndShapeInstance& ndShapeInstance::operator=(const ndShapeInstance& instance)
 	m_shapeMaterial = instance.m_shapeMaterial;
 	m_skinMargin = instance.m_skinMargin;
 	m_collisionMode = instance.m_collisionMode;
+	m_ownerBody = instance.m_ownerBody;
+	m_subCollisionHandle = instance.m_subCollisionHandle;
+
 	if (m_shape != nullptr)
 	{
 		m_shape->Release();
 	}
-	m_shape = instance.m_shape->AddRef();
-	m_ownerBody = instance.m_ownerBody;
 
-	m_subCollisionHandle = instance.m_subCollisionHandle;
+	const ndShapeCompound* const compound = ((ndShape*)instance.GetShape())->GetAsShapeCompound();
+	if (compound)
+	{
+		ndShapeCompound* const selfShape = new ndShapeCompound();
+		m_shape = selfShape->AddRef();
+
+		selfShape->BeginAddRemove();
+		ndShapeCompound::ndTreeArray::Iterator iter(compound->GetTree());
+		for (iter.Begin(); iter; iter++)
+		{
+			ndShapeCompound::ndNodeBase* const node = iter.GetNode()->GetInfo();
+			ndShapeInstance* const subInstance = node->GetShape();
+			selfShape->AddCollision(subInstance);
+		}
+		selfShape->EndAddRemove();
+	}
+	else
+	{
+		m_shape = instance.m_shape->AddRef();
+	}
 
 	return *this;
 }

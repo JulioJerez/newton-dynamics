@@ -371,65 +371,6 @@ ndShapeCompound* ndShapeCompound::GetAsShapeCompound()
 	return this;
 }
 
-//void ndShapeCompound::SetOwner(const ndShapeInstance* const instance)
-//{
-//	//m_ownerInstance = instance;
-//}
-
-/*
-//ndInt32 ndShapeCompound::CalculatePlaneIntersection(const ndFloat32* const vertex, const ndInt32* const index, ndInt32 indexCount, ndInt32 stride, const dPlane& localPlane, ndVector* const contactsOut) const
-ndInt32 ndShapeCompound::CalculatePlaneIntersection(const ndFloat32* const, const ndInt32* const, ndInt32, ndInt32, const dPlane&, ndVector* const) const
-{
-	ndAssert(0);
-	return 0;
-	//ndInt32 count = 0;
-	//ndInt32 j = index[indexCount - 1] * stride;
-	//ndVector p0(&vertex[j]);
-	//p0 = p0 & ndVector::m_triplexMask;
-	//ndFloat32 side0 = localPlane.Evalue(p0);
-	//for (ndInt32 i = 0; i < indexCount; ++i) 
-	//{
-	//	j = index[i] * stride;
-	//	ndVector p1(&vertex[j]);
-	//	p1 = p1 & ndVector::m_triplexMask;
-	//	ndFloat32 side1 = localPlane.Evalue(p1);
-	//
-	//	if (side0 < ndFloat32(0.0f)) {
-	//		if (side1 >= ndFloat32(0.0f)) {
-	//			ndVector dp(p1 - p0);
-	//			ndAssert(dp.m_w == ndFloat32(0.0f));
-	//			ndFloat32 t = localPlane.DotProduct(dp).GetScalar();
-	//			ndAssert(dgAbs(t) >= ndFloat32(0.0f));
-	//			if (dgAbs(t) < ndFloat32(1.0e-8f)) {
-	//				t = dgSign(t) * ndFloat32(1.0e-8f);
-	//			}
-	//			ndAssert(0);
-	//			contactsOut[count] = p0 - dp.Scale(side0 / t);
-	//			count++;
-	//
-	//		}
-	//	}
-	//	else if (side1 <= ndFloat32(0.0f)) {
-	//		ndVector dp(p1 - p0);
-	//		ndAssert(dp.m_w == ndFloat32(0.0f));
-	//		ndFloat32 t = localPlane.DotProduct(dp).GetScalar();
-	//		ndAssert(dgAbs(t) >= ndFloat32(0.0f));
-	//		if (dgAbs(t) < ndFloat32(1.0e-8f)) {
-	//			t = dgSign(t) * ndFloat32(1.0e-8f);
-	//		}
-	//		ndAssert(0);
-	//		contactsOut[count] = p0 - dp.Scale(side0 / t);
-	//		count++;
-	//	}
-	//
-	//	side0 = side1;
-	//	p0 = p1;
-	//}
-	//
-	//return count;
-}
-*/
-
 ndShapeInfo ndShapeCompound::GetShapeInfo() const
 {
 	ndShapeInfo info(ndShape::GetShapeInfo());

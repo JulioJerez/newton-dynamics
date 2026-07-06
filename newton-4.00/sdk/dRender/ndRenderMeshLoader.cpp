@@ -101,7 +101,6 @@ ndSharedPtr<ndRenderSceneNode> ndRenderMeshLoader::CreateRenderSceneMesh(ndRende
 		}
 
 		ndMesh::ndNodeType type = mesh->GetNodeType();
-		//if (mesh->GetHidden()  (type == ndMesh::m_collisionShape) || (entity->m_name.Find("-hidden") != -1))
 		if (!mesh->GetIsVisible() || (type == ndMesh::m_collisionShape) || (entity->m_name.Find("-hidden") != -1))
 		{
 			entity->m_isVisible = false;

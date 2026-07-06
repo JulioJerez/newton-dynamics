@@ -25,6 +25,7 @@
 #include "ndCoreStdafx.h"
 #include "ndTypes.h"
 #include "ndUtils.h"
+#include "ndArray.h"
 #include "ndFastRay.h"
 #include "ndFastAabb.h"
 #include "ndIntersections.h"
@@ -120,10 +121,6 @@ class ndAabbPolygonSoup: public ndPolygonSoupDatabase
 
 		inline ndFloat32 RayDistance (const ndFastRay& ray, const ndVector* const vertexArray) const
 		{
-			//ndVector minBox (&vertexArray[m_indexBox0].m_x);
-			//ndVector maxBox (&vertexArray[m_indexBox1].m_x);
-			//minBox = minBox & ndVector::m_triplexMask;
-			//maxBox = maxBox & ndVector::m_triplexMask;
 			const ndVector minBox = vertexArray[m_indexBox0];
 			const ndVector maxBox = vertexArray[m_indexBox1];
 			return ray.BoxIntersect(minBox, maxBox);
@@ -133,8 +130,6 @@ class ndAabbPolygonSoup: public ndPolygonSoupDatabase
 		{
 			const ndVector& p0 = vertexArray[m_indexBox0];
 			const ndVector& p1 = vertexArray[m_indexBox1];
-			//p0 = p0 & ndVector::m_triplexMask;
-			//p1 = p1 & ndVector::m_triplexMask;
 			const ndVector minBox (p0 - obb.m_p1);
 			const ndVector maxBox (p1 - obb.m_p0);
 			ndAssert(maxBox.m_x >= minBox.m_x);
@@ -177,11 +172,6 @@ class ndAabbPolygonSoup: public ndPolygonSoupDatabase
 
 		inline ndFloat32 BoxIntersect (const ndFastRay& ray, const ndFastRay& obbRay, const ndFastAabb& obb, const ndVector* const vertexArray) const
 		{
-			//ndVector p0 (&vertexArray[m_indexBox0].m_x);
-			//ndVector p1 (&vertexArray[m_indexBox1].m_x);
-			//p0 = p0 & ndVector::m_triplexMask;
-			//p1 = p1 & ndVector::m_triplexMask;
-
 			const ndVector& p0 = vertexArray[m_indexBox0];
 			const ndVector& p1 = vertexArray[m_indexBox1];
 			const ndVector minBox (p0 - obb.m_p1);
@@ -224,7 +214,8 @@ class ndAabbPolygonSoup: public ndPolygonSoupDatabase
 	D_CORE_API virtual void Deserialize (const char* const path);
 
 	protected:
-	D_CORE_API ndAabbPolygonSoup ();
+	D_CORE_API ndAabbPolygonSoup();
+	D_CORE_API ndAabbPolygonSoup(const ndArray<ndVector>& points, const ndArray<ndInt32>& indices, const ndArray<ndNode>& nodes);
 	D_CORE_API virtual ~ndAabbPolygonSoup ();
 
 	D_CORE_API void Create (const ndPolygonSoupBuilder& builder);
@@ -258,13 +249,11 @@ class ndAabbPolygonSoup: public ndPolygonSoupDatabase
 	/// Returns the bounding box of node in point p0 and p1.
 	inline void GetNodeAabb(const ndNode* const node, ndVector& p0, ndVector& p1) const
 	{
-		//p0 = ndVector (&((ndTriplex*)m_localVertex)[node->m_indexBox0].m_x);
-		//p1 = ndVector (&((ndTriplex*)m_localVertex)[node->m_indexBox1].m_x);
-		//p0 = p0 & ndVector::m_triplexMask;
-		//p1 = p1 & ndVector::m_triplexMask;
 		p0 = m_localVertex[node->m_indexBox0];
 		p1 = m_localVertex[node->m_indexBox1];
 	}
+
+	void Serialize(ndArray<ndVector>& points, ndArray<ndInt32>& indices, ndArray<ndNode>& nodes) const;
 
 	private:
 	ndNodeBuilder* BuildTopDown (ndNodeBuilder* const leafArray, ndInt32 firstBox, ndInt32 lastBox, ndNodeBuilder** const allocator) const;

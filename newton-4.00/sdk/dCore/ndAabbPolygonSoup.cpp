@@ -237,6 +237,26 @@ ndAabbPolygonSoup::ndAabbPolygonSoup ()
 {
 }
 
+ndAabbPolygonSoup::ndAabbPolygonSoup (const ndArray<ndVector>& points, const ndArray<ndInt32>& indices, const ndArray<ndNode>& nodes)
+	:ndPolygonSoupDatabase()
+	,m_aabb(nullptr)
+	,m_indices(nullptr)
+	,m_nodesCount(0)
+	,m_indexCount(0)
+{
+	m_vertexCount = ndInt32 (points.GetCount());
+	m_localVertex = new ndVector[size_t(m_vertexCount)];
+	ndMemCpy(m_localVertex, &points[0], m_vertexCount);
+
+	m_indexCount = ndInt32 (indices.GetCount());
+	m_indices = new ndInt32[size_t(m_indexCount)];
+	ndMemCpy(m_indices, &indices[0], m_indexCount);
+
+	m_nodesCount = ndInt32(nodes.GetCount());
+	m_aabb = new ndNode[size_t(m_nodesCount)];
+	ndMemCpy(m_aabb, &nodes[0], m_nodesCount);
+}
+
 ndAabbPolygonSoup::~ndAabbPolygonSoup ()
 {
 	if (m_aabb) 
@@ -1438,5 +1458,32 @@ void ndAabbPolygonSoup::ForThisSector(const ndAabbPolygonSoup::ndNode* const nod
 			//	}
 			//}
 		}
+	}
+}
+
+void ndAabbPolygonSoup::Serialize(ndArray<ndVector>& points, ndArray<ndInt32>& indices, ndArray<ndNode>& nodes) const
+{
+	const ndInt32 vertexCount = GetVertexCount();
+	const ndVector* const vertex = GetLocalVertexPool();
+
+	points.SetCount(vertexCount);
+	points.SetCount(0);
+	for (ndInt32 i = 0; i < vertexCount; ++i)
+	{
+		points.PushBack(vertex[i]);
+	}
+
+	indices.SetCount(m_indexCount);
+	indices.SetCount(0);
+	for (ndInt32 i = 0; i < m_indexCount; ++i)
+	{
+		indices.PushBack(m_indices[i]);
+	}
+
+	nodes.SetCount(m_nodesCount);
+	nodes.SetCount(0);
+	for (ndInt32 i = 0; i < m_nodesCount; ++i)
+	{
+		nodes.PushBack(m_aabb[i]);
 	}
 }

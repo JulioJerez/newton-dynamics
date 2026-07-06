@@ -777,7 +777,6 @@ ndMesh* ndFbxMeshLoader::CreateMeshHierarchy(ndOfbx::IScene* const fbxScene, ndF
 		ndMatrix localMatrix(ofbxMatrix2dMatrix(data.m_fbxNode->getLocalTransform()));
 		node->SetName(data.m_fbxNode->name);
 		node->SetMatrix(localMatrix);
-		//node->SetBasePoseMatrix(localMatrix);
 	
 		nodeMap.Insert(*node, data.m_fbxNode);
 		{
@@ -785,7 +784,8 @@ ndMesh* ndFbxMeshLoader::CreateMeshHierarchy(ndOfbx::IScene* const fbxScene, ndF
 			for (ndInt32 i = 0; i < children.GetCount(); ++i)
 			{
 				ndOfbx::Object* const child = children[children.GetCount() - i - 1];
-				nodeStack.PushBack(ndFbx2MeshNodeStackData(child, *node));
+				const ndFbx2MeshNodeStackData childData(ndFbx2MeshNodeStackData(child, *node));
+				nodeStack.PushBack(childData);
 			}
 		}
 	}

@@ -493,9 +493,10 @@ void ndBodyKinematic::SetCollisionShape(const ndShapeInstance& shapeInstance)
 {
 	m_shapeInstance = shapeInstance;
 	m_shapeInstance.m_ownerBody = this;
-	if (m_shapeInstance.GetShape()->GetAsShapeCompound())
+	ndShapeCompound* const compound = m_shapeInstance.GetShape()->GetAsShapeCompound();
+	if (compound)
 	{
-		m_shapeInstance.GetShape()->GetAsShapeCompound()->SetSubShapeOwner(this);
+		compound->SetSubShapeOwner(this);
 	}
 }
 

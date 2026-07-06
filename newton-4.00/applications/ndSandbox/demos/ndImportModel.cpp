@@ -187,7 +187,8 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
 
     // make an articulated from the loaded mesh
     ndSharedPtr<ndModel> model(new ndModelArticulation());
-    model->GetAsModelArticulation()->Deserialize(*loader.m_mesh);
+    ndModelArticulation* const articulation = model->GetAsModelArticulation();
+    articulation->Deserialize(*loader.m_mesh);
 
     // make a hierarchical render mesh and add to the render scene
     ndRender* const renderer = *scene->GetRenderer();
@@ -195,7 +196,6 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
     scene->AddEntity(sceneMesh);
 
     // set the matrix location to both visual and physic
-    ndModelArticulation* const articulation = model->GetAsModelArticulation();
     const ndModelArticulation::ndNode* const rootNode = articulation->GetRoot();
     const ndMatrix matrix(rootNode ? rootNode->m_body->GetMatrix() * location : location);
     sceneMesh->SetTransform(matrix);
@@ -246,6 +246,7 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
                 ndDemoEntityNotify* const fastNotify = (ndDemoEntityNotify*)*notify;
                 fastNotify->m_capSpeed = ndFloat32(30.0f);
                 node->m_body->GetAsBodyDynamic()->SetMaxLinearAndAngularIntegrationStep(node->m_body->GetAsBodyDynamic()->GetMaxAngularStep(), ndFloat32(10.0f));
+//node->m_body->GetAsBodyDynamic()->SetMassMatrix(ndVector::m_zero);
             }
 
             if (node->m_joint)

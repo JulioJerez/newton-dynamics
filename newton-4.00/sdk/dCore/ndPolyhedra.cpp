@@ -2924,7 +2924,12 @@ void ndPolyhedra::RemoveInteriorEdges (ndPolyhedra& buildConvex, const ndFloat64
 					ndAssert(edge->m_incidentFace > 0);
 
 					ndBigVector normal(FaceNormal(edge, vertex, strideInBytes));
-					normal = normal.Scale(ndFloat64(1.0f) / sqrt(normal.DotProduct(normal).GetScalar()));
+					ndFloat64 mag2 = normal.DotProduct(normal).GetScalar();
+					if (mag2 < ndFloat32(1.0e-14f))
+					{
+						mag2 = ndFloat32(1.0e-14f);
+					}
+					normal = normal.Scale(ndFloat64(1.0f) / sqrt(mag2));
 
 					edge = nullptr;
 					ndPolyhedra::Iterator iter1(flatFace);

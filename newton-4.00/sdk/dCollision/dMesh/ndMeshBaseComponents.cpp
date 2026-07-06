@@ -516,6 +516,113 @@ ndShape* ndMeshCollisionShapeConvexHull::CreateObject() const
 	return hull;
 }
 
+//
+ndMeshCollisionShapeTree::ndMeshCollisionShapeTree()
+	:ndMeshCollisionShape(ndShapeStatic_bvh::StaticClassName())
+	,m_points()
+	,m_indices()
+	,m_nodes()
+{
+}
+
+ndMeshCollisionShapeTree::ndMeshCollisionShapeTree(const ndMeshCollisionShapeTree& other)
+	:ndMeshCollisionShape(other)
+	,m_points(other.m_points)
+	,m_indices(other.m_indices)
+	,m_nodes(other.m_nodes)
+{
+}
+
+ndMeshCollisionShape* ndMeshCollisionShapeTree::Duplicate() const
+{
+	return new ndMeshCollisionShapeTree(*this);
+}
+
+bool ndMeshCollisionShapeTree::operator==(const ndMeshCollisionShape& other) const
+{
+	bool test = ndMeshCollisionShape::operator==(other);
+	if (test)
+	{
+		ndAssert(0);
+		//const ndMeshCollisionShapeTree* const otherShape = (ndMeshCollisionShapeTree*)&other;
+		//test = test && (m_tolarence == otherShape->m_tolarence);
+		//test = test && (m_maxPointCount == otherShape->m_maxPointCount);
+		//for (ndInt32 i = 0; test && (i < m_points.GetCount()); ++i)
+		//{
+		//	const ndVector diff(m_points[i] - otherShape->m_points[i]);
+		//	ndFloat32 err2 = diff.DotProduct(diff & ndVector::m_triplexMask).GetScalar();
+		//	test = test && (err2 < ndFloat32(1.0e-6f));
+		//}
+	}
+	return false;
+}
+
+//void ndMeshCollisionShapeTree::ApplyScale(ndFloat32 scale)
+void ndMeshCollisionShapeTree::ApplyScale(ndFloat32 )
+{
+	ndAssert(0);
+	//for (ndInt32 i = 0; i < m_points.GetCount(); ++i)
+	//{
+	//	m_points[i] = m_points[i].Scale(scale);
+	//	m_points[i].m_w = ndFloat32(1.0f);
+	//}
+}
+
+void ndMeshCollisionShapeTree::SerializeToXml(nd::TiXmlElement* const parent) const
+{
+	ndMeshCollisionShape::SerializeToXml(parent);
+
+	class ndNodesList : public ndArray<ndInt32>
+	{
+		public:
+		ndNodesList(const ndArray<ndAabbPolygonSoup::ndNode>& nodes)
+			:ndArray<ndInt32>()
+		{
+			m_array = (ndInt32*)&nodes[0];
+			m_size = ndInt64(nodes.GetCount() * sizeof(ndAabbPolygonSoup::ndNode) / sizeof(ndInt32));
+		}
+
+		~ndNodesList()
+		{
+			m_array = nullptr;
+		}
+	};
+	const ndNodesList nodeList(m_nodes);
+
+	xmlSaveParam(parent, "points", m_points);
+	xmlSaveParam(parent, "indices", m_indices);
+	xmlSaveParam(parent, "nodes", nodeList);
+}
+
+void ndMeshCollisionShapeTree::DeserializeFromXml(const nd::TiXmlElement* const parent)
+{
+	ndMeshCollisionShape::DeserializeFromXml(parent);
+
+	ndArray<ndInt32> nodes;
+	xmlGetFloatArray3(parent, "points", m_points);
+	xmlGetInt(parent, "indices", m_indices);
+	xmlGetInt(parent, "nodes", nodes);
+
+	const ndInt32 nodesSize = ndInt32 (sizeof(ndAabbPolygonSoup::ndNode) / sizeof (ndInt32));
+	const ndInt32 nodesCount = ndInt32 (nodes.GetCount() / nodesSize);
+	for (ndInt32 i = 0; i < nodesCount; ++i)
+	{
+		ndAabbPolygonSoup::ndNode data;
+		ndInt32* const ptr = (ndInt32*)&data;
+		for (ndInt32 j = 0; j < nodesSize; ++j)
+		{
+			ptr[j] = nodes[i * nodesSize + j];
+		}
+		m_nodes.PushBack(data);
+	}
+}
+
+ndShape* ndMeshCollisionShapeTree::CreateObject() const
+{
+	ndShape* const tree = new ndShapeStatic_bvh(m_points, m_indices, m_nodes);
+	return tree;
+}
+
 ndMeshCollisionShapeCompound::ndMeshCollisionShapeCompound()
 	:ndMeshCollisionShape(ndShapeCompound::StaticClassName())
 {
@@ -733,6 +840,11 @@ void ndMeshShapeInstance::DeserializeFromXml(const nd::TiXmlElement* const paren
 	else if (strcmp(constructor, ndShapeConvexHull::StaticClassName()) == 0)
 	{
 		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeConvexHull());
+		m_shape->DeserializeFromXml(xmlShape);
+	}
+	else if (strcmp(constructor, ndShapeStatic_bvh::StaticClassName()) == 0)
+	{
+		m_shape = ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeTree());
 		m_shape->DeserializeFromXml(xmlShape);
 	}
 	else if (strcmp(constructor, ndShapeCompound::StaticClassName()) == 0)
