@@ -455,6 +455,7 @@ void ndDebugDisplayRenderPass::RenderCollisionShape()
 {
 	const ndMesh* const selection = *m_manager->m_currentSelection;
 	ndAssert(selection);
+	const ndVector color(selection->GetAsMesh() ? m_shapeColor : m_collidingPairColor0);
 	if (selection->GetRigidBody())
 	{
 		auto DisplayShape = [this](const ndMesh* const mesh, const ndVector& color)
@@ -495,8 +496,6 @@ void ndDebugDisplayRenderPass::RenderCollisionShape()
 				}
 			}
 		};
-		//const ndVector color (selection->GetAsMesh() ? m_collidingPairColor0 : m_shapeColor);
-		const ndVector color(selection->GetAsMesh() ? m_shapeColor : m_collidingPairColor0);
 		DisplayShape(selection, color);
 	
 		switch (m_manager->m_subSelection)
