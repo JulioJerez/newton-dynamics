@@ -166,7 +166,7 @@ void ndPhysicsWorld::OnAddBody(ndBody* const body) const
 	ndTrace(("adding a body %d to world\n", body->GetId()));
 
 	ndBodyNotify* const notify = *body->GetNotifyCallback();
-	if (notify->IsType(ndDemoEntityNotify::StaticClassName()))
+	if (notify && notify->IsType(ndDemoEntityNotify::StaticClassName()))
 	{
 		ndDemoEntityNotify* const entNotify = (ndDemoEntityNotify*)notify;
 		entNotify->OnBodyAddedToWorld();
@@ -178,7 +178,7 @@ void ndPhysicsWorld::OnRemoveBody(ndBody* const body) const
 	ndWorld::OnRemoveBody(body);
 	ndTrace(("removing a body %d from world\n", body->GetId()));
 	ndBodyNotify* const notify = *body->GetNotifyCallback();
-	if (notify->IsType(ndDemoEntityNotify::StaticClassName()))
+	if (notify && notify->IsType(ndDemoEntityNotify::StaticClassName()))
 	{
 		ndDemoEntityNotify* const entNotify = (ndDemoEntityNotify*)notify;
 		entNotify->OnBodyRemovedFromWorld();
