@@ -1,0 +1,11 @@
+Model Information:
+* title:	Race Track Map
+* source:	https://sketchfab.com/3d-models/race-track-map-c9f923f05b7443b6b55f0f2a19e0cb48
+* author:	Mabaso_J (https://sketchfab.com/pgs_jayb3e)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Race Track Map" (https://sketchfab.com/3d-models/race-track-map-c9f923f05b7443b6b55f0f2a19e0cb48) by Mabaso_J (https://sketchfab.com/pgs_jayb3e) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
