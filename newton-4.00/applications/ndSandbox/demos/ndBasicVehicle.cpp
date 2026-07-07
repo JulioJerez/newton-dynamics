@@ -469,15 +469,45 @@ namespace ndMotorVehicle
 		//callback->RegisterMaterial(material, ndDemoContactCallback::m_vehicleTirePart, ndDemoContactCallback::m_vehicleTirePart);
 		//callback->RegisterMaterial(material, ndDemoContactCallback::m_vehicleTirePart, ndDemoContactCallback::m_default);
 	}
+
+	static void LoadMap(ndDemoEntityManager* const scene)
+	{
+		//ndSharedPtr<ndBody> bodyFloor(BuildPlayground(scene));
+		//ndSharedPtr<ndBody> bodyFloor(BuildCompoundScene(scene, ndGetIdentityMatrix()));
+		//ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true));
+
+		// get the file full path
+		ndPhysicsWorld* const world = scene->GetWorld();
+		const ndString fileName(ndGetWorkingFileName("racetrack/racetrack.nd"));
+
+		// load the mesh
+		ndMeshLoader loader;
+		loader.LoadMesh(fileName);
+
+		// generate the scene rigid body
+		ndSharedPtr<ndBody> bodyFloor(new ndBodyDynamic());
+		bodyFloor->Deserialize(*loader.m_mesh->GetRigidBody());
+
+		// genereta the visual mesh
+		ndRender* const renderer = *scene->GetRenderer();
+		const ndString materialPath(fileName.GetPath());
+		ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *loader.m_mesh, materialPath));
+
+		// bind scene and physics with a rb notification 
+		ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, sceneMesh, nullptr));
+		bodyFloor->SetNotifyCallback(notify);
+
+		// add rb and visual mesh to the world and visual scene
+		scene->AddEntity(sceneMesh);
+		world->AddBody(bodyFloor);
+	}
 };
 
 using namespace ndMotorVehicle;
 
 void ndBasicVehicle (ndDemoEntityManager* const scene)
 {
-	//ndSharedPtr<ndBody> bodyFloor(BuildPlayground(scene));
-	//ndSharedPtr<ndBody> bodyFloor(BuildCompoundScene(scene, ndGetIdentityMatrix()));
-	ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true));
+	LoadMap(scene);
 
 	ndPhysicsWorld* const world = scene->GetWorld();
 	ndVector location(0.0f, 2.0f, 0.0f, 1.0f);
@@ -498,7 +528,7 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	
 	matrix.m_posit.m_x += 40.0f;
 	matrix.m_posit.m_z += 5.0f;
-	AddPlanks(scene, matrix, 60.0f, 5);
+	//AddPlanks(scene, matrix, 60.0f, 5);
 
 
 	// set a ui paner to see vehicle state
