@@ -180,22 +180,23 @@ class ndVanillaController : public ndModelNotify
     ndFloat32 m_engineMaxTorque;
 };
 
-static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, const ndMatrix& location, const char* const pathFileName)
+static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, const ndMatrix& location, const ndString& pathFileName)
 {
     ndMeshLoader loader;
     loader.LoadMesh(pathFileName);
 
     // make an articulated from the loaded mesh
     ndSharedPtr<ndModel> model(new ndModelArticulation());
-    model->GetAsModelArticulation()->Deserialize(*loader.m_mesh);
+    ndModelArticulation* const articulation = model->GetAsModelArticulation();
+    articulation->Deserialize(*loader.m_mesh);
 
     // make a hierarchical render mesh and add to the render scene
     ndRender* const renderer = *scene->GetRenderer();
-    ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *loader.m_mesh, ndGetWorkingFileName("")));
+    const ndString materialPath(pathFileName.GetPath());
+    ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *loader.m_mesh, materialPath));
     scene->AddEntity(sceneMesh);
 
     // set the matrix location to both visual and physic
-    ndModelArticulation* const articulation = model->GetAsModelArticulation();
     const ndModelArticulation::ndNode* const rootNode = articulation->GetRoot();
     const ndMatrix matrix(rootNode ? rootNode->m_body->GetMatrix() * location : location);
     sceneMesh->SetTransform(matrix);
@@ -282,7 +283,7 @@ void ndImportModel(ndDemoEntityManager* const scene)
     snprintf(pathFileName, sizeof(pathFileName), "%s", lastFile.GetStr());
 
     ndTransform cameraTransform(scene->GetCameraMatrix());
-    if (dGetLoadNdFileName(pathFileName, sizeof(pathFileName)))
+    if (ndGetLoadFileName(pathFileName, sizeof(pathFileName)))
     {
         ndPhysicsWorld* const world = scene->GetWorld();
         ndSharedPtr<ndModel> testModel(LoadAndBindModel(scene, origin, pathFileName));

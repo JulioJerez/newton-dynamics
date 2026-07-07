@@ -59,11 +59,6 @@ ndVector* ndPolygonSoupDatabase::GetLocalVertexPool() const
 	return m_localVertex;
 }
 
-//ndInt32 ndPolygonSoupDatabase::GetStrideInBytes() const
-//{
-//	return m_strideInBytes;
-//}
-
 ndFloat32 ndPolygonSoupDatabase::GetRadius() const
 {
 	return ndFloat32(0.0f);

@@ -562,7 +562,7 @@ ndInt32 ndString::Find (const char* const subString, ndInt32 subStringLength, nd
 		{
 			char ch = subString[0];
 			const char* const ptr1 = m_string;
-			for (ndInt32 i = 0; i < m_size; ++i) 
+			for (ndInt32 i = from; i < m_size; ++i)
 			{
 				if (ch == ptr1[i]) 
 				{
@@ -616,6 +616,25 @@ ndInt32 ndString::Find (const char* const subString, ndInt32 subStringLength, nd
 		}
 	}
 	return location;
+}
+
+ndInt32 ndString::FindReverse(const char* const subString, ndInt32 stringSize, ndInt32 from, ndInt32 lenght) const
+{
+	ndInt32 index = Find(subString, stringSize, from, lenght);
+	if (index != -1)
+	{
+		ndInt32 index1 = index;
+		do 
+		{
+			index1 += stringSize;
+			index1 = Find(subString, stringSize, index1, lenght);
+			if (index1 != -1)
+			{
+				index = index1;
+			}
+		} while (index1 != -1);
+	}
+	return index;
 }
 
 void ndString::Replace (ndInt32 start, ndInt32 size, const char* const str, ndInt32 strSize)

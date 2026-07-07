@@ -22,10 +22,9 @@ ndRenderTextureCache::ndRenderTextureCache(ndRender* const owner)
 
 ndSharedPtr<ndRenderTexture> ndRenderTextureCache::GetTexture(const ndString& pathname)
 {
-	char pngName[256];
-
-	snprintf(pngName, sizeof(pngName), "%s", pathname.GetStr());
-	strtolwr(pngName);
+	//char pngName[256];
+	//snprintf(pngName, sizeof(pngName), "%s", pathname.GetStr());
+	//strtolwr(pngName);
 	//const char* const fileNameEnd = strstr(pngName, ".png");
 	//if (!fileNameEnd)
 	//{
@@ -34,7 +33,16 @@ ndSharedPtr<ndRenderTexture> ndRenderTextureCache::GetTexture(const ndString& pa
 	//	ndAssert(0);
 	//}
 
-	ndUnsigned64 hash = ndCRC64(pngName);
+	ndString pngName(pathname);
+	pngName.ToLower();
+	ndInt32 index = pngName.FindReverse(".png");
+	if (index == -1)
+	{
+		pngName = pngName.GetPath() + pngName.GetName() + ".png";
+		ndTrace(("subtitute texture %s with %s version\n", pathname.GetStr(), pngName.GetStr()));
+	}
+
+	ndUnsigned64 hash = ndCRC64(pngName.GetStr());
 	ndNode* node = Find(hash);
 	if (!node)
 	{

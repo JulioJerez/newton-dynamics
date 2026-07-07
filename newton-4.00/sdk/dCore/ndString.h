@@ -9,7 +9,6 @@
 * freely
 */
 
-
 #ifndef __NDSTRING_H_
 #define __NDSTRING_H_
 
@@ -49,8 +48,12 @@ class ndString: public ndClassAlloc
 	ndString operator+ (const char* const src) const;
 
 	D_CORE_API ndInt32 Find (char ch, ndInt32 from = 0) const;
+
 	ndInt32 Find (const ndString& subString, ndInt32 from = 0) const;
-	D_CORE_API ndInt32 Find (const char* const subString, ndInt32 from = 0, ndInt32 lenght = 0x7ffffff) const;
+	ndInt32 Find (const char* const subString, ndInt32 from = 0, ndInt32 lenght = 0x7ffffff) const;
+
+	ndInt32 FindReverse(const ndString& subString, ndInt32 from = 0) const;
+	ndInt32 FindReverse(const char* const subString, ndInt32 from = 0, ndInt32 lenght = 0x7ffffff) const;
 
 	D_CORE_API void Replace (ndInt32 start, ndInt32 size, const char* const str, ndInt32 strSize);
 	void Replace (ndInt32 start, ndInt32 size, const ndString& str);
@@ -86,8 +89,8 @@ class ndString: public ndClassAlloc
 	D_CORE_API ndInt32 Compare (const char* const str0, const char* const str1) const;
 	D_CORE_API void CopyBuffer (char* const dst, const char* const src, ndInt32 size) const;
 
-
-	D_CORE_API ndInt32 Find (const char* const subString, ndInt32 stringSize, ndInt32 from, ndInt32 lenght) const;
+	D_CORE_API ndInt32 Find (const char* const subString, ndInt32 subStringSize, ndInt32 from, ndInt32 lenght) const;
+	D_CORE_API ndInt32 FindReverse (const char* const subString, ndInt32 subStringSize, ndInt32 from, ndInt32 lenght) const;
 
 	protected:
 	char* AllocMem(ndInt32 size);
@@ -133,10 +136,21 @@ inline ndInt32 ndString::Find (const char* const subString, ndInt32 from, ndInt3
 	return Find (subString, CalculateSize(subString), from, lenght);
 }
 
+inline ndInt32 ndString::FindReverse(const char* const subString, ndInt32 from, ndInt32 lenght) const
+{
+	return FindReverse(subString, CalculateSize(subString), from, lenght);
+}
+
 inline ndInt32 ndString::Find (const ndString& subStream, ndInt32 from) const
 {
 	ndAssert (subStream.m_string);
 	return Find (subStream.m_string, subStream.m_size, from, subStream.m_size);
+}
+
+inline ndInt32 ndString::FindReverse(const ndString& subStream, ndInt32 from) const
+{
+	ndAssert(subStream.m_string);
+	return FindReverse(subStream.m_string, subStream.m_size, from, subStream.m_size);
 }
 
 inline void ndString::Replace (ndInt32 start, ndInt32 size, const ndString& str)

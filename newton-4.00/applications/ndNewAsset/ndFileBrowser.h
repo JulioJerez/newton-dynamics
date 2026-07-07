@@ -14,13 +14,13 @@
 #define _D_FILE_BROWSER_H_
 
 
-bool dGetLoadNdFileName(char* const fileName, int maxSize);
-bool dGetSaveNdFileName(char* const fileName, int maxSize);
+bool ndGetLoadFileName(char* const fileName, int maxSize);
+bool ndGetSaveFileName(char* const fileName, int maxSize);
 
-bool dGetImportFbxFileName(char* const fileName, int maxSize);
-bool dGetImportUrdfFileName(char* const fileName, int maxSize);
+bool ndGetImportFbxFileName(char* const fileName, int maxSize);
+bool ndGetImportUrdfFileName(char* const fileName, int maxSize);
 
-bool dGetWorkingFileName(const char* const basePath, char* const name, int maxSize);
+bool ndGetWorkingFileName(const char* const basePath, char* const name, int maxSize);
 
 
 #endif 

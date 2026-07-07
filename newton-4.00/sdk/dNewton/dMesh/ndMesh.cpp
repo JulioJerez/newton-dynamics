@@ -1282,6 +1282,10 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionConvex()
 {
 	ndAssert(*m_mesh);
 	ndSharedPtr<ndShapeInstance>shape(m_mesh->CreateConvexCollision(1.0e-3f));
+	if (!(*shape))
+	{
+		shape = ndSharedPtr<ndShapeInstance>(new ndShapeInstance(new ndShapeNull()));
+	}
 	shape->SetLocalMatrix(shape->GetLocalMatrix() * m_geometryMatrix);
 	return shape;
 }
@@ -1362,16 +1366,16 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionTree(bool optimize)
 	ndPolygonSoupBuilder meshBuilder;
 	meshBuilder.Begin();
 
-	ndFixSizeArray<ndMesh*, 1024> entBuffer;
-	ndFixSizeArray<ndMatrix, 1024> matrixBuffer;
+	ndFixSizeArray<ndMesh*, 2> entBuffer;
+	ndFixSizeArray<ndMatrix, 2> matrixBuffer;
 
 	entBuffer.PushBack(this);
 	matrixBuffer.PushBack(m_matrix.OrthoInverse());
 
 	while (entBuffer.GetCount())
 	{
-		ndMesh* node = entBuffer.Pop();
-		ndMatrix matrix(node->m_matrix * matrixBuffer.Pop());
+		const ndMesh* const node = entBuffer.Pop();
+		const ndMatrix matrix(node->m_geometryMatrix * node->m_matrix * matrixBuffer.Pop());
 
 		ndSharedPtr<ndMeshEffect> meshEffect = node->GetGeometry();
 		if (*meshEffect)
@@ -1405,12 +1409,12 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionTree(bool optimize)
 			}
 		}
 
-		for (ndList<ndSharedPtr<ndMesh>>::ndNode* childNode = node->GetChildren().GetFirst(); childNode; childNode = childNode->GetNext())
-		{
-			ndMesh* const child = *childNode->GetInfo();
-			entBuffer.PushBack(child);
-			matrixBuffer.PushBack(matrix);
-		}
+		//for (ndList<ndSharedPtr<ndMesh>>::ndNode* childNode = node->GetChildren().GetFirst(); childNode; childNode = childNode->GetNext())
+		//{
+		//	ndMesh* const child = *childNode->GetInfo();
+		//	entBuffer.PushBack(child);
+		//	matrixBuffer.PushBack(matrix);
+		//}
 	}
 	meshBuilder.End(optimize);
 	ndSharedPtr<ndShapeInstance>shape(new ndShapeInstance(new ndShapeStatic_bvh(meshBuilder)));
@@ -1434,106 +1438,69 @@ const ndSharedPtr<ndMeshBody>& ndMesh::GetRigidBody() const
 
 ndSharedPtr<ndShapeInstance> ndMesh::CreateCollisionFromChildren()
 {
-	ndArray<ndVector> points;
-	ndFixSizeArray<ndSharedPtr<ndShapeInstance>, 256> shapeArray;
+	ndFixSizeArray<ndSharedPtr<ndShapeInstance>, 2048> shapeArray;
 
-	for (ndList<ndSharedPtr<ndMesh>>::ndNode* ptr = GetChildren().GetFirst(); ptr; ptr = ptr->GetNext())
+	auto LoadChidren = [&shapeArray](ndMesh* const node, const ndMatrix& refMatrix, auto&& self)->void
 	{
-		ndMesh* const meshNode = *ptr->GetInfo();
-		ndString tmpName(meshNode->GetName());
-		tmpName.ToLower();
-		const char* const name = tmpName.GetStr();
-
-		if (!strstr(name, "-rb"))
+		for (ndList<ndSharedPtr<ndMesh>>::ndNode* ptr = node->GetChildren().GetFirst(); ptr; ptr = ptr->GetNext())
 		{
-			if (strstr(name, "-sphere"))
+			ndMesh* const meshNode = *ptr->GetInfo();
+			ndString tmpName(meshNode->GetName());
+			tmpName.ToLower();
+			const char* const name = tmpName.GetStr();
+
+			if (!strstr(name, "-rb"))
 			{
-				ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
-				const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
-				subShape->SetLocalMatrix(matrix);
-				shapeArray.PushBack(subShape);
-				meshNode->m_isVisible = false;
-			}
-			else if (strstr(name, "-box"))
-			{
-				ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
-				const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
-				subShape->SetLocalMatrix(matrix);
-				shapeArray.PushBack(subShape);
-				meshNode->m_isVisible = false;
-			}
-			else if (strstr(name, "-capsule"))
-			{
-				ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
-				const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
-				subShape->SetLocalMatrix(matrix);
-				shapeArray.PushBack(subShape);
-				meshNode->m_isVisible = false;
-			}
-			else if (strstr(name, "-cylinder"))
-			{
-				ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
-				const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
-				subShape->SetLocalMatrix(matrix);
-				shapeArray.PushBack(subShape);
-				meshNode->m_isVisible = false;
-			}
-			else if (strstr(name, "-convexhull"))
-			{
-				ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
-				const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix);
-				subShape->SetLocalMatrix(matrix);
-				shapeArray.PushBack(subShape);
-				meshNode->m_isVisible = false;
-			}
-			else if (strstr(name, "-vhacd"))
-			{
-				ndAssert(0);
-				//ndArray<ndInt32> indices;
-				//ndDemoMesh* const mesh = (ndDemoMesh*)*node->GetInfo()->GetMesh();
-				//ndAssert(mesh);
-				//mesh->GetVertexArray(points);
-				//mesh->GetIndexArray(indices);
-				//
-				//ndArray<ndTriplex> meshPoints;
-				//for (ndInt32 i = 0; i < points.GetCount(); ++i)
-				//{
-				//	ndTriplex p;
-				//	p.m_x = points[i].m_x;
-				//	p.m_y = points[i].m_y;
-				//	p.m_z = points[i].m_z;
-				//	meshPoints.PushBack(p);
-				//}
-				//nd_::VHACD::IVHACD* const interfaceVHACD = nd_::VHACD::CreateVHACD();
-				//
-				//nd_::VHACD::IVHACD::Parameters paramsVHACD;
-				////paramsVHACD.m_concavityToVolumeWeigh = 1.0;
-				//paramsVHACD.m_concavityToVolumeWeigh = 0.5f;
-				//interfaceVHACD->Compute(&meshPoints[0].m_x, uint32_t(points.GetCount()),
-				//	(uint32_t*)&indices[0], uint32_t(indices.GetCount()) / 3, paramsVHACD);
-				//
-				//ndInt32 hullCount = ndInt32(interfaceVHACD->GetNConvexHulls());
-				//ndArray<ndVector> convexMeshPoints;
-				//for (ndInt32 i = 0; i < hullCount; ++i)
-				//{
-				//	nd_::VHACD::IVHACD::ConvexHull ch;
-				//	interfaceVHACD->GetConvexHull(uint32_t(i), ch);
-				//	convexMeshPoints.SetCount(ndInt32(ch.m_nPoints));
-				//	for (ndInt32 j = 0; j < ndInt32(ch.m_nPoints); ++j)
-				//	{
-				//		ndVector p(ndFloat32(ch.m_points[j * 3 + 0]), ndFloat32(ch.m_points[j * 3 + 1]), ndFloat32(ch.m_points[j * 3 + 2]), ndFloat32(0.0f));
-				//		convexMeshPoints[j] = p;
-				//	}
-				//	shapeArray.PushBack(new ndShapeInstance(new ndShapeConvexHull(ndInt32(convexMeshPoints.GetCount()), sizeof(ndVector), 0.01f, &convexMeshPoints[0].m_x)));
-				//	const ndMatrix matrix(node->GetInfo()->GetMeshMatrix() * node->GetInfo()->GetCurrentMatrix());
-				//	shapeArray[shapeArray.GetCount() - 1]->SetLocalMatrix(matrix);
-				//}
-				//
-				//interfaceVHACD->Clean();
-				//interfaceVHACD->Release();
+				if (strstr(name, "-sphere"))
+				{
+					ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
+					const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix * refMatrix);
+					subShape->SetLocalMatrix(matrix);
+					shapeArray.PushBack(subShape);
+				}
+				else if (strstr(name, "-box"))
+				{
+					ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
+					const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix * refMatrix);
+					subShape->SetLocalMatrix(matrix);
+					shapeArray.PushBack(subShape);
+				}
+				else if (strstr(name, "-capsule"))
+				{
+					ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
+					const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix * refMatrix);
+					subShape->SetLocalMatrix(matrix);
+					shapeArray.PushBack(subShape);
+				}
+				else if (strstr(name, "-cylinder"))
+				{
+					ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
+					const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix * refMatrix);
+					subShape->SetLocalMatrix(matrix);
+					shapeArray.PushBack(subShape);
+				}
+				else if (strstr(name, "-convexhull"))
+				{
+					ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
+					const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix * refMatrix);
+					subShape->SetLocalMatrix(matrix);
+					shapeArray.PushBack(subShape);
+				}
+				else if (strstr(name, "-tree"))
+				{
+					ndSharedPtr<ndShapeInstance> subShape(meshNode->CreateCollision());
+					const ndMatrix matrix(subShape->GetLocalMatrix() * meshNode->m_matrix * refMatrix);
+					subShape->SetLocalMatrix(matrix);
+					shapeArray.PushBack(subShape);
+				}
+				else if (strstr(name, "-compound"))
+				{
+					self(meshNode, meshNode->GetMatrix(), self);
+				}
 			}
 		}
-	}
+	};
+	LoadChidren(this, ndGetIdentityMatrix(), LoadChidren);
 
 	if (shapeArray.GetCount() > 1)
 	{
@@ -1582,7 +1549,6 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollision()
 	{
 		shape = CreateCollisionChamferCylinder();
 	}
-	
 	else if (strstr(name, "-tire"))
 	{
 		shape = CreateCollisionTire();
@@ -1591,7 +1557,7 @@ ndSharedPtr<ndShapeInstance> ndMesh::CreateCollision()
 	{
 		shape = CreateCollisionConvex();
 	}
-	else if (strstr(name, "-mesh"))
+	else if (strstr(name, "-tree"))
 	{
 		shape = CreateCollisionTree();
 	}

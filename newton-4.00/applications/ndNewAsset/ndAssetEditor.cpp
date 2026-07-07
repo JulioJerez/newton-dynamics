@@ -362,7 +362,7 @@ void ndAssetEditor::ShowMainMenuBar()
 			if (ImGui::MenuItem("Load", ""))
 			{
 				char fileName[2048];
-				if (dGetLoadNdFileName(fileName, sizeof(fileName) - 1))
+				if (ndGetLoadFileName(fileName, sizeof(fileName) - 1))
 				{
 					const ndString path (fileName);
 					ndRenderMeshLoader loader(*m_renderer);
@@ -388,7 +388,7 @@ void ndAssetEditor::ShowMainMenuBar()
 			if (ImGui::MenuItem("Save As ...", ""))
 			{
 				char fileName[2048];
-				if (*m_mesh && dGetSaveNdFileName(fileName, sizeof(fileName) - 1))
+				if (*m_mesh && ndGetSaveFileName(fileName, sizeof(fileName) - 1))
 				{
 					m_subSelection = m_none;
 					m_currentPath = ndString(fileName);
@@ -404,7 +404,7 @@ void ndAssetEditor::ShowMainMenuBar()
 			if (ImGui::MenuItem("Import fbx", ""))
 			{
 				char fileName[2048];
-				if (dGetImportFbxFileName(fileName, sizeof(fileName) - 1))
+				if (ndGetImportFbxFileName(fileName, sizeof(fileName) - 1))
 				{
 					const ndString path(fileName);
 					ndRenderMeshLoader loader(*m_renderer);
@@ -420,7 +420,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					// Collision shapes:
 					// -box
 					// -tire
-					// -mesh
+					// -tree
 					// -vhacd
 					// -sphere
 					// -capsule
@@ -452,7 +452,7 @@ void ndAssetEditor::ShowMainMenuBar()
 			if (ImGui::MenuItem("Import urdf", ""))
 			{
 				char fileName[2048];
-				if (dGetImportUrdfFileName(fileName, sizeof(fileName) - 1))
+				if (ndGetImportUrdfFileName(fileName, sizeof(fileName) - 1))
 				{
 					const ndString path(fileName);
 					ndUrdfMeshLoader loader(*m_renderer);

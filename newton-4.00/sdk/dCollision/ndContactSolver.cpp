@@ -2449,22 +2449,55 @@ ndInt32 ndContactSolver::ConvexContactsDiscrete()
 	}
 
 	ndInt32 count = 0;
-	if (m_instance1.GetShape()->GetAsShapeConvex())
+	if (m_instance0.GetShape()->GetAsShapeConvex())
 	{
-		ndAssert(m_instance0.GetShape()->GetAsShapeConvex());
-		count = ConvexToConvexContactsDiscrete();
-	}
-	else
-	{
-		if (m_instance1.GetShape()->GetAsShapeStaticMesh())
+		if (m_instance1.GetShape()->GetAsShapeConvex())
 		{
-			count = ConvexToStaticMeshContactsDiscrete();
+			ndAssert(m_instance0.GetShape()->GetAsShapeConvex());
+			count = ConvexToConvexContactsDiscrete();
 		}
 		else
 		{
-			//ndAssert(0);
-			count = 0;
+			if (m_instance1.GetShape()->GetAsShapeStaticMesh())
+			{
+				count = ConvexToStaticMeshContactsDiscrete();
+			}
+			else
+			{
+				//ndAssert(0);
+				count = 0;
+			}
 		}
+	}
+	else
+	{
+		ndAssert(0);
+		// this should never happens, but it is hard to debug
+		// ther should never be a intance0 with a non convex shape. 
+		ndAssert(m_instance1.GetShape()->GetAsShapeConvex());
+		ndContactSolver surrugateSolver(*this, m_instance1, m_instance0);
+
+		surrugateSolver.m_instance0.m_localMatrix = m_instance1.m_localMatrix;
+		surrugateSolver.m_instance1.m_localMatrix = m_instance0.m_localMatrix;
+		surrugateSolver.m_instance0.m_globalMatrix = m_instance1.m_globalMatrix;
+		surrugateSolver.m_instance1.m_globalMatrix = m_instance0.m_globalMatrix;
+
+		ndAssert(surrugateSolver.m_instance0.GetShape()->GetAsShapeConvex());
+
+		count = 0;
+		if (surrugateSolver.m_instance1.GetShape()->GetAsShapeStaticMesh())
+		{
+			count = surrugateSolver.ConvexToStaticMeshContactsDiscrete();
+		}
+		for (ndInt32 i = 0; i < count; ++i)
+		{
+			m_contactBuffer[i].m_normal = m_contactBuffer[i].m_normal * ndVector::m_negOne;
+			ndSwap(m_contactBuffer[i].m_body0, m_contactBuffer[i].m_body1);
+			ndSwap(m_contactBuffer[i].m_shapeId0, m_contactBuffer[i].m_shapeId1);
+			ndSwap(m_contactBuffer[i].m_shapeInstance0, m_contactBuffer[i].m_shapeInstance1);
+		}
+		m_closestPoint0 = surrugateSolver.m_closestPoint1;
+		m_closestPoint1 = surrugateSolver.m_closestPoint0;
 	}
 
 	if (m_pruneContacts)

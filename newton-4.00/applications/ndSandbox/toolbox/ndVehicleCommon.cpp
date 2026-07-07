@@ -15,49 +15,7 @@
 #include "ndDemoEntityManager.h"
 #include "ndGameControllerInputs.h"
 
-class ndVehicleEngineSound : public ndSoundSourceNotify
-{
-	public:
-	ndVehicleEngineSound(ndVehicleCommonNotify* const vehicle)
-		:ndSoundSourceNotify()
-		,m_vehicle(vehicle)
-	{
-	}
-
-	virtual void Update(ndSoundSource* const source)
-	{
-		ndMultiBodyVehicle* const vehicle = m_vehicle->GetModel()->GetAsMultiBodyVehicle();
-		ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
-
-		// set the position and velocity
-		ndFloat32 rpm = ndAbs(motor->GetRpm());
-		if (rpm < ndFloat32 (10.0f))
-		{
-			source->Stop();
-		}
-		else if (!source->IsPlaying())
-		{
-			source->Play();
-		}
-		else
-		{
- 			const ndBodyKinematic* const chassis = vehicle->GetRoot()->m_body->GetAsBodyKinematic();
-			source->SetVelocity(chassis->GetVelocity());
-			source->SetPosition(chassis->GetMatrix().m_posit);
-			
-			const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& torqueCurve = motor->GetCurve();
-			ndFloat32 ideRpm = torqueCurve.GetIdleRpm();
-			ndFloat32 maxRpm = torqueCurve.GetPickPowerRpm();
-			ndFloat32 pitch = ndFloat32(1.0f) + (rpm - ideRpm) / (maxRpm - ideRpm);
-			source->SetPitch(ndClamp (pitch, ndFloat32(1.0f), ndFloat32(2.0f)));
-		}
-	}
-
-	ndWeakPtr<ndVehicleCommonNotify> m_vehicle;
-};
-
-
-ndVehicleCommonNotify::ndVehicleCommonNotify(ndDemoEntityManager* const scene, ndMultiBodyVehicle* const vehicle)
+ndVehicleCommonNotify::ndVehicleCommonNotify(ndMultiBodyVehicle* const vehicle)
 	:ndModelNotify()
 	,m_currentGear(ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear)
 	,m_autoGearShiftTimer(0)
@@ -66,12 +24,6 @@ ndVehicleCommonNotify::ndVehicleCommonNotify(ndDemoEntityManager* const scene, n
 	,m_isPlayer(false)
 {
 	SetModel(vehicle);
-
-	m_engineSound = scene->GetSoundManager()->AddSound("diesel_engine.wav");
-	m_engineSound->SetLooping(true);
-
-	ndSharedPtr<ndSoundSourceNotify> notify(new ndVehicleEngineSound(this));
-	m_engineSound->SetNotify(notify);
 }
 
 bool ndVehicleCommonNotify::GetPlayerState() const
@@ -425,7 +377,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			break;
 		}
 
-		// manual tranmission state machine
+		// manual transmission state machine
 		case m_driveForward:
 		{
 			if (m_ignition.Update(buttons[ndGameControllerInputs::m_ignitionButton] ? true : false))
@@ -439,6 +391,16 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				gearJoint->SetRatio(0.0f);
 				m_driverState = m_idle;
 			}
+
+			if (m_manualTransmission.Update(buttons[ndGameControllerInputs::m_automaticGearBoxButton] ? true : false))
+			{
+				m_transmission = m_automatic;
+				m_driverState = m_driveAutoGear;
+				m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
+				ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+				gearJoint->SetRatio(gearGain);
+			}
+
 
 			if (m_forwardGearUp.Update(buttons[ndGameControllerInputs::m_upGearButton] ? true : false))
 			{

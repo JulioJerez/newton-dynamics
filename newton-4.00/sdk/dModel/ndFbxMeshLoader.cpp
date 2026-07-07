@@ -263,7 +263,15 @@ void ndFbxMeshLoader::ImportMaterials(const ndOfbx::Mesh* const fbxMesh, ndMeshE
 				{
 					namePtr = textName;
 				}
-				strncpy(material.m_textureName, namePtr, sizeof(material.m_textureName));
+				ndString textureName(namePtr);
+				ndInt32 index = textureName.FindReverse(".png");
+				if (index == -1)
+				{
+					index = textureName.FindReverse(".");
+					ndAssert(index != -1);
+					textureName = ndString(textureName.GetStr(), index) + ".png";
+				}
+				strncpy(material.m_textureName, textureName.GetStr(), sizeof(material.m_textureName));
 			}
  			else
 			{
@@ -777,7 +785,6 @@ ndMesh* ndFbxMeshLoader::CreateMeshHierarchy(ndOfbx::IScene* const fbxScene, ndF
 		ndMatrix localMatrix(ofbxMatrix2dMatrix(data.m_fbxNode->getLocalTransform()));
 		node->SetName(data.m_fbxNode->name);
 		node->SetMatrix(localMatrix);
-		//node->SetBasePoseMatrix(localMatrix);
 	
 		nodeMap.Insert(*node, data.m_fbxNode);
 		{
@@ -785,7 +792,8 @@ ndMesh* ndFbxMeshLoader::CreateMeshHierarchy(ndOfbx::IScene* const fbxScene, ndF
 			for (ndInt32 i = 0; i < children.GetCount(); ++i)
 			{
 				ndOfbx::Object* const child = children[children.GetCount() - i - 1];
-				nodeStack.PushBack(ndFbx2MeshNodeStackData(child, *node));
+				const ndFbx2MeshNodeStackData childData(ndFbx2MeshNodeStackData(child, *node));
+				nodeStack.PushBack(childData);
 			}
 		}
 	}

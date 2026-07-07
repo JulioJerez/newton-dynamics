@@ -27,7 +27,7 @@
 ndShapeNull::ndShapeNull()
 	:ndShape(m_nullCollision)
 {
-	m_inertia = ndVector::m_one | ndVector::m_triplexMask;
+	m_inertia = ndVector::m_one;
 }
 
 ndShapeNull::~ndShapeNull()

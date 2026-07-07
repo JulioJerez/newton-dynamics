@@ -26,6 +26,7 @@
 #include "ndShapeInstance.h"
 #include "ndPolygonMeshDesc.h"
 #include "ndShapeStatic_bvh.h"
+#include "ndMeshBaseComponents.h"
 
 class ndCollisionBvhShowPolyContext
 {
@@ -68,6 +69,28 @@ ndShapeStatic_bvh::ndShapeStatic_bvh(const ndPolygonSoupBuilder& builder)
 	Create(builder);
 	CalculateAdjacent();
 
+	ndVector p0;
+	ndVector p1;
+	GetAABB(p0, p1);
+	m_boxSize = (p1 - p0) * ndVector::m_half;
+	m_boxOrigin = (p1 + p0) * ndVector::m_half;
+
+	ndMeshVertexListIndexList data;
+	data.m_indexList = nullptr;
+	data.m_userDataList = nullptr;
+	data.m_maxIndexCount = 1000000000;
+	data.m_triangleCount = 0;
+	ndVector zero(ndVector::m_zero);
+	ndFastAabb box(ndGetIdentityMatrix(), ndVector(ndFloat32(1.0e15f)));
+	ForAllSectors(box, zero, ndFloat32(1.0f), GetTriangleCount, &data);
+	m_trianglesCount = data.m_triangleCount;
+}
+
+ndShapeStatic_bvh::ndShapeStatic_bvh(const ndArray<ndVector>& points, const ndArray<ndInt32>& indices, const ndArray<ndNode>& nodes)
+	:ndShapeStaticMesh(m_boundingBoxHierachy)
+	,ndAabbPolygonSoup(points, indices, nodes)
+	,m_trianglesCount(0)
+{
 	ndVector p0;
 	ndVector p1;
 	GetAABB(p0, p1);
@@ -259,4 +282,13 @@ void ndShapeStatic_bvh::GetCollidingFaces(ndPolygonMeshDesc* const data) const
 {
 	data->m_pointArray = GetLocalVertexPool();
 	ForAllSectors(*data, data->m_boxDistanceTravelInMeshSpace, data->m_maxT, GetPolygon, data);
+}
+
+ndSharedPtr<ndMeshCollisionShape> ndShapeStatic_bvh::GetMeshShape() const
+{
+	ndMeshCollisionShapeTree* const shape = new ndMeshCollisionShapeTree;
+
+	ndAabbPolygonSoup::Serialize(shape->m_points, shape->m_indices, shape->m_nodes);
+
+	return ndSharedPtr<ndMeshCollisionShape>(shape);
 }

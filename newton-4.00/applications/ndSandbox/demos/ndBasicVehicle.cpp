@@ -33,6 +33,59 @@ namespace ndMotorVehicle
 		}
 	};
 
+	class ndVehicleEngineSound : public ndSoundSourceNotify
+	{
+		public:
+		ndVehicleEngineSound(ndMultiBodyVehicle* const vehicle)
+			:ndSoundSourceNotify()
+			,m_vehicle(vehicle)
+		{
+		}
+
+		virtual void Update(ndSoundSource* const source)
+		{
+			//ndMultiBodyVehicle* const vehicle = m_vehicle->GetModel()->GetAsMultiBodyVehicle();
+			ndMultiBodyVehicleMotor* const motor = m_vehicle->GetMotor();
+
+			// set the position and velocity
+			ndFloat32 rpm = ndAbs(motor->GetRpm());
+			if (rpm < ndFloat32(10.0f))
+			{
+				source->Stop();
+			}
+			else if (!source->IsPlaying())
+			{
+				source->Play();
+			}
+			else
+			{
+				const ndBodyKinematic* const chassis = m_vehicle->GetRoot()->m_body->GetAsBodyKinematic();
+				source->SetVelocity(chassis->GetVelocity());
+				source->SetPosition(chassis->GetMatrix().m_posit);
+
+				const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& torqueCurve = motor->GetCurve();
+				ndFloat32 ideRpm = torqueCurve.GetIdleRpm();
+				ndFloat32 maxRpm = torqueCurve.GetPickPowerRpm();
+				ndFloat32 pitch = ndFloat32(1.0f) + (rpm - ideRpm) / (maxRpm - ideRpm);
+				source->SetPitch(ndClamp(pitch, ndFloat32(1.0f), ndFloat32(2.0f)));
+			}
+		}
+
+		ndWeakPtr<ndMultiBodyVehicle> m_vehicle;
+	};
+
+	class ndVehicleController : public ndVehicleCommonNotify
+	{
+		public:
+		ndVehicleController(ndMultiBodyVehicle* const vehicle, ndSharedPtr<ndSoundSource> engineSound)
+			:ndVehicleCommonNotify(vehicle)
+			,m_engineSound(engineSound)
+		{
+		}
+
+		ndSharedPtr<ndSoundSource> m_engineSound;
+	};
+
 	class ndBasicVehicleDectriptor : public ndVehicleDectriptor
 	{
 		public:
@@ -86,7 +139,8 @@ namespace ndMotorVehicle
 		ndRender* const renderer = *scene->GetRenderer();
 		ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *loader.m_mesh, ndGetWorkingFileName("")));
 
-		auto BindApplicationData = [scene, mesh, vehicle, &sceneMesh, &superCar](ndModelArticulation::ndNode* const node)
+		ndSharedPtr<ndSoundSource> engineSound;
+		auto BindApplicationData = [scene, mesh, vehicle, &sceneMesh, &superCar, &engineSound](ndModelArticulation::ndNode* const node)
 		{
 			if (vehicle->IsCloseLoop(node))
 			{
@@ -96,6 +150,19 @@ namespace ndMotorVehicle
 			{
 				const ndMesh* const meshNode = mesh->FindByClosestMatch(node->m_name);
 				ndAssert(meshNode);
+
+				if (meshNode->GetName() == "engine")
+				{
+					ndMeshCustomPropertyString* const property = (ndMeshCustomPropertyString*)meshNode->GetCustomPropertyByName("engineSound");
+					if (property)
+					{
+						engineSound = scene->GetSoundManager()->AddSound(property->m_value.GetStr());
+						engineSound->SetLooping(true);
+
+						ndSharedPtr<ndSoundSourceNotify> notify(new ndVehicleEngineSound(vehicle));
+						engineSound->SetNotify(notify);
+					}
+				}
 
 				// find the visual node this body control by name. 
 				const ndMatrix matrix(node->m_body->GetMatrix());
@@ -150,8 +217,8 @@ namespace ndMotorVehicle
 			cameraPivotNode->AddChild(camera);
 		}
 
-		//add the notification to bind to the application.
-		ndSharedPtr<ndModelNotify> controller(new ndVehicleCommonNotify(scene, vehicle));
+		//add the notification for binding to the application.
+		ndSharedPtr<ndModelNotify> controller(new ndVehicleController(vehicle, engineSound));
 		vehicle->SetNotifyCallback(controller);
 
 		scene->AddEntity(sceneMesh);
@@ -402,15 +469,45 @@ namespace ndMotorVehicle
 		//callback->RegisterMaterial(material, ndDemoContactCallback::m_vehicleTirePart, ndDemoContactCallback::m_vehicleTirePart);
 		//callback->RegisterMaterial(material, ndDemoContactCallback::m_vehicleTirePart, ndDemoContactCallback::m_default);
 	}
+
+	static void LoadMap(ndDemoEntityManager* const scene)
+	{
+		//ndSharedPtr<ndBody> bodyFloor(BuildPlayground(scene));
+		//ndSharedPtr<ndBody> bodyFloor(BuildCompoundScene(scene, ndGetIdentityMatrix()));
+		//ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true));
+
+		// get the file full path
+		ndPhysicsWorld* const world = scene->GetWorld();
+		const ndString fileName(ndGetWorkingFileName("racetrack/racetrack.nd"));
+
+		// load the mesh
+		ndMeshLoader loader;
+		loader.LoadMesh(fileName);
+
+		// generate the scene rigid body
+		ndSharedPtr<ndBody> bodyFloor(new ndBodyDynamic());
+		bodyFloor->Deserialize(*loader.m_mesh->GetRigidBody());
+
+		// genereta the visual mesh
+		ndRender* const renderer = *scene->GetRenderer();
+		const ndString materialPath(fileName.GetPath());
+		ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *loader.m_mesh, materialPath));
+
+		// bind scene and physics with a rb notification 
+		ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, sceneMesh, nullptr));
+		bodyFloor->SetNotifyCallback(notify);
+
+		// add rb and visual mesh to the world and visual scene
+		scene->AddEntity(sceneMesh);
+		world->AddBody(bodyFloor);
+	}
 };
 
 using namespace ndMotorVehicle;
 
 void ndBasicVehicle (ndDemoEntityManager* const scene)
 {
-	//ndSharedPtr<ndBody> bodyFloor(BuildPlayground(scene));
-	//ndSharedPtr<ndBody> bodyFloor(BuildCompoundScene(scene, ndGetIdentityMatrix()));
-	ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true));
+	LoadMap(scene);
 
 	ndPhysicsWorld* const world = scene->GetWorld();
 	ndVector location(0.0f, 2.0f, 0.0f, 1.0f);
@@ -431,8 +528,7 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	
 	matrix.m_posit.m_x += 40.0f;
 	matrix.m_posit.m_z += 5.0f;
-	AddPlanks(scene, matrix, 60.0f, 5);
-
+	//AddPlanks(scene, matrix, 60.0f, 5);
 
 	// set a ui paner to see vehicle state
 	ndSharedPtr<ndDemoEntityManager::ndDemoUIpanel> dashboard(new ndDashboard());

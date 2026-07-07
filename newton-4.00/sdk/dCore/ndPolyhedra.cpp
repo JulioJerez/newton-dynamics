@@ -1099,7 +1099,12 @@ ndEdge* ndPolyhedra::FindEarTip (ndEdge* const face, const ndFloat64* const pool
 	{
 		ndBigVector p2 (ndBigVector::m_triplexMask & ndBigVector(&pool [ptr->m_next->m_incidentVertex * stride]));
 		ndBigVector d1 (p2 - p1);
-		ndFloat64 val1 = ndFloat64 (1.0f) / sqrt (d1.DotProduct(d1).GetScalar());
+		ndFloat64 mag2 = d1.DotProduct(d1).GetScalar();
+		if (mag2 < ndFloat64(1.0e-12f))
+		{
+			mag2 = ndFloat64(1.0e-12f);
+		}
+		ndFloat64 val1 = ndFloat64 (1.0f) / sqrt (mag2);
 		if (val1 < ndFloat64 (1.0e-10f)) 
 		{
 			val1 = ndFloat64 (1.0e-10f);
@@ -2919,7 +2924,12 @@ void ndPolyhedra::RemoveInteriorEdges (ndPolyhedra& buildConvex, const ndFloat64
 					ndAssert(edge->m_incidentFace > 0);
 
 					ndBigVector normal(FaceNormal(edge, vertex, strideInBytes));
-					normal = normal.Scale(ndFloat64(1.0f) / sqrt(normal.DotProduct(normal).GetScalar()));
+					ndFloat64 mag2 = normal.DotProduct(normal).GetScalar();
+					if (mag2 < ndFloat32(1.0e-14f))
+					{
+						mag2 = ndFloat32(1.0e-14f);
+					}
+					normal = normal.Scale(ndFloat64(1.0f) / sqrt(mag2));
 
 					edge = nullptr;
 					ndPolyhedra::Iterator iter1(flatFace);

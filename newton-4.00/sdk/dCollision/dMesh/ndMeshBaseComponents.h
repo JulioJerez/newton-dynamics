@@ -277,6 +277,25 @@ class ndMeshCollisionShapeCompound : public ndMeshCollisionShape
 	ndList<ndSharedPtr<ndMeshShapeInstance>> m_subShapes;
 };
 
+class ndMeshCollisionShapeTree : public ndMeshCollisionShape
+{
+	public:
+	D_COLLISION_API ndMeshCollisionShapeTree();
+
+	D_COLLISION_API ndMeshCollisionShapeTree(const ndMeshCollisionShapeTree& other);
+	D_COLLISION_API ndMeshCollisionShape* Duplicate() const;
+	D_COLLISION_API virtual bool operator==(const ndMeshCollisionShape& other) const;
+
+	D_COLLISION_API virtual ndShape* CreateObject() const override;
+	D_COLLISION_API virtual void ApplyScale(ndFloat32 scale) override;
+	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
+	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
+
+	ndArray<ndVector> m_points;
+	ndArray<ndInt32> m_indices;
+	ndArray<ndAabbPolygonSoup::ndNode> m_nodes;
+};
+
 class ndMeshShapeInstance : public ndClassAlloc
 {
 	public:

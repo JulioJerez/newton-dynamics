@@ -807,27 +807,32 @@ void ndRenderPrimitiveImplement::BuildWireframeDebugMesh(const ndRenderPrimitive
 				ndVector p2(faceVertex[2]);
 
 				ndVector normal((p1 - p0).CrossProduct(p2 - p0));
-				normal = normal.Normalize();
-				ndInt32 i0 = vertexCount - 1;
-				for (ndInt32 i = 0; i < vertexCount; ++i)
+				ndAssert(normal.m_w == ndFloat32(0.0f));
+				ndAssert(ndCheckVector(normal));
+				if (normal.DotProduct(normal).GetScalar() > ndFloat32(1.0e-6f))
 				{
-					glPositionNormal point;
-					point.m_posit.m_x = GLfloat(faceVertex[i].m_x);
-					point.m_posit.m_y = GLfloat(faceVertex[i].m_y);
-					point.m_posit.m_z = GLfloat(faceVertex[i].m_z);
-					point.m_normal.m_x = GLfloat(normal.m_x);
-					point.m_normal.m_y = GLfloat(normal.m_y);
-					point.m_normal.m_z = GLfloat(normal.m_z);
-					m_lines.PushBack(point);
+					normal = normal.Normalize();
+					ndInt32 i0 = vertexCount - 1;
+					for (ndInt32 i = 0; i < vertexCount; ++i)
+					{
+						glPositionNormal point;
+						point.m_posit.m_x = GLfloat(faceVertex[i].m_x);
+						point.m_posit.m_y = GLfloat(faceVertex[i].m_y);
+						point.m_posit.m_z = GLfloat(faceVertex[i].m_z);
+						point.m_normal.m_x = GLfloat(normal.m_x);
+						point.m_normal.m_y = GLfloat(normal.m_y);
+						point.m_normal.m_z = GLfloat(normal.m_z);
+						m_lines.PushBack(point);
 
-					point.m_posit.m_x = GLfloat(faceVertex[i0].m_x);
-					point.m_posit.m_y = GLfloat(faceVertex[i0].m_y);
-					point.m_posit.m_z = GLfloat(faceVertex[i0].m_z);
-					point.m_normal.m_x = GLfloat(normal.m_x);
-					point.m_normal.m_y = GLfloat(normal.m_y);
-					point.m_normal.m_z = GLfloat(normal.m_z);
-					m_lines.PushBack(point);
-					i0 = i;
+						point.m_posit.m_x = GLfloat(faceVertex[i0].m_x);
+						point.m_posit.m_y = GLfloat(faceVertex[i0].m_y);
+						point.m_posit.m_z = GLfloat(faceVertex[i0].m_z);
+						point.m_normal.m_x = GLfloat(normal.m_x);
+						point.m_normal.m_y = GLfloat(normal.m_y);
+						point.m_normal.m_z = GLfloat(normal.m_z);
+						m_lines.PushBack(point);
+						i0 = i;
+					}
 				}
 			}
 
@@ -981,36 +986,38 @@ void ndRenderPrimitiveImplement::BuildDebugFlatShadedMesh(const ndRenderPrimitiv
 				const ndVector p10(p1 - p0);
 				const ndVector p20(p2 - p0);
 				ndVector normal(p10.CrossProduct(p20));
-
 				ndAssert(normal.m_w == ndFloat32(0.0f));
 				ndAssert(ndCheckVector(normal));
-				normal = normal.Normalize();
-				for (ndInt32 i = 2; i < vertexCount; ++i)
+				if (normal.DotProduct(normal).GetScalar() > ndFloat32(1.0e-6f))
 				{
-					glPositionNormal point;
-					point.m_posit.m_x = GLfloat(faceVertex[0].m_x);
-					point.m_posit.m_y = GLfloat(faceVertex[0].m_y);
-					point.m_posit.m_z = GLfloat(faceVertex[0].m_z);
-					point.m_normal.m_x = GLfloat(normal.m_x);
-					point.m_normal.m_y = GLfloat(normal.m_y);
-					point.m_normal.m_z = GLfloat(normal.m_z);
-					m_triangles.PushBack(point);
+					normal = normal.Normalize();
+					for (ndInt32 i = 2; i < vertexCount; ++i)
+					{
+						glPositionNormal point;
+						point.m_posit.m_x = GLfloat(faceVertex[0].m_x);
+						point.m_posit.m_y = GLfloat(faceVertex[0].m_y);
+						point.m_posit.m_z = GLfloat(faceVertex[0].m_z);
+						point.m_normal.m_x = GLfloat(normal.m_x);
+						point.m_normal.m_y = GLfloat(normal.m_y);
+						point.m_normal.m_z = GLfloat(normal.m_z);
+						m_triangles.PushBack(point);
 
-					point.m_posit.m_x = GLfloat(faceVertex[i - 1].m_x);
-					point.m_posit.m_y = GLfloat(faceVertex[i - 1].m_y);
-					point.m_posit.m_z = GLfloat(faceVertex[i - 1].m_z);
-					point.m_normal.m_x = GLfloat(normal.m_x);
-					point.m_normal.m_y = GLfloat(normal.m_y);
-					point.m_normal.m_z = GLfloat(normal.m_z);
-					m_triangles.PushBack(point);
+						point.m_posit.m_x = GLfloat(faceVertex[i - 1].m_x);
+						point.m_posit.m_y = GLfloat(faceVertex[i - 1].m_y);
+						point.m_posit.m_z = GLfloat(faceVertex[i - 1].m_z);
+						point.m_normal.m_x = GLfloat(normal.m_x);
+						point.m_normal.m_y = GLfloat(normal.m_y);
+						point.m_normal.m_z = GLfloat(normal.m_z);
+						m_triangles.PushBack(point);
 
-					point.m_posit.m_x = GLfloat(faceVertex[i].m_x);
-					point.m_posit.m_y = GLfloat(faceVertex[i].m_y);
-					point.m_posit.m_z = GLfloat(faceVertex[i].m_z);
-					point.m_normal.m_x = GLfloat(normal.m_x);
-					point.m_normal.m_y = GLfloat(normal.m_y);
-					point.m_normal.m_z = GLfloat(normal.m_z);
-					m_triangles.PushBack(point);
+						point.m_posit.m_x = GLfloat(faceVertex[i].m_x);
+						point.m_posit.m_y = GLfloat(faceVertex[i].m_y);
+						point.m_posit.m_z = GLfloat(faceVertex[i].m_z);
+						point.m_normal.m_x = GLfloat(normal.m_x);
+						point.m_normal.m_y = GLfloat(normal.m_y);
+						point.m_normal.m_z = GLfloat(normal.m_z);
+						m_triangles.PushBack(point);
+					}
 				}
 			}
 
