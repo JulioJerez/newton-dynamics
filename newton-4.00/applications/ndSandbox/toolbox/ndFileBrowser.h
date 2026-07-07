@@ -13,8 +13,6 @@
 #ifndef _D_FILE_BROWSER_H_
 #define _D_FILE_BROWSER_H_
 
-bool dGetOpenFileNamePLY(char* const fileName, int maxSize);
-
 bool ndGetLoadFileName(char* const fileName, int maxSize);
 bool ndGetSaveFileName(char* const fileName, int maxSize);
 
