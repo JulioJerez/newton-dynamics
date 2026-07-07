@@ -27,7 +27,6 @@ static void strtolwr(char* const string)
 	}
 }
 
-
 //bool dGetOpenFileNameSerialization(char* const fileName, int maxSize)
 //{
 //#if (defined(WIN32) || defined(_WIN32))
