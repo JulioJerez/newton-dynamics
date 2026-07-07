@@ -530,7 +530,6 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	matrix.m_posit.m_z += 5.0f;
 	//AddPlanks(scene, matrix, 60.0f, 5);
 
-
 	// set a ui paner to see vehicle state
 	ndSharedPtr<ndDemoEntityManager::ndDemoUIpanel> dashboard(new ndDashboard());
 	scene->SetDemoUIpanel(dashboard);

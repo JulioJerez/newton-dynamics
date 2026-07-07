@@ -1071,6 +1071,11 @@ ndShapeInstance* ndShapeCompound::GetShapeInstance(ndTreeArray::ndNode* const no
 	return node->GetInfo()->GetShape();
 }
 
+const ndShapeInstance* ndShapeCompound::GetShapeInstance(ndTreeArray::ndNode* const node) const
+{
+	return node->GetInfo()->GetShape();
+}
+
 ndShapeCompound::ndTreeArray::ndNode* ndShapeCompound::AddCollision(ndShapeInstance* const subInstance)
 {
 	ndNodeBase* const newNode = new ndNodeBase(subInstance);

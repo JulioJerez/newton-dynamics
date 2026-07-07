@@ -465,9 +465,25 @@ ndShapeInfo ndShapeInstance::GetShapeInfo() const
 ndMatrix ndShapeInstance::CalculateInertia() const
 {
 	ndShape* const shape = (ndShape*)m_shape;
-	if (shape->GetAsShapeNull() || !(shape->GetAsShapeConvex() || shape->GetAsShapeCompound()))
+	//if (shape->GetAsShapeNull() || !(shape->GetAsShapeConvex() || shape->GetAsShapeCompound()))
+	if (shape->GetAsShapeNull() || shape->GetAsShapeStaticMesh())
 	{
 		return ndGetZeroMatrix();
+	}
+	else if (shape->GetAsShapeCompound())
+	{
+		const ndShapeCompound* const compound = shape->GetAsShapeCompound();
+		const ndShapeCompound::ndTreeArray& subShapes = compound->GetTree();
+		ndShapeCompound::ndTreeArray::Iterator it(subShapes);
+		for (it.Begin(); it; it++)
+		{
+			const ndShapeInstance* const subInStance = compound->GetShapeInstance(it.GetNode());
+			if (((ndShape*)subInStance->m_shape)->GetAsShapeStaticMesh())
+			{
+				return ndGetZeroMatrix();
+			}
+		}
+		return m_shape->CalculateInertiaAndCenterOfMass(m_alignmentMatrix, m_scale, m_localMatrix);
 	}
 	else 
 	{
