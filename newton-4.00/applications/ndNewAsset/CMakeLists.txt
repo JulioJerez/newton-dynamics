@@ -142,5 +142,11 @@ endif()
 install(DIRECTORY ../media DESTINATION "${PROJECT_BINARY_DIR}/applications")
 
 if (MSVC)
+	set (assetCommand "execute_process(COMMAND cmd /c unpackAssets.bat WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/applications/media/)")
+	install(CODE ${assetCommand})
+
+	set (raceTrackAssetCommand "execute_process(COMMAND cmd /c unpackAssets.bat WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/applications/media/racetrack)")
+	install(CODE ${raceTrackAssetCommand})
+
 	set_target_properties(${projectName} PROPERTIES FOLDER "demos")
 endif()
