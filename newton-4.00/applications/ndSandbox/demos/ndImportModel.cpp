@@ -180,7 +180,6 @@ class ndVanillaController : public ndModelNotify
     ndFloat32 m_engineMaxTorque;
 };
 
-//static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, const ndMatrix& location, const char* const pathFileName)
 static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, const ndMatrix& location, const ndString& pathFileName)
 {
     ndMeshLoader loader;
