@@ -133,7 +133,7 @@ bool dGetSaveFileNameSerialization(char* const fileName, int maxSize)
 #endif
 }
 
-bool dGetSaveNdFileName(char* const fileName, int maxSize)
+bool ndGetSaveFileName(char* const fileName, int maxSize)
 {
 #if (defined(WIN32) || defined(_WIN32))
 	OPENFILENAME ofn;
@@ -174,7 +174,7 @@ bool dGetSaveNdFileName(char* const fileName, int maxSize)
 #endif
 }
 
-bool dGetLoadNdFileName(char* const fileName, int maxSize)
+bool ndGetLoadFileName(char* const fileName, int maxSize)
 {
 #if (defined(WIN32) || defined(_WIN32))
 	OPENFILENAME ofn;

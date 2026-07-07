@@ -180,7 +180,8 @@ class ndVanillaController : public ndModelNotify
     ndFloat32 m_engineMaxTorque;
 };
 
-static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, const ndMatrix& location, const char* const pathFileName)
+//static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, const ndMatrix& location, const char* const pathFileName)
+static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, const ndMatrix& location, const ndString& pathFileName)
 {
     ndMeshLoader loader;
     loader.LoadMesh(pathFileName);
@@ -192,7 +193,8 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
 
     // make a hierarchical render mesh and add to the render scene
     ndRender* const renderer = *scene->GetRenderer();
-    ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *loader.m_mesh, ndGetWorkingFileName("")));
+    const ndString materialPath(pathFileName.GetPath());
+    ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *loader.m_mesh, materialPath));
     scene->AddEntity(sceneMesh);
 
     // set the matrix location to both visual and physic
@@ -246,7 +248,6 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
                 ndDemoEntityNotify* const fastNotify = (ndDemoEntityNotify*)*notify;
                 fastNotify->m_capSpeed = ndFloat32(30.0f);
                 node->m_body->GetAsBodyDynamic()->SetMaxLinearAndAngularIntegrationStep(node->m_body->GetAsBodyDynamic()->GetMaxAngularStep(), ndFloat32(10.0f));
-//node->m_body->GetAsBodyDynamic()->SetMassMatrix(ndVector::m_zero);
             }
 
             if (node->m_joint)
@@ -283,7 +284,7 @@ void ndImportModel(ndDemoEntityManager* const scene)
     snprintf(pathFileName, sizeof(pathFileName), "%s", lastFile.GetStr());
 
     ndTransform cameraTransform(scene->GetCameraMatrix());
-    if (dGetLoadNdFileName(pathFileName, sizeof(pathFileName)))
+    if (ndGetLoadFileName(pathFileName, sizeof(pathFileName)))
     {
         ndPhysicsWorld* const world = scene->GetWorld();
         ndSharedPtr<ndModel> testModel(LoadAndBindModel(scene, origin, pathFileName));

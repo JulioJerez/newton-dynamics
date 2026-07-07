@@ -1124,7 +1124,11 @@ void ndBodyKinematic::Deserialize(const ndMeshBody* const meshBody)
 	const ndMatrix matrix(meshBody->m_owner->CalculateGlobalMatrix());
 	SetMatrix(matrix);
 
-	const ndVector massMatrix (kinematic->m_invMass.Reciproc());
+	ndVector massMatrix(ndVector::m_zero);
+	if (kinematic->m_invMass.m_w > ndFloat32 (0.0f))
+	{
+		massMatrix = kinematic->m_invMass.Reciproc();
+	}
 	SetMassMatrix(massMatrix);
 
 	ndSharedPtr<ndShapeInstance> instance (kinematic->m_shapeInstance.CreateObject());

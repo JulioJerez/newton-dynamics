@@ -562,7 +562,7 @@ ndInt32 ndString::Find (const char* const subString, ndInt32 subStringLength, nd
 		{
 			char ch = subString[0];
 			const char* const ptr1 = m_string;
-			for (ndInt32 i = 0; i < m_size; ++i) 
+			for (ndInt32 i = from; i < m_size; ++i)
 			{
 				if (ch == ptr1[i]) 
 				{

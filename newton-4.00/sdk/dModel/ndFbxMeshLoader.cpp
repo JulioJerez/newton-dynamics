@@ -263,7 +263,15 @@ void ndFbxMeshLoader::ImportMaterials(const ndOfbx::Mesh* const fbxMesh, ndMeshE
 				{
 					namePtr = textName;
 				}
-				strncpy(material.m_textureName, namePtr, sizeof(material.m_textureName));
+				ndString textureName(namePtr);
+				ndInt32 index = textureName.FindReverse(".png");
+				if (index == -1)
+				{
+					index = textureName.FindReverse(".");
+					ndAssert(index != -1);
+					textureName = ndString(textureName.GetStr(), index) + ".png";
+				}
+				strncpy(material.m_textureName, textureName.GetStr(), sizeof(material.m_textureName));
 			}
  			else
 			{

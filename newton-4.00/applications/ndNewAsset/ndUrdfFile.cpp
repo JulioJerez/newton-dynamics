@@ -919,10 +919,10 @@ void ndUrdfMeshLoader::ImportVisual(const nd::TiXmlNode* const linkNode, ndMesh*
 
 bool ndUrdfMeshLoader::GetWorkingFileName(char* const name, ndInt32 maxSize) const
 {
-	bool ret = dGetWorkingFileName(m_path.GetStr(), name, maxSize - 1);
+	bool ret = ndGetWorkingFileName(m_path.GetStr(), name, maxSize - 1);
 	if (!ret)
 	{
-		ret = dGetWorkingFileName(m_searchPath.GetStr(), name, maxSize - 1);
+		ret = ndGetWorkingFileName(m_searchPath.GetStr(), name, maxSize - 1);
 	}
 	return ret;
 }
