@@ -24,7 +24,7 @@ bool ndGetSaveFileName(char* const fileName, int maxSize)
 	// open a file name
 	char appPath[256];
 	GetModuleFileNameA(nullptr, appPath, sizeof(appPath));
-	strtolwr(appPath);
+	//strtolwr(appPath);
 
 	char* const end = strstr(appPath, "applications");
 	end[0] = 0;
@@ -65,7 +65,7 @@ bool ndGetLoadFileName(char* const fileName, int maxSize)
 	// open a file name
 	char appPath[256];
 	GetModuleFileNameA(nullptr, appPath, sizeof(appPath));
-	strtolwr(appPath);
+	//strtolwr(appPath);
 
 	char* const end = strstr(appPath, "applications");
 	end[0] = 0;
@@ -106,7 +106,7 @@ bool ndGetImportFbxFileName(char* const fileName, int maxSize)
 	// open a file name
 	char appPath[256];
 	GetModuleFileNameA(nullptr, appPath, sizeof(appPath));
-	strtolwr(appPath);
+	//strtolwr(appPath);
 
 	char* const end = strstr(appPath, "applications");
 	end[0] = 0;
@@ -147,7 +147,7 @@ bool ndGetImportUrdfFileName(char* const fileName, int maxSize)
 	// open a file name
 	char appPath[256];
 	GetModuleFileNameA(nullptr, appPath, sizeof(appPath));
-	strtolwr(appPath);
+	//strtolwr(appPath);
 
 	char* const end = strstr(appPath, "applications");
 	end[0] = 0;

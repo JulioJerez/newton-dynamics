@@ -22,19 +22,8 @@ ndRenderTextureCache::ndRenderTextureCache(ndRender* const owner)
 
 ndSharedPtr<ndRenderTexture> ndRenderTextureCache::GetTexture(const ndString& pathname)
 {
-	//char pngName[256];
-	//snprintf(pngName, sizeof(pngName), "%s", pathname.GetStr());
-	//strtolwr(pngName);
-	//const char* const fileNameEnd = strstr(pngName, ".png");
-	//if (!fileNameEnd)
-	//{
-	//	strcat(pngName, ".png");
-	//	ndTrace(("subtitute texture %s with %s version\n", pathname.GetStr(), pngName));
-	//	ndAssert(0);
-	//}
-
 	ndString pngName(pathname);
-	pngName.ToLower();
+	//pngName.ToLower();
 	ndInt32 index = pngName.FindReverse(".png");
 	if (index == -1)
 	{
@@ -42,7 +31,9 @@ ndSharedPtr<ndRenderTexture> ndRenderTextureCache::GetTexture(const ndString& pa
 		ndTrace(("subtitute texture %s with %s version\n", pathname.GetStr(), pngName.GetStr()));
 	}
 
-	ndUnsigned64 hash = ndCRC64(pngName.GetStr());
+	ndString pngNameHash(pngName);
+	pngNameHash.ToLower();
+	ndUnsigned64 hash = ndCRC64(pngNameHash.GetStr());
 	ndNode* node = Find(hash);
 	if (!node)
 	{
@@ -53,7 +44,7 @@ ndSharedPtr<ndRenderTexture> ndRenderTextureCache::GetTexture(const ndString& pa
 
 ndSharedPtr<ndRenderTexture> ndRenderTextureCache::GetCubeMap(const ndFixSizeArray<ndString, 6>& pathnames)
 {
-	ndFixSizeArray<ndString, 6> pngName;
+	ndFixSizeArray<ndString, 6> pngNames;
 	ndAssert(pathnames.GetCount() == 6);
 	
 	ndUnsigned64 hash = 0;
@@ -62,21 +53,24 @@ ndSharedPtr<ndRenderTexture> ndRenderTextureCache::GetCubeMap(const ndFixSizeArr
 		ndAssert(pathnames[i].Size());
 		char tmp[256];
 		snprintf(tmp, sizeof(tmp), "%s", pathnames[i].GetStr());
-		strtolwr(tmp);
+		//strtolwr(tmp);
 		const char* const fileNameEnd = strstr(tmp, ".png");
 		if (!fileNameEnd)
 		{
 			strcat(tmp, ".png");
 			ndTrace(("subtitute texture %s with %s version\n", pathnames[i].GetStr(), tmp));
 		}
-		pngName.PushBack(ndString(tmp));
-		hash = ndCRC64(tmp, hash);
+		ndString pngNameHash(tmp);
+		pngNames.PushBack(ndString(pngNameHash));
+
+		pngNameHash.ToLower();
+		hash = ndCRC64(pngNameHash.GetStr(), hash);
 	}
 	
 	ndNode* node = Find(hash);
 	if (!node)
 	{
-		node = Insert(ndRenderTexture::LoadCubeMap(*m_owner->m_context, pngName), hash);
+		node = Insert(ndRenderTexture::LoadCubeMap(*m_owner->m_context, pngNames), hash);
 	}
 	return node->GetInfo();
 }

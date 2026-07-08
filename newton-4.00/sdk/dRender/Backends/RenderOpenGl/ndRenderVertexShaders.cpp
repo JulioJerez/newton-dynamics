@@ -74,6 +74,25 @@ R""""(
 	}
 )"""";
 
+const char* ndRenderShaderCache::m_generateAlphaTestShadowMapVertex =
+R""""(
+	#version 450 core
+
+	// using the same vertex buffer
+	layout(location = 0) in vec3 in_position;
+	layout(location = 1) in vec3 in_normal;
+	layout(location = 2) in vec2 in_uv;
+
+	out vec2 uv;
+
+	uniform mat4 viewModelProjectionMatrix;
+	void main()
+	{
+		uv = in_uv;
+		gl_Position = viewModelProjectionMatrix * vec4(in_position, 1.0);
+	}
+)"""";
+
 const char* ndRenderShaderCache::m_debugFlatShadedDiffuseVertex =
 R""""(
 	#version 450 core

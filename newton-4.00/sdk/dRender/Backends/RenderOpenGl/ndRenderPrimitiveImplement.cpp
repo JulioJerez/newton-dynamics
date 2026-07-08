@@ -239,6 +239,7 @@ void ndRenderPrimitiveImplement::InitShaderBlocks()
 	m_opaqueDiffusedColorShadowBlock.GetShaderParameters(shaderCache);
 	m_generateIntanceShadowMapsBlock.GetShaderParameters(shaderCache);
 	m_opaqueDifusedColorNoShadowBlock.GetShaderParameters(shaderCache);
+	m_generateAlphaTestShadowMapsBlock.GetShaderParameters(shaderCache);
 	m_opaqueDiffusedColorShadowSkinBlock.GetShaderParameters(shaderCache);
 	m_opaqueDifusedColorNoShadowInstanceBlock.GetShaderParameters(shaderCache);
 	m_opaqueDiffusedColorShadowAlphaTestBlock.GetShaderParameters(shaderCache);
@@ -1597,8 +1598,11 @@ void ndRenderPrimitiveImplement::RenderGenerateShadowMaps(const ndRender* const 
 		{
 			if (m_alphaTest)
 			{
-				//ndTrace(("Generate alpha test shadow\n"));
-				m_generateShadowMapsBlock.Render(this, render, lightMatrix);
+				m_generateAlphaTestShadowMapsBlock.SetWidingMode(true);
+				m_generateAlphaTestShadowMapsBlock.Render(this, render, lightMatrix);
+
+				m_generateAlphaTestShadowMapsBlock.SetWidingMode(false);
+				m_generateAlphaTestShadowMapsBlock.Render(this, render, lightMatrix);
 			}
 			else
 			{

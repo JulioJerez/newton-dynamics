@@ -22,6 +22,7 @@ class ndRenderShaderBlock
 	ndRenderShaderBlock();
 	virtual ~ndRenderShaderBlock();
 
+	void SetWidingMode(bool clockwise) const;
 	virtual void GetShaderParameters(const ndRenderShaderCache* const shaderCache) = 0;
 	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const = 0;
 
@@ -57,6 +58,18 @@ class ndRenderShaderGenerateShadowMapBlock : public ndRenderShaderSetZbufferClea
 
 	protected:
 	virtual void SetParameters(GLuint shader) override;
+};
+
+// *********************************************************************
+// 
+// *********************************************************************
+class ndRenderShaderGenerateAlphaTestShadowMapBlock : public ndRenderShaderGenerateShadowMapBlock
+{
+	public:
+	virtual void GetShaderParameters(const ndRenderShaderCache* const shaderCache) override;
+	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const override;
+	//protected:
+	//virtual void SetParameters(GLuint shader) override;
 };
 
 // *********************************************************************
@@ -146,7 +159,6 @@ class ndRenderShaderOpaqueDiffusedShadowColorBlock : public ndRenderShaderOpaque
 class ndRenderShaderTransparentDiffusedShadowColorBlock : public ndRenderShaderOpaqueDiffusedColorBlock
 {
 	public:
-	void SetWidingMode(bool clockwise) const;
 	virtual void GetShaderParameters(const ndRenderShaderCache* const shaderCache) override;
 	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const override;
 
@@ -268,7 +280,6 @@ class ndRenderShaderDynamicTrianglesArrayBlock : public ndRenderShaderBlock
 class ndRenderShaderOpaqueDiffusedShadowColorAlphaTestBlock : public ndRenderShaderOpaqueDiffusedShadowColorBlock
 {
 	public:
-	void SetWidingMode(bool clockwise) const;
 	virtual void GetShaderParameters(const ndRenderShaderCache* const shaderCache) override;
 };
 

@@ -617,7 +617,7 @@ ndSharedPtr<ndRenderTexture> ndRenderContext::LoadCubeMap(const ndFixSizeArray<n
 		ndAssert(pathnames[i].Size());
 		char tmp[256];
 		snprintf(tmp, sizeof(tmp), "%s", pathnames[i].GetStr());
-		strtolwr(tmp);
+		//strtolwr(tmp);
 		char* const fileNameEnd = strstr(tmp, ".png");
 		if (!fileNameEnd)
 		{

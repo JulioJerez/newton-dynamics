@@ -98,6 +98,7 @@ class ndRenderPrimitiveImplement : public ndContainersFreeListAlloc<ndRenderPrim
 	ndRenderShaderGenerateShadowMapBlock m_generateShadowMapsBlock;
 	ndRenderShaderGenerateSkinShadowMapBlock m_generateSkinShadowMapsBlock;
 	ndRenderShaderGenerateInstanceShadowMapBlock m_generateIntanceShadowMapsBlock;
+	ndRenderShaderGenerateAlphaTestShadowMapBlock m_generateAlphaTestShadowMapsBlock;
 
 	ndRenderShaderSetZbufferCleanBlock m_setZbufferBlock;
 	ndRenderShaderStaticLinesArrayBlock m_staticLinesArrayBlock;
@@ -121,6 +122,7 @@ class ndRenderPrimitiveImplement : public ndContainersFreeListAlloc<ndRenderPrim
 	friend class ndRenderShaderDebugFlatShadedDiffusedBlock;
 	friend class ndRenderShaderOpaqueDiffusedShadowColorBlock;
 	friend class ndRenderShaderGenerateInstanceShadowMapBlock;
+	friend class ndRenderShaderGenerateAlphaTestShadowMapBlock;
 	friend class ndRenderShaderOpaqueDiffusedShadowSkinColorBlock;
 	friend class ndRenderShaderInstancedOpaqueDiffusedShadowBlock;
 	friend class ndRenderShaderTransparentDiffusedShadowColorBlock;

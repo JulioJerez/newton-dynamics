@@ -21,7 +21,7 @@ static void ndGetWorkingFileName (const char* const name, char* const outPathNam
 	#if (defined(WIN32) || defined(_WIN32))
 		char appPath [256];
 		GetModuleFileNameA(nullptr, appPath, sizeof (appPath));
-		strtolwr(appPath);
+		//strtolwr(appPath);
 
 		char* const end = strstr (appPath, "applications");
 		end [0] = 0;
