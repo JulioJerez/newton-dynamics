@@ -22,6 +22,7 @@ ndVehicleCommonNotify::ndVehicleCommonNotify(ndMultiBodyVehicle* const vehicle)
 	,m_driverState(m_parked)
 	,m_transmission(m_manual)
 	,m_isPlayer(false)
+	,m_engineOn(false)
 {
 	SetModel(vehicle);
 }
@@ -29,6 +30,11 @@ ndVehicleCommonNotify::ndVehicleCommonNotify(ndMultiBodyVehicle* const vehicle)
 bool ndVehicleCommonNotify::GetPlayerState() const
 {
 	return m_isPlayer;
+}
+
+bool ndVehicleCommonNotify::EngineOn() const
+{
+	return m_engineOn;
 }
 
 void ndVehicleCommonNotify::SetAsPlayer(bool state)
@@ -215,6 +221,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 
 			if (m_ignition.Update(buttons[ndGameControllerInputs::m_ignitionButton] ? true : false))
 			{
+				m_engineOn = true;
 				m_driverState = m_idle;
 			}
 			break;
@@ -227,6 +234,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 
 			if (m_ignition.Update(buttons[ndGameControllerInputs::m_ignitionButton] ? true : false))
 			{
+				m_engineOn = false;
 				m_driverState = m_parked;
 			}
 

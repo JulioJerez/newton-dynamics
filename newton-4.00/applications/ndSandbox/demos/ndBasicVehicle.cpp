@@ -44,11 +44,14 @@ namespace ndMotorVehicle
 
 		virtual void Update(ndSoundSource* const source)
 		{
-			//ndMultiBodyVehicle* const vehicle = m_vehicle->GetModel()->GetAsMultiBodyVehicle();
 			ndMultiBodyVehicleMotor* const motor = m_vehicle->GetMotor();
 
-			// set the position and velocity
 			ndFloat32 rpm = ndAbs(motor->GetRpm());
+			ndVehicleCommonNotify* const controller = (ndVehicleCommonNotify*)*m_vehicle->GetNotifyCallback();
+			if (controller->EngineOn())
+			{
+				rpm = ndMax (ndFloat32(20.0f), rpm);
+			}
 			if (rpm < ndFloat32(10.0f))
 			{
 				source->Stop();
@@ -534,7 +537,7 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	// add a vehicle material
 	AddMaterial(scene);
 	
-	ndMatrix matrix(ndGetIdentityMatrix());
+	ndMatrix matrix(ndYawMatrix (ndFloat32 (90.0f) * ndDegreeToRad));
 	ndVector floor(FindFloor(*world, location, 100.0f));
 	matrix.m_posit = floor;
 	matrix.m_posit.m_y += 0.5f;

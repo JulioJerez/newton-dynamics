@@ -51,6 +51,7 @@ class ndVehicleCommonNotify : public ndModelNotify
 	void PostTransformUpdate(ndFloat32 timestep) override;
 	void Debug(ndConstraintDebugCallback&) const override;
 
+	bool EngineOn() const;
 	bool GetPlayerState() const;
 	void SetAsPlayer(bool state);
 
@@ -66,6 +67,7 @@ class ndVehicleCommonNotify : public ndModelNotify
 	ndDriveState m_driverState;
 	ndTransmissionMode m_transmission;
 	bool m_isPlayer;
+	bool m_engineOn;
 };
 
 #endif
