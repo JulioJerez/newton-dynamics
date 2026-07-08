@@ -162,8 +162,8 @@ class ndMesh : public ndClassAlloc
 	D_NEWTON_API ndNodeType GetNodeType() const;
 	D_NEWTON_API void SetNodeType(ndNodeType type);
 
-	D_NEWTON_API bool GetIsVisible() const;
-	D_NEWTON_API void SetIsVisible(bool flag);
+	D_NEWTON_API bool GetVisibility() const;
+	D_NEWTON_API void SetVisibility(bool flag);
 
 	D_NEWTON_API ndInt32 GetToolFlags() const;
 	D_NEWTON_API void SetToolFlags(ndInt32 flags);

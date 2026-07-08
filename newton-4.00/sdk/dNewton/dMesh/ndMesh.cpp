@@ -307,12 +307,12 @@ void ndMesh::SetNodeType(ndNodeType type)
 	m_type = type;
 }
 
-bool ndMesh::GetIsVisible() const
+bool ndMesh::GetVisibility() const
 {
 	return m_isVisible;
 }
 
-void ndMesh::SetIsVisible(bool flag)
+void ndMesh::SetVisibility(bool flag)
 {
 	m_isVisible = flag;
 }

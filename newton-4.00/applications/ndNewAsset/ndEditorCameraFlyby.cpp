@@ -258,7 +258,7 @@ void ndEditorCameraFlyby::MouseSelection()
 		ndFloat32 hitParam = ndFloat32(1.0f);
 		auto RayCast = [this, &hitNode, &hitParam, &p0, &p1](ndMesh* const node)
 		{
-			if (node->GetIsVisible() && node->GetGeometry())
+			if (node->GetVisibility() && node->GetGeometry())
 			{
 				const ndMatrix matrix(node->GetGeometryMatrix() * node->CalculateGlobalMatrix());
 				const ndVector localP0(matrix.UntransformVector(p0));
