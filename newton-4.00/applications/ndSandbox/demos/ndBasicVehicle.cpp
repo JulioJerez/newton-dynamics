@@ -484,6 +484,25 @@ namespace ndMotorVehicle
 		ndMeshLoader loader;
 		loader.LoadMesh(fileName);
 
+		// set all teh alpha test materials
+		auto SetAlphaTest = [](ndMesh* const node)
+		{
+			ndMeshEffect* const	geometry = *node->GetGeometry();
+			if (geometry)
+			{
+				if (node->GetParent()->GetName().Find("Pine") != -1)
+				{
+					ndArray<ndMeshEffect::ndMaterial>& materialArray = geometry->GetMaterials();
+					for (ndInt32 i = 0; i < materialArray.GetCount(); ++i)
+					{
+						ndMeshEffect::ndMaterial& material = materialArray[i];
+						material.m_useAlphaTest = true;
+					}
+				}
+			}
+		};
+		loader.m_mesh->NodeIterator(SetAlphaTest);
+
 		// generate the scene rigid body
 		ndSharedPtr<ndBody> bodyFloor(new ndBodyDynamic());
 		bodyFloor->Deserialize(*loader.m_mesh->GetRigidBody());
