@@ -35,6 +35,7 @@ ndRenderPrimitiveImplement::ndRenderPrimitiveImplement(ndRenderPrimitive* const 
 	,m_vertexBuffer(0)
 	,m_vertextArrayBuffer(0)
 	,m_instanceMatrixBuffer(0)
+	,m_alphaTest(false)
 	,m_isSimpleMesh(false)
 {
 	if (*descriptor.m_collision)
@@ -80,6 +81,7 @@ ndRenderPrimitiveImplement::ndRenderPrimitiveImplement(
 	,m_vertexBuffer(0)
 	,m_vertextArrayBuffer(0)
 	,m_instanceMatrixBuffer(0)
+	,m_alphaTest(src.m_alphaTest)
 	,m_isSimpleMesh(src.m_isSimpleMesh)
 {
 	ndAssert(0);
@@ -99,6 +101,7 @@ ndRenderPrimitiveImplement::ndRenderPrimitiveImplement(
 	,m_vertexBuffer(0)
 	,m_vertextArrayBuffer(0)
 	,m_instanceMatrixBuffer(0)
+	,m_alphaTest(false)
 	,m_isSimpleMesh(false)
 {
 	if (src.m_skinSceneNode)
@@ -226,17 +229,19 @@ ndRenderPrimitiveImplement::~ndRenderPrimitiveImplement()
 
 void ndRenderPrimitiveImplement::InitShaderBlocks()
 {
-	m_staticLinesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
-	m_dynamicLinesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
-	m_generateShadowMapsBlock.GetShaderParameters(*m_context->m_shaderCache);
-	m_transparencyDiffusedBlock.GetShaderParameters(*m_context->m_shaderCache);
-	m_dynamicTrianglesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
-	m_generateSkinShadowMapsBlock.GetShaderParameters(*m_context->m_shaderCache);
-	m_opaqueDiffusedColorShadowBlock.GetShaderParameters(*m_context->m_shaderCache);
-	m_generateIntanceShadowMapsBlock.GetShaderParameters(*m_context->m_shaderCache);
-	m_opaqueDifusedColorNoShadowBlock.GetShaderParameters(*m_context->m_shaderCache);
-	m_opaqueDiffusedColorShadowSkinBlock.GetShaderParameters(*m_context->m_shaderCache);
-	m_opaqueDifusedColorNoShadowInstanceBlock.GetShaderParameters(*m_context->m_shaderCache);
+	const ndRenderShaderCache* const shaderCache = *m_context->m_shaderCache;
+	m_staticLinesArrayBlock.GetShaderParameters(shaderCache);
+	m_dynamicLinesArrayBlock.GetShaderParameters(shaderCache);
+	m_generateShadowMapsBlock.GetShaderParameters(shaderCache);
+	m_transparencyDiffusedBlock.GetShaderParameters(shaderCache);
+	m_dynamicTrianglesArrayBlock.GetShaderParameters(shaderCache);
+	m_generateSkinShadowMapsBlock.GetShaderParameters(shaderCache);
+	m_opaqueDiffusedColorShadowBlock.GetShaderParameters(shaderCache);
+	m_generateIntanceShadowMapsBlock.GetShaderParameters(shaderCache);
+	m_opaqueDifusedColorNoShadowBlock.GetShaderParameters(shaderCache);
+	m_opaqueDiffusedColorShadowSkinBlock.GetShaderParameters(shaderCache);
+	m_opaqueDifusedColorNoShadowInstanceBlock.GetShaderParameters(shaderCache);
+	m_opaqueDiffusedColorShadowAlphaTestBlock.GetShaderParameters(shaderCache);
 }
 
 bool ndRenderPrimitiveImplement::IsSimpleMesh() const
@@ -436,6 +441,7 @@ void ndRenderPrimitiveImplement::BuildRenderMeshFromCollisionShape(const ndRende
 		segment.m_material.m_specular = material.m_specular;
 		segment.m_material.m_reflection = material.m_reflection;
 		segment.m_material.m_castShadows = material.m_castShadows;
+		segment.m_material.m_useAlphaTest = material.m_useAlphaTest;
 		segment.m_material.m_specularPower = material.m_specularPower;
 
 		segment.m_indexCount = mesh.GetMaterialIndexCount(geometryHandle, handle);
@@ -500,6 +506,7 @@ void ndRenderPrimitiveImplement::BuildRenderSimpleMeshFromMeshEffect(const ndRen
 	mesh.GetNormalChannel(sizeof(glPositionNormalUV), &points[0].m_normal[0]);
 	mesh.GetUV0Channel(sizeof(glPositionNormalUV), &points[0].m_uv.m_u);
 
+	bool isAlphaTest = false;
 	ndInt32 segmentStart = 0;
 	for (ndInt32 handle = mesh.GetFirstMaterial(geometryHandle); handle != -1; handle = mesh.GetNextMaterial(geometryHandle, handle))
 	{
@@ -519,8 +526,9 @@ void ndRenderPrimitiveImplement::BuildRenderSimpleMeshFromMeshEffect(const ndRen
 		segment.m_material.m_specular = material.m_specular;
 		segment.m_material.m_reflection = material.m_reflection;
 		segment.m_material.m_castShadows = material.m_castShadows;
+		segment.m_material.m_useAlphaTest = material.m_useAlphaTest;
+		isAlphaTest = isAlphaTest || material.m_useAlphaTest;
 		segment.m_material.m_specularPower = material.m_specularPower;
-
 		segment.m_indexCount = mesh.GetMaterialIndexCount(geometryHandle, handle);
 
 		segment.m_segmentStart = segmentStart;
@@ -528,6 +536,8 @@ void ndRenderPrimitiveImplement::BuildRenderSimpleMeshFromMeshEffect(const ndRen
 		segmentStart += segment.m_indexCount;
 	}
 	mesh.MaterialGeometryEnd(geometryHandle);
+	
+	m_alphaTest = isAlphaTest;
 
 	// optimize this mesh for hardware buffers if possible
 	m_indexCount = indexCount;
@@ -665,6 +675,7 @@ void ndRenderPrimitiveImplement::BuildRenderSkinnedMeshFromMeshEffect(const ndRe
 		segment.m_material.m_specular = material.m_specular;
 		segment.m_material.m_reflection = material.m_reflection;
 		segment.m_material.m_castShadows = material.m_castShadows;
+		segment.m_material.m_useAlphaTest = material.m_useAlphaTest;
 		segment.m_material.m_specularPower = material.m_specularPower;
 
 		segment.m_indexCount = mesh.GetMaterialIndexCount(geometryHandle, handle);
@@ -1365,6 +1376,7 @@ void ndRenderPrimitiveImplement::BuildRenderInstanceMesh(const ndRenderPrimitive
 		segment.m_material.m_specular = material.m_specular;
 		segment.m_material.m_reflection = material.m_reflection;
 		segment.m_material.m_castShadows = material.m_castShadows;
+		segment.m_material.m_useAlphaTest = material.m_useAlphaTest;
 		segment.m_material.m_specularPower = material.m_specularPower;
 
 		segment.m_indexCount = mesh.GetMaterialIndexCount(geometryHandle, handle);
@@ -1583,7 +1595,15 @@ void ndRenderPrimitiveImplement::RenderGenerateShadowMaps(const ndRender* const 
 		}
 		else
 		{
-			m_generateShadowMapsBlock.Render(this, render, lightMatrix);
+			if (m_alphaTest)
+			{
+				//ndTrace(("Generate alpha test shadow\n"));
+				m_generateShadowMapsBlock.Render(this, render, lightMatrix);
+			}
+			else
+			{
+				m_generateShadowMapsBlock.Render(this, render, lightMatrix);
+			}
 		}
 	}
 }
@@ -1639,7 +1659,18 @@ void ndRenderPrimitiveImplement::RenderDirectionalDiffuseColorShadow(const ndRen
 	}
 	else
 	{
-		m_opaqueDiffusedColorShadowBlock.Render(this, render, modelMatrix);
+		if (m_alphaTest)
+		{
+			m_opaqueDiffusedColorShadowAlphaTestBlock.SetWidingMode(true);
+			m_opaqueDiffusedColorShadowAlphaTestBlock.Render(this, render, modelMatrix);
+			
+			m_opaqueDiffusedColorShadowAlphaTestBlock.SetWidingMode(false);
+			m_opaqueDiffusedColorShadowAlphaTestBlock.Render(this, render, modelMatrix);
+		}
+		else
+		{
+			m_opaqueDiffusedColorShadowBlock.Render(this, render, modelMatrix);
+		}
 	}
 }
 

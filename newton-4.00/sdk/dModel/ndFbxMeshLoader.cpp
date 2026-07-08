@@ -243,12 +243,12 @@ void ndFbxMeshLoader::ImportMaterials(const ndOfbx::Mesh* const fbxMesh, ndMeshE
 			material.m_opacity = ndFloat32(fbxMaterial->getOpacityFactor());
 			material.m_shiness = ndFloat32(fbxMaterial->getShininessExponent());
 			
-			const ndOfbx::Texture* const texture = fbxMaterial->getTexture(ndOfbx::Texture::DIFFUSE);
-			if (texture)
+			const ndOfbx::Texture* const diffuseTexture = fbxMaterial->getTexture(ndOfbx::Texture::DIFFUSE);
+			if (diffuseTexture)
 			{
 				char textName[1024];
 				textName[1023] = 0;
-				ndOfbx::DataView dataView = texture->getRelativeFileName();
+				ndOfbx::DataView dataView = diffuseTexture->getRelativeFileName();
 				dataView.toString(textName);
 				char* namePtr = strrchr(textName, '\\');
 				if (!namePtr)

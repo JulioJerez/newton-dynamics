@@ -143,6 +143,7 @@ class ndRender: public ndClassAlloc
 	friend class ndRenderShaderOpaqueDiffusedShadowSkinColorBlock;
 	friend class ndRenderShaderInstancedOpaqueDiffusedShadowBlock;
 	friend class ndRenderShaderTransparentDiffusedShadowColorBlock;
+	friend class ndRenderShaderOpaqueDiffusedShadowColorAlphaTestBlock;
 };
 
 #endif 

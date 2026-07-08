@@ -24,6 +24,7 @@ ndRenderPrimitiveMaterial::ndRenderPrimitiveMaterial()
 	,m_opacity(ndFloat32(1.0f))
 	,m_texture(nullptr)
 	,m_castShadows(true)
+	,m_useAlphaTest(false)
 {
 }
 
@@ -35,6 +36,7 @@ ndRenderPrimitiveMaterial::ndRenderPrimitiveMaterial(const ndRenderPrimitiveMate
 	,m_opacity(src.m_opacity)
 	,m_texture(src.m_texture)
 	,m_castShadows(src.m_castShadows)
+	,m_useAlphaTest(src.m_useAlphaTest)
 {
 }
 

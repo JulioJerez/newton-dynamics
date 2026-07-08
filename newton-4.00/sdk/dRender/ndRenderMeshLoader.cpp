@@ -101,7 +101,7 @@ ndSharedPtr<ndRenderSceneNode> ndRenderMeshLoader::CreateRenderSceneMesh(ndRende
 		}
 
 		ndMesh::ndNodeType type = mesh->GetNodeType();
-		if (!mesh->GetIsVisible() || (type == ndMesh::m_collisionShape) || (entity->m_name.Find("-hidden") != -1))
+		if (!mesh->GetVisibility() || (type == ndMesh::m_collisionShape) || (entity->m_name.Find("-hidden") != -1))
 		{
 			entity->m_isVisible = false;
 		}
@@ -142,6 +142,7 @@ ndSharedPtr<ndRenderSceneNode> ndRenderMeshLoader::CreateRenderSceneMesh(ndRende
 			material.m_reflection = materials[j].m_reflection;
 			material.m_specularPower = ndReal(materials[j].m_shiness);
 			material.m_opacity = ndReal(materials[j].m_opacity);
+			material.m_useAlphaTest = materials[j].m_useAlphaTest;
 			material.m_castShadows = true;
 		}
 	

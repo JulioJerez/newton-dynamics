@@ -44,11 +44,14 @@ namespace ndMotorVehicle
 
 		virtual void Update(ndSoundSource* const source)
 		{
-			//ndMultiBodyVehicle* const vehicle = m_vehicle->GetModel()->GetAsMultiBodyVehicle();
 			ndMultiBodyVehicleMotor* const motor = m_vehicle->GetMotor();
 
-			// set the position and velocity
 			ndFloat32 rpm = ndAbs(motor->GetRpm());
+			ndVehicleCommonNotify* const controller = (ndVehicleCommonNotify*)*m_vehicle->GetNotifyCallback();
+			if (controller->EngineOn())
+			{
+				rpm = ndMax (ndFloat32(20.0f), rpm);
+			}
 			if (rpm < ndFloat32(10.0f))
 			{
 				source->Stop();
@@ -484,6 +487,50 @@ namespace ndMotorVehicle
 		ndMeshLoader loader;
 		loader.LoadMesh(fileName);
 
+		// set all teh alpha test materials
+		auto SetAlphaTest = [](ndMesh* const node)
+		{
+			ndMeshEffect* const	geometry = *node->GetGeometry();
+			if (geometry)
+			{
+				if (node->GetName().Find("Bush") != -1)
+				{
+					ndArray<ndMeshEffect::ndMaterial>& materialArray = geometry->GetMaterials();
+					for (ndInt32 i = 0; i < materialArray.GetCount(); ++i)
+					{
+						ndMeshEffect::ndMaterial& material = materialArray[i];
+						material.m_useAlphaTest = true;
+					}
+				}
+				else if (node->GetParent()->GetName().Find("Pine") != -1)
+				{
+					ndArray<ndMeshEffect::ndMaterial>& materialArray = geometry->GetMaterials();
+					for (ndInt32 i = 0; i < materialArray.GetCount(); ++i)
+					{
+						ndMeshEffect::ndMaterial& material = materialArray[i];
+						material.m_useAlphaTest = true;
+					}
+				}
+			}
+
+			// make sure props are invisible whne rendering the map
+			ndMeshBodyDynamic* const propMesh = (ndMeshBodyDynamic*)*node->GetRigidBody();
+			if (propMesh)
+			{
+				if (propMesh->m_invMass.m_w > 0.0f)
+				{
+					// make sure we hide this node
+					node->SetVisibility(false);
+					ndList<ndSharedPtr<ndMesh>>& children = node->GetChildren();
+					for (ndList<ndSharedPtr<ndMesh>>::ndNode* child = children.GetFirst(); child; child = child->GetNext())
+					{
+						child->GetInfo()->SetVisibility(false);
+					}
+				}
+			}
+		};
+		loader.m_mesh->NodeIterator(SetAlphaTest);
+
 		// generate the scene rigid body
 		ndSharedPtr<ndBody> bodyFloor(new ndBodyDynamic());
 		bodyFloor->Deserialize(*loader.m_mesh->GetRigidBody());
@@ -500,6 +547,44 @@ namespace ndMotorVehicle
 		// add rb and visual mesh to the world and visual scene
 		scene->AddEntity(sceneMesh);
 		world->AddBody(bodyFloor);
+
+		// now add all of dynamics props
+		auto AddProps = [world, scene, &fileName](ndMesh* const node)
+		{
+			ndMeshBodyDynamic* const propMesh = (ndMeshBodyDynamic*)*node->GetRigidBody();
+			if (propMesh)
+			{
+				if (propMesh->m_invMass.m_w > 0.0f)
+				{
+					// make sure it is visible before convert to visual mesh
+					node->SetVisibility(true);
+					ndList<ndSharedPtr<ndMesh>>& children = node->GetChildren();
+					for (ndList<ndSharedPtr<ndMesh>>::ndNode* child = children.GetFirst(); child; child = child->GetNext())
+					{
+						child->GetInfo()->SetVisibility(true);
+					}
+
+					// make a prop rigid body
+					ndSharedPtr<ndBody> propBody(new ndBodyDynamic());
+					propBody->Deserialize(propMesh);
+					const ndMatrix matrix(node->CalculateGlobalMatrix());
+					propBody->SetMatrix(matrix);
+
+					// make a prop visual mesh
+					ndRender* const renderer = *scene->GetRenderer();
+					const ndString materialPath(fileName.GetPath());
+					ndSharedPtr<ndRenderSceneNode> visualPropMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, node, materialPath));
+
+					// bind notification and add to world and scene
+					ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualPropMesh, nullptr));
+					propBody->SetNotifyCallback(notify);
+
+					world->AddBody(propBody);
+					scene->AddEntity(visualPropMesh);
+				}
+			}
+		};
+		loader.m_mesh->NodeIterator(AddProps);
 	}
 };
 
@@ -515,7 +600,7 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	// add a vehicle material
 	AddMaterial(scene);
 	
-	ndMatrix matrix(ndGetIdentityMatrix());
+	ndMatrix matrix(ndYawMatrix (ndFloat32 (90.0f) * ndDegreeToRad));
 	ndVector floor(FindFloor(*world, location, 100.0f));
 	matrix.m_posit = floor;
 	matrix.m_posit.m_y += 0.5f;
