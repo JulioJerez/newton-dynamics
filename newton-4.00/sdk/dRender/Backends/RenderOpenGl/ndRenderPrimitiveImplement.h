@@ -85,6 +85,7 @@ class ndRenderPrimitiveImplement : public ndContainersFreeListAlloc<ndRenderPrim
 	GLuint m_vertextArrayBuffer;
 	GLuint m_instanceMatrixBuffer;
 
+	bool m_alphaTest;
 	bool m_isSimpleMesh;
 	
 	ndRenderShaderOpaqueDiffusedColorBlock m_opaqueDifusedColorNoShadowBlock;
@@ -92,6 +93,7 @@ class ndRenderPrimitiveImplement : public ndContainersFreeListAlloc<ndRenderPrim
 	ndRenderShaderTransparentDiffusedShadowColorBlock m_transparencyDiffusedBlock;
 	ndRenderShaderOpaqueDiffusedShadowSkinColorBlock m_opaqueDiffusedColorShadowSkinBlock;
 	ndRenderShaderInstancedOpaqueDiffusedShadowBlock m_opaqueDifusedColorNoShadowInstanceBlock;
+	ndRenderShaderOpaqueDiffusedShadowColorAlphaTestBlock m_opaqueDiffusedColorShadowAlphaTestBlock;
 
 	ndRenderShaderGenerateShadowMapBlock m_generateShadowMapsBlock;
 	ndRenderShaderGenerateSkinShadowMapBlock m_generateSkinShadowMapsBlock;
@@ -122,6 +124,7 @@ class ndRenderPrimitiveImplement : public ndContainersFreeListAlloc<ndRenderPrim
 	friend class ndRenderShaderOpaqueDiffusedShadowSkinColorBlock;
 	friend class ndRenderShaderInstancedOpaqueDiffusedShadowBlock;
 	friend class ndRenderShaderTransparentDiffusedShadowColorBlock;
+	friend class ndRenderShaderOpaqueDiffusedShadowColorAlphaTestBlock;
 };
 
 #endif

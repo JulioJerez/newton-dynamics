@@ -81,6 +81,7 @@ class ndHeightfieldMesh : public ndRenderSceneNode
 			descriptor.m_meshNode = tileMesh;
 			ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(texture);
 			material.m_castShadows = false;
+			material.m_useAlphaTest = false;
 
 			ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
 			tileNode->SetPrimitive(mesh);

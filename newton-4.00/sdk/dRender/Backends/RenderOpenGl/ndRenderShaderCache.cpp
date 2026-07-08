@@ -57,6 +57,9 @@ bool ndRenderShaderCache::CreateAllEffects()
 	m_wireFrameEffect = CreateShaderEffect(m_wireFrameVertexColor, m_wireFramePixel);
 	m_dynamicTrianglesEffect = CreateShaderEffect(m_debugFlatShadedColorVertex, m_debugFlatShadedColorPixel);
 
+	// some alpha test for tree and foliage
+	m_diffuseShadowAlphaTestEffect = CreateShaderEffect(m_directionalDiffuseShadowVertex, m_directionalDiffuseShadowAlphaTestPixel);
+
 	return true;
 }
 

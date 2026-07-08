@@ -39,6 +39,7 @@ class ndRenderShaderCache
 			GLuint m_diffuseTransparentEffect;
 			GLuint m_generateShadowMapsEffect;
 			GLuint m_diffuseShadowIntanceEffect;
+			GLuint m_diffuseShadowAlphaTestEffect;
 			GLuint m_generateShadowMapsSkinEffect;
 			GLuint m_debugFlatShadedDiffuseEffect;
 			GLuint m_generateInstancedShadowMapsEffect;
@@ -74,6 +75,7 @@ class ndRenderShaderCache
 	static const char* m_debugFlatShadedDiffusePixel;
 	static const char* m_directionalDiffuseShadowPixel;
 	static const char* m_directionalDiffuseTransparentPixel;
+	static const char* m_directionalDiffuseShadowAlphaTestPixel;
 
 	friend class ndRenderContext;
 	friend class ndRenderShaderSetZbufferCleanBlock;

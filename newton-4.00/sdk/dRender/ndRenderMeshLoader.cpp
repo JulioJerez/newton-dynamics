@@ -142,6 +142,7 @@ ndSharedPtr<ndRenderSceneNode> ndRenderMeshLoader::CreateRenderSceneMesh(ndRende
 			material.m_reflection = materials[j].m_reflection;
 			material.m_specularPower = ndReal(materials[j].m_shiness);
 			material.m_opacity = ndReal(materials[j].m_opacity);
+			material.m_useAlphaTest = materials[j].m_useAlphaTest;
 			material.m_castShadows = true;
 		}
 	

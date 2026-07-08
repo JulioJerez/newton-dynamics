@@ -49,6 +49,7 @@ class ndRenderPrimitiveMaterial
 	ndReal m_opacity;
 	ndSharedPtr<ndRenderTexture> m_texture;
 	bool m_castShadows;
+	bool m_useAlphaTest;
 };
 
 class ndRenderPrimitiveSegment

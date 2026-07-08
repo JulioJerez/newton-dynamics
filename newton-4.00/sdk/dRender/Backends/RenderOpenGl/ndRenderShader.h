@@ -262,4 +262,14 @@ class ndRenderShaderDynamicTrianglesArrayBlock : public ndRenderShaderBlock
 	GLint m_viewModelMatrixLocation;
 };
 
+// *********************************************************************
+// 
+// *********************************************************************
+class ndRenderShaderOpaqueDiffusedShadowColorAlphaTestBlock : public ndRenderShaderOpaqueDiffusedShadowColorBlock
+{
+	public:
+	void SetWidingMode(bool clockwise) const;
+	virtual void GetShaderParameters(const ndRenderShaderCache* const shaderCache) override;
+};
+
 #endif

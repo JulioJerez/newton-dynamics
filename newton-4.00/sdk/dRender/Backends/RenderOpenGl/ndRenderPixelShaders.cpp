@@ -244,7 +244,6 @@ R""""(
 		
 		pixelColor = vec4(color, 1.0);
 	}
-
 )"""";
 
 const char* ndRenderShaderCache::m_directionalDiffuseTransparentPixel =
@@ -304,7 +303,6 @@ R""""(
 
 )"""";
 
-
 const char* ndRenderShaderCache::m_debugFlatShadedColorPixel =
 R""""(
 	#version 450 core
@@ -327,4 +325,118 @@ R""""(
 		pixelColor = vec4(diffuse, 1.0);
 	}
 
+)"""";
+
+const char* ndRenderShaderCache::m_directionalDiffuseShadowAlphaTestPixel =
+R""""(
+	#version 450 core
+
+	layout(binding = 0) uniform sampler2D texture0;
+	layout(binding = 1) uniform sampler2D shadowMapTexture;
+	layout(binding = 2) uniform samplerCube environmentMap;
+
+	uniform vec3 diffuseColor;
+	uniform vec3 specularColor;
+	uniform vec3 reflectionColor;
+
+	uniform vec3 directionalLightAmbient;
+	uniform vec3 directionalLightIntesity;
+	uniform vec3 directionalLightDirection;
+	uniform float specularAlpha;
+
+	uniform mat4 cameraToWorld;
+	uniform mat4 directionaLightViewProjectionMatrix[4];
+	uniform vec4 shadowSlices; 
+
+	in vec4 worldPosit;
+	in vec3 posit;
+	in vec3 normal;
+	in vec2 uv;
+
+	out vec4 pixelColor;
+	
+	// implement a simple Blinn model
+	void main()
+	{
+		// Check if alpha is below a certain threshold
+		vec4 texColor = texture(texture0, uv);
+		if(texColor.a < 0.1)
+		{
+			// Drop the fragment completely
+			discard; 
+		}
+
+		vec3 normalDir = normalize (normal);
+
+		// calculate emisive, just a constant;
+		vec3 emissive = diffuseColor * directionalLightAmbient;
+
+		// calculate Lambert diffuse component
+		float diffuseReflection = max (dot (normalDir, directionalLightDirection), 0.0);
+		vec3 diffuse = diffuseColor * directionalLightIntesity * diffuseReflection;
+
+		// calculate Blinn specular component
+		vec3 cameraDir = - normalize(posit);
+		vec3 blinnDir = normalize(cameraDir + directionalLightDirection);
+		float reflectionSign = (diffuseReflection >= 0.01) ? 1.0 : 0.0;
+		float specularReflection = reflectionSign * pow(max (dot (normalDir, blinnDir), 0.0), specularAlpha);
+		vec3 specular = specularColor * directionalLightIntesity * specularReflection;
+
+		vec3 color = specular + diffuse;
+
+		// calculate the shadow tile
+		int index = 4;
+		if (gl_FragCoord.z < shadowSlices.w)
+		{
+			index = 3;
+			if (gl_FragCoord.z < shadowSlices.z)
+			{
+				index = 2;
+				if (gl_FragCoord.z < shadowSlices.y)
+				{
+					index = 1;
+					if (gl_FragCoord.z < shadowSlices.x)
+					{
+						index = 0;
+					}
+				}
+			}
+		}
+
+		if (index < 4)
+		{
+			vec4 pointInDepthMapSpace = directionaLightViewProjectionMatrix[index] * worldPosit;
+
+			float textDepth = texture(shadowMapTexture, vec2(pointInDepthMapSpace)).x;
+			if (textDepth < pointInDepthMapSpace.z)
+			{
+				color = vec3(0.0f, 0.0f, 0.0f);
+				// enable this to show the shadows sections
+				#if 0
+					if (index < 3)
+					{
+						color[index] = 1.0f;
+					}
+					else
+					{
+						color[0] = 1.0f;
+						color[1] = 1.0f;
+					}
+				#endif
+			}
+		}
+
+		// calculate reflection	
+		vec4 reflectionDir = vec4(normalDir * (2.0 * dot(cameraDir, normalDir)) - cameraDir, 0.0f);
+		vec3 worldSpaceReflectionDir = vec3(cameraToWorld * reflectionDir);
+		vec3 reflection = directionalLightAmbient * reflectionColor * vec3(texture(environmentMap, worldSpaceReflectionDir));
+		
+		// add all contributions
+		color = color + emissive;
+		//color = color * vec3 (texture(texture0, uv));
+		color = color * vec3 (texColor);
+		color = color + reflection;
+		
+		pixelColor = vec4(color, 1.0);
+	}
 )"""";

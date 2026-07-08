@@ -148,6 +148,7 @@ ndSharedPtr<ndBody> BuildFloorBox(ndDemoEntityManager* const scene, const ndMatr
 	descriptor.m_mapping = ndRenderPrimitive::m_box;
 	ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName(textureName)));
 	material.m_castShadows = false;
+	material.m_useAlphaTest = false;
 	material.m_specular = ndVector::m_zero;
 
 	//ndSharedPtr<ndRenderPrimitive> geometry(ndRenderPrimitive::CreateMeshPrimitive(descriptor));
@@ -182,8 +183,6 @@ ndSharedPtr<ndBody> BuildFlatPlane(ndDemoEntityManager* const scene, const ndMat
 	
 	ndPolygonSoupBuilder meshBuilder;
 	meshBuilder.Begin();
-	//meshBuilder.LoadPLY("sword.ply");
-	//meshBuilder.LoadPLY("static_mesh.ply");
 	meshBuilder.AddFaceIndirect(&floor[0], 31, &index[0][0], 3);
 	meshBuilder.AddFaceIndirect(&floor[0], 31, &index[1][0], 3);
 	meshBuilder.End(optimized);
@@ -202,6 +201,7 @@ ndSharedPtr<ndBody> BuildFlatPlane(ndDemoEntityManager* const scene, const ndMat
 	descriptor.m_mapping = ndRenderPrimitive::m_box;
 	ndRenderPrimitiveMaterial& material = descriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName(textureName)));
 	material.m_castShadows = false;
+	material.m_useAlphaTest = false;
 	material.m_specular = ndVector::m_zero;
 
 	ndSharedPtr<ndRenderPrimitive> geometry(new ndRenderPrimitive(descriptor));

@@ -85,8 +85,8 @@ ndRenderTextureImage::ndRenderTextureImage(const unsigned char* const buffer, nd
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropic);
 
 		// build our texture mip maps
-		//gluBuild2DMipmaps(GL_TEXTURE_2D, iComponents, iWidth, iHeight, eFormat, GL_UNSIGNED_BYTE, buffer);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, iWidth, iHeight, 0, eFormat, GL_UNSIGNED_BYTE, buffer);
+		//glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, iWidth, iHeight, 0, eFormat, GL_UNSIGNED_BYTE, buffer);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, iWidth, iHeight, 0, eFormat, GL_UNSIGNED_BYTE, buffer);
 		ndAssert(glGetError() == GL_NO_ERROR);
 
 		glGenerateMipmap(GL_TEXTURE_2D);
