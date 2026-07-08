@@ -16,89 +16,15 @@
 
 #include "ndFileBrowser.h"
 
-static void strtolwr(char* const string)
-{
-	for (char * cp = string; *cp; ++cp)
-	{
-		if ((*cp >= 'A') && (*cp <= 'Z'))
-		{
-			*cp += 'a' - 'A';
-		}
-	}
-}
-
-//bool dGetOpenFileNameSerialization(char* const fileName, int maxSize)
+//static void strtolwr(char* const string)
 //{
-//#if (defined(WIN32) || defined(_WIN32))
-//	OPENFILENAME ofn;
-//	// open a file name
-//	char appPath[256];
-//	GetModuleFileNameA(nullptr, appPath, sizeof (appPath));
-//	strtolwr(appPath);
-//
-//	char* const end = strstr(appPath, "applications");
-//	end[0] = 0;
-//	strcat(appPath, "applications\\media");
-//
-//	ZeroMemory(&ofn, sizeof(ofn));
-//	ofn.lStructSize = sizeof (ofn);
-//	ofn.hwndOwner = nullptr;
-//	ofn.lpstrFile = fileName;
-//	ofn.lpstrFile[0] = '\0';
-//	ofn.nMaxFile = DWORD(maxSize);
-//	ofn.lpstrFilter = const_cast<LPSTR>("newton serialized file *.bin\0*.bin\0");
-//	ofn.nFilterIndex = 1;
-//	ofn.lpstrFileTitle = const_cast<LPSTR>("Newton Dynamics demos");
-//	ofn.nMaxFileTitle = 0;
-//	ofn.lpstrInitialDir = appPath;
-//	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-//
-//	bool state = GetOpenFileName(&ofn) ? true : false;
-//	return state;
-//#else
-//	return false;
-//#endif
-//}
-
-//bool dGetSaveFileNameSerialization(char* const fileName, int maxSize)
-//{
-//#if (defined(WIN32) || defined(_WIN32))
-//	OPENFILENAME ofn;
-//	// open a file name
-//	char appPath[256];
-//	GetModuleFileNameA(nullptr, appPath, sizeof(appPath));
-//	strtolwr(appPath);
-//
-//	char* const end = strstr(appPath, "applications");
-//	end[0] = 0;
-//	strcat(appPath, "applications\\media");
-//
-//	ZeroMemory(&ofn, sizeof(ofn));
-//	ofn.lStructSize = sizeof(ofn);
-//	ofn.hwndOwner = nullptr;
-//	ofn.lpstrFile = fileName;
-//	ofn.lpstrFile[0] = '\0';
-//	ofn.nMaxFile = DWORD(maxSize);
-//	ofn.lpstrFilter = const_cast<LPSTR>("newton serialized file *.bin\0*.bin\0");
-//	ofn.nFilterIndex = 1;
-//	ofn.lpstrFileTitle = const_cast<LPSTR>("Newton Dynamics demos");
-//	ofn.nMaxFileTitle = 0;
-//	ofn.lpstrInitialDir = appPath;
-//	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-//
-//	bool state = GetSaveFileName(&ofn) ? true : false;
-//	if (state) 
+//	for (char * cp = string; *cp; ++cp)
 //	{
-//		char* const ext = strrchr (fileName, '.');
-//		if (!ext) 
+//		if ((*cp >= 'A') && (*cp <= 'Z'))
 //		{
-//			strcat (fileName, ".bin");
+//			*cp += 'a' - 'A';
 //		}
 //	}
-//	return state;
-//#else
-//	return false;
-//#endif
 //}
 
 bool ndGetSaveFileName(char* const fileName, int maxSize)
@@ -108,7 +34,7 @@ bool ndGetSaveFileName(char* const fileName, int maxSize)
 	// open a file name
 	char appPath[256];
 	GetModuleFileNameA(nullptr, appPath, sizeof(appPath));
-	strtolwr(appPath);
+	//strtolwr(appPath);
 
 	char* const end = strstr(appPath, "applications");
 	end[0] = 0;
@@ -149,7 +75,7 @@ bool ndGetLoadFileName(char* const fileName, int maxSize)
 	// open a file name
 	char appPath[1024];
 	GetModuleFileNameA(nullptr, appPath, sizeof(appPath));
-	strtolwr(appPath);
+	//strtolwr(appPath);
 
 	char* const end = strstr(appPath, "applications");
 	end[0] = 0;

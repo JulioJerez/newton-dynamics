@@ -21,6 +21,28 @@ R""""(
 	}
 )"""";
 
+const char* ndRenderShaderCache::m_alphaTestShadowPixel =
+R""""(
+	#version 450 core
+
+	in vec2 uv;
+	layout(binding = 0) uniform sampler2D texture0;
+
+	void main (void) 
+	{	
+		// Sample the color from your texture map
+		vec4 texColor = texture(texture0, uv);
+    
+		// Check if the alpha component fails the threshold test
+		if(texColor.a < 0.1)
+		{
+			// Prevents the fragment from writing to the depth map
+			discard; 
+		}
+	}
+
+)"""";
+
 const char* ndRenderShaderCache::m_wireFramePixel =
 R""""(
 	#version 450 core

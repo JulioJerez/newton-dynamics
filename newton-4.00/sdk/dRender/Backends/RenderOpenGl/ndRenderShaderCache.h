@@ -42,6 +42,7 @@ class ndRenderShaderCache
 			GLuint m_diffuseShadowAlphaTestEffect;
 			GLuint m_generateShadowMapsSkinEffect;
 			GLuint m_debugFlatShadedDiffuseEffect;
+			GLuint m_generateAlphaTestShadowMapsEffect;
 			GLuint m_generateInstancedShadowMapsEffect;
 
 			GLuint m_dynamicLinesEffect;
@@ -62,6 +63,7 @@ class ndRenderShaderCache
 	static const char* m_generateShadowMapSkinVertex;
 	static const char* m_debugFlatShadedDiffuseVertex;
 	static const char* m_directionalDiffuseShadowVertex;
+	static const char* m_generateAlphaTestShadowMapVertex;
 	static const char* m_directionalDiffuseInstanceVertex;
 	static const char* m_generateInstancedShadowMapVertex;
 	static const char* m_directionalDiffuseShadowSkinVertex;
@@ -70,6 +72,7 @@ class ndRenderShaderCache
 	static const char* m_skyBoxPixel;
 	static const char* m_doNothingPixel;
 	static const char* m_wireFramePixel;
+	static const char* m_alphaTestShadowPixel;
 	static const char* m_directionalDiffusePixel;
 	static const char* m_debugFlatShadedColorPixel;
 	static const char* m_debugFlatShadedDiffusePixel;

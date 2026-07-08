@@ -43,6 +43,11 @@ void ndRenderShaderBlock::EndParameters()
 	glUseProgram(0);
 }
 
+void ndRenderShaderBlock::SetWidingMode(bool clockwise) const
+{
+	clockwise ? glFrontFace(GL_CW) : glFrontFace(GL_CCW);
+}
+
 // *********************************************************************
 // 
 // *********************************************************************
@@ -124,6 +129,46 @@ void ndRenderShaderGenerateShadowMapBlock::Render(const ndRenderPrimitiveImpleme
 	ndAssert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
 	glUseProgram(0);
 }	
+
+// *********************************************************************
+// 
+// *********************************************************************
+void ndRenderShaderGenerateAlphaTestShadowMapBlock::GetShaderParameters(const ndRenderShaderCache* const shaderCache)
+{
+	SetParameters(shaderCache->m_generateAlphaTestShadowMapsEffect);
+	EndParameters();
+}
+
+void ndRenderShaderGenerateAlphaTestShadowMapBlock::Render(const ndRenderPrimitiveImplement* const self, const ndRender* const, const ndMatrix& modelMatrix) const
+{
+	glUseProgram(m_shader);
+
+	const glMatrix matrix(modelMatrix);
+	glUniformMatrix4fv(m_viewModelProjectionMatrix, 1, false, &matrix[0][0]);
+
+	glBindVertexArray(self->m_vertextArrayBuffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self->m_indexBuffer);
+
+	glActiveTexture(GL_TEXTURE0);
+	for (ndList<ndRenderPrimitiveSegment>::ndNode* node = self->m_owner->m_segments.GetFirst(); node; node = node->GetNext())
+	{
+		ndRenderPrimitiveSegment& segment = node->GetInfo();
+		if (segment.m_material.m_castShadows)
+		{
+			const ndRenderPrimitiveMaterial* const material = &segment.m_material;
+			const ndRenderTextureImageCommon* const image = (ndRenderTextureImageCommon*)*material->m_texture;
+			ndAssert(image);
+			glBindTexture(GL_TEXTURE_2D, image->m_texture);
+
+			glDrawElements(GL_TRIANGLES, segment.m_indexCount, GL_UNSIGNED_INT, (void*)(segment.m_segmentStart * sizeof(GL_UNSIGNED_INT)));
+		}
+	}
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	ndAssert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+	glUseProgram(0);
+}
 
 // *********************************************************************
 // 
@@ -478,11 +523,6 @@ void ndRenderShaderTransparentDiffusedShadowColorBlock::SetParameters(GLuint sha
 {
 	ndRenderShaderOpaqueDiffusedColorBlock::SetParameters(shader);
 	m_opacity = glGetUniformLocation(m_shader, "opacity");
-}
-
-void ndRenderShaderTransparentDiffusedShadowColorBlock::SetWidingMode(bool clockwise) const
-{
-	clockwise ? glFrontFace(GL_CW) : glFrontFace(GL_CCW);
 }
 
 void ndRenderShaderTransparentDiffusedShadowColorBlock::Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const
@@ -1009,11 +1049,6 @@ void ndRenderShaderOpaqueDiffusedShadowColorAlphaTestBlock::GetShaderParameters(
 {
 	SetParameters(shaderCache->m_diffuseShadowAlphaTestEffect);
 	EndParameters();
-}
-
-void ndRenderShaderOpaqueDiffusedShadowColorAlphaTestBlock::SetWidingMode(bool clockwise) const
-{
-	clockwise ? glFrontFace(GL_CW) : glFrontFace(GL_CCW);
 }
 
 //void ndRenderShaderOpaqueDiffusedShadowColorAlphaTestBlock::SetParameters(GLuint shader)
