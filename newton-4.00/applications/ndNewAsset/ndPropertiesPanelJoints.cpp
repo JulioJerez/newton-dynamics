@@ -1331,17 +1331,25 @@ void ndAssetEditor::EditMotorJoint()
 
 	ndMeshJointVehicleMotor* const joint = (ndMeshJointVehicleMotor*)*m_currentSelection->GetJoint();
 	ndMultiBodyVehicleMotor::ndEngineTorqueCurve& engineCurve = joint->m_engineCurve;
-	ndInt32 numberOfPoints = engineCurve.m_rpms.GetCount();
-	if (ImGui::InputInt("number of points", &numberOfPoints, 0, ImGuiInputTextFlags_EnterReturnsTrue))
-	{
-		ndAssert(0);
-		//numberOfPoints = ndClamp(numberOfPoints, 5, engineCurve.m_torqueCurve.GetCapacity());
-		//if (numberOfPoints != engineCurve.m_torqueCurve.GetCount())
-		//{
-		//	ndAssert(0);
-		//}
-	}
+	//ndInt32 numberOfPoints = engineCurve.m_rpms.GetCount();
+	//if (ImGui::InputInt("number of points", &numberOfPoints, 0, ImGuiInputTextFlags_EnterReturnsTrue))
+	//{
+	//	numberOfPoints = ndClamp (numberOfPoints, )
+	//	if (numberOfPoints < engineCurve.m_rpms.GetCount())
+	//	{
+	//		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+	//
+	//		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+	//	}
+	//	//numberOfPoints = ndClamp(numberOfPoints, 5, engineCurve.m_torqueCurve.GetCapacity());
+	//	//if (numberOfPoints != engineCurve.m_torqueCurve.GetCount())
+	//	//{
+	//	//	ndAssert(0);
+	//	//}
+	//}
 
+	//ImGui::Text("torque/rmp curve");
+	ImGui::SeparatorText("torque/rmp curve");
 	for (ndInt32 i = 0; i < engineCurve.m_rpms.GetCount(); ++i)
 	{
 		char labelName[256];
@@ -1376,7 +1384,7 @@ void ndAssetEditor::EditMotorJoint()
 	}
 
 	ndReal loss = engineCurve.m_frictionLoss;
-	if (ImGui::InputFloat("internal Loss", &loss, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	if (ImGui::InputFloat("friction loss", &loss, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		loss = ndAbs(loss);
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
@@ -1385,11 +1393,10 @@ void ndAssetEditor::EditMotorJoint()
 	}
 
 	ndReal topSpeed = joint->m_topSpeed;
-	if (ImGui::InputFloat("stop speed", &topSpeed, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	if (ImGui::InputFloat("top speed", &topSpeed, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 		joint->m_topSpeed = ndMax(topSpeed, ndReal (10.0f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 	}
-
 }
