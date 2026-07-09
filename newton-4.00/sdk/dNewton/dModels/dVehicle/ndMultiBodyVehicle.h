@@ -24,7 +24,6 @@
 
 #include "ndNewtonStdafx.h"
 #include "ndModel.h"
-#include "ndIkSolver.h"
 #include "ndJointWheel.h"
 #include "ndModelArticulation.h"
 #include "ndMultiBodyVehicleMotor.h"
