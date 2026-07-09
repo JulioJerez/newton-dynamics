@@ -39,39 +39,6 @@ class ndMultiBodyVehicleTorsionBar;
 class ndMultiBodyVehicleDifferential;
 class ndMultiBodyVehicleDifferentialAxle;
 
-class ndVehicleDectriptor: public ndClassAlloc
-{
-	public:
-	enum ndDifferentialType
-	{
-		m_rearWheelDrive,
-		m_frontWheelDrive,
-		m_fourWheeldrive,
-		m_eightWheeldrive,
-	};
-
-	enum ndTorsionBarType
-	{
-		m_noWheelAxle,
-		m_rearWheelAxle,
-		m_frontWheelAxle,
-		m_fourWheelAxle,
-	};
-
-	D_NEWTON_API ndVehicleDectriptor();
-
-	ndString m_name;
-	ndFloat32 m_chassisAngularDrag;
-
-	ndFloat32 m_slipDifferentialRmpLock;
-	ndDifferentialType m_differentialType;
-
-	ndFloat32 m_torsionBarSpringK;
-	ndFloat32 m_torsionBarDamperC;
-	ndFloat32 m_torsionBarRegularizer;
-	ndTorsionBarType m_torsionBarType;
-};
-
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndMultiBodyVehicle : public ndModelArticulation
 {
@@ -118,9 +85,9 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	D_CLASS_REFLECTION(ndMultiBodyVehicle, ndModelArticulation)
 
 	D_NEWTON_API ndMultiBodyVehicle(ndFloat32 gravityMagnitud = ndFloat32 (10.0f));
-	D_NEWTON_API void ConvertToMotorVehicle(const ndVehicleDectriptor& vehicleDescritor);
 
-	D_NEWTON_API ndVehicleDectriptor& GetDescriptor();
+	D_NEWTON_API void ConvertToMotorVehicle();
+	//D_NEWTON_API ndVehicleDectriptor& GetDescriptor();
 
 	D_NEWTON_API const ndMatrix& GetLocalFrame() const;
 	D_NEWTON_API void SetLocalFrame(const ndMatrix& localframe);
@@ -183,7 +150,6 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	ndList<ndMultiBodyVehicleDifferential*> m_differentialList;
 
 	ndDownForce m_downForce;
-	ndVehicleDectriptor m_descriptor;
 	ndFloat32 m_steeringRate;
 	ndFloat32 m_maxSideslipRate;
 	ndFloat32 m_maxSideslipAngle;

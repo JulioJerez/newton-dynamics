@@ -99,9 +99,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 	const ndFixSizeArray<ndFloat32, 8>& axis = gameController->GetAxis();
 	const ndFixSizeArray<bool, 32>& buttons = gameController->GetButtons();
 
-	const ndVehicleDectriptor& desc = vehicle->GetDescriptor();
-
-	auto ApplyControls = [this, vehicle, &desc, &axis, &buttons]()
+	auto ApplyControls = [this, vehicle, &axis, &buttons]()
 	{
 		ndFloat32 throttle = axis[ndGameControllerInputs::m_gasPedal];
 

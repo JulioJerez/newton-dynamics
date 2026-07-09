@@ -89,38 +89,6 @@ namespace ndMotorVehicle
 		ndSharedPtr<ndSoundSource> m_engineSound;
 	};
 
-	class ndBasicVehicleDectriptor : public ndVehicleDectriptor
-	{
-		public:
-		ndBasicVehicleDectriptor()
-			:ndVehicleDectriptor()
-			,m_curve()
-		{
-		}
-		ndMultiBodyVehicleMotor::ndEngineTorqueCurve m_curve;
-	};
-
-	class ndVehicleDectriptorSuperCar : public ndBasicVehicleDectriptor
-	{
-		public:
-		ndVehicleDectriptorSuperCar()
-			:ndBasicVehicleDectriptor()
-		{
-			m_name = "supercar";
-			ndFloat32 idleTorquePoundFoot = ndFloat32(300.0f);
-			ndFloat32 idleRmp = ndFloat32(700.0f);
-			ndFloat32 horsePower = ndFloat32(400.0f);
-			ndFloat32 rpm0 = ndFloat32(5000.0f);
-			ndFloat32 rpm1 = ndFloat32(6200.0f);
-			ndFloat32 horsePowerAtRedLine = ndFloat32(100.0f);
-			ndFloat32 redLineRpm = ndFloat32(8000.0f);
-			m_curve.Init(idleTorquePoundFoot, idleRmp,
-				horsePower, rpm0, rpm1, horsePowerAtRedLine, redLineRpm);
-		}
-
-		ndMultiBodyVehicleMotor::ndEngineTorqueCurve m_curve;
-	};
-
 	ndSharedPtr<ndModel> CreateBasicVehicle(ndDemoEntityManager* const scene, const char* const modelName, const ndMatrix& matrix)
 	{
 		ndMeshLoader loader;
@@ -129,21 +97,19 @@ namespace ndMotorVehicle
 
 		ndPhysicsWorld* const world = scene->GetWorld();
 
-		// we first load the model as like any other arcilated model
+		// we first load the model as like any other arcilation
 		ndSharedPtr<ndModel> vehicleModel(new ndMultiBodyVehicle());
 		ndMultiBodyVehicle* const vehicle = vehicleModel->GetAsMultiBodyVehicle();
 		vehicle->Deserialize(mesh);
 
-		// the vehicle descriptor specify the kind of vehicle 
-		// we configure it then we convert the model to multibody vehicle.
-		ndVehicleDectriptorSuperCar superCar;
-		vehicle->ConvertToMotorVehicle(superCar);
+		// then, we convet the mode to a multibody vehicle.
+		vehicle->ConvertToMotorVehicle();
 
 		ndRender* const renderer = *scene->GetRenderer();
 		ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *loader.m_mesh, ndGetWorkingFileName("")));
 
 		ndSharedPtr<ndSoundSource> engineSound;
-		auto BindApplicationData = [scene, mesh, vehicle, &sceneMesh, &superCar, &engineSound](ndModelArticulation::ndNode* const node)
+		auto BindApplicationData = [scene, mesh, vehicle, &sceneMesh, &engineSound](ndModelArticulation::ndNode* const node)
 		{
 			if (vehicle->IsCloseLoop(node))
 			{
