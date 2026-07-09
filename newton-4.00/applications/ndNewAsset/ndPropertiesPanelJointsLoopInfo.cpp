@@ -590,20 +590,36 @@ void ndAssetEditor::EditDifferentialTorsionBarJoint(ndSharedPtr<ndMeshLoopJoint>
 void ndAssetEditor::EditGearBoxLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint)
 {
 	EditLoopJointLocalMatrix(loopJoint);
-	
+
+	ImGui::SeparatorText("gear box");
 	ndMeshJointVehicleGearBox* const joint = (ndMeshJointVehicleGearBox*)*loopJoint->m_joint;
 	ndMultiBodyVehicleGearBox::ndGearBox& gearBox = joint->m_gearBox;
 	ndInt32 numberOfGears = gearBox.m_gearRatios.GetCount() - ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
 	if (ImGui::InputInt("number of gears", &numberOfGears, 0, ImGuiInputTextFlags_EnterReturnsTrue))
 	{
-		ndAssert(0);
+		numberOfGears = ndClamp(numberOfGears, 1, gearBox.m_gearRatios.GetCount() - ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear);
+		if (numberOfGears < (gearBox.m_gearRatios.GetCount() - ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			gearBox.m_gearRatios.SetCount(numberOfGears + ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear);
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+		}
+		else if (numberOfGears > (gearBox.m_gearRatios.GetCount() - ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear))
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+			for (ndInt32 i = gearBox.m_gearRatios.GetCount() - ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear; i < numberOfGears; ++i)
+			{
+				gearBox.m_gearRatios.PushBack(gearBox.m_gearRatios[gearBox.m_gearRatios.GetCount() - 1]);
+			}
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
+		}
 	}
 
 	for (ndInt32 i = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear; i < gearBox.m_gearRatios.GetCount(); ++i)
 	{
 		ndReal ratio = gearBox.m_gearRatios[i];
 		char label[256];
-		snprintf(label, sizeof(label) - 1, "gear%d", i);
+		snprintf(label, sizeof(label) - 1, "gear%d", i - ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear);
 		if (ImGui::InputFloat(label, &ratio, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 		{
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));

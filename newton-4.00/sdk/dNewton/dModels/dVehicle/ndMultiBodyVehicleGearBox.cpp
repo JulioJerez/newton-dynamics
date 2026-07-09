@@ -164,9 +164,8 @@ void ndMultiBodyVehicleGearBox::JacobianDerivative(ndConstraintDescritor& desc)
 		const ndFloat32 w = w0 + w1;
 		SetMotorAcceleration(desc, -w * desc.m_invTimestep);
 		
-		if (m_gearBox.m_crownGearRatio > 0)
+		if (m_gearBox.m_crownGearRatio > ndFloat32(0.0f))
 		{
-			ndAssert(0);
 			if (m_gearRatio > ndFloat32(0.0f))
 			{
 				SetHighFriction(desc, m_clutchTorque);
@@ -174,15 +173,13 @@ void ndMultiBodyVehicleGearBox::JacobianDerivative(ndConstraintDescritor& desc)
 			}
 			else
 			{
-				//SetHighFriction(desc, m_driveTrainResistanceTorque);
-				//SetLowerFriction(desc, -m_clutchTorque);
-
-				SetHighFriction(desc, m_clutchTorque);
-				//SetLowerFriction(desc, -0.01f);
+				SetHighFriction(desc, m_driveTrainResistanceTorque);
+				SetLowerFriction(desc, -m_clutchTorque);
 			}
 		}
 		else
 		{
+			ndAssert(m_gearBox.m_crownGearRatio < ndFloat32(0.0f));
 			if (m_gearRatio > ndFloat32(0.0f))
 			{
 				SetHighFriction(desc, m_driveTrainResistanceTorque);
