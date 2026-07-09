@@ -67,7 +67,7 @@ void ndAssetEditor::ShowPropertiesRigidBodyInfo()
 
 		// body mass
 		{
-			ndReal scalar = rigidBody->m_invMass.m_w;
+			ndReal scalar = ndReal(rigidBody->m_invMass.m_w);
 			if (scalar > ndFloat32(0.0f))
 			{
 				scalar = ndReal(ndFloat32(1.0f) / rigidBody->m_invMass.m_w);
