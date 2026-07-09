@@ -160,7 +160,7 @@ class ndSoundSource::Implementation : public ndClassAlloc
 
 	virtual void SetVolume(ndFloat32 volume)
 	{
-		m_volume = ndClamp(volume, ndFloat32(0.0f), ndFloat32(1.0f));
+		m_volume = ndReal (ndClamp(volume, ndFloat32(0.0f), ndFloat32(1.0f)));
 	}
 
 	virtual ndFloat32 GetPitch() const
@@ -170,7 +170,7 @@ class ndSoundSource::Implementation : public ndClassAlloc
 
 	virtual void SetPitch(ndFloat32 ptich)
 	{
-		m_pitch = ndAbs(ptich);
+		m_pitch = ndReal(ndAbs(ptich));
 	}
 
 	ndSharedPtr<ndSoundSourceNotify> GetNotify() const
@@ -189,8 +189,8 @@ class ndSoundSource::Implementation : public ndClassAlloc
 	ndSharedPtr<ndSoundSourceNotify> m_notify;
 	ndList<ndWeakPtr<ndSoundSource>>::ndNode* m_sceneNode;
 
-	ndFloat32 m_pitch;
-	ndFloat32 m_volume;
+	ndReal m_pitch;
+	ndReal m_volume;
 	bool m_isPlayig;
 	bool m_isLooping;
 };
