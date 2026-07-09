@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Newton Dynamics 4.00 — Programmer Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,600;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:            #12151a;
+    --bg-panel:      #181c22;
+    --bg-raised:     #1f242c;
+    --line:          #2b323c;
+    --text:          #e7e8ea;
+    --text-dim:      #9aa3b0;
+    --text-faint:    #626b78;
+    --accent:        #7fd6c4;   /* vector-field teal */
+    --accent-soft:   rgba(127,214,196,0.12);
+    --amber:         #e0a458;   /* secondary: force / energy */
+    --code-bg:       #0d1014;
+    --radius:        3px;
+    --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+    --sans: 'IBM Plex Sans', -apple-system, Segoe UI, sans-serif;
+    --serif: 'IBM Plex Serif', Georgia, serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    font-size:15.5px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--accent); text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  a:focus-visible, button:focus-visible, summary:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+
+  /* ---------- vector field backdrop ---------- */
+  .vfield{
+    position:absolute; inset:0; z-index:0; opacity:0.55; pointer-events:none;
+  }
+
+  /* ---------- layout ---------- */
+  .shell{ display:grid; grid-template-columns: 268px 1fr; min-height:100vh; }
+  .sidebar{
+    position:sticky; top:0; height:100vh; overflow-y:auto;
+    border-right:1px solid var(--line);
+    background:var(--bg-panel);
+    padding:22px 18px 60px;
+  }
+  .sidebar::-webkit-scrollbar{width:8px;}
+  .sidebar::-webkit-scrollbar-thumb{background:var(--line); border-radius:4px;}
+
+  .brand{ display:flex; align-items:center; gap:10px; margin-bottom:4px; padding:0 4px;}
+  .brand-mark{ width:26px; height:26px; flex:none; }
+  .brand-name{ font-family:var(--serif); font-style:italic; font-weight:600; font-size:17px; letter-spacing:0.2px;}
+  .brand-sub{ font-family:var(--mono); font-size:10.5px; color:var(--text-faint); padding:0 4px 20px; letter-spacing:0.06em; text-transform:uppercase; border-bottom:1px solid var(--line); margin-bottom:16px;}
+
+  .nav-group{ margin-bottom:4px; }
+  .nav-group-title{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:0.09em; text-transform:uppercase;
+    color:var(--text-faint); padding:14px 8px 6px;
+  }
+  .nav-link{
+    display:flex; align-items:baseline; gap:8px;
+    padding:6px 8px; border-radius:var(--radius); font-size:13.5px; color:var(--text-dim);
+  }
+  .nav-link:hover{ background:var(--bg-raised); color:var(--text); text-decoration:none; }
+  .nav-link.active{ background:var(--accent-soft); color:var(--accent); }
+  .nav-link .idx{ font-family:var(--mono); font-size:10.5px; color:var(--text-faint); width:16px; flex:none;}
+
+  main{ position:relative; padding:0 0 120px; min-width:0; }
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative; overflow:hidden;
+    border-bottom:1px solid var(--line);
+    padding:80px 64px 56px;
+    background:
+      radial-gradient(ellipse 900px 420px at 78% -10%, rgba(127,214,196,0.10), transparent 60%),
+      var(--bg);
+  }
+  .hero-eyebrow{ position:relative; z-index:1; font-family:var(--mono); font-size:12px; color:var(--accent); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:18px;}
+  .hero h1{
+    position:relative; z-index:1;
+    font-family:var(--serif); font-weight:600; font-style:italic;
+    font-size:clamp(34px,4.6vw,54px); line-height:1.08; letter-spacing:-0.01em;
+    max-width:16ch;
+    margin-bottom:20px;
+  }
+  .hero p.lead{ position:relative; z-index:1; max-width:62ch; color:var(--text-dim); font-size:17px; line-height:1.6;}
+  .hero-badges{ position:relative; z-index:1; display:flex; gap:10px; margin-top:26px; flex-wrap:wrap;}
+  .badge{
+    font-family:var(--mono); font-size:11.5px; color:var(--text-dim);
+    border:1px solid var(--line); padding:5px 10px; border-radius:20px; background:var(--bg-panel);
+  }
+  .badge b{color:var(--accent); font-weight:600;}
+
+  section{ padding:56px 64px; border-bottom:1px solid var(--line); scroll-margin-top:20px; }
+  section:last-child{ border-bottom:none; }
+
+  .kicker{ font-family:var(--mono); font-size:11.5px; color:var(--text-faint); letter-spacing:0.09em; text-transform:uppercase; margin-bottom:10px;}
+  h2{ font-family:var(--serif); font-weight:600; font-size:28px; margin-bottom:6px; letter-spacing:-0.01em;}
+  h2 .num{ color:var(--accent); font-family:var(--mono); font-size:16px; font-style:normal; margin-right:10px;}
+  .section-intro{ color:var(--text-dim); max-width:74ch; margin:14px 0 30px; }
+  h3{ font-family:var(--sans); font-weight:600; font-size:16.5px; margin:34px 0 10px; color:var(--text);}
+  h3:first-of-type{margin-top:8px;}
+  p{ color:var(--text-dim); max-width:74ch; margin-bottom:14px;}
+  p code, li code{ font-family:var(--mono); font-size:0.88em; background:var(--bg-raised); color:var(--accent); padding:1px 6px; border-radius:3px; border:1px solid var(--line);}
+  ul, ol{ color:var(--text-dim); max-width:74ch; padding-left:22px; margin-bottom:16px;}
+  li{ margin-bottom:6px;}
+  strong{ color:var(--text); font-weight:600;}
+
+  /* ---------- code blocks ---------- */
+  .code{
+    background:var(--code-bg); border:1px solid var(--line); border-radius:6px;
+    margin:16px 0 24px; overflow:hidden; max-width:860px;
+  }
+  .code-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:9px 14px; border-bottom:1px solid var(--line); background:var(--bg-panel);
+    font-family:var(--mono); font-size:11px; color:var(--text-faint); letter-spacing:0.04em;
+  }
+  .code pre{ padding:16px 18px; overflow-x:auto; }
+  .code code{ font-family:var(--mono); font-size:13px; line-height:1.65; color:#d3d8e0; white-space:pre;}
+  .tok-kw{color:#e0a458;} .tok-type{color:#7fd6c4;} .tok-str{color:#c3d67a;} .tok-com{color:#626b78; font-style:italic;} .tok-fn{color:#9cc2e8;}
+
+  /* ---------- tables ---------- */
+  table{ width:100%; max-width:900px; border-collapse:collapse; margin:16px 0 28px; font-size:13.5px;}
+  th{ text-align:left; font-family:var(--mono); font-size:10.5px; letter-spacing:0.07em; text-transform:uppercase; color:var(--text-faint); padding:8px 14px; border-bottom:1px solid var(--line);}
+  td{ padding:10px 14px; border-bottom:1px solid var(--line); color:var(--text-dim); vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  td code, th code{ font-family:var(--mono); color:var(--accent); font-size:12.5px; background:none; border:none; padding:0;}
+  td.name{ color:var(--text); font-family:var(--mono); font-size:12.5px; white-space:nowrap;}
+
+  /* ---------- module cards ---------- */
+  .grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(240px,1fr)); gap:14px; max-width:960px; margin:20px 0 10px;}
+  .card{ background:var(--bg-panel); border:1px solid var(--line); border-radius:6px; padding:18px 18px 16px;}
+  .card .tag{ font-family:var(--mono); font-size:11px; color:var(--accent); margin-bottom:8px; display:block;}
+  .card h4{ font-family:var(--sans); font-weight:600; font-size:14.5px; margin-bottom:6px; color:var(--text);}
+  .card p{ font-size:13px; margin:0; color:var(--text-dim);}
+
+  .callout{
+    border-left:2px solid var(--amber); background:rgba(224,164,88,0.07);
+    padding:14px 18px; max-width:74ch; margin:6px 0 26px; border-radius:0 4px 4px 0;
+  }
+  .callout p{ margin:0; color:var(--text-dim); font-size:13.8px;}
+  .callout .lbl{ font-family:var(--mono); font-size:10.5px; color:var(--amber); text-transform:uppercase; letter-spacing:0.07em; display:block; margin-bottom:6px;}
+
+  footer{ padding:40px 64px; color:var(--text-faint); font-size:12.5px; font-family:var(--mono);}
+  footer a{color:var(--text-dim);}
+
+  @media (max-width: 880px){
+    .shell{ grid-template-columns:1fr; }
+    .sidebar{ display:none; }
+    .hero, section, footer{ padding-left:26px; padding-right:26px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <nav class="sidebar" id="sidebar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="3.4" fill="#7fd6c4"/>
+        <circle cx="6" cy="9" r="2" fill="#2b323c"/>
+        <circle cx="26" cy="9" r="2" fill="#2b323c"/>
+        <circle cx="6" cy="23" r="2" fill="#2b323c"/>
+        <circle cx="26" cy="23" r="2" fill="#2b323c"/>
+        <path d="M16 16L6 9M16 16L26 9M16 16L6 23M16 16L26 23" stroke="#3a4350" stroke-width="1"/>
+      </svg>
+      <span class="brand-name">Newton Dynamics</span>
+    </div>
+    <div class="brand-sub">SDK 4.00 · Programmer Guide</div>
+
+    <div class="nav-group">
+      <div class="nav-group-title">Orientation</div>
+      <a class="nav-link" href="#overview"><span class="idx">00</span>Overview</a>
+      <a class="nav-link" href="#build"><span class="idx">01</span>Building the SDK</a>
+      <a class="nav-link" href="#modules"><span class="idx">02</span>Module map</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Core API</div>
+      <a class="nav-link" href="#getting-started"><span class="idx">03</span>Getting started</a>
+      <a class="nav-link" href="#core-types"><span class="idx">04</span>Core math types</a>
+      <a class="nav-link" href="#world"><span class="idx">05</span>ndWorld</a>
+      <a class="nav-link" href="#bodies"><span class="idx">06</span>Bodies</a>
+      <a class="nav-link" href="#shapes"><span class="idx">07</span>Collision shapes</a>
+      <a class="nav-link" href="#joints"><span class="idx">08</span>Joints &amp; constraints</a>
+      <a class="nav-link" href="#queries"><span class="idx">09</span>Queries &amp; callbacks</a>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Reference</div>
+      <a class="nav-link" href="#patterns"><span class="idx">10</span>Common patterns</a>
+      <a class="nav-link" href="#resources"><span class="idx">11</span>Resources</a>
+    </div>
+  </nav>
+
+  <main>
+    <!-- ============ HERO ============ -->
+    <header class="hero" id="overview">
+      <svg class="vfield" viewBox="0 0 900 420" preserveAspectRatio="xMaxYMin slice" aria-hidden="true">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="#7fd6c4" opacity="0.5"/>
+          </marker>
+        </defs>
+        <g stroke="#7fd6c4" stroke-width="1" opacity="0.35">
+          <line x1="560" y1="60" x2="610" y2="30" marker-end="url(#arrow)"/>
+          <line x1="620" y1="90" x2="700" y2="40" marker-end="url(#arrow)"/>
+          <line x1="680" y1="140" x2="640" y2="80" marker-end="url(#arrow)"/>
+          <line x1="740" y1="180" x2="810" y2="120" marker-end="url(#arrow)"/>
+          <line x1="600" y1="210" x2="560" y2="150" marker-end="url(#arrow)"/>
+          <line x1="800" y1="260" x2="760" y2="200" marker-end="url(#arrow)"/>
+          <line x1="500" y1="120" x2="470" y2="60" marker-end="url(#arrow)"/>
+          <line x1="850" y1="60" x2="880" y2="20" marker-end="url(#arrow)"/>
+          <line x1="720" y1="300" x2="780" y2="340" marker-end="url(#arrow)"/>
+        </g>
+        <g fill="#7fd6c4">
+          <circle cx="560" cy="60" r="2.2" opacity="0.6"/>
+          <circle cx="620" cy="90" r="2.2" opacity="0.6"/>
+          <circle cx="680" cy="140" r="2.2" opacity="0.6"/>
+          <circle cx="740" cy="180" r="2.2" opacity="0.6"/>
+          <circle cx="600" cy="210" r="2.2" opacity="0.6"/>
+          <circle cx="800" cy="260" r="2.2" opacity="0.6"/>
+          <circle cx="500" cy="120" r="2.2" opacity="0.6"/>
+          <circle cx="720" cy="300" r="2.2" opacity="0.6"/>
+        </g>
+      </svg>
+      <div class="hero-eyebrow">Rigid&#8202;-&#8202;body physics · C++ · zlib license</div>
+      <h1>A programmer's guide to the Newton Dynamics 4.00 SDK</h1>
+      <p class="lead">Newton Dynamics is a cross-platform rigid body simulation library for real-time
+      applications and game engines: bodies, collision shapes, joints, and a deterministic solver, exposed
+      through a small set of C++ headers under <code>sdk/</code>. This guide walks through the module layout,
+      the objects you'll touch most (<code>ndWorld</code>, <code>ndBody</code>, <code>ndShapeInstance</code>),
+      and a minimal working example, drawn directly from the SDK source and the bundled sandbox demos.</p>
+      <div class="hero-badges">
+        <span class="badge">Branch <b>dliw/newton-dynamics</b></span>
+        <span class="badge">Core version <b>4.00</b></span>
+        <span class="badge">License <b>zlib</b></span>
+        <span class="badge">Author <b>Julio Jerez</b></span>
+      </div>
+    </header>
+
+    <!-- ============ BUILD ============ -->
+    <section id="build">
+      <div class="kicker">01 — Setup</div>
+      <h2><span class="num">01</span>Building the SDK</h2>
+      <p class="section-intro">The SDK builds with CMake across Windows, macOS, and Linux. Newton's core has
+      no third-party dependencies; only the bundled sandbox demo application pulls in OpenGL/GLFW for rendering.</p>
+
+      <h3>Windows</h3>
+      <p>CMake generates Visual Studio solutions for the SDK, demos, and language wrappers.</p>
+      <ul>
+        <li>Core engine and packages: <code>sdk/projects/</code></li>
+        <li>Asset conversion tool: <code>applications/ndNewAsset/</code></li>
+        <li>Demo sandbox: <code>applications/ndSandbox/</code></li>
+      </ul>
+
+      <h3>macOS</h3>
+      <p>CMake generates an Xcode project for the SDK from the same <code>sdk/projects/</code> entry point.
+      The demo sandbox targets OpenGL and currently has no Metal backend, so it does not build on Apple platforms.</p>
+
+      <h3>Linux</h3>
+      <p>Unix makefiles are checked in alongside the CMake projects, but CMake is the recommended path. The
+      core engine itself has zero external dependencies. To build the demo sandbox, install development
+      packages for:</p>
+      <ul>
+        <li><code>OpenGL</code></li>
+        <li><code>glfw3</code></li>
+        <li><code>glatter</code></li>
+      </ul>
+      <p>These are available as <code>-dev</code>/<code>-devel</code> packages on most distributions, or can be
+      built from source out of <code>sdk/thirdParty/</code>.</p>
+
+      <div class="code">
+        <div class="code-head"><span>shell</span><span>configure &amp; build</span></div>
+        <pre><code><span class="tok-com"># from the repository root</span>
+mkdir build &amp;&amp; <span class="tok-fn">cd</span> build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . --config Release</code></pre>
+      </div>
+
+      <div class="callout">
+        <span class="lbl">Branch note</span>
+        <p>This guide documents the <code>sdk/</code> tree on the <code>dliw/newton-dynamics</code> branch of
+        <code>JulioJerez/newton-dynamics</code>, which corresponds to Newton core <strong>4.00</strong>. It is a
+        development branch — API surface can shift between commits. For the stable, long-supported line, see
+        <code>MADEAPPS/newton-dynamics</code>, linked in Resources below.</p>
+      </div>
+    </section>
+
+    <!-- ============ MODULES ============ -->
+    <section id="modules">
+      <div class="kicker">02 — Layout</div>
+      <h2><span class="num">02</span>Module map</h2>
+      <p class="section-intro">The SDK is split into independent static libraries under <code>sdk/</code>. Most
+      simulation code only needs <code>dCore</code>, <code>dCollision</code>, and <code>dNewton</code>; the rest
+      are opt-in.</p>
+
+      <div class="grid">
+        <div class="card"><span class="tag">dCore</span><h4>Math &amp; foundation</h4>
+          <p>Vectors, matrices, quaternions, containers (<code>ndArray</code>, <code>ndTree</code>), threading,
+          smart pointers (<code>ndSharedPtr</code>), and the tinyxml dependency used for scene serialization.</p></div>
+        <div class="card"><span class="tag">dCollision</span><h4>Bodies &amp; shapes</h4>
+          <p><code>ndBody</code>, <code>ndBodyKinematic</code>, collision shapes (box, sphere, capsule, convex
+          hull, height field, compound), broad-phase scene, and the player-capsule character controller.</p></div>
+        <div class="card"><span class="tag">dNewton</span><h4>Solver &amp; joints</h4>
+          <p><code>ndWorld</code>, <code>ndBodyDynamic</code>, the SIMD/SoA/AVX2 dynamics solvers, skeleton
+          (articulated body) solver, and every joint type (hinge, slider, wheel, 6-DOF, vehicle joints, IK).</p></div>
+        <div class="card"><span class="tag">dModel</span><h4>Higher-level models</h4>
+          <p>Multi-body assemblies built on top of <code>dNewton</code>: animation blend trees, FBX mesh
+          loading, and model-level body notification hooks.</p></div>
+        <div class="card"><span class="tag">dBrain</span><h4>Machine learning</h4>
+          <p>A self-contained neural-network / reinforcement-learning toolkit (layers, optimizers, CPU and
+          OpenCL execution contexts) used by the sandbox's reinforcement-learning demos.</p></div>
+        <div class="card"><span class="tag">dRender</span><h4>Reference renderer</h4>
+          <p>An OpenGL-backed scene renderer (cameras, render passes, primitives) used to visualize the demos —
+          not required to use the physics engine standalone.</p></div>
+        <div class="card"><span class="tag">dProfiler</span><h4>Instrumentation</h4>
+          <p>Optional Tracy-profiler integration for frame-level performance analysis.</p></div>
+        <div class="card"><span class="tag">dDependencies</span><h4>Vendored libs</h4>
+          <p>Third-party code built alongside the SDK, such as HACD for automatic convex decomposition.</p></div>
+      </div>
+
+      <p>The umbrella header <code>dNewton/ndNewton.h</code> pulls in the common simulation surface — world,
+      bodies, every joint, IK solvers, and vehicle/model helpers — in one include, and is the fastest way to
+      see the full public API at a glance.</p>
+    </section>
+
+    <!-- ============ GETTING STARTED ============ -->
+    <section id="getting-started">
+      <div class="kicker">03 — Walkthrough</div>
+      <h2><span class="num">03</span>Getting started</h2>
+      <p class="section-intro">Every simulation follows the same shape: create an <code>ndWorld</code>, add
+      bodies with a shape and a mass, and step the world forward in a loop. The example below is adapted
+      directly from the body-construction helpers in <code>applications/ndSandbox/toolbox/ndPhysicsUtils.cpp</code>
+      and the <code>ndBasicRigidBody</code> demo, with the rendering calls stripped out so only the physics
+      remain.</p>
+
+      <div class="code">
+        <div class="code-head"><span>C++</span><span>minimal_world.cpp</span></div>
+        <pre><code><span class="tok-com">// 1. Create the world and give it a fixed timestep to step</span>
+<span class="tok-type">ndWorld</span>* world = <span class="tok-kw">new</span> <span class="tok-fn">ndWorld</span>();
+world-&gt;<span class="tok-fn">SetSubSteps</span>(<span class="tok-str">2</span>);
+
+<span class="tok-com">// 2. Build a static floor: a large flat box with zero mass</span>
+<span class="tok-type">ndSharedPtr&lt;ndShapeInstance&gt;</span> floorShape(
+    <span class="tok-kw">new</span> <span class="tok-fn">ndShapeInstance</span>(<span class="tok-kw">new</span> <span class="tok-fn">ndShapeBox</span>(<span class="tok-str">200.0f</span>, <span class="tok-str">1.0f</span>, <span class="tok-str">200.0f</span>)));
+
+<span class="tok-type">ndSharedPtr&lt;ndBody&gt;</span> floorBody(<span class="tok-kw">new</span> <span class="tok-fn">ndBodyDynamic</span>());
+floorBody-&gt;<span class="tok-fn">SetMatrix</span>(<span class="tok-fn">ndGetIdentityMatrix</span>());
+floorBody-&gt;<span class="tok-fn">GetAsBodyKinematic</span>()-&gt;<span class="tok-fn">SetCollisionShape</span>(**floorShape);
+floorBody-&gt;<span class="tok-fn">GetAsBodyKinematic</span>()-&gt;<span class="tok-fn">SetMassMatrix</span>(<span class="tok-str">0.0f</span>, **floorShape); <span class="tok-com">// mass 0 = static</span>
+world-&gt;<span class="tok-fn">AddBody</span>(floorBody);
+
+<span class="tok-com">// 3. Build a dynamic sphere five units above the floor</span>
+<span class="tok-type">ndMatrix</span> origin(<span class="tok-fn">ndGetIdentityMatrix</span>());
+origin.m_posit.m_y = <span class="tok-str">5.0f</span>;
+
+<span class="tok-type">ndSharedPtr&lt;ndShapeInstance&gt;</span> ballShape(
+    <span class="tok-kw">new</span> <span class="tok-fn">ndShapeInstance</span>(<span class="tok-kw">new</span> <span class="tok-fn">ndShapeSphere</span>(<span class="tok-str">1.0f</span>)));
+
+<span class="tok-type">ndSharedPtr&lt;ndBody&gt;</span> ball(<span class="tok-kw">new</span> <span class="tok-fn">ndBodyDynamic</span>());
+ball-&gt;<span class="tok-fn">SetMatrix</span>(origin);
+ball-&gt;<span class="tok-fn">GetAsBodyKinematic</span>()-&gt;<span class="tok-fn">SetCollisionShape</span>(**ballShape);
+ball-&gt;<span class="tok-fn">GetAsBodyKinematic</span>()-&gt;<span class="tok-fn">SetMassMatrix</span>(<span class="tok-str">1.0f</span>, **ballShape); <span class="tok-com">// mass 1.0 kg</span>
+world-&gt;<span class="tok-fn">AddBody</span>(ball);
+
+<span class="tok-com">// 4. Step the simulation</span>
+<span class="tok-kw">const</span> <span class="tok-type">ndFloat32</span> timestep = <span class="tok-str">1.0f</span> / <span class="tok-str">60.0f</span>;
+<span class="tok-kw">for</span> (<span class="tok-type">int</span> frame = <span class="tok-str">0</span>; frame &lt; <span class="tok-str">120</span>; ++frame)
+{
+    world-&gt;<span class="tok-fn">Update</span>(timestep);
+    world-&gt;<span class="tok-fn">Sync</span>();  <span class="tok-com">// block until the update finishes</span>
+    <span class="tok-type">ndVector</span> pos = ball-&gt;<span class="tok-fn">GetPosition</span>();
+}
+
+<span class="tok-kw">delete</span> world;</code></pre>
+      </div>
+
+      <p>A few things worth internalizing from this example:</p>
+      <ul>
+        <li><strong>Shapes are shared, bodies own an instance.</strong> <code>ndShapeInstance</code> wraps a
+        reference-counted <code>ndShape</code> (the geometric primitive itself), so the same box or convex hull
+        can back many bodies cheaply. <code>SetCollisionShape</code> copies the instance onto the body.</li>
+        <li><strong>Mass of 0 means static.</strong> <code>SetMassMatrix(0.0f, shape)</code> marks a body as
+        immovable — the usual way to build floors, walls, and terrain.</li>
+        <li><strong>Everything is reference-counted.</strong> Bodies, joints, and models are held in
+        <code>ndSharedPtr&lt;T&gt;</code> and handed to the world with <code>AddBody</code> / <code>AddJoint</code>
+        / <code>AddModel</code>; the world keeps its own reference until you call the matching
+        <code>Remove*</code>.</li>
+        <li><strong>Update is asynchronous.</strong> <code>ndWorld::Update()</code> can run the solver across a
+        thread pool; call <code>Sync()</code> before reading back body transforms if you need the frame's
+        result immediately.</li>
+      </ul>
+    </section>
+
+    <!-- ============ CORE TYPES ============ -->
+    <section id="core-types">
+      <div class="kicker">04 — dCore</div>
+      <h2><span class="num">04</span>Core math types</h2>
+      <p class="section-intro">Everything in the physics API is built on a small set of SIMD-friendly value
+      types defined in <code>dCore</code>. They behave like ordinary C++ value types — pass by value or
+      const-reference, no manual lifetime management.</p>
+
+      <table>
+        <tr><th>Type</th><th>Purpose</th></tr>
+        <tr><td class="name">ndVector</td><td>4-wide float vector (x, y, z, w); used for positions, directions, forces, torques, and impulses.</td></tr>
+        <tr><td class="name">ndMatrix</td><td>4×4 transform matrix; body and joint frames are expressed as an <code>ndMatrix</code> (rotation + <code>m_posit</code>).</td></tr>
+        <tr><td class="name">ndQuaternion</td><td>Rotation-only orientation, used where interpolation or compact storage matters (e.g. <code>ndBody::GetRotation()</code>).</td></tr>
+        <tr><td class="name">ndFloat32 / ndInt32 / ndUnsigned32</td><td>Fixed-width scalar aliases used throughout the API instead of raw <code>float</code>/<code>int</code>, to keep behavior identical across platforms.</td></tr>
+        <tr><td class="name">ndSharedPtr&lt;T&gt;</td><td>Intrusive-style reference-counted smart pointer used for bodies, joints, models, and shape instances.</td></tr>
+        <tr><td class="name">ndArray&lt;T&gt; / ndTree&lt;T&gt;</td><td>Lightweight dynamic array and balanced-tree containers used internally and in public collection APIs (e.g. <code>ndBodyList</code>, <code>ndJointList</code>).</td></tr>
+      </table>
+
+      <p>Two free helpers you'll reach for constantly: <code>ndGetIdentityMatrix()</code> for a neutral
+      transform, and constructing an <code>ndMatrix</code> from an <code>ndQuaternion</code> plus a position
+      when you need an arbitrary starting orientation.</p>
+    </section>
+
+    <!-- ============ WORLD ============ -->
+    <section id="world">
+      <div class="kicker">05 — dNewton</div>
+      <h2><span class="num">05</span>ndWorld</h2>
+      <p class="section-intro"><code>ndWorld</code> is the simulation container: it owns the broad-phase
+      scene, the solver, and every body, joint, and model added to it. One <code>ndWorld</code> instance is a
+      complete, independent simulation.</p>
+
+      <table>
+        <tr><th>Method</th><th>What it does</th></tr>
+        <tr><td class="name">Update(ndFloat32 dt)</td><td>Advances the simulation by <code>dt</code>. May run asynchronously across the thread pool.</td></tr>
+        <tr><td class="name">Sync() const</td><td>Blocks until the in-flight <code>Update()</code> has finished.</td></tr>
+        <tr><td class="name">AddBody / RemoveBody</td><td>Registers or unregisters an <code>ndSharedPtr&lt;ndBody&gt;</code> with the world.</td></tr>
+        <tr><td class="name">AddJoint / RemoveJoint</td><td>Registers or unregisters a bilateral constraint (any joint in <code>dJoints</code>).</td></tr>
+        <tr><td class="name">AddModel / RemoveModel</td><td>Registers a higher-level <code>ndModel</code> (e.g. a vehicle or articulated ragdoll).</td></tr>
+        <tr><td class="name">SetThreadCount(n)</td><td>Sizes the internal worker thread pool used by the solver and broad-phase.</td></tr>
+        <tr><td class="name">SetSubSteps(n)</td><td>Number of solver sub-steps per <code>Update()</code> call, trading CPU time for stability/accuracy.</td></tr>
+        <tr><td class="name">SelectSolver(mode)</td><td>Chooses between <code>ndStandardSolver</code>, <code>ndSimdSoaSolver</code>, and <code>ndSimdAvx2Solver</code>.</td></tr>
+        <tr><td class="name">RayCast / ConvexCast</td><td>Casts a ray or a convex shape through the scene, reporting hits via a notify callback.</td></tr>
+        <tr><td class="name">BodiesInAabb(cb, min, max)</td><td>Broad-phase query for every body overlapping an axis-aligned box.</td></tr>
+        <tr><td class="name">GetBodyList / GetJointList / GetContactList</td><td>Read-only views over everything currently tracked by the world.</td></tr>
+      </table>
+    </section>
+
+    <!-- ============ BODIES ============ -->
+    <section id="bodies">
+      <div class="kicker">06 — dCollision / dNewton</div>
+      <h2><span class="num">06</span>Bodies</h2>
+      <p class="section-intro">Bodies form a small hierarchy. You'll almost always construct the concrete
+      leaf type, but the shared behavior lives further up.</p>
+
+      <table>
+        <tr><th>Class</th><th>Role</th></tr>
+        <tr><td class="name">ndBody</td><td>Abstract base: transform (<code>GetPosition</code>, <code>GetRotation</code>, <code>SetMatrix</code>), velocity, notify callback.</td></tr>
+        <tr><td class="name">ndBodyKinematic</td><td>Adds collision: shape instance, mass matrix, sleep state, contact/joint attachment, AABB.</td></tr>
+        <tr><td class="name">ndBodyDynamic</td><td>Concrete simulated rigid body — forces, torque, and impulses are integrated by the solver every step.</td></tr>
+        <tr><td class="name">ndBodyKinematicBase</td><td>Kinematic (script-driven) body: participates in collision but is moved directly rather than by forces.</td></tr>
+        <tr><td class="name">ndBodyPlayerCapsule</td><td>Purpose-built capsule body for first/third-person character controllers.</td></tr>
+        <tr><td class="name">ndBodyTriggerVolume</td><td>Non-colliding volume used to detect overlap events, e.g. gameplay trigger zones.</td></tr>
+        <tr><td class="name">ndBodySphFluid</td><td>SPH-based particle fluid body.</td></tr>
+      </table>
+
+      <h3>Common ndBodyKinematic operations</h3>
+      <table>
+        <tr><th>Method</th><th>What it does</th></tr>
+        <tr><td class="name">SetCollisionShape(shape)</td><td>Attaches an <code>ndShapeInstance</code> to the body.</td></tr>
+        <tr><td class="name">SetMassMatrix(mass, shape)</td><td>Derives inertia from the shape and assigns mass; <code>0.0f</code> makes the body static.</td></tr>
+        <tr><td class="name">SetForce / SetTorque</td><td>Applies a force or torque for the current step (re-applied every frame if you want continuous force, e.g. gravity or thrust).</td></tr>
+        <tr><td class="name">AddImpulse(vel, point, dt)</td><td>Applies an instantaneous impulse at a world-space point.</td></tr>
+        <tr><td class="name">SetOmega / SetVelocity</td><td>Directly sets angular / linear velocity.</td></tr>
+        <tr><td class="name">GetAutoSleep / SetAutoSleep</td><td>Controls whether the body is allowed to go dormant when at rest, to save CPU.</td></tr>
+        <tr><td class="name">SetSkeleton / GetSkeleton</td><td>Assigns the body to an <code>ndSkeletonContainer</code> for articulated (multi-body chain) solving.</td></tr>
+      </table>
+
+      <div class="callout">
+        <span class="lbl">Gotcha</span>
+        <p>Setting force or torque with <code>SetForce</code>/<code>SetTorque</code> only affects the next solver
+        step — Newton does not remember "constant" forces between calls. Gravity, thrusters, and similar
+        continuous forces are typically applied from an <code>ndBodyNotify::OnApplyExternalForce</code> override,
+        which the solver calls every sub-step.</p>
+      </div>
+    </section>
+
+    <!-- ============ SHAPES ============ -->
+    <section id="shapes">
+      <div class="kicker">07 — dCollision</div>
+      <h2><span class="num">07</span>Collision shapes</h2>
+      <p class="section-intro">A body's collidable geometry is an <code>ndShapeInstance</code> wrapping a
+      reference-counted <code>ndShape</code>. Because the shape is shared and reference-counted, it's normal
+      to build one shape and reuse it across hundreds of bodies (e.g. a crate box or a debris chunk).</p>
+
+      <table>
+        <tr><th>Shape</th><th>Notes</th></tr>
+        <tr><td class="name">ndShapeBox</td><td>Axis-aligned box primitive, defined by size.</td></tr>
+        <tr><td class="name">ndShapeSphere</td><td>Sphere primitive, defined by radius.</td></tr>
+        <tr><td class="name">ndShapeCapsule / ndShapeCylinder / ndShapeCone / ndShapeChamferCylinder</td><td>Rounded convex primitives.</td></tr>
+        <tr><td class="name">ndShapeConvexHull</td><td>Convex hull generated from an arbitrary point cloud.</td></tr>
+        <tr><td class="name">ndShapeCompound</td><td>Aggregates multiple child shapes into one rigid collidable, e.g. an L-shaped part.</td></tr>
+        <tr><td class="name">ndShapeStatic_bvh / ndShapeStaticMesh</td><td>Static triangle-mesh collision (level geometry) backed by a bounding-volume hierarchy.</td></tr>
+        <tr><td class="name">ndShapeHeightfield</td><td>Regular-grid heightfield for terrain.</td></tr>
+        <tr><td class="name">ndShapeStaticProceduralMesh / ndShapeUserDefinedImplicit</td><td>Extension points for custom or procedurally generated collision.</td></tr>
+        <tr><td class="name">ndShapeNull</td><td>Empty shape — a body that occupies space in the world but never collides.</td></tr>
+      </table>
+
+      <p>Automatic convex decomposition of concave meshes into a compound of hulls is available via the
+      vendored <strong>HACD</strong> library in <code>dDependencies/hacd</code>.</p>
+    </section>
+
+    <!-- ============ JOINTS ============ -->
+    <section id="joints">
+      <div class="kicker">08 — dNewton / dJoints</div>
+      <h2><span class="num">08</span>Joints &amp; constraints</h2>
+      <p class="section-intro">Joints connect two <code>ndBodyKinematic</code> instances (a child and a
+      parent — pass <code>nullptr</code> as parent to anchor to the static world). All joints derive from
+      <code>ndJointBilateralConstraint</code> and are registered with <code>world-&gt;AddJoint(...)</code>.</p>
+
+      <table>
+        <tr><th>Joint</th><th>Constrains</th></tr>
+        <tr><td class="name">ndJointHinge</td><td>1 rotational DOF about a pin axis, with optional limits and spring-damper.</td></tr>
+        <tr><td class="name">ndJointSlider</td><td>1 translational DOF along an axis.</td></tr>
+        <tr><td class="name">ndJointCylinder</td><td>1 rotational + 1 translational DOF along the same axis.</td></tr>
+        <tr><td class="name">ndJointDoubleHinge / ndJointSlidingHinge</td><td>2-DOF rotational combinations, e.g. universal-joint style linkages.</td></tr>
+        <tr><td class="name">ndJointSpherical</td><td>Ball-and-socket (3 rotational DOF).</td></tr>
+        <tr><td class="name">ndJointFix6dof</td><td>Fully fixed (0 DOF) — welds two bodies together while still reporting reaction forces.</td></tr>
+        <tr><td class="name">ndJointFixDistance</td><td>Keeps two points at a fixed distance, like a rope segment or rod.</td></tr>
+        <tr><td class="name">ndJointGear / ndJointPulley</td><td>Couples motion between two other joints with a fixed ratio.</td></tr>
+        <tr><td class="name">ndJointWheel / ndJointRoller</td><td>Suspension-style joints used by the vehicle model.</td></tr>
+        <tr><td class="name">ndJointUpVector</td><td>Constrains a body axis to stay aligned with a world direction (e.g. keep a character upright).</td></tr>
+        <tr><td class="name">ndJointFollowPath</td><td>Constrains a body to travel along a path.</td></tr>
+        <tr><td class="name">ndJointKinematicController</td><td>Drags a body toward a target frame — the basis for mouse-pick / grab interactions.</td></tr>
+        <tr><td class="name">ndJointDryRollingFriction</td><td>Adds rolling-resistance damping, typically to wheels.</td></tr>
+      </table>
+
+      <h3>Inverse kinematics</h3>
+      <p>The <code>dIkSolver</code> module layers IK on top of the same joint machinery:
+      <code>ndIkJointHinge</code>, <code>ndIkJointSpherical</code>, <code>ndIkJointDoubleHinge</code>,
+      <code>ndIk6DofEffector</code>, and <code>ndIkSwivelPositionEffector</code>, driven by an
+      <code>ndIkSolver</code> instance.</p>
+
+      <div class="code">
+        <div class="code-head"><span>C++</span><span>hinge_joint.cpp</span></div>
+        <pre><code><span class="tok-com">// pin frame: world-space matrix whose front axis is the hinge axis</span>
+<span class="tok-type">ndMatrix</span> pin(<span class="tok-fn">ndGetIdentityMatrix</span>());
+pin.m_posit = childBody-&gt;<span class="tok-fn">GetPosition</span>();
+
+<span class="tok-type">ndSharedPtr&lt;ndJointBilateralConstraint&gt;</span> hinge(
+    <span class="tok-kw">new</span> <span class="tok-fn">ndJointHinge</span>(pin, childBody-&gt;<span class="tok-fn">GetAsBodyKinematic</span>(), <span class="tok-kw">nullptr</span>));
+
+<span class="tok-type">ndJointHinge</span>* hingePtr = (<span class="tok-type">ndJointHinge</span>*)*hinge;
+hingePtr-&gt;<span class="tok-fn">SetAsSpringDamper</span>(<span class="tok-str">0.02f</span>, <span class="tok-str">1500.0f</span>, <span class="tok-str">40.0f</span>);
+world-&gt;<span class="tok-fn">AddJoint</span>(hinge);</code></pre>
+      </div>
+    </section>
+
+    <!-- ============ QUERIES ============ -->
+    <section id="queries">
+      <div class="kicker">09 — Interaction</div>
+      <h2><span class="num">09</span>Queries &amp; callbacks</h2>
+      <p class="section-intro">Newton reports events through small notify/callback interfaces you subclass,
+      rather than a global event bus.</p>
+
+      <table>
+        <tr><th>Interface</th><th>Used for</th></tr>
+        <tr><td class="name">ndBodyNotify</td><td>Per-body hook for applying external forces (<code>OnApplyExternalForce</code>) and reacting to transform changes.</td></tr>
+        <tr><td class="name">ndContactNotify</td><td>World-level hook for contact creation/removal and material selection between shape pairs.</td></tr>
+        <tr><td class="name">ndRayCastNotify</td><td>Receives hits from <code>ndWorld::RayCast</code>.</td></tr>
+        <tr><td class="name">ndConvexCastNotify</td><td>Receives hits from <code>ndWorld::ConvexCast</code>.</td></tr>
+        <tr><td class="name">ndBodiesInAabbNotify</td><td>Receives results from <code>ndWorld::BodiesInAabb</code>.</td></tr>
+      </table>
+      <p>Each is a small abstract class: override the relevant virtual method, pass an instance to the query,
+      and the world calls back into it synchronously during the query.</p>
+    </section>
+
+    <!-- ============ PATTERNS ============ -->
+    <section id="patterns">
+      <div class="kicker">10 — Reference</div>
+      <h2><span class="num">10</span>Common patterns</h2>
+
+      <h3>Ownership</h3>
+      <p>Wrap anything handed to the world — bodies, joints, models, shape instances — in
+      <code>ndSharedPtr&lt;T&gt;</code>. The world holds its own reference once added; letting your local
+      <code>ndSharedPtr</code> go out of scope afterward is safe.</p>
+
+      <h3>Static vs. dynamic</h3>
+      <p>There's no separate "static body" class — a static object is simply an <code>ndBodyDynamic</code>
+      (or <code>ndBodyKinematic</code>) with <code>SetMassMatrix(0.0f, shape)</code>.</p>
+
+      <h3>Stepping on a fixed timestep</h3>
+      <p>Accumulate real elapsed time and call <code>world-&gt;Update(fixedDt)</code> in a fixed-size loop,
+      calling <code>Sync()</code> once per frame before reading back transforms for rendering — the same
+      pattern used by <code>ndDemoEntityManager</code> in the sandbox application.</p>
+
+      <h3>Threading</h3>
+      <p>Size the solver's thread pool once at startup with <code>SetThreadCount</code>; the solver and
+      broad-phase parallelize internally, so application code generally doesn't need its own locking around
+      world queries made between <code>Update()</code> calls.</p>
+    </section>
+
+    <!-- ============ RESOURCES ============ -->
+    <section id="resources">
+      <div class="kicker">11 — Reference</div>
+      <h2><span class="num">11</span>Resources</h2>
+      <ul>
+        <li>This branch: <a href="https://github.com/JulioJerez/newton-dynamics/tree/dliw/newton-dynamics/newton-4.00/sdk" target="_blank" rel="noopener">github.com/JulioJerez/newton-dynamics — dliw/newton-dynamics</a></li>
+        <li>Stable upstream repository: <a href="https://github.com/MADEAPPS/newton-dynamics" target="_blank" rel="noopener">github.com/MADEAPPS/newton-dynamics</a></li>
+        <li>Demos, tutorials, FAQ: <a href="https://github.com/MADEAPPS/newton-dynamics/wiki" target="_blank" rel="noopener">MADEAPPS/newton-dynamics wiki</a></li>
+        <li>Working example demos in this branch: <code>applications/ndSandbox/demos/</code> (start with <code>ndBasicRigidBody.cpp</code> and <code>ndBasicJoints.cpp</code>)</li>
+        <li>Full public API surface in one include: <code>sdk/dNewton/ndNewton.h</code></li>
+      </ul>
+    </section>
+
+    <footer>
+      Newton Dynamics is licensed under zlib — see <code>LICENSE</code> in the repository. Guide generated from
+      the SDK source on the <code>dliw/newton-dynamics</code> branch; verify method signatures against the
+      headers before shipping, as this is an active development branch.
+    </footer>
+  </main>
+</div>
+
+<script>
+  // Highlight active section in sidebar while scrolling
+  const links = Array.from(document.querySelectorAll('.nav-link'));
+  const sections = links.map(l => document.querySelector(l.getAttribute('href')));
+  function onScroll(){
+    let idx = 0;
+    const y = window.scrollY + 120;
+    sections.forEach((s,i) => { if(s && s.offsetTop <= y) idx = i; });
+    links.forEach((l,i) => l.classList.toggle('active', i===idx));
+  }
+  document.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+</script>
+</body>
+</html>
