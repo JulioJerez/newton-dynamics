@@ -186,6 +186,41 @@ namespace ndMotorVehicle
 			cameraPivotNode->AddChild(camera);
 		}
 
+		// a more explicit way to add the visual modifier
+		auto AddGraphicsModiers = [sceneMesh](ndMesh* const node)
+		{
+			ndSharedPtr<ndMeshTransformModifier> modifier(node->GetModifier());
+			if (modifier)
+			{
+				ndAssert(modifier->m_owner);
+				ndAssert(modifier->m_target);
+				ndRenderSceneNode* const owner = sceneMesh->FindByName(modifier->m_owner->GetName());
+				ndRenderSceneNode* const target = sceneMesh->FindByName(modifier->m_target->GetName());
+				ndAssert(owner);
+				ndAssert(target);
+
+				if (strcmp(modifier->ClassName(), ndMeshTransformModifierLookAt::StaticClassName()) == 0)
+				{
+					ndSharedPtr<ndRenderTransformModifier> renderModifier(new ndRenderTransformModifierLookAtNode(owner, target));
+					owner->SetTransformModifier(renderModifier);
+				}
+				else if (strcmp(modifier->ClassName(), ndMeshTransformModifierTwoLinksIK::StaticClassName()) == 0)
+				{
+					const ndMeshTransformModifierTwoLinksIK* const modifierIk = (ndMeshTransformModifierTwoLinksIK*)*modifier;
+					ndRenderSceneNode* const link = sceneMesh->FindByName(modifierIk->m_childLink->GetName());
+					ndAssert(link);
+					ndSharedPtr<ndRenderTransformModifier> renderModifier(new ndRenderTransformModifierTwoLinksIK(owner, link, target, modifierIk->m_solutionSign));
+					owner->SetTransformModifier(renderModifier);
+				}
+				else
+				{
+					ndAssert(0);
+				}
+			}
+		};
+		loader.m_mesh->NodeIterator(AddGraphicsModiers);
+
+
 		//add the notification for binding to the application.
 		ndSharedPtr<ndModelNotify> controller(new ndVehicleController(vehicle, engineSound));
 		vehicle->SetNotifyCallback(controller);
