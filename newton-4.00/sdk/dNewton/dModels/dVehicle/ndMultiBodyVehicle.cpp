@@ -43,22 +43,6 @@
 //#define D_PACEJKA_USE_REST_SPRUNG_WEIGHT
 #define D_CONVERT_PACEJKA_FORCES_TO_FRICTION_COEFFICIENT
 
-//ndVehicleDectriptor::ndVehicleDectriptor()
-//	:ndClassAlloc()
-//	,m_name ("default")
-//{
-//	m_chassisAngularDrag = ndFloat32(0.25f);
-//
-//	m_slipDifferentialRmpLock = ndFloat32(30.0f);
-//
-//	m_torsionBarSpringK = ndFloat32(100.0f);
-//	m_torsionBarDamperC = ndFloat32(10.0f);
-//	m_torsionBarRegularizer = ndFloat32(0.15f);
-//	m_torsionBarType = m_noWheelAxle;
-//
-//	m_differentialType = m_rearWheelDrive;
-//}
-
 ndMultiBodyVehicle::ndDownForce::ndDownForce()
 	:m_suspensionStiffnessModifier(ndFloat32(1.0f))
 {
@@ -113,7 +97,7 @@ ndFloat32 ndMultiBodyVehicle::ndDownForce::GetDownforceFactor(ndFloat32 speed) c
 
 class ndMultiBodyVehicle::ndComponentNotify : public ndBodyNotify
 {
-public:
+	public:
 	D_CLASS_REFLECTION(ndComponentNotify, ndBodyNotify)
 
 		ndComponentNotify(ndMultiBodyVehicle* const owner)
@@ -143,7 +127,7 @@ public:
 
 class ndMultiBodyVehicle::ndMotorNotify : public ndMultiBodyVehicle::ndComponentNotify
 {
-public:
+	public:
 	ndMotorNotify(ndMultiBodyVehicle* const owner)
 		:ndComponentNotify(owner)
 	{
@@ -183,7 +167,7 @@ ndMultiBodyVehicle::ndMultiBodyVehicle(ndFloat32 gravityMagnitud)
 	,m_localFrame(ndGetIdentityMatrix())
 	,m_tireShape(new ndShapeWheel())
 	,m_downForce()
-	//,m_descriptor()
+	,m_debugFlags(DebugFlags(0))
 {
 	m_initialized = false;
 	m_motor = nullptr;
@@ -207,11 +191,6 @@ void ndMultiBodyVehicle::SetDebugFlags(DebugFlags flags)
 {
 	m_debugFlags = flags;
 }
-
-//ndVehicleDectriptor& ndMultiBodyVehicle::GetDescriptor()
-//{
-//	return m_descriptor;
-//}
 
 const ndMatrix& ndMultiBodyVehicle::GetLocalFrame() const
 {
