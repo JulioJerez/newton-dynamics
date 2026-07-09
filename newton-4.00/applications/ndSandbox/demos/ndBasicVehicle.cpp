@@ -89,38 +89,6 @@ namespace ndMotorVehicle
 		ndSharedPtr<ndSoundSource> m_engineSound;
 	};
 
-	class ndBasicVehicleDectriptor : public ndVehicleDectriptor
-	{
-		public:
-		ndBasicVehicleDectriptor()
-			:ndVehicleDectriptor()
-			,m_curve()
-		{
-		}
-		ndMultiBodyVehicleMotor::ndEngineTorqueCurve m_curve;
-	};
-
-	class ndVehicleDectriptorSuperCar : public ndBasicVehicleDectriptor
-	{
-		public:
-		ndVehicleDectriptorSuperCar()
-			:ndBasicVehicleDectriptor()
-		{
-			m_name = "supercar";
-			ndFloat32 idleTorquePoundFoot = ndFloat32(300.0f);
-			ndFloat32 idleRmp = ndFloat32(700.0f);
-			ndFloat32 horsePower = ndFloat32(400.0f);
-			ndFloat32 rpm0 = ndFloat32(5000.0f);
-			ndFloat32 rpm1 = ndFloat32(6200.0f);
-			ndFloat32 horsePowerAtRedLine = ndFloat32(100.0f);
-			ndFloat32 redLineRpm = ndFloat32(8000.0f);
-			m_curve.Init(idleTorquePoundFoot, idleRmp,
-				horsePower, rpm0, rpm1, horsePowerAtRedLine, redLineRpm);
-		}
-
-		ndMultiBodyVehicleMotor::ndEngineTorqueCurve m_curve;
-	};
-
 	ndSharedPtr<ndModel> CreateBasicVehicle(ndDemoEntityManager* const scene, const char* const modelName, const ndMatrix& matrix)
 	{
 		ndMeshLoader loader;
@@ -129,21 +97,19 @@ namespace ndMotorVehicle
 
 		ndPhysicsWorld* const world = scene->GetWorld();
 
-		// we first load the model as like any other arcilated model
+		// we first load the model as like any other arcilation
 		ndSharedPtr<ndModel> vehicleModel(new ndMultiBodyVehicle());
 		ndMultiBodyVehicle* const vehicle = vehicleModel->GetAsMultiBodyVehicle();
 		vehicle->Deserialize(mesh);
 
-		// the vehicle descriptor specify the kind of vehicle 
-		// we configure it then we convert the model to multibody vehicle.
-		ndVehicleDectriptorSuperCar superCar;
-		vehicle->ConvertToMotorVehicle(superCar);
+		// then, we convet the mode to a multibody vehicle.
+		vehicle->ConvertToMotorVehicle();
 
 		ndRender* const renderer = *scene->GetRenderer();
 		ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *loader.m_mesh, ndGetWorkingFileName("")));
 
 		ndSharedPtr<ndSoundSource> engineSound;
-		auto BindApplicationData = [scene, mesh, vehicle, &sceneMesh, &superCar, &engineSound](ndModelArticulation::ndNode* const node)
+		auto BindApplicationData = [scene, mesh, vehicle, &sceneMesh, &engineSound](ndModelArticulation::ndNode* const node)
 		{
 			if (vehicle->IsCloseLoop(node))
 			{
@@ -590,7 +556,6 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 {
 	LoadMap(scene);
 	//BuildPlayground(scene);
-	//BuildCompoundScene(scene, ndGetIdentityMatrix());
 	//BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true);
 
 	ndPhysicsWorld* const world = scene->GetWorld();
@@ -607,11 +572,11 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	//ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f))));
 	//ndSharedPtr<ndModel> vehicle1(CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f))));
 	ndSharedPtr<ndModel> vehicle2(CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f))));
-	//ndSharedPtr<ndModel> vehicle3(CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 5.0f, 0.0f))));
-	ndSharedPtr<ndModel> vehicle4(CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f))));
+	ndSharedPtr<ndModel> vehicle3(CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f))));
+	ndSharedPtr<ndModel> vehicle4(CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(12.0f, 1.0f, 6.0f, 0.0f))));
 	
-	matrix.m_posit.m_x += 40.0f;
-	matrix.m_posit.m_z += 5.0f;
+	//matrix.m_posit.m_x += 40.0f;
+	//matrix.m_posit.m_z += 5.0f;
 	//AddPlanks(scene, matrix, 60.0f, 5);
 
 	// set a ui paner to see vehicle state
