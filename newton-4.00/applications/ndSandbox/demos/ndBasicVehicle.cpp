@@ -556,7 +556,6 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 {
 	LoadMap(scene);
 	//BuildPlayground(scene);
-	//BuildCompoundScene(scene, ndGetIdentityMatrix());
 	//BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true);
 
 	ndPhysicsWorld* const world = scene->GetWorld();
@@ -573,11 +572,11 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	//ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f))));
 	//ndSharedPtr<ndModel> vehicle1(CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f))));
 	ndSharedPtr<ndModel> vehicle2(CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f))));
-	//ndSharedPtr<ndModel> vehicle3(CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 5.0f, 0.0f))));
-	ndSharedPtr<ndModel> vehicle4(CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f))));
+	ndSharedPtr<ndModel> vehicle3(CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f))));
+	ndSharedPtr<ndModel> vehicle4(CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(12.0f, 1.0f, 6.0f, 0.0f))));
 	
-	matrix.m_posit.m_x += 40.0f;
-	matrix.m_posit.m_z += 5.0f;
+	//matrix.m_posit.m_x += 40.0f;
+	//matrix.m_posit.m_z += 5.0f;
 	//AddPlanks(scene, matrix, 60.0f, 5);
 
 	// set a ui paner to see vehicle state
