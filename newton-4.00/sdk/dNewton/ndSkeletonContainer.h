@@ -316,6 +316,7 @@ class ndSkeletonContainer
 	friend class ndIkSolver;
 	friend class ndSkeletonList;
 	friend class ndDynamicsUpdate;
+	friend class ndConvexCastVehicle;
 	friend class ndDynamicsUpdateSoa;
 	friend class ndDynamicsUpdateAvx2;
 };
