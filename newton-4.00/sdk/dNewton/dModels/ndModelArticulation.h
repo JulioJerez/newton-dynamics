@@ -98,8 +98,9 @@ class ndModelArticulation: public ndModel
 	D_NEWTON_API ndNode* AddRootBody(const ndSharedPtr<ndBody>& rootBody);
 	D_NEWTON_API ndNode* AddLimb(ndNode* const parent, const ndSharedPtr<ndBody>& body, const ndSharedPtr<ndJointBilateralConstraint>& joint);
 
+	D_NEWTON_API ndList<ndModelArticulation::ndNode, ndContainersFreeListAlloc<ndNode>>& GetCloseLoops();
 	D_NEWTON_API const ndList<ndModelArticulation::ndNode, ndContainersFreeListAlloc<ndNode>>& GetCloseLoops() const;
-	D_NEWTON_API void AddCloseLoop(const ndSharedPtr<ndJointBilateralConstraint>& joint, const char* const name = "none");
+	D_NEWTON_API void AddCloseLoop(const ndSharedPtr<ndJointBilateralConstraint>& loopJoint, const char* const name = "none");
 
 	D_NEWTON_API virtual bool GetMulticoreHint() const override;
 	D_NEWTON_API virtual void SetMulticoreHint(bool hint) override;
@@ -133,7 +134,7 @@ class ndModelArticulation: public ndModel
 	void NodeIterator(Function func);
 
 	protected:
-	D_COLLISION_API virtual void OnAddWorld() override;
+	D_COLLISION_API virtual void OnAddToWorld() override;
 	D_COLLISION_API virtual void OnRemoveFromWorld() override;
 	
 	ndString m_name;

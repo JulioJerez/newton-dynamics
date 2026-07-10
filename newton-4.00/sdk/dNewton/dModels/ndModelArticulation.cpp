@@ -203,6 +203,11 @@ ndModelArticulation::ndNode* ndModelArticulation::AddLimb(ndNode* const parent, 
 	return new ndNode(body, joint, parent);
 }
 
+ndList<ndModelArticulation::ndNode, ndContainersFreeListAlloc<ndModelArticulation::ndNode>>& ndModelArticulation::GetCloseLoops()
+{
+	return m_closeLoops;
+}
+
 const ndList<ndModelArticulation::ndNode, ndContainersFreeListAlloc<ndModelArticulation::ndNode>>& ndModelArticulation::GetCloseLoops() const
 {
 	return m_closeLoops;
@@ -336,75 +341,116 @@ ndModelArticulation::ndNode* ndModelArticulation::FindLoopByJoint(const ndJointB
 	return nullptr;
 }
 
-void ndModelArticulation::OnAddWorld()
+void ndModelArticulation::OnAddToWorld()
 {
 	ndAssert(m_world);
-	ndFixSizeArray<ndNode*, D_INV_IK_MAX_LINKS> stack;
-	if (m_rootNode)
+	//ndFixSizeArray<ndNode*, D_INV_IK_MAX_LINKS> stack;
+	//if (m_rootNode)
+	//{
+	//	stack.PushBack(m_rootNode);
+	//	while (stack.GetCount())
+	//	{
+	//		ndInt32 index = stack.GetCount() - 1;
+	//		ndNode* const node = stack[index];
+	//		stack.SetCount(index);
+	//		m_world->AddBody(node->m_body);
+	//		if (node->m_joint)
+	//		{
+	//			m_world->AddJoint(node->m_joint);
+	//		}
+	//
+	//		for (ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
+	//		{
+	//			stack.PushBack(child);
+	//		}
+	//	}
+	//}
+	//for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
+	//{
+	//	m_world->AddJoint(node->GetInfo().m_joint);
+	//}
+
+	auto OnAddToWorld = [this](ndNode* const node)
 	{
-		stack.PushBack(m_rootNode);
-		while (stack.GetCount())
+		bool isActive = node->m_joint ? node->m_joint->IsActive() : true;
+		if (isActive)
 		{
-			ndInt32 index = stack.GetCount() - 1;
-			ndNode* const node = stack[index];
-			stack.SetCount(index);
-			m_world->AddBody(node->m_body);
+			if (node->m_body)
+			{
+				m_world->AddBody(node->m_body);
+			}
 			if (node->m_joint)
 			{
 				m_world->AddJoint(node->m_joint);
 			}
-	
-			for (ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
-			{
-				stack.PushBack(child);
-			}
 		}
-	}
-	
-	for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
-	{
-		m_world->AddJoint(node->GetInfo().m_joint);
-	}
+	};
+	NodeIterator(OnAddToWorld);
 }
 
 void ndModelArticulation::OnRemoveFromWorld()
 {
 	ndAssert(m_world);
-	ndFixSizeArray<ndNode*, D_INV_IK_MAX_LINKS> stack;
-	if (m_rootNode)
+	//ndFixSizeArray<ndNode*, D_INV_IK_MAX_LINKS> stack;
+	//if (m_rootNode)
+	//{
+	//	for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
+	//	{
+	//		if (node->GetInfo().m_joint->m_worldNode)
+	//		{
+	//			m_world->RemoveJoint(*node->GetInfo().m_joint);
+	//		}
+	//	}
+	//
+	//	stack.PushBack(m_rootNode);
+	//	while (stack.GetCount())
+	//	{
+	//		ndInt32 index = stack.GetCount() - 1;
+	//		ndNode* const node = stack[index];
+	//		stack.SetCount(index);
+	//		if (node->m_joint)
+	//		{
+	//			if (node->m_joint->m_worldNode)
+	//			{
+	//				m_world->RemoveJoint(*node->m_joint);
+	//			}
+	//		}
+	//		if (node->m_body->GetAsBodyKinematic()->m_sceneNode)
+	//		{
+	//			m_world->RemoveBody(*node->m_body);
+	//		}
+	//
+	//		for (ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
+	//		{
+	//			stack.PushBack(child);
+	//		}
+	//	}
+	//}
+
+	// remove loops joints first
+	for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
 	{
-		for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* node = m_closeLoops.GetFirst(); node; node = node->GetNext())
+		ndNode* loopNode = &node->GetInfo();
+		if (loopNode->m_joint && loopNode->m_joint->m_worldNode)
 		{
-			if (node->GetInfo().m_joint->m_worldNode)
-			{
-				m_world->RemoveJoint(*node->GetInfo().m_joint);
-			}
-		}
-	
-		stack.PushBack(m_rootNode);
-		while (stack.GetCount())
-		{
-			ndInt32 index = stack.GetCount() - 1;
-			ndNode* const node = stack[index];
-			stack.SetCount(index);
-			if (node->m_joint)
-			{
-				if (node->m_joint->m_worldNode)
-				{
-					m_world->RemoveJoint(*node->m_joint);
-				}
-			}
-			if (node->m_body->GetAsBodyKinematic()->m_sceneNode)
-			{
-				m_world->RemoveBody(*node->m_body);
-			}
-	
-			for (ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
-			{
-				stack.PushBack(child);
-			}
+			m_world->RemoveJoint(*loopNode->m_joint);
 		}
 	}
+
+	// remove structural bodies and joints
+	auto OnRemoveFromWorld = [this](ndNode* const node)
+	{
+		if (node->m_joint && node->m_joint->m_worldNode)
+		{
+			m_world->RemoveJoint(*node->m_joint);
+		}
+
+		if (node->m_body && node->m_body->GetAsBodyKinematic()->m_sceneNode)
+		{
+			m_world->AddBody(node->m_body);
+		}
+	};
+	NodeIterator(OnRemoveFromWorld);
 }
 
 bool ndModelArticulation::GetMulticoreHint() const

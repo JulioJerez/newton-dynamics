@@ -21,6 +21,13 @@
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
 #include "ndConvexCastVehicle.h"
+#include "ndMultiBodyVehicleMotor.h"
+#include "ndMultiBodyVehicleGearBox.h"
+#include "ndMultiBodyVehicleTireJoint.h"
+#include "ndMultiBodyVehicleTorsionBar.h"
+#include "ndMultiBodyVehicleDifferential.h"
+#include "ndMultiBodyVehicleDifferentialAxle.h"
+
 
 ndConvexCastVehicle::ndConvexCastVehicle(ndFloat32 gravityMagnitud)
 	:ndMultiBodyVehicle(gravityMagnitud)
@@ -31,4 +38,35 @@ ndConvexCastVehicle::ndConvexCastVehicle(ndFloat32 gravityMagnitud)
 void ndConvexCastVehicle::ConvertToMotorVehicle()
 {
 	ndMultiBodyVehicle::ConvertToMotorVehicle();
+
+	m_skeleton = ndSharedPtr<ndSkeletonContainer>(new ndSkeletonContainer);
+	//m_skeleton->Init(owner, rootBody, id);
+	//return container;
+
+
+	// remove the drive train from simulation
+	ndList<ndNode, ndContainersFreeListAlloc<ndNode>>& loops = GetCloseLoops();
+	ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* nextNode;
+	for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* node = loops.GetFirst(); node; node = nextNode)
+	{
+		nextNode = node->GetNext();
+		ndSharedPtr<ndJointBilateralConstraint> joint(node->GetInfo().m_joint);
+		if (joint->IsType(ndMultiBodyVehicleGearBox::StaticClassName()))
+		{
+			m_castGearBox = joint;
+			loops.Remove(node);
+		}
+		else if (joint->IsType(ndMultiBodyVehicleDifferentialAxle::StaticClassName()))
+		{
+			m_castDifferentialAxelList.Append(joint);
+			loops.Remove(node);
+		}
+	}
+
+	//auto RemoveStructuralJoint
+	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = m_tireList.GetFirst(); node; node = node->GetNext())
+	{
+		ndJointBilateralConstraint* const joint = node->GetInfo();
+		joint->SetActive(false);
+	}
 }

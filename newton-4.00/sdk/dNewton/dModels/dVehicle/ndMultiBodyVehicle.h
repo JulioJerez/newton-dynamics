@@ -125,7 +125,7 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	D_NEWTON_API virtual void PostUpdate(ndFloat32 timestep);
 	D_NEWTON_API virtual void Debug(ndConstraintDebugCallback& context) const;
 
-	private:
+	protected:
 	void ApplyTireModel();
 	void ApplyStabilityControl();
 	void CalculateRestSprungWeight();
@@ -141,8 +141,8 @@ class ndMultiBodyVehicle : public ndModelArticulation
 
 	ndMatrix m_localFrame;
 	ndWeakPtr<ndBodyDynamic> m_chassis;
-	ndWeakPtr<ndMultiBodyVehicleMotor> m_motor;
 	ndSharedPtr<ndShapeWheel> m_tireShape;
+	ndWeakPtr<ndMultiBodyVehicleMotor> m_motor;
 	ndWeakPtr<ndMultiBodyVehicleGearBox> m_gearBox;
 	ndList<ndMultiBodyVehicleTireJoint*> m_tireList;
 	ndList<ndMultiBodyVehicleDifferential*> m_differentialList;

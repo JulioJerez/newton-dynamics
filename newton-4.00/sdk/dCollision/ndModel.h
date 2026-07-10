@@ -56,7 +56,7 @@ class ndModel: public ndContainersFreeListAlloc<ndModel>
 	D_COLLISION_API virtual void SetSleep(ndFloat32, ndFloat32, ndFloat32, ndFloat32) const {}
 
 	protected:
-	D_COLLISION_API virtual void OnAddWorld() {}
+	D_COLLISION_API virtual void OnAddToWorld() {}
 	D_COLLISION_API virtual void OnRemoveFromWorld() {}
 
 	ndWorld* m_world;

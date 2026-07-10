@@ -26,6 +26,8 @@
 #include "ndIkSolver.h"
 #include "ndMultiBodyVehicle.h"
 
+class ndSkeletonContainer;
+
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndConvexCastVehicle : public ndMultiBodyVehicle
 {
@@ -37,6 +39,9 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 
 	private:
 	ndIkSolver m_solver;
+	ndSharedPtr<ndSkeletonContainer> m_skeleton;
+	ndSharedPtr<ndJointBilateralConstraint> m_castGearBox;
+	ndList<ndSharedPtr<ndJointBilateralConstraint>> m_castDifferentialAxelList;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif

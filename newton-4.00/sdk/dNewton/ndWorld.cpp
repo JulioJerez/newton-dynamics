@@ -976,7 +976,7 @@ void ndWorld::AddModel(const ndSharedPtr<ndModel>& model)
 {
 	ndScopeSpinLock lock(m_addRemoveModelsLock);
 	m_modelList.AddModel(model, this);
-	model->OnAddWorld();
+	model->OnAddToWorld();
 	OnAddModel((ndModel*)*model);
 }
 
