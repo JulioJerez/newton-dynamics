@@ -74,8 +74,9 @@
 #include <ndModel.h>
 #include <ndModelList.h>
 #include <ndModelNotify.h>
-#include <ndModelArticulation.h>
 #include <ndMultiBodyVehicle.h>
+#include <ndModelArticulation.h>
+#include <ndConvexCastVehicle.h>
 #include <ndMultiBodyVehicleMotor.h>
 #include <ndMultiBodyVehicleGearBox.h>
 #include <ndMultiBodyVehicleTireJoint.h>
