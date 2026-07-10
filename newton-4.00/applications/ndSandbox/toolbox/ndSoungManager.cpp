@@ -261,7 +261,7 @@ class ndOpenAlSource: public ndSoundSource::Implementation
 ndMatrix ndOpenAlManager::m_newtonToOpenAl(ndYawMatrix(ndFloat32(90.0f)* ndDegreeToRad));
 
 ndOpenAlSource::ndOpenAlSource(ndSharedPtr<ndSoundManager>& owner, const char* const waveFileName)
-	:ndSoundSource::Implementation(owner)
+	:ndSoundSource::Implementation(owner, waveFileName)
 {
 	ndOpenAlManager* const manager = (ndOpenAlManager*)m_manager->m_implementation;
 	ndTree<ALuint, ndString>::ndNode* const resource = manager->m_buffersCache.Find(waveFileName);
