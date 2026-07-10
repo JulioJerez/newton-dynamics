@@ -20,6 +20,8 @@
 
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
+#include "ndBodyDynamic.h"
+#include "ndBodyKinematic.h"
 #include "ndConvexCastVehicle.h"
 #include "ndMultiBodyVehicleMotor.h"
 #include "ndMultiBodyVehicleGearBox.h"
@@ -39,12 +41,47 @@ void ndConvexCastVehicle::ConvertToMotorVehicle()
 {
 	ndMultiBodyVehicle::ConvertToMotorVehicle();
 
+	// clone the skeleton structural joints.
 	m_skeleton = ndSharedPtr<ndSkeletonContainer>(new ndSkeletonContainer);
-	//m_skeleton->Init(owner, rootBody, id);
-	//return container;
+	ndFixSizeArray<ndNode*, 64> stack;
+	ndFixSizeArray<ndSkeletonContainer::ndNode*, 64> parents;
+	stack.PushBack(m_rootNode);
+	parents.PushBack(nullptr);
+	while (stack.GetCount())
+	{
+		ndNode* const node = stack.Pop();
+		ndSkeletonContainer::ndNode* parent = parents.Pop();
+		if (parent)
+		{
+			parent = m_skeleton->AddChild(*node->m_joint, parent);
+			parent->m_body->SetSkeleton(nullptr);
+			parent->m_joint->SetSkeletonFlag(false);
+		}
+		else
+		{
+			ndBodyDynamic* const rootBody = node->m_body->GetAsBodyDynamic();
+			m_skeleton->Init(nullptr, rootBody, 0);
+			rootBody->SetSkeleton(nullptr);
+			parent = m_skeleton->GetRoot();
+		}
+
+		for (ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
+		{
+			stack.PushBack(child);
+			parents.PushBack(parent);
+		}
+	}
+
+	// clone the skeleton loop joints.
+	ndFixSizeArray<ndJointBilateralConstraint*, 256> loopJoints;
+	ndList<ndNode, ndContainersFreeListAlloc<ndNode>>& loops = GetCloseLoops();
+	for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* node = loops.GetFirst(); node; node = node->GetNext())
+	{
+		loopJoints.PushBack(*node->GetInfo().m_joint);
+	}
+	m_skeleton->Finalize(loopJoints.GetCount(), &loopJoints[0]);
 
 	// remove the drive train from simulation
-	ndList<ndNode, ndContainersFreeListAlloc<ndNode>>& loops = GetCloseLoops();
 	ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* nextNode;
 	for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* node = loops.GetFirst(); node; node = nextNode)
 	{
