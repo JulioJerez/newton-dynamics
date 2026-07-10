@@ -43,7 +43,6 @@ void ndConvexCastVehicle::ConvertToMotorVehicle()
 	//m_skeleton->Init(owner, rootBody, id);
 	//return container;
 
-
 	// remove the drive train from simulation
 	ndList<ndNode, ndContainersFreeListAlloc<ndNode>>& loops = GetCloseLoops();
 	ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* nextNode;
@@ -63,10 +62,25 @@ void ndConvexCastVehicle::ConvertToMotorVehicle()
 		}
 	}
 
-	//auto RemoveStructuralJoint
-	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = m_tireList.GetFirst(); node; node = node->GetNext())
+	//disable wheel, body, and differntials 
+	auto DisableStructuralNodes = [](ndNode* const node)
 	{
-		ndJointBilateralConstraint* const joint = node->GetInfo();
-		joint->SetActive(false);
-	}
+		if (node->m_body && node->m_joint)
+		{
+			ndSharedPtr<ndJointBilateralConstraint> joint(node->m_joint);
+			if (joint->IsType(ndMultiBodyVehicleTireJoint::StaticClassName()))
+			{
+				joint->SetActive(false);
+			}
+			else if (joint->IsType(ndMultiBodyVehicleMotor::StaticClassName()))
+			{
+				joint->SetActive(false);
+			}
+			else if (joint->IsType(ndMultiBodyVehicleDifferential::StaticClassName()))
+			{
+				joint->SetActive(false);
+			}
+		}
+	};
+	NodeIterator(DisableStructuralNodes);
 }
