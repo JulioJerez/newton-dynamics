@@ -121,3 +121,14 @@ void ndConvexCastVehicle::ConvertToMotorVehicle()
 	};
 	NodeIterator(DisableStructuralNodes);
 }
+
+void ndConvexCastVehicle::Update(ndFloat32 timestep)
+{
+	// update tire contacts 
+
+	// update model
+	ndMultiBodyVehicle::Update(timestep);
+
+	// solve using immediate solver.
+
+}

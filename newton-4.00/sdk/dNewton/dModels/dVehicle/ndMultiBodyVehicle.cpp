@@ -1459,16 +1459,11 @@ void ndMultiBodyVehicle::CalculateRestSprungWeight()
 		ndMultiBodyVehicleTireJoint* const tire = tireArray[i];
 		tire->m_frictionModel.m_sprungWeight = sprungWeight;
 	}
-
-	m_initialized = true;
 	SetTransform(savedMatrix);
 }
 
-//void ndMultiBodyVehicle::ConvertToMotorVehicle(const ndVehicleDectriptor& vehicleDescritor___)
 void ndMultiBodyVehicle::ConvertToMotorVehicle()
 {
-	//m_descriptor = vehicleDescritor;
-
 	auto SetChassisAndMotor = [this](ndNode* const node)
 	{
 		if (node->m_joint && (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleMotor::StaticClassName()) == 0))
@@ -1523,6 +1518,8 @@ void ndMultiBodyVehicle::Update(ndFloat32 timestep)
 {
 	if (!m_initialized)
 	{
+		m_initialized = true;
+
 		CalculateRestSprungWeight();
 
 		// reset forces of assesories attached to chassis
