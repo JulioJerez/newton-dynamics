@@ -73,7 +73,7 @@ class ndSoundManager::Implementation : public ndClassAlloc
 class ndSoundSource::Implementation : public ndClassAlloc
 {
 	public:
-	Implementation(ndSharedPtr<ndSoundManager>& owner)
+	Implementation(ndSharedPtr<ndSoundManager>& owner, const char* const)
 		:ndClassAlloc()
 		,m_posit(ndVector::m_wOne)
 		,m_veloc(ndVector::m_zero)
