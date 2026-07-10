@@ -109,9 +109,9 @@ class CBasicBodyModelNotify : public ndModelNotify
 	{
 		SetModel(basicBodyModel);
 	}
-	virtual void PostUpdate(ndFloat32 timestep) override
+	virtual void PostUpdate(ndFloat32 timestep, ndInt32 threadId) override
 	{
-		ndModelNotify::PostUpdate(timestep);
+		ndModelNotify::PostUpdate(timestep, threadId);
 
 		SimpleConveyorFloor* myModel = (SimpleConveyorFloor*)GetModel();
 		ndPhysicsWorld* const world = (ndPhysicsWorld*)myModel->GetWorld();

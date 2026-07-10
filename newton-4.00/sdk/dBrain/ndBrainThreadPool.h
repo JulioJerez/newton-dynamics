@@ -76,7 +76,7 @@ class ndBrainTaskImplement: public ndTask
 			ndAssert(count <= m_jobsStride);
 			for (ndInt32 j = 0; j < count; ++j)
 			{
-				m_function(batchIndex + j, 0);
+				m_function(batchIndex + j, 0, 1);
 			}
 		}
 	}
@@ -98,7 +98,7 @@ void ndBrainThreadPool::ParallelExecute(const Function& function, ndInt32 number
 		// in single threaded, just execute all jobs in the main thread
 		for (ndInt32 i = 0; i < numberOfJobs; ++i)
 		{
-			function(i, 0);
+			function(i, 0, 1);
 		}
 	}
 	else
@@ -111,7 +111,7 @@ void ndBrainThreadPool::ParallelExecute(const Function& function, ndInt32 number
 			// not enough jobs to use all cores, just dispact all job in main thread
 			for (ndInt32 i = 0; i < numberOfJobs; ++i)
 			{
-				function(i, 0);
+				function(i, 0, virtualThreadCount);
 			}
 		}
 		else
@@ -139,7 +139,7 @@ void ndBrainThreadPool::ParallelExecute(const Function& function, ndInt32 number
 				const ndInt32 count = ((batchIndex + numberOfJobsBatch) < numberOfJobs) ? numberOfJobsBatch : numberOfJobs - batchIndex;
 				for (ndInt32 j = 0; j < count; ++j)
 				{
-					function(batchIndex + j, 0);
+					function(batchIndex + j, 0, numberOfThreads);
 				}
 			}
 

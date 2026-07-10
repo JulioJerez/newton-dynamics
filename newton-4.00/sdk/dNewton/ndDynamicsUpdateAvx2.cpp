@@ -174,7 +174,7 @@ void ndDynamicsUpdateAvx2::SortJoints()
 
 	ndInt32 rowsCount = 0;
 	ndInt32 soaJointRowCount = 0;
-	auto SetRowStarts = ndMakeObject::ndFunction([this, &jointArray, &rowsCount, &soaJointRowCount](ndInt32 groupId, ndInt32)
+	auto SetRowStarts = ndMakeObject::ndFunction([this, &jointArray, &rowsCount, &soaJointRowCount](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(SetRowStarts);
 		auto SetRowsCount = [&jointArray, &rowsCount]()
@@ -262,7 +262,7 @@ void ndDynamicsUpdateAvx2::SortIslands()
 
 	ndInt32 histogram[D_MAX_THREADS_COUNT][3];
 
-	auto Scan0 = ndMakeObject::ndFunction([&bodyArray, &histogram, groupSize](ndInt32 groupId, ndInt32)
+	auto Scan0 = ndMakeObject::ndFunction([&bodyArray, &histogram, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(Scan0);
 		ndInt32* const hist = &histogram[groupId][0];
@@ -306,7 +306,7 @@ void ndDynamicsUpdateAvx2::SortIslands()
 		scan[i] = sum;
 	}
 
-	auto Sort0 = ndMakeObject::ndFunction([&bodyArray, &activeBodyArray, &histogram, groupSize](ndInt32 groupId, ndInt32)
+	auto Sort0 = ndMakeObject::ndFunction([&bodyArray, &activeBodyArray, &histogram, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(Sort0);
 		ndInt32* const hist = &histogram[groupId][0];
@@ -356,7 +356,7 @@ void ndDynamicsUpdateAvx2::InitJacobianMatrix()
 	ndScene* const scene = m_world->GetScene();
 	ndArray<ndConstraint*>& jointArray = scene->GetActiveContactArray();
 
-	auto TransposeMassMatrix = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32)
+	auto TransposeMassMatrix = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(TransposeMassMatrix);
 		const ndLeftHandSide* const leftHandSide = &GetLeftHandSide()[0];
@@ -948,7 +948,7 @@ void ndDynamicsUpdateAvx2::CalculateJointsAcceleration()
 	ndScene* const scene = m_world->GetScene();
 	const ndArray<ndConstraint*>& jointArray = scene->GetActiveContactArray();
 
-	auto UpdateAcceleration = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32)
+	auto UpdateAcceleration = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(UpdateAcceleration);
 		const ndArray<ndRightHandSide>& rightHandSide = m_rightHandSide;
@@ -1015,7 +1015,7 @@ void ndDynamicsUpdateAvx2::CalculateJointsForce()
 	ndArray<ndBodyKinematic*>& bodyArray = scene->GetActiveBodyArray();
 	ndArray<ndConstraint*>& jointArray = scene->GetActiveContactArray();
 
-	auto CalculateJointsForce = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32)
+	auto CalculateJointsForce = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(CalculateJointsForce);
 		ndVector8* const jointPartialForces = (ndVector8*)&GetTempInternalForces()[0];
@@ -1287,7 +1287,7 @@ void ndDynamicsUpdateAvx2::CalculateJointsForce()
 		JointForce(m, &soaMassMatrix[soaJointRows[m]]);
 	});
 
-	auto ApplyJacobianAccumulatePartialForces = ndMakeObject::ndFunction([this, &bodyArray](ndInt32 group, ndInt32)
+	auto ApplyJacobianAccumulatePartialForces = ndMakeObject::ndFunction([this, &bodyArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(ApplyJacobianAccumulatePartialForces);
 		const ndVector8 zero(ndVector8::m_zero);
@@ -1296,7 +1296,7 @@ void ndDynamicsUpdateAvx2::CalculateJointsForce()
 		const ndVector8* const jointInternalForces = (ndVector8*)&GetTempInternalForces()[0];
 		const ndJointBodyPairIndex* const jointBodyPairIndexBuffer = &GetJointBodyPairIndexBuffer()[0];
 
-		const ndInt32 m = group;
+		const ndInt32 m = groupId;
 		const ndBodyKinematic* const body = bodyArray[m];
 		const ndInt32 startIndex = bodyIndex[m];
 		const ndInt32 mask = body->m_isStatic - 1;

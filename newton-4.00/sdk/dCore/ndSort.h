@@ -295,7 +295,7 @@ void ndCountingSort(ndThreadPool& threadPool, const T* const srcArray, T* const 
 	ndUnsigned32* const sum = ndAlloca(ndUnsigned32, 1 << keyBitSize);
 	ndUnsigned32* const scans = ndAlloca(ndUnsigned32, numberOfGroups * (1 << keyBitSize));
 
-	auto ndBuildHistogram = ndMakeObject::ndFunction([&srcArray, size, &evaluator, &scans, groupSize](ndInt32 groupId, ndInt32)
+	auto ndBuildHistogram = ndMakeObject::ndFunction([&srcArray, size, &evaluator, &scans, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(ndBuildHistogram);
 		ndUnsigned32* const scan = &scans[groupId * (1 << keyBitSize)];
@@ -351,7 +351,7 @@ void ndCountingSort(ndThreadPool& threadPool, const T* const srcArray, T* const 
 		prefixScanOut[1 << keyBitSize] = ndUnsigned32(size);
 	}
 
-	auto ndShuffleArray = ndMakeObject::ndFunction([&srcArray, &dstArray, size, &evaluator, &scans, &sum, groupSize](ndInt32 groupId, ndInt32)
+	auto ndShuffleArray = ndMakeObject::ndFunction([&srcArray, &dstArray, size, &evaluator, &scans, &sum, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(ndShuffleArray);
 		ndUnsigned32* const scan = &scans[groupId * (1 << keyBitSize)];
@@ -401,7 +401,7 @@ void ndCountingSortInPlace(ndThreadPool& threadPool, T* const array, T* const sc
 	ndUnsigned32* const sum = ndAlloca(ndUnsigned32, 1 << keyBitSize);
 	ndUnsigned32* const scans = ndAlloca(ndUnsigned32, numberOfGroups * (1 << keyBitSize));
 
-	auto ndBuildHistogram = ndMakeObject::ndFunction([&array, &scratchBuffer, size, &evaluator, &scans, groupSize](ndInt32 groupId, ndInt32)
+	auto ndBuildHistogram = ndMakeObject::ndFunction([&array, &scratchBuffer, size, &evaluator, &scans, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(ndBuildHistogram);
 		ndUnsigned32* const scan = &scans[groupId * (1 << keyBitSize)];
@@ -458,7 +458,7 @@ void ndCountingSortInPlace(ndThreadPool& threadPool, T* const array, T* const sc
 		prefixScanOut[1 << keyBitSize] = ndUnsigned32(size);
 	}
 
-	auto ndShuffleArray = ndMakeObject::ndFunction([&array, &scratchBuffer, size, &evaluator, &scans, &sum, groupSize](ndInt32 groupId, ndInt32)
+	auto ndShuffleArray = ndMakeObject::ndFunction([&array, &scratchBuffer, size, &evaluator, &scans, &sum, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(ndShuffleArray);
 		ndUnsigned32* const scan = &scans[groupId * (1 << keyBitSize)];

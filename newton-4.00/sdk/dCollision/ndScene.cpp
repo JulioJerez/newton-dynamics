@@ -875,7 +875,7 @@ void ndScene::UpdateTransform()
 	//}
 
 	ndFloat32 timestep = GetTimestep();
-	auto TransformUpdate = ndMakeObject::ndFunction([this, timestep](ndInt32 groupId, ndInt32)
+	auto TransformUpdate = ndMakeObject::ndFunction([this, timestep](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(TransformUpdate);
 		const ndArray<ndBodyKinematic*>& bodyArray = GetActiveBodyArray();
@@ -1389,7 +1389,7 @@ void ndScene::AddPair(ndBodyKinematic* const body0, ndBodyKinematic* const body1
 void ndScene::FindCollidingPairs()
 {
 	D_TRACKTIME();
-	auto FindPairsForward = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32 threadIndex)
+	auto FindPairsForward = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
 	{
 		D_TRACKTIME_NAMED(FindPairsForward);
 		const ndArray<ndBodyKinematic*>& bodyArray = m_sceneBodyArray;
@@ -1397,7 +1397,7 @@ void ndScene::FindCollidingPairs()
 		FindCollidingPairsForward(body, threadIndex);
 	});
 
-	auto FindPairsBackward = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32 threadIndex)
+	auto FindPairsBackward = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
 	{
 		D_TRACKTIME_NAMED(FindPairsBackward);
 		const ndArray<ndBodyKinematic*>& bodyArray = m_sceneBodyArray;
@@ -1448,7 +1448,7 @@ void ndScene::UpdateBodyList()
 void ndScene::ApplyExtForce()
 {
 	D_TRACKTIME();
-	auto ApplyForce = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	auto ApplyForce = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(ApplyForce);
 		const ndArray<ndBodyKinematic*>& view = GetActiveBodyArray();
@@ -1465,7 +1465,7 @@ void ndScene::ApplyExtForce()
 void ndScene::InitBodyArray()
 {
 	D_TRACKTIME();
-	auto BuildBodyArray = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	auto BuildBodyArray = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(BuildBodyArray);
 		const ndArray<ndBodyKinematic*>& view = GetActiveBodyArray();
@@ -1535,7 +1535,7 @@ void ndScene::InitBodyArray()
 		const ndInt32 cutoffCount = (ndExp2(bodyCount) + 1) * movingBodyCount;
 		if (cutoffCount < bodyCount)
 		{
-			auto UpdateSceneBvh = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+			auto UpdateSceneBvh = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 			{
 				D_TRACKTIME_NAMED(UpdateSceneBvh);
 				const ndArray<ndBodyKinematic*>& view = m_sceneBodyArray;
@@ -1596,7 +1596,7 @@ void ndScene::CreateNewContacts()
 	ndContact** const tmpJointsArray = (ndContact**)&m_scratchBuffer[0];
 	if (m_newPairs.GetCount())
 	{ 
-		auto CreateNewContacts = ndMakeObject::ndFunction([this, tmpJointsArray](ndInt32 groupId, ndInt32)
+		auto CreateNewContacts = ndMakeObject::ndFunction([this, tmpJointsArray](ndInt32 groupId, ndInt32, ndInt32)
 		{
 			D_TRACKTIME_NAMED(CreateNewContacts);
 			const ndArray<ndContactPairs>& newPairs = m_newPairs;
@@ -1643,7 +1643,7 @@ void ndScene::CalculateContacts()
 		// calculate all new and old contact points in the temp buffer
 		ndContact** const tmpJointsArray = (ndContact**)&m_scratchBuffer[0];
 
-		auto CalculateContactPoints = ndMakeObject::ndFunction([this, tmpJointsArray](ndInt32 groupId, ndInt32 threadIndex)
+		auto CalculateContactPoints = ndMakeObject::ndFunction([this, tmpJointsArray](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
 		{
 			D_TRACKTIME_NAMED(CalculateContactPoints);
 
@@ -1697,7 +1697,7 @@ void ndScene::DeleteDeadContacts()
 		ndCountingSort<ndContact*, ndJointActive, 2>(*this, tmpJointsArray, &m_contactArray[0], ndInt32(m_contactArray.GetCount()), prefixScan, nullptr);
 		if (prefixScan[m_dead + 1] != prefixScan[m_dead])
 		{
-			auto DeleteContactArray = ndMakeObject::ndFunction([this, &prefixScan](ndInt32 groupId, ndInt32)
+			auto DeleteContactArray = ndMakeObject::ndFunction([this, &prefixScan](ndInt32 groupId, ndInt32, ndInt32)
 			{
 				D_TRACKTIME_NAMED(DeleteContactArray);
 				ndArray<ndContact*>& contactArray = m_contactArray;

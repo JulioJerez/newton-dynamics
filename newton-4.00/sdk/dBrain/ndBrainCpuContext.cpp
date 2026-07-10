@@ -211,7 +211,7 @@ void ndBrainCpuContext::MemoryToDevice(ndBrainBuffer& deviceBuffer, size_t offse
 void ndBrainCpuContext::SubmitBufferCommand(ndBrainBufferCommand* const command)
 {
 	// adaptive thread dispacher, in general 50% faster
-	auto ExecuteCommand = ndMakeObject::ndFunction([this, command](ndInt32 groupId, ndInt32)
+	auto ExecuteCommand = ndMakeObject::ndFunction([this, command](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		ndBrainBufferCommandCpu* const cpuCommand = (ndBrainBufferCommandCpu*)command;
 		cpuCommand->Execute(groupId);

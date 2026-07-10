@@ -498,7 +498,7 @@ void ndWorld::ParticleUpdate(ndFloat32 timestep)
 void ndWorld::ModelUpdate()
 {
 	D_TRACKTIME();
-	auto ModelUpdate = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	auto ModelUpdate = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32 threadId, ndInt32)
 	{
 		D_TRACKTIME_NAMED(ModelUpdate);
 		const ndFloat32 timestep = m_scene->GetTimestep();
@@ -507,7 +507,7 @@ void ndWorld::ModelUpdate()
 		ndModel* const model = modelList[groupId];
 		if (*model->m_notifyCallback)
 		{
-			model->m_notifyCallback->Update(timestep);
+			model->m_notifyCallback->Update(timestep, threadId);
 		}
 	});
 
@@ -519,7 +519,7 @@ void ndWorld::ModelUpdate()
 void ndWorld::ModelPostUpdate()
 {
 	D_TRACKTIME();
-	auto ModelPostUpdate = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	auto ModelPostUpdate = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32 threadId, ndInt32)
 	{
 		D_TRACKTIME_NAMED(ModelPostUpdate);
 		const ndFloat32 timestep = m_scene->GetTimestep();
@@ -528,7 +528,7 @@ void ndWorld::ModelPostUpdate()
 		ndModel* const model = modelList[groupId];
 		if (*model->m_notifyCallback)
 		{
-			model->m_notifyCallback->PostUpdate(timestep);
+			model->m_notifyCallback->PostUpdate(timestep, threadId);
 		}
 	});
 	const ndInt32 modelCount = ndInt32(m_modelList.GetCount());
@@ -538,7 +538,7 @@ void ndWorld::ModelPostUpdate()
 void ndWorld::PostModelTransform()
 {
 	D_TRACKTIME();
-	auto PostModelTransform = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	auto PostModelTransform = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32 threadId, ndInt32)
 	{
 		D_TRACKTIME_NAMED(PostModelTransform);
 		const ndFloat32 timestep = m_scene->GetTimestep();
@@ -547,7 +547,7 @@ void ndWorld::PostModelTransform()
 		ndModel* const model = modelList[groupId];
 		if (*model->m_notifyCallback)
 		{
-			model->m_notifyCallback->PostTransformUpdate(timestep);
+			model->m_notifyCallback->PostTransformUpdate(timestep, threadId);
 		}
 	});
 

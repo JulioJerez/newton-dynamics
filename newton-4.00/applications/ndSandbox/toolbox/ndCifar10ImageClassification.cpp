@@ -264,7 +264,7 @@ ndAssert(0);
 
 			ndAtomic<ndInt32> iterator(0);
 			const ndBrainMatrix& trainingImages = *sourceTrainingImages;
-			auto BackPropagateBatch = ndMakeObject::ndFunction([this, &iterator, &trainingImages, trainingLabels, &miniBatchArray, &failCount](ndInt32 threadIndex, ndInt32)
+			auto BackPropagateBatch = ndMakeObject::ndFunction([this, &iterator, &trainingImages, trainingLabels, &miniBatchArray, &failCount](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
 			{
 				class CategoricalLoss : public ndBrainLossCategoricalCrossEntropy
 				{
@@ -363,7 +363,8 @@ ndAssert(0);
 				//bool test = (trainFail < minTrainingFail) || ((trainFail == minTrainingFail) && (testFail < minTestFail));
 				if (test)
 				{
-					auto CrossValidateTest = ndMakeObject::ndFunction([this, &iterator, testLabels, testImages, &failCount](ndInt32 threadIndex, ndInt32)
+					//auto CrossValidateTest = ndMakeObject::ndFunction([this, &iterator, testLabels, testImages, &failCount](ndInt32 threadIndex, ndInt32)
+					auto CrossValidateTest = ndMakeObject::ndFunction([this, &iterator, testLabels, testImages, &failCount](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
 					{
 						ndBrainFloat outputBuffer[32];
 						ndBrainMemVector output(outputBuffer, m_brain.GetOutputSize());

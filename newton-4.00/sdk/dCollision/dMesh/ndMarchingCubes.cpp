@@ -3105,7 +3105,7 @@ ndMarchingCubesPaticles::ndMarchingCubesPaticles(ndThreadPool* const threadPool,
 void ndMarchingCubesPaticles::CalculateAABB()
 {
 	ndFixSizeArray<ndVector, D_MAX_THREADS_COUNT * 2> partialAABB(m_threadPool->GetThreadCount() * 2);
-	auto CalculateAABB = ndMakeObject::ndFunction([this, &partialAABB](ndInt32 groupId, ndInt32 threadIndex)
+	auto CalculateAABB = ndMakeObject::ndFunction([this, &partialAABB](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
 	{
 		const ndVector p(m_pointParticles[groupId]);
 		partialAABB[threadIndex * 2 + 0] = p.GetMin(partialAABB[threadIndex * 2 + 0]);
@@ -3138,7 +3138,7 @@ void ndMarchingCubesPaticles::CalculateAABB()
 void ndMarchingCubesPaticles::RemoveDuplicates()
 {
 	m_hashGridMapScratchBuffer.SetCount(m_pointParticles.GetCount());
-	auto CalculateHashes = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	auto CalculateHashes = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		const ndVector r(m_pointParticles[groupId] - m_boxP0);
 		const ndVector p(r * m_invGridSize);
@@ -3187,7 +3187,7 @@ void ndMarchingCubesPaticles::GenerateGrids()
 {
 	const ndGridHashSteps steps;
 	m_hashGridMap.SetCount(m_hashGridMapScratchBuffer.GetCount() * 8);
-	auto GenerateGrids = ndMakeObject::ndFunction([this, &steps](ndInt32 groupId, ndInt32)
+	auto GenerateGrids = ndMakeObject::ndFunction([this, &steps](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		const ndInt32 gridStartIndex = groupId;
 		const ndGridHash hashKey(m_hashGridMapScratchBuffer[gridStartIndex]);
@@ -3279,7 +3279,7 @@ void ndMarchingCubesPaticles::GenerateGrids()
 
 void ndMarchingCubesPaticles::GenerateTriangles()
 {
-	auto CountTriangles = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	auto CountTriangles = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		m_cellTrianglesScans[groupId] = 0;
 		const ndInt32 cellStart = m_cellScans[groupId];
@@ -3332,7 +3332,7 @@ void ndMarchingCubesPaticles::GenerateTriangles()
 	m_cellTrianglesScans[count] = sum;
 
 	m_meshPoints.SetCount(sum * 3);
-	auto GenerateTriangles = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	auto GenerateTriangles = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		const ndInt32 triangleStart = m_cellTrianglesScans[groupId];
 		const ndInt32 triangleCount = m_cellTrianglesScans[groupId + 1] - triangleStart;
@@ -3554,7 +3554,7 @@ void ndMarchingCubesPaticles::GenerateIndexList()
 	m_meshNormals.SetCount(vertexCount);
 
 	// transform to world space
-	auto ApplyScale = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	auto ApplyScale = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		m_meshNormals[groupId] = ndVector::m_zero;
 		m_meshPoints[groupId] = m_meshPoints[groupId] * m_gridSize + m_boxP0;
@@ -3564,7 +3564,7 @@ void ndMarchingCubesPaticles::GenerateIndexList()
 	const ndInt32 count = ndInt32(m_meshPoints.GetCount());
 	m_threadPool->ParallelExecute(ApplyScale, count, jobStride);
 
-	auto CalculateVertexNormals = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	auto CalculateVertexNormals = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		const ndInt32 index = groupId * 3;
 		const ndInt32 id0 = m_meshIndices[index + 0];
@@ -3589,7 +3589,7 @@ void ndMarchingCubesPaticles::GenerateIndexList()
 	//m_threadPool->ParallelExecute(CalculateVertexNormals, triangleCount, jobStride);
 	for (ndInt32 i = 0; i < triangleCount; ++i)
 	{
-		CalculateVertexNormals(i, 0);
+		CalculateVertexNormals(i, 0, 1);
 	}
 
 	// Normalize normals.

@@ -116,9 +116,9 @@ namespace ndExcavator
 		}
 
 		// update the model physics every sub step.
-		void Update(ndFloat32 timestep) override
+		void Update(ndFloat32 timestep, ndInt32 threadId) override
 		{
-			ndModelNotify::Update(timestep);
+			ndModelNotify::Update(timestep, threadId);
 			UpdateEngine(timestep);
 		}
 
@@ -270,7 +270,7 @@ namespace ndExcavator
 		}
 
 		// apply model control at the step rate 
-		void PostTransformUpdate(ndFloat32) override
+		void PostTransformUpdate(ndFloat32, ndInt32) override
 		{
 			// apply aggressive sleep is the model is moving too slow
 			GetModel()->SetSleep(ndFloat32(0.71f), ndFloat32(0.71f), ndFloat32(1.5f), ndFloat32(2.25f));

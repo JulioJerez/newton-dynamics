@@ -42,26 +42,26 @@ void ndVehicleCommonNotify::SetAsPlayer(bool state)
 	m_isPlayer = state;
 }
 
-void ndVehicleCommonNotify::Update(ndFloat32 timestep)
+void ndVehicleCommonNotify::Update(ndFloat32 timestep, ndInt32 threadId)
 {
 	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
 	if (m_isPlayer || (vehicle && !vehicle->IsSleeping()))
 	{
-		vehicle->Update(timestep);
+		vehicle->Update(timestep, threadId);
 	}
 }
 
-void ndVehicleCommonNotify::PostUpdate(ndFloat32 timestep)
+void ndVehicleCommonNotify::PostUpdate(ndFloat32 timestep, ndInt32 threadId)
 {
-	ndModelNotify::PostUpdate(timestep);
+	ndModelNotify::PostUpdate(timestep, threadId);
 	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
 	if (vehicle)
 	{
-		vehicle->PostUpdate(timestep);
+		vehicle->PostUpdate(timestep, threadId);
 	}
 }
 
-void ndVehicleCommonNotify::PostTransformUpdate(ndFloat32 timestep)
+void ndVehicleCommonNotify::PostTransformUpdate(ndFloat32 timestep, ndInt32)
 {
 	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
 

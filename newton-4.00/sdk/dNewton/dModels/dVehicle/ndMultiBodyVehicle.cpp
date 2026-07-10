@@ -1514,7 +1514,7 @@ void ndMultiBodyVehicle::ConvertToMotorVehicle()
 	//m_debugFlags = m_torsionBar;
 }
 
-void ndMultiBodyVehicle::Update(ndFloat32 timestep)
+void ndMultiBodyVehicle::Update(ndFloat32 timestep, ndInt32)
 {
 	if (!m_initialized)
 	{
@@ -1544,7 +1544,7 @@ void ndMultiBodyVehicle::Update(ndFloat32 timestep)
 	ApplyTireModel();
 }
 
-void ndMultiBodyVehicle::PostUpdate(ndFloat32)
+void ndMultiBodyVehicle::PostUpdate(ndFloat32, ndInt32)
 {
 	ApplyAlignmentAndBalancing();
 }

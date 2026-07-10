@@ -72,14 +72,14 @@ namespace ndUnicyclePlayer
 	{
 	}
 
-	void ndController::Update(ndFloat32 timestep)
+	void ndController::Update(ndFloat32 timestep, ndInt32)
 	{
 		m_timestep = timestep;
 		m_agent->Step();
 	}
 
 	//#pragma optimize( "", off )
-	void ndController::PostUpdate(ndFloat32)
+	void ndController::PostUpdate(ndFloat32, ndInt32)
 	{
 		ndMatrix matrix (m_topBox->GetMatrix());
 		if (ndAbs(matrix.m_posit.m_x) > 300.0f)

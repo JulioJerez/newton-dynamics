@@ -122,13 +122,27 @@ void ndConvexCastVehicle::ConvertToMotorVehicle()
 	NodeIterator(DisableStructuralNodes);
 }
 
-void ndConvexCastVehicle::Update(ndFloat32 timestep)
+void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 {
+	ndWorld* const world = GetWorld();
+	ndAssert(world);
+
 	// update tire contacts 
+	//ndFixSizeArray<ndJointBilateralConstraint*, 8> effectors;
+	m_skeleton->m_owner = world;
+	m_skeleton->ClearCloseLoopJoints();
 
 	// update model
-	ndMultiBodyVehicle::Update(timestep);
+	ndMultiBodyVehicle::Update(timestep, threadId);
 
 	// solve using immediate solver.
-
+	//ndFixSizeArray<ndJointBilateralConstraint*, 8> effectors;
+	//for (ndInt32 i = 0; i < m_effectorsJoints.GetCount(); ++i)
+	//{
+	//	effectors.PushBack(*m_effectorsJoints[i]);
+	//}
+	
+	m_solver.SolverBegin(*m_skeleton, nullptr, 0, world, timestep, 0);
+	m_solver.Solve();
+	m_solver.SolverEnd();
 }

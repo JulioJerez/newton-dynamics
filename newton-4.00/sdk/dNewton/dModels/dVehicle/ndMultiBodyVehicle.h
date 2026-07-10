@@ -121,8 +121,8 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	D_NEWTON_API ndMultiBodyVehicleDifferential* AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleTireJoint* const leftTire, ndMultiBodyVehicleTireJoint* const rightTire, ndFloat32 slipOmegaLock);
 	D_NEWTON_API ndMultiBodyVehicleDifferential* AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleDifferential* const leftDifferential, ndMultiBodyVehicleDifferential* const rightDifferential, ndFloat32 slipOmegaLock);
 
-	D_NEWTON_API virtual void Update(ndFloat32 timestep);
-	D_NEWTON_API virtual void PostUpdate(ndFloat32 timestep);
+	D_NEWTON_API virtual void Update(ndFloat32 timestep, ndInt32 threadId);
+	D_NEWTON_API virtual void PostUpdate(ndFloat32 timestep, ndInt32 threadId);
 	D_NEWTON_API virtual void Debug(ndConstraintDebugCallback& context) const;
 
 	protected:

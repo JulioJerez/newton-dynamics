@@ -152,9 +152,9 @@ class ndBackGroundVehicleController : public ndModelNotify
 
 	private:
 	// update pseudo physics every substep
-	void Update(ndFloat32 timestep) override
+	void Update(ndFloat32 timestep, ndInt32 threadId) override
 	{
-		ndModelNotify::Update(timestep);
+		ndModelNotify::Update(timestep, threadId);
 		if (IsOnGround())
 		{
 			ApplyTurningImpulse(timestep);
@@ -165,9 +165,9 @@ class ndBackGroundVehicleController : public ndModelNotify
 
 	// update the body part stuff like animations of the wheels,
 	// setting the follow camera, apply controls, etc;
-	void PostTransformUpdate(ndFloat32 timestep)
+	void PostTransformUpdate(ndFloat32 timestep, ndInt32 threadId)
 	{
-		ndModelNotify::PostTransformUpdate(timestep);
+		ndModelNotify::PostTransformUpdate(timestep, threadId);
 
 		// apply vehicle control 
 		ApplyImpulseControls();
