@@ -98,8 +98,8 @@ namespace ndMotorVehicle
 		ndPhysicsWorld* const world = scene->GetWorld();
 
 		// we first load the model as like any other arcilation
-		//ndSharedPtr<ndModel> vehicleModel(new ndMultiBodyVehicle());
-		ndSharedPtr<ndModel> vehicleModel(new ndConvexCastVehicle());
+		ndSharedPtr<ndModel> vehicleModel(new ndMultiBodyVehicle());
+		//ndSharedPtr<ndModel> vehicleModel(new ndConvexCastVehicle());
 		ndMultiBodyVehicle* const vehicle = vehicleModel->GetAsMultiBodyVehicle();
 		vehicle->Deserialize(mesh);
 
@@ -590,9 +590,9 @@ using namespace ndMotorVehicle;
 
 void ndBasicVehicle (ndDemoEntityManager* const scene)
 {
-	//LoadMap(scene);
+	LoadMap(scene);
 	//BuildPlayground(scene);
-	BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true);
+	//BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true);
 
 	ndPhysicsWorld* const world = scene->GetWorld();
 	ndVector location(0.0f, 2.0f, 0.0f, 1.0f);
@@ -605,13 +605,13 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	matrix.m_posit = floor;
 	matrix.m_posit.m_y += 0.5f;
 	
-	//ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f))));
-	//ndSharedPtr<ndModel> vehicle1(CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f))));
-	//ndSharedPtr<ndModel> vehicle2(CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f))));
-	//ndSharedPtr<ndModel> vehicle3(CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f))));
-	//ndSharedPtr<ndModel> vehicle4(CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(12.0f, 1.0f, 6.0f, 0.0f))));
+	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f)));
+	//CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f)));
+	CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f)));
+	CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f)));
+	CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(12.0f, 1.0f, 6.0f, 0.0f)));
 	
-	ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f))));
+	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f)));
 
 	//matrix.m_posit.m_x += 40.0f;
 	//matrix.m_posit.m_z += 5.0f;
