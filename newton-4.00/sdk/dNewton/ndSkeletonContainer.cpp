@@ -488,7 +488,7 @@ ndSkeletonContainer::ndNode* ndSkeletonContainer::AddChild(ndJointBilateralConst
 	node->m_parent->m_child = node;
 
 	joint->SetSkeletonFlag(true);
-	ndAssert(node->m_body->GetScene()->GetWorld()->GetSentinelBody()->GetAsBodyKinematic() != node->m_body);
+	ndAssert(!node->m_body->GetScene() || (node->m_body->GetScene()->GetWorld()->GetSentinelBody()->GetAsBodyKinematic() != node->m_body));
 	node->m_body->SetSkeleton(this);
 	return node;
 }
