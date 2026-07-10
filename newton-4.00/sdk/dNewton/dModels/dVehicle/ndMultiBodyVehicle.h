@@ -85,8 +85,7 @@ class ndMultiBodyVehicle : public ndModelArticulation
 
 	D_NEWTON_API ndMultiBodyVehicle(ndFloat32 gravityMagnitud = ndFloat32 (10.0f));
 
-	D_NEWTON_API void ConvertToMotorVehicle();
-	//D_NEWTON_API ndVehicleDectriptor& GetDescriptor();
+	D_NEWTON_API virtual void ConvertToMotorVehicle();
 
 	D_NEWTON_API const ndMatrix& GetLocalFrame() const;
 	D_NEWTON_API void SetLocalFrame(const ndMatrix& localframe);

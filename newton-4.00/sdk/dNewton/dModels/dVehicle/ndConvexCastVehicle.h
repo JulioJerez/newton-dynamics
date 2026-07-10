@@ -32,7 +32,8 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 	public:
 	D_CLASS_REFLECTION(ndConvexCastVehicle, ndMultiBodyVehicle )
 	D_NEWTON_API ndConvexCastVehicle(ndFloat32 gravityMagnitud = ndFloat32 (10.0f));
-	D_NEWTON_API void ConvertToMotorVehicle();
+
+	D_NEWTON_API void ConvertToMotorVehicle() override;
 
 	private:
 	ndIkSolver m_solver;

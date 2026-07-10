@@ -26,11 +26,9 @@ ndConvexCastVehicle::ndConvexCastVehicle(ndFloat32 gravityMagnitud)
 	:ndMultiBodyVehicle(gravityMagnitud)
 	,m_solver()
 {
-	ndAssert(0);
 }
 
 void ndConvexCastVehicle::ConvertToMotorVehicle()
 {
 	ndMultiBodyVehicle::ConvertToMotorVehicle();
-	ndAssert(0);
 }
