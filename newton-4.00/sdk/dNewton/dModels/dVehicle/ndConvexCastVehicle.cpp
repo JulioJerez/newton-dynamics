@@ -122,27 +122,35 @@ void ndConvexCastVehicle::ConvertToMotorVehicle()
 	NodeIterator(DisableStructuralNodes);
 }
 
+void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& contacts)
+{
+	m_skeleton->ClearCloseLoopJoints();
+	ndList<ndSharedPtr<ndContact>>::ndNode* cachePtr = m_contactCache.GetFirst();
+	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
+	{
+		const ndMultiBodyVehicleTireJoint* const joint = tireNode->GetInfo();
+		const ndBodyDynamic* const body = joint->GetBody0()->GetAsBodyDynamic();
+		const ndMatrix matrix(joint->CalculateUpperBumperMatrix());
+		const ndShapeInstance* const tireShape = &body->GetCollisionShape();
+		
+	}
+}
+
 void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 {
 	ndWorld* const world = GetWorld();
 	ndAssert(world);
 
 	// update tire contacts 
-	//ndFixSizeArray<ndJointBilateralConstraint*, 8> effectors;
+	ndFixSizeArray<ndConstraint*, 32> contacts;
 	m_skeleton->m_owner = world;
-	m_skeleton->ClearCloseLoopJoints();
+	CalculateContacts(contacts);
 
 	// update model
 	ndMultiBodyVehicle::Update(timestep, threadId);
 
 	// solve using immediate solver.
-	//ndFixSizeArray<ndJointBilateralConstraint*, 8> effectors;
-	//for (ndInt32 i = 0; i < m_effectorsJoints.GetCount(); ++i)
-	//{
-	//	effectors.PushBack(*m_effectorsJoints[i]);
-	//}
-	
-	m_solver.SolverBegin(*m_skeleton, nullptr, 0, world, timestep, 0);
+	m_solver.SolverBegin(*m_skeleton, &contacts[0], contacts.GetCount(), world, timestep, 0);
 	m_solver.Solve();
 	m_solver.SolverEnd();
 }

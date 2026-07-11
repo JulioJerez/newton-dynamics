@@ -745,7 +745,8 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 		bodyCenter[i] = (bodyCenter[i] - dynamics.m_centerOfMass.m_posit) & ndVector::m_triplexMask;
 	}
 
-	ndJointBilateralConstraint** const extraJointsPtr = extraJoints.GetCount() ? &extraJoints[0] : nullptr;
+	//ndJointBilateralConstraint** const extraJointsPtr = extraJoints.GetCount() ? &extraJoints[0] : nullptr;
+	ndConstraint** const extraJointsPtr = extraJoints.GetCount() ? (ndConstraint**) & extraJoints[0] : nullptr;
 	solver.SolverBegin(skeleton, extraJointsPtr, extraJoints.GetCount(), GetWorld(), timestep, 0);
 	solver.Solve();
 	auto CalculateComFullDynamics = [&dynamics, &bodyArray, &bodyCenter]()

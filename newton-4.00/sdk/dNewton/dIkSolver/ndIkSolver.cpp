@@ -506,7 +506,7 @@ void ndIkSolver::BuildMassMatrix(ndInt32 threadId)
 	m_skeleton->InitMassMatrix(&m_leftHandSide[0], &m_rightHandSide[0], threadId);
 }
 
-void ndIkSolver::SolverBegin(ndSkeletonContainer* const skeleton, ndJointBilateralConstraint* const* joints, ndInt32 jointCount, ndWorld* const world, ndFloat32 timestep, ndInt32 threadId)
+void ndIkSolver::SolverBegin(ndSkeletonContainer* const skeleton, ndConstraint* const* constraintLoops, ndInt32 loopsCount, ndWorld* const world, ndFloat32 timestep, ndInt32 threadId)
 {
 	m_world = ndWeakPtr<ndWorld>(world);
 	m_skeleton = ndWeakPtr<ndSkeletonContainer>(skeleton);
@@ -516,9 +516,9 @@ void ndIkSolver::SolverBegin(ndSkeletonContainer* const skeleton, ndJointBilater
 		m_invTimestep = ndFloat32(1.0f) / m_timestep;
 
 		m_skeleton->ClearCloseLoopJoints();
-		for (ndInt32 i = jointCount - 1; i >= 0; --i)
+		for (ndInt32 i = loopsCount - 1; i >= 0; --i)
 		{
-			m_skeleton->AddCloseLoopJoint((ndConstraint*)joints[i]);
+			m_skeleton->AddCloseLoopJoint(constraintLoops[i]);
 		}
 
 		for (ndInt32 i = m_skeleton->m_nodeList.GetCount() - 2; i >= 0; --i)
