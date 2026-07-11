@@ -20,6 +20,8 @@
 
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"
+#include "ndWorld.h"
+#include "ndScene.h"
 #include "ndBodyDynamic.h"
 #include "ndBodyKinematic.h"
 #include "ndConvexCastVehicle.h"
@@ -122,17 +124,138 @@ void ndConvexCastVehicle::ConvertToMotorVehicle()
 	NodeIterator(DisableStructuralNodes);
 }
 
-void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& contacts)
+void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& contacts, ndInt32 threadId)
 {
 	m_skeleton->ClearCloseLoopJoints();
-	ndList<ndSharedPtr<ndContact>>::ndNode* cachePtr = m_contactCache.GetFirst();
+
+	//ndVector p0;
+	//ndVector p1;
+	//m_chassis->GetCollisionShape().CalculateAabb(m_chassis->GetCollisionShape().GetLocalMatrix() * m_chassis->GetMatrix(), p0, p1);
+	//for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
+	//{
+	//	ndVector q0;
+	//	ndVector q1;
+	//	const ndMultiBodyVehicleTireJoint* const joint = tireNode->GetInfo();
+	//	const ndBodyDynamic* const wheel = joint->GetBody0()->GetAsBodyDynamic();
+	//	wheel->GetCollisionShape().CalculateAabb(wheel->GetCollisionShape().GetLocalMatrix() * wheel->GetMatrix(), q0, q1);
+	//	p0 = p0.GetMin(q0);
+	//	p1 = p1.GetMax(q1);
+	//}
+
+	class ndShapeCast : public ndConvexCastNotify
+	{
+		public:
+		ndShapeCast(ndConvexCastVehicle* const self, const ndMatrix& start, ndFloat32 length, const ndShapeInstance& shape)
+			:ndConvexCastNotify()
+			,m_self(self)
+		{
+			ndVector end(start.m_posit - start.m_up.Scale(length));
+			m_self->GetWorld()->ConvexCast(*this, shape, start, end);
+		}
+
+		virtual ndUnsigned32 OnRayPrecastAction(const ndBody* const body, const ndShapeInstance* const) override
+		{
+			const ndBodyKinematic* const dynBody = ((ndBody*)body)->GetAsBodyKinematic();
+			ndModel* const model = dynBody->GetModel();
+			return (!model || (model->GetAsModelArticulation() != *m_self));
+		}
+
+		ndFloat32 OnRayCastAction(const ndContactPoint&, ndFloat32 param) override
+		{
+			return param;
+		}
+
+		ndWeakPtr<ndConvexCastVehicle> m_self;
+	};
+
+	ndList<ndContact>::ndNode* cachePtr = m_contactCache.GetFirst();
 	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
 	{
 		const ndMultiBodyVehicleTireJoint* const joint = tireNode->GetInfo();
-		const ndBodyDynamic* const body = joint->GetBody0()->GetAsBodyDynamic();
+		ndBodyDynamic* const wheelBody = joint->GetBody0()->GetAsBodyDynamic();
 		const ndMatrix matrix(joint->CalculateUpperBumperMatrix());
-		const ndShapeInstance* const tireShape = &body->GetCollisionShape();
-		
+		const ndShapeInstance* const wheelShape = &wheelBody->GetCollisionShape();
+
+		const ndWheelDescriptor& wheelInfo = joint->GetInfo();
+		ndFloat32 dist = ndAbs(wheelInfo.m_lowerStop - wheelInfo.m_upperStop);
+		ndShapeCast caster(this, matrix, dist, *wheelShape);
+
+		if (caster.m_contacts.GetCount())
+		{
+			// set first body to the wheel body
+			for (ndInt32 i = 0; i < caster.m_contacts.GetCount(); ++i)
+			{
+				caster.m_contacts[i].m_body0 = wheelBody;
+			}
+
+			// first sort the contacts by the secund body.
+			for (ndInt32 i = 1; i < caster.m_contacts.GetCount(); ++i)
+			{
+				ndAssert(0);
+				ndContactPoint point(caster.m_contacts[i]);
+				ndAssert(point.m_body0 == wheelBody);
+				ndInt32 j = i - 1;
+				while (j >= 0 && caster.m_contacts[j].m_body1 > point.m_body1)
+				{
+					caster.m_contacts[j + 1] = caster.m_contacts[j];
+					j--;
+				}
+				// Place 'key' into the gap created by shifting.
+				caster.m_contacts[j + 1] = point;
+			}
+
+			// calculate the scans of contacts
+			ndInt32 count = 0;
+			ndFixSizeArray<ndInt32, 16> scans;
+			for (ndInt32 i = 1; i < caster.m_contacts.GetCount(); ++i)
+			{
+				count++;
+				if (caster.m_contacts[i - 1].m_body1 != caster.m_contacts[i].m_body1)
+				{
+					scans.PushBack(count);
+					count = 0;
+				}
+			}
+
+			ndInt32 sum = 0;
+			scans.PushBack(count + 1);
+			for (ndInt32 i = 0; i < scans.GetCount(); ++i)
+			{
+				ndInt32 scanCount = scans[i];
+				scans[i] = sum;
+				sum += scanCount;
+			}
+			scans.PushBack(sum);
+			ndAssert(sum == caster.m_contacts.GetCount());
+
+			// add the contacts 
+			ndScene* const scene = GetWorld()->GetScene();
+			for (ndInt32 i = 0; i < scans.GetCount() - 1; ++i)
+			{
+				// get a new contacts from cache
+				if (!cachePtr)
+				{
+					cachePtr = m_contactCache.Append();
+				}
+				ndContact* const contact = &cachePtr->GetInfo();
+				cachePtr = cachePtr->GetNext();
+				contacts.PushBack(contact);
+
+				// craete a contact joint
+				const ndInt32 start = scans[i];
+				const ndInt32 pointCount = scans[i + 1] - start;
+				ndBodyKinematic* const body1 = ((ndBody*)caster.m_contacts[start].m_body1)->GetAsBodyKinematic();
+				contact->SetBodies(wheelBody, body1);
+				//contact->AttachToBodies();
+				contact->GetContactPoints().RemoveAll();
+
+				ndContactSolver contactSolver;
+				contactSolver.m_threadId = threadId;
+				contactSolver.m_contact = contact;
+				contactSolver.m_contactBuffer = &caster.m_contacts[start];
+				scene->ProcessContacts(threadId, pointCount, &contactSolver);
+			}
+		}
 	}
 }
 
@@ -144,13 +267,13 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	// update tire contacts 
 	ndFixSizeArray<ndConstraint*, 32> contacts;
 	m_skeleton->m_owner = world;
-	CalculateContacts(contacts);
+	CalculateContacts(contacts, threadId);
 
 	// update model
 	ndMultiBodyVehicle::Update(timestep, threadId);
 
-	// solve using immediate solver.
-	m_solver.SolverBegin(*m_skeleton, &contacts[0], contacts.GetCount(), world, timestep, 0);
-	m_solver.Solve();
-	m_solver.SolverEnd();
+	//// solve using immediate solver.
+	//m_solver.SolverBegin(*m_skeleton, &contacts[0], contacts.GetCount(), world, timestep, 0);
+	//m_solver.Solve();
+	//m_solver.SolverEnd();
 }
