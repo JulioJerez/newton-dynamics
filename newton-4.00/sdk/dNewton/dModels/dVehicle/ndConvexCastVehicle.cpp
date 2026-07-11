@@ -297,11 +297,51 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	m_skeleton->m_owner = world;
 	CalculateContacts(contacts, threadId);
 
+	// apply all extarna forces to non
+	auto ApplyExternamForces = [timestep, threadId](ndNode* const node)
+	{
+		if (node->m_body)
+		{
+			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
+			if (node->m_joint)
+			{
+				ndSharedPtr<ndJointBilateralConstraint> joint(node->m_joint);
+				if (joint->IsType(ndMultiBodyVehicleTireJoint::StaticClassName()))
+				{
+					body->GetNotifyCallback()->OnApplyExternalForce(threadId, timestep);
+				}
+				else if (joint->IsType(ndMultiBodyVehicleMotor::StaticClassName()))
+				{
+					body->GetNotifyCallback()->OnApplyExternalForce(threadId, timestep);
+				}
+				else if (joint->IsType(ndMultiBodyVehicleDifferential::StaticClassName()))
+				{
+					body->GetNotifyCallback()->OnApplyExternalForce(threadId, timestep);
+				}
+			}
+			
+			body->UpdateInvInertiaMatrix();
+			body->AddDampingAcceleration(timestep);
+			const ndVector angularMomentum(body->CalculateAngularMomentum());
+			body->m_gyroTorque = body->m_omega.CrossProduct(angularMomentum);
+			body->m_gyroAlpha = body->m_invWorldInertiaMatrix.RotateVector(body->m_gyroTorque);
+		}
+	};
+	NodeIterator(ApplyExternamForces);
+
 	// update model
 	ndMultiBodyVehicle::Update(timestep, threadId);
 
-	//// solve using immediate solver.
-	//m_solver.SolverBegin(*m_skeleton, &contacts[0], contacts.GetCount(), world, timestep, 0);
-	//m_solver.Solve();
-	//m_solver.SolverEnd();
+	// solve using immediate solver.
+	ndConstraint** loopsPtr = contacts.GetCount() ? &contacts[0] : nullptr;
+	m_solver.SolverBegin(*m_skeleton, loopsPtr, contacts.GetCount(), world, timestep, 0);
+	m_solver.Solve();
+
+	// integrate tires
+
+	// apply reation impulses to other bodies
+	 
+	// apply the impulse to boy models. 
+
+	m_solver.SolverEnd();
 }
