@@ -38,6 +38,7 @@ class ndJointBilateralConstraint;
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndBodyKinematic : public ndBody
 {
+	public:
 	class ndContactkey
 	{
 		public:
@@ -59,7 +60,6 @@ class ndBodyKinematic : public ndBody
 		};
 	};
 
-	public:
 	class ndJointList : public ndList<ndJointBilateralConstraint*, ndContainersFreeListAlloc<ndJointBilateralConstraint*>>
 	{
 		public:
@@ -79,7 +79,9 @@ class ndBodyKinematic : public ndBody
 		~ndContactMap();
 		void AttachContact(ndContact* const contact);
 		void DetachContact(ndContact* const contact);
+		void AttachContact(ndContact* const contact, ndUnsigned32 hash);
 		friend class ndBodyKinematic;
+		friend class ndConvexCastVehicle;
 	};
 
 	D_CLASS_REFLECTION(ndBodyKinematic,ndBody)

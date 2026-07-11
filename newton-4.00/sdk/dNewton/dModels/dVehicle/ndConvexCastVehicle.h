@@ -39,10 +39,11 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 	D_NEWTON_API virtual void Update(ndFloat32 timestep, ndInt32 threadId) override;
 
 	private:
+	virtual void OnAddToWorld() override;
+	virtual void OnRemoveFromWorld() override;
 	void CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& contacts, ndInt32 threadId);
 
 	ndIkSolver m_solver;
-	ndList<ndContact> m_contactCache;
 	ndSharedPtr<ndSkeletonContainer> m_skeleton;
 	ndSharedPtr<ndJointBilateralConstraint> m_castGearBox;
 	ndList<ndSharedPtr<ndJointBilateralConstraint>> m_castDifferentialAxelList;

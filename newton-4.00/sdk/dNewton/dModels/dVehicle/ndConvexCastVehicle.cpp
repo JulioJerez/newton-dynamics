@@ -101,7 +101,7 @@ void ndConvexCastVehicle::ConvertToMotorVehicle()
 		}
 	}
 
-	//disable wheel, body, and differntials 
+	//disable wheels, motor and differentials 
 	auto DisableStructuralNodes = [](ndNode* const node)
 	{
 		if (node->m_body && node->m_joint)
@@ -127,20 +127,6 @@ void ndConvexCastVehicle::ConvertToMotorVehicle()
 void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& contacts, ndInt32 threadId)
 {
 	m_skeleton->ClearCloseLoopJoints();
-
-	//ndVector p0;
-	//ndVector p1;
-	//m_chassis->GetCollisionShape().CalculateAabb(m_chassis->GetCollisionShape().GetLocalMatrix() * m_chassis->GetMatrix(), p0, p1);
-	//for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
-	//{
-	//	ndVector q0;
-	//	ndVector q1;
-	//	const ndMultiBodyVehicleTireJoint* const joint = tireNode->GetInfo();
-	//	const ndBodyDynamic* const wheel = joint->GetBody0()->GetAsBodyDynamic();
-	//	wheel->GetCollisionShape().CalculateAabb(wheel->GetCollisionShape().GetLocalMatrix() * wheel->GetMatrix(), q0, q1);
-	//	p0 = p0.GetMin(q0);
-	//	p1 = p1.GetMax(q1);
-	//}
 
 	class ndShapeCast : public ndConvexCastNotify
 	{
@@ -168,26 +154,35 @@ void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& c
 		ndWeakPtr<ndConvexCastVehicle> m_self;
 	};
 
-	ndList<ndContact>::ndNode* cachePtr = m_contactCache.GetFirst();
 	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
 	{
 		const ndMultiBodyVehicleTireJoint* const joint = tireNode->GetInfo();
 		ndBodyDynamic* const wheelBody = joint->GetBody0()->GetAsBodyDynamic();
+
+		// deative contacts
+		ndBodyKinematic::ndContactMap& contactMap = wheelBody->GetContactMap();
+		ndBodyKinematic::ndContactMap::Iterator it(contactMap);
+		for (it.Begin(); it; it++)
+		{
+			ndContact* const contact = it.GetNode()->GetInfo();
+			contact->SetActive(false);
+		}
+
+		// shot a convex cast to generate wheel contact joint manually
 		const ndMatrix matrix(joint->CalculateUpperBumperMatrix());
 		const ndShapeInstance* const wheelShape = &wheelBody->GetCollisionShape();
 
 		const ndWheelDescriptor& wheelInfo = joint->GetInfo();
 		ndFloat32 dist = ndAbs(wheelInfo.m_lowerStop - wheelInfo.m_upperStop);
 		ndShapeCast caster(this, matrix, dist, *wheelShape);
-
 		if (caster.m_contacts.GetCount())
 		{
-			// set first body to the wheel body
+			//if there are contact point, set the tire conttct joints
 			for (ndInt32 i = 0; i < caster.m_contacts.GetCount(); ++i)
 			{
 				caster.m_contacts[i].m_body0 = wheelBody;
 			}
-
+			
 			// first sort the contacts by the secund body.
 			for (ndInt32 i = 1; i < caster.m_contacts.GetCount(); ++i)
 			{
@@ -203,7 +198,7 @@ void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& c
 				// Place 'key' into the gap created by shifting.
 				caster.m_contacts[j + 1] = point;
 			}
-
+			
 			// calculate the scans of contacts
 			ndInt32 count = 0;
 			ndFixSizeArray<ndInt32, 16> scans;
@@ -216,9 +211,9 @@ void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& c
 					count = 0;
 				}
 			}
-
-			ndInt32 sum = 0;
 			scans.PushBack(count + 1);
+			
+			ndInt32 sum = 0;
 			for (ndInt32 i = 0; i < scans.GetCount(); ++i)
 			{
 				ndInt32 scanCount = scans[i];
@@ -227,28 +222,28 @@ void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& c
 			}
 			scans.PushBack(sum);
 			ndAssert(sum == caster.m_contacts.GetCount());
-
+			
 			// add the contacts 
 			ndScene* const scene = GetWorld()->GetScene();
-			for (ndInt32 i = 0; i < scans.GetCount() - 1; ++i)
+			const ndInt32 contactJointCount = ndMin(scans.GetCount() - 1, 2);
+			for (ndInt32 i = 0; i < contactJointCount; ++i)
 			{
 				// get a new contacts from cache
-				if (!cachePtr)
-				{
-					cachePtr = m_contactCache.Append();
-				}
-				ndContact* const contact = &cachePtr->GetInfo();
-				cachePtr = cachePtr->GetNext();
+				const ndBodyKinematic::ndContactkey key(ndUnsigned32(i + 1), 0);
+				ndBodyKinematic::ndContactMap::ndNode* const contactNode = contactMap.Find(key);
+				ndAssert(contactNode);
+				ndContact* const contact = contactNode->GetInfo();
 				contacts.PushBack(contact);
-
+			
 				// craete a contact joint
 				const ndInt32 start = scans[i];
 				const ndInt32 pointCount = scans[i + 1] - start;
 				ndBodyKinematic* const body1 = ((ndBody*)caster.m_contacts[start].m_body1)->GetAsBodyKinematic();
+				contact->SetActive(true);
 				contact->SetBodies(wheelBody, body1);
 				//contact->AttachToBodies();
 				contact->GetContactPoints().RemoveAll();
-
+			
 				ndContactSolver contactSolver;
 				contactSolver.m_threadId = threadId;
 				contactSolver.m_contact = contact;
@@ -257,6 +252,39 @@ void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& c
 			}
 		}
 	}
+}
+
+void ndConvexCastVehicle::OnAddToWorld()
+{
+	ndMultiBodyVehicle::OnAddToWorld();
+
+	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
+	{
+		// support up to two contacts per tire
+		ndBodyDynamic* const wheelBody = tireNode->GetInfo()->GetBody0()->GetAsBodyDynamic();
+		ndBodyKinematic::ndContactMap& contacts = wheelBody->GetContactMap();
+		contacts.AttachContact(new ndContact(), 1);
+		contacts.AttachContact(new ndContact(), 2);
+	}
+}
+
+void ndConvexCastVehicle::OnRemoveFromWorld()
+{
+	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
+	{
+		// support up to two contacts per tire
+		ndBodyDynamic* const wheelBody = tireNode->GetInfo()->GetBody0()->GetAsBodyDynamic();
+		ndBodyKinematic::ndContactMap& contacts = wheelBody->GetContactMap();
+
+		while (contacts.GetCount())
+		{
+			ndContact* const contact = contacts.GetRoot()->GetInfo();
+			contacts.Remove(contacts.GetRoot());
+			delete contact;
+		}
+	}
+
+	ndMultiBodyVehicle::OnRemoveFromWorld();
 }
 
 void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
