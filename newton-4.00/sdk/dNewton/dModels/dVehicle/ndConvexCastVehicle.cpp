@@ -159,8 +159,6 @@ void ndConvexCastVehicle::ConvertToMotorVehicle()
 
 void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& contacts, ndInt32 threadId)
 {
-	//m_skeleton->ClearCloseLoopJoints();
-
 	class ndShapeCast : public ndConvexCastNotify
 	{
 		public:
@@ -168,7 +166,7 @@ void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& c
 			:ndConvexCastNotify()
 			,m_self(self)
 		{
-			ndVector end(start.m_posit - start.m_up.Scale(length));
+			ndVector end(start.m_posit + start.m_up.Scale(length));
 			m_self->GetWorld()->ConvexCast(*this, shape, start, end);
 		}
 
@@ -189,8 +187,8 @@ void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& c
 
 	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
 	{
-		const ndMultiBodyVehicleTireJoint* const joint = tireNode->GetInfo();
-		ndBodyDynamic* const wheelBody = joint->GetBody0()->GetAsBodyDynamic();
+		const ndMultiBodyVehicleTireJoint* const wheelJoint = tireNode->GetInfo();
+		ndBodyDynamic* const wheelBody = wheelJoint->GetBody0()->GetAsBodyDynamic();
 		
 		// deative contacts
 		ndBodyKinematic::ndContactMap& contactMap = wheelBody->GetContactMap();
@@ -202,24 +200,35 @@ void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& c
 		}
 		
 		// shot a convex cast to generate wheel contact joint manually
-		const ndMatrix matrix(joint->CalculateUpperBumperMatrix());
+		const ndMatrix matrix(wheelJoint->CalculateUpperBumperMatrix());
 		const ndShapeInstance* const wheelShape = &wheelBody->GetCollisionShape();
 		
-		const ndWheelDescriptor& wheelInfo = joint->GetInfo();
-		ndFloat32 dist = ndAbs(wheelInfo.m_lowerStop - wheelInfo.m_upperStop);
+		const ndWheelDescriptor& wheelInfo = wheelJoint->GetInfo();
+		ndFloat32 dist = wheelInfo.m_lowerStop - wheelInfo.m_upperStop;
+		ndAssert(dist < ndFloat32(0.0f));
 		ndShapeCast caster(this, matrix, dist, *wheelShape);
+
+		//if there are contact point, set the tire contact joints
+		for (ndInt32 i = caster.m_contacts.GetCount() - 1; i >= 0; --i)
+		{
+			caster.m_contacts[i].m_body0 = wheelBody;
+			// convex cast reports zero penetration, 
+			// we must extract the panetration by using the the current tore local position.
+			// if not, the tire slowtlly thinks into the support object.
+			ndFloat32 castPosit = wheelInfo.m_upperStop + dist * caster.m_param;
+			ndFloat32 currentPosit = wheelJoint->GetPosit();
+			ndFloat32 penetration = castPosit - currentPosit;
+			caster.m_contacts[i].m_penetration = penetration;
+			if (penetration < ndFloat32(0.0f))
+			{
+				const ndInt32 n = caster.m_contacts.GetCount() - 1;
+				caster.m_contacts[i] = caster.m_contacts[n];
+				caster.m_contacts.SetCount(n);
+			}
+		}
+
 		if (caster.m_contacts.GetCount())
 		{
-			//if there are contact point, set the tire contact joints
-			for (ndInt32 i = 0; i < caster.m_contacts.GetCount(); ++i)
-			{
-				caster.m_contacts[i].m_body0 = wheelBody;
-				// convex cast reports zero penetration, 
-				// we must extract the panetration by using the the current tore local position.
-				// if not, the tire slowtlly thinks into the support object.
-
-			}
-			
 			// first sort the contacts by the secund body.
 			for (ndInt32 i = 1; i < caster.m_contacts.GetCount(); ++i)
 			{
