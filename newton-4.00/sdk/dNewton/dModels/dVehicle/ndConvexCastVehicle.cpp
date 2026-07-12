@@ -316,6 +316,11 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 {
 	ndWorld* const world = GetWorld();
 	ndAssert(world);
+	m_savedBody.SetCount(0);
+	m_savedForceTorque.SetCount(0);
+
+	// check for equelibrium state here
+
 
 	// update tire contacts 
 	ndFixSizeArray<ndConstraint*, 32> contacts;
@@ -363,8 +368,6 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	// integrate tires, and internal drive train components
 	// apply reaction impulses to other bodies
 	// apply the impulse to model bodies. 
-	m_savedBody.SetCount(0);
-	m_savedForceTorque.SetCount(0);
 	auto IntegrateBodyParts = [this, timestep](ndNode* const node)
 	{
 		if (node->m_body)
