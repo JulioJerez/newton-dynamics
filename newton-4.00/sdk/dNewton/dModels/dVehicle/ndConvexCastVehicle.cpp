@@ -333,7 +333,7 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	ndConstraint** loopsPtr = contacts.GetCount() ? &contacts[0] : nullptr;
 
 	// factroize mass matrix
-	m_solver.SolverBegin(*m_skeleton, loopsPtr, contacts.GetCount(), world, timestep, 0);
+	m_solver.SolverBegin(*m_skeleton, loopsPtr, contacts.GetCount(), world, timestep, threadId);
 
 	// calculate forces
 	m_solver.Solve();

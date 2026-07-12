@@ -1383,7 +1383,7 @@ void ndDynamicsUpdate::InitSkeletons()
 			}
 		}
 
-		auto InitSkeletons = ndMakeObject::ndFunction([this, &activeSkeletons](ndInt32 groupId, ndInt32, ndInt32)
+		auto InitSkeletons = ndMakeObject::ndFunction([this, &activeSkeletons](ndInt32 groupId, ndInt32 threadId, ndInt32)
 		{
 			D_TRACKTIME_NAMED(InitSkeletons);
 			ndArray<ndRightHandSide>& rightHandSide = m_rightHandSide;
@@ -1392,7 +1392,7 @@ void ndDynamicsUpdate::InitSkeletons()
 			ndSkeletonContainer* const skeleton = activeSkeletons[m_parallelSkeleton + groupId];
 			if (!skeleton->m_isResting)
 			{
-				skeleton->InitMassMatrix(&leftHandSide[0], &rightHandSide[0], groupId);
+				skeleton->InitMassMatrix(&leftHandSide[0], &rightHandSide[0], threadId);
 			}
 		});
 
@@ -1420,7 +1420,7 @@ void ndDynamicsUpdate::UpdateSkeletons()
 		}
 	}
 
-	auto UpdateSkeletons = ndMakeObject::ndFunction([this, &activeSkeletons](ndInt32 groupId, ndInt32, ndInt32)
+	auto UpdateSkeletons = ndMakeObject::ndFunction([this, &activeSkeletons](ndInt32 groupId, ndInt32 threadId, ndInt32)
 	{
 		D_TRACKTIME_NAMED(UpdateSkeletons);
 		ndJacobian* const internalForces = &GetInternalForces()[0];
@@ -1428,7 +1428,7 @@ void ndDynamicsUpdate::UpdateSkeletons()
 		ndSkeletonContainer* const skeleton = activeSkeletons[m_parallelSkeleton + groupId];
 		if (!skeleton->m_isResting)
 		{
-			skeleton->CalculateReactionForces(internalForces, groupId);
+			skeleton->CalculateReactionForces(internalForces, threadId);
 		}
 	});
 
@@ -1495,12 +1495,7 @@ void ndDynamicsUpdate::CalculateJointsForce()
 				}
 				force[rowsCount] = ndFloat32(1.0f);
 
-				//ndVector8 forceTorqueM0(internalForces[m0]);
-				//ndVector8 forceTorqueM1(internalForces[m1]);
 				ndVector16 forceTorqueM(internalForces[m0], internalForces[m1]);
-
-				//const ndFloat32 weight0 = body0->m_weigh;
-				//const ndFloat32 weight1 = body1->m_weigh;
 				const ndVector16 weight(ndVector8(body0->m_weigh), ndVector8(body1->m_weigh));
 
 				const ndFloat32 tol = ndFloat32(0.125f);
@@ -1515,8 +1510,6 @@ void ndDynamicsUpdate::CalculateJointsForce()
 						const ndLeftHandSide* const lhs = &m_leftHandSide[rowStart + i];
 						const ndFloat32 f0 = force[i];
 
-						//ndVector8 accel(((ndVector8&)lhs->m_JMinv.m_jacobianM0) * forceTorqueM0);
-						//accel = accel.MulAdd((ndVector8&)lhs->m_JMinv.m_jacobianM1, forceTorqueM1);
 						const ndVector16 accel(((ndVector16&)lhs->m_JMinv.m_jacobianM0) * forceTorqueM);
 						const ndFloat32 a = coordenateAccel[i] - f0 * diagDamp[i] - accel.AddHorizontal();
 
@@ -1533,10 +1526,6 @@ void ndDynamicsUpdate::CalculateJointsForce()
 						ndFloat32 residual = deltaForce * JinvMJt[i];
 						accNorm += residual * residual;
 						 
-						//const ndVector8 deltaForce0(deltaForce * weight0);
-						//const ndVector8 deltaForce1(deltaForce * weight1);
-						//forceTorqueM0 = forceTorqueM0.MulAdd((ndVector8&)lhs->m_Jt.m_jacobianM0, deltaForce0);
-						//forceTorqueM1 = forceTorqueM1.MulAdd((ndVector8&)lhs->m_Jt.m_jacobianM1, deltaForce1);
 						const ndVector16 deltaForceV(ndVector16(deltaForce) * weight);
 						forceTorqueM = forceTorqueM.MulAdd((ndVector16&)lhs->m_Jt.m_jacobianM0, deltaForceV);
 					}
@@ -1549,17 +1538,12 @@ void ndDynamicsUpdate::CalculateJointsForce()
 				}
 			}
 
-			//ndVector8 forceTorqueM0(ndVector8::m_zero);
-			//ndVector8 forceTorqueM1(ndVector8::m_zero);
 			ndVector16 forceTorqueM(ndVector16::m_zero);
 			for (ndInt32 j = 0; j < rowsCount; ++j)
 			{
 				ndRightHandSide* const rhs = &m_rightHandSide[rowStart + j];
 				const ndLeftHandSide* const lhs = &m_leftHandSide[rowStart + j];
 
-				//const ndVector8 f(rhs->m_force);
-				//forceTorqueM0 = forceTorqueM0.MulAdd((ndVector8&)lhs->m_Jt.m_jacobianM0, f);
-				//forceTorqueM1 = forceTorqueM1.MulAdd((ndVector8&)lhs->m_Jt.m_jacobianM1, f);
 				const ndVector16 f(rhs->m_force);
 				forceTorqueM = forceTorqueM.MulAdd((ndVector16&)lhs->m_Jt.m_jacobianM0, f);
 				rhs->m_maxImpact = ndMax(ndAbs(rhs->m_force), rhs->m_maxImpact);
