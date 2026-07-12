@@ -39,6 +39,39 @@ ndConvexCastVehicle::ndConvexCastVehicle(ndFloat32 gravityMagnitud)
 {
 }
 
+void ndConvexCastVehicle::OnAddToWorld()
+{
+	ndMultiBodyVehicle::OnAddToWorld();
+
+	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
+	{
+		// support up to two contacts per tire
+		ndBodyDynamic* const wheelBody = tireNode->GetInfo()->GetBody0()->GetAsBodyDynamic();
+		ndBodyKinematic::ndContactMap& contacts = wheelBody->GetContactMap();
+		contacts.AttachContact(new ndContact(), 1);
+		contacts.AttachContact(new ndContact(), 2);
+	}
+}
+
+void ndConvexCastVehicle::OnRemoveFromWorld()
+{
+	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
+	{
+		// support up to two contacts per tire
+		ndBodyDynamic* const wheelBody = tireNode->GetInfo()->GetBody0()->GetAsBodyDynamic();
+		ndBodyKinematic::ndContactMap& contacts = wheelBody->GetContactMap();
+
+		while (contacts.GetCount())
+		{
+			ndContact* const contact = contacts.GetRoot()->GetInfo();
+			contacts.Remove(contacts.GetRoot());
+			delete contact;
+		}
+	}
+
+	ndMultiBodyVehicle::OnRemoveFromWorld();
+}
+
 void ndConvexCastVehicle::ConvertToMotorVehicle()
 {
 	ndMultiBodyVehicle::ConvertToMotorVehicle();
@@ -126,7 +159,7 @@ void ndConvexCastVehicle::ConvertToMotorVehicle()
 
 void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& contacts, ndInt32 threadId)
 {
-	m_skeleton->ClearCloseLoopJoints();
+	//m_skeleton->ClearCloseLoopJoints();
 
 	class ndShapeCast : public ndConvexCastNotify
 	{
@@ -158,7 +191,7 @@ void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& c
 	{
 		const ndMultiBodyVehicleTireJoint* const joint = tireNode->GetInfo();
 		ndBodyDynamic* const wheelBody = joint->GetBody0()->GetAsBodyDynamic();
-
+		
 		// deative contacts
 		ndBodyKinematic::ndContactMap& contactMap = wheelBody->GetContactMap();
 		ndBodyKinematic::ndContactMap::Iterator it(contactMap);
@@ -167,20 +200,24 @@ void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& c
 			ndContact* const contact = it.GetNode()->GetInfo();
 			contact->SetActive(false);
 		}
-
+		
 		// shot a convex cast to generate wheel contact joint manually
 		const ndMatrix matrix(joint->CalculateUpperBumperMatrix());
 		const ndShapeInstance* const wheelShape = &wheelBody->GetCollisionShape();
-
+		
 		const ndWheelDescriptor& wheelInfo = joint->GetInfo();
 		ndFloat32 dist = ndAbs(wheelInfo.m_lowerStop - wheelInfo.m_upperStop);
 		ndShapeCast caster(this, matrix, dist, *wheelShape);
 		if (caster.m_contacts.GetCount())
 		{
-			//if there are contact point, set the tire conttct joints
+			//if there are contact point, set the tire contact joints
 			for (ndInt32 i = 0; i < caster.m_contacts.GetCount(); ++i)
 			{
 				caster.m_contacts[i].m_body0 = wheelBody;
+				// convex cast reports zero penetration, 
+				// we must extract the panetration by using the the current tore local position.
+				// if not, the tire slowtlly thinks into the support object.
+
 			}
 			
 			// first sort the contacts by the secund body.
@@ -241,7 +278,6 @@ void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& c
 				ndBodyKinematic* const body1 = ((ndBody*)caster.m_contacts[start].m_body1)->GetAsBodyKinematic();
 				contact->SetActive(true);
 				contact->SetBodies(wheelBody, body1);
-				//contact->AttachToBodies();
 				contact->GetContactPoints().RemoveAll();
 			
 				ndContactSolver contactSolver;
@@ -252,39 +288,6 @@ void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& c
 			}
 		}
 	}
-}
-
-void ndConvexCastVehicle::OnAddToWorld()
-{
-	ndMultiBodyVehicle::OnAddToWorld();
-
-	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
-	{
-		// support up to two contacts per tire
-		ndBodyDynamic* const wheelBody = tireNode->GetInfo()->GetBody0()->GetAsBodyDynamic();
-		ndBodyKinematic::ndContactMap& contacts = wheelBody->GetContactMap();
-		contacts.AttachContact(new ndContact(), 1);
-		contacts.AttachContact(new ndContact(), 2);
-	}
-}
-
-void ndConvexCastVehicle::OnRemoveFromWorld()
-{
-	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
-	{
-		// support up to two contacts per tire
-		ndBodyDynamic* const wheelBody = tireNode->GetInfo()->GetBody0()->GetAsBodyDynamic();
-		ndBodyKinematic::ndContactMap& contacts = wheelBody->GetContactMap();
-
-		while (contacts.GetCount())
-		{
-			ndContact* const contact = contacts.GetRoot()->GetInfo();
-			contacts.Remove(contacts.GetRoot());
-			delete contact;
-		}
-	}
-
-	ndMultiBodyVehicle::OnRemoveFromWorld();
 }
 
 void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
@@ -331,6 +334,7 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 
 	// factroize mass matrix
 	m_solver.SolverBegin(*m_skeleton, loopsPtr, contacts.GetCount(), world, timestep, 0);
+
 	// calculate forces
 	m_solver.Solve();
 
