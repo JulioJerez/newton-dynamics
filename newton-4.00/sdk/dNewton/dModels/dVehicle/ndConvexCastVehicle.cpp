@@ -299,6 +299,19 @@ void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& c
 	}
 }
 
+void ndConvexCastVehicle::PostUpdate(ndFloat32 timestep, ndInt32 threadId)
+{
+	ndMultiBodyVehicle::PostUpdate(timestep, threadId);
+
+	for (ndInt32 i = 0; i < m_savedBody.GetCount(); ++i)
+	{
+		ndBodyDynamic* const body = m_savedBody[i];
+		const ndJacobian& forceTorque = m_savedForceTorque[i];
+		body->m_savedExternalForce = forceTorque.m_linear;
+		body->m_savedExternalTorque = forceTorque.m_angular;
+	}
+}
+
 void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 {
 	ndWorld* const world = GetWorld();
@@ -309,8 +322,8 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	m_skeleton->m_owner = world;
 	CalculateContacts(contacts, threadId);
 
-	// apply all extarna forces to non
-	auto ApplyExternamForces = [timestep, threadId](ndNode* const node)
+	// apply all external forces to intenal bodies
+	auto ApplyExternalForces = [timestep, threadId](ndNode* const node)
 	{
 		if (node->m_body)
 		{
@@ -333,7 +346,7 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 			}
 		}
 	};
-	NodeIterator(ApplyExternamForces);
+	NodeIterator(ApplyExternalForces);
 
 	// update model
 	ndMultiBodyVehicle::Update(timestep, threadId);
@@ -350,18 +363,41 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	// integrate tires, and internal drive train components
 	// apply reaction impulses to other bodies
 	// apply the impulse to model bodies. 
-	auto IntegrateBodyParts = [timestep](ndNode* const node)
+	m_savedBody.SetCount(0);
+	m_savedForceTorque.SetCount(0);
+	auto IntegrateBodyParts = [this, timestep](ndNode* const node)
 	{
 		if (node->m_body)
 		{
 			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
-			if (node->m_body)
+
+			auto IntegrateStructuralPart = [this, body, timestep]()
+			{
+				// for model bodies we just set the net force
+				const ndMatrix inertia(body->CalculateInertiaMatrix());
+				const ndVector torque(inertia.RotateVector(body->m_alpha) + body->m_gyroTorque);
+				const ndVector force(body->m_accel.Scale(body->m_mass.m_w));
+
+				ndUnsigned8 equilibrium = body->m_equilibrium;
+				ndJacobian forceTorque;
+				forceTorque.m_linear = body->m_externalForce;
+				forceTorque.m_angular = body->m_externalTorque;
+				m_savedBody.PushBack(body);
+				m_savedForceTorque.PushBack(forceTorque);
+				body->SetForce(force);
+				body->SetTorque(torque);
+				body->m_equilibrium = equilibrium;
+			};
+
+			if (node->m_joint)
 			{
 				auto IntegrateInternalPart = [body, timestep]()
 				{
+				#ifdef _DEBUG
 					const ndVector angularMomentum(body->CalculateAngularMomentum());
 					const ndVector xxxx(body->m_omega.CrossProduct(angularMomentum) - body->m_gyroTorque);
 					ndAssert(xxxx.DotProduct(xxxx).GetScalar() - ndFloat32(1.0e-3f));
+				#endif
 
 					const ndMatrix inertia(body->CalculateInertiaMatrix());
 					const ndVector torque(inertia.RotateVector(body->m_alpha) + body->m_gyroTorque);
@@ -372,38 +408,32 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 					body->IntegrateVelocity(timestep);
 				};
 
-				if (node->m_joint)
+				// internal bodies are full integrared
+				ndSharedPtr<ndJointBilateralConstraint>& joint(node->m_joint);
+				if (joint->IsType(ndMultiBodyVehicleTireJoint::StaticClassName()))
 				{
-					// internal bodies are full integrared
-					ndSharedPtr<ndJointBilateralConstraint> joint(node->m_joint);
-					if (joint->IsType(ndMultiBodyVehicleTireJoint::StaticClassName()))
-					{
-						IntegrateInternalPart();
-					}
-					else if (joint->IsType(ndMultiBodyVehicleMotor::StaticClassName()))
-					{
-						IntegrateInternalPart();
-					}
-					else if (joint->IsType(ndMultiBodyVehicleDifferential::StaticClassName()))
-					{
-						IntegrateInternalPart();
-					}
+					IntegrateInternalPart();
 				}
-
+				else if (joint->IsType(ndMultiBodyVehicleMotor::StaticClassName()))
+				{
+					IntegrateInternalPart();
+				}
+				else if (joint->IsType(ndMultiBodyVehicleDifferential::StaticClassName()))
+				{
+					IntegrateInternalPart();
+				}
 				else
 				{
-					// for model bodies we just set the net force
-					const ndMatrix inertia(body->CalculateInertiaMatrix());
-					const ndVector torque(inertia.RotateVector(body->m_alpha) + body->m_gyroTorque);
-					const ndVector force(body->m_accel.Scale(body->m_mass.m_w));
-					body->SetForce(force);
-					body->SetTorque(torque);
+					IntegrateStructuralPart();
 				}
+			}
+			else
+			{
+				IntegrateStructuralPart();
 			}
 		}
 	};
 	NodeIterator(IntegrateBodyParts);
-
 
 	m_solver.SolverEnd();
 }

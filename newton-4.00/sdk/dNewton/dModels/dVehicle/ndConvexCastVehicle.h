@@ -37,6 +37,7 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 
 	D_NEWTON_API virtual void ConvertToMotorVehicle() override;
 	D_NEWTON_API virtual void Update(ndFloat32 timestep, ndInt32 threadId) override;
+	D_NEWTON_API virtual void PostUpdate(ndFloat32 timestep, ndInt32 threadId) override;
 
 	private:
 	virtual void OnAddToWorld() override;
@@ -44,6 +45,8 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 	void CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& contacts, ndInt32 threadId);
 
 	ndIkSolver m_solver;
+	ndFixSizeArray<ndBodyDynamic*, 32> m_savedBody;
+	ndFixSizeArray<ndJacobian, 32> m_savedForceTorque;
 	ndSharedPtr<ndSkeletonContainer> m_skeleton;
 	ndSharedPtr<ndJointBilateralConstraint> m_castGearBox;
 	ndList<ndSharedPtr<ndJointBilateralConstraint>> m_castDifferentialAxelList;
