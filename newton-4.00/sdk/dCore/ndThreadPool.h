@@ -247,7 +247,7 @@ void ndThreadPool::ParallelExecute(const Function& function, ndInt32 workGroupCo
 				const ndInt32 count = ((batchIndex + groupsPerThreads) < workGroupCount) ? groupsPerThreads : workGroupCount - batchIndex;
 				for (ndInt32 j = 0; j < count; ++j)
 				{
-					function(batchIndex + j, 0, numberOfThreads);
+					function(batchIndex + j, 0, threadCount);
 				}
 			}
 			WaitForWorkers();
