@@ -342,12 +342,12 @@ class ndTriplexReal
 		return #SuperClass;								\
 	}													\
 	virtual bool IsType(const char* const name) const override	\
-	{																\
-		if (strcmp(#Class, name) == 0)								\
-		{															\
-			return true;											\
-		}															\
-		return SuperClass::IsType(name);							\
+	{															\
+		if (strcmp(#Class, name) == 0)							\
+		{														\
+			return true;										\
+		}														\
+		return SuperClass::IsType(name);						\
 	}
 
 #endif

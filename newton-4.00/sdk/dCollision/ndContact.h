@@ -163,6 +163,7 @@ class ndContact: public ndConstraint
 	friend class ndContactSolver;
 	friend class ndShapeInstance;
 	friend class ndConvexCastNotify;
+	friend class ndConvexCastVehicle;
 	friend class ndSkeletonContainer;
 	friend class ndModelArticulation;
 	friend class ndShapeConvexPolygon;

@@ -106,13 +106,13 @@ class ndVanillaController : public ndModelNotify
         }
     }
 
-    void Update(ndFloat32 timestep) override
+    void Update(ndFloat32 timestep, ndInt32 threadId) override
     {
-        ndModelNotify::Update(timestep);
+        ndModelNotify::Update(timestep, threadId);
         UpdateEngine(timestep);
     }
 
-    void PostTransformUpdate(ndFloat32 timestep) override
+    void PostTransformUpdate(ndFloat32 timestep, ndInt32) override
     {
         ndRender* const renderer = *m_scene->GetRenderer();
         ndSharedPtr<ndRenderSceneNode> camera(renderer->GetCamera());

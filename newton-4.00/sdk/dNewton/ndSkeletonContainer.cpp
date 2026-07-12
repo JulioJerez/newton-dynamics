@@ -367,6 +367,7 @@ ndSkeletonContainer::ndSkeletonContainer()
 	:m_owner(nullptr)
 	,m_skeleton(nullptr)
 	,m_nodesOrder(nullptr)
+	,m_nodesFactorizationOrder(nullptr)
 	,m_rightHandSide(nullptr)
 	,m_leftHandSide(nullptr)
 	,m_pairs(nullptr)
@@ -487,7 +488,7 @@ ndSkeletonContainer::ndNode* ndSkeletonContainer::AddChild(ndJointBilateralConst
 	node->m_parent->m_child = node;
 
 	joint->SetSkeletonFlag(true);
-	ndAssert(node->m_body->GetScene()->GetWorld()->GetSentinelBody()->GetAsBodyKinematic() != node->m_body);
+	ndAssert(!node->m_body->GetScene() || (node->m_body->GetScene()->GetWorld()->GetSentinelBody()->GetAsBodyKinematic() != node->m_body));
 	node->m_body->SetSkeleton(this);
 	return node;
 }

@@ -328,9 +328,9 @@ class ndPlayerCapsuleController : public ndModelNotify
 		UpdateSkeleton();
 	}
 
-	virtual void PostTransformUpdate(ndFloat32 timestep) override
+	virtual void PostTransformUpdate(ndFloat32 timestep, ndInt32 threadId) override
 	{
-		ndModelNotify::PostTransformUpdate(timestep);
+		ndModelNotify::PostTransformUpdate(timestep, threadId);
 
 		ndRenderSceneCamera* const playerCamera = m_cameraNode->FindCameraNode();
 		ndRenderSceneCamera* const sceneCamera = m_scene->GetRenderer()->GetCamera()->FindCameraNode();

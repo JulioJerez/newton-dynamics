@@ -170,7 +170,7 @@ void ndThreadPool::Begin()
 		}
 		#endif
 
-		auto BeginJobs = ndMakeObject::ndFunction([](ndInt32, ndInt32)
+		auto BeginJobs = ndMakeObject::ndFunction([](ndInt32, ndInt32, ndInt32)
 		{
 			D_TRACKTIME_NAMED(BeginJobs);
 		});

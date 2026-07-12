@@ -43,9 +43,9 @@ class ndModelNotify : public ndContainersFreeListAlloc<ndModelNotify>
 	D_COLLISION_API void SetModel(ndModel* const model);
 
 	D_COLLISION_API virtual ndModelNotify* Clone() const;
-	D_COLLISION_API virtual void Update(ndFloat32 timestep);
-	D_COLLISION_API virtual void PostUpdate(ndFloat32 timestep);
-	D_COLLISION_API virtual void PostTransformUpdate(ndFloat32 timestep);
+	D_COLLISION_API virtual void Update(ndFloat32 timestep, ndInt32 threadId);
+	D_COLLISION_API virtual void PostUpdate(ndFloat32 timestep, ndInt32 threadId);
+	D_COLLISION_API virtual void PostTransformUpdate(ndFloat32 timestep, ndInt32 threadId);
 	D_COLLISION_API virtual bool OnContactGeneration(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1);
 
 	D_COLLISION_API virtual void Debug(ndConstraintDebugCallback& context) const;

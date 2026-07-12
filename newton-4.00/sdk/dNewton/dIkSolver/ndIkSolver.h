@@ -37,7 +37,7 @@ class ndIkSolver: public ndClassAlloc
 	D_NEWTON_API void SetMaxAccel(ndFloat32 maxAccel, ndFloat32 maxAlpha);
 	D_NEWTON_API bool IsSleeping(ndSkeletonContainer* const skeleton) const;
 
-	D_NEWTON_API void SolverBegin(ndSkeletonContainer* const skeleton, ndJointBilateralConstraint* const* joint, ndInt32 jointCount, ndWorld* const world, ndFloat32 timestep, ndInt32 threadId);
+	D_NEWTON_API void SolverBegin(ndSkeletonContainer* const skeleton, ndConstraint* const* loopConstraint, ndInt32 loopsCount, ndWorld* const world, ndFloat32 timestep, ndInt32 threadId);
 	D_NEWTON_API void Solve();
 	D_NEWTON_API void UpdateJointAcceleration(ndConstraint* const joint);
 	D_NEWTON_API void SolverEnd();

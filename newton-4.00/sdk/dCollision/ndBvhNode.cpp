@@ -493,7 +493,7 @@ void ndBvhSceneManager::Update(ndThreadPool& threadPool)
 
 		if (nodeArray.GetCount())
 		{
-			auto EnumerateNodes = ndMakeObject::ndFunction([&nodeArray](ndInt32 groupId, ndInt32)
+			auto EnumerateNodes = ndMakeObject::ndFunction([&nodeArray](ndInt32 groupId, ndInt32, ndInt32)
 			{
 				D_TRACKTIME_NAMED(MarkCellBounds);
 				ndBvhNode** const nodes = &nodeArray[0];
@@ -548,7 +548,7 @@ void ndBvhSceneManager::UpdateScene(ndThreadPool& threadPool)
 	D_TRACKTIME();
 
 	ndInt32 start = 0;
-	auto UpdateSceneBvh = ndMakeObject::ndFunction([this, &start](ndInt32 groupId, ndInt32)
+	auto UpdateSceneBvh = ndMakeObject::ndFunction([this, &start](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(UpdateSceneBvh);
 		ndBvhInternalNode** const nodes = (ndBvhInternalNode**)&m_workingArray[start];
@@ -578,7 +578,7 @@ bool ndBvhSceneManager::BuildBvhTreeInitNodes(ndThreadPool& threadPool)
 	D_TRACKTIME();
 	Update(threadPool);
 
-	auto CopyBodyNodes = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	auto CopyBodyNodes = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(CopyBodyNodes);
 
@@ -598,7 +598,7 @@ bool ndBvhSceneManager::BuildBvhTreeInitNodes(ndThreadPool& threadPool)
 		srcArray[groupId] = node;
 	});
 
-	auto CopySceneNode = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	auto CopySceneNode = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(CopySceneNode);
 		ndBvhNodeArray& nodeArray = m_workingArray;
@@ -642,7 +642,7 @@ void ndBvhSceneManager::BuildBvhTreeCalculateLeafBoxes(ndThreadPool& threadPool)
 	const ndInt32 numberOfGroups = (m_bvhBuildState.m_leafNodesCount + groupSize - 1) / groupSize;
 	ndAssert(numberOfGroups <= threadCount);
 
-	auto CalculateBoxSize = ndMakeObject::ndFunction([this, &boxSizes, &boxes, groupSize](ndInt32 groupId, ndInt32)
+	auto CalculateBoxSize = ndMakeObject::ndFunction([this, &boxSizes, &boxes, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(CalculateBoxSize);
 		ndVector minP(ndFloat32(1.0e15f));
@@ -689,7 +689,7 @@ ndInt32 ndBvhSceneManager::BuildSmallBvhTree(ndThreadPool& threadPool, ndBvhNode
 {
 	ndInt32 depthLevel[D_MAX_THREADS_COUNT];
 	ndMemSet(depthLevel, 0, threadPool.GetThreadCount());
-	auto SmallBhvNodes = ndMakeObject::ndFunction([this, parentsArray, batchCount, &depthLevel](ndInt32 groupId, ndInt32 threadIndex)
+	auto SmallBhvNodes = ndMakeObject::ndFunction([this, parentsArray, batchCount, &depthLevel](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
 	{
 		D_TRACKTIME_NAMED(SmallBhvNodes);
 		ndAssert(threadIndex < D_MAX_THREADS_COUNT);
@@ -1269,7 +1269,7 @@ void ndBvhSceneManager::BuildBvhGenerateLayerGrids(ndThreadPool& threadPool)
 		m_bvhBuildState.m_srcArray += linkedNodes;
 		m_bvhBuildState.m_leafNodesCount -= linkedNodes;
 
-		auto MakeGrids = ndMakeObject::ndFunction([this, &maxGrids, groupSize](ndInt32 groupId, ndInt32)
+		auto MakeGrids = ndMakeObject::ndFunction([this, &maxGrids, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 		{
 			D_TRACKTIME_NAMED(MakeGrids);
 
@@ -1349,7 +1349,7 @@ void ndBvhSceneManager::BuildBvhGenerateLayerGrids(ndThreadPool& threadPool)
 		m_bvhBuildState.m_cellCounts0.SetCount(m_bvhBuildState.m_cellBuffer0.GetCount());
 		m_bvhBuildState.m_cellCounts1.SetCount(m_bvhBuildState.m_cellBuffer1.GetCount());
 		
-		auto MarkCellBounds = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+		auto MarkCellBounds = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 		{
 			D_TRACKTIME_NAMED(MarkCellBounds);
 			ndCellScanPrefix* const dst = &m_bvhBuildState.m_cellCounts0[0];
@@ -1382,7 +1382,7 @@ void ndBvhSceneManager::BuildBvhGenerateLayerGrids(ndThreadPool& threadPool)
 			m_bvhBuildState.m_depthLevel += subTreeDepth;
 
 			//ndAtomic<ndInt32> iterator2(0);
-			auto EnumerateSmallBvh = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+			auto EnumerateSmallBvh = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 			{
 				D_TRACKTIME_NAMED(EnumerateSmallBvh);
 

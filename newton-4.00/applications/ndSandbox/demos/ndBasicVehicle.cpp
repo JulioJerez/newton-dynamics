@@ -99,6 +99,7 @@ namespace ndMotorVehicle
 
 		// we first load the model as like any other arcilation
 		ndSharedPtr<ndModel> vehicleModel(new ndMultiBodyVehicle());
+		//ndSharedPtr<ndModel> vehicleModel(new ndConvexCastVehicle());
 		ndMultiBodyVehicle* const vehicle = vehicleModel->GetAsMultiBodyVehicle();
 		vehicle->Deserialize(mesh);
 
@@ -185,6 +186,41 @@ namespace ndMotorVehicle
 			camera = ndSharedPtr<ndRenderSceneNode>(new ndDemoCameraNodeFollow(renderer, cameraPivot, dist));
 			cameraPivotNode->AddChild(camera);
 		}
+
+		// a more explicit way to add the visual modifier
+		auto AddGraphicsModiers = [sceneMesh](ndMesh* const node)
+		{
+			ndSharedPtr<ndMeshTransformModifier> modifier(node->GetModifier());
+			if (modifier)
+			{
+				ndAssert(modifier->m_owner);
+				ndAssert(modifier->m_target);
+				ndRenderSceneNode* const owner = sceneMesh->FindByName(modifier->m_owner->GetName());
+				ndRenderSceneNode* const target = sceneMesh->FindByName(modifier->m_target->GetName());
+				ndAssert(owner);
+				ndAssert(target);
+
+				if (strcmp(modifier->ClassName(), ndMeshTransformModifierLookAt::StaticClassName()) == 0)
+				{
+					ndSharedPtr<ndRenderTransformModifier> renderModifier(new ndRenderTransformModifierLookAtNode(owner, target));
+					owner->SetTransformModifier(renderModifier);
+				}
+				else if (strcmp(modifier->ClassName(), ndMeshTransformModifierTwoLinksIK::StaticClassName()) == 0)
+				{
+					const ndMeshTransformModifierTwoLinksIK* const modifierIk = (ndMeshTransformModifierTwoLinksIK*)*modifier;
+					ndRenderSceneNode* const link = sceneMesh->FindByName(modifierIk->m_childLink->GetName());
+					ndAssert(link);
+					ndSharedPtr<ndRenderTransformModifier> renderModifier(new ndRenderTransformModifierTwoLinksIK(owner, link, target, modifierIk->m_solutionSign));
+					owner->SetTransformModifier(renderModifier);
+				}
+				else
+				{
+					ndAssert(0);
+				}
+			}
+		};
+		loader.m_mesh->NodeIterator(AddGraphicsModiers);
+
 
 		//add the notification for binding to the application.
 		ndSharedPtr<ndModelNotify> controller(new ndVehicleController(vehicle, engineSound));
@@ -569,12 +605,14 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	matrix.m_posit = floor;
 	matrix.m_posit.m_y += 0.5f;
 	
-	//ndSharedPtr<ndModel> vehicle0(CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f))));
-	//ndSharedPtr<ndModel> vehicle1(CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f))));
-	ndSharedPtr<ndModel> vehicle2(CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f))));
-	ndSharedPtr<ndModel> vehicle3(CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f))));
-	ndSharedPtr<ndModel> vehicle4(CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(12.0f, 1.0f, 6.0f, 0.0f))));
+	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f)));
+	//CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f)));
+	CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f)));
+	CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f)));
+	CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(12.0f, 1.0f, 6.0f, 0.0f)));
 	
+	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f)));
+
 	//matrix.m_posit.m_x += 40.0f;
 	//matrix.m_posit.m_z += 5.0f;
 	//AddPlanks(scene, matrix, 60.0f, 5);

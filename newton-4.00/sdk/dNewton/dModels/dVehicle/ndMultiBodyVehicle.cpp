@@ -43,22 +43,6 @@
 //#define D_PACEJKA_USE_REST_SPRUNG_WEIGHT
 #define D_CONVERT_PACEJKA_FORCES_TO_FRICTION_COEFFICIENT
 
-//ndVehicleDectriptor::ndVehicleDectriptor()
-//	:ndClassAlloc()
-//	,m_name ("default")
-//{
-//	m_chassisAngularDrag = ndFloat32(0.25f);
-//
-//	m_slipDifferentialRmpLock = ndFloat32(30.0f);
-//
-//	m_torsionBarSpringK = ndFloat32(100.0f);
-//	m_torsionBarDamperC = ndFloat32(10.0f);
-//	m_torsionBarRegularizer = ndFloat32(0.15f);
-//	m_torsionBarType = m_noWheelAxle;
-//
-//	m_differentialType = m_rearWheelDrive;
-//}
-
 ndMultiBodyVehicle::ndDownForce::ndDownForce()
 	:m_suspensionStiffnessModifier(ndFloat32(1.0f))
 {
@@ -113,7 +97,7 @@ ndFloat32 ndMultiBodyVehicle::ndDownForce::GetDownforceFactor(ndFloat32 speed) c
 
 class ndMultiBodyVehicle::ndComponentNotify : public ndBodyNotify
 {
-public:
+	public:
 	D_CLASS_REFLECTION(ndComponentNotify, ndBodyNotify)
 
 		ndComponentNotify(ndMultiBodyVehicle* const owner)
@@ -143,7 +127,7 @@ public:
 
 class ndMultiBodyVehicle::ndMotorNotify : public ndMultiBodyVehicle::ndComponentNotify
 {
-public:
+	public:
 	ndMotorNotify(ndMultiBodyVehicle* const owner)
 		:ndComponentNotify(owner)
 	{
@@ -183,7 +167,7 @@ ndMultiBodyVehicle::ndMultiBodyVehicle(ndFloat32 gravityMagnitud)
 	,m_localFrame(ndGetIdentityMatrix())
 	,m_tireShape(new ndShapeWheel())
 	,m_downForce()
-	//,m_descriptor()
+	,m_debugFlags(DebugFlags(0))
 {
 	m_initialized = false;
 	m_motor = nullptr;
@@ -207,11 +191,6 @@ void ndMultiBodyVehicle::SetDebugFlags(DebugFlags flags)
 {
 	m_debugFlags = flags;
 }
-
-//ndVehicleDectriptor& ndMultiBodyVehicle::GetDescriptor()
-//{
-//	return m_descriptor;
-//}
 
 const ndMatrix& ndMultiBodyVehicle::GetLocalFrame() const
 {
@@ -1480,16 +1459,11 @@ void ndMultiBodyVehicle::CalculateRestSprungWeight()
 		ndMultiBodyVehicleTireJoint* const tire = tireArray[i];
 		tire->m_frictionModel.m_sprungWeight = sprungWeight;
 	}
-
-	m_initialized = true;
 	SetTransform(savedMatrix);
 }
 
-//void ndMultiBodyVehicle::ConvertToMotorVehicle(const ndVehicleDectriptor& vehicleDescritor___)
 void ndMultiBodyVehicle::ConvertToMotorVehicle()
 {
-	//m_descriptor = vehicleDescritor;
-
 	auto SetChassisAndMotor = [this](ndNode* const node)
 	{
 		if (node->m_joint && (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleMotor::StaticClassName()) == 0))
@@ -1540,10 +1514,12 @@ void ndMultiBodyVehicle::ConvertToMotorVehicle()
 	//m_debugFlags = m_torsionBar;
 }
 
-void ndMultiBodyVehicle::Update(ndFloat32 timestep)
+void ndMultiBodyVehicle::Update(ndFloat32 timestep, ndInt32)
 {
 	if (!m_initialized)
 	{
+		m_initialized = true;
+
 		CalculateRestSprungWeight();
 
 		// reset forces of assesories attached to chassis
@@ -1568,7 +1544,7 @@ void ndMultiBodyVehicle::Update(ndFloat32 timestep)
 	ApplyTireModel();
 }
 
-void ndMultiBodyVehicle::PostUpdate(ndFloat32)
+void ndMultiBodyVehicle::PostUpdate(ndFloat32, ndInt32)
 {
 	ApplyAlignmentAndBalancing();
 }

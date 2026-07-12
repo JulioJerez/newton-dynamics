@@ -188,6 +188,7 @@ class ndScene : public ndThreadPool
 	friend class ndPolygonMeshDesc;
 	friend class ndConvexCastNotify;
 	friend class ndSkeletonContainer;
+	friend class ndConvexCastVehicle;
 } D_GCC_NEWTON_CLASS_ALIGN_32 ;
 
 

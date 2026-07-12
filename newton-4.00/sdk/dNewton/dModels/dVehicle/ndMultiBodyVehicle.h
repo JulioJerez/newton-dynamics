@@ -24,7 +24,6 @@
 
 #include "ndNewtonStdafx.h"
 #include "ndModel.h"
-#include "ndIkSolver.h"
 #include "ndJointWheel.h"
 #include "ndModelArticulation.h"
 #include "ndMultiBodyVehicleMotor.h"
@@ -86,8 +85,7 @@ class ndMultiBodyVehicle : public ndModelArticulation
 
 	D_NEWTON_API ndMultiBodyVehicle(ndFloat32 gravityMagnitud = ndFloat32 (10.0f));
 
-	D_NEWTON_API void ConvertToMotorVehicle();
-	//D_NEWTON_API ndVehicleDectriptor& GetDescriptor();
+	D_NEWTON_API virtual void ConvertToMotorVehicle();
 
 	D_NEWTON_API const ndMatrix& GetLocalFrame() const;
 	D_NEWTON_API void SetLocalFrame(const ndMatrix& localframe);
@@ -123,11 +121,11 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	D_NEWTON_API ndMultiBodyVehicleDifferential* AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleTireJoint* const leftTire, ndMultiBodyVehicleTireJoint* const rightTire, ndFloat32 slipOmegaLock);
 	D_NEWTON_API ndMultiBodyVehicleDifferential* AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleDifferential* const leftDifferential, ndMultiBodyVehicleDifferential* const rightDifferential, ndFloat32 slipOmegaLock);
 
-	D_NEWTON_API virtual void Update(ndFloat32 timestep);
-	D_NEWTON_API virtual void PostUpdate(ndFloat32 timestep);
+	D_NEWTON_API virtual void Update(ndFloat32 timestep, ndInt32 threadId);
+	D_NEWTON_API virtual void PostUpdate(ndFloat32 timestep, ndInt32 threadId);
 	D_NEWTON_API virtual void Debug(ndConstraintDebugCallback& context) const;
 
-	private:
+	protected:
 	void ApplyTireModel();
 	void ApplyStabilityControl();
 	void CalculateRestSprungWeight();
@@ -143,8 +141,8 @@ class ndMultiBodyVehicle : public ndModelArticulation
 
 	ndMatrix m_localFrame;
 	ndWeakPtr<ndBodyDynamic> m_chassis;
-	ndWeakPtr<ndMultiBodyVehicleMotor> m_motor;
 	ndSharedPtr<ndShapeWheel> m_tireShape;
+	ndWeakPtr<ndMultiBodyVehicleMotor> m_motor;
 	ndWeakPtr<ndMultiBodyVehicleGearBox> m_gearBox;
 	ndList<ndMultiBodyVehicleTireJoint*> m_tireList;
 	ndList<ndMultiBodyVehicleDifferential*> m_differentialList;

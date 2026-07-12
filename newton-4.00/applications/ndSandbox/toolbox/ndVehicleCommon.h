@@ -46,9 +46,10 @@ class ndVehicleCommonNotify : public ndModelNotify
 
 	virtual void ApplyInputs(ndFloat32 timestep);
 	
-	void Update(ndFloat32 timestep) override;
-	void PostUpdate(ndFloat32 timestep) override;
-	void PostTransformUpdate(ndFloat32 timestep) override;
+	void Update(ndFloat32 timestep, ndInt32 threadId) override;
+	void PostUpdate(ndFloat32 timestep, ndInt32 threadId) override;
+	void PostTransformUpdate(ndFloat32 timestep, ndInt32 threadId) override;
+
 	void Debug(ndConstraintDebugCallback&) const override;
 
 	bool EngineOn() const;

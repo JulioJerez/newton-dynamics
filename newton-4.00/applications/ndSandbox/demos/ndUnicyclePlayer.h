@@ -109,8 +109,8 @@ namespace ndUnicyclePlayer
 		};
 
 		ndController();
-		void Update(ndFloat32 timestep) override;
-		void PostUpdate(ndFloat32 timestep) override;
+		void Update(ndFloat32 timestep, ndInt32 threadId) override;
+		void PostUpdate(ndFloat32 timestep, ndInt32 threadId) override;
 
 		void ResetModel();
 		ndBrainFloat IsOnAir() const;

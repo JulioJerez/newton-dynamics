@@ -113,7 +113,7 @@ void ndDynamicsUpdate::SortBodyJointScan()
 	bodyJointPairs.SetCount(jointArray.GetCount() * 2);
 	GetTempInternalForces().SetCount(jointArray.GetCount() * 2);
 
-	auto EnumerateJointBodyPairs = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32)
+	auto EnumerateJointBodyPairs = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(EnumerateJointBodyPairs);
 		ndJointBodyPairIndex* const jointBodyBuffer = &GetJointBodyPairIndexBuffer()[0];
@@ -258,7 +258,7 @@ void ndDynamicsUpdate::SortJointsScan()
 	const ndInt32 threadCount = scene->GetThreadCount();
 	ndMemSet(movingJoints, 0, threadCount);
 
-	auto MarkFence0 = ndMakeObject::ndFunction([&jointArray](ndInt32 groupId, ndInt32)
+	auto MarkFence0 = ndMakeObject::ndFunction([&jointArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(MarkFence0);
 		ndConstraint* const joint = jointArray[groupId];
@@ -284,7 +284,7 @@ void ndDynamicsUpdate::SortJointsScan()
 		}
 	});
 	
-	auto MarkFence1 = ndMakeObject::ndFunction([&jointArray, &movingJoints](ndInt32 groupId, ndInt32 threadIndex)
+	auto MarkFence1 = ndMakeObject::ndFunction([&jointArray, &movingJoints](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
 	{
 		D_TRACKTIME_NAMED(MarkFence1);
 		ndConstraint* const joint = jointArray[groupId];
@@ -324,7 +324,7 @@ void ndDynamicsUpdate::SortJointsScan()
 	const ndInt32 numberOfWorkGroups = (numberOfGroups + groupSize - 1) / groupSize;
 	ndAssert(numberOfWorkGroups <= threadCount);
 
-	auto Scan0 = ndMakeObject::ndFunction([&jointArray, &histogram, scene, groupSize](ndInt32 groupId, ndInt32)
+	auto Scan0 = ndMakeObject::ndFunction([&jointArray, &histogram, scene, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(Scan0);
 		ndInt32* const hist = &histogram[groupId][0];
@@ -378,7 +378,7 @@ void ndDynamicsUpdate::SortJointsScan()
 		}
 	}
 
-	auto Sort0 = ndMakeObject::ndFunction([&jointArray, &histogram, scene, groupSize](ndInt32 groupId, ndInt32)
+	auto Sort0 = ndMakeObject::ndFunction([&jointArray, &histogram, scene, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(Sort0);
 		ndInt32* const hist = &histogram[groupId][0];
@@ -497,7 +497,7 @@ void ndDynamicsUpdate::SortIslands()
 	ndAssert(numberOfWorkGroups <= threadCount);
 
 	ndInt32 histogram[D_MAX_THREADS_COUNT][3];
-	auto Scan0 = ndMakeObject::ndFunction([&bodyArray, &histogram, groupSize](ndInt32 groupId, ndInt32)
+	auto Scan0 = ndMakeObject::ndFunction([&bodyArray, &histogram, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(Scan0);
 		ndInt32* const hist = &histogram[groupId][0];
@@ -541,7 +541,7 @@ void ndDynamicsUpdate::SortIslands()
 		scan[i] = sum;
 	}
 
-	auto Sort0 = ndMakeObject::ndFunction([&bodyArray, &activeBodyArray, &histogram, groupSize](ndInt32 groupId, ndInt32)
+	auto Sort0 = ndMakeObject::ndFunction([&bodyArray, &activeBodyArray, &histogram, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(Sort0);
 		ndInt32* const hist = &histogram[groupId][0];
@@ -589,7 +589,7 @@ void ndDynamicsUpdate::IntegrateUnconstrainedBodies()
 {
 	ndScene* const scene = m_world->GetScene();
 
-	auto IntegrateUnconstrainedBodies = ndMakeObject::ndFunction([this, &scene](ndInt32 groupId, ndInt32)
+	auto IntegrateUnconstrainedBodies = ndMakeObject::ndFunction([this, &scene](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(IntegrateUnconstrainedBodies);
 		ndArray<ndBodyKinematic*>& bodyArray = GetBodyIslandOrder();
@@ -628,7 +628,7 @@ void ndDynamicsUpdate::InitWeights()
 	ndInt32 extraPassesArray[D_MAX_THREADS_COUNT];
 	ndMemSet(extraPassesArray, 1, D_MAX_THREADS_COUNT);
 
-	auto InitWeights = ndMakeObject::ndFunction([this, &bodyArray, &extraPassesArray](ndInt32 groupId, ndInt32 threadIndex)
+	auto InitWeights = ndMakeObject::ndFunction([this, &bodyArray, &extraPassesArray](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
 	{
 		D_TRACKTIME_NAMED(InitWeights);
 		const ndArray<ndInt32>& jointForceIndexBuffer = GetJointForceIndexBuffer();
@@ -675,7 +675,7 @@ void ndDynamicsUpdate::InitBodyArray()
 	ndScene* const scene = m_world->GetScene();
 	const ndFloat32 timestep = scene->GetTimestep();
 
-	auto InitBodyArray = ndMakeObject::ndFunction([this, timestep](ndInt32 groupId, ndInt32)
+	auto InitBodyArray = ndMakeObject::ndFunction([this, timestep](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(InitBodyArray);
 		const ndArray<ndBodyKinematic*>& bodyArray = GetBodyIslandOrder();
@@ -807,13 +807,13 @@ void ndDynamicsUpdate::InitJacobianMatrix()
 	ndBodyKinematic** const bodyArray = &scene->GetActiveBodyArray()[0];
 	ndArray<ndConstraint*>& jointArray = scene->GetActiveContactArray();
 
-	auto GetJacobianMatrix = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32)
+	auto GetJacobianMatrix = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		ndConstraint* const joint = jointArray[groupId];
 		GetJacobianDerivatives(joint);
 	});
 
-	auto InitJacobianMatrix = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32)
+	auto InitJacobianMatrix = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(InitJacobianMatrix);
 		ndVector8* const internalForces = (ndVector8*)&GetTempInternalForces()[0];
@@ -890,7 +890,7 @@ void ndDynamicsUpdate::InitJacobianMatrix()
 		ndAssert (!joint->IsBilateral() || joint->CheckBlockMatrixPSD(&m_leftHandSide[0], &m_rightHandSide[0]));
 	});
 
-	auto InitJacobianAccumulatePartialForces = ndMakeObject::ndFunction([this, &bodyArray](ndInt32 groupId, ndInt32)
+	auto InitJacobianAccumulatePartialForces = ndMakeObject::ndFunction([this, &bodyArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(InitJacobianAccumulatePartialForces);
 		const ndArray<ndInt32>& bodyIndex = GetJointForceIndexBuffer();
@@ -1115,7 +1115,7 @@ void ndDynamicsUpdate::CalculateJointsAcceleration()
 	ndScene* const scene = m_world->GetScene();
 	const ndArray<ndConstraint*>& jointArray = scene->GetActiveContactArray();
 
-	auto CalculateJointsAcceleration = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32)
+	auto CalculateJointsAcceleration = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(CalculateJointsAcceleration);
 		ndJointAccelerationDecriptor joindDesc;
@@ -1143,7 +1143,7 @@ void ndDynamicsUpdate::IntegrateBodiesVelocity()
 	D_TRACKTIME();
 	ndScene* const scene = m_world->GetScene();
 
-	auto IntegrateBodiesVelocity = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	auto IntegrateBodiesVelocity = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(IntegrateBodiesVelocity);
 		ndArray<ndBodyKinematic*>& bodyArray = GetBodyIslandOrder();
@@ -1190,7 +1190,7 @@ void ndDynamicsUpdate::UpdateForceFeedback()
 	ndScene* const scene = m_world->GetScene();
 	const ndArray<ndConstraint*>& jointArray = scene->GetActiveContactArray();
 
-	auto UpdateForceFeedback = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32)
+	auto UpdateForceFeedback = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(UpdateForceFeedback);
 		ndArray<ndRightHandSide>& rightHandSide = m_rightHandSide;
@@ -1232,7 +1232,7 @@ void ndDynamicsUpdate::IntegrateBodies()
 	const ndVector invTime(m_invTimestep);
 	const ndFloat32 timestep = scene->GetTimestep();
 
-	auto IntegrateBodies = ndMakeObject::ndFunction([this, timestep, invTime](ndInt32 groupId, ndInt32)
+	auto IntegrateBodies = ndMakeObject::ndFunction([this, timestep, invTime](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(IntegrateBodies);
 		const ndWorld* const world = m_world;
@@ -1258,7 +1258,7 @@ void ndDynamicsUpdate::DetermineSleepStates()
 {
 	D_TRACKTIME();
 
-	auto CalculateSleepState = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	auto CalculateSleepState = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(CalculateSleepState);
 		ndScene* const scene = m_world->GetScene();
@@ -1383,7 +1383,7 @@ void ndDynamicsUpdate::InitSkeletons()
 			}
 		}
 
-		auto InitSkeletons = ndMakeObject::ndFunction([this, &activeSkeletons](ndInt32 groupId, ndInt32)
+		auto InitSkeletons = ndMakeObject::ndFunction([this, &activeSkeletons](ndInt32 groupId, ndInt32, ndInt32)
 		{
 			D_TRACKTIME_NAMED(InitSkeletons);
 			ndArray<ndRightHandSide>& rightHandSide = m_rightHandSide;
@@ -1420,7 +1420,7 @@ void ndDynamicsUpdate::UpdateSkeletons()
 		}
 	}
 
-	auto UpdateSkeletons = ndMakeObject::ndFunction([this, &activeSkeletons](ndInt32 groupId, ndInt32)
+	auto UpdateSkeletons = ndMakeObject::ndFunction([this, &activeSkeletons](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(UpdateSkeletons);
 		ndJacobian* const internalForces = &GetInternalForces()[0];
@@ -1448,7 +1448,7 @@ void ndDynamicsUpdate::CalculateJointsForce()
 	ndArray<ndBodyKinematic*>& bodyArray = scene->GetActiveBodyArray();
 	ndArray<ndConstraint*>& jointArray = scene->GetActiveContactArray();
 
-	auto CalculateJointsForce = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32)
+	auto CalculateJointsForce = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(CalculateJointsForce);
 		ndVector8* const internalForces = (ndVector8*)&m_internalForces[0];
@@ -1578,7 +1578,7 @@ void ndDynamicsUpdate::CalculateJointsForce()
 		JointForce(joint, groupId);
 	});
 
-	auto ApplyJacobianAccumulatePartialForces = ndMakeObject::ndFunction([this, &bodyArray](ndInt32 groupId, ndInt32)
+	auto ApplyJacobianAccumulatePartialForces = ndMakeObject::ndFunction([this, &bodyArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		D_TRACKTIME_NAMED(ApplyJacobianAccumulatePartialForces);
 

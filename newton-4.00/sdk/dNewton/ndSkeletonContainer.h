@@ -267,6 +267,12 @@ class ndSkeletonContainer
 	class ndBodyForcePtr
 	{
 		public:
+		ndBodyForcePtr()
+			:m_indexSpan(nullptr)
+			,m_index(nullptr)
+			,m_spansCount(0)
+		{
+		}
 		ndInt32* m_indexSpan;
 		ndBodyForceIndexPair* m_index;
 		ndInt32 m_spansCount;
@@ -310,6 +316,7 @@ class ndSkeletonContainer
 	friend class ndIkSolver;
 	friend class ndSkeletonList;
 	friend class ndDynamicsUpdate;
+	friend class ndConvexCastVehicle;
 	friend class ndDynamicsUpdateSoa;
 	friend class ndDynamicsUpdateAvx2;
 };

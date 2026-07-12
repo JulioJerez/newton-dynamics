@@ -174,7 +174,7 @@ void ndBodySphFluid::CalculateScans(ndThreadPool* const threadPool)
 	ndInt32 sums[D_MAX_THREADS_COUNT + 1];
 	ndInt32 scans[D_MAX_THREADS_COUNT + 1];
 
-	auto CountGridScans = ndMakeObject::ndFunction([&data, &scans](ndInt32 threadIndex, ndInt32)
+	auto CountGridScans = ndMakeObject::ndFunction([&data, &scans](ndInt32, ndInt32 threadIndex, ndInt32 threadCount)
 	{
 		D_TRACKTIME_NAMED(CountGridScans);
 		const ndGridHash* const hashGridMap = &data.m_hashGridMap[0];
@@ -200,7 +200,7 @@ void ndBodySphFluid::CalculateScans(ndThreadPool* const threadPool)
 		gridScans.PushBack(count);
 	});
 
-	auto CalculateScans = ndMakeObject::ndFunction([&data, &scans, &sums](ndInt32 threadIndex, ndInt32)
+	auto CalculateScans = ndMakeObject::ndFunction([&data, &scans, &sums](ndInt32, ndInt32 threadIndex, ndInt32 threadCount)
 	{
 		D_TRACKTIME_NAMED(CalculateScans);
 		ndArray<ndInt32>& gridScans = data.m_gridScans;
@@ -357,7 +357,7 @@ void ndBodySphFluid::BuildBuckets(ndThreadPool* const threadPool)
 		data.m_pairCount[i] = 0;
 	}
 
-	auto BuildBuckets = ndMakeObject::ndFunction([this, &data](ndInt32 threadIndex, ndInt32 threadCount)
+	auto BuildBuckets = ndMakeObject::ndFunction([this, &data](ndInt32, ndInt32 threadIndex, ndInt32 threadCount)
 	{
 		D_TRACKTIME_NAMED(AddPairs);
 		const ndArray<ndInt32>& gridScans = data.m_gridScans;
@@ -426,7 +426,7 @@ void ndBodySphFluid::CalculateParticlesDensity(ndThreadPool* const threadPool)
 	data.m_density.SetCount(m_posit.GetCount());
 	data.m_invDensity.SetCount(m_posit.GetCount());
 	
-	auto CalculateDensity = ndMakeObject::ndFunction([this, &data](ndInt32 threadIndex, ndInt32 threadCount)
+	auto CalculateDensity = ndMakeObject::ndFunction([this, &data](ndInt32, ndInt32 threadIndex, ndInt32 threadCount)
 	{
 		D_TRACKTIME_NAMED(CalculateDensity);
 		const ndArray<ndVector>& posit = m_posit;
@@ -466,7 +466,7 @@ void ndBodySphFluid::CalculateAccelerations(ndThreadPool* const threadPool)
 	ndWorkingBuffers& data = *m_workingBuffers;
 	data.m_accel.SetCount(m_posit.GetCount());
 	
-	auto CalculateAcceleration = ndMakeObject::ndFunction([this, &data](ndInt32 threadIndex, ndInt32 threadCount)
+	auto CalculateAcceleration = ndMakeObject::ndFunction([this, &data](ndInt32, ndInt32 threadIndex, ndInt32 threadCount)
 	{
 		D_TRACKTIME_NAMED(CalculateAcceleration);
 		const ndVector epsilon2 (ndFloat32(1.0e-12f));
@@ -533,7 +533,7 @@ void ndBodySphFluid::IntegrateParticles(ndThreadPool* const threadPool)
 {
 	D_TRACKTIME();
 	ndWorkingBuffers& data = *m_workingBuffers;
-	auto IntegrateParticles = ndMakeObject::ndFunction([this, &data](ndInt32 threadIndex, ndInt32 threadCount)
+	auto IntegrateParticles = ndMakeObject::ndFunction([this, &data](ndInt32, ndInt32 threadIndex, ndInt32 threadCount)
 	{
 		D_TRACKTIME_NAMED(IntegrateParticles);
 		const ndArray<ndVector>& accel = data.m_accel;
@@ -576,7 +576,7 @@ void ndBodySphFluid::CaculateAabb(ndThreadPool* const threadPool)
 	};
 
 	ndBox boxes[D_MAX_THREADS_COUNT];
-	auto CalculateAabb = ndMakeObject::ndFunction([this, &boxes](ndInt32 threadIndex, ndInt32 threadCount)
+	auto CalculateAabb = ndMakeObject::ndFunction([this, &boxes](ndInt32, ndInt32 threadIndex, ndInt32 threadCount)
 	{
 		D_TRACKTIME_NAMED(CalculateAabb);
 		ndBox box;
@@ -628,7 +628,7 @@ void ndBodySphFluid::CreateGrids(ndThreadPool* const threadPool)
 	D_TRACKTIME();
 	ndWorkingBuffers& data = *m_workingBuffers;
 
-	auto CountGrids = ndMakeObject::ndFunction([this, &data](ndInt32 threadIndex, ndInt32 threadCount)
+	auto CountGrids = ndMakeObject::ndFunction([this, &data](ndInt32, ndInt32 threadIndex, ndInt32 threadCount)
 	{
 		D_TRACKTIME_NAMED(CountGrids);
 		const ndVector origin(m_box0);
@@ -662,7 +662,7 @@ void ndBodySphFluid::CreateGrids(ndThreadPool* const threadPool)
 		}
 	});
 
-	auto CreateGrids = ndMakeObject::ndFunction([this, &data](ndInt32 threadIndex, ndInt32 threadCount)
+	auto CreateGrids = ndMakeObject::ndFunction([this, &data](ndInt32, ndInt32 threadIndex, ndInt32 threadCount)
 	{
 		D_TRACKTIME_NAMED(CreateGrids);
 		const ndVector origin(m_box0);

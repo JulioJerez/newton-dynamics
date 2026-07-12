@@ -95,7 +95,7 @@ void ndSkeletonContainer::ParallelInitMassMatrix(const ndLeftHandSide* const mat
 				m_diagonalPreconditioner[i] = ndFloat32(1.0f) / diagSqrt;
 			}
 
-			auto Precondition = ndMakeObject::ndFunction([this, stride, size, matrix](ndInt32 groupId, ndInt32)
+			auto Precondition = ndMakeObject::ndFunction([this, stride, size, matrix](ndInt32 groupId, ndInt32, ndInt32)
 			{
 				ndFloat32* const row = &matrix[groupId * stride];
 				const ndFloat32 diagonal = m_diagonalPreconditioner[groupId];
@@ -125,7 +125,7 @@ void ndSkeletonContainer::ParallelBuildSparseMatrix()
 
 	const ndInt32 sparseFactor = ndInt32 (ndFloat32(size) * D_SPARSE_SKELETON_MATRIX_FACTOR);
 	ndAssert(sparseFactor > 0);
-	auto SparseRow = ndMakeObject::ndFunction([this, size, sparseFactor, matrix, sparseMatrix](ndInt32 groupId, ndInt32)
+	auto SparseRow = ndMakeObject::ndFunction([this, size, sparseFactor, matrix, sparseMatrix](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		ndInt32 floatsCount = 0;
 		ndFloat32* const row = &matrix[groupId * m_auxiliaryRowCount];
@@ -200,7 +200,7 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 		}
 		scans.PushBack(sum);
 
-		auto SubmmitRows = ndMakeObject::ndFunction([this, &scans](ndInt32 groupId, ndInt32)
+		auto SubmmitRows = ndMakeObject::ndFunction([this, &scans](ndInt32 groupId, ndInt32, ndInt32)
 		{
 			const ndNode* const node = m_nodesOrder[groupId];
 			ndJointBilateralConstraint* const joint = node->m_joint;
@@ -248,7 +248,7 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 		}
 		scans.PushBack(sum);
 
-		auto SubmmitRows = ndMakeObject::ndFunction([this, &scans, boundRow, primaryCount](ndInt32 groupId, ndInt32)
+		auto SubmmitRows = ndMakeObject::ndFunction([this, &scans, boundRow, primaryCount](ndInt32 groupId, ndInt32, ndInt32)
 		{
 			const ndNode* const node = m_nodesOrder[groupId];
 			ndJointBilateralConstraint* const joint = node->m_joint;
@@ -301,7 +301,7 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 		}
 		scans.PushBack(sum);
 
-		auto SubmmitRows = ndMakeObject::ndFunction([this, &scans, primaryCount, auxiliaryIndexCount, boundRow](ndInt32 groupId, ndInt32)
+		auto SubmmitRows = ndMakeObject::ndFunction([this, &scans, primaryCount, auxiliaryIndexCount, boundRow](ndInt32 groupId, ndInt32, ndInt32)
 		{
 			const ndJointBilateralConstraint* const joint = m_permanentLoopingJoints[groupId];
 			const ndInt32 m0 = joint->GetBody0()->m_index;
@@ -348,7 +348,7 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 		}
 		scans.PushBack(sum);
 
-		auto SubmmitRows = ndMakeObject::ndFunction([this, &scans, primaryCount, auxiliaryIndexCount, boundRow](ndInt32 groupId, ndInt32)
+		auto SubmmitRows = ndMakeObject::ndFunction([this, &scans, primaryCount, auxiliaryIndexCount, boundRow](ndInt32 groupId, ndInt32, ndInt32)
 		{
 			const ndJointBilateralConstraint* const joint = m_transientLoopingJoints[groupId];
 			const ndInt32 m0 = joint->GetBody0()->m_index;
@@ -396,7 +396,7 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 		}
 		scans.PushBack(sum);
 
-		auto SubmmitRows = ndMakeObject::ndFunction([this, &scans, primaryCount, auxiliaryIndexCount, boundRow](ndInt32 groupId, ndInt32)
+		auto SubmmitRows = ndMakeObject::ndFunction([this, &scans, primaryCount, auxiliaryIndexCount, boundRow](ndInt32 groupId, ndInt32, ndInt32)
 		{
 			const ndContact* const joint = m_transientLoopingContacts[groupId];
 			const ndInt32 m0 = joint->GetBody0()->m_index;
@@ -510,7 +510,7 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 			}
 		}
 
-		auto InitMassMatrixBoundedBlock = ndMakeObject::ndFunction([this, boundedSize, diagDamp](ndInt32 groupId, ndInt32)
+		auto InitMassMatrixBoundedBlock = ndMakeObject::ndFunction([this, boundedSize, diagDamp](ndInt32 groupId, ndInt32, ndInt32)
 		{
 			ndFixSizeArray<ndFloat32, 1024> acc(m_blockSize);
 			ndAssert(m_blockSize <= acc.GetCapacity());
@@ -601,7 +601,7 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 void ndSkeletonContainer::ParallelCalculateLoopMassMatrixCoefficients(ndFloat32* const diagDamp)
 {
 	D_TRACKTIME();
-	auto CalculateLoopMassMatrixCoefficients = ndMakeObject::ndFunction([this, diagDamp](ndInt32 groupId, ndInt32)
+	auto CalculateLoopMassMatrixCoefficients = ndMakeObject::ndFunction([this, diagDamp](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		const ndInt32 index = groupId;
 		const ndVector8 zero(ndVector8::m_zero);
@@ -724,7 +724,7 @@ void ndSkeletonContainer::ParallelConditionMassMatrix() const
 {
 	D_TRACKTIME();
 	//auto ConditionMassMatrix = [this](ndInt32 groupId)
-	auto ConditionMassMatrix = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	auto ConditionMassMatrix = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		ndInt32 entry0 = 0;
 		const ndInt32 nodeCount = m_nodeList.GetCount();
@@ -786,7 +786,7 @@ void ndSkeletonContainer::ParallelRebuildMassMatrix(const ndFloat32* const diagD
 {
 	D_TRACKTIME();
 	//auto RebuildMassMatrix = [this, diagDamp](ndInt32 groupId)
-	auto RebuildMassMatrix = ndMakeObject::ndFunction([this, diagDamp](ndInt32 groupId, ndInt32)
+	auto RebuildMassMatrix = ndMakeObject::ndFunction([this, diagDamp](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		const ndInt32 primaryCount = m_rowCount - m_auxiliaryRowCount;
 		const ndFloat32* const matrixRow10 = &m_massMatrix10[groupId * primaryCount];
@@ -874,7 +874,7 @@ bool ndSkeletonContainer::ParallelTestPSDmatrix(ndInt32 size, ndInt32 stride, nd
 
 	const ndInt32 bufferStride = ndInt32 (((size * sizeof(ndFloat32) + 32 - 1) & -32) / sizeof(ndFloat32));
 	ndFloat32* const buffer = GetScratchBuffer(bufferStride * size);
-	auto MakeCopy = ndMakeObject::ndFunction([this, size, stride, psdMatrix, buffer, bufferStride](ndInt32 groupId, ndInt32)
+	auto MakeCopy = ndMakeObject::ndFunction([this, size, stride, psdMatrix, buffer, bufferStride](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		ndFloat32* const dstRow = &buffer[bufferStride * groupId];
 		const ndFloat32* const srcRow = &psdMatrix[stride * groupId];
@@ -1287,7 +1287,7 @@ void ndSkeletonContainer::ParallelCalculateJointAccel(const ndJacobian* const in
 	const ndVector8* const internalForcesArray = (ndVector8*)internalForces;
 
 	const ndSpatialVector zero(ndSpatialVector::m_zero);
-	auto CalculateJointAccel = ndMakeObject::ndFunction([this, internalForcesArray, accel, &zero](ndInt32 groupId, ndInt32)
+	auto CalculateJointAccel = ndMakeObject::ndFunction([this, internalForcesArray, accel, &zero](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		ndNode* const node = m_nodesOrder[groupId];
 		ndAssert(groupId == node->m_index);
@@ -1355,7 +1355,7 @@ void ndSkeletonContainer::ParallelSolveAuxiliary(ndJacobian* const internalForce
 	ndAssert(primaryIndex == primaryCount);
 
 	ndVector8* const internalForcesArray = (ndVector8*)internalForces;
-	auto SolveAuxiliary = ndMakeObject::ndFunction([this, primaryCount, u, f, b, low, high, internalForcesArray](ndInt32 groupId, ndInt32)
+	auto SolveAuxiliary = ndMakeObject::ndFunction([this, primaryCount, u, f, b, low, high, internalForcesArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		const ndInt32 index = m_matrixRowsIndex[primaryCount + groupId];
 		const ndLeftHandSide* const row = &m_leftHandSide[index];
@@ -1402,7 +1402,7 @@ void ndSkeletonContainer::ParallelSolveAuxiliary(ndJacobian* const internalForce
 	}
 	ndInt32 threads = scene->GetThreadCount();
 	ndInt32 stride = primaryCount / threads;
-	auto AddForces = ndMakeObject::ndFunction([this, u, f, threads, stride, primaryCount](ndInt32 groupId, ndInt32)
+	auto AddForces = ndMakeObject::ndFunction([this, u, f, threads, stride, primaryCount](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		const ndInt32 base = stride * groupId;
 		const ndInt32 count = groupId == (threads - 1) ? primaryCount - stride * groupId : stride;
@@ -1420,7 +1420,7 @@ void ndSkeletonContainer::ParallelSolveAuxiliary(ndJacobian* const internalForce
 	//}
 	scene->ParallelExecute(AddForces, threads, 1);
 
-	auto AddForcesBody0 = ndMakeObject::ndFunction([this, f, internalForcesArray](ndInt32 groupId, ndInt32)
+	auto AddForcesBody0 = ndMakeObject::ndFunction([this, f, internalForcesArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		const ndBodyForcePtr& bodyForceRemap = m_bodyForceRemap0;
 		const ndLeftHandSide* const leftHandSide = m_leftHandSide;
@@ -1446,7 +1446,7 @@ void ndSkeletonContainer::ParallelSolveAuxiliary(ndJacobian* const internalForce
 	//}
 	scene->ParallelExecute(AddForcesBody0, m_bodyForceRemap0.m_spansCount, 4);
 
-	auto AddForcesBody1 = ndMakeObject::ndFunction([this, f, internalForcesArray](ndInt32 groupId, ndInt32)
+	auto AddForcesBody1 = ndMakeObject::ndFunction([this, f, internalForcesArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		const ndBodyForcePtr& bodyForceRemap = m_bodyForceRemap1;
 		const ndLeftHandSide* const leftHandSide = (ndLeftHandSide*)(((ndJacobian*)m_leftHandSide) + 1);
@@ -1490,7 +1490,7 @@ void ndSkeletonContainer::ParallelSolveBlockLcp(ndInt32 size, ndInt32 blockSize,
 			const ndInt32 boundedSize = size - blockSize;
 			SolveLcp(size, boundedSize, &x[blockSize], &b[blockSize], &low[blockSize], &high[blockSize], &normalIndex[blockSize], accelTol);
 
-			auto AddRows = ndMakeObject::ndFunction([this, x, size, blockSize, boundedSize](ndInt32 groupId, ndInt32)
+			auto AddRows = ndMakeObject::ndFunction([this, x, size, blockSize, boundedSize](ndInt32 groupId, ndInt32, ndInt32)
 			{
 				ndFloat32 acc = ndFloat32(0.0f);
 				const ndFloat32* const row = &m_massMatrix11[groupId * size + blockSize];

@@ -303,7 +303,7 @@ namespace ndQuadSpiderPlayer
 	{
 	}
 
-	void ndController::Update(ndFloat32 timestep)
+	void ndController::Update(ndFloat32 timestep, ndInt32)
 	{
 		m_timestep = timestep;
 
@@ -350,7 +350,7 @@ namespace ndQuadSpiderPlayer
 		}
 	}
 
-	void ndController::PostTransformUpdate(ndFloat32)
+	void ndController::PostTransformUpdate(ndFloat32, ndInt32)
 	{
 		ndPhysicsWorld* const world = (ndPhysicsWorld*)GetModel()->GetWorld();
 		ndDemoEntityManager* const scene = world->GetManager();

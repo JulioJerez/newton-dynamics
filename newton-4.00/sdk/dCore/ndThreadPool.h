@@ -131,10 +131,10 @@ class ndFunction<Type>
 	{
 	}
 
-	void operator()(ndInt32 threadIndex, ndInt32 threadCount) const
-	{
-		m_object.operator()(threadIndex, threadCount);
-	}
+	//void operator()(ndInt32 threadIndex, ndInt32 threadCount) const
+	//{
+	//	m_object.operator()(threadIndex, threadCount);
+	//}
 
 	void operator()(ndInt32 groupId, ndInt32 threadIndex, ndInt32 threadCount) const
 	{
@@ -176,6 +176,7 @@ class ndTaskImplement : public ndTask
 	private:
 	void Execute() const
 	{
+		const ndInt32 threadCount = m_threadPool->GetThreadCount();
 		for (ndInt32 batchIndex = m_threadIterator.fetch_add(m_jobsStride); batchIndex < m_jobsCount; batchIndex = m_threadIterator.fetch_add(m_jobsStride))
 		{
 			//ndTrace(("t(%d) bat(%d) %x\n", m_threadIndex, batchIndex, &m_threadIterator));
@@ -183,7 +184,7 @@ class ndTaskImplement : public ndTask
 			ndAssert(count <= m_jobsStride);
 			for (ndInt32 j = 0; j < count; ++j)
 			{
-				m_function(batchIndex + j, m_threadIndex);
+				m_function(batchIndex + j, m_threadIndex, threadCount);
 			}
 		}
 	}
@@ -205,7 +206,7 @@ void ndThreadPool::ParallelExecute(const Function& function, ndInt32 workGroupCo
 		// in single threaded, just execute all jobs in the main thread
 		for (ndInt32 i = 0; i < workGroupCount; ++i)
 		{
-			function(i, 0);
+			function(i, 0, threadCount);
 		}
 	}
 	else
@@ -246,7 +247,7 @@ void ndThreadPool::ParallelExecute(const Function& function, ndInt32 workGroupCo
 				const ndInt32 count = ((batchIndex + groupsPerThreads) < workGroupCount) ? groupsPerThreads : workGroupCount - batchIndex;
 				for (ndInt32 j = 0; j < count; ++j)
 				{
-					function(batchIndex + j, 0);
+					function(batchIndex + j, 0, numberOfThreads);
 				}
 			}
 			WaitForWorkers();

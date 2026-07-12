@@ -59,15 +59,15 @@ void ndModelNotify::Debug(ndConstraintDebugCallback&) const
 {
 }
 
-void ndModelNotify::Update(ndFloat32)
+void ndModelNotify::Update(ndFloat32, ndInt32)
 {
 }
 
-void ndModelNotify::PostUpdate(ndFloat32)
+void ndModelNotify::PostUpdate(ndFloat32, ndInt32)
 {
 }
 
-void ndModelNotify::PostTransformUpdate(ndFloat32)
+void ndModelNotify::PostTransformUpdate(ndFloat32, ndInt32)
 {
 }
 

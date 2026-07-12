@@ -312,7 +312,7 @@ class ndHeightfieldMesh3d : public ndRenderSceneNode
 			}
 		}
 
-		auto BuildTiles = ndMakeObject::ndFunction([this, shape, &tilesOrigin, &tileSlots](ndInt32 groupId, ndInt32)
+		auto BuildTiles = ndMakeObject::ndFunction([this, shape, &tilesOrigin, &tileSlots](ndInt32 groupId, ndInt32, ndInt32)
 		{
 			const TilePosit& posit = tilesOrigin[groupId];
 			tileSlots[groupId] = BuildTile(shape, posit.m_x, posit.m_z);

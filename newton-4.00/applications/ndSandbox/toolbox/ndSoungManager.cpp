@@ -73,7 +73,7 @@ class ndSoundManager::Implementation : public ndClassAlloc
 class ndSoundSource::Implementation : public ndClassAlloc
 {
 	public:
-	Implementation(ndSharedPtr<ndSoundManager>& owner)
+	Implementation(ndSharedPtr<ndSoundManager>& owner, const char* const)
 		:ndClassAlloc()
 		,m_posit(ndVector::m_wOne)
 		,m_veloc(ndVector::m_zero)
@@ -160,7 +160,7 @@ class ndSoundSource::Implementation : public ndClassAlloc
 
 	virtual void SetVolume(ndFloat32 volume)
 	{
-		m_volume = ndClamp(volume, ndFloat32(0.0f), ndFloat32(1.0f));
+		m_volume = ndReal (ndClamp(volume, ndFloat32(0.0f), ndFloat32(1.0f)));
 	}
 
 	virtual ndFloat32 GetPitch() const
@@ -170,7 +170,7 @@ class ndSoundSource::Implementation : public ndClassAlloc
 
 	virtual void SetPitch(ndFloat32 ptich)
 	{
-		m_pitch = ndAbs(ptich);
+		m_pitch = ndReal(ndAbs(ptich));
 	}
 
 	ndSharedPtr<ndSoundSourceNotify> GetNotify() const
@@ -189,8 +189,8 @@ class ndSoundSource::Implementation : public ndClassAlloc
 	ndSharedPtr<ndSoundSourceNotify> m_notify;
 	ndList<ndWeakPtr<ndSoundSource>>::ndNode* m_sceneNode;
 
-	ndFloat32 m_pitch;
-	ndFloat32 m_volume;
+	ndReal m_pitch;
+	ndReal m_volume;
 	bool m_isPlayig;
 	bool m_isLooping;
 };
@@ -261,7 +261,7 @@ class ndOpenAlSource: public ndSoundSource::Implementation
 ndMatrix ndOpenAlManager::m_newtonToOpenAl(ndYawMatrix(ndFloat32(90.0f)* ndDegreeToRad));
 
 ndOpenAlSource::ndOpenAlSource(ndSharedPtr<ndSoundManager>& owner, const char* const waveFileName)
-	:ndSoundSource::Implementation(owner)
+	:ndSoundSource::Implementation(owner, waveFileName)
 {
 	ndOpenAlManager* const manager = (ndOpenAlManager*)m_manager->m_implementation;
 	ndTree<ALuint, ndString>::ndNode* const resource = manager->m_buffersCache.Find(waveFileName);

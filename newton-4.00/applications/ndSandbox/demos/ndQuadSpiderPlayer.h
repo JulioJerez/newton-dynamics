@@ -108,8 +108,8 @@ namespace ndQuadSpiderPlayer
 
 		ndController();
 
-		void Update(ndFloat32 timestep) override;
-		void PostTransformUpdate(ndFloat32 timetep) override;
+		void Update(ndFloat32 timestep, ndInt32 threadId) override;
+		void PostTransformUpdate(ndFloat32 timetep, ndInt32 threadId) override;
 		void Debug(ndConstraintDebugCallback& callback) const  override;
 
 		void ResetModel();

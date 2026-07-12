@@ -80,7 +80,16 @@ void ndBodyKinematic::ndContactMap::AttachContact(ndContact* const contact)
 {
 	ndBody* const body0 = contact->GetBody0();
 	ndBody* const body1 = contact->GetBody1();
+	ndAssert(body0);
+	ndAssert(body1);
 	ndContactkey key(body0->GetId(), body1->GetId());
+	ndAssert(!Find(key));
+	Insert(contact, key);
+}
+
+void ndBodyKinematic::ndContactMap::AttachContact(ndContact* const contact, ndUnsigned32 id)
+{
+	ndContactkey key(id, 0);
 	ndAssert(!Find(key));
 	Insert(contact, key);
 }

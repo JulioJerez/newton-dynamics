@@ -469,10 +469,14 @@ void ndIkSolver::BuildMassMatrix(ndInt32 threadId)
 		ndBodyKinematic* const body = m_bodies[i];
 		m_savedBodiesIndex[i] = body->m_index;
 		body->m_index = i;
-	
+
 		body->UpdateInvInertiaMatrix();
-		const ndVector gyroTorque(body->m_omega.CrossProduct(body->CalculateAngularMomentum()));
-		body->m_gyroTorque = gyroTorque;
+		body->AddDampingAcceleration(m_timestep);
+		//const ndVector gyroTorque(body->m_omega.CrossProduct(body->CalculateAngularMomentum()));
+		//body->m_gyroTorque = gyroTorque;
+		const ndVector angularMomentum(body->CalculateAngularMomentum());
+		body->m_gyroTorque = body->m_omega.CrossProduct(angularMomentum);
+		body->m_gyroAlpha = body->m_invWorldInertiaMatrix.RotateVector(body->m_gyroTorque);
 	}
 
 	for (ndInt32 i = m_skeleton->m_nodeList.GetCount() - 2; i >= 0; --i)
@@ -506,7 +510,7 @@ void ndIkSolver::BuildMassMatrix(ndInt32 threadId)
 	m_skeleton->InitMassMatrix(&m_leftHandSide[0], &m_rightHandSide[0], threadId);
 }
 
-void ndIkSolver::SolverBegin(ndSkeletonContainer* const skeleton, ndJointBilateralConstraint* const* joints, ndInt32 jointCount, ndWorld* const world, ndFloat32 timestep, ndInt32 threadId)
+void ndIkSolver::SolverBegin(ndSkeletonContainer* const skeleton, ndConstraint* const* constraintLoops, ndInt32 loopsCount, ndWorld* const world, ndFloat32 timestep, ndInt32 threadId)
 {
 	m_world = ndWeakPtr<ndWorld>(world);
 	m_skeleton = ndWeakPtr<ndSkeletonContainer>(skeleton);
@@ -516,9 +520,9 @@ void ndIkSolver::SolverBegin(ndSkeletonContainer* const skeleton, ndJointBilater
 		m_invTimestep = ndFloat32(1.0f) / m_timestep;
 
 		m_skeleton->ClearCloseLoopJoints();
-		for (ndInt32 i = jointCount - 1; i >= 0; --i)
+		for (ndInt32 i = loopsCount - 1; i >= 0; --i)
 		{
-			m_skeleton->AddCloseLoopJoint((ndConstraint*)joints[i]);
+			m_skeleton->AddCloseLoopJoint(constraintLoops[i]);
 		}
 
 		for (ndInt32 i = m_skeleton->m_nodeList.GetCount() - 2; i >= 0; --i)
@@ -607,22 +611,6 @@ void ndIkSolver::Solve()
 			accel1.m_linear = body1->m_accel;
 			accel1.m_angular = body1->m_alpha;
 
-			#if 0
-			ndFloat32 xxx0 = body0->m_omega.DotProduct(body0->m_omega).GetScalar();
-			ndFloat32 xxx1 = body1->m_omega.DotProduct(body1->m_omega).GetScalar();
-			ndFloat32 xxx2 = body0->m_accel.DotProduct(body0->m_accel).GetScalar();
-			ndFloat32 xxx3 = body1->m_alpha.DotProduct(body1->m_alpha).GetScalar();
-			if ((xxx0 > 50000.0f) || (xxx1 > 50000.0f) || (xxx2 > 1.0e8f) || (xxx3 > 1.0e8f))
-			{
-				for (ndInt32 j = ndInt32(m_bodies.GetCount()) - 1; j >= 0; --j)
-				{
-					ndBodyKinematic* const body = m_bodies[j];
-					body->m_accel = body->GetForce();
-					body->m_alpha = body->GetTorque() - body->m_gyroTorque;
-				}
-				m_skeleton->SolveImmediate(*this);
-			}
-			#endif
 			joint->SetIkSetAccel(accel0, accel1);
 			joint->SetIkMode(false);
 		}

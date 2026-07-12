@@ -735,7 +735,7 @@ void ndMarchingCubeIsoSurface::GenerateIndexList()
 	//m_meshNormals.SetCount(vertexCount);
 	//auto ApplyScale = [this](ndInt32 groupId)
 
-	auto ApplyScale = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32)
+	auto ApplyScale = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		//m_meshNormals[groupId] = ndVector::m_zero;
 		m_meshPoints[groupId] = ndVector::m_triplexMask & (m_meshPoints[groupId] * m_gridSize + m_boxP0);
@@ -797,7 +797,7 @@ void ndMarchingCubeIsoSurface::GenerateMesh()
 	densityWindow1.SetCount(boxSizeInGrids.m_ix * boxSizeInGrids.m_iz);
 
 	ndFloat32 high = m_boxP0.m_y;
-	auto ReadLayerDensity = ndMakeObject::ndFunction([this, &boxSizeInGrids, &high, &densityWindow0, &densityWindow1](ndInt32 groupId, ndInt32)
+	auto ReadLayerDensity = ndMakeObject::ndFunction([this, &boxSizeInGrids, &high, &densityWindow0, &densityWindow1](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		ndFloat32 posit_x = m_boxP0.m_x;
 		ndFloat32 posit_z = m_boxP0.m_z + ndFloat32(groupId) * m_gridSize.m_z;
@@ -827,7 +827,7 @@ void ndMarchingCubeIsoSurface::GenerateMesh()
 		ndArray<ndGridInfo> gridScansLayerTemp;
 		gridScansLayer.SetCount((boxSizeInGrids.m_ix - 1) * (boxSizeInGrids.m_iz - 1));
 		gridScansLayer.PushBack(ndGridInfo());
-		auto CountGrids = ndMakeObject::ndFunction([this, &boxSizeInGrids, &densityWindow0, &densityWindow1, &gridScansLayer](ndInt32 groupId, ndInt32)
+		auto CountGrids = ndMakeObject::ndFunction([this, &boxSizeInGrids, &densityWindow0, &densityWindow1, &gridScansLayer](ndInt32 groupId, ndInt32, ndInt32)
 		{
 			ndIsoCell cell;
 			ndFloat32 isoValues[8];
@@ -890,7 +890,7 @@ void ndMarchingCubeIsoSurface::GenerateMesh()
 
 			ndInt32 trianglesBase = ndInt32 (m_meshPoints.GetCount());
 			m_meshPoints.SetCount(trianglesBase + sum * 3);
-			auto GenerateTriangles = ndMakeObject::ndFunction([this, &boxSizeInGrids, trianglesBase, &grid_y0, &grid_y1, &densityWindow0, &densityWindow1, &gridScansLayer](ndInt32 groupId, ndInt32)
+			auto GenerateTriangles = ndMakeObject::ndFunction([this, &boxSizeInGrids, trianglesBase, &grid_y0, &grid_y1, &densityWindow0, &densityWindow1, &gridScansLayer](ndInt32 groupId, ndInt32, ndInt32)
 			{
 				ndIsoCell cell;
 				const ndGridInfo& info = gridScansLayer[groupId];

@@ -222,6 +222,7 @@ class ndContactSolver: public ndDownHeap<ndMinkFace *, ndFloat32>
 	friend class ndShapeInstance;
 	friend class ndPolygonMeshDesc;
 	friend class ndConvexCastNotify;
+	friend class ndConvexCastVehicle;
 	friend class ndShapeConvexPolygon;
 	friend class ndPolygonMeshLocalDesc;
 	friend class ndBodyPlayerCapsuleContactSolver;
