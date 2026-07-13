@@ -167,6 +167,7 @@ ndMultiBodyVehicle::ndMultiBodyVehicle(ndFloat32 gravityMagnitud)
 	,m_localFrame(ndGetIdentityMatrix())
 	,m_tireShape(new ndShapeWheel())
 	,m_downForce()
+	,m_sleepCounter(0)
 	,m_debugFlags(DebugFlags(0))
 {
 	m_initialized = false;
@@ -1522,6 +1523,21 @@ void ndMultiBodyVehicle::Update(ndFloat32 timestep, ndInt32)
 			selfBody->SetNotifyCallback(notify);
 		}
 	}
+
+	//const ndFloat32 sleepValue = ndFloat32(0.02f);
+	//bool sleeping = SetSleep(sleepValue, sleepValue, sleepValue, sleepValue);
+	//if (IsSleeping())
+	//{
+	//	m_sleepCounter++;
+	//	if (m_sleepCounter >= 8)
+	//	{
+	//		return;
+	//	}
+	//}
+	//else
+	//{
+	//	m_sleepCounter = 0;
+	//}
 
 	// apply down force
 	ApplyAerodynamics(timestep);

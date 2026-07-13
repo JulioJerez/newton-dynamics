@@ -151,7 +151,7 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	ndFloat32 m_maxSideslipRate;
 	ndFloat32 m_maxSideslipAngle;
 	ndFloat32 m_gravityMagnitud;
-
+	ndInt32 m_sleepCounter;
 	DebugFlags m_debugFlags;
 	bool m_initialized;
 

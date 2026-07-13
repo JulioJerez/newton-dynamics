@@ -45,7 +45,8 @@ void ndVehicleCommonNotify::SetAsPlayer(bool state)
 void ndVehicleCommonNotify::Update(ndFloat32 timestep, ndInt32 threadId)
 {
 	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
-	if (m_isPlayer || (vehicle && !vehicle->IsSleeping()))
+	//if (m_isPlayer || (vehicle && !vehicle->IsSleeping()))
+	if (vehicle)
 	{
 		vehicle->Update(timestep, threadId);
 	}
@@ -67,7 +68,8 @@ void ndVehicleCommonNotify::PostTransformUpdate(ndFloat32 timestep, ndInt32)
 
 	vehicle->TransformUpdate(timestep);
 
-	if (m_isPlayer || (vehicle && !vehicle->IsSleeping()))
+	//if (m_isPlayer || (vehicle && !vehicle->IsSleeping()))
+	if (m_isPlayer || vehicle)
 	{
 		ApplyInputs(timestep);
 	}
@@ -77,7 +79,7 @@ void ndVehicleCommonNotify::Debug(ndConstraintDebugCallback& callback) const
 {
 	ndModelNotify::Debug(callback);
 	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
-	if (vehicle)
+	if (m_isPlayer && vehicle)
 	{
 		vehicle->Debug(callback);
 	}

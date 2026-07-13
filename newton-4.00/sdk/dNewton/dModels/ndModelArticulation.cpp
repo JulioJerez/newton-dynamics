@@ -1071,8 +1071,11 @@ bool ndModelArticulation::IsSleeping() const
 	{
 		for (ndNode* node = GetRoot()->GetFirstIterator(); sleeping && node; node = node->GetNextIterator())
 		{
-			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
-			sleeping = sleeping && body->GetSleepState();
+			if (!node->m_joint || node->m_joint->IsActive())
+			{
+				ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
+				sleeping = sleeping && body->GetSleepState();
+			}
 		}
 	}
 	return sleeping;
