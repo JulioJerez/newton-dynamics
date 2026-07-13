@@ -53,7 +53,9 @@ class ndModel: public ndContainersFreeListAlloc<ndModel>
 
 	D_COLLISION_API virtual void SetMulticoreHint(bool){};
 	D_COLLISION_API virtual bool GetMulticoreHint() const { return true;}
-	D_COLLISION_API virtual void SetSleep(ndFloat32, ndFloat32, ndFloat32, ndFloat32) const {}
+	D_COLLISION_API virtual bool SetSleep(ndFloat32, ndFloat32, ndFloat32, ndFloat32) const { return false; }
+
+	D_COLLISION_API virtual void TransformUpdate(ndFloat32) {}
 
 	protected:
 	D_COLLISION_API virtual void OnAddToWorld() {}

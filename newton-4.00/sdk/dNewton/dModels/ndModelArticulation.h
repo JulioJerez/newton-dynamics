@@ -104,7 +104,9 @@ class ndModelArticulation: public ndModel
 
 	D_NEWTON_API virtual bool GetMulticoreHint() const override;
 	D_NEWTON_API virtual void SetMulticoreHint(bool hint) override;
-	D_NEWTON_API virtual void SetSleep(ndFloat32 speed, ndFloat32 angularSpeed, ndFloat32 accel, ndFloat32 alpha) const override;
+
+	D_NEWTON_API virtual bool IsSleeping() const;
+	D_NEWTON_API virtual bool SetSleep(ndFloat32 speed, ndFloat32 angularSpeed, ndFloat32 accel, ndFloat32 alpha) const override;
 
 	D_NEWTON_API const ndString& GetName() const;
 	D_NEWTON_API void SetName(const ndString& name);

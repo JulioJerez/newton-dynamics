@@ -502,20 +502,6 @@ ndMultiBodyVehicleGearBox* ndMultiBodyVehicle::AddGearBox(ndMultiBodyVehicleDiff
 	return *m_gearBox;
 }
 
-bool ndMultiBodyVehicle::IsSleeping() const
-{
-	bool sleeping = true;
-	if (GetRoot())
-	{
-		for (ndNode* node = GetRoot()->GetFirstIterator(); sleeping && node; node = node->GetNextIterator())
-		{
-			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
-			sleeping = sleeping && body->GetSleepState();
-		}
-	}
-	return sleeping;
-}
-
 void ndMultiBodyVehicle::ApplyAerodynamics(ndFloat32)
 {
 	m_downForce.m_suspensionStiffnessModifier = ndFloat32(1.0f);

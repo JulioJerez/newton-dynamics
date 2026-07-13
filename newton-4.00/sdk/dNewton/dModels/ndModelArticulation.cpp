@@ -463,55 +463,6 @@ void ndModelArticulation::SetMulticoreHint(bool hint)
 	m_solveMulticore = hint;
 }
 
-void ndModelArticulation::SetSleep(ndFloat32 speed, ndFloat32 angularSpeed, ndFloat32 accel, ndFloat32 alpha) const
-{
-	accel *= accel;
-	speed *= speed;
-	alpha *= alpha;
-	angularSpeed *= angularSpeed;
-
-	bool isSleeping = true;
-	for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
-	{
-		const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
-		if (!body->GetSleepState())
-		{
-			const ndVector bodyAccel(body->GetAccel());
-			if (bodyAccel.DotProduct(bodyAccel).GetScalar() > accel)
-			{
-				isSleeping = false;
-				break;
-			}
-			const ndVector bodyAlpha(body->GetAlpha());
-			if (bodyAlpha.DotProduct(bodyAlpha).GetScalar() > alpha)
-			{
-				isSleeping = false;
-				break;
-			}
-			const ndVector veloc(body->GetOmega());
-			if (veloc.DotProduct(veloc).GetScalar() > speed)
-			{
-				isSleeping = false;
-				break;
-			}
-			const ndVector omega(body->GetVelocity());
-			if (omega.DotProduct(omega).GetScalar() > angularSpeed)
-			{
-				isSleeping = false;
-				break;
-			}
-		}
-	}
-	if (isSleeping)
-	{
-		for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
-		{
-			ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
-			body->RestoreSleepState(true);
-		}
-	}
-}
-
 ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentreOfMassKinematics(const ndMatrix& localFrame) const
 {
 	ndCenterOfMassDynamics dynamics;
@@ -1111,4 +1062,71 @@ void ndModelArticulation::SetCollidingSubSelection(const ndNode* const node0, co
 		index--;
 	}
 	m_collisionPairs[index + 1] = newPair;
+}
+
+bool ndModelArticulation::IsSleeping() const
+{
+	bool sleeping = true;
+	if (GetRoot())
+	{
+		for (ndNode* node = GetRoot()->GetFirstIterator(); sleeping && node; node = node->GetNextIterator())
+		{
+			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
+			sleeping = sleeping && body->GetSleepState();
+		}
+	}
+	return sleeping;
+}
+
+bool ndModelArticulation::SetSleep(ndFloat32 speed, ndFloat32 angularSpeed, ndFloat32 accel, ndFloat32 alpha) const
+{
+	accel *= accel;
+	speed *= speed;
+	alpha *= alpha;
+	angularSpeed *= angularSpeed;
+
+	bool isSleeping = true;
+	for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
+	{
+		if (!node->m_joint || node->m_joint->IsActive())
+		{
+			const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+			if (!body->GetSleepState())
+			{
+				const ndVector bodyAccel(body->GetAccel());
+				if (bodyAccel.DotProduct(bodyAccel).GetScalar() > accel)
+				{
+					isSleeping = false;
+					break;
+				}
+				const ndVector bodyAlpha(body->GetAlpha());
+				if (bodyAlpha.DotProduct(bodyAlpha).GetScalar() > alpha)
+				{
+					isSleeping = false;
+					break;
+				}
+				const ndVector veloc(body->GetOmega());
+				if (veloc.DotProduct(veloc).GetScalar() > speed)
+				{
+					isSleeping = false;
+					break;
+				}
+				const ndVector omega(body->GetVelocity());
+				if (omega.DotProduct(omega).GetScalar() > angularSpeed)
+				{
+					isSleeping = false;
+					break;
+				}
+			}
+		}
+	}
+	if (isSleeping)
+	{
+		for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
+		{
+			ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+			body->RestoreSleepState(true);
+		}
+	}
+	return isSleeping;
 }

@@ -299,6 +299,36 @@ void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& c
 	}
 }
 
+void ndConvexCastVehicle::TransformUpdate(ndFloat32 timestep)
+{
+	ndMultiBodyVehicle::TransformUpdate(timestep);
+
+	auto UpdateIntenalTransforms = [timestep](ndNode* const node)
+	{
+		if (node->m_body)
+		{
+			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
+			if (node->m_joint)
+			{
+				ndSharedPtr<ndJointBilateralConstraint> joint(node->m_joint);
+				if (joint->IsType(ndMultiBodyVehicleTireJoint::StaticClassName()))
+				{
+					body->GetNotifyCallback()->OnTransform(timestep, body->GetMatrix());
+				}
+				else if (joint->IsType(ndMultiBodyVehicleMotor::StaticClassName()))
+				{
+					body->GetNotifyCallback()->OnTransform(timestep, body->GetMatrix());
+				}
+				else if (joint->IsType(ndMultiBodyVehicleDifferential::StaticClassName()))
+				{
+					body->GetNotifyCallback()->OnTransform(timestep, body->GetMatrix());
+				}
+			}
+		}
+	};
+	NodeIterator(UpdateIntenalTransforms);
+}
+
 void ndConvexCastVehicle::PostUpdate(ndFloat32 timestep, ndInt32 threadId)
 {
 	ndMultiBodyVehicle::PostUpdate(timestep, threadId);
@@ -319,7 +349,7 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	m_savedBody.SetCount(0);
 	m_savedForceTorque.SetCount(0);
 
-	// check for equelibrium state here
+	// check for equilibrium state here
 
 
 	// update tire contacts 

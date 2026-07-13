@@ -38,6 +38,7 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 	D_NEWTON_API virtual void ConvertToMotorVehicle() override;
 	D_NEWTON_API virtual void Update(ndFloat32 timestep, ndInt32 threadId) override;
 	D_NEWTON_API virtual void PostUpdate(ndFloat32 timestep, ndInt32 threadId) override;
+	D_NEWTON_API virtual void TransformUpdate(ndFloat32 timestep) override;
 
 	private:
 	virtual void OnAddToWorld() override;
