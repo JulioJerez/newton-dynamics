@@ -65,6 +65,8 @@ void ndVehicleCommonNotify::PostTransformUpdate(ndFloat32 timestep, ndInt32)
 {
 	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
 
+	vehicle->TransformUpdate(timestep);
+
 	if (m_isPlayer || (vehicle && !vehicle->IsSleeping()))
 	{
 		ApplyInputs(timestep);
