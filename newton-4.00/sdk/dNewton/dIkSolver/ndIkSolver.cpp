@@ -396,8 +396,6 @@ void ndIkSolver::BuildMassMatrix(ndInt32 threadId)
 							}
 							if (surrogateBodiesIndex == ndInt32(m_surrogateBodies.GetCount()))
 							{
-								ndAssert(0);
-								//ndBodyDynamic* const surrogateBody = new ndBodyDynamic();
 								ndSharedPtr<ndBodyDynamic> surrogateBody (new ndBodyDynamic());
 								m_surrogateBodies.Add(surrogateBody);
 							}
@@ -428,13 +426,12 @@ void ndIkSolver::BuildMassMatrix(ndInt32 threadId)
 
 								if (surrogateContactIndex == ndInt32(m_surrogateContact.GetCount()))
 								{
-									ndAssert(0);
 									ndSharedPtr<ndContact> surrogateContact(new ndContact);
 									m_surrogateContact.Add(surrogateContact);
 								}
 								ndContact* const surrogateContact = m_surrogateContact[surrogateContactIndex];
 								surrogateContactIndex++;
-								contact->InitSurrogateContact(surrogateContact, body0, surrogateBody);
+								surrogateContact->InitSurrogateContact(contact, body0, surrogateBody);
 								m_contacts.PushBack(surrogateContact);
 							}
 						}
@@ -454,7 +451,7 @@ void ndIkSolver::BuildMassMatrix(ndInt32 threadId)
 							}
 							ndContact* const surrogateContact = m_surrogateContact[surrogateContactIndex];
 							surrogateContactIndex++;
-							contact->InitSurrogateContact(surrogateContact, surrogateBody, body1);
+							surrogateContact->InitSurrogateContact(contact, surrogateBody, body1);
 							m_contacts.PushBack(surrogateContact);
 						}
 					}
@@ -464,6 +461,7 @@ void ndIkSolver::BuildMassMatrix(ndInt32 threadId)
 	}
 
 	m_savedBodiesIndex.SetCount(m_bodies.GetCount());
+	m_savedBodiesIndex[0] = 0;
 	for (ndInt32 i = ndInt32(m_bodies.GetCount()) - 1; i >= 1 ; --i)
 	{
 		ndBodyKinematic* const body = m_bodies[i];
@@ -472,8 +470,6 @@ void ndIkSolver::BuildMassMatrix(ndInt32 threadId)
 
 		body->UpdateInvInertiaMatrix();
 		body->AddDampingAcceleration(m_timestep);
-		//const ndVector gyroTorque(body->m_omega.CrossProduct(body->CalculateAngularMomentum()));
-		//body->m_gyroTorque = gyroTorque;
 		const ndVector angularMomentum(body->CalculateAngularMomentum());
 		body->m_gyroTorque = body->m_omega.CrossProduct(angularMomentum);
 		body->m_gyroAlpha = body->m_invWorldInertiaMatrix.RotateVector(body->m_gyroTorque);

@@ -49,6 +49,7 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 	ndFixSizeArray<ndBodyDynamic*, 32> m_savedBody;
 	ndFixSizeArray<ndJacobian, 32> m_savedForceTorque;
 	ndSharedPtr<ndSkeletonContainer> m_skeleton;
+	ndWeakPtr<ndSkeletonContainer> m_originaSkeleton;
 	ndSharedPtr<ndJointBilateralConstraint> m_castGearBox;
 	ndList<ndSharedPtr<ndJointBilateralConstraint>> m_castDifferentialAxelList;
 	ndInt32 m_sleepCounter;

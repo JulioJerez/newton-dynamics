@@ -265,6 +265,8 @@ void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
 		m_manager->m_onPostUpdate->OnDebug(m_manager, false);
 	}
 
+	ndScopeSpinLock Lock(m_lock);
+
 	// update sound manager
 	const ndMatrix listenerMatrix(m_manager->GetRenderer()->GetCamera()->CalculateGlobalMatrix());
 	const ndMatrix oldListenerMatrix(m_manager->m_soundManager->GetMatrix());
@@ -272,8 +274,6 @@ void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
 	m_manager->m_soundManager->SetMatrix(listenerMatrix);
 	m_manager->m_soundManager->SetVelocity(listenerVeloc);
 	m_manager->m_soundManager->Update();
-
-	ndScopeSpinLock Lock(m_lock);
 
 	m_manager->SetNextActiveCamera();
 

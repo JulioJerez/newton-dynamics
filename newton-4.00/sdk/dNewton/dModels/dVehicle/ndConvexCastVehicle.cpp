@@ -280,13 +280,13 @@ void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& c
 				ndBodyKinematic::ndContactMap::ndNode* const contactNode = contactMap.Find(key);
 				ndAssert(contactNode);
 				ndContact* const contact = contactNode->GetInfo();
-				contacts.PushBack(contact);
 			
 				// craete a contact joint
 				const ndInt32 start = scans[i];
 				const ndInt32 pointCount = scans[i + 1] - start;
 				ndBodyKinematic* const body1 = ((ndBody*)caster.m_contacts[start].m_body1)->GetAsBodyKinematic();
 				contact->SetActive(true);
+				contact->m_maxDof = 0;
 				contact->SetBodies(wheelBody, body1);
 				contact->GetContactPoints().RemoveAll();
 			
@@ -295,6 +295,14 @@ void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& c
 				contactSolver.m_contact = contact;
 				contactSolver.m_contactBuffer = &caster.m_contacts[start];
 				scene->ProcessContacts(threadId, pointCount, &contactSolver);
+				if (contact->m_maxDof == 0)
+				{
+					contact->SetActive(false);
+				}
+				else
+				{
+					contacts.PushBack(contact);
+				}
 			}
 		}
 	}
@@ -311,7 +319,7 @@ void ndConvexCastVehicle::TransformUpdate(ndFloat32 timestep)
 			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
 			if (node->m_joint)
 			{
-				ndSharedPtr<ndJointBilateralConstraint> joint(node->m_joint);
+				const ndJointBilateralConstraint* const joint = *node->m_joint;
 				if (joint->IsType(ndMultiBodyVehicleTireJoint::StaticClassName()))
 				{
 					body->GetNotifyCallback()->OnTransform(timestep, body->GetMatrix());
@@ -370,11 +378,15 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	CalculateContacts(contacts, threadId);
 
 	// apply all external forces to intenal bodies
-	auto ApplyExternalForces = [timestep, threadId](ndNode* const node)
+	m_originaSkeleton = GetRoot()->m_body->GetAsBodyKinematic()->GetSkeleton();
+	auto ApplyExternalForces = [this, timestep, threadId](ndNode* const node)
 	{
 		if (node->m_body)
 		{
 			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
+			ndAssert(body->GetSkeleton() == *m_originaSkeleton);
+			body->SetSkeleton(*m_skeleton);
+
 			if (node->m_joint)
 			{
 				ndSharedPtr<ndJointBilateralConstraint> joint(node->m_joint);
@@ -410,11 +422,13 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	// integrate tires, and internal drive train components
 	// apply reaction impulses to other bodies
 	// apply the impulse to model bodies. 
+	// restore the orginal skeleton
 	auto IntegrateBodyParts = [this, timestep](ndNode* const node)
 	{
 		if (node->m_body)
 		{
 			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
+			body->SetSkeleton(*m_originaSkeleton);
 
 			auto IntegrateStructuralPart = [this, body, timestep]()
 			{

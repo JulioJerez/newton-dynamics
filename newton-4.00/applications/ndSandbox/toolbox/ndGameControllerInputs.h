@@ -24,6 +24,7 @@ class ndGameControllerInputs
 		m_gasPedal,
 		m_brakePedal,
 		m_clutch,
+		m_usedAxisCount,
 	};
 
 	enum ndInputButtons

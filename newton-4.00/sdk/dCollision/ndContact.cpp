@@ -149,25 +149,27 @@ void ndContact::GetSeparatingSurface(ndVector& normal, ndVector& point0, ndVecto
 	point1 = m_closestPointOnBodyB;
 }
 
-void ndContact::InitSurrogateContact(ndContact* const surrogate, ndBodyKinematic* const body0, ndBodyKinematic* const body1) const
+//void ndContact::InitSurrogateContact(ndContact* const surrogate, ndBodyKinematic* const body0, ndBodyKinematic* const body1) const
+void ndContact::InitSurrogateContact(const ndContact* const sourceContact, ndBodyKinematic* const body0, ndBodyKinematic* const body1)
 {
-	ndAssert(m_body0->GetInvMass() > ndFloat32(0.0f));
-	surrogate->m_body0 = body0;
-	surrogate->m_body1 = body1;
+	ndAssert(body0->GetInvMass() > ndFloat32(0.0f));
 
-	surrogate->m_forceBody0 = m_forceBody0;
-	surrogate->m_forceBody1 = m_forceBody1;
-	surrogate->m_torqueBody0 = m_torqueBody0;
-	surrogate->m_torqueBody1 = m_torqueBody1;
-	//surrogate->m_forceTorqueBody0 = m_forceTorqueBody0;
-	//surrogate->m_forceTorqueBody1 = m_forceTorqueBody1;
+	m_body0 = body0;
+	m_body1 = body1;
+	m_forceBody0 = sourceContact->m_forceBody0;
+	m_forceBody1 = sourceContact->m_forceBody1;
+	m_torqueBody0 = sourceContact->m_torqueBody0;
+	m_torqueBody1 = sourceContact->m_torqueBody1;
 
-	surrogate->m_active = m_active;
-	surrogate->m_contacPointsList.RemoveAll();
-	for (ndContactPointList::ndNode* node = m_contacPointsList.GetFirst(); node; node = node->GetNext())
+	m_maxDof = sourceContact->m_maxDof;
+	m_active = sourceContact->m_active;
+	m_rowCount = sourceContact->m_rowCount;
+	m_contacPointsList.RemoveAll();
+	for (ndContactPointList::ndNode* node = sourceContact->m_contacPointsList.GetFirst(); node; node = node->GetNext())
 	{
-		const ndContactMaterial& contact = node->GetInfo();
-		surrogate->m_contacPointsList.Append(contact);
+		ndContactMaterial contact (node->GetInfo());
+		contact.m_body1 = body1;
+		m_contacPointsList.Append(contact);
 	}
 }
 

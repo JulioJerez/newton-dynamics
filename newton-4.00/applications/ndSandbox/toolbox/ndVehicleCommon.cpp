@@ -65,14 +65,12 @@ void ndVehicleCommonNotify::PostUpdate(ndFloat32 timestep, ndInt32 threadId)
 void ndVehicleCommonNotify::PostTransformUpdate(ndFloat32 timestep, ndInt32)
 {
 	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
-
-	vehicle->TransformUpdate(timestep);
-
 	//if (m_isPlayer || (vehicle && !vehicle->IsSleeping()))
 	if (m_isPlayer || vehicle)
 	{
 		ApplyInputs(timestep);
 	}
+	vehicle->TransformUpdate(timestep);
 }
 
 void ndVehicleCommonNotify::Debug(ndConstraintDebugCallback& callback) const
@@ -151,18 +149,21 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			tire->SetHandBrake(handBrake);
 		}
 
-		bool aweakeVehicle = false;
-		for (ndInt32 i = 0; i < axis.GetCount(); i++)
+		if (m_isPlayer)
 		{
-			aweakeVehicle = aweakeVehicle || (ndAbs(axis[i]) > ndFloat32(0.01f));
-		}
-		for (ndInt32 i = 0; i < buttons.GetCount(); i++)
-		{
-			aweakeVehicle = aweakeVehicle || buttons[i];
-		}
-		if (aweakeVehicle)
-		{
-			vehicle->GetRoot()->m_body->GetAsBodyDynamic()->SetSleepState(false);
+			bool aweakeVehicle = false;
+			for (ndInt32 i = 0; i < ndGameControllerInputs::m_usedAxisCount; i++)
+			{
+				aweakeVehicle = aweakeVehicle || (ndAbs(axis[i]) > ndFloat32(0.01f));
+			}
+			for (ndInt32 i = 0; i < buttons.GetCount(); i++)
+			{
+				aweakeVehicle = aweakeVehicle || buttons[i];
+			}
+			if (aweakeVehicle)
+			{
+				vehicle->GetRoot()->m_body->GetAsBodyDynamic()->SetSleepState(false);
+			}
 		}
 	};
 	ApplyControls();

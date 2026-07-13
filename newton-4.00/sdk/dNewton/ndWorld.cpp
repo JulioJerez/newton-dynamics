@@ -297,7 +297,7 @@ ndSharedPtr<ndJointBilateralConstraint> ndWorld::GetJoint(ndJointBilateralConstr
 
 ndSharedPtr<ndModel> ndWorld::GetModel(ndModel* const model) const
 {
-	return model->m_worldNode->GetInfo();
+	return model->m_worldNode ? model->m_worldNode->GetInfo() : ndSharedPtr<ndModel>(nullptr);
 }
 
 ndInt32 ndWorld::CompareJointByInvMass(const ndJointBilateralConstraint* const jointA, const ndJointBilateralConstraint* const jointB, void*)
