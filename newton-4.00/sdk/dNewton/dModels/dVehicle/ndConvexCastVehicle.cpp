@@ -36,6 +36,7 @@
 ndConvexCastVehicle::ndConvexCastVehicle(ndFloat32 gravityMagnitud)
 	:ndMultiBodyVehicle(gravityMagnitud)
 	,m_solver()
+	,m_sleepCounter(0)
 {
 }
 
@@ -350,7 +351,18 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	m_savedForceTorque.SetCount(0);
 
 	// check for equilibrium state here
-
+	if (IsSleeping())
+	{
+		m_sleepCounter++;
+		if (m_sleepCounter >= 8)
+		{
+			return;
+		}
+	}
+	else 
+	{
+		m_sleepCounter = 0;
+	}
 
 	// update tire contacts 
 	ndFixSizeArray<ndConstraint*, 32> contacts;
