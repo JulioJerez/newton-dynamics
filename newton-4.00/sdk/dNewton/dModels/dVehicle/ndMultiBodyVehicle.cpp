@@ -1133,8 +1133,8 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	// Both books only give a brief example and leave the details unexplained.
 	// After two decades, the method still feels more like bad heuristicks than
 	// sound engineering: the equations mix units and fail dimensional checks.
-	// It may be possible that works in some confined experimetal steady state 
-	// laboratory condition, but the are not scalable for symulations. 
+	// It may be possible that it works in some confined experimetal steady state 
+	// laboratory condition, but those are not scalable for symulations. 
 
 	// Pages 80‑83 outline *two* inconsistent ways to calculate combined slip.
 	// - Method 1 (implemented here) produces sensible, stable results,
