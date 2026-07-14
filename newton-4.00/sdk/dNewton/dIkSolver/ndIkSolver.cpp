@@ -443,9 +443,6 @@ void ndIkSolver::BuildMassMatrix(ndInt32 threadId)
 
 							if (surrogateContactIndex == ndInt32(m_surrogateContact.GetCount()))
 							{
-								ndAssert(0);
-								//m_surrogateContact.PushBack(new ndContact);
-								//m_surrogateContact.PushBack(ndSharedPtr<ndContact>(new ndContact));
 								ndSharedPtr<ndContact> surrogateContact(new ndContact);
 								m_surrogateContact.Add(surrogateContact);
 							}
