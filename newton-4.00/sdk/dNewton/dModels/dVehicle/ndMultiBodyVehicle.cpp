@@ -1133,7 +1133,7 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	// Both books only give a brief example and leave the details unexplained.
 	// After two decades, the method still feels more like bad heuristicks than
 	// sound engineering: the equations mix units and fail dimensional checks.
-	// It may be possibel the works in some confibe experimetal statady state 
+	// It may be possible that works in some confined experimetal steady state 
 	// laboratory condition, but the are not scalable for symulations. 
 
 	// Pages 80‑83 outline *two* inconsistent ways to calculate combined slip.
@@ -1143,9 +1143,8 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	//   to get anything remotely realistic from it.
 
 #if 1
-	// Until a better reference turns up, Method 1 remains the least‑bad
-	// option I’ve found stable in practice, if not theoretically satisfying,  
-	// therefore I am going with that. 
+	// Until a better reference turns up, Method 0 remains the least‑bad
+	// option I’ve found stable in practice, if not theoretically satisfying, therefore I am going with that. 
 	// I still find the lateral force some what too strong.
 
 	//I am assuming sv and sv to be zero.
@@ -1177,11 +1176,11 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	const ndFloat32 fz = pure_fz * phi_z / phi;
 #else
 
-	// This is the second method that the slips and the use a 
-	// normalized dimension less slip for both lateral and longitudinal
+	// In the second method the slips and the sizdeSlip use a 
+	// normalized dimensionless slip for both lateral and longitudinal
 	// with not explanation as to how the Pacekka equation can be called 
 	// with these dimension less values.
-	// to me, this seems like nonsence, unless lots of details that are omitted in the book.
+	// to me, this seems like nonsence, unless lots of details are omitted in the book.
 	const ndFloat32 dimensionLessPhi_x = longitudialSlip / frictionModel.m_longitudinalPacejka.m_normalizingPhi;
 	const ndFloat32 dimensionLessPhi_z = sideSlipAngleInRadians / (frictionModel.m_lateralPacejka.m_normalizingPhi * ndDegreeToRad * 0.5f);
 
