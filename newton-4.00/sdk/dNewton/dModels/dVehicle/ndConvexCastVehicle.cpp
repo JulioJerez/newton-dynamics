@@ -191,7 +191,7 @@ void ndConvexCastVehicle::CalculateConveCastTireContacts(ndInt32 threadId)
 		const ndMultiBodyVehicleTireJoint* const wheelJoint = tireNode->GetInfo();
 		ndBodyDynamic* const wheelBody = wheelJoint->GetBody0()->GetAsBodyDynamic();
 		
-		// deative contacts
+		// deactive contacts
 		ndBodyKinematic::ndContactMap& contactMap = wheelBody->GetContactMap();
 		ndBodyKinematic::ndContactMap::Iterator it(contactMap);
 		for (it.Begin(); it; it++)

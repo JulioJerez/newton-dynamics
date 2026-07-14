@@ -89,25 +89,28 @@ namespace ndMotorVehicle
 		ndSharedPtr<ndSoundSource> m_engineSound;
 	};
 
-	ndSharedPtr<ndModel> CreateBasicVehicle(ndDemoEntityManager* const scene, const char* const modelName, const ndMatrix& matrix)
+	ndSharedPtr<ndMesh> LoadMesh(const char* const modelName)
 	{
 		ndMeshLoader loader;
 		loader.LoadMesh(ndGetWorkingFileName(modelName));
-		const ndMesh* const mesh = *loader.m_mesh;
+		return loader.m_mesh;
+	}
 
+	ndSharedPtr<ndModel> CreateBasicVehicle(ndDemoEntityManager* const scene, ndSharedPtr<ndMesh>& mesh, const ndMatrix& matrix)
+	{
 		ndPhysicsWorld* const world = scene->GetWorld();
 
 		// we first load the model as like any other arcilation
-		ndSharedPtr<ndModel> vehicleModel(new ndMultiBodyVehicle());
-		//ndSharedPtr<ndModel> vehicleModel(new ndConvexCastVehicle());
+		//ndSharedPtr<ndModel> vehicleModel(new ndMultiBodyVehicle());
+		ndSharedPtr<ndModel> vehicleModel(new ndConvexCastVehicle());
 		ndMultiBodyVehicle* const vehicle = vehicleModel->GetAsMultiBodyVehicle();
-		vehicle->Deserialize(mesh);
+		vehicle->Deserialize(*mesh);
 
 		// then, we convet the mode to a multibody vehicle.
 		vehicle->ConvertToMotorVehicle();
 
 		ndRender* const renderer = *scene->GetRenderer();
-		ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *loader.m_mesh, ndGetWorkingFileName("")));
+		ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *mesh, ndGetWorkingFileName("")));
 
 		ndSharedPtr<ndSoundSource> engineSound;
 		auto BindApplicationData = [scene, mesh, vehicle, &sceneMesh, &engineSound](ndModelArticulation::ndNode* const node)
@@ -179,7 +182,7 @@ namespace ndMotorVehicle
 		if (cameraPivotNode)
 		{
 			ndVector cameraPivot(ndVector::m_zero);
-			const ndMesh* const cameraPivotMesh = loader.m_mesh->FindByName("cameraPivot");
+			const ndMesh* const cameraPivotMesh = mesh->FindByName("cameraPivot");
 			ndAssert(cameraPivotMesh);
 			ndMeshCustomPropertyFloat* const property = (ndMeshCustomPropertyFloat*)cameraPivotMesh->GetCustomPropertyByName("cameraDistance");
 			ndFloat32 dist = property ? -ndAbs(property->m_value) : ndFloat32(-5.0f);
@@ -219,8 +222,7 @@ namespace ndMotorVehicle
 				}
 			}
 		};
-		loader.m_mesh->NodeIterator(AddGraphicsModiers);
-
+		mesh->NodeIterator(AddGraphicsModiers);
 
 		//add the notification for binding to the application.
 		ndSharedPtr<ndModelNotify> controller(new ndVehicleController(vehicle, engineSound));
@@ -233,6 +235,12 @@ namespace ndMotorVehicle
 		sceneMesh->SetTransform(matrix);
 		sceneMesh->SetTransform(matrix);
 		return vehicleModel;
+	}
+
+	ndSharedPtr<ndModel> CreateBasicVehicle(ndDemoEntityManager* const scene, const char* const modelName, const ndMatrix& matrix)
+	{
+		ndSharedPtr<ndMesh> mesh(LoadMesh(modelName));
+		return CreateBasicVehicle(scene, mesh, matrix);
 	}
 
 	class ndDashboard : public ndDemoEntityManager::ndDemoUIpanel
@@ -485,7 +493,7 @@ namespace ndMotorVehicle
 		ndMeshLoader loader;
 		loader.LoadMesh(fileName);
 
-		// set all teh alpha test materials
+		// set all the alpha test materials
 		auto SetAlphaTest = [](ndMesh* const node)
 		{
 			ndMeshEffect* const	geometry = *node->GetGeometry();
@@ -590,9 +598,9 @@ using namespace ndMotorVehicle;
 
 void ndBasicVehicle (ndDemoEntityManager* const scene)
 {
-	LoadMap(scene);
+	//LoadMap(scene);
 	//BuildPlayground(scene);
-	//BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true);
+	BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true);
 
 	ndPhysicsWorld* const world = scene->GetWorld();
 	ndVector location(0.0f, 2.0f, 0.0f, 1.0f);
@@ -605,13 +613,38 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	matrix.m_posit = floor;
 	matrix.m_posit.m_y += 0.5f;
 	
-	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f)));
-	//CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f)));
-	CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f)));
-	CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f)));
-	CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(12.0f, 1.0f, 6.0f, 0.0f)));
+	////CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f)));
+	////CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f)));
+	//CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f)));
+	//CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f)));
+	//CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(12.0f, 1.0f, 6.0f, 0.0f)));
 	
-	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f)));
+	CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f)));
+
+	//AddBox(scene, ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f)), 500.0f, 1.0f, 1.0f, 1.0f);
+	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -15.0f, 0.0f)));
+#if 1
+	// stress test convex cast vehicle 
+	ndInt32 size = 10;
+	ndSharedPtr<ndMesh> mesh0(LoadMesh("pickupTruck.nd"));
+	ndSharedPtr<ndMesh> mesh1(LoadMesh("testarossaMultiBody.nd"));
+	for (ndInt32 i = 0; i < size; ++i)
+	{
+		for (ndInt32 j = 0; j < size; ++j)
+		{
+			ndFloat32 x = ndFloat32(j * 7 + 4);
+			ndFloat32 z = ndFloat32(i * 7 + 4);
+			if (ndRandInt() & 1)
+			{
+				CreateBasicVehicle(scene, mesh0, ndPlacementMatrix(matrix, ndVector(x, 0.0f, z, 0.0f)));
+			}
+			else
+			{
+				CreateBasicVehicle(scene, mesh1, ndPlacementMatrix(matrix, ndVector(x, 0.0f, z, 0.0f)));
+			}
+		}
+	}
+#endif
 
 	//matrix.m_posit.m_x += 40.0f;
 	//matrix.m_posit.m_z += 5.0f;
