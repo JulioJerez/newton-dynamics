@@ -43,7 +43,7 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 	private:
 	virtual void OnAddToWorld() override;
 	virtual void OnRemoveFromWorld() override;
-	void CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& contacts, ndInt32 threadId);
+	void CalculateConveCastTireContacts(ndInt32 threadId);
 
 	ndIkSolver m_solver;
 	ndFixSizeArray<ndBodyDynamic*, 32> m_savedBody;

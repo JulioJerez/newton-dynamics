@@ -158,7 +158,7 @@ void ndConvexCastVehicle::ConvertToMotorVehicle()
 	NodeIterator(DisableStructuralNodes);
 }
 
-void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& contacts, ndInt32 threadId)
+void ndConvexCastVehicle::CalculateConveCastTireContacts(ndInt32 threadId)
 {
 	class ndShapeCast : public ndConvexCastNotify
 	{
@@ -233,7 +233,6 @@ void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& c
 			// first sort the contacts by the secund body.
 			for (ndInt32 i = 1; i < caster.m_contacts.GetCount(); ++i)
 			{
-				ndAssert(0);
 				ndContactPoint point(caster.m_contacts[i]);
 				ndAssert(point.m_body0 == wheelBody);
 				ndInt32 j = i - 1;
@@ -298,10 +297,6 @@ void ndConvexCastVehicle::CalculateContacts(ndFixSizeArray<ndConstraint*, 32>& c
 				if (contact->m_maxDof == 0)
 				{
 					contact->SetActive(false);
-				}
-				else
-				{
-					contacts.PushBack(contact);
 				}
 			}
 		}
@@ -373,9 +368,8 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	}
 
 	// update tire contacts 
-	ndFixSizeArray<ndConstraint*, 32> contacts;
 	m_skeleton->m_owner = world;
-	CalculateContacts(contacts, threadId);
+	CalculateConveCastTireContacts(threadId);
 
 	// apply all external forces to intenal bodies
 	m_originaSkeleton = GetRoot()->m_body->GetAsBodyKinematic()->GetSkeleton();
@@ -411,10 +405,7 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	ndMultiBodyVehicle::Update(timestep, threadId);
 
 	// solve using immediate solver.
-	ndConstraint** loopsPtr = contacts.GetCount() ? &contacts[0] : nullptr;
-
-	// factroize mass matrix
-	m_solver.SolverBegin(*m_skeleton, loopsPtr, contacts.GetCount(), world, timestep, threadId);
+	m_solver.SolverBegin(*m_skeleton, nullptr, 0, world, timestep, threadId);
 
 	// calculate forces
 	m_solver.Solve();

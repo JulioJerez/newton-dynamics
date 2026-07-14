@@ -301,7 +301,6 @@ void ndIkSolver::BuildMassMatrix(ndInt32 threadId)
 
 	auto CopyCloseLoopBody = [this](ndBodyKinematic* const body)
 	{
-		//ndAssert(body->GetId() > 0);
 		if (body->GetInvMass() == ndFloat32(0.0f))
 		{
 			return;
@@ -455,6 +454,11 @@ void ndIkSolver::BuildMassMatrix(ndInt32 threadId)
 				}
 			}
 		}
+	}
+
+	for (ndInt32 i = m_contacts.GetCount() - 1; i >= 0; --i)
+	{
+		m_skeleton->AddCloseLoopJoint(m_contacts[i]);
 	}
 
 	m_savedBodiesIndex.SetCount(m_bodies.GetCount());
