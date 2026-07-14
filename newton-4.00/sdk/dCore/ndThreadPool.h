@@ -131,11 +131,6 @@ class ndFunction<Type>
 	{
 	}
 
-	//void operator()(ndInt32 threadIndex, ndInt32 threadCount) const
-	//{
-	//	m_object.operator()(threadIndex, threadCount);
-	//}
-
 	void operator()(ndInt32 groupId, ndInt32 threadIndex, ndInt32 threadCount) const
 	{
 		m_object.operator()(groupId, threadIndex, threadCount);

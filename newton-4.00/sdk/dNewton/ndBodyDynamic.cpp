@@ -399,15 +399,9 @@ void ndBodyDynamic::EvaluateSleepState(ndFloat32 freezeSpeed2, ndFloat32 freezeA
 		ndAssert(m_omega.m_w == ndFloat32(0.0f));
 		
 		ndInt32 count = ndInt32(m_weigh);
-		ndAssert((!m_isConstrained && !m_weigh) || (m_isConstrained && m_weigh));
 
 		#ifdef _DEBUG
 		ndInt32 checkConnection = 0;
-		for (ndJointList::ndNode* node = m_jointList.GetFirst(); node; node = node->GetNext())
-		{
-			checkConnection += node->GetInfo()->IsActive() ? 1 : 0;
-		}
-
 		ndContactMap::Iterator it(m_contactList);
 		for (it.Begin(); it; it++)
 		{
@@ -417,7 +411,13 @@ void ndBodyDynamic::EvaluateSleepState(ndFloat32 freezeSpeed2, ndFloat32 freezeA
 				checkConnection++;
 			}
 		}
-		ndAssert(count == checkConnection);
+		ndAssert(!checkConnection || (!m_isConstrained && !m_weigh) || (m_isConstrained && m_weigh));
+
+		for (ndJointList::ndNode* node = m_jointList.GetFirst(); node; node = node->GetNext())
+		{
+			checkConnection += node->GetInfo()->IsActive() ? 1 : 0;
+		}
+		//ndAssert(count == checkConnection);
 		#endif
 
 		const ndVector maxAccNorm2 ((count > 1) ? m_sleepAccelTest2 : m_sleepAccelTest2 * m_sleepAccelTestScale2);

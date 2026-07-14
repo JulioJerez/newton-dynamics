@@ -126,7 +126,7 @@ class ndContact: public ndConstraint
 	D_COLLISION_API const ndContactPointList& GetContactPoints() const;
 	D_COLLISION_API virtual void JacobianDerivative(ndConstraintDescritor& desc);
 	D_COLLISION_API virtual void JointAccelerations(ndJointAccelerationDecriptor* const desc);
-	D_COLLISION_API void InitSurrogateContact(ndContact* const surrogate, ndBodyKinematic* const body0, ndBodyKinematic* const body1) const;
+	D_COLLISION_API void InitSurrogateContact(const ndContact* const sourceContact, ndBodyKinematic* const body0, ndBodyKinematic* const body1);
 
 	D_COLLISION_API void GetSeparatingSurface(ndVector& normal, ndVector& point0, ndVector& point1) const;
 	

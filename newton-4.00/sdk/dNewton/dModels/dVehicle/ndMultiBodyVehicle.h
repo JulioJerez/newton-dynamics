@@ -101,7 +101,6 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	
 	D_NEWTON_API const ndList<ndMultiBodyVehicleTireJoint*>& GetTireList() const;
 
-	D_NEWTON_API bool IsSleeping() const;
 	D_NEWTON_API ndFloat32 GetSpeed() const;
 	D_NEWTON_API void AddChassis(const ndSharedPtr<ndBody>& chassis);
 	D_NEWTON_API ndMultiBodyVehicleMotor* AddMotor(ndFloat32 mass, ndFloat32 radius);
@@ -152,7 +151,7 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	ndFloat32 m_maxSideslipRate;
 	ndFloat32 m_maxSideslipAngle;
 	ndFloat32 m_gravityMagnitud;
-
+	ndInt32 m_sleepCounter;
 	DebugFlags m_debugFlags;
 	bool m_initialized;
 

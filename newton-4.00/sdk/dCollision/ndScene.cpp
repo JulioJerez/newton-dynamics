@@ -383,13 +383,12 @@ bool ndScene::RemoveBody(const ndSharedPtr<ndBody>& body)
 ndSharedPtr<ndBody> ndScene::GetBody(ndBody* const body) const
 {
 	ndBodyKinematic* const kinematicBody = body->GetAsBodyKinematic();
-	if (kinematicBody)
+	if (kinematicBody && kinematicBody->m_sceneNode)
 	{
 		return kinematicBody->m_sceneNode->GetInfo();
 	}
 	else
 	{
-		ndAssert(0);
 		return ndSharedPtr<ndBody>(nullptr);
 	}
 }

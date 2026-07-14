@@ -167,6 +167,7 @@ ndMultiBodyVehicle::ndMultiBodyVehicle(ndFloat32 gravityMagnitud)
 	,m_localFrame(ndGetIdentityMatrix())
 	,m_tireShape(new ndShapeWheel())
 	,m_downForce()
+	,m_sleepCounter(0)
 	,m_debugFlags(DebugFlags(0))
 {
 	m_initialized = false;
@@ -500,20 +501,6 @@ ndMultiBodyVehicleGearBox* ndMultiBodyVehicle::AddGearBox(ndMultiBodyVehicleDiff
 	ndSharedPtr<ndJointBilateralConstraint> gearBox(new ndMultiBodyVehicleGearBox(ndFloat32 (1.0f), motorPinMatrix.m_front, m_motor->GetBody0(), differentialPinMatrix.m_front, differential->GetBody0()));
 	AddGearBox(gearBox);
 	return *m_gearBox;
-}
-
-bool ndMultiBodyVehicle::IsSleeping() const
-{
-	bool sleeping = true;
-	if (GetRoot())
-	{
-		for (ndNode* node = GetRoot()->GetFirstIterator(); sleeping && node; node = node->GetNextIterator())
-		{
-			ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
-			sleeping = sleeping && body->GetSleepState();
-		}
-	}
-	return sleeping;
 }
 
 void ndMultiBodyVehicle::ApplyAerodynamics(ndFloat32)
@@ -1536,6 +1523,21 @@ void ndMultiBodyVehicle::Update(ndFloat32 timestep, ndInt32)
 			selfBody->SetNotifyCallback(notify);
 		}
 	}
+
+	//const ndFloat32 sleepValue = ndFloat32(0.02f);
+	//bool sleeping = SetSleep(sleepValue, sleepValue, sleepValue, sleepValue);
+	//if (IsSleeping())
+	//{
+	//	m_sleepCounter++;
+	//	if (m_sleepCounter >= 8)
+	//	{
+	//		return;
+	//	}
+	//}
+	//else
+	//{
+	//	m_sleepCounter = 0;
+	//}
 
 	// apply down force
 	ApplyAerodynamics(timestep);

@@ -601,7 +601,14 @@ void ndDynamicsUpdate::IntegrateUnconstrainedBodies()
 		ndAssert(body);
 		body->UpdateInvInertiaMatrix();
 		body->AddDampingAcceleration(timestep);
+
+		const ndVector savedVeloc(body->m_veloc);
+		const ndVector savedOmega(body->m_omega);
 		body->IntegrateExternalForce(timestep);
+
+		// for free floating bodies we must strapolate acceleration
+		body->m_accel = savedVeloc;
+		body->m_alpha = savedOmega;
 	});
 
 	if (GetUnconstrainedBodyCount())

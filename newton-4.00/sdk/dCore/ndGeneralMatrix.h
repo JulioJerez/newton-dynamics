@@ -156,6 +156,7 @@ bool ndCholeskyFactorization(ndInt32 size, ndInt32 stride, T* const psdMatrix)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		T* const row_i = &psdMatrix[stride * i];
+		ndAssert(row_i[i] > T(0.0f));
 		for (ndInt32 j = 0; j <= i; ++j)
 		{
 			T diag (row_i[j]);
@@ -342,6 +343,7 @@ bool ndCholeskyTiledFactorization(ndInt32 size, ndInt32 stride, T* const psdMatr
 		T invDiag[__CholeskyTiledBlockSize__];
 		for (ndInt32 i = 0; i < __CholeskyTiledBlockSize__; ++i)
 		{
+			ndAssert(tile.m_element[i][i] > T(0.0f));
 			for (ndInt32 j = 0; j <= i; ++j)
 			{
 				T diag = tile.m_element[i][j];

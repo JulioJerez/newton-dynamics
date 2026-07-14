@@ -226,8 +226,6 @@ void ndPhysicsWorld::SetUpdateMode(bool collisionOnly)
 
 void ndPhysicsWorld::UpdateTransforms()
 {
-	// for some reason this cause a dead lock. I need to investigate.
-	//ndScopeSpinLock Lock(m_lock); 
 	ndWorld::UpdateTransforms();
 }
 
@@ -267,6 +265,8 @@ void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
 		m_manager->m_onPostUpdate->OnDebug(m_manager, false);
 	}
 
+	ndScopeSpinLock Lock(m_lock);
+
 	// update sound manager
 	const ndMatrix listenerMatrix(m_manager->GetRenderer()->GetCamera()->CalculateGlobalMatrix());
 	const ndMatrix oldListenerMatrix(m_manager->m_soundManager->GetMatrix());
@@ -274,8 +274,6 @@ void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
 	m_manager->m_soundManager->SetMatrix(listenerMatrix);
 	m_manager->m_soundManager->SetVelocity(listenerVeloc);
 	m_manager->m_soundManager->Update();
-
-	ndScopeSpinLock Lock(m_lock);
 
 	m_manager->SetNextActiveCamera();
 
@@ -292,6 +290,25 @@ void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
 				ndDemoEntityNotify* const entityNotify = (ndDemoEntityNotify*)notify;
 				entityNotify->OnPostUpdate(timestep);
 				entityNotify->m_entity->SetTransform(entityNotify->m_transform.m_rotation, entityNotify->m_transform.m_position);
+
+				const ndModel* const model = body->GetModel();
+				if (model && model->IsType(ndConvexCastVehicle::StaticClassName()))
+				{
+					const ndConvexCastVehicle* const fastVehicle = (ndConvexCastVehicle*) model;
+					if (*fastVehicle->GetRoot()->m_body == body)
+					{
+						const ndList<ndMultiBodyVehicleTireJoint*>& tireList = fastVehicle->GetTireList();
+						for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
+						{
+							ndBodyKinematic* const tireBody = tireNode->GetInfo()->GetBody0()->GetAsBodyKinematic();
+							ndAssert(tireBody);
+							ndAssert(tireBody->GetNotifyCallback()->IsType(ndDemoEntityNotify::StaticClassName()));
+							ndDemoEntityNotify* const tireNotify = (ndDemoEntityNotify*)*tireBody->GetNotifyCallback();
+							tireNotify->OnPostUpdate(timestep);
+							tireNotify->m_entity->SetTransform(tireNotify->m_transform.m_rotation, tireNotify->m_transform.m_position);
+						}
+					}
+				}
 			}
 		}
 	}
