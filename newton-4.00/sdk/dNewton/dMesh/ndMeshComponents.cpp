@@ -1064,7 +1064,7 @@ ndJointBilateralConstraint* ndMeshJointSlidingHinge::CreateObject(ndBodyKinemati
 {
 	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
 	const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
-	ndJointRoller* const joint = new ndJointRoller(pinAndPivotInChild, pinAndPivotInParent, child, parent);
+	ndJointSlidingHinge* const joint = new ndJointSlidingHinge(pinAndPivotInChild, pinAndPivotInParent, child, parent);
 
 	joint->SetLimitStatePosit(m_linearAxis.m_limitState ? true : false);
 	joint->SetLimitsPosit(m_linearAxis.m_minLimit, m_linearAxis.m_maxLimit);

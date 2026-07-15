@@ -80,13 +80,54 @@ namespace ndMotorVehicle
 	class ndVehicleController : public ndVehicleCommonNotify
 	{
 		public:
-		ndVehicleController(ndMultiBodyVehicle* const vehicle, ndSharedPtr<ndSoundSource> engineSound)
+		ndVehicleController(ndMultiBodyVehicle* const vehicle)
 			:ndVehicleCommonNotify(vehicle)
-			,m_engineSound(engineSound)
 		{
 		}
 
+		void PostUpdate(ndFloat32 timestep, ndInt32 threadId)
+		{
+			ndVehicleCommonNotify::PostUpdate(timestep, threadId);
+
+			if (m_sliderHinge)
+			{
+				UpdateTruck();
+			}
+			else if (m_hinge0)
+			{
+				ndTrace (("xxxxxxx\n"))
+			}
+			else if (m_hinge1)
+			{
+				ndTrace(("zzzzzzzzz\n"))
+			}
+
+		}
+
+		void UpdateTruck()
+		{
+			ndMultiBodyVehicle* const vehicle = GetModel()->GetAsMultiBodyVehicle();
+			ndPhysicsWorld* const world = (ndPhysicsWorld*)vehicle->GetWorld();
+			ndDemoEntityManager* const scene = world->GetManager();
+
+			const ndSharedPtr<ndGameControllerInputs>& gameController = scene->GetGameController();
+			const ndFixSizeArray<bool, 32>& buttons = gameController->GetButtons();
+
+			if (buttons[ndGameControllerInputs::m_action0])
+			{
+				ndTrace(("xxxxx\n"));
+			}
+			else if (buttons[ndGameControllerInputs::m_action3])
+			{
+				ndTrace(("zzzzz\n"));
+			}
+
+		}
+
 		ndSharedPtr<ndSoundSource> m_engineSound;
+		ndWeakPtr<ndJointHinge> m_hinge0;
+		ndWeakPtr<ndJointHinge> m_hinge1;
+		ndWeakPtr<ndJointSlidingHinge> m_sliderHinge;
 	};
 
 	ndSharedPtr<ndMesh> LoadMesh(const char* const modelName)
@@ -96,24 +137,27 @@ namespace ndMotorVehicle
 		return loader.m_mesh;
 	}
 
-	ndSharedPtr<ndModel> CreateBasicVehicle(ndDemoEntityManager* const scene, ndSharedPtr<ndMesh>& mesh, const ndMatrix& matrix)
+	ndSharedPtr<ndModel> CreateBasicVehicle(ndDemoEntityManager* const scene, ndSharedPtr<ndMesh>& mesh, const ndMatrix& matrix, bool convexCast)
 	{
 		ndPhysicsWorld* const world = scene->GetWorld();
 
 		// we first load the model as like any other arcilation
-		//ndSharedPtr<ndModel> vehicleModel(new ndMultiBodyVehicle());
-		ndSharedPtr<ndModel> vehicleModel(new ndConvexCastVehicle());
+		ndSharedPtr<ndModel> vehicleModel(convexCast ? new ndConvexCastVehicle() : new ndMultiBodyVehicle());
 		ndMultiBodyVehicle* const vehicle = vehicleModel->GetAsMultiBodyVehicle();
 		vehicle->Deserialize(*mesh);
 
 		// then, we convet the mode to a multibody vehicle.
 		vehicle->ConvertToMotorVehicle();
 
+		//add the notification for binding to the application.
+		ndSharedPtr<ndModelNotify> controller(new ndVehicleController(vehicle));
+		vehicle->SetNotifyCallback(controller);
+
 		ndRender* const renderer = *scene->GetRenderer();
 		ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *mesh, ndGetWorkingFileName("")));
 
 		ndSharedPtr<ndSoundSource> engineSound;
-		auto BindApplicationData = [scene, mesh, vehicle, &sceneMesh, &engineSound](ndModelArticulation::ndNode* const node)
+		auto BindApplicationData = [scene, mesh, vehicle, &sceneMesh, &engineSound, controller](ndModelArticulation::ndNode* const node)
 		{
 			if (vehicle->IsCloseLoop(node))
 			{
@@ -134,6 +178,8 @@ namespace ndMotorVehicle
 
 						ndSharedPtr<ndSoundSourceNotify> notify(new ndVehicleEngineSound(vehicle));
 						engineSound->SetNotify(notify);
+
+						((ndVehicleController*)*controller)->m_engineSound = engineSound;
 					}
 				}
 
@@ -148,27 +194,17 @@ namespace ndMotorVehicle
 				ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
 				if (node->m_joint)
 				{
-					if ((strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleMotor::StaticClassName()) == 0) ||
-						(strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleDifferential::StaticClassName()) == 0) ||
-						(strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0))
+					if (node->m_joint->IsType(ndMultiBodyVehicleMotor::StaticClassName()) ||
+						node->m_joint->IsType(ndMultiBodyVehicleDifferential::StaticClassName()) ||
+						node->m_joint->IsType(ndMultiBodyVehicleTireJoint::StaticClassName()))
 					{
 						// fast moving wheel
 						ndDemoEntityNotify* const fastNotify = (ndDemoEntityNotify*)*notify;
 						fastNotify->m_capOmega = ndFloat32(10000.0f);
 					}
-					if ((strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0))
+					else if (node->m_joint->IsType(ndJointSlidingHinge::StaticClassName()))
 					{
-						////costumize friction model if desired
-						////plot the curve to check it is a value form
-						//ndMultiBodyVehicleTireJoint* const joint = (ndMultiBodyVehicleTireJoint*)*node->m_joint;
-						//ndTireFrictionModel frictionMode(joint->GetFrictionModel());
-						//frictionMode.PlotPacejkaCurves(node->m_name.GetStr());
-					}
-					if ((strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleMotor::StaticClassName()) == 0))
-					{
-						//override the default trque rpm curve, if desired
-						//ndMultiBodyVehicleMotor* const motor = (ndMultiBodyVehicleMotor*)*node->m_joint;
-						//motor->SetCurve(superCar.m_curve);
+						((ndVehicleController*)*controller)->m_sliderHinge = (ndJointSlidingHinge*)*node->m_joint;
 					}
 				}
 				node->m_body->SetNotifyCallback(notify);
@@ -224,10 +260,6 @@ namespace ndMotorVehicle
 		};
 		mesh->NodeIterator(AddGraphicsModiers);
 
-		//add the notification for binding to the application.
-		ndSharedPtr<ndModelNotify> controller(new ndVehicleController(vehicle, engineSound));
-		vehicle->SetNotifyCallback(controller);
-
 		scene->AddEntity(sceneMesh);
 		world->AddModel(vehicleModel);
 
@@ -237,10 +269,10 @@ namespace ndMotorVehicle
 		return vehicleModel;
 	}
 
-	ndSharedPtr<ndModel> CreateBasicVehicle(ndDemoEntityManager* const scene, const char* const modelName, const ndMatrix& matrix)
+	ndSharedPtr<ndModel> CreateBasicVehicle(ndDemoEntityManager* const scene, const char* const modelName, const ndMatrix& matrix, bool convexCast = false)
 	{
 		ndSharedPtr<ndMesh> mesh(LoadMesh(modelName));
-		return CreateBasicVehicle(scene, mesh, matrix);
+		return CreateBasicVehicle(scene, mesh, matrix, convexCast);
 	}
 
 	class ndDashboard : public ndDemoEntityManager::ndDemoUIpanel
@@ -613,17 +645,16 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	matrix.m_posit = floor;
 	matrix.m_posit.m_y += 0.5f;
 	
-	////CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f)));
-	////CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f)));
-	//CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f)));
+	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f)), true);
+	//CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f)), true);
+	CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f)));
 	//CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f)));
 	//CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(12.0f, 1.0f, 6.0f, 0.0f)));
 	
-	CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f)));
-
+	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f)));
 	//AddBox(scene, ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f)), 500.0f, 1.0f, 1.0f, 1.0f);
 	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -15.0f, 0.0f)));
-#if 1
+#if 0
 	// stress test convex cast vehicle 
 	ndInt32 size = 10;
 	ndSharedPtr<ndMesh> mesh0(LoadMesh("pickupTruck.nd"));

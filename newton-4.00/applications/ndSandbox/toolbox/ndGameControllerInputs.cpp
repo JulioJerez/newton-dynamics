@@ -214,6 +214,10 @@ void ndGameControllerInputs::GetXboxJoystickInputs(ndDemoEntityManager* const sc
 			//}
 		}
 		
+		m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_action0] = 0;
+		m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_action1] = 0;
+		m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_action2] = 0;
+		m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_action3] = 0;
 		if (m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_shiftKey])
 		{
 			if (m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_automaticGearBoxButton])
