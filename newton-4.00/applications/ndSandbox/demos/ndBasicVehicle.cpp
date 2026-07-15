@@ -82,6 +82,16 @@ namespace ndMotorVehicle
 		public:
 		ndVehicleController(ndMultiBodyVehicle* const vehicle)
 			:ndVehicleCommonNotify(vehicle)
+			,m_hinge0(nullptr)
+			,m_hinge1(nullptr)
+			,m_engineSound(nullptr)
+			,m_sliderHinge(nullptr)
+			,m_param0(ndFloat32(0.0f))
+			,m_minParam0(ndFloat32(0.0f))
+			,m_maxParam0(ndFloat32(0.0f))
+			,m_param1(ndFloat32(0.0f))
+			,m_minParam1(ndFloat32(0.0f))
+			,m_maxParam1(ndFloat32(0.0f))
 		{
 		}
 
@@ -89,22 +99,25 @@ namespace ndMotorVehicle
 		{
 			ndVehicleCommonNotify::PostUpdate(timestep, threadId);
 
-			if (m_sliderHinge)
+			if (m_isPlayer)
 			{
-				UpdateTruck();
-			}
-			else if (m_hinge0)
-			{
-				ndTrace (("xxxxxxx\n"))
-			}
-			else if (m_hinge1)
-			{
-				ndTrace(("zzzzzzzzz\n"))
+				if (m_sliderHinge)
+				{
+					UpdateTruck(timestep);
+				}
+				else if (m_hinge0)
+				{
+					ndTrace(("xxxxxxx\n"))
+				}
+				else if (m_hinge1)
+				{
+					ndTrace(("zzzzzzzzz\n"))
+				}
 			}
 
 		}
 
-		void UpdateTruck()
+		void UpdateTruck(ndFloat32 timestep)
 		{
 			ndMultiBodyVehicle* const vehicle = GetModel()->GetAsMultiBodyVehicle();
 			ndPhysicsWorld* const world = (ndPhysicsWorld*)vehicle->GetWorld();
@@ -115,19 +128,37 @@ namespace ndMotorVehicle
 
 			if (buttons[ndGameControllerInputs::m_action0])
 			{
-				ndTrace(("xxxxx\n"));
+				ndFloat32 angle = ndClamp(m_sliderHinge->GetAngle() - m_param0 * timestep, m_minParam0, m_maxParam0);
+				m_sliderHinge->SetOffsetAngle(angle);
 			}
 			else if (buttons[ndGameControllerInputs::m_action3])
 			{
-				ndTrace(("zzzzz\n"));
+				ndFloat32 angle = ndClamp(m_sliderHinge->GetAngle() + m_param0 * timestep, m_minParam0, m_maxParam0);
+				m_sliderHinge->SetOffsetAngle(angle);
 			}
 
+			if (buttons[ndGameControllerInputs::m_action1])
+			{
+				ndFloat32 posit = ndClamp(m_sliderHinge->GetPosit() - m_param1 * timestep, m_minParam1, m_maxParam1);
+				m_sliderHinge->SetTargetPosit(posit);
+			}
+			else if (buttons[ndGameControllerInputs::m_action2])
+			{
+				ndFloat32 posit = ndClamp(m_sliderHinge->GetPosit() + m_param1 * timestep, m_minParam1, m_maxParam1);
+				m_sliderHinge->SetTargetPosit(posit);
+			}
 		}
 
-		ndSharedPtr<ndSoundSource> m_engineSound;
 		ndWeakPtr<ndJointHinge> m_hinge0;
 		ndWeakPtr<ndJointHinge> m_hinge1;
+		ndSharedPtr<ndSoundSource> m_engineSound;
 		ndWeakPtr<ndJointSlidingHinge> m_sliderHinge;
+		ndFloat32 m_param0;
+		ndFloat32 m_minParam0;
+		ndFloat32 m_maxParam0;
+		ndFloat32 m_param1;
+		ndFloat32 m_minParam1;
+		ndFloat32 m_maxParam1;
 	};
 
 	ndSharedPtr<ndMesh> LoadMesh(const char* const modelName)
@@ -156,8 +187,8 @@ namespace ndMotorVehicle
 		ndRender* const renderer = *scene->GetRenderer();
 		ndSharedPtr<ndRenderSceneNode> sceneMesh(ndRenderMeshLoader::CreateRenderSceneMesh(renderer, *mesh, ndGetWorkingFileName("")));
 
-		ndSharedPtr<ndSoundSource> engineSound;
-		auto BindApplicationData = [scene, mesh, vehicle, &sceneMesh, &engineSound, controller](ndModelArticulation::ndNode* const node)
+		ndVehicleController* const vehController = (ndVehicleController*)*controller;
+		auto BindApplicationData = [scene, mesh, vehicle, &sceneMesh, vehController](ndModelArticulation::ndNode* const node)
 		{
 			if (vehicle->IsCloseLoop(node))
 			{
@@ -173,13 +204,13 @@ namespace ndMotorVehicle
 					ndMeshCustomPropertyString* const property = (ndMeshCustomPropertyString*)meshNode->GetCustomPropertyByName("engineSound");
 					if (property)
 					{
-						engineSound = scene->GetSoundManager()->AddSound(property->m_value.GetStr());
+						ndSharedPtr<ndSoundSource>engineSound (scene->GetSoundManager()->AddSound(property->m_value.GetStr()));
 						engineSound->SetLooping(true);
 
 						ndSharedPtr<ndSoundSourceNotify> notify(new ndVehicleEngineSound(vehicle));
 						engineSound->SetNotify(notify);
 
-						((ndVehicleController*)*controller)->m_engineSound = engineSound;
+						vehController->m_engineSound = engineSound;
 					}
 				}
 
@@ -192,22 +223,55 @@ namespace ndMotorVehicle
 				// add a rigid body with notification callback
 				ndBodyKinematic* const parentBody = node->GetParent() ? node->GetParent()->m_body->GetAsBodyKinematic() : nullptr;
 				ndSharedPtr<ndBodyNotify> notify(new ndDemoEntityNotify(scene, visualEntity, parentBody));
+				node->m_body->SetNotifyCallback(notify);
+
 				if (node->m_joint)
 				{
 					if (node->m_joint->IsType(ndMultiBodyVehicleMotor::StaticClassName()) ||
 						node->m_joint->IsType(ndMultiBodyVehicleDifferential::StaticClassName()) ||
 						node->m_joint->IsType(ndMultiBodyVehicleTireJoint::StaticClassName()))
 					{
-						// fast moving wheel
-						ndDemoEntityNotify* const fastNotify = (ndDemoEntityNotify*)*notify;
-						fastNotify->m_capOmega = ndFloat32(10000.0f);
+						// set wheels, motors and diferentials as fast pinning nodies
+						ndDemoEntityNotify* const fastSpinNotify = (ndDemoEntityNotify*)*node->m_body->GetNotifyCallback();
+						ndAssert(fastSpinNotify->IsType(ndDemoEntityNotify::StaticClassName()));
+						fastSpinNotify->m_capOmega = ndFloat32(10000.0f);
 					}
 					else if (node->m_joint->IsType(ndJointSlidingHinge::StaticClassName()))
 					{
-						((ndVehicleController*)*controller)->m_sliderHinge = (ndJointSlidingHinge*)*node->m_joint;
+						// set special feature controls.
+						vehController->m_sliderHinge = (ndJointSlidingHinge*)*node->m_joint;
+						{
+							// set angular parameters
+							const ndMeshCustomPropertyFloat* const angleRate = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("omegaRate");
+							ndAssert(angleRate->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+							vehController->m_param0 = angleRate->m_value;
+
+							const ndMeshCustomPropertyFloat* const minAngle = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("minAngle");
+							ndAssert(minAngle->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+							vehController->m_minParam0 = minAngle->m_value * ndDegreeToRad;
+
+							const ndMeshCustomPropertyFloat* const maxAngle = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("maxAngle");
+							ndAssert(maxAngle->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+							vehController->m_maxParam0 = maxAngle->m_value * ndDegreeToRad;
+						}
+
+						{
+							// set sliding parameters
+							const ndMeshCustomPropertyFloat* const slideSpeed = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("slideSpeed");
+							ndAssert(slideSpeed->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+							vehController->m_param1 = slideSpeed->m_value;
+
+							const ndMeshCustomPropertyFloat* const minSlide = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("minSlide");
+							ndAssert(minSlide->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+							vehController->m_minParam1 = minSlide->m_value;
+
+							const ndMeshCustomPropertyFloat* const maxSlide = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("maxSlide");
+							ndAssert(maxSlide->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+							vehController->m_maxParam1 = maxSlide->m_value;
+						}
+
 					}
 				}
-				node->m_body->SetNotifyCallback(notify);
 			}
 		};
 		vehicle->NodeIterator(BindApplicationData);
