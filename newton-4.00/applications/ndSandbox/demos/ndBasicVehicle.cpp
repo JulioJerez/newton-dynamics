@@ -113,12 +113,12 @@ namespace ndMotorVehicle
 
 				if (m_hinge0)
 				{
-					if (buttons[ndGameControllerInputs::m_action0])
+					if (buttons[ndGameControllerInputs::m_action1])
 					{
 						ndFloat32 angle = ndClamp(m_hinge0->GetAngle() - m_param0 * timestep, m_minParam0, m_maxParam0);
 						m_hinge0->SetTargetAngle(angle);
 					}
-					else if (buttons[ndGameControllerInputs::m_action3])
+					else if (buttons[ndGameControllerInputs::m_action0])
 					{
 						ndFloat32 angle = ndClamp(m_hinge0->GetAngle() + m_param0 * timestep, m_minParam0, m_maxParam0);
 						m_hinge0->SetTargetAngle(angle);
@@ -126,7 +126,7 @@ namespace ndMotorVehicle
 				}
 				if (m_hinge1)
 				{
-					if (buttons[ndGameControllerInputs::m_action1])
+					if (buttons[ndGameControllerInputs::m_action3])
 					{
 						ndFloat32 angle = ndClamp(m_hinge1->GetAngle() - m_param1 * timestep, m_minParam1, m_maxParam1);
 						m_hinge1->SetTargetAngle(angle);
@@ -139,7 +139,7 @@ namespace ndMotorVehicle
 				}
 				if (m_slider)
 				{
-					if (buttons[ndGameControllerInputs::m_action1])
+					if (buttons[ndGameControllerInputs::m_action3])
 					{
 						ndFloat32 posit = ndClamp(m_slider->GetPosit() - m_sliderParam * timestep, m_sliderMinParam, m_sliderMaxParam);
 						m_slider->SetTargetPosit(posit);
@@ -723,9 +723,9 @@ using namespace ndMotorVehicle;
 
 void ndBasicVehicle (ndDemoEntityManager* const scene)
 {
-	//LoadMap(scene);
+	LoadMap(scene);
 	//BuildPlayground(scene);
-	BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true);
+	//BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true);
 
 	ndPhysicsWorld* const world = scene->GetWorld();
 	ndVector location(0.0f, 2.0f, 0.0f, 1.0f);
@@ -741,7 +741,7 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f)), true);
 	//CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f)), true);
 	CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f)));
-	//CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f)));
+	CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f)));
 	CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(12.0f, 1.0f, 6.0f, 0.0f)));
 	
 	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f)));

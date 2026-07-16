@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
 set (projectName "ndSandbox")
 message (${projectName})
 
-option("NEWTON_BUILD_SANDBOX_DEMOS_OPEN_AL" "enable sound" OFF)
+option("NEWTON_BUILD_SANDBOX_DEMOS_OPEN_AL" "enable sound" ON)
 
 # source and header files
 if (APPLE) 
