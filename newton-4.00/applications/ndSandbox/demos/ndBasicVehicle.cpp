@@ -84,14 +84,17 @@ namespace ndMotorVehicle
 			:ndVehicleCommonNotify(vehicle)
 			,m_hinge0(nullptr)
 			,m_hinge1(nullptr)
+			,m_slider(nullptr)
 			,m_engineSound(nullptr)
-			,m_sliderHinge(nullptr)
 			,m_param0(ndFloat32(0.0f))
 			,m_minParam0(ndFloat32(0.0f))
 			,m_maxParam0(ndFloat32(0.0f))
 			,m_param1(ndFloat32(0.0f))
 			,m_minParam1(ndFloat32(0.0f))
 			,m_maxParam1(ndFloat32(0.0f))
+			,m_sliderParam(ndFloat32(0.0f))
+			,m_sliderMinParam(ndFloat32(0.0f))
+			,m_sliderMaxParam(ndFloat32(0.0f))
 		{
 		}
 
@@ -101,64 +104,61 @@ namespace ndMotorVehicle
 
 			if (m_isPlayer)
 			{
-				if (m_sliderHinge)
+				ndMultiBodyVehicle* const vehicle = GetModel()->GetAsMultiBodyVehicle();
+				ndPhysicsWorld* const world = (ndPhysicsWorld*)vehicle->GetWorld();
+				ndDemoEntityManager* const scene = world->GetManager();
+
+				const ndSharedPtr<ndGameControllerInputs>& gameController = scene->GetGameController();
+				const ndFixSizeArray<bool, 32>& buttons = gameController->GetButtons();
+
+				if (m_hinge0)
 				{
-					UpdateTruck(timestep);
+					if (buttons[ndGameControllerInputs::m_action0])
+					{
+						ndFloat32 angle = ndClamp(m_hinge0->GetAngle() - m_param0 * timestep, m_minParam0, m_maxParam0);
+						m_hinge0->SetTargetAngle(angle);
+					}
+					else if (buttons[ndGameControllerInputs::m_action3])
+					{
+						ndFloat32 angle = ndClamp(m_hinge0->GetAngle() + m_param0 * timestep, m_minParam0, m_maxParam0);
+						m_hinge0->SetTargetAngle(angle);
+					}
 				}
-				else if (m_hinge0)
+				if (m_slider)
 				{
-					ndTrace(("xxxxxxx\n"))
+					if (buttons[ndGameControllerInputs::m_action1])
+					{
+						ndFloat32 posit = ndClamp(m_slider->GetPosit() - m_sliderParam * timestep, m_sliderMinParam, m_sliderMaxParam);
+						m_slider->SetTargetPosit(posit);
+					}
+					else if (buttons[ndGameControllerInputs::m_action2])
+					{
+						ndFloat32 posit = ndClamp(m_slider->GetPosit() + m_sliderParam * timestep, m_sliderMinParam, m_sliderMaxParam);
+						m_slider->SetTargetPosit(posit);
+					}
 				}
 				else if (m_hinge1)
 				{
 					ndTrace(("zzzzzzzzz\n"))
 				}
 			}
-
-		}
-
-		void UpdateTruck(ndFloat32 timestep)
-		{
-			ndMultiBodyVehicle* const vehicle = GetModel()->GetAsMultiBodyVehicle();
-			ndPhysicsWorld* const world = (ndPhysicsWorld*)vehicle->GetWorld();
-			ndDemoEntityManager* const scene = world->GetManager();
-
-			const ndSharedPtr<ndGameControllerInputs>& gameController = scene->GetGameController();
-			const ndFixSizeArray<bool, 32>& buttons = gameController->GetButtons();
-
-			if (buttons[ndGameControllerInputs::m_action0])
-			{
-				ndFloat32 angle = ndClamp(m_sliderHinge->GetAngle() - m_param0 * timestep, m_minParam0, m_maxParam0);
-				m_sliderHinge->SetOffsetAngle(angle);
-			}
-			else if (buttons[ndGameControllerInputs::m_action3])
-			{
-				ndFloat32 angle = ndClamp(m_sliderHinge->GetAngle() + m_param0 * timestep, m_minParam0, m_maxParam0);
-				m_sliderHinge->SetOffsetAngle(angle);
-			}
-
-			if (buttons[ndGameControllerInputs::m_action1])
-			{
-				ndFloat32 posit = ndClamp(m_sliderHinge->GetPosit() - m_param1 * timestep, m_minParam1, m_maxParam1);
-				m_sliderHinge->SetTargetPosit(posit);
-			}
-			else if (buttons[ndGameControllerInputs::m_action2])
-			{
-				ndFloat32 posit = ndClamp(m_sliderHinge->GetPosit() + m_param1 * timestep, m_minParam1, m_maxParam1);
-				m_sliderHinge->SetTargetPosit(posit);
-			}
 		}
 
 		ndWeakPtr<ndJointHinge> m_hinge0;
 		ndWeakPtr<ndJointHinge> m_hinge1;
+		ndWeakPtr<ndJointSlider> m_slider;
 		ndSharedPtr<ndSoundSource> m_engineSound;
-		ndWeakPtr<ndJointSlidingHinge> m_sliderHinge;
+
 		ndFloat32 m_param0;
 		ndFloat32 m_minParam0;
 		ndFloat32 m_maxParam0;
 		ndFloat32 m_param1;
 		ndFloat32 m_minParam1;
 		ndFloat32 m_maxParam1;
+		ndFloat32 m_sliderParam;
+		ndFloat32 m_sliderMinParam;
+		ndFloat32 m_sliderMaxParam;
+
 	};
 
 	ndSharedPtr<ndMesh> LoadMesh(const char* const modelName)
@@ -236,40 +236,58 @@ namespace ndMotorVehicle
 						ndAssert(fastSpinNotify->IsType(ndDemoEntityNotify::StaticClassName()));
 						fastSpinNotify->m_capOmega = ndFloat32(10000.0f);
 					}
-					else if (node->m_joint->IsType(ndJointSlidingHinge::StaticClassName()))
+					else if (node->m_joint->IsType(ndJointSlider::StaticClassName()))
+					{
+						vehController->m_slider = (ndJointSlider*)*node->m_joint;
+						// set sliding parameters
+						const ndMeshCustomPropertyFloat* const rate = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("rate");
+						ndAssert(rate->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+						vehController->m_sliderParam = rate->m_value;
+						
+						const ndMeshCustomPropertyFloat* const minSlide = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("minimum");
+						ndAssert(minSlide->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+						vehController->m_sliderMinParam = minSlide->m_value;
+						
+						const ndMeshCustomPropertyFloat* const maxSlide = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("maximum");
+						ndAssert(maxSlide->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+						vehController->m_sliderMaxParam = maxSlide->m_value;
+					}
+					else if (node->m_joint->IsType(ndJointHinge::StaticClassName()))
 					{
 						// set special feature controls.
-						vehController->m_sliderHinge = (ndJointSlidingHinge*)*node->m_joint;
+						if (!(*vehController->m_hinge0))
 						{
+							vehController->m_hinge0 = (ndJointHinge*)*node->m_joint;
 							// set angular parameters
-							const ndMeshCustomPropertyFloat* const angleRate = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("omegaRate");
-							ndAssert(angleRate->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
-							vehController->m_param0 = angleRate->m_value;
+							const ndMeshCustomPropertyFloat* const rate = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("rate");
+							ndAssert(rate->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+							vehController->m_param0 = rate->m_value;
 
-							const ndMeshCustomPropertyFloat* const minAngle = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("minAngle");
-							ndAssert(minAngle->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
-							vehController->m_minParam0 = minAngle->m_value * ndDegreeToRad;
+							const ndMeshCustomPropertyFloat* const minParam = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("minimum");
+							ndAssert(minParam->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+							vehController->m_minParam0 = minParam->m_value * ndDegreeToRad;
 
-							const ndMeshCustomPropertyFloat* const maxAngle = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("maxAngle");
-							ndAssert(maxAngle->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
-							vehController->m_maxParam0 = maxAngle->m_value * ndDegreeToRad;
+							const ndMeshCustomPropertyFloat* const maxParam = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("maximum");
+							ndAssert(maxParam->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+							vehController->m_maxParam0 = maxParam->m_value * ndDegreeToRad;
 						}
-
+						else
 						{
-							// set sliding parameters
-							const ndMeshCustomPropertyFloat* const slideSpeed = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("slideSpeed");
-							ndAssert(slideSpeed->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
-							vehController->m_param1 = slideSpeed->m_value;
+							ndAssert(0);
+							vehController->m_hinge1 = (ndJointHinge*)*node->m_joint;
+							// set angular parameters
+							const ndMeshCustomPropertyFloat* const rate = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("rate");
+							ndAssert(rate->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+							vehController->m_param1 = rate->m_value;
 
-							const ndMeshCustomPropertyFloat* const minSlide = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("minSlide");
-							ndAssert(minSlide->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
-							vehController->m_minParam1 = minSlide->m_value;
+							const ndMeshCustomPropertyFloat* const minParam = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("minimun");
+							ndAssert(minParam->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+							vehController->m_minParam1 = minParam->m_value * ndDegreeToRad;
 
-							const ndMeshCustomPropertyFloat* const maxSlide = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("maxSlide");
-							ndAssert(maxSlide->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
-							vehController->m_maxParam1 = maxSlide->m_value;
+							const ndMeshCustomPropertyFloat* const maxParam = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("maximim");
+							ndAssert(maxParam->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+							vehController->m_maxParam1 = maxParam->m_value * ndDegreeToRad;
 						}
-
 					}
 				}
 			}

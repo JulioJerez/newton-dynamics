@@ -152,7 +152,8 @@ void ndAssetEditor::EditLoopJointGlobalMatrix(ndSharedPtr<ndMeshLoopJoint>& loop
 
 	if (m_parentSpaceTransform)
 	{
-		ndAssert(0);
+		ndTrace (("TO DO: global matrix EditLoopJointGlobalMatrix\n"))
+		//ndAssert(0);
 	}
 	else
 	{

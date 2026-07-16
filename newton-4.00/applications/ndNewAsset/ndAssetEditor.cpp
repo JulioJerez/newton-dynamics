@@ -436,7 +436,6 @@ void ndAssetEditor::ShowMainMenuBar()
 					// -roller
 					// -spherical
 					// -cylindrical
-					// -slidingHinge
 
 					// for mesh runtine manipulation:
 					// -hidden 
