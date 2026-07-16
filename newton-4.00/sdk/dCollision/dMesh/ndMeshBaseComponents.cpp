@@ -663,10 +663,21 @@ bool ndMeshCollisionShapeCompound::operator==(const ndMeshCollisionShape& other)
 	return false;
 }
 
-//void ndMeshCollisionShapeCompound::ApplyScale(ndFloat32 scale)
-void ndMeshCollisionShapeCompound::ApplyScale(ndFloat32)
+void ndMeshCollisionShapeCompound::ApplyScale(ndFloat32 scale)
 {
-	ndAssert(0);
+	ndShapeCompound* const compoundShape = new ndShapeCompound();
+	compoundShape->BeginAddRemove();
+	ndMatrix scaleMatrix(ndGetIdentityMatrix());
+	scaleMatrix[0][0] = scale;
+	scaleMatrix[1][1] = scale;
+	scaleMatrix[2][2] = scale;
+	for (ndList<ndSharedPtr<ndMeshShapeInstance>>::ndNode* node = m_subShapes.GetFirst(); node; node = node->GetNext())
+	{
+		ndSharedPtr<ndMeshShapeInstance>& subMeshInstancePtr = node->GetInfo();
+		ndMeshShapeInstance* const subMeshInstance = *subMeshInstancePtr;
+		subMeshInstance->ApplyScale(scaleMatrix);
+	}
+	compoundShape->EndAddRemove();
 }
 
 ndShape* ndMeshCollisionShapeCompound::CreateObject() const
@@ -676,7 +687,7 @@ ndShape* ndMeshCollisionShapeCompound::CreateObject() const
 	for (ndList<ndSharedPtr<ndMeshShapeInstance>>::ndNode* node = m_subShapes.GetFirst(); node; node = node->GetNext())
 	{
 		const ndSharedPtr<ndMeshShapeInstance>& subMeshInstancePtr = node->GetInfo();
-		const ndMeshShapeInstance* subMeshInstance = *subMeshInstancePtr;
+		const ndMeshShapeInstance* const subMeshInstance = *subMeshInstancePtr;
 		ndSharedPtr<ndShapeInstance> subIntance(subMeshInstance->CreateObject());
 		compoundShape->AddCollision(*subIntance);
 	}

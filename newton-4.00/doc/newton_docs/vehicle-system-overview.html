@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anatomy of a Vehicle — Newton Dynamics Source Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0d1117;
+    --panel: #121a26;
+    --panel-2: #161f2d;
+    --line: #24303f;
+    --line-strong: #3a4a5e;
+    --text: #e6edf5;
+    --muted: #8fa0b8;
+    --dim: #5c6b81;
+    --amber: #f0a868;
+    --cyan: #6fc3d6;
+    --red: #e2686a;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --sans: 'Inter', -apple-system, sans-serif;
+    --maxw: 920px;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(111,195,214,0.06), transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, rgba(240,168,104,0.05), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* faint blueprint grid */
+  .grid-bg{
+    position:fixed; inset:0; z-index:-1; opacity:0.35;
+    background-image:
+      linear-gradient(rgba(111,195,214,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(111,195,214,0.05) 1px, transparent 1px);
+    background-size: 42px 42px;
+    mask-image: radial-gradient(circle at 30% 10%, black, transparent 75%);
+  }
+
+  a{ color:var(--cyan); }
+
+  .wrap{ max-width:var(--maxw); margin:0 auto; padding:0 28px; }
+
+  /* ---------- NAV ---------- */
+  nav{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    background:rgba(13,17,23,0.86);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  nav .wrap{ display:flex; align-items:center; justify-content:space-between; height:56px; }
+  .brand{ font-family:var(--mono); font-weight:700; font-size:13px; letter-spacing:0.08em; color:var(--amber); text-transform:uppercase; }
+  .brand span{ color:var(--dim); }
+  .navlinks{ display:flex; gap:22px; }
+  .navlinks a{
+    font-family:var(--mono); font-size:12px; color:var(--muted); text-decoration:none;
+    letter-spacing:0.03em; text-transform:uppercase; transition:color .15s;
+  }
+  .navlinks a:hover{ color:var(--cyan); }
+  @media (max-width:720px){ .navlinks{ display:none; } }
+
+  /* ---------- HERO ---------- */
+  header.hero{ padding:140px 0 70px; border-bottom:1px solid var(--line); }
+  .eyebrow{
+    font-family:var(--mono); font-size:12px; color:var(--cyan);
+    letter-spacing:0.12em; text-transform:uppercase; margin-bottom:18px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{ content:''; width:22px; height:1px; background:var(--cyan); display:inline-block; }
+  h1{
+    font-family:var(--mono); font-weight:800; font-size:clamp(28px,5vw,44px);
+    line-height:1.15; margin:0 0 18px; letter-spacing:-0.01em;
+  }
+  h1 em{ font-style:normal; color:var(--amber); }
+  .lede{ font-size:17px; color:var(--muted); max-width:640px; margin:0 0 8px; }
+  .filepaths{
+    margin-top:28px; display:flex; flex-wrap:wrap; gap:8px;
+  }
+  .filepaths code{
+    font-family:var(--mono); font-size:12px; color:var(--muted);
+    border:1px solid var(--line-strong); padding:4px 9px; border-radius:3px;
+    background:var(--panel);
+  }
+
+  /* ---------- HIERARCHY DIAGRAM ---------- */
+  .diagram-section{ padding:64px 0; border-bottom:1px solid var(--line); }
+  .section-label{
+    font-family:var(--mono); font-size:12px; color:var(--dim);
+    text-transform:uppercase; letter-spacing:0.12em; margin-bottom:8px;
+  }
+  .section-title{ font-family:var(--mono); font-weight:700; font-size:22px; margin:0 0 26px; }
+  .diagram-frame{
+    border:1px solid var(--line-strong); border-radius:6px; background:var(--panel);
+    padding:22px 10px; overflow-x:auto;
+  }
+  svg text{ font-family:var(--mono); }
+  .dim-caption{ font-family:var(--mono); font-size:11px; color:var(--dim); margin-top:14px; text-align:center; }
+
+  /* ---------- CONTENT SECTIONS ---------- */
+  main section.file-section{ padding:70px 0; border-bottom:1px solid var(--line); }
+  main section.file-section:last-of-type{ border-bottom:none; }
+
+  .file-tag{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--mono); font-size:11px; color:var(--bg);
+    background:var(--cyan); padding:3px 9px; border-radius:3px; font-weight:700;
+    letter-spacing:0.04em; margin-bottom:16px;
+  }
+  .file-tag.impl{ background:var(--amber); }
+
+  h2.filename{
+    font-family:var(--mono); font-weight:700; font-size:26px; margin:0 0 6px;
+    color:var(--text);
+  }
+  .role{ color:var(--muted); font-size:15.5px; max-width:680px; margin-bottom:30px; }
+
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:6px;
+    padding:22px 24px; margin-bottom:18px;
+  }
+  .card h3{
+    font-family:var(--mono); font-size:14px; text-transform:uppercase; letter-spacing:0.05em;
+    color:var(--amber); margin:0 0 12px; font-weight:700;
+  }
+  .card p{ margin:0 0 12px; color:var(--text); font-size:15px; }
+  .card p:last-child{ margin-bottom:0; }
+  .card ul{ margin:0; padding-left:20px; color:var(--text); font-size:15px; }
+  .card li{ margin-bottom:8px; }
+  .card li:last-child{ margin-bottom:0; }
+
+  code.inline{
+    font-family:var(--mono); font-size:0.88em; color:var(--cyan);
+    background:rgba(111,195,214,0.08); padding:1px 5px; border-radius:3px;
+  }
+
+  pre{
+    font-family:var(--mono); font-size:12.5px; line-height:1.55; color:var(--muted);
+    background:#0a0f16; border:1px solid var(--line); border-radius:6px;
+    padding:16px 18px; overflow-x:auto; margin:0 0 18px;
+  }
+  pre .kw{ color:var(--cyan); }
+  pre .fn{ color:var(--amber); }
+  pre .cm{ color:var(--dim); font-style:italic; }
+
+  .callout{
+    border-left:3px solid var(--amber); padding:14px 18px;
+    background:rgba(240,168,104,0.06); border-radius:0 4px 4px 0; margin-bottom:18px;
+  }
+  .callout p{ margin:0; color:var(--text); font-size:14.5px; }
+  .callout .cl-label{
+    font-family:var(--mono); font-size:11px; color:var(--amber); text-transform:uppercase;
+    letter-spacing:0.08em; margin-bottom:6px; font-weight:700;
+  }
+
+  /* ---------- COMPARISON TABLE ---------- */
+  .compare{
+    padding:70px 0;
+  }
+  table.compare-table{
+    width:100%; border-collapse:collapse; font-size:14px;
+    border:1px solid var(--line-strong); border-radius:6px; overflow:hidden;
+  }
+  table.compare-table th, table.compare-table td{
+    border:1px solid var(--line); padding:12px 16px; text-align:left; vertical-align:top;
+  }
+  table.compare-table thead th{
+    font-family:var(--mono); font-size:12px; text-transform:uppercase; letter-spacing:0.05em;
+    background:var(--panel-2); color:var(--amber);
+  }
+  table.compare-table tbody th{
+    font-family:var(--mono); font-size:12.5px; color:var(--cyan); background:var(--panel);
+    white-space:nowrap;
+  }
+  table.compare-table td{ color:var(--muted); }
+
+  /* ---------- FOOTER ---------- */
+  footer{ padding:50px 0 90px; }
+  footer p{ font-family:var(--mono); font-size:12px; color:var(--dim); }
+
+  ::selection{ background:rgba(111,195,214,0.25); }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">nd<span>::</span>vehicle</div>
+    <div class="navlinks">
+      <a href="#diagram">Hierarchy</a>
+      <a href="#articulation">Articulation</a>
+      <a href="#multibody">MultiBodyVehicle</a>
+      <a href="#convexcast">ConvexCastVehicle</a>
+      <a href="#compare">Compare</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Newton Dynamics — Vehicle system</div>
+    <h1>Multibody and convex cast vehicle models overview.</h1>
+    <p class="lede">
+      This page traces how a tree of rigid bodies becomes a driveable car and why 
+      the engine ships two different ways to make a wheel hit the ground.
+    </p>
+    <div class="filepaths">
+      <code>ndModelArticulation.h</code>
+      <code>ndModelArticulation.cpp</code>
+      <code>ndMultiBodyVehicle.h</code>
+      <code>ndMultiBodyVehicle.cpp</code>
+      <code>ndConvexCastVehicle.h</code>
+      <code>ndConvexCastVehicle.cpp</code>
+    </div>
+  </div>
+</header>
+
+<section class="diagram-section" id="diagram">
+  <div class="wrap">
+    <div class="section-label">01 — Class hierarchy</div>
+    <h2 class="section-title">Three layers, each adding one job</h2>
+    <div class="diagram-frame">
+      <svg viewBox="0 0 860 320" width="100%" style="min-width:640px;">
+        <!-- connecting lines -->
+        <line x1="430" y1="70" x2="430" y2="110" stroke="#3a4a5e" stroke-width="1.5"/>
+        <line x1="430" y1="150" x2="430" y2="190" stroke="#3a4a5e" stroke-width="1.5"/>
+        <line x1="430" y1="230" x2="430" y2="270" stroke="#3a4a5e" stroke-width="1.5"/>
+
+        <!-- arrowheads -->
+        <polygon points="430,110 425,100 435,100" fill="#3a4a5e"/>
+        <polygon points="430,190 425,180 435,180" fill="#3a4a5e"/>
+        <polygon points="430,270 425,260 435,260" fill="#3a4a5e"/>
+
+        <!-- ndModel -->
+        <rect x="340" y="20" width="180" height="50" rx="4" fill="#161f2d" stroke="#3a4a5e"/>
+        <text x="430" y="41" text-anchor="middle" font-size="12" fill="#8fa0b8">ndModel</text>
+        <text x="430" y="58" text-anchor="middle" font-size="10" fill="#5c6b81">engine base class</text>
+
+        <!-- ndModelArticulation -->
+        <rect x="290" y="110" width="280" height="60" rx="4" fill="#121a26" stroke="#6fc3d6" stroke-width="1.5"/>
+        <text x="430" y="135" text-anchor="middle" font-size="13" fill="#6fc3d6" font-weight="700">ndModelArticulation</text>
+        <text x="430" y="153" text-anchor="middle" font-size="10.5" fill="#8fa0b8">generic tree of bodies + joints</text>
+
+        <!-- ndMultiBodyVehicle -->
+        <rect x="270" y="190" width="320" height="60" rx="4" fill="#121a26" stroke="#f0a868" stroke-width="1.5"/>
+        <text x="430" y="215" text-anchor="middle" font-size="13" fill="#f0a868" font-weight="700">ndMultiBodyVehicle</text>
+        <text x="430" y="233" text-anchor="middle" font-size="10.5" fill="#8fa0b8">chassis · tires · motor · differential · Pacejka/Coulomb tire models</text>
+
+        <!-- ndConvexCastVehicle -->
+        <rect x="230" y="270" width="400" height="45" rx="4" fill="#121a26" stroke="#e2686a" stroke-width="1.5"/>
+        <text x="430" y="292" text-anchor="middle" font-size="13" fill="#e2686a" font-weight="700">ndConvexCastVehicle</text>
+        <text x="430" y="309" text-anchor="middle" font-size="10.5" fill="#8fa0b8">wheels driven by convex-cast sweeps, solved with an embedded ndIkSolver</text>
+      </svg>
+    </div>
+    <p class="dim-caption">solid border = class covered on this page · arrow = "inherits from"</p>
+  </div>
+</section>
+
+<main>
+
+<section class="file-section" id="articulation">
+  <div class="wrap">
+    <span class="file-tag">02 — foundation</span>
+    <h2 class="filename">ndModelArticulation</h2>
+    <p class="role">
+      The generic skeleton framework underneath everything. It knows nothing about wheels or engines —
+      only that a physical object can be represented as a <strong>tree of rigid bodies connected by joints</strong>,
+      with the odd extra joint that breaks the tree shape entirely.
+    </p>
+
+    <div class="card">
+      <h3>The core data shape</h3>
+      <p>
+        An <code class="inline">ndNode</code> pairs one body with the joint that attaches it to its parent.
+        <code class="inline">m_rootNode</code> is the top of the tree (a chassis, a torso, a robot base).
+        Some joints don't fit a tree at all — a gearbox links two branches that are already connected
+        elsewhere — so those go in a side list, <code class="inline">m_closeLoops</code>, instead of being
+        forced into parent/child form.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>NodeIterator — the workhorse</h3>
+      <p>
+        A templated method in the header that walks the whole tree with an explicit stack (no recursion,
+        so it can't blow up on deep hierarchies) and calls a lambda on every node, then does the same for
+        the loop joints. Nearly every operation elsewhere in the vehicle code — applying forces, disabling
+        joints, cloning a skeleton — is written as a small lambda handed to this one function.
+      </p>
+      <pre><span class="kw">template</span> &lt;<span class="kw">typename</span> Function&gt;
+<span class="kw">void</span> <span class="fn">ndModelArticulation::NodeIterator</span>(Function func)
+{
+    <span class="cm">// walks m_rootNode's tree with a stack, then every close-loop node</span>
+}</pre>
+    </div>
+
+    <div class="card">
+      <h3>What else lives here</h3>
+      <ul>
+        <li><code class="inline">CalculateCentreOfMassKinematics</code> / <code class="inline">…Dynamics</code> — aggregate the whole structure's mass, momentum, and inertia into one virtual point, borrowing the same math used to derive the Zero Moment Point in bipedal-robot walking research.</li>
+        <li><code class="inline">Serialize</code> / <code class="inline">Deserialize</code> — convert the tree to and from <code class="inline">ndMesh</code>, so a model can be saved to disk and reloaded.</li>
+        <li><code class="inline">IsSleeping</code> / <code class="inline">SetSleep</code> — lets an entire articulated structure go dormant together rather than each body deciding independently.</li>
+      </ul>
+    </div>
+
+    <div class="callout">
+      <div class="cl-label">Why this layer exists</div>
+      <p>
+        Vehicles, ragdolls, and robot arms are all "trees of bodies with one or two extra constraints."
+        By solving that problem once, generically, the vehicle classes below only have to add
+        <em>vehicle meaning</em> on top — not tree-walking logic.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="file-section" id="multibody">
+  <div class="wrap">
+    <span class="file-tag impl">03 — vehicle physics</span>
+    <h2 class="filename">ndMultiBodyVehicle</h2>
+    <p class="role">
+      Inherits the tree machinery above and gives it a steering wheel. This is where "chassis," "tire,"
+      "motor," and "differential" become real concepts, and where tire friction is actually computed.
+    </p>
+
+    <div class="card">
+      <h3>Assembling a vehicle</h3>
+      <p>
+        <code class="inline">AddChassis</code>, <code class="inline">AddTire</code>, <code class="inline">AddMotor</code>,
+        <code class="inline">AddDifferential</code> attach parts directly to the chassis as tree limbs.
+        <code class="inline">AddGearBox</code>, <code class="inline">AddTorsionBar</code>, and
+        <code class="inline">AddDifferentialAxle</code> instead register as <em>loop</em> joints, since a
+        gearbox connects a motor branch to a differential branch that are already both attached to the
+        chassis elsewhere in the tree.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Two tire-friction models, side by side</h3>
+      <p><code class="inline">CoulombTireModel</code> is the simple case: a flat static/dynamic friction coefficient, reduced a bit under braking.</p>
+      <p><code class="inline">PacejkaTireModel</code> implements the "Magic Formula" from tire dynamics literature — friction as a function of slip angle and slip ratio, combining lateral and longitudinal force. The code comments are unusually candid about this one: the author documents two textbook methods for combining slip, notes the book itself calls the implemented method "incorrect," and explains why it was kept anyway (it's stable in practice; the alternative never produced realistic results).</p>
+    </div>
+
+    <div class="card">
+      <h3>Per-frame update order</h3>
+      <p><code class="inline">Update()</code> runs, in sequence:</p>
+      <ul>
+        <li><strong>ApplyAerodynamics</strong> — speed-dependent downforce, read from a small lookup table (<code class="inline">ndDownForce</code>) rather than a closed-form drag equation.</li>
+        <li><strong>ApplyTireModel</strong> — filters contacts to the tire's actual contact patch, then dispatches each contact point to Coulomb or Pacejka based on the tire's configured friction model.</li>
+      </ul>
+      <p><code class="inline">PostUpdate()</code> then calls <strong>ApplyAlignmentAndBalancing</strong>, which gently corrects tire velocity/angular velocity toward what the chassis implies, preventing small numerical drift from accumulating.</p>
+    </div>
+
+    <div class="card">
+      <h3>CalculateRestSprungWeight — solving for who's carrying what</h3>
+      <p>
+        Before the Pacejka model can scale forces by load, the engine needs to know each tire's static
+        share of the vehicle's weight. This method builds a small constrained linear system by hand
+        (Jacobians, a mass matrix, Cholesky factorization) and solves it once, at rest, to get a
+        per-tire "sprung weight" — a miniature physics solve nested inside the vehicle setup code.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="file-section" id="convexcast">
+  <div class="wrap">
+    <span class="file-tag" style="background:var(--red); color:#0d1117;">04 — alternate wheel model</span>
+    <h2 class="filename">ndConvexCastVehicle</h2>
+    <p class="role">
+      Same vehicle concept, different physical wheel. Instead of letting a spinning wheel-shaped rigid
+      body collide with the ground the normal way — which is fast but prone to jitter and tunneling —
+      this variant sweeps a shape downward every frame and builds the contact by hand.
+    </p>
+
+    <div class="card">
+      <h3>Why not just use a normal wheel body?</h3>
+      <p>
+        A thin, fast-spinning collision shape sitting right at the suspension's contact point is a
+        classic source of instability: high angular velocity plus a small shape can tunnel through thin
+        ground geometry or jitter under load. Sweeping a convex shape from the top of suspension travel
+        down to the bottom, and treating the sweep result as the contact, sidesteps that instability at
+        the cost of doing the contact generation manually.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>CalculateConveCastTireContacts — the manual contact pipeline</h3>
+      <ul>
+        <li>Deactivates the tire's existing contacts.</li>
+        <li>Casts the wheel shape from its upper suspension-travel position downward by the suspension's full range.</li>
+        <li>Recovers penetration depth from the suspension's own known position — a convex cast reports zero penetration by construction, so penetration has to be derived from where the wheel <em>actually</em> sits, or the tire will slowly sink into whatever it's resting on.</li>
+        <li>Sorts and groups the resulting contact points by which body they hit, then builds up to two real <code class="inline">ndContact</code> joints per tire from those groups.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>ConvertToMotorVehicle — a private drivetrain solver</h3>
+      <p>
+        This override does everything the base class does, then goes further: it clones the vehicle's
+        skeleton into a private <code class="inline">ndSkeletonContainer</code>, and deactivates the
+        tires, motor, and differential joints from the <em>main world solver</em>. The drivetrain is no
+        longer solved by the engine's global physics step — it's solved separately.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>Update — a solve sandwiched inside a solve</h3>
+      <p>Each frame, this class:</p>
+      <ul>
+        <li>Refreshes tire contacts via the convex-cast pipeline above.</li>
+        <li>Temporarily swaps every body's skeleton pointer to the private, cloned skeleton.</li>
+        <li>Runs its own embedded <code class="inline">ndIkSolver</code> (<code class="inline">m_solver</code>) — <code class="inline">SolverBegin → Solve → SolverEnd</code> — in isolation from the rest of the world.</li>
+        <li>Restores each body's original skeleton and integrates drivetrain parts (tires, motor, differential) directly, while chassis-adjacent "structural" parts are left for the main solver to finish integrating.</li>
+      </ul>
+      <p>A small sleep counter (<code class="inline">m_sleepCounter</code>) skips this entire pipeline once the vehicle has been at rest for eight consecutive frames — the convex-cast sweep isn't free, so an idle car shouldn't keep paying for it.</p>
+    </div>
+  </div>
+</section>
+
+<section class="compare" id="compare">
+  <div class="wrap">
+    <div class="section-label">05 — side by side</div>
+    <h2 class="section-title">ndMultiBodyVehicle vs. ndConvexCastVehicle</h2>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Aspect</th>
+          <th>ndMultiBodyVehicle</th>
+          <th>ndConvexCastVehicle</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th>Wheel–ground contact</th>
+          <td>Ordinary rigid-body collision detection on the wheel shape.</td>
+          <td>Manual convex-cast sweep each frame; contacts built by hand.</td>
+        </tr>
+        <tr>
+          <th>Drivetrain solve</th>
+          <td>Solved together with the rest of the world, in the main step.</td>
+          <td>Solved separately with a private, cloned skeleton and an embedded <code class="inline">ndIkSolver</code>.</td>
+        </tr>
+        <tr>
+          <th>Best suited for</th>
+          <td>Higher-fidelity simulation where true wheel collision matters.</td>
+          <td>Fast, stable arcade/game-style driving where jitter and tunneling must be avoided.</td>
+        </tr>
+        <tr>
+          <th>Sleep handling</th>
+          <td>Delegated to the generic <code class="inline">ndModelArticulation::IsSleeping</code>.</td>
+          <td>Adds its own frame-counted sleep gate around the extra convex-cast cost.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Source: Newton Dynamics physics engine (Julio Jerez) · notes compiled for orientation, not a replacement for reading the code.</p>
+  </div>
+</footer>
+
+</body>
+</html>

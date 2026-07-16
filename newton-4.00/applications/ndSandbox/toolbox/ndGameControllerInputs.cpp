@@ -195,12 +195,14 @@ void ndGameControllerInputs::GetXboxJoystickInputs(ndDemoEntityManager* const sc
 		buttonMapping[1] = ndGameControllerInputs::ndGameControllerInputs::m_parkGearButton;
 		buttonMapping[2] = ndGameControllerInputs::ndGameControllerInputs::m_changeCamera;
 		buttonMapping[3] = ndGameControllerInputs::ndGameControllerInputs::m_changePlayer;
-		buttonMapping[4] = ndGameControllerInputs::ndGameControllerInputs::m_neutralGearButton;
+		//buttonMapping[4] = ndGameControllerInputs::ndGameControllerInputs::m_neutralGearButton;
 		buttonMapping[5] = ndGameControllerInputs::ndGameControllerInputs::m_handBreakButton;
-		buttonMapping[6] = ndGameControllerInputs::ndGameControllerInputs::m_reverseGearButton;
+		buttonMapping[6] = ndGameControllerInputs::ndGameControllerInputs::m_shiftKey;
 		buttonMapping[7] = ndGameControllerInputs::ndGameControllerInputs::m_ignitionButton;
 		buttonMapping[10] = ndGameControllerInputs::ndGameControllerInputs::m_upGearButton;
+		buttonMapping[11] = ndGameControllerInputs::ndGameControllerInputs::m_neutralGearButton;
 		buttonMapping[12] = ndGameControllerInputs::ndGameControllerInputs::m_downGearButton;
+		buttonMapping[13] = ndGameControllerInputs::ndGameControllerInputs::m_reverseGearButton;
 
 		for (ndInt32 i = 0; i < unmappedButtons.GetCount(); ++i)
 		{
@@ -211,6 +213,35 @@ void ndGameControllerInputs::GetXboxJoystickInputs(ndDemoEntityManager* const sc
 			//	ndTrace(("%d\n", i));
 			//}
 		}
+		
+		m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_action0] = 0;
+		m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_action1] = 0;
+		m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_action2] = 0;
+		m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_action3] = 0;
+		if (m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_shiftKey])
+		{
+			if (m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_automaticGearBoxButton])
+			{
+				m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_action0] = 1;
+				m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_automaticGearBoxButton] = 0;
+			}
+			else if (m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_parkGearButton])
+			{
+				m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_action1] = 1;
+				m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_parkGearButton] = 0;
+			}
+			else if (m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_changeCamera])
+			{
+				m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_action2] = 1;
+				m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_changeCamera] = 0;
+			}
+			else if (m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_changePlayer])
+			{
+				m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_action3] = 1;
+				m_buttons[ndGameControllerInputs::ndGameControllerInputs::m_changePlayer] = 0;
+			}
+		}
+
 	}
 
 	{

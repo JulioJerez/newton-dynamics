@@ -170,7 +170,6 @@ class ndAssetEditor : public ndClassAlloc
 	void EditSphericalJoint();
 	void EditMotorWheelJoint();
 	void EditDoubleHingeJoint();
-	void EditSlidingHingeJoint();
 	void EditDifferentialJoint();
 
 	void EditLoopJointLocalMatrix(ndSharedPtr<ndMeshLoopJoint>& joint);

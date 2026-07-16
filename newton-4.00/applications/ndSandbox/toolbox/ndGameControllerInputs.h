@@ -39,6 +39,11 @@ class ndGameControllerInputs
 		m_automaticGearBoxButton,
 		m_changeCamera,
 		m_changePlayer,
+		m_action0,
+		m_action1,
+		m_action2,
+		m_action3,
+		m_shiftKey,
 	};
 
 	static const char* m_buttonNames[];

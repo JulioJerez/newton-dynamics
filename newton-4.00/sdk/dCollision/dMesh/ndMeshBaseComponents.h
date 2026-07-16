@@ -37,6 +37,8 @@ class ndJointBilateralConstraint;
 class ndMeshCustomProperty : public ndClassAlloc
 {
 	public:
+	D_BASE_CLASS_REFLECTION(ndMeshCustomProperty);
+
 	D_COLLISION_API ndMeshCustomProperty(ndMesh* const owner);
 	D_COLLISION_API ndMeshCustomProperty(ndMesh* const owner, const ndMeshCustomProperty& other);
 	D_COLLISION_API virtual ~ndMeshCustomProperty();
@@ -47,8 +49,6 @@ class ndMeshCustomProperty : public ndClassAlloc
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent);
 
-	D_BASE_CLASS_REFLECTION(ndMeshCustomProperty)
-
 	ndString m_name;
 	ndWeakPtr<ndMesh> m_owner;
 };
@@ -56,6 +56,8 @@ class ndMeshCustomProperty : public ndClassAlloc
 class ndMeshCustomPropertyFloat : public ndMeshCustomProperty
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshCustomPropertyFloat, ndMeshCustomProperty)
+
 	D_COLLISION_API ndMeshCustomPropertyFloat(ndMesh* const owner);
 	D_COLLISION_API ndMeshCustomPropertyFloat(ndMesh* const owner, const ndMeshCustomPropertyFloat& other);
 
@@ -64,14 +66,14 @@ class ndMeshCustomPropertyFloat : public ndMeshCustomProperty
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 
-	D_CLASS_REFLECTION(ndMeshCustomPropertyFloat, ndMeshCustomProperty)
-
 	ndReal m_value;
 };
 
 class ndMeshCustomPropertyString : public ndMeshCustomProperty
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshCustomPropertyString, ndMeshCustomProperty)
+
 	D_COLLISION_API ndMeshCustomPropertyString(ndMesh* const owner);
 	D_COLLISION_API ndMeshCustomPropertyString(ndMesh* const owner, const ndMeshCustomPropertyString& other);
 
@@ -80,14 +82,14 @@ class ndMeshCustomPropertyString : public ndMeshCustomProperty
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
 
-	D_CLASS_REFLECTION(ndMeshCustomPropertyString, ndMeshCustomProperty)
-
 	ndString m_value;
 };
 
 class ndMeshCustomPropertyNode : public ndMeshCustomProperty
 {
 	public:
+	D_CLASS_REFLECTION(ndMeshCustomPropertyNode, ndMeshCustomProperty)
+
 	D_COLLISION_API ndMeshCustomPropertyNode(ndMesh* const owner);
 	D_COLLISION_API ndMeshCustomPropertyNode(ndMesh* const owner, const ndMeshCustomPropertyNode& other);
 
@@ -95,8 +97,6 @@ class ndMeshCustomPropertyNode : public ndMeshCustomProperty
 	D_COLLISION_API virtual bool operator==(const ndMeshCustomProperty& other) const override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
 	D_COLLISION_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
-
-	D_CLASS_REFLECTION(ndMeshCustomPropertyNode, ndMeshCustomProperty)
 
 	ndWeakPtr<ndMesh> m_value;
 };

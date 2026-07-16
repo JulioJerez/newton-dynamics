@@ -127,24 +127,6 @@ class ndMeshJointRoller : public ndMeshJoint
 	ndAxis m_angularAxis;
 };
 
-class ndMeshJointSlidingHinge : public ndMeshJoint
-{
-	public:
-	D_NEWTON_API ndMeshJointSlidingHinge(const ndMesh* const owner);
-	D_NEWTON_API ndMeshJointSlidingHinge(const ndMesh* const owner, const ndJointBilateralConstraint* const joint);
-
-	D_NEWTON_API ndMeshJointSlidingHinge(const ndMeshJointSlidingHinge& other);
-	D_NEWTON_API virtual ndMeshJoint* Duplicate() const override;
-	D_NEWTON_API virtual bool operator==(const ndMeshJoint& other) const override;
-
-	D_NEWTON_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
-	D_NEWTON_API virtual void DeserializeFromXml(const nd::TiXmlElement* const parent) override;
-	D_NEWTON_API virtual ndJointBilateralConstraint* CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const override;
-
-	ndAxis m_linearAxis;
-	ndAxis m_angularAxis;
-};
-
 class ndMeshJointCylinder : public ndMeshJoint
 {
 	public:

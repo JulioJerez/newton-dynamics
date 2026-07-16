@@ -38,7 +38,6 @@
 #include "ndJointSpherical.h"
 #include "ndMeshComponents.h"
 #include "ndJointDoubleHinge.h"
-#include "ndJointSlidingHinge.h"
 #include "ndMultiBodyVehicleMotor.h"
 #include "ndMultiBodyVehicleGearBox.h"
 #include "ndIkSwivelPositionEffector.h"
@@ -1602,10 +1601,6 @@ ndSharedPtr<ndJointBilateralConstraint> ndMesh::CreateJoint()
 	{
 		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointDoubleHinge());
 	}
-	else if (strstr(name, "-slidinghinge"))
-	{
-		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointSlidingHinge());
-	}
 	else if (strstr(name, "-plane"))
 	{
 		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointDoubleHinge());
@@ -1820,10 +1815,6 @@ ndSharedPtr<ndMeshJoint> ndMesh::LoadJoint(const nd::TiXmlElement* const xmlJoin
 	else if (strcmp(constructor, ndJointRoller::StaticClassName()) == 0)
 	{
 		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointRoller(mesh));
-	}
-	else if (strcmp(constructor, ndJointSlidingHinge::StaticClassName()) == 0)
-	{
-		joint = ndSharedPtr<ndMeshJoint>(new ndMeshJointSlidingHinge(mesh));
 	}
 	else if (strcmp(constructor, ndJointDoubleHinge::StaticClassName()) == 0)
 	{

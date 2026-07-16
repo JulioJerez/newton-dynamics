@@ -113,7 +113,6 @@ void ndAnimationMeshLoader::SetTranslationTracks(const ndString& boneName)
 // -roller
 // -spherical
 // -cylindrical
-// -slidinghinge
 
 bool ndAnimationMeshLoader::ImportFbx(const ndString& fbxPathMeshName)
 {
