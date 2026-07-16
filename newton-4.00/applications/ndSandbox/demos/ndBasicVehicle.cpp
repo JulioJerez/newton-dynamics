@@ -124,6 +124,19 @@ namespace ndMotorVehicle
 						m_hinge0->SetTargetAngle(angle);
 					}
 				}
+				if (m_hinge1)
+				{
+					if (buttons[ndGameControllerInputs::m_action1])
+					{
+						ndFloat32 angle = ndClamp(m_hinge1->GetAngle() - m_param1 * timestep, m_minParam1, m_maxParam1);
+						m_hinge1->SetTargetAngle(angle);
+					}
+					else if (buttons[ndGameControllerInputs::m_action2])
+					{
+						ndFloat32 angle = ndClamp(m_hinge1->GetAngle() + m_param1 * timestep, m_minParam1, m_maxParam1);
+						m_hinge1->SetTargetAngle(angle);
+					}
+				}
 				if (m_slider)
 				{
 					if (buttons[ndGameControllerInputs::m_action1])
@@ -136,10 +149,6 @@ namespace ndMotorVehicle
 						ndFloat32 posit = ndClamp(m_slider->GetPosit() + m_sliderParam * timestep, m_sliderMinParam, m_sliderMaxParam);
 						m_slider->SetTargetPosit(posit);
 					}
-				}
-				else if (m_hinge1)
-				{
-					ndTrace(("zzzzzzzzz\n"))
 				}
 			}
 		}
@@ -246,47 +255,49 @@ namespace ndMotorVehicle
 						
 						const ndMeshCustomPropertyFloat* const minSlide = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("minimum");
 						ndAssert(minSlide->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
-						vehController->m_sliderMinParam = minSlide->m_value;
+						vehController->m_sliderMinParam = -ndAbs(minSlide->m_value);
 						
 						const ndMeshCustomPropertyFloat* const maxSlide = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("maximum");
 						ndAssert(maxSlide->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
-						vehController->m_sliderMaxParam = maxSlide->m_value;
+						vehController->m_sliderMaxParam = ndAbs(maxSlide->m_value);
 					}
 					else if (node->m_joint->IsType(ndJointHinge::StaticClassName()))
 					{
 						// set special feature controls.
-						if (!(*vehController->m_hinge0))
+						if (meshNode->GetCustomPropertyByName("rate"))
 						{
-							vehController->m_hinge0 = (ndJointHinge*)*node->m_joint;
-							// set angular parameters
-							const ndMeshCustomPropertyFloat* const rate = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("rate");
-							ndAssert(rate->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
-							vehController->m_param0 = rate->m_value;
+							if (!(*vehController->m_hinge0))
+							{
+								vehController->m_hinge0 = (ndJointHinge*)*node->m_joint;
+								// set angular parameters
+								const ndMeshCustomPropertyFloat* const rate = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("rate");
+								ndAssert(rate->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+								vehController->m_param0 = rate->m_value;
 
-							const ndMeshCustomPropertyFloat* const minParam = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("minimum");
-							ndAssert(minParam->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
-							vehController->m_minParam0 = minParam->m_value * ndDegreeToRad;
+								const ndMeshCustomPropertyFloat* const minParam = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("minimum");
+								ndAssert(minParam->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+								vehController->m_minParam0 = -ndAbs(minParam->m_value) * ndDegreeToRad;
 
-							const ndMeshCustomPropertyFloat* const maxParam = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("maximum");
-							ndAssert(maxParam->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
-							vehController->m_maxParam0 = maxParam->m_value * ndDegreeToRad;
-						}
-						else
-						{
-							ndAssert(0);
-							vehController->m_hinge1 = (ndJointHinge*)*node->m_joint;
-							// set angular parameters
-							const ndMeshCustomPropertyFloat* const rate = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("rate");
-							ndAssert(rate->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
-							vehController->m_param1 = rate->m_value;
+								const ndMeshCustomPropertyFloat* const maxParam = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("maximum");
+								ndAssert(maxParam->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+								vehController->m_maxParam0 = ndAbs(maxParam->m_value) * ndDegreeToRad;
+							}
+							else
+							{
+								vehController->m_hinge1 = (ndJointHinge*)*node->m_joint;
+								// set angular parameters
+								const ndMeshCustomPropertyFloat* const rate = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("rate");
+								ndAssert(rate->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+								vehController->m_param1 = rate->m_value;
 
-							const ndMeshCustomPropertyFloat* const minParam = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("minimun");
-							ndAssert(minParam->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
-							vehController->m_minParam1 = minParam->m_value * ndDegreeToRad;
+								const ndMeshCustomPropertyFloat* const minParam = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("minimum");
+								ndAssert(minParam->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+								vehController->m_minParam1 = -ndAbs(minParam->m_value) * ndDegreeToRad;
 
-							const ndMeshCustomPropertyFloat* const maxParam = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("maximim");
-							ndAssert(maxParam->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
-							vehController->m_maxParam1 = maxParam->m_value * ndDegreeToRad;
+								const ndMeshCustomPropertyFloat* const maxParam = (ndMeshCustomPropertyFloat*)meshNode->GetCustomPropertyByName("maximum");
+								ndAssert(maxParam->IsType(ndMeshCustomPropertyFloat::StaticClassName()));
+								vehController->m_maxParam1 = ndAbs(maxParam->m_value) * ndDegreeToRad;
+							}
 						}
 					}
 				}
@@ -731,7 +742,7 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	//CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f)), true);
 	CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f)));
 	//CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f)));
-	//CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(12.0f, 1.0f, 6.0f, 0.0f)));
+	CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(12.0f, 1.0f, 6.0f, 0.0f)));
 	
 	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f)));
 	//AddBox(scene, ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f)), 500.0f, 1.0f, 1.0f, 1.0f);
