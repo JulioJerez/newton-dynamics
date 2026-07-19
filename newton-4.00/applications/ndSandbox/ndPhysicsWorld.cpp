@@ -224,9 +224,77 @@ void ndPhysicsWorld::SetUpdateMode(bool collisionOnly)
 	m_updateMode = collisionOnly;
 }
 
-void ndPhysicsWorld::UpdateTransforms()
+void ndPhysicsWorld::DefferedRemoveBody(ndSharedPtr<ndBody> body)
 {
-	ndWorld::UpdateTransforms();
+	ndScopeSpinLock Lock(m_lock);
+	ndBodyKinematic* const kinematicBody = body->GetAsBodyKinematic();
+	ndAssert(kinematicBody);
+	if (kinematicBody->GetScene())
+	{
+		ndModel* const model = kinematicBody->GetModel();
+		if (model)
+		{
+			ndSharedPtr<ndModel> modelPtr(GetModel(model));
+			if (*modelPtr)
+			{
+				m_deadModels.Insert(modelPtr);
+			}
+		}
+		else
+		{
+			ndSharedPtr<ndBody> sharedPtr(kinematicBody->GetAsBodyKinematic()->GetScene()->GetBody(kinematicBody));
+			ndDefferedBodyList::ndNode* const node = m_deadBodies.Find(sharedPtr);
+			if (!node)
+			{
+				// we now find all bodies and joints linked to this body to this body
+				ndFixSizeArray<ndSharedPtr<ndBody>, 256> stack;
+				stack.PushBack(sharedPtr);
+				while (stack.GetCount())
+				{
+					ndSharedPtr<ndBody> bodyNode(stack.Pop());
+					if (m_deadBodies.Insert(0, bodyNode))
+					{
+						ndBodyKinematic* const pivotBody = bodyNode->GetAsBodyKinematic();
+						ndBodyNotify* const notify = *body->GetNotifyCallback();
+						if (notify->IsType(ndDemoEntityNotify::StaticClassName()))
+						{
+							ndDemoEntityNotify* const entNotify = (ndDemoEntityNotify*)notify;
+							ndSharedPtr<ndRenderSceneNode> visualEntity(entNotify->GetUserData());
+							if (*visualEntity)
+							{
+								DefferedRemoveSceneNode(visualEntity);
+							}
+						}
+
+						const ndBodyKinematic::ndJointList& joints = pivotBody->GetJointList();
+						for (ndBodyKinematic::ndJointList::ndNode* jointNode = joints.GetFirst(); jointNode; jointNode = jointNode->GetNext())
+						{
+							ndJointBilateralConstraint* const joint = jointNode->GetInfo();
+							const ndBodyKinematic* const body0 = joint->GetBody0();
+							const ndBodyKinematic* const body1 = joint->GetBody1();
+							ndBodyKinematic* const childBody = (ndBodyKinematic*)((body0 == pivotBody) ? body1 : body0);
+							if (childBody->GetInvMass() > ndFloat32(0.0f))
+							{
+								ndSharedPtr<ndBody> childBodyPtr(childBody->GetScene()->GetBody(childBody));
+								stack.PushBack(childBodyPtr);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+void ndPhysicsWorld::DefferedRemoveSceneNode(ndSharedPtr<ndRenderSceneNode> entity)
+{
+	m_deadEntities.Insert(0, entity);
+}
+
+void ndPhysicsWorld::SetCamera(ndSharedPtr<ndRenderSceneNode>& camera)
+{
+	ndScopeSpinLock Lock(m_lock);
+	m_manager->GetRenderer()->SetCamera(camera);
 }
 
 void ndPhysicsWorld::PreUpdate(ndFloat32 timestep)
@@ -247,12 +315,6 @@ void ndPhysicsWorld::PreUpdate(ndFloat32 timestep)
 
 	ndRenderPassDebug* const debugRenderPass = m_manager->GetDebugRenderPass();
 	debugRenderPass->ClearRuntimeLines();
-}
-
-void ndPhysicsWorld::SetCamera(ndSharedPtr<ndRenderSceneNode>& camera)
-{
-	ndScopeSpinLock Lock(m_lock);
-	m_manager->GetRenderer()->SetCamera(camera);
 }
 
 void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
@@ -329,71 +391,9 @@ void ndPhysicsWorld::PostUpdate(ndFloat32 timestep)
 	debugRenderPass->SwapRuntimeLinesBuffers();
 }
 
-void ndPhysicsWorld::DefferedRemoveBody(ndSharedPtr<ndBody> body)
+void ndPhysicsWorld::UpdateTransforms()
 {
-	ndScopeSpinLock Lock(m_lock);
-	ndBodyKinematic* const kinematicBody = body->GetAsBodyKinematic();
-	ndAssert (kinematicBody);
-	if (kinematicBody->GetScene())
-	{
-		ndModel* const model = kinematicBody->GetModel();
-		if (model)
-		{
-			ndSharedPtr<ndModel> modelPtr(GetModel(model));
-			if (*modelPtr)
-			{
-				m_deadModels.Insert(modelPtr);
-			}
-		}
-		else
-		{
-			ndSharedPtr<ndBody> sharedPtr(kinematicBody->GetAsBodyKinematic()->GetScene()->GetBody(kinematicBody));
-			ndDefferedBodyList::ndNode* const node = m_deadBodies.Find(sharedPtr);
-			if (!node)
-			{
-				// we now find all bodies and joints linked to this body to this body
-				ndFixSizeArray<ndSharedPtr<ndBody>, 256> stack;
-				stack.PushBack(sharedPtr);
-				while (stack.GetCount())
-				{
-					ndSharedPtr<ndBody> bodyNode(stack.Pop());
-					if (m_deadBodies.Insert(0, bodyNode))
-					{
-						ndBodyKinematic* const pivotBody = bodyNode->GetAsBodyKinematic();
-						ndBodyNotify* const notify = *body->GetNotifyCallback();
-						if (notify->IsType(ndDemoEntityNotify::StaticClassName()))
-						{
-							ndDemoEntityNotify* const entNotify = (ndDemoEntityNotify*)notify;
-							ndSharedPtr<ndRenderSceneNode> visualEntity(entNotify->GetUserData());
-							if (*visualEntity)
-							{
-								DefferedRemoveSceneNode(visualEntity);
-							}
-						}
-
-						const ndBodyKinematic::ndJointList& joints = pivotBody->GetJointList();
-						for (ndBodyKinematic::ndJointList::ndNode* jointNode = joints.GetFirst(); jointNode; jointNode = jointNode->GetNext())
-						{
-							ndJointBilateralConstraint* const joint = jointNode->GetInfo();
-							const ndBodyKinematic* const body0 = joint->GetBody0();
-							const ndBodyKinematic* const body1 = joint->GetBody1();
-							ndBodyKinematic* const childBody = (ndBodyKinematic*)((body0 == pivotBody) ? body1 : body0);
-							if (childBody->GetInvMass() > ndFloat32(0.0f))
-							{
-								ndSharedPtr<ndBody> childBodyPtr(childBody->GetScene()->GetBody(childBody));
-								stack.PushBack(childBodyPtr);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-void ndPhysicsWorld::DefferedRemoveSceneNode(ndSharedPtr<ndRenderSceneNode> entity)
-{
-	m_deadEntities.Insert(0, entity);
+	ndWorld::UpdateTransforms();
 }
 
 void ndPhysicsWorld::PhysicsUpdate(ndFloat32 timestep)

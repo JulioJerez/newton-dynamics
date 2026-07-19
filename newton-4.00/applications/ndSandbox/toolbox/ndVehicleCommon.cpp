@@ -144,8 +144,13 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 		{
 			ndMultiBodyVehicleTireJoint* const tire = node->GetInfo();
 			tire->SetBrake(brake);
-			tire->SetSteering(steerAngle);
 			tire->SetHandBrake(handBrake);
+			ndFloat32 steerError = tire->GetSteering() - steerAngle;
+			if (ndAbs(steerError) > ndFloat32(1.0e-2f))
+			{
+				tire->GetBody0()->SetSleepState(false);
+			}
+			tire->SetSteering(steerAngle);
 		}
 
 		if (m_isPlayer)
