@@ -3719,7 +3719,6 @@ ndInt32 ndContactSolver::ConvexToCompoundContactsContinue()
 				ndAssert(right);
 				const ndVector minBox(right->m_p0 - boxP1);
 				const ndVector maxBox = right->m_p1 - boxP0;
-				//ndFloat32 dist1 = ray.BoxIntersect(minBox, maxBox);
 				ndFloat32 dist1 = ndMin(ray.BoxIntersect(minBox, maxBox), ndFloat32(1.0f));
 				if (dist1 <= ndFloat32(1.0f))
 				{
@@ -3813,6 +3812,7 @@ ndInt32 ndContactSolver::CalculatePolySoupToHullContactsContinue(ndPolygonMeshDe
 
 		polygon.m_localPoly.SetCount(0);
 		polygon.m_convexCapFace.SetCount(0);
+		polygon.m_adjancentEdge.SetCount(0);
 		polygon.m_convexCapFaceIndex.SetCount(0);
 		polygon.m_convexCapFace.PushBack(vertexCount);
 		polygon.m_adjacentFaceEdgeNormalIndex.SetCount(0);
