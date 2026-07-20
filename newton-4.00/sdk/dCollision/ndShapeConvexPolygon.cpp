@@ -102,7 +102,6 @@ void ndShapeConvexPolygon::GenerateConvexCap()
 			ndAssert(faceEddge.DotProduct(faceEddge).GetScalar() > ndFloat32(0.0f));
 			const ndVector edge(faceEddge.Normalize());
 			
-			//const ndInt32 adjacentNormalIndex = m_adjacentFaceEdgeNormalIndex[i0] & (~D_CONCAVE_EDGE_MASK);
 			const ndInt32 adjacentNormalIndex = m_adjacentFaceEdgeNormalIndex[i0];
 			const ndVector localAdjacentNormal(m_vertexArray[adjacentNormalIndex]);
 			const ndVector adjacentNormal(CalculateGlobalNormal(localAdjacentNormal & ndVector::m_triplexMask));
@@ -131,24 +130,24 @@ void ndShapeConvexPolygon::GenerateConvexCap()
 
 bool ndShapeConvexPolygon::BeamClipping(const ndVector& origin, ndFloat32 dist)
 {
-	ndPlane planes[4];
-	ndFixSizeArray<ndVector, 2 * D_CONVEX_POLYGON_MAX_VERTEX_COUNT> points(2 * D_CONVEX_POLYGON_MAX_VERTEX_COUNT);
+	ndBigPlane planes[4];
+	ndFixSizeArray<ndBigVector, 2 * D_CONVEX_POLYGON_MAX_VERTEX_COUNT> points(2 * D_CONVEX_POLYGON_MAX_VERTEX_COUNT);
 
 	dgClippedFaceEdge clippedFace[2 * sizeof(m_localPoly) / sizeof(m_localPoly[0]) + 8];
 
-	ndVector dir(m_localPoly[1] - m_localPoly[0]);
+	ndBigVector dir(m_localPoly[1] - m_localPoly[0]);
 	ndAssert(dir.m_w == ndFloat32(0.0f));
 	ndAssert(dir.DotProduct(dir).GetScalar() > ndFloat32(1.0e-8f));
 	dir = dir.Normalize();
 
-	ndFloat32 distH = origin.DotProduct(dir).GetScalar();
-	planes[0] = ndPlane(dir, dist - distH);
-	planes[2] = ndPlane(dir * ndVector::m_negOne, dist + distH);
+	ndFloat64 distH = origin.DotProduct(dir).GetScalar();
+	planes[0] = ndBigPlane(dir, dist - distH);
+	planes[2] = ndBigPlane(dir * ndVector::m_negOne, dist + distH);
 
 	dir = m_normal.CrossProduct(dir);
-	ndFloat32 distV = origin.DotProduct(dir).GetScalar();
-	planes[1] = ndPlane(dir, dist - distV);
-	planes[3] = ndPlane(dir * ndVector::m_negOne, dist + distV);
+	ndFloat64 distV = origin.DotProduct(dir).GetScalar();
+	planes[1] = ndBigPlane(dir, dist - distV);
+	planes[3] = ndBigPlane(dir * ndBigVector::m_negOne, dist + distV);
 
 	const ndInt32 count = m_localPoly.GetCount();
 	for (ndInt32 i = 0; i < count; ++i)
@@ -181,24 +180,24 @@ bool ndShapeConvexPolygon::BeamClipping(const ndVector& origin, ndFloat32 dist)
 	const ndFloat32 tol = ndFloat32(1.0e-5f);
 	for (ndInt32 i = 0; i < 4; ++i) 
 	{
-		const ndPlane& plane = planes[i];
+		const ndBigPlane& plane = planes[i];
 
 		ndInt32 conectCount = 0;
 		dgClippedFaceEdge* connect[2];
 		dgClippedFaceEdge* ptr = first;
 		dgClippedFaceEdge* newFirst = first;
-		ndFloat32 test0 = plane.Evalue(points[ptr->m_incidentVertex]);
+		ndFloat64 test0 = plane.Evalue(points[ptr->m_incidentVertex]);
 		do 
 		{
-			ndFloat32 test1 = plane.Evalue(points[ptr->m_next->m_incidentVertex]);
+			ndFloat64 test1 = plane.Evalue(points[ptr->m_next->m_incidentVertex]);
 
 			if (test0 > tol) 
 			{
 				if (test1 <= -tol) 
 				{
-					const ndVector& p0 = points[ptr->m_incidentVertex];
-					const ndVector& p1 = points[ptr->m_next->m_incidentVertex];
-					const ndVector dp(p1 - p0);
+					const ndBigVector& p0 = points[ptr->m_incidentVertex];
+					const ndBigVector& p1 = points[ptr->m_next->m_incidentVertex];
+					const ndBigVector dp(p1 - p0);
 
 					points[indexCount] = p0 - dp.Scale(test0 / dp.DotProduct(plane).GetScalar());
 
@@ -230,9 +229,9 @@ bool ndShapeConvexPolygon::BeamClipping(const ndVector& origin, ndFloat32 dist)
 				if ((test1 > tol) && (test0 * test1) < ndFloat32(0.0f)) 
 				{
 					newFirst = ptr->m_next;
-					const ndVector& p0 = points[ptr->m_incidentVertex];
-					const ndVector& p1 = points[ptr->m_next->m_incidentVertex];
-					const ndVector dp(p1 - p0);
+					const ndBigVector& p0 = points[ptr->m_incidentVertex];
+					const ndBigVector& p1 = points[ptr->m_next->m_incidentVertex];
+					const ndBigVector dp(p1 - p0);
 					points[indexCount] = p0 - dp.Scale(test0 / dp.DotProduct(plane).GetScalar());
 
 					dgClippedFaceEdge* const newEdge = &clippedFace[edgeCount];
@@ -266,15 +265,15 @@ bool ndShapeConvexPolygon::BeamClipping(const ndVector& origin, ndFloat32 dist)
 
 		if (conectCount == 1)
 		{
-			ndFloat32 minDist = ndFloat32(1.0e10f);
+			ndFloat64 minDist = ndFloat32(1.0e10f);
 
 			dgClippedFaceEdge* nextPtr = connect[0]->m_next;
 			dgClippedFaceEdge* cornerPtr = nextPtr->m_next;
 			conectCount = 2;
 			do
 			{
-				ndVector cornerPoint(points[cornerPtr->m_incidentVertex]);
-				ndFloat32 test = ndAbs(plane.Evalue(cornerPoint));
+				ndBigVector cornerPoint(points[cornerPtr->m_incidentVertex]);
+				ndFloat64 test = ndAbs(plane.Evalue(cornerPoint));
 				if (test < minDist)
 				{
 					minDist = test;
@@ -307,23 +306,14 @@ bool ndShapeConvexPolygon::BeamClipping(const ndVector& origin, ndFloat32 dist)
 
 			edgeCount += 2;
 		}
-
-		//ndTrace(("\n"));
-		//dgClippedFaceEdge* ptr___ = first;
-		//do
-		//{
-		//	ndVector xxxx (points[ptr___->m_incidentVertex]);
-		//	ndTrace(("%f %f %f\n", xxxx[0], xxxx[1], xxxx[2]));
-		//	ptr___ = ptr___->m_next;
-		//} while (ptr___ != first);
 	}
 
 	dgClippedFaceEdge* ptr = first;
 	do 
 	{
-		ndVector dist1(points[ptr->m_next->m_incidentVertex] - points[ptr->m_incidentVertex]);
+		ndBigVector dist1(points[ptr->m_next->m_incidentVertex] - points[ptr->m_incidentVertex]);
 		ndAssert(dist1.m_w == ndFloat32(0.0f));
-		ndFloat32 error = dist1.DotProduct(dist1).GetScalar();
+		ndFloat64 error = dist1.DotProduct(dist1).GetScalar();
 		if (error < ndFloat32(1.0e-4f)) 
 		{
 			ptr->m_next = ptr->m_next->m_next;
@@ -336,7 +326,7 @@ bool ndShapeConvexPolygon::BeamClipping(const ndVector& origin, ndFloat32 dist)
 	m_adjacentFaceEdgeNormalIndex.SetCount(0);
 	do 
 	{
-		m_localPoly.PushBack(points[ptr->m_incidentVertex]);
+		m_localPoly.PushBack(ndVector (points[ptr->m_incidentVertex]));
 		m_adjacentFaceEdgeNormalIndex.PushBack(ptr->m_incidentNormal);
 		ptr = ptr->m_next;
 	} while (ptr != first);
@@ -441,10 +431,11 @@ ndInt32 ndShapeConvexPolygon::CalculateContactToConvexHullContinue(ndContactSolv
 			i0 = i;
 		}
 
+		bool isConvexCapped = false;
 		ndFloat32 convexSphapeUmbra = ndMax(contactSolver.m_instance0.GetUmbraClipSize(), radius);
 		if (m_faceClipSize > convexSphapeUmbra)
 		{
-			BeamClipping(pointInPlane, convexSphapeUmbra);
+			isConvexCapped = BeamClipping(pointInPlane, convexSphapeUmbra);
 			m_faceClipSize = contactSolver.m_instance0.GetShape()->GetBoxMaxRadius();
 		}
 
@@ -494,7 +485,10 @@ ndInt32 ndShapeConvexPolygon::CalculateContactToConvexHullContinue(ndContactSolv
 		}
 		else
 		{
-			GenerateConvexCap();
+			if (!isConvexCapped)
+			{
+				GenerateConvexCap();
+			}
 			m_vertexCount = ndUnsigned16(vertexCount);
 			count = contactSolver.ConvexToConvexContactsContinue();
 			if (count >= 1)
