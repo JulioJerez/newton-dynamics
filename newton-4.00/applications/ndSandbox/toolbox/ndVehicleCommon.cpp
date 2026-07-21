@@ -45,7 +45,6 @@ void ndVehicleCommonNotify::SetAsPlayer(bool state)
 void ndVehicleCommonNotify::Update(ndFloat32 timestep, ndInt32 threadId)
 {
 	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
-	//if (m_isPlayer || (vehicle && !vehicle->IsSleeping()))
 	if (vehicle)
 	{
 		vehicle->Update(timestep, threadId);
@@ -65,7 +64,6 @@ void ndVehicleCommonNotify::PostUpdate(ndFloat32 timestep, ndInt32 threadId)
 void ndVehicleCommonNotify::PostTransformUpdate(ndFloat32 timestep, ndInt32)
 {
 	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
-	//if (m_isPlayer || (vehicle && !vehicle->IsSleeping()))
 	if (m_isPlayer || vehicle)
 	{
 		ApplyInputs(timestep);
@@ -119,6 +117,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			brake = ndFloat32(1.0f);
 			handBrake = ndFloat32(1.0f);
 			desiredRpm = ndFloat32(0.0f);
+			steerAngle = ndFloat32(0.0f);
 			torqueFromCurve = ndFloat32(0.0f);
 
 			m_driverState = m_parked;
@@ -145,8 +144,13 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 		{
 			ndMultiBodyVehicleTireJoint* const tire = node->GetInfo();
 			tire->SetBrake(brake);
-			tire->SetSteering(steerAngle);
 			tire->SetHandBrake(handBrake);
+			ndFloat32 steerError = tire->GetSteering() - steerAngle;
+			if (ndAbs(steerError) > ndFloat32(1.0e-2f))
+			{
+				tire->GetBody0()->SetSleepState(false);
+			}
+			tire->SetSteering(steerAngle);
 		}
 
 		if (m_isPlayer)

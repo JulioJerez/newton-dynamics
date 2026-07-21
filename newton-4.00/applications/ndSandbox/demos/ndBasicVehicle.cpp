@@ -717,6 +717,20 @@ namespace ndMotorVehicle
 		};
 		loader.m_mesh->NodeIterator(AddProps);
 	}
+
+	void AddProps(ndDemoEntityManager* const scene, const ndMatrix& matrix)
+	{
+		const ndInt32 propsSize = 4;
+		for (ndInt32 i = 0; i < propsSize; i++)
+		{
+			for (ndInt32 j = 0; j < propsSize; j++)
+			{
+				ndFloat32 z = ndFloat32(i * 3) - 30.0f;
+				ndFloat32 x = ndFloat32(j * 4) + 5.0f;
+				AddBox(scene, ndPlacementMatrix(matrix, ndVector(x, 0.0f, z, 0.0f)), 500.0f, 5.0f, 0.125f, 3.0f);
+			}
+		}
+	}
 };
 
 using namespace ndMotorVehicle;
@@ -744,9 +758,8 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f)));
 	CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(12.0f, 1.0f, 6.0f, 0.0f)));
 	
-	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, 0.0f, 0.0f)));
-	//AddBox(scene, ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f)), 500.0f, 1.0f, 1.0f, 1.0f);
-	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -15.0f, 0.0f)));
+	AddProps(scene, matrix);
+
 #if 0
 	// stress test convex cast vehicle 
 	ndInt32 size = 10;
