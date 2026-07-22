@@ -13,19 +13,8 @@ cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
 set (projectName "ndNewAsset")
 message (${projectName})
 
-# source and header files
-if (APPLE) 
-	file(GLOB CPP_SOURCE 
-		*.h
-		*.cpp
-	)
-else()
-	file(GLOB CPP_SOURCE 
-		*.h
-		*.cpp
-	)
-endif()
 
+file(GLOB CPP_SOURCE *.h *.cpp)
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/" FILES ${CPP_SOURCE})
 
 include_directories(.)
@@ -139,14 +128,13 @@ if(UNIX)
         COMMENT "symbolic link resources folder from ${source} => ${destination}")
 endif()
 
-install(DIRECTORY ../media DESTINATION "${PROJECT_BINARY_DIR}/applications")
+#install(DIRECTORY ../media DESTINATION "${PROJECT_BINARY_DIR}/applications")
+#if (MSVC)
+#	set (assetCommand "execute_process(COMMAND cmd /c unpackAssets.bat WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/applications/media/)")
+#	install(CODE ${assetCommand})
+#    
+#	set (raceTrackAssetCommand "execute_process(COMMAND cmd /c unpackAssets.bat WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/applications/media/racetrack)")
+#	install(CODE ${raceTrackAssetCommand})
+#endif()
 
-if (MSVC)
-	set (assetCommand "execute_process(COMMAND cmd /c unpackAssets.bat WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/applications/media/)")
-	install(CODE ${assetCommand})
-
-	set (raceTrackAssetCommand "execute_process(COMMAND cmd /c unpackAssets.bat WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/applications/media/racetrack)")
-	install(CODE ${raceTrackAssetCommand})
-
-	set_target_properties(${projectName} PROPERTIES FOLDER "demos")
-endif()
+set_target_properties(${projectName} PROPERTIES FOLDER "demos")
