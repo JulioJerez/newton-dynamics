@@ -84,16 +84,22 @@ typedef struct _GLFWlibraryOSMesa
 } _GLFWlibraryOSMesa;
 
 
-inline GLFWbool _glfwInitOSMesa(void) 
+//inline GLFWbool _glfwInitOSMesa(void) 
+static inline GLFWbool _glfwInitOSMesa(void)
 { 
     return 0; 
 }
 
-inline void _glfwTerminateOSMesa(void) 
+//inline void _glfwTerminateOSMesa(void) 
+static inline void _glfwTerminateOSMesa(void)
 {
 }
 
-inline GLFWbool _glfwCreateContextOSMesa(_GLFWwindow* window,
+//inline GLFWbool _glfwCreateContextOSMesa(_GLFWwindow* window,
+//    const _GLFWctxconfig* ctxconfig,
+//    const _GLFWfbconfig* fbconfig)
+
+static inline GLFWbool _glfwCreateContextOSMesa(_GLFWwindow* window,
     const _GLFWctxconfig* ctxconfig,
     const _GLFWfbconfig* fbconfig) 
 {
