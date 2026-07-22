@@ -47,20 +47,6 @@ ndMatrix FindFloor(const ndWorld& world, const ndMatrix& origin, const ndShapeIn
 			m_floor = origin.m_posit;
 			if (((ndShape*)shape.GetShape())->GetAsShapeCompound())
 			{
-				//ndVector size;
-				//ndVector obbOrigin;
-				//shape.CalculateObb(obbOrigin, size);
-				//size = size.Scale(ndFloat32 (2.0f));
-				//ndShapeInstance surrogate(new ndShapeBox(size.m_x, size.m_y, size.m_z));
-				//ndMatrix surrogateMatrix(ndGetIdentityMatrix());
-				//
-				////ndMatrix xxxxx(shape.CalculateInertia());
-				////ndVector xxxxxx(xxxxx.EigenVectors());
-				//
-				//surrogateMatrix.m_posit = obbOrigin;
-				//surrogateMatrix.m_posit.m_w = ndFloat32(1.0f);
-				//surrogate.SetLocalMatrix(surrogateMatrix);
-
 				ndFloat32 radios = shape.GetBoxMinRadius();
 				ndShapeInstance surrogate(new ndShapeSphere(radios));
 				world.ConvexCast(*this, surrogate, origin, dst);

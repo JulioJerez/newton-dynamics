@@ -49,10 +49,9 @@ void ndBasicSceneCompoundCollision(ndDemoEntityManager* const scene)
 	scene->SetCameraMatrix(rot, origin);
 }
 
-#if 1
 void ndBasicStaticMeshCollision(ndDemoEntityManager* const scene)
 {
-	ndSharedPtr<ndBody> background(BuildPlayground(scene));
+	BuildPlayground(scene);
 
 	class PlaceMatrix : public ndMatrix
 	{
@@ -81,45 +80,3 @@ void ndBasicStaticMeshCollision(ndDemoEntityManager* const scene)
 	ndVector origin(-40.0f, 15.0f, 20.0f, 1.0f);
 	scene->SetCameraMatrix(rot, origin);
 }
-#else
-
-void ndBasicStaticMeshCollision(ndDemoEntityManager* const scene)
-{
-	ndRenderMeshLoader loader(*scene->GetRenderer());
-	loader.LoadMesh(ndGetWorkingFileName("leadwerktestscene.nd"));
-	scene->AddEntity(loader.m_renderMesh);
-
-	ndWorld* const world = scene->GetWorld();
-	ndList<ndSharedPtr<ndMesh>>& children = loader.m_mesh->GetChildren();
-	for (ndList<ndSharedPtr<ndMesh>>::ndNode* child = children.GetFirst(); child; child = child->GetNext())
-	{
-		const ndString& name = child->GetInfo()->GetName();
-		bool test = (name == "Box");
-		test = test || (name == "Cylinder");
-		if (test)
-		{
-			ndSharedPtr<ndShapeInstance> shape (child->GetInfo()->CreateCollisionConvex());
-
-			ndSharedPtr<ndBody> body(new ndBodyDynamic());
-			ndMatrix matrix(child->GetInfo()->CalculateGlobalMatrix());
-			body->SetMatrix(matrix);
-			body->GetAsBodyKinematic()->SetCollisionShape(**shape);
-			world->AddBody(body);
-		}
-	}
-
-	ndMatrix matrix(ndGetIdentityMatrix());
-	matrix.m_posit.m_x = 10.0f;
-	matrix.m_posit.m_z = 4.0f;
-	matrix.m_posit.m_y = 2.0f;
-	//ndSharedPtr<ndBody> testBody(AddCylinder(scene, matrix, ndFloat32(10.0f), 0.7f, 1.8f, 0.7f));
-	//ndSharedPtr<ndBody> testBody(AddBox(scene, matrix, ndFloat32(10.0f), 1.0f, 1.0f, 1.0f));
-	ndSharedPtr<ndBody> testBody(AddSphere(scene, matrix, ndFloat32(10.0f), 0.5f));
-	testBody->GetAsBodyKinematic()->SetMatrixUpdateScene(matrix);
-
-	ndMatrix camMatrix(ndGetIdentityMatrix());
-	ndQuaternion rot(camMatrix);
-	ndVector origin(-0.0f, 5.0f, 0.0f, 0.0f);
-	scene->SetCameraMatrix(rot, origin);
-}
-#endif
