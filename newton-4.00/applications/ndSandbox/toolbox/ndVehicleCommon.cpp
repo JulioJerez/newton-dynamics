@@ -106,7 +106,8 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 		ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
 		const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& engineCurve = motor->GetCurve();
 		ndFloat32 currentRpm = motor->GetRpm();
-		ndFloat32 desiredRpm = ndMax(engineCurve.GetIdleRpm(), throttle * engineCurve.GetRedLineRpm());
+		ndFloat32 idleRpm = engineCurve.GetIdleRpm();
+		ndFloat32 desiredRpm = ndMax(idleRpm, throttle * engineCurve.GetRedLineRpm());
 		ndFloat32 torqueFromCurve = engineCurve.GetTorque(currentRpm);
 		ndFloat32 brake = axis[ndGameControllerInputs::m_brakePedal];
 		ndFloat32 steerAngle = axis[ndGameControllerInputs::m_steeringWheel];
@@ -155,15 +156,16 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 
 		if (m_isPlayer)
 		{
-			bool aweakeVehicle = false;
-			for (ndInt32 i = 0; i < ndGameControllerInputs::m_usedAxisCount; i++)
+			bool aweakeVehicle = ndAbs(currentRpm - idleRpm) > ndFloat32(1.0f);
+			for (ndInt32 i = 0; !aweakeVehicle && (i < ndGameControllerInputs::m_usedAxisCount); i++)
 			{
 				aweakeVehicle = aweakeVehicle || (ndAbs(axis[i]) > ndFloat32(0.01f));
 			}
-			for (ndInt32 i = 0; i < buttons.GetCount(); i++)
+			for (ndInt32 i = 0; !aweakeVehicle && (i < buttons.GetCount()); i++)
 			{
 				aweakeVehicle = aweakeVehicle || buttons[i];
 			}
+			
 			if (aweakeVehicle)
 			{
 				vehicle->GetRoot()->m_body->GetAsBodyDynamic()->SetSleepState(false);
