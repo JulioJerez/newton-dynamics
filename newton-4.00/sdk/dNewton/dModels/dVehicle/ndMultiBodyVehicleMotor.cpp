@@ -86,7 +86,7 @@ void ndMultiBodyVehicleMotor::ndEngineTorqueCurve::Init(
 	m_torques[4] = ndReal(torqueInPoundFood);
 	m_torques[4] = ndReal(torqueInPoundFood);
 
-	m_omegaStep = ndFloat32(8.0f);
+	m_omegaStep = ndFloat32(200.0f);
 	m_frictionLoss = ndReal(GetTorque(ndFloat32(0.0f)) * ndFloat32(0.5f));
 }
 
