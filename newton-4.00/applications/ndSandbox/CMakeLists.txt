@@ -196,4 +196,11 @@ if (MSVC)
 	install(CODE ${raceTrackAssetCommand})
 
 	set_target_properties(${projectName} PROPERTIES FOLDER "demos")
+
+elseif(UNIX)
+
+	install(CODE "execute_process(COMMAND unzip -o fbx.zip WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/applications/media/)")
+	install(CODE "execute_process(COMMAND unzip -o fbx.zip WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/applications/media/racetrack)")
+	install(CODE "execute_process(COMMAND unzip -o racetrack.zip WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/applications/media/racetrack)")
+
 endif()

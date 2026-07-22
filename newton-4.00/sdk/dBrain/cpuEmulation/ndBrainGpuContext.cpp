@@ -137,7 +137,7 @@ void ndBrainGpuContext::SubmitBufferCommand(ndBrainBufferCommand* const command)
 		shader.m_parameters.PushBack(desc[i]);
 	}
 
-	auto ExecuteCommand = ndMakeObject::ndFunction([this, &command](ndInt32 groupId, ndInt32)
+	auto ExecuteCommand = ndMakeObject::ndFunction([this, &command](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 		ndBrainKernel& shader = **desc.m_kernel;
