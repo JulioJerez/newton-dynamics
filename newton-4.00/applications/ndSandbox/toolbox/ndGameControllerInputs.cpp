@@ -195,8 +195,7 @@ void ndGameControllerInputs::GetXboxJoystickInputs(ndDemoEntityManager* const sc
 		buttonMapping[1] = ndGameControllerInputs::ndGameControllerInputs::m_parkGearButton;
 		buttonMapping[2] = ndGameControllerInputs::ndGameControllerInputs::m_changeCamera;
 		buttonMapping[3] = ndGameControllerInputs::ndGameControllerInputs::m_changePlayer;
-		//buttonMapping[4] = ndGameControllerInputs::ndGameControllerInputs::m_neutralGearButton;
-		buttonMapping[5] = ndGameControllerInputs::ndGameControllerInputs::m_handBreakButton;
+		buttonMapping[4] = ndGameControllerInputs::ndGameControllerInputs::m_handBreakButton;
 		buttonMapping[6] = ndGameControllerInputs::ndGameControllerInputs::m_shiftKey;
 		buttonMapping[7] = ndGameControllerInputs::ndGameControllerInputs::m_ignitionButton;
 		buttonMapping[10] = ndGameControllerInputs::ndGameControllerInputs::m_upGearButton;
