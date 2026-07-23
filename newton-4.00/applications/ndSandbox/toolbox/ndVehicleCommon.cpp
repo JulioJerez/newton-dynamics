@@ -179,40 +179,6 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 		return;
 	}
 
-	auto ShiftGearUpUpdate = [this, gearJoint]()
-	{
-		const ndMultiBodyVehicleGearBox::ndGearBox& gearBox = gearJoint->GetGearBox();
-		if (m_autoGearShiftTimer == gearBox.m_gearShiftDelayTicks)
-		{
-			m_currentGear++;
-			if (m_currentGear >= gearBox.m_gearRatios.GetCount())
-			{
-				m_currentGear = gearBox.m_gearRatios.GetCount() - 1;
-			}
-			ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
-			gearJoint->SetRatio(gearGain);
-		}
-		m_autoGearShiftTimer--;
-		return m_autoGearShiftTimer > 0;
-	};
-
-	auto ShiftGearDownUpdate = [this, gearJoint]()
-	{
-		const ndMultiBodyVehicleGearBox::ndGearBox& gearBox = gearJoint->GetGearBox();
-		if (m_autoGearShiftTimer == gearBox.m_gearShiftDelayTicks)
-		{
-			m_currentGear--;
-			if (m_currentGear <= ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear)
-			{
-				m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
-			}
-			ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
-			gearJoint->SetRatio(gearGain);
-		}
-		m_autoGearShiftTimer--;
-		return m_autoGearShiftTimer > 0;
-	};
-
 	const ndMultiBodyVehicleGearBox::ndGearBox& gearBox = gearJoint->GetGearBox();
 	const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& engineCurve = motor->GetCurve();
 	switch (m_driverState)
@@ -251,6 +217,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			{
 				m_transmission = m_automatic;
 				m_driverState = m_driveAutoGear;
+				m_autoGearShiftTimer = 0;
 				m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
 				ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
 				gearJoint->SetRatio(gearGain);
@@ -258,10 +225,10 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 
 			if (m_forwardGearUp.Update(buttons[ndGameControllerInputs::m_upGearButton] ? true : false))
 			{
-				m_driverState = m_driveShitGearUp;
 				m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
+				m_driverState = m_driveForwardGearDelay;
+				m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
 				ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
-				m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks - 1;
 				gearJoint->SetRatio(gearGain);
 			}
 
@@ -272,7 +239,6 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
 				gearJoint->SetRatio(gearGain);
 			}
-
 			break;
 		}
 
@@ -313,19 +279,24 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			{
 				if (m_currentGear < (gearBox.m_gearRatios.GetCount() - 1))
 				{
-					m_driverState = m_driveAutoShitGearUp;
-					m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
+					ndAssert(0);
+					//m_driverState = m_driveAutoShiftGearUp;
+					//m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
 				}
 			}
 			else if (m_forwardGearDown.Update(buttons[ndGameControllerInputs::m_downGearButton] ? true : false))
 			{
 				if (m_currentGear > ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear)
 				{
-					m_driverState = m_driveAutoShitGearDown;
-					m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
+					ndAssert(0);
+					//m_driverState = m_driveAutoShiftGearDown;
+					//m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
+					//ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+					//	gearJoint->SetRatio(gearGain);
+
 				}
 			}
-			else
+			else if (m_autoGearShiftTimer <= 0)
 			{
 				ndFloat32 rmp = motor->GetRpm();
 				ndFloat32 lowRpm = engineCurve.GetLowGearShiftRpm();
@@ -334,16 +305,22 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				{
 					if (m_currentGear < (gearBox.m_gearRatios.GetCount() - 1))
 					{
-						m_driverState = m_driveAutoShitGearUp;
-						m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
+						m_currentGear++;
+						m_driverState = m_driveAutoShiftGearUp;
+						m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks * 1;
+						ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+						gearJoint->SetRatio(gearGain);
 					}
 				}
 				else if (rmp <= lowRpm)
 				{
 					if (m_currentGear > ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear)
 					{
-						m_driverState = m_driveAutoShitGearDown;
-						m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
+						m_currentGear--;
+						m_driverState = m_driveAutoShiftGearDown;
+						m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks * 1;
+						ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+						gearJoint->SetRatio(gearGain);
 					}
 				}
 			}
@@ -376,20 +353,60 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			break;
 		}
 
-		case m_driveAutoShitGearUp:
+		case m_driveAutoShiftGearUp:
 		{
-			if (!ShiftGearUpUpdate())
+			if (m_manualTransmission.Update(buttons[ndGameControllerInputs::m_automaticGearBoxButton] ? true : false))
 			{
-				m_driverState = m_driveAutoGear;
+				m_transmission = m_manual;
+				m_driverState = m_driveForward;
+				break;
+			}
+			if (m_ignition.Update(buttons[ndGameControllerInputs::m_ignitionButton] ? true : false))
+			{
+				gearJoint->SetRatio(0.0f);
+				m_driverState = m_idle;
+				break;
+			}
+		
+			m_autoGearShiftTimer--;
+			if (m_autoGearShiftTimer <= 0)
+			{
+				// apply hysteresis. 
+				ndFloat32 rmp = motor->GetRpm();
+				ndFloat32 lowRpm = engineCurve.GetLowGearShiftRpm();
+				if ((m_autoGearShiftTimer < -120) || (rmp > lowRpm))
+				{
+					m_driverState = m_driveAutoGear;
+				}
 			}
 			break;
 		}
 
-		case m_driveAutoShitGearDown:
+		case m_driveAutoShiftGearDown:
 		{
-			if (!ShiftGearDownUpdate())
+			if (m_manualTransmission.Update(buttons[ndGameControllerInputs::m_automaticGearBoxButton] ? true : false))
 			{
-				m_driverState = m_driveAutoGear;
+				m_transmission = m_manual;
+				m_driverState = m_driveForward;
+				break;
+			}
+			if (m_ignition.Update(buttons[ndGameControllerInputs::m_ignitionButton] ? true : false))
+			{
+				gearJoint->SetRatio(0.0f);
+				m_driverState = m_idle;
+				break;
+			}
+
+			m_autoGearShiftTimer--;
+			if (m_autoGearShiftTimer <= 0)
+			{
+				// apply hysteresis. 
+				ndFloat32 rmp = motor->GetRpm();
+				ndFloat32 highRpm = engineCurve.GetHighGearShiftRpm();
+				if ((m_autoGearShiftTimer < -120) || (rmp < highRpm))
+				{
+					m_driverState = m_driveAutoGear;
+				}
 			}
 			break;
 		}
@@ -418,16 +435,30 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				gearJoint->SetRatio(gearGain);
 			}
 
-
 			if (m_forwardGearUp.Update(buttons[ndGameControllerInputs::m_upGearButton] ? true : false))
 			{
-				m_driverState = m_driveShitGearUp;
-				m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
+				if (m_currentGear < (gearBox.m_gearRatios.GetCount() - 1))
+				{
+					m_currentGear++;
+					m_driverState = m_driveForwardGearDelay;
+					m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
+					ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+					gearJoint->SetRatio(gearGain);
+				}
 			}
-			if (m_forwardGearUp.Update(buttons[ndGameControllerInputs::m_downGearButton] ? true : false))
+			if (m_forwardGearDown.Update(buttons[ndGameControllerInputs::m_downGearButton] ? true : false))
 			{
-				m_driverState = m_driveShitGearDown;
-				m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
+				//m_driverState = m_driveShitGearDown;
+				//m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
+
+				if (m_currentGear > ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear)
+				{
+					m_currentGear--;
+					m_driverState = m_driveForwardGearDelay;
+					m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
+					ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+					gearJoint->SetRatio(gearGain);
+				}
 			}
 
 			if (m_reverseGear.Update(buttons[ndGameControllerInputs::m_reverseGearButton] ? true : false))
@@ -460,11 +491,12 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			{
 				if (ndAbs(vehicle->GetSpeed()) < ndFloat32(1.0f))
 				{
-					m_driverState = m_driveShitGearUp;
-					m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
-					ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
-					m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks - 1;
-					gearJoint->SetRatio(gearGain);
+					ndAssert(0);
+					//m_driverState = m_driveShitGearUp;
+					//m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
+					//ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+					//m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks - 1;
+					//gearJoint->SetRatio(gearGain);
 				}
 			}
 			if (m_manualTransmission.Update(buttons[ndGameControllerInputs::m_automaticGearBoxButton] ? true : false))
@@ -482,19 +514,11 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			break;
 		}
 
-		case m_driveShitGearUp:
+		case m_driveForwardGearDelay:
 		{
-			if (!ShiftGearUpUpdate())
-			{
-				m_driverState = m_driveForward;
-			}
-			break;
-		}
-
-		case m_driveShitGearDown:
-		{
-			if (!ShiftGearDownUpdate())
-			{
+			m_autoGearShiftTimer--;
+			if (m_autoGearShiftTimer <= 0)
+			{ 
 				m_driverState = m_driveForward;
 			}
 			break;
