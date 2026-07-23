@@ -634,8 +634,8 @@ void ndMultiBodyVehicle::Debug(ndConstraintDebugCallback& context) const
 	const ndVector p1(p0 + kinematics.m_centerOfMass.m_front.Scale(vehicleHeight));
 	const ndVector p2(p0 + kinematics.m_centerOfMass.RotateVector(veloc.Scale(0.25f * vehicleHeight)));
 
-	context.DrawLine(p0, p1, ndVector(1.0f, 0.0f, 0.0f, 0.0f));
-	context.DrawLine(p0, p2, ndVector(1.0f, 1.0f, 0.0f, 0.0f));
+	context.DrawLine(p0, p1, ndVector(0.0f, 1.0f, 1.0f, 0.0f));
+	context.DrawLine(p0, p2, ndVector(1.0f, 0.0f, 1.0f, 0.0f));
 	
 	// draw tires info
 	ndFloat32 tireGravityScale = ndAbs(ndFloat32(4.0f) * vehicleHeight / (kinematics.m_mass * m_gravityMagnitud));
