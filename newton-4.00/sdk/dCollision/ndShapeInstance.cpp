@@ -491,41 +491,6 @@ ndMatrix ndShapeInstance::CalculateInertia() const
 	}
 }
 
-void ndShapeInstance::CalculateObb(ndVector& origin, ndVector& size) const
-{
-	size = m_shape->GetObbSize();
-	origin = m_shape->GetObbOrigin();
-
-	switch (m_scaleType)
-	{
-		case m_unit:
-		{
-			size += m_padding;
-			break;
-		}
-
-		case m_uniform:
-		case m_nonUniform:
-		{
-			size = size * m_scale + m_padding;
-			origin = origin * m_scale;
-			break;
-		}
-		case m_global:
-		{
-			ndVector p0;
-			ndVector p1;
-			m_shape->CalculateAabb(m_alignmentMatrix, p0, p1);
-			size = (ndVector::m_half * (p1 - p0) * m_scale + m_padding) & ndVector::m_triplexMask;
-			origin = (ndVector::m_half * (p1 + p0) * m_scale) & ndVector::m_triplexMask;;
-			break;
-		}
-	}
-
-	ndAssert(size.m_w == ndFloat32(0.0f));
-	ndAssert(origin.m_w == ndFloat32(0.0f));
-}
-
 ndFloat32 ndShapeInstance::RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, const ndBody* const body, ndContactPoint& contactOut, ndFloat32 maxT) const
 {
 	//ndFloat32 t = ndFloat32(1.2f);
@@ -761,6 +726,41 @@ bool ndShapeInstance::ndDistanceCalculator::ClosestPoint()
 	m_point0.m_w = ndFloat32(1.0f);
 	m_point1.m_w = ndFloat32(1.0f);
 	return ret;
+}
+
+void ndShapeInstance::CalculateObb(ndVector& origin, ndVector& size) const
+{
+	size = m_shape->GetObbSize();
+	origin = m_shape->GetObbOrigin();
+
+	switch (m_scaleType)
+	{
+		case m_unit:
+		{
+			size += m_padding;
+			break;
+		}
+
+		case m_uniform:
+		case m_nonUniform:
+		{
+			size = size * m_scale + m_padding;
+			origin = origin * m_scale;
+			break;
+		}
+		case m_global:
+		{
+			ndVector p0;
+			ndVector p1;
+			m_shape->CalculateAabb(m_alignmentMatrix, p0, p1);
+			size = (ndVector::m_half * (p1 - p0) * m_scale + m_padding) & ndVector::m_triplexMask;
+			origin = (ndVector::m_half * (p1 + p0) * m_scale) & ndVector::m_triplexMask;;
+			break;
+		}
+	}
+
+	ndAssert(size.m_w == ndFloat32(0.0f));
+	ndAssert(origin.m_w == ndFloat32(0.0f));
 }
 
 void ndShapeInstance::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) const
