@@ -307,6 +307,7 @@ void ndConvexCastVehicle::Debug(ndConstraintDebugCallback& context) const
 {
 	ndMultiBodyVehicle::Debug(context);
 
+	// try to render the a represenation of teh tire her, for now nothong
 	//ndVector red(ndVector::m_wOne);
 	//red.m_x = 1.0f;
 	//for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
@@ -473,12 +474,6 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 			{
 				auto IntegrateInternalPart = [body, timestep]()
 				{
-				#ifdef _DEBUG
-					const ndVector angularMomentum(body->CalculateAngularMomentum());
-					const ndVector xxxx(body->m_omega.CrossProduct(angularMomentum) - body->m_gyroTorque);
-					ndAssert(xxxx.DotProduct(xxxx).GetScalar() - ndFloat32(1.0e-3f));
-				#endif
-
 					const ndMatrix inertia(body->CalculateInertiaMatrix());
 					const ndVector torque(inertia.RotateVector(body->m_alpha) + body->m_gyroTorque);
 					const ndVector force(body->m_accel.Scale(body->m_mass.m_w));
