@@ -1174,24 +1174,7 @@ void ndAssetEditor::EditMotorJoint()
 
 	ndMeshJointVehicleMotor* const joint = (ndMeshJointVehicleMotor*)*m_currentSelection->GetJoint();
 	ndMultiBodyVehicleMotor::ndEngineTorqueCurve& engineCurve = joint->m_engineCurve;
-	//ndInt32 numberOfPoints = engineCurve.m_rpms.GetCount();
-	//if (ImGui::InputInt("number of points", &numberOfPoints, 0, ImGuiInputTextFlags_EnterReturnsTrue))
-	//{
-	//	numberOfPoints = ndClamp (numberOfPoints, )
-	//	if (numberOfPoints < engineCurve.m_rpms.GetCount())
-	//	{
-	//		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
-	//
-	//		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
-	//	}
-	//	//numberOfPoints = ndClamp(numberOfPoints, 5, engineCurve.m_torqueCurve.GetCapacity());
-	//	//if (numberOfPoints != engineCurve.m_torqueCurve.GetCount())
-	//	//{
-	//	//	ndAssert(0);
-	//	//}
-	//}
 
-	//ImGui::Text("torque/rmp curve");
 	ImGui::SeparatorText("torque/rmp curve");
 	for (ndInt32 i = 0; i < engineCurve.m_rpms.GetCount(); ++i)
 	{
