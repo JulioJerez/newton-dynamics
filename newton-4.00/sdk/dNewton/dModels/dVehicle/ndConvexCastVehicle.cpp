@@ -303,6 +303,36 @@ void ndConvexCastVehicle::CalculateConveCastTireContacts(ndInt32 threadId)
 	}
 }
 
+void ndConvexCastVehicle::Debug(ndConstraintDebugCallback& context) const
+{
+	ndMultiBodyVehicle::Debug(context);
+
+	//ndVector red(ndVector::m_wOne);
+	//red.m_x = 1.0f;
+	//for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
+	//{
+	//	const ndMultiBodyVehicleTireJoint* const wheelJoint = tireNode->GetInfo();
+	//	ndBodyDynamic* const wheelBody = wheelJoint->GetBody0()->GetAsBodyDynamic();
+	//
+	//	// deactive contacts
+	//	ndBodyKinematic::ndContactMap& contactMap = wheelBody->GetContactMap();
+	//	ndBodyKinematic::ndContactMap::Iterator it(contactMap);
+	//	for (it.Begin(); it; it++)
+	//	{
+	//		ndContact* const contact = it.GetNode()->GetInfo();
+	//		if (contact->IsActive())
+	//		{
+	//			ndContactPointList& contactPoints = contact->GetContactPoints();
+	//			for (ndContactPointList::ndNode* node = contactPoints.GetFirst(); node; node = node->GetNext())
+	//			{
+	//				const ndContactMaterial& contactMaterial = node->GetInfo();
+	//				context.DrawPoint(contactMaterial.m_point, red);
+	//			}
+	//		}
+	//	}
+	//}
+}
+
 void ndConvexCastVehicle::TransformUpdate(ndFloat32 timestep)
 {
 	ndMultiBodyVehicle::TransformUpdate(timestep);
