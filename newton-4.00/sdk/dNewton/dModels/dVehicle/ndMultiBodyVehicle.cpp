@@ -615,7 +615,7 @@ void ndMultiBodyVehicle::Debug(ndConstraintDebugCallback& context) const
 	// draw vehicle coordinade system;
 	const ndBodyKinematic* const chassis = *m_chassis;
 	ndAssert(chassis);
-	const ndMatrix chassisMatrix(chassis->GetMatrix());
+	const ndMatrix chassisMatrix(m_localFrame * chassis->GetMatrix());
 
 	// draw center of mass;
 	const ndCenterOfMassDynamics kinematics(CalculateCentreOfMassKinematics(chassisMatrix));
@@ -628,14 +628,15 @@ void ndMultiBodyVehicle::Debug(ndConstraintDebugCallback& context) const
 
 	ndFloat32 vehicleHeight = maxAabb.m_y - minAabb.m_y;
 	
-	// draw vehicle velocity
-	const ndVector veloc(kinematics.m_veloc);
-	const ndVector p0(kinematics.m_centerOfMass.m_posit + kinematics.m_centerOfMass.m_up.Scale(vehicleHeight));
-	const ndVector p1(p0 + kinematics.m_centerOfMass.m_front.Scale(vehicleHeight));
-	const ndVector p2(p0 + kinematics.m_centerOfMass.RotateVector(veloc.Scale(0.25f * vehicleHeight)));
+	// draw vehicle Lagrangian frame
+	ndMatrix lagragianFrame(chassisMatrix);
+	lagragianFrame.m_posit = kinematics.m_centerOfMass.m_posit + kinematics.m_centerOfMass.m_up.Scale(vehicleHeight);
+	context.DrawFrame(lagragianFrame);
 
-	context.DrawLine(p0, p1, ndVector(0.0f, 1.0f, 1.0f, 0.0f));
-	context.DrawLine(p0, p2, ndVector(1.0f, 0.0f, 1.0f, 0.0f));
+	// vehicle speed in the lagrangian frame
+	const ndVector veloc(kinematics.m_veloc);
+	const ndVector velocPoint(lagragianFrame.m_posit + kinematics.m_centerOfMass.RotateVector(veloc.Scale(0.25f * vehicleHeight)));
+	context.DrawLine(lagragianFrame.m_posit, velocPoint, ndVector(0.8f, 0.8f, 0.8f, 0.0f));
 	
 	// draw tires info
 	ndFloat32 tireGravityScale = ndAbs(ndFloat32(4.0f) * vehicleHeight / (kinematics.m_mass * m_gravityMagnitud));
@@ -1552,8 +1553,8 @@ void ndMultiBodyVehicle::ApplyBicycleModelLateralStability()
 	//
 	// The resulting equations are:
 	//
-	// 1) mass * localVelocity * (betaRate + yawRate) + mass * beta * localAccel = lateralForce
-	// 2) mass * (localAccel - yawRate * localVelocity * beta) = longitudinalForce
+	// 1) mass * localSpeed * (betaRate + yawRate) + mass * beta * localAccel = lateralForce
+	// 2) mass * (localAccel - yawRate * localSpeed * beta) = longitudinalForce
 	// 3) yeaInertia * yawAlpha = yawTorque
 	//
 	// The system is overdetermined, so one or more variables must be
@@ -1596,9 +1597,21 @@ void ndMultiBodyVehicle::ApplyBicycleModelLateralStability()
 	{
 		return;
 	}
+	// calculate speed and beta angle
+	const ndVector veloc(frameMatrix.UnrotateVector(m_chassis->GetVelocity()));
+	ndFloat32 localSpeed = ndSqrt (veloc.m_x * veloc.m_x + veloc.m_z * veloc.m_z);
+	if (localSpeed < ndFloat32 (2.0f))
+	{
+		// less than 2 m/s is just too speed for no linear lateral dynamics
+		return;
+	}
+	const ndFloat32 beta = ndAtan2(veloc.m_z, veloc.m_x);
 
-	// using the forces for previeus frames calculate rear and fron forces.
+	// calculate yawrate
+	const ndVector omega(frameMatrix.UnrotateVector(m_chassis->GetOmega()));
+	const ndFloat32 yawRate = omega.m_y;
 
+	// using the forces for previuos frames calculate rear and fron forces.
 	ndVector externalForce(frameMatrix.UnrotateVector(m_chassis->GetForce()));
 	ndFloat32 rearLateralForce = externalForce.m_z;
 	ndFloat32 frontLateralForce = externalForce.m_z;
@@ -1625,5 +1638,17 @@ void ndMultiBodyVehicle::ApplyBicycleModelLateralStability()
 		}
 	}
 
+	// calculate acceleration, from equation 2 we get
+	// 2) mass * (localAccel - yawRate * localSpeed * beta) = longitudinalForce
+	ndFloat32 mass = m_chassis->GetMassMatrix().m_w;
+	ndFloat32 longitudinalForce = frontLongitudinalForce + rearLongitudinalForce;
+	ndFloat32 localAccel = (longitudinalForce - mass * yawRate * localSpeed * beta) / mass;
+
+	// calculate beta rate, form equation 1
+	// 1) mass * localSpeed * (betaRate + yawRate) + mass * beta * localAccel = lateralForce
+	ndFloat32 lateralForce = frontLateralForce + rearLateralForce;
+	ndFloat32 betaRate = (lateralForce - mass * beta * localAccel) / (mass * localSpeed) - yawRate;
+
+	ndTrace(("beta=%g betaRate=%g\n", beta * ndRadToDegree, betaRate));
 	//ndTrace (("Fxf=%g Fzf=%g Fxr=%g Fzr=%g\n", frontLongitudinalForce, frontLateralForce, rearLongitudinalForce, rearLateralForce));
 }

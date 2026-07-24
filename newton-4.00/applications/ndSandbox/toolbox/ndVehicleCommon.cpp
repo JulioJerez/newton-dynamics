@@ -279,21 +279,22 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			{
 				if (m_currentGear < (gearBox.m_gearRatios.GetCount() - 1))
 				{
-					ndAssert(0);
-					//m_driverState = m_driveAutoShiftGearUp;
-					//m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
+					m_currentGear++;
+					m_driverState = m_driveAutoShiftGearUp;
+					m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks * 1;
+					ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+					gearJoint->SetRatio(gearGain);
 				}
 			}
 			else if (m_forwardGearDown.Update(buttons[ndGameControllerInputs::m_downGearButton] ? true : false))
 			{
 				if (m_currentGear > ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear)
 				{
-					ndAssert(0);
-					//m_driverState = m_driveAutoShiftGearDown;
-					//m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
-					//ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
-					//	gearJoint->SetRatio(gearGain);
-
+					m_currentGear--;
+					m_driverState = m_driveAutoShiftGearDown;
+					m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks * 1;
+					ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+					gearJoint->SetRatio(gearGain);
 				}
 			}
 			else if (m_autoGearShiftTimer <= 0)
