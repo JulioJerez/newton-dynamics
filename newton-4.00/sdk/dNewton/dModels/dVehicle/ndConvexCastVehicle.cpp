@@ -435,6 +435,9 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 	// update model
 	ndMultiBodyVehicle::Update(timestep, threadId);
 
+	// calculate lateral dynamics stability
+	ApplyBicycleModelLateralStability();
+
 	// solve using immediate solver.
 	m_solver.SolverBegin(*m_skeleton, nullptr, 0, world, timestep, threadId);
 

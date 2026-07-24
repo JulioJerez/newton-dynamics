@@ -116,8 +116,8 @@
     <rigidbody>
         <constructor string="ndBodyDynamic" />
         <com float3="-0.185416 0.3 -0.00021247" />
-        <inverseMass float="0.00117729" />
-        <inverseDiagonalInertia float3="0.00232248 0.000743926 0.000754909" />
+        <inverseMass float="0.000689592" />
+        <inverseDiagonalInertia float3="0.00136038 0.000435751 0.000442184" />
         <principalAxis float3="0 0 0" />
         <maxAngleStep float="90" />
         <maxLinearStep float="1" />
@@ -206,8 +206,8 @@
                     <posit float3="0 0 0" />
                     <angles float3="0 -0 0" />
                 </localFrame1>
-                <ratios count="6" floatArray="-3 0 3 1.5 1.1 0.8" />
-                <crownGearRatio float="10" />
+                <ratios count="6" floatArray="-3 0 3 1.95 1.5 1.13" />
+                <crownGearRatio float="3" />
                 <idleClutchTorque float="200" />
                 <lockedClutchTorque float="1e+06" />
                 <torqueConverter float="2000" />
@@ -288,8 +288,8 @@
         <rigidbody>
             <constructor string="ndBodyDynamic" />
             <com float3="-3.60508e-05 0 0" />
-            <inverseMass float="0.0316307" />
-            <inverseDiagonalInertia float3="0.650093 0.556284 0.559532" />
+            <inverseMass float="0.0201639" />
+            <inverseDiagonalInertia float3="0.414421 0.35462 0.356691" />
             <principalAxis float3="0 0 0" />
             <maxAngleStep float="90" />
             <maxLinearStep float="1" />
@@ -393,8 +393,8 @@
         <rigidbody>
             <constructor string="ndBodyDynamic" />
             <com float3="-3.60508e-05 0 0" />
-            <inverseMass float="0.0316306" />
-            <inverseDiagonalInertia float3="0.650091 0.556282 0.55953" />
+            <inverseMass float="0.0201639" />
+            <inverseDiagonalInertia float3="0.414421 0.35462 0.35669" />
             <principalAxis float3="0 0 0" />
             <maxAngleStep float="90" />
             <maxLinearStep float="1" />
@@ -498,8 +498,8 @@
         <rigidbody>
             <constructor string="ndBodyDynamic" />
             <com float3="-3.60508e-05 0 0" />
-            <inverseMass float="0.0316306" />
-            <inverseDiagonalInertia float3="0.650091 0.556282 0.55953" />
+            <inverseMass float="0.0201639" />
+            <inverseDiagonalInertia float3="0.414421 0.35462 0.35669" />
             <principalAxis float3="0 0 0" />
             <maxAngleStep float="90" />
             <maxLinearStep float="1" />
@@ -603,8 +603,8 @@
         <rigidbody>
             <constructor string="ndBodyDynamic" />
             <com float3="-3.60508e-05 0 0" />
-            <inverseMass float="0.0316307" />
-            <inverseDiagonalInertia float3="0.650093 0.556284 0.559532" />
+            <inverseMass float="0.0201639" />
+            <inverseDiagonalInertia float3="0.414421 0.35462 0.356691" />
             <principalAxis float3="0 0 0" />
             <maxAngleStep float="90" />
             <maxLinearStep float="1" />
@@ -737,12 +737,12 @@
         <rigidbody>
             <constructor string="ndBodyDynamic" />
             <com float3="0 0 0" />
-            <inverseMass float="0.0414431" />
-            <inverseDiagonalInertia float3="1.68381 1.68381 1.68381" />
+            <inverseMass float="0.0388403" />
+            <inverseDiagonalInertia float3="1.57806 1.57806 1.57806" />
             <principalAxis float3="0 0 0" />
             <maxAngleStep float="45" />
             <maxLinearStep float="2" />
-            <massVolumeWeigh float="1" />
+            <massVolumeWeigh float="5" />
             <collisionInstance>
                 <localMatrix>
                     <posit float3="0 0 0" />
@@ -805,12 +805,12 @@
         <rigidbody>
             <constructor string="ndBodyDynamic" />
             <com float3="0 0 0" />
-            <inverseMass float="0.0414431" />
-            <inverseDiagonalInertia float3="1.68381 1.68381 1.68381" />
+            <inverseMass float="0.0388403" />
+            <inverseDiagonalInertia float3="1.57806 1.57806 1.57806" />
             <principalAxis float3="0 0 0" />
             <maxAngleStep float="45" />
             <maxLinearStep float="2" />
-            <massVolumeWeigh float="1" />
+            <massVolumeWeigh float="5" />
             <collisionInstance>
                 <localMatrix>
                     <posit float3="0 0 0" />
@@ -840,11 +840,11 @@
                 <posit float3="0 0.25 -1.20797e-07" />
                 <angles float3="-8.05958e-05 -90 0" />
             </localFrame1>
-            <rpms count="5" floatArray="0 900 5000 6200 8000" />
-            <torques count="5" floatArray="100 100 417.927 337.965 65.4807" />
+            <rpms count="5" floatArray="0 900 4500 6300 7000" />
+            <torques count="5" floatArray="250 200 490 435 300.481" />
             <topSpeed float="40" />
             <fuelInjection float="200" />
-            <frictionLoss float="50" />
+            <frictionLoss float="100" />
         </joint>
         <customProperties>
             <property>
