@@ -62,7 +62,7 @@ namespace ndUnicyclePlayer
 		{
 		}
 
-		ndApplicationMaterial* Clone() const
+		ndApplicationMaterial* Clone() const override
 		{
 			return new ndModelMaterial(*this);
 		}
