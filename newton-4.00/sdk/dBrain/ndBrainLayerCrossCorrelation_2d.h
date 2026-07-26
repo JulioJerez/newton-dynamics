@@ -39,35 +39,35 @@ class ndBrainLayerCrossCorrelation_2d : public ndBrainLayer
 	ndInt32 GetOutputHeight() const;
 	ndInt32 GetOutputChannels() const;
 
-	virtual bool HasParameters() const;
-	virtual ndInt32 GetOutputSize() const;
-	virtual ndInt32 GetInputSize() const;
+	virtual bool HasParameters() const override;
+	virtual ndInt32 GetOutputSize() const override;
+	virtual ndInt32 GetInputSize() const override;
 	virtual const char* GetLabelId() const override;
-	virtual ndInt32 GetOutputBufferSize() const;
-	virtual ndInt32 GetNumberOfParameters() const;
-	
-	virtual void UpdateDropOut();
-	virtual void InitWeights();
-	virtual void AdamUpdate(const ndBrainLayer& u, const ndBrainLayer& v, ndBrainFloat epsilon);
+	virtual ndInt32 GetOutputBufferSize() const override;
+	virtual ndInt32 GetNumberOfParameters() const override;
+
+	virtual void InitWeights() override;
+	virtual void UpdateDropOut() override;
+	virtual void AdamUpdate(const ndBrainLayer& u, const ndBrainLayer& v, ndBrainFloat epsilon) override;
 
 	virtual void MakePrediction(const ndBrainVector& input, ndBrainVector& output) const override;
 	virtual void InputDerivative(const ndBrainVector& input, const ndBrainVector& output, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const override;
 
 	virtual void CalculateParamGradients(
 		const ndBrainVector& input, const ndBrainVector& output,
-		const ndBrainVector& outputDerivative, ndBrainVector& inputGradient, ndBrainLayer* const gradientOut) const;
+		const ndBrainVector& outputDerivative, ndBrainVector& inputGradient, ndBrainLayer* const gradientOut) const override;
 
-	virtual void Save(const ndBrainSave* const loadSave) const;
+	virtual void Save(const ndBrainSave* const loadSave) const override;
 	static ndBrainLayer* Load(const ndBrainLoad* const loadSave);
 
-	virtual void Clear();
-	virtual void FlushToZero();
-	virtual void Scale(ndBrainFloat scale);
-	virtual void Set(const ndBrainLayer& src);
-	virtual void Add(const ndBrainLayer& src);
-	virtual void Mul(const ndBrainLayer& src);
-	virtual void Blend(const ndBrainLayer& src, ndBrainFloat blend);
-	virtual void ScaleAdd(const ndBrainLayer& src, ndBrainFloat scale);
+	virtual void Clear() override;
+	virtual void FlushToZero() override;
+	virtual void Scale(ndBrainFloat scale) override;
+	virtual void Set(const ndBrainLayer& src) override;
+	virtual void Add(const ndBrainLayer& src) override;
+	virtual void Mul(const ndBrainLayer& src) override;
+	virtual void Blend(const ndBrainLayer& src, ndBrainFloat blend) override;
+	virtual void ScaleAdd(const ndBrainLayer& src, ndBrainFloat scale) override;
 
 	private:
 	ndBrainVector m_bias;

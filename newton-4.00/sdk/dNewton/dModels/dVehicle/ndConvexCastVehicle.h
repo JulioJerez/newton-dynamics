@@ -40,10 +40,11 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 	D_NEWTON_API virtual void PostUpdate(ndFloat32 timestep, ndInt32 threadId) override;
 	D_NEWTON_API virtual void TransformUpdate(ndFloat32 timestep) override;
 
-	private:
-	virtual void OnAddToWorld() override;
-	virtual void OnRemoveFromWorld() override;
-	void CalculateConveCastTireContacts(ndInt32 threadId);
+	protected:
+	D_NEWTON_API virtual void OnAddToWorld() override;
+	D_NEWTON_API virtual void OnRemoveFromWorld() override;
+	D_NEWTON_API virtual void CalculateConveCastTireContacts(ndInt32 threadId);
+	D_NEWTON_API virtual void Debug(ndConstraintDebugCallback& context) const override;
 
 	ndIkSolver m_solver;
 	ndFixSizeArray<ndBodyDynamic*, 32> m_savedBody;

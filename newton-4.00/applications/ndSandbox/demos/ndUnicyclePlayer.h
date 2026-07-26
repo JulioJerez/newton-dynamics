@@ -1,5 +1,4 @@
 /* Copyright (c) <2003-2022> <Newton Game Dynamics>
-/* Copyright (c) <2003-2022> <Newton Game Dynamics>
 * 
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
@@ -63,7 +62,7 @@ namespace ndUnicyclePlayer
 		{
 		}
 
-		ndApplicationMaterial* Clone() const
+		ndApplicationMaterial* Clone() const override
 		{
 			return new ndModelMaterial(*this);
 		}

@@ -28,10 +28,11 @@ class ndVehicleCommonNotify : public ndModelNotify
 		m_driveForward,
 		m_driveAutoGear,
 		m_driveAutoReverse,
-		m_driveAutoShitGearUp,
-		m_driveAutoShitGearDown,
-		m_driveShitGearUp,
-		m_driveShitGearDown,
+		m_driveAutoShiftGearUp,
+		m_driveAutoShiftGearDown,
+		//m_driveShiftGearDeleya
+		//m_driveShitGearUp,
+		//m_driveShitGearDown,
 		m_driveForwardGearDelay,
 		m_driveReverseFromForward,
 	};

@@ -1487,6 +1487,11 @@ void ndSkeletonContainer::SolveAuxiliaryImmediate(ndFixSizeArray<ndBodyKinematic
 		ndBodyKinematic* const body0 = bodyArray[m0];
 		ndBodyKinematic* const body1 = bodyArray[m1];
 
+		joint->m_forceBody0 += force0;
+		joint->m_forceBody1 += force1;
+		joint->m_torqueBody0 += torque0;
+		joint->m_torqueBody1 += torque1;
+
 		body0->m_accel += force0;
 		body0->m_alpha += torque0;
 		body1->m_accel += force1;
@@ -1511,6 +1516,45 @@ void ndSkeletonContainer::SolveImmediate(ndIkSolver& solverInfo)
 
 	CalculateJointAccelImmediate(b);
 	CalculateForce(x, b);
+
+	const ndVector zero(ndVector::m_zero);
+	for (ndInt32 i = m_nodeList.GetCount() - 2; i >= 0; --i)
+	{
+		const ndSkeletonContainer::ndNode* const node = m_nodesOrder[i];
+		ndJointBilateralConstraint* const joint = node->m_joint;
+		joint->m_forceBody0 = zero;
+		joint->m_forceBody1 = zero;
+		joint->m_torqueBody0 = zero;
+		joint->m_torqueBody1 = zero;
+	}
+
+	for (ndInt32 i = ndInt32(m_transientLoopingContacts.GetCount() - 1); i >= 0; --i)
+	{
+		ndContact* const contact = m_transientLoopingContacts[i];
+		contact->m_forceBody0 = zero;
+		contact->m_forceBody1 = zero;
+		contact->m_torqueBody0 = zero;
+		contact->m_torqueBody1 = zero;
+	}
+
+	for (ndInt32 i = ndInt32 (m_transientLoopingJoints.GetCount() - 1); i >= 0; --i)
+	{
+		ndJointBilateralConstraint* const joint = m_transientLoopingJoints[i];
+		joint->m_forceBody0 = zero;
+		joint->m_forceBody1 = zero;
+		joint->m_torqueBody0 = zero;
+		joint->m_torqueBody1 = zero;
+	}
+
+	for (ndInt32 i = ndInt32(m_permanentLoopingJoints.GetCount() - 1); i >= 0; --i)
+	{
+		ndJointBilateralConstraint* const joint = m_permanentLoopingJoints[i];
+		joint->m_forceBody0 = zero;
+		joint->m_forceBody1 = zero;
+		joint->m_torqueBody0 = zero;
+		joint->m_torqueBody1 = zero;
+	}
+
 	if (m_auxiliaryRowCount)
 	{
 		SolveAuxiliaryImmediate(solverInfo.m_bodies, x);

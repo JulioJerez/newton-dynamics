@@ -71,7 +71,7 @@ void ndAssetEditor::ShowPropertiesCustomProperties()
 
 			ImGui::Text("type:");
 			ImGui::SameLine();
-			ImGui::Text(propNode->GetInfo()->ClassName());
+			ImGui::Text("%s", propNode->GetInfo()->ClassName());
 			if (newPropType != oldPropType)
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
@@ -131,7 +131,7 @@ void ndAssetEditor::ShowPropertiesCustomProperties()
 
 					ImGui::Text("target: ");
 					ImGui::SameLine();
-					ImGui::Text(propName);
+					ImGui::Text("%s", propName);
 
 					if (ImGui::Button("select target node"))
 					{
@@ -148,7 +148,7 @@ void ndAssetEditor::ShowPropertiesCustomProperties()
 
 					ImGui::Text("target: ");
 					ImGui::SameLine();
-					ImGui::Text(propName);
+					ImGui::Text("%s", propName);
 
 					if (ImGui::Button("exit target node"))
 					{

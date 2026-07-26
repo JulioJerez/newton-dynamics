@@ -45,7 +45,7 @@ namespace ndCartpoleTrainer_ppo
 		{
 		}
 
-		ndApplicationMaterial* Clone() const
+		ndApplicationMaterial* Clone() const override
 		{
 			return new TrainMaterial(*this);
 		}

@@ -165,7 +165,7 @@ class ndBackGroundVehicleController : public ndModelNotify
 
 	// update the body part stuff like animations of the wheels,
 	// setting the follow camera, apply controls, etc;
-	void PostTransformUpdate(ndFloat32 timestep, ndInt32 threadId)
+	void PostTransformUpdate(ndFloat32 timestep, ndInt32 threadId) override
 	{
 		ndModelNotify::PostTransformUpdate(timestep, threadId);
 

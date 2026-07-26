@@ -25,9 +25,12 @@ class ndRenderPassDebug::ndCallback : public ndConstraintDebugCallback
 	{
 	}
 
-	void DrawPoint(const ndVector&, const ndVector&, ndFloat32) override
+	void DrawPoint(const ndVector& point, const ndVector& color, ndFloat32) override
 	{
-		ndAssert(0);
+		ndPointColor line;
+		line.m_point = point;
+		line.m_color = color;
+		m_owner->m_debugPoints.PushBack(line);
 	}
 
 	void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32) override

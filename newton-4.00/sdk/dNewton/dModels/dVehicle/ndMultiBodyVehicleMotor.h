@@ -34,6 +34,16 @@ class ndMultiBodyVehicleMotor: public ndJointBilateralConstraint
 	class ndEngineTorqueCurve
 	{
 		public:
+		enum rpmName
+		{
+			m_engineOff,
+			m_engineIdle,
+			m_enginePickTorque,
+			m_enginePickPower,
+			m_engineRedLine,
+			m_engineRMPSize
+		};
+
 		D_NEWTON_API ndEngineTorqueCurve();
 		D_NEWTON_API void Init(ndFloat32 idleTorquePoundFoot, ndFloat32 idleRmp,
 			ndFloat32 horsePower, ndFloat32 rpm0, ndFloat32 rpm1,
@@ -42,6 +52,7 @@ class ndMultiBodyVehicleMotor: public ndJointBilateralConstraint
 		D_NEWTON_API ndFloat32 GetIdleRpm() const;
 		D_NEWTON_API ndFloat32 GetRedLineRpm() const;
 		D_NEWTON_API ndFloat32 GetPickPowerRpm() const;
+		D_NEWTON_API ndFloat32 GetPickTorqueRpm() const;
 
 		D_NEWTON_API ndFloat32 GetLowGearShiftRpm() const;
 		D_NEWTON_API ndFloat32 GetHighGearShiftRpm() const;
@@ -50,8 +61,8 @@ class ndMultiBodyVehicleMotor: public ndJointBilateralConstraint
 
 		D_NEWTON_API bool operator==(const ndEngineTorqueCurve& other) const;
 
-		ndFixSizeArray<ndReal, 16> m_rpms;
-		ndFixSizeArray<ndReal, 16> m_torques;
+		ndFixSizeArray<ndReal, m_engineRMPSize> m_rpms;
+		ndFixSizeArray<ndReal, m_engineRMPSize> m_torques;
 		ndReal m_omegaStep;
 		ndReal m_frictionLoss;
 	};

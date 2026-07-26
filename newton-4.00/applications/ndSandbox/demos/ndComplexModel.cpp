@@ -93,7 +93,7 @@ namespace ndExcavator
 			cameraPivotNode->AddChild(m_cameraNode);
 		}
 
-		bool OnContactGeneration(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1)
+		bool OnContactGeneration(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1) override
 		{
 			const ndModelArticulation* const articulation = GetModel()->GetAsModelArticulation();
 			return articulation->PairCollide(body0, body1);

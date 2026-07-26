@@ -126,7 +126,6 @@ if (MSVC)
 			ARGS -E copy $<TARGET_FILE:${projectName}> ${PROJECT_BINARY_DIR}/applications/ndTest/${CMAKE_CFG_INTDIR}/$<TARGET_FILE_NAME:${projectName}>)
 		install(FILES $<TARGET_PDB_FILE:${projectName}> DESTINATION "install/lib" OPTIONAL)
 	endif(NEWTON_BUILD_SHARED_LIBS)
-
 endif(MSVC)
 
 target_include_directories(${projectName} PUBLIC .)

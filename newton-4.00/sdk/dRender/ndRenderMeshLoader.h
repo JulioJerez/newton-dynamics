@@ -20,7 +20,7 @@ class ndRenderMeshLoader : public ndAnimationMeshLoader
 	virtual ~ndRenderMeshLoader();
 
 	virtual bool LoadMesh(const ndString& fullPathMeshName) override;
-	virtual bool ImportFbx(const ndString& fbxPathMeshName);
+	virtual bool ImportFbx(const ndString& fbxPathMeshName) override;
 
 	static ndSharedPtr<ndRenderSceneNode> CreateRenderSceneMesh(ndRender* const renderer, const ndMesh* const mesh, const ndString& materialBasePath);
 

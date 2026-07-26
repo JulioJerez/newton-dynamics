@@ -48,7 +48,6 @@ class ndDynamicsUpdateSoa: public ndDynamicsUpdate
 	void InitJacobianMatrix();
 	void CalculateJointsForce();
 	void CalculateJointsAcceleration();
-	virtual void RegenerateSkeletonJacobians(ndSkeletonContainer* const skeleton) override;
 
 	ndVector m_ordinals;
 	ndArray<ndInt8> m_groupType;

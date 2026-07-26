@@ -529,9 +529,9 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			snprintf(targetName, sizeof(nodeName) - 1, "no target");
 			if (modifier && modifier->m_target)
 			{
-				snprintf(targetName, sizeof(nodeName) - 1, modifier->m_target->GetName().GetStr());
+				snprintf(targetName, sizeof(nodeName) - 1, "%s", modifier->m_target->GetName().GetStr());
 			}
-			ImGui::Text(targetName);
+			ImGui::Text("%s", targetName);
 
 			if (m_subSelection == m_transformModifier)
 			{

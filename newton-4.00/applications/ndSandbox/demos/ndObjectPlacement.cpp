@@ -120,7 +120,7 @@ class ndObjectPlacementCamera : public ndDemoCameraNode
 		m_yaw = ndAtan2(-matrix.m_front.m_z, matrix.m_front.m_x);
 	}
 
-	void TickUpdate(ndFloat32 timestep)
+	void TickUpdate(ndFloat32 timestep) override
 	{
 		ndRender* const renderer = GetOwner();
 		ndAssert(renderer);
