@@ -236,12 +236,12 @@ void ndAssetEditor::ShowPropertiesJointsLoopInfo()
 				ImGui::NewLine();
 				ImGui::Text("child: ");
 				ImGui::SameLine();
-				ImGui::Text(loopJoint->m_childNode->GetName().GetStr());
+				ImGui::Text("%s", loopJoint->m_childNode->GetName().GetStr());
 				if (loopJoint->m_parentNode)
 				{
 					ImGui::Text("parent:");
 					ImGui::SameLine();
-					ImGui::Text(loopJoint->m_parentNode->GetName().GetStr());
+					ImGui::Text("%s", loopJoint->m_parentNode->GetName().GetStr());
 				}
 
 				if (ImGui::Button("remove selected"))
