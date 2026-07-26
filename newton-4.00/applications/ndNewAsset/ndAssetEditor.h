@@ -60,22 +60,22 @@ class ndAssetEditor : public ndClassAlloc
 			m_owner->KeyCallback(key, action);
 		}
 	
-		virtual void CharCallback(ndUnsigned32 ch)
+		virtual void CharCallback(ndUnsigned32 ch) override
 		{
 			m_owner->CharCallback(ch);
 		}
 	
-		virtual void CursorposCallback(ndReal x, ndReal y)
+		virtual void CursorposCallback(ndReal x, ndReal y) override
 		{
 			m_owner->CursorposCallback(x, y);
 		}
 	
-		virtual void MouseScrollCallback(ndReal x, ndReal y)
+		virtual void MouseScrollCallback(ndReal x, ndReal y) override
 		{
 			m_owner->MouseScrollCallback(x, y);
 		}
 	
-		virtual void MouseButtonCallback(ndInt32 button, ndInt32 action)
+		virtual void MouseButtonCallback(ndInt32 button, ndInt32 action) override
 		{
 			m_owner->MouseButtonCallback(button, action);
 		}
