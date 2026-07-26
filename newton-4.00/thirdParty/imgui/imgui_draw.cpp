@@ -402,7 +402,7 @@ void ImDrawList::_ResetForNewFrame()
     IdxBuffer.resize(0);
     VtxBuffer.resize(0);
     Flags = _Data->InitialFlags;
-    memset(&_CmdHeader, 0, sizeof(_CmdHeader));
+    memset((void*)&_CmdHeader, 0, sizeof(_CmdHeader));
     _VtxCurrentIdx = 0;
     _VtxWritePtr = NULL;
     _IdxWritePtr = NULL;
@@ -1677,7 +1677,7 @@ void ImDrawListSplitter::ClearFreeMemory()
     for (int i = 0; i < _Channels.Size; i++)
     {
         if (i == _Current)
-            memset(&_Channels[i], 0, sizeof(_Channels[i]));  // Current channel is a copy of CmdBuffer/IdxBuffer, don't destruct again
+            memset((void*)&_Channels[i], 0, sizeof(_Channels[i]));  // Current channel is a copy of CmdBuffer/IdxBuffer, don't destruct again
         _Channels[i]._CmdBuffer.clear();
         _Channels[i]._IdxBuffer.clear();
     }
@@ -1701,7 +1701,7 @@ void ImDrawListSplitter::Split(ImDrawList* draw_list, int channels_count)
     // Channels[] (24/32 bytes each) hold storage that we'll swap with draw_list->_CmdBuffer/_IdxBuffer
     // The content of Channels[0] at this point doesn't matter. We clear it to make state tidy in a debugger but we don't strictly need to.
     // When we switch to the next channel, we'll copy draw_list->_CmdBuffer/_IdxBuffer into Channels[0] and then Channels[1] into draw_list->CmdBuffer/_IdxBuffer
-    memset(&_Channels[0], 0, sizeof(ImDrawChannel));
+    memset((void*)&_Channels[0], 0, sizeof(ImDrawChannel));
     for (int i = 1; i < channels_count; i++)
     {
         if (i >= old_channels_count)
