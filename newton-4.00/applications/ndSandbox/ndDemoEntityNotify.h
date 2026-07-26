@@ -27,7 +27,7 @@ class ndDemoEntityNotify : public ndModelBodyNotify
 		ndBodyKinematic* const parentBody = nullptr, 
 		const ndVector& gravity = ndVector(0.0f, DEMO_GRAVITY, 0.0f, 0.0f));
 
-	ndBodyNotify* Clone() const
+	ndBodyNotify* Clone() const override
 	{
 		return new ndDemoEntityNotify(*this);
 	}
