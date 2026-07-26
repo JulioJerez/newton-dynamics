@@ -73,7 +73,7 @@ class ndShapeWheel: public ndShapeChamferCylinder
 	{
 	}
 
-	D_COLLISION_API ndSharedPtr<ndMeshCollisionShape> GetMeshShape() const
+	D_COLLISION_API ndSharedPtr<ndMeshCollisionShape> GetMeshShape() const override
 	{
 		return ndSharedPtr<ndMeshCollisionShape>(new ndMeshCollisionShapeWheel());
 	}
