@@ -42,11 +42,11 @@ class ndBrainLayerImagePadding : public ndBrainLayerActivation
 	ndInt32 GetOutputChannels() const;
 
 	ndInt32 GetFilterSize() const;
-	virtual ndInt32 GetInputSize() const;
-	virtual ndInt32 GetOutputBufferSize() const;
+	virtual ndInt32 GetInputSize() const override;
+	virtual ndInt32 GetOutputBufferSize() const override;
 
 	const char* GetLabelId() const override;
-	void Save(const ndBrainSave* const loadSave) const;
+	void Save(const ndBrainSave* const loadSave) const override;
 	void MakePrediction(const ndBrainVector& input, ndBrainVector& output) const override;
 	void InputDerivative(const ndBrainVector& input, const ndBrainVector& output, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const override;
 		
