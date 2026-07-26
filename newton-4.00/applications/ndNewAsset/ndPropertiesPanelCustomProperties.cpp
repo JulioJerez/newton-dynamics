@@ -71,7 +71,8 @@ void ndAssetEditor::ShowPropertiesCustomProperties()
 
 			ImGui::Text("type:");
 			ImGui::SameLine();
-			ImGui::Text(propNode->GetInfo()->ClassName());
+			const char* const name = propNode->GetInfo()->ClassName();
+			ImGui::Text(name);
 			if (newPropType != oldPropType)
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
