@@ -462,8 +462,8 @@ class ndMeshTransformModifierLookAt : public ndMeshTransformModifier
 	public:
 	D_COLLISION_API ndMeshTransformModifierLookAt(const ndMesh* const owner, const ndMesh* const target);
 	D_COLLISION_API ndMeshTransformModifierLookAt(const ndMeshTransformModifierLookAt& other);
-	D_COLLISION_API virtual ndMeshTransformModifier* Duplicate() const;
-	D_COLLISION_API virtual bool operator==(const ndMeshTransformModifier& other) const;
+	D_COLLISION_API virtual ndMeshTransformModifier* Duplicate() const override;
+	D_COLLISION_API virtual bool operator==(const ndMeshTransformModifier& other) const override;
 
 	D_CLASS_REFLECTION(ndMeshTransformModifierLookAt, ndMeshTransformModifier)
 };
@@ -473,7 +473,7 @@ class ndMeshTransformModifierTwoLinksIK : public ndMeshTransformModifier
 	public:
 	D_COLLISION_API ndMeshTransformModifierTwoLinksIK(const ndMesh* const owner, const ndMesh* const target);
 	D_COLLISION_API ndMeshTransformModifierTwoLinksIK(const ndMeshTransformModifierTwoLinksIK& other);
-	D_COLLISION_API virtual ndMeshTransformModifier* Duplicate() const;
+	D_COLLISION_API virtual ndMeshTransformModifier* Duplicate() const override;
 
 	D_COLLISION_API virtual void DuplicateFixDependencies(const ndMesh* const otherRoot) override;
 	D_COLLISION_API virtual ndFixSizeArray<const ndMesh*, 256> GetAffectedNodes() const override;
@@ -493,7 +493,7 @@ class ndMeshTransformModifierUserDefined : public ndMeshTransformModifier
 	public:
 	D_COLLISION_API ndMeshTransformModifierUserDefined(const ndMesh* const owner);
 	D_COLLISION_API ndMeshTransformModifierUserDefined(const ndMeshTransformModifierUserDefined& other);
-	D_COLLISION_API virtual ndMeshTransformModifier* Duplicate() const;
+	D_COLLISION_API virtual ndMeshTransformModifier* Duplicate() const override;
 
 	D_COLLISION_API virtual bool operator==(const ndMeshTransformModifier& other) const override;
 	D_COLLISION_API virtual void SerializeToXml(nd::TiXmlElement* const parent) const override;
