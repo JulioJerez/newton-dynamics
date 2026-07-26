@@ -1619,7 +1619,7 @@ ndSharedPtr<ndJointBilateralConstraint> ndMesh::CreateJoint()
 	}
 
 	ndMesh* parent = GetParent();
-	for (; parent && !(*parent->GetRigidBody()); parent = parent->GetParent());
+	for (; parent && !(*parent->GetRigidBody()); parent = parent->GetParent()) {}
 	ndAssert(parent);
 	const ndMatrix childMatrix(CalculateGlobalMatrix());
 	const ndMatrix parentMatrix(parent->CalculateGlobalMatrix());
