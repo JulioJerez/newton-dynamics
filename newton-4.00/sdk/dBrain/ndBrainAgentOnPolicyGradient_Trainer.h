@@ -115,12 +115,12 @@ class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 	public:
 	ndBrainAgentOnPolicyGradient_Agent(ndBrainAgentOnPolicyGradient_Trainer* const master, ndInt32 maxTrajecxtories);
 
-	virtual void Step();
-	virtual void InitWeights() { ndAssert(0); }
-	virtual void OptimizeStep() { ndAssert(0); }
-	virtual void Save(ndBrainSave* const) { ndAssert(0); }
-	virtual bool IsTrainer() const { ndAssert(0); return true; }
-	virtual ndInt32 GetEpisodeFrames() const;
+	virtual void Step() override;
+	virtual void InitWeights() override { ndAssert(0); }
+	virtual void OptimizeStep() override { ndAssert(0); }
+	virtual void Save(ndBrainSave* const) override { ndAssert(0); }
+	virtual bool IsTrainer() const override { ndAssert(0); return true; }
+	virtual ndInt32 GetEpisodeFrames() const override;
 	virtual void SampleActions(ndBrainVector& action);
 	virtual ndFloat32 GetExpectedReward() const override;
 	
