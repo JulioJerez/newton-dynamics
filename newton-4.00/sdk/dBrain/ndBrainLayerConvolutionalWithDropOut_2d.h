@@ -43,7 +43,7 @@ class ndBrainLayerConvolutionalWithDropOut_2d : public ndBrainLayerConvolutional
 
 	virtual void CalculateParamGradients(
 		const ndBrainVector& input, const ndBrainVector& output,
-		const ndBrainVector& outputDerivative, ndBrainVector& inputGradient, ndBrainLayer* const gradientOut) const;
+		const ndBrainVector& outputDerivative, ndBrainVector& inputGradient, ndBrainLayer* const gradientOut) const override;
 
 	virtual void Save(const ndBrainSave* const loadSave) const override;
 	static ndBrainLayer* Load(const ndBrainLoad* const loadSave);
