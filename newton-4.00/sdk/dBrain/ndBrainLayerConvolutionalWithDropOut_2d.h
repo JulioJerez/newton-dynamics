@@ -45,7 +45,7 @@ class ndBrainLayerConvolutionalWithDropOut_2d : public ndBrainLayerConvolutional
 		const ndBrainVector& input, const ndBrainVector& output,
 		const ndBrainVector& outputDerivative, ndBrainVector& inputGradient, ndBrainLayer* const gradientOut) const;
 
-	virtual void Save(const ndBrainSave* const loadSave) const;
+	virtual void Save(const ndBrainSave* const loadSave) const override;
 	static ndBrainLayer* Load(const ndBrainLoad* const loadSave);
 
 	private:
