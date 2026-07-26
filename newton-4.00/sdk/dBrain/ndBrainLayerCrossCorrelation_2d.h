@@ -39,16 +39,16 @@ class ndBrainLayerCrossCorrelation_2d : public ndBrainLayer
 	ndInt32 GetOutputHeight() const;
 	ndInt32 GetOutputChannels() const;
 
-	virtual bool HasParameters() const;
-	virtual ndInt32 GetOutputSize() const;
-	virtual ndInt32 GetInputSize() const;
+	virtual bool HasParameters() const override;
+	virtual ndInt32 GetOutputSize() const override;
+	virtual ndInt32 GetInputSize() const override;
 	virtual const char* GetLabelId() const override;
-	virtual ndInt32 GetOutputBufferSize() const;
-	virtual ndInt32 GetNumberOfParameters() const;
+	virtual ndInt32 GetOutputBufferSize() const override;
+	virtual ndInt32 GetNumberOfParameters() const override;
 	
 	virtual void UpdateDropOut();
-	virtual void InitWeights();
-	virtual void AdamUpdate(const ndBrainLayer& u, const ndBrainLayer& v, ndBrainFloat epsilon);
+	virtual void InitWeights() override;
+	virtual void AdamUpdate(const ndBrainLayer& u, const ndBrainLayer& v, ndBrainFloat epsilon) override;
 
 	virtual void MakePrediction(const ndBrainVector& input, ndBrainVector& output) const override;
 	virtual void InputDerivative(const ndBrainVector& input, const ndBrainVector& output, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const override;
