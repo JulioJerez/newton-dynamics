@@ -15,16 +15,16 @@
 
 const char* ndGameControllerInputs::m_buttonNames[] =
 {
-	{"ignitionButton"},
-	{"upGearButton"},
-	{"downGearButton"},
-	{"handBreakButton"},
-	{"neutralGearButton"},
-	{"reverseGearButton"},
-	{"parkGearButton"},
-	{"automaticGearBoxButton"},
-	{"changeCamera"},
-	{"changePlayer"}
+	"ignitionButton",
+	"upGearButton",
+	"downGearButton",
+	"handBreakButton",
+	"neutralGearButton",
+	"reverseGearButton",
+	"parkGearButton",
+	"automaticGearBoxButton",
+	"changeCamera",
+	"changePlayer"
 };
 
 ndGameControllerInputs::ndGameControllerInputs()
