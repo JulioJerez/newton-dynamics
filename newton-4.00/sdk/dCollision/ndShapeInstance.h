@@ -63,6 +63,7 @@ D_MSV_NEWTON_CLASS_ALIGN_32
 class ndShapeInstance: public ndContainersFreeListAlloc<ndShapeInstance>
 {
 	public:
+	D_STATIC_CLASS_REFLECTION(ndShapeInstance)
 	class ndDistanceCalculator
 	{
 		public:
@@ -105,9 +106,9 @@ class ndShapeInstance: public ndContainersFreeListAlloc<ndShapeInstance>
 		m_global,
 	};
 
-	const char* ClassName() const;
-	const char* SuperClassName() const;
-	static const char* StaticClassName();
+	//const char* ClassName() const;
+	//const char* SuperClassName() const;
+	//static const char* StaticClassName();
 
 	D_COLLISION_API ndShapeInstance(ndShape* const shape);
 	D_COLLISION_API ndShapeInstance(const ndShapeInstance& instance);

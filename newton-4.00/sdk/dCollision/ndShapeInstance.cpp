@@ -326,20 +326,20 @@ void ndShapeInstance::SetShape(ndShape* const shape)
 	m_shape = shape ? shape->AddRef() : shape;
 }
 
-const char* ndShapeInstance::ClassName() const
-{
-	return "ndShapeInstance";
-}
-
-const char* ndShapeInstance::StaticClassName()
-{
-	return "ndShapeInstance";
-}
-
-const char* ndShapeInstance::SuperClassName() const
-{
-	return "ndShapeInstance";
-}
+//const char* ndShapeInstance::ClassName() const
+//{
+//	return "ndShapeInstance";
+//}
+//
+//const char* ndShapeInstance::StaticClassName()
+//{
+//	return "ndShapeInstance";
+//}
+//
+//const char* ndShapeInstance::SuperClassName() const
+//{
+//	return "ndShapeInstance";
+//}
 
 
 void ndShapeInstance::SavePLY(const char* const fileName) const
