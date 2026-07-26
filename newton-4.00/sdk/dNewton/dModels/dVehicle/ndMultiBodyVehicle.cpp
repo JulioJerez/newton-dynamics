@@ -1648,12 +1648,13 @@ void ndMultiBodyVehicle::ApplyBicycleModelLateralStability()
 	// 1) mass * localSpeed * (betaRate + yawRate) + mass * beta * localAccel = lateralForce
 	ndFloat32 lateralForce = frontLateralForce + rearLateralForce;
 	ndFloat32 betaRate = (lateralForce - massMatrix.m_w * beta * localAccel) / (massMatrix.m_w * localSpeed) - yawRate;
-static int xxxxx;
-	ndTrace(("%d beta=%g betaRate=%g yawRate=%g fy=%g\n", xxxxx, beta * ndRadToDegree, betaRate, yawRate, lateralForce));
-	//ndTrace (("Fxf=%g Fzf=%g Fxr=%g Fzr=%g\n", frontLongitudinalForce, frontLateralForce, rearLongitudinalForce, rearLateralForce));
-	xxxxx++;
-if (ndAbs (lateralForce) > 200)
-lateralForce *= 1;
+betaRate = 0;
+//static int xxxxx;
+//	ndTrace(("%d beta=%g betaRate=%g yawRate=%g fy=%g\n", xxxxx, beta * ndRadToDegree, betaRate, yawRate, lateralForce));
+//	//ndTrace (("Fxf=%g Fzf=%g Fxr=%g Fzr=%g\n", frontLongitudinalForce, frontLateralForce, rearLongitudinalForce, rearLateralForce));
+//	xxxxx++;
+//if (ndAbs (lateralForce) > 200)
+//lateralForce *= 1;
 
 	//if (ndAbs(beta) > 30.0f * ndDegreeToRad) 
 	{
