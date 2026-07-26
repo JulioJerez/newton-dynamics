@@ -47,8 +47,8 @@ class ndBrainLayerConvolutional_2d : public ndBrainLayer
 	virtual ndInt32 GetOutputBufferSize() const override;
 	virtual ndInt32 GetNumberOfParameters() const override;
 
-	virtual void UpdateDropOut();
 	virtual void InitWeights() override;
+	virtual void UpdateDropOut() override;
 	virtual void AdamUpdate(const ndBrainLayer& u, const ndBrainLayer& v, ndBrainFloat epsilon) override;
 
 	virtual void MakePrediction(const ndBrainVector& input, ndBrainVector& output) const override;

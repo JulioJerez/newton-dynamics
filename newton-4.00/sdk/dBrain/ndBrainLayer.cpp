@@ -128,7 +128,16 @@ bool ndBrainLayer::HasParameters() const
 	return false;
 }
 
+void ndBrainLayer::EnableDropOut(bool)
+{
+	ndAssert(0);
+}
+
 void ndBrainLayer::ApplyDropOut(ndFloat32)
+{
+}
+
+void ndBrainLayer::UpdateDropOut()
 {
 }
 

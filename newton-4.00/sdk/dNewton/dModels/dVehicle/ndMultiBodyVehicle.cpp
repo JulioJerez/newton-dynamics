@@ -1640,15 +1640,29 @@ void ndMultiBodyVehicle::ApplyBicycleModelLateralStability()
 
 	// calculate acceleration, from equation 2 we get
 	// 2) mass * (localAccel - yawRate * localSpeed * beta) = longitudinalForce
-	ndFloat32 mass = m_chassis->GetMassMatrix().m_w;
+	ndVector massMatrix (m_chassis->GetMassMatrix());
 	ndFloat32 longitudinalForce = frontLongitudinalForce + rearLongitudinalForce;
-	ndFloat32 localAccel = (longitudinalForce - mass * yawRate * localSpeed * beta) / mass;
+	ndFloat32 localAccel = (longitudinalForce - massMatrix.m_w * yawRate * localSpeed * beta) / massMatrix.m_w;
 
 	// calculate beta rate, form equation 1
 	// 1) mass * localSpeed * (betaRate + yawRate) + mass * beta * localAccel = lateralForce
 	ndFloat32 lateralForce = frontLateralForce + rearLateralForce;
-	ndFloat32 betaRate = (lateralForce - mass * beta * localAccel) / (mass * localSpeed) - yawRate;
-
-	ndTrace(("beta=%g betaRate=%g\n", beta * ndRadToDegree, betaRate));
+	ndFloat32 betaRate = (lateralForce - massMatrix.m_w * beta * localAccel) / (massMatrix.m_w * localSpeed) - yawRate;
+static int xxxxx;
+	ndTrace(("%d beta=%g betaRate=%g yawRate=%g fy=%g\n", xxxxx, beta * ndRadToDegree, betaRate, yawRate, lateralForce));
 	//ndTrace (("Fxf=%g Fzf=%g Fxr=%g Fzr=%g\n", frontLongitudinalForce, frontLateralForce, rearLongitudinalForce, rearLateralForce));
+	xxxxx++;
+if (ndAbs (lateralForce) > 200)
+lateralForce *= 1;
+
+	//if (ndAbs(beta) > 30.0f * ndDegreeToRad) 
+	{
+		// catastrofic drift, need to stop
+		//ndFloat32 xxxx = yawRate - betaRate;
+		//ndFloat32 t = -0.5f * xxxx * massMatrix.m_y;
+		//ndVector torque(frameMatrix.m_up.Scale(t));
+		////m_chassis->SetTorque(frameMatrix.RotateVector(torque));
+		//
+		//ndTrace(("torque=%g\n", t));
+	}
 }
