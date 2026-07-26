@@ -62,7 +62,7 @@ class ndPlayerCapsuleNotify : public ndDemoEntityNotify
 
 	// an app can use this to determine what ovject form the scene 
 	// is colliding with, and take appropiate action.
-	virtual bool OnSceneAabbOverlap(const ndBody* const) const
+	virtual bool OnSceneAabbOverlap(const ndBody* const) const override
 	{
 		return true;
 	}
