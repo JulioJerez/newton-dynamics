@@ -310,6 +310,24 @@ class ndTriplexReal
 	ndReal m_z;
 };
 
+#define D_STATIC_CLASS_REFLECTION(Class)		\
+	const char* ClassName() const				\
+	{											\
+		return #Class;							\
+	}											\
+	const char* StaticClassName()				\
+	{											\
+		return #Class;							\
+	}											\
+	const char* SuperClassName() const			\
+	{											\
+		return #Class;							\
+	}											\
+	bool IsType(const char* const name) const	\
+	{														\
+		return (strcmp(#Class, name) == 0) ? true : false;	\
+	}
+
 #define D_BASE_CLASS_REFLECTION(Class)			\
 	virtual const char* ClassName() const		\
 	{											\
