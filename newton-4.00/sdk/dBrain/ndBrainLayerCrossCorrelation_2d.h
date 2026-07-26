@@ -60,14 +60,14 @@ class ndBrainLayerCrossCorrelation_2d : public ndBrainLayer
 	virtual void Save(const ndBrainSave* const loadSave) const override;
 	static ndBrainLayer* Load(const ndBrainLoad* const loadSave);
 
-	virtual void Clear();
-	virtual void FlushToZero();
-	virtual void Scale(ndBrainFloat scale);
-	virtual void Set(const ndBrainLayer& src);
-	virtual void Add(const ndBrainLayer& src);
-	virtual void Mul(const ndBrainLayer& src);
-	virtual void Blend(const ndBrainLayer& src, ndBrainFloat blend);
-	virtual void ScaleAdd(const ndBrainLayer& src, ndBrainFloat scale);
+	virtual void Clear() override;
+	virtual void FlushToZero() override;
+	virtual void Scale(ndBrainFloat scale) override;
+	virtual void Set(const ndBrainLayer& src) override;
+	virtual void Add(const ndBrainLayer& src) override;
+	virtual void Mul(const ndBrainLayer& src) override;
+	virtual void Blend(const ndBrainLayer& src, ndBrainFloat blend) override;
+	virtual void ScaleAdd(const ndBrainLayer& src, ndBrainFloat scale) override;
 
 	private:
 	ndBrainVector m_bias;
