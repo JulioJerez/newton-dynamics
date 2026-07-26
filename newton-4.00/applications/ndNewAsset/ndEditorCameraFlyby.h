@@ -23,7 +23,7 @@ class ndEditorCameraFlyby: public ndEditorCameraNode
 	public:
 	ndEditorCameraFlyby(ndAssetEditor* const editor);
 
-	void TickUpdate(ndFloat32 timestep);
+	void TickUpdate(ndFloat32 timestep) override;
 	virtual void SetTransform(const ndQuaternion& rotation, const ndVector& position) override;
 
 	void MouseSelection();
