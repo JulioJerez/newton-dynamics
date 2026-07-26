@@ -902,7 +902,10 @@ void ndBrainLayerLinear::TiledMatrixMultiply(const ndBrainLayerFeedForwardCpuCom
 	for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
 	{
 		ndBrainFloatTileVector timeColumn(&tile_accReg[0].m_f[i], indexArray);
-		((ndBrainFloatTileVector&)outputBuffer[dstOffset]) = timeColumn;
+		//((ndBrainFloatTileVector&)outputBuffer[dstOffset]) = timeColumn;
+		ndBrainFloat* const dstFloat = &outputBuffer[dstOffset];
+		ndBrainFloatTileVector* const dstTile = (ndBrainFloatTileVector*)dstFloat;
+		*dstTile = timeColumn;
 		dstOffset += inputOutputSize;
 	}
 }
