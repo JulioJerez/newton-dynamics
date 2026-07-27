@@ -181,49 +181,8 @@ class ndRightHandSide
 		m_friction
 	};
 
+	bool SanityCheck() const;
 	void SetSanityCheck(const ndConstraint* const joint);
-	bool SanityCheck() const
-	{
-		#ifdef _DEBUG
-			if (m_debugCheck == m_friction)
-			{
-				if (m_lowerBoundFrictionCoefficent > ndFloat32(0.0f))
-				{
-					return false;
-				}
-				if (m_lowerBoundFrictionCoefficent < ndFloat32(-2.0f)) // allow for high that one friction
-				{
-					return false;
-				}
-				if (m_upperBoundFrictionCoefficent < ndFloat32(0.0f))
-				{
-					return false;
-				}
-				if (m_lowerBoundFrictionCoefficent > ndFloat32 (2.0f)) // allow for high that one friction
-				{
-					return false;
-				}
-			}
-			else if (m_debugCheck == m_contact)
-			{
-				if (m_lowerBoundFrictionCoefficent != ndFloat32(0.0f))
-				{
-					return false;
-				}
-				if (m_upperBoundFrictionCoefficent < ndFloat32(0.0f))
-				{
-					return false;
-				}
-				if (m_lowerBoundFrictionCoefficent > ndFloat32(D_MAX_BOUND * 0.1f)) 
-				{
-					return false;
-				}
-			}
-			return true;
-		#else
-		return true;
-		#endif
-	}
 
 	ndFloat32 m_force;
 	ndFloat32 m_diagDamp;
