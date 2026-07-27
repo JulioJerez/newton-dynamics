@@ -14,7 +14,7 @@
 
 const char* ndRenderShaderCache::m_doNothingPixel =
 R""""(
-	#version 450 core
+	#version 420 core
 
 	void main()
 	{	
@@ -23,7 +23,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_alphaTestShadowPixel =
 R""""(
-	#version 450 core
+	#version 420 core
 
 	in vec2 uv;
 	layout(binding = 0) uniform sampler2D texture0;
@@ -45,7 +45,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_wireFramePixel =
 R""""(
-	#version 450 core
+	#version 420 core
 
 	in vec4 color;
 	out vec4 pixelColor;
@@ -58,7 +58,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_skyBoxPixel =
 R""""(
-	#version 450 core
+	#version 420 core
 
 	in vec3 texCoord;
 	out vec4 pixelColor;
@@ -72,7 +72,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_debugFlatShadedDiffusePixel =
 R""""(
-	#version 450 core
+	#version 420 core
 
 	uniform vec3 diffuseColor;
 	uniform vec3 directionalLightAmbient;
@@ -106,7 +106,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_directionalDiffusePixel =
 R""""(
-	#version 450 core
+	#version 420 core
 
 	layout(binding = 0) uniform sampler2D texture0;
 	layout(binding = 1) uniform samplerCube environmentMap;
@@ -165,7 +165,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_directionalDiffuseShadowPixel =
 R""""(
-	#version 450 core
+	#version 420 core
 
 	layout(binding = 0) uniform sampler2D texture0;
 	layout(binding = 1) uniform sampler2D shadowMapTexture;
@@ -270,7 +270,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_directionalDiffuseTransparentPixel =
 R""""(
-	#version 450 core
+	#version 420 core
 
 	layout(binding = 0) uniform sampler2D texture0;
 	layout(binding = 1) uniform samplerCube environmentMap;
@@ -327,7 +327,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_debugFlatShadedColorPixel =
 R""""(
-	#version 450 core
+	#version 420 core
 
 	uniform vec3 directionalLightDirection;
 
@@ -351,7 +351,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_directionalDiffuseShadowAlphaTestPixel =
 R""""(
-	#version 450 core
+	#version 420 core
 
 	layout(binding = 0) uniform sampler2D texture0;
 	layout(binding = 1) uniform sampler2D shadowMapTexture;
