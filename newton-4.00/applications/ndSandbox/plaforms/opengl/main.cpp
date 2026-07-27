@@ -15,7 +15,9 @@
 
 int main(int, char**)
 {
+#ifdef _WIN32
 	ndSetAllocators setAllocators;
+#endif
 	ndDemoEntityManager demos;
 	demos.Run();
 	return 0;
