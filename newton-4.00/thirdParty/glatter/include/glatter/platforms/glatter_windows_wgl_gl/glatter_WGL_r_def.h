@@ -48,7 +48,7 @@ GLATTER_FBLOCK(return, WGL, , HGLRC, WINAPI, wglGetCurrentAssociatedContextAMD, 
 #define wglGetCurrentAssociatedContextAMD_defined
 GLATTER_FBLOCK(return, WGL, , UINT, WINAPI, wglGetGPUIDsAMD, (maxCount, ids), (UINT maxCount, UINT *ids))
 #define wglGetGPUIDsAMD_defined
-GLATTER_FBLOCK(return, WGL, , INT, WINAPI, wglGetGPUInfoAMD, (id, property, dataType, size, data), (UINT id, int property, GLenum dataType, UINT size, void *data))
+GLATTER_FBLOCK(return, WGL, , INT, WINAPI, wglGetGPUInfoAMD, (id, property, dataType, size, data), (UINT id, INT property, GLenum dataType, UINT size, void *data))
 #define wglGetGPUInfoAMD_defined
 GLATTER_FBLOCK(return, WGL, , BOOL, WINAPI, wglMakeAssociatedContextCurrentAMD, (hglrc), (HGLRC hglrc))
 #define wglMakeAssociatedContextCurrentAMD_defined
@@ -262,9 +262,9 @@ GLATTER_FBLOCK(return, WGL, , BOOL, WINAPI, wglEnumGpusNV, (iGpuIndex, phGpu), (
 #define wglEnumGpusNV_defined
 #endif // defined(WGL_NV_gpu_affinity)
 #if defined(WGL_NV_present_video)
-GLATTER_FBLOCK(return, WGL, , BOOL, WINAPI, wglBindVideoDeviceNV, (hDC, uVideoSlot, hVideoDevice, piAttribList), (HDC hDC, unsigned int uVideoSlot, HVIDEOOUTPUTDEVICENV hVideoDevice, const int *piAttribList))
+GLATTER_FBLOCK(return, WGL, , BOOL, WINAPI, wglBindVideoDeviceNV, (hDc, uVideoSlot, hVideoDevice, piAttribList), (HDC hDc, unsigned int uVideoSlot, HVIDEOOUTPUTDEVICENV hVideoDevice, const int *piAttribList))
 #define wglBindVideoDeviceNV_defined
-GLATTER_FBLOCK(return, WGL, , int, WINAPI, wglEnumerateVideoDevicesNV, (hDC, phDeviceList), (HDC hDC, HVIDEOOUTPUTDEVICENV *phDeviceList))
+GLATTER_FBLOCK(return, WGL, , int, WINAPI, wglEnumerateVideoDevicesNV, (hDc, phDeviceList), (HDC hDc, HVIDEOOUTPUTDEVICENV *phDeviceList))
 #define wglEnumerateVideoDevicesNV_defined
 GLATTER_FBLOCK(return, WGL, , BOOL, WINAPI, wglQueryCurrentContextNV, (iAttribute, piValue), (int iAttribute, int *piValue))
 #define wglQueryCurrentContextNV_defined
@@ -322,7 +322,7 @@ GLATTER_FBLOCK(return, WGL, , BOOL, WINAPI, wglGetSyncValuesOML, (hdc, ust, msc,
 #define wglGetSyncValuesOML_defined
 GLATTER_FBLOCK(return, WGL, , INT64, WINAPI, wglSwapBuffersMscOML, (hdc, target_msc, divisor, remainder), (HDC hdc, INT64 target_msc, INT64 divisor, INT64 remainder))
 #define wglSwapBuffersMscOML_defined
-GLATTER_FBLOCK(return, WGL, , INT64, WINAPI, wglSwapLayerBuffersMscOML, (hdc, fuPlanes, target_msc, divisor, remainder), (HDC hdc, int fuPlanes, INT64 target_msc, INT64 divisor, INT64 remainder))
+GLATTER_FBLOCK(return, WGL, , INT64, WINAPI, wglSwapLayerBuffersMscOML, (hdc, fuPlanes, target_msc, divisor, remainder), (HDC hdc, INT fuPlanes, INT64 target_msc, INT64 divisor, INT64 remainder))
 #define wglSwapLayerBuffersMscOML_defined
 GLATTER_FBLOCK(return, WGL, , BOOL, WINAPI, wglWaitForMscOML, (hdc, target_msc, divisor, remainder, ust, msc, sbc), (HDC hdc, INT64 target_msc, INT64 divisor, INT64 remainder, INT64 *ust, INT64 *msc, INT64 *sbc))
 #define wglWaitForMscOML_defined

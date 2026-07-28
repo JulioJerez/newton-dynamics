@@ -67,7 +67,7 @@ GLATTER_INLINE_OR_NOT UINT glatter_wglGetGPUIDsAMD_debug(UINT maxCount, UINT *id
 #ifndef wglGetGPUInfoAMD
 #define wglGetGPUInfoAMD(id, property, dataType, size, data) glatter_wglGetGPUInfoAMD_debug((id), (property), (dataType), (size), (data), __FILE__, __LINE__)
 #endif
-GLATTER_INLINE_OR_NOT INT glatter_wglGetGPUInfoAMD_debug(UINT id, int property, GLenum dataType, UINT size, void *data, const char* file, int line);
+GLATTER_INLINE_OR_NOT INT glatter_wglGetGPUInfoAMD_debug(UINT id, INT property, GLenum dataType, UINT size, void *data, const char* file, int line);
 #ifndef wglMakeAssociatedContextCurrentAMD
 #define wglMakeAssociatedContextCurrentAMD(hglrc) glatter_wglMakeAssociatedContextCurrentAMD_debug((hglrc), __FILE__, __LINE__)
 #endif
@@ -445,13 +445,13 @@ GLATTER_INLINE_OR_NOT BOOL glatter_wglEnumGpusNV_debug(UINT iGpuIndex, HGPUNV *p
 #endif // defined(WGL_NV_gpu_affinity)
 #if defined(WGL_NV_present_video)
 #ifndef wglBindVideoDeviceNV
-#define wglBindVideoDeviceNV(hDC, uVideoSlot, hVideoDevice, piAttribList) glatter_wglBindVideoDeviceNV_debug((hDC), (uVideoSlot), (hVideoDevice), (piAttribList), __FILE__, __LINE__)
+#define wglBindVideoDeviceNV(hDc, uVideoSlot, hVideoDevice, piAttribList) glatter_wglBindVideoDeviceNV_debug((hDc), (uVideoSlot), (hVideoDevice), (piAttribList), __FILE__, __LINE__)
 #endif
-GLATTER_INLINE_OR_NOT BOOL glatter_wglBindVideoDeviceNV_debug(HDC hDC, unsigned int uVideoSlot, HVIDEOOUTPUTDEVICENV hVideoDevice, const int *piAttribList, const char* file, int line);
+GLATTER_INLINE_OR_NOT BOOL glatter_wglBindVideoDeviceNV_debug(HDC hDc, unsigned int uVideoSlot, HVIDEOOUTPUTDEVICENV hVideoDevice, const int *piAttribList, const char* file, int line);
 #ifndef wglEnumerateVideoDevicesNV
-#define wglEnumerateVideoDevicesNV(hDC, phDeviceList) glatter_wglEnumerateVideoDevicesNV_debug((hDC), (phDeviceList), __FILE__, __LINE__)
+#define wglEnumerateVideoDevicesNV(hDc, phDeviceList) glatter_wglEnumerateVideoDevicesNV_debug((hDc), (phDeviceList), __FILE__, __LINE__)
 #endif
-GLATTER_INLINE_OR_NOT int glatter_wglEnumerateVideoDevicesNV_debug(HDC hDC, HVIDEOOUTPUTDEVICENV *phDeviceList, const char* file, int line);
+GLATTER_INLINE_OR_NOT int glatter_wglEnumerateVideoDevicesNV_debug(HDC hDc, HVIDEOOUTPUTDEVICENV *phDeviceList, const char* file, int line);
 #ifndef wglQueryCurrentContextNV
 #define wglQueryCurrentContextNV(iAttribute, piValue) glatter_wglQueryCurrentContextNV_debug((iAttribute), (piValue), __FILE__, __LINE__)
 #endif
@@ -557,7 +557,7 @@ GLATTER_INLINE_OR_NOT INT64 glatter_wglSwapBuffersMscOML_debug(HDC hdc, INT64 ta
 #ifndef wglSwapLayerBuffersMscOML
 #define wglSwapLayerBuffersMscOML(hdc, fuPlanes, target_msc, divisor, remainder) glatter_wglSwapLayerBuffersMscOML_debug((hdc), (fuPlanes), (target_msc), (divisor), (remainder), __FILE__, __LINE__)
 #endif
-GLATTER_INLINE_OR_NOT INT64 glatter_wglSwapLayerBuffersMscOML_debug(HDC hdc, int fuPlanes, INT64 target_msc, INT64 divisor, INT64 remainder, const char* file, int line);
+GLATTER_INLINE_OR_NOT INT64 glatter_wglSwapLayerBuffersMscOML_debug(HDC hdc, INT fuPlanes, INT64 target_msc, INT64 divisor, INT64 remainder, const char* file, int line);
 #ifndef wglWaitForMscOML
 #define wglWaitForMscOML(hdc, target_msc, divisor, remainder, ust, msc, sbc) glatter_wglWaitForMscOML_debug((hdc), (target_msc), (divisor), (remainder), (ust), (msc), (sbc), __FILE__, __LINE__)
 #endif

@@ -28,8 +28,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #ifdef GLATTER_GL
-#if !defined(__GL_H__)
 #if !defined(GL_VERSION_ES_CM_1_0)
+#if !defined(__GL_H__)
 #if defined(__gl_h_)
 #if defined(GL_ARB_multitexture)
 #ifndef glActiveTextureARB
@@ -1856,8 +1856,8 @@ GLATTER_INLINE_OR_NOT void glatter_glVertexPointer_debug(GLint size, GLenum type
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glViewport_debug(GLint x, GLint y, GLsizei width, GLsizei height, const char* file, int line);
 #endif // defined(__gl_h_)
-#endif // !defined(GL_VERSION_ES_CM_1_0)
 #endif // !defined(__GL_H__)
+#endif // !defined(GL_VERSION_ES_CM_1_0)
 #if defined(__gl_glext_h_)
 #if defined(GL_3DFX_tbuffer)
 #ifndef glTbufferMask3DFX
@@ -1879,9 +1879,9 @@ GLATTER_INLINE_OR_NOT void glatter_glDebugMessageEnableAMD_debug(GLenum category
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glDebugMessageInsertAMD_debug(GLenum category, GLenum severity, GLuint id, GLsizei length, const GLchar *buf, const char* file, int line);
 #ifndef glGetDebugMessageLogAMD
-#define glGetDebugMessageLogAMD(count, bufsize, categories, severities, ids, lengths, message) glatter_glGetDebugMessageLogAMD_debug((count), (bufsize), (categories), (severities), (ids), (lengths), (message), __FILE__, __LINE__)
+#define glGetDebugMessageLogAMD(count, bufSize, categories, severities, ids, lengths, message) glatter_glGetDebugMessageLogAMD_debug((count), (bufSize), (categories), (severities), (ids), (lengths), (message), __FILE__, __LINE__)
 #endif
-GLATTER_INLINE_OR_NOT GLuint glatter_glGetDebugMessageLogAMD_debug(GLuint count, GLsizei bufsize, GLenum *categories, GLuint *severities, GLuint *ids, GLsizei *lengths, GLchar *message, const char* file, int line);
+GLATTER_INLINE_OR_NOT GLuint glatter_glGetDebugMessageLogAMD_debug(GLuint count, GLsizei bufSize, GLenum *categories, GLenum *severities, GLuint *ids, GLsizei *lengths, GLchar *message, const char* file, int line);
 #endif // defined(GL_AMD_debug_output)
 #if defined(GL_AMD_draw_buffers_blend)
 #ifndef glBlendEquationIndexedAMD
@@ -3721,6 +3721,16 @@ GLATTER_INLINE_OR_NOT void glatter_glGetActiveAttribARB_debug(GLhandleARB progra
 #endif
 GLATTER_INLINE_OR_NOT GLint glatter_glGetAttribLocationARB_debug(GLhandleARB programObj, const GLcharARB *name, const char* file, int line);
 #endif // defined(GL_ARB_vertex_shader)
+#if defined(GL_ARB_viewport_array)
+#ifndef glDepthRangeArraydvNV
+#define glDepthRangeArraydvNV(first, count, v) glatter_glDepthRangeArraydvNV_debug((first), (count), (v), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glDepthRangeArraydvNV_debug(GLuint first, GLsizei count, const GLdouble *v, const char* file, int line);
+#ifndef glDepthRangeIndexeddNV
+#define glDepthRangeIndexeddNV(index, n, f) glatter_glDepthRangeIndexeddNV_debug((index), (n), (f), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glDepthRangeIndexeddNV_debug(GLuint index, GLdouble n, GLdouble f, const char* file, int line);
+#endif // defined(GL_ARB_viewport_array)
 #if defined(GL_ARB_window_pos)
 #ifndef glWindowPos2dARB
 #define glWindowPos2dARB(x, y) glatter_glWindowPos2dARB_debug((x), (y), __FILE__, __LINE__)
@@ -5509,12 +5519,40 @@ GLATTER_INLINE_OR_NOT void glatter_glFogCoordfEXT_debug(GLfloat coord, const cha
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glFogCoordfvEXT_debug(const GLfloat *coord, const char* file, int line);
 #endif // defined(GL_EXT_fog_coord)
+#if defined(GL_EXT_fragment_shading_rate)
+#ifndef glFramebufferShadingRateEXT
+#define glFramebufferShadingRateEXT(target, attachment, texture, baseLayer, numLayers, texelWidth, texelHeight) glatter_glFramebufferShadingRateEXT_debug((target), (attachment), (texture), (baseLayer), (numLayers), (texelWidth), (texelHeight), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glFramebufferShadingRateEXT_debug(GLenum target, GLenum attachment, GLuint texture, GLint baseLayer, GLsizei numLayers, GLsizei texelWidth, GLsizei texelHeight, const char* file, int line);
+#ifndef glGetFragmentShadingRatesEXT
+#define glGetFragmentShadingRatesEXT(samples, maxCount, count, shadingRates) glatter_glGetFragmentShadingRatesEXT_debug((samples), (maxCount), (count), (shadingRates), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glGetFragmentShadingRatesEXT_debug(GLsizei samples, GLsizei maxCount, GLsizei *count, GLenum *shadingRates, const char* file, int line);
+#ifndef glShadingRateCombinerOpsEXT
+#define glShadingRateCombinerOpsEXT(combinerOp0, combinerOp1) glatter_glShadingRateCombinerOpsEXT_debug((combinerOp0), (combinerOp1), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glShadingRateCombinerOpsEXT_debug(GLenum combinerOp0, GLenum combinerOp1, const char* file, int line);
+#ifndef glShadingRateEXT
+#define glShadingRateEXT(rate) glatter_glShadingRateEXT_debug((rate), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glShadingRateEXT_debug(GLenum rate, const char* file, int line);
+#endif // defined(GL_EXT_fragment_shading_rate)
 #if defined(GL_EXT_framebuffer_blit)
 #ifndef glBlitFramebufferEXT
 #define glBlitFramebufferEXT(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter) glatter_glBlitFramebufferEXT_debug((srcX0), (srcY0), (srcX1), (srcY1), (dstX0), (dstY0), (dstX1), (dstY1), (mask), (filter), __FILE__, __LINE__)
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glBlitFramebufferEXT_debug(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter, const char* file, int line);
 #endif // defined(GL_EXT_framebuffer_blit)
+#if defined(GL_EXT_framebuffer_blit_layers)
+#ifndef glBlitFramebufferLayerEXT
+#define glBlitFramebufferLayerEXT(srcX0, srcY0, srcX1, srcY1, srcLayer, dstX0, dstY0, dstX1, dstY1, dstLayer, mask, filter) glatter_glBlitFramebufferLayerEXT_debug((srcX0), (srcY0), (srcX1), (srcY1), (srcLayer), (dstX0), (dstY0), (dstX1), (dstY1), (dstLayer), (mask), (filter), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glBlitFramebufferLayerEXT_debug(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint srcLayer, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLint dstLayer, GLbitfield mask, GLenum filter, const char* file, int line);
+#ifndef glBlitFramebufferLayersEXT
+#define glBlitFramebufferLayersEXT(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter) glatter_glBlitFramebufferLayersEXT_debug((srcX0), (srcY0), (srcX1), (srcY1), (dstX0), (dstY0), (dstX1), (dstY1), (mask), (filter), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glBlitFramebufferLayersEXT_debug(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter, const char* file, int line);
+#endif // defined(GL_EXT_framebuffer_blit_layers)
 #if defined(GL_EXT_framebuffer_multisample)
 #ifndef glRenderbufferStorageMultisampleEXT
 #define glRenderbufferStorageMultisampleEXT(target, samples, internalformat, width, height) glatter_glRenderbufferStorageMultisampleEXT_debug((target), (samples), (internalformat), (width), (height), __FILE__, __LINE__)
@@ -5620,6 +5658,14 @@ GLATTER_INLINE_OR_NOT GLint glatter_glGetFragDataLocationEXT_debug(GLuint progra
 #define glGetUniformuivEXT(program, location, params) glatter_glGetUniformuivEXT_debug((program), (location), (params), __FILE__, __LINE__)
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glGetUniformuivEXT_debug(GLuint program, GLint location, GLuint *params, const char* file, int line);
+#ifndef glGetVertexAttribIivEXT
+#define glGetVertexAttribIivEXT(index, pname, params) glatter_glGetVertexAttribIivEXT_debug((index), (pname), (params), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glGetVertexAttribIivEXT_debug(GLuint index, GLenum pname, GLint *params, const char* file, int line);
+#ifndef glGetVertexAttribIuivEXT
+#define glGetVertexAttribIuivEXT(index, pname, params) glatter_glGetVertexAttribIuivEXT_debug((index), (pname), (params), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glGetVertexAttribIuivEXT_debug(GLuint index, GLenum pname, GLuint *params, const char* file, int line);
 #ifndef glUniform1uiEXT
 #define glUniform1uiEXT(location, v0) glatter_glUniform1uiEXT_debug((location), (v0), __FILE__, __LINE__)
 #endif
@@ -5652,6 +5698,90 @@ GLATTER_INLINE_OR_NOT void glatter_glUniform4uiEXT_debug(GLint location, GLuint 
 #define glUniform4uivEXT(location, count, value) glatter_glUniform4uivEXT_debug((location), (count), (value), __FILE__, __LINE__)
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glUniform4uivEXT_debug(GLint location, GLsizei count, const GLuint *value, const char* file, int line);
+#ifndef glVertexAttribI1iEXT
+#define glVertexAttribI1iEXT(index, x) glatter_glVertexAttribI1iEXT_debug((index), (x), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI1iEXT_debug(GLuint index, GLint x, const char* file, int line);
+#ifndef glVertexAttribI1ivEXT
+#define glVertexAttribI1ivEXT(index, v) glatter_glVertexAttribI1ivEXT_debug((index), (v), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI1ivEXT_debug(GLuint index, const GLint *v, const char* file, int line);
+#ifndef glVertexAttribI1uiEXT
+#define glVertexAttribI1uiEXT(index, x) glatter_glVertexAttribI1uiEXT_debug((index), (x), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI1uiEXT_debug(GLuint index, GLuint x, const char* file, int line);
+#ifndef glVertexAttribI1uivEXT
+#define glVertexAttribI1uivEXT(index, v) glatter_glVertexAttribI1uivEXT_debug((index), (v), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI1uivEXT_debug(GLuint index, const GLuint *v, const char* file, int line);
+#ifndef glVertexAttribI2iEXT
+#define glVertexAttribI2iEXT(index, x, y) glatter_glVertexAttribI2iEXT_debug((index), (x), (y), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI2iEXT_debug(GLuint index, GLint x, GLint y, const char* file, int line);
+#ifndef glVertexAttribI2ivEXT
+#define glVertexAttribI2ivEXT(index, v) glatter_glVertexAttribI2ivEXT_debug((index), (v), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI2ivEXT_debug(GLuint index, const GLint *v, const char* file, int line);
+#ifndef glVertexAttribI2uiEXT
+#define glVertexAttribI2uiEXT(index, x, y) glatter_glVertexAttribI2uiEXT_debug((index), (x), (y), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI2uiEXT_debug(GLuint index, GLuint x, GLuint y, const char* file, int line);
+#ifndef glVertexAttribI2uivEXT
+#define glVertexAttribI2uivEXT(index, v) glatter_glVertexAttribI2uivEXT_debug((index), (v), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI2uivEXT_debug(GLuint index, const GLuint *v, const char* file, int line);
+#ifndef glVertexAttribI3iEXT
+#define glVertexAttribI3iEXT(index, x, y, z) glatter_glVertexAttribI3iEXT_debug((index), (x), (y), (z), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI3iEXT_debug(GLuint index, GLint x, GLint y, GLint z, const char* file, int line);
+#ifndef glVertexAttribI3ivEXT
+#define glVertexAttribI3ivEXT(index, v) glatter_glVertexAttribI3ivEXT_debug((index), (v), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI3ivEXT_debug(GLuint index, const GLint *v, const char* file, int line);
+#ifndef glVertexAttribI3uiEXT
+#define glVertexAttribI3uiEXT(index, x, y, z) glatter_glVertexAttribI3uiEXT_debug((index), (x), (y), (z), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI3uiEXT_debug(GLuint index, GLuint x, GLuint y, GLuint z, const char* file, int line);
+#ifndef glVertexAttribI3uivEXT
+#define glVertexAttribI3uivEXT(index, v) glatter_glVertexAttribI3uivEXT_debug((index), (v), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI3uivEXT_debug(GLuint index, const GLuint *v, const char* file, int line);
+#ifndef glVertexAttribI4bvEXT
+#define glVertexAttribI4bvEXT(index, v) glatter_glVertexAttribI4bvEXT_debug((index), (v), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI4bvEXT_debug(GLuint index, const GLbyte *v, const char* file, int line);
+#ifndef glVertexAttribI4iEXT
+#define glVertexAttribI4iEXT(index, x, y, z, w) glatter_glVertexAttribI4iEXT_debug((index), (x), (y), (z), (w), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI4iEXT_debug(GLuint index, GLint x, GLint y, GLint z, GLint w, const char* file, int line);
+#ifndef glVertexAttribI4ivEXT
+#define glVertexAttribI4ivEXT(index, v) glatter_glVertexAttribI4ivEXT_debug((index), (v), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI4ivEXT_debug(GLuint index, const GLint *v, const char* file, int line);
+#ifndef glVertexAttribI4svEXT
+#define glVertexAttribI4svEXT(index, v) glatter_glVertexAttribI4svEXT_debug((index), (v), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI4svEXT_debug(GLuint index, const GLshort *v, const char* file, int line);
+#ifndef glVertexAttribI4ubvEXT
+#define glVertexAttribI4ubvEXT(index, v) glatter_glVertexAttribI4ubvEXT_debug((index), (v), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI4ubvEXT_debug(GLuint index, const GLubyte *v, const char* file, int line);
+#ifndef glVertexAttribI4uiEXT
+#define glVertexAttribI4uiEXT(index, x, y, z, w) glatter_glVertexAttribI4uiEXT_debug((index), (x), (y), (z), (w), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI4uiEXT_debug(GLuint index, GLuint x, GLuint y, GLuint z, GLuint w, const char* file, int line);
+#ifndef glVertexAttribI4uivEXT
+#define glVertexAttribI4uivEXT(index, v) glatter_glVertexAttribI4uivEXT_debug((index), (v), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI4uivEXT_debug(GLuint index, const GLuint *v, const char* file, int line);
+#ifndef glVertexAttribI4usvEXT
+#define glVertexAttribI4usvEXT(index, v) glatter_glVertexAttribI4usvEXT_debug((index), (v), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI4usvEXT_debug(GLuint index, const GLushort *v, const char* file, int line);
+#ifndef glVertexAttribIPointerEXT
+#define glVertexAttribIPointerEXT(index, size, type, stride, pointer) glatter_glVertexAttribIPointerEXT_debug((index), (size), (type), (stride), (pointer), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glVertexAttribIPointerEXT_debug(GLuint index, GLint size, GLenum type, GLsizei stride, const void *pointer, const char* file, int line);
 #endif // defined(GL_EXT_gpu_shader4)
 #if defined(GL_EXT_histogram)
 #ifndef glGetHistogramEXT
@@ -5815,6 +5945,24 @@ GLATTER_INLINE_OR_NOT void glatter_glImportMemoryWin32HandleEXT_debug(GLuint mem
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glImportMemoryWin32NameEXT_debug(GLuint memory, GLuint64 size, GLenum handleType, const void *name, const char* file, int line);
 #endif // defined(GL_EXT_memory_object_win32)
+#if defined(GL_EXT_mesh_shader)
+#ifndef glDrawMeshTasksEXT
+#define glDrawMeshTasksEXT(num_groups_x, num_groups_y, num_groups_z) glatter_glDrawMeshTasksEXT_debug((num_groups_x), (num_groups_y), (num_groups_z), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glDrawMeshTasksEXT_debug(GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z, const char* file, int line);
+#ifndef glDrawMeshTasksIndirectEXT
+#define glDrawMeshTasksIndirectEXT(indirect) glatter_glDrawMeshTasksIndirectEXT_debug((indirect), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glDrawMeshTasksIndirectEXT_debug(GLintptr indirect, const char* file, int line);
+#ifndef glMultiDrawMeshTasksIndirectCountEXT
+#define glMultiDrawMeshTasksIndirectCountEXT(indirect, drawcount, maxdrawcount, stride) glatter_glMultiDrawMeshTasksIndirectCountEXT_debug((indirect), (drawcount), (maxdrawcount), (stride), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glMultiDrawMeshTasksIndirectCountEXT_debug(GLintptr indirect, GLintptr drawcount, GLsizei maxdrawcount, GLsizei stride, const char* file, int line);
+#ifndef glMultiDrawMeshTasksIndirectEXT
+#define glMultiDrawMeshTasksIndirectEXT(indirect, drawcount, stride) glatter_glMultiDrawMeshTasksIndirectEXT_debug((indirect), (drawcount), (stride), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glMultiDrawMeshTasksIndirectEXT_debug(GLintptr indirect, GLsizei drawcount, GLsizei stride, const char* file, int line);
+#endif // defined(GL_EXT_mesh_shader)
 #if defined(GL_EXT_multi_draw_arrays)
 #ifndef glMultiDrawArraysEXT
 #define glMultiDrawArraysEXT(mode, first, count, primcount) glatter_glMultiDrawArraysEXT_debug((mode), (first), (count), (primcount), __FILE__, __LINE__)
@@ -6161,6 +6309,20 @@ GLATTER_INLINE_OR_NOT void glatter_glPrioritizeTexturesEXT_debug(GLsizei n, cons
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glTextureNormalEXT_debug(GLenum mode, const char* file, int line);
 #endif // defined(GL_EXT_texture_perturb_normal)
+#if defined(GL_EXT_texture_storage)
+#ifndef glTexStorage1DEXT
+#define glTexStorage1DEXT(target, levels, internalformat, width) glatter_glTexStorage1DEXT_debug((target), (levels), (internalformat), (width), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glTexStorage1DEXT_debug(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, const char* file, int line);
+#ifndef glTexStorage2DEXT
+#define glTexStorage2DEXT(target, levels, internalformat, width, height) glatter_glTexStorage2DEXT_debug((target), (levels), (internalformat), (width), (height), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glTexStorage2DEXT_debug(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, const char* file, int line);
+#ifndef glTexStorage3DEXT
+#define glTexStorage3DEXT(target, levels, internalformat, width, height, depth) glatter_glTexStorage3DEXT_debug((target), (levels), (internalformat), (width), (height), (depth), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glTexStorage3DEXT_debug(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth, const char* file, int line);
+#endif // defined(GL_EXT_texture_storage)
 #if defined(GL_EXT_timer_query)
 #ifndef glGetQueryObjecti64vEXT
 #define glGetQueryObjecti64vEXT(id, pname, params) glatter_glGetQueryObjecti64vEXT_debug((id), (pname), (params), __FILE__, __LINE__)
@@ -6673,6 +6835,16 @@ GLATTER_INLINE_OR_NOT void glatter_glBlendBarrierKHR_debug(const char* file, int
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glMaxShaderCompilerThreadsKHR_debug(GLuint count, const char* file, int line);
 #endif // defined(GL_KHR_parallel_shader_compile)
+#if defined(GL_MESA_framebuffer_flip_y)
+#ifndef glFramebufferParameteriMESA
+#define glFramebufferParameteriMESA(target, pname, param) glatter_glFramebufferParameteriMESA_debug((target), (pname), (param), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glFramebufferParameteriMESA_debug(GLenum target, GLenum pname, GLint param, const char* file, int line);
+#ifndef glGetFramebufferParameterivMESA
+#define glGetFramebufferParameterivMESA(target, pname, params) glatter_glGetFramebufferParameterivMESA_debug((target), (pname), (params), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glGetFramebufferParameterivMESA_debug(GLenum target, GLenum pname, GLint *params, const char* file, int line);
+#endif // defined(GL_MESA_framebuffer_flip_y)
 #if defined(GL_MESA_resize_buffers)
 #ifndef glResizeBuffersMESA
 #define glResizeBuffersMESA() glatter_glResizeBuffersMESA_debug(__FILE__, __LINE__)
@@ -6787,6 +6959,32 @@ GLATTER_INLINE_OR_NOT void glatter_glBeginConditionalRenderNVX_debug(GLuint id, 
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glEndConditionalRenderNVX_debug(const char* file, int line);
 #endif // defined(GL_NVX_conditional_render)
+#if defined(GL_NVX_gpu_multicast2)
+#ifndef glAsyncCopyBufferSubDataNVX
+#define glAsyncCopyBufferSubDataNVX(waitSemaphoreCount, waitSemaphoreArray, fenceValueArray, readGpu, writeGpuMask, readBuffer, writeBuffer, readOffset, writeOffset, size, signalSemaphoreCount, signalSemaphoreArray, signalValueArray) glatter_glAsyncCopyBufferSubDataNVX_debug((waitSemaphoreCount), (waitSemaphoreArray), (fenceValueArray), (readGpu), (writeGpuMask), (readBuffer), (writeBuffer), (readOffset), (writeOffset), (size), (signalSemaphoreCount), (signalSemaphoreArray), (signalValueArray), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT GLuint glatter_glAsyncCopyBufferSubDataNVX_debug(GLsizei waitSemaphoreCount, const GLuint *waitSemaphoreArray, const GLuint64 *fenceValueArray, GLuint readGpu, GLbitfield writeGpuMask, GLuint readBuffer, GLuint writeBuffer, GLintptr readOffset, GLintptr writeOffset, GLsizeiptr size, GLsizei signalSemaphoreCount, const GLuint *signalSemaphoreArray, const GLuint64 *signalValueArray, const char* file, int line);
+#ifndef glAsyncCopyImageSubDataNVX
+#define glAsyncCopyImageSubDataNVX(waitSemaphoreCount, waitSemaphoreArray, waitValueArray, srcGpu, dstGpuMask, srcName, srcTarget, srcLevel, srcX, srcY, srcZ, dstName, dstTarget, dstLevel, dstX, dstY, dstZ, srcWidth, srcHeight, srcDepth, signalSemaphoreCount, signalSemaphoreArray, signalValueArray) glatter_glAsyncCopyImageSubDataNVX_debug((waitSemaphoreCount), (waitSemaphoreArray), (waitValueArray), (srcGpu), (dstGpuMask), (srcName), (srcTarget), (srcLevel), (srcX), (srcY), (srcZ), (dstName), (dstTarget), (dstLevel), (dstX), (dstY), (dstZ), (srcWidth), (srcHeight), (srcDepth), (signalSemaphoreCount), (signalSemaphoreArray), (signalValueArray), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT GLuint glatter_glAsyncCopyImageSubDataNVX_debug(GLsizei waitSemaphoreCount, const GLuint *waitSemaphoreArray, const GLuint64 *waitValueArray, GLuint srcGpu, GLbitfield dstGpuMask, GLuint srcName, GLenum srcTarget, GLint srcLevel, GLint srcX, GLint srcY, GLint srcZ, GLuint dstName, GLenum dstTarget, GLint dstLevel, GLint dstX, GLint dstY, GLint dstZ, GLsizei srcWidth, GLsizei srcHeight, GLsizei srcDepth, GLsizei signalSemaphoreCount, const GLuint *signalSemaphoreArray, const GLuint64 *signalValueArray, const char* file, int line);
+#ifndef glMulticastScissorArrayvNVX
+#define glMulticastScissorArrayvNVX(gpu, first, count, v) glatter_glMulticastScissorArrayvNVX_debug((gpu), (first), (count), (v), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glMulticastScissorArrayvNVX_debug(GLuint gpu, GLuint first, GLsizei count, const GLint *v, const char* file, int line);
+#ifndef glMulticastViewportArrayvNVX
+#define glMulticastViewportArrayvNVX(gpu, first, count, v) glatter_glMulticastViewportArrayvNVX_debug((gpu), (first), (count), (v), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glMulticastViewportArrayvNVX_debug(GLuint gpu, GLuint first, GLsizei count, const GLfloat *v, const char* file, int line);
+#ifndef glMulticastViewportPositionWScaleNVX
+#define glMulticastViewportPositionWScaleNVX(gpu, index, xcoeff, ycoeff) glatter_glMulticastViewportPositionWScaleNVX_debug((gpu), (index), (xcoeff), (ycoeff), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glMulticastViewportPositionWScaleNVX_debug(GLuint gpu, GLuint index, GLfloat xcoeff, GLfloat ycoeff, const char* file, int line);
+#ifndef glUploadGpuMaskNVX
+#define glUploadGpuMaskNVX(mask) glatter_glUploadGpuMaskNVX_debug((mask), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glUploadGpuMaskNVX_debug(GLbitfield mask, const char* file, int line);
+#endif // defined(GL_NVX_gpu_multicast2)
 #if defined(GL_NVX_linked_gpu_multicast)
 #ifndef glLGPUCopyImageSubDataNVX
 #define glLGPUCopyImageSubDataNVX(sourceGpu, destinationGpuMask, srcName, srcTarget, srcLevel, srcX, srxY, srcZ, dstName, dstTarget, dstLevel, dstX, dstY, dstZ, width, height, depth) glatter_glLGPUCopyImageSubDataNVX_debug((sourceGpu), (destinationGpuMask), (srcName), (srcTarget), (srcLevel), (srcX), (srxY), (srcZ), (dstName), (dstTarget), (dstLevel), (dstX), (dstY), (dstZ), (width), (height), (depth), __FILE__, __LINE__)
@@ -6801,6 +6999,24 @@ GLATTER_INLINE_OR_NOT void glatter_glLGPUInterlockNVX_debug(const char* file, in
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glLGPUNamedBufferSubDataNVX_debug(GLbitfield gpuMask, GLuint buffer, GLintptr offset, GLsizeiptr size, const void *data, const char* file, int line);
 #endif // defined(GL_NVX_linked_gpu_multicast)
+#if defined(GL_NVX_progress_fence)
+#ifndef glClientWaitSemaphoreui64NVX
+#define glClientWaitSemaphoreui64NVX(fenceObjectCount, semaphoreArray, fenceValueArray) glatter_glClientWaitSemaphoreui64NVX_debug((fenceObjectCount), (semaphoreArray), (fenceValueArray), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glClientWaitSemaphoreui64NVX_debug(GLsizei fenceObjectCount, const GLuint *semaphoreArray, const GLuint64 *fenceValueArray, const char* file, int line);
+#ifndef glCreateProgressFenceNVX
+#define glCreateProgressFenceNVX() glatter_glCreateProgressFenceNVX_debug(__FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT GLuint glatter_glCreateProgressFenceNVX_debug(const char* file, int line);
+#ifndef glSignalSemaphoreui64NVX
+#define glSignalSemaphoreui64NVX(signalGpu, fenceObjectCount, semaphoreArray, fenceValueArray) glatter_glSignalSemaphoreui64NVX_debug((signalGpu), (fenceObjectCount), (semaphoreArray), (fenceValueArray), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glSignalSemaphoreui64NVX_debug(GLuint signalGpu, GLsizei fenceObjectCount, const GLuint *semaphoreArray, const GLuint64 *fenceValueArray, const char* file, int line);
+#ifndef glWaitSemaphoreui64NVX
+#define glWaitSemaphoreui64NVX(waitGpu, fenceObjectCount, semaphoreArray, fenceValueArray) glatter_glWaitSemaphoreui64NVX_debug((waitGpu), (fenceObjectCount), (semaphoreArray), (fenceValueArray), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glWaitSemaphoreui64NVX_debug(GLuint waitGpu, GLsizei fenceObjectCount, const GLuint *semaphoreArray, const GLuint64 *fenceValueArray, const char* file, int line);
+#endif // defined(GL_NVX_progress_fence)
 #if defined(GL_NV_alpha_to_coverage_dither_control)
 #ifndef glAlphaToCoverageDitherControlNV
 #define glAlphaToCoverageDitherControlNV(mode) glatter_glAlphaToCoverageDitherControlNV_debug((mode), __FILE__, __LINE__)
@@ -7167,9 +7383,9 @@ GLATTER_INLINE_OR_NOT void glatter_glCoverageModulationNV_debug(GLenum component
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glCoverageModulationTableNV_debug(GLsizei n, const GLfloat *v, const char* file, int line);
 #ifndef glGetCoverageModulationTableNV
-#define glGetCoverageModulationTableNV(bufsize, v) glatter_glGetCoverageModulationTableNV_debug((bufsize), (v), __FILE__, __LINE__)
+#define glGetCoverageModulationTableNV(bufSize, v) glatter_glGetCoverageModulationTableNV_debug((bufSize), (v), __FILE__, __LINE__)
 #endif
-GLATTER_INLINE_OR_NOT void glatter_glGetCoverageModulationTableNV_debug(GLsizei bufsize, GLfloat *v, const char* file, int line);
+GLATTER_INLINE_OR_NOT void glatter_glGetCoverageModulationTableNV_debug(GLsizei bufSize, GLfloat *v, const char* file, int line);
 #endif // defined(GL_NV_framebuffer_mixed_samples)
 #if defined(GL_NV_framebuffer_multisample_coverage)
 #ifndef glRenderbufferStorageMultisampleCoverageNV
@@ -7505,10 +7721,72 @@ GLATTER_INLINE_OR_NOT void glatter_glVertexWeighthvNV_debug(const GLhalfNV *weig
 #endif // defined(GL_NV_half_float)
 #if defined(GL_NV_internalformat_sample_query)
 #ifndef glGetInternalformatSampleivNV
-#define glGetInternalformatSampleivNV(target, internalformat, samples, pname, bufSize, params) glatter_glGetInternalformatSampleivNV_debug((target), (internalformat), (samples), (pname), (bufSize), (params), __FILE__, __LINE__)
+#define glGetInternalformatSampleivNV(target, internalformat, samples, pname, count, params) glatter_glGetInternalformatSampleivNV_debug((target), (internalformat), (samples), (pname), (count), (params), __FILE__, __LINE__)
 #endif
-GLATTER_INLINE_OR_NOT void glatter_glGetInternalformatSampleivNV_debug(GLenum target, GLenum internalformat, GLsizei samples, GLenum pname, GLsizei bufSize, GLint *params, const char* file, int line);
+GLATTER_INLINE_OR_NOT void glatter_glGetInternalformatSampleivNV_debug(GLenum target, GLenum internalformat, GLsizei samples, GLenum pname, GLsizei count, GLint *params, const char* file, int line);
 #endif // defined(GL_NV_internalformat_sample_query)
+#if defined(GL_NV_memory_attachment)
+#ifndef glBufferAttachMemoryNV
+#define glBufferAttachMemoryNV(target, memory, offset) glatter_glBufferAttachMemoryNV_debug((target), (memory), (offset), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glBufferAttachMemoryNV_debug(GLenum target, GLuint memory, GLuint64 offset, const char* file, int line);
+#ifndef glGetMemoryObjectDetachedResourcesuivNV
+#define glGetMemoryObjectDetachedResourcesuivNV(memory, pname, first, count, params) glatter_glGetMemoryObjectDetachedResourcesuivNV_debug((memory), (pname), (first), (count), (params), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glGetMemoryObjectDetachedResourcesuivNV_debug(GLuint memory, GLenum pname, GLint first, GLsizei count, GLuint *params, const char* file, int line);
+#ifndef glNamedBufferAttachMemoryNV
+#define glNamedBufferAttachMemoryNV(buffer, memory, offset) glatter_glNamedBufferAttachMemoryNV_debug((buffer), (memory), (offset), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glNamedBufferAttachMemoryNV_debug(GLuint buffer, GLuint memory, GLuint64 offset, const char* file, int line);
+#ifndef glResetMemoryObjectParameterNV
+#define glResetMemoryObjectParameterNV(memory, pname) glatter_glResetMemoryObjectParameterNV_debug((memory), (pname), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glResetMemoryObjectParameterNV_debug(GLuint memory, GLenum pname, const char* file, int line);
+#ifndef glTexAttachMemoryNV
+#define glTexAttachMemoryNV(target, memory, offset) glatter_glTexAttachMemoryNV_debug((target), (memory), (offset), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glTexAttachMemoryNV_debug(GLenum target, GLuint memory, GLuint64 offset, const char* file, int line);
+#ifndef glTextureAttachMemoryNV
+#define glTextureAttachMemoryNV(texture, memory, offset) glatter_glTextureAttachMemoryNV_debug((texture), (memory), (offset), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glTextureAttachMemoryNV_debug(GLuint texture, GLuint memory, GLuint64 offset, const char* file, int line);
+#endif // defined(GL_NV_memory_attachment)
+#if defined(GL_NV_memory_object_sparse)
+#ifndef glBufferPageCommitmentMemNV
+#define glBufferPageCommitmentMemNV(target, offset, size, memory, memOffset, commit) glatter_glBufferPageCommitmentMemNV_debug((target), (offset), (size), (memory), (memOffset), (commit), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glBufferPageCommitmentMemNV_debug(GLenum target, GLintptr offset, GLsizeiptr size, GLuint memory, GLuint64 memOffset, GLboolean commit, const char* file, int line);
+#ifndef glNamedBufferPageCommitmentMemNV
+#define glNamedBufferPageCommitmentMemNV(buffer, offset, size, memory, memOffset, commit) glatter_glNamedBufferPageCommitmentMemNV_debug((buffer), (offset), (size), (memory), (memOffset), (commit), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glNamedBufferPageCommitmentMemNV_debug(GLuint buffer, GLintptr offset, GLsizeiptr size, GLuint memory, GLuint64 memOffset, GLboolean commit, const char* file, int line);
+#ifndef glTexPageCommitmentMemNV
+#define glTexPageCommitmentMemNV(target, layer, level, xoffset, yoffset, zoffset, width, height, depth, memory, offset, commit) glatter_glTexPageCommitmentMemNV_debug((target), (layer), (level), (xoffset), (yoffset), (zoffset), (width), (height), (depth), (memory), (offset), (commit), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glTexPageCommitmentMemNV_debug(GLenum target, GLint layer, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLuint memory, GLuint64 offset, GLboolean commit, const char* file, int line);
+#ifndef glTexturePageCommitmentMemNV
+#define glTexturePageCommitmentMemNV(texture, layer, level, xoffset, yoffset, zoffset, width, height, depth, memory, offset, commit) glatter_glTexturePageCommitmentMemNV_debug((texture), (layer), (level), (xoffset), (yoffset), (zoffset), (width), (height), (depth), (memory), (offset), (commit), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glTexturePageCommitmentMemNV_debug(GLuint texture, GLint layer, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLuint memory, GLuint64 offset, GLboolean commit, const char* file, int line);
+#endif // defined(GL_NV_memory_object_sparse)
+#if defined(GL_NV_mesh_shader)
+#ifndef glDrawMeshTasksIndirectNV
+#define glDrawMeshTasksIndirectNV(indirect) glatter_glDrawMeshTasksIndirectNV_debug((indirect), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glDrawMeshTasksIndirectNV_debug(GLintptr indirect, const char* file, int line);
+#ifndef glDrawMeshTasksNV
+#define glDrawMeshTasksNV(first, count) glatter_glDrawMeshTasksNV_debug((first), (count), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glDrawMeshTasksNV_debug(GLuint first, GLuint count, const char* file, int line);
+#ifndef glMultiDrawMeshTasksIndirectCountNV
+#define glMultiDrawMeshTasksIndirectCountNV(indirect, drawcount, maxdrawcount, stride) glatter_glMultiDrawMeshTasksIndirectCountNV_debug((indirect), (drawcount), (maxdrawcount), (stride), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glMultiDrawMeshTasksIndirectCountNV_debug(GLintptr indirect, GLintptr drawcount, GLsizei maxdrawcount, GLsizei stride, const char* file, int line);
+#ifndef glMultiDrawMeshTasksIndirectNV
+#define glMultiDrawMeshTasksIndirectNV(indirect, drawcount, stride) glatter_glMultiDrawMeshTasksIndirectNV_debug((indirect), (drawcount), (stride), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glMultiDrawMeshTasksIndirectNV_debug(GLintptr indirect, GLsizei drawcount, GLsizei stride, const char* file, int line);
+#endif // defined(GL_NV_mesh_shader)
 #if defined(GL_NV_occlusion_query)
 #ifndef glBeginOcclusionQueryNV
 #define glBeginOcclusionQueryNV(id) glatter_glBeginOcclusionQueryNV_debug((id), __FILE__, __LINE__)
@@ -7635,9 +7913,9 @@ GLATTER_INLINE_OR_NOT void glatter_glGetPathTexGenfvNV_debug(GLenum texCoordSet,
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glGetPathTexGenivNV_debug(GLenum texCoordSet, GLenum pname, GLint *value, const char* file, int line);
 #ifndef glGetProgramResourcefvNV
-#define glGetProgramResourcefvNV(program, programInterface, index, propCount, props, bufSize, length, params) glatter_glGetProgramResourcefvNV_debug((program), (programInterface), (index), (propCount), (props), (bufSize), (length), (params), __FILE__, __LINE__)
+#define glGetProgramResourcefvNV(program, programInterface, index, propCount, props, count, length, params) glatter_glGetProgramResourcefvNV_debug((program), (programInterface), (index), (propCount), (props), (count), (length), (params), __FILE__, __LINE__)
 #endif
-GLATTER_INLINE_OR_NOT void glatter_glGetProgramResourcefvNV_debug(GLuint program, GLenum programInterface, GLuint index, GLsizei propCount, const GLenum *props, GLsizei bufSize, GLsizei *length, GLfloat *params, const char* file, int line);
+GLATTER_INLINE_OR_NOT void glatter_glGetProgramResourcefvNV_debug(GLuint program, GLenum programInterface, GLuint index, GLsizei propCount, const GLenum *props, GLsizei count, GLsizei *length, GLfloat *params, const char* file, int line);
 #ifndef glInterpolatePathsNV
 #define glInterpolatePathsNV(resultPath, pathA, pathB, weight) glatter_glInterpolatePathsNV_debug((resultPath), (pathA), (pathB), (weight), __FILE__, __LINE__)
 #endif
@@ -7709,7 +7987,7 @@ GLATTER_INLINE_OR_NOT GLenum glatter_glPathGlyphIndexArrayNV_debug(GLuint firstP
 #ifndef glPathGlyphIndexRangeNV
 #define glPathGlyphIndexRangeNV(fontTarget, fontName, fontStyle, pathParameterTemplate, emScale, baseAndCount) glatter_glPathGlyphIndexRangeNV_debug((fontTarget), (fontName), (fontStyle), (pathParameterTemplate), (emScale), (baseAndCount), __FILE__, __LINE__)
 #endif
-GLATTER_INLINE_OR_NOT GLenum glatter_glPathGlyphIndexRangeNV_debug(GLenum fontTarget, const void *fontName, GLbitfield fontStyle, GLuint pathParameterTemplate, GLfloat emScale, GLuint baseAndCount[2], const char* file, int line);
+GLATTER_INLINE_OR_NOT GLenum glatter_glPathGlyphIndexRangeNV_debug(GLenum fontTarget, const void *fontName, GLbitfield fontStyle, GLuint pathParameterTemplate, GLfloat emScale, GLuint *baseAndCount, const char* file, int line);
 #ifndef glPathGlyphRangeNV
 #define glPathGlyphRangeNV(firstPathName, fontTarget, fontName, fontStyle, firstGlyph, numGlyphs, handleMissingGlyphs, pathParameterTemplate, emScale) glatter_glPathGlyphRangeNV_debug((firstPathName), (fontTarget), (fontName), (fontStyle), (firstGlyph), (numGlyphs), (handleMissingGlyphs), (pathParameterTemplate), (emScale), __FILE__, __LINE__)
 #endif
@@ -7869,9 +8147,9 @@ GLATTER_INLINE_OR_NOT void glatter_glPrimitiveRestartNV_debug(const char* file, 
 #endif // defined(GL_NV_primitive_restart)
 #if defined(GL_NV_query_resource)
 #ifndef glQueryResourceNV
-#define glQueryResourceNV(queryType, tagId, bufSize, buffer) glatter_glQueryResourceNV_debug((queryType), (tagId), (bufSize), (buffer), __FILE__, __LINE__)
+#define glQueryResourceNV(queryType, tagId, count, buffer) glatter_glQueryResourceNV_debug((queryType), (tagId), (count), (buffer), __FILE__, __LINE__)
 #endif
-GLATTER_INLINE_OR_NOT GLint glatter_glQueryResourceNV_debug(GLenum queryType, GLint tagId, GLuint bufSize, GLint *buffer, const char* file, int line);
+GLATTER_INLINE_OR_NOT GLint glatter_glQueryResourceNV_debug(GLenum queryType, GLint tagId, GLuint count, GLint *buffer, const char* file, int line);
 #endif // defined(GL_NV_query_resource)
 #if defined(GL_NV_query_resource_tag)
 #ifndef glDeleteQueryResourceTagNV
@@ -7965,6 +8243,16 @@ GLATTER_INLINE_OR_NOT void glatter_glNamedFramebufferSampleLocationsfvNV_debug(G
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glResolveDepthValuesNV_debug(const char* file, int line);
 #endif // defined(GL_NV_sample_locations)
+#if defined(GL_NV_scissor_exclusive)
+#ifndef glScissorExclusiveArrayvNV
+#define glScissorExclusiveArrayvNV(first, count, v) glatter_glScissorExclusiveArrayvNV_debug((first), (count), (v), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glScissorExclusiveArrayvNV_debug(GLuint first, GLsizei count, const GLint *v, const char* file, int line);
+#ifndef glScissorExclusiveNV
+#define glScissorExclusiveNV(x, y, width, height) glatter_glScissorExclusiveNV_debug((x), (y), (width), (height), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glScissorExclusiveNV_debug(GLint x, GLint y, GLsizei width, GLsizei height, const char* file, int line);
+#endif // defined(GL_NV_scissor_exclusive)
 #if defined(GL_NV_shader_buffer_load)
 #ifndef glGetBufferParameterui64vNV
 #define glGetBufferParameterui64vNV(target, pname, params) glatter_glGetBufferParameterui64vNV_debug((target), (pname), (params), __FILE__, __LINE__)
@@ -8019,6 +8307,36 @@ GLATTER_INLINE_OR_NOT void glatter_glUniformui64NV_debug(GLint location, GLuint6
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glUniformui64vNV_debug(GLint location, GLsizei count, const GLuint64EXT *value, const char* file, int line);
 #endif // defined(GL_NV_shader_buffer_load)
+#if defined(GL_NV_shading_rate_image)
+#ifndef glBindShadingRateImageNV
+#define glBindShadingRateImageNV(texture) glatter_glBindShadingRateImageNV_debug((texture), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glBindShadingRateImageNV_debug(GLuint texture, const char* file, int line);
+#ifndef glGetShadingRateImagePaletteNV
+#define glGetShadingRateImagePaletteNV(viewport, entry, rate) glatter_glGetShadingRateImagePaletteNV_debug((viewport), (entry), (rate), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glGetShadingRateImagePaletteNV_debug(GLuint viewport, GLuint entry, GLenum *rate, const char* file, int line);
+#ifndef glGetShadingRateSampleLocationivNV
+#define glGetShadingRateSampleLocationivNV(rate, samples, index, location) glatter_glGetShadingRateSampleLocationivNV_debug((rate), (samples), (index), (location), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glGetShadingRateSampleLocationivNV_debug(GLenum rate, GLuint samples, GLuint index, GLint *location, const char* file, int line);
+#ifndef glShadingRateImageBarrierNV
+#define glShadingRateImageBarrierNV(synchronize) glatter_glShadingRateImageBarrierNV_debug((synchronize), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glShadingRateImageBarrierNV_debug(GLboolean synchronize, const char* file, int line);
+#ifndef glShadingRateImagePaletteNV
+#define glShadingRateImagePaletteNV(viewport, first, count, rates) glatter_glShadingRateImagePaletteNV_debug((viewport), (first), (count), (rates), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glShadingRateImagePaletteNV_debug(GLuint viewport, GLuint first, GLsizei count, const GLenum *rates, const char* file, int line);
+#ifndef glShadingRateSampleOrderCustomNV
+#define glShadingRateSampleOrderCustomNV(rate, samples, locations) glatter_glShadingRateSampleOrderCustomNV_debug((rate), (samples), (locations), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glShadingRateSampleOrderCustomNV_debug(GLenum rate, GLuint samples, const GLint *locations, const char* file, int line);
+#ifndef glShadingRateSampleOrderNV
+#define glShadingRateSampleOrderNV(order) glatter_glShadingRateSampleOrderNV_debug((order), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glShadingRateSampleOrderNV_debug(GLenum order, const char* file, int line);
+#endif // defined(GL_NV_shading_rate_image)
 #if defined(GL_NV_texture_barrier)
 #ifndef glTextureBarrierNV
 #define glTextureBarrierNV() glatter_glTextureBarrierNV_debug(__FILE__, __LINE__)
@@ -8051,6 +8369,20 @@ GLATTER_INLINE_OR_NOT void glatter_glTextureImage3DMultisampleCoverageNV_debug(G
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glTextureImage3DMultisampleNV_debug(GLuint texture, GLenum target, GLsizei samples, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLboolean fixedSampleLocations, const char* file, int line);
 #endif // defined(GL_NV_texture_multisample)
+#if defined(GL_NV_timeline_semaphore)
+#ifndef glCreateSemaphoresNV
+#define glCreateSemaphoresNV(n, semaphores) glatter_glCreateSemaphoresNV_debug((n), (semaphores), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glCreateSemaphoresNV_debug(GLsizei n, GLuint *semaphores, const char* file, int line);
+#ifndef glGetSemaphoreParameterivNV
+#define glGetSemaphoreParameterivNV(semaphore, pname, params) glatter_glGetSemaphoreParameterivNV_debug((semaphore), (pname), (params), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glGetSemaphoreParameterivNV_debug(GLuint semaphore, GLenum pname, GLint *params, const char* file, int line);
+#ifndef glSemaphoreParameterivNV
+#define glSemaphoreParameterivNV(semaphore, pname, params) glatter_glSemaphoreParameterivNV_debug((semaphore), (pname), (params), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glSemaphoreParameterivNV_debug(GLuint semaphore, GLenum pname, const GLint *params, const char* file, int line);
+#endif // defined(GL_NV_timeline_semaphore)
 #if defined(GL_NV_transform_feedback)
 #ifndef glActiveVaryingNV
 #define glActiveVaryingNV(program, name) glatter_glActiveVaryingNV_debug((program), (name), __FILE__, __LINE__)
@@ -8137,9 +8469,9 @@ GLATTER_INLINE_OR_NOT void glatter_glResumeTransformFeedbackNV_debug(const char*
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glVDPAUFiniNV_debug(const char* file, int line);
 #ifndef glVDPAUGetSurfaceivNV
-#define glVDPAUGetSurfaceivNV(surface, pname, bufSize, length, values) glatter_glVDPAUGetSurfaceivNV_debug((surface), (pname), (bufSize), (length), (values), __FILE__, __LINE__)
+#define glVDPAUGetSurfaceivNV(surface, pname, count, length, values) glatter_glVDPAUGetSurfaceivNV_debug((surface), (pname), (count), (length), (values), __FILE__, __LINE__)
 #endif
-GLATTER_INLINE_OR_NOT void glatter_glVDPAUGetSurfaceivNV_debug(GLvdpauSurfaceNV surface, GLenum pname, GLsizei bufSize, GLsizei *length, GLint *values, const char* file, int line);
+GLATTER_INLINE_OR_NOT void glatter_glVDPAUGetSurfaceivNV_debug(GLvdpauSurfaceNV surface, GLenum pname, GLsizei count, GLsizei *length, GLint *values, const char* file, int line);
 #ifndef glVDPAUInitNV
 #define glVDPAUInitNV(vdpDevice, getProcAddress) glatter_glVDPAUInitNV_debug((vdpDevice), (getProcAddress), __FILE__, __LINE__)
 #endif
@@ -8173,6 +8505,12 @@ GLATTER_INLINE_OR_NOT void glatter_glVDPAUUnmapSurfacesNV_debug(GLsizei numSurfa
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glVDPAUUnregisterSurfaceNV_debug(GLvdpauSurfaceNV surface, const char* file, int line);
 #endif // defined(GL_NV_vdpau_interop)
+#if defined(GL_NV_vdpau_interop2)
+#ifndef glVDPAURegisterVideoSurfaceWithPictureStructureNV
+#define glVDPAURegisterVideoSurfaceWithPictureStructureNV(vdpSurface, target, numTextureNames, textureNames, isFrameStructure) glatter_glVDPAURegisterVideoSurfaceWithPictureStructureNV_debug((vdpSurface), (target), (numTextureNames), (textureNames), (isFrameStructure), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT GLvdpauSurfaceNV glatter_glVDPAURegisterVideoSurfaceWithPictureStructureNV_debug(const void *vdpSurface, GLenum target, GLsizei numTextureNames, const GLuint *textureNames, GLboolean isFrameStructure, const char* file, int line);
+#endif // defined(GL_NV_vdpau_interop2)
 #if defined(GL_NV_vertex_array_range)
 #ifndef glFlushVertexArrayRangeNV
 #define glFlushVertexArrayRangeNV() glatter_glFlushVertexArrayRangeNV_debug(__FILE__, __LINE__)
@@ -8569,100 +8907,6 @@ GLATTER_INLINE_OR_NOT void glatter_glVertexAttribs4svNV_debug(GLuint index, GLsi
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glVertexAttribs4ubvNV_debug(GLuint index, GLsizei count, const GLubyte *v, const char* file, int line);
 #endif // defined(GL_NV_vertex_program)
-#if defined(GL_NV_vertex_program4)
-#ifndef glGetVertexAttribIivEXT
-#define glGetVertexAttribIivEXT(index, pname, params) glatter_glGetVertexAttribIivEXT_debug((index), (pname), (params), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glGetVertexAttribIivEXT_debug(GLuint index, GLenum pname, GLint *params, const char* file, int line);
-#ifndef glGetVertexAttribIuivEXT
-#define glGetVertexAttribIuivEXT(index, pname, params) glatter_glGetVertexAttribIuivEXT_debug((index), (pname), (params), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glGetVertexAttribIuivEXT_debug(GLuint index, GLenum pname, GLuint *params, const char* file, int line);
-#ifndef glVertexAttribI1iEXT
-#define glVertexAttribI1iEXT(index, x) glatter_glVertexAttribI1iEXT_debug((index), (x), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI1iEXT_debug(GLuint index, GLint x, const char* file, int line);
-#ifndef glVertexAttribI1ivEXT
-#define glVertexAttribI1ivEXT(index, v) glatter_glVertexAttribI1ivEXT_debug((index), (v), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI1ivEXT_debug(GLuint index, const GLint *v, const char* file, int line);
-#ifndef glVertexAttribI1uiEXT
-#define glVertexAttribI1uiEXT(index, x) glatter_glVertexAttribI1uiEXT_debug((index), (x), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI1uiEXT_debug(GLuint index, GLuint x, const char* file, int line);
-#ifndef glVertexAttribI1uivEXT
-#define glVertexAttribI1uivEXT(index, v) glatter_glVertexAttribI1uivEXT_debug((index), (v), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI1uivEXT_debug(GLuint index, const GLuint *v, const char* file, int line);
-#ifndef glVertexAttribI2iEXT
-#define glVertexAttribI2iEXT(index, x, y) glatter_glVertexAttribI2iEXT_debug((index), (x), (y), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI2iEXT_debug(GLuint index, GLint x, GLint y, const char* file, int line);
-#ifndef glVertexAttribI2ivEXT
-#define glVertexAttribI2ivEXT(index, v) glatter_glVertexAttribI2ivEXT_debug((index), (v), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI2ivEXT_debug(GLuint index, const GLint *v, const char* file, int line);
-#ifndef glVertexAttribI2uiEXT
-#define glVertexAttribI2uiEXT(index, x, y) glatter_glVertexAttribI2uiEXT_debug((index), (x), (y), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI2uiEXT_debug(GLuint index, GLuint x, GLuint y, const char* file, int line);
-#ifndef glVertexAttribI2uivEXT
-#define glVertexAttribI2uivEXT(index, v) glatter_glVertexAttribI2uivEXT_debug((index), (v), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI2uivEXT_debug(GLuint index, const GLuint *v, const char* file, int line);
-#ifndef glVertexAttribI3iEXT
-#define glVertexAttribI3iEXT(index, x, y, z) glatter_glVertexAttribI3iEXT_debug((index), (x), (y), (z), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI3iEXT_debug(GLuint index, GLint x, GLint y, GLint z, const char* file, int line);
-#ifndef glVertexAttribI3ivEXT
-#define glVertexAttribI3ivEXT(index, v) glatter_glVertexAttribI3ivEXT_debug((index), (v), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI3ivEXT_debug(GLuint index, const GLint *v, const char* file, int line);
-#ifndef glVertexAttribI3uiEXT
-#define glVertexAttribI3uiEXT(index, x, y, z) glatter_glVertexAttribI3uiEXT_debug((index), (x), (y), (z), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI3uiEXT_debug(GLuint index, GLuint x, GLuint y, GLuint z, const char* file, int line);
-#ifndef glVertexAttribI3uivEXT
-#define glVertexAttribI3uivEXT(index, v) glatter_glVertexAttribI3uivEXT_debug((index), (v), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI3uivEXT_debug(GLuint index, const GLuint *v, const char* file, int line);
-#ifndef glVertexAttribI4bvEXT
-#define glVertexAttribI4bvEXT(index, v) glatter_glVertexAttribI4bvEXT_debug((index), (v), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI4bvEXT_debug(GLuint index, const GLbyte *v, const char* file, int line);
-#ifndef glVertexAttribI4iEXT
-#define glVertexAttribI4iEXT(index, x, y, z, w) glatter_glVertexAttribI4iEXT_debug((index), (x), (y), (z), (w), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI4iEXT_debug(GLuint index, GLint x, GLint y, GLint z, GLint w, const char* file, int line);
-#ifndef glVertexAttribI4ivEXT
-#define glVertexAttribI4ivEXT(index, v) glatter_glVertexAttribI4ivEXT_debug((index), (v), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI4ivEXT_debug(GLuint index, const GLint *v, const char* file, int line);
-#ifndef glVertexAttribI4svEXT
-#define glVertexAttribI4svEXT(index, v) glatter_glVertexAttribI4svEXT_debug((index), (v), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI4svEXT_debug(GLuint index, const GLshort *v, const char* file, int line);
-#ifndef glVertexAttribI4ubvEXT
-#define glVertexAttribI4ubvEXT(index, v) glatter_glVertexAttribI4ubvEXT_debug((index), (v), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI4ubvEXT_debug(GLuint index, const GLubyte *v, const char* file, int line);
-#ifndef glVertexAttribI4uiEXT
-#define glVertexAttribI4uiEXT(index, x, y, z, w) glatter_glVertexAttribI4uiEXT_debug((index), (x), (y), (z), (w), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI4uiEXT_debug(GLuint index, GLuint x, GLuint y, GLuint z, GLuint w, const char* file, int line);
-#ifndef glVertexAttribI4uivEXT
-#define glVertexAttribI4uivEXT(index, v) glatter_glVertexAttribI4uivEXT_debug((index), (v), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI4uivEXT_debug(GLuint index, const GLuint *v, const char* file, int line);
-#ifndef glVertexAttribI4usvEXT
-#define glVertexAttribI4usvEXT(index, v) glatter_glVertexAttribI4usvEXT_debug((index), (v), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribI4usvEXT_debug(GLuint index, const GLushort *v, const char* file, int line);
-#ifndef glVertexAttribIPointerEXT
-#define glVertexAttribIPointerEXT(index, size, type, stride, pointer) glatter_glVertexAttribIPointerEXT_debug((index), (size), (type), (stride), (pointer), __FILE__, __LINE__)
-#endif
-GLATTER_INLINE_OR_NOT void glatter_glVertexAttribIPointerEXT_debug(GLuint index, GLint size, GLenum type, GLsizei stride, const void *pointer, const char* file, int line);
-#endif // defined(GL_NV_vertex_program4)
 #if defined(GL_NV_video_capture)
 #ifndef glBeginVideoCaptureNV
 #define glBeginVideoCaptureNV(video_capture_slot) glatter_glBeginVideoCaptureNV_debug((video_capture_slot), __FILE__, __LINE__)
@@ -9260,6 +9504,10 @@ GLATTER_INLINE_OR_NOT void glatter_glOrthofOES_debug(GLfloat l, GLfloat r, GLflo
 #define glFramebufferTextureMultiviewOVR(target, attachment, texture, level, baseViewIndex, numViews) glatter_glFramebufferTextureMultiviewOVR_debug((target), (attachment), (texture), (level), (baseViewIndex), (numViews), __FILE__, __LINE__)
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glFramebufferTextureMultiviewOVR_debug(GLenum target, GLenum attachment, GLuint texture, GLint level, GLint baseViewIndex, GLsizei numViews, const char* file, int line);
+#ifndef glNamedFramebufferTextureMultiviewOVR
+#define glNamedFramebufferTextureMultiviewOVR(framebuffer, attachment, texture, level, baseViewIndex, numViews) glatter_glNamedFramebufferTextureMultiviewOVR_debug((framebuffer), (attachment), (texture), (level), (baseViewIndex), (numViews), __FILE__, __LINE__)
+#endif
+GLATTER_INLINE_OR_NOT void glatter_glNamedFramebufferTextureMultiviewOVR_debug(GLuint framebuffer, GLenum attachment, GLuint texture, GLint level, GLint baseViewIndex, GLsizei numViews, const char* file, int line);
 #endif // defined(GL_OVR_multiview)
 #if defined(GL_PGI_misc_hints)
 #ifndef glHintPGI
@@ -11167,9 +11415,9 @@ GLATTER_INLINE_OR_NOT void glatter_glGetInteger64v_debug(GLenum pname, GLint64 *
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glGetMultisamplefv_debug(GLenum pname, GLuint index, GLfloat *val, const char* file, int line);
 #ifndef glGetSynciv
-#define glGetSynciv(sync, pname, bufSize, length, values) glatter_glGetSynciv_debug((sync), (pname), (bufSize), (length), (values), __FILE__, __LINE__)
+#define glGetSynciv(sync, pname, count, length, values) glatter_glGetSynciv_debug((sync), (pname), (count), (length), (values), __FILE__, __LINE__)
 #endif
-GLATTER_INLINE_OR_NOT void glatter_glGetSynciv_debug(GLsync sync, GLenum pname, GLsizei bufSize, GLsizei *length, GLint *values, const char* file, int line);
+GLATTER_INLINE_OR_NOT void glatter_glGetSynciv_debug(GLsync sync, GLenum pname, GLsizei count, GLsizei *length, GLint *values, const char* file, int line);
 #ifndef glIsSync
 #define glIsSync(sync) glatter_glIsSync_debug((sync), __FILE__, __LINE__)
 #endif
@@ -11487,13 +11735,13 @@ GLATTER_INLINE_OR_NOT void glatter_glEndQueryIndexed_debug(GLenum target, GLuint
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glGenTransformFeedbacks_debug(GLsizei n, GLuint *ids, const char* file, int line);
 #ifndef glGetActiveSubroutineName
-#define glGetActiveSubroutineName(program, shadertype, index, bufsize, length, name) glatter_glGetActiveSubroutineName_debug((program), (shadertype), (index), (bufsize), (length), (name), __FILE__, __LINE__)
+#define glGetActiveSubroutineName(program, shadertype, index, bufSize, length, name) glatter_glGetActiveSubroutineName_debug((program), (shadertype), (index), (bufSize), (length), (name), __FILE__, __LINE__)
 #endif
-GLATTER_INLINE_OR_NOT void glatter_glGetActiveSubroutineName_debug(GLuint program, GLenum shadertype, GLuint index, GLsizei bufsize, GLsizei *length, GLchar *name, const char* file, int line);
+GLATTER_INLINE_OR_NOT void glatter_glGetActiveSubroutineName_debug(GLuint program, GLenum shadertype, GLuint index, GLsizei bufSize, GLsizei *length, GLchar *name, const char* file, int line);
 #ifndef glGetActiveSubroutineUniformName
-#define glGetActiveSubroutineUniformName(program, shadertype, index, bufsize, length, name) glatter_glGetActiveSubroutineUniformName_debug((program), (shadertype), (index), (bufsize), (length), (name), __FILE__, __LINE__)
+#define glGetActiveSubroutineUniformName(program, shadertype, index, bufSize, length, name) glatter_glGetActiveSubroutineUniformName_debug((program), (shadertype), (index), (bufSize), (length), (name), __FILE__, __LINE__)
 #endif
-GLATTER_INLINE_OR_NOT void glatter_glGetActiveSubroutineUniformName_debug(GLuint program, GLenum shadertype, GLuint index, GLsizei bufsize, GLsizei *length, GLchar *name, const char* file, int line);
+GLATTER_INLINE_OR_NOT void glatter_glGetActiveSubroutineUniformName_debug(GLuint program, GLenum shadertype, GLuint index, GLsizei bufSize, GLsizei *length, GLchar *name, const char* file, int line);
 #ifndef glGetActiveSubroutineUniformiv
 #define glGetActiveSubroutineUniformiv(program, shadertype, index, pname, values) glatter_glGetActiveSubroutineUniformiv_debug((program), (shadertype), (index), (pname), (values), __FILE__, __LINE__)
 #endif
@@ -11913,9 +12161,9 @@ GLATTER_INLINE_OR_NOT void glatter_glScissorIndexed_debug(GLuint index, GLint le
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glScissorIndexedv_debug(GLuint index, const GLint *v, const char* file, int line);
 #ifndef glShaderBinary
-#define glShaderBinary(count, shaders, binaryformat, binary, length) glatter_glShaderBinary_debug((count), (shaders), (binaryformat), (binary), (length), __FILE__, __LINE__)
+#define glShaderBinary(count, shaders, binaryFormat, binary, length) glatter_glShaderBinary_debug((count), (shaders), (binaryFormat), (binary), (length), __FILE__, __LINE__)
 #endif
-GLATTER_INLINE_OR_NOT void glatter_glShaderBinary_debug(GLsizei count, const GLuint *shaders, GLenum binaryformat, const void *binary, GLsizei length, const char* file, int line);
+GLATTER_INLINE_OR_NOT void glatter_glShaderBinary_debug(GLsizei count, const GLuint *shaders, GLenum binaryFormat, const void *binary, GLsizei length, const char* file, int line);
 #ifndef glUseProgramStages
 #define glUseProgramStages(pipeline, stages, program) glatter_glUseProgramStages_debug((pipeline), (stages), (program), __FILE__, __LINE__)
 #endif
@@ -12003,9 +12251,9 @@ GLATTER_INLINE_OR_NOT void glatter_glDrawTransformFeedbackStreamInstanced_debug(
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glGetActiveAtomicCounterBufferiv_debug(GLuint program, GLuint bufferIndex, GLenum pname, GLint *params, const char* file, int line);
 #ifndef glGetInternalformativ
-#define glGetInternalformativ(target, internalformat, pname, bufSize, params) glatter_glGetInternalformativ_debug((target), (internalformat), (pname), (bufSize), (params), __FILE__, __LINE__)
+#define glGetInternalformativ(target, internalformat, pname, count, params) glatter_glGetInternalformativ_debug((target), (internalformat), (pname), (count), (params), __FILE__, __LINE__)
 #endif
-GLATTER_INLINE_OR_NOT void glatter_glGetInternalformativ_debug(GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint *params, const char* file, int line);
+GLATTER_INLINE_OR_NOT void glatter_glGetInternalformativ_debug(GLenum target, GLenum internalformat, GLenum pname, GLsizei count, GLint *params, const char* file, int line);
 #ifndef glMemoryBarrier
 #define glMemoryBarrier(barriers) glatter_glMemoryBarrier_debug((barriers), __FILE__, __LINE__)
 #endif
@@ -12073,9 +12321,9 @@ GLATTER_INLINE_OR_NOT GLuint glatter_glGetDebugMessageLog_debug(GLuint count, GL
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glGetFramebufferParameteriv_debug(GLenum target, GLenum pname, GLint *params, const char* file, int line);
 #ifndef glGetInternalformati64v
-#define glGetInternalformati64v(target, internalformat, pname, bufSize, params) glatter_glGetInternalformati64v_debug((target), (internalformat), (pname), (bufSize), (params), __FILE__, __LINE__)
+#define glGetInternalformati64v(target, internalformat, pname, count, params) glatter_glGetInternalformati64v_debug((target), (internalformat), (pname), (count), (params), __FILE__, __LINE__)
 #endif
-GLATTER_INLINE_OR_NOT void glatter_glGetInternalformati64v_debug(GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint64 *params, const char* file, int line);
+GLATTER_INLINE_OR_NOT void glatter_glGetInternalformati64v_debug(GLenum target, GLenum internalformat, GLenum pname, GLsizei count, GLint64 *params, const char* file, int line);
 #ifndef glGetObjectLabel
 #define glGetObjectLabel(identifier, name, bufSize, length, label) glatter_glGetObjectLabel_debug((identifier), (name), (bufSize), (length), (label), __FILE__, __LINE__)
 #endif
@@ -12105,9 +12353,9 @@ GLATTER_INLINE_OR_NOT GLint glatter_glGetProgramResourceLocationIndex_debug(GLui
 #endif
 GLATTER_INLINE_OR_NOT void glatter_glGetProgramResourceName_debug(GLuint program, GLenum programInterface, GLuint index, GLsizei bufSize, GLsizei *length, GLchar *name, const char* file, int line);
 #ifndef glGetProgramResourceiv
-#define glGetProgramResourceiv(program, programInterface, index, propCount, props, bufSize, length, params) glatter_glGetProgramResourceiv_debug((program), (programInterface), (index), (propCount), (props), (bufSize), (length), (params), __FILE__, __LINE__)
+#define glGetProgramResourceiv(program, programInterface, index, propCount, props, count, length, params) glatter_glGetProgramResourceiv_debug((program), (programInterface), (index), (propCount), (props), (count), (length), (params), __FILE__, __LINE__)
 #endif
-GLATTER_INLINE_OR_NOT void glatter_glGetProgramResourceiv_debug(GLuint program, GLenum programInterface, GLuint index, GLsizei propCount, const GLenum *props, GLsizei bufSize, GLsizei *length, GLint *params, const char* file, int line);
+GLATTER_INLINE_OR_NOT void glatter_glGetProgramResourceiv_debug(GLuint program, GLenum programInterface, GLuint index, GLsizei propCount, const GLenum *props, GLsizei count, GLsizei *length, GLint *params, const char* file, int line);
 #ifndef glInvalidateBufferData
 #define glInvalidateBufferData(buffer) glatter_glInvalidateBufferData_debug((buffer), __FILE__, __LINE__)
 #endif

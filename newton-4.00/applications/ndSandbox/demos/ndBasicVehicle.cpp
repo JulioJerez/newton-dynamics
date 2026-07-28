@@ -735,7 +735,7 @@ namespace ndMotorVehicle
 
 using namespace ndMotorVehicle;
 
-#if 0
+#if 1
 void ndBasicVehicle (ndDemoEntityManager* const scene)
 {
 	LoadMap(scene);

@@ -33,7 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 GLATTER_INLINE_OR_NOT
-const char* enum_to_string_GLU(GLenum e)
+const char* enum_to_string_GLU(GLATTER_ENUM_GLU e)
 {
     switch (e) {
 #if defined(__glu_h__)

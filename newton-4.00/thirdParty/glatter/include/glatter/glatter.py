@@ -23,13 +23,25 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 '''
 
+import os
+import sys
 
-from unittest import case
-input_root = r'./headers'
-output_dir = r'./platforms'
-platform_headers_file = r'./glatter_platform_headers.h'
+script_dir = os.path.dirname(os.path.realpath(__file__))
 
-families = {'GL':'gl', 'GLX':'glX', 'EGL':'egl', 'GLU':'glu', 'WGL':'wgl', 'khronos_':'khronos_'}
+input_root = os.path.join(script_dir, 'headers')
+output_dir = os.path.join(script_dir, 'platforms')
+platform_headers_file = os.path.join(script_dir, 'glatter_platform_headers.h')
+
+from collections import OrderedDict
+
+families = OrderedDict([
+    ('GL', 'gl'),
+    ('GLX', 'glX'),
+    ('EGL', 'egl'),
+    ('GLU', 'glu'),
+    ('WGL', 'wgl'),
+    ('khronos_', 'khronos_'),
+])
 
 extension_groups = {key: {} for key in families}
 
@@ -67,24 +79,62 @@ windows_typedefs = {
     'DWORD': 'unsigned long',
     'CHAR': 'char',
     'WCHAR': 'wchar_t',
-    'TCHAR': 'WCHAR',
+    # Leave TCHAR unresolved; handle at compile/runtime.
+    'TCHAR': 'TCHAR',
     'FLOAT': 'float',
     'DOUBLE': 'double',
     'COLORREF': 'DWORD'
 }
 
+# Let the parser recognize common Windows string pointer aliases.
+windows_typedefs.update({
+    'LPSTR': 'char*',
+    'LPCSTR': 'const char*',
+    'LPWSTR': 'wchar_t*',
+    'LPCWSTR': 'const wchar_t*',
+    'LPTSTR': 'TCHAR*',
+    'LPCTSTR': 'const TCHAR*',
+})
+
 typedefs = windows_typedefs
 
 known_fnames = {}
 
-import os
-import sys
 import re
 import operator
 import string
 import copy
 import itertools
 import shutil
+
+
+def split_args_top_level(s):
+    args = []
+    current = []
+    depth = 0
+    for ch in s:
+        if ch == '(':
+            depth += 1
+        elif ch == ')':
+            depth -= 1
+        elif ch == ',' and depth == 0:
+            args.append(''.join(current).strip())
+            current = []
+            continue
+        current.append(ch)
+    args.append(''.join(current).strip())
+    return args
+
+config_path = os.path.join(script_dir, 'glatter_config.h')
+try:
+    with open(config_path, 'r', encoding='utf-8') as cfg_file:
+        config_data = cfg_file.read()
+except OSError:
+    config_data = ''
+
+# Honor GLATTER_WINDOWS_MBCS only if explicitly requested before generation.
+if re.search(r'^\s*#\s*define\s+GLATTER_WINDOWS_MBCS\b', config_data, re.MULTILINE):
+    windows_typedefs['TCHAR'] = 'CHAR'
 
 ckwords = ['auto', 'break', 'case', 'char', 'const', 'continue', 'default', 'do', 'double', 'else',
     'enum', 'extern', 'float', 'for', 'goto', 'if', 'inline', 'int', 'long', 'register', 'restrict',
@@ -103,7 +153,7 @@ printable_c_types =  {
     'unsigned short int': '%hu',
     'int': '%d',
     'signed': '%d',
-    'signed int    ': '%d',
+    'signed int': '%d',
     'unsigned': '%u',
     'unsigned int': '%u',
     'long': '%li',
@@ -120,33 +170,33 @@ printable_c_types =  {
     'unsigned long long int': '%llu',
     'float': '%f',
     'double': '%f',
-    'int8_t': '%" PRId8 "',
-    'int16_t': '%" PRId16 "',
-    'int32_t': '%" PRId32 "',
-    'int64_t': '%" PRId64 "',
-    'int_fast8_t': '%" PRIdFAST8 "',
-    'int_fast16_t': '%" PRIdFAST16 "',
-    'int_fast32_t': '%" PRIdFAST32 "',
-    'int_fast64_t': '%" PRIdFAST64 "',
-    'int_least8_t': '%" PRIdLEAST8 "',
-    'int_least16_t': '%" PRIdLEAST16 "',
-    'int_least32_t': '%" PRIdLEAST32 "',
-    'int_least64_t': '%" PRIdLEAST64 "',
-    'uint8_t': '%" PRIu8 "',
-    'uint16_t': '%" PRIu16 "',
-    'uint32_t': '%" PRIu32 "',
-    'uint64_t': '%" PRIu64 "',
-    'uint_fast8_t': '%" PRIuFAST8 "',
-    'uint_fast16_t': '%" PRIuFAST16 "',
-    'uint_fast32_t': '%" PRIuFAST32 "',
-    'uint_fast64_t': '%" PRIuFAST64 "',
-    'uint_least8_t': '%" PRIuLEAST8 "',
-    'uint_least16_t': '%" PRIuLEAST16 "',
-    'uint_least32_t': '%" PRIuLEAST32 "',
-    'uint_least64_t': '%" PRIuLEAST64 "',
-    'intptr_t': '%" PRIxPTR "',
-    'uintptr_t': '%" PRIxPTR "',
-    'size_t': '%zu',
+    'int8_t': '"%" PRId8',
+    'int16_t': '"%" PRId16',
+    'int32_t': '"%" PRId32',
+    'int64_t': '"%" PRId64',
+    'int_fast8_t': '"%" PRIdFAST8',
+    'int_fast16_t': '"%" PRIdFAST16',
+    'int_fast32_t': '"%" PRIdFAST32',
+    'int_fast64_t': '"%" PRIdFAST64',
+    'int_least8_t': '"%" PRIdLEAST8',
+    'int_least16_t': '"%" PRIdLEAST16',
+    'int_least32_t': '"%" PRIdLEAST32',
+    'int_least64_t': '"%" PRIdLEAST64',
+    'uint8_t': '"%" PRIu8',
+    'uint16_t': '"%" PRIu16',
+    'uint32_t': '"%" PRIu32',
+    'uint64_t': '"%" PRIu64',
+    'uint_fast8_t': '"%" PRIuFAST8',
+    'uint_fast16_t': '"%" PRIuFAST16',
+    'uint_fast32_t': '"%" PRIuFAST32',
+    'uint_fast64_t': '"%" PRIuFAST64',
+    'uint_least8_t': '"%" PRIuLEAST8',
+    'uint_least16_t': '"%" PRIuLEAST16',
+    'uint_least32_t': '"%" PRIuLEAST32',
+    'uint_least64_t': '"%" PRIuLEAST64',
+    'intptr_t': '"%" PRIxPTR',
+    'uintptr_t': '"%" PRIxPTR',
+    'size_t': '"%" GLATTER_FMT_ZU',
     'wchar_t': '%lc',
     'ptrdiff_t': '%td'
 }
@@ -159,20 +209,20 @@ comment_pattern = re.compile(
 fm_sbp = '(?P<family>'+ '|'.join(families) + ')'
 fm_sbl = '(?P<fprefix>'+ '|'.join(list(reversed(sorted(families.values())))) + ')'
 familyenum = re.compile(fm_sbp + 'enum$')
-validenum_pattern = re.compile('\w*_BIT[0-9S]?(_[0-9A-Z]+)?$')
-condblock_define_pattern = re.compile('^# ?define (?P<dname>'+fm_sbp+'_\w*) 1')
-condblock_ifndef_pattern = re.compile('^# ?ifndef (?P<dname>'+fm_sbp+'_\w*)')
+validenum_pattern = re.compile(r'\w*_BIT[0-9S]?(?:_[0-9A-Z]+)?$')
+condblock_define_pattern = re.compile(r'^# ?define (?P<dname>' + fm_sbp + r'_\w*) 1')
+condblock_ifndef_pattern = re.compile(r'^# ?ifndef (?P<dname>' + fm_sbp + r'_\w*)')
 headerversion_pattern = re.compile(r'[A-Z0-9]+_VERSION_[0-9]{1,2}_[0-9]{1,2}')
 endif_pattern = re.compile('^ ?# ?endif')
 condblock_any_ifstar = re.compile('^# ?if')
-condblock_any_ifndef = re.compile('^# ?ifndef (?P<dname>\w+)')
+condblock_any_ifndef = re.compile(r'^# ?ifndef (?P<dname>\w+)')
 
-enum_pattern = re.compile('^# ?define ('+fm_sbp+'_\w*) ?(\w*)$')
-function_coarse_pattern = re.compile(r'(.*?[ *]+)('+fm_sbl+'[A-Z]\w+?) ?\( ?(.*?) ?\) ?;')
+enum_pattern = re.compile(r'^# ?define (' + fm_sbp + r'_\w*) ?(\w*)$')
+function_coarse_pattern = re.compile(r'(.*?[ *]+)(' + fm_sbl + r'[A-Z]\w+?) ?\( ?(.*?) ?\) ?;')
 cconv_p = 'CALLBACK|WINAPIV?|APIENTRY|APIPRIVATE|PASCAL|CDECL|_cdecl|__cdecl|__stdcall|__pascal'
 function_fine_pattern = re.compile(r'^((?P<expkw>extern|([A-Z0-9_]*API(CALL)?)?) +)? ?(?P<rt>[\w* ]*?) ?(?P<cconv>\w*('+cconv_p+'))?$')
 function_group_pattern = re.compile(r'\w*[a-z]+(?P<group>[A-Z0-9]{2,10})$')
-typedef_pattern = re.compile(r'^typedef(?P<type>.+?)(?P<name>'+fm_sbp+'\w+);$');
+typedef_pattern = re.compile(r'^typedef(?P<type>.+?)(?P<name>' + fm_sbp + r'\w+);$');
 
 hash_table_size = 0x4000
 
@@ -215,17 +265,28 @@ class Function_argument:
     def __eq__(self, other): 
         return self.type == other.type
 
+    # Order matters: resolve typedefs, handle TCHAR* specially for UTF-8 logging,
+    # then fall back to generic pointer formatting.
     def get_printf_faa(self): ## faa = format and args
         mm = re.match(familyenum, self.type)
         # 1. is api-enum
         if (bool(mm)):
             return ['%s', 'enum_to_string_' + mm.group('family') + '(' + self.name + ')']
-        if self.is_pointer:
-            return ['%p', '(void*)'+self.name]
-
         argtype = self.type
         while argtype in typedefs:
-            argtype = typedefs[argtype]
+            next_type = typedefs[argtype]
+            if next_type == argtype:
+                break
+            argtype = next_type
+        # Handle TCHAR* specially (UNICODE vs. MBCS decided at compile/run time)
+        if re.match(r'^(const\s+)?TCHAR\s*\*$', argtype):
+            return ['%s', 'glatter_pr_tstr(' + self.name + ')']
+
+        if '(' in self.type and '(*' in self.declaration:
+            return ['%p', '(void*)' + self.name]
+
+        if self.is_pointer:
+            return ['%p', '(void*)'+self.name]
 
         if '*' in argtype:
             return ['%p', '(void*)'+self.name]
@@ -301,13 +362,13 @@ def analyze_condition(ppline, former_condition = None):
     if (bool(m)):
         return ['('+m.group('condition')+')']
     #ifdef / #ifndef
-    m = re.match('^# ?if(?P<n>n)?def (?P<dname>\w+)$', ppline)
+    m = re.match(r'^# ?if(?P<n>n)?def (?P<dname>\w+)$', ppline)
     if (bool(m)):
         rlist = []
         mgd = m.group('dname')
         ns = '!' if m.group('n') else ''
         if mgd in conflict_differentiators:
-            for v in conflict_differentiators[mgd]:
+            for v in sorted(conflict_differentiators[mgd]):
                 rlist.append(ns+'defined('+v+')')
         return rlist + [ns+'defined('+mgd+')']
     #else
@@ -351,7 +412,7 @@ def copystack(st):
 def preprocess(file_string):
 
     # remove split lines and comments
-    c0 = re.sub(r'\\\n', '', file_string, re.S | re.M)
+    c0 = re.sub(r'\\\n', '', file_string, flags=re.S | re.M)
     c1 = comment_remover(c0)
 
     # collapse multiple spaces and tabs to single spaces, remove trailing and leading spaces
@@ -377,8 +438,8 @@ def preprocess(file_string):
 
 
 def parse_platform_headers_file():
-    f = open(platform_headers_file, 'r')
-    c3 = preprocess(f.read())
+    with open(platform_headers_file, 'r', encoding='utf-8') as f:
+        c3 = preprocess(f.read())
     c4 = []
 
     #========================#
@@ -402,15 +463,17 @@ def parse_platform_headers_file():
             if platform_block_depth == block_depth:
                 platform_block_depth = -1
 
-        elif (bool(holder.set(re.match('^# ?define GLATTER_PLATFORM_DIR (?P<platform_name>\w+)$', v)))):
+        elif (bool(holder.set(re.match(r'^# ?define GLATTER_PLATFORM_DIR (?P<platform_name>\w+)$', v)))):
             if platform_block_depth != -1:
                 print("Nested platform blocks are not supported.")
                 sys.exit()
             platform_headers.append([holder.get().group('platform_name')])
             platform_block_depth = block_depth
 
-        elif ((platform_block_depth != -1) and bool(holder.set(re.match('^# ?include ["<] ?(?P<file_path>[\w\s\-(.)/ ]+) ?[">]$', v)))):
-            platform_headers[-1].append(holder.get().group('file_path'))
+        elif ((platform_block_depth != -1)
+              and bool(holder.set(re.match(r'^# ?include (?P<delim>["<]) ?(?P<file_path>[\w\s\-(.)/ ]+) ?[">]$', v)))):
+            if holder.get().group('delim') == '"':   # only keep project-relative includes
+                platform_headers[-1].append(holder.get().group('file_path'))
 
     return platform_headers
 
@@ -442,7 +505,7 @@ def parse(filename):
             indstack[-1] = analyze_condition(v, indstack[-1][0])
 
         elif (bool(re.match('^# ?define ', v))):
-            m = re.match('^# ?define (?P<what>\w+)( (?P<as>\w+)$)?', v)
+            m = re.match(r'^# ?define (?P<what>\w+)( (?P<as>\w+)$)?', v)
             mg_what = m.group('what')
             mg_as = m.group('as')
             for k in indstack:
@@ -451,7 +514,7 @@ def parse(filename):
                     if mg_as != None and mg_as != '1':
                         indstack[-1].append('('+m.group('what')+'=='+m.group('as')+')')
             if mg_as == '1':
-                m = re.match('^(?P<family>[A-Z]+)_(?P<group>[A-Z0-9]+)_\w+$', mg_what)
+                m = re.match(r'^(?P<family>[A-Z]+)_(?P<group>[A-Z0-9]+)_\w+$', mg_what)
                 if bool(m) and (m.group('family') in families) and (m.group('group') in all_extgroups) and bool(re.match('^# ?ifndef '+mg_what+'$', c3[i-1])):
                     h = hash_djb2(mg_what)
                     h_short = h & (hash_table_size-1)
@@ -470,10 +533,10 @@ def parse(filename):
         if (bool(m) and validate_enum(m.group(1)) != ''):
             try:
                 value = int(m.group(3), 0)
-                
+
                 if ((value >= 0x100 and value < 0x20000) or m.group(1) in out_of_range_enums):
                     name = m.group(1)
-                    family = m.group(2)
+                    family = m.group('family')
                     eblock = d[1][-1] #if d[1] != None else hcr(header_guard)
                     
                     if (family not in enum_to_string):
@@ -542,7 +605,7 @@ def parse(filename):
             all_extgroups[egroup] += 1
             tmp.extension_group = egroup
 
-            arglist_coarse = m.group(4).split(",")
+            arglist_coarse = split_args_top_level(m.group(4))
             arglist_fine = []
             for i, y in enumerate(arglist_coarse):
                 arg = Function_argument()
@@ -551,41 +614,50 @@ def parse(filename):
                     continue
                 arg.is_pointer = '*' in arg.declaration
 
-                # place lindex, rindex at the beginning and at the end of the string accordingly.
-                lindex = 0
-                rindex = len(arg.declaration)
+                m_fp = re.search(r'\(\s*(?:\w+\s+)?\*+\s*([A-Za-z_]\w*)\s*\)', arg.declaration)
+                if m_fp:
+                    arg.name = m_fp.group(1)
+                    arg.type = arg.declaration.replace(arg.name, '', 1).strip()
+                    if not arg.type:
+                        arg.type = 'UNKNOWN TYPE'
+                else:
+                    # place lindex, rindex at the beginning and at the end of the string accordingly.
+                    lindex = 0
+                    rindex = len(arg.declaration)
 
-                # place rindex before the first closing parenthesis
-                if ')' in arg.declaration:
-                    rindex = arg.declaration.index(')')
+                    # place rindex before the first closing parenthesis
+                    if ')' in arg.declaration:
+                        rindex = arg.declaration.index(')')
 
-                # place rindex before the first opening angle bracket
-                if '[' in arg.declaration:
-                    rindex = arg.declaration.index('[')
+                    # place rindex before the first opening angle bracket
+                    if '[' in arg.declaration:
+                        rindex = arg.declaration.index('[')
 
-                # place lindex after the last *
-                if '*' in arg.declaration:
-                    lindex = arg.declaration.rindex('*')
+                    # place lindex after the last *
+                    if '*' in arg.declaration:
+                        lindex = arg.declaration.rindex('*')
 
-                s1 = arg.declaration[lindex:rindex]
-                s1 = s1.rstrip()
+                    s1 = arg.declaration[lindex:rindex]
+                    s1 = s1.rstrip()
 
-                for mm in re.finditer(r'([A-Za-z]+\w*)', s1):
-                    pass
-                lindex += mm.start()
+                    matches = list(re.finditer(r'([A-Za-z]+\w*)', s1))
+                    if matches:
+                        lindex += matches[-1].start()
 
-                arg.name = arg.declaration[lindex:rindex]
-                
-                arg.type = 'UNKNOWN TYPE'
-                if (len(arg.declaration) == rindex):
-                    arg.type = arg.declaration[0:lindex].strip()
+                    arg.name = arg.declaration[lindex:rindex]
 
-                #if the argument has no name, we assign a name to it
-                if rindex - lindex < 1:
-                    arg.name = 'a'+str(i)
-                    dfinal = arg.declaration[:lindex] + arg.name + arg.declaration[rindex:]
-                    rindex += len(arg.name)
-                    arg.declaration = dfinal
+                    arg.type = 'UNKNOWN TYPE'
+                    if (len(arg.declaration) == rindex):
+                        arg.type = arg.declaration[0:lindex].strip()
+
+                    #if the argument has no name, we assign a name to it
+                    if not arg.declaration[lindex:rindex].strip():
+                        arg.name = 'a'+str(i)
+                        dfinal = arg.declaration[:lindex] + arg.name + arg.declaration[rindex:]
+                        rindex += len(arg.name)
+                        arg.declaration = dfinal
+                        if (len(arg.declaration) == rindex):
+                            arg.type = arg.declaration[0:lindex].strip()
 
                 #arg.name_range = (lindex, rindex)
                 arglist_fine.append(arg)
@@ -688,7 +760,7 @@ def get_function_mdnd(family): #macros, declarations and definitions
             s1 = set(sfd0[w[1]].block)
             if s0 < s1:
                 ds = s1 - s0
-                for x in ds:
+                for x in sorted(ds):
                     sfd0[w[0]].block.append(('!'+x) if x[0]!='!' else x[1:])
             elif s0==s1:
                 indices_for_deletion.add(min(w[0], w[1]))
@@ -701,6 +773,16 @@ def get_function_mdnd(family): #macros, declarations and definitions
 // header guard ''' + v.block[0][8:-1] + ''' was found to be potentially conflicting,
 // thus was omitted.'''
         else:
+            # Skip wrapping resolver entry points to avoid macro recursion and
+            # standards-incompatible signatures (e.g., unnamed params in headers).
+            resolver_denylist = {
+                'glXGetProcAddressARB',
+                'glXGetProcAddress',
+                'eglGetProcAddress',
+                'wglGetProcAddress',
+            }
+            if v.name in resolver_denylist:
+                continue
             sfd.append(v)
 
 
@@ -790,6 +872,11 @@ def get_function_mdnd(family): #macros, declarations and definitions
         df_def = df_dec[:-1] + '''
 {
     GLATTER_DBLOCK(file, line, ''' + x.name + ', "(' + a6s[0] + ')"' + printf_va_args + ')'
+        if x.family == 'WGL':
+            # NOTE: We clear LastError *after* GLATTER_DBLOCK so any Windows calls made by logging
+            # cannot taint the error we attribute to the WGL call. Do not move this higher.
+            df_def += '''
+    SetLastError(0);'''
         if (x.rtype not in ['void', 'VOID']):
             rarg = Function_argument()
             rarg.name = 'rval'
@@ -857,6 +944,7 @@ def get_function_mdnd(family): #macros, declarations and definitions
 def get_enum_to_string(family):
     if family not in enum_to_string:
         return
+    enum_typedef = 'GLATTER_ENUM_' + family
     rv = '''
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -864,7 +952,7 @@ def get_enum_to_string(family):
 #endif
 
 GLATTER_INLINE_OR_NOT
-const char* enum_to_string_''' + family  + '''(GLenum e)
+const char* enum_to_string_''' + family  + '''(''' + '''%s''' % enum_typedef + ''' e)
 {
     switch (e) {\n'''
     sorted_ets = sorted(enum_to_string[family].items(), key=lambda x: x[0] )
@@ -874,13 +962,15 @@ const char* enum_to_string_''' + family  + '''(GLenum e)
 
     for x in sorted_ets:
         inv_d = {}
-        for y in x[1]:
+        for y in sorted(x[1]):
             if y == '':
                 continue
-            for z in x[1][y]:
+            for z in sorted(x[1][y]):
                 if (not z in inv_d):
                     inv_d[z] = []
                 inv_d[z].append(y)
+        for key in inv_d:
+            inv_d[key].sort()
         if len(inv_d) == 1:
             ifb = '''\
 #if ''' + ' || '.join(map(str, next(iter(inv_d.values()))))
@@ -934,6 +1024,9 @@ def get_ext_support_decl(v):
         return
 
     rv = '''
+#ifndef GLATTER_LOOKUP_SIZE
+#define GLATTER_LOOKUP_SIZE ''' + hex(hash_table_size) + '''
+#endif
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -964,7 +1057,7 @@ def get_ext_support_def(v):
 
     hts = ''
     ht = ['0'] * hash_table_size;
-    for x in ext_hash_to_full_hash[v]:
+    for x in sorted(ext_hash_to_full_hash[v]):
         ht[x] = 'e' + '{:x}'.format(x)
     for idx, val in enumerate(ht):
         hts += str(val) + ',' + ('\n        ' if (((idx+1) % 30) == 0) else '')
@@ -972,11 +1065,57 @@ def get_ext_support_def(v):
     rv = '''
 #include <string.h> /* memcpy */
 
+/* ---- Per-context, per-thread extension support cache (generated) ---- */
+#ifndef GLATTER_ES_CACHE_SLOTS
+#define GLATTER_ES_CACHE_SLOTS 8
+#endif
+
+typedef struct {
+    uintptr_t key; /* context key from glatter_current_gl_context_key_() */
+    glatter_extension_support_status_''' + v + '''_t ess;
+} glatter_es_cache_entry_''' + v + '''_t;
+
+static GLATTER_THREAD_LOCAL glatter_es_cache_entry_''' + v + '''_t
+    glatter_es_cache_''' + v + '''[GLATTER_ES_CACHE_SLOTS];
+
+static GLATTER_THREAD_LOCAL unsigned glatter_es_cache_pos_''' + v + ''' = 0;
+
+/* Optional: public invalidation for this family. */
+GLATTER_INLINE_OR_NOT void glatter_invalidate_extension_cache_''' + v + '''(void) {
+    for (unsigned i = 0; i < GLATTER_ES_CACHE_SLOTS; ++i) {
+        glatter_es_cache_''' + v + '''[i].key = (uintptr_t)0;
+    }
+}
+
 GLATTER_INLINE_OR_NOT
 glatter_extension_support_status_''' + v + '''_t glatter_get_extension_support_''' + v + '''()
 {
-    static int indexed_extensions[''' + str(len(ext_names_sorted[v])) + '''];
-    static glatter_extension_support_status_''' + v + '''_t ess;
+    /* Per-thread scratch array to build the bitset before mapping into ess. */
+    static GLATTER_THREAD_LOCAL int indexed_extensions[''' + str(len(ext_names_sorted[v])) + '''];
+
+    /* Local result object (returned by value). */
+    glatter_extension_support_status_''' + v + '''_t ess; /* will be filled then returned */
+    memset(&ess, 0, sizeof(ess));
+
+    /* 1) Compute a key for the current context; 0 means "no current context". */
+    uintptr_t ctx_key = glatter_current_gl_context_key_();
+
+    /* 2) If no current context, return zeros without touching the cache. */
+    if (ctx_key == (uintptr_t)0) {
+        /* Leave ess zero-initialized to indicate "no extensions known". */
+        return ess;
+    }
+
+    /* 3) Cache lookup (TLS ring of 8 entries). */
+    for (unsigned i = 0; i < GLATTER_ES_CACHE_SLOTS; ++i) {
+        if (glatter_es_cache_''' + v + '''[i].key == ctx_key) {
+            return glatter_es_cache_''' + v + '''[i].ess; /* HIT */
+        }
+    }
+
+    /* 4) MISS: (re)build indexed_extensions[...] for the *current* context. */
+    /* Ensure scratch is cleared before probing. */
+    memset(indexed_extensions, 0, sizeof(indexed_extensions));
 
     typedef glatter_es_record_t rt;
 #ifdef __cplusplus
@@ -984,9 +1123,13 @@ glatter_extension_support_status_''' + v + '''_t glatter_get_extension_support_'
 #else
 #define zrt {0, 0}
 #endif
-''' + '\n'.join(['    static rt e' +   '{: <4x}'.format(x)  + '[] = {{' + '}, {'.join(
-        str([y, ext_hash_to_full_hash[v][x][y]]).translate({ord(c): None for c in '[]'}) \
-            for y in ext_hash_to_full_hash[v][x]) + '}, zrt};' for x in ext_hash_to_full_hash[v]]) + '''
+''' + '\n'.join([
+        '    static rt e' + '{: <4x}'.format(x) + '[] = {{' + '}, {'.join(
+            str([y, ext_hash_to_full_hash[v][x][y]]).translate({ord(c): None for c in '[]'})
+            for y in sorted(ext_hash_to_full_hash[v][x])
+        ) + '}, zrt};'
+        for x in sorted(ext_hash_to_full_hash[v])
+    ]) + '''
 
 #ifndef __cplusplus
 #undef zrt
@@ -997,17 +1140,22 @@ glatter_extension_support_status_''' + v + '''_t glatter_get_extension_support_'
     };
 
 
-    static int initialized = 0;
-    if (!initialized) {
 '''
     if (v == 'GL'):
         rv += '''
-        const uint8_t* glv = (const uint8_t*)glatter_glGetString(GL_VERSION);
+        const uint8_t* glv = NULL;
+        if (glatter_get_proc_address_GL("glGetString")) {
+            glv = (const uint8_t*)glatter_glGetString(GL_VERSION);
+        }
         int new_way = 0;
-        if (glv) {
-            // if this fails, something might be wrong with the implementation
-            assert((int)glv[0] > 48 && (int)glv[0] < 58);
-            new_way = (int)glv[0] > 50; // i.e. gl version is 3 or higher
+        if (!glv) {
+            return ess;
+        }
+        if (glv[0] < '0' || glv[0] > '9') {
+            new_way = 0;
+        }
+        else {
+            new_way = glv[0] > '2'; // i.e. gl version is 3 or higher
         }
 
 #ifdef GL_NUM_EXTENSIONS
@@ -1038,7 +1186,7 @@ glatter_extension_support_status_''' + v + '''_t glatter_get_extension_support_'
 #endif
             uint32_t hash = 5381;
             const uint8_t* ext_str = (const uint8_t*)glatter_glGetString(GL_EXTENSIONS);
-            for ( ; *ext_str; ext_str++) {
+            for ( ; ext_str && *ext_str; ext_str++) {
                 if (*ext_str == ' ') {
                     int index = -1;
                     rt* r = es_dispatch[ hash & (GLATTER_LOOKUP_SIZE-1) ];
@@ -1062,7 +1210,7 @@ glatter_extension_support_status_''' + v + '''_t glatter_get_extension_support_'
                 hash = ((hash << 5) + hash) + (int)(*ext_str);
 
             }
-            if (hash != 5381) {
+            if (ext_str && hash != 5381) {
                 int index = -1;
                 rt* r = es_dispatch[ hash & (GLATTER_LOOKUP_SIZE-1) ];
                 for ( ; r && (r->hash | r->index); r++ ) {
@@ -1084,17 +1232,24 @@ glatter_extension_support_status_''' + v + '''_t glatter_get_extension_support_'
         if (v == 'GLX'):
             estring_acquisition = '''
         Display* d = glXGetCurrentDisplay();
-        const uint8_t* ext_str = (const uint8_t*)glatter_glXQueryExtensionsString(d, DefaultScreen(d));'''
+        const uint8_t* ext_str = d ? (const uint8_t*)glatter_glXQueryExtensionsString(d, DefaultScreen(d)) : NULL;'''
         elif (v == 'WGL'):
             estring_acquisition = '''
-        const uint8_t* ext_str = (const uint8_t*)glatter_wglGetExtensionsStringEXT();'''
+        const uint8_t* ext_str = NULL;
+        if (glatter_wglGetExtensionsStringEXT) {
+            ext_str = (const uint8_t*)glatter_wglGetExtensionsStringEXT();
+        }
+        if (!ext_str && glatter_wglGetExtensionsStringARB) {
+            HDC dc = wglGetCurrentDC();
+            ext_str = dc ? (const uint8_t*)glatter_wglGetExtensionsStringARB(dc) : NULL;
+        }'''
         elif (v == 'EGL'):
             estring_acquisition = '''
         const uint8_t* ext_str = (const uint8_t*)glatter_eglQueryString(eglGetCurrentDisplay(), EGL_EXTENSIONS);'''
 
         rv += '''
         uint32_t hash = 5381;''' + estring_acquisition + '''
-        for ( ; *ext_str; ext_str++) {
+        for ( ; ext_str && *ext_str; ext_str++) {
             if (*ext_str == ' ') {
                 int index = -1;
                 rt* r = es_dispatch[ hash & (GLATTER_LOOKUP_SIZE-1) ];
@@ -1118,7 +1273,7 @@ glatter_extension_support_status_''' + v + '''_t glatter_get_extension_support_'
             hash = ((hash << 5) + hash) + (int)(*ext_str);
 
         }
-        if (hash != 5381) {
+        if (ext_str && hash != 5381) {
             int index = -1;
             rt* r = es_dispatch[ hash & (GLATTER_LOOKUP_SIZE-1) ];
             for ( ; r && (r->hash | r->index); r++ ) {
@@ -1131,15 +1286,17 @@ glatter_extension_support_status_''' + v + '''_t glatter_get_extension_support_'
             if (index == -1) {
                 // (3)
             }
-        }'''
+        }
+        '''
 
     rv += '''
-        initialized = 1;
-    }
-    
     // Map array to a struct without undefined behaviour.
     // No actual copy is performed with even basic optimization e.g.: -Og
-    memcpy((void*)&ess, indexed_extensions, sizeof(ess)); 
+    memcpy((void*)&ess, indexed_extensions, sizeof(ess));
+
+    glatter_es_cache_''' + v + '''[glatter_es_cache_pos_''' + v + '''].key = ctx_key;
+    glatter_es_cache_''' + v + '''[glatter_es_cache_pos_''' + v + '''].ess = ess;
+    glatter_es_cache_pos_''' + v + ''' = (glatter_es_cache_pos_''' + v + ''' + 1) % GLATTER_ES_CACHE_SLOTS;
 
     return ess;
 }
@@ -1164,10 +1321,11 @@ for platform in platform_headers:
     print('Header list for platform ', platform[0], ':', sep='')
     for header in platform[1:]:
         print('   ', header)
-        if not os.path.exists(header):
-            print('        ERROR: the file was not found')
-        else:    
-            platform_headers_filtered[-1].append(header)
+        abs_header = header if os.path.isabs(header) else os.path.join(script_dir, header)
+        if not os.path.exists(abs_header):
+            sys.stderr.write(f"error: missing input header {header}\n")
+            sys.exit(2)
+        platform_headers_filtered[-1].append(abs_header)
     print()
 platform_headers = platform_headers_filtered
 
@@ -1195,6 +1353,16 @@ for platform in platform_headers:
             for idx, val in enumerate(ext_names_sorted[x]):
                 h = hash_djb2(val)
                 ext_hash_to_full_hash[x][ext_name_to_hash[x][val]][h] = idx
+
+    seen_hashes = {}
+    for fam, names in ext_names_sorted.items():
+        for nm in names:
+            h = hash_djb2(nm)
+            if h in seen_hashes and seen_hashes[h] != nm:
+                print("WARNING: full djb2 hash collision between %s and %s in %s" % (
+                    seen_hashes[h], nm, fam))
+            else:
+                seen_hashes[h] = nm
 
 
     # GENERATE OUTPUT FILES

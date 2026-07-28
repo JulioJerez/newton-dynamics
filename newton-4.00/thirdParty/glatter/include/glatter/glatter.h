@@ -26,8 +26,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef GLATTER_H_DEFINED
 #define GLATTER_H_DEFINED
 
+#include <inttypes.h>
+
 #include "glatter_config.h"
 #include "glatter_platform_headers.h"
+
+#if defined(__cplusplus) && __cplusplus >= 201103L
+#include <atomic>
+#endif
 
 #ifdef __cplusplus
 
@@ -35,10 +41,24 @@ extern "C" {
 
 #elif defined (GLATTER_HEADER_ONLY)
 
-    // this can be modified in glatter_config.h
+    // Header-only mode requires C++ (function-local statics). Non-negotiable.
     #error GLATTER_HEADER_ONLY can only be used in C++
 
 #endif //__cplusplus
+
+#ifndef GLATTER_WSI_AUTO_VALUE
+#define GLATTER_WSI_AUTO_VALUE 0
+#define GLATTER_WSI_WGL_VALUE  1
+#define GLATTER_WSI_GLX_VALUE  2
+#define GLATTER_WSI_EGL_VALUE  3
+#endif
+
+enum {
+    GLATTER_WSI_AUTO = GLATTER_WSI_AUTO_VALUE,
+    GLATTER_WSI_WGL  = GLATTER_WSI_WGL_VALUE,
+    GLATTER_WSI_GLX  = GLATTER_WSI_GLX_VALUE,
+    GLATTER_WSI_EGL  = GLATTER_WSI_EGL_VALUE
+};
 
 
 
@@ -57,7 +77,9 @@ extern "C" {
 #endif
 
 #if defined(GLATTER_EGL)
-	#include GLATTER_xstr(GLATTER_PDIR(GLATTER_PLATFORM_DIR)/glatter_EGL_ges_decl.h)
+#if GLATTER_HAS_EGL_GENERATED_HEADERS
+        #include GLATTER_xstr(GLATTER_PDIR(GLATTER_PLATFORM_DIR)/glatter_EGL_ges_decl.h)
+#endif
 #endif
 
 #if defined(GLATTER_WGL)
@@ -67,10 +89,11 @@ extern "C" {
 
 
 #ifdef GLATTER_HEADER_ONLY
+    /* Do not link libglatter (glatter.c) when GLATTER_HEADER_ONLY is used. */
 
     #include "glatter_def.h"
 
-    #if defined(GLATTER_LOG_ERRORS) || defined(GLATTER_LOG_ERRORS)
+    #if defined(GLATTER_LOG_ERRORS) || defined(GLATTER_LOG_CALLS)
         #define GLATTER_UBLOCK(rtype, cconv, name, dargs)\
             typedef rtype (cconv *glatter_##name##_t) dargs;\
             extern glatter_##name##_t glatter_##name;
@@ -84,6 +107,8 @@ extern "C" {
     typedef rtype (cconv *glatter_##name##_t) dargs;\
     extern glatter_##name##_t glatter_##name;
 
+void glatter_set_log_handler(void(*handler_ptr)(const char*));
+
 #endif
 
 
@@ -91,29 +116,34 @@ extern "C" {
 #define GLATTER_INLINE_OR_NOT
 #endif
 
+GLATTER_INLINE_OR_NOT void  glatter_set_wsi(int wsi);
+GLATTER_INLINE_OR_NOT int   glatter_get_wsi(void);
+GLATTER_INLINE_OR_NOT void* glatter_get_proc_address(const char* function_name);
+GLATTER_INLINE_OR_NOT void  glatter_bind_owner_to_current_thread(void);
+
 
 #if defined(GLATTER_GL)
     GLATTER_INLINE_OR_NOT glatter_extension_support_status_GL_t  glatter_get_extension_support_GL();
-    GLATTER_INLINE_OR_NOT const char* enum_to_string_GL(GLenum e);
+    GLATTER_INLINE_OR_NOT const char* enum_to_string_GL(GLATTER_ENUM_GL e);
 #endif
 
 #if defined(GLATTER_GLX)
     GLATTER_INLINE_OR_NOT glatter_extension_support_status_GLX_t glatter_get_extension_support_GLX();
-    GLATTER_INLINE_OR_NOT const char* enum_to_string_GLX(GLenum e);
+    GLATTER_INLINE_OR_NOT const char* enum_to_string_GLX(GLATTER_ENUM_GLX e);
 #endif
 
 #if defined(GLATTER_EGL)
     GLATTER_INLINE_OR_NOT glatter_extension_support_status_EGL_t glatter_get_extension_support_EGL();
-    GLATTER_INLINE_OR_NOT const char* enum_to_string_WGL(GLenum e);
+    GLATTER_INLINE_OR_NOT const char* enum_to_string_EGL(GLATTER_ENUM_EGL e);
 #endif
 
 #if defined(GLATTER_WGL)
     GLATTER_INLINE_OR_NOT glatter_extension_support_status_WGL_t glatter_get_extension_support_WGL();
-    GLATTER_INLINE_OR_NOT const char* enum_to_string_EGL(GLenum e);
+    GLATTER_INLINE_OR_NOT const char* enum_to_string_WGL(GLATTER_ENUM_WGL e);
 #endif
     
 #if defined (GLATTER_GLU)
-    GLATTER_INLINE_OR_NOT const char* enum_to_string_GLU(GLenum e);
+    GLATTER_INLINE_OR_NOT const char* enum_to_string_GLU(GLATTER_ENUM_GLU e);
 #endif
 
 
@@ -127,7 +157,7 @@ extern "C" {
         #include GLATTER_xstr(GLATTER_PDIR(GLATTER_PLATFORM_DIR)/glatter_GLX_d.h)
     #endif
 
-    #if defined(GLATTER_EGL)
+    #if defined(GLATTER_EGL) && GLATTER_HAS_EGL_GENERATED_HEADERS
         #include GLATTER_xstr(GLATTER_PDIR(GLATTER_PLATFORM_DIR)/glatter_EGL_d.h)
     #endif
 
@@ -149,7 +179,7 @@ extern "C" {
         #include GLATTER_xstr(GLATTER_PDIR(GLATTER_PLATFORM_DIR)/glatter_GLX_r.h)
     #endif
 
-    #if defined(GLATTER_EGL)
+    #if defined(GLATTER_EGL) && GLATTER_HAS_EGL_GENERATED_HEADERS
         #include GLATTER_xstr(GLATTER_PDIR(GLATTER_PLATFORM_DIR)/glatter_EGL_r.h)
     #endif
 
@@ -162,6 +192,8 @@ extern "C" {
     #endif
 
 #endif
+
+#include "glatter_qt_compat.h"
 
 
 #ifdef __cplusplus

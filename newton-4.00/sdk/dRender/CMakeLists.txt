@@ -45,6 +45,7 @@ elseif(WIN32 OR UNIX)
 	include_directories(../../thirdParty/glfw/)
 	include_directories(../../thirdParty/glfw/include/)
 	include_directories(../../thirdParty/glatter/include/glatter/)
+	include_directories(../../thirdParty/glatter/include/glatter/headers/khronos_gl)
 	
 	file(GLOB CPP_SOURCE 
 		*.h

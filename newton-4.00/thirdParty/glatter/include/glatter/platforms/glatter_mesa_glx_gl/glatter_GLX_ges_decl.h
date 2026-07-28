@@ -27,6 +27,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
+#ifndef GLATTER_LOOKUP_SIZE
+#define GLATTER_LOOKUP_SIZE 0x4000
+#endif
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -51,10 +54,12 @@ typedef struct glatter_extension_support_status_GLX
         int has_GLX_ARB_robustness_share_group_isolation;
         int has_GLX_ARB_vertex_buffer_object;
         int has_GLX_EXT_buffer_age;
+        int has_GLX_EXT_context_priority;
         int has_GLX_EXT_create_context_es2_profile;
         int has_GLX_EXT_create_context_es_profile;
         int has_GLX_EXT_fbconfig_packed_float;
         int has_GLX_EXT_framebuffer_sRGB;
+        int has_GLX_EXT_get_drawable_type;
         int has_GLX_EXT_import_context;
         int has_GLX_EXT_libglvnd;
         int has_GLX_EXT_no_config_context;
@@ -77,6 +82,7 @@ typedef struct glatter_extension_support_status_GLX
         int has_GLX_NV_copy_image;
         int has_GLX_NV_delay_before_swap;
         int has_GLX_NV_float_buffer;
+        int has_GLX_NV_multigpu_context;
         int has_GLX_NV_multisample_coverage;
         int has_GLX_NV_present_video;
         int has_GLX_NV_robustness_video_memory_purge;
@@ -126,10 +132,12 @@ typedef struct glatter_extension_support_status_GLX
 #define glatter_GLX_ARB_robustness_share_group_isolation glatter_get_extension_support_GLX().has_GLX_ARB_robustness_share_group_isolation
 #define glatter_GLX_ARB_vertex_buffer_object glatter_get_extension_support_GLX().has_GLX_ARB_vertex_buffer_object
 #define glatter_GLX_EXT_buffer_age glatter_get_extension_support_GLX().has_GLX_EXT_buffer_age
+#define glatter_GLX_EXT_context_priority glatter_get_extension_support_GLX().has_GLX_EXT_context_priority
 #define glatter_GLX_EXT_create_context_es2_profile glatter_get_extension_support_GLX().has_GLX_EXT_create_context_es2_profile
 #define glatter_GLX_EXT_create_context_es_profile glatter_get_extension_support_GLX().has_GLX_EXT_create_context_es_profile
 #define glatter_GLX_EXT_fbconfig_packed_float glatter_get_extension_support_GLX().has_GLX_EXT_fbconfig_packed_float
 #define glatter_GLX_EXT_framebuffer_sRGB glatter_get_extension_support_GLX().has_GLX_EXT_framebuffer_sRGB
+#define glatter_GLX_EXT_get_drawable_type glatter_get_extension_support_GLX().has_GLX_EXT_get_drawable_type
 #define glatter_GLX_EXT_import_context glatter_get_extension_support_GLX().has_GLX_EXT_import_context
 #define glatter_GLX_EXT_libglvnd glatter_get_extension_support_GLX().has_GLX_EXT_libglvnd
 #define glatter_GLX_EXT_no_config_context glatter_get_extension_support_GLX().has_GLX_EXT_no_config_context
@@ -152,6 +160,7 @@ typedef struct glatter_extension_support_status_GLX
 #define glatter_GLX_NV_copy_image glatter_get_extension_support_GLX().has_GLX_NV_copy_image
 #define glatter_GLX_NV_delay_before_swap glatter_get_extension_support_GLX().has_GLX_NV_delay_before_swap
 #define glatter_GLX_NV_float_buffer glatter_get_extension_support_GLX().has_GLX_NV_float_buffer
+#define glatter_GLX_NV_multigpu_context glatter_get_extension_support_GLX().has_GLX_NV_multigpu_context
 #define glatter_GLX_NV_multisample_coverage glatter_get_extension_support_GLX().has_GLX_NV_multisample_coverage
 #define glatter_GLX_NV_present_video glatter_get_extension_support_GLX().has_GLX_NV_present_video
 #define glatter_GLX_NV_robustness_video_memory_purge glatter_get_extension_support_GLX().has_GLX_NV_robustness_video_memory_purge

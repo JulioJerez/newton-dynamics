@@ -67,7 +67,7 @@ GLATTER_UBLOCK(UINT, WINAPI, wglGetGPUIDsAMD, (UINT maxCount, UINT *ids))
 #ifndef wglGetGPUInfoAMD
 #define wglGetGPUInfoAMD(id, property, dataType, size, data) glatter_wglGetGPUInfoAMD((id), (property), (dataType), (size), (data))
 #endif
-GLATTER_UBLOCK(INT, WINAPI, wglGetGPUInfoAMD, (UINT id, int property, GLenum dataType, UINT size, void *data))
+GLATTER_UBLOCK(INT, WINAPI, wglGetGPUInfoAMD, (UINT id, INT property, GLenum dataType, UINT size, void *data))
 #ifndef wglMakeAssociatedContextCurrentAMD
 #define wglMakeAssociatedContextCurrentAMD(hglrc) glatter_wglMakeAssociatedContextCurrentAMD((hglrc))
 #endif
@@ -445,13 +445,13 @@ GLATTER_UBLOCK(BOOL, WINAPI, wglEnumGpusNV, (UINT iGpuIndex, HGPUNV *phGpu))
 #endif // defined(WGL_NV_gpu_affinity)
 #if defined(WGL_NV_present_video)
 #ifndef wglBindVideoDeviceNV
-#define wglBindVideoDeviceNV(hDC, uVideoSlot, hVideoDevice, piAttribList) glatter_wglBindVideoDeviceNV((hDC), (uVideoSlot), (hVideoDevice), (piAttribList))
+#define wglBindVideoDeviceNV(hDc, uVideoSlot, hVideoDevice, piAttribList) glatter_wglBindVideoDeviceNV((hDc), (uVideoSlot), (hVideoDevice), (piAttribList))
 #endif
-GLATTER_UBLOCK(BOOL, WINAPI, wglBindVideoDeviceNV, (HDC hDC, unsigned int uVideoSlot, HVIDEOOUTPUTDEVICENV hVideoDevice, const int *piAttribList))
+GLATTER_UBLOCK(BOOL, WINAPI, wglBindVideoDeviceNV, (HDC hDc, unsigned int uVideoSlot, HVIDEOOUTPUTDEVICENV hVideoDevice, const int *piAttribList))
 #ifndef wglEnumerateVideoDevicesNV
-#define wglEnumerateVideoDevicesNV(hDC, phDeviceList) glatter_wglEnumerateVideoDevicesNV((hDC), (phDeviceList))
+#define wglEnumerateVideoDevicesNV(hDc, phDeviceList) glatter_wglEnumerateVideoDevicesNV((hDc), (phDeviceList))
 #endif
-GLATTER_UBLOCK(int, WINAPI, wglEnumerateVideoDevicesNV, (HDC hDC, HVIDEOOUTPUTDEVICENV *phDeviceList))
+GLATTER_UBLOCK(int, WINAPI, wglEnumerateVideoDevicesNV, (HDC hDc, HVIDEOOUTPUTDEVICENV *phDeviceList))
 #ifndef wglQueryCurrentContextNV
 #define wglQueryCurrentContextNV(iAttribute, piValue) glatter_wglQueryCurrentContextNV((iAttribute), (piValue))
 #endif
@@ -557,7 +557,7 @@ GLATTER_UBLOCK(INT64, WINAPI, wglSwapBuffersMscOML, (HDC hdc, INT64 target_msc, 
 #ifndef wglSwapLayerBuffersMscOML
 #define wglSwapLayerBuffersMscOML(hdc, fuPlanes, target_msc, divisor, remainder) glatter_wglSwapLayerBuffersMscOML((hdc), (fuPlanes), (target_msc), (divisor), (remainder))
 #endif
-GLATTER_UBLOCK(INT64, WINAPI, wglSwapLayerBuffersMscOML, (HDC hdc, int fuPlanes, INT64 target_msc, INT64 divisor, INT64 remainder))
+GLATTER_UBLOCK(INT64, WINAPI, wglSwapLayerBuffersMscOML, (HDC hdc, INT fuPlanes, INT64 target_msc, INT64 divisor, INT64 remainder))
 #ifndef wglWaitForMscOML
 #define wglWaitForMscOML(hdc, target_msc, divisor, remainder, ust, msc, sbc) glatter_wglWaitForMscOML((hdc), (target_msc), (divisor), (remainder), (ust), (msc), (sbc))
 #endif
