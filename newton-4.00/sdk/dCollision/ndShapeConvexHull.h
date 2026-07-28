@@ -38,6 +38,12 @@ class ndShapeConvexHull : public ndShapeConvex
 
 	virtual ndShapeConvexHull* GetAsShapeConvexHull() override { return this; }
 
+	// Returns false when the source points were degenerate (e.g. coplanar,
+	// collinear, or duplicated) and Create() could not build a valid hull.
+	// Callers must check this before using the shape; a degenerate hull has
+	// no vertices/faces and will crash later if used as-is.
+	bool IsValid() const { return m_faceCount > 0; }
+
 	protected:
 	D_COLLISION_API ndShapeInfo GetShapeInfo() const override;
 	D_COLLISION_API ndUnsigned64 GetHash(ndUnsigned64 hash) const override;
