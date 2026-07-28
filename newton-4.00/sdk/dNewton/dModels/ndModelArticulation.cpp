@@ -898,7 +898,7 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 			else 
 			{
 				const ndSharedPtr<ndMeshJoint>& meshJoint = meshNode->GetJoint();
-				if (!meshJoint->GetSurrogateParent())
+				if (*meshJoint && !meshJoint->GetSurrogateParent())
 				{
 					ndSharedPtr<ndBody> body(meshNode->GetRigidBody()->CreateObject());
 					const ndMesh* parentMesh = meshNode->GetParent();
@@ -923,24 +923,27 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 	};
 	((ndMesh*)rootNode)->NodeIterator(BuildHiearchy);
 
-	while (sorrugatesNodes.GetCount())
+	//while (sorrugatesNodes.GetCount())
 	{
 		for (ndInt32 i = sorrugatesNodes.GetCount() - 1; i >= 0; --i)
 		{
-			const ndMesh* const surrogateMeshNode = sorrugatesNodes[i]->GetJoint()->GetSurrogateParent();
-			ndModelArticulation::ndNode* parentNode = FindByName(surrogateMeshNode->GetName().GetStr());
-			if (parentNode)
+			const ndMesh* const surrogateMeshNode = sorrugatesNodes[i]->GetJoint() ? sorrugatesNodes[i]->GetJoint()->GetSurrogateParent() : nullptr;
+			if (surrogateMeshNode)
 			{
-				ndSharedPtr<ndBody> body(sorrugatesNodes[i]->GetRigidBody()->CreateObject());
-				ndBodyKinematic* const childBody = body->GetAsBodyKinematic();
-				ndBodyKinematic* const parentBody = parentNode->m_body->GetAsBodyKinematic();
-				ndSharedPtr<ndJointBilateralConstraint> joint(sorrugatesNodes[i]->GetJoint()->CreateObject(childBody, parentBody));
-				ndModelArticulation::ndNode* const limbNode = AddLimb(parentNode, body, joint);
-				limbNode->m_name = sorrugatesNodes[i]->GetName();
+				ndModelArticulation::ndNode* parentNode = FindByName(surrogateMeshNode->GetName().GetStr());
+				if (parentNode)
+				{
+					ndSharedPtr<ndBody> body(sorrugatesNodes[i]->GetRigidBody()->CreateObject());
+					ndBodyKinematic* const childBody = body->GetAsBodyKinematic();
+					ndBodyKinematic* const parentBody = parentNode->m_body->GetAsBodyKinematic();
+					ndSharedPtr<ndJointBilateralConstraint> joint(sorrugatesNodes[i]->GetJoint()->CreateObject(childBody, parentBody));
+					ndModelArticulation::ndNode* const limbNode = AddLimb(parentNode, body, joint);
+					limbNode->m_name = sorrugatesNodes[i]->GetName();
 
-				sorrugatesNodes[i] = sorrugatesNodes[sorrugatesNodes.GetCount() - 1];
-				sorrugatesNodes.SetCount(sorrugatesNodes.GetCount() - 1);
-				break;
+					sorrugatesNodes[i] = sorrugatesNodes[sorrugatesNodes.GetCount() - 1];
+					sorrugatesNodes.SetCount(sorrugatesNodes.GetCount() - 1);
+					break;
+				}
 			}
 		}
 	}
