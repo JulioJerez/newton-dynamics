@@ -276,10 +276,14 @@ class ndBigVector: public ndClassAlloc
 			(a[3] == 0) ? ndFloat64(-1.0f) : ndFloat64(1.0f));
 	}
 
-
 	inline ndBigVector Floor() const
 	{
 		return ndBigVector(floor(m_x), floor(m_y), floor(m_z), floor(m_w));
+	}
+
+	inline ndBigVector Ceiling() const
+	{
+		return ndBigVector(ndCeil(m_x), ndCeil(m_y), ndCeil(m_z), ndCeil(m_w));
 	}
 
 	inline ndBigVector DotProduct(const ndBigVector &A) const
@@ -811,6 +815,11 @@ class ndVector : public ndClassAlloc
 	inline ndVector Floor() const
 	{
 		return ndVector(ndFloor(m_x), ndFloor(m_y), ndFloor(m_z), ndFloor(m_w));
+	}
+
+	inline ndVector Ceiling() const
+	{
+		return ndVector(ndCeil(m_x), ndCeil(m_y), ndCeil(m_z), ndCeil(m_w));
 	}
 
 	inline ndVector DotProduct(const ndVector& A) const
