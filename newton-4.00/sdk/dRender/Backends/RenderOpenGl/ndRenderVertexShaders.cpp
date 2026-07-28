@@ -14,7 +14,7 @@
 
 const char* ndRenderShaderCache::m_skyBoxVertex =
 R""""(
-	#version 420 core
+	#version 450 core
 
 	uniform mat4 invViewModelProjectionTextureMatrix;
 	in vec3 vertex;
@@ -29,7 +29,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_wireFrameVertexColor =
 R""""(
-	#version 420 core
+	#version 450 core
 
 	layout(location = 0) in vec3 in_position;
 	layout(location = 1) in vec3 in_vertexColor;
@@ -46,7 +46,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_setZbufferVertex =
 R""""(
-	#version 420 core
+	#version 450 core
 
 	layout(location = 0) in vec3 in_position;
 
@@ -60,7 +60,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_generateShadowMapVertex =
 R""""(
-	#version 420 core
+	#version 450 core
 
 	// using the same vertex buffer
 	layout(location = 0) in vec3 in_position;
@@ -76,7 +76,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_generateAlphaTestShadowMapVertex =
 R""""(
-	#version 420 core
+	#version 450 core
 
 	// using the same vertex buffer
 	layout(location = 0) in vec3 in_position;
@@ -95,7 +95,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_debugFlatShadedDiffuseVertex =
 R""""(
-	#version 420 core
+	#version 450 core
 
 	layout(location = 0) in vec3 in_position;
 	layout(location = 1) in vec3 in_normal;
@@ -117,7 +117,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_directionalDiffuseVertex =
 R""""(
-	#version 420 core
+	#version 450 core
 
 	layout(location = 0) in vec3 in_position;
 	layout(location = 1) in vec3 in_normal;
@@ -143,7 +143,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_directionalDiffuseShadowVertex =
 R""""(
-	#version 420 core
+	#version 450 core
 
 	layout(location = 0) in vec3 in_position;
 	layout(location = 1) in vec3 in_normal;
@@ -171,7 +171,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_generateInstancedShadowMapVertex =
 R""""(
-	#version 420 core
+	#version 450 core
 
 	// using the same vertex buffer
 	layout(location = 0) in vec3 in_position;
@@ -189,7 +189,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_directionalDiffuseInstanceVertex =
 R""""(
-	#version 420 core
+	#version 450 core
 
 	layout(location = 0) in vec3 in_position;
 	layout(location = 1) in vec3 in_normal;
@@ -222,7 +222,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_directionalDiffuseShadowSkinVertex =
 R""""(
-	#version 420 core
+	#version 450 core
 
 	layout(location = 0) in vec3 in_position;
 	layout(location = 1) in vec3 in_normal;
@@ -270,7 +270,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_generateShadowMapSkinVertex =
 R""""(
-	#version 420 core
+	#version 450 core
 
 	// using the same vertex buffer
 	layout(location = 0) in vec3 in_position;
@@ -301,7 +301,7 @@ R""""(
 
 const char* ndRenderShaderCache::m_debugFlatShadedColorVertex =
 R""""(
-	#version 420 core
+	#version 450 core
 
 	layout(location = 0) in vec3 in_position;
 	layout(location = 1) in vec3 in_normal;
