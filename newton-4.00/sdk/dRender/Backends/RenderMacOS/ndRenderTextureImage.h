@@ -30,6 +30,8 @@ class ndRenderTextureImageCommon : public ndRenderTexture
 	public:
 	ndRenderTextureImageCommon();
 	~ndRenderTextureImageCommon();
+
+	GLuint m_texture;
 };
 
 class ndRenderTextureImage: public ndRenderTextureImageCommon

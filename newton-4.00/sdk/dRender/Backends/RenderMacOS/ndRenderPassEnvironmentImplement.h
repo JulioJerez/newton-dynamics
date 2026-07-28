@@ -24,6 +24,10 @@ class ndRenderPassEnvironmentImplement : public ndClassAlloc
 	void RenderScene(const ndRenderSceneCamera* const camera, const ndRenderTexture* const texture);
 
 	ndRenderContext* m_context;
+	GLuint m_indexBuffer;
+	GLuint m_vertexBuffer;
+	GLuint m_vertextArrayBuffer;
+	GLint m_invViewModelProjectionTextureMatrix;
 };
 
 #endif

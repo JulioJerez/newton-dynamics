@@ -735,6 +735,7 @@ namespace ndMotorVehicle
 
 using namespace ndMotorVehicle;
 
+#if 0
 void ndBasicVehicle (ndDemoEntityManager* const scene)
 {
 	LoadMap(scene);
@@ -803,3 +804,43 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	ndVector origin(-10.0f, 2.0f, -0.0f, 1.0f);
 	scene->SetCameraMatrix(rot, origin);
 }
+
+#else
+
+// working on high speed four wheel convex cast vehicles.
+// this model are so non linear that the require special 
+// treatment with  bycycle model equations.
+// It is still a multibody, but the drive train is different.
+// in general, it will just inject the torque diretly to the tires
+// rather than using a loop differential axle joint.
+void ndBasicVehicle(ndDemoEntityManager* const scene)
+{
+	BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true);
+
+	ndPhysicsWorld* const world = scene->GetWorld();
+	ndVector location(0.0f, 2.0f, 0.0f, 1.0f);
+
+	// add a vehicle material
+	AddMaterial(scene);
+
+	ndMatrix matrix(ndYawMatrix(ndFloat32(0.0f) * ndDegreeToRad));
+	ndVector floor(FindFloor(*world, location, 100.0f));
+	matrix.m_posit = floor;
+	matrix.m_posit.m_y += 0.5f;
+
+	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -0.0f, 0.0f)));
+	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -0.0f, 0.0f)), true);
+
+	// set a ui paner to see vehicle state
+	ndSharedPtr<ndDemoEntityManager::ndDemoUIpanel> dashboard(new ndDashboard());
+	scene->SetDemoUIpanel(dashboard);
+
+	// add a scene navigation post update
+	ndSharedPtr<ndDemoEntityManager::OnPostUpdate> driver(new SceneNavigation(dashboard));
+	scene->RegisterPostUpdate(driver);
+
+	ndQuaternion rot;
+	ndVector origin(-10.0f, 2.0f, -0.0f, 1.0f);
+	scene->SetCameraMatrix(rot, origin);
+}
+#endif

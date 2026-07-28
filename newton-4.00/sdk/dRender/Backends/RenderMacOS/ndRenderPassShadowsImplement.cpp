@@ -11,6 +11,7 @@
 
 #include "ndRenderStdafx.h"
 #include "ndRender.h"
+#include "ndRenderTexture.h"
 #include "ndRenderContext.h"
 #include "ndRenderSceneNode.h"
 #include "ndRenderSceneCamera.h"
@@ -19,39 +20,64 @@
 
 #define ND_SHADOW_MAP_RESOLUTION	(1024 * 4)
 #define ND_MAX_FAR_PLANE			ndFloat32 (50.0f)
+//#define ND_MAX_FAR_PLANE			ndFloat32 (200.0f)
 #define ND_MIN_NEAR_PLANE			ndFloat32 (0.1f)
-
 
 ndRenderPassShadowsImplement::ndRenderPassShadowsImplement(ndRenderContext* const context)
 	:ndClassAlloc()
 	,m_context(context)
 {
-	//m_width = ND_SHADOW_MAP_RESOLUTION;
-	//m_height = ND_SHADOW_MAP_RESOLUTION;
-	//
-	//m_viewPortTiles[0] = ndVector(ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.5f), ndFloat32(0.5f));
-	//m_viewPortTiles[1] = ndVector(ndFloat32(0.5f), ndFloat32(0.0f), ndFloat32(0.5f), ndFloat32(0.5f));
-	//m_viewPortTiles[2] = ndVector(ndFloat32(0.0f), ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(0.5f));
-	//m_viewPortTiles[3] = ndVector(ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(0.5f));
-	//
-	//m_lightProjectToTextureSpace = ndGetIdentityMatrix();
-	//m_lightProjectToTextureSpace[0][0] = ndFloat32(0.5f);
-	//m_lightProjectToTextureSpace[1][1] = ndFloat32(0.5f);
-	//m_lightProjectToTextureSpace[2][2] = ndFloat32(0.5f);
-	//m_lightProjectToTextureSpace.m_posit = ndVector(ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(1.0f));
+	m_width = ND_SHADOW_MAP_RESOLUTION;
+	m_height = ND_SHADOW_MAP_RESOLUTION;
+
+	glGenFramebuffers(1, &m_frameBufferObject);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, m_frameBufferObject);
+	// Disable writes to the color buffer
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
+	
+	// Create the depth buffer textures, only one 4 x 4 tile
+	glGenTextures(1, &m_shadowMapTexture);
+	glBindTexture(GL_TEXTURE_2D, m_shadowMapTexture);
+	
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, m_width * 2, m_height * 2, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, m_shadowMapTexture, 0);
+	
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	ndAssert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
+
+	//m_generateShadowMapsBlock.GetShaderParameters(*m_context->m_shaderCache);
+	m_generateIntanceShadowMapsBlock.GetShaderParameters(*m_context->m_shaderCache);
+	
+	m_viewPortTiles[0] = ndVector(ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.5f), ndFloat32(0.5f));
+	m_viewPortTiles[1] = ndVector(ndFloat32(0.5f), ndFloat32(0.0f), ndFloat32(0.5f), ndFloat32(0.5f));
+	m_viewPortTiles[2] = ndVector(ndFloat32(0.0f), ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(0.5f));
+	m_viewPortTiles[3] = ndVector(ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(0.5f));
+	
+	m_lightProjectToTextureSpace = ndGetIdentityMatrix();
+	m_lightProjectToTextureSpace[0][0] = ndFloat32(0.5f);
+	m_lightProjectToTextureSpace[1][1] = ndFloat32(0.5f);
+	m_lightProjectToTextureSpace[2][2] = ndFloat32(0.5f);
+	m_lightProjectToTextureSpace.m_posit = ndVector(ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(1.0f));
 }
 
 ndRenderPassShadowsImplement::~ndRenderPassShadowsImplement()
 {
-	//if (m_shadowMapTexture != 0)
-	//{
-	//	glDeleteTextures(1, &m_shadowMapTexture);
-	//}
-	//
-	//if (m_frameBufferObject != 0)
-	//{
-	//	glDeleteFramebuffers(1, &m_frameBufferObject);
-	//}
+	if (m_shadowMapTexture != 0)
+	{
+		glDeleteTextures(1, &m_shadowMapTexture);
+	}
+
+	if (m_frameBufferObject != 0)
+	{
+		glDeleteFramebuffers(1, &m_frameBufferObject);
+	}
 }
 
 void ndRenderPassShadowsImplement::CalculateWorldSpaceSubFrustum(const ndRenderSceneCamera* const camera, ndVector* const frustum, ndInt32 sliceIndex) const
@@ -158,58 +184,72 @@ void ndRenderPassShadowsImplement::UpdateCascadeSplits(const ndRenderSceneCamera
 
 void ndRenderPassShadowsImplement::RenderScene(const ndRenderSceneCamera* const camera)
 {
-	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_frameBufferObject);
-	//glDisable(GL_SCISSOR_TEST);
-	//glEnable(GL_DEPTH_TEST);
-	//glDepthFunc(GL_LEQUAL);
-	//
-	//glClear(GL_DEPTH_BUFFER_BIT);
-	//
-	//GLuint shader = m_context->m_shaderCache->m_shadowMaps;
-	//glUseProgram(shader);
-	//
-	//glPolygonOffset(GLfloat(1.0f), GLfloat(1024.0f * 8.0f));
-	//glEnable(GL_POLYGON_OFFSET_FILL);
-	//
-	//UpdateCascadeSplits(camera);
-	//
-	//ndMatrix tileMatrix(ndGetIdentityMatrix());
-	//tileMatrix[0][0] = ndFloat32(0.5f);
-	//tileMatrix[1][1] = ndFloat32(0.5f);
-	//
-	//ndVector cameraTestPoint(ndVector::m_wOne);
-	//const ndMatrix& cameraProjection = camera->m_projectionMatrix;
-	//
-	//ndRender* const owner = m_context->m_owner;
-	//const ndList<ndSharedPtr<ndRenderSceneNode>>& scene = owner->m_scene;
-	//for (ndInt32 i = 0; i < 4; i++)
-	//{
-	//	const ndMatrix lightSpaceMatrix(CalculateLightSpaceMatrix(camera, i));
-	//	const ndVector viewPortTile(m_viewPortTiles[i]);
-	//	ndInt32 vp_x = ndInt32(viewPortTile.m_x * ndFloat32(2 * m_width));
-	//	ndInt32 vp_y = ndInt32(viewPortTile.m_y * ndFloat32(2 * m_height));
-	//
-	//	cameraTestPoint.m_x = m_farFrustumPlanes[i];
-	//	const ndVector cameraPoint(cameraProjection.TransformVector1x4(cameraTestPoint));
-	//	m_cameraSpaceSplits[i] = GLfloat(ndFloat32(0.5f) * cameraPoint.m_z / cameraPoint.m_w + ndFloat32(0.5f));
-	//
-	//	tileMatrix[3][0] = viewPortTile.m_x;
-	//	tileMatrix[3][1] = viewPortTile.m_y;
-	//	m_lighProjectionMatrix[i] = lightSpaceMatrix * m_lightProjectToTextureSpace * tileMatrix;
-	//
-	//	glViewport(vp_x, vp_y, m_width, m_height);
-	//
-	//	for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* node = scene.GetFirst(); node; node = node->GetNext())
-	//	{
-	//		ndRenderSceneNode* const sceneNode = *node->GetInfo();
-	//		sceneNode->Render(owner, 0.0f, lightSpaceMatrix, m_shadowMap);
-	//	}
-	//}
-	//
-	//glDisable(GL_POLYGON_OFFSET_FILL);
-	//ndAssert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
-	//glUseProgram(0);
-	//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-	//
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_frameBufferObject);
+	glDisable(GL_SCISSOR_TEST);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glClear(GL_DEPTH_BUFFER_BIT);
+	glEnable(GL_POLYGON_OFFSET_FILL);
+
+	UpdateCascadeSplits(camera);
+	
+	ndMatrix tileMatrix(ndGetIdentityMatrix());
+	tileMatrix[0][0] = ndFloat32(0.5f);
+	tileMatrix[1][1] = ndFloat32(0.5f);
+	
+	ndVector cameraTestPoint(ndVector::m_wOne);
+	const ndMatrix& cameraProjection = camera->m_projectionMatrix;
+	
+	ndRender* const owner = m_context->m_owner;
+	auto SetCascadesLayers = [this, &owner, camera, &cameraTestPoint, &cameraProjection, &tileMatrix]()
+	{
+		//const ndVector zBiasUnits(ndFloat32(1024.0f * 64.0f), ndFloat32(1024.0f * 64.0f), ndFloat32(1024.0f * 40.0f), ndFloat32(1024.0f * 16.0f));
+		for (ndInt32 i = 0; i < 4; i++)
+		{
+			const ndMatrix lightSpaceMatrix(CalculateLightSpaceMatrix(camera, i));
+			const ndVector viewPortTile(m_viewPortTiles[i]);
+			cameraTestPoint.m_x = m_farFrustumPlanes[i];
+			const ndVector cameraPoint(cameraProjection.TransformVector1x4(cameraTestPoint));
+			m_cameraSpaceSplits[i] = GLfloat(ndFloat32(0.5f) * cameraPoint.m_z / cameraPoint.m_w + ndFloat32(0.5f));
+
+			tileMatrix[3][0] = viewPortTile.m_x;
+			tileMatrix[3][1] = viewPortTile.m_y;
+			m_lighProjectionMatrix[i] = lightSpaceMatrix * m_lightProjectToTextureSpace * tileMatrix;
+		}
+	};
+
+	auto RenderPrimitive = [this, &owner, camera, &cameraTestPoint, &cameraProjection, &tileMatrix](ndRenderPassMode modepass)
+	{
+		const ndVector zBiasUnits(ndFloat32(1024.0f * 64.0f), ndFloat32(1024.0f * 64.0f), ndFloat32(1024.0f * 40.0f), ndFloat32(1024.0f * 16.0f));
+		const ndList<ndSharedPtr<ndRenderSceneNode>>& scene = owner->m_scene;
+		for (ndInt32 i = 0; i < 4; i++)
+		{
+			const ndMatrix lightSpaceMatrix(CalculateLightSpaceMatrix(camera, i));
+			const ndVector viewPortTile(m_viewPortTiles[i]);
+			ndInt32 vp_x = ndInt32(viewPortTile.m_x * ndFloat32(2 * m_width));
+			ndInt32 vp_y = ndInt32(viewPortTile.m_y * ndFloat32(2 * m_height));
+		
+			glViewport(vp_x, vp_y, m_width, m_height);
+			glPolygonOffset(GLfloat(1.0f), GLfloat(zBiasUnits[i]));
+			for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* node = scene.GetFirst(); node; node = node->GetNext())
+			{
+				ndRenderSceneNode* const sceneNode = *node->GetInfo();
+				sceneNode->Render(owner, lightSpaceMatrix, modepass);
+			}
+		}
+	};
+
+	// set the parameter for each cascade layers
+	SetCascadesLayers();
+
+	// render simple primitive pass
+	RenderPrimitive(m_generateShadowMaps);
+
+	// render instance primitives
+	RenderPrimitive(m_generateInstanceShadowMaps);
+
+	glDisable(GL_POLYGON_OFFSET_FILL);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	//m_context->SetViewport(m_context->GetWidth(), m_context->GetHeight());
+	m_context->SetViewport();
 }

@@ -12,7 +12,9 @@
 #define __ND_RENDER_PASS_SHADOWS_IMPLEMNETH__
 
 #include "ndRenderPass.h"
+#include "ndRenderShader.h"
 #include "ndRenderContext.h"
+#include "ndRenderShaderCache.h"
 
 class ndRenderPassShadowsImplement : public ndClassAlloc
 {
@@ -40,7 +42,16 @@ class ndRenderPassShadowsImplement : public ndClassAlloc
 
 	ndInt32 m_width;
 	ndInt32 m_height;
-	friend class ndRenderPrimitiveMeshImplement;
+	GLuint m_shadowMapTexture;
+	GLuint m_frameBufferObject;
+
+	ndRenderShaderGenerateInstanceShadowMapBlock m_generateIntanceShadowMapsBlock;
+	
+	friend class ndRenderPrimitiveImplement;
+	friend class ndRenderShaderOpaqueDiffusedShadowColorBlock;
+	friend class ndRenderShaderOpaqueDiffusedShadowSkinColorBlock;
+	friend class ndRenderShaderInstancedOpaqueDiffusedShadowBlock;
+	friend class ndRenderShaderOpaqueDiffusedShadowColorAlphaTestBlock;
 };
 
 #endif
