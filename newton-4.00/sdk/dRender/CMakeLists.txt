@@ -33,6 +33,7 @@ include_directories(../../thirdParty/openFBX/src)
 if (APPLE) 
 	message ("render library with metal backend")
 	include_directories(Backends/RenderMacOS)
+	include_directories(../../thirdParty/glatter/include/glatter/)
 	file(GLOB CPP_SOURCE 
 		*.h
 		*.cpp 
