@@ -36,7 +36,10 @@ bool ndConvexCastNotify::CastShape(const ndShapeInstance& castingInstance, const
 	ndFixSizeArray<ndContactPoint, D_MAX_CONTATCS> contactBuffer(D_MAX_CONTATCS);
 
 	#ifdef _DEBUG
-		memset(&contactBuffer[0], 0, sizeof(ndContactPoint) * D_MAX_CONTATCS);
+		//memset(&contactBuffer[0], 0, sizeof(ndContactPoint) * D_MAX_CONTATCS);
+		ndContactPoint zeroPoint;
+		zeroPoint.Init();
+		ndMemSet(&contactBuffer[0], zeroPoint, D_MAX_CONTATCS);
 	#endif
 	
 	body0.SetCollisionShape(castingInstance);

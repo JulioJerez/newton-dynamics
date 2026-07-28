@@ -11,7 +11,7 @@
 
 #include "ndSandboxStdafx.h"
 
-#ifdef _DEBUG
+#if defined (_WIN32) && defined (_DEBUG)
 	#define ND_USE_LEAK_TRACKER
 #endif
 

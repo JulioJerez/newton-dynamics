@@ -706,7 +706,16 @@ ndDemoEntityManager::ndDemoEntityManager()
 
 	ndSharedPtr<ndRender::ndUserCallback> callbacks(new ndRenderCallback(this));
 	snprintf(title, sizeof(title), "Newton Dynamics %d.%.2i sandbox demos", D_NEWTON_ENGINE_MAJOR_VERSION, D_NEWTON_ENGINE_MINOR_VERSION);
-	m_renderer = ndSharedPtr<ndRender>(new ndRender(callbacks, 1280, 768, title));
+
+	#ifdef _WIN32
+	ndInt32 width = 1280;
+	ndInt32 height = 768;
+	#else
+	ndInt32 width = 800;
+	ndInt32 height = 600;
+	#endif
+
+	m_renderer = ndSharedPtr<ndRender>(new ndRender(callbacks, width, height, title));
 
 	const ndString fontPathName(ndGetWorkingFileName("Cousine-Regular.ttf"));
 	m_renderer->InitImGui(fontPathName.GetStr());

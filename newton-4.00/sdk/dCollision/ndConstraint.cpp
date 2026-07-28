@@ -133,7 +133,60 @@ void ndRightHandSide::SetSanityCheck(const ndConstraint* const joint)
 		}
 	}
 }
+
+bool ndRightHandSide::SanityCheck() const
+{
+	if (m_debugCheck == m_friction)
+	{
+		if (m_lowerBoundFrictionCoefficent > ndFloat32(0.0f))
+		{
+			ndAssert(0);
+			return false;
+		}
+		if (m_lowerBoundFrictionCoefficent < ndFloat32(-2.0f)) // allow for high that one friction
+		{
+			ndAssert(0);
+			return false;
+		}
+		if (m_upperBoundFrictionCoefficent < ndFloat32(0.0f))
+		{
+			ndAssert(0);
+			return false;
+		}
+		if (m_lowerBoundFrictionCoefficent > ndFloat32(2.0f)) // allow for high that one friction
+		{
+			ndAssert(0);
+			return false;
+		}
+	}
+	else if (m_debugCheck == m_contact)
+	{
+		if (m_lowerBoundFrictionCoefficent != ndFloat32(0.0f))
+		{
+			ndAssert(0);
+			return false;
+		}
+		if (m_upperBoundFrictionCoefficent < ndFloat32(0.0f))
+		{
+			ndAssert(0);
+			return false;
+		}
+		if (m_lowerBoundFrictionCoefficent > ndFloat32(D_MAX_BOUND * 0.1f))
+		{
+			ndAssert(0);
+			return false;
+		}
+	}
+	return true;
+}
+
 #else
+
+bool ndRightHandSide::SanityCheck() const
+{
+	return true;
+}
+
 void ndRightHandSide::SetSanityCheck(const ndConstraint* const)
 {
 }
