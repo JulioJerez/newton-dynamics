@@ -20,6 +20,7 @@
 
 #include "ndRenderPrimitiveMeshImplement.h"
 
+xxxxxxxxxxxx
 ndRenderPrimitiveMeshImplement::ndRenderPrimitiveMeshImplement(ndRenderPrimitiveMesh* const owner, const ndRender* const render, const ndShapeInstance* const collision)
 {
 
