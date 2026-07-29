@@ -44,7 +44,7 @@ class ndRenderShaderSetZbufferCleanBlock : public ndRenderShaderBlock
 
 	protected:
 	virtual void SetParameters(ndUnsigned32 shader) override;
-	GLint m_viewModelProjectionMatrix;
+	ndInt32 m_viewModelProjectionMatrix;
 };
 
 // *********************************************************************
@@ -98,12 +98,12 @@ class ndRenderShaderDebugFlatShadedDiffusedBlock : public ndRenderShaderBlock
 	protected:
 	virtual void SetParameters(ndUnsigned32 shader) override;
 
-	GLint m_diffuseColor;
-	GLint m_directionalLightAmbient;
-	GLint m_directionalLightIntesity;
-	GLint m_directionalLightDirection;
-	GLint m_projectMatrixLocation;
-	GLint m_viewModelMatrixLocation;
+	ndInt32 m_diffuseColor;
+	ndInt32 m_directionalLightAmbient;
+	ndInt32 m_directionalLightIntesity;
+	ndInt32 m_directionalLightDirection;
+	ndInt32 m_projectMatrixLocation;
+	ndInt32 m_viewModelMatrixLocation;
 };
 
 // *********************************************************************
@@ -127,12 +127,12 @@ class ndRenderShaderOpaqueDiffusedColorBlock : public ndRenderShaderDebugFlatSha
 	protected:
 	virtual void SetParameters(ndUnsigned32 shader) override;
 
-	GLint m_texture;
-	GLint m_cameraToWorld;
-	GLint m_specularColor;
-	GLint m_specularAlpha;
-	GLint m_environmentMap;
-	GLint m_reflectionColor;
+	ndInt32 m_texture;
+	ndInt32 m_cameraToWorld;
+	ndInt32 m_specularColor;
+	ndInt32 m_specularAlpha;
+	ndInt32 m_environmentMap;
+	ndInt32 m_reflectionColor;
 };
 
 // *********************************************************************
@@ -147,10 +147,10 @@ class ndRenderShaderOpaqueDiffusedShadowColorBlock : public ndRenderShaderOpaque
 	protected:
 	virtual void SetParameters(ndUnsigned32 shader) override;
 
-	GLint m_worldMatrix;
-	GLint m_shadowSlices;
-	GLint m_depthMapTexture;
-	GLint m_directionLightViewProjectionMatrixShadow;
+	ndInt32 m_worldMatrix;
+	ndInt32 m_shadowSlices;
+	ndInt32 m_depthMapTexture;
+	ndInt32 m_directionLightViewProjectionMatrixShadow;
 };
 
 // *********************************************************************
@@ -165,7 +165,7 @@ class ndRenderShaderTransparentDiffusedShadowColorBlock : public ndRenderShaderO
 	protected:
 	virtual void SetParameters(ndUnsigned32 shader) override;
 
-	GLint m_opacity;
+	ndInt32 m_opacity;
 };
 
 // *********************************************************************
@@ -194,7 +194,7 @@ class ndRenderShaderGenerateSkinShadowMapBlock : public ndRenderShaderGenerateSh
 	protected:
 	virtual void SetParameters(ndUnsigned32 shader) override;
 
-	GLint m_matrixPalette;
+	ndInt32 m_matrixPalette;
 };
 
 // *********************************************************************
@@ -209,7 +209,7 @@ class ndRenderShaderOpaqueDiffusedShadowSkinColorBlock : public ndRenderShaderOp
 	protected:
 	virtual void SetParameters(ndUnsigned32 shader) override;
 
-	GLint m_matrixPalette;
+	ndInt32 m_matrixPalette;
 };
 
 // *********************************************************************
@@ -224,7 +224,7 @@ class ndRenderShaderStaticLinesArrayBlock : public ndRenderShaderBlock
 	protected:
 	virtual void SetParameters(ndUnsigned32 shader) override;
 
-	GLint m_viewModelProjectionMatrix;
+	ndInt32 m_viewModelProjectionMatrix;
 };
 
 // *********************************************************************
@@ -239,7 +239,7 @@ class ndRenderShaderDynamicLinesArrayBlock : public ndRenderShaderBlock
 	protected:
 	virtual void SetParameters(ndUnsigned32 shader) override;
 
-	GLint m_viewModelProjectionMatrix;
+	ndInt32 m_viewModelProjectionMatrix;
 };
 
 // *********************************************************************
@@ -254,7 +254,7 @@ class ndRenderShaderDynamicPointsArrayBlock : public ndRenderShaderBlock
 	protected:
 	virtual void SetParameters(ndUnsigned32 shader) override;
 
-	GLint m_viewModelProjectionMatrix;
+	ndInt32 m_viewModelProjectionMatrix;
 };
 
 // *********************************************************************
@@ -269,9 +269,9 @@ class ndRenderShaderDynamicTrianglesArrayBlock : public ndRenderShaderBlock
 	protected:
 	virtual void SetParameters(ndUnsigned32 shader) override;
 
-	GLint m_directionalLightDirection;
-	GLint m_projectMatrixLocation;
-	GLint m_viewModelMatrixLocation;
+	ndInt32 m_directionalLightDirection;
+	ndInt32 m_projectMatrixLocation;
+	ndInt32 m_viewModelMatrixLocation;
 };
 
 // *********************************************************************
