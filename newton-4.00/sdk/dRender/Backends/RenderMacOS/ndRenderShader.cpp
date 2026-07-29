@@ -23,6 +23,7 @@
 #include "ndRenderPrimitiveImplement.h"
 #include "ndRenderPassShadowsImplement.h"
 
+#if 0
 ndRenderShaderBlock::ndRenderShaderBlock()
 	:m_shader(0)
 {
@@ -1141,3 +1142,5 @@ void ndRenderShaderOpaqueDiffusedShadowColorAlphaTestBlock::GetShaderParameters(
 //	glBindVertexArray(0);
 //	glUseProgram(0);
 //}
+
+#endif

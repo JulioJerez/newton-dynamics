@@ -52,20 +52,20 @@ class ndRenderPrimitiveImplement : public ndContainersFreeListAlloc<ndRenderPrim
 	void BuildDebugTriangleArray(const ndRenderPrimitive::ndDescriptor& descriptor);
 	void BuildWireframeDebugMesh(const ndRenderPrimitive::ndDescriptor& descriptor);
 	void BuildSetZBufferDebugMesh(const ndRenderPrimitive::ndDescriptor& descriptor);
-
-	void RenderDebugSetZbuffer(const ndRender* const render, const ndMatrix& modelMatrix) const;
-	void RenderGenerateShadowMaps(const ndRender* const render, const ndMatrix& lightMatrix) const;
-	void RenderDebugLineArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
-	void RenderDebugPointArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
-	void RenderDebugTriangleArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
-	void RenderSimplePrimitive(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
-	void RenderDebugShapeSolid(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
-	void RenderDebugShapeWireFrame(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
-	void RenderGenerateInstancedShadowMaps(const ndRender* const render, const ndMatrix& lightMatrix) const;
-	void RenderTransparency(const ndRender* const render, const ndMatrix& modelViewMatrix, bool backface) const;
-	void RenderDirectionalDiffuseColorShadow(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
-	void RenderDirectionalDiffuseColorNoShadow(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
-	void RenderDirectionalDiffuseColorInstanceShadow(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
+	
+	//void RenderDebugSetZbuffer(const ndRender* const render, const ndMatrix& modelMatrix) const;
+	//void RenderGenerateShadowMaps(const ndRender* const render, const ndMatrix& lightMatrix) const;
+	//void RenderDebugLineArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
+	//void RenderDebugPointArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
+	//void RenderDebugTriangleArray(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
+	//void RenderSimplePrimitive(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
+	//void RenderDebugShapeSolid(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
+	//void RenderDebugShapeWireFrame(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
+	//void RenderGenerateInstancedShadowMaps(const ndRender* const render, const ndMatrix& lightMatrix) const;
+	//void RenderTransparency(const ndRender* const render, const ndMatrix& modelViewMatrix, bool backface) const;
+	//void RenderDirectionalDiffuseColorShadow(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
+	//void RenderDirectionalDiffuseColorNoShadow(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
+	//void RenderDirectionalDiffuseColorInstanceShadow(const ndRender* const render, const ndMatrix& modelViewMatrix) const;
 
 	ndRenderPrimitive* m_owner;
 	const ndRenderContext* m_context;
@@ -88,25 +88,25 @@ class ndRenderPrimitiveImplement : public ndContainersFreeListAlloc<ndRenderPrim
 	bool m_alphaTest;
 	bool m_isSimpleMesh;
 	
-	ndRenderShaderOpaqueDiffusedColorBlock m_opaqueDifusedColorNoShadowBlock;
-	ndRenderShaderOpaqueDiffusedShadowColorBlock m_opaqueDiffusedColorShadowBlock;
-	ndRenderShaderTransparentDiffusedShadowColorBlock m_transparencyDiffusedBlock;
-	ndRenderShaderOpaqueDiffusedShadowSkinColorBlock m_opaqueDiffusedColorShadowSkinBlock;
-	ndRenderShaderInstancedOpaqueDiffusedShadowBlock m_opaqueDifusedColorNoShadowInstanceBlock;
-	ndRenderShaderOpaqueDiffusedShadowColorAlphaTestBlock m_opaqueDiffusedColorShadowAlphaTestBlock;
-
-	ndRenderShaderGenerateShadowMapBlock m_generateShadowMapsBlock;
-	ndRenderShaderGenerateSkinShadowMapBlock m_generateSkinShadowMapsBlock;
-	ndRenderShaderGenerateInstanceShadowMapBlock m_generateIntanceShadowMapsBlock;
-	ndRenderShaderGenerateAlphaTestShadowMapBlock m_generateAlphaTestShadowMapsBlock;
-
-	ndRenderShaderSetZbufferCleanBlock m_setZbufferBlock;
-	ndRenderShaderStaticLinesArrayBlock m_staticLinesArrayBlock;
-	ndRenderShaderDynamicLinesArrayBlock m_dynamicLinesArrayBlock;
-	ndRenderShaderDynamicPointsArrayBlock m_dynamicPointsArrayBlock;
-	ndRenderShaderDebugWireframeDiffuseBlock m_debugWireframeColorBlock;
-	ndRenderShaderDynamicTrianglesArrayBlock m_dynamicTrianglesArrayBlock;
-	ndRenderShaderDebugFlatShadedDiffusedBlock m_debugFlatShadedColorBlock;
+	//ndRenderShaderOpaqueDiffusedColorBlock m_opaqueDifusedColorNoShadowBlock;
+	//ndRenderShaderOpaqueDiffusedShadowColorBlock m_opaqueDiffusedColorShadowBlock;
+	//ndRenderShaderTransparentDiffusedShadowColorBlock m_transparencyDiffusedBlock;
+	//ndRenderShaderOpaqueDiffusedShadowSkinColorBlock m_opaqueDiffusedColorShadowSkinBlock;
+	//ndRenderShaderInstancedOpaqueDiffusedShadowBlock m_opaqueDifusedColorNoShadowInstanceBlock;
+	//ndRenderShaderOpaqueDiffusedShadowColorAlphaTestBlock m_opaqueDiffusedColorShadowAlphaTestBlock;
+	//
+	//ndRenderShaderGenerateShadowMapBlock m_generateShadowMapsBlock;
+	//ndRenderShaderGenerateSkinShadowMapBlock m_generateSkinShadowMapsBlock;
+	//ndRenderShaderGenerateInstanceShadowMapBlock m_generateIntanceShadowMapsBlock;
+	//ndRenderShaderGenerateAlphaTestShadowMapBlock m_generateAlphaTestShadowMapsBlock;
+	//
+	//ndRenderShaderSetZbufferCleanBlock m_setZbufferBlock;
+	//ndRenderShaderStaticLinesArrayBlock m_staticLinesArrayBlock;
+	//ndRenderShaderDynamicLinesArrayBlock m_dynamicLinesArrayBlock;
+	//ndRenderShaderDynamicPointsArrayBlock m_dynamicPointsArrayBlock;
+	//ndRenderShaderDebugWireframeDiffuseBlock m_debugWireframeColorBlock;
+	//ndRenderShaderDynamicTrianglesArrayBlock m_dynamicTrianglesArrayBlock;
+	//ndRenderShaderDebugFlatShadedDiffusedBlock m_debugFlatShadedColorBlock;
 
 	friend class ndRenderSceneNodeInstance;
 	friend class ndRenderSceneNodeInstanceImplement;

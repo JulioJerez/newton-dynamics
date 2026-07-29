@@ -44,21 +44,27 @@ class ndRenderContext: public ndClassAlloc
 
 	ndInt32 GetWidth() const;
 	ndInt32 GetHeight() const;
-	void MaximizeWindow() const;
+	void MaximizeWindow() const {};
 	void SetTitle(const char* const title);
 	void InitImGui(const char* const fontPathName);
 
 	void EndFrame();
 	void BeginFrame();
 
-	void ClearZBuffer();
+	void ClearZBuffer() {};
 	void ClearFrameBuffer(const ndVector& color);
-	void SetViewport(ndInt32 x, ndInt32 yt, ndInt32 width, ndInt32 height);
+	void SetViewport(ndInt32 x, ndInt32 y, ndInt32 width, ndInt32 height);
 
-	bool HasGameController() const;
-	const char* GameControllerName() const;
-	const ndFixSizeArray<ndFloat32, 8>& GameControllerAxis() const;
-	const ndFixSizeArray<ndInt8, 32>& GameControllerButtons() const;
+	bool HasGameController() const { return false; };
+	const char* GameControllerName() const { return nullptr; };
+	const ndFixSizeArray<ndFloat32, 8>& GameControllerAxis() const 
+	{
+		return ndFixSizeArray<ndFloat32, 8>();
+	};
+	const ndFixSizeArray<ndInt8, 32>& GameControllerButtons() const
+	{
+		return ndFixSizeArray<ndInt8, 32>();
+	};
 
 	private:
 	void SetGuiRenderStates();
@@ -72,11 +78,6 @@ class ndRenderContext: public ndClassAlloc
 	//ndSharedPtr<ndRenderTexture> LoadCubeMap(const ndFixSizeArray<ndString, 6>& pathnames);
 	//
 	//void SetInputCallbacks();
-	//
-
-
-	
-	//
 	//void SetViewport();
 	//void UpdateJoystick();
 	//

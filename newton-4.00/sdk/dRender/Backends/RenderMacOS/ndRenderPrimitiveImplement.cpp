@@ -104,6 +104,8 @@ ndRenderPrimitiveImplement::ndRenderPrimitiveImplement(
 	,m_alphaTest(false)
 	,m_isSimpleMesh(false)
 {
+	ndAssert(0);
+#if 0
 	if (src.m_skinSceneNode)
 	{
 		m_skinSceneNode = (ndRenderSceneNode*)skinSceneNode;
@@ -202,10 +204,13 @@ ndRenderPrimitiveImplement::ndRenderPrimitiveImplement(
 	}
 
 	InitShaderBlocks();
+#endif
 }
 
 ndRenderPrimitiveImplement::~ndRenderPrimitiveImplement()
 {
+	ndAssert(0);
+#if 0
 	if (m_instanceMatrixBuffer)
 	{
 		glDeleteBuffers(1, &m_instanceMatrixBuffer);
@@ -225,24 +230,26 @@ ndRenderPrimitiveImplement::~ndRenderPrimitiveImplement()
 	{
 		glDeleteVertexArrays(1, &m_vertextArrayBuffer);
 	}
+#endif
 }
 
 void ndRenderPrimitiveImplement::InitShaderBlocks()
 {
-	const ndRenderShaderCache* const shaderCache = *m_context->m_shaderCache;
-	m_staticLinesArrayBlock.GetShaderParameters(shaderCache);
-	m_dynamicLinesArrayBlock.GetShaderParameters(shaderCache);
-	m_generateShadowMapsBlock.GetShaderParameters(shaderCache);
-	m_transparencyDiffusedBlock.GetShaderParameters(shaderCache);
-	m_dynamicTrianglesArrayBlock.GetShaderParameters(shaderCache);
-	m_generateSkinShadowMapsBlock.GetShaderParameters(shaderCache);
-	m_opaqueDiffusedColorShadowBlock.GetShaderParameters(shaderCache);
-	m_generateIntanceShadowMapsBlock.GetShaderParameters(shaderCache);
-	m_opaqueDifusedColorNoShadowBlock.GetShaderParameters(shaderCache);
-	m_generateAlphaTestShadowMapsBlock.GetShaderParameters(shaderCache);
-	m_opaqueDiffusedColorShadowSkinBlock.GetShaderParameters(shaderCache);
-	m_opaqueDifusedColorNoShadowInstanceBlock.GetShaderParameters(shaderCache);
-	m_opaqueDiffusedColorShadowAlphaTestBlock.GetShaderParameters(shaderCache);
+	ndAssert(0);
+	//const ndRenderShaderCache* const shaderCache = *m_context->m_shaderCache;
+	//m_staticLinesArrayBlock.GetShaderParameters(shaderCache);
+	//m_dynamicLinesArrayBlock.GetShaderParameters(shaderCache);
+	//m_generateShadowMapsBlock.GetShaderParameters(shaderCache);
+	//m_transparencyDiffusedBlock.GetShaderParameters(shaderCache);
+	//m_dynamicTrianglesArrayBlock.GetShaderParameters(shaderCache);
+	//m_generateSkinShadowMapsBlock.GetShaderParameters(shaderCache);
+	//m_opaqueDiffusedColorShadowBlock.GetShaderParameters(shaderCache);
+	//m_generateIntanceShadowMapsBlock.GetShaderParameters(shaderCache);
+	//m_opaqueDifusedColorNoShadowBlock.GetShaderParameters(shaderCache);
+	//m_generateAlphaTestShadowMapsBlock.GetShaderParameters(shaderCache);
+	//m_opaqueDiffusedColorShadowSkinBlock.GetShaderParameters(shaderCache);
+	//m_opaqueDifusedColorNoShadowInstanceBlock.GetShaderParameters(shaderCache);
+	//m_opaqueDiffusedColorShadowAlphaTestBlock.GetShaderParameters(shaderCache);
 }
 
 bool ndRenderPrimitiveImplement::IsSimpleMesh() const
@@ -365,6 +372,8 @@ void ndRenderPrimitiveImplement::BuildFromNewtonMeshEffect(const ndRenderPrimiti
 
 void ndRenderPrimitiveImplement::BuildRenderMeshFromCollisionShape(const ndRenderPrimitive::ndDescriptor& descriptor)
 {
+	ndAssert(0);
+#if 0
 	ndAssert(*descriptor.m_collision);
 	ndMeshEffect mesh(**descriptor.m_collision);
 
@@ -481,10 +490,13 @@ void ndRenderPrimitiveImplement::BuildRenderMeshFromCollisionShape(const ndRende
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+#endif
 }
 
 void ndRenderPrimitiveImplement::BuildRenderSimpleMeshFromMeshEffect(const ndRenderPrimitive::ndDescriptor& descriptor)
 {
+	ndAssert(0);
+#if 0
 	ndMeshEffect& mesh = *((ndMeshEffect*)*descriptor.m_meshNode);
 	ndAssert(descriptor.m_materials.GetCount());
 
@@ -568,10 +580,13 @@ void ndRenderPrimitiveImplement::BuildRenderSimpleMeshFromMeshEffect(const ndRen
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+#endif
 }
 
 void ndRenderPrimitiveImplement::BuildRenderSkinnedMeshFromMeshEffect(const ndRenderPrimitive::ndDescriptor& descriptor)
 {
+	ndAssert(0);
+#if 0
 	ndMeshEffect& mesh = *((ndMeshEffect*)*descriptor.m_meshNode);
 	ndAssert(*descriptor.m_skeleton);
 	ndAssert(descriptor.m_materials.GetCount());
@@ -721,10 +736,13 @@ void ndRenderPrimitiveImplement::BuildRenderSkinnedMeshFromMeshEffect(const ndRe
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+#endif
 }
 
 void ndRenderPrimitiveImplement::BuildDebugLineArray(const ndRenderPrimitive::ndDescriptor&)
 {
+	ndAssert(0);
+#if 0
 	glGenVertexArrays(1, &m_vertextArrayBuffer);
 	glBindVertexArray(m_vertextArrayBuffer);
 
@@ -745,10 +763,13 @@ void ndRenderPrimitiveImplement::BuildDebugLineArray(const ndRenderPrimitive::nd
 	glBindVertexArray(0);
 
 	m_dynamicLinesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
+#endif
 }
 
 void ndRenderPrimitiveImplement::BuildDebugTriangleArray(const ndRenderPrimitive::ndDescriptor&)
 {
+	ndAssert(0);
+#if 0
 	glGenVertexArrays(1, &m_vertextArrayBuffer);
 	glBindVertexArray(m_vertextArrayBuffer);
 	
@@ -773,10 +794,13 @@ void ndRenderPrimitiveImplement::BuildDebugTriangleArray(const ndRenderPrimitive
 	
 	//m_dynamicLinesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
 	m_dynamicTrianglesArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
+#endif
 }
 
 void ndRenderPrimitiveImplement::BuildDebugPointArray(const ndRenderPrimitive::ndDescriptor&)
 {
+	ndAssert(0);
+#if 0
 	glGenVertexArrays(1, &m_vertextArrayBuffer);
 	glBindVertexArray(m_vertextArrayBuffer);
 
@@ -797,10 +821,13 @@ void ndRenderPrimitiveImplement::BuildDebugPointArray(const ndRenderPrimitive::n
 	glBindVertexArray(0);
 
 	m_dynamicPointsArrayBlock.GetShaderParameters(*m_context->m_shaderCache);
+#endif
 }
 
 void ndRenderPrimitiveImplement::BuildWireframeDebugMesh(const ndRenderPrimitive::ndDescriptor& descriptor)
 {
+	ndAssert(0);
+#if 0
 	if (*descriptor.m_collision)
 	{
 		class ndDrawShape : public ndShapeDebugNotify
@@ -975,10 +1002,13 @@ void ndRenderPrimitiveImplement::BuildWireframeDebugMesh(const ndRenderPrimitive
 
 		m_debugWireframeColorBlock.GetShaderParameters(*m_context->m_shaderCache);
 	}
+#endif
 }
 
 void ndRenderPrimitiveImplement::BuildDebugFlatShadedMesh(const ndRenderPrimitive::ndDescriptor& descriptor)
 {
+	ndAssert(0);
+#if 0
 	if (*descriptor.m_collision)
 	{
 		class ndDrawShape : public ndShapeDebugNotify
@@ -1148,10 +1178,13 @@ void ndRenderPrimitiveImplement::BuildDebugFlatShadedMesh(const ndRenderPrimitiv
 
 		m_debugFlatShadedColorBlock.GetShaderParameters(*m_context->m_shaderCache);
 	}
+#endif
 }
 
 void ndRenderPrimitiveImplement::BuildSetZBufferDebugMesh(const ndRenderPrimitive::ndDescriptor& descriptor)
 {
+	ndAssert(0);
+#if 0
 	if (*descriptor.m_collision)
 	{
 		class ndDrawShape : public ndShapeDebugNotify
@@ -1296,10 +1329,13 @@ void ndRenderPrimitiveImplement::BuildSetZBufferDebugMesh(const ndRenderPrimitiv
 	{
 		ndAssert(0);
 	}
+#endif
 }
 
 void ndRenderPrimitiveImplement::BuildRenderInstanceMesh(const ndRenderPrimitive::ndDescriptor& descriptor)
 {
+	ndAssert(0);
+#if 0
 	ndAssert(descriptor.m_collision);
 	ndMeshEffect mesh(**descriptor.m_collision);
 
@@ -1440,10 +1476,13 @@ void ndRenderPrimitiveImplement::BuildRenderInstanceMesh(const ndRenderPrimitive
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+#endif
 }
 
 void ndRenderPrimitiveImplement::BuildFromSimpleMesh(const ndRenderPrimitive::ndDescriptor& descriptor)
 {
+	ndAssert(0);
+#if 0
 	m_isSimpleMesh = true;
 
 	glGenVertexArrays(1, &m_vertextArrayBuffer);
@@ -1476,69 +1515,72 @@ void ndRenderPrimitiveImplement::BuildFromSimpleMesh(const ndRenderPrimitive::nd
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+#endif
 }
 
 void ndRenderPrimitiveImplement::Render(const ndRender* const render, const ndMatrix& modelMatrix, ndRenderPassMode renderMode) const
 {
-	switch (renderMode)
-	{
-		case m_generateShadowMaps:
-			RenderGenerateShadowMaps(render, modelMatrix);
-			break;
-
-		case m_directionalDiffusseNoShadow:
-			RenderDirectionalDiffuseColorNoShadow(render, modelMatrix);
-			break;
-
-		case m_directionalDiffusseShadow:
-			RenderDirectionalDiffuseColorShadow(render, modelMatrix);
-			break;
-
-		case m_transparencyBackface:
-			RenderTransparency(render, modelMatrix, true);
-			break;
-
-		case m_transparencyFrontface:
-			RenderTransparency(render, modelMatrix, false);
-			break;
-
-		case m_debugDisplaySolidMesh:
-			RenderDebugShapeSolid(render, modelMatrix);
-			break;
-
-		case m_debugDisplayWireFrameMesh:
-			RenderDebugShapeWireFrame(render, modelMatrix);
-			break;
-
-		case m_debugDisplaySetZbuffer:
-			RenderDebugSetZbuffer(render, modelMatrix);
-			break;
-
-		case m_directionalDiffusseInstanceShadow:
-			RenderDirectionalDiffuseColorInstanceShadow(render, modelMatrix);
-			break;
-
-		case m_generateInstanceShadowMaps:
-			RenderGenerateInstancedShadowMaps(render, modelMatrix);
-			break;
-
-		case m_debugPointArray:
-			RenderDebugPointArray(render, modelMatrix);
-			break;
-
-		case m_debugLineArray:
-			RenderDebugLineArray(render, modelMatrix);
-			break;
-
-		case m_debugTriangleArray:
-			RenderDebugTriangleArray(render, modelMatrix);
-			break;
-
-		default:
-			ndAssert(0);
-	}
+	ndAssert(0);
+	//switch (renderMode)
+	//{
+	//	case m_generateShadowMaps:
+	//		RenderGenerateShadowMaps(render, modelMatrix);
+	//		break;
+	//
+	//	case m_directionalDiffusseNoShadow:
+	//		RenderDirectionalDiffuseColorNoShadow(render, modelMatrix);
+	//		break;
+	//
+	//	case m_directionalDiffusseShadow:
+	//		RenderDirectionalDiffuseColorShadow(render, modelMatrix);
+	//		break;
+	//
+	//	case m_transparencyBackface:
+	//		RenderTransparency(render, modelMatrix, true);
+	//		break;
+	//
+	//	case m_transparencyFrontface:
+	//		RenderTransparency(render, modelMatrix, false);
+	//		break;
+	//
+	//	case m_debugDisplaySolidMesh:
+	//		RenderDebugShapeSolid(render, modelMatrix);
+	//		break;
+	//
+	//	case m_debugDisplayWireFrameMesh:
+	//		RenderDebugShapeWireFrame(render, modelMatrix);
+	//		break;
+	//
+	//	case m_debugDisplaySetZbuffer:
+	//		RenderDebugSetZbuffer(render, modelMatrix);
+	//		break;
+	//
+	//	case m_directionalDiffusseInstanceShadow:
+	//		RenderDirectionalDiffuseColorInstanceShadow(render, modelMatrix);
+	//		break;
+	//
+	//	case m_generateInstanceShadowMaps:
+	//		RenderGenerateInstancedShadowMaps(render, modelMatrix);
+	//		break;
+	//
+	//	case m_debugPointArray:
+	//		RenderDebugPointArray(render, modelMatrix);
+	//		break;
+	//
+	//	case m_debugLineArray:
+	//		RenderDebugLineArray(render, modelMatrix);
+	//		break;
+	//
+	//	case m_debugTriangleArray:
+	//		RenderDebugTriangleArray(render, modelMatrix);
+	//		break;
+	//
+	//	default:
+	//		ndAssert(0);
+	//}
 }
 
+#if 0
 void ndRenderPrimitiveImplement::RenderDebugSetZbuffer(const ndRender* const render, const ndMatrix& modelMatrix) const
 {
 	m_setZbufferBlock.Render(this, render, modelMatrix);
@@ -1704,3 +1746,5 @@ void ndRenderPrimitiveImplement::RenderDirectionalDiffuseColorInstanceShadow(con
 {
 	m_opaqueDifusedColorNoShadowInstanceBlock.Render(this, render, modelMatrix);
 }
+
+#endif

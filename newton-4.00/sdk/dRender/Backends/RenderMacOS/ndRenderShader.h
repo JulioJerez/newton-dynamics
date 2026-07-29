@@ -33,6 +33,7 @@ class ndRenderShaderBlock
 	ndUnsigned32 m_shader;
 };
 
+#if 0
 // *********************************************************************
 // 
 // *********************************************************************
@@ -283,4 +284,5 @@ class ndRenderShaderOpaqueDiffusedShadowColorAlphaTestBlock : public ndRenderSha
 	virtual void GetShaderParameters(const ndRenderShaderCache* const shaderCache) override;
 };
 
+#endif
 #endif

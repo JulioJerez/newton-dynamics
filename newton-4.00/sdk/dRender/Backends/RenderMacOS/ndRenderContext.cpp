@@ -47,7 +47,7 @@ void ndRenderContext::Terminate()
 {
 }
 
-void ndRenderContext::SetViewport(ndInt32, ndInt32)
+void ndRenderContext::SetViewport(ndInt32, ndInt32, ndInt32, ndInt32)
 {
 }
 
@@ -56,14 +56,6 @@ void ndRenderContext::EndGuiRenderStates()
 }
 
 void ndRenderContext::InitImGui(const char* const)
-{
-}
-
-void ndRenderContext::SetInputCallbacks()
-{
-}
-
-void ndRenderContext::LoadFont(const char* const)
 {
 }
 
@@ -121,3 +113,12 @@ ndSharedPtr<ndRenderTexture> ndRenderContext::LoadCubeMap(const ndFixSizeArray<n
 {
 	return ndSharedPtr<ndRenderTexture>();
 }
+
+
+//void ndRenderContext::SetInputCallbacks()
+//{
+//}
+//
+//void ndRenderContext::LoadFont(const char* const)
+//{
+//}
