@@ -456,11 +456,6 @@ void ndIkSolver::BuildMassMatrix(ndInt32 threadId)
 		}
 	}
 
-	for (ndInt32 i = m_contacts.GetCount() - 1; i >= 0; --i)
-	{
-		m_skeleton->AddCloseLoopJoint(m_contacts[i]);
-	}
-
 	m_savedBodiesIndex.SetCount(m_bodies.GetCount());
 	m_savedBodiesIndex[0] = 0;
 	for (ndInt32 i = ndInt32(m_bodies.GetCount()) - 1; i >= 1 ; --i)
