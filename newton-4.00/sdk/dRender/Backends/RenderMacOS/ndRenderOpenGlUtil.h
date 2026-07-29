@@ -19,7 +19,7 @@
 //#ifdef D_NEWTON_USE_DOUBLE
 //	inline void glMaterialParam(GLenum face, GLenum pname, const ndFloat32 *params)
 //	{
-//		GLfloat tmp[4] = { ndReal(params[0]), ndReal(params[1]), ndReal(params[2]), ndReal(params[3]) };
+//		ndReal tmp[4] = { ndReal(params[0]), ndReal(params[1]), ndReal(params[2]), ndReal(params[3]) };
 //		glMaterialfv(face, pname, &tmp[0]);
 //	}
 //	#define glMultMatrix(x) glMultMatrixd(x)
@@ -29,7 +29,7 @@
 //	#define glMaterialParam glMaterialfv
 //	#define glMultMatrix(x) glMultMatrixf(x)
 //	#define glLoadMatrix(x) glMultMatrixf(x)
-//	#define glGetFloat(x,y) glGetFloatv(x, (GLfloat*)y) 
+//	#define glGetFloat(x,y) glGetFloatv(x, (ndReal*)y) 
 //#endif
 
 class glUV
@@ -63,14 +63,14 @@ class glVector3
 		m_data[2] = ndReal(v[2]);
 	}
 
-	GLfloat& operator[] (ndInt32 i)
+	ndReal& operator[] (ndInt32 i)
 	{
 		ndAssert(i >= 0);
 		ndAssert(i < ndInt32(sizeof(m_data) / sizeof(m_data[0])));
 		return m_data[i];
 	}
 
-	const GLfloat& operator[] (ndInt32 i) const
+	const ndReal& operator[] (ndInt32 i) const
 	{
 		ndAssert(i >= 0);
 		ndAssert(i < ndInt32(sizeof(m_data) / sizeof(m_data[0])));
@@ -115,14 +115,14 @@ class glVector4
 		m_data[3] = ndReal(v[3]);
 	}
 
-	GLfloat& operator[] (ndInt32 i)
+	ndReal& operator[] (ndInt32 i)
 	{
 		ndAssert(i >= 0);
 		ndAssert(i < ndInt32(sizeof(m_data) / sizeof(m_data[0])));
 		return m_data[i];
 	}
 
-	const GLfloat& operator[] (ndInt32 i) const
+	const ndReal& operator[] (ndInt32 i) const
 	{
 		ndAssert(i >= 0);
 		ndAssert(i < ndInt32(sizeof(m_data) / sizeof(m_data[0])));
