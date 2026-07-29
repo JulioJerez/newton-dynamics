@@ -12,6 +12,7 @@
 #include "ndRenderStdafx.h"
 #include "ndRenderShaderCache.h"
 
+#if 0
 const char* ndRenderShaderCache::m_doNothingPixel =
 R""""(
 	#version 450 core
@@ -462,3 +463,4 @@ R""""(
 		pixelColor = vec4(color, 1.0);
 	}
 )"""";
+#endif

@@ -12,6 +12,7 @@
 #include "ndRenderStdafx.h"
 #include "ndRenderShaderCache.h"
 
+#if 0
 const char* ndRenderShaderCache::m_skyBoxVertex =
 R""""(
 	#version 450 core
@@ -323,3 +324,4 @@ R""""(
 	}
 
 )"""";
+#endif
