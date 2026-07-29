@@ -25,7 +25,7 @@
 #include "ndRenderStdafx.h"
 
 // include all the Mac OS header need for Meta here
-#include <CoreFoundation/CoreFoundation.h> 
+//#include <CoreFoundation/CoreFoundation.h> 
 
 class ndRender;
 class ndRenderTexture;
@@ -44,41 +44,80 @@ class ndRenderContext: public ndClassAlloc
 
 	ndInt32 GetWidth() const;
 	ndInt32 GetHeight() const;
+	void MaximizeWindow() const;
 	void SetTitle(const char* const title);
 	void InitImGui(const char* const fontPathName);
 
 	void EndFrame();
 	void BeginFrame();
+
+	void ClearZBuffer();
 	void ClearFrameBuffer(const ndVector& color);
+	void SetViewport(ndInt32 x, ndInt32 yt, ndInt32 width, ndInt32 height);
+
+	bool HasGameController() const;
+	const char* GameControllerName() const;
+	const ndFixSizeArray<ndFloat32, 8>& GameControllerAxis() const;
+	const ndFixSizeArray<ndInt8, 32>& GameControllerButtons() const;
 
 	private:
-	void LoadFont(const char* const fontPathName);
+	void SetGuiRenderStates();
+	void EndGuiRenderStates();
+	void SetCollorPassRenderStates();
 	ndSharedPtr<ndRenderTexture> LoadTexture(const ndString& pathname);
 	ndSharedPtr<ndRenderTexture> LoadCubeMap(const ndFixSizeArray<ndString, 6>& pathnames);
 
-	void SetInputCallbacks();
+	//void LoadFont(const char* const fontPathName);
+	//ndSharedPtr<ndRenderTexture> LoadTexture(const ndString& pathname);
+	//ndSharedPtr<ndRenderTexture> LoadCubeMap(const ndFixSizeArray<ndString, 6>& pathnames);
+	//
+	//void SetInputCallbacks();
+	//
 
-	void EndGuiRenderStates();
-	void SetGuiRenderStates();
-	void SetCollorPassRenderStates();
 
-	void SetViewport(ndInt32 width, ndInt32 height);
+	
+	//
+	//void SetViewport();
+	//void UpdateJoystick();
+	//
+	//static void ErrorCallback(ndInt32 error, const char* const description);
+	//static void ResizeWindowsCallback(GLFWwindow* window, int x, int y);
+	//
+	//static void CharCallback(GLFWwindow* window, ndUnsigned32 ch);
+	//static void CursorposCallback(GLFWwindow* const window, double x, double y);
+	//static void MouseScrollCallback(GLFWwindow* const window, double x, double y);
+	//static void MouseButtonCallback(GLFWwindow* const window, ndInt32 button, ndInt32 action, ndInt32 mods);
+	//static void KeyCallback(GLFWwindow* const window, ndInt32 key, ndInt32, ndInt32 action, ndInt32 mods);
+	//static void WindowMaximize(GLFWwindow* window, int maximized);
+
+	//#if (defined(_DEBUG) && defined(WIN32))
+	//static void APIENTRY OpenMessageCallback(
+	//	GLenum source, GLenum type, GLuint id, GLenum severity,
+	//	GLsizei length, const GLchar* message, const void* userParam);
+	//#endif
 
 	ndRender* m_owner;
-
+	//GLFWwindow* m_mainFrame;
 	ndSharedPtr<ndRenderShaderCache> m_shaderCache;
-
+	ndInt32 m_defaultFont;
 	ndInt32 m_prevKey;
+	ndInt32 m_viewport_x0;
+	ndInt32 m_viewport_y0;
+	ndInt32 m_viewport_width;
+	ndInt32 m_viewport_heigh;
 	bool m_imGuiEnabled;
 	bool m_mousePressed[3];
+	const char* m_joystickName;
+	ndFixSizeArray<ndFloat32, 8> m_joystickAxis;
+	ndFixSizeArray<ndInt8, 32> m_joystickButtons;
 
 	friend class ndRenderTexture;
 	friend class ndRenderPassGui;
 	friend class ndRenderPassColor;
 	friend class ndRenderSceneCamera;
 	friend class ndRenderPassTransparency;
+	friend class ndRenderPrimitiveImplement;
 	friend class ndRenderPassShadowsImplement;
-	friend class ndRenderPrimitiveMeshImplement;
 	friend class ndRenderPassEnvironmentImplement;
 };
 

@@ -75,15 +75,15 @@ class ndRenderPrimitiveImplement : public ndContainersFreeListAlloc<ndRenderPrim
 	ndArray<ndMatrix> m_bindingSkinMatrixArray;		// this is a uniform array
 	ndArray<glMatrix> m_skinPaletteMatrixArray;		// this is a uniform array
 
-	GLint m_vertexSize;
-	GLint m_indexCount;
-	GLint m_vertexCount;
-	GLint m_instanceCount;
+	ndInt32 m_vertexSize;
+	ndInt32 m_indexCount;
+	ndInt32 m_vertexCount;
+	ndInt32 m_instanceCount;
 
-	GLuint m_indexBuffer;
-	GLuint m_vertexBuffer;
-	GLuint m_vertextArrayBuffer;
-	GLuint m_instanceMatrixBuffer;
+	ndUnsigned32 m_indexBuffer;
+	ndUnsigned32 m_vertexBuffer;
+	ndUnsigned32 m_vertextArrayBuffer;
+	ndUnsigned32 m_instanceMatrixBuffer;
 
 	bool m_alphaTest;
 	bool m_isSimpleMesh;
