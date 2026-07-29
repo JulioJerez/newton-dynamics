@@ -278,7 +278,7 @@ class ndBigVector: public ndClassAlloc
 
 	inline ndBigVector Floor() const
 	{
-		return ndBigVector(floor(m_x), floor(m_y), floor(m_z), floor(m_w));
+		return ndBigVector(ndFloor(m_x), ndFloor(m_y), ndFloor(m_z), ndFloor(m_w));
 	}
 
 	inline ndBigVector Ceiling() const

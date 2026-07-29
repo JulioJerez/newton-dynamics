@@ -27,9 +27,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#ifndef GLATTER_LOOKUP_SIZE
-#define GLATTER_LOOKUP_SIZE 0x4000
-#endif
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -58,7 +55,6 @@ typedef struct glatter_extension_support_status_WGL
         int has_WGL_ARB_robustness_application_isolation;
         int has_WGL_ARB_robustness_share_group_isolation;
         int has_WGL_ATI_pixel_format_float;
-        int has_WGL_ATI_render_texture_rectangle;
         int has_WGL_EXT_colorspace;
         int has_WGL_EXT_create_context_es2_profile;
         int has_WGL_EXT_create_context_es_profile;
@@ -85,7 +81,6 @@ typedef struct glatter_extension_support_status_WGL
         int has_WGL_NV_delay_before_swap;
         int has_WGL_NV_float_buffer;
         int has_WGL_NV_gpu_affinity;
-        int has_WGL_NV_multigpu_context;
         int has_WGL_NV_multisample_coverage;
         int has_WGL_NV_present_video;
         int has_WGL_NV_render_depth_texture;
@@ -123,7 +118,6 @@ typedef struct glatter_extension_support_status_WGL
 #define glatter_WGL_ARB_robustness_application_isolation glatter_get_extension_support_WGL().has_WGL_ARB_robustness_application_isolation
 #define glatter_WGL_ARB_robustness_share_group_isolation glatter_get_extension_support_WGL().has_WGL_ARB_robustness_share_group_isolation
 #define glatter_WGL_ATI_pixel_format_float glatter_get_extension_support_WGL().has_WGL_ATI_pixel_format_float
-#define glatter_WGL_ATI_render_texture_rectangle glatter_get_extension_support_WGL().has_WGL_ATI_render_texture_rectangle
 #define glatter_WGL_EXT_colorspace glatter_get_extension_support_WGL().has_WGL_EXT_colorspace
 #define glatter_WGL_EXT_create_context_es2_profile glatter_get_extension_support_WGL().has_WGL_EXT_create_context_es2_profile
 #define glatter_WGL_EXT_create_context_es_profile glatter_get_extension_support_WGL().has_WGL_EXT_create_context_es_profile
@@ -150,7 +144,6 @@ typedef struct glatter_extension_support_status_WGL
 #define glatter_WGL_NV_delay_before_swap glatter_get_extension_support_WGL().has_WGL_NV_delay_before_swap
 #define glatter_WGL_NV_float_buffer glatter_get_extension_support_WGL().has_WGL_NV_float_buffer
 #define glatter_WGL_NV_gpu_affinity glatter_get_extension_support_WGL().has_WGL_NV_gpu_affinity
-#define glatter_WGL_NV_multigpu_context glatter_get_extension_support_WGL().has_WGL_NV_multigpu_context
 #define glatter_WGL_NV_multisample_coverage glatter_get_extension_support_WGL().has_WGL_NV_multisample_coverage
 #define glatter_WGL_NV_present_video glatter_get_extension_support_WGL().has_WGL_NV_present_video
 #define glatter_WGL_NV_render_depth_texture glatter_get_extension_support_WGL().has_WGL_NV_render_depth_texture

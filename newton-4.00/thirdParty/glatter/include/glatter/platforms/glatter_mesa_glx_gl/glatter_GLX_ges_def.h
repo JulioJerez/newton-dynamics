@@ -29,57 +29,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <string.h> /* memcpy */
 
-/* ---- Per-context, per-thread extension support cache (generated) ---- */
-#ifndef GLATTER_ES_CACHE_SLOTS
-#define GLATTER_ES_CACHE_SLOTS 8
-#endif
-
-typedef struct {
-    uintptr_t key; /* context key from glatter_current_gl_context_key_() */
-    glatter_extension_support_status_GLX_t ess;
-} glatter_es_cache_entry_GLX_t;
-
-static GLATTER_THREAD_LOCAL glatter_es_cache_entry_GLX_t
-    glatter_es_cache_GLX[GLATTER_ES_CACHE_SLOTS];
-
-static GLATTER_THREAD_LOCAL unsigned glatter_es_cache_pos_GLX = 0;
-
-/* Optional: public invalidation for this family. */
-GLATTER_INLINE_OR_NOT void glatter_invalidate_extension_cache_GLX(void) {
-    for (unsigned i = 0; i < GLATTER_ES_CACHE_SLOTS; ++i) {
-        glatter_es_cache_GLX[i].key = (uintptr_t)0;
-    }
-}
-
 GLATTER_INLINE_OR_NOT
 glatter_extension_support_status_GLX_t glatter_get_extension_support_GLX()
 {
-    /* Per-thread scratch array to build the bitset before mapping into ess. */
-    static GLATTER_THREAD_LOCAL int indexed_extensions[70];
-
-    /* Local result object (returned by value). */
-    glatter_extension_support_status_GLX_t ess; /* will be filled then returned */
-    memset(&ess, 0, sizeof(ess));
-
-    /* 1) Compute a key for the current context; 0 means "no current context". */
-    uintptr_t ctx_key = glatter_current_gl_context_key_();
-
-    /* 2) If no current context, return zeros without touching the cache. */
-    if (ctx_key == (uintptr_t)0) {
-        /* Leave ess zero-initialized to indicate "no extensions known". */
-        return ess;
-    }
-
-    /* 3) Cache lookup (TLS ring of 8 entries). */
-    for (unsigned i = 0; i < GLATTER_ES_CACHE_SLOTS; ++i) {
-        if (glatter_es_cache_GLX[i].key == ctx_key) {
-            return glatter_es_cache_GLX[i].ess; /* HIT */
-        }
-    }
-
-    /* 4) MISS: (re)build indexed_extensions[...] for the *current* context. */
-    /* Ensure scratch is cleared before probing. */
-    memset(indexed_extensions, 0, sizeof(indexed_extensions));
+    static int indexed_extensions[67];
+    static glatter_extension_support_status_GLX_t ess;
 
     typedef glatter_es_record_t rt;
 #ifdef __cplusplus
@@ -87,76 +41,73 @@ glatter_extension_support_status_GLX_t glatter_get_extension_support_GLX()
 #else
 #define zrt {0, 0}
 #endif
-    static rt e18b [] = {{1471218059, 5}, zrt};
-    static rt e259 [] = {{454509145, 48}, zrt};
-    static rt e273 [] = {{1395098227, 52}, zrt};
-    static rt e353 [] = {{58065747, 11}, zrt};
-    static rt e3a8 [] = {{1556202408, 1}, zrt};
-    static rt e3ff [] = {{4004250623, 58}, zrt};
-    static rt e470 [] = {{3891119216, 14}, zrt};
-    static rt e545 [] = {{573916485, 15}, zrt};
-    static rt e551 [] = {{3242100049, 51}, zrt};
-    static rt e579 [] = {{1515128185, 19}, zrt};
-    static rt e611 [] = {{3678357009, 62}, zrt};
-    static rt e64d [] = {{2793817677, 39}, zrt};
-    static rt e841 [] = {{1082738753, 43}, zrt};
-    static rt e909 [] = {{3761686793, 46}, zrt};
-    static rt e96d [] = {{3244231021, 44}, zrt};
-    static rt ecfc [] = {{3801681148, 49}, zrt};
-    static rt ed10 [] = {{3112307984, 17}, zrt};
-    static rt ee0a [] = {{167038474, 65}, zrt};
-    static rt ee6c [] = {{2845691500, 67}, zrt};
-    static rt ee90 [] = {{1369247376, 61}, zrt};
-    static rt eea4 [] = {{3413839524, 68}, zrt};
-    static rt eef0 [] = {{2071547632, 10}, zrt};
-    static rt ef07 [] = {{1280052999, 55}, zrt};
-    static rt ef5b [] = {{2519650139, 3}, zrt};
-    static rt e100d[] = {{2417250317, 42}, zrt};
-    static rt e1020[] = {{3617591328, 25}, zrt};
-    static rt e14b1[] = {{767120561, 23}, zrt};
-    static rt e1568[] = {{3951121768, 64}, zrt};
-    static rt e1776[] = {{3757758326, 7}, zrt};
-    static rt e1986[] = {{503454086, 40}, zrt};
-    static rt e1a3e[] = {{602348094, 29}, zrt};
-    static rt e1b60[] = {{3989887840, 35}, zrt};
-    static rt e1b74[] = {{3770506100, 56}, zrt};
-    static rt e1be1[] = {{782998497, 36}, zrt};
-    static rt e1c12[] = {{188423186, 32}, zrt};
-    static rt e1e49[] = {{1226513993, 2}, zrt};
-    static rt e1e7f[] = {{1910808191, 12}, zrt};
-    static rt e1fb3[] = {{621043635, 53}, zrt};
-    static rt e1fd0[] = {{3729432528, 63}, zrt};
-    static rt e2118[] = {{3263652120, 37}, zrt};
-    static rt e217e[] = {{2730615166, 22}, zrt};
-    static rt e2207[] = {{1819107847, 57}, zrt};
-    static rt e222a[] = {{4155662890, 45}, zrt};
-    static rt e2241[] = {{3414139457, 21}, zrt};
-    static rt e242a[] = {{2227479594, 60}, zrt};
-    static rt e2486[] = {{1077879942, 31}, zrt};
-    static rt e24ac[] = {{576922796, 66}, zrt};
-    static rt e2685[] = {{1989863045, 27}, zrt};
-    static rt e27e0[] = {{1091626976, 50}, zrt};
-    static rt e2b0a[] = {{3907349258, 13}, zrt};
-    static rt e2d2c[] = {{2477911340, 69}, zrt};
-    static rt e2f72[] = {{1288056690, 6}, zrt};
-    static rt e3337[] = {{3459347255, 30}, zrt};
-    static rt e3370[] = {{162624368, 0}, zrt};
     static rt e33db[] = {{229618651, 9}, zrt};
-    static rt e34b3[] = {{3229529267, 59}, zrt};
-    static rt e34b5[] = {{854357173, 24}, zrt};
-    static rt e3631[] = {{2668754481, 54}, zrt};
-    static rt e371f[] = {{3549050655, 34}, zrt};
-    static rt e37d1[] = {{4290820049, 28}, zrt};
-    static rt e39ef[] = {{3277027823, 41}, zrt};
-    static rt e3a95[] = {{218200725, 8}, zrt};
+    static rt e353 [] = {{58065747, 11}, zrt};
+    static rt e64d [] = {{2793817677, 37}, zrt};
+    static rt e3c4f[] = {{1990163535, 36}, zrt};
+    static rt e1e49[] = {{1226513993, 2}, zrt};
+    static rt ef5b [] = {{2519650139, 3}, zrt};
     static rt e3b00[] = {{1761557248, 4}, zrt};
-    static rt e3b91[] = {{3995057041, 33}, zrt};
-    static rt e3c4f[] = {{1990163535, 38}, zrt};
-    static rt e3ca5[] = {{2443295909, 16}, zrt};
-    static rt e3d1e[] = {{1751989534, 18}, zrt};
-    static rt e3eda[] = {{3300064986, 47}, zrt};
-    static rt e3fda[] = {{1647738842, 26}, zrt};
-    static rt e3ff1[] = {{541786097, 20}, zrt};
+    static rt e18b [] = {{1471218059, 5}, zrt};
+    static rt e2f72[] = {{1288056690, 6}, zrt};
+    static rt e1776[] = {{3757758326, 7}, zrt};
+    static rt e3a95[] = {{218200725, 8}, zrt};
+    static rt eef0 [] = {{2071547632, 10}, zrt};
+    static rt e1e7f[] = {{1910808191, 12}, zrt};
+    static rt e2b0a[] = {{3907349258, 13}, zrt};
+    static rt e470 [] = {{3891119216, 14}, zrt};
+    static rt e3370[] = {{162624368, 0}, zrt};
+    static rt e3a8 [] = {{1556202408, 1}, zrt};
+    static rt e545 [] = {{573916485, 15}, zrt};
+    static rt ed10 [] = {{3112307984, 16}, zrt};
+    static rt e3d1e[] = {{1751989534, 17}, zrt};
+    static rt e579 [] = {{1515128185, 18}, zrt};
+    static rt e3ff1[] = {{541786097, 19}, zrt};
+    static rt e217e[] = {{2730615166, 20}, zrt};
+    static rt e14b1[] = {{767120561, 21}, zrt};
+    static rt e34b5[] = {{854357173, 22}, zrt};
+    static rt e1020[] = {{3617591328, 23}, zrt};
+    static rt e3fda[] = {{1647738842, 24}, zrt};
+    static rt e2685[] = {{1989863045, 25}, zrt};
+    static rt e37d1[] = {{4290820049, 26}, zrt};
+    static rt e1a3e[] = {{602348094, 27}, zrt};
+    static rt e3337[] = {{3459347255, 28}, zrt};
+    static rt e2486[] = {{1077879942, 29}, zrt};
+    static rt e1c12[] = {{188423186, 30}, zrt};
+    static rt e3b91[] = {{3995057041, 31}, zrt};
+    static rt e371f[] = {{3549050655, 32}, zrt};
+    static rt e1b60[] = {{3989887840, 33}, zrt};
+    static rt e1be1[] = {{782998497, 34}, zrt};
+    static rt e2118[] = {{3263652120, 35}, zrt};
+    static rt e1986[] = {{503454086, 38}, zrt};
+    static rt e39ef[] = {{3277027823, 39}, zrt};
+    static rt e100d[] = {{2417250317, 40}, zrt};
+    static rt e841 [] = {{1082738753, 41}, zrt};
+    static rt e222a[] = {{4155662890, 42}, zrt};
+    static rt e909 [] = {{3761686793, 43}, zrt};
+    static rt e3eda[] = {{3300064986, 44}, zrt};
+    static rt e259 [] = {{454509145, 45}, zrt};
+    static rt ecfc [] = {{3801681148, 46}, zrt};
+    static rt e27e0[] = {{1091626976, 47}, zrt};
+    static rt e551 [] = {{3242100049, 48}, zrt};
+    static rt e273 [] = {{1395098227, 49}, zrt};
+    static rt e1fb3[] = {{621043635, 50}, zrt};
+    static rt e3631[] = {{2668754481, 51}, zrt};
+    static rt ef07 [] = {{1280052999, 52}, zrt};
+    static rt e1b74[] = {{3770506100, 53}, zrt};
+    static rt e2207[] = {{1819107847, 54}, zrt};
+    static rt e3ff [] = {{4004250623, 55}, zrt};
+    static rt e34b3[] = {{3229529267, 56}, zrt};
+    static rt e242a[] = {{2227479594, 57}, zrt};
+    static rt ee90 [] = {{1369247376, 58}, zrt};
+    static rt e611 [] = {{3678357009, 59}, zrt};
+    static rt e1fd0[] = {{3729432528, 60}, zrt};
+    static rt e1568[] = {{3951121768, 61}, zrt};
+    static rt ee0a [] = {{167038474, 62}, zrt};
+    static rt e24ac[] = {{576922796, 63}, zrt};
+    static rt ee6c [] = {{2845691500, 64}, zrt};
+    static rt eea4 [] = {{3413839524, 65}, zrt};
+    static rt e2d2c[] = {{2477911340, 66}, zrt};
 
 #ifndef __cplusplus
 #undef zrt
@@ -243,7 +194,7 @@ glatter_extension_support_status_GLX_t glatter_get_extension_support_GLX()
         0,0,0,e909,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,e96d,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -455,7 +406,7 @@ glatter_extension_support_status_GLX_t glatter_get_extension_support_GLX()
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,e2207,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,e222a,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,e2241,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -680,7 +631,7 @@ glatter_extension_support_status_GLX_t glatter_get_extension_support_GLX()
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,e3c4f,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,e3ca5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
         0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -713,11 +664,13 @@ glatter_extension_support_status_GLX_t glatter_get_extension_support_GLX()
     };
 
 
+    static int initialized = 0;
+    if (!initialized) {
 
         uint32_t hash = 5381;
         Display* d = glXGetCurrentDisplay();
-        const uint8_t* ext_str = d ? (const uint8_t*)glatter_glXQueryExtensionsString(d, DefaultScreen(d)) : NULL;
-        for ( ; ext_str && *ext_str; ext_str++) {
+        const uint8_t* ext_str = (const uint8_t*)glatter_glXQueryExtensionsString(d, DefaultScreen(d));
+        for ( ; *ext_str; ext_str++) {
             if (*ext_str == ' ') {
                 int index = -1;
                 rt* r = es_dispatch[ hash & (GLATTER_LOOKUP_SIZE-1) ];
@@ -741,7 +694,7 @@ glatter_extension_support_status_GLX_t glatter_get_extension_support_GLX()
             hash = ((hash << 5) + hash) + (int)(*ext_str);
 
         }
-        if (ext_str && hash != 5381) {
+        if (hash != 5381) {
             int index = -1;
             rt* r = es_dispatch[ hash & (GLATTER_LOOKUP_SIZE-1) ];
             for ( ; r && (r->hash | r->index); r++ ) {
@@ -755,14 +708,12 @@ glatter_extension_support_status_GLX_t glatter_get_extension_support_GLX()
                 // (3)
             }
         }
-        
+        initialized = 1;
+    }
+    
     // Map array to a struct without undefined behaviour.
     // No actual copy is performed with even basic optimization e.g.: -Og
-    memcpy((void*)&ess, indexed_extensions, sizeof(ess));
-
-    glatter_es_cache_GLX[glatter_es_cache_pos_GLX].key = ctx_key;
-    glatter_es_cache_GLX[glatter_es_cache_pos_GLX].ess = ess;
-    glatter_es_cache_pos_GLX = (glatter_es_cache_pos_GLX + 1) % GLATTER_ES_CACHE_SLOTS;
+    memcpy((void*)&ess, indexed_extensions, sizeof(ess)); 
 
     return ess;
 }

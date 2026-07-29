@@ -29,6 +29,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifdef GLATTER_GLX
 #if defined(GLX_H)
+#if defined(GLX_ARB_get_proc_address)
+#ifndef glXGetProcAddressARB
+#define glXGetProcAddressARB(a0) glatter_glXGetProcAddressARB((a0))
+#endif
+GLATTER_UBLOCK(__GLXextFuncPtr, , glXGetProcAddressARB, (const GLubyte *a0))
+#endif // defined(GLX_ARB_get_proc_address)
 #if defined(GLX_ARB_render_texture)
 #ifndef glXBindTexImageARB
 #define glXBindTexImageARB(dpy, pbuffer, buffer) glatter_glXBindTexImageARB((dpy), (pbuffer), (buffer))
@@ -279,6 +285,12 @@ GLATTER_UBLOCK(Bool, , glXMakeAssociatedContextCurrentAMD, (GLXContext ctx))
 #endif
 GLATTER_UBLOCK(GLXContext, , glXCreateContextAttribsARB, (Display *dpy, GLXFBConfig config, GLXContext share_context, Bool direct, const int *attrib_list))
 #endif // defined(GLX_ARB_create_context)
+#if defined(GLX_ARB_get_proc_address)
+#ifndef glXGetProcAddressARB
+#define glXGetProcAddressARB(procName) glatter_glXGetProcAddressARB((procName))
+#endif
+GLATTER_UBLOCK(__GLXextFuncPtr, , glXGetProcAddressARB, (const GLubyte *procName))
+#endif // defined(GLX_ARB_get_proc_address)
 #if defined(GLX_EXT_import_context)
 #ifndef glXFreeContextEXT
 #define glXFreeContextEXT(dpy, context) glatter_glXFreeContextEXT((dpy), (context))
@@ -363,7 +375,7 @@ GLATTER_UBLOCK(Bool, , glXReleaseBuffersMESA, (Display *dpy, GLXDrawable drawabl
 #ifndef glXSet3DfxModeMESA
 #define glXSet3DfxModeMESA(mode) glatter_glXSet3DfxModeMESA((mode))
 #endif
-GLATTER_UBLOCK(GLboolean, , glXSet3DfxModeMESA, (GLint mode))
+GLATTER_UBLOCK(Bool, , glXSet3DfxModeMESA, (int mode))
 #endif // defined(GLX_MESA_set_3dfx_mode)
 #if defined(GLX_MESA_swap_control)
 #ifndef glXGetSwapIntervalMESA
@@ -587,7 +599,7 @@ GLATTER_UBLOCK(void, , glXGetSelectedEventSGIX, (Display *dpy, GLXDrawable drawa
 #ifndef glXQueryGLXPbufferSGIX
 #define glXQueryGLXPbufferSGIX(dpy, pbuf, attribute, value) glatter_glXQueryGLXPbufferSGIX((dpy), (pbuf), (attribute), (value))
 #endif
-GLATTER_UBLOCK(void, , glXQueryGLXPbufferSGIX, (Display *dpy, GLXPbufferSGIX pbuf, int attribute, unsigned int *value))
+GLATTER_UBLOCK(int, , glXQueryGLXPbufferSGIX, (Display *dpy, GLXPbufferSGIX pbuf, int attribute, unsigned int *value))
 #ifndef glXSelectEventSGIX
 #define glXSelectEventSGIX(dpy, drawable, mask) glatter_glXSelectEventSGIX((dpy), (drawable), (mask))
 #endif
@@ -679,7 +691,7 @@ GLATTER_UBLOCK(int, , glXWaitVideoSyncSGI, (int divisor, int remainder, unsigned
 #ifndef glXGetTransparentIndexSUN
 #define glXGetTransparentIndexSUN(dpy, overlay, underlay, pTransparentIndex) glatter_glXGetTransparentIndexSUN((dpy), (overlay), (underlay), (pTransparentIndex))
 #endif
-GLATTER_UBLOCK(Status, , glXGetTransparentIndexSUN, (Display *dpy, Window overlay, Window underlay, unsigned long *pTransparentIndex))
+GLATTER_UBLOCK(Status, , glXGetTransparentIndexSUN, (Display *dpy, Window overlay, Window underlay, long *pTransparentIndex))
 #endif // defined(GLX_SUN_get_transparent_index)
 #if defined(GLX_VERSION_1_3)
 #ifndef glXChooseFBConfig
@@ -750,7 +762,13 @@ GLATTER_UBLOCK(void, , glXQueryDrawable, (Display *dpy, GLXDrawable draw, int at
 #define glXSelectEvent(dpy, draw, event_mask) glatter_glXSelectEvent((dpy), (draw), (event_mask))
 #endif
 GLATTER_UBLOCK(void, , glXSelectEvent, (Display *dpy, GLXDrawable draw, unsigned long event_mask))
-#endif // defined(__glx_glxext_h_)
 #endif // defined(GLX_VERSION_1_3)
+#if defined(GLX_VERSION_1_4)
+#ifndef glXGetProcAddress
+#define glXGetProcAddress(procName) glatter_glXGetProcAddress((procName))
+#endif
+GLATTER_UBLOCK(__GLXextFuncPtr, , glXGetProcAddress, (const GLubyte *procName))
+#endif // defined(__glx_glxext_h_)
+#endif // defined(GLX_VERSION_1_4)
 #endif // GLATTER_GLX
 

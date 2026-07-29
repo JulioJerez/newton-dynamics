@@ -33,7 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 GLATTER_INLINE_OR_NOT
-const char* enum_to_string_WGL(GLATTER_ENUM_WGL e)
+const char* enum_to_string_WGL(GLenum e)
 {
     switch (e) {
 #if defined(WGL_AMD_gpu_association)
@@ -491,13 +491,6 @@ const char* enum_to_string_WGL(GLATTER_ENUM_WGL e)
                     return "WGL_FRAMEBUFFER_SRGB_CAPABLE_EXT";
 #endif
             break;
-#if defined(WGL_NV_multigpu_context)
-        case 0x20aa: return "WGL_CONTEXT_MULTIGPU_ATTRIB_NV";
-        case 0x20ab: return "WGL_CONTEXT_MULTIGPU_ATTRIB_SINGLE_NV";
-        case 0x20ac: return "WGL_CONTEXT_MULTIGPU_ATTRIB_AFR_NV";
-        case 0x20ad: return "WGL_CONTEXT_MULTIGPU_ATTRIB_MULTICAST_NV";
-        case 0x20ae: return "WGL_CONTEXT_MULTIGPU_ATTRIB_MULTI_DISPLAY_MULTICAST_NV";
-#endif
 #if defined(WGL_NV_float_buffer)
         case 0x20b0: return "WGL_FLOAT_COMPONENTS_NV";
         case 0x20b1: return "WGL_BIND_TO_TEXTURE_RECTANGLE_FLOAT_R_NV";
@@ -546,24 +539,15 @@ const char* enum_to_string_WGL(GLATTER_ENUM_WGL e)
         case 0x21a2: return "WGL_GPU_FASTEST_TARGET_GPUS_AMD";
         case 0x21a3: return "WGL_GPU_RAM_AMD";
         case 0x21a4: return "WGL_GPU_CLOCK_AMD";
-#endif
-        case 0x21a5:
-#if defined(WGL_AMD_gpu_association)
-                    return "WGL_GPU_NUM_PIPES_AMD";
-#endif
-#if defined(WGL_ATI_render_texture_rectangle)
-                    return "WGL_TEXTURE_RECTANGLE_ATI";
-#endif
-            break;
-#if defined(WGL_AMD_gpu_association)
+        case 0x21a5: return "WGL_GPU_NUM_PIPES_AMD";
         case 0x21a6: return "WGL_GPU_NUM_SIMD_AMD";
         case 0x21a7: return "WGL_GPU_NUM_RB_AMD";
         case 0x21a8: return "WGL_GPU_NUM_SPI_AMD";
 #endif
 #if defined(WGL_EXT_colorspace)
+        case 0x3087: return "WGL_COLORSPACE_EXT";
         case 0x3089: return "WGL_COLORSPACE_SRGB_EXT";
         case 0x308a: return "WGL_COLORSPACE_LINEAR_EXT";
-        case 0x309d: return "WGL_COLORSPACE_EXT";
 #endif
 #if defined(WGL_ARB_create_context_no_error)
         case 0x31b3: return "WGL_CONTEXT_OPENGL_NO_ERROR_ARB";

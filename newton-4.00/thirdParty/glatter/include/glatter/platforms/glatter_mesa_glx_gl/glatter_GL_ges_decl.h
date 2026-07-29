@@ -27,9 +27,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 
-#ifndef GLATTER_LOOKUP_SIZE
-#define GLATTER_LOOKUP_SIZE 0x4000
-#endif
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -283,7 +280,6 @@ typedef struct glatter_extension_support_status_GL
         int has_GL_ATI_vertex_streams;
         int has_GL_EXT_422_pixels;
         int has_GL_EXT_EGL_image_storage;
-        int has_GL_EXT_EGL_sync;
         int has_GL_EXT_abgr;
         int has_GL_EXT_bgra;
         int has_GL_EXT_bindable_uniform;
@@ -310,9 +306,7 @@ typedef struct glatter_extension_support_status_GL
         int has_GL_EXT_draw_range_elements;
         int has_GL_EXT_external_buffer;
         int has_GL_EXT_fog_coord;
-        int has_GL_EXT_fragment_shading_rate;
         int has_GL_EXT_framebuffer_blit;
-        int has_GL_EXT_framebuffer_blit_layers;
         int has_GL_EXT_framebuffer_multisample;
         int has_GL_EXT_framebuffer_multisample_blit_scaled;
         int has_GL_EXT_framebuffer_object;
@@ -329,13 +323,9 @@ typedef struct glatter_extension_support_status_GL
         int has_GL_EXT_memory_object;
         int has_GL_EXT_memory_object_fd;
         int has_GL_EXT_memory_object_win32;
-        int has_GL_EXT_mesh_shader;
         int has_GL_EXT_misc_attribute;
         int has_GL_EXT_multi_draw_arrays;
         int has_GL_EXT_multisample;
-        int has_GL_EXT_multiview_tessellation_geometry_shader;
-        int has_GL_EXT_multiview_texture_multisample;
-        int has_GL_EXT_multiview_timer_query;
         int has_GL_EXT_packed_depth_stencil;
         int has_GL_EXT_packed_float;
         int has_GL_EXT_packed_pixels;
@@ -361,7 +351,6 @@ typedef struct glatter_extension_support_status_GL
         int has_GL_EXT_shader_image_load_formatted;
         int has_GL_EXT_shader_image_load_store;
         int has_GL_EXT_shader_integer_mix;
-        int has_GL_EXT_shader_samples_identical;
         int has_GL_EXT_shadow_funcs;
         int has_GL_EXT_shared_texture_palette;
         int has_GL_EXT_sparse_texture2;
@@ -388,13 +377,9 @@ typedef struct glatter_extension_support_status_GL
         int has_GL_EXT_texture_object;
         int has_GL_EXT_texture_perturb_normal;
         int has_GL_EXT_texture_sRGB;
-        int has_GL_EXT_texture_sRGB_R8;
-        int has_GL_EXT_texture_sRGB_RG8;
         int has_GL_EXT_texture_sRGB_decode;
-        int has_GL_EXT_texture_shadow_lod;
         int has_GL_EXT_texture_shared_exponent;
         int has_GL_EXT_texture_snorm;
-        int has_GL_EXT_texture_storage;
         int has_GL_EXT_texture_swizzle;
         int has_GL_EXT_timer_query;
         int has_GL_EXT_transform_feedback;
@@ -436,29 +421,22 @@ typedef struct glatter_extension_support_status_GL
         int has_GL_KHR_parallel_shader_compile;
         int has_GL_KHR_robust_buffer_access_behavior;
         int has_GL_KHR_robustness;
-        int has_GL_KHR_shader_subgroup;
         int has_GL_KHR_texture_compression_astc_hdr;
         int has_GL_KHR_texture_compression_astc_ldr;
         int has_GL_KHR_texture_compression_astc_sliced_3d;
         int has_GL_MESAX_texture_stack;
-        int has_GL_MESA_framebuffer_flip_x;
-        int has_GL_MESA_framebuffer_flip_y;
-        int has_GL_MESA_framebuffer_swap_xy;
         int has_GL_MESA_pack_invert;
         int has_GL_MESA_packed_depth_stencil;
         int has_GL_MESA_program_binary_formats;
         int has_GL_MESA_resize_buffers;
         int has_GL_MESA_shader_integer_functions;
-        int has_GL_MESA_texture_const_bandwidth;
         int has_GL_MESA_tile_raster_order;
         int has_GL_MESA_window_pos;
         int has_GL_MESA_ycbcr_texture;
         int has_GL_NVX_blend_equation_advanced_multi_draw_buffers;
         int has_GL_NVX_conditional_render;
         int has_GL_NVX_gpu_memory_info;
-        int has_GL_NVX_gpu_multicast2;
         int has_GL_NVX_linked_gpu_multicast;
-        int has_GL_NVX_progress_fence;
         int has_GL_NV_alpha_to_coverage_dither_control;
         int has_GL_NV_bindless_multi_draw_indirect;
         int has_GL_NV_bindless_multi_draw_indirect_count;
@@ -470,7 +448,6 @@ typedef struct glatter_extension_support_status_GL
         int has_GL_NV_clip_space_w_scaling;
         int has_GL_NV_command_list;
         int has_GL_NV_compute_program5;
-        int has_GL_NV_compute_shader_derivatives;
         int has_GL_NV_conditional_render;
         int has_GL_NV_conservative_raster;
         int has_GL_NV_conservative_raster_dilate;
@@ -495,7 +472,6 @@ typedef struct glatter_extension_support_status_GL
         int has_GL_NV_fragment_program2;
         int has_GL_NV_fragment_program4;
         int has_GL_NV_fragment_program_option;
-        int has_GL_NV_fragment_shader_barycentric;
         int has_GL_NV_fragment_shader_interlock;
         int has_GL_NV_framebuffer_mixed_samples;
         int has_GL_NV_framebuffer_multisample_coverage;
@@ -510,9 +486,6 @@ typedef struct glatter_extension_support_status_GL
         int has_GL_NV_half_float;
         int has_GL_NV_internalformat_sample_query;
         int has_GL_NV_light_max_exponent;
-        int has_GL_NV_memory_attachment;
-        int has_GL_NV_memory_object_sparse;
-        int has_GL_NV_mesh_shader;
         int has_GL_NV_multisample_coverage;
         int has_GL_NV_multisample_filter_hint;
         int has_GL_NV_occlusion_query;
@@ -525,16 +498,13 @@ typedef struct glatter_extension_support_status_GL
         int has_GL_NV_point_sprite;
         int has_GL_NV_present_video;
         int has_GL_NV_primitive_restart;
-        int has_GL_NV_primitive_shading_rate;
         int has_GL_NV_query_resource;
         int has_GL_NV_query_resource_tag;
         int has_GL_NV_register_combiners;
         int has_GL_NV_register_combiners2;
-        int has_GL_NV_representative_fragment_test;
         int has_GL_NV_robustness_video_memory_purge;
         int has_GL_NV_sample_locations;
         int has_GL_NV_sample_mask_override_coverage;
-        int has_GL_NV_scissor_exclusive;
         int has_GL_NV_shader_atomic_counters;
         int has_GL_NV_shader_atomic_float;
         int has_GL_NV_shader_atomic_float64;
@@ -543,11 +513,8 @@ typedef struct glatter_extension_support_status_GL
         int has_GL_NV_shader_buffer_load;
         int has_GL_NV_shader_buffer_store;
         int has_GL_NV_shader_storage_buffer_object;
-        int has_GL_NV_shader_subgroup_partitioned;
-        int has_GL_NV_shader_texture_footprint;
         int has_GL_NV_shader_thread_group;
         int has_GL_NV_shader_thread_shuffle;
-        int has_GL_NV_shading_rate_image;
         int has_GL_NV_stereo_view_rendering;
         int has_GL_NV_tessellation_program5;
         int has_GL_NV_texgen_emboss;
@@ -562,13 +529,10 @@ typedef struct glatter_extension_support_status_GL
         int has_GL_NV_texture_shader;
         int has_GL_NV_texture_shader2;
         int has_GL_NV_texture_shader3;
-        int has_GL_NV_timeline_semaphore;
         int has_GL_NV_transform_feedback;
         int has_GL_NV_transform_feedback2;
-        int has_GL_NV_uniform_buffer_std430_layout;
         int has_GL_NV_uniform_buffer_unified_memory;
         int has_GL_NV_vdpau_interop;
-        int has_GL_NV_vdpau_interop2;
         int has_GL_NV_vertex_array_range;
         int has_GL_NV_vertex_array_range2;
         int has_GL_NV_vertex_attrib_integer_64bit;
@@ -915,7 +879,6 @@ typedef struct glatter_extension_support_status_GL
 #define glatter_GL_ATI_vertex_streams glatter_get_extension_support_GL().has_GL_ATI_vertex_streams
 #define glatter_GL_EXT_422_pixels glatter_get_extension_support_GL().has_GL_EXT_422_pixels
 #define glatter_GL_EXT_EGL_image_storage glatter_get_extension_support_GL().has_GL_EXT_EGL_image_storage
-#define glatter_GL_EXT_EGL_sync glatter_get_extension_support_GL().has_GL_EXT_EGL_sync
 #define glatter_GL_EXT_abgr glatter_get_extension_support_GL().has_GL_EXT_abgr
 #define glatter_GL_EXT_bgra glatter_get_extension_support_GL().has_GL_EXT_bgra
 #define glatter_GL_EXT_bindable_uniform glatter_get_extension_support_GL().has_GL_EXT_bindable_uniform
@@ -942,9 +905,7 @@ typedef struct glatter_extension_support_status_GL
 #define glatter_GL_EXT_draw_range_elements glatter_get_extension_support_GL().has_GL_EXT_draw_range_elements
 #define glatter_GL_EXT_external_buffer glatter_get_extension_support_GL().has_GL_EXT_external_buffer
 #define glatter_GL_EXT_fog_coord glatter_get_extension_support_GL().has_GL_EXT_fog_coord
-#define glatter_GL_EXT_fragment_shading_rate glatter_get_extension_support_GL().has_GL_EXT_fragment_shading_rate
 #define glatter_GL_EXT_framebuffer_blit glatter_get_extension_support_GL().has_GL_EXT_framebuffer_blit
-#define glatter_GL_EXT_framebuffer_blit_layers glatter_get_extension_support_GL().has_GL_EXT_framebuffer_blit_layers
 #define glatter_GL_EXT_framebuffer_multisample glatter_get_extension_support_GL().has_GL_EXT_framebuffer_multisample
 #define glatter_GL_EXT_framebuffer_multisample_blit_scaled glatter_get_extension_support_GL().has_GL_EXT_framebuffer_multisample_blit_scaled
 #define glatter_GL_EXT_framebuffer_object glatter_get_extension_support_GL().has_GL_EXT_framebuffer_object
@@ -961,13 +922,9 @@ typedef struct glatter_extension_support_status_GL
 #define glatter_GL_EXT_memory_object glatter_get_extension_support_GL().has_GL_EXT_memory_object
 #define glatter_GL_EXT_memory_object_fd glatter_get_extension_support_GL().has_GL_EXT_memory_object_fd
 #define glatter_GL_EXT_memory_object_win32 glatter_get_extension_support_GL().has_GL_EXT_memory_object_win32
-#define glatter_GL_EXT_mesh_shader glatter_get_extension_support_GL().has_GL_EXT_mesh_shader
 #define glatter_GL_EXT_misc_attribute glatter_get_extension_support_GL().has_GL_EXT_misc_attribute
 #define glatter_GL_EXT_multi_draw_arrays glatter_get_extension_support_GL().has_GL_EXT_multi_draw_arrays
 #define glatter_GL_EXT_multisample glatter_get_extension_support_GL().has_GL_EXT_multisample
-#define glatter_GL_EXT_multiview_tessellation_geometry_shader glatter_get_extension_support_GL().has_GL_EXT_multiview_tessellation_geometry_shader
-#define glatter_GL_EXT_multiview_texture_multisample glatter_get_extension_support_GL().has_GL_EXT_multiview_texture_multisample
-#define glatter_GL_EXT_multiview_timer_query glatter_get_extension_support_GL().has_GL_EXT_multiview_timer_query
 #define glatter_GL_EXT_packed_depth_stencil glatter_get_extension_support_GL().has_GL_EXT_packed_depth_stencil
 #define glatter_GL_EXT_packed_float glatter_get_extension_support_GL().has_GL_EXT_packed_float
 #define glatter_GL_EXT_packed_pixels glatter_get_extension_support_GL().has_GL_EXT_packed_pixels
@@ -993,7 +950,6 @@ typedef struct glatter_extension_support_status_GL
 #define glatter_GL_EXT_shader_image_load_formatted glatter_get_extension_support_GL().has_GL_EXT_shader_image_load_formatted
 #define glatter_GL_EXT_shader_image_load_store glatter_get_extension_support_GL().has_GL_EXT_shader_image_load_store
 #define glatter_GL_EXT_shader_integer_mix glatter_get_extension_support_GL().has_GL_EXT_shader_integer_mix
-#define glatter_GL_EXT_shader_samples_identical glatter_get_extension_support_GL().has_GL_EXT_shader_samples_identical
 #define glatter_GL_EXT_shadow_funcs glatter_get_extension_support_GL().has_GL_EXT_shadow_funcs
 #define glatter_GL_EXT_shared_texture_palette glatter_get_extension_support_GL().has_GL_EXT_shared_texture_palette
 #define glatter_GL_EXT_sparse_texture2 glatter_get_extension_support_GL().has_GL_EXT_sparse_texture2
@@ -1020,13 +976,9 @@ typedef struct glatter_extension_support_status_GL
 #define glatter_GL_EXT_texture_object glatter_get_extension_support_GL().has_GL_EXT_texture_object
 #define glatter_GL_EXT_texture_perturb_normal glatter_get_extension_support_GL().has_GL_EXT_texture_perturb_normal
 #define glatter_GL_EXT_texture_sRGB glatter_get_extension_support_GL().has_GL_EXT_texture_sRGB
-#define glatter_GL_EXT_texture_sRGB_R8 glatter_get_extension_support_GL().has_GL_EXT_texture_sRGB_R8
-#define glatter_GL_EXT_texture_sRGB_RG8 glatter_get_extension_support_GL().has_GL_EXT_texture_sRGB_RG8
 #define glatter_GL_EXT_texture_sRGB_decode glatter_get_extension_support_GL().has_GL_EXT_texture_sRGB_decode
-#define glatter_GL_EXT_texture_shadow_lod glatter_get_extension_support_GL().has_GL_EXT_texture_shadow_lod
 #define glatter_GL_EXT_texture_shared_exponent glatter_get_extension_support_GL().has_GL_EXT_texture_shared_exponent
 #define glatter_GL_EXT_texture_snorm glatter_get_extension_support_GL().has_GL_EXT_texture_snorm
-#define glatter_GL_EXT_texture_storage glatter_get_extension_support_GL().has_GL_EXT_texture_storage
 #define glatter_GL_EXT_texture_swizzle glatter_get_extension_support_GL().has_GL_EXT_texture_swizzle
 #define glatter_GL_EXT_timer_query glatter_get_extension_support_GL().has_GL_EXT_timer_query
 #define glatter_GL_EXT_transform_feedback glatter_get_extension_support_GL().has_GL_EXT_transform_feedback
@@ -1068,29 +1020,22 @@ typedef struct glatter_extension_support_status_GL
 #define glatter_GL_KHR_parallel_shader_compile glatter_get_extension_support_GL().has_GL_KHR_parallel_shader_compile
 #define glatter_GL_KHR_robust_buffer_access_behavior glatter_get_extension_support_GL().has_GL_KHR_robust_buffer_access_behavior
 #define glatter_GL_KHR_robustness glatter_get_extension_support_GL().has_GL_KHR_robustness
-#define glatter_GL_KHR_shader_subgroup glatter_get_extension_support_GL().has_GL_KHR_shader_subgroup
 #define glatter_GL_KHR_texture_compression_astc_hdr glatter_get_extension_support_GL().has_GL_KHR_texture_compression_astc_hdr
 #define glatter_GL_KHR_texture_compression_astc_ldr glatter_get_extension_support_GL().has_GL_KHR_texture_compression_astc_ldr
 #define glatter_GL_KHR_texture_compression_astc_sliced_3d glatter_get_extension_support_GL().has_GL_KHR_texture_compression_astc_sliced_3d
 #define glatter_GL_MESAX_texture_stack glatter_get_extension_support_GL().has_GL_MESAX_texture_stack
-#define glatter_GL_MESA_framebuffer_flip_x glatter_get_extension_support_GL().has_GL_MESA_framebuffer_flip_x
-#define glatter_GL_MESA_framebuffer_flip_y glatter_get_extension_support_GL().has_GL_MESA_framebuffer_flip_y
-#define glatter_GL_MESA_framebuffer_swap_xy glatter_get_extension_support_GL().has_GL_MESA_framebuffer_swap_xy
 #define glatter_GL_MESA_pack_invert glatter_get_extension_support_GL().has_GL_MESA_pack_invert
 #define glatter_GL_MESA_packed_depth_stencil glatter_get_extension_support_GL().has_GL_MESA_packed_depth_stencil
 #define glatter_GL_MESA_program_binary_formats glatter_get_extension_support_GL().has_GL_MESA_program_binary_formats
 #define glatter_GL_MESA_resize_buffers glatter_get_extension_support_GL().has_GL_MESA_resize_buffers
 #define glatter_GL_MESA_shader_integer_functions glatter_get_extension_support_GL().has_GL_MESA_shader_integer_functions
-#define glatter_GL_MESA_texture_const_bandwidth glatter_get_extension_support_GL().has_GL_MESA_texture_const_bandwidth
 #define glatter_GL_MESA_tile_raster_order glatter_get_extension_support_GL().has_GL_MESA_tile_raster_order
 #define glatter_GL_MESA_window_pos glatter_get_extension_support_GL().has_GL_MESA_window_pos
 #define glatter_GL_MESA_ycbcr_texture glatter_get_extension_support_GL().has_GL_MESA_ycbcr_texture
 #define glatter_GL_NVX_blend_equation_advanced_multi_draw_buffers glatter_get_extension_support_GL().has_GL_NVX_blend_equation_advanced_multi_draw_buffers
 #define glatter_GL_NVX_conditional_render glatter_get_extension_support_GL().has_GL_NVX_conditional_render
 #define glatter_GL_NVX_gpu_memory_info glatter_get_extension_support_GL().has_GL_NVX_gpu_memory_info
-#define glatter_GL_NVX_gpu_multicast2 glatter_get_extension_support_GL().has_GL_NVX_gpu_multicast2
 #define glatter_GL_NVX_linked_gpu_multicast glatter_get_extension_support_GL().has_GL_NVX_linked_gpu_multicast
-#define glatter_GL_NVX_progress_fence glatter_get_extension_support_GL().has_GL_NVX_progress_fence
 #define glatter_GL_NV_alpha_to_coverage_dither_control glatter_get_extension_support_GL().has_GL_NV_alpha_to_coverage_dither_control
 #define glatter_GL_NV_bindless_multi_draw_indirect glatter_get_extension_support_GL().has_GL_NV_bindless_multi_draw_indirect
 #define glatter_GL_NV_bindless_multi_draw_indirect_count glatter_get_extension_support_GL().has_GL_NV_bindless_multi_draw_indirect_count
@@ -1102,7 +1047,6 @@ typedef struct glatter_extension_support_status_GL
 #define glatter_GL_NV_clip_space_w_scaling glatter_get_extension_support_GL().has_GL_NV_clip_space_w_scaling
 #define glatter_GL_NV_command_list glatter_get_extension_support_GL().has_GL_NV_command_list
 #define glatter_GL_NV_compute_program5 glatter_get_extension_support_GL().has_GL_NV_compute_program5
-#define glatter_GL_NV_compute_shader_derivatives glatter_get_extension_support_GL().has_GL_NV_compute_shader_derivatives
 #define glatter_GL_NV_conditional_render glatter_get_extension_support_GL().has_GL_NV_conditional_render
 #define glatter_GL_NV_conservative_raster glatter_get_extension_support_GL().has_GL_NV_conservative_raster
 #define glatter_GL_NV_conservative_raster_dilate glatter_get_extension_support_GL().has_GL_NV_conservative_raster_dilate
@@ -1127,7 +1071,6 @@ typedef struct glatter_extension_support_status_GL
 #define glatter_GL_NV_fragment_program2 glatter_get_extension_support_GL().has_GL_NV_fragment_program2
 #define glatter_GL_NV_fragment_program4 glatter_get_extension_support_GL().has_GL_NV_fragment_program4
 #define glatter_GL_NV_fragment_program_option glatter_get_extension_support_GL().has_GL_NV_fragment_program_option
-#define glatter_GL_NV_fragment_shader_barycentric glatter_get_extension_support_GL().has_GL_NV_fragment_shader_barycentric
 #define glatter_GL_NV_fragment_shader_interlock glatter_get_extension_support_GL().has_GL_NV_fragment_shader_interlock
 #define glatter_GL_NV_framebuffer_mixed_samples glatter_get_extension_support_GL().has_GL_NV_framebuffer_mixed_samples
 #define glatter_GL_NV_framebuffer_multisample_coverage glatter_get_extension_support_GL().has_GL_NV_framebuffer_multisample_coverage
@@ -1142,9 +1085,6 @@ typedef struct glatter_extension_support_status_GL
 #define glatter_GL_NV_half_float glatter_get_extension_support_GL().has_GL_NV_half_float
 #define glatter_GL_NV_internalformat_sample_query glatter_get_extension_support_GL().has_GL_NV_internalformat_sample_query
 #define glatter_GL_NV_light_max_exponent glatter_get_extension_support_GL().has_GL_NV_light_max_exponent
-#define glatter_GL_NV_memory_attachment glatter_get_extension_support_GL().has_GL_NV_memory_attachment
-#define glatter_GL_NV_memory_object_sparse glatter_get_extension_support_GL().has_GL_NV_memory_object_sparse
-#define glatter_GL_NV_mesh_shader glatter_get_extension_support_GL().has_GL_NV_mesh_shader
 #define glatter_GL_NV_multisample_coverage glatter_get_extension_support_GL().has_GL_NV_multisample_coverage
 #define glatter_GL_NV_multisample_filter_hint glatter_get_extension_support_GL().has_GL_NV_multisample_filter_hint
 #define glatter_GL_NV_occlusion_query glatter_get_extension_support_GL().has_GL_NV_occlusion_query
@@ -1157,16 +1097,13 @@ typedef struct glatter_extension_support_status_GL
 #define glatter_GL_NV_point_sprite glatter_get_extension_support_GL().has_GL_NV_point_sprite
 #define glatter_GL_NV_present_video glatter_get_extension_support_GL().has_GL_NV_present_video
 #define glatter_GL_NV_primitive_restart glatter_get_extension_support_GL().has_GL_NV_primitive_restart
-#define glatter_GL_NV_primitive_shading_rate glatter_get_extension_support_GL().has_GL_NV_primitive_shading_rate
 #define glatter_GL_NV_query_resource glatter_get_extension_support_GL().has_GL_NV_query_resource
 #define glatter_GL_NV_query_resource_tag glatter_get_extension_support_GL().has_GL_NV_query_resource_tag
 #define glatter_GL_NV_register_combiners glatter_get_extension_support_GL().has_GL_NV_register_combiners
 #define glatter_GL_NV_register_combiners2 glatter_get_extension_support_GL().has_GL_NV_register_combiners2
-#define glatter_GL_NV_representative_fragment_test glatter_get_extension_support_GL().has_GL_NV_representative_fragment_test
 #define glatter_GL_NV_robustness_video_memory_purge glatter_get_extension_support_GL().has_GL_NV_robustness_video_memory_purge
 #define glatter_GL_NV_sample_locations glatter_get_extension_support_GL().has_GL_NV_sample_locations
 #define glatter_GL_NV_sample_mask_override_coverage glatter_get_extension_support_GL().has_GL_NV_sample_mask_override_coverage
-#define glatter_GL_NV_scissor_exclusive glatter_get_extension_support_GL().has_GL_NV_scissor_exclusive
 #define glatter_GL_NV_shader_atomic_counters glatter_get_extension_support_GL().has_GL_NV_shader_atomic_counters
 #define glatter_GL_NV_shader_atomic_float glatter_get_extension_support_GL().has_GL_NV_shader_atomic_float
 #define glatter_GL_NV_shader_atomic_float64 glatter_get_extension_support_GL().has_GL_NV_shader_atomic_float64
@@ -1175,11 +1112,8 @@ typedef struct glatter_extension_support_status_GL
 #define glatter_GL_NV_shader_buffer_load glatter_get_extension_support_GL().has_GL_NV_shader_buffer_load
 #define glatter_GL_NV_shader_buffer_store glatter_get_extension_support_GL().has_GL_NV_shader_buffer_store
 #define glatter_GL_NV_shader_storage_buffer_object glatter_get_extension_support_GL().has_GL_NV_shader_storage_buffer_object
-#define glatter_GL_NV_shader_subgroup_partitioned glatter_get_extension_support_GL().has_GL_NV_shader_subgroup_partitioned
-#define glatter_GL_NV_shader_texture_footprint glatter_get_extension_support_GL().has_GL_NV_shader_texture_footprint
 #define glatter_GL_NV_shader_thread_group glatter_get_extension_support_GL().has_GL_NV_shader_thread_group
 #define glatter_GL_NV_shader_thread_shuffle glatter_get_extension_support_GL().has_GL_NV_shader_thread_shuffle
-#define glatter_GL_NV_shading_rate_image glatter_get_extension_support_GL().has_GL_NV_shading_rate_image
 #define glatter_GL_NV_stereo_view_rendering glatter_get_extension_support_GL().has_GL_NV_stereo_view_rendering
 #define glatter_GL_NV_tessellation_program5 glatter_get_extension_support_GL().has_GL_NV_tessellation_program5
 #define glatter_GL_NV_texgen_emboss glatter_get_extension_support_GL().has_GL_NV_texgen_emboss
@@ -1194,13 +1128,10 @@ typedef struct glatter_extension_support_status_GL
 #define glatter_GL_NV_texture_shader glatter_get_extension_support_GL().has_GL_NV_texture_shader
 #define glatter_GL_NV_texture_shader2 glatter_get_extension_support_GL().has_GL_NV_texture_shader2
 #define glatter_GL_NV_texture_shader3 glatter_get_extension_support_GL().has_GL_NV_texture_shader3
-#define glatter_GL_NV_timeline_semaphore glatter_get_extension_support_GL().has_GL_NV_timeline_semaphore
 #define glatter_GL_NV_transform_feedback glatter_get_extension_support_GL().has_GL_NV_transform_feedback
 #define glatter_GL_NV_transform_feedback2 glatter_get_extension_support_GL().has_GL_NV_transform_feedback2
-#define glatter_GL_NV_uniform_buffer_std430_layout glatter_get_extension_support_GL().has_GL_NV_uniform_buffer_std430_layout
 #define glatter_GL_NV_uniform_buffer_unified_memory glatter_get_extension_support_GL().has_GL_NV_uniform_buffer_unified_memory
 #define glatter_GL_NV_vdpau_interop glatter_get_extension_support_GL().has_GL_NV_vdpau_interop
-#define glatter_GL_NV_vdpau_interop2 glatter_get_extension_support_GL().has_GL_NV_vdpau_interop2
 #define glatter_GL_NV_vertex_array_range glatter_get_extension_support_GL().has_GL_NV_vertex_array_range
 #define glatter_GL_NV_vertex_array_range2 glatter_get_extension_support_GL().has_GL_NV_vertex_array_range2
 #define glatter_GL_NV_vertex_attrib_integer_64bit glatter_get_extension_support_GL().has_GL_NV_vertex_attrib_integer_64bit

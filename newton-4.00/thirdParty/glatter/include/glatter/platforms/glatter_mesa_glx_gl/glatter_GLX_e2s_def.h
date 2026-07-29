@@ -33,7 +33,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 GLATTER_INLINE_OR_NOT
-const char* enum_to_string_GLX(GLATTER_ENUM_GLX e)
+const char* enum_to_string_GLX(GLenum e)
 {
     switch (e) {
 #if defined(GLX_AMD_gpu_association)
@@ -52,13 +52,6 @@ const char* enum_to_string_GLX(GLATTER_ENUM_GLX e)
 #if defined(GLX_ARB_context_flush_control)
         case 0x2097: return "GLX_CONTEXT_RELEASE_BEHAVIOR_ARB";
         case 0x2098: return "GLX_CONTEXT_RELEASE_BEHAVIOR_FLUSH_ARB";
-#endif
-#if defined(GLX_NV_multigpu_context)
-        case 0x20aa: return "GLX_CONTEXT_MULTIGPU_ATTRIB_NV";
-        case 0x20ab: return "GLX_CONTEXT_MULTIGPU_ATTRIB_SINGLE_NV";
-        case 0x20ac: return "GLX_CONTEXT_MULTIGPU_ATTRIB_AFR_NV";
-        case 0x20ad: return "GLX_CONTEXT_MULTIGPU_ATTRIB_MULTICAST_NV";
-        case 0x20ae: return "GLX_CONTEXT_MULTIGPU_ATTRIB_MULTI_DISPLAY_MULTICAST_NV";
 #endif
 #if defined(GLX_NV_float_buffer)
         case 0x20b0: return "GLX_FLOAT_COMPONENTS_NV";
@@ -175,12 +168,6 @@ const char* enum_to_string_GLX(GLATTER_ENUM_GLX e)
         case 0x21a6: return "GLX_GPU_NUM_SIMD_AMD";
         case 0x21a7: return "GLX_GPU_NUM_RB_AMD";
         case 0x21a8: return "GLX_GPU_NUM_SPI_AMD";
-#endif
-#if defined(GLX_EXT_context_priority)
-        case 0x3100: return "GLX_CONTEXT_PRIORITY_LEVEL_EXT";
-        case 0x3101: return "GLX_CONTEXT_PRIORITY_HIGH_EXT";
-        case 0x3102: return "GLX_CONTEXT_PRIORITY_MEDIUM_EXT";
-        case 0x3103: return "GLX_CONTEXT_PRIORITY_LOW_EXT";
 #endif
 #if defined(GLX_ARB_create_context_no_error)
         case 0x31b3: return "GLX_CONTEXT_OPENGL_NO_ERROR_ARB";
@@ -487,6 +474,7 @@ const char* enum_to_string_GLX(GLATTER_ENUM_GLX e)
         case 0x818b: return "GLX_RENDERER_OPENGL_COMPATIBILITY_PROFILE_VERSION_MESA";
         case 0x818c: return "GLX_RENDERER_OPENGL_ES_PROFILE_VERSION_MESA";
         case 0x818d: return "GLX_RENDERER_OPENGL_ES2_PROFILE_VERSION_MESA";
+        case 0x818e: return "GLX_RENDERER_ID_MESA";
 #endif
 #if defined(GLX_ARB_create_context_robustness)
         case 0x8252: return "GLX_LOSE_CONTEXT_ON_RESET_ARB";
