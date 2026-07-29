@@ -94,7 +94,6 @@ if(NOT CMAKE_BUILD_TYPE)
           FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
-
 #check for UNIX
 if(UNIX)
 	# ----------------------------------------------------------------------
@@ -128,9 +127,11 @@ if(UNIX)
 		add_compile_options(-fPIC)
 	endif()
 
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unused-cli ")
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wno-unused-cli ")
-	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -Wno-unused-cli ")
+	if(NOT APPLE) 
+		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unused-cli ")
+		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wno-unused-cli ")
+		set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -Wno-unused-cli ")
+	endif()
 
 	if (X86 AND NEWTON_ENABLE_AVX2)
 		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -march=haswell ")
