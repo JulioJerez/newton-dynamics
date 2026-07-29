@@ -19,7 +19,7 @@
 //#ifdef D_NEWTON_USE_DOUBLE
 //	inline void glMaterialParam(GLenum face, GLenum pname, const ndFloat32 *params)
 //	{
-//		GLfloat tmp[4] = { GLfloat(params[0]), GLfloat(params[1]), GLfloat(params[2]), GLfloat(params[3]) };
+//		GLfloat tmp[4] = { ndReal(params[0]), ndReal(params[1]), ndReal(params[2]), ndReal(params[3]) };
 //		glMaterialfv(face, pname, &tmp[0]);
 //	}
 //	#define glMultMatrix(x) glMultMatrixd(x)
@@ -44,23 +44,23 @@ class glVector3
 	public:
 	glVector3()
 	{
-		m_data[0] = GLfloat(0.0f);
-		m_data[1] = GLfloat(0.0f);
-		m_data[2] = GLfloat(0.0f);
+		m_data[0] = ndReal(0.0f);
+		m_data[1] = ndReal(0.0f);
+		m_data[2] = ndReal(0.0f);
 	}
 
 	glVector3(ndFloat32 x, ndFloat32 y, ndFloat32 z)
 	{
-		m_data[0] = GLfloat(x);
-		m_data[1] = GLfloat(y);
-		m_data[2] = GLfloat(z);
+		m_data[0] = ndReal(x);
+		m_data[1] = ndReal(y);
+		m_data[2] = ndReal(z);
 	}
 
 	glVector3(const ndVector& v)
 	{
-		m_data[0] = GLfloat(v[0]);
-		m_data[1] = GLfloat(v[1]);
-		m_data[2] = GLfloat(v[2]);
+		m_data[0] = ndReal(v[0]);
+		m_data[1] = ndReal(v[1]);
+		m_data[2] = ndReal(v[2]);
 	}
 
 	GLfloat& operator[] (ndInt32 i)
@@ -93,26 +93,26 @@ class glVector4
 	public:
 	glVector4()
 	{
-		m_data[0] = GLfloat(0.0f);
-		m_data[1] = GLfloat(0.0f);
-		m_data[2] = GLfloat(0.0f);
-		m_data[3] = GLfloat(0.0f);
+		m_data[0] = ndReal(0.0f);
+		m_data[1] = ndReal(0.0f);
+		m_data[2] = ndReal(0.0f);
+		m_data[3] = ndReal(0.0f);
 	}
 
 	glVector4(ndFloat32 x, ndFloat32 y, ndFloat32 z, ndFloat32 w)
 	{
-		m_data[0] = GLfloat(x);
-		m_data[1] = GLfloat(y);
-		m_data[2] = GLfloat(z);
-		m_data[3] = GLfloat(w);
+		m_data[0] = ndReal(x);
+		m_data[1] = ndReal(y);
+		m_data[2] = ndReal(z);
+		m_data[3] = ndReal(w);
 	}
 
 	glVector4(const ndVector& v)
 	{
-		m_data[0] = GLfloat(v[0]);
-		m_data[1] = GLfloat(v[1]);
-		m_data[2] = GLfloat(v[2]);
-		m_data[3] = GLfloat(v[3]);
+		m_data[0] = ndReal(v[0]);
+		m_data[1] = ndReal(v[1]);
+		m_data[2] = ndReal(v[2]);
+		m_data[3] = ndReal(v[3]);
 	}
 
 	GLfloat& operator[] (ndInt32 i)
