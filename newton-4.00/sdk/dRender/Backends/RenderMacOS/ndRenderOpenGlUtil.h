@@ -14,29 +14,29 @@
 
 #include "ndRenderContext.h"
 
-#define OFFSETOF(s,m) ((size_t)&(((s*)0)->m))
-
-#ifdef D_NEWTON_USE_DOUBLE
-	inline void glMaterialParam(GLenum face, GLenum pname, const ndFloat32 *params)
-	{
-		GLfloat tmp[4] = { GLfloat(params[0]), GLfloat(params[1]), GLfloat(params[2]), GLfloat(params[3]) };
-		glMaterialfv(face, pname, &tmp[0]);
-	}
-	#define glMultMatrix(x) glMultMatrixd(x)
-	#define glLoadMatrix(x) glMultMatrixd(x)
-	#define glGetFloat(x,y) glGetDoublev(x,(GLdouble *)y) 
-#else 
-	#define glMaterialParam glMaterialfv
-	#define glMultMatrix(x) glMultMatrixf(x)
-	#define glLoadMatrix(x) glMultMatrixf(x)
-	#define glGetFloat(x,y) glGetFloatv(x, (GLfloat*)y) 
-#endif
+//#define OFFSETOF(s,m) ((size_t)&(((s*)0)->m))
+//
+//#ifdef D_NEWTON_USE_DOUBLE
+//	inline void glMaterialParam(GLenum face, GLenum pname, const ndFloat32 *params)
+//	{
+//		GLfloat tmp[4] = { GLfloat(params[0]), GLfloat(params[1]), GLfloat(params[2]), GLfloat(params[3]) };
+//		glMaterialfv(face, pname, &tmp[0]);
+//	}
+//	#define glMultMatrix(x) glMultMatrixd(x)
+//	#define glLoadMatrix(x) glMultMatrixd(x)
+//	#define glGetFloat(x,y) glGetDoublev(x,(GLdouble *)y) 
+//#else 
+//	#define glMaterialParam glMaterialfv
+//	#define glMultMatrix(x) glMultMatrixf(x)
+//	#define glLoadMatrix(x) glMultMatrixf(x)
+//	#define glGetFloat(x,y) glGetFloatv(x, (GLfloat*)y) 
+//#endif
 
 class glUV
 {
 	public:
-	GLfloat m_u;
-	GLfloat m_v;
+	ndReal m_u;
+	ndReal m_v;
 };
 
 class glVector3
@@ -80,11 +80,11 @@ class glVector3
 	{
 		struct
 		{
-			GLfloat m_x;
-			GLfloat m_y;
-			GLfloat m_z;
+			ndReal m_x;
+			ndReal m_y;
+			ndReal m_z;
 		};
-		GLfloat m_data[3];
+		ndReal m_data[3];
 	};
 };
 
@@ -133,12 +133,12 @@ class glVector4
 	{
 		struct
 		{
-			GLfloat m_x;
-			GLfloat m_y;
-			GLfloat m_z;
-			GLfloat m_w;
+			ndReal m_x;
+			ndReal m_y;
+			ndReal m_z;
+			ndReal m_w;
 		};
-		GLfloat m_data[4];
+		ndReal m_data[4];
 	};
 };
 
@@ -216,7 +216,7 @@ class glSkinVertex : public glPositionNormalUV
 	union 
 	{
 		GLuint m_boneIndexInt[4];
-		GLfloat m_boneIndexFloat[4];
+		ndReal m_boneIndexFloat[4];
 	};
 };
 
