@@ -59,11 +59,13 @@ class ndRenderContext: public ndClassAlloc
 	const char* GameControllerName() const { return nullptr; };
 	const ndFixSizeArray<ndFloat32, 8>& GameControllerAxis() const 
 	{
-		return ndFixSizeArray<ndFloat32, 8>();
+        static ndFixSizeArray<ndFloat32, 8> xxxx;
+		return xxxx;
 	};
 	const ndFixSizeArray<ndInt8, 32>& GameControllerButtons() const
 	{
-		return ndFixSizeArray<ndInt8, 32>();
+        static ndFixSizeArray<ndInt8, 32> xxxx;
+		return xxxx;
 	};
 
 	private:
