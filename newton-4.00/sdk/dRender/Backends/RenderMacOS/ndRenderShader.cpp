@@ -32,7 +32,7 @@ ndRenderShaderBlock::~ndRenderShaderBlock()
 {
 }
 
-void ndRenderShaderBlock::SetParameters(GLuint shader)
+void ndRenderShaderBlock::SetParameters(ndUnsigned32 shader)
 {
 	m_shader = shader;
 	glUseProgram(m_shader);
@@ -57,7 +57,7 @@ void ndRenderShaderSetZbufferCleanBlock::GetShaderParameters(const ndRenderShade
 	EndParameters();
 }
 
-void ndRenderShaderSetZbufferCleanBlock::SetParameters(GLuint shader)
+void ndRenderShaderSetZbufferCleanBlock::SetParameters(ndUnsigned32 shader)
 {
 	ndRenderShaderBlock::SetParameters(shader);
 	m_viewModelProjectionMatrix = glGetUniformLocation(m_shader, "viewModelProjectionMatrix");
@@ -100,7 +100,7 @@ void ndRenderShaderGenerateShadowMapBlock::GetShaderParameters(const ndRenderSha
 	EndParameters();
 }
 
-void ndRenderShaderGenerateShadowMapBlock::SetParameters(GLuint shader)
+void ndRenderShaderGenerateShadowMapBlock::SetParameters(ndUnsigned32 shader)
 {
 	ndRenderShaderSetZbufferCleanBlock::SetParameters(shader);
 }
@@ -179,7 +179,7 @@ void ndRenderShaderGenerateInstanceShadowMapBlock::GetShaderParameters(const ndR
 	EndParameters();
 }
 
-void ndRenderShaderGenerateInstanceShadowMapBlock::SetParameters(GLuint shader)
+void ndRenderShaderGenerateInstanceShadowMapBlock::SetParameters(ndUnsigned32 shader)
 {
 	ndRenderShaderGenerateShadowMapBlock::SetParameters(shader);
 }
@@ -223,7 +223,7 @@ void ndRenderShaderDebugFlatShadedDiffusedBlock::GetShaderParameters(const ndRen
 	EndParameters();
 }
 
-void ndRenderShaderDebugFlatShadedDiffusedBlock::SetParameters(GLuint shader)
+void ndRenderShaderDebugFlatShadedDiffusedBlock::SetParameters(ndUnsigned32 shader)
 {
 	ndRenderShaderBlock::SetParameters(shader);
 	m_diffuseColor = glGetUniformLocation(m_shader, "diffuseColor");
@@ -334,7 +334,7 @@ void ndRenderShaderOpaqueDiffusedColorBlock::GetShaderParameters(const ndRenderS
 	EndParameters();
 }
 
-void ndRenderShaderOpaqueDiffusedColorBlock::SetParameters(GLuint shader)
+void ndRenderShaderOpaqueDiffusedColorBlock::SetParameters(ndUnsigned32 shader)
 {
 	ndRenderShaderDebugFlatShadedDiffusedBlock::SetParameters(shader);
 	m_texture = glGetUniformLocation(m_shader, "texture0");
@@ -418,7 +418,7 @@ void ndRenderShaderOpaqueDiffusedShadowColorBlock::GetShaderParameters(const ndR
 	EndParameters();
 }
 
-void ndRenderShaderOpaqueDiffusedShadowColorBlock::SetParameters(GLuint shader)
+void ndRenderShaderOpaqueDiffusedShadowColorBlock::SetParameters(ndUnsigned32 shader)
 {
 	ndRenderShaderOpaqueDiffusedColorBlock::SetParameters(shader);
 	m_shadowSlices = glGetUniformLocation(m_shader, "shadowSlices");
@@ -519,7 +519,7 @@ void ndRenderShaderTransparentDiffusedShadowColorBlock::GetShaderParameters(cons
 	EndParameters();
 }
 
-void ndRenderShaderTransparentDiffusedShadowColorBlock::SetParameters(GLuint shader)
+void ndRenderShaderTransparentDiffusedShadowColorBlock::SetParameters(ndUnsigned32 shader)
 {
 	ndRenderShaderOpaqueDiffusedColorBlock::SetParameters(shader);
 	m_opacity = glGetUniformLocation(m_shader, "opacity");
@@ -607,7 +607,7 @@ void ndRenderShaderInstancedOpaqueDiffusedShadowBlock::GetShaderParameters(const
 	EndParameters();
 }
 
-void ndRenderShaderInstancedOpaqueDiffusedShadowBlock::SetParameters(GLuint shader)
+void ndRenderShaderInstancedOpaqueDiffusedShadowBlock::SetParameters(ndUnsigned32 shader)
 {
 	ndRenderShaderOpaqueDiffusedShadowColorBlock::SetParameters(shader);
 }
@@ -711,7 +711,7 @@ void ndRenderShaderOpaqueDiffusedShadowSkinColorBlock::GetShaderParameters(const
 	EndParameters();
 }
 
-void ndRenderShaderOpaqueDiffusedShadowSkinColorBlock::SetParameters(GLuint shader)
+void ndRenderShaderOpaqueDiffusedShadowSkinColorBlock::SetParameters(ndUnsigned32 shader)
 {
 	ndRenderShaderOpaqueDiffusedShadowColorBlock::SetParameters(shader);
 	m_matrixPalette = glGetUniformLocation(m_shader, "matrixPalette");
@@ -809,7 +809,7 @@ void ndRenderShaderGenerateSkinShadowMapBlock::GetShaderParameters(const ndRende
 	EndParameters();
 }
 
-void ndRenderShaderGenerateSkinShadowMapBlock::SetParameters(GLuint shader)
+void ndRenderShaderGenerateSkinShadowMapBlock::SetParameters(ndUnsigned32 shader)
 {
 	ndRenderShaderGenerateShadowMapBlock::SetParameters(shader);
 	m_matrixPalette = glGetUniformLocation(m_shader, "matrixPalette");
@@ -850,7 +850,7 @@ void ndRenderShaderStaticLinesArrayBlock::GetShaderParameters(const ndRenderShad
 	EndParameters();
 }
 
-void ndRenderShaderStaticLinesArrayBlock::SetParameters(GLuint shader)
+void ndRenderShaderStaticLinesArrayBlock::SetParameters(ndUnsigned32 shader)
 {
 	ndRenderShaderBlock::SetParameters(shader);
 	m_viewModelProjectionMatrix = glGetUniformLocation(m_shader, "viewModelProjectionMatrix");
@@ -882,7 +882,7 @@ void ndRenderShaderDynamicLinesArrayBlock::GetShaderParameters(const ndRenderSha
 	EndParameters();
 }
 
-void ndRenderShaderDynamicLinesArrayBlock::SetParameters(GLuint shader)
+void ndRenderShaderDynamicLinesArrayBlock::SetParameters(ndUnsigned32 shader)
 {
 	ndRenderShaderBlock::SetParameters(shader);
 	m_viewModelProjectionMatrix = glGetUniformLocation(m_shader, "viewModelProjectionMatrix");
@@ -935,7 +935,7 @@ void ndRenderShaderDynamicPointsArrayBlock::GetShaderParameters(const ndRenderSh
 	EndParameters();
 }
 
-void ndRenderShaderDynamicPointsArrayBlock::SetParameters(GLuint shader)
+void ndRenderShaderDynamicPointsArrayBlock::SetParameters(ndUnsigned32 shader)
 {
 	ndRenderShaderBlock::SetParameters(shader);
 	m_viewModelProjectionMatrix = glGetUniformLocation(m_shader, "viewModelProjectionMatrix");
@@ -988,7 +988,7 @@ void ndRenderShaderDynamicTrianglesArrayBlock::GetShaderParameters(const ndRende
 	EndParameters();
 }
 
-void ndRenderShaderDynamicTrianglesArrayBlock::SetParameters(GLuint shader)
+void ndRenderShaderDynamicTrianglesArrayBlock::SetParameters(ndUnsigned32 shader)
 {
 	ndRenderShaderBlock::SetParameters(shader);
 
@@ -1051,7 +1051,7 @@ void ndRenderShaderOpaqueDiffusedShadowColorAlphaTestBlock::GetShaderParameters(
 	EndParameters();
 }
 
-//void ndRenderShaderOpaqueDiffusedShadowColorAlphaTestBlock::SetParameters(GLuint shader)
+//void ndRenderShaderOpaqueDiffusedShadowColorAlphaTestBlock::SetParameters(ndUnsigned32 shader)
 //{
 //	ndRenderShaderOpaqueDiffusedColorBlock::SetParameters(shader);
 //	m_shadowSlices = glGetUniformLocation(m_shader, "shadowSlices");

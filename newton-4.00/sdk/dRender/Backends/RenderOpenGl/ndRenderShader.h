@@ -28,9 +28,9 @@ class ndRenderShaderBlock
 
 	protected:
 	void EndParameters();
-	virtual void SetParameters(GLuint shader);
+	virtual void SetParameters(ndUnsigned32 shader);
 
-	GLuint m_shader;
+	ndUnsigned32 m_shader;
 };
 
 // *********************************************************************
@@ -43,7 +43,7 @@ class ndRenderShaderSetZbufferCleanBlock : public ndRenderShaderBlock
 	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const override;
 
 	protected:
-	virtual void SetParameters(GLuint shader) override;
+	virtual void SetParameters(ndUnsigned32 shader) override;
 	GLint m_viewModelProjectionMatrix;
 };
 
@@ -57,7 +57,7 @@ class ndRenderShaderGenerateShadowMapBlock : public ndRenderShaderSetZbufferClea
 	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const override;
 
 	protected:
-	virtual void SetParameters(GLuint shader) override;
+	virtual void SetParameters(ndUnsigned32 shader) override;
 };
 
 // *********************************************************************
@@ -69,7 +69,7 @@ class ndRenderShaderGenerateAlphaTestShadowMapBlock : public ndRenderShaderGener
 	virtual void GetShaderParameters(const ndRenderShaderCache* const shaderCache) override;
 	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const override;
 	//protected:
-	//virtual void SetParameters(GLuint shader) override;
+	//virtual void SetParameters(ndUnsigned32 shader) override;
 };
 
 // *********************************************************************
@@ -83,7 +83,7 @@ class ndRenderShaderGenerateInstanceShadowMapBlock : public ndRenderShaderGenera
 	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const override;
 
 	protected:
-	virtual void SetParameters(GLuint shader) override;
+	virtual void SetParameters(ndUnsigned32 shader) override;
 };
 
 // *********************************************************************
@@ -96,7 +96,7 @@ class ndRenderShaderDebugFlatShadedDiffusedBlock : public ndRenderShaderBlock
 	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const override;
 
 	protected:
-	virtual void SetParameters(GLuint shader) override;
+	virtual void SetParameters(ndUnsigned32 shader) override;
 
 	GLint m_diffuseColor;
 	GLint m_directionalLightAmbient;
@@ -125,7 +125,7 @@ class ndRenderShaderOpaqueDiffusedColorBlock : public ndRenderShaderDebugFlatSha
 	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const override;
 
 	protected:
-	virtual void SetParameters(GLuint shader) override;
+	virtual void SetParameters(ndUnsigned32 shader) override;
 
 	GLint m_texture;
 	GLint m_cameraToWorld;
@@ -145,7 +145,7 @@ class ndRenderShaderOpaqueDiffusedShadowColorBlock : public ndRenderShaderOpaque
 	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const override;
 
 	protected:
-	virtual void SetParameters(GLuint shader) override;
+	virtual void SetParameters(ndUnsigned32 shader) override;
 
 	GLint m_worldMatrix;
 	GLint m_shadowSlices;
@@ -163,7 +163,7 @@ class ndRenderShaderTransparentDiffusedShadowColorBlock : public ndRenderShaderO
 	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const override;
 
 	protected:
-	virtual void SetParameters(GLuint shader) override;
+	virtual void SetParameters(ndUnsigned32 shader) override;
 
 	GLint m_opacity;
 };
@@ -178,7 +178,7 @@ class ndRenderShaderInstancedOpaqueDiffusedShadowBlock : public ndRenderShaderOp
 	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const override;
 
 	protected:
-	virtual void SetParameters(GLuint shader) override;
+	virtual void SetParameters(ndUnsigned32 shader) override;
 };
 
 
@@ -192,7 +192,7 @@ class ndRenderShaderGenerateSkinShadowMapBlock : public ndRenderShaderGenerateSh
 	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const override;
 
 	protected:
-	virtual void SetParameters(GLuint shader) override;
+	virtual void SetParameters(ndUnsigned32 shader) override;
 
 	GLint m_matrixPalette;
 };
@@ -207,7 +207,7 @@ class ndRenderShaderOpaqueDiffusedShadowSkinColorBlock : public ndRenderShaderOp
 	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const override;
 
 	protected:
-	virtual void SetParameters(GLuint shader) override;
+	virtual void SetParameters(ndUnsigned32 shader) override;
 
 	GLint m_matrixPalette;
 };
@@ -222,7 +222,7 @@ class ndRenderShaderStaticLinesArrayBlock : public ndRenderShaderBlock
 	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const override;
 
 	protected:
-	virtual void SetParameters(GLuint shader) override;
+	virtual void SetParameters(ndUnsigned32 shader) override;
 
 	GLint m_viewModelProjectionMatrix;
 };
@@ -237,7 +237,7 @@ class ndRenderShaderDynamicLinesArrayBlock : public ndRenderShaderBlock
 	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const override;
 
 	protected:
-	virtual void SetParameters(GLuint shader) override;
+	virtual void SetParameters(ndUnsigned32 shader) override;
 
 	GLint m_viewModelProjectionMatrix;
 };
@@ -252,7 +252,7 @@ class ndRenderShaderDynamicPointsArrayBlock : public ndRenderShaderBlock
 	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const override;
 
 	protected:
-	virtual void SetParameters(GLuint shader) override;
+	virtual void SetParameters(ndUnsigned32 shader) override;
 
 	GLint m_viewModelProjectionMatrix;
 };
@@ -267,7 +267,7 @@ class ndRenderShaderDynamicTrianglesArrayBlock : public ndRenderShaderBlock
 	virtual void Render(const ndRenderPrimitiveImplement* const self, const ndRender* const render, const ndMatrix& modelMatrix) const override;
 
 	protected:
-	virtual void SetParameters(GLuint shader) override;
+	virtual void SetParameters(ndUnsigned32 shader) override;
 
 	GLint m_directionalLightDirection;
 	GLint m_projectMatrixLocation;
