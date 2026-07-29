@@ -58,35 +58,11 @@ include_directories(../../sdk/dNewton/dModels/dVehicle)
 
 include_directories(../../sdk/dBrain)
 include_directories(../../sdk/dRender)
-
 include_directories(../../thirdParty/png/)
-include_directories(../../thirdParty/imgui/)
 include_directories(../../thirdParty/openFBX/src/)
+
+include_directories(../../thirdParty/imgui/)
 include_directories(../../thirdParty/imgui/backends)
-
-if (APPLE) 
-	#message ("apple headers here")	
-	#include_directories(../../thirdParty/glfw/)
-	#include_directories(../../thirdParty/glfw/include/)
-	#include_directories(../../thirdParty/glatter/include/glatter/)
-
-else()
-	#include_directories(../../thirdParty/glfw/)
-	#include_directories(../../thirdParty/glfw/include/)
-	#include_directories(../../thirdParty/glatter/include/)
-	#include_directories(../../thirdParty/glatter/include/glatter/)
-	#include_directories(../../thirdParty/glatter/include/KHR)
-	#include_directories(../../thirdParty/glatter/include/EGL)
-	#include_directories(../../thirdParty/glatter/include/GLES2)
-	#include_directories(../../thirdParty/glatter/include/GLES3)
-
-	#include_directories(include/glatter)
-	#include_directories(include/glatter/KHR)
-	#include_directories(include/glatter/EGL)
-	#include_directories(include/glatter/GLES2)
-	#include_directories(include/glatter/GLES3)
-
-endif()
 
 if (NEWTON_BUILD_SANDBOX_DEMOS_OPEN_AL AND MSVC)
 	add_definitions(-DND_OPEN_AL)
