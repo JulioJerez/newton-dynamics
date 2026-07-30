@@ -1200,7 +1200,7 @@ ndJointBilateralConstraint* ndMeshJointVehicleDifferential::CreateObject(ndBodyK
 ndMeshJointVehicleMotor::ndMeshJointVehicleMotor(const ndMesh* const owner)
 	:ndMeshJoint(owner)
 	,m_engineCurve()
-	,m_topSpeed(40.0f)
+	,m_topSpeed(ndFloat32 (40.0f))
 {
 }
 
