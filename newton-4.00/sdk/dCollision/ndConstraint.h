@@ -100,21 +100,7 @@ class ndForceImpactPair
 
 	void Clear();
 	void Push(ndFloat32 val);
-	ndFloat32 GetInitialGuess() const
-	{
-		ndFloat32 smallest = ndFloat32(1.0e15f);
-		ndFloat32 value = ndFloat32(ndFloat32(0.0f));
-		for (ndInt32 i = 0; i < ndInt32(sizeof(m_initialGuess) / sizeof(m_initialGuess[0])); ++i)
-		{
-			ndFloat32 mag = ndAbs(m_initialGuess[i]);
-			if (mag < smallest)
-			{
-				smallest = mag;
-				value = m_initialGuess[i];
-			}
-		}
-		return value;
-	}
+	ndFloat32 GetInitialGuess() const;
 
 	ndFloat32 m_force;
 	ndFloat32 m_impact;

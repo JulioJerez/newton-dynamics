@@ -32,6 +32,23 @@
 #include "ndMultiBodyVehicleDifferential.h"
 #include "ndMultiBodyVehicleDifferentialAxle.h"
 
+class ndConvexCastVehicle::ndVehicleContact : public ndContact
+{
+	public:
+	ndVehicleContact(ndConvexCastVehicle* const owner)
+		:ndContact()
+		,m_owner(owner)
+	{
+	}
+
+	void JacobianDerivative(ndConstraintDescritor& desc) override
+	{
+		ndContact::JacobianDerivative(desc);
+	}
+
+	ndWeakPtr<ndConvexCastVehicle> m_owner;
+};
+
 
 ndConvexCastVehicle::ndConvexCastVehicle(ndFloat32 gravityMagnitud)
 	:ndMultiBodyVehicle(gravityMagnitud)
@@ -49,8 +66,8 @@ void ndConvexCastVehicle::OnAddToWorld()
 		// support up to two contacts per tire
 		ndBodyDynamic* const wheelBody = tireNode->GetInfo()->GetBody0()->GetAsBodyDynamic();
 		ndBodyKinematic::ndContactMap& contacts = wheelBody->GetContactMap();
-		contacts.AttachContact(new ndContact(), 1);
-		contacts.AttachContact(new ndContact(), 2);
+		contacts.AttachContact(new ndVehicleContact(this), 1);
+		contacts.AttachContact(new ndVehicleContact(this), 2);
 	}
 }
 
@@ -158,7 +175,7 @@ void ndConvexCastVehicle::ConvertToMotorVehicle()
 	NodeIterator(DisableStructuralNodes);
 }
 
-void ndConvexCastVehicle::CalculateConveCastTireContacts(ndInt32 threadId)
+void ndConvexCastVehicle::CalculateConvexCastTireContacts(ndInt32 threadId)
 {
 	class ndShapeCast : public ndConvexCastNotify
 	{
@@ -287,7 +304,7 @@ void ndConvexCastVehicle::CalculateConveCastTireContacts(ndInt32 threadId)
 				contact->SetActive(true);
 				contact->m_maxDof = 0;
 				contact->SetBodies(wheelBody, body1);
-				contact->GetContactPoints().RemoveAll();
+				//contact->GetContactPoints().RemoveAll();
 			
 				ndContactSolver contactSolver;
 				contactSolver.m_threadId = threadId;
@@ -377,6 +394,148 @@ void ndConvexCastVehicle::PostUpdate(ndFloat32 timestep, ndInt32 threadId)
 	}
 }
 
+void ndConvexCastVehicle::ApplyBicycleModelLateralStability()
+{
+
+	// Based on pages 222–230 of Giancarlo Genta's book.
+	//
+	// When the tires operate outside the linear slip region, 
+	// the vehicle's rigid-body equations must be corrected 
+	// by introducing the chassis sideslip angle (beta) 
+	// and its time derivative (betaRate).
+	//
+	// Genta derives these equations using Lagrangian dynamics 
+	// for the bicycle vehicle model. 
+	// On page 230, the equations are linearized
+	// under the assumption that the sideslip angle is small:
+	//
+	// cos(beta) ~= 1
+	// sin(beta) ~= beta
+	//
+	// This yields the following equations:
+	//
+	// 1) mass * localSpeed * (betaRate + yawRate)
+	//      + mass * beta * localAccel = lateralForce
+	//
+	// 2) mass * (localAccel - yawRate * localSpeed * beta)
+	//      = longitudinalForce
+	//
+	// 3) yawInertia * yawAlpha = yawTorque
+	//
+	// The resulting system is overdetermined, 
+	// so additional constraints are required. 
+	// This implementation applies the following assumptions:
+	//
+	// - The sideslip angle (beta) is clamped to +-25 degrees.
+	// - Yaw angular acceleration (yawAlpha) is driven toward zero.
+	//
+	// All calculations are performed in the vehicle's local reference frame.
+	//
+	// Verify that the vehicle satisfies the required stability conditions
+	// before applying these equations.
+	const ndMatrix frameMatrix(m_localFrame * m_chassis->GetMatrix());
+
+	//if vehicle tilt more than 20 degrees, stability does not apply
+	if (frameMatrix.m_up.m_y < ndFloat32(0.94f))
+	{
+		return;
+	}
+
+	// if less than two contacts, stability does not apply 
+	ndInt32 contactCount = 0;
+	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = m_tireList.GetFirst(); node; node = node->GetNext())
+	{
+		ndMultiBodyVehicleTireJoint* const tireJoint = node->GetInfo();
+		ndBodyKinematic* const tireBody = tireJoint->GetBody0()->GetAsBodyDynamic();
+
+		// draw tire normal forces
+		const ndBodyKinematic::ndContactMap& contactMap = tireBody->GetContactMap();
+		ndBodyKinematic::ndContactMap::Iterator it(contactMap);
+		for (it.Begin(); it; it++)
+		{
+			ndContact* const contact = *it;
+			if (contact->IsActive())
+			{
+				contactCount++;
+				break;
+			}
+		}
+	}
+	if (contactCount < 2)
+	{
+		return;
+	}
+	// calculate speed and beta angle
+	const ndVector veloc(frameMatrix.UnrotateVector(m_chassis->GetVelocity()));
+	ndFloat32 localSpeed = ndSqrt(veloc.m_x * veloc.m_x + veloc.m_z * veloc.m_z);
+	if (localSpeed < ndFloat32(2.0f))
+	{
+		// less than 2 m/s is just too speed for no linear lateral dynamics
+		return;
+	}
+	const ndFloat32 beta = ndAtan2(veloc.m_z, veloc.m_x);
+
+	// calculate yawrate
+	const ndVector omega(frameMatrix.UnrotateVector(m_chassis->GetOmega()));
+	const ndFloat32 yawRate = omega.m_y;
+
+	// using the forces for previuos frames calculate rear and fron forces.
+	ndVector externalForce(frameMatrix.UnrotateVector(m_chassis->GetForce()));
+	ndFloat32 rearLateralForce = externalForce.m_z;
+	ndFloat32 frontLateralForce = externalForce.m_z;
+	ndFloat32 rearLongitudinalForce = externalForce.m_x;
+	ndFloat32 frontLongitudinalForce = externalForce.m_x;
+	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
+	{
+		const ndMultiBodyVehicleTireJoint* const tireJoint = tireNode->GetInfo();
+
+		// Get the tire force and torque.
+		const ndMatrix tireMatrix(tireJoint->CalculateGlobalMatrix1());
+		const ndVector8 jointForce(tireJoint->GetForceTorqueBody1());
+		const ndVector tireForce(frameMatrix.UnrotateVector(jointForce.GetLow()));
+		const ndVector locaTirePosit(frameMatrix.UntransformVector(tireMatrix.m_posit));
+		if (locaTirePosit.m_x < ndFloat32(0.0f))
+		{
+			rearLateralForce += tireForce.m_z;
+			rearLongitudinalForce += tireForce.m_x;
+		}
+		else
+		{
+			frontLateralForce += tireForce.m_z;
+			frontLongitudinalForce += tireForce.m_x;
+		}
+	}
+
+	// calculate acceleration, from equation 2 we get
+	// 2) mass * (localAccel - yawRate * localSpeed * beta) = longitudinalForce
+	ndVector massMatrix(m_chassis->GetMassMatrix());
+	ndFloat32 longitudinalForce = frontLongitudinalForce + rearLongitudinalForce;
+	ndFloat32 localAccel = (longitudinalForce - massMatrix.m_w * yawRate * localSpeed * beta) / massMatrix.m_w;
+
+	// calculate beta rate, form equation 1
+	// 1) mass * localSpeed * (betaRate + yawRate) + mass * beta * localAccel = lateralForce
+	ndFloat32 lateralForce = frontLateralForce + rearLateralForce;
+	ndFloat32 betaRate = (lateralForce - massMatrix.m_w * beta * localAccel) / (massMatrix.m_w * localSpeed) - yawRate;
+	betaRate = 0;
+	//static int xxxxx;
+	//	ndTrace(("%d beta=%g betaRate=%g yawRate=%g fy=%g\n", xxxxx, beta * ndRadToDegree, betaRate, yawRate, lateralForce));
+	//	//ndTrace (("Fxf=%g Fzf=%g Fxr=%g Fzr=%g\n", frontLongitudinalForce, frontLateralForce, rearLongitudinalForce, rearLateralForce));
+	//	xxxxx++;
+	//if (ndAbs (lateralForce) > 200)
+	//lateralForce *= 1;
+
+		//if (ndAbs(beta) > 30.0f * ndDegreeToRad) 
+	{
+		// catastrofic drift, need to stop
+		//ndFloat32 xxxx = yawRate - betaRate;
+		//ndFloat32 t = -0.5f * xxxx * massMatrix.m_y;
+		//ndVector torque(frameMatrix.m_up.Scale(t));
+		////m_chassis->SetTorque(frameMatrix.RotateVector(torque));
+		//
+		//ndTrace(("torque=%g\n", t));
+	}
+}
+
 void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 {
 	ndWorld* const world = GetWorld();
@@ -400,7 +559,7 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 
 	// update tire contacts 
 	m_skeleton->m_owner = world;
-	CalculateConveCastTireContacts(threadId);
+	CalculateConvexCastTireContacts(threadId);
 
 	// apply all external forces to intenal bodies
 	m_originaSkeleton = GetRoot()->m_body->GetAsBodyKinematic()->GetSkeleton();
@@ -491,6 +650,25 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 				if (joint->IsType(ndMultiBodyVehicleTireJoint::StaticClassName()))
 				{
 					IntegrateInternalPart();
+					// save contact normal force 
+					ndBodyKinematic::ndContactMap::Iterator it(node->m_body->GetAsBodyKinematic()->GetContactMap());
+					const ndVector normalForce(joint->GetForceBody0());
+					for (it.Begin(); it; it++)
+					{
+						ndContact* const contact = it.GetNode()->GetInfo();
+						if (contact->IsActive())
+						{
+							for (ndContactPointList::ndNode* pointNode = contact->GetContactPoints().GetFirst(); pointNode; pointNode = pointNode->GetNext())
+							{
+								ndContactMaterial& point = pointNode->GetInfo();
+								ndFloat32 forceMag = point.m_normal.DotProduct(normalForce).GetScalar();
+								point.m_normal_Force.Push(ndAbs(forceMag));
+								forceMag *= 1;
+							}
+						}
+					}
+
+					//desc.m_forceBounds[normalIndex].m_jointForce = (ndForceImpactPair*)&contact.m_normal_Force;
 				}
 				else if (joint->IsType(ndMultiBodyVehicleMotor::StaticClassName()))
 				{
