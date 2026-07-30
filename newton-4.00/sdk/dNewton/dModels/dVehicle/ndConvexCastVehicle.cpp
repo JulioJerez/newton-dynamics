@@ -32,21 +32,41 @@
 #include "ndMultiBodyVehicleDifferential.h"
 #include "ndMultiBodyVehicleDifferentialAxle.h"
 
+#define ND_MAR_SIDESLIP (ndFloat32(25.0f) * ndDegreeToRad)
+
 class ndConvexCastVehicle::ndVehicleContact : public ndContact
 {
 	public:
 	ndVehicleContact(ndConvexCastVehicle* const owner)
 		:ndContact()
 		,m_owner(owner)
+		,m_u(ndFloat32 (0.0f))
+		,m_vx(ndFloat32(0.0f))
+		,m_vz(ndFloat32(0.0f))
+		,m_r(ndFloat32(0.0f))
+		,m_beta(ndFloat32(0.0f))
+		,m_betaRate(ndFloat32(0.0f))
+		,m_steadyStateValid(false)
 	{
 	}
 
 	void JacobianDerivative(ndConstraintDescritor& desc) override
 	{
+		if (m_steadyStateValid)
+		{
+			ndTrace(("xxxx\n"));
+		}
 		ndContact::JacobianDerivative(desc);
 	}
 
 	ndWeakPtr<ndConvexCastVehicle> m_owner;
+	ndFloat32 m_u;
+	ndFloat32 m_vx;
+	ndFloat32 m_vz;
+	ndFloat32 m_r;
+	ndFloat32 m_beta;
+	ndFloat32 m_betaRate;
+	bool m_steadyStateValid;
 };
 
 
@@ -396,7 +416,6 @@ void ndConvexCastVehicle::PostUpdate(ndFloat32 timestep, ndInt32 threadId)
 
 void ndConvexCastVehicle::ApplyBicycleModelLateralStability()
 {
-
 	// Based on pages 222–230 of Giancarlo Genta's book.
 	//
 	// When the tires operate outside the linear slip region, 
@@ -430,7 +449,28 @@ void ndConvexCastVehicle::ApplyBicycleModelLateralStability()
 	// - Yaw angular acceleration (yawAlpha) is driven toward zero.
 	//
 	// All calculations are performed in the vehicle's local reference frame.
-	//
+
+	// if less than two contacts, stability does not apply 
+	ndInt32 contactCount = 0;
+	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = m_tireList.GetFirst(); node; node = node->GetNext())
+	{
+		ndMultiBodyVehicleTireJoint* const tireJoint = node->GetInfo();
+		ndBodyKinematic* const tireBody = tireJoint->GetBody0()->GetAsBodyDynamic();
+
+		// draw tire normal forces
+		ndBodyKinematic::ndContactMap::Iterator it(tireBody->GetContactMap());
+		for (it.Begin(); it; it++)
+		{
+			ndVehicleContact* const contact = (ndVehicleContact*)*it;
+			contact->m_steadyStateValid = false;
+			if (contact->IsActive())
+			{
+				contactCount++;
+				break;
+			}
+		}
+	}
+
 	// Verify that the vehicle satisfies the required stability conditions
 	// before applying these equations.
 	const ndMatrix frameMatrix(m_localFrame * m_chassis->GetMatrix());
@@ -441,26 +481,6 @@ void ndConvexCastVehicle::ApplyBicycleModelLateralStability()
 		return;
 	}
 
-	// if less than two contacts, stability does not apply 
-	ndInt32 contactCount = 0;
-	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = m_tireList.GetFirst(); node; node = node->GetNext())
-	{
-		ndMultiBodyVehicleTireJoint* const tireJoint = node->GetInfo();
-		ndBodyKinematic* const tireBody = tireJoint->GetBody0()->GetAsBodyDynamic();
-
-		// draw tire normal forces
-		const ndBodyKinematic::ndContactMap& contactMap = tireBody->GetContactMap();
-		ndBodyKinematic::ndContactMap::Iterator it(contactMap);
-		for (it.Begin(); it; it++)
-		{
-			ndContact* const contact = *it;
-			if (contact->IsActive())
-			{
-				contactCount++;
-				break;
-			}
-		}
-	}
 	if (contactCount < 2)
 	{
 		return;
@@ -474,65 +494,69 @@ void ndConvexCastVehicle::ApplyBicycleModelLateralStability()
 		return;
 	}
 	const ndFloat32 beta = ndAtan2(veloc.m_z, veloc.m_x);
-
-	// calculate yawrate
-	const ndVector omega(frameMatrix.UnrotateVector(m_chassis->GetOmega()));
-	const ndFloat32 yawRate = omega.m_y;
-
-	// using the forces for previuos frames calculate rear and fron forces.
-	ndVector externalForce(frameMatrix.UnrotateVector(m_chassis->GetForce()));
-	ndFloat32 rearLateralForce = externalForce.m_z;
-	ndFloat32 frontLateralForce = externalForce.m_z;
-	ndFloat32 rearLongitudinalForce = externalForce.m_x;
-	ndFloat32 frontLongitudinalForce = externalForce.m_x;
-	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
+	if (ndAbs(beta) > ND_MAR_SIDESLIP)
 	{
-		const ndMultiBodyVehicleTireJoint* const tireJoint = tireNode->GetInfo();
+		// calculate yawrate
+		const ndVector omega(frameMatrix.UnrotateVector(m_chassis->GetOmega()));
+		const ndFloat32 yawRate = omega.m_y;
 
-		// Get the tire force and torque.
-		const ndMatrix tireMatrix(tireJoint->CalculateGlobalMatrix1());
-		const ndVector8 jointForce(tireJoint->GetForceTorqueBody1());
-		const ndVector tireForce(frameMatrix.UnrotateVector(jointForce.GetLow()));
-		const ndVector locaTirePosit(frameMatrix.UntransformVector(tireMatrix.m_posit));
-		if (locaTirePosit.m_x < ndFloat32(0.0f))
+		// using the forces for previuos frames calculate rear and fron forces.
+		ndVector externalForce(frameMatrix.UnrotateVector(m_chassis->GetForce()));
+		ndFloat32 rearLateralForce = externalForce.m_z;
+		ndFloat32 frontLateralForce = externalForce.m_z;
+		ndFloat32 rearLongitudinalForce = externalForce.m_x;
+		ndFloat32 frontLongitudinalForce = externalForce.m_x;
+		for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
 		{
-			rearLateralForce += tireForce.m_z;
-			rearLongitudinalForce += tireForce.m_x;
+			const ndMultiBodyVehicleTireJoint* const tireJoint = tireNode->GetInfo();
+
+			// Get the tire force and torque.
+			const ndMatrix tireMatrix(tireJoint->CalculateGlobalMatrix1());
+			const ndVector8 jointForce(tireJoint->GetForceTorqueBody1());
+			const ndVector tireForce(frameMatrix.UnrotateVector(jointForce.GetLow()));
+			const ndVector locaTirePosit(frameMatrix.UntransformVector(tireMatrix.m_posit));
+			if (locaTirePosit.m_x < ndFloat32(0.0f))
+			{
+				rearLateralForce += tireForce.m_z;
+				rearLongitudinalForce += tireForce.m_x;
+			}
+			else
+			{
+				frontLateralForce += tireForce.m_z;
+				frontLongitudinalForce += tireForce.m_x;
+			}
 		}
-		else
+
+		// calculate acceleration, from equation 2 we get
+		// 2) mass * (localAccel - yawRate * localSpeed * beta) = longitudinalForce
+		ndVector massMatrix(m_chassis->GetMassMatrix());
+		ndFloat32 longitudinalForce = frontLongitudinalForce + rearLongitudinalForce;
+		ndFloat32 localAccel = (longitudinalForce - massMatrix.m_w * yawRate * localSpeed * beta) / massMatrix.m_w;
+
+		// calculate beta rate, form equation 1
+		// 1) mass * localSpeed * (betaRate + yawRate) + mass * beta * localAccel = lateralForce
+		ndFloat32 lateralForce = frontLateralForce + rearLateralForce;
+		ndFloat32 betaRate = (lateralForce - massMatrix.m_w * beta * localAccel) / (massMatrix.m_w * localSpeed) - yawRate;
+
+		// store U, V, beta, and beta rate in each contact joint
+		for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = m_tireList.GetFirst(); node; node = node->GetNext())
 		{
-			frontLateralForce += tireForce.m_z;
-			frontLongitudinalForce += tireForce.m_x;
+			ndMultiBodyVehicleTireJoint* const tireJoint = node->GetInfo();
+			ndBodyKinematic* const tireBody = tireJoint->GetBody0()->GetAsBodyDynamic();
+
+			ndBodyKinematic::ndContactMap::Iterator it(tireBody->GetContactMap());
+			for (it.Begin(); it; it++)
+			{
+				ndVehicleContact* const contact = (ndVehicleContact*)*it;
+				contact->m_u = localSpeed;
+				contact->m_vx = veloc.m_x;
+				contact->m_vz = veloc.m_z;
+				contact->m_r = yawRate;
+				contact->m_beta = beta;
+				contact->m_betaRate = betaRate;
+				contact->m_steadyStateValid = true;
+			}
 		}
-	}
-
-	// calculate acceleration, from equation 2 we get
-	// 2) mass * (localAccel - yawRate * localSpeed * beta) = longitudinalForce
-	ndVector massMatrix(m_chassis->GetMassMatrix());
-	ndFloat32 longitudinalForce = frontLongitudinalForce + rearLongitudinalForce;
-	ndFloat32 localAccel = (longitudinalForce - massMatrix.m_w * yawRate * localSpeed * beta) / massMatrix.m_w;
-
-	// calculate beta rate, form equation 1
-	// 1) mass * localSpeed * (betaRate + yawRate) + mass * beta * localAccel = lateralForce
-	ndFloat32 lateralForce = frontLateralForce + rearLateralForce;
-	ndFloat32 betaRate = (lateralForce - massMatrix.m_w * beta * localAccel) / (massMatrix.m_w * localSpeed) - yawRate;
-	betaRate = 0;
-	//static int xxxxx;
-	//	ndTrace(("%d beta=%g betaRate=%g yawRate=%g fy=%g\n", xxxxx, beta * ndRadToDegree, betaRate, yawRate, lateralForce));
-	//	//ndTrace (("Fxf=%g Fzf=%g Fxr=%g Fzr=%g\n", frontLongitudinalForce, frontLateralForce, rearLongitudinalForce, rearLateralForce));
-	//	xxxxx++;
-	//if (ndAbs (lateralForce) > 200)
-	//lateralForce *= 1;
-
-		//if (ndAbs(beta) > 30.0f * ndDegreeToRad) 
-	{
-		// catastrofic drift, need to stop
-		//ndFloat32 xxxx = yawRate - betaRate;
-		//ndFloat32 t = -0.5f * xxxx * massMatrix.m_y;
-		//ndVector torque(frameMatrix.m_up.Scale(t));
-		////m_chassis->SetTorque(frameMatrix.RotateVector(torque));
-		//
-		//ndTrace(("torque=%g\n", t));
 	}
 }
 
