@@ -663,12 +663,9 @@ void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)
 								ndContactMaterial& point = pointNode->GetInfo();
 								ndFloat32 forceMag = point.m_normal.DotProduct(normalForce).GetScalar();
 								point.m_normal_Force.Push(ndAbs(forceMag));
-								forceMag *= 1;
 							}
 						}
 					}
-
-					//desc.m_forceBounds[normalIndex].m_jointForce = (ndForceImpactPair*)&contact.m_normal_Force;
 				}
 				else if (joint->IsType(ndMultiBodyVehicleMotor::StaticClassName()))
 				{
