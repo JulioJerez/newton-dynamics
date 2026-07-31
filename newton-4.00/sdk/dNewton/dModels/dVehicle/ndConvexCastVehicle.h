@@ -57,6 +57,15 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 	ndSharedPtr<ndJointBilateralConstraint> m_castGearBox;
 	ndList<ndSharedPtr<ndJointBilateralConstraint>> m_castDifferentialAxelList;
 	ndInt32 m_sleepCounter;
+
+	// bicycle model parameters
+	ndFloat32 m_u;
+	ndFloat32 m_vx;
+	ndFloat32 m_vz;
+	ndFloat32 m_r;
+	ndFloat32 m_beta;
+	ndFloat32 m_betaRate;
+	bool m_bicycleModelValid;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif
