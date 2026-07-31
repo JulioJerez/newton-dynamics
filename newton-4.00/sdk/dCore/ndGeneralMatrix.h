@@ -88,67 +88,6 @@ void ndCovarianceMatrix(ndInt32 size, ndInt32 stride, T* const matrix, const T* 
 	}
 }
 
-//template<class T>
-//bool ndCholeskyFactorizationAddRow(ndInt32 stride, ndInt32 n, T* const matrix, T* const invDiagonalOut)
-//{
-//	T* const rowN = &matrix[stride * n];
-//
-//	ndInt32 base = 0;
-//	for (ndInt32 j = 0; j < n; ++j) 
-//	{
-//		T s(0.0f);
-//		T* const rowJ = &matrix[base];
-//		for (ndInt32 k = 0; k < j; ++k) 
-//		{
-//			s += rowN[k] * rowJ[k];
-//		}
-//		rowJ[n] = T(0.0f);
-//		rowN[j] = invDiagonalOut[j] * (rowN[j] - s);
-//		base += stride;
-//	}
-//
-//	T s(0.0f);
-//	const T* const rowJ = &matrix[base];
-//	for (ndInt32 k = 0; k < n; ++k)
-//	{
-//		s += rowN[k] * rowJ[k];
-//	}
-//
-//	T diag = rowN[n] - s;
-//	#ifdef D_NEWTON_USE_DOUBLE
-//	if (diag < T(1.0e-12f))
-//	{
-//		return false;
-//	}
-//	#else
-//	if (diag < T(1.0e-6f))
-//	{
-//		return false;
-//	}
-//	#endif
-//
-//	rowN[n] = T(sqrt(diag));
-//	invDiagonalOut[n] = T(1.0f) / rowN[n];
-//	return true;
-//}
-//
-//template<class T>
-//bool ndCholeskyFactorization(ndInt32 size, ndInt32 stride, T* const psdMatrix)
-//{
-//	ndAssert(size);
-//	bool state = true;
-//	T* const invDiagonal = ndAlloca(T, size);
-//
-//	ndAssert(psdMatrix[0] > T(0.0f));
-//	psdMatrix[0] = T(sqrt(psdMatrix[0]));
-//	invDiagonal[0] = T(1.0f) / psdMatrix[0];
-//	for (ndInt32 i = 1; (i < size) && state; ++i) 
-//	{
-//		state = state && ndCholeskyFactorizationAddRow(stride, i, psdMatrix, invDiagonal);
-//	}
-//	return state;
-//}
-
 template<class T>
 bool ndCholeskyFactorization(ndInt32 size, ndInt32 stride, T* const psdMatrix)
 {
@@ -194,8 +133,8 @@ bool ndCholeskyFactorization(ndInt32 size, ndInt32 stride, T* const psdMatrix)
 }
 
 // in single thread is much faster until the size is about 300 x 300
-// which make umpractical for rigibody physics.
-// however this is a good candidate for parallezation 
+// which make impractical for rigibody physics.
+// however this is a good candidate for parallelization 
 template<class T>
 bool ndCholeskyTiledFactorization(ndInt32 size, ndInt32 stride, T* const psdMatrix)
 {
@@ -380,9 +319,9 @@ bool ndCholeskyTiledFactorization(ndInt32 size, ndInt32 stride, T* const psdMatr
 		return true;
 	};
 
-	const ndInt32 maxSize = size / __CholeskyTiledBlockSize__;
-	CholeskyTile* const invDiagonalTiles = (CholeskyTile*)ndAlloca(CholeskyTile, maxSize + 1);
-	for (ndInt32 i = 0; i < maxSize; ++i)
+	const ndInt32 numberOfTiles = size / __CholeskyTiledBlockSize__;
+	CholeskyTile* const invDiagonalTiles = (CholeskyTile*)ndAlloca(CholeskyTile, numberOfTiles + 1);
+	for (ndInt32 i = 0; i < numberOfTiles; ++i)
 	{
 		for (ndInt32 j = 0; j <= i; ++j)
 		{
@@ -414,9 +353,9 @@ bool ndCholeskyTiledFactorization(ndInt32 size, ndInt32 stride, T* const psdMatr
 		}
 	}
 
-	if (size > (maxSize * __CholeskyTiledBlockSize__))
+	if (size > (numberOfTiles * __CholeskyTiledBlockSize__))
 	{
-		const ndInt32 residual = size - maxSize * __CholeskyTiledBlockSize__;
+		const ndInt32 residual = size - numberOfTiles * __CholeskyTiledBlockSize__;
 		auto GetResidualTile = [residual, stride, psdMatrix](ndInt32 row, ndInt32 column)
 		{
 			CholeskyTile tile;
@@ -542,7 +481,7 @@ bool ndCholeskyTiledFactorization(ndInt32 size, ndInt32 stride, T* const psdMatr
 			return true;
 		};
 
-		const ndInt32 i = maxSize;
+		const ndInt32 i = numberOfTiles;
 		for (ndInt32 j = 0; j <= i; ++j)
 		{
 			CholeskyTile tile(GetResidualTile(i, j));
