@@ -199,12 +199,6 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 		}
 
-		ImGui::SameLine();
-		if (ImGui::Button("delete node"))
-		{
-			ndTrace(("xxxx1\n"));
-		}
-
 		if (m_currentSelection->GetParent())
 		{
 			if (ImGui::Button("clone node"))
@@ -233,6 +227,57 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 
 				m_debugDisplayRenderPass->ResetScene();
 				m_currentSelection = *clone;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+			}
+
+			if (ImGui::Button("delete node"))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				ndWeakPtr<ndMesh> parent(m_currentSelection->GetParent());
+				parent->RemoveChild(m_currentSelection->GetSharedPtr());
+
+				ndSharedPtr<ndRenderSceneNode> visualMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*GetRenderer(), *m_mesh, GetPath().GetPath()));
+				SetVisualScene(m_mesh, visualMesh);
+
+				m_currentSelection = parent;
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+			}
+
+			if (ImGui::Button("delete node preserve children"))
+			{
+				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+				ndWeakPtr<ndMesh> parent(m_currentSelection->GetParent());
+				const ndMatrix transform(m_currentSelection->GetMatrix());
+				ndList<ndSharedPtr<ndMesh>>& children = m_currentSelection->GetChildren();
+				while (children.GetCount())
+				{
+					ndSharedPtr<ndMesh> child(children.GetFirst()->GetInfo());
+
+					ndMatrix jointMatrix0(ndGetIdentityMatrix());
+					ndMatrix jointMatrix1(ndGetIdentityMatrix());
+					ndSharedPtr<ndMeshJoint> joint(child->GetJoint());
+					if (joint)
+					{
+						jointMatrix0 = joint->m_localFrame0 * child->CalculateGlobalMatrix();
+						jointMatrix1 = joint->m_localFrame1 * m_currentSelection->CalculateGlobalMatrix();
+					}
+
+					m_currentSelection->RemoveChild(child);
+					child->SetMatrix(child->GetMatrix() * transform);
+					parent->AddChild(child);
+
+					if (joint)
+					{
+						joint->m_localFrame0 = jointMatrix0 * child->CalculateGlobalMatrix().OrthoInverse();
+						joint->m_localFrame1 = jointMatrix1 * parent->CalculateGlobalMatrix().OrthoInverse();
+					}
+				}
+				parent->RemoveChild(m_currentSelection->GetSharedPtr());
+
+				ndSharedPtr<ndRenderSceneNode> visualMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*GetRenderer(), *m_mesh, GetPath().GetPath()));
+				SetVisualScene(m_mesh, visualMesh);
+
+				m_currentSelection = parent;
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			}
 		}
