@@ -230,9 +230,55 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
 			}
 
+			auto RemoveCollision = [](ndMesh* const mesh)
+			{
+				ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* nextPtr;
+				ndCollidingPairs* const pairs = mesh->GetCollingPairs();
+				for (ndList<ndSharedPtr<ndMeshCollidingPair>>::ndNode* ptr = pairs->m_collidingPairs.GetFirst(); ptr; ptr = nextPtr)
+				{
+					nextPtr = ptr->GetNext();
+					ndSharedPtr<ndMeshCollidingPair>& pair = ptr->GetInfo();
+					if (pair->m_childNode == mesh)
+					{
+						pairs->m_collidingPairs.Remove(ptr);
+					}
+					else if (pair->m_parentNode == mesh)
+					{
+						pairs->m_collidingPairs.Remove(ptr);
+					}
+				}
+			};
+
+			auto RemoveLoops = [](ndMesh* const mesh)
+			{
+				ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* nextPtr;
+				ndCloseLoopConstraints* const loops = mesh->GetLoopJoints();
+				for (ndList<ndSharedPtr<ndMeshLoopJoint>>::ndNode* ptr = loops->m_loopJoints.GetFirst(); ptr; ptr = nextPtr)
+				{
+					nextPtr = ptr->GetNext();
+					ndSharedPtr<ndMeshLoopJoint>& loop = ptr->GetInfo();
+					if (loop->m_childNode == mesh)
+					{
+						loops->m_loopJoints.Remove(ptr);
+					}
+					else if (loop->m_parentNode == mesh)
+					{
+						loops->m_loopJoints.Remove(ptr);
+					}
+				}
+			};
+
 			if (ImGui::Button("delete node"))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+
+				auto RemoveDependencies = [RemoveLoops, RemoveCollision](ndMesh* const mesh)
+				{
+					RemoveLoops(mesh);
+					RemoveCollision(mesh);
+				};
+				m_currentSelection->NodeIterator(RemoveDependencies);
+
 				ndWeakPtr<ndMesh> parent(m_currentSelection->GetParent());
 				parent->RemoveChild(m_currentSelection->GetSharedPtr());
 
@@ -246,6 +292,10 @@ void ndAssetEditor::ShowPropertiesMeshInfo()
 			if (ImGui::Button("delete node preserve children"))
 			{
 				m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoMeshNode(this, *m_currentSelection)));
+
+				RemoveLoops(*m_currentSelection);
+				RemoveCollision(*m_currentSelection);
+
 				ndWeakPtr<ndMesh> parent(m_currentSelection->GetParent());
 				const ndMatrix transform(m_currentSelection->GetMatrix());
 				ndList<ndSharedPtr<ndMesh>>& children = m_currentSelection->GetChildren();
