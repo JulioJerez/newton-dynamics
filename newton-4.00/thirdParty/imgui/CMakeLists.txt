@@ -20,8 +20,8 @@ if (APPLE)
     file(GLOB CPP_SOURCE 
 	    *.h 
 	    *.cpp
-        backends/imgui_impl_osx.h
-        backends/imgui_impl_osx.mm
+        #backends/imgui_impl_osx.h
+        #backends/imgui_impl_osx.mm
         backends/imgui_impl_metal.h
 	    backends/imgui_impl_metal.mm
     )

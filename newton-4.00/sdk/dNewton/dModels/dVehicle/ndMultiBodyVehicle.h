@@ -126,7 +126,6 @@ class ndMultiBodyVehicle : public ndModelArticulation
 
 	protected:
 	void ApplyTireModel();
-	void ApplyBicycleModelLateralStability();
 	void CalculateRestSprungWeight();
 	void ApplyAlignmentAndBalancing();
 	void ApplyAerodynamics(ndFloat32 timestep);

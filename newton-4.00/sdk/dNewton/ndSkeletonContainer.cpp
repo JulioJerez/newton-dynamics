@@ -1130,13 +1130,15 @@ void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* cons
 		x[i] = ndClamp(x[i], l, h);
 	}
 
-	const ndInt32 maxIterCount = 64;
 	ndFloat32 error2 = tol2 * ndFloat32(2.0f);
 	const ndFloat32 sor = ndFloat32(1.125f);
 
 	const ndUnsigned16* const sparseMatrix = m_sparseMatrix;
 	const ndFloat32* const matrix = &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize];
-	for (ndInt32 m = maxIterCount; (m >= 0) && (error2 > tol2); --m)
+
+	const ndInt32 maxIterCount = 64;
+	ndInt32 iterCount = maxIterCount - 1;
+	for (; (iterCount >= 0) && (error2 > tol2); --iterCount)
 	{
 		ndInt32 rowBase = 0;
 		ndInt32 sparseRowBase = 0;
@@ -1146,10 +1148,10 @@ void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* cons
 			const ndFloat32* const row = &matrix[rowBase];
 			const ndUnsigned16* const sparceRow = &sparseMatrix[sparseRowBase];
 			ndFloat32 r = residual[i];
-			const ndInt32 sparceCount = sparceRow[0];
-			if (sparceCount)
+			const ndInt32 sparseCount = sparceRow[0];
+			if (sparseCount)
 			{
-				for (ndInt32 j = 0; j < sparceCount; ++j)
+				for (ndInt32 j = 0; j < sparseCount; ++j)
 				{
 					const ndInt32 index = sparceRow[j + 1];
 					r -= row[j] * x[index];
@@ -1182,6 +1184,11 @@ void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* cons
 			sparseRowBase += size + 1;
 		}
 	}
+
+	//if (iterCount == 0)
+	//{
+	//	ndTrace(("maxIterCount%d\n", maxIterCount - iterCount));
+	//}
 
 	for (ndInt32 i = 0; i < size; ++i)
 	{

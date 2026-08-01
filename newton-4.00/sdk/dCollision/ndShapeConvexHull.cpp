@@ -62,7 +62,8 @@ class ndShapeConvexHull::ndConvexBox
 		m_vertex = nullptr;
 		m_simplex = nullptr;
 		Create(count, strideInBytes, vertexArray, tolerance, maxPointsOut);
-		ndAssert(m_faceCount > 0);
+		// Degenerate input (coplanar/collinear/duplicated points) leaves
+		// m_faceCount at 0 instead of crashing; callers must check IsValid().
 		ndAssert(ndMemory::CheckMemory(this));
 	}
 
@@ -105,7 +106,8 @@ class ndShapeConvexHull::ndConvexBox
 		ndConvexHull3d* convexHull = new ndConvexHull3d(&buffer[0].m_x, sizeof(ndBigVector), count, tolerance, maxPointsOut);
 		if (!convexHull->GetCount())
 		{
-			ndAssert(0);
+			// Degenerate input (coplanar/collinear/duplicated points); fall
+			// through so the vertexCount < 4 check below returns false.
 			//// this is a degenerated hull, add some thickness and form a thick plane
 			//delete convexHull;
 
@@ -802,7 +804,8 @@ class ndShapeConvexHull::ndConvexBox
 		m_vertex = nullptr;
 		m_simplex = nullptr;
 		Create(count, strideInBytes, vertexArray, tolerance, maxPointsOut);
-		ndAssert(m_faceCount > 0);
+		// Degenerate input (coplanar/collinear/duplicated points) leaves
+		// m_faceCount at 0 instead of crashing; callers must check IsValid().
 	}
 
 	ndShapeConvexHull::~ndShapeConvexHull()
@@ -841,9 +844,10 @@ class ndShapeConvexHull::ndConvexBox
 		}
 
 		ndConvexHull3d* convexHull = new ndConvexHull3d(&buffer[0].m_x, sizeof (ndBigVector), count, tolerance, maxPointsOut);
-		if (!convexHull->GetCount()) 
+		if (!convexHull->GetCount())
 		{
-			ndAssert(0);
+			// Degenerate input (coplanar/collinear/duplicated points); fall
+			// through so the vertexCount < 4 check below returns false.
 			//// this is a degenerated hull, add some thickness and form a thick plane
 			//delete convexHull;
 		

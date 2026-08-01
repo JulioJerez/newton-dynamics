@@ -58,7 +58,6 @@ include_directories(../../sdk/dNewton/dModels/dVehicle)
 
 include_directories(../../sdk/dBrain)
 include_directories(../../sdk/dRender)
-
 include_directories(../../thirdParty/png/)
 include_directories(../../thirdParty/imgui/)
 include_directories(../../thirdParty/openFBX/src/)

@@ -94,7 +94,6 @@ if(NOT CMAKE_BUILD_TYPE)
           FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 
-
 #check for UNIX
 if(UNIX)
 	# ----------------------------------------------------------------------
@@ -128,9 +127,17 @@ if(UNIX)
 		add_compile_options(-fPIC)
 	endif()
 
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unused-cli ")
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wno-unused-cli ")
-	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -Wno-unused-cli ")
+	if(APPLE) 
+		message ("disabling warning: -no_warning_for_no_symbols seems impossble")
+		message ("nothing is eassy with xcode, it really sucks")
+		#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -no_warning_for_no_symbols ")
+		#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -no_warning_for_no_symbols ")
+		#set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -no_warning_for_no_symbols ")
+	else()
+		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unused-cli ")
+		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wno-unused-cli ")
+		set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -Wno-unused-cli ")
+	endif()
 
 	if (X86 AND NEWTON_ENABLE_AVX2)
 		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -march=haswell ")
@@ -192,7 +199,7 @@ if (MSVC)
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi /Od /fp:fast")
 	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} /Zi /O2 /Qpar /fp:fast")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Gy /Zi /GS /Ox /Oi /Ot /Ob2 /Oy /Qpar /fp:fast")
-	set(CMAKE_WARNINGS "/Wall /wd4061 /wd4191 /wd4201 /wd4263 /wd4264 /wd4266 /wd4324 /wd4505 /wd4514 /wd4582 /wd4587 /wd4625 /wd4626 /wd4710 /wd4711 /wd4371 /wd4571 /wd4623 /wd4668 /wd4774 /wd4820 /wd5026 /wd5027 /wd5039 /wd5045 /wd5264")
+	set(CMAKE_WARNINGS "/Wall /wd26495 /wd4061 /wd4191 /wd4201 /wd4263 /wd4264 /wd4266 /wd4324 /wd4505 /wd4514 /wd4582 /wd4587 /wd4625 /wd4626 /wd4710 /wd4711 /wd4371 /wd4571 /wd4623 /wd4668 /wd4774 /wd4820 /wd5026 /wd5027 /wd5039 /wd5045 /wd5264")
 
 	if(NEWTON_ENABLE_AVX2)
 		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /arch:AVX2")

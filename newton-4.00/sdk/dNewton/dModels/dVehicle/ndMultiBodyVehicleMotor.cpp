@@ -175,7 +175,6 @@ ndFloat32 ndMultiBodyVehicleMotor::ndEngineTorqueCurve::GetTorque(ndFloat32 rpm)
 	return m_torques[m_torques.GetCount() - 1];
 }
 
-
 ndMultiBodyVehicleMotor::ndMultiBodyVehicleMotor()
 	:ndJointBilateralConstraint()
 	,m_vehicle(nullptr)
@@ -305,8 +304,18 @@ ndFloat32 ndMultiBodyVehicleMotor::CalculateAcceleration(ndConstraintDescritor& 
 
 //ndTrace(("%f\n", currentOmega * ndRadPerSecToRpm));
 
+	ndFloat32 gasScale = ndFloat32 (1.0f);
+	if (currentOmega < m_engineCurve.GetPickPowerRpm())
+	{
+		ndFloat32 t0 = m_engineCurve.GetIdleRpm();
+		ndFloat32 t1 = m_engineCurve.GetPickTorqueRpm();
+		ndFloat32 t2 = m_engineCurve.GetPickPowerRpm();
+		gasScale = (t1 - t0) / (t2 - t1);
+	}
+
 	m_omega = currentOmega;
-	ndFloat32 gasStep = m_engineCurve.m_omegaStep;
+	ndFloat32 gasStep = ndRpmToRadPerSec * gasScale * m_engineCurve.m_omegaStep;
+	
 	ndFloat32 omegaStep = ndClamp(m_targetOmega - m_omega, -gasStep, gasStep);
 	ndFloat32 accel = omegaStep * desc.m_invTimestep;
 	return accel;

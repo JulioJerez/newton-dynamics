@@ -38,6 +38,7 @@ include_directories(../../thirdParty/imgui/backends)
 
 if (APPLE) 
 	message ("apple headers here")	
+   	#include_directories(../../thirdParty/glatter/include/glatter/)
 else()
 	include_directories(../../thirdParty/glfw/)
 	include_directories(../../thirdParty/glfw/include/)

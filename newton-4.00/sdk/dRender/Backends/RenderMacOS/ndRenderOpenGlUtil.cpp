@@ -10,14 +10,4 @@
 */
 
 #include "ndRenderStdafx.h"
-#include "ndRenderContext.h"
-#include "ndRenderShaderCache.h"
-
-ndRenderShaderCache::ndRenderShaderCache(void)
-{
-}
-
-ndRenderShaderCache::~ndRenderShaderCache(void)
-{
-}
-
+#include "ndRenderOpenGlUtil.h"

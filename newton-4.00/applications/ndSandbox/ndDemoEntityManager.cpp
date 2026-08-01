@@ -276,8 +276,8 @@ static void Test0__()
 
 static void TestTiledCholesky()
 {
-	//const ndInt32 size = 9;
-	const ndInt32 size = 128;
+	const ndInt32 size = 300;
+	//const ndInt32 size = 64 * 1;
 
 	ndArray<ndFloat32> A;
 	ndArray<ndFloat32> B;
@@ -310,21 +310,24 @@ static void TestTiledCholesky()
 	{
 		for (ndInt32 j = 0; j < size; ++j)
 		{
-			*Element(A, i, j) = *Element(B, i, j);
+			*Element(A, i, j) = *Element(C, i, j);
+			*Element(B, i, j) = *Element(C, i, j);
 		}
 	}
 	bool test0 = false;
 	bool test1 = false;
+
 	ndUnsigned64 t0 = ndGetTimeInMicroseconds();
 	test0 = ndCholeskyFactorization(size, size, &A[0]);
 	ndUnsigned64 t1 = ndGetTimeInMicroseconds();
-	test1 = ndCholeskyTiledFactorization(size, size, &C[0]);
+	test1 = ndCholeskyTiledFactorization(size, size, &B[0]);
 	ndUnsigned64 t2 = ndGetTimeInMicroseconds();
 
 	ndUnsigned64 t10 = t1 - t0;
 	ndUnsigned64 t21 = t2 - t1;
-	ndExpandTraceMessage("row Cholesky(%d)\n", ndInt32 (t10));
-	ndExpandTraceMessage("tiled Cholesky(%d)\n", ndInt32(t21));
+	ndExpandTraceMessage("row cholesky(%d)\n", ndInt32 (t10));
+	ndExpandTraceMessage("tiled cholesky(%d)\n", ndInt32(t21));
+	ndExpandTraceMessage("\n");
 	
 	ndAssert(test0);
 	ndAssert(test1);
@@ -785,10 +788,10 @@ ndDemoEntityManager::ndDemoEntityManager()
 	ndResetTimer();
 	ApplyOptions();
 
-#if 0
+#if 1
 	//Test0__();
 	//Test2__();
-	TestTiledCholesky();
+	//TestTiledCholesky();
 	//SimpleRegressionBrainStressTest();
 	//ndHandWrittenDigits();
 	//ndCifar10ImageClassification();
