@@ -544,20 +544,35 @@ void ndAssetEditor::MakeVisualGeometry()
 
 	if (ImGui::Button("build visual mesh"))
 	{
-		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
-
-		ndSharedPtr<ndShapeInstance> instance (shapeInstance.CreateObject());
+		ndSharedPtr<ndShapeInstance> instance(shapeInstance.CreateObject());
 		ndSharedPtr<ndMesh> tmpMesh(new ndMesh(**instance));
-		m_currentSelection->SetGeometry(tmpMesh->GetGeometry());
-		m_currentSelection->SetGeometryMatrix(tmpMesh->GetGeometryMatrix());
+		if (tmpMesh->GetGeometry())
+		{
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
+			m_currentSelection->SetGeometry(tmpMesh->GetGeometry());
+			m_currentSelection->SetGeometryMatrix(tmpMesh->GetGeometryMatrix());
 
-		ndRenderSceneNode* const visualMesh = m_entity->FindByName(m_currentSelection->GetName());
-		ndSharedPtr<ndRenderSceneNode> tmpVisualMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*m_renderer, *tmpMesh, ndGetWorkingFileName("")));
-		visualMesh->SetPrimitive(tmpVisualMesh->GetPrimitive());
-		visualMesh->SetPrimitiveMatrix(tmpVisualMesh->GetPrimitiveMatrix());
-		
-		GetDebugDisplay()->RebuildVisualDebugMesh();
+			ndRenderSceneNode* const visualMesh = m_entity->FindByName(m_currentSelection->GetName());
+			ndSharedPtr<ndRenderSceneNode> tmpVisualMesh(ndRenderMeshLoader::CreateRenderSceneMesh(*m_renderer, *tmpMesh, ndGetWorkingFileName("")));
+			visualMesh->SetPrimitive(tmpVisualMesh->GetPrimitive());
+			visualMesh->SetPrimitiveMatrix(tmpVisualMesh->GetPrimitiveMatrix());
 
-		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
+			GetDebugDisplay()->RebuildVisualDebugMesh();
+
+			ndVector p0;
+			ndVector p1;
+			const ndMatrix matrix(ndGetIdentityMatrix());
+			m_mesh->CalculateAabb(matrix, p0, p1);
+			ndVector size(ndVector::m_half * (p1 - p0));
+			ndVector origin(ndVector::m_half * (p1 + p0));
+			ndFloat32 maxSize = ndMax(ndMax(ndMax(size.m_x, size.m_y), size.m_z), ndFloat32(2.0f));
+			origin.m_x -= maxSize * ndFloat32(4.0f);
+			ndQuaternion rot;
+
+			m_orbitRootNode = true;
+			SetCameraMatrix(rot, origin);
+
+			m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoShape(this, *m_currentSelection)));
+		}
 	}
 }

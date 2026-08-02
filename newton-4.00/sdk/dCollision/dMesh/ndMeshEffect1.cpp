@@ -3266,29 +3266,32 @@ ndMeshEffect::ndMeshEffect(const ndShapeInstance& shapeInstance)
 		shapeInstance.DebugShape(matrix, builder);
 	}
 
-	ndStack<ndInt32>indexListBuffer(ndInt32(builder.m_vertex.GetCount()));
-	ndInt32* const indexList = &indexListBuffer[0];
-	ndVertexListToIndexList(&builder.m_vertex[0].m_x, sizeof(ndBigVector), 4, ndInt32(builder.m_vertex.GetCount()), &indexList[0], DG_VERTEXLIST_INDEXLIST_TOL);
-
-	ndArray<ndInt32> faceMaterialArray;
-	ndMeshEffect::ndMeshVertexFormat vertexFormat;
-
-	for (ndInt32 i = 0; i < builder.m_faceIndexCount.GetCount(); ++i)
+	if (builder.m_vertex.GetCount())
 	{
-		faceMaterialArray.PushBack(0);
+		ndStack<ndInt32>indexListBuffer(ndInt32(builder.m_vertex.GetCount()));
+		ndInt32* const indexList = &indexListBuffer[0];
+		ndVertexListToIndexList(&builder.m_vertex[0].m_x, sizeof(ndBigVector), 4, ndInt32(builder.m_vertex.GetCount()), &indexList[0], DG_VERTEXLIST_INDEXLIST_TOL);
+
+		ndArray<ndInt32> faceMaterialArray;
+		ndMeshEffect::ndMeshVertexFormat vertexFormat;
+
+		for (ndInt32 i = 0; i < builder.m_faceIndexCount.GetCount(); ++i)
+		{
+			faceMaterialArray.PushBack(0);
+		}
+
+		vertexFormat.m_faceCount = ndInt32(builder.m_faceIndexCount.GetCount());
+		vertexFormat.m_faceIndexCount = &builder.m_faceIndexCount[0];
+		vertexFormat.m_faceMaterial = &faceMaterialArray[0];
+
+		vertexFormat.m_vertex.m_data = &builder.m_vertex[0].m_x;
+		vertexFormat.m_vertex.m_strideInBytes = sizeof(ndBigVector);
+		vertexFormat.m_vertex.m_indexList = &indexList[0];
+
+		BuildFromIndexList(&vertexFormat);
+		RepairTJoints();
+		CalculateNormals(ndFloat32(45.0f) * ndDegreeToRad);
 	}
-
-	vertexFormat.m_faceCount = ndInt32(builder.m_faceIndexCount.GetCount());
-	vertexFormat.m_faceIndexCount = &builder.m_faceIndexCount[0];
-	vertexFormat.m_faceMaterial = &faceMaterialArray[0];
-
-	vertexFormat.m_vertex.m_data = &builder.m_vertex[0].m_x;
-	vertexFormat.m_vertex.m_strideInBytes = sizeof(ndBigVector);
-	vertexFormat.m_vertex.m_indexList = &indexList[0];
-
-	BuildFromIndexList(&vertexFormat);
-	RepairTJoints();
-	CalculateNormals(ndFloat32(45.0f) * ndDegreeToRad);
 }
 
 ndMatrix ndMeshEffect::CalculateOOBB(ndBigVector& size) const
