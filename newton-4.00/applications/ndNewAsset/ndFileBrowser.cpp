@@ -24,7 +24,6 @@ bool ndGetSaveFileName(char* const fileName, int maxSize)
 	// open a file name
 	char appPath[256];
 	GetModuleFileNameA(nullptr, appPath, sizeof(appPath));
-	//strtolwr(appPath);
 
 	char* const end = strstr(appPath, "applications");
 	end[0] = 0;
@@ -77,7 +76,7 @@ bool ndGetLoadFileName(char* const fileName, int maxSize)
 	ofn.lpstrFile = fileName;
 	ofn.lpstrFile[0] = '\0';
 	ofn.nMaxFile = DWORD(maxSize);
-	ofn.lpstrFilter = const_cast<LPSTR>("newton load file *.nd\0*.nd\0All Files (*.*)\0*.*\0");
+	ofn.lpstrFilter = const_cast<LPSTR>("newton load file *.nd\0*.nd\0native xml *.xml\0*.xml\0All Files (*.*)\0*.*\0");
 	ofn.nFilterIndex = 1;
 	ofn.lpstrFileTitle = const_cast<LPSTR>("Newton asset editor");
 	ofn.nMaxFileTitle = 0;

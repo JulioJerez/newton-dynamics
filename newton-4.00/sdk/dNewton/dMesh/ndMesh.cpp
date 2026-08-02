@@ -89,44 +89,51 @@ ndMesh::ndMesh(const ndShapeInstance& shape, ndUvMapingMode mapping)
 	,m_assetToolFlags(0)
 	,m_isVisible(true)
 {
-	switch (mapping)
+	if (m_mesh->GetVertexCount())
 	{
-		//case m_capsule:
-		//case m_spherical:
-		//{
-		//	ndMatrix flipMatrix(ndGetIdentityMatrix());
-		//	flipMatrix[0][0] = ndFloat32(-1.0f);
-		//	ndMatrix aligmentUV(flipMatrix * descriptor.m_uvMatrix);
-		//	mesh.SphericalMapping(textureId, aligmentUV);
-		//	break;
-		//}
-		//
-		//case m_cylindrical:
-		//{
-		//	ndMatrix flipMatrix(ndGetIdentityMatrix());
-		//	flipMatrix[0][0] = ndFloat32(-1.0f);
-		//	ndMatrix aligmentUV(flipMatrix * descriptor.m_uvMatrix);
-		//	mesh.CylindricalMapping(textureId, aligmentUV);
-		//	break;
-		//}
-		//
-		//case m_box:
-		//{
-		//	if (descriptor.m_stretchMaping)
-		//	{
-		//		mesh.BoxMapping(textureId, textureId, textureId, descriptor.m_uvMatrix);
-		//	}
-		//	else
-		//	{
-		//		mesh.UniformBoxMapping(textureId, descriptor.m_uvMatrix);
-		//	}
-		//	break;
-		//}
-		case m_box:
-		default:
+		switch (mapping)
 		{
-			m_mesh->UniformBoxMapping(0, ndGetIdentityMatrix());
+			//case m_capsule:
+			//case m_spherical:
+			//{
+			//	ndMatrix flipMatrix(ndGetIdentityMatrix());
+			//	flipMatrix[0][0] = ndFloat32(-1.0f);
+			//	ndMatrix aligmentUV(flipMatrix * descriptor.m_uvMatrix);
+			//	mesh.SphericalMapping(textureId, aligmentUV);
+			//	break;
+			//}
+			//
+			//case m_cylindrical:
+			//{
+			//	ndMatrix flipMatrix(ndGetIdentityMatrix());
+			//	flipMatrix[0][0] = ndFloat32(-1.0f);
+			//	ndMatrix aligmentUV(flipMatrix * descriptor.m_uvMatrix);
+			//	mesh.CylindricalMapping(textureId, aligmentUV);
+			//	break;
+			//}
+			//
+			//case m_box:
+			//{
+			//	if (descriptor.m_stretchMaping)
+			//	{
+			//		mesh.BoxMapping(textureId, textureId, textureId, descriptor.m_uvMatrix);
+			//	}
+			//	else
+			//	{
+			//		mesh.UniformBoxMapping(textureId, descriptor.m_uvMatrix);
+			//	}
+			//	break;
+			//}
+			case m_box:
+			default:
+			{
+				m_mesh->UniformBoxMapping(0, ndGetIdentityMatrix());
+			}
 		}
+	}
+	else
+	{
+		m_mesh = ndSharedPtr<ndMeshEffect>(nullptr);
 	}
 }
 
