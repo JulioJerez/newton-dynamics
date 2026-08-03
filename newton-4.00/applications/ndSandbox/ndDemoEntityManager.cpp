@@ -23,8 +23,9 @@
 #include "ndDebugDisplayRenderPass.h"
 #include "ndDemoCameraNodeLookAtTarget.h"
 
-#define LOAD_MESH_INDEX			200
 #define MACHINE_LEARNING_BASE	100
+#define LOAD_MODEL_INDEX		200
+#define LOAD_MESH_INDEX			201
 
 //#define DEFAULT_SCENE	0		// basic collision only
 //#define DEFAULT_SCENE	1		// basic rigidbody
@@ -82,6 +83,7 @@
 						 
 void ndBasicModel(ndDemoEntityManager* const scene);
 void ndExportModel(ndDemoEntityManager* const scene);
+void ndImportMesh(ndDemoEntityManager* const scene);
 void ndImportModel(ndDemoEntityManager* const scene);
 void ndBasicJoints(ndDemoEntityManager* const scene);
 void ndBasicStacks(ndDemoEntityManager* const scene);
@@ -1048,6 +1050,11 @@ void ndDemoEntityManager::ShowMainMenuBar()
 				m_currentScene = LOAD_MESH_INDEX;
 			}
 
+			if (ImGui::MenuItem("Load ndMesh as ndModelArticulation", ""))
+			{
+				m_currentScene = LOAD_MODEL_INDEX;
+			}
+
 			if (ImGui::MenuItem("Exit", "")) 
 			{
 				m_renderer->Terminate();
@@ -1191,9 +1198,14 @@ void ndDemoEntityManager::LoadDemo(ndInt32 menuIndex)
 	m_lookAtTargetCamera = ndSharedPtr<ndRenderSceneNode>(new ndDemoCameraNodeLookAtTarget(*m_renderer));
 	m_lookAtTargetCamera->SetTransform(savedTransform);
 
-	if (menuIndex == LOAD_MESH_INDEX)
+	if (menuIndex == LOAD_MODEL_INDEX)
 	{
 		ndImportModel(this);
+		snprintf(newTitle, sizeof(newTitle), "Newton Dynamics %d.%.2i demo: %s", D_NEWTON_ENGINE_MAJOR_VERSION, D_NEWTON_ENGINE_MINOR_VERSION, "ndMesh model");
+	}
+	else if (menuIndex == LOAD_MESH_INDEX)
+	{
+		ndImportMesh(this);
 		snprintf(newTitle, sizeof(newTitle), "Newton Dynamics %d.%.2i demo: %s", D_NEWTON_ENGINE_MAJOR_VERSION, D_NEWTON_ENGINE_MINOR_VERSION, "ndMesh model");
 	}
 	else if (menuIndex < ndInt32(sizeof (m_demosSelection)/sizeof(m_demosSelection[0])))
