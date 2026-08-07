@@ -79,21 +79,19 @@ class ndRenderSceneNode : public ndContainersFreeListAlloc<ndRenderSceneNode>
 
 	ndTransform GetTransform() const;
 	void SetTransform(const ndTransform& transform);
-
 	void SetTransformModifier(const ndSharedPtr<ndRenderTransformModifier>& modifier);
+
+	virtual void Render(const ndRender* const owner, const ndMatrix& parentMatrix, ndRenderPassMode renderMode) const;
 
 	ndRenderSceneNode* IteratorNext();
 	ndRenderSceneNode* IteratorFirst();
 	const ndRenderSceneNode* IteratorNext() const;
 	const ndRenderSceneNode* IteratorFirst() const;
-
 	template <typename Function>
 	void NodeIterator(Function func);
 
-	virtual void Render(const ndRender* const owner, const ndMatrix& parentMatrix, ndRenderPassMode renderMode) const;
-
 	ndMatrix m_matrix;			 // interpolated local matrix
-	ndMatrix m_basePoseMatrix;	 // matrix for skin meh binding 
+	ndMatrix m_basePoseMatrix;	 // matrix for skin mesh binding 
 	ndMatrix m_globalMatrix;	 // world space matrix calculated each frame for rendering
 	ndMatrix m_primitiveMatrix;   
 	ndTransform m_transform0;
