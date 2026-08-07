@@ -1352,8 +1352,8 @@ class ndVector : public ndClassAlloc
 	inline ndVector CrossProduct(const ndVector& B) const
 	{
 #if 1
-		// actually this is better because the compilier replace 
-		// shffle with permutes.
+		// actually this is better because the must compilers 
+		// replace shuffles with permutes.
 		__m128 tmp0 = _mm_shuffle_ps(m_type, m_type, _MM_SHUFFLE(3, 0, 2, 1));
 		__m128 tmp1 = _mm_shuffle_ps(B.m_type, B.m_type, _MM_SHUFFLE(3, 1, 0, 2));
 		__m128 tmp2 = _mm_mul_ps(tmp0, B.m_type);
