@@ -151,7 +151,6 @@ ndSharedPtr<ndBody> BuildFloorBox(ndDemoEntityManager* const scene, const ndMatr
 	material.m_useAlphaTest = false;
 	material.m_specular = ndVector::m_zero;
 
-	//ndSharedPtr<ndRenderPrimitive> geometry(ndRenderPrimitive::CreateMeshPrimitive(descriptor));
 	ndSharedPtr<ndRenderPrimitive> geometry(new ndRenderPrimitive(descriptor));
 	
 	ndMatrix location(matrix);
