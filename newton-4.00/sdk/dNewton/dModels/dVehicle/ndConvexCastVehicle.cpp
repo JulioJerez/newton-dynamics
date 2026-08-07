@@ -37,10 +37,9 @@
 class ndConvexCastVehicle::ndVehicleContact : public ndContact
 {
 	public:
-	ndVehicleContact(ndConvexCastVehicle* const owner, ndMultiBodyVehicleTireJoint* const tire)
+	ndVehicleContact(ndConvexCastVehicle* const owner)
 		:ndContact()
 		,m_owner(owner)
-		,m_myTire(tire)
 	{
 	}
 
@@ -50,7 +49,6 @@ class ndConvexCastVehicle::ndVehicleContact : public ndContact
 		{
 			ndBodyDynamic* const chassis = *m_owner->m_chassis;
 			const ndBodyDynamic* const tireBody = GetBody0()->GetAsBodyDynamic();
-			ndAssert(tireBody == m_myTire->GetBody0());
 			
 			// I can calculate the velocity in inline, but the 
 			// methiod take com into account, so use the methof and then restore omega
@@ -64,16 +62,23 @@ class ndConvexCastVehicle::ndVehicleContact : public ndContact
 			// restore ChassisOmega
 			chassis->SetOmegaNoSleep(savedChassisOmega);
 
-			// now this these velocoies and the toire joint 
-			// calculate the reqires tire slip ratio.
+			// now this these velocities and the tire joint 
+			// calculate the requires tire slip ratio.
+			ndVector tireHubRelativeVeloc(targetTireHubVeloc - tireHubVeloc);
+			ndContactPointList& contactPoints = GetContactPoints();
+			for (ndContactPointList::ndNode* contactNode = contactPoints.GetFirst(); contactNode; contactNode = contactNode->GetNext())
+			{
+				ndContactMaterial& contactPoint = contactNode->GetInfo();
+				const ndVector larealDir(contactPoint.m_dir1);
+				ndFloat32 relAccel = larealDir.DotProduct(tireHubRelativeVeloc).GetScalar() * desc.m_invTimestep;
+				contactPoint.OverrideFriction1Accel(relAccel);
+			}
 		}
 		ndContact::JacobianDerivative(desc);
 	}
 
 	ndWeakPtr<ndConvexCastVehicle> m_owner;
-	ndWeakPtr<ndMultiBodyVehicleTireJoint> m_myTire;
 };
-
 
 ndConvexCastVehicle::ndConvexCastVehicle(ndFloat32 gravityMagnitud)
 	:ndMultiBodyVehicle(gravityMagnitud)
@@ -99,8 +104,8 @@ void ndConvexCastVehicle::OnAddToWorld()
 		ndMultiBodyVehicleTireJoint* const tire = tireNode->GetInfo();
 		ndBodyDynamic* const wheelBody = tire->GetBody0()->GetAsBodyDynamic();
 		ndBodyKinematic::ndContactMap& contacts = wheelBody->GetContactMap();
-		contacts.AttachContact(new ndVehicleContact(this, tire), 1);
-		contacts.AttachContact(new ndVehicleContact(this, tire), 2);
+		contacts.AttachContact(new ndVehicleContact(this), 1);
+		contacts.AttachContact(new ndVehicleContact(this), 2);
 	}
 }
 

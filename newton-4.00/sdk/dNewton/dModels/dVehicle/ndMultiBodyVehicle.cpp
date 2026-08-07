@@ -736,10 +736,14 @@ void ndMultiBodyVehicle::ApplyTireModel(ndFixSizeArray<ndTireContactPair, 128>& 
 		{
 			ndContact* const contact = tireContacts[i].m_contact;
 			ndMultiBodyVehicleTireJoint* const tire = tireContacts[i].m_tireJoint;
+			const ndVector tireHubPin(tire->CalculateBaseFrame().m_front);
+
 			ndContactPointList& contactPoints = contact->GetContactPoints();
 			for (ndContactPointList::ndNode* contactNode = contactPoints.GetFirst(); contactNode; contactNode = contactNode->GetNext())
 			{
 				ndContactMaterial& contactPoint = contactNode->GetInfo();
+				const ndVector longitudialDir(tireHubPin.CrossProduct(contactPoint.m_normal));
+				contactPoint.RotateTangentDirections(longitudialDir);
 				switch (tire->m_frictionModel.m_frictionModel)
 				{
 					case ndTireFrictionModel::m_pacejkaSport:
