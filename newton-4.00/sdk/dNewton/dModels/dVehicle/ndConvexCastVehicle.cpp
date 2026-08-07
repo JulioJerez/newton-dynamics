@@ -37,22 +37,41 @@
 class ndConvexCastVehicle::ndVehicleContact : public ndContact
 {
 	public:
-	ndVehicleContact(ndConvexCastVehicle* const owner)
+	ndVehicleContact(ndConvexCastVehicle* const owner, ndMultiBodyVehicleTireJoint* const tire)
 		:ndContact()
 		,m_owner(owner)
+		,m_myTire(tire)
 	{
 	}
 
 	void JacobianDerivative(ndConstraintDescritor& desc) override
 	{
-		if (m_owner->m_bicycleModelValid)
+		if (m_owner->m_bicycleModelIsValid)
 		{
-			ndTrace(("xxxx\n"));
+			ndBodyDynamic* const chassis = *m_owner->m_chassis;
+			const ndBodyDynamic* const tireBody = GetBody0()->GetAsBodyDynamic();
+			ndAssert(tireBody == m_myTire->GetBody0());
+			
+			// I can calculate the velocity in inline, but the 
+			// methiod take com into account, so use the methof and then restore omega
+			const ndVector tireHubVeloc(chassis->GetVelocityAtPoint(tireBody->GetMatrix().m_posit));
+			const ndVector savedChassisOmega(chassis->GetOmega());
+
+			ndVector desiredChassiOmega(savedChassisOmega);
+			desiredChassiOmega.m_y = -m_owner->m_betaRate;
+			chassis->SetOmegaNoSleep(desiredChassiOmega);
+			const ndVector targetTireHubVeloc(chassis->GetVelocityAtPoint(tireBody->GetMatrix().m_posit));
+			// restore ChassisOmega
+			chassis->SetOmegaNoSleep(savedChassisOmega);
+
+			// now this these velocoies and the toire joint 
+			// calculate the reqires tire slip ratio.
 		}
 		ndContact::JacobianDerivative(desc);
 	}
 
 	ndWeakPtr<ndConvexCastVehicle> m_owner;
+	ndWeakPtr<ndMultiBodyVehicleTireJoint> m_myTire;
 };
 
 
@@ -66,7 +85,7 @@ ndConvexCastVehicle::ndConvexCastVehicle(ndFloat32 gravityMagnitud)
 	,m_r(ndFloat32(0.0f))
 	,m_beta(ndFloat32(0.0f))
 	,m_betaRate(ndFloat32(0.0f))
-	,m_bicycleModelValid(false)
+	,m_bicycleModelIsValid(false)
 {
 }
 
@@ -77,10 +96,11 @@ void ndConvexCastVehicle::OnAddToWorld()
 	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* tireNode = m_tireList.GetFirst(); tireNode; tireNode = tireNode->GetNext())
 	{
 		// support up to two contacts per tire
-		ndBodyDynamic* const wheelBody = tireNode->GetInfo()->GetBody0()->GetAsBodyDynamic();
+		ndMultiBodyVehicleTireJoint* const tire = tireNode->GetInfo();
+		ndBodyDynamic* const wheelBody = tire->GetBody0()->GetAsBodyDynamic();
 		ndBodyKinematic::ndContactMap& contacts = wheelBody->GetContactMap();
-		contacts.AttachContact(new ndVehicleContact(this), 1);
-		contacts.AttachContact(new ndVehicleContact(this), 2);
+		contacts.AttachContact(new ndVehicleContact(this, tire), 1);
+		contacts.AttachContact(new ndVehicleContact(this, tire), 2);
 	}
 }
 
@@ -414,7 +434,7 @@ void ndConvexCastVehicle::ApplyBicycleModelLateralStability()
 	// 
 	// 1-if less than two contacts, stability does not apply 
 	ndInt32 contactCount = 0;
-	m_bicycleModelValid = false;
+	m_bicycleModelIsValid = false;
 	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = m_tireList.GetFirst(); node; node = node->GetNext())
 	{
 		ndMultiBodyVehicleTireJoint* const tireJoint = node->GetInfo();
@@ -478,14 +498,10 @@ void ndConvexCastVehicle::ApplyBicycleModelLateralStability()
 	// cos(beta) ~= 1
 	// sin(beta) ~= beta
 	//
-	// This yields the following equations:
-	//
-	// 1) mass * localSpeed * (betaRate + yawRate)
-	//      + mass * beta * localAccel = lateralForce
-	//
-	// 2) mass * (localAccel - yawRate * localSpeed * beta)
-	//      = longitudinalForce
-	//
+	// This yields the following equations, whe all parameter are in teh body frame coodinate system:
+	// 
+	// 1) mass * localSpeed * (betaRate + yawRate) + mass * beta * localAccel = lateralForce
+	// 2) mass * (localAccel - yawRate * localSpeed * beta) = longitudinalForce
 	// 3) yawInertia * yawAlpha = yawTorque
 	//
 	// The resulting system is overdetermined, 
@@ -549,18 +565,20 @@ void ndConvexCastVehicle::ApplyBicycleModelLateralStability()
 	m_vx = veloc.m_x;
 	m_vz = veloc.m_z;
 	m_betaRate = betaRate;
-	m_bicycleModelValid = true;
+	m_bicycleModelIsValid = true;
 
 	// the stability critirial in to tweak the lateral
-	// tire frintion coneficient in such what that 
+	// tire friction conefficient in such way that 
 	// betaRate and Yaw rate and identical. 
 	// for that, using equation 1 
-	// 1) mass * localSpeed * (betaRate + yawRate)
-	//      + mass * beta * localAccel = lateralForce
+	// 1) mass * localSpeed * (betaRate + yawRate) + mass * beta * localAccel = lateralForce
 
-	//the expression betaRate + yawRate should be set to zero.
-	// therefore the target yawRate is
+	// the expression betaRate + yawRate should be set to zero.
+	// therefore the target yawRate should be 
 	// targetYawRate = -betaRate
+
+	// this information is now used by each tire contact
+	// to inforce a sideslip that forces yawRate match -betaRate
 }
 
 void ndConvexCastVehicle::Update(ndFloat32 timestep, ndInt32 threadId)

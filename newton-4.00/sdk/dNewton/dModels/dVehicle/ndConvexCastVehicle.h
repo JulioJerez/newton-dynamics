@@ -65,7 +65,7 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 	ndFloat32 m_r;
 	ndFloat32 m_beta;
 	ndFloat32 m_betaRate;
-	bool m_bicycleModelValid;
+	bool m_bicycleModelIsValid;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif
