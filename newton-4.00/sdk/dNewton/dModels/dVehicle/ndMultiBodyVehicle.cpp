@@ -1345,9 +1345,6 @@ void ndMultiBodyVehicle::Update(ndFloat32 timestep, ndInt32)
 
 	// apply tire model
 	ApplyTireModel();
-
-	// apply vehicle stability control
-	//ApplyBicycleModelLateralStability();
 }
 
 void ndMultiBodyVehicle::PostUpdate(ndFloat32, ndInt32)
