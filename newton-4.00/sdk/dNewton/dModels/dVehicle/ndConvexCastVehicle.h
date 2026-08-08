@@ -28,11 +28,33 @@
 
 class ndSkeletonContainer;
 
+#define ND_MAX_SIDESLIP (ndFloat32(15.0f) * ndDegreeToRad)
+//#define ND_MAX_SIDESLIP (ndFloat32(1.0f) * ndDegreeToRad)
+
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndConvexCastVehicle : public ndMultiBodyVehicle
 {
 	public:
-	class ndVehicleContact;
+	class ndBicycleModelStability
+	{
+		public:
+		ndBicycleModelStability()
+			:m_u(ndFloat32(0.0f))
+			,m_r(ndFloat32(0.0f))
+			,m_vx(ndFloat32(0.0f))
+			,m_vz(ndFloat32(0.0f))
+			,m_beta(ndFloat32(0.0f))
+			,m_betaRate(ndFloat32(0.0f))
+		{
+		}
+
+		ndFloat32 m_u;
+		ndFloat32 m_r;
+		ndFloat32 m_vx;
+		ndFloat32 m_vz;
+		ndFloat32 m_beta;
+		ndFloat32 m_betaRate;
+	};
 
 	D_CLASS_REFLECTION(ndConvexCastVehicle, ndMultiBodyVehicle )
 	D_NEWTON_API ndConvexCastVehicle(ndFloat32 gravityMagnitud = ndFloat32 (10.0f));
@@ -46,8 +68,8 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 	D_NEWTON_API virtual void OnAddToWorld() override;
 	D_NEWTON_API virtual void OnRemoveFromWorld() override;
 	D_NEWTON_API virtual void CalculateConvexCastTireContacts(ndInt32 threadId);
+	D_NEWTON_API virtual void ApplyBicycleModelLateralStability(ndFloat32 timestep);
 	D_NEWTON_API virtual void Debug(ndConstraintDebugCallback& context) const override;
-	void ApplyBicycleModelLateralStability();
 
 	ndIkSolver m_solver;
 	ndFixSizeArray<ndBodyDynamic*, 32> m_savedBody;
@@ -59,13 +81,7 @@ class ndConvexCastVehicle : public ndMultiBodyVehicle
 	ndInt32 m_sleepCounter;
 
 	// bicycle model parameters
-	ndFloat32 m_u;
-	ndFloat32 m_vx;
-	ndFloat32 m_vz;
-	ndFloat32 m_r;
-	ndFloat32 m_beta;
-	ndFloat32 m_betaRate;
-	bool m_bicycleModelIsValid;
+	ndBicycleModelStability m_bicycleModel;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif
