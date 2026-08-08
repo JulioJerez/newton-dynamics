@@ -10,7 +10,7 @@ This document describes the principles behind that architecture.
 
 # **Fundamental Design Principles** 
 
-## **Conservation Before Approximation** 
+## **Conservation of total momentum before approximation** 
 
 Whenever possible, Newton attempts to preserve the governing equations of motion instead of replacing them with empirical corrections. 
 
