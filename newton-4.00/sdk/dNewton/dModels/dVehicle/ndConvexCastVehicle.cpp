@@ -39,7 +39,7 @@ class ndConvexCastVehicle::ndBicycleModelStability : public ndJointBilateralCons
 {
 	public:
 	ndBicycleModelStability(ndConvexCastVehicle* const owner)
-		:ndJointBilateralConstraint(1, *owner->m_chassis, &m_sentinel, owner->m_chassis->GetMatrix())
+		:ndJointBilateralConstraint(2, *owner->m_chassis, &m_sentinel, owner->m_chassis->GetMatrix())
 		,m_owner(owner)
 		,m_u(ndFloat32(0.0f))
 		,m_r(ndFloat32(0.0f))
@@ -51,14 +51,35 @@ class ndConvexCastVehicle::ndBicycleModelStability : public ndJointBilateralCons
 	{
 	}
 
-	//void JacobianDerivative(ndConstraintDescritor& desc) override
-	void JacobianDerivative(ndConstraintDescritor&) override
+	void JacobianDerivative(ndConstraintDescritor& desc) override
 	{
 		// only add row when the model is applicable
 		if (m_modelIsValid)
 		{
-			m_modelIsValid = true;
-			//ndAssert(0);
+			{
+				// add angular row
+				ndMatrix matrix0;
+				ndMatrix matrix1;
+
+				// calculate the position of the pivot point and the Jacobian direction vectors, in global space. 
+				CalculateGlobalMatrix(matrix0, matrix1);
+				AddAngularRowJacobian(desc, matrix0.m_up, ndFloat32(0.0f));
+
+				const ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
+				const ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
+
+				const ndVector omega0 (m_body0->GetOmega());
+				const ndVector omega1 (m_body1->GetOmega());
+
+				const ndVector relOmega(omega0 * jacobian0.m_angular + omega1 * jacobian1.m_angular);
+				const ndFloat32 w = -1.0f + relOmega.AddHorizontal().GetScalar();
+				SetMotorAcceleration(desc, -w * desc.m_invTimestep);
+			}
+
+
+			//const ndVector omega0(m_body0->GetVelocity());
+			//const ndVector omega1(m_body1->GetVelocity());
+
 		}
 	}
 
@@ -84,11 +105,18 @@ class ndConvexCastVehicle::ndBicycleModelContact: public ndContact
 
 	void JacobianDerivative(ndConstraintDescritor& desc) override
 	{
-		//const ndBicycleModelStability& bicycle = **m_owner->m_bicycleModel;
-		//if (bicycle.m_modelIsValid)
-		//{
-		//
-		//}
+		ndBicycleModelStability& bicycle = **m_owner->m_bicycleModel;
+		if (bicycle.m_modelIsValid)
+		{
+			for (ndContactPointList::ndNode* pointNode = GetContactPoints().GetFirst(); pointNode; pointNode = pointNode->GetNext())
+			{
+				ndContactMaterial& point = pointNode->GetInfo();
+				point.m_material.m_staticFriction0 = ndFloat32(0.01f);
+				point.m_material.m_staticFriction1 = ndFloat32(0.01f);
+				point.m_material.m_dynamicFriction0 = ndFloat32(0.01f);
+				point.m_material.m_dynamicFriction1 = ndFloat32(0.01f);
+			}
+		}
 
 		ndContact::JacobianDerivative(desc);
 	}
@@ -106,6 +134,7 @@ ndConvexCastVehicle::ndConvexCastVehicle(ndFloat32 gravityMagnitud)
 
 void ndConvexCastVehicle::OnAddToWorld()
 {
+	m_initialized = false;
 	ndMultiBodyVehicle::OnAddToWorld();
 
 	m_bicycleModel = ndSharedPtr<ndBicycleModelStability>(new ndBicycleModelStability(this));
@@ -355,7 +384,6 @@ void ndConvexCastVehicle::CalculateConvexCastTireContacts(ndInt32 threadId)
 				contact->SetActive(true);
 				contact->m_maxDof = 0;
 				contact->SetBodies(wheelBody, body1);
-				//contact->GetContactPoints().RemoveAll();
 			
 				ndContactSolver contactSolver;
 				contactSolver.m_threadId = threadId;
