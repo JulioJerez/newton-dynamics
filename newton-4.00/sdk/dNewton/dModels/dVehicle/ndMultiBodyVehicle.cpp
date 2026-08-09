@@ -407,7 +407,6 @@ void ndMultiBodyVehicle::AddDifferential(const ndSharedPtr<ndBody>& differential
 	differentialBody->GetAsBodyDynamic()->SetMaxLinearAndAngularIntegrationStep(ndFloat32(2.0f * 360.0f) * ndDegreeToRad, ndFloat32(10.0f));
 }
 
-//ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleTireJoint* const leftTire, ndMultiBodyVehicleTireJoint* const rightTire, ndFloat32 slipOmegaLock)
 ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleTireJoint* const leftTire, ndMultiBodyVehicleTireJoint* const, ndFloat32 slipOmegaLock)
 {
 	ndAssert(m_chassis);
@@ -430,7 +429,6 @@ ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 ma
 	return joint;
 }
 
-//ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleDifferential* const leftDifferential, ndMultiBodyVehicleDifferential* const rightDifferential, ndFloat32 slipOmegaLock)
 ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleDifferential* const leftDifferential, ndMultiBodyVehicleDifferential* const, ndFloat32 slipOmegaLock)
 {
 	ndAssert(m_chassis);
@@ -543,9 +541,6 @@ bool ndMultiBodyVehicle::CalculateNormalizedAlgniningTorque(ndMultiBodyVehicleTi
 	ndVector p1(x1, y1, ndFloat32(0.0f), ndFloat32(0.0f));
 	ndVector p0(-a, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f));
 
-	//ndFloat32 alignTorque = ndFloat32(0.0f);
-	//ndFloat32 sign = ndSign(alignTorque);
-	//tire->m_normalizedAligningTorque = sign * ndMax(ndAbs(alignTorque), ndAbs(tire->m_normalizedAligningTorque));
 	return true;
 }
 
@@ -689,8 +684,13 @@ void ndMultiBodyVehicle::ApplyTireModel(ndFixSizeArray<ndTireContactPair, 128>& 
 		ndContact* const contact = tireContacts[i].m_contact;
 		ndMultiBodyVehicleTireJoint* const tire = tireContacts[i].m_tireJoint;
 		ndContactPointList& contactPoints = contact->GetContactPoints();
-		ndMatrix tireBasisMatrix(tire->GetLocalMatrix1() * tire->GetBody1()->GetMatrix());
+		//note: this is not a mistake 
+		//it needs the tire frame, not the tire matrix whish is rolling
+		ndMatrix tireBasisMatrix(tire->CalculateGlobalMatrix1());
+
+		// overid the position with the actual tire origin
 		tireBasisMatrix.m_posit = tire->GetBody0()->GetMatrix().m_posit;
+
 		bool useCoulombModel = (tire->m_frictionModel.m_frictionModel == ndTireFrictionModel::ndFrictionModel::m_coulomb) ? true : false;
 
 		const ndVector tireUp(m_localFrame.UnrotateVector(tireBasisMatrix.m_up));
@@ -699,20 +699,23 @@ void ndMultiBodyVehicle::ApplyTireModel(ndFixSizeArray<ndTireContactPair, 128>& 
 		{
 			ndContactMaterial& contactPoint = contactNode->GetInfo();
 			const ndVector localNormal(m_localFrame.UntransformVector(contactPoint.m_normal));
-			ndFloat32 contactPathLocation = ndAbs(localNormal.DotProduct(tireFront).GetScalar());
-			if (contactPathLocation < ndFloat32(0.71f))
+			ndFloat32 contactPatchLocation = ndAbs(localNormal.DotProduct(tireFront).GetScalar());
+			if (contactPatchLocation < ndFloat32(0.71f))
 			{
 				// align tire friction direction
 				const ndVector longitudinalDir(localNormal.CrossProduct(tireFront).Normalize());
 				const ndVector lateralDir(longitudinalDir.CrossProduct(localNormal));
 
-				contactPoint.m_dir1 = m_localFrame.RotateVector(lateralDir);
-				contactPoint.m_dir0 = m_localFrame.RotateVector(longitudinalDir);
+				const ndVector tang1(m_localFrame.RotateVector(lateralDir));
+				const ndVector tang0(m_localFrame.RotateVector(longitudinalDir));
+				
+				contactPoint.m_dir0 = tang0;
+				contactPoint.m_dir1 = tang1;
 
 				bool isOutOfContactPatch = useCoulombModel;
 				if (!isOutOfContactPatch)
 				{
-					// check if the contact is in the contact patch,
+					// check if the contact is in the contact patch area,
 					// the is the 45 degree point around the tire vehicle axis. 
 					const ndVector dir(m_localFrame.UnrotateVector(contactPoint.m_point - tireBasisMatrix.m_posit));
 					ndAssert(dir.DotProduct(dir).GetScalar() > ndFloat32(0.0f));
@@ -736,14 +739,14 @@ void ndMultiBodyVehicle::ApplyTireModel(ndFixSizeArray<ndTireContactPair, 128>& 
 		{
 			ndContact* const contact = tireContacts[i].m_contact;
 			ndMultiBodyVehicleTireJoint* const tire = tireContacts[i].m_tireJoint;
-			const ndVector tireHubPin(tire->CalculateBaseFrame().m_front);
+			//const ndVector tireHubPin(tire->CalculateBaseFrame().m_front);
 
 			ndContactPointList& contactPoints = contact->GetContactPoints();
 			for (ndContactPointList::ndNode* contactNode = contactPoints.GetFirst(); contactNode; contactNode = contactNode->GetNext())
 			{
 				ndContactMaterial& contactPoint = contactNode->GetInfo();
-				const ndVector longitudialDir(tireHubPin.CrossProduct(contactPoint.m_normal));
-				contactPoint.RotateTangentDirections(longitudialDir);
+				//const ndVector longitudialDir(tireHubPin.CrossProduct(contactPoint.m_normal));
+				//contactPoint.RotateTangentDirections(longitudialDir);
 				switch (tire->m_frictionModel.m_frictionModel)
 				{
 					case ndTireFrictionModel::m_pacejkaSport:
