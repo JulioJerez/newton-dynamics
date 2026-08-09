@@ -70,6 +70,8 @@ void ndJointPulley::JacobianDerivative(ndConstraintDescritor& desc)
 	ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
 	ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
 
+	jacobian0.m_angular = ndVector::m_zero;
+	jacobian1.m_angular = ndVector::m_zero;
 	jacobian0.m_linear = matrix0.m_front.Scale(m_gearRatio);
 	jacobian1.m_linear = matrix1.m_front;
 
