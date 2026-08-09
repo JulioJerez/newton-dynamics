@@ -70,13 +70,15 @@ void ndJointWormGear::JacobianDerivative(ndConstraintDescritor& desc)
 	ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
 	ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
 
-	jacobian0.m_linear = matrix0.m_front.Scale(m_gearRatio);
+	jacobian0.m_linear = ndVector::m_zero;
+	jacobian0.m_angular = matrix0.m_front.Scale(m_gearRatio);
+
 	jacobian1.m_linear = matrix1.m_front;
+	jacobian1.m_angular = ndVector::m_zero;
 
 	const ndVector omega (m_body0->GetOmega());
 	const ndVector veloc (m_body1->GetVelocity());
-
-	const ndVector relVeloc(omega * jacobian0.m_linear + veloc * jacobian1.m_linear);
+	const ndVector relVeloc(omega * jacobian0.m_angular + veloc * jacobian1.m_linear);
 	const ndFloat32 w = relVeloc.AddHorizontal().GetScalar() * ndFloat32(0.5f);
 	SetMotorAcceleration(desc, -w * desc.m_invTimestep);
 }
