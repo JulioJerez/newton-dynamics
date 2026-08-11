@@ -907,8 +907,7 @@ void ndDemoEntityManager::KeyCallback(ndInt32 key, ndInt32)
 	}
 	else if (key == ImGuiKey_F10)
 	{
-		// set debug tracer here;
-		//ndAssert(0);
+		ToggleProfiler();
 	}
 }
 
