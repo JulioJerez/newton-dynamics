@@ -22,10 +22,33 @@
 
 	static bool profileOn = false;
 
-	void ndPropfileZone::TraceSample()
+	ndPropfileZone::ndTracer::ndTracer(ndPropfileZone* const owner)
+		:m_owner(owner)
 	{
-		tracy::SourceLocationData* const contact = (tracy::SourceLocationData*)&m_tracyConcat;
-		tracy::ScopedZone varname(contact, profileOn);
+		if (profileOn)
+		{
+			#ifdef TRACY_ON_DEMAND
+				m_connectionId = GetProfiler().ConnectionId();
+			#endif
+			tracy::SourceLocationData* const contact = (tracy::SourceLocationData*)&m_owner->m_tracyConcat;
+			TracyQueuePrepare(QueueType::ZoneBegin);
+			MemWrite(&item->zoneBegin.time, Profiler::GetTime());
+			MemWrite(&item->zoneBegin.srcloc, (uint64_t)contact);
+			TracyQueueCommit(zoneBeginThread);
+		}
+	}
+
+	ndPropfileZone::ndTracer::~ndTracer()
+	{
+		if (profileOn)
+		{
+			#ifdef TRACY_ON_DEMAND
+			if (GetProfiler().ConnectionId() != m_connectionId) return;
+			#endif
+			TracyQueuePrepare(QueueType::ZoneEnd);
+			MemWrite(&item->zoneEnd.time, Profiler::GetTime());
+			TracyQueueCommit(zoneEndThread);
+		}
 	}
 
 	void ndProfilerFamerMarker()

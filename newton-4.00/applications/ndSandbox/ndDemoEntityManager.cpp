@@ -1533,6 +1533,8 @@ void ndDemoEntityManager::RenderScene()
 	m_renderer->Render();
 	m_renderer->EndRender();
 	m_renderer->Present();
+
+	ND_PROFILE_FRAME_MARKER();
 }
 
 void ndDemoEntityManager::TestImGui()
@@ -1602,12 +1604,10 @@ void ndDemoEntityManager::Run()
 		}
 	
 		m_suspendPhysicsUpdate = false;
-		ND_PROFILE_ZONE();
-	
+
 		if (m_renderer->PollEvents())
 		{
 			RenderScene();
 		}
-		ND_PROFILE_FRAME_MARKER();
 	}
 }

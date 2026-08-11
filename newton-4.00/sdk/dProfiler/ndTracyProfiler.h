@@ -37,6 +37,17 @@ D_PROFILER_API void ndProfilerSetThreadName(const char* const threadName);
 class ndPropfileZone
 {
 	public:
+	class ndTracer
+	{
+		public:
+		D_PROFILER_API ndTracer(ndPropfileZone* const owner);
+		D_PROFILER_API ~ndTracer();
+		//D_PROFILER_API void BeginTrace();
+		//D_PROFILER_API void EndTrace();
+
+		ndPropfileZone* m_owner;
+	};
+
 	ndPropfileZone(const char* const name, const char* const file, unsigned lineNumber)
 	{
 		m_tracyConcat.name = nullptr;
@@ -50,14 +61,13 @@ class ndPropfileZone
 	{
 	}
 
-	D_PROFILER_API void TraceSample();
 
 	ndProfilerSourceLocation m_tracyConcat;
 };
 
 #define ndProfilerScopedZone(name)									\
-	static ndPropfileZone __hotSpot__ (name, __FILE__, __LINE__);	\
-	__hotSpot__.TraceSample();
+	static ndPropfileZone __hookSpot__ (name, __FILE__, __LINE__);	\
+	ndPropfileZone::ndTracer __sampler__(&__hookSpot__);
 
 #define ndProfilerFrameMarker() 
 

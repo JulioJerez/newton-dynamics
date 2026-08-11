@@ -260,7 +260,7 @@ void ndDynamicsUpdate::SortJointsScan()
 
 	auto MarkFence0 = ndMakeObject::ndFunction([&jointArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		ND_PROFILE_ZONE_NAMED("MarkFence0");
+		//ND_PROFILE_ZONE_NAMED("MarkFence0");
 		ndConstraint* const joint = jointArray[groupId];
 		ndBodyKinematic* const body0 = joint->GetBody0();
 		ndBodyKinematic* const body1 = joint->GetBody1();
@@ -286,7 +286,7 @@ void ndDynamicsUpdate::SortJointsScan()
 	
 	auto MarkFence1 = ndMakeObject::ndFunction([&jointArray, &movingJoints](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
 	{
-		ND_PROFILE_ZONE_NAMED("MarkFence1");
+		//ND_PROFILE_ZONE_NAMED("MarkFence1");
 		ndConstraint* const joint = jointArray[groupId];
 		ndBodyKinematic* const body0 = joint->GetBody0();
 		ndBodyKinematic* const body1 = joint->GetBody1();
@@ -708,6 +708,7 @@ void ndDynamicsUpdate::InitBodyArray()
 
 void ndDynamicsUpdate::GetJacobianDerivatives(ndConstraint* const joint)
 {
+	ND_PROFILE_ZONE();
 	ndConstraintDescritor constraintParam;
 	ndAssert(joint->GetRowsCount() <= D_CONSTRAINT_MAX_ROWS);
 	for (ndInt32 i = ndInt32(joint->GetRowsCount() - 1); i >= 0; i--)
@@ -810,6 +811,7 @@ void ndDynamicsUpdate::GetJacobianDerivatives(ndConstraint* const joint)
 
 void ndDynamicsUpdate::InitJacobianMatrix()
 {
+	ND_PROFILE_ZONE();
 	ndScene* const scene = m_world->GetScene();
 	ndBodyKinematic** const bodyArray = &scene->GetActiveBodyArray()[0];
 	ndArray<ndConstraint*>& jointArray = scene->GetActiveContactArray();
@@ -822,7 +824,7 @@ void ndDynamicsUpdate::InitJacobianMatrix()
 
 	auto InitJacobianMatrix = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		ND_PROFILE_ZONE_NAMED("InitJacobianMatrix");
+		ND_PROFILE_ZONE_NAMED("InitJacobianJointsMatrix");
 		ndVector8* const internalForces = (ndVector8*)&GetTempInternalForces()[0];
 		auto BuildJacobianMatrix = [this, &internalForces](ndConstraint* const joint, ndInt32 jointIndex)
 		{
@@ -1287,7 +1289,7 @@ void ndDynamicsUpdate::CalculateJointsForce()
 
 		auto JointForce = [this, &jointPartialForces, &internalForces](ndConstraint* const joint, ndInt32 jointIndex)
 		{
-			ND_PROFILE_ZONE_NAMED("JointForce");
+			//ND_PROFILE_ZONE_NAMED("JointForce");
 			const ndVector zero(ndVector::m_zero);
 			ndBodyKinematic* const body0 = joint->GetBody0();
 			ndBodyKinematic* const body1 = joint->GetBody1();
