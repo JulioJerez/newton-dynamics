@@ -695,7 +695,7 @@ void ndSkeletonContainer::CalculateBufferSizeInBytes()
 
 void ndSkeletonContainer::CalculateLoopMassMatrixCoefficients(ndFloat32* const diagDamp)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	auto CalculateLoopMassMatrixCoefficients = [this, diagDamp](ndInt32 groupId)
 	{
 		const ndInt32 index = groupId;
@@ -719,7 +719,6 @@ void ndSkeletonContainer::CalculateLoopMassMatrixCoefficients(ndFloat32* const d
 		matrixRow11[index] = diagonal;
 		diagDamp[index] = diagonal * ndFloat32(4.0e-3f);
 
-		//nonZerosCount++;
 		const ndInt32 m0_i = m_pairs[primaryCount + index].m_m0;
 		const ndInt32 m1_i = m_pairs[primaryCount + index].m_m1;
 		for (ndInt32 j = index + 1; j < m_auxiliaryRowCount; ++j)
@@ -763,7 +762,6 @@ void ndSkeletonContainer::CalculateLoopMassMatrixCoefficients(ndFloat32* const d
 					ndAssert(matrixRow11[j] == ndFloat32(0.0f));
 					matrixRow11[j] = offDiagValue;
 					m_massMatrix11[j * m_auxiliaryRowCount + index] = offDiagValue;
-					//nonZerosCount += 2;
 				}
 			}
 		}
@@ -874,7 +872,7 @@ void ndSkeletonContainer::SolveBackward(ndForcePair* const force) const
 
 void ndSkeletonContainer::ConditionMassMatrix() const
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	auto ConditionMassMatrix = [this](ndInt32 groupId)
 	{
 		ndInt32 entry0 = 0;
@@ -933,7 +931,7 @@ void ndSkeletonContainer::ConditionMassMatrix() const
 
 void ndSkeletonContainer::RebuildMassMatrix(const ndFloat32* const diagDamp) const
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	auto RebuildMassMatrix = [this, diagDamp](ndInt32 groupId)
 	{
 		const ndInt32 primaryCount = m_rowCount - m_auxiliaryRowCount;
@@ -967,23 +965,16 @@ void ndSkeletonContainer::RebuildMassMatrix(const ndFloat32* const diagDamp) con
 	{
 		RebuildMassMatrix(index);
 	}
+}
 
-#if 0
-	ndInt32 nonZeroCount = 0;
-	for (ndInt32 i = 0; i < m_auxiliaryRowCount; ++i)
-	{
-		for (ndInt32 j = i + 1; j < m_auxiliaryRowCount; ++j)
-		{
-			nonZeroCount += (m_massMatrix11[i * m_auxiliaryRowCount + j] != ndFloat32(0.0f)) ? 1 : 0;
-		}
-	}
-	ndTrace(("not zero %d %d\n", nonZeroCount * 2 + m_auxiliaryRowCount, m_auxiliaryRowCount * m_auxiliaryRowCount));
-#endif
+void ndSkeletonContainer::FactorizationUpdate()
+{
+	ND_PROFILE_ZONE();
 }
 
 void ndSkeletonContainer::FactorizeMatrix(ndInt32 size, ndInt32 stride, ndFloat32* const matrix, ndFloat32* const diagDamp) const
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	// save the matrix 
 	ndInt32 srcLine = 0;
 	ndInt32 dstLine = 0;
@@ -1012,7 +1003,7 @@ void ndSkeletonContainer::FactorizeMatrix(ndInt32 size, ndInt32 stride, ndFloat3
 
 void ndSkeletonContainer::CalculateJointAccel(const ndJacobian* const internalForces, ndForcePair* const accel) const
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	const ndInt32 nodeCount = m_nodeList.GetCount();
 	const ndVector8* const internalForcesArray = (ndVector8*)internalForces;
 
@@ -1112,7 +1103,7 @@ ndFloat32* ndSkeletonContainer::GetScratchBuffer(ndInt32 size) const
 
 void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* const x, const ndFloat32* const b, const ndFloat32* const low, const ndFloat32* const high, const ndInt32* const normalIndex, ndFloat32 accelTol) const
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	const ndFloat32 tol2 = accelTol * accelTol;
 	ndFloat32* const residual = ndAlloca(ndFloat32, stride);
 
@@ -1516,7 +1507,7 @@ void ndSkeletonContainer::SolveAuxiliaryImmediate(ndFixSizeArray<ndBodyKinematic
 
 void ndSkeletonContainer::SolveImmediate(ndIkSolver& solverInfo)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	const ndInt32 nodeCount = m_nodeList.GetCount();
 	ndForcePair* const x = ndAlloca(ndForcePair, nodeCount);
 	ndForcePair* const b = ndAlloca(ndForcePair, nodeCount);
@@ -2031,7 +2022,7 @@ void ndSkeletonContainer::BuildSparseMatrix()
 
 void ndSkeletonContainer::InitMassMatrix(const ndLeftHandSide* const leftHandSide, ndRightHandSide* const rightHandSide, ndInt32 threadIndex)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	if (m_isResting)
 	{
 		return;
@@ -2124,7 +2115,7 @@ void ndSkeletonContainer::CalculateReactionForces(ndJacobian* const internalForc
 {
 	if (!m_isResting)
 	{
-		D_TRACKTIME();
+		ND_PROFILE_ZONE();
 		m_threadId = threadId;
 		const ndInt32 nodeCount = m_nodeList.GetCount();
 		ndForcePair* const force = ndAlloca(ndForcePair, nodeCount);

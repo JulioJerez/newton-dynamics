@@ -169,14 +169,14 @@ ndBodySphFluid::~ndBodySphFluid()
 
 void ndBodySphFluid::CalculateScans(ndThreadPool* const threadPool)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndWorkingBuffers& data = *m_workingBuffers;
 	ndInt32 sums[D_MAX_THREADS_COUNT + 1];
 	ndInt32 scans[D_MAX_THREADS_COUNT + 1];
 
 	auto CountGridScans = ndMakeObject::ndFunction([&data, &scans](ndInt32, ndInt32 threadIndex, ndInt32 threadCount)
 	{
-		D_TRACKTIME_NAMED(CountGridScans);
+		ND_PROFILE_ZONE_NAMED(CountGridScans);
 		const ndGridHash* const hashGridMap = &data.m_hashGridMap[0];
 
 		const ndInt32 start = scans[threadIndex];
@@ -202,7 +202,7 @@ void ndBodySphFluid::CalculateScans(ndThreadPool* const threadPool)
 
 	auto CalculateScans = ndMakeObject::ndFunction([&data, &scans, &sums](ndInt32, ndInt32 threadIndex, ndInt32 threadCount)
 	{
-		D_TRACKTIME_NAMED(CalculateScans);
+		ND_PROFILE_ZONE_NAMED(CalculateScans);
 		ndArray<ndInt32>& gridScans = data.m_gridScans;
 		const ndArray<ndInt32>& partialScan = data.m_partialsGridScans[threadIndex];
 		const ndInt32 base = sums[threadIndex];
@@ -249,7 +249,7 @@ void ndBodySphFluid::CalculateScans(ndThreadPool* const threadPool)
 
 void ndBodySphFluid::SortGrids(ndThreadPool* const threadPool)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	class ndKey_xlow
 	{
 		public:
@@ -346,7 +346,7 @@ void ndBodySphFluid::SortGrids(ndThreadPool* const threadPool)
 
 void ndBodySphFluid::BuildBuckets(ndThreadPool* const threadPool)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndWorkingBuffers& data = *m_workingBuffers;
 	data.m_pairs.SetCount(m_posit.GetCount());
 
@@ -359,7 +359,7 @@ void ndBodySphFluid::BuildBuckets(ndThreadPool* const threadPool)
 
 	auto BuildBuckets = ndMakeObject::ndFunction([this, &data](ndInt32, ndInt32 threadIndex, ndInt32 threadCount)
 	{
-		D_TRACKTIME_NAMED(AddPairs);
+		ND_PROFILE_ZONE_NAMED(AddPairs);
 		const ndArray<ndInt32>& gridScans = data.m_gridScans;
 		const ndArray<ndGridHash>& hashGridMap = data.m_hashGridMap;
 		
@@ -421,14 +421,14 @@ void ndBodySphFluid::BuildBuckets(ndThreadPool* const threadPool)
 
 void ndBodySphFluid::CalculateParticlesDensity(ndThreadPool* const threadPool)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndWorkingBuffers& data = *m_workingBuffers;
 	data.m_density.SetCount(m_posit.GetCount());
 	data.m_invDensity.SetCount(m_posit.GetCount());
 	
 	auto CalculateDensity = ndMakeObject::ndFunction([this, &data](ndInt32, ndInt32 threadIndex, ndInt32 threadCount)
 	{
-		D_TRACKTIME_NAMED(CalculateDensity);
+		ND_PROFILE_ZONE_NAMED(CalculateDensity);
 		const ndArray<ndVector>& posit = m_posit;
 	
 		const ndFloat32 h = ndFloat32 (2.0f) * GetParticleRadius();
@@ -462,13 +462,13 @@ void ndBodySphFluid::CalculateParticlesDensity(ndThreadPool* const threadPool)
 
 void ndBodySphFluid::CalculateAccelerations(ndThreadPool* const threadPool)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndWorkingBuffers& data = *m_workingBuffers;
 	data.m_accel.SetCount(m_posit.GetCount());
 	
 	auto CalculateAcceleration = ndMakeObject::ndFunction([this, &data](ndInt32, ndInt32 threadIndex, ndInt32 threadCount)
 	{
-		D_TRACKTIME_NAMED(CalculateAcceleration);
+		ND_PROFILE_ZONE_NAMED(CalculateAcceleration);
 		const ndVector epsilon2 (ndFloat32(1.0e-12f));
 	
 		const ndArray<ndVector>& veloc = m_veloc;
@@ -531,11 +531,11 @@ void ndBodySphFluid::CalculateAccelerations(ndThreadPool* const threadPool)
 
 void ndBodySphFluid::IntegrateParticles(ndThreadPool* const threadPool)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndWorkingBuffers& data = *m_workingBuffers;
 	auto IntegrateParticles = ndMakeObject::ndFunction([this, &data](ndInt32, ndInt32 threadIndex, ndInt32 threadCount)
 	{
-		D_TRACKTIME_NAMED(IntegrateParticles);
+		ND_PROFILE_ZONE_NAMED(IntegrateParticles);
 		const ndArray<ndVector>& accel = data.m_accel;
 		ndArray<ndVector>& veloc = m_veloc;
 		ndArray<ndVector>& posit = m_posit;
@@ -562,7 +562,7 @@ void ndBodySphFluid::IntegrateParticles(ndThreadPool* const threadPool)
 
 void ndBodySphFluid::CaculateAabb(ndThreadPool* const threadPool)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	class ndBox
 	{
 		public:
@@ -578,7 +578,7 @@ void ndBodySphFluid::CaculateAabb(ndThreadPool* const threadPool)
 	ndBox boxes[D_MAX_THREADS_COUNT];
 	auto CalculateAabb = ndMakeObject::ndFunction([this, &boxes](ndInt32, ndInt32 threadIndex, ndInt32 threadCount)
 	{
-		D_TRACKTIME_NAMED(CalculateAabb);
+		ND_PROFILE_ZONE_NAMED(CalculateAabb);
 		ndBox box;
 		const ndArray<ndVector>& posit = m_posit;
 		const ndStartEnd startEnd(posit.GetCount(), threadIndex, threadCount);
@@ -625,12 +625,12 @@ void ndBodySphFluid::CaculateAabb(ndThreadPool* const threadPool)
 
 void ndBodySphFluid::CreateGrids(ndThreadPool* const threadPool)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndWorkingBuffers& data = *m_workingBuffers;
 
 	auto CountGrids = ndMakeObject::ndFunction([this, &data](ndInt32, ndInt32 threadIndex, ndInt32 threadCount)
 	{
-		D_TRACKTIME_NAMED(CountGrids);
+		ND_PROFILE_ZONE_NAMED(CountGrids);
 		const ndVector origin(m_box0);
 		const ndVector invGridSize(data.m_hashInvGridSize);
 		const ndVector particleBox(ndFloat32(1.5f) * GetParticleRadius());
@@ -664,7 +664,7 @@ void ndBodySphFluid::CreateGrids(ndThreadPool* const threadPool)
 
 	auto CreateGrids = ndMakeObject::ndFunction([this, &data](ndInt32, ndInt32 threadIndex, ndInt32 threadCount)
 	{
-		D_TRACKTIME_NAMED(CreateGrids);
+		ND_PROFILE_ZONE_NAMED(CreateGrids);
 		const ndVector origin(m_box0);
 		const ndVector invGridSize(data.m_hashInvGridSize);
 		const ndVector particleBox(ndFloat32(1.5f) * GetParticleRadius());
@@ -759,7 +759,7 @@ void ndBodySphFluid::Update(const ndScene* const scene, ndFloat32 timestep)
 
 void ndBodySphFluid::Execute(ndThreadPool* const threadPool)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndAssert(sizeof(ndGridHash) == sizeof(ndUnsigned64));
 
 	CaculateAabb(threadPool);

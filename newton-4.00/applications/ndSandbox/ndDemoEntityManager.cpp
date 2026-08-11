@@ -29,7 +29,7 @@
 
 //#define DEFAULT_SCENE	0		// basic collision only
 //#define DEFAULT_SCENE	1		// basic rigidbody
-//#define DEFAULT_SCENE	2		// basic Stacks 
+#define DEFAULT_SCENE	2		// basic Stacks 
 //#define DEFAULT_SCENE	3		// basic friction
 //#define DEFAULT_SCENE	4		// basic sliding platform
 //#define DEFAULT_SCENE	5		// basic Trigger
@@ -46,7 +46,7 @@
 //#define DEFAULT_SCENE	16		// export articulated model
 //#define DEFAULT_SCENE	17		// basic rag doll
 //#define DEFAULT_SCENE	18		// complex model, implement a complex model with joints
-#define DEFAULT_SCENE	19		// basics multi body vehicle
+//#define DEFAULT_SCENE	19		// basics multi body vehicle
 //#define DEFAULT_SCENE	20		// object Placement
 //#define DEFAULT_SCENE	21		// third person player capsule
 //#define DEFAULT_SCENE	22		// player capsule in a planet
@@ -1249,7 +1249,7 @@ void ndDemoEntityManager::ToggleProfiler()
 		ndAssert(m_world);
 		ndTrace(("profiler Enable\n"));
 		m_world->Sync();
-		dProfilerEnableProling();
+		ndProfilerStartSampling();
 	#endif
 }
 
@@ -1524,7 +1524,7 @@ void ndDemoEntityManager::OnSubStepPostUpdate(ndFloat32)
 
 void ndDemoEntityManager::RenderScene()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndFloat32 timestep = ndGetElapsedSeconds();	
 	CalculateFPS(timestep);
 	UpdatePhysics(timestep);
@@ -1602,11 +1602,12 @@ void ndDemoEntityManager::Run()
 		}
 	
 		m_suspendPhysicsUpdate = false;
-		D_TRACKTIME();
+		ND_PROFILE_ZONE();
 	
 		if (m_renderer->PollEvents())
 		{
 			RenderScene();
 		}
+		ND_PROFILE_FRAME_MARKER();
 	}
 }

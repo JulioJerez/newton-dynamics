@@ -105,7 +105,7 @@ const char* ndDynamicsUpdateAvx2::GetStringId() const
 
 void ndDynamicsUpdateAvx2::SortJoints()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	SortJointsScan();
 	if (!m_activeJointCount)
 	{
@@ -176,7 +176,7 @@ void ndDynamicsUpdateAvx2::SortJoints()
 	ndInt32 soaJointRowCount = 0;
 	auto SetRowStarts = ndMakeObject::ndFunction([this, &jointArray, &rowsCount, &soaJointRowCount](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		D_TRACKTIME_NAMED(SetRowStarts);
+		ND_PROFILE_ZONE_NAMED("SetRowStarts");
 		auto SetRowsCount = [&jointArray, &rowsCount]()
 		{
 			ndInt32 rowCount = 1;
@@ -245,7 +245,7 @@ void ndDynamicsUpdateAvx2::SortJoints()
 
 void ndDynamicsUpdateAvx2::SortIslands()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndScene* const scene = m_world->GetScene();
 	const ndArray<ndBodyKinematic*>& bodyArray = scene->GetActiveBodyArray();
 	ndArray<ndBodyKinematic*>& activeBodyArray = GetBodyIslandOrder();
@@ -264,7 +264,7 @@ void ndDynamicsUpdateAvx2::SortIslands()
 
 	auto Scan0 = ndMakeObject::ndFunction([&bodyArray, &histogram, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		D_TRACKTIME_NAMED(Scan0);
+		ND_PROFILE_ZONE_NAMED("Scan0");
 		ndInt32* const hist = &histogram[groupId][0];
 		hist[0] = 0;
 		hist[1] = 0;
@@ -308,7 +308,7 @@ void ndDynamicsUpdateAvx2::SortIslands()
 
 	auto Sort0 = ndMakeObject::ndFunction([&bodyArray, &activeBodyArray, &histogram, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		D_TRACKTIME_NAMED(Sort0);
+		ND_PROFILE_ZONE_NAMED("Sort0");
 		ndInt32* const hist = &histogram[groupId][0];
 
 		ndInt32 map[4];
@@ -345,7 +345,7 @@ void ndDynamicsUpdateAvx2::BuildIsland()
 	ndAssert(bodyArray.GetCount() >= 1);
 	if (bodyArray.GetCount() - 1)
 	{
-		D_TRACKTIME();
+		ND_PROFILE_ZONE();
 		SortJoints();
 		SortIslands();
 	}
@@ -358,7 +358,7 @@ void ndDynamicsUpdateAvx2::InitJacobianMatrix()
 
 	auto TransposeMassMatrix = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		D_TRACKTIME_NAMED(TransposeMassMatrix);
+		ND_PROFILE_ZONE_NAMED("TransposeMassMatrix");
 		const ndLeftHandSide* const leftHandSide = &GetLeftHandSide()[0];
 		const ndRightHandSide* const rightHandSide = &GetRightHandSide()[0];
 		ndAvxMatrixArray& massMatrix = *m_avxMassMatrixArray;
@@ -695,7 +695,7 @@ void ndDynamicsUpdateAvx2::InitJacobianMatrix()
 
 	if (scene->GetActiveContactArray().GetCount())
 	{
-		D_TRACKTIME();
+		ND_PROFILE_ZONE();
 		ndDynamicsUpdate::InitJacobianMatrix();
 
 		const ndInt32 numberOfJoints = ndInt32(jointArray.GetCount());
@@ -707,13 +707,13 @@ void ndDynamicsUpdateAvx2::InitJacobianMatrix()
 
 void ndDynamicsUpdateAvx2::CalculateJointsAcceleration()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndScene* const scene = m_world->GetScene();
 	const ndArray<ndConstraint*>& jointArray = scene->GetActiveContactArray();
 
 	auto UpdateAcceleration = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		D_TRACKTIME_NAMED(UpdateAcceleration);
+		ND_PROFILE_ZONE_NAMED("UpdateAcceleration");
 		const ndArray<ndRightHandSide>& rightHandSide = m_rightHandSide;
 
 		const ndInt32* const soaJointRows = &m_avxJointRows[0];
@@ -771,7 +771,7 @@ void ndDynamicsUpdateAvx2::CalculateJointsAcceleration()
 
 void ndDynamicsUpdateAvx2::CalculateJointsForce()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	const ndUnsigned32 passes = m_solverPasses;
 	ndScene* const scene = m_world->GetScene();
 
@@ -780,7 +780,7 @@ void ndDynamicsUpdateAvx2::CalculateJointsForce()
 
 	auto CalculateJointsForce = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		D_TRACKTIME_NAMED(CalculateJointsForce);
+		ND_PROFILE_ZONE_NAMED("CalculateJointsForce");
 		ndVector8* const jointPartialForces = (ndVector8*)&GetTempInternalForces()[0];
 
 		const ndInt32* const soaJointRows = &m_avxJointRows[0];
@@ -1052,7 +1052,7 @@ void ndDynamicsUpdateAvx2::CalculateJointsForce()
 
 	auto ApplyJacobianAccumulatePartialForces = ndMakeObject::ndFunction([this, &bodyArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		D_TRACKTIME_NAMED(ApplyJacobianAccumulatePartialForces);
+		ND_PROFILE_ZONE_NAMED("ApplyJacobianAccumulatePartialForces");
 		const ndVector8 zero(ndVector8::m_zero);
 		const ndInt32* const bodyIndex = &GetJointForceIndexBuffer()[0];
 		ndVector8* const internalForces = (ndVector8*)&GetInternalForces()[0];
@@ -1088,7 +1088,7 @@ void ndDynamicsUpdateAvx2::CalculateJointsForce()
 
 void ndDynamicsUpdateAvx2::CalculateForces()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	if (m_world->GetScene()->GetActiveContactArray().GetCount())
 	{
 		m_firstPassCoef = ndFloat32(0.0f);
@@ -1106,7 +1106,7 @@ void ndDynamicsUpdateAvx2::CalculateForces()
 
 void ndDynamicsUpdateAvx2::Update()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	m_timestep = m_world->GetScene()->GetTimestep();
 
 	BuildIsland();

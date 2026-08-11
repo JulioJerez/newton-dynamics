@@ -395,7 +395,7 @@ ndSharedPtr<ndBody> ndScene::GetBody(ndBody* const body) const
 
 void ndScene::BalanceScene()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	UpdateBodyList();
 	if (m_bvhSceneManager.GetNodeArray().GetCount() > 2)
 	{
@@ -860,7 +860,7 @@ void ndScene::FindCollidingPairsBackward(ndBodyKinematic* const body, ndInt32 th
 
 void ndScene::UpdateTransform()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 
 	//for (ndBodyList::ndNode* node = m_particleSetList.GetFirst(); node; node = node->GetNext())
 	//{
@@ -876,7 +876,7 @@ void ndScene::UpdateTransform()
 	ndFloat32 timestep = GetTimestep();
 	auto TransformUpdate = ndMakeObject::ndFunction([this, timestep](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		D_TRACKTIME_NAMED(TransformUpdate);
+		ND_PROFILE_ZONE_NAMED("TransformUpdate");
 		const ndArray<ndBodyKinematic*>& bodyArray = GetActiveBodyArray();
 
 		ndBodyKinematic* const body = bodyArray[groupId];
@@ -1387,10 +1387,10 @@ void ndScene::AddPair(ndBodyKinematic* const body0, ndBodyKinematic* const body1
 
 void ndScene::FindCollidingPairs()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	auto FindPairsForward = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
 	{
-		D_TRACKTIME_NAMED(FindPairsForward);
+		ND_PROFILE_ZONE_NAMED("FindPairsForward");
 		const ndArray<ndBodyKinematic*>& bodyArray = m_sceneBodyArray;
 		ndBodyKinematic* const body = bodyArray[groupId];
 		FindCollidingPairsForward(body, threadIndex);
@@ -1398,7 +1398,7 @@ void ndScene::FindCollidingPairs()
 
 	auto FindPairsBackward = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
 	{
-		D_TRACKTIME_NAMED(FindPairsBackward);
+		ND_PROFILE_ZONE_NAMED("FindPairsBackward");
 		const ndArray<ndBodyKinematic*>& bodyArray = m_sceneBodyArray;
 
 		ndBodyKinematic* const body = bodyArray[groupId];
@@ -1446,10 +1446,10 @@ void ndScene::UpdateBodyList()
 
 void ndScene::ApplyExtForce()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	auto ApplyForce = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		D_TRACKTIME_NAMED(ApplyForce);
+		ND_PROFILE_ZONE_NAMED("ApplyForce");
 		const ndArray<ndBodyKinematic*>& view = GetActiveBodyArray();
 
 		const ndFloat32 timestep = m_timestep;
@@ -1463,10 +1463,10 @@ void ndScene::ApplyExtForce()
 
 void ndScene::InitBodyArray()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	auto BuildBodyArray = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		D_TRACKTIME_NAMED(BuildBodyArray);
+		ND_PROFILE_ZONE_NAMED("BuildBodyArray");
 		const ndArray<ndBodyKinematic*>& view = GetActiveBodyArray();
 		ndBodyKinematic* const body = view[groupId];
 		body->PrepareStep(groupId);
@@ -1536,7 +1536,7 @@ void ndScene::InitBodyArray()
 		{
 			auto UpdateSceneBvh = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 			{
-				D_TRACKTIME_NAMED(UpdateSceneBvh);
+				ND_PROFILE_ZONE_NAMED("UpdateSceneBvh");
 				const ndArray<ndBodyKinematic*>& view = m_sceneBodyArray;
 				ndBvhNodeArray& array = m_bvhSceneManager.GetNodeArray();
 
@@ -1562,7 +1562,7 @@ void ndScene::InitBodyArray()
 				}
 			});
 	
-			D_TRACKTIME_NAMED(UpdateSceneBvhLight);
+			ND_PROFILE_ZONE_NAMED("UpdateSceneBvhLight");
 			const ndInt32 viewBodyCount = ndInt32(m_sceneBodyArray.GetCount());
 			ParallelExecute(UpdateSceneBvh, viewBodyCount, OptimalGroupBatch(viewBodyCount));
 		}
@@ -1588,7 +1588,7 @@ void ndScene::InitBodyArray()
 
 void ndScene::CreateNewContacts()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	const ndInt32 contactCount = ndInt32(m_contactArray.GetCount());
 	m_scratchBuffer.SetCount(ndInt32((contactCount + m_newPairs.GetCount() + 16) * sizeof(ndContact*)));
 
@@ -1597,7 +1597,7 @@ void ndScene::CreateNewContacts()
 	{ 
 		auto CreateNewContacts = ndMakeObject::ndFunction([this, tmpJointsArray](ndInt32 groupId, ndInt32, ndInt32)
 		{
-			D_TRACKTIME_NAMED(CreateNewContacts);
+			ND_PROFILE_ZONE_NAMED("CreateNewContacts");
 			const ndArray<ndContactPairs>& newPairs = m_newPairs;
 			ndBodyKinematic** const bodyArray = &GetActiveBodyArray()[0];
 
@@ -1621,7 +1621,7 @@ void ndScene::CreateNewContacts()
 
 	if (contactCount)
 	{
-		D_TRACKTIME_NAMED(CopyContactArray)
+		ND_PROFILE_ZONE_NAMED("CopyContactArray")
 		const ndInt32 start = ndInt32(m_newPairs.GetCount());
 		ndContact** const contactArray = &m_contactArray[0];
 		for (ndInt32 i = 0; i < contactCount; ++i)
@@ -1634,7 +1634,7 @@ void ndScene::CreateNewContacts()
 
 void ndScene::CalculateContacts()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	m_activeConstraintArray.SetCount(0);
 	const ndInt32 contactCount = ndInt32(m_newPairs.GetCount() + m_contactArray.GetCount());
 	if (contactCount)
@@ -1644,7 +1644,7 @@ void ndScene::CalculateContacts()
 
 		auto CalculateContactPoints = ndMakeObject::ndFunction([this, tmpJointsArray](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
 		{
-			D_TRACKTIME_NAMED(CalculateContactPoints);
+			ND_PROFILE_ZONE_NAMED("CalculateContactPoints");
 
 			ndContact* const contact = tmpJointsArray[groupId];
 			ndAssert(contact);
@@ -1691,14 +1691,14 @@ void ndScene::DeleteDeadContacts()
 	m_contactArray.SetCount(m_newPairs.GetCount() + m_contactArray.GetCount());
 	if (m_contactArray.GetCount())
 	{
-		D_TRACKTIME();
+		ND_PROFILE_ZONE();
 		ndContact** const tmpJointsArray = (ndContact**)&m_scratchBuffer[0];
 		ndCountingSort<ndContact*, ndJointActive, 2>(*this, tmpJointsArray, &m_contactArray[0], ndInt32(m_contactArray.GetCount()), prefixScan, nullptr);
 		if (prefixScan[m_dead + 1] != prefixScan[m_dead])
 		{
 			auto DeleteContactArray = ndMakeObject::ndFunction([this, &prefixScan](ndInt32 groupId, ndInt32, ndInt32)
 			{
-				D_TRACKTIME_NAMED(DeleteContactArray);
+				ND_PROFILE_ZONE_NAMED("DeleteContactArray");
 				ndArray<ndContact*>& contactArray = m_contactArray;
 
 				const ndInt32 start = ndInt32(prefixScan[m_dead]);
@@ -1728,7 +1728,7 @@ void ndScene::DeleteDeadContacts()
 //void ndScene::ParticleUpdate(ndFloat32 timestep)
 void ndScene::ParticleUpdate(ndFloat32)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	//ndAssert(0);
 	//for (ndBodyList::ndNode* node = m_particleSetList.GetFirst(); node; node = node->GetNext())
 	//{

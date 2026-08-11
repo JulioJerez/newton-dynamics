@@ -1324,6 +1324,7 @@ void ndMultiBodyVehicle::Update(ndFloat32 timestep, ndInt32)
 {
 	if (!m_initialized)
 	{
+		ND_PROFILE_ZONE();
 		m_initialized = true;
 
 		CalculateRestSprungWeight();

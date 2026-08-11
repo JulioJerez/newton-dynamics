@@ -451,7 +451,7 @@ void ndPhysicsWorld::CollisionUpdate(ndFloat32 timestep)
 
 void ndPhysicsWorld::AdvanceTime(ndFloat32 timestep)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	if (m_updateMode)
 	{
 		CollisionUpdate(timestep);

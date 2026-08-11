@@ -114,7 +114,8 @@ void ndGameControllerInputs::Update(ndDemoEntityManager* const scene)
 //void ndGameControllerInputs::GetJoystickInputs(ndDemoEntityManager* const scene)
 void ndGameControllerInputs::GetJoystickInputs(ndDemoEntityManager* const)
 {
-	ndAssert(0);
+	// TO DO 
+	ndTrace(("%s: implement regilar joint control\n", __FUNCTION__));
 }
 
 void ndGameControllerInputs::GetWheelJoystickInputs(ndDemoEntityManager* const scene)

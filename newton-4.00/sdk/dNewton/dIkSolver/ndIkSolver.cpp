@@ -508,6 +508,7 @@ void ndIkSolver::SolverBegin(ndSkeletonContainer* const skeleton, ndConstraint* 
 	m_skeleton = ndWeakPtr<ndSkeletonContainer>(skeleton);
 	if (*m_skeleton)
 	{
+		ND_PROFILE_ZONE();
 		m_timestep = timestep;
 		m_invTimestep = ndFloat32(1.0f) / m_timestep;
 
@@ -528,10 +529,19 @@ void ndIkSolver::SolverBegin(ndSkeletonContainer* const skeleton, ndConstraint* 
 	}
 }
 
+void ndIkSolver::FactorizationUpdate()
+{
+	if (*m_skeleton)
+	{
+		m_skeleton->FactorizationUpdate();
+	}
+}
+
 void ndIkSolver::SolverEnd()
 {
 	if (*m_skeleton)
 	{
+		ND_PROFILE_ZONE();
 		for (ndInt32 i = ndInt32(m_bodies.GetCount())-1; i >= 1; --i)
 		{
 			ndBodyKinematic* const body = m_bodies[i];
@@ -541,6 +551,7 @@ void ndIkSolver::SolverEnd()
 		
 		m_skeleton->ClearCloseLoopJoints();
 	}
+	m_skeleton = ndWeakPtr<ndSkeletonContainer>(nullptr);
 }
 
 void ndIkSolver::Solve()
@@ -548,6 +559,7 @@ void ndIkSolver::Solve()
 	ndAssert(*m_skeleton);
 	if (*m_skeleton)
 	{
+		ND_PROFILE_ZONE();
 		const ndVector zero(ndVector::m_zero);
 		for (ndInt32 i = ndInt32(m_bodies.GetCount()) - 1; i >= 0; --i)
 		{

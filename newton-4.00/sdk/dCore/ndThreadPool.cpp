@@ -53,7 +53,7 @@ void ndThreadPool::ndWorker::TaskUpdate()
 	m_begin = 1;
 	while (m_begin)
 	{
-		//D_TRACKTIME();
+		//ND_PROFILE_ZONE();
 		if (m_task)
 		{
 			ndAssert(m_task->m_threadIndex == m_threadIndex);
@@ -157,7 +157,7 @@ void ndThreadPool::SetThreadCount(ndInt32 count)
 
 void ndThreadPool::Begin()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndAssert(m_isInUpdate >= 0);
 
 	m_isInUpdate++;
@@ -172,7 +172,7 @@ void ndThreadPool::Begin()
 
 		auto BeginJobs = ndMakeObject::ndFunction([](ndInt32, ndInt32, ndInt32)
 		{
-			D_TRACKTIME_NAMED(BeginJobs);
+			ND_PROFILE_ZONE_NAMED("BeginJobs");
 		});
 		ParallelExecute(BeginJobs, GetThreadCount(), 1);
 	}

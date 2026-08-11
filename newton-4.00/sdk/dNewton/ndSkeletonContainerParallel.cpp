@@ -32,7 +32,7 @@ void ndSkeletonContainer::ParallelInitMassMatrix(const ndLeftHandSide* const mat
 		return;
 	}
 
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndInt32 rowCount = 0;
 	ndInt32 auxiliaryCount = 0;
 
@@ -600,7 +600,7 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 
 void ndSkeletonContainer::ParallelCalculateLoopMassMatrixCoefficients(ndFloat32* const diagDamp)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	auto CalculateLoopMassMatrixCoefficients = ndMakeObject::ndFunction([this, diagDamp](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		const ndInt32 index = groupId;
@@ -722,7 +722,7 @@ void ndSkeletonContainer::ParallelCalculateLoopMassMatrixCoefficients(ndFloat32*
 
 void ndSkeletonContainer::ParallelConditionMassMatrix() const
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	//auto ConditionMassMatrix = [this](ndInt32 groupId)
 	auto ConditionMassMatrix = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
@@ -784,7 +784,7 @@ void ndSkeletonContainer::ParallelConditionMassMatrix() const
 
 void ndSkeletonContainer::ParallelRebuildMassMatrix(const ndFloat32* const diagDamp) const
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	//auto RebuildMassMatrix = [this, diagDamp](ndInt32 groupId)
 	auto RebuildMassMatrix = ndMakeObject::ndFunction([this, diagDamp](ndInt32 groupId, ndInt32, ndInt32)
 	{
@@ -1262,7 +1262,7 @@ void ndSkeletonContainer::ParallelCalculateReactionForces(ndJacobian* const inte
 		return;
 	}
 
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	m_threadId = 0;
 	const ndInt32 nodeCount = m_nodeList.GetCount();
 	ndForcePair* const force = ndAlloca(ndForcePair, nodeCount);
@@ -1282,7 +1282,7 @@ void ndSkeletonContainer::ParallelCalculateReactionForces(ndJacobian* const inte
 
 void ndSkeletonContainer::ParallelCalculateJointAccel(const ndJacobian* const internalForces, ndForcePair* const accel) const
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	const ndInt32 nodeCount = m_nodeList.GetCount();
 	const ndVector8* const internalForcesArray = (ndVector8*)internalForces;
 
