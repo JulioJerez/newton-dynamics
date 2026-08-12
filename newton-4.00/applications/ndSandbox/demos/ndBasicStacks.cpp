@@ -267,8 +267,8 @@ void ndBasicStacks (ndDemoEntityManager* const scene)
 	//ndInt32 pyramidHigh = 20;
 	ndInt32 pyramidHigh = 30;
 	//ndInt32 pyramidHigh = 50;
-	for (ndInt32 i = 0; i < 1; ++i)
-	//for (ndInt32 i = 0; i < 4; ++i)
+	//for (ndInt32 i = 0; i < 1; ++i)
+	for (ndInt32 i = 0; i < 4; ++i)
 	{
 		BuildPyramidStacks(scene, 1.0f, origin, ndVector(0.5f, 0.25f, 0.8f, 0.0f), pyramidHigh);
 		origin.m_x += 4.0f;
@@ -277,17 +277,17 @@ void ndBasicStacks (ndDemoEntityManager* const scene)
 	origin = ndVector::m_wOne;
 	origin.m_x -= 2.0f;
 	origin.m_z -= 3.0f;
-	//BuildSphereColumn(scene, 10.0f, origin, ndVector(0.5f, 0.5f, 0.5f, 0.0f), 20);
+	BuildSphereColumn(scene, 10.0f, origin, ndVector(0.5f, 0.5f, 0.5f, 0.0f), 20);
 
 	origin.m_z += 6.0f;
-	//BuildBoxColumn(scene, 10.0f, origin, ndVector(0.5f, 0.5f, 0.5f, 0.0f), 20);
+	BuildBoxColumn(scene, 10.0f, origin, ndVector(0.5f, 0.5f, 0.5f, 0.0f), 20);
 
 	origin.m_z += 10.0f;
-	//BuildCylinderColumn(scene, 10.0f, origin, ndVector(0.75f, 0.6f, 1.0f, 0.0f), 20);
+	BuildCylinderColumn(scene, 10.0f, origin, ndVector(0.75f, 0.6f, 1.0f, 0.0f), 20);
 
 	origin.m_x -= 6.0f;
 	origin.m_z -= 10.0f;
-	//BuildCapsuleStack(scene, 10.0f, origin, ndVector(0.25f, 0.25f, 2.0f, 0.0f), 20);
+	BuildCapsuleStack(scene, 10.0f, origin, ndVector(0.25f, 0.25f, 2.0f, 0.0f), 20);
 
 	ndMatrix matrix(ndGetIdentityMatrix());
 	matrix.m_posit = origin;
