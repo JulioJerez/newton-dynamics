@@ -1232,6 +1232,7 @@ void ndDynamicsUpdate::InitSkeletons()
 		const ndInt32 skelCount = ndInt32(activeSkeletons.GetCount() - m_parallelSkeleton);
 		if (skelCount)
 		{
+			//ndInt32 batchSize = scene->OptimalGroupBatch(skelCount);
 			scene->ParallelExecute(InitSkeletons, skelCount, 1);
 		}
 	}
