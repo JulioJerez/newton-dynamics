@@ -78,7 +78,7 @@ void ndDynamicsUpdate::Clear()
 
 void ndDynamicsUpdate::SortBodyJointScan()
 {
-	ND_PROFILE_ZONE();
+	//ND_PROFILE_ZONE();
 	class ndEvaluateKey0
 	{
 		public:
@@ -192,7 +192,7 @@ void ndDynamicsUpdate::SortBodyJointScan()
 
 void ndDynamicsUpdate::SortJointsScan()
 {
-	ND_PROFILE_ZONE();
+	//ND_PROFILE_ZONE();
 	class ndEvaluateCountRows
 	{
 		public:
@@ -260,7 +260,7 @@ void ndDynamicsUpdate::SortJointsScan()
 
 	auto MarkFence0 = ndMakeObject::ndFunction([&jointArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		//ND_PROFILE_ZONE_NAMED("MarkFence0");
+		ND_PROFILE_ZONE_NAMED("MarkFence0");
 		ndConstraint* const joint = jointArray[groupId];
 		ndBodyKinematic* const body0 = joint->GetBody0();
 		ndBodyKinematic* const body1 = joint->GetBody1();
@@ -286,7 +286,7 @@ void ndDynamicsUpdate::SortJointsScan()
 	
 	auto MarkFence1 = ndMakeObject::ndFunction([&jointArray, &movingJoints](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
 	{
-		//ND_PROFILE_ZONE_NAMED("MarkFence1");
+		ND_PROFILE_ZONE_NAMED("MarkFence1");
 		ndConstraint* const joint = jointArray[groupId];
 		ndBodyKinematic* const body0 = joint->GetBody0();
 		ndBodyKinematic* const body1 = joint->GetBody1();
@@ -481,7 +481,7 @@ void ndDynamicsUpdate::SortJoints()
 
 void ndDynamicsUpdate::SortIslands()
 {
-	ND_PROFILE_ZONE();
+	//ND_PROFILE_ZONE();
 	ndScene* const scene = m_world->GetScene();
 	const ndArray<ndBodyKinematic*>& bodyArray = scene->GetActiveBodyArray();
 	ndArray<ndBodyKinematic*>& activeBodyArray = GetBodyIslandOrder();
