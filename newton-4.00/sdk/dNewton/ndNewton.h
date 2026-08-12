@@ -58,6 +58,7 @@
 #include <ndJointCylinder.h>
 #include <ndJointUpVector.h>
 #include <ndJointSpherical.h>
+#include <ndJointRelational.h>
 #include <ndJointFollowPath.h>
 #include <ndJointDoubleHinge.h>
 #include <ndJointFixDistance.h>

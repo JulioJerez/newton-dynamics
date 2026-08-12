@@ -15,40 +15,18 @@
 #include "ndMeshComponents.h"
 
 ndJointGear::ndJointGear()
-	:ndJointBilateralConstraint()
+	:ndJointRelational()
 	,m_angle(ndFloat32(0.0f))
 	,m_omega(ndFloat32(0.0f))
-	,m_gearRatio(ndFloat32(1.0f))
 {
-	m_maxDof = 1;
 }
 
 ndJointGear::ndJointGear(ndFloat32 gearRatio,
 	const ndVector& parentPin, ndBodyKinematic* const parent,
 	const ndVector& childPin, ndBodyKinematic* const child)
-	:ndJointBilateralConstraint(1, child, parent, ndGetIdentityMatrix())
+	:ndJointRelational(gearRatio, childPin, child, parentPin, parent)
 	,m_angle(ndFloat32(0.0f))
 	,m_omega(ndFloat32(0.0f))
-	,m_gearRatio(gearRatio)
-{
-	// calculate the two local matrix of the pivot point
-	ndMatrix dommyMatrix;
-
-	// calculate the local matrix for body body0
-	const ndMatrix pinAndPivotChild(ndGramSchmidtMatrix(childPin));
-	CalculateLocalMatrix(pinAndPivotChild, m_localMatrix0, dommyMatrix);
-	m_localMatrix0.m_posit = ndVector::m_wOne;
-
-	// calculate the local matrix for body body1  
-	const ndMatrix pinAndPivotParent(ndGramSchmidtMatrix(parentPin));
-	CalculateLocalMatrix(pinAndPivotParent, dommyMatrix, m_localMatrix1);
-	m_localMatrix1.m_posit = ndVector::m_wOne;
-
-	// set as kinematic loop
-	SetSolverModel(m_jointkinematicOpenLoop);
-}
-
-ndJointGear::~ndJointGear()
 {
 }
 
@@ -56,16 +34,6 @@ ndSharedPtr<ndMeshJoint> ndJointGear::GetMeshJoint(const ndMesh* const owner) co
 {
 	ndMeshJointGear* const joint = new ndMeshJointGear(owner, this);
 	return ndSharedPtr<ndMeshJoint>(joint);
-}
-
-ndFloat32 ndJointGear::GetRatio() const
-{
-	return m_gearRatio;
-}
-
-void ndJointGear::SetRatio(ndFloat32 ratio)
-{
-	m_gearRatio = ratio;
 }
 
 void ndJointGear::UpdateParameters()
@@ -91,11 +59,11 @@ void ndJointGear::UpdateParameters()
 
 void ndJointGear::JacobianDerivative(ndConstraintDescritor& desc)
 {
-	ndMatrix matrix0;
-	ndMatrix matrix1;
-
 	if (ndAbs(m_gearRatio) > ndFloat32(1.0e-3f))
 	{
+		ndMatrix matrix0;
+		ndMatrix matrix1;
+
 		// calculate the position of the pivot point and the Jacobian direction vectors, in global space. 
 		CalculateGlobalMatrix(matrix0, matrix1);
 
@@ -111,7 +79,9 @@ void ndJointGear::JacobianDerivative(ndConstraintDescritor& desc)
 		const ndVector& omega1 = m_body1->GetOmega();
 
 		const ndVector relOmega(omega0 * jacobian0.m_angular + omega1 * jacobian1.m_angular);
-		const ndFloat32 w = relOmega.AddHorizontal().GetScalar() * ndFloat32(0.5f);
+		const ndFloat32 w = relOmega.AddHorizontal().GetScalar();
+
+		SetDiagonalRegularizer(desc, m_regularizer);
 		SetMotorAcceleration(desc, -w * desc.m_invTimestep);
 	}
 }

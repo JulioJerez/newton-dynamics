@@ -13,27 +13,23 @@
 #define __ND_JOINT_WORMGEAR_H__
 
 #include "ndNewtonStdafx.h"
-#include "ndJointBilateralConstraint.h"
+#include "ndJointRelational.h"
 
 D_MSV_NEWTON_CLASS_ALIGN_32
-class ndJointWormGear: public ndJointBilateralConstraint
+class ndJointWormGear: public ndJointRelational
 {
 	public:
-	D_CLASS_REFLECTION(ndJointWormGear, ndJointBilateralConstraint)
+	D_CLASS_REFLECTION(ndJointWormGear, ndJointRelational)
 
 	D_NEWTON_API ndJointWormGear();
 	D_NEWTON_API ndJointWormGear(ndFloat32 gearRatio,
 		const ndVector& body0Pin, ndBodyKinematic* const body0,
 		const ndVector& body1Pin, ndBodyKinematic* const body1);
-	D_NEWTON_API virtual ~ndJointWormGear();
-
-	D_NEWTON_API ndFloat32 GetRatio() const;
-	D_NEWTON_API void SetRatio(ndFloat32 ratio);
 
 	protected:
+	D_NEWTON_API void UpdateParameters() override;
 	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
 
-	ndFloat32 m_gearRatio;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 
