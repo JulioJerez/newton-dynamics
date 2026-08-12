@@ -29,13 +29,13 @@
 
 //#define DEFAULT_SCENE	0		// basic collision only
 //#define DEFAULT_SCENE	1		// basic rigidbody
-#define DEFAULT_SCENE	2		// basic Stacks 
+//#define DEFAULT_SCENE	2		// basic Stacks 
 //#define DEFAULT_SCENE	3		// basic friction
 //#define DEFAULT_SCENE	4		// basic sliding platform
 //#define DEFAULT_SCENE	5		// basic Trigger
 //#define DEFAULT_SCENE	6		// basic Particles
 //#define DEFAULT_SCENE	7		// conservation of momentum 
-//#define DEFAULT_SCENE	8		// basic joints
+#define DEFAULT_SCENE	8		// basic joints
 //#define DEFAULT_SCENE	9		// static mesh collision 
 //#define DEFAULT_SCENE	10		// basic height field collision
 //#define DEFAULT_SCENE	11		// basic user height field 2d collision
