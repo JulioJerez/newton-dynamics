@@ -27,7 +27,7 @@ static ndBodyKinematic* BuildFlatMeshGround(const ndVector& pos)
 	matrix.m_posit = pos;
 	body->SetMatrix(matrix);
 
-	const ndFloat32 s = ndFloat32(50.0f);
+	const ndFloat32 s = ndFloat32(100.0f);
 	ndVector verts[4] =
 	{
 		ndVector(-s, ndFloat32(0.0f), -s, ndFloat32(0.0f)),
@@ -68,6 +68,7 @@ static ndBodyKinematic* BuildFlatMeshGround(const ndVector& pos)
 	return body;
 }
 
+#define BOX_SHAPE_SIZE ndFloat32 (1.0f)
 // Build a dynamic box with gravity.
 static ndBodyDynamic* BuildDynamicBox(const ndVector& pos)
 {
@@ -79,7 +80,7 @@ static ndBodyDynamic* BuildDynamicBox(const ndVector& pos)
 	matrix.m_posit = pos;
 	body->SetMatrix(matrix);
 
-	ndShapeInstance box(new ndShapeBox(ndFloat32(1.0f), ndFloat32(1.0f), ndFloat32(1.0f)));
+	ndShapeInstance box(new ndShapeBox(BOX_SHAPE_SIZE, BOX_SHAPE_SIZE, BOX_SHAPE_SIZE));
 	body->SetCollisionShape(box);
 	body->SetMassMatrix(ndFloat32(1.0f), box);
 
@@ -119,9 +120,10 @@ TEST(MeshPenetration, StackedBoxesOnFlatMesh)
 		world.Sync();
 
 		// Verify no box penetrated the ground.
-		// Ground is at Y=0, box half-height is 0.5, so center should be >= -0.5
+		// Ground is at Y=0, box half-height is 0.5, so center should be >= 0.5 - penetation
 		// (using small tolerance for floating point).
-		const ndFloat32 minY = ndFloat32(-0.5f);
+		//const ndFloat32 minY = ndFloat32(0.5f);
+		const ndFloat32 minY = ndFloat32(0.5f) * BOX_SHAPE_SIZE - 0.4f;
 		for (int j = 0; j < numBoxes; ++j)
 		{
 			ndVector p = boxes[j]->GetMatrix().m_posit;
@@ -132,7 +134,8 @@ TEST(MeshPenetration, StackedBoxesOnFlatMesh)
 	// Verify no box penetrated the ground.
 	// Ground is at Y=0, box half-height is 0.5, so center should be >= -0.5
 	// (using small tolerance for floating point).
-	const ndFloat32 minY = ndFloat32(-0.5f);
+	//const ndFloat32 minY = ndFloat32(-0.5f);
+	const ndFloat32 minY = ndFloat32(0.5f) * BOX_SHAPE_SIZE - 0.01f;
 	for (int i = 0; i < numBoxes; ++i)
 	{
 		ndVector p = boxes[i]->GetMatrix().m_posit;

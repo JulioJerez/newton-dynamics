@@ -64,21 +64,20 @@ class NewtonPhantom : public ndModel
 			return new NewtonPhantomModelNotify(*this);
 		}
 
-		void Update(ndFloat32)
+		void Update(ndFloat32, ndInt32) override
 		{
 			NewtonPhantom* const model = (NewtonPhantom*)GetModel();
 			model->Update();
 		}
 
-		void PostUpdate(ndFloat32)
+		void PostUpdate(ndFloat32, ndInt32) override
 		{
 		}
 
-		void PostTransformUpdate(ndFloat32)
+		void PostTransformUpdate(ndFloat32, ndInt32) override
 		{
 		}
 	};
-
 
 	// A Phantom collision shape can be moved around the world, gathering contact
 	// information with other ndBody's without effecting the simulation
