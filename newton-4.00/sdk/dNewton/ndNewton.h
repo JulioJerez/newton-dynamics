@@ -54,9 +54,11 @@
 #include <ndJointSlider.h>
 #include <ndJointPulley.h>
 #include <ndJointFix6dof.h>
+#include <ndJointWormGear.h>
 #include <ndJointCylinder.h>
 #include <ndJointUpVector.h>
 #include <ndJointSpherical.h>
+#include <ndJointRelational.h>
 #include <ndJointFollowPath.h>
 #include <ndJointDoubleHinge.h>
 #include <ndJointFixDistance.h>

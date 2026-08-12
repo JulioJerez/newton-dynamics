@@ -9,11 +9,10 @@
 * freely
 */
 
-#include "dTracyProfiler.h"
+#include "ndTracyProfiler.h"
 
-//#if 0
-#if !defined (WIN32) || (_MSC_VER >= 1900)
-
+//#if !defined (WIN32) || (_MSC_VER >= 1900)
+#if defined (WIN32)
 
 	#include "Tracy.hpp"
 	#include "common\TracySystem.hpp"
@@ -23,35 +22,51 @@
 
 	static bool profileOn = false;
 
-	void dProfilerEnableProlingLow()
+	ndPropfileZone::ndTracer::ndTracer(ndPropfileZone* const owner)
+		:m_owner(owner)
 	{
-		profileOn = !profileOn;
-	}
-	
-	void dProfilerStartTraceLow(const dProfilerSourceLocation* const srcloc)
-	{
-		if (profileOn) 
+		if (profileOn)
 		{
+			#ifdef TRACY_ON_DEMAND
+				m_connectionId = GetProfiler().ConnectionId();
+			#endif
+			tracy::SourceLocationData* const contact = (tracy::SourceLocationData*)&m_owner->m_tracyConcat;
 			TracyQueuePrepare(QueueType::ZoneBegin);
 			MemWrite(&item->zoneBegin.time, Profiler::GetTime());
-			MemWrite(&item->zoneBegin.srcloc, (uint64_t)srcloc);
+			MemWrite(&item->zoneBegin.srcloc, (uint64_t)contact);
 			TracyQueueCommit(zoneBeginThread);
 		}
 	}
 
-	void dProfilerEndTraceLow()
+	ndPropfileZone::ndTracer::~ndTracer()
 	{
-		if (profileOn) 
+		if (profileOn)
 		{
+			#ifdef TRACY_ON_DEMAND
+			if (GetProfiler().ConnectionId() != m_connectionId) return;
+			#endif
 			TracyQueuePrepare(QueueType::ZoneEnd);
 			MemWrite(&item->zoneEnd.time, Profiler::GetTime());
 			TracyQueueCommit(zoneEndThread);
 		}
 	}
 
-	void dProfilerSetTrackNameLow(const char* const trackName)
+	void ndProfilerFamerMarker()
 	{
-		tracy::SetThreadName(trackName);
+		if (profileOn)
+		{
+			FrameMark;
+		}
+	}
+
+	void ndProfilerStartSampling()
+	{
+		profileOn = !profileOn;
+	}
+
+	void ndProfilerSetThreadName(const char* const threadName)
+	{
+		tracy::SetThreadName(threadName);
 	}
 
 #else

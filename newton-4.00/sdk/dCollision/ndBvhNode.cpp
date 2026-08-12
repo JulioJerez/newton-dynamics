@@ -453,7 +453,7 @@ void ndBvhSceneManager::Update(ndThreadPool& threadPool)
 
 	if (nodeArray.m_isDirty && nodeArray.GetCount())
 	{
-		D_TRACKTIME();
+		ND_PROFILE_ZONE();
 		const ndInt32 count = ndInt32(nodeArray.GetCount());
 		nodeArray.SetCount(count * 2);
 		ndBvhNode** const src = &nodeArray[0];
@@ -495,7 +495,7 @@ void ndBvhSceneManager::Update(ndThreadPool& threadPool)
 		{
 			auto EnumerateNodes = ndMakeObject::ndFunction([&nodeArray](ndInt32 groupId, ndInt32, ndInt32)
 			{
-				D_TRACKTIME_NAMED(MarkCellBounds);
+				ND_PROFILE_ZONE_NAMED("MarkCellBounds");
 				ndBvhNode** const nodes = &nodeArray[0];
 				const ndInt32 baseCount = ndInt32(nodeArray.GetCount()) / 2;
 				ndBvhLeafNode* const bodyNode = (ndBvhLeafNode*)nodes[baseCount + groupId];
@@ -545,12 +545,12 @@ void ndBuildBvhTreeBuildState::Init(ndInt32 maxCount)
 
 void ndBvhSceneManager::UpdateScene(ndThreadPool& threadPool)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 
 	ndInt32 start = 0;
 	auto UpdateSceneBvh = ndMakeObject::ndFunction([this, &start](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		D_TRACKTIME_NAMED(UpdateSceneBvh);
+		ND_PROFILE_ZONE_NAMED("UpdateSceneBvh");
 		ndBvhInternalNode** const nodes = (ndBvhInternalNode**)&m_workingArray[start];
 		ndBvhInternalNode* const node = nodes[groupId];
 		ndAssert(node && node->GetAsSceneNode());
@@ -575,12 +575,12 @@ void ndBvhSceneManager::UpdateScene(ndThreadPool& threadPool)
 
 bool ndBvhSceneManager::BuildBvhTreeInitNodes(ndThreadPool& threadPool)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	Update(threadPool);
 
 	auto CopyBodyNodes = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		D_TRACKTIME_NAMED(CopyBodyNodes);
+		ND_PROFILE_ZONE_NAMED("CopyBodyNodes");
 
 		ndBvhNodeArray& nodeArray = m_workingArray;
 		const ndInt32 baseCount = ndInt32(nodeArray.GetCount()) / 2;
@@ -600,7 +600,7 @@ bool ndBvhSceneManager::BuildBvhTreeInitNodes(ndThreadPool& threadPool)
 
 	auto CopySceneNode = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		D_TRACKTIME_NAMED(CopySceneNode);
+		ND_PROFILE_ZONE_NAMED("CopySceneNode");
 		ndBvhNodeArray& nodeArray = m_workingArray;
 		
 		ndBvhInternalNode** const sceneNodes = (ndBvhInternalNode**)&nodeArray[0];
@@ -631,7 +631,7 @@ bool ndBvhSceneManager::BuildBvhTreeInitNodes(ndThreadPool& threadPool)
 
 void ndBvhSceneManager::BuildBvhTreeCalculateLeafBoxes(ndThreadPool& threadPool)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndVector boxes[D_MAX_THREADS_COUNT][2];
 	ndFloat32 boxSizes[D_MAX_THREADS_COUNT];
 
@@ -644,7 +644,7 @@ void ndBvhSceneManager::BuildBvhTreeCalculateLeafBoxes(ndThreadPool& threadPool)
 
 	auto CalculateBoxSize = ndMakeObject::ndFunction([this, &boxSizes, &boxes, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		D_TRACKTIME_NAMED(CalculateBoxSize);
+		ND_PROFILE_ZONE_NAMED("CalculateBoxSize");
 		ndVector minP(ndFloat32(1.0e15f));
 		ndVector maxP(ndFloat32(-1.0e15f));
 		ndFloat32 minSize = ndFloat32(1.0e15f);
@@ -691,7 +691,7 @@ ndInt32 ndBvhSceneManager::BuildSmallBvhTree(ndThreadPool& threadPool, ndBvhNode
 	ndMemSet(depthLevel, 0, threadPool.GetThreadCount());
 	auto SmallBhvNodes = ndMakeObject::ndFunction([this, parentsArray, batchCount, &depthLevel](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
 	{
-		D_TRACKTIME_NAMED(SmallBhvNodes);
+		ND_PROFILE_ZONE_NAMED("SmallBhvNodes");
 		ndAssert(threadIndex < D_MAX_THREADS_COUNT);
 
 		const ndCellScanPrefix* const srcCellNodes = &m_bvhBuildState.m_cellCounts0[0];
@@ -1094,7 +1094,7 @@ ndInt32 ndBvhSceneManager::BuildSmallBvhTree(ndThreadPool& threadPool, ndBvhNode
 
 void ndBvhSceneManager::BuildBvhTreeSetNodesDepth(ndThreadPool& threadPool)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	class ndSortGetDethpKey
 	{
 		public:
@@ -1129,7 +1129,7 @@ void ndBvhSceneManager::BuildBvhTreeSetNodesDepth(ndThreadPool& threadPool)
 
 void ndBvhSceneManager::BuildBvhGenerateLayerGrids(ndThreadPool& threadPool)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	enum
 	{
 		m_linkedCell,
@@ -1271,7 +1271,7 @@ void ndBvhSceneManager::BuildBvhGenerateLayerGrids(ndThreadPool& threadPool)
 
 		auto MakeGrids = ndMakeObject::ndFunction([this, &maxGrids, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 		{
-			D_TRACKTIME_NAMED(MakeGrids);
+			ND_PROFILE_ZONE_NAMED("MakeGrids");
 
 			const ndGridClassifier gridClassifier(&m_bvhBuildState);
 			const ndVector origin(gridClassifier.m_origin);
@@ -1351,7 +1351,7 @@ void ndBvhSceneManager::BuildBvhGenerateLayerGrids(ndThreadPool& threadPool)
 		
 		auto MarkCellBounds = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 		{
-			D_TRACKTIME_NAMED(MarkCellBounds);
+			ND_PROFILE_ZONE_NAMED("MarkCellBounds");
 			ndCellScanPrefix* const dst = &m_bvhBuildState.m_cellCounts0[0];
 
 			const ndBottomUpCell& cell0 = m_bvhBuildState.m_cellBuffer0[groupId + 1];
@@ -1384,7 +1384,7 @@ void ndBvhSceneManager::BuildBvhGenerateLayerGrids(ndThreadPool& threadPool)
 			//ndAtomic<ndInt32> iterator2(0);
 			auto EnumerateSmallBvh = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 			{
-				D_TRACKTIME_NAMED(EnumerateSmallBvh);
+				ND_PROFILE_ZONE_NAMED("EnumerateSmallBvh");
 
 				ndInt32 depthLevel = m_bvhBuildState.m_depthLevel;
 				ndBvhNode** const parentsArray = m_bvhBuildState.m_parentsArray;
@@ -1440,7 +1440,7 @@ void ndBvhSceneManager::BuildBvhGenerateLayerGrids(ndThreadPool& threadPool)
 
 ndBvhNode* ndBvhSceneManager::BuildIncrementalBvhTree(ndThreadPool& threadPool)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndBvhNode* root = nullptr;
 	switch (m_bvhBuildState.m_state)
 	{
@@ -1498,7 +1498,7 @@ ndBvhNode* ndBvhSceneManager::BuildIncrementalBvhTree(ndThreadPool& threadPool)
 
 ndBvhNode* ndBvhSceneManager::BuildBvhTree(ndThreadPool& threadPool)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 
 	//while (!BuildIncrementalBvhTree());
 

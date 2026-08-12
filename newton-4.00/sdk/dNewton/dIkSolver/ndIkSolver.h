@@ -39,6 +39,7 @@ class ndIkSolver: public ndClassAlloc
 
 	D_NEWTON_API void SolverBegin(ndSkeletonContainer* const skeleton, ndConstraint* const* loopConstraint, ndInt32 loopsCount, ndWorld* const world, ndFloat32 timestep, ndInt32 threadId);
 	D_NEWTON_API void Solve();
+	D_NEWTON_API void FactorizationUpdate();
 	D_NEWTON_API void UpdateJointAcceleration(ndConstraint* const joint);
 	D_NEWTON_API void SolverEnd();
 
@@ -91,11 +92,9 @@ class ndIkSolver: public ndClassAlloc
 	ndFixSizeArray<ndLeftHandSide, D_INV_IK_MAX_LINKS> m_leftHandSide;
 	ndFixSizeArray<ndRightHandSide, D_INV_IK_MAX_LINKS> m_rightHandSide;
 	
-	//ndFixSizeArray<ndSharedPtr<ndContact>, D_INV_IK_MAX_LINKS> m_surrogateContact;
-	//ndFixSizeArray<ndSharedPtr<ndBodyDynamic>, D_INV_IK_MAX_LINKS> m_surrogateBodies;
 	ndSurrogateList<ndContact> m_surrogateContact;
 	ndSurrogateList<ndBodyDynamic> m_surrogateBodies;
-	
+
 	ndWeakPtr<ndWorld> m_world;
 	ndWeakPtr<ndSkeletonContainer> m_skeleton;
 	ndFloat32 m_timestep;

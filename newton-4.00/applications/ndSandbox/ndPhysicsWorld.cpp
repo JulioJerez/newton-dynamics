@@ -398,6 +398,7 @@ void ndPhysicsWorld::UpdateTransforms()
 
 void ndPhysicsWorld::PhysicsUpdate(ndFloat32 timestep)
 {
+	ND_PROFILE_ZONE();
 	const ndFloat32 descreteStep = (1.0f / MAX_PHYSICS_FPS);
 
 	if (m_acceleratedUpdate)
@@ -451,7 +452,6 @@ void ndPhysicsWorld::CollisionUpdate(ndFloat32 timestep)
 
 void ndPhysicsWorld::AdvanceTime(ndFloat32 timestep)
 {
-	D_TRACKTIME();
 	if (m_updateMode)
 	{
 		CollisionUpdate(timestep);

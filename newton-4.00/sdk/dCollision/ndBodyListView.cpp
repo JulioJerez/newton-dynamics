@@ -45,7 +45,7 @@ bool ndBodyListView::UpdateView()
 	bool ret = false;
 	if (m_listIsDirty)
 	{
-		D_TRACKTIME();
+		ND_PROFILE_ZONE();
 		ret = true;
 		m_listIsDirty = 0;
 		ndInt32 index = 0;

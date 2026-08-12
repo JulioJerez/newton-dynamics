@@ -19,7 +19,7 @@
 
 class CheckMemoryLeaks
 {
-public:
+	public:
 	CheckMemoryLeaks()
 	{
 		#if defined(_DEBUG) && defined(_MSC_VER)
@@ -38,13 +38,12 @@ public:
 
 	static void CheckMemoryLeaksCallback()
 	{
-#if defined(_DEBUG) && defined(_MSC_VER)
+		#if defined(_DEBUG) && defined(_MSC_VER)
 		_CrtDumpMemoryLeaks();
-#endif
+		#endif
 	}
 };
 //static CheckMemoryLeaks checkLeaks;
-
 
 BOOL APIENTRY DllMain( HMODULE,
                        DWORD  ul_reason_for_call,

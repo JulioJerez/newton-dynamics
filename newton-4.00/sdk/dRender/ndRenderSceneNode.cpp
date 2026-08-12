@@ -376,6 +376,13 @@ void ndRenderSceneNode::Render(const ndRender* const owner, const ndMatrix& mode
 	{
 		const ndRenderPrimitive* const mesh = *m_primitive;
 		const ndMatrix modelMatrix(m_primitiveMatrix * m_globalMatrix * modelViewMatrix);
+
+		// TO DO: try some camera frunto coolling here.
+		// for small scenes rendring every thing is fine
+		// but to a typical with mane nodes, rending many 
+		// porimitive does have to notiziable cost.
+		// for now, just continue rendering everything.
+
 		mesh->Render(owner, modelMatrix, renderMode);
 	}
 

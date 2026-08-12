@@ -102,6 +102,8 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 	auto ApplyControls = [this, vehicle, &axis, &buttons]()
 	{
 		ndFloat32 throttle = axis[ndGameControllerInputs::m_gasPedal];
+//throttle = 0.7f;
+//throttle = 0.0f;
 
 		ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
 		const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& engineCurve = motor->GetCurve();
@@ -181,6 +183,15 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 
 	const ndMultiBodyVehicleGearBox::ndGearBox& gearBox = gearJoint->GetGearBox();
 	const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& engineCurve = motor->GetCurve();
+
+//m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
+//m_driverState = m_driveForwardGearDelay;
+//m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
+//ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+//gearJoint->SetRatio(gearGain);
+//return;
+
+
 	switch (m_driverState)
 	{
 		case m_parked:

@@ -807,12 +807,15 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 
 #else
 
-// working on high speed four wheel convex cast vehicles.
-// this model are so non linear that the require special 
-// treatment with  bycycle model equations.
-// It is still a multibody, but the drive train is different.
-// in general, it will just inject the torque diretly to the tires
-// rather than using a loop differential axle joint.
+// Working on high-speed, four-wheel, convex-cast vehicles.
+//
+// These models are highly nonlinear and require specialized
+// constraint stabilization based on the bicycle-model equations.
+//
+// It is still a full multibody model, but the drivetrain is
+// handled differently. In general, torque is applied directly
+// to the tires rather than being transmitted through a looped
+// differential-axle joint.
 void ndBasicVehicle(ndDemoEntityManager* const scene)
 {
 	BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true);
@@ -828,10 +831,11 @@ void ndBasicVehicle(ndDemoEntityManager* const scene)
 	matrix.m_posit = floor;
 	matrix.m_posit.m_y += 0.5f;
 
+	//CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f)));
 	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -0.0f, 0.0f)));
-	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -0.0f, 0.0f)), true);
+	CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -0.0f, 0.0f)), true);
 
-	// set a ui paner to see vehicle state
+	// set a ui panel to see vehicle state
 	ndSharedPtr<ndDemoEntityManager::ndDemoUIpanel> dashboard(new ndDashboard());
 	scene->SetDemoUIpanel(dashboard);
 

@@ -30,6 +30,11 @@ include_directories(../../thirdParty/png)
 include_directories(../../thirdParty/imgui/)
 include_directories(../../thirdParty/openFBX/src)
 
+if(NEWTON_BUILD_PROFILER)
+	include_directories(../dProfiler)
+	add_definitions(-DD_PROFILER)
+endif()
+
 if (APPLE) 
 	message ("render library with metal backend")
 	include_directories(Backends/RenderMacOS)

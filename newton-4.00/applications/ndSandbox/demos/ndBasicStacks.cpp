@@ -267,7 +267,7 @@ void ndBasicStacks (ndDemoEntityManager* const scene)
 	//ndInt32 pyramidHigh = 20;
 	ndInt32 pyramidHigh = 30;
 	//ndInt32 pyramidHigh = 50;
-	//for (ndInt32 i = 0; i < 4; ++i)
+	//for (ndInt32 i = 0; i < 1; ++i)
 	for (ndInt32 i = 0; i < 4; ++i)
 	{
 		BuildPyramidStacks(scene, 1.0f, origin, ndVector(0.5f, 0.25f, 0.8f, 0.0f), pyramidHigh);
@@ -292,7 +292,7 @@ void ndBasicStacks (ndDemoEntityManager* const scene)
 	ndMatrix matrix(ndGetIdentityMatrix());
 	matrix.m_posit = origin;
 	matrix.m_posit.m_z -= 10.0f;
-	AddLumberYard(scene, matrix, 10.0f, 10);
+	//AddLumberYard(scene, matrix, 10.0f, 10);
 
 	origin = ndVector::m_wOne;
 	origin.m_x -= 3.0f;

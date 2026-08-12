@@ -56,7 +56,7 @@ void ndCountingSortInPlace(ndThreadPool& threadPool, T* const array, T* const sc
 template <class T, class dCompareKey>
 void ndSort(T* const array, ndInt32 elements, void* const context)
 {
-	//D_TRACKTIME();
+	//ND_PROFILE_ZONE();
 	const ndInt32 batchSize = 8;
 
 	class ndIntervale
@@ -167,7 +167,7 @@ void ndSort(T* const array, ndInt32 elements, void* const context)
 template <class T, class ndEvaluateKey, ndInt32 keyBitSize>
 void ndCountingSortInPlace(T* const array, T* const scratchBuffer, ndInt32 size, ndUnsigned32* const prefixScanOut, void* const context)
 {
-	//D_TRACKTIME();
+	//ND_PROFILE_ZONE();
 	ndAssert(keyBitSize > 0);
 	ndUnsigned32 scans[(1 << keyBitSize) + 1];
 	ndEvaluateKey evaluator(context);
@@ -226,7 +226,7 @@ void ndCountingSortInPlace(T* const array, T* const scratchBuffer, ndInt32 size,
 template <class T, class ndEvaluateKey, ndInt32 keyBitSize>
 void ndCountingSort(const T* const srcArray, T* const dstArray, ndInt32 size, ndUnsigned32* const prefixScanOut, void* const context)
 {
-	//D_TRACKTIME();
+	//ND_PROFILE_ZONE();
 	ndAssert(keyBitSize > 0);
 	ndUnsigned32 scans[(1 << keyBitSize) + 1];
 	ndEvaluateKey evaluator(context);
@@ -283,7 +283,7 @@ void ndCountingSort(const T* const srcArray, T* const dstArray, ndInt32 size, nd
 template <class T, class ndEvaluateKey, ndInt32 keyBitSize>
 void ndCountingSort(ndThreadPool& threadPool, const T* const srcArray, T* const dstArray, ndInt32 size, ndUnsigned32* const prefixScanOut,  void* const context)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndEvaluateKey evaluator(context);
 	const ndInt32 minGroupSize = 1024;
 	const ndInt32 threadCount = threadPool.GetThreadCount();
@@ -297,7 +297,7 @@ void ndCountingSort(ndThreadPool& threadPool, const T* const srcArray, T* const 
 
 	auto ndBuildHistogram = ndMakeObject::ndFunction([&srcArray, size, &evaluator, &scans, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		D_TRACKTIME_NAMED(ndBuildHistogram);
+		ND_PROFILE_ZONE_NAMED("ndBuildHistogram");
 		ndUnsigned32* const scan = &scans[groupId * (1 << keyBitSize)];
 
 		for (ndInt32 i = 0; i < (1 << keyBitSize); ++i)
@@ -353,7 +353,7 @@ void ndCountingSort(ndThreadPool& threadPool, const T* const srcArray, T* const 
 
 	auto ndShuffleArray = ndMakeObject::ndFunction([&srcArray, &dstArray, size, &evaluator, &scans, &sum, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		D_TRACKTIME_NAMED(ndShuffleArray);
+		ND_PROFILE_ZONE_NAMED("ndShuffleArray");
 		ndUnsigned32* const scan = &scans[groupId * (1 << keyBitSize)];
 
 		for (ndInt32 i = 0; i < (1 << keyBitSize); ++i)
@@ -389,7 +389,7 @@ void ndCountingSort(ndThreadPool& threadPool, const T* const srcArray, T* const 
 template <class T, class ndEvaluateKey, ndInt32 keyBitSize>
 void ndCountingSortInPlace(ndThreadPool& threadPool, T* const array, T* const scratchBuffer, ndInt32 size, ndUnsigned32* const prefixScanOut, void* const context)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndEvaluateKey evaluator(context);
 	const ndInt32 minGroupSize = 1024;
 	const ndInt32 threadCount = threadPool.GetThreadCount();
@@ -403,7 +403,7 @@ void ndCountingSortInPlace(ndThreadPool& threadPool, T* const array, T* const sc
 
 	auto ndBuildHistogram = ndMakeObject::ndFunction([&array, &scratchBuffer, size, &evaluator, &scans, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		D_TRACKTIME_NAMED(ndBuildHistogram);
+		ND_PROFILE_ZONE_NAMED("ndBuildHistogram");
 		ndUnsigned32* const scan = &scans[groupId * (1 << keyBitSize)];
 
 		for (ndInt32 i = 0; i < (1 << keyBitSize); ++i)
@@ -460,7 +460,7 @@ void ndCountingSortInPlace(ndThreadPool& threadPool, T* const array, T* const sc
 
 	auto ndShuffleArray = ndMakeObject::ndFunction([&array, &scratchBuffer, size, &evaluator, &scans, &sum, groupSize](ndInt32 groupId, ndInt32, ndInt32)
 	{
-		D_TRACKTIME_NAMED(ndShuffleArray);
+		ND_PROFILE_ZONE_NAMED("ndShuffleArray");
 		ndUnsigned32* const scan = &scans[groupId * (1 << keyBitSize)];
 
 		for (ndInt32 i = 0; i < (1 << keyBitSize); ++i)

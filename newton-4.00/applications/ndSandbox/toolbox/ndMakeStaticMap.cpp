@@ -133,7 +133,7 @@ ndSharedPtr<ndBody> BuildFloorBox(ndDemoEntityManager* const scene, const ndMatr
 {
 	ndPhysicsWorld* const world = scene->GetWorld();
 
-	ndSharedPtr<ndShapeInstance>box(new ndShapeInstance(new ndShapeBox(200.0f, 1.0f, 200.f)));
+	ndSharedPtr<ndShapeInstance>box(new ndShapeInstance(new ndShapeBox(400.0f, 1.0f, 400.f)));
 	ndMatrix uvMatrix(ndGetIdentityMatrix());
 	uvMatrix[0][0] *= uvTiling;
 	uvMatrix[1][1] *= uvTiling;
@@ -151,7 +151,6 @@ ndSharedPtr<ndBody> BuildFloorBox(ndDemoEntityManager* const scene, const ndMatr
 	material.m_useAlphaTest = false;
 	material.m_specular = ndVector::m_zero;
 
-	//ndSharedPtr<ndRenderPrimitive> geometry(ndRenderPrimitive::CreateMeshPrimitive(descriptor));
 	ndSharedPtr<ndRenderPrimitive> geometry(new ndRenderPrimitive(descriptor));
 	
 	ndMatrix location(matrix);

@@ -23,8 +23,9 @@
 #include "ndDebugDisplayRenderPass.h"
 #include "ndDemoCameraNodeLookAtTarget.h"
 
-#define LOAD_MESH_INDEX			200
 #define MACHINE_LEARNING_BASE	100
+#define LOAD_MODEL_INDEX		200
+#define LOAD_MESH_INDEX			201
 
 //#define DEFAULT_SCENE	0		// basic collision only
 //#define DEFAULT_SCENE	1		// basic rigidbody
@@ -34,7 +35,7 @@
 //#define DEFAULT_SCENE	5		// basic Trigger
 //#define DEFAULT_SCENE	6		// basic Particles
 //#define DEFAULT_SCENE	7		// conservation of momentum 
-//#define DEFAULT_SCENE	8		// basic joints
+#define DEFAULT_SCENE	8		// basic joints
 //#define DEFAULT_SCENE	9		// static mesh collision 
 //#define DEFAULT_SCENE	10		// basic height field collision
 //#define DEFAULT_SCENE	11		// basic user height field 2d collision
@@ -45,7 +46,7 @@
 //#define DEFAULT_SCENE	16		// export articulated model
 //#define DEFAULT_SCENE	17		// basic rag doll
 //#define DEFAULT_SCENE	18		// complex model, implement a complex model with joints
-#define DEFAULT_SCENE	19		// basics multi body vehicle
+//#define DEFAULT_SCENE	19		// basics multi body vehicle
 //#define DEFAULT_SCENE	20		// object Placement
 //#define DEFAULT_SCENE	21		// third person player capsule
 //#define DEFAULT_SCENE	22		// player capsule in a planet
@@ -82,6 +83,7 @@
 						 
 void ndBasicModel(ndDemoEntityManager* const scene);
 void ndExportModel(ndDemoEntityManager* const scene);
+void ndImportMesh(ndDemoEntityManager* const scene);
 void ndImportModel(ndDemoEntityManager* const scene);
 void ndBasicJoints(ndDemoEntityManager* const scene);
 void ndBasicStacks(ndDemoEntityManager* const scene);
@@ -905,8 +907,7 @@ void ndDemoEntityManager::KeyCallback(ndInt32 key, ndInt32)
 	}
 	else if (key == ImGuiKey_F10)
 	{
-		// set debug tracer here;
-		//ndAssert(0);
+		ToggleProfiler();
 	}
 }
 
@@ -1046,6 +1047,11 @@ void ndDemoEntityManager::ShowMainMenuBar()
 			if (ImGui::MenuItem("Load ndMesh", "")) 
 			{
 				m_currentScene = LOAD_MESH_INDEX;
+			}
+
+			if (ImGui::MenuItem("Load ndMesh as ndModelArticulation", ""))
+			{
+				m_currentScene = LOAD_MODEL_INDEX;
 			}
 
 			if (ImGui::MenuItem("Exit", "")) 
@@ -1191,9 +1197,14 @@ void ndDemoEntityManager::LoadDemo(ndInt32 menuIndex)
 	m_lookAtTargetCamera = ndSharedPtr<ndRenderSceneNode>(new ndDemoCameraNodeLookAtTarget(*m_renderer));
 	m_lookAtTargetCamera->SetTransform(savedTransform);
 
-	if (menuIndex == LOAD_MESH_INDEX)
+	if (menuIndex == LOAD_MODEL_INDEX)
 	{
 		ndImportModel(this);
+		snprintf(newTitle, sizeof(newTitle), "Newton Dynamics %d.%.2i demo: %s", D_NEWTON_ENGINE_MAJOR_VERSION, D_NEWTON_ENGINE_MINOR_VERSION, "ndMesh model");
+	}
+	else if (menuIndex == LOAD_MESH_INDEX)
+	{
+		ndImportMesh(this);
 		snprintf(newTitle, sizeof(newTitle), "Newton Dynamics %d.%.2i demo: %s", D_NEWTON_ENGINE_MAJOR_VERSION, D_NEWTON_ENGINE_MINOR_VERSION, "ndMesh model");
 	}
 	else if (menuIndex < ndInt32(sizeof (m_demosSelection)/sizeof(m_demosSelection[0])))
@@ -1238,7 +1249,7 @@ void ndDemoEntityManager::ToggleProfiler()
 		ndAssert(m_world);
 		ndTrace(("profiler Enable\n"));
 		m_world->Sync();
-		dProfilerEnableProling();
+		ndProfilerStartSampling();
 	#endif
 }
 
@@ -1513,7 +1524,7 @@ void ndDemoEntityManager::OnSubStepPostUpdate(ndFloat32)
 
 void ndDemoEntityManager::RenderScene()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndFloat32 timestep = ndGetElapsedSeconds();	
 	CalculateFPS(timestep);
 	UpdatePhysics(timestep);
@@ -1522,6 +1533,8 @@ void ndDemoEntityManager::RenderScene()
 	m_renderer->Render();
 	m_renderer->EndRender();
 	m_renderer->Present();
+
+	ND_PROFILE_FRAME_MARKER();
 }
 
 void ndDemoEntityManager::TestImGui()
@@ -1591,8 +1604,7 @@ void ndDemoEntityManager::Run()
 		}
 	
 		m_suspendPhysicsUpdate = false;
-		D_TRACKTIME();
-	
+
 		if (m_renderer->PollEvents())
 		{
 			RenderScene();

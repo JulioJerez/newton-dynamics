@@ -1009,7 +1009,7 @@ void DemoEntityManager::ToggleProfiler()
 		dTrace(("profiler Enable\n"));
 		NewtonWaitForUpdateToFinish(m_world);
 		m_profilerMode = !m_profilerMode;
-		dProfilerEnableProling(m_profilerMode);
+		dProfilerEnablePooling(m_profilerMode);
 	#endif
 }
 

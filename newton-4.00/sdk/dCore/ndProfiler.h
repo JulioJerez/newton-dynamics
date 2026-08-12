@@ -29,14 +29,18 @@
 // or make a configuration that define macro D_PROFILER
 
 #ifdef D_PROFILER
-	#include <dTracyProfiler.h>
-	#define D_TRACKTIME() dProfilerZoneScoped(__FUNCTION__)
-	#define D_TRACKTIME_NAMED(name) dProfilerZoneScoped(#name)
-	#define D_SET_TRACK_NAME(trackName) dProfilerSetTrackName(trackName)
+	#include <ndTracyProfiler.h>
+
+	#define ND_PROFILE_FRAME_MARKER()
+	#define ND_PROFILE_ZONE_NAMED(name) ndProfilerScopedZone(name);
+	#define ND_PROFILE_ZONE() ND_PROFILE_ZONE_NAMED(__FUNCTION__)
+	#define ND_PROFILE_SET_THREAD_NAME(threadName) ndProfilerSetThreadName(threadName)
+
 #else
-	#define D_TRACKTIME() 
-	#define D_TRACKTIME_NAMED(name)
-	#define D_SET_TRACK_NAME(trackName)
+	#define ND_PROFILE_ZONE() 
+	#define ND_PROFILE_FRAME_MARKER()
+	#define ND_PROFILE_ZONE_NAMED(name)
+	#define ND_PROFILE_SET_THREAD_NAME(trackName)
 #endif
 
 #endif

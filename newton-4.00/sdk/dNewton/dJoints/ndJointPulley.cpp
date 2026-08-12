@@ -14,70 +14,70 @@
 #include "ndJointPulley.h"
 
 ndJointPulley::ndJointPulley()
-	:ndJointBilateralConstraint()
-	,m_gearRatio(ndFloat32 (1.0f))
+	:ndJointRelational()
+	,m_posit(ndFloat32 (0.0f))
+	,m_speed(ndFloat32(0.0f))
 {
-	m_maxDof = 1;
 }
 
 ndJointPulley::ndJointPulley(ndFloat32 gearRatio,
-	const ndVector& body0Pin, ndBodyKinematic* const body0,
-	const ndVector& body1Pin, ndBodyKinematic* const body1)
-	:ndJointBilateralConstraint(1, body0, body1, ndGetIdentityMatrix())
-	,m_gearRatio(gearRatio)
-{
-	// calculate the two local matrix of the pivot point
-	ndMatrix dommyMatrix;
-
-	// calculate the local matrix for body body0
-	ndMatrix pinAndPivot0(ndGramSchmidtMatrix(body0Pin));
-	CalculateLocalMatrix(pinAndPivot0, m_localMatrix0, dommyMatrix);
-	m_localMatrix0.m_posit = ndVector::m_wOne;
-
-	// calculate the local matrix for body body1  
-	ndMatrix pinAndPivot1(ndGramSchmidtMatrix(body1Pin));
-	CalculateLocalMatrix(pinAndPivot1, dommyMatrix, m_localMatrix1);
-	m_localMatrix1.m_posit = ndVector::m_wOne;
-
-	// set as kinematic loop
-	SetSolverModel(m_jointkinematicCloseLoop);
-}
-
-ndJointPulley::~ndJointPulley()
+	const ndVector& parentPin, ndBodyKinematic* const parent,
+	const ndVector& childPin, ndBodyKinematic* const child)
+	:ndJointRelational(gearRatio, childPin, child, parentPin, parent)
+	,m_posit(ndFloat32(0.0f))
+	,m_speed(ndFloat32(0.0f))
 {
 }
 
-ndFloat32 ndJointPulley::GetRatio() const
+void ndJointPulley::UpdateParameters()
 {
-	return m_gearRatio;
-}
-
-void ndJointPulley::SetRatio(ndFloat32 ratio)
-{
-	m_gearRatio = ratio;
+	ndMatrix matrix0;
+	ndMatrix matrix1;
+	
+	// calculate the position of the pivot point and the Jacobian direction vectors, in global space. 
+	CalculateGlobalMatrix(matrix0, matrix1);
+	
+	const ndVector jacobian0(matrix0.m_front.Scale(m_gearRatio));
+	const ndVector jacobian1(matrix1.m_front);
+	
+	const ndVector& veloc0 = m_body0->GetVelocity();
+	const ndVector& veloc1 = m_body1->GetVelocity();
+	
+	const ndVector relSpeed(veloc0 * jacobian0 + veloc1 * jacobian1);
+	m_speed = relSpeed.AddHorizontal().GetScalar();
+	
+	const ndVector relPosit(matrix0.m_posit * jacobian0 + matrix1.m_posit * jacobian1);
+	m_posit = relPosit.AddHorizontal().GetScalar();
 }
 
 void ndJointPulley::JacobianDerivative(ndConstraintDescritor& desc)
 {
-	ndMatrix matrix0;
-	ndMatrix matrix1;
+	if (ndAbs(m_gearRatio) > ndFloat32(1.0e-3f))
+	{
+		ndMatrix matrix0;
+		ndMatrix matrix1;
 
-	// calculate the position of the pivot point and the Jacobian direction vectors, in global space. 
-	CalculateGlobalMatrix(matrix0, matrix1);
+		// calculate the position of the pivot point and the Jacobian direction vectors, in global space. 
+		CalculateGlobalMatrix(matrix0, matrix1);
 
-	AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
+		AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
 
-	ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
-	ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
+		ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
+		ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
 
-	jacobian0.m_linear = matrix0.m_front.Scale(m_gearRatio);
-	jacobian1.m_linear = matrix1.m_front;
+		jacobian0.m_angular = ndVector::m_zero;
+		jacobian1.m_angular = ndVector::m_zero;
+		jacobian0.m_linear = matrix0.m_front.Scale(m_gearRatio);
+		jacobian1.m_linear = matrix1.m_front;
 
-	const ndVector& veloc0 = m_body0->GetVelocity();
-	const ndVector& veloc1 = m_body1->GetVelocity();
+		const ndVector& veloc0 = m_body0->GetVelocity();
+		const ndVector& veloc1 = m_body1->GetVelocity();
 
-	const ndVector relVeloc(veloc0 * jacobian0.m_linear + veloc1 * jacobian1.m_linear);
-	const ndFloat32 w = relVeloc.AddHorizontal().GetScalar() * ndFloat32(0.5f);
-	SetMotorAcceleration(desc, -w * desc.m_invTimestep);
+		const ndVector relVeloc(veloc0 * jacobian0.m_linear + veloc1 * jacobian1.m_linear);
+		const ndFloat32 w = relVeloc.AddHorizontal().GetScalar();
+
+		SetDiagonalRegularizer(desc, m_regularizer);
+		SetMotorAcceleration(desc, -w * desc.m_invTimestep);
+	}
 }
 

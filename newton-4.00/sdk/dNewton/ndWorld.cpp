@@ -336,7 +336,7 @@ void ndWorld::WorkerUpdate(ndInt32 threadIndex)
 
 void ndWorld::PhysicsUpdate()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndUnsigned64 timeAcc = ndGetTimeInMicroseconds();
 
 	m_inUpdate = true;
@@ -370,7 +370,7 @@ void ndWorld::PhysicsUpdate()
 
 void ndWorld::CollisionUpdate()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	ndUnsigned64 timeAcc = ndGetTimeInMicroseconds();
 
 	m_inUpdate = true;
@@ -447,7 +447,7 @@ void ndWorld::CalculateAverageUpdateTime()
 
 void ndWorld::SubStepUpdate(ndFloat32 timestep)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 
 	// do physics step
 	OnSubStepPreUpdate(timestep);
@@ -491,16 +491,16 @@ void ndWorld::SubStepUpdate(ndFloat32 timestep)
 
 void ndWorld::ParticleUpdate(ndFloat32 timestep)
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	m_scene->ParticleUpdate(timestep);
 }
 
 void ndWorld::ModelUpdate()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	auto ModelUpdate = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32 threadId, ndInt32)
 	{
-		D_TRACKTIME_NAMED(ModelUpdate);
+		ND_PROFILE_ZONE_NAMED("ModelUpdate");
 		const ndFloat32 timestep = m_scene->GetTimestep();
 		const ndArray<ndModel*>& modelList = m_modelList.GetUpdateList();
 
@@ -518,10 +518,10 @@ void ndWorld::ModelUpdate()
 
 void ndWorld::ModelPostUpdate()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	auto ModelPostUpdate = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32 threadId, ndInt32)
 	{
-		D_TRACKTIME_NAMED(ModelPostUpdate);
+		ND_PROFILE_ZONE_NAMED("ModelPostUpdate");
 		const ndFloat32 timestep = m_scene->GetTimestep();
 		const ndArray<ndModel*>& modelList = m_modelList.GetUpdateList();
 
@@ -537,10 +537,10 @@ void ndWorld::ModelPostUpdate()
 
 void ndWorld::PostModelTransform()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	auto PostModelTransform = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32 threadId, ndInt32)
 	{
-		D_TRACKTIME_NAMED(PostModelTransform);
+		ND_PROFILE_ZONE_NAMED("PostModelTransform");
 		const ndFloat32 timestep = m_scene->GetTimestep();
 		const ndArray<ndModel*>& modelList = m_modelList.GetUpdateList();
 
@@ -567,7 +567,7 @@ bool ndWorld::SkeletonJointTest(ndJointBilateralConstraint* const constraint) co
 
 void ndWorld::UpdateSkeletons()
 {
-	D_TRACKTIME();
+	ND_PROFILE_ZONE();
 	if (m_skeletonList.m_skelListIsDirty)
 	{
 		m_skeletonList.m_skelListIsDirty = false;

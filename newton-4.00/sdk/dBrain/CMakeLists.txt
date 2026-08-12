@@ -18,6 +18,11 @@ include_directories(../dCore)
 include_directories(../dCore/tinyxml)
 include_directories(../../thirdParty/png)
 
+if(NEWTON_BUILD_PROFILER)
+	include_directories(../dProfiler)
+	add_definitions(-DD_PROFILER)
+endif()
+
 # for now opencl only for windows, I need to figure out the path for linux systems
 if(NEWTON_ENABLE_OPENCL_SDK AND MSVC)
 	include_directories(dOpencl)

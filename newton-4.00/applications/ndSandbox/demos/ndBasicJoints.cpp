@@ -408,6 +408,76 @@ static void BuildGear(ndDemoEntityManager* const scene, const ndVector& origin, 
 	world->AddJoint(joint2);
 }
 
+static void BuildPulley(ndDemoEntityManager* const scene, const ndVector& origin, ndFloat32 mass, ndFloat32 diameter)
+{
+	ndPhysicsWorld* const world = scene->GetWorld();
+	ndRender* const render = *scene->GetRenderer();
+
+	ndSharedPtr<ndShapeInstance>shape(new ndShapeInstance(new ndShapeBox(diameter, diameter, diameter)));
+	ndRenderPrimitive::ndDescriptor descriptor(render);
+	descriptor.m_collision = shape;
+	descriptor.m_mapping = ndRenderPrimitive::m_box;
+	descriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName("wood_0.png")));
+
+	ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
+
+	ndMatrix matrix(ndGetIdentityMatrix());
+	matrix.m_posit = FindFloor(*world, origin, 200.0f);
+	matrix.m_posit.m_y += 2.0f;
+
+	ndBodyKinematic* const fixBody = world->GetSentinelBody();
+	ndSharedPtr<ndBody> body0(MakePrimitive(scene, matrix, **shape, mesh, mass));
+
+	matrix.m_posit.m_y += diameter * 1.5f;
+	ndSharedPtr<ndBody> body1(MakePrimitive(scene, matrix, **shape, mesh, mass));
+
+	matrix = ndYawMatrix(ndFloat32 (-90.0f) * ndDegreeToRad) * matrix;
+	ndVector pin(matrix.m_front);
+	ndSharedPtr<ndJointBilateralConstraint> joint0(new ndJointSlider(matrix, body0->GetAsBodyDynamic(), fixBody));
+	ndSharedPtr<ndJointBilateralConstraint> joint1(new ndJointSlider(matrix, body1->GetAsBodyDynamic(), fixBody));
+	ndSharedPtr<ndJointBilateralConstraint> joint2(new ndJointPulley(4.0f, pin, body0->GetAsBodyDynamic(), pin, body1->GetAsBodyDynamic()));
+
+	world->AddJoint(joint0);
+	world->AddJoint(joint1);
+	world->AddJoint(joint2);
+}
+
+static void BuildWormGear(ndDemoEntityManager* const scene, const ndVector& origin, ndFloat32 mass, ndFloat32 diameter)
+{
+	ndPhysicsWorld* const world = scene->GetWorld();
+	ndRender* const render = *scene->GetRenderer();
+
+	ndSharedPtr<ndShapeInstance>shape(new ndShapeInstance(new ndShapeBox(diameter, diameter, diameter)));
+	ndRenderPrimitive::ndDescriptor descriptor(render);
+	descriptor.m_collision = shape;
+	descriptor.m_mapping = ndRenderPrimitive::m_box;
+	descriptor.AddMaterial(render->GetTextureCache()->GetTexture(ndGetWorkingFileName("wood_0.png")));
+
+	ndSharedPtr<ndRenderPrimitive> mesh(new ndRenderPrimitive(descriptor));
+
+	ndMatrix matrix(ndGetIdentityMatrix());
+	matrix.m_posit = FindFloor(*world, origin, 200.0f);
+	matrix.m_posit.m_y += 2.0f;
+
+	ndBodyKinematic* const fixBody = world->GetSentinelBody();
+	ndSharedPtr<ndBody> body0(MakePrimitive(scene, matrix, **shape, mesh, mass));
+
+	matrix.m_posit.m_y += diameter * 1.5f;
+	ndSharedPtr<ndBody> body1(MakePrimitive(scene, matrix, **shape, mesh, mass));
+
+	ndMatrix matrix0(ndRollMatrix(ndFloat32(-90.0f) * ndDegreeToRad) * matrix);
+	ndSharedPtr<ndJointBilateralConstraint> joint0(new ndJointHinge(matrix0, body0->GetAsBodyDynamic(), fixBody));
+
+	ndMatrix matrix1 (ndYawMatrix(ndFloat32(-90.0f) * ndDegreeToRad) * matrix);
+	ndSharedPtr<ndJointBilateralConstraint> joint1(new ndJointSlider(matrix1, body1->GetAsBodyDynamic(), fixBody));
+
+	ndSharedPtr<ndJointBilateralConstraint> joint2(new ndJointWormGear(4.0f, matrix0.m_front, body0->GetAsBodyDynamic(), matrix1.m_front, body1->GetAsBodyDynamic()));
+
+	world->AddJoint(joint0);
+	world->AddJoint(joint1);
+	world->AddJoint(joint2);
+}
+
 static void BuildDoubleHinge(ndDemoEntityManager* const scene, const ndVector& origin, ndFloat32 mass, ndFloat32 diameter)
 {
 	class ndJointDoubleHingeMotor : public ndJointDoubleHinge
@@ -956,6 +1026,8 @@ void ndBasicJoints (ndDemoEntityManager* const scene)
 	BuildHinge(scene, ndVector(0.0f, 0.0f, -2.0f, 1.0f), 10.0f, 1.0f);
 	BuildSlider(scene, ndVector(0.0f, 0.0f, 1.0f, 1.0f), 100.0f, 0.75f);
 	BuildGear(scene, ndVector(0.0f, 0.0f, -4.0f, 1.0f), 100.0f, 0.75f);
+	BuildPulley(scene, ndVector(3.0f, 0.0f, -8.0f, 1.0f), 100.0f, 0.75f);
+	BuildWormGear(scene, ndVector(6.0f, 0.0f, -12.0f, 1.0f), 100.0f, 0.75f);
 	BuildDoubleHinge(scene, ndVector(0.0f, 0.0f, 4.0f, 1.0f), 100.0f, 0.75f);
 	BuildRoller(scene, ndVector(0.0f, 0.0f, 9.0f, 1.0f), 10.0f, 0.75f);
 	BuildCylindrical(scene, ndVector(0.0f, 0.0f, 12.0f, 1.0f), 10.0f, 0.75f);

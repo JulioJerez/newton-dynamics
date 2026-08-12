@@ -85,7 +85,7 @@ void ndThread::SetName(const char* const name)
 	}
 #endif
 
-	D_SET_TRACK_NAME(m_name);
+	ND_PROFILE_SET_THREAD_NAME(m_name.m_name);
 }
 
 void ndThread::Finish()
@@ -153,7 +153,7 @@ void ndThread::ThreadFunctionCallback()
 		ndThreadYield();
 	}
 
-	D_SET_TRACK_NAME(m_name);
+	ND_PROFILE_SET_THREAD_NAME(m_name.m_name);
 	ndFloatExceptions exception;
 
 	while (!Wait())

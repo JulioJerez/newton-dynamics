@@ -15,11 +15,19 @@ Compiling Newton
 ================
 
 ## Windows
-Cmake generate varius Visual Studio solutions for: build sdk, demos, wrappers and ulities 
+Using the GUI:
 
+Cmake generate varius Visual Studio solutions for: build sdk, demos, wrappers and ulities 
 * Newton Core and packages: [sdk/projects/](sdk/projects/)
 * assets tool: [applications/ndNewAsset/](applications/ndNewAsset/)
 * demo sandbox: [applications/ndSandbox/](applications/ndSandbox/)
+
+Using command line:
+
+* cd .\newton-4.00\ 
+* cmake -B build -G "Visual Studio 17 2022"
+* cmake --build build --config Release
+* cmake --install build --config Release
 
 ## OSX
 Cmake XCode for SDK, 

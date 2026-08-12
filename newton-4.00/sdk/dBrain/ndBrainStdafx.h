@@ -26,10 +26,6 @@
 #include <ndCore.h>
 #include <lodepng.h>
 
-#ifdef D_USE_VULKAN_SDK
-	#include <vulkan/vulkan.h>
-#endif
-
 #ifdef D_USE_OPENCL_SDK
 	#define CL_HPP_TARGET_OPENCL_VERSION 300
 	#include <CL/opencl.hpp>
