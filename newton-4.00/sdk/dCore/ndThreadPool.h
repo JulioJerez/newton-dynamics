@@ -80,9 +80,8 @@ class ndThreadPool: public ndSyncMutex, public ndThread
 
 		ndThreadPool* m_owner;
 		ndTask* m_task;
+		ndInt32 m_begin;
 		ndInt32 m_threadIndex;
-		ndUnsigned8 m_begin;
-		ndUnsigned8 m_stillLooping;
 		friend class ndThreadPool;
 	};
 
@@ -110,7 +109,6 @@ class ndThreadPool: public ndSyncMutex, public ndThread
 	D_CORE_API virtual void WaitForWorkers();
 
 	ndWorker* m_workers;
-	ndAtomic<ndInt32> m_taskInProgress;
 	ndInt32 m_count;
 	ndInt32 m_isInUpdate;
 	char m_baseName[32];
@@ -174,7 +172,6 @@ class ndTaskImplement : public ndTask
 		const ndInt32 threadCount = m_threadPool->GetThreadCount();
 		for (ndInt32 batchIndex = m_threadIterator.fetch_add(m_jobsStride); batchIndex < m_jobsCount; batchIndex = m_threadIterator.fetch_add(m_jobsStride))
 		{
-			//ndTrace(("t(%d) bat(%d) %x\n", m_threadIndex, batchIndex, &m_threadIterator));
 			const ndInt32 count = ((batchIndex + m_jobsStride) < m_jobsCount) ? m_jobsStride : m_jobsCount - batchIndex;
 			ndAssert(count <= m_jobsStride);
 			for (ndInt32 j = 0; j < count; ++j)
@@ -229,11 +226,9 @@ void ndThreadPool::ParallelExecute(const Function& function, ndInt32 workGroupCo
 				new (job) ndTaskImplement<Function>(this, function, threadIterator, workGroupCount, groupsPerThreads, i + 1);
 			}
 	
-			//ndTrace(("start batches\n"));
 			for (ndInt32 i = numberOfThreads - 1; i >= 0; --i)
 			{
 				ndTaskImplement<Function>* const job = &jobsArray[i];
-				m_taskInProgress.fetch_add(1);
 				m_workers[i].ExecuteTask(job);
 			}
 	

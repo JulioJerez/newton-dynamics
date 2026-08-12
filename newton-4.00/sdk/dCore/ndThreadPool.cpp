@@ -32,9 +32,8 @@ ndThreadPool::ndWorker::ndWorker()
 	:ndThread()
 	,m_owner(nullptr)
 	,m_task(nullptr)
-	,m_threadIndex(0)
 	,m_begin(0)
-	,m_stillLooping(0)
+	,m_threadIndex(0)
 {
 }
 
@@ -53,16 +52,16 @@ void ndThreadPool::ndWorker::TaskUpdate()
 	m_begin = 1;
 	while (m_begin)
 	{
-		//ND_PROFILE_ZONE();
 		if (m_task)
 		{
+			//ND_PROFILE_ZONE_NAMED("TaskUpdate");
 			ndAssert(m_task->m_threadIndex == m_threadIndex);
 			m_task->Execute();
 			m_task = nullptr;
-			m_owner->m_taskInProgress.fetch_add(-1);
 		} 
 		else
 		{ 
+			//ND_PROFILE_ZONE_NAMED("TaskUpdateIdle");
 			ndThreadYield();
 		}
 	}
@@ -71,9 +70,7 @@ void ndThreadPool::ndWorker::TaskUpdate()
 void ndThreadPool::ndWorker::ThreadFunction()
 {
 #ifndef	D_USE_THREAD_EMULATION
-	m_stillLooping = 1;
 	m_owner->WorkerUpdate(m_threadIndex);
-	m_stillLooping = 0;
 #endif
 }
 
@@ -81,7 +78,6 @@ ndThreadPool::ndThreadPool(const char* const baseName)
 	:ndSyncMutex()
 	,ndThread()
 	,m_workers(nullptr)
-	,m_taskInProgress(0)
 	,m_count(0)
 	,m_isInUpdate(0)
 {
@@ -188,20 +184,21 @@ void ndThreadPool::End()
 			m_workers[i].m_begin = 0;
 		}
 
-		ndUnsigned8 stillLooping = 1;
-		do
-		{
-			ndUnsigned8 looping = 0;
-			for (ndInt32 i = 0; i < m_count; ++i)
-			{
-				looping = ndUnsigned8(looping | m_workers[i].m_stillLooping);
-			}
-			stillLooping = ndUnsigned8(stillLooping & looping);
-			if (m_count && stillLooping)
-			{
-				ndThreadYield();
-			}
-		} while (stillLooping);
+		//ndUnsigned8 stillLooping = 1;
+		//do
+		//{
+		//	ndUnsigned8 looping = 0;
+		//	for (ndInt32 i = m_count - 1; i >= 0; --i)
+		//	{
+		//		looping = ndUnsigned8(looping | m_workers[i].m_stillLooping);
+		//	}
+		//	stillLooping = ndUnsigned8(stillLooping & looping);
+		//	if (m_count && stillLooping)
+		//	{
+		//		ndThreadYield();
+		//	}
+		//} while (stillLooping);
+		WaitForWorkers();
 		#endif
 	}
 	m_isInUpdate--;
@@ -238,8 +235,17 @@ ndInt32 ndThreadPool::OptimalGroupBatch(ndInt32 numberOfGroups) const
 
 void ndThreadPool::WaitForWorkers()
 {
-	for (ndInt32 test = 0; !m_taskInProgress.compare_exchange_weak(test, 0); test = 0)
+	bool stillWorking;
+	do
 	{
-		ndThreadYield();
-	}
+		stillWorking = false;
+		for (ndInt32 i = m_count - 1; i >= 0; --i)
+		{
+			stillWorking = stillWorking || m_workers[i].m_task;
+		}
+		if (stillWorking)
+		{
+			ndThreadYield();
+		}
+	} while (stillWorking);
 }
