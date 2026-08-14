@@ -94,7 +94,7 @@ namespace ndCartpoleTrainer_sac
 			// create a Soft Actor Critic traniing agent
 			ndBrainAgentOffPolicyGradient_Trainer::HyperParameters hyperParameters;
 
-			//hyperParameters.m_useGpuBackend = false;
+			hyperParameters.m_useGpuBackend = false;
 			hyperParameters.m_hiddenLayersNumberOfNeurons = 64;
 			hyperParameters.m_numberOfActions = m_actionsSize;
 			hyperParameters.m_numberOfObservations = m_observationsSize;

@@ -70,13 +70,13 @@ namespace ndCarpolePlayer
 	{
 	}
 
-	void ndController::Update(ndFloat32 timestep)
+	void ndController::Update(ndFloat32 timestep, ndInt32)
 	{
 		m_timestep = timestep;
 		m_agent->Step();
 	}
 
-	void ndController::PostUpdate(ndFloat32)
+	void ndController::PostUpdate(ndFloat32, ndInt32)
 	{
 		m_randomImpulseCounter = (m_randomImpulseCounter + 1) % ND_RANDOM_IMPULSE_MOD;
 	}

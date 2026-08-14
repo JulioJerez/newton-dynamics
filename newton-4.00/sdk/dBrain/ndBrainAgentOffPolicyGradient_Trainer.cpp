@@ -31,7 +31,6 @@
 #include "ndBrainIntegerBuffer.h"
 #include "ndBrainOptimizerSgd.h"
 #include "ndBrainOptimizerAdam.h"
-#include "ndBrainLayerActivationRelu.h"
 #include "ndBrainLayerActivationTanh.h"
 #include "ndBrainLayerActivationLinear.h"
 #include "ndBrainLossLeastSquaredError.h"
@@ -390,7 +389,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildPolicyClass()
 	{
 		ndAssert(layers[layers.GetCount() - 1]->GetOutputSize() == m_parameters.m_hiddenLayersNumberOfNeurons);
 		layers.PushBack(new ndBrainLayerLinear(layers[layers.GetCount() - 1]->GetOutputSize(), m_parameters.m_hiddenLayersNumberOfNeurons));
-		//layers.PushBack(new ndBrainLayerActivationRelu(layers[layers.GetCount() - 1]->GetOutputSize()));
 		layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 	}
 	layers.PushBack(new ndBrainLayerLinear(layers[layers.GetCount() - 1]->GetOutputSize(), m_parameters.m_numberOfActions * 2));
@@ -444,7 +442,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildCriticClass()
 		{
 			ndAssert(layers[layers.GetCount() - 1]->GetOutputSize() == m_parameters.m_hiddenLayersNumberOfNeurons);
 			layers.PushBack(new ndBrainLayerLinear(layers[layers.GetCount() - 1]->GetOutputSize(), m_parameters.m_hiddenLayersNumberOfNeurons));
-			//layers.PushBack(new ndBrainLayerActivationRelu(layers[layers.GetCount() - 1]->GetOutputSize()));
 			layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 		}
 		layers.PushBack(new ndBrainLayerLinear(layers[layers.GetCount() - 1]->GetOutputSize(), 1));
@@ -567,7 +564,11 @@ void ndBrainAgentOffPolicyGradient_Trainer::SaveTrajectoryNoTerminal()
 	{
 		ndInt32 index = ndInt32(m_agent->m_trajectoryBaseIndex + i);
 		ndBrainMemVector entry(&m_scratchBuffer[i * stride], stride);
-		entry[trajectory.GetRewardOffset()] = trajectory.GetReward(index + 1);
+		// this was a huge mistake. 
+		// it is the reward for been on that state.
+		// not the reaward for the action that leads to a next state
+		// entry[trajectory.GetRewardOffset()] = trajectory.GetReward(index + 1);
+		entry[trajectory.GetRewardOffset()] = trajectory.GetReward(index);
 		entry[trajectory.GetTerminalOffset()] = ndBrainFloat (1.0f) - trajectory.GetTerminalState(index);
 
 		ndBrainMemVector action(&entry[trajectory.GetActionOffset()], actionsSize);
