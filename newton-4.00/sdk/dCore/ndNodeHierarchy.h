@@ -33,8 +33,8 @@ class ndNodeHierarchy: public ndContainersFreeListAlloc<T>
 	T* GetNext () const;
 	T* GetRoot () const;
 
-	T* GetFirstIterator() const;
 	T* GetNextIterator() const;
+	T* GetFirstIterator() const;
 
 	protected:
 	ndNodeHierarchy (const ndNodeHierarchy<T>& clone);
