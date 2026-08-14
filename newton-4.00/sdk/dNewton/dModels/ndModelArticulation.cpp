@@ -266,11 +266,26 @@ ndModelArticulation::ndNode* ndModelArticulation::FindByBodyId(ndInt32 bodyId) c
 {
 	if (m_rootNode)
 	{
-		for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
+		//for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
+		//{
+		//	if (node->m_body->GetId() == ndUnsigned32(bodyId))
+		//	{
+		//		return node;
+		//	}
+		//}
+		ndFixSizeArray<ndModelArticulation::ndNode*, 1024> stack;
+		stack.PushBack(m_rootNode);
+		while (stack.GetCount())
 		{
+			ndModelArticulation::ndNode* const node = stack.Pop();
 			if (node->m_body->GetId() == ndUnsigned32(bodyId))
 			{
 				return node;
+			}
+
+			for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
+			{
+				stack.PushBack(child);
 			}
 		}
 	}
@@ -283,16 +298,24 @@ ndModelArticulation::ndNode* ndModelArticulation::FindByBody(const ndBody* const
 	return FindByBodyId(ndInt32 (body->GetId()));
 }
 
-ndModelArticulation::ndNode* ndModelArticulation::FindByName(const char* const name) const
+ndModelArticulation::ndNode* ndModelArticulation::FindByName(const char* const namePtr) const
 {
 	if (m_rootNode)
 	{
-		for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
+		const ndString name(namePtr);
+		ndFixSizeArray<ndModelArticulation::ndNode*, 1024> stack;
+		stack.PushBack(m_rootNode);
+		while (stack.GetCount())
 		{
-			//if (strcmp(node->m_name.GetStr(), name) == 0)
+			ndModelArticulation::ndNode* const node = stack.Pop();
 			if (node->m_name.CompareIgnoreCase(name))
 			{
 				return node;
+			}
+			
+			for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
+			{
+				stack.PushBack(child);
 			}
 		}
 
@@ -473,18 +496,24 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 
 	ndFixSizeArray<ndVector, D_INV_IK_MAX_LINKS> bodyCenter;
 	ndFixSizeArray<const ndBodyKinematic*, D_INV_IK_MAX_LINKS> bodyArray;
-	for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
+	auto CalculateCom = [this, &dynamics, &bodyArray, &bodyCenter](ndModelArticulation::ndNode* node)
 	{
-		const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
-		bodyArray.PushBack(body);
-		const ndMatrix matrix(body->GetMatrix());
-		const ndVector bodyCom(matrix.TransformVector(body->GetCentreOfMass()));
-		bodyCenter.PushBack(bodyCom);
+		if (node->m_body)
+		{
+			const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+			bodyArray.PushBack(body);
+			const ndMatrix matrix(body->GetMatrix());
+			const ndVector bodyCom(matrix.TransformVector(body->GetCentreOfMass()));
+			bodyCenter.PushBack(bodyCom);
+			
+			ndFloat32 mass = body->GetMassMatrix().m_w;
+			dynamics.m_mass += mass;
+			dynamics.m_centerOfMass.m_posit += bodyCom.Scale(mass);
+		}
+	};
+	ndModelArticulation* const self = (ndModelArticulation*)this;
+	self->NodeIterator(CalculateCom);
 
-		ndFloat32 mass = body->GetMassMatrix().m_w;
-		dynamics.m_mass += mass;
-		dynamics.m_centerOfMass.m_posit += bodyCom.Scale(mass);
-	}
 	dynamics.m_centerOfMass.m_posit = dynamics.m_centerOfMass.m_posit.Scale(ndFloat32(1.0f) / dynamics.m_mass);
 	dynamics.m_centerOfMass.m_posit.m_w = ndFloat32(1.0f);
 
@@ -675,18 +704,24 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 
 	ndFixSizeArray<ndVector, D_INV_IK_MAX_LINKS> bodyCenter;
 	ndFixSizeArray<const ndBodyKinematic*, D_INV_IK_MAX_LINKS> bodyArray;
-	for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
+	auto CalculateCom = [this, &dynamics, &bodyArray, &bodyCenter](ndModelArticulation::ndNode* node)
 	{
-		const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
-		bodyArray.PushBack(body);
-		const ndMatrix matrix(body->GetMatrix());
-		const ndVector bodyCom(matrix.TransformVector(body->GetCentreOfMass()));
-		bodyCenter.PushBack(bodyCom);
+		if (node->m_body)
+		{
+			const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+			bodyArray.PushBack(body);
+			const ndMatrix matrix(body->GetMatrix());
+			const ndVector bodyCom(matrix.TransformVector(body->GetCentreOfMass()));
+			bodyCenter.PushBack(bodyCom);
 
-		ndFloat32 mass = body->GetMassMatrix().m_w;
-		dynamics.m_mass += mass;
-		dynamics.m_centerOfMass.m_posit += bodyCom.Scale(mass);
-	}
+			ndFloat32 mass = body->GetMassMatrix().m_w;
+			dynamics.m_mass += mass;
+			dynamics.m_centerOfMass.m_posit += bodyCom.Scale(mass);
+		}
+	};
+	ndModelArticulation* const self = (ndModelArticulation*)this;
+	self->NodeIterator(CalculateCom);
+
 	dynamics.m_centerOfMass.m_posit = dynamics.m_centerOfMass.m_posit.Scale(ndFloat32(1.0f) / dynamics.m_mass);
 	dynamics.m_centerOfMass.m_posit.m_w = ndFloat32(1.0f);
 
@@ -846,14 +881,14 @@ void ndModelArticulation::Serialize(ndMesh* const meshRootNode) const
 						parentMesh = parentMesh->GetParent();
 					}
 
-					//if (parentMesh->GetName() != node->GetParent()->m_name)
-					if (!parentMesh->GetName().CompareIgnoreCase(node->GetParent()->m_name))
-					{
-						// this node has a surrogate parent,
-						const ndMesh* const surrogateMesh = meshRootNode->FindByName(node->GetParent()->m_name);
-						ndAssert(surrogateMesh);
-						meshNode->GetJoint()->SetSurrogateParent(surrogateMesh);
-					}
+					ndAssert(0);
+					//if (!parentMesh->GetName().CompareIgnoreCase(node->GetParent()->m_name))
+					//{
+					//	// this node has a surrogate parent,
+					//	const ndMesh* const surrogateMesh = meshRootNode->FindByName(node->GetParent()->m_name);
+					//	ndAssert(surrogateMesh);
+					//	meshNode->GetJoint()->SetSurrogateParent(surrogateMesh);
+					//}
 				}
 			}
 		}
@@ -884,8 +919,9 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 		m_rootNode = nullptr;
 	}
 
-	ndFixSizeArray<ndMesh*, 256> sorrugatesNodes;
-	auto BuildHiearchy = [this, &sorrugatesNodes](ndMesh* const meshNode)
+	//ndFixSizeArray<ndMesh*, 256> sorrugatesNodes;
+	//auto BuildHiearchy = [this, &sorrugatesNodes](ndMesh* const meshNode)
+	auto BuildHiearchy = [this](ndMesh* const meshNode)
 	{
 		if (meshNode->GetRigidBody())
 		{ 
@@ -898,7 +934,8 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 			else 
 			{
 				const ndSharedPtr<ndMeshJoint>& meshJoint = meshNode->GetJoint();
-				if (*meshJoint && !meshJoint->GetSurrogateParent())
+				//if (*meshJoint && !meshJoint->GetSurrogateParent())
+				if (*meshJoint)
 				{
 					ndSharedPtr<ndBody> body(meshNode->GetRigidBody()->CreateObject());
 					const ndMesh* parentMesh = meshNode->GetParent();
@@ -914,38 +951,37 @@ void ndModelArticulation::Deserialize(const ndMesh* const rootNode)
 					ndModelArticulation::ndNode* const limbNode = AddLimb(parentNode, body, joint);
 					limbNode->m_name = meshNode->GetName();
 				}
-				else
-				{
-					sorrugatesNodes.PushBack(meshNode);
-				}
+				//else
+				//{
+				//	sorrugatesNodes.PushBack(meshNode);
+				//}
 			}
 		}
 	};
 	((ndMesh*)rootNode)->NodeIterator(BuildHiearchy);
 
-	//while (sorrugatesNodes.GetCount())
 	{
-		for (ndInt32 i = sorrugatesNodes.GetCount() - 1; i >= 0; --i)
-		{
-			const ndMesh* const surrogateMeshNode = sorrugatesNodes[i]->GetJoint() ? sorrugatesNodes[i]->GetJoint()->GetSurrogateParent() : nullptr;
-			if (surrogateMeshNode)
-			{
-				ndModelArticulation::ndNode* parentNode = FindByName(surrogateMeshNode->GetName().GetStr());
-				if (parentNode)
-				{
-					ndSharedPtr<ndBody> body(sorrugatesNodes[i]->GetRigidBody()->CreateObject());
-					ndBodyKinematic* const childBody = body->GetAsBodyKinematic();
-					ndBodyKinematic* const parentBody = parentNode->m_body->GetAsBodyKinematic();
-					ndSharedPtr<ndJointBilateralConstraint> joint(sorrugatesNodes[i]->GetJoint()->CreateObject(childBody, parentBody));
-					ndModelArticulation::ndNode* const limbNode = AddLimb(parentNode, body, joint);
-					limbNode->m_name = sorrugatesNodes[i]->GetName();
-
-					sorrugatesNodes[i] = sorrugatesNodes[sorrugatesNodes.GetCount() - 1];
-					sorrugatesNodes.SetCount(sorrugatesNodes.GetCount() - 1);
-					break;
-				}
-			}
-		}
+		//for (ndInt32 i = sorrugatesNodes.GetCount() - 1; i >= 0; --i)
+		//{
+		//	const ndMesh* const surrogateMeshNode = sorrugatesNodes[i]->GetJoint() ? sorrugatesNodes[i]->GetJoint()->GetSurrogateParent() : nullptr;
+		//	if (surrogateMeshNode)
+		//	{
+		//		ndModelArticulation::ndNode* parentNode = FindByName(surrogateMeshNode->GetName().GetStr());
+		//		if (parentNode)
+		//		{
+		//			ndSharedPtr<ndBody> body(sorrugatesNodes[i]->GetRigidBody()->CreateObject());
+		//			ndBodyKinematic* const childBody = body->GetAsBodyKinematic();
+		//			ndBodyKinematic* const parentBody = parentNode->m_body->GetAsBodyKinematic();
+		//			ndSharedPtr<ndJointBilateralConstraint> joint(sorrugatesNodes[i]->GetJoint()->CreateObject(childBody, parentBody));
+		//			ndModelArticulation::ndNode* const limbNode = AddLimb(parentNode, body, joint);
+		//			limbNode->m_name = sorrugatesNodes[i]->GetName();
+		//
+		//			sorrugatesNodes[i] = sorrugatesNodes[sorrugatesNodes.GetCount() - 1];
+		//			sorrugatesNodes.SetCount(sorrugatesNodes.GetCount() - 1);
+		//			break;
+		//		}
+		//	}
+		//}
 	}
 
 	const ndCloseLoopConstraints* const loops = rootNode->GetLoopJoints();
@@ -1072,14 +1108,37 @@ bool ndModelArticulation::IsSleeping() const
 	bool sleeping = true;
 	if (GetRoot())
 	{
-		for (ndNode* node = GetRoot()->GetFirstIterator(); sleeping && node; node = node->GetNextIterator())
+		//for (ndNode* node = GetRoot()->GetFirstIterator(); sleeping && node; node = node->GetNextIterator())
+		//{
+		//	if (!node->m_joint || node->m_joint->IsActive())
+		//	{
+		//		ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
+		//		sleeping = sleeping && body->GetSleepState();
+		//	}
+		//}
+
+		ndFixSizeArray<ndModelArticulation::ndNode*, 1024> stack;
+		stack.PushBack(m_rootNode);
+		while (stack.GetCount())
 		{
+			ndAssert(0);
+			ndModelArticulation::ndNode* const node = stack.Pop();
 			if (!node->m_joint || node->m_joint->IsActive())
 			{
 				ndBodyDynamic* const body = node->m_body->GetAsBodyDynamic();
 				sleeping = sleeping && body->GetSleepState();
+				if (!sleeping)
+				{
+					break;
+				}
+			}
+
+			for (ndModelArticulation::ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
+			{
+				stack.PushBack(child);
 			}
 		}
+
 	}
 	return sleeping;
 }
@@ -1092,47 +1151,60 @@ bool ndModelArticulation::SetSleep(ndFloat32 speed, ndFloat32 angularSpeed, ndFl
 	angularSpeed *= angularSpeed;
 
 	bool isSleeping = true;
-	for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
-	{
-		if (!node->m_joint || node->m_joint->IsActive())
-		{
-			const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
-			if (!body->GetSleepState())
-			{
-				const ndVector bodyAccel(body->GetAccel());
-				if (bodyAccel.DotProduct(bodyAccel).GetScalar() > accel)
-				{
-					isSleeping = false;
-					break;
-				}
-				const ndVector bodyAlpha(body->GetAlpha());
-				if (bodyAlpha.DotProduct(bodyAlpha).GetScalar() > alpha)
-				{
-					isSleeping = false;
-					break;
-				}
-				const ndVector veloc(body->GetOmega());
-				if (veloc.DotProduct(veloc).GetScalar() > speed)
-				{
-					isSleeping = false;
-					break;
-				}
-				const ndVector omega(body->GetVelocity());
-				if (omega.DotProduct(omega).GetScalar() > angularSpeed)
-				{
-					isSleeping = false;
-					break;
-				}
-			}
-		}
-	}
+	ndAssert(0);
+	//for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
+	//{
+	//	if (!node->m_joint || node->m_joint->IsActive())
+	//	{
+	//		const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+	//		if (!body->GetSleepState())
+	//		{
+	//			const ndVector bodyAccel(body->GetAccel());
+	//			if (bodyAccel.DotProduct(bodyAccel).GetScalar() > accel)
+	//			{
+	//				isSleeping = false;
+	//				break;
+	//			}
+	//			const ndVector bodyAlpha(body->GetAlpha());
+	//			if (bodyAlpha.DotProduct(bodyAlpha).GetScalar() > alpha)
+	//			{
+	//				isSleeping = false;
+	//				break;
+	//			}
+	//			const ndVector veloc(body->GetOmega());
+	//			if (veloc.DotProduct(veloc).GetScalar() > speed)
+	//			{
+	//				isSleeping = false;
+	//				break;
+	//			}
+	//			const ndVector omega(body->GetVelocity());
+	//			if (omega.DotProduct(omega).GetScalar() > angularSpeed)
+	//			{
+	//				isSleeping = false;
+	//				break;
+	//			}
+	//		}
+	//	}
+	//}
+
 	if (isSleeping)
 	{
-		for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
+		//for (ndModelArticulation::ndNode* node = m_rootNode->GetFirstIterator(); node; node = node->GetNextIterator())
+		//{
+		//	ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+		//	body->RestoreSleepState(true);
+		//}
+
+		auto SetSleep = [](ndModelArticulation::ndNode* node)
 		{
-			ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
-			body->RestoreSleepState(true);
-		}
+			if (node->m_body)
+			{
+				ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+				body->RestoreSleepState(true);
+			}
+		};
+		ndModelArticulation* const self = (ndModelArticulation*)this;
+		self->NodeIterator(SetSleep);
 	}
 	return isSleeping;
 }
