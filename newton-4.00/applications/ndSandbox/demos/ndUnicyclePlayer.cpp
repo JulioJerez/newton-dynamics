@@ -178,25 +178,26 @@ namespace ndUnicyclePlayer
 		m_wheel->SetOmegaNoSleep(savedWheelOmega);
 
 		const ndFloat32 poleAngle = ndFloat32(8.0f) * GetPoleAngle() / ND_TERMINATION_ANGLE;
-		const ndFloat32 comOmega = ndFloat32(2.0f) * comDynamics.m_omega.m_x;
-		const ndFloat32 comAlpha = ndFloat32(0.5f) * comDynamics.m_alpha.m_x;
-		//const ndFloat32 comSpeed = ndMax(ndAbs(comDynamics.m_veloc.m_z) - ndFloat32(8.0f), ndFloat32(0.0f));
-		const ndFloat32 boxOmega = GetBoxOmega() * ndFloat32(2.0f);
+		//const ndFloat32 comOmega = ndFloat32(2.0f) * comDynamics.m_omega.m_x;
+		//const ndFloat32 comAlpha = ndFloat32(0.5f) * comDynamics.m_alpha.m_x;
+		const ndFloat32 comSpeed = ndMax(ndAbs(comDynamics.m_veloc.m_z) - ndFloat32(2.0f), ndFloat32(0.0f));
+		const ndFloat32 boxOmega = ndMax(ndAbs(GetBoxOmega()) - ndFloat32(1.0f), ndFloat32(0.0f));
 		const ndFloat32 whellOmega = savedWheelOmega.m_z * ndFloat32(0.25f);
 
 		const ndFloat32 invSigma2 = ndFloat32(4.0f);
 		const ndFloat32 poleAngleReward = ndExp(-invSigma2 * poleAngle * poleAngle);
-		const ndFloat32 comOmegaReward = ndExp(-invSigma2 * comOmega * comOmega);
-		const ndFloat32 comAlphaReward = ndExp(-invSigma2 * comAlpha * comAlpha);
+		//const ndFloat32 comOmegaReward = ndExp(-invSigma2 * comOmega * comOmega);
+		//const ndFloat32 comAlphaReward = ndExp(-invSigma2 * comAlpha * comAlpha);
+		const ndFloat32 comSpeedReward = ndExp(-invSigma2 * comSpeed * comSpeed);
 		const ndFloat32 boxOmegaReward = ndExp(-invSigma2 * boxOmega * boxOmega);
 		const ndFloat32 whellOmegaReward = ndExp(-invSigma2 * whellOmega * whellOmega);
 
 		ndFloat32 reward = ndFloat32(0.0f);
-		reward += comOmegaReward * ndFloat32(0.2f);
-		reward += comAlphaReward * ndFloat32(0.2f);
-		reward += boxOmegaReward * ndFloat32(0.2f);
-		reward += poleAngleReward * ndFloat32(0.2f);
-		reward += whellOmegaReward * ndFloat32(0.2f);
+		//reward += comOmegaReward * ndFloat32(0.2f);
+		reward += comSpeedReward * ndFloat32(0.25f);
+		reward += boxOmegaReward * ndFloat32(0.25f);
+		reward += poleAngleReward * ndFloat32(0.25f);
+		reward += whellOmegaReward * ndFloat32(0.25f);
 		
 		return ndBrainFloat(reward);
 	}
