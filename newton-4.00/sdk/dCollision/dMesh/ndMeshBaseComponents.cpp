@@ -1036,7 +1036,7 @@ ndMeshJoint::ndMeshJoint(const ndMesh* const owner)
 	,m_localFrame1(ndGetIdentityMatrix())
 	,m_constructor("ndJointFix6dof")
 	,m_owner(ndWeakPtr<const ndMesh>(owner))
-	,m_surrogateParent(ndWeakPtr<const ndMesh>(nullptr))
+	//,m_surrogateParent(ndWeakPtr<const ndMesh>(nullptr))
 {
 }
 
@@ -1046,7 +1046,7 @@ ndMeshJoint::ndMeshJoint(const ndMesh* const owner, const ndJointBilateralConstr
 	,m_localFrame1(joint->GetLocalMatrix1())
 	,m_constructor(joint->ClassName())
 	,m_owner(ndWeakPtr<const ndMesh>(owner))
-	,m_surrogateParent(ndWeakPtr<const ndMesh>(nullptr))
+	//,m_surrogateParent(ndWeakPtr<const ndMesh>(nullptr))
 {
 }
 
@@ -1056,7 +1056,7 @@ ndMeshJoint::ndMeshJoint(const ndMeshJoint& other)
 	,m_localFrame1(other.m_localFrame1)
 	,m_constructor(other.m_constructor)
 	,m_owner(ndWeakPtr<const ndMesh>(other.m_owner))
-	,m_surrogateParent(ndWeakPtr<const ndMesh>(other.m_surrogateParent))
+	//,m_surrogateParent(ndWeakPtr<const ndMesh>(other.m_surrogateParent))
 {
 }
 
@@ -1075,13 +1075,13 @@ void ndMeshJoint::DuplicateFixDependencies(const ndMesh* const root)
 	m_owner = root->FindByName(m_owner->GetName());
 	ndAssert(m_owner);
 
-	if (m_surrogateParent)
-	{
-		//const ndMesh* const root = m_owner->GetRoot();
-		ndMesh* const surrogateParent = root->FindByName(m_surrogateParent->GetName());
-		ndAssert(surrogateParent);
-		m_surrogateParent = ndWeakPtr<const ndMesh>(surrogateParent);
-	}
+	//if (m_surrogateParent)
+	//{
+	//	//const ndMesh* const root = m_owner->GetRoot();
+	//	ndMesh* const surrogateParent = root->FindByName(m_surrogateParent->GetName());
+	//	ndAssert(surrogateParent);
+	//	m_surrogateParent = ndWeakPtr<const ndMesh>(surrogateParent);
+	//}
 }
 
 bool ndMeshJoint::operator==(const ndMeshJoint& other) const
@@ -1110,15 +1110,15 @@ void ndMeshJoint::ApplyTransform(const ndMatrix& transform)
 	m_localFrame1 = transformMatrix;
 }
 
-const ndMesh* ndMeshJoint::GetSurrogateParent() const
-{
-	return *m_surrogateParent;
-}
-
-void ndMeshJoint::SetSurrogateParent(const ndMesh* const surrodateParent)
-{
-	m_surrogateParent = ndWeakPtr<const ndMesh>(surrodateParent);
-}
+//const ndMesh* ndMeshJoint::GetSurrogateParent() const
+//{
+//	return *m_surrogateParent;
+//}
+//
+//void ndMeshJoint::SetSurrogateParent(const ndMesh* const surrodateParent)
+//{
+//	m_surrogateParent = ndWeakPtr<const ndMesh>(surrodateParent);
+//}
 
 void ndMeshJoint::SerializeToXml(nd::TiXmlElement* const parent) const
 {
@@ -1126,10 +1126,10 @@ void ndMeshJoint::SerializeToXml(nd::TiXmlElement* const parent) const
 	xmlSaveParam(parent, "localFrame0", m_localFrame0);
 	xmlSaveParam(parent, "localFrame1", m_localFrame1);
 
-	if (m_surrogateParent)
-	{
-		xmlSaveParam(parent, "surrogateParent", m_surrogateParent->GetName().GetStr());
-	}
+	//if (m_surrogateParent)
+	//{
+	//	xmlSaveParam(parent, "surrogateParent", m_surrogateParent->GetName().GetStr());
+	//}
 }
 
 void ndMeshJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
@@ -1138,11 +1138,11 @@ void ndMeshJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
 	m_localFrame0 = xmlGetMatrix(parent, "localFrame0");
 	m_localFrame1 = xmlGetMatrix(parent, "localFrame1");
 
-	if (xmlHasParam(parent, "surrogateParent"))
-	{
-		const char* const name = xmlGetString(parent, "surrogateParent");
-		m_surrogateParent = ndWeakPtr<const ndMesh> (m_owner->GetRoot()->FindByName(name));
-	}
+	//if (xmlHasParam(parent, "surrogateParent"))
+	//{
+	//	const char* const name = xmlGetString(parent, "surrogateParent");
+	//	m_surrogateParent = ndWeakPtr<const ndMesh> (m_owner->GetRoot()->FindByName(name));
+	//}
 }
 
 ndJointBilateralConstraint* ndMeshJoint::CreateObject(ndBodyKinematic* const, ndBodyKinematic* const) const
