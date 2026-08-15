@@ -47,7 +47,8 @@ ndBrainAgentOffPolicyGradient_Trainer::HyperParameters::HyperParameters()
 	m_maxNumberOfTrainingSteps = 1024 * 256;
 	m_polyakBlendFactor = ND_POLICY_DEFAULT_POLYAK_BLEND;
 	
-	m_numberOfUpdates = 8;
+	//m_numberOfUpdates = 8;
+	m_numberOfUpdates = 2;
 	m_replayBufferStartOptimizeSize = 1024 * 64;
 }
 
@@ -355,7 +356,7 @@ ndBrainAgentOffPolicyGradient_Trainer::ndBrainAgentOffPolicyGradient_Trainer(con
 	m_minibatchMean = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, actionsSize * m_parameters.m_miniBatchSize));
 	m_minibatchSigma = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, actionsSize * m_parameters.m_miniBatchSize));
 	m_minibatchGaussianDistribution = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, actionsSize * m_parameters.m_miniBatchSize));
-	m_uniformRandom = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, actionsSize * m_parameters.m_numberOfUpdates * m_parameters.m_miniBatchSize));
+	m_uniformRandom = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, 2 * actionsSize * m_parameters.m_numberOfUpdates * m_parameters.m_miniBatchSize));
 }
 
 void ndBrainAgentOffPolicyGradient_Trainer::AddAgent(ndSharedPtr<ndBrainAgentOffPolicyGradient_Agent>& agent)
@@ -986,13 +987,15 @@ void ndBrainAgentOffPolicyGradient_Trainer::Optimize()
 		for (ndInt32 j = 0; j < numberOfActions; ++j)
 		{
 			m_scratchBuffer.PushBack(ndBrainFloat(m_uniformDistribution()));
+			m_scratchBuffer.PushBack(ndBrainFloat(m_uniformDistribution()));
 		}
 	}
 	m_uniformRandom->VectorToDevice(m_scratchBuffer);
 
 	const ndBrainAgentOffPolicyGradient_Agent::ndTrajectory& trajectory = m_agent->m_trajectory;
-	ndInt32 transitionSizeInBytes = ndInt32(trajectory.GetStride() * sizeof(ndInt32));
-	ndInt32 copyIndicesStrideInBytes = ndInt32(m_parameters.m_miniBatchSize * sizeof(ndInt32));
+	const ndInt32 transitionSizeInBytes = ndInt32(trajectory.GetStride() * sizeof(ndInt32));
+	const ndInt32 copyIndicesStrideInBytes = ndInt32(m_parameters.m_miniBatchSize * sizeof(ndInt32));
+	const ndInt32 bashSizeInByte = ndInt32 (sizeof(ndFloat32) * numberOfActions * m_parameters.m_numberOfUpdates * m_parameters.m_miniBatchSize);
 
 	for (ndInt32 i = 0; i < m_parameters.m_numberOfUpdates; ++i)
 	{
@@ -1033,6 +1036,8 @@ void ndBrainAgentOffPolicyGradient_Trainer::Optimize()
 		}
 
 		// load the same uniform random array
+		// actually, a complete set of random numbers for re-samplig
+		minibatchReparametization.m_srcOffsetInByte += bashSizeInByte;
 		m_minibatchGaussianDistribution->CopyBuffer(minibatchReparametization, 1, **m_uniformRandom);
 
 		TrainPolicy();
