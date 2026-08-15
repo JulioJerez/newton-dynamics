@@ -285,6 +285,7 @@ ndBrainAgentOffPolicyGradient_Trainer::ndBrainAgentOffPolicyGradient_Trainer(con
 	,m_uniformRandom(nullptr)
 	,m_minibatchMean(nullptr)
 	,m_minibatchSigma(nullptr)
+	,m_minibatchEntropy(nullptr)
 	,m_replayBufferFlat(nullptr)
 	,m_minibatchNoTerminal(nullptr)
 	,m_minibatchOfTransitions(nullptr)
@@ -662,14 +663,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::SaveTrajectory()
 			{
 				m_shuffleBuffer.PushBack(base + i);
 			}
-		}
-		else
-		{
-			//for (ndInt32 i = 0; i < entriesCount; ++i)
-			//{
-			//	ndInt32 index = m_replayBufferIndex % m_shuffleBuffer.GetCount();
-			//	m_shuffleBuffer[index] = ndInt32 (m_replayBufferIndex);
-			//}
 		}
 		ndAssert((startOffset + sizeInBytes) <= m_replayBufferFlat->SizeInBytes());
 		m_replayBufferFlat->MemoryToDevice(startOffset, sizeInBytes, &m_scratchBuffer[0]);
