@@ -83,7 +83,7 @@ namespace ndCartpoleTrainer_sac
 			,m_discountRewardFactor(0.99f)
 			,m_horizon(ndFloat32(1.0f) / (ndFloat32(1.0f) - m_discountRewardFactor))
 			,m_lastEpisode(0xffffffff)
-			,m_stopTraining(500000)
+			,m_stopTraining(1000000)
 			,m_modelIsTrained(false)
 		{
 			char name[256];
