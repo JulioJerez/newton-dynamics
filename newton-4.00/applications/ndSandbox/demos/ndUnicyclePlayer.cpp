@@ -143,8 +143,6 @@ namespace ndUnicyclePlayer
 		return omega;
 	}
 
-
-
 	ndFloat32 ndController::GetBoxAngle() const
 	{
 		const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
