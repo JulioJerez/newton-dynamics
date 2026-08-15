@@ -198,7 +198,6 @@ class ndBrainAgentOffPolicyGradient_Trainer : public ndClassAlloc
 	ndUnsigned32 m_horizonSteps;
 	ndUnsigned32 m_eposideCount;
 	ndUnsigned32 m_replayBufferIndex;
-	ndUnsigned32 m_shuffleBatchIndex;
 	
 	bool m_replayIsFilled;
 	bool m_startOptimization;

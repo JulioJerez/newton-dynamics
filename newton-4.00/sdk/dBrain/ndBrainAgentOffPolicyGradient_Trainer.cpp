@@ -43,12 +43,12 @@
 ndBrainAgentOffPolicyGradient_Trainer::HyperParameters::HyperParameters()
 	:ndContinuePolicyGradientHyperParameters()
 {
-	m_replayBufferSize = 1024 * 1024;
+	m_replayBufferSize = 1024 * 512;
 	m_maxNumberOfTrainingSteps = 1024 * 256;
 	m_polyakBlendFactor = ND_POLICY_DEFAULT_POLYAK_BLEND;
-	
-	//m_numberOfUpdates = 8;
+
 	m_numberOfUpdates = 2;
+	//m_numberOfUpdates = 8;
 	m_replayBufferStartOptimizeSize = 1024 * 64;
 }
 
@@ -304,7 +304,6 @@ ndBrainAgentOffPolicyGradient_Trainer::ndBrainAgentOffPolicyGradient_Trainer(con
 	,m_horizonSteps(0)
 	,m_eposideCount(0)
 	,m_replayBufferIndex(0)
-	,m_shuffleBatchIndex(0)
 	,m_replayIsFilled(false)
 	,m_startOptimization(false)
 {
@@ -314,7 +313,7 @@ ndBrainAgentOffPolicyGradient_Trainer::ndBrainAgentOffPolicyGradient_Trainer(con
 	ndSetRandSeed(ndUnsigned32(m_parameters.m_randomSeed));
 	m_uniformDistribution.Init(ndRandInt());
 	
-	m_parameters.m_numberOfUpdates = ndMax(m_parameters.m_numberOfUpdates, 2);
+	m_parameters.m_numberOfUpdates = ndMax(m_parameters.m_numberOfUpdates, 1);
 	m_parameters.m_discountRewardFactor = ndClamp(m_parameters.m_discountRewardFactor, ndBrainFloat(0.1f), ndBrainFloat(0.999f));
 
 	if (m_parameters.m_useGpuBackend)
@@ -630,7 +629,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::CacheTrajectoryTransitions()
 			m_agent->ResetModel();
 			trajectory.SetCount(0);
 			m_agent->m_trajectoryBaseIndex = 0;
-			m_shuffleBuffer.RandomShuffle(m_shuffleBuffer.GetCount());
 			return;
 		}
 	}
@@ -641,7 +639,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::CacheTrajectoryTransitions()
 		m_agent->ResetModel();
 		trajectory.SetCount(0);
 		m_agent->m_trajectoryBaseIndex = 0;
-		m_shuffleBuffer.RandomShuffle(m_shuffleBuffer.GetCount());
 	}
 }
 
@@ -665,6 +662,14 @@ void ndBrainAgentOffPolicyGradient_Trainer::SaveTrajectory()
 			{
 				m_shuffleBuffer.PushBack(base + i);
 			}
+		}
+		else
+		{
+			//for (ndInt32 i = 0; i < entriesCount; ++i)
+			//{
+			//	ndInt32 index = m_replayBufferIndex % m_shuffleBuffer.GetCount();
+			//	m_shuffleBuffer[index] = ndInt32 (m_replayBufferIndex);
+			//}
 		}
 		ndAssert((startOffset + sizeInBytes) <= m_replayBufferFlat->SizeInBytes());
 		m_replayBufferFlat->MemoryToDevice(startOffset, sizeInBytes, &m_scratchBuffer[0]);
@@ -953,26 +958,12 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 
 void ndBrainAgentOffPolicyGradient_Trainer::Optimize()
 {
-	// get the number of indirect transitions 
+	// get the number of randomized transitions 
 	m_miniBatchIndices.SetCount(0);
-	const ndInt32 numberOfSamples = m_parameters.m_numberOfUpdates * m_parameters.m_miniBatchSize;
-	if ((numberOfSamples + m_shuffleBatchIndex) >= (m_shuffleBuffer.GetCount() - numberOfSamples))
+	for (ndInt32 i = m_parameters.m_numberOfUpdates * m_parameters.m_miniBatchSize - 1; i >= 0; --i)
 	{
-		// re shuffle after every pass.
-		m_shuffleBatchIndex = 0;
-		m_shuffleBuffer.RandomShuffle(m_shuffleBuffer.GetCount());
-	}
-
-	for (ndInt32 i = 0; i < numberOfSamples; ++i)
-	{
-		m_miniBatchIndices.PushBack(m_shuffleBuffer[m_shuffleBatchIndex]);
-		m_shuffleBatchIndex++;
-		if (m_shuffleBatchIndex >= m_shuffleBuffer.GetCount())
-		{
-			// re shuffle after every pass.
-			m_shuffleBatchIndex = 0;
-			m_shuffleBuffer.RandomShuffle(m_shuffleBuffer.GetCount());
-		}
+		ndInt32 transition = ndInt32 (ndRandInt() % ndInt32 (m_shuffleBuffer.GetCount()));
+		m_miniBatchIndices.PushBack(transition);
 	}
 
 	// load all the shuffled indices, they use GPU command to get a mini batch
@@ -981,10 +972,9 @@ void ndBrainAgentOffPolicyGradient_Trainer::Optimize()
 
 	// get a vector of random numbers
 	m_scratchBuffer.SetCount(0);
-	const ndInt32 numberOfActions = m_policyTrainer->GetBrain()->GetOutputSize() / 2;
-	for (ndInt32 i = 0; i < numberOfSamples; ++i)
+	for (ndInt32 i = m_parameters.m_numberOfActions-1; i >= 0 ; --i)
 	{
-		for (ndInt32 j = 0; j < numberOfActions; ++j)
+		for (ndInt32 j = m_parameters.m_numberOfUpdates * m_parameters.m_miniBatchSize - 1; j >= 0; --j)
 		{
 			m_scratchBuffer.PushBack(ndBrainFloat(m_uniformDistribution()));
 			m_scratchBuffer.PushBack(ndBrainFloat(m_uniformDistribution()));
@@ -995,13 +985,13 @@ void ndBrainAgentOffPolicyGradient_Trainer::Optimize()
 	const ndBrainAgentOffPolicyGradient_Agent::ndTrajectory& trajectory = m_agent->m_trajectory;
 	const ndInt32 transitionSizeInBytes = ndInt32(trajectory.GetStride() * sizeof(ndInt32));
 	const ndInt32 copyIndicesStrideInBytes = ndInt32(m_parameters.m_miniBatchSize * sizeof(ndInt32));
-	const ndInt32 bashSizeInByte = ndInt32 (sizeof(ndFloat32) * numberOfActions * m_parameters.m_numberOfUpdates * m_parameters.m_miniBatchSize);
+	const ndInt32 bashSizeInByte = ndInt32 (sizeof(ndFloat32) * m_parameters.m_numberOfActions * m_parameters.m_numberOfUpdates * m_parameters.m_miniBatchSize);
 
 	for (ndInt32 i = 0; i < m_parameters.m_numberOfUpdates; ++i)
 	{
 		// get a mini batch of uniform distributed random number form 0.0 to 1.0
 		ndCopyBufferCommandInfo minibatchReparametization;
-		ndInt32 strideSizeInBytes = ndInt32(sizeof(ndInt32)) * numberOfActions * m_parameters.m_miniBatchSize;
+		ndInt32 strideSizeInBytes = ndInt32(sizeof(ndInt32)) * m_parameters.m_numberOfActions * m_parameters.m_miniBatchSize;
 		minibatchReparametization.m_dstOffsetInByte = 0;
 		minibatchReparametization.m_dstStrideInByte = strideSizeInBytes;
 		minibatchReparametization.m_srcOffsetInByte = i * strideSizeInBytes;
