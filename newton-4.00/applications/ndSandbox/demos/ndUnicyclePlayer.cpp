@@ -67,7 +67,7 @@ namespace ndUnicyclePlayer
 		:ndModelNotify()
 		,m_agent(nullptr)
 		,m_timestep(0.0f)
-		,m_randomImpulseCounter(ndInt32(1 + (ndRandInt() & 200)))
+		,m_randomImpulseCounter(ndInt32(1 + (ndRandInt() % 200)))
 		,m_isTrainning(false)
 	{
 	}
@@ -224,7 +224,7 @@ namespace ndUnicyclePlayer
 			const ndVector mass(m_topBox->GetAsBodyDynamic()->GetMassMatrix());
 			const ndVector pin(m_poleHinge->CalculateGlobalMatrix1().m_front.Scale (randOmega));
 			const ndVector randomImpulseTorque(pin * mass);
-			//m_topBox->GetAsBodyDynamic()->ApplyImpulsePair(ndVector::m_zero, randomImpulseTorque, m_timestep);
+			m_topBox->GetAsBodyDynamic()->ApplyImpulsePair(ndVector::m_zero, randomImpulseTorque, m_timestep);
 		}
 	}
 
