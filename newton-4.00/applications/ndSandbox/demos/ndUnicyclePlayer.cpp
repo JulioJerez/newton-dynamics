@@ -135,6 +135,16 @@ namespace ndUnicyclePlayer
 		return omega;
 	}
 
+	ndFloat32 ndController::GetWheelOmega() const
+	{
+		const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
+		const ndMatrix matrix(hinge->CalculateGlobalMatrix1());
+		ndFloat32 omega = matrix.m_front.DotProduct(m_poleHinge->GetBody1()->GetOmega()).GetScalar();
+		return omega;
+	}
+
+
+
 	ndFloat32 ndController::GetBoxAngle() const
 	{
 		const ndJointHinge* const hinge = (ndJointHinge*)*m_poleHinge;
@@ -167,34 +177,23 @@ namespace ndUnicyclePlayer
 			return ndBrainFloat(-1.0f);
 		}
 
-		// trying with center of mass dynamics
-		// b*ut the result so far the results are very dissapointing
-		// this however word much better is an order version 
-		// maybe I have bugs that I have to track
-		ndMatrix comFrame(m_wheelRoller->CalculateGlobalMatrix1());
-		comFrame.m_up = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
-		comFrame.m_right = comFrame.m_front.CrossProduct(comFrame.m_up).Normalize();
-		comFrame.m_up = comFrame.m_right.CrossProduct(comFrame.m_front).Normalize();
-
-
-		const ndFloat32 boxOmega = GetBoxOmega();
-		const ndFloat32 poleOmega = GetPoleOmega();
-		const ndFloat32 boxAngle = GetBoxAngle() / ND_TERMINATION_ANGLE;;
+		//const ndFloat32 boxOmega = GetBoxOmega();
+		//const ndFloat32 boxAngle = GetBoxAngle() / ND_TERMINATION_ANGLE;;
+		//const ndFloat32 poleOmega = GetPoleOmega();
 		const ndFloat32 poleAngle = GetPoleAngle() / ND_TERMINATION_ANGLE;
 
-		const ndFloat32 invSigma2 = ndFloat32(2500.0f);
+		const ndFloat32 invSigma2 = ndFloat32(900.0f);
 
-		const ndFloat32 boxOmegaReward = ndExp(-invSigma2 * boxOmega * boxOmega);
-		const ndFloat32 poleOmegaReward = ndExp(-invSigma2 * poleOmega * poleOmega);
-
-		const ndFloat32 boxAngleReward = ndExp(-invSigma2 * boxAngle * boxAngle);
+		//const ndFloat32 boxOmegaReward = ndExp(-invSigma2 * boxOmega * boxOmega);
+		//const ndFloat32 boxAngleReward = ndExp(-invSigma2 * boxAngle * boxAngle);
+		//const ndFloat32 poleOmegaReward = ndExp(-invSigma2 * poleOmega * poleOmega);
 		const ndFloat32 poleAngleReward = ndExp(-invSigma2 * poleAngle * poleAngle);
 
 		ndFloat32 reward = ndFloat32(0.0f);
-		reward += boxAngleReward * ndFloat32(0.1f);
-		reward += boxOmegaReward * ndFloat32(0.1f);
-		reward += poleAngleReward * ndFloat32(0.4f);
-		reward += poleOmegaReward * ndFloat32(0.4f);
+		//reward += boxAngleReward * ndFloat32(0.1f);
+		//reward += boxOmegaReward * ndFloat32(0.1f);
+		reward += poleAngleReward * ndFloat32(1.0f);
+		//reward += poleOmegaReward * ndFloat32(0.5f);
 		
 		return ndBrainFloat(reward);
 	}
@@ -244,28 +243,21 @@ namespace ndUnicyclePlayer
 		return ndBrainFloat(1.0f);
 	};
 
-	//#pragma optimize( "", off)
+	#pragma optimize( "", off)
 	void ndController::GetObservation(ndBrainFloat* const observation)
 	{
-		//ndMatrix comFrame(m_wheelRoller->CalculateGlobalMatrix1());
-		//comFrame.m_up = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
-		//comFrame.m_right = comFrame.m_front.CrossProduct(comFrame.m_up).Normalize();
-		//comFrame.m_up = comFrame.m_right.CrossProduct(comFrame.m_front).Normalize();
-		//const ndVector savedWheelOmega(m_wheel->GetOmega());
-		//m_wheel->SetOmegaNoSleep(ndVector::m_zero);
-		//ndModelArticulation::ndCenterOfMassDynamics comKinematics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassKinematics(comFrame));
-		//m_wheel->SetOmegaNoSleep(savedWheelOmega);
-
 		ndFloat32 boxAngle = GetBoxAngle();
 		ndFloat32 boxOmega = GetBoxOmega();
-		ndFloat32 hingeAngle = ((ndJointHinge*)*m_poleHinge)->GetAngle();
-		ndFloat32 hingeOmega = ((ndJointHinge*)*m_poleHinge)->GetOmega();
+		ndFloat32 poleAngle = GetPoleAngle();
+		ndFloat32 poleOmega = GetPoleOmega();
+		ndFloat32 wheelOmega = GetWheelOmega();
 
 		observation[m_hasContactSupport] = IsOnAir();
 		observation[m_boxAngle] = ndBrainFloat(boxAngle);
 		observation[m_boxOmega] = ndBrainFloat(boxOmega);
-		observation[m_hingeAngle] = ndBrainFloat(hingeAngle);
-		observation[m_hingeOmega] = ndBrainFloat(hingeOmega);
+		observation[m_poleAngle] = ndBrainFloat(poleAngle);
+		observation[m_poleOmega] = ndBrainFloat(poleOmega);
+		observation[m_wheelOmega] = ndBrainFloat(wheelOmega);
 	}
 
 	void ndController::CreateArticulatedModel(

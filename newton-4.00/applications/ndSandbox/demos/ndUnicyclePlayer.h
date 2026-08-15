@@ -42,8 +42,9 @@ namespace ndUnicyclePlayer
 	{
 		m_boxAngle,
 		m_boxOmega,
-		m_hingeOmega,
-		m_hingeAngle,
+		m_poleOmega,
+		m_poleAngle,
+		m_wheelOmega,
 		m_hasContactSupport,
 		m_observationsSize
 	};
@@ -118,6 +119,7 @@ namespace ndUnicyclePlayer
 		ndFloat32 GetBoxOmega() const;
 		ndFloat32 GetPoleAngle() const;
 		ndFloat32 GetPoleOmega() const;
+		ndFloat32 GetWheelOmega() const;
 		ndBrainFloat CalculateReward() const;
 		void ApplyActions(ndBrainFloat* const actions);
 		void GetObservation(ndBrainFloat* const observation);
