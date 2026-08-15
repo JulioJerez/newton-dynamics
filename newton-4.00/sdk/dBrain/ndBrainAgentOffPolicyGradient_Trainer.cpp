@@ -41,6 +41,7 @@
 #define ND_POLICY_DEFAULT_POLYAK_BLEND		ndBrainFloat(0.005f)
 
 ndBrainAgentOffPolicyGradient_Trainer::HyperParameters::HyperParameters()
+	:ndContinuePolicyGradientHyperParameters()
 {
 	m_replayBufferSize = 1024 * 1024;
 	m_maxNumberOfTrainingSteps = 1024 * 256;
@@ -420,7 +421,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildPolicyClass()
 	policy->InitWeights();
 	
 	ndSharedPtr<ndBrainOptimizer> optimizer (new ndBrainOptimizerAdam(m_context));
-	//ndSharedPtr<ndBrainOptimizer> optimizer(new ndBrainOptimizerSgd(m_context));
 	optimizer->SetRegularizer(m_parameters.m_policyRegularizer);
 	optimizer->SetRegularizerType(m_parameters.m_policyRegularizerType);
 
@@ -1056,7 +1056,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::OptimizeStep()
 		Optimize();
 		m_frameCount++;
 
-		//m_policyTrainer->GetWeightAndBiasBuffer()->VectorFromDevice(m_lastPolicy);
 		m_context->SyncBufferCommandQueue();
 		m_policyTrainer->GetWeightAndBiasBuffer()->VectorFromDevice(m_lastPolicy);
 		m_policyTrainer->UpdateParameters(m_lastPolicy);
