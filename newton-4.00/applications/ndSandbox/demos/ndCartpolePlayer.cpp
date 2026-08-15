@@ -65,7 +65,7 @@ namespace ndCarpolePlayer
 		:ndModelNotify()
 		,m_agent(nullptr)
 		,m_timestep(0.0f)
-		,m_randomImpulseCounter(ndInt32(1 + (ndRandInt() & 200)))
+		,m_randomImpulseCounter(ndInt32(1 + (ndRandInt() % 200)))
 		,m_isTrainning(false)
 	{
 	}
