@@ -123,8 +123,8 @@ namespace ndCarpolePlayer
 		ndFloat32 angle = hinge->GetAngle() / REWARD_MIN_ANGLE;
 		ndFloat32 speed = slider->GetSpeed() / REWARD_MAX_SPEED;
 
-		ndFloat32 invSigma2 = ndFloat32(20.0f);
-		ndFloat32 speedReward = ndExp(-100.0f * speed * speed);
+		ndFloat32 invSigma2 = ndFloat32(100.0f);
+		ndFloat32 speedReward = ndExp(-400.0f * speed * speed);
 		ndFloat32 omegaReward = ndExp(-invSigma2 * omega * omega);
 		ndFloat32 angleReward = ndExp(-invSigma2 * angle * angle);
 
