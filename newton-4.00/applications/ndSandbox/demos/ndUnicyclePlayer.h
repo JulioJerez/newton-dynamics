@@ -44,7 +44,6 @@ namespace ndUnicyclePlayer
 		m_boxOmega,
 		m_hingeOmega,
 		m_hingeAngle,
-		m_comSpeed,
 		m_hasContactSupport,
 		m_observationsSize
 	};
@@ -118,6 +117,7 @@ namespace ndUnicyclePlayer
 		ndFloat32 GetBoxAngle() const;
 		ndFloat32 GetBoxOmega() const;
 		ndFloat32 GetPoleAngle() const;
+		ndFloat32 GetPoleOmega() const;
 		ndBrainFloat CalculateReward() const;
 		void ApplyActions(ndBrainFloat* const actions);
 		void GetObservation(ndBrainFloat* const observation);
@@ -136,7 +136,6 @@ namespace ndUnicyclePlayer
 		ndSharedPtr<ndJointBilateralConstraint> m_plane;
 		ndSharedPtr<ndJointBilateralConstraint> m_poleHinge;
 		ndSharedPtr<ndJointBilateralConstraint> m_wheelRoller;
-		ndSharedPtr<ndIkSolver> m_solver;
 		ndSharedPtr<ndBrainAgent> m_agent;
 		ndFloat32 m_timestep;
 		ndInt32 m_randomImpulseCounter;

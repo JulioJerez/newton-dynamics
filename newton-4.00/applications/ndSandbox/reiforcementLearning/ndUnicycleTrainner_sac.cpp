@@ -146,7 +146,6 @@ namespace ndUnicycleTrainer_sac
 			//add a control for the reward function
 			ndController* const controller = (ndController*)(*model->GetNotifyCallback());
 			controller->m_isTrainning = true;
-			controller->m_solver = ndSharedPtr<ndIkSolver>(new ndIkSolver);
 			
 			// add model a visual mesh to the scene and world
 			world->AddModel(model);
