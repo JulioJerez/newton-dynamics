@@ -193,7 +193,6 @@ namespace ndUnicyclePlayer
 		const ndFloat32 whellOmegaReward = ndExp(-invSigma2 * whellOmega * whellOmega);
 
 		ndFloat32 reward = ndFloat32(0.0f);
-		//reward += comOmegaReward * ndFloat32(0.2f);
 		reward += comSpeedReward * ndFloat32(0.25f);
 		reward += boxOmegaReward * ndFloat32(0.25f);
 		reward += poleAngleReward * ndFloat32(0.25f);
