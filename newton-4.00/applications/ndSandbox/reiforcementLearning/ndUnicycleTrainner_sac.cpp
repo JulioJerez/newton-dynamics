@@ -116,12 +116,13 @@ namespace ndUnicycleTrainer_sac
 			// set random see for replication
 			ndSetRandSeed(47);
 
-			// create a proximal policy training agent
+			// create a soft actor critic training agent
 			ndBrainAgentOffPolicyGradient_Trainer::HyperParameters hyperParameters;
 			
 			hyperParameters.m_useGpuBackend = false;
-			//hyperParameters.m_numberOfHiddenLayers = 2;
-			hyperParameters.m_hiddenLayersNumberOfNeurons = 64;
+			hyperParameters.m_numberOfUpdates = 4;
+			hyperParameters.m_numberOfHiddenLayers = 2;
+			hyperParameters.m_hiddenLayersNumberOfNeurons = 128;
 			hyperParameters.m_numberOfActions = m_actionsSize;
 			hyperParameters.m_numberOfObservations = m_observationsSize;
 			hyperParameters.m_maxNumberOfTrainingSteps = m_stopTraining;
