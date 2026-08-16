@@ -201,6 +201,7 @@ namespace ndBipedPlayer
 
 	void ndController::ApplyActions(ndBrainFloat* const actions)
 	{
+		ndAssert(0);
 		//const ndVector wheelMass(m_wheel->GetAsBodyDynamic()->GetMassMatrix());
 		//const ndMatrix wheelMatrix(m_wheelRoller->CalculateGlobalMatrix0());
 		//
