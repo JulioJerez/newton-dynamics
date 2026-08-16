@@ -18,19 +18,15 @@
 
 namespace ndUnicyclePlayer
 {
-	#define CONTROLLER_NAME_SAC		"unicycleSac"
-	#define CONTROLLER_NAME_PPO		"unicyclePpo"
+	#define CONTROLLER_NAME_SAC			"unicycleSac"
+	#define CONTROLLER_NAME_PPO			"unicyclePpo"
 
-	#define ND_MAX_LEG_JOINT_ANGLE	(ndFloat32 (45.0f) * ndDegreeToRad)
-
-	#define ND_MAX_WHEEL_ALPHA		(ndFloat32 (100.0f))
-
-	#define ND_TERMINATION_ANGLE	(ndFloat32 (45.0f) * ndDegreeToRad)
-	#define ND_TRAJECTORY_STEPS		(1024 * 4)
+	#define ND_MAX_WHEEL_ALPHA			(ndFloat32 (50.0f))
+	#define ND_TERMINATION_ANGLE		(ndFloat32 (30.0f) * ndDegreeToRad)
+	#define ND_TRAJECTORY_STEPS			(1024 * 4)
 
 	#define ND_RANDOM_IMPULSE_MOD		256
-	#define ND_RANDOM_IMPULSE_MAGNITUD	ndFloat32 (7.0f)
-
+	#define ND_RANDOM_IMPULSE_MAGNITUD	ndFloat32 (5.0f)
 
 	enum ndActionSpace
 	{
@@ -45,6 +41,7 @@ namespace ndUnicyclePlayer
 		m_poleOmega,
 		m_poleAngle,
 		m_wheelOmega,
+		m_wheelAlpha,
 		m_hasContactSupport,
 		m_observationsSize
 	};
@@ -120,6 +117,7 @@ namespace ndUnicyclePlayer
 		ndFloat32 GetPoleAngle() const;
 		ndFloat32 GetPoleOmega() const;
 		ndFloat32 GetWheelOmega() const;
+		ndFloat32 GetWheelAlpha() const;
 		ndBrainFloat CalculateReward() const;
 		void ApplyActions(ndBrainFloat* const actions);
 		void GetObservation(ndBrainFloat* const observation);
