@@ -911,7 +911,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 		critic.BackPropagate();
 	}
 
-	// get tht min of the two q values
+	// get the min of the two q values
 	ndBrainTrainer& critic = **m_criticTrainer[0];
 	ndBrainFloatBuffer* const criticMinibatchOutputBuffer = critic.GetOuputBuffer();
 	ndBrainFloatBuffer* const criticMinibatchInputGradientBuffer = critic.GetInputGradientBuffer();
@@ -939,11 +939,11 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 	policyGradient.m_bytesToCopy = ndInt32(m_policyTrainer->GetBrain()->GetOutputSize() * sizeof(ndReal));
 	policyMinibatchOutputGradientBuffer->CopyBuffer(policyGradient, m_parameters.m_miniBatchSize, *criticMinibatchInputGradientBuffer);
 
-	// calculate and substract regularized entropy gradient 
+	// calculate and subtract regularized entropy gradient 
 	policyMinibatchOutputBuffer->CalculateEntropyRegularizationGradient(**m_minibatchGaussianDistribution, **m_minibatchSigma, m_parameters.m_entropyTemperature, ndInt32(meanOutputSizeInBytes / sizeof(ndReal)));
 	policyMinibatchOutputGradientBuffer->Sub(*policyMinibatchOutputBuffer);
 
-	// negate gradinet to make it a gradient ascend
+	// negate gradient to make it a gradient ascend
 	policyMinibatchOutputGradientBuffer->Scale(ndBrainFloat(-1.0f));
 
 	m_policyTrainer->BackPropagate();
