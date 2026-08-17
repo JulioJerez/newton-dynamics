@@ -838,6 +838,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 
 	ndBrainFloatBuffer* const policyMinibatchInputBuffer = policy->GetInputBuffer();
 	ndBrainFloatBuffer* const policyMinibatchOutputBuffer = policy->GetOuputBuffer();
+	ndBrainFloatBuffer* const policyMinibatchOutputGradientBuffer = m_policyTrainer->GetOuputGradientBuffer();
 
 	ndCopyBufferCommandInfo policyObservation;
 	policyObservation.m_srcStrideInByte = ndInt32(trajectory.GetStride() * sizeof(ndReal));
@@ -846,7 +847,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 	policyObservation.m_dstStrideInByte = ndInt32(policy->GetBrain()->GetInputSize() * sizeof(ndReal));
 	policyObservation.m_bytesToCopy = ndInt32(policy->GetBrain()->GetInputSize() * sizeof(ndReal));
 	policyMinibatchInputBuffer->CopyBuffer(policyObservation, m_parameters.m_miniBatchSize, **m_minibatchOfTransitions);
-
 	policy->MakePrediction();
 
 	ndInt32 meanOutputSizeInBytes = ndInt32 (policy->GetBrain()->GetOutputSize() * sizeof(ndReal) / 2);
@@ -879,21 +879,21 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 		ndBrainTrainer& critic = **m_criticTrainer[i];
 		ndBrainFloatBuffer* const criticMinibatchInputBuffer = critic.GetInputBuffer();
 
-		ndCopyBufferCommandInfo criticInputNextActionMean;
-		criticInputNextActionMean.m_srcOffsetInByte = 0;
-		criticInputNextActionMean.m_srcStrideInByte = meanOutputSizeInBytes;
-		criticInputNextActionMean.m_dstOffsetInByte = 0;
-		criticInputNextActionMean.m_dstStrideInByte = ndInt32(criticInputSize * sizeof(ndReal));
-		criticInputNextActionMean.m_bytesToCopy = meanOutputSizeInBytes;
-		criticMinibatchInputBuffer->CopyBuffer(criticInputNextActionMean, m_parameters.m_miniBatchSize, **m_minibatchMean);
+		ndCopyBufferCommandInfo criticInputActionMean;
+		criticInputActionMean.m_srcOffsetInByte = 0;
+		criticInputActionMean.m_srcStrideInByte = meanOutputSizeInBytes;
+		criticInputActionMean.m_dstOffsetInByte = 0;
+		criticInputActionMean.m_dstStrideInByte = ndInt32(criticInputSize * sizeof(ndReal));
+		criticInputActionMean.m_bytesToCopy = meanOutputSizeInBytes;
+		criticMinibatchInputBuffer->CopyBuffer(criticInputActionMean, m_parameters.m_miniBatchSize, **m_minibatchMean);
 
-		ndCopyBufferCommandInfo criticInputNextActionSigma;
-		criticInputNextActionSigma.m_srcOffsetInByte = 0;
-		criticInputNextActionSigma.m_srcStrideInByte = meanOutputSizeInBytes;
-		criticInputNextActionSigma.m_dstOffsetInByte = meanOutputSizeInBytes;
-		criticInputNextActionSigma.m_dstStrideInByte = ndInt32(criticInputSize * sizeof(ndReal));
-		criticInputNextActionSigma.m_bytesToCopy = meanOutputSizeInBytes;
-		criticMinibatchInputBuffer->CopyBuffer(criticInputNextActionSigma, m_parameters.m_miniBatchSize, **m_minibatchSigma);
+		ndCopyBufferCommandInfo criticInputActionSigma;
+		criticInputActionSigma.m_srcOffsetInByte = 0;
+		criticInputActionSigma.m_srcStrideInByte = meanOutputSizeInBytes;
+		criticInputActionSigma.m_dstOffsetInByte = meanOutputSizeInBytes;
+		criticInputActionSigma.m_dstStrideInByte = ndInt32(criticInputSize * sizeof(ndReal));
+		criticInputActionSigma.m_bytesToCopy = meanOutputSizeInBytes;
+		criticMinibatchInputBuffer->CopyBuffer(criticInputActionSigma, m_parameters.m_miniBatchSize, **m_minibatchSigma);
 
 		ndCopyBufferCommandInfo criticInputObservation;
 		criticInputObservation.m_srcOffsetInByte = 0;
@@ -911,6 +911,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 		critic.BackPropagate();
 	}
 
+	// get tht min of the two q values
 	ndBrainTrainer& critic = **m_criticTrainer[0];
 	ndBrainFloatBuffer* const criticMinibatchOutputBuffer = critic.GetOuputBuffer();
 	ndBrainFloatBuffer* const criticMinibatchInputGradientBuffer = critic.GetInputGradientBuffer();
@@ -929,21 +930,21 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 		criticMinibatchInputGradientBuffer->Blend(*criticMinibatchInputGradientBuffer1, **m_minibatchCriticInputTest);
 	}
 
-	// calculate entropy Regularization
-	ndCopyBufferCommandInfo policyEntropyGradients;
-	policyEntropyGradients.m_srcOffsetInByte = 0;
-	policyEntropyGradients.m_srcStrideInByte = ndInt32(criticInputSize * sizeof(ndReal));
-	policyEntropyGradients.m_dstOffsetInByte = 0;
-	policyEntropyGradients.m_dstStrideInByte = ndInt32(m_policyTrainer->GetBrain()->GetOutputSize() * sizeof(ndReal));
-	policyEntropyGradients.m_bytesToCopy = ndInt32(m_policyTrainer->GetBrain()->GetOutputSize() * sizeof(ndReal));
-	policyMinibatchOutputBuffer->CopyBuffer(policyEntropyGradients, m_parameters.m_miniBatchSize, *criticMinibatchInputGradientBuffer);
+	// start by taking min (grad(q0), grad(q1))
+	ndCopyBufferCommandInfo policyGradient;
+	policyGradient.m_srcOffsetInByte = 0;
+	policyGradient.m_srcStrideInByte = ndInt32(criticInputSize * sizeof(ndReal));
+	policyGradient.m_dstOffsetInByte = 0;
+	policyGradient.m_dstStrideInByte = ndInt32(m_policyTrainer->GetBrain()->GetOutputSize() * sizeof(ndReal));
+	policyGradient.m_bytesToCopy = ndInt32(m_policyTrainer->GetBrain()->GetOutputSize() * sizeof(ndReal));
+	policyMinibatchOutputGradientBuffer->CopyBuffer(policyGradient, m_parameters.m_miniBatchSize, *criticMinibatchInputGradientBuffer);
 
-	ndBrainFloatBuffer* const policyMinibatchOutputGradientBuffer = m_policyTrainer->GetOuputGradientBuffer();
-	policyMinibatchOutputGradientBuffer->CalculateEntropyRegularizationGradient(**m_minibatchGaussianDistribution, **m_minibatchSigma, m_parameters.m_entropyTemperature, ndInt32(meanOutputSizeInBytes / sizeof(ndReal)));
-
-	// subtract the qValue gradient from the entropy gradient.
-	// The subtraction in reverse order, to get the gradient ascend.
+	// calculate and substract regularized entropy gradient 
+	policyMinibatchOutputBuffer->CalculateEntropyRegularizationGradient(**m_minibatchGaussianDistribution, **m_minibatchSigma, m_parameters.m_entropyTemperature, ndInt32(meanOutputSizeInBytes / sizeof(ndReal)));
 	policyMinibatchOutputGradientBuffer->Sub(*policyMinibatchOutputBuffer);
+
+	// negate gradinet to make it a gradient ascend
+	policyMinibatchOutputGradientBuffer->Scale(ndBrainFloat(-1.0f));
 
 	m_policyTrainer->BackPropagate();
 	m_policyTrainer->ApplyLearnRate(ND_POLICY_LEARN_SCALE * m_learnRate);
