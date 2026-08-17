@@ -1233,8 +1233,8 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 			advantageReadWriteInfo.m_srcOffsetInByte += minibatchStrideInBytes;
 		}
 
-		// average all the mini batches, 
-		// also and negate the gradient for gradinet ascend
+		// update the gradient of all minibaches.
+		// also and negate the average for gradient ascend learning rate.
 		m_policyGradientAccumulator->Scale(ndBrainFloat(-1.0f) / ndBrainFloat(numberOfIterations));
 		weightAndBiasGradientBuffer->Set(**m_policyGradientAccumulator);
 	
