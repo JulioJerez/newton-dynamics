@@ -67,14 +67,11 @@ class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 		ndBrainFloat GetExpectedReward(ndInt32 entry) const;
 		void SetExpectedReward(ndInt32 entry, ndBrainFloat expectedReward);
 
-		bool GetTerminalState(ndInt32 entry) const;
-		void SetTerminalState(ndInt32 entry, bool isTermimal);
+		bool GetAliveState(ndInt32 entry) const;
+		void SetAliveState(ndInt32 entry, bool alive);
 
 		ndBrainFloat GetReward(ndInt32 entry) const;
 		void SetReward(ndInt32 entry, ndBrainFloat reward);
-
-		//ndBrainFloat GetMonteCarlosReward(ndInt32 entry) const;
-		//void SetMonteCarlosReward(ndInt32 entry, ndBrainFloat reward);
 
 		ndBrainFloat* GetActions(ndInt32 entry);
 		const ndBrainFloat* GetActions(ndInt32 entry) const;
@@ -87,17 +84,17 @@ class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 
 		// for GPU 
 		ndInt32 GetStride() const;
+		ndInt32 GetAliveOffset() const;
 		ndInt32 GetRewardOffset() const;
 		ndInt32 GetActionOffset() const;
-		ndInt32 GetTerminalOffset() const;
 		ndInt32 GetObsevationOffset() const;
 		ndInt32 GetExpectedRewardOffset() const;
 		ndInt32 GetNextObsevationOffset() const;
 		void GetFlatArray(ndInt32 index, ndBrainVector& output) const;
 
+		ndBrainVector m_alive;
 		ndBrainVector m_reward;
 		ndBrainVector m_expectedReward;
-		ndBrainVector m_terminal;
 		ndBrainVector m_actions;
 		ndBrainVector m_observations;
 		ndBrainVector m_nextObservations;
@@ -163,12 +160,14 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	private:
 	void Optimize();
 	void UpdateScore();
-	void OptimizeCritic();
+	void OptimizeValue();
 	void OptimizePolicy();
 	void BuildPolicyClass();
 	void BuildCriticClass();
 	void CalculateAdvantage();
 	void TrajectoryToGpuBuffers();
+
+	void DebugValue();
 
 	ndBrainFloat CalculateKLdivergence();
 	void SaveTrajectory(ndBrainAgentOnPolicyGradient_Agent* const agent);
