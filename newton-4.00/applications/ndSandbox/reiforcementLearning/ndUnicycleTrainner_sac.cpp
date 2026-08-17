@@ -105,7 +105,7 @@ namespace ndUnicycleTrainer_sac
 			,m_discountRewardFactor(0.99f)
 			,m_horizon(ndFloat32(1.0f) / (ndFloat32(1.0f) - m_discountRewardFactor))
 			,m_lastEpisode(0xfffffff)
-			,m_stopTraining(500000)
+			,m_stopTraining(1000000)
 			,m_modelIsTrained(false)
 		{
 			char name[256];
@@ -116,12 +116,13 @@ namespace ndUnicycleTrainer_sac
 			// set random see for replication
 			ndSetRandSeed(47);
 
-			// create a proximal policy training agent
+			// create a soft actor critic training agent
 			ndBrainAgentOffPolicyGradient_Trainer::HyperParameters hyperParameters;
 			
 			hyperParameters.m_useGpuBackend = false;
-			//hyperParameters.m_numberOfHiddenLayers = 2;
-			hyperParameters.m_hiddenLayersNumberOfNeurons = 64;
+			hyperParameters.m_numberOfUpdates = 4;
+			hyperParameters.m_numberOfHiddenLayers = 2;
+			hyperParameters.m_hiddenLayersNumberOfNeurons = 128;
 			hyperParameters.m_numberOfActions = m_actionsSize;
 			hyperParameters.m_numberOfObservations = m_observationsSize;
 			hyperParameters.m_maxNumberOfTrainingSteps = m_stopTraining;
@@ -146,7 +147,6 @@ namespace ndUnicycleTrainer_sac
 			//add a control for the reward function
 			ndController* const controller = (ndController*)(*model->GetNotifyCallback());
 			controller->m_isTrainning = true;
-			controller->m_solver = ndSharedPtr<ndIkSolver>(new ndIkSolver);
 			
 			// add model a visual mesh to the scene and world
 			world->AddModel(model);

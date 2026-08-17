@@ -18,6 +18,7 @@
 #include "ndDemoCameraNodeFollow.h"
 #include "ndHeightFieldPrimitive.h"
 
+#if 0
 #define ND_EXCAVATOR_ENGINE_OMEGA		ndFloat32 (100.0f)
 #define ND_EXCAVATOR_CAMERA_DISTANCE	ndFloat32 (-15.0f)
 
@@ -551,48 +552,59 @@ using namespace ndExcavator;
 
 void ndComplexModel(ndDemoEntityManager* const scene)
 {
-	//ndSharedPtr<ndBody> mapBody(BuildPlayground(scene));
-	ndSharedPtr<ndBody> mapBody(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
-	//ndSharedPtr<ndBody> mapBody(BuildHeightFieldTerrain(scene, "grass.png", ndGetIdentityMatrix()));
-
-	// add a help menu
-	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend());
-	scene->SetDemoHelp(demoHelper);
-
-	ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
-
-	// set defualt matrial frition to maximum
-	ndMaterial* const defaulMaterial = callback->GetMaterial(ndDemoContactCallback::m_default, ndDemoContactCallback::m_default);
-	defaulMaterial->m_staticFriction0 = ndFloat32 (1.0f);
-	defaulMaterial->m_staticFriction1 = ndFloat32(1.0f);
-	defaulMaterial->m_dynamicFriction0 = ndFloat32(1.0f);
-	defaulMaterial->m_dynamicFriction1 = ndFloat32(1.0f);
-
-	// this material prune extra contact from the thread links and ground 
-	ExcavatorThreadFloorMaterial material0;
-	callback->RegisterMaterial(material0, m_thread, ndDemoContactCallback::m_default);
-
-	// another material to remove the friction from the thread and roller contacts
-	ExcavatorThreadRollerMaterial material1;
-	callback->RegisterMaterial(material1, m_thread, m_roller);
-
-	ndMatrix matrix(ndGetIdentityMatrix());
-	ndSharedPtr<ndModelNotify> controller(CreateExcavator(scene, matrix));
-
-	const ndInt32 stacks = 1;
-	//const ndInt32 stacks = 3; //need multi threaded for this
-	ndMatrix matrix1(ndGetIdentityMatrix());
-	for (ndInt32 i = 0; i < stacks; ++i)
-	{
-		for (ndInt32 j = 0; j < stacks; ++j)
-		{
-			matrix1.m_posit.m_x = 25.0f + ndFloat32(i - stacks / 2) * 12.0f;
-			matrix1.m_posit.m_z = ndFloat32(j - stacks / 2) * 12.0f;
-			AddLumberYard(scene, matrix1, 4.0f, 10);
-		}
-	}
-
-	ExcavatorController* const playerController = (ExcavatorController*)*controller;
-	ndRender* const renderer = *scene->GetRenderer();
-	renderer->SetCamera(playerController->GetCamera());
+	////ndSharedPtr<ndBody> mapBody(BuildPlayground(scene));
+	//ndSharedPtr<ndBody> mapBody(BuildFloorBox(scene, ndGetIdentityMatrix(), "marbleCheckBoard.png", 0.1f, true));
+	////ndSharedPtr<ndBody> mapBody(BuildHeightFieldTerrain(scene, "grass.png", ndGetIdentityMatrix()));
+	//
+	//// add a help menu
+	//ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndHelpLegend());
+	//scene->SetDemoHelp(demoHelper);
+	//
+	//ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
+	//
+	//// set defualt matrial frition to maximum
+	//ndMaterial* const defaulMaterial = callback->GetMaterial(ndDemoContactCallback::m_default, ndDemoContactCallback::m_default);
+	//defaulMaterial->m_staticFriction0 = ndFloat32 (1.0f);
+	//defaulMaterial->m_staticFriction1 = ndFloat32(1.0f);
+	//defaulMaterial->m_dynamicFriction0 = ndFloat32(1.0f);
+	//defaulMaterial->m_dynamicFriction1 = ndFloat32(1.0f);
+	//
+	//// this material prune extra contact from the thread links and ground 
+	//ExcavatorThreadFloorMaterial material0;
+	//callback->RegisterMaterial(material0, m_thread, ndDemoContactCallback::m_default);
+	//
+	//// another material to remove the friction from the thread and roller contacts
+	//ExcavatorThreadRollerMaterial material1;
+	//callback->RegisterMaterial(material1, m_thread, m_roller);
+	//
+	//ndMatrix matrix(ndGetIdentityMatrix());
+	//ndSharedPtr<ndModelNotify> controller(CreateExcavator(scene, matrix));
+	//
+	//const ndInt32 stacks = 1;
+	////const ndInt32 stacks = 3; //need multi threaded for this
+	//ndMatrix matrix1(ndGetIdentityMatrix());
+	//for (ndInt32 i = 0; i < stacks; ++i)
+	//{
+	//	for (ndInt32 j = 0; j < stacks; ++j)
+	//	{
+	//		matrix1.m_posit.m_x = 25.0f + ndFloat32(i - stacks / 2) * 12.0f;
+	//		matrix1.m_posit.m_z = ndFloat32(j - stacks / 2) * 12.0f;
+	//		AddLumberYard(scene, matrix1, 4.0f, 10);
+	//	}
+	//}
+	//
+	//ExcavatorController* const playerController = (ExcavatorController*)*controller;
+	//ndRender* const renderer = *scene->GetRenderer();
+	//renderer->SetCamera(playerController->GetCamera());
 }
+
+#else
+
+void ndComplexModel(ndDemoEntityManager* const)
+{
+	// TO DO: the excavator mesh is too old and the emsh 
+	// has too many artifacts, it is posponed until 
+	// I get a more moderl mesh model.
+}
+
+#endif

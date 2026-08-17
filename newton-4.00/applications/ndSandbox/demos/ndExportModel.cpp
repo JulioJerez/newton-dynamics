@@ -909,6 +909,7 @@ namespace ndBasicRagdoll
     }
 };
 
+#if 0
 namespace ndExcavator
 {
     #define ND_EXCAVATOR_GEAR_GAIN			ndFloat32 (5.0f)
@@ -1355,6 +1356,8 @@ namespace ndExcavator
         world->AddModel(testModel);
     }
 };
+
+#endif
 
 void ndExportModel(ndDemoEntityManager* const scene)
 {

@@ -42,10 +42,6 @@
 
 #define ND_ON_POLICY_MOVING_AVERAGE_SCORE	8
 
-#define ND_ON_POLICY_MONTE_CARLOS_STEPS		1
-//#define ND_ON_POLICY_MONTE_CARLOS_STEPS		5
-//#define ND_ON_POLICY_MONTE_CARLOS_STEPS		8
-
 class ndBrainFloatBuffer;
 class ndBrainIntegerBuffer;
 class ndBrainUniformBuffer;
@@ -71,14 +67,11 @@ class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 		ndBrainFloat GetExpectedReward(ndInt32 entry) const;
 		void SetExpectedReward(ndInt32 entry, ndBrainFloat expectedReward);
 
-		bool GetTerminalState(ndInt32 entry) const;
-		void SetTerminalState(ndInt32 entry, bool isTermimal);
+		bool GetAliveState(ndInt32 entry) const;
+		void SetAliveState(ndInt32 entry, bool alive);
 
 		ndBrainFloat GetReward(ndInt32 entry) const;
 		void SetReward(ndInt32 entry, ndBrainFloat reward);
-
-		ndBrainFloat GetMonteCarlosReward(ndInt32 entry) const;
-		void SetMonteCarlosReward(ndInt32 entry, ndBrainFloat reward);
 
 		ndBrainFloat* GetActions(ndInt32 entry);
 		const ndBrainFloat* GetActions(ndInt32 entry) const;
@@ -91,20 +84,17 @@ class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 
 		// for GPU 
 		ndInt32 GetStride() const;
+		ndInt32 GetAliveOffset() const;
 		ndInt32 GetRewardOffset() const;
 		ndInt32 GetActionOffset() const;
-		ndInt32 GetTerminalOffset() const;
 		ndInt32 GetObsevationOffset() const;
 		ndInt32 GetExpectedRewardOffset() const;
 		ndInt32 GetNextObsevationOffset() const;
-		ndInt32 GetTerminalRewardOffset() const;
-		ndInt32 GetMonteCarlosRewardOffset() const;
 		void GetFlatArray(ndInt32 index, ndBrainVector& output) const;
 
+		ndBrainVector m_alive;
 		ndBrainVector m_reward;
-		ndBrainVector m_monteCarlosReward;
 		ndBrainVector m_expectedReward;
-		ndBrainVector m_terminal;
 		ndBrainVector m_actions;
 		ndBrainVector m_observations;
 		ndBrainVector m_nextObservations;
@@ -170,12 +160,14 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	private:
 	void Optimize();
 	void UpdateScore();
-	void OptimizeCritic();
+	void OptimizeValue();
 	void OptimizePolicy();
 	void BuildPolicyClass();
 	void BuildCriticClass();
 	void CalculateAdvantage();
 	void TrajectoryToGpuBuffers();
+
+	void DebugValue();
 
 	ndBrainFloat CalculateKLdivergence();
 	void SaveTrajectory(ndBrainAgentOnPolicyGradient_Agent* const agent);
@@ -190,8 +182,8 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndString m_name;
 	HyperParameters m_parameters;
 	ndSharedPtr<ndBrainContext> m_context;
+	ndSharedPtr<ndBrainTrainer> m_valueTrainer;
 	ndSharedPtr<ndBrainTrainer> m_policyTrainer;
-	ndSharedPtr<ndBrainTrainer> m_criticTrainer;
 
 	ndUniformDistribution m_uniformDistribution;
 	ndList<ndSharedPtr<ndBrainAgentOnPolicyGradient_Agent>> m_agents;
@@ -220,14 +212,13 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndSharedPtr<ndBrainFloatBuffer> m_minibatchBrocastAdvantageBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_minibatchClippedLikelihoodRatioBuffer;
 
-	ndSharedPtr<ndBrainIntegerBuffer> m_randomShuffleBuffer;
-	ndSharedPtr<ndBrainIntegerBuffer> m_minibatchRandomShuffleBuffer;
+	ndSharedPtr<ndBrainIntegerBuffer> m_valueShuffleBuffer;
+	ndSharedPtr<ndBrainIntegerBuffer> m_minibatchValueShuffleBuffer;
 
 	ndBrainVector m_lastPolicy;
 	ndBrainVector m_scratchBuffer;
 	ndArray<ndInt32> m_shuffleBuffer;
 	ndArray<ndInt32> m_criticShuffleBuffer;
-	ndArray<ndInt32> m_shuffleBufferBuilder;
 	ndBrainAgentOnPolicyGradient_Agent::ndTrajectory m_trajectoryAccumulator;
 	ndMovingAverage<ND_ON_POLICY_MOVING_AVERAGE_SCORE> m_averageExpectedRewards;
 	ndMovingAverage<ND_ON_POLICY_MOVING_AVERAGE_SCORE> m_averageFramesPerEpisodes;
@@ -237,8 +228,6 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndUnsigned32 m_horizonSteps;
 	ndUnsigned32 m_eposideCount;
 	ndUnsigned32 m_trajectiesCount;
-	ndUnsigned32 m_numberOfIterations;
-
 	friend class ndBrainAgentOnPolicyGradient_Agent;
 };
 

@@ -73,8 +73,8 @@ namespace ndCarpolePlayer
 
 		ndController();
 
-		void Update(ndFloat32 timestep);
-		void PostUpdate(ndFloat32 timestep);
+		void Update(ndFloat32 timestep, ndInt32 threadIndex) override;
+		void PostUpdate(ndFloat32 timestep, ndInt32 threadIndex) override;
 
 		void ResetModel();
 		bool IsTerminal() const;

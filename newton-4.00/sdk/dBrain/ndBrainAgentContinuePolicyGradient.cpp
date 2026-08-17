@@ -29,9 +29,8 @@
 // as a valid probability density value.
 // This guarantees that the maximum entropy remains <= 0.
 #define ND_POLICY_MIN_SIGMA_SQUARE		ndBrainFloat(0.01f)
-//#define ND_POLICY_MAX_SIGMA_SQUARE		ndBrainFloat(1.0f)
 #define ND_POLICY_MAX_SIGMA_SQUARE		ndBrainFloat(4.0f)
-#define ND_POLICY_ENTROPY_TEMPERATURE	ndBrainFloat(0.05f)
+#define ND_POLICY_ENTROPY_TEMPERATURE	ndBrainFloat(0.2f)
 
 ndContinuePolicyGradientHyperParameters::ndContinuePolicyGradientHyperParameters()
 {

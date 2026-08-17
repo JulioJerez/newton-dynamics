@@ -483,18 +483,24 @@ ndBrainFloat ndBrainVector::CalculatePartialKlDivergence(const ndBrainVector& ga
 	return ndBrainFloat(ndFloat32 (0.5f) * divergence);
 }
 
-ndBrainFloat ndBrainVector::CalculateEntropyRegularization(const ndBrainVector& varianceBuffer, ndBrainFloat regularization) const
+// On input: 
+// the vector contains the means of a diagonal multivaried Gaussian.
+// multivariedGaussian contains the standard deviation of a diagonal multivaried Gaussian.
+// On output the return entropu = alpha * Log (multivariedGaussianLikelihood)
+// is a scalar that represents the entropy ragularization value 
+ndBrainFloat ndBrainVector::CalculateEntropyRegularization(const ndBrainVector& gaussianSigma, ndBrainFloat regularization) const
 {
-	ndAssert(GetCount() == varianceBuffer.GetCount());
+	ndAssert(GetCount() == gaussianSigma.GetCount());
 	ndBrainFloat entropy = ndBrainFloat(0.5f) * ndBrainFloat (GetCount()) * ndBrainFloat(ndLog(ndBrainFloat(2.0f) * ndPi));
 	for (ndInt32 i = 0; i < GetCount(); ++i)
 	{
 		ndBrainFloat sample = (*this)[i];
-		ndBrainFloat sigma = varianceBuffer[i];
+		ndBrainFloat sigma = gaussianSigma[i];
 		ndBrainFloat z = sample / sigma;
 		entropy += (ndBrainFloat(0.5f) * z * z + ndBrainFloat(ndLog(sigma)));
 	}
-	return -entropy * regularization;
+	//return -entropy * regularization;
+	return entropy * regularization;
 }
 
 void ndBrainVector::CalculateEntropyRegularizationGradient(const ndBrainVector& meanSampleBuffer, const ndBrainVector& varianceBuffer, ndBrainFloat regularization)

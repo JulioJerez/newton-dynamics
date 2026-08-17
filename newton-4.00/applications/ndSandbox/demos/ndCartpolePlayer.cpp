@@ -65,18 +65,18 @@ namespace ndCarpolePlayer
 		:ndModelNotify()
 		,m_agent(nullptr)
 		,m_timestep(0.0f)
-		,m_randomImpulseCounter(ndInt32(1 + (ndRandInt() & 200)))
+		,m_randomImpulseCounter(ndInt32(1 + (ndRandInt() % 200)))
 		,m_isTrainning(false)
 	{
 	}
 
-	void ndController::Update(ndFloat32 timestep)
+	void ndController::Update(ndFloat32 timestep, ndInt32)
 	{
 		m_timestep = timestep;
 		m_agent->Step();
 	}
 
-	void ndController::PostUpdate(ndFloat32)
+	void ndController::PostUpdate(ndFloat32, ndInt32)
 	{
 		m_randomImpulseCounter = (m_randomImpulseCounter + 1) % ND_RANDOM_IMPULSE_MOD;
 	}
@@ -123,8 +123,8 @@ namespace ndCarpolePlayer
 		ndFloat32 angle = hinge->GetAngle() / REWARD_MIN_ANGLE;
 		ndFloat32 speed = slider->GetSpeed() / REWARD_MAX_SPEED;
 
-		ndFloat32 invSigma2 = ndFloat32(20.0f);
-		ndFloat32 speedReward = ndExp(-100.0f * speed * speed);
+		ndFloat32 invSigma2 = ndFloat32(100.0f);
+		ndFloat32 speedReward = ndExp(-400.0f * speed * speed);
 		ndFloat32 omegaReward = ndExp(-invSigma2 * omega * omega);
 		ndFloat32 angleReward = ndExp(-invSigma2 * angle * angle);
 

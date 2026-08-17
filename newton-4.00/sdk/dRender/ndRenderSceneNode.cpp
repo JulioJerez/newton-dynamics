@@ -74,7 +74,7 @@ ndRenderSceneNode::ndRenderSceneNode(const ndRenderSceneNode& src)
 	,m_children()
 	,m_sceneHandle(nullptr)
 	,m_selfChildNode(nullptr)
-	,m_isVisible(true)
+	,m_isVisible(src.m_isVisible)
 {
 	for (ndList<ndSharedPtr<ndRenderSceneNode>>::ndNode* node = src.m_children.GetFirst(); node; node = node->GetNext())
 	{
@@ -377,10 +377,10 @@ void ndRenderSceneNode::Render(const ndRender* const owner, const ndMatrix& mode
 		const ndRenderPrimitive* const mesh = *m_primitive;
 		const ndMatrix modelMatrix(m_primitiveMatrix * m_globalMatrix * modelViewMatrix);
 
-		// TO DO: try some camera frunto coolling here.
-		// for small scenes rendring every thing is fine
-		// but to a typical with mane nodes, rending many 
-		// porimitive does have to notiziable cost.
+		// TO DO: try some camera frustum coolling here.
+		// for small scenes rendering every thing is fine
+		// but to a typical with many nodes, rendering many 
+		// primitives does have to notizable cost.
 		// for now, just continue rendering everything.
 
 		mesh->Render(owner, modelMatrix, renderMode);
