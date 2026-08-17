@@ -21,7 +21,8 @@ namespace ndUnicyclePlayer
 	#define CONTROLLER_NAME_SAC			"unicycleSac"
 	#define CONTROLLER_NAME_PPO			"unicyclePpo"
 
-	#define ND_MAX_WHEEL_ALPHA			(ndFloat32 (50.0f))
+	//#define ND_MAX_WHEEL_ALPHA		(ndFloat32 (50.0f))
+	#define ND_MAX_WHEEL_ALPHA			(ndFloat32 (25.0f))
 	#define ND_TERMINATION_ANGLE		(ndFloat32 (30.0f) * ndDegreeToRad)
 	#define ND_TRAJECTORY_STEPS			(1024 * 4)
 
