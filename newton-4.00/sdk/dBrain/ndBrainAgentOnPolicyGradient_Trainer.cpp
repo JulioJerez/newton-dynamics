@@ -526,14 +526,18 @@ void ndBrainAgentOnPolicyGradient_Trainer::SaveTrajectory(ndBrainAgentOnPolicyGr
 	if (agent->m_trajectoryIndex < agent->m_maxTrajectores)
 	{
 		ndBrainAgentOnPolicyGradient_Agent::ndTrajectory& trajectory = agent->m_trajectory;
+
 		// if the agent is dead, then remove all transitions past the last dead step.
 		if (agent->m_isDead)
 		{
+			// it is posible to be more than one deat state, 
+			// since the enveroiment takes more than one substep per update
 			ndInt32 start = ndMax(0, ndInt32(trajectory.GetCount() - 64));
 			for (ndInt32 i = start; i < trajectory.GetCount(); ++i)
 			{
 				if (!trajectory.GetAliveState(i))
 				{
+					// clip that trajectory at the first dead state
 					trajectory.SetCount(i + 1);
 					break;
 				}
@@ -557,6 +561,8 @@ void ndBrainAgentOnPolicyGradient_Trainer::SaveTrajectory(ndBrainAgentOnPolicyGr
 		{
 			ndMemCpy(trajectory.GetNextObservations(i), trajectory.GetObservations(i + 1), m_parameters.m_numberOfObservations);
 		}
+
+		// clip trajetory to that max horizon
 		trajectory.SetCount(ndMin (trajectory.GetCount(), m_parameters.m_maxTrajectorySteps));
 
 		// append the transitions to the end of the data buffer
@@ -1170,7 +1176,7 @@ ndBrainFloat ndBrainAgentOnPolicyGradient_Trainer::CalculateKLdivergence()
 	return sumDivergence / den;
 }
 
-#pragma optimize( "", off )
+//#pragma optimize( "", off )
 void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 {
 	ndCopyBufferCommandInfo actionInfo;
