@@ -67,6 +67,7 @@ class ndBrainVector: public ndArray<ndBrainFloat>
 	void Blend(const ndBrainVector& blend, ndBrainFloat a, ndBrainFloat b);
 	void MulAdd(const ndBrainVector& a, const ndBrainVector& b);
 	void MulSub(const ndBrainVector& a, const ndBrainVector& b);
+	bool SanityCheck(ndBrainFloat bound = ndBrainFloat(100.0f)) const;
 
 	void Sqrt();
 	void InvSqrt();
