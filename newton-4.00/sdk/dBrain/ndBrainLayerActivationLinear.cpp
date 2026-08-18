@@ -130,6 +130,7 @@ void ndBrainLayerActivationLinear::MakePrediction(const ndBrainVector& input, nd
 	output.Set(input);
 	output.Mul(m_slopes);
 	output.Add(m_biases);
+	ndAssert(output.SanityCheck());
 }
 
 void ndBrainLayerActivationLinear::InputDerivative(const ndBrainVector&, const ndBrainVector&, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const
@@ -139,6 +140,7 @@ void ndBrainLayerActivationLinear::InputDerivative(const ndBrainVector&, const n
 
 	inputDerivative.Set(m_slopes);
 	inputDerivative.Mul(outputDerivative);
+	ndAssert(inputDerivative.SanityCheck());
 }
 
 bool ndBrainLayerActivationLinear::HasGpuSupport() const
@@ -167,6 +169,7 @@ void ndBrainLayerActivationLinear::FeedForward(const ndBrainLayerFeedForwardCpuC
 	output.Set(input);
 	output.Mul(m_slopes);
 	output.Add(m_biases);
+	ndAssert(output.SanityCheck());
 }
 
 void ndBrainLayerActivationLinear::BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const
@@ -192,6 +195,7 @@ void ndBrainLayerActivationLinear::BackPropagate(const ndBrainLayerBackPropagate
 
 	inputDerivative.Set(m_slopes);
 	inputDerivative.Mul(outputDerivative);
+	ndAssert (inputDerivative.SanityCheck());
 }
 
 ndCommandArray ndBrainLayerActivationLinear::CreateFeedForwardBufferCommand(
