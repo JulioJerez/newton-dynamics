@@ -140,46 +140,53 @@ void ndBrainLayerActivationSigmoid::FeedForward(const ndBrainLayerFeedForwardCpu
 
 void ndBrainLayerActivationSigmoid::BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const
 {
-	ndAssert(0);
-	//const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
-	//const ndCommandSharedInfo& info = desc.m_info;
-	//ndBrainTrainer* const trainer = (ndBrainTrainer*)desc.m_owner;
-	//
-	//const ndBrainFloat* const inputOutputBuffer = (ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr();
-	//const ndBrainFloat* const inputOutputGradientsBuffer = (ndBrainFloat*)trainer->GetHiddenLayerGradientBuffer()->GetCpuPtr();
-	//
-	//ndInt32 inputSize = info.m_inputSize;
-	//ndInt32 inputOutputSize = info.m_inputOutputSize;
-	//ndInt32 inputOutputStartOffset = info.m_inputOutputStartOffset;
-	//
-	//ndInt64 srcBase = miniBatchIndex * ndInt64(inputOutputSize) + inputOutputStartOffset;
-	//ndInt64 dstBase = srcBase + trainer->RoundOffOffset(inputSize);
-	//ndAssert(srcBase >= 0);
-	//ndAssert(dstBase >= 0);
-	//ndAssert(inputSize == info.m_outputSize);
-	//
-	//const ndBrainMemVector input(&inputOutputBuffer[srcBase], inputSize);
-	//const ndBrainMemVector outputDerivative(&inputOutputGradientsBuffer[dstBase], inputSize);
-	//ndBrainMemVector inputDerivative(&inputOutputGradientsBuffer[srcBase], inputSize);
-	//
-	//const ndBrainFloat8 one(1.0f);
-	//const ndBrainFloat8 zero(0.0f);
-	//ndBrainFloat* const dst = &inputDerivative[0];
-	//const ndBrainFloat* const src = &input[0];
-	//const ndInt32 roundCount = ndInt32(input.GetCount()) & -8;
-	//for (ndInt32 i = 0; i < roundCount; i += 8)
-	//{
-	//	const ndBrainFloat8 x(&src[i]);
-	//	const ndBrainFloat8 test(x >= zero);
-	//	const ndBrainFloat8 value(test & one);
-	//	value.Store(&dst[i]);
-	//}
-	//for (ndInt32 i = ndInt32(input.GetCount() - 1); i >= roundCount; --i)
-	//{
-	//	inputDerivative[i] = (input[i] >= ndBrainFloat(0.0f)) ? ndBrainFloat(1.0f) : ndBrainFloat(0.0f);
-	//}
-	//inputDerivative.Mul(outputDerivative);
-	//ndAssert(inputDerivative.SanityCheck());
+	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
+	const ndCommandSharedInfo& info = desc.m_info;
+	ndBrainTrainer* const trainer = (ndBrainTrainer*)desc.m_owner;
+	
+	const ndBrainFloat* const inputOutputBuffer = (ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr();
+	const ndBrainFloat* const inputOutputGradientsBuffer = (ndBrainFloat*)trainer->GetHiddenLayerGradientBuffer()->GetCpuPtr();
+	
+	ndInt32 inputSize = info.m_inputSize;
+	ndInt32 inputOutputSize = info.m_inputOutputSize;
+	ndInt32 inputOutputStartOffset = info.m_inputOutputStartOffset;
+	
+	ndInt64 srcBase = miniBatchIndex * ndInt64(inputOutputSize) + inputOutputStartOffset;
+	ndInt64 dstBase = srcBase + trainer->RoundOffOffset(inputSize);
+	ndAssert(srcBase >= 0);
+	ndAssert(dstBase >= 0);
+	ndAssert(inputSize == info.m_outputSize);
+	
+	const ndBrainMemVector input(&inputOutputBuffer[srcBase], inputSize);
+	const ndBrainMemVector output(&inputOutputBuffer[dstBase], inputSize);
+	const ndBrainMemVector outputDerivative(&inputOutputGradientsBuffer[dstBase], inputSize);
+	ndBrainMemVector inputDerivative(&inputOutputGradientsBuffer[srcBase], inputSize);
+	
+	const ndBrainFloat8 one(1.0f);
+	ndBrainFloat* const dst = &inputDerivative[0];
+	const ndInt32 roundCount = ndInt32(input.GetCount()) & -8;
+	for (ndInt32 i = 0; i < roundCount; i += 8)
+	{
+		//inputDerivative.Set(ndBrainFloat(1.0f));
+		//inputDerivative.Sub(output);
+		//inputDerivative.Mul(output);
+		//inputDerivative.Mul(outputDerivative);
+		//inputDerivative.FlushToZero();
+		const ndBrainFloat8& out = (ndBrainFloat8&)output[i];
+		const ndBrainFloat8& outGrad = (ndBrainFloat8&)outputDerivative[i];
+		const ndBrainFloat8 value(out * (one - out) * outGrad);
+		value.Store(&dst[i]);
+	}
+	for (ndInt32 i = ndInt32(input.GetCount() - 1); i >= roundCount; --i)
+	{
+		inputDerivative.Set(ndBrainFloat(1.0f));
+		inputDerivative.Sub(output);
+		inputDerivative.Mul(output);
+
+		inputDerivative.Mul(outputDerivative);
+		inputDerivative.FlushToZero();
+	}
+	ndAssert(inputDerivative.SanityCheck());
 }
 
 ndCommandArray ndBrainLayerActivationSigmoid::CreateFeedForwardBufferCommand(
