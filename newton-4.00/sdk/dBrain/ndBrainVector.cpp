@@ -122,6 +122,22 @@ void ndBrainVector::Clamp(ndBrainFloat min, ndBrainFloat max)
 	}
 }
 
+bool ndBrainVector::SanityCheck(ndBrainFloat bound) const
+{
+#ifdef _DEBUG
+	for (ndInt64 i = GetCount() - 1; i >= 0; --i)
+	{
+		ndBrainFloat val = ndAbs((*this)[i]);
+		if (val > bound)
+		{
+			return false;
+		}
+	}
+#endif
+
+	return true;
+}
+
 void ndBrainVector::FlushToZero()
 {
 	const ndBrainFloat8 max(ndBrainFloat(1.0e-16f));
