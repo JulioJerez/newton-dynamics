@@ -81,6 +81,7 @@ void ndBrainLayerActivationLeakyRelu::MakePrediction(const ndBrainVector& input,
 	{
 		output[i] = (input[i] >= 0) ? input[i] : ND_LEAKY_LRU_GRADIENT * input[i];
 	}
+	ndAssert(output.SanityCheck());
 }
 
 void ndBrainLayerActivationLeakyRelu::InputDerivative(const ndBrainVector& input, const ndBrainVector&, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const
@@ -107,8 +108,8 @@ void ndBrainLayerActivationLeakyRelu::InputDerivative(const ndBrainVector& input
 	}
 
 	inputDerivative.Mul(outputDerivative);
+	ndAssert(inputDerivative.SanityCheck());
 }
-
 
 bool ndBrainLayerActivationLeakyRelu::ndBrainLayerActivationLeakyRelu::HasGpuSupport() const
 {
@@ -147,6 +148,7 @@ void ndBrainLayerActivationLeakyRelu::FeedForward(const ndBrainLayerFeedForwardC
 	{
 		output[i] = (input[i] >= 0) ? input[i] : ND_LEAKY_LRU_GRADIENT * input[i];
 	}
+	ndAssert(output.SanityCheck());
 }
 
 void ndBrainLayerActivationLeakyRelu::BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const
@@ -189,6 +191,7 @@ void ndBrainLayerActivationLeakyRelu::BackPropagate(const ndBrainLayerBackPropag
 		inputDerivative[i] = (input[i] >= ndBrainFloat(0.0f)) ? ndBrainFloat(1.0f) : ND_LEAKY_LRU_GRADIENT;
 	}
 	inputDerivative.Mul(outputDerivative);
+	ndAssert(inputDerivative.SanityCheck());
 }
 
 ndCommandArray ndBrainLayerActivationLeakyRelu::CreateFeedForwardBufferCommand(

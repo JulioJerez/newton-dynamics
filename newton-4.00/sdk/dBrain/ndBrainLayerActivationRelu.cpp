@@ -79,6 +79,7 @@ void ndBrainLayerActivationRelu::MakePrediction(const ndBrainVector& input, ndBr
 		ndAssert(output[i] <= ndFloat32(1000.0f));
 		ndAssert(output[i] >= ndFloat32(-1000.0f));
 	}
+	ndAssert(output.SanityCheck());
 }
 
 void ndBrainLayerActivationRelu::InputDerivative(const ndBrainVector& input, const ndBrainVector&, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const
@@ -102,8 +103,8 @@ void ndBrainLayerActivationRelu::InputDerivative(const ndBrainVector& input, con
 	{
 		inputDerivative[i] = (input[i] >= ndBrainFloat(0.0f)) ? ndBrainFloat(1.0f) : ndBrainFloat(0.0f);
 	}
-
 	inputDerivative.Mul(outputDerivative);
+	ndAssert(inputDerivative.SanityCheck());
 }
 
 bool ndBrainLayerActivationRelu::HasGpuSupport() const
@@ -143,6 +144,7 @@ void ndBrainLayerActivationRelu::FeedForward(const ndBrainLayerFeedForwardCpuCom
 	{
 		output[i] = ndMax(input[i], ndBrainFloat(0.0f));
 	}
+	ndAssert(output.SanityCheck());
 }
 
 void ndBrainLayerActivationRelu::BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const
@@ -185,6 +187,7 @@ void ndBrainLayerActivationRelu::BackPropagate(const ndBrainLayerBackPropagateCp
 		inputDerivative[i] = (input[i] >= ndBrainFloat(0.0f)) ? ndBrainFloat(1.0f) : ndBrainFloat(0.0f);
 	}
 	inputDerivative.Mul(outputDerivative);
+	ndAssert(inputDerivative.SanityCheck());
 }
 
 ndCommandArray ndBrainLayerActivationRelu::CreateFeedForwardBufferCommand(

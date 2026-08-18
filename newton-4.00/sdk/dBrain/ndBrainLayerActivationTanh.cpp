@@ -79,10 +79,9 @@ void ndBrainLayerActivationTanh::MakePrediction(const ndBrainVector& input, ndBr
 	{
 		ndBrainFloat value = ndClamp(src[i], ndBrainFloat(-30.0f), ndBrainFloat(30.0f));
 		dst[i] = ndBrainFloat(ndTanh(value));
-		ndAssert(dst[i] <= ndFloat32(1000.0f));
-		ndAssert(dst[i] >= ndFloat32(-1000.0f));
 	}
 	output.FlushToZero();
+	ndAssert(output.SanityCheck());
 }
 
 void ndBrainLayerActivationTanh::InputDerivative(const ndBrainVector&, const ndBrainVector& output, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const
@@ -94,6 +93,7 @@ void ndBrainLayerActivationTanh::InputDerivative(const ndBrainVector&, const ndB
 	inputDerivative.MulSub(output, output);
 	inputDerivative.Mul(outputDerivative);
 	inputDerivative.FlushToZero();
+	ndAssert(inputDerivative.SanityCheck());
 }
 
 bool ndBrainLayerActivationTanh::HasGpuSupport() const
@@ -136,6 +136,7 @@ void ndBrainLayerActivationTanh::FeedForward(const ndBrainLayerFeedForwardCpuCom
 		dst[i] = ndBrainFloat(ndTanh(value));
 	}
 	output.FlushToZero();
+	ndAssert(output.SanityCheck());
 }
 
 void ndBrainLayerActivationTanh::BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const
@@ -165,6 +166,7 @@ void ndBrainLayerActivationTanh::BackPropagate(const ndBrainLayerBackPropagateCp
 	inputDerivative.MulSub(output, output);
 	inputDerivative.Mul(outputDerivative);
 	inputDerivative.FlushToZero();
+	ndAssert (inputDerivative.SanityCheck());
 }
 
 ndCommandArray ndBrainLayerActivationTanh::CreateFeedForwardBufferCommand(
