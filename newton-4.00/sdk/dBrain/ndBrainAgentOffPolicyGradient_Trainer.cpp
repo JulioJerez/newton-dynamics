@@ -53,8 +53,8 @@ ndBrainAgentOffPolicyGradient_Trainer::HyperParameters::HyperParameters()
 }
 
 ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::ndTrajectory()
-	:m_reward()
-	,m_terminal()
+	:m_alive()
+	,m_reward()
 	,m_actions()
 	,m_observations()
 	,m_nextObservations()
@@ -64,8 +64,8 @@ ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::ndTrajectory()
 }
 
 ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::ndTrajectory(ndInt32 actionsSize, ndInt32 obsevationsSize)
-	:m_reward()
-	,m_terminal()
+	:m_alive()
+	,m_reward()
 	,m_actions()
 	,m_observations()
 	,m_nextObservations()
@@ -83,8 +83,8 @@ void ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::Init(ndInt32 actionsSize
 
 void ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::Clear(ndInt32 entry)
 {
+	m_alive[entry] = ndBrainFloat(0.0f);
 	m_reward[entry] = ndBrainFloat(0.0f);
-	m_terminal[entry] = ndBrainFloat(0.0f);
 	ndMemSet(&m_actions[entry * m_actionsSize], ndBrainFloat(0.0f), m_actionsSize);
 	ndMemSet(&m_observations[entry * m_obsevationsSize], ndBrainFloat(0.0f), m_obsevationsSize);
 	ndMemSet(&m_nextObservations[entry * m_obsevationsSize], ndBrainFloat(0.0f), m_obsevationsSize);
@@ -92,8 +92,8 @@ void ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::Clear(ndInt32 entry)
 
 void ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::CopyFrom(ndInt32 entry, ndTrajectory& src, ndInt32 srcEntry)
 {
+	m_alive[entry] = src.m_alive[srcEntry];
 	m_reward[entry] = src.m_reward[srcEntry];
-	m_terminal[entry] = src.m_terminal[srcEntry];
 	ndMemCpy(&m_actions[entry * m_actionsSize], &src.m_actions[srcEntry * m_actionsSize], m_actionsSize);
 	ndMemCpy(&m_observations[entry * m_obsevationsSize], &src.m_observations[srcEntry * m_obsevationsSize], m_obsevationsSize);
 	ndMemCpy(&m_nextObservations[entry * m_obsevationsSize], &src.m_nextObservations[srcEntry * m_obsevationsSize], m_obsevationsSize);
@@ -106,8 +106,8 @@ ndInt32 ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::GetCount() const
 
 void ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::SetCount(ndInt32 count)
 {
+	m_alive.SetCount(count);
 	m_reward.SetCount(count);
-	m_terminal.SetCount(count);
 	m_actions.SetCount(count * m_actionsSize);
 	m_observations.SetCount(count * m_obsevationsSize);
 	m_nextObservations.SetCount(count * m_obsevationsSize);
@@ -123,14 +123,14 @@ void ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::SetReward(ndInt32 entry,
 	m_reward[entry] = reward;
 }
 
-bool ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::GetTerminalState(ndInt32 entry) const
+bool ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::GetAliveState(ndInt32 entry) const
 {
-	return (m_terminal[entry] == 0.0f) ? true : false;
+	return (m_alive[entry] == 1.0f) ? true : false;
 }
 
-void ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::SetTerminalState(ndInt32 entry, bool isTernimal)
+void ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::SetAliveState(ndInt32 entry, bool isAlive)
 {
-	m_terminal[entry] = isTernimal ? ndBrainFloat(0.0f) : ndBrainFloat(1.0f);
+	m_alive[entry] = isAlive ? ndBrainFloat(1.0f) : ndBrainFloat(0.0f);
 }
 
 ndBrainFloat* ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::GetActions(ndInt32 entry)
@@ -168,14 +168,14 @@ ndInt32 ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::GetRewardOffset() con
 	return 0;
 }
 
-ndInt32 ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::GetTerminalOffset() const
+ndInt32 ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::GetAliveOffset() const
 {
 	return GetRewardOffset() + 1;
 }
 
 ndInt32 ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::GetActionOffset() const
 {
-	return 1 + GetTerminalOffset();
+	return 1 + GetAliveOffset();
 }
 
 ndInt32 ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::GetObsevationOffset() const
@@ -202,8 +202,8 @@ ndInt32 ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::GetStride() const
 void ndBrainAgentOffPolicyGradient_Agent::ndTrajectory::GetFlatArray(ndInt32 index, ndBrainVector& output) const
 {
 	output.SetCount(GetStride());
-	output[0] = m_reward[index];
-	output[1] = m_terminal[index];
+	output[GetAliveOffset()] = m_alive[index];
+	output[GetRewardOffset()] = m_reward[index];
 	ndMemCpy(&output[GetActionOffset()], &m_actions[index * m_actionsSize], m_actionsSize);
 	ndMemCpy(&output[GetObsevationOffset()], &m_observations[index * m_obsevationsSize], m_obsevationsSize);
 	ndMemCpy(&output[GetNextObsevationOffset()], &m_nextObservations[index * m_obsevationsSize], m_obsevationsSize);
@@ -272,7 +272,7 @@ void ndBrainAgentOffPolicyGradient_Agent::Step()
 	bool isdead = IsTerminal();
 	ndBrainFloat reward = CalculateReward();
 	m_trajectory.SetReward(entryIndex, reward);
-	m_trajectory.SetTerminalState(entryIndex, isdead);
+	m_trajectory.SetAliveState(entryIndex, !isdead);
 }
 
 ndBrainAgentOffPolicyGradient_Trainer::ndBrainAgentOffPolicyGradient_Trainer(const HyperParameters& parameters)
@@ -524,7 +524,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::CalculateScore()
 		averageReward += stateReward;
 	}
 	ndInt32 numberOfSteps = trajectory.GetCount();
-	if (!trajectory.GetTerminalState(trajectory.GetCount() - 1))
+	if (trajectory.GetAliveState(trajectory.GetCount() - 1))
 	{
 		numberOfSteps -= m_horizonSteps;
 		if (numberOfSteps < 100)
@@ -567,10 +567,10 @@ void ndBrainAgentOffPolicyGradient_Trainer::SaveTrajectoryNoTerminal()
 		ndBrainMemVector entry(&m_scratchBuffer[i * stride], stride);
 		// this was a huge mistake. 
 		// it is the reward for been on that state.
-		// not the reaward for the action that leads to a next state
+		// not the reward for the action that leads to a next state
 		// entry[trajectory.GetRewardOffset()] = trajectory.GetReward(index + 1);
 		entry[trajectory.GetRewardOffset()] = trajectory.GetReward(index);
-		entry[trajectory.GetTerminalOffset()] = ndBrainFloat (1.0f) - trajectory.GetTerminalState(index);
+		entry[trajectory.GetAliveOffset()] = trajectory.GetAliveState(index);
 
 		ndBrainMemVector action(&entry[trajectory.GetActionOffset()], actionsSize);
 		const ndBrainMemVector srcAction(trajectory.GetActions(index), actionsSize);
@@ -602,7 +602,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::SaveTrajectoryTerminal()
 	ndInt32 index = ndInt32(m_agent->m_trajectoryBaseIndex);
 	ndBrainMemVector entry(&m_scratchBuffer[base * stride], stride);
 	entry[trajectory.GetRewardOffset()] = trajectory.GetReward(index);
-	entry[trajectory.GetTerminalOffset()] = ndBrainFloat(1.0f) - trajectory.GetTerminalState(index);
+	entry[trajectory.GetAliveOffset()] = trajectory.GetAliveState(index);
 
 	ndBrainMemVector action(&entry[trajectory.GetActionOffset()], actionsSize);
 	const ndBrainMemVector srcAction(trajectory.GetActions(index), actionsSize);
@@ -621,7 +621,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::CacheTrajectoryTransitions()
 	ndBrainAgentOffPolicyGradient_Agent::ndTrajectory& trajectory = m_agent->m_trajectory;
 	for (ndInt32 i = ndInt32(m_agent->m_trajectoryBaseIndex); i < trajectory.GetCount(); ++i)
 	{
-		if (trajectory.GetTerminalState(i))
+		if (!trajectory.GetAliveState(i))
 		{
 			trajectory.SetCount(i + 1);
 			CalculateScore();
@@ -767,7 +767,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::CalculateExpectedRewards()
 	}
 
 	ndCopyBufferCommandInfo criticOutputTerminal;
-	criticOutputTerminal.m_srcOffsetInByte = ndInt32(trajectory.GetTerminalOffset() * sizeof(ndReal));
+	criticOutputTerminal.m_srcOffsetInByte = ndInt32(trajectory.GetAliveOffset() * sizeof(ndReal));
 	criticOutputTerminal.m_srcStrideInByte = transitionStrideInBytes;
 	criticOutputTerminal.m_dstOffsetInByte = 0;
 	criticOutputTerminal.m_dstStrideInByte = ndInt32(sizeof(ndReal));

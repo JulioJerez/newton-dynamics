@@ -65,8 +65,8 @@ class ndBrainAgentOffPolicyGradient_Agent: public ndBrainAgent
 		ndBrainFloat GetReward(ndInt32 entry) const;
 		void SetReward(ndInt32 entry, ndBrainFloat reward);
 
-		bool GetTerminalState(ndInt32 entry) const;
-		void SetTerminalState(ndInt32 entry, bool isTermimal);
+		bool GetAliveState(ndInt32 entry) const;
+		void SetAliveState(ndInt32 entry, bool isTermimal);
 
 		ndBrainFloat* GetActions(ndInt32 entry);
 		const ndBrainFloat* GetActions(ndInt32 entry) const;
@@ -79,15 +79,15 @@ class ndBrainAgentOffPolicyGradient_Agent: public ndBrainAgent
 
 		// for GPU 
 		ndInt32 GetStride() const;
+		ndInt32 GetAliveOffset() const;
 		ndInt32 GetRewardOffset() const;
 		ndInt32 GetActionOffset() const;
-		ndInt32 GetTerminalOffset() const;
 		ndInt32 GetObsevationOffset() const;
 		ndInt32 GetNextObsevationOffset() const;
 		void GetFlatArray(ndInt32 index, ndBrainVector& output) const;
 
+		ndBrainVector m_alive;
 		ndBrainVector m_reward;
-		ndBrainVector m_terminal;
 		ndBrainVector m_actions;
 		ndBrainVector m_observations;
 		ndBrainVector m_nextObservations;
