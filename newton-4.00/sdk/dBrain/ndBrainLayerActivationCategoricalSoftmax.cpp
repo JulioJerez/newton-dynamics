@@ -92,7 +92,6 @@ void ndBrainLayerActivationCategoricalSoftmax::BackPropagate(const ndBrainLayerB
 	const ndBrainFloat* const inputOutputGradientsBuffer = (ndBrainFloat*)trainer->GetHiddenLayerGradientBuffer()->GetCpuPtr();
 	
 	ndInt32 inputSize = info.m_inputSize;
-	//ndInt32 outputSize = info.m_outputSize;
 	ndInt32 inputOutputSize = info.m_inputOutputSize;
 	ndInt32 inputOutputStartOffset = info.m_inputOutputStartOffset;
 

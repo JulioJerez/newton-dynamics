@@ -21,6 +21,12 @@
 
 #include "ndBrainStdafx.h"
 #include "ndBrain.h"
+#include "ndBrain.h"
+#include "ndBrainFloat8.h"
+#include "ndBrainTrainer.h"
+#include "ndBrainContext.h"
+#include "ndBrainSaveLoad.h"
+#include "ndBrainFloatBuffer.h"
 #include "ndBrainLayerActivationSigmoid.h"
 
 ndBrainLayerActivationSigmoid::ndBrainLayerActivationSigmoid(ndInt32 neurons)
@@ -64,13 +70,6 @@ void ndBrainLayerActivationSigmoid::MakePrediction(const ndBrainVector& input, n
 		output[i] = ndBrainFloat(ndExp(-value));
 		ndAssert(ndCheckFloat(output[i]));
 	}
-	
-	//for (ndInt32 i = ndInt32(input.GetCount() - 1); i >= 0; --i)
-	//{
-	//	output[i] = ndBrainFloat(1.0f) / (ndBrainFloat(1.0f) + output[i]);
-	//	ndAssert(output[i] <= ndBrainFloat(1.0f));
-	//	ndAssert(output[i] >= ndBrainFloat(0.0f));
-	//}
 
 	for (ndInt32 i = ndInt32(input.GetCount() - 1); i >= 0; --i)
 	{
@@ -81,7 +80,6 @@ void ndBrainLayerActivationSigmoid::MakePrediction(const ndBrainVector& input, n
 		ndAssert(output[i] <= ndBrainFloat(1.0f));
 		ndAssert(output[i] >= ndBrainFloat(0.0f));
 	}
-
 	output.FlushToZero();
 }
 
@@ -97,3 +95,149 @@ void ndBrainLayerActivationSigmoid::InputDerivative(const ndBrainVector&, const 
 	inputDerivative.Mul(outputDerivative);
 	inputDerivative.FlushToZero();
 }
+
+void ndBrainLayerActivationSigmoid::FeedForward(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const
+{
+	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
+	const ndCommandSharedInfo& info = desc.m_info;
+	ndBrainTrainerInference* const trainer = desc.m_owner;
+	const ndBrainFloat* const inputOutputBuffer = (ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr();
+	
+	ndInt32 inputSize = info.m_inputSize;
+	ndInt32 outputSize = info.m_outputSize;
+	ndInt32 inputOutputSize = info.m_inputOutputSize;
+	ndInt32 inputOutputStartOffset = info.m_inputOutputStartOffset;
+	
+	ndInt64 inputOffset = miniBatchIndex * ndInt64(inputOutputSize) + inputOutputStartOffset;
+	ndInt64 outputOffset = inputOffset + trainer->RoundOffOffset(inputSize);
+	
+	const ndBrainMemVector input(&inputOutputBuffer[inputOffset], inputSize);
+	ndBrainMemVector output(&inputOutputBuffer[outputOffset], outputSize);
+	
+	const ndBrainFloat8 one(ndBrainFloat(1.0f));
+	const ndBrainFloat8 negOne(ndBrainFloat (-1.0f));
+	const ndBrainFloat8 maxValue(ndBrainFloat(30.0f));
+	const ndBrainFloat8 minValue(ndBrainFloat(-30.0f));
+	ndBrainFloat* const dst = &output[0];
+	const ndBrainFloat* const src = &input[0];
+	const ndInt32 roundCount = ndInt32(input.GetCount()) & -8;
+	for (ndInt32 i = 0; i < roundCount; i += 8)
+	{
+		const ndBrainFloat8 in(&src[i]);
+		const ndBrainFloat8 value (in.Clamp(minValue, maxValue));
+		const ndBrainFloat8 x ((value * negOne).Exp());
+		const ndBrainFloat8 out((one + x).Inv());
+		out.Store(&dst[i]);
+	}
+	for (ndInt32 i = ndInt32(input.GetCount() - 1); i >= roundCount; --i)
+	{
+		ndBrainFloat value = ndClamp(input[i], ndBrainFloat(-30.0f), ndBrainFloat(30.0f));
+		ndBrainFloat x = ndBrainFloat(ndExp(-value));
+		output[i] = ndBrainFloat(1.0f) / (ndBrainFloat(1.0f) + x);
+	}
+	ndAssert(output.SanityCheck());
+}
+
+void ndBrainLayerActivationSigmoid::BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const
+{
+	ndAssert(0);
+	//const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
+	//const ndCommandSharedInfo& info = desc.m_info;
+	//ndBrainTrainer* const trainer = (ndBrainTrainer*)desc.m_owner;
+	//
+	//const ndBrainFloat* const inputOutputBuffer = (ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr();
+	//const ndBrainFloat* const inputOutputGradientsBuffer = (ndBrainFloat*)trainer->GetHiddenLayerGradientBuffer()->GetCpuPtr();
+	//
+	//ndInt32 inputSize = info.m_inputSize;
+	//ndInt32 inputOutputSize = info.m_inputOutputSize;
+	//ndInt32 inputOutputStartOffset = info.m_inputOutputStartOffset;
+	//
+	//ndInt64 srcBase = miniBatchIndex * ndInt64(inputOutputSize) + inputOutputStartOffset;
+	//ndInt64 dstBase = srcBase + trainer->RoundOffOffset(inputSize);
+	//ndAssert(srcBase >= 0);
+	//ndAssert(dstBase >= 0);
+	//ndAssert(inputSize == info.m_outputSize);
+	//
+	//const ndBrainMemVector input(&inputOutputBuffer[srcBase], inputSize);
+	//const ndBrainMemVector outputDerivative(&inputOutputGradientsBuffer[dstBase], inputSize);
+	//ndBrainMemVector inputDerivative(&inputOutputGradientsBuffer[srcBase], inputSize);
+	//
+	//const ndBrainFloat8 one(1.0f);
+	//const ndBrainFloat8 zero(0.0f);
+	//ndBrainFloat* const dst = &inputDerivative[0];
+	//const ndBrainFloat* const src = &input[0];
+	//const ndInt32 roundCount = ndInt32(input.GetCount()) & -8;
+	//for (ndInt32 i = 0; i < roundCount; i += 8)
+	//{
+	//	const ndBrainFloat8 x(&src[i]);
+	//	const ndBrainFloat8 test(x >= zero);
+	//	const ndBrainFloat8 value(test & one);
+	//	value.Store(&dst[i]);
+	//}
+	//for (ndInt32 i = ndInt32(input.GetCount() - 1); i >= roundCount; --i)
+	//{
+	//	inputDerivative[i] = (input[i] >= ndBrainFloat(0.0f)) ? ndBrainFloat(1.0f) : ndBrainFloat(0.0f);
+	//}
+	//inputDerivative.Mul(outputDerivative);
+	//ndAssert(inputDerivative.SanityCheck());
+}
+
+ndCommandArray ndBrainLayerActivationSigmoid::CreateFeedForwardBufferCommand(
+	ndBrainTrainerInference* const owner,
+	ndBrainContext* const context,
+	const ndCommandSharedInfo& info,
+	ndInt32 miniBatchSize,
+	ndBrainFloatBuffer* const inputOutputData,
+	ndBrainFloatBuffer* const weightsAndBias) const
+{
+	ndBrainBufferCommandDesc descriptor(MakeFeedForwardDesctriptor(
+		owner, context, info, miniBatchSize, 0,
+		inputOutputData, weightsAndBias));
+
+	ndBrainBufferCommand* command = nullptr;
+	if (context->GetAsCpuContext())
+	{
+		command = new ndBrainLayerFeedForwardCpuCommand(descriptor, (ndBrainLayer*)this);
+	}
+	else
+	{
+		descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerReluActivation;
+		command = new ndBrainGpuCommand(descriptor);
+	}
+
+	ndCommandArray commandArray(0);
+	commandArray.PushBack(command);
+	return commandArray;
+}
+
+ndCommandArray ndBrainLayerActivationSigmoid::CreateBackPropagateBufferCommand(
+	ndBrainTrainerInference* const owner,
+	ndBrainContext* const context,
+	const ndCommandSharedInfo& info,
+	ndInt32 miniBatchSize,
+	ndBrainFloatBuffer* const inputOutputData,
+	ndBrainFloatBuffer* const weightsAndBias,
+	ndBrainFloatBuffer* const inputOutputGradients,
+	ndBrainFloatBuffer* const weightsAndBiasGradients) const
+{
+	ndBrainBufferCommandDesc descriptor(MakeBackpropagateDesctriptor(
+		owner, context, info, miniBatchSize, 0,
+		inputOutputData, weightsAndBias,
+		inputOutputGradients, weightsAndBiasGradients));
+
+	ndCommandArray commands(0);
+
+	if (context->GetAsCpuContext())
+	{
+		ndBrainBufferCommand* const command = new ndBrainLayerBackPropagateCpuCommand(descriptor, (ndBrainLayer*)this);
+		commands.PushBack(command);
+	}
+	else
+	{
+		descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerReluBackPropagate;
+		ndBrainBufferCommand* const command = new ndBrainGpuCommand(descriptor);
+		commands.PushBack(command);
+	}
+	return commands;
+}
+
