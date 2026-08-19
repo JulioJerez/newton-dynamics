@@ -57,6 +57,7 @@ class ndBrainVector: public ndArray<ndBrainFloat>
 	void Clamp(ndBrainFloat min, ndBrainFloat max);
 	void InitGaussianWeights(ndBrainFloat variance);
 
+	void Add(ndBrainFloat b);
 	void Min(ndBrainFloat b);
 	void Max(ndBrainFloat b);
 	void Scale(ndBrainFloat b);

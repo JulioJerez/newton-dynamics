@@ -21,7 +21,6 @@
 
 #include "ndBrainStdafx.h"
 #include "ndBrain.h"
-#include "ndBrain.h"
 #include "ndBrainFloat8.h"
 #include "ndBrainTrainer.h"
 #include "ndBrainContext.h"
@@ -64,23 +63,22 @@ ndBrainLayer* ndBrainLayerActivationSigmoid::Load(const ndBrainLoad* const loadS
 void ndBrainLayerActivationSigmoid::MakePrediction(const ndBrainVector& input, ndBrainVector& output) const
 {
 	ndAssert(input.GetCount() == output.GetCount());
-	for (ndInt32 i = ndInt32(input.GetCount() - 1); i >= 0; --i)
-	{
-		ndBrainFloat value = ndClamp(input[i], ndBrainFloat(-30.0f), ndBrainFloat(30.0f));
-		output[i] = ndBrainFloat(ndExp(-value));
-		ndAssert(ndCheckFloat(output[i]));
-	}
-
-	for (ndInt32 i = ndInt32(input.GetCount() - 1); i >= 0; --i)
-	{
-		ndBrainFloat value = ndClamp(input[i], ndBrainFloat(-30.0f), ndBrainFloat(30.0f));
-		ndBrainFloat x = ndBrainFloat(ndExp(-value));
-		output[i] = ndBrainFloat(1.0f) / (ndBrainFloat(1.0f) + x);
-		ndAssert(ndCheckFloat(output[i]));
-		ndAssert(output[i] <= ndBrainFloat(1.0f));
-		ndAssert(output[i] >= ndBrainFloat(0.0f));
-	}
-	output.FlushToZero();
+	//for (ndInt32 i = ndInt32(input.GetCount() - 1); i >= 0; --i)
+	//{
+	//	ndBrainFloat value = ndClamp(input[i], ndBrainFloat(-30.0f), ndBrainFloat(30.0f));
+	//	ndBrainFloat x = ndBrainFloat(ndExp(-value));
+	//	output[i] = ndBrainFloat(1.0f) / (ndBrainFloat(1.0f) + x);
+	//	ndAssert(ndCheckFloat(output[i]));
+	//	ndAssert(output[i] <= ndBrainFloat(1.0f));
+	//	ndAssert(output[i] >= ndBrainFloat(0.0f));
+	//}
+	output.Set(input);
+	output.Clamp(ndBrainFloat(-30.0f), ndBrainFloat(30.0f));
+	output.Scale(ndBrainFloat(-1.0f));
+	output.Exp(output);
+	output.Add(ndBrainFloat(1.0f));
+	output.Reciprocal(output);
+	ndAssert(output.SanityCheck());
 }
 
 void ndBrainLayerActivationSigmoid::InputDerivative(const ndBrainVector&, const ndBrainVector& output, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const
@@ -113,28 +111,13 @@ void ndBrainLayerActivationSigmoid::FeedForward(const ndBrainLayerFeedForwardCpu
 	
 	const ndBrainMemVector input(&inputOutputBuffer[inputOffset], inputSize);
 	ndBrainMemVector output(&inputOutputBuffer[outputOffset], outputSize);
-	
-	const ndBrainFloat8 one(ndBrainFloat(1.0f));
-	const ndBrainFloat8 negOne(ndBrainFloat (-1.0f));
-	const ndBrainFloat8 maxValue(ndBrainFloat(30.0f));
-	const ndBrainFloat8 minValue(ndBrainFloat(-30.0f));
-	ndBrainFloat* const dst = &output[0];
-	const ndBrainFloat* const src = &input[0];
-	const ndInt32 roundCount = ndInt32(input.GetCount()) & -8;
-	for (ndInt32 i = 0; i < roundCount; i += 8)
-	{
-		const ndBrainFloat8 in(&src[i]);
-		const ndBrainFloat8 value (in.Clamp(minValue, maxValue));
-		const ndBrainFloat8 x ((value * negOne).Exp());
-		const ndBrainFloat8 out((one + x).Inv());
-		out.Store(&dst[i]);
-	}
-	for (ndInt32 i = ndInt32(input.GetCount() - 1); i >= roundCount; --i)
-	{
-		ndBrainFloat value = ndClamp(input[i], ndBrainFloat(-30.0f), ndBrainFloat(30.0f));
-		ndBrainFloat x = ndBrainFloat(ndExp(-value));
-		output[i] = ndBrainFloat(1.0f) / (ndBrainFloat(1.0f) + x);
-	}
+
+	output.Set(input);
+	output.Clamp(ndBrainFloat(-30.0f), ndBrainFloat(30.0f));
+	output.Scale(ndBrainFloat(-1.0f));
+	output.Exp(output);
+	output.Add(ndBrainFloat(1.0f));
+	output.Reciprocal(output);
 	ndAssert(output.SanityCheck());
 }
 
@@ -162,30 +145,10 @@ void ndBrainLayerActivationSigmoid::BackPropagate(const ndBrainLayerBackPropagat
 	const ndBrainMemVector outputDerivative(&inputOutputGradientsBuffer[dstBase], inputSize);
 	ndBrainMemVector inputDerivative(&inputOutputGradientsBuffer[srcBase], inputSize);
 	
-	const ndBrainFloat8 one(1.0f);
-	ndBrainFloat* const dst = &inputDerivative[0];
-	const ndInt32 roundCount = ndInt32(input.GetCount()) & -8;
-	for (ndInt32 i = 0; i < roundCount; i += 8)
-	{
-		//inputDerivative.Set(ndBrainFloat(1.0f));
-		//inputDerivative.Sub(output);
-		//inputDerivative.Mul(output);
-		//inputDerivative.Mul(outputDerivative);
-		//inputDerivative.FlushToZero();
-		const ndBrainFloat8& out = (ndBrainFloat8&)output[i];
-		const ndBrainFloat8& outGrad = (ndBrainFloat8&)outputDerivative[i];
-		const ndBrainFloat8 value(out * (one - out) * outGrad);
-		value.Store(&dst[i]);
-	}
-	for (ndInt32 i = ndInt32(input.GetCount() - 1); i >= roundCount; --i)
-	{
-		inputDerivative.Set(ndBrainFloat(1.0f));
-		inputDerivative.Sub(output);
-		inputDerivative.Mul(output);
-
-		inputDerivative.Mul(outputDerivative);
-		inputDerivative.FlushToZero();
-	}
+	inputDerivative.Set(ndBrainFloat(1.0f));
+	inputDerivative.Sub(output);
+	inputDerivative.Mul(output);
+	inputDerivative.Mul(outputDerivative);
 	ndAssert(inputDerivative.SanityCheck());
 }
 

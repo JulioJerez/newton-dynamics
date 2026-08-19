@@ -113,6 +113,14 @@ void ndBrainVector::Max(ndBrainFloat b)
 	ndMax(ndInt32(GetCount()), &(*this)[0], b);
 }
 
+void ndBrainVector::Add(ndBrainFloat b)
+{
+	for (ndInt64 i = GetCount() - 1; i >= 0; --i)
+	{
+		(*this)[i] += b;
+	}
+}
+
 void ndBrainVector::Clamp(ndBrainFloat min, ndBrainFloat max)
 {
 	for (ndInt64 i = GetCount() - 1; i >= 0; --i)
@@ -140,29 +148,25 @@ bool ndBrainVector::SanityCheck(ndBrainFloat bound) const
 
 void ndBrainVector::FlushToZero()
 {
-	const ndBrainFloat8 max(ndBrainFloat(1.0e-16f));
-	const ndBrainFloat8 min(ndBrainFloat(-1.0e-16f));
-	const ndInt32 roundCount = ndInt32(GetCount()) & -8;
-	ndBrainFloat* const data = &(*this)[0];
-	for (ndInt32 i = 0; i < roundCount; i += 8)
-	{
-		const ndBrainFloat8 x(&data[i]);
-		const ndBrainFloat8 mask((x < min) | (x > max));
-		(x & mask).Store(&data[i]);
-	}
-	for (ndInt32 i = ndInt32(GetCount() - 1); i >= roundCount; --i)
-	{
-		ndBrainFloat val = data[i];
-		data[i] = (val > max.m_f[0]) ? val : ((val < min.m_f[0]) ? val : ndBrainFloat(0.0f));
-	}
+	// it seems this one apply to older intel cpu
+	// for with denormal values degrade the alu performace
+	// I am commetic it out for now
 
-#ifdef _DEBUG
-	for (ndInt32 i = ndInt32(GetCount() - 1); i >= 0; --i)
-	{
-		ndBrainFloat val = (*this)[i];
-		ndAssert(ndAbs(val) < 1.0e4f);
-	}
-#endif
+	//const ndBrainFloat8 max(ndBrainFloat(1.0e-16f));
+	//const ndBrainFloat8 min(ndBrainFloat(-1.0e-16f));
+	//const ndInt32 roundCount = ndInt32(GetCount()) & -8;
+	//ndBrainFloat* const data = &(*this)[0];
+	//for (ndInt32 i = 0; i < roundCount; i += 8)
+	//{
+	//	const ndBrainFloat8 x(&data[i]);
+	//	const ndBrainFloat8 mask((x < min) | (x > max));
+	//	(x & mask).Store(&data[i]);
+	//}
+	//for (ndInt32 i = ndInt32(GetCount() - 1); i >= roundCount; --i)
+	//{
+	//	ndBrainFloat val = data[i];
+	//	data[i] = (val > max.m_f[0]) ? val : ((val < min.m_f[0]) ? val : ndBrainFloat(0.0f));
+	//}
 }
 
 void ndBrainVector::Min(const ndBrainVector& a)
