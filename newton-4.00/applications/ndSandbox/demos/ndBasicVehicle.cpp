@@ -186,7 +186,7 @@ namespace ndMotorVehicle
 		ndMultiBodyVehicle* const vehicle = vehicleModel->GetAsMultiBodyVehicle();
 		vehicle->Deserialize(*mesh);
 
-		// then, we convet the mode to a multibody vehicle.
+		// then, we convert the model to a multibody vehicle.
 		vehicle->ConvertToMotorVehicle();
 
 		//add the notification for binding to the application.
