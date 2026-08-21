@@ -18,19 +18,20 @@
 //#define MNIST_CONVOLUTIONAL_FEATURE_MAPS		32
 
 //#define MINIST_MINIBATCH_BUFFER_SIZE	32
-//#define MINIST_MINIBATCH_BUFFER_SIZE	256
-#define MINIST_MINIBATCH_BUFFER_SIZE	512
+#define MINIST_MINIBATCH_BUFFER_SIZE	256
+//#define MINIST_MINIBATCH_BUFFER_SIZE	512
 //#define MINIST_MINIBATCH_BUFFER_SIZE	1024
 
+#define MINIST_LINEAR_LAYERS_NEURONS	32
 //#define MINIST_LINEAR_LAYERS_NEURONS	64
 //#define MINIST_LINEAR_LAYERS_NEURONS	128
 //#define MINIST_LINEAR_LAYERS_NEURONS	256
-#define MINIST_LINEAR_LAYERS_NEURONS	512
+//#define MINIST_LINEAR_LAYERS_NEURONS	512
 //#define MINIST_LINEAR_LAYERS_NEURONS	1024
 
 
 //#define MINIST_NUMBER_OF_EPOCHS		70
-//#define MINIST_NUMBER_OF_EPOCHS			20
+//#define MINIST_NUMBER_OF_EPOCHS		20
 #define MINIST_NUMBER_OF_EPOCHS			1
 
 #ifdef MNIST_USE_MINIST_CONVOLUTIONAL_LAYERS
@@ -43,8 +44,10 @@
 
 #define MINIST_LINEAR_DROPOUT_RATE		ndFloat32 (0.05f)
 
-#define MINIST_ACTIVATION_TYPE ndBrainLayerActivationRelu
+
 //#define MINIST_ACTIVATION_TYPE ndBrainLayerActivationElu
+//#define MINIST_ACTIVATION_TYPE ndBrainLayerActivationRelu
+#define MINIST_ACTIVATION_TYPE ndBrainLayerActivationTanh
 //#define MINIST_ACTIVATION_TYPE ndBrainLayerActivationSigmoidLinear
 
 //#if 1
@@ -311,28 +314,16 @@ class mnistSupervisedTrainer
 				trainer->MakePrediction();
 
 				//calculate loss
-#if 0
-				minibatchOutpuBuffer->VectorFromDevice(miniBatchOutput);
-				for (ndInt32 i = 0; i < m_miniBatchSize; ++i)
-				{
-					ndUnsigned32 index = shuffleBuffer[batchStart + i];
-					ndBrainMemVector grad(&miniBatchOutputGradients[i * outputSize], outputSize);
-					const ndBrainMemVector output(&miniBatchOutput[i * outputSize], outputSize);
-					const ndBrainMemVector truth(&(*trainingLabels)[index][0], outputSize);
-					loss.SetTruth(truth);
-					loss.GetLoss(output, grad);
-				}
-				minibatchOutpuGradientBuffer->VectorToDevice(miniBatchOutputGradients);
-#else
-				//for non categorical soft max, calculate the least scuare error lost
-				//minibatchOutpuGradientBuffer->CopyBuffer(*minibatchOutpuBuffer);
-				//context->Sub(*minibatchOutpuGradientBuffer, **groundTruthMinibatch);
+				//for non categorical soft max, calculate the least square error lost
+				minibatchOutpuGradientBuffer->Set(*minibatchOutpuBuffer);
+				minibatchOutpuGradientBuffer->Sub(groundTruthMinibatch);
 
 				//for categorical soft max, just pass the categorical class as gradient loss
-				minibatchOutpuGradientBuffer->CopyBuffer(groundTruthMinibatch);
-#endif
+				//minibatchOutpuGradientBuffer->CopyBuffer(groundTruthMinibatch);
+
 				// back propagate loss.
 				trainer->BackPropagate();
+				trainer->AccumulateWeightAndBiasGradients();
 				trainer->ApplyLearnRate(m_learnRate);
 			}
 
@@ -455,20 +446,21 @@ static void MnistTrainingSet()
 
 		#else
 			layers.PushBack(new ndBrainLayerLinear(trainingDigits->GetColumns(), MINIST_LINEAR_LAYERS_NEURONS));
-			layers.PushBack(new ndBrainLayerLinearWithDropOut(layers[layers.GetCount() - 1]->GetOutputSize()));
+			//layers.PushBack(new ndBrainLayerLinearWithDropOut(layers[layers.GetCount() - 1]->GetOutputSize()));
 			layers.PushBack(new MINIST_ACTIVATION_TYPE(layers[layers.GetCount() - 1]->GetOutputSize()));
 			
 			layers.PushBack(new ndBrainLayerLinear(layers[layers.GetCount() - 1]->GetOutputSize(), MINIST_LINEAR_LAYERS_NEURONS));
-			layers.PushBack(new ndBrainLayerLinearWithDropOut(layers[layers.GetCount() - 1]->GetOutputSize()));
+			//layers.PushBack(new ndBrainLayerLinearWithDropOut(layers[layers.GetCount() - 1]->GetOutputSize()));
 			layers.PushBack(new MINIST_ACTIVATION_TYPE(layers[layers.GetCount() - 1]->GetOutputSize()));
 			 
-			layers.PushBack(new ndBrainLayerLinear(layers[layers.GetCount() - 1]->GetOutputSize(), MINIST_LINEAR_LAYERS_NEURONS));
-			layers.PushBack(new ndBrainLayerLinearWithDropOut(layers[layers.GetCount() - 1]->GetOutputSize()));
-			layers.PushBack(new MINIST_ACTIVATION_TYPE(layers[layers.GetCount() - 1]->GetOutputSize()));
+			//layers.PushBack(new ndBrainLayerLinear(layers[layers.GetCount() - 1]->GetOutputSize(), MINIST_LINEAR_LAYERS_NEURONS));
+			////layers.PushBack(new ndBrainLayerLinearWithDropOut(layers[layers.GetCount() - 1]->GetOutputSize()));
+			//layers.PushBack(new MINIST_ACTIVATION_TYPE(layers[layers.GetCount() - 1]->GetOutputSize()));
 
 			layers.PushBack(new ndBrainLayerLinear(layers[layers.GetCount() - 1]->GetOutputSize(), trainingLabels->GetColumns()));
-			layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
-			layers.PushBack(new ndBrainLayerActivationCategoricalSoftmax(layers[layers.GetCount() - 1]->GetOutputSize()));
+			//layers.PushBack(new ndBrainLayerActivationSoftmax(layers[layers.GetCount() - 1]->GetOutputSize()));
+			//layers.PushBack(new ndBrainLayerActivationCategoricalSoftmax(layers[layers.GetCount() - 1]->GetOutputSize()));
+			layers.PushBack(new ndBrainLayerActivationSigmoid(layers[layers.GetCount() - 1]->GetOutputSize()));
 		#endif
 
 		for (ndInt32 i = 0; i < layers.GetCount(); ++i)
@@ -624,6 +616,6 @@ static void MnistTestSet()
 void ndHandWrittenDigits()
 {
 	ndSetRandSeed(53);
-	//MnistTrainingSet();
+	MnistTrainingSet();
 	//MnistTestSet();
 }

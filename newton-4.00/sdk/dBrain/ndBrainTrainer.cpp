@@ -47,7 +47,6 @@ ndBrainTrainer::ndBrainTrainer(const ndTrainerDescriptor& descriptor, ndSharedPt
 
 ndBrainTrainer::ndBrainTrainer(const ndBrainTrainer& src)
 	:ndBrainTrainerInference(src)
-	//,m_optimizer(new **src.m_optimizer)
 	,m_inputOutputGradientsBuffer()
 	,m_weightAndBiasGradientsBuffer()
 {
@@ -68,11 +67,6 @@ ndBrainFloatBuffer* ndBrainTrainer::GetOuputGradientBuffer()
 	return *m_miniBatchOutputGradientBuffer;
 }
 
-ndBrainFloatBuffer* ndBrainTrainer::GetPartialSumBiasGradientBuffer()
-{
-	return *m_biasPartialSumGradientsCacheBuffer;
-}
-
 ndBrainFloatBuffer* ndBrainTrainer::GetHiddenLayerGradientBuffer()
 {
 	return *m_inputOutputGradientsBuffer;
@@ -86,28 +80,28 @@ ndBrainFloatBuffer* ndBrainTrainer::GetWeightAndBiasGradientBuffer()
 void ndBrainTrainer::Initialize()
 {
 	ndBrainVector buffer;
-	ndInt64 maxSize = ndInt64(ndMax(m_weightAndBiasBuffer->GetCount(), m_inputOutputBuffer->GetCount()));
+	ndInt64 maxSize = ndInt64(ndMax(m_descriptor.m_minibatchSize * m_weightAndBiasBuffer->GetCount(), m_inputOutputBuffer->GetCount()));
 	buffer.Resize(maxSize);
 	
 	buffer.SetCount(ndInt64(m_inputOutputBuffer->GetCount()));
 	buffer.Set(ndReal(0.0f));
 	m_inputOutputGradientsBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_descriptor.m_context, buffer));
 	
-	ndInt32 partialSum = 0;
-	for (ndInt32 i = 0; i < m_descriptor.m_brain->GetCount(); ++i)
-	{	
-		const ndBrainLayer* const layer = (**m_descriptor.m_brain)[0];
-		if (partialSum < (layer->GetOutputSize() + 1024))
-		{
-			ndInt32 outSize = layer->GetOutputSize();
-			partialSum = RoundOffOffset(outSize);
-		}
-	}
-	buffer.SetCount(ndInt64(m_descriptor.m_minibatchSize) * partialSum);
-	buffer.Set(ndReal(0.0f));
-	m_biasPartialSumGradientsCacheBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_descriptor.m_context, buffer));
+	//ndInt32 partialSum = 0;
+	//for (ndInt32 i = 0; i < m_descriptor.m_brain->GetCount(); ++i)
+	//{	
+	//	const ndBrainLayer* const layer = (**m_descriptor.m_brain)[0];
+	//	if (partialSum < (layer->GetOutputSize() + 1024))
+	//	{
+	//		ndInt32 outSize = layer->GetOutputSize();
+	//		partialSum = RoundOffOffset(outSize);
+	//	}
+	//}
+	//buffer.SetCount(ndInt64(m_descriptor.m_minibatchSize) * partialSum);
+	//buffer.Set(ndReal(0.0f));
+	//m_biasPartialSumGradientsCacheBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_descriptor.m_context, buffer));
 	
-	buffer.SetCount(ndInt64(m_weightAndBiasBuffer->GetCount()));
+	buffer.SetCount(ndInt64(m_descriptor.m_minibatchSize * m_weightAndBiasBuffer->GetCount()));
 	buffer.Set(ndReal(0.0f));
 	m_weightAndBiasGradientsBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_descriptor.m_context, buffer));
 	
@@ -289,12 +283,19 @@ void ndBrainTrainer::ApplyLearnRate(ndBrainFloat learnRate)
 	m_optimizer->ApplyLearnRate(learnRate);
 }
 
+void ndBrainTrainer::AccumulateWeightAndBiasGradients()
+{
+	m_descriptor.m_context->AccumulateWeightsAndBiasBuffer(m_descriptor.m_minibatchSize, ndInt32 (m_weightAndBiasBuffer->GetCount()), **m_weightAndBiasGradientsBuffer);
+}
+
 void ndBrainTrainer::BackPropagate()
 {
+int xxxx = 0;
 	ndBrainContext* const context = *m_descriptor.m_context;
 	for (ndList<ndSharedPtr<ndBrainBufferCommand>>::ndNode* node = m_backPropagateCommands.GetFirst(); node; node = node->GetNext())
 	{
 		ndSharedPtr<ndBrainBufferCommand>& command = node->GetInfo();
 		context->SubmitBufferCommand(*command);
+xxxx++;
 	}
 }

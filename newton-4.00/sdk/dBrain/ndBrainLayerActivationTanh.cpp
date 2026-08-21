@@ -165,7 +165,7 @@ void ndBrainLayerActivationTanh::BackPropagate(const ndBrainLayerBackPropagateCp
 	inputDerivative.Set(ndBrainFloat(1.0f));
 	inputDerivative.MulSub(output, output);
 	inputDerivative.Mul(outputDerivative);
-	inputDerivative.FlushToZero();
+
 	ndAssert (inputDerivative.SanityCheck());
 }
 

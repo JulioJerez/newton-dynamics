@@ -292,6 +292,7 @@ ndBrainAgentOffPolicyGradient_Trainer::ndBrainAgentOffPolicyGradient_Trainer(con
 	,m_minibatchExpectedRewards(nullptr)
 	,m_minibatchCriticInputTest(nullptr)
 	,m_minibatchGaussianDistribution(nullptr)
+	,m_minibatchPolicyEntropyGradient(nullptr)
 	,m_randomShuffleBuffer(nullptr)
 	,m_minibatchIndexBuffer(nullptr)
 	,m_lastPolicy()
@@ -355,6 +356,7 @@ ndBrainAgentOffPolicyGradient_Trainer::ndBrainAgentOffPolicyGradient_Trainer(con
 	m_minibatchEntropy = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, m_parameters.m_miniBatchSize));
 	m_minibatchMean = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, actionsSize * m_parameters.m_miniBatchSize));
 	m_minibatchSigma = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, actionsSize * m_parameters.m_miniBatchSize));
+	m_minibatchPolicyEntropyGradient = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, 2 * actionsSize * m_parameters.m_miniBatchSize));
 	m_minibatchGaussianDistribution = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, actionsSize * m_parameters.m_miniBatchSize));
 	m_uniformRandom = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, 2 * actionsSize * m_parameters.m_numberOfUpdates * m_parameters.m_miniBatchSize));
 }
@@ -826,6 +828,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainCritics(ndInt32 criticIndex)
 	critic.BackPropagate();
 
 	// update parameters
+	critic.AccumulateWeightAndBiasGradients();
 	critic.ApplyLearnRate(m_learnRate);
 }
 
@@ -940,13 +943,14 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 	policyMinibatchOutputGradientBuffer->CopyBuffer(policyGradient, m_parameters.m_miniBatchSize, *criticMinibatchInputGradientBuffer);
 
 	// calculate and subtract regularized entropy gradient 
-	policyMinibatchOutputBuffer->CalculateEntropyRegularizationGradient(**m_minibatchGaussianDistribution, **m_minibatchSigma, m_parameters.m_entropyTemperature, ndInt32(meanOutputSizeInBytes / sizeof(ndReal)));
-	policyMinibatchOutputGradientBuffer->Sub(*policyMinibatchOutputBuffer);
+	m_minibatchPolicyEntropyGradient->CalculateEntropyRegularizationGradient(**m_minibatchGaussianDistribution, **m_minibatchSigma, m_parameters.m_entropyTemperature, ndInt32(meanOutputSizeInBytes / sizeof(ndReal)));
+	policyMinibatchOutputGradientBuffer->Sub(**m_minibatchPolicyEntropyGradient);
 
 	// negate gradient to make it a gradient ascend
 	policyMinibatchOutputGradientBuffer->Scale(ndBrainFloat(-1.0f));
 
 	m_policyTrainer->BackPropagate();
+	critic.AccumulateWeightAndBiasGradients();
 	m_policyTrainer->ApplyLearnRate(ND_POLICY_LEARN_SCALE * m_learnRate);
 }
 

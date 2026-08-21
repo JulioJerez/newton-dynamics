@@ -35,7 +35,6 @@ class ndBrainContext : public ndClassAlloc
 	{
 		m_inputId = 7,
 		m_outpuId,
-		//m_adamOptimizerSum,
 		m_adamOptimizerUpdate,
 		m_adamOptimizerBiasCorrection,
 	};
@@ -111,6 +110,7 @@ class ndBrainContext : public ndClassAlloc
 	// learnRate commands
 	virtual void ApplyLeanRateCommands(ndBrainBufferCommand*, ndBrainFloat) = 0;
 	virtual void SetLearnRateCommandBuffers(ndBrainOptimizerAdam&, ndInt32, ndBrainFloatBuffer&, ndBrainFloatBuffer&) = 0;
+	virtual void AccumulateWeightsAndBiasBuffer(ndInt32 numberOfBuffers, ndInt32 bufferSizeInFloats, ndBrainFloatBuffer& weightsAndBiasGradientBuffer) = 0;
 };
 
 #endif
