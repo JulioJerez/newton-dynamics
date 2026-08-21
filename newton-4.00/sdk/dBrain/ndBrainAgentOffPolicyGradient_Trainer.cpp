@@ -358,7 +358,7 @@ ndBrainAgentOffPolicyGradient_Trainer::ndBrainAgentOffPolicyGradient_Trainer(con
 	m_minibatchSigma = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, actionsSize * m_parameters.m_miniBatchSize));
 	m_minibatchPolicyEntropyGradient = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, 2 * actionsSize * m_parameters.m_miniBatchSize));
 	m_minibatchGaussianDistribution = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, actionsSize * m_parameters.m_miniBatchSize));
-	m_uniformRandom = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, 2 * actionsSize * m_parameters.m_numberOfUpdates * m_parameters.m_miniBatchSize));
+	m_uniformRandom = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, actionsSize * m_parameters.m_numberOfUpdates * m_parameters.m_miniBatchSize));
 }
 
 void ndBrainAgentOffPolicyGradient_Trainer::AddAgent(ndSharedPtr<ndBrainAgentOffPolicyGradient_Agent>& agent)
@@ -721,13 +721,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::CalculateExpectedRewards()
 	minibatchSigma.m_bytesToCopy = policyActionSize * ndInt32(sizeof(ndReal));
 	m_minibatchSigma->CopyBuffer(minibatchSigma, m_parameters.m_miniBatchSize, *policyMinibatchOutputBuffer);
 
-	// draw a sample action from the normal distribution and clip again the bounds
-	m_minibatchGaussianDistribution->StandardNormalDistribution();
-	m_minibatchGaussianDistribution->Mul(**m_minibatchSigma);
-	m_minibatchMean->Add(**m_minibatchGaussianDistribution);
-	m_minibatchMean->Min(ndBrainFloat(1.0f));
-	m_minibatchMean->Max(ndBrainFloat(-1.0f));
-
 	const ndInt32 criticInputSize = policy->GetBrain()->GetInputSize() + policy->GetBrain()->GetOutputSize();
 	for (ndInt32 i = 0; i < ndInt32(sizeof(m_criticTrainer) / sizeof(m_criticTrainer[0])); ++i)
 	{
@@ -777,7 +770,10 @@ void ndBrainAgentOffPolicyGradient_Trainer::CalculateExpectedRewards()
 	m_minibatchNoTerminal->CopyBuffer(criticOutputTerminal, m_parameters.m_miniBatchSize, **m_minibatchOfTransitions);
 
 	// calculate and add entropy regularization to the q value
-	m_minibatchEntropy->CalculateEntropyRegularization(**m_minibatchGaussianDistribution, **m_minibatchSigma, m_parameters.m_entropyTemperature);
+	// get the entropy of next next obsevation, 
+	// set z = sampledAction(t+1) - mean(t+1) = 0;
+	m_minibatchMean->Set(ndBrainFloat(0.0f));
+	m_minibatchEntropy->CalculateEntropyRegularization(**m_minibatchMean, **m_minibatchSigma, m_parameters.m_entropyTemperature);
 	qValue.Sub(**m_minibatchEntropy);
 	qValue.Mul(**m_minibatchNoTerminal);
 	qValue.Scale(m_parameters.m_discountRewardFactor);
@@ -815,7 +811,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainCritics(ndInt32 criticIndex)
 	criticInputObservation.m_dstStrideInByte = ndInt32(criticInputSize * sizeof(ndReal));
 	criticInputObservation.m_bytesToCopy = ndInt32(m_policyTrainer->GetBrain()->GetInputSize() * sizeof(ndReal));
 	criticMinibatchInputBuffer->CopyBuffer(criticInputObservation, m_parameters.m_miniBatchSize, **m_minibatchOfTransitions);
-	
 	critic.MakePrediction();
 	
 	// calculate loss
@@ -975,7 +970,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::Optimize()
 		for (ndInt32 j = m_parameters.m_numberOfUpdates * m_parameters.m_miniBatchSize - 1; j >= 0; --j)
 		{
 			m_scratchBuffer.PushBack(ndBrainFloat(m_uniformDistribution()));
-			m_scratchBuffer.PushBack(ndBrainFloat(m_uniformDistribution()));
 		}
 	}
 	m_uniformRandom->VectorToDevice(m_scratchBuffer);
@@ -983,20 +977,9 @@ void ndBrainAgentOffPolicyGradient_Trainer::Optimize()
 	const ndBrainAgentOffPolicyGradient_Agent::ndTrajectory& trajectory = m_agent->m_trajectory;
 	const ndInt32 transitionSizeInBytes = ndInt32(trajectory.GetStride() * sizeof(ndInt32));
 	const ndInt32 copyIndicesStrideInBytes = ndInt32(m_parameters.m_miniBatchSize * sizeof(ndInt32));
-	const ndInt32 bashSizeInByte = ndInt32 (sizeof(ndFloat32) * m_parameters.m_numberOfActions * m_parameters.m_numberOfUpdates * m_parameters.m_miniBatchSize);
 
 	for (ndInt32 i = 0; i < m_parameters.m_numberOfUpdates; ++i)
 	{
-		// get a mini batch of uniform distributed random number form 0.0 to 1.0
-		ndCopyBufferCommandInfo minibatchReparametization;
-		ndInt32 strideSizeInBytes = ndInt32(sizeof(ndInt32)) * m_parameters.m_numberOfActions * m_parameters.m_miniBatchSize;
-		minibatchReparametization.m_dstOffsetInByte = 0;
-		minibatchReparametization.m_dstStrideInByte = strideSizeInBytes;
-		minibatchReparametization.m_srcOffsetInByte = i * strideSizeInBytes;
-		minibatchReparametization.m_srcStrideInByte = strideSizeInBytes;
-		minibatchReparametization.m_bytesToCopy = strideSizeInBytes;
-		m_minibatchGaussianDistribution->CopyBuffer(minibatchReparametization, 1, **m_uniformRandom);
-
 		// sample a random mini batch of shuffled transitions indices
 		ndCopyBufferCommandInfo copyIndicesInfo;
 		copyIndicesInfo.m_dstOffsetInByte = 0;
@@ -1015,7 +998,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::Optimize()
 		minibatchOfTransitions.m_bytesToCopy = transitionSizeInBytes;
 		m_minibatchOfTransitions->CopyBufferIndirect(minibatchOfTransitions, **m_minibatchIndexBuffer, **m_replayBufferFlat);
 
-		// calculate expected rewards for thsi mini batch
+		// calculate expected rewards for this mini batch
 		CalculateExpectedRewards();
 
 		for (ndInt32 j = 0; j < ndInt32(sizeof(m_referenceCriticTrainer) / sizeof(m_referenceCriticTrainer[0])); ++j)
@@ -1023,9 +1006,15 @@ void ndBrainAgentOffPolicyGradient_Trainer::Optimize()
 			TrainCritics(j);
 		}
 
-		// load the same uniform random array
-		// actually, a complete set of random numbers for re-samplig
-		minibatchReparametization.m_srcOffsetInByte += bashSizeInByte;
+		// load the a uniform minibatch random array
+		// get a mini batch of uniform distributed random number form 0.0 to 1.0
+		ndCopyBufferCommandInfo minibatchReparametization;
+		ndInt32 strideSizeInBytes = ndInt32(sizeof(ndInt32)) * m_parameters.m_numberOfActions * m_parameters.m_miniBatchSize;
+		minibatchReparametization.m_dstOffsetInByte = 0;
+		minibatchReparametization.m_dstStrideInByte = strideSizeInBytes;
+		minibatchReparametization.m_srcOffsetInByte = i * strideSizeInBytes;
+		minibatchReparametization.m_srcStrideInByte = strideSizeInBytes;
+		minibatchReparametization.m_bytesToCopy = strideSizeInBytes;
 		m_minibatchGaussianDistribution->CopyBuffer(minibatchReparametization, 1, **m_uniformRandom);
 
 		TrainPolicy();
