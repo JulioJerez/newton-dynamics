@@ -940,8 +940,8 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 
 	// calculate and subtract regularized entropy gradient 
 	// set z = sampledAction(t) - mean(t) = 0;
-	m_minibatchGaussianDistribution->Set(ndBrainFloat(0.0f));
-	m_minibatchPolicyEntropyGradient->CalculateEntropyRegularizationGradient(**m_minibatchMean, **m_minibatchSigma, m_parameters.m_entropyTemperature, ndInt32(meanOutputSizeInBytes / sizeof(ndReal)));
+	//m_minibatchGaussianDistribution->Set(ndBrainFloat(0.0f));
+	m_minibatchPolicyEntropyGradient->CalculateEntropyRegularizationGradient(**m_minibatchGaussianDistribution, **m_minibatchSigma, m_parameters.m_entropyTemperature, ndInt32(meanOutputSizeInBytes / sizeof(ndReal)));
 	policyMinibatchOutputGradientBuffer->Sub(**m_minibatchPolicyEntropyGradient);
 
 	// negate gradient to make it a gradient ascend
