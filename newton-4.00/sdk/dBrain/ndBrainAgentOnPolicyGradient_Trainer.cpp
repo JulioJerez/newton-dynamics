@@ -324,7 +324,6 @@ ndBrainAgentOnPolicyGradient_Trainer::ndBrainAgentOnPolicyGradient_Trainer(const
 	,m_horizonSteps(0)
 	,m_eposideCount(0)
 	,m_trajectiesCount(0)
-	//,m_numberOfIterations(0)
 {
 	ndAssert(m_parameters.m_numberOfActions);
 	ndAssert(m_parameters.m_numberOfObservations);
@@ -762,7 +761,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeValue()
 	//rewardBufferInfo.m_dstStrideInByte = ndInt32(sizeof(ndBrainFloat));
 	//rewardBufferInfo.m_bytesToCopy = ndInt32(sizeof(ndBrainFloat));
 
-	const ndInt32 numberOfIterations = ndInt32(m_trajectoryAccumulator.GetCount() / (m_parameters.m_miniBatchSize));
+	const ndInt32 numberOfIterations = ndMin (ndInt32(m_trajectoryAccumulator.GetCount() / m_parameters.m_miniBatchSize), 1024 * 4);
 	ndAssert(numberOfIterations >= 1);
 
 	ndBrainFloatBuffer* const inputBuffer = m_valueTrainer->GetInputBuffer();
@@ -789,21 +788,13 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeValue()
 
 		grad->Scale(-1.0f);
 
-		//// Get State reward and terminal state
-		//alive->CopyBufferIndirect(isAliveBufferInfo, **m_minibatchValueShuffleBuffer, **m_trainingBuffer);
-		//reward->CopyBufferIndirect(rewardBufferInfo, **m_minibatchValueShuffleBuffer, **m_trainingBuffer);
-
-		// calculate loss 
-		// note: rewar == outputGradientBuffer
-		//loss = isAlive * grad + (1.0 - isAlive) * reward(t);
-		//outputGradientBuffer->Blend(**grad, **alive);
-
 		// maybe apply a Huber loss here
 		outputGradientBuffer->Min(huberSlope);
 		outputGradientBuffer->Max(-huberSlope);
 		
 		// back propagate the critic loss
 		m_valueTrainer->BackPropagate();
+		m_valueTrainer->AccumulateWeightAndBiasGradients();
 		m_valueTrainer->ApplyLearnRate(m_learnRate);
 	}
 }
@@ -1344,6 +1335,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 		weightAndBiasGradientBuffer->Set(**m_policyGradientAccumulator);
 	
 		// update network weight and bias.
+		m_policyTrainer->AccumulateWeightAndBiasGradients();
 		m_policyTrainer->ApplyLearnRate(m_learnRate * ND_POLICY_DOWN_SAMPLE_LEARN_RATE);
 	
 		// calculate the KL divergence
