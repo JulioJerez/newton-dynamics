@@ -310,6 +310,8 @@ ndBrainAgentOnPolicyGradient_Trainer::ndBrainAgentOnPolicyGradient_Trainer(const
 	,m_minibatchLikelihoodRatioBuffer(nullptr)
 	,m_minibatchCriticStateValueBuffer(nullptr)
 	,m_minibatchBrocastAdvantageBuffer(nullptr)
+	,m_minibatchClippedMinimunZeroGradient(nullptr)
+	,m_minibatchClippedMaximumZeroGradient(nullptr)
 	,m_minibatchClippedLikelihoodRatioBuffer(nullptr)
 	,m_valueShuffleBuffer(nullptr)
 	,m_minibatchValueShuffleBuffer(nullptr)
@@ -366,6 +368,8 @@ ndBrainAgentOnPolicyGradient_Trainer::ndBrainAgentOnPolicyGradient_Trainer(const
 	m_minibatchInvLikelihoodBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, m_parameters.m_miniBatchSize));
 	m_minibatchLikelihoodRatioBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, m_parameters.m_miniBatchSize));
 	m_minibatchValueShuffleBuffer = ndSharedPtr<ndBrainIntegerBuffer>(new ndBrainIntegerBuffer(*m_context, m_parameters.m_miniBatchSize));
+	m_minibatchClippedMinimunZeroGradient = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, m_parameters.m_miniBatchSize));
+	m_minibatchClippedMaximumZeroGradient = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, m_parameters.m_miniBatchSize));
 	m_minibatchClippedLikelihoodRatioBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, m_parameters.m_miniBatchSize));
 
 	m_meanBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_context, m_parameters.m_miniBatchSize * m_parameters.m_numberOfActions));
@@ -1036,7 +1040,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeCritic()
 // For a terminal state, the future-state value must be excluded:
 // loss = r(i) + (gamma * stateValue(i + 1) - stateValue(i)) * terminal;
 // it si the worse performe I have,
-// I am only keeping for reference 
+// I am only keeping it for reference 
 void ndBrainAgentOnPolicyGradient_Trainer::OptimizeValue()
 {
 	ndCopyBufferCommandInfo shuffleBufferInfo;
@@ -1289,14 +1293,19 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 			m_minibatchLikelihoodRatioBuffer->CalculateLikelihood(**m_zMeanBuffer, **m_sigmaBuffer);
 			m_minibatchInvLikelihoodBuffer->CopyBuffer(advantageReadWriteInfo, m_parameters.m_miniBatchSize, **m_invLikelihoodBuffer);
 			m_minibatchLikelihoodRatioBuffer->Mul(**m_minibatchInvLikelihoodBuffer);
-			
 			m_minibatchClippedLikelihoodRatioBuffer->Set(**m_minibatchLikelihoodRatioBuffer);
+			m_minibatchClippedMinimunZeroGradient->Set(**m_minibatchClippedLikelihoodRatioBuffer);
+			m_minibatchClippedMaximumZeroGradient->Set(**m_minibatchClippedLikelihoodRatioBuffer);
+			m_minibatchClippedMaximumZeroGradient->LessEqual(ndBrainFloat(1.0f) + ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON);
+			m_minibatchClippedMinimunZeroGradient->GreaterEqual(ndBrainFloat(1.0f) - ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON);
 			m_minibatchClippedLikelihoodRatioBuffer->Min(ndBrainFloat(1.0f) + ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON);
 			m_minibatchClippedLikelihoodRatioBuffer->Max(ndBrainFloat(1.0f) - ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON);
 
 			m_minibatchLikelihoodRatioBuffer->Mul(**m_minibatchAdvantageBuffer);
 			m_minibatchAdvantageBuffer->Mul(**m_minibatchClippedLikelihoodRatioBuffer);
 			m_minibatchAdvantageBuffer->Min(**m_minibatchLikelihoodRatioBuffer);
+			m_minibatchAdvantageBuffer->Mul(**m_minibatchClippedMaximumZeroGradient);
+			m_minibatchAdvantageBuffer->Mul(**m_minibatchClippedMinimunZeroGradient);
 
 			// calculate gradient
 			outputGradientBuffer->CalculateEntropyRegularizationGradient(**m_zMeanBuffer, **m_sigmaBuffer, ndBrainFloat(-1.0f), m_parameters.m_numberOfActions);
@@ -1340,8 +1349,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 	
 		// calculate the KL divergence
 		// this will make the agin a vanilla policy gradient
-		divergence = 1000.0f;
-		//divergence = CalculateKLdivergence();
+		divergence = CalculateKLdivergence();
 	}
 	if (passes > 1)
 	{
@@ -1391,54 +1399,6 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeStep()
 	}
 }
 
-void ndBrainAgentOnPolicyGradient_Trainer::DebugValue()
-{
-	ndCopyBufferCommandInfo shuffleBufferInfo;
-	shuffleBufferInfo.m_srcOffsetInByte = 0;
-	shuffleBufferInfo.m_srcStrideInByte = ndInt32(m_parameters.m_miniBatchSize * sizeof(ndReal));
-	shuffleBufferInfo.m_dstOffsetInByte = 0;
-	shuffleBufferInfo.m_dstStrideInByte = shuffleBufferInfo.m_srcStrideInByte;
-	shuffleBufferInfo.m_bytesToCopy = shuffleBufferInfo.m_srcStrideInByte;
-
-	ndCopyBufferCommandInfo observationInfo;
-	observationInfo.m_srcStrideInByte = ndInt32(m_trajectoryAccumulator.GetStride() * sizeof(ndReal));
-	observationInfo.m_srcOffsetInByte = ndInt32(m_trajectoryAccumulator.GetObsevationOffset() * sizeof(ndReal));
-	observationInfo.m_dstOffsetInByte = 0;
-	observationInfo.m_dstStrideInByte = ndInt32(m_valueTrainer->GetBrain()->GetInputSize() * sizeof(ndReal));
-	observationInfo.m_bytesToCopy = observationInfo.m_dstStrideInByte;
-
-	ndCopyBufferCommandInfo expectedRewardBufferInfo;
-	expectedRewardBufferInfo.m_srcOffsetInByte = ndInt32(m_trajectoryAccumulator.GetExpectedRewardOffset() * sizeof(ndReal));
-	expectedRewardBufferInfo.m_srcStrideInByte = ndInt32(m_trajectoryAccumulator.GetStride() * sizeof(ndReal));
-	expectedRewardBufferInfo.m_dstOffsetInByte = 0;
-	expectedRewardBufferInfo.m_dstStrideInByte = ndInt32(sizeof(ndBrainFloat));
-	expectedRewardBufferInfo.m_bytesToCopy = ndInt32(sizeof(ndBrainFloat));
-
-	const ndInt32 numberOfIterations = ndMin(ndInt32(m_trajectoryAccumulator.GetCount() / (m_parameters.m_miniBatchSize)), 10);
-	ndAssert(numberOfIterations >= 1);
-
-	ndBrainFloatBuffer* const inputBuffer = m_valueTrainer->GetInputBuffer();
-	ndBrainFloatBuffer* const outputBuffer = m_valueTrainer->GetOuputBuffer();
-
-	// alias pointers
-	ndWeakPtr<ndBrainFloatBuffer> stateValue(outputBuffer);
-	ndWeakPtr<ndBrainFloatBuffer> expectedReward(*m_zMeanBuffer);
-
-	for (ndInt32 i = 0; i < numberOfIterations; ++i)
-	{
-		shuffleBufferInfo.m_srcOffsetInByte = i * ndInt32(m_parameters.m_miniBatchSize * sizeof(ndInt32));
-		m_minibatchValueShuffleBuffer->CopyBuffer(shuffleBufferInfo, 1, **m_valueShuffleBuffer);
-
-		// calculate stateValue(i)
-		inputBuffer->CopyBufferIndirect(observationInfo, **m_minibatchValueShuffleBuffer, **m_trainingBuffer);
-		m_valueTrainer->MakePrediction();
-
-		// calculate grad = expectedReward - stateValue(i);
-		expectedReward->CopyBufferIndirect(expectedRewardBufferInfo, **m_minibatchValueShuffleBuffer, **m_trainingBuffer);
-		expectedReward->Sub(**stateValue);
-	}
-}
-
 void ndBrainAgentOnPolicyGradient_Trainer::Optimize()
 {
 m_parameters.m_entropyTemperature = 0.0f;
@@ -1449,6 +1409,4 @@ m_parameters.m_entropyTemperature = 0.0f;
 	CalculateAdvantage();
 	OptimizePolicy();
 	OptimizeValue();
-
-	//DebugValue();
 }

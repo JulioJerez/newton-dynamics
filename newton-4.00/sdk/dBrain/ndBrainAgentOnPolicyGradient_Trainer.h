@@ -166,9 +166,6 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	void BuildCriticClass();
 	void CalculateAdvantage();
 	void TrajectoryToGpuBuffers();
-
-	void DebugValue();
-
 	ndBrainFloat CalculateKLdivergence();
 	void SaveTrajectory(ndBrainAgentOnPolicyGradient_Agent* const agent);
 
@@ -210,6 +207,8 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	ndSharedPtr<ndBrainFloatBuffer> m_minibatchLikelihoodRatioBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_minibatchCriticStateValueBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_minibatchBrocastAdvantageBuffer;
+	ndSharedPtr<ndBrainFloatBuffer> m_minibatchClippedMinimunZeroGradient;
+	ndSharedPtr<ndBrainFloatBuffer> m_minibatchClippedMaximumZeroGradient;
 	ndSharedPtr<ndBrainFloatBuffer> m_minibatchClippedLikelihoodRatioBuffer;
 
 	ndSharedPtr<ndBrainIntegerBuffer> m_valueShuffleBuffer;
