@@ -694,6 +694,13 @@ void ndBrainLayerLinear::CopyWeights(ndBrainTrainerInference* const trainer, ndB
 		offset += width;
 		ndAssert(offset >= 0);
 	}
+
+//if (m_bias.GetCount() == 1)
+//{
+//	ndBrainMemVector xxx(&m_bias[0], 1);
+//	xxx[0] = 0.999f;
+//}
+
 	ndBrainMemVector bias(&output[matrixSize], m_bias.GetCount());
 	bias.Set(m_bias);
 }
@@ -756,10 +763,13 @@ void ndBrainLayerLinear::DotProductMatrixMultiply(const ndBrainLayerFeedForwardC
 	ndInt32 height;
 	CalculateRoundedSize(width, height);
 	const ndInt32 matrixSize = width * height;
+	ndAssert(weightAndBias.BounceCheck(info.m_parametersStartOffset + matrixSize + outputSize - 1));
 	const ndBrainMemVector parameters(&weightAndBias[info.m_parametersStartOffset], matrixSize + outputSize);
 
 	const ndInt64 inputOffset = miniBatchIndex * ndInt64(inputOutputSize) + inputOutputStartOffset;
 	const ndInt64 outputOffset = inputOffset + trainer->RoundOffOffset(inputSize);
+
+	ndAssert(inputOutputBuffer.BounceCheck(outputOffset + outputSize - 1));
 	ndBrainMemVector output(&inputOutputBuffer[outputOffset], outputSize);
 
 #ifndef ND_USING_WIDE_VECTOR_CLASS
@@ -904,8 +914,6 @@ void ndBrainLayerLinear::TiledMatrixMultiply(const ndBrainLayerFeedForwardCpuCom
 	for (ndInt32 i = 0; i < ndBrainLayerLinearTileSize; ++i)
 	{
 		ndBrainFloatTileVector timeColumn(&tile_accReg[0].m_f[i], indexArray);
-		//((ndBrainFloatTileVector&)outputBuffer[dstOffset]) = timeColumn;
-		//ndBrainFloat* const dstFloat = &inputOutputBuffer[dstOffset];
 		ndBrainMemVector dstFloat(&inputOutputBuffer[dstOffset], ndBrainLayerLinearTileSize);
 		ndBrainFloatTileVector* const dstTile = (ndBrainFloatTileVector*)&dstFloat[0];
 		*dstTile = timeColumn;
@@ -1174,15 +1182,19 @@ void ndBrainLayerLinear::BackPropagateInputGradients(const ndBrainLayerBackPropa
 	ndAssert(srcBase >= 0);
 	ndAssert(dstBase >= 0);
 
+	ndAssert(inputOutputGradientsBuffer.BounceCheck(dstBase + outputSize - 1));
+	ndAssert(weightAndBias.BounceCheck(info.m_parametersStartOffset + matrixSize - 1));
 	const ndBrainMemVector outputDerivative(&inputOutputGradientsBuffer[dstBase], outputSize);
 	const ndBrainMemVector weightsMatrix(&weightAndBias[info.m_parametersStartOffset], matrixSize);
 
 #ifndef ND_USING_WIDE_VECTOR_CLASS
+	ndAssert(inputOutputGradientsBuffer.BounceCheck(srcBase + inputSize - 1));
 	ndBrainMemVector inputDerivative(&inputOutputGradientsBuffer[srcBase], inputSize);
 	inputDerivative.Set(ndBrainFloat(0.0f));
 	for (ndInt32 i = 0; i < outputSize; ++i)
 	{
 		ndBrainFloat outDerivative = outputDerivative[i];
+		ndAssert(weightsMatrix.BounceCheck(i * width + inputSize - 1));
 		const ndBrainMemVector weightsRow(&weightsMatrix[i * width], inputSize);
 		inputDerivative.ScaleAdd(weightsRow, outDerivative);
 	}
@@ -1230,6 +1242,8 @@ void ndBrainLayerLinear::BackPropagateBiasGradients(const ndBrainLayerBackPropag
 	const ndInt64 inputGradientOffset = miniBatchIndex * ndInt64(inputOutputSize) + inputOutputStartOffset;
 	const ndInt64 outputGradientOffset = inputGradientOffset + trainer->RoundOffOffset(inputSize);
 
+	ndAssert(inputOutputGradientsBuffer.BounceCheck(outputGradientOffset + outputSize - 1));
+	ndAssert(weightAndBiasGradients.BounceCheck(info.m_parametersStartOffset + matrixSize + info.m_parametersBatchSize * miniBatchIndex + outputSize - 1));
 	const ndBrainMemVector outputDerivative(&inputOutputGradientsBuffer[outputGradientOffset], outputSize);
 	ndBrainMemVector biasRowGradients(&weightAndBiasGradients[info.m_parametersStartOffset + matrixSize + info.m_parametersBatchSize * miniBatchIndex], outputSize);
 	biasRowGradients.Set(outputDerivative);
@@ -1257,15 +1271,18 @@ void ndBrainLayerLinear::BackPropagateWeightsGradients(const ndBrainLayerBackPro
 	CalculateRoundedSize(width, height);
 	const ndInt32 matrixSize = trainer->RoundOffOffset(width * height);
 
+	ndAssert(inputOutputBuffer.BounceCheck(srcBase + inputSize - 1));
+	ndAssert(weightAndBiasGradients.BounceCheck(info.m_parametersStartOffset + matrixSize + info.m_parametersBatchSize * miniBatchIndex + outputSize - 1));
 	const ndBrainMemVector inputData(&inputOutputBuffer[srcBase], inputSize);
 	const ndBrainMemVector biasRowGradients(&weightAndBiasGradients[info.m_parametersStartOffset + matrixSize + info.m_parametersBatchSize * miniBatchIndex], outputSize);
-	ndInt32 matrixOffset = ndInt32(info.m_parametersStartOffset + info.m_parametersBatchSize * miniBatchIndex);
+	const ndInt32 matrixOffsetStart = ndInt32(info.m_parametersStartOffset + info.m_parametersBatchSize * miniBatchIndex);
 	for (ndInt32 i = 0; i < outputSize; ++i)
 	{
+		const ndBrainFloat scale = biasRowGradients[i];
+		const ndInt32 matrixOffset = matrixOffsetStart + width * i;
+		ndAssert(weightAndBiasGradients.BounceCheck(matrixOffset + inputSize - 1));
 		ndBrainMemVector weightRowGradients(&weightAndBiasGradients[matrixOffset], inputSize);
-		ndBrainFloat scale = biasRowGradients[i];
 		weightRowGradients.ScaleSet(inputData, scale);
-		matrixOffset += width;
 		ndAssert(weightRowGradients.SanityCheck());
 	}
 }
