@@ -123,7 +123,7 @@ namespace ndUnicycleTrainer_ppo
 			hyperParameters.m_useGpuBackend = false;
 			//hyperParameters.m_numberOfHiddenLayers = 2;
 			hyperParameters.m_hiddenLayersNumberOfNeurons = 64;
-			hyperParameters.m_batchTrajectoryCount = 100;
+			hyperParameters.m_batchTrajectoryCount = 1000;
 			hyperParameters.m_numberOfActions = m_actionsSize;
 			hyperParameters.m_numberOfObservations = m_observationsSize;
 			hyperParameters.m_maxNumberOfTrainingSteps = ndInt32(m_stopTraining);
@@ -141,8 +141,7 @@ namespace ndUnicycleTrainer_ppo
 			loader.m_mesh->SetMatrix(loader.m_mesh->GetMatrix() * matrix);
 			
 			// create an articulated model
-			const ndInt32 numberOfAgents = 110;
-			//const ndInt32 numberOfAgents = 1;
+			const ndInt32 numberOfAgents = 350;
 			const ndInt32 maxTrajectories = (hyperParameters.m_batchTrajectoryCount + numberOfAgents - 1) / numberOfAgents;
 			for (ndInt32 i = 0; i < numberOfAgents; ++i)
 			{

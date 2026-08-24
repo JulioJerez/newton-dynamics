@@ -36,6 +36,7 @@
 #include "ndBrainLayerCrossCorrelation_2d.h"
 #include "ndBrainLayerActivationLeakyRelu.h"
 #include "ndBrainLayerActivationSigmoidLinear.h"
+#include "ndBrainLayerActivationBatchNormalize.h"
 #include "ndBrainAgentOnPolicyGradient_Trainer.h"
 #include "ndBrainAgentOffPolicyGradient_Trainer.h"
 #include "ndBrainLayerActivationCategoricalSoftmax.h"
@@ -123,6 +124,10 @@ ndBrain* ndBrainLoad::Load() const
 		else if (!strcmp(layerType, ND_BRAIN_LAYER_ACTIVATION_RELU_NAME))
 		{
 			layer = ndBrainLayerActivationRelu::Load(this);
+		}
+		else if (!strcmp(layerType, ND_BRAIN_LAYER_ACTIVATION_BATCH_NORMALIZE_NAME))
+		{
+			layer = ndBrainLayerActivationBatchNormalize::Load(this);
 		}
 		else if (!strcmp(layerType, ND_BRAIN_LAYER_ACTIVATION_LEAKY_RELU_NAME))
 		{

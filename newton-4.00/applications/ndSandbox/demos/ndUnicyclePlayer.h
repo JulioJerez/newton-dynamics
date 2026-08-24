@@ -42,7 +42,7 @@ namespace ndUnicyclePlayer
 		m_poleOmega,
 		m_poleAngle,
 		m_wheelOmega,
-		m_wheelAlpha,
+		//m_wheelAlpha,
 		m_hasContactSupport,
 		m_observationsSize
 	};

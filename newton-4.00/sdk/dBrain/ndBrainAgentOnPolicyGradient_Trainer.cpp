@@ -37,12 +37,10 @@
 #include "ndBrainLayerActivationLeakyRelu.h"
 #include "ndBrainAgentOnPolicyGradient_Trainer.h"
 
-//#define ND_DEBUG_CONTINUE_PROXIMA_POLICY
-
 #define ND_POLICY_MAX_KL_DIVERGENCE_PASSES			8
 #define ND_POLICY_DOWN_SAMPLE_LEARN_RATE			ndBrainFloat(1.0f)
 #define ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON		ndBrainFloat(0.2f)
-#define ND_POLICY_KL_DIVERGENCE_STOP_THRESHHOLD		ndBrainFloat(5.0e-3f)
+#define ND_POLICY_KL_DIVERGENCE_STOP_THRESHHOLD		ndBrainFloat(1.0e-3f)
 
 //entropy regularization improvement from 
 //https://arxiv.org/pdf/1912.01557
@@ -907,10 +905,6 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeCritic()
 			{
 				inputBuffer->CopyBufferIndirect(nextObservationInfo, **m_minibatchRandomShuffleBuffer, **m_trainingBuffer);
 				m_criticTrainer->MakePrediction();
-				#ifdef ND_DEBUG_CONTINUE_PROXIMA_POLICY
-					static ndBrainVector value;
-					outputBuffer->VectorFromDevice(value);
-				#endif
 
 				outputBuffer->Scale(monetcarloDiscount);
 				m_invSigmaBuffer->CopyBufferIndirect(isTerminalBufferInfo, **m_minibatchRandomShuffleBuffer, **m_trainingBuffer);
@@ -1348,7 +1342,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 		m_policyTrainer->ApplyLearnRate(m_learnRate * ND_POLICY_DOWN_SAMPLE_LEARN_RATE);
 	
 		// calculate the KL divergence
-		// this will make the agin a vanilla policy gradient
+		// this will make the agent a vanilla policy gradient
 		divergence = CalculateKLdivergence();
 	}
 	if (passes > 1)

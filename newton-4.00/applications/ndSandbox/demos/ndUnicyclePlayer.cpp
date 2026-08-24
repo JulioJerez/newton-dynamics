@@ -254,7 +254,7 @@ namespace ndUnicyclePlayer
 		ndFloat32 poleAngle = GetPoleAngle();
 		ndFloat32 poleOmega = GetPoleOmega();
 		ndFloat32 wheelOmega = GetWheelOmega();
-		ndFloat32 wheelAlpha = GetWheelAlpha();
+		//ndFloat32 wheelAlpha = GetWheelAlpha();
 
 		observation[m_hasContactSupport] = IsOnAir();
 		observation[m_boxAngle] = ndBrainFloat(boxAngle);
@@ -262,7 +262,7 @@ namespace ndUnicyclePlayer
 		observation[m_poleAngle] = ndBrainFloat(poleAngle);
 		observation[m_poleOmega] = ndBrainFloat(poleOmega);
 		observation[m_wheelOmega] = ndBrainFloat(wheelOmega);
-		observation[m_wheelAlpha] = ndBrainFloat(wheelAlpha);
+		//observation[m_wheelAlpha] = ndBrainFloat(wheelAlpha);
 	}
 
 	void ndController::CreateArticulatedModel(
