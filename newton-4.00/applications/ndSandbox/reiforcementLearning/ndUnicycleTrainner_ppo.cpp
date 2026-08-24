@@ -137,7 +137,7 @@ namespace ndUnicycleTrainer_ppo
 			// create a visual mesh and add to the scene.
 			ndWorld* const world = scene->GetWorld();
 			ndMatrix matrix(location);
-			matrix.m_posit.m_y = ndFloat32(0.1f);
+			matrix.m_posit.m_y = ndFloat32(0.25f);
 			loader.m_mesh->SetMatrix(loader.m_mesh->GetMatrix() * matrix);
 			
 			// create an articulated model

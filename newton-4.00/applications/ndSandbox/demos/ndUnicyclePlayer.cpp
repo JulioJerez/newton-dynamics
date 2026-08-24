@@ -97,7 +97,7 @@ namespace ndUnicyclePlayer
 
 		ndFloat32 randX = ndFloat32(20.0f) * (ndRand() - ndFloat32(0.5f));
 		boxMatrix.m_posit.m_x = randX;
-		boxMatrix.m_posit.m_y = ndFloat32(2.5f);
+		boxMatrix.m_posit.m_y = ndFloat32(3.5f);
 		m_topBox->SetMatrix(boxMatrix);
 		
 		const ndMatrix poleMatrix(m_poleHinge->GetLocalMatrix0().OrthoInverse() * m_poleHinge->CalculateGlobalMatrix1());
@@ -287,20 +287,17 @@ namespace ndUnicyclePlayer
 			if (node->m_name.Find("body") > -1)
 			{
 				m_topBox = node->m_body;
-				//node->m_body->GetAsBodyKinematic()->SetMassMatrix(BOX_MASS, node->m_body->GetAsBodyKinematic()->GetCollisionShape());
 			}
 			else if (node->m_name.Find("pole") > -1)
 			{
 				m_pole = node->m_body;
 				m_poleHinge = node->m_joint;
-				//node->m_body->GetAsBodyKinematic()->SetMassMatrix(POLE_MASS, node->m_body->GetAsBodyKinematic()->GetCollisionShape());
-				((ndJointHinge*)*m_poleHinge)->SetAsSpringDamper(0.5f, 0.0f, 1.0f);
+				//((ndJointHinge*)*m_poleHinge)->SetAsSpringDamper(0.5f, 0.0f, 1.0f);
 			}
 			else if (node->m_name.Find("roller") > -1)
 			{
 				m_wheel = node->m_body;
 				m_wheelRoller = node->m_joint;
-				//node->m_body->GetAsBodyKinematic()->SetMassMatrix(POLE_MASS, node->m_body->GetAsBodyKinematic()->GetCollisionShape());
 			}
 		};
 		model->GetAsModelArticulation()->NodeIterator(BindApplicationData);
