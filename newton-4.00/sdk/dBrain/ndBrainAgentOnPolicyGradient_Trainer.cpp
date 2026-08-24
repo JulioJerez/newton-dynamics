@@ -763,7 +763,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeValue()
 	//rewardBufferInfo.m_dstStrideInByte = ndInt32(sizeof(ndBrainFloat));
 	//rewardBufferInfo.m_bytesToCopy = ndInt32(sizeof(ndBrainFloat));
 
-	const ndInt32 numberOfIterations = ndMin (ndInt32(m_trajectoryAccumulator.GetCount() / m_parameters.m_miniBatchSize), 1024 * 4);
+	const ndInt32 numberOfIterations = ndInt32(m_trajectoryAccumulator.GetCount() / m_parameters.m_miniBatchSize);
 	ndAssert(numberOfIterations >= 1);
 
 	ndBrainFloatBuffer* const inputBuffer = m_valueTrainer->GetInputBuffer();
