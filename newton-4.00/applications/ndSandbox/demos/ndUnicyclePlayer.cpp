@@ -189,8 +189,9 @@ namespace ndUnicyclePlayer
 		ndFloat32 comSpeed = kinematic.m_veloc.m_x;
 		ndFloat32 comSpeedReward = ndExp(-ndFloat32(0.1f) * comSpeed * comSpeed);
 
-		const ndFloat32 invSigma2 = ndFloat32(900.0f);
-		const ndFloat32 poleAngle = ndMax((ndAbs(GetPoleAngle()) - ndFloat32(10.0f * ndDegreeToRad)), ndFloat32(0.0f));
+		const ndFloat32 invSigma2 = ndFloat32(81.0f);
+		//const ndFloat32 poleAngle = ndMax((ndAbs(GetPoleAngle()) - ndFloat32(10.0f * ndDegreeToRad)), ndFloat32(0.0f));
+		const ndFloat32 poleAngle = GetPoleAngle();
 		const ndFloat32 poleAngleReward = ndExp(-invSigma2 * poleAngle * poleAngle);
 
 		ndFloat32 reward = ndFloat32(0.0f);
