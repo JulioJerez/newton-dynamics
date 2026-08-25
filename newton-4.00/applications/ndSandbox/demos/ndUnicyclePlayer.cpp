@@ -187,7 +187,7 @@ namespace ndUnicyclePlayer
 		ndModelArticulation::ndCenterOfMassDynamics kinematic(model->CalculateCentreOfMassKinematics(ndGetIdentityMatrix()));
 
 		ndFloat32 comSpeed = kinematic.m_veloc.m_x;
-		ndFloat32 comSpeedReward = ndExp(-ndFloat32(10.0f) * comSpeed * comSpeed);
+		ndFloat32 comSpeedReward = ndExp(-ndFloat32(0.1f) * comSpeed * comSpeed);
 
 		const ndFloat32 invSigma2 = ndFloat32(900.0f);
 		const ndFloat32 poleAngle = ndMax((ndAbs(GetPoleAngle()) - ndFloat32(10.0f * ndDegreeToRad)), ndFloat32(0.0f));
