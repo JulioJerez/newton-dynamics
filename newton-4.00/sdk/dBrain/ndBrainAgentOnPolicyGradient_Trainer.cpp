@@ -1220,7 +1220,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 	ndAssert(numberOfIterations >= 1);
 
 	// calculate all of the base values
-	// policy base action vector and inverx likelihood.
+	// policy base action vector and invert likelihood.
 	for (ndInt32 i = 0; i < numberOfIterations; ++i)
 	{
 		// get the policy output
@@ -1244,7 +1244,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 		// save the inverse likelihood
 		m_invLikelihoodBuffer->CopyBuffer(advantageReadWriteInfo, m_parameters.m_miniBatchSize, **m_minibatchInvLikelihoodBuffer);
 		
-		// advance to the next minibatch
+		// advance to the next mini batch
 		actionInfo.m_dstOffsetInByte += policyActionsStrideInBytes;
 		observationInfo.m_srcOffsetInByte += transitionStrideInBytes;
 		meanSampledActions.m_srcOffsetInByte += transitionStrideInBytes;
@@ -1332,8 +1332,8 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 			advantageReadWriteInfo.m_srcOffsetInByte += minibatchStrideInBytes;
 		}
 
-		// average all minibaches gradients.
-		// use positve gradient as ascend learning rate.
+		// average all mini batches gradients.
+		// use positive gradient as ascend learning rate.
 		m_policyGradientAccumulator->Scale(ndBrainFloat(1.0f) / ndBrainFloat(numberOfIterations));
 		weightAndBiasGradientBuffer->Set(**m_policyGradientAccumulator);
 	
