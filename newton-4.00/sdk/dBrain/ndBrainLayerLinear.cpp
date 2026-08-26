@@ -695,12 +695,6 @@ void ndBrainLayerLinear::CopyWeights(ndBrainTrainerInference* const trainer, ndB
 		ndAssert(offset >= 0);
 	}
 
-//if (m_bias.GetCount() == 1)
-//{
-//	ndBrainMemVector xxx(&m_bias[0], 1);
-//	xxx[0] = 0.999f;
-//}
-
 	ndBrainMemVector bias(&output[matrixSize], m_bias.GetCount());
 	bias.Set(m_bias);
 }
@@ -812,8 +806,6 @@ void ndBrainLayerLinear::TiledMatrixMultiply(const ndBrainLayerFeedForwardCpuCom
 	const ndCommandSharedInfo& info = desc.m_info;
 	ndBrainTrainerInference* const trainer = desc.m_owner;
 
-	//const ndBrainFloat* const weightsAndBias = (ndBrainFloat*)trainer->GetWeightAndBiasBuffer()->GetCpuPtr();
-	//const ndBrainFloat* const inputOutputBuffer = (ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr();
 	const ndBrainMemVector weightsAndBias((ndBrainFloat*)trainer->GetWeightAndBiasBuffer()->GetCpuPtr(), ndInt32(trainer->GetWeightAndBiasBuffer()->GetCount()));
 	const ndBrainMemVector inputOutputBuffer((ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr(), ndInt32(trainer->GetHiddenLayerBuffer()->GetCount()));
 
