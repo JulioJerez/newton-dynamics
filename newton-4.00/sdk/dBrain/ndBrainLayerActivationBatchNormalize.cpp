@@ -28,6 +28,7 @@
 #include "ndBrainFloatBuffer.h"
 #include "ndBrainLayerActivationBatchNormalize.h"
 
+#ifdef ND_LEAR_BATCH_NOMALIZED_PARAMS
 ndBrainLayerActivationBatchNormalize::ndBrainLayerActivationBatchNormalize(ndInt32 neurons)
 	:ndBrainLayerActivation(neurons)
 	,m_bias()
@@ -425,3 +426,46 @@ ndCommandArray ndBrainLayerActivationBatchNormalize::CreateBackPropagateBufferCo
 	}
 	return commands;
 }
+
+#else
+
+
+ndBrainLayerActivationBatchNormalize::ndBrainLayerActivationBatchNormalize(ndInt32 neurons)
+	:ndBrainLayerActivationLinear(ndBrainVector(), ndBrainVector())
+{
+	m_neurons = neurons;
+	m_slopes.SetCount(neurons);
+	m_biases.SetCount(neurons);
+
+	m_slopes.Set(ndBrainFloat(1.0f));
+	m_biases.Set(ndBrainFloat(0.0f));
+}
+
+ndBrainLayerActivationBatchNormalize::ndBrainLayerActivationBatchNormalize(const ndBrainLayerActivationBatchNormalize& src)
+	:ndBrainLayerActivationLinear(src)
+{
+}
+
+ndBrainLayer* ndBrainLayerActivationBatchNormalize::Clone() const
+{
+	return new ndBrainLayerActivationBatchNormalize(*this);
+}
+
+const char* ndBrainLayerActivationBatchNormalize::GetLabelId() const
+{
+	return ND_BRAIN_LAYER_ACTIVATION_BATCH_NORMALIZE_NAME;
+}
+
+ndBrainLayer* ndBrainLayerActivationBatchNormalize::Load(const ndBrainLoad* const loadSave)
+{
+	return ndBrainLayerActivationLinear::Load(loadSave);
+}
+
+void ndBrainLayerActivationBatchNormalize::Save(const ndBrainSave* const loadSave) const
+{
+	ndBrainLayerActivationLinear::Save(loadSave);
+}
+
+
+
+#endif

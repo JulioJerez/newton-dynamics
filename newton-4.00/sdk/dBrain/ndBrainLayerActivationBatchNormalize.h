@@ -24,9 +24,13 @@
 
 #include "ndBrainStdafx.h"
 #include "ndBrainLayerActivation.h"
+#include "ndBrainLayerActivationLinear.h"
 
 #define ND_BRAIN_LAYER_ACTIVATION_BATCH_NORMALIZE_NAME	"ndBrainLayerActivationBatchNormalize"
 
+//#define ND_LEAR_BATCH_NOMALIZED_PARAMS
+
+#ifdef ND_LEAR_BATCH_NOMALIZED_PARAMS
 class ndBrainLayerActivationBatchNormalize : public ndBrainLayerActivation
 {
 	public:
@@ -76,6 +80,54 @@ class ndBrainLayerActivationBatchNormalize : public ndBrainLayerActivation
 	mutable ndBrainVector m_inferenceBias;
 	mutable ndBrainVector m_inferenceScale;
 };
+#else
+
+class ndBrainLayerActivationBatchNormalize : public ndBrainLayerActivationLinear
+{
+	public:
+	ndBrainLayerActivationBatchNormalize(ndInt32 neurons);
+	ndBrainLayerActivationBatchNormalize(const ndBrainLayerActivationBatchNormalize& src);
+	ndBrainLayer* Clone() const override;
+	static ndBrainLayer* Load(const ndBrainLoad* const loadSave);
+	virtual void Save(const ndBrainSave* const loadSave) const override;
+	virtual const char* GetLabelId() const override;
+
+	//void MakePrediction(const ndBrainVector& input, ndBrainVector& output) const override;
+	//void InputDerivative(const ndBrainVector& input, const ndBrainVector& output, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const override;
+	//
+	//virtual bool HasGpuSupport() const override;
+	//virtual void FeedForward(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const override;
+	//virtual void BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const override;
+	//
+	//virtual void SetWeights(ndBrainTrainerInference* const trainer, const ndBrainVector& input) override;
+	//virtual void CopyWeights(ndBrainTrainerInference* const trainer, ndBrainVector& output) const override;
+	//virtual ndCommandSharedInfo GetCommandSharedInfo(ndBrainTrainerInference* const trainer) const override;
+	//
+	//void CalculateMeanAndVariance(const ndBrainLayerFeedForwardCpuCommand* const command) const;
+	//void NormalizeMeanAndVariance(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const;
+	//
+	//virtual ndCommandArray CreateFeedForwardBufferCommand(
+	//	ndBrainTrainerInference* const owner,
+	//	ndBrainContext* const context,
+	//	const ndCommandSharedInfo& info,
+	//	ndInt32 miniBatchSize,
+	//	ndBrainFloatBuffer* const inputOutputData,
+	//	ndBrainFloatBuffer* const weightsAndBias) const override;
+	//
+	//virtual ndCommandArray CreateBackPropagateBufferCommand(
+	//	ndBrainTrainerInference* const owner,
+	//	ndBrainContext* const context,
+	//	const ndCommandSharedInfo& info,
+	//	ndInt32 miniBatchSize,
+	//	ndBrainFloatBuffer* const inputOutputData,
+	//	ndBrainFloatBuffer* const weightsAndBias,
+	//	ndBrainFloatBuffer* const inputOutputGradients,
+	//	ndBrainFloatBuffer* const weightsAndBiasGradients) const override;
+	//
+	//ndBrainVector m_bias;
+	//ndBrainVector m_scale;
+};
+#endif
 
 #endif 
 

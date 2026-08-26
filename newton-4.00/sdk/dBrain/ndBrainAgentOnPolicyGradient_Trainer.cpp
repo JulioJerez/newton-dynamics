@@ -35,6 +35,7 @@
 #include "ndBrainLayerActivationLinear.h"
 #include "ndBrainLossLeastSquaredError.h"
 #include "ndBrainLayerActivationLeakyRelu.h"
+#include "ndBrainLayerActivationBatchNormalize.h"
 #include "ndBrainAgentOnPolicyGradient_Trainer.h"
 
 #define ND_POLICY_MAX_KL_DIVERGENCE_PASSES			8
@@ -413,6 +414,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildPolicyClass()
 {
 	ndFixSizeArray<ndBrainLayer*, 32> layers(0);
 
+	layers.PushBack(new ndBrainLayerActivationBatchNormalize(m_parameters.m_numberOfObservations));
 	layers.PushBack(new ndBrainLayerLinear(m_parameters.m_numberOfObservations, m_parameters.m_hiddenLayersNumberOfNeurons));
 	layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 
@@ -463,6 +465,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::BuildCriticClass()
 	ndFixSizeArray<ndBrainLayer*, 32> layers(0);
 	const ndBrain& policy = **m_policyTrainer->GetBrain();
 
+	layers.PushBack(new ndBrainLayerActivationBatchNormalize(policy.GetInputSize()));
 	layers.PushBack(new ndBrainLayerLinear(policy.GetInputSize(), m_parameters.m_hiddenLayersNumberOfNeurons));
 	layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 
