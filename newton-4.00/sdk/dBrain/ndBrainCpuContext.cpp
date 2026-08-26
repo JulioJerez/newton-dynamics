@@ -32,16 +32,21 @@ class ndBrainAdamUpdateParametersRidge : public ndBrainBufferCommandCpu
 	// I am skipping the bias correction 
 	// I am yet to see why bias correction is nesserary, 
 	// to me is just generated a fake initial gain
-	#pragma optimize( "", off )
 	virtual void Execute(ndInt32 groupId) override
 	{
 		ndInt32 workGroupSize = m_desc.m_workGroupSize;
 
 		const ndBrainOptimizerAdam::ndCommandSharedInfo* const parameters = (ndBrainOptimizerAdam::ndCommandSharedInfo*)m_desc[0]->GetCpuPtr();
-		ndBrainFloat* const weightAndBiasBuffer = (ndBrainFloat*)m_desc[1]->GetCpuPtr();
-		ndBrainFloat* const weightAndBiasGradientBuffer = (ndBrainFloat*)m_desc[2]->GetCpuPtr();
-		ndBrainFloat* const vdw = (ndBrainFloat*)m_desc[3]->GetCpuPtr();
-		ndBrainFloat* const vdw2 = (ndBrainFloat*)m_desc[4]->GetCpuPtr();
+		//ndBrainFloat* const weightAndBiasBuffer = (ndBrainFloat*)m_desc[1]->GetCpuPtr();
+		//ndBrainFloat* const weightAndBiasGradientBuffer = (ndBrainFloat*)m_desc[2]->GetCpuPtr();
+		//ndBrainFloat* const vdw = (ndBrainFloat*)m_desc[3]->GetCpuPtr();
+		//ndBrainFloat* const vdw2 = (ndBrainFloat*)m_desc[4]->GetCpuPtr();
+
+		ndInt64 bufferSize = ndInt64(((ndBrainFloatBuffer*)m_desc[1])->GetCount());
+		ndBrainMemVector weightAndBiasBuffer ((ndBrainFloat*)m_desc[1]->GetCpuPtr(), bufferSize);
+		ndBrainMemVector weightAndBiasGradientBuffer ((ndBrainFloat*)m_desc[2]->GetCpuPtr(), bufferSize);
+		ndBrainMemVector vdw ((ndBrainFloat*)m_desc[3]->GetCpuPtr(), bufferSize);
+		ndBrainMemVector vdw2 ((ndBrainFloat*)m_desc[4]->GetCpuPtr(), bufferSize);
 
 		ndBrainFloat descendRate = -m_learnRate;
 		ndBrainFloat regularizer = -parameters->m_decayRegularizer;
@@ -86,7 +91,6 @@ class ndBrainAdamBiasCorrectionUpdate : public ndBrainBufferCommandCpu
 	{
 	}
 
-	//#pragma optimize( "", off )
 	virtual void Execute(ndInt32) override
 	{
 		ndBrainOptimizerAdam::ndCommandSharedInfo* const parameters = (ndBrainOptimizerAdam::ndCommandSharedInfo*)m_desc[0]->GetCpuPtr();
@@ -584,4 +588,47 @@ void ndBrainCpuContext::Rand(ndBrainIntegerBuffer& randBuffer)
 void ndBrainCpuContext::SetRandSeeds(const ndFixSizeArray<ndUnsigned32, 256>& seed)
 {
 	ndAssert(0);
+}
+
+void ndBrainCpuContext::AccumulateWeightsAndBiasBuffer(ndInt32 numberOfBuffers, ndInt32 bufferSizeInFloats, ndBrainFloatBuffer& weightsAndBiasGradientBuffer)
+{
+	class ndAccumulateWeigndAndBias : public ndBrainBufferCommandCpu
+	{
+		public:
+		ndAccumulateWeigndAndBias(const ndBrainBufferCommandDesc& desc, ndInt64 elements, ndBrainFloatBuffer& weightsAndBiasGradientBuffer)
+			:ndBrainBufferCommandCpu(desc)
+			,m_weightsAndBiasGradientBuffer(&weightsAndBiasGradientBuffer)
+			,m_elements(elements)
+		{
+		}
+
+		virtual void Execute(ndInt32 groupId) override
+		{
+			ndInt32 span = ndInt32(m_elements / m_desc.m_miniBatchSize);
+			ndInt32 start = groupId * span;
+			ndInt32 count = ndInt32(((start + span) < m_elements) ? span : m_elements - start);
+			ndBrainVector& buffer = **m_weightsAndBiasGradientBuffer->m_buffer;
+			
+			ndBrainMemVector dst(&buffer[start], count);
+			const ndBrainMemVector src(&buffer[start + m_elements], count);
+			dst.Add(src);
+			dst.SanityCheck();
+		}
+
+		ndBrainFloatBuffer* m_weightsAndBiasGradientBuffer;
+		ndInt64 m_elements;
+	};
+
+	const ndInt32 size = numberOfBuffers / 2;
+	ndAssert((size & (size - 1)) == 0);
+	ndInt64 elements = ndInt64(size * bufferSizeInFloats);
+
+	for (ndInt32 i = size; i > 0; i >>= 1)
+	{
+		ndBrainBufferCommandDesc desc(i);
+		desc.m_workGroupSize = i;
+		ndAccumulateWeigndAndBias command(desc, elements, weightsAndBiasGradientBuffer);
+		SubmitBufferCommand(&command);
+		elements = elements / 2;
+	}
 }

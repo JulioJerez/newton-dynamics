@@ -85,7 +85,8 @@ void* ndBrainFloatBuffer::GetCpuPtr()
 	if (m_context->GetAsCpuContext())
 	{
 		ndBrainVector& dst = **m_buffer;
-		return &dst[0];
+		void* const ptr = &dst[0];
+		return ptr;
 	}
 	ndAssert(GetGpuBuffer());
 	return GetGpuBuffer()->GetPtr();

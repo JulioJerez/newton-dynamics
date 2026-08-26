@@ -22,12 +22,12 @@ namespace ndUnicyclePlayer
 	#define CONTROLLER_NAME_PPO			"unicyclePpo"
 
 	//#define ND_MAX_WHEEL_ALPHA		(ndFloat32 (50.0f))
-	#define ND_MAX_WHEEL_ALPHA			(ndFloat32 (25.0f))
-	#define ND_TERMINATION_ANGLE		(ndFloat32 (30.0f) * ndDegreeToRad)
+	#define ND_MAX_WHEEL_ALPHA			(ndFloat32 (200.0f))
+	#define ND_TERMINATION_ANGLE		(ndFloat32 (20.0f) * ndDegreeToRad)
 	#define ND_TRAJECTORY_STEPS			(1024 * 4)
 
-	#define ND_RANDOM_IMPULSE_MOD		256
-	#define ND_RANDOM_IMPULSE_MAGNITUD	ndFloat32 (5.0f)
+	#define ND_RANDOM_IMPULSE_MOD		1024
+	#define ND_RANDOM_IMPULSE_MAGNITUD	ndFloat32 (2.0f)
 
 	enum ndActionSpace
 	{
@@ -42,7 +42,7 @@ namespace ndUnicyclePlayer
 		m_poleOmega,
 		m_poleAngle,
 		m_wheelOmega,
-		m_wheelAlpha,
+		//m_wheelAlpha,
 		m_hasContactSupport,
 		m_observationsSize
 	};

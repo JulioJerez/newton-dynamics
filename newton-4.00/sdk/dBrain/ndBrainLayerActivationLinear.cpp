@@ -130,6 +130,7 @@ void ndBrainLayerActivationLinear::MakePrediction(const ndBrainVector& input, nd
 	output.Set(input);
 	output.Mul(m_slopes);
 	output.Add(m_biases);
+	ndAssert(output.SanityCheck());
 }
 
 void ndBrainLayerActivationLinear::InputDerivative(const ndBrainVector&, const ndBrainVector&, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const
@@ -139,6 +140,7 @@ void ndBrainLayerActivationLinear::InputDerivative(const ndBrainVector&, const n
 
 	inputDerivative.Set(m_slopes);
 	inputDerivative.Mul(outputDerivative);
+	ndAssert(inputDerivative.SanityCheck());
 }
 
 bool ndBrainLayerActivationLinear::HasGpuSupport() const
@@ -151,7 +153,8 @@ void ndBrainLayerActivationLinear::FeedForward(const ndBrainLayerFeedForwardCpuC
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
 	ndBrainTrainerInference* const trainer = desc.m_owner;
-	const ndBrainFloat* const inputOutputBuffer = (ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr();
+
+	const ndBrainMemVector inputOutputBuffer((ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr(), ndInt32(trainer->GetHiddenLayerBuffer()->GetCount()));
 
 	ndInt32 inputSize = info.m_inputSize;
 	ndInt32 outputSize = info.m_outputSize;
@@ -167,6 +170,7 @@ void ndBrainLayerActivationLinear::FeedForward(const ndBrainLayerFeedForwardCpuC
 	output.Set(input);
 	output.Mul(m_slopes);
 	output.Add(m_biases);
+	ndAssert(output.SanityCheck());
 }
 
 void ndBrainLayerActivationLinear::BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const
@@ -175,7 +179,7 @@ void ndBrainLayerActivationLinear::BackPropagate(const ndBrainLayerBackPropagate
 	const ndCommandSharedInfo& info = desc.m_info;
 	ndBrainTrainer* const trainer = (ndBrainTrainer*)desc.m_owner;
 
-	const ndBrainFloat* const inputOutputGradientsBuffer = (ndBrainFloat*)trainer->GetHiddenLayerGradientBuffer()->GetCpuPtr();
+	const ndBrainMemVector inputOutputGradientsBuffer((ndBrainFloat*)trainer->GetHiddenLayerGradientBuffer()->GetCpuPtr(), ndInt32(trainer->GetHiddenLayerGradientBuffer()->GetCount()));
 
 	ndInt32 inputSize = info.m_inputSize;
 	ndInt32 inputOutputSize = info.m_inputOutputSize;
@@ -192,6 +196,7 @@ void ndBrainLayerActivationLinear::BackPropagate(const ndBrainLayerBackPropagate
 
 	inputDerivative.Set(m_slopes);
 	inputDerivative.Mul(outputDerivative);
+	ndAssert (inputDerivative.SanityCheck());
 }
 
 ndCommandArray ndBrainLayerActivationLinear::CreateFeedForwardBufferCommand(

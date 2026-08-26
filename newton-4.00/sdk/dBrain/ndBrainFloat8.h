@@ -49,6 +49,8 @@ class ndBrainFloat8
 	void Store(ndBrainFloat* const ptr) const;
 	void Store(ndBrainFloat* const ptr, const ndBrainFloat8& index) const;
 
+	ndBrainFloat8 Inv() const;
+	ndBrainFloat8 Exp() const;
 	ndBrainFloat8 Tanh() const;
 	ndBrainFloat8 Min(const ndBrainFloat8& src) const;
 	ndBrainFloat8 Max(const ndBrainFloat8& src) const;
@@ -201,6 +203,28 @@ inline ndBrainFloat8 ndBrainFloat8::Max(const ndBrainFloat8& max) const
 		tmp.m_f[i] = ndMax(m_f[i], max.m_f[i]);
 		ndAssert(tmp.m_f[i] <= ndFloat32(1000.0f));
 		ndAssert(tmp.m_f[i] >= ndFloat32(-1000.0f));
+	}
+	return tmp;
+}
+
+inline ndBrainFloat8 ndBrainFloat8::Exp() const
+{
+	ndBrainFloat8 tmp;
+	for (ndInt32 i = 0; i < 8; ++i)
+	{
+		tmp.m_f[i] = ndBrainFloat(ndExp(m_f[i]));
+		ndAssert(tmp.m_f[i] <= ndFloat32(2000.0f));
+		ndAssert(tmp.m_f[i] >= ndFloat32(-2000.0f));
+	}
+	return tmp;
+}
+
+inline ndBrainFloat8 ndBrainFloat8::Inv() const
+{
+	ndBrainFloat8 tmp;
+	for (ndInt32 i = 0; i < 8; ++i)
+	{
+		tmp.m_f[i] = (ndBrainFloat(1.0f) / m_f[i]);
 	}
 	return tmp;
 }

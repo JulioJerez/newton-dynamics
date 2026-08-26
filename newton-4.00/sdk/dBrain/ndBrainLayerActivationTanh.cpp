@@ -79,10 +79,9 @@ void ndBrainLayerActivationTanh::MakePrediction(const ndBrainVector& input, ndBr
 	{
 		ndBrainFloat value = ndClamp(src[i], ndBrainFloat(-30.0f), ndBrainFloat(30.0f));
 		dst[i] = ndBrainFloat(ndTanh(value));
-		ndAssert(dst[i] <= ndFloat32(1000.0f));
-		ndAssert(dst[i] >= ndFloat32(-1000.0f));
 	}
 	output.FlushToZero();
+	ndAssert(output.SanityCheck());
 }
 
 void ndBrainLayerActivationTanh::InputDerivative(const ndBrainVector&, const ndBrainVector& output, const ndBrainVector& outputDerivative, ndBrainVector& inputDerivative) const
@@ -94,6 +93,7 @@ void ndBrainLayerActivationTanh::InputDerivative(const ndBrainVector&, const ndB
 	inputDerivative.MulSub(output, output);
 	inputDerivative.Mul(outputDerivative);
 	inputDerivative.FlushToZero();
+	ndAssert(inputDerivative.SanityCheck());
 }
 
 bool ndBrainLayerActivationTanh::HasGpuSupport() const
@@ -106,7 +106,8 @@ void ndBrainLayerActivationTanh::FeedForward(const ndBrainLayerFeedForwardCpuCom
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
 	ndBrainTrainerInference* const trainer = desc.m_owner;
-	const ndBrainFloat* const inputOutputBuffer = (ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr();
+
+	const ndBrainMemVector inputOutputBuffer ((ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr(), ndInt32(trainer->GetHiddenLayerBuffer()->GetCount()));
 
 	ndInt32 inputSize = info.m_inputSize;
 	ndInt32 outputSize = info.m_outputSize;
@@ -116,6 +117,8 @@ void ndBrainLayerActivationTanh::FeedForward(const ndBrainLayerFeedForwardCpuCom
 	ndInt64 inputOffset = miniBatchIndex * ndInt64(inputOutputSize) + inputOutputStartOffset;
 	ndInt64 outputOffset = inputOffset + trainer->RoundOffOffset(inputSize);
 	
+	ndAssert(inputOutputBuffer.BounceCheck(inputOffset + inputSize - 1));
+	ndAssert(inputOutputBuffer.BounceCheck(outputOffset + outputSize - 1));
 	const ndBrainMemVector input(&inputOutputBuffer[inputOffset], inputSize);
 	ndBrainMemVector output(&inputOutputBuffer[outputOffset], outputSize);
 
@@ -135,7 +138,8 @@ void ndBrainLayerActivationTanh::FeedForward(const ndBrainLayerFeedForwardCpuCom
 		ndBrainFloat value = ndClamp(src[i], ndBrainFloat(-30.0f), ndBrainFloat(30.0f));
 		dst[i] = ndBrainFloat(ndTanh(value));
 	}
-	output.FlushToZero();
+	//output.FlushToZero();
+	ndAssert(output.SanityCheck());
 }
 
 void ndBrainLayerActivationTanh::BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const
@@ -144,8 +148,8 @@ void ndBrainLayerActivationTanh::BackPropagate(const ndBrainLayerBackPropagateCp
 	const ndCommandSharedInfo& info = desc.m_info;
 	ndBrainTrainer* const trainer = (ndBrainTrainer*)desc.m_owner;
 
-	const ndBrainFloat* const inputOutputBuffer = (ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr();
-	const ndBrainFloat* const inputOutputGradientsBuffer = (ndBrainFloat*)trainer->GetHiddenLayerGradientBuffer()->GetCpuPtr();
+	const ndBrainMemVector inputOutputBuffer ((ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr(), ndInt32(trainer->GetHiddenLayerBuffer()->GetCount()));
+	const ndBrainMemVector inputOutputGradientsBuffer ((ndBrainFloat*)trainer->GetHiddenLayerGradientBuffer()->GetCpuPtr(), ndInt32 (trainer->GetHiddenLayerGradientBuffer()->GetCount()));
 
 	ndInt32 inputSize = info.m_inputSize;
 	ndInt32 inputOutputSize = info.m_inputOutputSize;
@@ -157,6 +161,9 @@ void ndBrainLayerActivationTanh::BackPropagate(const ndBrainLayerBackPropagateCp
 	ndAssert(dstBase >= 0);
 	ndAssert(inputSize == info.m_outputSize);
 
+	ndAssert(inputOutputBuffer.BounceCheck(dstBase + inputSize - 1));
+	ndAssert(inputOutputGradientsBuffer.BounceCheck(dstBase + inputSize - 1));
+	ndAssert(inputOutputGradientsBuffer.BounceCheck(srcBase + inputSize - 1));
 	const ndBrainMemVector output(&inputOutputBuffer[dstBase], inputSize);
 	const ndBrainMemVector outputDerivative(&inputOutputGradientsBuffer[dstBase], inputSize);
 	ndBrainMemVector inputDerivative(&inputOutputGradientsBuffer[srcBase], inputSize);
@@ -164,7 +171,8 @@ void ndBrainLayerActivationTanh::BackPropagate(const ndBrainLayerBackPropagateCp
 	inputDerivative.Set(ndBrainFloat(1.0f));
 	inputDerivative.MulSub(output, output);
 	inputDerivative.Mul(outputDerivative);
-	inputDerivative.FlushToZero();
+
+	ndAssert (inputDerivative.SanityCheck());
 }
 
 ndCommandArray ndBrainLayerActivationTanh::CreateFeedForwardBufferCommand(

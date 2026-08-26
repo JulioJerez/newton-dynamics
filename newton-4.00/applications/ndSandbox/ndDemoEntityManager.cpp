@@ -59,9 +59,9 @@
 //#define DEFAULT_SCENE	29		// procedurally animated quadruped spider
 
 // These are the machine learning training demos
-//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// SAC cart pole training
+#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// SAC cart pole training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// SAC double pendulum unicycle training
-#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// PPO cart pole training
+//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// PPO cart pole training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 3)	// PPO double pendulum unicycle training
 
 // legacy demos 
@@ -210,7 +210,7 @@ ndInt32 ndDemoEntityManager::ButtonKey::UpdatePushButton (bool triggerValue)
 	return m_state ? 1 : 0;
 }
 
-static void Test0__()
+static void ConjugateGradient()
 {
 	ndFixSizeArray<ndFloat32, 6> B(6);
 	ndFixSizeArray<ndFloat32, 6> x0(6);
@@ -351,60 +351,6 @@ static ndInt32 Fibonacci(ndInt32 n)
 		b = c;
 	}
 	return b;
-}
-
-static void Test2__()
-{
-	//ndFloat32 A[2][2];
-	//ndFloat32 x[2];
-	//ndFloat32 b[2];
-	//ndFloat32 l[2];
-	//ndFloat32 h[2];
-	//
-	//A[0][0] = 2.0f;
-	//A[0][1] = 1.0f;
-	//A[1][0] = 1.0f;
-	//A[1][1] = 2.0f;
-	//b[0] = 1.0f;
-	//b[1] = 1.0f;
-	//x[0] = 1;
-	//x[1] = 2;
-	//
-	//l[0] = 0.0f;
-	//l[1] = 0.0f;
-	//h[0] = 0.25f;
-	//h[1] = 1.0f;
-	//
-	//ndMatrixTimeVector(2, &A[0][0], x, b);
-	//dSolveDantzigLCP(2, &A[0][0], x, b, l, h);
-	//
-	//ndInt32 xxx = 0;
-	//const ndInt32 xxxxxx = 450;
-	//dDownHeap<ndInt32, unsigned> xxxxx (xxxxxx + 2);
-	//for (ndInt32 i = 0; i < xxxxxx; ++i)
-	//{
-	//	xxxxx.Push (xxx, i);
-	//}
-	//
-	//for (ndInt32 i = 0; i < 10000; ++i)
-	//{
-	//	ndInt32 index = dRandInt() % xxxxxx;
-	//	ndInt32 key = xxxxx.Value(index);
-	//	xxxxx.Remove (index);
-	//	xxxxx.Push (xxx, key);
-	//}
-
-	//ndBrainVector xxx;
-	//ndBrainVector xxx1;
-	//xxx.PushBack(0.1f);
-	//xxx.PushBack(0.7f);
-	//xxx.PushBack(0.2f);
-	//
-	//xxx1.SetCount(3);
-	//for (ndInt32 i = 0; i < 20; i++)
-	//{
-	//	xxx1.CategoricalSample(xxx, 0.5f);
-	//}
 }
 
 static void SimpleRegressionBrainStressTest()
@@ -791,15 +737,14 @@ ndDemoEntityManager::ndDemoEntityManager()
 	ApplyOptions();
 
 #if 1
-	//Test0__();
-	//Test2__();
+	//ConjugateGradient();
 	//TestTiledCholesky();
 	//SimpleRegressionBrainStressTest();
 	//ndHandWrittenDigits();
 	//ndCifar10ImageClassification();
+	//TestAutoDifferentiation();
 #endif
 
-	TestAutoDifferentiation();
 }
 
 ndDemoEntityManager::~ndDemoEntityManager ()

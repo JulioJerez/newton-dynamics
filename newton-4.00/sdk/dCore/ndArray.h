@@ -95,6 +95,8 @@ class ndArray: public ndClassAlloc
 	/// useful for when making vectors of vectors (ex matrices)
 	void SetMembers(ndInt64 size, void* const memory);
 
+	bool BounceCheck(ndInt64 index) const;
+
 	private: 
 	void CopyBuffer(T* const dst, const T* const src, ndInt64 elements);
 
@@ -151,18 +153,22 @@ ndArray<T>::~ndArray ()
 }
 
 template<class T>
+bool ndArray<T>::BounceCheck(ndInt64 index) const
+{
+	return (index >= 0) && (index < m_size);
+}
+
+template<class T>
 const T& ndArray<T>::operator[] (ndInt64 i) const
 {
-	ndAssert(i >= 0);
-	ndAssert(i < m_size);
+	ndAssert(BounceCheck(i));
 	return m_array[i];
 }
 
 template<class T>
 T& ndArray<T>::operator[] (ndInt64 i)
 {
-	ndAssert(i >= 0);
-	ndAssert(i < m_size);
+	ndAssert(BounceCheck(i));
 	return m_array[i];
 }
 

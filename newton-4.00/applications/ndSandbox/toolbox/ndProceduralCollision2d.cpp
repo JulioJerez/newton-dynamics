@@ -235,7 +235,7 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 		}
 	}
 
-	void GetFacesPatch(ndPatchMesh& patch) const override
+	virtual void GetFacesPatch(ndPatchMesh& patch) const override
 	{
 		ndAssert(patch.m_convexShapeInstance);
 		// calculate box extend rounded you the padding

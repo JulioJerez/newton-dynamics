@@ -40,9 +40,9 @@ class ndBrainTrainer: public ndBrainTrainerInference
 
 	ndBrainFloatBuffer* GetHiddenLayerGradientBuffer();
 	ndBrainFloatBuffer* GetWeightAndBiasGradientBuffer();
-	ndBrainFloatBuffer* GetPartialSumBiasGradientBuffer();
 
 	void BackPropagate();
+	void AccumulateWeightAndBiasGradients();
 	void ApplyLearnRate(ndBrainFloat learnRate);
 	
 	protected:
@@ -52,7 +52,6 @@ class ndBrainTrainer: public ndBrainTrainerInference
 	void AddOptimizerGradientCommand();
 	void AddCopyOutputGradientCommand();
 
-	//ndSharedPtr<ndBrainOptimizerAdam> m_optimizer;
 	ndSharedPtr<ndBrainOptimizer> m_optimizer;
 	ndSharedPtr<ndBrainBufferCommand> m_adamOtimizerUpdate;
 	ndSharedPtr<ndBrainBufferCommand> m_adamMomentumUpdate;
@@ -61,7 +60,6 @@ class ndBrainTrainer: public ndBrainTrainerInference
 	ndSharedPtr<ndBrainFloatBuffer> m_weightAndBiasGradientsBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_miniBatchInputGradientBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_miniBatchOutputGradientBuffer;
-	ndSharedPtr<ndBrainFloatBuffer> m_biasPartialSumGradientsCacheBuffer;
 
 	ndList<ndSharedPtr<ndBrainBufferCommand>> m_backPropagateCommands;
 	//ndSharedPtr<ndBrainBufferCommand> m_adamOptimizerCommand;

@@ -84,7 +84,6 @@ ndBrainTrainerInference::~ndBrainTrainerInference()
 
 ndInt32 ndBrainTrainerInference::RoundOffOffset(ndInt32 value) const
 {
-	//return m_descriptor.m_context->GetAsGpuContext() ? (value + ND_DEFAULT_WORKGROUP_SIZE - 1) & -ND_DEFAULT_WORKGROUP_SIZE : value;
 	return (value + ND_DEFAULT_WORKGROUP_SIZE - 1) & -ND_DEFAULT_WORKGROUP_SIZE;
 }
 

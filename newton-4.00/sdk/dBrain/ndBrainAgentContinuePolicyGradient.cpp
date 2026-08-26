@@ -48,7 +48,7 @@ ndContinuePolicyGradientHyperParameters::ndContinuePolicyGradientHyperParameters
 	m_numberOfActions = 0;
 	m_numberOfObservations = 0;
 
-	m_numberOfHiddenLayers = 3;
+	m_numberOfHiddenLayers = 2;
 	m_hiddenLayersNumberOfNeurons = 128;
 	
 	m_maxTrajectorySteps = 4096;

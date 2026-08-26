@@ -700,6 +700,11 @@ void ndBrainGpuContext::SetLearnRateCommandBuffers(ndBrainOptimizerAdam& optimiz
 	}
 }
 
+void ndBrainGpuContext::AccumulateWeightsAndBiasBuffer(ndInt32 numberOfBuffers, ndInt32 bufferSizeInFloats, ndBrainFloatBuffer& weightsAndBiasGradientBuffer)
+{
+	ndAssert(0);
+}
+
 void ndBrainGpuContext::Set(ndBrainFloatBuffer& dstData, ndBrainFloat value)
 {
 	SubmitMathOperation(m_brainSet, &dstData, value);

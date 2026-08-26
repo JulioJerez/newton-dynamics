@@ -97,7 +97,7 @@ namespace ndUnicyclePlayer
 
 		ndFloat32 randX = ndFloat32(20.0f) * (ndRand() - ndFloat32(0.5f));
 		boxMatrix.m_posit.m_x = randX;
-		boxMatrix.m_posit.m_y = ndFloat32(2.5f);
+		boxMatrix.m_posit.m_y = ndFloat32(3.5f);
 		m_topBox->SetMatrix(boxMatrix);
 		
 		const ndMatrix poleMatrix(m_poleHinge->GetLocalMatrix0().OrthoInverse() * m_poleHinge->CalculateGlobalMatrix1());
@@ -186,12 +186,11 @@ namespace ndUnicyclePlayer
 		const ndModelArticulation* const model = GetModel()->GetAsModelArticulation();
 		ndModelArticulation::ndCenterOfMassDynamics kinematic(model->CalculateCentreOfMassKinematics(ndGetIdentityMatrix()));
 
-		ndFloat32 comSpeed = kinematic.m_veloc.m_x;
-		ndFloat32 comSpeedReward = ndExp(-ndFloat32(10.0f) * comSpeed * comSpeed);
+		const ndFloat32 comSpeed = kinematic.m_veloc.m_x;
+		const ndFloat32 comSpeedReward = ndExp(ndFloat32(-100.0f) * comSpeed * comSpeed);
 
-		const ndFloat32 invSigma2 = ndFloat32(900.0f);
-		const ndFloat32 poleAngle = ndMax((ndAbs(GetPoleAngle()) - ndFloat32(10.0f * ndDegreeToRad)), ndFloat32(0.0f));
-		const ndFloat32 poleAngleReward = ndExp(-invSigma2 * poleAngle * poleAngle);
+		const ndFloat32 poleAngle = GetPoleAngle();
+		const ndFloat32 poleAngleReward = ndExp(ndFloat32(-1500.0f) * poleAngle * poleAngle);
 
 		ndFloat32 reward = ndFloat32(0.0f);
 		reward += comSpeedReward * ndFloat32(0.5f);
@@ -254,7 +253,7 @@ namespace ndUnicyclePlayer
 		ndFloat32 poleAngle = GetPoleAngle();
 		ndFloat32 poleOmega = GetPoleOmega();
 		ndFloat32 wheelOmega = GetWheelOmega();
-		ndFloat32 wheelAlpha = GetWheelAlpha();
+		//ndFloat32 wheelAlpha = GetWheelAlpha();
 
 		observation[m_hasContactSupport] = IsOnAir();
 		observation[m_boxAngle] = ndBrainFloat(boxAngle);
@@ -262,7 +261,7 @@ namespace ndUnicyclePlayer
 		observation[m_poleAngle] = ndBrainFloat(poleAngle);
 		observation[m_poleOmega] = ndBrainFloat(poleOmega);
 		observation[m_wheelOmega] = ndBrainFloat(wheelOmega);
-		observation[m_wheelAlpha] = ndBrainFloat(wheelAlpha);
+		//observation[m_wheelAlpha] = ndBrainFloat(wheelAlpha);
 	}
 
 	void ndController::CreateArticulatedModel(
@@ -287,20 +286,17 @@ namespace ndUnicyclePlayer
 			if (node->m_name.Find("body") > -1)
 			{
 				m_topBox = node->m_body;
-				//node->m_body->GetAsBodyKinematic()->SetMassMatrix(BOX_MASS, node->m_body->GetAsBodyKinematic()->GetCollisionShape());
 			}
 			else if (node->m_name.Find("pole") > -1)
 			{
 				m_pole = node->m_body;
 				m_poleHinge = node->m_joint;
-				//node->m_body->GetAsBodyKinematic()->SetMassMatrix(POLE_MASS, node->m_body->GetAsBodyKinematic()->GetCollisionShape());
-				((ndJointHinge*)*m_poleHinge)->SetAsSpringDamper(0.5f, 0.0f, 1.0f);
+				//((ndJointHinge*)*m_poleHinge)->SetAsSpringDamper(0.5f, 0.0f, 1.0f);
 			}
 			else if (node->m_name.Find("roller") > -1)
 			{
 				m_wheel = node->m_body;
 				m_wheelRoller = node->m_joint;
-				//node->m_body->GetAsBodyKinematic()->SetMassMatrix(POLE_MASS, node->m_body->GetAsBodyKinematic()->GetCollisionShape());
 			}
 		};
 		model->GetAsModelArticulation()->NodeIterator(BindApplicationData);
