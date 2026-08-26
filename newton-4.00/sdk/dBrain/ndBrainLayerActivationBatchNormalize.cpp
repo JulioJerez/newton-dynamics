@@ -52,6 +52,12 @@ ndBrainLayerActivationBatchNormalize::ndBrainLayerActivationBatchNormalize(ndInt
 
 ndBrainLayerActivationBatchNormalize::ndBrainLayerActivationBatchNormalize(const ndBrainLayerActivationBatchNormalize& src)
 	:ndBrainLayerActivation(src)
+	,m_bias(src.m_bias)
+	,m_scale(src.m_scale)
+	,m_trainingBias(src.m_trainingBias)
+	,m_trainingScale(src.m_trainingScale)
+	,m_inferenceBias(src.m_inferenceBias)
+	,m_inferenceScale(src.m_inferenceScale)
 {
 }
 
