@@ -35,6 +35,7 @@
 #include "ndBrainLayerActivationLinear.h"
 #include "ndBrainLossLeastSquaredError.h"
 #include "ndBrainLayerActivationLeakyRelu.h"
+#include "ndBrainLayerActivationBatchNormalize.h"
 #include "ndBrainAgentOffPolicyGradient_Trainer.h"
 
 #define ND_POLICY_LEARN_SCALE				ndBrainFloat(0.5f)
@@ -386,7 +387,8 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildPolicyClass()
 {
 	ndFixSizeArray<ndBrainLayer*, 32> layers(0);
 	
-	layers.PushBack(new ndBrainLayerLinear(m_parameters.m_numberOfObservations, m_parameters.m_hiddenLayersNumberOfNeurons));
+	layers.PushBack(new ndBrainLayerActivationBatchNormalize(m_parameters.m_numberOfObservations));
+	layers.PushBack(new ndBrainLayerLinear(layers[layers.GetCount() - 1]->GetOutputSize(), m_parameters.m_hiddenLayersNumberOfNeurons));
 	layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 
 	for (ndInt32 i = 0; i < m_parameters.m_numberOfHiddenLayers; ++i)
@@ -438,6 +440,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildCriticClass()
 		ndFixSizeArray<ndBrainLayer*, 32> layers(0);
 		const ndBrain& policy = **m_policyTrainer->GetBrain();
 
+		layers.PushBack(new ndBrainLayerActivationBatchNormalize(policy.GetOutputSize() + policy.GetInputSize()));
 		layers.PushBack(new ndBrainLayerLinear(policy.GetOutputSize() + policy.GetInputSize(), m_parameters.m_hiddenLayersNumberOfNeurons));
 		layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
 

@@ -34,6 +34,7 @@ class ndBrainLayerActivationBatchNormalize : public ndBrainLayerActivation
 	ndBrainLayerActivationBatchNormalize(const ndBrainLayerActivationBatchNormalize& src);
 	ndBrainLayer* Clone() const override;
 	static ndBrainLayer* Load(const ndBrainLoad* const loadSave);
+	virtual void Save(const ndBrainSave* const loadSave) const override;
 
 	const char* GetLabelId() const override;
 	void MakePrediction(const ndBrainVector& input, ndBrainVector& output) const override;
@@ -42,6 +43,13 @@ class ndBrainLayerActivationBatchNormalize : public ndBrainLayerActivation
 	virtual bool HasGpuSupport() const override;
 	virtual void FeedForward(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const override;
 	virtual void BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const override;
+
+	virtual void SetWeights(ndBrainTrainerInference* const trainer, const ndBrainVector& input) override;
+	virtual void CopyWeights(ndBrainTrainerInference* const trainer, ndBrainVector& output) const override;
+	virtual ndCommandSharedInfo GetCommandSharedInfo(ndBrainTrainerInference* const trainer) const override;
+
+	void CalculateMeanAndVariance(const ndBrainLayerFeedForwardCpuCommand* const command) const;
+	void NormalizeMeanAndVariance(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const;
 
 	virtual ndCommandArray CreateFeedForwardBufferCommand(
 		ndBrainTrainerInference* const owner,
@@ -60,6 +68,13 @@ class ndBrainLayerActivationBatchNormalize : public ndBrainLayerActivation
 		ndBrainFloatBuffer* const weightsAndBias,
 		ndBrainFloatBuffer* const inputOutputGradients,
 		ndBrainFloatBuffer* const weightsAndBiasGradients) const override;
+
+	ndBrainVector m_bias;
+	ndBrainVector m_scale;
+	mutable ndBrainVector m_trainingBias;
+	mutable ndBrainVector m_trainingScale;
+	mutable ndBrainVector m_inferenceBias;
+	mutable ndBrainVector m_inferenceScale;
 };
 
 #endif 
