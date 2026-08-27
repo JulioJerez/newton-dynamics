@@ -436,8 +436,8 @@ ndBrainLayerActivationBatchNormalize::ndBrainLayerActivationBatchNormalize(ndInt
 	m_slopes.SetCount(neurons);
 	m_biases.SetCount(neurons);
 
-	m_slopes.Set(ndBrainFloat(1.0f));
 	m_biases.Set(ndBrainFloat(0.0f));
+	m_slopes.Set(ndBrainFloat(10.0f));
 }
 
 ndBrainLayerActivationBatchNormalize::ndBrainLayerActivationBatchNormalize(const ndBrainLayerActivationBatchNormalize& src)
