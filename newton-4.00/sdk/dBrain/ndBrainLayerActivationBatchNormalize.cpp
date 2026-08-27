@@ -437,7 +437,7 @@ ndBrainLayerActivationBatchNormalize::ndBrainLayerActivationBatchNormalize(ndInt
 	m_biases.SetCount(neurons);
 
 	m_biases.Set(ndBrainFloat(0.0f));
-	m_slopes.Set(ndBrainFloat(10.0f));
+	m_slopes.Set(ndBrainFloat(1.0f));
 }
 
 ndBrainLayerActivationBatchNormalize::ndBrainLayerActivationBatchNormalize(const ndBrainLayerActivationBatchNormalize& src)
@@ -538,7 +538,7 @@ void ndBrainLayerActivationBatchNormalize::CalculateVariance(const ndBrainLayerF
 	variance.Sqrt();
 
 	tmp.Reciprocal(m_slopes);
-	variance.Max(tmp);
+	//variance.Max(tmp);
 
 	tmp.Blend(variance, ndBrainFloat(0.01f));
 	m_slopes.Reciprocal(tmp);
