@@ -19,9 +19,7 @@ class ndFbxExport : public ndRenderMeshLoader
 	public:
 	ndFbxExport(ndRender* const renderer);
 	
-	bool Export(const ndString& ouputPath);
-
-
+	bool Export(const ndString& ndPath, const ndString& fbxOuputPath);
 };
 
 #endif

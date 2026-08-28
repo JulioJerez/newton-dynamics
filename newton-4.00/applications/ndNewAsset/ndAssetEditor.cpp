@@ -475,7 +475,7 @@ void ndAssetEditor::ShowMainMenuBar()
 					loader.m_mesh = m_mesh;
 
 					const ndString path(fileName);
-					loader.Export(path);
+					loader.Export(m_currentPath, path);
 				}
 			}
 

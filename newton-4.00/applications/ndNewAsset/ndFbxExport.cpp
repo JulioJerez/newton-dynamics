@@ -17,7 +17,7 @@ ndFbxExport::ndFbxExport(ndRender* const renderer)
 {
 }
 
-bool ndFbxExport::Export(const ndString& ouputPath)
+bool ndFbxExport::Export(const ndString& ndPath, const ndString& fbxOuputPath)
 {
 	return true;
 }

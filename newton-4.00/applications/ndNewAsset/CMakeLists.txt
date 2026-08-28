@@ -129,13 +129,8 @@ if(UNIX)
         COMMENT "symbolic link resources folder from ${source} => ${destination}")
 endif()
 
-#install(DIRECTORY ../media DESTINATION "${PROJECT_BINARY_DIR}/applications")
-#if (MSVC)
-#	set (assetCommand "execute_process(COMMAND cmd /c unpackAssets.bat WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/applications/media/)")
-#	install(CODE ${assetCommand})
-#    
-#	set (raceTrackAssetCommand "execute_process(COMMAND cmd /c unpackAssets.bat WORKING_DIRECTORY ${PROJECT_BINARY_DIR}/applications/media/racetrack)")
-#	install(CODE ${raceTrackAssetCommand})
-#endif()
+if (MSVC)
+	install(DIRECTORY autodesk/ DESTINATION "${PROJECT_BINARY_DIR}/applications/${projectName}/$<CONFIG>")
+endif()
 
 set_target_properties(${projectName} PROPERTIES FOLDER "demos")
