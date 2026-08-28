@@ -20,6 +20,8 @@ bool ndGetSaveFileName(char* const fileName, int maxSize);
 bool ndGetImportFbxFileName(char* const fileName, int maxSize);
 bool ndGetImportUrdfFileName(char* const fileName, int maxSize);
 
+bool ndGetExportFbxFileName(char* const fileName, int maxSize);
+
 bool ndGetWorkingFileName(const char* const basePath, char* const name, int maxSize);
 
 

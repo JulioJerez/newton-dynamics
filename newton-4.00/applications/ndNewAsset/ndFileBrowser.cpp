@@ -46,7 +46,8 @@ bool ndGetSaveFileName(char* const fileName, int maxSize)
 	if (state) 
 	{
 		char* const ext = strrchr(fileName, '.');
-		if (!ext) 
+//		if (!ext) 
+		if (!ext || strcmp(ext, ".nd"))
 		{
 			strcat(fileName, ".nd");
 		}
@@ -87,7 +88,8 @@ bool ndGetLoadFileName(char* const fileName, int maxSize)
 	if (state)
 	{
 		char* const ext = strrchr(fileName, '.');
-		if (!ext)
+//		if (!ext)
+		if (!ext || strcmp(ext, ".nd"))
 		{
 			strcat(fileName, ".nd");
 		}
@@ -128,7 +130,8 @@ bool ndGetImportFbxFileName(char* const fileName, int maxSize)
 	if (state)
 	{
 		char* const ext = strrchr(fileName, '.');
-		if (!ext)
+//		if (!ext)
+		if (!ext || strcmp(ext, ".fbx"))
 		{
 			strcat(fileName, ".fbx");
 		}
@@ -169,9 +172,51 @@ bool ndGetImportUrdfFileName(char* const fileName, int maxSize)
 	if (state)
 	{
 		char* const ext = strrchr(fileName, '.');
-		if (!ext)
+		//if (!ext)
+		if (!ext || strcmp(ext, ".urdf"))
 		{
 			strcat(fileName, ".urdf");
+		}
+	}
+	return state;
+#else
+	return false;
+#endif
+}
+
+
+bool ndGetExportFbxFileName(char* const fileName, int maxSize)
+{
+#if (defined(WIN32) || defined(_WIN32))
+	OPENFILENAME ofn;
+	// open a file name
+	char appPath[256];
+	GetModuleFileNameA(nullptr, appPath, sizeof(appPath));
+
+	char* const end = strstr(appPath, "applications");
+	end[0] = 0;
+	strcat(appPath, "applications\\ndSandbox");
+
+	ZeroMemory(&ofn, sizeof(ofn));
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = nullptr;
+	ofn.lpstrFile = fileName;
+	ofn.lpstrFile[0] = '\0';
+	ofn.nMaxFile = DWORD(maxSize);
+	ofn.lpstrFilter = const_cast<LPSTR>("newton save file *.fbx\0*.fbx\0");
+	ofn.nFilterIndex = 1;
+	ofn.lpstrFileTitle = const_cast<LPSTR>("Newton asset editor");
+	ofn.nMaxFileTitle = 0;
+	ofn.lpstrInitialDir = appPath;
+	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+	bool state = GetSaveFileName(&ofn) ? true : false;
+	if (state)
+	{
+		char* const ext = strrchr(fileName, '.');
+		if (!ext || strcmp (ext, ".fbx"))
+		{
+			strcat(fileName, ".fbx");
 		}
 	}
 	return state;

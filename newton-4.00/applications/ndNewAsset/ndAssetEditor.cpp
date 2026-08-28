@@ -11,6 +11,7 @@
 
 #include "ndNewAssetStdafx.h"
 #include "ndUrdfFile.h"
+#include "ndFbxExport.h"
 #include "ndResizeMesh.h"
 #include "ndRotateMesh.h"
 #include "ndAssetEditor.h"
@@ -461,6 +462,20 @@ void ndAssetEditor::ShowMainMenuBar()
 						SetVisualScene(loader.m_mesh, loader.m_renderMesh);
 						m_undoRedo.Clear();
 					}
+				}
+			}
+
+			ImGui::Separator();
+			if (ImGui::MenuItem("Export fbx", ""))
+			{
+				char fileName[2048];
+				if (ndGetExportFbxFileName(fileName, sizeof(fileName) - 1))
+				{
+					ndFbxExport loader(*m_renderer);
+					loader.m_mesh = m_mesh;
+
+					const ndString path(fileName);
+					loader.Export(path);
 				}
 			}
 
