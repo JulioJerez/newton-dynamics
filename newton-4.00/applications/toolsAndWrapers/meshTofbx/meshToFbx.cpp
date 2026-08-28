@@ -14,7 +14,7 @@
 
 class exportVector
 {
-public:
+	public:
 	inline exportVector()
 	{
 	}
@@ -667,26 +667,36 @@ void AnimateSkeleton(const exportMeshNode* const model, FbxScene* const fbxScene
 
 int main(int argc, char** argv)
 {
-	const char* name = nullptr;
-	if ((argc > 1) && strstr(argv[1], ".nd"))
+	if (argc < 3)
 	{
-		name = argv[1];
-	}
-	if (!name)
-	{
-		printf("usage meshToFbx [nd_file_name]\n");
-		return 0;
+		printf("usage meshToFbx [nd_src_file fbx_dst_file]\n");
+		return 1;
 	}
 
-	const ndString ndPath(name);
-	ndString fbxPath (ndPath.GetPath() + ndPath.GetName() + ".fbx");
+	const ndString src(argv[1]);
+	const ndString ndExt (src.GetExtension());
+	if (ndExt != "nd")
+	{
+		printf("invalid file extension: %s\n", argv[1]);
+		printf("usage meshToFbx [nd_src_file.nd fbx_dst_file.fbx]\n");
+		return 1;
+	}
+
+	const ndString dst(argv[2]);
+	const ndString fbxExt(dst.GetExtension());
+	if (fbxExt != "fbx")
+	{
+		printf("invalid file extension: %s\n", argv[2]);
+		printf("usage meshToFbx [nd_src_file.nd fbx_dst_file.fbx]\n");
+		return 1;
+	}
 
 	ndMeshLoader loader;
-	loader.LoadMesh(ndPath);
+	loader.LoadMesh(src);
 	if (!loader.m_mesh)
 	{
-		printf("file not found %s\n", ndPath.GetStr());
-		return 0;
+		printf("file not found %s\n", src.GetStr());
+		return 1;
 	}
 	loader.m_mesh->ApplyTransform(ndYawMatrix(ndFloat32(-90.0f) * ndDegreeToRad));
 
@@ -694,31 +704,30 @@ int main(int argc, char** argv)
 	FbxManager* fbxManager = nullptr;
 	if (!InitializeSdkObjects(fbxManager, fbxScene))
 	{
-		FBXSDK_printf("failed to initialize fbx sdk: %s\n", name);
-		return 0;
+		FBXSDK_printf("failed to initialize fbx sdk\n");
+		return 1;
 	}
 
 	// Create the scene.
-	bool lResult = CreateScene(*loader.m_mesh, fbxManager, fbxScene, fbxPath.GetPath());
+	bool lResult = CreateScene(*loader.m_mesh, fbxManager, fbxScene, dst.GetPath());
 	
 	if (lResult == false)
 	{
 		FBXSDK_printf("\n\nAn error occurred while creating the fbsScene...\n");
 		fbxManager->Destroy();
-		return 0;
+		return 1;
 	}
 	
 	// Save the fbsScene.
-	lResult = SaveScene(fbxManager, fbxScene, fbxPath.GetStr());
+	lResult = SaveScene(fbxManager, fbxScene, dst.GetStr());
 	if (lResult == false)
 	{
 		FBXSDK_printf("\n\nAn error occurred while saving the fbsScene...\n");
 		fbxManager->Destroy();
-		return 0;
+		return 1;
 	}
 	
 	fbxManager->Destroy();
-
 	return 0;
 }
 

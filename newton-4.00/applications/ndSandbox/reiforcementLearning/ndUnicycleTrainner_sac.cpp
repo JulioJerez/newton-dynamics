@@ -120,8 +120,10 @@ namespace ndUnicycleTrainer_sac
 			ndBrainAgentOffPolicyGradient_Trainer::HyperParameters hyperParameters;
 			
 			hyperParameters.m_useGpuBackend = false;
-			hyperParameters.m_numberOfUpdates = 4;
-			hyperParameters.m_numberOfHiddenLayers = 2;
+			hyperParameters.m_numberOfUpdates = 1;
+			hyperParameters.m_numberOfHiddenLayers = 3;
+			hyperParameters.m_maxTrajectorySteps = 2048;
+			hyperParameters.m_discountRewardFactor = 0.99f;
 			hyperParameters.m_hiddenLayersNumberOfNeurons = 128;
 			hyperParameters.m_numberOfActions = m_actionsSize;
 			hyperParameters.m_numberOfObservations = m_observationsSize;

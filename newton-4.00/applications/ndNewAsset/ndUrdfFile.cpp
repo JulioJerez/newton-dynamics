@@ -936,7 +936,6 @@ bool ndUrdfMeshLoader::Import(const ndString& urdfPathName)
 		ptr = strrchr(m_path.GetStr(), '\\');
 	}
 	ndString parentPath(m_path.GetStr(), ndInt32(m_path.Size() - strlen(ptr)));
-	//m_searchPath = ndGetPath(parentPath);
 	m_searchPath = parentPath.GetPath();
 
 	ndString oldloc = setlocale(LC_ALL, 0);
