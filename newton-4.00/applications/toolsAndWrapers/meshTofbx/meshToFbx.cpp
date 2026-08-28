@@ -670,7 +670,7 @@ int main(int argc, char** argv)
 	if (argc < 3)
 	{
 		printf("usage meshToFbx [nd_src_file fbx_dst_file]\n");
-		return 0;
+		return 1;
 	}
 
 	const ndString src(argv[1]);
@@ -679,6 +679,7 @@ int main(int argc, char** argv)
 	{
 		printf("invalid file extension: %s\n", argv[1]);
 		printf("usage meshToFbx [nd_src_file.nd fbx_dst_file.fbx]\n");
+		return 1;
 	}
 
 	const ndString dst(argv[2]);
@@ -687,6 +688,7 @@ int main(int argc, char** argv)
 	{
 		printf("invalid file extension: %s\n", argv[2]);
 		printf("usage meshToFbx [nd_src_file.nd fbx_dst_file.fbx]\n");
+		return 1;
 	}
 
 	ndMeshLoader loader;
@@ -694,7 +696,7 @@ int main(int argc, char** argv)
 	if (!loader.m_mesh)
 	{
 		printf("file not found %s\n", src.GetStr());
-		return 0;
+		return 1;
 	}
 	loader.m_mesh->ApplyTransform(ndYawMatrix(ndFloat32(-90.0f) * ndDegreeToRad));
 
@@ -703,7 +705,7 @@ int main(int argc, char** argv)
 	if (!InitializeSdkObjects(fbxManager, fbxScene))
 	{
 		FBXSDK_printf("failed to initialize fbx sdk\n");
-		return 0;
+		return 1;
 	}
 
 	// Create the scene.
@@ -713,7 +715,7 @@ int main(int argc, char** argv)
 	{
 		FBXSDK_printf("\n\nAn error occurred while creating the fbsScene...\n");
 		fbxManager->Destroy();
-		return 0;
+		return 1;
 	}
 	
 	// Save the fbsScene.
@@ -722,12 +724,11 @@ int main(int argc, char** argv)
 	{
 		FBXSDK_printf("\n\nAn error occurred while saving the fbsScene...\n");
 		fbxManager->Destroy();
-		return 0;
+		return 1;
 	}
 	
 	fbxManager->Destroy();
-
-	return 1;
+	return 0;
 }
 
 

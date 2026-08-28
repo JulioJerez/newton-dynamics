@@ -19,5 +19,19 @@ ndFbxExport::ndFbxExport(ndRender* const renderer)
 
 bool ndFbxExport::Export(const ndString& ndPath, const ndString& fbxOuputPath)
 {
+	char commandLine[1024];
+
+	char appPath[256];
+	GetModuleFileNameA(nullptr, appPath, sizeof(appPath));
+	const ndString selfPath(appPath);
+	const ndString meshToFbxPath(selfPath.GetPath());
+
+	ndInt32 ret = 0;
+	snprintf(commandLine, sizeof(commandLine) - 1, "%smeshToFbx.exe %s %s", meshToFbxPath.GetStr(), ndPath.GetStr(), fbxOuputPath.GetStr());
+	ret = std::system(commandLine);
+	if (ret)
+	{
+		ndTrace(("export failed\n"));
+	}
 	return true;
 }
