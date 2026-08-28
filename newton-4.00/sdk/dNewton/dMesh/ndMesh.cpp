@@ -1598,11 +1598,11 @@ ndSharedPtr<ndJointBilateralConstraint> ndMesh::CreateJoint()
 	}
 	else if (strstr(name, "-roller"))
 	{
-		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointSlider());
+		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointRoller());
 	}
 	else if (strstr(name, "-cylindrical"))
 	{
-		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointSlider());
+		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointCylinder());
 	}
 	else if (strstr(name, "-doublehinge"))
 	{
@@ -1610,7 +1610,7 @@ ndSharedPtr<ndJointBilateralConstraint> ndMesh::CreateJoint()
 	}
 	else if (strstr(name, "-plane"))
 	{
-		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointDoubleHinge());
+		joint = ndSharedPtr<ndJointBilateralConstraint>(new ndJointPlane());
 	}
 	else if (strstr(name, "-wheel"))
 	{
