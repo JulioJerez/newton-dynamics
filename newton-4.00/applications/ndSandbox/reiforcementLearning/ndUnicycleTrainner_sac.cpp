@@ -105,7 +105,7 @@ namespace ndUnicycleTrainer_sac
 			,m_discountRewardFactor(0.99f)
 			,m_horizon(ndFloat32(1.0f) / (ndFloat32(1.0f) - m_discountRewardFactor))
 			,m_lastEpisode(0xfffffff)
-			,m_stopTraining(1000000)
+			,m_stopTraining(250000)
 			,m_modelIsTrained(false)
 		{
 			char name[256];
@@ -122,8 +122,8 @@ namespace ndUnicycleTrainer_sac
 			hyperParameters.m_useGpuBackend = false;
 			hyperParameters.m_numberOfUpdates = 1;
 			hyperParameters.m_numberOfHiddenLayers = 3;
-			hyperParameters.m_maxTrajectorySteps = 2048;
-			hyperParameters.m_discountRewardFactor = 0.99f;
+			hyperParameters.m_maxTrajectorySteps = 4096;
+			hyperParameters.m_discountRewardFactor = 0.995f;
 			hyperParameters.m_hiddenLayersNumberOfNeurons = 128;
 			hyperParameters.m_numberOfActions = m_actionsSize;
 			hyperParameters.m_numberOfObservations = m_observationsSize;
@@ -136,9 +136,9 @@ namespace ndUnicycleTrainer_sac
 			
 			// create a visual mesh and add to the scene.
 			ndWorld* const world = scene->GetWorld();
-			ndMatrix matrix(location);
-			matrix.m_posit.m_y = ndFloat32(0.1f);
-			loader.m_mesh->SetMatrix(loader.m_mesh->GetMatrix() * matrix);
+			ndMatrix matrix(loader.m_mesh->GetMatrix() * location);
+			matrix.m_posit.m_y = ndFloat32(2.5f);
+			loader.m_mesh->SetMatrix(matrix);
 			
 			ndSharedPtr<ndRenderSceneNode> visualMesh(loader.m_renderMesh->Clone());
 			visualMesh->SetTransform(loader.m_mesh->GetMatrix());
@@ -174,12 +174,7 @@ namespace ndUnicycleTrainer_sac
 
 			ndController* const playerController = (ndController*)(*controller);
 			playerController->CreateArticulatedModel(scene, model, mesh, visualMesh);
-
-			for (ndModelArticulation::ndNode* node = model->GetRoot()->GetFirstIterator(); node; node = node->GetNextIterator())
-			{
-				ndShapeMaterial& material = node->m_body->GetAsBodyDynamic()->GetCollisionShape().m_shapeMaterial;
-				material.m_userId = ndDemoContactCallback::m_modelPart;
-			}
+			playerController->ResetModel();
 
 			ndSharedPtr<ndBrainAgentOffPolicyGradient_Agent> agent(new ndAgent(m_master, playerController));
 			playerController->m_agent = (ndSharedPtr<ndBrainAgent>&) agent;
@@ -280,6 +275,7 @@ void ndUnicycleTrainingSAC(ndDemoEntityManager* const scene)
 
 	//load the mesh so that is can be re used
 	ndMatrix matrix(ndGetIdentityMatrix());
+	matrix.m_posit.m_y = ndFloat32 (2.5f);
 	ndRenderMeshLoader loader(*scene->GetRenderer());
 	loader.LoadMesh(ndGetWorkingFileName("unicycle.nd"));
 
