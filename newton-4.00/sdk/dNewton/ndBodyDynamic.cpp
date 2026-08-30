@@ -366,7 +366,7 @@ void ndBodyDynamic::IntegrateGyroSubstep(const ndVector& timestep)
 		const ndFloat32 omegaAngle = ndSqrt(omegaMag2);
 		const ndVector omegaAxis(m_omega.Scale(ndFloat32(1.0f) / omegaAngle));
 		const ndQuaternion rotationStep(omegaAxis, omegaAngle * timestep.GetScalar());
-		m_gyroRotation = m_gyroRotation * rotationStep;
+		m_gyroRotation = (m_gyroRotation * rotationStep).Normalize();
 		ndAssert((m_gyroRotation.DotProduct(m_gyroRotation).GetScalar() - ndFloat32(1.0f)) < ndFloat32(1.0e-5f));
 		
 		// calculate new Gyro torque and Gyro acceleration
