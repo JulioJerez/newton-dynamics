@@ -731,6 +731,18 @@ bool ndMatrix::TestIdentity(ndFloat32 tolerance) const
 	return true;
 }
 
+void ndMatrix::MakeOrthoNormal()
+{
+	m_up.m_w = ndFloat32(0.0f);
+	m_front.m_w = ndFloat32(0.0f);
+	m_right.m_w = ndFloat32(0.0f);
+	m_posit.m_w = ndFloat32(1.0f);
+
+	m_front.Normalize();
+	m_right = m_front.CrossProduct(m_up).Normalize();
+	m_up = m_right.CrossProduct(m_front).Normalize();
+}
+
 bool ndMatrix::TestOrthogonal(ndFloat32 tol) const
 {
 #ifdef _DEBUG
@@ -744,19 +756,19 @@ bool ndMatrix::TestOrthogonal(ndFloat32 tol) const
 #endif
 
 	ndVector n(m_front.CrossProduct(m_up));
-	ndFloat32 a = m_right.DotProduct(m_right).GetScalar();
+	ndFloat32 a = n.DotProduct(m_right).GetScalar();
 	ndFloat32 b = m_up.DotProduct(m_up).GetScalar();
 	ndFloat32 c = m_front.DotProduct(m_front).GetScalar();
-	ndFloat32 d = n.DotProduct(m_right).GetScalar();
-	bool ret = 
-		(m_up[3] == ndFloat32(0.0f)) &&
-		(m_front[3] == ndFloat32(0.0f)) &&
-		(m_right[3] == ndFloat32(0.0f)) &&
-		(m_posit[3] == ndFloat32(1.0f)) &&
-		(ndAbs(a - ndFloat32(1.0f)) < tol) &&
-		(ndAbs(b - ndFloat32(1.0f)) < tol) &&
-		(ndAbs(c - ndFloat32(1.0f)) < tol) &&
-		(ndAbs(d - ndFloat32(1.0f)) < tol);
+	ndFloat32 d = m_right.DotProduct(m_right).GetScalar();
+	bool ret = true;
+	ret = ret && (m_up[3] == ndFloat32(0.0f));
+	ret = ret && (m_front[3] == ndFloat32(0.0f));
+	ret = ret && (m_right[3] == ndFloat32(0.0f));
+	ret = ret && (m_posit[3] == ndFloat32(1.0f));
+	ret = ret && (ndAbs(a - ndFloat32(1.0f)) < tol);
+	ret = ret && (ndAbs(b - ndFloat32(1.0f)) < tol);
+	ret = ret && (ndAbs(c - ndFloat32(1.0f)) < tol);
+	ret = ret && (ndAbs(d - ndFloat32(1.0f)) < tol);
 	if (!ret)
 	{
 		ndAssert(0);
