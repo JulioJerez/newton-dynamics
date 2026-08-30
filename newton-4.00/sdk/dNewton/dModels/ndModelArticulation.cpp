@@ -687,13 +687,19 @@ void ndModelArticulation::SetTransform(const ndMatrix& matrix)
 {
 	if (m_rootNode)
 	{
-		const ndMatrix offset(m_rootNode->m_body->GetMatrix().OrthoInverse() * matrix);
+		ndMatrix bodyMatrix(m_rootNode->m_body->GetMatrix());
+		const ndMatrix offset(bodyMatrix.OrthoInverse() * matrix);
+		ndAssert(offset.TestOrthogonal());
 		auto ApplyTransfrom = [this, &offset](ndModelArticulation::ndNode* const node)
 		{
 			if (node->m_body)
 			{
 				ndSharedPtr<ndBody> body(node->m_body);
-				const ndMatrix matrix(body->GetMatrix() * offset);
+				const ndMatrix bodyMatrix(body->GetMatrix());
+				ndMatrix matrix(bodyMatrix * offset);
+				matrix.MakeOrthoNormal();
+				ndAssert(matrix.TestOrthogonal());
+				ndAssert(bodyMatrix.TestOrthogonal());
 				body->SetMatrix(matrix);
 			}
 		};
