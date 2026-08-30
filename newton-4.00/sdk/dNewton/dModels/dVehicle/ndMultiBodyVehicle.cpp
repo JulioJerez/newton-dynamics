@@ -626,7 +626,7 @@ void ndMultiBodyVehicle::Debug(ndConstraintDebugCallback& context) const
 	context.DrawFrame(lagragianFrame);
 
 	// vehicle speed in the lagrangian frame
-	const ndVector veloc(kinematics.m_veloc);
+	const ndVector veloc(kinematics.m_momentum.Scale (ndFloat32 (1.0f) / kinematics.m_mass));
 	const ndVector velocPoint(lagragianFrame.m_posit + kinematics.m_centerOfMass.RotateVector(veloc.Scale(0.25f * vehicleHeight)));
 	context.DrawLine(lagragianFrame.m_posit, velocPoint, ndVector(0.8f, 0.8f, 0.8f, 0.0f));
 	
