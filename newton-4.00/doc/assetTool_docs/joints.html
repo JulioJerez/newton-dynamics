@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Joints & Colliding Pairs · Newton Asset Editor Guide</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <nav class="side">
+    <div class="brand">
+      <svg class="gizmo" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <circle cx="13" cy="13" r="2.1" fill="#dce9ef"/>
+  <line x1="13" y1="13" x2="22" y2="13" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round"/>
+  <line x1="13" y1="13" x2="13" y2="4"  stroke="#5be08a" stroke-width="2" stroke-linecap="round"/>
+  <line x1="13" y1="13" x2="7" y2="19"  stroke="#59a8ff" stroke-width="2" stroke-linecap="round"/>
+</svg>
+      <div class="brand-text"><b>Newton Asset Editor</b><span>User Guide</span></div>
+    </div>
+    <div class="nav-group"><h3>Guide</h3>
+<a href="index.html">Overview</a>
+<a href="interface.html">Interface & Navigation</a>
+<a href="mesh-editing.html">Mesh & Body Editing</a>
+<a href="joints.html" class="current">Joints & Colliding Pairs</a>
+<a href="tools.html">Mesh Tools</a>
+<a href="reference.html">Files & Reference</a>
+</div>
+  </nav>
+  <main>
+    <div class="page">
+      
+<p class="eyebrow">03 &middot; Constraints</p>
+<h1>Joints &amp; Colliding Pairs</h1>
+<p class="lede">Newton assets connect bodies two ways: a <strong>structural joint</strong>
+along the parent/child chain, and, outside that chain, editor&#8209;defined
+<strong>loop joints</strong> and <strong>colliding pairs</strong>.</p>
+
+<h2><span class="num">1</span>Structural joints</h2>
+<p>A node with a rigid body and a parent body automatically gets a joint connecting
+them (default: <code>Fix6dof</code>, fully rigid). Change its type from the
+<strong>joint type</strong> dropdown in the mesh node's properties; switching types
+preserves the joint's current global frame so geometry doesn't jump.</p>
+<div class="panel">
+  <div class="panel-head">Available joint types</div>
+  <div class="row"><div class="k">Fix6dof</div><div class="v">softness, max force, max torque</div></div>
+  <div class="row"><div class="k">Hinge</div><div class="v">spring/damper, angular limits</div></div>
+  <div class="row"><div class="k">Slider</div><div class="v">spring/damper, linear limits</div></div>
+  <div class="row"><div class="k">Plane</div><div class="v">lock rotation on/off</div></div>
+  <div class="row"><div class="k">Roller</div><div class="v">independent linear + angular actuators</div></div>
+  <div class="row"><div class="k">Cylinder</div><div class="v">independent linear + angular actuators</div></div>
+  <div class="row"><div class="k">Double hinge</div><div class="v">two perpendicular hinge actuators</div></div>
+  <div class="row"><div class="k">Spherical</div><div class="v">twist limits + cone limit angle</div></div>
+  <div class="row"><div class="k">Wheel</div><div class="v">suspension stops, steering angle, brake torques</div></div>
+  <div class="row"><div class="k">Vehicle motor / differential / tire</div><div class="v">torque curve, friction model, slip omega</div></div>
+</div>
+<p>All joint types share a <strong>joint frame</strong> editor above their specific
+parameters: relative position and rotation, applied in the node's global frame.</p>
+
+<h2><span class="num">2</span>Loop joints (closed kinematic loops)</h2>
+<p>Use a loop joint to connect two bodies that aren't in a direct parent/child
+relationship &mdash; the second constraint that closes a loop (four&#8209;bar linkages,
+gear trains, differential axles, IK effectors).</p>
+<div class="path"><b>Properties Panel</b><span class="sep">&rsaquo;</span>Rigid body<span class="sep">&rsaquo;</span><b>enter loop joint</b></div>
+<ol>
+  <li>Select the first body, open <strong>Rigid body</strong>, click
+      <strong>enter loop joint</strong>.</li>
+  <li>Pick the second body in the viewport or outliner.</li>
+  <li>Click <strong>add loop joint</strong>. A new entry appears in the
+      closed&#8209;loop list under the outliner, named after both bodies.</li>
+</ol>
+<p>Select the closed&#8209;loop list in the outliner to inspect existing loop joints:
+pick one from the list, edit its type and parameters, or <strong>remove
+selected</strong>. Loop joints can be edited in the <strong>child local frame</strong> /
+<strong>parent local frame</strong> (relative offsets on each side) or, for most
+types, a single <strong>global frame</strong> control.</p>
+<div class="panel">
+  <div class="panel-head">Loop joint types</div>
+  <div class="row"><div class="k">Fix6dof / Hinge / Slider / Double hinge / Spherical</div><div class="v">same params as structural joints</div></div>
+  <div class="row"><div class="k">Gear</div><div class="v">gear ratio</div></div>
+  <div class="row"><div class="k">Vehicle gear box</div><div class="v">per&#8209;gear ratios, clutch torque, shift delay</div></div>
+  <div class="row"><div class="k">Vehicle differential axle</div><div class="v">gear ratio</div></div>
+  <div class="row"><div class="k">Vehicle torsion bar</div><div class="v">spring/damper/regularizer</div></div>
+  <div class="row"><div class="k">IK swivel position effector</div><div class="v">linear + angular actuator, work&#8209;space radius</div></div>
+</div>
+
+<h2><span class="num">3</span>Colliding pairs</h2>
+<p>By default, bodies connected by a joint don't collide with each other, but
+unconnected or loop&#8209;jointed bodies otherwise <em>do</em>. A colliding&#8209;pair
+entry is an explicit allow&#8209;list item &mdash; add one where you specifically want two
+bodies to collide (e.g. two links joined only through a loop constraint).</p>
+<div class="path"><b>Properties Panel</b><span class="sep">&rsaquo;</span>Rigid body<span class="sep">&rsaquo;</span><b>enter colliding pairs</b></div>
+<ol>
+  <li>Select the first body, open <strong>Rigid body</strong>, click
+      <strong>enter colliding pairs</strong>.</li>
+  <li>Pick the second body.</li>
+  <li>Click <strong>add pair</strong>.</li>
+</ol>
+<p>Select the colliding&#8209;pairs list in the outliner to review or
+<strong>remove selected</strong> pairs.</p>
+
+<div class="note"><b>Deleting nodes cleans up references</b>
+Deleting a mesh node (either variant) automatically removes any loop joint or
+colliding pair that referenced it, so you won't be left with dangling entries in
+either list.</div>
+
+      <div class="pagenav"><a href="mesh-editing.html"><span class="dir">Previous</span>Mesh & Body Editing</a><a href="tools.html"><span class="dir">Next</span>Mesh Tools</a></div>
+    </div>
+    <footer class="credit">Newton Asset Editor User Guide &middot; ndNewAsset application &middot; Newton Dynamics SDK</footer>
+  </main>
+</div>
+</body>
+</html>

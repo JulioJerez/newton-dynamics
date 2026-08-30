@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Files & Reference · Newton Asset Editor Guide</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <nav class="side">
+    <div class="brand">
+      <svg class="gizmo" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <circle cx="13" cy="13" r="2.1" fill="#dce9ef"/>
+  <line x1="13" y1="13" x2="22" y2="13" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round"/>
+  <line x1="13" y1="13" x2="13" y2="4"  stroke="#5be08a" stroke-width="2" stroke-linecap="round"/>
+  <line x1="13" y1="13" x2="7" y2="19"  stroke="#59a8ff" stroke-width="2" stroke-linecap="round"/>
+</svg>
+      <div class="brand-text"><b>Newton Asset Editor</b><span>User Guide</span></div>
+    </div>
+    <div class="nav-group"><h3>Guide</h3>
+<a href="index.html">Overview</a>
+<a href="interface.html">Interface & Navigation</a>
+<a href="mesh-editing.html">Mesh & Body Editing</a>
+<a href="joints.html">Joints & Colliding Pairs</a>
+<a href="tools.html">Mesh Tools</a>
+<a href="reference.html" class="current">Files & Reference</a>
+</div>
+  </nav>
+  <main>
+    <div class="page">
+      
+<p class="eyebrow">05 &middot; Reference</p>
+<h1>Files &amp; Reference</h1>
+<p class="lede">Opening, saving, and exchanging assets with other formats, plus a
+consolidated shortcut list.</p>
+
+<h2><span class="num">1</span>File menu</h2>
+<div class="panel">
+  <div class="panel-head">File</div>
+  <div class="row"><div class="k">New</div><div class="v">start an empty asset</div></div>
+  <div class="row"><div class="k">Load&hellip;</div><div class="v">open an existing <code>.nd</code> file</div></div>
+  <div class="row"><div class="k">Save</div><div class="v">write to the currently open path</div></div>
+  <div class="row"><div class="k">Save As&hellip;</div><div class="v">choose a new <code>.nd</code> path</div></div>
+  <div class="row"><div class="k">Import fbx&hellip;</div><div class="v">build an asset from an FBX rig</div></div>
+  <div class="row"><div class="k">Import urdf&hellip;</div><div class="v">build an asset from a URDF robot description</div></div>
+  <div class="row"><div class="k">Export fbx&hellip;</div><div class="v">write the current asset back out as FBX</div></div>
+  <div class="row"><div class="k">Exit</div><div class="v">close the editor</div></div>
+</div>
+<p>Loading, importing, or starting a new asset each clear the undo history &mdash;
+there's no undoing past a file operation.</p>
+
+<h2><span class="num">2</span>FBX import naming conventions</h2>
+<p>FBX has no native concept of Newton bodies, shapes or joints, so the importer
+reads them from suffixes on node names. Add these to a node's name in your DCC
+tool before exporting:</p>
+<div class="panel">
+  <div class="panel-head">Physics suffixes</div>
+  <div class="row"><div class="k">Rigid body</div><div class="v"><code>-rb</code> (mass defaults to 1.0)</div></div>
+  <div class="row"><div class="k">Collision &mdash; box</div><div class="v"><code>-box</code></div></div>
+  <div class="row"><div class="k">Collision &mdash; sphere</div><div class="v"><code>-sphere</code></div></div>
+  <div class="row"><div class="k">Collision &mdash; capsule</div><div class="v"><code>-capsule</code></div></div>
+  <div class="row"><div class="k">Collision &mdash; cylinder</div><div class="v"><code>-cylinder</code></div></div>
+  <div class="row"><div class="k">Collision &mdash; chamfered cylinder</div><div class="v"><code>-chamferedcylinder</code></div></div>
+  <div class="row"><div class="k">Collision &mdash; convex hull</div><div class="v"><code>-convexhull</code></div></div>
+  <div class="row"><div class="k">Collision &mdash; tree / vhacd</div><div class="v"><code>-tree</code> / <code>-vhacd</code></div></div>
+  <div class="row"><div class="k">Tire shape</div><div class="v"><code>-tire</code></div></div>
+</div>
+<div class="panel">
+  <div class="panel-head">Joint suffixes (default parameters)</div>
+  <div class="row"><div class="k">Hinge</div><div class="v"><code>-hinge</code></div></div>
+  <div class="row"><div class="k">Plane</div><div class="v"><code>-plane</code></div></div>
+  <div class="row"><div class="k">Wheel</div><div class="v"><code>-wheel</code></div></div>
+  <div class="row"><div class="k">Slider</div><div class="v"><code>-slider</code></div></div>
+  <div class="row"><div class="k">Roller</div><div class="v"><code>-roller</code></div></div>
+  <div class="row"><div class="k">Spherical</div><div class="v"><code>-spherical</code></div></div>
+  <div class="row"><div class="k">Cylindrical</div><div class="v"><code>-cylindrical</code></div></div>
+</div>
+<div class="panel">
+  <div class="panel-head">Runtime hints</div>
+  <div class="row"><div class="k">Hidden at runtime</div><div class="v"><code>-hidden</code></div></div>
+</div>
+<p>All joints created this way come in with engine default parameters &mdash; tune
+spring, damper, and limit values afterward in the
+<a href="joints.html">joint inspector</a>.</p>
+
+<h2><span class="num">3</span>URDF import</h2>
+<p>URDF joints map onto Newton joints directly: <code>fixed</code> &rarr;
+<code>Fix6dof</code>, <code>continuous</code>/<code>revolute</code> &rarr;
+<code>Hinge</code> (or an IK hinge, if requested), <code>prismatic</code> &rarr;
+<code>Slider</code>. URDF <code>&lt;limit&gt;</code> and a Newton
+<code>&lt;newton&gt;</code> extension element (spring/damper/regularizer, or a
+<code>replaceWith</code> override for IK variants) carry through automatically. A
+purely kinematic root link with no inertial data is treated as a static mount and
+folded away so the first real body becomes the asset root.</p>
+
+<h2><span class="num">4</span>Options menu</h2>
+<div class="panel">
+  <div class="panel-head">Rendering</div>
+  <div class="row"><div class="k">Render mode</div><div class="v">shaded / wireframe / hidden surface</div></div>
+  <div class="row"><div class="k">Gizmo scale</div><div class="v">1/32 &ndash; 10</div></div>
+</div>
+<div class="panel">
+  <div class="panel-head">Visibility toggles</div>
+  <div class="row"><div class="k">Show node</div><div class="v">selected node highlight</div></div>
+  <div class="row"><div class="k">Show collision</div><div class="v">collision shape overlay</div></div>
+  <div class="row"><div class="k">Show mesh skeleton</div><div class="v">also switches viewport picking to bones</div></div>
+  <div class="row"><div class="k">Show node / joints / geometry / collision / center&#8209;of&#8209;mass gizmo</div><div class="v">per&#8209;frame axis triads</div></div>
+</div>
+<p>Every gizmo is drawn as the same red/green/blue axis triad
+(<span class="chip x"><i></i>X</span><span class="chip y"><i></i>Y</span><span class="chip z"><i></i>Z</span>)
+used throughout this guide's parameter tables.</p>
+
+<h2><span class="num">5</span>Full shortcut &amp; control summary</h2>
+<div class="panel">
+  <div class="panel-head">Viewport</div>
+  <div class="row"><div class="k">Left drag / click</div><div class="v">orbit / select</div></div>
+  <div class="row"><div class="k">Right drag</div><div class="v">pan</div></div>
+  <div class="row"><div class="k">Middle drag</div><div class="v">zoom</div></div>
+</div>
+<div class="panel">
+  <div class="panel-head">Numeric fields</div>
+  <div class="row"><div class="k">Any inspector field</div><div class="v">type a value, press <kbd>Enter</kbd> to commit</div></div>
+</div>
+
+<h2><span class="num">6</span>Saved file format</h2>
+<p>Assets are saved as Newton's native <code>.nd</code> mesh format at the path
+chosen in <strong>Save As&hellip;</strong>. The file browser also accepts native XML
+assets on load. Always <strong>Save As&hellip;</strong> once for a new asset before
+relying on plain <strong>Save</strong>, which writes to whatever path is already
+associated with the open document.</p>
+
+      <div class="pagenav"><a href="tools.html"><span class="dir">Previous</span>Mesh Tools</a><span></span></div>
+    </div>
+    <footer class="credit">Newton Asset Editor User Guide &middot; ndNewAsset application &middot; Newton Dynamics SDK</footer>
+  </main>
+</div>
+</body>
+</html>

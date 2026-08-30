@@ -3,370 +3,100 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Newton Asset Editor — Documentation</title>
-<style>
-  :root {
-    --bg: #0d0f14;
-    --surface: #161a22;
-    --border: #252a35;
-    --accent: #4f9cf9;
-    --accent2: #a78bfa;
-    --text: #e2e8f0;
-    --muted: #6b7280;
-    --heading: #f8fafc;
-    --code-bg: #1e2330;
-    --warning: #fbbf24;
-    --success: #34d399;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    line-height: 1.6;
-  }
-
-  header {
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    height: 60px;
-    position: sticky;
-    top: 0;
-    background: var(--bg);
-    z-index: 100;
-  }
-
-  .logo {
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--accent);
-  }
-
-  nav {
-    margin-left: auto;
-    display: flex;
-    gap: 1.5rem;
-  }
-
-  nav a {
-    color: var(--muted);
-    text-decoration: none;
-    font-size: 0.875rem;
-    transition: color 0.15s;
-  }
-
-  nav a:hover { color: var(--text); }
-
-  .hero {
-    padding: 5rem 2rem 4rem;
-    max-width: 900px;
-    margin: 0 auto;
-  }
-
-  .hero h1 {
-    font-size: 3.5rem;
-    font-weight: 800;
-    line-height: 1.1;
-    color: var(--heading);
-    letter-spacing: -0.02em;
-    margin-bottom: 1.25rem;
-  }
-
-  .hero h1 span {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .hero p {
-    font-size: 1.2rem;
-    color: var(--muted);
-    max-width: 600px;
-    margin-bottom: 2.5rem;
-  }
-
-  .badge-row {
-    display: flex;
-    gap: 0.75rem;
-    flex-wrap: wrap;
-    margin-bottom: 3rem;
-  }
-
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 0.35rem 0.75rem;
-    border-radius: 99px;
-    letter-spacing: 0.04em;
-  }
-
-  .badge-blue { background: rgba(79,156,249,0.12); color: var(--accent); border: 1px solid rgba(79,156,249,0.25); }
-  .badge-purple { background: rgba(167,139,250,0.12); color: var(--accent2); border: 1px solid rgba(167,139,250,0.25); }
-  .badge-green { background: rgba(52,211,153,0.12); color: var(--success); border: 1px solid rgba(52,211,153,0.25); }
-
-  .card-grid {
-    max-width: 1100px;
-    margin: 0 auto 4rem;
-    padding: 0 2rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.25rem;
-  }
-
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.5rem;
-    text-decoration: none;
-    color: inherit;
-    transition: border-color 0.15s, transform 0.15s;
-    display: block;
-  }
-
-  .card:hover {
-    border-color: var(--accent);
-    transform: translateY(-2px);
-  }
-
-  .card-icon {
-    font-size: 1.75rem;
-    margin-bottom: 0.75rem;
-  }
-
-  .card h3 {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--heading);
-    margin-bottom: 0.5rem;
-  }
-
-  .card p {
-    font-size: 0.875rem;
-    color: var(--muted);
-    line-height: 1.5;
-  }
-
-  .section-label {
-    max-width: 1100px;
-    margin: 0 auto 1rem;
-    padding: 0 2rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .quick-start {
-    max-width: 900px;
-    margin: 0 auto 5rem;
-    padding: 0 2rem;
-  }
-
-  .quick-start h2 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--heading);
-    margin-bottom: 1.5rem;
-  }
-
-  .steps {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .step {
-    display: flex;
-    gap: 1.25rem;
-    position: relative;
-  }
-
-  .step-num {
-    flex-shrink: 0;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: rgba(79,156,249,0.15);
-    border: 1px solid rgba(79,156,249,0.4);
-    color: var(--accent);
-    font-size: 0.8rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    z-index: 1;
-  }
-
-  .step-line {
-    position: absolute;
-    left: 15px;
-    top: 32px;
-    bottom: -1px;
-    width: 1px;
-    background: var(--border);
-  }
-
-  .step-body {
-    padding-bottom: 2rem;
-  }
-
-  .step:last-child .step-line { display: none; }
-
-  .step-body h4 {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--heading);
-    margin-bottom: 0.4rem;
-    padding-top: 0.35rem;
-  }
-
-  .step-body p {
-    font-size: 0.875rem;
-    color: var(--muted);
-  }
-
-  .step-body code {
-    font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    font-size: 0.8rem;
-    background: var(--code-bg);
-    color: var(--accent);
-    padding: 0.15rem 0.4rem;
-    border-radius: 4px;
-    border: 1px solid var(--border);
-  }
-
-  footer {
-    border-top: 1px solid var(--border);
-    padding: 2rem;
-    text-align: center;
-    font-size: 0.8rem;
-    color: var(--muted);
-  }
-</style>
+<title>Overview · Newton Asset Editor Guide</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<header>
-  <span class="logo">Newton Asset Editor</span>
-  <nav>
-    <a href="interface.html">Interface</a>
-    <a href="camera.html">Camera</a>
-    <a href="physics.html">Physics</a>
-    <a href="tools.html">Tools</a>
-    <a href="undo-redo.html">Undo/Redo</a>
-    <a href="file-formats.html">File Formats</a>
+<div class="shell">
+  <nav class="side">
+    <div class="brand">
+      <svg class="gizmo" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <circle cx="13" cy="13" r="2.1" fill="#dce9ef"/>
+  <line x1="13" y1="13" x2="22" y2="13" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round"/>
+  <line x1="13" y1="13" x2="13" y2="4"  stroke="#5be08a" stroke-width="2" stroke-linecap="round"/>
+  <line x1="13" y1="13" x2="7" y2="19"  stroke="#59a8ff" stroke-width="2" stroke-linecap="round"/>
+</svg>
+      <div class="brand-text"><b>Newton Asset Editor</b><span>User Guide</span></div>
+    </div>
+    <div class="nav-group"><h3>Guide</h3>
+<a href="index.html" class="current">Overview</a>
+<a href="interface.html">Interface & Navigation</a>
+<a href="mesh-editing.html">Mesh & Body Editing</a>
+<a href="joints.html">Joints & Colliding Pairs</a>
+<a href="tools.html">Mesh Tools</a>
+<a href="reference.html">Files & Reference</a>
+</div>
   </nav>
-</header>
+  <main>
+    <div class="page">
+      
+<p class="eyebrow">Newton Game Dynamics &middot; ndNewAsset</p>
+<h1>Newton Asset Editor</h1>
+<p class="lede">A visual editor for building physics assets: rigid&#8209;body hierarchies,
+constraint joints, collision shapes and render meshes, saved as <code>.nd</code> files
+that the Newton runtime can load directly. This guide covers the interface, the mesh
+and body inspector, joints, editing tools, and file operations.</p>
 
-<main>
-  <section class="hero">
-    <h1>Newton Asset<br><span>Editor Docs</span></h1>
-    <p>A 3D physics asset editor for building and configuring rigid bodies, joints, collision shapes, and articulated models for the Newton Game Dynamics engine.</p>
+<div class="note"><b>Who this is for</b>
+Anyone assembling or tuning a Newton asset by hand &mdash; characters, vehicles, ragdolls,
+mechanisms &mdash; rather than generating one purely through code or an FBX/URDF import
+pipeline.</p></div>
 
-    <div class="badge-row">
-      <span class="badge badge-blue">C++17</span>
-      <span class="badge badge-blue">ImGui</span>
-      <span class="badge badge-purple">Newton Dynamics</span>
-      <span class="badge badge-green">OpenGL</span>
+<h2><span class="num">01</span>What the editor does</h2>
+<p>A Newton asset is a tree of <strong>mesh nodes</strong>. Any node can carry a
+render <strong>geometry</strong>, a <strong>rigid body</strong> with a collision shape,
+and a <strong>joint</strong> connecting it to its parent body. On top of that tree, an
+asset can define <strong>loop joints</strong> (constraints that close a kinematic loop
+outside the parent/child chain) and <strong>colliding pairs</strong> (an explicit
+allow&#8209;list of bodies that are permitted to collide with each other). The editor
+gives you a 3D viewport, an outliner for the hierarchy, and a properties panel for
+whatever is currently selected.</p>
+
+<h2><span class="num">02</span>Find your way around</h2>
+<div class="grid">
+  <a class="card" href="interface.html">
+    <span class="tag">01 &middot; Interface</span>
+    <h4>Interface &amp; Navigation</h4>
+    <p>Main toolbar, outliner, camera controls, selection and undo/redo.</p>
+  </a>
+  <a class="card" href="mesh-editing.html">
+    <span class="tag">02 &middot; Inspector</span>
+    <h4>Mesh &amp; Body Editing</h4>
+    <p>Node transforms, rigid bodies, collision shapes, materials, custom properties.</p>
+  </a>
+  <a class="card" href="joints.html">
+    <span class="tag">03 &middot; Constraints</span>
+    <h4>Joints &amp; Colliding Pairs</h4>
+    <p>Structural joints, closed&#8209;loop constraints, and collision allow&#8209;lists.</p>
+  </a>
+  <a class="card" href="tools.html">
+    <span class="tag">04 &middot; Tools</span>
+    <h4>Mesh Tools</h4>
+    <p>Resize, rotate mesh/pivots/bones, and normalize mass distribution.</p>
+  </a>
+  <a class="card" href="reference.html">
+    <span class="tag">05 &middot; Reference</span>
+    <h4>Files &amp; Reference</h4>
+    <p>New/Load/Save, FBX &amp; URDF import/export, and the full shortcut list.</p>
+  </a>
+</div>
+
+<h2><span class="num">03</span>The three panels, at a glance</h2>
+<div class="panel">
+  <div class="panel-head">Default layout</div>
+  <div class="row"><div class="k">Main Toolbar<small>top of window</small></div><div class="v">undo / redo / camera / lock</div></div>
+  <div class="row"><div class="k">Outliner Panel<small>left dock</small></div><div class="v">mesh hierarchy tree</div></div>
+  <div class="row"><div class="k">Properties Panel<small>right dock</small></div><div class="v">inspector for the current selection</div></div>
+  <div class="row"><div class="k">Viewport<small>center</small></div><div class="v">3D scene, camera flyby, click&#8209;to&#8209;select</div></div>
+</div>
+
+<p>Panels are dockable (the window uses an ImGui dockspace) &mdash; drag any panel's
+title bar to rearrange or float it.</p>
+
+      <div class="pagenav"><span></span><a href="interface.html"><span class="dir">Next</span>Interface & Navigation</a></div>
     </div>
-  </section>
-
-  <div class="section-label">Documentation</div>
-  <div class="card-grid">
-    <a href="interface.html" class="card">
-      <div class="card-icon">🖥️</div>
-      <h3>Interface Overview</h3>
-      <p>Learn the main panels — Outliner, Properties, Toolbar — and how they work together to navigate your scene.</p>
-    </a>
-    <a href="camera.html" class="card">
-      <div class="card-icon">📷</div>
-      <h3>Camera & Navigation</h3>
-      <p>Flyby camera controls, preset views (front, back, side), perspective vs orthographic, and mouse shortcuts.</p>
-    </a>
-    <a href="physics.html" class="card">
-      <div class="card-icon">⚙️</div>
-      <h3>Physics Properties</h3>
-      <p>Rigid bodies, collision shapes, joints, loop joints, and colliding pairs. How to configure mass, inertia, and constraints.</p>
-    </a>
-    <a href="tools.html" class="card">
-      <div class="card-icon">🔧</div>
-      <h3>Mesh Tools</h3>
-      <p>Resize, rotate, pivot tools, bone rotation, and mass normalization utilities accessible from the Tools menu.</p>
-    </a>
-    <a href="undo-redo.html" class="card">
-      <div class="card-icon">↩️</div>
-      <h3>Undo / Redo</h3>
-      <p>How the command-based undo/redo system works and what operations it covers.</p>
-    </a>
-    <a href="file-formats.html" class="card">
-      <div class="card-icon">📁</div>
-      <h3>File Formats</h3>
-      <p>Loading and saving <code>.nd</code> files, importing FBX and URDF models including joint and collision conventions.</p>
-    </a>
-  </div>
-
-  <section class="quick-start">
-    <h2>Getting Started</h2>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <div class="step-line"></div>
-        <div class="step-body">
-          <h4>Launch the editor</h4>
-          <p>Run the executable. A blank mesh named <code>root</code> is created automatically so you can begin immediately.</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <div class="step-line"></div>
-        <div class="step-body">
-          <h4>Load a mesh</h4>
-          <p>Use <strong>File → Load</strong> to open a <code>.nd</code> file, or <strong>File → Import fbx / Import urdf</strong> to bring in external models.</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <div class="step-line"></div>
-        <div class="step-body">
-          <h4>Select nodes</h4>
-          <p>Click any node in the <strong>Outliner Panel</strong> or click geometry in the viewport. The <strong>Properties Panel</strong> updates immediately.</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">4</div>
-        <div class="step-line"></div>
-        <div class="step-body">
-          <h4>Configure physics</h4>
-          <p>Add a rigid body, pick a collision shape, set mass and inertia, then define joints to connect bodies in a hierarchy.</p>
-        </div>
-      </div>
-      <div class="step">
-        <div class="step-num">5</div>
-        <div class="step-line"></div>
-        <div class="step-body">
-          <h4>Save</h4>
-          <p>Use <strong>File → Save</strong> to overwrite the current <code>.nd</code> file or <strong>File → Save As</strong> to write a new one.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-</main>
-
-<footer>Newton Asset Editor — User Documentation</footer>
-
+    <footer class="credit">Newton Asset Editor User Guide &middot; ndNewAsset application &middot; Newton Dynamics SDK</footer>
+  </main>
+</div>
 </body>
 </html>

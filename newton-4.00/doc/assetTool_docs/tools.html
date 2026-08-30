@@ -3,154 +3,94 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mesh Tools — Newton Asset Editor</title>
-<style>
-  :root {
-    --bg: #0d0f14; --surface: #161a22; --surface2: #1c2130;
-    --border: #252a35; --accent: #4f9cf9; --accent2: #a78bfa;
-    --text: #e2e8f0; --muted: #6b7280; --heading: #f8fafc;
-    --code-bg: #1e2330; --warning: #fbbf24; --success: #34d399;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.65; }
-  header { border-bottom: 1px solid var(--border); padding: 0 2rem; display: flex; align-items: center; gap: 1rem; height: 60px; position: sticky; top: 0; background: var(--bg); z-index: 100; }
-  .logo { font-size: 0.85rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); text-decoration: none; }
-  nav { margin-left: auto; display: flex; gap: 1.5rem; }
-  nav a { color: var(--muted); text-decoration: none; font-size: 0.875rem; }
-  nav a:hover, nav a.active { color: var(--text); }
-  .layout { display: flex; min-height: calc(100vh - 60px); }
-  .sidebar { width: 240px; flex-shrink: 0; border-right: 1px solid var(--border); padding: 2rem 1.25rem; position: sticky; top: 60px; height: calc(100vh - 60px); overflow-y: auto; }
-  .sidebar h4 { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.75rem; }
-  .sidebar ul { list-style: none; margin-bottom: 2rem; }
-  .sidebar li a { display: block; padding: 0.35rem 0.75rem; font-size: 0.875rem; color: var(--muted); text-decoration: none; border-radius: 6px; }
-  .sidebar li a:hover { background: var(--surface); color: var(--text); }
-  .sidebar li a.active { background: rgba(79,156,249,0.1); color: var(--accent); }
-  .content { flex: 1; padding: 3rem 3rem 5rem; max-width: 820px; }
-  .breadcrumb { font-size: 0.8rem; color: var(--muted); margin-bottom: 2rem; }
-  .breadcrumb a { color: var(--muted); text-decoration: none; }
-  h1 { font-size: 2.5rem; font-weight: 800; color: var(--heading); letter-spacing: -0.02em; margin-bottom: 0.75rem; }
-  .lead { font-size: 1.1rem; color: var(--muted); margin-bottom: 3rem; }
-  h2 { font-size: 1.35rem; font-weight: 700; color: var(--heading); margin: 2.5rem 0 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
-  h3 { font-size: 1.05rem; font-weight: 600; color: var(--heading); margin: 1.75rem 0 0.6rem; }
-  p { margin-bottom: 1rem; font-size: 0.95rem; }
-  ul { margin: 0 0 1rem 1.5rem; font-size: 0.9rem; }
-  li { margin-bottom: 0.35rem; }
-  code { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; background: var(--code-bg); color: var(--accent); padding: 0.15rem 0.4rem; border-radius: 4px; border: 1px solid var(--border); }
-  .info-box { border: 1px solid rgba(79,156,249,0.3); background: rgba(79,156,249,0.06); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.25rem 0; font-size: 0.875rem; }
-  .info-box strong { color: var(--accent); }
-  .warn-box { border: 1px solid rgba(251,191,36,0.3); background: rgba(251,191,36,0.06); border-radius: 8px; padding: 1rem 1.25rem; margin: 1.25rem 0; font-size: 0.875rem; }
-  .warn-box strong { color: var(--warning); }
-  table { width: 100%; border-collapse: collapse; margin: 1.25rem 0; font-size: 0.875rem; }
-  th { text-align: left; padding: 0.6rem 1rem; background: var(--surface); color: var(--muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
-  td { padding: 0.65rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top; }
-  tr:last-child td { border-bottom: none; }
-  .tool-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin: 1rem 0; }
-  .tool-card h3 { margin-top: 0; font-size: 1rem; }
-  .tool-card .fields { margin-top: 0.75rem; }
-  .field-row { display: flex; gap: 0.75rem; align-items: baseline; padding: 0.4rem 0; border-bottom: 1px solid var(--border); font-size: 0.875rem; }
-  .field-row:last-child { border-bottom: none; }
-  .field-name { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--accent); min-width: 160px; }
-  .field-desc { color: var(--muted); }
-</style>
+<title>Mesh Tools · Newton Asset Editor Guide</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header>
-  <a href="index.html" class="logo">Newton Asset Editor</a>
-  <nav>
-    <a href="interface.html">Interface</a>
-    <a href="camera.html">Camera</a>
-    <a href="physics.html">Physics</a>
-    <a href="tools.html" class="active">Tools</a>
-    <a href="undo-redo.html">Undo/Redo</a>
-    <a href="file-formats.html">File Formats</a>
+<div class="shell">
+  <nav class="side">
+    <div class="brand">
+      <svg class="gizmo" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <circle cx="13" cy="13" r="2.1" fill="#dce9ef"/>
+  <line x1="13" y1="13" x2="22" y2="13" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round"/>
+  <line x1="13" y1="13" x2="13" y2="4"  stroke="#5be08a" stroke-width="2" stroke-linecap="round"/>
+  <line x1="13" y1="13" x2="7" y2="19"  stroke="#59a8ff" stroke-width="2" stroke-linecap="round"/>
+</svg>
+      <div class="brand-text"><b>Newton Asset Editor</b><span>User Guide</span></div>
+    </div>
+    <div class="nav-group"><h3>Guide</h3>
+<a href="index.html">Overview</a>
+<a href="interface.html">Interface & Navigation</a>
+<a href="mesh-editing.html">Mesh & Body Editing</a>
+<a href="joints.html">Joints & Colliding Pairs</a>
+<a href="tools.html" class="current">Mesh Tools</a>
+<a href="reference.html">Files & Reference</a>
+</div>
   </nav>
-</header>
+  <main>
+    <div class="page">
+      
+<p class="eyebrow">04 &middot; Tools</p>
+<h1>Mesh Tools</h1>
+<p class="lede">Whole&#8209;asset operations, listed under the <strong>Tools</strong>
+menu. Each opens a small floating window; nothing is applied until you press
+<strong>Execute</strong>, and every tool wraps its change in a single undo step.</p>
 
-<div class="layout">
-  <aside class="sidebar">
-    <h4>On this page</h4>
-    <ul>
-      <li><a href="#about" class="active">About Tools</a></li>
-      <li><a href="#resize">Resize Mesh</a></li>
-      <li><a href="#rotate">Rotate Mesh</a></li>
-      <li><a href="#pivots">Rotate Pivots</a></li>
-      <li><a href="#bones">Rotate Bones</a></li>
-      <li><a href="#mass">Normalize Mass</a></li>
-    </ul>
-  </aside>
+<div class="path"><b>Tools</b></div>
 
-  <main class="content">
-    <div class="breadcrumb"><a href="index.html">Docs</a> / Mesh Tools</div>
-    <h1>Mesh Tools</h1>
-    <p class="lead">Batch transform and physics utilities accessible from <strong>Tools</strong> in the menu bar. Each tool opens a floating window you can close at any time.</p>
+<h2><span class="num">1</span>Resize mesh</h2>
+<p>Uniformly scales the entire asset &mdash; render geometry, collision shapes, joint
+frames, and mass properties together.</p>
+<div class="panel">
+  <div class="panel-head">Resize mesh</div>
+  <div class="row"><div class="k">Size<small>read&#8209;only</small></div><div class="v">current bounding&#8209;box dimensions</div></div>
+  <div class="row"><div class="k">Apply scale</div><div class="v">uniform factor, clamped 0.01&ndash;100</div></div>
+</div>
+<p>On execute, every node's center of mass and diagonal inertia are rescaled
+consistently with the geometry, and the visual scene is rebuilt so you can confirm
+the result immediately.</p>
 
-    <h2 id="about">How Tools Work</h2>
-    <p>Tools are modal operations. When you open a tool:</p>
-    <ul>
-      <li>A floating ImGui window appears with the tool's parameters.</li>
-      <li>You configure parameters and click <strong>execute</strong> to apply.</li>
-      <li>Closing the window (× button) cancels without applying.</li>
-      <li>Every successful execute is wrapped in an undo/redo pair, so you can reverse it with Ctrl+Z equivalent (the <strong>undo</strong> button in the toolbar).</li>
-    </ul>
-    <div class="info-box"><strong>Tip:</strong> You can open the <em>Resize Mesh</em> tool to see bounding box dimensions of the current scene without actually applying any scale.</div>
+<h2><span class="num">2</span>Rotate mesh</h2>
+<p>Rotates the whole asset's coordinate system by a pitch/yaw/roll triple, in
+degrees.</p>
+<div class="chip x"><i></i>pitch</div><div class="chip y" style="display:inline-flex"><i></i>yaw</div><div class="chip z" style="display:inline-flex"><i></i>roll</div>
 
-    <h2 id="resize">Resize Mesh</h2>
-    <div class="tool-card">
-      <h3>🔧 resize mesh</h3>
-      <p>Uniformly scales all vertex positions, collision shapes, and inertia tensors by a single factor.</p>
-      <div class="fields">
-        <div class="field-row"><span class="field-name">size (read-only)</span><span class="field-desc">Current X/Y/Z bounding box dimensions. Useful for reference without making changes.</span></div>
-        <div class="field-row"><span class="field-name">apply scale</span><span class="field-desc">The uniform scale factor to apply. Clamped 0.01 – 100. Default 1.0 (no change).</span></div>
-        <div class="field-row"><span class="field-name">execute</span><span class="field-desc">Applies the scale. Only fires if scale ≠ 1.0. Resets the field to 1.0 after execution.</span></div>
-      </div>
+<h2><span class="num">3</span>Rotate pivots</h2>
+<p>Rotates node <em>pivot orientations</em> only, without moving geometry or
+recomputing physics &mdash; useful for correcting axis conventions coming from an
+external DCC tool without disturbing anything downstream.</p>
+
+<h2><span class="num">4</span>Rotate bones</h2>
+<p>Same angle input as the other rotate tools, restricted to skeleton bones
+(<code>m_bone</code> / <code>m_boneEnd</code> node types) and their attached
+physics, including re&#8209;deriving each affected body's inertia in the new
+orientation.</p>
+
+<h2><span class="num">5</span>Normalize mass distribution</h2>
+<p>Redistributes total asset mass across every rigid body in proportion to each
+body's collision&#8209;shape volume, then optionally clamps how anisotropic each
+body's inertia is allowed to be.</p>
+<div class="panel">
+  <div class="panel-head">Normalize mass distribution</div>
+  <div class="row"><div class="k">Total mass</div><div class="v">minimum 1</div></div>
+  <div class="row"><div class="k">Principal inertia ratio</div><div class="v">0.1&ndash;1.0</div></div>
+</div>
+<p>The ratio is a floor on <em>min axis / max axis</em> of each body's principal
+inertia: at <code>1.0</code> every body's inertia is forced isotropic (like a
+sphere); at low values, thin or elongated shapes keep their natural, more extreme
+inertia ratios. Density is derived from total mass divided by the asset's total
+collision volume, then applied per body via each body's individual
+<strong>mass weigh</strong> multiplier (see <a href="mesh-editing.html">Mesh &amp;
+Body Editing</a>).</p>
+
+<div class="note"><b>Order of operations</b>
+Because Resize also rescales mass properties, run <strong>Resize mesh</strong>
+before <strong>Normalize mass distribution</strong> if you need both &mdash;
+normalizing first and then resizing will scale the masses you just tuned.</div>
+
+      <div class="pagenav"><a href="joints.html"><span class="dir">Previous</span>Joints & Colliding Pairs</a><a href="reference.html"><span class="dir">Next</span>Files & Reference</a></div>
     </div>
-    <p>Under the hood, scale is applied as a diagonal 3×3 matrix transform to all mesh geometry, then collision shapes use <code>ApplyScale</code> and inertia tensors are adjusted to match the new dimensions. Joint frames are not currently scaled (marked for future work).</p>
-    <div class="warn-box"><strong>Note:</strong> Collision shape inertia scaling is partially implemented. Physics bodies marked with <code>ndAssert(0)</code> inside the scale path may not scale physics correctly — review bodies manually after resizing.</div>
-
-    <h2 id="rotate">Rotate Mesh</h2>
-    <div class="tool-card">
-      <h3>🔄 rotate mesh</h3>
-      <p>Rotates the entire scene's coordinate system by a given Euler rotation. Useful when imported meshes arrive with a wrong-up-axis orientation.</p>
-      <div class="fields">
-        <div class="field-row"><span class="field-name">angles</span><span class="field-desc">Pitch / Yaw / Roll in degrees. All three axes applied simultaneously as a combined rotation.</span></div>
-        <div class="field-row"><span class="field-name">execute</span><span class="field-desc">Applies the rotation. Only fires if at least one angle ≠ 0. Resets all angles to 0.0 after execution.</span></div>
-      </div>
-    </div>
-    <p>This calls <code>ApplyCoordinateRotation</code> which rotates all vertex positions and normals. Physics body transforms are <strong>not</strong> automatically updated by this tool — commented-out code exists for that and may be enabled in a future release.</p>
-
-    <h2 id="pivots">Rotate Pivots</h2>
-    <div class="tool-card">
-      <h3>📐 rotate pivots</h3>
-      <p>Rotates all node pivot matrices without moving vertex geometry. Use this to re-align joint axes after importing from a DCC tool.</p>
-      <div class="fields">
-        <div class="field-row"><span class="field-name">angles</span><span class="field-desc">Pitch / Yaw / Roll in degrees.</span></div>
-        <div class="field-row"><span class="field-name">execute</span><span class="field-desc">Calls <code>ApplyPivotsRotation</code> on the root mesh. Visual scene is rebuilt after execution.</span></div>
-      </div>
-    </div>
-
-    <h2 id="bones">Rotate Bones</h2>
-    <div class="tool-card">
-      <h3>🦴 rotate bones</h3>
-      <p>Rotates only bone nodes and updates their inertia tensors, collision shape local matrices, and joint frames to match the new orientation.</p>
-      <div class="fields">
-        <div class="field-row"><span class="field-name">angles</span><span class="field-desc">Pitch / Yaw / Roll in degrees. Applied as <em>inverse</em> rotation to body data so the bone structure aligns correctly.</span></div>
-        <div class="field-row"><span class="field-name">execute</span><span class="field-desc">Applies rotation to all bone-type nodes. Non-bone nodes are untouched.</span></div>
-      </div>
-    </div>
-    <p>This is the preferred tool for skeletons imported with a wrong axis convention. It handles the inertia and joint frame updates that <em>Rotate Mesh</em> skips.</p>
-
-    <h2 id="mass">Normalize Mass Distribution</h2>
-    <div class="tool-card">
-      <h3>⚖️ normalize mass distribution</h3>
-      <p>Distributes a target total mass across all rigid bodies proportionally to their collision volume, then optionally enforces a minimum inertia ratio so no axis is disproportionately low.</p>
-      <div class="fields">
-        <div class="field-row"><span class="field-name">total mass</span><span class="field-desc">Target total mass in kg for the entire model. Must be ≥ 1.0.</span></div>
-        <div class="field-row"><span class="field-name">principal Inertia ratio</span><span class="field-desc">Minimum ratio between smallest and largest principal inertia. Clamped 0.1 – 1.0. Lower values allow more extreme inertia distributions.</span></div>
-        <div class="field-row"><span class="field-name">execute</span><span class="field-desc">Computes total volume across all bodies, derives a density, then assigns per-body mass = density × volume × massVolumeWeigh. Inertia axes are then clamped to the ratio.</span></div>
-      </div>
-    </div>
-    <p>This tool requires each body to have a collision shape. Bodies with <code>Null</code> collision contribute zero volume and receive zero mass.</p>
-    <div class="info-box"><strong>Tip:</strong> Use the <em>mass weigh</em> field on individual rigid bodies (in the Rigid Body section of Properties) to bias heavier or lighter relative to pure volume, then run this tool to normalize the total.</div>
+    <footer class="credit">Newton Asset Editor User Guide &middot; ndNewAsset application &middot; Newton Dynamics SDK</footer>
   </main>
 </div>
 </body>

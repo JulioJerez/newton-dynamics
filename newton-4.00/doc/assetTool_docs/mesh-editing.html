@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mesh & Body Editing · Newton Asset Editor Guide</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+  <nav class="side">
+    <div class="brand">
+      <svg class="gizmo" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <circle cx="13" cy="13" r="2.1" fill="#dce9ef"/>
+  <line x1="13" y1="13" x2="22" y2="13" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round"/>
+  <line x1="13" y1="13" x2="13" y2="4"  stroke="#5be08a" stroke-width="2" stroke-linecap="round"/>
+  <line x1="13" y1="13" x2="7" y2="19"  stroke="#59a8ff" stroke-width="2" stroke-linecap="round"/>
+</svg>
+      <div class="brand-text"><b>Newton Asset Editor</b><span>User Guide</span></div>
+    </div>
+    <div class="nav-group"><h3>Guide</h3>
+<a href="index.html">Overview</a>
+<a href="interface.html">Interface & Navigation</a>
+<a href="mesh-editing.html" class="current">Mesh & Body Editing</a>
+<a href="joints.html">Joints & Colliding Pairs</a>
+<a href="tools.html">Mesh Tools</a>
+<a href="reference.html">Files & Reference</a>
+</div>
+  </nav>
+  <main>
+    <div class="page">
+      
+<p class="eyebrow">02 &middot; Inspector</p>
+<h1>Mesh &amp; Body Editing</h1>
+<p class="lede">The Properties Panel changes shape depending on what's selected.
+For a regular mesh node it shows up to five collapsible sections, in this order.</p>
+
+<div class="path"><b>Properties Panel</b></div>
+
+<h2><span class="num">1</span>Mesh node</h2>
+<p>Identity, visibility, structure, and the node's own transform.</p>
+<div class="panel">
+  <div class="panel-head">Fields</div>
+  <div class="row"><div class="k">Name</div><div class="v">renamed on Enter; duplicates get a numeric suffix</div></div>
+  <div class="row"><div class="k">Parent space transform</div><div class="v">edits absolute values instead of relative deltas</div></div>
+  <div class="row"><div class="k">Transform pivot only</div><div class="v">move the pivot without dragging geometry/children</div></div>
+  <div class="row"><div class="k">Visible</div><div class="v">show/hide the node's render mesh</div></div>
+</div>
+<p>Buttons: <strong>Add node</strong> (new empty child), <strong>Clone node</strong>
+(duplicates the subtree with unique names), <strong>Delete node</strong>,
+<strong>Delete node, preserve children</strong> (re&#8209;parents children to the
+removed node's parent, correcting their joints so nothing moves), and, depending on
+whether the node already has a body, <strong>Add body</strong> / <strong>Delete
+body</strong>.</p>
+
+<h3>Node transform &amp; geometry transform</h3>
+<p>Two independent 3D position/rotation fields: the node's own pivot, and the local
+offset of its render geometry relative to that pivot. Both respect the
+<strong>Parent space transform</strong> toggle above &mdash; on, you edit the absolute
+matrix; off, each entry is a relative nudge applied on top of the current transform.</p>
+<p><strong>Align to target</strong> lets you pick a second node in the viewport/outliner
+and instantly re&#8209;orients the selected node's X axis to point at it.</p>
+
+<h3>Modifier <span class="chip x"><i></i>runtime behavior</span></h3>
+<p>Nodes without a rigid body can carry a transform modifier, evaluated at runtime:</p>
+<table>
+<tr><th>Modifier</th><th>Purpose</th></tr>
+<tr><td><code>LookAt</code></td><td>orients the node toward a target node</td></tr>
+<tr><td><code>TwoLinksIK</code></td><td>two&#8209;bone IK solver; needs a child link and a solution sign</td></tr>
+<tr><td><code>UserDefined</code></td><td>a named hook resolved by game code at load time</td></tr>
+</table>
+
+<h2><span class="num">2</span>Render materials</h2>
+<p>Only shown when the node has geometry. Pick a material from the list, then edit
+<code>ambient</code>, <code>diffuse</code>, <code>specular</code>, <code>reflection</code>
+(each RGB), <code>opacity</code>, <code>shininess</code>, and the texture file name.
+Changes rebuild the node's visual mesh immediately.</p>
+
+<h2><span class="num">3</span>Custom properties</h2>
+<p>Free&#8209;form metadata attached to a node, exported with the asset for game code
+to read. Three types, switchable per property:</p>
+<div class="panel">
+  <div class="panel-head">Property types</div>
+  <div class="row"><div class="k">Float</div><div class="v">a single numeric value</div></div>
+  <div class="row"><div class="k">String</div><div class="v">free text</div></div>
+  <div class="row"><div class="k">Node</div><div class="v">a reference to another mesh node, picked via "select target node"</div></div>
+</div>
+
+<h2><span class="num">4</span>Collision shape</h2>
+<p>Shown for any node that has a rigid body. Pick a shape type from the dropdown,
+then edit its parameters and local transform (position, rotation, scale, plus a
+<strong>collidable</strong> checkbox to disable collision without deleting the shape).</p>
+<div class="panel">
+  <div class="panel-head">Shape parameters</div>
+  <div class="row"><div class="k">Null</div><div class="v">no parameters</div></div>
+  <div class="row"><div class="k">Box</div><div class="v">x / y / z</div></div>
+  <div class="row"><div class="k">Sphere</div><div class="v">radius</div></div>
+  <div class="row"><div class="k">Capsule</div><div class="v">radius0 / radius1 / height</div></div>
+  <div class="row"><div class="k">Cylinder</div><div class="v">radius0 / radius1 / height</div></div>
+  <div class="row"><div class="k">Chamfer cylinder</div><div class="v">radius / height</div></div>
+  <div class="row"><div class="k">Convex hull</div><div class="v">tolerance / max point count</div></div>
+  <div class="row"><div class="k">Compound</div><div class="v">read&#8209;only sub&#8209;shape count</div></div>
+</div>
+<p><strong>Build visual mesh</strong> regenerates the node's render geometry directly
+from its collision shape &mdash; a quick way to get a placeholder visual while you're
+still blocking out physics.</p>
+
+<h2><span class="num">5</span>Rigid body</h2>
+<div class="panel">
+  <div class="panel-head">Mass &amp; integration</div>
+  <div class="row"><div class="k">Mass</div><div class="v">0 = static body</div></div>
+  <div class="row"><div class="k">Mass weigh</div><div class="v">per&#8209;body density multiplier used by mass tools</div></div>
+  <div class="row"><div class="k">Linear step / Angle step</div><div class="v">max per&#8209;substep integration limits</div></div>
+  <div class="row"><div class="k">Linear damp / Angular damp</div><div class="v">intrinsic velocity damping</div></div>
+  <div class="row"><div class="k">Center of mass</div><div class="v">local offset, editable directly</div></div>
+  <div class="row"><div class="k">Principal inertia</div><div class="v">shown only when mass &gt; 0</div></div>
+  <div class="row"><div class="k">Inertia axis</div><div class="v">orientation of the principal inertia frame</div></div>
+</div>
+<p>Setting mass on a body that <em>has</em> a joint recomputes inertia from the
+collision shape's volume automatically; a body with no joint (a static root) just
+stores the value as entered.</p>
+<p>Two more entries live at the bottom of this section &mdash; <strong>enter loop
+joint</strong> and <strong>enter colliding pairs</strong> &mdash; covered on the next
+page.</p>
+
+      <div class="pagenav"><a href="interface.html"><span class="dir">Previous</span>Interface & Navigation</a><a href="joints.html"><span class="dir">Next</span>Joints & Colliding Pairs</a></div>
+    </div>
+    <footer class="credit">Newton Asset Editor User Guide &middot; ndNewAsset application &middot; Newton Dynamics SDK</footer>
+  </main>
+</div>
+</body>
+</html>
