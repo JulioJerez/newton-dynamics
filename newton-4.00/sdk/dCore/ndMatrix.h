@@ -82,10 +82,16 @@ class ndMatrix : public ndClassAlloc
 		ndFloat64* const dst, ndInt32 dstStrideInBytes,
 		const ndFloat32* const src, ndInt32 srcStrideInBytes, ndInt32 count) const;
 #endif
+	D_CORE_API void MakeOrthoNormal();
 	D_CORE_API bool SanityCheck() const;
 	D_CORE_API bool TestSymetric3x3() const;
 	D_CORE_API bool TestIdentity(ndFloat32 tolerance = ndFloat32(0.0f)) const;
-	D_CORE_API bool TestOrthogonal(ndFloat32 tol = ndFloat32 (1.0e-4f)) const;
+
+#ifdef D_NEWTON_USE_DOUBLE
+	D_CORE_API bool TestOrthogonal(ndFloat32 tol = ndFloat32 (1.0e-5f)) const;
+#else
+	D_CORE_API bool TestOrthogonal(ndFloat32 tol = ndFloat32(5.0e-4f)) const;
+#endif
 
 	D_CORE_API ndMatrix Multiply3X3 (const ndMatrix &B) const;
 	D_CORE_API ndMatrix operator* (const ndMatrix &B) const;

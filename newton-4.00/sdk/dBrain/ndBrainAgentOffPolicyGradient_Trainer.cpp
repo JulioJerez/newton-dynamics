@@ -266,12 +266,13 @@ void ndBrainAgentOffPolicyGradient_Agent::Step()
 	ndBrainMemVector observation(m_trajectory.GetObservations(entryIndex), owner->m_parameters.m_numberOfObservations);
 	
 	GetObservation(&observation[0]);
+	ndBrainFloat reward = CalculateReward();
+
 	policy->MakePrediction(observation, actions);
 	SampleActions(actions);
 	ApplyActions(&actions[0]);
 
 	bool isdead = IsTerminal();
-	ndBrainFloat reward = CalculateReward();
 	m_trajectory.SetReward(entryIndex, reward);
 	m_trajectory.SetAliveState(entryIndex, !isdead);
 }

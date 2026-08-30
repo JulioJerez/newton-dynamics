@@ -455,7 +455,8 @@ class ndBigVector: public ndClassAlloc
 	// return dot 4d dot product
 	inline ndBigVector DotProduct(const ndBigVector &A) const
 	{
-		return (*this * A).AddHorizontal();
+		const ndBigVector produt(*this * A);
+		return produt.AddHorizontal();
 	}
 
 	// return 3d cross product
@@ -1261,25 +1262,21 @@ class ndVector : public ndClassAlloc
 
 	inline ndVector BroadcastX() const
 	{
-		//return _mm_shuffle_ps(m_type, m_type, PERMUTE_MASK(0, 0, 0, 0));
 		return ndVector(m_x);
 	}
 
 	inline ndVector BroadcastY() const
 	{
-		//return _mm_shuffle_ps(m_type, m_type, PERMUTE_MASK(1, 1, 1, 1));
 		return ndVector(m_y);
 	}
 
 	inline ndVector BroadcastZ() const
 	{
-		//return _mm_shuffle_ps(m_type, m_type, PERMUTE_MASK(2, 2, 2, 2));
 		return ndVector(m_z);
 	}
 
 	inline ndVector BroadcastW() const
 	{
-		//return _mm_shuffle_ps(m_type, m_type, PERMUTE_MASK(3, 3, 3, 3));
 		return ndVector(m_w);
 	}
 
@@ -1341,11 +1338,8 @@ class ndVector : public ndClassAlloc
 	// return 4d dot product
 	inline ndVector DotProduct(const ndVector& A) const
 	{
-#ifdef D_NEWTON_USE_AVX2_OPTION
-		return _mm_dp_ps(m_type, A.m_type, 0xff);
-#else
-		return (*this * A).AddHorizontal();
-#endif
+		const ndVector produt(*this * A);
+		return produt.AddHorizontal();
 	}
 
 	// return 3d cross product

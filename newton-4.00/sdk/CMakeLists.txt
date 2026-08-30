@@ -41,8 +41,6 @@ include_directories(dNewton/dModels/dVehicle)
 include_directories(dDependencies/hacd/src/VHACD_Lib/inc/)
 include_directories(dDependencies/hacd/src/VHACD_Lib/public/)
 
-#add_subdirectory(dNewton/dExtensions)
-
 file(GLOB CPP_SOURCE 
 	dCore/*.h 
 	dCore/*.cpp

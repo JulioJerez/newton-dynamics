@@ -18,16 +18,12 @@
 
 namespace ndUnicyclePlayer
 {
-	#define CONTROLLER_NAME_SAC			"unicycleSac"
-	#define CONTROLLER_NAME_PPO			"unicyclePpo"
+	#define CONTROLLER_NAME_SAC		"unicycleSac"
+	#define CONTROLLER_NAME_PPO		"unicyclePpo"
 
-	//#define ND_MAX_WHEEL_ALPHA		(ndFloat32 (50.0f))
-	#define ND_MAX_WHEEL_ALPHA			(ndFloat32 (500.0f))
-	#define ND_TERMINATION_ANGLE		(ndFloat32 (20.0f) * ndDegreeToRad)
-	#define ND_TRAJECTORY_STEPS			(1024 * 4)
-
-	#define ND_RANDOM_IMPULSE_MOD		1024
-	#define ND_RANDOM_IMPULSE_MAGNITUD	ndFloat32 (2.0f)
+	#define ND_MAX_WHEEL_ALPHA		(ndFloat32 (500.0f))
+	#define ND_TERMINATION_ANGLE	(ndFloat32 (45.0f) * ndDegreeToRad)
+	#define ND_MAX_LEG_JOINT_ANGLE	(ndFloat32 (45.0f) * ndDegreeToRad)
 
 	enum ndActionSpace
 	{
@@ -37,13 +33,11 @@ namespace ndUnicyclePlayer
 
 	enum ndStateSpace
 	{
-		m_boxAngle,
-		m_boxOmega,
-		m_poleOmega,
+		m_velocity,
 		m_poleAngle,
+		m_poleOmega,
 		m_wheelOmega,
-		//m_wheelAlpha,
-		m_hasContactSupport,
+		m_hasSupportContact,
 		m_observationsSize
 	};
 
@@ -69,6 +63,37 @@ namespace ndUnicyclePlayer
 		{
 			return false;
 		}
+	};
+
+	class ndBasePose
+	{
+		public:
+		ndBasePose()
+			:m_body(nullptr)
+		{
+		}
+
+		ndBasePose(ndBodyDynamic* const body)
+			:m_veloc(body->GetVelocity())
+			,m_omega(body->GetOmega())
+			,m_posit(body->GetPosition())
+			,m_rotation(body->GetRotation())
+			,m_body(body)
+		{
+		}
+
+		void SetPose() const
+		{
+			m_body->SetMatrix(ndCalculateMatrix(m_rotation, m_posit));
+			m_body->SetOmega(m_omega);
+			m_body->SetVelocity(m_veloc);
+		}
+
+		ndVector m_veloc;
+		ndVector m_omega;
+		ndVector m_posit;
+		ndQuaternion m_rotation;
+		ndBodyDynamic* m_body;
 	};
 
 	class ndController : public ndModelNotify
@@ -117,7 +142,7 @@ namespace ndUnicyclePlayer
 		ndFloat32 GetBoxOmega() const;
 		ndFloat32 GetPoleAngle() const;
 		ndFloat32 GetPoleOmega() const;
-		ndFloat32 GetWheelOmega() const;
+		//ndFloat32 GetWheelOmega() const;
 		ndFloat32 GetWheelAlpha() const;
 		ndBrainFloat CalculateReward() const;
 		void ApplyActions(ndBrainFloat* const actions);
@@ -131,6 +156,7 @@ namespace ndUnicyclePlayer
 
 		static ndModelArticulation* CreateModel(ndDemoEntityManager* const scene, const ndMatrix& location, const ndRenderMeshLoader& loader, const char* const name);
 
+		mutable ndIkSolver m_solver;
 		ndSharedPtr<ndBody> m_pole;
 		ndSharedPtr<ndBody> m_wheel;
 		ndSharedPtr<ndBody> m_topBox;
@@ -138,8 +164,8 @@ namespace ndUnicyclePlayer
 		ndSharedPtr<ndJointBilateralConstraint> m_poleHinge;
 		ndSharedPtr<ndJointBilateralConstraint> m_wheelRoller;
 		ndSharedPtr<ndBrainAgent> m_agent;
+		ndFixSizeArray<ndBasePose, 8> m_basePose;
 		ndFloat32 m_timestep;
-		ndInt32 m_randomImpulseCounter;
 		bool m_isTrainning;
 	};
 };

@@ -195,7 +195,7 @@ void ndBody::SetVelocity(const ndVector& veloc)
 void ndBody::SetMatrixNoSleep(const ndMatrix& matrix)
 {
 	m_matrix = matrix;
-	ndAssert(m_matrix.TestOrthogonal(ndFloat32(1.0e-4f)));
+	ndAssert(m_matrix.TestOrthogonal());
 
 	m_rotation = ndQuaternion(m_matrix);
 	m_globalCentreOfMass = m_matrix.TransformVector(m_localCentreOfMass);
