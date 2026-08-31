@@ -1343,8 +1343,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 		m_policyTrainer->AccumulateWeightAndBiasGradients();
 		m_policyTrainer->ApplyLearnRate(m_learnRate * ND_POLICY_DOWN_SAMPLE_LEARN_RATE);
 	
-		// calculate the KL divergence
-		// this will make the agent a vanilla policy gradient
+		// calculate KL divergence between original and new policy
 		divergence = CalculateKLdivergence();
 	}
 	if (passes > 1)
