@@ -41,10 +41,7 @@
 #define ND_POLICY_MAX_KL_DIVERGENCE_PASSES			8
 #define ND_POLICY_DOWN_SAMPLE_LEARN_RATE			ndBrainFloat(1.0f)
 #define ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON		ndBrainFloat(0.2f)
-#define ND_POLICY_KL_DIVERGENCE_STOP_THRESHHOLD		ndBrainFloat(1.0e-3f)
-
-//entropy regularization improvement from 
-//https://arxiv.org/pdf/1912.01557
+#define ND_POLICY_KL_DIVERGENCE_STOP_THRESHHOLD		ndBrainFloat(0.05f)
 
 ndBrainAgentOnPolicyGradient_Trainer::HyperParameters::HyperParameters()
 {
@@ -790,7 +787,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeValue()
 		// calculate grad = expectedReward - stateValue(i);
 		outputGradientBuffer->CopyBufferIndirect(expectedRewardBufferInfo, **m_minibatchValueShuffleBuffer, **m_trainingBuffer);
 		outputGradientBuffer->Sub(*outputBuffer);
-		outputGradientBuffer->Scale(-1.0f);
+		outputGradientBuffer->Scale(ndBrainFloat(-1.0f));
 
 		// maybe apply a Huber loss here
 		outputGradientBuffer->Min(huberSlope);
