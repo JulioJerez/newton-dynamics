@@ -29,14 +29,15 @@
 #include "ndBrainAgentContinuePolicyGradient.h"
 
 // Implementation of Proximal Policy Optimization (PPO) as described in:
-// https://arxiv.org/abs/1707.06347
-// for implementation details, see paper
-// https://arxiv.org/pdf/2005.12729
-//
 // The algorithm is stochastic and uses bootstrapped method for advantage estimation.
 // It optionally supports entropy regularization to scale the loss of both
 // the actor and critic networks.
-//
+// original paper
+// https://arxiv.org/abs/1707.06347
+// for implementation details, see paper
+// https://arxiv.org/pdf/2005.12729
+// entropy regularization improvement from 
+// https://arxiv.org/pdf/1912.01557
 // Reference pseudo code:
 // https://spinningup.openai.com/en/latest/algorithms/ppo.html
 
