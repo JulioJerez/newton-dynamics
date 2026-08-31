@@ -136,6 +136,7 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 
 		ndInt32 m_divergenceMaxPasses;
 		ndInt32 m_batchTrajectoryCount;
+		ndInt32 m_maxTransitionsPerEpoc;
 		ndBrainFloat m_divergenceStopThreshold;
 	};
 
