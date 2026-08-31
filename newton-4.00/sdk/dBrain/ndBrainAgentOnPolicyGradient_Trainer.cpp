@@ -685,7 +685,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::CalculateAdvantage()
 	// 
 	// just using bellman equation to calculate state expected reward.
 	// advantage(i) = reward(i) + gamma * Value(i + 1) - value(i)
-	// using the teminal condition as preciate
+	// using the terminal condition as predicate
 	// advantage(i) = reward(i) + alive * gamma * Value(i + 1) - value(i)
 	for (ndInt32 i = 0; i < numberOfMiniBatches; ++i)
 	{
