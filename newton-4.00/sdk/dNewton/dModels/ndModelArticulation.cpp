@@ -1018,6 +1018,12 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 	};
 	ndModelArticulation* const self = (ndModelArticulation*)this;
 	self->NodeIterator(CalculateCom);
+
+	dynamics.m_centerOfMass.m_up = localFrame.m_up;
+	dynamics.m_centerOfMass.m_front = localFrame.m_front;
+	dynamics.m_centerOfMass.m_right = localFrame.m_right;
+	dynamics.m_centerOfMass.m_posit = dynamics.m_centerOfMass.m_posit.Scale(ndFloat32(1.0f) / dynamics.m_mass);
+	dynamics.m_centerOfMass.m_posit.m_w = ndFloat32(1.0f);
 	
 	const ndInt32 numOfBodies = bodyArray.GetCount();
 	for (ndInt32 i = 0; i < numOfBodies; ++i)
@@ -1065,12 +1071,6 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 	dynamics.m_torque = localFrame.UnrotateVector(dynamics.m_torque);
 	dynamics.m_momentum = localFrame.UnrotateVector(dynamics.m_momentum);
 	dynamics.m_angularMomentum = localFrame.UnrotateVector(dynamics.m_angularMomentum);
-	
-	dynamics.m_centerOfMass.m_up = localFrame.m_up;
-	dynamics.m_centerOfMass.m_front = localFrame.m_front;
-	dynamics.m_centerOfMass.m_right = localFrame.m_right;
-	dynamics.m_centerOfMass.m_posit = dynamics.m_centerOfMass.m_posit.Scale(ndFloat32(1.0f) / dynamics.m_mass);
-	dynamics.m_centerOfMass.m_posit.m_w = ndFloat32(1.0f);
 	return dynamics;
 }
 
