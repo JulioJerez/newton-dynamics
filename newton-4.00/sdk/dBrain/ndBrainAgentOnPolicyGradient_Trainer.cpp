@@ -326,6 +326,9 @@ ndBrainAgentOnPolicyGradient_Trainer::ndBrainAgentOnPolicyGradient_Trainer(const
 	ndAssert(m_parameters.m_numberOfActions);
 	ndAssert(m_parameters.m_numberOfObservations);
 
+	// no entropy regularization
+	m_parameters.m_entropyTemperature = ndBrainFloat(0.0f);
+
 	ndSetRandSeed(ndUnsigned32(m_parameters.m_randomSeed));
 	m_uniformDistribution.Init(ndRandInt());
 
@@ -1393,8 +1396,6 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeStep()
 
 void ndBrainAgentOnPolicyGradient_Trainer::Optimize()
 {
-m_parameters.m_entropyTemperature = 0.0f;
-
 	UpdateScore();
 	TrajectoryToGpuBuffers();
 
