@@ -175,6 +175,7 @@ namespace ndUnicycleTrainer_sac
 			ndController* const playerController = (ndController*)(*controller);
 			playerController->CreateArticulatedModel(scene, model, mesh, visualMesh);
 			playerController->ResetModel();
+			playerController->CalculateWholeInvInertia();
 
 			ndSharedPtr<ndBrainAgentOffPolicyGradient_Agent> agent(new ndAgent(m_master, playerController));
 			playerController->m_agent = (ndSharedPtr<ndBrainAgent>&) agent;

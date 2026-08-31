@@ -135,6 +135,7 @@ namespace ndUnicyclePlayer
 		void PostUpdate(ndFloat32 timestep, ndInt32 threadId) override;
 
 		void ResetModel();
+		void CalculateWholeInvInertia();
 		ndBrainFloat IsOnAir() const;
 
 		bool IsTerminal() const;
@@ -166,6 +167,7 @@ namespace ndUnicyclePlayer
 		ndSharedPtr<ndBrainAgent> m_agent;
 		ndFixSizeArray<ndBasePose, 8> m_basePose;
 		ndFloat32 m_timestep;
+		ndFloat32 m_invInertiaScale;
 		bool m_isTrainning;
 	};
 };

@@ -53,17 +53,11 @@ class ndModelArticulation: public ndModel
 		public:
 		D_NEWTON_API ndCenterOfMassDynamics();
 
-		ndVector m_omega;
-		ndVector m_veloc;
-		ndVector m_alpha;
-		ndVector m_accel;
 		ndVector m_force;
 		ndVector m_torque;
 		ndVector m_momentum;
 		ndVector m_angularMomentum;
 		ndMatrix m_centerOfMass;
-		ndMatrix m_inertiaMatrix;
-		ndMatrix m_invInertiaMatrix;
 		ndFloat32 m_mass;
 	};
 
@@ -123,6 +117,7 @@ class ndModelArticulation: public ndModel
 	D_NEWTON_API void SetCollidingSubSelection(const ndNode* const node0, const ndNode* const node1);
 	D_NEWTON_API bool PairCollide(const ndBody* const body0, const ndBody* const body1) const;
 	
+	D_NEWTON_API ndFloat32 CalculateConservativeInetiaScaler() const;
 	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassKinematics(const ndMatrix& localFrame) const;
 	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassDynamics(ndIkSolver& solver, const ndMatrix& localFrame, ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS>& extraJoints, ndFloat32 timestep) const;
 	

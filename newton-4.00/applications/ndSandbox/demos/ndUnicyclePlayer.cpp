@@ -67,7 +67,8 @@ namespace ndUnicyclePlayer
 		:ndModelNotify()
 		,m_solver()
 		,m_agent(nullptr)
-		,m_timestep(0.0f)
+		,m_timestep(ndFloat32 (0.0f))
+		,m_invInertiaScale(ndFloat32(1.0f))
 		,m_isTrainning(false)
 	{
 	}
@@ -88,6 +89,11 @@ namespace ndUnicyclePlayer
 			matrix.m_posit.m_x = ndFloat32(0.0f);
 			GetModel()->GetAsModelArticulation()->SetTransform(matrix);
 		}
+	}
+
+	void ndController::CalculateWholeInvInertia()
+	{
+		m_invInertiaScale = ndFloat32 (1.0f) / GetModel()->GetAsModelArticulation()->CalculateConservativeInetiaScaler();
 	}
 
 	void ndController::ResetModel()
@@ -198,27 +204,27 @@ namespace ndUnicyclePlayer
 		};
 		ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS> extraJoint;
 		const ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(m_solver, comFrame, extraJoint, m_timestep));
-		const ndVector comOmega(comDynamics.m_omega);
-		const ndVector comAlpha(comDynamics.m_alpha);
 
+		const ndVector comAlpha(comDynamics.m_torque.Scale(m_invInertiaScale));
+		const ndVector comOmega(comDynamics.m_angularMomentum.Scale (m_invInertiaScale));
+		
 		ndVector veloc(m_topBox->GetVelocity());
 		ndFloat32 speedReward = ndExp(-100.0f * veloc.m_x * veloc.m_x);
-
+		
 		ndFloat32 omegaReward = PolynomialOmegaReward(comOmega.m_x);
 		ndFloat32 alphaReward = PolynomialAccelerationReward(comAlpha.m_x);
 		ndFloat32 reward = ndFloat32(0.2f) * speedReward + ndFloat32(0.4f) * omegaReward + ndFloat32(0.4f) * alphaReward;
-
+		
 		if (IsOnAir())
 		{
 			// penalize air borne high angular velocity
 			const ndMatrix wheelMatrix(m_wheelRoller->CalculateGlobalMatrix0());
 			const ndVector wheelOmega(m_wheel->GetOmega());
 			ndFloat32 speed = (wheelOmega.DotProduct(wheelMatrix.m_front)).GetScalar();
-
+		
 			ndFloat32 arg = ndFloat32 (-0.5f) * speed * speed;
 			reward = ndExp(arg);
 		}
-
 		return ndBrainFloat(reward);
 	}
 
