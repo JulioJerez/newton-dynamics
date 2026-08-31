@@ -106,7 +106,7 @@ namespace ndUnicycleTrainer_ppo
 			,m_discountRewardFactor(0.99f)
 			,m_horizon(ndFloat32(1.0f) / (ndFloat32(1.0f) - m_discountRewardFactor))
 			,m_lastEpisode(0xfffffff)
-			,m_stopTraining(100 * 1000000)
+			,m_stopTraining(200 * 1000000)
 			,m_modelIsTrained(false)
 		{
 			char name[256];
@@ -125,6 +125,7 @@ namespace ndUnicycleTrainer_ppo
 			hyperParameters.m_maxTrajectorySteps = 2048;
 			hyperParameters.m_batchTrajectoryCount = 1000;
 			hyperParameters.m_discountRewardFactor = 0.995f;
+			hyperParameters.m_entropyTemperature = 0.005f;
 			hyperParameters.m_hiddenLayersNumberOfNeurons = 128;
 			hyperParameters.m_numberOfActions = m_actionsSize;
 			hyperParameters.m_numberOfObservations = m_observationsSize;
