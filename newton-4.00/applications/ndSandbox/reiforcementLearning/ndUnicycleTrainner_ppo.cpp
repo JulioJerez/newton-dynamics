@@ -125,7 +125,6 @@ namespace ndUnicycleTrainer_ppo
 			hyperParameters.m_maxTrajectorySteps = 2048;
 			hyperParameters.m_batchTrajectoryCount = 1000;
 			hyperParameters.m_discountRewardFactor = 0.995f;
-			//hyperParameters.m_divergenceStopThreshold = 0.1f;
 			hyperParameters.m_hiddenLayersNumberOfNeurons = 128;
 			hyperParameters.m_numberOfActions = m_actionsSize;
 			hyperParameters.m_numberOfObservations = m_observationsSize;
