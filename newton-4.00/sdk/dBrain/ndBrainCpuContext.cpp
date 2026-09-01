@@ -37,11 +37,6 @@ class ndBrainAdamUpdateParametersRidge : public ndBrainBufferCommandCpu
 		ndInt32 workGroupSize = m_desc.m_workGroupSize;
 
 		const ndBrainOptimizerAdam::ndCommandSharedInfo* const parameters = (ndBrainOptimizerAdam::ndCommandSharedInfo*)m_desc[0]->GetCpuPtr();
-		//ndBrainFloat* const weightAndBiasBuffer = (ndBrainFloat*)m_desc[1]->GetCpuPtr();
-		//ndBrainFloat* const weightAndBiasGradientBuffer = (ndBrainFloat*)m_desc[2]->GetCpuPtr();
-		//ndBrainFloat* const vdw = (ndBrainFloat*)m_desc[3]->GetCpuPtr();
-		//ndBrainFloat* const vdw2 = (ndBrainFloat*)m_desc[4]->GetCpuPtr();
-
 		ndInt64 bufferSize = ndInt64(((ndBrainFloatBuffer*)m_desc[1])->GetCount());
 		ndBrainMemVector weightAndBiasBuffer ((ndBrainFloat*)m_desc[1]->GetCpuPtr(), bufferSize);
 		ndBrainMemVector weightAndBiasGradientBuffer ((ndBrainFloat*)m_desc[2]->GetCpuPtr(), bufferSize);
