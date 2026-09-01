@@ -289,6 +289,7 @@ void ndBrainAgentOnPolicyGradient_Agent::Step()
 
 ndBrainAgentOnPolicyGradient_Trainer::ndBrainAgentOnPolicyGradient_Trainer(const HyperParameters& parameters)
 	:ndClassAlloc()
+	,ndBrainContextUpdateCallback()
 	,m_name()
 	,m_parameters(parameters)
 	,m_context()
@@ -343,7 +344,7 @@ ndBrainAgentOnPolicyGradient_Trainer::ndBrainAgentOnPolicyGradient_Trainer(const
 	{
 		m_context = ndSharedPtr<ndBrainContext>(new ndBrainCpuContext);
 	}
-	
+
 	ndFloat32 gain = ndFloat32(1.0f);
 	ndFloat32 maxGain = ndFloat32(0.99f) / (ndFloat32(1.0f) - m_parameters.m_discountRewardFactor);
 	for (ndInt32 i = 0; (i < m_parameters.m_maxTrajectorySteps) && (gain < maxGain); ++i)
@@ -1384,7 +1385,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeStep()
 	}
 }
 
-void ndBrainAgentOnPolicyGradient_Trainer::Optimize()
+void ndBrainAgentOnPolicyGradient_Trainer::Update()
 {
 	UpdateScore();
 	TrajectoryToGpuBuffers();
@@ -1392,4 +1393,9 @@ void ndBrainAgentOnPolicyGradient_Trainer::Optimize()
 	CalculateAdvantage();
 	OptimizePolicy();
 	OptimizeValue();
+}
+
+void ndBrainAgentOnPolicyGradient_Trainer::Optimize()
+{
+	m_context->Update(this);
 }

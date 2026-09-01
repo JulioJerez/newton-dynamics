@@ -279,6 +279,7 @@ void ndBrainAgentOffPolicyGradient_Agent::Step()
 
 ndBrainAgentOffPolicyGradient_Trainer::ndBrainAgentOffPolicyGradient_Trainer(const HyperParameters& parameters)
 	:ndClassAlloc()
+	,ndBrainContextUpdateCallback()
 	,m_name()
 	,m_parameters(parameters)
 	,m_context()
@@ -956,7 +957,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 	m_policyTrainer->ApplyLearnRate(ND_POLICY_LEARN_SCALE * m_learnRate);
 }
 
-void ndBrainAgentOffPolicyGradient_Trainer::Optimize()
+void ndBrainAgentOffPolicyGradient_Trainer::Update()
 {
 	// get the number of randomized transitions 
 	m_miniBatchIndices.SetCount(0);
@@ -1035,6 +1036,11 @@ void ndBrainAgentOffPolicyGradient_Trainer::Optimize()
 			referenceParameterBuffer->Blend(*parameterBuffer, m_parameters.m_polyakBlendFactor);
 		}
 	}
+}
+
+void ndBrainAgentOffPolicyGradient_Trainer::Optimize()
+{
+	m_context->Update(this);
 }
 
 void ndBrainAgentOffPolicyGradient_Trainer::OptimizeStep()

@@ -290,12 +290,10 @@ void ndBrainTrainer::AccumulateWeightAndBiasGradients()
 
 void ndBrainTrainer::BackPropagate()
 {
-int xxxx = 0;
 	ndBrainContext* const context = *m_descriptor.m_context;
 	for (ndList<ndSharedPtr<ndBrainBufferCommand>>::ndNode* node = m_backPropagateCommands.GetFirst(); node; node = node->GetNext())
 	{
 		ndSharedPtr<ndBrainBufferCommand>& command = node->GetInfo();
 		context->SubmitBufferCommand(*command);
-xxxx++;
 	}
 }
