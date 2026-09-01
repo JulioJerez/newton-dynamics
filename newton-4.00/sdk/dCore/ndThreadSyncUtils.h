@@ -27,11 +27,7 @@
 
 /// tell the operating system the library is done with this job, 
 /// the OS is free to switch to another task if it needs to.
-D_CORE_API void ndThreadYield();
-
-/// in some systems, thread yield could be too expensive 
-/// since it could task switch to another thread. 
-D_CORE_API void ndThreadPause();
+D_CORE_API void ndThreadYield(ndInt32& loop);
 
 /// Set cpu floating point exceptions, the original exception state is restored when the destructor is called.
 class ndFloatExceptions
