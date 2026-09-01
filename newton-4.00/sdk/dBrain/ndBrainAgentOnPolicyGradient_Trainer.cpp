@@ -39,9 +39,9 @@
 #include "ndBrainAgentOnPolicyGradient_Trainer.h"
 
 #define ND_POLICY_MAX_KL_DIVERGENCE_PASSES			8
-#define ND_POLICY_DOWN_SAMPLE_LEARN_RATE			ndBrainFloat(1.0f)
+#define ND_POLICY_DOWN_SAMPLE_LEARN_RATE			ndBrainFloat(0.5f)
 #define ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON		ndBrainFloat(0.2f)
-#define ND_POLICY_KL_DIVERGENCE_STOP_THRESHHOLD		ndBrainFloat(0.002f)
+#define ND_POLICY_KL_DIVERGENCE_STOP_THRESHHOLD		ndBrainFloat(0.001f)
 
 ndBrainAgentOnPolicyGradient_Trainer::HyperParameters::HyperParameters()
 {
@@ -1269,29 +1269,6 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 			m_zMeanBuffer->CopyBuffer(meanSampledActions, m_parameters.m_miniBatchSize, **m_trainingBuffer);
 			m_zMeanBuffer->Sub(**m_meanBuffer);
 
-#if 0
-			// get this mini batch advantage
-			m_minibatchAdvantageBuffer->CopyBuffer(advantageReadWriteInfo, m_parameters.m_miniBatchSize, **m_advantageBuffer);
-			
-			//calculate the clip surrogate factor
-			m_minibatchLikelihoodRatioBuffer->CalculateLikelihood(**m_zMeanBuffer, **m_sigmaBuffer);
-			m_minibatchInvLikelihoodBuffer->CopyBuffer(advantageReadWriteInfo, m_parameters.m_miniBatchSize, **m_invLikelihoodBuffer);
-			m_minibatchLikelihoodRatioBuffer->Mul(**m_minibatchInvLikelihoodBuffer);
-			m_minibatchClippedLikelihoodRatioBuffer->Set(**m_minibatchLikelihoodRatioBuffer);
-			m_minibatchClippedMinimunZeroGradient->Set(**m_minibatchClippedLikelihoodRatioBuffer);
-			m_minibatchClippedMaximumZeroGradient->Set(**m_minibatchClippedLikelihoodRatioBuffer);
-			m_minibatchClippedMaximumZeroGradient->LessEqual(ndBrainFloat(1.0f) + ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON);
-			m_minibatchClippedMinimunZeroGradient->GreaterEqual(ndBrainFloat(1.0f) - ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON);
-			m_minibatchClippedLikelihoodRatioBuffer->Min(ndBrainFloat(1.0f) + ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON);
-			m_minibatchClippedLikelihoodRatioBuffer->Max(ndBrainFloat(1.0f) - ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON);
-
-			m_minibatchLikelihoodRatioBuffer->Mul(**m_minibatchAdvantageBuffer);
-			m_minibatchAdvantageBuffer->Mul(**m_minibatchClippedLikelihoodRatioBuffer);
-			m_minibatchAdvantageBuffer->Min(**m_minibatchLikelihoodRatioBuffer);
-			m_minibatchAdvantageBuffer->Mul(**m_minibatchClippedMaximumZeroGradient);
-			m_minibatchAdvantageBuffer->Mul(**m_minibatchClippedMinimunZeroGradient);
-
-#else
 			//calculate the clip surrogate
 			//according to the method in the paper
 			m_minibatchLikelihoodRatioBuffer->CalculateLikelihood(**m_zMeanBuffer, **m_sigmaBuffer);
@@ -1315,7 +1292,7 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizePolicy()
 			m_minibatchLikelihoodRatioBuffer->GreaterEqual(ndBrainFloat(0.0f));
 			m_minibatchClippedMaximumZeroGradient->Blend(**m_minibatchClippedMinimunZeroGradient, **m_minibatchLikelihoodRatioBuffer);
 			m_minibatchAdvantageBuffer->Mul(**m_minibatchClippedMaximumZeroGradient);
-#endif
+
 			// calculate gradient
 			outputGradientBuffer->CalculateEntropyRegularizationGradient(**m_zMeanBuffer, **m_sigmaBuffer, ndBrainFloat(-1.0f), m_parameters.m_numberOfActions);
 			m_minibatchBrocastAdvantageBuffer->BroadcastScaler(**m_minibatchAdvantageBuffer);
