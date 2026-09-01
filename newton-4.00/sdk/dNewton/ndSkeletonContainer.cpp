@@ -1327,7 +1327,7 @@ void ndSkeletonContainer::CalculateJointAccelImmediate(ndForcePair* const accel)
 {
 	const ndSpatialVector zero(ndSpatialVector::m_zero);
 	const ndInt32 nodeCount = m_nodeList.GetCount();
-	for (ndInt32 i = 0; i < nodeCount - 1; ++i)
+	for (ndInt32 i = 0; i < (nodeCount - 1); ++i)
 	{
 		ndNode* const node = m_nodesOrder[i];
 		ndAssert(i == node->m_index);
