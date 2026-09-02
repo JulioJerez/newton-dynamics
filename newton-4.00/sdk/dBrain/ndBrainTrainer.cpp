@@ -121,7 +121,7 @@ void ndBrainTrainer::Initialize()
 
 void ndBrainTrainer::AddCopyOutputGradientCommand()
 {
-	ndBrainBufferCommand* const lastLayerCommand = FindCommand(ndBrainContext::m_outpuId);
+	ndBrainBufferCommand* const lastLayerCommand = FindCommand(m_feedForwardCommands, ndBrainContext::m_outpuId);
 	ndAssert(lastLayerCommand);
 
 	ndBrainBufferCommandDesc& desc = lastLayerCommand->GetDescriptor();
@@ -184,7 +184,7 @@ void ndBrainTrainer::AddCopyOutputGradientCommand()
 
 void ndBrainTrainer::AddCopyInputGradientCommand()
 {
-	ndBrainBufferCommand* const firstCommand = FindCommand(ndBrainContext::m_inputId);
+	ndBrainBufferCommand* const firstCommand = FindCommand(m_feedForwardCommands, ndBrainContext::m_inputId);
 	ndAssert(firstCommand);
 
 	ndBrainBufferCommandDesc& desc = firstCommand->GetDescriptor();
@@ -250,7 +250,7 @@ void ndBrainTrainer::AddLayersGradientCommands()
 	for (ndInt32 i = ndInt32(brain.GetCount()) - 1; i >= 0; --i)
 	{
 		ndBrainLayer* const layer = brain[i];
-		ndBrainBufferCommand* const feedForwardLayerCommand = FindCommand(size_t(layer));
+		ndBrainBufferCommand* const feedForwardLayerCommand = FindCommand(m_feedForwardCommands, size_t(layer));
 		ndAssert(feedForwardLayerCommand);
 
 		const ndBrainBufferCommandDesc& desc = feedForwardLayerCommand->GetDescriptor();

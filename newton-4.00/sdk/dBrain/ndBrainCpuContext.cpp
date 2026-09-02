@@ -112,7 +112,7 @@ ndBrainCpuContext::ndBrainCpuContext()
 {
 	ndInt32 numOfThreads = ndBrainThreadPool::GetMaxThreads();
 #ifdef _DEBUG
-numOfThreads = 2;
+numOfThreads = 1;
 #endif
 //numOfThreads = 1;
 

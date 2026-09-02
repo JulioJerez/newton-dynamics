@@ -67,18 +67,21 @@ class ndBrainTrainerInference : public ndClassAlloc
 	ndBrainFloatBuffer* GetWeightAndBiasBuffer();
 
 	void MakePrediction();
+	void UpdateSelfModifyingLayers();
 	void UpdateParameters(const ndBrainVector& weightAndBias);
 	void MakeSinglePrediction(const ndBrainVector& input, ndBrainVector& output);
 
 	ndInt32 RoundOffOffset(ndInt32 value) const;
 
 	protected:
-	void AddCopyOutputCommand();
 	void InitInputOutputBuffer();
 	void InitWeightAndBiasBuffer();
-	ndBrainBufferCommand* FindCommand(size_t id) const;
-	void AddCopyInputCommand(const ndCommandSharedInfo& uniformData);
+	ndBrainBufferCommand* FindCommand(ndList<ndSharedPtr<ndBrainBufferCommand>>& commandList, size_t id) const;
+
+	void AddCopyOutputCommand(ndList<ndSharedPtr<ndBrainBufferCommand>>& commandList);
+	void AddCopyInputCommand(ndList<ndSharedPtr<ndBrainBufferCommand>>& commandList, const ndCommandSharedInfo& uniformData);
 	void AddLayersCommands(ndFixSizeArray<ndCommandSharedInfo, 256>& layersUniformsData);
+	void AddSelfModifyingLayersCommands(ndFixSizeArray<ndCommandSharedInfo, 256>& layersUniformsData);
 
 	ndTrainerDescriptor m_descriptor;
 	ndSharedPtr<ndBrainFloatBuffer> m_inputOutputBuffer;
@@ -86,6 +89,7 @@ class ndBrainTrainerInference : public ndClassAlloc
 	ndSharedPtr<ndBrainFloatBuffer> m_miniBatchInputBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_miniBatchOutputBuffer;
 	ndList<ndSharedPtr<ndBrainBufferCommand>> m_feedForwardCommands;
+	ndList<ndSharedPtr<ndBrainBufferCommand>> m_selfModyfyingCommands;
 
 	friend class ndBrainCpuContext;
 	friend class ndBrainGpuContext;

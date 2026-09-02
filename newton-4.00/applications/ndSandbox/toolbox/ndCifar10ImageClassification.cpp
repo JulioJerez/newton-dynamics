@@ -12,6 +12,7 @@
 #include "ndSandboxStdafx.h"
 #include "ndTestDeepBrain.h"
 
+#if 0
 static void LoadTrainingData(ndSharedPtr<ndBrainMatrix>& trainingImages, ndSharedPtr<ndBrainMatrix>& srcTrainingImages, ndSharedPtr<ndBrainMatrix>& trainingLabels)
 {
 	const ndInt32 batches = 5;
@@ -515,10 +516,11 @@ static void Cifar10TestSet()
 	}
 }
 
+#endif
 void ndCifar10ImageClassification()
 {
 	ndSetRandSeed(47);
 
-	Cifar10TrainingSet();
+	//Cifar10TrainingSet();
 	//Cifar10TestSet();
 }

@@ -92,18 +92,16 @@ class ndBrainLayerActivationBatchNormalize : public ndBrainLayerActivationLinear
 	virtual void Save(const ndBrainSave* const loadSave) const override;
 	virtual const char* GetLabelId() const override;
 
-	void CalculateVariance(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const;
-	virtual void BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const override;
+	void CalculateVariance(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const;
+	virtual void SelfModifyingFeedForward(const ndBrainLayerSelfModyfyingFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const override;
 
-	virtual ndCommandArray CreateBackPropagateBufferCommand(
+	virtual ndCommandArray CreateSelfModyfingFeedForwardBufferCommand(
 		ndBrainTrainerInference* const owner,
 		ndBrainContext* const context,
 		const ndCommandSharedInfo& info,
 		ndInt32 miniBatchSize,
 		ndBrainFloatBuffer* const inputOutputData,
-		ndBrainFloatBuffer* const weightsAndBias,
-		ndBrainFloatBuffer* const inputOutputGradients,
-		ndBrainFloatBuffer* const weightsAndBiasGradients) const override;
+		ndBrainFloatBuffer* const weightsAndBias) const override;
 };
 #endif
 

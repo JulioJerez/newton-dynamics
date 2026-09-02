@@ -36,12 +36,12 @@ ndBrainGpuContext* ndBrainContext::GetAsGpuContext()
 	return nullptr;
 }
 
-void ndBrainContext::Blend(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer, ndBrainFloat scale)
-{
-	ndAssert(0);
-	Scale(buffer, ndBrainFloat(1.0f) - scale);
-	ScaleAdd(buffer, srcBuffer, scale);
-}
+//void ndBrainContext::Blend(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer, ndBrainFloat scale)
+//{
+//	ndAssert(0);
+//	Scale(buffer, ndBrainFloat(1.0f) - scale);
+//	ScaleAdd(buffer, srcBuffer, scale);
+//}
 
 void ndBrainContext::Update(ndBrainContextUpdateCallback* const callback)
 {

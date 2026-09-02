@@ -40,6 +40,16 @@ void ndBrainLayerFeedForwardCpuCommand::Execute(ndInt32 miniBatchIndex)
 	m_layer->FeedForward(this, miniBatchIndex);
 }
 
+ndBrainLayerSelfModyfyingFeedForwardCpuCommand::ndBrainLayerSelfModyfyingFeedForwardCpuCommand(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer)
+	:ndBrainLayerFeedForwardCpuCommand(desc, layer)
+{
+}
+
+void ndBrainLayerSelfModyfyingFeedForwardCpuCommand::Execute(ndInt32 miniBatchIndex)
+{
+	m_layer->SelfModifyingFeedForward(this, miniBatchIndex);
+}
+
 ndBrainLayerBackPropagateCpuCommand::ndBrainLayerBackPropagateCpuCommand(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer)
 	:ndBrainBufferCommandCpu(desc)
 	,m_layer(layer)
@@ -95,6 +105,11 @@ void ndBrainLayer::FeedForward(const ndBrainLayerFeedForwardCpuCommand* const, n
 }
 
 void ndBrainLayer::BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const, ndInt32) const
+{
+	ndAssert(0);
+}
+
+void ndBrainLayer::SelfModifyingFeedForward(const ndBrainLayerSelfModyfyingFeedForwardCpuCommand* const, ndInt32) const
 {
 	ndAssert(0);
 }
@@ -245,6 +260,19 @@ ndCommandArray ndBrainLayer::CreateFeedForwardBufferCommand(
 	ndBrainFloatBuffer* const, ndBrainFloatBuffer* const) const
 {
 	return ndCommandArray();
+}
+
+ndCommandArray ndBrainLayer::CreateSelfModyfingFeedForwardBufferCommand(
+	ndBrainTrainerInference* const owner,
+	ndBrainContext* const context,
+	const ndCommandSharedInfo& info,
+	ndInt32 miniBatchSize,
+	ndBrainFloatBuffer* const inputOutputData,
+	ndBrainFloatBuffer* const weightsAndBias) const
+{
+	return CreateFeedForwardBufferCommand(
+		owner, context, info, miniBatchSize,
+		inputOutputData, weightsAndBias);
 }
 
 ndCommandArray ndBrainLayer::CreateBackPropagateBufferCommand(

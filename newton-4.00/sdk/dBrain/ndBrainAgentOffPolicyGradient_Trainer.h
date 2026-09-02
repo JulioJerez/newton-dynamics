@@ -156,6 +156,7 @@ class ndBrainAgentOffPolicyGradient_Trainer : public ndClassAlloc, public ndBrai
 	void TrainPolicy();
 	void BuildPolicyClass();
 	void BuildCriticClass();
+	void UpdateSpecialLayers();
 	void SaveTrajectoryTerminal();
 	void SaveTrajectoryNoTerminal();
 	void CalculateExpectedRewards();

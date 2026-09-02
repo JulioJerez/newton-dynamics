@@ -187,7 +187,7 @@ namespace ndUnicyclePlayer
 
 		auto PolynomialOmegaReward = [](ndFloat32 omega)
 		{
-			ndFloat32 maxOmega = 2.0f;
+			ndFloat32 maxOmega = ndFloat32(2.0f);
 			omega = ndClamp(omega, -maxOmega, maxOmega);
 			ndFloat32 r = ndFloat32(1.0f) - ndAbs(omega) / maxOmega;
 			ndFloat32 reward = r * r * r * r;
@@ -203,10 +203,12 @@ namespace ndUnicyclePlayer
 			return reward;
 		};
 		ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS> extraJoint;
-		const ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(m_solver, comFrame, extraJoint, m_timestep));
+		const ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(m_solver, extraJoint, m_timestep));
+		//ndMatrix xxxx(GetModel()->GetAsModelArticulation()->CalculateComMassMatrix());
+		//xxxx = xxxx.Inverse4x4();
 
-		const ndVector comAlpha(comDynamics.m_torque.Scale(m_invInertiaScale));
-		const ndVector comOmega(comDynamics.m_angularMomentum.Scale (m_invInertiaScale));
+		const ndVector comAlpha(comFrame.UnrotateVector(comDynamics.m_torque.Scale(m_invInertiaScale)));
+		const ndVector comOmega(comFrame.UnrotateVector(comDynamics.m_angularMomentum.Scale (m_invInertiaScale)));
 		
 		ndVector veloc(m_topBox->GetVelocity());
 		ndFloat32 speedReward = ndExp(-100.0f * veloc.m_x * veloc.m_x);
