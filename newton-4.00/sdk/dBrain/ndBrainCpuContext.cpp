@@ -114,6 +114,7 @@ ndBrainCpuContext::ndBrainCpuContext()
 #ifdef _DEBUG
 numOfThreads = 2;
 #endif
+//numOfThreads = 1;
 
 	m_threadPool->SetThreadCount(numOfThreads);
 }
