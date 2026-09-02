@@ -1062,11 +1062,6 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 	};
 	CalculateComFullDynamics();
 	solver.SolverEnd();
-	
-	//dynamics.m_force = localFrame.UnrotateVector(dynamics.m_force);
-	//dynamics.m_torque = localFrame.UnrotateVector(dynamics.m_torque);
-	//dynamics.m_momentum = localFrame.UnrotateVector(dynamics.m_momentum);
-	//dynamics.m_angularMomentum = localFrame.UnrotateVector(dynamics.m_angularMomentum);
 	return dynamics;
 }
 
