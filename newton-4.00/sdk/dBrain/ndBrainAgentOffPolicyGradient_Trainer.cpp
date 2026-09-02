@@ -1056,7 +1056,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::Update()
 		minibatchOfTransitions.m_bytesToCopy = transitionSizeInBytes;
 		m_minibatchOfTransitions->CopyBufferIndirect(minibatchOfTransitions, **m_minibatchIndexBuffer, **m_replayBufferFlat);
 
-		// make sure spacial sel modfying layes are updaded befored training
+		// make sure spacial self modifying layers are updaded befored training
 		UpdateSpecialLayers();
 
 		// calculate expected rewards for this mini batch

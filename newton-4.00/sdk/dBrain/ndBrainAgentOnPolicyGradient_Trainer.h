@@ -168,6 +168,7 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc, public ndBrain
 	void BuildPolicyClass();
 	void BuildCriticClass();
 	void CalculateAdvantage();
+	void UpdateSpecialLayers();
 	void TrajectoryToGpuBuffers();
 	ndBrainFloat CalculateKLdivergence();
 	void SaveTrajectory(ndBrainAgentOnPolicyGradient_Agent* const agent);

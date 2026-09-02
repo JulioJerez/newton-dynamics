@@ -41,7 +41,7 @@
 #define ND_POLICY_MAX_KL_DIVERGENCE_PASSES			8
 #define ND_POLICY_DOWN_SAMPLE_LEARN_RATE			ndBrainFloat(0.5f)
 #define ND_CONTINUE_PROXIMA_POLICY_CLIP_EPSILON		ndBrainFloat(0.2f)
-#define ND_POLICY_KL_DIVERGENCE_STOP_THRESHHOLD		ndBrainFloat(0.001f)
+#define ND_POLICY_KL_DIVERGENCE_STOP_THRESHHOLD		ndBrainFloat(0.005f)
 
 ndBrainAgentOnPolicyGradient_Trainer::HyperParameters::HyperParameters()
 {
@@ -1109,6 +1109,34 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeValue()
 }
 #endif
 
+void ndBrainAgentOnPolicyGradient_Trainer::UpdateSpecialLayers()
+{
+	ndBrainFloatBuffer* const valueBuffer = m_valueTrainer->GetInputBuffer();
+	ndBrainFloatBuffer* const policyBuffer = m_policyTrainer->GetInputBuffer();
+
+	ndCopyBufferCommandInfo observationInfo;
+	observationInfo.m_srcStrideInByte = ndInt32(m_trajectoryAccumulator.GetStride() * sizeof(ndReal));
+	observationInfo.m_srcOffsetInByte = ndInt32(m_trajectoryAccumulator.GetObsevationOffset() * sizeof(ndReal));
+	observationInfo.m_dstOffsetInByte = 0;
+	observationInfo.m_dstStrideInByte = ndInt32(m_valueTrainer->GetBrain()->GetInputSize() * sizeof(ndReal));
+	observationInfo.m_bytesToCopy = observationInfo.m_dstStrideInByte;
+
+	const ndInt32 numberOfMiniBatches = ndInt32(m_trajectoryAccumulator.GetCount() / (m_parameters.m_miniBatchSize));
+	ndAssert(numberOfMiniBatches >= 1);
+	const ndInt32 transitionStrideInBytes = ndInt32(m_parameters.m_miniBatchSize * m_trajectoryAccumulator.GetStride() * sizeof(ndReal));
+
+	for (ndInt32 i = 0; i < numberOfMiniBatches; ++i)
+	{
+		valueBuffer->CopyBuffer(observationInfo, m_parameters.m_miniBatchSize, **m_trainingBuffer);
+		m_valueTrainer->UpdateSelfModifyingLayers();
+
+		policyBuffer->CopyBuffer(observationInfo, m_parameters.m_miniBatchSize, **m_trainingBuffer);
+		m_policyTrainer->UpdateSelfModifyingLayers();
+
+		observationInfo.m_srcOffsetInByte += transitionStrideInBytes;
+	}
+}
+
 ndBrainFloat ndBrainAgentOnPolicyGradient_Trainer::CalculateKLdivergence()
 {
 	// https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
@@ -1389,6 +1417,9 @@ void ndBrainAgentOnPolicyGradient_Trainer::Update()
 {
 	UpdateScore();
 	TrajectoryToGpuBuffers();
+
+	// make sure spacial self modifying layers are updaded befored training
+	UpdateSpecialLayers();
 
 	CalculateAdvantage();
 	OptimizePolicy();
