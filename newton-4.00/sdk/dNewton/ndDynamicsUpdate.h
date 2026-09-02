@@ -107,7 +107,7 @@ class ndDynamicsUpdate : public ndClassAlloc
 	void IntegrateBodiesVelocity();
 	void CalculateJointsAcceleration();
 	void IntegrateUnconstrainedBodies();
-	bool CanSkeletonMulticore(ndInt32 index) const;
+	//bool CanSkeletonMulticore(ndInt32 index) const;
 
 	void DetermineSleepStates();
 	void GetJacobianDerivatives(ndConstraint* const joint);
@@ -121,6 +121,7 @@ class ndDynamicsUpdate : public ndClassAlloc
 
 	ndVector m_velocTol;
 	ndArray<ndIsland> m_islands;
+	ndArray<ndInt32> m_skeletonOrder;
 	ndArray<ndInt32> m_jointForcesIndex;
 	ndArray<ndJacobian> m_internalForces;
 	ndArray<ndLeftHandSide> m_leftHandSide;
@@ -128,7 +129,7 @@ class ndDynamicsUpdate : public ndClassAlloc
 	ndArray<ndJacobian> m_tempInternalForces;
 	ndArray<ndBodyKinematic*> m_bodyIslandOrder;
 	ndArray<ndJointBodyPairIndex> m_jointBodyPairIndexBuffer;
-
+	
 	ndWorld* m_world;
 	ndFloat32 m_timestep;
 	ndFloat32 m_invTimestep;
@@ -138,6 +139,7 @@ class ndDynamicsUpdate : public ndClassAlloc
 	ndFloat32 m_invTimestepRK;
 	ndUnsigned32 m_solverPasses;
 	ndInt32 m_activeJointCount;
+	ndInt32 m_restingSkeleton;
 	ndInt32 m_parallelSkeleton;
 	ndInt32 m_unConstrainedBodyCount;
 
