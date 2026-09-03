@@ -24,14 +24,14 @@
 
 ndBrainGpuContext::ndBrainGpuContext()
 	:ndBrainContext()
-	,ndBrainThreadPool()
+	,m_threadPool(new ndBrainThreadPool())
 {
 	ndInt32 numOfThreads = ndBrainThreadPool::GetMaxThreads();
 #ifdef _DEBUG
 numOfThreads = 1;
 #endif
 
-	SetThreadCount(numOfThreads);
+	m_threadPool->SetThreadCount(numOfThreads);
 	CreateKerners();
 	CreateCopyCommands();
 }
@@ -144,7 +144,7 @@ void ndBrainGpuContext::SubmitBufferCommand(ndBrainBufferCommand* const command)
 		ndInt32 workGroupdSize = ndInt32(desc.m_workGroupSize);
 		shader.Execute(groupId, workGroupdSize);
 	});
-	ParallelExecute(ExecuteCommand, desc.m_miniBatchSize);
+	m_threadPool->ParallelExecute(ExecuteCommand, desc.m_miniBatchSize);
 }
 
 void ndBrainGpuContext::BrainVectorToDevice(ndBrainFloatBuffer& dst, const ndBrainVector& srcVector)
@@ -554,4 +554,9 @@ void ndBrainGpuContext::AccumulateWeightsAndBiasBuffer(ndInt32 numberOfBuffers, 
 	//	SubmitBufferCommand(&command);
 	//	elements = elements / 2;
 	//}
+}
+
+void ndBrainGpuContext::Update(ndBrainContextUpdateCallback* callback)
+{
+	ndAssert(0);
 }

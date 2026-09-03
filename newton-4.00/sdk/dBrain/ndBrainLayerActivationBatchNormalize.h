@@ -93,9 +93,9 @@ class ndBrainLayerActivationBatchNormalize : public ndBrainLayerActivationLinear
 	virtual const char* GetLabelId() const override;
 
 	void CalculateVariance(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const;
-	virtual void FeedForward(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const override;
+	virtual void SelfModifyingFeedForward(const ndBrainLayerSelfModyfyingFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const override;
 
-	virtual ndCommandArray CreateFeedForwardBufferCommand(
+	virtual ndCommandArray CreateSelfModyfingFeedForwardBufferCommand(
 		ndBrainTrainerInference* const owner,
 		ndBrainContext* const context,
 		const ndCommandSharedInfo& info,

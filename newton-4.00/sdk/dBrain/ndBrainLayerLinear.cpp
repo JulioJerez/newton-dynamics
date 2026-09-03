@@ -794,6 +794,7 @@ void ndBrainLayerLinear::DotProductMatrixMultiply(const ndBrainLayerFeedForwardC
 		output[i] = bias[i] + element;
 	}
 #endif
+	ndAssert(output.SanityCheck());
 }
 
 void ndBrainLayerLinear::TiledMatrixMultiply(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex)

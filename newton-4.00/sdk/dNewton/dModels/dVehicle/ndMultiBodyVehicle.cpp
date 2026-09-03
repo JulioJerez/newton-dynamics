@@ -610,8 +610,10 @@ void ndMultiBodyVehicle::Debug(ndConstraintDebugCallback& context) const
 	const ndMatrix chassisMatrix(m_localFrame * chassis->GetMatrix());
 
 	// draw center of mass;
-	const ndCenterOfMassDynamics kinematics(CalculateCentreOfMassKinematics(chassisMatrix));
-	context.DrawFrame(kinematics.m_centerOfMass);
+	const ndCenterOfMassDynamics kinematics(CalculateCentreOfMassKinematics());
+	ndMatrix matrix(chassisMatrix);
+	matrix.m_posit = kinematics.m_com;
+	context.DrawFrame(matrix);
 
 	ndVector minAabb;
 	ndVector maxAabb;
@@ -622,12 +624,13 @@ void ndMultiBodyVehicle::Debug(ndConstraintDebugCallback& context) const
 	
 	// draw vehicle Lagrangian frame
 	ndMatrix lagragianFrame(chassisMatrix);
-	lagragianFrame.m_posit = kinematics.m_centerOfMass.m_posit + kinematics.m_centerOfMass.m_up.Scale(vehicleHeight);
+	//lagragianFrame.m_posit = kinematics.m_centerOfMass.m_posit + kinematics.m_centerOfMass.m_up.Scale(vehicleHeight);
+	lagragianFrame.m_posit = kinematics.m_com + lagragianFrame.m_up.Scale(vehicleHeight);
 	context.DrawFrame(lagragianFrame);
 
 	// vehicle speed in the lagrangian frame
 	const ndVector veloc(kinematics.m_momentum.Scale (ndFloat32 (1.0f) / kinematics.m_mass));
-	const ndVector velocPoint(lagragianFrame.m_posit + kinematics.m_centerOfMass.RotateVector(veloc.Scale(0.25f * vehicleHeight)));
+	const ndVector velocPoint(lagragianFrame.m_posit + lagragianFrame.RotateVector(veloc.Scale(ndFloat32(0.25f) * vehicleHeight)));
 	context.DrawLine(lagragianFrame.m_posit, velocPoint, ndVector(0.8f, 0.8f, 0.8f, 0.0f));
 	
 	// draw tires info

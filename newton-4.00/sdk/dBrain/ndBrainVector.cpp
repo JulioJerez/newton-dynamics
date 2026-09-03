@@ -142,6 +142,7 @@ bool ndBrainVector::SanityCheck(ndBrainFloat bound) const
 		}
 	}
 #endif
+	bound = 0;
 
 	return true;
 }

@@ -37,11 +37,6 @@ class ndBrainAdamUpdateParametersRidge : public ndBrainBufferCommandCpu
 		ndInt32 workGroupSize = m_desc.m_workGroupSize;
 
 		const ndBrainOptimizerAdam::ndCommandSharedInfo* const parameters = (ndBrainOptimizerAdam::ndCommandSharedInfo*)m_desc[0]->GetCpuPtr();
-		//ndBrainFloat* const weightAndBiasBuffer = (ndBrainFloat*)m_desc[1]->GetCpuPtr();
-		//ndBrainFloat* const weightAndBiasGradientBuffer = (ndBrainFloat*)m_desc[2]->GetCpuPtr();
-		//ndBrainFloat* const vdw = (ndBrainFloat*)m_desc[3]->GetCpuPtr();
-		//ndBrainFloat* const vdw2 = (ndBrainFloat*)m_desc[4]->GetCpuPtr();
-
 		ndInt64 bufferSize = ndInt64(((ndBrainFloatBuffer*)m_desc[1])->GetCount());
 		ndBrainMemVector weightAndBiasBuffer ((ndBrainFloat*)m_desc[1]->GetCpuPtr(), bufferSize);
 		ndBrainMemVector weightAndBiasGradientBuffer ((ndBrainFloat*)m_desc[2]->GetCpuPtr(), bufferSize);
@@ -113,7 +108,7 @@ class ndBrainAdamBiasCorrectionUpdate : public ndBrainBufferCommandCpu
 
 ndBrainCpuContext::ndBrainCpuContext()
 	:ndBrainContext()
-	,ndBrainThreadPool()
+	,m_threadPool(new ndBrainThreadPool())
 {
 	ndInt32 numOfThreads = ndBrainThreadPool::GetMaxThreads();
 #ifdef _DEBUG
@@ -121,11 +116,13 @@ numOfThreads = 1;
 #endif
 //numOfThreads = 1;
 
-	SetThreadCount(numOfThreads);
+	m_threadPool->SetThreadCount(numOfThreads);
 }
 
 ndBrainCpuContext::~ndBrainCpuContext()
 {
+	m_threadPool->Finish();
+	m_threadPool = ndSharedPtr<ndBrainThreadPool>(nullptr);
 }
 
 ndBrainCpuContext* ndBrainCpuContext::GetAsCpuContext()
@@ -222,7 +219,7 @@ void ndBrainCpuContext::SubmitBufferCommand(ndBrainBufferCommand* const command)
 	});
 
 	const ndBrainBufferCommandDesc& descriptor = command->GetDescriptor();
-	ParallelExecute(ExecuteCommand, descriptor.m_miniBatchSize);
+	m_threadPool->ParallelExecute(ExecuteCommand, descriptor.m_miniBatchSize);
 }
 
 void ndBrainCpuContext::BrainVectorToDevice(ndBrainFloatBuffer& buffer, const ndBrainVector& srcVector)
@@ -631,4 +628,11 @@ void ndBrainCpuContext::AccumulateWeightsAndBiasBuffer(ndInt32 numberOfBuffers, 
 		SubmitBufferCommand(&command);
 		elements = elements / 2;
 	}
+}
+
+void ndBrainCpuContext::Update(ndBrainContextUpdateCallback* const callback)
+{
+	ndBrainContext::Update(callback);
+	callback->m_owner;
+	m_threadPool->Update(callback);
 }

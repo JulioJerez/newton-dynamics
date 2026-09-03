@@ -114,7 +114,7 @@ class ndBrainAgentOffPolicyGradient_Agent: public ndBrainAgent
 	friend class ndBrainAgentOffPolicyGradient_Trainer;
 };
 
-class ndBrainAgentOffPolicyGradient_Trainer : public ndClassAlloc
+class ndBrainAgentOffPolicyGradient_Trainer : public ndClassAlloc, public ndBrainContextUpdateCallback
 {
 	public:
 	class HyperParameters: public ndContinuePolicyGradientHyperParameters
@@ -147,6 +147,7 @@ class ndBrainAgentOffPolicyGradient_Trainer : public ndClassAlloc
 	void AddAgent(ndSharedPtr<ndBrainAgentOffPolicyGradient_Agent>& agent);
 
 	private:
+	virtual void Update() override;
 	void Optimize();
 	void CalculateScore();
 	void SaveTrajectory();
@@ -155,6 +156,7 @@ class ndBrainAgentOffPolicyGradient_Trainer : public ndClassAlloc
 	void TrainPolicy();
 	void BuildPolicyClass();
 	void BuildCriticClass();
+	void UpdateSpecialLayers();
 	void SaveTrajectoryTerminal();
 	void SaveTrajectoryNoTerminal();
 	void CalculateExpectedRewards();

@@ -50,11 +50,14 @@ void ndThreadPool::ndWorker::ExecuteTask(ndTask* const task)
 void ndThreadPool::ndWorker::TaskUpdate()
 {
 	m_begin = 1;
+	const ndInt32 spinLoop = 1024;
+	ndInt32 loops = spinLoop;
 	while (m_begin)
 	{
 		if (m_task)
 		{
 			//ND_PROFILE_ZONE_NAMED("TaskUpdate");
+			loops = spinLoop;
 			ndAssert(m_task->m_threadIndex == m_threadIndex);
 			m_task->Execute();
 			m_task = nullptr;
@@ -62,7 +65,7 @@ void ndThreadPool::ndWorker::TaskUpdate()
 		else
 		{ 
 			//ND_PROFILE_ZONE_NAMED("TaskUpdateIdle");
-			ndThreadYield();
+			ndThreadYield(loops);
 		}
 	}
 }
@@ -110,7 +113,7 @@ void ndThreadPool::TaskUpdate(ndInt32 threadIndex)
 
 void ndThreadPool::WorkerUpdate(ndInt32 threadIndex)
 {
-	ndAssert(0);
+	//ndAssert(0);
 	TaskUpdate(threadIndex);
 }
 
@@ -236,6 +239,8 @@ ndInt32 ndThreadPool::OptimalGroupBatch(ndInt32 numberOfGroups) const
 void ndThreadPool::WaitForWorkers()
 {
 	bool stillWorking;
+	const ndInt32 spinLoop = 1024;
+	ndInt32 loops = spinLoop;
 	do
 	{
 		stillWorking = false;
@@ -245,7 +250,11 @@ void ndThreadPool::WaitForWorkers()
 		}
 		if (stillWorking)
 		{
-			ndThreadYield();
+			ndThreadYield(loops);
+			if (loops <= 0)
+			{
+				loops = spinLoop;
+			}
 		}
 	} while (stillWorking);
 }

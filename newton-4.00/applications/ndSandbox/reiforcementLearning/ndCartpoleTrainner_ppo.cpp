@@ -122,6 +122,7 @@ namespace ndCartpoleTrainer_ppo
 			ndBrainAgentOnPolicyGradient_Trainer::HyperParameters hyperParameters;
 			
 			hyperParameters.m_useGpuBackend = false;
+			hyperParameters.m_maxTrajectorySteps = 2048;
 			hyperParameters.m_batchTrajectoryCount = 1000;
 			hyperParameters.m_hiddenLayersNumberOfNeurons = 64;
 			hyperParameters.m_numberOfActions = m_actionsSize;

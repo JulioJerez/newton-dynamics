@@ -29,14 +29,15 @@
 #include "ndBrainAgentContinuePolicyGradient.h"
 
 // Implementation of Proximal Policy Optimization (PPO) as described in:
-// https://arxiv.org/abs/1707.06347
-// for implementation details, see paper
-// https://arxiv.org/pdf/2005.12729
-//
 // The algorithm is stochastic and uses bootstrapped method for advantage estimation.
 // It optionally supports entropy regularization to scale the loss of both
 // the actor and critic networks.
-//
+// original paper
+// https://arxiv.org/abs/1707.06347
+// for implementation details, see paper
+// https://arxiv.org/pdf/2005.12729
+// entropy regularization improvement from 
+// https://arxiv.org/pdf/1912.01557
 // Reference pseudo code:
 // https://spinningup.openai.com/en/latest/algorithms/ppo.html
 
@@ -125,7 +126,7 @@ class ndBrainAgentOnPolicyGradient_Agent: public ndBrainAgent
 	friend class ndBrainAgentOnPolicyGradient_Trainer;
 };
 
-class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
+class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc, public ndBrainContextUpdateCallback
 {
 	public:
 	class HyperParameters : public ndContinuePolicyGradientHyperParameters
@@ -158,6 +159,8 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	void AddAgent(ndSharedPtr<ndBrainAgentOnPolicyGradient_Agent>& agent);
 
 	private:
+	virtual void Update() override;
+
 	void Optimize();
 	void UpdateScore();
 	void OptimizeValue();
@@ -165,6 +168,7 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc
 	void BuildPolicyClass();
 	void BuildCriticClass();
 	void CalculateAdvantage();
+	void UpdateSpecialLayers();
 	void TrajectoryToGpuBuffers();
 	ndBrainFloat CalculateKLdivergence();
 	void SaveTrajectory(ndBrainAgentOnPolicyGradient_Agent* const agent);

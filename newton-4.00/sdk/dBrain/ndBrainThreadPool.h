@@ -24,128 +24,20 @@
 
 #include "ndBrainStdafx.h"
 
-//#define D_USE_BRAIN_THREAD_EMULATION
+#define USING_ND_THREAD_POOL
 
-class ndBrainThreadPool: public ndClassAlloc, public ndSyncMutex
-{
-	public: 
-	class ndWorker;
-
-	ndBrainThreadPool();
-	~ndBrainThreadPool();
-
-	ndInt32 GetThreadCount() const;
-	static ndInt32 GetMaxThreads();
-	void SetThreadCount(ndInt32 count);
-
-	template <typename Function>
-	void ParallelExecute(const Function& function, ndInt32 numberOfJobs, ndInt32 numberOfJobsBatch = D_WORKER_BATCH_SIZE);
-
-	private:
-	void SubmmitTask(ndTask* const task, ndInt32 index);
-	ndFixSizeArray<ndWorker*, D_MAX_THREADS_COUNT> m_workers;
-};
-
-template <typename Function>
-class ndBrainTaskImplement: public ndTask
+class ndBrainThreadPool : public ndThreadPool
 {
 	public:
-	ndBrainTaskImplement(
-		ndBrainThreadPool* const threadPool,
-		const Function& function,
-		ndAtomic<ndInt32>& threadIterator,
-		ndInt32 jobsCount,
-		ndInt32 jobsStride,
-		ndInt32 threadIndex)
-		:ndTask(threadIndex)
-		,m_function(function)
-		,m_threadPool(threadPool)
-		,m_threadIterator(threadIterator)
-		,m_jobsCount(jobsCount)
-		,m_jobsStride(jobsStride)
-	{
-	}
+	ndBrainThreadPool();
+	~ndBrainThreadPool();
+	void Update(class ndBrainContextUpdateCallback* const callback);
 
-	private:
-	void Execute() const
-	{
-		for (ndInt32 batchIndex = m_threadIterator.fetch_add(m_jobsStride); batchIndex < m_jobsCount; batchIndex = m_threadIterator.fetch_add(m_jobsStride))
-		{
-			//ndTrace(("t(%d) bat(%d) %x\n", m_threadIndex, batchIndex, &m_threadIterator));
-			const ndInt32 count = ((batchIndex + m_jobsStride) < m_jobsCount) ? m_jobsStride : m_jobsCount - batchIndex;
-			ndAssert(count <= m_jobsStride);
-			for (ndInt32 j = 0; j < count; ++j)
-			{
-				m_function(batchIndex + j, 0, 1);
-			}
-		}
-	}
+	protected:
+	virtual void ThreadFunction() override;
 
-	Function m_function;
-	ndBrainThreadPool* m_threadPool;
-	ndAtomic<ndInt32>& m_threadIterator;
-	const ndInt32 m_jobsCount;
-	const ndInt32 m_jobsStride;
-	friend class ndBrainThreadPool;
+	ndWeakPtr<ndBrainContextUpdateCallback> m_callback;
 };
 
-template <typename Function>
-void ndBrainThreadPool::ParallelExecute(const Function& function, ndInt32 numberOfJobs, ndInt32 numberOfJobsBatch)
-{
-	const ndInt32 threadCount = GetThreadCount();
-	if (threadCount <= 1)
-	{
-		// in single threaded, just execute all jobs in the main thread
-		for (ndInt32 i = 0; i < numberOfJobs; ++i)
-		{
-			function(i, 0, 1);
-		}
-	}
-	else
-	{
-		// calculate number of thread needed
-		ndAssert(numberOfJobsBatch >= 1);
-		const ndInt32 virtualThreadCount = numberOfJobs / numberOfJobsBatch;
-		if (virtualThreadCount < 2)
-		{
-			// not enough jobs to use all cores, just dispact all job in main thread
-			for (ndInt32 i = 0; i < numberOfJobs; ++i)
-			{
-				function(i, 0, virtualThreadCount);
-			}
-		}
-		else
-		{
-			// enough work to use more than one core. get number of cores needed using batch size
-			ndAtomic<ndInt32> threadIterator(0);
-			const ndInt32 numberOfThreads = ndMin(virtualThreadCount, threadCount);
-			ndBrainTaskImplement<Function>* const jobsArray = ndAlloca(ndBrainTaskImplement<Function>, numberOfThreads);
-			for (ndInt32 i = 0; i < numberOfThreads; ++i)
-			{
-				ndBrainTaskImplement<Function>* const job = &jobsArray[i];
-				new (job) ndBrainTaskImplement<Function>(this, function, threadIterator, numberOfJobs, numberOfJobsBatch, i);
-			}
-
-			//ndTrace(("start batches\n"));
-			for (ndInt32 i = numberOfThreads - 1; i > 0; --i)
-			{
-				ndInt32 threadSlot = i - 1;
-				ndBrainTaskImplement<Function>* const job = &jobsArray[i];
-				SubmmitTask(job, threadSlot);
-			}
-
-			for (ndInt32 batchIndex = threadIterator.fetch_add(numberOfJobsBatch); batchIndex < numberOfJobs; batchIndex = threadIterator.fetch_add(numberOfJobsBatch))
-			{
-				const ndInt32 count = ((batchIndex + numberOfJobsBatch) < numberOfJobs) ? numberOfJobsBatch : numberOfJobs - batchIndex;
-				for (ndInt32 j = 0; j < count; ++j)
-				{
-					function(batchIndex + j, 0, numberOfThreads);
-				}
-			}
-
-			Sync();
-		}
-	}
-}
 #endif 
 

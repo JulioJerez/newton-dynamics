@@ -150,7 +150,8 @@ void ndThread::ThreadFunctionCallback()
 	// wait until constructor was fully initialized.
 	while (load())
 	{
-		ndThreadYield();
+		ndInt32 loops = 0;
+		ndThreadYield(loops);
 	}
 
 	ND_PROFILE_SET_THREAD_NAME(m_name.m_name);

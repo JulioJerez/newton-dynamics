@@ -40,7 +40,6 @@ class ndSkeletonContainer
 	D_NEWTON_API ndSkeletonContainer();
 	D_NEWTON_API ~ndSkeletonContainer();
 	D_NEWTON_API ndInt32 GetId() const;
-	D_NEWTON_API void SetMulticoreSolver(bool hint);
 
 	const ndNodeList& GetNodeList() const;
 	ndInt32 FindBoneIndex(const ndBodyKinematic* const body) const;
@@ -311,7 +310,6 @@ class ndSkeletonContainer
 	ndInt32 m_auxiliaryRowCount;
 	ndInt32 m_isResting;
 	ndInt32 m_threadId;
-	bool m_multicore;
 
 	friend class ndWorld;
 	friend class ndIkSolver;

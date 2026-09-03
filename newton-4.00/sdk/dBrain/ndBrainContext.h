@@ -28,6 +28,23 @@ class ndCopyBufferCommandInfo;
 
 #define ND_DEFAULT_WORKGROUP_SIZE	256
 
+class ndBrainContextUpdateCallback
+{
+	public: 
+	ndBrainContextUpdateCallback()
+		:m_owner(nullptr)
+	{
+	}
+
+	virtual ~ndBrainContextUpdateCallback()
+	{
+	}
+
+	virtual void Update() = 0;
+
+	ndWeakPtr<ndBrainContext> m_owner;
+};
+
 class ndBrainContext : public ndClassAlloc
 {
 	public:
@@ -45,6 +62,7 @@ class ndBrainContext : public ndClassAlloc
 	virtual bool IsValid() const;
 	virtual ndBrainGpuContext* GetAsGpuContext();
 	virtual ndBrainCpuContext* GetAsCpuContext();
+	virtual void Update(ndBrainContextUpdateCallback* const callback);
 
 	static bool HasGpuSupport() 
 	{ 

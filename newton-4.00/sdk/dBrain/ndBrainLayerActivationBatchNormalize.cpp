@@ -465,7 +465,7 @@ void ndBrainLayerActivationBatchNormalize::Save(const ndBrainSave* const loadSav
 	ndBrainLayerActivationLinear::Save(loadSave);
 }
 
-ndCommandArray ndBrainLayerActivationBatchNormalize::CreateFeedForwardBufferCommand(
+ndCommandArray ndBrainLayerActivationBatchNormalize::CreateSelfModyfingFeedForwardBufferCommand(
 	ndBrainTrainerInference* const owner,
 	ndBrainContext* const context,
 	const ndCommandSharedInfo& info,
@@ -476,20 +476,20 @@ ndCommandArray ndBrainLayerActivationBatchNormalize::CreateFeedForwardBufferComm
 	ndCommandArray commandArray(ndBrainLayerActivationLinear::CreateFeedForwardBufferCommand(
 		owner, context, info, miniBatchSize, inputOutputData, weightsAndBias));
 
-	ndBrainBufferCommand* const normalizeCommand = commandArray[0];
+	ndBrainBufferCommand* const linearActivationCommand = commandArray[0];
 	commandArray.SetCount(0);
-	normalizeCommand->GetDescriptor().m_info.m_matrixDimensionK = miniBatchSize * 256 + 1;
+	linearActivationCommand->GetDescriptor().m_info.m_matrixDimensionK = miniBatchSize * 256 + 1;
 
 	ndBrainBufferCommandDesc descriptor(MakeFeedForwardDesctriptor(
 		owner, context, info, miniBatchSize, 0,
 		inputOutputData, weightsAndBias));
 
-	ndBrainBufferCommand* varianceCommand = nullptr;
+	ndBrainBufferCommand* calculateVarianceCommand = nullptr;
 	if (context->GetAsCpuContext())
 	{
 		descriptor.m_info.m_matrixDimensionK = miniBatchSize * 256 + 0;
 		descriptor.m_miniBatchSize = 1;
-		varianceCommand = new ndBrainLayerFeedForwardCpuCommand(descriptor, (ndBrainLayer*)this);
+		calculateVarianceCommand = new ndBrainLayerSelfModyfyingFeedForwardCpuCommand(descriptor, (ndBrainLayer*)this);
 	}
 	else
 	{
@@ -499,28 +499,27 @@ ndCommandArray ndBrainLayerActivationBatchNormalize::CreateFeedForwardBufferComm
 		commandArray.PushBack(command);
 	}
 
-	commandArray.PushBack(varianceCommand);
-	commandArray.PushBack(normalizeCommand);
-
+	commandArray.PushBack(calculateVarianceCommand);
+	commandArray.PushBack(linearActivationCommand);
 	return commandArray;
 }
 
-void ndBrainLayerActivationBatchNormalize::CalculateVariance(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32) const
+void ndBrainLayerActivationBatchNormalize::SelfModifyingFeedForward(const ndBrainLayerSelfModyfyingFeedForwardCpuCommand* const command, ndInt32) const
 {
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
 	ndBrainTrainerInference* const trainer = desc.m_owner;
 	const ndBrainMemVector inputOutputBuffer((ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr(), ndInt32(trainer->GetHiddenLayerBuffer()->GetCount()));
-
+	
 	ndInt32 inputSize = info.m_inputSize;
 	ndInt32 outputSize = info.m_outputSize;
 	ndInt32 inputOutputSize = info.m_inputOutputSize;
 	ndInt32 inputOutputStartOffset = info.m_inputOutputStartOffset;
-
+	
 	ndBrainFixSizeVector<1024> tmp(inputSize);
 	ndBrainFixSizeVector<1024> variance(inputSize);
 	variance.Set(ndBrainFloat(0.0f));
-
+	
 	const ndInt64 startOffset = inputOutputStartOffset;
 	const ndInt32 miniBatches = info.m_matrixDimensionK >> 8;
 	for (ndInt32 i = 0; i < miniBatches; ++i)
@@ -531,31 +530,15 @@ void ndBrainLayerActivationBatchNormalize::CalculateVariance(const ndBrainLayerF
 		tmp.Mul(input);
 		variance.Add(tmp);
 	}
-
+	
 	ndBrainFloat den = ndBrainFloat(1.0f) / ndBrainFloat(miniBatches);
 	variance.Scale(den);
 	variance.Max(ndBrainFloat(1.0e-12f));
 	variance.Sqrt();
-
 	tmp.Reciprocal(m_slopes);
-	//variance.Max(tmp);
-
+	
 	tmp.Blend(variance, ndBrainFloat(0.01f));
 	m_slopes.Reciprocal(tmp);
-}
-
-void ndBrainLayerActivationBatchNormalize::FeedForward(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const
-{
-	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
-	const ndCommandSharedInfo& info = desc.m_info;
-	if ((info.m_matrixDimensionK & 0xff) == 0)
-	{
-		CalculateVariance(command, miniBatchIndex);
-	}
-	else
-	{
-		ndBrainLayerActivationLinear::FeedForward(command, miniBatchIndex);
-	}
 }
 
 #endif

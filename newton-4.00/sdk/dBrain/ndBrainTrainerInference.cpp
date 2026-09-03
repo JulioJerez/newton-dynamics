@@ -60,6 +60,7 @@ ndBrainTrainerInference::ndBrainTrainerInference(const ndTrainerDescriptor& desc
 	,m_miniBatchInputBuffer()
 	,m_miniBatchOutputBuffer()
 	,m_feedForwardCommands()
+	,m_selfModyfyingCommands()
 {
 	ndAssert((m_descriptor.m_minibatchSize & (ND_GPU_TILED_MATRIX_ROWS - 1)) == 0);
 	InitInputOutputBuffer();
@@ -74,6 +75,7 @@ ndBrainTrainerInference::ndBrainTrainerInference(const ndBrainTrainerInference& 
 	,m_miniBatchInputBuffer()
 	,m_miniBatchOutputBuffer()
 	,m_feedForwardCommands()
+	,m_selfModyfyingCommands()
 {
 	ndAssert(0);
 }
@@ -189,14 +191,18 @@ void ndBrainTrainerInference::InitWeightAndBiasBuffer()
 	scratchBuffer.Set(ndBrainFloat(0.0f));
 	m_miniBatchOutputBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_descriptor.m_context, scratchBuffer));
 
-	AddCopyInputCommand(uniformData[0]);
+	AddCopyInputCommand(m_feedForwardCommands, uniformData[0]);
 	AddLayersCommands(uniformData);
-	AddCopyOutputCommand();
+	AddCopyOutputCommand(m_feedForwardCommands);
+
+	AddCopyInputCommand(m_selfModyfyingCommands, uniformData[0]);
+	AddSelfModifyingLayersCommands(uniformData);
+	AddCopyOutputCommand(m_selfModyfyingCommands);
 }
 
-ndBrainBufferCommand* ndBrainTrainerInference::FindCommand(size_t id) const
+ndBrainBufferCommand* ndBrainTrainerInference::FindCommand(ndList<ndSharedPtr<ndBrainBufferCommand>>& commandList, size_t id) const
 {
-	for (ndList<ndSharedPtr<ndBrainBufferCommand>>::ndNode* node = m_feedForwardCommands.GetFirst(); node; node = node->GetNext())
+	for (ndList<ndSharedPtr<ndBrainBufferCommand>>::ndNode* node = commandList.GetFirst(); node; node = node->GetNext())
 	{
 		ndBrainBufferCommand* const command = (ndBrainBufferCommand*)*node->GetInfo();
 		const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
@@ -208,7 +214,7 @@ ndBrainBufferCommand* ndBrainTrainerInference::FindCommand(size_t id) const
 	return nullptr;
 }
 
-void ndBrainTrainerInference::AddCopyInputCommand(const ndCommandSharedInfo& uniformData)
+void ndBrainTrainerInference::AddCopyInputCommand(ndList<ndSharedPtr<ndBrainBufferCommand>>& commandList, const ndCommandSharedInfo& uniformData)
 {
 	const ndBrain& brain = **m_descriptor.m_brain;
 	ndInt32 inputOutputBufferSize = RoundOffOffset(brain.GetInputSize());
@@ -267,21 +273,21 @@ void ndBrainTrainerInference::AddCopyInputCommand(const ndCommandSharedInfo& uni
 		};
 
 		ndSharedPtr<ndBrainBufferCommand>command(new ndCopyInputCommandCpu(descriptor));
-		m_feedForwardCommands.Append(command);
+		commandList.Append(command);
 	}
 	else
 	{
 		descriptor.m_kernel = descriptor.m_context->GetAsGpuContext()->m_brainCopyInput;
 		ndSharedPtr<ndBrainBufferCommand>command(new ndBrainGpuCommand(descriptor));
-		m_feedForwardCommands.Append(command);
+		commandList.Append(command);
 	}
 }
 
-void ndBrainTrainerInference::AddCopyOutputCommand()
+void ndBrainTrainerInference::AddCopyOutputCommand(ndList<ndSharedPtr<ndBrainBufferCommand>>& commandList)
 {
 	const ndBrain& brain = **m_descriptor.m_brain;
 	size_t lastId = size_t(brain[brain.GetCount() - 1]);
-	ndBrainBufferCommand* const lastLayerCommand = FindCommand(lastId);
+	ndBrainBufferCommand* const lastLayerCommand = FindCommand(commandList, lastId);
 	ndAssert(lastLayerCommand);
 	
 	const ndBrainBufferCommandDesc& desc = lastLayerCommand->GetDescriptor();
@@ -332,13 +338,13 @@ void ndBrainTrainerInference::AddCopyOutputCommand()
 		};
 
 		ndSharedPtr<ndBrainBufferCommand>command(new ndCopyOutputCommandCpu(descriptor));
-		m_feedForwardCommands.Append(command);
+		commandList.Append(command);
 	}
 	else
 	{
 		descriptor.m_kernel = descriptor.m_context->GetAsGpuContext()->m_brainCopyOutput;
 		ndSharedPtr<ndBrainBufferCommand>command(new ndBrainGpuCommand(descriptor));
-		m_feedForwardCommands.Append(command);
+		commandList.Append(command);
 	}
 }
 
@@ -401,6 +407,45 @@ void ndBrainTrainerInference::AddLayersCommands(ndFixSizeArray<ndCommandSharedIn
 	}
 }
 
+void ndBrainTrainerInference::AddSelfModifyingLayersCommands(ndFixSizeArray<ndCommandSharedInfo, 256>& layersUniformsData)
+{
+	// create all the uniform buffers 
+	const ndBrain& brain = **m_descriptor.m_brain;
+
+	ndInt32 inputOutputStartOffset = 0;
+	ndInt32 inputOutputBufferSize = RoundOffOffset(brain.GetInputSize());
+	for (ndInt32 i = 0; i < ndInt32(brain.GetCount()); ++i)
+	{
+		ndCommandSharedInfo& data = layersUniformsData[i];
+		data.m_inputOutputStartOffset = inputOutputStartOffset;
+		inputOutputBufferSize += RoundOffOffset(data.m_outputSize);
+		inputOutputStartOffset += RoundOffOffset(data.m_inputSize);
+	}
+
+	ndBrainFloatBuffer* const weightsBuffer = *m_weightAndBiasBuffer;
+	ndBrainFloatBuffer* const inputOutputBuffer = *m_inputOutputBuffer;
+	for (ndInt32 i = 0; i < ndInt32(brain.GetCount()); ++i)
+	{
+		ndCommandSharedInfo uniformParam;
+		ndBrainLayer* const layer = brain[i];
+		const ndCommandSharedInfo& data = layersUniformsData[i];
+		uniformParam.m_inputSize = data.m_inputSize;
+		uniformParam.m_outputSize = data.m_outputSize;
+		uniformParam.m_inputOutputSize = inputOutputBufferSize;
+		uniformParam.m_inputOutputStartOffset = data.m_inputOutputStartOffset;
+		uniformParam.m_parametersBatchSize = data.m_parametersBatchSize;
+		uniformParam.m_parametersStartOffset = data.m_parametersStartOffset;
+
+		ndCommandArray forwardCommands(layer->CreateSelfModyfingFeedForwardBufferCommand(
+			this, *m_descriptor.m_context, uniformParam, m_descriptor.m_minibatchSize, inputOutputBuffer, weightsBuffer));
+		for (ndInt32 j = 0; j < forwardCommands.GetCount(); ++j)
+		{
+			ndSharedPtr<ndBrainBufferCommand>command(forwardCommands[j]);
+			m_selfModyfyingCommands.Append(command);
+		}
+	}
+}
+
 void ndBrainTrainerInference::MakeSinglePrediction(const ndBrainVector& input, ndBrainVector& output)
 {
 	m_miniBatchInputBuffer->VectorToDevice(input);
@@ -419,3 +464,13 @@ void ndBrainTrainerInference::MakePrediction()
 	}
 }
 
+void ndBrainTrainerInference::UpdateSelfModifyingLayers()
+{
+	ndBrainContext* const context = *m_descriptor.m_context;
+
+	for (ndList<ndSharedPtr<ndBrainBufferCommand>>::ndNode* node = m_selfModyfyingCommands.GetFirst(); node; node = node->GetNext())
+	{
+		ndSharedPtr<ndBrainBufferCommand>& command = node->GetInfo();
+		context->SubmitBufferCommand(*command);
+	}
+}

@@ -279,6 +279,7 @@ void ndBrainAgentOffPolicyGradient_Agent::Step()
 
 ndBrainAgentOffPolicyGradient_Trainer::ndBrainAgentOffPolicyGradient_Trainer(const HyperParameters& parameters)
 	:ndClassAlloc()
+	,ndBrainContextUpdateCallback()
 	,m_name()
 	,m_parameters(parameters)
 	,m_context()
@@ -956,7 +957,57 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 	m_policyTrainer->ApplyLearnRate(ND_POLICY_LEARN_SCALE * m_learnRate);
 }
 
-void ndBrainAgentOffPolicyGradient_Trainer::Optimize()
+void ndBrainAgentOffPolicyGradient_Trainer::UpdateSpecialLayers()
+{
+	const ndBrainAgentOffPolicyGradient_Agent::ndTrajectory& trajectory = m_agent->m_trajectory;
+
+	ndBrainTrainer* const policy = *m_policyTrainer;
+	//ndInt32 criticInputSize = policy->GetBrain()->GetInputSize() + policy->GetBrain()->GetOutputSize();
+
+	ndBrainFloatBuffer* const policyMinibatchInputBuffer = policy->GetInputBuffer();
+	//ndBrainFloatBuffer* const policyMinibatchOutputBuffer = policy->GetOuputBuffer();
+
+	ndCopyBufferCommandInfo policyObservation;
+	policyObservation.m_srcStrideInByte = ndInt32(trajectory.GetStride() * sizeof(ndReal));
+	policyObservation.m_srcOffsetInByte = ndInt32(trajectory.GetObsevationOffset() * sizeof(ndReal));
+	policyObservation.m_dstOffsetInByte = 0;
+	policyObservation.m_dstStrideInByte = ndInt32(policy->GetBrain()->GetInputSize() * sizeof(ndReal));
+	policyObservation.m_bytesToCopy = ndInt32(policy->GetBrain()->GetInputSize() * sizeof(ndReal));
+	policyMinibatchInputBuffer->CopyBuffer(policyObservation, m_parameters.m_miniBatchSize, **m_minibatchOfTransitions);
+	policy->UpdateSelfModifyingLayers();
+
+	for (ndInt32 criticIndex = 0; criticIndex < ndInt32(sizeof(m_referenceCriticTrainer) / sizeof(m_referenceCriticTrainer[0])); ++criticIndex)
+	{
+		ndInt32 criticInputSize = m_policyTrainer->GetBrain()->GetInputSize() + m_policyTrainer->GetBrain()->GetOutputSize();
+		ndBrainTrainer* const critic = *m_criticTrainer[criticIndex];
+		ndBrainFloatBuffer* criticMinibatchInputBuffer = critic->GetInputBuffer();
+
+		ndCopyBufferCommandInfo criticInputAction;
+		criticInputAction.m_srcStrideInByte = ndInt32(trajectory.GetStride() * sizeof(ndReal));
+		criticInputAction.m_srcOffsetInByte = ndInt32(trajectory.GetActionOffset() * sizeof(ndReal));
+		criticInputAction.m_dstOffsetInByte = 0;
+		criticInputAction.m_dstStrideInByte = ndInt32(criticInputSize * sizeof(ndReal));
+		criticInputAction.m_bytesToCopy = ndInt32(m_policyTrainer->GetBrain()->GetOutputSize() * sizeof(ndReal));
+		criticMinibatchInputBuffer->CopyBuffer(criticInputAction, m_parameters.m_miniBatchSize, **m_minibatchOfTransitions);
+
+		ndCopyBufferCommandInfo criticInputObservation;
+		criticInputObservation.m_srcStrideInByte = ndInt32(trajectory.GetStride() * sizeof(ndReal));
+		criticInputObservation.m_srcOffsetInByte = ndInt32(trajectory.GetObsevationOffset() * sizeof(ndReal));
+		criticInputObservation.m_dstOffsetInByte = ndInt32(m_policyTrainer->GetBrain()->GetOutputSize() * sizeof(ndReal));
+		criticInputObservation.m_dstStrideInByte = ndInt32(criticInputSize * sizeof(ndReal));
+		criticInputObservation.m_bytesToCopy = ndInt32(m_policyTrainer->GetBrain()->GetInputSize() * sizeof(ndReal));
+		criticMinibatchInputBuffer->CopyBuffer(criticInputObservation, m_parameters.m_miniBatchSize, **m_minibatchOfTransitions);
+		critic->UpdateSelfModifyingLayers();
+
+		ndBrainTrainerInference* const referenceCritic = *m_referenceCriticTrainer[criticIndex];
+		criticMinibatchInputBuffer = referenceCritic->GetInputBuffer();
+		criticMinibatchInputBuffer->CopyBuffer(criticInputAction, m_parameters.m_miniBatchSize, **m_minibatchOfTransitions);
+		criticMinibatchInputBuffer->CopyBuffer(criticInputObservation, m_parameters.m_miniBatchSize, **m_minibatchOfTransitions);
+		referenceCritic->UpdateSelfModifyingLayers();
+	}
+}
+
+void ndBrainAgentOffPolicyGradient_Trainer::Update()
 {
 	// get the number of randomized transitions 
 	m_miniBatchIndices.SetCount(0);
@@ -1005,6 +1056,9 @@ void ndBrainAgentOffPolicyGradient_Trainer::Optimize()
 		minibatchOfTransitions.m_bytesToCopy = transitionSizeInBytes;
 		m_minibatchOfTransitions->CopyBufferIndirect(minibatchOfTransitions, **m_minibatchIndexBuffer, **m_replayBufferFlat);
 
+		// make sure spacial self modifying layers are updaded befored training
+		UpdateSpecialLayers();
+
 		// calculate expected rewards for this mini batch
 		CalculateExpectedRewards();
 
@@ -1035,6 +1089,11 @@ void ndBrainAgentOffPolicyGradient_Trainer::Optimize()
 			referenceParameterBuffer->Blend(*parameterBuffer, m_parameters.m_polyakBlendFactor);
 		}
 	}
+}
+
+void ndBrainAgentOffPolicyGradient_Trainer::Optimize()
+{
+	m_context->Update(this);
 }
 
 void ndBrainAgentOffPolicyGradient_Trainer::OptimizeStep()

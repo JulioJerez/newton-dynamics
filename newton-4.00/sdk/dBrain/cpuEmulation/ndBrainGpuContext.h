@@ -22,11 +22,13 @@ class ndBrainFloatBuffer;
 class ndBrainIntegerBuffer;
 class ndBrainUniformBuffer;
 
-class ndBrainGpuContext : public ndBrainContext, public ndBrainThreadPool
+class ndBrainGpuContext : public ndBrainContext
 {
 	public:
 	ndBrainGpuContext();
 	virtual ~ndBrainGpuContext();
+
+	virtual void Update(ndBrainContextUpdateCallback* const callback) override;
 
 	virtual void SyncBufferCommandQueue() override;
 	virtual ndBrainGpuContext* GetAsGpuContext() override;
@@ -95,6 +97,7 @@ class ndBrainGpuContext : public ndBrainContext, public ndBrainThreadPool
 	void CreateKerners();
 	void CreateCopyCommands();
 
+	ndSharedPtr<ndBrainThreadPool> m_threadPool;
 	ndSharedPtr<ndBrainUniformBuffer> m_copyBufferParams;
 	ndSharedPtr<ndBrainGpuCommand> m_copyBufferCommand;
 	ndSharedPtr<ndBrainGpuCommand> m_copyBufferIndirectCommand;

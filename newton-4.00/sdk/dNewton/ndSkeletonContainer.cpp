@@ -391,7 +391,6 @@ ndSkeletonContainer::ndSkeletonContainer()
 	,m_auxiliaryRowCount(0)
 	,m_isResting(0)
 	,m_threadId(0)
-	,m_multicore(true)
 {
 	m_auxiliaryMemoryBuffer.SetCount(1024 * 8);
 	m_auxiliaryMemoryBuffer.SetCount(0);
@@ -421,11 +420,6 @@ ndSkeletonContainer::~ndSkeletonContainer()
 ndInt32 ndSkeletonContainer::GetId() const
 {
 	return m_id;
-}
-
-void ndSkeletonContainer::SetMulticoreSolver(bool hint)
-{
-	m_multicore = hint;
 }
 
 ndSkeletonContainer::ndNode* ndSkeletonContainer::GetRoot() const
@@ -1327,7 +1321,7 @@ void ndSkeletonContainer::CalculateJointAccelImmediate(ndForcePair* const accel)
 {
 	const ndSpatialVector zero(ndSpatialVector::m_zero);
 	const ndInt32 nodeCount = m_nodeList.GetCount();
-	for (ndInt32 i = 0; i < nodeCount - 1; ++i)
+	for (ndInt32 i = 0; i < (nodeCount - 1); ++i)
 	{
 		ndNode* const node = m_nodesOrder[i];
 		ndAssert(i == node->m_index);

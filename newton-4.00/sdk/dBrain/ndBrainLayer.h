@@ -42,10 +42,16 @@ class ndBrainLayerFeedForwardCpuCommand : public ndBrainBufferCommandCpu
 {
 	public:
 	ndBrainLayerFeedForwardCpuCommand(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer);
-
 	virtual void Execute(ndInt32 miniBatchIndex) override;
 
 	ndBrainLayer* m_layer;
+};
+
+class ndBrainLayerSelfModyfyingFeedForwardCpuCommand : public ndBrainLayerFeedForwardCpuCommand
+{
+	public:
+	ndBrainLayerSelfModyfyingFeedForwardCpuCommand(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer);
+	virtual void Execute(ndInt32 miniBatchIndex) override;
 };
 
 class ndBrainLayerBackPropagateCpuCommand : public ndBrainBufferCommandCpu
@@ -123,6 +129,15 @@ class ndBrainLayer : public ndClassAlloc
 	virtual bool HasGpuSupport() const;
 	virtual void FeedForward(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const;
 	virtual void BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const;
+	virtual void SelfModifyingFeedForward(const ndBrainLayerSelfModyfyingFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const;
+
+	virtual ndCommandArray CreateSelfModyfingFeedForwardBufferCommand(
+		ndBrainTrainerInference* const owner,
+		ndBrainContext* const context,
+		const ndCommandSharedInfo& info,
+		ndInt32 miniBatchSize,
+		ndBrainFloatBuffer* const inputOutputData,
+		ndBrainFloatBuffer* const weightsAndBias) const;
 
 	virtual ndCommandArray CreateFeedForwardBufferCommand(
 		ndBrainTrainerInference* const owner,
