@@ -261,6 +261,27 @@ void ndBrainCpuContext::Exp(ndBrainFloatBuffer& dstData, const ndBrainFloatBuffe
 	dst.Exp(src);
 }
 
+void ndBrainCpuContext::Abs(ndBrainFloatBuffer& dstData, const ndBrainFloatBuffer& srcData)
+{
+	ndBrainVector& dst = **dstData.m_buffer;
+	const ndBrainVector& src = **srcData.m_buffer;
+	dst.Abs(src);
+}
+
+void ndBrainCpuContext::Sign(ndBrainFloatBuffer& dstData, const ndBrainFloatBuffer& srcData)
+{
+	ndBrainVector& dst = **dstData.m_buffer;
+	const ndBrainVector& src = **srcData.m_buffer;
+	dst.Sign(src);
+}
+
+void ndBrainCpuContext::Sqrt(ndBrainFloatBuffer& dstData, const ndBrainFloatBuffer& srcData)
+{
+	ndBrainVector& dst = **dstData.m_buffer;
+	const ndBrainVector& src = **srcData.m_buffer;
+	dst.Sqrt(src);
+}
+
 void ndBrainCpuContext::Reciprocal(ndBrainFloatBuffer& dstData, const ndBrainFloatBuffer& srcData)
 {
 	ndBrainVector& dst = **dstData.m_buffer;

@@ -184,6 +184,36 @@ void ndBrainVector::Max(const ndBrainVector& a)
 	ndMax(ndInt32(GetCount()), &(*this)[0], &a[0]);
 }
 
+void ndBrainVector::Sign(const ndBrainVector& a)
+{
+	ndAssert(GetCount() < (1ll << 32));
+	ndAssert(GetCount() == a.GetCount());
+	for (ndInt64 i = GetCount() - 1; i >= 0; --i)
+	{
+		(*this)[i] = ndSign(a[i]);
+	}
+}
+
+void ndBrainVector::Abs(const ndBrainVector& a)
+{
+	ndAssert(GetCount() < (1ll << 32));
+	ndAssert(GetCount() == a.GetCount());
+	for (ndInt64 i = GetCount() - 1; i >= 0; --i)
+	{
+		(*this)[i] = ndAbs(a[i]);
+	}
+}
+
+void ndBrainVector::Sqrt(const ndBrainVector& a)
+{
+	ndAssert(GetCount() < (1ll << 32));
+	ndAssert(GetCount() == a.GetCount());
+	for (ndInt64 i = GetCount() - 1; i >= 0; --i)
+	{
+		(*this)[i] = ndSqrt(a[i]);
+	}
+}
+
 void ndBrainVector::LessEqual(const ndBrainVector& a)
 {
 	ndAssert(GetCount() < (1ll << 32));

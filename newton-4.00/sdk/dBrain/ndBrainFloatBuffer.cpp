@@ -151,6 +151,21 @@ void ndBrainFloatBuffer::Exp(const ndBrainFloatBuffer& buffer)
 	m_context->Exp(*this, buffer);
 }
 
+void ndBrainFloatBuffer::Abs(const ndBrainFloatBuffer& buffer)
+{
+	m_context->Abs(*this, buffer);
+}
+
+void ndBrainFloatBuffer::Sign(const ndBrainFloatBuffer& buffer)
+{
+	m_context->Sign(*this, buffer);
+}
+
+void ndBrainFloatBuffer::Sqrt(const ndBrainFloatBuffer& buffer)
+{
+	m_context->Sqrt(*this, buffer);
+}
+
 void ndBrainFloatBuffer::Reciprocal(const ndBrainFloatBuffer& buffer)
 {
 	m_context->Reciprocal(*this, buffer);
