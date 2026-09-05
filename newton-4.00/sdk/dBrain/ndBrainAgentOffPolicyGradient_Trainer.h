@@ -38,8 +38,6 @@
 // Reference pseudocode:
 // https://spinningup.openai.com/en/latest/algorithms/sac.html
 
-#define ND_OFF_POLICY_MOVING_AVERAGE_SCORE	8
-
 class ndBrainFloatBuffer;
 class ndBrainIntegerBuffer;
 class ndBrainUniformBuffer;
@@ -125,7 +123,6 @@ class ndBrainAgentOffPolicyGradient_Trainer : public ndClassAlloc, public ndBrai
 		ndInt32 m_numberOfUpdates;
 		ndInt32 m_replayBufferSize;
 		ndInt32 m_replayBufferStartOptimizeSize;
-		ndBrainFloat m_polyakBlendFactor;
 	};
 
 	ndBrainAgentOffPolicyGradient_Trainer(const HyperParameters& parameters);
@@ -193,8 +190,8 @@ class ndBrainAgentOffPolicyGradient_Trainer : public ndClassAlloc, public ndBrai
 
 	ndArray<ndInt32> m_shuffleBuffer;
 	ndArray<ndInt32> m_miniBatchIndices;
-	ndMovingAverage<ND_OFF_POLICY_MOVING_AVERAGE_SCORE> m_averageExpectedRewards;
-	ndMovingAverage<ND_OFF_POLICY_MOVING_AVERAGE_SCORE> m_averageFramesPerEpisodes;
+	ndMovingAverage<8> m_averageExpectedRewards;
+	ndMovingAverage<8> m_averageFramesPerEpisodes;
 
 	ndBrainFloat m_learnRate;
 	ndUnsigned32 m_frameCount;

@@ -39,17 +39,15 @@
 #include "ndBrainAgentOffPolicyGradient_Trainer.h"
 
 #define ND_POLICY_LEARN_SCALE				ndBrainFloat(0.5f)
-#define ND_POLICY_DEFAULT_POLYAK_BLEND		ndBrainFloat(0.005f)
+
 
 ndBrainAgentOffPolicyGradient_Trainer::HyperParameters::HyperParameters()
 	:ndContinuePolicyGradientHyperParameters()
 {
 	m_replayBufferSize = 1024 * 512;
 	m_maxNumberOfTrainingSteps = 1024 * 256;
-	m_polyakBlendFactor = ND_POLICY_DEFAULT_POLYAK_BLEND;
 
 	m_numberOfUpdates = 2;
-	//m_numberOfUpdates = 8;
 	m_replayBufferStartOptimizeSize = 1024 * 64;
 }
 
@@ -437,7 +435,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildPolicyClass()
 
 void ndBrainAgentOffPolicyGradient_Trainer::BuildCriticClass()
 {
-	auto BuildNeuralNetwork = [this]()
+	auto BuildCriticNetwork = [this]()
 	{
 		ndFixSizeArray<ndBrainLayer*, 32> layers(0);
 		const ndBrain& policy = **m_policyTrainer->GetBrain();
@@ -466,7 +464,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildCriticClass()
 
 	for (ndInt32 j = 0; j < ndInt32(sizeof(m_referenceCriticTrainer) / sizeof(m_referenceCriticTrainer[0])); ++j)
 	{
-		ndSharedPtr<ndBrain> critic(BuildNeuralNetwork());
+		ndSharedPtr<ndBrain> critic(BuildCriticNetwork());
 		ndSharedPtr<ndBrain> referenceCritic(new ndBrain(**critic));
 		ndTrainerDescriptor referenceDescriptor(referenceCritic, m_context, m_parameters.m_miniBatchSize);
 		referenceDescriptor.m_regularizer = m_parameters.m_criticRegularizer;
