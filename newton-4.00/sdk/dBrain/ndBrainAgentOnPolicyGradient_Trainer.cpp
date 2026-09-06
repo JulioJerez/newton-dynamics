@@ -46,7 +46,7 @@
 ndBrainAgentOnPolicyGradient_Trainer::HyperParameters::HyperParameters()
 {
 	m_batchTrajectoryCount = 1000;
-	m_enableSelModifyingLayerPass = false;
+	m_enableSelModifyingLayerPass = true;
 	m_divergenceMaxPasses = ND_POLICY_MAX_KL_DIVERGENCE_PASSES;
 	m_divergenceStopThreshold = ND_POLICY_KL_DIVERGENCE_STOP_THRESHHOLD;
 }
