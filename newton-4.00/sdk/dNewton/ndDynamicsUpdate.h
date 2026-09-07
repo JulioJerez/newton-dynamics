@@ -139,7 +139,7 @@ class ndDynamicsUpdate : public ndClassAlloc
 	ndFloat32 m_invTimestepRK;
 	ndUnsigned32 m_solverPasses;
 	ndInt32 m_activeJointCount;
-	ndInt32 m_restingSkeleton;
+	ndInt32 m_activeSkeleton;
 	ndInt32 m_parallelSkeleton;
 	ndInt32 m_unConstrainedBodyCount;
 
