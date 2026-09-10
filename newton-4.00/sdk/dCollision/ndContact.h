@@ -133,12 +133,13 @@ class ndContact: public ndConstraint
 
 	D_COLLISION_API void GetSeparatingSurface(ndVector& normal, ndVector& point0, ndVector& point1) const;
 	
-	private:
-	virtual void ClearMemory();
+	protected:
 	void ClearSeparatingDistance();
 	void SetBodies(ndBodyKinematic* const body0, ndBodyKinematic* const body1);
 	void CalculatePointDerivative(ndInt32 index, ndConstraintDescritor& desc, const ndVector& dir, const ndPointParam& param) const;
 	void JacobianContactDerivative(ndConstraintDescritor& desc, const ndContactMaterial& contact, ndInt32 normalIndex, ndInt32& frictionIndex);
+
+	D_COLLISION_API virtual void ClearMemory();
 
 	ndVector m_positAcc;
 	ndQuaternion m_rotationAcc;

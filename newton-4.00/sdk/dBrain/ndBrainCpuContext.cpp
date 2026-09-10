@@ -654,6 +654,6 @@ void ndBrainCpuContext::AccumulateWeightsAndBiasBuffer(ndInt32 numberOfBuffers, 
 void ndBrainCpuContext::Update(ndBrainContextUpdateCallback* const callback)
 {
 	ndBrainContext::Update(callback);
-	callback->m_owner;
+	callback->m_owner = this;
 	m_threadPool->Update(callback);
 }

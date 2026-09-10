@@ -38,6 +38,8 @@ numOfThreads = 1;
 
 ndBrainGpuContext::~ndBrainGpuContext()
 {
+	m_threadPool->Finish();
+	m_threadPool = ndSharedPtr<ndBrainThreadPool>(nullptr);
 }
 
 ndBrainGpuContext* ndBrainGpuContext::GetAsGpuContext()
@@ -583,7 +585,9 @@ void ndBrainGpuContext::AccumulateWeightsAndBiasBuffer(ndInt32 numberOfBuffers, 
 	//}
 }
 
-void ndBrainGpuContext::Update(ndBrainContextUpdateCallback* callback)
+void ndBrainGpuContext::Update(ndBrainContextUpdateCallback* const callback)
 {
-	ndAssert(0);
+	ndBrainContext::Update(callback);
+	callback->m_owner = this;
+	m_threadPool->Update(callback);
 }
