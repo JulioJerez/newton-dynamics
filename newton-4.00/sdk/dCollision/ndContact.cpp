@@ -28,11 +28,6 @@
 
 ndVector ndContact::m_initialSeparatingVector(ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f));
 
-#define D_REST_RELATIVE_VELOCITY		ndFloat32 (1.0e-3f)
-#define D_MAX_DYNAMIC_FRICTION_SPEED	ndFloat32 (0.3f)
-#define D_MAX_PENETRATION_STIFFNESS		ndFloat32 (50.0f)
-#define D_DIAGONAL_REGULARIZER			ndFloat32 (1.0e-3f)
-
 void ndContactMaterial::RotateTangentDirections(const ndVector& dir)
 {
 	const ndVector dir0(dir);

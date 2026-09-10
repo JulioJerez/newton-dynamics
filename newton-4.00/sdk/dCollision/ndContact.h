@@ -32,6 +32,11 @@ class ndShapeInstance;
 
 #define D_CONSTRAINT_MAX_ROWS			(3 * 16)
 #define D_RESTING_CONTACT_PENETRATION	(D_PENETRATION_TOL + ndFloat32 (1.0f / 1024.0f))
+#define D_REST_RELATIVE_VELOCITY		ndFloat32 (1.0e-3f)
+#define D_MAX_DYNAMIC_FRICTION_SPEED	ndFloat32 (0.3f)
+#define D_MAX_PENETRATION_STIFFNESS		ndFloat32 (50.0f)
+#define D_DIAGONAL_REGULARIZER			ndFloat32 (1.0e-3f)
+
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndContactPoint

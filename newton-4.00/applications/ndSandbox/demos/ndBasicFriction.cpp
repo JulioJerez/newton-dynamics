@@ -22,28 +22,28 @@
 class ndFrictionContactCallback : public ndDemoContactCallback
 {
 
-	class ndUserContact : public ndContact
+	class ndUserContact : public ndContactSticky
 	{
 		public:
 		ndUserContact()
-			:ndContact()
+			:ndContactSticky()
 		{
 		}
 
 		ndUserContact(const ndUserContact& src)
-			:ndContact(src)
+			:ndContactSticky(src)
 		{
 		}
 
 		virtual ndContact* Clone() const override
 		{
-			return new ndUserContact;
+			return new ndUserContact(*this);
 		}
 
 		virtual void JacobianDerivative(ndConstraintDescritor& desc) override
 		{
 			// app can do some cool especial stuff
-			ndContact::JacobianDerivative(desc);
+			ndContactSticky::JacobianDerivative(desc);
 		}
 	};
 
