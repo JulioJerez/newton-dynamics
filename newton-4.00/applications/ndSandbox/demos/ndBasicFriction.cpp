@@ -72,7 +72,7 @@ static void BuildFrictionRamp(ndDemoEntityManager* const scene)
 	ndPhysicsWorld* const world = scene->GetWorld();
 	
 	ndFrictionMaterial material;
-	ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
+	ndContactCallback* const callback = (ndContactCallback*)*scene->GetWorld()->GetContactNotify();
 	callback->RegisterMaterial(material, ndDemoContactCallback::m_frictionTest, ndDemoContactCallback::m_default);
 	
 	ndMatrix matrix(ndPitchMatrix(30.0f * ndDegreeToRad));

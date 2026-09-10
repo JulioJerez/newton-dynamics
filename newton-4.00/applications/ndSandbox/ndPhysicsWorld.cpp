@@ -124,7 +124,7 @@ ndPhysicsWorld::ndPhysicsWorld(ndDemoEntityManager* const manager)
 	m_deadJoints.m_owner = this;
 	m_deadModels.m_owner = this;
 	m_deadEntities.m_owner = this;
-	SetContactNotify(new ndDemoContactCallback);
+	SetContactNotify(ndSharedPtr<ndContactNotify>(new ndDemoContactCallback));
 }
 
 ndPhysicsWorld::~ndPhysicsWorld()

@@ -60,7 +60,7 @@ class ndPhysicsWorld: public ndWorld
 		public:
 		ndDefferedBodyList();
 		void RemovePendingItems();
-		ndPhysicsWorld* m_owner;
+		ndWeakPtr<ndPhysicsWorld> m_owner;
 	};
 
 	class ndDefferedJointList : public ndTree<ndInt32, ndSharedPtr<ndJointBilateralConstraint>, ndContainersFreeListAlloc<ndJointBilateralConstraint>>
@@ -68,7 +68,7 @@ class ndPhysicsWorld: public ndWorld
 		public:
 		ndDefferedJointList();
 		void RemovePendingItems();
-		ndPhysicsWorld* m_owner;
+		ndWeakPtr<ndPhysicsWorld> m_owner;
 	};
 
 	class ndDefferedModelList : public ndTree<ndInt32, ndSharedPtr<ndModel>, ndContainersFreeListAlloc<ndModel>>
@@ -76,7 +76,7 @@ class ndPhysicsWorld: public ndWorld
 		public:
 		ndDefferedModelList();
 		void RemovePendingItems();
-		ndPhysicsWorld* m_owner;
+		ndWeakPtr<ndPhysicsWorld> m_owner;
 	};
 
 	class ndDefferedEntityList : public ndTree<ndInt32, ndSharedPtr<ndRenderSceneNode>, ndContainersFreeListAlloc<ndRenderSceneNode>>
@@ -84,7 +84,7 @@ class ndPhysicsWorld: public ndWorld
 		public:
 		ndDefferedEntityList();
 		void RemovePendingItems();
-		ndPhysicsWorld* m_owner;
+		ndWeakPtr<ndPhysicsWorld> m_owner;
 	};
 
 	ndPhysicsWorld(ndDemoEntityManager* const manager);

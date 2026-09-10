@@ -112,7 +112,10 @@ class ndContact: public ndConstraint
 {
 	public:
 	D_COLLISION_API ndContact();
+	D_COLLISION_API ndContact(const ndContact& src);
 	D_COLLISION_API virtual ~ndContact();
+
+	D_COLLISION_API virtual ndContact* Clone() const;
 
 	D_COLLISION_API void AttachToBodies();
 	D_COLLISION_API void DetachFromBodies();

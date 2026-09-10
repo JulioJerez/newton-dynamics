@@ -729,7 +729,7 @@ void ndBipedPlayer_SAC(ndDemoEntityManager* const scene)
 
 	// oveload the ground friction
 	// make sure the ground has enough friction
-	ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
+	ndContactCallback* const callback = (ndContactCallback*)*scene->GetWorld()->GetContactNotify();
 	ndMaterial* const defaultMaterial = callback->GetMaterial(ndDemoContactCallback::m_default, ndDemoContactCallback::m_default);
 	ndAssert(defaultMaterial);
 	defaultMaterial->m_dynamicFriction0 = defaultMaterial->m_staticFriction0;

@@ -66,8 +66,33 @@ ndContact::ndContact()
 	m_active = 0;
 }
 
+ndContact::ndContact(const ndContact& src)
+	:ndConstraint()
+	,m_positAcc(src.m_positAcc)
+	,m_rotationAcc(src.m_rotationAcc)
+	,m_separatingVector(src.m_separatingVector)
+	,m_contacPointsList()
+	,m_material(nullptr)
+	,m_timeOfImpact(ndFloat32(1.0e10f))
+	,m_separationDistance(ndFloat32(0.0f))
+	,m_sceneLru(0)
+	,m_isDead(0)
+	,m_inTrigger(0)
+	,m_isAttached(0)
+	,m_isIntersetionTestOnly(0)
+	,m_skeletonSelftCollision(1)
+	,m_skeletonExtraContact(0)
+{
+	m_active = 0;
+}
+
 ndContact::~ndContact()
 {
+}
+
+ndContact* ndContact::Clone() const
+{
+	return new ndContact(*this);
 }
 
 ndContact* ndContact::GetAsContact()

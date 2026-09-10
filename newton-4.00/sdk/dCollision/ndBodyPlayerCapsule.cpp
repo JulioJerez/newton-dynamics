@@ -588,7 +588,7 @@ ndBodyPlayerCapsuleContactSolver::ndBodyPlayerCapsuleContactSolver(ndBodyPlayerC
 void ndBodyPlayerCapsuleContactSolver::CalculateContacts()
 {
 	ndScene* const scene = m_player->GetScene();
-	ndContactNotify* const contactNotify = m_player->GetScene()->GetContactNotify();
+	ndContactNotify* const contactNotify = *m_player->GetScene()->GetContactNotify();
 	ndBodyKinematic::ndContactMap::Iterator it(m_player->GetContactMap());
 
 	m_contactBuffer.SetCount(0);
@@ -609,7 +609,7 @@ void ndBodyPlayerCapsuleContactSolver::CalculateContacts()
 			contact.SetBodies(body0, body1);
 			contact.m_material = contactNotify->GetMaterial(&contact, body0->GetCollisionShape(), body1->GetCollisionShape());
 
-			ndContactSolver contactSolver(&contact, scene->GetContactNotify(), ndFloat32(1.0f), 0);
+			ndContactSolver contactSolver(&contact, *scene->GetContactNotify(), ndFloat32(1.0f), 0);
 			contactSolver.m_instance0.SetGlobalMatrix(contactSolver.m_instance0.GetLocalMatrix() * body0->GetMatrix());
 			contactSolver.m_instance1.SetGlobalMatrix(contactSolver.m_instance1.GetLocalMatrix() * body1->GetMatrix());
 			contactSolver.m_separatingVector = srcContact->m_separatingVector;
