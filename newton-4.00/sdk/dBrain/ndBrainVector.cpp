@@ -135,6 +135,7 @@ bool ndBrainVector::SanityCheck(ndBrainFloat bound) const
 #ifdef _DEBUG
 	for (ndInt64 i = GetCount() - 1; i >= 0; --i)
 	{
+		ndAssert (ndCheckFloat((*this)[i]));
 		ndBrainFloat val = ndAbs((*this)[i]);
 		if (val > bound)
 		{
@@ -550,7 +551,6 @@ ndBrainFloat ndBrainVector::CalculateEntropyRegularization(const ndBrainVector& 
 		ndBrainFloat z = sample / sigma;
 		entropy += (ndBrainFloat(0.5f) * z * z + ndBrainFloat(ndLog(sigma)));
 	}
-	//return -entropy * regularization;
 	return entropy * regularization;
 }
 

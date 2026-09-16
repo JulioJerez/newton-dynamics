@@ -17,7 +17,7 @@
 class ndBrainGpuCommand : public ndBrainBufferCommand
 {
 	public:
-	ndBrainGpuCommand(const ndBrainBufferCommandDesc& desc);
+	ndBrainGpuCommand(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer);
 	virtual ~ndBrainGpuCommand();
 
 	virtual void Execute(ndInt32 groupId);

@@ -195,7 +195,7 @@ ndCommandArray ndBrainLayerActivationTanh::CreateFeedForwardBufferCommand(
 	else
 	{
 		descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerTanhActivation;
-		command = new ndBrainGpuCommand(descriptor);
+		command = new ndBrainGpuCommand(descriptor, (ndBrainLayer*)this);
 	}
 	ndCommandArray commandArray(0);
 	commandArray.PushBack(command);
@@ -227,7 +227,7 @@ ndCommandArray ndBrainLayerActivationTanh::CreateBackPropagateBufferCommand(
 	else
 	{
 		descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerTanhBackPropagate;
-		ndBrainBufferCommand* const command = new ndBrainGpuCommand(descriptor);
+		ndBrainBufferCommand* const command = new ndBrainGpuCommand(descriptor, (ndBrainLayer*)this);
 		commands.PushBack(command);
 	}
 	return commands;

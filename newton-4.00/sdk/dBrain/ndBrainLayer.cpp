@@ -30,8 +30,7 @@
 class ndBrainContext;
 
 ndBrainLayerFeedForwardCpuCommand::ndBrainLayerFeedForwardCpuCommand(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer)
-	:ndBrainBufferCommandCpu(desc)
-	,m_layer(layer)
+	:ndBrainBufferCommandCpu(desc, layer)
 {
 }
 
@@ -51,8 +50,7 @@ void ndBrainLayerSelfModyfyingFeedForwardCpuCommand::Execute(ndInt32 miniBatchIn
 }
 
 ndBrainLayerBackPropagateCpuCommand::ndBrainLayerBackPropagateCpuCommand(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer)
-	:ndBrainBufferCommandCpu(desc)
-	,m_layer(layer)
+	:ndBrainBufferCommandCpu(desc, layer)
 {
 }
 

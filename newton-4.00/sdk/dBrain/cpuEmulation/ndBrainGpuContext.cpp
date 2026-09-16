@@ -96,12 +96,12 @@ void ndBrainGpuContext::CreateCopyCommands()
 	ndBrainBufferCommandDesc copyDescriptor(0);
 	copyDescriptor.m_context = this;
 	copyDescriptor.m_kernel = m_brainCopyBuffer;
-	m_copyBufferCommand = ndSharedPtr<ndBrainGpuCommand>(new ndBrainGpuCommand(copyDescriptor));
+	m_copyBufferCommand = ndSharedPtr<ndBrainGpuCommand>(new ndBrainGpuCommand(copyDescriptor, nullptr));
 
 	ndBrainBufferCommandDesc copyIndirectDescriptor(0);
 	copyIndirectDescriptor.m_context = this;
 	copyIndirectDescriptor.m_kernel = m_brainCopyBufferIndirect;
-	m_copyBufferIndirectCommand = ndSharedPtr<ndBrainGpuCommand>(new ndBrainGpuCommand(copyIndirectDescriptor));
+	m_copyBufferIndirectCommand = ndSharedPtr<ndBrainGpuCommand>(new ndBrainGpuCommand(copyIndirectDescriptor, nullptr));
 
 	ndCopyBufferCommandInfo copyBuffer;
 	m_copyBufferParams = ndSharedPtr<ndBrainUniformBuffer>(new ndBrainUniformBuffer(this, sizeof(ndCopyBufferCommandInfo), &copyBuffer));
@@ -192,6 +192,7 @@ ndBrainFloat ndBrainGpuContext::Element(const ndBrainFloatBuffer& buffer, ndInt3
 
 void ndBrainGpuContext::Abs(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer)
 {
+	ndAssert(0);
 	//ndAssert(buffer.SizeInBytes() == srcBuffer.SizeInBytes());
 	//ndInt32 elements = ndInt32(buffer.SizeInBytes() / sizeof(ndBrainFloat));
 	//ndBrainMemVector dst((ndBrainFloat*)buffer.GetCpuPtr(), elements);
@@ -285,6 +286,7 @@ void ndBrainGpuContext::Mul(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer
 
 void ndBrainGpuContext::Sign(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer)
 {
+	ndAssert(0);
 	//ndAssert(buffer.SizeInBytes() == srcBuffer.SizeInBytes());
 	//ndInt32 elements = ndInt32(buffer.SizeInBytes() / sizeof(ndBrainFloat));
 	//ndBrainMemVector dst((ndBrainFloat*)buffer.GetCpuPtr(), elements);
@@ -294,6 +296,7 @@ void ndBrainGpuContext::Sign(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffe
 
 void ndBrainGpuContext::Sqrt(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer)
 {
+	ndAssert(0);
 	//ndAssert(buffer.SizeInBytes() == srcBuffer.SizeInBytes());
 	//ndInt32 elements = ndInt32(buffer.SizeInBytes() / sizeof(ndBrainFloat));
 	//ndBrainMemVector dst((ndBrainFloat*)buffer.GetCpuPtr(), elements);
@@ -504,7 +507,7 @@ void ndBrainGpuContext::SetLearnRateCommandBuffers(ndBrainOptimizerAdam& optimiz
 		{
 			descriptor.m_kernel = descriptor.m_context->GetAsGpuContext()->m_brainAdamLassoOptimizerUpdate;
 		}
-		optimizer.m_commands.Append(ndSharedPtr<ndBrainBufferCommand>(new ndBrainGpuCommand(descriptor)));
+		optimizer.m_commands.Append(ndSharedPtr<ndBrainBufferCommand>(new ndBrainGpuCommand(descriptor, nullptr)));
 	}
 	
 	{
@@ -517,7 +520,7 @@ void ndBrainGpuContext::SetLearnRateCommandBuffers(ndBrainOptimizerAdam& optimiz
 		descriptor.PushBack(*adamUniformbuffer);
 	
 		descriptor.m_kernel = descriptor.m_context->GetAsGpuContext()->m_brainAdamBiasCorrectionUpdate;
-		optimizer.m_commands.Append(ndSharedPtr<ndBrainBufferCommand>(new ndBrainGpuCommand(descriptor)));
+		optimizer.m_commands.Append(ndSharedPtr<ndBrainBufferCommand>(new ndBrainGpuCommand(descriptor, nullptr)));
 	}
 }
 
@@ -529,16 +532,6 @@ void ndBrainGpuContext::ApplyLeanRateCommands(ndBrainBufferCommand* const comman
 	desc.PushBack(buffer);
 	SubmitBufferCommand(command);
 	desc.Pop();
-}
-
-void ndBrainGpuContext::Rand(ndBrainIntegerBuffer& randBuffer)
-{
-	ndAssert(0);
-}
-
-void ndBrainGpuContext::SetRandSeeds(const ndFixSizeArray<ndUnsigned32, 256>& seed)
-{
-	ndAssert(0);
 }
 
 void ndBrainGpuContext::AccumulateWeightsAndBiasBuffer(ndInt32 numberOfBuffers, ndInt32 bufferSizeInFloats, ndBrainFloatBuffer& weightsAndBiasGradientBuffer)

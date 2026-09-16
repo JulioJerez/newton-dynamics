@@ -189,7 +189,7 @@ ndCommandArray ndBrainLayerActivationSoftmax::CreateFeedForwardBufferCommand(
 	else
 	{
 		descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerSoftmaxActivation;
-		command = new ndBrainGpuCommand(descriptor);
+		command = new ndBrainGpuCommand(descriptor, (ndBrainLayer*)this);
 	}
 
 	ndCommandArray commandArray(0);

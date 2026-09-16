@@ -152,7 +152,7 @@ void ndBrainTrainer::AddCopyOutputGradientCommand()
 		{
 			public:
 			ndCopyOutputGradientCommandCpu(const ndBrainBufferCommandDesc& desc)
-				:ndBrainBufferCommandCpu(desc)
+				:ndBrainBufferCommandCpu(desc, nullptr)
 			{
 			}
 
@@ -177,7 +177,7 @@ void ndBrainTrainer::AddCopyOutputGradientCommand()
 	else
 	{
 		descriptor.m_kernel = descriptor.m_context->GetAsGpuContext()->m_brainCopyOutputGradients;
-		ndSharedPtr<ndBrainBufferCommand>command(new ndBrainGpuCommand(descriptor));
+		ndSharedPtr<ndBrainBufferCommand>command(new ndBrainGpuCommand(descriptor, nullptr));
 		m_backPropagateCommands.Append(command);
 	}
 }
@@ -215,7 +215,7 @@ void ndBrainTrainer::AddCopyInputGradientCommand()
 		{
 			public:
 			ndCopyInputGradientCommandCpu(const ndBrainBufferCommandDesc& desc)
-				:ndBrainBufferCommandCpu(desc)
+				:ndBrainBufferCommandCpu(desc, nullptr)
 			{
 			}
 
@@ -239,7 +239,7 @@ void ndBrainTrainer::AddCopyInputGradientCommand()
 	else
 	{
 		descriptor.m_kernel = descriptor.m_context->GetAsGpuContext()->m_brainCopyInputGradients;
-		ndSharedPtr<ndBrainBufferCommand>command(new ndBrainGpuCommand(descriptor));
+		ndSharedPtr<ndBrainBufferCommand>command(new ndBrainGpuCommand(descriptor, nullptr));
 		m_backPropagateCommands.Append(command);
 	}
 }

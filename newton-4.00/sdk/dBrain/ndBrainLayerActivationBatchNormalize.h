@@ -102,6 +102,8 @@ class ndBrainLayerActivationBatchNormalize : public ndBrainLayerActivationLinear
 		ndInt32 miniBatchSize,
 		ndBrainFloatBuffer* const inputOutputData,
 		ndBrainFloatBuffer* const weightsAndBias) const override;
+
+	mutable ndSharedPtr<ndBrainFloatBuffer> m_varianceBuffer;
 };
 #endif
 

@@ -88,9 +88,6 @@ class ndBrainGpuContext : public ndBrainContext
 	virtual void InvSqrt(ndBrainFloatBuffer&, ndInt32 clipSize) override;
 	virtual void ReductionSum(ndBrainFloatBuffer& buffer, ndInt32 clipSize) override;
 
-	virtual void Rand(ndBrainIntegerBuffer& randBuffer) override;
-	virtual void SetRandSeeds(const ndFixSizeArray<ndUnsigned32, 256>& seed) override;
-
 	// learnRate commands
 	virtual void ApplyLeanRateCommands(ndBrainBufferCommand* const command, ndBrainFloat learRate) override;
 	virtual void SetLearnRateCommandBuffers(ndBrainOptimizerAdam& optimizer, ndInt32 minibatchSize, ndBrainFloatBuffer& weightsAndBiasBuffer, ndBrainFloatBuffer& weightsAndBiasGradientBuffer) override;
@@ -115,8 +112,11 @@ class ndBrainGpuContext : public ndBrainContext
 	ndSharedPtr<ndBrainKernel> m_brainLayerSoftmaxActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerDropOutActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerLeakyReluActivation;
-	ndSharedPtr<ndBrainKernel> m_brainLayerPolicyGradientActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiply;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerPolicyGradientActivation;
+	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationAddInputActivation;
+	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationLoadInputActivation;
+	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationNormalizeInputActivation;
 
 	// back propagate shaders
 	ndSharedPtr<ndBrainKernel> m_brainCopyInputGradients;
@@ -131,8 +131,8 @@ class ndBrainGpuContext : public ndBrainContext
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateBiasGradients;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateInputGradients;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateWeightGradients;
-	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateAddBiasGradients;
-	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateClearBiasGradients;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateAddBiasGradients;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateClearBiasGradients;
 
 	// optimizer shaders
 	ndSharedPtr<ndBrainKernel> m_brainAdamBiasCorrectionUpdate;

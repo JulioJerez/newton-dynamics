@@ -75,7 +75,7 @@ class ndBrainBufferCommandDesc : public ndFixSizeArray<ndBrainBuffer*, 16>
 class ndBrainBufferCommand : public ndContainersFreeListAlloc<ndBrainBufferCommand>
 {
 	public:
-	ndBrainBufferCommand(const ndBrainBufferCommandDesc& desc);
+	ndBrainBufferCommand(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer);
 	virtual ~ndBrainBufferCommand();
 	
 	ndBrainBufferCommandDesc& GetDescriptor();
@@ -83,12 +83,13 @@ class ndBrainBufferCommand : public ndContainersFreeListAlloc<ndBrainBufferComma
 
 	protected:
 	ndBrainBufferCommandDesc m_desc;
+	ndWeakPtr<ndBrainLayer> m_layer;
 };
 
 class ndBrainBufferCommandCpu : public ndBrainBufferCommand
 {
 	public:
-	ndBrainBufferCommandCpu(const ndBrainBufferCommandDesc& desc);
+	ndBrainBufferCommandCpu(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer);
 	virtual ~ndBrainBufferCommandCpu();
 
 	virtual void Execute(ndInt32 miniBatchIndex) = 0;

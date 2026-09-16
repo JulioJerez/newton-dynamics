@@ -134,7 +134,7 @@ ndCommandArray ndBrainLayerActivationCategoricalSoftmax::CreateBackPropagateBuff
 	else
 	{
 		descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerCathegoricalSoftmaxBackPropagate;
-		ndBrainBufferCommand* const command = new ndBrainGpuCommand(descriptor);
+		ndBrainBufferCommand* const command = new ndBrainGpuCommand(descriptor, (ndBrainLayer*)this);
 		commands.PushBack(command);
 	}
 	return commands;

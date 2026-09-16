@@ -24,6 +24,7 @@
 #include "ndBrainTrainer.h"
 #include "ndBrainContext.h"
 #include "ndBrainSaveLoad.h"
+#include "ndBrainGpuBuffer.h"
 #include "ndBrainLayerLinear.h"
 #include "ndBrainFloatBuffer.h"
 #include "ndBrainLayerActivationBatchNormalize.h"
@@ -431,17 +432,18 @@ ndCommandArray ndBrainLayerActivationBatchNormalize::CreateBackPropagateBufferCo
 
 ndBrainLayerActivationBatchNormalize::ndBrainLayerActivationBatchNormalize(ndInt32 neurons)
 	:ndBrainLayerActivationLinear(ndBrainVector(), ndBrainVector())
+	,m_varianceBuffer(nullptr)
 {
 	m_neurons = neurons;
 	m_slopes.SetCount(neurons);
 	m_biases.SetCount(neurons);
-
 	m_biases.Set(ndBrainFloat(0.0f));
 	m_slopes.Set(ndBrainFloat(1.0f));
 }
 
 ndBrainLayerActivationBatchNormalize::ndBrainLayerActivationBatchNormalize(const ndBrainLayerActivationBatchNormalize& src)
 	:ndBrainLayerActivationLinear(src)
+	,m_varianceBuffer(nullptr)
 {
 }
 
@@ -473,35 +475,88 @@ ndCommandArray ndBrainLayerActivationBatchNormalize::CreateSelfModyfingFeedForwa
 	ndBrainFloatBuffer* const inputOutputData,
 	ndBrainFloatBuffer* const weightsAndBias) const
 {
-	ndCommandArray commandArray(ndBrainLayerActivationLinear::CreateFeedForwardBufferCommand(
-		owner, context, info, miniBatchSize, inputOutputData, weightsAndBias));
-
-	ndBrainBufferCommand* const linearActivationCommand = commandArray[0];
-	commandArray.SetCount(0);
-	linearActivationCommand->GetDescriptor().m_info.m_matrixDimensionK = miniBatchSize * 256 + 1;
-
-	ndBrainBufferCommandDesc descriptor(MakeFeedForwardDesctriptor(
-		owner, context, info, miniBatchSize, 0,
-		inputOutputData, weightsAndBias));
-
-	ndBrainBufferCommand* calculateVarianceCommand = nullptr;
 	if (context->GetAsCpuContext())
 	{
-		descriptor.m_info.m_matrixDimensionK = miniBatchSize * 256 + 0;
+		ndCommandArray commandArray(ndBrainLayerActivationLinear::CreateFeedForwardBufferCommand(
+			owner, context, info, miniBatchSize, inputOutputData, weightsAndBias));
+
+		ndBrainBufferCommand* const linearActivationCommand = commandArray[0];
+		commandArray.SetCount(0);
+		linearActivationCommand->GetDescriptor().m_info.m_matrixDimensionK = miniBatchSize * 256 + 1;
+
+		ndBrainBufferCommandDesc descriptor(MakeFeedForwardDesctriptor(
+			owner, context, info, miniBatchSize, 0,
+			inputOutputData, weightsAndBias));
+
 		descriptor.m_miniBatchSize = 1;
-		calculateVarianceCommand = new ndBrainLayerSelfModyfyingFeedForwardCpuCommand(descriptor, (ndBrainLayer*)this);
+		descriptor.m_info.m_matrixDimensionK = miniBatchSize * 256 + 0;
+		ndBrainBufferCommand* const varianceCommand = new ndBrainLayerSelfModyfyingFeedForwardCpuCommand(descriptor, (ndBrainLayer*)this);
+
+		commandArray.PushBack(varianceCommand);
+		commandArray.PushBack(linearActivationCommand);
+		return commandArray;
 	}
 	else
-	{
-		ndAssert(0);
-		descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerReluActivation;
-		ndBrainBufferCommand* command = new ndBrainGpuCommand(descriptor);
-		commandArray.PushBack(command);
-	}
+	{	
+		// add the bash sumation, reduction and normalization
+		auto TwosPower = [](ndInt32 x)
+		{
+			ndInt32 exp = 0;
+			for (x-- ; x > 0; x >>= 1)
+			{
+				exp++;
+			}
+			return exp;
+		};
 
-	commandArray.PushBack(calculateVarianceCommand);
-	commandArray.PushBack(linearActivationCommand);
-	return commandArray;
+		ndCommandArray commandArray(0);
+		ndBrainBufferCommandDesc descriptor(MakeFeedForwardDesctriptor(
+			owner, context, info, miniBatchSize, 0, inputOutputData, weightsAndBias));
+
+ndBrainMemVector xxxx((ndBrainFloat*)inputOutputData->GetGpuBuffer()->GetPtr(), ndInt32(inputOutputData->SizeInItems()));
+
+		ndInt32 twosPower = TwosPower(miniBatchSize);
+		ndAssert(twosPower > 0);
+		if (!m_varianceBuffer)
+		{
+			ndInt32 size = (1 << twosPower) * ndInt32(m_slopes.GetCount());
+			m_varianceBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(context, size));
+			m_varianceBuffer->Set(ndBrainFloat(0.0f));
+		}
+		ndAssert(m_slopesBuffer);
+		ndAssert(m_biasesBuffer);
+
+		descriptor.PushBack(*m_biasesBuffer);
+		descriptor.PushBack(*m_slopesBuffer);
+		descriptor.PushBack(*m_varianceBuffer);
+
+		descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerBatchNormalizationLoadInputActivation;
+		ndBrainBufferCommand* const loadInputCommand = new ndBrainGpuCommand(descriptor, (ndBrainLayer*)this);
+		commandArray.PushBack(loadInputCommand);
+
+		ndInt32 savedWorkGroupSize = descriptor.m_workGroupSize;
+		for (; twosPower > 0; --twosPower)
+		{
+			descriptor.m_miniBatchSize = 1<<(twosPower - 1);
+			descriptor.m_workGroupSize = 1 << (twosPower - 1);
+			descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerBatchNormalizationAddInputActivation;
+			ndBrainBufferCommand* const reductionCommand = new ndBrainGpuCommand(descriptor, (ndBrainLayer*)this);
+			commandArray.PushBack(reductionCommand);
+		}
+		descriptor.m_miniBatchSize = 1;
+		descriptor.m_workGroupSize = savedWorkGroupSize;
+		descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerBatchNormalizationNormalizeInputActivation;
+		ndBrainBufferCommand* const varianceCommand = new ndBrainGpuCommand(descriptor, (ndBrainLayer*)this);
+		commandArray.PushBack(varianceCommand);
+
+		// add the linear layer ax + b manually
+		descriptor.m_miniBatchSize = miniBatchSize;
+		descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerLinearActivation;
+		ndBrainBufferCommand* const linearCommand = new ndBrainGpuCommand(descriptor, (ndBrainLayer*)this);
+		commandArray.PushBack(linearCommand);
+
+		return commandArray;
+	}
 }
 
 void ndBrainLayerActivationBatchNormalize::SelfModifyingFeedForward(const ndBrainLayerSelfModyfyingFeedForwardCpuCommand* const command, ndInt32) const

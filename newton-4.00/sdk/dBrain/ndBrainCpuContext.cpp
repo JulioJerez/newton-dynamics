@@ -24,7 +24,7 @@ class ndBrainAdamUpdateParametersRidge : public ndBrainBufferCommandCpu
 {
 	public:
 	ndBrainAdamUpdateParametersRidge(const ndBrainBufferCommandDesc& desc)
-		:ndBrainBufferCommandCpu(desc)
+		:ndBrainBufferCommandCpu(desc, nullptr)
 		,m_learnRate(ndBrainFloat(1.0e-4f))
 	{
 	}
@@ -82,7 +82,7 @@ class ndBrainAdamBiasCorrectionUpdate : public ndBrainBufferCommandCpu
 {
 	public:
 	ndBrainAdamBiasCorrectionUpdate(const ndBrainBufferCommandDesc& desc)
-		:ndBrainBufferCommandCpu(desc)
+		:ndBrainBufferCommandCpu(desc, nullptr)
 	{
 	}
 
@@ -598,23 +598,13 @@ void ndBrainCpuContext::ApplyLeanRateCommands(ndBrainBufferCommand* const comman
 	SubmitBufferCommand(command);
 }
 
-void ndBrainCpuContext::Rand(ndBrainIntegerBuffer& randBuffer)
-{
-	ndAssert(0);
-}
-
-void ndBrainCpuContext::SetRandSeeds(const ndFixSizeArray<ndUnsigned32, 256>& seed)
-{
-	ndAssert(0);
-}
-
 void ndBrainCpuContext::AccumulateWeightsAndBiasBuffer(ndInt32 numberOfBuffers, ndInt32 bufferSizeInFloats, ndBrainFloatBuffer& weightsAndBiasGradientBuffer)
 {
 	class ndAccumulateWeigndAndBias : public ndBrainBufferCommandCpu
 	{
 		public:
 		ndAccumulateWeigndAndBias(const ndBrainBufferCommandDesc& desc, ndInt64 elements, ndBrainFloatBuffer& weightsAndBiasGradientBuffer)
-			:ndBrainBufferCommandCpu(desc)
+			:ndBrainBufferCommandCpu(desc, nullptr)
 			,m_weightsAndBiasGradientBuffer(&weightsAndBiasGradientBuffer)
 			,m_elements(elements)
 		{

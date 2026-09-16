@@ -43,8 +43,6 @@ class ndBrainLayerFeedForwardCpuCommand : public ndBrainBufferCommandCpu
 	public:
 	ndBrainLayerFeedForwardCpuCommand(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer);
 	virtual void Execute(ndInt32 miniBatchIndex) override;
-
-	ndBrainLayer* m_layer;
 };
 
 class ndBrainLayerSelfModyfyingFeedForwardCpuCommand : public ndBrainLayerFeedForwardCpuCommand
