@@ -79,6 +79,7 @@ class ndBrainLayerLinear : public ndBrainLayer
 		m_biasGradientsPass,
 		m_inputGradientsPass,
 		m_weightGradientsPass,
+		m_tiledGradientsDebugPass,
 		m_dimFactor = 1 << 4,
 	};
 
@@ -96,6 +97,7 @@ class ndBrainLayerLinear : public ndBrainLayer
 	void BackPropagateBiasGradients(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const;
 	void BackPropagateInputGradients(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const;
 	void BackPropagateWeightsGradients(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const;
+	void BackPropagateTileInputGradients(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const;
 	
 	virtual ndCommandArray CreateFeedForwardBufferCommand(
 		ndBrainTrainerInference* const owner,
