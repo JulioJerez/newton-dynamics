@@ -32,6 +32,11 @@ class ndShapeInstance;
 
 #define D_CONSTRAINT_MAX_ROWS			(3 * 16)
 #define D_RESTING_CONTACT_PENETRATION	(D_PENETRATION_TOL + ndFloat32 (1.0f / 1024.0f))
+#define D_REST_RELATIVE_VELOCITY		ndFloat32 (1.0e-3f)
+#define D_MAX_DYNAMIC_FRICTION_SPEED	ndFloat32 (0.3f)
+#define D_MAX_PENETRATION_STIFFNESS		ndFloat32 (50.0f)
+#define D_DIAGONAL_REGULARIZER			ndFloat32 (1.0e-3f)
+
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndContactPoint
@@ -112,7 +117,10 @@ class ndContact: public ndConstraint
 {
 	public:
 	D_COLLISION_API ndContact();
+	D_COLLISION_API ndContact(const ndContact& src);
 	D_COLLISION_API virtual ~ndContact();
+
+	D_COLLISION_API virtual ndContact* Clone() const;
 
 	D_COLLISION_API void AttachToBodies();
 	D_COLLISION_API void DetachFromBodies();
@@ -130,12 +138,13 @@ class ndContact: public ndConstraint
 
 	D_COLLISION_API void GetSeparatingSurface(ndVector& normal, ndVector& point0, ndVector& point1) const;
 	
-	private:
-	virtual void ClearMemory();
+	protected:
 	void ClearSeparatingDistance();
 	void SetBodies(ndBodyKinematic* const body0, ndBodyKinematic* const body1);
 	void CalculatePointDerivative(ndInt32 index, ndConstraintDescritor& desc, const ndVector& dir, const ndPointParam& param) const;
 	void JacobianContactDerivative(ndConstraintDescritor& desc, const ndContactMaterial& contact, ndInt32 normalIndex, ndInt32& frictionIndex);
+
+	D_COLLISION_API virtual void ClearMemory();
 
 	ndVector m_positAcc;
 	ndQuaternion m_rotationAcc;

@@ -17,6 +17,52 @@
 #include "ndContactCallback.h"
 #include "ndDemoEntityManager.h"
 
+// testing user define contact
+
+class ndFrictionContactCallback : public ndDemoContactCallback
+{
+
+	class ndUserContact : public ndContactSticky
+	{
+		public:
+		ndUserContact()
+			:ndContactSticky()
+		{
+		}
+
+		ndUserContact(const ndUserContact& src)
+			:ndContactSticky(src)
+		{
+		}
+
+		virtual ndContact* Clone() const override
+		{
+			return new ndUserContact(*this);
+		}
+
+		virtual void JacobianDerivative(ndConstraintDescritor& desc) override
+		{
+			// app can do some cool especial stuff
+			ndContactSticky::JacobianDerivative(desc);
+		}
+	};
+
+
+	public:
+	ndFrictionContactCallback()
+		:ndDemoContactCallback()
+	{
+	}
+
+	virtual const ndContact* GetContactConstructor(const ndShapeInstance&, const ndShapeInstance&) const override
+	{
+		//return ndDemoContactCallback::GetContactConstructor(id0, id1);
+		return &m_construtor;
+	}
+
+	ndUserContact m_construtor;
+};
+
 class ndFrictionMaterial : public ndApplicationMaterial
 {
 	public:
@@ -70,9 +116,13 @@ class ndFrictionMaterial : public ndApplicationMaterial
 static void BuildFrictionRamp(ndDemoEntityManager* const scene)
 {
 	ndPhysicsWorld* const world = scene->GetWorld();
-	
+
+	// test user define contact generation
+	ndSharedPtr<ndContactNotify> userContacts(new ndFrictionContactCallback());
+	world->SetContactNotify(userContacts);
+
 	ndFrictionMaterial material;
-	ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
+	ndContactCallback* const callback = (ndContactCallback*)*scene->GetWorld()->GetContactNotify();
 	callback->RegisterMaterial(material, ndDemoContactCallback::m_frictionTest, ndDemoContactCallback::m_default);
 	
 	ndMatrix matrix(ndPitchMatrix(30.0f * ndDegreeToRad));

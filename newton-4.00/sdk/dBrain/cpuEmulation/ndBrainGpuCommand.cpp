@@ -15,10 +15,9 @@
 #include "ndBrainGpuCommand.h"
 #include "ndBrainUniformBuffer.h"
 
-ndBrainGpuCommand::ndBrainGpuCommand(const ndBrainBufferCommandDesc& desc)
-	:ndBrainBufferCommand(desc)
+ndBrainGpuCommand::ndBrainGpuCommand(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer)
+	:ndBrainBufferCommand(desc, layer)
 {
-
 }
 
 ndBrainGpuCommand::~ndBrainGpuCommand()

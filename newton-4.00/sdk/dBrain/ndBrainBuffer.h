@@ -55,6 +55,7 @@ class ndBrainBuffer : public ndContainersFreeListAlloc<ndBrainBuffer>
 	public:
 	virtual ~ndBrainBuffer();
 	size_t SizeInBytes() const;
+	size_t SizeInItems() const;
 
 	virtual void* GetCpuPtr() = 0;
 	virtual void* GetCpuPtr() const = 0;
@@ -65,6 +66,7 @@ class ndBrainBuffer : public ndContainersFreeListAlloc<ndBrainBuffer>
 	protected:
 	ndBrainContext* m_context;
 	ndSharedPtr<ndBrainGpuBuffer> m_gpuBuffer;
+	size_t m_itemSize;
 	size_t m_sizeInBytes;
 
 	friend class ndBrainGpuBuffer;

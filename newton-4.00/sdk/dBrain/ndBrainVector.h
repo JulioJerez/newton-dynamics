@@ -37,11 +37,14 @@ class ndBrainVector: public ndArray<ndBrainFloat>
 	void Set(const ndBrainVector& data);
 	void Exp(const ndBrainVector& data);
 
+	void Abs(const ndBrainVector& a);
 	void Add(const ndBrainVector& a);
 	void Sub(const ndBrainVector& a);
 	void Mul(const ndBrainVector& a);
 	void Min(const ndBrainVector& a);
 	void Max(const ndBrainVector& a);
+	void Sign(const ndBrainVector& a);
+	void Sqrt(const ndBrainVector& a);
 
 	void Less(ndBrainFloat test);
 	void Greater(ndBrainFloat test);

@@ -79,6 +79,7 @@ class ndBrainLayerLinear : public ndBrainLayer
 		m_biasGradientsPass,
 		m_inputGradientsPass,
 		m_weightGradientsPass,
+		m_tiledGradientsDebugPass,
 		m_dimFactor = 1 << 4,
 	};
 
@@ -96,6 +97,7 @@ class ndBrainLayerLinear : public ndBrainLayer
 	void BackPropagateBiasGradients(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const;
 	void BackPropagateInputGradients(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const;
 	void BackPropagateWeightsGradients(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const;
+	void BackPropagateTileInputGradients(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const;
 	
 	virtual ndCommandArray CreateFeedForwardBufferCommand(
 		ndBrainTrainerInference* const owner,
@@ -116,12 +118,14 @@ class ndBrainLayerLinear : public ndBrainLayer
 		ndBrainFloatBuffer* const weightsAndBiasGradients) const override;
 
 	private:
+	void TiledMatrixAddBias(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex);
 	void TiledMatrixMultiply(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex);
 	void DotProductMatrixMultiply(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex);
 
 	ndBrainVector m_bias;
 	ndBrainMatrix m_weights;
 	friend class ndBrainTrainerInference;
+	friend class ndBrainLayerFeedForwardCpuCommand_TiledMatrixAddBias;
 	friend class ndBrainLayerFeedForwardCpuCommand_TiledMatrixMultiply;
 	friend class ndBrainLayerFeedForwardCpuCommand_DotProductMatrixMultiply;
 };

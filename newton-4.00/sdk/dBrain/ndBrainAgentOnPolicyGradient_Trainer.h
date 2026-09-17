@@ -41,7 +41,6 @@
 // Reference pseudo code:
 // https://spinningup.openai.com/en/latest/algorithms/ppo.html
 
-#define ND_ON_POLICY_MOVING_AVERAGE_SCORE	8
 
 class ndBrainFloatBuffer;
 class ndBrainIntegerBuffer;
@@ -137,6 +136,7 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc, public ndBrain
 		ndInt32 m_divergenceMaxPasses;
 		ndInt32 m_batchTrajectoryCount;
 		ndBrainFloat m_divergenceStopThreshold;
+		bool m_enableSelModifyingLayerPass;
 	};
 
 	ndBrainAgentOnPolicyGradient_Trainer(const HyperParameters& parameters);
@@ -163,7 +163,7 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc, public ndBrain
 
 	void Optimize();
 	void UpdateScore();
-	void OptimizeValue();
+	void OptimizeCritics();
 	void OptimizePolicy();
 	void BuildPolicyClass();
 	void BuildCriticClass();
@@ -183,8 +183,9 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc, public ndBrain
 	ndString m_name;
 	HyperParameters m_parameters;
 	ndSharedPtr<ndBrainContext> m_context;
-	ndSharedPtr<ndBrainTrainer> m_valueTrainer;
 	ndSharedPtr<ndBrainTrainer> m_policyTrainer;
+	ndSharedPtr<ndBrainTrainer> m_criticTrainer[2];
+	ndSharedPtr<ndBrainTrainerInference> m_referenceCriticTrainer[2];
 
 	ndUniformDistribution m_uniformDistribution;
 	ndList<ndSharedPtr<ndBrainAgentOnPolicyGradient_Agent>> m_agents;
@@ -222,9 +223,9 @@ class ndBrainAgentOnPolicyGradient_Trainer : public ndClassAlloc, public ndBrain
 	ndBrainVector m_scratchBuffer;
 	ndArray<ndInt32> m_shuffleBuffer;
 	ndArray<ndInt32> m_criticShuffleBuffer;
+	ndMovingAverage<8> m_averageExpectedRewards;
+	ndMovingAverage<8> m_averageFramesPerEpisodes;
 	ndBrainAgentOnPolicyGradient_Agent::ndTrajectory m_trajectoryAccumulator;
-	ndMovingAverage<ND_ON_POLICY_MOVING_AVERAGE_SCORE> m_averageExpectedRewards;
-	ndMovingAverage<ND_ON_POLICY_MOVING_AVERAGE_SCORE> m_averageFramesPerEpisodes;
 
 	ndBrainFloat m_learnRate;
 	ndUnsigned32 m_frameCount;

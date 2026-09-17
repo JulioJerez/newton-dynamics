@@ -39,17 +39,15 @@
 #include "ndBrainAgentOffPolicyGradient_Trainer.h"
 
 #define ND_POLICY_LEARN_SCALE				ndBrainFloat(0.5f)
-#define ND_POLICY_DEFAULT_POLYAK_BLEND		ndBrainFloat(0.005f)
+
 
 ndBrainAgentOffPolicyGradient_Trainer::HyperParameters::HyperParameters()
 	:ndContinuePolicyGradientHyperParameters()
 {
 	m_replayBufferSize = 1024 * 512;
 	m_maxNumberOfTrainingSteps = 1024 * 256;
-	m_polyakBlendFactor = ND_POLICY_DEFAULT_POLYAK_BLEND;
 
 	m_numberOfUpdates = 2;
-	//m_numberOfUpdates = 8;
 	m_replayBufferStartOptimizeSize = 1024 * 64;
 }
 
@@ -392,7 +390,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildPolicyClass()
 	layers.PushBack(new ndBrainLayerActivationBatchNormalize(m_parameters.m_numberOfObservations));
 	layers.PushBack(new ndBrainLayerLinear(m_parameters.m_numberOfObservations, m_parameters.m_hiddenLayersNumberOfNeurons));
 	layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
-
 	for (ndInt32 i = 0; i < m_parameters.m_numberOfHiddenLayers; ++i)
 	{
 		ndAssert(layers[layers.GetCount() - 1]->GetOutputSize() == m_parameters.m_hiddenLayersNumberOfNeurons);
@@ -437,7 +434,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildPolicyClass()
 
 void ndBrainAgentOffPolicyGradient_Trainer::BuildCriticClass()
 {
-	auto BuildNeuralNetwork = [this]()
+	auto BuildCriticNetwork = [this]()
 	{
 		ndFixSizeArray<ndBrainLayer*, 32> layers(0);
 		const ndBrain& policy = **m_policyTrainer->GetBrain();
@@ -445,7 +442,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildCriticClass()
 		layers.PushBack(new ndBrainLayerActivationBatchNormalize(policy.GetOutputSize() + policy.GetInputSize()));
 		layers.PushBack(new ndBrainLayerLinear(policy.GetOutputSize() + policy.GetInputSize(), m_parameters.m_hiddenLayersNumberOfNeurons));
 		layers.PushBack(new ndBrainLayerActivationTanh(layers[layers.GetCount() - 1]->GetOutputSize()));
-
 		for (ndInt32 i = 0; i < m_parameters.m_numberOfHiddenLayers; ++i)
 		{
 			ndAssert(layers[layers.GetCount() - 1]->GetOutputSize() == m_parameters.m_hiddenLayersNumberOfNeurons);
@@ -466,7 +462,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::BuildCriticClass()
 
 	for (ndInt32 j = 0; j < ndInt32(sizeof(m_referenceCriticTrainer) / sizeof(m_referenceCriticTrainer[0])); ++j)
 	{
-		ndSharedPtr<ndBrain> critic(BuildNeuralNetwork());
+		ndSharedPtr<ndBrain> critic(BuildCriticNetwork());
 		ndSharedPtr<ndBrain> referenceCritic(new ndBrain(**critic));
 		ndTrainerDescriptor referenceDescriptor(referenceCritic, m_context, m_parameters.m_miniBatchSize);
 		referenceDescriptor.m_regularizer = m_parameters.m_criticRegularizer;
@@ -775,7 +771,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::CalculateExpectedRewards()
 	m_minibatchNoTerminal->CopyBuffer(criticOutputTerminal, m_parameters.m_miniBatchSize, **m_minibatchOfTransitions);
 
 	// calculate and add entropy regularization to the q value
-	// get the entropy of next next obsevation, 
+	// get the entropy of next obsevation, 
 	// set z = sampledAction(t+1) - mean(t+1) = 0;
 	m_minibatchMean->Set(ndBrainFloat(0.0f));
 	m_minibatchEntropy->CalculateEntropyRegularization(**m_minibatchMean, **m_minibatchSigma, m_parameters.m_entropyTemperature);
@@ -945,6 +941,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 
 	// calculate and subtract regularized entropy gradient 
 	// set z = sampledAction(t) - mean(t) = 0;
+	// but it has disastros results, so don't do it
 	//m_minibatchGaussianDistribution->Set(ndBrainFloat(0.0f));
 	m_minibatchPolicyEntropyGradient->CalculateEntropyRegularizationGradient(**m_minibatchGaussianDistribution, **m_minibatchSigma, m_parameters.m_entropyTemperature, ndInt32(meanOutputSizeInBytes / sizeof(ndReal)));
 	policyMinibatchOutputGradientBuffer->Sub(**m_minibatchPolicyEntropyGradient);
@@ -962,10 +959,7 @@ void ndBrainAgentOffPolicyGradient_Trainer::UpdateSpecialLayers()
 	const ndBrainAgentOffPolicyGradient_Agent::ndTrajectory& trajectory = m_agent->m_trajectory;
 
 	ndBrainTrainer* const policy = *m_policyTrainer;
-	//ndInt32 criticInputSize = policy->GetBrain()->GetInputSize() + policy->GetBrain()->GetOutputSize();
-
 	ndBrainFloatBuffer* const policyMinibatchInputBuffer = policy->GetInputBuffer();
-	//ndBrainFloatBuffer* const policyMinibatchOutputBuffer = policy->GetOuputBuffer();
 
 	ndCopyBufferCommandInfo policyObservation;
 	policyObservation.m_srcStrideInByte = ndInt32(trajectory.GetStride() * sizeof(ndReal));

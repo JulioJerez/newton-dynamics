@@ -214,12 +214,6 @@
 	#define D_CORE_API 
 #endif
 
-#if defined(_MSC_VER)
-	#define D_FORCE_INLINE __forceinline 
-#else
-	#define D_FORCE_INLINE inline
-#endif
-
 typedef float ndReal;
 typedef int8_t ndInt8;
 typedef int16_t ndInt16;
@@ -263,14 +257,6 @@ extern D_CORE_API ndFloat32 ndExp_VS_Fix(ndReal x);
 #define ndAtan(x)		ndFloat32 (atan(x))
 #define ndAtan2(x,y)	ndFloat32 (atan2(x,y))
 #define ndRsqrt(x)		(ndFloat32 (1.0f) / ndSqrt(x))
-
-#if (defined (WIN32) || defined(_WIN32) || defined (_M_ARM) || defined (_M_ARM64))
-	#define ndCheckFloat(x) (1)
-	//#define ndCheckFloat(x) (_finite(x) && !_isnan(x))
-#else
-	//#define ndCheckFloat(x) (isfinite(x) && !isnan(x))
-	#define ndCheckFloat(x) (1)
-#endif
 
 #ifdef D_NEWTON_USE_DOUBLE
 	union ndFloatSign

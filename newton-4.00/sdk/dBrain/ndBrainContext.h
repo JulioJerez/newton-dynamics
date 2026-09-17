@@ -84,6 +84,7 @@ class ndBrainContext : public ndClassAlloc
 	virtual void BrainVectorToDevice(ndBrainFloatBuffer& dst, const ndBrainVector& srcVector) = 0;
 
 	virtual ndBrainFloat Element(const ndBrainFloatBuffer& buffer, ndInt32 index) const = 0;
+	virtual void Abs(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) = 0;
 	virtual void Exp(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) = 0;
 	virtual void Set(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) = 0;
 	virtual void Min(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) = 0;
@@ -91,6 +92,8 @@ class ndBrainContext : public ndClassAlloc
 	virtual void Add(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) = 0;
 	virtual void Sub(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) = 0;
 	virtual void Mul(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) = 0;
+	virtual void Sign(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) = 0;
+	virtual void Sqrt(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) = 0;
 	virtual void Reciprocal(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) = 0;
 	virtual void LessEqual(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) = 0;
 	virtual void GreaterEqual(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) = 0;
@@ -121,9 +124,6 @@ class ndBrainContext : public ndClassAlloc
 	virtual void Sqrt(ndBrainFloatBuffer&, ndInt32) = 0;
 	virtual void InvSqrt(ndBrainFloatBuffer&, ndInt32) = 0;
 	virtual void ReductionSum(ndBrainFloatBuffer&, ndInt32) = 0;
-
-	virtual void Rand(ndBrainIntegerBuffer& randBuffer) = 0;
-	virtual void SetRandSeeds(const ndFixSizeArray<ndUnsigned32, 256>& seed) = 0;
 
 	// learnRate commands
 	virtual void ApplyLeanRateCommands(ndBrainBufferCommand*, ndBrainFloat) = 0;

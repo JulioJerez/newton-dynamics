@@ -215,7 +215,7 @@ ndCommandArray ndBrainLayerActivationLeakyRelu::CreateFeedForwardBufferCommand(
 	else
 	{
 		descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerLeakyReluActivation;
-		command = new ndBrainGpuCommand(descriptor);
+		command = new ndBrainGpuCommand(descriptor, (ndBrainLayer*)this);
 	}
 
 	ndCommandArray commandArray(0);
@@ -248,7 +248,7 @@ ndCommandArray ndBrainLayerActivationLeakyRelu::CreateBackPropagateBufferCommand
 	else
 	{
 		descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerLeakyReluBackPropagate;
-		ndBrainBufferCommand* const command = new ndBrainGpuCommand(descriptor);
+		ndBrainBufferCommand* const command = new ndBrainGpuCommand(descriptor, (ndBrainLayer*)this);
 		commands.PushBack(command);
 	}
 	return commands;

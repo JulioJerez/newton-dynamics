@@ -63,7 +63,7 @@ ndScene::ndScene()
 	,m_lock()
 	,m_rootNode(nullptr)
 	,m_sentinelBody(nullptr)
-	,m_contactNotifyCallback(new ndContactNotify(nullptr))
+	,m_contactNotifyCallback(nullptr)
 	,m_timestep(ndFloat32 (0.0f))
 	,m_lru(D_CONTACT_DELAY_FRAMES)
 	,m_frameNumber(0)
@@ -71,7 +71,8 @@ ndScene::ndScene()
 	,m_forceBalanceSceneCounter(0)
 {
 	m_sentinelBody = new ndBodySentinel;
-	m_contactNotifyCallback->m_scene = this;
+	m_contactNotifyCallback = ndSharedPtr<ndContactNotify>(new ndContactNotify(this));
+	//m_contactNotifyCallback->m_scene = new ndContactNotify(nullptr) this;
 
 	for (ndInt32 i = 0; i < D_MAX_THREADS_COUNT; ++i)
 	{
@@ -110,6 +111,7 @@ ndScene::ndScene(const ndScene& src)
 
 	ndSwap(m_rootNode, stealData->m_rootNode);
 	ndSwap(m_sentinelBody, stealData->m_sentinelBody);
+	ndAssert(0);
 	ndSwap(m_contactNotifyCallback, stealData->m_contactNotifyCallback);
 	m_contactNotifyCallback->m_scene = this;
 
@@ -152,10 +154,7 @@ ndScene::~ndScene()
 {
 	Cleanup();
 	Finish();
-	if (m_contactNotifyCallback)
-	{
-		delete m_contactNotifyCallback;
-	}
+	m_contactNotifyCallback = ndSharedPtr<ndContactNotify>(nullptr);
 	ndFreeListAlloc::Flush();
 }
 
@@ -276,24 +275,15 @@ bool ndScene::RemoveParticle(const ndSharedPtr<ndBody>&)
 	return true;
 }
 
-ndContactNotify* ndScene::GetContactNotify() const
+ndSharedPtr<ndContactNotify> ndScene::GetContactNotify() const
 {
 	return m_contactNotifyCallback;
 }
 
-void ndScene::SetContactNotify(ndContactNotify* const notify)
+void ndScene::SetContactNotify(ndSharedPtr<ndContactNotify> notify)
 {
-	ndAssert(m_contactNotifyCallback);
-	delete m_contactNotifyCallback;
-	
-	if (notify)
-	{
-		m_contactNotifyCallback = notify;
-	}
-	else
-	{
-		m_contactNotifyCallback = new ndContactNotify(nullptr);
-	}
+	ndAssert(notify);
+	m_contactNotifyCallback = notify;
 	m_contactNotifyCallback->m_scene = this;
 }
 
@@ -475,7 +465,7 @@ void ndScene::CalculateJointContacts(ndInt32 threadIndex, ndContact* const conta
 	if (processContacts)
 	{
 		ndContactPoint contactBuffer[D_MAX_CONTATCS];
-		ndContactSolver contactSolver(contact, m_contactNotifyCallback, m_timestep, threadIndex);
+		ndContactSolver contactSolver(contact, *m_contactNotifyCallback, m_timestep, threadIndex);
 		contactSolver.m_separatingVector = contact->m_separatingVector;
 		contactSolver.m_contactBuffer = contactBuffer;
 		contactSolver.m_intersectionTestOnly = body0->m_contactTestOnly | body1->m_contactTestOnly;
@@ -1607,7 +1597,10 @@ void ndScene::CreateNewContacts()
 			ndAssert(ndUnsigned32(body0->m_index) == pair.m_body0);
 			ndAssert(ndUnsigned32(body1->m_index) == pair.m_body1);
 
-			ndContact* const contact = new ndContact;
+			const ndContact* const constructor = m_contactNotifyCallback->GetContactConstructor(body0->GetCollisionShape(), body1->GetCollisionShape());
+			//ndContact* const contact = new ndContact;
+			ndContact* const contact = constructor->Clone();
+
 			contact->SetBodies(body0, body1);
 			contact->AttachToBodies();
 

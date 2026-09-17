@@ -184,12 +184,12 @@ void ndWorld::SetSolverIterations(ndInt32 iterations)
 	m_solverIterations = ndInt32(ndMax(4, iterations));
 }
 
-ndContactNotify* ndWorld::GetContactNotify() const
+ndSharedPtr<ndContactNotify> ndWorld::GetContactNotify() const
 {
 	return m_scene->GetContactNotify();
 }
 
-void ndWorld::SetContactNotify(ndContactNotify* const notify)
+void ndWorld::SetContactNotify(ndSharedPtr<ndContactNotify> notify)
 {
 	m_scene->SetContactNotify(notify);
 }

@@ -135,6 +135,7 @@ bool ndBrainVector::SanityCheck(ndBrainFloat bound) const
 #ifdef _DEBUG
 	for (ndInt64 i = GetCount() - 1; i >= 0; --i)
 	{
+		ndAssert (ndCheckFloat((*this)[i]));
 		ndBrainFloat val = ndAbs((*this)[i]);
 		if (val > bound)
 		{
@@ -182,6 +183,36 @@ void ndBrainVector::Max(const ndBrainVector& a)
 	ndAssert(GetCount() < (1ll << 32));
 	ndAssert(GetCount() == a.GetCount());
 	ndMax(ndInt32(GetCount()), &(*this)[0], &a[0]);
+}
+
+void ndBrainVector::Sign(const ndBrainVector& a)
+{
+	ndAssert(GetCount() < (1ll << 32));
+	ndAssert(GetCount() == a.GetCount());
+	for (ndInt64 i = GetCount() - 1; i >= 0; --i)
+	{
+		(*this)[i] = ndBrainFloat(ndSign(a[i]));
+	}
+}
+
+void ndBrainVector::Abs(const ndBrainVector& a)
+{
+	ndAssert(GetCount() < (1ll << 32));
+	ndAssert(GetCount() == a.GetCount());
+	for (ndInt64 i = GetCount() - 1; i >= 0; --i)
+	{
+		(*this)[i] = ndBrainFloat (ndAbs(a[i]));
+	}
+}
+
+void ndBrainVector::Sqrt(const ndBrainVector& a)
+{
+	ndAssert(GetCount() < (1ll << 32));
+	ndAssert(GetCount() == a.GetCount());
+	for (ndInt64 i = GetCount() - 1; i >= 0; --i)
+	{
+		(*this)[i] = ndBrainFloat (ndSqrt(a[i]));
+	}
 }
 
 void ndBrainVector::LessEqual(const ndBrainVector& a)
@@ -520,7 +551,6 @@ ndBrainFloat ndBrainVector::CalculateEntropyRegularization(const ndBrainVector& 
 		ndBrainFloat z = sample / sigma;
 		entropy += (ndBrainFloat(0.5f) * z * z + ndBrainFloat(ndLog(sigma)));
 	}
-	//return -entropy * regularization;
 	return entropy * regularization;
 }
 

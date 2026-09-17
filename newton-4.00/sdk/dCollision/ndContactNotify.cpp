@@ -21,7 +21,10 @@
 
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"
+#include "ndContact.h"
 #include "ndContactNotify.h"
+
+ndContact ndContactNotify::m_defaultConstructor;
 
 ndMaterial::ndMaterial()
 	:ndContainersFreeListAlloc<ndMaterial>()
@@ -39,12 +42,17 @@ ndMaterial::ndMaterial()
 
 ndContactNotify::ndContactNotify(ndScene* const scene)
 	:ndClassAlloc()
-	, m_scene(scene)
+	,m_scene(scene)
 {
 }
 
 ndContactNotify::~ndContactNotify()
 {
+}
+
+const ndContact* ndContactNotify::GetContactConstructor(const ndShapeInstance&, const ndShapeInstance&) const
+{
+	return &m_defaultConstructor;
 }
 
 ndMaterial* ndContactNotify::GetMaterial(const ndContact* const, const ndShapeInstance&, const ndShapeInstance&) const

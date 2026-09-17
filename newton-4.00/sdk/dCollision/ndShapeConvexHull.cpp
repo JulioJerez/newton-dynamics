@@ -1425,6 +1425,8 @@ class ndShapeConvexHull::ndConvexBox
 		{
 			const ndFloat32 dist = distPool.Pop();
 			const ndConvexBox& box = *stackPool.Pop();
+
+#if 0
 			if (dist > maxProj.GetScalar())
 			{
 				if (box.m_leftBox > 0)
@@ -1469,6 +1471,63 @@ class ndShapeConvexHull::ndConvexBox
 					maxProj = maxProj.GetMax(maxProj.ShiftRight());
 				}
 			}
+
+#else
+			if (dist < maxProj.GetScalar())
+			{
+				break;
+			}
+
+			if (box.m_leftBox > 0)
+			{
+				ndAssert(box.m_rightBox > 0);
+
+				auto InsertNode = [&distPool, &stackPool](const ndConvexBox* const node, ndFloat32 dist)
+				{
+					stackPool.PushBack(node);
+					distPool.PushBack(dist);
+					ndInt32 slotIndex = distPool.GetCount() - 2;
+
+					for (; (slotIndex >= 0) && (distPool[slotIndex + 1] < distPool[slotIndex]); --slotIndex)
+					{
+						ndSwap(stackPool[slotIndex], stackPool[slotIndex + 1]);
+						ndSwap(distPool[slotIndex], distPool[slotIndex + 1]);
+					}
+
+					#ifdef _DEBUG
+					for (ndInt32 i = distPool.GetCount() - 1; i > 0; --i)
+					{
+						ndAssert(distPool[i - 1] <= distPool[i]);
+					}
+					#endif
+				};
+
+				const ndConvexBox& leftBox1 = m_supportTree[box.m_leftBox];
+				const ndConvexBox& rightBox1 = m_supportTree[box.m_rightBox];
+
+				const ndVector leftBoxP(leftBox1.m_box[ix][0], leftBox1.m_box[iy][1], leftBox1.m_box[iz][2], ndFloat32(0.0f));
+				const ndVector rightBoxP(rightBox1.m_box[ix][0], rightBox1.m_box[iy][1], rightBox1.m_box[iz][2], ndFloat32(0.0f));
+
+				const ndFloat32 leftBoxDist = leftBoxP.DotProduct(dir).GetScalar();
+				const ndFloat32 rightBoxDist = rightBoxP.DotProduct(dir).GetScalar();
+				InsertNode(&leftBox1, leftBoxDist);
+				InsertNode(&rightBox1, rightBoxDist);
+			}
+
+			else
+			{
+				for (ndInt32 j = box.m_soaVertexCount - 1; j >= 0; --j)
+				{
+					ndInt32 i = box.m_soaVertexStart + j;
+					ndVector dot(m_soa_x[i] * dirX + m_soa_y[i] * dirY + m_soa_z[i] * dirZ);
+					support = support.Select(m_soa_index[i], dot > maxVertexProjection);
+					maxVertexProjection = maxVertexProjection.GetMax(dot);
+				}
+
+				maxProj = maxProj.GetMax(maxVertexProjection.ShiftRight().ShiftRight());
+				maxProj = maxProj.GetMax(maxProj.ShiftRight());
+			}
+#endif
 		}
 
 		ndVector support1(support.ShiftRight().ShiftRight());

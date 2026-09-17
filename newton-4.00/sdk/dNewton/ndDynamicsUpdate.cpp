@@ -29,6 +29,7 @@
 
 #define D_MAX_BODY_RADIX_BIT		9
 #define D_DEFAULT_BUFFER_SIZE		1024
+#define D_PARALLEL_SKELETONS_CUT	32
 
 ndDynamicsUpdate::ndDynamicsUpdate(ndWorld* const world)
 	:m_velocTol(ndFloat32(1.0e-8f))
@@ -50,7 +51,7 @@ ndDynamicsUpdate::ndDynamicsUpdate(ndWorld* const world)
 	,m_invTimestepRK(ndFloat32(0.0f))
 	,m_solverPasses(0)
 	,m_activeJointCount(0)
-	,m_restingSkeleton(0)
+	,m_activeSkeleton(0)
 	,m_parallelSkeleton(0)
 	,m_unConstrainedBodyCount(0)
 {
@@ -1160,8 +1161,8 @@ void ndDynamicsUpdate::InitSkeletons()
 	ndScene* const scene = m_world->GetScene();
 	ndArray<ndSkeletonContainer*>& activeSkeletons = m_world->m_activeSkeletons;
 
-	m_restingSkeleton = 0;
 	m_parallelSkeleton = 0;
+	m_activeSkeleton = ndInt32(activeSkeletons.GetCount());
 	if (activeSkeletons.GetCount())
 	{
 		for (ndInt32 i = ndInt32(activeSkeletons.GetCount()) - 1; i >= 0; --i)
@@ -1200,31 +1201,34 @@ void ndDynamicsUpdate::InitSkeletons()
 			};
 			ndSort<ndSkeletonContainer*, ndCompareSkeletons>(&activeSkeletons[0], ndInt32(activeSkeletons.GetCount()), nullptr);
 			ndInt32 sum = 0;
+			m_activeSkeleton = 0;
 			for (ndInt32 i = 0; i < ndInt32(activeSkeletons.GetCount()); ++i)
 			{
 				m_skeletonOrder.PushBack(sum);
 				const ndSkeletonContainer* const element = activeSkeletons[i];
 				sum += element->m_isResting ? 0 : element->m_nodeList.GetCount();;
-				m_restingSkeleton += element->m_isResting ? 1 : 0;
+				m_activeSkeleton += element->m_isResting ? 0 : 1;
 			}
 			m_skeletonOrder.PushBack(sum);
 
-			m_parallelSkeleton = m_restingSkeleton;
 			const ndInt32 numbeOfJoints = m_skeletonOrder[m_skeletonOrder.GetCount() - 1];
-			for (ndInt32 i = m_restingSkeleton; i < ndInt32(m_skeletonOrder.GetCount() - 1); ++i)
+			for (ndInt32 i = 0; i < ndInt32(m_skeletonOrder.GetCount() - 1); ++i)
 			{
 				ndSkeletonContainer* const skeleton = activeSkeletons[i];
 				if (!skeleton->m_isResting)
 				{
 					const ndInt32 sizeLeft = numbeOfJoints - m_skeletonOrder[i + 1];
 					const ndInt32 skelSize = skeleton->m_nodeList.GetCount();
-					if ((skelSize >= 60) && (skelSize > sizeLeft))
+					if ((skelSize >= D_PARALLEL_SKELETONS_CUT) && (skelSize > sizeLeft))
 					{
-						ndAssert(0);
 						m_parallelSkeleton ++;
 						ndArray<ndRightHandSide>& rightHandSide = m_rightHandSide;
 						const ndArray<ndLeftHandSide>& leftHandSide = m_leftHandSide;
 						skeleton->ParallelInitMassMatrix(&leftHandSide[0], &rightHandSide[0]);
+					}
+					else
+					{
+						break;
 					}
 				}
 			}
@@ -1243,7 +1247,7 @@ void ndDynamicsUpdate::InitSkeletons()
 			}
 		});
 
-		const ndInt32 skelCount = ndInt32(activeSkeletons.GetCount() - m_parallelSkeleton);
+		const ndInt32 skelCount = ndInt32(m_activeSkeleton - m_parallelSkeleton);
 		if (skelCount)
 		{
 			scene->ParallelExecute(InitSkeletons, skelCount, 1);
@@ -1258,7 +1262,7 @@ void ndDynamicsUpdate::UpdateSkeletons()
 	const ndArray<ndSkeletonContainer*>& activeSkeletons = m_world->m_activeSkeletons;
 
 	ndJacobian* const internalForces = &GetInternalForces()[0];
-	for (ndInt32 i = m_restingSkeleton; i < m_parallelSkeleton; ++i)
+	for (ndInt32 i = 0; i < m_parallelSkeleton; ++i)
 	{
 		ndSkeletonContainer* const skeleton = activeSkeletons[i];
 		if (!skeleton->m_isResting)
@@ -1279,7 +1283,7 @@ void ndDynamicsUpdate::UpdateSkeletons()
 		}
 	});
 
-	const ndInt32 skelCount = ndInt32(activeSkeletons.GetCount() - m_parallelSkeleton);
+	const ndInt32 skelCount = ndInt32(m_activeSkeleton - m_parallelSkeleton);
 	if (skelCount)
 	{
 		scene->ParallelExecute(UpdateSkeletons, skelCount, 1);

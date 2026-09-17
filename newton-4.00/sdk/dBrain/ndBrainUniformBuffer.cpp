@@ -17,6 +17,7 @@
 ndBrainUniformBuffer::ndBrainUniformBuffer(ndBrainContext* const context, ndInt32 sizeInBytes)
 	:ndBrainBuffer(context, sizeInBytes)
 {
+	m_itemSize = sizeof(ndUnsigned32);
 	if (m_context->GetAsCpuContext())
 	{
 		ndAssert(0);
@@ -30,6 +31,7 @@ ndBrainUniformBuffer::ndBrainUniformBuffer(ndBrainContext* const context, ndInt3
 ndBrainUniformBuffer::ndBrainUniformBuffer(ndBrainContext* const context, ndInt32 sizeInBytes, const void* const data)
 	:ndBrainBuffer(context, sizeInBytes)
 {
+	m_itemSize = sizeof(ndUnsigned32);
 	sizeInBytes += (sizeof(ndUnsigned32) - 1) & -ndInt32 (sizeof(ndUnsigned32));
 	if (m_context->GetAsCpuContext())
 	{

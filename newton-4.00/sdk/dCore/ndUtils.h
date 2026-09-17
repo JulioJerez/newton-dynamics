@@ -31,6 +31,14 @@
 // assume this function returns memory aligned to 16 bytes
 #define ndAlloca(type, count) (type*) alloca (sizeof (type) * size_t(count))
 
+#if (defined (WIN32) || defined(_WIN32) || defined (_M_ARM) || defined (_M_ARM64))
+	//#define ndCheckFloat(x) (1)
+	D_CORE_API bool ndCheckFloat(ndFloat64 x);
+#else
+	//#define ndCheckFloat(x) (isfinite(x) && !isnan(x))
+	#define ndCheckFloat(x) (1)
+#endif
+
 inline ndInt32 ndExp2 (ndInt32 x)
 {
 	ndInt32 exp = -1;

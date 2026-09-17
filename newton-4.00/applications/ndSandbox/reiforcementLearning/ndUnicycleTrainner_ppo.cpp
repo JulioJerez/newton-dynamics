@@ -278,7 +278,7 @@ void ndUnicycleTrainingPPO(ndDemoEntityManager* const scene)
 	scene->SetDemoHelp(demoHelper);
 
 	// get the material graph
-	ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
+	ndContactCallback* const callback = (ndContactCallback*)*scene->GetWorld()->GetContactNotify();
 
 	// overload the ground friction
 	// make sure the ground has enough friction

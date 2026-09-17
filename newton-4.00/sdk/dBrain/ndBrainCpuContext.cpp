@@ -24,7 +24,7 @@ class ndBrainAdamUpdateParametersRidge : public ndBrainBufferCommandCpu
 {
 	public:
 	ndBrainAdamUpdateParametersRidge(const ndBrainBufferCommandDesc& desc)
-		:ndBrainBufferCommandCpu(desc)
+		:ndBrainBufferCommandCpu(desc, nullptr)
 		,m_learnRate(ndBrainFloat(1.0e-4f))
 	{
 	}
@@ -82,7 +82,7 @@ class ndBrainAdamBiasCorrectionUpdate : public ndBrainBufferCommandCpu
 {
 	public:
 	ndBrainAdamBiasCorrectionUpdate(const ndBrainBufferCommandDesc& desc)
-		:ndBrainBufferCommandCpu(desc)
+		:ndBrainBufferCommandCpu(desc, nullptr)
 	{
 	}
 
@@ -259,6 +259,27 @@ void ndBrainCpuContext::Exp(ndBrainFloatBuffer& dstData, const ndBrainFloatBuffe
 	ndBrainVector& dst = **dstData.m_buffer;
 	const ndBrainVector& src = **srcData.m_buffer;
 	dst.Exp(src);
+}
+
+void ndBrainCpuContext::Abs(ndBrainFloatBuffer& dstData, const ndBrainFloatBuffer& srcData)
+{
+	ndBrainVector& dst = **dstData.m_buffer;
+	const ndBrainVector& src = **srcData.m_buffer;
+	dst.Abs(src);
+}
+
+void ndBrainCpuContext::Sign(ndBrainFloatBuffer& dstData, const ndBrainFloatBuffer& srcData)
+{
+	ndBrainVector& dst = **dstData.m_buffer;
+	const ndBrainVector& src = **srcData.m_buffer;
+	dst.Sign(src);
+}
+
+void ndBrainCpuContext::Sqrt(ndBrainFloatBuffer& dstData, const ndBrainFloatBuffer& srcData)
+{
+	ndBrainVector& dst = **dstData.m_buffer;
+	const ndBrainVector& src = **srcData.m_buffer;
+	dst.Sqrt(src);
 }
 
 void ndBrainCpuContext::Reciprocal(ndBrainFloatBuffer& dstData, const ndBrainFloatBuffer& srcData)
@@ -577,23 +598,13 @@ void ndBrainCpuContext::ApplyLeanRateCommands(ndBrainBufferCommand* const comman
 	SubmitBufferCommand(command);
 }
 
-void ndBrainCpuContext::Rand(ndBrainIntegerBuffer& randBuffer)
-{
-	ndAssert(0);
-}
-
-void ndBrainCpuContext::SetRandSeeds(const ndFixSizeArray<ndUnsigned32, 256>& seed)
-{
-	ndAssert(0);
-}
-
 void ndBrainCpuContext::AccumulateWeightsAndBiasBuffer(ndInt32 numberOfBuffers, ndInt32 bufferSizeInFloats, ndBrainFloatBuffer& weightsAndBiasGradientBuffer)
 {
 	class ndAccumulateWeigndAndBias : public ndBrainBufferCommandCpu
 	{
 		public:
 		ndAccumulateWeigndAndBias(const ndBrainBufferCommandDesc& desc, ndInt64 elements, ndBrainFloatBuffer& weightsAndBiasGradientBuffer)
-			:ndBrainBufferCommandCpu(desc)
+			:ndBrainBufferCommandCpu(desc, nullptr)
 			,m_weightsAndBiasGradientBuffer(&weightsAndBiasGradientBuffer)
 			,m_elements(elements)
 		{
@@ -633,6 +644,6 @@ void ndBrainCpuContext::AccumulateWeightsAndBiasBuffer(ndInt32 numberOfBuffers, 
 void ndBrainCpuContext::Update(ndBrainContextUpdateCallback* const callback)
 {
 	ndBrainContext::Update(callback);
-	callback->m_owner;
+	callback->m_owner = this;
 	m_threadPool->Update(callback);
 }

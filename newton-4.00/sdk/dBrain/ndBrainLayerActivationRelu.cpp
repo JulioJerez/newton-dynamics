@@ -209,7 +209,7 @@ ndCommandArray ndBrainLayerActivationRelu::CreateFeedForwardBufferCommand(
 	else
 	{
 		descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerReluActivation;
-		command = new ndBrainGpuCommand(descriptor);
+		command = new ndBrainGpuCommand(descriptor, (ndBrainLayer*)this);
 	}
 
 	ndCommandArray commandArray(0);
@@ -242,7 +242,7 @@ ndCommandArray ndBrainLayerActivationRelu::CreateBackPropagateBufferCommand(
 	else
 	{
 		descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerReluBackPropagate;
-		ndBrainBufferCommand* const command = new ndBrainGpuCommand(descriptor);
+		ndBrainBufferCommand* const command = new ndBrainGpuCommand(descriptor, (ndBrainLayer*)this);
 		commands.PushBack(command);
 	}
 	return commands;

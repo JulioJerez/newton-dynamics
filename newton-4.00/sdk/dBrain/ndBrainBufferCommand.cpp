@@ -28,9 +28,10 @@ ndBrainBufferCommandDesc::ndBrainBufferCommandDesc(ndInt32 minibatchSize)
 {
 }
 
-ndBrainBufferCommand::ndBrainBufferCommand(const ndBrainBufferCommandDesc& desc)
+ndBrainBufferCommand::ndBrainBufferCommand(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer)
 	:ndContainersFreeListAlloc<ndBrainBufferCommand>()
 	,m_desc(desc)
+	,m_layer(layer)
 {
 }
 
@@ -48,8 +49,8 @@ const ndBrainBufferCommandDesc& ndBrainBufferCommand::GetDescriptor() const
 	return m_desc;
 }
 
-ndBrainBufferCommandCpu::ndBrainBufferCommandCpu(const ndBrainBufferCommandDesc& desc)
-	:ndBrainBufferCommand(desc)
+ndBrainBufferCommandCpu::ndBrainBufferCommandCpu(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer)
+	:ndBrainBufferCommand(desc, layer)
 {
 }
 

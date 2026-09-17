@@ -53,6 +53,8 @@ class ndContactNotify: public ndClassAlloc
 	public:
 	D_COLLISION_API ndContactNotify(ndScene* const scene);
 	D_COLLISION_API virtual ~ndContactNotify();
+
+	D_COLLISION_API virtual const ndContact* GetContactConstructor(const ndShapeInstance& id0, const ndShapeInstance& id1) const;
 	D_COLLISION_API virtual ndMaterial* GetMaterial(const ndContact* const, const ndShapeInstance&, const ndShapeInstance&) const;
 
 	protected:
@@ -65,6 +67,7 @@ class ndContactNotify: public ndClassAlloc
 
 	private:
 	ndWeakPtr<ndScene> m_scene;
+	static ndContact m_defaultConstructor;
 
 	friend class ndScene;
 	friend class ndContactSolver;

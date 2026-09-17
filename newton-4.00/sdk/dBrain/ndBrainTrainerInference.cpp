@@ -252,7 +252,7 @@ void ndBrainTrainerInference::AddCopyInputCommand(ndList<ndSharedPtr<ndBrainBuff
 		{
 			public:
 			ndCopyInputCommandCpu(const ndBrainBufferCommandDesc& desc)
-				:ndBrainBufferCommandCpu(desc)
+				:ndBrainBufferCommandCpu(desc, nullptr)
 			{
 			}
 
@@ -278,7 +278,7 @@ void ndBrainTrainerInference::AddCopyInputCommand(ndList<ndSharedPtr<ndBrainBuff
 	else
 	{
 		descriptor.m_kernel = descriptor.m_context->GetAsGpuContext()->m_brainCopyInput;
-		ndSharedPtr<ndBrainBufferCommand>command(new ndBrainGpuCommand(descriptor));
+		ndSharedPtr<ndBrainBufferCommand>command(new ndBrainGpuCommand(descriptor, nullptr));
 		commandList.Append(command);
 	}
 }
@@ -316,7 +316,7 @@ void ndBrainTrainerInference::AddCopyOutputCommand(ndList<ndSharedPtr<ndBrainBuf
 		{
 			public:
 			ndCopyOutputCommandCpu(const ndBrainBufferCommandDesc& desc)
-				:ndBrainBufferCommandCpu(desc)
+				:ndBrainBufferCommandCpu(desc, nullptr)
 			{
 			}
 
@@ -343,7 +343,7 @@ void ndBrainTrainerInference::AddCopyOutputCommand(ndList<ndSharedPtr<ndBrainBuf
 	else
 	{
 		descriptor.m_kernel = descriptor.m_context->GetAsGpuContext()->m_brainCopyOutput;
-		ndSharedPtr<ndBrainBufferCommand>command(new ndBrainGpuCommand(descriptor));
+		ndSharedPtr<ndBrainBufferCommand>command(new ndBrainGpuCommand(descriptor, nullptr));
 		commandList.Append(command);
 	}
 }

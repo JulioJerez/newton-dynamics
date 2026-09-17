@@ -33,6 +33,7 @@ ndBrainFloatBuffer::ndBrainFloatBuffer(ndBrainContext* const context, ndInt64 si
 ndBrainFloatBuffer::ndBrainFloatBuffer(ndBrainContext* const context, const ndBrainVector& input)
 	:ndBrainBuffer(context, input.GetCount() * ndInt32(sizeof(ndReal)))
 {
+	m_itemSize = sizeof(ndReal);
 	if (m_context->GetAsCpuContext())
 	{
 		m_buffer = ndSharedPtr<ndBrainVector>(new ndBrainVector());
@@ -46,6 +47,7 @@ ndBrainFloatBuffer::ndBrainFloatBuffer(ndBrainContext* const context, const ndBr
 	:ndBrainBuffer(context, matrix.GetColumns() * matrix.GetRows() * ndInt32(sizeof(ndReal)))
 {
 	ndBrainVector flatArray;
+	m_itemSize = sizeof(ndReal);
 	for (ndInt32 i = 0; i < matrix.GetRows(); i++)
 	{
 		for (ndInt32 j = 0; j < matrix.GetColumns(); j++)
@@ -149,6 +151,21 @@ void ndBrainFloatBuffer::Set(const ndBrainFloatBuffer& buffer)
 void ndBrainFloatBuffer::Exp(const ndBrainFloatBuffer& buffer)
 {
 	m_context->Exp(*this, buffer);
+}
+
+void ndBrainFloatBuffer::Abs(const ndBrainFloatBuffer& buffer)
+{
+	m_context->Abs(*this, buffer);
+}
+
+void ndBrainFloatBuffer::Sign(const ndBrainFloatBuffer& buffer)
+{
+	m_context->Sign(*this, buffer);
+}
+
+void ndBrainFloatBuffer::Sqrt(const ndBrainFloatBuffer& buffer)
+{
+	m_context->Sqrt(*this, buffer);
 }
 
 void ndBrainFloatBuffer::Reciprocal(const ndBrainFloatBuffer& buffer)

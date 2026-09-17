@@ -17,6 +17,7 @@
 ndBrainBuffer::ndBrainBuffer(const ndBrainBuffer& src)
 	:ndContainersFreeListAlloc<ndBrainBuffer>()
 	,m_context(src.m_context)
+	,m_itemSize(src.m_itemSize)
 	,m_sizeInBytes(src.m_sizeInBytes)
 {
 	if (m_context->GetAsGpuContext())
@@ -28,6 +29,7 @@ ndBrainBuffer::ndBrainBuffer(const ndBrainBuffer& src)
 ndBrainBuffer::ndBrainBuffer(ndBrainContext* const context, ndInt64 sizeInByte)
 	:ndContainersFreeListAlloc<ndBrainBuffer>()
 	,m_context(context)
+	,m_itemSize(1)
 	,m_sizeInBytes(size_t(sizeInByte))
 {
 	if (m_context->GetAsGpuContext())
@@ -43,6 +45,12 @@ ndBrainBuffer::~ndBrainBuffer()
 size_t ndBrainBuffer::SizeInBytes() const
 { 
 	return m_sizeInBytes; 
+}
+
+size_t ndBrainBuffer::SizeInItems() const
+{
+	ndAssert(m_itemSize > 1);
+	return SizeInBytes() / m_itemSize;
 }
 
 ndBrainGpuBuffer* ndBrainBuffer::GetGpuBuffer()

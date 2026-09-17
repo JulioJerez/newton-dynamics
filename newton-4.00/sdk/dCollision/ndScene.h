@@ -89,8 +89,8 @@ class ndScene : public ndThreadPool
 	D_COLLISION_API virtual void Cleanup();
 	D_COLLISION_API virtual void PrepareCleanup();
 
-	D_COLLISION_API ndContactNotify* GetContactNotify() const;
-	D_COLLISION_API void SetContactNotify(ndContactNotify* const notify);
+	D_COLLISION_API ndSharedPtr<ndContactNotify> GetContactNotify() const;
+	D_COLLISION_API void SetContactNotify(ndSharedPtr<ndContactNotify> notify);
 
 	D_COLLISION_API virtual void DebugScene(ndSceneTreeNotiFy* const notify);
 
@@ -170,7 +170,8 @@ class ndScene : public ndThreadPool
 	ndSpinLock m_lock;
 	ndBvhNode* m_rootNode;
 	ndBodyKinematic* m_sentinelBody;
-	ndContactNotify* m_contactNotifyCallback;
+	//ndContactNotify* m_contactNotifyCallback;
+	ndSharedPtr<ndContactNotify> m_contactNotifyCallback;
 	
 	ndFloat32 m_timestep;
 	ndUnsigned32 m_lru;

@@ -122,6 +122,7 @@ namespace ndCartpoleTrainer_ppo
 			ndBrainAgentOnPolicyGradient_Trainer::HyperParameters hyperParameters;
 			
 			hyperParameters.m_useGpuBackend = false;
+			//hyperParameters.m_useGpuBackend = true;
 			hyperParameters.m_maxTrajectorySteps = 2048;
 			hyperParameters.m_batchTrajectoryCount = 1000;
 			hyperParameters.m_hiddenLayersNumberOfNeurons = 64;
@@ -270,7 +271,7 @@ void ndCartpoleTrainingPPO(ndDemoEntityManager* const scene)
 
 	// create a material that make the objects in training not collsionnle
 	TrainMaterial material;
-	ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
+	ndContactCallback* const callback = (ndContactCallback*)*scene->GetWorld()->GetContactNotify();
 	callback->RegisterMaterial(material, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_modelPart);
 
 	//load the mesh so that is can be re used

@@ -116,8 +116,8 @@ class ndWorld: public ndClassAlloc
 	D_NEWTON_API ndUnsigned32 GetSubFrameNumber() const;
 	D_NEWTON_API ndFloat32 GetAverageUpdateTime() const;
 
-	D_NEWTON_API ndContactNotify* GetContactNotify() const;
-	D_NEWTON_API void SetContactNotify(ndContactNotify* const notify);
+	D_NEWTON_API ndSharedPtr<ndContactNotify> GetContactNotify() const;
+	D_NEWTON_API void SetContactNotify(ndSharedPtr<ndContactNotify> notify);
 
 	D_NEWTON_API void DebugScene(ndSceneTreeNotiFy* const notify);
 
