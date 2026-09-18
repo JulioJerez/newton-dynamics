@@ -79,7 +79,7 @@ class ndBrainLayerLinear : public ndBrainLayer
 		m_biasGradientsPass,
 		m_inputGradientsPass,
 		m_weightGradientsPass,
-		m_tiledGradientsDebugPass,
+		m_tiledInputGradientsPass,
 		m_dimFactor = 1 << 4,
 	};
 
