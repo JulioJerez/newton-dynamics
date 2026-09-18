@@ -706,20 +706,32 @@ ndCommandArray ndBrainLayerLinear::CreateFeedForwardBufferCommand(
 	}
 	else
 	{
-		ndInt32 width;
-		ndInt32 height;
-		CalculateRoundedSize(width, height);
-		ndAssert((miniBatchSize & (ND_GPU_TILED_MATRIX_ROWS - 1)) == 0);
+		{
 
-		ndInt32 dim_M = height / ND_GPU_TILED_MATRIX_ROWS;
-		ndInt32 dim_N = miniBatchSize / ND_GPU_TILED_MATRIX_ROWS;
+			ndInt32 rows = GetOutputSize();
+			ndInt32 columns = GetInputSize();
 
-		ndBrainBufferCommandDesc descriptor(MakeFeedForwardDesctriptor(
-			owner, context, info, dim_M * dim_N, 0,
-			inputOutputData, weightsAndBias));
-		descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerMatrixMatrixMultiply;
-		ndBrainBufferCommand* const command = new ndBrainGpuCommand(descriptor, (ndBrainLayer*)this);
-		commandArray.PushBack(command);
+			CalculateRoundedSize(columns, rows);
+			ndAssert((miniBatchSize & (ND_GPU_TILED_MATRIX_ROWS - 1)) == 0);
+
+			ndInt32 rowDim = rows / ND_GPU_TILED_MATRIX_ROWS;
+			ndInt32 columnDim = miniBatchSize / ND_GPU_TILED_MATRIX_ROWS;
+
+			ndBrainBufferCommandDesc descriptor(MakeFeedForwardDesctriptor(
+				owner, context, info, columnDim * rowDim, columnDim, inputOutputData, weightsAndBias));
+			descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerMatrixMatrixMultiply;
+			ndBrainBufferCommand* const command = new ndBrainGpuCommand(descriptor, (ndBrainLayer*)this);
+			commandArray.PushBack(command);
+		}
+
+		{
+			// add matrix bias
+			ndBrainBufferCommandDesc descriptor(MakeFeedForwardDesctriptor(
+				owner, context, info, miniBatchSize, 0, inputOutputData, weightsAndBias));
+			descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerMatrixMatrixAddBias;
+			ndBrainBufferCommand* const command = new ndBrainLayerFeedForwardCpuCommand_TiledMatrixAddBias(descriptor, (ndBrainLayer*)this);
+			commandArray.PushBack(command);
+		}
 	}
 
 	return commandArray;
@@ -907,8 +919,8 @@ void ndBrainLayerLinear::BackPropagateWeightsGradients(const ndBrainLayerBackPro
 	const ndInt32 inputSize = info.m_inputSize;
 	const ndInt32 outputSize = info.m_outputSize;
 	const ndInt32 inputOutputSize = info.m_inputOutputSize;
-
 	const ndInt64 inputOutputStartOffset = info.m_inputOutputStartOffset;
+
 	const ndInt64 srcBase = miniBatchIndex * ndInt64(inputOutputSize) + inputOutputStartOffset;
 
 	ndInt32 width;
