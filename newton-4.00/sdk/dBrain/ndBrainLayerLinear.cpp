@@ -921,27 +921,40 @@ void ndBrainLayerLinear::BackPropagateWeightsGradients(const ndBrainLayerBackPro
 	const ndInt32 inputOutputSize = info.m_inputOutputSize;
 	const ndInt64 inputOutputStartOffset = info.m_inputOutputStartOffset;
 
-	const ndInt64 srcBase = miniBatchIndex * ndInt64(inputOutputSize) + inputOutputStartOffset;
-
 	ndInt32 width;
 	ndInt32 height;
 	CalculateRoundedSize(width, height);
 	const ndInt32 matrixSize = trainer->RoundOffOffset(width * height);
 
-	ndAssert(inputOutputBuffer.BounceCheck(srcBase + inputSize - 1));
-	ndAssert(weightAndBiasGradients.BounceCheck(info.m_parametersStartOffset + matrixSize + info.m_parametersBatchSize * miniBatchIndex + outputSize - 1));
+	const ndInt32 dimK = info.m_matrixDimensionK / m_dimFactor;
+	const ndInt32 matrixBlock = miniBatchIndex / dimK;
+	const ndInt32 rowBlock = miniBatchIndex - dimK * matrixBlock;
+
+	const ndInt32 matrixOffsetStart = ndInt32(info.m_parametersStartOffset + info.m_parametersBatchSize * matrixBlock);
+	const ndInt64 srcBase = matrixBlock * ndInt64(inputOutputSize) + inputOutputStartOffset;
+
 	const ndBrainMemVector inputData(&inputOutputBuffer[srcBase], inputSize);
-	const ndBrainMemVector biasRowGradients(&weightAndBiasGradients[info.m_parametersStartOffset + matrixSize + info.m_parametersBatchSize * miniBatchIndex], outputSize);
-	const ndInt32 matrixOffsetStart = ndInt32(info.m_parametersStartOffset + info.m_parametersBatchSize * miniBatchIndex);
-	for (ndInt32 i = 0; i < outputSize; ++i)
-	{
-		const ndBrainFloat scale = biasRowGradients[i];
-		const ndInt32 matrixOffset = matrixOffsetStart + width * i;
-		ndAssert(weightAndBiasGradients.BounceCheck(matrixOffset + inputSize - 1));
-		ndBrainMemVector weightRowGradients(&weightAndBiasGradients[matrixOffset], inputSize);
-		weightRowGradients.ScaleSet(inputData, scale);
-		ndAssert(weightRowGradients.SanityCheck());
-	}
+	const ndBrainMemVector biasRowGradients(&weightAndBiasGradients[info.m_parametersStartOffset + matrixSize + info.m_parametersBatchSize * matrixBlock], outputSize);
+
+	ndAssert(inputOutputBuffer.BounceCheck(srcBase + inputSize - 1));
+	ndAssert(weightAndBiasGradients.BounceCheck(info.m_parametersStartOffset + matrixSize + info.m_parametersBatchSize * matrixBlock + outputSize - 1));
+
+	//for (ndInt32 i = 0; i < outputSize; ++i)
+	//{
+	//	const ndBrainFloat scale = biasRowGradients[i];
+	//	const ndInt32 matrixOffset = matrixOffsetStart + width * i;
+	//	ndAssert(weightAndBiasGradients.BounceCheck(matrixOffset + inputSize - 1));
+	//	ndBrainMemVector weightRowGradients(&weightAndBiasGradients[matrixOffset], inputSize);
+	//	weightRowGradients.ScaleSet(inputData, scale);
+	//	ndAssert(weightRowGradients.SanityCheck());
+	//}
+
+	const ndBrainFloat scale = biasRowGradients[rowBlock];
+	const ndInt32 matrixOffset = matrixOffsetStart + width * rowBlock;
+	ndAssert(weightAndBiasGradients.BounceCheck(matrixOffset + inputSize - 1));
+	ndBrainMemVector weightRowGradients(&weightAndBiasGradients[matrixOffset], inputSize);
+	weightRowGradients.ScaleSet(inputData, scale);
+	ndAssert(weightRowGradients.SanityCheck());
 }
 
 void ndBrainLayerLinear::BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const
@@ -1037,8 +1050,9 @@ ndCommandArray ndBrainLayerLinear::CreateBackPropagateBufferCommand(
 
 		{
 			// calculate the weights gradient
+			ndInt32 rows = ndInt32 (m_weights.GetCount());
 			ndBrainBufferCommandDesc descriptor(MakeBackpropagateDesctriptor(
-				owner, context, info, miniBatchSize, m_weightGradientsPass,
+				owner, context, info, miniBatchSize * rows, rows * m_dimFactor + m_weightGradientsPass,
 				inputOutputData, weightsAndBias,
 				inputOutputGradients, weightsAndBiasGradients));
 			ndBrainBufferCommand* const command = new ndBrainLayerBackPropagateCpuCommand(descriptor, (ndBrainLayer*)this);
@@ -1079,12 +1093,13 @@ ndCommandArray ndBrainLayerLinear::CreateBackPropagateBufferCommand(
 		{
 			// add the weight gradient kernel;
 			ndCommandSharedInfo weightsInfo(info);
-			ndBrainBufferCommandDesc weightsDescriptor(
-				MakeBackpropagateDesctriptor(
-					owner, context, weightsInfo, miniBatchSize * info.m_outputSize, miniBatchSize,
-					inputOutputData, weightsAndBias,
-					inputOutputGradients, weightsAndBiasGradients));
+			ndInt32 rows = ndInt32(m_weights.GetCount());
+			ndBrainBufferCommandDesc weightsDescriptor(MakeBackpropagateDesctriptor(
+				owner, context, weightsInfo, miniBatchSize * rows, rows * m_dimFactor + m_weightGradientsPass,
+				inputOutputData, weightsAndBias,
+				inputOutputGradients, weightsAndBiasGradients));
 			weightsDescriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerMatrixBackPropagateWeightGradients;
+
 			ndBrainBufferCommand* const weightsCommand = new ndBrainGpuCommand(weightsDescriptor, (ndBrainLayer*)this);
 			commands.PushBack(weightsCommand);
 		}
