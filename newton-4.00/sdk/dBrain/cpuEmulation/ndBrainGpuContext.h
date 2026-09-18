@@ -112,8 +112,8 @@ class ndBrainGpuContext : public ndBrainContext
 	ndSharedPtr<ndBrainKernel> m_brainLayerSoftmaxActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerDropOutActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerLeakyReluActivation;
+	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixAddBias;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiply;
-	//ndSharedPtr<ndBrainKernel> m_brainLayerPolicyGradientActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationAddInputActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationLoadInputActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationNormalizeInputActivation;
