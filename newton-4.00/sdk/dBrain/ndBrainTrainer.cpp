@@ -264,10 +264,10 @@ void ndBrainTrainer::AddLayersGradientCommands()
 
 void ndBrainTrainer::AddWeighAndBiasSumCommand()
 {
-	class ndAccumulateWeigndAndBias : public ndBrainBufferCommandCpu
+	class ndAccumulateWeigndAndBiasGradients: public ndBrainBufferCommandCpu
 	{
 		public:
-		ndAccumulateWeigndAndBias(const ndBrainBufferCommandDesc& desc)
+		ndAccumulateWeigndAndBiasGradients(const ndBrainBufferCommandDesc& desc)
 			:ndBrainBufferCommandCpu(desc, nullptr)
 			,m_info()
 		{
@@ -318,12 +318,14 @@ void ndBrainTrainer::AddWeighAndBiasSumCommand()
 
 		if (descriptor.m_context->GetAsCpuContext())
 		{
-			ndSharedPtr<ndBrainBufferCommand> command(new ndAccumulateWeigndAndBias (descriptor));
+			ndSharedPtr<ndBrainBufferCommand> command(new ndAccumulateWeigndAndBiasGradients(descriptor));
 			m_weightAndBiasGradientsSumCommands.Append(command);
 		}
 		else
 		{
-			ndAssert(0);
+			descriptor.m_kernel = descriptor.m_context->GetAsGpuContext()->m_accumulateWeigndAndBiasGradiens;
+			ndSharedPtr<ndBrainBufferCommand>command(new ndBrainGpuCommand(descriptor, nullptr));
+			m_backPropagateCommands.Append(command);
 		}
 		bufferSize = bufferSize / 2;
 	}
