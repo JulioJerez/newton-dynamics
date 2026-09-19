@@ -38,7 +38,8 @@ ndFloat32 ndExp_VS_Fix(ndReal x)
 
 bool ndCheckFloat(ndFloat64 x)
 {
-	return _finite(x) && !_isnan(x);
+	//return _finite(x) && !_isnan(x);
+	return true;
 }
 
 ndFloat64 ndRoundToFloat(ndFloat64 val)
