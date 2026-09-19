@@ -41,6 +41,8 @@ ndBrainTrainer::ndBrainTrainer(const ndTrainerDescriptor& descriptor, ndSharedPt
 	,m_weightAndBiasGradientsBuffer()
 	,m_miniBatchInputGradientBuffer()
 	,m_miniBatchOutputGradientBuffer()
+	,m_backPropagateCommands()
+	,m_weightAndBiasGradientsSumCommands()
 {
 	Initialize();
 }
@@ -87,20 +89,6 @@ void ndBrainTrainer::Initialize()
 	buffer.Set(ndReal(0.0f));
 	m_inputOutputGradientsBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_descriptor.m_context, buffer));
 	
-	//ndInt32 partialSum = 0;
-	//for (ndInt32 i = 0; i < m_descriptor.m_brain->GetCount(); ++i)
-	//{	
-	//	const ndBrainLayer* const layer = (**m_descriptor.m_brain)[0];
-	//	if (partialSum < (layer->GetOutputSize() + 1024))
-	//	{
-	//		ndInt32 outSize = layer->GetOutputSize();
-	//		partialSum = RoundOffOffset(outSize);
-	//	}
-	//}
-	//buffer.SetCount(ndInt64(m_descriptor.m_minibatchSize) * partialSum);
-	//buffer.Set(ndReal(0.0f));
-	//m_biasPartialSumGradientsCacheBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_descriptor.m_context, buffer));
-	
 	buffer.SetCount(ndInt64(m_descriptor.m_minibatchSize * m_weightAndBiasBuffer->GetCount()));
 	buffer.Set(ndReal(0.0f));
 	m_weightAndBiasGradientsBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_descriptor.m_context, buffer));
@@ -117,6 +105,7 @@ void ndBrainTrainer::Initialize()
 	AddLayersGradientCommands();
 	AddCopyInputGradientCommand();
 	AddOptimizerGradientCommand();
+	AddWeighAndBiasSumCommand();
 }
 
 void ndBrainTrainer::AddCopyOutputGradientCommand()
@@ -159,7 +148,7 @@ void ndBrainTrainer::AddCopyOutputGradientCommand()
 			virtual void Execute(ndInt32 miniBatchIndex) override
 			{
 				const ndCommandSharedInfo& info = m_desc.m_info;
-				ndBrainTrainer* const owner = (ndBrainTrainer*)m_desc.m_owner;
+				ndBrainTrainer* const owner = (ndBrainTrainer*)*m_desc.m_owner;
 
 				ndBrainFloat* const dstPtr = (ndBrainFloat*)owner->m_inputOutputGradientsBuffer->GetCpuPtr();
 				const ndBrainFloat* const srcPtr = (ndBrainFloat*)owner->m_miniBatchOutputGradientBuffer->GetCpuPtr();
@@ -222,7 +211,7 @@ void ndBrainTrainer::AddCopyInputGradientCommand()
 			virtual void Execute(ndInt32 miniBatchIndex) override
 			{
 				const ndCommandSharedInfo& info = m_desc.m_info;
-				ndBrainTrainer* const owner = (ndBrainTrainer*)m_desc.m_owner;
+				ndBrainTrainer* const owner = (ndBrainTrainer*)*m_desc.m_owner;
 
 				ndBrainFloat* const dstPtr = (ndBrainFloat*)owner->m_miniBatchInputGradientBuffer->GetCpuPtr();
 				const ndBrainFloat* const srcPtr = (ndBrainFloat*)owner->m_inputOutputGradientsBuffer->GetCpuPtr();
@@ -273,6 +262,73 @@ void ndBrainTrainer::AddLayersGradientCommands()
 	}
 }
 
+void ndBrainTrainer::AddWeighAndBiasSumCommand()
+{
+	class ndAccumulateWeigndAndBias : public ndBrainBufferCommandCpu
+	{
+		public:
+		ndAccumulateWeigndAndBias(const ndBrainBufferCommandDesc& desc)
+			:ndBrainBufferCommandCpu(desc, nullptr)
+			,m_info()
+		{
+			const ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)desc[0];
+			m_info = *(ndCommandSharedInfo*)buffer0->GetCpuPtr();
+			m_buffer = (ndBrainFloatBuffer*)desc[1];
+		}
+
+		virtual void Execute(ndInt32 groupId) override
+		{
+			ndInt32 start = groupId * m_info.m_matrixDimensionK;
+			ndInt32 count = ndInt32(((start + m_info.m_matrixDimensionK) < m_info.m_inputOutputSize) ? m_info.m_matrixDimensionK : m_info.m_inputOutputSize - start);
+
+			ndBrainMemVector buffer((ndBrainFloat*)m_buffer->GetCpuPtr(), ndInt32(m_buffer->SizeInItems()));
+			ndBrainMemVector dst(&buffer[start], count);
+			const ndBrainMemVector src(&buffer[start + m_info.m_inputOutputSize], count);
+			dst.Add(src);
+			dst.SanityCheck();
+		}
+
+		ndCommandSharedInfo m_info;
+		ndBrainFloatBuffer* m_buffer;
+	};
+
+	const ndInt32 size = m_descriptor.m_minibatchSize / 2;
+	ndInt64 bufferSize = ndInt64(m_weightAndBiasGradientsBuffer->SizeInItems()) / 2;
+
+	ndBrainFloatBuffer* const weightAndBiasGradientsBuffer = *m_weightAndBiasGradientsBuffer;
+	for (ndInt32 i = size; i > 0; i >>= 1)
+	{
+		ndInt32 numberOfGroups = ndInt32(bufferSize + m_descriptor.m_minibatchSize  - 1) / m_descriptor.m_minibatchSize;
+		ndBrainBufferCommandDesc descriptor(numberOfGroups);
+		ndCommandSharedInfo data(descriptor.m_info);
+
+		descriptor.m_owner = this;
+		descriptor.m_context = *m_descriptor.m_context;
+		descriptor.m_id = ndBrainContext::m_outpuId;
+		descriptor.m_info = data;
+
+		data.m_inputOutputSize = ndInt32(bufferSize);
+		data.m_matrixDimensionK = m_descriptor.m_minibatchSize;
+		ndSharedPtr<ndBrainUniformBuffer> uniformbuffer(new ndBrainUniformBuffer(*m_descriptor.m_context, sizeof(ndCommandSharedInfo), &data));
+		descriptor.m_uniformBuffer = uniformbuffer;
+
+		descriptor.m_uniformBuffer = uniformbuffer;
+		descriptor.PushBack(*uniformbuffer);
+		descriptor.PushBack(weightAndBiasGradientsBuffer);
+
+		if (descriptor.m_context->GetAsCpuContext())
+		{
+			ndSharedPtr<ndBrainBufferCommand> command(new ndAccumulateWeigndAndBias (descriptor));
+			m_weightAndBiasGradientsSumCommands.Append(command);
+		}
+		else
+		{
+			ndAssert(0);
+		}
+		bufferSize = bufferSize / 2;
+	}
+}
+
 void ndBrainTrainer::AddOptimizerGradientCommand()
 {
 	m_optimizer->Init(m_descriptor.m_minibatchSize, **m_weightAndBiasBuffer, **m_weightAndBiasGradientsBuffer);
@@ -285,7 +341,12 @@ void ndBrainTrainer::ApplyLearnRate(ndBrainFloat learnRate)
 
 void ndBrainTrainer::AccumulateWeightAndBiasGradients()
 {
-	m_descriptor.m_context->AccumulateWeightsAndBiasBuffer(m_descriptor.m_minibatchSize, ndInt32 (m_weightAndBiasBuffer->GetCount()), **m_weightAndBiasGradientsBuffer);
+	ndBrainContext* const context = *m_descriptor.m_context;
+	for (ndList<ndSharedPtr<ndBrainBufferCommand>>::ndNode* node = m_weightAndBiasGradientsSumCommands.GetFirst(); node; node = node->GetNext())
+	{
+		ndSharedPtr<ndBrainBufferCommand>& command = node->GetInfo();
+		context->SubmitBufferCommand(*command);
+	}
 }
 
 void ndBrainTrainer::BackPropagate()

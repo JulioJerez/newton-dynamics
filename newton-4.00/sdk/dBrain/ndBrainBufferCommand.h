@@ -62,8 +62,8 @@ class ndBrainBufferCommandDesc : public ndFixSizeArray<ndBrainBuffer*, 16>
 	public:
 	ndBrainBufferCommandDesc(ndInt32 minibatchSize);
 
-	ndBrainContext* m_context;
-	ndBrainTrainerInference* m_owner;
+	ndWeakPtr<ndBrainContext> m_context;
+	ndWeakPtr<ndBrainTrainerInference> m_owner;
 	ndCommandSharedInfo m_info;
 	ndSharedPtr<ndBrainKernel> m_kernel;
 	ndSharedPtr<ndBrainUniformBuffer> m_uniformBuffer;

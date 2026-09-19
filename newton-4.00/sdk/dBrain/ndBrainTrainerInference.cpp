@@ -259,7 +259,7 @@ void ndBrainTrainerInference::AddCopyInputCommand(ndList<ndSharedPtr<ndBrainBuff
 			virtual void Execute(ndInt32 groupId) override
 			{
 				const ndCommandSharedInfo& info = m_desc.m_info;
-				ndBrainTrainerInference* const owner = m_desc.m_owner;
+				ndBrainTrainerInference* const owner = *m_desc.m_owner;
 
 				ndBrainFloat* const dstPtr = (ndBrainFloat*)owner->m_inputOutputBuffer->GetCpuPtr();
 				const ndBrainFloat* const srcPtr = (ndBrainFloat*)owner->m_miniBatchInputBuffer->GetCpuPtr();
@@ -323,7 +323,7 @@ void ndBrainTrainerInference::AddCopyOutputCommand(ndList<ndSharedPtr<ndBrainBuf
 			virtual void Execute(ndInt32 groupId) override
 			{
 				const ndCommandSharedInfo& info = m_desc.m_info;
-				ndBrainTrainerInference* const owner = m_desc.m_owner;
+				ndBrainTrainerInference* const owner = *m_desc.m_owner;
 
 				ndBrainFloat* const dstPtr = (ndBrainFloat*)owner->m_miniBatchOutputBuffer->GetCpuPtr();
 				const ndBrainFloat* const srcPtr = (ndBrainFloat*)owner->m_inputOutputBuffer->GetCpuPtr();

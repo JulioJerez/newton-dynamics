@@ -127,7 +127,7 @@ void ndBrainLayerActivationSoftmax::FeedForward(const ndBrainLayerFeedForwardCpu
 {
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
-	ndBrainTrainerInference* const trainer = desc.m_owner;
+	ndBrainTrainerInference* const trainer = (ndBrainTrainerInference*)*desc.m_owner;
 
 	const ndBrainMemVector inputOutputBuffer((ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr(), ndInt32(trainer->GetHiddenLayerBuffer()->GetCount()));
 
