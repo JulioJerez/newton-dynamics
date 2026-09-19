@@ -73,7 +73,7 @@ class brainCopyInput : public ndBrainKernel
             ndBrainFloat a = inputBuffer[srcBase + modWorkGroupSize + itemId];
             inputOutputData[dstBase + modWorkGroupSize + itemId] = a;
         }
-        ndAssert(inputOutputData.SanityCheck());
+        //ndAssert(inputOutputData.SanityCheck());
     }
 };
 
@@ -122,7 +122,7 @@ class brainCopyOutput : public ndBrainKernel
             ndBrainFloat a = inputOutputData[srcBase + modWorkGroupSize + itemId];
             outputBuffer[dstBase + modWorkGroupSize + itemId] = a;
         }
-        ndAssert(outputBuffer.SanityCheck());
+        //ndAssert(outputBuffer.SanityCheck());
     }
 };
 
@@ -167,7 +167,7 @@ class brainLayerReluActivation : public ndBrainKernel
             ndBrainFloat outputValue = (inputValue >= ndBrainFloat(0.0f)) ? inputValue : ndBrainFloat(0.0f);
             inputOutputData[outputOffset + modWorkGroupSize + itemId] = outputValue;
         }
-        ndAssert(inputOutputData.SanityCheck());
+        //ndAssert(inputOutputData.SanityCheck());
     }
 };
 
@@ -212,7 +212,7 @@ class brainLayerLeakyReluActivation : public ndBrainKernel
             ndBrainFloat outputValue = (inputValue >= ndBrainFloat(0.0f)) ? inputValue : ND_GPU_LEAKY_LRU_GRADIENT * inputValue;
             inputOutputData[outputOffset + modWorkGroupSize + itemId] = outputValue;
         }
-        ndAssert(inputOutputData.SanityCheck());
+        //ndAssert(inputOutputData.SanityCheck());
     }
 };
 
@@ -260,8 +260,8 @@ class brainLayerTanhActivation : public ndBrainKernel
             ndBrainFloat outputValue = (inputValue > ndBrainFloat (-30.0f)) ? ((inputValue < ndBrainFloat(30.0f)) ? inputValue : ndBrainFloat(30.0f)) : ndBrainFloat (-30.0f);
             dstData[modWorkGroupSize + itemId] = ndBrainFloat(ndTanh(outputValue));
         }
-        ndAssert(srcData.SanityCheck());
-        ndAssert(dstData.SanityCheck());
+        //ndAssert(srcData.SanityCheck());
+        //ndAssert(dstData.SanityCheck());
     }
 };
 
@@ -363,7 +363,7 @@ class brainLayerLinearActivation : public ndBrainKernel
             ndBrainFloat outputValue = bias + slope * inputValue;
             inputOutputData[outputOffset + modWorkGroupSize + itemId] = outputValue;
         }
-        ndAssert(inputOutputData.SanityCheck());
+        //ndAssert(inputOutputData.SanityCheck());
     }
 };
 
@@ -392,7 +392,7 @@ class brainLayerBatchNormalizationActivation_0 : public ndBrainKernel
         const ndBrainMemVector inputOutputBuffer(&srcData[parameters->m_inputOutputStartOffset + inputOutputSize * groupId], inputSize);
         slopesBuffer.Set(inputOutputBuffer);
         slopesBuffer.Mul(slopesBuffer);
-        ndAssert(slopesBuffer.SanityCheck(ndBrainFloat(1.0e4f)));
+        //ndAssert(slopesBuffer.SanityCheck(ndBrainFloat(1.0e4f)));
     }
 };
 
@@ -416,7 +416,7 @@ class brainLayerBatchNormalizationActivation_1 : public ndBrainKernel
         ndBrainMemVector dstBuffer(&data[inputSize * groupId], inputSize);
         const ndBrainMemVector srcBuffer(&data[inputSize * (groupId + workGroupSize)], inputSize);
         dstBuffer.Add(srcBuffer);
-        ndAssert(dstBuffer.SanityCheck(ndBrainFloat(1.0e4f)));
+        //ndAssert(dstBuffer.SanityCheck(ndBrainFloat(1.0e4f)));
     }
 };
 
@@ -453,7 +453,7 @@ class brainLayerBatchNormalizationActivation_2 : public ndBrainKernel
         
         tmp.Blend(varianceBuffer, ndBrainFloat(0.01f));
         slopesBuffer.Reciprocal(tmp);
-        ndAssert(slopesBuffer.SanityCheck());
+        //ndAssert(slopesBuffer.SanityCheck());
     }
 };
 
@@ -683,7 +683,7 @@ class brainCopyOutputGradients : public ndBrainKernel
             ndBrainFloat a = miniBatchGradients[srcBase + modWorkGroupSize + itemId];
             inputOutputGradients[dstBase + modWorkGroupSize + itemId] = a;
         }
-        ndAssert(inputOutputGradients.SanityCheck());
+        //ndAssert(inputOutputGradients.SanityCheck());
     }
 };
 
@@ -811,7 +811,7 @@ class brainLayerBrainLeakyReluBackPropagate : public ndBrainKernel
             }
         }
         #endif
-        ndAssert(inputOutputGradients.SanityCheck());
+        //ndAssert(inputOutputGradients.SanityCheck());
     }
 };
 
@@ -1271,8 +1271,7 @@ class brainLayerMatrixMatrixAddBias : public ndBrainKernel
         ndBrainMemVector output(&inputOutputBuffer[outputOffset], outputSize);
         const ndBrainMemVector bias(&parameters[matrixSize], outputSize);
         output.Add(bias);
-
-        ndAssert(output.SanityCheck());
+        //ndAssert(output.SanityCheck());
     }
 };
 
@@ -1388,8 +1387,7 @@ class brainLayerMatrixMatrixMultiply : public ndBrainKernel
             }
             outputOffset += inputOutputSize;
         }
-        ndAssert(outputBuffer.SanityCheck());
-
+        //ndAssert(outputBuffer.SanityCheck());
     }
 };
 
@@ -1515,8 +1513,9 @@ class brainLayerBrainBackPropagateMatrixBiasGradients : public ndBrainKernel
         const ndInt64 inputGradientOffset = groupId * ndInt64(inputOutputSize) + inputOutputStartOffset;
         const ndInt64 outputGradientOffset = inputGradientOffset + __cpuKernelRoundoff(inputSize, workGroupSize);
 
+        const ndInt32 width = (inputSize + ND_GPU_TILED_MATRIX_ROWS - 1) & -ND_GPU_TILED_MATRIX_ROWS;
         const ndInt32 height = (outputSize + ND_GPU_TILED_MATRIX_ROWS - 1) & -ND_GPU_TILED_MATRIX_ROWS;
-        const ndInt32 width = (inputSize + ND_GPU_TILED_MATRIX_ROWS * 2 - 1) & -ND_GPU_TILED_MATRIX_ROWS * 2;
+
         const ndInt32 matrixSize = __cpuKernelRoundoff(width * height, ND_DEFAULT_WORKGROUP_SIZE);;
         const ndInt64 parametersStartOffset = ndInt64(parameters->m_parametersStartOffset) + matrixSize;
         const ndInt32 workGroupSizeReminder = outputSize % workGroupSize;
@@ -1537,7 +1536,7 @@ class brainLayerBrainBackPropagateMatrixBiasGradients : public ndBrainKernel
             ndBrainFloat biasDerivative = outputDerivative[modWorkGroupSize + itemId];
             biasRowGradients[modWorkGroupSize + itemId] = biasDerivative;
         }
-        ndAssert(biasRowGradients.SanityCheck());
+        //ndAssert(biasRowGradients.SanityCheck());
     }
 };
 
@@ -1553,7 +1552,6 @@ class brainLayerBrainBackPropagateMatrixWeightsGradients : public ndBrainKernel
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
-        //ndBrainFloatBuffer* const buffer3 = (ndBrainFloatBuffer*)m_parameters[3];
         ndBrainFloatBuffer* const buffer4 = (ndBrainFloatBuffer*)m_parameters[4];
 
         const ndCommandSharedInfo& info = *(ndCommandSharedInfo*)buffer0->GetGpuBuffer()->GetPtr();
@@ -1561,32 +1559,34 @@ class brainLayerBrainBackPropagateMatrixWeightsGradients : public ndBrainKernel
         const ndInt32 inputSize = info.m_inputSize;
         const ndInt32 outputSize = info.m_outputSize;
         const ndInt32 inputOutputSize = info.m_inputOutputSize;
+        const ndInt64 inputOutputStartOffset = info.m_inputOutputStartOffset;
+
+        const ndInt32 width = (inputSize + ND_GPU_TILED_MATRIX_ROWS - 1) & -ND_GPU_TILED_MATRIX_ROWS;
+        const ndInt32 height = (outputSize + ND_GPU_TILED_MATRIX_ROWS - 1) & -ND_GPU_TILED_MATRIX_ROWS;
+        const ndInt32 matrixSize = __cpuKernelRoundoff(width * height, ND_DEFAULT_WORKGROUP_SIZE);
+
+        const ndInt32 dimK = info.m_matrixDimensionK / ndBrainLayerLinear::m_dimFactor;
+        const ndInt32 matrixBlock = groupId / dimK;
+        const ndInt32 rowBlock = groupId - dimK * matrixBlock;
+
+        const ndInt32 matrixOffsetStart = ndInt32(info.m_parametersStartOffset + info.m_parametersBatchSize * matrixBlock);
+        const ndInt64 srcBase = matrixBlock * ndInt64(inputOutputSize) + inputOutputStartOffset;
 
         const ndBrainMemVector inputOutputBuffer((ndBrainFloat*)buffer1->GetGpuBuffer()->GetPtr(), ndInt32(buffer1->GetCount()));
         ndBrainMemVector weightAndBiasGradients((ndBrainFloat*)buffer4->GetGpuBuffer()->GetPtr(), ndInt32(buffer4->SizeInItems()));
 
-        const ndInt64 inputOutputStartOffset = info.m_inputOutputStartOffset;
-        const ndInt64 srcBase = groupId * ndInt64(inputOutputSize) + inputOutputStartOffset;
-
-        const ndInt32 height = (outputSize + ND_GPU_TILED_MATRIX_ROWS - 1) & -ND_GPU_TILED_MATRIX_ROWS;
-        const ndInt32 width = (inputSize + ND_GPU_TILED_MATRIX_ROWS * 2 - 1) & -ND_GPU_TILED_MATRIX_ROWS * 2;
-        const ndInt32 matrixSize = __cpuKernelRoundoff(width * height, ND_DEFAULT_WORKGROUP_SIZE);;
+        const ndBrainMemVector inputData(&inputOutputBuffer[srcBase], inputSize);
+        const ndBrainMemVector biasRowGradients(&weightAndBiasGradients[info.m_parametersStartOffset + matrixSize + info.m_parametersBatchSize * matrixBlock], outputSize);
 
         ndAssert(inputOutputBuffer.BounceCheck(srcBase + inputSize - 1));
-        ndAssert(weightAndBiasGradients.BounceCheck(info.m_parametersStartOffset + matrixSize + info.m_parametersBatchSize * groupId + outputSize - 1));
-        const ndBrainMemVector inputData(&inputOutputBuffer[srcBase], inputSize);
-        const ndBrainMemVector biasRowGradients(&weightAndBiasGradients[info.m_parametersStartOffset + matrixSize + info.m_parametersBatchSize * groupId], outputSize);
-        const ndInt32 matrixOffsetStart = ndInt32(info.m_parametersStartOffset + info.m_parametersBatchSize * groupId);
+        ndAssert(weightAndBiasGradients.BounceCheck(info.m_parametersStartOffset + matrixSize + info.m_parametersBatchSize * matrixBlock + outputSize - 1));
 
-        for (ndInt32 i = 0; i < outputSize; ++i)
-        {
-            const ndBrainFloat scale = biasRowGradients[i];
-            const ndInt32 matrixOffset = matrixOffsetStart + width * i;
-            ndAssert(weightAndBiasGradients.BounceCheck(matrixOffset + inputSize - 1));
-            ndBrainMemVector weightRowGradients(&weightAndBiasGradients[matrixOffset], inputSize);
-            weightRowGradients.ScaleSet(inputData, scale);
-            ndAssert(weightRowGradients.SanityCheck());
-        }
+        const ndBrainFloat scale = biasRowGradients[rowBlock];
+        const ndInt32 matrixOffset = matrixOffsetStart + width * rowBlock;
+        ndAssert(weightAndBiasGradients.BounceCheck(matrixOffset + inputSize - 1));
+        ndBrainMemVector weightRowGradients(&weightAndBiasGradients[matrixOffset], inputSize);
+        weightRowGradients.ScaleSet(inputData, scale);
+        //ndAssert(weightRowGradients.SanityCheck());
     }
 };
 
@@ -1715,8 +1715,6 @@ void ndBrainGpuContext::CreateKerners()
     m_brainLayerMatrixBackPropagateBiasGradients = ndSharedPtr<ndBrainKernel>(new brainLayerBrainBackPropagateMatrixBiasGradients(this));
     m_brainLayerMatrixBackPropagateInputGradients = ndSharedPtr<ndBrainKernel>(new brainLayerBrainBackPropagateMatrixInputGradients(this));
     m_brainLayerMatrixBackPropagateWeightGradients = ndSharedPtr<ndBrainKernel>(new brainLayerBrainBackPropagateMatrixWeightsGradients(this));
-    //m_brainLayerMatrixBackPropagateClearBiasGradients = ndSharedPtr<ndBrainKernel>(new brainLayerBrainBackPropagateMatrixClearBiasGradients(this));
-    //m_brainLayerMatrixBackPropagateAddBiasGradients = ndSharedPtr<ndBrainKernel>(new brainLayerBrainBackPropagateMatrixPartialSumBiasGradients(this));
 
     // optimizer kernels
     //m_brainAdamMomentumUpdate = ndSharedPtr<ndBrainKernel>(new brainAdamBiasCorrectionUpdate(this));

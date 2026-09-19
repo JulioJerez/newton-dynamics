@@ -904,79 +904,6 @@ R""""(
 
 const char* ndBrainGpuContext::m_matrixWeightsAndBiasGradients =
 R""""(
-    __kernel void brainLayerBrainBackPropagateMatrixClearBiasGradients(
-        __global const UniformBufferLayerArguments* parameters, 
-        __global float* dummy0, 
-        __global float* partialBiasSumBuffer, 
-        __global float* inputOutputGradientsBuffer,
-        __global float* dummy1) 
-    {
-        const uint itemId = get_local_id(0);
-        const uint groupId = get_group_id(0);
-        const uint workGroupSize = get_local_size(0);
-        
-        const uint inputSize = parameters->m_inputSize;
-        const uint outputSize = parameters->m_outputSize;
-        const uint inputOutputSize = parameters->m_inputOutputSize;
-        const uint inputOutputStartOffset = parameters->m_inputOutputStartOffset;
-        
-        const uint alignedOffset = CalculateWorkGroupRoundoff(outputSize, workGroupSize);
-        const uint dstOffset = groupId * alignedOffset;
-
-        long inputGradientOffset = groupId * (long)inputOutputSize + inputOutputStartOffset;
-        long outputGradientOffset = inputGradientOffset + CalculateWorkGroupRoundoff(inputSize, workGroupSize);
-        
-        const uint workGroupSizeReminder = outputSize % workGroupSize;
-        const uint modWorkGroupSize = outputSize - workGroupSizeReminder;
-        
-        for (uint i = 0; i < modWorkGroupSize; i += workGroupSize)
-        {
-            float outputDerivative = inputOutputGradientsBuffer[outputGradientOffset + i + itemId];
-            partialBiasSumBuffer[dstOffset + i + itemId] = outputDerivative;
-        }
-        if (itemId < workGroupSizeReminder)
-        {
-            float outputDerivative = inputOutputGradientsBuffer[outputGradientOffset + modWorkGroupSize + itemId];
-            partialBiasSumBuffer[dstOffset + modWorkGroupSize + itemId] = outputDerivative;
-        }
-    }
-
-    __kernel void brainLayerBrainBackPropagateMatrixPartialSumBiasGradients(
-        __global const UniformBufferLayerArguments* parameters, 
-        __global float* dummy0, 
-        __global float* partialBiasSumBuffer, 
-        __global float* dummy1,
-        __global float* dummy2) 
-    {
-        const uint itemId = get_local_id(0);
-        const uint groupId = get_group_id(0);
-        const uint workGroupSize = get_local_size(0);
-        
-        const uint numberOfIndex = parameters->m_matrixDimensionK;
-        const uint srcIndex = groupId + (numberOfIndex + 1) /2;
-        if (srcIndex < numberOfIndex)
-        {
-            const uint outputSize = parameters->m_outputSize;
-            const uint alignedOffset = (outputSize + 255) & -256;
-        
-            const uint dstOffset = groupId * alignedOffset;
-            const uint srcOffset = srcIndex * alignedOffset;
-        
-            const uint workGroupSizeReminder = outputSize % workGroupSize;
-            const uint modWorkGroupSize = outputSize - workGroupSizeReminder;
-            for (uint i = 0; i < modWorkGroupSize; i += workGroupSize)
-            {
-                float biasGradient = partialBiasSumBuffer[srcOffset + i + itemId];
-                partialBiasSumBuffer[dstOffset + i + itemId] += biasGradient;
-            }
-            if (itemId < workGroupSizeReminder)
-            {
-                float biasGradient = partialBiasSumBuffer[srcOffset + modWorkGroupSize + itemId];
-                partialBiasSumBuffer[dstOffset + modWorkGroupSize + itemId] += biasGradient;
-            }
-        }
-    }
-
     __kernel void brainLayerBrainBackPropagateMatrixBiasGradients(
         __global const UniformBufferLayerArguments* parameters, 
         __global float* dummy0, 
@@ -1800,8 +1727,6 @@ void ndBrainGpuContext::CreateKerners()
     m_brainLayerMatrixBackPropagateBiasGradients = CreateKerner(program, "brainLayerBrainBackPropagateMatrixBiasGradients");
     m_brainLayerMatrixBackPropagateInputGradients = CreateKerner(program, "brainLayerBrainBackPropagateMatrixInputGradients");
     m_brainLayerMatrixBackPropagateWeightGradients = CreateKerner(program, "brainLayerBrainBackPropagateMatrixWeightsGradients");
-    m_brainLayerMatrixBackPropagateClearBiasGradients = CreateKerner(program, "brainLayerBrainBackPropagateMatrixClearBiasGradients");
-    m_brainLayerMatrixBackPropagateAddBiasGradients = CreateKerner(program, "brainLayerBrainBackPropagateMatrixPartialSumBiasGradients");
 
     // accumulate gradient kernels and optimizer kernels
     m_brainAdamBiasCorrectionUpdate = CreateKerner(program, "brainAdamMomentumUpdate");
