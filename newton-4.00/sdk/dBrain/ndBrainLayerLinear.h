@@ -33,7 +33,16 @@
 
 class ndBrainLayerLinear : public ndBrainLayer
 {
-	public: 
+	public:
+	enum BackpropagatePass
+	{
+		m_biasGradientsPass,
+		m_inputGradientsPass,
+		m_weightGradientsPass,
+		m_tiledInputGradientsPass,
+		m_dimFactor = 1 << 4,
+	};
+
 	ndBrainLayerLinear(ndInt32 inputs, ndInt32 outputs);
 	ndBrainLayerLinear(const ndBrainLayerLinear& src);
 	virtual ~ndBrainLayerLinear();
@@ -74,15 +83,6 @@ class ndBrainLayerLinear : public ndBrainLayer
 	void AddReqularizerL2(const ndBrainLayer& weights, ndBrainFloat regularizer) override;
 
 	protected:
-	enum BackpropagatePass
-	{
-		m_biasGradientsPass,
-		m_inputGradientsPass,
-		m_weightGradientsPass,
-		m_tiledGradientsDebugPass,
-		m_dimFactor = 1 << 4,
-	};
-
 	void CalculateRoundedSize(ndInt32& width, ndInt32& height) const;
 	void AdamUpdate(const ndBrainLayer& u, const ndBrainLayer& v, ndBrainFloat epsilon) override;
 

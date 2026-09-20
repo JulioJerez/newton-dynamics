@@ -68,7 +68,9 @@ class ndBrainTrainerInference : public ndClassAlloc
 
 	void MakePrediction();
 	void UpdateSelfModifyingLayers();
-	void UpdateParameters(const ndBrainVector& weightAndBias);
+
+	void CopyActivationParameters();
+	void CopyWeightsAnBiasParameters(const ndBrainVector& weightAndBias);
 	void MakeSinglePrediction(const ndBrainVector& input, ndBrainVector& output);
 
 	ndInt32 RoundOffOffset(ndInt32 value) const;

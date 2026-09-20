@@ -89,6 +89,10 @@ bool ndBrainLayer::HasGpuSupport() const
 	return false;
 }
 
+void ndBrainLayer::CopyModifyingParameters()
+{
+}
+
 void ndBrainLayer::CopyWeights(ndBrainTrainerInference* const, ndBrainVector&) const
 {
 }

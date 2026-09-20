@@ -96,6 +96,7 @@ namespace ndCartpoleTrainer_sac
 
 			//hyperParameters.m_useGpuBackend = true;
 			hyperParameters.m_useGpuBackend = false;
+			//hyperParameters.m_numberOfHiddenLayers = 0;
 			hyperParameters.m_hiddenLayersNumberOfNeurons = 64;
 			hyperParameters.m_numberOfActions = m_actionsSize;
 			hyperParameters.m_numberOfObservations = m_observationsSize;

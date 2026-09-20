@@ -259,7 +259,7 @@ void ndBrainTrainerInference::AddCopyInputCommand(ndList<ndSharedPtr<ndBrainBuff
 			virtual void Execute(ndInt32 groupId) override
 			{
 				const ndCommandSharedInfo& info = m_desc.m_info;
-				ndBrainTrainerInference* const owner = m_desc.m_owner;
+				ndBrainTrainerInference* const owner = *m_desc.m_owner;
 
 				ndBrainFloat* const dstPtr = (ndBrainFloat*)owner->m_inputOutputBuffer->GetCpuPtr();
 				const ndBrainFloat* const srcPtr = (ndBrainFloat*)owner->m_miniBatchInputBuffer->GetCpuPtr();
@@ -323,7 +323,7 @@ void ndBrainTrainerInference::AddCopyOutputCommand(ndList<ndSharedPtr<ndBrainBuf
 			virtual void Execute(ndInt32 groupId) override
 			{
 				const ndCommandSharedInfo& info = m_desc.m_info;
-				ndBrainTrainerInference* const owner = m_desc.m_owner;
+				ndBrainTrainerInference* const owner = *m_desc.m_owner;
 
 				ndBrainFloat* const dstPtr = (ndBrainFloat*)owner->m_miniBatchOutputBuffer->GetCpuPtr();
 				const ndBrainFloat* const srcPtr = (ndBrainFloat*)owner->m_inputOutputBuffer->GetCpuPtr();
@@ -348,7 +348,7 @@ void ndBrainTrainerInference::AddCopyOutputCommand(ndList<ndSharedPtr<ndBrainBuf
 	}
 }
 
-void ndBrainTrainerInference::UpdateParameters(const ndBrainVector& weightAndBias)
+void ndBrainTrainerInference::CopyWeightsAnBiasParameters(const ndBrainVector& weightAndBias)
 {
 	for (ndList<ndSharedPtr<ndBrainBufferCommand>>::ndNode* node = m_feedForwardCommands.GetFirst(); node; node = node->GetNext())
 	{
@@ -467,10 +467,21 @@ void ndBrainTrainerInference::MakePrediction()
 void ndBrainTrainerInference::UpdateSelfModifyingLayers()
 {
 	ndBrainContext* const context = *m_descriptor.m_context;
-
 	for (ndList<ndSharedPtr<ndBrainBufferCommand>>::ndNode* node = m_selfModyfyingCommands.GetFirst(); node; node = node->GetNext())
 	{
 		ndSharedPtr<ndBrainBufferCommand>& command = node->GetInfo();
 		context->SubmitBufferCommand(*command);
+	}
+}
+
+void ndBrainTrainerInference::CopyActivationParameters()
+{
+	if (m_descriptor.m_context->GetAsGpuContext())
+	{
+		for (ndInt32 i = 0; i < m_descriptor.m_brain->GetCount(); ++i)
+		{
+			ndBrainLayer* const layer = (**m_descriptor.m_brain)[i];
+			layer->CopyModifyingParameters();
+		}
 	}
 }

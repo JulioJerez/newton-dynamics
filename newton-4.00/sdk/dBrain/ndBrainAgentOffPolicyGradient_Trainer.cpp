@@ -1100,6 +1100,14 @@ void ndBrainAgentOffPolicyGradient_Trainer::OptimizeStep()
 
 		m_context->SyncBufferCommandQueue();
 		m_policyTrainer->GetWeightAndBiasBuffer()->VectorFromDevice(m_lastPolicy);
-		m_policyTrainer->UpdateParameters(m_lastPolicy);
+
+		m_policyTrainer->CopyActivationParameters();
+		for (ndInt32 j = 0; j < ndInt32(sizeof(m_referenceCriticTrainer) / sizeof(m_referenceCriticTrainer[0])); ++j)
+		{
+			m_criticTrainer[j]->CopyActivationParameters();
+			m_referenceCriticTrainer[j]->CopyActivationParameters();
+		}
+
+		m_policyTrainer->CopyWeightsAnBiasParameters(m_lastPolicy);
 	}
 }

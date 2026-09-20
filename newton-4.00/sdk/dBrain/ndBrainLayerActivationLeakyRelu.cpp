@@ -120,7 +120,7 @@ void ndBrainLayerActivationLeakyRelu::FeedForward(const ndBrainLayerFeedForwardC
 {
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
-	ndBrainTrainerInference* const trainer = desc.m_owner;
+	ndBrainTrainerInference* const trainer = (ndBrainTrainerInference*)*desc.m_owner;
 
 	const ndBrainMemVector inputOutputBuffer((ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr(), ndInt32(trainer->GetHiddenLayerBuffer()->GetCount()));
 
@@ -156,7 +156,7 @@ void ndBrainLayerActivationLeakyRelu::BackPropagate(const ndBrainLayerBackPropag
 {
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
-	ndBrainTrainer* const trainer = (ndBrainTrainer*)desc.m_owner;
+	ndBrainTrainer* const trainer = (ndBrainTrainer*)*desc.m_owner;
 
 	const ndBrainMemVector inputOutputBuffer ((ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr(), ndInt32 (trainer->GetHiddenLayerBuffer()->GetCount()));
 	const ndBrainMemVector inputOutputGradientsBuffer((ndBrainFloat*)trainer->GetHiddenLayerGradientBuffer()->GetCpuPtr(), ndInt32(trainer->GetHiddenLayerGradientBuffer()->GetCount()));
@@ -193,6 +193,19 @@ void ndBrainLayerActivationLeakyRelu::BackPropagate(const ndBrainLayerBackPropag
 	}
 	inputDerivative.Mul(outputDerivative);
 	ndAssert(inputDerivative.SanityCheck());
+
+#ifdef _DEBUG
+	{
+		const ndBrainMemVector checkPadding(&inputOutputGradientsBuffer[srcBase], ND_DEFAULT_WORKGROUP_SIZE);
+		ndInt32 padded = (inputSize + ND_DEFAULT_WORKGROUP_SIZE - 1) & -ND_DEFAULT_WORKGROUP_SIZE;
+		for (ndInt32 i = inputSize; i < padded; ++i)
+		{
+			ndBrainFloat a = checkPadding[i];
+			ndAssert(a == ndBrainFloat(0.0f));
+		}
+	}
+#endif
+
 }
 
 ndCommandArray ndBrainLayerActivationLeakyRelu::CreateFeedForwardBufferCommand(

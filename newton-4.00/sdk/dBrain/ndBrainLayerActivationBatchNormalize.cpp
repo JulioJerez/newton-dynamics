@@ -61,6 +61,11 @@ ndBrainLayer* ndBrainLayerActivationBatchNormalize::Load(const ndBrainLoad* cons
 	return ndBrainLayerActivationLinear::Load(loadSave);
 }
 
+void ndBrainLayerActivationBatchNormalize::CopyModifyingParameters()
+{
+	m_slopesBuffer->VectorFromDevice(m_slopes);
+}
+
 ndCommandArray ndBrainLayerActivationBatchNormalize::CreateSelfModyfingFeedForwardBufferCommand(
 	ndBrainTrainerInference* const owner,
 	ndBrainContext* const context,
@@ -155,7 +160,7 @@ void ndBrainLayerActivationBatchNormalize::SelfModifyingFeedForward(const ndBrai
 {
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
-	ndBrainTrainerInference* const trainer = desc.m_owner;
+	ndBrainTrainerInference* const trainer = (ndBrainTrainerInference*)*desc.m_owner;
 	const ndBrainMemVector inputOutputBuffer((ndBrainFloat*)trainer->GetHiddenLayerBuffer()->GetCpuPtr(), ndInt32(trainer->GetHiddenLayerBuffer()->GetCount()));
 	
 	ndInt32 inputSize = info.m_inputSize;
@@ -184,6 +189,6 @@ void ndBrainLayerActivationBatchNormalize::SelfModifyingFeedForward(const ndBrai
 	variance.Sqrt();
 	tmp.Reciprocal(m_slopes);
 	
-	tmp.Blend(variance, ndBrainFloat(0.01f));
+	tmp.Blend(variance, ND_BRAIN_LAYER_ACTIVATION_BATCH_NORMALIZE_BLEND);
 	m_slopes.Reciprocal(tmp);
 }

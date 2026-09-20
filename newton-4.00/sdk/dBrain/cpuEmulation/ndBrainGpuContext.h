@@ -91,7 +91,6 @@ class ndBrainGpuContext : public ndBrainContext
 	// learnRate commands
 	virtual void ApplyLeanRateCommands(ndBrainBufferCommand* const command, ndBrainFloat learRate) override;
 	virtual void SetLearnRateCommandBuffers(ndBrainOptimizerAdam& optimizer, ndInt32 minibatchSize, ndBrainFloatBuffer& weightsAndBiasBuffer, ndBrainFloatBuffer& weightsAndBiasGradientBuffer) override;
-	virtual void AccumulateWeightsAndBiasBuffer(ndInt32 numberOfBuffers, ndInt32 bufferSizeInFloats, ndBrainFloatBuffer& weightsAndBiasGradientBuffer) override;
 
 	private:
 	void CreateKerners();
@@ -112,8 +111,8 @@ class ndBrainGpuContext : public ndBrainContext
 	ndSharedPtr<ndBrainKernel> m_brainLayerSoftmaxActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerDropOutActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerLeakyReluActivation;
+	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixAddBias;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiply;
-	//ndSharedPtr<ndBrainKernel> m_brainLayerPolicyGradientActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationAddInputActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationLoadInputActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationNormalizeInputActivation;
@@ -131,8 +130,6 @@ class ndBrainGpuContext : public ndBrainContext
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateBiasGradients;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateInputGradients;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateWeightGradients;
-	//ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateAddBiasGradients;
-	//ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateClearBiasGradients;
 
 	// optimizer shaders
 	ndSharedPtr<ndBrainKernel> m_brainAdamBiasCorrectionUpdate;
@@ -142,5 +139,6 @@ class ndBrainGpuContext : public ndBrainContext
 	// other shader
 	ndSharedPtr<ndBrainKernel> m_brainCopyBuffer;
 	ndSharedPtr<ndBrainKernel> m_brainCopyBufferIndirect;
+	ndSharedPtr<ndBrainKernel> m_accumulateWeigndAndBiasGradiens;
 };
 #endif

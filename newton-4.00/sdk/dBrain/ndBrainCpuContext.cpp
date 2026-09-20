@@ -39,15 +39,15 @@ class ndBrainAdamUpdateParametersRidge : public ndBrainBufferCommandCpu
 		const ndBrainOptimizerAdam::ndCommandSharedInfo* const parameters = (ndBrainOptimizerAdam::ndCommandSharedInfo*)m_desc[0]->GetCpuPtr();
 		ndInt64 bufferSize = ndInt64(((ndBrainFloatBuffer*)m_desc[1])->GetCount());
 		ndBrainMemVector weightAndBiasBuffer ((ndBrainFloat*)m_desc[1]->GetCpuPtr(), bufferSize);
-		ndBrainMemVector weightAndBiasGradientBuffer ((ndBrainFloat*)m_desc[2]->GetCpuPtr(), bufferSize);
 		ndBrainMemVector vdw ((ndBrainFloat*)m_desc[3]->GetCpuPtr(), bufferSize);
 		ndBrainMemVector vdw2 ((ndBrainFloat*)m_desc[4]->GetCpuPtr(), bufferSize);
+		const ndBrainMemVector weightAndBiasGradientBuffer((ndBrainFloat*)m_desc[2]->GetCpuPtr(), bufferSize);
 
-		ndBrainFloat descendRate = -m_learnRate;
-		ndBrainFloat regularizer = -parameters->m_decayRegularizer;
+		const ndBrainFloat descendRate = -m_learnRate;
+		const ndBrainFloat regularizer = -parameters->m_decayRegularizer;
 
-		ndInt32 start = groupId * workGroupSize;
-		ndBrainFloat miniBatchWeight = parameters->m_minibathScale;
+		const ndInt32 start = groupId * workGroupSize;
+		const ndBrainFloat miniBatchWeight = parameters->m_minibathScale;
 		for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
 		{
 			ndBrainFloat m = vdw[start + itemId];
@@ -74,7 +74,6 @@ class ndBrainAdamUpdateParametersRidge : public ndBrainBufferCommandCpu
 			weightAndBiasBuffer[start + itemId] = weight + gradient * descendRate;
 		}
 	}
-
 	ndBrainFloat m_learnRate;
 };
 
@@ -596,49 +595,6 @@ void ndBrainCpuContext::ApplyLeanRateCommands(ndBrainBufferCommand* const comman
 	ndAssert(gradientUpdateCommand->GetDescriptor().m_id == m_adamOptimizerUpdate);
 	gradientUpdateCommand->m_learnRate = learnRate;
 	SubmitBufferCommand(command);
-}
-
-void ndBrainCpuContext::AccumulateWeightsAndBiasBuffer(ndInt32 numberOfBuffers, ndInt32 bufferSizeInFloats, ndBrainFloatBuffer& weightsAndBiasGradientBuffer)
-{
-	class ndAccumulateWeigndAndBias : public ndBrainBufferCommandCpu
-	{
-		public:
-		ndAccumulateWeigndAndBias(const ndBrainBufferCommandDesc& desc, ndInt64 elements, ndBrainFloatBuffer& weightsAndBiasGradientBuffer)
-			:ndBrainBufferCommandCpu(desc, nullptr)
-			,m_weightsAndBiasGradientBuffer(&weightsAndBiasGradientBuffer)
-			,m_elements(elements)
-		{
-		}
-
-		virtual void Execute(ndInt32 groupId) override
-		{
-			ndInt32 span = ndInt32(m_elements / m_desc.m_miniBatchSize);
-			ndInt32 start = groupId * span;
-			ndInt32 count = ndInt32(((start + span) < m_elements) ? span : m_elements - start);
-			ndBrainVector& buffer = **m_weightsAndBiasGradientBuffer->m_buffer;
-			
-			ndBrainMemVector dst(&buffer[start], count);
-			const ndBrainMemVector src(&buffer[start + m_elements], count);
-			dst.Add(src);
-			dst.SanityCheck();
-		}
-
-		ndBrainFloatBuffer* m_weightsAndBiasGradientBuffer;
-		ndInt64 m_elements;
-	};
-
-	const ndInt32 size = numberOfBuffers / 2;
-	ndAssert((size & (size - 1)) == 0);
-	ndInt64 elements = ndInt64(size * bufferSizeInFloats);
-
-	for (ndInt32 i = size; i > 0; i >>= 1)
-	{
-		ndBrainBufferCommandDesc desc(i);
-		desc.m_workGroupSize = i;
-		ndAccumulateWeigndAndBias command(desc, elements, weightsAndBiasGradientBuffer);
-		SubmitBufferCommand(&command);
-		elements = elements / 2;
-	}
 }
 
 void ndBrainCpuContext::Update(ndBrainContextUpdateCallback* const callback)

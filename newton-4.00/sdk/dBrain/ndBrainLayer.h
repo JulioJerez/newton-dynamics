@@ -125,6 +125,8 @@ class ndBrainLayer : public ndClassAlloc
 	virtual bool HasGpuSupport() const;
 	virtual void FeedForward(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const;
 	virtual void BackPropagate(const ndBrainLayerBackPropagateCpuCommand* const command, ndInt32 miniBatchIndex) const;
+
+	virtual void CopyModifyingParameters();
 	virtual void SelfModifyingFeedForward(const ndBrainLayerSelfModyfyingFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const;
 
 	virtual ndCommandArray CreateSelfModyfingFeedForwardBufferCommand(

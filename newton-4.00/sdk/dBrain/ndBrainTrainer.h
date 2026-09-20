@@ -47,23 +47,20 @@ class ndBrainTrainer: public ndBrainTrainerInference
 	
 	protected:
 	void Initialize();
+	void AddWeighAndBiasSumCommand();
 	void AddLayersGradientCommands();
 	void AddCopyInputGradientCommand();
 	void AddOptimizerGradientCommand();
 	void AddCopyOutputGradientCommand();
 
 	ndSharedPtr<ndBrainOptimizer> m_optimizer;
-	ndSharedPtr<ndBrainBufferCommand> m_adamOtimizerUpdate;
-	ndSharedPtr<ndBrainBufferCommand> m_adamMomentumUpdate;
-
 	ndSharedPtr<ndBrainFloatBuffer> m_inputOutputGradientsBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_weightAndBiasGradientsBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_miniBatchInputGradientBuffer;
 	ndSharedPtr<ndBrainFloatBuffer> m_miniBatchOutputGradientBuffer;
 
 	ndList<ndSharedPtr<ndBrainBufferCommand>> m_backPropagateCommands;
-	//ndSharedPtr<ndBrainBufferCommand> m_adamOptimizerCommand;
-	//ndSharedPtr<ndBrainBufferCommand> m_adamMomentumUpdateCommand;
+	ndList<ndSharedPtr<ndBrainBufferCommand>> m_weightAndBiasGradientsSumCommands;
 };
 
 #endif 
