@@ -38,6 +38,10 @@ class ndBrainLayerActivationBatchNormalize : public ndBrainLayerActivationLinear
 
 	virtual const char* GetLabelId() const override;
 	static ndBrainLayer* Load(const ndBrainLoad* const loadSave);
+
+	void AddVariance(const ndBrainLayerSelfModyfyingFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const;
+	void CopyVariance(const ndBrainLayerSelfModyfyingFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const;
+	void CalculateVariance(const ndBrainLayerSelfModyfyingFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const;
 	virtual void SelfModifyingFeedForward(const ndBrainLayerSelfModyfyingFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const override;
 
 	virtual void CopyModifyingParameters() override;

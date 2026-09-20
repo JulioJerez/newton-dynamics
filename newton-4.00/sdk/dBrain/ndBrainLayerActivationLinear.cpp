@@ -222,6 +222,12 @@ ndCommandArray ndBrainLayerActivationLinear::CreateFeedForwardBufferCommand(
 		owner, context, info, miniBatchSize, 0,
 		inputOutputData, weightsAndBias));
 
+	if (!m_slopesBuffer)
+	{
+		m_slopesBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(context, m_slopes));
+		m_biasesBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(context, m_biases));
+	}
+
 	ndBrainBufferCommand* command = nullptr;
 	if (context->GetAsCpuContext())
 	{
@@ -229,11 +235,6 @@ ndCommandArray ndBrainLayerActivationLinear::CreateFeedForwardBufferCommand(
 	}
 	else
 	{
-		if (!m_slopesBuffer)
-		{
-			m_slopesBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(context, m_slopes));
-			m_biasesBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(context, m_biases));
-		}
 		descriptor.PushBack(*m_biasesBuffer);
 		descriptor.PushBack(*m_slopesBuffer);
 
