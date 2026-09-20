@@ -510,7 +510,7 @@ void ndMeshCollisionShapeConvexHull::DeserializeFromXml(const nd::TiXmlElement* 
 ndShape* ndMeshCollisionShapeConvexHull::CreateObject() const
 {
 	ndShape* const hull = new ndShapeConvexHull(ndInt32(m_points.GetCount()), sizeof(ndVector), m_tolarence, &m_points[0].m_x, m_maxPointCount);
-	ndShapeInfo info(hull->GetShapeInfo());
+	//ndShapeInfo info(hull->GetShapeInfo());
 	//ndMeshCollisionShapeConvexHull* const self = (ndMeshCollisionShapeConvexHull*)this;
 	//self->m_maxPointCount = info.m_convexhull.m_vertexCount;
 	return hull;
