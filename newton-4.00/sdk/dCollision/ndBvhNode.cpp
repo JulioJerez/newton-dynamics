@@ -354,7 +354,7 @@ ndBvhNode* ndBvhSceneManager::AddBody(ndBodyKinematic* const body, ndBvhNode* ro
 		childNode->m_left = bodyNode;
 		bodyNode->m_parent = childNode;
 
-		ndUnsigned32 depth = 0;
+		//ndUnsigned32 depth = 0;
 		ndBvhNode* rootNode = root;
 		ndBvhNode* parent = rootNode;
 		while (1)
@@ -372,7 +372,7 @@ ndBvhNode* ndBvhSceneManager::AddBody(ndBodyKinematic* const body, ndBvhNode* ro
 				const ndFloat32 rightArea = rightSize.DotProduct(rightSize.ShiftTripleRight()).GetScalar();
 
 				parent = (leftArea < rightArea) ? sceneNode->m_left : sceneNode->m_right;
-				depth++;
+				//depth++;
 			}
 			else
 			{
@@ -409,13 +409,12 @@ ndBvhNode* ndBvhSceneManager::AddBody(ndBodyKinematic* const body, ndBvhNode* ro
 				break;
 			}
 		}
-		#ifdef _DEBUG
-		//ndAssert(depth < 128);
-		if (depth >= 256)
-		{
-			ndTrace(("This may be a pathological scene, consider balancing the scene\n"));
-		}
-		#endif
+		//#ifdef _DEBUG
+		//if (depth >= 256)
+		//{
+		//	ndTrace(("This may be a pathological scene, consider balancing the scene\n"));
+		//}
+		//#endif
 		return rootNode;
 	}
 	else
@@ -689,7 +688,7 @@ ndInt32 ndBvhSceneManager::BuildSmallBvhTree(ndThreadPool& threadPool, ndBvhNode
 {
 	ndInt32 depthLevel[D_MAX_THREADS_COUNT];
 	ndMemSet(depthLevel, 0, threadPool.GetThreadCount());
-	auto SmallBhvNodes = ndMakeObject::ndFunction([this, parentsArray, batchCount, &depthLevel](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
+	auto SmallBhvNodes = ndMakeObject::ndFunction([this, parentsArray, &depthLevel](ndInt32 groupId, ndInt32 threadIndex, ndInt32)
 	{
 		ND_PROFILE_ZONE_NAMED("SmallBhvNodes");
 		ndAssert(threadIndex < D_MAX_THREADS_COUNT);
