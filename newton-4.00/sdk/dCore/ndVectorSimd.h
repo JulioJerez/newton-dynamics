@@ -24,6 +24,10 @@
 
 #include "ndTypes.h"
 
+// visual studion does not support these types
+//#include <std::simd>
+//#include <std::experimental::simd>
+
 class ndVector;
 // *****************************************************************************************
 //
@@ -1682,7 +1686,6 @@ class ndVector : public ndClassAlloc
 } D_GCC_NEWTON_CLASS_ALIGN_16;
 #endif
 
-
 #ifndef D_NEWTON_USE_DOUBLE
 	#ifdef D_NEWTON_USE_AVX2_OPTION
 		inline ndBigVector::ndBigVector(const ndVector& v)
@@ -1699,8 +1702,6 @@ class ndVector : public ndClassAlloc
 		}
 #endif
 #endif
-
-
 
 #endif
 
