@@ -27,7 +27,7 @@
 #include "ndBrainLayerActivationLinear.h"
 
 #define ND_BRAIN_LAYER_ACTIVATION_BATCH_NORMALIZE_NAME	"ndBrainLayerActivationBatchNormalize"
-
+#define ND_BRAIN_LAYER_ACTIVATION_BATCH_NORMALIZE_BLEND	ndBrainFloat(0.01f)
 
 class ndBrainLayerActivationBatchNormalize : public ndBrainLayerActivationLinear
 {
@@ -40,6 +40,7 @@ class ndBrainLayerActivationBatchNormalize : public ndBrainLayerActivationLinear
 	static ndBrainLayer* Load(const ndBrainLoad* const loadSave);
 	virtual void SelfModifyingFeedForward(const ndBrainLayerSelfModyfyingFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const override;
 
+	virtual void CopyModifyingParameters() override;
 	virtual ndCommandArray CreateSelfModyfingFeedForwardBufferCommand(
 		ndBrainTrainerInference* const owner,
 		ndBrainContext* const context,

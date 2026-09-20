@@ -34,7 +34,7 @@ class ndBrainOptimizerAdam : public ndBrainOptimizer
 	class ndCommandSharedInfo
 	{
 		public:
-		ndCommandSharedInfo(bool enableBiasCorrection = false)
+		ndCommandSharedInfo(bool enableBiasCorrection = true)
 			:m_beta(ndBrainFloat(0.999f))
 			,m_alpha(ndBrainFloat(0.9f))
 			,m_epsilon(ndBrainFloat(1.0e-6f))
@@ -65,8 +65,7 @@ class ndBrainOptimizerAdam : public ndBrainOptimizer
 		ndBrainFloat m_decayRegularizer;
 	};
 
-	//ndBrainOptimizerAdam(const ndSharedPtr<ndBrainContext>& context, bool enableBiasCorrection = true);
-	ndBrainOptimizerAdam(const ndSharedPtr<ndBrainContext>& context, bool enableBiasCorrection = false);
+	ndBrainOptimizerAdam(const ndSharedPtr<ndBrainContext>& context, bool enableBiasCorrection = true);
 
 	virtual void ApplyLearnRate(ndBrainFloat learnRate) override;
 	virtual void Init(ndInt32 minibatchSize, ndBrainFloatBuffer& weightsAndBiasBuffer, ndBrainFloatBuffer& weightsAndBiasGradientBuffer) override;

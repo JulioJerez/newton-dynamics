@@ -139,5 +139,6 @@ class ndBrainGpuContext : public ndBrainContext
 	// other shader
 	ndSharedPtr<ndBrainKernel> m_brainCopyBuffer;
 	ndSharedPtr<ndBrainKernel> m_brainCopyBufferIndirect;
+	ndSharedPtr<ndBrainKernel> m_accumulateWeigndAndBiasGradiens;
 };
 #endif

@@ -333,7 +333,7 @@ class mnistSupervisedTrainer
 			if (testFailCount < m_minValidationFail)
 			{
 				weightdAndBiasBuffer->VectorFromDevice(weightAndBias);
-				trainer->UpdateParameters(weightAndBias);
+				trainer->CopyWeightsAnBiasParameters(weightAndBias);
 				m_bestBrain->CopyFrom(**trainer->GetBrain());
 
 				m_minValidationFail = testFailCount + 1;
@@ -368,7 +368,7 @@ class mnistSupervisedTrainer
 			if (testFailCount < m_minValidationFail)
 			{
 				weightdAndBiasBuffer->VectorFromDevice(weightAndBias);
-				trainer->UpdateParameters(weightAndBias);
+				trainer->CopyWeightsAnBiasParameters(weightAndBias);
 				m_bestBrain->CopyFrom(**trainer->GetBrain());
 				m_minValidationFail = testFailCount;
 

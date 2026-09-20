@@ -1144,7 +1144,10 @@ void ndBrainAgentOnPolicyGradient_Trainer::OptimizeStep()
 
 		m_context->SyncBufferCommandQueue();
 		m_policyTrainer->GetWeightAndBiasBuffer()->VectorFromDevice(m_lastPolicy);
-		m_policyTrainer->UpdateParameters(m_lastPolicy);
+
+		ndAssert(0);
+		//m_policyTrainer->CopyActivationParameters();
+		m_policyTrainer->CopyWeightsAnBiasParameters(m_lastPolicy);
 
 		ndAssert(ndMemory::CheckMemoryHeap());
 	}

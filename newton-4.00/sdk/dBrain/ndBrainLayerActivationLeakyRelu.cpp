@@ -193,6 +193,19 @@ void ndBrainLayerActivationLeakyRelu::BackPropagate(const ndBrainLayerBackPropag
 	}
 	inputDerivative.Mul(outputDerivative);
 	ndAssert(inputDerivative.SanityCheck());
+
+#ifdef _DEBUG
+	{
+		const ndBrainMemVector checkPadding(&inputOutputGradientsBuffer[srcBase], ND_DEFAULT_WORKGROUP_SIZE);
+		ndInt32 padded = (inputSize + ND_DEFAULT_WORKGROUP_SIZE - 1) & -ND_DEFAULT_WORKGROUP_SIZE;
+		for (ndInt32 i = inputSize; i < padded; ++i)
+		{
+			ndBrainFloat a = checkPadding[i];
+			ndAssert(a == ndBrainFloat(0.0f));
+		}
+	}
+#endif
+
 }
 
 ndCommandArray ndBrainLayerActivationLeakyRelu::CreateFeedForwardBufferCommand(

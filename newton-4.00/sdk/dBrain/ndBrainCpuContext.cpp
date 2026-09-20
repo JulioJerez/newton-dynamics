@@ -39,15 +39,15 @@ class ndBrainAdamUpdateParametersRidge : public ndBrainBufferCommandCpu
 		const ndBrainOptimizerAdam::ndCommandSharedInfo* const parameters = (ndBrainOptimizerAdam::ndCommandSharedInfo*)m_desc[0]->GetCpuPtr();
 		ndInt64 bufferSize = ndInt64(((ndBrainFloatBuffer*)m_desc[1])->GetCount());
 		ndBrainMemVector weightAndBiasBuffer ((ndBrainFloat*)m_desc[1]->GetCpuPtr(), bufferSize);
-		ndBrainMemVector weightAndBiasGradientBuffer ((ndBrainFloat*)m_desc[2]->GetCpuPtr(), bufferSize);
 		ndBrainMemVector vdw ((ndBrainFloat*)m_desc[3]->GetCpuPtr(), bufferSize);
 		ndBrainMemVector vdw2 ((ndBrainFloat*)m_desc[4]->GetCpuPtr(), bufferSize);
+		const ndBrainMemVector weightAndBiasGradientBuffer((ndBrainFloat*)m_desc[2]->GetCpuPtr(), bufferSize);
 
-		ndBrainFloat descendRate = -m_learnRate;
-		ndBrainFloat regularizer = -parameters->m_decayRegularizer;
+		const ndBrainFloat descendRate = -m_learnRate;
+		const ndBrainFloat regularizer = -parameters->m_decayRegularizer;
 
-		ndInt32 start = groupId * workGroupSize;
-		ndBrainFloat miniBatchWeight = parameters->m_minibathScale;
+		const ndInt32 start = groupId * workGroupSize;
+		const ndBrainFloat miniBatchWeight = parameters->m_minibathScale;
 		for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
 		{
 			ndBrainFloat m = vdw[start + itemId];
@@ -74,7 +74,6 @@ class ndBrainAdamUpdateParametersRidge : public ndBrainBufferCommandCpu
 			weightAndBiasBuffer[start + itemId] = weight + gradient * descendRate;
 		}
 	}
-
 	ndBrainFloat m_learnRate;
 };
 

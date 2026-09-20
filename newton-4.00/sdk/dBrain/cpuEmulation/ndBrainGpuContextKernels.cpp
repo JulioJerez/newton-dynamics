@@ -19,6 +19,7 @@
 #include "ndBrainUniformBuffer.h"
 #include "ndBrainIntegerBuffer.h"
 #include "ndBrainOptimizerAdam.h"
+#include "ndBrainLayerActivationBatchNormalize.h"
 
 #define ND_GPU_LOCAL_BUFFER_SIZE	    1024 * 4
 
@@ -367,10 +368,10 @@ class brainLayerLinearActivation : public ndBrainKernel
     }
 };
 
-class brainLayerBatchNormalizationActivation_0 : public ndBrainKernel
+class brainLayerBatchNormalizationActivationInputSqr : public ndBrainKernel
 {
     public:
-       brainLayerBatchNormalizationActivation_0(ndBrainContext* const context)
+       brainLayerBatchNormalizationActivationInputSqr(ndBrainContext* const context)
         :ndBrainKernel(context)
     {
     }
@@ -396,10 +397,10 @@ class brainLayerBatchNormalizationActivation_0 : public ndBrainKernel
     }
 };
 
-class brainLayerBatchNormalizationActivation_1 : public ndBrainKernel
+class brainLayerBatchNormalizationActivationVarianceSum : public ndBrainKernel
 {
     public:
-    brainLayerBatchNormalizationActivation_1(ndBrainContext* const context)
+    brainLayerBatchNormalizationActivationVarianceSum(ndBrainContext* const context)
         :ndBrainKernel(context)
     {
     }
@@ -420,10 +421,10 @@ class brainLayerBatchNormalizationActivation_1 : public ndBrainKernel
     }
 };
 
-class brainLayerBatchNormalizationActivation_2 : public ndBrainKernel
+class brainLayerBatchNormalizationActivationNormalize : public ndBrainKernel
 {
     public:
-    brainLayerBatchNormalizationActivation_2(ndBrainContext* const context)
+    brainLayerBatchNormalizationActivationNormalize(ndBrainContext* const context)
         :ndBrainKernel(context)
     {
     }
@@ -451,7 +452,7 @@ class brainLayerBatchNormalizationActivation_2 : public ndBrainKernel
         ndBrainFixSizeVector<1024> tmp(inputSize);
         tmp.Reciprocal(slopesBuffer);
         
-        tmp.Blend(varianceBuffer, ndBrainFloat(0.01f));
+        tmp.Blend(varianceBuffer, ND_BRAIN_LAYER_ACTIVATION_BATCH_NORMALIZE_BLEND);
         slopesBuffer.Reciprocal(tmp);
         //ndAssert(slopesBuffer.SanityCheck());
     }
@@ -758,20 +759,15 @@ class brainLayerBrainLeakyReluBackPropagate : public ndBrainKernel
 
     void Execute(ndInt32 groupId, ndInt32 workGroupSize)
     {
+        ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer3 = (ndBrainFloatBuffer*)m_parameters[3];
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
-        ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
 
-        //ndBrainFloat* const inputOutputDataPtr = (ndBrainFloat*)buffer1->GetGpuBuffer()->GetPtr();
-        //ndBrainFloat* const inputOutputGradientsPtr = (ndBrainFloat*)buffer3->GetGpuBuffer()->GetPtr();
         ndCommandSharedInfo* const parameters = (ndCommandSharedInfo*)buffer0->GetGpuBuffer()->GetPtr();
-
         ndInt32 inputSize = parameters->m_inputSize;
         ndInt32 inputOutputSize = parameters->m_inputOutputSize;
         ndInt32 inputOutputStartOffset = parameters->m_inputOutputStartOffset;
 
-        //const ndBrainFloat* const inputOutputDataPtr = (ndBrainFloat*)buffer1->GetGpuBuffer()->GetPtr();
-        //ndBrainFloat* const inputOutputGradients = (ndBrainFloat*)buffer3->GetGpuBuffer()->GetPtr();
         const ndBrainMemVector inputOutputData((ndBrainFloat*)buffer1->GetGpuBuffer()->GetPtr(), ndInt32(buffer1->SizeInItems()));
         ndBrainMemVector inputOutputGradients ((ndBrainFloat*)buffer3->GetGpuBuffer()->GetPtr(), ndInt32(buffer3->SizeInItems()));
 
@@ -803,10 +799,11 @@ class brainLayerBrainLeakyReluBackPropagate : public ndBrainKernel
 
         #ifdef _DEBUG
         {
+            const ndBrainMemVector checkPadding(&inputOutputGradients[srcBase], workGroupSize);
             ndInt32 padded = (inputSize + workGroupSize - 1) & -workGroupSize;
             for (ndInt32 i = inputSize; i < padded; ++i)
             {
-                ndBrainFloat a = inputOutputGradients[srcBase + i];
+                ndBrainFloat a = checkPadding[i];
                 ndAssert(a == ndBrainFloat(0.0f));
             }
         }
@@ -1137,7 +1134,6 @@ class brainAdamBiasCorrectionUpdate : public ndBrainKernel
     {
     }
 
-    #pragma optimize( "", off )
     void Execute(ndInt32, ndInt32)
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
@@ -1179,58 +1175,56 @@ class brainAdamUpdateRidgeRegularizer : public ndBrainKernel
     public:
     brainAdamUpdateRidgeRegularizer(ndBrainContext* const context)
         :ndBrainKernel(context)
-        ,m_learRate(ndBrainFloat (1.0e-4f))
     {
     }
 
-    #pragma optimize( "", off )
-    //void Execute(ndInt32 groupId, ndInt32 workGroupSize)
-    void Execute(ndInt32, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
     {
-        ndAssert(0);
-        //ndBrainFloat* const buffer5 = (ndBrainFloat*)m_parameters[5];
-        //ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
-        //ndBrainFloatBuffer* const buffer2 = (ndBrainFloatBuffer*)m_parameters[2];
-        //ndBrainFloatBuffer* const buffer3 = (ndBrainFloatBuffer*)m_parameters[3];
-        //ndBrainFloatBuffer* const buffer4 = (ndBrainFloatBuffer*)m_parameters[4];
-        //ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
+        ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
+        ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
+        ndBrainFloatBuffer* const buffer2 = (ndBrainFloatBuffer*)m_parameters[2];
+        ndBrainFloatBuffer* const buffer3 = (ndBrainFloatBuffer*)m_parameters[3];
+        ndBrainFloatBuffer* const buffer4 = (ndBrainFloatBuffer*)m_parameters[4];
+        ndBrainFloat* const buffer5 = (ndBrainFloat*)m_parameters[5];        
+
+        const ndBrainOptimizerAdam::ndCommandSharedInfo* const parameters = (ndBrainOptimizerAdam::ndCommandSharedInfo*)buffer0->GetGpuBuffer()->GetPtr();
+        const ndInt64 bufferSize = ndInt32(buffer1->SizeInItems());
+        ndBrainMemVector weightAndBiasBuffer((ndBrainFloat*)buffer1->GetCpuPtr(), bufferSize);
+        ndBrainMemVector vdw((ndBrainFloat*)buffer3->GetCpuPtr(), bufferSize);
+        ndBrainMemVector vdw2((ndBrainFloat*)buffer4->GetCpuPtr(), bufferSize);
+        const ndBrainMemVector weightAndBiasGradientBuffer((ndBrainFloat*)buffer2->GetCpuPtr(), bufferSize);
+
+        const ndBrainFloat descendRate = -*buffer5;
+        const ndBrainFloat regularizer = -parameters->m_decayRegularizer;
         
-        //ndBrainFloat* const vdw2 = (ndBrainFloat*)buffer4->GetGpuBuffer()->GetPtr();
-        //ndBrainFloat* const vdw = (ndBrainFloat*)buffer3->GetGpuBuffer()->GetPtr();
-        //ndBrainFloat* const weightAndBiasGradientBuffer = (ndBrainFloat*)buffer2->GetGpuBuffer()->GetPtr();
-        //ndBrainFloat* const weightAndBiasBuffer = (ndBrainFloat*)buffer1->GetGpuBuffer()->GetPtr();
-        //ndBrainOptimizerAdam::ndCommandSharedInfo* const parameters = (ndBrainOptimizerAdam::ndCommandSharedInfo*)buffer0->GetGpuBuffer()->GetPtr();
-        
-        //ndBrainFloat descendRate = - *buffer5;
-        //ndBrainFloat regularizer = -parameters->m_decayRegularizer;
-        
-        //ndInt64 start = groupId * ndInt64(workGroupSize);
-        //ndBrainFloat miniBatchWeight = parameters->m_minibathScale;
+        const ndInt32 start = groupId * workGroupSize;
+        const ndBrainFloat miniBatchWeight = parameters->m_minibathScale;
         for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
         {
-            ndAssert(0);
-            //ndBrainFloat weightAndBiasGradient = miniBatchWeight * weightAndBiasGradientBuffer[start + itemId];
-            //
-            //// calculate moving average
-            //ndBrainFloat a = vdw[start + itemId] * parameters->m_alpha + weightAndBiasGradient * (ndBrainFloat(1.0f) - parameters->m_alpha);
-            //vdw[start + itemId] = a;
-            //
-            //// caluate RMS
-            //ndBrainFloat b = vdw2[start + itemId] * parameters->m_beta + weightAndBiasGradient * weightAndBiasGradient * (ndBrainFloat(1.0f) - parameters->m_beta);
-            //vdw2[start + itemId] = b;
-            //
-            //ndBrainFloat vdwCorrected = a * parameters->m_invAlpha;
-            //ndBrainFloat vdw2Corrected = b * parameters->m_invBeta;
-            //
-            //ndBrainFloat bias_den = ndBrainFloat(1.0f) / (ndBrainFloat(ndSqrt(vdw2Corrected)) + parameters->m_epsilon);
-            //ndBrainFloat gradient = vdwCorrected * bias_den;
-            // 
-            //ndBrainFloat weight = weightAndBiasBuffer[start + itemId];
-            //gradient += weight * regularizer;
-            //weightAndBiasBuffer[start + itemId] = weight + gradient * descendRate;
+            ndBrainFloat m = vdw[start + itemId];
+            ndBrainFloat v = vdw2[start + itemId];
+            ndBrainFloat g = miniBatchWeight * weightAndBiasGradientBuffer[start + itemId];
+        
+            // calculate moving average
+            m = m * parameters->m_alpha + g * (ndBrainFloat(1.0f) - parameters->m_alpha);
+        
+            // calculate RMS
+            v = v * parameters->m_beta + g * g * (ndBrainFloat(1.0f) - parameters->m_beta);
+        
+            // save veloc and accel for net update
+            vdw[start + itemId] = m;
+            vdw2[start + itemId] = v;
+            const ndBrainFloat weight = weightAndBiasBuffer[start + itemId];
+        
+            // apply bias correction, until bias becomes 1.0
+            ndBrainFloat vCorrected = v * parameters->m_invBiasBetaCorrection;
+            ndBrainFloat mCorrected = m * parameters->m_invBiasAlphaCorrection;
+        
+            const ndBrainFloat denV = ndBrainFloat(ndSqrt(vCorrected)) + parameters->m_epsilon;
+            const ndBrainFloat gradient = weight * regularizer + mCorrected / denV;
+            weightAndBiasBuffer[start + itemId] = weight + gradient * descendRate;
         }
     }
-    ndBrainFloat m_learRate;
 };
 
 // matrix vector operation kernels.
@@ -1272,6 +1266,18 @@ class brainLayerMatrixMatrixAddBias : public ndBrainKernel
         const ndBrainMemVector bias(&parameters[matrixSize], outputSize);
         output.Add(bias);
         //ndAssert(output.SanityCheck());
+
+#ifdef _DEBUG
+        {
+            const ndBrainMemVector checkPadding(&inputOutputBuffer[outputOffset], workGroupSize);
+            ndInt32 padded = (outputSize + workGroupSize - 1) & -workGroupSize;
+            for (ndInt32 i = outputSize; i < padded; ++i)
+            {
+                ndBrainFloat a = checkPadding[i];
+                ndAssert(a == ndBrainFloat(0.0f));
+            }
+        }
+#endif
     }
 };
 
@@ -1314,20 +1320,20 @@ class brainLayerMatrixMatrixMultiply : public ndBrainKernel
         const ndCommandSharedInfo& info = *(ndCommandSharedInfo*)buffer0->GetGpuBuffer()->GetPtr();
 
         const ndInt32 inputSize = info.m_inputSize;
-        //const ndInt32 outputSize = info.m_outputSize;
+        const ndInt32 ouputSize = info.m_outputSize;
         const ndInt32 inputOutputSize = info.m_inputOutputSize;
         const ndInt32 inputOutputStartOffset = info.m_inputOutputStartOffset;
 
         const ndInt32 width = (inputSize + ND_GPU_TILED_MATRIX_ROWS - 1) & -ND_GPU_TILED_MATRIX_ROWS;
-        //const ndInt32 height = (outputSize + ND_GPU_TILED_MATRIX_ROWS - 1) & -ND_GPU_TILED_MATRIX_ROWS;
-        //const ndInt32 matrixSize = width * height;
+        const ndInt32 height = (ouputSize + ND_GPU_TILED_MATRIX_ROWS - 1) & -ND_GPU_TILED_MATRIX_ROWS;
+        const ndInt32 matrixSize = width * height;
 
         const ndInt32 kDim = (inputSize + ND_GPU_TILED_MATRIX_ROWS - 1) / ND_GPU_TILED_MATRIX_ROWS;
         const ndInt32 rowStart = groupId / info.m_matrixDimensionK;
         const ndInt32 columStart = groupId - rowStart * info.m_matrixDimensionK;
 
-        const ndBrainMemVector weightsAndBias((ndBrainFloat*)buffer2->GetGpuBuffer()->GetPtr(), ndInt32(buffer2->SizeInItems()));
-        //ndAssert(weightsAndBias.BounceCheck(matrixSize - 1));
+        const ndBrainFloat* const weightAndBiasPtr = (ndBrainFloat*)buffer2->GetGpuBuffer()->GetPtr();
+        const ndBrainMemVector weightsAndBias(&weightAndBiasPtr[info.m_parametersStartOffset], matrixSize);
         const ndBrainMemVector inputBuffer((ndBrainFloat*)buffer1->GetGpuBuffer()->GetPtr(), ndInt32(buffer1->SizeInItems()));
 
         const ndInt32 weightsBase = rowStart * width * ND_GPU_TILED_MATRIX_ROWS;
@@ -1425,7 +1431,7 @@ class brainLayerBrainBackPropagateMatrixInputGradients : public ndBrainKernel
 
         const ndInt32 width = (inputSize + ND_GPU_TILED_MATRIX_ROWS - 1) & -ND_GPU_TILED_MATRIX_ROWS;
         const ndInt32 height = (outputSize + ND_GPU_TILED_MATRIX_ROWS - 1) & -ND_GPU_TILED_MATRIX_ROWS;
-        //const ndInt32 matrixSize = width * height;
+        const ndInt32 matrixSize = width * height;
 
         const ndInt32 kDim = height / ND_GPU_TILED_MATRIX_ROWS;
         const ndInt32 minibatchSize = info.m_matrixDimensionK / ndBrainLayerLinear::m_dimFactor;
@@ -1433,9 +1439,9 @@ class brainLayerBrainBackPropagateMatrixInputGradients : public ndBrainKernel
         const ndInt32 columStart = groupId - rowStart * minibatchSize;
 
         const ndInt32 weightsBase = columStart * ND_GPU_TILED_MATRIX_ROWS;
-        const ndBrainMemVector weightAndBias((ndBrainFloat*)buffer2->GetGpuBuffer()->GetPtr(), ndInt32(buffer2->SizeInItems()));
+        const ndBrainFloat* const weightAndBiasPtr = (ndBrainFloat*)(ndBrainFloat*)buffer2->GetGpuBuffer()->GetPtr();
+        const ndBrainMemVector weightAndBias(&weightAndBiasPtr[info.m_parametersStartOffset], matrixSize);
         ndBrainMemVector inputOutputGradientsBuffer((ndBrainFloat*)buffer3->GetGpuBuffer()->GetPtr(), ndInt32(buffer3->SizeInItems()));
-        //ndAssert(weightAndBias.BounceCheck(matrixSize - 1));
 
         const ndInt32 inputBase = rowStart * inputOutputSize * ND_GPU_TILED_MATRIX_ROWS + inputOutputStartOffset;
         const ndInt32 outputBase = inputBase + ((inputSize + workGroupSize - 1) & -workGroupSize);
@@ -1684,6 +1690,32 @@ class brainCopyBufferIndirect : public ndBrainKernel
     }
 };
 
+class brainAccumulateWeigndAndBiasGradients : public ndBrainKernel
+{
+    public:
+    brainAccumulateWeigndAndBiasGradients(ndBrainContext* const context)
+        :ndBrainKernel(context)
+    {
+    }
+
+    virtual void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
+    {
+        ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
+        ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
+
+        const ndCommandSharedInfo& info = *(ndCommandSharedInfo*)buffer0->GetGpuBuffer()->GetPtr();
+        ndAssert(info.m_matrixDimensionK == workGroupSize);
+        ndInt32 start = groupId * workGroupSize;
+        ndInt32 count = ndInt32(((start + workGroupSize) < info.m_inputOutputSize) ? workGroupSize : info.m_inputOutputSize - start);
+        
+        ndBrainMemVector buffer((ndBrainFloat*)buffer1->GetCpuPtr(), ndInt32(buffer1->SizeInItems()));
+        ndBrainMemVector dst(&buffer[start], count);
+        const ndBrainMemVector src(&buffer[start + info.m_inputOutputSize], count);
+        dst.Add(src);
+        dst.SanityCheck();
+    }
+};
+
 void ndBrainGpuContext::CreateKerners()
 {   
     // create all feed foward shaders
@@ -1698,9 +1730,9 @@ void ndBrainGpuContext::CreateKerners()
     m_brainLayerMatrixMatrixAddBias = ndSharedPtr<ndBrainKernel>(new brainLayerMatrixMatrixAddBias(this));
     m_brainLayerMatrixMatrixMultiply = ndSharedPtr<ndBrainKernel>(new brainLayerMatrixMatrixMultiply(this));
 
-    m_brainLayerBatchNormalizationLoadInputActivation = ndSharedPtr<ndBrainKernel>(new brainLayerBatchNormalizationActivation_0(this));
-    m_brainLayerBatchNormalizationAddInputActivation = ndSharedPtr<ndBrainKernel>(new brainLayerBatchNormalizationActivation_1(this));
-    m_brainLayerBatchNormalizationNormalizeInputActivation = ndSharedPtr<ndBrainKernel>(new brainLayerBatchNormalizationActivation_2(this));
+    m_brainLayerBatchNormalizationLoadInputActivation = ndSharedPtr<ndBrainKernel>(new brainLayerBatchNormalizationActivationInputSqr(this));
+    m_brainLayerBatchNormalizationAddInputActivation = ndSharedPtr<ndBrainKernel>(new brainLayerBatchNormalizationActivationVarianceSum(this));
+    m_brainLayerBatchNormalizationNormalizeInputActivation = ndSharedPtr<ndBrainKernel>(new brainLayerBatchNormalizationActivationNormalize(this));
 
     // create all backpropagate shaders
     m_brainCopyInputGradients = ndSharedPtr<ndBrainKernel>(new brainCopyInputGradients(this));
@@ -1717,11 +1749,12 @@ void ndBrainGpuContext::CreateKerners()
     m_brainLayerMatrixBackPropagateWeightGradients = ndSharedPtr<ndBrainKernel>(new brainLayerBrainBackPropagateMatrixWeightsGradients(this));
 
     // optimizer kernels
-    //m_brainAdamMomentumUpdate = ndSharedPtr<ndBrainKernel>(new brainAdamBiasCorrectionUpdate(this));
+    m_brainAdamBiasCorrectionUpdate = ndSharedPtr<ndBrainKernel>(new brainAdamBiasCorrectionUpdate(this));
     m_brainAdamRidgeOptimizerUpdate = ndSharedPtr<ndBrainKernel>(new brainAdamUpdateRidgeRegularizer(this));
     m_brainAdamLassoOptimizerUpdate = ndSharedPtr<ndBrainKernel>(new brainAdamUpdateLassoRegularizer(this));
 
     // optimizer kernels
     m_brainCopyBuffer = ndSharedPtr<ndBrainKernel>(new brainCopyBuffer(this));
     m_brainCopyBufferIndirect = ndSharedPtr<ndBrainKernel>(new brainCopyBufferIndirect(this));
+    m_accumulateWeigndAndBiasGradiens = ndSharedPtr<ndBrainKernel>(new brainAccumulateWeigndAndBiasGradients(this));
 }
