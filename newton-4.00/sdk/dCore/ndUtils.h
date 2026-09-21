@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_UTILS_H__
-#define __ND_UTILS_H__
+#ifndef ND_UTILS_H_
+#define ND_UTILS_H_
 
 #include "ndCoreStdafx.h"
 #include "ndTypes.h"
@@ -245,15 +245,15 @@ D_CORE_API ndFloat32 ndExp_VS_Fix(ndFloat32 x);
 D_CORE_API ndUnsigned64 ndGetTimeInMicroseconds();
 
 /// Round a 64 bit float to a 32 bit float by truncating the mantissa to 24 bits 
-/// \param ndFloat64 val: 64 bit float 
-/// \return a 64 bit double precision with a 32 bit mantissa
+/// param ndFloat64 val: 64 bit float 
+/// return a 64 bit double precision with a 32 bit mantissa
 D_CORE_API ndFloat64 ndRoundToFloat(ndFloat64 val);
 
 /// removed all duplicate points from an array and place the location in the index array
-D_CORE_API ndInt32 ndVertexListToIndexList(ndReal* const vertexList, ndInt32 strideInBytes, ndInt32 compareCount, ndInt32 vertexCount, ndInt32* const indexListOut, ndFloat64 tolerance = ndEpsilon);
+D_CORE_API ndInt32 ndVertexListToIndexList(ndReal* const vertexList, ndInt32 strideInBytes, ndInt32 compareCount, ndInt32 vertexCount, ndInt32* const indexListOut, ndFloat64 tolerance = ndFloat64(ndEpsilon));
 
 /// removed all duplicate points from an array and place the location in the index array
-D_CORE_API ndInt32 ndVertexListToIndexList(ndFloat64* const vertexList, ndInt32 strideInBytes, ndInt32 compareCount, ndInt32 vertexCount, ndInt32* const indexListOut, ndFloat64 tolerance = ndEpsilon);
+D_CORE_API ndInt32 ndVertexListToIndexList(ndFloat64* const vertexList, ndInt32 strideInBytes, ndInt32 compareCount, ndInt32 vertexCount, ndInt32* const indexListOut, ndFloat64 tolerance = ndFloat64(ndEpsilon));
 
 /// Simple moving average class, useful for stuff like frame rate smoothing
 template <ndInt32 size>

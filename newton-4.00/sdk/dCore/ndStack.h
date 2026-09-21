@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ndStack__
-#define __ndStack__
+#ifndef ND_STACK_H_
+#define ND_STACK_H_
 
 #include "ndCoreStdafx.h"
 #include "ndTypes.h"

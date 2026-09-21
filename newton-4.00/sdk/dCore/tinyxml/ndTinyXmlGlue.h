@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_TINYXML_GLUE_H__
-#define __ND_TINYXML_GLUE_H__
+#ifndef ND_TINYXML_GLUE_H_
+#define ND_TINYXML_GLUE_H_
 
 #include "ndArray.h"
 #include "ndVector.h"

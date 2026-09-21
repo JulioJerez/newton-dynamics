@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_MEMORY_H__
-#define __ND_MEMORY_H__
+#ifndef ND_MEMORY_H_
+#define ND_MEMORY_H_
 
 #include "ndCoreStdafx.h"
 #include "ndTypes.h"
@@ -70,9 +70,9 @@ class ndMemory
 	D_CORE_API static ndUnsigned64 GetMemoryUsed();
 
 	/// Install low level system memory allocation functions.
-	/// \param ndMemAllocCallback alloc: is a function pointer callback to allocate a memory chunk.
-	/// \param ndMemFreeCallback free: is a function pointer callback to free a memory chunk.
-	/// \brief All memory allocated by alloc, does not need to be aligned, therefore an application can
+	/// param ndMemAllocCallback alloc: is a function pointer callback to allocate a memory chunk.
+	/// param ndMemFreeCallback free: is a function pointer callback to free a memory chunk.
+	/// brief All memory allocated by alloc, does not need to be aligned, therefore an application can
 	/// write them using standard malloc and free.
 	/// By default the memory allocation is set to call the standard 
 	/// library functions malloc and free, however if an application wants to

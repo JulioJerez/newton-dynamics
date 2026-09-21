@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_VECTOR_X86_SIMD_H__
-#define __ND_VECTOR_X86_SIMD_H__
+#ifndef ND_VECTOR_X86_SIMD_H_
+#define ND_VECTOR_X86_SIMD_H_
 
 #include "ndTypes.h"
 
@@ -266,7 +266,7 @@ class ndBigVector: public ndClassAlloc
 	inline ndBigVector Normalize() const
 	{
 		ndFloat64 mag2 = DotProduct(*this).GetScalar();
-		ndAssert(mag2 > ndFloat32(0.0f));
+		ndAssert(mag2 > ndFloat64(0.0f));
 		return Scale(ndFloat64 (1.0f) / sqrt (mag2));
 	}
 
@@ -1519,7 +1519,7 @@ class ndVector : public ndClassAlloc
 
 	inline ndVector Normalize() const
 	{
-		ndFloat64 mag2 = DotProduct(*this).GetScalar();
+		ndFloat32 mag2 = DotProduct(*this).GetScalar();
 		ndAssert(mag2 > ndFloat32(0.0f));
 		return Scale(ndFloat32(1.0f) / ndSqrt(mag2));
 	}

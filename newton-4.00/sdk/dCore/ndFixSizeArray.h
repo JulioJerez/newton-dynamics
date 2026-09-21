@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_FIX_SIZE_ARRAY_H__
-#define __ND_FIX_SIZE_ARRAY_H__
+#ifndef ND_FIX_SIZE_ARRAY_H_
+#define ND_FIX_SIZE_ARRAY_H_
 
 #include "ndCoreStdafx.h"
 

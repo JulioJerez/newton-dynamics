@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_TYPES_H__
-#define __ND_TYPES_H__
+#ifndef ND_TYPES_H_
+#define ND_TYPES_H_
 
 #ifdef _MSC_VER 
 	#if _MSC_VER >= 1400

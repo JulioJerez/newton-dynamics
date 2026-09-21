@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _ND_TYPES_H_
-#define _ND_TYPES_H_
+#ifndef ND_CORE_STDAFX_H_
+#define ND_CORE_STDAFX_H_
 
 #include "ndTypes.h"
 
