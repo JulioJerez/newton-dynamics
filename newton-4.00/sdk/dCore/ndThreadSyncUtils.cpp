@@ -68,6 +68,7 @@ void ndThreadYield(ndInt32& loop)
 
 ndFloatExceptions::ndFloatExceptions(ndUnsigned32 mask)
 {
+#if _DEBUG
 	#if defined (_MSC_VER)
 		_clearfp();
 		m_floatMask = _controlfp(0, 0);
@@ -83,21 +84,20 @@ ndFloatExceptions::ndFloatExceptions(ndUnsigned32 mask)
 	#if defined (__APPLE__)
 		//#pragma message ("warning!!! apple flush to zero not defined for x86 platforms")
 	#endif
+#else
 
-	//ndFloat32 a = ndFloat32(1.0f);
-	//ndFloat32 b = ndFloat32(0.1f);
-	//ndFloat32 c = ndFloat32(0.0f);
-	//ndInt32 count = 0;
-	//while (a != 0.0f)
-	//{
-	//	a = a * b;
-	//	count++;
-	//}
-	//count++;
+	#if (defined(_M_IX86) || defined(__x86_64__) || defined(_M_X64))
+		m_simdMask = _mm_getcsr();
+		_MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
+		_MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
+	#endif
+#endif
+
 }
 
 ndFloatExceptions::~ndFloatExceptions()
 {
+#if _DEBUG
 	#if (defined(_M_IX86) || defined(__x86_64__) || defined(_M_X64))
 		_mm_setcsr(m_simdMask);
 	#endif
@@ -107,4 +107,6 @@ ndFloatExceptions::~ndFloatExceptions()
 		_clearfp();
 		_controlfp(m_floatMask, _MCW_EM);
 	#endif
+#endif
+
 }
