@@ -408,7 +408,7 @@ ndOpenAlManager::~ndOpenAlManager()
 	if (m_device)
 	{
 		ndAssert(m_context == alcGetCurrentContext());
-		ndAssert(m_device = alcGetContextsDevice(m_context));
+		ndAssert(m_device == alcGetContextsDevice(m_context));
 		alcMakeContextCurrent(nullptr);
 		alcDestroyContext(m_context);
 		alcCloseDevice(m_device);
