@@ -188,7 +188,7 @@ namespace ndUnicycleTrainer_sac
 		{
 		}
 
-		#pragma optimize( "", off )
+		//#pragma optimize( "", off )
 		virtual void Update(ndDemoEntityManager* const manager, ndFloat32)
 		{
 			ndInt32 stopTraining = ndInt32(m_master->GetFramesCount());

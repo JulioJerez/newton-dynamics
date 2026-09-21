@@ -257,10 +257,22 @@ class brainLayerTanhActivation : public ndBrainKernel
         }
         for (ndInt32 itemId = 0; itemId < workGroupSizeReminder; ++itemId)
         {
-            ndBrainFloat inputValue = srcData[ modWorkGroupSize + itemId];
+            ndBrainFloat inputValue = srcData[modWorkGroupSize + itemId];
             ndBrainFloat outputValue = (inputValue > ndBrainFloat (-30.0f)) ? ((inputValue < ndBrainFloat(30.0f)) ? inputValue : ndBrainFloat(30.0f)) : ndBrainFloat (-30.0f);
             dstData[modWorkGroupSize + itemId] = ndBrainFloat(ndTanh(outputValue));
         }
+#ifdef _DEBUG
+        {
+            ndInt32 padded = (inputSize + workGroupSize - 1) & -workGroupSize;
+            const ndBrainMemVector checkData(&inputOutputData[outputOffset], workGroupSize);
+            for (ndInt32 i = inputSize; i < padded; ++i)
+            {
+                ndBrainFloat a = checkData[modWorkGroupSize + i];
+                ndAssert(a == ndBrainFloat(0.0f));
+            }
+        }
+#endif
+
         //ndAssert(srcData.SanityCheck());
         //ndAssert(dstData.SanityCheck());
     }
@@ -340,7 +352,8 @@ class brainLayerLinearActivation : public ndBrainKernel
 
         const ndBrainMemVector biasPtr(biasDataPtr, inputSize);
         const ndBrainMemVector slopesPtr(slopesDataPtr, inputSize);
-        ndBrainMemVector inputOutputData(inputOutputDataPtr, inputOutputSize * workGroupSize);
+        ndBrainMemVector input(&inputOutputDataPtr[inputOffset], inputSize);
+        ndBrainMemVector output(&inputOutputDataPtr[outputOffset], inputSize);
         
         ndInt32 workGroupSizeReminder = inputSize % workGroupSize;
         ndInt32 modWorkGroupSize = inputSize - workGroupSizeReminder;
@@ -350,21 +363,34 @@ class brainLayerLinearActivation : public ndBrainKernel
             {
                 ndBrainFloat bias = biasPtr[i + itemId];
                 ndBrainFloat slope = slopesPtr[i + itemId];
-                ndBrainFloat inputValue = inputOutputData[inputOffset + i + itemId];
+                ndBrainFloat inputValue = input[i + itemId];
                 ndBrainFloat outputValue = bias + slope * inputValue;
-                inputOutputData[outputOffset + i + itemId] = outputValue;
+                output[i + itemId] = outputValue;
             }
         }
         for (ndInt32 itemId = 0; itemId < workGroupSizeReminder; ++itemId)
         {
             ndBrainFloat bias = biasPtr[modWorkGroupSize + itemId];
             ndBrainFloat slope = slopesPtr[modWorkGroupSize + itemId];
-            ndBrainFloat inputValue = inputOutputData[inputOffset + modWorkGroupSize + itemId];
+            ndBrainFloat inputValue = input[modWorkGroupSize + itemId];
 
             ndBrainFloat outputValue = bias + slope * inputValue;
-            inputOutputData[outputOffset + modWorkGroupSize + itemId] = outputValue;
+            output[modWorkGroupSize + itemId] = outputValue;
         }
         //ndAssert(inputOutputData.SanityCheck());
+
+#ifdef _DEBUG
+        {
+            ndInt32 padded = (inputSize + workGroupSize - 1) & -workGroupSize;
+            const ndBrainMemVector checkData(&inputOutputDataPtr[outputOffset], workGroupSize);
+            for (ndInt32 i = inputSize; i < padded; ++i)
+            {
+                ndBrainFloat a = checkData[modWorkGroupSize + i];
+                ndAssert(a == ndBrainFloat(0.0f));
+            }
+        }
+#endif
+
     }
 };
 
@@ -655,8 +681,6 @@ class brainCopyOutputGradients : public ndBrainKernel
 
         ndCommandSharedInfo* const parameters = (ndCommandSharedInfo*)buffer0->GetGpuBuffer()->GetPtr();
 
-        //ndBrainFloat* const miniBatchGradients = (ndBrainFloat*)buffer1->GetGpuBuffer()->GetPtr();
-        //ndBrainFloat* const inputOutputGradients = (ndBrainFloat*)buffer2->GetGpuBuffer()->GetPtr();
         const ndBrainMemVector miniBatchGradients((ndBrainFloat*)buffer1->GetGpuBuffer()->GetPtr(), ndInt32(buffer1->SizeInItems()));
         ndBrainMemVector inputOutputGradients((ndBrainFloat*)buffer2->GetGpuBuffer()->GetPtr(), ndInt32(buffer2->SizeInItems()));
 

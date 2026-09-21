@@ -218,7 +218,6 @@ void ndBrainLayerActivationBatchNormalize::AddVariance(const ndBrainLayerSelfMod
 {
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
-	//ndBrainTrainerInference* const trainer = (ndBrainTrainerInference*)*desc.m_owner;
 
 	const ndInt32 inputSize = info.m_inputSize;
 	const ndInt32 workGroupSize = info.m_matrixDimensionK >> 8;

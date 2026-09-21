@@ -78,9 +78,10 @@ class ndBrainBufferCommand : public ndContainersFreeListAlloc<ndBrainBufferComma
 	ndBrainBufferCommand(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer);
 	virtual ~ndBrainBufferCommand();
 	
+	const ndBrainLayer* GetLayer() const;
 	ndBrainBufferCommandDesc& GetDescriptor();
 	const ndBrainBufferCommandDesc& GetDescriptor() const;
-
+	
 	protected:
 	ndBrainBufferCommandDesc m_desc;
 	ndWeakPtr<ndBrainLayer> m_layer;

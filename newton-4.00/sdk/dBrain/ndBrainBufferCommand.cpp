@@ -39,6 +39,11 @@ ndBrainBufferCommand::~ndBrainBufferCommand()
 {
 }
 
+const ndBrainLayer* ndBrainBufferCommand::GetLayer() const
+{
+	return *m_layer;
+}
+
 ndBrainBufferCommandDesc& ndBrainBufferCommand::GetDescriptor()
 {
 	return m_desc;
