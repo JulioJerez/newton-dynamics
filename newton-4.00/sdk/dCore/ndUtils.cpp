@@ -36,7 +36,7 @@ ndFloat32 ndExp_VS_Fix(ndReal x)
 	return ndFloat32 (exp(x));
 }
 
-bool ndCheckFloat(ndFloat64 x)
+bool ndCheckFloat(ndFloat64)
 {
 	//return _finite(x) && !_isnan(x);
 	return true;
