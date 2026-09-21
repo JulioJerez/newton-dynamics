@@ -178,9 +178,12 @@ void ndBrainLayerActivationLinear::FeedForward(const ndBrainLayerFeedForwardCpuC
 	const ndBrainMemVector input(&inputOutputBuffer[inputOffset], inputSize);
 	ndBrainMemVector output(&inputOutputBuffer[outputOffset], outputSize);
 
+	const ndBrainMemVector bias((ndBrainFloat*)m_biasesBuffer->GetCpuPtr(), inputSize);
+	const ndBrainMemVector slope((ndBrainFloat*)m_slopesBuffer->GetCpuPtr(), inputSize);
+
 	output.Set(input);
-	output.Mul(m_slopes);
-	output.Add(m_biases);
+	output.Mul(slope);
+	output.Add(bias);
 	ndAssert(output.SanityCheck());
 }
 

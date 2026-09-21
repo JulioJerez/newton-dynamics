@@ -1045,10 +1045,12 @@ void ndBrainAgentOffPolicyGradient_Trainer::Update()
 	}
 	m_uniformRandom->VectorToDevice(m_scratchBuffer);
 
+
 	const ndBrainAgentOffPolicyGradient_Agent::ndTrajectory& trajectory = m_agent->m_trajectory;
 	const ndInt32 transitionSizeInBytes = ndInt32(trajectory.GetStride() * sizeof(ndInt32));
 	const ndInt32 copyIndicesStrideInBytes = ndInt32(m_parameters.m_miniBatchSize * sizeof(ndInt32));
 
+	// update self modifying layers before training weights and bias pass
 	for (ndInt32 i = 0; i < m_parameters.m_numberOfUpdates; ++i)
 	{
 		// sample a random mini batch of shuffled transitions indices
@@ -1069,8 +1071,28 @@ void ndBrainAgentOffPolicyGradient_Trainer::Update()
 		minibatchOfTransitions.m_bytesToCopy = transitionSizeInBytes;
 		m_minibatchOfTransitions->CopyBufferIndirect(minibatchOfTransitions, **m_minibatchIndexBuffer, **m_replayBufferFlat);
 
-		// make sure spacial self modifying layers are updaded befored training
 		UpdateSpecialLayers();
+	}
+
+	for (ndInt32 i = 0; i < m_parameters.m_numberOfUpdates; ++i)
+	{
+		// sample a random mini batch of shuffled transitions indices
+		ndCopyBufferCommandInfo copyIndicesInfo;
+		copyIndicesInfo.m_dstOffsetInByte = 0;
+		copyIndicesInfo.m_dstStrideInByte = copyIndicesStrideInBytes;
+		copyIndicesInfo.m_srcOffsetInByte = ndInt32(i * copyIndicesStrideInBytes);
+		copyIndicesInfo.m_srcStrideInByte = copyIndicesStrideInBytes;
+		copyIndicesInfo.m_bytesToCopy = copyIndicesStrideInBytes;
+		m_minibatchIndexBuffer->CopyBuffer(copyIndicesInfo, 1, **m_randomShuffleBuffer);
+
+		// get an indirect mini batch of transition from flat array
+		ndCopyBufferCommandInfo minibatchOfTransitions;
+		minibatchOfTransitions.m_dstOffsetInByte = 0;
+		minibatchOfTransitions.m_dstStrideInByte = transitionSizeInBytes;
+		minibatchOfTransitions.m_srcOffsetInByte = 0;
+		minibatchOfTransitions.m_srcStrideInByte = transitionSizeInBytes;
+		minibatchOfTransitions.m_bytesToCopy = transitionSizeInBytes;
+		m_minibatchOfTransitions->CopyBufferIndirect(minibatchOfTransitions, **m_minibatchIndexBuffer, **m_replayBufferFlat);
 
 		// calculate expected rewards for this mini batch
 		CalculateExpectedRewards();
