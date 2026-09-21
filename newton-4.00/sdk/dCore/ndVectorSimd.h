@@ -24,10 +24,6 @@
 
 #include "ndTypes.h"
 
-// visual studion does not support these types
-//#include <std::simd>
-//#include <std::experimental::simd>
-
 class ndVector;
 // *****************************************************************************************
 //
