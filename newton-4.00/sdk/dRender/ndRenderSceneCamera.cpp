@@ -185,8 +185,6 @@ ndVector ndRenderSceneCamera::ScreenToWorld(const ndVector& screenPoint) const
 	sp.m_z = ndFloat32(2.0f) * sp.m_z - ndFloat32(1.0f);
 	sp.m_w = ndFloat32(1.0f);
 
-	//sp = viewPoint * ViewMatrx * projeMatrix;
-	//ndVector viewPoint(m_viewMatrix.OrthoInverse().TransformVector1x4(m_invProjectionMatrix.TransformVector1x4(sp)));
 	ndVector viewPoint(m_viewMatrix.TransformVector1x4(m_invProjectionMatrix.TransformVector1x4(sp)));
 	if (viewPoint.m_w != ndFloat32 (0.0f))
 	{
