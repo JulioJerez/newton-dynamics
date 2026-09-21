@@ -24,6 +24,9 @@
 
 #include "ndTypes.h"
 
+// visual studio 2022 does not supports these types
+//#include <std::simd>
+//#include <std::experimental::simd>
 
 class ndVector;
 // *****************************************************************************************
