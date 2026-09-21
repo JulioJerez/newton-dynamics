@@ -66,6 +66,7 @@ class ndModel: public ndContainersFreeListAlloc<ndModel>
 	private:
 	ndWeakPtr<ndModelList::ndNode> m_worldNode;
 	ndSharedPtr<ndModelNotify> m_notifyCallback;
+	ndClassPadding m_padding;
 
 	friend class ndWorld;
 	friend class ndLoadSave;

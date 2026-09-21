@@ -198,6 +198,7 @@ class ndWorld: public ndClassAlloc
 	bool m_inUpdate;
 	bool m_collisionUpdate;
 	ndArray<ndUnsigned8> m_threadLocalBuffers[D_MAX_THREADS_COUNT];
+	ndClassPadding m_padding;
 	
 	friend class ndScene;
 	friend class ndIkSolver;

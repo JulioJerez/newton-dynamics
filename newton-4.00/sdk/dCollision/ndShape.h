@@ -275,6 +275,7 @@ class ndShape: public ndContainersFreeListAlloc<ndShape>
 
 	mutable ndAtomic<ndInt32> m_refCount;
 	ndShapeID m_collisionId;
+	ndClassPadding m_padding;
 
 	static ndVector m_flushZero;
 } D_GCC_NEWTON_CLASS_ALIGN_32;

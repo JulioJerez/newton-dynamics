@@ -142,6 +142,7 @@ class ndDynamicsUpdate : public ndClassAlloc
 	ndInt32 m_activeSkeleton;
 	ndInt32 m_parallelSkeleton;
 	ndInt32 m_unConstrainedBodyCount;
+	ndClassPadding m_padding;
 
 	friend class ndWorld;
 	friend class ndSkeletonContainer;

@@ -296,6 +296,22 @@ class ndTriplexReal
 	ndReal m_z;
 };
 
+D_MSV_NEWTON_CLASS_ALIGN_32
+class ndClassPadding
+{
+	public:
+	ndClassPadding()
+	{
+		for (ndInt32 i = 0; i < ndInt32(sizeof(m_padding) / sizeof(m_padding[0])); ++i)
+		{
+			m_padding[i] = 0;
+		}
+	}
+
+	ndInt32 m_padding[8];
+};
+
+
 #define D_STATIC_CLASS_REFLECTION(Class)		\
 	const char* ClassName() const				\
 	{											\

@@ -62,6 +62,7 @@ class ndConstraintDebugCallback: public ndClassAlloc
 	D_COLLISION_API void DrawArrow(const ndMatrix& origin, const ndVector& color, ndFloat32 length);
 
 	ndFloat32 m_debugScale;
+	ndClassPadding m_padding;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 D_MSV_NEWTON_CLASS_ALIGN_32

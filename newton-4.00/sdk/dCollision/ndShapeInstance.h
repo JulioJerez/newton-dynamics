@@ -55,8 +55,9 @@ class ndShapeDebugNotify : public ndClassAlloc
 
 	virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceArray, const ndEdgeType* const edgeType) = 0;
 
-	const ndShapeInstance* m_instance;
-
+	//const ndShapeInstance* m_instance;
+	ndWeakPtr<ndShapeInstance> m_instance;
+	ndClassPadding m_padding;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 D_MSV_NEWTON_CLASS_ALIGN_32

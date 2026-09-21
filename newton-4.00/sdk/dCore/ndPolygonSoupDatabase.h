@@ -45,6 +45,7 @@ class ndPolygonSoupDatabase: public ndClassAlloc
 
 	ndVector* m_localVertex;
 	ndInt32 m_vertexCount;
+	ndClassPadding m_padding;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif

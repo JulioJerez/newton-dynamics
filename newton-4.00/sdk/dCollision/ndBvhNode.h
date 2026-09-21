@@ -62,6 +62,7 @@ class ndBvhNode : public ndContainersFreeListAlloc<ndBvhNode>
 	ndInt32 m_depthLevel;
 	ndUnsigned8 m_isDead;
 	ndUnsigned8 m_bhvLinked;
+	ndClassPadding m_padding;
 #ifdef _DEBUG
 	ndInt32 m_nodeId;
 #endif

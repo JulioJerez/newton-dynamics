@@ -52,7 +52,7 @@ class ndModelNotify : public ndContainersFreeListAlloc<ndModelNotify>
 
 	private:
 	ndWeakPtr<ndModel> m_model;
-
+	ndClassPadding m_padding;
 	friend class ndModel;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
