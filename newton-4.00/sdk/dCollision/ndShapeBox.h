@@ -30,7 +30,7 @@ class ndShapeBox: public ndShapeConvex
 	public:
 	D_CLASS_REFLECTION(ndShapeBox,ndShapeConvex)
 	D_COLLISION_API ndShapeBox(ndFloat32 size_x, ndFloat32 size_y, ndFloat32 size_z);
-	D_COLLISION_API virtual ~ndShapeBox();
+	D_COLLISION_API virtual ~ndShapeBox() override;
 
 	D_COLLISION_API virtual ndShapeBox* GetAsShapeBox() override { return this; }
 

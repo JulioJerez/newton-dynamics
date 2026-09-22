@@ -50,7 +50,7 @@ class ndJointWheel : public ndJointBilateralConstraint
 	D_NEWTON_API ndJointWheel(const ndJointWheel& wheel);
 	D_NEWTON_API ndJointWheel(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent, const ndWheelDescriptor& desc);
 	D_NEWTON_API ndJointWheel(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent, const ndWheelDescriptor& desc);
-	D_NEWTON_API virtual ~ndJointWheel();
+	D_NEWTON_API virtual ~ndJointWheel() override;
 
 	D_NEWTON_API ndFloat32 GetPosit() const;
 	D_NEWTON_API ndFloat32 SetSpeed() const;

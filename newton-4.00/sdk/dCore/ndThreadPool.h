@@ -71,12 +71,12 @@ class ndThreadPool: public ndSyncMutex, public ndThread
 	{
 		public:
 		D_CORE_API ndWorker();
-		D_CORE_API virtual ~ndWorker();
+		D_CORE_API virtual ~ndWorker() override;
 		D_CORE_API void ExecuteTask(ndTask* const task);
 	
 		private:
 		void TaskUpdate();
-		virtual void ThreadFunction();
+		virtual void ThreadFunction() override;
 
 		ndThreadPool* m_owner;
 		ndTask* m_task;
@@ -87,7 +87,7 @@ class ndThreadPool: public ndSyncMutex, public ndThread
 
 	public:
 	D_CORE_API ndThreadPool(const char* const baseName);
-	D_CORE_API virtual ~ndThreadPool();
+	D_CORE_API virtual ~ndThreadPool() override;
 
 	D_CORE_API ndInt32 GetThreadCount() const;
 	D_CORE_API static ndInt32 GetMaxThreads();
@@ -105,7 +105,7 @@ class ndThreadPool: public ndSyncMutex, public ndThread
 	void ParallelExecute(const Function& function, ndInt32 workGroupCount, ndInt32 groupsPerThreads = D_WORKER_BATCH_SIZE);
 
 	private:
-	D_CORE_API virtual void Release();
+	D_CORE_API virtual void Release() override;
 	D_CORE_API virtual void WaitForWorkers();
 
 	ndWorker* m_workers;
@@ -167,7 +167,7 @@ class ndTaskImplement : public ndTask
 	}
 
 	private:
-	void Execute() const
+	void Execute() const override
 	{
 		const ndInt32 threadCount = m_threadPool->GetThreadCount();
 		for (ndInt32 batchIndex = m_threadIterator.fetch_add(m_jobsStride); batchIndex < m_jobsCount; batchIndex = m_threadIterator.fetch_add(m_jobsStride))

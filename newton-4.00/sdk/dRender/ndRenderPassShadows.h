@@ -20,7 +20,7 @@ class ndRenderPassShadows: public ndRenderPass
 {
 	public:
 	ndRenderPassShadows(ndRender* const owner);
-	virtual ~ndRenderPassShadows();
+	virtual ~ndRenderPassShadows() override;
 
 	virtual void RenderScene() override;
 

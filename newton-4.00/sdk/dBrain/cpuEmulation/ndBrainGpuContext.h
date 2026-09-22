@@ -27,7 +27,7 @@ class ndBrainGpuContext : public ndBrainContext
 {
 	public:
 	ndBrainGpuContext();
-	virtual ~ndBrainGpuContext();
+	virtual ~ndBrainGpuContext() override;
 
 	virtual void Update(ndBrainContextUpdateCallback* const callback) override;
 

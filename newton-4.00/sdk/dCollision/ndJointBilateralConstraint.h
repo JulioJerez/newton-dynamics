@@ -72,7 +72,7 @@ D_MSV_NEWTON_CLASS_ALIGN_32
 class ndJointBilateralConstraint : public ndConstraint
 {
 	public:
-	D_CLASS_REFLECTION(ndJointBilateralConstraint, ndConstraint);
+	D_CLASS_REFLECTION(ndJointBilateralConstraint, ndConstraint)
 
 	class ndIkInterface
 	{
@@ -130,7 +130,7 @@ class ndJointBilateralConstraint : public ndConstraint
 	D_COLLISION_API ndJointBilateralConstraint(const ndJointBilateralConstraint& joint);
 	D_COLLISION_API ndJointBilateralConstraint(ndInt32 maxDof, ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrix);
 	D_COLLISION_API ndJointBilateralConstraint(ndInt32 maxDof, ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrixBody0, const ndMatrix& globalMatrixBody1);
-	D_COLLISION_API virtual ~ndJointBilateralConstraint();
+	D_COLLISION_API virtual ~ndJointBilateralConstraint() override;
 
 	D_COLLISION_API virtual ndJointBilateralConstraint* GetAsBilateral() override;
 	D_COLLISION_API virtual void JacobianDerivative(ndConstraintDescritor& desc) override;

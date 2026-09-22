@@ -38,11 +38,11 @@ class ndSemaphore
 	D_CORE_API ndInt32 GetCount();
 
 	/// Synchronize with another threads.
-	/// \return returns false if member function Terminate has not been called. 
-	/// \brief When internal variable m_counter is zero, this function blocks
+	/// return returns false if member function Terminate has not been called. 
+	/// brief When internal variable m_counter is zero, this function blocks
 	/// the calling thread until another thread call Signal function incrementing
 	/// m_count by one. 
-	/// \brief when counter is hight that zero, this function return immediately 
+	/// brief when counter is hight that zero, this function return immediately 
 	/// decrementing the m_count by one.
 	D_CORE_API bool Wait();
 

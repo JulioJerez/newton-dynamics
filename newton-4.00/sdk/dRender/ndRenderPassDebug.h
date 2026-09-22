@@ -62,7 +62,7 @@ class ndRenderPassDebug : public ndRenderPass
 	};
 
 	ndRenderPassDebug(ndRender* const owner, ndWorld* const world);
-	~ndRenderPassDebug();
+	~ndRenderPassDebug() override;
 
 	const ndArray<ndPointColor>& GetLines() const;
 	const ndArray<ndPointColor>& GetPoints() const;
@@ -107,3 +107,4 @@ class ndRenderPassDebug : public ndRenderPass
 };
 
 #endif
+

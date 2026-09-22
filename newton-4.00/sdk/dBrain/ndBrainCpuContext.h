@@ -20,7 +20,7 @@ class ndBrainCpuContext : public ndBrainContext
 {
 	public:
 	ndBrainCpuContext();
-	virtual ~ndBrainCpuContext();
+	virtual ~ndBrainCpuContext() override;
 
 	virtual void Update(ndBrainContextUpdateCallback* const callback) override;
 

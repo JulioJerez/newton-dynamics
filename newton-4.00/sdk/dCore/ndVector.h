@@ -41,7 +41,6 @@
 //#endif
 
 #ifdef D_SCALAR_VECTOR_CLASS
-	xxxxxxxx
 	#include "ndVectorScalar.h"
 #else
 	#include "ndVectorSimd.h"

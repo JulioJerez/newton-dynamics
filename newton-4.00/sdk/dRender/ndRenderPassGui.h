@@ -18,7 +18,7 @@ class ndRenderPassGui: public ndRenderPass
 {
 	public:
 	ndRenderPassGui(ndRender* const owner);
-	virtual ~ndRenderPassGui();
+	virtual ~ndRenderPassGui() override;
 
 	void StateBegin();
 	void StateEnd();

@@ -72,7 +72,7 @@ class ndScene : public ndThreadPool
 	};
 
 	public:
-	D_COLLISION_API virtual ~ndScene();
+	D_COLLISION_API virtual ~ndScene() override;
 	D_COLLISION_API bool ValidateScene();
 
 	D_COLLISION_API virtual bool AddBody(const ndSharedPtr<ndBody>& body);

@@ -17,7 +17,7 @@ class ndMenuRenderPass: public ndRenderPassGui
 {
 	public:
 	ndMenuRenderPass(ndAssetEditor* const owner);
-	virtual ~ndMenuRenderPass();
+	virtual ~ndMenuRenderPass() override;
 
 	void RenderScene() override;
 
@@ -25,3 +25,4 @@ class ndMenuRenderPass: public ndRenderPassGui
 };
 
 #endif
+

@@ -31,7 +31,7 @@ class ndShapeNull : public ndShape
 	public:
 	D_CLASS_REFLECTION(ndShapeNull, ndShape)
 	D_COLLISION_API ndShapeNull();
-	D_COLLISION_API virtual ~ndShapeNull();
+	D_COLLISION_API virtual ~ndShapeNull() override;
 
 	D_COLLISION_API virtual ndShapeNull* GetAsShapeNull() override;
 

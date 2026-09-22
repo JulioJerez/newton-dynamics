@@ -18,7 +18,7 @@ class ndAnimationMeshLoader : public ndMeshLoader
 {
 	public:
 	ndAnimationMeshLoader();
-	virtual ~ndAnimationMeshLoader();
+	virtual ~ndAnimationMeshLoader() override;
 
 	ndSharedPtr<ndAnimationSequence> GetAnimationSequence(const ndString& pathAnimName);
 	const ndSharedPtr<ndAnimationSequence> FindSequence(const ndString& pathAnimName) const;

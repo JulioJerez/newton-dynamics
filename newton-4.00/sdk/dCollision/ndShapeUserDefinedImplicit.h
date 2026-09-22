@@ -31,7 +31,7 @@ class ndShapeUserDefinedImplicit: public ndShapeConvex
 	D_CLASS_REFLECTION(ndShapeUserDefinedImplicit,ndShapeConvex)
 
 	D_COLLISION_API ndShapeUserDefinedImplicit();
-	D_COLLISION_API virtual ~ndShapeUserDefinedImplicit();
+	D_COLLISION_API virtual ~ndShapeUserDefinedImplicit() override;
 
 	virtual ndShapeUserDefinedImplicit* GetAsShape() { return this; }
 

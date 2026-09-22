@@ -45,7 +45,7 @@ inline ndStackBase::ndStackBase (ndInt32 size)
 
 inline ndStackBase::~ndStackBase ()
 {
-	ndMemory::Free ((void*)m_ptr);
+	ndMemory::Free (const_cast<void*>(m_ptr));
 }
 
 template<class T>

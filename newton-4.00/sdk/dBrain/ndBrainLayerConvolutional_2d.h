@@ -32,7 +32,7 @@ class ndBrainLayerConvolutional_2d : public ndBrainLayer
 	public: 
 	ndBrainLayerConvolutional_2d(ndInt32 inputWidth, ndInt32 inputHeight, ndInt32 inputLayers, ndInt32 kernelSize, ndInt32 outputLayers);
 	ndBrainLayerConvolutional_2d(const ndBrainLayerConvolutional_2d& src);
-	virtual ~ndBrainLayerConvolutional_2d();
+	virtual ~ndBrainLayerConvolutional_2d() override;
 	virtual ndBrainLayer* Clone() const override;
 
 	ndInt32 GetFilterSize() const;

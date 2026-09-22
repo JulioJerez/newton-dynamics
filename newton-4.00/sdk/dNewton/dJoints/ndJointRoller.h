@@ -24,7 +24,7 @@ class ndJointRoller: public ndJointBilateralConstraint
 	D_NEWTON_API ndJointRoller();
 	D_NEWTON_API ndJointRoller(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent);
 	D_NEWTON_API ndJointRoller(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent);
-	D_NEWTON_API virtual ~ndJointRoller();
+	D_NEWTON_API virtual ~ndJointRoller() override;
 
 	D_NEWTON_API ndFloat32 GetAngle() const;
 	D_NEWTON_API ndFloat32 GetOmega() const;

@@ -45,7 +45,7 @@ class ndMarchingCubeIsoSurface : public ndMarchingCubes
 
 	public:
 	D_COLLISION_API ndMarchingCubeIsoSurface(ndThreadPool* const threadPool, const ndVector& boxP0, const ndVector& boxP1, ndFloat32 gridSize);
-	D_COLLISION_API virtual ~ndMarchingCubeIsoSurface();
+	D_COLLISION_API virtual ~ndMarchingCubeIsoSurface() override;
 
 	D_COLLISION_API void GetBox (ndVector& boxP0, ndVector& boxP1) const;
 	D_COLLISION_API void SetBox(const ndVector& boxP0, const ndVector& boxP1);

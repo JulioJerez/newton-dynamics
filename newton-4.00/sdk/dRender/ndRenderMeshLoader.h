@@ -17,7 +17,7 @@ class ndRenderMeshLoader : public ndAnimationMeshLoader
 {
 	public:
 	ndRenderMeshLoader(ndRender* const renderer);
-	virtual ~ndRenderMeshLoader();
+	virtual ~ndRenderMeshLoader() override;
 
 	virtual bool LoadMesh(const ndString& fullPathMeshName) override;
 	virtual bool ImportFbx(const ndString& fbxPathMeshName) override;

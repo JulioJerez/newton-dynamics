@@ -92,7 +92,7 @@ class ndShapeStaticMesh: public ndShape
 	public:
 	D_CLASS_REFLECTION(ndShapeStaticMesh,ndShape)
 	D_COLLISION_API ndShapeStaticMesh(ndShapeID id);
-	D_COLLISION_API virtual ~ndShapeStaticMesh();
+	D_COLLISION_API virtual ~ndShapeStaticMesh() override;
 
 	D_COLLISION_API virtual void DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& debugCallback) const override;
 	D_COLLISION_API virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const override;

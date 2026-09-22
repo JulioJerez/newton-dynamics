@@ -24,7 +24,7 @@ class ndJointSlider: public ndJointBilateralConstraint
 	D_NEWTON_API ndJointSlider();
 	D_NEWTON_API ndJointSlider(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent);
 	D_NEWTON_API ndJointSlider(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent);
-	D_NEWTON_API virtual ~ndJointSlider();
+	D_NEWTON_API virtual ~ndJointSlider() override;
 
 	D_NEWTON_API ndFloat32 GetSpeed() const;
 	D_NEWTON_API ndFloat32 GetPosit() const;

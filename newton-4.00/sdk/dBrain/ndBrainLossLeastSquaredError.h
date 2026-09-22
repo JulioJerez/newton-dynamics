@@ -31,7 +31,7 @@ class ndBrainLossLeastSquaredError: public ndBrainLoss
 	public:
 	ndBrainLossLeastSquaredError(ndInt32 size);
 	void SetTruth(const ndBrainVector& truth);
-	virtual void GetLoss(const ndBrainVector& output, ndBrainVector& loss);
+	virtual void GetLoss(const ndBrainVector& output, ndBrainVector& loss) override;
 
 	virtual bool HasGpuSupport() const;
 	ndBrainVector m_truth;

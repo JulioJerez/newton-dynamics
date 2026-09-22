@@ -18,13 +18,13 @@ class ndAnimationTwoWayBlend: public ndAnimationBlendTreeNode
 {
 	public:
 	ndAnimationTwoWayBlend(const ndSharedPtr<ndAnimationBlendTreeNode>& node0, const ndSharedPtr<ndAnimationBlendTreeNode>& node1);
-	virtual ~ndAnimationTwoWayBlend();
+	virtual ~ndAnimationTwoWayBlend() override;
 
 	ndFloat32 GetParam() const;
 	void SetParam(ndFloat32 param);
 
-	void Update(ndFloat32 dt);
-	void Evaluate(ndAnimationPose& output, ndVector& veloc);
+	void Update(ndFloat32 dt) override;
+	void Evaluate(ndAnimationPose& output, ndVector& veloc) override;
 
 	protected:
 	ndSharedPtr<ndAnimationBlendTreeNode> m_node0;

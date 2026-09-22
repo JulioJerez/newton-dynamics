@@ -54,6 +54,6 @@ class ndRenderTransformModifierTwoLinksIK : public ndRenderTransformModifier
 	ndFloat32 m_l1;
 	ndFloat32 m_sign;
 	TwoLinksIK m_initialAngle;
-
 };
+
 #endif

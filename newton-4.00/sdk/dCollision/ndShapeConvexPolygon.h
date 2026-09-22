@@ -58,25 +58,25 @@ class ndShapeConvexPolygon: public ndShapeConvex
 	};
 
 	ndShapeConvexPolygon ();
-	~ndShapeConvexPolygon ();
+	~ndShapeConvexPolygon () override;
 
-	virtual ndShapeConvexPolygon* GetAsShapeConvexPolygon();
+	virtual ndShapeConvexPolygon* GetAsShapeConvexPolygon() override;
 
 	ndVector CalculateGlobalNormal(const ndVector& localNormal) const;
 	ndInt32 CalculateContactToConvexHullDescrete(ndContactSolver& proxy);
 	ndInt32 CalculateContactToConvexHullContinue(ndContactSolver& proxy);
 
 	void GenerateConvexCap();
-	virtual ndFloat32 GetVolume() const;
-	virtual ndFloat32 GetBoxMinRadius() const;
-	virtual ndFloat32 GetBoxMaxRadius() const;
-	virtual ndVector SupportVertex(const ndVector& dir) const;
+	virtual ndFloat32 GetVolume() const override;
+	virtual ndFloat32 GetBoxMinRadius() const override;
+	virtual ndFloat32 GetBoxMaxRadius() const override;
+	virtual ndVector SupportVertex(const ndVector& dir) const override;
 	bool BeamClipping(const ndVector& origin, ndFloat32 size);
-	virtual ndInt32 CalculatePlaneIntersection(const ndVector& normal, const ndVector& point, ndVector* const contactsOut) const;
+	virtual ndInt32 CalculatePlaneIntersection(const ndVector& normal, const ndVector& point, ndVector* const contactsOut) const override;
 
-	virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const;
+	virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const override;
 
-	virtual ndInt32 Release() const;
+	virtual ndInt32 Release() const override;
 
 	ndVector m_normal;
 	ndFixSizeArray<ndVector, D_CONVEX_POLYGON_MAX_VERTEX_COUNT> m_localPoly;

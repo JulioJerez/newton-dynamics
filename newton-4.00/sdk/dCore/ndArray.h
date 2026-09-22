@@ -242,7 +242,7 @@ void ndArray<T>::Resize(ndInt64 newSize)
 	{
 		ndInt64 oldSize = newSize;
 		newSize = ndMax(newSize, ndInt64(16));
-		T* const newArray = (T*)ndMemory::Malloc(sizeof(T) * size_t(newSize));
+		T* const newArray = reinterpret_cast<T*>(ndMemory::Malloc(sizeof(T) * size_t(newSize)));
 		if (m_array) 
 		{
 			CopyBuffer(newArray, m_array, newSize);

@@ -27,5 +27,4 @@ class ndResizeMesh : public ndAssetEditor::ndAssetTool
 	ndReal m_scale;
 };
 
-
 #endif

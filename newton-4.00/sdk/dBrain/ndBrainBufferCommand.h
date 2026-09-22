@@ -92,7 +92,7 @@ class ndBrainBufferCommandCpu : public ndBrainBufferCommand
 {
 	public:
 	ndBrainBufferCommandCpu(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer);
-	virtual ~ndBrainBufferCommandCpu();
+	virtual ~ndBrainBufferCommandCpu() override;
 
 	virtual void Execute(ndInt32 miniBatchIndex) = 0;
 };

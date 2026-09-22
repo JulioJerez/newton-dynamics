@@ -18,7 +18,7 @@ class ndRenderPassColor: public ndRenderPass
 {
 	public:
 	ndRenderPassColor(ndRender* const owner);
-	virtual ~ndRenderPassColor();
+	virtual ~ndRenderPassColor() override;
 
 	virtual void RenderScene() override;
 };

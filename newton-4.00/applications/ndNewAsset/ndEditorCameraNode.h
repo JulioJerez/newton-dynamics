@@ -21,7 +21,7 @@ class ndEditorCameraNode: public ndRenderSceneNode
 
 	ndRenderSceneCamera* GetCamera() const;
 	virtual void TickUpdate(ndFloat32 timestep) = 0;
-	virtual ndRenderSceneNode* Clone() const;
+	virtual ndRenderSceneNode* Clone() const override;
 	
 	protected:
 	bool m_prevMouseState;

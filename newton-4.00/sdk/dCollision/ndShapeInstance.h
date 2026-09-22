@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef ND_SHAPE_INSTANCE_H__ 
-#define ND_SHAPE_INSTANCE_H__ 
+#ifndef ND_SHAPE_INSTANCE_H_ 
+#define ND_SHAPE_INSTANCE_H_ 
 
 #define D_MAX_SHAPE_AABB_PADDING ndFloat32 (1.0f / 16.0f)
 

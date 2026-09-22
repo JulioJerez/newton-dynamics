@@ -58,7 +58,7 @@ class ndShapeHeightfield: public ndShapeStaticMesh
 
 	D_CLASS_REFLECTION(ndShapeHeightfield,ndShapeStaticMesh)
 	D_COLLISION_API ndShapeHeightfield(ndInt32 width, ndInt32 height, ndGridConstruction constructionMode,ndFloat32 horizontalScale_x, ndFloat32 horizontalScale_z);
-	D_COLLISION_API virtual ~ndShapeHeightfield();
+	D_COLLISION_API virtual ~ndShapeHeightfield() override;
 
 	D_COLLISION_API ndArray<ndReal>& GetElevationMap();
 	D_COLLISION_API const ndArray<ndReal>& GetElevationMap() const;

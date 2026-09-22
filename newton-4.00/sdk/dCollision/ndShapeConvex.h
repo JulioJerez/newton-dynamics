@@ -45,7 +45,7 @@ class ndShapeConvex: public ndShape
 
 	protected:
 	D_COLLISION_API ndShapeConvex (ndShapeID id);
-	D_COLLISION_API ~ndShapeConvex ();
+	D_COLLISION_API ~ndShapeConvex () override;
 
 	virtual ndShapeConvex* GetAsShapeConvex()  override { return this; }
 

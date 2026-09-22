@@ -39,7 +39,7 @@ class brainCopyInput : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
        ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
        ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
@@ -86,7 +86,7 @@ class brainCopyOutput : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
@@ -135,7 +135,7 @@ class brainLayerReluActivation : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
@@ -180,7 +180,7 @@ class brainLayerLeakyReluActivation : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
@@ -225,7 +225,7 @@ class brainLayerTanhActivation : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
@@ -286,7 +286,7 @@ class brainLayerLinearDropOutActivation : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
@@ -330,7 +330,7 @@ class brainLayerLinearActivation : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
@@ -402,7 +402,7 @@ class brainLayerBatchNormalizationActivationInputSqr : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32)
+    void Execute(ndInt32 groupId, ndInt32) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndCommandSharedInfo* const parameters = (ndCommandSharedInfo*)buffer0->GetGpuBuffer()->GetPtr();
@@ -431,7 +431,7 @@ class brainLayerBatchNormalizationActivationVarianceSum : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndCommandSharedInfo* const parameters = (ndCommandSharedInfo*)buffer0->GetGpuBuffer()->GetPtr();
@@ -455,7 +455,7 @@ class brainLayerBatchNormalizationActivationNormalize : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32, ndInt32 workGroupSize)
+    void Execute(ndInt32, ndInt32 workGroupSize) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         const ndBrainFloatBuffer* const buffer4 = (ndBrainFloatBuffer*)m_parameters[4];
@@ -492,7 +492,7 @@ class brainLayerSoftmaxActivation : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndFixSizeArray<ndBrainFloat, 1024> reductionBuffer(1024);
         ndFixSizeArray<ndBrainFloat, ND_GPU_LOCAL_BUFFER_SIZE> tmpInputBuffer(ND_GPU_LOCAL_BUFFER_SIZE);
@@ -625,7 +625,7 @@ class brainCopyInputGradients : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
@@ -673,7 +673,7 @@ class brainCopyOutputGradients : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
@@ -720,7 +720,7 @@ class brainLayerBrainReluBackPropagate : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
@@ -781,7 +781,7 @@ class brainLayerBrainLeakyReluBackPropagate : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer3 = (ndBrainFloatBuffer*)m_parameters[3];
@@ -844,7 +844,7 @@ class brainLayerBrainTanhBackPropagate : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainFloatBuffer* const buffer3 = (ndBrainFloatBuffer*)m_parameters[3];
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
@@ -909,7 +909,7 @@ class brainLayerBrainCathegoricalSoftmaxBackPropagate : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainFloatBuffer* const buffer3 = (ndBrainFloatBuffer*)m_parameters[3];
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
@@ -967,7 +967,7 @@ class brainLayerBrainLinearDropOutBackPropagate : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainFloatBuffer* const buffer3 = (ndBrainFloatBuffer*)m_parameters[3];
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
@@ -1021,7 +1021,7 @@ class brainLayerBrainLinearBackPropagate : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer3 = (ndBrainFloatBuffer*)m_parameters[3];
@@ -1085,7 +1085,7 @@ class brainLayerBrainPolicyGradientBackPropagate : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainFloatBuffer* const buffer5 = (ndBrainFloatBuffer*)m_parameters[5];
         ndBrainFloatBuffer* const buffer3 = (ndBrainFloatBuffer*)m_parameters[3];
@@ -1169,7 +1169,7 @@ class brainAdamBiasCorrectionUpdate : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32, ndInt32)
+    void Execute(ndInt32, ndInt32) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainOptimizerAdam::ndCommandSharedInfo* const parameters = (ndBrainOptimizerAdam::ndCommandSharedInfo*)buffer0->GetGpuBuffer()->GetPtr();
@@ -1199,7 +1199,7 @@ class brainAdamUpdateLassoRegularizer : public ndBrainKernel
     }
 
     //void Execute(ndInt32 groupId, ndInt32 workGroupSize)
-    void Execute(ndInt32, ndInt32)
+    void Execute(ndInt32, ndInt32) override
     {
         ndAssert(0);
     }
@@ -1213,7 +1213,7 @@ class brainAdamUpdateRidgeRegularizer : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
@@ -1271,7 +1271,7 @@ class brainLayerMatrixMatrixAddBias : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
@@ -1334,7 +1334,7 @@ class brainLayerMatrixMatrixMultiply : public ndBrainKernel
     // inpement in speciallized instartion to speed up the opertioan 100s of times, 
     // Unfortunatly OpenCl and my intel cpu do not exposes these instrutions to the user, 
     // maybe one day. for now this will do using avx and cumpute units.
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainFloat tile_acc[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
         ndBrainFloat tile_inputs[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
@@ -1484,7 +1484,7 @@ class brainLayerBrainBackPropagateMatrixInputGradients : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer2 = (ndBrainFloatBuffer*)m_parameters[2];
@@ -1493,13 +1493,6 @@ class brainLayerBrainBackPropagateMatrixInputGradients : public ndBrainKernel
         ndBrainFloat tile_acc[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
         ndBrainFloat tile_weights[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
         ndBrainFloat tile_outputGrad[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
-        for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
-        {
-            for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
-            {
-                tile_acc[j][i] = ndBrainFloat(0.0f);
-            }
-        }
 
         const ndCommandSharedInfo& info = *(ndCommandSharedInfo*)buffer0->GetGpuBuffer()->GetPtr();
         const ndInt32 inputSize = info.m_inputSize;
@@ -1540,19 +1533,42 @@ class brainLayerBrainBackPropagateMatrixInputGradients : public ndBrainKernel
                 outputOffset += inputOutputSize;
             }
 
-            // multiply tiles
-            for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
+            for (ndInt32 j1 = 0; j1 < ND_GPU_TILED_MATRIX_ROWS; j1 += ND_GPU_TILED_MATRIX_ROWS / 2)
             {
-                for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
+                for (ndInt32 i1 = 0; i1 < ND_GPU_TILED_MATRIX_ROWS; i1 += ND_GPU_TILED_MATRIX_ROWS / 2)
                 {
-                    ndBrainFloat acc = ndBrainFloat(0.0f);
-                    for (ndInt32 m = 0; m < ND_GPU_TILED_MATRIX_ROWS; ++m)
+                    ndBrainFloat smallTile[ND_GPU_TILED_MATRIX_ROWS / 2][ND_GPU_TILED_MATRIX_ROWS / 2];
+
+                    for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
                     {
-                        ndBrainFloat weight = tile_weights[i][m];
-                        ndBrainFloat outputGrad = tile_outputGrad[j][m];
-                        acc += outputGrad * weight;
+                        for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
+                        {
+                            smallTile[j][i] = ndBrainFloat(0.0f);
+                        }
                     }
-                    tile_acc[j][i] += acc;
+
+                    for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
+                    {
+                        for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
+                        {
+                            ndBrainFloat acc = ndBrainFloat(0.0f);
+                            for (ndInt32 m = 0; m < ND_GPU_TILED_MATRIX_ROWS / 2; ++m)
+                            {
+                                ndBrainFloat weight = tile_weights[i1 + i][m];
+                                ndBrainFloat outputGrad = tile_outputGrad[j1 + j][m];
+                                acc += outputGrad * weight;
+                            }
+                            smallTile[j][i] += acc;
+                        }
+                    }
+
+                    for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
+                    {
+                        for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
+                        {
+                            tile_acc[j1 + j][i1 + i] = smallTile[j][i];
+                        }
+                    }
                 }
             }
         }
@@ -1580,7 +1596,7 @@ class brainLayerBrainBackPropagateMatrixBiasGradients : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer3 = (ndBrainFloatBuffer*)m_parameters[3];
@@ -1632,7 +1648,7 @@ class brainLayerBrainBackPropagateMatrixWeightsGradients : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32)
+    void Execute(ndInt32 groupId, ndInt32) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
@@ -1682,7 +1698,7 @@ class brainCopyBuffer : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
@@ -1728,7 +1744,7 @@ class brainCopyBufferIndirect : public ndBrainKernel
     {
     }
 
-    void Execute(ndInt32 groupId, ndInt32 workGroupSize)
+    void Execute(ndInt32 groupId, ndInt32 workGroupSize) override
     {
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];

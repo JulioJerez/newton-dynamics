@@ -24,7 +24,7 @@ class ndJointCylinder: public ndJointBilateralConstraint
 	D_NEWTON_API ndJointCylinder();
 	D_NEWTON_API ndJointCylinder(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent);
 	D_NEWTON_API ndJointCylinder(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent);
-	D_NEWTON_API virtual ~ndJointCylinder();
+	D_NEWTON_API virtual ~ndJointCylinder() override;
 
 	D_NEWTON_API ndFloat32 GetAngle() const;
 	D_NEWTON_API ndFloat32 GetOmega() const;

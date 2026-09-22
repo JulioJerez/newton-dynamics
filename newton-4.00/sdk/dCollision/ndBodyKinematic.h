@@ -88,7 +88,7 @@ class ndBodyKinematic : public ndBody
 
 	D_COLLISION_API ndBodyKinematic();
 	D_COLLISION_API ndBodyKinematic(const ndBodyKinematic& src);
-	D_COLLISION_API virtual ~ndBodyKinematic();
+	D_COLLISION_API virtual ~ndBodyKinematic() override;
 
 	D_COLLISION_API ndScene* GetScene() const;
 
@@ -254,7 +254,7 @@ class ndBodyKinematic : public ndBody
 
 class ndBodySentinel : public ndBodyKinematic
 {
-	ndBodySentinel* GetAsBodySentinel() { return this; }
+	ndBodySentinel* GetAsBodySentinel() override { return this; }
 };
 
 #endif 

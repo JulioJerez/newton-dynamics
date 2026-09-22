@@ -25,7 +25,7 @@ class ndJointRelational: public ndJointBilateralConstraint
 	D_NEWTON_API ndJointRelational(ndFloat32 gearRatio,
 		const ndVector& parentPin, ndBodyKinematic* const parent,
 		const ndVector& childPin, ndBodyKinematic* const child);
-	D_NEWTON_API virtual ~ndJointRelational();
+	D_NEWTON_API virtual ~ndJointRelational() override;
 
 	D_NEWTON_API ndFloat32 GetRatio() const;
 	D_NEWTON_API void SetRatio(ndFloat32 ratio);

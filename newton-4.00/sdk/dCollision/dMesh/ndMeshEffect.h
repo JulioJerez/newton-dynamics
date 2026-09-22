@@ -396,7 +396,7 @@ class ndMeshEffect: public ndPolyhedra
 	// Create a convex hull Mesh from point cloud
 	D_COLLISION_API ndMeshEffect(const ndFloat64* const vertexCloud, ndInt32 count, ndInt32 strideInByte, ndFloat64 distTol);
 
-	D_COLLISION_API virtual ~ndMeshEffect();
+	D_COLLISION_API virtual ~ndMeshEffect() override;
 
 	D_COLLISION_API void SetName (const ndString& name);
 	D_COLLISION_API const ndString& GetName() const;
@@ -484,8 +484,8 @@ class ndMeshEffect: public ndPolyhedra
 
 	protected:
 	D_COLLISION_API void Init();
-	D_COLLISION_API virtual void BeginFace();
-	D_COLLISION_API virtual bool EndFace();
+	D_COLLISION_API virtual void BeginFace() override;
+	D_COLLISION_API virtual bool EndFace() override;
 	ndFloat64 QuantizeCoordinade(ndFloat64 val) const;
 
 	bool Sanity() const;

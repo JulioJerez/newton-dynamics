@@ -33,12 +33,12 @@ class ndDynamicsUpdateSimd8: public ndDynamicsUpdate
 {
 	public:
 	ndDynamicsUpdateSimd8(ndWorld* const world);
-	virtual ~ndDynamicsUpdateSimd8();
+	virtual ~ndDynamicsUpdateSimd8() override;
 
-	virtual const char* GetStringId() const;
+	virtual const char* GetStringId() const override;
 
 	protected:
-	virtual void Update();
+	virtual void Update() override;
 
 	private:
 	void SortJoints();
