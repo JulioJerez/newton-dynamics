@@ -28,10 +28,13 @@
 #include "ndMemory.h"
 #include "ndFixSizeArray.h"
 
-
 // assume this function returns memory aligned to 16 bytes
-#define ndAlloca(type, count) reinterpret_cast<type*> (alloca (sizeof (type) * size_t(count) + 31))
-#define ndAllocaPtr(type, ptr) reinterpret_cast<type*> ((reinterpret_cast<long long> (ptr) + 31) & -32)
+#define ndAlloca(type, count) \
+	reinterpret_cast<type*> (alloca (sizeof (type) * size_t(count) + 31))
+
+// for that cases when a pointer need to be align to 32 bit boundary
+#define ndAllocaPtr(type, ptr) \
+	reinterpret_cast<type*> ((reinterpret_cast<uintptr_t> (ptr) + 31) & uintptr_t(-32))
 
 
 #if (defined (WIN32) || defined(_WIN32) || defined (_M_ARM) || defined (_M_ARM64))
