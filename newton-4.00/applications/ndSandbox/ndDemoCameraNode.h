@@ -10,8 +10,8 @@
 */
 
 
-#ifndef __DEMO_CAMERA_NODE_H__
-#define __DEMO_CAMERA_NODE_H__
+#ifndef DEMO_CAMERA_NODE_H_
+#define DEMO_CAMERA_NODE_H_
 
 #include "ndSandboxStdafx.h"
 
@@ -26,7 +26,7 @@ class ndDemoCameraPickBodyJoint : public ndJointKinematicController
 	{
 	}
 
-	~ndDemoCameraPickBodyJoint()
+	~ndDemoCameraPickBodyJoint() override
 	{
 		if (m_owner)
 		{

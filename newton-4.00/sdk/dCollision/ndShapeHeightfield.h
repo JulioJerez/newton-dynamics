@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_SHAPE_HEIGHT_FIELD__
-#define __ND_SHAPE_HEIGHT_FIELD__
+#ifndef ND_SHAPE_HEIGHT_FIELD_
+#define ND_SHAPE_HEIGHT_FIELD_
 
 #include "ndCollisionStdafx.h"
 #include "ndShapeStaticMesh.h"

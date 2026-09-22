@@ -24,8 +24,8 @@
 //      are changed infrequently
 //
 
-#ifndef __ND_NEWTON_H__
-#define __ND_NEWTON_H__
+#ifndef ND_NEWTON_H_
+#define ND_NEWTON_H_
 
 #include <ndNewtonStdafx.h>
 #include <ndMesh.h>

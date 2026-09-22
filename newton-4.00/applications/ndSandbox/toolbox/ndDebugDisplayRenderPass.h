@@ -8,8 +8,9 @@
 * including commercial applications, and to alter it and redistribute it
 * freely
 */
-#ifndef __ND_DEBUG_DISPLAY_RENDER_PASS_H__
-#define __ND_DEBUG_DISPLAY_RENDER_PASS_H__
+
+#ifndef ND_DEBUG_DISPLAY_RENDER_PASS_H_
+#define ND_DEBUG_DISPLAY_RENDER_PASS_H_
 
 class ndDemoEntityManager;
 
@@ -32,7 +33,7 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	};
 
 	ndDebugDisplayRenderPass(ndDemoEntityManager* const owner);
-	~ndDebugDisplayRenderPass();
+	~ndDebugDisplayRenderPass() override;
 
 	virtual void SetDebugDisplayOptions();
 

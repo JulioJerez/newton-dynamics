@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __ND_ANIMATION_TWO_WAY_h__
-#define __ND_ANIMATION_TWO_WAY_h__
+#ifndef ND_ANIMATION_TWO_WAY_H_
+#define ND_ANIMATION_TWO_WAY_H_
 
 #include "ndAnimationBlendTreeNode.h"
 

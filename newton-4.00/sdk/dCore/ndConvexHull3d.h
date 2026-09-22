@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_CONVEXHULL_3D__
-#define __ND_CONVEXHULL_3D__
+#ifndef ND_CONVEXHULL_3D_
+#define ND_CONVEXHULL_3D_
 
 #include "ndCoreStdafx.h"
 #include "ndList.h"

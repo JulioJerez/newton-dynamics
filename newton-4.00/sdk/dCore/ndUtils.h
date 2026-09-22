@@ -28,8 +28,11 @@
 #include "ndMemory.h"
 #include "ndFixSizeArray.h"
 
+
 // assume this function returns memory aligned to 16 bytes
-#define ndAlloca(type, count) (type*) alloca (sizeof (type) * size_t(count))
+#define ndAlloca(type, count) reinterpret_cast<type*> (alloca (sizeof (type) * size_t(count) + 31))
+#define ndAllocaPtr(type, ptr) reinterpret_cast<type*> ((reinterpret_cast<long long> (ptr) + 31) & -32)
+
 
 #if (defined (WIN32) || defined(_WIN32) || defined (_M_ARM) || defined (_M_ARM64))
 	//#define ndCheckFloat(x) (1)

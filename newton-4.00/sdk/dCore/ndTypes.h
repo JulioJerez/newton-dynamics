@@ -146,6 +146,12 @@
 // or applications that wants to control threading at the application level. 
 //#define D_USE_FORCE_THREAD_EMULATION
 
+#if !defined(D_SCALAR_VECTOR_CLASS)
+	#if defined(__clang__)
+		#define D_SCALAR_VECTOR_CLASS
+	#endif
+#endif
+
 #ifdef D_USE_FORCE_THREAD_EMULATION
 	#ifndef D_USE_THREAD_EMULATION
 		#define D_USE_THREAD_EMULATION

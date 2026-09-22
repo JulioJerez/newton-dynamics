@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __NDSTRING_H_
-#define __NDSTRING_H_
+#ifndef ND_STRING_H_
+#define ND_STRING_H_
 
 #include "ndCoreStdafx.h"
 #include "ndClassAlloc.h"

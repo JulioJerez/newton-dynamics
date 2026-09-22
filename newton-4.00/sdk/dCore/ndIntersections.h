@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_INTERSECTION_H__
-#define __ND_INTERSECTION_H__
+#ifndef ND_INTERSECTION_H_
+#define ND_INTERSECTION_H_
 
 #include "ndCoreStdafx.h"
 #include "ndDebug.h"

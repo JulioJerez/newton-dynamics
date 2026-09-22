@@ -24,8 +24,9 @@
 *  Visual C++ 6.0 created by: Julio Jerez
 *
 ****************************************************************************/
-#ifndef __ND_POLYGONSOUP_BUILDER_H__
-#define __ND_POLYGONSOUP_BUILDER_H__
+
+#ifndef ND_POLYGONSOUP_BUILDER_H_
+#define ND_POLYGONSOUP_BUILDER_H_
 
 #include "ndCoreStdafx.h"
 #include "ndTypes.h"
@@ -61,9 +62,6 @@ class ndPolygonSoupBuilder: public ndClassAlloc
 	D_CORE_API virtual void End(bool optimize);
 
 	// legacy interface
-	D_CORE_API virtual void AddFace____(const ndFloat32* const vertex, ndInt32 strideInBytes, ndInt32 vertexCount, const ndInt32 faceId);
-	D_CORE_API virtual void AddFaceIndirect____(const ndFloat32* const vertex, ndInt32 strideInBytes, ndInt32 faceId, const ndInt32* const indexArray, ndInt32 indexCount);
-
 	D_CORE_API virtual void AddFace(const ndVector* const vertex, ndInt32 vertexCount, const ndInt32 faceId);
 	D_CORE_API virtual void AddFaceIndirect(const ndVector* const vertex, ndInt32 faceId, const ndInt32* const indexArray, ndInt32 indexCount);
 

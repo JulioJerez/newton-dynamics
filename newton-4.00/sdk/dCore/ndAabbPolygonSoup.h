@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __NDG_AABB_POLYGONSOUP_H_
-#define __NDG_AABB_POLYGONSOUP_H_
+#ifndef NDG_AABB_POLYGONSOUP_H_
+#define NDG_AABB_POLYGONSOUP_H_
 
 #include "ndCoreStdafx.h"
 #include "ndTypes.h"

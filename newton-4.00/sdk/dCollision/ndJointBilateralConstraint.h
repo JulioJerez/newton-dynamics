@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_JOINT_BILATERAL_CONSTRAINT_H__
-#define __ND_JOINT_BILATERAL_CONSTRAINT_H__
+#ifndef ND_JOINT_BILATERAL_CONSTRAINT_H_
+#define ND_JOINT_BILATERAL_CONSTRAINT_H_
 
 #include "ndCollisionStdafx.h"
 #include "ndJointList.h"

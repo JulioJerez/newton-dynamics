@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_WORLD_H__
-#define __ND_WORLD_H__
+#ifndef ND_WORLD_H_
+#define ND_WORLD_H_
 
 #include "ndNewtonStdafx.h"
 #include "ndJointList.h"
@@ -64,7 +64,7 @@ class ndWorld: public ndClassAlloc
 
 	D_NEWTON_API void Sync() const;
 	D_NEWTON_API void Update(ndFloat32 timestep);
-	D_NEWTON_API void CollisionUpdate(ndFloat32 timestep);
+	D_NEWTON_API virtual void CollisionUpdate(ndFloat32 timestep);
 
 	D_NEWTON_API ndInt32 GetThreadCount() const;
 	D_NEWTON_API void SetThreadCount(ndInt32 count);
@@ -128,8 +128,8 @@ class ndWorld: public ndClassAlloc
 
 	D_NEWTON_API void CalculateJointContacts(ndContact* const contact);
 
-	D_NEWTON_API virtual void PhysicsUpdate();
-	D_NEWTON_API virtual void CollisionUpdate();
+	D_NEWTON_API void PhysicsUpdate____();
+	D_NEWTON_API void CollisionUpdate____();
 	D_NEWTON_API virtual void WorkerUpdate(ndInt32 threadIndex);
 
 	void* GetScratchBuffer(ndInt32 threadIndex, ndInt32 sizeInBytes);

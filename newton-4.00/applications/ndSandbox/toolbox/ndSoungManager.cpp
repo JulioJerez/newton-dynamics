@@ -222,7 +222,7 @@ class ndOpenAlManager: public ndSoundManager::Implementation
 {
 	public:
 	ndOpenAlManager(ndDemoEntityManager* const owner);
-	virtual ~ndOpenAlManager();
+	virtual ~ndOpenAlManager() override;
 
 	virtual void Update() override;
 	virtual ndSharedPtr<ndSoundSource> AddSound(const char* const waveFileName) override;
@@ -241,7 +241,7 @@ class ndOpenAlSource: public ndSoundSource::Implementation
 {
 	public:
 	ndOpenAlSource(ndSharedPtr<ndSoundManager>& owner, const char* const waveFileName);
-	virtual ~ndOpenAlSource();
+	virtual ~ndOpenAlSource() override;
 
 	virtual void ClearSource() override;
 	virtual void Play() override;
@@ -448,7 +448,7 @@ bool ndOpenAlManager::LoadWaveFile(ALuint buffer, const char* const waveFileName
 	// Verify this is a proper standard WAV file container
 	if (ndString(header.riffId, 4) != "RIFF" || ndString(header.waveId, 4) != "WAVE")
 	{
-		ndTrace(("sound file %s : Invalid WAVE file format\n", fileName.GetStr()));
+		ndTrace(("sound file %s : Invalid WAVE file format\n", fileName.GetStr()))
 		return false;
 	}
 
@@ -473,7 +473,7 @@ bool ndOpenAlManager::LoadWaveFile(ALuint buffer, const char* const waveFileName
 	ALenum format = GetOpenAlFormat(header.channels, header.bitsPerSample);
 	if (format == 0)
 	{
-		ndTrace(("sound file %s : Unsupported channel/bit depth combination.\n", fileName.GetStr()));
+		ndTrace(("sound file %s : Unsupported channel/bit depth combination.\n", fileName.GetStr()))
 		return false;
 	}
 
@@ -547,7 +547,7 @@ void ndOpenAlManager::ClearSounds()
 	Implementation::ClearSounds();
 	while (m_buffersCache.GetCount())
 	{
-		ndTree<ALuint, ndString>::ndNode* const node = m_buffersCache.GetRoot();;
+		ndTree<ALuint, ndString>::ndNode* const node = m_buffersCache.GetRoot();
 		ALuint buffer = node->GetInfo();
 		alDeleteBuffers(1, &buffer);
 		ndAssert(alGetError() == AL_NO_ERROR);
@@ -692,7 +692,7 @@ void ndSoundManager::ClearSounds()
 
 ndMatrix ndSoundManager::GetMatrix() const
 {
-	return m_implementation->GetMatrix();;
+	return m_implementation->GetMatrix();
 }
 
 ndVector ndSoundManager::GetVelocity() const

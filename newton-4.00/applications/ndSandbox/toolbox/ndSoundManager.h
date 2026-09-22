@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __ND_SOUND_MANAGER_UTIL__
-#define __ND_SOUND_MANAGER_UTIL__
+#ifndef ND_SOUND_MANAGER_UTIL_
+#define ND_SOUND_MANAGER_UTIL_
 
 #include "ndSandboxStdafx.h"
 

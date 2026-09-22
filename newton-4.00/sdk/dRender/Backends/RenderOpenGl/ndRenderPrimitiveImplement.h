@@ -8,8 +8,9 @@
 * including commercial applications, and to alter it and redistribute it
 * freely
 */
-#ifndef __ND_RENDER_PRIMITIVE_MESH_IMPLEMENT_H__
-#define __ND_RENDER_PRIMITIVE_MESH_IMPLEMENT_H__
+
+#ifndef ND_RENDER_PRIMITIVE_MESH_IMPLEMENT_H_
+#define ND_RENDER_PRIMITIVE_MESH_IMPLEMENT_H_
 
 #include "ndRenderStdafx.h"
 #include "ndRenderShader.h"

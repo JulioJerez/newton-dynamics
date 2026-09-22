@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __ND_NODE_HIERARCHY_H__
-#define __ND_NODE_HIERARCHY_H__
+#ifndef ND_NODE_HIERARCHY_H_
+#define ND_NODE_HIERARCHY_H_
 
 #include "ndCoreStdafx.h"
 #include "ndContainersAlloc.h"

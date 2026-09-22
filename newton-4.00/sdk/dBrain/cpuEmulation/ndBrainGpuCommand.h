@@ -8,8 +8,9 @@
 * including commercial applications, and to alter it and redistribute it
 * freely
 */
-#ifndef __ND_BRAIN_GPU_COMMAND_H__
-#define __ND_BRAIN_GPU_COMMAND_H__
+
+#ifndef ND_BRAIN_GPU_COMMAND_H_
+#define ND_BRAIN_GPU_COMMAND_H_
 
 #include "ndBrainStdafx.h"
 #include "ndBrainBufferCommand.h"

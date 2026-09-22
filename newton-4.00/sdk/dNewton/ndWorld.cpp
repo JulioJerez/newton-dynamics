@@ -334,7 +334,7 @@ void ndWorld::WorkerUpdate(ndInt32 threadIndex)
 	m_scene->TaskUpdate(threadIndex);
 }
 
-void ndWorld::PhysicsUpdate()
+void ndWorld::PhysicsUpdate____()
 {
 	ND_PROFILE_ZONE();
 	ndUnsigned64 timeAcc = ndGetTimeInMicroseconds();
@@ -368,7 +368,7 @@ void ndWorld::PhysicsUpdate()
 	CalculateAverageUpdateTime();
 }
 
-void ndWorld::CollisionUpdate()
+void ndWorld::CollisionUpdate____()
 {
 	ND_PROFILE_ZONE();
 	ndUnsigned64 timeAcc = ndGetTimeInMicroseconds();
@@ -421,11 +421,11 @@ void ndWorld::ThreadFunction()
 {
 	if (m_collisionUpdate)
 	{
-		CollisionUpdate();
+		CollisionUpdate____();
 	}
 	else
 	{
-		PhysicsUpdate();
+		PhysicsUpdate____();
 	}
 }
 

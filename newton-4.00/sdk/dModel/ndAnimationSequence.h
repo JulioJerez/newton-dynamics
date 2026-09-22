@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __ND_ANIMIMATION_SEQUENCE_h__
-#define __ND_ANIMIMATION_SEQUENCE_h__
+#ifndef ND_ANIMIMATION_SEQUENCE_H_
+#define ND_ANIMIMATION_SEQUENCE_H_
 
 #include "ndAnimationKeyframesTrack.h"
 

@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __CAMERA_NODE_H__
-#define __CAMERA_NODE_H__
+#ifndef CAMERA_NODE_H_
+#define CAMERA_NODE_H_
 
 #include "ndNewAssetStdafx.h"
 

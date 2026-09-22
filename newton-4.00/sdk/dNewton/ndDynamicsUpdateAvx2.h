@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_DYNAMICS_UPDATE_AVX2_H__
-#define __ND_DYNAMICS_UPDATE_AVX2_H__
+#ifndef ND_DYNAMICS_UPDATE_AVX2_H_
+#define ND_DYNAMICS_UPDATE_AVX2_H_
 
 #include <ndNewton.h>
 

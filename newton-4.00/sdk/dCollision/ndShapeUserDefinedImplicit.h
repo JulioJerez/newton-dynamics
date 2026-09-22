@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_USER_DEFINED_IMPLICIT_H__
-#define __ND_USER_DEFINED_IMPLICIT_H__
+#ifndef ND_USER_DEFINED_IMPLICIT_H_
+#define ND_USER_DEFINED_IMPLICIT_H_
 
 #include "ndShapeConvex.h"
 

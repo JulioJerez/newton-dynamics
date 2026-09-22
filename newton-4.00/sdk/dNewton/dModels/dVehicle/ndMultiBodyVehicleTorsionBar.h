@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_MULTIBODY_VEHICLE_TORSION_BAR_H__
-#define __ND_MULTIBODY_VEHICLE_TORSION_BAR_H__
+#ifndef ND_MULTIBODY_VEHICLE_TORSION_BAR_H_
+#define ND_MULTIBODY_VEHICLE_TORSION_BAR_H_
 
 #include "ndNewtonStdafx.h"
 #include "ndJointGear.h"

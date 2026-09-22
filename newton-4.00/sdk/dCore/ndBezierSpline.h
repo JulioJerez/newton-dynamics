@@ -13,8 +13,8 @@
 #include "ndArray.h"
 #include "ndClassAlloc.h"
 
-#ifndef __ND_BEZIER_SPLINE_H__
-#define __ND_BEZIER_SPLINE_H__
+#ifndef ND_BEZIER_SPLINE_H_
+#define ND_BEZIER_SPLINE_H_
 
 class ndBezierSpline : public ndClassAlloc
 {

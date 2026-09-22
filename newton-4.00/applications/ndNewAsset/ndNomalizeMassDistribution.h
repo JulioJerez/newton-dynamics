@@ -12,8 +12,8 @@
 #include "ndNewAssetStdafx.h"
 #include "ndAssetEditor.h"
 
-#ifndef __D_NORMALIZE_MASS_TOOL_H__
-#define __D_NORMALIZE_MASS_TOOL_H__
+#ifndef D_NORMALIZE_MASS_TOOL_H_
+#define D_NORMALIZE_MASS_TOOL_H_
 
 class ndNomalizeMassDistribution : public ndAssetEditor::ndAssetTool
 {

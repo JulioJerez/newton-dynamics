@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_SCENE_NODE_H__
-#define __ND_SCENE_NODE_H__
+#ifndef ND_SCENE_NODE_H_
+#define ND_SCENE_NODE_H_
 
 #include "ndCollisionStdafx.h"
 

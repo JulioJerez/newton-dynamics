@@ -1,5 +1,7 @@
-#ifndef __ND_OFBX_H__
-#define __ND_OFBX_H__
+
+
+#ifndef ND_OFBX_H_
+#define ND_OFBX_H_
 
 namespace ndOfbx
 {

@@ -12,8 +12,8 @@
 #include "ndNewAssetStdafx.h"
 #include "ndAssetEditor.h"
 
-#ifndef __D_ROTATE_MESH_H__
-#define __D_ROTATE_MESH_H__
+#ifndef D_ROTATE_MESH_H_
+#define D_ROTATE_MESH_H_
 
 class ndRotateMesh : public ndAssetEditor::ndAssetTool
 {

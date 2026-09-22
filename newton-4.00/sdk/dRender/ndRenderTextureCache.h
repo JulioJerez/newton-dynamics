@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __NR_RENDER_TEXTURE_CACHE_H__ 
-#define __NR_RENDER_TEXTURE_CACHE_H__ 
+#ifndef ND_RENDER_TEXTURE_CACHE_H_ 
+#define ND_RENDER_TEXTURE_CACHE_H_ 
 
 #include "ndRenderStdafx.h"
 

@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_QUATERNION_H__
-#define __ND_QUATERNION_H__
+#ifndef ND_QUATERNION_H_
+#define ND_QUATERNION_H_
 
 #include "ndCoreStdafx.h"
 #include "ndTypes.h"

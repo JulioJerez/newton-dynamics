@@ -188,25 +188,25 @@ void ndPhysicsWorld::OnRemoveBody(ndBody* const body) const
 void ndPhysicsWorld::OnAddJoint(ndJointBilateralConstraint* const joint) const
 {
 	ndWorld::OnAddJoint(joint);
-	ndTrace(("adding a joint to world\n"));
+	ndTrace(("adding a joint to world\n"))
 }
 
 void ndPhysicsWorld::OnRemoveJoint(ndJointBilateralConstraint* const joint) const
 {
 	ndWorld::OnRemoveJoint(joint);
-	ndTrace(("removing a joint from world\n"));
+	ndTrace(("removing a joint from world\n"))
 }
 
 void ndPhysicsWorld::OnAddModel(ndModel* const model) const
 {
 	ndWorld::OnAddModel(model);
-	ndTrace(("adding a model to world\n"));
+	ndTrace(("adding a model to world\n"))
 }
 
 void ndPhysicsWorld::OnRemoveModel(ndModel* const model) const
 {
 	ndWorld::OnRemoveModel(model);
-	ndTrace(("removing a model from world\n"));
+	ndTrace(("removing a model from world\n"))
 }
 
 void ndPhysicsWorld::NormalUpdates()

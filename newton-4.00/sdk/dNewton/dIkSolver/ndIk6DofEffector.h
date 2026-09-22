@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __ND_IK_6DOF_EFFECTOR_H__
-#define __ND_IK_6DOF_EFFECTOR_H__
+#ifndef ND_IK_6DOF_EFFECTOR_H_
+#define ND_IK_6DOF_EFFECTOR_H_
 
 #include "ndNewtonStdafx.h"
 #include "ndJointBilateralConstraint.h"

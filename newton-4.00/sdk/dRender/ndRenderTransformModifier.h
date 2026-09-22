@@ -8,8 +8,9 @@
 * including commercial applications, and to alter it and redistribute it
 * freely
 */
-#ifndef __ND_RENDER_TRANSFORM_MODIOFIER_H__
-#define __ND_RENDER_TRANSFORM_MODIOFIER_H__
+
+#ifndef ND_RENDER_TRANSFORM_MODIOFIER_H_
+#define ND_RENDER_TRANSFORM_MODIOFIER_H_
 
 #include "ndRenderStdafx.h"
 

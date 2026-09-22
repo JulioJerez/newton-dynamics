@@ -20,8 +20,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_GENERAL_MATRIX_H__
-#define __ND_GENERAL_MATRIX_H__
+#ifndef ND_GENERAL_MATRIX_H_
+#define ND_GENERAL_MATRIX_H_
 
 #include "ndCoreStdafx.h"
 #include "ndTypes.h"

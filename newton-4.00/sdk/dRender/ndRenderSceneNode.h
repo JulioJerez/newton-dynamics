@@ -8,8 +8,9 @@
 * including commercial applications, and to alter it and redistribute it
 * freely
 */
-#ifndef __ND_RENDER_SCENE_NODE_H__
-#define __ND_RENDER_SCENE_NODE_H__
+
+#ifndef ND_RENDER_SCENE_NODE_H_
+#define ND_RENDER_SCENE_NODE_H_
 
 #include "ndRenderStdafx.h"
 #include "ndRenderPrimitive.h"

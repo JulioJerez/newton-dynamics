@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __NDCRC_H__
-#define __NDCRC_H__
+#ifndef ND_CRC_H_
+#define ND_CRC_H_
 
 #include "ndCoreStdafx.h"
 

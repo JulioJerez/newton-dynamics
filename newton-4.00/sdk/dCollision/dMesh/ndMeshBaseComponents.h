@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_MESH_BASE_COMPONENTS_H__
-#define __ND_MESH_BASE_COMPONENTS_H__
+#ifndef ND_MESH_BASE_COMPONENTS_H_
+#define ND_MESH_BASE_COMPONENTS_H_
 
 #include "ndCore.h"
 

@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_BODY_KINEMATIC_H__
-#define __ND_BODY_KINEMATIC_H__
+#ifndef ND_BODY_KINEMATIC_H_
+#define ND_BODY_KINEMATIC_H_
 
 #include "ndCollisionStdafx.h"
 #include "ndBody.h"

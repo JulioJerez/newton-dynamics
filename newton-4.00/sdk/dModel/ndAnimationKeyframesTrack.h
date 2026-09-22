@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __ND_ANIMATION_KEYFRAMES_TRACK_h__
-#define __ND_ANIMATION_KEYFRAMES_TRACK_h__
+#ifndef ND_ANIMATION_KEYFRAMES_TRACK_H_
+#define ND_ANIMATION_KEYFRAMES_TRACK_H_
 
 class ndAnimationKeyFramesTrack
 {

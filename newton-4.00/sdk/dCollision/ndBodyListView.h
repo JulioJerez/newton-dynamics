@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_LIST_VIEW_H__
-#define __ND_LIST_VIEW_H__
+#ifndef ND_LIST_VIEW_H_
+#define ND_LIST_VIEW_H_
 
 #include "ndCollisionStdafx.h"
 

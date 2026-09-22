@@ -24,8 +24,8 @@
 //      are changed infrequently
 //
 
-#ifndef __ND_NEWTON_STDAFX_H__
-#define __ND_NEWTON_STDAFX_H__
+#ifndef ND_NEWTON_STDAFX_H_
+#define ND_NEWTON_STDAFX_H_
 
 #include <ndCore.h>
 #include <ndCollision.h>

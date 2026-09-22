@@ -9,8 +9,8 @@
 * freely
 */
 	
-#ifndef __ND_RENDER_OPENGLUTIL_H__
-#define __ND_RENDER_OPENGLUTIL_H__
+#ifndef ND_RENDER_OPENGLUTIL_H_
+#define ND_RENDER_OPENGLUTIL_H_
 
 #include "ndRenderContext.h"
 

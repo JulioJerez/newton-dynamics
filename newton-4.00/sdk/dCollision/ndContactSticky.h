@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_CONTACT_STICKY_H__
-#define __ND_CONTACT_STICKY_H__
+#ifndef ND_CONTACT_STICKY_H_
+#define ND_CONTACT_STICKY_H_
 
 #include "ndCollisionStdafx.h"
 #include "ndContact.h"
