@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef _ND_FBX_EXPORT_H_
-#define _ND_FBX_EXPORT_H_
+#ifndef ND_FBX_EXPORT_H_
+#define ND_FBX_EXPORT_H_
 
 #include "ndNewAssetStdafx.h"
 

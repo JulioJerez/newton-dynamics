@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef _D_BASIC_PLAYER_CAPSULE_H_
-#define _D_BASIC_PLAYER_CAPSULE_H_
+#ifndef D_BASIC_PLAYER_CAPSULE_H_
+#define D_BASIC_PLAYER_CAPSULE_H_
 
 #include "ndSandboxStdafx.h"
 

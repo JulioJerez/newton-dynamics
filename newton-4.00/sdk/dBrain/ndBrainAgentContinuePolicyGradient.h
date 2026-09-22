@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _ND_AGENT_CONTINUE_POLICY_GRADIENT_H__
-#define _ND_AGENT_CONTINUE_POLICY_GRADIENT_H__
+#ifndef ND_AGENT_CONTINUE_POLICY_GRADIENT_H_
+#define ND_AGENT_CONTINUE_POLICY_GRADIENT_H_
 
 #include "ndBrainStdafx.h"
 #include "ndBrain.h"

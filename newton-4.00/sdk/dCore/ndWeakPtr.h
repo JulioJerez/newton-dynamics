@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef _ND_WEAK_PTR_H_
-#define _ND_WEAK_PTR_H_
+#ifndef ND_WEAK_PTR_H_
+#define ND_WEAK_PTR_H_
 
 #include "ndCoreStdafx.h"
 

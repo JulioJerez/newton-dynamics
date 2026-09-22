@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef _ND_ANIMATION_MESH_LOADER_H_
-#define _ND_ANIMATION_MESH_LOADER_H_
+#ifndef ND_ANIMATION_MESH_LOADER_H_
+#define ND_ANIMATION_MESH_LOADER_H_
 
 #include "ndFbxMeshLoader.h"
 

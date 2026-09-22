@@ -20,8 +20,8 @@
 */
 
 
-#ifndef _ND_BRAIN_STDAFX_H__
-#define _ND_BRAIN_STDAFX_H__
+#ifndef ND_BRAIN_STDAFX_H_
+#define ND_BRAIN_STDAFX_H_
 
 #include <ndCore.h>
 #include <lodepng.h>

@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef _ND_URDF_FILE_H_
-#define _ND_URDF_FILE_H_
+#ifndef ND_URDF_FILE_H_
+#define ND_URDF_FILE_H_
 
 #include "ndNewAssetStdafx.h"
 

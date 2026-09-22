@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _ND_CORE_H_
-#define _ND_CORE_H_
+#ifndef ND_CORE_H_
+#define ND_CORE_H_
 
 #include <ndCoreStdafx.h>
 #include <ndCRC.h>

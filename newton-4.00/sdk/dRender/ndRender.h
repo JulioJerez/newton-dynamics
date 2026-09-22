@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _ND_RENDER_H__
-#define _ND_RENDER_H__
+#ifndef ND_RENDER_H_
+#define ND_RENDER_H_
 
 #include "ndRenderStdafx.h"
 

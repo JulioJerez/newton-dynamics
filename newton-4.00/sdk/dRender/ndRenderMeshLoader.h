@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef _ND_RENDER_MESH_LOADER_H_
-#define _ND_RENDER_MESH_LOADER_H_
+#ifndef ND_RENDER_MESH_LOADER_H_
+#define ND_RENDER_MESH_LOADER_H_
 
 class ndRender;
 class ndRenderMeshLoader : public ndAnimationMeshLoader

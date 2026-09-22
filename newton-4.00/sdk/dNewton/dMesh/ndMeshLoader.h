@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef _ND_MESH_LOADER_H_
-#define _ND_MESH_LOADER_H_
+#ifndef ND_MESH_LOADER_H_
+#define ND_MESH_LOADER_H_
 
 #include "ndNewtonStdafx.h"
 

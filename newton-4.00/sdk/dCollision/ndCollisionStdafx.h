@@ -20,8 +20,8 @@
 */
 
 
-#ifndef _ND_COLLISION_STDAFX_H__
-#define _ND_COLLISION_STDAFX_H__
+#ifndef ND_COLLISION_STDAFX_H_
+#define ND_COLLISION_STDAFX_H_
 
 #include <ndCore.h>
 

@@ -20,8 +20,8 @@
 */
 
 
-#ifndef _ND_MODEL_STDAFX_H__
-#define _ND_MODEL_STDAFX_H__
+#ifndef ND_MODEL_STDAFX_H_
+#define ND_MODEL_STDAFX_H_
 
 #include <ofbx.h>
 #include <ndNewton.h>
