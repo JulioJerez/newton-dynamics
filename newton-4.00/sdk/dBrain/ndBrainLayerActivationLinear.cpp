@@ -179,10 +179,10 @@ void ndBrainLayerActivationLinear::FeedForward(const ndBrainLayerFeedForwardCpuC
 	ndBrainMemVector output(&inputOutputBuffer[outputOffset], outputSize);
 
 	const ndBrainMemVector bias((ndBrainFloat*)m_biasesBuffer->GetCpuPtr(), inputSize);
-	const ndBrainMemVector slope((ndBrainFloat*)m_slopesBuffer->GetCpuPtr(), inputSize);
+	const ndBrainMemVector slopes((ndBrainFloat*)m_slopesBuffer->GetCpuPtr(), inputSize);
 
 	output.Set(input);
-	output.Mul(slope);
+	output.Mul(slopes);
 	output.Add(bias);
 	ndAssert(output.SanityCheck());
 }
@@ -208,7 +208,9 @@ void ndBrainLayerActivationLinear::BackPropagate(const ndBrainLayerBackPropagate
 	const ndBrainMemVector outputDerivative(&inputOutputGradientsBuffer[dstBase], inputSize);
 	ndBrainMemVector inputDerivative(&inputOutputGradientsBuffer[srcBase], inputSize);
 
-	inputDerivative.Set(m_slopes);
+	const ndBrainMemVector slopes((ndBrainFloat*)m_slopesBuffer->GetCpuPtr(), inputSize);
+
+	inputDerivative.Set(slopes);
 	inputDerivative.Mul(outputDerivative);
 	ndAssert (inputDerivative.SanityCheck());
 }
@@ -227,8 +229,8 @@ ndCommandArray ndBrainLayerActivationLinear::CreateFeedForwardBufferCommand(
 
 	if (!m_slopesBuffer)
 	{
-		m_slopesBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(context, m_slopes));
 		m_biasesBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(context, m_biases));
+		m_slopesBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(context, m_slopes));
 	}
 
 	ndBrainBufferCommand* command = nullptr;

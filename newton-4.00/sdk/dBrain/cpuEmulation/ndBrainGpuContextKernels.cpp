@@ -863,32 +863,37 @@ class brainLayerBrainTanhBackPropagate : public ndBrainKernel
         ndAssert(srcBase >= 0);
         ndAssert(dstBase >= 0);
 
+        const ndBrainMemVector output(&inputOutputData[dstBase], inputSize);
+        const ndBrainMemVector outputDerivative(&inputOutputGradients[dstBase], inputSize);
+        ndBrainMemVector inputDerivative(&inputOutputGradients[srcBase], inputSize);
+
         ndInt32 workGroupSizeReminder = inputSize % workGroupSize;
         ndInt32 modWorkGroupSize = inputSize - workGroupSizeReminder;
         for (ndInt32 i = 0; i < modWorkGroupSize; i += workGroupSize)
         {
             for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
             {
-                ndBrainFloat outputData = inputOutputData[dstBase + i + itemId];
+                ndBrainFloat outputData = output[i + itemId];
                 ndBrainFloat a = ndBrainFloat(1.0f) - outputData * outputData;
-                ndBrainFloat b = inputOutputGradients[dstBase + i + itemId];
-                inputOutputGradients[srcBase + i + itemId] = a * b;
+                ndBrainFloat b = outputDerivative[i + itemId];
+                inputDerivative[i + itemId] = a * b;
             }
         }
         for (ndInt32 itemId = 0; itemId < workGroupSizeReminder; ++itemId)
         {
-            ndBrainFloat outputData = inputOutputData[dstBase + modWorkGroupSize + itemId];
+            ndBrainFloat outputData = output[modWorkGroupSize + itemId];
             ndBrainFloat a = ndBrainFloat(1.0f) - outputData * outputData;
-            ndBrainFloat b = inputOutputGradients[dstBase + modWorkGroupSize + itemId];
-            inputOutputGradients[srcBase + modWorkGroupSize + itemId] = a * b;
+            ndBrainFloat b = outputDerivative[modWorkGroupSize + itemId];
+            inputDerivative[modWorkGroupSize + itemId] = a * b;
         }
 
         #ifdef _DEBUG
         {
+            const ndBrainMemVector checkDerivative(&inputOutputGradients[srcBase], workGroupSize);
             ndInt32 padded = (inputSize + workGroupSize - 1) & -workGroupSize;
             for (ndInt32 i = inputSize; i < padded; ++i)
             {
-                ndBrainFloat a = inputOutputGradients[srcBase + i];
+                ndBrainFloat a = checkDerivative[i];
                 ndAssert(a == ndBrainFloat(0.0f));
             }
         }
@@ -1018,11 +1023,11 @@ class brainLayerBrainLinearBackPropagate : public ndBrainKernel
 
     void Execute(ndInt32 groupId, ndInt32 workGroupSize)
     {
-        ndBrainFloatBuffer* const buffer3 = (ndBrainFloatBuffer*)m_parameters[3];
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
-        ndBrainUniformBuffer* const buffer5 = (ndBrainUniformBuffer*)m_parameters[5];
+        ndBrainFloatBuffer* const buffer3 = (ndBrainFloatBuffer*)m_parameters[3];
+        ndBrainFloatBuffer* const buffer6 = (ndBrainFloatBuffer*)m_parameters[6];
 
-        ndBrainFloat* const slopesPtr = (ndBrainFloat*)buffer5->GetGpuBuffer()->GetPtr();
+        ndBrainFloat* const slopesPtr = (ndBrainFloat*)buffer6->GetGpuBuffer()->GetPtr();
         ndBrainFloat* const inputOutputGradients = (ndBrainFloat*)buffer3->GetGpuBuffer()->GetPtr();
         ndCommandSharedInfo* const parameters = (ndCommandSharedInfo*)buffer0->GetGpuBuffer()->GetPtr();
         
@@ -1037,28 +1042,34 @@ class brainLayerBrainLinearBackPropagate : public ndBrainKernel
         
         ndInt32 workGroupSizeReminder = inputSize % workGroupSize;
         ndInt32 modWorkGroupSize = inputSize - workGroupSizeReminder;
+
+        const ndBrainMemVector slopes(slopesPtr, inputSize);
+        const ndBrainMemVector outputDerivative(&inputOutputGradients[dstBase], inputSize);
+        ndBrainMemVector inputDerivative(&inputOutputGradients[srcBase], inputSize);
+
         for (ndInt32 i = 0; i < modWorkGroupSize; i += workGroupSize)
         {
             for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
             {
-                ndBrainFloat slope = slopesPtr[i + itemId];
-                ndBrainFloat outputGrad = inputOutputGradients[dstBase + i + itemId];
-                inputOutputGradients[srcBase + i + itemId] = slope * outputGrad;
+                ndBrainFloat slope = slopes[i + itemId];
+                ndBrainFloat outputGrad = outputDerivative[i + itemId];
+                inputDerivative[i + itemId] = slope * outputGrad;
             }
         }
         for (ndInt32 itemId = 0; itemId < workGroupSizeReminder; ++itemId)
         {
-            ndBrainFloat slope = slopesPtr[modWorkGroupSize + itemId];
-            ndBrainFloat outputGrad = inputOutputGradients[dstBase + modWorkGroupSize + itemId];
-            inputOutputGradients[srcBase + modWorkGroupSize + itemId] = slope * outputGrad;
+            ndBrainFloat slope = slopes[modWorkGroupSize + itemId];
+            ndBrainFloat outputGrad = outputDerivative[modWorkGroupSize + itemId];
+            inputDerivative[modWorkGroupSize + itemId] = slope * outputGrad;
         }
         
         #ifdef _DEBUG
         {
+            const ndBrainMemVector checkDerivative(&inputOutputGradients[srcBase], workGroupSize);
             ndInt32 padded = (inputSize + workGroupSize - 1) & -workGroupSize;
             for (ndInt32 i = inputSize; i < padded; ++i)
             {
-                ndBrainFloat a = inputOutputGradients[srcBase + i];
+                ndBrainFloat a = checkDerivative[i];
                 ndAssert(a == ndBrainFloat(0.0f));
             }
         }
