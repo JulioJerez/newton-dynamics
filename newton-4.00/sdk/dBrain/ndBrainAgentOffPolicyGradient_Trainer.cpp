@@ -697,11 +697,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::UpdateSpecialLayers()
 	policyMinibatchInputBuffer->CopyBuffer(policyObservation, m_parameters.m_miniBatchSize, **m_minibatchOfTransitions);
 	policy->UpdateSelfModifyingLayers();
 
-static int xxxx;
-ndBrainVector xxx;
-policy->GetOuputBuffer()->VectorFromDevice(xxx);
-xxxx *= 1;
-
 	for (ndInt32 criticIndex = 0; criticIndex < ndInt32(sizeof(m_referenceCriticTrainer) / sizeof(m_referenceCriticTrainer[0])); ++criticIndex)
 	{
 		ndInt32 criticInputSize = m_policyTrainer->GetBrain()->GetInputSize() + m_policyTrainer->GetBrain()->GetOutputSize();
@@ -724,17 +719,13 @@ xxxx *= 1;
 		criticInputObservation.m_bytesToCopy = ndInt32(m_policyTrainer->GetBrain()->GetInputSize() * sizeof(ndReal));
 		criticMinibatchInputBuffer->CopyBuffer(criticInputObservation, m_parameters.m_miniBatchSize, **m_minibatchOfTransitions);
 		critic->UpdateSelfModifyingLayers();
-		critic->GetOuputBuffer()->VectorFromDevice(xxx);
 
 		ndBrainTrainerInference* const referenceCritic = *m_referenceCriticTrainer[criticIndex];
 		criticMinibatchInputBuffer = referenceCritic->GetInputBuffer();
 		criticMinibatchInputBuffer->CopyBuffer(criticInputAction, m_parameters.m_miniBatchSize, **m_minibatchOfTransitions);
 		criticMinibatchInputBuffer->CopyBuffer(criticInputObservation, m_parameters.m_miniBatchSize, **m_minibatchOfTransitions);
 		referenceCritic->UpdateSelfModifyingLayers();
-
-		referenceCritic->GetOuputBuffer()->VectorFromDevice(xxx);
 	}
-	xxxx++;
 }
 
 void ndBrainAgentOffPolicyGradient_Trainer::CalculateExpectedRewards()
@@ -843,11 +834,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::CalculateExpectedRewards()
 	criticOutputReward.m_bytesToCopy = ndInt32(sizeof(ndReal));
 	m_minibatchExpectedRewards->CopyBuffer(criticOutputReward, m_parameters.m_miniBatchSize, **m_minibatchOfTransitions);
 	m_minibatchExpectedRewards->Add(qValue);
-
-static int xxxx;
-ndBrainVector xxx;
-m_minibatchExpectedRewards->VectorFromDevice(xxx);
-xxxx++;
 }
 
 void ndBrainAgentOffPolicyGradient_Trainer::TrainCritics(ndInt32 criticIndex)
@@ -883,12 +869,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainCritics(ndInt32 criticIndex)
 
 	// back propagate loss
 	critic.BackPropagate();
-
-static int xxxx;
-ndBrainVector xxx;
-criticMinibatchOutputGradientBuffer->VectorFromDevice(xxx);
-critic.GetInputGradientBuffer()->VectorFromDevice(xxx);
-xxxx++;
 
 	// update parameters
 	critic.AccumulateWeightAndBiasGradients();
@@ -1016,11 +996,6 @@ void ndBrainAgentOffPolicyGradient_Trainer::TrainPolicy()
 	// negate gradient to make it a gradient ascend
 	policyMinibatchOutputGradientBuffer->Scale(ndBrainFloat(-1.0f));
 	m_policyTrainer->BackPropagate();
-
-static int xxxx;
-ndBrainVector xxx;
-policy->GetInputGradientBuffer()->VectorFromDevice(xxx);
-xxxx++;
 
 	critic.AccumulateWeightAndBiasGradients();
 	m_policyTrainer->ApplyLearnRate(ND_POLICY_LEARN_SCALE * m_learnRate);
