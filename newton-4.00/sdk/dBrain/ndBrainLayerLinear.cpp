@@ -490,8 +490,6 @@ void ndBrainLayerLinear::DotProductMatrixMultiply(const ndBrainLayerFeedForwardC
 	ndAssert(inputOutputBuffer.BounceCheck(outputOffset + outputSize - 1));
 	ndBrainMemVector output(&inputOutputBuffer[outputOffset], outputSize);
 
-//ndBrainFixSizeVector<1024> xxxx(outputSize);
-//xxxx.Set(output);
 	const ndBrainMemVector input(&inputOutputBuffer[inputOffset], inputSize);
 	for (ndInt32 i = outputSize - 1; i >= 0; --i)
 	{
@@ -500,28 +498,15 @@ void ndBrainLayerLinear::DotProductMatrixMultiply(const ndBrainLayerFeedForwardC
 	}
 	const ndBrainMemVector bias(&parameters[matrixSize], outputSize);
 	output.Add(bias);
-	//for (ndInt32 i = 0; i < outputSize; ++i)
-	//{
-	//	ndBrainFloat error = ndAbs(output[i] - xxxx[i]);
-	//	ndAssert(error < ndBrainFloat(1.0e-5f));
-	//}
-
 	//ndAssert(output.SanityCheck());
 }
 
 void ndBrainLayerLinear::TiledMatrixMultiply(const ndBrainLayerFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex)
 {
 	ndBrainFloat tile_acc[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
-	ndBrainFloat tile_weights[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
 	ndBrainFloat tile_inputs[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
-
-	for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
-	{
-		for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
-		{
-			tile_acc[j][i] = ndBrainFloat(0.0f);
-		}
-	}
+	ndBrainFloat tile_weights[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
+	ndBrainFloat smallTile[ND_GPU_TILED_MATRIX_ROWS / 2][ND_GPU_TILED_MATRIX_ROWS / 2];
 
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
@@ -550,6 +535,14 @@ void ndBrainLayerLinear::TiledMatrixMultiply(const ndBrainLayerFeedForwardCpuCom
 	const ndInt32 weightsBase = rowStart * width * ND_GPU_TILED_MATRIX_ROWS;
 	const ndInt32 inputBase = columStart * inputOutputSize * ND_GPU_TILED_MATRIX_ROWS + inputOutputStartOffset;
 
+	for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
+	{
+		for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
+		{
+			tile_acc[j][i] = ndBrainFloat(0.0f);
+		}
+	}
+
 	for (ndInt32 k = 0; k < kDim; ++k)
 	{
 		// load tiles
@@ -566,6 +559,7 @@ void ndBrainLayerLinear::TiledMatrixMultiply(const ndBrainLayerFeedForwardCpuCom
 			inputOffset += inputOutputSize;
 		}
 
+#if 0
 		// multiply tiles
 		for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
 		{
@@ -581,6 +575,47 @@ void ndBrainLayerLinear::TiledMatrixMultiply(const ndBrainLayerFeedForwardCpuCom
 				tile_acc[j][i] += acc;
 			}
 		}
+#else
+		for (ndInt32 j1 = 0; j1 < ND_GPU_TILED_MATRIX_ROWS; j1 += ND_GPU_TILED_MATRIX_ROWS / 2)
+		{
+			for (ndInt32 i1 = 0; i1 < ND_GPU_TILED_MATRIX_ROWS; i1 += ND_GPU_TILED_MATRIX_ROWS / 2)
+			{
+				for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
+				{
+					for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
+					{
+						smallTile[j][i] = ndBrainFloat(0.0f);
+					}
+				}
+
+				for (ndInt32 m = 0; m < ND_GPU_TILED_MATRIX_ROWS; m += ND_GPU_TILED_MATRIX_ROWS / 2)
+				{
+					for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
+					{
+						for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
+						{
+							ndBrainFloat acc = ndBrainFloat(0.0f);
+							for (ndInt32 n = 0; n < ND_GPU_TILED_MATRIX_ROWS / 2; ++n)
+							{
+								ndBrainFloat input = tile_inputs[i1 + i][n + m];
+								ndBrainFloat weight = tile_weights[j1 + j][n + m];
+								acc += weight * input;
+							}
+							smallTile[j][i] += acc;
+						}
+					}
+				}
+
+				for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
+				{
+					for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
+					{
+						tile_acc[j1 + j][i1 + i] += smallTile[j][i];
+					}
+				}
+			}
+		}
+#endif
 	}
 
 	// the tire is transposed, but  
