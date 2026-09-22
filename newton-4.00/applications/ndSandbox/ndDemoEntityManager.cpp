@@ -650,7 +650,7 @@ ndDemoEntityManager::ndDemoEntityManager()
 	,m_profilerMode(false)
 	,m_changeCamera(false)
 	,m_nextActiveCamera()
-	,m_solverMode(ndWorld::ndSimdSoaSolver)
+	,m_solverMode(ndWorld::ndSimd8Solver)
 {
 	// Setup window
 	char title[256];
@@ -714,8 +714,8 @@ ndDemoEntityManager::ndDemoEntityManager()
 	//m_hidePostUpdate = true;
 	//m_hideVisualMeshes = true;
 	m_solverMode = ndWorld::ndStandardSolver;
-	//m_solverMode = ndWorld::ndSimdSoaSolver;
-	//m_solverMode = ndWorld::ndSimdAvx2Solver;
+	//m_solverMode = ndWorld::ndSimd8Solver;
+	//m_solverMode = ndWorld::ndSimd16Solver;
 	//m_solverPasses = 4;
 	m_workerThreads = 1;
 	//m_solverSubSteps = 2;
@@ -1057,8 +1057,8 @@ void ndDemoEntityManager::ShowMainMenuBar()
 			ImGui::Text("solvers");
 			ndInt32 solverMode(m_solverMode);
 			ImGui::RadioButton("default", &solverMode, ndWorld::ndStandardSolver);
-			ImGui::RadioButton("sse", &solverMode, ndWorld::ndSimdSoaSolver);
-			ImGui::RadioButton("avx2", &solverMode, ndWorld::ndSimdAvx2Solver);
+			ImGui::RadioButton("sse", &solverMode, ndWorld::ndSimd8Solver);
+			ImGui::RadioButton("avx2", &solverMode, ndWorld::ndSimd16Solver);
 	
 			m_solverMode = ndWorld::ndSolverModes(solverMode);
 			ImGui::Separator();

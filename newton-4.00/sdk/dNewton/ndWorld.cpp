@@ -887,25 +887,25 @@ void ndWorld::SelectSolver(ndSolverModes solverMode)
 		delete m_solver;
 		switch (solverMode)
 		{
-			case ndSimdSoaSolver:
+			case ndSimd8Solver:
 			{
 				ndWorldScene* const newScene = new ndWorldScene(*((ndWorldScene*)m_scene));
 				delete m_scene;
 				m_scene = newScene;
 
 				m_solverMode = solverMode;
-				m_solver = new ndDynamicsUpdateSoa(this);
+				m_solver = new ndDynamicsUpdateSimd8(this);
 				break;
 			}
 
-			case ndSimdAvx2Solver:
+			case ndSimd16Solver:
 			{
 				ndWorldScene* const newScene = new ndWorldScene(*((ndWorldScene*)m_scene));
 				delete m_scene;
 				m_scene = newScene;
 
 				m_solverMode = solverMode;
-				m_solver = new ndDynamicsUpdateAvx2(this);
+				m_solver = new ndDynamicsUpdateSimd16(this);
 				break;
 			}
 

@@ -25,15 +25,15 @@
 #include "ndNewtonStdafx.h"
 #include "ndDynamicsUpdate.h"
 
-class ndSoaMatrixArray;
-class ndSoaJointMaskArray;
+class ndMatrixSimd8Array;
+class ndJointMaskSimd8Array;
 
 D_MSV_NEWTON_CLASS_ALIGN_32
-class ndDynamicsUpdateSoa: public ndDynamicsUpdate
+class ndDynamicsUpdateSimd8: public ndDynamicsUpdate
 {
 	public:
-	ndDynamicsUpdateSoa(ndWorld* const world);
-	virtual ~ndDynamicsUpdateSoa();
+	ndDynamicsUpdateSimd8(ndWorld* const world);
+	virtual ~ndDynamicsUpdateSimd8();
 
 	virtual const char* GetStringId() const;
 
@@ -51,10 +51,10 @@ class ndDynamicsUpdateSoa: public ndDynamicsUpdate
 
 	ndVector m_ordinals;
 	ndArray<ndInt8> m_groupType;
-	ndArray<ndInt32> m_soaJointRows;
+	ndArray<ndInt32> m_simdJointRows;
 
-	ndSoaJointMaskArray* m_jointMask;
-	ndSoaMatrixArray* m_soaMassMatrixArray;
+	ndJointMaskSimd8Array* m_jointMask;
+	ndMatrixSimd8Array* m_simdMassMatrixArray;
 
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 

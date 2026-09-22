@@ -247,8 +247,8 @@ class ndBodyKinematic : public ndBody
 	friend class ndBvhSceneManager;
 	friend class ndSkeletonContainer;
 	friend class ndModelArticulation;
-	friend class ndDynamicsUpdateSoa;
-	friend class ndDynamicsUpdateAvx2;
+	friend class ndDynamicsUpdateSimd8;
+	friend class ndDynamicsUpdateSimd16;
 	friend class ndJointBilateralConstraint;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 

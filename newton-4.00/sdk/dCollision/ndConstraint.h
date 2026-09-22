@@ -271,8 +271,8 @@ class ndConstraint: public ndContainersFreeListAlloc<ndConstraint>
 	friend class ndBodyKinematic;
 	friend class ndDynamicsUpdate;
 	friend class ndSkeletonContainer;
-	friend class ndDynamicsUpdateSoa;
-	friend class ndDynamicsUpdateAvx2;
+	friend class ndDynamicsUpdateSimd8;
+	friend class ndDynamicsUpdateSimd16;
 } D_GCC_NEWTON_CLASS_ALIGN_32 ;
 
 

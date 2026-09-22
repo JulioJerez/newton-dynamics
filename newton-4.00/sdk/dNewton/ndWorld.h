@@ -49,8 +49,8 @@ class ndWorld: public ndClassAlloc
 	enum ndSolverModes
 	{	
 		ndStandardSolver,
-		ndSimdSoaSolver,
-		ndSimdAvx2Solver,
+		ndSimd8Solver,
+		ndSimd16Solver,
 	};
 
 	D_BASE_CLASS_REFLECTION(ndWorld)
@@ -208,7 +208,7 @@ class ndWorld: public ndClassAlloc
 	friend class ndSkeletonContainer;
 	friend class ndModelArticulation;
 	friend class ndDynamicsUpdateSoa;
-	friend class ndDynamicsUpdateAvx2;
+	friend class ndDynamicsUpdateSimd16;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif
