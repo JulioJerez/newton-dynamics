@@ -1337,16 +1337,9 @@ class brainLayerMatrixMatrixMultiply : public ndBrainKernel
     void Execute(ndInt32 groupId, ndInt32 workGroupSize)
     {
         ndBrainFloat tile_acc[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
-        ndBrainFloat tile_weights[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
         ndBrainFloat tile_inputs[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
-
-        for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
-        {
-            for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
-            {
-                tile_acc[j][i] = ndBrainFloat(0.0f);
-            }
-        }
+        ndBrainFloat tile_weights[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
+        ndBrainFloat smallTile[ND_GPU_TILED_MATRIX_ROWS / 2][ND_GPU_TILED_MATRIX_ROWS / 2];
 
         ndBrainUniformBuffer* const buffer0 = (ndBrainUniformBuffer*)m_parameters[0];
         ndBrainFloatBuffer* const buffer1 = (ndBrainFloatBuffer*)m_parameters[1];
@@ -1374,6 +1367,14 @@ class brainLayerMatrixMatrixMultiply : public ndBrainKernel
         const ndInt32 weightsBase = rowStart * width * ND_GPU_TILED_MATRIX_ROWS;
         const ndInt32 inputBase = columStart * inputOutputSize * ND_GPU_TILED_MATRIX_ROWS + inputOutputStartOffset;
 
+        for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
+        {
+            for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
+            {
+                tile_acc[j][i] = ndBrainFloat(0.0f);
+            }
+        }
+
         for (ndInt32 k = 0; k < kDim; ++k)
         {
             // load tiles
@@ -1390,6 +1391,7 @@ class brainLayerMatrixMatrixMultiply : public ndBrainKernel
                 inputOffset += inputOutputSize;
             }
 
+#if 0
             // multiply tiles
             for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
             {
@@ -1405,9 +1407,51 @@ class brainLayerMatrixMatrixMultiply : public ndBrainKernel
                     tile_acc[j][i] += acc;
                 }
             }
+#else
+            for (ndInt32 j1 = 0; j1 < ND_GPU_TILED_MATRIX_ROWS; j1 += ND_GPU_TILED_MATRIX_ROWS / 2)
+            {
+                for (ndInt32 i1 = 0; i1 < ND_GPU_TILED_MATRIX_ROWS; i1 += ND_GPU_TILED_MATRIX_ROWS / 2)
+                {
+                    for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
+                    {
+                        for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
+                        {
+                            smallTile[j][i] = ndBrainFloat(0.0f);
+                        }
+                    }
+
+                    for (ndInt32 m = 0; m < ND_GPU_TILED_MATRIX_ROWS; m += ND_GPU_TILED_MATRIX_ROWS / 2)
+                    {
+                        for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
+                        {
+                            for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
+                            {
+                                ndBrainFloat acc = ndBrainFloat(0.0f);
+                                for (ndInt32 n = 0; n < ND_GPU_TILED_MATRIX_ROWS / 2; ++n)
+                                {
+                                    ndBrainFloat input = tile_inputs[i1 + i][n + m];
+                                    ndBrainFloat weight = tile_weights[j1 + j][n + m];
+                                    acc += weight * input;
+                                }
+                                smallTile[j][i] += acc;
+                            }
+                        }
+                    }
+
+                    for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
+                    {
+                        for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
+                        {
+                            tile_acc[j1 + j][i1 + i] += smallTile[j][i];
+                        }
+                    }
+                }
+            }
+#endif
         }
 
-        // the tire is transposed, but  
+        // the tile is transposed, 
+        // but since they are in register, it nee to save to local memory
         for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
         {
             for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
@@ -1449,7 +1493,6 @@ class brainLayerBrainBackPropagateMatrixInputGradients : public ndBrainKernel
         ndBrainFloat tile_acc[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
         ndBrainFloat tile_weights[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
         ndBrainFloat tile_outputGrad[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
-
         for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
         {
             for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
