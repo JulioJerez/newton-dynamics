@@ -1057,8 +1057,8 @@ void ndDemoEntityManager::ShowMainMenuBar()
 			ImGui::Text("solvers");
 			ndInt32 solverMode(m_solverMode);
 			ImGui::RadioButton("default", &solverMode, ndWorld::ndStandardSolver);
-			ImGui::RadioButton("sse", &solverMode, ndWorld::ndSimd8Solver);
-			ImGui::RadioButton("avx2", &solverMode, ndWorld::ndSimd16Solver);
+			ImGui::RadioButton("simd-8", &solverMode, ndWorld::ndSimd8Solver);
+			ImGui::RadioButton("simd-16", &solverMode, ndWorld::ndSimd16Solver);
 	
 			m_solverMode = ndWorld::ndSolverModes(solverMode);
 			ImGui::Separator();

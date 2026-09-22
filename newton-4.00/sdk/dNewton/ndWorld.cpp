@@ -28,8 +28,8 @@
 #include "ndModelNotify.h"
 #include "ndSkeletonList.h"
 #include "ndDynamicsUpdate.h"
-#include "ndDynamicsUpdateSoa.h"
-#include "ndDynamicsUpdateAvx2.h"
+#include "ndDynamicsUpdateSimd8.h"
+#include "ndDynamicsUpdateSimd16.h"
 #include "ndJointBilateralConstraint.h"
 
 ndWorld::ndWorld()

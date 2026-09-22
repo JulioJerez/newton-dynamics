@@ -44,7 +44,8 @@
 #include <ndDynamicsUpdate.h>
 #include <ndMeshComponents.h>
 #include <ndSkeletonContainer.h>
-#include <ndDynamicsUpdateSoa.h>
+#include <ndDynamicsUpdateSimd8.h>
+#include <ndDynamicsUpdateSimd16.h>
 
 #include <ndJointGear.h>
 #include <ndJointHinge.h>

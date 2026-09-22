@@ -24,87 +24,86 @@
 #include "ndWorld.h"
 #include "ndBodyDynamic.h"
 #include "ndSkeletonList.h"
-#include "ndDynamicsUpdateSoa.h"
+#include "ndDynamicsUpdateSimd16.h"
 #include "ndJointBilateralConstraint.h"
 
-#define D_SOA_DEFAULT_BUFFER_SIZE	1024
+#define D_SIMD8_DEFAULT_BUFFER_SIZE	1024
 
 D_MSV_NEWTON_CLASS_ALIGN_32
-class ndSoaVector3
+class ndSimd16Vector3
 {
 	public:
-	ndVector8 m_x;
-	ndVector8 m_y;
-	ndVector8 m_z;
+	ndVector16 m_x;
+	ndVector16 m_y;
+	ndVector16 m_z;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 D_MSV_NEWTON_CLASS_ALIGN_32
-class ndSoaVector6
+class ndSimd16Vector6
 {
 	public:
-	ndSoaVector3 m_linear;
-	ndSoaVector3 m_angular;
+	ndSimd16Vector3 m_linear;
+	ndSimd16Vector3 m_angular;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 D_MSV_NEWTON_CLASS_ALIGN_32
-class ndSoaJacobianPair
+class ndSimd16JacobianPair
 {
 	public:
-	ndSoaVector6 m_jacobianM0;
-	ndSoaVector6 m_jacobianM1;
+	ndSimd16Vector6 m_jacobianM0;
+	ndSimd16Vector6 m_jacobianM1;
 }D_GCC_NEWTON_CLASS_ALIGN_32;
 
 D_MSV_NEWTON_CLASS_ALIGN_32
-class ndSoaMatrixElement
+class ndSimd16MatrixElement
 {
 	public:
-	ndSoaJacobianPair m_Jt;
-	ndSoaJacobianPair m_JMinv;
+	ndSimd16JacobianPair m_Jt;
+	ndSimd16JacobianPair m_JMinv;
 
-	ndVector8 m_force;
-	ndVector8 m_diagDamp;
-	ndVector8 m_JinvMJt;
-	ndVector8 m_invJinvMJt;
-	ndVector8 m_coordenateAccel;
-	ndVector8 m_normalForceIndex;
-	ndVector8 m_lowerBoundFrictionCoefficent;
-	ndVector8 m_upperBoundFrictionCoefficent;
+	ndVector16 m_force;
+	ndVector16 m_diagDamp;
+	ndVector16 m_JinvMJt;
+	ndVector16 m_invJinvMJt;
+	ndVector16 m_coordenateAccel;
+	ndVector16 m_normalForceIndex;
+	ndVector16 m_lowerBoundFrictionCoefficent;
+	ndVector16 m_upperBoundFrictionCoefficent;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
-class ndMatrixSimd8Array : public ndArray<ndSoaMatrixElement>
+class ndMatrixSimd16Array : public ndArray<ndSimd16MatrixElement>
 {
 };
 
-class ndJointMaskSimd8Array : public ndArray<ndVector8>
+class ndJointMaskSimd16Array : public ndArray<ndVector16>
 {
 };
 
-ndDynamicsUpdateSimd8::ndDynamicsUpdateSimd8(ndWorld* const world)
+ndDynamicsUpdateSimd16::ndDynamicsUpdateSimd16(ndWorld* const world)
 	:ndDynamicsUpdate(world)
-	,m_groupType(D_SOA_DEFAULT_BUFFER_SIZE)
-	,m_simdJointRows(D_SOA_DEFAULT_BUFFER_SIZE)
-	,m_jointMask(new ndJointMaskSimd8Array)
-	,m_simdMassMatrixArray(new ndMatrixSimd8Array)
+	,m_groupType(D_SIMD8_DEFAULT_BUFFER_SIZE)
+	,m_simdJointRows(D_SIMD8_DEFAULT_BUFFER_SIZE)
+	,m_jointMask(new ndJointMaskSimd16Array)
+	,m_simdMassMatrixArray(new ndMatrixSimd16Array)
 {
 }
 
-ndDynamicsUpdateSimd8::~ndDynamicsUpdateSimd8()
+ndDynamicsUpdateSimd16::~ndDynamicsUpdateSimd16()
 {
 	Clear();
-
-	m_groupType.Resize(D_SOA_DEFAULT_BUFFER_SIZE);
-	m_simdJointRows.Resize(D_SOA_DEFAULT_BUFFER_SIZE);
+	m_groupType.Resize(D_SIMD8_DEFAULT_BUFFER_SIZE);
+	m_simdJointRows.Resize(D_SIMD8_DEFAULT_BUFFER_SIZE);
 
 	delete m_jointMask;
 	delete m_simdMassMatrixArray;
 }
 
-const char* ndDynamicsUpdateSimd8::GetStringId() const
+const char* ndDynamicsUpdateSimd16::GetStringId() const
 {
-	return "Soa";
+	return "simd-16";
 }
 
-void ndDynamicsUpdateSimd8::SortJoints()
+void ndDynamicsUpdateSimd16::SortJoints()
 {
 	ND_PROFILE_ZONE();
 	SortJointsScan();
@@ -140,10 +139,10 @@ void ndDynamicsUpdateSimd8::SortJoints()
 	}
 #endif
 
-	const ndInt32 mask = -ndInt32(ND_SIMD8_WORK_GROUP_SIZE);
+	const ndInt32 mask = -ndInt32(ND_SIMD16_WORK_GROUP_SIZE);
 	const ndInt32 jointCount = ndInt32(jointArray.GetCount());
-	const ndInt32 soaJointCount = (jointCount + ND_SIMD8_WORK_GROUP_SIZE - 1) & mask;
-	ndAssert(jointArray.GetCapacity() >= soaJointCount);
+	const ndInt32 soaJointCount = (jointCount + ND_SIMD16_WORK_GROUP_SIZE - 1) & mask;
+	ndAssert(jointArray.GetCapacity() > soaJointCount);
 	ndConstraint** const jointArrayPtr = &jointArray[0];
 	for (ndInt32 i = jointCount; i < soaJointCount; ++i)
 	{
@@ -153,8 +152,8 @@ void ndDynamicsUpdateSimd8::SortJoints()
 	if (m_activeJointCount - jointArray.GetCount())
 	{
 		const ndInt32 base = m_activeJointCount & mask;
-		const ndInt32 count = jointArrayPtr[base + ND_SIMD8_WORK_GROUP_SIZE - 1] ? ND_SIMD8_WORK_GROUP_SIZE : ndInt32(jointArray.GetCount()) - base;
-		ndAssert(count <= ND_SIMD8_WORK_GROUP_SIZE);
+		const ndInt32 count = jointArrayPtr[base + ND_SIMD16_WORK_GROUP_SIZE - 1] ? ND_SIMD16_WORK_GROUP_SIZE : ndInt32(jointArray.GetCount()) - base;
+		ndAssert(count <= ND_SIMD16_WORK_GROUP_SIZE);
 		ndConstraint** const array = &jointArrayPtr[base];
 		for (ndInt32 j = 1; j < count; ++j)
 		{
@@ -168,7 +167,7 @@ void ndDynamicsUpdateSimd8::SortJoints()
 		}
 	}
 
-	const ndInt32 soaJointCountBatches = soaJointCount / ND_SIMD8_WORK_GROUP_SIZE;
+	const ndInt32 soaJointCountBatches = soaJointCount / ND_SIMD16_WORK_GROUP_SIZE;
 	m_jointMask->SetCount(soaJointCountBatches);
 	m_groupType.SetCount(soaJointCountBatches);
 	m_simdJointRows.SetCount(soaJointCountBatches);
@@ -198,7 +197,7 @@ void ndDynamicsUpdateSimd8::SortJoints()
 			const ndInt32 count = ndInt32(soaJointRows.GetCount());
 			for (ndInt32 i = 0; i < count; ++i)
 			{
-				const ndConstraint* const joint = jointArray[i * ND_SIMD8_WORK_GROUP_SIZE];
+				const ndConstraint* const joint = jointArray[i * ND_SIMD16_WORK_GROUP_SIZE];
 				soaJointRows[i] = rowCount;
 				rowCount += joint->m_rowCount;
 			}
@@ -230,9 +229,9 @@ void ndDynamicsUpdateSimd8::SortJoints()
 		ndAssert((joint->m_rowStart + joint->m_rowCount) <= maxRowCount);
 	}
 
-	for (ndInt32 i = 0; i < jointCount; i += ND_SIMD8_WORK_GROUP_SIZE)
+	for (ndInt32 i = 0; i < jointCount; i += ND_SIMD16_WORK_GROUP_SIZE)
 	{
-		const ndInt32 count = jointArrayPtr[i + ND_SIMD8_WORK_GROUP_SIZE - 1] ? ND_SIMD8_WORK_GROUP_SIZE : jointCount - i;
+		const ndInt32 count = jointArrayPtr[i + ND_SIMD16_WORK_GROUP_SIZE - 1] ? ND_SIMD16_WORK_GROUP_SIZE : jointCount - i;
 		for (ndInt32 j = 1; j < count; ++j)
 		{
 			ndConstraint* const joint0 = jointArrayPtr[i + j - 1];
@@ -244,7 +243,7 @@ void ndDynamicsUpdateSimd8::SortJoints()
 	SortBodyJointScan();
 }
 
-void ndDynamicsUpdateSimd8::SortIslands()
+void ndDynamicsUpdateSimd16::SortIslands()
 {
 	ND_PROFILE_ZONE();
 	ndScene* const scene = m_world->GetScene();
@@ -337,7 +336,7 @@ void ndDynamicsUpdateSimd8::SortIslands()
 	m_unConstrainedBodyCount = scan[1] - scan[0];
 }
 
-void ndDynamicsUpdateSimd8::BuildIsland()
+void ndDynamicsUpdateSimd16::BuildIsland()
 {
 	m_unConstrainedBodyCount = 0;
 	GetBodyIslandOrder().SetCount(0);
@@ -352,7 +351,7 @@ void ndDynamicsUpdateSimd8::BuildIsland()
 	}
 }
 
-void ndDynamicsUpdateSimd8::InitJacobianMatrix()
+void ndDynamicsUpdateSimd16::InitJacobianMatrix()
 {
 	ndScene* const scene = m_world->GetScene();
 	ndArray<ndConstraint*>& jointArray = scene->GetActiveContactArray();
@@ -362,20 +361,20 @@ void ndDynamicsUpdateSimd8::InitJacobianMatrix()
 		ND_PROFILE_ZONE_NAMED("TransposeMassMatrix");
 		const ndLeftHandSide* const leftHandSide = &GetLeftHandSide()[0];
 		const ndRightHandSide* const rightHandSide = &GetRightHandSide()[0];
-		ndMatrixSimd8Array& massMatrix = *m_simdMassMatrixArray;
+		ndMatrixSimd16Array& massMatrix = *m_simdMassMatrixArray;
 
 		ndInt8* const groupType = &m_groupType[0];
-		ndVector8* const jointMask = &(*m_jointMask)[0];
+		ndVector16* const jointMask = (ndVector16*)&(*m_jointMask)[0];
 		const ndInt32* const soaJointRows = &m_simdJointRows[0];
 
 		ndConstraint** const jointsPtr = &jointArray[0];
 
 		const ndInt32 m = groupId;
-		const ndInt32 index = m * ND_SIMD8_WORK_GROUP_SIZE;
+		const ndInt32 index = m * ND_SIMD16_WORK_GROUP_SIZE;
 		ndInt32 maxRow = 0;
 		ndInt32 minRow = 255;
-		ndVector8 selectMask(-1);
-		for (ndInt32 k = 0; k < ND_SIMD8_WORK_GROUP_SIZE; ++k)
+		ndVector16 selectMask(-1);
+		for (ndInt32 k = 0; k < ND_SIMD16_WORK_GROUP_SIZE; ++k)
 		{
 			ndConstraint* const joint = jointsPtr[index + k];
 			if (joint)
@@ -405,37 +404,28 @@ void ndDynamicsUpdateSimd8::InitJacobianMatrix()
 		const ndInt32 soaRowBase = soaJointRows[m];
 		if (isUniformGroup)
 		{
-			const ndConstraint* const joint0 = jointsPtr[index + 0];
-			const ndConstraint* const joint1 = jointsPtr[index + 1];
-			const ndConstraint* const joint2 = jointsPtr[index + 2];
-			const ndConstraint* const joint3 = jointsPtr[index + 3];
-			const ndConstraint* const joint4 = jointsPtr[index + 4];
-			const ndConstraint* const joint5 = jointsPtr[index + 5];
-			const ndConstraint* const joint6 = jointsPtr[index + 6];
-			const ndConstraint* const joint7 = jointsPtr[index + 7];
-
 			ndVector8 dommy;
-			const ndInt32 rowCount = joint0->m_rowCount;
+			const ndInt32 rowCount = jointsPtr[index + 0]->m_rowCount;
 			for (ndInt32 k = 0; k < rowCount; ++k)
 			{
-				const ndLeftHandSide* const row0 = &leftHandSide[joint0->m_rowStart + k];
-				const ndLeftHandSide* const row1 = &leftHandSide[joint1->m_rowStart + k];
-				const ndLeftHandSide* const row2 = &leftHandSide[joint2->m_rowStart + k];
-				const ndLeftHandSide* const row3 = &leftHandSide[joint3->m_rowStart + k];
-				const ndLeftHandSide* const row4 = &leftHandSide[joint4->m_rowStart + k];
-				const ndLeftHandSide* const row5 = &leftHandSide[joint5->m_rowStart + k];
-				const ndLeftHandSide* const row6 = &leftHandSide[joint6->m_rowStart + k];
-				const ndLeftHandSide* const row7 = &leftHandSide[joint7->m_rowStart + k];
-				ndSoaMatrixElement& row = massMatrix[soaRowBase + k];
+				ndSimd16MatrixElement& row = massMatrix[soaRowBase + k];
 
+				const ndLeftHandSide* const row0 = &leftHandSide[jointsPtr[index + 0]->m_rowStart + k];
+				const ndLeftHandSide* const row1 = &leftHandSide[jointsPtr[index + 1]->m_rowStart + k];
+				const ndLeftHandSide* const row2 = &leftHandSide[jointsPtr[index + 2]->m_rowStart + k];
+				const ndLeftHandSide* const row3 = &leftHandSide[jointsPtr[index + 3]->m_rowStart + k];
+				const ndLeftHandSide* const row4 = &leftHandSide[jointsPtr[index + 4]->m_rowStart + k];
+				const ndLeftHandSide* const row5 = &leftHandSide[jointsPtr[index + 5]->m_rowStart + k];
+				const ndLeftHandSide* const row6 = &leftHandSide[jointsPtr[index + 6]->m_rowStart + k];
+				const ndLeftHandSide* const row7 = &leftHandSide[jointsPtr[index + 7]->m_rowStart + k];
 				ndVector8::Transpose(
-					row.m_Jt.m_jacobianM0.m_linear.m_x,
-					row.m_Jt.m_jacobianM0.m_linear.m_y,
-					row.m_Jt.m_jacobianM0.m_linear.m_z,
+					row.m_Jt.m_jacobianM0.m_linear.m_x.m_low,
+					row.m_Jt.m_jacobianM0.m_linear.m_y.m_low,
+					row.m_Jt.m_jacobianM0.m_linear.m_z.m_low,
 					dommy,
-					row.m_Jt.m_jacobianM0.m_angular.m_x,
-					row.m_Jt.m_jacobianM0.m_angular.m_y,
-					row.m_Jt.m_jacobianM0.m_angular.m_z,
+					row.m_Jt.m_jacobianM0.m_angular.m_x.m_low,
+					row.m_Jt.m_jacobianM0.m_angular.m_y.m_low,
+					row.m_Jt.m_jacobianM0.m_angular.m_z.m_low,
 					dommy,
 					(ndVector8&)row0->m_Jt.m_jacobianM0,
 					(ndVector8&)row1->m_Jt.m_jacobianM0,
@@ -445,15 +435,15 @@ void ndDynamicsUpdateSimd8::InitJacobianMatrix()
 					(ndVector8&)row5->m_Jt.m_jacobianM0,
 					(ndVector8&)row6->m_Jt.m_jacobianM0,
 					(ndVector8&)row7->m_Jt.m_jacobianM0);
-
+				
 				ndVector8::Transpose(
-					row.m_Jt.m_jacobianM1.m_linear.m_x,
-					row.m_Jt.m_jacobianM1.m_linear.m_y,
-					row.m_Jt.m_jacobianM1.m_linear.m_z,
+					row.m_Jt.m_jacobianM1.m_linear.m_x.m_low,
+					row.m_Jt.m_jacobianM1.m_linear.m_y.m_low,
+					row.m_Jt.m_jacobianM1.m_linear.m_z.m_low,
 					dommy,
-					row.m_Jt.m_jacobianM1.m_angular.m_x,
-					row.m_Jt.m_jacobianM1.m_angular.m_y,
-					row.m_Jt.m_jacobianM1.m_angular.m_z,
+					row.m_Jt.m_jacobianM1.m_angular.m_x.m_low,
+					row.m_Jt.m_jacobianM1.m_angular.m_y.m_low,
+					row.m_Jt.m_jacobianM1.m_angular.m_z.m_low,
 					dommy,
 					(ndVector8&)row0->m_Jt.m_jacobianM1,
 					(ndVector8&)row1->m_Jt.m_jacobianM1,
@@ -463,15 +453,15 @@ void ndDynamicsUpdateSimd8::InitJacobianMatrix()
 					(ndVector8&)row5->m_Jt.m_jacobianM1,
 					(ndVector8&)row6->m_Jt.m_jacobianM1,
 					(ndVector8&)row7->m_Jt.m_jacobianM1);
-
+				
 				ndVector8::Transpose(
-					row.m_JMinv.m_jacobianM0.m_linear.m_x,
-					row.m_JMinv.m_jacobianM0.m_linear.m_y,
-					row.m_JMinv.m_jacobianM0.m_linear.m_z,
+					row.m_JMinv.m_jacobianM0.m_linear.m_x.m_low,
+					row.m_JMinv.m_jacobianM0.m_linear.m_y.m_low,
+					row.m_JMinv.m_jacobianM0.m_linear.m_z.m_low,
 					dommy,
-					row.m_JMinv.m_jacobianM0.m_angular.m_x,
-					row.m_JMinv.m_jacobianM0.m_angular.m_y,
-					row.m_JMinv.m_jacobianM0.m_angular.m_z,
+					row.m_JMinv.m_jacobianM0.m_angular.m_x.m_low,
+					row.m_JMinv.m_jacobianM0.m_angular.m_y.m_low,
+					row.m_JMinv.m_jacobianM0.m_angular.m_z.m_low,
 					dommy,
 					(ndVector8&)row0->m_JMinv.m_jacobianM0,
 					(ndVector8&)row1->m_JMinv.m_jacobianM0,
@@ -481,15 +471,15 @@ void ndDynamicsUpdateSimd8::InitJacobianMatrix()
 					(ndVector8&)row5->m_JMinv.m_jacobianM0,
 					(ndVector8&)row6->m_JMinv.m_jacobianM0,
 					(ndVector8&)row7->m_JMinv.m_jacobianM0);
-
+				
 				ndVector8::Transpose(
-					row.m_JMinv.m_jacobianM1.m_linear.m_x,
-					row.m_JMinv.m_jacobianM1.m_linear.m_y,
-					row.m_JMinv.m_jacobianM1.m_linear.m_z,
+					row.m_JMinv.m_jacobianM1.m_linear.m_x.m_low,
+					row.m_JMinv.m_jacobianM1.m_linear.m_y.m_low,
+					row.m_JMinv.m_jacobianM1.m_linear.m_z.m_low,
 					dommy,
-					row.m_JMinv.m_jacobianM1.m_angular.m_x,
-					row.m_JMinv.m_jacobianM1.m_angular.m_y,
-					row.m_JMinv.m_jacobianM1.m_angular.m_z,
+					row.m_JMinv.m_jacobianM1.m_angular.m_x.m_low,
+					row.m_JMinv.m_jacobianM1.m_angular.m_y.m_low,
+					row.m_JMinv.m_jacobianM1.m_angular.m_z.m_low,
 					dommy,
 					(ndVector8&)row0->m_JMinv.m_jacobianM1,
 					(ndVector8&)row1->m_JMinv.m_jacobianM1,
@@ -500,12 +490,92 @@ void ndDynamicsUpdateSimd8::InitJacobianMatrix()
 					(ndVector8&)row6->m_JMinv.m_jacobianM1,
 					(ndVector8&)row7->m_JMinv.m_jacobianM1);
 
+				const ndLeftHandSide* const row8 =  &leftHandSide[jointsPtr[index + 8]->m_rowStart + k];
+				const ndLeftHandSide* const row9 =  &leftHandSide[jointsPtr[index + 9]->m_rowStart + k];
+				const ndLeftHandSide* const row10 = &leftHandSide[jointsPtr[index + 10]->m_rowStart + k];
+				const ndLeftHandSide* const row11 = &leftHandSide[jointsPtr[index + 11]->m_rowStart + k];
+				const ndLeftHandSide* const row12 = &leftHandSide[jointsPtr[index + 12]->m_rowStart + k];
+				const ndLeftHandSide* const row13 = &leftHandSide[jointsPtr[index + 13]->m_rowStart + k];
+				const ndLeftHandSide* const row14 = &leftHandSide[jointsPtr[index + 14]->m_rowStart + k];
+				const ndLeftHandSide* const row15 = &leftHandSide[jointsPtr[index + 15]->m_rowStart + k];
+				ndVector8::Transpose(
+					row.m_Jt.m_jacobianM0.m_linear.m_x.m_high,
+					row.m_Jt.m_jacobianM0.m_linear.m_y.m_high,
+					row.m_Jt.m_jacobianM0.m_linear.m_z.m_high,
+					dommy,
+					row.m_Jt.m_jacobianM0.m_angular.m_x.m_high,
+					row.m_Jt.m_jacobianM0.m_angular.m_y.m_high,
+					row.m_Jt.m_jacobianM0.m_angular.m_z.m_high,
+					dommy,
+					(ndVector8&)row8->m_Jt.m_jacobianM0,
+					(ndVector8&)row9->m_Jt.m_jacobianM0,
+					(ndVector8&)row10->m_Jt.m_jacobianM0,
+					(ndVector8&)row11->m_Jt.m_jacobianM0,
+					(ndVector8&)row12->m_Jt.m_jacobianM0,
+					(ndVector8&)row13->m_Jt.m_jacobianM0,
+					(ndVector8&)row14->m_Jt.m_jacobianM0,
+					(ndVector8&)row15->m_Jt.m_jacobianM0);
+
+				ndVector8::Transpose(
+					row.m_Jt.m_jacobianM1.m_linear.m_x.m_high,
+					row.m_Jt.m_jacobianM1.m_linear.m_y.m_high,
+					row.m_Jt.m_jacobianM1.m_linear.m_z.m_high,
+					dommy,
+					row.m_Jt.m_jacobianM1.m_angular.m_x.m_high,
+					row.m_Jt.m_jacobianM1.m_angular.m_y.m_high,
+					row.m_Jt.m_jacobianM1.m_angular.m_z.m_high,
+					dommy,
+					(ndVector8&)row8->m_Jt.m_jacobianM1,
+					(ndVector8&)row9->m_Jt.m_jacobianM1,
+					(ndVector8&)row10->m_Jt.m_jacobianM1,
+					(ndVector8&)row11->m_Jt.m_jacobianM1,
+					(ndVector8&)row12->m_Jt.m_jacobianM1,
+					(ndVector8&)row13->m_Jt.m_jacobianM1,
+					(ndVector8&)row14->m_Jt.m_jacobianM1,
+					(ndVector8&)row15->m_Jt.m_jacobianM1);
+
+				ndVector8::Transpose(
+					row.m_JMinv.m_jacobianM0.m_linear.m_x.m_high,
+					row.m_JMinv.m_jacobianM0.m_linear.m_y.m_high,
+					row.m_JMinv.m_jacobianM0.m_linear.m_z.m_high,
+					dommy,
+					row.m_JMinv.m_jacobianM0.m_angular.m_x.m_high,
+					row.m_JMinv.m_jacobianM0.m_angular.m_y.m_high,
+					row.m_JMinv.m_jacobianM0.m_angular.m_z.m_high,
+					dommy,
+					(ndVector8&)row8->m_JMinv.m_jacobianM0,
+					(ndVector8&)row9->m_JMinv.m_jacobianM0,
+					(ndVector8&)row10->m_JMinv.m_jacobianM0,
+					(ndVector8&)row11->m_JMinv.m_jacobianM0,
+					(ndVector8&)row12->m_JMinv.m_jacobianM0,
+					(ndVector8&)row13->m_JMinv.m_jacobianM0,
+					(ndVector8&)row14->m_JMinv.m_jacobianM0,
+					(ndVector8&)row15->m_JMinv.m_jacobianM0);
+
+				ndVector8::Transpose(
+					row.m_JMinv.m_jacobianM1.m_linear.m_x.m_high,
+					row.m_JMinv.m_jacobianM1.m_linear.m_y.m_high,
+					row.m_JMinv.m_jacobianM1.m_linear.m_z.m_high,
+					dommy,
+					row.m_JMinv.m_jacobianM1.m_angular.m_x.m_high,
+					row.m_JMinv.m_jacobianM1.m_angular.m_y.m_high,
+					row.m_JMinv.m_jacobianM1.m_angular.m_z.m_high,
+					dommy,
+					(ndVector8&)row8->m_JMinv.m_jacobianM1,
+					(ndVector8&)row9->m_JMinv.m_jacobianM1,
+					(ndVector8&)row10->m_JMinv.m_jacobianM1,
+					(ndVector8&)row11->m_JMinv.m_jacobianM1,
+					(ndVector8&)row12->m_JMinv.m_jacobianM1,
+					(ndVector8&)row13->m_JMinv.m_jacobianM1,
+					(ndVector8&)row14->m_JMinv.m_jacobianM1,
+					(ndVector8&)row15->m_JMinv.m_jacobianM1);
+
 				#ifdef D_NEWTON_USE_DOUBLE
 					ndInt64* const normalIndex = (ndInt64*)&row.m_normalForceIndex[0];
 				#else
 					ndInt32* const normalIndex = (ndInt32*)&row.m_normalForceIndex[0];
 				#endif
-				for (ndInt32 n = 0; n < ND_SIMD8_WORK_GROUP_SIZE; ++n)
+				for (ndInt32 n = 0; n < ND_SIMD16_WORK_GROUP_SIZE; ++n)
 				{
 					const ndConstraint* const soaJoint = jointsPtr[index + n];
 					const ndRightHandSide* const rhs = &rightHandSide[soaJoint->m_rowStart + k];
@@ -514,7 +584,7 @@ void ndDynamicsUpdateSimd8::InitJacobianMatrix()
 					row.m_JinvMJt[n] = rhs->m_JinvMJt;
 					row.m_invJinvMJt[n] = rhs->m_invJinvMJt;
 					row.m_coordenateAccel[n] = rhs->m_coordenateAccel;
-					normalIndex[n] = (rhs->m_normalForceIndex + 1) * ND_SIMD8_WORK_GROUP_SIZE + n;
+					normalIndex[n] = (rhs->m_normalForceIndex + 1) * ND_SIMD16_WORK_GROUP_SIZE + n;
 					row.m_lowerBoundFrictionCoefficent[n] = rhs->m_lowerBoundFrictionCoefficent;
 					row.m_upperBoundFrictionCoefficent[n] = rhs->m_upperBoundFrictionCoefficent;
 					ndAssert(rhs->SanityCheck());
@@ -523,12 +593,12 @@ void ndDynamicsUpdateSimd8::InitJacobianMatrix()
 		}
 		else
 		{
-			const ndVector8 zero(ndVector8::m_zero);
-			const ndVector8 ordinals(ndVector8::m_ordinals);
+			const ndVector16 zero(ndVector16::m_zero);
+			const ndVector16 ordinals(ndVector16::m_ordinals);
 			const ndConstraint* const firstJoint = jointsPtr[index];
 			for (ndInt32 k = 0; k < firstJoint->m_rowCount; ++k)
 			{
-				ndSoaMatrixElement& row = massMatrix[soaRowBase + k];
+				ndSimd16MatrixElement& row = massMatrix[soaRowBase + k];
 				row.m_Jt.m_jacobianM0.m_linear.m_x = zero;
 				row.m_Jt.m_jacobianM0.m_linear.m_y = zero;
 				row.m_Jt.m_jacobianM0.m_linear.m_z = zero;
@@ -565,14 +635,14 @@ void ndDynamicsUpdateSimd8::InitJacobianMatrix()
 				row.m_upperBoundFrictionCoefficent = zero;
 			}
 
-			for (ndInt32 k = 0; k < ND_SIMD8_WORK_GROUP_SIZE; ++k)
+			for (ndInt32 k = 0; k < ND_SIMD16_WORK_GROUP_SIZE; ++k)
 			{
 				const ndConstraint* const joint = jointsPtr[index + k];
 				if (joint)
 				{
 					for (ndInt32 n = 0; n < joint->m_rowCount; ++n)
 					{
-						ndSoaMatrixElement& row = massMatrix[soaRowBase + n];
+						ndSimd16MatrixElement& row = massMatrix[soaRowBase + n];
 						const ndLeftHandSide* const lhs = &leftHandSide[joint->m_rowStart + n];
 
 						row.m_Jt.m_jacobianM0.m_linear.m_x[k] = lhs->m_Jt.m_jacobianM0.m_linear.m_x;
@@ -613,7 +683,7 @@ void ndDynamicsUpdateSimd8::InitJacobianMatrix()
 						#else
 							ndInt32* const normalIndex = (ndInt32*)&row.m_normalForceIndex[0];
 						#endif
-						normalIndex[k] = (rhs->m_normalForceIndex + 1) * ND_SIMD8_WORK_GROUP_SIZE + k;
+						normalIndex[k] = (rhs->m_normalForceIndex + 1) * ND_SIMD16_WORK_GROUP_SIZE + k;
 						row.m_lowerBoundFrictionCoefficent[k] = rhs->m_lowerBoundFrictionCoefficent;
 						row.m_upperBoundFrictionCoefficent[k] = rhs->m_upperBoundFrictionCoefficent;
 						ndAssert(rhs->SanityCheck());
@@ -629,17 +699,18 @@ void ndDynamicsUpdateSimd8::InitJacobianMatrix()
 		ndDynamicsUpdate::InitJacobianMatrix();
 
 		const ndInt32 numberOfJoints = ndInt32(jointArray.GetCount());
-		const ndInt32 mask = -ndInt32(ND_SIMD8_WORK_GROUP_SIZE);
-		const ndInt32 soaJointCount = ((numberOfJoints + ND_SIMD8_WORK_GROUP_SIZE - 1) & mask) / ND_SIMD8_WORK_GROUP_SIZE;
+		const ndInt32 mask = -ndInt32(ND_SIMD16_WORK_GROUP_SIZE);
+		const ndInt32 soaJointCount = ((numberOfJoints + ND_SIMD16_WORK_GROUP_SIZE - 1) & mask) / ND_SIMD16_WORK_GROUP_SIZE;
 		scene->ParallelExecute(TransposeMassMatrix, soaJointCount, 1);
 	}
 }
 
-void ndDynamicsUpdateSimd8::CalculateJointsAcceleration()
+void ndDynamicsUpdateSimd16::CalculateJointsAcceleration()
 {
 	ND_PROFILE_ZONE();
 	ndScene* const scene = m_world->GetScene();
 	const ndArray<ndConstraint*>& jointArray = scene->GetActiveContactArray();
+
 	auto UpdateAcceleration = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		ND_PROFILE_ZONE_NAMED("UpdateAcceleration");
@@ -650,22 +721,22 @@ void ndDynamicsUpdateSimd8::CalculateJointsAcceleration()
 		const ndInt8* const groupType = &m_groupType[0];
 
 		const ndConstraint* const* jointArrayPtr = &jointArray[0];
-		ndMatrixSimd8Array& massMatrix = *m_simdMassMatrixArray;
+		ndMatrixSimd16Array& massMatrix = *m_simdMassMatrixArray;
 
 		const ndInt32 m = groupId;
 		if (groupType[m])
 		{
 			const ndInt32 soaRowStartBase = soaJointRows[m];
-			const ndConstraint* const* jointGroup = &jointArrayPtr[m * ND_SIMD8_WORK_GROUP_SIZE];
+			const ndConstraint* const* jointGroup = &jointArrayPtr[m * ND_SIMD16_WORK_GROUP_SIZE];
 			const ndConstraint* const firstJoint = jointGroup[0];
 			const ndInt32 rowCount = firstJoint->m_rowCount;
-			for (ndInt32 k = 0; k < ND_SIMD8_WORK_GROUP_SIZE; ++k)
+			for (ndInt32 k = 0; k < ND_SIMD16_WORK_GROUP_SIZE; ++k)
 			{
 				const ndConstraint* const Joint = jointGroup[k];
 				const ndInt32 base = Joint->m_rowStart;
 				for (ndInt32 n = 0; n < rowCount; ++n)
 				{
-					ndSoaMatrixElement* const row = &massMatrix[soaRowStartBase + n];
+					ndSimd16MatrixElement* const row = &massMatrix[soaRowStartBase + n];
 					row->m_coordenateAccel[k] = rightHandSide[base + n].m_coordenateAccel;
 				}
 			}
@@ -673,8 +744,8 @@ void ndDynamicsUpdateSimd8::CalculateJointsAcceleration()
 		else
 		{
 			const ndInt32 soaRowStartBase = soaJointRows[m];
-			const ndConstraint* const* jointGroup = &jointArrayPtr[m * ND_SIMD8_WORK_GROUP_SIZE];
-			for (ndInt32 k = 0; k < ND_SIMD8_WORK_GROUP_SIZE; ++k)
+			const ndConstraint* const* jointGroup = &jointArrayPtr[m * ND_SIMD16_WORK_GROUP_SIZE];
+			for (ndInt32 k = 0; k < ND_SIMD16_WORK_GROUP_SIZE; ++k)
 			{
 				const ndConstraint* const Joint = jointGroup[k];
 				if (Joint)
@@ -683,7 +754,7 @@ void ndDynamicsUpdateSimd8::CalculateJointsAcceleration()
 					const ndInt32 rowCount = Joint->m_rowCount;
 					for (ndInt32 n = 0; n < rowCount; ++n)
 					{
-						ndSoaMatrixElement* const row = &massMatrix[soaRowStartBase + n];
+						ndSimd16MatrixElement* const row = &massMatrix[soaRowStartBase + n];
 						row->m_coordenateAccel[k] = rightHandSide[base + n].m_coordenateAccel;
 					}
 				}
@@ -692,13 +763,13 @@ void ndDynamicsUpdateSimd8::CalculateJointsAcceleration()
 	});
 	ndDynamicsUpdate::CalculateJointsAcceleration();
 
-	const ndInt32 mask = -ndInt32(ND_SIMD8_WORK_GROUP_SIZE);
+	const ndInt32 mask = -ndInt32(ND_SIMD16_WORK_GROUP_SIZE);
 	const ndInt32 jointCount = ndInt32(jointArray.GetCount());
-	const ndInt32 soaJointCountBatches = ((jointCount + ND_SIMD8_WORK_GROUP_SIZE - 1) & mask) / ND_SIMD8_WORK_GROUP_SIZE;
+	const ndInt32 soaJointCountBatches = ((jointCount + ND_SIMD16_WORK_GROUP_SIZE - 1) & mask) / ND_SIMD16_WORK_GROUP_SIZE;
 	scene->ParallelExecute(UpdateAcceleration, soaJointCountBatches, scene->OptimalGroupBatch(soaJointCountBatches));
 }
 
-void ndDynamicsUpdateSimd8::CalculateJointsForce()
+void ndDynamicsUpdateSimd16::CalculateJointsForce()
 {
 	ND_PROFILE_ZONE();
 	const ndUnsigned32 passes = m_solverPasses;
@@ -713,25 +784,25 @@ void ndDynamicsUpdateSimd8::CalculateJointsForce()
 		ndVector8* const jointPartialForces = (ndVector8*)&GetTempInternalForces()[0];
 
 		const ndInt32* const soaJointRows = &m_simdJointRows[0];
-		ndMatrixSimd8Array& soaMassMatrixArray = *m_simdMassMatrixArray;
-		ndSoaMatrixElement* const soaMassMatrix = &soaMassMatrixArray[0];
+		ndMatrixSimd16Array& soaMassMatrixArray = *m_simdMassMatrixArray;
+		ndSimd16MatrixElement* const soaMassMatrix = &soaMassMatrixArray[0];
 
-		auto JointForce = [this, &jointArray, jointPartialForces](ndInt32 group, ndSoaMatrixElement* const massMatrix)
+		auto JointForce = [this, &jointArray, jointPartialForces](ndInt32 group, ndSimd16MatrixElement* const massMatrix)
 		{
-			ndSoaVector6 forceM0;
-			ndSoaVector6 forceM1;
-			ndVector8 preconditioner0;
-			ndVector8 preconditioner1;
-			ndFixSizeArray<ndVector8, D_CONSTRAINT_MAX_ROWS + 1> normalForce(D_CONSTRAINT_MAX_ROWS + 1);
+			ndSimd16Vector6 forceM0;
+			ndSimd16Vector6 forceM1;
+			ndVector16 preconditioner0;
+			ndVector16 preconditioner1;
+			ndFixSizeArray<ndVector16, D_CONSTRAINT_MAX_ROWS + 1> normalForce(D_CONSTRAINT_MAX_ROWS + 1);
 
-			const ndInt32 block = group * ND_SIMD8_WORK_GROUP_SIZE;
+			const ndInt32 block = group * ND_SIMD16_WORK_GROUP_SIZE;
 			ndConstraint** const jointGroup = &jointArray[block];
 
-			ndVector8 zero(ndVector8::m_zero);
-			const ndInt8 isUniformGroup = m_groupType[group];
-			if (isUniformGroup)
+			ndVector16 zero(ndFloat32(0.0f));
+			const ndInt8 isUniformGruop = m_groupType[group];
+			if (isUniformGruop)
 			{
-				for (ndInt32 i = 0; i < ND_SIMD8_WORK_GROUP_SIZE; ++i)
+				for (ndInt32 i = 0; i < ND_SIMD16_WORK_GROUP_SIZE; ++i)
 				{
 					const ndConstraint* const joint = jointGroup[i];
 					const ndBodyKinematic* const body0 = joint->GetBody0();
@@ -775,7 +846,7 @@ void ndDynamicsUpdateSimd8::CalculateJointsForce()
 				forceM1.m_angular.m_x = zero;
 				forceM1.m_angular.m_y = zero;
 				forceM1.m_angular.m_z = zero;
-				for (ndInt32 i = 0; i < ND_SIMD8_WORK_GROUP_SIZE; ++i)
+				for (ndInt32 i = 0; i < ND_SIMD16_WORK_GROUP_SIZE; ++i)
 				{
 					const ndConstraint* const joint = jointGroup[i];
 					if (joint && joint->m_rowCount)
@@ -805,28 +876,28 @@ void ndDynamicsUpdateSimd8::CalculateJointsForce()
 				}
 			}
 
-			//normalForce[0] = ndVector8(ndFloat32(1.0f));
-			normalForce[0] = ndVector8::m_one;
+			//normalForce[0] = ndVector16(ndFloat32(1.0f));
+			normalForce[0] = ndVector16::m_one;
 			const ndInt32 rowsCount = jointGroup[0]->m_rowCount;
 
 			for (ndInt32 j = 0; j < rowsCount; ++j)
 			{
-				const ndSoaMatrixElement* const row = &massMatrix[j];
+				const ndSimd16MatrixElement* const row = &massMatrix[j];
 				normalForce[j + 1] = row->m_force;
 			}
 
 			const ndFloat32 tol = ndFloat32(0.125f);
 			const ndFloat32 tol2 = tol * tol;
 
-			ndVector8 accNorm(ndFloat32(10.0f));
+			ndVector16 accNorm(ndFloat32(10.0f));
 			for (ndInt32 k = 0; (k < 4) && (accNorm.GetMax() > tol2); ++k)
 			{
 				accNorm = zero;
 				for (ndInt32 j = 0; j < rowsCount; ++j)
 				{
-					ndSoaMatrixElement* const row = &massMatrix[j];
+					ndSimd16MatrixElement* const row = &massMatrix[j];
 
-					ndVector8 a(row->m_JMinv.m_jacobianM0.m_linear.m_x * forceM0.m_linear.m_x);
+					ndVector16 a(row->m_JMinv.m_jacobianM0.m_linear.m_x * forceM0.m_linear.m_x);
 					a = a.MulAdd(row->m_JMinv.m_jacobianM0.m_angular.m_x, forceM0.m_angular.m_x);
 					a = a.MulAdd(row->m_JMinv.m_jacobianM0.m_linear.m_y, forceM0.m_linear.m_y);
 					a = a.MulAdd(row->m_JMinv.m_jacobianM0.m_angular.m_y, forceM0.m_angular.m_y);
@@ -840,23 +911,23 @@ void ndDynamicsUpdateSimd8::CalculateJointsForce()
 					a = a.MulAdd(row->m_JMinv.m_jacobianM1.m_linear.m_z, forceM1.m_linear.m_z);
 					a = a.MulAdd(row->m_JMinv.m_jacobianM1.m_angular.m_z, forceM1.m_angular.m_z);
 
-					const ndVector8 force(normalForce[j + 1]);
+					const ndVector16 force(normalForce[j + 1]);
 					a = row->m_coordenateAccel.MulSub(force, row->m_diagDamp) - a;
-					ndVector8 f(force.MulAdd(row->m_invJinvMJt, a));
+					ndVector16 f(force.MulAdd(row->m_invJinvMJt, a));
 
-					const ndVector8 frictionNormal(&normalForce[0], row->m_normalForceIndex);
-					const ndVector8 lowerFrictionForce(frictionNormal * row->m_lowerBoundFrictionCoefficent);
-					const ndVector8 upperFrictionForce(frictionNormal * row->m_upperBoundFrictionCoefficent);
+					const ndVector16 frictionNormal(&normalForce[0], row->m_normalForceIndex);
+					const ndVector16 lowerFrictionForce(frictionNormal * row->m_lowerBoundFrictionCoefficent);
+					const ndVector16 upperFrictionForce(frictionNormal * row->m_upperBoundFrictionCoefficent);
 
 					f = f.GetMax(lowerFrictionForce).GetMin(upperFrictionForce);
 					normalForce[j + 1] = f;
 
-					const ndVector8 deltaForce(f - force);
-					const ndVector8 residual(deltaForce * row->m_JinvMJt);
+					const ndVector16 deltaForce(f - force);
+					const ndVector16 residual(deltaForce * row->m_JinvMJt);
 					accNorm = accNorm.MulAdd(residual, residual);
 
-					const ndVector8 deltaForce0(deltaForce * preconditioner0);
-					const ndVector8 deltaForce1(deltaForce * preconditioner1);
+					const ndVector16 deltaForce0(deltaForce * preconditioner0);
+					const ndVector16 deltaForce1(deltaForce * preconditioner1);
 
 					forceM0.m_linear.m_x = forceM0.m_linear.m_x.MulAdd(row->m_Jt.m_jacobianM0.m_linear.m_x, deltaForce0);
 					forceM0.m_linear.m_y = forceM0.m_linear.m_y.MulAdd(row->m_Jt.m_jacobianM0.m_linear.m_y, deltaForce0);
@@ -874,8 +945,8 @@ void ndDynamicsUpdateSimd8::CalculateJointsForce()
 				}
 			}
 
-			ndVector8 mask(ndVector8::m_mask);
-			for (ndInt32 i = 0; i < ND_SIMD8_WORK_GROUP_SIZE; ++i)
+			ndVector16 mask(ndVector16::m_mask);
+			for (ndInt32 i = 0; i < ND_SIMD16_WORK_GROUP_SIZE; ++i)
 			{
 				const ndConstraint* const joint = jointGroup[i];
 				if (joint && joint->m_rowCount)
@@ -907,8 +978,8 @@ void ndDynamicsUpdateSimd8::CalculateJointsForce()
 			forceM1.m_angular.m_z = zero;
 			for (ndInt32 i = 0; i < rowsCount; ++i)
 			{
-				ndSoaMatrixElement* const row = &massMatrix[i];
-				const ndVector8 force(row->m_force.Select(normalForce[i + 1], mask));
+				ndSimd16MatrixElement* const row = &massMatrix[i];
+				const ndVector16 force(row->m_force.Select(normalForce[i + 1], mask));
 				row->m_force = force;
 
 				forceM0.m_linear.m_x = forceM0.m_linear.m_x.MulAdd(row->m_Jt.m_jacobianM0.m_linear.m_x, force);
@@ -926,20 +997,31 @@ void ndDynamicsUpdateSimd8::CalculateJointsForce()
 				forceM1.m_angular.m_z = forceM1.m_angular.m_z.MulAdd(row->m_Jt.m_jacobianM1.m_angular.m_z, force);
 			}
 
-			ndVector8 force0[8];
+			ndVector8 force0[ND_SIMD16_WORK_GROUP_SIZE];
+			ndVector8 force1[ND_SIMD16_WORK_GROUP_SIZE];
+
 			ndVector8::Transpose(
 				force0[0], force0[1], force0[2], force0[3], force0[4], force0[5], force0[6], force0[7],
-				forceM0.m_linear.m_x, forceM0.m_linear.m_y, forceM0.m_linear.m_z, ndVector8::m_zero,
-				forceM0.m_angular.m_x, forceM0.m_angular.m_y, forceM0.m_angular.m_z, ndVector8::m_zero);
+				forceM0.m_linear.m_x.m_low, forceM0.m_linear.m_y.m_low, forceM0.m_linear.m_z.m_low, ndVector16::m_zero.m_low,
+				forceM0.m_angular.m_x.m_low, forceM0.m_angular.m_y.m_low, forceM0.m_angular.m_z.m_low, ndVector16::m_zero.m_low);
 
-			ndVector8 force1[8];
+			ndVector8::Transpose(
+				force0[8], force0[9], force0[10], force0[11], force0[12], force0[13], force0[14], force0[15],
+				forceM0.m_linear.m_x.m_high, forceM0.m_linear.m_y.m_high, forceM0.m_linear.m_z.m_high, ndVector16::m_zero.m_high,
+				forceM0.m_angular.m_x.m_high, forceM0.m_angular.m_y.m_high, forceM0.m_angular.m_z.m_high, ndVector16::m_zero.m_high);
+
 			ndVector8::Transpose(
 				force1[0], force1[1], force1[2], force1[3], force1[4], force1[5], force1[6], force1[7],
-				forceM1.m_linear.m_x, forceM1.m_linear.m_y, forceM1.m_linear.m_z, ndVector8::m_zero,
-				forceM1.m_angular.m_x, forceM1.m_angular.m_y, forceM1.m_angular.m_z, ndVector8::m_zero);
+				forceM1.m_linear.m_x.m_low, forceM1.m_linear.m_y.m_low, forceM1.m_linear.m_z.m_low, ndVector16::m_zero.m_low,
+				forceM1.m_angular.m_x.m_low, forceM1.m_angular.m_y.m_low, forceM1.m_angular.m_z.m_low, ndVector16::m_zero.m_low);
+
+			ndVector8::Transpose(
+				force1[8], force1[9], force1[10], force1[11], force1[12], force1[13], force1[14], force1[15],
+				forceM1.m_linear.m_x.m_high, forceM1.m_linear.m_y.m_high, forceM1.m_linear.m_z.m_high, ndVector16::m_zero.m_high,
+				forceM1.m_angular.m_x.m_high, forceM1.m_angular.m_y.m_high, forceM1.m_angular.m_z.m_high, ndVector16::m_zero.m_high);
 
 			ndRightHandSide* const rightHandSide = &m_rightHandSide[0];
-			for (ndInt32 i = 0; i < ND_SIMD8_WORK_GROUP_SIZE; ++i)
+			for (ndInt32 i = 0; i < ND_SIMD16_WORK_GROUP_SIZE; ++i)
 			{
 				const ndConstraint* const joint = jointGroup[i];
 				if (joint)
@@ -948,7 +1030,7 @@ void ndDynamicsUpdateSimd8::CalculateJointsForce()
 					const ndInt32 rowStartBase = joint->m_rowStart;
 					for (ndInt32 j = 0; j < rowCount; ++j)
 					{
-						const ndSoaMatrixElement* const row = &massMatrix[j];
+						const ndSimd16MatrixElement* const row = &massMatrix[j];
 						rightHandSide[j + rowStartBase].m_force = row->m_force[i];
 						rightHandSide[j + rowStartBase].m_maxImpact = ndMax(ndAbs(row->m_force[i]), rightHandSide[j + rowStartBase].m_maxImpact);
 					}
@@ -971,6 +1053,7 @@ void ndDynamicsUpdateSimd8::CalculateJointsForce()
 	auto ApplyJacobianAccumulatePartialForces = ndMakeObject::ndFunction([this, &bodyArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		ND_PROFILE_ZONE_NAMED("ApplyJacobianAccumulatePartialForces");
+		const ndVector8 zero(ndVector8::m_zero);
 		const ndInt32* const bodyIndex = &GetJointForceIndexBuffer()[0];
 		ndVector8* const internalForces = (ndVector8*)&GetInternalForces()[0];
 		const ndVector8* const jointInternalForces = (ndVector8*)&GetTempInternalForces()[0];
@@ -993,9 +1076,9 @@ void ndDynamicsUpdateSimd8::CalculateJointsForce()
 
 	for (ndInt32 i = 0; i < ndInt32(passes); ++i)
 	{
-		const ndInt32 mask = -ndInt32(ND_SIMD8_WORK_GROUP_SIZE);
+		const ndInt32 mask = -ndInt32(ND_SIMD16_WORK_GROUP_SIZE);
 		const ndInt32 jointCount = ndInt32(jointArray.GetCount());
-		const ndInt32 soaJointCount = ((jointCount + ND_SIMD8_WORK_GROUP_SIZE - 1) & mask) / ND_SIMD8_WORK_GROUP_SIZE;
+		const ndInt32 soaJointCount = ((jointCount + ND_SIMD16_WORK_GROUP_SIZE - 1) & mask) / ND_SIMD16_WORK_GROUP_SIZE;
 		scene->ParallelExecute(CalculateJointsForce, soaJointCount, scene->OptimalGroupBatch(soaJointCount) / 8);
 
 		const ndInt32 bodyCount = ndInt32(bodyArray.GetCount());
@@ -1003,7 +1086,7 @@ void ndDynamicsUpdateSimd8::CalculateJointsForce()
 	}
 }
 
-void ndDynamicsUpdateSimd8::CalculateForces()
+void ndDynamicsUpdateSimd16::CalculateForces()
 {
 	ND_PROFILE_ZONE();
 	if (m_world->GetScene()->GetActiveContactArray().GetCount())
@@ -1021,7 +1104,7 @@ void ndDynamicsUpdateSimd8::CalculateForces()
 	}
 }
 
-void ndDynamicsUpdateSimd8::Update()
+void ndDynamicsUpdateSimd16::Update()
 {
 	ND_PROFILE_ZONE();
 	m_timestep = m_world->GetScene()->GetTimestep();
