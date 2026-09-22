@@ -1568,8 +1568,6 @@ void ndSkeletonContainer::InitLoopMassMatrix()
 	ndInt8* const memoryBuffer = &m_auxiliaryMemoryBuffer[0];
 	const ndInt32 primaryCount = m_rowCount - m_auxiliaryRowCount;
 
-	//#define ndAlignedPtr(type, ptr) (type*)((size_t(ptr) + 31) & -0x20)
-
 	m_frictionIndex = ndAllocaPtr(ndInt32, memoryBuffer);
 	m_matrixRowsIndex = ndAllocaPtr(ndInt32, &m_frictionIndex[m_rowCount]);
 
