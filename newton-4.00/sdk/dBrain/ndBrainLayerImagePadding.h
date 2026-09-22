@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _ND_BRAIN_LAYER_CONVOLUTIONAL_PADDING_2D_H__
-#define _ND_BRAIN_LAYER_CONVOLUTIONAL_PADDING_2D_H__
+#ifndef ND_BRAIN_LAYER_CONVOLUTIONAL_PADDING_2D_H_
+#define ND_BRAIN_LAYER_CONVOLUTIONAL_PADDING_2D_H_
 
 #include "ndBrainStdafx.h"
 #include "ndBrainLayerActivation.h"

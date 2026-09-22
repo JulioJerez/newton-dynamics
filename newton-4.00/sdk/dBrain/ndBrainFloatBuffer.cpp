@@ -22,6 +22,7 @@
 ndBrainFloatBuffer::ndBrainFloatBuffer(ndBrainContext* const context, ndInt64 sizeInFloat)
 	:ndBrainBuffer(context, sizeInFloat * ndInt32(sizeof(ndReal)))
 {
+	m_itemSize = sizeof(ndReal);
 	if (m_context->GetAsCpuContext())
 	{
 		m_buffer = ndSharedPtr<ndBrainVector>(new ndBrainVector());
@@ -68,6 +69,7 @@ ndBrainFloatBuffer::ndBrainFloatBuffer(ndBrainContext* const context, const ndBr
 ndBrainFloatBuffer::ndBrainFloatBuffer(const ndBrainFloatBuffer& src)
 	:ndBrainBuffer(src)
 {
+	m_itemSize = sizeof(ndReal);
 	if (m_context->GetAsCpuContext())
 	{
 		m_buffer = ndSharedPtr<ndBrainVector>(new ndBrainVector());

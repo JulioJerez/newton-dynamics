@@ -96,7 +96,6 @@ namespace ndUnicycleTrainer_ppo
 	class TrainingUpdata : public ndDemoEntityManager::OnPostUpdate
 	{
 		public:
-		#pragma optimize( "", off)
 		TrainingUpdata(ndDemoEntityManager* const scene, const ndMatrix& location, const ndRenderMeshLoader& loader)
 			:OnPostUpdate()
 			,m_master()

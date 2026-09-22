@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_POLOGON_MESH_DESC_H__
-#define __ND_POLOGON_MESH_DESC_H__
+#ifndef ND_POLOGON_MESH_DESC_H_
+#define ND_POLOGON_MESH_DESC_H_
 
 #include "ndCollisionStdafx.h"
 #include "ndShape.h"

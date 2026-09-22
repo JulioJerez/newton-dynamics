@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef _D_MAKE_STATIC_MAP_H_
-#define _D_MAKE_STATIC_MAP_H_
+#ifndef D_MAKE_STATIC_MAP_H_
+#define D_MAKE_STATIC_MAP_H_
 
 #include "ndSandboxStdafx.h"
 class ndDemoEntityManager;

@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_SHAPE_STATIC_PROCEDURAL_MESH__
-#define __ND_SHAPE_STATIC_PROCEDURAL_MESH__
+#ifndef ND_SHAPE_STATIC_PROCEDURAL_MESH_
+#define ND_SHAPE_STATIC_PROCEDURAL_MESH_
 
 #include "ndCollisionStdafx.h"
 #include "ndShapeStaticMesh.h"

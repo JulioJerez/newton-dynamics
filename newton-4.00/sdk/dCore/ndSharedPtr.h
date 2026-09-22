@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef _ND_SHARED_PTR_H_
-#define _ND_SHARED_PTR_H_
+#ifndef ND_SHARED_PTR_H_
+#define ND_SHARED_PTR_H_
 
 #include "ndCoreStdafx.h"
 #include "ndContainersAlloc.h"

@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_MODEL_NOTIFY_H__
-#define __ND_MODEL_NOTIFY_H__
+#ifndef ND_MODEL_NOTIFY_H_
+#define ND_MODEL_NOTIFY_H_
 
 #include "ndCollisionStdafx.h"
 
@@ -52,7 +52,7 @@ class ndModelNotify : public ndContainersFreeListAlloc<ndModelNotify>
 
 	private:
 	ndWeakPtr<ndModel> m_model;
-
+	ndClassPadding m_padding;
 	friend class ndModel;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 

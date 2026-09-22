@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _ND_MODEL_ARTICULATION_H__
-#define _ND_MODEL_ARTICULATION_H__
+#ifndef ND_MODEL_ARTICULATION_H_
+#define ND_MODEL_ARTICULATION_H_
 
 #include "ndCoreStdafx.h"
 #include "ndNewtonStdafx.h"

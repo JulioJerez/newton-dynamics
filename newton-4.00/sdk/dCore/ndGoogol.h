@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __NDGoogol__
-#define __NDGoogol__
+#ifndef ND_GOOGOL_H_
+#define ND_GOOGOL_H_
 
 #include "ndCoreStdafx.h"
 #include "ndTypes.h"

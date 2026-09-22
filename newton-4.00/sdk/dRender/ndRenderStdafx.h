@@ -20,8 +20,8 @@
 */
 
 
-#ifndef _ND_RENDER_STDAFX_H__
-#define _ND_RENDER_STDAFX_H__
+#ifndef ND_RENDER_STDAFX_H_
+#define ND_RENDER_STDAFX_H_
 
 #include <imgui.h>
 #include <lodepng.h>

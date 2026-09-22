@@ -8,8 +8,9 @@
 * including commercial applications, and to alter it and redistribute it
 * freely
 */
-#ifndef __ND_BRAIN_BUFFER_COMMAND_H__
-#define __ND_BRAIN_BUFFER_COMMAND_H__
+
+#ifndef ND_BRAIN_BUFFER_COMMAND_H_
+#define ND_BRAIN_BUFFER_COMMAND_H_
 
 #include "ndBrainStdafx.h"
 
@@ -78,9 +79,10 @@ class ndBrainBufferCommand : public ndContainersFreeListAlloc<ndBrainBufferComma
 	ndBrainBufferCommand(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer);
 	virtual ~ndBrainBufferCommand();
 	
+	const ndBrainLayer* GetLayer() const;
 	ndBrainBufferCommandDesc& GetDescriptor();
 	const ndBrainBufferCommandDesc& GetDescriptor() const;
-
+	
 	protected:
 	ndBrainBufferCommandDesc m_desc;
 	ndWeakPtr<ndBrainLayer> m_layer;

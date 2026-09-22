@@ -10,8 +10,8 @@
 */
 
 
-#ifndef __EDITOR_CAMERA_NODE_FLYBY_H__
-#define __EDITOR_CAMERA_NODE_FLYBY_H__
+#ifndef EDITOR_CAMERA_NODE_FLYBY_H_
+#define EDITOR_CAMERA_NODE_FLYBY_H_
 
 #include "ndNewAssetStdafx.h"
 #include "ndEditorCameraNode.h"

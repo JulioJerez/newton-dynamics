@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __ND_JOINT_FIX_DISTANCE_H_
-#define __ND_JOINT_FIX_DISTANCE_H_
+#ifndef ND_JOINT_FIX_DISTANCE_H_
+#define ND_JOINT_FIX_DISTANCE_H_
 
 #include "ndNewtonStdafx.h"
 #include "ndJointBilateralConstraint.h"

@@ -107,6 +107,8 @@ void ndSkeletonContainer::ndNode::GetJacobians(const ndLeftHandSide* const leftH
 			const ndInt32 k = m_ordinal.m_sourceJacobianIndex[i];
 			const ndRightHandSide* const rhs = &rightHandSide[start + k];
 			const ndLeftHandSide* const row = &leftHandSide[start + k];
+
+
 			jointMass[i] = zero;
 			jointMass[i][i] = -rhs->m_diagDamp;
 
@@ -874,7 +876,8 @@ void ndSkeletonContainer::ConditionMassMatrix() const
 		const ndInt32 primaryCount = m_rowCount - m_auxiliaryRowCount;
 
 		const ndSpatialVector zero(ndSpatialVector::m_zero);
-		ndForcePair* const forcePair = ndAlloca(ndForcePair, nodeCount);
+		ndForcePair* const forcePairStack = ndAlloca(ndForcePair, nodeCount);
+		ndForcePair* const forcePair = ndAllocaPtr(ndForcePair, forcePairStack);
 
 		ndInt32 startjoint = nodeCount;
 		const ndFloat32* const matrixRow10 = &m_massMatrix10[groupId * primaryCount];
@@ -1333,12 +1336,12 @@ void ndSkeletonContainer::CalculateJointAccelImmediate(ndForcePair* const accel)
 		const ndVector& force = body->m_accel;
 		const ndVector& torque = body->m_alpha;
 
-		a.m_body.m_f[0] = force.m_x;
-		a.m_body.m_f[1] = force.m_y;
-		a.m_body.m_f[2] = force.m_z;
-		a.m_body.m_f[3] = torque.m_x;
-		a.m_body.m_f[4] = torque.m_y;
-		a.m_body.m_f[5] = torque.m_z;
+		a.m_body.m_f[0] = ndFloat64(force.m_x);
+		a.m_body.m_f[1] = ndFloat64(force.m_y);
+		a.m_body.m_f[2] = ndFloat64(force.m_z);
+		a.m_body.m_f[3] = ndFloat64(torque.m_x);
+		a.m_body.m_f[4] = ndFloat64(torque.m_y);
+		a.m_body.m_f[5] = ndFloat64(torque.m_z);
 		a.m_body.m_f[6] = ndFloat64(0.0f);
 		a.m_body.m_f[7] = ndFloat64(0.0f);
 
@@ -1367,12 +1370,12 @@ void ndSkeletonContainer::CalculateJointAccelImmediate(ndForcePair* const accel)
 	const ndVector& force = body->m_accel;
 	const ndVector& torque = body->m_alpha;
 
-	a.m_body.m_f[0] = force.m_x;
-	a.m_body.m_f[1] = force.m_y;
-	a.m_body.m_f[2] = force.m_z;
-	a.m_body.m_f[3] = torque.m_x;
-	a.m_body.m_f[4] = torque.m_y;
-	a.m_body.m_f[5] = torque.m_z;
+	a.m_body.m_f[0] = ndFloat64(force.m_x);
+	a.m_body.m_f[1] = ndFloat64(force.m_y);
+	a.m_body.m_f[2] = ndFloat64(force.m_z);
+	a.m_body.m_f[3] = ndFloat64(torque.m_x);
+	a.m_body.m_f[4] = ndFloat64(torque.m_y);
+	a.m_body.m_f[5] = ndFloat64(torque.m_z);
 	a.m_body.m_f[6] = ndFloat64(0.0f);
 	a.m_body.m_f[7] = ndFloat64(0.0f);
 }
@@ -1503,8 +1506,10 @@ void ndSkeletonContainer::SolveImmediate(ndIkSolver& solverInfo)
 {
 	ND_PROFILE_ZONE();
 	const ndInt32 nodeCount = m_nodeList.GetCount();
-	ndForcePair* const x = ndAlloca(ndForcePair, nodeCount);
-	ndForcePair* const b = ndAlloca(ndForcePair, nodeCount);
+	ndForcePair* const xStack = ndAlloca(ndForcePair, nodeCount);
+	ndForcePair* const bStack = ndAlloca(ndForcePair, nodeCount);
+	ndForcePair* const x = ndAllocaPtr(ndForcePair, xStack);
+	ndForcePair* const b = ndAllocaPtr(ndForcePair, bStack);
 
 	CalculateJointAccelImmediate(b);
 	CalculateForce(x, b);
@@ -1563,22 +1568,20 @@ void ndSkeletonContainer::InitLoopMassMatrix()
 	ndInt8* const memoryBuffer = &m_auxiliaryMemoryBuffer[0];
 	const ndInt32 primaryCount = m_rowCount - m_auxiliaryRowCount;
 
-	#define ndAlignedPtr(type, ptr) (type*)((size_t(ptr) + 31) & -0x20)
+	m_frictionIndex = ndAllocaPtr(ndInt32, memoryBuffer);
+	m_matrixRowsIndex = ndAllocaPtr(ndInt32, &m_frictionIndex[m_rowCount]);
 
-	m_frictionIndex = ndAlignedPtr(ndInt32, memoryBuffer);
-	m_matrixRowsIndex = ndAlignedPtr(ndInt32, &m_frictionIndex[m_rowCount]);
+	m_bodyForceRemap0.m_index = ndAllocaPtr(ndBodyForceIndexPair, &m_matrixRowsIndex[m_rowCount]);
+	m_bodyForceRemap0.m_indexSpan = ndAllocaPtr(ndInt32, &m_bodyForceRemap0.m_index[m_rowCount]);
+	m_bodyForceRemap1.m_index = ndAllocaPtr(ndBodyForceIndexPair, &m_bodyForceRemap0.m_indexSpan[m_rowCount]);
+	m_bodyForceRemap1.m_indexSpan = ndAllocaPtr(ndInt32, &m_bodyForceRemap1.m_index[m_rowCount]);
 
-	m_bodyForceRemap0.m_index = ndAlignedPtr(ndBodyForceIndexPair, &m_matrixRowsIndex[m_rowCount]);
-	m_bodyForceRemap0.m_indexSpan = ndAlignedPtr(ndInt32, &m_bodyForceRemap0.m_index[m_rowCount]);
-	m_bodyForceRemap1.m_index = ndAlignedPtr(ndBodyForceIndexPair, &m_bodyForceRemap0.m_indexSpan[m_rowCount]);
-	m_bodyForceRemap1.m_indexSpan = ndAlignedPtr(ndInt32, &m_bodyForceRemap1.m_index[m_rowCount]);
-
-	m_pairs = ndAlignedPtr(ndNodePair, &m_bodyForceRemap1.m_indexSpan[m_rowCount]);
-	m_diagonalPreconditioner = ndAlignedPtr(ndFloat32, &m_pairs[m_rowCount]);
-	m_massMatrix11 = ndAlignedPtr(ndFloat32, &m_diagonalPreconditioner[m_rowCount]);
-	m_massMatrix10 = ndAlignedPtr(ndFloat32, &m_massMatrix11[m_auxiliaryRowCount * m_auxiliaryRowCount]);
-	m_sparseMatrix = ndAlignedPtr(ndUnsigned16, &m_massMatrix10[m_auxiliaryRowCount * primaryCount]);
-	m_deltaForce = ndAlignedPtr(ndFloat32, &m_sparseMatrix[m_auxiliaryRowCount * (m_auxiliaryRowCount + 1)]);
+	m_pairs = ndAllocaPtr(ndNodePair, &m_bodyForceRemap1.m_indexSpan[m_rowCount]);
+	m_diagonalPreconditioner = ndAllocaPtr(ndFloat32, &m_pairs[m_rowCount]);
+	m_massMatrix11 = ndAllocaPtr(ndFloat32, &m_diagonalPreconditioner[m_rowCount]);
+	m_massMatrix10 = ndAllocaPtr(ndFloat32, &m_massMatrix11[m_auxiliaryRowCount * m_auxiliaryRowCount]);
+	m_sparseMatrix = ndAllocaPtr(ndUnsigned16, &m_massMatrix10[m_auxiliaryRowCount * primaryCount]);
+	m_deltaForce = ndAllocaPtr(ndFloat32, &m_sparseMatrix[m_auxiliaryRowCount * (m_auxiliaryRowCount + 1)]);
 
 	m_blockSize = 0;
 	ndInt32 primaryIndex = 0;
@@ -2030,8 +2033,12 @@ void ndSkeletonContainer::InitMassMatrix(const ndLeftHandSide* const leftHandSid
 	m_rightHandSide = rightHandSide;
 
 	const ndInt32 nodeCount = m_nodeList.GetCount();
-	ndSpatialMatrix* const bodyMassArray = ndAlloca(ndSpatialMatrix, nodeCount);
-	ndSpatialMatrix* const jointMassArray = ndAlloca(ndSpatialMatrix, nodeCount);
+	ndSpatialMatrix* const bodyMassArrayStack = ndAlloca(ndSpatialMatrix, nodeCount);
+	ndSpatialMatrix* const jointMassArrayStack = ndAlloca(ndSpatialMatrix, nodeCount);
+	ndSpatialMatrix* const bodyMassArray = ndAllocaPtr(ndSpatialMatrix, bodyMassArrayStack);
+	ndSpatialMatrix* const jointMassArray = ndAllocaPtr(ndSpatialMatrix, jointMassArrayStack);
+	
+
 	if (m_nodesOrder)
 	{
 		for (ndInt32 i = 0; i < nodeCount - 1; ++i)
@@ -2112,8 +2119,10 @@ void ndSkeletonContainer::CalculateReactionForces(ndJacobian* const internalForc
 		ND_PROFILE_ZONE();
 		m_threadId = threadId;
 		const ndInt32 nodeCount = m_nodeList.GetCount();
-		ndForcePair* const force = ndAlloca(ndForcePair, nodeCount);
-		ndForcePair* const accel = ndAlloca(ndForcePair, nodeCount);
+		ndForcePair* const forceStack = ndAlloca(ndForcePair, nodeCount);
+		ndForcePair* const accelStack = ndAlloca(ndForcePair, nodeCount);
+		ndForcePair* const force = ndAllocaPtr(ndForcePair, forceStack);
+		ndForcePair* const accel = ndAllocaPtr(ndForcePair, accelStack);
 
 		CalculateJointAccel(internalForces, accel);
 		CalculateForce(force, accel);

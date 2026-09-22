@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __HeightFieldPrimitive_H__
-#define __HeightFieldPrimitive_H__
+#ifndef HeightFieldPrimitive_H_
+#define HeightFieldPrimitive_H_
 
 #include "ndSandboxStdafx.h"
 

@@ -10,8 +10,8 @@
 */
 
 
-#ifndef __DEMO_CAMERA_NODE_FOLLOW_H__
-#define __DEMO_CAMERA_NODE_FOLLOW_H__
+#ifndef DEMO_CAMERA_NODE_FOLLOW_H_
+#define DEMO_CAMERA_NODE_FOLLOW_H_
 
 #include "ndSandboxStdafx.h"
 #include "ndDemoCameraNode.h"

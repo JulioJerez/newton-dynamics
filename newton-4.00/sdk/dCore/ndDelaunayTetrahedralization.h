@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __NDG_DEALUNAY_TETRAHEDRALIZAION_4D__
-#define __NDG_DEALUNAY_TETRAHEDRALIZAION_4D__
+#ifndef ND_DEALUNAY_TETRAHEDRALIZAION_4D_
+#define ND_DEALUNAY_TETRAHEDRALIZAION_4D_
 
 #include "ndCoreStdafx.h"
 #include "ndConvexHull4d.h"

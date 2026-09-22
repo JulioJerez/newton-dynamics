@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __ND_MULTIBODY_VEHICLE_TIRE_JOINT_H__
-#define __ND_MULTIBODY_VEHICLE_TIRE_JOINT_H__
+#ifndef ND_MULTIBODY_VEHICLE_TIRE_JOINT_H_
+#define ND_MULTIBODY_VEHICLE_TIRE_JOINT_H_
 
 #include "ndNewtonStdafx.h"
 #include "ndJointWheel.h"

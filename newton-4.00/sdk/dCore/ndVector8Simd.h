@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_VECTOR8_SIMD_H__
-#define __ND_VECTOR8_SIMD_H__
+#ifndef ND_VECTOR8_SIMD_H_
+#define ND_VECTOR8_SIMD_H_
 
 #include "ndVector.h"
 

@@ -89,13 +89,13 @@ namespace ndCartpoleTrainer_sac
 			char name[256];
 			snprintf(name, sizeof(name), "%s.csv", CONTROLLER_NAME_SAC);
 			m_outFile = fopen(name, "wb");
-			fprintf(m_outFile, "vpg\n");
+			fprintf(m_outFile, "sac\n");
 
 			// create a Soft Actor Critic traniing agent
 			ndBrainAgentOffPolicyGradient_Trainer::HyperParameters hyperParameters;
 
-			//hyperParameters.m_useGpuBackend = true;
-			hyperParameters.m_useGpuBackend = false;
+			hyperParameters.m_useGpuBackend = true;
+			//hyperParameters.m_useGpuBackend = false;
 			//hyperParameters.m_numberOfHiddenLayers = 0;
 			hyperParameters.m_hiddenLayersNumberOfNeurons = 64;
 			hyperParameters.m_numberOfActions = m_actionsSize;

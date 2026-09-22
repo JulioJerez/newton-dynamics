@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __DEMO_ENTITY_NOTIFY_H__
-#define __DEMO_ENTITY_NOTIFY_H__
+#ifndef DEMO_ENTITY_NOTIFY_H_
+#define DEMO_ENTITY_NOTIFY_H_
 
 #include "ndDemoEntityManager.h"
 #include "ndPhysicsUtils.h"
@@ -32,7 +32,7 @@ class ndDemoEntityNotify : public ndModelBodyNotify
 		return new ndDemoEntityNotify(*this);
 	}
 
-	virtual ~ndDemoEntityNotify();
+	virtual ~ndDemoEntityNotify() override;
 
 	ndSharedPtr<ndRenderSceneNode> GetUserData() const
 	{

@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_TRHEAD_SYNC_UTILS_H__
-#define __ND_TRHEAD_SYNC_UTILS_H__
+#ifndef ND_THREAD_SYNC_UTILS_H_
+#define ND_THREAD_SYNC_UTILS_H_
 
 #include "ndCoreStdafx.h"
 #include "ndTypes.h"

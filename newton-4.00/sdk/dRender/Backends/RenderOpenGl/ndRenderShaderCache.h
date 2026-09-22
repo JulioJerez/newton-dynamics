@@ -8,8 +8,8 @@
 * including commercial applications, and to alter it and redistribute it
 * freely
 */
-#ifndef __RENDER_SHADER_CACHE_H__
-#define __RENDER_SHADER_CACHE_H__
+#ifndef ND_RENDER_SHADER_CACHE_H_
+#define ND_RENDER_SHADER_CACHE_H_
 
 #include "ndRenderStdafx.h"
 #include "ndRenderContext.h"

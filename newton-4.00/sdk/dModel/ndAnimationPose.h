@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __ND_ANIMATION_POSE_h__
-#define __ND_ANIMATION_POSE_h__
+#ifndef ND_ANIMATION_POSE_H_
+#define ND_ANIMATION_POSE_H_
 
 class ndAnimKeyframe
 {

@@ -10,8 +10,8 @@
 */
 
 
-#ifndef _D_TEST_DEEP_BRAIN_H_
-#define _D_TEST_DEEP_BRAIN_H_
+#ifndef D_TEST_DEEP_BRAIN_H_
+#define D_TEST_DEEP_BRAIN_H_
 
 
 void ndHandWrittenDigits();

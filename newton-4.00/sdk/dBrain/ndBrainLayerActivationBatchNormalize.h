@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _ND_BRAIN_LAYER_BATCH_NORMALIZE_ACTIVATION_H__
-#define _ND_BRAIN_LAYER_BATCH_NORMALIZE_ACTIVATION_H__
+#ifndef ND_BRAIN_LAYER_BATCH_NORMALIZE_ACTIVATION_H_
+#define ND_BRAIN_LAYER_BATCH_NORMALIZE_ACTIVATION_H_
 
 #include "ndBrainStdafx.h"
 #include "ndBrainLayerActivation.h"
@@ -38,6 +38,10 @@ class ndBrainLayerActivationBatchNormalize : public ndBrainLayerActivationLinear
 
 	virtual const char* GetLabelId() const override;
 	static ndBrainLayer* Load(const ndBrainLoad* const loadSave);
+
+	void AddVariance(const ndBrainLayerSelfModyfyingFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const;
+	void CopyVariance(const ndBrainLayerSelfModyfyingFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const;
+	void CalculateVariance(const ndBrainLayerSelfModyfyingFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const;
 	virtual void SelfModifyingFeedForward(const ndBrainLayerSelfModyfyingFeedForwardCpuCommand* const command, ndInt32 miniBatchIndex) const override;
 
 	virtual void CopyModifyingParameters() override;

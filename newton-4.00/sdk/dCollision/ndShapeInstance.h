@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_SHAPE_INSTANCE_H__ 
-#define __ND_SHAPE_INSTANCE_H__ 
+#ifndef ND_SHAPE_INSTANCE_H__ 
+#define ND_SHAPE_INSTANCE_H__ 
 
 #define D_MAX_SHAPE_AABB_PADDING ndFloat32 (1.0f / 16.0f)
 
@@ -55,8 +55,9 @@ class ndShapeDebugNotify : public ndClassAlloc
 
 	virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceArray, const ndEdgeType* const edgeType) = 0;
 
-	const ndShapeInstance* m_instance;
-
+	//const ndShapeInstance* m_instance;
+	ndWeakPtr<ndShapeInstance> m_instance;
+	ndClassPadding m_padding;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 D_MSV_NEWTON_CLASS_ALIGN_32

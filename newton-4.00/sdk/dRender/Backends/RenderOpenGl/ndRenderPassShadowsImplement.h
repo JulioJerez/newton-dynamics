@@ -8,8 +8,9 @@
 * including commercial applications, and to alter it and redistribute it
 * freely
 */
-#ifndef __ND_RENDER_PASS_SHADOWS_IMPLEMNETH__
-#define __ND_RENDER_PASS_SHADOWS_IMPLEMNETH__
+
+#ifndef ND_RENDER_PASS_SHADOWS_IMPLEMNET_H_
+#define ND_RENDER_PASS_SHADOWS_IMPLEMNET_H_
 
 #include "ndRenderPass.h"
 #include "ndRenderShader.h"

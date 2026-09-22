@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_THREAD_H_
-#define __ND_THREAD_H_
+#ifndef ND_THREAD_H_
+#define ND_THREAD_H_
 
 #include "ndCoreStdafx.h"
 #include "ndSemaphore.h"

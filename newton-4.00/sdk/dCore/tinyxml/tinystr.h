@@ -46,18 +46,18 @@ typedef void (*xmlFree) (void*);
 typedef void* (*xmlAlloc) (size_t size);
 
 #if defined(_MSC_VER)
-	#define _D_TINYXML_EXPORT __declspec(dllexport)
-	#define _D_TINYXML_IMPORT __declspec(dllimport)
+	#define D_TINYXML_EXPORT __declspec(dllexport)
+	#define D_TINYXML_IMPORT __declspec(dllimport)
 #else
-	#define _D_TINYXML_EXPORT __attribute__((visibility("default")))
-	#define _D_TINYXML_IMPORT __attribute__((visibility("default")))
+	#define D_TINYXML_EXPORT __attribute__((visibility("default")))
+	#define D_TINYXML_IMPORT __attribute__((visibility("default")))
 #endif
 
 #ifdef _D_TINY_DLL
 	#ifdef _D_TINYXML_EXPORT_DLL
-		#define D_TINY_API _D_TINYXML_EXPORT
+		#define D_TINY_API D_TINYXML_EXPORT
 	#else
-		#define D_TINY_API _D_TINYXML_IMPORT
+		#define D_TINY_API D_TINYXML_IMPORT
 	#endif
 #else
 	#define D_TINY_API
@@ -106,21 +106,21 @@ class D_TINY_API TiXmlString
 	}
 
 	// TiXmlString copy constructor
-	TiXmlString ( const TiXmlString & copy) : rep_(0)
+	TiXmlString ( const TiXmlString & copy) : rep_(nullptr)
 	{
 		init(copy.length());
 		memcpy(start(), copy.data(), length());
 	}
 
 	// TiXmlString constructor, based on a string
-	TIXML_EXPLICIT TiXmlString ( const char * copy) : rep_(0)
+	TIXML_EXPLICIT TiXmlString ( const char * copy) : rep_(nullptr)
 	{
 		init( static_cast<size_type>( strlen(copy) ));
 		memcpy(start(), copy, length());
 	}
 
 	// TiXmlString constructor, based on a string
-	TIXML_EXPLICIT TiXmlString ( const char * str, size_type len) : rep_(0)
+	TIXML_EXPLICIT TiXmlString ( const char * str, size_type len) : rep_(nullptr)
 	{
 		init(len);
 		memcpy(start(), str, len);
@@ -140,7 +140,7 @@ class D_TINY_API TiXmlString
 	// = operator
 	TiXmlString& operator = (const char * copy)
 	{
-		return assign( copy, (size_type)strlen(copy));
+		return assign( copy, size_type(strlen(copy)));
 	}
 
 	// = operator

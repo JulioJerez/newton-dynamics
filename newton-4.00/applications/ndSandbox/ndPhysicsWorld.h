@@ -8,8 +8,9 @@
 * including commercial applications, and to alter it and redistribute it
 * freely
 */
-#ifndef __ND_PHYSICS_WORLD_H__
-#define __ND_PHYSICS_WORLD_H__
+
+#ifndef ND_PHYSICS_WORLD_H_
+#define ND_PHYSICS_WORLD_H_
 
 #include "ndSandboxStdafx.h"
 
@@ -47,7 +48,7 @@ class ndDemoContactCallback : public ndContactCallback
 	};
 
 	ndDemoContactCallback();
-	~ndDemoContactCallback();
+	~ndDemoContactCallback() override;
 };
 
 class ndPhysicsWorld: public ndWorld
@@ -88,7 +89,8 @@ class ndPhysicsWorld: public ndWorld
 	};
 
 	ndPhysicsWorld(ndDemoEntityManager* const manager);
-	virtual ~ndPhysicsWorld();
+	virtual ~ndPhysicsWorld() override;
+
 	virtual void CleanUp() override;
 
 	void AdvanceTime(ndFloat32 timestep);
@@ -116,8 +118,9 @@ class ndPhysicsWorld: public ndWorld
 	void OnAddJoint(ndJointBilateralConstraint* const) const override;
 	void OnRemoveJoint(ndJointBilateralConstraint* const) const override;
 
+	//void PhysicsUpdate(ndFloat32 timestep) override;
 	void PhysicsUpdate(ndFloat32 timestep);
-	void CollisionUpdate(ndFloat32 timestep);
+	void CollisionUpdate(ndFloat32 timestep) override;
 
 	ndDemoEntityManager* m_manager;
 	ndFloat32 m_timeAccumulator;

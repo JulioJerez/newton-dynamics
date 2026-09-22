@@ -38,111 +38,111 @@ namespace nd
 
 	//void SetXmlMemoryFunctions(xmlAlloc allocMemory, xmlFree freeMemory)
 	//{
-	//	__alloc__ = allocMemory;
-	//	__free__ = freeMemory;
+	//	_alloc_ = allocMemory;
+	//	_free_ = freeMemory;
 	//}
 
-	static void* __alloc__(size_t size)
+	static void* _alloc_(size_t size)
 	{
 		return ndMemory::Malloc(size);
 	}
 
-	static void __free__(void* const ptr)
+	static void _free_(void* const ptr)
 	{
 		return ndMemory::Free(ptr);
 	}
 
 	void *TiXmlVisitor::operator new (size_t size)
 	{
-		return __alloc__(size);
+		return _alloc_(size);
 	}
 
 	void *TiXmlVisitor::operator new[](size_t size)
 	{
-		return __alloc__(size);
+		return _alloc_(size);
 	}
 
 	void TiXmlVisitor::operator delete (void* ptr)
 	{
-		__free__(ptr);
+		_free_(ptr);
 	}
 
 	void TiXmlVisitor::operator delete[](void* ptr)
 	{
-		__free__(ptr);
+		_free_(ptr);
 	}
 
 	void *TiXmlAttributeSet::operator new (size_t size)
 	{
-		return __alloc__(size);
+		return _alloc_(size);
 	}
 
 	void *TiXmlAttributeSet::operator new[](size_t size)
 	{
-		return __alloc__(size);
+		return _alloc_(size);
 	}
 
 	void TiXmlAttributeSet::operator delete (void* ptr)
 	{
-		__free__(ptr);
+		_free_(ptr);
 	}
 
 	void TiXmlAttributeSet::operator delete[](void* ptr)
 	{
-		__free__(ptr);
+		_free_(ptr);
 	}
 
 	void *TiXmlBase::operator new (size_t size)
 	{
-		return __alloc__(size);
+		return _alloc_(size);
 	}
 
 	void *TiXmlBase::operator new[](size_t size)
 	{
-		return __alloc__(size);
+		return _alloc_(size);
 	}
 
 	void TiXmlBase::operator delete (void* ptr)
 	{
-		__free__(ptr);
+		_free_(ptr);
 	}
 
 	void TiXmlBase::operator delete[](void* ptr)
 	{
-		__free__(ptr);
+		_free_(ptr);
 	}
 
 	void *TiXmlHandle::operator new (size_t size)
 	{
-		return __alloc__(size);
+		return _alloc_(size);
 	}
 
 	void *TiXmlHandle::operator new[](size_t size)
 	{
-		return __alloc__(size);
+		return _alloc_(size);
 	}
 
 	void TiXmlHandle::operator delete (void* ptr)
 	{
-		__free__(ptr);
+		_free_(ptr);
 	}
 
 	void TiXmlHandle::operator delete[](void* ptr)
 	{
-		__free__(ptr);
+		_free_(ptr);
 	}
 
 	bool TiXmlBase::condenseWhiteSpace = true;
 
 	// Microsoft compiler security
-	FILE* TiXmlFOpen( const char* filename, const char* mode )
+	static FILE* TiXmlFOpen( const char* filename, const char* mode )
 	{
 		#if defined(_MSC_VER) && (_MSC_VER >= 1400 )
-			FILE* fp = 0;
+			FILE* fp = nullptr;
 			errno_t err = fopen_s( &fp, filename, mode );
 			if ( !err && fp )
 				return fp;
-			return 0;
+			return nullptr;
 		#else
 			return fopen( filename, mode );
 		#endif
@@ -154,7 +154,7 @@ namespace nd
 
 		while( i<str.length() )
 		{
-			unsigned char c = (unsigned char) str[i];
+			unsigned char c = static_cast<unsigned char> (str[i]);
 
 			if (    c == '&' 
 				 && i < ( str.length() - 2 )
@@ -211,7 +211,7 @@ namespace nd
 				char buf[ 32 ];
 			
 				#if defined(TIXML_SNPRINTF)		
-					TIXML_SNPRINTF( buf, sizeof(buf), "&#x%02X;", (unsigned) ( c & 0xff ) );
+					TIXML_SNPRINTF( buf, sizeof(buf), "&#x%02X;", unsigned ( c & 0xff ) );
 				#else
 					sprintf( buf, "&#x%02X;", (unsigned) ( c & 0xff ) );
 				#endif		
@@ -225,7 +225,7 @@ namespace nd
 			{
 				//char realc = (char) c;
 				//outString->append( &realc, 1 );
-				*outString += (char) c;	// somewhat more efficient function call.
+				*outString += char (c);	// somewhat more efficient function call.
 				++i;
 			}
 		}
@@ -234,19 +234,19 @@ namespace nd
 
 	TiXmlNode::TiXmlNode( NodeType _type ) : TiXmlBase()
 	{
-		parent = 0;
+		parent = nullptr;
 		type = _type;
-		firstChild = 0;
-		lastChild = 0;
-		prev = 0;
-		next = 0;
+		firstChild = nullptr;
+		lastChild = nullptr;
+		prev = nullptr;
+		next = nullptr;
 	}
 
 
 	TiXmlNode::~TiXmlNode()
 	{
 		TiXmlNode* node = firstChild;
-		TiXmlNode* temp = 0;
+		TiXmlNode* temp = nullptr;
 
 		while ( node )
 		{
@@ -267,7 +267,7 @@ namespace nd
 	void TiXmlNode::Clear()
 	{
 		TiXmlNode* node = firstChild;
-		TiXmlNode* temp = 0;
+		TiXmlNode* temp = nullptr;
 
 		while ( node )
 		{
@@ -276,27 +276,27 @@ namespace nd
 			delete temp;
 		}	
 
-		firstChild = 0;
-		lastChild = 0;
+		firstChild = nullptr;
+		lastChild = nullptr;
 	}
 
 
 	TiXmlNode* TiXmlNode::LinkEndChild( TiXmlNode* node )
 	{
-		assert( node->parent == 0 || node->parent == this );
-		assert( node->GetDocument() == 0 || node->GetDocument() == this->GetDocument() );
+		assert( node->parent == nullptr || node->parent == this );
+		assert( node->GetDocument() == nullptr || node->GetDocument() == this->GetDocument() );
 
 		if ( node->Type() == TiXmlNode::DOCUMENT )
 		{
 			delete node;
-			if ( GetDocument() ) GetDocument()->SetError( TIXML_ERROR_DOCUMENT_TOP_ONLY, 0, 0, TIXML_ENCODING_UNKNOWN );
-			return 0;
+			if ( GetDocument() ) GetDocument()->SetError( TIXML_ERROR_DOCUMENT_TOP_ONLY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
+			return nullptr;
 		}
 
 		node->parent = this;
 
 		node->prev = lastChild;
-		node->next = 0;
+		node->next = nullptr;
 
 		if ( lastChild )
 			lastChild->next = node;
@@ -312,12 +312,12 @@ namespace nd
 	{
 		if ( addThis.Type() == TiXmlNode::DOCUMENT )
 		{
-			if ( GetDocument() ) GetDocument()->SetError( TIXML_ERROR_DOCUMENT_TOP_ONLY, 0, 0, TIXML_ENCODING_UNKNOWN );
-			return 0;
+			if ( GetDocument() ) GetDocument()->SetError( TIXML_ERROR_DOCUMENT_TOP_ONLY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
+			return nullptr;
 		}
 		TiXmlNode* node = addThis.Clone();
 		if ( !node )
-			return 0;
+			return nullptr;
 
 		return LinkEndChild( node );
 	}
@@ -326,17 +326,17 @@ namespace nd
 	TiXmlNode* TiXmlNode::InsertBeforeChild( TiXmlNode* beforeThis, const TiXmlNode& addThis )
 	{	
 		if ( !beforeThis || beforeThis->parent != this ) {
-			return 0;
+			return nullptr;
 		}
 		if ( addThis.Type() == TiXmlNode::DOCUMENT )
 		{
-			if ( GetDocument() ) GetDocument()->SetError( TIXML_ERROR_DOCUMENT_TOP_ONLY, 0, 0, TIXML_ENCODING_UNKNOWN );
-			return 0;
+			if ( GetDocument() ) GetDocument()->SetError( TIXML_ERROR_DOCUMENT_TOP_ONLY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
+			return nullptr;
 		}
 
 		TiXmlNode* node = addThis.Clone();
 		if ( !node )
-			return 0;
+			return nullptr;
 		node->parent = this;
 
 		node->next = beforeThis;
@@ -358,17 +358,17 @@ namespace nd
 	TiXmlNode* TiXmlNode::InsertAfterChild( TiXmlNode* afterThis, const TiXmlNode& addThis )
 	{
 		if ( !afterThis || afterThis->parent != this ) {
-			return 0;
+			return nullptr;
 		}
 		if ( addThis.Type() == TiXmlNode::DOCUMENT )
 		{
-			if ( GetDocument() ) GetDocument()->SetError( TIXML_ERROR_DOCUMENT_TOP_ONLY, 0, 0, TIXML_ENCODING_UNKNOWN );
-			return 0;
+			if ( GetDocument() ) GetDocument()->SetError( TIXML_ERROR_DOCUMENT_TOP_ONLY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
+			return nullptr;
 		}
 
 		TiXmlNode* node = addThis.Clone();
 		if ( !node )
-			return 0;
+			return nullptr;
 		node->parent = this;
 
 		node->prev = afterThis;
@@ -390,11 +390,11 @@ namespace nd
 	TiXmlNode* TiXmlNode::ReplaceChild( TiXmlNode* replaceThis, const TiXmlNode& withThis )
 	{
 		if ( replaceThis->parent != this )
-			return 0;
+			return nullptr;
 
 		TiXmlNode* node = withThis.Clone();
 		if ( !node )
-			return 0;
+			return nullptr;
 
 		node->next = replaceThis->next;
 		node->prev = replaceThis->prev;
@@ -445,7 +445,7 @@ namespace nd
 			if ( strcmp( node->Value(), _value ) == 0 )
 				return node;
 		}
-		return 0;
+		return nullptr;
 	}
 
 
@@ -457,7 +457,7 @@ namespace nd
 			if ( strcmp( node->Value(), _value ) == 0 )
 				return node;
 		}
-		return 0;
+		return nullptr;
 	}
 
 
@@ -497,7 +497,7 @@ namespace nd
 			if ( strcmp( node->Value(), _value ) == 0 )
 				return node;
 		}
-		return 0;
+		return nullptr;
 	}
 
 
@@ -509,7 +509,7 @@ namespace nd
 			if ( strcmp( node->Value(), _value ) == 0 )
 				return node;
 		}
-		return 0;
+		return nullptr;
 	}
 
 
@@ -539,7 +539,7 @@ namespace nd
 			if ( node->ToElement() )
 				return node->ToElement();
 		}
-		return 0;
+		return nullptr;
 	}
 
 
@@ -554,7 +554,7 @@ namespace nd
 			if ( node->ToElement() )
 				return node->ToElement();
 		}
-		return 0;
+		return nullptr;
 	}
 
 
@@ -569,7 +569,7 @@ namespace nd
 			if ( node->ToElement() )
 				return node->ToElement();
 		}
-		return 0;
+		return nullptr;
 	}
 
 
@@ -584,7 +584,7 @@ namespace nd
 			if ( node->ToElement() )
 				return node->ToElement();
 		}
-		return 0;
+		return nullptr;
 	}
 
 
@@ -597,14 +597,14 @@ namespace nd
 			if ( node->ToDocument() )
 				return node->ToDocument();
 		}
-		return 0;
+		return nullptr;
 	}
 
 
 	TiXmlElement::TiXmlElement (const char * _value)
 		: TiXmlNode( TiXmlNode::ELEMENT )
 	{
-		firstChild = lastChild = 0;
+		firstChild = lastChild = nullptr;
 		value = _value;
 	}
 
@@ -622,7 +622,7 @@ namespace nd
 	TiXmlElement::TiXmlElement( const TiXmlElement& copy)
 		: TiXmlNode( TiXmlNode::ELEMENT )
 	{
-		firstChild = lastChild = 0;
+		firstChild = lastChild = nullptr;
 		copy.CopyTo( this );	
 	}
 
@@ -657,7 +657,7 @@ namespace nd
 		const TiXmlAttribute* node = attributeSet.Find( name );
 		if ( node )
 			return node->Value();
-		return 0;
+		return nullptr;
 	}
 
 
@@ -839,7 +839,7 @@ namespace nd
 		else
 		{
 			TiXmlDocument* document = GetDocument();
-			if ( document ) document->SetError( TIXML_ERROR_OUT_OF_MEMORY, 0, 0, TIXML_ENCODING_UNKNOWN );
+			if ( document ) document->SetError( TIXML_ERROR_OUT_OF_MEMORY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
 		}
 	}
 
@@ -862,7 +862,7 @@ namespace nd
 		else
 		{
 			TiXmlDocument* document = GetDocument();
-			if ( document ) document->SetError( TIXML_ERROR_OUT_OF_MEMORY, 0, 0, TIXML_ENCODING_UNKNOWN );
+			if ( document ) document->SetError( TIXML_ERROR_OUT_OF_MEMORY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
 		}
 	}
 	#endif
@@ -928,7 +928,7 @@ namespace nd
 
 		// Element class: 
 		// Clone the attributes, then clone the children.
-		const TiXmlAttribute* attribute = 0;
+		const TiXmlAttribute* attribute = nullptr;
 		for(	attribute = attributeSet.First();
 		attribute;
 		attribute = attribute->Next() )
@@ -936,7 +936,7 @@ namespace nd
 			target->SetAttribute( attribute->Name(), attribute->Value() );
 		}
 
-		TiXmlNode* node = 0;
+		TiXmlNode* node = nullptr;
 		for ( node = firstChild; node; node = node->NextSibling() )
 		{
 			target->LinkEndChild( node->Clone() );
@@ -961,7 +961,7 @@ namespace nd
 	{
 		TiXmlElement* clone = new TiXmlElement( Value() );
 		if ( !clone )
-			return 0;
+			return nullptr;
 
 		CopyTo( clone );
 		return clone;
@@ -977,7 +977,7 @@ namespace nd
 				return childText->Value();
 			}
 		}
-		return 0;
+		return nullptr;
 	}
 
 
@@ -1065,7 +1065,7 @@ namespace nd
 		}
 		else
 		{
-			SetError( TIXML_ERROR_OPENING_FILE, 0, 0, TIXML_ENCODING_UNKNOWN );
+			SetError( TIXML_ERROR_OPENING_FILE, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
 			return false;
 		}
 	}
@@ -1074,7 +1074,7 @@ namespace nd
 	{
 		if ( !file ) 
 		{
-			SetError( TIXML_ERROR_OPENING_FILE, 0, 0, TIXML_ENCODING_UNKNOWN );
+			SetError( TIXML_ERROR_OPENING_FILE, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
 			return false;
 		}
 
@@ -1091,7 +1091,7 @@ namespace nd
 		// Strange case, but good to handle up front.
 		if ( length <= 0 )
 		{
-			SetError( TIXML_ERROR_DOCUMENT_EMPTY, 0, 0, TIXML_ENCODING_UNKNOWN );
+			SetError( TIXML_ERROR_DOCUMENT_EMPTY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
 			return false;
 		}
 
@@ -1114,12 +1114,12 @@ namespace nd
 		// Generally, you expect fgets to translate from the convention of the OS to the c/unix
 		// convention, and not work generally.
 
-		char* buf = (char*)__alloc__((length + 1) * sizeof(char));
+		char* buf = static_cast<char*>(_alloc_(size_t(length + 1) * sizeof(char)));
 		buf[0] = 0;
 
 		if ( fread( buf, size_t(length), 1, file ) != 1 ) {
-			__free__(buf);
-			SetError( TIXML_ERROR_OPENING_FILE, 0, 0, TIXML_ENCODING_UNKNOWN );
+			_free_(buf);
+			SetError( TIXML_ERROR_OPENING_FILE, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
 			return false;
 		}
 
@@ -1143,7 +1143,7 @@ namespace nd
 				if ( (p-lastPos) > 0 ) {
 					data.append( lastPos, size_t(p-lastPos) );	// do not add the CR
 				}
-				data += (char)0xa;						// a proper newline
+				data += char(0xa);						// a proper newline
 
 				if ( *(p+1) == 0xa ) {
 					// Carriage return - new line sequence
@@ -1166,10 +1166,10 @@ namespace nd
 		if ( p-lastPos ) {
 			data.append( lastPos, size_t(p-lastPos) );
 		}		
-		__free__(buf);
-		buf = 0;
+		_free_(buf);
+		buf = nullptr;
 
-		Parse( data.c_str(), 0, encoding );
+		Parse( data.c_str(), nullptr, encoding );
 
 		if (  Error() )
 			return false;
@@ -1219,7 +1219,7 @@ namespace nd
 		target->errorLocation = errorLocation;
 		target->useMicrosoftBOM = useMicrosoftBOM;
 
-		TiXmlNode* node = 0;
+		TiXmlNode* node = nullptr;
 		for ( node = firstChild; node; node = node->NextSibling() )
 		{
 			target->LinkEndChild( node->Clone() );
@@ -1231,7 +1231,7 @@ namespace nd
 	{
 		TiXmlDocument* clone = new TiXmlDocument();
 		if ( !clone )
-			return 0;
+			return nullptr;
 
 		CopyTo( clone );
 		return clone;
@@ -1268,7 +1268,7 @@ namespace nd
 		// We are using knowledge of the sentinel. The sentinel
 		// have a value or name.
 		if ( next->value.empty() && next->name.empty() )
-			return 0;
+			return nullptr;
 		return next;
 	}
 
@@ -1288,7 +1288,7 @@ namespace nd
 		// We are using knowledge of the sentinel. The sentinel
 		// have a value or name.
 		if ( prev->value.empty() && prev->name.empty() )
-			return 0;
+			return nullptr;
 		return prev;
 	}
 
@@ -1417,7 +1417,7 @@ namespace nd
 		TiXmlComment* clone = new TiXmlComment();
 
 		if ( !clone )
-			return 0;
+			return nullptr;
 
 		CopyTo( clone );
 		return clone;
@@ -1460,11 +1460,11 @@ namespace nd
 
 	TiXmlNode* TiXmlText::Clone() const
 	{	
-		TiXmlText* clone = 0;
+		TiXmlText* clone = nullptr;
 		clone = new TiXmlText( "" );
 
 		if ( !clone )
-			return 0;
+			return nullptr;
 
 		CopyTo( clone );
 		return clone;
@@ -1552,7 +1552,7 @@ namespace nd
 		TiXmlDeclaration* clone = new TiXmlDeclaration();
 
 		if ( !clone )
-			return 0;
+			return nullptr;
 
 		CopyTo( clone );
 		return clone;
@@ -1584,7 +1584,7 @@ namespace nd
 		TiXmlUnknown* clone = new TiXmlUnknown();
 
 		if ( !clone )
-			return 0;
+			return nullptr;
 
 		CopyTo( clone );
 		return clone;
@@ -1630,8 +1630,8 @@ namespace nd
 			{
 				node->prev->next = node->next;
 				node->next->prev = node->prev;
-				node->next = 0;
-				node->prev = 0;
+				node->next = nullptr;
+				node->prev = nullptr;
 				return;
 			}
 		}
@@ -1671,7 +1671,7 @@ namespace nd
 			if ( strcmp( node->name.c_str(), name ) == 0 )
 				return node;
 		}
-		return 0;
+		return nullptr;
 	}
 
 	/*
@@ -1731,7 +1731,7 @@ namespace nd
 			if ( child )
 				return TiXmlHandle( child );
 		}
-		return TiXmlHandle( 0 );
+		return TiXmlHandle( nullptr );
 	}
 
 
@@ -1743,7 +1743,7 @@ namespace nd
 			if ( child )
 				return TiXmlHandle( child );
 		}
-		return TiXmlHandle( 0 );
+		return TiXmlHandle( nullptr );
 	}
 
 
@@ -1755,7 +1755,7 @@ namespace nd
 			if ( child )
 				return TiXmlHandle( child );
 		}
-		return TiXmlHandle( 0 );
+		return TiXmlHandle( nullptr );
 	}
 
 
@@ -1767,7 +1767,7 @@ namespace nd
 			if ( child )
 				return TiXmlHandle( child );
 		}
-		return TiXmlHandle( 0 );
+		return TiXmlHandle(nullptr);
 	}
 
 
@@ -1786,7 +1786,7 @@ namespace nd
 			if ( child )
 				return TiXmlHandle( child );
 		}
-		return TiXmlHandle( 0 );
+		return TiXmlHandle(nullptr);
 	}
 
 
@@ -1805,7 +1805,7 @@ namespace nd
 			if ( child )
 				return TiXmlHandle( child );
 		}
-		return TiXmlHandle( 0 );
+		return TiXmlHandle(nullptr);
 	}
 
 
@@ -1824,7 +1824,7 @@ namespace nd
 			if ( child )
 				return TiXmlHandle( child );
 		}
-		return TiXmlHandle( 0 );
+		return TiXmlHandle(nullptr);
 	}
 
 
@@ -1843,7 +1843,7 @@ namespace nd
 			if ( child )
 				return TiXmlHandle( child );
 		}
-		return TiXmlHandle( 0 );
+		return TiXmlHandle(nullptr);
 	}
 
 
@@ -1866,7 +1866,7 @@ namespace nd
 		for( const TiXmlAttribute* attrib = firstAttribute; attrib; attrib = attrib->Next() )
 		{
 			buffer += " ";
-			attrib->Print( 0, 0, &buffer );
+			attrib->Print(nullptr, 0, &buffer );
 		}
 
 		if ( !element.FirstChild() ) 
@@ -1951,7 +1951,7 @@ namespace nd
 	bool TiXmlPrinter::Visit( const TiXmlDeclaration& declaration )
 	{
 		DoIndent();
-		declaration.Print( 0, 0, &buffer );
+		declaration.Print( nullptr, 0, &buffer );
 		DoLineBreak();
 		return true;
 	}

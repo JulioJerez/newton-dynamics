@@ -10,8 +10,8 @@
 */
 
 
-#ifndef __TIMER_H_INCLUDED__
-#define __TIMER_H_INCLUDED__
+#ifndef TIMER_H_INCLUDED_
+#define TIMER_H_INCLUDED_
 
 #include "ndNewAssetStdafx.h"
 

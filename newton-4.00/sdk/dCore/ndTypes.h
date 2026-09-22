@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_TYPES_H__
-#define __ND_TYPES_H__
+#ifndef ND_TYPES_H_
+#define ND_TYPES_H_
 
 #ifdef _MSC_VER 
 	#if _MSC_VER >= 1400
@@ -145,6 +145,12 @@
 // uncoment this define for platforms that do not support hardware multi threading 
 // or applications that wants to control threading at the application level. 
 //#define D_USE_FORCE_THREAD_EMULATION
+
+#if !defined(D_SCALAR_VECTOR_CLASS)
+	#if defined(__clang__)
+		#define D_SCALAR_VECTOR_CLASS
+	#endif
+#endif
 
 #ifdef D_USE_FORCE_THREAD_EMULATION
 	#ifndef D_USE_THREAD_EMULATION
@@ -295,6 +301,22 @@ class ndTriplexReal
 	ndReal m_y;
 	ndReal m_z;
 };
+
+D_MSV_NEWTON_CLASS_ALIGN_32
+class ndClassPadding
+{
+	public:
+	ndClassPadding()
+	{
+		for (ndInt32 i = 0; i < ndInt32(sizeof(m_padding) / sizeof(m_padding[0])); ++i)
+		{
+			m_padding[i] = 0;
+		}
+	}
+
+	ndInt32 m_padding[8];
+};
+
 
 #define D_STATIC_CLASS_REFLECTION(Class)		\
 	const char* ClassName() const				\

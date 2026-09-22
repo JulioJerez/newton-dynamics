@@ -19,11 +19,14 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_VECTOR_SCALAR_H__
-#define __ND_VECTOR_SCALAR_H__
+#ifndef ND_VECTOR_SCALAR_H_
+#define ND_VECTOR_SCALAR_H_
 
 #include "ndTypes.h"
 
+// visual studio 2022 does not supports these types
+//#include <std::simd>
+//#include <std::experimental::simd>
 
 class ndVector;
 // *****************************************************************************************

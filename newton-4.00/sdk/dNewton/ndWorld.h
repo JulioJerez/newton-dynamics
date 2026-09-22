@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_WORLD_H__
-#define __ND_WORLD_H__
+#ifndef ND_WORLD_H_
+#define ND_WORLD_H_
 
 #include "ndNewtonStdafx.h"
 #include "ndJointList.h"
@@ -49,8 +49,8 @@ class ndWorld: public ndClassAlloc
 	enum ndSolverModes
 	{	
 		ndStandardSolver,
-		ndSimdSoaSolver,
-		ndSimdAvx2Solver,
+		ndSimd8Solver,
+		ndSimd16Solver,
 	};
 
 	D_BASE_CLASS_REFLECTION(ndWorld)
@@ -64,7 +64,7 @@ class ndWorld: public ndClassAlloc
 
 	D_NEWTON_API void Sync() const;
 	D_NEWTON_API void Update(ndFloat32 timestep);
-	D_NEWTON_API void CollisionUpdate(ndFloat32 timestep);
+	D_NEWTON_API virtual void CollisionUpdate(ndFloat32 timestep);
 
 	D_NEWTON_API ndInt32 GetThreadCount() const;
 	D_NEWTON_API void SetThreadCount(ndInt32 count);
@@ -128,8 +128,8 @@ class ndWorld: public ndClassAlloc
 
 	D_NEWTON_API void CalculateJointContacts(ndContact* const contact);
 
-	D_NEWTON_API virtual void PhysicsUpdate();
-	D_NEWTON_API virtual void CollisionUpdate();
+	D_NEWTON_API void PhysicsUpdate____();
+	D_NEWTON_API void CollisionUpdate____();
 	D_NEWTON_API virtual void WorkerUpdate(ndInt32 threadIndex);
 
 	void* GetScratchBuffer(ndInt32 threadIndex, ndInt32 sizeInBytes);
@@ -198,6 +198,7 @@ class ndWorld: public ndClassAlloc
 	bool m_inUpdate;
 	bool m_collisionUpdate;
 	ndArray<ndUnsigned8> m_threadLocalBuffers[D_MAX_THREADS_COUNT];
+	ndClassPadding m_padding;
 	
 	friend class ndScene;
 	friend class ndIkSolver;
@@ -207,7 +208,7 @@ class ndWorld: public ndClassAlloc
 	friend class ndSkeletonContainer;
 	friend class ndModelArticulation;
 	friend class ndDynamicsUpdateSoa;
-	friend class ndDynamicsUpdateAvx2;
+	friend class ndDynamicsUpdateSimd16;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif

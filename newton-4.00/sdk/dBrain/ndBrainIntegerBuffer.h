@@ -8,8 +8,9 @@
 * including commercial applications, and to alter it and redistribute it
 * freely
 */
-#ifndef __ND_BRAIN_INTEGER_BUFFER_H__
-#define __ND_BRAIN_INTEGER_BUFFER_H__
+
+#ifndef ND_BRAIN_INTEGER_BUFFER_H_
+#define ND_BRAIN_INTEGER_BUFFER_H_
 
 #include "ndBrainBuffer.h"
 

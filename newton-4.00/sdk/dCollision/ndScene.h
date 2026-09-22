@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_SCENE_H__
-#define __ND_SCENE_H__
+#ifndef ND_SCENE_H_
+#define ND_SCENE_H_
 
 #include "ndCollisionStdafx.h"
 #include "ndBvhNode.h"
@@ -39,7 +39,7 @@ class ndConvexCastNotify;
 class ndBodiesInAabbNotify;
 class ndJointBilateralConstraint;
 
-D_MSV_NEWTON_CLASS_ALIGN_32
+
 class ndSceneTreeNotiFy : public ndClassAlloc
 {
 	public:
@@ -52,7 +52,7 @@ class ndSceneTreeNotiFy : public ndClassAlloc
 	}
 
 	virtual void OnDebugNode(const ndBvhNode* const node) = 0;
-} D_GCC_NEWTON_CLASS_ALIGN_32;
+};
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndScene : public ndThreadPool

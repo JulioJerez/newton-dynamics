@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_SHAPE_H__ 
-#define __ND_SHAPE_H__ 
+#ifndef ND_SHAPE_H_ 
+#define ND_SHAPE_H_ 
 
 #include "ndCollisionStdafx.h"
 
@@ -275,6 +275,7 @@ class ndShape: public ndContainersFreeListAlloc<ndShape>
 
 	mutable ndAtomic<ndInt32> m_refCount;
 	ndShapeID m_collisionId;
+	ndClassPadding m_padding;
 
 	static ndVector m_flushZero;
 } D_GCC_NEWTON_CLASS_ALIGN_32;

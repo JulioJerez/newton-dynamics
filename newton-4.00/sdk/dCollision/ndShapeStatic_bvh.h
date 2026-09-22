@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_SHAPE_STATIC_BVH__
-#define __ND_SHAPE_STATIC_BVH__
+#ifndef ND_SHAPE_STATIC_BVH_
+#define ND_SHAPE_STATIC_BVH_
 
 #include "ndCollisionStdafx.h"
 #include "ndShapeStaticMesh.h"

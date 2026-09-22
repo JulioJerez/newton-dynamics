@@ -8,8 +8,8 @@
 * including commercial applications, and to alter it and redistribute it
 * freely
 */
-#ifndef __ASSET_EDITOR_H__
-#define __ASSET_EDITOR_H__
+#ifndef ASSET_EDITOR_H_
+#define ASSET_EDITOR_H_
 
 #include "ndUndoRedo.h"
 

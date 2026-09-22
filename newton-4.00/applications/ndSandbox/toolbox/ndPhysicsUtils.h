@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __PHYSICS_UTIL__
-#define __PHYSICS_UTIL__
+#ifndef D_PHYSICS_UTIL_
+#define D_PHYSICS_UTIL_
 
 #define DEMO_GRAVITY  ndFloat32(-10.0f)
 //#define DEMO_GRAVITY  ndFloat32(-1.0f)
@@ -45,3 +45,4 @@ void AddLumberYard(ndDemoEntityManager* const scene, const ndMatrix& origin, ndF
 void AddCapsuleStacks(ndDemoEntityManager* const scene, const ndMatrix& origin, ndFloat32 mass, ndFloat32 radius0, ndFloat32 radius1, ndFloat32 high, ndInt32 rows_x, ndInt32 rows_z, ndInt32 columHigh);
 
 #endif
+

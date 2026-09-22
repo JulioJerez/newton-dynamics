@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_CONVEXHULL_3D_UTILS__
-#define __ND_CONVEXHULL_3D_UTILS__
+#ifndef ND_CONVEXHULL_3D_UTILS_
+#define ND_CONVEXHULL_3D_UTILS_
 
 #include "vhacdDefines.h"
 #include "vhacdVector.h"

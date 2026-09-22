@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __ND_ANIM_TAKE_DATA_h__
-#define __ND_ANIM_TAKE_DATA_h__
+#ifndef ND_ANIM_TAKE_DATA_H_
+#define ND_ANIM_TAKE_DATA_H_
 
 
 #include "ndAnimationBlendTreeNode.h"

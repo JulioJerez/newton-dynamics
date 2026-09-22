@@ -24,8 +24,8 @@
 *  Visual C++ 6.0 created by: Julio Jerez
 *
 ****************************************************************************/
-#ifndef __ND_ARRAY_H__
-#define __ND_ARRAY_H__
+#ifndef ND_ARRAY_H_
+#define ND_ARRAY_H_
 
 #include "ndCoreStdafx.h"
 #include "ndTypes.h"

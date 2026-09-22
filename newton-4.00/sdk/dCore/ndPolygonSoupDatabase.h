@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_POLYGONSOUP_DATABASE_H_
-#define __ND_POLYGONSOUP_DATABASE_H_
+#ifndef ND_POLYGONSOUP_DATABASE_H_
+#define ND_POLYGONSOUP_DATABASE_H_
 
 #include "ndCoreStdafx.h"
 #include "ndTypes.h"
@@ -45,6 +45,7 @@ class ndPolygonSoupDatabase: public ndClassAlloc
 
 	ndVector* m_localVertex;
 	ndInt32 m_vertexCount;
+	ndClassPadding m_padding;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif

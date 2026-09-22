@@ -8,8 +8,9 @@
 * including commercial applications, and to alter it and redistribute it
 * freely
 */
-#ifndef __DEMO_MAIN_FRAME_H__
-#define __DEMO_MAIN_FRAME_H__
+
+#ifndef DEMO_MAIN_FRAME_H_
+#define DEMO_MAIN_FRAME_H_
 
 class ndPhysicsWorld;
 class ndGameControllerInputs;

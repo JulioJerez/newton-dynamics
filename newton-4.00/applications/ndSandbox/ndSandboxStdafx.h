@@ -14,8 +14,8 @@
 //      are changed infrequently
 
 
-#ifndef _TOLLBOX_STDAFX_H_
-#define _TOLLBOX_STDAFX_H_
+#ifndef TOLLBOX_STDAFX_H_
+#define TOLLBOX_STDAFX_H_
 
 // Insert your headers here
 #define WIN32_LEAN_AND_MEAN		// Exclude rarely-used stuff from Windows headers

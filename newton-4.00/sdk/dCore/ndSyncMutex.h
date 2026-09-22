@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_SYNC_MUTEX_H_
-#define __ND_SYNC_MUTEX_H_
+#ifndef ND_SYNC_MUTEX_H_
+#define ND_SYNC_MUTEX_H_
 
 #include "ndCoreStdafx.h"
 

@@ -12,8 +12,8 @@
 #include "ndNewAssetStdafx.h"
 #include "ndAssetEditor.h"
 
-#ifndef __D_RESIZE_MESH_H__
-#define __D_RESIZE_MESH_H__
+#ifndef D_RESIZE_MESH_H_
+#define D_RESIZE_MESH_H_
 
 class ndResizeMesh : public ndAssetEditor::ndAssetTool
 {

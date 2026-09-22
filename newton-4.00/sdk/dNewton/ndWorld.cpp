@@ -28,8 +28,8 @@
 #include "ndModelNotify.h"
 #include "ndSkeletonList.h"
 #include "ndDynamicsUpdate.h"
-#include "ndDynamicsUpdateSoa.h"
-#include "ndDynamicsUpdateAvx2.h"
+#include "ndDynamicsUpdateSimd8.h"
+#include "ndDynamicsUpdateSimd16.h"
 #include "ndJointBilateralConstraint.h"
 
 ndWorld::ndWorld()
@@ -334,7 +334,7 @@ void ndWorld::WorkerUpdate(ndInt32 threadIndex)
 	m_scene->TaskUpdate(threadIndex);
 }
 
-void ndWorld::PhysicsUpdate()
+void ndWorld::PhysicsUpdate____()
 {
 	ND_PROFILE_ZONE();
 	ndUnsigned64 timeAcc = ndGetTimeInMicroseconds();
@@ -368,7 +368,7 @@ void ndWorld::PhysicsUpdate()
 	CalculateAverageUpdateTime();
 }
 
-void ndWorld::CollisionUpdate()
+void ndWorld::CollisionUpdate____()
 {
 	ND_PROFILE_ZONE();
 	ndUnsigned64 timeAcc = ndGetTimeInMicroseconds();
@@ -421,11 +421,11 @@ void ndWorld::ThreadFunction()
 {
 	if (m_collisionUpdate)
 	{
-		CollisionUpdate();
+		CollisionUpdate____();
 	}
 	else
 	{
-		PhysicsUpdate();
+		PhysicsUpdate____();
 	}
 }
 
@@ -887,25 +887,25 @@ void ndWorld::SelectSolver(ndSolverModes solverMode)
 		delete m_solver;
 		switch (solverMode)
 		{
-			case ndSimdSoaSolver:
+			case ndSimd8Solver:
 			{
 				ndWorldScene* const newScene = new ndWorldScene(*((ndWorldScene*)m_scene));
 				delete m_scene;
 				m_scene = newScene;
 
 				m_solverMode = solverMode;
-				m_solver = new ndDynamicsUpdateSoa(this);
+				m_solver = new ndDynamicsUpdateSimd8(this);
 				break;
 			}
 
-			case ndSimdAvx2Solver:
+			case ndSimd16Solver:
 			{
 				ndWorldScene* const newScene = new ndWorldScene(*((ndWorldScene*)m_scene));
 				delete m_scene;
 				m_scene = newScene;
 
 				m_solverMode = solverMode;
-				m_solver = new ndDynamicsUpdateAvx2(this);
+				m_solver = new ndDynamicsUpdateSimd16(this);
 				break;
 			}
 

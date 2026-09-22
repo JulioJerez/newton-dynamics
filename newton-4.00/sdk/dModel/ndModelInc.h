@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _ND_MODEL_INC_H__
-#define _ND_MODEL_INC_H__
+#ifndef ND_MODEL_INC_H_
+#define ND_MODEL_INC_H_
 
 #include <ndModelStdafx.h>
 #include <ndFbxMeshLoader.h>

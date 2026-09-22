@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_BODY_DYNAMIC_BODY_H__
-#define __ND_BODY_DYNAMIC_BODY_H__
+#ifndef ND_BODY_DYNAMIC_BODY_H_
+#define ND_BODY_DYNAMIC_BODY_H_
 
 #include "ndNewtonStdafx.h"
 
@@ -99,10 +99,10 @@ class ndBodyDynamic: public ndBodyKinematic
 	static ndVector m_sleepAccelTestScale2;
 
 	friend class ndDynamicsUpdate;
-	friend class ndDynamicsUpdateSoa;
+	friend class ndDynamicsUpdateSimd8;
 	friend class ndSkeletonContainer;
 	friend class ndConvexCastVehicle;
-	friend class ndDynamicsUpdateAvx2;
+	friend class ndDynamicsUpdateSimd16;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif 

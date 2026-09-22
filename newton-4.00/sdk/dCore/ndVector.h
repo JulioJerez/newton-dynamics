@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_VECTOR_H__
-#define __ND_VECTOR_H__
+#ifndef ND_VECTOR_H_
+#define ND_VECTOR_H_
 
 #include "ndCoreStdafx.h"
 #include "ndTypes.h"
@@ -29,15 +29,22 @@
 
 #define ndCheckVector(x) (ndCheckFloat(x[0]) && ndCheckFloat(x[1]) && ndCheckFloat(x[2]) && ndCheckFloat(x[3]))
 
+//#ifdef D_SCALAR_VECTOR_CLASS
+//	#include "ndVectorScalar.h"
+//#elif (defined (__x86_64) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64))
+//	#include "ndVectorSimd.h"
+//#elif (defined(__arm__) || defined(__aarch64__) || defined(__ARM_ARCH_ISA_A64) || defined(__ARM_ARCH_7S__) || defined(__ARM_ARCH_7A__))
+//	#include "ndVectorArmNeon.h"
+//#else
+//	// unknown cpu assume scaler instruction set until otherwise
+//	#include "ndVectorScalar.h"
+//#endif
+
 #ifdef D_SCALAR_VECTOR_CLASS
+	xxxxxxxx
 	#include "ndVectorScalar.h"
-#elif (defined (__x86_64) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64))
-	#include "ndVectorSimd.h"
-#elif (defined(__arm__) || defined(__aarch64__) || defined(__ARM_ARCH_ISA_A64) || defined(__ARM_ARCH_7S__) || defined(__ARM_ARCH_7A__))
-	#include "ndVectorArmNeon.h"
 #else
-	// unknown cpu assume scaler instruction set until otherwise
-	#include "ndVectorScalar.h"
+	#include "ndVectorSimd.h"
 #endif
 
 #endif

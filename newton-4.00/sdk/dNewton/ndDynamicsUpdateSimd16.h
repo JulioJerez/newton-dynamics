@@ -19,20 +19,20 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_DYNAMICS_UPDATE_AVX2_H__
-#define __ND_DYNAMICS_UPDATE_AVX2_H__
+#ifndef ND_DYNAMICS_UPDATE_SIMD16_H_
+#define ND_DYNAMICS_UPDATE_SIMD16_H_
 
 #include <ndNewton.h>
 
-class ndAvxMatrixArray;
-class ndAvxJointMaskArray;
+class ndMatrixSimd16Array;
+class ndJointMaskSimd16Array;
 
 D_MSV_NEWTON_CLASS_ALIGN_32
-class ndDynamicsUpdateAvx2: public ndDynamicsUpdate
+class ndDynamicsUpdateSimd16: public ndDynamicsUpdate
 {
 	public:
-	ndDynamicsUpdateAvx2(ndWorld* const world);
-	virtual ~ndDynamicsUpdateAvx2();
+	ndDynamicsUpdateSimd16(ndWorld* const world);
+	virtual ~ndDynamicsUpdateSimd16();
 
 	virtual const char* GetStringId() const;
 
@@ -49,9 +49,10 @@ class ndDynamicsUpdateAvx2: public ndDynamicsUpdate
 	void CalculateJointsAcceleration();
 
 	ndArray<ndInt8> m_groupType;
-	ndArray<ndInt32> m_avxJointRows;
-	ndAvxJointMaskArray* m_jointMask;
-	ndAvxMatrixArray* m_avxMassMatrixArray;
+	ndArray<ndInt32> m_simdJointRows;
+
+	ndJointMaskSimd16Array* m_jointMask;
+	ndMatrixSimd16Array* m_simdMassMatrixArray;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif

@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_UTILS_H__
-#define __ND_UTILS_H__
+#ifndef ND_UTILS_H_
+#define ND_UTILS_H_
 
 #include "ndCoreStdafx.h"
 #include "ndTypes.h"
@@ -29,7 +29,13 @@
 #include "ndFixSizeArray.h"
 
 // assume this function returns memory aligned to 16 bytes
-#define ndAlloca(type, count) (type*) alloca (sizeof (type) * size_t(count))
+#define ndAlloca(type, count) \
+	reinterpret_cast<type*> (alloca (sizeof (type) * size_t(count) + 31))
+
+// for that cases when a pointer need to be align to 32 bit boundary
+#define ndAllocaPtr(type, ptr) \
+	reinterpret_cast<type*> ((reinterpret_cast<uintptr_t> (ptr) + 31) & uintptr_t(-32))
+
 
 #if (defined (WIN32) || defined(_WIN32) || defined (_M_ARM) || defined (_M_ARM64))
 	//#define ndCheckFloat(x) (1)
@@ -245,15 +251,15 @@ D_CORE_API ndFloat32 ndExp_VS_Fix(ndFloat32 x);
 D_CORE_API ndUnsigned64 ndGetTimeInMicroseconds();
 
 /// Round a 64 bit float to a 32 bit float by truncating the mantissa to 24 bits 
-/// \param ndFloat64 val: 64 bit float 
-/// \return a 64 bit double precision with a 32 bit mantissa
+/// param ndFloat64 val: 64 bit float 
+/// return a 64 bit double precision with a 32 bit mantissa
 D_CORE_API ndFloat64 ndRoundToFloat(ndFloat64 val);
 
 /// removed all duplicate points from an array and place the location in the index array
-D_CORE_API ndInt32 ndVertexListToIndexList(ndReal* const vertexList, ndInt32 strideInBytes, ndInt32 compareCount, ndInt32 vertexCount, ndInt32* const indexListOut, ndFloat64 tolerance = ndEpsilon);
+D_CORE_API ndInt32 ndVertexListToIndexList(ndReal* const vertexList, ndInt32 strideInBytes, ndInt32 compareCount, ndInt32 vertexCount, ndInt32* const indexListOut, ndFloat64 tolerance = ndFloat64(ndEpsilon));
 
 /// removed all duplicate points from an array and place the location in the index array
-D_CORE_API ndInt32 ndVertexListToIndexList(ndFloat64* const vertexList, ndInt32 strideInBytes, ndInt32 compareCount, ndInt32 vertexCount, ndInt32* const indexListOut, ndFloat64 tolerance = ndEpsilon);
+D_CORE_API ndInt32 ndVertexListToIndexList(ndFloat64* const vertexList, ndInt32 strideInBytes, ndInt32 compareCount, ndInt32 vertexCount, ndInt32* const indexListOut, ndFloat64 tolerance = ndFloat64(ndEpsilon));
 
 /// Simple moving average class, useful for stuff like frame rate smoothing
 template <ndInt32 size>

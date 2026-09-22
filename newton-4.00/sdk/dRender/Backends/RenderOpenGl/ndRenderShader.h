@@ -8,8 +8,9 @@
 * including commercial applications, and to alter it and redistribute it
 * freely
 */
-#ifndef __RENDER_SHADER_BLOCK_H__
-#define __RENDER_SHADER_BLOCK_H__
+
+#ifndef ND_RENDER_SHADER_BLOCK_H_
+#define ND_RENDER_SHADER_BLOCK_H_
 
 #include "ndRenderStdafx.h"
 #include "ndRenderContext.h"

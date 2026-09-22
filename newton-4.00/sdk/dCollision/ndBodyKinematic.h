@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_BODY_KINEMATIC_H__
-#define __ND_BODY_KINEMATIC_H__
+#ifndef ND_BODY_KINEMATIC_H_
+#define ND_BODY_KINEMATIC_H_
 
 #include "ndCollisionStdafx.h"
 #include "ndBody.h"
@@ -247,8 +247,8 @@ class ndBodyKinematic : public ndBody
 	friend class ndBvhSceneManager;
 	friend class ndSkeletonContainer;
 	friend class ndModelArticulation;
-	friend class ndDynamicsUpdateSoa;
-	friend class ndDynamicsUpdateAvx2;
+	friend class ndDynamicsUpdateSimd8;
+	friend class ndDynamicsUpdateSimd16;
 	friend class ndJointBilateralConstraint;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 

@@ -476,12 +476,9 @@ void ndBrainTrainerInference::UpdateSelfModifyingLayers()
 
 void ndBrainTrainerInference::CopyActivationParameters()
 {
-	if (m_descriptor.m_context->GetAsGpuContext())
+	for (ndInt32 i = 0; i < m_descriptor.m_brain->GetCount(); ++i)
 	{
-		for (ndInt32 i = 0; i < m_descriptor.m_brain->GetCount(); ++i)
-		{
-			ndBrainLayer* const layer = (**m_descriptor.m_brain)[i];
-			layer->CopyModifyingParameters();
-		}
+		ndBrainLayer* const layer = (**m_descriptor.m_brain)[i];
+		layer->CopyModifyingParameters();
 	}
 }

@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __DEMO_CAMERA_NODE_LOOKAT_TARGET_H__
-#define __DEMO_CAMERA_NODE_LOOKAT_TARGET_H__
+#ifndef DEMO_CAMERA_NODE_LOOKAT_TARGET_H_
+#define DEMO_CAMERA_NODE_LOOKAT_TARGET_H_
 
 #include "ndSandboxStdafx.h"
 #include "ndDemoCameraNodeFlyby.h"

@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_SKELETON_CONTAINER_H__
-#define __ND_SKELETON_CONTAINER_H__
+#ifndef ND_SKELETON_CONTAINER_H_
+#define ND_SKELETON_CONTAINER_H_
 
 #include "ndNewtonStdafx.h"
 
@@ -316,8 +316,8 @@ class ndSkeletonContainer
 	friend class ndSkeletonList;
 	friend class ndDynamicsUpdate;
 	friend class ndConvexCastVehicle;
-	friend class ndDynamicsUpdateSoa;
-	friend class ndDynamicsUpdateAvx2;
+	friend class ndDynamicsUpdateSimd8;
+	friend class ndDynamicsUpdateSimd16;
 };
 
 #endif

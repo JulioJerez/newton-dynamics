@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_BODY_NOTIFY_H__
-#define __ND_BODY_NOTIFY_H__
+#ifndef ND_BODY_NOTIFY_H_
+#define ND_BODY_NOTIFY_H_
 
 #include "ndCollisionStdafx.h"
 
@@ -54,6 +54,7 @@ class ndBodyNotify : public ndContainersFreeListAlloc<ndBodyNotify>
 	private:
 	ndVector m_defaultGravity;
 	ndWeakPtr<ndBody> m_body;
+	ndClassPadding m_padding;
 
 	friend class ndBody;
 } D_GCC_NEWTON_CLASS_ALIGN_32;

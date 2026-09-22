@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __D_TRACY_PROFILER_H__
-#define __D_TRACY_PROFILER_H__
+#ifndef D_TRACY_PROFILER_H_
+#define D_TRACY_PROFILER_H_
 
 
 #ifdef D_PROFILER_EXPORTS

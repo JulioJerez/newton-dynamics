@@ -10,8 +10,8 @@
 */
 
 
-#ifndef _D_FILE_BROWSER_H_
-#define _D_FILE_BROWSER_H_
+#ifndef D_FILE_BROWSER_H_
+#define D_FILE_BROWSER_H_
 
 
 bool ndGetLoadFileName(char* const fileName, int maxSize);

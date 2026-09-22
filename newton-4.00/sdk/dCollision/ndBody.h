@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_BODY_H_
-#define __ND_BODY_H_
+#ifndef ND_BODY_H_
+#define ND_BODY_H_
 
 #include "ndCollisionStdafx.h"
 #include "ndShapeInstance.h"

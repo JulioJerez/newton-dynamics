@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __ND_IK_JOINT_HINGE_H__
-#define __ND_IK_JOINT_HINGE_H__
+#ifndef ND_IK_JOINT_HINGE_H_
+#define ND_IK_JOINT_HINGE_H_
 
 #include "ndNewtonStdafx.h"
 #include "ndJointHinge.h"

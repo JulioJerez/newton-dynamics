@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __ND_PERLIN_NOISE_H__
-#define __ND_PERLIN_NOISE_H__
+#ifndef ND_PERLIN_NOISE_H_
+#define ND_PERLIN_NOISE_H_
 
 #include "ndCoreStdafx.h"
 

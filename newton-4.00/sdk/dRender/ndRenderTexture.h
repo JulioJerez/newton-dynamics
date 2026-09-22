@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _ND_RENDER_TEXTURE_H__
-#define _ND_RENDER_TEXTURE_H__
+#ifndef ND_RENDER_TEXTURE_H_
+#define ND_RENDER_TEXTURE_H_
 
 #include "ndRenderStdafx.h"
 

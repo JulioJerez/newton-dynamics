@@ -24,8 +24,8 @@
 //      are changed infrequently
 //
 
-#ifndef __ND_NEWTON_H__
-#define __ND_NEWTON_H__
+#ifndef ND_NEWTON_H_
+#define ND_NEWTON_H_
 
 #include <ndNewtonStdafx.h>
 #include <ndMesh.h>
@@ -44,7 +44,8 @@
 #include <ndDynamicsUpdate.h>
 #include <ndMeshComponents.h>
 #include <ndSkeletonContainer.h>
-#include <ndDynamicsUpdateSoa.h>
+#include <ndDynamicsUpdateSimd8.h>
+#include <ndDynamicsUpdateSimd16.h>
 
 #include <ndJointGear.h>
 #include <ndJointHinge.h>

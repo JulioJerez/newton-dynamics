@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_WORLD_DYNAMICS_UPDATE_H__
-#define __ND_WORLD_DYNAMICS_UPDATE_H__
+#ifndef ND_WORLD_DYNAMICS_UPDATE_H_
+#define ND_WORLD_DYNAMICS_UPDATE_H_
 
 #include "ndNewtonStdafx.h"
 
@@ -142,11 +142,12 @@ class ndDynamicsUpdate : public ndClassAlloc
 	ndInt32 m_activeSkeleton;
 	ndInt32 m_parallelSkeleton;
 	ndInt32 m_unConstrainedBodyCount;
+	ndClassPadding m_padding;
 
 	friend class ndWorld;
 	friend class ndSkeletonContainer;
-	friend class ndDynamicsUpdateSoa;
-	friend class ndDynamicsUpdateAvx2;
+	friend class ndDynamicsUpdateSimd8;
+	friend class ndDynamicsUpdateSimd16;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 inline ndVector ndDynamicsUpdate::GetVelocTol() const

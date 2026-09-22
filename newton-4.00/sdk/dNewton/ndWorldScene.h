@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_WORLD_SCENE_H__
-#define __ND_WORLD_SCENE_H__
+#ifndef ND_WORLD_SCENE_H_
+#define ND_WORLD_SCENE_H_
 
 #include "ndNewtonStdafx.h"
 #include "ndWorld.h"

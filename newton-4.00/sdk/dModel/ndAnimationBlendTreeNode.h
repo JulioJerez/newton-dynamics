@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __ND_ANIM_ID_BLENDTREE_NODE_h__
-#define __ND_ANIM_ID_BLENDTREE_NODE_h__
+#ifndef ND_ANIM_ID_BLENDTREE_NODE_H_
+#define ND_ANIM_ID_BLENDTREE_NODE_H_
 
 class ndAnimationPose;
 

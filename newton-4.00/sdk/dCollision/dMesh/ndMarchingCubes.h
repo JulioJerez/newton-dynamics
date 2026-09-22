@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_MARCHING_CUBES_H__
-#define __ND_MARCHING_CUBES_H__
+#ifndef ND_MARCHING_CUBES_H_
+#define ND_MARCHING_CUBES_H_
 
 #include "ndCoreStdafx.h"
 #include "ndCollisionStdafx.h"

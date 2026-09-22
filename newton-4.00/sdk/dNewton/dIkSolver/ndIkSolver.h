@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_SKELETON_IMMEDIATE_SOLVER_H__
-#define __ND_SKELETON_IMMEDIATE_SOLVER_H__
+#ifndef ND_SKELETON_IMMEDIATE_SOLVER_H_
+#define ND_SKELETON_IMMEDIATE_SOLVER_H_
 
 #include "ndNewtonStdafx.h"
 #include "ndSkeletonContainer.h"

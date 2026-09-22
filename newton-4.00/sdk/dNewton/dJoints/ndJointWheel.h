@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __ND_JOINT_WHEEL_H__
-#define __ND_JOINT_WHEEL_H__
+#ifndef ND_JOINT_WHEEL_H_
+#define ND_JOINT_WHEEL_H_
 
 #include "ndNewtonStdafx.h"
 #include "ndJointBilateralConstraint.h"

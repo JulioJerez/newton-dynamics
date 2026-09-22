@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __NDG_CONVEXHULL_4D__
-#define __NDG_CONVEXHULL_4D__
+#ifndef NDG_CONVEXHULL_4D_
+#define NDG_CONVEXHULL_4D_
 
 #include "ndCoreStdafx.h"
 #include "ndList.h"

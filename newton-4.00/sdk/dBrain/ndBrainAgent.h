@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef _ND_BRAIN_AGENT_H__
-#define _ND_BRAIN_AGENT_H__
+#ifndef ND_BRAIN_AGENT_H_
+#define ND_BRAIN_AGENT_H_
 
 class ndBrainSave;
 

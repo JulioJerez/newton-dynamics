@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef __ND_JOINT_GEAR_H__
-#define __ND_JOINT_GEAR_H__
+#ifndef ND_JOINT_GEAR_H__
+#define ND_JOINT_GEAR_H__
 
 #include "ndNewtonStdafx.h"
 #include "ndJointRelational.h"

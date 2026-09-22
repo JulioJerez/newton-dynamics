@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_MODEL_H__
-#define __ND_MODEL_H__
+#ifndef ND_MODEL_H_
+#define ND_MODEL_H_
 
 #include "ndCoreStdafx.h"
 #include "ndModelList.h"
@@ -66,6 +66,7 @@ class ndModel: public ndContainersFreeListAlloc<ndModel>
 	private:
 	ndWeakPtr<ndModelList::ndNode> m_worldNode;
 	ndSharedPtr<ndModelNotify> m_notifyCallback;
+	ndClassPadding m_padding;
 
 	friend class ndWorld;
 	friend class ndLoadSave;

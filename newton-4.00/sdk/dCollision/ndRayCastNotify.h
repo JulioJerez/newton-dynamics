@@ -19,8 +19,8 @@
 * 3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef __ND_RAYCAST_NOTYFY_H__
-#define __ND_RAYCAST_NOTYFY_H__
+#ifndef ND_RAYCAST_NOTYFY_H_
+#define ND_RAYCAST_NOTYFY_H_
 
 #include "ndCollisionStdafx.h"
 #include "ndBody.h"
