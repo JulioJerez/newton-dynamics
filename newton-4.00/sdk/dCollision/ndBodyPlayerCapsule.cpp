@@ -374,7 +374,8 @@ void ndBodyPlayerCapsule::UpdatePlayerStatus(ndBodyPlayerCapsuleContactSolver& c
 		{
 			ndVector normal(contact->m_normal);
 			ndVector localNormal(matrix.UnrotateVector(normal));
-			if (localNormal.m_x > D_SLOP_JUMP_ANGLE)
+			//if (localNormal.m_x > D_SLOP_JUMP_ANGLE)
+			if (localNormal.m_y > D_SLOP_JUMP_ANGLE)
 			{
 				m_isOnFloor = true;
 			}
