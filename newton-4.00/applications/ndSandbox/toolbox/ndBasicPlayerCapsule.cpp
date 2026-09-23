@@ -16,7 +16,8 @@
 #include "ndDemoEntityManager.h"
 #include "ndBasicPlayerCapsule.h"
 
-#define PLAYER_JUMP_SPEED				5.0f
+//#define PLAYER_JUMP_SPEED	ndFloat32(5.0f)
+#define PLAYER_JUMP_SPEED	ndFloat32(10.0f)
 
 ndBasicPlayerCapsule::ndBasicPlayerCapsule()
 	:ndBodyPlayerCapsule()
@@ -51,7 +52,7 @@ void ndBasicPlayerCapsule::ApplyInputs(ndFloat32 timestep)
 	m_impulse = totalImpulse;
 
 	//dTrace(("  frame: %d    player camera: %f\n", m_scene->GetWorld()->GetFrameIndex(), m_playerInput.m_heading * dRadToDegree));
-	if (m_playerInput.m_jump)
+	if (m_playerInput.m_jump && IsOnFloor())
 	{
 		const ndVector jumpImpulse(GetMatrix().m_up.Scale(PLAYER_JUMP_SPEED * m_mass));
 		m_impulse += jumpImpulse;
