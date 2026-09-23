@@ -31,15 +31,11 @@
 
 #define ND_USE_CPU_TILE_MULTIPLY
 // Tile-based matrix multiplication on the CPU is mostly an academic exercise.
-// It can be up to 10ms faster per trainning steps on a single core. 
-// However, in a multicore setup, the number of tiles is juts too small,
-// and there’s significant L1/L2 cache contention. 
-// Even a 256x256 matrix is too small for typical neural network training workloads.
-// This limitation doesn’t apply to GPUs, since their L1 cache acts as a scratchpad,
-// and they don’t need to manage cache coherence the same way CPUs do.#define ndBrainLayerLinearTileSize 32 
-// therfere for CPU I am using dot-product based matrix multiplication
-// with the wide 32 float wide vector class.
-
+#ifdef ND_USE_CPU_TILE_MULTIPLY
+	// this is only practical for debuging the GPU tile kernels.
+	// the tile size of just too small for the compiler to optimized it.
+	//#define ND_USE_SUB_CPU_TILE_MULTIPLY
+#endif
 class ndBrainLayerFeedForwardCpuCommand_TiledMatrixMultiply : public ndBrainLayerFeedForwardCpuCommand
 {
 	public:
@@ -506,7 +502,9 @@ void ndBrainLayerLinear::TiledMatrixMultiply(const ndBrainLayerFeedForwardCpuCom
 	ndBrainFloat tile_acc[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
 	ndBrainFloat tile_inputs[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
 	ndBrainFloat tile_weights[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
+#ifdef ND_USE_SUB_CPU_TILE_MULTIPLY
 	ndBrainFloat smallTile[ND_GPU_TILED_MATRIX_ROWS / 2][ND_GPU_TILED_MATRIX_ROWS / 2];
+#endif
 
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
@@ -559,23 +557,8 @@ void ndBrainLayerLinear::TiledMatrixMultiply(const ndBrainLayerFeedForwardCpuCom
 			inputOffset += inputOutputSize;
 		}
 
-#if 0
-		// multiply tiles
-		for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
-		{
-			for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
-			{
-				ndBrainFloat acc = ndBrainFloat(0.0f);
-				for (ndInt32 m = 0; m < ND_GPU_TILED_MATRIX_ROWS; ++m)
-				{
-					ndBrainFloat input = tile_inputs[i][m];
-					ndBrainFloat weight = tile_weights[j][m];
-					acc += weight * input;
-				}
-				tile_acc[j][i] += acc;
-			}
-		}
-#else
+#ifdef ND_USE_SUB_CPU_TILE_MULTIPLY
+		// multiply tiles 4 x 16 x 16
 		for (ndInt32 j1 = 0; j1 < ND_GPU_TILED_MATRIX_ROWS; j1 += ND_GPU_TILED_MATRIX_ROWS / 2)
 		{
 			for (ndInt32 i1 = 0; i1 < ND_GPU_TILED_MATRIX_ROWS; i1 += ND_GPU_TILED_MATRIX_ROWS / 2)
@@ -597,8 +580,8 @@ void ndBrainLayerLinear::TiledMatrixMultiply(const ndBrainLayerFeedForwardCpuCom
 							ndBrainFloat acc = ndBrainFloat(0.0f);
 							for (ndInt32 n = 0; n < ND_GPU_TILED_MATRIX_ROWS / 2; ++n)
 							{
-								ndBrainFloat input = tile_inputs[i1 + i][n + m];
-								ndBrainFloat weight = tile_weights[j1 + j][n + m];
+								ndBrainFloat input = tile_inputs[j1 + j][n + m];
+								ndBrainFloat weight = tile_weights[i1 + i][n + m];
 								acc += weight * input;
 							}
 							smallTile[j][i] += acc;
@@ -615,16 +598,23 @@ void ndBrainLayerLinear::TiledMatrixMultiply(const ndBrainLayerFeedForwardCpuCom
 				}
 			}
 		}
-#endif
-	}
-
-	// the tire is transposed, but  
-	for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
-	{
-		for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
+#else
+		// multiply tiles 32 x 32
+		for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
 		{
-			tile_inputs[j][i] = tile_acc[i][j];
+			for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
+			{
+				ndBrainFloat acc = ndBrainFloat(0.0f);
+				for (ndInt32 m = 0; m < ND_GPU_TILED_MATRIX_ROWS; ++m)
+				{
+					ndBrainFloat input = tile_inputs[j][m];
+					ndBrainFloat weight = tile_weights[i][m];
+					acc += weight * input;
+				}
+				tile_acc[j][i] += acc;
+			}
 		}
+#endif
 	}
 
 	// store tile results
@@ -634,7 +624,7 @@ void ndBrainLayerLinear::TiledMatrixMultiply(const ndBrainLayerFeedForwardCpuCom
 	{
 		for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
 		{
-			ndBrainFloat acc = tile_inputs[j][i];
+			ndBrainFloat acc = tile_acc[j][i];
 			outputBuffer[outputOffset + i] = acc;
 		}
 		outputOffset += inputOutputSize;
@@ -816,9 +806,6 @@ void ndBrainLayerLinear::BackPropagateInputGradients(const ndBrainLayerBackPropa
 	ndAssert(inputOutputGradientsBuffer.BounceCheck(srcBase + inputSize - 1));
 	ndBrainMemVector inputDerivative(&inputOutputGradientsBuffer[srcBase], inputSize);
 
-//ndBrainFixSizeVector<1024>xxx(inputSize);
-//xxx.Set(inputDerivative);
-
 	inputDerivative.Set(ndBrainFloat(0.0f));
 	for (ndInt32 i = 0; i < outputSize; ++i)
 	{
@@ -827,13 +814,6 @@ void ndBrainLayerLinear::BackPropagateInputGradients(const ndBrainLayerBackPropa
 		const ndBrainMemVector weightsRow(&weightsMatrix[i * width], inputSize);
 		inputDerivative.ScaleAdd(weightsRow, outDerivative);
 	}
-
-//for (ndInt32 i = 0; i < inputSize; ++i)
-//{
-//	ndBrainFloat error = ndAbs(inputDerivative[i] - xxx[i]);
-//	ndAssert(error < ndBrainFloat(1.0e-2f));
-//}
-
 	//ndAssert(inputDerivative.SanityCheck());
 }
 
@@ -842,14 +822,9 @@ void ndBrainLayerLinear::BackPropagateTileInputGradients(const ndBrainLayerBackP
 	ndBrainFloat tile_acc[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
 	ndBrainFloat tile_weights[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
 	ndBrainFloat tile_outputGrad[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
-
-	for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
-	{
-		for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
-		{
-			tile_acc[j][i] = ndBrainFloat(0.0f);
-		}
-	}
+#ifdef ND_USE_SUB_CPU_TILE_MULTIPLY
+	ndBrainFloat smallTile[ND_GPU_TILED_MATRIX_ROWS / 2][ND_GPU_TILED_MATRIX_ROWS / 2];
+#endif
 
 	const ndBrainBufferCommandDesc& desc = command->GetDescriptor();
 	const ndCommandSharedInfo& info = desc.m_info;
@@ -878,6 +853,14 @@ void ndBrainLayerLinear::BackPropagateTileInputGradients(const ndBrainLayerBackP
 	const ndInt32 inputBase = rowStart * inputOutputSize * ND_GPU_TILED_MATRIX_ROWS + inputOutputStartOffset;
 	const ndInt32 outputBase = inputBase + trainer->RoundOffOffset(inputSize);
 
+	for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
+	{
+		for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
+		{
+			tile_acc[j][i] = ndBrainFloat(0.0f);
+		}
+	}
+
 	for (ndInt32 k = 0; k < kDim; ++k)
 	{
 		// load tiles
@@ -894,7 +877,50 @@ void ndBrainLayerLinear::BackPropagateTileInputGradients(const ndBrainLayerBackP
 			outputOffset += inputOutputSize;
 		}
 
-		// multiply tiles
+#ifdef ND_USE_SUB_CPU_TILE_MULTIPLY
+		// multiply tiles 4 x 16 x 16
+		for (ndInt32 j1 = 0; j1 < ND_GPU_TILED_MATRIX_ROWS; j1 += ND_GPU_TILED_MATRIX_ROWS / 2)
+		{
+			for (ndInt32 i1 = 0; i1 < ND_GPU_TILED_MATRIX_ROWS; i1 += ND_GPU_TILED_MATRIX_ROWS / 2)
+			{
+				for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
+				{
+					for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
+					{
+						smallTile[j][i] = ndBrainFloat(0.0f);
+					}
+				}
+
+				for (ndInt32 m = 0; m < ND_GPU_TILED_MATRIX_ROWS; m += ND_GPU_TILED_MATRIX_ROWS / 2)
+				{
+					for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
+					{
+						for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
+						{
+							ndBrainFloat acc = ndBrainFloat(0.0f);
+							for (ndInt32 n = 0; n < ND_GPU_TILED_MATRIX_ROWS / 2; ++n)
+							{
+								ndBrainFloat weight = tile_weights[i1 + i][n + m];
+								ndBrainFloat outputGrad = tile_outputGrad[j1 + j][n + m];
+								acc += weight * outputGrad;
+							}
+							smallTile[j][i] += acc;
+						}
+					}
+				}
+
+				for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
+				{
+					for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
+					{
+						tile_acc[j1 + j][i1 + i] += smallTile[j][i];
+					}
+				}
+			}
+
+		}
+#else
+		// multiply tiles 32 x 32
 		for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
 		{
 			for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
@@ -909,9 +935,9 @@ void ndBrainLayerLinear::BackPropagateTileInputGradients(const ndBrainLayerBackP
 				tile_acc[j][i] += acc;
 			}
 		}
+#endif
 	}
 
-	// store tile results
 	ndInt64 inputOffset = (columStart + rowStart * inputOutputSize) * ND_GPU_TILED_MATRIX_ROWS + inputOutputStartOffset;
 	for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
 	{
