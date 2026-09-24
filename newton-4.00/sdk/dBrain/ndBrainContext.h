@@ -129,6 +129,9 @@ class ndBrainContext : public ndClassAlloc
 	// learnRate commands
 	virtual void ApplyLeanRateCommands(ndBrainBufferCommand*, ndBrainFloat) = 0;
 	virtual void SetLearnRateCommandBuffers(ndBrainOptimizerAdam&, ndInt32, ndBrainFloatBuffer&, ndBrainFloatBuffer&) = 0;
+
+	virtual void SetSharedMatrixMultiplyBuffer(ndInt32 size) = 0;
+	virtual ndSharedPtr<ndBrainFloatBuffer> GetSharedMatrixMultiplyBuffer() const = 0;
 };
 
 #endif

@@ -86,6 +86,9 @@ class ndBrainCpuContext : public ndBrainContext
 	virtual void ApplyLeanRateCommands(ndBrainBufferCommand* const command, ndBrainFloat learRate) override;
 	virtual void SetLearnRateCommandBuffers(ndBrainOptimizerAdam& optimizer, ndInt32 minibatchSize, ndBrainFloatBuffer& weightsAndBiasBuffer, ndBrainFloatBuffer& weightsAndBiasGradientBuffer) override;
 
+	virtual void SetSharedMatrixMultiplyBuffer(ndInt32 size) override;
+	virtual ndSharedPtr<ndBrainFloatBuffer> GetSharedMatrixMultiplyBuffer() const override;
+
 	ndSharedPtr<ndBrainThreadPool> m_threadPool;
 };
 

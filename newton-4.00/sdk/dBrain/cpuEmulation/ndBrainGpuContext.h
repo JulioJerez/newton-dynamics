@@ -93,6 +93,9 @@ class ndBrainGpuContext : public ndBrainContext
 	virtual void ApplyLeanRateCommands(ndBrainBufferCommand* const command, ndBrainFloat learRate) override;
 	virtual void SetLearnRateCommandBuffers(ndBrainOptimizerAdam& optimizer, ndInt32 minibatchSize, ndBrainFloatBuffer& weightsAndBiasBuffer, ndBrainFloatBuffer& weightsAndBiasGradientBuffer) override;
 
+	virtual void SetSharedMatrixMultiplyBuffer(ndInt32 size) override;
+	virtual ndSharedPtr<ndBrainFloatBuffer> GetSharedMatrixMultiplyBuffer() const override;
+
 	private:
 	void CreateKerners();
 	void CreateCopyCommands();
@@ -114,6 +117,8 @@ class ndBrainGpuContext : public ndBrainContext
 	ndSharedPtr<ndBrainKernel> m_brainLayerLeakyReluActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixAddBias;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiply;
+	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiplySubTile;
+	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiplyAddSubTile;
 	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationAddInputActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationLoadInputActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationNormalizeInputActivation;
@@ -141,5 +146,7 @@ class ndBrainGpuContext : public ndBrainContext
 	ndSharedPtr<ndBrainKernel> m_brainCopyBuffer;
 	ndSharedPtr<ndBrainKernel> m_brainCopyBufferIndirect;
 	ndSharedPtr<ndBrainKernel> m_accumulateWeigndAndBiasGradiens;
+
+	ndSharedPtr<ndBrainFloatBuffer> m_sharedMatrixMultiplyBuffer;
 };
 #endif

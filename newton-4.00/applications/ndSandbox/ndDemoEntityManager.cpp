@@ -48,7 +48,7 @@
 //#define DEFAULT_SCENE	18		// complex model, implement a complex model with joints
 //#define DEFAULT_SCENE	19		// basics multi body vehicle
 //#define DEFAULT_SCENE	20		// object Placement
-#define DEFAULT_SCENE	21		// third person player capsule
+//#define DEFAULT_SCENE	21		// third person player capsule
 //#define DEFAULT_SCENE	22		// player capsule in a planet
 //#define DEFAULT_SCENE	23		// cart pole SAC trained controller
 //#define DEFAULT_SCENE	24		// cart pole PPO trained controller
@@ -59,7 +59,7 @@
 //#define DEFAULT_SCENE	29		// procedurally animated quadruped spider
 
 // These are the machine learning training demos
-//#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// SAC cart pole training
+#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 0)	// SAC cart pole training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 1)	// SAC double pendulum unicycle training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 2)	// PPO cart pole training
 //#define DEFAULT_SCENE			(MACHINE_LEARNING_BASE + 3)	// PPO double pendulum unicycle training

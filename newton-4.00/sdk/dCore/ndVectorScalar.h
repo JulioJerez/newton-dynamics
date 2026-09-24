@@ -58,14 +58,20 @@ class ndBigVector : public ndClassAlloc
 	inline ndBigVector(const ndVector& v);
 
 	inline ndBigVector (const ndFloat32* const ptr)
-		:m_x(ptr[0]), m_y(ptr[1]), m_z(ptr[2]), m_w (ndFloat32 (0.0f))
+		:m_x(ndFloat64(ptr[0])) 
+		,m_y(ndFloat64(ptr[1]))
+		,m_z(ndFloat64(ptr[2]))
+		,m_w (ndFloat64(0.0f))
 	{
 		ndAssert (ndCheckVector ((*this)));
 	}
 #endif
 
 	inline ndBigVector (const ndFloat64* const ptr)
-		:m_x(ptr[0]), m_y(ptr[1]), m_z(ptr[2]), m_w (ptr[3])
+		:m_x(ptr[0])
+		,m_y(ptr[1])
+		,m_z(ptr[2])
+		,m_w(ptr[3])
 	{
 		ndAssert (ndCheckVector ((*this)));
 	}
@@ -259,7 +265,7 @@ class ndBigVector : public ndClassAlloc
 			array[0][i] = me[i];
 			array[1][i] = A[i];
 			array[2][i] = B[i];
-			array[3][i] = ndFloat32 (1.0f);
+			array[3][i] = ndFloat64 (1.0f);
 		}
 
 		ndBigVector normal;
@@ -306,12 +312,12 @@ class ndBigVector : public ndClassAlloc
 
 	inline ndBigVector Floor () const
 	{
-		return ndBigVector (ndFloor (m_x), ndFloor(m_y), ndFloor (m_z), ndFloor(m_w));
+		return ndBigVector (floor (m_x), floor(m_y), floor(m_z), floor(m_w));
 	}
 
 	inline ndBigVector Ceiling() const
 	{
-		return ndBigVector(ndCeil(m_x), ndCeil(m_y), ndCeil(m_z), ndCeil(m_w));
+		return ndBigVector(ceil(m_x), ceil(m_y), ceil(m_z), ceil(m_w));
 	}
 
 	inline ndBigVector DotProduct (const ndBigVector &A) const
@@ -1092,7 +1098,10 @@ class ndVector : public ndClassAlloc
 
 #ifndef D_NEWTON_USE_DOUBLE
 inline ndBigVector::ndBigVector(const ndVector& v)
-	:m_x(v.m_x), m_y(v.m_y), m_z(v.m_z), m_w(v.m_w)
+	:m_x(ndFloat64(v.m_x))
+	,m_y(ndFloat64(v.m_y))
+	,m_z(ndFloat64(v.m_z))
+	,m_w(ndFloat64(v.m_w))
 {
 }
 #endif

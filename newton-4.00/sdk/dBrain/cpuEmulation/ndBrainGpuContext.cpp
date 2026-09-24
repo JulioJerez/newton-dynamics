@@ -161,6 +161,13 @@ void ndBrainGpuContext::BrainVectorFromDevice(ndBrainFloatBuffer& src, ndBrainVe
 	MemoryFromDevice(src, 0, sizeInBytes, &dstVector[0]);
 }
 
+//ndBrainFloat ndBrainGpuContext::Element(const ndBrainFloatBuffer& buffer, ndInt32 index) const
+ndBrainFloat ndBrainGpuContext::Element(const ndBrainFloatBuffer&, ndInt32) const
+{
+	ndAssert(0);
+	return 0;
+}
+
 void ndBrainGpuContext::Scale(ndBrainFloatBuffer& buffer, ndBrainFloat scale)
 {
 	ndInt32 elements = ndInt32(buffer.SizeInBytes() / sizeof(ndBrainFloat));
@@ -184,20 +191,13 @@ void ndBrainGpuContext::Set(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer
 	dst.Set(src);
 }
 
-ndBrainFloat ndBrainGpuContext::Element(const ndBrainFloatBuffer& buffer, ndInt32 index) const
-{
-	ndAssert(0);
-	return 0;
-}
-
 void ndBrainGpuContext::Abs(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer)
 {
-	ndAssert(0);
-	//ndAssert(buffer.SizeInBytes() == srcBuffer.SizeInBytes());
-	//ndInt32 elements = ndInt32(buffer.SizeInBytes() / sizeof(ndBrainFloat));
-	//ndBrainMemVector dst((ndBrainFloat*)buffer.GetCpuPtr(), elements);
-	//const ndBrainMemVector src((ndBrainFloat*)srcBuffer.GetCpuPtr(), elements);
-	//dst.Exp(src);
+	ndAssert(buffer.SizeInBytes() == srcBuffer.SizeInBytes());
+	ndInt32 elements = ndInt32(buffer.SizeInItems());
+	ndBrainMemVector dst((ndBrainFloat*)buffer.GetCpuPtr(), elements);
+	const ndBrainMemVector src((ndBrainFloat*)srcBuffer.GetCpuPtr(), elements);
+	dst.Abs(src);
 }
 
 void ndBrainGpuContext::Exp(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer)
@@ -278,7 +278,7 @@ void ndBrainGpuContext::Sub(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer
 void ndBrainGpuContext::Mul(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer)
 {
 	ndAssert(buffer.SizeInBytes() == srcBuffer.SizeInBytes());
-	ndInt32 elements = ndInt32(buffer.SizeInBytes() / sizeof(ndBrainFloat));
+	ndInt32 elements = ndInt32(buffer.SizeInItems());
 	ndBrainMemVector dst ((ndBrainFloat*)buffer.GetCpuPtr(), elements);
 	const ndBrainMemVector src((ndBrainFloat*)srcBuffer.GetCpuPtr(), elements);
 	dst.Mul(src);
@@ -286,22 +286,20 @@ void ndBrainGpuContext::Mul(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer
 
 void ndBrainGpuContext::Sign(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer)
 {
-	ndAssert(0);
-	//ndAssert(buffer.SizeInBytes() == srcBuffer.SizeInBytes());
-	//ndInt32 elements = ndInt32(buffer.SizeInBytes() / sizeof(ndBrainFloat));
-	//ndBrainMemVector dst((ndBrainFloat*)buffer.GetCpuPtr(), elements);
-	//const ndBrainMemVector src((ndBrainFloat*)srcBuffer.GetCpuPtr(), elements);
-	//dst.Mul(src);
+	ndAssert(buffer.SizeInBytes() == srcBuffer.SizeInBytes());
+	ndInt32 elements = ndInt32(buffer.SizeInItems());
+	ndBrainMemVector dst((ndBrainFloat*)buffer.GetCpuPtr(), elements);
+	const ndBrainMemVector src((ndBrainFloat*)srcBuffer.GetCpuPtr(), elements);
+	dst.Sign(src);
 }
 
 void ndBrainGpuContext::Sqrt(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer)
 {
-	ndAssert(0);
-	//ndAssert(buffer.SizeInBytes() == srcBuffer.SizeInBytes());
-	//ndInt32 elements = ndInt32(buffer.SizeInBytes() / sizeof(ndBrainFloat));
-	//ndBrainMemVector dst((ndBrainFloat*)buffer.GetCpuPtr(), elements);
-	//const ndBrainMemVector src((ndBrainFloat*)srcBuffer.GetCpuPtr(), elements);
-	//dst.Mul(src);
+	ndAssert(buffer.SizeInBytes() == srcBuffer.SizeInBytes());
+	ndInt32 elements = ndInt32(buffer.SizeInItems());
+	ndBrainMemVector dst((ndBrainFloat*)buffer.GetCpuPtr(), elements);
+	const ndBrainMemVector src((ndBrainFloat*)srcBuffer.GetCpuPtr(), elements);
+	dst.Sqrt(src);
 }
 
 void ndBrainGpuContext::ScaleAdd(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer, ndBrainFloat scale)
@@ -313,7 +311,8 @@ void ndBrainGpuContext::ScaleAdd(ndBrainFloatBuffer& buffer, const ndBrainFloatB
 	dst.ScaleAdd(src, scale);
 }
 
-void ndBrainGpuContext::CalculatePartialKlDivergence(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& baseGaussianLikelihood, const ndBrainFloatBuffer& gaussianLikelihood)
+//void ndBrainGpuContext::CalculatePartialKlDivergence(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& baseGaussianLikelihood, const ndBrainFloatBuffer& gaussianLikelihood)
+void ndBrainGpuContext::CalculatePartialKlDivergence(ndBrainFloatBuffer&, const ndBrainFloatBuffer&, const ndBrainFloatBuffer&)
 {
 	ndAssert(0);
 }
@@ -407,14 +406,16 @@ void ndBrainGpuContext::BroadcastScaler(ndBrainFloatBuffer& buffer, ndInt32 buff
 	}
 }
 
-void ndBrainGpuContext::SetOrdinal(ndBrainFloatBuffer& dstData)
+//void ndBrainGpuContext::SetOrdinal(ndBrainFloatBuffer& dstData)
+void ndBrainGpuContext::SetOrdinal(ndBrainFloatBuffer&)
 {
 	ndAssert(0);
 	//ndBrainVector& dst = **dstData.m_buffer;
 	//dst.SetOrdinal();
 }
 
-void ndBrainGpuContext::ReductionSum(ndBrainFloatBuffer& dstData)
+//void ndBrainGpuContext::ReductionSum(ndBrainFloatBuffer& dstData)
+void ndBrainGpuContext::ReductionSum(ndBrainFloatBuffer&)
 {
 	ndAssert(0);
 	//ndBrainVector& dst = **dstData.m_buffer;
@@ -426,17 +427,20 @@ void ndBrainGpuContext::Sqrt(ndBrainFloatBuffer&, ndInt32)
 	ndAssert(0);
 }
 
-void ndBrainGpuContext::InvSqrt(ndBrainFloatBuffer&, ndInt32 clipSize)
+//void ndBrainGpuContext::InvSqrt(ndBrainFloatBuffer&, ndInt32 clipSize)
+void ndBrainGpuContext::InvSqrt(ndBrainFloatBuffer&, ndInt32)
 {
 	ndAssert(0);
 }
 
-void ndBrainGpuContext::ReductionSum(ndBrainFloatBuffer& buffer, ndInt32 clipSize)
+//void ndBrainGpuContext::ReductionSum(ndBrainFloatBuffer& buffer, ndInt32 clipSize)
+void ndBrainGpuContext::ReductionSum(ndBrainFloatBuffer&, ndInt32)
 {
 	ndAssert(0);
 }
 
-void ndBrainGpuContext::CalculateLikelihood(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& sampleBuffer, const ndBrainFloatBuffer& sigmaBuffer)
+//void ndBrainGpuContext::CalculateLikelihood(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& sampleBuffer, const ndBrainFloatBuffer& sigmaBuffer)
+void ndBrainGpuContext::CalculateLikelihood(ndBrainFloatBuffer&, const ndBrainFloatBuffer&, const ndBrainFloatBuffer&)
 {
 	ndAssert(0);
 }
@@ -539,4 +543,23 @@ void ndBrainGpuContext::Update(ndBrainContextUpdateCallback* const callback)
 	ndBrainContext::Update(callback);
 	callback->m_owner = this;
 	m_threadPool->Update(callback);
+}
+
+void ndBrainGpuContext::SetSharedMatrixMultiplyBuffer(ndInt32 sizeInFloat)
+{
+	if (!m_sharedMatrixMultiplyBuffer)
+	{
+		m_sharedMatrixMultiplyBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(this, sizeInFloat));
+		m_sharedMatrixMultiplyBuffer->Set(ndBrainFloat(0.0f));
+	}
+	else if (m_sharedMatrixMultiplyBuffer->SizeInItems() < size_t(sizeInFloat))
+	{
+		m_sharedMatrixMultiplyBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(this, sizeInFloat));
+		m_sharedMatrixMultiplyBuffer->Set(ndBrainFloat(0.0f));
+	}
+}
+
+ndSharedPtr<ndBrainFloatBuffer> ndBrainGpuContext::GetSharedMatrixMultiplyBuffer() const
+{
+	return m_sharedMatrixMultiplyBuffer;
 }

@@ -105,7 +105,9 @@ class ndAabbPolygonSoup: public ndPolygonSoupDatabase
 
 			inline ndNode* GetNode (const void* const root) const
 			{
-				return ((ndNode*) root) + m_node;
+				//return ((ndNode*) root) + m_node;
+				void* const nonConstRoot = const_cast<void*>(root);
+				return reinterpret_cast<ndNode*>(nonConstRoot) + m_node;
 			}
 
 			ndUnsigned32 m_node;

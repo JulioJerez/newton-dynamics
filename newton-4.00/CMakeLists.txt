@@ -202,7 +202,7 @@ if (MSVC)
 	set(CMAKE_WARNINGS "/Wall /wd26495 /wd4061 /wd4191 /wd4201 /wd4263 /wd4264 /wd4266 /wd4324 /wd4505 /wd4514 /wd4582 /wd4587 /wd4625 /wd4626 /wd4710 /wd4711 /wd4371 /wd4571 /wd4623 /wd4668 /wd4774 /wd4820 /wd5026 /wd5027 /wd5039 /wd5045 /wd5264")
 
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-		set(CMAKE_WARNINGS "${CMAKE_WARNINGS} -Wno-unsafe-buffer-usage -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-sign-conversion -Wno-extra-semi-stmt")
+		set(CMAKE_WARNINGS "${CMAKE_WARNINGS} -Wno-unsafe-buffer-usage -Wno-c++98-compat -Wno-c++98-compat-pedantic -Wno-sign-conversion -Wno-extra-semi-stmt -Wno-gnu-anonymous-struct -Wno-nested-anon-types")
 	endif()
 
 	if(NEWTON_ENABLE_AVX2)

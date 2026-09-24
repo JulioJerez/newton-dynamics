@@ -21,7 +21,7 @@ class ndBrainFloatBuffer : public ndBrainBuffer
 {
 	public:
 	ndBrainFloatBuffer(const ndBrainFloatBuffer& src);
-	ndBrainFloatBuffer(ndBrainContext* const context, ndInt64 size);
+	ndBrainFloatBuffer(ndBrainContext* const context, ndInt64 sizeInFloat);
 	ndBrainFloatBuffer(ndBrainContext* const context, const ndBrainVector& input);
 	ndBrainFloatBuffer(ndBrainContext* const context, const ndBrainMatrix& matrix);
 
