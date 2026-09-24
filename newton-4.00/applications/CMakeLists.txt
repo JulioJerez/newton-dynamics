@@ -63,6 +63,3 @@ if (NEWTON_BUILD_ASSET_EDITOR OR NEWTON_BUILD_SANDBOX_DEMOS)
         endif()
     endif()
 endif()
-
-
-	
