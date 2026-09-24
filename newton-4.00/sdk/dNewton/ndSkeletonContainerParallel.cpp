@@ -162,22 +162,22 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 	ndInt8* const memoryBuffer = &m_auxiliaryMemoryBuffer[0];
 	const ndInt32 primaryCount = m_rowCount - m_auxiliaryRowCount;
 
-	#define ndAlignedPtr(type, ptr) (type*)((size_t(ptr) + 31) & -0x20)
+	//#define ndAlignedPtr(type, ptr) (type*)((size_t(ptr) + 31) & -0x20)
 
-	m_frictionIndex = ndAlignedPtr(ndInt32, memoryBuffer);
-	m_matrixRowsIndex = ndAlignedPtr(ndInt32, &m_frictionIndex[m_rowCount]);
+	m_frictionIndex = ndAllocaPtr(ndInt32, memoryBuffer);
+	m_matrixRowsIndex = ndAllocaPtr(ndInt32, &m_frictionIndex[m_rowCount]);
 
-	m_bodyForceRemap0.m_index = ndAlignedPtr(ndBodyForceIndexPair, &m_matrixRowsIndex[m_rowCount]);
-	m_bodyForceRemap0.m_indexSpan = ndAlignedPtr(ndInt32, &m_bodyForceRemap0.m_index[m_rowCount]);
-	m_bodyForceRemap1.m_index = ndAlignedPtr(ndBodyForceIndexPair, &m_bodyForceRemap0.m_indexSpan[m_rowCount]);
-	m_bodyForceRemap1.m_indexSpan = ndAlignedPtr(ndInt32, &m_bodyForceRemap1.m_index[m_rowCount]);
+	m_bodyForceRemap0.m_index = ndAllocaPtr(ndBodyForceIndexPair, &m_matrixRowsIndex[m_rowCount]);
+	m_bodyForceRemap0.m_indexSpan = ndAllocaPtr(ndInt32, &m_bodyForceRemap0.m_index[m_rowCount]);
+	m_bodyForceRemap1.m_index = ndAllocaPtr(ndBodyForceIndexPair, &m_bodyForceRemap0.m_indexSpan[m_rowCount]);
+	m_bodyForceRemap1.m_indexSpan = ndAllocaPtr(ndInt32, &m_bodyForceRemap1.m_index[m_rowCount]);
 
-	m_pairs = ndAlignedPtr(ndNodePair, &m_bodyForceRemap1.m_indexSpan[m_rowCount]);
-	m_diagonalPreconditioner = ndAlignedPtr(ndFloat32, &m_pairs[m_rowCount]);
-	m_massMatrix11 = ndAlignedPtr(ndFloat32, &m_diagonalPreconditioner[m_rowCount]);
-	m_massMatrix10 = ndAlignedPtr(ndFloat32, &m_massMatrix11[m_auxiliaryRowCount * m_auxiliaryRowCount]);
-	m_sparseMatrix = ndAlignedPtr(ndUnsigned16, &m_massMatrix10[m_auxiliaryRowCount * primaryCount]);
-	m_deltaForce = ndAlignedPtr(ndFloat32, &m_sparseMatrix[m_auxiliaryRowCount * (m_auxiliaryRowCount + 1)]);
+	m_pairs = ndAllocaPtr(ndNodePair, &m_bodyForceRemap1.m_indexSpan[m_rowCount]);
+	m_diagonalPreconditioner = ndAllocaPtr(ndFloat32, &m_pairs[m_rowCount]);
+	m_massMatrix11 = ndAllocaPtr(ndFloat32, &m_diagonalPreconditioner[m_rowCount]);
+	m_massMatrix10 = ndAllocaPtr(ndFloat32, &m_massMatrix11[m_auxiliaryRowCount * m_auxiliaryRowCount]);
+	m_sparseMatrix = ndAllocaPtr(ndUnsigned16, &m_massMatrix10[m_auxiliaryRowCount * primaryCount]);
+	m_deltaForce = ndAllocaPtr(ndFloat32, &m_sparseMatrix[m_auxiliaryRowCount * (m_auxiliaryRowCount + 1)]);
 
 	m_blockSize = 0;
 	ndScene* const scene = m_owner->GetScene();
