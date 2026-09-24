@@ -136,6 +136,8 @@ class ndBrainGpuContext : public ndBrainContext
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateBiasGradients;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateInputGradients;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateWeightGradients;
+	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateInputGradientsSubTile;
+	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateInputGradientsAddSubTile;
 
 	// optimizer shaders
 	ndSharedPtr<ndBrainKernel> m_brainAdamBiasCorrectionUpdate;
