@@ -36,7 +36,8 @@ class ndSpatialMatrix : public ndClassAlloc
 
 	inline ndSpatialMatrix(ndFloat32 val)
 	{
-		const ndSpatialVector row (val);
+		ndFloat64 value = ndFloat64(val);
+		const ndSpatialVector row (value);
 		for (ndInt32 i = 0; i < 6; ++i) 
 		{
 			m_rows[i] = row;

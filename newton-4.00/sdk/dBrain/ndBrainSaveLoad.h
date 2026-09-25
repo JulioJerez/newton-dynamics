@@ -56,8 +56,8 @@ class ndSaveToFile : public ndBrainSave
 {
 	public:
 	ndSaveToFile(const char* const pathFilename);
-	virtual ~ndSaveToFile();
-	virtual void WriteData(const char* const data) const;
+	virtual ~ndSaveToFile() override;
+	virtual void WriteData(const char* const data) const override;
 
 	FILE* m_file;
 };

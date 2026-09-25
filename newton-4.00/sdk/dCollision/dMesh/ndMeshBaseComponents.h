@@ -37,7 +37,7 @@ class ndJointBilateralConstraint;
 class ndMeshCustomProperty : public ndClassAlloc
 {
 	public:
-	D_BASE_CLASS_REFLECTION(ndMeshCustomProperty);
+	D_BASE_CLASS_REFLECTION(ndMeshCustomProperty)
 
 	D_COLLISION_API ndMeshCustomProperty(ndMesh* const owner);
 	D_COLLISION_API ndMeshCustomProperty(ndMesh* const owner, const ndMeshCustomProperty& other);
@@ -454,7 +454,7 @@ class ndMeshTransformModifier : public ndClassAlloc
 	ndWeakPtr<const ndMesh> m_owner;
 	ndWeakPtr<const ndMesh> m_target;
 
-	D_BASE_CLASS_REFLECTION(ndMeshTransformModifier);
+	D_BASE_CLASS_REFLECTION(ndMeshTransformModifier)
 };
 
 class ndMeshTransformModifierLookAt : public ndMeshTransformModifier

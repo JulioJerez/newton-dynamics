@@ -32,7 +32,7 @@ class ndBrainLayerCrossCorrelation_2d : public ndBrainLayer
 	public: 
 	ndBrainLayerCrossCorrelation_2d(ndInt32 inputWidth, ndInt32 inputHeight, ndInt32 inputLayers, ndInt32 kernelSize, ndInt32 outputLayers);
 	ndBrainLayerCrossCorrelation_2d(const ndBrainLayerCrossCorrelation_2d& src);
-	virtual ~ndBrainLayerCrossCorrelation_2d();
+	virtual ~ndBrainLayerCrossCorrelation_2d() override;
 	virtual ndBrainLayer* Clone() const override;
 
 	ndInt32 GetOutputWidth() const;

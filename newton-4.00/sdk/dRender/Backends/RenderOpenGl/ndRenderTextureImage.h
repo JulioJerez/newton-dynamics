@@ -29,7 +29,7 @@ class ndRenderTextureImageCommon : public ndRenderTexture
 {
 	public:
 	ndRenderTextureImageCommon();
-	~ndRenderTextureImageCommon();
+	~ndRenderTextureImageCommon() override;
 
 	GLuint m_texture;
 };

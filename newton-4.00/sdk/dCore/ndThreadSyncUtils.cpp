@@ -85,7 +85,7 @@ ndFloatExceptions::ndFloatExceptions(ndUnsigned32 mask)
 		//#pragma message ("warning!!! apple flush to zero not defined for x86 platforms")
 	#endif
 #else
-
+	mask = 0;
 	#if (defined(_M_IX86) || defined(__x86_64__) || defined(_M_X64))
 		m_simdMask = _mm_getcsr();
 		_MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);

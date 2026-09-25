@@ -36,7 +36,7 @@ class ndBodyPlayerCapsule : public ndBodyKinematicBase
 
 	D_COLLISION_API ndBodyPlayerCapsule();
 	D_COLLISION_API ndBodyPlayerCapsule(const ndMatrix& localAxis, ndFloat32 mass, ndFloat32 radius, ndFloat32 height, ndFloat32 stepHeight);
-	D_COLLISION_API virtual ~ndBodyPlayerCapsule();
+	D_COLLISION_API virtual ~ndBodyPlayerCapsule() override;
 
 	D_COLLISION_API ndBodyPlayerCapsule* GetAsBodyPlayerCapsule() override;
 

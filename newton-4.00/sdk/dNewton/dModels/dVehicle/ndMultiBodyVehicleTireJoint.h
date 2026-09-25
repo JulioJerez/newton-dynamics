@@ -77,7 +77,7 @@ class ndMultiBodyVehicleTireJoint: public ndJointWheel
 	D_NEWTON_API ndMultiBodyVehicleTireJoint(const ndMultiBodyVehicleTireJoint& joint);
 	D_NEWTON_API ndMultiBodyVehicleTireJoint(const ndJointWheel* const joint, ndMultiBodyVehicle* const owner);
 	D_NEWTON_API ndMultiBodyVehicleTireJoint(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent, const ndWheelDescriptor& desc, ndMultiBodyVehicle* const owner);
-	D_NEWTON_API virtual ~ndMultiBodyVehicleTireJoint();
+	D_NEWTON_API virtual ~ndMultiBodyVehicleTireJoint() override;
 
 	D_NEWTON_API ndFloat32 GetSideSlip() const;
 	D_NEWTON_API ndFloat32 GetLongitudinalSlip() const;

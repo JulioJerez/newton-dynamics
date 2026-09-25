@@ -51,7 +51,7 @@ class ndModel: public ndContainersFreeListAlloc<ndModel>
 	D_COLLISION_API const ndSharedPtr<ndModelNotify>& GetNotifyCallback() const;
 	D_COLLISION_API void SetNotifyCallback(const ndSharedPtr<ndModelNotify>& notifyCallback);
 
-	D_COLLISION_API virtual void SetMulticoreHint(bool){};
+	D_COLLISION_API virtual void SetMulticoreHint(bool){}
 	D_COLLISION_API virtual bool GetMulticoreHint() const { return true;}
 	D_COLLISION_API virtual bool SetSleep(ndFloat32, ndFloat32, ndFloat32, ndFloat32) const { return false; }
 

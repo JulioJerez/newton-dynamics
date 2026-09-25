@@ -77,14 +77,14 @@ class ndBvhInternalNode: public ndBvhNode
 	public:
 	ndBvhInternalNode();
 	ndBvhInternalNode(const ndBvhInternalNode& src);
-	virtual ~ndBvhInternalNode();
-	virtual ndBvhNode* Clone() const;
+	virtual ~ndBvhInternalNode() override;
+	virtual ndBvhNode* Clone() const override;
 
-	virtual ndBvhNode* GetLeft() const;
-	virtual ndBvhNode* GetRight() const;
-	virtual ndBvhInternalNode* GetAsSceneTreeNode() const;
+	virtual ndBvhNode* GetLeft() const override;
+	virtual ndBvhNode* GetRight() const override;
+	virtual ndBvhInternalNode* GetAsSceneTreeNode() const override;
 
-	bool SanityCheck(ndUnsigned32 level) const;
+	bool SanityCheck(ndUnsigned32 level) const override;
 
 	ndBvhNode* m_left;
 	ndBvhNode* m_right;
@@ -96,11 +96,11 @@ class ndBvhLeafNode : public ndBvhNode
 	public:
 	ndBvhLeafNode(ndBodyKinematic* const body);
 	ndBvhLeafNode(const ndBvhLeafNode& src);
-	virtual ~ndBvhLeafNode();
+	virtual ~ndBvhLeafNode() override;
 
-	virtual ndBvhNode* Clone() const;
-	virtual ndBodyKinematic* GetBody() const;
-	virtual ndBvhLeafNode* GetAsSceneBodyNode() const;
+	virtual ndBvhNode* Clone() const override;
+	virtual ndBodyKinematic* GetBody() const override;
+	virtual ndBvhLeafNode* GetAsSceneBodyNode() const override;
 
 	ndBodyKinematic* m_body;
 } D_GCC_NEWTON_CLASS_ALIGN_32;

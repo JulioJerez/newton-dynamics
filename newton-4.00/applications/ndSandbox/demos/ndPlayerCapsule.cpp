@@ -60,7 +60,7 @@ class ndPlayerCapsuleNotify : public ndDemoEntityNotify
 	// not call for this body, since a playe is a kinematic body 
 	//void OnApplyExternalForce(ndInt32, ndFloat32) override
 
-	// an app can use this to determine what ovject form the scene 
+	// an app can use this to determine what object form the scene 
 	// is colliding with, and take appropiate action.
 	virtual bool OnSceneAabbOverlap(const ndBody* const) const override
 	{
@@ -80,9 +80,10 @@ class ndPlayerCapsuleController : public ndModelNotify
 			ndVector color(1.0f, 1.0f, 0.0f, 0.0f);
 			scene->Print(color, "implements a basic player capsule mechanic");
 			scene->Print(color, "c key to change player");
-			scene->Print(color, "w key for moving walking forward");
-			scene->Print(color, "s key for going walking backward");
-			scene->Print(color, "shift w key for running forwad");
+			scene->Print(color, "w key walking forward");
+			scene->Print(color, "s key walking backward");
+			scene->Print(color, "space jumps");
+			scene->Print(color, "shift w running forwad");
 			scene->Print(color, "left click on dynamics body for picking the body");
 			scene->Print(color, "left click on the scene for turning and look up and down");
 			scene->Print(color, "num pad 1, 2, 3 for changing play local frame");
@@ -284,6 +285,7 @@ class ndPlayerCapsuleController : public ndModelNotify
 			ndFloat32 timestepSign = ndFloat32(1.0f);
 			ndAnimationBlendTransition* const walkRunBlender = (ndAnimationBlendTransition*)*m_walkRunBlend;
 			// run the input mini state machine
+
 			if (m_scene->GetKeyState(ImGuiKey_W))
 			{
 				idleWalkBlender->SetTransition(1.0f);
@@ -306,6 +308,11 @@ class ndPlayerCapsuleController : public ndModelNotify
 			{
 				walkRunBlender->SetTransition(0.0f);
 				idleWalkBlender->SetTransition(0.0f);
+			}
+
+			if (m_scene->GetKeyState(ImGuiKey_Space))
+			{
+				player->m_playerInput.m_jump = true;
 			}
 
 			ndVector veloc;
@@ -699,15 +706,9 @@ void ndBoxPlanetPlayerCapsule(ndDemoEntityManager* const scene)
 void ndPlayerCapsule_ThirdPerson (ndDemoEntityManager* const scene)
 {
 	// build a floor
-	//ndSharedPtr<ndBody> bodyFloor(BuildPlayground(scene));
-	ndSharedPtr<ndBody> bodyFloor(BuildCompoundScene(scene, ndGetIdentityMatrix()));
+	ndSharedPtr<ndBody> bodyFloor(BuildPlayground(scene));
+	//ndSharedPtr<ndBody> bodyFloor(BuildCompoundScene(scene, ndGetIdentityMatrix()));
 	//ndSharedPtr<ndBody> bodyFloor(BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true));
-
-	// add a box for testing
-	ndMatrix boxMatrix(ndGetIdentityMatrix());
-	boxMatrix.m_posit.m_x += 2.0f;
-	boxMatrix.m_posit.m_z += 2.0f;
-	AddBox(scene, boxMatrix, ndFloat32(10.0f), ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(0.5f), "smilli.png");
 
 	// add a help menu
 	ndSharedPtr<ndDemoEntityManager::ndDemoHelper> demoHelper(new ndPlayerCapsuleController::ndHelpLegend());
@@ -731,8 +732,14 @@ void ndPlayerCapsule_ThirdPerson (ndDemoEntityManager* const scene)
 	ndRender* const renderer = *scene->GetRenderer();
 	renderer->SetCamera(playerController->GetCamera());
 
-#if 1
+#if 0
 	{
+		// add a box for testing
+		ndMatrix boxMatrix(ndGetIdentityMatrix());
+		boxMatrix.m_posit.m_x += 2.0f;
+		boxMatrix.m_posit.m_z += 2.0f;
+		AddBox(scene, boxMatrix, ndFloat32(10.0f), ndFloat32(0.5f), ndFloat32(0.5f), ndFloat32(0.5f), "smilli.png");
+
 		// populate the world with props and other players
 		AddSomeProps(scene);
 

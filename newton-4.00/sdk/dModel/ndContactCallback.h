@@ -76,7 +76,7 @@ class ndContactCallback: public ndContactNotify
 {
 	public: 
 	ndContactCallback();
-	virtual ~ndContactCallback();
+	virtual ~ndContactCallback() override;
 	virtual ndApplicationMaterial& RegisterMaterial(const ndApplicationMaterial& material, ndUnsigned32 id0, ndUnsigned32 id1);
 
 	virtual ndMaterial* GetMaterial(ndUnsigned32 id0, ndUnsigned32 id1) const;

@@ -63,7 +63,7 @@ class ndBrainAgentContinuePolicyGradient: public ndBrainAgent
 	public:
 	ndBrainAgentContinuePolicyGradient(const ndSharedPtr<ndBrain>& actor);
 	ndBrainAgentContinuePolicyGradient(const ndBrainAgentContinuePolicyGradient& src);
-	~ndBrainAgentContinuePolicyGradient();
+	~ndBrainAgentContinuePolicyGradient() override;
 
 	void Step() override;
 

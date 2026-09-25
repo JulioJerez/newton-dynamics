@@ -30,7 +30,7 @@ class ndBrainThreadPool : public ndThreadPool
 {
 	public:
 	ndBrainThreadPool();
-	~ndBrainThreadPool();
+	~ndBrainThreadPool() override;
 	void Update(class ndBrainContextUpdateCallback* const callback);
 
 	protected:

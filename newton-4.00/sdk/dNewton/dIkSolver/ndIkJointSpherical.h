@@ -23,7 +23,7 @@ class ndIkJointSpherical: public ndJointSpherical, public ndJointBilateralConstr
 
 	D_NEWTON_API ndIkJointSpherical();
 	D_NEWTON_API ndIkJointSpherical(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent);
-	D_NEWTON_API virtual ~ndIkJointSpherical();
+	D_NEWTON_API virtual ~ndIkJointSpherical() override;
 
 	// inverse dynamics interface
 	D_ADD_IK_INTERFACE()

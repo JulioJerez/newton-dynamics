@@ -27,7 +27,7 @@
 #include "ndUtils.h"
 #include "ndClassAlloc.h"
 
-#define ndCheckVector(x) (ndCheckFloat(x[0]) && ndCheckFloat(x[1]) && ndCheckFloat(x[2]) && ndCheckFloat(x[3]))
+#define ndCheckVector(x) (ndCheckFloat(ndFloat64(x[0])) && ndCheckFloat(ndFloat64(x[1])) && ndCheckFloat(ndFloat64(x[2])) && ndCheckFloat(ndFloat64(x[3])))
 
 //#ifdef D_SCALAR_VECTOR_CLASS
 //	#include "ndVectorScalar.h"
@@ -41,7 +41,6 @@
 //#endif
 
 #ifdef D_SCALAR_VECTOR_CLASS
-	xxxxxxxx
 	#include "ndVectorScalar.h"
 #else
 	#include "ndVectorSimd.h"

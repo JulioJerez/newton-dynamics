@@ -105,7 +105,9 @@ class ndAabbPolygonSoup: public ndPolygonSoupDatabase
 
 			inline ndNode* GetNode (const void* const root) const
 			{
-				return ((ndNode*) root) + m_node;
+				//return ((ndNode*) root) + m_node;
+				void* const nonConstRoot = const_cast<void*>(root);
+				return reinterpret_cast<ndNode*>(nonConstRoot) + m_node;
 			}
 
 			ndUnsigned32 m_node;
@@ -232,7 +234,7 @@ class ndAabbPolygonSoup: public ndPolygonSoupDatabase
 	protected:
 	D_CORE_API ndAabbPolygonSoup();
 	D_CORE_API ndAabbPolygonSoup(const ndArray<ndVector>& points, const ndArray<ndInt32>& indices, const ndArray<ndNode>& nodes);
-	D_CORE_API virtual ~ndAabbPolygonSoup();
+	D_CORE_API virtual ~ndAabbPolygonSoup() override;
 
 	D_CORE_API void Create(const ndPolygonSoupBuilder& builder);
 	D_CORE_API void CalculateAdjacent();

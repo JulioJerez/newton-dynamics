@@ -832,7 +832,7 @@ class State : public LodePNGState
   public:
     State();
     State(const State& other);
-    virtual ~State();
+    virtual ~State() override;
     State& operator=(const State& other);
 };
 

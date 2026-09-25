@@ -262,7 +262,7 @@ void ndRenderPassDebug::GenerateBroadphase()
 			m_color.m_z = ndFloat32(0.75f);
 		}
 
-		virtual void OnDebugNode(const ndBvhNode* const node)
+		virtual void OnDebugNode(const ndBvhNode* const node) override
 		{
 			ndVector p0;
 			ndVector p1;

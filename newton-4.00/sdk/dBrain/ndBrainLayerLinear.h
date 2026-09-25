@@ -45,7 +45,7 @@ class ndBrainLayerLinear : public ndBrainLayer
 
 	ndBrainLayerLinear(ndInt32 inputs, ndInt32 outputs);
 	ndBrainLayerLinear(const ndBrainLayerLinear& src);
-	virtual ~ndBrainLayerLinear();
+	virtual ~ndBrainLayerLinear() override;
 	virtual ndBrainLayer* Clone() const override;
 
 	virtual bool HasParameters() const override;

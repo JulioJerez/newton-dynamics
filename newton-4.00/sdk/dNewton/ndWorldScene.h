@@ -31,12 +31,12 @@ class ndWorldScene : public ndScene
 	public:
 	D_NEWTON_API ndWorldScene(ndWorld* const world);
 	D_NEWTON_API ndWorldScene(const ndWorldScene& src);
-	D_NEWTON_API virtual ~ndWorldScene();
+	D_NEWTON_API virtual ~ndWorldScene() override;
 
 	protected:
-	D_NEWTON_API virtual void ThreadFunction();
-	D_NEWTON_API virtual ndWorld* GetWorld() const;
-	D_NEWTON_API virtual void WorkerUpdate(ndInt32 threadIndex);
+	D_NEWTON_API virtual void ThreadFunction() override;
+	D_NEWTON_API virtual ndWorld* GetWorld() const override;
+	D_NEWTON_API virtual void WorkerUpdate(ndInt32 threadIndex) override;
 
 	ndWorld* m_world;
 } D_GCC_NEWTON_CLASS_ALIGN_32;

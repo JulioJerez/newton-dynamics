@@ -22,14 +22,14 @@ class ndAnimationSequencePlayer: public ndAnimationBlendTreeNode
 {
 	public:
 	ndAnimationSequencePlayer(ndSharedPtr<ndAnimationSequence>& sequence);
-	virtual ~ndAnimationSequencePlayer();
+	virtual ~ndAnimationSequencePlayer() override;
 
-	virtual void Evaluate(ndAnimationPose& output, ndVector& veloc);
+	virtual void Evaluate(ndAnimationPose& output, ndVector& veloc) override;
 
 	ndFloat32 GetTime() const;
-	void SetTime(ndFloat32 time);
+	void SetTime(ndFloat32 time) override;
 
-	virtual void Update(ndFloat32 dt);
+	virtual void Update(ndFloat32 dt) override;
 
 	ndSharedPtr<ndAnimationSequence>& GetSequence();
 

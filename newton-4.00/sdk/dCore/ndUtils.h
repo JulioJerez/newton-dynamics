@@ -224,7 +224,7 @@ template <class T>
 inline void ndMemCpy(T* const dst, const T* const src, ndInt64 elements)
 {
 	size_t bytes = sizeof(T) * size_t(elements);
-	memcpy((void*)dst, (void*)src, bytes);
+	memcpy(static_cast<void*>(dst), reinterpret_cast<const void*>(src), bytes);
 }
 
 #ifndef _MSC_VER 

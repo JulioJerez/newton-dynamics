@@ -31,7 +31,7 @@ class ndBodyTriggerVolume : public ndBodyKinematicBase
 	public:
 	D_CLASS_REFLECTION(ndBodyTriggerVolume, ndBodyKinematicBase)
 	D_COLLISION_API ndBodyTriggerVolume();
-	D_COLLISION_API virtual ~ndBodyTriggerVolume();
+	D_COLLISION_API virtual ~ndBodyTriggerVolume() override;
 
 	D_COLLISION_API ndBodyTriggerVolume* GetAsBodyTriggerVolume() override;
 

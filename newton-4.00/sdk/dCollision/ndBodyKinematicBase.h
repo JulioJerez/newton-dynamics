@@ -31,7 +31,7 @@ class ndBodyKinematicBase : public ndBodyKinematic
 	public:
 	D_CLASS_REFLECTION(ndBodyKinematicBase,ndBodyKinematic)
 	D_COLLISION_API ndBodyKinematicBase();
-	D_COLLISION_API virtual ~ndBodyKinematicBase();
+	D_COLLISION_API virtual ~ndBodyKinematicBase() override;
 
 	virtual void SpecialUpdate(ndFloat32 timestep) override;
 	virtual ndBodyKinematicBase* GetAsBodyKinematicSpecial() override;

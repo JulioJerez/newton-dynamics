@@ -603,3 +603,12 @@ void ndBrainCpuContext::Update(ndBrainContextUpdateCallback* const callback)
 	callback->m_owner = this;
 	m_threadPool->Update(callback);
 }
+
+void ndBrainCpuContext::SetSharedMatrixMultiplyBuffer(ndInt32)
+{
+}
+
+ndSharedPtr<ndBrainFloatBuffer> ndBrainCpuContext::GetSharedMatrixMultiplyBuffer() const
+{
+	return ndSharedPtr<ndBrainFloatBuffer>(nullptr);
+}

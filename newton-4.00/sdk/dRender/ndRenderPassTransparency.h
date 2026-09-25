@@ -18,7 +18,7 @@ class ndRenderPassTransparency: public ndRenderPass
 {
 	public:
 	ndRenderPassTransparency(ndRender* const owner);
-	virtual ~ndRenderPassTransparency();
+	virtual ~ndRenderPassTransparency() override;
 
 	virtual void RenderScene() override;
 };

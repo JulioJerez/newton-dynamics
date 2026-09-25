@@ -23,7 +23,7 @@ class ndJointPlane: public ndJointBilateralConstraint
 	
 	D_NEWTON_API ndJointPlane();
 	D_NEWTON_API ndJointPlane (const ndVector& pivot, const ndVector& normal, ndBodyKinematic* const child, ndBodyKinematic* const parent);
-	D_NEWTON_API virtual ~ndJointPlane();
+	D_NEWTON_API virtual ~ndJointPlane() override;
 
 	D_NEWTON_API void EnableControlRotation(bool state);
 	D_NEWTON_API bool GetEnableControlRotation() const;

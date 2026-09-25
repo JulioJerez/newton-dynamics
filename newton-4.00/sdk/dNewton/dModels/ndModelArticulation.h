@@ -41,7 +41,7 @@ class ndModelArticulation: public ndModel
 		public:
 		D_NEWTON_API ndNode(const ndNode& src);
 		D_NEWTON_API ndNode(const ndSharedPtr<ndBody>& body, const ndSharedPtr<ndJointBilateralConstraint>& joint, ndNode* const parent);
-		D_NEWTON_API virtual ~ndNode();
+		D_NEWTON_API virtual ~ndNode() override;
 
 		ndSharedPtr<ndBody> m_body;
 		ndSharedPtr<ndJointBilateralConstraint> m_joint;
@@ -83,7 +83,7 @@ class ndModelArticulation: public ndModel
 
 	D_NEWTON_API ndModelArticulation();
 	D_NEWTON_API ndModelArticulation(const ndModelArticulation& src);
-	D_NEWTON_API virtual ~ndModelArticulation();
+	D_NEWTON_API virtual ~ndModelArticulation() override;
 	D_NEWTON_API virtual ndModel* Clone() const override;
 
 	D_NEWTON_API virtual ndModelArticulation* GetAsModelArticulation() override;

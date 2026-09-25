@@ -37,7 +37,7 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 	};
 
 	ndDebugDisplayRenderPass(ndAssetEditor* const owner);
-	~ndDebugDisplayRenderPass();
+	~ndDebugDisplayRenderPass() override;
 
 	void RebuildDebugCollision();
 	void RebuildVisualDebugMesh();
@@ -76,3 +76,4 @@ class ndDebugDisplayRenderPass : public ndRenderPassDebug
 };
 
 #endif
+

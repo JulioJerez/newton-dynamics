@@ -32,7 +32,7 @@ class ndBrainLayerConvolutionalWithDropOut_2d : public ndBrainLayerConvolutional
 	public: 
 	ndBrainLayerConvolutionalWithDropOut_2d(ndInt32 inputWidth, ndInt32 inputHeight, ndInt32 inputLayers, ndInt32 kernelSize, ndInt32 outputLayers, ndBrainFloat dropOutFactor = ND_CNN_DROPOUT_FACTOR);
 	ndBrainLayerConvolutionalWithDropOut_2d(const ndBrainLayerConvolutionalWithDropOut_2d& src);
-	virtual ~ndBrainLayerConvolutionalWithDropOut_2d();
+	virtual ~ndBrainLayerConvolutionalWithDropOut_2d() override;
 	virtual ndBrainLayer* Clone() const override;
 
 	virtual void UpdateDropOut() override;

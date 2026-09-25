@@ -23,7 +23,7 @@ class ndIkJointDoubleHinge: public ndJointDoubleHinge, public ndJointBilateralCo
 
 	D_NEWTON_API ndIkJointDoubleHinge();
 	D_NEWTON_API ndIkJointDoubleHinge(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent);
-	D_NEWTON_API virtual ~ndIkJointDoubleHinge();
+	D_NEWTON_API virtual ~ndIkJointDoubleHinge() override;
 
 	// inverse dynamics interface
 	D_ADD_IK_INTERFACE()

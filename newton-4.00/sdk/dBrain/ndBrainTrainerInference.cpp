@@ -191,6 +191,9 @@ void ndBrainTrainerInference::InitWeightAndBiasBuffer()
 	scratchBuffer.Set(ndBrainFloat(0.0f));
 	m_miniBatchOutputBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(*m_descriptor.m_context, scratchBuffer));
 
+	// for now just use a 1 mega float stract buffer 
+	m_descriptor.m_context->SetSharedMatrixMultiplyBuffer(1024 * 1024);
+
 	AddCopyInputCommand(m_feedForwardCommands, uniformData[0]);
 	AddLayersCommands(uniformData);
 	AddCopyOutputCommand(m_feedForwardCommands);

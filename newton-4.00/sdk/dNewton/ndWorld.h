@@ -128,8 +128,8 @@ class ndWorld: public ndClassAlloc
 
 	D_NEWTON_API void CalculateJointContacts(ndContact* const contact);
 
-	D_NEWTON_API void PhysicsUpdate____();
-	D_NEWTON_API void CollisionUpdate____();
+	D_NEWTON_API void PhysicsUpdate();
+	D_NEWTON_API void CollisionUpdate();
 	D_NEWTON_API virtual void WorkerUpdate(ndInt32 threadIndex);
 
 	void* GetScratchBuffer(ndInt32 threadIndex, ndInt32 sizeInBytes);

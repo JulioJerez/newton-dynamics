@@ -118,7 +118,7 @@ class ndContact: public ndConstraint
 	public:
 	D_COLLISION_API ndContact();
 	D_COLLISION_API ndContact(const ndContact& src);
-	D_COLLISION_API virtual ~ndContact();
+	D_COLLISION_API virtual ~ndContact() override;
 
 	D_COLLISION_API virtual ndContact* Clone() const;
 
@@ -127,13 +127,13 @@ class ndContact: public ndConstraint
 	D_COLLISION_API bool IsTestOnly() const;
 	D_COLLISION_API bool IsInTrigger() const;
 	D_COLLISION_API void InvalicatdeCache();
-	D_COLLISION_API virtual ndContact* GetAsContact();
+	D_COLLISION_API virtual ndContact* GetAsContact() override;
 	D_COLLISION_API const ndMaterial* GetMaterial() const;
 	D_COLLISION_API bool IsSkeletonSelftCollision() const;
 	D_COLLISION_API ndContactPointList& GetContactPoints();
 	D_COLLISION_API const ndContactPointList& GetContactPoints() const;
-	D_COLLISION_API virtual void JacobianDerivative(ndConstraintDescritor& desc);
-	D_COLLISION_API virtual void JointAccelerations(ndJointAccelerationDecriptor* const desc);
+	D_COLLISION_API virtual void JacobianDerivative(ndConstraintDescritor& desc) override;
+	D_COLLISION_API virtual void JointAccelerations(ndJointAccelerationDecriptor* const desc) override;
 	D_COLLISION_API void InitSurrogateContact(const ndContact* const sourceContact, ndBodyKinematic* const body0, ndBodyKinematic* const body1);
 
 	D_COLLISION_API void GetSeparatingSurface(ndVector& normal, ndVector& point0, ndVector& point1) const;
@@ -144,7 +144,7 @@ class ndContact: public ndConstraint
 	void CalculatePointDerivative(ndInt32 index, ndConstraintDescritor& desc, const ndVector& dir, const ndPointParam& param) const;
 	void JacobianContactDerivative(ndConstraintDescritor& desc, const ndContactMaterial& contact, ndInt32 normalIndex, ndInt32& frictionIndex);
 
-	D_COLLISION_API virtual void ClearMemory();
+	D_COLLISION_API virtual void ClearMemory() override;
 
 	ndVector m_positAcc;
 	ndQuaternion m_rotationAcc;

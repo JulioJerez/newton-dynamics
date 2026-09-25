@@ -30,7 +30,7 @@ class ndIk6DofEffector: public ndJointBilateralConstraint
 
 	D_NEWTON_API ndIk6DofEffector();
 	D_NEWTON_API ndIk6DofEffector(const ndMatrix& pinAndPivotChild, const ndMatrix& pinAndPivotParent, ndBodyKinematic* const child, ndBodyKinematic* const parent);
-	D_NEWTON_API virtual ~ndIk6DofEffector();
+	D_NEWTON_API virtual ~ndIk6DofEffector() override;
 
 	D_NEWTON_API void EnableAxisX(bool state);
 	D_NEWTON_API void EnableAxisY(bool state);

@@ -33,7 +33,7 @@ class ndBrainTrainer: public ndBrainTrainerInference
 	public: 
 	ndBrainTrainer(const ndTrainerDescriptor& descriptor, ndSharedPtr<ndBrainOptimizer> optimizer);
 	ndBrainTrainer(const ndBrainTrainer& src);
-	virtual ~ndBrainTrainer();
+	virtual ~ndBrainTrainer() override;
 
 	ndBrainFloatBuffer* GetOuputGradientBuffer();
 	ndBrainFloatBuffer* GetInputGradientBuffer();

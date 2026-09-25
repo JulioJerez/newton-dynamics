@@ -24,7 +24,7 @@ class ndJointFollowPath: public ndJointBilateralConstraint
 
 	D_NEWTON_API ndJointFollowPath();
 	D_NEWTON_API ndJointFollowPath (const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent);
-	D_NEWTON_API virtual ~ndJointFollowPath();
+	D_NEWTON_API virtual ~ndJointFollowPath() override;
 
 	virtual void GetPointAndTangentAtLocation(const ndVector& location, ndVector& positOut, ndVector& tangentOut) const 
 	{ 

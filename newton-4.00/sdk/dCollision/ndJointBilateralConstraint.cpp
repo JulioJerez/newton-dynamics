@@ -231,15 +231,6 @@ ndFloat32 ndJointBilateralConstraint::GetMotorAcceleration(ndConstraintDescritor
 	return desc.m_jointAccel[index];
 }
 
-//void ndJointBilateralConstraint::SetJointErrorPosit(ndConstraintDescritor& desc, ndFloat32 errorPosit)
-//{
-//	const ndInt32 index = desc.m_rowsCount - 1;
-//	ndAssert(index >= 0);
-//	ndAssert(index < ndInt32(m_maxDof));
-//	ndAssert(0);
-//	desc.m_penetration[index] = errorPosit;
-//}
-
 void ndJointBilateralConstraint::SetLowerFriction(ndConstraintDescritor& desc, ndFloat32 friction)
 {
 	const ndInt32 index = desc.m_rowsCount - 1;

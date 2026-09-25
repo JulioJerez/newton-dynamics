@@ -117,4 +117,5 @@ inline bool ndBodyListView::IsListDirty() const
 {
 	return m_listIsDirty ? true : false;
 }
+
 #endif

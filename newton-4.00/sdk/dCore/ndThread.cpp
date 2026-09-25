@@ -58,7 +58,7 @@ ndThread::~ndThread()
 void ndThread::SetName(const char* const name)
 {
 	strncpy(m_name.m_name, name, sizeof(m_name) - 1);
-#if defined(_MSC_VER) && !defined (D_USE_THREAD_EMULATION)
+#if defined(_MSC_VER)  && !defined(__clang__) && !defined (D_USE_THREAD_EMULATION)
 	// a hideous way to set the thread name, bu this is how Microsoft does it
 	const DWORD MS_VC_EXCEPTION = 0x406D1388;
 	#pragma pack(push,8)  
@@ -78,7 +78,7 @@ void ndThread::SetName(const char* const name)
 	info.dwFlags = 0;
 	__try 
 	{
-		RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), (ULONG_PTR*)&info);
+		RaiseException(MS_VC_EXCEPTION, 0, sizeof(info) / sizeof(ULONG_PTR), reinterpret_cast<ULONG_PTR*>(&info));
 	}
 	__except (EXCEPTION_EXECUTE_HANDLER)
 	{

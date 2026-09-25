@@ -20,7 +20,7 @@ class ndBrainCpuContext : public ndBrainContext
 {
 	public:
 	ndBrainCpuContext();
-	virtual ~ndBrainCpuContext();
+	virtual ~ndBrainCpuContext() override;
 
 	virtual void Update(ndBrainContextUpdateCallback* const callback) override;
 
@@ -85,6 +85,9 @@ class ndBrainCpuContext : public ndBrainContext
 	// learnRate commands
 	virtual void ApplyLeanRateCommands(ndBrainBufferCommand* const command, ndBrainFloat learRate) override;
 	virtual void SetLearnRateCommandBuffers(ndBrainOptimizerAdam& optimizer, ndInt32 minibatchSize, ndBrainFloatBuffer& weightsAndBiasBuffer, ndBrainFloatBuffer& weightsAndBiasGradientBuffer) override;
+
+	virtual void SetSharedMatrixMultiplyBuffer(ndInt32 size) override;
+	virtual ndSharedPtr<ndBrainFloatBuffer> GetSharedMatrixMultiplyBuffer() const override;
 
 	ndSharedPtr<ndBrainThreadPool> m_threadPool;
 };

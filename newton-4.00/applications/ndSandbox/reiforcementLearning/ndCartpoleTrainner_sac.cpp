@@ -94,8 +94,8 @@ namespace ndCartpoleTrainer_sac
 			// create a Soft Actor Critic traniing agent
 			ndBrainAgentOffPolicyGradient_Trainer::HyperParameters hyperParameters;
 
-			hyperParameters.m_useGpuBackend = true;
-			//hyperParameters.m_useGpuBackend = false;
+			//hyperParameters.m_useGpuBackend = true;
+			hyperParameters.m_useGpuBackend = false;
 			//hyperParameters.m_numberOfHiddenLayers = 0;
 			hyperParameters.m_hiddenLayersNumberOfNeurons = 64;
 			hyperParameters.m_numberOfActions = m_actionsSize;
@@ -243,4 +243,3 @@ void ndCartpoleTrainingSAC(ndDemoEntityManager* const scene)
 	ndQuaternion rotation(ndVector(0.0f, 1.0f, 0.0f, 0.0f), 90.0f * ndDegreeToRad);
 	scene->SetCameraMatrix(rotation, matrix.m_posit);
 }
-

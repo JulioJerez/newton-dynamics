@@ -273,3 +273,5 @@ class ndAssetEditor : public ndClassAlloc
 };
 
 #endif
+
+

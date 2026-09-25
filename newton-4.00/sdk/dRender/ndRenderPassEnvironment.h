@@ -21,7 +21,7 @@ class ndRenderPassEnvironment: public ndRenderPass
 {
 	public:
 	ndRenderPassEnvironment(ndRender* const owner, ndSharedPtr<ndRenderTexture>& cubeMap);
-	~ndRenderPassEnvironment();
+	~ndRenderPassEnvironment() override;
 
 	virtual void RenderScene() override;
 	

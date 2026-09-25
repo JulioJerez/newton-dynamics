@@ -38,9 +38,9 @@ class ndBrainLossCategoricalCrossEntropy: public ndBrainLoss
 	public:
 	ndBrainLossCategoricalCrossEntropy(ndInt32 size);
 	void SetTruth(const ndBrainVector& truth);
-	virtual void GetLoss(const ndBrainVector& output, ndBrainVector& loss);
+	virtual void GetLoss(const ndBrainVector& output, ndBrainVector& loss) override;
 
-	virtual bool IsCategorical() const;
+	virtual bool IsCategorical() const override;
 
 	ndBrainVector m_truth;
 };

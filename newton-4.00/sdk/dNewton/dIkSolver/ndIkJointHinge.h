@@ -27,7 +27,7 @@ class ndIkJointHinge: public ndJointHinge, public ndJointBilateralConstraint::nd
 	D_NEWTON_API ndIkJointHinge();
 	D_NEWTON_API ndIkJointHinge(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent);
 	D_NEWTON_API ndIkJointHinge(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent);
-	D_NEWTON_API virtual ~ndIkJointHinge();
+	D_NEWTON_API virtual ~ndIkJointHinge() override;
 
 	// inverse dynamics interface
 	D_ADD_IK_INTERFACE()

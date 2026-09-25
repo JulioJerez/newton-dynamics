@@ -34,7 +34,7 @@ class ndShapeStatic_bvh: public ndShapeStaticMesh, public ndAabbPolygonSoup
 	D_COLLISION_API ndShapeStatic_bvh();
 	D_COLLISION_API ndShapeStatic_bvh(const ndPolygonSoupBuilder& builder);
 	D_COLLISION_API ndShapeStatic_bvh(const ndArray<ndVector>& points, const ndArray<ndInt32>& indices, const ndArray<ndNode>& nodes);
-	D_COLLISION_API virtual ~ndShapeStatic_bvh();
+	D_COLLISION_API virtual ~ndShapeStatic_bvh() override;
 	D_COLLISION_API void *operator new (size_t size);
 	D_COLLISION_API void operator delete (void* ptr);
 

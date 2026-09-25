@@ -812,7 +812,7 @@ void ndRenderPrimitiveImplement::BuildWireframeDebugMesh(const ndRenderPrimitive
 			{
 			}
 
-			virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceVertex, const ndEdgeType* const)
+			virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceVertex, const ndEdgeType* const) override
 			{
 				ndVector p0(faceVertex[0]);
 				ndVector p1(faceVertex[1]);
@@ -990,7 +990,7 @@ void ndRenderPrimitiveImplement::BuildDebugFlatShadedMesh(const ndRenderPrimitiv
 			{
 			}
 
-			virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceVertex, const ndEdgeType* const)
+			virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceVertex, const ndEdgeType* const) override
 			{
 				const ndVector p0(faceVertex[0]);
 				const ndVector p1(faceVertex[1]);
@@ -1163,7 +1163,7 @@ void ndRenderPrimitiveImplement::BuildSetZBufferDebugMesh(const ndRenderPrimitiv
 			{
 			}
 
-			virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceVertex, const ndEdgeType* const)
+			virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceVertex, const ndEdgeType* const) override
 			{
 				ndVector p0(faceVertex[0]);
 				ndVector p1(faceVertex[1]);

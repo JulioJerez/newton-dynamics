@@ -24,7 +24,7 @@ class ndJointUpVector: public ndJointBilateralConstraint
 
 	D_NEWTON_API ndJointUpVector();
 	D_NEWTON_API ndJointUpVector(const ndVector& normal, ndBodyKinematic* const child, ndBodyKinematic* const parent);
-	D_NEWTON_API virtual ~ndJointUpVector();
+	D_NEWTON_API virtual ~ndJointUpVector() override;
 
 	D_NEWTON_API void SetPinDir (const ndVector& pin);
 

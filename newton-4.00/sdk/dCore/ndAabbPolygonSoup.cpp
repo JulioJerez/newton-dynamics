@@ -493,7 +493,7 @@ void ndAabbPolygonSoup::CalculateAdjacent ()
 	if (normalCount) 
 	{
 		ndStack<ndInt32> indexArray (normalCount);
-		ndInt32 newNormalCount = ndVertexListToIndexList (&pool[0].m_x, sizeof (ndVector), 3, normalCount, &indexArray[0], ndFloat32 (1.0e-6f));
+		ndInt32 newNormalCount = ndVertexListToIndexList (&pool[0].m_x, sizeof (ndVector), 3, normalCount, &indexArray[0], ndFloat64 (1.0e-6f));
 	
 		ndInt32 oldCount = GetVertexCount();
 		ndVector* const vertexArray1 = (ndVector*)ndMemory::Malloc (sizeof (ndVector) * (oldCount + newNormalCount));
@@ -756,7 +756,7 @@ void ndAabbPolygonSoup::Create (const ndPolygonSoupBuilder& builder)
 	}
 
 	ndStack<ndInt32> indexArray (vertexIndex);
-	ndInt32 aabbPointCount = ndVertexListToIndexList (&aabbPoints[0].m_x, sizeof (ndVector), 3, vertexIndex, &indexArray[0], ndFloat32 (1.0e-6f));
+	ndInt32 aabbPointCount = ndVertexListToIndexList (&aabbPoints[0].m_x, sizeof (ndVector), 3, vertexIndex, &indexArray[0], ndFloat64 (1.0e-6f));
 
 	m_vertexCount = aabbBase + aabbPointCount;
 	m_localVertex = (ndVector*) ndMemory::Malloc (sizeof (ndVector) * m_vertexCount);

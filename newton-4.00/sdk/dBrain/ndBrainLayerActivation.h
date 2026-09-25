@@ -32,7 +32,7 @@ class ndBrainLayerActivation : public ndBrainLayer
 	public: 
 	ndBrainLayerActivation(ndInt32 neurons);
 	ndBrainLayerActivation(const ndBrainLayerActivation& src);
-	virtual ~ndBrainLayerActivation();
+	virtual ~ndBrainLayerActivation() override;
 	virtual ndBrainLayer* Clone() const override;
 
 	virtual bool HasParameters() const override;

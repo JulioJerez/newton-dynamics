@@ -32,7 +32,7 @@ class ndShapeCylinder : public ndShapeConvex
 	public:
 	D_CLASS_REFLECTION(ndShapeCylinder,ndShapeConvex)
 	D_COLLISION_API ndShapeCylinder(ndFloat32 radio0, ndFloat32 radio1, ndFloat32 height);
-	D_COLLISION_API ~ndShapeCylinder();
+	D_COLLISION_API ~ndShapeCylinder() override;
 
 	D_COLLISION_API virtual ndShapeCylinder* GetAsShapeCylinder() override { return this; }
 

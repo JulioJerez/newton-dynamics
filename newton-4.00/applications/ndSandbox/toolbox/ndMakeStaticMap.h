@@ -30,3 +30,4 @@ ndSharedPtr<ndBody> BuildPlayground(ndDemoEntityManager* const scene, bool kinem
 ndSharedPtr<ndBody> BuildCompoundScene(ndDemoEntityManager* const scene, const ndMatrix& location);
 
 #endif
+

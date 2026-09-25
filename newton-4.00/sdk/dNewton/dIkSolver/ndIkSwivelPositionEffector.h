@@ -33,7 +33,7 @@ class ndIkSwivelPositionEffector: public ndJointBilateralConstraint
 	D_NEWTON_API ndIkSwivelPositionEffector(
 		const ndMatrix& pinAndPivotParentInGlobalSpace, ndBodyKinematic* const parent,
 		const ndVector& childPivotInGlobalSpace, ndBodyKinematic* const child);
-	D_NEWTON_API virtual ~ndIkSwivelPositionEffector();
+	D_NEWTON_API virtual ~ndIkSwivelPositionEffector() override;
 
 	D_NEWTON_API ndVector GetLocalTargetPosition() const;
 	D_NEWTON_API bool TestWorkSpaceViolation(ndVector& posit) const;

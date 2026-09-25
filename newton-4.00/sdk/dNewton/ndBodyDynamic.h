@@ -45,7 +45,7 @@ class ndBodyDynamic: public ndBodyKinematic
 	D_CLASS_REFLECTION(ndBodyDynamic, ndBodyKinematic)
 	D_NEWTON_API ndBodyDynamic();
 	D_NEWTON_API ndBodyDynamic(const ndBodyDynamic& src);
-	D_NEWTON_API virtual ~ndBodyDynamic ();
+	D_NEWTON_API virtual ~ndBodyDynamic () override;
 
 	D_NEWTON_API virtual ndBodyDynamic* GetAsBodyDynamic() override { return this; }
 	D_NEWTON_API virtual void ApplyExternalForces(ndInt32 threadIndex, ndFloat32 timestep) override;
