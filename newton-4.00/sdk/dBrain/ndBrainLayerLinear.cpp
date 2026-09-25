@@ -1047,7 +1047,7 @@ ndCommandArray ndBrainLayerLinear::CreateFeedForwardBufferCommand(
 						owner, context, info, kDim * rowDim * columnDim, (rowDim << 16) + columnDim, inputOutputData, weightsAndBias));
 					ndSharedPtr<ndBrainFloatBuffer> matrixTempBuffer(context->GetSharedMatrixMultiplyBuffer());
 					descriptor.PushBack(*matrixTempBuffer);
-					descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerMatrixMatrixMultiplySubTile;
+					descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerMatrixMatrixMultiplyTile;
 					ndBrainBufferCommand* const command = new ndBrainGpuCommand(descriptor, (ndBrainLayer*)this);
 					commandArray.PushBack(command);
 				}
@@ -1062,7 +1062,7 @@ ndCommandArray ndBrainLayerLinear::CreateFeedForwardBufferCommand(
 						owner, context, info, columnDim * rowDim, columnDim, inputOutputData, weightsAndBias));
 					ndSharedPtr<ndBrainFloatBuffer> matrixTempBuffer(context->GetSharedMatrixMultiplyBuffer());
 					descriptor.PushBack(*matrixTempBuffer);
-					descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerMatrixMatrixMultiplyAddSubTile;
+					descriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerMatrixMatrixMultiplyAddTile;
 					ndBrainBufferCommand* const command = new ndBrainGpuCommand(descriptor, (ndBrainLayer*)this);
 					commandArray.PushBack(command);
 				}
@@ -1169,12 +1169,13 @@ ndCommandArray ndBrainLayerLinear::CreateBackPropagateBufferCommand(
 		ndInt32 width;
 		ndInt32 height;
 		CalculateRoundedSize(width, height);
+		ndInt32 kTiles = height / ND_GPU_TILED_MATRIX_ROWS;
 		ndInt32 blockColums = width / ND_GPU_TILED_MATRIX_ROWS;
 		ndInt32 blockRows = miniBatchSize / ND_GPU_TILED_MATRIX_ROWS;
-		if (0)
+		if (kTiles > 1)
 		{
 			{
-				// for debug only
+				//// for debug only
 				//ndBrainBufferCommandDesc inputGradDescriptor(MakeBackpropagateDesctriptor(
 				//	owner, context, info, blockRows * blockColums, blockColums,
 				//	inputOutputData, weightsAndBias,
@@ -1187,11 +1188,12 @@ ndCommandArray ndBrainLayerLinear::CreateBackPropagateBufferCommand(
 			{
 				// generate all tile to a temp buffers
 				ndBrainBufferCommandDesc inputGradDescriptor(MakeBackpropagateDesctriptor(
-					owner, context, info, blockRows * blockColums, blockColums,
+					owner, context, info, kTiles * blockRows * blockColums, (blockRows << 16) + blockColums,
 					inputOutputData, weightsAndBias,
 					inputOutputGradients, weightsAndBiasGradients));
 				ndSharedPtr<ndBrainFloatBuffer> matrixTempBuffer(context->GetSharedMatrixMultiplyBuffer());
-				inputGradDescriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerMatrixBackPropagateInputGradientsSubTile;
+				inputGradDescriptor.PushBack(*matrixTempBuffer);
+				inputGradDescriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerMatrixBackPropagateInputGradientsTile;
 				ndBrainBufferCommand* const inputGradientCommand = new ndBrainGpuCommand(inputGradDescriptor, (ndBrainLayer*)this);
 				commands.PushBack(inputGradientCommand);
 			}
@@ -1199,11 +1201,12 @@ ndCommandArray ndBrainLayerLinear::CreateBackPropagateBufferCommand(
 			{
 				// add partial tiles and store result in out buffer
 				ndBrainBufferCommandDesc inputGradDescriptor(MakeBackpropagateDesctriptor(
-					owner, context, info, blockRows * blockColums, blockColums,
+					owner, context, info, blockRows * blockColums, (blockRows << 16) + blockColums,
 					inputOutputData, weightsAndBias,
 					inputOutputGradients, weightsAndBiasGradients));
 				ndSharedPtr<ndBrainFloatBuffer> matrixTempBuffer(context->GetSharedMatrixMultiplyBuffer());
-				inputGradDescriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerMatrixBackPropagateInputGradientsAddSubTile;
+				inputGradDescriptor.PushBack(*matrixTempBuffer);
+				inputGradDescriptor.m_kernel = context->GetAsGpuContext()->m_brainLayerMatrixBackPropagateInputGradientsAddTile;
 				ndBrainBufferCommand* const inputGradientCommand = new ndBrainGpuCommand(inputGradDescriptor, (ndBrainLayer*)this);
 				commands.PushBack(inputGradientCommand);
 			}

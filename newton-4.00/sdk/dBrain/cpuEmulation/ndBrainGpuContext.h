@@ -117,8 +117,8 @@ class ndBrainGpuContext : public ndBrainContext
 	ndSharedPtr<ndBrainKernel> m_brainLayerLeakyReluActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixAddBias;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiply;
-	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiplySubTile;
-	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiplyAddSubTile;
+	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiplyTile;
+	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiplyAddTile;
 	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationAddInputActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationLoadInputActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationNormalizeInputActivation;
@@ -136,8 +136,8 @@ class ndBrainGpuContext : public ndBrainContext
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateBiasGradients;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateInputGradients;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateWeightGradients;
-	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateInputGradientsSubTile;
-	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateInputGradientsAddSubTile;
+	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateInputGradientsTile;
+	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateInputGradientsAddTile;
 
 	// optimizer shaders
 	ndSharedPtr<ndBrainKernel> m_brainAdamBiasCorrectionUpdate;
