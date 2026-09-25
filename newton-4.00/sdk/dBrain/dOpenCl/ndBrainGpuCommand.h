@@ -14,42 +14,11 @@
 #include "ndBrainStdafx.h"
 #include "ndBrainBufferCommand.h"
 
-#if 0
-#include "ndBrainLayer.h"
-#include "ndBrainGpuContext.h"
-
-class ndBrainGpuBuffer;
-class ndBrainGpuFloatBuffer;
-class ndBrainGpuUniformBuffer;
-
-class ndBrainGpuCommand : public ndClassAlloc
-{
-	public:
-	ndBrainGpuCommand(ndBrainGpuContext* const context, const ndBrainLayer::ndCommandShareInfo& info);
-	virtual ~ndBrainGpuCommand();
-	void Assembly(const ndSharedPtr<ndBrainGpuShader>& shader, ndInt32 workGroupSize, ndInt32 buffersCount, ndBrainBuffer** buffer);
-
-	protected:
-	ndBrainGpuContext* m_context;
-	ndSharedPtr<ndBrainGpuShader> m_shader;
-	ndBrainLayer::ndCommandShareInfo m_info;
-	ndBrainLayer* m_layer;
-	ndFixSizeArray<ndBrainBuffer*, 8> m_parameters;
-	size_t m_workGroupSize;
-	size_t m_numberOfWorkGroups;
-
-	friend class ndBrainGpuContext;
-	friend class ndBrainTrainerGpu;
-	friend class ndBrainTrainerGpuInference;
-};
-#endif
-
-
 class ndBrainGpuCommand : public ndBrainBufferCommand
 {
 	public:
-	ndBrainGpuCommand(const ndBrainBufferCommandDesc& desc);
-	virtual ~ndBrainGpuCommand();
+	ndBrainGpuCommand(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer);
+	virtual ~ndBrainGpuCommand() override;
 };
 
 #endif

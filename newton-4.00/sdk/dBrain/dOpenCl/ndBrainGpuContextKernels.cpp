@@ -1713,7 +1713,8 @@ void ndBrainGpuContext::CreateKerners()
     m_brainLayerLeakyReluActivation = CreateKerner(program, "brainLayerLeakyReluActivation");
     m_brainLayerDropOutActivation = CreateKerner(program, "brainLayerLinearDropOutActivation");
     m_brainLayerMatrixMatrixMultiply = CreateKerner(program, "brainLayerMatrixMatrixMultiply");
-    m_brainLayerPolicyGradientActivation = CreateKerner(program, "brainLayerPolicyGradientActivation");
+    ndAssert(0);
+    //m_brainLayerPolicyGradientActivation = CreateKerner(program, "brainLayerPolicyGradientActivation");
 
     // create all backpropagate shaders
     m_brainCopyInputGradients = CreateKerner(program, "brainCopyInputGradients");
@@ -1734,8 +1735,9 @@ void ndBrainGpuContext::CreateKerners()
     m_brainAdamLassoOptimizerUpdate = CreateKerner(program, "brainAdamUpdateLassoRegularizer");
 
     // other shaders
-    m_brainCopyStridedBuffer = CreateKerner(program, "brainCopyStridedBuffer");
-    m_brainCopyStridedBufferIndirect = CreateKerner(program, "brainCopyStridedBufferIndirect");
+    ndAssert(0);
+    //m_brainCopyStridedBuffer = CreateKerner(program, "brainCopyStridedBuffer");
+    //m_brainCopyStridedBufferIndirect = CreateKerner(program, "brainCopyStridedBufferIndirect");
 
     // math operations
     m_brainSet = CreateKerner(program, "brainSet");

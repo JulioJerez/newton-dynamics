@@ -149,6 +149,6 @@ class ndBrainGpuContext : public ndBrainContext
 	ndSharedPtr<ndBrainKernel> m_brainCopyBufferIndirect;
 	ndSharedPtr<ndBrainKernel> m_accumulateWeigndAndBiasGradiens;
 
-	ndSharedPtr<ndBrainFloatBuffer> m_sharedMatrixMultiplyBuffer;
+	ndSharedPtr<ndBrainFloatBuffer> m_sharedTiledMatrixMultiplyBuffer;
 };
 #endif

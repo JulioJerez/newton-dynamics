@@ -62,6 +62,7 @@ class ndBrainGpuContext : public ndBrainContext
 	virtual void CopyBufferIndirect(const ndCopyBufferCommandInfo& descriptor, const ndBrainIntegerBuffer& indexBuffer, ndBrainBuffer& dstData, const ndBrainBuffer& srcData) override;
 
 	virtual ndBrainFloat Element(const ndBrainFloatBuffer& buffer, ndInt32 index) const override;
+	virtual void Abs(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) override;
 	virtual void Exp(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) override;
 	virtual void Set(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) override;
 	virtual void Min(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) override;
@@ -69,10 +70,16 @@ class ndBrainGpuContext : public ndBrainContext
 	virtual void Add(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) override;
 	virtual void Sub(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) override;
 	virtual void Mul(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) override;
-	virtual void Reciprocal(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) override;
+	virtual void Sign(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) override;
+	virtual void Sqrt(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) override;
 	virtual void LessEqual(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) override;
 	virtual void GreaterEqual(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) override;
 	virtual void Blend(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer, const ndBrainFloatBuffer& blend) override;
+
+	virtual void Reciprocal(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer) override;
+	virtual void Blend(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer, ndBrainFloat blend) override;
+	virtual void Select(ndBrainFloatBuffer& buffer, ndBrainFloatBuffer& mask, ndBrainFloat a, ndBrainFloat b) override;
+	virtual void ScaleAdd(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer, ndBrainFloat scale) override;
 
 	virtual void Set(ndBrainFloatBuffer& buffer, ndBrainFloat value) override;
 	virtual void Min(ndBrainFloatBuffer& buffer, ndBrainFloat value) override;
@@ -82,9 +89,6 @@ class ndBrainGpuContext : public ndBrainContext
 	virtual void Greater(ndBrainFloatBuffer& buffer, ndBrainFloat test) override;
 	virtual void LessEqual(ndBrainFloatBuffer& buffer, ndBrainFloat test) override;
 	virtual void GreaterEqual(ndBrainFloatBuffer& buffer, ndBrainFloat test) override;
-	virtual void Blend(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer, ndBrainFloat blend) override;
-	virtual void Select(ndBrainFloatBuffer& buffer, ndBrainFloatBuffer& mask, ndBrainFloat a, ndBrainFloat b) override;
-	virtual void ScaleAdd(ndBrainFloatBuffer& buffer, const ndBrainFloatBuffer& srcBuffer, ndBrainFloat scale) override;
 
 	virtual void SetOrdinal(ndBrainFloatBuffer& buffer) override;
 	virtual void ReductionSum(ndBrainFloatBuffer& buffer) override;
@@ -100,13 +104,13 @@ class ndBrainGpuContext : public ndBrainContext
 	virtual void InvSqrt(ndBrainFloatBuffer&, ndInt32 clipSize) override;
 	virtual void ReductionSum(ndBrainFloatBuffer& buffer, ndInt32 clipSize) override;
 
-	virtual void Rand(ndBrainIntegerBuffer& randBuffer) override;
-	virtual void SetRandSeeds(const ndFixSizeArray<ndUnsigned32, 256>& seed) override;
-
 	// learnRate commands
 	virtual void ApplyLeanRateCommands(ndBrainBufferCommand* const command, ndBrainFloat learnRate) override;
 	virtual void SetLearnRateCommandBuffers(ndBrainOptimizerAdam& optimizer, ndInt32 minibatchSize, ndBrainFloatBuffer& weightsAndBiasBuffer, ndBrainFloatBuffer& weightsAndBiasGradientBuffer) override;
-	virtual void AccumulateWeightsAndBiasBuffer(ndInt32 numberOfBuffers, ndInt32 bufferSizeInFloats, ndBrainFloatBuffer& weightsAndBiasGradientBuffer) override;
+	//virtual void AccumulateWeightsAndBiasBuffer(ndInt32 numberOfBuffers, ndInt32 bufferSizeInFloats, ndBrainFloatBuffer& weightsAndBiasGradientBuffer) override;
+
+	virtual void SetSharedMatrixMultiplyBuffer(ndInt32 size) override;
+	virtual ndSharedPtr<ndBrainFloatBuffer> GetSharedMatrixMultiplyBuffer() const override;
 
 	private:
 	void CreateQueue();
@@ -130,7 +134,19 @@ class ndBrainGpuContext : public ndBrainContext
 	bool m_isValid;
 
 	public:
-	// feed forward shaders
+	//feed forward shaders
+	//ndSharedPtr<ndBrainKernel> m_brainCopyInput;
+	//ndSharedPtr<ndBrainKernel> m_brainCopyOutput;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerReluActivation;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerTanhActivation;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerLinearActivation;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerSoftmaxActivation;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerDropOutActivation;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerLeakyReluActivation;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiply;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerPolicyGradientActivation;
+
+	//feed forward shaders
 	ndSharedPtr<ndBrainKernel> m_brainCopyInput;
 	ndSharedPtr<ndBrainKernel> m_brainCopyOutput;
 	ndSharedPtr<ndBrainKernel> m_brainLayerReluActivation;
@@ -139,8 +155,26 @@ class ndBrainGpuContext : public ndBrainContext
 	ndSharedPtr<ndBrainKernel> m_brainLayerSoftmaxActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerDropOutActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerLeakyReluActivation;
+	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixAddBias;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiply;
-	ndSharedPtr<ndBrainKernel> m_brainLayerPolicyGradientActivation;
+	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiplyTile;
+	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiplyAddTile;
+	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationAddInputActivation;
+	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationLoadInputActivation;
+	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationNormalizeInputActivation;
+
+
+	//// back propagate shaders
+	//ndSharedPtr<ndBrainKernel> m_brainCopyInputGradients;
+	//ndSharedPtr<ndBrainKernel> m_brainCopyOutputGradients;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerLinearPropagate;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerReluBackPropagate;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerTanhBackPropagate;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerDropOutBackPropagate;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerLeakyReluBackPropagate;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerCathegoricalSoftmaxBackPropagate;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateInputGradients;
+	//ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateWeightGradients;
 
 	// back propagate shaders
 	ndSharedPtr<ndBrainKernel> m_brainCopyInputGradients;
@@ -150,25 +184,30 @@ class ndBrainGpuContext : public ndBrainContext
 	ndSharedPtr<ndBrainKernel> m_brainLayerTanhBackPropagate;
 	ndSharedPtr<ndBrainKernel> m_brainLayerDropOutBackPropagate;
 	ndSharedPtr<ndBrainKernel> m_brainLayerLeakyReluBackPropagate;
+	ndSharedPtr<ndBrainKernel> m_brainLayerPolicyGradientBackPropagate;
 	ndSharedPtr<ndBrainKernel> m_brainLayerCathegoricalSoftmaxBackPropagate;
+	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateBiasGradients;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateInputGradients;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateWeightGradients;
-
-	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateBiasGradients;
-	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateAddBiasGradients;
-	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateClearBiasGradients;
+	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateInputGradientsTile;
+	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixBackPropagateInputGradientsAddTile;
 
 	// optimizer shaders
 	ndSharedPtr<ndBrainKernel> m_brainAdamBiasCorrectionUpdate;
 	ndSharedPtr<ndBrainKernel> m_brainAdamRidgeOptimizerUpdate;
 	ndSharedPtr<ndBrainKernel> m_brainAdamLassoOptimizerUpdate;
 
-	// shader stride buffers
-	ndSharedPtr<ndBrainKernel> m_brainCopyStridedBuffer;
-	ndSharedPtr<ndBrainKernel> m_brainCopyStridedBufferIndirect;
-	ndSharedPtr<ndBrainUniformBuffer> m_copyStridedBufferParams;
-	ndSharedPtr<ndBrainGpuCommand> m_copyStridedBufferCommand;
-	ndSharedPtr<ndBrainGpuCommand> m_copyStridedBufferIndirectCommand;
+	// other shader
+	ndSharedPtr<ndBrainKernel> m_brainCopyBuffer;
+	ndSharedPtr<ndBrainKernel> m_brainCopyBufferIndirect;
+	ndSharedPtr<ndBrainKernel> m_accumulateWeigndAndBiasGradiens;
+
+	//// shader stride buffers
+	//ndSharedPtr<ndBrainKernel> m_brainCopyStridedBuffer;
+	//ndSharedPtr<ndBrainKernel> m_brainCopyStridedBufferIndirect;
+	//ndSharedPtr<ndBrainUniformBuffer> m_copyStridedBufferParams;
+	//ndSharedPtr<ndBrainGpuCommand> m_copyStridedBufferCommand;
+	//ndSharedPtr<ndBrainGpuCommand> m_copyStridedBufferIndirectCommand;
 
 	// arithmetic operations kernels
 	ndSharedPtr<ndBrainKernel> m_brainSet;
@@ -196,6 +235,8 @@ class ndBrainGpuContext : public ndBrainContext
 	ndSharedPtr<ndBrainKernel> m_brainNormalDistribution;
 	ndSharedPtr<ndBrainKernel> m_brainEntropyRegularization;
 	ndSharedPtr<ndBrainKernel> m_brainEntropyRegularizationGradient;
+
+	ndSharedPtr<ndBrainFloatBuffer> m_sharedTiledMatrixMultiplyBuffer;
 
 	static const char* m_mathOpsCommand;
 	static const char* m_matrixMultiply;
