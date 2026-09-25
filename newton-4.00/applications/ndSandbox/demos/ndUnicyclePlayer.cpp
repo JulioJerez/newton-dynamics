@@ -204,8 +204,6 @@ namespace ndUnicyclePlayer
 		};
 		ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS> extraJoint;
 		const ndModelArticulation::ndCenterOfMassDynamics comDynamics(GetModel()->GetAsModelArticulation()->CalculateCentreOfMassDynamics(m_solver, extraJoint, m_timestep));
-		//ndMatrix xxxx(GetModel()->GetAsModelArticulation()->CalculateComMassMatrix());
-		//xxxx = xxxx.Inverse4x4();
 
 		const ndVector comAlpha(comFrame.UnrotateVector(comDynamics.m_torque.Scale(m_invInertiaScale)));
 		const ndVector comOmega(comFrame.UnrotateVector(comDynamics.m_angularMomentum.Scale (m_invInertiaScale)));

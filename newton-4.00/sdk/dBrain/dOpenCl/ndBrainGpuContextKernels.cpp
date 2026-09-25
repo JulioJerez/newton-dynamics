@@ -18,7 +18,7 @@
 const char* ndBrainGpuContext::m_commonKernelsInclude =
 R""""(
 
-    #define ND_GPU_TILED_MATRIX_ROWS_BITS       4
+    #define ND_GPU_TILED_MATRIX_ROWS_BITS       5
     #define ND_GPU_TILED_MATRIX_ROWS            (1<<ND_GPU_TILED_MATRIX_ROWS_BITS)
 
     #define ND_DEFAULT_WORKGROUP_SIZE           256
@@ -70,7 +70,10 @@ R""""(
 const char* ndBrainGpuContext::m_feedForwardKernels_1 =
 R""""(
 
-    __kernel void brainCopyInput(__global const UniformBufferLayerArguments* parameters, __global float* inputOutputData, __global float* inputBuffer)
+    __kernel void brainCopyInput(
+        __global const UniformBufferLayerArguments* restrict parameters, 
+        __global float* restrict inputOutputData, 
+        __global float* restrict inputBuffer)
     {                                                                      
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -98,9 +101,9 @@ R""""(
     }
 
     __kernel void brainCopyOutput(
-        __global const UniformBufferLayerArguments* parameters, 
-        __global float* inputOutputData, 
-        __global float* outputBuffer) 
+        __global const UniformBufferLayerArguments* restrict parameters, 
+        __global float* restrict inputOutputData, 
+        __global float* restrict outputBuffer) 
     {
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -133,9 +136,9 @@ R""""(
 const char* ndBrainGpuContext::m_feedForwardKernels_2 =
 R""""(
     __kernel void brainLayerReluActivation(
-        __global const UniformBufferLayerArguments* parameters, 
-        __global float* inputOutputData, 
-        __global float* notUsed)  
+        __global const UniformBufferLayerArguments* restrict parameters, 
+        __global float* restrict inputOutputData, 
+        __global float* restrict notUsed)  
     {
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -165,9 +168,9 @@ R""""(
     }
 
     __kernel void brainLayerLeakyReluActivation(
-        __global const UniformBufferLayerArguments* parameters, 
-        __global float* inputOutputData, 
-        __global float* notUsed)  
+        __global const UniformBufferLayerArguments* restrict parameters, 
+        __global float* restrict inputOutputData, 
+        __global float* restrict notUsed)  
     {
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -196,7 +199,10 @@ R""""(
         }
     }
 
-    __kernel void brainLayerTanhActivation(__global const UniformBufferLayerArguments* parameters, __global float* inputOutputData, __global float* notUsed)  
+    __kernel void brainLayerTanhActivation(
+        __global const UniformBufferLayerArguments* restrict parameters, 
+        __global float* restrict inputOutputData, 
+        __global float* restrict notUsed)  
     {
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -225,7 +231,10 @@ R""""(
         }
     }
 
-    __kernel void brainLayerLinearDropOutActivation(__global const UniformBufferLayerArguments* parameters, __global float* inputOutputData, __global float* notUsed)  
+    __kernel void brainLayerLinearDropOutActivation(
+        __global const UniformBufferLayerArguments* restrict parameters, 
+        __global float* restrict inputOutputData, 
+        __global float* restrict notUsed)  
     {
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -255,11 +264,11 @@ R""""(
     }
 
     __kernel void brainLayerLinearActivation(
-        __global const UniformBufferLayerArguments* parameters, 
-        __global float* inputOutputData, 
-        __global float* notUsed,
-        __global float* biasPtr,
-        __global float* slopesPtr)
+        __global const UniformBufferLayerArguments* restrict parameters, 
+        __global float* restrict inputOutputData, 
+        __global float* restrict notUsed,
+        __global float* restrict biasPtr,
+        __global float* restrict slopesPtr)
     {
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -295,10 +304,10 @@ R""""(
     }
 
     __kernel void brainLayerPolicyGradientActivation(
-        __global const UniformBufferLayerArguments* parameters, 
-        __global float* inputOutputData, 
-        __global float* notUsed,
-        __global float* sigmaBuffer)
+        __global const UniformBufferLayerArguments* restrict parameters, 
+        __global float* restrict inputOutputData, 
+        __global float* restrict notUsed,
+        __global float* restrict sigmaBuffer)
     {
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -341,7 +350,10 @@ R""""(
 
 const char* ndBrainGpuContext::m_feedForwardKernels_3 =
 R""""(
-    __kernel void brainLayerSoftmaxActivation(__global const UniformBufferLayerArguments* parameters, __global float* inputOutputData, __global float* notUsed)
+    __kernel void brainLayerSoftmaxActivation(
+        __global const UniformBufferLayerArguments* restrict parameters, 
+        __global float* restrict inputOutputData, 
+        __global float* restrict notUsed)
     {
         __local float reductionBuffer [1024];
         __local float tmpInputBuffer [ND_GPU_LOCAL_BUFFER_SIZE];
@@ -455,9 +467,9 @@ R""""(
 const char* ndBrainGpuContext::m_backPropagateKernels_1 =
 R""""(
     __kernel void brainCopyInputGradients(
-            __global const UniformBufferLayerArguments* parameters, 
-            __global float* miniBatchGradients, 
-            __global float* inputOutputGradients) 
+            __global const UniformBufferLayerArguments* restrict parameters, 
+            __global float* restrict miniBatchGradients, 
+            __global float* restrict inputOutputGradients) 
     {
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -485,9 +497,9 @@ R""""(
     }
 
     __kernel void brainCopyOutputGradients(
-            __global const UniformBufferLayerArguments* parameters, 
-            __global float* miniBatchGradients, 
-            __global float* inputOutputGradients) 
+            __global const UniformBufferLayerArguments* restrict parameters, 
+            __global float* restrict miniBatchGradients, 
+            __global float* restrict inputOutputGradients) 
     {
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -519,11 +531,11 @@ R""""(
 const char* ndBrainGpuContext::m_backPropagateKernels_2 =
 R""""(
     __kernel void brainLayerBrainReluBackPropagate(
-            __global const UniformBufferLayerArguments* parameters, 
-            __global float* inputOutputData, 
-            __global float* weightsAndBias, 
-            __global float* inputOutputGradients,
-            __global float* weightsAndBiasGradients) 
+            __global const UniformBufferLayerArguments* restrict parameters, 
+            __global float* restrict inputOutputData, 
+            __global float* restrict weightsAndBias, 
+            __global float* restrict inputOutputGradients,
+            __global float* restrict weightsAndBiasGradients) 
     {
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -555,11 +567,11 @@ R""""(
     }
 
     __kernel void brainLayerBrainLeakyReluBackPropagate(
-            __global const UniformBufferLayerArguments* parameters, 
-            __global float* inputOutputData, 
-            __global float* weightsAndBias, 
-            __global float* inputOutputGradients,
-            __global float* weightsAndBiasGradients) 
+            __global const UniformBufferLayerArguments* restrict parameters, 
+            __global float* restrict inputOutputData, 
+            __global float* restrict weightsAndBias, 
+            __global float* restrict inputOutputGradients,
+            __global float* restrict weightsAndBiasGradients) 
     {
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -591,11 +603,11 @@ R""""(
     }
 
     __kernel void brainLayerBrainTanhBackPropagate(
-            __global const UniformBufferLayerArguments* parameters, 
-            __global float* inputOutputData, 
-            __global float* weightsAndBias, 
-            __global float* inputOutputGradients,
-            __global float* weightsAndBiasGradients) 
+            __global const UniformBufferLayerArguments* restrict parameters, 
+            __global float* restrict restrict inputOutputData, 
+            __global float* restrict weightsAndBias, 
+            __global float* restrict inputOutputGradients,
+            __global float* restrict weightsAndBiasGradients) 
     {
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -627,12 +639,12 @@ R""""(
     }
 
     __kernel void brainLayerBrainLinearBackPropagate(
-            __global const UniformBufferLayerArguments* parameters, 
-            __global float* inputOutputData, 
-            __global float* weightsAndBias, 
-            __global float* inputOutputGradients,
-            __global float* weightsAndBiasGradients,
-            __global float* slopesPtr) 
+            __global const UniformBufferLayerArguments* restrict parameters, 
+            __global float* restrict restrict inputOutputData, 
+            __global float* restrict weightsAndBias, 
+            __global float* restrict inputOutputGradients,
+            __global float* restrict weightsAndBiasGradients,
+            __global float* restrict slopesPtr) 
     {
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -662,11 +674,11 @@ R""""(
     }
 
     __kernel void brainLayerBrainCathegoricalSoftmaxBackPropagate(
-            __global const UniformBufferLayerArguments* parameters, 
-            __global float* inputOutputData, 
-            __global float* weightsAndBias, 
-            __global float* inputOutputGradients,
-            __global float* weightsAndBiasGradients) 
+            __global const UniformBufferLayerArguments* restrict parameters, 
+            __global float* restrict restrict inputOutputData, 
+            __global float* restrict weightsAndBias, 
+            __global float* restrict inputOutputGradients,
+            __global float* restrict weightsAndBiasGradients) 
     {
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -696,11 +708,11 @@ R""""(
     }
 
     __kernel void brainLayerBrainDropOutBackPropagate(
-            __global const UniformBufferLayerArguments* parameters, 
-            __global float* inputOutputData, 
-            __global float* weightsAndBias, 
-            __global float* inputOutputGradients,
-            __global float* weightsAndBiasGradients) 
+            __global const UniformBufferLayerArguments* restrict parameters, 
+            __global float* restrict inputOutputData, 
+            __global float* restrict weightsAndBias, 
+            __global float* restrict inputOutputGradients,
+            __global float* restrict weightsAndBiasGradients) 
     {
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -728,12 +740,12 @@ R""""(
     }
 
     __kernel void brainLayerBrainPolicyGradientBackPropagate(
-            __global const UniformBufferLayerArguments* parameters, 
-            __global float* inputOutputData, 
-            __global float* weightsAndBias, 
-            __global float* inputOutputGradients,
-            __global float* weightsAndBiasGradients,
-            __global float* variance) 
+            __global const UniformBufferLayerArguments* restrict parameters, 
+            __global float* restrict inputOutputData, 
+            __global float* restrict weightsAndBias, 
+            __global float* restrict inputOutputGradients,
+            __global float* restrict weightsAndBiasGradients,
+            __global float* restrict variance) 
     {
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -790,7 +802,7 @@ R""""(
 
 const char* ndBrainGpuContext::m_optimizerKernels =
 R""""(
-    __kernel void brainAdamMomentumUpdate(__global UniformBufferOptimizerArguments* parameters) 
+    __kernel void brainAdamMomentumUpdate(__global UniformBufferOptimizerArguments* restrict parameters) 
     {
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -830,9 +842,11 @@ R""""(
     }
 
     __kernel void brainAdamUpdateLassoRegularizer(
-        __global const UniformBufferOptimizerArguments* parameters,
-        __global float* weightAndBiasBuffer, __global float* weightAndBiasGradientBuffer,
-        __global float* vdw, __global float* vdw2,
+        __global const UniformBufferOptimizerArguments* restrict parameters,
+        __global float* restrict weightAndBiasBuffer, 
+        __global float* restrict weightAndBiasGradientBuffer,
+        __global float* restrict vdw, 
+        __global float* restrict vdw2,
         float learnRate)
     {
         uint itemId = get_local_id(0);
@@ -866,9 +880,11 @@ R""""(
     }
 
     __kernel void brainAdamUpdateRidgeRegularizer(
-        __global const UniformBufferOptimizerArguments* parameters,
-        __global float* weightAndBiasBuffer, __global float* weightAndBiasGradientBuffer,
-        __global float* vdw, __global float* vdw2,
+        __global const UniformBufferOptimizerArguments* restrict parameters,
+        __global float* restrict weightAndBiasBuffer, 
+        __global float* restrict weightAndBiasGradientBuffer,
+        __global float* restrict vdw, 
+        __global float* restrict vdw2,
         float learnRate)
     {
         uint itemId = get_local_id(0);
@@ -905,11 +921,11 @@ R""""(
 const char* ndBrainGpuContext::m_matrixWeightsAndBiasGradients =
 R""""(
     __kernel void brainLayerBrainBackPropagateMatrixBiasGradients(
-        __global const UniformBufferLayerArguments* parameters, 
-        __global float* dummy0, 
-        __global float* partialBiasSumBuffer, 
-        __global float* dummy1,
-        __global float* weightAndBiasGradients) 
+        __global const UniformBufferLayerArguments* restrict parameters, 
+        __global float* restrict dummy0, 
+        __global float* restrict partialBiasSumBuffer, 
+        __global float* restrict dummy1,
+        __global float* restrict weightAndBiasGradients) 
     {
         const uint itemId = get_local_id(0);
         const uint groupId = get_group_id(0);
@@ -938,11 +954,11 @@ R""""(
     }
 
     __kernel void brainLayerBrainBackPropagateMatrixWeightsGradients(
-        __global const UniformBufferLayerArguments* parameters, 
-        __global float* inputOutputData, 
-        __global float* weightAndBias, 
-        __global float* inputOutputGradients,
-        __global float* weightAndBiasGradients) 
+        __global const UniformBufferLayerArguments* restrict parameters, 
+        __global float* restrict inputOutputData, 
+        __global float* restrict weightAndBias, 
+        __global float* restrict inputOutputGradients,
+        __global float* restrict weightAndBiasGradients) 
     {
         __local float cachedRowGradient[1024];
         __local float cachedOutputGradients[ND_GPU_LOCAL_BUFFER_SIZE];
@@ -1018,9 +1034,9 @@ R""""(
 const char* ndBrainGpuContext::m_matrixMultiply =
 R""""(
     __kernel void brainLayerMatrixMatrixMultiply(
-            __global const UniformBufferLayerArguments* parameters, 
-            __global float* inputOutputData, 
-            __global float* weightsAndBias) 
+            __global const UniformBufferLayerArguments* restrict parameters, 
+            __global float* restrict inputOutputData, 
+            __global float* restrict weightsAndBias) 
     {
         const uint tileSize = ND_GPU_TILED_MATRIX_ROWS;
         const uint tileSizeBits = ND_GPU_TILED_MATRIX_ROWS_BITS;
@@ -1107,11 +1123,11 @@ R""""(
     }
 
     __kernel void brainLayerBrainBackPropagateMatrixInputGradients(
-        __global const UniformBufferLayerArguments* parameters, 
-        __global float* inputOutputData, 
-        __global float* weightAndBias, 
-        __global float* inputOutputGradients,
-        __global float* weightAndBiasGradients) 
+        __global const UniformBufferLayerArguments* restrict parameters, 
+        __global float* restrict inputOutputData, 
+        __global float* restrict weightAndBias, 
+        __global float* restrict inputOutputGradients,
+        __global float* restrict weightAndBiasGradients) 
     {
         const uint tileSize = ND_GPU_TILED_MATRIX_ROWS;
         const uint tileSizeBits = ND_GPU_TILED_MATRIX_ROWS_BITS;
@@ -1178,8 +1194,8 @@ R""""(
         uint srcOffsetInByte,
         uint dstStrideInByte,
         uint dstOffsetInByte,
-        __global float* outputData,
-        __global float* inputData)
+        __global float* restrict outputData,
+        __global float* restrict inputData)
     {                                                                      
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -1209,9 +1225,9 @@ R""""(
         uint srcOffsetInByte,
         uint dstStrideInByte,
         uint dstOffsetInByte,
-        __global float* outputData,
-        __global float* inputData, 
-        __global uint* indexBuffer) 
+        __global float* restrict outputData,
+        __global float* restrict inputData, 
+        __global uint* restrict indexBuffer) 
     {                                                                      
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -1241,8 +1257,8 @@ const char* ndBrainGpuContext::m_mathOpsCommand =
 R""""(
     __kernel void brainBufferAssigment(
         int numberOfElements,
-        __global float* outputData,
-        __global float* inputData)
+        __global float* restrict outputData,
+        __global float* restrict inputData)
     {
         int global_id = get_global_id(0);
         if (global_id < numberOfElements)
@@ -1253,8 +1269,8 @@ R""""(
 
     __kernel void brainAdd(
         int numberOfElements,
-        __global float* outputData,
-        __global float* inputData)
+        __global float* restrict outputData,
+        __global float* restrict inputData)
     {
         int global_id = get_global_id(0);
         if (global_id < numberOfElements)
@@ -1265,8 +1281,8 @@ R""""(
 
     __kernel void brainSub(
         int numberOfElements,
-        __global float* outputData,
-        __global float* inputData)
+        __global float* restrict outputData,
+        __global float* restrict inputData)
     {
         int global_id = get_global_id(0);
         if (global_id < numberOfElements)
@@ -1277,8 +1293,8 @@ R""""(
 
     __kernel void brainMul(
         int numberOfElements,
-        __global float* outputData,
-        __global float* inputData)
+        __global float* restrict outputData,
+        __global float* restrict inputData)
     {
         int global_id = get_global_id(0);
         if (global_id < numberOfElements)
@@ -1289,8 +1305,8 @@ R""""(
 
     __kernel void brainMin(
         int numberOfElements,
-        __global float* outputData,
-        __global float* inputData)
+        __global float* restrict outputData,
+        __global float* restrict inputData)
     {
         int global_id = get_global_id(0);
         if (global_id < numberOfElements)
@@ -1303,8 +1319,8 @@ R""""(
 
     __kernel void brainMax(
         int numberOfElements,
-        __global float* outputData,
-        __global float* inputData)
+        __global float* restrict outputData,
+        __global float* restrict inputData)
     {
         int global_id = get_global_id(0);
         if (global_id < numberOfElements)
@@ -1317,8 +1333,8 @@ R""""(
 
     __kernel void brainLessEqual(
         int numberOfElements,
-        __global float* outputData,
-        __global float* inputData)
+        __global float* restrict outputData,
+        __global float* restrict inputData)
     {
         int global_id = get_global_id(0);
         if (global_id < numberOfElements)
@@ -1329,8 +1345,8 @@ R""""(
 
     __kernel void brainGreaterEqual(
         int numberOfElements,
-        __global float* outputData,
-        __global float* inputData)
+        __global float* restrict outputData,
+        __global float* restrict inputData)
     {
         int global_id = get_global_id(0);
         if (global_id < numberOfElements)
@@ -1341,7 +1357,7 @@ R""""(
 
     __kernel void brainLessScalar(
         int numberOfElements,
-        __global float* outputData,
+        __global float* restrict outputData,
         float test)
     {
         int global_id = get_global_id(0);
@@ -1353,7 +1369,7 @@ R""""(
 
     __kernel void brainGreaterScalar(
         int numberOfElements,
-        __global float* outputData,
+        __global float* restrict outputData,
         float test)
     {
         int global_id = get_global_id(0);
@@ -1365,7 +1381,7 @@ R""""(
 
     __kernel void brainLessEqualScalar(
         int numberOfElements,
-        __global float* outputData,
+        __global float* restrict outputData,
         float test)
     {
         int global_id = get_global_id(0);
@@ -1377,7 +1393,7 @@ R""""(
 
     __kernel void brainGreaterEqualScalar(
         int numberOfElements,
-        __global float* outputData,
+        __global float* restrict outputData,
         float test)
     {
         int global_id = get_global_id(0);
@@ -1389,7 +1405,7 @@ R""""(
 
     __kernel void brainScale(
         int numberOfElements,
-        __global float* outputData, 
+        __global float* restrict outputData, 
         float scale)
     {
         int global_id = get_global_id(0);
@@ -1401,7 +1417,7 @@ R""""(
 
     __kernel void brainSelect(
         int numberOfElements,
-        __global float* outputData, 
+        __global float* restrict outputData, 
         __global float* mask, 
         float a, float b)
     {
@@ -1416,7 +1432,7 @@ R""""(
 
     __kernel void brainSet(
         int numberOfElements,
-        __global float* outputData, 
+        __global float* restrict outputData, 
         float value)
     {
         int global_id = get_global_id(0);
@@ -1428,8 +1444,8 @@ R""""(
 
     __kernel void brainScaleAdd(
         int numberOfElements,
-        __global float* outputData, 
-        __global float* inputData, 
+        __global float* restrict outputData, 
+        __global float* restrict inputData, 
         float scale)
     {
         int global_id = get_global_id(0);
@@ -1441,8 +1457,8 @@ R""""(
 
     __kernel void brainBlendScale(
         int numberOfElements,
-        __global float* outputData, 
-        __global float* inputData,
+        __global float* restrict outputData, 
+        __global float* restrict inputData,
         float blend)
     {
         int global_id = get_global_id(0);
@@ -1455,8 +1471,8 @@ R""""(
 
     __kernel void brainBlendVector(
         int numberOfElements,
-        __global float* outputData, 
-        __global float* inputData,
+        __global float* restrict outputData, 
+        __global float* restrict inputData,
         __global float* blendData)
     {
         int global_id = get_global_id(0);
@@ -1471,8 +1487,8 @@ R""""(
 
     __kernel void brainBroadcastScalar(
         int numberOfElements,
-        __global float* outputData, 
-        __global float* inputData)
+        __global float* restrict outputData, 
+        __global float* restrict inputData)
     {
         uint itemId = get_local_id(0);
         uint groupId = get_group_id(0);
@@ -1495,7 +1511,7 @@ R""""(
 
     __kernel void brainMinScalar(
         int numberOfElements,
-        __global float* outputData,
+        __global float* restrict outputData,
         float scalar)
     {
         int global_id = get_global_id(0);
@@ -1508,7 +1524,7 @@ R""""(
 
     __kernel void brainMaxScalar(
         int numberOfElements,
-        __global float* outputData,
+        __global float* restrict outputData,
         float scalar)
     {
         int global_id = get_global_id(0);
@@ -1521,8 +1537,8 @@ R""""(
 
     __kernel void brainReciprocal(
         int numberOfElements,
-        __global float* outputData,
-        __global float* inputData)
+        __global float* restrict outputData,
+        __global float* restrict inputData)
     {
         int global_id = get_global_id(0);
         if (global_id < numberOfElements)
@@ -1535,7 +1551,9 @@ R""""(
 
 const char* ndBrainGpuContext::m_probabilitiesKernels =
 R""""(
-    __kernel void brainNormalDistribution(int numberOfElements, __global float* uniformRandom)
+    __kernel void brainNormalDistribution(
+        int numberOfElements, 
+        __global float* restrict uniformRandom)
     {
         int global_id = get_global_id(0);
         if (global_id < numberOfElements)
@@ -1573,9 +1591,9 @@ R""""(
 
     __kernel void brainEntropyReqularization(
         int numberOfElements,
-        __global float* outputBuffer,
-        __global float* meanBuffer,
-        __global float* varianceBuffer,
+        __global float* restrict outputBuffer,
+        __global float* restrict meanBuffer,
+        __global float* restrict varianceBuffer,
         float regularizationTemperature)
     {
         uint itemId = get_local_id(0);
@@ -1606,9 +1624,9 @@ R""""(
 
     __kernel void brainEntropyReqularizationGradient(
         int numberOfElements,
-        __global float* outputBuffer,
-        __global float* meanBuffer,
-        __global float* varianceBuffer,
+        __global float* restrict outputBuffer,
+        __global float* restrict meanBuffer,
+        __global float* restrict varianceBuffer,
         float regularizationTemperature)
     {
         uint itemId = get_local_id(0);
