@@ -1357,7 +1357,8 @@ class brainLayerMatrixMatrixMultiply : public ndBrainKernel
         const ndInt32 height = (ouputSize + ND_GPU_TILED_MATRIX_ROWS - 1) & -ND_GPU_TILED_MATRIX_ROWS;
         const ndInt32 matrixSize = width * height;
 
-        const ndInt32 kDim = (inputSize + ND_GPU_TILED_MATRIX_ROWS - 1) / ND_GPU_TILED_MATRIX_ROWS;
+        //const ndInt32 kDim = (inputSize + ND_GPU_TILED_MATRIX_ROWS - 1) / ND_GPU_TILED_MATRIX_ROWS;
+        ndAssert((inputSize + ND_GPU_TILED_MATRIX_ROWS - 1) / ND_GPU_TILED_MATRIX_ROWS == 1);
         const ndInt32 rowStart = groupId / info.m_matrixDimensionK;
         const ndInt32 columStart = groupId - rowStart * info.m_matrixDimensionK;
 
@@ -1365,70 +1366,70 @@ class brainLayerMatrixMatrixMultiply : public ndBrainKernel
         const ndBrainMemVector weightsAndBias(&weightAndBiasPtr[info.m_parametersStartOffset], matrixSize);
         const ndBrainMemVector inputBuffer((ndBrainFloat*)buffer1->GetGpuBuffer()->GetPtr(), ndInt32(buffer1->SizeInItems()));
 
-        const ndInt32 weightsBase = rowStart * width * ND_GPU_TILED_MATRIX_ROWS;
-        const ndInt32 inputBase = columStart * inputOutputSize * ND_GPU_TILED_MATRIX_ROWS + inputOutputStartOffset;
-
-        for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
+        for (ndInt32 k = 0; k < ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS; k += workGroupSize)
         {
-            for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
+            const ndInt32 base = k >> ND_GPU_TILED_MATRIX_ROWS_BITS;
+            for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
             {
-                tile_acc[j][i] = ndBrainFloat(0.0f);
+                ndInt32 itemIdTile_i = itemId & (ND_GPU_TILED_MATRIX_ROWS-1);
+                ndInt32 itemIdTile_j = itemId >> ND_GPU_TILED_MATRIX_ROWS_BITS;
+                tile_acc[base + itemIdTile_j][itemIdTile_i] = ndBrainFloat(0.0f);
             }
         }
 
-        for (ndInt32 k = 0; k < kDim; ++k)
+        // load tiles
+        const ndInt32 tileWorkGroupStride = (workGroupSize >> ND_GPU_TILED_MATRIX_ROWS_BITS);
+        const ndInt32 weightsBase = rowStart * width * ND_GPU_TILED_MATRIX_ROWS;
+        const ndInt32 inputBase = columStart * inputOutputSize * ND_GPU_TILED_MATRIX_ROWS + inputOutputStartOffset;
+
+        ndInt32 inputOffset = inputBase;
+        ndInt32 weightOffset = weightsBase;
+        for (ndInt32 k = 0; k < ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS; k += workGroupSize)
         {
-            // load tiles
-            ndInt32 inputOffset = inputBase + k * ND_GPU_TILED_MATRIX_ROWS;
-            ndInt32 weightOffset = weightsBase + k * ND_GPU_TILED_MATRIX_ROWS;
-            for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
+            const ndInt32 base = k >> ND_GPU_TILED_MATRIX_ROWS_BITS;
+            for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
             {
-                for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
-                {
-                    tile_weights[j][i] = weightsAndBias[weightOffset + i];
-                    tile_inputs[j][i] = inputBuffer[inputOffset + i];
-                }
-                weightOffset += width;
-                inputOffset += inputOutputSize;
+                ndInt32 itemIdTile_i = itemId & (ND_GPU_TILED_MATRIX_ROWS - 1);
+                ndInt32 itemIdTile_j = itemId >> ND_GPU_TILED_MATRIX_ROWS_BITS;
+
+                tile_weights[base + itemIdTile_j][itemIdTile_i] = weightsAndBias[weightOffset + itemIdTile_j * width + itemIdTile_i];
+                tile_inputs[base + itemIdTile_j][itemIdTile_i] = inputBuffer[inputOffset + itemIdTile_j * inputOutputSize + itemIdTile_i];
             }
+            weightOffset += width * tileWorkGroupStride;
+            inputOffset += inputOutputSize * tileWorkGroupStride;
+        }
 
-            for (ndInt32 j1 = 0; j1 < ND_GPU_TILED_MATRIX_ROWS; j1 += ND_GPU_TILED_MATRIX_ROWS / 2)
+        for (ndInt32 j1 = 0; j1 < ND_GPU_TILED_MATRIX_ROWS; j1 += ND_GPU_TILED_MATRIX_ROWS / 2)
+        {
+            for (ndInt32 i1 = 0; i1 < ND_GPU_TILED_MATRIX_ROWS; i1 += ND_GPU_TILED_MATRIX_ROWS / 2)
             {
-                for (ndInt32 i1 = 0; i1 < ND_GPU_TILED_MATRIX_ROWS; i1 += ND_GPU_TILED_MATRIX_ROWS / 2)
+                for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
                 {
-                    for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
-                    {
-                        for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
-                        {
-                            smallTile[j][i] = ndBrainFloat(0.0f);
-                        }
-                    }
+                    ndInt32 itemIdSmallTile_i = itemId & (ND_GPU_TILED_MATRIX_ROWS / 2 - 1);
+                    ndInt32 itemIdSmallTile_j = itemId >> (ND_GPU_TILED_MATRIX_ROWS_BITS - 1);
+                    smallTile[itemIdSmallTile_j][itemIdSmallTile_i] = ndBrainFloat(0.0f);
+                }
 
-                    for (ndInt32 m = 0; m < ND_GPU_TILED_MATRIX_ROWS; m += ND_GPU_TILED_MATRIX_ROWS / 2)
+                for (ndInt32 m = 0; m < ND_GPU_TILED_MATRIX_ROWS; m += ND_GPU_TILED_MATRIX_ROWS / 2)
+                {
+                    for (ndInt32 k = 0; k < ND_GPU_TILED_MATRIX_ROWS / 2; ++k)
                     {
-                        for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
+                        for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
                         {
-                            for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
-                            {
-                                ndBrainFloat acc = ndBrainFloat(0.0f);
-                                for (ndInt32 n = 0; n < ND_GPU_TILED_MATRIX_ROWS / 2; ++n)
-                                {
-                                    ndBrainFloat input = tile_inputs[j1 + j][n + m];
-                                    ndBrainFloat weight = tile_weights[i1 + i][n + m];
-                                    acc += weight * input;
-                                }
-                                smallTile[j][i] += acc;
-                            }
+                            ndInt32 itemIdSmallTile_i = itemId & (ND_GPU_TILED_MATRIX_ROWS / 2 - 1);
+                            ndInt32 itemIdSmallTile_j = itemId >> (ND_GPU_TILED_MATRIX_ROWS_BITS - 1);
+                            ndBrainFloat input = tile_inputs[j1 + itemIdSmallTile_j][m + k];
+                            ndBrainFloat weight = tile_weights[i1 + itemIdSmallTile_i][m + k];
+                            smallTile[itemIdSmallTile_j][itemIdSmallTile_i] += weight * input;
                         }
                     }
+                }
 
-                    for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
-                    {
-                        for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
-                        {
-                            tile_acc[j1 + j][i1 + i] += smallTile[j][i];
-                        }
-                    }
+                for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
+                {
+                    ndInt32 itemIdSmallTile_i = itemId & (ND_GPU_TILED_MATRIX_ROWS/2 - 1);
+                    ndInt32 itemIdSmallTile_j = itemId >> (ND_GPU_TILED_MATRIX_ROWS_BITS-1);
+                    tile_acc[j1 + itemIdSmallTile_j][i1 + itemIdSmallTile_i] += smallTile[itemIdSmallTile_j][itemIdSmallTile_i];
                 }
             }
         }
@@ -1436,14 +1437,16 @@ class brainLayerMatrixMatrixMultiply : public ndBrainKernel
         // store tile results
         ndInt64 outputOffset = inputBase + rowStart * ND_GPU_TILED_MATRIX_ROWS + ((inputSize + workGroupSize - 1) & -workGroupSize);
         ndBrainMemVector outputBuffer((ndBrainFloat*)buffer1->GetGpuBuffer()->GetPtr(), ndInt32(buffer1->SizeInItems()));
-        for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
+        for (ndInt32 k = 0; k < ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS; k += workGroupSize)
         {
-            for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
+            const ndInt32 base = k >> ND_GPU_TILED_MATRIX_ROWS_BITS;
+            for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
             {
-                ndBrainFloat acc = tile_acc[j][i];
-                outputBuffer[outputOffset + i] = acc;
+                ndInt32 itemIdTile_i = itemId & (ND_GPU_TILED_MATRIX_ROWS - 1);
+                ndInt32 itemIdTile_j = itemId >> ND_GPU_TILED_MATRIX_ROWS_BITS;
+                outputBuffer[outputOffset + itemIdTile_j * inputOutputSize + itemIdTile_i] = tile_acc[base + itemIdTile_j][itemIdTile_i];
             }
-            outputOffset += inputOutputSize;
+            outputOffset += inputOutputSize * tileWorkGroupStride;
         }
         //ndAssert(outputBuffer.SanityCheck());
     }
@@ -1489,7 +1492,6 @@ class brainLayerMatrixMatrixMultiplyTile : public ndBrainKernel
         const ndInt32 groupTileIndex = groupId / (rowDim * columDim);
         groupId = groupId - groupTileIndex * rowDim * columDim;
 
-        //const ndInt32 kDim = (inputSize + ND_GPU_TILED_MATRIX_ROWS - 1) / ND_GPU_TILED_MATRIX_ROWS;
         const ndInt32 rowStart = groupId / columDim;
         const ndInt32 columStart = groupId - rowStart * columDim;
 
@@ -1501,67 +1503,126 @@ class brainLayerMatrixMatrixMultiplyTile : public ndBrainKernel
         const ndInt32 inputBase = columStart * inputOutputSize * ND_GPU_TILED_MATRIX_ROWS + inputOutputStartOffset;
 
         // load tiles
+        const ndInt32 tileWorkGroupStride = (workGroupSize >> ND_GPU_TILED_MATRIX_ROWS_BITS);
         ndInt32 inputOffset = inputBase + groupTileIndex * ND_GPU_TILED_MATRIX_ROWS;
         ndInt32 weightOffset = weightsBase + groupTileIndex * ND_GPU_TILED_MATRIX_ROWS;
-        for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
+        //for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS; ++j)
+        //{
+        //    for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
+        //    {
+        //        tile_weights[j][i] = weightsAndBias[weightOffset + i];
+        //        tile_inputs[j][i] = inputBuffer[inputOffset + i];
+        //    }
+        //    weightOffset += width;
+        //    inputOffset += inputOutputSize;
+        //}
+        for (ndInt32 k = 0; k < ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS; k += workGroupSize)
         {
-            for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS; ++i)
+            const ndInt32 base = k >> ND_GPU_TILED_MATRIX_ROWS_BITS;
+            for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
             {
-                tile_weights[j][i] = weightsAndBias[weightOffset + i];
-                tile_inputs[j][i] = inputBuffer[inputOffset + i];
+                ndInt32 itemIdTile_i = itemId & (ND_GPU_TILED_MATRIX_ROWS - 1);
+                ndInt32 itemIdTile_j = itemId >> ND_GPU_TILED_MATRIX_ROWS_BITS;
+
+                tile_weights[base + itemIdTile_j][itemIdTile_i] = weightsAndBias[weightOffset + itemIdTile_j * width + itemIdTile_i];
+                tile_inputs[base + itemIdTile_j][itemIdTile_i] = inputBuffer[inputOffset + itemIdTile_j * inputOutputSize + itemIdTile_i];
             }
-            weightOffset += width;
-            inputOffset += inputOutputSize;
+            weightOffset += width * tileWorkGroupStride;
+            inputOffset += inputOutputSize * tileWorkGroupStride;
         }
 
+        //ndBrainFloat tile_acc____[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS];
+        //ndBrainFloat smallTile___[ND_GPU_TILED_MATRIX_ROWS / 2][ND_GPU_TILED_MATRIX_ROWS / 2];
         for (ndInt32 j1 = 0; j1 < ND_GPU_TILED_MATRIX_ROWS; j1 += ND_GPU_TILED_MATRIX_ROWS / 2)
         {
             for (ndInt32 i1 = 0; i1 < ND_GPU_TILED_MATRIX_ROWS; i1 += ND_GPU_TILED_MATRIX_ROWS / 2)
             {
-                for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
+                //for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
+                //{
+                //    for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
+                //    {
+                //        smallTile___[j][i] = ndBrainFloat(0.0f);
+                //    }
+                //}
+                //
+                //for (ndInt32 m = 0; m < ND_GPU_TILED_MATRIX_ROWS; m += ND_GPU_TILED_MATRIX_ROWS / 2)
+                //{
+                //    for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
+                //    {
+                //        for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
+                //        {
+                //            ndBrainFloat acc = ndBrainFloat(0.0f);
+                //            for (ndInt32 n = 0; n < ND_GPU_TILED_MATRIX_ROWS / 2; ++n)
+                //            {
+                //                ndBrainFloat input = tile_inputs[j1 + j][n + m];
+                //                ndBrainFloat weight = tile_weights[i1 + i][n + m];
+                //                acc += weight * input;
+                //            }
+                //            smallTile___[j][i] += acc;
+                //        }
+                //    }
+                //}
+                //
+                //for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
+                //{
+                //    for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
+                //    {
+                //        tile_acc____[j1 + j][i1 + i] = smallTile___[j][i];
+                //    }
+                //}
+
+                for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
                 {
-                    for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
-                    {
-                        smallTile[j][i] = ndBrainFloat(0.0f);
-                    }
+                    ndInt32 itemIdSmallTile_i = itemId & (ND_GPU_TILED_MATRIX_ROWS / 2 - 1);
+                    ndInt32 itemIdSmallTile_j = itemId >> (ND_GPU_TILED_MATRIX_ROWS_BITS - 1);
+                    smallTile[itemIdSmallTile_j][itemIdSmallTile_i] = ndBrainFloat(0.0f);
                 }
 
                 for (ndInt32 m = 0; m < ND_GPU_TILED_MATRIX_ROWS; m += ND_GPU_TILED_MATRIX_ROWS / 2)
                 {
-                    for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
+                    for (ndInt32 k = 0; k < ND_GPU_TILED_MATRIX_ROWS / 2; ++k)
                     {
-                        for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
+                        for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
                         {
-                            ndBrainFloat acc = ndBrainFloat(0.0f);
-                            for (ndInt32 n = 0; n < ND_GPU_TILED_MATRIX_ROWS / 2; ++n)
-                            {
-                                ndBrainFloat input = tile_inputs[j1 + j][n + m];
-                                ndBrainFloat weight = tile_weights[i1 + i][n + m];
-                                acc += weight * input;
-                            }
-                            smallTile[j][i] += acc;
+                            ndInt32 itemIdSmallTile_i = itemId & (ND_GPU_TILED_MATRIX_ROWS / 2 - 1);
+                            ndInt32 itemIdSmallTile_j = itemId >> (ND_GPU_TILED_MATRIX_ROWS_BITS - 1);
+                            ndBrainFloat input = tile_inputs[j1 + itemIdSmallTile_j][m + k];
+                            ndBrainFloat weight = tile_weights[i1 + itemIdSmallTile_i][m + k];
+                            smallTile[itemIdSmallTile_j][itemIdSmallTile_i] += weight * input;
                         }
                     }
                 }
 
-                for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS / 2; ++j)
+                for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
                 {
-                    for (ndInt32 i = 0; i < ND_GPU_TILED_MATRIX_ROWS / 2; ++i)
-                    {
-                        tile_acc[j1 + j][i1 + i] = smallTile[j][i];
-                    }
+                    ndInt32 itemIdSmallTile_i = itemId & (ND_GPU_TILED_MATRIX_ROWS / 2 - 1);
+                    ndInt32 itemIdSmallTile_j = itemId >> (ND_GPU_TILED_MATRIX_ROWS_BITS - 1);
+                    tile_acc[j1 + itemIdSmallTile_j][i1 + itemIdSmallTile_i] = smallTile[itemIdSmallTile_j][itemIdSmallTile_i];
                 }
             }
         }
 
-        const ndBrainMemVector tileMem(&tile_acc[0][0], ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS);
-        ndBrainMemVector tempBuffer((ndBrainFloat*)buffer3->GetGpuBuffer()->GetPtr(), ndInt32(buffer3->SizeInItems()));
-        ndBrainMemVector tileMatrixOuput(&tempBuffer[matrixTileOffset], ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS);
-        for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS; j += workGroupSize)
+        //const ndBrainMemVector tileMem(&tile_acc[0][0], ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS);
+        //ndBrainMemVector tempBuffer((ndBrainFloat*)buffer3->GetGpuBuffer()->GetPtr(), ndInt32(buffer3->SizeInItems()));
+        //ndBrainMemVector tileMatrixOuput(&tempBuffer[matrixTileOffset], ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS);
+        //for (ndInt32 j = 0; j < ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS; j += workGroupSize)
+        //{
+        //    for (ndInt32 i = 0; i < workGroupSize; ++i)
+        //    {
+        //        tileMatrixOuput[j + i] = tileMem[j + i];
+        //    }
+        //}
+
+        ndBrainMemVector tempTileBuffer((ndBrainFloat*)buffer3->GetGpuBuffer()->GetPtr(), ndInt32(buffer3->SizeInItems()));
+        ndBrainMemVector tileMatrixOuput(&tempTileBuffer[matrixTileOffset], ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS);
+        for (ndInt32 k = 0; k < ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS; k += workGroupSize)
         {
-            for (ndInt32 i = 0; i < workGroupSize; ++i)
+            const ndInt32 base = k >> ND_GPU_TILED_MATRIX_ROWS_BITS;
+            for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
             {
-                tileMatrixOuput[j + i] = tileMem[j + i];
+                ndInt32 itemIdTile_i = itemId & (ND_GPU_TILED_MATRIX_ROWS - 1);
+                ndInt32 itemIdTile_j = itemId >> ND_GPU_TILED_MATRIX_ROWS_BITS;
+                tileMatrixOuput[k + itemId] = tile_acc[base + itemIdTile_j][itemIdTile_i];
             }
         }
     }
