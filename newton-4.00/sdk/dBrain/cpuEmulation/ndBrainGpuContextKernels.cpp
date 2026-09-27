@@ -1366,16 +1366,16 @@ class brainLayerMatrixMatrixMultiply : public ndBrainKernel
         const ndBrainMemVector weightsAndBias(&weightAndBiasPtr[info.m_parametersStartOffset], matrixSize);
         const ndBrainMemVector inputBuffer((ndBrainFloat*)buffer1->GetGpuBuffer()->GetPtr(), ndInt32(buffer1->SizeInItems()));
 
-        for (ndInt32 k = 0; k < ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS; k += workGroupSize)
-        {
-            const ndInt32 base = k >> ND_GPU_TILED_MATRIX_ROWS_BITS;
-            for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
-            {
-                ndInt32 itemIdTile_i = itemId & (ND_GPU_TILED_MATRIX_ROWS-1);
-                ndInt32 itemIdTile_j = itemId >> ND_GPU_TILED_MATRIX_ROWS_BITS;
-                tile_acc[base + itemIdTile_j][itemIdTile_i] = ndBrainFloat(0.0f);
-            }
-        }
+        //for (ndInt32 k = 0; k < ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS; k += workGroupSize)
+        //{
+        //    const ndInt32 base = k >> ND_GPU_TILED_MATRIX_ROWS_BITS;
+        //    for (ndInt32 itemId = 0; itemId < workGroupSize; ++itemId)
+        //    {
+        //        ndInt32 itemIdTile_i = itemId & (ND_GPU_TILED_MATRIX_ROWS-1);
+        //        ndInt32 itemIdTile_j = itemId >> ND_GPU_TILED_MATRIX_ROWS_BITS;
+        //        tile_acc[base + itemIdTile_j][itemIdTile_i] = ndBrainFloat(0.0f);
+        //    }
+        //}
 
         // load tiles
         const ndInt32 tileWorkGroupStride = (workGroupSize >> ND_GPU_TILED_MATRIX_ROWS_BITS);
@@ -1429,7 +1429,8 @@ class brainLayerMatrixMatrixMultiply : public ndBrainKernel
                 {
                     ndInt32 itemIdSmallTile_i = itemId & (ND_GPU_TILED_MATRIX_ROWS/2 - 1);
                     ndInt32 itemIdSmallTile_j = itemId >> (ND_GPU_TILED_MATRIX_ROWS_BITS-1);
-                    tile_acc[j1 + itemIdSmallTile_j][i1 + itemIdSmallTile_i] += smallTile[itemIdSmallTile_j][itemIdSmallTile_i];
+                    //tile_acc[j1 + itemIdSmallTile_j][i1 + itemIdSmallTile_i] += smallTile[itemIdSmallTile_j][itemIdSmallTile_i];
+                    tile_acc[j1 + itemIdSmallTile_j][i1 + itemIdSmallTile_i] = smallTile[itemIdSmallTile_j][itemIdSmallTile_i];
                 }
             }
         }
@@ -1596,7 +1597,6 @@ class brainLayerMatrixMatrixMultiplyAddTile : public ndBrainKernel
         const ndInt32 inputOutputSize = info.m_inputOutputSize;
         const ndInt32 inputOutputStartOffset = info.m_inputOutputStartOffset;
 
-        //const ndInt32 width = (inputSize + ND_GPU_TILED_MATRIX_ROWS - 1) / ND_GPU_TILED_MATRIX_ROWS;
         const ndInt32 width = (ouputSize + ND_GPU_TILED_MATRIX_ROWS - 1) / ND_GPU_TILED_MATRIX_ROWS;
         const ndInt32 height = workGroupSize / ND_GPU_TILED_MATRIX_ROWS;
         const ndInt32 tileStride = width * height * ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS;
