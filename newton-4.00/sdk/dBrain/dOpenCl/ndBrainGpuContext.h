@@ -135,18 +135,6 @@ class ndBrainGpuContext : public ndBrainContext
 
 	public:
 	//feed forward shaders
-	//ndSharedPtr<ndBrainKernel> m_brainCopyInput;
-	//ndSharedPtr<ndBrainKernel> m_brainCopyOutput;
-	//ndSharedPtr<ndBrainKernel> m_brainLayerReluActivation;
-	//ndSharedPtr<ndBrainKernel> m_brainLayerTanhActivation;
-	//ndSharedPtr<ndBrainKernel> m_brainLayerLinearActivation;
-	//ndSharedPtr<ndBrainKernel> m_brainLayerSoftmaxActivation;
-	//ndSharedPtr<ndBrainKernel> m_brainLayerDropOutActivation;
-	//ndSharedPtr<ndBrainKernel> m_brainLayerLeakyReluActivation;
-	//ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiply;
-	//ndSharedPtr<ndBrainKernel> m_brainLayerPolicyGradientActivation;
-
-	//feed forward shaders
 	ndSharedPtr<ndBrainKernel> m_brainCopyInput;
 	ndSharedPtr<ndBrainKernel> m_brainCopyOutput;
 	ndSharedPtr<ndBrainKernel> m_brainLayerReluActivation;
@@ -159,6 +147,7 @@ class ndBrainGpuContext : public ndBrainContext
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiply;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiplyTile;
 	ndSharedPtr<ndBrainKernel> m_brainLayerMatrixMatrixMultiplyAddTile;
+
 	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationAddInputActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationLoadInputActivation;
 	ndSharedPtr<ndBrainKernel> m_brainLayerBatchNormalizationNormalizeInputActivation;
@@ -240,6 +229,7 @@ class ndBrainGpuContext : public ndBrainContext
 
 	static const char* m_mathOpsCommand;
 	static const char* m_matrixMultiply;
+	static const char* m_transposeMatrixMultiply;
 	static const char* m_optimizerKernels;
 	static const char* m_commonKernelsInclude;
 	static const char* m_probabilitiesKernels;

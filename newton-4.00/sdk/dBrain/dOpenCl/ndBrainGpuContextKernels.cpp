@@ -304,49 +304,6 @@ R""""(
         }
     }
 
-    __kernel void brainLayerPolicyGradientActivation(
-        __global const UniformBufferLayerArguments* restrict parameters, 
-        __global float* restrict inputOutputData, 
-        __global float* restrict notUsed,
-        __global float* restrict sigmaBuffer)
-    {
-        uint itemId = get_local_id(0);
-        uint groupId = get_group_id(0);
-        uint workGroupSize = get_local_size(0);
-        
-        uint inputSize = parameters->m_inputSize;
-        uint inputOutputSize = parameters->m_inputOutputSize;
-        uint inputOutputStartOffset = parameters->m_inputOutputStartOffset;
-        
-        long inputOffset = groupId * (long)inputOutputSize + inputOutputStartOffset;
-        long outputOffset = inputOffset + CalculateWorkGroupRoundoff(inputSize, workGroupSize);
-
-        float varianceBias = sigmaBuffer[0];
-        float varianceSlope = sigmaBuffer[1];
-
-        uint halfSize = inputSize / 2;
-        uint workGroupSizeReminder = inputSize % workGroupSize;
-        uint modWorkGroupSize = inputSize - workGroupSizeReminder;
-        for (uint i = 0; i < modWorkGroupSize; i += workGroupSize)
-        {
-            float x = inputOutputData[inputOffset + i + itemId];
-            float value = (x < -30.0) ? -30.0 : ((x > 30.0) ? 30.0 : x);
-            float out0 = tanh(value);
-            float out1 = varianceBias + varianceSlope * out0;
-            bool test = (i + itemId) < halfSize;
-            inputOutputData[outputOffset + i + itemId] = test ? out0 : out1;
-        }
-        if (itemId < workGroupSizeReminder)
-        {
-            float x = inputOutputData[inputOffset + modWorkGroupSize + itemId];
-            float value = (x < -30.0) ? -30.0 : ((x > 30.0) ? 30.0 : x);
-            float out0 = tanh(value);
-            float out1 = varianceBias + varianceSlope * out0;
-            bool test = (modWorkGroupSize + itemId) < halfSize;
-            inputOutputData[outputOffset + modWorkGroupSize + itemId] = test ? out0 : out1;
-        }
-    }
-
 )"""";
 
 const char* ndBrainGpuContext::m_feedForwardKernels_3 =
@@ -1064,12 +1021,6 @@ R""""(
         const uint rowStart = groupId / parameters->m_matrixDimensionK;
         const uint columStart = groupId - rowStart * parameters->m_matrixDimensionK;
         
-        for (uint k = 0; k < ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS; k += workGroupSize)
-        {
-            const uint base = k >> ND_GPU_TILED_MATRIX_ROWS_BITS;
-            tile_acc[base + itemIdTile_j][itemIdTile_i] = 0.0f;
-        }
-        
         const uint tileWorkGroupStride = (workGroupSize >> ND_GPU_TILED_MATRIX_ROWS_BITS);
         const uint weightsBase = rowStart * width * ND_GPU_TILED_MATRIX_ROWS;
         const uint inputBase = columStart * inputOutputSize * ND_GPU_TILED_MATRIX_ROWS + inputOutputStartOffset;
@@ -1103,7 +1054,7 @@ R""""(
                         smallTile += weight * input;
                     }
                 }
-                tile_acc[j1 + itemIdSmallTile_j][i1 + itemIdSmallTile_i] += smallTile;
+                tile_acc[j1 + itemIdSmallTile_j][i1 + itemIdSmallTile_i] = smallTile;
             }
         }
         barrier(CLK_LOCAL_MEM_FENCE); 
@@ -1114,6 +1065,13 @@ R""""(
             const uint base = k >> ND_GPU_TILED_MATRIX_ROWS_BITS;
             inputOutputData[outputOffset + itemIdTile_j * inputOutputSize + itemIdTile_i] = tile_acc[base + itemIdTile_j][itemIdTile_i];
         }
+    }
+
+    __kernel void brainLayerMatrixMatrixAddBias(
+            __global const UniformBufferLayerArguments* restrict parameters, 
+            __global float* restrict inputOutputData, 
+            __global float* restrict weightsAndBiasData) 
+    {
     }
 
     __kernel void brainLayerMatrixMatrixMultiplyTile(
@@ -1201,6 +1159,69 @@ R""""(
         }
     }
 
+    __kernel void brainLayerMatrixMatrixMultiplyAddTile(
+            __global const UniformBufferLayerArguments* restrict parameters, 
+            __global float* restrict inputOutputData, 
+            __global float* restrict unUsed0, 
+            __global float* restrict tempTileBuffer) 
+    {
+        __local float tile_acc[ND_GPU_TILED_MATRIX_ROWS][ND_GPU_TILED_MATRIX_ROWS + 1];
+
+        uint itemId = get_local_id(0);
+        uint groupId = get_group_id(0);
+        uint workGroupSize = get_local_size(0);
+
+        const uint itemIdTile_i = itemId & (ND_GPU_TILED_MATRIX_ROWS-1);
+        const uint itemIdTile_j = itemId >> ND_GPU_TILED_MATRIX_ROWS_BITS;
+        //const uint itemIdSmallTile_i = itemId & (ND_GPU_TILED_MATRIX_ROWS / 2 - 1);
+        //const uint itemIdSmallTile_j = itemId >> (ND_GPU_TILED_MATRIX_ROWS_BITS - 1);
+
+        const uint inputSize = parameters->m_inputSize;
+        const uint ouputSize = parameters->m_outputSize;
+        const uint inputOutputSize = parameters->m_inputOutputSize;
+        const uint inputOutputStartOffset = parameters->m_inputOutputStartOffset;
+
+        const uint width = (ouputSize + ND_GPU_TILED_MATRIX_ROWS - 1) / ND_GPU_TILED_MATRIX_ROWS;
+        const uint height = workGroupSize / ND_GPU_TILED_MATRIX_ROWS;
+        const uint tileStride = width * height * ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS;
+
+        const uint kDim = (inputSize + ND_GPU_TILED_MATRIX_ROWS - 1) / ND_GPU_TILED_MATRIX_ROWS;
+        const uint rowStart = groupId / parameters->m_matrixDimensionK;
+        const uint columStart = groupId - rowStart * parameters->m_matrixDimensionK;
+
+        for (uint k = 0; k < ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS; k += workGroupSize)
+        {
+            const uint base = k >> ND_GPU_TILED_MATRIX_ROWS_BITS;
+            tile_acc[base + itemIdTile_j][itemIdTile_i] = 0.0f;
+        }
+
+        for (uint m = 0; m < kDim; ++m)
+        {
+            const uint tileOffset = m * tileStride + groupId * ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS;
+            const float* restrict subTileMatrix = &tempTileBuffer[tileOffset];
+            for (uint k = 0; k < ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS; k += workGroupSize)
+            {
+                const uint base = k >> ND_GPU_TILED_MATRIX_ROWS_BITS;
+                tile_acc[base + itemIdTile_j][itemIdTile_i] += subTileMatrix[k + itemId];
+            }
+        }
+
+        // store tile results
+        const uint inputBase = columStart * inputOutputSize * ND_GPU_TILED_MATRIX_ROWS + inputOutputStartOffset;
+        const uint tileWorkGroupStride = (workGroupSize >> ND_GPU_TILED_MATRIX_ROWS_BITS);
+        uint outputOffset = inputBase + rowStart * ND_GPU_TILED_MATRIX_ROWS + ((inputSize + workGroupSize - 1) & -workGroupSize);
+        for (uint k = 0; k < ND_GPU_TILED_MATRIX_ROWS * ND_GPU_TILED_MATRIX_ROWS; k += workGroupSize)
+        {
+            const uint base = k >> ND_GPU_TILED_MATRIX_ROWS_BITS;
+            inputOutputData[outputOffset + itemIdTile_j * inputOutputSize + itemIdTile_i] = tile_acc[base + itemIdTile_j][itemIdTile_i];
+            outputOffset += inputOutputSize * tileWorkGroupStride;
+        }
+    }
+)"""";
+
+
+const char* ndBrainGpuContext::m_transposeMatrixMultiply =
+R""""(
 
     __kernel void brainLayerBrainBackPropagateMatrixInputGradients(
         __global const UniformBufferLayerArguments* restrict parameters, 
@@ -1746,6 +1767,7 @@ void ndBrainGpuContext::CreateKerners()
     std::string source(m_commonKernelsInclude);
     source += m_mathOpsCommand;
     source += m_matrixMultiply;
+    source += m_transposeMatrixMultiply;
     source += m_optimizerKernels;
     source += m_otherShaderFunctions;
     source += m_feedForwardKernels_1;
@@ -1809,11 +1831,13 @@ void ndBrainGpuContext::CreateKerners()
     m_brainLayerLinearActivation = CreateKerner(program, "brainLayerLinearActivation");
     m_brainLayerSoftmaxActivation = CreateKerner(program, "brainLayerSoftmaxActivation");
     m_brainLayerLeakyReluActivation = CreateKerner(program, "brainLayerLeakyReluActivation");
+    m_brainLayerMatrixMatrixAddBias = CreateKerner(program, "brainLayerMatrixMatrixAddBias");
     m_brainLayerDropOutActivation = CreateKerner(program, "brainLayerLinearDropOutActivation");
     m_brainLayerMatrixMatrixMultiply = CreateKerner(program, "brainLayerMatrixMatrixMultiply");
     m_brainLayerMatrixMatrixMultiplyTile = CreateKerner(program, "brainLayerMatrixMatrixMultiplyTile");
+    m_brainLayerMatrixMatrixMultiplyAddTile = CreateKerner(program, "brainLayerMatrixMatrixMultiplyAddTile");
     ndAssert(0);
-    //m_brainLayerPolicyGradientActivation = CreateKerner(program, "brainLayerPolicyGradientActivation");
+
 
     // create all backpropagate shaders
     m_brainCopyInputGradients = CreateKerner(program, "brainCopyInputGradients");
