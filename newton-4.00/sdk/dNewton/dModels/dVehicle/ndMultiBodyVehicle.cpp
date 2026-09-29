@@ -624,13 +624,13 @@ void ndMultiBodyVehicle::Debug(ndConstraintDebugCallback& context) const
 	
 	// draw vehicle Lagrangian frame
 	ndMatrix lagragianFrame(chassisMatrix);
-	//lagragianFrame.m_posit = kinematics.m_centerOfMass.m_posit + kinematics.m_centerOfMass.m_up.Scale(vehicleHeight);
 	lagragianFrame.m_posit = kinematics.m_com + lagragianFrame.m_up.Scale(vehicleHeight);
 	context.DrawFrame(lagragianFrame);
 
 	// vehicle speed in the lagrangian frame
 	const ndVector veloc(kinematics.m_momentum.Scale (ndFloat32 (1.0f) / kinematics.m_mass));
-	const ndVector velocPoint(lagragianFrame.m_posit + lagragianFrame.RotateVector(veloc.Scale(ndFloat32(0.25f) * vehicleHeight)));
+	//const ndVector velocPoint(lagragianFrame.m_posit + lagragianFrame.RotateVector(veloc.Scale(ndFloat32(0.25f) * vehicleHeight)));
+	const ndVector velocPoint(lagragianFrame.m_posit + veloc.Scale(ndFloat32(0.25f) * vehicleHeight));
 	context.DrawLine(lagragianFrame.m_posit, velocPoint, ndVector(0.8f, 0.8f, 0.8f, 0.0f));
 	
 	// draw tires info
