@@ -122,8 +122,8 @@ class ndConvexCastVehicle::ndBicycleModelContact: public ndContact
 				ndContactMaterial& point = pointNode->GetInfo();
 				point.m_material.m_staticFriction0 = ndFloat32(0.01f);
 				point.m_material.m_staticFriction1 = ndFloat32(0.01f);
-				point.m_material.m_dynamicFriction0 = ndFloat32(0.01f);
-				point.m_material.m_dynamicFriction1 = ndFloat32(0.01f);
+				point.m_material.m_kineticFriction0 = ndFloat32(0.01f);
+				point.m_material.m_kineticFriction1 = ndFloat32(0.01f);
 			}
 		}
 		ndContact::JacobianDerivative(desc);
@@ -156,8 +156,8 @@ class ndConvexCastVehicle::ndBicycleModelContact: public ndContact
 				//ndContactMaterial& point = pointNode->GetInfo();
 				//point.m_material.m_staticFriction0 = ndFloat32(0.01f);
 				//point.m_material.m_staticFriction1 = ndFloat32(0.01f);
-				//point.m_material.m_dynamicFriction0 = ndFloat32(0.01f);
-				//point.m_material.m_dynamicFriction1 = ndFloat32(0.01f);
+				//point.m_material.m_kineticFriction0 = ndFloat32(0.01f);
+				//point.m_material.m_kineticFriction1 = ndFloat32(0.01f);
 			}
 		}
 		ndContact::JacobianDerivative(desc);

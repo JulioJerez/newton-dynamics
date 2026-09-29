@@ -94,8 +94,8 @@ class ndFrictionMaterial : public ndApplicationMaterial
 			ndFloat32 friction = contactPoint.m_shapeInstance0->m_shapeMaterial.m_userParam[ndDemoContactCallback::m_friction].m_floatData;
 			contactPoint.m_material.m_staticFriction0 = friction;
 			contactPoint.m_material.m_staticFriction1 = friction;
-			contactPoint.m_material.m_dynamicFriction0 = friction;
-			contactPoint.m_material.m_dynamicFriction1 = friction;
+			contactPoint.m_material.m_kineticFriction0 = friction;
+			contactPoint.m_material.m_kineticFriction1 = friction;
 			ndVector contactVeloc(body->GetVelocityAtPoint(contactPoint.m_point));
 			ndFloat32 speed = contactVeloc.DotProduct(contactPoint.m_normal).GetScalar();
 			if (speed < maxSpeed)

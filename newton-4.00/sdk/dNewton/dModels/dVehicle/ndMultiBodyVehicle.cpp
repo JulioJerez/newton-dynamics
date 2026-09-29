@@ -847,8 +847,8 @@ bool ndMultiBodyVehicle::CoulombTireModel(ndMultiBodyVehicleTireJoint* const joi
 
 	contactPoint.m_material.m_staticFriction0 = frictionCoefficient;
 	contactPoint.m_material.m_staticFriction1 = frictionCoefficient;
-	contactPoint.m_material.m_dynamicFriction0 = frictionCoefficient * dynamicFrictionCoef;
-	contactPoint.m_material.m_dynamicFriction1 = frictionCoefficient * dynamicFrictionCoef;
+	contactPoint.m_material.m_kineticFriction0 = frictionCoefficient * dynamicFrictionCoef;
+	contactPoint.m_material.m_kineticFriction1 = frictionCoefficient * dynamicFrictionCoef;
 	return true;
 }
 
@@ -1043,9 +1043,9 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	ndFloat32 lateralFrictionCoefficient = ndClamp(ndAbs(fz) / sprungWeight, ndFloat32 (0.0f), maxFrictionCoeficient);
 	ndFloat32 longitudinalFrictionCoefficient = ndClamp(ndAbs(fx) / sprungWeight, ndFloat32(0.0f), maxFrictionCoeficient);
 	contactPoint.m_material.m_staticFriction0 = longitudinalFrictionCoefficient;
-	contactPoint.m_material.m_dynamicFriction0 = longitudinalFrictionCoefficient;
+	contactPoint.m_material.m_kineticFriction0 = longitudinalFrictionCoefficient;
 	contactPoint.m_material.m_staticFriction1 = lateralFrictionCoefficient;
-	contactPoint.m_material.m_dynamicFriction1 = lateralFrictionCoefficient;
+	contactPoint.m_material.m_kineticFriction1 = lateralFrictionCoefficient;
 
 	return true;
 }

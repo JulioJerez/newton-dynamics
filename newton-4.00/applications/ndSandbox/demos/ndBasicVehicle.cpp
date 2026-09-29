@@ -597,8 +597,8 @@ namespace ndMotorVehicle
 		//material.m_restitution = 0.1f;
 		//material.m_staticFriction0 = 0.8f;
 		//material.m_staticFriction1 = 0.8f;
-		//material.m_dynamicFriction0 = 0.8f;
-		//material.m_dynamicFriction1 = 0.8f;
+		//material.m_kineticFriction0 = 0.8f;
+		//material.m_kineticFriction1 = 0.8f;
 		//
 		//ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
 		//callback->RegisterMaterial(material, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_default);
@@ -756,8 +756,8 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	
 	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f)), true);
 	//CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f)), true);
-	CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f))); 
-	//CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f)));
+	//CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f))); 
+	CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f)));
 	//CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f)));
 	//CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(12.0f, 1.0f, 6.0f, 0.0f)));
 	

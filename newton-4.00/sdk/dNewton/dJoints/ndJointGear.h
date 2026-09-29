@@ -15,6 +15,36 @@
 #include "ndNewtonStdafx.h"
 #include "ndJointRelational.h"
 
+//#define ND_WORKING_GEAR
+
+#ifdef ND_WORKING_GEAR
+D_MSV_NEWTON_CLASS_ALIGN_32
+class ndJointGear: public ndJointBilateralConstraint
+{
+	public:
+	D_CLASS_REFLECTION(ndJointGear, ndJointBilateralConstraint)
+
+	D_NEWTON_API ndJointGear();
+	D_NEWTON_API ndJointGear(ndFloat32 gearRatio,
+		const ndVector& parentPin, ndBodyKinematic* const parent,
+		const ndVector& childPin, ndBodyKinematic* const child);
+	D_NEWTON_API virtual ~ndJointGear();
+
+	D_NEWTON_API ndFloat32 GetRatio() const;
+	D_NEWTON_API void SetRatio(ndFloat32 ratio);
+
+	protected:
+	D_NEWTON_API void UpdateParameters() override;
+	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
+
+	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
+
+	ndFloat32 m_angle;
+	ndFloat32 m_omega;
+	ndFloat32 m_gearRatio;
+} D_GCC_NEWTON_CLASS_ALIGN_32;
+
+#else
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndJointGear: public ndJointRelational
@@ -38,6 +68,7 @@ class ndJointGear: public ndJointRelational
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 
+#endif
 
 #endif 
 

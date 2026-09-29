@@ -283,8 +283,8 @@ void ndUnicycleTrainingPPO(ndDemoEntityManager* const scene)
 	// make sure the ground has enough friction
 	ndMaterial* const defaultMaterial = callback->GetMaterial(ndDemoContactCallback::m_default, ndDemoContactCallback::m_default);
 	ndAssert(defaultMaterial);
-	defaultMaterial->m_dynamicFriction0 = defaultMaterial->m_staticFriction0;
-	defaultMaterial->m_dynamicFriction1 = defaultMaterial->m_staticFriction1;
+	defaultMaterial->m_kineticFriction0 = defaultMaterial->m_staticFriction0;
+	defaultMaterial->m_kineticFriction1 = defaultMaterial->m_staticFriction1;
 
 	// create a material that make models in training non collidable
 	ndModelMaterial material;
