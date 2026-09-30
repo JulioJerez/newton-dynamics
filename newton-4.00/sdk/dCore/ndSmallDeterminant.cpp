@@ -103,8 +103,8 @@ ndGoogol Determinant3x3 (const ndGoogol matrix[3][3])
 
 ndFloat64 Determinant4x4 (const ndFloat64 matrix[4][4], ndFloat64* const error)
 {
+	ndFloat64 det = ndFloat64(0.0f);
 	ndFloat64 sign = ndFloat64 (1.0f);
-	ndFloat64 det = ndFloat64 (0.0f);
 	ndFloat64 accError = ndFloat64 (0.0f); 
 	for (ndInt32 i = 0; i < 4; ++i)  
 	{
@@ -134,13 +134,12 @@ ndFloat64 Determinant4x4 (const ndFloat64 matrix[4][4], ndFloat64* const error)
 
 ndGoogol Determinant4x4 (const ndGoogol matrix[4][4])
 {
+	ndGoogol det = ndFloat64(0.0f);
 	ndGoogol sign = ndFloat64 (1.0f);
-	ndGoogol det = ndFloat64 (0.0f);
 	ndGoogol negOne (ndFloat64 (-1.0f));
-	//dGoogol accError = ndFloat64 (0.0f);
 	for (ndInt32 i = 0; i < 4; ++i)  
 	{
-		ndGoogol  cofactor[3][3];
+		ndGoogol cofactor[3][3];
 		for (ndInt32 j = 0; j < 3; ++j) 
 		{
 			ndInt32 k0 = 0;
