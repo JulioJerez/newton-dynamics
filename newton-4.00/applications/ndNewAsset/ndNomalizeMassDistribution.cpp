@@ -18,6 +18,19 @@ ndNomalizeMassDistribution::ndNomalizeMassDistribution(ndAssetEditor* const owne
 	,m_totalMass(100.0f)
 	,m_inertialRatio(0.25f)
 {
+
+	m_totalMass = ndFloat32 (0.0f);
+	auto TotalMass = [this](ndMesh* const node)
+	{
+		ndSharedPtr<ndMeshBody> body(node->GetRigidBody());
+		if (body)
+		{
+			const ndMeshBodyKinematic* const kinBody = (ndMeshBodyKinematic*)*body;
+			const ndVector inertia(kinBody->m_invMass.Reciproc());
+			m_totalMass += inertia.m_w;
+		}
+	};
+	m_owner->GetMesh()->NodeIterator(TotalMass);
 }
 
 void ndNomalizeMassDistribution::Execute()

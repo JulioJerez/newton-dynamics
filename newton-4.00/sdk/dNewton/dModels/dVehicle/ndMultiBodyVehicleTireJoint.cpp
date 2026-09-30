@@ -214,6 +214,7 @@ ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint()
 	,m_normalizedAligningTorque(ndFloat32(0.0f))
 	,m_lateralStiffness(ndFloat32(1.0f))
 	,m_longitudinalStiffness(ndFloat32(1.0f))
+	,m_maxSideAngle(ndFloat32(10.0f)* ndDegreeToRad)
 {
 }
 
@@ -226,6 +227,7 @@ ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint(const ndMatrix& pinAndP
 	,m_normalizedAligningTorque(ndFloat32(0.0f))
 	,m_lateralStiffness(ndFloat32(1.0f))
 	,m_longitudinalStiffness(ndFloat32(1.0f))
+	,m_maxSideAngle(ndFloat32(10.0f)* ndDegreeToRad)
 {
 }
 
@@ -238,6 +240,7 @@ ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint(const ndMultiBodyVehicl
 	,m_normalizedAligningTorque(ndFloat32(0.0f))
 	,m_lateralStiffness(ndFloat32(1.0f))
 	,m_longitudinalStiffness(ndFloat32(1.0f))
+	,m_maxSideAngle(joint.m_maxSideAngle)
 {
 	ndAssert(0);
 }
@@ -251,6 +254,7 @@ ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint(const ndJointWheel* con
 	,m_normalizedAligningTorque(ndFloat32(0.0f))
 	,m_lateralStiffness(ndFloat32(1.0f))
 	,m_longitudinalStiffness(ndFloat32(1.0f))
+	,m_maxSideAngle(ndFloat32(10.0f) * ndDegreeToRad)
 {
 }
 
@@ -278,6 +282,16 @@ ndFloat32 ndMultiBodyVehicleTireJoint::GetSideSlip() const
 ndFloat32 ndMultiBodyVehicleTireJoint::GetLongitudinalSlip() const
 {
 	return m_longitudinalSlip;
+}
+
+ndFloat32 ndMultiBodyVehicleTireJoint::GetMaxSlipAngle() const
+{
+	return m_maxSideAngle;
+}
+
+void ndMultiBodyVehicleTireJoint::SetMaxSlipAngle(ndFloat32 angleInRadians)
+{
+	m_maxSideAngle = ndClamp (angleInRadians, ndFloat32(5.0f) * ndDegreeToRad, ndFloat32(20.0f) * ndDegreeToRad);
 }
 
 void ndMultiBodyVehicleTireJoint::SetStiffness(ndFloat32 lateral, ndFloat32 longitudinal)

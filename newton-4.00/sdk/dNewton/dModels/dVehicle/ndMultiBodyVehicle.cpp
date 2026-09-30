@@ -921,6 +921,7 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	const ndFloat32 wheelComSpeed_z = (speed_z > ndFloat32(1.0e-3f) || (speed_z < ndFloat32(-1.0e-3f))) ? speed_z : ndFloat32(0.0f);
 	const ndFloat32 sideSlipAngleInRadians = ndAtan2(wheelComSpeed_z, ndAbs(wheelComSpeed_x));
 	tire->m_lateralSlip = ndMax(tire->m_lateralSlip, ndAbs(sideSlipAngleInRadians));
+//ndTrace(("(%f %f)\n", wheelComSpeed_z, ndAbs(wheelComSpeed_x)));
 
 	// calculate longitudinal slip
 	const ndVector contactVeloc(tireBody->GetVelocityAtPoint(contactPoint.m_point) - contactVeloc1);
@@ -1046,6 +1047,10 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	contactPoint.m_material.m_kineticFriction0 = longitudinalFrictionCoefficient;
 	contactPoint.m_material.m_staticFriction1 = lateralFrictionCoefficient;
 	contactPoint.m_material.m_kineticFriction1 = lateralFrictionCoefficient;
+
+	ndFloat32 sideSlipAngle = ndMin (ndAbs(sideSlipAngleInRadians), tire->m_maxSideAngle);
+	ndFloat32 tireSlip = sideSlipAngle * ndAbs(wheelComSpeed_x);
+	contactPoint.m_material.m_targetSlidingFriction1 = tireSlip;
 
 	return true;
 }

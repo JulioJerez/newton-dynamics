@@ -1046,6 +1046,14 @@ void ndAssetEditor::EditMotorWheelJoint()
 		joint->m_lateralStiffness = ndClamp(value, ndReal(0.0f), ndReal(1.0f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 	}
+
+	value = ndReal(joint->m_maxSideSlipAngle);
+	if (ImGui::InputFloat("max side slip angle", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+		joint->m_maxSideSlipAngle = ndClamp(value, ndReal(0.5f), ndReal(20.0f));
+		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+	}
 }
 
 void ndAssetEditor::EditSphericalJoint()

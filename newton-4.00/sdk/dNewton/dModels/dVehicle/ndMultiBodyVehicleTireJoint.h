@@ -85,6 +85,9 @@ class ndMultiBodyVehicleTireJoint: public ndJointWheel
 	D_NEWTON_API void SetStiffness(ndFloat32 lateral, ndFloat32 longitudinal);
 	D_NEWTON_API void GetStiffness(ndFloat32& lateral, ndFloat32& longitudinal) const;
 
+	D_NEWTON_API ndFloat32 GetMaxSlipAngle() const;
+	D_NEWTON_API void SetMaxSlipAngle(ndFloat32 angle);
+
 	D_NEWTON_API const ndTireFrictionModel& GetFrictionModel() const;
 	D_NEWTON_API void SetFrictionModel(const ndTireFrictionModel& model);
 	D_NEWTON_API void SetVehicleOwner(ndMultiBodyVehicle* const vehicle);
@@ -100,6 +103,7 @@ class ndMultiBodyVehicleTireJoint: public ndJointWheel
 	ndFloat32 m_normalizedAligningTorque;
 	ndFloat32 m_lateralStiffness;
 	ndFloat32 m_longitudinalStiffness;
+	ndFloat32 m_maxSideAngle;
 
 	friend class ndMultiBodyVehicle;
 } D_GCC_NEWTON_CLASS_ALIGN_32;

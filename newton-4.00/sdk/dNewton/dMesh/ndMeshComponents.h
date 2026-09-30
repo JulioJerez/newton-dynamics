@@ -358,6 +358,7 @@ class ndMeshJointVehicleTireJoint : public ndMeshJointWheel
 	ndFrictionModel m_frictionModel;
 	ndReal m_lateralStiffness;
 	ndReal m_longitudinalStiffness;
+	ndReal m_maxSideSlipAngle;
 };
 
 class ndMeshJointVehicleMotor : public ndMeshJoint
