@@ -203,7 +203,6 @@ ndGoogol ndGoogol::operator* (const ndGoogol &A) const
 		}
 
 		ndUnsigned64 carrier = 0;
-		//ndInt32 bits = ndUnsigned64(LeadingZeros (mantissaAcc[0]) - 2);
 		ndInt32 bits = LeadingZeros (mantissaAcc[0]) - 2;
 		for (ndInt32 i = 0; i < 2 * ND_GOOGOL_SIZE; ++i) 
 		{
