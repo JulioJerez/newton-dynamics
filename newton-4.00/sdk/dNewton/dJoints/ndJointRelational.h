@@ -37,8 +37,6 @@ class ndJointRelational: public ndJointBilateralConstraint
 	D_NEWTON_API void UpdateParameters() override;
 	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
 
-	//ndFloat32 m_angle;
-	//ndFloat32 m_omega;
 	ndFloat32 m_gearRatio;
 	ndFloat32 m_regularizer;
 } D_GCC_NEWTON_CLASS_ALIGN_32;

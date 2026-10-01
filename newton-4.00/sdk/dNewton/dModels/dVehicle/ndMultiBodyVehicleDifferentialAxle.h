@@ -46,9 +46,9 @@ class ndMultiBodyVehicleDifferentialAxle : public ndJointBilateralConstraint
 	D_NEWTON_API void DebugJoint(ndConstraintDebugCallback&) const override {}
 	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
-	//ndFloat32 m_angle;
 	ndFloat32 m_omega;
 	ndFloat32 m_gearRatio;
+	friend ndMultiBodyVehicle;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif

@@ -187,7 +187,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 //m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
 //m_driverState = m_driveForwardGearDelay;
 //m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
-//ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+//ndFloat32 gearGain = gearBox.m_gearRatios[m_currentGear];
 //gearJoint->SetRatio(gearGain);
 //return;
 
@@ -230,7 +230,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				m_driverState = m_driveAutoGear;
 				m_autoGearShiftTimer = 0;
 				m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
-				ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+				ndFloat32 gearGain = gearBox.m_gearRatios[m_currentGear];
 				gearJoint->SetRatio(gearGain);
 			}
 
@@ -239,7 +239,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
 				m_driverState = m_driveForwardGearDelay;
 				m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
-				ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+				ndFloat32 gearGain = gearBox.m_gearRatios[m_currentGear];
 				gearJoint->SetRatio(gearGain);
 			}
 
@@ -247,7 +247,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			{
 				m_driverState = m_driveReverse;
 				m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_revertGear;
-				ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+				ndFloat32 gearGain = gearBox.m_gearRatios[m_currentGear];
 				gearJoint->SetRatio(gearGain);
 			}
 			break;
@@ -280,7 +280,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				{
 					m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_revertGear;
 					ndFloat32 reverseGearRatio = gearBox.m_gearRatios[m_currentGear];
-					ndFloat32 gearGain = gearBox.m_crownGearRatio * reverseGearRatio;
+					ndFloat32 gearGain = reverseGearRatio;
 					gearJoint->SetRatio(gearGain);
 					m_driverState = m_driveAutoReverse;
 				}
@@ -293,7 +293,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 					m_currentGear++;
 					m_driverState = m_driveAutoShiftGearUp;
 					m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks * 1;
-					ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+					ndFloat32 gearGain = gearBox.m_gearRatios[m_currentGear];
 					gearJoint->SetRatio(gearGain);
 				}
 			}
@@ -304,7 +304,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 					m_currentGear--;
 					m_driverState = m_driveAutoShiftGearDown;
 					m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks * 1;
-					ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+					ndFloat32 gearGain = gearBox.m_gearRatios[m_currentGear];
 					gearJoint->SetRatio(gearGain);
 				}
 			}
@@ -320,7 +320,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 						m_currentGear++;
 						m_driverState = m_driveAutoShiftGearUp;
 						m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks * 1;
-						ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+						ndFloat32 gearGain = gearBox.m_gearRatios[m_currentGear];
 						gearJoint->SetRatio(gearGain);
 					}
 				}
@@ -331,7 +331,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 						m_currentGear--;
 						m_driverState = m_driveAutoShiftGearDown;
 						m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks * 1;
-						ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+						ndFloat32 gearGain = gearBox.m_gearRatios[m_currentGear];
 						gearJoint->SetRatio(gearGain);
 					}
 				}
@@ -358,7 +358,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 					m_transmission = m_automatic;
 					m_driverState = m_driveAutoGear;
 					m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
-					ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+					ndFloat32 gearGain = gearBox.m_gearRatios[m_currentGear];
 					gearJoint->SetRatio(gearGain);
 				}
 			}
@@ -443,7 +443,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				m_transmission = m_automatic;
 				m_driverState = m_driveAutoGear;
 				m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
-				ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+				ndFloat32 gearGain = gearBox.m_gearRatios[m_currentGear];
 				gearJoint->SetRatio(gearGain);
 			}
 
@@ -454,7 +454,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 					m_currentGear++;
 					m_driverState = m_driveForwardGearDelay;
 					m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
-					ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+					ndFloat32 gearGain = gearBox.m_gearRatios[m_currentGear];
 					gearJoint->SetRatio(gearGain);
 				}
 			}
@@ -468,7 +468,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 					m_currentGear--;
 					m_driverState = m_driveForwardGearDelay;
 					m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks;
-					ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+					ndFloat32 gearGain = gearBox.m_gearRatios[m_currentGear];
 					gearJoint->SetRatio(gearGain);
 				}
 			}
@@ -479,7 +479,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 				{
 					m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_revertGear;
 					ndFloat32 reverseGearRatio = gearBox.m_gearRatios[m_currentGear];
-					ndFloat32 gearGain = gearBox.m_crownGearRatio * reverseGearRatio;
+					ndFloat32 gearGain = reverseGearRatio;
 					gearJoint->SetRatio(gearGain);
 					m_driverState = m_driveReverse;
 				}
@@ -506,7 +506,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 					ndAssert(0);
 					//m_driverState = m_driveShitGearUp;
 					//m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
-					//ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+					//ndFloat32 gearGain = gearBox.m_gearRatios[m_currentGear];
 					//m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks - 1;
 					//gearJoint->SetRatio(gearGain);
 				}
@@ -518,7 +518,7 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 					m_transmission = m_automatic;
 					m_driverState = m_driveAutoGear;
 					m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
-					ndFloat32 gearGain = gearBox.m_crownGearRatio * gearBox.m_gearRatios[m_currentGear];
+					ndFloat32 gearGain = gearBox.m_gearRatios[m_currentGear];
 					m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks - 1;
 					gearJoint->SetRatio(gearGain);
 				}

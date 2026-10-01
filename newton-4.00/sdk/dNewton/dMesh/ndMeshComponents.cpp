@@ -1568,7 +1568,6 @@ void ndMeshJointVehicleGearBox::SerializeToXml(nd::TiXmlElement* const parent) c
 	}
 	xmlSaveParam(parent, "ratios", tmp);
 
-	xmlSaveParam(parent, "crownGearRatio", m_gearBox.m_crownGearRatio);
 	xmlSaveParam(parent, "idleClutchTorque", m_gearBox.m_idleClutchTorque);
 	xmlSaveParam(parent, "lockedClutchTorque", m_gearBox.m_lockedClutchTorque);
 	xmlSaveParam(parent, "torqueConverter", m_gearBox.m_torqueConverter);
@@ -1589,7 +1588,6 @@ void ndMeshJointVehicleGearBox::DeserializeFromXml(const nd::TiXmlElement* const
 		m_gearBox.m_gearRatios.PushBack(tmp[i]);
 	}
 
-	m_gearBox.m_crownGearRatio = ndReal(xmlGetFloat(parent, "crownGearRatio"));
 	m_gearBox.m_idleClutchTorque = ndReal(xmlGetFloat(parent, "idleClutchTorque"));
 	m_gearBox.m_lockedClutchTorque = ndReal(xmlGetFloat(parent, "lockedClutchTorque"));
 	m_gearBox.m_torqueConverter = ndReal(xmlGetFloat(parent, "torqueConverter"));

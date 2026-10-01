@@ -31,7 +31,7 @@
 ndMultiBodyVehicleGearBox::ndGearBox::ndGearBox()
 	:m_manual(false)
 {
-	m_crownGearRatio = ndFloat32(10.0f);
+	m_crownGearRatio = ndFloat32(1.0f);
 	m_torqueConverter = ndFloat32(2000.0f);
 	m_idleClutchTorque = ndFloat32(200.0f);
 	m_lockedClutchTorque = ndFloat32(1.0e6f);
@@ -48,7 +48,7 @@ ndMultiBodyVehicleGearBox::ndGearBox::ndGearBox()
 
 bool ndMultiBodyVehicleGearBox::ndGearBox::operator==(const ndGearBox& other) const
 {
-	bool test = m_crownGearRatio == other.m_crownGearRatio;
+	bool test = true;
 	test = test && (m_idleClutchTorque == other.m_idleClutchTorque);
 	test = test && (m_lockedClutchTorque == other.m_lockedClutchTorque);
 	test = test && (m_torqueConverter == other.m_torqueConverter);
@@ -149,7 +149,7 @@ void ndMultiBodyVehicleGearBox::JacobianDerivative(ndConstraintDescritor& desc)
 		
 		AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
 
-		const ndFloat32 gearRatio = m_gearRatio;
+		const ndFloat32 gearRatio = m_gearRatio * m_gearBox.m_crownGearRatio;
 		ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
 		ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
 		jacobian0.m_angular = matrix0.m_front;
