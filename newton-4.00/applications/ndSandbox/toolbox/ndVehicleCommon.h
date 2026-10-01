@@ -30,11 +30,8 @@ class ndVehicleCommonNotify : public ndModelNotify
 		m_driveAutoReverse,
 		m_driveAutoShiftGearUp,
 		m_driveAutoShiftGearDown,
-		//m_driveShiftGearDeleya
-		//m_driveShitGearUp,
-		//m_driveShitGearDown,
 		m_driveForwardGearDelay,
-		m_driveReverseFromForward,
+		//m_driveReverseFromForward,
 	};
 
 	enum ndTransmissionMode

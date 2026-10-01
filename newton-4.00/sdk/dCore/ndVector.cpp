@@ -51,11 +51,11 @@
 ndBigVector ndBigVector::m_zero (ndFloat64 (0.0f));
 ndBigVector ndBigVector::m_one (ndFloat64 (1.0f));
 ndBigVector ndBigVector::m_two (ndFloat64 (2.0f));
-ndBigVector ndBigVector::m_half (ndFloat32 (0.5f));
-ndBigVector ndBigVector::m_three (ndFloat32 (3.0f));
-ndBigVector ndBigVector::m_negOne (ndFloat32 (-1.0f));
-ndBigVector ndBigVector::m_epsilon(ndFloat32(1.0e-20f));
-ndBigVector ndBigVector::m_wOne (ndFloat32 (0.0f), ndFloat32 (0.0f), ndFloat32 (0.0f), ndFloat32 (1.0f));
+ndBigVector ndBigVector::m_half (ndFloat64(0.5f));
+ndBigVector ndBigVector::m_three (ndFloat64(3.0f));
+ndBigVector ndBigVector::m_negOne (ndFloat64(-1.0f));
+ndBigVector ndBigVector::m_epsilon(ndFloat64(1.0e-20f));
+ndBigVector ndBigVector::m_wOne (ndFloat64(0.0f), ndFloat64(0.0f), ndFloat64(0.0f), ndFloat64(1.0f));
 ndBigVector ndBigVector::m_triplexMask (ndInt32 (-1), ndInt32 (-1),	ndInt32 (-1), ndInt32 (0));
 ndBigVector ndBigVector::m_signMask (ndBigVector(ndInt32 (-1), ndInt32 (-1), ndInt32 (-1), ndInt32 (-1)).ShiftRightLogical(1));
 
@@ -75,6 +75,6 @@ ndVector16 ndVector16::m_one(ndFloat32(1.0f));
 ndVector16 ndVector16::m_zero(ndFloat32(0.0f));
 ndVector16 ndVector16::m_ordinals(ndVector(0, 1, 2, 3), ndVector(4, 5, 6, 7), ndVector(8, 9, 10, 11), ndVector(12, 13, 14, 15));
 
-ndSpatialVector ndSpatialVector::m_zero(ndFloat32(0.0f));
+ndSpatialVector ndSpatialVector::m_zero(ndFloat64(0.0f));
 ndSpatialMatrix ndSpatialMatrix::m_zero(ndFloat32(0.0f));
 

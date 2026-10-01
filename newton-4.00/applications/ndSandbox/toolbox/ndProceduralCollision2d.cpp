@@ -645,7 +645,7 @@ class ndHeightfieldMesh2d : public ndRenderSceneNode
 			tileNode->SetPrimitive(mesh);
 		}
 		time = ndGetTimeInMicroseconds() - time;
-		ndExpandTraceMessage("%s: build time %g (sec)\n", __FUNCTION__, ndFloat32(time)* ndFloat32(1.0e-6f));
+		ndExpandTraceMessage("%s: build time %g (sec)\n", __FUNCTION__, ndFloat32(time) * ndFloat32(1.0e-6f));
 	}
 
 	private:
@@ -726,7 +726,7 @@ class ndHeightfieldMesh2d : public ndRenderSceneNode
 		uvMapping[1][1] = 1.0f / 20.0f;
 		uvMapping[2][2] = 1.0f / 20.0f;
 
-		mesh->CalculateNormals(60 * ndDegreeToRad);
+		mesh->CalculateNormals(ndFloat32(60.0f * ndDegreeToRad));
 		mesh->UniformBoxMapping(0, uvMapping);
 		return mesh;
 	}

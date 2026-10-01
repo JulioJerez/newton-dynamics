@@ -291,7 +291,7 @@ ndFloat32 ndMultiBodyVehicleTireJoint::GetMaxSlipAngle() const
 
 void ndMultiBodyVehicleTireJoint::SetMaxSlipAngle(ndFloat32 angleInRadians)
 {
-	m_maxSideAngle = ndClamp (angleInRadians, ndFloat32(5.0f) * ndDegreeToRad, ndFloat32(20.0f) * ndDegreeToRad);
+	m_maxSideAngle = ndClamp (angleInRadians, ndFloat32(0.0f) * ndDegreeToRad, ndFloat32(20.0f) * ndDegreeToRad);
 }
 
 void ndMultiBodyVehicleTireJoint::SetStiffness(ndFloat32 lateral, ndFloat32 longitudinal)

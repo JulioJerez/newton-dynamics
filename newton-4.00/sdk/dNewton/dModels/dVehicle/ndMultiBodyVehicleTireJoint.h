@@ -22,7 +22,6 @@ class ndTireFrictionModel
 	{
 		public:
 		D_NEWTON_API ndPacejkaTireModel();
-		//D_NEWTON_API ndPacejkaTireModel(ndFloat32 B, ndFloat32 C, ndFloat32 D, ndFloat32 E, ndFloat32 Sv, ndFloat32 Sh);
 		D_NEWTON_API ndPacejkaTireModel(ndFloat32 B, ndFloat32 C, ndFloat32 E, ndFloat32 Sv, ndFloat32 Sh);
 
 		private:
@@ -86,7 +85,7 @@ class ndMultiBodyVehicleTireJoint: public ndJointWheel
 	D_NEWTON_API void GetStiffness(ndFloat32& lateral, ndFloat32& longitudinal) const;
 
 	D_NEWTON_API ndFloat32 GetMaxSlipAngle() const;
-	D_NEWTON_API void SetMaxSlipAngle(ndFloat32 angle);
+	D_NEWTON_API void SetMaxSlipAngle(ndFloat32 angleInRadians);
 
 	D_NEWTON_API const ndTireFrictionModel& GetFrictionModel() const;
 	D_NEWTON_API void SetFrictionModel(const ndTireFrictionModel& model);

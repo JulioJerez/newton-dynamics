@@ -163,7 +163,7 @@ class ndProceduralTerrainShape3d : public ndShapeStaticProceduralMesh
 		SetAABB(boxP0, boxP1);
 	}
 
-	~ndProceduralTerrainShape3d()
+	~ndProceduralTerrainShape3d() override
 	{
 	}
 

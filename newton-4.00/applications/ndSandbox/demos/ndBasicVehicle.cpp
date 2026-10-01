@@ -432,7 +432,7 @@ namespace ndMotorVehicle
 
 				ImGui::SameLine();
 				ndReal speed = ndReal(vehicle->GetSpeed() * 3.6f);
-				ImGui::Text("  kmh %d", ndInt32(speed));
+				ImGui::Text("     kmh %d", ndInt32(speed));
 				DrawDial(160.0f, 50.0f, 50.0f, speed, ndReal(motor->GetTopSpeed() * 3.6f), IM_COL32(180, 180, 0, 255));
 
 				const ndSharedPtr<ndModelNotify>& notify = vehicle->GetNotifyCallback();

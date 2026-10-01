@@ -44,7 +44,7 @@ void ndVehicleCommonNotify::SetAsPlayer(bool state)
 
 void ndVehicleCommonNotify::Update(ndFloat32 timestep, ndInt32 threadId)
 {
-	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
+	ndMultiBodyVehicle* const vehicle = static_cast<ndMultiBodyVehicle*>(GetModel());
 	if (vehicle)
 	{
 		vehicle->Update(timestep, threadId);
@@ -54,7 +54,7 @@ void ndVehicleCommonNotify::Update(ndFloat32 timestep, ndInt32 threadId)
 void ndVehicleCommonNotify::PostUpdate(ndFloat32 timestep, ndInt32 threadId)
 {
 	ndModelNotify::PostUpdate(timestep, threadId);
-	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
+	ndMultiBodyVehicle* const vehicle = static_cast<ndMultiBodyVehicle*>(GetModel());
 	if (vehicle)
 	{
 		vehicle->PostUpdate(timestep, threadId);
@@ -63,7 +63,7 @@ void ndVehicleCommonNotify::PostUpdate(ndFloat32 timestep, ndInt32 threadId)
 
 void ndVehicleCommonNotify::PostTransformUpdate(ndFloat32 timestep, ndInt32)
 {
-	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
+	ndMultiBodyVehicle* const vehicle = static_cast<ndMultiBodyVehicle*>(GetModel());
 	if (m_isPlayer || vehicle)
 	{
 		ApplyInputs(timestep);
@@ -74,7 +74,7 @@ void ndVehicleCommonNotify::PostTransformUpdate(ndFloat32 timestep, ndInt32)
 void ndVehicleCommonNotify::Debug(ndConstraintDebugCallback& callback) const
 {
 	ndModelNotify::Debug(callback);
-	ndMultiBodyVehicle* const vehicle = (ndMultiBodyVehicle*)GetModel();
+	ndMultiBodyVehicle* const vehicle = static_cast<ndMultiBodyVehicle*>(GetModel());
 	if (m_isPlayer && vehicle)
 	{
 		vehicle->Debug(callback);
@@ -92,20 +92,21 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 		return;
 	}
 
-	ndPhysicsWorld* const world = (ndPhysicsWorld*)vehicle->GetWorld();
+	//ndPhysicsWorld* const world = (ndPhysicsWorld*)vehicle->GetWorld();
+	ndPhysicsWorld* const world = static_cast<ndPhysicsWorld*>(vehicle->GetWorld());
 	ndDemoEntityManager* const scene = world->GetManager();
 
 	const ndSharedPtr<ndGameControllerInputs>& gameController = scene->GetGameController();
 	const ndFixSizeArray<ndFloat32, 8>& axis = gameController->GetAxis();
 	const ndFixSizeArray<bool, 32>& buttons = gameController->GetButtons();
 
-	auto ApplyControls = [this, vehicle, &axis, &buttons]()
+	auto ApplyControls = [this, vehicle, motor, gearJoint, &axis, &buttons]()
 	{
 		ndFloat32 throttle = axis[ndGameControllerInputs::m_gasPedal];
 //throttle = 0.7f;
 //throttle = 0.0f;
 
-		ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
+		//ndMultiBodyVehicleMotor* const motor = vehicle->GetMotor();
 		const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& engineCurve = motor->GetCurve();
 		ndFloat32 currentRpm = motor->GetRpm();
 		ndFloat32 idleRpm = engineCurve.GetIdleRpm();
@@ -124,12 +125,12 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			torqueFromCurve = ndFloat32(0.0f);
 
 			m_driverState = m_parked;
-			ndMultiBodyVehicleGearBox* const gearJoint = vehicle->GetGearBox();
+			//ndMultiBodyVehicleGearBox* const gearJoint = vehicle->GetGearBox();
 			gearJoint->SetRatio(ndFloat32(0.0f));
 			m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear;
 		}
 
-		ndMultiBodyVehicleGearBox* const gearJoint = vehicle->GetGearBox();
+		//ndMultiBodyVehicleGearBox* const gearJoint = vehicle->GetGearBox();
 		ndMultiBodyVehicleGearBox::ndGearBox& gearBox = gearJoint->GetGearBox();
 		gearJoint->SetClutchTorque(gearBox.m_lockedClutchTorque);
 		if ((handBrake > ndFloat32(0.1f)) || (brake > ndFloat32(0.1f)))
