@@ -76,7 +76,7 @@ class ndShapeConvex: public ndShape
 	ndVector CalculateVolumeIntegral(const ndPlane& plane) const;
 	ndInt32 BuildCylinderCapPoly (ndFloat32 radius, const ndMatrix& transform, ndVector* const vertexOut) const;
 
-	ndVector* m_vertex;
+	ndVector* m_vertexPtr;
 	ndConvexSimplexEdge* m_simplex;
 	ndFloat32 m_boxMinRadius;
 	ndFloat32 m_boxMaxRadius;

@@ -101,17 +101,17 @@ class ndTree: public ndClassAlloc
 
 		ndNode* GetLeft () const
 		{
-			return (ndNode* )ndRedBackNode::m_left;
+			return static_cast<ndNode*>(ndRedBackNode::m_left);
 		}
 
 		ndNode* GetRight () const
 		{
-			return (ndNode* )ndRedBackNode::m_right;
+			return static_cast<ndNode*>(ndRedBackNode::m_right);
 		}
 
 		ndNode* GetParent ()
 		{
-			return (ndNode* )ndRedBackNode::m_parent;
+			return static_cast<ndNode*>(ndRedBackNode::m_parent);
 		}
 
 		void SetLeft (ndNode* const node)
@@ -210,18 +210,17 @@ class ndTree: public ndClassAlloc
 
 		OBJECT &operator* () const 
 		{
-			return ((ndNode*)m_ptr)->GetInfo();
+			return static_cast<ndNode*>(m_ptr)->GetInfo();
 		}
 
 		ndNode* GetNode() const
 		{
-			return (ndNode*)m_ptr;
+			return static_cast<ndNode*>(m_ptr);
 		}
 
 		KEY GetKey () const
 		{
-			ndNode* const tmp = (ndNode*)m_ptr;
-			//return tmp ? tmp->GetKey() : KEY(0);
+			ndNode* const tmp = static_cast<ndNode*>(m_ptr);
 			return tmp ? tmp->GetKey() : KEY();
 		}
 
@@ -352,13 +351,13 @@ ndInt32 ndTree<OBJECT, KEY, allocator>::GetCount() const
 template<class OBJECT, class KEY, class allocator>
 typename ndTree<OBJECT, KEY, allocator>::ndNode* ndTree<OBJECT, KEY, allocator>::Minimum () const
 {
-	return m_head ? (ndNode* )m_head->Minimum() : nullptr;
+	return m_head ? static_cast<ndNode*>(m_head->Minimum()) : nullptr;
 }
 
 template<class OBJECT, class KEY, class allocator>
 typename ndTree<OBJECT, KEY, allocator>::ndNode* ndTree<OBJECT, KEY, allocator>::Maximum () const
 {
-	return m_head ? (ndNode* )m_head->Maximum() : nullptr;
+	return m_head ? static_cast<ndNode*>m_head->Maximum() : nullptr;
 }
 
 template<class OBJECT, class KEY, class allocator>

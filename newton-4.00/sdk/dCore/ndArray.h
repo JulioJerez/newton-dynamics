@@ -226,7 +226,7 @@ void ndArray<T>::Resize(ndInt64 newSize)
 	if (newSize > m_capacity || (m_capacity == 0))
 	{
 		newSize = ndMax(newSize, ndInt64(16));
-		T* const newArray = (T*)ndMemory::Malloc(sizeof(T) * size_t(newSize));
+		T* const newArray = static_cast<T*>(ndMemory::Malloc(sizeof(T) * size_t(newSize)));
 		if (m_array) 
 		{
 			if (m_size)

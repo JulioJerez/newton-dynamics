@@ -59,14 +59,16 @@ class ndSpatialVector : public ndClassAlloc
 	{
 		ndAssert(i >= 0);
 		ndAssert(i < ndInt32(sizeof(m_f) / sizeof(m_f[0])));
-		return ((ndFloat64*)&m_f)[i];
+		//return ((ndFloat64*)&m_f)[i];
+		return m_f[i];
 	}
 
 	inline const ndFloat64& operator[] (ndInt32 i) const
 	{
 		ndAssert(i >= 0);
 		ndAssert(i < ndInt32 (sizeof(m_f) / sizeof(m_f[0])));
-		return ((ndFloat64*)&m_f)[i];
+		//return ((ndFloat64*)&m_f)[i];
+		return m_f[i];
 	}
 
 	inline ndSpatialVector& operator= (const ndSpatialVector& A)

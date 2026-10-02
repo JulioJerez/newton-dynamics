@@ -88,7 +88,7 @@ void ndShapeCapsule::Init(ndFloat32 radio0, ndFloat32 radio1, ndFloat32 height)
 	ndInt32 index = 0;
 	ndInt32 dx0 = ndInt32(ndFloor(DG_CAPSULE_SEGMENTS * ((m_p0.m_x + m_height + m_radius0) / m_radius0)) + ndFloat32(1.0f));
 	ndFloat32 step = m_radius0 / DG_CAPSULE_SEGMENTS;
-	ndFloat32 x0 = m_p0.m_x - step * (ndFloat32)dx0;
+	ndFloat32 x0 = m_p0.m_x - step * ndFloat32(dx0);
 	for (ndInt32 j = 0; j < dx0; ++j) 
 	{
 		x0 += step;
@@ -130,8 +130,8 @@ void ndShapeCapsule::Init(ndFloat32 radio0, ndFloat32 radio1, ndFloat32 height)
 	}
 
 	m_vertexCount = ndUnsigned16(index);
-	ndShapeConvex::m_vertex = (ndVector*)ndMemory::Malloc(size_t(m_vertexCount * sizeof(ndVector)));
-	ndMemCpy(ndShapeConvex::m_vertex, tempVertex, m_vertexCount);
+	ndShapeConvex::m_vertexPtr = static_cast<ndVector*>(ndMemory::Malloc(size_t(m_vertexCount * sizeof(ndVector))));
+	ndMemCpy(ndShapeConvex::m_vertexPtr, tempVertex, m_vertexCount);
 
 	ndPolyhedra polyhedra;
 	polyhedra.BeginFace();

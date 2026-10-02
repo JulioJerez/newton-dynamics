@@ -35,9 +35,9 @@ class ndSyncMutex
 	D_CORE_API ~ndSyncMutex();
 
 	/// Synchronize with another worker threads.
-	/// \brief When internal variable m_counter larger than zero, this function blocks
+	/// brief When internal variable m_counter larger than zero, this function blocks
 	/// the calling thread until another thread call member function Release.
-	/// \brief When counter is zero, this function return immediately. 
+	/// brief When counter is zero, this function return immediately. 
 	D_CORE_API void Sync();
 
 	/// Increment internal variable m_count by one.

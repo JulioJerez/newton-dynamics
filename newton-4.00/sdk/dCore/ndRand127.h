@@ -33,8 +33,8 @@ class ndRand127
 
     /**
      * This function outputs 32-bit unsigned integer from internal state.
-     * @param random tinymt internal status
-     * @return 32-bit unsigned integer r (0 <= r < 2^32)
+     * param random tinymt internal status
+     * return 32-bit unsigned integer r (0 <= r < 2^32)
      */
     D_CORE_API uint32_t Generate();
 

@@ -26,3 +26,4 @@ class ndMenuRenderPass: public ndRenderPassGui
 };
 
 #endif
+
