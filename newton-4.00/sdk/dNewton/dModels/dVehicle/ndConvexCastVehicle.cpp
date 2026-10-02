@@ -433,7 +433,7 @@ void ndConvexCastVehicle::CalculateConvexCastTireContacts(ndInt32 threadId)
 				contactSolver.m_contact = contact;
 				contactSolver.m_contactBuffer = &caster.m_contacts[start];
 				scene->ProcessContacts(threadId, pointCount, &contactSolver);
-				if (contact->m_maxDof == 0)
+				if (contact->GetMaxRowsCount() == 0)
 				{
 					contact->SetActive(false);
 				}

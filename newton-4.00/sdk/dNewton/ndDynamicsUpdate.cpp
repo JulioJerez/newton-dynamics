@@ -267,7 +267,7 @@ void ndDynamicsUpdate::SortJointsScan()
 		ndConstraint* const joint = jointArray[groupId];
 		ndBodyKinematic* const body0 = joint->GetBody0();
 		ndBodyKinematic* const body1 = joint->GetBody1();
-		const ndInt32 rows = ndInt32(joint->GetRowsCount());
+		const ndInt32 rows = ndInt32(joint->GetMaxRowsCount());
 		joint->m_rowCount = rows;
 
 		const ndInt32 equilibrium = body0->m_equilibrium & body1->m_equilibrium;
@@ -713,8 +713,8 @@ void ndDynamicsUpdate::GetJacobianDerivatives(ndConstraint* const joint)
 {
 	ND_PROFILE_ZONE();
 	ndConstraintDescritor constraintParam;
-	ndAssert(joint->GetRowsCount() <= D_CONSTRAINT_MAX_ROWS);
-	for (ndInt32 i = ndInt32(joint->GetRowsCount() - 1); i >= 0; i--)
+	ndAssert(joint->GetMaxRowsCount() <= D_CONSTRAINT_MAX_ROWS);
+	for (ndInt32 i = ndInt32(joint->GetMaxRowsCount() - 1); i >= 0; i--)
 	{
 		constraintParam.m_forceBounds[i].m_low = D_MIN_BOUND;
 		constraintParam.m_forceBounds[i].m_upper = D_MAX_BOUND;

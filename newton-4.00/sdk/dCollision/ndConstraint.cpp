@@ -238,7 +238,13 @@ bool ndConstraint::IsBilateral() const
 	return false;
 }
 
-ndUnsigned32 ndConstraint::GetRowsCount() const
+//ndUnsigned32 ndConstraint::GetRowsCount____() const
+//{
+//	ndAssert(0);
+//	return m_maxDof;
+//}
+
+ndUnsigned32 ndConstraint::GetMaxRowsCount() const
 {
 	return m_maxDof;
 }

@@ -1414,10 +1414,6 @@ void ndSkeletonContainer::ParallelSolveAuxiliary(ndJacobian* const internalForce
 			ndScaleAdd(count, dst, &src[i * primaryCount], s);
 	}
 	});
-	//for (ndInt32 i = 0; i < threads; ++i)
-	//{
-	//	AddForces(i, 0);
-	//}
 	scene->ParallelExecute(AddForces, threads, 1);
 
 	auto AddForcesBody0 = ndMakeObject::ndFunction([this, f, internalForcesArray](ndInt32 groupId, ndInt32, ndInt32)
@@ -1440,10 +1436,6 @@ void ndSkeletonContainer::ParallelSolveAuxiliary(ndJacobian* const internalForce
 		}
 		internalForcesArray[m] = force;
 	});
-	//for (ndInt32 i = 0; i < m_bodyForceRemap0.m_spansCount; ++i)
-	//{
-	//	AddForcesBody0(i, 0);
-	//}
 	scene->ParallelExecute(AddForcesBody0, m_bodyForceRemap0.m_spansCount, 4);
 
 	auto AddForcesBody1 = ndMakeObject::ndFunction([this, f, internalForcesArray](ndInt32 groupId, ndInt32, ndInt32)

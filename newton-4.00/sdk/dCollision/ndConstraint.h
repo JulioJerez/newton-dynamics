@@ -216,7 +216,8 @@ class ndConstraint: public ndContainersFreeListAlloc<ndConstraint>
 	D_COLLISION_API bool IsActive() const;
 	D_COLLISION_API void SetActive(bool state);
 
-	D_COLLISION_API ndUnsigned32 GetRowsCount() const;
+	//D_COLLISION_API ndUnsigned32 GetRowsCount____() const;
+	D_COLLISION_API ndUnsigned32 GetMaxRowsCount() const;
 	D_COLLISION_API virtual void JacobianDerivative(ndConstraintDescritor& desc) = 0;
 	D_COLLISION_API virtual void JointAccelerations(ndJointAccelerationDecriptor* const desc) = 0;
 

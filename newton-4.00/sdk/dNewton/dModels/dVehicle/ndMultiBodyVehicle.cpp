@@ -117,6 +117,7 @@ class ndMultiBodyVehicle::ndComponentNotify : public ndBodyNotify
 	{
 		ndBodyDynamic* const selfBody = GetBody()->GetAsBodyDynamic();
 		selfBody->SetForce(ndVector::m_zero);
+		selfBody->SetTorque(ndVector::m_zero);
 	}
 
 	ndWeakPtr<ndMultiBodyVehicle> m_owner;
@@ -153,7 +154,7 @@ class ndMultiBodyVehicle::ndMotorNotify : public ndMultiBodyVehicle::ndComponent
 		}
 		ndAssert(omegaSpeed <= ndFloat32(0.01f));
 
-		ndVector torque(axis.m_front.Scale(m_dragCoeff * omegaSpeed * omegaSpeed));
+		ndVector torque(axis.m_front.Scale(-ndSign(omegaSpeed) * m_dragCoeff * omegaSpeed * omegaSpeed));
 		selfBody->SetTorque(torque);
 	}
 
