@@ -761,7 +761,7 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	//CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f)));
 	//CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(12.0f, 1.0f, 6.0f, 0.0f)));
 	
-	AddProps(scene, matrix);
+	//AddProps(scene, matrix);
 
 	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -0.0f, 0.0f)));
 	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -0.0f, 0.0f)), true);
