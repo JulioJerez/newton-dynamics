@@ -94,8 +94,6 @@ class ndJacobianPair
 class ndForceImpactPair
 {
 	public:
-	//#define D_USING_NORM_FILTER
-
 	ndForceImpactPair()
 	{
 		Clear();
@@ -107,9 +105,7 @@ class ndForceImpactPair
 
 	ndFloat32 m_force;
 	ndFloat32 m_impact;
-#ifdef D_USING_NORM_FILTER
-	ndFloat32 m_initialGuess[4];
-#endif
+	ndFloat32 m_initialGuess[8];
 };
 
 class ndJointAccelerationDecriptor
