@@ -1049,9 +1049,9 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	contactPoint.m_material.m_staticFriction1 = lateralFrictionCoefficient;
 	contactPoint.m_material.m_kineticFriction1 = lateralFrictionCoefficient;
 
-	ndFloat32 sideSlipAngle = ndMin (ndAbs(sideSlipAngleInRadians), tire->m_maxSideAngle);
-	ndFloat32 tireSlip = sideSlipAngle * ndAbs(wheelComSpeed_x);
-	contactPoint.m_material.m_targetSlidingFriction1 = tireSlip;
+	ndFloat32 nomalizedSidSlip = ndClamp(ndAbs(sideSlipAngleInRadians) / tire->m_maxSideAngle, ndFloat32(0.0f), ndFloat32(1.0f));
+	ndFloat32 sideSlipRegularization = D_DIAGONAL_MIN_REGULARIZER + (D_DIAGONAL_MAX_REGULARIZER - D_DIAGONAL_MIN_REGULARIZER) * nomalizedSidSlip;
+	contactPoint.m_material.m_slidingFrictionRegularizer1 = sideSlipRegularization;
 
 	return true;
 }

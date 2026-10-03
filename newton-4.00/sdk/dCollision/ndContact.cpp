@@ -26,9 +26,6 @@
 #include "ndBodyKinematic.h"
 #include "ndContactOptions.h"
 
-#define D_DIAGONAL_MIN_REGULARIZER	ndFloat32 (1.0e-3f)
-#define D_DIAGONAL_MAX_REGULARIZER	ndFloat32 (1.0e-1f)
-
 ndVector ndContact::m_initialSeparatingVector(ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f));
 
 void ndContactMaterial::RotateTangentDirections(const ndVector& dir)
