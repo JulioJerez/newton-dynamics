@@ -29,14 +29,13 @@ enum ndContactOptions
 	m_collisionEnable = 1 << 0,
 	m_friction0Enable = 1 << 1,
 	m_friction1Enable = 1 << 2,
-	m_isSoftContact = 1 << 3,
-	m_override0Accel = 1 << 4,
-	m_override1Accel = 1 << 5,
-	m_override0Friction = 1 << 6,
-	m_override1Friction = 1 << 7,
-	m_overrideNormalAccel = 1 << 8,
-	m_resetSkeletonSelfCollision = 1 << 9,
-	m_resetSkeletonIntraCollision = 1 << 10,
+	m_override0Accel = 1 << 3,
+	m_override1Accel = 1 << 4,
+	m_override0Friction = 1 << 5,
+	m_override1Friction = 1 << 6,
+	m_overrideNormalAccel = 1 << 7,
+	m_resetSkeletonSelfCollision = 1 << 8,
+	m_resetSkeletonIntraCollision = 1 << 9,
 };
 
 #endif 

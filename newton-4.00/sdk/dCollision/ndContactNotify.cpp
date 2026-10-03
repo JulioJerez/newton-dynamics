@@ -37,8 +37,8 @@ ndMaterial::ndMaterial()
 	m_staticFriction1 = ndFloat32(0.8f);
 	m_kineticFriction0 = ndFloat32(0.4f);
 	m_kineticFriction1 = ndFloat32(0.4f);
-	m_targetSlidingFriction0 = ndFloat32(0.0f);
-	m_targetSlidingFriction1 = ndFloat32(0.0f);
+	m_slidingFrictionRegularizer0 = ndFloat32(0.0f);
+	m_slidingFrictionRegularizer1 = ndFloat32(0.0f);
 	m_flags = m_collisionEnable | m_friction0Enable | m_friction1Enable;
 }
 

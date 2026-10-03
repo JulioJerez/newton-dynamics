@@ -216,7 +216,6 @@ void ndJointBilateralConstraint::SetMotorAcceleration(ndConstraintDescritor& des
 	ndAssert(index >= 0);
 	ndAssert(index < ndInt32(m_maxDof));
 	m_rowIsMotor |= (1 << index);
-	desc.m_flags[index] = 0;
 	m_motorAcceleration[index] = acceleration;
 	desc.m_jointAccel[index] = acceleration;
 	desc.m_positError[index] = ndFloat32(0.0f);
@@ -550,14 +549,11 @@ void ndJointBilateralConstraint::AddLinearRowJacobian(ndConstraintDescritor& des
 	const ndFloat32 accelError = num / den;
 
 	const ndFloat32 relAccel = accelError + relCentr + relGyro;
-	desc.m_flags[index] = 0;
 	desc.m_jointAccel[index] = relAccel;
 	desc.m_penetration[index] = relPosit;
 	desc.m_jointSpeed[index] = relVeloc;
 	desc.m_positError[index] = relPosit;
 	desc.m_speedError[index] = relVeloc;
-	desc.m_slidingFriction[index] = ndFloat32 (0.0f);
-
 	desc.m_restitution[index] = ndFloat32(0.0f);
 	desc.m_penetrationStiffness[index] = ndFloat32(0.0f);
 	desc.m_forceBounds[index].m_jointForce = jointForce;
@@ -609,7 +605,6 @@ void ndJointBilateralConstraint::AddAngularRowJacobian(ndConstraintDescritor& de
 	ndFloat32 den = ndFloat32(1.0f) + dt * kd + dt * ksd;
 	ndFloat32 alphaError = num / den;
 
-	desc.m_flags[index] = 0;
 	desc.m_jointSpeed[index] = relOmega;
 	desc.m_penetration[index] = relAngle;
 	desc.m_positError[index] = ndFloat32(0.0f);
