@@ -35,8 +35,6 @@ class ndShapeInstance;
 #define D_REST_RELATIVE_VELOCITY		ndFloat32 (1.0e-3f)
 #define D_MAX_DYNAMIC_FRICTION_SPEED	ndFloat32 (0.3f)
 #define D_MAX_PENETRATION_STIFFNESS		ndFloat32 (50.0f)
-#define D_DIAGONAL_REGULARIZER			ndFloat32 (1.0e-3f)
-
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndContactPoint
