@@ -318,7 +318,7 @@
                 <ratios count="6" floatArray="-3 0 2 1.5 1.1 0.8" />
                 <idleClutchTorque float="200" />
                 <lockedClutchTorque float="100000" />
-                <torqueConverter float="100" />
+                <torqueConverter float="500" />
                 <gearShiftDelayTicks int32="180" />
                 <autoTransmission int32="1" />
             </joint>
