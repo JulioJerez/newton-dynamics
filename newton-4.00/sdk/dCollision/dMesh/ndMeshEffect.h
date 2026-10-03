@@ -132,7 +132,7 @@ class ndMeshEffect: public ndPolyhedra
 		public:
 		ndChannel();
 		ndChannel(const ndChannel& source);
-		~ndChannel();
+		//~ndChannel();
 
 		void Clear();
 		void PushBack(const T& element);
@@ -523,10 +523,10 @@ ndMeshEffect::ndChannel<T, type>::ndChannel(const ndChannel& source)
 {
 }
 
-template<class T, ndMeshEffect::ndChannelType type>
-ndMeshEffect::ndChannel<T, type>::~ndChannel()
-{
-}
+//template<class T, ndMeshEffect::ndChannelType type>
+//ndMeshEffect::ndChannel<T, type>::~ndChannel<T, type>()
+//{
+//}
 
 template<class T, ndMeshEffect::ndChannelType type>
 void ndMeshEffect::ndChannel<T, type>::Clear()

@@ -54,7 +54,7 @@ inline T ndDotProduct(ndInt32 size, const T* const A, const T* const B)
 	for (ndInt32 i = 0; i < size; ++i) 
 	{
 		val = val + A[i] * B[i];
-		ndAssert(ndCheckFloat(val));
+		ndAssert(ndCheckFloat(ndFloat64(val)));
 	}
 	return val;
 }
@@ -65,7 +65,7 @@ inline void ndScale(ndInt32 size, T* const X, T scale)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] *= scale;
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -75,7 +75,7 @@ inline void ndScaleSet(ndInt32 size, T* const X, const T* const A, T scale)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] = A[i] * scale;
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -85,7 +85,7 @@ inline void ndScaleAdd(ndInt32 size, T* const X, const T* const B, T C)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] += B[i] * C;
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -95,7 +95,7 @@ inline void ndScaleAdd(ndInt32 size, T* const X, const T* const A, const T* cons
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] = A[i] + B[i] * C;
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -105,7 +105,7 @@ inline void ndMin(ndInt32 size, T* const X, T A)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] = ndMin(X[i], A);
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -115,7 +115,7 @@ inline void ndMin(ndInt32 size, T* const X, const T* const A)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] = ndMin (X[i], A[i]);
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -125,7 +125,7 @@ inline void ndMax(ndInt32 size, T* const X, T A)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] = ndMax(X[i], A);
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -135,7 +135,7 @@ inline void ndMax(ndInt32 size, T* const X, const T* const A)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] = ndMax(X[i], A[i]);
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -145,7 +145,7 @@ inline void ndLessMask(ndInt32 size, T* const X, T A)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] = (X[i] < A) ? T(1.0f) : T(0.0f);
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -155,7 +155,7 @@ inline void ndLessEqualMask(ndInt32 size, T* const X, T A)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] = (X[i] <= A) ? T(1.0f) : T(0.0f);
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -165,7 +165,7 @@ inline void ndLessEqualMask(ndInt32 size, T* const X, const T* const A)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] = (X[i] <= A[i]) ? T (1.0f) : T(0.0f);
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -175,7 +175,7 @@ inline void ndGreaterMask(ndInt32 size, T* const X, T A)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] = (X[i] > A) ? T(1.0f) : T(0.0f);
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -185,7 +185,7 @@ inline void ndGreaterEqualMask(ndInt32 size, T* const X, T A)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] = (X[i] >= A) ? T(1.0f) : T(0.0f);
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -195,7 +195,7 @@ inline void ndGreaterEqualMask(ndInt32 size, T* const X, const T* const A)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] = (X[i] >= A[i]) ? T(1.0f) : T(0.0f);
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -206,7 +206,7 @@ inline void ndBlend(ndInt32 size, T* const X, const T* const mask, T a, T b)
 	{
 		T s = mask[i];
 		X[i] = a * (T(1.0f) - s) + b * s;
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -216,7 +216,7 @@ inline void ndAdd(ndInt32 size, T* const X, const T* const A)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] += A[i];
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -226,7 +226,7 @@ inline void ndAdd(ndInt32 size, T* const X, const T* const A, const T* const B)
 	for (ndInt32 i = 0; i < size; ++i) 
 	{
 		X[i] = A[i] + B[i];
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -236,7 +236,7 @@ inline void ndSub(ndInt32 size, T* const X, const T* const A)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] -= A[i];
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -246,7 +246,7 @@ inline void ndSub(ndInt32 size, T* const X, const T* const A, const T* const B)
 	for (ndInt32 i = 0; i < size; ++i) 
 	{
 		X[i] = A[i] - B[i];
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -256,7 +256,7 @@ inline void ndMul(ndInt32 size, T* const X, const T* const A)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] *= A[i];
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -266,7 +266,7 @@ inline void ndMul(ndInt32 size, T* const X, const T* const A, const T* const B)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] = A[i] * B[i];
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -276,7 +276,7 @@ inline void ndDiv(ndInt32 size, T* const X, const T* const A, const T* const B)
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] = A[i] / B[i];
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -286,7 +286,7 @@ inline void ndMulAdd(ndInt32 size, T* const X, const T* const B, const T* const 
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] += B[i] * C[i];
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -296,7 +296,7 @@ inline void ndMulAdd(ndInt32 size, T* const X, const T* const A, const T* const 
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] = A[i] + B[i] * C[i];
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -306,7 +306,7 @@ inline void ndMulSub(ndInt32 size, T* const X, const T* const B, const T* const 
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] -= B[i] * C[i];
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 
@@ -316,7 +316,7 @@ inline void ndMulSub(ndInt32 size, T* const X, const T* const A, const T* const 
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		X[i] = A[i] - B[i] * C[i];
-		ndAssert(ndCheckFloat(X[i]));
+		ndAssert(ndCheckFloat(ndFloat64(X[i])));
 	}
 }
 

@@ -320,7 +320,7 @@ bool ndCholeskyTiledFactorization(ndInt32 size, ndInt32 stride, T* const psdMatr
 	};
 
 	const ndInt32 numberOfTiles = size / CholeskyTiledBlockSize_;
-	CholeskyTile* const invDiagonalTiles = (CholeskyTile*)ndAlloca(CholeskyTile, numberOfTiles + 1);
+	CholeskyTile* const invDiagonalTiles = reinterpret_cast<CholeskyTile*>(ndAlloca(CholeskyTile, numberOfTiles + 1));
 	for (ndInt32 i = 0; i < numberOfTiles; ++i)
 	{
 		for (ndInt32 j = 0; j <= i; ++j)

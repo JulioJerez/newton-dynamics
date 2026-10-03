@@ -1441,7 +1441,9 @@ void ndSkeletonContainer::ParallelSolveAuxiliary(ndJacobian* const internalForce
 	auto AddForcesBody1 = ndMakeObject::ndFunction([this, f, internalForcesArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		const ndBodyForcePtr& bodyForceRemap = m_bodyForceRemap1;
-		const ndLeftHandSide* const leftHandSide = (ndLeftHandSide*)(((ndJacobian*)m_leftHandSide) + 1);
+		//const ndLeftHandSide* const leftHandSide = (ndLeftHandSide*)(((ndJacobian*)m_leftHandSide) + 1);
+		const ndJacobian* const jacobian = reinterpret_cast<const ndJacobian*>(m_leftHandSide) + 1;
+		const ndLeftHandSide* const leftHandSide = reinterpret_cast<const ndLeftHandSide*>(jacobian);
 	
 		const ndInt32 start = bodyForceRemap.m_indexSpan[groupId];
 		const ndInt32 count = bodyForceRemap.m_indexSpan[groupId + 1] - start;
@@ -1458,10 +1460,6 @@ void ndSkeletonContainer::ParallelSolveAuxiliary(ndJacobian* const internalForce
 		}
 		internalForcesArray[m] = force;
 	});
-	//for (ndInt32 i = 0; i < m_bodyForceRemap1.m_spansCount; ++i)
-	//{
-	//	AddForcesBody1(i, 0);
-	//}
 	scene->ParallelExecute(AddForcesBody1, m_bodyForceRemap1.m_spansCount, 4);
 }
 
@@ -1492,10 +1490,6 @@ void ndSkeletonContainer::ParallelSolveBlockLcp(ndInt32 size, ndInt32 blockSize,
 				}
 				x[groupId] += acc;
 			});
-			//for (ndInt32 i = 0; i < blockSize; ++i)
-			//{
-			//	AddRows(i, 0);
-			//}
 			ndScene* const scene = m_owner->GetScene();
 			scene->ParallelExecute(AddRows, blockSize, 4);
 		}

@@ -145,16 +145,16 @@ inline bool ndAreEqual(T A, T B, T tol)
 		if (exp0 > exp1)
 		{
 			exp1 *= 2;
-			mantissa1 *= ndFloat32(0.5f);
+			mantissa1 *= ndFloat64(0.5f);
 		}
 		else
 		{
 			exp1 /= 2;
-			mantissa1 *= ndFloat32(2.0f);
+			mantissa1 *= ndFloat64(2.0f);
 		}
 	}
 
-	ndFloat64 scale = ndPow(ndFloat64(2.0f), ndFloat64(exp0));
+	ndFloat64 scale = ndFloat64(ndPow(ndFloat64(2.0f), ndFloat64(exp0)));
 	ndFloat64 tolerance = tol / scale;
 	ndFloat64 error = mantissa0 - mantissa1;
 	return ndAbs(error) < tolerance;
