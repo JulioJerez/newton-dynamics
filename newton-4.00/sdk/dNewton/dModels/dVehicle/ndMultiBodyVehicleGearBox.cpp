@@ -164,17 +164,23 @@ void ndMultiBodyVehicleGearBox::JacobianDerivative(ndConstraintDescritor& desc)
 		const ndFloat32 w = w0 + w1;
 		SetMotorAcceleration(desc, -w * desc.m_invTimestep);
 		
+		ndFloat32 maxFrictionTorque = ndFloat32(1.0f);
+		ndFloat32 minFrictionTorque = ndFloat32(-1.0f);
 		if (m_gearBox.m_crownGearRatio > ndFloat32(0.0f))
 		{
 			if (m_gearRatio > ndFloat32(0.0f))
 			{
-				SetHighFriction(desc, m_clutchTorque);
-				SetLowerFriction(desc, -m_driveTrainResistanceTorque);
+				//SetHighFriction(desc, m_clutchTorque);
+				//SetLowerFriction(desc, -m_driveTrainResistanceTorque);
+				maxFrictionTorque = m_clutchTorque;
+				minFrictionTorque = -m_driveTrainResistanceTorque;
 			}
 			else
 			{
-				SetHighFriction(desc, m_driveTrainResistanceTorque);
-				SetLowerFriction(desc, -m_clutchTorque);
+				//SetHighFriction(desc, m_driveTrainResistanceTorque);
+				//SetLowerFriction(desc, -m_clutchTorque);
+				maxFrictionTorque = -m_clutchTorque;
+				minFrictionTorque = m_driveTrainResistanceTorque;
 			}
 		}
 		else
@@ -182,14 +188,24 @@ void ndMultiBodyVehicleGearBox::JacobianDerivative(ndConstraintDescritor& desc)
 			ndAssert(m_gearBox.m_crownGearRatio < ndFloat32(0.0f));
 			if (m_gearRatio > ndFloat32(0.0f))
 			{
-				SetHighFriction(desc, m_driveTrainResistanceTorque);
-				SetLowerFriction(desc, -m_clutchTorque);
+				//SetHighFriction(desc, m_driveTrainResistanceTorque);
+				//SetLowerFriction(desc, -m_clutchTorque);
+				maxFrictionTorque = -m_clutchTorque;
+				minFrictionTorque = m_driveTrainResistanceTorque;
 			}
 			else
 			{
-				SetHighFriction(desc, m_clutchTorque);
-				SetLowerFriction(desc, -m_driveTrainResistanceTorque);
+				//SetHighFriction(desc, m_clutchTorque);
+				//SetLowerFriction(desc, -m_driveTrainResistanceTorque);
+				maxFrictionTorque = m_clutchTorque;
+				minFrictionTorque = -m_driveTrainResistanceTorque;
 			}
 		}
+		SetLowerFriction(desc, minFrictionTorque);
+		SetHighFriction(desc, maxFrictionTorque);
+
+		//ndVector t0(GetTorqueBody0());
+		//ndVector t1(GetTorqueBody1());
+		//ndTrace(("gearBox ratio(%f) f0(%f) f1(%f) t0(%f) t1(%f)\n", gearRatio, minFrictionTorque, maxFrictionTorque, t0.m_x, t1.m_x));
 	}
 }
