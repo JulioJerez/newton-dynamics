@@ -554,6 +554,8 @@ void ndJointBilateralConstraint::AddLinearRowJacobian(ndConstraintDescritor& des
 	desc.m_jointSpeed[index] = relVeloc;
 	desc.m_positError[index] = relPosit;
 	desc.m_speedError[index] = relVeloc;
+	desc.m_slidingFriction[index] = ndFloat32 (0.0f);
+
 	desc.m_restitution[index] = ndFloat32(0.0f);
 	desc.m_penetrationStiffness[index] = ndFloat32(0.0f);
 	desc.m_forceBounds[index].m_jointForce = jointForce;

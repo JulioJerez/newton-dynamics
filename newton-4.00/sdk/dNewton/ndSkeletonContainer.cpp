@@ -2041,7 +2041,7 @@ void ndSkeletonContainer::InitMassMatrix(const ndLeftHandSide* const leftHandSid
 	ndSpatialMatrix* const jointMassArrayStack = ndAlloca(ndSpatialMatrix, nodeCount);
 	ndSpatialMatrix* const bodyMassArray = ndAllocaPtr(ndSpatialMatrix, bodyMassArrayStack);
 	ndSpatialMatrix* const jointMassArray = ndAllocaPtr(ndSpatialMatrix, jointMassArrayStack);
-	
+
 	if (m_nodesOrder)
 	{
 		for (ndInt32 i = 0; i < nodeCount - 1; ++i)

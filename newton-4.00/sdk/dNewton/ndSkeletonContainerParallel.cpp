@@ -1408,11 +1408,11 @@ void ndSkeletonContainer::ParallelSolveAuxiliary(ndJacobian* const internalForce
 		const ndInt32 count = groupId == (threads - 1) ? primaryCount - stride * groupId : stride;
 		ndFloat32* const dst = &f[base];
 		const ndFloat32* const src = &m_deltaForce[base];
-	for (ndInt32 i = 0; i < m_auxiliaryRowCount; ++i)
-	{
-		const ndFloat32 s = u[i];
+		for (ndInt32 i = 0; i < m_auxiliaryRowCount; ++i)
+		{
+			const ndFloat32 s = u[i];
 			ndScaleAdd(count, dst, &src[i * primaryCount], s);
-	}
+		}
 	});
 	scene->ParallelExecute(AddForces, threads, 1);
 
