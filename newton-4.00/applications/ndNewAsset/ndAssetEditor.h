@@ -90,6 +90,7 @@ class ndAssetEditor : public ndClassAlloc
 			:ndClassAlloc()
 			,m_owner(owner)
 		{
+			m_owner->m_toolActive = true;
 		}
 
 		virtual ~ndAssetTool()

@@ -1178,6 +1178,101 @@ void ndAssetEditor::EditDifferentialJoint()
 
 void ndAssetEditor::EditMotorJoint()
 {
+	class ndEngineDeginer : public ndAssetEditor::ndAssetTool
+	{
+		public:
+		ndEngineDeginer(ndAssetEditor* const owner, ndMeshJointVehicleMotor* const joint)
+			:ndAssetTool(owner)
+			,m_motor(joint)
+		{
+		}
+
+		virtual void Execute() override
+		{
+			ImGuiWindowFlags flags = ImGuiWindowFlags_None;
+			flags |= ImGuiWindowFlags_NoDocking;
+			//flags |= ImGuiWindowFlags_AlwaysAutoResize;
+
+			bool toolActive = m_owner->GetActiveTool();
+			ImGui::Begin("normalize mass distribution", &toolActive, flags);
+			m_owner->SetActiveTool(toolActive);
+
+			//for (ndInt32 i = 0; i < 6; ++i)
+			//{
+			//	ImGui::NewLine();
+			//	ImGui::NewLine();
+			//	ImGui::NewLine();
+			//	ImGui::NewLine();
+			//	ImGui::NewLine();
+			//}
+
+			auto PlotTorqueCurve = []()
+			{
+				ImVec2 canvas_pos = ImGui::GetCursorScreenPos();
+
+				ImDrawList* const drawList = ImGui::GetWindowDrawList();
+
+				ndReal y0 = 30.0f;
+				ndReal x0 = 30.0f;
+				ndReal high = 200.0f;
+				ndReal width = 400.0f;
+				ImU32 grayColor = IM_COL32(180, 180, 180, 255);
+
+				// vertical axis
+				{
+					ImGui::Text("torque (nm)");
+					const ImVec2 p0(canvas_pos.x + x0, canvas_pos.y + y0 + 5.0f);
+					const ImVec2 p1(canvas_pos.x + x0, canvas_pos.y + high + y0 + 5.0f);
+					drawList->AddLine(p0, p1, IM_COL32_WHITE, 1.0f);
+				
+					ndInt32 divisions = 10;
+					ndReal y = y0;
+					ndReal divisionStep = high / ndReal(divisions);
+					for (ndInt32 i = 0; i < divisions; ++i)
+					{
+						y += divisionStep;
+						const ImVec2 q0(canvas_pos.x + x0 - 5.0f, canvas_pos.y + y);
+						const ImVec2 q1(canvas_pos.x + x0 + 5.0f, canvas_pos.y + y);
+						drawList->AddLine(q0, q1, grayColor);
+					}
+				}
+
+
+				// horzontaL axis
+				{
+					for (ndInt32 i = 0; i < 10; ++i)
+					{
+						ImGui::NewLine();
+					}
+					ImGui::Text("                                           rpm");
+					const ImVec2 p0(canvas_pos.x + x0 - 10.0f, canvas_pos.y + high + y0);
+					const ImVec2 p1(canvas_pos.x + width + x0 + 10.0f, canvas_pos.y + high + y0);
+					drawList->AddLine(p0, p1, IM_COL32_WHITE, 1.0f);
+				
+					ndInt32 divisions = 10;
+					ndReal x = x0;
+					ndReal divisionStep = width / ndReal(divisions);
+					for (ndInt32 i = 0; i < divisions; ++i)
+					{
+						x += divisionStep;
+						const ImVec2 q0(canvas_pos.x + x, canvas_pos.y + high + y0 - 5.0f);
+						const ImVec2 q1(canvas_pos.x + x, canvas_pos.y + high + y0 + 5.0f);
+						drawList->AddLine(q0, q1, grayColor);
+					}
+				}
+
+				
+				//ndMultiBodyVehicleMotor::ndEngineTorqueCurve& engineCurve = m_motor->m_engineCurve;
+			};
+			PlotTorqueCurve();
+
+			ImGui::End();
+		}
+
+		ndWeakPtr<ndMeshJointVehicleMotor> m_motor;
+	};
+
+
 	EditJointGlobalMatrix();
 
 	ndMeshJointVehicleMotor* const joint = (ndMeshJointVehicleMotor*)*m_currentSelection->GetJoint();
@@ -1232,5 +1327,14 @@ void ndAssetEditor::EditMotorJoint()
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 		joint->m_topSpeed = ndMax(topSpeed, ndReal (10.0f));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
+	}
+
+	if (!m_toolActive)
+	{
+		if (ImGui::Button("plot torque curve"))
+		{
+			m_currentTool = new ndEngineDeginer(this, joint);
+			
+		}
 	}
 }
