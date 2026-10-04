@@ -160,3 +160,4 @@ class ndMultiBodyVehicle : public ndModelArticulation
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif
+

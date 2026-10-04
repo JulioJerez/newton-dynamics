@@ -255,3 +255,5 @@ ndFloat32 ndNomalDistribution::operator()()
 	return NormalGaussian(uniform);
 #endif
 }
+
+

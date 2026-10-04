@@ -402,3 +402,5 @@ TwoLinksIK::TwoLinksIK(ndFloat32 x, ndFloat32 y, ndFloat32 l0, ndFloat32 l1, ndF
 	m_angle1 = ndAtan2(sinAngle1, cosAngle1);
 	m_angle0 = ndAtan2(y, x) - ndAtan2(l1 * sinAngle1, l0 + l1 * cosAngle1);
 }
+
+

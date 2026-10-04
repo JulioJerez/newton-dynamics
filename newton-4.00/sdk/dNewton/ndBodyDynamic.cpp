@@ -496,3 +496,4 @@ void ndBodyDynamic::Deserialize(const ndMeshBody* const meshBody)
 	ndMeshBodyDynamic* const dynamic = (ndMeshBodyDynamic*)meshBody;
 	m_dampCoef = dynamic->m_intrinsicDamping;
 }
+

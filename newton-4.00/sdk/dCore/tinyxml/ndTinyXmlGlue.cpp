@@ -548,3 +548,5 @@ D_TINY_API bool xmlHasParam(const nd::TiXmlNode* const rootNode, const char* con
 	const nd::TiXmlElement* const element = (nd::TiXmlElement*)rootNode->FirstChild(name);
 	return element ? true : false;
 }
+
+

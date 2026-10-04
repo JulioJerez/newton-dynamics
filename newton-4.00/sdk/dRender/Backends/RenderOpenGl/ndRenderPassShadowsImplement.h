@@ -56,3 +56,7 @@ class ndRenderPassShadowsImplement : public ndClassAlloc
 };
 
 #endif
+
+
+
+
