@@ -437,14 +437,14 @@ void ndDynamicsUpdateSimd8::InitJacobianMatrix()
 					row.m_Jt.m_jacobianM0.m_angular.m_y,
 					row.m_Jt.m_jacobianM0.m_angular.m_z,
 					dommy,
-					(ndVector8&)row0->m_Jt.m_jacobianM0,
-					(ndVector8&)row1->m_Jt.m_jacobianM0,
-					(ndVector8&)row2->m_Jt.m_jacobianM0,
-					(ndVector8&)row3->m_Jt.m_jacobianM0,
-					(ndVector8&)row4->m_Jt.m_jacobianM0,
-					(ndVector8&)row5->m_Jt.m_jacobianM0,
-					(ndVector8&)row6->m_Jt.m_jacobianM0,
-					(ndVector8&)row7->m_Jt.m_jacobianM0);
+					reinterpret_cast<const ndVector8&>(row0->m_Jt.m_jacobianM0),
+					reinterpret_cast<const ndVector8&>(row1->m_Jt.m_jacobianM0),
+					reinterpret_cast<const ndVector8&>(row2->m_Jt.m_jacobianM0),
+					reinterpret_cast<const ndVector8&>(row3->m_Jt.m_jacobianM0),
+					reinterpret_cast<const ndVector8&>(row4->m_Jt.m_jacobianM0),
+					reinterpret_cast<const ndVector8&>(row5->m_Jt.m_jacobianM0),
+					reinterpret_cast<const ndVector8&>(row6->m_Jt.m_jacobianM0),
+					reinterpret_cast<const ndVector8&>(row7->m_Jt.m_jacobianM0));
 
 				ndVector8::Transpose(
 					row.m_Jt.m_jacobianM1.m_linear.m_x,
@@ -455,14 +455,14 @@ void ndDynamicsUpdateSimd8::InitJacobianMatrix()
 					row.m_Jt.m_jacobianM1.m_angular.m_y,
 					row.m_Jt.m_jacobianM1.m_angular.m_z,
 					dommy,
-					(ndVector8&)row0->m_Jt.m_jacobianM1,
-					(ndVector8&)row1->m_Jt.m_jacobianM1,
-					(ndVector8&)row2->m_Jt.m_jacobianM1,
-					(ndVector8&)row3->m_Jt.m_jacobianM1,
-					(ndVector8&)row4->m_Jt.m_jacobianM1,
-					(ndVector8&)row5->m_Jt.m_jacobianM1,
-					(ndVector8&)row6->m_Jt.m_jacobianM1,
-					(ndVector8&)row7->m_Jt.m_jacobianM1);
+					reinterpret_cast<const ndVector8&>(row0->m_Jt.m_jacobianM1),
+					reinterpret_cast<const ndVector8&>(row1->m_Jt.m_jacobianM1),
+					reinterpret_cast<const ndVector8&>(row2->m_Jt.m_jacobianM1),
+					reinterpret_cast<const ndVector8&>(row3->m_Jt.m_jacobianM1),
+					reinterpret_cast<const ndVector8&>(row4->m_Jt.m_jacobianM1),
+					reinterpret_cast<const ndVector8&>(row5->m_Jt.m_jacobianM1),
+					reinterpret_cast<const ndVector8&>(row6->m_Jt.m_jacobianM1),
+					reinterpret_cast<const ndVector8&>(row7->m_Jt.m_jacobianM1));
 
 				ndVector8::Transpose(
 					row.m_JMinv.m_jacobianM0.m_linear.m_x,
@@ -473,14 +473,14 @@ void ndDynamicsUpdateSimd8::InitJacobianMatrix()
 					row.m_JMinv.m_jacobianM0.m_angular.m_y,
 					row.m_JMinv.m_jacobianM0.m_angular.m_z,
 					dommy,
-					(ndVector8&)row0->m_JMinv.m_jacobianM0,
-					(ndVector8&)row1->m_JMinv.m_jacobianM0,
-					(ndVector8&)row2->m_JMinv.m_jacobianM0,
-					(ndVector8&)row3->m_JMinv.m_jacobianM0,
-					(ndVector8&)row4->m_JMinv.m_jacobianM0,
-					(ndVector8&)row5->m_JMinv.m_jacobianM0,
-					(ndVector8&)row6->m_JMinv.m_jacobianM0,
-					(ndVector8&)row7->m_JMinv.m_jacobianM0);
+					reinterpret_cast<const ndVector8&>(row0->m_JMinv.m_jacobianM0),
+					reinterpret_cast<const ndVector8&>(row1->m_JMinv.m_jacobianM0),
+					reinterpret_cast<const ndVector8&>(row2->m_JMinv.m_jacobianM0),
+					reinterpret_cast<const ndVector8&>(row3->m_JMinv.m_jacobianM0),
+					reinterpret_cast<const ndVector8&>(row4->m_JMinv.m_jacobianM0),
+					reinterpret_cast<const ndVector8&>(row5->m_JMinv.m_jacobianM0),
+					reinterpret_cast<const ndVector8&>(row6->m_JMinv.m_jacobianM0),
+					reinterpret_cast<const ndVector8&>(row7->m_JMinv.m_jacobianM0));
 
 				ndVector8::Transpose(
 					row.m_JMinv.m_jacobianM1.m_linear.m_x,
@@ -491,19 +491,19 @@ void ndDynamicsUpdateSimd8::InitJacobianMatrix()
 					row.m_JMinv.m_jacobianM1.m_angular.m_y,
 					row.m_JMinv.m_jacobianM1.m_angular.m_z,
 					dommy,
-					(ndVector8&)row0->m_JMinv.m_jacobianM1,
-					(ndVector8&)row1->m_JMinv.m_jacobianM1,
-					(ndVector8&)row2->m_JMinv.m_jacobianM1,
-					(ndVector8&)row3->m_JMinv.m_jacobianM1,
-					(ndVector8&)row4->m_JMinv.m_jacobianM1,
-					(ndVector8&)row5->m_JMinv.m_jacobianM1,
-					(ndVector8&)row6->m_JMinv.m_jacobianM1,
-					(ndVector8&)row7->m_JMinv.m_jacobianM1);
+					reinterpret_cast<const ndVector8&>(row0->m_JMinv.m_jacobianM1),
+					reinterpret_cast<const ndVector8&>(row1->m_JMinv.m_jacobianM1),
+					reinterpret_cast<const ndVector8&>(row2->m_JMinv.m_jacobianM1),
+					reinterpret_cast<const ndVector8&>(row3->m_JMinv.m_jacobianM1),
+					reinterpret_cast<const ndVector8&>(row4->m_JMinv.m_jacobianM1),
+					reinterpret_cast<const ndVector8&>(row5->m_JMinv.m_jacobianM1),
+					reinterpret_cast<const ndVector8&>(row6->m_JMinv.m_jacobianM1),
+					reinterpret_cast<const ndVector8&>(row7->m_JMinv.m_jacobianM1));
 
 				#ifdef D_NEWTON_USE_DOUBLE
 					ndInt64* const normalIndex = (ndInt64*)&row.m_normalForceIndex[0];
 				#else
-					ndInt32* const normalIndex = (ndInt32*)&row.m_normalForceIndex[0];
+					ndInt32* const normalIndex = row.m_normalForceIndex.m_int;
 				#endif
 				for (ndInt32 n = 0; n < ND_SIMD8_WORK_GROUP_SIZE; ++n)
 				{
@@ -611,7 +611,7 @@ void ndDynamicsUpdateSimd8::InitJacobianMatrix()
 						#ifdef D_NEWTON_USE_DOUBLE
 							ndInt64* const normalIndex = (ndInt64*)&row.m_normalForceIndex[0];
 						#else
-							ndInt32* const normalIndex = (ndInt32*)&row.m_normalForceIndex[0];
+							ndInt32* const normalIndex = row.m_normalForceIndex.m_int;
 						#endif
 						normalIndex[k] = (rhs->m_normalForceIndex + 1) * ND_SIMD8_WORK_GROUP_SIZE + k;
 						row.m_lowerBoundFrictionCoefficent[k] = rhs->m_lowerBoundFrictionCoefficent;
@@ -710,7 +710,7 @@ void ndDynamicsUpdateSimd8::CalculateJointsForce()
 	auto CalculateJointsForce = ndMakeObject::ndFunction([this, &jointArray](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		ND_PROFILE_ZONE_NAMED("CalculateJointsForce");
-		ndVector8* const jointPartialForces = (ndVector8*)&GetTempInternalForces()[0];
+		ndVector8* const jointPartialForces = reinterpret_cast<ndVector8*>(&GetTempInternalForces()[0]);
 
 		const ndInt32* const soaJointRows = &m_simdJointRows[0];
 		ndMatrixSimd8Array& soaMassMatrixArray = *m_simdMassMatrixArray;
@@ -972,8 +972,8 @@ void ndDynamicsUpdateSimd8::CalculateJointsForce()
 	{
 		ND_PROFILE_ZONE_NAMED("ApplyJacobianAccumulatePartialForces");
 		const ndInt32* const bodyIndex = &GetJointForceIndexBuffer()[0];
-		ndVector8* const internalForces = (ndVector8*)&GetInternalForces()[0];
-		const ndVector8* const jointInternalForces = (ndVector8*)&GetTempInternalForces()[0];
+		ndVector8* const internalForces = reinterpret_cast<ndVector8*>(&GetInternalForces()[0]);
+		const ndVector8* const jointInternalForces = reinterpret_cast<const ndVector8*>(&GetTempInternalForces()[0]);
 		const ndJointBodyPairIndex* const jointBodyPairIndexBuffer = &GetJointBodyPairIndexBuffer()[0];
 
 		const ndInt32 m = groupId;
