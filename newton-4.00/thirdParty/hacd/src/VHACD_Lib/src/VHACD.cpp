@@ -32,11 +32,11 @@ namespace nd
 {
 	#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 	#define MIN(a, b) (((a) < (b)) ? (a) : (b))
-	#define ABS(a) (((a) < 0) ? -(a) : (a))
-	#define ZSGN(a) (((a) < 0) ? -1 : (a) > 0 ? 1 : 0)
+	//#define ABS(a) (((a) < 0) ? -(a) : (a))
+	//#define ZSGN(a) (((a) < 0) ? -1 : (a) > 0 ? 1 : 0)
 	#define MAX_DOUBLE (1.79769e+308)
 
-	#define USE_CPP_11_THREADS
+	//#define USE_CPP_11_THREADS
 
 	inline int32_t FindMinimumElement(const float* const d, float* const m, const int32_t begin, const int32_t end)
 	{
@@ -79,7 +79,7 @@ namespace nd
 		m_pset = vset;
 
 		delete m_volume;
-		m_volume = 0;
+		m_volume = nullptr;
 
 		if (params.m_logger) {
 			msg.str("");
@@ -107,7 +107,7 @@ namespace nd
 	{
 		return ComputeACD(points, nPoints, triangles, nTriangles, params);
 	}
-	double ComputePreferredCuttingDirection(const PrimitiveSet* const tset, Vec3<double>& dir)
+	static double ComputePreferredCuttingDirection(const PrimitiveSet* const tset, Vec3<double>& dir)
 	{
 		double ex = tset->GetEigenValue(AXIS_X);
 		double ey = tset->GetEigenValue(AXIS_Y);
@@ -137,7 +137,7 @@ namespace nd
 			return (e == 0.0) ? 0.0 : 1.0 - vz / e;
 		}
 	}
-	void ComputeAxesAlignedClippingPlanes(const VoxelSet& vset, const short downsampling, SArray<Plane>& planes)
+	static void ComputeAxesAlignedClippingPlanes(const VoxelSet& vset, const short downsampling, SArray<Plane>& planes)
 	{
 		const Vec3<short> minV = vset.GetMinBBVoxels();
 		const Vec3<short> maxV = vset.GetMaxBBVoxels();
@@ -181,7 +181,7 @@ namespace nd
 		}
 	}
 
-	void RefineAxesAlignedClippingPlanes(const VoxelSet& vset, const Plane& bestPlane, const short downsampling,
+	static void RefineAxesAlignedClippingPlanes(const VoxelSet& vset, const Plane& bestPlane, const short downsampling,
 		SArray<Plane>& planes)
 	{
 		const Vec3<short> minV = vset.GetMinBBVoxels();
@@ -262,7 +262,7 @@ namespace nd
 		PrimitiveSet* onSurfacePSet = inputPSet->Create();
 		inputPSet->SelectOnSurface(onSurfacePSet);
 
-		PrimitiveSet** psets = 0;
+		PrimitiveSet** psets = nullptr;
 		if (!params.m_convexhullApproximation) 
 		{
 			psets = new PrimitiveSet*[2];
@@ -310,7 +310,7 @@ namespace nd
 		{
 		}
 
-		void Execute(int threadId)
+		void Execute(int threadId) override
 		{
 			Mesh& leftCH = m_commonData->chs[threadId][0];
 			Mesh& rightCH = m_commonData->chs[threadId][1];
@@ -327,8 +327,8 @@ namespace nd
 				leftCHPts.Resize(0);
 				m_commonData->m_onSurfacePSet->Intersect(m_plane, &rightCHPts, &leftCHPts, size_t (m_commonData->m_convexhullDownsampling * 32));
 				m_commonData->m_inputPSet->GetConvexHull().Clip(m_plane, rightCHPts, leftCHPts);
-				rightCH.ComputeConvexHull((double*)rightCHPts.Data(), rightCHPts.Size());
-				leftCH.ComputeConvexHull((double*)leftCHPts.Data(), leftCHPts.Size());
+				rightCH.ComputeConvexHull(reinterpret_cast<double*>(rightCHPts.Data()), rightCHPts.Size());
+				leftCH.ComputeConvexHull(reinterpret_cast<double*>(leftCHPts.Data()), leftCHPts.Size());
 			}
 			else 
 			{
@@ -349,8 +349,8 @@ namespace nd
 			
 			m_commonData->m_inputPSet->ComputeClippedVolumes(m_plane, volumeRight, volumeLeft);
 			
-			double concavityLeft = float(ComputeConcavity(volumeLeft, volumeLeftCH, m_commonData->m_me->m_volumeCH0));
-			double concavityRight = float(ComputeConcavity(volumeRight, volumeRightCH, m_commonData->m_me->m_volumeCH0));
+			double concavityLeft = ComputeConcavity(volumeLeft, volumeLeftCH, m_commonData->m_me->m_volumeCH0);
+			double concavityRight = ComputeConcavity(volumeRight, volumeRightCH, m_commonData->m_me->m_volumeCH0);
 			double concavity = (concavityLeft + concavityRight);
 			
 			// compute cost
@@ -446,7 +446,7 @@ namespace nd
 		SArray<PrimitiveSet*> inputParts;
 		SArray<PrimitiveSet*> temp;
 		inputParts.PushBack(m_pset);
-		m_pset = 0;
+		m_pset = nullptr;
 		SArray<Plane> planes;
 		SArray<Plane> planesRef;
 		uint32_t sub = 0;
@@ -491,14 +491,14 @@ namespace nd
 			const size_t nInputParts = inputParts.Size();
 			Update(m_stageProgress, 0.0, params);
 			for (size_t p = 0; p < nInputParts && !m_cancel; ++p) {
-				const double progress0 = double(p) * 100.0 / (double)nInputParts;
-				const double progress1 = (double(p) + 0.75) * 100.0 / (double)nInputParts;
-				const double progress2 = (double(p) + 1.00) * 100.0 / (double)nInputParts;
+				const double progress0 = double(p) * 100.0 / double(nInputParts);
+				const double progress1 = (double(p) + 0.75) * 100.0 / double(nInputParts);
+				const double progress2 = (double(p) + 1.00) * 100.0 / double(nInputParts);
 
 				Update(m_stageProgress, progress0, params);
 
 				PrimitiveSet* pset = inputParts[p];
-				inputParts[p] = 0;
+				inputParts[p] = nullptr;
 				double volume = pset->ComputeVolume();
 				pset->ComputeBB();
 				pset->ComputePrincipalAxes();
@@ -512,7 +512,7 @@ namespace nd
 					m_volumeCH0 = volumeCH;
 				}
 
-				double concavity = float(ComputeConcavity(volume, volumeCH, m_volumeCH0));
+				double concavity = ComputeConcavity(volume, volumeCH, m_volumeCH0);
 				double error = 1.01 * pset->ComputeMaxVolumeError() / m_volumeCH0;
 				// make the value smaller, later put it the parameters.
 				error *= params.m_concavityToVolumeWeigh;
@@ -537,8 +537,7 @@ namespace nd
 					double w = ComputePreferredCuttingDirection(pset, preferredCuttingDirection);
 					planes.Resize(0);
 
-					//VoxelSet* vset = (VoxelSet*)pset;
-					ComputeAxesAlignedClippingPlanes(*((VoxelSet*)pset), short(params.m_planeDownsampling), planes);
+					ComputeAxesAlignedClippingPlanes(*static_cast<VoxelSet*>(pset), short(params.m_planeDownsampling), planes);
 
 					if (params.m_logger) {
 						msg.str("");
@@ -565,7 +564,7 @@ namespace nd
 						planesRef.Resize(0);
 
 						//VoxelSet* vset = (VoxelSet*)pset;
-						RefineAxesAlignedClippingPlanes(*((VoxelSet*)pset), bestPlane, short(params.m_planeDownsampling), planesRef);
+						RefineAxesAlignedClippingPlanes(*static_cast<VoxelSet*>(pset), bestPlane, short(params.m_planeDownsampling), planesRef);
 
 						if (params.m_logger) {
 							msg.str("");
@@ -656,7 +655,7 @@ namespace nd
 		Update(m_stageProgress, 0.0, params);
 		m_convexHulls.Resize(0);
 		for (size_t p = 0; p < nConvexHulls && !m_cancel; ++p) {
-			Update(m_stageProgress, (double)p * 100.0 / (double)nConvexHulls, params);
+			Update(m_stageProgress, double(p) * 100.0 / double(nConvexHulls), params);
 			m_convexHulls.PushBack(new Mesh);
 			parts[p]->ComputeConvexHull(*m_convexHulls[p]);
 			size_t nv = m_convexHulls[p]->GetNPoints();
@@ -675,7 +674,7 @@ namespace nd
 		const size_t nParts = parts.Size();
 		for (size_t p = 0; p < nParts; ++p) {
 			delete parts[p];
-			parts[p] = 0;
+			parts[p] = nullptr;
 		}
 		parts.Resize(0);
 
@@ -696,20 +695,20 @@ namespace nd
 			params.m_logger->Log(msg.str().c_str());
 		}
 	}
-	void AddPoints(const Mesh* const mesh, SArray<Vec3<double> >& pts)
+	static void AddPoints(const Mesh* const mesh, SArray<Vec3<double> >& pts)
 	{
 		const size_t n = mesh->GetNPoints();
 		for (size_t i = 0; i < n; ++i) {
 			pts.PushBack(mesh->GetPoint(i));
 		}
 	}
-	void ComputeConvexHull(const Mesh* const ch1, const Mesh* const ch2, SArray<Vec3<double> >& pts, Mesh* const combinedCH)
+	static void ComputeConvexHull(const Mesh* const ch1, const Mesh* const ch2, SArray<Vec3<double> >& pts, Mesh* const combinedCH)
 	{
 		pts.Resize(0);
 		AddPoints(ch1, pts);
 		AddPoints(ch2, pts);
 	
-		ConvexHull ch((double*)pts.Data(), 3 * sizeof(double), (int32_t)pts.Size(), 1.0e-5f);
+		ConvexHull ch(reinterpret_cast<double*>(pts.Data()), 3 * sizeof(double), int32_t(pts.Size()), 1.0e-5);
 
 		combinedCH->ResizePoints(0);
 		combinedCH->ResizeTriangles(0);
@@ -797,15 +796,15 @@ namespace nd
 			{
 			}
 
-			void Execute(int)
+			void Execute(int) override
 			{
 				Mesh combinedCH;
 				SArray<Vec3<double> > pts;
 				for (int i = 0; i < m_pairsCount; i++)
 				{
 					ConvexPair& pair = m_pairs[i];
-					const float volume0 = float(m_convexHulls[pair.m_p0]->ComputeVolume());
-					const float volume1 = float(m_convexHulls[pair.m_p1]->ComputeVolume());
+					const double volume0 = m_convexHulls[pair.m_p0]->ComputeVolume();
+					const double volume1 = m_convexHulls[pair.m_p1]->ComputeVolume();
 					ComputeConvexHull(m_convexHulls[pair.m_p0], m_convexHulls[pair.m_p1], pts, &combinedCH);
 					pair.m_cost = float(ComputeConcavity(volume0 + volume1, combinedCH.ComputeVolume(), m_volumeCH0));
 				}
@@ -887,7 +886,7 @@ namespace nd
 			for (size_t i = 0; i < pairsCount; i++)
 			{
 				ConvexPair& pair = convexPairArray[i];
-				if (pair.m_cost < (2.0f * params.m_minMergeToleranace))
+				if (pair.m_cost < float(2.0 * params.m_minMergeToleranace))
 				{
 					priority.Push(pair, pair.m_cost);
 				}
@@ -895,7 +894,7 @@ namespace nd
 
 			Mesh combinedCH;
 			SArray<Vec3<double> > pts;
-			while (((nConvexHulls > params.m_maxConvexHulls) || (priority.Value() <= params.m_minMergeToleranace)) && priority.GetCount())
+			while (((nConvexHulls > params.m_maxConvexHulls) || (priority.Value() <= float(params.m_minMergeToleranace))) && priority.GetCount())
 			{
 				ConvexKey key(priority[0]);
 				std::set<ConvexKey>::iterator it = hullGraph.find(key);
@@ -927,7 +926,7 @@ namespace nd
 					convexProxyArray[size_t(key.m_p0)].m_hull = nullptr;
 					convexProxyArray[size_t(key.m_p1)].m_hull = nullptr;
 
-					const float volume0 = float(newHull->ComputeVolume());
+					const double volume0 = newHull->ComputeVolume();
 
 					const Vec3<double> bmin(convexProxyArray[index].m_bmin);
 					const Vec3<double> bmax(convexProxyArray[index].m_bmax);
@@ -946,7 +945,7 @@ namespace nd
 							{
 								int i0 = int(i);
 								ConvexPair pair(i0, int(index));
-								const float volume1 = float(convexProxyArray[i].m_hull->ComputeVolume());
+								const double volume1 = convexProxyArray[i].m_hull->ComputeVolume();
 								ComputeConvexHull(newHull, convexProxyArray[i].m_hull, pts, &combinedCH);
 								float cost = float(ComputeConcavity(volume0 + volume1, combinedCH.ComputeVolume(), m_volumeCH0));
 								priority.Push(pair, cost);
@@ -1066,7 +1065,7 @@ namespace nd
 		{
 			icHull.AddPoints(ch->GetPointsBuffer(), ch->GetNPoints());
 		}
-		icHull.Process((uint32_t)nvertices, minVolume);
+		icHull.Process(uint32_t(nvertices), minVolume);
 		TMMesh& mesh = icHull.GetMesh();
 		const size_t nT = mesh.GetNTriangles();
 		const size_t nV = mesh.GetNVertices();

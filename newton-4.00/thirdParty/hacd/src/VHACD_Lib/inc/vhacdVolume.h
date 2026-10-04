@@ -74,16 +74,16 @@ namespace nd
 
 			public:
 			//! Destructor.
-			~VoxelSet(void);
+			~VoxelSet(void) override;
 			//! Constructor.
 			VoxelSet();
 
-			size_t GetNPrimitives() const { return m_voxels.Size(); }
-			size_t GetNPrimitivesOnSurf() const { return m_numVoxelsOnSurface; }
-			size_t GetNPrimitivesInsideSurf() const { return m_numVoxelsInsideSurface; }
-			double GetEigenValue(AXIS axis) const { return m_D[axis][axis]; }
-			double ComputeVolume() const { return m_unitVolume * (double)m_voxels.Size(); }
-			double ComputeMaxVolumeError() const { return m_unitVolume * (double)m_numVoxelsOnSurface; }
+			size_t GetNPrimitives() const override { return m_voxels.Size(); }
+			size_t GetNPrimitivesOnSurf() const override { return m_numVoxelsOnSurface; }
+			size_t GetNPrimitivesInsideSurf() const override { return m_numVoxelsInsideSurface; }
+			double GetEigenValue(AXIS axis) const override { return m_D[axis][axis]; }
+			double ComputeVolume() const override { return m_unitVolume * double(m_voxels.Size()); }
+			double ComputeMaxVolumeError() const override { return m_unitVolume * double(m_numVoxelsOnSurface); }
 			const Vec3<short>& GetMinBBVoxels() const { return m_minBBVoxels; }
 			const Vec3<short>& GetMaxBBVoxels() const { return m_maxBBVoxels; }
 			const Vec3<double>& GetMinBB() const { return m_minBB; }
@@ -108,26 +108,26 @@ namespace nd
 					voxel[2] * m_scale + m_minBB[2]);
 			}
 
-			void GetPointArray(std::vector<Vec3<double>>& points) const ;
+			void GetPointArray(std::vector<Vec3<double>>& points) const override;
 
 			void GetPoints(const Voxel& voxel, Vec3<double>* const pts) const;
-			void ComputeConvexHull(Mesh& meshCH, const size_t sampling = 1) const;
-			void Clip(const Plane& plane, PrimitiveSet* const positivePart, PrimitiveSet* const negativePart) const;
+			void ComputeConvexHull(Mesh& meshCH, const size_t sampling = 1) const override;
+			void Clip(const Plane& plane, PrimitiveSet* const positivePart, PrimitiveSet* const negativePart) const override;
 			void Intersect(const Plane& plane, SArray<Vec3<double> >* const positivePts,
-				SArray<Vec3<double> >* const negativePts, const size_t sampling) const;
+				SArray<Vec3<double> >* const negativePts, const size_t sampling) const override;
 			void ComputeExteriorPoints(const Plane& plane, const Mesh& mesh,
-				SArray<Vec3<double> >* const exteriorPts) const;
-			void ComputeClippedVolumes(const Plane& plane, double& positiveVolume, double& negativeVolume) const;
-			void SelectOnSurface(PrimitiveSet* const onSurfP) const;
-			void ComputeBB();
-			void Convert(Mesh& mesh, const VOXEL_VALUE value) const;
-			void ComputePrincipalAxes();
-			PrimitiveSet* Create() const
+				SArray<Vec3<double> >* const exteriorPts) const override;
+			void ComputeClippedVolumes(const Plane& plane, double& positiveVolume, double& negativeVolume) const override;
+			void SelectOnSurface(PrimitiveSet* const onSurfP) const override;
+			void ComputeBB() override;
+			void Convert(Mesh& mesh, const VOXEL_VALUE value) const override;
+			void ComputePrincipalAxes() override;
+			PrimitiveSet* Create() const override
 			{
 				return new VoxelSet();
 			}
-			void AlignToPrincipalAxes() {}
-			void RevertAlignToPrincipalAxes() {}
+			void AlignToPrincipalAxes() override {}
+			void RevertAlignToPrincipalAxes() override {}
 			Voxel* GetVoxels() { return m_voxels.Data(); }
 			const Voxel* GetVoxels() const { return m_voxels.Data(); }
 
@@ -209,9 +209,9 @@ namespace nd
 		template <>
 		inline void ComputeAlignedPoint<float>(const float* const points, const uint32_t idx, const Vec3<double>& barycenter, const double(&rot)[3][3], Vec3<double>& pt)
 		{
-			double x = points[idx + 0] - barycenter[0];
-			double y = points[idx + 1] - barycenter[1];
-			double z = points[idx + 2] - barycenter[2];
+			double x = double(points[idx + 0]) - barycenter[0];
+			double y = double(points[idx + 1]) - barycenter[1];
+			double z = double(points[idx + 2]) - barycenter[2];
 			pt[0] = rot[0][0] * x + rot[1][0] * y + rot[2][0] * z;
 			pt[1] = rot[0][1] * x + rot[1][1] * y + rot[2][1] * z;
 			pt[2] = rot[0][2] * x + rot[1][2] * y + rot[2][2] * z;
@@ -271,8 +271,8 @@ namespace nd
 			else {
 				r = d[2];
 				m_dim[2] = dim;
-				m_dim[0] = 2 + static_cast<size_t>((double)dim * d[0] / d[2]);
-				m_dim[1] = 2 + static_cast<size_t>((double)dim * d[1] / d[2]);
+				m_dim[0] = 2 + static_cast<size_t>(double(dim) * d[0] / d[2]);
+				m_dim[1] = 2 + static_cast<size_t>(double(dim) * d[1] / d[2]);
 			}
 
 			m_scale = r / (double(dim) - 1);
@@ -340,13 +340,13 @@ namespace nd
 					++k1;
 				for (size_t i = i0; i < i1; ++i) 
 				{
-					boxcenter[0] = (double)i;
+					boxcenter[0] = double(i);
 					for (size_t j = j0; j < j1; ++j) 
 					{
-						boxcenter[1] = (double)j;
+						boxcenter[1] = double(j);
 						for (size_t k = k0; k < k1; ++k) 
 						{
-							boxcenter[2] = (double)k;
+							boxcenter[2] = double(k);
 							int32_t res = TriBoxOverlap(boxcenter, boxhalfsize, p[0], p[1], p[2]);
 							unsigned char& value = GetVoxel(i, j, k);
 							if (res == 1 && value == PRIMITIVE_UNDEFINED) 

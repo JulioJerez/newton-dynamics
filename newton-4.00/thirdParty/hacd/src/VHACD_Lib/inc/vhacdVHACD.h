@@ -34,26 +34,26 @@ namespace nd
 				Init();
 			}
 			//! Destructor.
-			~VHACD(void)
+			~VHACD(void) override
 			{
 			}
-			uint32_t GetNConvexHulls() const
+			uint32_t GetNConvexHulls() const override
 			{
-				return (uint32_t)m_convexHulls.Size();
+				return uint32_t(m_convexHulls.Size());
 			}
-			void Cancel()
+			void Cancel() override
 			{
 				SetCancel(true);
 			}
-			void GetConvexHull(const uint32_t index, ConvexHull& ch) const
+			void GetConvexHull(const uint32_t index, ConvexHull& ch) const override
 			{
 				Mesh* mesh = m_convexHulls[index];
-				ch.m_nPoints = (uint32_t)mesh->GetNPoints();
-				ch.m_nTriangles = (uint32_t)mesh->GetNTriangles();
+				ch.m_nPoints = uint32_t(mesh->GetNPoints());
+				ch.m_nTriangles = uint32_t(mesh->GetNTriangles());
 				ch.m_points = mesh->GetPoints();
-				ch.m_triangles = (uint32_t *)mesh->GetTriangles();
+				ch.m_triangles = reinterpret_cast<uint32_t*>(mesh->GetTriangles());
 			}
-			void Clean(void)
+			void Clean(void) override
 			{
 				delete m_volume;
 				delete m_pset;
@@ -64,7 +64,7 @@ namespace nd
 				m_convexHulls.Clear();
 				Init();
 			}
-			void Release(void)
+			void Release(void) override
 			{
 				delete this;
 			}
@@ -72,12 +72,12 @@ namespace nd
 				const uint32_t nPoints,
 				const uint32_t* const triangles,
 				const uint32_t nTriangles,
-				const Parameters& params);
+				const Parameters& params) override;
 			bool Compute(const double* const points,
 				const uint32_t nPoints,
 				const uint32_t* const triangles,
 				const uint32_t nTriangles,
-				const Parameters& params);
+				const Parameters& params) override;
 
 			private:
 			void SetCancel(bool cancel)
@@ -108,9 +108,9 @@ namespace nd
 				m_raycastMesh = nullptr;
 				memset(m_rot, 0, sizeof(double) * 9);
 				m_dim = 64;
-				m_volume = 0;
+				m_volume = nullptr;
 				m_volumeCH0 = 0.0;
-				m_pset = 0;
+				m_pset = nullptr;
 				m_overallProgress = 0.0;
 				m_stageProgress = 0.0;
 				m_operationProgress = 0.0;
@@ -164,7 +164,7 @@ namespace nd
 				if (GetCancel()) {
 					return;
 				}
-				m_dim = (size_t)(pow((double)params.m_resolution, 1.0 / 3.0) + 0.5);
+				m_dim = size_t(pow(double(params.m_resolution), 1.0 / 3.0) + 0.5);
 				Volume volume;
 				volume.Voxelize(points, stridePoints, nPoints,
 					triangles, strideTriangles, nTriangles,
@@ -213,7 +213,7 @@ namespace nd
 				}
 
 				delete m_volume;
-				m_volume = 0;
+				m_volume = nullptr;
 				int32_t iteration = 0;
 				const int32_t maxIteration = 5;
 				double progress = 0.0;
@@ -240,10 +240,10 @@ namespace nd
 					}
 
 					double a = pow(double(params.m_resolution) / double(n), 0.33);
-					size_t dim_next = (size_t)(double(m_dim) * a + 0.5);
+					size_t dim_next = size_t(double(m_dim) * a + 0.5);
 					if (n < params.m_resolution && iteration < maxIteration && m_volume->GetNPrimitivesOnSurf() < params.m_resolution / 8 && m_dim != dim_next) {
 						delete m_volume;
-						m_volume = 0;
+						m_volume = nullptr;
 						m_dim = dim_next;
 					}
 					else {
@@ -266,14 +266,14 @@ namespace nd
 				const Parameters& params)
 			{
 				Init();
-				AlignMesh(points, 3, nPoints, (int32_t *)triangles, 3, nTriangles, params);
-				VoxelizeMesh(points, 3, nPoints, (int32_t *)triangles, 3, nTriangles, params);
+				AlignMesh(points, 3, nPoints, reinterpret_cast<const int32_t*>(triangles), 3, nTriangles, params);
+				VoxelizeMesh(points, 3, nPoints, reinterpret_cast<const int32_t*>(triangles), 3, nTriangles, params);
 				ComputePrimitiveSet(params);
 				ComputeACD(params);
 				MergeConvexHulls(params);
 				if (params.m_projectHullVertices)
 				{
-					m_raycastMesh = RaycastMesh::createRaycastMesh(nPoints, points, nTriangles, (const uint32_t *)triangles);
+					m_raycastMesh = RaycastMesh::createRaycastMesh(nPoints, points, nTriangles, reinterpret_cast<const uint32_t*>(triangles));
 					SimplifyConvexHulls(params);
 					m_raycastMesh->release();
 					m_raycastMesh = nullptr;

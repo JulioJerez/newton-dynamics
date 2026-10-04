@@ -32,7 +32,7 @@ namespace nd
 			if (!points) {
 				return false;
 			}
-			CircularListElement<TMMVertex>* vertex = NULL;
+			CircularListElement<TMMVertex>* vertex = nullptr;
 			for (size_t i = 0; i < nPoints; i++) {
 				vertex = m_mesh.AddVertex();
 				vertex->GetData().m_pos.X() = points[i].X();
@@ -129,7 +129,7 @@ namespace nd
 						for (int32_t k = 0; k < 3; ++k) {
 							for (int32_t h = 0; h < 2; h++) {
 								if (currentTriangle.m_edges[k]->GetData().m_triangles[h] == m_mesh.m_triangles.GetHead()) {
-									currentTriangle.m_edges[k]->GetData().m_triangles[h] = 0;
+									currentTriangle.m_edges[k]->GetData().m_triangles[h] = nullptr;
 									break;
 								}
 							}
@@ -143,7 +143,7 @@ namespace nd
 				size_t nE = m_mesh.GetNEdges();
 				for (size_t e = 0; e < nE; e++) {
 					TMMEdge& currentEdge = m_mesh.m_edges.GetHead()->GetData();
-					if (currentEdge.m_triangles[0] == 0 && currentEdge.m_triangles[1] == 0) {
+					if (currentEdge.m_triangles[0] == nullptr && currentEdge.m_triangles[1] == nullptr) {
 						m_edgesToDelete.PushBack(m_mesh.m_edges.GetHead());
 					}
 					m_mesh.m_edges.Next();
@@ -255,7 +255,7 @@ namespace nd
 						for (int32_t k = 0; k < 3; ++k) {
 							for (int32_t h = 0; h < 2; h++) {
 								if (currentTriangle.m_edges[k]->GetData().m_triangles[h] == m_mesh.m_triangles.GetHead()) {
-									currentTriangle.m_edges[k]->GetData().m_triangles[h] = 0;
+									currentTriangle.m_edges[k]->GetData().m_triangles[h] = nullptr;
 									break;
 								}
 							}
@@ -269,7 +269,7 @@ namespace nd
 				size_t nE = m_mesh.GetNEdges();
 				for (size_t e = 0; e < nE; e++) {
 					TMMEdge& currentEdge = m_mesh.m_edges.GetHead()->GetData();
-					if (currentEdge.m_triangles[0] == 0 && currentEdge.m_triangles[1] == 0) {
+					if (currentEdge.m_triangles[0] == nullptr && currentEdge.m_triangles[1] == nullptr) {
 						m_edgesToDelete.PushBack(m_mesh.m_edges.GetHead());
 					}
 					m_mesh.m_edges.Next();
@@ -300,7 +300,7 @@ namespace nd
 		bool ICHull::FindMaxVolumePoint(const double minVolume)
 		{
 			CircularList<TMMVertex>& vertices = m_mesh.GetVertices();
-			CircularListElement<TMMVertex>* vMaxVolume = 0;
+			CircularListElement<TMMVertex>* vMaxVolume = nullptr;
 			CircularListElement<TMMVertex>* vHeadPrev = vertices.GetHead()->GetPrev();
 
 			double maxVolume = minVolume;
@@ -349,7 +349,7 @@ namespace nd
 			v0->GetData().m_tag = v1->GetData().m_tag = v2->GetData().m_tag = true;
 
 			// create two triangles
-			CircularListElement<TMMTriangle>* f0 = MakeFace(v0, v1, v2, 0);
+			CircularListElement<TMMTriangle>* f0 = MakeFace(v0, v1, v2, nullptr);
 			MakeFace(v2, v1, v0, f0);
 
 			// find a fourth non-coplanar point to form tetrahedron
@@ -525,7 +525,7 @@ namespace nd
 			CircularListElement<TMMVertex>* v0 = m_mesh.GetVertices().GetHead();
 			CircularListElement<TMMEdge>* eHead = m_mesh.GetEdges().GetHead();
 			CircularListElement<TMMEdge>* e = eHead;
-			CircularListElement<TMMEdge>* tmp = 0;
+			CircularListElement<TMMEdge>* tmp = nullptr;
 			int32_t nvisible = 0;
 			m_edgesToDelete.Resize(0);
 			m_edgesToUpdate.Resize(0);
@@ -604,7 +604,7 @@ namespace nd
 					else {
 						e->GetData().m_triangles[1] = e->GetData().m_newFace;
 					}
-					e->GetData().m_newFace = 0;
+					e->GetData().m_newFace = nullptr;
 				}
 			}
 			// delete edges maked for deletion
@@ -651,7 +651,7 @@ namespace nd
 					addedPoints--;
 				}
 				else {
-					v->GetData().m_duplicate = 0;
+					v->GetData().m_duplicate = nullptr;
 					v->GetData().m_onHull = false;
 					v = v->GetPrev();
 				}
