@@ -49,8 +49,8 @@ namespace nd
 			const Vec3& GetPoint(size_t index) const { return m_points[index]; }
 			Vec3& GetPoint(size_t index) { return m_points[index]; }
 			size_t GetNPoints() const { return m_points.Size(); }
-			double* GetPoints() { return (double*)m_points.Data(); } // ugly
-			const double* GetPoints() const { return (double*)m_points.Data(); } // ugly
+			double* GetPoints() { return reinterpret_cast<double*>(m_points.Data()); } // ugly
+			const double* GetPoints() const { return reinterpret_cast<const double*>(m_points.Data()); } // ugly
 			const Vec3* GetPointsBuffer() const { return m_points.Data(); } //
 			Vec3* GetPointsBuffer() { return m_points.Data(); } //
 			void AddTriangle(const Triangle& tri) { m_triangles.PushBack(tri); }
@@ -58,8 +58,8 @@ namespace nd
 			const Triangle& GetTriangle(size_t index) const { return m_triangles[index]; }
 			Triangle& GetTriangle(size_t index) { return m_triangles[index]; }
 			size_t GetNTriangles() const { return m_triangles.Size(); }
-			int32_t* GetTriangles() { return (int32_t*)m_triangles.Data(); } // ugly
-			const int32_t* GetTriangles() const { return (int32_t*)m_triangles.Data(); } // ugly
+			int32_t* GetTriangles() { return reinterpret_cast<int32_t*>(m_triangles.Data()); } // ugly
+			const int32_t* GetTriangles() const { return reinterpret_cast<const int32_t*>(m_triangles.Data()); } // ugly
 			const Triangle* GetTrianglesBuffer() const { return m_triangles.Data(); }
 			Triangle* GetTrianglesBuffer() { return m_triangles.Data(); }
 			void ClearPoints() { m_points.Clear(); }

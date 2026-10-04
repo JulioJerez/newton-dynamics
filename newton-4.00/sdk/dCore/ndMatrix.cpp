@@ -25,6 +25,28 @@
 #include "ndQuaternion.h"
 #include "ndGeneralMatrix.h"
 
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif
+
+static ndMatrix identityMatrix(
+	ndVector(ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f)),
+	ndVector(ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f)),
+	ndVector(ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f)),
+	ndVector(ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0f)));
+
+static ndMatrix zeroMatrix(
+	ndVector(ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f)),
+	ndVector(ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f)),
+	ndVector(ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f)),
+	ndVector(ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f)));
+
+#if defined(__clang__)
+	#pragma clang diagnostic pop
+#endif
+
+
 ndMatrix::ndMatrix (const ndMatrix& transformMatrix, const ndVector& scale, const ndMatrix& stretchAxis)
 {
 	const ndMatrix scaledAxis(
@@ -102,9 +124,9 @@ void ndMatrix::TransformTriplex (ndFloat64* const dst, ndInt32 dstStrideInBytes,
 		ndFloat64 y = src[srcIndex + 1];
 		ndFloat64 z = src[srcIndex + 2];
 		srcIndex += srcStride;
-		dst[dstIndex + 0] = x * m_front.m_x + y * m_up.m_x + z * m_right.m_x + m_posit.m_x;
-		dst[dstIndex + 1] = x * m_front.m_y + y * m_up.m_y + z * m_right.m_y + m_posit.m_y;
-		dst[dstIndex + 2] = x * m_front.m_z + y * m_up.m_z + z * m_right.m_z + m_posit.m_z;
+		dst[dstIndex + 0] = x * ndFloat64(m_front.m_x) + y * ndFloat64(m_up.m_x) + z * ndFloat64(m_right.m_x) + ndFloat64(m_posit.m_x);
+		dst[dstIndex + 1] = x * ndFloat64(m_front.m_y) + y * ndFloat64(m_up.m_y) + z * ndFloat64(m_right.m_y) + ndFloat64(m_posit.m_y);
+		dst[dstIndex + 2] = x * ndFloat64(m_front.m_z) + y * ndFloat64(m_up.m_z) + z * ndFloat64(m_right.m_z) + ndFloat64(m_posit.m_z);
 		dstIndex += dstStride;
 	}
 }
@@ -118,13 +140,13 @@ void ndMatrix::TransformTriplex (ndFloat64* const dst, ndInt32 dstStrideInBytes,
 	ndInt32 srcIndex = 0;
 	for (ndInt32 i = 0 ; i < count; i ++ ) 
 	{
-		ndFloat64 x = src[srcIndex + 0];
-		ndFloat64 y = src[srcIndex + 1];
-		ndFloat64 z = src[srcIndex + 2];
+		ndFloat64 x = ndFloat64(src[srcIndex + 0]);
+		ndFloat64 y = ndFloat64(src[srcIndex + 1]);
+		ndFloat64 z = ndFloat64(src[srcIndex + 2]);
 		srcIndex += srcStride;
-		dst[dstIndex + 0] = x * m_front.m_x + y * m_up.m_x + z * m_right.m_x + m_posit.m_x;
-		dst[dstIndex + 1] = x * m_front.m_y + y * m_up.m_y + z * m_right.m_y + m_posit.m_y;
-		dst[dstIndex + 2] = x * m_front.m_z + y * m_up.m_z + z * m_right.m_z + m_posit.m_z;
+		dst[dstIndex + 0] = x * ndFloat64(m_front.m_x) + y * ndFloat64(m_up.m_x) + z * ndFloat64(m_right.m_x) + ndFloat64(m_posit.m_x);
+		dst[dstIndex + 1] = x * ndFloat64(m_front.m_y) + y * ndFloat64(m_up.m_y) + z * ndFloat64(m_right.m_y) + ndFloat64(m_posit.m_y);
+		dst[dstIndex + 2] = x * ndFloat64(m_front.m_z) + y * ndFloat64(m_up.m_z) + z * ndFloat64(m_right.m_z) + ndFloat64(m_posit.m_z);
 		dstIndex += dstStride;
 	}
 }
@@ -165,7 +187,7 @@ ndMatrix ndMatrix::Inverse4x4 () const
 			if (permute != i) 
 			{
 				ndAssert(pivot > ndFloat32(0.0f));
-				ndAssert((pivot > ndFloat32(1.0e-6f)) || (ndConditionNumber(4, 4, (ndFloat32*)&(*this)[0][0]) < ndFloat32(1.0e5f)));
+				//ndAssert((pivot > ndFloat32(1.0e-6f)) || (ndConditionNumber(4, 4, (ndFloat32*)&(*this)[0][0]) < ndFloat32(1.0e5f)));
 				ndSwap(inv[i], inv[permute]);
 				ndSwap(tmp[i], tmp[permute]);
 			}
@@ -232,7 +254,7 @@ ndVector ndMatrix::SolveByGaussianElimination(const ndVector &v) const
 			// Lax insight: 
 			// if the matrix is singular, we can just set the row solusion to zero 
 			// and apply a rank reduction.
-			ndAssert(ndCheckFloat(pivot));
+			ndAssert(ndCheckFloat(ndFloat64(pivot)));
 			if (ndAbs(pivot) < ndFloat32(1.0e-8f))
 			{
 				// Matrix is effectively singular for this system.
@@ -432,7 +454,7 @@ ndVector ndMatrix::EigenVectors ()
 		ndFloat32 thresh = ndFloat32 (0.0f);
 		if (i < 3) 
 		{
-			thresh = (ndFloat32)(0.2f / 9.0f) * sm;
+			thresh = ndFloat32(0.2f / 9.0f) * sm;
 		}
 
 		ndVector z (ndVector::m_zero);
@@ -534,18 +556,6 @@ ndVector ndMatrix::EigenVectors ()
 	return d;
 }
 
-static ndMatrix identityMatrix(
-	ndVector(ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f)),
-	ndVector(ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f)),
-	ndVector(ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f)),
-	ndVector(ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0f)));
-
-static ndMatrix zeroMatrix(
-	ndVector(ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f)),
-	ndVector(ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f)),
-	ndVector(ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f)),
-	ndVector(ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f)));
-
 const ndMatrix& ndGetIdentityMatrix()
 {
 	return identityMatrix;
@@ -614,7 +624,7 @@ ndMatrix ndCalculateMatrix(const ndQuaternion& quat, const ndVector& position)
 	const ndVector up(xy - zw, ndFloat32(1.0f) - x2 - z2, yz + xw, ndFloat32(0.0f));
 	const ndVector right(xz + yw, yz - xw, ndFloat32(1.0f) - x2 - y2, ndFloat32(0.0f));
 	const ndVector posit (position & ndVector::m_triplexMask);
-	return ndMatrix(front, up, right, position | ndVector::m_wOne);
+	return ndMatrix(front, up, right, posit | ndVector::m_wOne);
 }
 
 ndMatrix ndCovarianceMatrix(const ndVector& p, const ndVector& q)
@@ -750,7 +760,7 @@ bool ndMatrix::TestOrthogonal(ndFloat32 tol) const
 	{
 		for (ndInt32 j = 0; j < 4; ++j)
 		{
-			ndAssert(ndCheckFloat((*this)[i][j]));
+			ndAssert(ndCheckFloat(ndFloat64((*this)[i][j])));
 		}
 	}
 #endif

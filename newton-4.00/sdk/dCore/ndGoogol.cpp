@@ -24,11 +24,19 @@
 #include "ndTypes.h"
 #include "ndGoogol.h"
 
+#if defined(__clang__)
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Wglobal-constructors"
+#endif
 ndGoogol ndGoogol::m_zero(0.0); 
 ndGoogol ndGoogol::m_one(1.0); 
 ndGoogol ndGoogol::m_two(2.0);  
 ndGoogol ndGoogol::m_three(3.0);   
 ndGoogol ndGoogol::m_half(0.5);   
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
 
 ndGoogol::ndGoogol(void)
 	:m_sign(0)
@@ -284,7 +292,7 @@ ndGoogol ndGoogol::Floor () const
 ndGoogol ndGoogol::InvSqrt () const
 {
 	const ndGoogol& me = *this;
-	ndGoogol x (1.0f / sqrt (me));
+	ndGoogol x (1.0 / sqrt (me));
 
 	ndInt32 test = 0;
 	ndInt32 passes = 0;

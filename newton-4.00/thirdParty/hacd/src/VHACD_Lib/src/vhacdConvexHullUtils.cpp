@@ -28,11 +28,19 @@ namespace nd
 	{
 		#define Absolute(a)  ((a) >= 0.0 ? (a) : -(a))
 
+		#if defined(__clang__)
+			#pragma clang diagnostic push
+			#pragma clang diagnostic ignored "-Wglobal-constructors"
+		#endif
 		Googol Googol::m_zero(0.0);
 		Googol Googol::m_one(1.0);
 		Googol Googol::m_two(2.0);
 		Googol Googol::m_three(3.0);
 		Googol Googol::m_half(0.5);
+
+		#if defined(__clang__)
+			#pragma clang diagnostic pop
+		#endif
 
 		Googol::Googol(void)
 			:m_sign(0)
@@ -43,7 +51,7 @@ namespace nd
 
 		Googol::Googol(double value)
 			:m_sign(0)
-			, m_exponent(0)
+			,m_exponent(0)
 		{
 			int exp;
 			double mantissa = fabs(frexp(value, &exp));
@@ -273,7 +281,7 @@ namespace nd
 		Googol Googol::InvSqrt() const
 		{
 			const Googol& me = *this;
-			Googol x(1.0f / sqrt(me));
+			Googol x(1.0 / sqrt(me));
 
 			int test = 0;
 			int passes = 0;

@@ -56,7 +56,7 @@ namespace nd
 			T& GetData() { return m_head->GetData(); }
 			bool Delete();
 			bool Delete(CircularListElement<T>* element);
-			CircularListElement<T>* Add(const T* data = 0);
+			CircularListElement<T>* Add(const T* data = nullptr);
 			CircularListElement<T>* Add(const T& data);
 			bool Next();
 			bool Prev();
@@ -69,7 +69,7 @@ namespace nd
 			//!    Constructor
 			CircularList()
 			{
-				m_head = 0;
+				m_head = nullptr;
 				m_size = 0;
 			}
 			CircularList(const CircularList& rhs);
@@ -132,7 +132,7 @@ namespace nd
 			{
 				delete m_head;
 				m_size--;
-				m_head = 0;
+				m_head = nullptr;
 				return true;
 			}
 			else

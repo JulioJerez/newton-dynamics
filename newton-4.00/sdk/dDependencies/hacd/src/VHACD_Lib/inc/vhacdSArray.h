@@ -55,7 +55,7 @@ namespace nd
 
 			size_t Size() const
 			{
-				return (size_t)ndArray<T>::GetCount();
+				return size_t(ndArray<T>::GetCount());
 			}
 
 			T* Data()

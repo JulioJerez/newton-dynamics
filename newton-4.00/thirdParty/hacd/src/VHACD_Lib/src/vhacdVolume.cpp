@@ -143,7 +143,7 @@ namespace nd
 			if (min > rad || max < -rad)                     \
 				return 0;
 
-		int32_t PlaneBoxOverlap(const Vec3<double>& normal,
+		static int32_t PlaneBoxOverlap(const Vec3<double>& normal,
 			const Vec3<double>& vert,
 			const Vec3<double>& maxbox)
 		{
@@ -257,7 +257,7 @@ namespace nd
 
 		// Slightly modified version of  Stan Melax's code for 3x3 matrix diagonalization (Thanks Stan!)
 		// source: http://www.melax.com/diag.html?attredirects=0
-		void Diagonalize(const double (&A)[3][3], double (&Q)[3][3], double (&D)[3][3])
+		static void Diagonalize(const double (&A)[3][3], double (&Q)[3][3], double (&D)[3][3])
 		{
 			// A must be a symmetric matrix.
 			// returns Q and D such that
@@ -635,7 +635,7 @@ namespace nd
 		}
 		void VoxelSet::SelectOnSurface(PrimitiveSet* const onSurfP) const
 		{
-			VoxelSet* const onSurf = reinterpret_cast<VoxelSet*>(onSurfP);
+			VoxelSet* const onSurf = static_cast<VoxelSet*>(onSurfP);
 			const size_t nVoxels = m_voxels.Size();
 			if (nVoxels == 0)
 				return;
@@ -661,8 +661,8 @@ namespace nd
 			PrimitiveSet* const positivePartP,
 			PrimitiveSet* const negativePartP) const
 		{
-			VoxelSet* const positivePart = reinterpret_cast<VoxelSet*>(positivePartP);
-			VoxelSet* const negativePart = reinterpret_cast<VoxelSet*>(negativePartP);
+			VoxelSet* const positivePart = static_cast<VoxelSet*>(positivePartP);
+			VoxelSet* const negativePart = static_cast<VoxelSet*>(negativePartP);
 			const size_t nVoxels = m_voxels.Size();
 			if (nVoxels == 0)
 				return;
