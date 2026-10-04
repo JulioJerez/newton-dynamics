@@ -62,7 +62,7 @@ inline ndInt32 ndBoxInclusionTest (const ndVector& p0, const ndVector& p1, const
 inline ndInt32 ndCompareBox (const ndVector& p0, const ndVector& p1, const ndVector& q0, const ndVector& q1)
 {
 	ndAssert(0);
-	return (p0.m_x != q0.m_x) || (p0.m_y != q0.m_y) || (p0.m_z != q0.m_z) || (p1.m_x != q1.m_x) || (p1.m_y != q1.m_y) || (p1.m_z != q1.m_z);
+	return (p0.m_ix != q0.m_ix) || (p0.m_iy != q0.m_iy) || (p0.m_iz != q0.m_iz) || (p1.m_ix != q1.m_ix) || (p1.m_iy != q1.m_iy) || (p1.m_iz != q1.m_iz);
 }
 
 inline void ndMovingAABB (ndVector& p0, ndVector& p1, const ndVector& veloc, const ndVector& omega, ndFloat32 timestep, ndFloat32 maxRadius, ndFloat32 minRadius)

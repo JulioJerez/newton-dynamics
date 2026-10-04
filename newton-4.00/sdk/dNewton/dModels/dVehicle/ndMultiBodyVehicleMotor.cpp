@@ -317,6 +317,7 @@ ndFloat32 ndMultiBodyVehicleMotor::CalculateAcceleration(ndConstraintDescritor& 
 	ndFloat32 gasStep = ndRpmToRadPerSec * gasScale * m_engineCurve.m_omegaStep;
 	
 	ndFloat32 omegaStep = ndClamp(m_targetOmega - m_omega, -gasStep, gasStep);
+//omegaStep *= 10.0f;
 	ndFloat32 accel = omegaStep * desc.m_invTimestep;
 	return accel;
 }
@@ -347,9 +348,8 @@ void ndMultiBodyVehicleMotor::JacobianDerivative(ndConstraintDescritor& desc)
 	chassisJacobian.m_angular = ndVector::m_zero;
 
 	const ndFloat32 accel = CalculateAcceleration(desc);
-	const ndFloat32 torque = m_engineTorque;
 	SetMotorAcceleration(desc, accel);
-	SetHighFriction(desc, torque);
+	SetHighFriction(desc, m_engineTorque);
 	SetLowerFriction(desc, -m_engineCurve.m_frictionLoss);
 	SetDiagonalRegularizer(desc, ndFloat32(0.001f));
 }

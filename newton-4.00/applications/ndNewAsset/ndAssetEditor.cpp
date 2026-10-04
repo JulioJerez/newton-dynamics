@@ -489,52 +489,30 @@ void ndAssetEditor::ShowMainMenuBar()
 			ImGui::EndMenu();
 		}
 
-		//if (ImGui::BeginMenu("Objects"))
-		//{
-		//	if (ImGui::Button("create node"))
-		//	{
-		//	}
-		//
-		//	if (ImGui::Button("create box"))
-		//	{
-		//	}
-		//
-		//	if (ImGui::Button("delete node"))
-		//	{
-		//	}
-		//
-		//	ImGui::EndMenu();
-		//}
-
 		if (ImGui::BeginMenu("Tools"))
 		{
 			if (ImGui::MenuItem("resize mesh", ""))
 			{
-				m_toolActive = true;
 				m_currentTool = new ndResizeMesh(this);
 			}
 
 			if (ImGui::MenuItem("rotate mesh", ""))
 			{
-				m_toolActive = true;
 				m_currentTool = new ndRotateMesh(this);
 			}
 
 			if (ImGui::MenuItem("rotate pivots", ""))
 			{
-				m_toolActive = true;
 				m_currentTool = new ndRotatePivots(this);
 			}
 
 			if (ImGui::MenuItem("rotate bones", ""))
 			{
-				m_toolActive = true;
 				m_currentTool = new ndRotateBones(this);
 			}
 
 			if (ImGui::MenuItem("normalize mass distibution", ""))
 			{
-				m_toolActive = true;
 				m_currentTool = new ndNomalizeMassDistribution(this);
 			}
 

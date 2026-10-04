@@ -111,7 +111,6 @@ ndScene::ndScene(const ndScene& src)
 
 	ndSwap(m_rootNode, stealData->m_rootNode);
 	ndSwap(m_sentinelBody, stealData->m_sentinelBody);
-	ndAssert(0);
 	ndSwap(m_contactNotifyCallback, stealData->m_contactNotifyCallback);
 	m_contactNotifyCallback->m_scene = this;
 

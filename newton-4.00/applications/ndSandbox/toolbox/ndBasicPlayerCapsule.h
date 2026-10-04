@@ -39,7 +39,7 @@ class ndBasicPlayerCapsule: public ndBodyPlayerCapsule
 		ndDemoEntityManager* const scene,
 		ndSharedPtr<ndRenderSceneNode>& modelEntity, const ndMatrix& localAxis, const ndMatrix& location,
 		ndFloat32 mass, ndFloat32 radius, ndFloat32 height, ndFloat32 stepHeight);
-	~ndBasicPlayerCapsule();
+	~ndBasicPlayerCapsule() override;
 
 	void ApplyInputs(ndFloat32 timestep) override;
 	ndFloat32 ContactFrictionCallback(const ndVector& position, const ndVector& normal, ndInt32 contactId, const ndBodyKinematic* const otherbody) const override;

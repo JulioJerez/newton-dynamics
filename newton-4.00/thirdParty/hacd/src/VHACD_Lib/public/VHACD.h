@@ -105,8 +105,8 @@ namespace nd
 				{
 					m_resolution = 1000000;
 					m_concavity = 0.001;
-					m_minMergeToleranace = 0.5e-3f;
-					m_concavityToVolumeWeigh = 1.0f;
+					m_minMergeToleranace = 0.5e-3;
+					m_concavityToVolumeWeigh = 1.0;
 					m_planeDownsampling = 4;
 					m_convexhullDownsampling = 4;
 					m_alpha = 0.05;
@@ -114,8 +114,8 @@ namespace nd
 					m_pca = 0;
 					m_maxNumVerticesPerCH = 64;
 					m_minVolumePerCH = 0.0001;
-					m_callback = 0;
-					m_logger = 0;
+					m_callback = nullptr;
+					m_logger = nullptr;
 					m_convexhullApproximation = true;
 					//m_maxConvexHulls = 1024;
 					m_maxConvexHulls = 128;

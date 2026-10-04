@@ -36,6 +36,14 @@
 #include <stdio.h>
 
 
+#if defined(__clang__)
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wdocumentation"
+    #pragma clang diagnostic ignored "-Wunused-parameter"
+    #pragma clang diagnostic ignored "-Wcast-function-type-strict"
+    #pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
+#endif
+
 //////////////////////////////////////////////////////////////////////////
 //////                       GLFW internal API                      //////
 //////////////////////////////////////////////////////////////////////////
@@ -756,3 +764,6 @@ GLFWAPI GLFWglproc glfwGetProcAddress(const char* procname)
     return window->context.getProcAddress(procname);
 }
 
+#if defined(__clang__)
+    #pragma clang diagnostic pop
+#endif

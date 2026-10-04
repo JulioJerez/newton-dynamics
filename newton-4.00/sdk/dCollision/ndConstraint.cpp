@@ -69,30 +69,23 @@ void ndForceImpactPair::Clear()
 {
 	m_force = ndFloat32(ndFloat32(0.0f));
 	m_impact = ndFloat32(ndFloat32(0.0f));
-#ifdef D_USING_NORM_FILTER
 	for (ndInt32 i = 0; i < ndInt32(sizeof(m_initialGuess) / sizeof(m_initialGuess[0])); ++i)
 	{
 		m_initialGuess[i] = ndFloat32(ndFloat32(0.0f));
 	}
-#endif
 }
 
 void ndForceImpactPair::Push(ndFloat32 val)
 {
-#ifdef D_USING_NORM_FILTER
 	for (ndInt32 i = 1; i < ndInt32(sizeof(m_initialGuess) / sizeof(m_initialGuess[0])); ++i)
 	{
 		m_initialGuess[i - 1] = m_initialGuess[i];
 	}
 	m_initialGuess[sizeof(m_initialGuess) / sizeof(m_initialGuess[0]) - 1] = val;
-#else
-	m_force = m_force * (ndFloat32(1.0f) - D_WARM_START_LOW_PASS_FILTER) + D_WARM_START_LOW_PASS_FILTER * val;
-#endif
 }
 
 ndFloat32 ndForceImpactPair::GetInitialGuess() const
 {
-#ifdef D_USING_NORM_FILTER
 	ndFloat32 smallest = ndFloat32(1.0e15f);
 	ndFloat32 value = ndFloat32(ndFloat32(0.0f));
 	for (ndInt32 i = 0; i < ndInt32(sizeof(m_initialGuess) / sizeof(m_initialGuess[0])); ++i)
@@ -105,9 +98,6 @@ ndFloat32 ndForceImpactPair::GetInitialGuess() const
 		}
 	}
 	return value;
-#else
-	return m_force;
-#endif	
 }
 
 ndConstraint::ndConstraint()
@@ -248,7 +238,13 @@ bool ndConstraint::IsBilateral() const
 	return false;
 }
 
-ndUnsigned32 ndConstraint::GetRowsCount() const
+//ndUnsigned32 ndConstraint::GetRowsCount____() const
+//{
+//	ndAssert(0);
+//	return m_maxDof;
+//}
+
+ndUnsigned32 ndConstraint::GetMaxRowsCount() const
 {
 	return m_maxDof;
 }

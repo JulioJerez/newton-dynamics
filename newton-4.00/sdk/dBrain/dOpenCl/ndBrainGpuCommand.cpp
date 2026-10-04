@@ -12,8 +12,8 @@
 #include "ndBrainStdafx.h"
 #include "ndBrainGpuCommand.h"
 
-ndBrainGpuCommand::ndBrainGpuCommand(const ndBrainBufferCommandDesc& desc)
-	:ndBrainBufferCommand(desc)
+ndBrainGpuCommand::ndBrainGpuCommand(const ndBrainBufferCommandDesc& desc, ndBrainLayer* const layer)
+	:ndBrainBufferCommand(desc, layer)
 {
 }
 

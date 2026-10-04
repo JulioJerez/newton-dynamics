@@ -635,13 +635,6 @@ void ndAssetEditor::EditGearBoxLoopJoint(ndSharedPtr<ndMeshLoopJoint>& loopJoint
 		gearBox.m_gearRatios[ndMultiBodyVehicleGearBox::ndGearBox::m_revertGear] = value;
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
 	}
-	value = gearBox.m_crownGearRatio;
-	if (ImGui::InputFloat("crown gear", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
-	{
-		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-		gearBox.m_crownGearRatio = value;
-		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoLoopJoint(this)));
-	}
 	value = gearBox.m_idleClutchTorque;
 	if (ImGui::InputFloat("idle torque", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{

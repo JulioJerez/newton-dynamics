@@ -73,7 +73,7 @@ class ndHeap : public ndClassAlloc
 
 	ndRecord* m_pool;
 	ndInt32 m_curCount;
-	ndInt32 m_maxCount;
+	ndInt32 m_maxSize;
 	bool m_bufferIsOwnned;
 };
 
@@ -86,9 +86,9 @@ class ndHeap : public ndClassAlloc
 template <class dItem, class dKey>
 ndHeap<dItem, dKey>::ndHeap(ndInt32 maxElements)
 	:ndClassAlloc()
-	,m_pool((ndRecord *)ndMemory::Malloc(maxElements * sizeof(ndRecord)))
+	,m_pool(static_cast<ndRecord*>(ndMemory::Malloc(maxElements * sizeof(ndRecord))))
 	,m_curCount(0)
-	,m_maxCount(maxElements)
+	,m_maxSize(maxElements)
 	,m_bufferIsOwnned(true)
 {
 	Flush();
@@ -97,9 +97,9 @@ ndHeap<dItem, dKey>::ndHeap(ndInt32 maxElements)
 template <class dItem, class dKey>
 ndHeap<dItem, dKey>::ndHeap(const void * const buffer, ndInt32 sizeInBytes)
 	:ndClassAlloc()
-	,m_pool((ndRecord *)buffer)
+	,m_pool(reinterpret_cast<ndRecord*>(const_cast<void*>(buffer)))
 	,m_curCount(0)
-	,m_maxCount(ndInt32(sizeInBytes / sizeof(ndRecord)))
+	,m_maxSize(ndInt32(sizeInBytes / sizeof(ndRecord)))
 	,m_bufferIsOwnned(false)
 {
 	Flush();
@@ -145,7 +145,7 @@ dKey ndHeap<dItem, dKey>::MaxValue() const
 template <class dItem, class dKey>
 ndInt32 ndHeap<dItem, dKey>::GetMaxCount() const
 {
-	return m_maxCount;
+	return m_maxSize;
 }
 
 template <class dItem, class dKey>

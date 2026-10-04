@@ -38,7 +38,7 @@ ndShapeCone::~ndShapeCone()
 {
 	m_shapeRefCount--;
 	ndAssert(m_shapeRefCount >= 0);
-	ndShapeConvex::m_vertex = nullptr;
+	ndShapeConvex::m_vertexPtr = nullptr;
 	ndShapeConvex::m_simplex = nullptr;
 }
 
@@ -59,7 +59,7 @@ void ndShapeCone::Init(ndFloat32 radius, ndFloat32 height)
 
 	m_edgeCount = D_CONE_SEGMENTS * 4;
 	m_vertexCount = D_CONE_SEGMENTS + 1;
-	ndShapeConvex::m_vertex = m_vertex;
+	ndShapeConvex::m_vertexPtr = m_vertex;
 
 	if (!m_shapeRefCount) 
 	{

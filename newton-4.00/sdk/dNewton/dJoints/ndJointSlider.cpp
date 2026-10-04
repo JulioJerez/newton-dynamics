@@ -21,8 +21,6 @@ ndJointSlider::ndJointSlider()
 	:ndJointBilateralConstraint()
 	,m_axis()
 	,m_maxForce(D_LCP_MAX_VALUE)
-	//,m_limitState(0)
-	//,m_forceState(0)
 {
 	m_maxDof = 7;
 }
@@ -31,8 +29,6 @@ ndJointSlider::ndJointSlider(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* 
 	:ndJointBilateralConstraint(7, child, parent, pinAndPivotFrame)
 	,m_axis()
 	,m_maxForce(D_LCP_MAX_VALUE)
-	//,m_limitState(0)
-	//,m_forceState(0)
 {
 }
 

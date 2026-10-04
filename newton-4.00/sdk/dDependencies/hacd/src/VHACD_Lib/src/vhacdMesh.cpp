@@ -78,7 +78,7 @@ namespace nd
 		{
 			ResizePoints(0);
 			ResizeTriangles(0);
-			ConvexHull ch(points, 1.0e-5f);
+			ConvexHull ch(points, 1.0e-5);
 
 			const ndArray<ndBigVector>& convexPoints = ch.GetVertexPool();
 			for (ndInt32 v = 0; v < ndInt32(convexPoints.GetCount()); v++)
@@ -99,7 +99,7 @@ namespace nd
 		{
 			ResizePoints(0);
 			ResizeTriangles(0);
-			ConvexHull ch(&pts[0][0], sizeof(Vec3), (int32_t)nPts, 1.0e-5f);
+			ConvexHull ch(&pts[0][0], sizeof(Vec3), int32_t(nPts), 1.0e-5);
 		
 			const ndArray<ndBigVector>& convexPoints = ch.GetVertexPool();
 			for (ndInt32 v = 0; v < ndInt32(convexPoints.GetCount()); v++)
@@ -181,3 +181,6 @@ namespace nd
 		}
 	}
 }
+
+
+

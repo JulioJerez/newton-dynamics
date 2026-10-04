@@ -94,8 +94,6 @@ class ndJacobianPair
 class ndForceImpactPair
 {
 	public:
-	//#define D_USING_NORM_FILTER
-
 	ndForceImpactPair()
 	{
 		Clear();
@@ -107,9 +105,7 @@ class ndForceImpactPair
 
 	ndFloat32 m_force;
 	ndFloat32 m_impact;
-#ifdef D_USING_NORM_FILTER
-	ndFloat32 m_initialGuess[4];
-#endif
+	ndFloat32 m_initialGuess[8];
 };
 
 class ndJointAccelerationDecriptor
@@ -147,7 +143,6 @@ class ndConstraintDescritor
 	ndFloat32 m_diagonalRegularizer[D_CONSTRAINT_MAX_ROWS];
 	ndFloat32 m_penetrationStiffness[D_CONSTRAINT_MAX_ROWS];
 	ndFloat32 m_zeroRowAcceleration[D_CONSTRAINT_MAX_ROWS];
-	ndInt32 m_flags[D_CONSTRAINT_MAX_ROWS];
 	ndFloat32 m_timestep;
 	ndFloat32 m_invTimestep;
 	ndInt32 m_rowsCount;
@@ -218,7 +213,8 @@ class ndConstraint: public ndContainersFreeListAlloc<ndConstraint>
 	D_COLLISION_API bool IsActive() const;
 	D_COLLISION_API void SetActive(bool state);
 
-	D_COLLISION_API ndUnsigned32 GetRowsCount() const;
+	//D_COLLISION_API ndUnsigned32 GetRowsCount____() const;
+	D_COLLISION_API ndUnsigned32 GetMaxRowsCount() const;
 	D_COLLISION_API virtual void JacobianDerivative(ndConstraintDescritor& desc) = 0;
 	D_COLLISION_API virtual void JointAccelerations(ndJointAccelerationDecriptor* const desc) = 0;
 

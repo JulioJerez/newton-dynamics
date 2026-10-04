@@ -39,7 +39,7 @@ ndShapeCylinder::~ndShapeCylinder()
 {
 	m_shapeRefCount--;
 	ndAssert(m_shapeRefCount >= 0);
-	ndShapeConvex::m_vertex = nullptr;
+	ndShapeConvex::m_vertexPtr = nullptr;
 	ndShapeConvex::m_simplex = nullptr;
 }
 
@@ -63,7 +63,7 @@ void ndShapeCylinder::Init(ndFloat32 radio0, ndFloat32 radio1, ndFloat32 height)
 
 	m_edgeCount = D_TAPED_CYLINDER_SEGMENTS * 6;
 	m_vertexCount = D_TAPED_CYLINDER_SEGMENTS * 2;
-	ndShapeConvex::m_vertex = m_vertex;
+	ndShapeConvex::m_vertexPtr = m_vertex;
 
 	if (!m_shapeRefCount) 
 	{

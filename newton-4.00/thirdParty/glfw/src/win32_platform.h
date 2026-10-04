@@ -48,6 +48,12 @@
  #define UNICODE
 #endif
 
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundef"
+#endif
+
+
 // GLFW requires Windows XP or later
 #if WINVER < 0x0501
  #undef WINVER
@@ -456,3 +462,6 @@ void _glfwSetVideoModeWin32(_GLFWmonitor* monitor, const GLFWvidmode* desired);
 void _glfwRestoreVideoModeWin32(_GLFWmonitor* monitor);
 void _glfwGetMonitorContentScaleWin32(HMONITOR handle, float* xscale, float* yscale);
 
+#if defined(__clang__)
+#pragma clang diagnostic pop    
+#endif

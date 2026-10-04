@@ -31,7 +31,7 @@
 ndMultiBodyVehicleGearBox::ndGearBox::ndGearBox()
 	:m_manual(false)
 {
-	m_crownGearRatio = ndFloat32(10.0f);
+	m_crownGearRatio = ndFloat32(1.0f);
 	m_torqueConverter = ndFloat32(2000.0f);
 	m_idleClutchTorque = ndFloat32(200.0f);
 	m_lockedClutchTorque = ndFloat32(1.0e6f);
@@ -48,7 +48,7 @@ ndMultiBodyVehicleGearBox::ndGearBox::ndGearBox()
 
 bool ndMultiBodyVehicleGearBox::ndGearBox::operator==(const ndGearBox& other) const
 {
-	bool test = m_crownGearRatio == other.m_crownGearRatio;
+	bool test = true;
 	test = test && (m_idleClutchTorque == other.m_idleClutchTorque);
 	test = test && (m_lockedClutchTorque == other.m_lockedClutchTorque);
 	test = test && (m_torqueConverter == other.m_torqueConverter);
@@ -149,7 +149,7 @@ void ndMultiBodyVehicleGearBox::JacobianDerivative(ndConstraintDescritor& desc)
 		
 		AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32(0.0f));
 
-		const ndFloat32 gearRatio = m_gearRatio;
+		const ndFloat32 gearRatio = m_gearRatio * m_gearBox.m_crownGearRatio;
 		ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
 		ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
 		jacobian0.m_angular = matrix0.m_front;
@@ -164,17 +164,23 @@ void ndMultiBodyVehicleGearBox::JacobianDerivative(ndConstraintDescritor& desc)
 		const ndFloat32 w = w0 + w1;
 		SetMotorAcceleration(desc, -w * desc.m_invTimestep);
 		
+		ndFloat32 maxFrictionTorque = ndFloat32(1.0f);
+		ndFloat32 minFrictionTorque = ndFloat32(-1.0f);
 		if (m_gearBox.m_crownGearRatio > ndFloat32(0.0f))
 		{
 			if (m_gearRatio > ndFloat32(0.0f))
 			{
-				SetHighFriction(desc, m_clutchTorque);
-				SetLowerFriction(desc, -m_driveTrainResistanceTorque);
+				//SetHighFriction(desc, m_clutchTorque);
+				//SetLowerFriction(desc, -m_driveTrainResistanceTorque);
+				maxFrictionTorque = m_clutchTorque;
+				minFrictionTorque = -m_driveTrainResistanceTorque;
 			}
 			else
 			{
-				SetHighFriction(desc, m_driveTrainResistanceTorque);
-				SetLowerFriction(desc, -m_clutchTorque);
+				//SetHighFriction(desc, m_driveTrainResistanceTorque);
+				//SetLowerFriction(desc, -m_clutchTorque);
+				maxFrictionTorque = -m_clutchTorque;
+				minFrictionTorque = m_driveTrainResistanceTorque;
 			}
 		}
 		else
@@ -182,14 +188,24 @@ void ndMultiBodyVehicleGearBox::JacobianDerivative(ndConstraintDescritor& desc)
 			ndAssert(m_gearBox.m_crownGearRatio < ndFloat32(0.0f));
 			if (m_gearRatio > ndFloat32(0.0f))
 			{
-				SetHighFriction(desc, m_driveTrainResistanceTorque);
-				SetLowerFriction(desc, -m_clutchTorque);
+				//SetHighFriction(desc, m_driveTrainResistanceTorque);
+				//SetLowerFriction(desc, -m_clutchTorque);
+				maxFrictionTorque = -m_clutchTorque;
+				minFrictionTorque = m_driveTrainResistanceTorque;
 			}
 			else
 			{
-				SetHighFriction(desc, m_clutchTorque);
-				SetLowerFriction(desc, -m_driveTrainResistanceTorque);
+				//SetHighFriction(desc, m_clutchTorque);
+				//SetLowerFriction(desc, -m_driveTrainResistanceTorque);
+				maxFrictionTorque = m_clutchTorque;
+				minFrictionTorque = -m_driveTrainResistanceTorque;
 			}
 		}
+		SetLowerFriction(desc, minFrictionTorque);
+		SetHighFriction(desc, maxFrictionTorque);
+
+		//ndVector t0(GetTorqueBody0());
+		//ndVector t1(GetTorqueBody1());
+		//ndTrace(("gearBox ratio(%f) f0(%f) f1(%f) t0(%f) t1(%f)\n", gearRatio, minFrictionTorque, maxFrictionTorque, t0.m_x, t1.m_x));
 	}
 }

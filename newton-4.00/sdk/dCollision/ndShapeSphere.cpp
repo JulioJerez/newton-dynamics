@@ -44,7 +44,7 @@ ndShapeSphere::~ndShapeSphere()
 	ndAssert(m_shapeRefCount >= 0);
 
 	ndShapeConvex::m_simplex = nullptr;
-	ndShapeConvex::m_vertex = nullptr;
+	ndShapeConvex::m_vertexPtr = nullptr;
 }
 
 void ndShapeSphere::TesselateTriangle(ndInt32 level, const ndVector& p0, const ndVector& p1, const ndVector& p2, ndInt32& count, ndVector* const output) const
@@ -85,7 +85,7 @@ void ndShapeSphere::Init(ndFloat32 radius)
 	
 	m_edgeCount = D_SPHERE_EDGE_COUNT;
 	m_vertexCount = D_SPHERE_VERTEX_COUNT;
-	ndShapeConvex::m_vertex = m_vertex;
+	ndShapeConvex::m_vertexPtr = m_vertex;
 	
 	if (!m_shapeRefCount) 
 	{

@@ -15,8 +15,6 @@
 
 ndJointRelational::ndJointRelational()
 	:ndJointBilateralConstraint()
-	//,m_angle(ndFloat32(0.0f))
-	//,m_omega(ndFloat32(0.0f))
 	,m_gearRatio(ndFloat32(1.0f))
 	,m_regularizer(ndFloat32(0.0f))
 {

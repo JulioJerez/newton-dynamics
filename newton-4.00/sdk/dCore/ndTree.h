@@ -95,23 +95,23 @@ class ndTree: public ndClassAlloc
 		{
 		}
 
-		~ndNode () 
+		~ndNode () override
 		{
 		}
 
 		ndNode* GetLeft () const
 		{
-			return (ndNode* )ndRedBackNode::m_left;
+			return static_cast<ndNode*>(ndRedBackNode::m_left);
 		}
 
 		ndNode* GetRight () const
 		{
-			return (ndNode* )ndRedBackNode::m_right;
+			return static_cast<ndNode*>(ndRedBackNode::m_right);
 		}
 
 		ndNode* GetParent ()
 		{
-			return (ndNode* )ndRedBackNode::m_parent;
+			return static_cast<ndNode*>(ndRedBackNode::m_parent);
 		}
 
 		void SetLeft (ndNode* const node)
@@ -210,18 +210,17 @@ class ndTree: public ndClassAlloc
 
 		OBJECT &operator* () const 
 		{
-			return ((ndNode*)m_ptr)->GetInfo();
+			return static_cast<ndNode*>(m_ptr)->GetInfo();
 		}
 
 		ndNode* GetNode() const
 		{
-			return (ndNode*)m_ptr;
+			return static_cast<ndNode*>(m_ptr);
 		}
 
 		KEY GetKey () const
 		{
-			ndNode* const tmp = (ndNode*)m_ptr;
-			//return tmp ? tmp->GetKey() : KEY(0);
+			ndNode* const tmp = static_cast<ndNode*>(m_ptr);
 			return tmp ? tmp->GetKey() : KEY();
 		}
 
@@ -352,13 +351,13 @@ ndInt32 ndTree<OBJECT, KEY, allocator>::GetCount() const
 template<class OBJECT, class KEY, class allocator>
 typename ndTree<OBJECT, KEY, allocator>::ndNode* ndTree<OBJECT, KEY, allocator>::Minimum () const
 {
-	return m_head ? (ndNode* )m_head->Minimum() : nullptr;
+	return m_head ? static_cast<ndNode*>(m_head->Minimum()) : nullptr;
 }
 
 template<class OBJECT, class KEY, class allocator>
 typename ndTree<OBJECT, KEY, allocator>::ndNode* ndTree<OBJECT, KEY, allocator>::Maximum () const
 {
-	return m_head ? (ndNode* )m_head->Maximum() : nullptr;
+	return m_head ? static_cast<ndNode*>m_head->Maximum() : nullptr;
 }
 
 template<class OBJECT, class KEY, class allocator>
@@ -600,8 +599,10 @@ typename ndTree<OBJECT, KEY, allocator>::ndNode* ndTree<OBJECT, KEY, allocator>:
 		}
 	}
 
-	ndNode** const headPtr = (ndNode**) &m_head;
-	ptr->InsertFixup ((ndRedBackNode**)headPtr);
+	//ndNode** const headPtr = (ndNode**) &m_head;
+	ndNode** const headPtr = static_cast<ndNode**>(&m_head);
+	//ptr->InsertFixup ((ndRedBackNode**)headPtr);
+	ptr->InsertFixup(reinterpret_cast<ndRedBackNode**>(headPtr));
 	return ptr;
 }
 
@@ -814,8 +815,10 @@ template<class OBJECT, class KEY, class allocator>
 void ndTree<OBJECT, KEY, allocator>::Remove (typename ndTree<OBJECT, KEY, allocator>::ndNode* const node)
 {
 	m_count	--;
-	ndNode** const headPtr = (ndNode**) &m_head;
-	node->Remove ((ndRedBackNode**)headPtr);
+	//ndNode** const headPtr = (ndNode**) &m_head;
+	ndNode** const headPtr = static_cast<ndNode**>(&m_head);
+	//node->Remove ((ndRedBackNode**)headPtr);
+	node->Remove(reinterpret_cast<ndRedBackNode**>(headPtr));
 }
 
 template<class OBJECT, class KEY, class allocator>

@@ -148,6 +148,7 @@
 
 #if !defined(D_SCALAR_VECTOR_CLASS)
 	#if defined(__clang__)
+		#include <assert.h>
 		#define D_SCALAR_VECTOR_CLASS
 	#endif
 #endif
@@ -169,7 +170,7 @@
 	#define ndAssert(x)
 #else 
 	#ifdef _DEBUG
-		#if (defined (WIN32) || defined(_WIN32) || defined (_M_ARM) || defined (_M_ARM64))
+		#if ((defined (WIN32) || defined(_WIN32)) && !defined(__clang__))
 			#define ndAssert(x) _ASSERTE(x)
 		#else
 			#define ndAssert(x) assert(x)

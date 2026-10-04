@@ -713,17 +713,17 @@ namespace nd
 
 			inline hullVector operator+(const hullVector & rhs) const
 			{
-				return hullVector(X() + rhs.X(), Y() + rhs.Y(), Z() + rhs.Z(), 0.0f);
+				return hullVector(X() + rhs.X(), Y() + rhs.Y(), Z() + rhs.Z(), 0.0);
 			}
 
 			inline hullVector operator-(const hullVector & rhs) const
 			{
-				return hullVector(X() - rhs.X(), Y() - rhs.Y(), Z() - rhs.Z(), 0.0f);
+				return hullVector(X() - rhs.X(), Y() - rhs.Y(), Z() - rhs.Z(), 0.0);
 			}
 
 			inline hullVector operator*(const hullVector & rhs) const
 			{
-				return hullVector(X() * rhs.X(), Y() * rhs.Y(), Z() * rhs.Z(), 0.0f);
+				return hullVector(X() * rhs.X(), Y() * rhs.Y(), Z() * rhs.Z(), 0.0);
 			}
 
 			inline double DotProduct(const hullVector & rhs) const
@@ -791,7 +791,7 @@ namespace nd
 
 			inline hullVector operator*(const hullVector & rhs) const
 			{
-				return hullVector(X() * rhs.X(), Y() * rhs.Y(), Z() * rhs.Z(), 0.0f);
+				return hullVector(X() * rhs.X(), Y() * rhs.Y(), Z() * rhs.Z(), 0.0);
 			}
 
 			double Evalue(const hullVector &point) const

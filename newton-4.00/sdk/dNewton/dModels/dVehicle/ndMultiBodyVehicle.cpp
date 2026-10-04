@@ -97,9 +97,9 @@ class ndMultiBodyVehicle::ndComponentNotify : public ndBodyNotify
 	public:
 	D_CLASS_REFLECTION(ndComponentNotify, ndBodyNotify)
 
-		ndComponentNotify(ndMultiBodyVehicle* const owner)
+	ndComponentNotify(ndMultiBodyVehicle* const owner)
 		:ndBodyNotify(ndVector::m_zero)
-		, m_owner(owner)
+		,m_owner(owner)
 	{
 	}
 
@@ -117,6 +117,7 @@ class ndMultiBodyVehicle::ndComponentNotify : public ndBodyNotify
 	{
 		ndBodyDynamic* const selfBody = GetBody()->GetAsBodyDynamic();
 		selfBody->SetForce(ndVector::m_zero);
+		selfBody->SetTorque(ndVector::m_zero);
 	}
 
 	ndWeakPtr<ndMultiBodyVehicle> m_owner;
@@ -153,7 +154,7 @@ class ndMultiBodyVehicle::ndMotorNotify : public ndMultiBodyVehicle::ndComponent
 		}
 		ndAssert(omegaSpeed <= ndFloat32(0.01f));
 
-		ndVector torque(axis.m_front.Scale(m_dragCoeff * omegaSpeed * omegaSpeed));
+		ndVector torque(axis.m_front.Scale(-ndSign(omegaSpeed) * m_dragCoeff * omegaSpeed * omegaSpeed));
 		selfBody->SetTorque(torque);
 	}
 
@@ -624,13 +625,13 @@ void ndMultiBodyVehicle::Debug(ndConstraintDebugCallback& context) const
 	
 	// draw vehicle Lagrangian frame
 	ndMatrix lagragianFrame(chassisMatrix);
-	//lagragianFrame.m_posit = kinematics.m_centerOfMass.m_posit + kinematics.m_centerOfMass.m_up.Scale(vehicleHeight);
 	lagragianFrame.m_posit = kinematics.m_com + lagragianFrame.m_up.Scale(vehicleHeight);
 	context.DrawFrame(lagragianFrame);
 
 	// vehicle speed in the lagrangian frame
 	const ndVector veloc(kinematics.m_momentum.Scale (ndFloat32 (1.0f) / kinematics.m_mass));
-	const ndVector velocPoint(lagragianFrame.m_posit + lagragianFrame.RotateVector(veloc.Scale(ndFloat32(0.25f) * vehicleHeight)));
+	//const ndVector velocPoint(lagragianFrame.m_posit + lagragianFrame.RotateVector(veloc.Scale(ndFloat32(0.25f) * vehicleHeight)));
+	const ndVector velocPoint(lagragianFrame.m_posit + veloc.Scale(ndFloat32(0.25f) * vehicleHeight));
 	context.DrawLine(lagragianFrame.m_posit, velocPoint, ndVector(0.8f, 0.8f, 0.8f, 0.0f));
 	
 	// draw tires info
@@ -847,8 +848,8 @@ bool ndMultiBodyVehicle::CoulombTireModel(ndMultiBodyVehicleTireJoint* const joi
 
 	contactPoint.m_material.m_staticFriction0 = frictionCoefficient;
 	contactPoint.m_material.m_staticFriction1 = frictionCoefficient;
-	contactPoint.m_material.m_dynamicFriction0 = frictionCoefficient * dynamicFrictionCoef;
-	contactPoint.m_material.m_dynamicFriction1 = frictionCoefficient * dynamicFrictionCoef;
+	contactPoint.m_material.m_kineticFriction0 = frictionCoefficient * dynamicFrictionCoef;
+	contactPoint.m_material.m_kineticFriction1 = frictionCoefficient * dynamicFrictionCoef;
 	return true;
 }
 
@@ -921,6 +922,7 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	const ndFloat32 wheelComSpeed_z = (speed_z > ndFloat32(1.0e-3f) || (speed_z < ndFloat32(-1.0e-3f))) ? speed_z : ndFloat32(0.0f);
 	const ndFloat32 sideSlipAngleInRadians = ndAtan2(wheelComSpeed_z, ndAbs(wheelComSpeed_x));
 	tire->m_lateralSlip = ndMax(tire->m_lateralSlip, ndAbs(sideSlipAngleInRadians));
+//ndTrace(("(%f %f)\n", wheelComSpeed_z, ndAbs(wheelComSpeed_x)));
 
 	// calculate longitudinal slip
 	const ndVector contactVeloc(tireBody->GetVelocityAtPoint(contactPoint.m_point) - contactVeloc1);
@@ -1043,11 +1045,140 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 	ndFloat32 lateralFrictionCoefficient = ndClamp(ndAbs(fz) / sprungWeight, ndFloat32 (0.0f), maxFrictionCoeficient);
 	ndFloat32 longitudinalFrictionCoefficient = ndClamp(ndAbs(fx) / sprungWeight, ndFloat32(0.0f), maxFrictionCoeficient);
 	contactPoint.m_material.m_staticFriction0 = longitudinalFrictionCoefficient;
-	contactPoint.m_material.m_dynamicFriction0 = longitudinalFrictionCoefficient;
+	contactPoint.m_material.m_kineticFriction0 = longitudinalFrictionCoefficient;
 	contactPoint.m_material.m_staticFriction1 = lateralFrictionCoefficient;
-	contactPoint.m_material.m_dynamicFriction1 = lateralFrictionCoefficient;
+	contactPoint.m_material.m_kineticFriction1 = lateralFrictionCoefficient;
+
+	const ndFloat32 maxSideAngle = ndMax(tire->m_maxSideAngle, ndFloat32(1.0f) * ndDegreeToRad);
+	const ndFloat32 sideSlipAngle = ndMin (ndAbs(sideSlipAngleInRadians), maxSideAngle);
+	const ndFloat32 normalizedTireSlip = sideSlipAngle / maxSideAngle;
+	contactPoint.m_material.m_normalizedSlidingFrictionRegularizer1 = normalizedTireSlip;
+	contactPoint.m_material.m_normalizedSlidingFrictionRegularizer1 = ndFloat32 (0.0f);
 
 	return true;
+}
+
+void ndMultiBodyVehicle::CalculateCrowndGear()
+{
+	if (m_motor)
+	{
+		ndFloat32 tireRadios = ndFloat32(1.0f);
+		ndFixSizeArray<ndFloat32, 256> combinedRatio(0);
+		ndFixSizeArray<ndJointBilateralConstraint*, 256> stack(0);
+		for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = m_tireList.GetFirst(); node; node = node->GetNext())
+		{
+			ndBodyDynamic* const tireBody = node->GetInfo()->GetBody0()->GetAsBodyDynamic();
+			auto FindJoint = [tireBody]()
+			{
+				const ndBodyKinematic::ndJointList& jointList = tireBody->GetJointList();
+				for (ndBodyKinematic::ndJointList::ndNode* jointNode = jointList.GetFirst(); jointNode; jointNode = jointNode->GetNext())
+				{
+					ndJointBilateralConstraint* const axle = jointNode->GetInfo();
+					if (strcmp(axle->ClassName(), ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0)
+					{
+						return static_cast<ndMultiBodyVehicleDifferentialAxle*>(axle);
+					}
+				}
+				return static_cast<ndMultiBodyVehicleDifferentialAxle*>(nullptr);
+			};
+			ndMultiBodyVehicleDifferentialAxle* const axle = FindJoint();
+			if (axle)
+			{
+				ndShapeInstance& instance = tireBody->GetCollisionShape();
+				ndShape* const shape = instance.GetShape();
+				ndAssert(static_cast<ndShapeChamferCylinder*>(shape->GetAsShapeChamferCylinder()));
+				ndShapeInfo info(shape->GetShapeInfo());
+				tireRadios = instance.GetScale().m_y * info.m_chamferCylinder.m_radius + ndFloat32(0.5f) * info.m_chamferCylinder.m_height;
+
+				stack.PushBack(axle);
+				combinedRatio.PushBack(1.0f);
+				break;
+			}
+		}
+
+		ndFixSizeArray<ndJointBilateralConstraint*, 256> filter(0);
+			
+		auto Proccessed = [&filter](ndJointBilateralConstraint* const joint)
+		{
+			for (ndInt32 i = filter.GetCount() - 1; i >= 0; --i)
+			{
+				if (joint == filter[i])
+				{
+					return true;
+				}
+			}
+			return false;
+		};
+
+		auto SetCrownGear = [this, tireRadios](ndJointBilateralConstraint* const joint, ndFloat32 driveTrainGearRatio)
+		{
+			ndMultiBodyVehicleGearBox* const gearBoxJoint = static_cast<ndMultiBodyVehicleGearBox*>(joint);
+			const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& torqueCurve = m_motor->GetCurve();
+			ndMultiBodyVehicleGearBox::ndGearBox& gearBox = gearBoxJoint->GetGearBox();
+
+			ndFloat32 vehicleTopSpeed = m_motor->GetTopSpeed();
+			ndFloat32 motorMaxOmega = torqueCurve.GetPickPowerRpm() * ndRpmToRadPerSec;
+			ndFloat32 gearBoxRatio = gearBox.m_gearRatios[gearBox.m_gearRatios.GetCount() - 1];
+
+			driveTrainGearRatio = ndFloat32(1.0f) / (driveTrainGearRatio * gearBoxRatio);
+			ndFloat32 tireSpeed = tireRadios * motorMaxOmega * driveTrainGearRatio;
+			gearBox.m_crownGearRatio = tireSpeed / vehicleTopSpeed;
+		};
+
+			
+		ndFloat32 gearSign = ndFloat32(1.0f);
+		while (stack.GetCount())
+		{
+			ndFloat32 ratio = combinedRatio.Pop();
+			ndJointBilateralConstraint* const gearJoint = stack.Pop();
+			ndAssert(strcmp(gearJoint->ClassName(), ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0);
+			ndMultiBodyVehicleDifferentialAxle* const axle = static_cast<ndMultiBodyVehicleDifferentialAxle*>(gearJoint);
+			ratio = gearSign * ndAbs(ratio) * axle->GetGearRatio();
+			gearSign *= ndFloat32(-1.0f);
+
+		
+			filter.PushBack(gearJoint);
+			const ndBodyKinematic::ndJointList& jointList0 = gearJoint->GetBody0()->GetJointList();
+			for (ndBodyKinematic::ndJointList::ndNode* jointNode = jointList0.GetFirst(); jointNode; jointNode = jointNode->GetNext())
+			{
+				ndJointBilateralConstraint* const joint = jointNode->GetInfo();
+				if (!Proccessed(joint))
+				{
+					if (strcmp(joint->ClassName(), ndMultiBodyVehicleGearBox::StaticClassName()) == 0)
+					{
+						SetCrownGear(joint, ratio);
+						return;
+					}
+					if (strcmp(joint->ClassName(), ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0)
+					{
+						combinedRatio.PushBack(ratio);
+						stack.PushBack(joint);
+					}
+				}
+			}
+			const ndBodyKinematic::ndJointList& jointList1 = gearJoint->GetBody1()->GetJointList();
+			for (ndBodyKinematic::ndJointList::ndNode* jointNode = jointList1.GetFirst(); jointNode; jointNode = jointNode->GetNext())
+			{
+				ndJointBilateralConstraint* const joint = jointNode->GetInfo();
+				if (!Proccessed(joint))
+				{
+					if (strcmp(joint->ClassName(), ndMultiBodyVehicleGearBox::StaticClassName()) == 0)
+					{
+						ndAssert(0);
+						SetCrownGear(joint, ratio);
+						return;
+					}
+
+					if (strcmp(joint->ClassName(), ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0)
+					{
+						combinedRatio.PushBack(ratio);
+						stack.PushBack(joint);
+					}
+				}
+			}
+		}
+	}
+	ndAssert(0);
 }
 
 void ndMultiBodyVehicle::CalculateRestSprungWeight()
@@ -1330,6 +1461,7 @@ void ndMultiBodyVehicle::Update(ndFloat32 timestep, ndInt32)
 		ND_PROFILE_ZONE();
 		m_initialized = true;
 
+		CalculateCrowndGear();
 		CalculateRestSprungWeight();
 
 		// reset forces of assesories attached to chassis

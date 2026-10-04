@@ -547,19 +547,19 @@ void ndBrainGpuContext::Update(ndBrainContextUpdateCallback* const callback)
 
 void ndBrainGpuContext::SetSharedMatrixMultiplyBuffer(ndInt32 sizeInFloat)
 {
-	if (!m_sharedMatrixMultiplyBuffer)
+	if (!m_sharedTiledMatrixMultiplyBuffer)
 	{
-		m_sharedMatrixMultiplyBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(this, sizeInFloat));
-		m_sharedMatrixMultiplyBuffer->Set(ndBrainFloat(0.0f));
+		m_sharedTiledMatrixMultiplyBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(this, sizeInFloat));
+		m_sharedTiledMatrixMultiplyBuffer->Set(ndBrainFloat(0.0f));
 	}
-	else if (m_sharedMatrixMultiplyBuffer->SizeInItems() < size_t(sizeInFloat))
+	else if (m_sharedTiledMatrixMultiplyBuffer->SizeInItems() < size_t(sizeInFloat))
 	{
-		m_sharedMatrixMultiplyBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(this, sizeInFloat));
-		m_sharedMatrixMultiplyBuffer->Set(ndBrainFloat(0.0f));
+		m_sharedTiledMatrixMultiplyBuffer = ndSharedPtr<ndBrainFloatBuffer>(new ndBrainFloatBuffer(this, sizeInFloat));
+		m_sharedTiledMatrixMultiplyBuffer->Set(ndBrainFloat(0.0f));
 	}
 }
 
 ndSharedPtr<ndBrainFloatBuffer> ndBrainGpuContext::GetSharedMatrixMultiplyBuffer() const
 {
-	return m_sharedMatrixMultiplyBuffer;
+	return m_sharedTiledMatrixMultiplyBuffer;
 }

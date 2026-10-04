@@ -325,8 +325,8 @@ namespace ndExcavator
 			m_restitution = ndFloat32(0.1f);
 			m_staticFriction0 = ndFloat32(0.8f);
 			m_staticFriction1 = ndFloat32(0.8f);
-			m_dynamicFriction0 = ndFloat32(0.8f);
-			m_dynamicFriction1 = ndFloat32(0.8f);
+			m_kineticFriction0 = ndFloat32(0.8f);
+			m_kineticFriction1 = ndFloat32(0.8f);
 		}
 
 		ndApplicationMaterial* Clone() const override
@@ -361,8 +361,8 @@ namespace ndExcavator
 			m_restitution = ndFloat32(0.1f);
 			m_staticFriction0 = ndFloat32(1.0f);
 			m_staticFriction1 = ndFloat32(1.0f);
-			m_dynamicFriction0 = ndFloat32(1.0f);
-			m_dynamicFriction1 = ndFloat32(1.0f);
+			m_kineticFriction0 = ndFloat32(1.0f);
+			m_kineticFriction1 = ndFloat32(1.0f);
 		}
 
 		ExcavatorThreadRollerMaterial(const ExcavatorThreadFloorMaterial& src)
@@ -518,8 +518,8 @@ using namespace ndExcavator;
 //	ndMaterial* const defaulMaterial = callback->GetMaterial(ndDemoContactCallback::m_default, ndDemoContactCallback::m_default);
 //	defaulMaterial->m_staticFriction0 = ndFloat32(1.0f);
 //	defaulMaterial->m_staticFriction1 = ndFloat32(1.0f);
-//	defaulMaterial->m_dynamicFriction0 = ndFloat32(1.0f);
-//	defaulMaterial->m_dynamicFriction1 = ndFloat32(1.0f);
+//	defaulMaterial->m_kineticFriction0 = ndFloat32(1.0f);
+//	defaulMaterial->m_kineticFriction1 = ndFloat32(1.0f);
 //
 //	// this material prune extra contact from the thread links and ground 
 //	ExcavatorThreadFloorMaterial material0;
@@ -566,8 +566,8 @@ void ndComplexModel(ndDemoEntityManager* const scene)
 	//ndMaterial* const defaulMaterial = callback->GetMaterial(ndDemoContactCallback::m_default, ndDemoContactCallback::m_default);
 	//defaulMaterial->m_staticFriction0 = ndFloat32 (1.0f);
 	//defaulMaterial->m_staticFriction1 = ndFloat32(1.0f);
-	//defaulMaterial->m_dynamicFriction0 = ndFloat32(1.0f);
-	//defaulMaterial->m_dynamicFriction1 = ndFloat32(1.0f);
+	//defaulMaterial->m_kineticFriction0 = ndFloat32(1.0f);
+	//defaulMaterial->m_kineticFriction1 = ndFloat32(1.0f);
 	//
 	//// this material prune extra contact from the thread links and ground 
 	//ExcavatorThreadFloorMaterial material0;

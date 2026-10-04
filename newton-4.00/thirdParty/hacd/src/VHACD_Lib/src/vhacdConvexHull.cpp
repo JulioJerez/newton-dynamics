@@ -44,10 +44,10 @@ namespace nd
 
 			isvalid = false;
 			double mag2 = plane.DotProduct(plane);
-			if (mag2 > 1.0e-16f)
+			if (mag2 > 1.0e-16)
 			{
 				isvalid = true;
-				plane = plane.Scale(1.0f / sqrt(mag2));
+				plane = plane.Scale(1.0 / sqrt(mag2));
 			}
 			return plane;
 		}
@@ -181,7 +181,7 @@ namespace nd
 			{
 				ConvexHull3dPointCluster* const clump = new (&m_treeBuffer[memoryIndex]) ConvexHull3dPointCluster();
 				memoryIndex++;
-				_ASSERT(memoryIndex <= int (m_treeBuffer.size()));
+				_ASSERT(memoryIndex <= m_treeBuffer.size());
 		
 				_ASSERT(clump);
 				clump->m_count = count;
@@ -353,6 +353,9 @@ namespace nd
 
 			static const ndNormalMap& GetNormaMap()
 			{
+				#if defined(__clang__)
+					[[clang::no_destroy]] 
+				#endif
 				static ndNormalMap normalMap;
 				return normalMap;
 			}
@@ -418,7 +421,7 @@ namespace nd
 		{
 			m_points.resize(0);
 			#ifdef _DEBUG
-			for (size_t i = 0; i < int (accelerator.size()); i++)
+			for (size_t i = 0; i < accelerator.size(); i++)
 			{
 				_ASSERT(accelerator[i].m_mark == 0);
 			}
@@ -469,10 +472,10 @@ namespace nd
 
 					if (me->m_left && me->m_right)
 					{
-						const hullVector leftSupportPoint(me->m_left->m_box[ix].X(), me->m_left->m_box[iy].Y(), me->m_left->m_box[iz].Z(), 0.0f);
+						const hullVector leftSupportPoint(me->m_left->m_box[ix].X(), me->m_left->m_box[iy].Y(), me->m_left->m_box[iz].Z(), 0.0);
 						double leftSupportDist = leftSupportPoint.DotProduct(dir);
 
-						const hullVector rightSupportPoint(me->m_right->m_box[ix].X(), me->m_right->m_box[iy].Y(), me->m_right->m_box[iz].Z(), 0.0f);
+						const hullVector rightSupportPoint(me->m_right->m_box[ix].X(), me->m_right->m_box[iy].Y(), me->m_right->m_box[iz].Z(), 0.0);
 						double rightSupportDist = rightSupportPoint.DotProduct(dir);
 
 						if (rightSupportDist >= leftSupportDist)
@@ -500,7 +503,7 @@ namespace nd
 					}
 					else
 					{
-						ConvexHull3dPointCluster* const cluster = (ConvexHull3dPointCluster*)me;
+						ConvexHull3dPointCluster* const cluster = const_cast<ConvexHull3dPointCluster*>(static_cast<const ConvexHull3dPointCluster*>(me));
 						for (int i = 0; i < cluster->m_count; ++i)
 						{
 							const ConvexHullVertex& p = points[size_t(cluster->m_indices[i])];

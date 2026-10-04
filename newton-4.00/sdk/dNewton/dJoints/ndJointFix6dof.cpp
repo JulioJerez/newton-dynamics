@@ -178,3 +178,4 @@ void ndJointFix6dof::JacobianDerivative(ndConstraintDescritor& desc)
 		SubmitAngularAxis(desc, matrix0, matrix1);
 	}
 }
+

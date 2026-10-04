@@ -126,6 +126,7 @@ class ndMultiBodyVehicle : public ndModelArticulation
 
 	protected:
 	void ApplyTireModel();
+	void CalculateCrowndGear();
 	void CalculateRestSprungWeight();
 	void ApplyAlignmentAndBalancing();
 	void ApplyAerodynamics(ndFloat32 timestep);
@@ -159,3 +160,4 @@ class ndMultiBodyVehicle : public ndModelArticulation
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif
+

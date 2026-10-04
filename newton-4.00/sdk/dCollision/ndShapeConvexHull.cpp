@@ -801,7 +801,7 @@ class ndShapeConvexHull::ndConvexBox
 	{
 		m_edgeCount = 0;
 		m_vertexCount = 0;
-		m_vertex = nullptr;
+		m_vertexPtr = nullptr;
 		m_simplex = nullptr;
 		Create(count, strideInBytes, vertexArray, tolerance, maxPointsOut);
 		// Degenerate input (coplanar/collinear/duplicated points) leaves
@@ -840,10 +840,10 @@ class ndShapeConvexHull::ndConvexBox
 		ndInt32 stride = strideInBytes / ndInt32(sizeof(ndFloat32));
 		for (ndInt32 i = 0; i < count; ++i) 
 		{
-			buffer[i] = ndBigVector(vertexArray[i * stride + 0], vertexArray[i * stride + 1], vertexArray[i * stride + 2], ndFloat32(0.0f));
+			buffer[i] = ndBigVector(ndFloat64(vertexArray[i * stride + 0]), ndFloat64(vertexArray[i * stride + 1]), ndFloat64(vertexArray[i * stride + 2]), ndFloat64(0.0f));
 		}
 
-		ndConvexHull3d* convexHull = new ndConvexHull3d(&buffer[0].m_x, sizeof (ndBigVector), count, tolerance, maxPointsOut);
+		ndConvexHull3d* convexHull = new ndConvexHull3d(&buffer[0].m_x, sizeof (ndBigVector), count, ndFloat64(tolerance), maxPointsOut);
 		if (!convexHull->GetCount())
 		{
 			// Degenerate input (coplanar/collinear/duplicated points); fall
@@ -955,7 +955,7 @@ class ndShapeConvexHull::ndConvexBox
 					}
 				}
 				delete convexHull;
-				convexHull = new ndConvexHull3d(&buffer[0].m_x, sizeof(ndBigVector), count1, tolerance);
+				convexHull = new ndConvexHull3d(&buffer[0].m_x, sizeof(ndBigVector), count1, ndFloat64(tolerance));
 			}
 		}
 
@@ -1008,16 +1008,16 @@ class ndShapeConvexHull::ndConvexBox
 			}
 		}
 
-		m_vertex = (ndVector*)ndMemory::Malloc(size_t(m_vertexCount * sizeof(ndVector)));
-		m_simplex = (ndConvexSimplexEdge*)ndMemory::Malloc(size_t(m_edgeCount * sizeof(ndConvexSimplexEdge)));
-		m_vertexToEdgeMapping = (const ndConvexSimplexEdge**)ndMemory::Malloc(size_t(m_vertexCount * sizeof(ndConvexSimplexEdge*)));
+		m_vertexPtr = static_cast<ndVector*>(ndMemory::Malloc(size_t(m_vertexCount * sizeof(ndVector))));
+		m_simplex = static_cast<ndConvexSimplexEdge*>(ndMemory::Malloc(size_t(m_edgeCount * sizeof(ndConvexSimplexEdge))));
+		m_vertexToEdgeMapping = static_cast<const ndConvexSimplexEdge**>(ndMemory::Malloc(size_t(m_vertexCount * sizeof(ndConvexSimplexEdge*))));
 
 		for (ndInt32 i = 0; i < vertexCount; ++i) 
 		{
 			if (vertexMap[i] != -1) 
 			{
-				m_vertex[vertexMap[i]] = hullVertexArray[i];
-				m_vertex[vertexMap[i]].m_w = ndFloat32(0.0f);
+				m_vertexPtr[vertexMap[i]] = hullVertexArray[i];
+				m_vertexPtr[vertexMap[i]].m_w = ndFloat32(0.0f);
 			}
 		}
 		delete convexHull;
@@ -1067,7 +1067,7 @@ class ndShapeConvexHull::ndConvexBox
 				m_faceCount++;
 			}
 		}
-		m_faceArray = (ndConvexSimplexEdge **)ndMemory::Malloc(size_t(m_faceCount * sizeof(ndConvexSimplexEdge *)));
+		m_faceArray = static_cast<ndConvexSimplexEdge **>(ndMemory::Malloc(size_t(m_faceCount * sizeof(ndConvexSimplexEdge *))));
 		ndMemCpy(m_faceArray, &faceArray[0], m_faceCount);
 	
 		ndFixSizeArray<ndVector, D_CONVEX_VERTEX_BRUTE_FORCE_SPLIT> array;
@@ -1083,7 +1083,7 @@ class ndShapeConvexHull::ndConvexBox
 			ndVector boxP1(-ndFloat32(1.0e15f));
 			for (ndInt32 i = 0; i < vertexCount; ++i) 
 			{
-				const ndVector& p = m_vertex[i];
+				const ndVector& p = m_vertexPtr[i];
 				vertexNodeList[i] = sortTree.Insert(p, i);
 				boxP0 = boxP0.GetMin(p);
 				boxP1 = boxP1.GetMax(p);
@@ -1126,10 +1126,10 @@ class ndShapeConvexHull::ndConvexBox
 					varian = varian.Scale(ndFloat32(box.m_vertexCount)) - median * median;
 					for (ndInt32 i = 0; i < 3; ++i) 
 					{
-						if (varian[i] > maxVarian) 
+						if (ndFloat64(varian[i]) > maxVarian)
 						{
 							index = i;
-							maxVarian = varian[i];
+							maxVarian = ndFloat64(varian[i]);
 						}
 					}
 					ndVector center = median.Scale(ndFloat32(1.0f) / ndFloat32(box.m_vertexCount));
@@ -1233,12 +1233,12 @@ class ndShapeConvexHull::ndConvexBox
 		
 			for (ndInt32 i = 0; i < m_vertexCount; ++i) 
 			{
-				m_vertex[i] = vertexNodeList[i]->GetInfo();
+				m_vertexPtr[i] = vertexNodeList[i]->GetInfo();
 				vertexNodeList[i]->GetInfo().m_w = ndFloat32(i);
 			}
 		
 			m_supportTreeCount = boxCount;
-			m_supportTree = (ndConvexBox*)ndMemory::Malloc(size_t(boxCount * sizeof(ndConvexBox)));
+			m_supportTree = static_cast<ndConvexBox*>(ndMemory::Malloc(size_t(boxCount * sizeof(ndConvexBox))));
 			ndMemCpy(m_supportTree, &boxTree[0], boxCount);
 		
 			for (ndInt32 i = 0; i < m_edgeCount; ++i) 
@@ -1261,10 +1261,10 @@ class ndShapeConvexHull::ndConvexBox
 				}
 			}
 
-			m_soa_x = (ndVector*)ndMemory::Malloc(m_soaVertexCount * sizeof(ndVector));
-			m_soa_y = (ndVector*)ndMemory::Malloc(m_soaVertexCount * sizeof(ndVector));
-			m_soa_z = (ndVector*)ndMemory::Malloc(m_soaVertexCount * sizeof(ndVector));
-			m_soa_index = (ndVector*)ndMemory::Malloc(m_soaVertexCount * sizeof(ndVector));
+			m_soa_x = static_cast<ndVector*>(ndMemory::Malloc(m_soaVertexCount * sizeof(ndVector)));
+			m_soa_y = static_cast<ndVector*>(ndMemory::Malloc(m_soaVertexCount * sizeof(ndVector)));
+			m_soa_z = static_cast<ndVector*>(ndMemory::Malloc(m_soaVertexCount * sizeof(ndVector)));
+			m_soa_index = static_cast<ndVector*>(ndMemory::Malloc(m_soaVertexCount * sizeof(ndVector)));
 
 			ndInt32 startAcc = 0;
 			for (ndInt32 k = 0; k < boxCount; ++k)
@@ -1278,13 +1278,13 @@ class ndShapeConvexHull::ndConvexBox
 					ndFloat32* const indexptr = &m_soa_index[startAcc].m_x;
 					for (ndInt32 i = 0; i < box->m_vertexCount; ++i)
 					{
-						array[i] = m_vertex[box->m_vertexStart + i];
+						array[i] = m_vertexPtr[box->m_vertexStart + i];
 						indexptr[i] = ndFloat32(box->m_vertexStart + i);
 					}
 
 					for (ndInt32 i = box->m_vertexCount; i < soaCount * 4; ++i)
 					{
-						array[i] = m_vertex[box->m_vertexStart];
+						array[i] = m_vertexPtr[box->m_vertexStart];
 						indexptr[i] = ndFloat32(box->m_vertexStart);
 					}
 
@@ -1306,21 +1306,21 @@ class ndShapeConvexHull::ndConvexBox
 		else 
 		{
 			m_soaVertexCount = ((m_vertexCount + 3) & -4) / 4;
-			m_soa_x = (ndVector*)ndMemory::Malloc(m_soaVertexCount * sizeof(ndVector));
-			m_soa_y = (ndVector*)ndMemory::Malloc(m_soaVertexCount * sizeof(ndVector));
-			m_soa_z = (ndVector*)ndMemory::Malloc(m_soaVertexCount * sizeof(ndVector));
-			m_soa_index = (ndVector*)ndMemory::Malloc(m_soaVertexCount * sizeof(ndVector));
+			m_soa_x = static_cast<ndVector*>(ndMemory::Malloc(m_soaVertexCount * sizeof(ndVector)));
+			m_soa_y = static_cast<ndVector*>(ndMemory::Malloc(m_soaVertexCount * sizeof(ndVector)));
+			m_soa_z = static_cast<ndVector*>(ndMemory::Malloc(m_soaVertexCount * sizeof(ndVector)));
+			m_soa_index = static_cast<ndVector*>(ndMemory::Malloc(m_soaVertexCount * sizeof(ndVector)));
 
 			ndFloat32* const indexptr = &m_soa_index[0].m_x;
 			for (ndInt32 i = 0; i < m_vertexCount; ++i)
 			{
-				array[i] = m_vertex[i];
+				array[i] = m_vertexPtr[i];
 				indexptr[i] = ndFloat32(i);
 			}
 
 			for (ndInt32 i = m_vertexCount; i < m_soaVertexCount * 4; ++i)
 			{
-				array[i] = m_vertex[0];
+				array[i] = m_vertexPtr[0];
 				indexptr[i] = ndFloat32(0);
 			}
 
@@ -1376,14 +1376,14 @@ class ndShapeConvexHull::ndConvexBox
 		}
 		ndAssert(index != -1);
 		ndAssert(index < m_vertexCount);
-		return m_vertex[index];
+		return m_vertexPtr[index];
 	}
 
 	ndVector ndShapeConvexHull::SupportVertexHierarchical(const ndVector& dir, ndInt32* const vertexIndex) const
 	{
-		const ndInt32 ix = (dir[0] > ndFloat64(0.0f)) ? 1 : 0;
-		const ndInt32 iy = (dir[1] > ndFloat64(0.0f)) ? 1 : 0;
-		const ndInt32 iz = (dir[2] > ndFloat64(0.0f)) ? 1 : 0;
+		const ndInt32 ix = (dir[0] > ndFloat32(0.0f)) ? 1 : 0;
+		const ndInt32 iy = (dir[1] > ndFloat32(0.0f)) ? 1 : 0;
+		const ndInt32 iz = (dir[2] > ndFloat32(0.0f)) ? 1 : 0;
 
 		const ndConvexBox& leftBox = m_supportTree[m_supportTree[0].m_leftBox];
 		const ndConvexBox& rightBox = m_supportTree[m_supportTree[0].m_rightBox];
@@ -1482,10 +1482,10 @@ class ndShapeConvexHull::ndConvexBox
 			{
 				ndAssert(box.m_rightBox > 0);
 
-				auto InsertNode = [&distPool, &stackPool](const ndConvexBox* const node, ndFloat32 dist)
+				auto InsertNode = [&distPool, &stackPool](const ndConvexBox* const node, ndFloat32 distance)
 				{
 					stackPool.PushBack(node);
-					distPool.PushBack(dist);
+					distPool.PushBack(distance);
 					ndInt32 slotIndex = distPool.GetCount() - 2;
 
 					for (; (slotIndex >= 0) && (distPool[slotIndex + 1] < distPool[slotIndex]); --slotIndex)
@@ -1545,7 +1545,7 @@ class ndShapeConvexHull::ndConvexBox
 			*vertexIndex = index;
 		}
 		ndAssert(index != -1);
-		return m_vertex[index];
+		return m_vertexPtr[index];
 	}
 #endif
 
@@ -1639,7 +1639,7 @@ bool ndShapeConvexHull::RemoveCoplanarEdge(ndPolyhedra& polyhedra, const ndBigVe
 						ndBigVector n1(e0.CrossProduct(e1));
 
 						ndFloat64 projection = n1.DotProduct(normal0).GetScalar();
-						if (projection >= DG_MAX_EDGE_ANGLE)
+						if (projection >= ndFloat64(DG_MAX_EDGE_ANGLE))
 						{
 							ndBigVector e11(hullVertexArray[edge0->m_next->m_next->m_incidentVertex] - hullVertexArray[edge0->m_twin->m_incidentVertex]);
 							ndBigVector e00(hullVertexArray[edge0->m_twin->m_incidentVertex] - hullVertexArray[edge0->m_twin->m_prev->m_incidentVertex]);
@@ -1652,7 +1652,7 @@ bool ndShapeConvexHull::RemoveCoplanarEdge(ndPolyhedra& polyhedra, const ndBigVe
 
 							ndBigVector n11(e00.CrossProduct(e11));
 							projection = n11.DotProduct(normal0).GetScalar();
-							if (projection >= DG_MAX_EDGE_ANGLE)
+							if (projection >= ndFloat64(DG_MAX_EDGE_ANGLE))
 							{
 								ndAssert(&(*iter) != edge0);
 								ndAssert(&(*iter) != edge0->m_twin);
@@ -1723,7 +1723,7 @@ ndShapeInfo ndShapeConvexHull::GetShapeInfo() const
 	info.m_convexhull.m_vertexCount = m_vertexCount;
 	info.m_convexhull.m_strideInBytes = sizeof(ndVector);
 	info.m_convexhull.m_faceCount = m_faceCount;
-	info.m_convexhull.m_vertex = &m_vertex[0];
+	info.m_convexhull.m_vertex = &m_vertexPtr[0];
 	return info;
 }
 
@@ -1740,7 +1740,7 @@ void ndShapeConvexHull::DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& d
 		ndInt32 count = 0;
 		do
 		{
-			vertex[count] = m_vertex[ptr->m_vertex];
+			vertex[count] = m_vertexPtr[ptr->m_vertex];
 			count++;
 			ndAssert(count < ndInt32(sizeof(vertex) / sizeof(vertex[0])));
 			ptr = ptr->m_next;
@@ -1752,7 +1752,7 @@ void ndShapeConvexHull::DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& d
 
 ndUnsigned64 ndShapeConvexHull::GetHash(ndUnsigned64 hash) const
 {
-	return ndCRC64(&m_vertex[0].m_x, m_vertexCount * ndInt32(sizeof(ndVector)), hash);
+	return ndCRC64(&m_vertexPtr[0].m_x, m_vertexCount * ndInt32(sizeof(ndVector)), hash);
 }
 
 ndSharedPtr<ndMeshCollisionShape> ndShapeConvexHull::GetMeshShape() const
@@ -1761,7 +1761,7 @@ ndSharedPtr<ndMeshCollisionShape> ndShapeConvexHull::GetMeshShape() const
 	shape->m_points.SetCount(m_vertexCount);
 	for (ndInt32 i = 0; i < m_vertexCount; ++i)
 	{
-		shape->m_points[i] = m_vertex[i];
+		shape->m_points[i] = m_vertexPtr[i];
 	}
 	return ndSharedPtr<ndMeshCollisionShape>(shape);
 }

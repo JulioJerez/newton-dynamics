@@ -32,3 +32,4 @@ class ndRenderPassEnvironmentImplement : public ndClassAlloc
 };
 
 #endif
+

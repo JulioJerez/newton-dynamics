@@ -303,7 +303,8 @@ class ndBigVector : public ndClassAlloc
 
 	inline ndBigVector TestZero() const
 	{
-		const ndInt64* const a = (ndInt64*)&m_x;
+		//const ndInt64* const a = (ndInt64*)&m_x;
+		const ndInt64* const a = &m_i[0];
 		return ndBigVector ((a[0] == 0) ? ndFloat64 (-1.0f) : ndFloat64 (1.0f),
 							(a[1] == 0) ? ndFloat64 (-1.0f) : ndFloat64 (1.0f),
 							(a[2] == 0) ? ndFloat64 (-1.0f) : ndFloat64 (1.0f),
@@ -387,70 +388,70 @@ class ndBigVector : public ndClassAlloc
 	// relational operators
 	inline ndBigVector operator== (const ndBigVector& data) const
 	{
-		return ndBigVector ((m_x == data.m_x) ? ndInt64 (-1) : ndInt64 (0),
-							(m_y == data.m_y) ? ndInt64 (-1) : ndInt64 (0),
-							(m_z == data.m_z) ? ndInt64 (-1) : ndInt64 (0),
-							(m_w == data.m_w) ? ndInt64 (-1) : ndInt64 (0));
+		return ndBigVector ((m_ix == data.m_ix) ? ndInt64 (-1) : ndInt64 (0),
+							(m_iy == data.m_iy) ? ndInt64 (-1) : ndInt64 (0),
+							(m_iz == data.m_iz) ? ndInt64 (-1) : ndInt64 (0),
+							(m_iw == data.m_iw) ? ndInt64 (-1) : ndInt64 (0));
 	}
 
 	inline ndBigVector operator> (const ndBigVector& data) const
 	{
-		return ndBigVector ((m_x > data.m_x) ? ndInt64 (-1) : ndInt64 (0),
-							(m_y > data.m_y) ? ndInt64 (-1) : ndInt64 (0),
-							(m_z > data.m_z) ? ndInt64 (-1) : ndInt64 (0),
-							(m_w > data.m_w) ? ndInt64 (-1) : ndInt64 (0));
+		return ndBigVector ((m_ix > data.m_ix) ? ndInt64 (-1) : ndInt64 (0),
+							(m_iy > data.m_iy) ? ndInt64 (-1) : ndInt64 (0),
+							(m_iz > data.m_iz) ? ndInt64 (-1) : ndInt64 (0),
+							(m_iw > data.m_iw) ? ndInt64 (-1) : ndInt64 (0));
 	}
 
 	inline ndBigVector operator< (const ndBigVector& data) const
 	{
-		return ndBigVector ((m_x < data.m_x) ? ndInt64 (-1) : ndInt64 (0),
-							(m_y < data.m_y) ? ndInt64 (-1) : ndInt64 (0),
-							(m_z < data.m_z) ? ndInt64 (-1) : ndInt64 (0),
-							(m_w < data.m_w) ? ndInt64 (-1) : ndInt64 (0));
+		return ndBigVector ((m_ix < data.m_ix) ? ndInt64 (-1) : ndInt64 (0),
+							(m_iy < data.m_iy) ? ndInt64 (-1) : ndInt64 (0),
+							(m_iz < data.m_iz) ? ndInt64 (-1) : ndInt64 (0),
+							(m_iw < data.m_iw) ? ndInt64 (-1) : ndInt64 (0));
 	}
 
 	inline ndBigVector operator>= (const ndBigVector& data) const
 	{
-		return ndBigVector ((m_x >= data.m_x) ? ndInt64 (-1) : ndInt64 (0), 
-							(m_y >= data.m_y) ? ndInt64 (-1) : ndInt64 (0),
-							(m_z >= data.m_z) ? ndInt64 (-1) : ndInt64 (0),
-							(m_w >= data.m_w) ? ndInt64 (-1) : ndInt64 (0));
+		return ndBigVector ((m_ix >= data.m_ix) ? ndInt64 (-1) : ndInt64 (0), 
+							(m_iy >= data.m_iy) ? ndInt64 (-1) : ndInt64 (0),
+							(m_iz >= data.m_iz) ? ndInt64 (-1) : ndInt64 (0),
+							(m_iw >= data.m_iw) ? ndInt64 (-1) : ndInt64 (0));
 	}
 
 	inline ndBigVector operator<= (const ndBigVector& data) const
 	{
-		return ndBigVector ((m_x <= data.m_x) ? ndInt64 (-1) : ndInt64 (0),
-							(m_y <= data.m_y) ? ndInt64 (-1) : ndInt64 (0),
-							(m_z <= data.m_z) ? ndInt64 (-1) : ndInt64 (0),
-							(m_w <= data.m_w) ? ndInt64 (-1) : ndInt64 (0));
+		return ndBigVector ((m_ix <= data.m_ix) ? ndInt64 (-1) : ndInt64 (0),
+							(m_iy <= data.m_iy) ? ndInt64 (-1) : ndInt64 (0),
+							(m_iz <= data.m_iz) ? ndInt64 (-1) : ndInt64 (0),
+							(m_iw <= data.m_iw) ? ndInt64 (-1) : ndInt64 (0));
 	}
 
 	// logical operations
 	inline ndBigVector operator& (const ndBigVector& data) const
 	{
-		const ndInt64* const a = (ndInt64*)&m_x;
-		const ndInt64* const b = (ndInt64*)&data.m_x;
+		const ndInt64* const a = &m_i[0];
+		const ndInt64* const b = &data.m_i[0];
 		return ndBigVector (a[0] & b[0], a[1] & b[1], a[2] & b[2], a[3] & b[3]); 
 	}
 
 	inline ndBigVector operator| (const ndBigVector& data) const
 	{
-		const ndInt64* const a = (ndInt64*)&m_x;
-		const ndInt64* const b = (ndInt64*)&data.m_x;
+		const ndInt64* const a = &m_i[0];
+		const ndInt64* const b = &data.m_i[0];
 		return ndBigVector (a[0] | b[0], a[1] | b[1], a[2] | b[2], a[3] | b[3]); 
 	}
 
 	inline ndBigVector operator^ (const ndBigVector& data) const
 	{
-		const ndInt64* const a = (ndInt64*)&m_x;
-		const ndInt64* const b = (ndInt64*)&data.m_x;
+		const ndInt64* const a = &m_i[0];
+		const ndInt64* const b = &data.m_i[0];
 		return ndBigVector (a[0] ^ b[0], a[1] ^ b[1], a[2] ^ b[2], a[3] ^ b[3]); 
 	}
 
 	inline ndBigVector AndNot (const ndBigVector& data) const
 	{
-		const ndInt64* const a = (ndInt64*)&m_x;
-		const ndInt64* const b = (ndInt64*)&data.m_x;
+		const ndInt64* const a = &m_i[0];
+		const ndInt64* const b = &data.m_i[0];
 		return ndBigVector (a[0] & ~b[0], a[1] & ~b[1], a[2] & ~b[2], a[3] & ~b[3]); 
 	}
 
@@ -462,7 +463,7 @@ class ndBigVector : public ndClassAlloc
 
 	inline ndInt32 GetSignMask() const
 	{
-		const ndInt64* const a = (ndInt64*)&m_x;
+		const ndInt64* const a = &m_i[0];
 		return (((a[0]>>63) ? 1 : 0) | ((a[1]>>63) ? 2 : 0) | ((a[2]>>63) ? 4 : 0) | ((a[3]>>63) ? 8 : 0));
 	} 
 
@@ -616,10 +617,10 @@ class ndVector : public ndClassAlloc
 	}
 
 	inline ndVector(const ndBigVector& copy)
-		:m_x(ndFloat32(((ndFloat64*)&copy)[0]))
-		, m_y(ndFloat32(((ndFloat64*)&copy)[1]))
-		, m_z(ndFloat32(((ndFloat64*)&copy)[2]))
-		, m_w(ndFloat32(((ndFloat64*)&copy)[3]))
+		:m_x(ndFloat32(copy.m_x))
+		,m_y(ndFloat32(copy.m_y))
+		,m_z(ndFloat32(copy.m_z))
+		,m_w(ndFloat32(copy.m_w))
 	{
 		ndAssert(ndCheckVector((*this)));
 	}
@@ -839,7 +840,7 @@ class ndVector : public ndClassAlloc
 
 	inline ndVector TestZero() const
 	{
-		const ndInt32* const a = (ndInt32*)&m_x;
+		const ndInt32* const a = &m_i[0];
 		return ndVector(
 			(a[0] == 0) ? ndFloat32(-1.0f) : ndFloat32(0.0f),
 			(a[1] == 0) ? ndFloat32(-1.0f) : ndFloat32(0.0f),
@@ -932,11 +933,12 @@ class ndVector : public ndClassAlloc
 	// relational operators
 	inline ndVector operator== (const ndVector& data) const
 	{
+		// never check th ecase +0 and -0
 		return ndVector(
-			(m_x == data.m_x) ? ndInt32(0xffffffff) : ndInt32(0),
-			(m_y == data.m_y) ? ndInt32(0xffffffff) : ndInt32(0),
-			(m_z == data.m_z) ? ndInt32(0xffffffff) : ndInt32(0),
-			(m_w == data.m_w) ? ndInt32(0xffffffff) : ndInt32(0));
+			(m_ix == data.m_ix) ? ndInt32(0xffffffff) : ndInt32(0),
+			(m_iy == data.m_iy) ? ndInt32(0xffffffff) : ndInt32(0),
+			(m_iz == data.m_iz) ? ndInt32(0xffffffff) : ndInt32(0),
+			(m_iw == data.m_iw) ? ndInt32(0xffffffff) : ndInt32(0));
 	}
 
 	inline ndVector operator> (const ndVector& data) const
@@ -978,29 +980,29 @@ class ndVector : public ndClassAlloc
 	// logical operations
 	inline ndVector operator& (const ndVector& data) const
 	{
-		const ndInt32* const a = (ndInt32*)&m_x;
-		const ndInt32* const b = (ndInt32*)&data.m_x;
+		const ndInt32* const a = &m_i[0];
+		const ndInt32* const b = &data.m_i[0];
 		return ndVector(a[0] & b[0], a[1] & b[1], a[2] & b[2], a[3] & b[3]);
 	}
 
 	inline ndVector operator| (const ndVector& data) const
 	{
-		const ndInt32* const a = (ndInt32*)&m_x;
-		const ndInt32* const b = (ndInt32*)&data.m_x;
+		const ndInt32* const a = &m_i[0];
+		const ndInt32* const b = &data.m_i[0];
 		return ndVector(a[0] | b[0], a[1] | b[1], a[2] | b[2], a[3] | b[3]);
 	}
 
 	inline ndVector operator^ (const ndVector& data) const
 	{
-		const ndInt32* const a = (ndInt32*)&m_x;
-		const ndInt32* const b = (ndInt32*)&data.m_x;
+		const ndInt32* const a = &m_i[0];
+		const ndInt32* const b = &data.m_i[0];
 		return ndVector(a[0] ^ b[0], a[1] ^ b[1], a[2] ^ b[2], a[3] ^ b[3]);
 	}
 
 	inline ndVector AndNot(const ndVector& data) const
 	{
-		const ndInt32* const a = (ndInt32*)&m_x;
-		const ndInt32* const b = (ndInt32*)&data.m_x;
+		const ndInt32* const a = &m_i[0];
+		const ndInt32* const b = &data.m_i[0];
 		return ndVector(a[0] & ~b[0], a[1] & ~b[1], a[2] & ~b[2], a[3] & ~b[3]);
 	}
 
@@ -1012,7 +1014,7 @@ class ndVector : public ndClassAlloc
 
 	inline ndInt32 GetSignMask() const
 	{
-		const ndInt32* const a = (ndInt32*)&m_x;
+		const ndInt32* const a = &m_i[0];
 		return (((a[0] & 0x80000000) ? 1 : 0) | ((a[1] & 0x80000000) ? 2 : 0) | ((a[2] & 0x80000000) ? 4 : 0) | ((a[3] & 0x80000000) ? 8 : 0));
 	}
 

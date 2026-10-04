@@ -41,6 +41,18 @@ Rename this file to lodepng.cpp to use it for C++, or to lodepng.c to use it for
 
 const char* LODEPNG_VERSION_STRING = "20161127";
 
+
+#if defined(__clang__)
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wcast-qual"
+    #pragma clang diagnostic ignored "-Wswitch-default"
+    #pragma clang diagnostic ignored "-Wold-style-cast"
+    #pragma clang diagnostic ignored "-Wmissing-prototypes"
+    #pragma clang diagnostic ignored "-Wimplicit-int-conversion"
+    #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
+#endif
+
+
 /*
 This source file is built up in the following large parts. The code sections
 with the "LODEPNG_COMPILE_" #defines divide this up further in an intermixed way.
@@ -6256,3 +6268,8 @@ unsigned encode(const std::string& filename,
 #endif /* LODEPNG_COMPILE_PNG */
 } /* namespace lodepng */
 #endif /*LODEPNG_COMPILE_CPP*/
+
+
+#if defined(__clang__)
+    #pragma clang diagnostic pop
+#endif

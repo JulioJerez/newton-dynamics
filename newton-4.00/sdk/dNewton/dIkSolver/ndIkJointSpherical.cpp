@@ -82,3 +82,4 @@ ndInt32 ndIkJointSpherical::GetKinematicState(ndKinematicState* const state) con
 
 	return 3;
 }
+

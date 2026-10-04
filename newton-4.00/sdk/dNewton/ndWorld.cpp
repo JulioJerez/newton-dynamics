@@ -560,7 +560,7 @@ bool ndWorld::SkeletonJointTest(ndJointBilateralConstraint* const constraint) co
 {
 	bool test = true;
 	ndAssert(constraint && constraint->GetAsBilateral());
-	test = test && (constraint->GetRowsCount() > 0);
+	test = test && (constraint->GetMaxRowsCount() > 0);
 	test = test && (constraint->IsSkeleton());
 	return test;
 }

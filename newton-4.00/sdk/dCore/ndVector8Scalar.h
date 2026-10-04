@@ -339,7 +339,8 @@ class ndVector8
 
 	inline ndVector8(const ndVector8* const baseAddr, const ndVector8& index)
 	{
-		const ndFloat32* const base = (ndFloat32*)baseAddr;
+		//const ndFloat32* const base = (ndFloat32*)baseAddr;
+		const ndFloat32* const base = static_cast<const ndFloat32*>(&baseAddr->m_float[0]);
 		for (ndInt32 i = 0; i < ND_SIMD8_WORK_GROUP_SIZE; ++i)
 		{
 			m_float[i] = base[index.m_int[i]];

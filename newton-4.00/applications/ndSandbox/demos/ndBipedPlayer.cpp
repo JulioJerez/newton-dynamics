@@ -732,8 +732,8 @@ void ndBipedPlayer_SAC(ndDemoEntityManager* const scene)
 	ndContactCallback* const callback = (ndContactCallback*)*scene->GetWorld()->GetContactNotify();
 	ndMaterial* const defaultMaterial = callback->GetMaterial(ndDemoContactCallback::m_default, ndDemoContactCallback::m_default);
 	ndAssert(defaultMaterial);
-	defaultMaterial->m_dynamicFriction0 = defaultMaterial->m_staticFriction0;
-	defaultMaterial->m_dynamicFriction1 = defaultMaterial->m_staticFriction1;
+	defaultMaterial->m_kineticFriction0 = defaultMaterial->m_staticFriction0;
+	defaultMaterial->m_kineticFriction1 = defaultMaterial->m_staticFriction1;
 
 	//ndModelMaterial material;
 	//callback->RegisterMaterial(material, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_modelPart);
@@ -763,8 +763,8 @@ void ndBipedPlayer_PPO(ndDemoEntityManager* const scene)
 	//ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
 	//ndMaterial* const defaultMaterial = callback->GetMaterial(ndDemoContactCallback::m_default, ndDemoContactCallback::m_default);
 	//ndAssert(defaultMaterial);
-	//defaultMaterial->m_dynamicFriction0 = defaultMaterial->m_staticFriction0;
-	//defaultMaterial->m_dynamicFriction1 = defaultMaterial->m_staticFriction1;
+	//defaultMaterial->m_kineticFriction0 = defaultMaterial->m_staticFriction0;
+	//defaultMaterial->m_kineticFriction1 = defaultMaterial->m_staticFriction1;
 	
 	ndMatrix matrix(ndGetIdentityMatrix());
 	//ndRenderMeshLoader loader(*scene->GetRenderer());

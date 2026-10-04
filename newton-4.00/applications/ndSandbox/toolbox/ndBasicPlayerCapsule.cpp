@@ -48,13 +48,13 @@ void ndBasicPlayerCapsule::ApplyInputs(ndFloat32 timestep)
 {
 	//calculate the gravity contribution to the velocity, 
 	const ndVector gravity(GetNotifyCallback()->GetGravity());
-	const ndVector totalImpulse(m_impulse + gravity.Scale(m_mass * timestep));
+	const ndVector totalImpulse(m_impulse + gravity.Scale(m_mass.m_w * timestep));
 	m_impulse = totalImpulse;
 
 	//dTrace(("  frame: %d    player camera: %f\n", m_scene->GetWorld()->GetFrameIndex(), m_playerInput.m_heading * dRadToDegree));
 	if (m_playerInput.m_jump && IsOnFloor())
 	{
-		const ndVector jumpImpulse(GetMatrix().m_up.Scale(PLAYER_JUMP_SPEED * m_mass));
+		const ndVector jumpImpulse(GetMatrix().m_up.Scale(PLAYER_JUMP_SPEED * m_mass.m_w));
 		m_impulse += jumpImpulse;
 		m_playerInput.m_jump = false;
 	}

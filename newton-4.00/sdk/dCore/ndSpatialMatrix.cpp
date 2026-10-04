@@ -227,3 +227,5 @@ ndSpatialMatrix ndSpatialMatrix::InversePositiveDefinite(ndInt32 rows) const
 
 	return inv;
 }
+
+

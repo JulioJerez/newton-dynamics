@@ -1064,12 +1064,18 @@ void dgCollisionHeightField::GetCollidingFaces (dgPolygonMeshDesc* const data) c
 
 		const int maxIndex = index;
 		dgInt32 stepBase = (x1 - x0) * (2 * 9);
+		// The first pass above stops at DG_MAX_COLLIDING_FACES, so cells beyond
+		// that point in data->m_indices were never written. Both passes below
+		// read and rewrite the neighbouring cell at edgeMap + stepBase, so the
+		// whole two-cell span has to be inside the region the first pass filled.
+		// Without this the leftovers of an earlier query are read as vertex indices.
+		const int maxFlipIndex = maxIndex - stepBase - (2 * 9);
 		for (dgInt32 z = z0; z < z1; z ++) {
 			const dgInt32 diagBase = m_width * z;
 			const dgInt32 triangleIndexBase = (z - z0) * stepBase;
 			for (dgInt32 x = x0; x < (x1 - 1); x ++) {
 				dgInt32 index1 = (x - x0) * (2 * 9) + triangleIndexBase;
-				if (index1 < maxIndex) {
+				if (index1 <= maxFlipIndex) {
 					const dgInt32 code = (m_diagonals[diagBase + x] << 1) + m_diagonals[diagBase + x + 1];
 					const dgInt32* const edgeMap = &m_horizontalEdgeMap[code][0];
 				
@@ -1100,7 +1106,7 @@ void dgCollisionHeightField::GetCollidingFaces (dgPolygonMeshDesc* const data) c
 			const dgInt32 triangleIndexBase = (x - x0) * (2 * 9);
 			for (dgInt32 z = z0; z < (z1 - 1); z ++) {	
 				dgInt32 index1 = (z - z0) * stepBase + triangleIndexBase;
-				if (index1 < maxIndex) {
+				if (index1 <= maxFlipIndex) {
 					const dgInt32 diagBase = m_width * z;
 					const dgInt32 code = (m_diagonals[diagBase + x] << 1) + m_diagonals[diagBase + m_width + x];
 					const dgInt32* const edgeMap = &m_verticalEdgeMap[code][0];

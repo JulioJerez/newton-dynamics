@@ -427,12 +427,12 @@ namespace ndMotorVehicle
 
 				// draw engine rpm
 				ndReal rpm = ndReal(motor->GetRpm());
-				ImGui::Text("  rmp %04d", ndInt32 (rpm));
+				ImGui::Text("  rmp %d", ndInt32 (rpm));
 				DrawDial(60.0f, 50.0f, 50.0f, rpm, ndReal(motor->GetMaxRpm()), IM_COL32(180, 0, 0, 255));
 
 				ImGui::SameLine();
 				ndReal speed = ndReal(vehicle->GetSpeed() * 3.6f);
-				ImGui::Text("  kmh %03d", ndInt32(speed));
+				ImGui::Text("     kmh %d", ndInt32(speed));
 				DrawDial(160.0f, 50.0f, 50.0f, speed, ndReal(motor->GetTopSpeed() * 3.6f), IM_COL32(180, 180, 0, 255));
 
 				const ndSharedPtr<ndModelNotify>& notify = vehicle->GetNotifyCallback();
@@ -597,8 +597,8 @@ namespace ndMotorVehicle
 		//material.m_restitution = 0.1f;
 		//material.m_staticFriction0 = 0.8f;
 		//material.m_staticFriction1 = 0.8f;
-		//material.m_dynamicFriction0 = 0.8f;
-		//material.m_dynamicFriction1 = 0.8f;
+		//material.m_kineticFriction0 = 0.8f;
+		//material.m_kineticFriction1 = 0.8f;
 		//
 		//ndContactCallback* const callback = (ndContactCallback*)scene->GetWorld()->GetContactNotify();
 		//callback->RegisterMaterial(material, ndDemoContactCallback::m_modelPart, ndDemoContactCallback::m_default);
@@ -738,9 +738,9 @@ using namespace ndMotorVehicle;
 #if 1
 void ndBasicVehicle (ndDemoEntityManager* const scene)
 {
-	LoadMap(scene);
+	//LoadMap(scene);
 	//BuildPlayground(scene);
-	//BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true);
+	BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true);
 
 	ndPhysicsWorld* const world = scene->GetWorld();
 	ndVector location(0.0f, 2.0f, 0.0f, 1.0f);
@@ -756,11 +756,12 @@ void ndBasicVehicle (ndDemoEntityManager* const scene)
 	
 	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -10.0f, 0.0f)), true);
 	//CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f)), true);
-	CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f)));
-	CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f)));
-	CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(12.0f, 1.0f, 6.0f, 0.0f)));
+	CreateBasicVehicle(scene, "pickupTruck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -5.0f, 0.0f))); 
+	//CreateBasicVehicle(scene, "truck.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 1.0f, 0.0f, 0.0f)));
+	//CreateBasicVehicle(scene, "lav-25.nd", ndPlacementMatrix(matrix, ndVector(-4.0f, 1.0f, 4.0f, 0.0f)));
+	//CreateBasicVehicle(scene, "tractor.nd", ndPlacementMatrix(matrix, ndVector(12.0f, 1.0f, 6.0f, 0.0f)));
 	
-	AddProps(scene, matrix);
+	//AddProps(scene, matrix);
 
 	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -0.0f, 0.0f)));
 	//CreateBasicVehicle(scene, "testarossaMultiBody.nd", ndPlacementMatrix(matrix, ndVector(0.0f, 0.0f, -0.0f, 0.0f)), true);

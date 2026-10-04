@@ -54,7 +54,7 @@ namespace nd
 			{
 				m_size = 0;
 				delete[] m_data;
-				m_data = 0;
+				m_data = nullptr;
 				m_maxSize = N;
 			}
 			void PopBack()
@@ -65,7 +65,7 @@ namespace nd
 			{
 				if (size > m_maxSize) {
 					T* temp = new T[size];
-					memcpy((void*)temp, (void*)Data(), m_size * sizeof(T));
+					memcpy(static_cast<void*>(temp), Data(), m_size * sizeof(T));
 					delete[] m_data;
 					m_data = temp;
 					m_maxSize = size;
@@ -82,7 +82,7 @@ namespace nd
 				if (m_size == m_maxSize) {
 					size_t maxSize = (m_maxSize << 1);
 					T* temp = new T[maxSize];
-					memcpy((void*)temp, (void*)Data(), m_maxSize * sizeof(T));
+					memcpy(static_cast<void*>(temp), Data(), m_maxSize * sizeof(T));
 					delete[] m_data;
 					m_data = temp;
 					m_maxSize = maxSize;
@@ -126,11 +126,11 @@ namespace nd
 					m_data = new T[m_maxSize];
 				}
 				m_size = rhs.m_size;
-				memcpy((void*)Data(), (void*)rhs.Data(), m_size * sizeof(T));
+				memcpy(static_cast<void*>(Data()), rhs.Data(), m_size * sizeof(T));
 			}
 			void Initialize()
 			{
-				m_data = 0;
+				m_data = nullptr;
 				m_size = 0;
 				m_maxSize = N;
 			}

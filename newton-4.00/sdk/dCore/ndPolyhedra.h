@@ -248,7 +248,7 @@ inline ndInt32 ndPolyhedra::GetEdgeCount() const
 	{
 		edgeCount ++;
 	}
-	ndAssert (edgeCount == GetCount());;
+	ndAssert (edgeCount == GetCount());
 #endif
 	return GetCount();
 }

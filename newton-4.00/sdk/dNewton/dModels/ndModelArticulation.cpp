@@ -906,70 +906,49 @@ ndModelArticulation::ndCenterOfMassDynamics ndModelArticulation::CalculateCentre
 		return dynamics;
 	}
 
-	ndAssert(0);
-	//ndFixSizeArray<ndVector, D_INV_IK_MAX_LINKS> bodyCenter;
-	//ndFixSizeArray<const ndBodyKinematic*, D_INV_IK_MAX_LINKS> bodyArray;
-	//auto CalculateCom = [this, &dynamics, &bodyArray, &bodyCenter](ndModelArticulation::ndNode* node)
-	//{
-	//	if (node->m_body)
-	//	{
-	//		const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
-	//		bodyArray.PushBack(body);
-	//		const ndMatrix matrix(body->GetMatrix());
-	//		const ndVector bodyCom(matrix.TransformVector(body->GetCentreOfMass()));
-	//		bodyCenter.PushBack(bodyCom);
-	//		
-	//		ndFloat32 mass = body->GetMassMatrix().m_w;
-	//		dynamics.m_mass += mass;
-	//		dynamics.m_centerOfMass.m_posit += bodyCom.Scale(mass);
-	//	}
-	//};
-	//ndModelArticulation* const self = (ndModelArticulation*)this;
-	//self->NodeIterator(CalculateCom);
-	//
-	//dynamics.m_centerOfMass.m_posit = dynamics.m_centerOfMass.m_posit.Scale(ndFloat32(1.0f) / dynamics.m_mass);
-	//dynamics.m_centerOfMass.m_posit.m_w = ndFloat32(1.0f);
-	//
-	//const ndInt32 numOfBodies = bodyArray.GetCount();
-	//for (ndInt32 i = 0; i < numOfBodies; ++i)
-	//{
-	//	bodyCenter[i] = (bodyCenter[i] - dynamics.m_centerOfMass.m_posit) & ndVector::m_triplexMask;
-	//}
-	//
-	//for (ndInt32 i = 0; i < numOfBodies; ++i)
-	//{
-	//	const ndBodyKinematic* const body = bodyArray[i];
-	//	ndFloat32 mass = body->GetMassMatrix().m_w;
-	//	ndMatrix bodyInertia(body->CalculateInertiaMatrix());
-	//
-	//	const ndVector linearMomentum(body->GetVelocity().Scale(mass));
-	//	const ndVector angularMomentum(bodyInertia.RotateVector(body->GetOmega()));
-	//	dynamics.m_momentum += linearMomentum;
-	//	dynamics.m_angularMomentum += angularMomentum;
-	//	dynamics.m_angularMomentum += bodyCenter[i].CrossProduct(linearMomentum);
-	//
-	//	ndFloat32 mag2 = bodyCenter[i].DotProduct(bodyCenter[i]).GetScalar();
-	//	ndMatrix covariance(ndCovarianceMatrix(bodyCenter[i], bodyCenter[i]));
-	//	for (ndInt32 j = 0; j < 3; j++)
-	//	{
-	//		bodyInertia[j][j] += mass * mag2;
-	//		bodyInertia[j] -= covariance[j].Scale(mass);
-	//		dynamics.m_inertiaMatrix[j] += bodyInertia[j];
-	//	}
-	//}
-	//dynamics.m_inertiaMatrix.m_posit.m_w = ndFloat32(1.0f);
-	//
-	//dynamics.m_momentum = localFrame.UnrotateVector(dynamics.m_momentum);
-	//dynamics.m_angularMomentum = localFrame.UnrotateVector(dynamics.m_angularMomentum);
-	//dynamics.m_inertiaMatrix = localFrame * dynamics.m_inertiaMatrix * localFrame.OrthoInverse();
-	//dynamics.m_inertiaMatrix.m_posit = ndVector::m_wOne;
-	//
-	//dynamics.m_invInertiaMatrix = dynamics.m_inertiaMatrix.Inverse4x4();
-	//dynamics.m_omega = dynamics.m_invInertiaMatrix.RotateVector(dynamics.m_angularMomentum);
-	//dynamics.m_veloc = dynamics.m_momentum.Scale(ndFloat32(1.0f) / dynamics.m_mass);
-	//dynamics.m_centerOfMass.m_up = localFrame.m_up;
-	//dynamics.m_centerOfMass.m_front = localFrame.m_front;
-	//dynamics.m_centerOfMass.m_right = localFrame.m_right;
+	ndFixSizeArray<ndVector, D_INV_IK_MAX_LINKS> bodyCenter;
+	ndFixSizeArray<const ndBodyKinematic*, D_INV_IK_MAX_LINKS> bodyArray;
+	auto CalculateCom = [this, &dynamics, &bodyArray, &bodyCenter](ndModelArticulation::ndNode* node)
+	{
+		if (node->m_body)
+		{
+			const ndBodyKinematic* const body = node->m_body->GetAsBodyKinematic();
+			bodyArray.PushBack(body);
+			const ndMatrix matrix(body->GetMatrix());
+			const ndVector bodyCom(matrix.TransformVector(body->GetCentreOfMass()));
+			bodyCenter.PushBack(bodyCom);
+			
+			ndFloat32 mass = body->GetMassMatrix().m_w;
+			dynamics.m_mass += mass;
+			dynamics.m_com += bodyCom.Scale(mass);
+		}
+	};
+	ndModelArticulation* const self = (ndModelArticulation*)this;
+	self->NodeIterator(CalculateCom);
+	
+	dynamics.m_com = dynamics.m_com.Scale(ndFloat32(1.0f) / dynamics.m_mass);
+	dynamics.m_com.m_w = ndFloat32(1.0f);
+	
+	const ndInt32 numOfBodies = bodyArray.GetCount();
+	for (ndInt32 i = 0; i < numOfBodies; ++i)
+	{
+		bodyCenter[i] = (bodyCenter[i] - dynamics.m_com) & ndVector::m_triplexMask;
+		bodyCenter[i].m_w = ndFloat32(1.0f);
+	}
+	
+	for (ndInt32 i = 0; i < numOfBodies; ++i)
+	{
+		const ndBodyKinematic* const body = bodyArray[i];
+		ndFloat32 mass = body->GetMassMatrix().m_w;
+		ndMatrix bodyInertia(body->CalculateInertiaMatrix());
+	
+		const ndVector linearMomentum(body->GetVelocity().Scale(mass));
+		const ndVector angularMomentum(bodyInertia.RotateVector(body->GetOmega()));
+		dynamics.m_momentum += linearMomentum;
+		dynamics.m_angularMomentum += angularMomentum;
+		dynamics.m_angularMomentum += bodyCenter[i].CrossProduct(linearMomentum);
+	}
+	
 	return dynamics;
 }
 

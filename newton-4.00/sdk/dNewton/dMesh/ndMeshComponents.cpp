@@ -1434,6 +1434,7 @@ ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMesh* const own
 	,m_frictionModel(m_pacejkaUtility)
 	,m_lateralStiffness(ndReal (1.0f))
 	,m_longitudinalStiffness(ndReal(1.0f))
+	,m_maxSideSlipAngle(ndReal(10.0f))
 {
 }
 
@@ -1442,7 +1443,14 @@ ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMesh* const own
 	,m_frictionModel(m_pacejkaUtility)
 	,m_lateralStiffness(ndReal(1.0f))
 	,m_longitudinalStiffness(ndReal(1.0f))
+	,m_maxSideSlipAngle(ndReal(10.0f))
 {
+	ndAssert(strcmp(joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0);
+	//const ndMultiBodyVehicleTireJoint* const tire = static_cast<const ndMultiBodyVehicleTireJoint*>(joint);
+	//m_frictionModel = tire->m_lateralStiffness;
+	//	, m_lateralStiffness(ndReal(1.0f))
+	//	, m_longitudinalStiffness(ndReal(1.0f))
+
 }
 
 ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMeshJointVehicleTireJoint& other)
@@ -1450,6 +1458,7 @@ ndMeshJointVehicleTireJoint::ndMeshJointVehicleTireJoint(const ndMeshJointVehicl
 	,m_frictionModel(other.m_frictionModel)
 	,m_lateralStiffness(other.m_lateralStiffness)
 	,m_longitudinalStiffness(other.m_longitudinalStiffness)
+	,m_maxSideSlipAngle(other.m_maxSideSlipAngle)
 {
 }
 
@@ -1467,6 +1476,7 @@ bool ndMeshJointVehicleTireJoint::operator==(const ndMeshJoint& other) const
 		test = test && (m_frictionModel == otherJoint->m_frictionModel);
 		test = test && (m_lateralStiffness == otherJoint->m_lateralStiffness);
 		test = test && (m_longitudinalStiffness == otherJoint->m_longitudinalStiffness);
+		test = test && (m_maxSideSlipAngle == otherJoint->m_maxSideSlipAngle);
 	}
 	return test;
 }
@@ -1477,6 +1487,7 @@ void ndMeshJointVehicleTireJoint::SerializeToXml(nd::TiXmlElement* const parent)
 	xmlSaveParam(parent, "frictionModel", ndTireFrictionModel::GetLabel(ndTireFrictionModel::ndFrictionModel(m_frictionModel)));
 	xmlSaveParam(parent, "lateralStiffness", m_lateralStiffness);
 	xmlSaveParam(parent, "longitudinalStiffness", m_longitudinalStiffness);
+	xmlSaveParam(parent, "maxSizeSlipAngle", m_maxSideSlipAngle);
 }
 
 void ndMeshJointVehicleTireJoint::DeserializeFromXml(const nd::TiXmlElement* const parent)
@@ -1487,18 +1498,22 @@ void ndMeshJointVehicleTireJoint::DeserializeFromXml(const nd::TiXmlElement* con
 
 	m_lateralStiffness = ndReal(xmlGetFloat(parent, "lateralStiffness"));
 	m_longitudinalStiffness = ndReal(xmlGetFloat(parent, "longitudinalStiffness"));
+	if (xmlHasAttribute(parent, "maxSizeSlipAngle"))
+	{
+		m_longitudinalStiffness = ndReal(xmlGetFloat(parent, "maxSizeSlipAngle"));
+	}
 }
 
 ndJointBilateralConstraint* ndMeshJointVehicleTireJoint::CreateObject(ndBodyKinematic* const child, ndBodyKinematic* const parent) const
 {
 	const ndMatrix pinAndPivotInChild(m_localFrame0 * child->GetMatrix());
-	//const ndMatrix pinAndPivotInParent(m_localFrame1 * parent->GetMatrix());
 	ndMultiBodyVehicleTireJoint* const joint = new ndMultiBodyVehicleTireJoint(pinAndPivotInChild, child, parent, **m_desc, nullptr);
 
 	ndTireFrictionModel frictionModel;
 	frictionModel.SetPacejkaCurves(ndTireFrictionModel::ndFrictionModel(m_frictionModel));
 	joint->SetFrictionModel(frictionModel);
 	joint->SetStiffness(m_lateralStiffness, m_longitudinalStiffness);
+	joint->SetMaxSlipAngle(m_maxSideSlipAngle * ndDegreeToRad);
 
 	return joint;
 }
@@ -1553,7 +1568,6 @@ void ndMeshJointVehicleGearBox::SerializeToXml(nd::TiXmlElement* const parent) c
 	}
 	xmlSaveParam(parent, "ratios", tmp);
 
-	xmlSaveParam(parent, "crownGearRatio", m_gearBox.m_crownGearRatio);
 	xmlSaveParam(parent, "idleClutchTorque", m_gearBox.m_idleClutchTorque);
 	xmlSaveParam(parent, "lockedClutchTorque", m_gearBox.m_lockedClutchTorque);
 	xmlSaveParam(parent, "torqueConverter", m_gearBox.m_torqueConverter);
@@ -1574,7 +1588,6 @@ void ndMeshJointVehicleGearBox::DeserializeFromXml(const nd::TiXmlElement* const
 		m_gearBox.m_gearRatios.PushBack(tmp[i]);
 	}
 
-	m_gearBox.m_crownGearRatio = ndReal(xmlGetFloat(parent, "crownGearRatio"));
 	m_gearBox.m_idleClutchTorque = ndReal(xmlGetFloat(parent, "idleClutchTorque"));
 	m_gearBox.m_lockedClutchTorque = ndReal(xmlGetFloat(parent, "lockedClutchTorque"));
 	m_gearBox.m_torqueConverter = ndReal(xmlGetFloat(parent, "torqueConverter"));

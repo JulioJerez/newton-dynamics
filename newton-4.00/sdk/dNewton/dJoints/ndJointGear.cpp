@@ -14,6 +14,7 @@
 #include "ndJointGear.h"
 #include "ndMeshComponents.h"
 
+
 ndJointGear::ndJointGear()
 	:ndJointRelational()
 	,m_angle(ndFloat32(0.0f))
@@ -24,7 +25,7 @@ ndJointGear::ndJointGear()
 ndJointGear::ndJointGear(ndFloat32 gearRatio,
 	const ndVector& parentPin, ndBodyKinematic* const parent,
 	const ndVector& childPin, ndBodyKinematic* const child)
-	:ndJointRelational(gearRatio, childPin, child, parentPin, parent)
+	:ndJointRelational(gearRatio, parentPin, parent, childPin, child)
 	,m_angle(ndFloat32(0.0f))
 	,m_omega(ndFloat32(0.0f))
 {

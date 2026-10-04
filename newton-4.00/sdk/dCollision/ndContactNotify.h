@@ -39,8 +39,10 @@ class ndMaterial : public ndContainersFreeListAlloc<ndMaterial>
 	ndFloat32 m_restitution;
 	ndFloat32 m_staticFriction0;
 	ndFloat32 m_staticFriction1;
-	ndFloat32 m_dynamicFriction0;
-	ndFloat32 m_dynamicFriction1;
+	ndFloat32 m_kineticFriction0;
+	ndFloat32 m_kineticFriction1;
+	ndFloat32 m_normalizedSlidingFrictionRegularizer0;
+	ndFloat32 m_normalizedSlidingFrictionRegularizer1;
 	ndFloat32 m_skinMargin;
 	ndFloat32 m_softness;
 	ndUnsigned32 m_flags;

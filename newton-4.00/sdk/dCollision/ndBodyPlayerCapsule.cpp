@@ -254,7 +254,8 @@ void ndBodyPlayerCapsule::ResolveStep(ndBodyPlayerCapsuleContactSolver& contactS
 			}
 
 			impulseSolver.AddAngularRows();
-			ndVector veloc(impulseSolver.CalculateImpulse().Scale(m_invMass));
+			//ndVector veloc(impulseSolver.CalculateImpulse().Scale(m_invMass));
+			ndVector veloc(impulseSolver.CalculateImpulse().Scale(GetInvMass()));
 			SetVelocity(veloc);
 			ndBodyKinematic::IntegrateVelocity(timestep);
 			startMatrix = GetMatrix();
@@ -268,7 +269,7 @@ void ndBodyPlayerCapsule::ResolveStep(ndBodyPlayerCapsuleContactSolver& contactS
 		ndFloat32 forwardSpeed = m_forwardSpeed * scaleSpeedFactor;
 		ndFloat32 lateralSpeed = m_lateralSpeed * scaleSpeedFactor;
 		ndFloat32 maxSpeed = ndMax(ndAbs(forwardSpeed), ndAbs(lateralSpeed));
-		ndFloat32 stepFriction = ndFloat32(1.0f) + m_mass * maxSpeed;
+		ndFloat32 stepFriction = ndFloat32(1.0f) + m_mass.m_w * maxSpeed;
 		
 		SetVelocity(savedVeloc);
 		impulseSolver.Reset(this);
@@ -277,7 +278,7 @@ void ndBodyPlayerCapsule::ResolveStep(ndBodyPlayerCapsuleContactSolver& contactS
 		impulseSolver.AddLinearRow(matrix[2], ndVector::m_zero,  lateralSpeed, -stepFriction, stepFriction, index);
 
 		const ndVector impulse(impulseSolver.CalculateImpulse());
-		ndVector veloc(savedVeloc + impulse.Scale(m_invMass));
+		ndVector veloc(savedVeloc + impulse.Scale(GetInvMass()));
 		
 		bool advanceIsBlocked = true;
 		for (ndInt32 j = 0; advanceIsBlocked && (j < 4); ++j) 
@@ -316,7 +317,7 @@ void ndBodyPlayerCapsule::ResolveStep(ndBodyPlayerCapsuleContactSolver& contactS
 					}
 					
 					impulseSolver.AddAngularRows();
-					veloc += impulseSolver.CalculateImpulse().Scale(m_invMass);
+					veloc += impulseSolver.CalculateImpulse().Scale(GetInvMass());
 					SetMatrix(startMatrix);
 				}
 			}	
@@ -497,7 +498,7 @@ void ndBodyPlayerCapsule::ResolveInterpenetrations(ndBodyPlayerCapsuleContactSol
 
 		impulseSolver.AddAngularRows();
 	
-		ndVector veloc(impulseSolver.CalculateImpulse().Scale(m_invMass));
+		ndVector veloc(impulseSolver.CalculateImpulse().Scale(GetInvMass()));
 		SetVelocity(veloc);
 		ndBodyKinematic::IntegrateVelocity(timestep);
 	
@@ -561,7 +562,7 @@ void ndBodyPlayerCapsule::ResolveCollision(ndBodyPlayerCapsuleContactSolver& con
 	
 	impulseSolver.AddAngularRows();
 	
-	veloc += impulseSolver.CalculateImpulse().Scale(m_invMass);
+	veloc += impulseSolver.CalculateImpulse().Scale(GetInvMass());
 	impulseSolver.ApplyReaction(timestep);
 	
 	SetVelocity(veloc);
@@ -816,7 +817,7 @@ void ndBodyPlayerCapsule::SpecialUpdate(ndFloat32 timestep)
 	SetMatrix(bodyMatrix);
 
 	// set play desired velocity
-	ndVector veloc(GetVelocity() + m_impulse.Scale(m_invMass));
+	ndVector veloc(GetVelocity() + m_impulse.Scale(GetInvMass()));
 	SetVelocity(veloc);
 
 	// determine if player has to step over obstacles lower than step hight

@@ -29,15 +29,17 @@ ndContact ndContactNotify::m_defaultConstructor;
 ndMaterial::ndMaterial()
 	:ndContainersFreeListAlloc<ndMaterial>()
 {
+	m_userFlags = 0;
+	m_softness = ndFloat32(0.1f);
+	m_skinMargin = ndFloat32(0.0f);
 	m_restitution = ndFloat32(0.4f);
 	m_staticFriction0 = ndFloat32(0.8f);
 	m_staticFriction1 = ndFloat32(0.8f);
-	m_dynamicFriction0 = ndFloat32(0.4f);
-	m_dynamicFriction1 = ndFloat32(0.4f);
-	m_skinMargin = ndFloat32(0.0f);
-	m_softness = ndFloat32(0.1f);
+	m_kineticFriction0 = ndFloat32(0.4f);
+	m_kineticFriction1 = ndFloat32(0.4f);
+	m_normalizedSlidingFrictionRegularizer0 = ndFloat32(0.0f);
+	m_normalizedSlidingFrictionRegularizer1 = ndFloat32(0.0f);
 	m_flags = m_collisionEnable | m_friction0Enable | m_friction1Enable;
-	m_userFlags = 0;
 }
 
 ndContactNotify::ndContactNotify(ndScene* const scene)

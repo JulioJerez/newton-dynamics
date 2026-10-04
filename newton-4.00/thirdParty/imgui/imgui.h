@@ -118,6 +118,8 @@ Index of this file:
 #if defined(__clang__)
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wreserved-identifier"
+
 #if __has_warning("-Wzero-as-null-pointer-constant")
 #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"
 #endif

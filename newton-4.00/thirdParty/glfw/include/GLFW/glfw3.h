@@ -29,6 +29,15 @@
 #ifndef _glfw3_h_
 #define _glfw3_h_
 
+#if defined(__clang__)
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wdocumentation"
+    #pragma clang diagnostic ignored "-Wunused-parameter"
+    #pragma clang diagnostic ignored "-Wcast-function-type-strict"
+    #pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
+#endif
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -5906,6 +5915,10 @@ GLFWAPI VkResult glfwCreateWindowSurface(VkInstance instance, GLFWwindow* window
 
 #ifdef __cplusplus
 }
+#endif
+
+#if defined(__clang__)
+    #pragma clang diagnostic pop
 #endif
 
 #endif /* _glfw3_h_ */

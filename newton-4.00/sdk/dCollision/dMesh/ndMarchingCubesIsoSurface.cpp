@@ -296,7 +296,7 @@ void ndMarchingCubeIsoSurface::GetFacesPatch(ndPatchMesh& patch) const
 						{
 							remapVertexArray[i] = -1;
 						}
-						auto RemapVertexIndex = [this, & patch, &remapVertexArray, &vertlist](ndInt32 index)
+						auto RemapVertexIndex = [&patch, &remapVertexArray, &vertlist](ndInt32 index)
 						{
 							ndAssert(index < 12);
 							ndInt32 remapIndex = remapVertexArray[index];
@@ -693,7 +693,7 @@ void ndMarchingCubeIsoSurface::GenerateIndexList()
 		ndHash(const ndVector& p)
 			:ndGridHash()
 		{
-			auto GetHash = [this](ndFloat32 x)
+			auto GetHash = [](ndFloat32 x)
 			{
 				const ndFloat32 intBase = ndFloor(x);
 				const ndInt32 frac = ((x - intBase) > ndFloat32(0.0f)) ? 1 : 0;
@@ -797,7 +797,7 @@ void ndMarchingCubeIsoSurface::GenerateMesh()
 	densityWindow1.SetCount(boxSizeInGrids.m_ix * boxSizeInGrids.m_iz);
 
 	ndFloat32 high = m_boxP0.m_y;
-	auto ReadLayerDensity = ndMakeObject::ndFunction([this, &boxSizeInGrids, &high, &densityWindow0, &densityWindow1](ndInt32 groupId, ndInt32, ndInt32)
+	auto ReadLayerDensity = ndMakeObject::ndFunction([this, &boxSizeInGrids, &high, &densityWindow1](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		ndFloat32 posit_x = m_boxP0.m_x;
 		ndFloat32 posit_z = m_boxP0.m_z + ndFloat32(groupId) * m_gridSize.m_z;
@@ -820,14 +820,14 @@ void ndMarchingCubeIsoSurface::GenerateMesh()
 		high += m_gridSize.m_y;
 		m_threadPool->ParallelExecute(ReadLayerDensity, ndInt32(boxSizeInGrids.m_iz), 4);
 		
-		ndFloat32 grid_Z0 = ndFloat32(0.0f);
-		ndFloat32 grid_Z1 = ndFloat32(1.0f);
+		//ndFloat32 grid_Z0 = ndFloat32(0.0f);
+		//ndFloat32 grid_Z1 = ndFloat32(1.0f);
 
 		ndArray<ndGridInfo> gridScansLayer;
 		ndArray<ndGridInfo> gridScansLayerTemp;
 		gridScansLayer.SetCount((boxSizeInGrids.m_ix - 1) * (boxSizeInGrids.m_iz - 1));
 		gridScansLayer.PushBack(ndGridInfo());
-		auto CountGrids = ndMakeObject::ndFunction([this, &boxSizeInGrids, &densityWindow0, &densityWindow1, &gridScansLayer](ndInt32 groupId, ndInt32, ndInt32)
+		auto CountGrids = ndMakeObject::ndFunction([&boxSizeInGrids, &densityWindow0, &densityWindow1, &gridScansLayer](ndInt32 groupId, ndInt32, ndInt32)
 		{
 			ndIsoCell cell;
 			ndFloat32 isoValues[8];
@@ -969,8 +969,8 @@ void ndMarchingCubeIsoSurface::GenerateMesh()
 			});
 			m_threadPool->ParallelExecute(GenerateTriangles, gridsCount, 32);
 
-			grid_Z0 += ndFloat32(1.0f);
-			grid_Z1 += ndFloat32(1.0f);
+			//grid_Z0 += ndFloat32(1.0f);
+			//grid_Z1 += ndFloat32(1.0f);
 		}
 
 		grid_y0 += ndFloat32(1.0f);
@@ -990,8 +990,8 @@ void ndMarchingCubeIsoSurface::GenerateMesh()
 
 	ndUnsigned32 scans[4];
 	m_meshNormals.SetCount(m_meshPoints.GetCount());
-	ndTriangle* const triangles = (ndTriangle*)&m_meshPoints[0];
-	ndTriangle* const trianglesTmp = (ndTriangle*)&m_meshNormals[0];
+	ndTriangle* const triangles = reinterpret_cast<ndTriangle*>(&m_meshPoints[0]);
+	ndTriangle* const trianglesTmp = reinterpret_cast<ndTriangle*>(&m_meshNormals[0]);
 	ndCountingSort<ndTriangle, ndTriangleClassifier, 1>(*m_threadPool, triangles, trianglesTmp, ndInt32(m_meshPoints.GetCount()) / 3, scans, nullptr);
 	m_meshPoints.Swap(m_meshNormals);
 	m_meshPoints.SetCount(scans[1] * 3);

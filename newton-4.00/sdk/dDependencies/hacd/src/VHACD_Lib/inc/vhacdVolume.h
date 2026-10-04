@@ -91,16 +91,16 @@ namespace nd
 
 			public:
 			//! Destructor.
-			~VoxelSet(void);
+			~VoxelSet(void) override;
 			//! Constructor.
 			VoxelSet();
 
-			size_t GetNPrimitives() const { return m_voxels.Size(); }
-			size_t GetNPrimitivesOnSurf() const { return m_numVoxelsOnSurface; }
-			size_t GetNPrimitivesInsideSurf() const { return m_numVoxelsInsideSurface; }
-			double GetEigenValue(AXIS axis) const { return m_D[axis][axis]; }
-			double ComputeVolume() const { return m_unitVolume * (double)m_voxels.Size(); }
-			double ComputeMaxVolumeError() const { return m_unitVolume * (double)m_numVoxelsOnSurface; }
+			size_t GetNPrimitives() const override { return m_voxels.Size(); }
+			size_t GetNPrimitivesOnSurf() const override { return m_numVoxelsOnSurface; }
+			size_t GetNPrimitivesInsideSurf() const override { return m_numVoxelsInsideSurface; }
+			double GetEigenValue(AXIS axis) const override { return m_D[axis][axis]; }
+			double ComputeVolume() const override { return m_unitVolume * double(m_voxels.Size()); }
+			double ComputeMaxVolumeError() const override { return m_unitVolume * double(m_numVoxelsOnSurface); }
 			const Triangle& GetMinBBVoxels() const { return m_minBBVoxels; }
 			const Triangle& GetMaxBBVoxels() const { return m_maxBBVoxels; }
 			const Vec3& GetMinBB() const { return m_minBB; }
@@ -126,36 +126,36 @@ namespace nd
 					voxel[2] * m_scale + m_minBB[2]);
 			}
 
-			void GetPointArray(ndArray<Vec3>& points) const ;
+			void GetPointArray(ndArray<Vec3>& points) const override;
 
 			void GetPoints(const Voxel& voxel, Vec3* const pts) const;
-			void ComputeConvexHull(Mesh& meshCH, const size_t sampling = 1);
+			void ComputeConvexHull(Mesh& meshCH, const size_t sampling = 1) override;
 
-			void Clip(const Plane& plane, ConvexHull3dPointSet& posTemp, ConvexHull3dPointSet& negTemp, ndInt32 sampe) const;
+			void Clip(const Plane& plane, ConvexHull3dPointSet& posTemp, ConvexHull3dPointSet& negTemp, ndInt32 sampe) const override;
 			void Clip(const Plane& plane, 
 				PrimitiveSet* const positivePart, ConvexHull3dPointSet& posTemp,
-				PrimitiveSet* const negativePart, ConvexHull3dPointSet& negTemp) const;
+				PrimitiveSet* const negativePart, ConvexHull3dPointSet& negTemp) const override;
 			void Intersect(const Plane& plane, SArray<Vec3>* const positivePts,
-				SArray<Vec3>* const negativePts, const size_t sampling) const;
+				SArray<Vec3>* const negativePts, const size_t sampling) const override;
 			void ComputeExteriorPoints(const Plane& plane, const Mesh& mesh,
-				SArray<Vec3>* const exteriorPts) const;
-			void ComputeClippedVolumes(const Plane& plane, double& positiveVolume, double& negativeVolume) const;
+				SArray<Vec3>* const exteriorPts) const override;
+			void ComputeClippedVolumes(const Plane& plane, double& positiveVolume, double& negativeVolume) const override;
 
-			virtual void BuildHullPoints(size_t sampling = 1);
+			virtual void BuildHullPoints(size_t sampling = 1) override;
 			void ComputeClippedVolumes(
 				const ConvexHullAABBTreeNode* const voxelSpace, const Plane& plane, 
-				double& positiveVolume,	double& negativeVolume) const;
+				double& positiveVolume,	double& negativeVolume) const override;
 
-			void SelectOnSurface(PrimitiveSet* const onSurfP) const;
-			void ComputeBB();
-			void Convert(Mesh& mesh, const VOXEL_VALUE value) const;
-			void ComputePrincipalAxes();
-			PrimitiveSet* Create() const
+			void SelectOnSurface(PrimitiveSet* const onSurfP) const override;
+			void ComputeBB() override;
+			void Convert(Mesh& mesh, const VOXEL_VALUE value) const override;
+			void ComputePrincipalAxes() override;
+			PrimitiveSet* Create() const override
 			{
 				return new VoxelSet();
 			}
-			void AlignToPrincipalAxes() {}
-			void RevertAlignToPrincipalAxes() {}
+			void AlignToPrincipalAxes() override {}
+			void RevertAlignToPrincipalAxes() override {}
 			Voxel* GetVoxels() { return m_voxels.Data(); }
 			const Voxel* GetVoxels() const { return m_voxels.Data(); }
 
@@ -246,9 +246,9 @@ namespace nd
 		}
 		inline Vec3 ComputeAlignedPoint(const float* const points, const uint32_t idx, const Vec3& barycenter, const double(&rot)[3][3])
 		{
-			double x = points[idx + 0] - barycenter[0];
-			double y = points[idx + 1] - barycenter[1];
-			double z = points[idx + 2] - barycenter[2];
+			double x = double(points[idx + 0]) - barycenter[0];
+			double y = double(points[idx + 1]) - barycenter[1];
+			double z = double(points[idx + 2]) - barycenter[2];
 			return Vec3(
 				rot[0][0] * x + rot[1][0] * y + rot[2][0] * z,
 				rot[0][1] * x + rot[1][1] * y + rot[2][1] * z,

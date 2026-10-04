@@ -1239,7 +1239,7 @@ ndFloat32 ndShapeCompound::CalculateMassProperties(const ndMatrix& offset, ndVec
 	{
 		public:
 
-		virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceArray, const ndEdgeType* const)
+		virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceArray, const ndEdgeType* const) override
 		{
 			m_localData.AddInertiaAndCrossFace(vertexCount, faceArray);
 		}

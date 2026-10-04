@@ -53,7 +53,7 @@ ndShapeBox::ndShapeBox(ndFloat32 size_x, ndFloat32 size_y, ndFloat32 size_z)
 ndShapeBox::~ndShapeBox()
 {
 	ndShapeConvex::m_simplex = nullptr;
-	ndShapeConvex::m_vertex = nullptr;
+	ndShapeConvex::m_vertexPtr = nullptr;
 }
 
 void ndShapeBox::Init(ndFloat32 size_x, ndFloat32 size_y, ndFloat32 size_z)
@@ -81,7 +81,7 @@ void ndShapeBox::Init(ndFloat32 size_x, ndFloat32 size_y, ndFloat32 size_z)
 	m_vertex[6] = ndVector(m_size[0].m_x, -m_size[0].m_y, -m_size[0].m_z, ndFloat32(0.0f));
 	m_vertex[7] = ndVector(-m_size[0].m_x, -m_size[0].m_y, -m_size[0].m_z, ndFloat32(0.0f));
 
-	ndShapeConvex::m_vertex = m_vertex;
+	ndShapeConvex::m_vertexPtr = m_vertex;
 	ndShapeConvex::m_simplex = m_edgeArray;
 	
 	if (!m_initSimplex) 

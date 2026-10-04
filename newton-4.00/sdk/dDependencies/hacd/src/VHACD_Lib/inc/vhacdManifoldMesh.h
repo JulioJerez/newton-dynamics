@@ -140,3 +140,4 @@ namespace nd
 	}
 }
 #endif // VHACD_MANIFOLD_MESH_H
+

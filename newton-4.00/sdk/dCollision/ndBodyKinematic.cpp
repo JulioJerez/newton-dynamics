@@ -955,13 +955,13 @@ void ndBodyKinematic::IntegrateExternalForce(ndFloat32 timestep)
 		//     f(t + dt) = f(t) + f'(t + dt) * dt
 		//
 		// To approximate f'(t + dt), use a first-order Taylor expansion:
-		//     f(w + dt) = f(w) + f'(w) * dt + O(dt²)
+		//     f(w + dt) = f(w) + f'(w) * dt + O(dt^2)
 		//
-		// Assuming dt² terms are negligible:
+		// Assuming dt^2 terms are negligible:
 		//     f(w + dt) ~= f(w) + f'(w) * dt
 		//
 		// Angular acceleration is obtained from Euler's rigid-body equation:
-		//     dw/dt = a = inv(I) * (T - w × (I * w))
+		//     dw/dt = a = inv(I) * (T - w x (I * w))
 		//
 		// Expanded component form:
 		//     Ix * ax = Tx - (Iz - Iy) * wy * wz

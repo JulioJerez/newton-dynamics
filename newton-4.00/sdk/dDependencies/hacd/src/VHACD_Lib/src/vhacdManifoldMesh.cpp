@@ -29,7 +29,7 @@ namespace nd
 		{
 			m_name = 0;
 			m_id = 0;
-			m_duplicate = 0;
+			m_duplicate = nullptr;
 			m_onHull = false;
 			m_tag = false;
 		}
@@ -41,16 +41,17 @@ namespace nd
 		void TMMEdge::Initialize()
 		{
 			m_id = 0;
-			m_triangles[0] = m_triangles[1] = m_newFace = 0;
-			m_vertices[0] = m_vertices[1] = 0;
+			m_triangles[0] = m_triangles[1] = m_newFace = nullptr;
+			m_vertices[0] = m_vertices[1] = nullptr;
 		}
 
 		void TMMTriangle::Initialize()
 		{
 			m_id = 0;
-			for (int32_t i = 0; i < 3; i++) {
-				m_edges[i] = 0;
-				m_vertices[0] = 0;
+			for (int32_t i = 0; i < 3; i++) 
+			{
+				m_edges[i] = nullptr;
+				m_vertices[0] = nullptr;
 			}
 			m_visible = false;
 		}
@@ -202,3 +203,4 @@ namespace nd
 		}
 	}
 }
+

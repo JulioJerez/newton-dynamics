@@ -207,8 +207,6 @@ class ndWorld: public ndClassAlloc
 	friend class ndDynamicsUpdate;
 	friend class ndSkeletonContainer;
 	friend class ndModelArticulation;
-	friend class ndDynamicsUpdateSoa;
-	friend class ndDynamicsUpdateSimd16;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif

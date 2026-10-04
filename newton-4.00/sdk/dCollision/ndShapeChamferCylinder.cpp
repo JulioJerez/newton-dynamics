@@ -43,7 +43,7 @@ ndShapeChamferCylinder::~ndShapeChamferCylinder()
 	ndAssert (m_shapeRefCount >= 0);
 
 	ndShapeConvex::m_simplex = nullptr;
-	ndShapeConvex::m_vertex = nullptr;
+	ndShapeConvex::m_vertexPtr = nullptr;
 }
 
 void ndShapeChamferCylinder::Init (ndFloat32 radius, ndFloat32 height)
@@ -71,7 +71,7 @@ void ndShapeChamferCylinder::Init (ndFloat32 radius, ndFloat32 height)
 
 	m_edgeCount = (4 * DG_CHAMFERCYLINDER_SLICES + 2)* DG_CHAMFERCYLINDER_BRAKES;
 	m_vertexCount = DG_CHAMFERCYLINDER_BRAKES * (DG_CHAMFERCYLINDER_SLICES + 1);
-	ndShapeConvex::m_vertex = m_vertex;
+	ndShapeConvex::m_vertexPtr = m_vertex;
 
 	if (!m_shapeRefCount) 
 	{
@@ -163,8 +163,8 @@ void ndShapeChamferCylinder::DebugShape(const ndMatrix& matrix, ndShapeDebugNoti
 	ndInt32 slices = 12;
 	ndInt32 brakes = 24;
 	ndFloat32 sliceAngle = ndFloat32(0.0f);
-	ndFloat32 sliceStep = ndPi / (ndFloat32)slices;
-	ndFloat32 breakStep = ndFloat32(2.0f) * ndPi / (ndFloat32)brakes;
+	ndFloat32 sliceStep = ndPi / ndFloat32(slices);
+	ndFloat32 breakStep = ndFloat32(2.0f) * ndPi / ndFloat32(brakes);
 	//ndVector pool[24 * (12 + 1)];
 	ndFixSizeArray<ndVector, 24 * (12 + 1)> pool;
 
