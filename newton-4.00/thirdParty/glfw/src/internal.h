@@ -53,6 +53,14 @@
     #include "../include/GLFW/glfw3.h"
 #endif
 
+#if defined(__clang__)
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wunused-parameter"
+    #pragma clang diagnostic ignored "-Wreserved-identifier"
+    #pragma clang diagnostic ignored "-Wreserved-macro-identifier"
+    #pragma clang diagnostic ignored "-Wnonportable-system-include-path"
+#endif
+
 #define _GLFW_INSERT_FIRST      0
 #define _GLFW_INSERT_LAST       1
 
@@ -789,3 +797,6 @@ int _glfw_max(int a, int b);
 float _glfw_fminf(float a, float b);
 float _glfw_fmaxf(float a, float b);
 
+#if defined(__clang__)
+    #pragma clang diagnostic pop
+#endif

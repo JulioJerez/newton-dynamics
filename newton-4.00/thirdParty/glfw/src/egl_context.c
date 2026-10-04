@@ -34,6 +34,16 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#if defined(__clang__)
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wdocumentation"
+    #pragma clang diagnostic ignored "-Wunused-parameter"
+    #pragma clang diagnostic ignored "-Wmissing-prototypes"
+    #pragma clang diagnostic ignored "-Wcast-function-type-strict"
+    #pragma clang diagnostic ignored "-Wcast-function-type-mismatch"
+    #pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
+    #pragma clang diagnostic ignored "-Wnonportable-system-include-path"
+#endif
 
 // Return a description of the specified EGL error
 //
@@ -807,3 +817,6 @@ GLFWAPI EGLSurface glfwGetEGLSurface(GLFWwindow* handle)
     return window->context.egl.surface;
 }
 
+#if defined(__clang__)
+    #pragma clang diagnostic pop    
+#endif

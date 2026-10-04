@@ -24,6 +24,19 @@
  *
  **************************************************************************/
 
+#if defined(__clang__)
+    #pragma clang diagnostic push
+    #pragma clang diagnostic ignored "-Wcast-qual"
+    #pragma clang diagnostic ignored "-Wcast-align"
+    #pragma clang diagnostic ignored "-Wcast-align"
+    #pragma clang diagnostic ignored "-Wswitch-enum"
+    #pragma clang diagnostic ignored "-Wunused-macros"
+    #pragma clang diagnostic ignored "-Wswitch-default"
+    #pragma clang diagnostic ignored "-Wimplicit-int-conversion"
+    #pragma clang diagnostic ignored "-Wdeclaration-after-statement"
+    #pragma clang diagnostic ignored "-Wtautological-type-limit-compare"
+#endif
+
 #include  "miniz.h"
 
 typedef unsigned char mz_validate_uint16[sizeof(mz_uint16) == 2 ? 1 : -1];
@@ -7246,6 +7259,10 @@ mz_bool mz_zip_end(mz_zip_archive *pZip)
 
 #ifdef __cplusplus
 }
+#endif
+
+#if defined(__clang__)
+    #pragma clang diagnostic pop
 #endif
 
 #endif /*#ifndef MINIZ_NO_ARCHIVE_APIS*/
