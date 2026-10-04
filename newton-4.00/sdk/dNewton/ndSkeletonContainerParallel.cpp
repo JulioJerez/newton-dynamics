@@ -511,7 +511,7 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 		auto InitMassMatrixBoundedBlock = ndMakeObject::ndFunction([this, boundedSize, diagDamp](ndInt32 groupId, ndInt32, ndInt32)
 		{
 			ndFixSizeArray<ndFloat32, 1024> accumulator(m_blockSize);
-			ndAssert(m_blockSize <= acc.GetCapacity());
+			ndAssert(m_blockSize <= accumulator.GetCapacity());
 			for (ndInt32 j = 0; j < m_blockSize; ++j)
 			{
 				accumulator[j] = m_massMatrix11[j * m_auxiliaryRowCount + m_blockSize + groupId];
