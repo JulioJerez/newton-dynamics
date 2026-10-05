@@ -9,8 +9,8 @@
 * freely
 */
 
-#ifndef ND_JOINT_HINGE_H__
-#define ND_JOINT_HINGE_H__
+#ifndef ND_JOINT_HINGE_H_
+#define ND_JOINT_HINGE_H_
 
 #include "ndNewtonStdafx.h"
 #include "ndJointBilateralConstraint.h"

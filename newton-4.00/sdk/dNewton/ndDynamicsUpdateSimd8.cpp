@@ -27,7 +27,7 @@
 #include "ndDynamicsUpdateSimd8.h"
 #include "ndJointBilateralConstraint.h"
 
-#define D_SOA_DEFAULT_BUFFER_SIZE	1024
+#define ND_SIMD8_DEFAULT_BUFFER_SIZE	1024
 
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndSimd8Vector3
@@ -81,8 +81,8 @@ class ndJointMaskSimd8Array : public ndArray<ndVector8>
 
 ndDynamicsUpdateSimd8::ndDynamicsUpdateSimd8(ndWorld* const world)
 	:ndDynamicsUpdate(world)
-	,m_groupType(D_SOA_DEFAULT_BUFFER_SIZE)
-	,m_simdJointRows(D_SOA_DEFAULT_BUFFER_SIZE)
+	,m_groupType(ND_SIMD8_DEFAULT_BUFFER_SIZE)
+	,m_simdJointRows(ND_SIMD8_DEFAULT_BUFFER_SIZE)
 	,m_jointMask(new ndJointMaskSimd8Array)
 	,m_simdMassMatrixArray(new ndMatrixSimd8Array)
 {
@@ -92,8 +92,8 @@ ndDynamicsUpdateSimd8::~ndDynamicsUpdateSimd8()
 {
 	Clear();
 
-	m_groupType.Resize(D_SOA_DEFAULT_BUFFER_SIZE);
-	m_simdJointRows.Resize(D_SOA_DEFAULT_BUFFER_SIZE);
+	m_groupType.Resize(ND_SIMD8_DEFAULT_BUFFER_SIZE);
+	m_simdJointRows.Resize(ND_SIMD8_DEFAULT_BUFFER_SIZE);
 
 	delete m_jointMask;
 	delete m_simdMassMatrixArray;
@@ -501,7 +501,8 @@ void ndDynamicsUpdateSimd8::InitJacobianMatrix()
 					reinterpret_cast<const ndVector8&>(row7->m_JMinv.m_jacobianM1));
 
 				#ifdef D_NEWTON_USE_DOUBLE
-					ndInt64* const normalIndex = (ndInt64*)&row.m_normalForceIndex[0];
+					//ndInt64* const normalIndex = (ndInt64*)&row.m_normalForceIndex[0];
+					ndInt64* const normalIndex = row.m_normalForceIndex.m_int;
 				#else
 					ndInt32* const normalIndex = row.m_normalForceIndex.m_int;
 				#endif
@@ -609,7 +610,8 @@ void ndDynamicsUpdateSimd8::InitJacobianMatrix()
 						row.m_coordenateAccel[k] = rhs->m_coordenateAccel;
 
 						#ifdef D_NEWTON_USE_DOUBLE
-							ndInt64* const normalIndex = (ndInt64*)&row.m_normalForceIndex[0];
+							//ndInt64* const normalIndex = (ndInt64*)&row.m_normalForceIndex[0];
+							ndInt64* const normalIndex = row.m_normalForceIndex.m_int;
 						#else
 							ndInt32* const normalIndex = row.m_normalForceIndex.m_int;
 						#endif

@@ -10,8 +10,8 @@
 */
 
 
-#ifndef ND_JOINT_FOLLOW_PATH_H__
-#define ND_JOINT_FOLLOW_PATH_H__
+#ifndef ND_JOINT_FOLLOW_PATH_H_
+#define ND_JOINT_FOLLOW_PATH_H_
 
 #include "ndNewtonStdafx.h"
 #include "ndJointBilateralConstraint.h"
