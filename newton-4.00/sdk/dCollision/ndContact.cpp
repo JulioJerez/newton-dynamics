@@ -26,8 +26,7 @@
 #include "ndBodyKinematic.h"
 #include "ndContactOptions.h"
 
-#define D_DIAGONAL_MIN_REGULARIZER		ndFloat32 (1.0e-3f)
-#define D_DIAGONAL_MAX_REGULARIZER		ndFloat32 (1.0e-2f)
+#define D_DIAGONAL_REGULARIZER		ndFloat32 (1.0e-3f)
 
 ndVector ndContact::m_initialSeparatingVector(ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f));
 
@@ -280,7 +279,7 @@ void ndContact::JacobianContactDerivative(ndConstraintDescritor& desc, const ndC
 	ndAssert(ndAbs(penetrationVeloc - D_MAX_PENETRATION_STIFFNESS * contact.m_material.m_softness * penetration) < ndFloat32(1.0e-6f));
 	desc.m_penetrationStiffness[normalIndex] = penetrationStiffness;
 
-	desc.m_diagonalRegularizer[normalIndex] = ndMax(D_DIAGONAL_MIN_REGULARIZER, contact.m_material.m_skinMargin);
+	desc.m_diagonalRegularizer[normalIndex] = ndMax(D_DIAGONAL_REGULARIZER, contact.m_material.m_skinMargin);
 	const ndFloat32 relGyro = (normalJacobian0.m_angular * gyroAlpha0 + normalJacobian1.m_angular * gyroAlpha1).AddHorizontal().GetScalar();
 	// correct restititioan calculation, may be more unsatble.
 	relSpeed = ndMax(restitutionVelocity, penetrationVeloc);
@@ -306,12 +305,22 @@ void ndContact::JacobianContactDerivative(ndConstraintDescritor& desc, const ndC
 		const ndJacobian &jacobian1 = desc.m_jacobian[jacobIndex].m_jacobianM1;
 		ndFloat32 relVelocErr = -(jacobian0.m_linear * veloc0 + jacobian0.m_angular * omega0 + jacobian1.m_linear * veloc1 + jacobian1.m_angular * omega1).AddHorizontal().GetScalar();
 
+		if (relVelocErr > ndFloat32(0.0f))
+		{
+			relVelocErr = ndMax(relVelocErr - contact.m_material.m_targetSlidingFriction0, ndFloat32(0.0f));
+		}
+		else
+		{
+			relVelocErr = ndMin(relVelocErr + contact.m_material.m_targetSlidingFriction0, ndFloat32(0.0f));
+		}
+
 		desc.m_forceBounds[jacobIndex].m_normalIndex = (contact.m_material.m_flags & m_override0Friction) ? D_OVERRIDE_FRICTION_ROW : normalIndex;
-		desc.m_diagonalRegularizer[jacobIndex] = ndMax(D_DIAGONAL_MIN_REGULARIZER, D_DIAGONAL_MIN_REGULARIZER + contact.m_material.m_normalizedSlidingFrictionRegularizer0 * (D_DIAGONAL_MAX_REGULARIZER - D_DIAGONAL_MIN_REGULARIZER));
+		desc.m_diagonalRegularizer[jacobIndex] = D_DIAGONAL_REGULARIZER;
 
 		desc.m_restitution[jacobIndex] = ndFloat32(0.0f);
 		desc.m_penetration[jacobIndex] = ndFloat32(0.0f);
-		desc.m_penetrationStiffness[jacobIndex] = ndFloat32(0.0f);
+		//desc.m_penetrationStiffness[jacobIndex] = ndFloat32(0.0f);
+		desc.m_penetrationStiffness[jacobIndex] = contact.m_material.m_targetSlidingFriction0;
 
 		desc.m_jointSpeed[normalIndex] = ndFloat32(0.0f);
 		desc.m_positError[normalIndex] = ndFloat32(0.0f);
@@ -351,15 +360,23 @@ void ndContact::JacobianContactDerivative(ndConstraintDescritor& desc, const ndC
 
 		const ndJacobian &jacobian0 = desc.m_jacobian[jacobIndex].m_jacobianM0;
 		const ndJacobian &jacobian1 = desc.m_jacobian[jacobIndex].m_jacobianM1;
-		const ndFloat32 relVelocErr = -(jacobian0.m_linear * veloc0 + jacobian0.m_angular * omega0 + jacobian1.m_linear * veloc1 + jacobian1.m_angular * omega1).AddHorizontal().GetScalar();
+		ndFloat32 relVelocErr = -(jacobian0.m_linear * veloc0 + jacobian0.m_angular * omega0 + jacobian1.m_linear * veloc1 + jacobian1.m_angular * omega1).AddHorizontal().GetScalar();
+		if (relVelocErr > ndFloat32(0.0f))
+		{
+			relVelocErr = ndMax(relVelocErr - contact.m_material.m_targetSlidingFriction1, ndFloat32(0.0f));
+		}
+		else
+		{
+			relVelocErr = ndMin(relVelocErr + contact.m_material.m_targetSlidingFriction1, ndFloat32(0.0f));
+		}
 
 		desc.m_forceBounds[jacobIndex].m_normalIndex = (contact.m_material.m_flags & m_override1Friction) ? D_OVERRIDE_FRICTION_ROW : normalIndex;
-		//desc.m_diagonalRegularizer[jacobIndex] = D_DIAGONAL_MIN_REGULARIZER;
-		desc.m_diagonalRegularizer[jacobIndex] = ndMax(D_DIAGONAL_MIN_REGULARIZER, D_DIAGONAL_MIN_REGULARIZER + contact.m_material.m_normalizedSlidingFrictionRegularizer1 * (D_DIAGONAL_MAX_REGULARIZER - D_DIAGONAL_MIN_REGULARIZER));
+		desc.m_diagonalRegularizer[jacobIndex] = D_DIAGONAL_REGULARIZER;
 
 		desc.m_restitution[jacobIndex] = ndFloat32(0.0f);
 		desc.m_penetration[jacobIndex] = ndFloat32(0.0f);
-		desc.m_penetrationStiffness[jacobIndex] = ndFloat32(0.0f);
+		//desc.m_penetrationStiffness[jacobIndex] = ndFloat32(0.0f);
+		desc.m_penetrationStiffness[jacobIndex] = contact.m_material.m_targetSlidingFriction1;
 
 		desc.m_jointSpeed[normalIndex] = ndFloat32(0.0f);
 		desc.m_positError[normalIndex] = ndFloat32(0.0f);
@@ -449,6 +466,19 @@ void ndContact::JointAccelerations(ndJointAccelerationDecriptor* const desc)
 					penetrationVeloc = -(rhs->m_penetration * rhs->m_penetrationStiffness);
 				}
 				vRel = vRel * restitution + penetrationVeloc;
+			}
+			else
+			{
+				if (vRel > ndFloat32(0.0f))
+				{
+					//vRel = ndMax(vRel - rhs->m_slidingFriction, ndFloat32(0.0f));
+					vRel = ndMax(vRel - rhs->m_penetrationStiffness, ndFloat32(0.0f));
+				}
+				else
+				{
+					//vRel = ndMin(vRel + rhs->m_slidingFriction, ndFloat32(0.0f));
+					vRel = ndMin(vRel + rhs->m_penetrationStiffness, ndFloat32(0.0f));
+				}
 			}
 
 			rhs->m_positError = ndFloat32(0.0f);

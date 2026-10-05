@@ -66,6 +66,7 @@ class ndJointWheel : public ndJointBilateralConstraint
 
 	D_NEWTON_API ndMatrix CalculateBaseFrame() const;
 	D_NEWTON_API ndMatrix CalculateUpperBumperMatrix() const;
+	D_NEWTON_API void GetJacobian(ndJacobianPair& lateral, ndJacobianPair& longitudical) const;
 
 	D_NEWTON_API const ndWheelDescriptor& GetInfo() const;
 	D_NEWTON_API void SetInfo(const ndWheelDescriptor& info);

@@ -229,6 +229,36 @@ void ndJointWheel::UpdateParameters()
 	// for now do nothing
 }
 
+void ndJointWheel::GetJacobian(ndJacobianPair& lateral, ndJacobianPair& longitudical) const
+{
+	ndConstraintDescritor desc;
+	ndMatrix matrix0;
+	ndMatrix matrix1;
+
+	// calculate the position of the pivot point and the Jacobian direction vectors, in global space. 
+	CalculateGlobalMatrix(matrix0, matrix1);
+
+	// calculate position and speed	
+	const ndVector veloc0(m_body0->GetVelocityAtPoint(matrix0.m_posit));
+	const ndVector veloc1(m_body1->GetVelocityAtPoint(matrix1.m_posit));
+
+	const ndVector& pin = matrix1[0];
+	const ndVector& p0 = matrix0.m_posit;
+	const ndVector& p1 = matrix1.m_posit;
+	const ndVector prel(p0 - p1);
+	const ndVector vrel(veloc0 - veloc1);
+	const ndVector projectedPoint = p1 + pin.Scale(pin.DotProduct(prel).GetScalar());
+
+	desc.m_rowsCount = 0;
+	desc.m_timestep = ndFloat32(1.0f);
+	desc.m_invTimestep = ndFloat32(1.0f);
+	ndJointWheel* const self = const_cast<ndJointWheel*>(static_cast<const ndJointWheel*>(this));
+	self->AddLinearRowJacobian(desc, p0, projectedPoint, matrix1[0]);
+	self->AddLinearRowJacobian(desc, p0, projectedPoint, matrix1[2]);
+	lateral = desc.m_jacobian[0];
+	longitudical = desc.m_jacobian[1];
+}
+
 void ndJointWheel::JacobianDerivative(ndConstraintDescritor& desc)
 {
 	ndMatrix matrix0;
@@ -251,13 +281,12 @@ void ndJointWheel::JacobianDerivative(ndConstraintDescritor& desc)
 	m_posit = prel.DotProduct(matrix1.m_up).GetScalar();
 	const ndVector projectedPoint = p1 + pin.Scale(pin.DotProduct(prel).GetScalar());
 
-	const ndFloat32 angle0 = CalculateAngle(matrix0.m_front, matrix1.m_front, matrix1.m_up);
-	const ndFloat32 angle1 = CalculateAngle(matrix0.m_front, matrix1.m_front, matrix1.m_right);
-
 	m_angularJacobians.SetCount(0);
 	AddLinearRowJacobian(desc, p0, projectedPoint, matrix1[0]);
 	AddLinearRowJacobian(desc, p0, projectedPoint, matrix1[2]);
 
+	const ndFloat32 angle0 = CalculateAngle(matrix0.m_front, matrix1.m_front, matrix1.m_up);
+	const ndFloat32 angle1 = CalculateAngle(matrix0.m_front, matrix1.m_front, matrix1.m_right);
 	m_angularJacobians.PushBack(desc.m_rowsCount);
 	AddAngularRowJacobian(desc, matrix1.m_up, angle0);
 

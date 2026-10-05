@@ -147,6 +147,7 @@ class ndMultiBodyVehicle : public ndModelArticulation
 	ndList<ndMultiBodyVehicleDifferential*> m_differentialList;
 
 	ndDownForce m_downForce;
+	ndFloat32 m_timestep;
 	ndFloat32 m_steeringRate;
 	ndFloat32 m_maxSideslipRate;
 	ndFloat32 m_maxSideslipAngle;
