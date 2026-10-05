@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
 
 option("NEWTON_BUILD_SHARED_LIBS" "build shared library" ON)
 
-set (projectName "newtonC")
+set (projectName "newton")
 project(${projectName})
 
 message (${projectName})
