@@ -738,9 +738,9 @@ using namespace ndMotorVehicle;
 #if 1
 void ndBasicVehicle (ndDemoEntityManager* const scene)
 {
-	//LoadMap(scene);
+	LoadMap(scene);
 	//BuildPlayground(scene);
-	BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true);
+	//BuildFloorBox(scene, ndGetIdentityMatrix(), "marblecheckboard.png", 0.1f, true);
 
 	ndPhysicsWorld* const world = scene->GetWorld();
 	ndVector location(0.0f, 2.0f, 0.0f, 1.0f);

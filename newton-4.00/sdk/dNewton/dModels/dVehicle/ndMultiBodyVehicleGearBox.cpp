@@ -179,8 +179,8 @@ void ndMultiBodyVehicleGearBox::JacobianDerivative(ndConstraintDescritor& desc)
 			{
 				//SetHighFriction(desc, m_driveTrainResistanceTorque);
 				//SetLowerFriction(desc, -m_clutchTorque);
-				maxFrictionTorque = -m_clutchTorque;
-				minFrictionTorque = m_driveTrainResistanceTorque;
+				minFrictionTorque = -m_clutchTorque; 
+				maxFrictionTorque = m_driveTrainResistanceTorque;
 			}
 		}
 		else

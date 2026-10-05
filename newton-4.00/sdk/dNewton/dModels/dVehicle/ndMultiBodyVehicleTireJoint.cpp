@@ -214,7 +214,7 @@ ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint()
 	,m_normalizedAligningTorque(ndFloat32(0.0f))
 	,m_lateralStiffness(ndFloat32(1.0f))
 	,m_longitudinalStiffness(ndFloat32(1.0f))
-	,m_maxSideAngle(ndFloat32(10.0f)* ndDegreeToRad)
+	,m_maxSideAngle(ND_TIRE_MAX_STATIC_SLEEP)
 {
 }
 
@@ -227,7 +227,7 @@ ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint(const ndMatrix& pinAndP
 	,m_normalizedAligningTorque(ndFloat32(0.0f))
 	,m_lateralStiffness(ndFloat32(1.0f))
 	,m_longitudinalStiffness(ndFloat32(1.0f))
-	,m_maxSideAngle(ndFloat32(10.0f)* ndDegreeToRad)
+	,m_maxSideAngle(ND_TIRE_MAX_STATIC_SLEEP)
 {
 }
 
@@ -254,7 +254,7 @@ ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint(const ndJointWheel* con
 	,m_normalizedAligningTorque(ndFloat32(0.0f))
 	,m_lateralStiffness(ndFloat32(1.0f))
 	,m_longitudinalStiffness(ndFloat32(1.0f))
-	,m_maxSideAngle(ndFloat32(10.0f) * ndDegreeToRad)
+	,m_maxSideAngle(ND_TIRE_MAX_STATIC_SLEEP)
 {
 }
 

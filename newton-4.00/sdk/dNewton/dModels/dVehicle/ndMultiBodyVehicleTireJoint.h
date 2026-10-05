@@ -15,6 +15,9 @@
 #include "ndNewtonStdafx.h"
 #include "ndJointWheel.h"
 
+#define ND_TIRE_MIN_STATIC_SLEEP (ndFloat32(1.0f) * ndDegreeToRad)
+#define ND_TIRE_MAX_STATIC_SLEEP (ndFloat32(10.0f) * ndDegreeToRad)
+
 class ndTireFrictionModel
 {
 	public:
