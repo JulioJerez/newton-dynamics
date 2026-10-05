@@ -655,10 +655,10 @@ void ndMultiBodyVehicle::Debug(ndConstraintDebugCallback& context) const
 		context.DrawLine(tireMatrix.m_posit, tireMatrix.m_posit + normalForce.Scale(tireGravityScale), forceColor);
 
 		const ndVector longitudinalForce(tireMatrix.m_right * tireMatrix.m_right.DotProduct(tireForce));
-		context.DrawLine(tireMatrix.m_posit, tireMatrix.m_posit + longitudinalForce.Scale(tireGravityScale), longitudinalColor);
+		context.DrawLine(tireMatrix.m_posit, tireMatrix.m_posit - longitudinalForce.Scale(tireGravityScale), longitudinalColor);
 
 		const ndVector lateralForce(tireMatrix.m_front * tireMatrix.m_front.DotProduct(tireForce));
-		context.DrawLine(tireMatrix.m_posit, tireMatrix.m_posit + lateralForce.Scale(tireGravityScale), lateralColor);
+		context.DrawLine(tireMatrix.m_posit, tireMatrix.m_posit - lateralForce.Scale(tireGravityScale), lateralColor);
 
 		// draw tire normal forces
 		const ndBodyKinematic::ndContactMap& contactMap = tireBody->GetContactMap();
@@ -996,10 +996,10 @@ bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tir
 
 	ndBodyDynamic* const wheelBody = tire->GetBody0()->GetAsBodyDynamic();
 	ndBodyDynamic* const chassisBody = tire->GetBody1()->GetAsBodyDynamic();
-	const ndVector tireLaterForce(lateralJacobian.m_jacobianM0.m_linear.Scale(fz * ndSign(speed_z)));
-	const ndVector tireLateralTorque(lateralJacobian.m_jacobianM0.m_angular.Scale(fz * ndSign(speed_z)));
-	const ndVector chassisLateralForce(lateralJacobian.m_jacobianM1.m_linear.Scale(fz * ndSign(speed_z)));
-	const ndVector chassisLateralTorque(lateralJacobian.m_jacobianM1.m_angular.Scale(fz * ndSign(speed_z)));
+	const ndVector tireLaterForce(lateralJacobian.m_jacobianM0.m_linear.Scale(fz));
+	const ndVector tireLateralTorque(lateralJacobian.m_jacobianM0.m_angular.Scale(fz));
+	const ndVector chassisLateralForce(lateralJacobian.m_jacobianM1.m_linear.Scale(fz));
+	const ndVector chassisLateralTorque(lateralJacobian.m_jacobianM1.m_angular.Scale(fz));
 
 	wheelBody->SetForce(wheelBody->GetForce() + tireLaterForce);
 	wheelBody->SetTorque(wheelBody->GetTorque() + tireLateralTorque);
