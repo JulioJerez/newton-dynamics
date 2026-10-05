@@ -88,34 +88,6 @@ void SaveCollision (const NewtonCollision* const collisionPtr)
 #endif
 
 
-/*!
-  Return the exact amount of memory (in Bytes) use by the engine at any given time.
-
-  @return total memory use by the engine.
-
-  Applications can use this function to ascertain that the memory use by the
-  engine is balanced at all times.
-
-  See also: ::NewtonCreate
-*/
-int NewtonGetMemoryUsed()
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return dgMemoryAllocator::GetGlobalMemoryUsed();
-}
-
-
-
-void* NewtonAlloc (int sizeInBytes)
-{
-	return dgMallocStack(sizeInBytes);
-}
-
-void NewtonFree (void* const ptr)
-{
-	dgFreeStack(ptr); 
-}
-
 /*! @} */ // end of group Misc
 
 
@@ -8632,28 +8604,50 @@ void NewtonCollisionAggregateSetSelfCollision(void* const aggregatePtr, int stat
 // ported code
 // 
 // ***************************************************************
-static void* NewtonAlloc(int sizeInBytes)
+static void* NewtonDefaultAlloc(int sizeInBytes)
 {
 	return malloc(sizeInBytes);
 }
 
-static void NewtonFree (void* const ptr, int sizeInBytes)
+static void NewtonDefaultFree (void* const ptr, int sizeInBytes)
 {
 	free(ptr);
 }
 
-NewtonFreeMemory newtonFree = NewtonFree;
-NewtonAllocMemory newtonAlloc = NewtonAlloc;
+NewtonFreeMemory newtonFree = NewtonDefaultFree;
+NewtonAllocMemory newtonAlloc = NewtonDefaultAlloc;
 
 static void* ndNewtonAllocator(size_t size)
 {
-	return NewtonAlloc(int (size));
+	return newtonAlloc(int (size));
 }
 
 static void ndNewtonFree(void* const ptr)
 {
-	NewtonFree(ptr, int (ndMemory::GetSize(ptr)));
+	newtonFree(ptr, int (ndMemory::GetSize(ptr)));
 }
+
+void* NewtonAlloc(int sizeInBytes)
+{
+	return ndMemory::Malloc(sizeInBytes);
+}
+
+void NewtonFree(void* const ptr)
+{
+	ndMemory::Free(ptr);
+}
+
+#if !defined (_NEWTON_STATIC_LIB) 
+void* operator new(std::size_t count)
+{
+	return ndMemory::Malloc(count);
+}
+
+void operator delete(void* ptr) noexcept
+{
+	ndMemory::Free(ptr);
+}
+#endif
 
 // fixme: needs docu
 // @param mallocFnt is a pointer to the memory allocator callback function. If this parameter is NULL the standard *malloc* function is used.
@@ -8664,6 +8658,22 @@ void NewtonSetMemorySystem(NewtonAllocMemory mallocFnt, NewtonFreeMemory mfreeFn
 	newtonFree = mfreeFnt;
 	newtonAlloc = mallocFnt;
 	ndMemory::SetMemoryAllocators(ndNewtonAllocator, ndNewtonFree);
+}
+
+/*!
+  Return the exact amount of memory (in Bytes) use by the engine at any given time.
+
+  @return total memory use by the engine.
+
+  Applications can use this function to ascertain that the memory use by the
+  engine is balanced at all times.
+
+  See also: ::NewtonCreate
+*/
+int NewtonGetMemoryUsed()
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	return int (ndMemory::GetMemoryUsed());
 }
 
 /*!
@@ -8700,3 +8710,4 @@ void NewtonDestroy(const NewtonWorld* const newtonWorld)
 	ndSharedPtr<NewtonWorld>* const world = reinterpret_cast<ndSharedPtr<NewtonWorld>*>(rawHandle);
 	delete world;
 }
+

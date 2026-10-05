@@ -356,9 +356,6 @@ extern "C" {
 	} NewtonMeshVertexFormat;
 
 	// Newton callback functions
-	typedef void* (*NewtonAllocMemory) (int sizeInBytes);
-	typedef void (*NewtonFreeMemory) (void* const ptr, int sizeInBytes);
-
 	typedef void (*NewtonWorldDestructorCallback) (const NewtonWorld* const world);
 	typedef void (*NewtonPostUpdateCallback) (const NewtonWorld* const world, dFloat timestep);
 
@@ -449,18 +446,10 @@ extern "C" {
 	NEWTON_API int NewtonWorldGetVersion ();
 	NEWTON_API int NewtonWorldFloatSize ();
 
-	NEWTON_API int NewtonGetMemoryUsed ();
-	NEWTON_API void NewtonSetMemorySystem (NewtonAllocMemory malloc, NewtonFreeMemory free);
-
-	NEWTON_API NewtonWorld* NewtonCreate ();
-	NEWTON_API void NewtonDestroy (const NewtonWorld* const newtonWorld);
 	NEWTON_API void NewtonDestroyAllBodies (const NewtonWorld* const newtonWorld);
 
 	NEWTON_API NewtonPostUpdateCallback NewtonGetPostUpdateCallback(const NewtonWorld* const newtonWorld);
 	NEWTON_API void NewtonSetPostUpdateCallback (const NewtonWorld* const newtonWorld, NewtonPostUpdateCallback callback);
-
-	NEWTON_API void* NewtonAlloc (int sizeInBytes);
-	NEWTON_API void NewtonFree (void* const ptr);
 
 	NEWTON_API void NewtonLoadPlugins(const NewtonWorld* const newtonWorld, const char* const plugInPath);
 	NEWTON_API void NewtonUnloadPlugins(const NewtonWorld* const newtonWorld);
@@ -1320,6 +1309,24 @@ extern "C" {
 	NEWTON_API void NewtonMeshCalculateFaceNormal (const NewtonMesh* const mesh, const void* const face, dFloat64* const normal);
 
 	NEWTON_API void NewtonMeshSetFaceMaterial (const NewtonMesh* const mesh, const void* const face, int matId);
+
+
+	// ********************************************************************************
+	// 
+	// 
+	// ********************************************************************************
+	// Newton callback functions
+	typedef void* (*NewtonAllocMemory) (int sizeInBytes);
+	typedef void (*NewtonFreeMemory) (void* const ptr, int sizeInBytes);
+
+
+	NEWTON_API void* NewtonAlloc(int sizeInBytes);
+	NEWTON_API void NewtonFree(void* const ptr);
+	NEWTON_API int NewtonGetMemoryUsed();
+	NEWTON_API void NewtonSetMemorySystem(NewtonAllocMemory malloc, NewtonFreeMemory free);
+
+	NEWTON_API NewtonWorld* NewtonCreate();
+	NEWTON_API void NewtonDestroy(const NewtonWorld* const newtonWorld);
 
 
 #ifdef __cplusplus 
