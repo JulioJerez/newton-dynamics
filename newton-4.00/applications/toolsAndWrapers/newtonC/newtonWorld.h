@@ -12,7 +12,6 @@
 #define __NEWTON_WORLD_H__
 
 
-//#include "newtonConfig.h"
 #include "newtonStdafx.h"
 
 
@@ -22,10 +21,9 @@ class NewtonWorld: public ndWorld
 	NewtonWorld();
 	~NewtonWorld();
 
-	void Update(ndFloat32 timestep);
-
-	void SetSubSteps(ndInt32 substeps);
-	void SetIterations(ndInt32 iterations);
+	//void Update(ndFloat32 timestep);
+	//void SetSubSteps(ndInt32 substeps);
+	//void SetIterations(ndInt32 iterations);
 };
 
 #endif

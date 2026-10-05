@@ -1,0 +1,1487 @@
+﻿/* Copyright (c) <2003-2022> <Julio Jerez, Newton Game Dynamics>
+* 
+* This software is provided 'as-is', without any express or implied
+* warranty. In no event will the authors be held liable for any damages
+* arising from the use of this software.
+* 
+* Permission is granted to anyone to use this software for any purpose,
+* including commercial applications, and to alter it and redistribute it
+* freely, subject to the following restrictions:
+* 
+* 1. The origin of this software must not be misrepresented; you must not
+* claim that you wrote the original software. If you use this software
+* in a product, an acknowledgment in the product documentation would be
+* appreciated but is not required.
+* 2. Altered source versions must be plainly marked as such, and must not be
+* misrepresented as being the original software.
+* 
+* 3. This notice may not be removed or altered from any source distribution.
+*/
+
+#include "ndCoreStdafx.h"
+#include "ndNewtonStdafx.h"
+#include "ndWorld.h"
+#include "ndJointHinge.h"
+#include "ndBodyDynamic.h"
+#include "ndBodyKinematic.h"
+#include "ndMultiBodyVehicle.h"
+#include "ndMultiBodyVehicleMotor.h"
+#include "ndMultiBodyVehicleGearBox.h"
+#include "ndMultiBodyVehicleTireJoint.h"
+#include "ndMultiBodyVehicleTorsionBar.h"
+#include "ndMultiBodyVehicleDifferential.h"
+#include "ndMultiBodyVehicleDifferentialAxle.h"
+
+#define D_MAX_CONTACT_SPEED_TRESHOLD	ndFloat32 (0.1f)
+#define D_MAX_CONTACT_PENETRATION		ndFloat32 (1.0e-2f)
+#define D_MIN_CONTACT_CLOSE_DISTANCE2	ndFloat32 (5.0e-2f * 5.0e-2f)
+
+#define D_MAX_SIDESLIP_ANGLE			ndFloat32(20.0f)
+#define D_MAX_STEERING_RATE				ndFloat32(0.03f)
+#define D_MAX_SIZE_SLIP_RATE			ndFloat32(2.0f)
+
+ndMultiBodyVehicle::ndDownForce::ndDownForce()
+	:m_suspensionStiffnessModifier(ndFloat32(1.0f))
+{
+	m_downForceTable[0].m_speed = ndFloat32(0.0f) * ndFloat32(0.27f);
+	m_downForceTable[0].m_forceFactor = 0.0f;
+	m_downForceTable[0].m_aerodynamicDownforceConstant = ndFloat32(0.0f);
+
+	m_downForceTable[1].m_speed = ndFloat32(30.0f) * ndFloat32(0.27f);
+	m_downForceTable[1].m_forceFactor = 0.5f;
+	m_downForceTable[1].m_aerodynamicDownforceConstant = CalculateFactor(&m_downForceTable[0]);
+
+	m_downForceTable[2].m_speed = ndFloat32(60.0f) * ndFloat32(0.27f);
+	m_downForceTable[2].m_forceFactor = 1.0f;
+	m_downForceTable[2].m_aerodynamicDownforceConstant = CalculateFactor(&m_downForceTable[1]);
+
+	m_downForceTable[3].m_speed = ndFloat32(140.0f) * ndFloat32(0.27f);
+	m_downForceTable[3].m_forceFactor = 2.0f;
+	m_downForceTable[3].m_aerodynamicDownforceConstant = CalculateFactor(&m_downForceTable[2]);
+
+	m_downForceTable[4].m_speed = ndFloat32(1000.0f) * ndFloat32(0.27f);
+	m_downForceTable[4].m_forceFactor = 2.0f;
+	m_downForceTable[4].m_aerodynamicDownforceConstant = CalculateFactor(&m_downForceTable[3]);
+}
+
+ndFloat32 ndMultiBodyVehicle::ndDownForce::CalculateFactor(const ndSpeedForcePair* const entry0) const
+{
+	const ndSpeedForcePair* const entry1 = entry0 + 1;
+	ndFloat32 num = ndMax(entry1->m_forceFactor - entry0->m_forceFactor, ndFloat32(0.0f));
+	ndFloat32 den = ndMax(ndAbs(entry1->m_speed - entry0->m_speed), ndFloat32(1.0f));
+	return num / (den * den);
+}
+
+ndFloat32 ndMultiBodyVehicle::ndDownForce::GetDownforceFactor(ndFloat32 speed) const
+{
+	ndAssert(speed >= ndFloat32(0.0f));
+	ndInt32 index = 0;
+	for (ndInt32 i = sizeof(m_downForceTable) / sizeof(m_downForceTable[0]) - 1; i; i--)
+	{
+		if (m_downForceTable[i].m_speed <= speed)
+		{
+			index = i;
+			break;
+		}
+	}
+
+	index = ndMin(index, ndInt32(sizeof(m_downForceTable) / sizeof(m_downForceTable[0])) - 2);
+	ndFloat32 deltaSpeed = speed - m_downForceTable[index].m_speed;
+	ndFloat32 downForceFactor = m_downForceTable[index].m_forceFactor + m_downForceTable[index + 1].m_aerodynamicDownforceConstant * deltaSpeed * deltaSpeed;
+	//return downForceFactor * m_gravity;
+	return downForceFactor;
+}
+
+class ndMultiBodyVehicle::ndComponentNotify : public ndBodyNotify
+{
+	public:
+	D_CLASS_REFLECTION(ndComponentNotify, ndBodyNotify)
+
+	ndComponentNotify(ndMultiBodyVehicle* const owner)
+		:ndBodyNotify(ndVector::m_zero)
+		,m_owner(owner)
+	{
+	}
+
+	ndComponentNotify(const ndComponentNotify& src)
+		:ndBodyNotify(src)
+	{
+	}
+
+	ndBodyNotify* Clone() const override
+	{
+		return new ndComponentNotify(*this);
+	}
+
+	void OnApplyExternalForce(ndInt32, ndFloat32) override
+	{
+		ndBodyDynamic* const selfBody = GetBody()->GetAsBodyDynamic();
+		selfBody->SetForce(ndVector::m_zero);
+		selfBody->SetTorque(ndVector::m_zero);
+	}
+
+	ndWeakPtr<ndMultiBodyVehicle> m_owner;
+};
+
+class ndMultiBodyVehicle::ndMotorNotify : public ndMultiBodyVehicle::ndComponentNotify
+{
+	public:
+	ndMotorNotify(ndMultiBodyVehicle* const owner)
+		:ndComponentNotify(owner)
+	{
+		// add some drag after the engine reach pick rpm
+		const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& curve = owner->m_motor->GetCurve();
+		//ndFloat32 rpm = curve.GetPickPowerRpm();
+		ndFloat32 rpm = curve.GetRedLineRpm();
+		ndFloat32 torque = curve.GetTorque(rpm);
+		ndFloat32 omega = rpm * ndRpmToRadPerSec;
+		m_dragCoeff = torque / (omega * omega);
+	}
+
+	void OnApplyExternalForce(ndInt32, ndFloat32) override
+	{
+		ndComponentNotify::OnApplyExternalForce(0, ndFloat32(0.0f));
+
+		ndBodyDynamic* const selfBody = GetBody()->GetAsBodyDynamic();
+		const ndMatrix axis(m_owner->GetMotor()->CalculateGlobalMatrix0());
+		const ndVector omega(selfBody->GetOmega());
+		ndFloat32 omegaSpeed = axis.m_front.DotProduct(selfBody->GetOmega()).GetScalar();
+		if (omegaSpeed > ndFloat32 (1.0e-4f))
+		{
+			const ndVector clampOmega(omega - axis.m_front.Scale(omegaSpeed));
+			selfBody->SetOmega(clampOmega);
+			omegaSpeed = axis.m_front.DotProduct(clampOmega).GetScalar();
+		}
+		ndAssert(omegaSpeed <= ndFloat32(0.01f));
+
+		ndVector torque(axis.m_front.Scale(-ndSign(omegaSpeed) * m_dragCoeff * omegaSpeed * omegaSpeed));
+		selfBody->SetTorque(torque);
+	}
+
+	ndFloat32 m_dragCoeff;
+};
+
+ndMultiBodyVehicle::ndMultiBodyVehicle(ndFloat32 gravityMagnitud)
+	:ndModelArticulation()
+	,m_localFrame(ndGetIdentityMatrix())
+	,m_tireShape(new ndShapeWheel())
+	,m_downForce()
+	,m_timestep(ndFloat32(0.0f))
+	,m_sleepCounter(0)
+	,m_debugFlags(DebugFlags(0))
+{
+	m_initialized = false;
+	m_motor = nullptr;
+	m_gearBox = nullptr;
+	m_chassis = nullptr;
+
+	m_steeringRate = D_MAX_STEERING_RATE;
+	m_maxSideslipRate = D_MAX_SIZE_SLIP_RATE;
+	m_maxSideslipAngle = D_MAX_SIDESLIP_ANGLE;
+
+	m_gravityMagnitud = -ndAbs(gravityMagnitud);
+	ndAssert(ndAbs(m_gravityMagnitud) > ndFloat32 (0.0f));
+}
+
+ndMultiBodyVehicle::DebugFlags ndMultiBodyVehicle::GetDebugFlags() const
+{
+	return m_debugFlags;
+}
+
+void ndMultiBodyVehicle::SetDebugFlags(DebugFlags flags)
+{
+	m_debugFlags = flags;
+}
+
+const ndMatrix& ndMultiBodyVehicle::GetLocalFrame() const
+{
+	return m_localFrame;
+}
+
+void ndMultiBodyVehicle::SetLocalFrame(const ndMatrix& localframe)
+{
+	m_localFrame.m_front = (localframe.m_front & ndVector::m_triplexMask).Normalize();
+	m_localFrame.m_up = localframe.m_up & ndVector::m_triplexMask;
+	m_localFrame.m_right = m_localFrame.m_front.CrossProduct(m_localFrame.m_up).Normalize();
+	m_localFrame.m_up = m_localFrame.m_right.CrossProduct(m_localFrame.m_front).Normalize();
+}
+
+ndBodyDynamic* ndMultiBodyVehicle::GetChassis() const
+{
+	return (ndBodyDynamic*)*m_chassis;
+}
+
+ndMultiBodyVehicleMotor* ndMultiBodyVehicle::GetMotor() const
+{
+	return (ndMultiBodyVehicleMotor*)*m_motor;
+}
+
+ndMultiBodyVehicleGearBox* ndMultiBodyVehicle::GetGearBox() const
+{
+	return (ndMultiBodyVehicleGearBox*)*m_gearBox;
+}
+
+const ndList<ndMultiBodyVehicleTireJoint*>& ndMultiBodyVehicle::GetTireList() const
+{
+	return m_tireList;
+}
+
+ndMultiBodyVehicle* ndMultiBodyVehicle::GetAsMultiBodyVehicle()
+{
+	return this;
+}
+
+ndFloat32 ndMultiBodyVehicle::GetSpeed() const
+{
+	const ndVector dir(m_chassis->GetMatrix().RotateVector(m_localFrame.m_front));
+	const ndFloat32 speed = ndAbs(m_chassis->GetVelocity().DotProduct(dir).GetScalar());
+	return speed;
+}
+
+void ndMultiBodyVehicle::AddChassis(const ndSharedPtr<ndBody>& chassis)
+{
+	m_initialized = false;
+	m_chassis = chassis->GetAsBodyDynamic();
+	ndAssert(m_chassis);
+	ndAssert(!GetRoot() || (GetRoot()->m_body == chassis));
+	if (!FindByBody(*chassis))
+	{
+		AddRootBody(chassis);
+	}
+	//m_chassis->SetAngularDamping(ndVector(m_descriptor.m_chassisAngularDrag));
+}
+
+void ndMultiBodyVehicle::AddTire(const ndSharedPtr<ndBody>& tireBody, const ndSharedPtr<ndJointBilateralConstraint>& joint)
+{
+	m_initialized = false;
+	ndAssert(m_chassis);
+	ndAssert(!strcmp(joint->ClassName(), "ndMultiBodyVehicleTireJoint"));
+	ndMultiBodyVehicleTireJoint* const tireJoint = (ndMultiBodyVehicleTireJoint*) * joint;
+	m_tireList.Append(tireJoint);
+	tireJoint->SetVehicleOwner(this);
+
+	// make the inertial spherical
+	ndBodyKinematic* const body = tireBody->GetAsBodyKinematic();
+	ndVector inertia(body->GetMassMatrix());
+	ndFloat32 maxInertia(ndMax(ndMax(inertia.m_x, inertia.m_y), inertia.m_z));
+	inertia.m_x = maxInertia;
+	inertia.m_y = maxInertia;
+	inertia.m_z = maxInertia;
+	body->SetMassMatrix(inertia);
+
+	ndNode* const node = FindByBody(body);
+	ndAssert(!node || ((node->m_body->GetAsBody() == body) && ((*node->m_joint == tireJoint))));
+	if (!node)
+	{
+		ndAssert(tireJoint->GetBody1() == GetRoot()->m_body->GetAsBody());
+		AddLimb(GetRoot(), tireBody, tireJoint);
+	}
+	body->GetAsBodyDynamic()->SetMaxLinearAndAngularIntegrationStep(ndFloat32(360.0f) * ndDegreeToRad, ndFloat32(10.0f));
+}
+
+ndMultiBodyVehicleTireJoint* ndMultiBodyVehicle::AddTire(const ndWheelDescriptor& desc, const ndSharedPtr<ndBody>& tire)
+{
+	ndAssert(m_chassis);
+	ndMatrix tireFrame(ndGetIdentityMatrix());
+	tireFrame.m_front = ndVector(ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f));
+	tireFrame.m_up = ndVector(ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f));
+	tireFrame.m_right = ndVector(ndFloat32(-1.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f));
+	const ndMatrix chassiMatrix(m_chassis->GetMatrix());
+	ndMatrix matrix(tireFrame * m_localFrame * chassiMatrix);
+	matrix.m_posit = tire->GetMatrix().m_posit;
+
+	m_initialized = false;
+	ndBodyDynamic* const tireBody = tire->GetAsBodyDynamic();
+
+	// make tire inertia spherical
+	//ndVector inertia(tireBody->GetMassMatrix());
+	//ndFloat32 maxInertia(ndMax(ndMax(inertia.m_x, inertia.m_y), inertia.m_z));
+	//inertia.m_x = maxInertia;
+	//inertia.m_y = maxInertia;
+	//inertia.m_z = maxInertia;
+	//tireBody->SetMassMatrix(inertia);
+	ndSharedPtr<ndJointBilateralConstraint> tireJoint (new ndMultiBodyVehicleTireJoint(matrix, tireBody, *m_chassis, desc, this));
+	AddTire(tire, tireJoint);
+	return m_tireList.GetLast()->GetInfo();
+}
+
+void ndMultiBodyVehicle::AddMotor(const ndSharedPtr<ndBody>& motorBody, const ndSharedPtr<ndJointBilateralConstraint>& motorJoint)
+{
+	m_initialized = false;
+	ndAssert(m_chassis);
+	ndAssert(!strcmp(motorJoint->ClassName(), "ndMultiBodyVehicleMotor"));
+	m_motor = (ndMultiBodyVehicleMotor*)*motorJoint;
+	m_motor->m_vehicle = this;
+	
+	ndNode* const node = FindByBody(*motorBody);
+	ndAssert(!node || ((node->m_body->GetAsBody() == *motorBody) && ((*node->m_joint == *motorJoint))));
+	if (!node)
+	{
+		ndAssert(motorJoint->GetBody1() == GetRoot()->m_body->GetAsBody());
+		AddLimb(GetRoot(), motorBody, motorJoint);
+	}
+	motorBody->GetAsBodyDynamic()->SetMaxLinearAndAngularIntegrationStep(ndFloat32(2.0f * 360.0f) * ndDegreeToRad, ndFloat32(10.0f));
+}
+
+ndMultiBodyVehicleMotor* ndMultiBodyVehicle::AddMotor(ndFloat32 mass, ndFloat32 radius)
+{
+	ndAssert(m_chassis);
+	m_initialized = false;
+	ndSharedPtr<ndBody> motorBody(CreateInternalBodyPart(mass, radius));
+	ndSharedPtr<ndJointBilateralConstraint> motorJoint(new ndMultiBodyVehicleMotor(motorBody->GetAsBodyKinematic(), this));
+	AddMotor(motorBody, motorJoint);
+	return *m_motor;
+}
+
+//ndMultiBodyVehicleTireJoint* ndMultiBodyVehicle::AddAxleTire(const ndMultiBodyVehicleTireJointInfo& desc, const ndSharedPtr<ndBody>& tire, const ndSharedPtr<ndBody>& axleBody)
+//{
+//	ndAssert(m_chassis);
+//
+//	m_initialized = false;
+//	ndMatrix tireFrame(ndGetIdentityMatrix());
+//	tireFrame.m_front = ndVector(0.0f, 0.0f, 1.0f, 0.0f);
+//	tireFrame.m_up = ndVector(0.0f, 1.0f, 0.0f, 0.0f);
+//	tireFrame.m_right = ndVector(-1.0f, 0.0f, 0.0f, 0.0f);
+//	ndMatrix matrix(tireFrame * m_localFrame * axleBody->GetMatrix());
+//	matrix.m_posit = tire->GetMatrix().m_posit;
+//	
+//	ndBodyDynamic* const tireBody = tire->GetAsBodyDynamic();
+//	// make tire inertia spherical
+//	ndVector inertia(tireBody->GetMassMatrix());
+//	ndFloat32 maxInertia(ndMax(ndMax(inertia.m_x, inertia.m_y), inertia.m_z));
+//	inertia.m_x = maxInertia;
+//	inertia.m_y = maxInertia;
+//	inertia.m_z = maxInertia;
+//	tireBody->SetMassMatrix(inertia);
+//	
+//	ndSharedPtr<ndJointBilateralConstraint> tireJoint(new ndMultiBodyVehicleTireJoint(matrix, tireBody, axleBody->GetAsBodyDynamic(), desc, this));
+//	m_tireList.Append((ndMultiBodyVehicleTireJoint*)*tireJoint);
+//	ndNode* const parentNode = FindByBody(*axleBody);
+//	ndAssert(parentNode);
+//	AddLimb(parentNode, tire, tireJoint);
+//
+//	tireBody->SetMaxLinearAndAngularIntegrationStep(ndFloat32(2.0f * 360.0f) * ndDegreeToRad, ndFloat32(10.0f));
+//	return m_tireList.GetLast()->GetInfo();
+//}
+
+ndShapeInstance ndMultiBodyVehicle::CreateTireShape(ndFloat32 radius, ndFloat32 width) const
+{
+	ndShapeInstance tireCollision((ndShape*)*m_tireShape);
+	ndVector scale(ndFloat32 (2.0f) * width, radius, radius, 0.0f);
+	tireCollision.SetScale(scale);
+	return tireCollision;
+}
+
+ndBodyKinematic* ndMultiBodyVehicle::CreateInternalBodyPart(ndFloat32 mass, ndFloat32 radius) const
+{
+	ndShapeInstance diffCollision(new ndShapeSphere(radius));
+	diffCollision.SetCollisionMode(false);
+
+	ndBodyDynamic* const body = new ndBodyDynamic();
+	ndAssert(m_chassis);
+	const ndMatrix matrix(m_localFrame * m_chassis->GetMatrix());
+	body->SetMatrix(matrix);
+	body->SetCollisionShape(diffCollision);
+	body->SetMassMatrix(mass, diffCollision);
+	body->SetMaxLinearAndAngularIntegrationStep(ndFloat32(2.0f * 360.0f) * ndDegreeToRad, ndFloat32(10.0f));
+	return body;
+}
+
+void ndMultiBodyVehicle::AddDifferential(const ndSharedPtr<ndBody>& differentialBody, const ndSharedPtr<ndJointBilateralConstraint>& differentialJoint)
+{
+	ndAssert(m_chassis);
+	ndAssert(!strcmp(differentialJoint->ClassName(), "ndMultiBodyVehicleDifferential"));
+
+	ndMultiBodyVehicleDifferential* const joint = (ndMultiBodyVehicleDifferential*)*differentialJoint;
+	m_differentialList.Append(joint);
+
+	// make internal body parts non collidable
+	//ndShapeInstance& collision = differentialBody->GetAsBodyKinematic()->GetCollisionShape();
+	//collision.SetCollisionMode(false);
+
+	ndNode* const node = FindByBody(*differentialBody);
+	ndAssert(!node || ((node->m_body->GetAsBody() == *differentialBody) && ((*node->m_joint == *differentialJoint))));
+	if (!node)
+	{
+		ndAssert(differentialJoint->GetBody1() == GetRoot()->m_body->GetAsBody());
+		AddLimb(GetRoot(), differentialBody, differentialJoint);
+	}
+	differentialBody->GetAsBodyDynamic()->SetMaxLinearAndAngularIntegrationStep(ndFloat32(2.0f * 360.0f) * ndDegreeToRad, ndFloat32(10.0f));
+}
+
+ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleTireJoint* const leftTire, ndMultiBodyVehicleTireJoint* const, ndFloat32 slipOmegaLock)
+{
+	ndAssert(m_chassis);
+	ndSharedPtr<ndBody> differentialBody (CreateInternalBodyPart(mass, radius));
+	ndSharedPtr<ndJointBilateralConstraint> differentialJoint(new ndMultiBodyVehicleDifferential(differentialBody->GetAsBodyDynamic(), *m_chassis, slipOmegaLock));
+	AddDifferential(differentialBody, differentialJoint);
+	
+	m_initialized = false;
+	const ndVector pin(differentialBody->GetMatrix().RotateVector(differentialJoint->GetLocalMatrix0().m_front));
+	const ndVector upPin(differentialBody->GetMatrix().RotateVector(differentialJoint->GetLocalMatrix0().m_up));
+	const ndVector drivePin(leftTire->GetBody0()->GetMatrix().RotateVector(leftTire->GetLocalMatrix0().m_front));
+	
+	ndAssert(0);
+	//ndSharedPtr<ndJointBilateralConstraint> leftAxle (new ndMultiBodyVehicleDifferentialAxle(pin, upPin, differentialBody->GetAsBodyKinematic(), drivePin, leftTire->GetBody0()));
+	//ndSharedPtr<ndJointBilateralConstraint> rightAxle (new ndMultiBodyVehicleDifferentialAxle(pin, upPin.Scale(ndFloat32(-1.0f)), differentialBody->GetAsBodyKinematic(), drivePin, rightTire->GetBody0()));
+	//AddDifferentialAxle(leftAxle);
+	//AddDifferentialAxle(rightAxle);
+
+	ndMultiBodyVehicleDifferential* const joint = (ndMultiBodyVehicleDifferential*)*differentialJoint;
+	return joint;
+}
+
+ndMultiBodyVehicleDifferential* ndMultiBodyVehicle::AddDifferential(ndFloat32 mass, ndFloat32 radius, ndMultiBodyVehicleDifferential* const leftDifferential, ndMultiBodyVehicleDifferential* const, ndFloat32 slipOmegaLock)
+{
+	ndAssert(m_chassis);
+	ndSharedPtr<ndBody> differentialBody(CreateInternalBodyPart(mass, radius));
+	ndSharedPtr<ndJointBilateralConstraint> differentialJoint(new ndMultiBodyVehicleDifferential(differentialBody->GetAsBodyKinematic(), *m_chassis, slipOmegaLock));
+	AddDifferential(differentialBody, differentialJoint);
+
+	m_initialized = false;
+	const ndVector pin(differentialBody->GetMatrix().RotateVector(differentialJoint->GetLocalMatrix0().m_front));
+	const ndVector upPin(differentialBody->GetMatrix().RotateVector(differentialJoint->GetLocalMatrix0().m_up));
+	const ndVector drivePin(leftDifferential->GetBody0()->GetMatrix().RotateVector(leftDifferential->GetLocalMatrix0().m_front.Scale(ndFloat32(-1.0f))));
+	
+	ndAssert(0);
+	//ndSharedPtr<ndJointBilateralConstraint> leftAxle (new ndMultiBodyVehicleDifferentialAxle(pin, upPin, differentialBody->GetAsBodyKinematic(), drivePin, leftDifferential->GetBody0()));
+	//ndSharedPtr<ndJointBilateralConstraint> rightAxle (new ndMultiBodyVehicleDifferentialAxle(pin, upPin.Scale(ndFloat32(-1.0f)), differentialBody->GetAsBodyKinematic(), drivePin, rightDifferential->GetBody0()));
+	//AddDifferentialAxle(leftAxle);
+	//AddDifferentialAxle(rightAxle);
+
+	ndMultiBodyVehicleDifferential* const joint = (ndMultiBodyVehicleDifferential*)*differentialJoint;
+	return joint;
+}
+
+void ndMultiBodyVehicle::AddDifferentialAxle(const ndSharedPtr<ndJointBilateralConstraint>& differentialAxleJoint)
+{
+	ndMultiBodyVehicleDifferentialAxle* const joint = (ndMultiBodyVehicleDifferentialAxle*)*differentialAxleJoint;
+	ndNode* const node = FindLoopByJoint(joint);
+	if (!node)
+	{
+		AddCloseLoop(differentialAxleJoint);
+	}
+}
+
+void ndMultiBodyVehicle::AddTorsionBar(const ndSharedPtr<ndJointBilateralConstraint>& torsionBar)
+{
+	ndMultiBodyVehicleTorsionBar* const joint = (ndMultiBodyVehicleTorsionBar*)*torsionBar;
+
+	const ndNode* const wheelNode = FindByBody(joint->GetBody0());
+	if (wheelNode)
+	{
+		const ndMatrix matrix (joint->CalculateGlobalMatrix0());
+		joint->m_referenceBody = wheelNode->GetParent()->m_body->GetAsBodyKinematic();
+		joint->localReferenceFrame = matrix * joint->m_referenceBody->GetMatrix().OrthoInverse();
+	}
+
+	ndNode* const node = FindLoopByJoint(joint);
+	if (!node)
+	{
+		AddCloseLoop(torsionBar);
+	}
+}
+
+void ndMultiBodyVehicle::AddGearBox(const ndSharedPtr<ndJointBilateralConstraint>& gearBoxJoint)
+{
+	m_gearBox = (ndMultiBodyVehicleGearBox*)*gearBoxJoint;
+	ndNode* const node = FindLoopByJoint(*m_gearBox);
+	if (!node)
+	{
+		AddCloseLoop(gearBoxJoint);
+	}
+}
+
+ndMultiBodyVehicleGearBox* ndMultiBodyVehicle::AddGearBox(ndMultiBodyVehicleDifferential* const differential)
+{
+	ndAssert(m_motor);
+	m_initialized = false;
+	const ndMatrix motorPinMatrix(m_motor->GetLocalMatrix0() * m_motor->GetBody0()->GetMatrix());
+	const ndMatrix differentialPinMatrix(differential->GetLocalMatrix0() * differential->GetBody0()->GetMatrix());
+	ndSharedPtr<ndJointBilateralConstraint> gearBox(new ndMultiBodyVehicleGearBox(ndFloat32 (1.0f), motorPinMatrix.m_front, m_motor->GetBody0(), differentialPinMatrix.m_front, differential->GetBody0()));
+	AddGearBox(gearBox);
+	return *m_gearBox;
+}
+
+void ndMultiBodyVehicle::ApplyAerodynamics(ndFloat32)
+{
+	m_downForce.m_suspensionStiffnessModifier = ndFloat32(1.0f);
+	ndFloat32 gravity = m_downForce.GetDownforceFactor(GetSpeed()) * m_gravityMagnitud;
+	if (ndAbs (gravity) > ndFloat32(1.0e-2f))
+	{
+		const ndVector up(m_chassis->GetMatrix().RotateVector(m_localFrame.m_up));
+		const ndVector weight(m_chassis->GetForce());
+		const ndVector downForce(up.Scale(gravity * m_chassis->GetMassMatrix().m_w));
+		m_chassis->SetForce(weight + downForce);
+		m_downForce.m_suspensionStiffnessModifier = up.DotProduct(weight).GetScalar() / up.DotProduct(weight + downForce.Scale (0.5f)).GetScalar();
+		//dTrace(("%f\n", m_suspensionStiffnessModifier));
+		
+		for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = m_tireList.GetFirst(); node; node = node->GetNext())
+		{
+			ndMultiBodyVehicleTireJoint* const tire = node->GetInfo();
+			ndBodyKinematic* const tireBody = tire->GetBody0();
+			const ndVector tireWeight(tireBody->GetForce());
+			const ndVector tireDownForce(up.Scale(gravity * tireBody->GetMassMatrix().m_w));
+			tireBody->SetForce(tireWeight + tireDownForce);
+		}
+	}
+}
+
+bool ndMultiBodyVehicle::CalculateNormalizedAlgniningTorque(ndMultiBodyVehicleTireJoint* const, ndFloat32 sideSlipTangent) const
+{
+	//I need to calculate the integration of the align torque 
+	//using the calculate contact patch, form the standard brush model.
+	//for now just set the torque to zero.
+	ndFloat32 angle = ndAtan(sideSlipTangent);
+	ndFloat32 a = ndFloat32(0.1f);
+
+	ndFloat32 slipCos(ndCos(angle));
+	ndFloat32 slipSin(ndSin(angle));
+	ndFloat32 y1 = ndFloat32(2.0f) * slipSin * slipCos;
+	ndFloat32 x1 = -a + ndFloat32(2.0f) * slipCos * slipCos;
+
+	ndVector p1(x1, y1, ndFloat32(0.0f), ndFloat32(0.0f));
+	ndVector p0(-a, ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(0.0f));
+
+	return true;
+}
+
+void ndMultiBodyVehicle::ApplyAlignmentAndBalancing()
+{
+	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = m_tireList.GetFirst(); node; node = node->GetNext())
+	{
+		ndMultiBodyVehicleTireJoint* const tire = node->GetInfo();
+		ndBodyKinematic* const tireBody = tire->GetBody0()->GetAsBodyDynamic();
+		ndBodyKinematic* const chassisBody = tire->GetBody1()->GetAsBodyDynamic();
+	
+		bool savedSleepState = tireBody->GetSleepState();
+		tire->UpdateTireSteeringAngleMatrix();
+		
+		ndMatrix tireMatrix;
+		ndMatrix chassisMatrix;
+		tire->CalculateGlobalMatrix(tireMatrix, chassisMatrix);
+		
+		// align tire velocity
+		const ndVector chassisVelocity(chassisBody->GetVelocityAtPoint(tireMatrix.m_posit));
+		const ndVector relVeloc(tireBody->GetVelocity() - chassisVelocity);
+		ndVector localVeloc(chassisMatrix.UnrotateVector(relVeloc));
+		bool applyProjection = (localVeloc.m_x * localVeloc.m_x + localVeloc.m_z * localVeloc.m_z) > (ndFloat32(0.05f) * ndFloat32(0.05f));
+		localVeloc.m_x *= ndFloat32(0.3f);
+		localVeloc.m_z *= ndFloat32(0.3f);
+		const ndVector tireVelocity(chassisVelocity + chassisMatrix.RotateVector(localVeloc));
+		
+		// align tire angular velocity
+		const ndVector chassisOmega(chassisBody->GetOmega());
+		const ndVector relOmega(tireBody->GetOmega() - chassisOmega);
+		ndVector localOmega(chassisMatrix.UnrotateVector(relOmega));
+		applyProjection = applyProjection || (localOmega.m_y * localOmega.m_y + localOmega.m_z * localOmega.m_z) > (ndFloat32(0.05f) * ndFloat32(0.05f));
+		localOmega.m_y *= ndFloat32(0.3f);
+		localOmega.m_z *= ndFloat32(0.3f);
+		const ndVector tireOmega(chassisOmega + chassisMatrix.RotateVector(localOmega));
+		
+		if (applyProjection)
+		{
+			tireBody->SetOmega(tireOmega);
+			tireBody->SetVelocity(tireVelocity);
+		}
+		tireBody->RestoreSleepState(savedSleepState);
+	}
+	
+	for (ndList<ndMultiBodyVehicleDifferential*>::ndNode* node = m_differentialList.GetFirst(); node; node = node->GetNext())
+	{
+		ndMultiBodyVehicleDifferential* const diff = node->GetInfo();
+		diff->AlignMatrix();
+	}
+	
+	if (m_motor)
+	{
+		m_motor->AlignMatrix();
+	}
+}
+
+void ndMultiBodyVehicle::Debug(ndConstraintDebugCallback& context) const
+{
+	if (!GetRoot())
+	{
+		return;
+	}
+
+	// draw vehicle coordinade system;
+	const ndBodyKinematic* const chassis = *m_chassis;
+	ndAssert(chassis);
+	const ndMatrix chassisMatrix(m_localFrame * chassis->GetMatrix());
+
+	// draw center of mass;
+	const ndCenterOfMassDynamics kinematics(CalculateCentreOfMassKinematics());
+	ndMatrix matrix(chassisMatrix);
+	matrix.m_posit = kinematics.m_com;
+	context.DrawFrame(matrix);
+
+	ndVector minAabb;
+	ndVector maxAabb;
+	ndMatrix shapeMatrix(m_chassis->GetCollisionShape().GetLocalMatrix() * chassisMatrix);
+	m_chassis->GetCollisionShape().CalculateAabb(shapeMatrix, minAabb, maxAabb);
+
+	ndFloat32 vehicleHeight = maxAabb.m_y - minAabb.m_y;
+	
+	// draw vehicle Lagrangian frame
+	ndMatrix lagragianFrame(chassisMatrix);
+	lagragianFrame.m_posit = kinematics.m_com + lagragianFrame.m_up.Scale(vehicleHeight);
+	context.DrawFrame(lagragianFrame);
+
+	// vehicle speed in the lagrangian frame
+	const ndVector veloc(kinematics.m_momentum.Scale (ndFloat32 (1.0f) / kinematics.m_mass));
+	const ndVector velocPoint(lagragianFrame.m_posit + veloc.Scale(ndFloat32(0.25f) * vehicleHeight));
+	context.DrawLine(lagragianFrame.m_posit, velocPoint, ndVector(0.8f, 0.8f, 0.8f, 0.0f));
+	
+	// draw tires info
+	ndFloat32 tireGravityScale = ndAbs(ndFloat32(2.0f) * vehicleHeight / (kinematics.m_mass * m_gravityMagnitud));
+
+	const ndVector contactColor(ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0f));
+	const ndVector forceColor(ndFloat32(0.7f), ndFloat32(0.0f), ndFloat32(0.0f), ndFloat32(1.0f));
+	const ndVector lateralColor(ndFloat32(0.7f), ndFloat32(0.7f), ndFloat32(0.0f), ndFloat32(1.0f));
+	const ndVector longitudinalColor(ndFloat32(0.0f), ndFloat32(0.7f), ndFloat32(0.0f), ndFloat32(1.0f));
+	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = m_tireList.GetFirst(); node; node = node->GetNext())
+	{
+		ndMultiBodyVehicleTireJoint* const tireJoint = node->GetInfo();
+		ndBodyKinematic* const tireBody = tireJoint->GetBody0()->GetAsBodyDynamic();
+	
+		// draw tire normal lateral and longitidinal forces.
+		const ndMatrix tireMatrix(tireJoint->CalculateGlobalMatrix1());
+		const ndVector8 jointForce(tireJoint->GetForceTorqueBody1());
+		const ndVector tireForce(jointForce.GetLow());
+
+		const ndVector normalForce(tireMatrix.m_up * tireMatrix.m_up.DotProduct(tireForce));
+		context.DrawLine(tireMatrix.m_posit, tireMatrix.m_posit + normalForce.Scale(tireGravityScale), forceColor);
+
+		const ndVector longitudinalForce(tireMatrix.m_right * tireMatrix.m_right.DotProduct(tireForce));
+		context.DrawLine(tireMatrix.m_posit, tireMatrix.m_posit - longitudinalForce.Scale(tireGravityScale), longitudinalColor);
+
+		const ndVector lateralForce(tireMatrix.m_front * tireMatrix.m_front.DotProduct(tireForce));
+		context.DrawLine(tireMatrix.m_posit, tireMatrix.m_posit - lateralForce.Scale(tireGravityScale), lateralColor);
+
+		// draw tire normal forces
+		const ndBodyKinematic::ndContactMap& contactMap = tireBody->GetContactMap();
+		ndBodyKinematic::ndContactMap::Iterator it(contactMap);
+		for (it.Begin(); it; it++)
+		{
+			ndContact* const contact = *it;
+			if (contact->IsActive())
+			{
+				const ndContactPointList& contactPoints = contact->GetContactPoints();
+				for (ndContactPointList::ndNode* contactNode = contactPoints.GetFirst(); contactNode; contactNode = contactNode->GetNext())
+				{
+					const ndContactMaterial& contactPoint = contactNode->GetInfo();
+					// draw the contact point
+					context.DrawPoint(contactPoint.m_point, contactColor);
+				}
+			}
+		}
+	}
+}
+
+void ndMultiBodyVehicle::ApplyTireModel(ndFixSizeArray<ndTireContactPair, 128>& tireContacts)
+{
+	ndInt32 savedContactCount = tireContacts.GetCount();
+	for (ndInt32 i = tireContacts.GetCount() - 1; i >= 0; --i)
+	{
+		ndContact* const contact = tireContacts[i].m_contact;
+		ndMultiBodyVehicleTireJoint* const tire = tireContacts[i].m_tireJoint;
+		ndContactPointList& contactPoints = contact->GetContactPoints();
+		//note: this is not a mistake 
+		//it needs the tire frame, not the tire matrix whish is rolling
+		ndMatrix tireBasisMatrix(tire->CalculateGlobalMatrix1());
+
+		// overid the position with the actual tire origin
+		tireBasisMatrix.m_posit = tire->GetBody0()->GetMatrix().m_posit;
+
+		bool useCoulombModel = (tire->m_frictionModel.m_frictionModel == ndTireFrictionModel::ndFrictionModel::m_coulomb) ? true : false;
+
+		const ndVector tireUp(m_localFrame.UnrotateVector(tireBasisMatrix.m_up));
+		const ndVector tireFront(m_localFrame.UnrotateVector(tireBasisMatrix.m_front));
+		for (ndContactPointList::ndNode* contactNode = contactPoints.GetFirst(); contactNode; contactNode = contactNode->GetNext())
+		{
+			ndContactMaterial& contactPoint = contactNode->GetInfo();
+			const ndVector localNormal(m_localFrame.UntransformVector(contactPoint.m_normal));
+			ndFloat32 contactPatchLocation = ndAbs(localNormal.DotProduct(tireFront).GetScalar());
+			if (contactPatchLocation < ndFloat32(0.71f))
+			{
+				// align tire friction direction
+				const ndVector longitudinalDir(localNormal.CrossProduct(tireFront).Normalize());
+				const ndVector lateralDir(longitudinalDir.CrossProduct(localNormal));
+
+				const ndVector tang1(m_localFrame.RotateVector(lateralDir));
+				const ndVector tang0(m_localFrame.RotateVector(longitudinalDir));
+				
+				contactPoint.m_dir0 = tang0;
+				contactPoint.m_dir1 = tang1;
+
+				bool isOutOfContactPatch = useCoulombModel;
+				if (!isOutOfContactPatch)
+				{
+					// check if the contact is in the contact patch area,
+					// the is the 45 degree point around the tire vehicle axis. 
+					const ndVector dir(m_localFrame.UnrotateVector(contactPoint.m_point - tireBasisMatrix.m_posit));
+					ndAssert(dir.DotProduct(dir).GetScalar() > ndFloat32(0.0f));
+					ndFloat32 contactPatch = tireUp.DotProduct(dir.Normalize()).GetScalar();
+					isOutOfContactPatch = (contactPatch > ndFloat32(-0.71f));
+				}
+				if (isOutOfContactPatch)
+				{
+					// remove this contact
+					tireContacts[i] = tireContacts[tireContacts.GetCount() - 1];
+					tireContacts.Pop();
+					break;
+				}
+			}
+		}
+	}
+
+	if (tireContacts.GetCount() && (tireContacts.GetCount() == savedContactCount))
+	{
+		for (ndInt32 i = tireContacts.GetCount() - 1; i >= 0 ; --i)
+		{
+			ndContact* const contact = tireContacts[i].m_contact;
+			ndMultiBodyVehicleTireJoint* const tire = tireContacts[i].m_tireJoint;
+			//const ndVector tireHubPin(tire->CalculateBaseFrame().m_front);
+
+			ndContactPointList& contactPoints = contact->GetContactPoints();
+			for (ndContactPointList::ndNode* contactNode = contactPoints.GetFirst(); contactNode; contactNode = contactNode->GetNext())
+			{
+				ndContactMaterial& contactPoint = contactNode->GetInfo();
+				//const ndVector longitudialDir(tireHubPin.CrossProduct(contactPoint.m_normal));
+				//contactPoint.RotateTangentDirections(longitudialDir);
+				switch (tire->m_frictionModel.m_frictionModel)
+				{
+					case ndTireFrictionModel::m_pacejkaSport:
+					case ndTireFrictionModel::m_pacejkaTruck:
+					case ndTireFrictionModel::m_pacejkaCustom:
+					case ndTireFrictionModel::m_pacejkaUtility:
+					{
+						if (PacejkaTireModel(tire, contactPoint))
+						{
+							contact->InvalicatdeCache();
+						}
+						break;
+					}
+
+					case ndTireFrictionModel::m_coulombCicleOfFriction:
+					{
+						CoulombFrictionCircleTireModel(tire, contactPoint);
+						break;
+					}
+
+					case ndTireFrictionModel::m_coulomb:
+					default:
+					{
+						CoulombTireModel(tire, contactPoint);
+						break;
+					}
+				}
+			}
+		}
+	}
+}
+
+void ndMultiBodyVehicle::ApplyTireModel()
+{
+	ndFixSizeArray<ndTireContactPair, 128> tireContacts;
+	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = m_tireList.GetFirst(); node; node = node->GetNext())
+	{
+		ndMultiBodyVehicleTireJoint* const tire = node->GetInfo();
+		ndAssert(((ndShape*)tire->GetBody0()->GetCollisionShape().GetShape())->GetAsShapeChamferCylinder());
+
+		tire->m_lateralSlip = ndFloat32(0.0f);
+		tire->m_longitudinalSlip = ndFloat32(0.0f);
+		tire->m_normalizedAligningTorque = ndFloat32(0.0f);
+
+		const ndBodyKinematic::ndContactMap& contactMap = tire->GetBody0()->GetContactMap();
+		ndBodyKinematic::ndContactMap::Iterator it(contactMap);
+		for (it.Begin(); it; it++)
+		{
+			ndContact* const contact = *it;
+			if (contact->IsActive())
+			{
+				ndContactPointList& contactPoints = contact->GetContactPoints();
+				// for mesh collision we need to remove contact duplicates, 
+				// these are contact produced by two or more polygons, 
+				// that can produce two contact so are close that they can generate 
+				// ill formed rows in the solver mass matrix
+				for (ndContactPointList::ndNode* contactNode0 = contactPoints.GetFirst(); contactNode0; contactNode0 = contactNode0->GetNext())
+				{
+					const ndContactPoint& contactPoint0 = contactNode0->GetInfo();
+					for (ndContactPointList::ndNode* contactNode1 = contactNode0->GetNext(); contactNode1; contactNode1 = contactNode1->GetNext())
+					{
+						const ndContactPoint& contactPoint1 = contactNode1->GetInfo();
+						const ndVector error(contactPoint1.m_point - contactPoint0.m_point);
+						ndFloat32 err2 = error.DotProduct(error).GetScalar();
+						if (err2 < D_MIN_CONTACT_CLOSE_DISTANCE2)
+						{
+							contactPoints.Remove(contactNode1);
+							break;
+						}
+					}
+				}
+				ndTireContactPair pair;
+				pair.m_contact = contact;
+				pair.m_tireJoint = tire;
+				tireContacts.PushBack(pair);
+			}
+		}
+	}
+	ApplyTireModel(tireContacts);
+
+	// save the steering
+	for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = m_tireList.GetFirst(); node; node = node->GetNext())
+	{
+		ndMultiBodyVehicleTireJoint* const tire = node->GetInfo();
+		tire->m_normalizedSteering0 = tire->m_normalizedSteering;
+	}
+}
+
+bool ndMultiBodyVehicle::CoulombTireModel(ndMultiBodyVehicleTireJoint* const joint, ndContactMaterial& contactPoint) const
+{
+	const ndFloat32 frictionCoefficient = contactPoint.m_material.m_staticFriction0;
+
+	// handling dynamics friction manually
+	ndFloat32 dynamicFrictionCoef = joint->m_isApplyingBrakes ? ndFloat32(0.75f) : ndFloat32(1.0f);
+
+	contactPoint.m_material.m_staticFriction0 = frictionCoefficient;
+	contactPoint.m_material.m_staticFriction1 = frictionCoefficient;
+	contactPoint.m_material.m_kineticFriction0 = frictionCoefficient * dynamicFrictionCoef;
+	contactPoint.m_material.m_kineticFriction1 = frictionCoefficient * dynamicFrictionCoef;
+	return true;
+}
+
+bool ndMultiBodyVehicle::CoulombFrictionCircleTireModel(ndMultiBodyVehicleTireJoint* const tire, ndContactMaterial& contactPoint) const
+{
+	return CoulombTireModel(tire, contactPoint);
+}
+
+bool ndMultiBodyVehicle::PacejkaTireModel(ndMultiBodyVehicleTireJoint* const tire, ndContactMaterial& contactPoint) const
+{
+	// According to Wikipedia, the Pacejka Magic Formula is typically written as:
+	//
+	// F = D * sin(C * atan(Bx * (1 - E) + E * atan(Bx)))
+	//
+	// This form does not include the parameter phi.
+	//
+	// Giancarlo Genta introduces horizontal and vertical shifts to extend the model
+	// to operating conditions near zero slip:
+	//
+	// F = D * sin(C * atan(Bx * (1 - E) * (phi + Sh) + E * atan(Bx * (phi + Sh)))) + Sv
+	//
+	// My primary challenge with this formulation is determining the values of
+	// C, D, E, Bx, phi, Sh, and Sv for each force and moment component.
+	//
+	// Genta provides tables of coefficients (a1 through a13) for several example
+	// vehicles, but does not clearly explain how these coefficients map to the
+	// Magic Formula parameters B, C, D, and E. The relationship must largely be
+	// inferred from the surrounding examples and equations.
+	//
+	// The most useful reference I have found on this topic is:
+	// http://www-cdr.stanford.edu/dynamic/bywire/tires.pdf
+	//
+	// More generally, I have struggled with Pacejka implementations because the
+	// treatment of units in Genta's discussion (pp. 60–78) appears inconsistent in
+	// several places, making it difficult to verify that the implementation is
+	// producing physically meaningful results.
+	//
+	// I have attempted to implement the model multiple times over the years, 
+	// but have never been fully satisfied with the results. 
+	// Currently, I am comparing it against the Brush tire model, 
+	// which seems to produce more intuitive behavior.
+	//
+	// One aspect that concerns me is that tire forces do not appear to depend
+	// explicitly on normal load. 
+	// Instead, load sensitivity is incorporated through parameter D.
+	//
+	// Conceptually, this seems counterintuitive. For example, a pickup truck with
+	// a heavy payload should exhibit different lateral force characteristics than
+	// the same vehicle when unloaded. If D remains constant, the model predicts
+	// identical behavior regardless of tire load, which does not appear physically
+	// realistic.
+	const ndBodyKinematic* const tireBody = tire->GetBody0()->GetAsBodyKinematic();
+	const ndBodyKinematic* const otherBody = (contactPoint.m_body0 == tireBody) ? contactPoint.m_body1 : contactPoint.m_body0;
+
+	const ndVector longitudDir(contactPoint.m_dir0);
+	const ndVector contactVeloc0(tireBody->GetVelocity());
+	const ndVector contactVeloc1(otherBody->GetVelocityAtPoint(contactPoint.m_point));
+	const ndVector wheelComVeloc(contactVeloc0 - contactVeloc1);
+	const ndFloat32 wheelComSpeed_x = wheelComVeloc.DotProduct(longitudDir).GetScalar();
+	if (ndAbs(wheelComSpeed_x) < D_MAX_CONTACT_SPEED_TRESHOLD)
+	{
+		// handle vehicle is at rest by just doing normal rigid body dynamics.
+		return true;
+	}
+
+	// calculate lateral slip angle
+	const ndVector lateralDir(contactPoint.m_dir1);
+	// use a dead zone and them use Sv for nonzero lateral force
+	const ndFloat32 speed_z = wheelComVeloc.DotProduct(lateralDir).GetScalar();
+	const ndFloat32 wheelComSpeed_z = (speed_z > ndFloat32(1.0e-3f) || (speed_z < ndFloat32(-1.0e-3f))) ? speed_z : ndFloat32(0.0f);
+	const ndFloat32 sideSlipAngleInRadians = ndAtan2(wheelComSpeed_z, ndAbs(wheelComSpeed_x));
+	tire->m_lateralSlip = ndMax(tire->m_lateralSlip, ndAbs(sideSlipAngleInRadians));
+//ndTrace(("(%f %f)\n", wheelComSpeed_z, ndAbs(wheelComSpeed_x)));
+
+	// calculate longitudinal slip
+	const ndVector contactVeloc(tireBody->GetVelocityAtPoint(contactPoint.m_point) - contactVeloc1);
+	const ndFloat32 vr_x = contactVeloc.DotProduct(longitudDir).GetScalar();
+	const ndFloat32 longitudialSlip = ndClamp(vr_x / wheelComSpeed_x, ndFloat32(-100.0f), ndFloat32(100.0f));
+	tire->m_longitudinalSlip = ndMax(tire->m_longitudinalSlip, longitudialSlip);
+
+	//I am now using the direct coeficients B, C, E, D as explained in 
+	//The multibody system approach to vehicle dynamics page 300 to 306
+	auto LongitudinalForce = [](const ndTireFrictionModel::ndPacejkaTireModel& model, ndFloat32 phi, ndFloat32 sprungWeight)
+	{
+		return model.Evaluate(phi, sprungWeight);
+	};
+
+	auto LateralForce = [](const ndTireFrictionModel::ndPacejkaTireModel& model, ndFloat32 phi, ndFloat32 sprungWeight)
+	{
+		// phi should be in degress
+		phi = ndAbs(ndRadToDegree * phi);
+		return model.Evaluate(phi, sprungWeight);
+	};
+
+	//now apply the combine effect, according to Genta book page 76
+	const ndTireFrictionModel& frictionModel = tire->m_frictionModel;
+
+	// ----- Combined‑force calculation notes -----
+	//
+	// The derivation below isn’t documented in either Pacejka or Genta books.
+	// Both books only give a brief example and leave the details unexplained.
+	// After two decades, the method still feels more like bad heuristicks than
+	// sound engineering: the equations mix units and fail dimensional checks.
+	// It may be possible that it works in some confined experimetal steady state 
+	// laboratory condition, but those are not scalable for symulations. 
+
+	// Pages 80‑83 outline *two* inconsistent ways to calculate combined slip.
+	// - Method 1 (implemented here) produces sensible, stable results,
+	//   yet the book itself calls it “incorrect.”
+	// - Method 2 is recommended by the authors, but I’ve never managed
+	//   to get anything remotely realistic from it.
+
+	// Until a better reference turns up, Method 0 remains the least‑bad
+	// option I’ve found stable in practice, if not theoretically satisfying, therefore I am going with that. 
+	// I still find the lateral force some what too strong.
+
+	//I am assuming sv and sv to be zero.
+	//under these conditions u and v become
+	ndFloat32 den = ndFloat32(1.0f) + ndAbs(longitudialSlip);
+	ndFloat32 phi_x = -longitudialSlip / den;
+	ndFloat32 phi_z = ndTan(sideSlipAngleInRadians) / den;
+	ndFloat32 phi2 = phi_x * phi_x + phi_z * phi_z;
+	if (phi2 < ndFloat32 (1.0e-6f))
+	{
+		// this is the vanishing phi
+		return true;
+	}
+	const ndFloat32 phi = ndSqrt(phi2);
+
+	const ndFloat32 hackStiffness = ndFloat32(5.0f);
+	const ndFloat32 isotropicMaterialFriction = contactPoint.m_material.m_staticFriction0;
+	const ndFloat32 sprungWeight = contactPoint.m_normal_Force.GetInitialGuess() + ndFloat32 (1.0f);
+	const ndFloat32 pacejkaAmplitud = sprungWeight * hackStiffness * isotropicMaterialFriction;
+
+	const ndFloat32 pure_fz = LateralForce(frictionModel.m_lateralPacejka, sideSlipAngleInRadians, tire->m_lateralStiffness * pacejkaAmplitud);
+	const ndFloat32 pure_fx = LongitudinalForce(frictionModel.m_longitudinalPacejka, longitudialSlip, tire->m_longitudinalStiffness * pacejkaAmplitud);
+
+	const ndFloat32 fx = pure_fx * phi_x / phi;
+	const ndFloat32 fz = pure_fz * phi_z / phi;
+
+	ndJacobianPair lateralJacobian;
+	ndJacobianPair longitudicalJacobian;
+	tire->GetJacobian(lateralJacobian, longitudicalJacobian);
+
+	ndBodyDynamic* const wheelBody = tire->GetBody0()->GetAsBodyDynamic();
+	ndBodyDynamic* const chassisBody = tire->GetBody1()->GetAsBodyDynamic();
+	const ndVector tireLaterForce(lateralJacobian.m_jacobianM0.m_linear.Scale(fz));
+	const ndVector tireLateralTorque(lateralJacobian.m_jacobianM0.m_angular.Scale(fz));
+	const ndVector chassisLateralForce(lateralJacobian.m_jacobianM1.m_linear.Scale(fz));
+	const ndVector chassisLateralTorque(lateralJacobian.m_jacobianM1.m_angular.Scale(fz));
+
+	wheelBody->SetForce(wheelBody->GetForce() + tireLaterForce);
+	wheelBody->SetTorque(wheelBody->GetTorque() + tireLateralTorque);
+
+	chassisBody->SetForce(chassisBody->GetForce() + chassisLateralForce);
+	chassisBody->SetTorque(chassisBody->GetTorque() + chassisLateralTorque);
+
+	// Convert the longitudinal and lateral forces computed by the tire model
+	// into friction coefficients. These coefficients are then used by the
+	// linear solver to compute the correct tire force distribution for the
+	// current simulation step.
+	//
+	// This is done by computing the ratio between the estimated tire force
+	// and the tire normal force.
+	//
+	// Note: For the sprung normal force, the textbook uses the D coefficient
+	// of the Pacejka equation. This is more accurate because it accounts for
+	// load sensitivity under steady-state conditions.
+	//
+	// However, this assumes the tire remains in continuous contact with the
+	// ground. In a real-time simulation, this assumption does not always hold.
+	// Using the Pacejka D coefficient when the tire is barely touching the
+	// ground can produce unrealistic tire forces.
+	//
+	// For this simulation, I instead use the average normal force from the
+	// previous time step together with the nominal sprung force. This provides
+	// more stable and plausible realistic results when tire contact varies.
+	// 
+	// Note: The tire stiffness model can produce friction coefficients greater
+	// than 1.0. Therefore, the computed values are clamped to the range
+	// [0, maxFrictionCoefficient].	
+	//const ndFloat32 maxFrictionCoeficient = ndFloat32(1.2f);
+	//ndFloat32 lateralFrictionCoefficient = ndClamp(ndAbs(fz) / sprungWeight, ndFloat32 (0.0f), maxFrictionCoeficient);
+	//ndFloat32 longitudinalFrictionCoefficient = ndClamp(ndAbs(fx) / sprungWeight, ndFloat32(0.0f), maxFrictionCoeficient);
+	//contactPoint.m_material.m_staticFriction0 = longitudinalFrictionCoefficient;
+	//contactPoint.m_material.m_kineticFriction0 = longitudinalFrictionCoefficient;
+	//contactPoint.m_material.m_staticFriction1 = lateralFrictionCoefficient;
+	//contactPoint.m_material.m_kineticFriction1 = lateralFrictionCoefficient;
+
+	contactPoint.m_material.m_staticFriction0 *= ndFloat32(1.2f);
+	contactPoint.m_material.m_staticFriction1 *= ndFloat32(1.2f);
+	contactPoint.m_material.m_kineticFriction0 = contactPoint.m_material.m_staticFriction0;
+	contactPoint.m_material.m_kineticFriction1 = contactPoint.m_material.m_staticFriction1;
+
+	const ndFloat32 maxSideAngle = ndMax(tire->m_maxSideAngle, ND_TIRE_MIN_STATIC_SLEEP);
+	const ndFloat32 sideSlipAngle = ndMin (ndAbs(sideSlipAngleInRadians), maxSideAngle);
+	const ndFloat32 sideSlipSpeed = sideSlipAngle * ndAbs(wheelComSpeed_x);
+	contactPoint.m_material.m_targetSlidingFriction1 = sideSlipSpeed;
+
+	return true;
+}
+
+void ndMultiBodyVehicle::CalculateCrowndGear()
+{
+	if (m_motor)
+	{
+		ndFloat32 tireRadios = ndFloat32(1.0f);
+		ndFixSizeArray<ndFloat32, 256> combinedRatio(0);
+		ndFixSizeArray<ndJointBilateralConstraint*, 256> stack(0);
+		for (ndList<ndMultiBodyVehicleTireJoint*>::ndNode* node = m_tireList.GetFirst(); node; node = node->GetNext())
+		{
+			ndBodyDynamic* const tireBody = node->GetInfo()->GetBody0()->GetAsBodyDynamic();
+			auto FindJoint = [tireBody]()
+			{
+				const ndBodyKinematic::ndJointList& jointList = tireBody->GetJointList();
+				for (ndBodyKinematic::ndJointList::ndNode* jointNode = jointList.GetFirst(); jointNode; jointNode = jointNode->GetNext())
+				{
+					ndJointBilateralConstraint* const axle = jointNode->GetInfo();
+					if (strcmp(axle->ClassName(), ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0)
+					{
+						return static_cast<ndMultiBodyVehicleDifferentialAxle*>(axle);
+					}
+				}
+				return static_cast<ndMultiBodyVehicleDifferentialAxle*>(nullptr);
+			};
+			ndMultiBodyVehicleDifferentialAxle* const axle = FindJoint();
+			if (axle)
+			{
+				ndShapeInstance& instance = tireBody->GetCollisionShape();
+				ndShape* const shape = instance.GetShape();
+				ndAssert(static_cast<ndShapeChamferCylinder*>(shape->GetAsShapeChamferCylinder()));
+				ndShapeInfo info(shape->GetShapeInfo());
+				tireRadios = instance.GetScale().m_y * info.m_chamferCylinder.m_radius + ndFloat32(0.5f) * info.m_chamferCylinder.m_height;
+
+				stack.PushBack(axle);
+				combinedRatio.PushBack(1.0f);
+				break;
+			}
+		}
+
+		ndFixSizeArray<ndJointBilateralConstraint*, 256> filter(0);
+			
+		auto Proccessed = [&filter](ndJointBilateralConstraint* const joint)
+		{
+			for (ndInt32 i = filter.GetCount() - 1; i >= 0; --i)
+			{
+				if (joint == filter[i])
+				{
+					return true;
+				}
+			}
+			return false;
+		};
+
+		auto SetCrownGear = [this, tireRadios](ndJointBilateralConstraint* const joint, ndFloat32 driveTrainGearRatio)
+		{
+			ndMultiBodyVehicleGearBox* const gearBoxJoint = static_cast<ndMultiBodyVehicleGearBox*>(joint);
+			const ndMultiBodyVehicleMotor::ndEngineTorqueCurve& torqueCurve = m_motor->GetCurve();
+			ndMultiBodyVehicleGearBox::ndGearBox& gearBox = gearBoxJoint->GetGearBox();
+
+			ndFloat32 vehicleTopSpeed = m_motor->GetTopSpeed();
+			ndFloat32 motorMaxOmega = torqueCurve.GetPickPowerRpm() * ndRpmToRadPerSec;
+			ndFloat32 gearBoxRatio = gearBox.m_gearRatios[gearBox.m_gearRatios.GetCount() - 1];
+
+			driveTrainGearRatio = ndFloat32(1.0f) / (driveTrainGearRatio * gearBoxRatio);
+			ndFloat32 tireSpeed = tireRadios * motorMaxOmega * driveTrainGearRatio;
+			gearBox.m_crownGearRatio = tireSpeed / vehicleTopSpeed;
+		};
+
+			
+		ndFloat32 gearSign = ndFloat32(1.0f);
+		while (stack.GetCount())
+		{
+			ndFloat32 ratio = combinedRatio.Pop();
+			ndJointBilateralConstraint* const gearJoint = stack.Pop();
+			ndAssert(strcmp(gearJoint->ClassName(), ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0);
+			ndMultiBodyVehicleDifferentialAxle* const axle = static_cast<ndMultiBodyVehicleDifferentialAxle*>(gearJoint);
+			ratio = gearSign * ndAbs(ratio) * axle->GetGearRatio();
+			gearSign *= ndFloat32(-1.0f);
+
+		
+			filter.PushBack(gearJoint);
+			const ndBodyKinematic::ndJointList& jointList0 = gearJoint->GetBody0()->GetJointList();
+			for (ndBodyKinematic::ndJointList::ndNode* jointNode = jointList0.GetFirst(); jointNode; jointNode = jointNode->GetNext())
+			{
+				ndJointBilateralConstraint* const joint = jointNode->GetInfo();
+				if (!Proccessed(joint))
+				{
+					if (strcmp(joint->ClassName(), ndMultiBodyVehicleGearBox::StaticClassName()) == 0)
+					{
+						SetCrownGear(joint, ratio);
+						return;
+					}
+					if (strcmp(joint->ClassName(), ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0)
+					{
+						combinedRatio.PushBack(ratio);
+						stack.PushBack(joint);
+					}
+				}
+			}
+			const ndBodyKinematic::ndJointList& jointList1 = gearJoint->GetBody1()->GetJointList();
+			for (ndBodyKinematic::ndJointList::ndNode* jointNode = jointList1.GetFirst(); jointNode; jointNode = jointNode->GetNext())
+			{
+				ndJointBilateralConstraint* const joint = jointNode->GetInfo();
+				if (!Proccessed(joint))
+				{
+					if (strcmp(joint->ClassName(), ndMultiBodyVehicleGearBox::StaticClassName()) == 0)
+					{
+						ndAssert(0);
+						SetCrownGear(joint, ratio);
+						return;
+					}
+
+					if (strcmp(joint->ClassName(), ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0)
+					{
+						combinedRatio.PushBack(ratio);
+						stack.PushBack(joint);
+					}
+				}
+			}
+		}
+	}
+	ndAssert(0);
+}
+
+void ndMultiBodyVehicle::CalculateRestSprungWeight()
+{
+	const ndMatrix savedMatrix(GetRoot()->m_body->GetMatrix());
+	SetTransform(ndGetIdentityMatrix());
+
+	const ndInt32 buffersCapacity = 128;
+	ndFixSizeArray<ndInt32, buffersCapacity> pairM0;
+	ndFixSizeArray<ndInt32, buffersCapacity> pairM1;
+	ndFixSizeArray<ndInt32, buffersCapacity> bodyIndex;
+	ndFixSizeArray<ndFloat32, buffersCapacity> rhsAccel;
+	ndFixSizeArray<ndBodyDynamic*, buffersCapacity> bodyArray;
+	ndFixSizeArray<ndJacobianPair, buffersCapacity> jacobianArray;
+	ndFixSizeArray<ndMultiBodyVehicleTireJoint*, buffersCapacity> tireArray;
+
+	ndBodyDynamic emptyBody;
+	bodyIndex.PushBack(0);
+	bodyArray.PushBack(&emptyBody);
+	auto GetStructuralJacobians = [&bodyArray, &bodyIndex, &jacobianArray, &rhsAccel, &tireArray, &pairM0, &pairM1](ndNode* const node)
+	{
+		if (node->m_body)
+		{
+			bodyIndex.PushBack(bodyIndex.GetCount());
+			bodyArray.PushBack(node->m_body->GetAsBodyDynamic());
+			node->m_body->GetAsBodyDynamic()->UpdateInvInertiaMatrix();
+
+			if (node->m_joint)
+			{
+				const ndBodyDynamic* const body0 = node->m_body->GetAsBodyDynamic();
+				const ndBodyDynamic* const body1 = node->GetParent()->m_body->GetAsBodyDynamic();
+				const ndJointBilateralConstraint* const joint = *node->m_joint;
+				const ndVector com0(body0->GetMatrix().TransformVector(body0->GetCentreOfMass()));
+				const ndVector com1(body1->GetMatrix().TransformVector(body1->GetCentreOfMass()));
+				const ndVector r0(joint->CalculateGlobalMatrix0().m_posit - com0);
+				const ndVector r1(joint->CalculateGlobalMatrix1().m_posit - com1);
+
+				ndMatrix matrix(ndGetIdentityMatrix());
+				matrix.m_posit = com0;
+
+				auto FindParentId = [&bodyArray, &bodyIndex](const ndBodyDynamic* const body)
+				{
+					for (ndInt32 i = bodyArray.GetCount() - 1; i >= 0; --i)
+					{
+						if (bodyArray[i] == body)
+						{
+							return bodyIndex[i];
+						}
+					}
+					ndAssert(0);
+					return -1;
+				};
+
+				ndInt32 m0 = bodyIndex[bodyIndex.GetCount() - 1];
+				ndInt32 m1 = FindParentId(body1);
+				for (ndInt32 i = 0; i < 3; ++i)
+				{
+					ndJacobianPair jacobianPair;
+					jacobianPair.m_jacobianM0.m_linear = matrix[i].Scale(ndFloat32(-1.0f));
+					jacobianPair.m_jacobianM0.m_angular = jacobianPair.m_jacobianM0.m_linear.CrossProduct(r0);
+					jacobianPair.m_jacobianM1.m_linear = matrix[i];
+					jacobianPair.m_jacobianM1.m_angular = jacobianPair.m_jacobianM1.m_linear.CrossProduct(r1);
+					rhsAccel.PushBack(ndFloat32(0.0f));
+					jacobianArray.PushBack(jacobianPair);
+					pairM0.PushBack(m0);
+					pairM1.PushBack(m1);
+
+					jacobianPair.m_jacobianM0.m_linear = ndVector::m_zero;
+					jacobianPair.m_jacobianM0.m_angular = matrix[i].Scale(ndFloat32(-1.0f));
+					jacobianPair.m_jacobianM1.m_linear = ndVector::m_zero;
+					jacobianPair.m_jacobianM1.m_angular = matrix[i];
+					rhsAccel.PushBack(ndFloat32(0.0f));
+					jacobianArray.PushBack(jacobianPair);
+					pairM0.PushBack(m0);
+					pairM1.PushBack(m1);
+				}
+				if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0)
+				{
+					tireArray.PushBack((ndMultiBodyVehicleTireJoint*)joint);
+				}
+			}
+		}
+	};
+	NodeIterator(GetStructuralJacobians);
+	ndInt32 tireStart = rhsAccel.GetCount();
+
+	const ndInt32 count = ndMin(tireArray.GetCount(), 4);
+	const ndMatrix rotation(ndYawMatrix(90.0f * ndDegreeToRad));
+	ndVector pin(ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f));
+	for (ndInt32 i = 0; i < count; ++i)
+	{
+		ndFloat32 dist = ndFloat32 (-1.0e10f);
+		for (ndInt32 j = i; j < tireArray.GetCount(); ++j)
+		{
+			const ndMultiBodyVehicleTireJoint* const joint = tireArray[j];
+			const ndBodyDynamic* const body = joint->GetBody0()->GetAsBodyDynamic();
+			const ndVector origin(body->GetMatrix().m_posit);
+			ndFloat32 project = origin.DotProduct(pin).GetScalar();
+			if (project > dist)
+			{
+				dist = project;
+				ndSwap(tireArray[i], tireArray[j]);
+			}
+		}
+		pin = rotation.RotateVector(pin);
+	}
+	tireArray.SetCount(count);
+
+	const ndVector upDir(m_localFrame.m_up.Scale(ndFloat32(1.0f)));
+	for (ndInt32 i = 0; i < tireArray.GetCount(); ++i)
+	{
+		const ndMultiBodyVehicleTireJoint* const joint = tireArray[i];
+		const ndBodyDynamic* const body = joint->GetBody0()->GetAsBodyDynamic();
+
+		auto FindParentId = [&bodyArray, &bodyIndex](const ndBodyDynamic* const body)
+		{
+			for (ndInt32 i = bodyArray.GetCount() - 1; i >= 0; --i)
+			{
+				if (bodyArray[i] == body)
+				{
+					return bodyIndex[i];
+				}
+			}
+			ndAssert(0);
+			return -1;
+		};
+		ndInt32 m0 = FindParentId(body);
+		ndInt32 m1 = 0;
+		ndJacobianPair jacobianPair;
+		jacobianPair.m_jacobianM0.m_linear = upDir;
+		jacobianPair.m_jacobianM0.m_angular = ndVector::m_zero;
+		jacobianPair.m_jacobianM1.m_linear = upDir.Scale(ndFloat32(-1.0f));
+		jacobianPair.m_jacobianM1.m_angular = ndVector::m_zero;
+
+		pairM0.PushBack(m0);
+		pairM1.PushBack(m1);
+		rhsAccel.PushBack(-m_gravityMagnitud);
+		jacobianArray.PushBack(jacobianPair);
+	}
+
+	const ndInt32 stride = rhsAccel.GetCount();
+
+	// build Mass Matrix
+	ndFixSizeArray<ndJacobian, buffersCapacity> Jt;
+	ndFixSizeArray<ndJacobian, buffersCapacity> JinvMass;
+	ndFixSizeArray<ndFloat32, buffersCapacity * buffersCapacity> massMatrix(stride * stride);
+
+	ndJacobian zeroJacobian;
+	zeroJacobian.m_linear = ndVector::m_zero;
+	zeroJacobian.m_angular = ndVector::m_zero;
+	for (ndInt32 i = 0; i < rhsAccel.GetCount(); ++i)
+	{
+		Jt.PushBack(zeroJacobian);
+		JinvMass.PushBack(zeroJacobian);
+	}
+
+	for (ndInt32 i = 0; i < stride; ++i)
+	{
+		ndInt32 m0 = pairM0[i];
+		ndInt32 m1 = pairM1[i];
+
+		ndFloat32 invMass0 = bodyArray[m0]->GetInvMass();
+		ndFloat32 invMass1 = bodyArray[m1]->GetInvMass();
+		const ndMatrix& invInertia0 = bodyArray[m0]->GetInvInertiaMatrix();
+		const ndMatrix& invInertia1 = bodyArray[m1]->GetInvInertiaMatrix();
+
+		const ndJacobian& J01invMass(jacobianArray[i].m_jacobianM0);
+		const ndJacobian& J10invMass(jacobianArray[i].m_jacobianM1);
+
+		JinvMass[m0].m_linear = J01invMass.m_linear.Scale(invMass0);
+		JinvMass[m1].m_linear = J10invMass.m_linear.Scale(invMass1);
+		JinvMass[m0].m_angular = invInertia0.RotateVector(J01invMass.m_angular);
+		JinvMass[m1].m_angular = invInertia1.RotateVector(J10invMass.m_angular);
+
+		ndVector diagDot(
+			JinvMass[m0].m_linear * jacobianArray[i].m_jacobianM0.m_linear +
+			JinvMass[m0].m_angular * jacobianArray[i].m_jacobianM0.m_angular +
+			JinvMass[m1].m_linear * jacobianArray[i].m_jacobianM1.m_linear +
+			JinvMass[m1].m_angular * jacobianArray[i].m_jacobianM1.m_angular);
+		ndFloat32 diagonal = diagDot.AddHorizontal().GetScalar() * ndFloat32(1.001f);
+		massMatrix[i * stride + i] = diagonal;
+
+		for (ndInt32 j = i + 1; j < stride; ++j)
+		{
+			ndInt32 n0 = pairM0[j];
+			ndInt32 n1 = pairM1[j];
+			Jt[n0] = jacobianArray[j].m_jacobianM0;
+			Jt[n1] = jacobianArray[j].m_jacobianM1;
+
+			ndVector sum(ndVector::m_zero);
+			for (ndInt32 k = 0; k < stride; ++k)
+			{
+				sum += JinvMass[k].m_linear * Jt[k].m_linear + JinvMass[k].m_angular * Jt[k].m_angular;
+			}
+			ndFloat32 offDiag = sum.AddHorizontal().GetScalar();
+			massMatrix[i * stride + j] = offDiag;
+			massMatrix[j * stride + i] = offDiag;
+
+			Jt[n0] = zeroJacobian;
+			Jt[n1] = zeroJacobian;
+		}
+		JinvMass[m0] = zeroJacobian;
+		JinvMass[m1] = zeroJacobian;
+	}
+#ifdef _DEBUG
+	ndArray<ndFloat32> buffer;
+	buffer.SetCount(stride * stride);
+	ndAssert(ndTestPSDmatrix(stride, stride, &massMatrix[0], &buffer[0]));
+#endif
+
+	ndFixSizeArray<ndFloat32, buffersCapacity> force(stride);
+	ndCholeskyFactorization(rhsAccel.GetCount(), rhsAccel.GetCount(), &massMatrix[0]);
+	ndSolveCholesky(stride, stride, &massMatrix[0], &force[0], &rhsAccel[0]);
+
+	for (ndInt32 i = 0; i < tireArray.GetCount(); ++i)
+	{
+		ndFloat32 sprungWeight = ndAbs(force[tireStart + i]);
+		ndMultiBodyVehicleTireJoint* const tire = tireArray[i];
+		tire->m_frictionModel.m_sprungWeight = sprungWeight;
+	}
+	SetTransform(savedMatrix);
+}
+
+void ndMultiBodyVehicle::ConvertToMotorVehicle()
+{
+	auto SetChassisAndMotor = [this](ndNode* const node)
+	{
+		if (node->m_joint && (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleMotor::StaticClassName()) == 0))
+		{
+			AddChassis(node->GetParent()->m_body);
+			AddMotor(node->m_body, node->m_joint);
+		}
+	};
+	NodeIterator(SetChassisAndMotor);
+
+	auto AddStructureParts = [this](ndNode* const node)
+	{
+		if (node->m_joint)
+		{
+			if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleTireJoint::StaticClassName()) == 0)
+			{
+				AddTire(node->m_body, node->m_joint);
+			}
+			else if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleDifferential::StaticClassName()) == 0)
+			{
+				AddDifferential(node->m_body, node->m_joint);
+			}
+		}
+	};
+	NodeIterator(AddStructureParts);
+
+	auto AddDriveTrain = [this](ndNode* const node)
+	{
+		if (node->m_joint)
+		{
+			if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleGearBox::StaticClassName()) == 0)
+			{
+				AddGearBox(node->m_joint);
+			}
+			else if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleDifferentialAxle::StaticClassName()) == 0)
+			{
+				AddDifferentialAxle(node->m_joint);
+			}
+			else if (strcmp(node->m_joint->ClassName(), ndMultiBodyVehicleTorsionBar::StaticClassName()) == 0)
+			{
+				AddTorsionBar(node->m_joint);
+			}
+		}
+	};
+	NodeIterator(AddDriveTrain);
+
+	m_debugFlags = m_wheel;
+	//m_debugFlags = m_torsionBar;
+}
+
+void ndMultiBodyVehicle::Update(ndFloat32 timestep, ndInt32)
+{
+	if (!m_initialized)
+	{
+		ND_PROFILE_ZONE();
+		m_initialized = true;
+		m_timestep = timestep;
+
+		CalculateCrowndGear();
+		CalculateRestSprungWeight();
+
+		// reset forces of assesories attached to chassis
+		if (m_motor)
+		{
+			ndBodyDynamic* const selfBody = m_motor->GetBody0()->GetAsBodyDynamic();
+			ndSharedPtr<ndBodyNotify> notify(new ndMotorNotify(this));
+			selfBody->SetNotifyCallback(notify);
+		}
+		for (ndList<ndMultiBodyVehicleDifferential*>::ndNode* node = m_differentialList.GetFirst(); node; node = node->GetNext())
+		{
+			ndBodyDynamic* const selfBody = node->GetInfo()->GetBody0()->GetAsBodyDynamic();
+			ndSharedPtr<ndBodyNotify> notify(new ndComponentNotify(this));
+			selfBody->SetNotifyCallback(notify);
+		}
+	}
+
+	// apply down force
+	ApplyAerodynamics(timestep);
+
+	// apply tire model
+	ApplyTireModel();
+}
+
+void ndMultiBodyVehicle::PostUpdate(ndFloat32, ndInt32)
+{
+	ApplyAlignmentAndBalancing();
+}

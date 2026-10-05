@@ -10,31 +10,27 @@
 
 cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
 
+option("NEWTON_BUILD_SHARED_LIBS" "build shared library" ON)
+
 set (projectName "newtonC")
 project(${projectName})
 
 message (${projectName})
 
-if(MSVC OR MINGW)
-	set (swig "${CMAKE_SOURCE_DIR}/../../../thirdParty/swigwin/swigwin-4.4.1/swig.exe")
-else()
-	set (swig "/usr/bin/swig")
-endif()
 
 set (wrapper "${PROJECT_BINARY_DIR}")
-set (swigScript "${CMAKE_SOURCE_DIR}")
 
-execute_process(COMMAND ${swig} -c++ -c ${swigScript}/newton.i)
+if(NEWTON_BUILD_SHARED_LIBS)
+	add_definitions(-D_NEWTON_BUILD_DLL)
+endif()
 
 # source and header files
 file(GLOB CPP_SOURCE 
 	*.h
 	*.cpp
-	*.cxx
-	*.i
-	install/source/*.h
-	install/source/*.c
-	install/source/*.cpp
+	newton-4/source/*.h
+	newton-4/source/*.c
+	newton-4/source/*.cpp
 )
 
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/" FILES ${CPP_SOURCE})
@@ -42,7 +38,7 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/" FILES ${CPP_SOURCE})
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 
 include_directories(.)
-include_directories(install/source)
+include_directories(newton-4/source)
 
 add_library(${projectName} SHARED ${CPP_SOURCE})
 
@@ -52,13 +48,6 @@ if (MSVC OR MINGW)
 else()
   set (cSuffix ".so")
 endif()
-
-#foreach(file IN LISTS PY_SOURCE)
-#	message ("copy ${pySrc}/${file} to ${wrapper}/${projectName}/${file}")
-#	add_custom_command(
-#	TARGET ${projectName} POST_BUILD COMMAND ${CMAKE_COMMAND}
-#	ARGS -E copy ${pySrc}/${file} ${wrapper}/${projectName}/${file})
-#endforeach()
 
 add_custom_command(
 	TARGET ${projectName} POST_BUILD COMMAND ${CMAKE_COMMAND}

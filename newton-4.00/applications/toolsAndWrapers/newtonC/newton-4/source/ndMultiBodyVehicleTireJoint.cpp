@@ -1,0 +1,331 @@
+/* Copyright (c) <2003-2022> <Newton Game Dynamics>
+* 
+* This software is provided 'as-is', without any express or implied
+* warranty. In no event will the authors be held liable for any damages
+* arising from the use of this software.
+* 
+* Permission is granted to anyone to use this software for any purpose,
+* including commercial applications, and to alter it and redistribute it
+* freely
+*/
+
+#include "ndCoreStdafx.h"
+#include "ndNewtonStdafx.h"
+#include "ndMeshComponents.h"
+#include "ndMultiBodyVehicle.h"
+#include "ndMultiBodyVehicleTireJoint.h"
+
+static ndTireFrictionModel::ndPacejkaTireModel pacejkaSportLateral(ndFloat32(0.2f), ndFloat32(1.5f), ndFloat32(-0.1f), ndFloat32(0.0f), ndFloat32(0.01f));
+static ndTireFrictionModel::ndPacejkaTireModel pacejkaSportLongitudinal(ndFloat32(0.5f), ndFloat32(1.65f), ndFloat32(0.8f), ndFloat32(0.0f), ndFloat32(0.0f));
+
+static ndTireFrictionModel::ndPacejkaTireModel pacejkaUtilityLateral(ndFloat32(0.14f), ndFloat32(1.35f), ndFloat32(-0.5f), ndFloat32(0.0f), ndFloat32(0.01f));
+static ndTireFrictionModel::ndPacejkaTireModel pacejkaUtilityLongitudinal(ndFloat32(0.2f), ndFloat32(1.4), ndFloat32(-9.8f), ndFloat32(0.0f), ndFloat32(0.0f));
+
+static ndTireFrictionModel::ndPacejkaTireModel pacejkaTruckLateral(ndFloat32(0.01f), ndFloat32(2.85f), ndFloat32(1.42f), ndFloat32(0.0f), ndFloat32(0.01f));
+static ndTireFrictionModel::ndPacejkaTireModel pacejkaTruckLongitudinal(ndFloat32(0.5f), ndFloat32(1.65f), ndFloat32(0.8f), ndFloat32(0.0f), ndFloat32(0.0f));
+
+ndTireFrictionModel::ndTireFrictionModel()
+	:m_frictionModel(m_pacejkaUtility)
+	,m_sprungWeight(ndFloat32 (1000.0f))
+{
+	SetPacejkaCurves(m_pacejkaUtility);
+}
+
+void ndTireFrictionModel::SetPacejkaCurves(const ndPacejkaTireModel& longitudinal, const ndPacejkaTireModel& lateral)
+{
+	m_lateralPacejka = lateral;
+	m_frictionModel = m_pacejkaCustom;
+	m_longitudinalPacejka = longitudinal;
+}
+
+const char* ndTireFrictionModel::GetLabel(ndFrictionModel frictionModel)
+{
+	switch (frictionModel)
+	{
+		case ndTireFrictionModel::m_coulomb:
+			return "coulomb";
+
+		case ndTireFrictionModel::m_pacejkaSport:
+			return "pacejkaSport";
+
+		case ndTireFrictionModel::m_pacejkaTruck:
+			return "pacejkaTruck";
+
+		case ndTireFrictionModel::m_pacejkaUtility:
+			return "pacejkaUtility";
+
+		case ndTireFrictionModel::m_pacejkaCustom:
+			return "pacejkaCustom";
+			break;
+
+		case ndTireFrictionModel::m_coulombCicleOfFriction:
+		default:
+			return "coulombCicleOfFriction";
+			break;
+	}
+}
+
+ndTireFrictionModel::ndFrictionModel ndTireFrictionModel::GetModel(const char* const label)
+{
+	if (strcmp(label, "coulomb") == 0)
+	{
+		return ndTireFrictionModel::m_coulomb;
+	}
+	else if (strcmp(label, "pacejkaSport") == 0)
+	{
+		return ndTireFrictionModel::m_pacejkaSport;
+	}
+	else if (strcmp(label, "pacejkaTruck") == 0)
+	{
+		return ndTireFrictionModel::m_pacejkaTruck;
+	}
+	else if (strcmp(label, "pacejkaCustom") == 0)
+	{
+		return ndTireFrictionModel::m_pacejkaCustom;
+	}
+	else if (strcmp(label, "coulombCicleOfFriction") == 0)
+	{
+		return ndTireFrictionModel::m_coulombCicleOfFriction;
+	}
+	return m_pacejkaUtility;
+}
+
+void ndTireFrictionModel::SetPacejkaCurves(ndFrictionModel frictionModel)
+{
+	switch (frictionModel)
+	{
+		case m_pacejkaSport:
+			SetPacejkaCurves(pacejkaSportLongitudinal, pacejkaSportLateral);
+			m_frictionModel = frictionModel;
+			break;
+
+		case ndTireFrictionModel::m_pacejkaTruck:
+			SetPacejkaCurves(pacejkaTruckLongitudinal, pacejkaTruckLateral);
+			m_frictionModel = frictionModel;
+			break;
+
+		case ndTireFrictionModel::m_pacejkaUtility:
+		default:
+			SetPacejkaCurves(pacejkaUtilityLongitudinal, pacejkaUtilityLateral);
+			m_frictionModel = frictionModel;
+			break;
+	}
+}
+
+void ndTireFrictionModel::GetPacejkaCurves(ndFrictionModel pacejkaStockModel, ndPacejkaTireModel& longitudinal, ndPacejkaTireModel& lateral) const
+{
+	switch (pacejkaStockModel)
+	{
+		case m_pacejkaSport:
+			lateral = pacejkaSportLateral;
+			longitudinal = pacejkaSportLongitudinal;
+			break;
+
+		case ndTireFrictionModel::m_pacejkaTruck:
+			lateral = pacejkaTruckLateral;
+			longitudinal = pacejkaTruckLongitudinal;
+			break;
+
+		case ndTireFrictionModel::m_pacejkaUtility:
+		default:
+			lateral = pacejkaUtilityLateral;
+			longitudinal = pacejkaUtilityLongitudinal;
+			break;
+	}
+}
+
+void ndTireFrictionModel::PlotPacejkaCurves(const char* const name) const
+{
+	FILE* outFile;
+	char nameExt[256];
+
+	// write as exel format
+	snprintf(nameExt, size_t(nameExt) - 1, "%s.csv", name);
+
+	outFile = fopen(nameExt, "wb");
+	fprintf(outFile, "fx; fz; phi\n");
+	for (ndFloat32 x = -20.0f; x < 20.0f; x += 0.01f)
+	{
+		ndFloat32 fx = m_longitudinalPacejka.Evaluate(x, ndFloat32(1.0f));
+		ndFloat32 fz = m_lateralPacejka.Evaluate(x, ndFloat32(1.0f));
+		fprintf(outFile, "%g; %g; %g\n", fx, fz, x);
+	}
+	fclose(outFile);
+}
+
+ndTireFrictionModel::ndPacejkaTireModel::ndPacejkaTireModel()
+	:m_b(ndFloat32(0.5f))
+	,m_c(ndFloat32(1.65f))
+	,m_d(ndFloat32(1.0f))
+	,m_e(ndFloat32(0.8f))
+	,m_sv(ndFloat32(0.0f))
+	,m_sh(ndFloat32(0.0f))
+	,m_normalizingPhi(ndFloat32(1.0f))
+{
+	// set some defualt values, longitudinal force for a classic tire form Giancalr Genta book.
+	CalculateMaxPhi();
+}
+
+ndTireFrictionModel::ndPacejkaTireModel::ndPacejkaTireModel(ndFloat32 B, ndFloat32 C, ndFloat32 E, ndFloat32 Sv, ndFloat32 Sh)
+	:m_b(B)
+	,m_c(C)
+	,m_d(ndFloat32(1.0f))
+	,m_e(E)
+	,m_sv(Sv)
+	,m_sh(Sh)
+	,m_normalizingPhi(ndFloat32(1.0f))
+{
+	CalculateMaxPhi();
+}
+
+void ndTireFrictionModel::ndPacejkaTireModel::CalculateMaxPhi()
+{
+	// calculate max sideSlipParam
+	ndFloat32 maxPhi = ndFloat32(0.0f);
+	ndFloat32 maxForce = ndFloat32(0.0f);
+	for (ndFloat32 phi = ndFloat32(0.0f); phi < ndFloat32(20.0f); phi += ndFloat32(0.001f))
+	{
+		ndFloat32 force = Evaluate(phi, ndFloat32(1000.0f));
+		if (force >= maxForce)
+		{
+			maxPhi = phi;
+			maxForce = force;
+		}
+	}
+	m_normalizingPhi = maxPhi;
+}
+
+ndFloat32 ndTireFrictionModel::ndPacejkaTireModel::Evaluate(ndFloat32 phi, ndFloat32 sprungWeight) const
+{
+	ndFloat32 displacedPhi = phi + m_sh;
+	ndFloat32 EaTang = m_e * ndAtan(m_b * displacedPhi);
+	ndFloat32 BEarg = m_b * (ndFloat32(1.0f) - m_e) * displacedPhi;
+	ndFloat32 Carg = m_c * ndAtan(BEarg + EaTang);
+	ndFloat32 unitForce = m_d * ndSin(Carg) + m_sv;
+	return sprungWeight * unitForce;
+}
+
+ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint()
+	:ndJointWheel()
+	,m_vehicle(nullptr)
+	,m_frictionModel()
+	,m_lateralSlip(ndFloat32(0.0f))
+	,m_longitudinalSlip(ndFloat32(0.0f))
+	,m_normalizedAligningTorque(ndFloat32(0.0f))
+	,m_lateralStiffness(ndFloat32(1.0f))
+	,m_longitudinalStiffness(ndFloat32(1.0f))
+	,m_maxSideAngle(ND_TIRE_MAX_STATIC_SLEEP)
+{
+}
+
+ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent, const ndWheelDescriptor& info, ndMultiBodyVehicle* const owner)
+	:ndJointWheel(pinAndPivotFrame, child, parent, info)
+	,m_vehicle(owner)
+	,m_frictionModel()
+	,m_lateralSlip(ndFloat32 (0.0f))
+	,m_longitudinalSlip(ndFloat32(0.0f))
+	,m_normalizedAligningTorque(ndFloat32(0.0f))
+	,m_lateralStiffness(ndFloat32(1.0f))
+	,m_longitudinalStiffness(ndFloat32(1.0f))
+	,m_maxSideAngle(ND_TIRE_MAX_STATIC_SLEEP)
+{
+}
+
+ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint(const ndMultiBodyVehicleTireJoint& joint)
+	:ndJointWheel(joint)
+	,m_vehicle(ndWeakPtr<ndMultiBodyVehicle>(nullptr))
+	,m_frictionModel(joint.m_frictionModel)
+	,m_lateralSlip(ndFloat32(0.0f))
+	,m_longitudinalSlip(ndFloat32(0.0f))
+	,m_normalizedAligningTorque(ndFloat32(0.0f))
+	,m_lateralStiffness(ndFloat32(1.0f))
+	,m_longitudinalStiffness(ndFloat32(1.0f))
+	,m_maxSideAngle(joint.m_maxSideAngle)
+{
+	ndAssert(0);
+}
+
+ndMultiBodyVehicleTireJoint::ndMultiBodyVehicleTireJoint(const ndJointWheel* const joint, ndMultiBodyVehicle* const owner)
+	:ndJointWheel(*joint)
+	,m_vehicle(ndWeakPtr<ndMultiBodyVehicle>(owner))
+	,m_frictionModel()
+	,m_lateralSlip(ndFloat32(0.0f))
+	,m_longitudinalSlip(ndFloat32(0.0f))
+	,m_normalizedAligningTorque(ndFloat32(0.0f))
+	,m_lateralStiffness(ndFloat32(1.0f))
+	,m_longitudinalStiffness(ndFloat32(1.0f))
+	,m_maxSideAngle(ND_TIRE_MAX_STATIC_SLEEP)
+{
+}
+
+ndMultiBodyVehicleTireJoint::~ndMultiBodyVehicleTireJoint()
+{
+}
+
+ndSharedPtr<ndMeshJoint> ndMultiBodyVehicleTireJoint::GetMeshJoint(const ndMesh* const owner) const
+{
+	ndMeshJointVehicleTireJoint* const joint = new ndMeshJointVehicleTireJoint(owner, this);
+	joint->m_frictionModel = ndMeshJointVehicleTireJoint::ndFrictionModel (m_frictionModel.m_frictionModel);
+	return ndSharedPtr<ndMeshJoint>(joint);
+}
+
+void ndMultiBodyVehicleTireJoint::SetVehicleOwner(ndMultiBodyVehicle* const vehicle)
+{
+	m_vehicle = vehicle;
+}
+
+ndFloat32 ndMultiBodyVehicleTireJoint::GetSideSlip() const
+{
+	return m_lateralSlip;
+}
+
+ndFloat32 ndMultiBodyVehicleTireJoint::GetLongitudinalSlip() const
+{
+	return m_longitudinalSlip;
+}
+
+ndFloat32 ndMultiBodyVehicleTireJoint::GetMaxSlipAngle() const
+{
+	return m_maxSideAngle;
+}
+
+void ndMultiBodyVehicleTireJoint::SetMaxSlipAngle(ndFloat32 angleInRadians)
+{
+	m_maxSideAngle = ndClamp (angleInRadians, ndFloat32(0.0f) * ndDegreeToRad, ndFloat32(20.0f) * ndDegreeToRad);
+}
+
+void ndMultiBodyVehicleTireJoint::SetStiffness(ndFloat32 lateral, ndFloat32 longitudinal)
+{
+	m_lateralStiffness = ndClamp(lateral, ndFloat32(0.0f), ndFloat32(1.0f));
+	m_longitudinalStiffness = ndClamp(longitudinal, ndFloat32(0.0f), ndFloat32(1.0f));
+}
+
+void ndMultiBodyVehicleTireJoint::GetStiffness(ndFloat32& lateral, ndFloat32& longitudinal) const
+{
+	lateral = m_lateralStiffness;
+	longitudinal = m_longitudinalStiffness;
+}
+
+const ndTireFrictionModel& ndMultiBodyVehicleTireJoint::GetFrictionModel() const
+{
+	return m_frictionModel;
+}
+
+void ndMultiBodyVehicleTireJoint::SetFrictionModel(const ndTireFrictionModel& model)
+{
+	m_frictionModel = model;
+}
+
+void ndMultiBodyVehicleTireJoint::JacobianDerivative(ndConstraintDescritor& desc)
+{
+	m_variableRateRegularizer = m_info.m_regularizer * (m_vehicle ? m_vehicle->m_downForce.m_suspensionStiffnessModifier : ndFloat32 (1.0f));
+	ndJointWheel::JacobianDerivative(desc);
+
+	const ndVector zero(ndVector::m_zero);
+	for (ndInt32 i = m_angularJacobians.GetCount() - 1; i >= 0; --i)
+	{
+		ndJacobian& jacobian = desc.m_jacobian[m_angularJacobians[i]].m_jacobianM1;
+		jacobian.m_angular = zero;
+	}
+}
+
