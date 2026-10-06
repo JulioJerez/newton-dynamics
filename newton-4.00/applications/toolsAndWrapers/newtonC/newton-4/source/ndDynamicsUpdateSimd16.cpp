@@ -576,7 +576,6 @@ void ndDynamicsUpdateSimd16::InitJacobianMatrix()
 				#else
 					ndInt32* const normalIndex = reinterpret_cast<ndInt32*>(&row.m_normalForceIndex[0]);
 				#endif
-
 				for (ndInt32 n = 0; n < ND_SIMD16_WORK_GROUP_SIZE; ++n)
 				{
 					const ndConstraint* const soaJoint = jointsPtr[index + n];
@@ -686,7 +685,6 @@ void ndDynamicsUpdateSimd16::InitJacobianMatrix()
 						#else
 							ndInt32* const normalIndex = reinterpret_cast<ndInt32*>(&row.m_normalForceIndex[0]);
 						#endif
-
 						normalIndex[k] = (rhs->m_normalForceIndex + 1) * ND_SIMD16_WORK_GROUP_SIZE + k;
 						row.m_lowerBoundFrictionCoefficent[k] = rhs->m_lowerBoundFrictionCoefficent;
 						row.m_upperBoundFrictionCoefficent[k] = rhs->m_upperBoundFrictionCoefficent;

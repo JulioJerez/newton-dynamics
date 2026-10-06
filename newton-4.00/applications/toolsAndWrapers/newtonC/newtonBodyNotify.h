@@ -13,13 +13,15 @@
 #define D_NEWTON_BODY_NOTIFY_H_
 
 #include "newtonStdafx.h"
-#include "Newton.h"
+
+class NewtonBody;
 
 class ndNewtonBodyNotify : public ndModelBodyNotify
 {
 	public:
 	D_CLASS_REFLECTION(ndNewtonBodyNotify, ndModelBodyNotify)
 
+	typedef void (*NewtonApplyForceAndTorque) (const NewtonBody* const body, ndFloat32 timestep, int threadIndex);
 	ndNewtonBodyNotify();
 	ndNewtonBodyNotify(const ndNewtonBodyNotify& notify);
 	//ndDemoEntityNotify(
@@ -59,6 +61,7 @@ class ndNewtonBodyNotify : public ndModelBodyNotify
 	ndWeakPtr<void> m_userData;
 	ndInt32 m_materialGoupId;
 	bool m_bodyIsInWorld;
+	NewtonApplyForceAndTorque m_forceAndTorque;
 };
 
 

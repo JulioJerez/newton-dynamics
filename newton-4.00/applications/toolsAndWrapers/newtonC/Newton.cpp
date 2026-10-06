@@ -508,32 +508,6 @@ int NewtonGetSolverIterations(const NewtonWorld* const newtonWorld)
 	return world->GetSolverIterations();
 }
 
-
-/*!
-  Advance the simulation by a user defined amount of time.
-
-  @param *newtonWorld is the pointer to the Newton world
-  @param timestep time step in seconds.
-
-  @return Nothing
-
-  This function will advance the simulation by the specified amount of time.
-
-  The Newton Engine does not perform sub-steps, nor  does it need
-  tuning parameters. As a consequence, the application is responsible for
-  requesting sane time steps.
-
-  See also: ::NewtonInvalidateCache
-*/
-void NewtonUpdate(const NewtonWorld* const newtonWorld, dFloat timestep)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-
-//NewtonSerializeToFile (newtonWorld, "xxx.bin", NULL, NULL);
-	world->UpdatePhysics (timestep);
-}
-
 void NewtonUpdateAsync (const NewtonWorld* const newtonWorld, dFloat timestep)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -571,30 +545,6 @@ int NewtonGetNumberOfSubsteps (const NewtonWorld* const newtonWorld)
 	return world->GetSubsteps ();
 }
 
-
-
-/*!
-  Remove all bodies and joints from the Newton world.
-
-  @param *newtonWorld Pointer to the Newton world.
-
-  @return Nothing
-
-  This function will destroy all bodies and all joints in the Newton world, but
-  will retain group IDs.
-
-  Use this function for when you want to clear the world but preserve all the
-  group IDs and material pairs.
-
-  See also: ::NewtonMaterialDestroyAllGroupID
-*/
-void NewtonDestroyAllBodies(const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	Newton* const world = (Newton *) newtonWorld;
-	world->DestroyAllBodies ();
-}
 
 /*!
   Set a function callback to be call on each island update.
@@ -1153,28 +1103,6 @@ GroupID interface
 @{
 */
 
-
-
-
-/*!
-  Remove all groups ID from the Newton world.
-
-  @param *newtonWorld pointer to the Newton world.
-
-  @return Nothing.
-
-  This function removes all groups ID from the Newton world.
-  This function must be called after there are no more rigid bodies in the word.
-
-  See also: ::NewtonDestroyAllBodies
-*/
-void NewtonMaterialDestroyAllGroupID(const NewtonWorld* const newtonWorld)
-{
-//	dgAssert (0);
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	world->	RemoveAllGroupID();
-}
 
 /*! @} */ // end of GroupID
 
@@ -3777,25 +3705,6 @@ void NewtonCollisionGetScale (const NewtonCollision* const collision, dFloat* co
 }
 
 
-
-
-/*!
-  Release a reference from this collision object returning control to Newton.
-
-  @param *collisionPtr pointer to the collision object
-
-  @return Nothing.
-
-  to get the correct reference count of a collision primitive the application can call function *NewtonCollisionGetInfo*
-
-*/
-void NewtonDestroyCollision(const NewtonCollision* const collisionPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const collision = (dgCollisionInstance*) collisionPtr;
-	collision->Release();
-}
-
 dFloat NewtonCollisionGetSkinThickness(const NewtonCollision* const collisionPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -4263,54 +4172,8 @@ NewtonSetTransform NewtonBodyGetTransformCallback (const NewtonBody* const bodyP
 }
 
 
-/*!
-  Assign an event function for applying external force and torque to a rigid body.
-
-  @param *bodyPtr pointer to the body.
-  @param callback pointer to a function callback used to apply force and torque to a rigid body.
-
-  @return Nothing.
-
-  Before the *NewtonApplyForceAndTorque callback* is called for a body, Newton first clears the net force and net torque for the body.
-
-  The function *NewtonApplyForceAndTorque callback* is called by the Newton Engine every time an active body is going to be simulated.
-  The Newton Engine does not call the *NewtonApplyForceAndTorque callback* function for bodies that are inactive or have reached a state of stable equilibrium.
-
-  See also: ::NewtonBodyGetUserData, ::NewtonBodyGetUserData, ::NewtonBodyGetForceAndTorqueCallback
-*/
-void  NewtonBodySetForceAndTorqueCallback(const NewtonBody* const bodyPtr, NewtonApplyForceAndTorque callback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-	body->SetExtForceAndTorqueCallback ((dgBody::OnApplyExtForceAndTorque) callback);
-}
 
 
-/*!
-  Return the pointer to the current force and torque call back function.
-
-  @param *bodyPtr pointer to the body.
-
-  @return pointer to the force call back.
-
-  This function can be used to concatenate different force calculation components making more modular the
-  design of function components dedicated to apply special effect. For example a body may have a basic force a force that
-  only apply the effect of gravity, but that application can place a region in where there can be a fluid volume, or another gravity field.
-  we this function the application can read the correct function and save into a local variable, and set a new one.
-  this new function will firs call the save function pointer and upon return apply the correct effect.
-  this similar to the concept of virtual methods on objected oriented languages.
-
-  The function *NewtonApplyForceAndTorque callback* is called by the Newton Engine every time an active body is going to be simulated.
-  The Newton Engine does not call the *NewtonApplyForceAndTorque callback* function for bodies that are inactive or have reached a state of stable equilibrium.
-
-  See also: ::NewtonBodyGetUserData, ::NewtonBodyGetUserData, ::NewtonBodySetForceAndTorqueCallback
-*/
-NewtonApplyForceAndTorque NewtonBodyGetForceAndTorqueCallback(const NewtonBody* const bodyPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-	return (NewtonApplyForceAndTorque) body->GetExtForceAndTorqueCallback ();
-}
 
 
 /*!
@@ -4382,13 +4245,6 @@ void NewtonBodySetMassMatrix(const NewtonBody* const bodyPtr, dFloat mass, dFloa
 	NewtonBodySetFullMassMatrix(bodyPtr, mass, &inertia[0][0]);
 }
 
-void  NewtonBodySetMassProperties (const NewtonBody* const bodyPtr, dFloat mass, const NewtonCollision* const collisionPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-	dgCollisionInstance* const collision = (dgCollisionInstance*) collisionPtr;
-	body->SetMassProperties (mass, collision);
-}
 
 /*!
   Get the mass matrix of a rigid body.
@@ -4473,34 +4329,6 @@ void NewtonBodyGetInvInertiaMatrix(const NewtonBody* const bodyPtr, dFloat* cons
 
 
 
-/*!
-  Set the transformation matrix of a rigid body.
-
-  @param *bodyPtr pointer to the body.
-  @param *matrixPtr pointer to an array of 16 floats containing the global matrix of the rigid body.
-
-  @return Nothing.
-
-  The matrix should be arranged in row-major order.
-  If you are using OpenGL matrices (column-major) you will need to transpose you matrices into a local array, before
-  passing them to Newton.
-
-  That application should make sure the transformation matrix has not scale, otherwise unpredictable result will occur.
-
-  See also: ::NewtonBodyGetMatrix
-*/
-void NewtonBodySetMatrix(const NewtonBody* const bodyPtr, const dFloat* const matrixPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-	dgMatrix matrix (matrixPtr);
-
-	matrix.m_front.m_w = dgFloat32 (0.0f);
-	matrix.m_up.m_w    = dgFloat32 (0.0f);
-	matrix.m_right.m_w = dgFloat32 (0.0f);
-	matrix.m_posit.m_w = dgFloat32 (1.0f);
-	body->SetMatrixResetSleep (matrix); 
-}
 
 void NewtonBodySetMatrixNoSleep (const NewtonBody* const bodyPtr, const dFloat* const matrixPtr)
 {
@@ -4549,37 +4377,6 @@ void NewtonBodySetMatrixRecursive(const NewtonBody* const bodyPtr, const dFloat*
 }
 
 
-/*!
-  Get the transformation matrix of a rigid body.
-
-  @param *bodyPtr pointer to the body.
-  @param *matrixPtr pointer to an array of 16 floats that will hold the global matrix of the rigid body.
-
-  @return Nothing.
-
-  The matrix should be arranged in row-major order (this is the way direct x stores matrices).
-  If you are using OpenGL matrices (column-major) you will need to transpose you matrices into a local array, before
-  passing them to Newton.
-
-  See also: ::NewtonBodySetMatrix, ::NewtonBodyGetRotation
-*/
-void NewtonBodyGetMatrix(const NewtonBody* const bodyPtr, dFloat* const matrixPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-	const dgMatrix& matrix = body->GetMatrix();
-	memcpy (matrixPtr, &matrix[0][0], sizeof (dgMatrix));
-}
-
-void NewtonBodyGetPosition(const NewtonBody* const bodyPtr, dFloat* const posPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-	const dgVector& rot = body->GetPosition();
-	posPtr[0] = rot.m_x;
-	posPtr[1] = rot.m_y;
-	posPtr[2] = rot.m_z;
-}
 
 /*!
   Get the rotation part of the transformation matrix of a body, in form of a unit quaternion.
@@ -8364,11 +8161,20 @@ void operator delete(void* ptr) noexcept
 #endif
 
 template<class Object, class Handle>
+ndSharedPtr<Object>* SharedObjectFromHandle(const Handle* const ptr)
+{
+	ndSharedPtr<Object>* const sharedPtr = const_cast<ndSharedPtr<Object>*>(reinterpret_cast<const ndSharedPtr<Object>*>(ptr));
+	return sharedPtr;
+}
+
+template<class Object, class Handle>
 Object* ObjectFromHandle(const Handle* const ptr)
 {
-	const ndSharedPtr<Object>* const sharedPtr = reinterpret_cast<const ndSharedPtr<Object>*>(ptr);
+	//const ndSharedPtr<Object>* const sharedPtr = reinterpret_cast<const ndSharedPtr<Object>*>(ptr);
+	const ndSharedPtr<Object>* const sharedPtr = SharedObjectFromHandle<Object, Handle>(ptr);
 	return const_cast<Object*>(**sharedPtr);
 }
+
 
 bool CheckFloat(ndFloat32* ptr, ndInt32 size)
 {
@@ -8444,6 +8250,58 @@ void NewtonDestroy(const NewtonWorld* const newtonWorld)
 }
 
 /*!
+  Remove all bodies and joints from the Newton world.
+
+  @param *newtonWorld Pointer to the Newton world.
+
+  @return Nothing
+
+  This function will destroy all bodies and all joints in the Newton world, but
+  will retain group IDs.
+
+  Use this function for when you want to clear the world but preserve all the
+  group IDs and material pairs.
+
+  See also: ::NewtonMaterialDestroyAllGroupID
+*/
+void NewtonDestroyAllBodies(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	const ndBodyListView& bodyList = world->GetBodyList();
+	while (bodyList.GetCount())
+	{
+		ndBodyListView::ndNode* const node = bodyList.GetLast();
+		ndSharedPtr<ndBody>& body = node->GetInfo();
+		world->RemoveBody(*body);
+	}
+}
+
+/*!
+  Advance the simulation by a user defined amount of time.
+
+  @param *newtonWorld is the pointer to the Newton world
+  @param timestep time step in seconds.
+
+  @return Nothing
+
+  This function will advance the simulation by the specified amount of time.
+
+  The Newton Engine does not perform sub-steps, nor  does it need
+  tuning parameters. As a consequence, the application is responsible for
+  requesting sane time steps.
+
+  See also: ::NewtonInvalidateCache
+*/
+void NewtonUpdate(const NewtonWorld* const newtonWorld, dFloat timestep)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+
+	world->Update(timestep);
+}
+
+/*!
   Retrieve the user data attached to the world.
 
   @param *newtonWorld Pointer to the Newton world.
@@ -8512,9 +8370,27 @@ int NewtonMaterialCreateGroupID(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
-	//ndContactCallback* const contactNotify = static_cast<ndContactCallback*>(*world->GetContactNotify());
 	world->m_bodyMaterialGroup++;
 	return world->m_bodyMaterialGroup - 1;
+}
+
+/*!
+  Remove all groups ID from the Newton world.
+
+  @param *newtonWorld pointer to the Newton world.
+
+  @return Nothing.
+
+  This function removes all groups ID from the Newton world.
+  This function must be called after there are no more rigid bodies in the word.
+
+  See also: ::NewtonDestroyAllBodies
+*/
+void NewtonMaterialDestroyAllGroupID(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	world->ClearMaterials();
 }
 
 /*!
@@ -8619,7 +8495,6 @@ void NewtonMaterialSetCollisionCallback(const NewtonWorld* const newtonWorld, in
 	material->m_onContactsProcess = processCallback;
 }
 
-
 void NewtonCollisionSetUserData(const NewtonCollision* const collision, void* const userData)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -8657,6 +8532,23 @@ NewtonCollision* NewtonCreateBox(const NewtonWorld* const newtonWorld, dFloat dx
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
 	return reinterpret_cast<NewtonCollision*>(shape);
+}
+
+/*!
+  Release a reference from this collision object returning control to Newton.
+
+  @param *collisionPtr pointer to the collision object
+
+  @return Nothing.
+
+  to get the correct reference count of a collision primitive the application can call function *NewtonCollisionGetInfo*
+
+*/
+void NewtonDestroyCollision(const NewtonCollision* const collisionPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndSharedPtr<ndShapeInstance>* const instance (SharedObjectFromHandle<ndShapeInstance, NewtonCollision>(collisionPtr));
+	delete instance;
 }
 
 
@@ -8754,4 +8646,128 @@ void NewtonBodySetMaterialGroupID(const NewtonBody* const bodyPtr, int id)
 	ndShapeInstance& instance = body->GetAsBodyKinematic()->GetCollisionShape();
 	ndShapeMaterial material = instance.GetMaterial();
 	material.m_userId = id;
+}
+
+void  NewtonBodySetMassProperties(const NewtonBody* const bodyPtr, dFloat mass, const NewtonCollision* const collisionPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndShapeInstance* const instance = ObjectFromHandle<ndShapeInstance, NewtonCollision>(collisionPtr);
+	body->GetAsBodyKinematic()->SetMassMatrix(mass, *instance);
+}
+
+/*!
+  Return the pointer to the current force and torque call back function.
+
+  @param *bodyPtr pointer to the body.
+
+  @return pointer to the force call back.
+
+  This function can be used to concatenate different force calculation components making more modular the
+  design of function components dedicated to apply special effect. For example a body may have a basic force a force that
+  only apply the effect of gravity, but that application can place a region in where there can be a fluid volume, or another gravity field.
+  we this function the application can read the correct function and save into a local variable, and set a new one.
+  this new function will firs call the save function pointer and upon return apply the correct effect.
+  this similar to the concept of virtual methods on objected oriented languages.
+
+  The function *NewtonApplyForceAndTorque callback* is called by the Newton Engine every time an active body is going to be simulated.
+  The Newton Engine does not call the *NewtonApplyForceAndTorque callback* function for bodies that are inactive or have reached a state of stable equilibrium.
+
+  See also: ::NewtonBodyGetUserData, ::NewtonBodyGetUserData, ::NewtonBodySetForceAndTorqueCallback
+*/
+NewtonApplyForceAndTorque NewtonBodyGetForceAndTorqueCallback(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
+	return bodyNotify->m_forceAndTorque;
+}
+
+/*!
+  Assign an event function for applying external force and torque to a rigid body.
+
+  @param *bodyPtr pointer to the body.
+  @param callback pointer to a function callback used to apply force and torque to a rigid body.
+
+  @return Nothing.
+
+  Before the *NewtonApplyForceAndTorque callback* is called for a body, Newton first clears the net force and net torque for the body.
+
+  The function *NewtonApplyForceAndTorque callback* is called by the Newton Engine every time an active body is going to be simulated.
+  The Newton Engine does not call the *NewtonApplyForceAndTorque callback* function for bodies that are inactive or have reached a state of stable equilibrium.
+
+  See also: ::NewtonBodyGetUserData, ::NewtonBodyGetUserData, ::NewtonBodyGetForceAndTorqueCallback
+*/
+void  NewtonBodySetForceAndTorqueCallback(const NewtonBody* const bodyPtr, NewtonApplyForceAndTorque callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
+	bodyNotify->m_forceAndTorque = callback;
+}
+
+/*!
+  Set the transformation matrix of a rigid body.
+
+  @param *bodyPtr pointer to the body.
+  @param *matrixPtr pointer to an array of 16 floats containing the global matrix of the rigid body.
+
+  @return Nothing.
+
+  The matrix should be arranged in row-major order.
+  If you are using OpenGL matrices (column-major) you will need to transpose you matrices into a local array, before
+  passing them to Newton.
+
+  That application should make sure the transformation matrix has not scale, otherwise unpredictable result will occur.
+
+  See also: ::NewtonBodyGetMatrix
+*/
+void NewtonBodySetMatrix(const NewtonBody* const bodyPtr, const dFloat* const matrixPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndMatrix matrix(matrixPtr);
+	if (!CheckFloat(&matrix[0][0], 16))
+	{
+		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
+		matrix = ndGetIdentityMatrix();
+	}
+
+	matrix.m_front.m_w = ndFloat32(0.0f);
+	matrix.m_up.m_w = ndFloat32(0.0f);
+	matrix.m_right.m_w = ndFloat32(0.0f);
+	matrix.m_posit.m_w = ndFloat32(1.0f);
+	body->SetMatrix(matrix);
+}
+
+/*!
+  Get the transformation matrix of a rigid body.
+
+  @param *bodyPtr pointer to the body.
+  @param *matrixPtr pointer to an array of 16 floats that will hold the global matrix of the rigid body.
+
+  @return Nothing.
+
+  The matrix should be arranged in row-major order (this is the way direct x stores matrices).
+  If you are using OpenGL matrices (column-major) you will need to transpose you matrices into a local array, before
+  passing them to Newton.
+
+  See also: ::NewtonBodySetMatrix, ::NewtonBodyGetRotation
+*/
+void NewtonBodyGetMatrix(const NewtonBody* const bodyPtr, dFloat* const matrixPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	const ndMatrix matrix (body->GetMatrix());
+	ndMemCpy(matrixPtr, &matrix[0][0], sizeof(ndMatrix)/sizeof (ndFloat32));
+}
+
+void NewtonBodyGetPosition(const NewtonBody* const bodyPtr, dFloat* const posPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	const ndMatrix matrix(body->GetMatrix());
+	posPtr[0] = matrix.m_posit.m_x;
+	posPtr[1] = matrix.m_posit.m_y;
+	posPtr[2] = matrix.m_posit.m_z;
 }

@@ -17,6 +17,7 @@ ndNewtonBodyNotify::ndNewtonBodyNotify()
 	:ndModelBodyNotify()
 	,m_userData(nullptr)
 	,m_bodyIsInWorld(false)
+	,m_forceAndTorque(nullptr)
 {
 }
 
@@ -24,6 +25,7 @@ ndNewtonBodyNotify::ndNewtonBodyNotify(const ndNewtonBodyNotify& notify)
 	:ndModelBodyNotify(notify)
 	,m_userData(notify.m_userData)
 	,m_bodyIsInWorld(false)
+	,m_forceAndTorque(notify.m_forceAndTorque)
 {
 }
 

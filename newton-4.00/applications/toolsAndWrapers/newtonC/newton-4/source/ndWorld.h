@@ -62,8 +62,8 @@ class ndWorld: public ndClassAlloc
 
 	D_NEWTON_API ndInt32 GetEngineVersion() const;
 
-	D_NEWTON_API void Sync() const;
-	D_NEWTON_API void Update(ndFloat32 timestep);
+	D_NEWTON_API virtual void Sync() const;
+	D_NEWTON_API virtual void Update(ndFloat32 timestep);
 	D_NEWTON_API virtual void CollisionUpdate(ndFloat32 timestep);
 
 	D_NEWTON_API ndInt32 GetThreadCount() const;

@@ -13,11 +13,15 @@
 #define D_NEWTON_CONTACT_CALLBACK_H_
 
 #include "newtonStdafx.h"
-#include "Newton.h"
+
+class NewtonJoint;
 
 class ndNewtonMaterial : public ndApplicationMaterial
 {
 	public:
+	typedef int (*NewtonOnAABBOverlap) (const NewtonJoint* const contact, ndFloat32 timestep, int threadIndex);
+	typedef void (*NewtonContactsProcess) (const NewtonJoint* const contact, ndFloat32 timestep, int threadIndex);
+
 	ndNewtonMaterial();
 	ndNewtonMaterial(const ndNewtonMaterial& src);
 	virtual ~ndNewtonMaterial();

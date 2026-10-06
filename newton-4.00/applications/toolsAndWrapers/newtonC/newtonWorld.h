@@ -18,13 +18,13 @@ class ndNewtonWorld: public ndWorld
 {
 	public:
 	ndNewtonWorld();
-	~ndNewtonWorld();
+	virtual ~ndNewtonWorld() override;
 
-
+	void ClearMaterials();
 	ndMaterial* GetMaterial(int id0, int id1) const;
 	
 	 
-	//void Update(ndFloat32 timestep);
+	void Update(ndFloat32 timestep) override;
 	//void SetSubSteps(ndInt32 substeps);
 	//void SetIterations(ndInt32 iterations);
 

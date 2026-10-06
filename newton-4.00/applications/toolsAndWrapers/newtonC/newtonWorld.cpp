@@ -18,11 +18,17 @@ ndNewtonWorld::ndNewtonWorld()
 	,m_userData(nullptr)
 	,m_bodyMaterialGroup(1)
 {
+	SetSubSteps(2);
 	SetContactNotify(ndSharedPtr<ndContactNotify>(new ndContactCallback));
 }
 
 ndNewtonWorld::~ndNewtonWorld()
 {
+}
+
+void ndNewtonWorld::ClearMaterials()
+{
+	SetContactNotify(ndSharedPtr<ndContactNotify>(new ndContactCallback));
 }
 
 ndMaterial* ndNewtonWorld::GetMaterial(int id0, int id1) const
@@ -37,4 +43,11 @@ ndMaterial* ndNewtonWorld::GetMaterial(int id0, int id1) const
 		}
 	}
 	return notify->GetMaterial(id0, id1);
+}
+
+void ndNewtonWorld::Update(ndFloat32 timestep)
+{
+	//ndTrace(("%f\n", timestep));
+	ndWorld::Update(timestep);
+	ndWorld::Sync();
 }
