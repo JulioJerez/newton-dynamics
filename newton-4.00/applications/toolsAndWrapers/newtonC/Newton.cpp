@@ -23,6 +23,7 @@
 #include "Newton.h"
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
+#include "newtonBodyNotify.h"
 
 #ifdef _NEWTON_BUILD_DLL
 	#if (defined (__MINGW32__) || defined (__MINGW64__))
@@ -822,21 +823,6 @@ void NewtonWorldSetUserData(const NewtonWorld* const newtonWorld, void* const us
 	world->SetUserData (userData);
 }
 
-/*!
-  Retrieve the user data attached to the world.
-
-  @param *newtonWorld Pointer to the Newton world.
-
-  @return Pointer to user data.
-
-  See also: ::NewtonBodySetUserData, ::NewtonWorldSetUserData, ::NewtonWorldGetUserData
-  */
-void* NewtonWorldGetUserData(const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	return world->GetUserData();
-}
 
 /*!
   Specify a custom destructor callback for destroying the world.
@@ -1997,29 +1983,6 @@ NewtonCollision* NewtonCreateNull(const NewtonWorld* const newtonWorld)
 }
 
 
-/*!
-  Create a box primitive for collision.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param dx box side one x dimension.
-  @param dy box side one y dimension.
-  @param dz box side one z dimension.
-  @param shapeID fixme
-  @param *offsetMatrix pointer to an array of 16 floats containing the offset matrix of the box relative to the body. If this parameter is NULL, then the primitive is centered at the origin of the body.
-
-  @return Pointer to the box
-
-*/
-NewtonCollision* NewtonCreateBox(const NewtonWorld* const newtonWorld, dFloat dx, dFloat dy, dFloat dz, int shapeID, const dFloat* const offsetMatrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	dgMatrix matrix (dgGetIdentityMatrix());
-	if (offsetMatrix) {
-		 matrix = dgMatrix (offsetMatrix);
-	}
-	return (NewtonCollision*) world->CreateBox (dx, dy, dz, shapeID, matrix);
-}
 
 /*!
   Create a generalized ellipsoid primitive..
@@ -3735,13 +3698,6 @@ dLong NewtonCollisionGetUserID(const NewtonCollision* const collision)
 	return instance->GetUserDataID();
 }
 
-void NewtonCollisionSetUserData (const NewtonCollision* const collision, void* const userData)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const instance = (dgCollisionInstance*) collision;
-	instance->SetUserData(userData);
-}
-
 void* NewtonCollisionGetUserData (const NewtonCollision* const collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -4050,46 +4006,6 @@ Rigid Body Interface
 */
 
 
-/*!
-  Create a rigid body.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param *collisionPtr pointer to the collision object.
-  @param *matrixPtr fixme
-
-  @return Pointer to the rigid body.
-
-  This function creates a Newton rigid body and assigns a *collisionPtr* as the collision geometry representing the rigid body.
-  This function increments the reference count of the collision geometry.
-  All event functions are set to NULL and the material gruopID of the body is set to the default GroupID.
-
-  See also: ::NewtonDestroyBody
-*/
-NewtonBody* NewtonCreateDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collisionPtr, const dFloat* const matrixPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	dgCollisionInstance* collision = (dgCollisionInstance*)collisionPtr;
-	if (!collisionPtr) {
-		collision = (dgCollisionInstance*) NewtonCreateNull(newtonWorld);
-	}
-
-	#ifdef SAVE_COLLISION
-	SaveCollision (collisionPtr);
-	#endif
-
-	dgMatrix matrix (matrixPtr);
-	matrix.m_front.m_w = dgFloat32 (0.0f);
-	matrix.m_up.m_w    = dgFloat32 (0.0f);
-	matrix.m_right.m_w = dgFloat32 (0.0f);
-	matrix.m_posit.m_w = dgFloat32 (1.0f);
-
-	NewtonBody* const body = (NewtonBody*)world->CreateDynamicBody (collision, matrix);
-	if (!collisionPtr) {
-		NewtonDestroyCollision((NewtonCollision*)collision);
-	}
-	return body;
-}
 
 NewtonBody* NewtonCreateAsymetricDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collisionPtr, const dFloat* const matrixPtr)
 {
@@ -4261,25 +4177,6 @@ int NewtonBodyGetID (const NewtonBody* const bodyPtr)
 	return body->GetUniqueID();
 }
 
-/*!
-  Store a user defined data value with the body.
-
-  @param *bodyPtr pointer to the body.
-  @param *userDataPtr pointer to the user defined user data value.
-
-  @return Nothing.
-
-  The application can store a user defined value with the Body. This value can be the pointer to a structure containing some application data for special effect.
-  if the application allocate some resource to store the user data, the application can register a joint destructor to get rid of the allocated resource when the body is destroyed
-
-  See also: ::NewtonBodyGetUserData
-*/
-void  NewtonBodySetUserData(const NewtonBody* const bodyPtr, void* const userDataPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-	body->SetUserData (userDataPtr);
-}
 
 /*!
   Retrieve a user defined data value stored with the body.
@@ -5252,26 +5149,6 @@ NewtonCollision* NewtonBodyGetCollision(const NewtonBody* const bodyPtr)
 	return (NewtonCollision*) body->GetCollision();
 }
 
-
-/*!
-  Assign a material group id to the body.
-
-  @param *bodyPtr pointer to the body.
-  @param id id of a previously created material group.
-
-  @return Nothing.
-
-  When the application creates a body, the default material group, *defaultGroupId*, is applied by default.
-
-  See also: ::NewtonBodyGetMaterialGroupID, ::NewtonMaterialCreateGroupID, ::NewtonMaterialGetDefaultGroupID
-*/
-void NewtonBodySetMaterialGroupID(const NewtonBody* const bodyPtr, int id)
-{
-	dgBody* const body = (dgBody *)bodyPtr;
-
-	TRACE_FUNCTION(__FUNCTION__);
-	body->SetGroupID (dgUnsigned32 (id));
-}
 
 
 /*!
@@ -8493,6 +8370,17 @@ Object* ObjectFromHandle(const Handle* const ptr)
 	return const_cast<Object*>(**sharedPtr);
 }
 
+bool CheckFloat(ndFloat32* ptr, ndInt32 size)
+{
+	for (ndInt32 i = 0; i < size; ++i)
+	{
+		if (!_finite(ptr[i]) || _isnan(ptr[i]))
+		{
+			return false;
+		}
+	}
+	return true;
+}
 
 // fixme: needs docu
 // @param mallocFnt is a pointer to the memory allocator callback function. If this parameter is NULL the standard *malloc* function is used.
@@ -8555,6 +8443,22 @@ void NewtonDestroy(const NewtonWorld* const newtonWorld)
 	delete world;
 }
 
+/*!
+  Retrieve the user data attached to the world.
+
+  @param *newtonWorld Pointer to the Newton world.
+
+  @return Pointer to user data.
+
+  See also: ::NewtonBodySetUserData, ::NewtonWorldSetUserData, ::NewtonWorldGetUserData
+  */
+void* NewtonWorldGetUserData(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	return *world->m_userData;
+}
+
 void NewtonLoadPlugins(const NewtonWorld* const, const char* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -8586,9 +8490,6 @@ const char* NewtonGetPluginString(const NewtonWorld* const newtonWorld, const vo
 int NewtonMaterialGetDefaultGroupID(const NewtonWorld* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
-	//ndContactCallback* contactNotify world->GetContactNotify()
-	//return int(world->GetDefualtBodyGroupID());
 	return 0;
 }
 
@@ -8718,3 +8619,139 @@ void NewtonMaterialSetCollisionCallback(const NewtonWorld* const newtonWorld, in
 	material->m_onContactsProcess = processCallback;
 }
 
+
+void NewtonCollisionSetUserData(const NewtonCollision* const collision, void* const userData)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = ObjectFromHandle<ndShapeInstance, NewtonCollision>(collision);
+	ndShapeMaterial material = instance->GetMaterial();
+	material.m_userParam[0].m_ptrData = userData;
+}
+
+
+/*!
+  Create a box primitive for collision.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param dx box side one x dimension.
+  @param dy box side one y dimension.
+  @param dz box side one z dimension.
+  @param shapeID fixme
+  @param *offsetMatrix pointer to an array of 16 floats containing the offset matrix of the box relative to the body. If this parameter is NULL, then the primitive is centered at the origin of the body.
+
+  @return Pointer to the box
+
+*/
+NewtonCollision* NewtonCreateBox(const NewtonWorld* const newtonWorld, dFloat dx, dFloat dy, dFloat dz, int shapeID, const dFloat* const offsetMatrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndMatrix matrix(ndGetIdentityMatrix());
+	if (offsetMatrix) 
+	{
+		matrix = ndMatrix(offsetMatrix);
+	}
+	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(new ndShapeInstance(new ndShapeBox(dx, dy, dz)));
+	ndShapeInstance* const instance = **shape;
+	instance->SetLocalMatrix(matrix);
+	ndShapeMaterial material = instance->GetMaterial();
+	material.m_userId = shapeID;
+	return reinterpret_cast<NewtonCollision*>(shape);
+}
+
+
+/*!
+  Create a rigid body.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param *collisionPtr pointer to the collision object.
+  @param *matrixPtr fixme
+
+  @return Pointer to the rigid body.
+
+  This function creates a Newton rigid body and assigns a *collisionPtr* as the collision geometry representing the rigid body.
+  This function increments the reference count of the collision geometry.
+  All event functions are set to NULL and the material gruopID of the body is set to the default GroupID.
+
+  See also: ::NewtonDestroyBody
+*/
+NewtonBody* NewtonCreateDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrixPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance instance(new ndShapeNull());
+	if (collision)
+	{
+		instance = *ObjectFromHandle<ndShapeInstance, NewtonCollision>(collision);
+	}
+
+	ndMatrix matrix(matrixPtr);
+	if (!CheckFloat(&matrix[0][0], 16))
+	{
+		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
+		matrix = ndGetIdentityMatrix();
+	}
+
+	matrix.m_front.m_w = ndFloat32(0.0f);
+	matrix.m_up.m_w = ndFloat32(0.0f);
+	matrix.m_right.m_w = ndFloat32(0.0f);
+	matrix.m_posit.m_w = ndFloat32(1.0f);
+	
+	ndSharedPtr<ndBody>* const body = new ndSharedPtr<ndBody>(new ndBodyDynamic());
+	ndBodyDynamic* const dynBody = (*body)->GetAsBodyDynamic();
+
+	ndSharedPtr<ndBodyNotify> bodyNotify(new ndNewtonBodyNotify());
+
+	dynBody->SetMatrix(matrix);
+	dynBody->SetCollisionShape(instance);
+	dynBody->SetNotifyCallback(bodyNotify);
+
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	world->AddBody(*body);
+	return reinterpret_cast<NewtonBody*>(body);
+}
+
+/*!
+  Store a user defined data value with the body.
+
+  @param *bodyPtr pointer to the body.
+  @param *userDataPtr pointer to the user defined user data value.
+
+  @return Nothing.
+
+  The application can store a user defined value with the Body. This value can be the pointer to a structure containing some application data for special effect.
+  if the application allocate some resource to store the user data, the application can register a joint destructor to get rid of the allocated resource when the body is destroyed
+
+  See also: ::NewtonBodyGetUserData
+*/
+void  NewtonBodySetUserData(const NewtonBody* const bodyPtr, void* const userDataPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+
+	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
+	bodyNotify->m_userData = ndWeakPtr<void>(userDataPtr);
+}
+
+/*!
+  Assign a material group id to the body.
+
+  @param *bodyPtr pointer to the body.
+  @param id id of a previously created material group.
+
+  @return Nothing.
+
+  When the application creates a body, the default material group, *defaultGroupId*, is applied by default.
+
+  See also: ::NewtonBodyGetMaterialGroupID, ::NewtonMaterialCreateGroupID, ::NewtonMaterialGetDefaultGroupID
+*/
+void NewtonBodySetMaterialGroupID(const NewtonBody* const bodyPtr, int id)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
+	bodyNotify->m_materialGoupId = id;
+
+	ndShapeInstance& instance = body->GetAsBodyKinematic()->GetCollisionShape();
+	ndShapeMaterial material = instance.GetMaterial();
+	material.m_userId = id;
+}

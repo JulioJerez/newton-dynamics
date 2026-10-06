@@ -28,6 +28,7 @@ class ndNewtonWorld: public ndWorld
 	//void SetSubSteps(ndInt32 substeps);
 	//void SetIterations(ndInt32 iterations);
 
+	ndWeakPtr<void> m_userData;
 	ndInt32 m_bodyMaterialGroup;
 };
 

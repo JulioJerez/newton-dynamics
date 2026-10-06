@@ -15,6 +15,7 @@
 
 ndNewtonWorld::ndNewtonWorld()
 	:ndWorld()
+	,m_userData(nullptr)
 	,m_bodyMaterialGroup(1)
 {
 	SetContactNotify(ndSharedPtr<ndContactNotify>(new ndContactCallback));

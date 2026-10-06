@@ -1,0 +1,65 @@
+/* Copyright (c) <2003-2021> <Newton Game Dynamics>
+* 
+* This software is provided 'as-is', without any express or implied
+* warranty. In no event will the authors be held liable for any damages
+* arising from the use of this software.
+* 
+* Permission is granted to anyone to use this software for any purpose,
+* including commercial applications, and to alter it and redistribute it
+* freely
+*/
+
+#ifndef D_NEWTON_BODY_NOTIFY_H_
+#define D_NEWTON_BODY_NOTIFY_H_
+
+#include "newtonStdafx.h"
+#include "Newton.h"
+
+class ndNewtonBodyNotify : public ndModelBodyNotify
+{
+	public:
+	D_CLASS_REFLECTION(ndNewtonBodyNotify, ndModelBodyNotify)
+
+	ndNewtonBodyNotify();
+	ndNewtonBodyNotify(const ndNewtonBodyNotify& notify);
+	//ndDemoEntityNotify(
+	//	ndDemoEntityManager* const manager,
+	//	const ndSharedPtr<ndRenderSceneNode>& entity,
+	//	ndBodyKinematic* const parentBody = nullptr,
+	//	const ndVector& gravity = ndVector(0.0f, DEMO_GRAVITY, 0.0f, 0.0f));
+
+	virtual ~ndNewtonBodyNotify() override;
+
+	ndBodyNotify* Clone() const override;
+
+
+	//ndSharedPtr<ndRenderSceneNode> GetUserData() const
+	//{
+	//	return m_entity;
+	//}
+	//
+	//void ResetEntityTransform(const ndMatrix& matrix);
+	//
+	//void RemoveBody();
+
+	virtual void OnBodyAddedToWorld();
+	virtual void OnBodyRemovedFromWorld();
+	virtual void OnTransform(ndFloat32 timestep, const ndMatrix& matrix) override;
+	virtual void OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep) override;
+
+	//bool CheckInWorld(const ndMatrix& matrix) const;
+
+	//ndDemoEntityManager* m_manager;
+	//ndSharedPtr<ndRenderSceneNode> m_entity;
+	//ndTransform m_transform;
+	//ndMatrix m_bindMatrix;
+	//ndFloat32 m_capSpeed;
+	//ndFloat32 m_capOmega;
+
+	ndWeakPtr<void> m_userData;
+	ndInt32 m_materialGoupId;
+	bool m_bodyIsInWorld;
+};
+
+
+#endif

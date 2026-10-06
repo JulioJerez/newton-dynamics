@@ -625,7 +625,6 @@ extern "C" {
 	// **********************************************************************************************
 	NEWTON_API NewtonCollision* NewtonCreateNull (const NewtonWorld* const newtonWorld);
 	NEWTON_API NewtonCollision* NewtonCreateSphere (const NewtonWorld* const newtonWorld, dFloat radius, int shapeID, const dFloat* const offsetMatrix);
-	NEWTON_API NewtonCollision* NewtonCreateBox (const NewtonWorld* const newtonWorld, dFloat dx, dFloat dy, dFloat dz, int shapeID, const dFloat* const offsetMatrix);
 	NEWTON_API NewtonCollision* NewtonCreateCone (const NewtonWorld* const newtonWorld, dFloat radius, dFloat height, int shapeID, const dFloat* const offsetMatrix);
 	NEWTON_API NewtonCollision* NewtonCreateCapsule (const NewtonWorld* const newtonWorld, dFloat radius0, dFloat radius1, dFloat height, int shapeID, const dFloat* const offsetMatrix);
 	NEWTON_API NewtonCollision* NewtonCreateCylinder (const NewtonWorld* const newtonWorld, dFloat radio0, dFloat radio1, dFloat height, int shapeID, const dFloat* const offsetMatrix);
@@ -782,7 +781,6 @@ extern "C" {
 	NEWTON_API int NewtonCollisionIsStaticShape (const NewtonCollision* const collision);
 
 	// for the end user
-	NEWTON_API void NewtonCollisionSetUserData (const NewtonCollision* const collision, void* const userData);
 	NEWTON_API void* NewtonCollisionGetUserData (const NewtonCollision* const collision);
 	
 	NEWTON_API void NewtonCollisionSetUserID (const NewtonCollision* const collision, dLong id);
@@ -864,7 +862,6 @@ extern "C" {
 	// body manipulation functions
 	//
 	// **********************************************************************************************
-	NEWTON_API NewtonBody* NewtonCreateDynamicBody (const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix);
 	NEWTON_API NewtonBody* NewtonCreateKinematicBody (const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix);
 	NEWTON_API NewtonBody* NewtonCreateAsymetricDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix);
 
@@ -889,7 +886,6 @@ extern "C" {
 	NEWTON_API void  NewtonBodySetMatrixNoSleep (const NewtonBody* const body, const dFloat* const matrix);
 	NEWTON_API void  NewtonBodySetMatrixRecursive (const NewtonBody* const body, const dFloat* const matrix);
 	
-	NEWTON_API void  NewtonBodySetMaterialGroupID (const NewtonBody* const body, int id);
 	NEWTON_API void  NewtonBodySetContinuousCollisionMode (const NewtonBody* const body, unsigned state);
 	NEWTON_API void  NewtonBodySetJointRecursiveCollision (const NewtonBody* const body, unsigned state);
 	NEWTON_API void  NewtonBodySetOmega (const NewtonBody* const body, const dFloat* const omega);
@@ -927,7 +923,7 @@ extern "C" {
 
 	NEWTON_API int NewtonBodyGetID (const NewtonBody* const body);
 
-	NEWTON_API void  NewtonBodySetUserData (const NewtonBody* const body, void* const userData);
+	
 	NEWTON_API void* NewtonBodyGetUserData (const NewtonBody* const body);
 
 	NEWTON_API NewtonWorld* NewtonBodyGetWorld (const NewtonBody* const body);
@@ -1333,6 +1329,16 @@ extern "C" {
 	NEWTON_API void NewtonMaterialSetDefaultFriction(const NewtonWorld* const newtonWorld, int id0, int id1, dFloat staticFriction, dFloat kineticFriction);
 	NEWTON_API void NewtonMaterialSetCollisionCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnAABBOverlap aabbOverlap, NewtonContactsProcess process);
 
+	// collision shapes
+	NEWTON_API NewtonCollision* NewtonCreateBox(const NewtonWorld* const newtonWorld, dFloat dx, dFloat dy, dFloat dz, int shapeID, const dFloat* const offsetMatrix);
+
+	NEWTON_API void NewtonCollisionSetUserData(const NewtonCollision* const collision, void* const userData);
+
+	// rigid bodies.
+	NEWTON_API NewtonBody* NewtonCreateDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix);
+
+	NEWTON_API void NewtonBodySetMaterialGroupID(const NewtonBody* const body, int id);
+	NEWTON_API void NewtonBodySetUserData(const NewtonBody* const body, void* const userData);
 #ifdef __cplusplus 
 }
 #endif
