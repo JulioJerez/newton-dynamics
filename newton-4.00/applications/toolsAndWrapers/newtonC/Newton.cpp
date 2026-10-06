@@ -4088,26 +4088,6 @@ int NewtonBodyGetID (const NewtonBody* const bodyPtr)
 
 
 /*!
-  Retrieve a user defined data value stored with the body.
-
-  @param *bodyPtr pointer to the body.
-
-  @return The user defined data.
-
-  The application can store a user defined value with a rigid body. This value can be the pointer
-  to a structure which is the graphical representation of the rigid body.
-
-  See also: ::NewtonBodySetUserData, 
-*/
-void* NewtonBodyGetUserData(const NewtonBody* const bodyPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-	return body->GetUserData ();
-}
-
-
-/*!
   Return pointer to the Newton world of the specified body.
 
   @param *bodyPtr Pointer to the body.
@@ -4123,57 +4103,6 @@ NewtonWorld* NewtonBodyGetWorld(const NewtonBody* const bodyPtr)
 	dgBody* const body = (dgBody *)bodyPtr;
 	return (NewtonWorld*) body->GetWorld();
 }
-
-
-/*!
-  Assign a transformation event function to the body.
-
-  @param *bodyPtr pointer to the body.
-  @param callback pointer to a function callback in used to update the transformation matrix of the visual object that represents the rigid body.
-
-  @return Nothing.
-
-  The function *NewtonSetTransform callback* is called by the Newton engine every time a visual object that represents the rigid body has changed.
-  The application can obtain the pointer user data value that points to the visual object.
-  The Newton engine does not call the *NewtonSetTransform callback* function for bodies that are inactive or have reached a state of stable equilibrium.
-
-  The matrix should be organized in row-major order (this is the way directX and OpenGL stores matrices).
-
-  See also: NewtonBodyGetTransformCallback
-*/
-void  NewtonBodySetTransformCallback(const NewtonBody* const bodyPtr, NewtonSetTransform callback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-	body->SetMatrixUpdateCallback ((dgBody::OnMatrixUpdateCallback) callback);
-}
-
-
-/*!
-  Assign a transformation event function to the body.
-
-  @param *bodyPtr pointer to the body.
-
-  @return Nothing.
-
-  The function *NewtonSetTransform callback* is called by the Newton engine every time a visual object that represents the rigid body has changed.
-  The application can obtain the pointer user data value that points to the visual object.
-  The Newton engine does not call the *NewtonSetTransform callback* function for bodies that are inactive or have reached a state of stable equilibrium.
-
-  The matrix should be organized in row-major order (this is the way directX and OpenGL stores matrices).
-
-  See also: ::NewtonBodySetTransformCallback
-*/
-NewtonSetTransform NewtonBodyGetTransformCallback (const NewtonBody* const bodyPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-	return (NewtonSetTransform) body->GetMatrixUpdateCallback();
-}
-
-
-
-
 
 
 /*!
@@ -4429,26 +4358,6 @@ void  NewtonBodySetForce(const NewtonBody* const bodyPtr, const dFloat* const ve
 	body->SetForce (vector);
 }
 
-/*!
-  Add the net force applied to a rigid body.
-
-  @param *bodyPtr pointer to the body to be destroyed.
-  @param *vectorPtr pointer to an array of 3 floats containing the net force to be applied to the body.
-
-  @return Nothing.
-
-  This function is only effective when called from *NewtonApplyForceAndTorque callback*
-
-  See also: ::NewtonBodySetForce, ::NewtonBodyGetForce
-*/
-void  NewtonBodyAddForce(const NewtonBody* const bodyPtr, const dFloat* const vectorPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-	dgVector vector (vectorPtr[0], vectorPtr[1], vectorPtr[2], dgFloat32 (0.0f));
-
-	body->AddForce (vector);
-}
 
 /*!
   Get the net force applied to a rigid body after the last NewtonUpdate.
@@ -4490,26 +4399,6 @@ void  NewtonBodySetTorque(const NewtonBody* const bodyPtr, const dFloat* const v
 	body->SetTorque (vector);
 }
 
-
-/*!
-  Add the net torque applied to a rigid body.
-
-  @param *bodyPtr pointer to the body.
-  @param *vectorPtr pointer to an array of 3 floats containing the net torque to be applied to the body.
-
-  @return Nothing.
-
-  This function is only effective when called from *NewtonApplyForceAndTorque callback*
-
-  See also: ::NewtonBodySetTorque, ::NewtonBodyGetTorque
-*/
-void  NewtonBodyAddTorque(const NewtonBody* const bodyPtr, const dFloat* const vectorPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-	dgVector vector (vectorPtr[0], vectorPtr[1], vectorPtr[2], dgFloat32 (0.0f));
-	body->AddTorque (vector);
-}
 
 /*!
   Get the net torque applied to a rigid body after the last NewtonUpdate.
@@ -8591,7 +8480,7 @@ NewtonBody* NewtonCreateDynamicBody(const NewtonWorld* const newtonWorld, const 
 	ndSharedPtr<ndBody>* const body = new ndSharedPtr<ndBody>(new ndBodyDynamic());
 	ndBodyDynamic* const dynBody = (*body)->GetAsBodyDynamic();
 
-	ndSharedPtr<ndBodyNotify> bodyNotify(new ndNewtonBodyNotify());
+	ndSharedPtr<ndBodyNotify> bodyNotify(new ndNewtonBodyNotify(reinterpret_cast<NewtonBody*>(body)));
 
 	dynBody->SetMatrix(matrix);
 	dynBody->SetCollisionShape(instance);
@@ -8623,6 +8512,27 @@ void  NewtonBodySetUserData(const NewtonBody* const bodyPtr, void* const userDat
 	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
 	bodyNotify->m_userData = ndWeakPtr<void>(userDataPtr);
 }
+
+/*!
+  Retrieve a user defined data value stored with the body.
+
+  @param *bodyPtr pointer to the body.
+
+  @return The user defined data.
+
+  The application can store a user defined value with a rigid body. This value can be the pointer
+  to a structure which is the graphical representation of the rigid body.
+
+  See also: ::NewtonBodySetUserData,
+*/
+void* NewtonBodyGetUserData(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
+	return *bodyNotify->m_userData;
+}
+
 
 /*!
   Assign a material group id to the body.
@@ -8770,4 +8680,92 @@ void NewtonBodyGetPosition(const NewtonBody* const bodyPtr, dFloat* const posPtr
 	posPtr[0] = matrix.m_posit.m_x;
 	posPtr[1] = matrix.m_posit.m_y;
 	posPtr[2] = matrix.m_posit.m_z;
+}
+
+/*!
+  Add the net force applied to a rigid body.
+
+  @param *bodyPtr pointer to the body to be destroyed.
+  @param *vectorPtr pointer to an array of 3 floats containing the net force to be applied to the body.
+
+  @return Nothing.
+
+  This function is only effective when called from *NewtonApplyForceAndTorque callback*
+
+  See also: ::NewtonBodySetForce, ::NewtonBodyGetForce
+*/
+void  NewtonBodyAddForce(const NewtonBody* const bodyPtr, const dFloat* const vectorPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndVector vector(vectorPtr[0], vectorPtr[1], vectorPtr[2], ndFloat32(0.0f));
+	body->SetForce(body->GetForce() + vector);
+}
+
+/*!
+  Add the net torque applied to a rigid body.
+
+  @param *bodyPtr pointer to the body.
+  @param *vectorPtr pointer to an array of 3 floats containing the net torque to be applied to the body.
+
+  @return Nothing.
+
+  This function is only effective when called from *NewtonApplyForceAndTorque callback*
+
+  See also: ::NewtonBodySetTorque, ::NewtonBodyGetTorque
+*/
+void  NewtonBodyAddTorque(const NewtonBody* const bodyPtr, const dFloat* const vectorPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndVector vector(vectorPtr[0], vectorPtr[1], vectorPtr[2], ndFloat32(0.0f));
+	body->SetTorque(body->GetTorque() + vector);
+}
+
+/*!
+  Assign a transformation event function to the body.
+
+  @param *bodyPtr pointer to the body.
+  @param callback pointer to a function callback in used to update the transformation matrix of the visual object that represents the rigid body.
+
+  @return Nothing.
+
+  The function *NewtonSetTransform callback* is called by the Newton engine every time a visual object that represents the rigid body has changed.
+  The application can obtain the pointer user data value that points to the visual object.
+  The Newton engine does not call the *NewtonSetTransform callback* function for bodies that are inactive or have reached a state of stable equilibrium.
+
+  The matrix should be organized in row-major order (this is the way directX and OpenGL stores matrices).
+
+  See also: NewtonBodyGetTransformCallback
+*/
+void  NewtonBodySetTransformCallback(const NewtonBody* const bodyPtr, NewtonSetTransform callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
+	bodyNotify->m_applyTransform = callback;
+}
+
+
+/*!
+  Assign a transformation event function to the body.
+
+  @param *bodyPtr pointer to the body.
+
+  @return Nothing.
+
+  The function *NewtonSetTransform callback* is called by the Newton engine every time a visual object that represents the rigid body has changed.
+  The application can obtain the pointer user data value that points to the visual object.
+  The Newton engine does not call the *NewtonSetTransform callback* function for bodies that are inactive or have reached a state of stable equilibrium.
+
+  The matrix should be organized in row-major order (this is the way directX and OpenGL stores matrices).
+
+  See also: ::NewtonBodySetTransformCallback
+*/
+NewtonSetTransform NewtonBodyGetTransformCallback(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
+	return bodyNotify->m_applyTransform;
 }

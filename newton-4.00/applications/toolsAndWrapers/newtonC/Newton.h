@@ -403,7 +403,6 @@ extern "C" {
 												 int vertexCount, const dFloat* const vertex, int vertexStrideInBytes); 
 
 	typedef void (*NewtonBodyDestructor) (const NewtonBody* const body);
-	typedef void (*NewtonSetTransform) (const NewtonBody* const body, const dFloat* const matrix, int threadIndex);
 
 	typedef int (*NewtonIslandUpdate) (const NewtonWorld* const newtonWorld, const void* islandHandle, int bodyCount);
 	
@@ -867,9 +866,6 @@ extern "C" {
 	NEWTON_API int NewtonBodyGetCollidable (const NewtonBody* const body);
 	NEWTON_API void NewtonBodySetCollidable (const NewtonBody* const body, int collidableState);
 
-	NEWTON_API void  NewtonBodyAddForce (const NewtonBody* const body, const dFloat* const force);
-	NEWTON_API void  NewtonBodyAddTorque (const NewtonBody* const body, const dFloat* const torque);
-
 	NEWTON_API void  NewtonBodySetCentreOfMass (const NewtonBody* const body, const dFloat* const com);
 	NEWTON_API void  NewtonBodySetMassMatrix (const NewtonBody* const body, dFloat mass, dFloat Ixx, dFloat Iyy, dFloat Izz);
 	NEWTON_API void  NewtonBodySetFullMassMatrix (const NewtonBody* const body, dFloat mass, const dFloat* const inertiaMatrix);
@@ -907,13 +903,7 @@ extern "C" {
 	NEWTON_API void NewtonBodySetDestructorCallback (const NewtonBody* const body, NewtonBodyDestructor callback);
 	NEWTON_API NewtonBodyDestructor NewtonBodyGetDestructorCallback (const NewtonBody* const body);
 
-	NEWTON_API void  NewtonBodySetTransformCallback (const NewtonBody* const body, NewtonSetTransform callback);
-	NEWTON_API NewtonSetTransform NewtonBodyGetTransformCallback (const NewtonBody* const body);
-
 	NEWTON_API int NewtonBodyGetID (const NewtonBody* const body);
-	
-	NEWTON_API void* NewtonBodyGetUserData (const NewtonBody* const body);
-
 	NEWTON_API NewtonWorld* NewtonBodyGetWorld (const NewtonBody* const body);
 	NEWTON_API NewtonCollision* NewtonBodyGetCollision (const NewtonBody* const body);
 	NEWTON_API int NewtonBodyGetMaterialGroupID (const NewtonBody* const body);
@@ -1295,6 +1285,7 @@ extern "C" {
 	typedef int (*NewtonOnAABBOverlap) (const NewtonJoint* const contact, dFloat timestep, int threadIndex);
 	typedef void (*NewtonContactsProcess) (const NewtonJoint* const contact, dFloat timestep, int threadIndex);
 	typedef void (*NewtonApplyForceAndTorque) (const NewtonBody* const body, dFloat timestep, int threadIndex);
+	typedef void (*NewtonSetTransform) (const NewtonBody* const body, const dFloat* const matrix, int threadIndex);
 
 	NEWTON_API void* NewtonAlloc(int sizeInBytes);
 	NEWTON_API void NewtonFree(void* const ptr);
@@ -1331,13 +1322,21 @@ extern "C" {
 	// rigid bodies.
 	NEWTON_API NewtonBody* NewtonCreateDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix);
 
+	NEWTON_API void* NewtonBodyGetUserData(const NewtonBody* const body);
 	NEWTON_API void NewtonBodySetMaterialGroupID(const NewtonBody* const body, int id);
 	NEWTON_API void NewtonBodySetUserData(const NewtonBody* const body, void* const userData);
 	NEWTON_API void NewtonBodySetMatrix(const NewtonBody* const body, const dFloat* const matrix);
 	NEWTON_API void NewtonBodySetMassProperties(const NewtonBody* const body, dFloat mass, const NewtonCollision* const collision);
 
+	NEWTON_API void  NewtonBodyAddForce(const NewtonBody* const body, const dFloat* const force);
+	NEWTON_API void  NewtonBodyAddTorque(const NewtonBody* const body, const dFloat* const torque);
+
 	NEWTON_API void NewtonBodyGetPosition(const NewtonBody* const body, dFloat* const pos);
 	NEWTON_API void NewtonBodyGetMatrix(const NewtonBody* const body, dFloat* const matrix);
+
+	NEWTON_API void  NewtonBodySetTransformCallback(const NewtonBody* const body, NewtonSetTransform callback);
+	NEWTON_API NewtonSetTransform NewtonBodyGetTransformCallback(const NewtonBody* const body);
+
 	NEWTON_API void NewtonBodySetForceAndTorqueCallback(const NewtonBody* const body, NewtonApplyForceAndTorque callback);
 	NEWTON_API NewtonApplyForceAndTorque NewtonBodyGetForceAndTorqueCallback(const NewtonBody* const body);
 #ifdef __cplusplus 

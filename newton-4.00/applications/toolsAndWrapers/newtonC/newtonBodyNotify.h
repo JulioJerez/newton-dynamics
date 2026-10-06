@@ -20,29 +20,14 @@ class ndNewtonBodyNotify : public ndModelBodyNotify
 {
 	public:
 	D_CLASS_REFLECTION(ndNewtonBodyNotify, ndModelBodyNotify)
-
 	typedef void (*NewtonApplyForceAndTorque) (const NewtonBody* const body, ndFloat32 timestep, int threadIndex);
-	ndNewtonBodyNotify();
-	ndNewtonBodyNotify(const ndNewtonBodyNotify& notify);
-	//ndDemoEntityNotify(
-	//	ndDemoEntityManager* const manager,
-	//	const ndSharedPtr<ndRenderSceneNode>& entity,
-	//	ndBodyKinematic* const parentBody = nullptr,
-	//	const ndVector& gravity = ndVector(0.0f, DEMO_GRAVITY, 0.0f, 0.0f));
+	typedef void (*NewtonSetTransform) (const NewtonBody* const body, const ndFloat32* const matrix, int threadIndex);
 
+	ndNewtonBodyNotify(NewtonBody* const owner);
+	ndNewtonBodyNotify(const ndNewtonBodyNotify& notify);
 	virtual ~ndNewtonBodyNotify() override;
 
 	ndBodyNotify* Clone() const override;
-
-
-	//ndSharedPtr<ndRenderSceneNode> GetUserData() const
-	//{
-	//	return m_entity;
-	//}
-	//
-	//void ResetEntityTransform(const ndMatrix& matrix);
-	//
-	//void RemoveBody();
 
 	virtual void OnBodyAddedToWorld();
 	virtual void OnBodyRemovedFromWorld();
@@ -59,8 +44,11 @@ class ndNewtonBodyNotify : public ndModelBodyNotify
 	//ndFloat32 m_capOmega;
 
 	ndWeakPtr<void> m_userData;
+	ndWeakPtr<NewtonBody> m_owner;
 	ndInt32 m_materialGoupId;
 	bool m_bodyIsInWorld;
+
+	NewtonSetTransform m_applyTransform;
 	NewtonApplyForceAndTorque m_forceAndTorque;
 };
 

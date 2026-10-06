@@ -13,10 +13,12 @@
 #include "newtonWorld.h"
 #include "newtonBodyNotify.h"
 
-ndNewtonBodyNotify::ndNewtonBodyNotify()
+ndNewtonBodyNotify::ndNewtonBodyNotify(NewtonBody* const owner)
 	:ndModelBodyNotify()
 	,m_userData(nullptr)
+	,m_owner(owner)
 	,m_bodyIsInWorld(false)
+	,m_applyTransform(nullptr)
 	,m_forceAndTorque(nullptr)
 {
 }
@@ -24,7 +26,9 @@ ndNewtonBodyNotify::ndNewtonBodyNotify()
 ndNewtonBodyNotify::ndNewtonBodyNotify(const ndNewtonBodyNotify& notify)
 	:ndModelBodyNotify(notify)
 	,m_userData(notify.m_userData)
+	,m_owner(notify.m_owner)
 	,m_bodyIsInWorld(false)
+	,m_applyTransform(notify.m_applyTransform)
 	,m_forceAndTorque(notify.m_forceAndTorque)
 {
 }
@@ -51,7 +55,10 @@ void ndNewtonBodyNotify::OnBodyRemovedFromWorld()
 
 void ndNewtonBodyNotify::OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep)
 {
-	ndAssert(0);
+	if (m_forceAndTorque)
+	{
+		m_forceAndTorque(*m_owner, timestep, threadIndex);
+	}
 	//ndModelBodyNotify::OnApplyExternalForce(threadIndex, timestep);
 	//
 	//ndBodyKinematic* const body = GetBody()->GetAsBodyKinematic();
@@ -80,7 +87,10 @@ void ndNewtonBodyNotify::OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 tim
 
 void ndNewtonBodyNotify::OnTransform(ndFloat32, const ndMatrix& matrix)
 {
-	ndAssert(0);
+	if (m_applyTransform)
+	{
+		m_applyTransform(*m_owner, &matrix[0][0], 0);
+	}
 	//// apply this transformation matrix to the application user data.
 	//if (*m_entity)
 	//{
