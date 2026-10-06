@@ -105,6 +105,13 @@ void NewtonSetPostUpdateCallback(const NewtonWorld* const newtonWorld, NewtonPos
 	world->SetPostUpdateCallback((OnPostUpdateCallback) callback);
 }
 
+int NewtonBodyGetSerializedID(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgBody* const body = (dgBody*)bodyPtr;
+	return body->GetSerializedID();
+}
+
 NewtonPostUpdateCallback NewtonGetPostUpdateCallback(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -2114,43 +2121,6 @@ NewtonCollision* NewtonCreateConvexHullFromMesh(const NewtonWorld* const newtonW
 	return (NewtonCollision*) meshEffect->CreateConvexCollision(world, tolerance, shapeID);
 }
 
-
-/*!
-  Create a container to hold an array of convex collision primitives.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param  shapeID: fixme
-
-  @return Pointer to the compound collision.
-
-  Compound collision primitives can only be made of convex collision primitives and they can not contain compound collision. Therefore they are treated as convex primitives.
-
-  Compound collision primitives are treated as instance collision objects that can not shared by multiples rigid bodies.
-
-*/
-NewtonCollision* NewtonCreateCompoundCollision(const NewtonWorld* const newtonWorld, int shapeID)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	dgCollisionInstance* const collision = world->CreateCompound ();
-	collision->SetUserDataID(dgUnsigned32 (shapeID));
-	return (NewtonCollision*) collision;
-}
-
-void* NewtonCompoundCollisionAddSubCollision (NewtonCollision* const compoundCollision, const NewtonCollision* const convexCollision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	
-	dgCollisionInstance* const compoundInstance = (dgCollisionInstance*) compoundCollision;
-	dgCollisionInstance* const compoundInstanceChild = (dgCollisionInstance*) convexCollision;
-	if (compoundInstance->IsType (dgCollision::dgCollisionCompound_RTTI) && compoundInstanceChild->IsType(dgCollision::dgCollisionConvexShape_RTTI)) {
-		dgCollisionCompound* const collision = (dgCollisionCompound*) compoundInstance->GetChildShape();
-		return collision->AddCollision (compoundInstanceChild);
-	}
-	return NULL;
-}
-
-
 void NewtonCompoundCollisionRemoveSubCollision (NewtonCollision* const compoundCollision, const void* const collisionNode)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -2182,27 +2152,6 @@ void NewtonCompoundCollisionSetSubCollisionMatrix (NewtonCollision* const compou
 	if (compoundInstance->IsType (dgCollision::dgCollisionCompound_RTTI)) {
 		dgCollisionCompound* const collision = (dgCollisionCompound*) compoundInstance->GetChildShape();
 		collision->SetCollisionMatrix((dgCollisionCompound::dgTreeArray::dgTreeNode*)collisionNode, dgMatrix(matrix));
-	}
-}
-
-
-void NewtonCompoundCollisionBeginAddRemove (NewtonCollision* const compoundCollision)	
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const instance = (dgCollisionInstance*) compoundCollision;
-	if (instance->IsType (dgCollision::dgCollisionCompound_RTTI)) {
-		dgCollisionCompound* const collision = (dgCollisionCompound*) instance->GetChildShape();
-		collision->BeginAddRemove();
-	}
-}
-
-void NewtonCompoundCollisionEndAddRemove (NewtonCollision* const compoundCollision)	
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const instance = (dgCollisionInstance*) compoundCollision;
-	if (instance->IsType (dgCollision::dgCollisionCompound_RTTI)) {
-		dgCollisionCompound* const collision = (dgCollisionCompound*) instance->GetChildShape();
-		collision->EndAddRemove();
 	}
 }
 
@@ -3659,22 +3608,6 @@ NewtonCollision* NewtonCollisionGetParentInstance (const NewtonCollision* const 
 }
 
 
-void NewtonCollisionSetMatrix (const NewtonCollision* collision, const dFloat* const matrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const instance = (dgCollisionInstance*) collision;
-	instance->SetLocalMatrix(dgMatrix (matrix));
-}
-
-void NewtonCollisionGetMatrix (const NewtonCollision* const collision, dFloat* const matrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const instance = (dgCollisionInstance*) collision;
-	const dgMatrix& instanceMatrix = instance->GetLocalMatrix();
-	memcpy (matrix, &instanceMatrix[0][0], sizeof (dgMatrix));
-}
-
-
 void NewtonCollisionSetScale (const NewtonCollision* const collision, dFloat scaleX, dFloat scaleY, dFloat scaleZ)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -4843,74 +4776,6 @@ int NewtonBodyGetMaterialGroupID(const NewtonBody* const bodyPtr)
 	return int (body->GetGroupID ());
 }
 
-/*!
-  Set the continuous collision state mode for this rigid body.
-  continuous collision flag is off by default in when bodies are created.
-
-  @param *bodyPtr pointer to the body.
-  @param state collision state. 1 indicates this body may tunnel through other objects while moving at high speed. 0 ignore high speed collision checks.
-
-  @return Nothing.
-
-  continuous collision mode enable allow the engine to predict colliding contact on rigid bodies
-  Moving at high speed of subject to strong forces.
-
-  continuous collision mode does not prevent rigid bodies from inter penetration instead it prevent bodies from
-  passing trough each others by extrapolating contact points when the bodies normal contact calculation determine the bodies are not colliding.
-
-  for performance reason the bodies angular velocities is only use on the broad face of the collision,
-  but not on the contact calculation.
-
-  continuous collision does not perform back tracking to determine time of contact, instead it extrapolate contact by incrementally
-  extruding the collision geometries of the two colliding bodies along the linear velocity of the bodies during the time step,
-  if during the extrusion colliding contact are found, a collision is declared and the normal contact resolution is called.
-
-  for continuous collision to be active the continuous collision mode must on the material pair of the colliding bodies as well as on at least one of the two colliding bodies.
-
-  Because there is penalty of about 40% to 80% depending of the shape complexity of the collision geometry, this feature is set
-  off by default. It is the job of the application to determine what bodies need this feature on. Good guidelines are: very small objects,
-  and bodies that move a height speed.
-
-  See also: ::NewtonBodyGetContinuousCollisionMode, ::NewtonBodySetContinuousCollisionMode
-*/
-void NewtonBodySetContinuousCollisionMode(const NewtonBody* const bodyPtr, unsigned state)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-	body->SetContinueCollisionMode (state ? true : false);
-}
-
-int NewtonBodyGetSerializedID(const NewtonBody* const bodyPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-	return body->GetSerializedID();
-}
-
-/*!
-  Get the continuous collision state mode for this rigid body.
-
-  @param *bodyPtr pointer to the body.
-
-  @return Nothing.
-
-
-  Because there is there is penalty of about 3 to 5 depending of the shape complexity of the collision geometry, this feature is set
-  off by default. It is the job of the application to determine what bodies need this feature on. Good guidelines are: very small objects,
-  and bodies that move a height speed.
-
-  this feature is currently disabled:
-
-  See also: ::NewtonBodySetContinuousCollisionMode, ::NewtonBodySetContinuousCollisionMode
-*/
-int NewtonBodyGetContinuousCollisionMode (const NewtonBody* const bodyPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-	return body->GetContinueCollisionMode () ? 1 : false;
-}
-
-
 
 /*!
   Set the collision state flag of this body when the body is connected to another body by a hierarchy of joints.
@@ -5235,102 +5100,6 @@ void NewtonBodyGetAcceleration(const NewtonBody* const bodyPtr, dFloat* const ac
 	acceleration[1] = vector.m_y;
 	acceleration[2] = vector.m_z;
 }
-
-/*!
-  Apply the linear viscous damping coefficient to the body.
-
-  @param *bodyPtr is the pointer to the body.
-  @param linearDamp linear damping coefficient.
-
-  the default value of *linearDamp* is clamped to a value between 0.0 and 1.0; the default value is 0.1,
-  There is a non zero implicit attenuation value of 0.0001 assume by the integrator.
-
-  The dampening viscous friction force is added to the external force applied to the body every frame before going to the solver-integrator.
-  This force is proportional to the square of the magnitude of the velocity to the body in the opposite direction of the velocity of the body.
-  An application can set *linearDamp* to zero when the application takes control of the external forces and torque applied to the body, should the application
-  desire to have absolute control of the forces over that body. However, it is recommended that the *linearDamp* coefficient is set to a non-zero
-  value for the majority of background bodies. This saves the application from having to control these forces and also prevents the integrator from
-  adding very large velocities to a body.
-
-  See also: ::NewtonBodyGetLinearDamping
-*/
-void NewtonBodySetLinearDamping(const NewtonBody* const bodyPtr, dFloat linearDamp)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-
-	body->SetLinearDamping (linearDamp);
-}
-
-/*!
-  Get the linear viscous damping of the body.
-
-  @param *bodyPtr is the pointer to the body.
-
-  @return The linear damping coefficient.
-
-  See also: ::NewtonBodySetLinearDamping
-*/
-dFloat NewtonBodyGetLinearDamping(const NewtonBody* const bodyPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-
-	return body->GetLinearDamping();
-}
-
-
-/*!
-  Apply the angular viscous damping coefficient to the body.
-
-  @param *bodyPtr is the pointer to the body.
-  @param *angularDamp pointer to an array of at least three floats containing the angular damping coefficients for the principal axis of the body.
-
-  the default value of *angularDamp* is clamped to a value between 0.0 and 1.0; the default value is 0.1,
-  There is a non zero implicit attenuation value of 0.0001 assumed by the integrator.
-
-  The dampening viscous friction torque is added to the external torque applied to the body every frame before going to the solver-integrator.
-  This torque is proportional to the square of the magnitude of the angular velocity to the body in the opposite direction of the angular velocity of the body.
-  An application can set *angularDamp* to zero when the to take control of the external forces and torque applied to the body, should the application
-  desire to have absolute control of the forces over that body. However, it is recommended that the *linearDamp* coefficient be set to a non-zero
-  value for the majority of background bodies. This saves the application from needing to control these forces and also prevents the integrator from
-  adding very large velocities to a body.
-
-  See also: ::NewtonBodyGetAngularDamping
-*/
-void  NewtonBodySetAngularDamping(const NewtonBody* const bodyPtr, const dFloat* angularDamp)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-
-	dgVector vector (angularDamp[0], angularDamp[1], angularDamp[2], dgFloat32 (0.0f));
-	body->SetAngularDamping (vector);
-}
-
-
-/*!
-  Get the linear viscous damping of the body.
-
-  @param *bodyPtr is the pointer to the body.
-  @param *angularDamp pointer to an array of at least three floats to hold the angular damping coefficient for the principal axis of the body.
-
-  See also: ::NewtonBodySetAngularDamping
-*/
-void  NewtonBodyGetAngularDamping(const NewtonBody* const bodyPtr, dFloat* angularDamp)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-
-//	dgVector& vector = *((dgVector*) angularDamp);
-//	vector = body->GetAngularDamping();
-
-	dgVector vector (body->GetAngularDamping());
-	angularDamp[0] = vector.m_x;
-	angularDamp[1] = vector.m_y;
-	angularDamp[2] = vector.m_z;
-}
-
-
 
 void NewtonBodyGetPointVelocity (const NewtonBody* const bodyPtr, const dFloat* const point, dFloat* const velocOut)
 {
@@ -8334,10 +8103,10 @@ void NewtonCollisionSetUserData(const NewtonCollision* const collision, void* co
   @return Pointer to the box
 
 */
-NewtonCollision* NewtonCreateBox(const NewtonWorld* const newtonWorld, dFloat dx, dFloat dy, dFloat dz, int shapeID, const dFloat* const offsetMatrix)
+NewtonCollision* NewtonCreateBox(const NewtonWorld* const, dFloat dx, dFloat dy, dFloat dz, int shapeID, const dFloat* const offsetMatrix)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	//ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	ndMatrix matrix(ndGetIdentityMatrix());
 	if (offsetMatrix) 
 	{
@@ -8368,6 +8137,28 @@ void NewtonDestroyCollision(const NewtonCollision* const collisionPtr)
 	delete instance;
 }
 
+void NewtonCollisionSetMatrix(const NewtonCollision* collision, const dFloat* const matrixPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance instance(*ObjectFromHandle<ndShapeInstance, NewtonCollision>(collision));
+
+	ndMatrix matrix(matrixPtr);
+	if (!CheckFloat(&matrix[0][0], 16))
+	{
+		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
+		matrix = ndGetIdentityMatrix();
+	}
+	instance.SetLocalMatrix(matrix);
+}
+
+void NewtonCollisionGetMatrix(const NewtonCollision* const collision, dFloat* const matrixPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance instance(*ObjectFromHandle<ndShapeInstance, NewtonCollision>(collision));
+
+	const ndMatrix instanceMatrix (instance.GetLocalMatrix());
+	ndMemCpy(matrixPtr, &instanceMatrix[0][0], sizeof(ndMatrix) / sizeof(ndFloat32));
+}
 
 /*!
   Create a rigid body.
@@ -8698,6 +8489,160 @@ NewtonSetTransform NewtonBodyGetTransformCallback(const NewtonBody* const bodyPt
 	return bodyNotify->m_applyTransform;
 }
 
+/*!
+  Set the continuous collision state mode for this rigid body.
+  continuous collision flag is off by default in when bodies are created.
+
+  @param *bodyPtr pointer to the body.
+  @param state collision state. 1 indicates this body may tunnel through other objects while moving at high speed. 0 ignore high speed collision checks.
+
+  @return Nothing.
+
+  continuous collision mode enable allow the engine to predict colliding contact on rigid bodies
+  Moving at high speed of subject to strong forces.
+
+  continuous collision mode does not prevent rigid bodies from inter penetration instead it prevent bodies from
+  passing trough each others by extrapolating contact points when the bodies normal contact calculation determine the bodies are not colliding.
+
+  for performance reason the bodies angular velocities is only use on the broad face of the collision,
+  but not on the contact calculation.
+
+  continuous collision does not perform back tracking to determine time of contact, instead it extrapolate contact by incrementally
+  extruding the collision geometries of the two colliding bodies along the linear velocity of the bodies during the time step,
+  if during the extrusion colliding contact are found, a collision is declared and the normal contact resolution is called.
+
+  for continuous collision to be active the continuous collision mode must on the material pair of the colliding bodies as well as on at least one of the two colliding bodies.
+
+  Because there is penalty of about 40% to 80% depending of the shape complexity of the collision geometry, this feature is set
+  off by default. It is the job of the application to determine what bodies need this feature on. Good guidelines are: very small objects,
+  and bodies that move a height speed.
+
+  See also: ::NewtonBodyGetContinuousCollisionMode, ::NewtonBodySetContinuousCollisionMode
+*/
+void NewtonBodySetContinuousCollisionMode(const NewtonBody* const bodyPtr, unsigned state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	//body->SetContinueCollisionMode(state ? true : false);
+}
+
+/*!
+  Get the continuous collision state mode for this rigid body.
+
+  @param *bodyPtr pointer to the body.
+
+  @return Nothing.
+
+
+  Because there is there is penalty of about 3 to 5 depending of the shape complexity of the collision geometry, this feature is set
+  off by default. It is the job of the application to determine what bodies need this feature on. Good guidelines are: very small objects,
+  and bodies that move a height speed.
+
+  this feature is currently disabled:
+
+  See also: ::NewtonBodySetContinuousCollisionMode, ::NewtonBodySetContinuousCollisionMode
+*/
+int NewtonBodyGetContinuousCollisionMode(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	//return body->GetContinueCollisionMode() ? 1 : false;
+	return 0;
+}
+
+
+/*!
+  Apply the linear viscous damping coefficient to the body.
+
+  @param *bodyPtr is the pointer to the body.
+  @param linearDamp linear damping coefficient.
+
+  the default value of *linearDamp* is clamped to a value between 0.0 and 1.0; the default value is 0.1,
+  There is a non zero implicit attenuation value of 0.0001 assume by the integrator.
+
+  The dampening viscous friction force is added to the external force applied to the body every frame before going to the solver-integrator.
+  This force is proportional to the square of the magnitude of the velocity to the body in the opposite direction of the velocity of the body.
+  An application can set *linearDamp* to zero when the application takes control of the external forces and torque applied to the body, should the application
+  desire to have absolute control of the forces over that body. However, it is recommended that the *linearDamp* coefficient is set to a non-zero
+  value for the majority of background bodies. This saves the application from having to control these forces and also prevents the integrator from
+  adding very large velocities to a body.
+
+  See also: ::NewtonBodyGetLinearDamping
+*/
+void NewtonBodySetLinearDamping(const NewtonBody* const bodyPtr, dFloat linearDamp)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+
+	body->SetLinearDamping(linearDamp);
+}
+
+/*!
+  Get the linear viscous damping of the body.
+
+  @param *bodyPtr is the pointer to the body.
+
+  @return The linear damping coefficient.
+
+  See also: ::NewtonBodySetLinearDamping
+*/
+dFloat NewtonBodyGetLinearDamping(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+
+	return body->GetLinearDamping();
+}
+
+
+/*!
+  Apply the angular viscous damping coefficient to the body.
+
+  @param *bodyPtr is the pointer to the body.
+  @param *angularDamp pointer to an array of at least three floats containing the angular damping coefficients for the principal axis of the body.
+
+  the default value of *angularDamp* is clamped to a value between 0.0 and 1.0; the default value is 0.1,
+  There is a non zero implicit attenuation value of 0.0001 assumed by the integrator.
+
+  The dampening viscous friction torque is added to the external torque applied to the body every frame before going to the solver-integrator.
+  This torque is proportional to the square of the magnitude of the angular velocity to the body in the opposite direction of the angular velocity of the body.
+  An application can set *angularDamp* to zero when the to take control of the external forces and torque applied to the body, should the application
+  desire to have absolute control of the forces over that body. However, it is recommended that the *linearDamp* coefficient be set to a non-zero
+  value for the majority of background bodies. This saves the application from needing to control these forces and also prevents the integrator from
+  adding very large velocities to a body.
+
+  See also: ::NewtonBodyGetAngularDamping
+*/
+void  NewtonBodySetAngularDamping(const NewtonBody* const bodyPtr, const dFloat* angularDamp)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+
+	ndVector vector(angularDamp[0], angularDamp[1], angularDamp[2], ndFloat32(0.0f));
+	body->SetAngularDamping(vector);
+}
+
+
+/*!
+  Get the linear viscous damping of the body.
+
+  @param *bodyPtr is the pointer to the body.
+  @param *angularDamp pointer to an array of at least three floats to hold the angular damping coefficient for the principal axis of the body.
+
+  See also: ::NewtonBodySetAngularDamping
+*/
+void  NewtonBodyGetAngularDamping(const NewtonBody* const bodyPtr, dFloat* angularDamp)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+
+	ndVector vector(body->GetAngularDamping());
+	angularDamp[0] = vector.m_x;
+	angularDamp[1] = vector.m_y;
+	angularDamp[2] = vector.m_z;
+}
+
+
 
 /*! @defgroup SpecialEffectMesh SpecialEffectMesh
 Special effect mesh interface
@@ -8779,4 +8724,65 @@ NewtonCollision* NewtonCreateTreeCollisionFromMesh(const NewtonWorld* const newt
 	material.m_userId = shapeID;
 
 	return reinterpret_cast<NewtonCollision*>(shape);
+}
+
+/*!
+  Create a container to hold an array of convex collision primitives.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param  shapeID: fixme
+
+  @return Pointer to the compound collision.
+
+  Compound collision primitives can only be made of convex collision primitives and they can not contain compound collision. Therefore they are treated as convex primitives.
+
+  Compound collision primitives are treated as instance collision objects that can not shared by multiples rigid bodies.
+
+*/
+NewtonCollision* NewtonCreateCompoundCollision(const NewtonWorld* const, int shapeID)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(new ndShapeInstance(new ndShapeCompound()));
+	ndShapeInstance* const instance = **shape;
+	ndShapeMaterial material = instance->GetMaterial();
+	material.m_userId = shapeID;
+	return reinterpret_cast<NewtonCollision*>(shape);
+}
+
+void NewtonCompoundCollisionBeginAddRemove(NewtonCollision* const compoundCollision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = ObjectFromHandle<ndShapeInstance, NewtonCollision>(compoundCollision);
+	ndShapeCompound* const collision = instance->GetShape()->GetAsShapeCompound();
+	if (collision)
+	{ 
+		collision->BeginAddRemove();
+	}
+}
+
+void NewtonCompoundCollisionEndAddRemove(NewtonCollision* const compoundCollision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const compoundInstance = ObjectFromHandle<ndShapeInstance, NewtonCollision>(compoundCollision);
+	ndShapeCompound* const collision = compoundInstance->GetShape()->GetAsShapeCompound();
+	if (collision)
+	{
+		collision->EndAddRemove();
+	}
+}
+
+
+void* NewtonCompoundCollisionAddSubCollision(NewtonCollision* const compoundCollision, const NewtonCollision* const convexCollision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+
+	ndShapeInstance* const compoundInstance = ObjectFromHandle<ndShapeInstance, NewtonCollision>(compoundCollision);
+	ndShapeInstance* const childInstance = ObjectFromHandle<ndShapeInstance, NewtonCollision>(convexCollision);
+
+	ndShapeCompound* const collision = compoundInstance->GetShape()->GetAsShapeCompound();
+	if (collision && childInstance->GetShape()->GetAsShapeConvex())
+	{
+		return collision->AddCollision(childInstance);
+	}
+	return nullptr;
 }
