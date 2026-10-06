@@ -14,6 +14,7 @@
 #define NEWTON_STDAFX_H_
 
 #include <ndNewtonInc.h>
+#include <ndContactCallback.h>
 
 #endif 
 

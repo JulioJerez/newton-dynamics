@@ -70,6 +70,7 @@ class ndMaterialGraph: public ndTree<ndApplicationMaterial*, ndMaterialHash, ndC
 	public:
 	ndMaterialGraph();
 	~ndMaterialGraph();
+	ndNode* GetNode(ndUnsigned32 id0, ndUnsigned32 id1) const;
 };
 
 class ndContactCallback: public ndContactNotify
@@ -79,6 +80,7 @@ class ndContactCallback: public ndContactNotify
 	virtual ~ndContactCallback() override;
 	virtual ndApplicationMaterial& RegisterMaterial(const ndApplicationMaterial& material, ndUnsigned32 id0, ndUnsigned32 id1);
 
+	bool HasMaterial(ndUnsigned32 id0, ndUnsigned32 id1) const;
 	virtual ndMaterial* GetMaterial(ndUnsigned32 id0, ndUnsigned32 id1) const;
 	virtual ndMaterial* GetMaterial(const ndContact* const contactJoint, const ndShapeInstance& instance0, const ndShapeInstance& instance1) const override;
 
@@ -91,69 +93,5 @@ class ndContactCallback: public ndContactNotify
 	ndMaterialGraph m_materialGraph;
 	ndApplicationMaterial m_defaultMaterial;
 };
-
-inline ndApplicationMaterial::ndApplicationMaterial()
-	:ndMaterial()
-{
-}
-
-inline ndApplicationMaterial::ndApplicationMaterial(const ndApplicationMaterial& copy)
-	:ndMaterial(copy)
-{
-}
-
-inline ndApplicationMaterial::~ndApplicationMaterial()
-{
-}
-
-inline bool ndApplicationMaterial::OnAabbOverlap(const ndBodyKinematic* const, const ndBodyKinematic* const) const
-{
-	return true;
-}
-
-inline bool ndApplicationMaterial::OnAabbOverlap(const ndContact* const, ndFloat32, const ndShapeInstance&, const ndShapeInstance&) const
-{
-	return true;
-}
-
-inline void ndApplicationMaterial::OnContactCallback(const ndContact* const, ndFloat32) const
-{
-}
-
-//**********************************************************************
-// 
-//**********************************************************************
-inline ndMaterialGraph::ndMaterialGraph()
-	:ndTree<ndApplicationMaterial*, ndMaterialHash, ndContainersFreeListAlloc<ndMaterialGraph*>>()
-{
-}
-
-//**********************************************************************
-// 
-//**********************************************************************
-inline ndContactCallback::ndContactCallback()
-	:ndContactNotify(nullptr)
-	,m_materialGraph()
-	,m_defaultMaterial()
-{
-}
-
-inline ndContactCallback::~ndContactCallback()
-{
-}
-
-inline ndMaterial* ndContactCallback::GetMaterial(ndUnsigned32 id0, ndUnsigned32 id1) const
-{
-	ndMaterialHash key(id0, id1);
-	ndMaterialGraph::ndNode* const node = m_materialGraph.Find(key);
-	return node ? node->GetInfo() : (ndMaterial*)&m_defaultMaterial;
-}
-
-inline ndMaterial* ndContactCallback::GetMaterial(const ndContact* const, const ndShapeInstance& instance0, const ndShapeInstance& instance1) const
-{
-	ndMaterialHash key(ndUnsigned32(instance0.GetMaterial().m_userId), ndUnsigned32(instance1.GetMaterial().m_userId));
-	ndMaterialGraph::ndNode* const node = m_materialGraph.Find(key);
-	return node ? node->GetInfo() : (ndMaterial*)&m_defaultMaterial;
-}
 
 #endif

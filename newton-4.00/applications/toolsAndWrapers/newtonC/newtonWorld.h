@@ -8,12 +8,11 @@
 * including commercial applications, and to alter it and redistribute it
 * freely
 */
-#ifndef __NEWTON_WORLD_H__
-#define __NEWTON_WORLD_H__
 
+#ifndef D_NEWTON_WORLD_H_
+#define D_NEWTON_WORLD_H_
 
 #include "newtonStdafx.h"
-
 
 class ndNewtonWorld: public ndWorld
 {
@@ -21,9 +20,15 @@ class ndNewtonWorld: public ndWorld
 	ndNewtonWorld();
 	~ndNewtonWorld();
 
+
+	ndMaterial* GetMaterial(int id0, int id1) const;
+	
+	 
 	//void Update(ndFloat32 timestep);
 	//void SetSubSteps(ndInt32 substeps);
 	//void SetIterations(ndInt32 iterations);
+
+	ndInt32 m_bodyMaterialGroup;
 };
 
 #endif

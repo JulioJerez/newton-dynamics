@@ -12,6 +12,40 @@
 #include "ndModelStdafx.h"
 #include "ndContactCallback.h"
 
+ndApplicationMaterial::ndApplicationMaterial()
+	:ndMaterial()
+{
+}
+
+ndApplicationMaterial::ndApplicationMaterial(const ndApplicationMaterial& copy)
+	:ndMaterial(copy)
+{
+}
+
+ndApplicationMaterial::~ndApplicationMaterial()
+{
+}
+
+bool ndApplicationMaterial::OnAabbOverlap(const ndBodyKinematic* const, const ndBodyKinematic* const) const
+{
+	return true;
+}
+
+bool ndApplicationMaterial::OnAabbOverlap(const ndContact* const, ndFloat32, const ndShapeInstance&, const ndShapeInstance&) const
+{
+	return true;
+}
+
+void ndApplicationMaterial::OnContactCallback(const ndContact* const, ndFloat32) const
+{
+}
+
+
+ndMaterialGraph::ndMaterialGraph()
+	:ndTree<ndApplicationMaterial*, ndMaterialHash, ndContainersFreeListAlloc<ndMaterialGraph*>>()
+{
+}
+
 ndMaterialGraph::~ndMaterialGraph()
 {
 	Iterator it(*this);
@@ -22,24 +56,61 @@ ndMaterialGraph::~ndMaterialGraph()
 	}
 }
 
-ndApplicationMaterial& ndContactCallback::RegisterMaterial(const ndApplicationMaterial& material, ndUnsigned32 id0, ndUnsigned32 id1)
+ndMaterialGraph::ndNode* ndMaterialGraph::GetNode(ndUnsigned32 id0, ndUnsigned32 id1) const
 {
 	ndMaterialHash key(id0, id1);
-	ndMaterialGraph::ndNode* node = m_materialGraph.Find(key);
+	return Find(key);
+}
+
+ndApplicationMaterial& ndContactCallback::RegisterMaterial(const ndApplicationMaterial& material, ndUnsigned32 id0, ndUnsigned32 id1)
+{
+	//ndMaterialHash key(id0, id1);
+	//ndMaterialGraph::ndNode* node = m_materialGraph.Find(key);
+	ndMaterialGraph::ndNode* node = m_materialGraph.GetNode(id0, id1);
 	if (!node)
 	{
 		ndApplicationMaterial* const materialCopy = material.Clone();
-		node = m_materialGraph.Insert(materialCopy, key);
+		node = m_materialGraph.Insert(materialCopy, ndMaterialHash(id0, id1));
 	}
 	return *node->GetInfo();
+}
+
+//**********************************************************************
+// 
+//**********************************************************************
+ndContactCallback::ndContactCallback()
+	:ndContactNotify(nullptr)
+	,m_materialGraph()
+	,m_defaultMaterial()
+{
+}
+
+ndContactCallback::~ndContactCallback()
+{
+}
+
+bool ndContactCallback::HasMaterial(ndUnsigned32 id0, ndUnsigned32 id1) const
+{
+	return m_materialGraph.GetNode(id0, id1) ? true : false;
+}
+
+ndMaterial* ndContactCallback::GetMaterial(ndUnsigned32 id0, ndUnsigned32 id1) const
+{
+	ndMaterialGraph::ndNode* const node = m_materialGraph.GetNode(id0, id1);
+	return node ? node->GetInfo() : (ndMaterial*)&m_defaultMaterial;
+}
+
+ndMaterial* ndContactCallback::GetMaterial(const ndContact* const, const ndShapeInstance& instance0, const ndShapeInstance& instance1) const
+{
+	ndMaterialGraph::ndNode* const node = m_materialGraph.GetNode(ndUnsigned32(instance0.GetMaterial().m_userId), ndUnsigned32(instance1.GetMaterial().m_userId));
+	return node ? node->GetInfo() : (ndMaterial*)&m_defaultMaterial;
 }
 
 bool ndContactCallback::OnAabbOverlap(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1) const
 {
 	const ndShapeInstance& instanceShape0 = body0->GetCollisionShape();
 	const ndShapeInstance& instanceShape1 = body1->GetCollisionShape();
-	ndMaterialHash key(ndUnsigned32(instanceShape0.m_shapeMaterial.m_userId), ndUnsigned32(instanceShape1.m_shapeMaterial.m_userId));
-	ndMaterialGraph::ndNode* const node = m_materialGraph.Find(key);
+	ndMaterialGraph::ndNode* node = m_materialGraph.GetNode(ndUnsigned32(instanceShape0.m_shapeMaterial.m_userId), ndUnsigned32(instanceShape1.m_shapeMaterial.m_userId));
 	if (node)
 	{
 		return node->GetInfo()->OnAabbOverlap(body0, body1);
