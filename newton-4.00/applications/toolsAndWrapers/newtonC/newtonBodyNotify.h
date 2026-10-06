@@ -40,12 +40,12 @@ class ndNewtonBodyNotify : public ndModelBodyNotify
 	//ndSharedPtr<ndRenderSceneNode> m_entity;
 	//ndTransform m_transform;
 	//ndMatrix m_bindMatrix;
-	//ndFloat32 m_capSpeed;
-	//ndFloat32 m_capOmega;
-
 	ndWeakPtr<void> m_userData;
 	ndWeakPtr<NewtonBody> m_owner;
 	ndInt32 m_materialGoupId;
+	ndFloat32 m_capSpeed;
+	ndFloat32 m_capOmega;
+
 	bool m_bodyIsInWorld;
 
 	NewtonSetTransform m_applyTransform;
