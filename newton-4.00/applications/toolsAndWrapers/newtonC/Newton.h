@@ -747,7 +747,6 @@ extern "C" {
 	NEWTON_API void NewtonHeightFieldSetUserRayCastCallback (const NewtonCollision* const heightfieldCollision, NewtonHeightFieldRayCastCallback rayHitCallback);
 
 	NEWTON_API NewtonCollision* NewtonCreateTreeCollision (const NewtonWorld* const newtonWorld, int shapeID);
-	NEWTON_API NewtonCollision* NewtonCreateTreeCollisionFromMesh (const NewtonWorld* const newtonWorld, const NewtonMesh* const mesh, int shapeID);
 	NEWTON_API void NewtonTreeCollisionSetUserRayCastCallback (const NewtonCollision* const treeCollision, NewtonCollisionTreeRayCastCallback rayHitCallback);
 
 	NEWTON_API void NewtonTreeCollisionBeginBuild (const NewtonCollision* const treeCollision);
@@ -1140,17 +1139,15 @@ extern "C" {
 
 	// **********************************************************************************************
 	//
-	// Mesh joint functions
+	// Mesh shapes functions
 	//
 	// **********************************************************************************************
-	NEWTON_API NewtonMesh* NewtonMeshCreate(const NewtonWorld* const newtonWorld);
 	NEWTON_API NewtonMesh* NewtonMeshCreateFromMesh(const NewtonMesh* const mesh);
 	NEWTON_API NewtonMesh* NewtonMeshCreateFromCollision(const NewtonCollision* const collision);
 	NEWTON_API NewtonMesh* NewtonMeshCreateTetrahedraIsoSurface(const NewtonMesh* const mesh);
 	NEWTON_API NewtonMesh* NewtonMeshCreateConvexHull (const NewtonWorld* const newtonWorld, int pointCount, const dFloat* const vertexCloud, int strideInBytes, dFloat tolerance);
 	NEWTON_API NewtonMesh* NewtonMeshCreateVoronoiConvexDecomposition (const NewtonWorld* const newtonWorld, int pointCount, const dFloat* const vertexCloud, int strideInBytes, int materialID, const dFloat* const textureMatrix);
 	NEWTON_API NewtonMesh* NewtonMeshCreateFromSerialization (const NewtonWorld* const newtonWorld, NewtonDeserializeCallback deserializeFunction, void* const serializeHandle);
-	NEWTON_API void NewtonMeshDestroy(const NewtonMesh* const mesh);
 
 	NEWTON_API void NewtonMeshSerialize (const NewtonMesh* const mesh, NewtonSerializeCallback serializeFunction, void* const serializeHandle);
 	NEWTON_API void NewtonMeshSaveOFF(const NewtonMesh* const mesh, const char* const filename);
@@ -1339,6 +1336,25 @@ extern "C" {
 
 	NEWTON_API void NewtonBodySetForceAndTorqueCallback(const NewtonBody* const body, NewtonApplyForceAndTorque callback);
 	NEWTON_API NewtonApplyForceAndTorque NewtonBodyGetForceAndTorqueCallback(const NewtonBody* const body);
+
+	// mesh geometry.
+	NEWTON_API NewtonMesh* NewtonMeshCreate(const NewtonWorld* const newtonWorld);
+	NEWTON_API void NewtonMeshDestroy(const NewtonMesh* const mesh);
+	NEWTON_API void NewtonMeshBeginBuild(const NewtonMesh* const mesh);
+		NEWTON_API void NewtonMeshBeginFace(const NewtonMesh* const mesh);
+			NEWTON_API void NewtonMeshAddPoint(const NewtonMesh* const mesh, dFloat64 x, dFloat64 y, dFloat64 z);
+			//NEWTON_API void NewtonMeshAddLayer(const NewtonMesh* const mesh, int layerIndex);
+			NEWTON_API void NewtonMeshAddMaterial(const NewtonMesh* const mesh, int materialIndex);
+			NEWTON_API void NewtonMeshAddNormal(const NewtonMesh* const mesh, dFloat x, dFloat y, dFloat z);
+			//NEWTON_API void NewtonMeshAddBinormal(const NewtonMesh* const mesh, dFloat x, dFloat y, dFloat z);
+			//NEWTON_API void NewtonMeshAddUV0(const NewtonMesh* const mesh, dFloat u, dFloat v);
+			//NEWTON_API void NewtonMeshAddUV1(const NewtonMesh* const mesh, dFloat u, dFloat v);
+			//NEWTON_API void NewtonMeshAddVertexColor(const NewtonMesh* const mesh, dFloat32 r, dFloat32 g, dFloat32 b, dFloat32 a);
+		NEWTON_API void NewtonMeshEndFace(const NewtonMesh* const mesh);
+	NEWTON_API void NewtonMeshEndBuild(const NewtonMesh* const mesh);
+
+	NEWTON_API NewtonCollision* NewtonCreateTreeCollisionFromMesh(const NewtonWorld* const newtonWorld, const NewtonMesh* const mesh, int shapeID);
+
 #ifdef __cplusplus 
 }
 #endif

@@ -2829,16 +2829,6 @@ NewtonCollision* NewtonCreateTreeCollision(const NewtonWorld* const newtonWorld,
 }
 
 
-NewtonCollision* NewtonCreateTreeCollisionFromMesh (const NewtonWorld* const newtonWorld, const NewtonMesh* const mesh, int shapeID)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-	dgCollisionInstance* const collision =  meshEffect->CreateCollisionTree(world, shapeID);
-	return (NewtonCollision*) collision;
-}
-
-
 /*!
   set a function call back to be call during the face query of a collision tree.
 
@@ -6912,19 +6902,6 @@ void NewtonDestroyJoint(const NewtonWorld* const newtonWorld, const NewtonJoint*
 
 /*! @} */ // end of JointCommon
 
-/*! @defgroup SpecialEffectMesh SpecialEffectMesh
-Special effect mesh interface
-@{
-*/
-
-NewtonMesh* NewtonMeshCreate(const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	Newton* const world = (Newton *) newtonWorld;
-	dgMeshEffect* const mesh = new (world->dgWorld::GetAllocator()) dgMeshEffect (world->dgWorld::GetAllocator());
-	return (NewtonMesh*) mesh;
-}
 
 NewtonMesh* NewtonMeshCreateFromMesh(const NewtonMesh* const mesh)
 {
@@ -6988,13 +6965,6 @@ NewtonMesh* NewtonMeshCreateFromSerialization (const NewtonWorld* const newtonWo
 	TRACE_FUNCTION(__FUNCTION__);
 	Newton* const world = (Newton *) newtonWorld;
 	return (NewtonMesh*) dgMeshEffect::CreateFromSerialization (world->dgWorld::GetAllocator(), (dgDeserialize) deserializeFunction, serializeHandle);
-}
-
-void NewtonMeshDestroy(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-	delete meshEffect;
 }
 
 void NewtonMeshSerialize (const NewtonMesh* const mesh, NewtonSerializeCallback serializeFunction, void* const serializeHandle)
@@ -7194,46 +7164,12 @@ void NewtonMeshBeginBuild(const NewtonMesh* const mesh)
 	meshEffect->BeginBuild();
 }
 
-void NewtonMeshBeginFace (const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->BeginBuildFace();
-}
-
-void NewtonMeshEndFace(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->EndBuildFace();
-}
-
-void NewtonMeshAddPoint(const NewtonMesh* const mesh, dFloat64 x, dFloat64 y, dFloat64 z)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->AddPoint (x, y, z);
-}
-
-void NewtonMeshAddMaterial(const NewtonMesh* const mesh, int materialIndex)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->AddMaterial(materialIndex);
-}
 
 void NewtonMeshAddLayer(const NewtonMesh* const mesh, int layer)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
 	meshEffect->AddLayer(layer);
-}
-
-void NewtonMeshAddNormal(const NewtonMesh* const mesh, dFloat x, dFloat y, dFloat z)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->AddNormal(x, y, z);
 }
 
 void NewtonMeshAddBinormal(const NewtonMesh* const mesh, dFloat x, dFloat y, dFloat z)
@@ -7262,14 +7198,6 @@ void NewtonMeshAddVertexColor(const NewtonMesh* const mesh, dFloat32 r, dFloat32
 	TRACE_FUNCTION(__FUNCTION__);
 	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
 	meshEffect->AddVertexColor(r, g, b, a);
-}
-
-void NewtonMeshEndBuild(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-
-	meshEffect->EndBuild(dgFloat64 (1.0e-8f));
 }
 
 void NewtonMeshClearVertexFormat (NewtonMeshVertexFormat* const format)
@@ -8768,4 +8696,87 @@ NewtonSetTransform NewtonBodyGetTransformCallback(const NewtonBody* const bodyPt
 	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
 	return bodyNotify->m_applyTransform;
+}
+
+
+/*! @defgroup SpecialEffectMesh SpecialEffectMesh
+Special effect mesh interface
+@{
+*/
+
+NewtonMesh* NewtonMeshCreate(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndSharedPtr<ndMeshEffect>* const mesh = new ndSharedPtr<ndMeshEffect>(new ndMeshEffect());
+	return reinterpret_cast<NewtonMesh*>(mesh);
+}
+
+void NewtonMeshDestroy(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndSharedPtr<ndMeshEffect>* const instance(SharedObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh));
+	delete instance;
+}
+
+void NewtonMeshBeginBuild(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	meshEffect->BeginBuild();
+}
+
+void NewtonMeshBeginFace(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	meshEffect->BeginBuildFace();
+}
+
+void NewtonMeshAddPoint(const NewtonMesh* const mesh, dFloat64 x, dFloat64 y, dFloat64 z)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	meshEffect->AddPoint(x, y, z);
+}
+
+void NewtonMeshAddNormal(const NewtonMesh* const mesh, dFloat x, dFloat y, dFloat z)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	meshEffect->AddNormal(x, y, z);
+}
+
+void NewtonMeshAddMaterial(const NewtonMesh* const mesh, int materialIndex)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	meshEffect->AddMaterial(materialIndex);
+}
+
+void NewtonMeshEndFace(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	meshEffect->EndBuildFace();
+}
+
+void NewtonMeshEndBuild(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	meshEffect->EndBuild(false);
+}
+
+NewtonCollision* NewtonCreateTreeCollisionFromMesh(const NewtonWorld* const newtonWorld, const NewtonMesh* const mesh, int shapeID)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+
+	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(meshEffect->CreateConvexCollision(ndFloat64(1.0e-6f)));
+	ndShapeInstance* const instance = **shape;
+	ndShapeMaterial material = instance->GetMaterial();
+	material.m_userId = shapeID;
+
+	return reinterpret_cast<NewtonCollision*>(shape);
 }
