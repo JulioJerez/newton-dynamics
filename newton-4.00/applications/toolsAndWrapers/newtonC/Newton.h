@@ -558,8 +558,6 @@ extern "C" {
 	// Physics Material Section
 	//
 	// **********************************************************************************************
-	NEWTON_API int NewtonMaterialCreateGroupID(const NewtonWorld* const newtonWorld);
-	NEWTON_API int NewtonMaterialGetDefaultGroupID(const NewtonWorld* const newtonWorld);
 	NEWTON_API void NewtonMaterialDestroyAllGroupID(const NewtonWorld* const newtonWorld);
 
 	// material definitions that can not be overwritten in function callback
@@ -1327,6 +1325,10 @@ extern "C" {
 
 	NEWTON_API NewtonWorld* NewtonCreate();
 	NEWTON_API void NewtonDestroy(const NewtonWorld* const newtonWorld);
+
+
+	NEWTON_API int NewtonMaterialCreateGroupID(const NewtonWorld* const newtonWorld);
+	NEWTON_API int NewtonMaterialGetDefaultGroupID(const NewtonWorld* const newtonWorld);
 
 
 #ifdef __cplusplus 

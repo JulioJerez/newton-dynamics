@@ -49,6 +49,10 @@ else()
   set (cSuffix ".so")
 endif()
 
+#add_custom_command(
+#	TARGET ${projectName} POST_BUILD COMMAND ${CMAKE_COMMAND}
+#	ARGS -E copy $<TARGET_FILE:${projectName}> ${wrapper}/${projectName}/${projectName}${CMAKE_DEBUG_POSTFIX}${cSuffix})
+
 add_custom_command(
 	TARGET ${projectName} POST_BUILD COMMAND ${CMAKE_COMMAND}
-	ARGS -E copy $<TARGET_FILE:${projectName}> ${wrapper}/${projectName}/${projectName}${CMAKE_DEBUG_POSTFIX}${cSuffix})
+	ARGS -E copy $<TARGET_FILE:${projectName}> C:/tmp/dagon-physics/${projectName}${cSuffix})

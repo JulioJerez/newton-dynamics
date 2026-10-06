@@ -15,11 +15,11 @@
 #include "newtonStdafx.h"
 
 
-class NewtonWorld: public ndWorld
+class ndNewtonWorld: public ndWorld
 {
 	public:
-	NewtonWorld();
-	~NewtonWorld();
+	ndNewtonWorld();
+	~ndNewtonWorld();
 
 	//void Update(ndFloat32 timestep);
 	//void SetSubSteps(ndInt32 substeps);

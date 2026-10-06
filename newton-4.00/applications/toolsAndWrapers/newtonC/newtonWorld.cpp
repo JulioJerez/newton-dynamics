@@ -10,14 +10,14 @@
 */
 
 #include "newtonStdafx.h"
-#include "newtonWorld.h"
+#include "NewtonWorld.h"
 
-NewtonWorld::NewtonWorld()
+ndNewtonWorld::ndNewtonWorld()
 	:ndWorld()
 {
 }
 
-NewtonWorld::~NewtonWorld()
+ndNewtonWorld::~ndNewtonWorld()
 {
 }
 

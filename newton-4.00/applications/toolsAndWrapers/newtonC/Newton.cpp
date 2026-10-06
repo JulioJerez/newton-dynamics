@@ -1190,46 +1190,7 @@ GroupID interface
 */
 
 
-/*!
-  Get the value of the default MaterialGroupID.
 
-  @param *newtonWorld pointer to the Newton world.
-
-  @return The ID number for the default Group ID.
-
-  Group IDs can be interpreted as the nodes of a dense graph. The edges of the graph are the physics materials.
-  When the Newton world is created, the default Group ID is created by the engine.
-  When bodies are created the application assigns a group ID to the body.
-*/
-int NewtonMaterialGetDefaultGroupID(const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	return int (world->GetDefualtBodyGroupID());
-}
-
-
-/*!
-  Create a new MaterialGroupID.
-
-  @param *newtonWorld pointer to the Newton world.
-
-  @return The ID of a new GroupID.
-
-  Group IDs can be interpreted as the nodes of a dense graph. The edges of the graph are the physics materials.
-  When the Newton world is created, the default Group ID is created by the engine.
-  When bodies are created the application assigns a group ID to the body.
-
-  Note: The only way to destroy a Group ID after its creation is by destroying all the bodies and calling the function  *NewtonMaterialDestroyAllGroupID*.
-
-  See also: ::NewtonMaterialDestroyAllGroupID
-*/
-int NewtonMaterialCreateGroupID(const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	return int (world->CreateBodyGroupID());
-}
 
 /*!
   Remove all groups ID from the Newton world.
@@ -8649,6 +8610,14 @@ void operator delete(void* ptr) noexcept
 }
 #endif
 
+template<class Object, class Handle>
+Object* ObjectFromHandle(const Handle* const ptr)
+{
+	const ndSharedPtr<Object>* const sharedPtr = reinterpret_cast<const ndSharedPtr<Object>*>(ptr);
+	return const_cast<Object*>(**sharedPtr);
+}
+
+
 // fixme: needs docu
 // @param mallocFnt is a pointer to the memory allocator callback function. If this parameter is NULL the standard *malloc* function is used.
 // @param mfreeFnt is a pointer to the memory release callback function. If this parameter is NULL the standard *free* function is used.
@@ -8688,7 +8657,7 @@ int NewtonGetMemoryUsed()
 NewtonWorld* NewtonCreate()
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndSharedPtr<NewtonWorld>* const world = new ndSharedPtr<NewtonWorld>(new NewtonWorld());
+	ndSharedPtr<ndNewtonWorld>* const world = new ndSharedPtr<ndNewtonWorld>(new ndNewtonWorld());
 	return reinterpret_cast<NewtonWorld*>(world);
 }
 
@@ -8706,8 +8675,50 @@ NewtonWorld* NewtonCreate()
 void NewtonDestroy(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	void* const rawHandle = const_cast<void*>(reinterpret_cast<const void*>(newtonWorld));
-	ndSharedPtr<NewtonWorld>* const world = reinterpret_cast<ndSharedPtr<NewtonWorld>*>(rawHandle);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	delete world;
+}
+
+
+/*!
+  Get the value of the default MaterialGroupID.
+
+  @param *newtonWorld pointer to the Newton world.
+
+  @return The ID number for the default Group ID.
+
+  Group IDs can be interpreted as the nodes of a dense graph. The edges of the graph are the physics materials.
+  When the Newton world is created, the default Group ID is created by the engine.
+  When bodies are created the application assigns a group ID to the body.
+*/
+int NewtonMaterialGetDefaultGroupID(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	//return int(world->GetDefualtBodyGroupID());
+	return 0;
+}
+
+/*!
+  Create a new MaterialGroupID.
+
+  @param *newtonWorld pointer to the Newton world.
+
+  @return The ID of a new GroupID.
+
+  Group IDs can be interpreted as the nodes of a dense graph. The edges of the graph are the physics materials.
+  When the Newton world is created, the default Group ID is created by the engine.
+  When bodies are created the application assigns a group ID to the body.
+
+  Note: The only way to destroy a Group ID after its creation is by destroying all the bodies and calling the function  *NewtonMaterialDestroyAllGroupID*.
+
+  See also: ::NewtonMaterialDestroyAllGroupID
+*/
+int NewtonMaterialCreateGroupID(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	//return int(world->CreateBodyGroupID());
+	return 0;
 }
 
