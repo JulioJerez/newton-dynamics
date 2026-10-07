@@ -56,6 +56,18 @@
 #endif
 
 
+bool CheckFloat(dFloat32* ptr, int size)
+{
+	for (int i = 0; i < size; ++i)
+	{
+		if (!_finite(ptr[i]) || _isnan(ptr[i]))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 
 /*! @defgroup Misc Misc
 Misc
@@ -4036,11 +4048,18 @@ NewtonCollision* NewtonCollisionGetParentInstance (const NewtonCollision* const 
 }
 
 
-void NewtonCollisionSetMatrix (const NewtonCollision* collision, const dFloat* const matrix)
+void NewtonCollisionSetMatrix (const NewtonCollision* collision, const dFloat* const matrixPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	dgCollisionInstance* const instance = (dgCollisionInstance*) collision;
-	instance->SetLocalMatrix(dgMatrix (matrix));
+
+	dgMatrix matrix(matrixPtr);
+	if (!CheckFloat(&matrix[0][0], 16))
+	{
+		matrix = dgGetIdentityMatrix();
+	}
+
+	instance->SetLocalMatrix(matrix);
 }
 
 void NewtonCollisionGetMatrix (const NewtonCollision* const collision, dFloat* const matrix)
@@ -4330,6 +4349,11 @@ NewtonBody* NewtonCreateDynamicBody(const NewtonWorld* const newtonWorld, const 
 	#endif
 
 	dgMatrix matrix (matrixPtr);
+	if (!CheckFloat(&matrix[0][0], 16))
+	{
+		matrix = dgGetIdentityMatrix();
+	}
+
 	matrix.m_front.m_w = dgFloat32 (0.0f);
 	matrix.m_up.m_w    = dgFloat32 (0.0f);
 	matrix.m_right.m_w = dgFloat32 (0.0f);
