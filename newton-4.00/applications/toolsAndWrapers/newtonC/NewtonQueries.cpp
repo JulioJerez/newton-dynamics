@@ -80,13 +80,13 @@ void NewtonWorldRayCast(const NewtonWorld* const newtonWorld, const dFloat* cons
 	{
 		class WorldRayCast : public ndRayCastClosestHitCallback
 		{
-		public:
+			public:
 			WorldRayCast(ndNewtonWorld* const world, void* const userData, NewtonWorldRayFilterCallback filter, NewtonWorldRayPrefilterCallback prefilter)
 				:ndRayCastClosestHitCallback()
-				, m_userData(userData)
-				, m_world(world)
-				, m_filter(filter)
-				, m_prefilter(prefilter)
+				,m_userData(userData)
+				,m_world(world)
+				,m_filter(filter)
+				,m_prefilter(prefilter)
 			{
 			}
 
@@ -132,4 +132,63 @@ void NewtonWorldRayCast(const NewtonWorld* const newtonWorld, const dFloat* cons
 		const ndVector pp1(p1[0], p1[1], p1[2], ndFloat32(0.0f));
 		world->RayCast(rayCaster, pp0, pp1);
 	}
+}
+
+
+/*!
+  Trigger a callback for every body that intersects the specified AABB.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param *p0 - pointer to an array of at least three floats to hold minimum value for the AABB.
+  @param *p1 - pointer to an array of at least three floats to hold maximum value for the AABB.
+  @param callback application defined callback
+  @param *userData pointer to the user defined user data value.
+
+  @return nothing
+
+  The application should provide the function *NewtonBodyIterator callback* to
+  be called by Newton for every body in the world.
+
+  For small AABB volumes this function is much more inefficients (fixme: more or
+  less efficient?) than NewtonWorldGetFirstBody. However, if the AABB contains
+  the majority of objects in the scene, the overhead of scanning the internal
+  Broadphase collision plus the AABB test make this function more expensive.
+
+  See also: ::NewtonWorldGetFirstBody
+*/
+void NewtonWorldForEachBodyInAABBDo(const NewtonWorld* const newtonWorld, const dFloat* const p0, const dFloat* const p1, NewtonBodyIterator callback, void* const userData)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	const ndVector minBox(ndMin(p0[0], p1[0]), ndMin(p0[1], p1[1]), ndMin(p0[2], p1[2]), ndFloat32(0.0f));
+	const ndVector maxBox(ndMax(p0[0], p1[0]), ndMax(p0[1], p1[1]), ndMax(p0[2], p1[2]), ndFloat32(0.0f));
+
+	class WorldBodiesInAabbNotify : public ndBodiesInAabbNotify
+	{
+		public:
+		WorldBodiesInAabbNotify(ndNewtonWorld* const world, NewtonBodyIterator callback, void* const userData)
+			:ndBodiesInAabbNotify()
+			,m_userData(userData)
+			,m_world (world)
+			,m_callback(callback)
+		{
+		}
+
+		virtual void OnOverlap(const ndBody* const body) override
+		{
+			if (m_callback)
+			{
+				ndSharedPtr<ndBody> sharedBody(m_world->GetBody(const_cast<ndBody*>(reinterpret_cast<const ndBody*>(body))));
+				m_callback(reinterpret_cast<NewtonBody*>(&sharedBody), m_userData);
+			}
+		}
+
+		void* const m_userData;
+		ndNewtonWorld* m_world;
+		NewtonBodyIterator m_callback;
+	};
+
+	WorldBodiesInAabbNotify notify(world, callback, userData);
+	world->BodiesInAabb(notify, minBox, maxBox);
 }

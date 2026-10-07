@@ -223,80 +223,9 @@ NewtonBody* NewtonWorldGetNextBody(const NewtonWorld* const newtonWorld, const N
 	} else {
 		return NULL;
 	}
-
 }
 
 
-/*!
-  Trigger callback function for each joint in the world.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param callback The callback function to invoke for each joint.
-  @param *userData User data to pass into the callback.
-
-  @return nothing
-
-  The application should provide the function *NewtonJointIterator callback* to
-  be called by Newton for every joint in the world.
-
-  Note that this function is primarily for debugging. The performance penalty
-  for calling it is high.
-
-  See also: ::NewtonWorldForEachBodyInAABBDo, ::NewtonWorldGetFirstBody
-*/
-void NewtonWorldForEachJointDo(const NewtonWorld* const newtonWorld, NewtonJointIterator callback, void* const userData)
-{
-	Newton* const world = (Newton *) newtonWorld;
-	dgBodyMasterList& masterList = *world;
-
-	TRACE_FUNCTION(__FUNCTION__);
-	dgTree<dgConstraint*, dgConstraint*> jointMap(world->dgWorld::GetAllocator());
-	for (dgBodyMasterList::dgListNode* node = masterList.GetFirst()->GetNext(); node; node = node->GetNext()) {
-		dgBodyMasterListRow& row = node->GetInfo();
-		for (dgBodyMasterListRow::dgListNode* jointNode = row.GetFirst(); jointNode; jointNode = jointNode->GetNext()) {
-			const dgBodyMasterListCell& cell = jointNode->GetInfo();
-			if (cell.m_joint->GetId() != dgConstraint::m_contactConstraint) {
-				if (!jointMap.Find(cell.m_joint)) {
-					jointMap.Insert(cell.m_joint, cell.m_joint);
-					callback ((const NewtonJoint*) cell.m_joint, userData);
-				}
-			}
-		}
-	}
-}
-
-
-/*!
-  Trigger a callback for every body that intersects the specified AABB.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param *p0 - pointer to an array of at least three floats to hold minimum value for the AABB.
-  @param *p1 - pointer to an array of at least three floats to hold maximum value for the AABB.
-  @param callback application defined callback
-  @param *userData pointer to the user defined user data value.
-
-  @return nothing
-
-  The application should provide the function *NewtonBodyIterator callback* to
-  be called by Newton for every body in the world.
-
-  For small AABB volumes this function is much more inefficients (fixme: more or
-  less efficient?) than NewtonWorldGetFirstBody. However, if the AABB contains
-  the majority of objects in the scene, the overhead of scanning the internal
-  Broadphase collision plus the AABB test make this function more expensive.
-
-  See also: ::NewtonWorldGetFirstBody
-*/
-void NewtonWorldForEachBodyInAABBDo(const NewtonWorld* const newtonWorld, const dFloat* const p0, const dFloat* const p1, NewtonBodyIterator callback, void* const userData)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	Newton* const world = (Newton *) newtonWorld;
-	dgVector q0 (dgMin (p0[0], p1[0]), dgMin (p0[1], p1[1]), dgMin (p0[2], p1[2]), dgFloat32 (0.0f));
-	dgVector q1 (dgMax (p0[0], p1[0]), dgMax (p0[1], p1[1]), dgMax (p0[2], p1[2]), dgFloat32 (0.0f));
-
-	world->GetBroadPhase()->ForEachBodyInAABB (q0, q1, (OnBodiesInAABB) callback, userData);
-}
 
 /*!
   Specify a custom destructor callback for destroying the world.
@@ -6854,6 +6783,14 @@ void NewtonUpdateAsync(const NewtonWorld* const newtonWorld, dFloat timestep)
 	world->Update(timestep);
 }
 
+void* NewtonGetPreferedPlugin(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(ndWorld::ndSimd8Solver + 1);
+	return reinterpret_cast<void*>(mode);
+}
+
 void* NewtonCurrentPlugin(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -6912,7 +6849,29 @@ const char* NewtonGetPluginString(const NewtonWorld* const newtonWorld, const vo
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
-	return world->GetSolverString();
+	ndInt32 enumerator = static_cast<ndInt32>(reinterpret_cast<uintptr_t>(plugin));
+	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(enumerator - 1);
+	switch (mode)
+	{
+		case ndWorld::ndStandardSolver:
+		{
+			return "default";
+			break;
+		}
+		case ndWorld::ndSimd8Solver:
+		{
+			return "simd8";
+			break;
+		}
+
+		case ndWorld::ndSimd16Solver:
+		{
+			return "simd16";
+			break;
+		}
+	}
+
+	return "default";
 }
 
 /*!
@@ -7082,4 +7041,60 @@ NewtonPostUpdateCallback NewtonGetPostUpdateCallback(const NewtonWorld* const ne
 	TRACE_FUNCTION(__FUNCTION__);
 	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	return world->m_onPostUpdate;
+}
+
+/*!
+  Trigger callback function for each joint in the world.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param callback The callback function to invoke for each joint.
+  @param *userData User data to pass into the callback.
+
+  @return nothing
+
+  The application should provide the function *NewtonJointIterator callback* to
+  be called by Newton for every joint in the world.
+
+  Note that this function is primarily for debugging. The performance penalty
+  for calling it is high.
+
+  See also: ::NewtonWorldForEachBodyInAABBDo, ::NewtonWorldGetFirstBody
+*/
+void NewtonWorldForEachJointDo(const NewtonWorld* const newtonWorld, NewtonJointIterator callback, void* const userData)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	const ndJointList& jointList = world->GetJointList();
+
+	//dgTree<dgConstraint*, dgConstraint*> jointMap(world->dgWorld::GetAllocator());
+	//for (dgBodyMasterList::dgListNode* node = masterList.GetFirst()->GetNext(); node; node = node->GetNext()) {
+	//	dgBodyMasterListRow& row = node->GetInfo();
+	//	for (dgBodyMasterListRow::dgListNode* jointNode = row.GetFirst(); jointNode; jointNode = jointNode->GetNext()) {
+	//		const dgBodyMasterListCell& cell = jointNode->GetInfo();
+	//		if (cell.m_joint->GetId() != dgConstraint::m_contactConstraint) {
+	//			if (!jointMap.Find(cell.m_joint)) {
+	//				jointMap.Insert(cell.m_joint, cell.m_joint);
+	//				callback((const NewtonJoint*)cell.m_joint, userData);
+	//			}
+	//		}
+	//	}
+	//}
+	for (ndJointList::ndNode* node = jointList.GetFirst()->GetNext(); node; node = node->GetNext())
+	{
+		ndSharedPtr<ndJointBilateralConstraint>& joint = node->GetInfo();
+		callback(reinterpret_cast<NewtonJoint*>(&joint), userData);
+	}
+}
+
+void NewtonWorldForEachBodyDo(const NewtonWorld* const newtonWorld, NewtonBodyIterator callback, void* const userData)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	const ndBodyListView& jointList = world->GetBodyList();
+
+	for (ndBodyListView::ndNode* node = jointList.GetFirst()->GetNext(); node; node = node->GetNext())
+	{
+		ndSharedPtr<ndBody>& body = node->GetInfo();
+		callback(reinterpret_cast<NewtonBody*>(&body), userData);
+	}
 }

@@ -255,3 +255,13 @@ void NewtonYield()
 	TRACE_FUNCTION(__FUNCTION__);
 	ndAssert(0);
 }
+
+void NewtonLoadPlugins(const NewtonWorld* const, const char* const)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+}
+
+void NewtonUnloadPlugins(const NewtonWorld* const)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+}
