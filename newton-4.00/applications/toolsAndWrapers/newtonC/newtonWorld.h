@@ -14,22 +14,26 @@
 
 #include "newtonStdafx.h"
 
+class NewtonWorld;
+
 class ndNewtonWorld: public ndWorld
 {
 	public:
+	typedef void (*NewtonPostUpdateCallback) (const NewtonWorld* const world, ndFloat32 timestep);
 	ndNewtonWorld();
 	virtual ~ndNewtonWorld() override;
 
 	void ClearMaterials();
 	ndMaterial* GetMaterial(int id0, int id1) const;
 	
-	 
-	void Update(ndFloat32 timestep) override;
-	//void SetSubSteps(ndInt32 substeps);
-	//void SetIterations(ndInt32 iterations);
+	virtual void Update(ndFloat32 timestep) override;
+	virtual void PostUpdate(ndFloat32 timestep) override;
 
 	ndWeakPtr<void> m_userData;
 	ndInt32 m_bodyMaterialGroup;
+
+
+	NewtonPostUpdateCallback m_onPostUpdate;
 };
 
 #endif

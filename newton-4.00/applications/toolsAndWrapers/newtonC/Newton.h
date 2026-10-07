@@ -357,7 +357,6 @@ extern "C" {
 
 	// Newton callback functions
 	typedef void (*NewtonWorldDestructorCallback) (const NewtonWorld* const world);
-	typedef void (*NewtonPostUpdateCallback) (const NewtonWorld* const world, dFloat timestep);
 
 	typedef void(*NewtonCreateContactCallback) (const NewtonWorld* const newtonWorld, NewtonJoint* const contact);
 	typedef void(*NewtonDestroyContactCallback) (const NewtonWorld* const newtonWorld, NewtonJoint* const contact);
@@ -434,9 +433,6 @@ extern "C" {
 	// world control functions
 	//
 	// **********************************************************************************************
-	NEWTON_API NewtonPostUpdateCallback NewtonGetPostUpdateCallback(const NewtonWorld* const newtonWorld);
-	NEWTON_API void NewtonSetPostUpdateCallback (const NewtonWorld* const newtonWorld, NewtonPostUpdateCallback callback);
-
 	NEWTON_API void NewtonSerializeToFile (const NewtonWorld* const newtonWorld, const char* const filename, NewtonOnBodySerializationCallback bodyCallback, void* const bodyUserData);
 	NEWTON_API void NewtonDeserializeFromFile (const NewtonWorld* const newtonWorld, const char* const filename, NewtonOnBodyDeserializationCallback bodyCallback, void* const bodyUserData);
 
@@ -540,14 +536,6 @@ extern "C" {
 	// convex collision primitives creation functions
 	//
 	// **********************************************************************************************
-	NEWTON_API NewtonCollision* NewtonCreateNull (const NewtonWorld* const newtonWorld);
-	NEWTON_API NewtonCollision* NewtonCreateSphere (const NewtonWorld* const newtonWorld, dFloat radius, int shapeID, const dFloat* const offsetMatrix);
-	NEWTON_API NewtonCollision* NewtonCreateCone (const NewtonWorld* const newtonWorld, dFloat radius, dFloat height, int shapeID, const dFloat* const offsetMatrix);
-	NEWTON_API NewtonCollision* NewtonCreateCapsule (const NewtonWorld* const newtonWorld, dFloat radius0, dFloat radius1, dFloat height, int shapeID, const dFloat* const offsetMatrix);
-	NEWTON_API NewtonCollision* NewtonCreateCylinder (const NewtonWorld* const newtonWorld, dFloat radio0, dFloat radio1, dFloat height, int shapeID, const dFloat* const offsetMatrix);
-	NEWTON_API NewtonCollision* NewtonCreateChamferCylinder (const NewtonWorld* const newtonWorld, dFloat radius, dFloat height, int shapeID, const dFloat* const offsetMatrix);
-	NEWTON_API NewtonCollision* NewtonCreateConvexHull (const NewtonWorld* const newtonWorld, int count, const dFloat* const vertexCloud, int strideInBytes, dFloat tolerance, int shapeID, const dFloat* const offsetMatrix);
-	NEWTON_API NewtonCollision* NewtonCreateConvexHullFromMesh (const NewtonWorld* const newtonWorld, const NewtonMesh* const mesh, dFloat tolerance, int shapeID);
 
 	NEWTON_API int NewtonCollisionGetMode(const NewtonCollision* const convexCollision);
 	NEWTON_API void NewtonCollisionSetMode (const NewtonCollision* const convexCollision, int mode);
@@ -1178,11 +1166,14 @@ extern "C" {
 	// Newton callback functions
 	typedef void* (*NewtonAllocMemory) (int sizeInBytes);
 	typedef void (*NewtonFreeMemory) (void* const ptr, int sizeInBytes);
+
+	typedef void (*NewtonPostUpdateCallback) (const NewtonWorld* const world, dFloat timestep);
 	typedef int (*NewtonOnAABBOverlap) (const NewtonJoint* const contact, dFloat timestep, int threadIndex);
 	typedef int (*NewtonOnCompoundSubCollisionAABBOverlap) (const NewtonJoint* const contact, dFloat timestep, const NewtonBody* const body0, const void* const collisionNode0, const NewtonBody* const body1, const void* const collisionNode1, int threadIndex);
 	typedef void (*NewtonContactsProcess) (const NewtonJoint* const contact, dFloat timestep, int threadIndex);
 	typedef void (*NewtonApplyForceAndTorque) (const NewtonBody* const body, dFloat timestep, int threadIndex);
 	typedef void (*NewtonSetTransform) (const NewtonBody* const body, const dFloat* const matrix, int threadIndex);
+	
 
 	typedef unsigned (*NewtonWorldRayPrefilterCallback)(const NewtonBody* const body, const NewtonCollision* const collision, void* const userData);
 	typedef dFloat(*NewtonWorldRayFilterCallback)(const NewtonBody* const body, const NewtonCollision* const shapeHit, const dFloat* const hitContact, const dFloat* const hitNormal, dLong collisionID, void* const userData, dFloat intersectParam);
@@ -1205,6 +1196,9 @@ extern "C" {
 
 	NEWTON_API void NewtonWorldSetUserData(const NewtonWorld* const newtonWorld, void* const userData);
 	NEWTON_API void* NewtonWorldGetUserData(const NewtonWorld* const newtonWorld);
+
+	NEWTON_API NewtonPostUpdateCallback NewtonGetPostUpdateCallback(const NewtonWorld* const newtonWorld);
+	NEWTON_API void NewtonSetPostUpdateCallback(const NewtonWorld* const newtonWorld, NewtonPostUpdateCallback callback);
 
 	NEWTON_API void* NewtonGetPreferedPlugin(const NewtonWorld* const newtonWorld);
 	NEWTON_API void NewtonLoadPlugins(const NewtonWorld* const newtonWorld, const char* const plugInPath);
@@ -1273,7 +1267,15 @@ extern "C" {
 	NEWTON_API void NewtonMaterialSetCollisionCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnAABBOverlap aabbOverlap, NewtonContactsProcess process);
 
 	// collision shapes
+	NEWTON_API NewtonCollision* NewtonCreateNull(const NewtonWorld* const newtonWorld);
 	NEWTON_API NewtonCollision* NewtonCreateBox(const NewtonWorld* const newtonWorld, dFloat dx, dFloat dy, dFloat dz, int shapeID, const dFloat* const offsetMatrix);
+	NEWTON_API NewtonCollision* NewtonCreateSphere(const NewtonWorld* const newtonWorld, dFloat radius, int shapeID, const dFloat* const offsetMatrix);
+	NEWTON_API NewtonCollision* NewtonCreateCone(const NewtonWorld* const newtonWorld, dFloat radius, dFloat height, int shapeID, const dFloat* const offsetMatrix);
+	NEWTON_API NewtonCollision* NewtonCreateCapsule(const NewtonWorld* const newtonWorld, dFloat radius0, dFloat radius1, dFloat height, int shapeID, const dFloat* const offsetMatrix);
+	NEWTON_API NewtonCollision* NewtonCreateCylinder(const NewtonWorld* const newtonWorld, dFloat radio0, dFloat radio1, dFloat height, int shapeID, const dFloat* const offsetMatrix);
+	NEWTON_API NewtonCollision* NewtonCreateChamferCylinder(const NewtonWorld* const newtonWorld, dFloat radius, dFloat height, int shapeID, const dFloat* const offsetMatrix);
+	NEWTON_API NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* const newtonWorld, int count, const dFloat* const vertexCloud, int strideInBytes, dFloat tolerance, int shapeID, const dFloat* const offsetMatrix);
+	NEWTON_API NewtonCollision* NewtonCreateConvexHullFromMesh(const NewtonWorld* const newtonWorld, const NewtonMesh* const mesh, dFloat tolerance, int shapeID);
 
 	NEWTON_API void NewtonCollisionSetMatrix(const NewtonCollision* const collision, const dFloat* const matrix);
 	NEWTON_API void NewtonCollisionGetMatrix(const NewtonCollision* const collision, dFloat* const matrix);
@@ -1371,7 +1373,6 @@ ndSharedPtr<Object>* SharedObjectFromHandle(const Handle* const ptr)
 template<class Object, class Handle>
 Object* ObjectFromHandle(const Handle* const ptr)
 {
-	//const ndSharedPtr<Object>* const sharedPtr = reinterpret_cast<const ndSharedPtr<Object>*>(ptr);
 	const ndSharedPtr<Object>* const sharedPtr = SharedObjectFromHandle<Object, Handle>(ptr);
 	return const_cast<Object*>(**sharedPtr);
 }

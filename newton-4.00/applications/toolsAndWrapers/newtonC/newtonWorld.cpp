@@ -17,6 +17,7 @@ ndNewtonWorld::ndNewtonWorld()
 	:ndWorld()
 	,m_userData(nullptr)
 	,m_bodyMaterialGroup(1)
+	,m_onPostUpdate(nullptr)
 {
 	SetSubSteps(2);
 	//SetThreadCount(2);
@@ -51,4 +52,13 @@ void ndNewtonWorld::Update(ndFloat32 timestep)
 {
 	//ndTrace(("%f\n", timestep));
 	ndWorld::Update(timestep);
+}
+
+void ndNewtonWorld::PostUpdate(ndFloat32 timestep)
+{
+	if (m_onPostUpdate)
+	{
+		ndWeakPtr<ndNewtonWorld> sharedWorld(this);
+		m_onPostUpdate(reinterpret_cast<NewtonWorld*>(&sharedWorld), timestep);
+	}
 }
