@@ -17,6 +17,7 @@ ndNewtonMaterial::ndNewtonMaterial()
 	:ndApplicationMaterial()
 	,m_onAABBOverlap(nullptr)
 	,m_onContactsProcess(nullptr)
+	,m_onSubShapeAABBOverlap(nullptr)
 {
 }
 
@@ -24,6 +25,7 @@ ndNewtonMaterial::ndNewtonMaterial(const ndNewtonMaterial& copy)
 	:ndApplicationMaterial(copy)
 	,m_onAABBOverlap(copy.m_onAABBOverlap)
 	,m_onContactsProcess(copy.m_onContactsProcess)
+	,m_onSubShapeAABBOverlap(copy.m_onSubShapeAABBOverlap)
 {
 }
 
@@ -33,19 +35,28 @@ ndNewtonMaterial::~ndNewtonMaterial()
 
 bool ndNewtonMaterial::OnAabbOverlap(const ndBodyKinematic* const, const ndBodyKinematic* const) const
 {
-	ndAssert(0);
+	if (m_onAABBOverlap)
+	{
+		ndAssert(0);
+	}
 	return true;
 }
 
 bool ndNewtonMaterial::OnAabbOverlap(const ndContact* const, ndFloat32, const ndShapeInstance&, const ndShapeInstance&) const
 {
-	ndAssert(0);
+	if (m_onSubShapeAABBOverlap)
+	{
+		ndAssert(0);
+	}
 	return true;
 }
 
 void ndNewtonMaterial::OnContactCallback(const ndContact* const, ndFloat32) const
 {
-	ndAssert(0);
+	if (m_onContactsProcess)
+	{
+		ndAssert(0);
+	}
 }
 
 

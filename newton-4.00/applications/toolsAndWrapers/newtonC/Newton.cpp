@@ -4844,53 +4844,6 @@ void NewtonBodyGetAABB(const NewtonBody* const bodyPtr, dFloat* const p0, dFloat
 
 
 /*!
-  Set the global angular velocity of the body.
-
-  @param *bodyPtr is the pointer to the body.
-  @param *omega pointer to an array of at least three floats containing the angular velocity vector.
-
-  See also: ::NewtonBodyGetOmega
-*/
-void NewtonBodySetOmega(const NewtonBody* const bodyPtr, const dFloat* const omega)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-
-	dgVector vector (omega[0], omega[1], omega[2], dgFloat32 (0.0f));
-	body->SetOmega (vector);
-}
-
-void NewtonBodySetOmegaNoSleep(const NewtonBody* const bodyPtr, const dFloat* const omega)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-
-	dgVector vector(omega[0], omega[1], omega[2], dgFloat32(0.0f));
-	body->SetOmegaNoSleep(vector);
-}
-
-/*!
-  Get the global angular velocity of the body.
-
-  @param *bodyPtr is the pointer to the body
-  @param *omega pointer to an array of at least three floats to hold the angular velocity vector.
-
-  See also: ::NewtonBodySetOmega
-*/
-void NewtonBodyGetOmega(const NewtonBody* const bodyPtr, dFloat* const omega)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	dgBody* const body = (dgBody *)bodyPtr;
-
-	dgVector vector (body->GetOmega());
-	omega[0] = vector.m_x;
-	omega[1] = vector.m_y;
-	omega[2] = vector.m_z;
-}
-
-
-/*!
 Get the global angular accelration of the body.
 
 @param *bodyPtr is the pointer to the body
@@ -4925,16 +4878,6 @@ void NewtonBodyGetAcceleration(const NewtonBody* const bodyPtr, dFloat* const ac
 	acceleration[0] = vector.m_x;
 	acceleration[1] = vector.m_y;
 	acceleration[2] = vector.m_z;
-}
-
-void NewtonBodyGetPointVelocity (const NewtonBody* const bodyPtr, const dFloat* const point, dFloat* const velocOut)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-	dgVector veloc (body->GetVelocityAtPoint (dgVector (point[0], point[1], point[2], dgFloat32 (0.0f))));
-	velocOut[0] = veloc[0];
-	velocOut[1] = veloc[1];
-	velocOut[2] = veloc[2];
 }
 
 /*!
@@ -7642,7 +7585,6 @@ NewtonWorld* NewtonCreate()
 	return reinterpret_cast<NewtonWorld*>(world);
 }
 
-
 /*!
   Destroy an instance of the Newton world.
 
@@ -8504,12 +8446,67 @@ void NewtonBodyGetVelocity(const NewtonBody* const bodyPtr, dFloat* const veloci
 {
 	TRACE_FUNCTION(__FUNCTION__);
 
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	const ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 
 	ndVector vector(body->GetVelocity());
 	velocity[0] = vector.m_x;
 	velocity[1] = vector.m_y;
 	velocity[2] = vector.m_z;
+}
+
+void NewtonBodyGetPointVelocity(const NewtonBody* const bodyPtr, const dFloat* const point, dFloat* const velocOut)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	const ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	const ndVector veloc(body->GetVelocityAtPoint(ndVector(point[0], point[1], point[2], ndFloat32(0.0f))));
+	velocOut[0] = veloc[0];
+	velocOut[1] = veloc[1];
+	velocOut[2] = veloc[2];
+}
+
+/*!
+  Get the global angular velocity of the body.
+
+  @param *bodyPtr is the pointer to the body
+  @param *omega pointer to an array of at least three floats to hold the angular velocity vector.
+
+  See also: ::NewtonBodySetOmega
+*/
+void NewtonBodyGetOmega(const NewtonBody* const bodyPtr, dFloat* const omega)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+
+	const ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	const ndVector vector(body->GetOmega());
+	omega[0] = vector.m_x;
+	omega[1] = vector.m_y;
+	omega[2] = vector.m_z;
+}
+
+/*!
+  Set the global angular velocity of the body.
+
+  @param *bodyPtr is the pointer to the body.
+  @param *omega pointer to an array of at least three floats containing the angular velocity vector.
+
+  See also: ::NewtonBodyGetOmega
+*/
+void NewtonBodySetOmega(const NewtonBody* const bodyPtr, const dFloat* const omega)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+
+	ndVector vector(omega[0], omega[1], omega[2], ndFloat32(0.0f));
+	body->SetOmega(vector);
+}
+
+void NewtonBodySetOmegaNoSleep(const NewtonBody* const bodyPtr, const dFloat* const omega)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+
+	ndVector vector(omega[0], omega[1], omega[2], ndFloat32(0.0f));
+	body->SetOmegaNoSleep(vector);
 }
 
 /*!

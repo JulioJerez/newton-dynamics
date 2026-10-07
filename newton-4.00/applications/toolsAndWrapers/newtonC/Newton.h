@@ -409,8 +409,6 @@ extern "C" {
 	typedef void (*NewtonFractureCompoundCollisionOnEmitCompoundFractured) (NewtonBody* const fracturedBody);
 	typedef void (*NewtonFractureCompoundCollisionOnEmitChunk) (NewtonBody* const chunkBody, NewtonFracturedCompoundMeshPart* const fracturexChunkMesh, const NewtonCollision* const fracturedCompountCollision);
 	typedef void (*NewtonFractureCompoundCollisionReconstructMainMeshCallBack) (NewtonBody* const body, NewtonFracturedCompoundMeshPart* const mainMesh, const NewtonCollision* const fracturedCompountCollision);
-
-	typedef int (*NewtonOnCompoundSubCollisionAABBOverlap) (const NewtonJoint* const contact, dFloat timestep, const NewtonBody* const body0, const void* const collisionNode0, const NewtonBody* const body1, const void* const collisionNode1, int threadIndex);
 	typedef int  (*NewtonOnContactGeneration) (const NewtonMaterial* const material, const NewtonBody* const body0, const NewtonCollision* const collision0, const NewtonBody* const body1, const NewtonCollision* const collision1, NewtonUserContactPoint* const contactBuffer, int maxCount, int threadIndex);
 
 	typedef int (*NewtonBodyIterator) (const NewtonBody* const body, void* const userData);
@@ -552,7 +550,7 @@ extern "C" {
 	
 	NEWTON_API void NewtonMaterialSetCallbackUserData (const NewtonWorld* const newtonWorld, int id0, int id1, void* const userData);
 	NEWTON_API void NewtonMaterialSetContactGenerationCallback (const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnContactGeneration contactGeneration);
-	NEWTON_API void NewtonMaterialSetCompoundCollisionCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnCompoundSubCollisionAABBOverlap compoundAabbOverlap);
+	
 
 	NEWTON_API void NewtonMaterialSetDefaultSoftness (const NewtonWorld* const newtonWorld, int id0, int id1, dFloat value);
 	NEWTON_API void NewtonMaterialSetDefaultCollidable (const NewtonWorld* const newtonWorld, int id0, int id1, int state);
@@ -857,8 +855,6 @@ extern "C" {
 	NEWTON_API void  NewtonBodySetMatrixRecursive (const NewtonBody* const body, const dFloat* const matrix);
 	
 	NEWTON_API void  NewtonBodySetJointRecursiveCollision (const NewtonBody* const body, unsigned state);
-	NEWTON_API void  NewtonBodySetOmega (const NewtonBody* const body, const dFloat* const omega);
-	NEWTON_API void  NewtonBodySetOmegaNoSleep (const NewtonBody* const body, const dFloat* const omega);
 	NEWTON_API void  NewtonBodySetForce (const NewtonBody* const body, const dFloat* const force);
 	NEWTON_API void  NewtonBodySetTorque (const NewtonBody* const body, const dFloat* const torque);
 	
@@ -893,12 +889,11 @@ extern "C" {
 	NEWTON_API void NewtonBodyGetInvMass(const NewtonBody* const body, dFloat* const invMass, dFloat* const invIxx, dFloat* const invIyy, dFloat* const invIzz);
 	NEWTON_API void NewtonBodyGetInertiaMatrix(const NewtonBody* const body, dFloat* const inertiaMatrix);
 	NEWTON_API void NewtonBodyGetInvInertiaMatrix(const NewtonBody* const body, dFloat* const invInertiaMatrix);
-	NEWTON_API void NewtonBodyGetOmega(const NewtonBody* const body, dFloat* const vector);
+
 	NEWTON_API void NewtonBodyGetAlpha(const NewtonBody* const body, dFloat* const vector);
 	NEWTON_API void NewtonBodyGetAcceleration(const NewtonBody* const body, dFloat* const vector);
 	NEWTON_API void NewtonBodyGetForce(const NewtonBody* const body, dFloat* const vector);
 	NEWTON_API void NewtonBodyGetTorque(const NewtonBody* const body, dFloat* const vector);
-	NEWTON_API void NewtonBodyGetPointVelocity (const NewtonBody* const body, const dFloat* const point, dFloat* const velocOut);
 
 	NEWTON_API void NewtonBodyApplyImpulsePair (const NewtonBody* const body, dFloat* const linearImpulse, dFloat* const angularImpulse, dFloat timestep);
 	NEWTON_API void NewtonBodyAddImpulse (const NewtonBody* const body, const dFloat* const pointDeltaVeloc, const dFloat* const pointPosit, dFloat timestep);
@@ -1252,6 +1247,7 @@ extern "C" {
 	typedef void* (*NewtonAllocMemory) (int sizeInBytes);
 	typedef void (*NewtonFreeMemory) (void* const ptr, int sizeInBytes);
 	typedef int (*NewtonOnAABBOverlap) (const NewtonJoint* const contact, dFloat timestep, int threadIndex);
+	typedef int (*NewtonOnCompoundSubCollisionAABBOverlap) (const NewtonJoint* const contact, dFloat timestep, const NewtonBody* const body0, const void* const collisionNode0, const NewtonBody* const body1, const void* const collisionNode1, int threadIndex);
 	typedef void (*NewtonContactsProcess) (const NewtonJoint* const contact, dFloat timestep, int threadIndex);
 	typedef void (*NewtonApplyForceAndTorque) (const NewtonBody* const body, dFloat timestep, int threadIndex);
 	typedef void (*NewtonSetTransform) (const NewtonBody* const body, const dFloat* const matrix, int threadIndex);
@@ -1297,6 +1293,7 @@ extern "C" {
 
 	// compund shape
 	NEWTON_API NewtonCollision* NewtonCreateCompoundCollision(const NewtonWorld* const newtonWorld, int shapeID);
+	//NEWTON_API void NewtonMaterialSetCompoundCollisionCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnCompoundSubCollisionAABBOverlap compoundAabbOverlap);
 
 	// rigid bodies.
 	NEWTON_API NewtonBody* NewtonCreateDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix);
@@ -1315,9 +1312,14 @@ extern "C" {
 	NEWTON_API void NewtonBodyGetMass(const NewtonBody* const body, dFloat* mass, dFloat* const Ixx, dFloat* const Iyy, dFloat* const Izz);
 	NEWTON_API void NewtonBodySetFullMassMatrix(const NewtonBody* const body, dFloat mass, const dFloat* const inertiaMatrix);
 
+	NEWTON_API void NewtonBodyGetOmega(const NewtonBody* const body, dFloat* const vector);
+	NEWTON_API void  NewtonBodySetOmega(const NewtonBody* const body, const dFloat* const omega);
+	NEWTON_API void  NewtonBodySetOmegaNoSleep(const NewtonBody* const body, const dFloat* const omega);
+
 	NEWTON_API void NewtonBodyGetVelocity(const NewtonBody* const body, dFloat* const vector);
 	NEWTON_API void  NewtonBodySetVelocity(const NewtonBody* const body, const dFloat* const velocity);
 	NEWTON_API void  NewtonBodySetVelocityNoSleep(const NewtonBody* const body, const dFloat* const velocity);
+
 	NEWTON_API dFloat NewtonBodyGetLinearDamping(const NewtonBody* const body);
 	NEWTON_API void  NewtonBodyGetAngularDamping(const NewtonBody* const body, dFloat* const vector);
 	NEWTON_API void  NewtonBodySetLinearDamping(const NewtonBody* const body, dFloat linearDamp);
@@ -1328,6 +1330,7 @@ extern "C" {
 
 	NEWTON_API void NewtonBodyGetPosition(const NewtonBody* const body, dFloat* const pos);
 	NEWTON_API void NewtonBodyGetMatrix(const NewtonBody* const body, dFloat* const matrix);
+	NEWTON_API void NewtonBodyGetPointVelocity(const NewtonBody* const body, const dFloat* const point, dFloat* const velocOut);
 
 	NEWTON_API void  NewtonBodySetTransformCallback(const NewtonBody* const body, NewtonSetTransform callback);
 	NEWTON_API NewtonSetTransform NewtonBodyGetTransformCallback(const NewtonBody* const body);

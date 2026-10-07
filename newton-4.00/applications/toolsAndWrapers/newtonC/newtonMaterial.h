@@ -14,6 +14,7 @@
 
 #include "newtonStdafx.h"
 
+class NewtonBody;
 class NewtonJoint;
 
 class ndNewtonMaterial : public ndApplicationMaterial
@@ -21,6 +22,7 @@ class ndNewtonMaterial : public ndApplicationMaterial
 	public:
 	typedef int (*NewtonOnAABBOverlap) (const NewtonJoint* const contact, ndFloat32 timestep, int threadIndex);
 	typedef void (*NewtonContactsProcess) (const NewtonJoint* const contact, ndFloat32 timestep, int threadIndex);
+	typedef int (*NewtonOnCompoundSubCollisionAABBOverlap) (const NewtonJoint* const contact, ndFloat32 timestep, const NewtonBody* const body0, const void* const collisionNode0, const NewtonBody* const body1, const void* const collisionNode1, int threadIndex);
 
 	ndNewtonMaterial();
 	ndNewtonMaterial(const ndNewtonMaterial& src);
@@ -37,6 +39,7 @@ class ndNewtonMaterial : public ndApplicationMaterial
 
 	NewtonOnAABBOverlap m_onAABBOverlap;
 	NewtonContactsProcess m_onContactsProcess;
+	NewtonOnCompoundSubCollisionAABBOverlap m_onSubShapeAABBOverlap;
 };
 
 #endif

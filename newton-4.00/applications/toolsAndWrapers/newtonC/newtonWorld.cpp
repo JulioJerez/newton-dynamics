@@ -19,6 +19,8 @@ ndNewtonWorld::ndNewtonWorld()
 	,m_bodyMaterialGroup(1)
 {
 	SetSubSteps(2);
+	//SetThreadCount(2);
+	SelectSolver(ndSimd8Solver);
 	SetContactNotify(ndSharedPtr<ndContactNotify>(new ndContactCallback));
 }
 

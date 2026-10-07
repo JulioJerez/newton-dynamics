@@ -18,7 +18,7 @@ ndNewtonBodyNotify::ndNewtonBodyNotify(NewtonBody* const owner)
 	,m_userData(nullptr)
 	,m_owner(owner)
 	,m_materialGoupId(0)
-	,m_capSpeed(ndFloat32 (20.0f))
+	,m_capSpeed(ndFloat32 (60.0f))
 	,m_capOmega(ndFloat32(10.0f))
 	,m_bodyIsInWorld(false)
 	,m_applyTransform(nullptr)
@@ -76,7 +76,7 @@ void ndNewtonBodyNotify::OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 tim
 		}
 	
 		ndFloat32 veloc2(veloc.DotProduct(veloc).GetScalar());
-		if (veloc2 > m_capSpeed * m_capSpeed)
+		if (veloc2 > (m_capSpeed * m_capSpeed))
 		{
 			veloc = veloc.Normalize().Scale(m_capSpeed);
 			body->SetVelocity(veloc);
