@@ -995,7 +995,7 @@ void ndScene::UpdateSpecial()
 
 bool ndScene::ConvexCast(
 	ndConvexCastNotify& callback, 
-	ndFixSizeArray<const ndBvhNode*, D_SCENE_MAX_STACK_DEPTH> stackPool, 
+	ndFixSizeArray<const ndBvhNode*, D_SCENE_MAX_STACK_DEPTH>& stackPool, 
 	ndFixSizeArray<ndFloat32, D_SCENE_MAX_STACK_DEPTH>& stackDistance,
 	const ndFastRay& ray, const ndShapeInstance& convexShape, const ndMatrix& globalOrigin, const ndVector& globalDest) const
 {
@@ -1142,7 +1142,7 @@ bool ndScene::ConvexCast(
 
 bool ndScene::RayCast(
 	ndRayCastNotify& callback, 
-	ndFixSizeArray<const ndBvhNode*, D_SCENE_MAX_STACK_DEPTH> stackPool,
+	ndFixSizeArray<const ndBvhNode*, D_SCENE_MAX_STACK_DEPTH>& stackPool,
 	ndFixSizeArray<ndFloat32, D_SCENE_MAX_STACK_DEPTH>& stackDistance,
 	const ndFastRay& ray) const
 {
