@@ -1,9 +1,9 @@
 /* Copyright (c) <2003-2021> <Newton Game Dynamics>
-* 
+*
 * This software is provided 'as-is', without any express or implied
 * warranty. In no event will the authors be held liable for any damages
 * arising from the use of this software.
-* 
+*
 * Permission is granted to anyone to use this software for any purpose,
 * including commercial applications, and to alter it and redistribute it
 * freely
@@ -11,102 +11,45 @@
 
 #include "newtonStdafx.h"
 #include "newtonWorld.h"
+#include "newtonMaterial.h"
 
-class ndContactCallback : public ndContactNotify
-{
-	public:
-	enum ndMaterialUserIDs
-	{
-		m_default = 0,
-		m_dedris = 100,
-	};
-
-	enum ndMaterialFlags
-	{
-		m_playSound = 1 << 0,
-		//m_debrisBody = 1 << 1,
-	};
-
-	class ndMaterailKey
-	{
-		public:
-		ndMaterailKey()
-			:m_key(0)
-		{
-		}
-
-		ndMaterailKey(ndUnsigned64 low, ndUnsigned64 high)
-			:m_lowKey(ndUnsigned32(ndMin(low, high)))
-			,m_highKey(ndUnsigned32(ndMax(low, high)))
-		{
-		}
-
-		bool operator<(const ndMaterailKey& other) const
-		{
-			return (m_key < other.m_key);
-		}
-
-		bool operator>(const ndMaterailKey& other) const
-		{
-			return (m_key > other.m_key);
-		}
-
-		union
-		{
-			struct
-			{
-				ndUnsigned32 m_lowKey;
-				ndUnsigned32 m_highKey;
-			};
-			ndUnsigned64 m_key;
-		};
-	};
-
-	ndContactCallback(ndScene* const scene)
-		:ndContactNotify(scene)
-		//,m_materialMap()
-	{
-		//m_materialMap.Insert(ndMaterial(), ndMaterailKey(0, 0));
-	}
-
-
-	//virtual ndMaterial& RegisterMaterial(ndUnsigned32 id0, ndUnsigned32 id1);
-	//
-	//virtual void OnBodyAdded(ndBodyKinematic* const body) const;
-	//virtual void OnBodyRemoved(ndBodyKinematic* const body) const;
-	//virtual ndMaterial GetMaterial(const ndContact* const contactJoint, const ndShapeInstance& instance0, const ndShapeInstance& instance1) const;
-	//virtual bool OnAabbOverlap(const ndContact* const contactJoint, ndFloat32 timestep);
-	//virtual void OnContactCallback(ndInt32 threadIndex, const ndContact* const contactJoint, ndFloat32 timestep);
-	//
-	//void PlaySoundTest(const ndContact* const contactJoint);
-	//
-	//dTree<ndMaterial, ndMaterailKey> m_materialMap;
-};
-
-NewtonWorld::NewtonWorld()
+ndNewtonWorld::ndNewtonWorld()
 	:ndWorld()
+	,m_userData(nullptr)
+	,m_bodyMaterialGroup(1)
 {
-	ClearCache();
-	SetContactNotify(new ndContactCallback(GetScene()));
+	SetSubSteps(2);
+	//SetThreadCount(2);
+	SelectSolver(ndSimd8Solver);
+	SetContactNotify(ndSharedPtr<ndContactNotify>(new ndContactCallback));
 }
 
-NewtonWorld::~NewtonWorld()
+ndNewtonWorld::~ndNewtonWorld()
 {
 }
 
-void NewtonWorld::SetSubSteps(int substeps)
+void ndNewtonWorld::ClearMaterials()
 {
-	substeps = ndClamp(substeps, 1, 4);
-	ndWorld::SetSubSteps(substeps);
+	SetContactNotify(ndSharedPtr<ndContactNotify>(new ndContactCallback));
 }
 
-void NewtonWorld::SetIterations(ndInt32 iterations)
+ndMaterial* ndNewtonWorld::GetMaterial(int id0, int id1) const
 {
-	iterations = ndClamp(iterations, 4, 16);
-	SetSolverIterations(iterations);
+	ndContactCallback* const notify = static_cast<ndContactCallback*>(*GetContactNotify());
+	if (!notify->HasMaterial(id0, id1))
+	{
+		if ((id0 < m_bodyMaterialGroup) && (id1 < m_bodyMaterialGroup))
+		{
+			ndNewtonMaterial material;
+			notify->RegisterMaterial(material, id0, id1);
+		}
+	}
+	return notify->GetMaterial(id0, id1);
 }
 
-void NewtonWorld::Update(ndFloat32 timestep)
+void ndNewtonWorld::Update(ndFloat32 timestep)
 {
+	//ndTrace(("%f\n", timestep));
 	ndWorld::Update(timestep);
+	ndWorld::Sync();
 }

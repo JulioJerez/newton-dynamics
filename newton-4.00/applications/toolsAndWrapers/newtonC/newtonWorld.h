@@ -8,24 +8,28 @@
 * including commercial applications, and to alter it and redistribute it
 * freely
 */
-#ifndef __NEWTON_WORLD_H__
-#define __NEWTON_WORLD_H__
 
+#ifndef D_NEWTON_WORLD_H_
+#define D_NEWTON_WORLD_H_
 
-//#include "newtonConfig.h"
 #include "newtonStdafx.h"
 
-
-class NewtonWorld: public ndWorld
+class ndNewtonWorld: public ndWorld
 {
 	public:
-	NewtonWorld();
-	~NewtonWorld();
+	ndNewtonWorld();
+	virtual ~ndNewtonWorld() override;
 
-	void Update(ndFloat32 timestep);
+	void ClearMaterials();
+	ndMaterial* GetMaterial(int id0, int id1) const;
+	
+	 
+	void Update(ndFloat32 timestep) override;
+	//void SetSubSteps(ndInt32 substeps);
+	//void SetIterations(ndInt32 iterations);
 
-	void SetSubSteps(ndInt32 substeps);
-	void SetIterations(ndInt32 iterations);
+	ndWeakPtr<void> m_userData;
+	ndInt32 m_bodyMaterialGroup;
 };
 
 #endif

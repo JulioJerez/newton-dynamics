@@ -504,12 +504,9 @@ void ndVehicleCommonNotify::ApplyInputs(ndFloat32)
 			{
 				if (ndAbs(vehicle->GetSpeed()) < ndFloat32(1.0f))
 				{
-					ndAssert(0);
-					//m_driverState = m_driveShitGearUp;
-					//m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_firstGear;
-					//ndFloat32 gearGain = gearBox.m_gearRatios[m_currentGear];
-					//m_autoGearShiftTimer = gearBox.m_gearShiftDelayTicks - 1;
-					//gearJoint->SetRatio(gearGain);
+					m_driverState = m_transmission ? m_driveAutoShiftGearUp : m_driveForward;
+					m_currentGear = ndMultiBodyVehicleGearBox::ndGearBox::m_neutralGear;
+					gearJoint->SetRatio(ndFloat32(0.0f));
 				}
 			}
 			if (m_manualTransmission.Update(buttons[ndGameControllerInputs::m_automaticGearBoxButton] ? true : false))

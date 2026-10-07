@@ -1051,7 +1051,7 @@ void ndAssetEditor::EditMotorWheelJoint()
 	if (ImGui::InputFloat("max side slip angle", &value, 0.0f, 0.0f, "%.3f", ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
-		joint->m_maxSideSlipAngle = ndClamp(value, ndReal(0.0f), ndReal(20.0f));
+		joint->m_maxSideSlipAngle = ndClamp(value, ndReal(ND_TIRE_MIN_STATIC_SLEEP * ndRadToDegree), ndReal(ND_TIRE_MAX_STATIC_SLEEP * ndRadToDegree));
 		m_undoRedo.Push(ndSharedPtr<ndUndoRedoCommand>(new ndUndoRedoStructuralJoint(this, *m_currentSelection)));
 	}
 }

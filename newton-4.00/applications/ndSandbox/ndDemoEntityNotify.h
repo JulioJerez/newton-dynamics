@@ -18,7 +18,7 @@
 class ndDemoEntityNotify : public ndModelBodyNotify
 {
 	public:
-	D_CLASS_REFLECTION(ndDemoEntityNotify, ndBodyNotify)
+	D_CLASS_REFLECTION(ndDemoEntityNotify, ndModelBodyNotify)
 
 	ndDemoEntityNotify(const ndDemoEntityNotify& notify);
 	ndDemoEntityNotify(
