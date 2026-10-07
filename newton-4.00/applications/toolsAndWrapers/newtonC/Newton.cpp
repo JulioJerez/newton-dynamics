@@ -7587,7 +7587,6 @@ Object* ObjectFromHandle(const Handle* const ptr)
 	return const_cast<Object*>(**sharedPtr);
 }
 
-
 bool CheckFloat(ndFloat32* ptr, ndInt32 size)
 {
 	for (ndInt32 i = 0; i < size; ++i)
