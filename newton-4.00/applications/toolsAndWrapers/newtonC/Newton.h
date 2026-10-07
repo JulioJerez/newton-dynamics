@@ -448,17 +448,9 @@ extern "C" {
 	NEWTON_API NewtonBody* NewtonFindSerializedBody(const NewtonWorld* const newtonWorld, int bodySerializedID);
 	NEWTON_API void NewtonSetJointSerializationCallbacks (const NewtonWorld* const newtonWorld, NewtonOnJointSerializationCallback serializeJoint, NewtonOnJointDeserializationCallback deserializeJoint);
 	NEWTON_API void NewtonGetJointSerializationCallbacks (const NewtonWorld* const newtonWorld, NewtonOnJointSerializationCallback* const serializeJoint, NewtonOnJointDeserializationCallback* const deserializeJoint);
-
-	NEWTON_API void NewtonSetIslandUpdateEvent (const NewtonWorld* const newtonWorld, NewtonIslandUpdate islandUpdate); 
-	NEWTON_API void NewtonWorldForEachJointDo (const NewtonWorld* const newtonWorld, NewtonJointIterator callback, void* const userData);
-	NEWTON_API void NewtonWorldForEachBodyInAABBDo (const NewtonWorld* const newtonWorld, const dFloat* const p0, const dFloat* const p1, NewtonBodyIterator callback, void* const userData);
-
-	NEWTON_API void NewtonWorldSetUserData (const NewtonWorld* const newtonWorld, void* const userData);
-	NEWTON_API void* NewtonWorldGetUserData (const NewtonWorld* const newtonWorld);
 	
 	NEWTON_API void* NewtonWorldAddListener (const NewtonWorld* const newtonWorld, const char* const nameId, void* const listenerUserData);
 	NEWTON_API void* NewtonWorldGetListener (const NewtonWorld* const newtonWorld, const char* const nameId);
-
 	NEWTON_API void NewtonWorldListenerSetDebugCallback (const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldListenerDebugCallback callback);
 	NEWTON_API void NewtonWorldListenerSetPostStepCallback (const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldUpdateListenerCallback callback);
 	NEWTON_API void NewtonWorldListenerSetPreUpdateCallback (const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldUpdateListenerCallback callback);
@@ -475,20 +467,6 @@ extern "C" {
 
 	NEWTON_API void NewtonWorldSetCreateDestroyContactCallback(const NewtonWorld* const newtonWorld, NewtonCreateContactCallback createContact, NewtonDestroyContactCallback destroyContact);
 
-	
-	// world utility functions
-	NEWTON_API int NewtonWorldGetBodyCount(const NewtonWorld* const newtonWorld);
-	NEWTON_API int NewtonWorldGetConstraintCount(const NewtonWorld* const newtonWorld);
-
-	NEWTON_API NewtonJoint* NewtonWorldFindJoint(const NewtonBody* const body0, const NewtonBody* const body1);
-
-	// **********************************************************************************************
-	//
-	// Simulation islands 
-	//
-	// **********************************************************************************************
-	NEWTON_API NewtonBody* NewtonIslandGetBody (const void* const island, int bodyIndex);
-	NEWTON_API void NewtonIslandGetBodyAABB (const void* const island, int bodyIndex, dFloat* const p0, dFloat* const p1);
 
 	// **********************************************************************************************
 	//
@@ -1225,6 +1203,9 @@ extern "C" {
 	NEWTON_API void NewtonUpdateAsync(const NewtonWorld* const newtonWorld, dFloat timestep);
 	NEWTON_API void NewtonDestroyAllBodies(const NewtonWorld* const newtonWorld);
 
+	NEWTON_API void NewtonWorldSetUserData(const NewtonWorld* const newtonWorld, void* const userData);
+	NEWTON_API void* NewtonWorldGetUserData(const NewtonWorld* const newtonWorld);
+
 	NEWTON_API void* NewtonGetPreferedPlugin(const NewtonWorld* const newtonWorld);
 	NEWTON_API void NewtonLoadPlugins(const NewtonWorld* const newtonWorld, const char* const plugInPath);
 	NEWTON_API const char* NewtonGetPluginString(const NewtonWorld* const newtonWorld, const void* const plugin);
@@ -1256,10 +1237,9 @@ extern "C" {
 	NEWTON_API void NewtonWaitForUpdateToFinish(const NewtonWorld* const newtonWorld);
 
 	// multi threading interface 
-	NEWTON_API void NewtonSetThreadsCount(const NewtonWorld* const newtonWorld, int threads);
 	NEWTON_API int NewtonGetThreadsCount(const NewtonWorld* const newtonWorld);
 	NEWTON_API int NewtonGetMaxThreadsCount(const NewtonWorld* const newtonWorld);
-	NEWTON_API void NewtonDispachThreadJob(const NewtonWorld* const newtonWorld, NewtonJobTask task, void* const usedData, const char* const functionName);
+	NEWTON_API void NewtonSetThreadsCount(const NewtonWorld* const newtonWorld, int threads);
 
 	// atomic operations, deprecated for newton 4
 	NEWTON_API void NewtonYield();
@@ -1267,6 +1247,20 @@ extern "C" {
 	NEWTON_API int NewtonAtomicSwap(int* const ptr, int value);
 	NEWTON_API void NewtonWorldCriticalSectionLock(const NewtonWorld* const newtonWorld, int threadIndex);
 	NEWTON_API void NewtonWorldCriticalSectionUnlock(const NewtonWorld* const newtonWorld);
+	NEWTON_API void NewtonDispachThreadJob(const NewtonWorld* const newtonWorld, NewtonJobTask task, void* const usedData, const char* const functionName);
+	NEWTON_API void NewtonSetIslandUpdateEvent(const NewtonWorld* const newtonWorld, NewtonIslandUpdate islandUpdate);
+	NEWTON_API NewtonBody* NewtonIslandGetBody(const void* const island, int bodyIndex);
+	NEWTON_API void NewtonIslandGetBodyAABB(const void* const island, int bodyIndex, dFloat* const p0, dFloat* const p1);
+
+
+	NEWTON_API int NewtonWorldGetBodyCount(const NewtonWorld* const newtonWorld);
+	NEWTON_API int NewtonWorldGetConstraintCount(const NewtonWorld* const newtonWorld);
+
+	NEWTON_API void NewtonWorldForEachBodyDo(const NewtonWorld* const newtonWorld, NewtonBodyIterator callback, void* const userData);
+	NEWTON_API void NewtonWorldForEachJointDo(const NewtonWorld* const newtonWorld, NewtonJointIterator callback, void* const userData);
+	NEWTON_API void NewtonWorldForEachBodyInAABBDo(const NewtonWorld* const newtonWorld, const dFloat* const p0, const dFloat* const p1, NewtonBodyIterator callback, void* const userData);
+	NEWTON_API NewtonJoint* NewtonWorldFindJoint(const NewtonBody* const body0, const NewtonBody* const body1);
+
 
 	// materials
 	NEWTON_API int NewtonMaterialCreateGroupID(const NewtonWorld* const newtonWorld);
@@ -1365,6 +1359,25 @@ extern "C" {
 #ifdef __cplusplus 
 }
 #endif
+
+
+template<class Object, class Handle>
+ndSharedPtr<Object>* SharedObjectFromHandle(const Handle* const ptr)
+{
+	ndSharedPtr<Object>* const sharedPtr = const_cast<ndSharedPtr<Object>*>(reinterpret_cast<const ndSharedPtr<Object>*>(ptr));
+	return sharedPtr;
+}
+
+template<class Object, class Handle>
+Object* ObjectFromHandle(const Handle* const ptr)
+{
+	//const ndSharedPtr<Object>* const sharedPtr = reinterpret_cast<const ndSharedPtr<Object>*>(ptr);
+	const ndSharedPtr<Object>* const sharedPtr = SharedObjectFromHandle<Object, Handle>(ptr);
+	return const_cast<Object*>(**sharedPtr);
+}
+
+bool CheckFloat(ndFloat32* ptr, ndInt32 size);
+
 #endif
 
 
