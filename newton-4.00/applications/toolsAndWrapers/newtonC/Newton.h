@@ -437,16 +437,6 @@ extern "C" {
 	NEWTON_API NewtonPostUpdateCallback NewtonGetPostUpdateCallback(const NewtonWorld* const newtonWorld);
 	NEWTON_API void NewtonSetPostUpdateCallback (const NewtonWorld* const newtonWorld, NewtonPostUpdateCallback callback);
 
-	NEWTON_API void NewtonSetSolverIterations (const NewtonWorld* const newtonWorld, int model);
-	NEWTON_API int NewtonGetSolverIterations(const NewtonWorld* const newtonWorld);
-	
-	NEWTON_API void NewtonUpdateAsync (const NewtonWorld* const newtonWorld, dFloat timestep);
-	NEWTON_API void NewtonWaitForUpdateToFinish (const NewtonWorld* const newtonWorld);
-
-	NEWTON_API int NewtonGetNumberOfSubsteps (const NewtonWorld* const newtonWorld);
-	NEWTON_API void NewtonSetNumberOfSubsteps (const NewtonWorld* const newtonWorld, int subSteps);
-	NEWTON_API dFloat NewtonGetLastUpdateTime (const NewtonWorld* const newtonWorld);
-
 	NEWTON_API void NewtonSerializeToFile (const NewtonWorld* const newtonWorld, const char* const filename, NewtonOnBodySerializationCallback bodyCallback, void* const bodyUserData);
 	NEWTON_API void NewtonDeserializeFromFile (const NewtonWorld* const newtonWorld, const char* const filename, NewtonOnBodyDeserializationCallback bodyCallback, void* const bodyUserData);
 
@@ -458,20 +448,6 @@ extern "C" {
 	NEWTON_API NewtonBody* NewtonFindSerializedBody(const NewtonWorld* const newtonWorld, int bodySerializedID);
 	NEWTON_API void NewtonSetJointSerializationCallbacks (const NewtonWorld* const newtonWorld, NewtonOnJointSerializationCallback serializeJoint, NewtonOnJointDeserializationCallback deserializeJoint);
 	NEWTON_API void NewtonGetJointSerializationCallbacks (const NewtonWorld* const newtonWorld, NewtonOnJointSerializationCallback* const serializeJoint, NewtonOnJointDeserializationCallback* const deserializeJoint);
-
-	// multi threading interface 
-	NEWTON_API void NewtonWorldCriticalSectionLock (const NewtonWorld* const newtonWorld, int threadIndex);
-	NEWTON_API void NewtonWorldCriticalSectionUnlock (const NewtonWorld* const newtonWorld);
-	NEWTON_API void NewtonSetThreadsCount (const NewtonWorld* const newtonWorld, int threads);
-	NEWTON_API int NewtonGetThreadsCount(const NewtonWorld* const newtonWorld);
-	NEWTON_API int NewtonGetMaxThreadsCount(const NewtonWorld* const newtonWorld);
-	NEWTON_API void NewtonDispachThreadJob(const NewtonWorld* const newtonWorld, NewtonJobTask task, void* const usedData, const char* const functionName);
-	NEWTON_API void NewtonSyncThreadJobs(const NewtonWorld* const newtonWorld);
-
-	// atomic operations
-	NEWTON_API int NewtonAtomicAdd (int* const ptr, int value);
-	NEWTON_API int NewtonAtomicSwap (int* const ptr, int value);
-	NEWTON_API void NewtonYield ();
 
 	NEWTON_API void NewtonSetIslandUpdateEvent (const NewtonWorld* const newtonWorld, NewtonIslandUpdate islandUpdate); 
 	NEWTON_API void NewtonWorldForEachJointDo (const NewtonWorld* const newtonWorld, NewtonJointIterator callback, void* const userData);
@@ -1233,7 +1209,6 @@ extern "C" {
 	typedef unsigned (*NewtonWorldRayPrefilterCallback)(const NewtonBody* const body, const NewtonCollision* const collision, void* const userData);
 	typedef dFloat(*NewtonWorldRayFilterCallback)(const NewtonBody* const body, const NewtonCollision* const shapeHit, const dFloat* const hitContact, const dFloat* const hitNormal, dLong collisionID, void* const userData, dFloat intersectParam);
 
-
 	NEWTON_API void* NewtonAlloc(int sizeInBytes);
 	NEWTON_API void NewtonFree(void* const ptr);
 	NEWTON_API int NewtonGetMemoryUsed();
@@ -1245,7 +1220,9 @@ extern "C" {
 	// world interface
 	NEWTON_API NewtonWorld* NewtonCreate();
 	NEWTON_API void NewtonDestroy(const NewtonWorld* const newtonWorld);
+
 	NEWTON_API void NewtonUpdate(const NewtonWorld* const newtonWorld, dFloat timestep);
+	NEWTON_API void NewtonUpdateAsync(const NewtonWorld* const newtonWorld, dFloat timestep);
 	NEWTON_API void NewtonDestroyAllBodies(const NewtonWorld* const newtonWorld);
 
 	NEWTON_API void* NewtonGetPreferedPlugin(const NewtonWorld* const newtonWorld);
@@ -1267,6 +1244,29 @@ extern "C" {
 	NEWTON_API int NewtonGetBroadphaseAlgorithm(const NewtonWorld* const newtonWorld);
 	NEWTON_API void NewtonSelectBroadphaseAlgorithm(const NewtonWorld* const newtonWorld, int algorithmType);
 	NEWTON_API void NewtonResetBroadphase(const NewtonWorld* const newtonWorld);
+
+	NEWTON_API int NewtonGetSolverIterations(const NewtonWorld* const newtonWorld);
+	NEWTON_API void NewtonSetSolverIterations(const NewtonWorld* const newtonWorld, int iterations);
+
+	NEWTON_API int NewtonGetNumberOfSubsteps(const NewtonWorld* const newtonWorld);
+	NEWTON_API void NewtonSetNumberOfSubsteps(const NewtonWorld* const newtonWorld, int subSteps);
+	NEWTON_API dFloat NewtonGetLastUpdateTime(const NewtonWorld* const newtonWorld);
+
+	NEWTON_API void NewtonSyncThreadJobs(const NewtonWorld* const newtonWorld);
+	NEWTON_API void NewtonWaitForUpdateToFinish(const NewtonWorld* const newtonWorld);
+
+	// multi threading interface 
+	NEWTON_API void NewtonSetThreadsCount(const NewtonWorld* const newtonWorld, int threads);
+	NEWTON_API int NewtonGetThreadsCount(const NewtonWorld* const newtonWorld);
+	NEWTON_API int NewtonGetMaxThreadsCount(const NewtonWorld* const newtonWorld);
+	NEWTON_API void NewtonDispachThreadJob(const NewtonWorld* const newtonWorld, NewtonJobTask task, void* const usedData, const char* const functionName);
+
+	// atomic operations, deprecated for newton 4
+	NEWTON_API void NewtonYield();
+	NEWTON_API int NewtonAtomicAdd(int* const ptr, int value);
+	NEWTON_API int NewtonAtomicSwap(int* const ptr, int value);
+	NEWTON_API void NewtonWorldCriticalSectionLock(const NewtonWorld* const newtonWorld, int threadIndex);
+	NEWTON_API void NewtonWorldCriticalSectionUnlock(const NewtonWorld* const newtonWorld);
 
 	// materials
 	NEWTON_API int NewtonMaterialCreateGroupID(const NewtonWorld* const newtonWorld);

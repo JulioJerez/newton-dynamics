@@ -51,5 +51,4 @@ void ndNewtonWorld::Update(ndFloat32 timestep)
 {
 	//ndTrace(("%f\n", timestep));
 	ndWorld::Update(timestep);
-	ndWorld::Sync();
 }

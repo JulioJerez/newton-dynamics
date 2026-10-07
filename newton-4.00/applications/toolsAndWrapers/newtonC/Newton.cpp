@@ -179,93 +179,6 @@ NewtonBody* NewtonFindSerializedBody(const NewtonWorld* const newtonWorld, int b
 	return (NewtonBody*) world->FindBodyFromSerializedID(bodySerializedID);
 }
 
-
-/*!
-  this function block all other threads from executing the same subsequent code simultaneously.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param threadIndex thread index from whe thsi function is called, zero if call form outsize a newton update
-
-  this function should use to present racing conditions when when a call back ins executed form a mutithreaded loop.
-  In general most call back are thread safe when they do not write to object outside the scope of the call back.
-  this means for example that the application can modify values of object pointed by the arguments and or call that function
-  that are allowed to be call for such callback.
-  There are cases, however, when the application need to collect data for the client logic, example of such case are collecting
-  information to display debug information, of collecting data for feedback.
-  In these situations it is possible the the same critical code could be execute at the same time but several thread causing unpredictable side effect.
-  so it is necessary to block all of the thread from executing any pieces of critical code.
-
-  Not calling function *NewtonWorldCriticalSectionUnlock* will result on the engine going into an infinite loop.
-
-  it is important that the critical section wrapped by functions *NewtonWorldCriticalSectionLock* and
-  *NewtonWorldCriticalSectionUnlock* be keep small if the application is using the multi threaded functionality of the engine
-  no doing so will lead to serialization of the parallel treads since only one thread can run the a critical section at a time.
-
-  @return Nothing.
-
-  See also: ::NewtonWorldCriticalSectionUnlock
-*/
-void NewtonWorldCriticalSectionLock (const NewtonWorld* const newtonWorld, int threadIndex)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	Newton* const world = (Newton *)newtonWorld;
-	world->GlobalLock();
-}
-
-
-int NewtonAtomicSwap (int* const ptr, int value)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return dgInterlockedExchange(ptr, value);
-}
-
-int NewtonAtomicAdd (int* const ptr, int value)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return dgAtomicExchangeAndAdd (ptr, value);
-}
-
-void NewtonYield ()
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgThreadYield();
-}
-
-
-/*!
-  this function block all other threads from executing the same subsequent code simultaneously.
-
-  @param *newtonWorld Pointer to the Newton world.
-
-
-  this function should use to present racing conditions when when a call back ins executed form a multi threaded loop.
-  In general most call back are thread safe when they do not write to object outside the scope of the call back.
-  this means for example that the application can modify values of object pointed by the arguments and or call that function
-  that are allowed to be call for such callback.
-  There are cases, however, when the application need to collect data for the client logic, example of such case are collecting
-  information to display debug information, of collecting data for feedback.
-  In these situations it is possible the the same critical code could be execute at the same time but several thread causing unpredictable side effect.
-  so it is necessary to block all of the thread from executing any pieces of critical code.
-
-  it is important that the critical section wrapped by functions *NewtonWorldCriticalSectionLock* and
-  *NewtonWorldCriticalSectionUnlock* be keep small if the application is using the multi threaded functionality of the engine
-  no doing so will lead to serialization of the parallel treads since only one thread can run the a critical section at a time.
-
-  @return Nothing.
-
-  See also: ::NewtonWorldCriticalSectionLock
-*/
-void NewtonWorldCriticalSectionUnlock(const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	Newton* const world = (Newton *)newtonWorld;
-	world->GlobalUnlock();
-}
-
-
-
 /*!
   Set the maximum number of threads the engine can use.
 
@@ -333,82 +246,6 @@ void NewtonDispachThreadJob(const NewtonWorld* const newtonWorld, NewtonJobTask 
 	Newton* const world = (Newton *)newtonWorld;
 	world->ExecuteUserJob (dgWorkerThreadTaskCallback (task), usedData, functionName);
 }
-
-void NewtonSyncThreadJobs(const NewtonWorld* const newtonWorld)
-{
-	Newton* const world = (Newton *)newtonWorld;
-	world->SynchronizationBarrier();
-}
-
-/*!
-  Set the solver precision mode.
-
-  @param *newtonWorld is the pointer to the Newton world
-  @param model model of operation n = number of iteration default value is 4.
-
-  @return Nothing
-
-  n: the solve will execute a maximum of n iteration per cluster of connected joints and will terminate regardless of the 
-  of the joint residual acceleration. 
-  If it happen that the joints residual acceleration fall below the minimum tolerance 1.0e-5
-  then the solve will terminate before the number of iteration reach N.
-*/
-void NewtonSetSolverIterations(const NewtonWorld* const newtonWorld, int model)
-{
-	Newton* const world = (Newton *)newtonWorld;
-
-	TRACE_FUNCTION(__FUNCTION__);
-	world->SetSolverIterations (model);
-}
-
-/*!
-Get the solver precision mode.
-*/
-int NewtonGetSolverIterations(const NewtonWorld* const newtonWorld)
-{
-	Newton* const world = (Newton *)newtonWorld;
-
-	TRACE_FUNCTION(__FUNCTION__);
-	return world->GetSolverIterations();
-}
-
-void NewtonUpdateAsync (const NewtonWorld* const newtonWorld, dFloat timestep)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-
-	world->UpdatePhysicsAsync(timestep);
-}
-
-void NewtonWaitForUpdateToFinish (const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	world->Sync ();
-}
-
-dFloat NewtonGetLastUpdateTime (const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	return world->GetUpdateTime();
-}
-
-
-void NewtonSetNumberOfSubsteps (const NewtonWorld* const newtonWorld, int subSteps)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	world->SetSubsteps (subSteps);
-}
-
-int NewtonGetNumberOfSubsteps (const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	return world->GetSubsteps ();
-}
-
 
 /*!
   Set a function callback to be call on each island update.
@@ -7597,6 +7434,16 @@ void NewtonUpdate(const NewtonWorld* const newtonWorld, dFloat timestep)
 	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
 
 	world->Update(timestep);
+	world->Sync();
+}
+
+void NewtonUpdateAsync(const NewtonWorld* const newtonWorld, dFloat timestep)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+
+	world->Sync();
+	world->Update(timestep);
 }
 
 /*!
@@ -7691,6 +7538,157 @@ const char* NewtonGetPluginString(const NewtonWorld* const newtonWorld, const vo
 	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	return world->GetSolverString();
 }
+
+/*!
+  Set the solver precision mode.
+
+  @param *newtonWorld is the pointer to the Newton world
+  @param model model of operation n = number of iteration default value is 4.
+
+  @return Nothing
+
+  n: the solve will execute a maximum of n iteration per cluster of connected joints and will terminate regardless of the
+  of the joint residual acceleration.
+  If it happen that the joints residual acceleration fall below the minimum tolerance 1.0e-5
+  then the solve will terminate before the number of iteration reach N.
+*/
+void NewtonSetSolverIterations(const NewtonWorld* const newtonWorld, int iterations)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	world->SetSolverIterations(iterations);
+}
+
+/*!
+Get the solver precision mode.
+*/
+int NewtonGetSolverIterations(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	return world->GetSolverIterations();
+}
+
+void NewtonSetNumberOfSubsteps(const NewtonWorld* const newtonWorld, int subSteps)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	world->SetSubSteps(subSteps);
+}
+
+int NewtonGetNumberOfSubsteps(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	return world->GetSubSteps();
+}
+
+dFloat NewtonGetLastUpdateTime(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	return world->GetUpdateTime();
+}
+
+void NewtonWaitForUpdateToFinish(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	world->Sync();
+}
+
+void NewtonSyncThreadJobs(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	world->Sync();
+}
+
+
+/*!
+  this function block all other threads from executing the same subsequent code simultaneously.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param threadIndex thread index from whe thsi function is called, zero if call form outsize a newton update
+
+  this function should use to present racing conditions when when a call back ins executed form a mutithreaded loop.
+  In general most call back are thread safe when they do not write to object outside the scope of the call back.
+  this means for example that the application can modify values of object pointed by the arguments and or call that function
+  that are allowed to be call for such callback.
+  There are cases, however, when the application need to collect data for the client logic, example of such case are collecting
+  information to display debug information, of collecting data for feedback.
+  In these situations it is possible the the same critical code could be execute at the same time but several thread causing unpredictable side effect.
+  so it is necessary to block all of the thread from executing any pieces of critical code.
+
+  Not calling function *NewtonWorldCriticalSectionUnlock* will result on the engine going into an infinite loop.
+
+  it is important that the critical section wrapped by functions *NewtonWorldCriticalSectionLock* and
+  *NewtonWorldCriticalSectionUnlock* be keep small if the application is using the multi threaded functionality of the engine
+  no doing so will lead to serialization of the parallel treads since only one thread can run the a critical section at a time.
+
+  @return Nothing.
+
+  See also: ::NewtonWorldCriticalSectionUnlock
+*/
+void NewtonWorldCriticalSectionLock(const NewtonWorld* const, int)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	// do nothing
+	ndAssert(0);
+}
+
+/*!
+  this function block all other threads from executing the same subsequent code simultaneously.
+
+  @param *newtonWorld Pointer to the Newton world.
+
+
+  this function should use to present racing conditions when when a call back ins executed form a multi threaded loop.
+  In general most call back are thread safe when they do not write to object outside the scope of the call back.
+  this means for example that the application can modify values of object pointed by the arguments and or call that function
+  that are allowed to be call for such callback.
+  There are cases, however, when the application need to collect data for the client logic, example of such case are collecting
+  information to display debug information, of collecting data for feedback.
+  In these situations it is possible the the same critical code could be execute at the same time but several thread causing unpredictable side effect.
+  so it is necessary to block all of the thread from executing any pieces of critical code.
+
+  it is important that the critical section wrapped by functions *NewtonWorldCriticalSectionLock* and
+  *NewtonWorldCriticalSectionUnlock* be keep small if the application is using the multi threaded functionality of the engine
+  no doing so will lead to serialization of the parallel treads since only one thread can run the a critical section at a time.
+
+  @return Nothing.
+
+  See also: ::NewtonWorldCriticalSectionLock
+*/
+void NewtonWorldCriticalSectionUnlock(const NewtonWorld* const)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	// do nothing
+	ndAssert(0);
+}
+
+int NewtonAtomicSwap(int* const, int)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndAssert(0);
+	return 0;
+}
+
+int NewtonAtomicAdd(int* const ptr, int value)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	// do nothing
+	ndAssert(0);
+	return value;
+}
+
+
+void NewtonYield()
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndAssert(0);
+}
+
 
 /*!
   Get the value of the default MaterialGroupID.
