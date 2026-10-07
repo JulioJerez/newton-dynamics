@@ -4062,75 +4062,6 @@ NewtonBodyDestructor NewtonBodyGetDestructorCallback (const NewtonBody* const bo
 }
 
 /*!
-  Set the mass matrix of a rigid body.
-
-  @param *bodyPtr pointer to the body.
-  @param mass mass value.
-  @param inertiaMatrix fixme
-
-  @return Nothing.
-
-  Newton algorithms have no restriction on the values for the mass, but due to floating point dynamic
-  range (24 bit precision) it is best if the ratio between the heaviest and the lightest body in the scene is limited to 200.
-  There are no special utility functions in Newton to calculate the moment of inertia of common primitives.
-  The application should specify the inertial values, keeping in mind that realistic inertia values are necessary for
-  realistic physics behavior.
-
-  See also: ::NewtonConvexCollisionCalculateInertialMatrix, ::NewtonBodyGetMass, ::NewtonBodyGetInvMass
-*/
-void NewtonBodySetFullMassMatrix(const NewtonBody* const bodyPtr, dFloat mass, const dFloat* const inertiaMatrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-	dgMatrix inertia(inertiaMatrix);
-	body->SetMassMatrix (mass, inertia);
-}
-
-
-void NewtonBodySetMassMatrix(const NewtonBody* const bodyPtr, dFloat mass, dFloat Ixx, dFloat Iyy, dFloat Izz)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMatrix inertia (dgGetIdentityMatrix());
-	inertia[0][0] = Ixx;
-	inertia[1][1] = Iyy;
-	inertia[2][2] = Izz;
-	NewtonBodySetFullMassMatrix(bodyPtr, mass, &inertia[0][0]);
-}
-
-
-/*!
-  Get the mass matrix of a rigid body.
-
-  @param *bodyPtr pointer to the body.
-  @param *mass pointer to a variable that will hold the mass value of the body.
-  @param *Ixx pointer to a variable that will hold the moment of inertia of the first principal axis of inertia of the body.
-  @param *Iyy pointer to a variable that will hold the moment of inertia of the first principal axis of inertia of the body.
-  @param *Izz pointer to a variable that will hold the moment of inertia of the first principal axis of inertia of the body.
-
-  @return Nothing.
-
-  See also: ::NewtonBodySetMassMatrix, ::NewtonBodyGetInvMass
-*/
-void  NewtonBodyGetMass(const NewtonBody* const bodyPtr, dFloat* const mass, dFloat* const Ixx, dFloat* const Iyy, dFloat* const Izz)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-
-//	dgVector vector (body->GetApparentMass());
-	dgVector vector (body->GetMass());
-	Ixx[0] = vector.m_x;
-	Iyy[0] = vector.m_y; 
-	Izz[0] = vector.m_z;
-	mass[0] = vector.m_w;
-	if (vector.m_w > DG_INFINITE_MASS * 0.5f) {
-		Ixx[0] = 0.0f;
-		Iyy[0] = 0.0f; 
-		Izz[0] = 0.0f;
-		mass[0] = 0.0f;
-	}
-}
-
-/*!
   Get the inverse mass matrix of a rigid body.
 
   @param *bodyPtr pointer to the body.
@@ -4970,52 +4901,6 @@ void NewtonBodyGetAABB(const NewtonBody* const bodyPtr, dFloat* const p0, dFloat
 	p1[2] = vector1.m_z;
 }
 
-/*!
-  Set the global linear velocity of the body.
-
-  @param *bodyPtr is the pointer to the body.
-  @param *velocity pointer to an array of at least three floats containing the velocity vector.
-
-  See also: ::NewtonBodyGetVelocity
-*/
-void NewtonBodySetVelocity(const NewtonBody* const bodyPtr, const dFloat* const velocity)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-
-	dgVector vector (velocity[0], velocity[1], velocity[2], dgFloat32 (0.0f));
-	body->SetVelocity (vector);
-}
-
-void NewtonBodySetVelocityNoSleep(const NewtonBody* const bodyPtr, const dFloat* const velocity)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBody* const body = (dgBody *)bodyPtr;
-
-	dgVector vector(velocity[0], velocity[1], velocity[2], dgFloat32(0.0f));
-	body->SetVelocityNoSleep(vector);
-}
-
-
-/*!
-  Get the global linear velocity of the body.
-
-  @param *bodyPtr is the pointer to the body.
-  @param *velocity pointer to an array of at least three floats to hold the velocity vector.
-
-  See also: ::NewtonBodySetVelocity
-*/
-void NewtonBodyGetVelocity(const NewtonBody* const bodyPtr, dFloat* const velocity)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	dgBody* const body = (dgBody *)bodyPtr;
-
-	dgVector vector (body->GetVelocity());
-	velocity[0] = vector.m_x;
-	velocity[1] = vector.m_y;
-	velocity[2] = vector.m_z;
-}
 
 /*!
   Set the global angular velocity of the body.
@@ -8642,7 +8527,192 @@ void  NewtonBodyGetAngularDamping(const NewtonBody* const bodyPtr, dFloat* angul
 	angularDamp[2] = vector.m_z;
 }
 
+/*!
+  Set the global linear velocity of the body.
 
+  @param *bodyPtr is the pointer to the body.
+  @param *velocity pointer to an array of at least three floats containing the velocity vector.
+
+  See also: ::NewtonBodyGetVelocity
+*/
+void NewtonBodySetVelocity(const NewtonBody* const bodyPtr, const dFloat* const velocity)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+
+	ndVector vector(velocity[0], velocity[1], velocity[2], ndFloat32(0.0f));
+	body->SetVelocity(vector);
+}
+
+void NewtonBodySetVelocityNoSleep(const NewtonBody* const bodyPtr, const dFloat* const velocity)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+
+	ndVector vector(velocity[0], velocity[1], velocity[2], ndFloat32(0.0f));
+	body->SetVelocityNoSleep(vector);
+}
+
+/*!
+  Get the global linear velocity of the body.
+
+  @param *bodyPtr is the pointer to the body.
+  @param *velocity pointer to an array of at least three floats to hold the velocity vector.
+
+  See also: ::NewtonBodySetVelocity
+*/
+void NewtonBodyGetVelocity(const NewtonBody* const bodyPtr, dFloat* const velocity)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+
+	ndVector vector(body->GetVelocity());
+	velocity[0] = vector.m_x;
+	velocity[1] = vector.m_y;
+	velocity[2] = vector.m_z;
+}
+
+/*!
+  Get the mass matrix of a rigid body.
+
+  @param *bodyPtr pointer to the body.
+  @param *mass pointer to a variable that will hold the mass value of the body.
+  @param *Ixx pointer to a variable that will hold the moment of inertia of the first principal axis of inertia of the body.
+  @param *Iyy pointer to a variable that will hold the moment of inertia of the first principal axis of inertia of the body.
+  @param *Izz pointer to a variable that will hold the moment of inertia of the first principal axis of inertia of the body.
+
+  @return Nothing.
+
+  See also: ::NewtonBodySetMassMatrix, ::NewtonBodyGetInvMass
+*/
+void  NewtonBodyGetMass(const NewtonBody* const bodyPtr, dFloat* const mass, dFloat* const Ixx, dFloat* const Iyy, dFloat* const Izz)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+
+	//	dgVector vector (body->GetApparentMass());
+	ndVector vector(body->GetMassMatrix());
+	Ixx[0] = vector.m_x;
+	Iyy[0] = vector.m_y;
+	Izz[0] = vector.m_z;
+	mass[0] = vector.m_w;
+	if (vector.m_w > ndFloat32 (1.0e12f))
+	{
+		Ixx[0] = 0.0f;
+		Iyy[0] = 0.0f;
+		Izz[0] = 0.0f;
+		mass[0] = 0.0f;
+	}
+}
+
+/*!
+  Set the mass matrix of a rigid body.
+
+  @param *bodyPtr pointer to the body.
+  @param mass mass value.
+  @param inertiaMatrix fixme
+
+  @return Nothing.
+
+  Newton algorithms have no restriction on the values for the mass, but due to floating point dynamic
+  range (24 bit precision) it is best if the ratio between the heaviest and the lightest body in the scene is limited to 200.
+  There are no special utility functions in Newton to calculate the moment of inertia of common primitives.
+  The application should specify the inertial values, keeping in mind that realistic inertia values are necessary for
+  realistic physics behavior.
+
+  See also: ::NewtonConvexCollisionCalculateInertialMatrix, ::NewtonBodyGetMass, ::NewtonBodyGetInvMass
+*/
+void NewtonBodySetFullMassMatrix(const NewtonBody* const bodyPtr, dFloat mass, const dFloat* const inertiaMatrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndMatrix inertia(inertiaMatrix);
+	body->SetMassMatrix(mass, inertia);
+}
+
+void NewtonBodySetMassMatrix(const NewtonBody* const bodyPtr, dFloat mass, dFloat Ixx, dFloat Iyy, dFloat Izz)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMatrix inertia(ndGetIdentityMatrix());
+	inertia[0][0] = Ixx;
+	inertia[1][1] = Iyy;
+	inertia[2][2] = Izz;
+	NewtonBodySetFullMassMatrix(bodyPtr, mass, &inertia[0][0]);
+}
+
+/*!
+  Set the relative position of the center of mass of a rigid body.
+
+  @param *bodyPtr pointer to the body.
+  @param *comPtr pointer to an array of 3 floats containing the relative offset of the center of mass of the body.
+
+  @return Nothing.
+
+  This function can be used to set the relative offset of the center of mass of a rigid body.
+  when a rigid body is created the center of mass is set the the point c(0, 0, 0), and normally this is
+  the best setting for a rigid body. However the are situations in which and object does not have symmetry or
+  simple some kind of special effect is desired, and this origin need to be changed.
+
+  Care must be taken when offsetting the center of mass of a body.
+  The application must make sure that the external torques resulting from forces applied at at point
+  relative to the center of mass are calculated appropriately.
+  this could be done Transform and Torque callback function as the follow pseudo code fragment shows:
+
+  Matrix matrix;
+  Vector center;
+
+  NewtonGetMatrix(body, matrix)
+  NewtonGetCentreOfMass(body, center);
+
+  //for global space torque.
+  Vector localForce (fx, fy, fz);
+  Vector localPosition (x, y, z);
+  Vector localTorque (crossproduct ((localPosition - center). localForce);
+  Vector globalTorque (matrix.RotateVector (localTorque));
+
+  //for global space torque.
+  Vector globalCentre (matrix.TranformVector (center));
+  Vector globalPosition (x, y, z);
+  Vector globalForce (fx, fy, fz);
+  Vector globalTorque (crossproduct ((globalPosition - globalCentre). globalForce);
+
+  See also: ::NewtonConvexCollisionCalculateInertialMatrix, ::NewtonBodyGetCentreOfMass
+*/
+void NewtonBodySetCentreOfMass(const NewtonBody* const bodyPtr, const dFloat* const comPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndVector vector(comPtr[0], comPtr[1], comPtr[2], ndFloat32(1.0f));
+	body->SetCentreOfMass(vector);
+}
+
+/*!
+  Get the relative position of the center of mass of a rigid body.
+
+  @param *bodyPtr pointer to the body.
+  @param *comPtr pointer to an array of 3 floats to hold the relative offset of the center of mass of the body.
+
+  @return Nothing.
+
+  This function can be used to set the relative offset of the center of mass of a rigid body.
+  when a rigid body is created the center of mass is set the the point c(0, 0, 0), and normally this is
+  the best setting for a rigid body. However the are situations in which and object does not have symmetry or
+  simple some kind of special effect is desired, and this origin need to be changed.
+
+  This function can be used in conjunction with *NewtonConvexCollisionCalculateInertialMatrix*
+
+  See also: ::NewtonConvexCollisionCalculateInertialMatrix, ::NewtonBodySetCentreOfMass
+*/
+void NewtonBodyGetCentreOfMass(const NewtonBody* const bodyPtr, dFloat* const comPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndVector vector(body->GetCentreOfMass());
+	comPtr[0] = vector.m_x;
+	comPtr[1] = vector.m_y;
+	comPtr[2] = vector.m_z;
+}
 
 /*! @defgroup SpecialEffectMesh SpecialEffectMesh
 Special effect mesh interface
