@@ -8,7 +8,8 @@
 # including commercial applications, and to alter it and redistribute it
 # freely.
 
-cmake_minimum_required(VERSION 3.4.0)
+
+cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
 
 option("NEWTON_BUILD_SANDBOX_DEMOS" "generates demos projects" "ON")
 option("NEWTON_BUILD_PROFILER" "build profiler" OFF)
