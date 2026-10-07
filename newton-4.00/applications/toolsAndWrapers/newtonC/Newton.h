@@ -434,33 +434,11 @@ extern "C" {
 	// world control functions
 	//
 	// **********************************************************************************************
-	NEWTON_API int NewtonWorldGetVersion ();
-	NEWTON_API int NewtonWorldFloatSize ();
-	
 	NEWTON_API NewtonPostUpdateCallback NewtonGetPostUpdateCallback(const NewtonWorld* const newtonWorld);
 	NEWTON_API void NewtonSetPostUpdateCallback (const NewtonWorld* const newtonWorld, NewtonPostUpdateCallback callback);
 
-
-	NEWTON_API void NewtonUnloadPlugins(const NewtonWorld* const newtonWorld);
-	NEWTON_API void* NewtonCurrentPlugin(const NewtonWorld* const newtonWorld);
-	NEWTON_API void* NewtonGetFirstPlugin(const NewtonWorld* const newtonWorld);
-	NEWTON_API void* NewtonGetNextPlugin(const NewtonWorld* const newtonWorld, const void* const plugin);
-	NEWTON_API void NewtonSelectPlugin(const NewtonWorld* const newtonWorld, const void* const plugin);
-
-	NEWTON_API dFloat NewtonGetContactMergeTolerance (const NewtonWorld* const newtonWorld);
-	NEWTON_API void NewtonSetContactMergeTolerance (const NewtonWorld* const newtonWorld, dFloat tolerance);
-
-	NEWTON_API void NewtonInvalidateCache (const NewtonWorld* const newtonWorld);
-
 	NEWTON_API void NewtonSetSolverIterations (const NewtonWorld* const newtonWorld, int model);
 	NEWTON_API int NewtonGetSolverIterations(const NewtonWorld* const newtonWorld);
-
-	NEWTON_API void NewtonSetParallelSolverOnLargeIsland (const NewtonWorld* const newtonWorld, int mode);
-	NEWTON_API int NewtonGetParallelSolverOnLargeIsland (const NewtonWorld* const newtonWorld);
-
-	NEWTON_API int NewtonGetBroadphaseAlgorithm (const NewtonWorld* const newtonWorld);
-	NEWTON_API void NewtonSelectBroadphaseAlgorithm (const NewtonWorld* const newtonWorld, int algorithmType);
-	NEWTON_API void NewtonResetBroadphase(const NewtonWorld* const newtonWorld);
 	
 	NEWTON_API void NewtonUpdateAsync (const NewtonWorld* const newtonWorld, dFloat timestep);
 	NEWTON_API void NewtonWaitForUpdateToFinish (const NewtonWorld* const newtonWorld);
@@ -1261,16 +1239,34 @@ extern "C" {
 	NEWTON_API int NewtonGetMemoryUsed();
 	NEWTON_API void NewtonSetMemorySystem(NewtonAllocMemory malloc, NewtonFreeMemory free);
 
-	// world inteface
+	NEWTON_API int NewtonWorldGetVersion();
+	NEWTON_API int NewtonWorldFloatSize();
+
+	// world interface
 	NEWTON_API NewtonWorld* NewtonCreate();
 	NEWTON_API void NewtonDestroy(const NewtonWorld* const newtonWorld);
 	NEWTON_API void NewtonUpdate(const NewtonWorld* const newtonWorld, dFloat timestep);
-
 	NEWTON_API void NewtonDestroyAllBodies(const NewtonWorld* const newtonWorld);
 
 	NEWTON_API void* NewtonGetPreferedPlugin(const NewtonWorld* const newtonWorld);
 	NEWTON_API void NewtonLoadPlugins(const NewtonWorld* const newtonWorld, const char* const plugInPath);
 	NEWTON_API const char* NewtonGetPluginString(const NewtonWorld* const newtonWorld, const void* const plugin);
+	NEWTON_API void NewtonUnloadPlugins(const NewtonWorld* const newtonWorld);
+	NEWTON_API void* NewtonCurrentPlugin(const NewtonWorld* const newtonWorld);
+	NEWTON_API void* NewtonGetFirstPlugin(const NewtonWorld* const newtonWorld);
+	NEWTON_API void* NewtonGetNextPlugin(const NewtonWorld* const newtonWorld, const void* const plugin);
+	NEWTON_API void NewtonSelectPlugin(const NewtonWorld* const newtonWorld, const void* const plugin);
+
+	NEWTON_API dFloat NewtonGetContactMergeTolerance(const NewtonWorld* const newtonWorld);
+	NEWTON_API void NewtonSetContactMergeTolerance(const NewtonWorld* const newtonWorld, dFloat tolerance);
+
+	NEWTON_API void NewtonInvalidateCache(const NewtonWorld* const newtonWorld);
+	NEWTON_API void NewtonSetParallelSolverOnLargeIsland(const NewtonWorld* const newtonWorld, int mode);
+	NEWTON_API int NewtonGetParallelSolverOnLargeIsland(const NewtonWorld* const newtonWorld);
+
+	NEWTON_API int NewtonGetBroadphaseAlgorithm(const NewtonWorld* const newtonWorld);
+	NEWTON_API void NewtonSelectBroadphaseAlgorithm(const NewtonWorld* const newtonWorld, int algorithmType);
+	NEWTON_API void NewtonResetBroadphase(const NewtonWorld* const newtonWorld);
 
 	// materials
 	NEWTON_API int NewtonMaterialCreateGroupID(const NewtonWorld* const newtonWorld);

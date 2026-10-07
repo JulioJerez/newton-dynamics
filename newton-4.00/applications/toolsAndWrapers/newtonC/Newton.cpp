@@ -119,69 +119,6 @@ NewtonPostUpdateCallback NewtonGetPostUpdateCallback(const NewtonWorld* const ne
 	return (NewtonPostUpdateCallback)world->GetPostUpdateCallback();
 }
 
-int NewtonGetBroadphaseAlgorithm (const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	return world->GetBroadPhaseType();
-}
-
-void NewtonSelectBroadphaseAlgorithm (const NewtonWorld* const newtonWorld, int algorithmType)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	world->SetBroadPhaseType(algorithmType);
-}
-
-void NewtonResetBroadphase(const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	return world->ResetBroadPhase();
-}
-
-
-dFloat NewtonGetContactMergeTolerance (const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	return world->GetContactMergeTolerance();
-}
-
-void NewtonSetContactMergeTolerance (const NewtonWorld* const newtonWorld, dFloat tolerance)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	world->SetContactMergeTolerance(tolerance);
-}
-
-
-/*!
-  Reset all internal engine states.
-
-  @param *newtonWorld Pointer to the Newton world.
-
-  Call this function whenever you want to create a reproducible simulation from
-  a pre-defined initial condition.
-
-  It does *not* suffice to merely reset the position and velocity of
-  objects. This is because Newton takes advantage of frame-to-frame coherence for
-  performance reasons.
-
-  This function must be called outside of a Newton Update.
-
-  Note: this kind of synchronization incurs a heavy performance penalty if
-  called during each update.
-
-  See also: ::NewtonUpdate
-*/
-void NewtonInvalidateCache(const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	world->FlushCache();
-}
-
 void NewtonSetJointSerializationCallbacks (const NewtonWorld* const newtonWorld, NewtonOnJointSerializationCallback serializeJoint, NewtonOnJointDeserializationCallback deserializeJoint)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -240,43 +177,6 @@ NewtonBody* NewtonFindSerializedBody(const NewtonWorld* const newtonWorld, int b
 	Newton* const world = (Newton *) newtonWorld;
 	dgAssert (0);
 	return (NewtonBody*) world->FindBodyFromSerializedID(bodySerializedID);
-}
-
-void NewtonUnloadPlugins(const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	world->UnloadPlugins();
-}
-
-void* NewtonCurrentPlugin(const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	return world->GetCurrentPlugin();
-}
-
-void* NewtonGetFirstPlugin(const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	return world->GetFirstPlugin();
-}
-
-void* NewtonGetNextPlugin(const NewtonWorld* const newtonWorld, const void* const plugin)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	dgWorldPluginList::dgListNode* const node = (dgWorldPluginList::dgListNode*) plugin;
-	return world->GetNextPlugin(node);
-}
-
-void NewtonSelectPlugin(const NewtonWorld* const newtonWorld, const void* const plugin)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	dgWorldPluginList::dgListNode* const node = (dgWorldPluginList::dgListNode*) plugin;
-	return world->SelectPlugin(node);
 }
 
 
@@ -427,42 +327,6 @@ int NewtonGetMaxThreadsCount(const NewtonWorld* const newtonWorld)
 	return world->GetMaxThreadCount();
 }
 
-
-/*!
-  Enable/disable multi-threaded constraint resolution for large islands
-  (disabled by default).
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param mode 1: enabled  0: disabled (default)
-
-  @return Nothing
-
-  Multi threaded mode is not always faster. Among the reasons are
-
-  1 - Significant software cost to set up threads, as well as instruction overhead.
-  2 - Different systems have different cost for running separate threads in a shared memory environment.
-  3 - Parallel algorithms often have decreased converge rate. This can be as
-      high as half of the of the sequential version. Consequently, the parallel
-      solver requires a higher number of interactions to achieve similar convergence.
-
-  It is recommended this option is enabled on system with more than two cores,
-  since the performance gain in a dual core system are marginally better. Your
-  mileage may vary.
-
-  At the very least the application must test the option to verify the performance gains.
-
-  This option has no impact on other subsystems of the engine.
-
-  See also: ::NewtonGetThreadsCount, ::NewtonSetThreadsCount
-*/
-void NewtonSetParallelSolverOnLargeIsland(const NewtonWorld* const newtonWorld, int mode)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	world->EnableParallelSolverOnLargeIsland (mode);
-}
-
-
 void NewtonDispachThreadJob(const NewtonWorld* const newtonWorld, NewtonJobTask task, void* const usedData, const char* const functionName)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -474,13 +338,6 @@ void NewtonSyncThreadJobs(const NewtonWorld* const newtonWorld)
 {
 	Newton* const world = (Newton *)newtonWorld;
 	world->SynchronizationBarrier();
-}
-
-int NewtonGetParallelSolverOnLargeIsland(const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	return world->GetParallelSolverOnLargeIsland();
 }
 
 /*!
@@ -725,37 +582,6 @@ void NewtonWorldForEachBodyInAABBDo(const NewtonWorld* const newtonWorld, const 
 
 	world->GetBroadPhase()->ForEachBodyInAABB (q0, q1, (OnBodiesInAABB) callback, userData);
 }
-
-
-/*!
-  Return the current library version number.
-
-  @return version number as an integer, eg 314.
-
-  The version number is a three-digit integer.
-
-  First digit:  major version (interface changes among other things)
-  Second digit: major patch number (new features, and bug fixes)
-  Third Digit:  minor bug fixed patch.
-*/
-int NewtonWorldGetVersion()
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return NEWTON_MAJOR_VERSION * 100 + NEWTON_MINOR_VERSION;
-}
-
-
-/*!
-  Return the size of a Newton dFloat in bytes.
-
-  @return sizeof(dFloat)
-*/
-int NewtonWorldFloatSize ()
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return sizeof (dFloat);
-}
-
 
 /*!
   Store a user defined data value with the world.
@@ -7570,6 +7396,34 @@ int NewtonGetMemoryUsed()
 }
 
 /*!
+  Return the current library version number.
+
+  @return version number as an integer, eg 314.
+
+  The version number is a three-digit integer.
+
+  First digit:  major version (interface changes among other things)
+  Second digit: major patch number (new features, and bug fixes)
+  Third Digit:  minor bug fixed patch.
+*/
+int NewtonWorldGetVersion()
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	return NEWTON_MAJOR_VERSION * 100 + NEWTON_MINOR_VERSION;
+}
+
+/*!
+  Return the size of a Newton dFloat in bytes.
+
+  @return sizeof(dFloat)
+*/
+int NewtonWorldFloatSize()
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	return sizeof(ndFloat32);
+}
+
+/*!
   Create an instance of the Newton world.
 
   @return Pointer to new Newton world.
@@ -7600,6 +7454,97 @@ void NewtonDestroy(const NewtonWorld* const newtonWorld)
 	TRACE_FUNCTION(__FUNCTION__);
 	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	delete world;
+}
+
+/*!
+  Reset all internal engine states.
+
+  @param *newtonWorld Pointer to the Newton world.
+
+  Call this function whenever you want to create a reproducible simulation from
+  a pre-defined initial condition.
+
+  It does *not* suffice to merely reset the position and velocity of
+  objects. This is because Newton takes advantage of frame-to-frame coherence for
+  performance reasons.
+
+  This function must be called outside of a Newton Update.
+
+  Note: this kind of synchronization incurs a heavy performance penalty if
+  called during each update.
+
+  See also: ::NewtonUpdate
+*/
+void NewtonInvalidateCache(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	world->ClearCache();
+}
+
+dFloat NewtonGetContactMergeTolerance(const NewtonWorld* const)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	return ndFloat32(0.0f);
+}
+
+void NewtonSetContactMergeTolerance(const NewtonWorld* const, dFloat)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+}
+
+/*!
+  Enable/disable multi-threaded constraint resolution for large islands
+  (disabled by default).
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param mode 1: enabled  0: disabled (default)
+
+  @return Nothing
+
+  Multi threaded mode is not always faster. Among the reasons are
+
+  1 - Significant software cost to set up threads, as well as instruction overhead.
+  2 - Different systems have different cost for running separate threads in a shared memory environment.
+  3 - Parallel algorithms often have decreased converge rate. This can be as
+	  high as half of the of the sequential version. Consequently, the parallel
+	  solver requires a higher number of interactions to achieve similar convergence.
+
+  It is recommended this option is enabled on system with more than two cores,
+  since the performance gain in a dual core system are marginally better. Your
+  mileage may vary.
+
+  At the very least the application must test the option to verify the performance gains.
+
+  This option has no impact on other subsystems of the engine.
+
+  See also: ::NewtonGetThreadsCount, ::NewtonSetThreadsCount
+*/
+void NewtonSetParallelSolverOnLargeIsland(const NewtonWorld* const, int)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+}
+
+int NewtonGetParallelSolverOnLargeIsland(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	return 0;
+}
+
+int NewtonGetBroadphaseAlgorithm(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	return 0;
+}
+
+void NewtonSelectBroadphaseAlgorithm(const NewtonWorld* const newtonWorld, int algorithmType)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+}
+
+void NewtonResetBroadphase(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
 }
 
 /*!
@@ -7681,10 +7626,70 @@ void* NewtonGetPreferedPlugin(const NewtonWorld* const)
 	return nullptr;
 }
 
+void NewtonUnloadPlugins(const NewtonWorld* const)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+}
+
+void* NewtonCurrentPlugin(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(world->GetSelectedSolver() + 1);
+	return reinterpret_cast<void*>(mode);
+}
+
+void* NewtonGetFirstPlugin(const NewtonWorld* const)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	return reinterpret_cast<void*>(ndWorld::ndStandardSolver + 1);
+}
+
+void* NewtonGetNextPlugin(const NewtonWorld* const newtonWorld, const void* const plugin)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+
+	ndInt32 enumerator = static_cast<ndInt32>(reinterpret_cast<uintptr_t>(plugin));
+	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(enumerator - 1);
+	switch (mode)
+	{
+		case ndWorld::ndStandardSolver:
+		{
+			mode = ndWorld::ndSimd8Solver;
+			break;
+		}
+		case ndWorld::ndSimd8Solver:
+		{
+			mode = ndWorld::ndSimd16Solver;
+			break;
+		}
+
+		case ndWorld::ndSimd16Solver:
+		{
+			mode = ndWorld::ndSolverModes(0);
+			break;
+		}
+	}
+
+	return reinterpret_cast<void*>(mode);
+}
+
+void NewtonSelectPlugin(const NewtonWorld* const newtonWorld, const void* const plugin)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+
+	ndInt32 enumerator = static_cast<ndInt32>(reinterpret_cast<uintptr_t>(plugin));
+	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(enumerator - 1);
+	world->SelectSolver(mode);
+}
+
 const char* NewtonGetPluginString(const NewtonWorld* const newtonWorld, const void* const plugin)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	return "simd8";
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	return world->GetSolverString();
 }
 
 /*!
