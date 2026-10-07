@@ -8727,7 +8727,7 @@ NewtonCollision* NewtonCreateTreeCollisionFromMesh(const NewtonWorld* const newt
 	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
 
-	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(meshEffect->CreateConvexCollision(ndFloat64(1.0e-6f)));
+	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(meshEffect->CreateCollisionTree(false));
 	ndShapeInstance* const instance = **shape;
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
@@ -8857,7 +8857,7 @@ void NewtonWorldRayCast(const NewtonWorld* const newtonWorld, const dFloat* cons
 				:ndRayCastClosestHitCallback()
 				,m_userData(userData)
 				,m_world(world)
-				,m_filer(filter)
+				,m_filter(filter)
 				,m_prefilter(prefilter)
 			{
 			}
@@ -8875,18 +8875,26 @@ void NewtonWorldRayCast(const NewtonWorld* const newtonWorld, const dFloat* cons
 
 			ndFloat32 OnRayCastAction(const ndContactPoint& contact, ndFloat32 intersetParam) override
 			{
-				//if (intersetParam < m_param)
-				//{
-				//	m_contact = contact;
-				//	m_param = intersetParam;
-				//}
-				//return intersetParam;
-				return 0;
+				if (m_filter)
+				{
+					//typedef dFloat(*NewtonWorldRayFilterCallback)(
+					// const NewtonBody* const body, 
+					// const NewtonCollision* const shapeHit, 
+					// const dFloat* const hitContact, 
+					// const dFloat* const hitNormal, 
+					// dLong collisionID, 
+					// void* const userData, 
+					// dFloat intersectParam);
+					ndWeakPtr<const ndShapeInstance> sharedInstance(contact.m_shapeInstance0);
+					ndSharedPtr<ndBody> sharedBody(m_world->GetBody(const_cast<ndBody*>(reinterpret_cast<const ndBody*>(contact.m_body0))));
+					intersetParam = m_filter(reinterpret_cast<NewtonBody*>(&sharedBody), reinterpret_cast<const NewtonCollision*>(&sharedInstance), &intersetParam, &contact.m_normal[0], contact.m_shapeId0, m_userData, intersetParam);
+				}
+				return intersetParam;
 			}
 
 			void* m_userData;
 			ndNewtonWorld* m_world;
-			NewtonWorldRayFilterCallback m_filer;
+			NewtonWorldRayFilterCallback m_filter;
 			NewtonWorldRayPrefilterCallback m_prefilter;
 		};
 

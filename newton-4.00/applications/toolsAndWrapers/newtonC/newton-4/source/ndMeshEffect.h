@@ -474,7 +474,10 @@ class ndMeshEffect: public ndPolyhedra
 	D_COLLISION_API void AddInterpolatedEdgeAttribute(ndEdge* const edge, ndFloat64 param);
 	D_COLLISION_API void RemoveUnusedVertices(ndInt32* const vertexRemapTable);
 	D_COLLISION_API ndInt32 PlaneClip(const ndMeshEffect& convexMesh, const ndEdge* const face);
+
+	D_COLLISION_API ndShapeInstance* CreateCollisionTree(bool optimize) const;
 	D_COLLISION_API ndShapeInstance* CreateConvexCollision(ndFloat64 tolerance) const;
+
 	D_COLLISION_API ndMeshEffect* ConvexMeshIntersection(const ndMeshEffect* const convexMesh) const;
 	D_COLLISION_API ndMeshEffect* InverseConvexMeshIntersection(const ndMeshEffect* const convexMesh) const;
 	D_COLLISION_API ndMeshEffect* CreateVoronoiConvexDecomposition(const ndArray<ndVector>& pointCloud, ndInt32 interiorMaterialIndex, const ndMatrix& textureProjectionMatrix);

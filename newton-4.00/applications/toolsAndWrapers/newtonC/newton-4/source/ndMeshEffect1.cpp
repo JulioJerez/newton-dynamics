@@ -30,6 +30,7 @@
 #include "ndShapeInstance.h"
 #include "ndShapeCompound.h"
 #include "ndShapeConvexHull.h"
+#include "ndShapeStatic_bvh.h"
 
 #define ND_VERTEXLIST_INDEX_LIST_BATCH (1024)
 
@@ -3416,6 +3417,38 @@ ndMeshEffect* ndMeshEffect::GetNextLayer(ndInt32 mark)
 		solid->SetLRU(mark);
 	}
 	return solid;
+}
+
+ndShapeInstance* ndMeshEffect::CreateCollisionTree(bool optimize) const
+{
+	ndPolygonSoupBuilder builder;
+	builder.Begin();
+	ndInt32 mark = IncLRU();
+	ndPolyhedra::Iterator iter(*this);
+	for (iter.Begin(); iter; iter++) 
+	{
+		ndNode* const faceNode = iter.GetNode();
+		ndEdge* const face = &faceNode->GetInfo();
+		if ((face->m_mark != mark) && (face->m_incidentFace > 0)) 
+		{
+			ndInt32 count = 0;
+			ndFixSizeArray<ndVector, 256> polygon;
+			ndEdge* ptr = face;
+			do 
+			{
+				const ndVector point(m_points.m_vertex[ptr->m_incidentVertex]);
+				polygon.PushBack(point);
+				count++;
+				ptr->m_mark = mark;
+				ptr = ptr->m_next;
+			} while (ptr != face);
+			builder.AddFace(&polygon[0], polygon.GetCount(), GetFaceMaterial(face));
+		}
+	}
+	builder.End(optimize);
+
+	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeStatic_bvh(builder));
+	return instance;
 }
 
 ndShapeInstance* ndMeshEffect::CreateConvexCollision(ndFloat64 tolerance) const
