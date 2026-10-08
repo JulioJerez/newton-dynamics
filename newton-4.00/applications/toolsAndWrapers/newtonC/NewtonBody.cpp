@@ -1314,3 +1314,447 @@ int NewtonBodyGetSerializedID(const NewtonBody* const bodyPtr)
 	ndAssert(0);
 	return 0;
 }
+
+/*!
+  Assign a collision primitive to the body.
+
+  @param *bodyPtr pointer to the body.
+  @param *collisionPtr pointer to the new collision geometry.
+
+  @return Nothing.
+
+  This function replaces a collision geometry of a body with the new collision geometry.
+  This function increments the reference count of the collision geometry and decrements the reference count
+  of the old collision geometry. If the reference count of the old collision geometry reaches zero, the old collision geometry is destroyed.
+  This function can be used to swap the collision geometry of bodies at runtime.
+
+  See also: ::NewtonCreateDynamicBody, ::NewtonBodyGetCollision
+*/
+void NewtonBodySetCollision(const NewtonBody* const bodyPtr, const NewtonCollision* const collisionPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//dgCollisionInstance* const collision = (dgCollisionInstance*)collisionPtr;
+	//body->AttachCollision(collision);
+	//body->UpdateCollisionMatrix(dgFloat32(0.0f), 0);
+
+	ndAssert(0);
+}
+
+void NewtonBodySetCollisionScale(const NewtonBody* const bodyPtr, dFloat scaleX, dFloat scaleY, dFloat scaleZ)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//dgWorld* const world = body->GetWorld();
+	//NewtonCollision* const collision = NewtonBodyGetCollision(bodyPtr);
+	//
+	//dgFloat32 mass = body->GetInvMass().m_w > dgFloat32(0.0f) ? body->GetMass().m_w : dgFloat32(0.0f);
+	//NewtonCollisionSetScale(collision, scaleX, scaleY, scaleZ);
+	//
+	//NewtonJoint* nextJoint;
+	//for (NewtonJoint* joint = NewtonBodyGetFirstContactJoint(bodyPtr); joint; joint = nextJoint) {
+	//	dgConstraint* const contactJoint = (dgConstraint*)joint;
+	//	nextJoint = NewtonBodyGetNextContactJoint(bodyPtr, joint);
+	//	//world->DestroyConstraint (contactJoint);
+	//	contactJoint->ResetMaxDOF();
+	//}
+	//NewtonBodySetMassProperties(bodyPtr, mass, collision);
+	//body->UpdateCollisionMatrix(dgFloat32(0.0f), 0);
+	//world->GetBroadPhase()->ResetEntropy();
+
+	ndAssert(0);
+}
+
+
+/*!
+  Get the collision primitive of a body.
+
+  @param *bodyPtr pointer to the body.
+
+  @return Pointer to body collision geometry.
+
+  This function does not increment the reference count of the collision geometry.
+
+  See also: ::NewtonCreateDynamicBody, ::NewtonBodySetCollision
+*/
+NewtonCollision* NewtonBodyGetCollision(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//return (NewtonCollision*)body->GetCollision();
+	ndAssert(0);
+	return 0;
+}
+
+/*!
+  Get the material group id of the body.
+
+  @param *bodyPtr pointer to the body.
+
+  @return Nothing.
+
+  See also: ::NewtonBodySetMaterialGroupID
+*/
+int NewtonBodyGetMaterialGroupID(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//return int(body->GetGroupID());
+	ndAssert(0);
+	return 0;
+
+}
+
+
+/*!
+  Set the collision state flag of this body when the body is connected to another body by a hierarchy of joints.
+
+  @param *bodyPtr pointer to the body.
+  @param state collision state. 1 indicates this body will collide with any linked body. 0 disable collision with body connected to this one by joints.
+
+  @return Nothing.
+
+  sometimes when making complicated arrangements of linked bodies it is possible the collision geometry of these bodies is in the way of the
+  joints work space. This could be a problem for the normal operation of the joints. When this situation happens the application can determine which bodies
+  are the problem and disable collision for those bodies while they are linked by joints. For the collision to be disable for a pair of body,
+  both bodies must have the collision disabled. If the joints connecting the bodies are destroyed these bodies become collidable automatically.
+  This feature can also be achieved by making special material for the whole configuration of jointed bodies, however it is a lot easier just to set collision disable
+  for jointed bodies.
+
+  See also: ::NewtonBodySetMaterialGroupID
+*/
+void NewtonBodySetJointRecursiveCollision(const NewtonBody* const bodyPtr, unsigned state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//body->SetCollisionWithLinkedBodies(state ? true : false);
+
+	ndAssert(0);
+}
+
+/*!
+  Get the collision state flag when the body is joint.
+
+  @param *bodyPtr pointer to the body.
+
+  @return return the collision state flag for this body.
+
+  See also: ::NewtonBodySetMaterialGroupID
+*/
+int NewtonBodyGetJointRecursiveCollision(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//
+	//return body->GetCollisionWithLinkedBodies() ? 1 : 0;
+
+	ndAssert(0);
+	return 0;
+
+}
+
+/*!
+  get the freeze state of this body
+
+  @param *bodyPtr is the pointer to the body to be frozen
+
+  @return 1 id the bode is frozen, 0 if bode is unfrozen.
+
+  When a body is created it is automatically placed in the active simulation list. As an optimization
+  for large scenes, you may use this function to put background bodies in an inactive equilibrium state.
+
+  This function tells Newton that this body does not currently need to be simulated.
+  However, if the body is part of a larger configuration it may be affected indirectly by the reaction forces
+  of objects that it is connected to.
+
+  See also: ::NewtonBodySetAutoSleep, ::NewtonBodyGetAutoSleep
+*/
+int NewtonBodyGetFreezeState(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//return body->GetFreeze() ? 1 : 0;
+
+	ndAssert(0);
+	return 0;
+
+}
+
+
+/*!
+  This function tells Newton to simulate or suspend simulation of this body and all other bodies in contact with it
+
+  @param *bodyPtr is the pointer to the body to be activated
+  @param state 1 teels newton to freeze the bode and allconceted bodiesm, 0 to unfreze it
+
+  @return Nothing
+
+  This function to no activate the body, is just lock or unlock the body for physics simulation.
+
+  See also: ::NewtonBodyGetFreezeState, ::NewtonBodySetAutoSleep, ::NewtonBodyGetAutoSleep
+*/
+void NewtonBodySetFreezeState(const NewtonBody* const bodyPtr, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//body->SetFreeze(state ? true : false);
+
+	ndAssert(0);
+}
+
+int NewtonBodyGetGyroscopicTorque(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//return body->GetGyroMode() ? 1 : 0;
+
+	ndAssert(0);
+	return 0;
+
+}
+
+void NewtonBodySetGyroscopicTorque(const NewtonBody* const bodyPtr, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//body->SetGyroMode(state ? true : false);
+	ndAssert(0);
+}
+
+/*!
+  Set the auto-activation mode for this body.
+
+  @param *bodyPtr is the pointer to the body.
+  @param state active mode: 1 = auto-activation on (controlled by Newton). 0 = auto-activation off and body is active all the time.
+
+  @return Nothing.
+
+  Bodies are created with auto-activation on by default.
+
+  Auto activation enabled is the default state for the majority of bodies in a large scene.
+  However, for player control, ai control or some other special circumstance, the application may want to control
+  the activation/deactivation of the body.
+  In that case, the application may call NewtonBodySetAutoSleep (body, 0) followed by
+  NewtonBodySetFreezeState(body), this will make the body active forever.
+
+  See also: ::NewtonBodyGetFreezeState, ::NewtonBodySetFreezeState, ::NewtonBodyGetAutoSleep
+*/
+void NewtonBodySetAutoSleep(const NewtonBody* const bodyPtr, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//body->SetAutoSleep(state ? true : false);
+	ndAssert(0);
+}
+
+/*!
+  Get the auto-activation state of the body.
+
+  @param *bodyPtr is the pointer to the body.
+
+  @return Auto activation state: 1 = auto-activation on. 0 = auto-activation off.
+
+  See also: ::NewtonBodySetAutoSleep, ::NewtonBodyGetSleepState
+*/
+int NewtonBodyGetAutoSleep(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//
+	//return body->GetAutoSleep() ? 1 : 0;
+
+	ndAssert(0);
+	return 0;
+
+}
+
+
+/*!
+  Return the sleep mode of a rigid body.
+
+  @param *bodyPtr is the pointer to the body.
+
+  @return Sleep state: 0 = active. 1 = sleeping.
+
+  See also: ::NewtonBodySetAutoSleep
+*/
+int NewtonBodyGetSleepState(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//return body->GetSleepState() ? 1 : 0;
+	ndAssert(0);
+	return 0;
+
+}
+
+void NewtonBodySetSleepState(const NewtonBody* const bodyPtr, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//body->SetSleepState(state ? true : false);
+	ndAssert(0);
+}
+
+
+/*!
+  Get the world axis aligned bounding box (AABB) of the body.
+
+  @param *bodyPtr is the pointer to the body.
+  @param  *p0 - pointer to an array of at least three floats to hold minimum value for the AABB.
+  @param  *p1 - pointer to an array of at least three floats to hold maximum value for the AABB.
+
+*/
+void NewtonBodyGetAABB(const NewtonBody* const bodyPtr, dFloat* const p0, dFloat* const p1)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+
+	//dgVector vector0;
+	//dgVector vector1;
+	//
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//body->GetAABB(vector0, vector1);
+	//
+	//p0[0] = vector0.m_x;
+	//p0[1] = vector0.m_y;
+	//p0[2] = vector0.m_z;
+	//
+	//p1[0] = vector1.m_x;
+	//p1[1] = vector1.m_y;
+	//p1[2] = vector1.m_z;
+	ndAssert(0);
+}
+
+
+/*!
+Get the global angular accelration of the body.
+
+@param *bodyPtr is the pointer to the body
+@param *omega pointer to an array of at least three floats to hold the angular acceleration vector.
+*/
+void NewtonBodyGetAlpha(const NewtonBody* const bodyPtr, dFloat* const alpha)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//
+	//const dgVector vector(body->GetAlpha());
+	//alpha[0] = vector.m_x;
+	//alpha[1] = vector.m_y;
+	//alpha[2] = vector.m_z;
+	ndAssert(0);
+}
+
+
+/*!
+Get the global linear Acceleration of the body.
+
+@param *bodyPtr is the pointer to the body.
+@param *acceleration pointer to an array of at least three floats to hold the acceleration vector.
+
+See also: ::NewtonBodySetVelocity
+*/
+void NewtonBodyGetAcceleration(const NewtonBody* const bodyPtr, dFloat* const acceleration)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//
+	//dgVector vector(body->GetAccel());
+	//acceleration[0] = vector.m_x;
+	//acceleration[1] = vector.m_y;
+	//acceleration[2] = vector.m_z;
+
+	ndAssert(0);
+}
+
+/*!
+  Add an impulse to a specific point on a body.
+
+  @param *bodyPtr is the pointer to the body.
+  @param pointDeltaVeloc pointer to an array of at least three floats containing the desired change in velocity to point pointPosit.
+  @param  pointPosit	- pointer to an array of at least three floats containing the center of the impulse in global space.
+  @param timestep - the update rate time step.
+
+  @return Nothing.
+
+  This function will activate the body.
+
+  *pointPosit* and *pointDeltaVeloc* must be specified in global space.
+
+  *pointDeltaVeloc* represent a change in velocity. For example, a value of *pointDeltaVeloc* of (1, 0, 0) changes the velocity
+  of *bodyPtr* in such a way that the velocity of point *pointDeltaVeloc* will increase by (1, 0, 0)
+
+  *the calculate impulse will be applied to the body on next frame update
+
+  Because *pointDeltaVeloc* represents a change in velocity, this function must be used with care. Repeated calls
+  to this function will result in an increase of the velocity of the body and may cause to integrator to lose stability.
+*/
+void NewtonBodyAddImpulse(const NewtonBody* const bodyPtr, const dFloat* const pointDeltaVeloc, const dFloat* const pointPosit, dFloat timestep)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//
+	//if (body->GetInvMass().m_w > dgFloat32(0.0f)) {
+	//	dgVector p(pointPosit[0], pointPosit[1], pointPosit[2], dgFloat32(0.0f));
+	//	dgVector v(pointDeltaVeloc[0], pointDeltaVeloc[1], pointDeltaVeloc[2], dgFloat32(0.0f));
+	//	body->AddImpulse(v, p, timestep);
+	//}
+	ndAssert(0);
+}
+
+
+/*!
+  Add an train of impulses to a specific point on a body.
+
+  @param *bodyPtr is the pointer to the body.
+  @param  impulseCount	- number of impulses and distances in the array distance
+  @param  strideInByte	- sized in bytes of vector impulse and
+  @param impulseArray pointer to an array containing the desired impulse to apply ate position point array.
+  @param pointArray pointer to an array of at least three floats containing the center of the impulse in global space.
+  @param timestep - the update rate time step.
+
+  @return Nothing.
+
+  This function will activate the body.
+
+  *pointPosit* and *pointDeltaVeloc* must be specified in global space.
+
+  *the calculate impulse will be applied to the body on next frame update
+
+  this function apply at general impulse to a body a oppose to a desired change on velocity
+  this mean that the body mass, and Inertia will determine the gain on velocity.
+*/
+void NewtonBodyApplyImpulseArray(const NewtonBody* const bodyPtr, int impulseCount, int strideInByte, const dFloat* const impulseArray, const dFloat* const pointArray, dFloat timestep)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//
+	//if (body->GetInvMass().m_w > dgFloat32(0.0f)) {
+	//	body->ApplyImpulsesAtPoint(impulseCount, strideInByte, impulseArray, pointArray, timestep);
+	//}
+	ndAssert(0);
+}
+
+void NewtonBodyApplyImpulsePair(const NewtonBody* const bodyPtr, dFloat* const linearImpulse, dFloat* const angularImpulse, dFloat timestep)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//
+	//if (body->GetInvMass().m_w > dgFloat32(0.0f)) {
+	//	dgVector l(linearImpulse[0], linearImpulse[1], linearImpulse[2], dgFloat32(0.0f));
+	//	dgVector a(angularImpulse[0], angularImpulse[1], angularImpulse[2], dgFloat32(0.0f));
+	//	body->ApplyImpulsePair(l, a, timestep);
+	//}
+	ndAssert(0);
+
+}
+
+void NewtonBodyIntegrateVelocity(const NewtonBody* const bodyPtr, dFloat timestep)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//
+	//if (body->IsRTTIType(dgBody::m_kinematicBody) || (body->GetInvMass().m_w > dgFloat32(0.0f))) {
+	//	body->IntegrateVelocity(timestep);
+	//}
+	ndAssert(0);
+}

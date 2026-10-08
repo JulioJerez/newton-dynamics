@@ -466,36 +466,6 @@ extern "C" {
 
 	// **********************************************************************************************
 	//
-	// Physics Material Section
-	//
-	// **********************************************************************************************
-	// material definitions that can not be overwritten in function callback
-	NEWTON_API void* NewtonMaterialGetUserData (const NewtonWorld* const newtonWorld, int id0, int id1);
-	NEWTON_API void NewtonMaterialSetSurfaceThickness (const NewtonWorld* const newtonWorld, int id0, int id1, dFloat thickness);
-
-//	deprecated, not longer continue collision is set on the material  	
-//	NEWTON_API void NewtonMaterialSetContinuousCollisionMode (const NewtonWorld* const newtonWorld, int id0, int id1, int state);
-	
-	NEWTON_API void NewtonMaterialSetCallbackUserData (const NewtonWorld* const newtonWorld, int id0, int id1, void* const userData);
-	NEWTON_API void NewtonMaterialSetContactGenerationCallback (const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnContactGeneration contactGeneration);
-	
-
-	NEWTON_API void NewtonMaterialSetDefaultSoftness (const NewtonWorld* const newtonWorld, int id0, int id1, dFloat value);
-	NEWTON_API void NewtonMaterialSetDefaultCollidable (const NewtonWorld* const newtonWorld, int id0, int id1, int state);
-
-
-	NEWTON_API void NewtonMaterialJointResetIntraJointCollision (const NewtonWorld* const newtonWorld, int id0, int id1);
-	NEWTON_API void NewtonMaterialJointResetSelftJointCollision (const NewtonWorld* const newtonWorld, int id0, int id1);
-
-	NEWTON_API NewtonMaterial* NewtonWorldGetFirstMaterial (const NewtonWorld* const newtonWorld);
-	NEWTON_API NewtonMaterial* NewtonWorldGetNextMaterial (const NewtonWorld* const newtonWorld, const NewtonMaterial* const material);
-
-	NEWTON_API NewtonBody* NewtonWorldGetFirstBody (const NewtonWorld* const newtonWorld);
-	NEWTON_API NewtonBody* NewtonWorldGetNextBody (const NewtonWorld* const newtonWorld, const NewtonBody* const curBody);
-
-
-	// **********************************************************************************************
-	//
 	// Physics Contact control functions
 	//
 	// **********************************************************************************************
@@ -530,24 +500,6 @@ extern "C" {
 	//NEWTON_API void NewtonMaterialSetContactPruningTolerance (const NewtonBody* const body0, const NewtonBody* const body1, dFloat tolerance);
 	NEWTON_API dFloat NewtonMaterialGetContactPruningTolerance(const NewtonJoint* const contactJoint);
 	NEWTON_API void NewtonMaterialSetContactPruningTolerance(const NewtonJoint* const contactJoint, dFloat tolerance);
-
-	// **********************************************************************************************
-	//
-	// convex collision primitives creation functions
-	//
-	// **********************************************************************************************
-
-	NEWTON_API int NewtonCollisionGetMode(const NewtonCollision* const convexCollision);
-	NEWTON_API void NewtonCollisionSetMode (const NewtonCollision* const convexCollision, int mode);
-
-	NEWTON_API int NewtonConvexHullGetFaceIndices (const NewtonCollision* const convexHullCollision, int face, int* const faceIndices);
-	NEWTON_API int NewtonConvexHullGetVertexData (const NewtonCollision* const convexHullCollision, dFloat** const vertexData, int* strideInBytes);
-	
-	NEWTON_API dFloat NewtonConvexCollisionCalculateVolume (const NewtonCollision* const convexCollision);
-	NEWTON_API void NewtonConvexCollisionCalculateInertialMatrix (const NewtonCollision* convexCollision, dFloat* const inertia, dFloat* const origin);	
-	NEWTON_API dFloat NewtonConvexCollisionCalculateBuoyancyVolume (const NewtonCollision* const convexCollision, const dFloat* const matrix, const dFloat* const fluidPlane, dFloat* const centerOfBuoyancy);
-
-	NEWTON_API const void* NewtonCollisionDataPointer (const NewtonCollision* const convexCollision);
 
 	// **********************************************************************************************
 	//
@@ -660,57 +612,6 @@ extern "C" {
 	// General purpose collision library functions
 	//
 	// **********************************************************************************************
-	NEWTON_API NewtonCollision* NewtonCollisionCreateInstance (const NewtonCollision* const collision);
-	NEWTON_API int NewtonCollisionGetType (const NewtonCollision* const collision);
-	NEWTON_API int NewtonCollisionIsConvexShape (const NewtonCollision* const collision);
-	NEWTON_API int NewtonCollisionIsStaticShape (const NewtonCollision* const collision);
-
-	// for the end user
-	NEWTON_API void* NewtonCollisionGetUserData (const NewtonCollision* const collision);
-	
-	NEWTON_API void NewtonCollisionSetUserID (const NewtonCollision* const collision, dLong id);
-	NEWTON_API dLong NewtonCollisionGetUserID (const NewtonCollision* const collision);
-
-	NEWTON_API void NewtonCollisionGetMaterial (const NewtonCollision* const collision, NewtonCollisionMaterial* const userData);
-	NEWTON_API void NewtonCollisionSetMaterial (const NewtonCollision* const collision, const NewtonCollisionMaterial* const userData);
-
-	NEWTON_API void* NewtonCollisionGetSubCollisionHandle (const NewtonCollision* const collision);
-	NEWTON_API NewtonCollision* NewtonCollisionGetParentInstance (const NewtonCollision* const collision);
-
-	NEWTON_API void NewtonCollisionSetScale (const NewtonCollision* const collision, dFloat scaleX, dFloat scaleY, dFloat scaleZ);
-	NEWTON_API void NewtonCollisionGetScale (const NewtonCollision* const collision, dFloat* const scaleX, dFloat* const scaleY, dFloat* const scaleZ);
-
-	NEWTON_API dFloat NewtonCollisionGetSkinThickness (const NewtonCollision* const collision);
-	NEWTON_API void NewtonCollisionSetSkinThickness(const NewtonCollision* const collision, dFloat thickness);
-
-	NEWTON_API int NewtonCollisionIntersectionTest (const NewtonWorld* const newtonWorld, 
-		const NewtonCollision* const collisionA, const dFloat* const matrixA, 
-		const NewtonCollision* const collisionB, const dFloat* const matrixB, int threadIndex);
-
-	NEWTON_API int NewtonCollisionPointDistance (const NewtonWorld* const newtonWorld, const dFloat* const point,
-		const NewtonCollision* const collision, const dFloat* const matrix, dFloat* const contact, dFloat* const normal, int threadIndex);
-
-	NEWTON_API int NewtonCollisionClosestPoint (const NewtonWorld* const newtonWorld, 
-		const NewtonCollision* const collisionA, const dFloat* const matrixA, 
-		const NewtonCollision* const collisionB, const dFloat* const matrixB,
-		dFloat* const contactA, dFloat* const contactB, dFloat* const normalAB, int threadIndex);
-
-	NEWTON_API int NewtonCollisionCollide (const NewtonWorld* const newtonWorld, int maxSize,
-		const NewtonCollision* const collisionA, const dFloat* const matrixA, 
-		const NewtonCollision* const collisionB, const dFloat* const matrixB,
-		dFloat* const contacts, dFloat* const normals, dFloat* const penetration, 
-		dLong* const attributeA, dLong* const attributeB, int threadIndex);
-
-	NEWTON_API int NewtonCollisionCollideContinue (const NewtonWorld* const newtonWorld, int maxSize, dFloat timestep, 
-		const NewtonCollision* const collisionA, const dFloat* const matrixA, const dFloat* const velocA, const dFloat* omegaA, 
-		const NewtonCollision* const collisionB, const dFloat* const matrixB, const dFloat* const velocB, const dFloat* const omegaB, 
-		dFloat* const timeOfImpact, dFloat* const contacts, dFloat* const normals, dFloat* const penetration, 
-		dLong* const attributeA, dLong* const attributeB, int threadIndex);
-
-	NEWTON_API void NewtonCollisionSupportVertex (const NewtonCollision* const collision, const dFloat* const dir, dFloat* const vertex);
-	NEWTON_API dFloat NewtonCollisionRayCast (const NewtonCollision* const collision, const dFloat* const p0, const dFloat* const p1, dFloat* const normal, dLong* const attribute);
-	NEWTON_API void NewtonCollisionCalculateAABB (const NewtonCollision* const collision, const dFloat* const matrix, dFloat* const p0, dFloat* const p1);
-	NEWTON_API void NewtonCollisionForEachPolygonDo (const NewtonCollision* const collision, const dFloat* const matrix, NewtonCollisionIterator callback, void* const userData);
 	
 	// **********************************************************************************************
 	// 
@@ -1171,6 +1072,24 @@ extern "C" {
 	NEWTON_API void NewtonMaterialSetDefaultFriction(const NewtonWorld* const newtonWorld, int id0, int id1, dFloat staticFriction, dFloat kineticFriction);
 	NEWTON_API void NewtonMaterialSetCollisionCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnAABBOverlap aabbOverlap, NewtonContactsProcess process);
 
+	NEWTON_API void* NewtonMaterialGetUserData(const NewtonWorld* const newtonWorld, int id0, int id1);
+	NEWTON_API void NewtonMaterialSetSurfaceThickness(const NewtonWorld* const newtonWorld, int id0, int id1, dFloat thickness);
+
+	NEWTON_API void NewtonMaterialSetCallbackUserData(const NewtonWorld* const newtonWorld, int id0, int id1, void* const userData);
+	NEWTON_API void NewtonMaterialSetContactGenerationCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnContactGeneration contactGeneration);
+
+	NEWTON_API void NewtonMaterialSetDefaultSoftness(const NewtonWorld* const newtonWorld, int id0, int id1, dFloat value);
+	NEWTON_API void NewtonMaterialSetDefaultCollidable(const NewtonWorld* const newtonWorld, int id0, int id1, int state);
+
+	NEWTON_API void NewtonMaterialJointResetIntraJointCollision(const NewtonWorld* const newtonWorld, int id0, int id1);
+	NEWTON_API void NewtonMaterialJointResetSelftJointCollision(const NewtonWorld* const newtonWorld, int id0, int id1);
+
+	NEWTON_API NewtonMaterial* NewtonWorldGetFirstMaterial(const NewtonWorld* const newtonWorld);
+	NEWTON_API NewtonMaterial* NewtonWorldGetNextMaterial(const NewtonWorld* const newtonWorld, const NewtonMaterial* const material);
+
+	NEWTON_API NewtonBody* NewtonWorldGetFirstBody(const NewtonWorld* const newtonWorld);
+	NEWTON_API NewtonBody* NewtonWorldGetNextBody(const NewtonWorld* const newtonWorld, const NewtonBody* const curBody);
+
 	// collision shapes
 	NEWTON_API NewtonCollision* NewtonCreateNull(const NewtonWorld* const newtonWorld);
 	NEWTON_API NewtonCollision* NewtonCreateBox(const NewtonWorld* const newtonWorld, dFloat dx, dFloat dy, dFloat dz, int shapeID, const dFloat* const offsetMatrix);
@@ -1205,6 +1124,71 @@ extern "C" {
 	NEWTON_API void* NewtonSceneCollisionGetNodeByIndex(NewtonCollision* const sceneCollision, int index);
 	NEWTON_API int NewtonSceneCollisionGetNodeIndex(NewtonCollision* const sceneCollision, const void* const collisionNode);
 	NEWTON_API NewtonCollision* NewtonSceneCollisionGetCollisionFromNode(NewtonCollision* const sceneCollision, const void* const collisionNode);
+
+	NEWTON_API NewtonCollision* NewtonCollisionCreateInstance(const NewtonCollision* const collision);
+	NEWTON_API int NewtonCollisionGetType(const NewtonCollision* const collision);
+	NEWTON_API int NewtonCollisionIsConvexShape(const NewtonCollision* const collision);
+	NEWTON_API int NewtonCollisionIsStaticShape(const NewtonCollision* const collision);
+
+	// for the end user
+	NEWTON_API void* NewtonCollisionGetUserData(const NewtonCollision* const collision);
+
+	NEWTON_API void NewtonCollisionSetUserID(const NewtonCollision* const collision, dLong id);
+	NEWTON_API dLong NewtonCollisionGetUserID(const NewtonCollision* const collision);
+
+	NEWTON_API void NewtonCollisionGetMaterial(const NewtonCollision* const collision, NewtonCollisionMaterial* const userData);
+	NEWTON_API void NewtonCollisionSetMaterial(const NewtonCollision* const collision, const NewtonCollisionMaterial* const userData);
+
+	NEWTON_API void* NewtonCollisionGetSubCollisionHandle(const NewtonCollision* const collision);
+	NEWTON_API NewtonCollision* NewtonCollisionGetParentInstance(const NewtonCollision* const collision);
+
+	NEWTON_API void NewtonCollisionSetScale(const NewtonCollision* const collision, dFloat scaleX, dFloat scaleY, dFloat scaleZ);
+	NEWTON_API void NewtonCollisionGetScale(const NewtonCollision* const collision, dFloat* const scaleX, dFloat* const scaleY, dFloat* const scaleZ);
+
+	NEWTON_API dFloat NewtonCollisionGetSkinThickness(const NewtonCollision* const collision);
+	NEWTON_API void NewtonCollisionSetSkinThickness(const NewtonCollision* const collision, dFloat thickness);
+
+	NEWTON_API int NewtonCollisionIntersectionTest(const NewtonWorld* const newtonWorld,
+		const NewtonCollision* const collisionA, const dFloat* const matrixA,
+		const NewtonCollision* const collisionB, const dFloat* const matrixB, int threadIndex);
+
+	NEWTON_API int NewtonCollisionPointDistance(const NewtonWorld* const newtonWorld, const dFloat* const point,
+		const NewtonCollision* const collision, const dFloat* const matrix, dFloat* const contact, dFloat* const normal, int threadIndex);
+
+	NEWTON_API int NewtonCollisionClosestPoint(const NewtonWorld* const newtonWorld,
+		const NewtonCollision* const collisionA, const dFloat* const matrixA,
+		const NewtonCollision* const collisionB, const dFloat* const matrixB,
+		dFloat* const contactA, dFloat* const contactB, dFloat* const normalAB, int threadIndex);
+
+	NEWTON_API int NewtonCollisionCollide(const NewtonWorld* const newtonWorld, int maxSize,
+		const NewtonCollision* const collisionA, const dFloat* const matrixA,
+		const NewtonCollision* const collisionB, const dFloat* const matrixB,
+		dFloat* const contacts, dFloat* const normals, dFloat* const penetration,
+		dLong* const attributeA, dLong* const attributeB, int threadIndex);
+
+	NEWTON_API int NewtonCollisionCollideContinue(const NewtonWorld* const newtonWorld, int maxSize, dFloat timestep,
+		const NewtonCollision* const collisionA, const dFloat* const matrixA, const dFloat* const velocA, const dFloat* omegaA,
+		const NewtonCollision* const collisionB, const dFloat* const matrixB, const dFloat* const velocB, const dFloat* const omegaB,
+		dFloat* const timeOfImpact, dFloat* const contacts, dFloat* const normals, dFloat* const penetration,
+		dLong* const attributeA, dLong* const attributeB, int threadIndex);
+
+	NEWTON_API void NewtonCollisionSupportVertex(const NewtonCollision* const collision, const dFloat* const dir, dFloat* const vertex);
+	NEWTON_API dFloat NewtonCollisionRayCast(const NewtonCollision* const collision, const dFloat* const p0, const dFloat* const p1, dFloat* const normal, dLong* const attribute);
+	NEWTON_API void NewtonCollisionCalculateAABB(const NewtonCollision* const collision, const dFloat* const matrix, dFloat* const p0, dFloat* const p1);
+	NEWTON_API void NewtonCollisionForEachPolygonDo(const NewtonCollision* const collision, const dFloat* const matrix, NewtonCollisionIterator callback, void* const userData);
+
+	NEWTON_API int NewtonCollisionGetMode(const NewtonCollision* const convexCollision);
+	NEWTON_API void NewtonCollisionSetMode(const NewtonCollision* const convexCollision, int mode);
+
+	NEWTON_API int NewtonConvexHullGetFaceIndices(const NewtonCollision* const convexHullCollision, int face, int* const faceIndices);
+	NEWTON_API int NewtonConvexHullGetVertexData(const NewtonCollision* const convexHullCollision, dFloat** const vertexData, int* strideInBytes);
+
+	NEWTON_API dFloat NewtonConvexCollisionCalculateVolume(const NewtonCollision* const convexCollision);
+	NEWTON_API void NewtonConvexCollisionCalculateInertialMatrix(const NewtonCollision* convexCollision, dFloat* const inertia, dFloat* const origin);
+	NEWTON_API dFloat NewtonConvexCollisionCalculateBuoyancyVolume(const NewtonCollision* const convexCollision, const dFloat* const matrix, const dFloat* const fluidPlane, dFloat* const centerOfBuoyancy);
+
+	NEWTON_API const void* NewtonCollisionDataPointer(const NewtonCollision* const convexCollision);
+
 
 	// rigid bodies.
 	NEWTON_API NewtonBody* NewtonCreateDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix);
@@ -1368,6 +1352,3 @@ Object* ObjectFromHandle(const Handle* const ptr)
 bool CheckFloat(ndFloat32* ptr, ndInt32 size);
 
 #endif
-
-
-

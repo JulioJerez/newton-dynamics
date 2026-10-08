@@ -185,3 +185,184 @@ void NewtonMaterialSetCollisionCallback(const NewtonWorld* const newtonWorld, in
 	material->m_onAABBOverlap = aabbOverlap;
 	material->m_onContactsProcess = processCallback;
 }
+
+
+/*!
+  Set the material interaction between two physics materials  to be collidable or non-collidable by default.
+
+  @param *newtonWorld pointer to the Newton world.
+  @param  id0 - group id0
+  @param  id1 - group id1
+  @param state state for this material: 1 = collidable; 0 = non collidable
+
+  @return Nothing.
+*/
+void NewtonMaterialSetDefaultCollidable(const NewtonWorld* const newtonWorld, int id0, int id1, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
+	//if (state) {
+	//	material->m_flags |= dgContactMaterial::m_collisionEnable;
+	//}
+	//else {
+	//	material->m_flags &= ~dgContactMaterial::m_collisionEnable;
+	//}
+	ndAssert(0);
+}
+
+/*!
+  Set an imaginary thickness between the collision geometry of two colliding bodies whose physics
+  properties are defined by this material pair
+
+  @param *newtonWorld pointer to the Newton world.
+  @param  id0 - group id0
+  @param  id1 - group id1
+  @param thickness material thickness a value form 0.0 to 0.125; the default surface value is 0.0
+
+  @return Nothing.
+
+  when two bodies collide the engine resolve contact inter penetration by applying a small restoring
+  velocity at each contact point. By default this restoring velocity will stop when the two contacts are
+  at zero inter penetration distance. However by setting a non zero thickness the restoring velocity will
+  continue separating the contacts until the distance between the two point of the collision geometry is equal
+  to the surface thickness.
+
+  Surfaces thickness can improve the behaviors of rolling objects on flat surfaces.
+
+  Surface thickness does not alter the performance of contact calculation.
+*/
+void NewtonMaterialSetSurfaceThickness(const NewtonWorld* const newtonWorld, int id0, int id1, dFloat thickness)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
+	//material->m_skinThickness = dgClamp(thickness, dgFloat32(0.0f), DG_MAX_COLLISION_AABB_PADDING * dgFloat32(0.5f));
+	ndAssert(0);
+}
+
+
+/*!
+  Set the default softness coefficients for the material interaction between two physics materials .
+
+  @param *newtonWorld pointer to the Newton world.
+  @param  id0 - group id0
+  @param  id1 - group id1
+  @param softnessCoef softness coefficient
+
+  @return Nothing.
+
+  *softnessCoef* must be a positive value.
+  It is recommended that *softnessCoef* be set to value lower or equal to 1.0
+  A low value for *softnessCoef* will make the material soft. A typical value for *softnessCoef* is 0.15
+*/
+void NewtonMaterialSetDefaultSoftness(const NewtonWorld* const newtonWorld, int id0, int id1, dFloat softnessCoef)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
+	//
+	//material->m_softness = dgClamp(softnessCoef, dFloat(0.01f), dFloat(dgFloat32(1.0f)));
+
+	ndAssert(0);
+}
+
+void NewtonMaterialSetCallbackUserData(const NewtonWorld* const newtonWorld, int id0, int id1, void* const userData)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
+	//material->SetUserData(userData);
+
+	ndAssert(0);
+}
+
+void NewtonMaterialJointResetIntraJointCollision(const NewtonWorld* const newtonWorld, int id0, int id1)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
+	//material->m_flags |= dgContactMaterial::m_resetSkeletonIntraCollision;
+	ndAssert(0);
+}
+
+void NewtonMaterialJointResetSelftJointCollision(const NewtonWorld* const newtonWorld, int id0, int id1)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
+	//material->m_flags |= dgContactMaterial::m_resetSkeletonSelfCollision;
+
+	ndAssert(0);
+}
+
+
+
+void NewtonMaterialSetContactGenerationCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnContactGeneration contactGeneration)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
+	//material->SetCollisionGenerationCallback((dgContactMaterial::OnContactGeneration)contactGeneration);
+	ndAssert(0);
+}
+
+/*!
+  Set userData and the functions event handlers for the material interaction between two physics materials .
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param  id0 - group id0.
+  @param  id1 - group id1.
+  @param  *compoundAabbOverlap: fixme (can this be NULL?)
+
+  @return Nothing.
+
+  When the AABB extents of the collision geometry of two bodies overlap, the Newton collision system retrieves the material
+  interaction that defines the behavior between the pair of bodies. The material interaction is collected from a database of materials,
+  indexed by the material gruopID assigned to the bodies. If the material is tagged as non collidable,
+  then no action is taken and the simulation continues.
+  If the material is tagged as collidable, and a *aabbOverlap* was set for this material, then the *aabbOverlap* function is called.
+  If the function  *aabbOverlap* returns 0, no further action is taken for this material (this can be use to ignore the interaction under
+  certain conditions). If the function  *aabbOverlap* returns 1, Newton proceeds to calculate the array of contacts for the pair of
+  colliding bodies. If the function *processCallback* was set, the application receives a callback for every contact found between the
+  two colliding bodies. Here the application can perform fine grain control over the behavior of the collision system. For example,
+  rejecting the contact, making the contact frictionless, applying special effects to the surface etc.
+  After all contacts are processed and if the function *endCallback* was set, Newton calls *endCallback*.
+  Here the application can collect information gathered during the contact-processing phase and provide some feedback to the player.
+  A typical use for the material callback is to play sound effects. The application passes the address of structure in the *userData* along with
+  three event function callbacks. When the function *aabbOverlap* is called by Newton, the application resets a variable say *maximumImpactSpeed*.
+  Then for every call to the function *processCallback*, the application compares the impact speed for this contact with the value of
+  *maximumImpactSpeed*, if the value is larger, then the application stores the new value along with the position, and any other quantity desired.
+  When the application receives the call to *endCallback* the application plays a 3d sound based in the position and strength of the contact.
+*/
+void NewtonMaterialSetCompoundCollisionCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnCompoundSubCollisionAABBOverlap compoundAabbOverlap)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
+	//
+	//material->SetCompoundCollisionCallback((dgContactMaterial::OnCompoundCollisionPrefilter)compoundAabbOverlap);
+	ndAssert(0);
+}
+
+
+/*!
+  Get userData associated with this material.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param  id0 - group id0.
+  @param  id1 - group id1.
+
+  @return Nothing.
+*/
+void* NewtonMaterialGetUserData(const NewtonWorld* const newtonWorld, int id0, int id1)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
+	//
+	//return material->GetUserData();
+
+	ndAssert(0);
+	return 0;
+}
