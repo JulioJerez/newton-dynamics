@@ -809,33 +809,6 @@ extern "C" {
 
 	// **********************************************************************************************
 	//
-	// User defined bilateral Joint
-	//
-	// **********************************************************************************************
-	NEWTON_API NewtonJoint* NewtonConstraintCreateUserJoint (const NewtonWorld* const newtonWorld, int maxDOF, NewtonUserBilateralCallback callback, const NewtonBody* const childBody, const NewtonBody* const parentBody) ; 
-	NEWTON_API int NewtonUserJointGetSolverModel(const NewtonJoint* const joint);
-	NEWTON_API void NewtonUserJointSetSolverModel(const NewtonJoint* const joint, int model);
-	NEWTON_API void NewtonUserJointMassScale(const NewtonJoint* const joint, dFloat scaleBody0, dFloat scaleBody1);
-
-	NEWTON_API void NewtonUserJointSetFeedbackCollectorCallback (const NewtonJoint* const joint, NewtonUserBilateralCallback getFeedback);
-	NEWTON_API void NewtonUserJointAddLinearRow (const NewtonJoint* const joint, const dFloat* const pivot0, const dFloat* const pivot1, const dFloat* const dir);
-	NEWTON_API void NewtonUserJointAddAngularRow (const NewtonJoint* const joint, dFloat relativeAngle, const dFloat* const dir);
-	NEWTON_API void NewtonUserJointAddGeneralRow (const NewtonJoint* const joint, const dFloat* const jacobian0, const dFloat* const jacobian1);
-	NEWTON_API void NewtonUserJointSetRowMinimumFriction (const NewtonJoint* const joint, dFloat friction);
-	NEWTON_API void NewtonUserJointSetRowMaximumFriction (const NewtonJoint* const joint, dFloat friction);
-	NEWTON_API dFloat NewtonUserJointCalculateRowZeroAcceleration (const NewtonJoint* const joint);
-	NEWTON_API dFloat NewtonUserJointGetRowAcceleration (const NewtonJoint* const joint);
-	NEWTON_API void NewtonUserJointGetRowJacobian(const NewtonJoint* const joint, dFloat* const linear0, dFloat* const angula0, dFloat* const linear1, dFloat* const angula1);
-	NEWTON_API void NewtonUserJointSetRowAcceleration (const NewtonJoint* const joint, dFloat acceleration);
-	NEWTON_API void NewtonUserJointSetRowMassDependentSpringDamperAcceleration(const NewtonJoint* const joint, dFloat spring, dFloat damper);
-	NEWTON_API void NewtonUserJointSetRowMassIndependentSpringDamperAcceleration (const NewtonJoint* const joint, dFloat rowStiffness, dFloat spring, dFloat damper);
-	NEWTON_API void NewtonUserJointSetRowStiffness (const NewtonJoint* const joint, dFloat stiffness);
-	NEWTON_API int NewtonUserJoinRowsCount (const NewtonJoint* const joint);
-	NEWTON_API void NewtonUserJointGetGeneralRow (const NewtonJoint* const joint, int index, dFloat* const jacobian0, dFloat* const jacobian1);
-	NEWTON_API dFloat NewtonUserJointGetRowForce (const NewtonJoint* const joint, int row);
-
-	// **********************************************************************************************
-	//
 	// Mesh shapes functions
 	//
 	// **********************************************************************************************
@@ -1082,9 +1055,6 @@ extern "C" {
 	NEWTON_API NewtonMaterial* NewtonWorldGetFirstMaterial(const NewtonWorld* const newtonWorld);
 	NEWTON_API NewtonMaterial* NewtonWorldGetNextMaterial(const NewtonWorld* const newtonWorld, const NewtonMaterial* const material);
 
-	NEWTON_API NewtonBody* NewtonWorldGetFirstBody(const NewtonWorld* const newtonWorld);
-	NEWTON_API NewtonBody* NewtonWorldGetNextBody(const NewtonWorld* const newtonWorld, const NewtonBody* const curBody);
-
 	// collision shapes
 	NEWTON_API NewtonCollision* NewtonCreateNull(const NewtonWorld* const newtonWorld);
 	NEWTON_API NewtonCollision* NewtonCreateBox(const NewtonWorld* const newtonWorld, dFloat dx, dFloat dy, dFloat dz, int shapeID, const dFloat* const offsetMatrix);
@@ -1183,7 +1153,6 @@ extern "C" {
 	NEWTON_API dFloat NewtonConvexCollisionCalculateBuoyancyVolume(const NewtonCollision* const convexCollision, const dFloat* const matrix, const dFloat* const fluidPlane, dFloat* const centerOfBuoyancy);
 
 	NEWTON_API const void* NewtonCollisionDataPointer(const NewtonCollision* const convexCollision);
-
 
 	// rigid bodies.
 	NEWTON_API NewtonBody* NewtonCreateDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix);
@@ -1325,7 +1294,31 @@ extern "C" {
 	NEWTON_API void NewtonWorldForEachBodyDo(const NewtonWorld* const newtonWorld, NewtonBodyIterator callback, void* const userData);
 	NEWTON_API void NewtonWorldForEachJointDo(const NewtonWorld* const newtonWorld, NewtonJointIterator callback, void* const userData);
 	NEWTON_API NewtonJoint* NewtonWorldFindJoint(const NewtonBody* const body0, const NewtonBody* const body1);
+	NEWTON_API NewtonBody* NewtonWorldGetFirstBody(const NewtonWorld* const newtonWorld);
+	NEWTON_API NewtonBody* NewtonWorldGetNextBody(const NewtonWorld* const newtonWorld, const NewtonBody* const curBody);
 
+	// user joints
+	NEWTON_API NewtonJoint* NewtonConstraintCreateUserJoint(const NewtonWorld* const newtonWorld, int maxDOF, NewtonUserBilateralCallback callback, const NewtonBody* const childBody, const NewtonBody* const parentBody);
+	NEWTON_API int NewtonUserJointGetSolverModel(const NewtonJoint* const joint);
+	NEWTON_API void NewtonUserJointSetSolverModel(const NewtonJoint* const joint, int model);
+	NEWTON_API void NewtonUserJointMassScale(const NewtonJoint* const joint, dFloat scaleBody0, dFloat scaleBody1);
+
+	NEWTON_API void NewtonUserJointSetFeedbackCollectorCallback(const NewtonJoint* const joint, NewtonUserBilateralCallback getFeedback);
+	NEWTON_API void NewtonUserJointAddLinearRow(const NewtonJoint* const joint, const dFloat* const pivot0, const dFloat* const pivot1, const dFloat* const dir);
+	NEWTON_API void NewtonUserJointAddAngularRow(const NewtonJoint* const joint, dFloat relativeAngle, const dFloat* const dir);
+	NEWTON_API void NewtonUserJointAddGeneralRow(const NewtonJoint* const joint, const dFloat* const jacobian0, const dFloat* const jacobian1);
+	NEWTON_API void NewtonUserJointSetRowMinimumFriction(const NewtonJoint* const joint, dFloat friction);
+	NEWTON_API void NewtonUserJointSetRowMaximumFriction(const NewtonJoint* const joint, dFloat friction);
+	NEWTON_API dFloat NewtonUserJointCalculateRowZeroAcceleration(const NewtonJoint* const joint);
+	NEWTON_API dFloat NewtonUserJointGetRowAcceleration(const NewtonJoint* const joint);
+	NEWTON_API void NewtonUserJointGetRowJacobian(const NewtonJoint* const joint, dFloat* const linear0, dFloat* const angula0, dFloat* const linear1, dFloat* const angula1);
+	NEWTON_API void NewtonUserJointSetRowAcceleration(const NewtonJoint* const joint, dFloat acceleration);
+	NEWTON_API void NewtonUserJointSetRowMassDependentSpringDamperAcceleration(const NewtonJoint* const joint, dFloat spring, dFloat damper);
+	NEWTON_API void NewtonUserJointSetRowMassIndependentSpringDamperAcceleration(const NewtonJoint* const joint, dFloat rowStiffness, dFloat spring, dFloat damper);
+	NEWTON_API void NewtonUserJointSetRowStiffness(const NewtonJoint* const joint, dFloat stiffness);
+	NEWTON_API int NewtonUserJoinRowsCount(const NewtonJoint* const joint);
+	NEWTON_API void NewtonUserJointGetGeneralRow(const NewtonJoint* const joint, int index, dFloat* const jacobian0, dFloat* const jacobian1);
+	NEWTON_API dFloat NewtonUserJointGetRowForce(const NewtonJoint* const joint, int row);
 
 #ifdef __cplusplus 
 }

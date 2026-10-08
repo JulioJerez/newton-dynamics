@@ -324,3 +324,69 @@ NewtonJoint* NewtonWorldFindJoint(const NewtonBody* const body0, const NewtonBod
 	ndAssert(0);
 	return 0;
 }
+
+/*!
+  Get the first body in the body in the world body list.
+
+  @param *newtonWorld Pointer to the Newton world.
+
+  @return nothing
+
+  The application can call this function to iterate thought every body in the world.
+
+  The application call this function for debugging purpose
+  See also: ::NewtonWorldGetNextBody, ::NewtonWorldForEachBodyInAABBDo, ::NewtonWorldForEachJointDo
+*/
+NewtonBody* NewtonWorldGetFirstBody(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//dgBodyMasterList& masterList = *world;
+	//
+
+	//dgAssert(masterList.GetFirst()->GetInfo().GetBody() == world->GetSentinelBody());
+	//dgBodyMasterList::dgListNode* const node = masterList.GetFirst()->GetNext();
+	////		body = node->GetInfo().GetBody();
+	////		node = node->GetNext();
+	////		callback ((const NewtonBody*) body);
+	////	}
+	//if (node) {
+	//	return (NewtonBody*)node->GetInfo().GetBody();
+	//}
+	//else {
+	//	return NULL;
+	//}
+	ndAssert(0);
+	return 0;
+}
+
+
+/*!
+  Get the first body in the general body.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param curBody fixme
+
+  @return nothing
+
+  The application can call this function to iterate through every body in the world.
+
+  The application call this function for debugging purpose
+
+  See also: ::NewtonWorldGetFirstBody, ::NewtonWorldForEachBodyInAABBDo, ::NewtonWorldForEachJointDo
+*/
+NewtonBody* NewtonWorldGetNextBody(const NewtonWorld* const newtonWorld, const NewtonBody* const curBody)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)curBody;
+	//
+	//dgBodyMasterList::dgListNode* const node = body->GetMasterList()->GetNext();
+	//if (node) {
+	//	return (NewtonBody*)node->GetInfo().GetBody();
+	//}
+	//else {
+	//	return NULL;
+	//}
+	ndAssert(0);
+	return 0;
+}
