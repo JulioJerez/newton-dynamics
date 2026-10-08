@@ -203,84 +203,6 @@ void NewtonWorldSetCollisionConstructorDestructorCallback (const NewtonWorld* co
 	world->SetCollisionInstanceConstructorDestructor((dgWorld::OnCollisionInstanceDuplicate) constructor, (dgWorld::OnCollisionInstanceDestroy)destructor);
 }
 
-void* NewtonWorldAddListener(const NewtonWorld* const newtonWorld, const char* const nameId, void* const listenerUserData)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	return world->AddListener(nameId, listenerUserData);
-}
-
-void* NewtonWorldGetListener(const NewtonWorld* const newtonWorld, const char* const nameId)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	return world->FindListener(nameId);
-}
-
-void* NewtonWorldGetListenerUserData (const NewtonWorld* const newtonWorld, void* const listener)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	return world->GetListenerUserData (listener);
-}
-
-NewtonWorldListenerBodyDestroyCallback NewtonWorldListenerGetBodyDestroyCallback (const NewtonWorld* const newtonWorld, void* const listener)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	return (NewtonWorldListenerBodyDestroyCallback) world->GetListenerBodyDestroyCallback (listener);
-}
-
-void NewtonWorldListenerSetBodyDestroyCallback (const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldListenerBodyDestroyCallback callback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	world->SetListenerBodyDestroyCallback (listener, (dgWorld::OnListenerBodyDestroyCallback) callback);
-}
-
-void NewtonWorldListenerSetDestructorCallback(const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldDestroyListenerCallback callback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	return world->ListenerSetDestroyCallback(listener, (dgWorld::OnListenerDestroyCallback) callback);
-}
-
-void NewtonWorldListenerSetPreUpdateCallback(const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldUpdateListenerCallback callback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	return world->ListenerSetPreUpdate(listener, (dgWorld::OnListenerUpdateCallback) callback);
-}
-
-void NewtonWorldListenerSetPostUpdateCallback(const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldUpdateListenerCallback callback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	return world->ListenerSetPostUpdate(listener, (dgWorld::OnListenerUpdateCallback) callback);
-}
-
-void NewtonWorldListenerSetPostStepCallback (const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldUpdateListenerCallback callback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	return world->ListenerSetPostStep(listener, (dgWorld::OnListenerUpdateCallback) callback);
-}
-
-void NewtonWorldListenerSetDebugCallback (const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldListenerDebugCallback callback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	return world->SetListenerBodyDebugCallback (listener, (dgWorld::OnListenerDebugCallback) callback);
-}
-
-void NewtonWorldListenerDebug(const NewtonWorld* const newtonWorld, void* const context)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	return world->ListenersDebug(context);
-}
-
-
 /*! @} */ // end of group World
 
 /*! @defgroup GroupID GroupID
@@ -306,218 +228,6 @@ Convex collision primitives interface
 */
 
 
-NewtonCollision* NewtonCreateFracturedCompoundCollision (const NewtonWorld* const newtonWorld, const NewtonMesh* const solidMesh, int shapeID, int fracturePhysicsMaterialID, int pointcloudCount, const dFloat* const vertexCloud, int strideInBytes, int materialID, const dFloat* const textureMatrix,
-														 NewtonFractureCompoundCollisionReconstructMainMeshCallBack regenerateMainMeshCallback, 
-														 NewtonFractureCompoundCollisionOnEmitCompoundFractured emitFracturedCompound, NewtonFractureCompoundCollisionOnEmitChunk emitFracfuredChunk)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	Newton* const world = (Newton *)newtonWorld;
-	dgMeshEffect* const mesh = (dgMeshEffect*) solidMesh;
-
-	dgMatrix textMatrix (textureMatrix);
-	dgCollisionInstance* const collision = world->CreateFracturedCompound (mesh, shapeID, fracturePhysicsMaterialID, pointcloudCount, vertexCloud, strideInBytes, materialID, textMatrix, 
-																		  (dgCollisionCompoundFractured::OnEmitFractureChunkCallBack) emitFracfuredChunk,
-																		  (dgCollisionCompoundFractured::OnEmitNewCompundFractureCallBack) emitFracturedCompound,
-																		  (dgCollisionCompoundFractured::OnReconstructFractureMainMeshCallBack) regenerateMainMeshCallback);
-	return (NewtonCollision*) collision;
-}
-
-NewtonCollision* NewtonFracturedCompoundPlaneClip (const NewtonCollision* const fracturedCompound, const dFloat* const plane)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const collision = (dgCollisionInstance*) fracturedCompound;
-
-	if (collision->IsType (dgCollision::dgCollisionCompoundBreakable_RTTI)) {
-		dgCollisionCompoundFractured* const compound = (dgCollisionCompoundFractured*) collision->GetChildShape();
-		dgWorld* const world = (dgWorld*)collision->GetWorld();
-		dgCollisionCompoundFractured* const newCompound = compound->PlaneClip(dgVector (plane[0], plane[1], plane[2], plane[3]));
-		if (newCompound) {
-			dgCollisionInstance* const newCollision = world->CreateInstance (newCompound, int (collision->GetUserDataID()), dgGetIdentityMatrix());
-			newCompound->Release();
-			return (NewtonCollision*)newCollision;
-		}
-	}
-	return NULL;
-}
-
-void NewtonFracturedCompoundSetCallbacks (const NewtonCollision* const fracturedCompound, 
-										  NewtonFractureCompoundCollisionReconstructMainMeshCallBack regenerateMainMeshCallback, 
-										  NewtonFractureCompoundCollisionOnEmitCompoundFractured emitFracturedCompound, NewtonFractureCompoundCollisionOnEmitChunk emitFracfuredChunk)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const collision = (dgCollisionInstance*) fracturedCompound;
-
-	if (collision->IsType (dgCollision::dgCollisionCompoundBreakable_RTTI)) {
-		dgCollisionCompoundFractured* const compound = (dgCollisionCompoundFractured*) collision->GetChildShape();
-		compound->SetCallbacks ((dgCollisionCompoundFractured::OnEmitFractureChunkCallBack) emitFracfuredChunk, (dgCollisionCompoundFractured::OnEmitNewCompundFractureCallBack) emitFracturedCompound, (dgCollisionCompoundFractured::OnReconstructFractureMainMeshCallBack) regenerateMainMeshCallback);
-	}
-}
-
-
-int NewtonFracturedCompoundNeighborNodeList (const NewtonCollision* const fracturedCompound, void* const collisionNode, void** const nodesArray, int maxCount)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const collision = (dgCollisionInstance*) fracturedCompound;
-	if (collision->IsType (dgCollision::dgCollisionCompoundBreakable_RTTI)) {
-		dgCollisionCompoundFractured* const compound = (dgCollisionCompoundFractured*) collision->GetChildShape();
-		return  compound->GetFirstNiegborghArray ((dgCollisionCompound::dgTreeArray::dgTreeNode*)collisionNode, (dgCollisionCompound::dgTreeArray::dgTreeNode**) nodesArray, maxCount);
-	}
-	return 0;
-}
-
-
-
-int NewtonFracturedCompoundIsNodeFreeToDetach (const NewtonCollision* const fracturedCompound, void* const collisionNode)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const collision = (dgCollisionInstance*) fracturedCompound;
-
-	if (collision->IsType (dgCollision::dgCollisionCompoundBreakable_RTTI)) {
-		dgCollisionCompoundFractured* const compound = (dgCollisionCompoundFractured*) collision->GetChildShape();
-		return compound->IsNodeSaseToDetach((dgCollisionCompound::dgTreeArray::dgTreeNode*)collisionNode) ? 1 : 0;
-	}
-	return 0;
-}
-
-NewtonFracturedCompoundMeshPart* NewtonFracturedCompoundGetFirstSubMesh(const NewtonCollision* const fracturedCompound)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const collision = (dgCollisionInstance*) fracturedCompound;
-
-	NewtonFracturedCompoundMeshPart* mesh = NULL;
-	if (collision->IsType (dgCollision::dgCollisionCompoundBreakable_RTTI)) {
-		dgCollisionCompoundFractured* const compound = (dgCollisionCompoundFractured*) collision->GetChildShape();
-		mesh = (NewtonFracturedCompoundMeshPart*) compound->GetFirstMesh();
-	}
-	return mesh;
-}
-
-NewtonFracturedCompoundMeshPart* NewtonFracturedCompoundGetNextSubMesh(const NewtonCollision* const fracturedCompound, NewtonFracturedCompoundMeshPart* const subMesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const collision = (dgCollisionInstance*) fracturedCompound;
-
-	NewtonFracturedCompoundMeshPart* mesh = NULL;
-	if (collision->IsType (dgCollision::dgCollisionCompoundBreakable_RTTI)) {
-		dgCollisionCompoundFractured* const compound = (dgCollisionCompoundFractured*) collision->GetChildShape();
-		mesh = (NewtonFracturedCompoundMeshPart*) compound->GetNextMesh((dgCollisionCompoundFractured::dgConectivityGraph::dgListNode*) subMesh);
-	}
-	return mesh;
-}
-
-NewtonFracturedCompoundMeshPart* NewtonFracturedCompoundGetMainMesh (const NewtonCollision* const fracturedCompound)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const collision = (dgCollisionInstance*) fracturedCompound;
-
-	NewtonFracturedCompoundMeshPart* mesh = NULL;
-	if (collision->IsType (dgCollision::dgCollisionCompoundBreakable_RTTI)) {
-		dgCollisionCompoundFractured* const compound = (dgCollisionCompoundFractured*) collision->GetChildShape();
-		mesh = (NewtonFracturedCompoundMeshPart*) compound->GetMainMesh();
-	}
-	return mesh;
-}
-
-
-int NewtonFracturedCompoundCollisionGetVertexCount (const NewtonCollision* const fracturedCompound, const NewtonFracturedCompoundMeshPart* const meshOwner)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const collision = (dgCollisionInstance*) fracturedCompound;
-
-	dgInt32 count = 0;
-	if (collision->IsType (dgCollision::dgCollisionCompoundBreakable_RTTI)) {
-		dgCollisionCompoundFractured* const compound = (dgCollisionCompoundFractured*) collision->GetChildShape();
-		count = compound->GetVertecCount((dgCollisionCompoundFractured::dgConectivityGraph::dgListNode*) meshOwner);
-	}
-	return count;
-}
-
-
-const dFloat* NewtonFracturedCompoundCollisionGetVertexPositions (const NewtonCollision* const fracturedCompound, const NewtonFracturedCompoundMeshPart* const meshOwner)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const collision = (dgCollisionInstance*) fracturedCompound;
-
-	const dgFloat32* points = NULL;
-	if (collision->IsType (dgCollision::dgCollisionCompoundBreakable_RTTI)) {
-		dgCollisionCompoundFractured* const compound = (dgCollisionCompoundFractured*) collision->GetChildShape();
-		points = compound->GetVertexPositions((dgCollisionCompoundFractured::dgConectivityGraph::dgListNode*) meshOwner);
-	}
-	return points;
-}
-
-
-const dFloat* NewtonFracturedCompoundCollisionGetVertexNormals (const NewtonCollision* const fracturedCompound, const NewtonFracturedCompoundMeshPart* const meshOwner)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const collision = (dgCollisionInstance*) fracturedCompound;
-
-	const dgFloat32* points = NULL;
-	if (collision->IsType (dgCollision::dgCollisionCompoundBreakable_RTTI)) {
-		dgCollisionCompoundFractured* const compound = (dgCollisionCompoundFractured*) collision->GetChildShape();
-		points = compound->GetVertexNormal((dgCollisionCompoundFractured::dgConectivityGraph::dgListNode*) meshOwner);
-	}
-	return points;
-}
-
-const dFloat* NewtonFracturedCompoundCollisionGetVertexUVs (const NewtonCollision* const fracturedCompound, const NewtonFracturedCompoundMeshPart* const meshOwner)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const collision = (dgCollisionInstance*) fracturedCompound;
-
-	const dgFloat32* points = NULL;
-	if (collision->IsType (dgCollision::dgCollisionCompoundBreakable_RTTI)) {
-		dgCollisionCompoundFractured* const compound = (dgCollisionCompoundFractured*) collision->GetChildShape();
-		points = compound->GetVertexUVs((dgCollisionCompoundFractured::dgConectivityGraph::dgListNode*) meshOwner);
-	}
-	return points;
-}
-
-int NewtonFracturedCompoundMeshPartGetIndexStream (const NewtonCollision* const fracturedCompound, const NewtonFracturedCompoundMeshPart* const meshOwner, const void* const segment, int* const index) 
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	dgInt32 count = 0;
-	dgCollisionInstance* const collision = (dgCollisionInstance*) fracturedCompound;
-	if (collision->IsType (dgCollision::dgCollisionCompoundBreakable_RTTI)) {
-		dgCollisionCompoundFractured* const compound = (dgCollisionCompoundFractured*) collision;
-		count = compound->GetSegmentIndexStream ((dgCollisionCompoundFractured::dgConectivityGraph::dgListNode*) meshOwner, (dgCollisionCompoundFractured::dgMesh::dgListNode*) segment, index);
-	}
-	return count;
-}
-
-
-void* NewtonFracturedCompoundMeshPartGetFirstSegment (const NewtonFracturedCompoundMeshPart* const breakableComponentMesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionCompoundFractured::dgConectivityGraph::dgListNode* const node = (dgCollisionCompoundFractured::dgConectivityGraph::dgListNode*) breakableComponentMesh;
-	return node->GetInfo().m_nodeData.m_mesh->GetFirst();
-}
-
-void* NewtonFracturedCompoundMeshPartGetNextSegment (const void* const breakableComponentSegment)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionCompoundFractured::dgMesh::dgListNode* const node = (dgCollisionCompoundFractured::dgMesh::dgListNode*) breakableComponentSegment;
-	return node->GetNext();
-}
-
-int NewtonFracturedCompoundMeshPartGetMaterial (const void* const segment)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	dgCollisionCompoundFractured::dgMesh::dgListNode* const node = (dgCollisionCompoundFractured::dgMesh::dgListNode*) segment;
-	return node->GetInfo().m_material;
-}
-
-
-int NewtonFracturedCompoundMeshPartGetIndexCount (const void* const segment)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	dgCollisionCompoundFractured::dgMesh::dgListNode* const node = (dgCollisionCompoundFractured::dgMesh::dgListNode*) segment;
-	return node->GetInfo().m_faceCount * 3;
-}
 
 
 /*! @} */ // end of CshapesConvexSimple
@@ -1971,743 +1681,6 @@ Joint common function s
 /*! @} */ // end of JointCommon
 
 
-NewtonMesh* NewtonMeshCreateFromMesh(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const srcMesh = (dgMeshEffect*) mesh;
-
-	dgMeshEffect* const clone = new (srcMesh->GetAllocator()) dgMeshEffect (*srcMesh);
-	return (NewtonMesh*) clone;
-}
-
-NewtonMesh* NewtonMeshCreateFromCollision(const NewtonCollision* const collision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	dgCollisionInstance* const shape = (dgCollisionInstance*) collision;
-	dgMeshEffect* const mesh = new (shape->GetAllocator()) dgMeshEffect (shape);
-	return (NewtonMesh*) mesh;
-}
-
-NewtonMesh* NewtonMeshCreateConvexHull (const NewtonWorld* const newtonWorld, int count, const dFloat* const vertexCloud, int strideInBytes, dFloat tolerance)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	dgStack<dgBigVector> pool (count);
-
-	dgInt32 stride = strideInBytes / sizeof (dgFloat32);
-	for (dgInt32 i = 0; i < count; i ++) {
-		pool[i].m_x = vertexCloud[i * stride + 0];
-		pool[i].m_y = vertexCloud[i * stride + 1];
-		pool[i].m_z = vertexCloud[i * stride + 2];
-		pool[i].m_w = dgFloat64 (0.0);
-	}
-	dgMeshEffect* const mesh = new (world->dgWorld::GetAllocator()) dgMeshEffect (world->dgWorld::GetAllocator(), &pool[0].m_x, count, sizeof (dgBigVector), tolerance);
-	return (NewtonMesh*) mesh;
-}
-
-NewtonMesh* NewtonMeshCreateTetrahedraIsoSurface(const NewtonMesh* const closeManifoldMesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) closeManifoldMesh;
-	return (NewtonMesh*)meshEffect->CreateTetrahedraIsoSurface();
-}
-
-void NewtonCreateTetrahedraLinearBlendSkinWeightsChannel(const NewtonMesh* const tetrahedraMesh, NewtonMesh* const skinMesh)
-{
-	dgAssert(0);
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)skinMesh;
-	meshEffect->CreateTetrahedraLinearBlendSkinWeightsChannel((const dgMeshEffect*)tetrahedraMesh);
-}
-
-NewtonMesh* NewtonMeshCreateVoronoiConvexDecomposition (const NewtonWorld* const newtonWorld, int pointCount, const dFloat* const vertexCloud, int strideInBytes, int materialID, const dFloat* const textureMatrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	return (NewtonMesh*) dgMeshEffect::CreateVoronoiConvexDecomposition (world->dgWorld::GetAllocator(), pointCount, strideInBytes, vertexCloud, materialID, dgMatrix (textureMatrix));
-}
-
-NewtonMesh* NewtonMeshCreateFromSerialization (const NewtonWorld* const newtonWorld, NewtonDeserializeCallback deserializeFunction, void* const serializeHandle)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	return (NewtonMesh*) dgMeshEffect::CreateFromSerialization (world->dgWorld::GetAllocator(), (dgDeserialize) deserializeFunction, serializeHandle);
-}
-
-void NewtonMeshSerialize (const NewtonMesh* const mesh, NewtonSerializeCallback serializeFunction, void* const serializeHandle)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-	meshEffect->Serialize ((dgSerialize) serializeFunction, serializeHandle);
-}
-
-void NewtonMeshSaveOFF(const NewtonMesh* const mesh, const char* const filename)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgAssert(0);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-	//meshEffect->SaveOFF(filename);
-}
-
-NewtonMesh* NewtonMeshLoadOFF(const NewtonWorld* const newtonWorld, const char* const filename)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton *) newtonWorld;
-	//dgMemoryAllocator* const allocator = world->dgWorld::GetAllocator();
-	//dgMeshEffect* const mesh = new (allocator) dgMeshEffect (allocator);
-	//mesh->LoadOffMesh(filename);
-	//return (NewtonMesh*) mesh;
-	dgAssert(0);
-	return NULL;
-}
-
-NewtonMesh* NewtonMeshLoadTetrahedraMesh(const NewtonWorld* const newtonWorld, const char* const filename)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	dgMemoryAllocator* const allocator = world->dgWorld::GetAllocator();
-	dgMeshEffect* const mesh = new (allocator) dgMeshEffect(allocator);
-	mesh->LoadTetraMesh (filename);
-	return (NewtonMesh*)mesh;
-}
-
-void NewtonMeshApplyTransform (const NewtonMesh* const mesh, const dFloat* const matrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-
-	meshEffect->ApplyTransform(dgMatrix (matrix));
-}
-
-void NewtonMeshFlipWinding(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->FlipWinding();
-}
-
-void NewtonMeshCalculateOOBB(const NewtonMesh* const mesh, dFloat* const matrix, dFloat* const x, dFloat* const y, dFloat* const z)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-
-	dgBigVector size;
-	dgMatrix alignMatrix (meshEffect->CalculateOOBB (size));
-
-//	*((dgMatrix *)matrix) = alignMatrix; 
-	memcpy (matrix, &alignMatrix[0][0], sizeof (dgMatrix));
-	*x = dgFloat32 (size.m_x);
-	*y = dgFloat32 (size.m_y);
-	*z = dgFloat32 (size.m_z);
-}
-
-void NewtonMeshCalculateVertexNormals(const NewtonMesh* const mesh, dFloat angleInRadians)
-{
-	TRACE_FUNCTION(__FUNCTION__);	
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-	meshEffect->CalculateNormals (angleInRadians);
-}
-
-void NewtonMeshApplyAngleBasedMapping(const NewtonMesh* const mesh, int material, NewtonReportProgress reportPrograssCallback, void* const reportPrgressUserData, dFloat* const aligmentMatrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);	
-	dgMatrix matrix(aligmentMatrix);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-	meshEffect->AngleBaseFlatteningMapping(material, (dgReportProgress) reportPrograssCallback, reportPrgressUserData);
-}
-
-void NewtonMeshApplySphericalMapping(const NewtonMesh* const mesh, int material, const dFloat* const aligmentMatrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);	
-	dgMatrix matrix(aligmentMatrix);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-	meshEffect->SphericalMapping (material, matrix);
-}
-
-void NewtonMeshApplyBoxMapping(const NewtonMesh* const mesh, int front, int side, int top, const dFloat* const aligmentMatrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMatrix matrix(aligmentMatrix);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-	meshEffect->BoxMapping (front, side, top, matrix);
-}
-
-void NewtonMeshApplyCylindricalMapping(const NewtonMesh* const mesh, int cylinderMaterial, int capMaterial, const dFloat* const aligmentMatrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);	
-	dgMatrix matrix(aligmentMatrix);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-	meshEffect->CylindricalMapping (cylinderMaterial, capMaterial, matrix);
-}
-
-void NewtonMeshTriangulate (const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	((dgMeshEffect*) mesh)->Triangulate ();
-}
-
-void NewtonMeshPolygonize (const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	((dgMeshEffect*) mesh)->ConvertToPolygons ();
-}
-
-
-int NewtonMeshIsOpenMesh (const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	return ((dgMeshEffect*) mesh)->HasOpenEdges () ? 1 : 0;
-}
-
-void NewtonMeshFixTJoints (const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	return ((dgMeshEffect*) mesh)->RepairTJoints();
-}
-
-
-void NewtonMeshClip (const NewtonMesh* const mesh, const NewtonMesh* const clipper, const dFloat* const clipperMatrix, NewtonMesh** const topMesh, NewtonMesh** const bottomMesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	*topMesh = NULL;
-	*bottomMesh = NULL;
-	((dgMeshEffect*) mesh)->ClipMesh (dgMatrix (clipperMatrix), (dgMeshEffect*)clipper, (dgMeshEffect**) topMesh, (dgMeshEffect**) bottomMesh);
-}
-
-
-NewtonMesh* NewtonMeshSimplify (const NewtonMesh* const mesh, int maxVertexCount, NewtonReportProgress progressReportCallback, void* const reportPrgressUserData)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return (NewtonMesh*) ((dgMeshEffect*) mesh)->CreateSimplification (maxVertexCount, (dgReportProgress) progressReportCallback, reportPrgressUserData);
-}
-
-NewtonMesh* NewtonMeshApproximateConvexDecomposition (const NewtonMesh* const mesh, dFloat maxConcavity, dFloat backFaceDistanceFactor, int maxCount, int maxVertexPerHull, NewtonReportProgress progressReportCallback, void* const reportProgressUserData)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return (NewtonMesh*) ((dgMeshEffect*) mesh)->CreateConvexApproximation (maxConcavity, backFaceDistanceFactor, maxCount, maxVertexPerHull, (dgReportProgress) progressReportCallback, reportProgressUserData);
-}
-
-
-
-NewtonMesh* NewtonMeshUnion (const NewtonMesh* const mesh, const NewtonMesh* const clipper, const dFloat* const clipperMatrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return (NewtonMesh*) ((dgMeshEffect*) mesh)->Union (dgMatrix (clipperMatrix), (dgMeshEffect*)clipper);
-}
-
-
-NewtonMesh* NewtonMeshDifference (const NewtonMesh* const mesh, const NewtonMesh* const clipper, const dFloat* const clipperMatrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return (NewtonMesh*) ((dgMeshEffect*) mesh)->Difference (dgMatrix (clipperMatrix), (dgMeshEffect*)clipper);
-}
-
-NewtonMesh* NewtonMeshIntersection (const NewtonMesh* const mesh, const NewtonMesh* const clipper, const dFloat* const clipperMatrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return (NewtonMesh*) ((dgMeshEffect*) mesh)->Intersection (dgMatrix (clipperMatrix), (dgMeshEffect*)clipper);
-}
-
-NewtonMesh* NewtonMeshConvexMeshIntersection (const NewtonMesh* const mesh, const NewtonMesh* const convexMesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return (NewtonMesh*) ((dgMeshEffect*) mesh)->ConvexMeshIntersection ((dgMeshEffect*)convexMesh);
-}
-
-void NewtonRemoveUnusedVertices(const NewtonMesh* const mesh, int* const vertexRemapTable)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	((dgMeshEffect*) mesh)->RemoveUnusedVertices (vertexRemapTable);
-}
-
-
-void NewtonMeshBeginBuild(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-	meshEffect->BeginBuild();
-}
-
-
-void NewtonMeshAddLayer(const NewtonMesh* const mesh, int layer)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->AddLayer(layer);
-}
-
-void NewtonMeshAddBinormal(const NewtonMesh* const mesh, dFloat x, dFloat y, dFloat z)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->AddBinormal(x, y, z);
-}
-
-void NewtonMeshAddUV0(const NewtonMesh* const mesh, dFloat u, dFloat v)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->AddUV0(u, v);
-}
-
-void NewtonMeshAddUV1(const NewtonMesh* const mesh, dFloat u, dFloat v)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->AddUV1(u, v);
-}
-
-void NewtonMeshAddVertexColor(const NewtonMesh* const mesh, dFloat32 r, dFloat32 g, dFloat32 b, dFloat32 a)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->AddVertexColor(r, g, b, a);
-}
-
-void NewtonMeshClearVertexFormat (NewtonMeshVertexFormat* const format)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect::dgMeshVertexFormat* const vertexFormat = (dgMeshEffect::dgMeshVertexFormat*) format;
-	vertexFormat->Clear ();
-}
-
-void NewtonMeshBuildFromVertexListIndexList (const NewtonMesh* const mesh, const NewtonMeshVertexFormat* const format)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-	meshEffect->BuildFromIndexList((dgMeshEffect::dgMeshVertexFormat*) format);
-}
-
-void NewtonMeshOptimizePoints(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->OptimizePoints();
-}
-
-void NewtonMeshOptimizeVertex(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->OptimizeAttibutes();
-}
-
-void NewtonMeshOptimize(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	NewtonMeshOptimizePoints(mesh);
-	NewtonMeshOptimizeVertex(mesh);
-}
-
-int NewtonMeshGetVertexCount(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);	
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-	return meshEffect->GetVertexCount();
-}
-
-int NewtonMeshGetVertexBaseCount(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	return meshEffect->GetVertexBaseCount();
-}
-
-void NewtonMeshSetVertexBaseCount(const NewtonMesh* const mesh, int baseCount)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->SetVertexBaseCount(baseCount);
-}
-
-int NewtonMeshGetVertexStrideInByte(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-
-	return meshEffect->GetVertexStrideInByte();
-}
-
-const dFloat64* NewtonMeshGetVertexArray (const NewtonMesh* const mesh) 
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-
-	return meshEffect->GetVertexPool (); 
-}
-
-int NewtonMeshGetPointCount (const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-	return meshEffect->GetPropertiesCount();
-}
-
-const int* NewtonMeshGetIndexToVertexMap(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	return meshEffect->GetIndexToVertexMap();
-}
-
-int NewtonMeshHasNormalChannel(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	return meshEffect->HasNormalChannel() ? 1 : 0;
-}
-
-int NewtonMeshHasBinormalChannel(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	return meshEffect->HasBinormalChannel() ? 1 : 0;
-}
-
-int NewtonMeshHasUV0Channel(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	return meshEffect->HasUV0Channel() ? 1 : 0;
-}
-
-int NewtonMeshHasUV1Channel(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	return meshEffect->HasUV1Channel() ? 1 : 0;
-}
-
-int NewtonMeshHasVertexColorChannel(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	return meshEffect->HasVertexColorChannel() ? 1 : 0;
-}
-
-void NewtonMeshGetVertexDoubleChannel (const NewtonMesh* const mesh, int vertexStrideInByte, dFloat64* const outBuffer)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->GetVertexChannel64(vertexStrideInByte, (dgFloat64*)outBuffer);
-}
-
-void NewtonMeshGetVertexChannel (const NewtonMesh* const mesh, int vertexStrideInByte, dFloat* const outBuffer)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->GetVertexChannel(vertexStrideInByte, (dgFloat32*)outBuffer);
-}
-
-void NewtonMeshGetNormalChannel(const NewtonMesh* const mesh, int vertexStrideInByte, dFloat* const outBuffer)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->GetNormalChannel(vertexStrideInByte, (dgFloat32*)outBuffer);
-}
-
-void NewtonMeshGetBinormalChannel(const NewtonMesh* const mesh, int vertexStrideInByte, dFloat* const outBuffer)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->GetBinormalChannel(vertexStrideInByte, (dgFloat32*)outBuffer);
-}
-
-void NewtonMeshGetUV0Channel(const NewtonMesh* const mesh, int vertexStrideInByte, dFloat* const outBuffer)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->GetUV0Channel(vertexStrideInByte, (dgFloat32*)outBuffer);
-}
-
-void NewtonMeshGetUV1Channel(const NewtonMesh* const mesh, int vertexStrideInByte, dFloat* const outBuffer)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->GetUV1Channel(vertexStrideInByte, (dgFloat32*)outBuffer);
-}
-
-void NewtonMeshGetVertexColorChannel(const NewtonMesh* const mesh, int vertexStrideInByte, dFloat* const outBuffer)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	meshEffect->GetVertexColorChannel(vertexStrideInByte, (dgFloat32*)outBuffer);
-}
-
-
-void* NewtonMeshBeginHandle (const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);	
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-
-	return meshEffect->MaterialGeometryBegin();
-}
-
-void NewtonMeshEndHandle (const NewtonMesh* const mesh, void* const handle)
-{
-	TRACE_FUNCTION(__FUNCTION__);	
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-	meshEffect->MaterialGeomteryEnd((dgMeshEffect::dgIndexArray*) handle);
-}
-
-
-
-int NewtonMeshFirstMaterial (const NewtonMesh* const mesh, void* const handle)
-{
-	TRACE_FUNCTION(__FUNCTION__);	
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-
-	return meshEffect->GetFirstMaterial((dgMeshEffect::dgIndexArray*) handle);
-}
-
-int NewtonMeshNextMaterial (const NewtonMesh* const mesh, void* const handle, int materialId)
-{
-	TRACE_FUNCTION(__FUNCTION__);	
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-
-	return meshEffect->GetNextMaterial((dgMeshEffect::dgIndexArray*) handle, materialId);
-}
-
-int NewtonMeshMaterialGetMaterial (const NewtonMesh* const mesh, void* const handle, int materialId)
-{
-	TRACE_FUNCTION(__FUNCTION__);	
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-
-	return  meshEffect->GetMaterialID ((dgMeshEffect::dgIndexArray*) handle, materialId);	
-}
-
-int NewtonMeshMaterialGetIndexCount (const NewtonMesh* const mesh, void* const handle, int materialId)
-{
-	TRACE_FUNCTION(__FUNCTION__);	
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-
-	return meshEffect->GetMaterialIndexCount ((dgMeshEffect::dgIndexArray*) handle, materialId);		
-}
-
-void NewtonMeshMaterialGetIndexStream (const NewtonMesh* const mesh, void* const handle, int materialId, int* const index)
-{
-	TRACE_FUNCTION(__FUNCTION__);	
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-
-	meshEffect->GetMaterialGetIndexStream ((dgMeshEffect::dgIndexArray*) handle, materialId, index);		
-}
-
-void NewtonMeshMaterialGetIndexStreamShort (const NewtonMesh* const mesh, void* const handle, int materialId, short int* const index)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMeshEffect* const meshEffect = (dgMeshEffect*) mesh;
-
-	meshEffect->GetMaterialGetIndexStreamShort ((dgMeshEffect::dgIndexArray*) handle, materialId, index);		
-}
-
-
-NewtonMesh* NewtonMeshCreateFirstSingleSegment (const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	dgMeshEffect* const effectMesh = (dgMeshEffect*)mesh;
-	dgPolyhedra segment(effectMesh->GetAllocator());
-
-	effectMesh->BeginConectedSurface();
-	if (effectMesh->GetConectedSurface (segment)) {
-		dgMeshEffect* const solid = new (effectMesh->GetAllocator()) dgMeshEffect(segment, *((dgMeshEffect*)mesh));
-		return (NewtonMesh*)solid;
-	} else {
-		return NULL;
-	}
-}
-
-NewtonMesh* NewtonMeshCreateNextSingleSegment (const NewtonMesh* const mesh, const NewtonMesh* const segment)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	dgMeshEffect* const effectMesh = (dgMeshEffect*)mesh;
-	dgPolyhedra nextSegment(effectMesh->GetAllocator());
-
-	dgAssert (segment);
-	dgInt32 moreSegments = effectMesh->GetConectedSurface (nextSegment);
-
-	dgMeshEffect* solid;
-	if (moreSegments) {
-		solid = new (effectMesh->GetAllocator()) dgMeshEffect(nextSegment, *effectMesh);
-	} else {
-		solid = NULL;
-		effectMesh->EndConectedSurface();
-	}
-
-	return (NewtonMesh*)solid;
-}
-
-NewtonMesh* NewtonMeshCreateFirstLayer (const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	dgMeshEffect* const effectMesh = (dgMeshEffect*)mesh;
-	return (NewtonMesh*) effectMesh->GetFirstLayer ();
-}
-
-NewtonMesh* NewtonMeshCreateNextLayer (const NewtonMesh* const mesh, const NewtonMesh* const segment)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	dgMeshEffect* const effectMesh = (dgMeshEffect*)mesh;
-	return (NewtonMesh*) effectMesh->GetNextLayer ((dgMeshEffect*)segment);
-}
-
-
-
-int NewtonMeshGetTotalFaceCount (const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return ((dgMeshEffect*)mesh)->GetTotalFaceCount();
-}
-
-int NewtonMeshGetTotalIndexCount (const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return ((dgMeshEffect*)mesh)->GetTotalIndexCount();
-}
-
-void NewtonMeshGetFaces (const NewtonMesh* const mesh, int* const faceIndexCount, int* const faceMaterial, void** const faceIndices)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	((dgMeshEffect*)mesh)->GetFaces (faceIndexCount, faceMaterial, faceIndices);
-}
-
-
-void* NewtonMeshGetFirstVertex (const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return ((dgMeshEffect*)mesh)->GetFirstVertex ();
-}
-
-void* NewtonMeshGetNextVertex (const NewtonMesh* const mesh, const void* const vertex)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return ((dgMeshEffect*)mesh)->GetNextVertex (vertex);
-}
-
-int NewtonMeshGetVertexIndex (const NewtonMesh* const mesh, const void* const vertex)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return ((dgMeshEffect*)mesh)->GetVertexIndex (vertex);
-}
-
-void* NewtonMeshGetFirstPoint (const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return ((dgMeshEffect*)mesh)->GetFirstPoint ();
-}
-void* NewtonMeshGetNextPoint (const NewtonMesh* const mesh, const void* const point)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return ((dgMeshEffect*)mesh)->GetNextPoint (point);
-}
-
-int NewtonMeshGetPointIndex (const NewtonMesh* const mesh, const void* const point)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return ((dgMeshEffect*)mesh)->GetPointIndex (point);
-}
-
-int NewtonMeshGetVertexIndexFromPoint (const NewtonMesh* const mesh, const void* const point)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return ((dgMeshEffect*)mesh)->GetVertexIndexFromPoint (point);
-}
-
-void* NewtonMeshGetFirstEdge (const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return ((dgMeshEffect*)mesh)->GetFirstEdge ();
-}
-
-void* NewtonMeshGetNextEdge (const NewtonMesh* const mesh, const void* const edge)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return ((dgMeshEffect*)mesh)->GetNextEdge (edge);
-}
-
-void NewtonMeshGetEdgeIndices (const NewtonMesh* const mesh, const void* const edge, int* const v0, int* const v1)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return ((dgMeshEffect*)mesh)->GetEdgeIndex (edge, *v0, *v1);
-}
-
-
-//void NewtonMeshGetEdgePointIndices (const NewtonMesh* const mesh, const void* const edge, int* const v0, int* const v1)
-//{
-//	return ((dgMeshEffect*)mesh)->GetEdgeAttributeIndex (edge, *v0, *v1);
-//}
-
-void* NewtonMeshGetFirstFace (const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return ((dgMeshEffect*)mesh)->GetFirstFace ();
-}
-
-void* NewtonMeshGetNextFace (const NewtonMesh* const mesh, const void* const face)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return ((dgMeshEffect*)mesh)->GetNextFace (face);
-}
-
-int NewtonMeshIsFaceOpen (const NewtonMesh* const mesh, const void* const face)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return ((dgMeshEffect*)mesh)->IsFaceOpen (face);
-}
-
-int NewtonMeshGetFaceIndexCount (const NewtonMesh* const mesh, const void* const face)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return ((dgMeshEffect*)mesh)->GetFaceIndexCount (face);
-}
-
-int NewtonMeshGetFaceMaterial (const NewtonMesh* const mesh, const void* const face)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return ((dgMeshEffect*)mesh)->GetFaceMaterial (face);
-}
-
-void NewtonMeshSetFaceMaterial (const NewtonMesh* const mesh, const void* const face, int matId)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	return ((dgMeshEffect*)mesh)->SetFaceMaterial (face, matId);
-}
-
-void NewtonMeshGetFaceIndices (const NewtonMesh* const mesh, const void* const face, int* const indices)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	((dgMeshEffect*)mesh)->GetFaceIndex (face, indices);
-}
-
-void NewtonMeshGetFacePointIndices (const NewtonMesh* const mesh, const void* const face, int* const indices)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	((dgMeshEffect*)mesh)->GetFaceAttributeIndex (face, indices);
-}
-
-void NewtonMeshCalculateFaceNormal (const NewtonMesh* const mesh, const void* const face, dFloat64* const normal)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBigVector n (((dgMeshEffect*)mesh)->CalculateFaceNormal (face));
-	normal[0] = n.m_x;
-	normal[1] = n.m_y;
-	normal[2] = n.m_z;
-}
-
-NewtonCollision* NewtonCreateDeformableSolid(const NewtonWorld* const newtonWorld, const NewtonMesh* const mesh, int shapeID)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	return (NewtonCollision*) world->CreateDeformableSolid ((dgMeshEffect*)mesh, shapeID);
-}
-
 NewtonCollision* NewtonCreateMassSpringDamperSystem (const NewtonWorld* const newtonWorld, int shapeID,
 													 const dFloat* const points, int pointCount, int strideInBytes, const dFloat* const pointMass, 
 													 const int* const links, int linksCount, const dFloat* const linksSpring, const dFloat* const linksDamper)
@@ -2716,43 +1689,6 @@ NewtonCollision* NewtonCreateMassSpringDamperSystem (const NewtonWorld* const ne
 	Newton* const world = (Newton *)newtonWorld;
 	return (NewtonCollision*)world->CreateMassSpringDamperSystem (shapeID, pointCount, points, strideInBytes, pointMass, linksCount, links, linksSpring, linksDamper);
 }
-
-int NewtonDeformableMeshGetParticleCount(const NewtonCollision* const deformableMesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const collision = (dgCollisionInstance*)deformableMesh;
-	if (collision->IsType(dgCollision::dgCollisionLumpedMass_RTTI)) {
-		dgCollisionLumpedMassParticles* const deformableShape = (dgCollisionLumpedMassParticles*)collision->GetChildShape();
-		return deformableShape->GetCount();
-	}
-	return 0;
-}
-
-
-const dFloat* NewtonDeformableMeshGetParticleArray(const NewtonCollision* const deformableMesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const collision = (dgCollisionInstance*)deformableMesh;
-	if (collision->IsType(dgCollision::dgCollisionLumpedMass_RTTI)) {
-		dgCollisionLumpedMassParticles* const deformableShape = (dgCollisionLumpedMassParticles*)collision->GetChildShape();
-		const dgVector* const posit = deformableShape->GetPositions();
-		return &posit[0].m_x;
-	}
-	return NULL;
-}
-
-
-int NewtonDeformableMeshGetParticleStrideInBytes(const NewtonCollision* const deformableMesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const collision = (dgCollisionInstance*)deformableMesh;
-	if (collision->IsType(dgCollision::dgCollisionLumpedMass_RTTI)) {
-		dgCollisionLumpedMassParticles* const deformableShape = (dgCollisionLumpedMassParticles*)collision->GetChildShape();
-		return deformableShape->GetStrideInByte();
-	}
-	return 0;
-}
-
 
 
 /*
@@ -3420,4 +2356,96 @@ NewtonPostUpdateCallback NewtonGetPostUpdateCallback(const NewtonWorld* const ne
 	TRACE_FUNCTION(__FUNCTION__);
 	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	return world->m_onPostUpdate;
+}
+
+void* NewtonWorldAddListener(const NewtonWorld* const newtonWorld, const char* const nameId, void* const listenerUserData)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//return world->AddListener(nameId, listenerUserData);
+	ndAssert(0);
+	return 0;
+}
+
+void* NewtonWorldGetListener(const NewtonWorld* const newtonWorld, const char* const nameId)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//return world->FindListener(nameId);
+	ndAssert(0);
+	return 0;
+}
+
+void* NewtonWorldGetListenerUserData(const NewtonWorld* const newtonWorld, void* const listener)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//return world->GetListenerUserData(listener);
+	ndAssert(0);
+	return 0;
+}
+
+NewtonWorldListenerBodyDestroyCallback NewtonWorldListenerGetBodyDestroyCallback(const NewtonWorld* const newtonWorld, void* const listener)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//return (NewtonWorldListenerBodyDestroyCallback)world->GetListenerBodyDestroyCallback(listener);
+	ndAssert(0);
+	return 0;
+}
+
+void NewtonWorldListenerSetBodyDestroyCallback(const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldListenerBodyDestroyCallback callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//world->SetListenerBodyDestroyCallback(listener, (dgWorld::OnListenerBodyDestroyCallback)callback);
+	ndAssert(0);
+}
+
+void NewtonWorldListenerSetDestructorCallback(const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldDestroyListenerCallback callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//return world->ListenerSetDestroyCallback(listener, (dgWorld::OnListenerDestroyCallback)callback);
+	ndAssert(0);
+}
+
+void NewtonWorldListenerSetPreUpdateCallback(const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldUpdateListenerCallback callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//return world->ListenerSetPreUpdate(listener, (dgWorld::OnListenerUpdateCallback)callback);
+	ndAssert(0);
+}
+
+void NewtonWorldListenerSetPostUpdateCallback(const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldUpdateListenerCallback callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//return world->ListenerSetPostUpdate(listener, (dgWorld::OnListenerUpdateCallback)callback);
+	ndAssert(0);
+}
+
+void NewtonWorldListenerSetPostStepCallback(const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldUpdateListenerCallback callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//return world->ListenerSetPostStep(listener, (dgWorld::OnListenerUpdateCallback)callback);
+	ndAssert(0);
+}
+
+void NewtonWorldListenerSetDebugCallback(const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldListenerDebugCallback callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//return world->SetListenerBodyDebugCallback(listener, (dgWorld::OnListenerDebugCallback)callback);
+	ndAssert(0);
+}
+
+void NewtonWorldListenerDebug(const NewtonWorld* const newtonWorld, void* const context)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//return world->ListenersDebug(context);
+	ndAssert(0);
 }
