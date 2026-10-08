@@ -1565,7 +1565,6 @@ int NewtonBodyGetAutoSleep(const NewtonBody* const bodyPtr)
 
 	ndAssert(0);
 	return 0;
-
 }
 
 

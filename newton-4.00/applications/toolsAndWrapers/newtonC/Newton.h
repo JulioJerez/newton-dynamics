@@ -584,53 +584,6 @@ extern "C" {
 
 	// **********************************************************************************************
 	//
-	// contact joints interface
-	//
-	// **********************************************************************************************
-	NEWTON_API void* NewtonContactJointGetFirstContact (const NewtonJoint* const contactJoint);
-	NEWTON_API void* NewtonContactJointGetNextContact (const NewtonJoint* const contactJoint, void* const contact);
-
-	NEWTON_API int NewtonContactJointGetContactCount(const NewtonJoint* const contactJoint);
-	NEWTON_API void NewtonContactJointRemoveContact(const NewtonJoint* const contactJoint, void* const contact); 
-
-	NEWTON_API dFloat NewtonContactJointGetClosestDistance(const NewtonJoint* const contactJoint);
-	NEWTON_API void NewtonContactJointResetSelftJointCollision(const NewtonJoint* const contactJoint);
-	NEWTON_API void NewtonContactJointResetIntraJointCollision(const NewtonJoint* const contactJoint);
-
-	NEWTON_API NewtonMaterial* NewtonContactGetMaterial (const void* const contact);
-
-	NEWTON_API NewtonCollision* NewtonContactGetCollision0 (const void* const contact);	
-	NEWTON_API NewtonCollision* NewtonContactGetCollision1 (const void* const contact);	
-
-	NEWTON_API void* NewtonContactGetCollisionID0 (const void* const contact);	
-	NEWTON_API void* NewtonContactGetCollisionID1 (const void* const contact);	
-	
-	
-	// **********************************************************************************************
-	//
-	// Common joint functions
-	//
-	// **********************************************************************************************
-	NEWTON_API void* NewtonJointGetUserData (const NewtonJoint* const joint);
-	NEWTON_API void NewtonJointSetUserData (const NewtonJoint* const joint, void* const userData);
-
-	NEWTON_API NewtonBody* NewtonJointGetBody0 (const NewtonJoint* const joint);
-	NEWTON_API NewtonBody* NewtonJointGetBody1 (const NewtonJoint* const joint);
-
-	NEWTON_API void NewtonJointGetInfo  (const NewtonJoint* const joint, NewtonJointRecord* const info);
-	NEWTON_API int NewtonJointGetCollisionState (const NewtonJoint* const joint);
-	NEWTON_API void NewtonJointSetCollisionState (const NewtonJoint* const joint, int state);
-
-	NEWTON_API dFloat NewtonJointGetStiffness (const NewtonJoint* const joint);
-	NEWTON_API void NewtonJointSetStiffness (const NewtonJoint* const joint, dFloat state);
-	
-	NEWTON_API void NewtonDestroyJoint(const NewtonWorld* const newtonWorld, const NewtonJoint* const joint);
-	NEWTON_API void NewtonJointSetDestructor (const NewtonJoint* const joint, NewtonConstraintDestructor destructor);
-
-	NEWTON_API int NewtonJointIsActive (const NewtonJoint* const joint);
-
-	// **********************************************************************************************
-	//
 	// particle system interface (soft bodies, individual, pressure bodies and cloth)   
 	//
 	// **********************************************************************************************
@@ -1282,6 +1235,44 @@ extern "C" {
 	NEWTON_API NewtonBody* NewtonWorldGetNextBody(const NewtonWorld* const newtonWorld, const NewtonBody* const curBody);
 	NEWTON_API NewtonMaterial* NewtonWorldGetFirstMaterial(const NewtonWorld* const newtonWorld);
 	NEWTON_API NewtonMaterial* NewtonWorldGetNextMaterial(const NewtonWorld* const newtonWorld, const NewtonMaterial* const material);
+
+	// common joints functions
+	NEWTON_API void* NewtonJointGetUserData(const NewtonJoint* const joint);
+	NEWTON_API void NewtonJointSetUserData(const NewtonJoint* const joint, void* const userData);
+
+	NEWTON_API NewtonBody* NewtonJointGetBody0(const NewtonJoint* const joint);
+	NEWTON_API NewtonBody* NewtonJointGetBody1(const NewtonJoint* const joint);
+
+	NEWTON_API void NewtonJointGetInfo(const NewtonJoint* const joint, NewtonJointRecord* const info);
+	NEWTON_API int NewtonJointGetCollisionState(const NewtonJoint* const joint);
+	NEWTON_API void NewtonJointSetCollisionState(const NewtonJoint* const joint, int state);
+
+	NEWTON_API dFloat NewtonJointGetStiffness(const NewtonJoint* const joint);
+	NEWTON_API void NewtonJointSetStiffness(const NewtonJoint* const joint, dFloat state);
+
+	NEWTON_API void NewtonDestroyJoint(const NewtonWorld* const newtonWorld, const NewtonJoint* const joint);
+	NEWTON_API void NewtonJointSetDestructor(const NewtonJoint* const joint, NewtonConstraintDestructor destructor);
+
+	NEWTON_API int NewtonJointIsActive(const NewtonJoint* const joint);
+
+	// contact joint
+	NEWTON_API void* NewtonContactJointGetFirstContact(const NewtonJoint* const contactJoint);
+	NEWTON_API void* NewtonContactJointGetNextContact(const NewtonJoint* const contactJoint, void* const contact);
+
+	NEWTON_API int NewtonContactJointGetContactCount(const NewtonJoint* const contactJoint);
+	NEWTON_API void NewtonContactJointRemoveContact(const NewtonJoint* const contactJoint, void* const contact);
+
+	NEWTON_API dFloat NewtonContactJointGetClosestDistance(const NewtonJoint* const contactJoint);
+	NEWTON_API void NewtonContactJointResetSelftJointCollision(const NewtonJoint* const contactJoint);
+	NEWTON_API void NewtonContactJointResetIntraJointCollision(const NewtonJoint* const contactJoint);
+
+	NEWTON_API NewtonMaterial* NewtonContactGetMaterial(const void* const contact);
+
+	NEWTON_API NewtonCollision* NewtonContactGetCollision0(const void* const contact);
+	NEWTON_API NewtonCollision* NewtonContactGetCollision1(const void* const contact);
+
+	NEWTON_API void* NewtonContactGetCollisionID0(const void* const contact);
+	NEWTON_API void* NewtonContactGetCollisionID1(const void* const contact);
 
 	// user joints
 	NEWTON_API NewtonJoint* NewtonConstraintCreateUserJoint(const NewtonWorld* const newtonWorld, int maxDOF, NewtonUserBilateralCallback callback, const NewtonBody* const childBody, const NewtonBody* const parentBody);
