@@ -608,21 +608,6 @@ extern "C" {
 	// scene collision are static compound collision that can take polygonal static collisions
 	//
 	// **********************************************************************************************
-	NEWTON_API NewtonCollision* NewtonCreateSceneCollision (const NewtonWorld* const newtonWorld, int shapeID);
-
-	NEWTON_API void NewtonSceneCollisionBeginAddRemove (NewtonCollision* const sceneCollision);	
-	NEWTON_API void* NewtonSceneCollisionAddSubCollision (NewtonCollision* const sceneCollision, const NewtonCollision* const collision);	
-	NEWTON_API void NewtonSceneCollisionRemoveSubCollision (NewtonCollision* const compoundCollision, const void* const collisionNode);	
-	NEWTON_API void NewtonSceneCollisionRemoveSubCollisionByIndex (NewtonCollision* const sceneCollision, int nodeIndex);
-	NEWTON_API void NewtonSceneCollisionSetSubCollisionMatrix (NewtonCollision* const sceneCollision, const void* const collisionNode, const dFloat* const matrix);	
-	NEWTON_API void NewtonSceneCollisionEndAddRemove (NewtonCollision* const sceneCollision);	
-
-	NEWTON_API void* NewtonSceneCollisionGetFirstNode (NewtonCollision* const sceneCollision);
-	NEWTON_API void* NewtonSceneCollisionGetNextNode (NewtonCollision* const sceneCollision, const void* const collisionNode);
-
-	NEWTON_API void* NewtonSceneCollisionGetNodeByIndex (NewtonCollision* const sceneCollision, int index);
-	NEWTON_API int NewtonSceneCollisionGetNodeIndex (NewtonCollision* const sceneCollision, const void* const collisionNode);
-	NEWTON_API NewtonCollision* NewtonSceneCollisionGetCollisionFromNode (NewtonCollision* const sceneCollision, const void* const collisionNode);
 
 
 	//  ***********************************************************************************************************
@@ -652,7 +637,6 @@ extern "C" {
 	// Static collision shapes functions
 	//
 	// **********************************************************************************************
-	NEWTON_API NewtonCollision* NewtonCreateHeightFieldCollision (const NewtonWorld* const newtonWorld, int width, int height, int gridsDiagonals, int elevationdatType, const void* const elevationMap, const char* const attributeMap, dFloat verticalScale, dFloat horizontalScale_x, dFloat horizontalScale_z, int shapeID);
 	NEWTON_API void NewtonHeightFieldSetUserRayCastCallback (const NewtonCollision* const heightfieldCollision, NewtonHeightFieldRayCastCallback rayHitCallback);
 
 	NEWTON_API NewtonCollision* NewtonCreateTreeCollision (const NewtonWorld* const newtonWorld, int shapeID);
@@ -1272,6 +1256,7 @@ extern "C" {
 	NEWTON_API NewtonCollision* NewtonCreateChamferCylinder(const NewtonWorld* const newtonWorld, dFloat radius, dFloat height, int shapeID, const dFloat* const offsetMatrix);
 	NEWTON_API NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* const newtonWorld, int count, const dFloat* const vertexCloud, int strideInBytes, dFloat tolerance, int shapeID, const dFloat* const offsetMatrix);
 	NEWTON_API NewtonCollision* NewtonCreateConvexHullFromMesh(const NewtonWorld* const newtonWorld, const NewtonMesh* const mesh, dFloat tolerance, int shapeID);
+	NEWTON_API NewtonCollision* NewtonCreateHeightFieldCollision(const NewtonWorld* const newtonWorld, int width, int height, int gridsDiagonals, int elevationdatType, const void* const elevationMap, const char* const attributeMap, dFloat verticalScale, dFloat horizontalScale_x, dFloat horizontalScale_z, int shapeID);
 
 	NEWTON_API void NewtonCollisionSetMatrix(const NewtonCollision* const collision, const dFloat* const matrix);
 	NEWTON_API void NewtonCollisionGetMatrix(const NewtonCollision* const collision, dFloat* const matrix);
@@ -1279,9 +1264,22 @@ extern "C" {
 	NEWTON_API void NewtonDestroyCollision(const NewtonCollision* const collision);
 	NEWTON_API void NewtonCollisionSetUserData(const NewtonCollision* const collision, void* const userData);
 
-	// compund shape
+	// compound shape
 	NEWTON_API NewtonCollision* NewtonCreateCompoundCollision(const NewtonWorld* const newtonWorld, int shapeID);
 	//NEWTON_API void NewtonMaterialSetCompoundCollisionCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnCompoundSubCollisionAABBOverlap compoundAabbOverlap);
+
+	NEWTON_API NewtonCollision* NewtonCreateSceneCollision(const NewtonWorld* const newtonWorld, int shapeID);
+	NEWTON_API void NewtonSceneCollisionBeginAddRemove(NewtonCollision* const sceneCollision);
+	NEWTON_API void* NewtonSceneCollisionAddSubCollision(NewtonCollision* const sceneCollision, const NewtonCollision* const collision);
+	NEWTON_API void NewtonSceneCollisionRemoveSubCollision(NewtonCollision* const compoundCollision, const void* const collisionNode);
+	NEWTON_API void NewtonSceneCollisionRemoveSubCollisionByIndex(NewtonCollision* const sceneCollision, int nodeIndex);
+	NEWTON_API void NewtonSceneCollisionSetSubCollisionMatrix(NewtonCollision* const sceneCollision, const void* const collisionNode, const dFloat* const matrix);
+	NEWTON_API void NewtonSceneCollisionEndAddRemove(NewtonCollision* const sceneCollision);
+	NEWTON_API void* NewtonSceneCollisionGetFirstNode(NewtonCollision* const sceneCollision);
+	NEWTON_API void* NewtonSceneCollisionGetNextNode(NewtonCollision* const sceneCollision, const void* const collisionNode);
+	NEWTON_API void* NewtonSceneCollisionGetNodeByIndex(NewtonCollision* const sceneCollision, int index);
+	NEWTON_API int NewtonSceneCollisionGetNodeIndex(NewtonCollision* const sceneCollision, const void* const collisionNode);
+	NEWTON_API NewtonCollision* NewtonSceneCollisionGetCollisionFromNode(NewtonCollision* const sceneCollision, const void* const collisionNode);
 
 	// rigid bodies.
 	NEWTON_API NewtonBody* NewtonCreateDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix);

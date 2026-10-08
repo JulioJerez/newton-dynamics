@@ -214,11 +214,9 @@ ndSharedPtr<ndBody> BuildHeightFieldTerrain(ndDemoEntityManager* const scene, co
 	// create the height field collision and rigid body
 	ndShapeInstance heighfieldInstance(new ndShapeHeightfield(D_TERRAIN__WIDTH, D_TERRAIN__WIDTH,
 			ndShapeHeightfield::m_invertedDiagonals, D_TERRAIN_GRID_SIZE, D_TERRAIN_GRID_SIZE));
-	//ndShapeInstance heighfieldInstance(new ndShapeHeightfield(D_TERRAIN__WIDTH, D_TERRAIN__WIDTH,
-	//	ndShapeHeightfield::m_normalDiagonals, D_TERRAIN_GRID_SIZE, D_TERRAIN_GRID_SIZE));
 	
-	ndShapeHeightfield* const heighfield = heighfieldInstance.GetShape()->GetAsShapeHeightfield();
-	ndArray<ndReal>& heightMap = heighfield->GetElevationMap();
+	ndShapeHeightfield* const heightfieldShape = heighfieldInstance.GetShape()->GetAsShapeHeightfield();
+	ndArray<ndReal>& heightMap = heightfieldShape->GetElevationMap();
 	ndAssert(heightMap.GetCount() == heightfield.GetCount());
 	for (ndInt32 i = 0; i < heightfield.GetCount(); ++i)
 	{

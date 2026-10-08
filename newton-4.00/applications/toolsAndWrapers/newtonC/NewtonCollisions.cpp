@@ -426,3 +426,188 @@ NewtonCollision* NewtonCreateConvexHullFromMesh(const NewtonWorld* const, const 
 
 	return reinterpret_cast<NewtonCollision*>(shape);
 }
+
+
+/*!
+  Create a height field collision geometry.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param width the number of sample points in the x direction (fixme)
+  @param height the number of sample points in the y direction (fixme)
+  @param gridsDiagonals fixme
+  @param elevationdatType fixme
+  @param elevationMap array holding elevation data of size = width*height (fixme)
+  @param attributeMap array holding attribute data of size = width*height (fixme)
+  @param verticalScale scale of the elevation (fixme)
+  @param horizontalScale scale in the xy direction. (fixme)
+  @param shapeID fixme
+
+  @return Pointer to the collision.
+
+  NewtonCollision* NewtonCreateHeightFieldCollision(const NewtonWorld* const newtonWorld, int width, int height, int cellsDiagonals,
+  const dFloat* const elevationMap, const char* const atributeMap,
+  dFloat horizontalScale, int shapeID)
+*/
+NewtonCollision* NewtonCreateHeightFieldCollision(const NewtonWorld* const newtonWorld, int width, int height, int gridsDiagonals, int elevationdatType,
+	const void* const elevationMap, const char* const attributeMap, dFloat verticalScale, dFloat horizontalScale_x, dFloat horizontalScale_z, int shapeID)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//dgCollisionInstance* const collision = world->CreateHeightField(width, height, gridsDiagonals, elevationdatType, elevationMap, (const dgInt8* const)attributeMap, verticalScale, horizontalScale_x, horizontalScale_z);
+	//collision->SetUserDataID(dgUnsigned32(shapeID));
+	//return (NewtonCollision*)collision;
+	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(new ndShapeInstance(new ndShapeHeightfield(width, height, ndShapeHeightfield::ndGridConstruction(gridsDiagonals), horizontalScale_x, horizontalScale_z)));
+	ndShapeInstance* const instance = **shape;
+	ndShapeMaterial material = instance->GetMaterial();
+	material.m_userId = shapeID;
+
+	ndShapeHeightfield* const heighfield = instance->GetShape()->GetAsShapeHeightfield();
+	ndArray<ndReal>& heightMap = heighfield->GetElevationMap();
+	ndArray<ndInt8>& materialMap = heighfield->GetAttributeMap();
+
+	ndAssert(0);
+	if (elevationdatType)
+	{
+		const ndReal* const elevations = reinterpret_cast<const ndReal*>(elevationMap);
+		for (ndInt32 i = 0; i < heightMap.GetCount(); ++i)
+		{
+			ndFloat32 high = elevations[i];
+			heightMap[i] = ndReal(high);
+			materialMap[i] = attributeMap[i];
+		}
+	}
+	else
+	{
+		ndAssert(0);
+	}
+	heighfield->UpdateElevationMapAabb();
+
+
+	return reinterpret_cast<NewtonCollision*>(shape);
+}
+
+
+
+/*!
+  Create a height field collision geometry.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param shapeID fixme
+
+  @return Pointer to the collision.
+
+*/
+NewtonCollision* NewtonCreateSceneCollision(const NewtonWorld* const newtonWorld, int shapeID)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//
+	//dgCollisionInstance* const collision = world->CreateScene();
+	//
+	//collision->SetUserDataID(dgUnsigned32(shapeID));
+	//return (NewtonCollision*)collision;
+	ndAssert(0);
+	return nullptr;
+}
+
+NewtonCollision* NewtonSceneCollisionGetCollisionFromNode(NewtonCollision* const sceneCollision, const void* const node)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndAssert(0);
+	//return NewtonCompoundCollisionGetCollisionFromNode(sceneCollision, node);
+	return nullptr;
+}
+
+void* NewtonSceneCollisionGetFirstNode(NewtonCollision* const sceneCollision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//return NewtonCompoundCollisionGetFirstNode(sceneCollision);
+	ndAssert(0);
+	return nullptr;
+}
+
+void* NewtonSceneCollisionGetNextNode(NewtonCollision* const sceneCollision, const void* const node)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//return NewtonCompoundCollisionGetNextNode(sceneCollision, node);
+	ndAssert(0);
+	return nullptr;
+}
+
+void NewtonSceneCollisionBeginAddRemove(NewtonCollision* const sceneCollision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//NewtonCompoundCollisionBeginAddRemove(sceneCollision);
+	ndAssert(0);
+}
+
+void NewtonSceneCollisionEndAddRemove(NewtonCollision* const sceneCollision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//NewtonCompoundCollisionEndAddRemove(sceneCollision);
+	ndAssert(0);
+}
+
+void NewtonSceneCollisionSetSubCollisionMatrix(NewtonCollision* const sceneCollision, const void* const collisionNode, const dFloat* const matrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//NewtonCompoundCollisionSetSubCollisionMatrix(sceneCollision, collisionNode, matrix);
+	ndAssert(0);
+}
+
+void* NewtonSceneCollisionAddSubCollision(NewtonCollision* const sceneCollision, const NewtonCollision* const collision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+
+	//dgCollisionInstance* const sceneInstance = (dgCollisionInstance*)sceneCollision;
+	//dgCollisionInstance* const sceneInstanceChild = (dgCollisionInstance*)collision;
+	//if (sceneInstance->IsType(dgCollision::dgCollisionScene_RTTI) && !sceneInstanceChild->IsType(dgCollision::dgCollisionCompound_RTTI)) {
+	//	dgCollisionScene* const collision1 = (dgCollisionScene*)sceneInstance->GetChildShape();
+	//	return collision1->AddCollision(sceneInstanceChild);
+	//}
+	//return NULL;
+	ndAssert(0);
+	return nullptr;
+}
+
+void NewtonSceneCollisionRemoveSubCollision(NewtonCollision* const sceneCollision, const void* const collisionNode)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgCollisionInstance* const sceneInstance = (dgCollisionInstance*)sceneCollision;
+	//if (sceneInstance->IsType(dgCollision::dgCollisionScene_RTTI)) {
+	//	dgCollisionScene* const collision = (dgCollisionScene*)sceneInstance->GetChildShape();
+	//	dgCollisionInstance* const childCollision = collision->GetCollisionFromNode((dgCollisionCompound::dgTreeArray::dgTreeNode*)collisionNode);
+	//	if (childCollision) {
+	//		collision->RemoveCollision((dgCollisionCompound::dgTreeArray::dgTreeNode*)collisionNode);
+	//	}
+	//}
+	ndAssert(0);
+}
+
+void NewtonSceneCollisionRemoveSubCollisionByIndex(NewtonCollision* const sceneCollision, int nodeIndex)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgCollisionInstance* const instance = (dgCollisionInstance*)sceneCollision;
+	//if (instance->IsType(dgCollision::dgCollisionCompound_RTTI)) {
+	//	dgCollisionCompound* const collision = (dgCollisionCompound*)instance->GetChildShape();
+	//	NewtonSceneCollisionRemoveSubCollision(sceneCollision, collision->FindNodeByIndex(nodeIndex));
+	//}
+	ndAssert(0);
+}
+
+void* NewtonSceneCollisionGetNodeByIndex(NewtonCollision* const sceneCollision, int index)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//return NewtonCompoundCollisionGetNodeByIndex(sceneCollision, index);
+	ndAssert(0);
+	return nullptr;
+}
+
+int NewtonSceneCollisionGetNodeIndex(NewtonCollision* const sceneCollision, const void* const collisionNode)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//return NewtonCompoundCollisionGetNodeIndex(sceneCollision, collisionNode);
+	ndAssert(0);
+	return 0;
+
+}
