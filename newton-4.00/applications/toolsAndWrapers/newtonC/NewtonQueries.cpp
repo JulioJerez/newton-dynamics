@@ -390,3 +390,41 @@ NewtonBody* NewtonWorldGetNextBody(const NewtonWorld* const newtonWorld, const N
 	ndAssert(0);
 	return 0;
 }
+
+/*!
+  Get the first Material pair from the material array.
+
+  @param *newtonWorld Pointer to the Newton world.
+
+  @return the first material.
+
+  See also: ::NewtonWorldGetNextMaterial
+*/
+NewtonMaterial* NewtonWorldGetFirstMaterial(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//return (NewtonMaterial*)world->GetFirstMaterial();
+	ndAssert(0);
+	return 0;
+}
+
+/*!
+  Get the next Material pair from the material array.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param *material corrent material
+
+  @return next material in material array or NULL if material is the last material in the list.
+
+  See also: ::NewtonWorldGetFirstMaterial
+*/
+NewtonMaterial* NewtonWorldGetNextMaterial(const NewtonWorld* const newtonWorld, const NewtonMaterial* const material)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//
+	//return (NewtonMaterial*)world->GetNextMaterial((dgContactMaterial*)material);
+	ndAssert(0);
+	return 0;
+}
