@@ -429,72 +429,6 @@ extern "C" {
 	typedef int (*NewtonReportProgress) (dFloat normalizedProgressPercent, void* const userData);
 
 	// **********************************************************************************************
-	//
-	// world control functions
-	//
-	// **********************************************************************************************
-	NEWTON_API void NewtonSerializeToFile (const NewtonWorld* const newtonWorld, const char* const filename, NewtonOnBodySerializationCallback bodyCallback, void* const bodyUserData);
-	NEWTON_API void NewtonDeserializeFromFile (const NewtonWorld* const newtonWorld, const char* const filename, NewtonOnBodyDeserializationCallback bodyCallback, void* const bodyUserData);
-
-	NEWTON_API void NewtonSerializeScene(const NewtonWorld* const newtonWorld, NewtonOnBodySerializationCallback bodyCallback, void* const bodyUserData,
-									   	 NewtonSerializeCallback serializeCallback, void* const serializeHandle);
-	NEWTON_API void NewtonDeserializeScene(const NewtonWorld* const newtonWorld, NewtonOnBodyDeserializationCallback bodyCallback, void* const bodyUserData,
-										   NewtonDeserializeCallback serializeCallback, void* const serializeHandle);
-
-	NEWTON_API NewtonBody* NewtonFindSerializedBody(const NewtonWorld* const newtonWorld, int bodySerializedID);
-	NEWTON_API void NewtonSetJointSerializationCallbacks (const NewtonWorld* const newtonWorld, NewtonOnJointSerializationCallback serializeJoint, NewtonOnJointDeserializationCallback deserializeJoint);
-	NEWTON_API void NewtonGetJointSerializationCallbacks (const NewtonWorld* const newtonWorld, NewtonOnJointSerializationCallback* const serializeJoint, NewtonOnJointDeserializationCallback* const deserializeJoint);
-
-	NEWTON_API void NewtonWorldSetDestructorCallback (const NewtonWorld* const newtonWorld, NewtonWorldDestructorCallback destructor);
-	NEWTON_API NewtonWorldDestructorCallback NewtonWorldGetDestructorCallback (const NewtonWorld* const newtonWorld);
-	NEWTON_API void NewtonWorldSetCollisionConstructorDestructorCallback (const NewtonWorld* const newtonWorld, NewtonCollisionCopyConstructionCallback constructor, NewtonCollisionDestructorCallback destructor);
-
-	NEWTON_API void NewtonWorldSetCreateDestroyContactCallback(const NewtonWorld* const newtonWorld, NewtonCreateContactCallback createContact, NewtonDestroyContactCallback destroyContact);
-
-
-	//  ***********************************************************************************************************
-	//
-	//	User Static mesh collision interface
-	//
-	// ***********************************************************************************************************
-	NEWTON_API NewtonCollision* NewtonCreateUserMeshCollision (const NewtonWorld* const newtonWorld, const dFloat* const minBox, 
-		const dFloat* const maxBox, void* const userData, NewtonUserMeshCollisionCollideCallback collideCallback, 
-		NewtonUserMeshCollisionRayHitCallback rayHitCallback, NewtonUserMeshCollisionDestroyCallback destroyCallback,
-		NewtonUserMeshCollisionGetCollisionInfo getInfoCallback, NewtonUserMeshCollisionAABBTest getLocalAABBCallback, 
-		NewtonUserMeshCollisionGetFacesInAABB facesInAABBCallback, NewtonOnUserCollisionSerializationCallback serializeCallback, int shapeID);
-
-	NEWTON_API int NewtonUserMeshCollisionContinuousOverlapTest (const NewtonUserMeshCollisionCollideDesc* const collideDescData, const void* const continueCollisionHandle, const dFloat* const minAabb, const dFloat* const maxAabb);
-	
-	// **********************************************************************************************
-	//
-	// Static collision shapes functions
-	//
-	// **********************************************************************************************
-	NEWTON_API void NewtonHeightFieldSetUserRayCastCallback (const NewtonCollision* const heightfieldCollision, NewtonHeightFieldRayCastCallback rayHitCallback);
-
-	NEWTON_API NewtonCollision* NewtonCreateTreeCollision (const NewtonWorld* const newtonWorld, int shapeID);
-	NEWTON_API void NewtonTreeCollisionSetUserRayCastCallback (const NewtonCollision* const treeCollision, NewtonCollisionTreeRayCastCallback rayHitCallback);
-
-	NEWTON_API void NewtonTreeCollisionBeginBuild (const NewtonCollision* const treeCollision);
-	NEWTON_API void NewtonTreeCollisionAddFace (const NewtonCollision* const treeCollision, int vertexCount, const dFloat* const vertexPtr, int strideInBytes, int faceAttribute);
-	NEWTON_API void NewtonTreeCollisionEndBuild (const NewtonCollision* const treeCollision, int optimize);
-
-	NEWTON_API int NewtonTreeCollisionGetFaceAttribute (const NewtonCollision* const treeCollision, const int* const faceIndexArray, int indexCount); 
-	NEWTON_API void NewtonTreeCollisionSetFaceAttribute (const NewtonCollision* const treeCollision, const int* const faceIndexArray, int indexCount, int attribute);
-
-	NEWTON_API void NewtonTreeCollisionForEachFace (const NewtonCollision* const treeCollision, NewtonTreeCollisionFaceCallback forEachFaceCallback, void* const context); 
-
-	NEWTON_API int NewtonTreeCollisionGetVertexListTriangleListInAABB (const NewtonCollision* const treeCollision, const dFloat* const p0, const dFloat* const p1, const dFloat** const vertexArray, int* const vertexCount, int* const vertexStrideInBytes, const int* const indexList, int maxIndexCount, const int* const faceAttribute); 
-
-	NEWTON_API void NewtonStaticCollisionSetDebugCallback (const NewtonCollision* const staticCollision, NewtonTreeCollisionCallback userCallback);
-
-	// **********************************************************************************************
-	//
-	// General purpose collision library functions
-	//
-	// **********************************************************************************************
-	
-	// **********************************************************************************************
 	// 
 	// collision aggregates, are a collision node on eh broad phase the serve as the root nod for a collection of rigid bodies
 	// that shared the property of being in close proximity all the time, they are similar to compound collision by the group bodies instead of collision instances
@@ -511,15 +445,6 @@ extern "C" {
 	NEWTON_API int NewtonCollisionAggregateGetSelfCollision (void* const aggregate);
 	NEWTON_API void NewtonCollisionAggregateSetSelfCollision (void* const aggregate, int state);
 	
-	// **********************************************************************************************
-	//
-	// transforms utility functions
-	//
-	// **********************************************************************************************
-	NEWTON_API void NewtonSetEulerAngle (const dFloat* const eulersAngles, dFloat* const matrix);
-	NEWTON_API void NewtonGetEulerAngle (const dFloat* const matrix, dFloat* const eulersAngles0, dFloat* const eulersAngles1);
-	NEWTON_API dFloat NewtonCalculateSpringDamperAcceleration (dFloat dt, dFloat ks, dFloat x, dFloat kd, dFloat s);
-
 	// **********************************************************************************************
 	//
 	// particle system interface (soft bodies, individual, pressure bodies and cloth)   
@@ -669,6 +594,11 @@ extern "C" {
 	NEWTON_API int NewtonWorldGetVersion();
 	NEWTON_API int NewtonWorldFloatSize();
 
+	NEWTON_API void NewtonSetEulerAngle(const dFloat* const eulersAngles, dFloat* const matrix);
+	NEWTON_API void NewtonGetEulerAngle(const dFloat* const matrix, dFloat* const eulersAngles0, dFloat* const eulersAngles1);
+	NEWTON_API dFloat NewtonCalculateSpringDamperAcceleration(dFloat dt, dFloat ks, dFloat x, dFloat kd, dFloat s);
+
+
 	// world interface
 	NEWTON_API NewtonWorld* NewtonCreate();
 	NEWTON_API void NewtonDestroy(const NewtonWorld* const newtonWorld);
@@ -712,6 +642,24 @@ extern "C" {
 
 	NEWTON_API void NewtonSyncThreadJobs(const NewtonWorld* const newtonWorld);
 	NEWTON_API void NewtonWaitForUpdateToFinish(const NewtonWorld* const newtonWorld);
+
+	NEWTON_API void NewtonSerializeToFile(const NewtonWorld* const newtonWorld, const char* const filename, NewtonOnBodySerializationCallback bodyCallback, void* const bodyUserData);
+	NEWTON_API void NewtonDeserializeFromFile(const NewtonWorld* const newtonWorld, const char* const filename, NewtonOnBodyDeserializationCallback bodyCallback, void* const bodyUserData);
+
+	NEWTON_API void NewtonSerializeScene(const NewtonWorld* const newtonWorld, NewtonOnBodySerializationCallback bodyCallback, void* const bodyUserData,
+		NewtonSerializeCallback serializeCallback, void* const serializeHandle);
+	NEWTON_API void NewtonDeserializeScene(const NewtonWorld* const newtonWorld, NewtonOnBodyDeserializationCallback bodyCallback, void* const bodyUserData,
+		NewtonDeserializeCallback serializeCallback, void* const serializeHandle);
+
+	NEWTON_API NewtonBody* NewtonFindSerializedBody(const NewtonWorld* const newtonWorld, int bodySerializedID);
+	NEWTON_API void NewtonSetJointSerializationCallbacks(const NewtonWorld* const newtonWorld, NewtonOnJointSerializationCallback serializeJoint, NewtonOnJointDeserializationCallback deserializeJoint);
+	NEWTON_API void NewtonGetJointSerializationCallbacks(const NewtonWorld* const newtonWorld, NewtonOnJointSerializationCallback* const serializeJoint, NewtonOnJointDeserializationCallback* const deserializeJoint);
+
+	NEWTON_API void NewtonWorldSetDestructorCallback(const NewtonWorld* const newtonWorld, NewtonWorldDestructorCallback destructor);
+	NEWTON_API NewtonWorldDestructorCallback NewtonWorldGetDestructorCallback(const NewtonWorld* const newtonWorld);
+	NEWTON_API void NewtonWorldSetCollisionConstructorDestructorCallback(const NewtonWorld* const newtonWorld, NewtonCollisionCopyConstructionCallback constructor, NewtonCollisionDestructorCallback destructor);
+
+	NEWTON_API void NewtonWorldSetCreateDestroyContactCallback(const NewtonWorld* const newtonWorld, NewtonCreateContactCallback createContact, NewtonDestroyContactCallback destroyContact);
 
 	// world listeners 
 	NEWTON_API void* NewtonWorldAddListener(const NewtonWorld* const newtonWorld, const char* const nameId, void* const listenerUserData);
@@ -986,7 +934,6 @@ extern "C" {
 	NEWTON_API NewtonCollision* NewtonCreateChamferCylinder(const NewtonWorld* const newtonWorld, dFloat radius, dFloat height, int shapeID, const dFloat* const offsetMatrix);
 	NEWTON_API NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* const newtonWorld, int count, const dFloat* const vertexCloud, int strideInBytes, dFloat tolerance, int shapeID, const dFloat* const offsetMatrix);
 	NEWTON_API NewtonCollision* NewtonCreateConvexHullFromMesh(const NewtonWorld* const newtonWorld, const NewtonMesh* const mesh, dFloat tolerance, int shapeID);
-	NEWTON_API NewtonCollision* NewtonCreateHeightFieldCollision(const NewtonWorld* const newtonWorld, int width, int height, int gridsDiagonals, int elevationdatType, const void* const elevationMap, const char* const attributeMap, dFloat verticalScale, dFloat horizontalScale_x, dFloat horizontalScale_z, int shapeID);
 
 	NEWTON_API NewtonCollision* NewtonCreateCollisionFromSerialization(const NewtonWorld* const newtonWorld, NewtonDeserializeCallback deserializeFunction, void* const serializeHandle);
 	NEWTON_API void NewtonCollisionSerialize(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, NewtonSerializeCallback serializeFunction, void* const serializeHandle);
@@ -997,6 +944,33 @@ extern "C" {
 
 	NEWTON_API void NewtonDestroyCollision(const NewtonCollision* const collision);
 	NEWTON_API void NewtonCollisionSetUserData(const NewtonCollision* const collision, void* const userData);
+
+	// heightfield 
+	NEWTON_API NewtonCollision* NewtonCreateHeightFieldCollision(const NewtonWorld* const newtonWorld, int width, int height, int gridsDiagonals, int elevationdatType, const void* const elevationMap, const char* const attributeMap, dFloat verticalScale, dFloat horizontalScale_x, dFloat horizontalScale_z, int shapeID);
+	NEWTON_API void NewtonHeightFieldSetUserRayCastCallback(const NewtonCollision* const heightfieldCollision, NewtonHeightFieldRayCastCallback rayHitCallback);
+
+	// static collisions
+	NEWTON_API NewtonCollision* NewtonCreateTreeCollision(const NewtonWorld* const newtonWorld, int shapeID);
+	NEWTON_API NewtonCollision* NewtonCreateTreeCollisionFromMesh(const NewtonWorld* const newtonWorld, const NewtonMesh* const mesh, int shapeID);
+	NEWTON_API void NewtonTreeCollisionSetUserRayCastCallback(const NewtonCollision* const treeCollision, NewtonCollisionTreeRayCastCallback rayHitCallback);
+	NEWTON_API void NewtonTreeCollisionBeginBuild(const NewtonCollision* const treeCollision);
+	NEWTON_API void NewtonTreeCollisionAddFace(const NewtonCollision* const treeCollision, int vertexCount, const dFloat* const vertexPtr, int strideInBytes, int faceAttribute);
+	NEWTON_API void NewtonTreeCollisionEndBuild(const NewtonCollision* const treeCollision, int optimize);
+	NEWTON_API int NewtonTreeCollisionGetFaceAttribute(const NewtonCollision* const treeCollision, const int* const faceIndexArray, int indexCount);
+	NEWTON_API void NewtonTreeCollisionSetFaceAttribute(const NewtonCollision* const treeCollision, const int* const faceIndexArray, int indexCount, int attribute);
+	NEWTON_API void NewtonTreeCollisionForEachFace(const NewtonCollision* const treeCollision, NewtonTreeCollisionFaceCallback forEachFaceCallback, void* const context);
+	NEWTON_API int NewtonTreeCollisionGetVertexListTriangleListInAABB(const NewtonCollision* const treeCollision, const dFloat* const p0, const dFloat* const p1, const dFloat** const vertexArray, int* const vertexCount, int* const vertexStrideInBytes, const int* const indexList, int maxIndexCount, const int* const faceAttribute);
+
+	NEWTON_API void NewtonStaticCollisionSetDebugCallback(const NewtonCollision* const staticCollision, NewtonTreeCollisionCallback userCallback);
+
+	// use mesh collisions
+	NEWTON_API NewtonCollision* NewtonCreateUserMeshCollision(const NewtonWorld* const newtonWorld, const dFloat* const minBox,
+		const dFloat* const maxBox, void* const userData, NewtonUserMeshCollisionCollideCallback collideCallback,
+		NewtonUserMeshCollisionRayHitCallback rayHitCallback, NewtonUserMeshCollisionDestroyCallback destroyCallback,
+		NewtonUserMeshCollisionGetCollisionInfo getInfoCallback, NewtonUserMeshCollisionAABBTest getLocalAABBCallback,
+		NewtonUserMeshCollisionGetFacesInAABB facesInAABBCallback, NewtonOnUserCollisionSerializationCallback serializeCallback, int shapeID);
+
+	NEWTON_API int NewtonUserMeshCollisionContinuousOverlapTest(const NewtonUserMeshCollisionCollideDesc* const collideDescData, const void* const continueCollisionHandle, const dFloat* const minAabb, const dFloat* const maxAabb);
 
 	// compound shape
 	NEWTON_API NewtonCollision* NewtonCreateCompoundCollision(const NewtonWorld* const newtonWorld, int shapeID);
@@ -1014,7 +988,6 @@ extern "C" {
 	NEWTON_API int NewtonCompoundCollisionGetNodeIndex(NewtonCollision* const compoundCollision, const void* const collisionNode);
 	NEWTON_API NewtonCollision* NewtonCompoundCollisionGetCollisionFromNode(NewtonCollision* const compoundCollision, const void* const collisionNode);
 
-	NEWTON_API NewtonCollision* NewtonCreateTreeCollisionFromMesh(const NewtonWorld* const newtonWorld, const NewtonMesh* const mesh, int shapeID);
 	NEWTON_API void NewtonCompoundCollisionBeginAddRemove(NewtonCollision* const compoundCollision);
 	NEWTON_API void* NewtonCompoundCollisionAddSubCollision(NewtonCollision* const compoundCollision, const NewtonCollision* const convexCollision);
 	NEWTON_API void NewtonCompoundCollisionEndAddRemove(NewtonCollision* const compoundCollision);

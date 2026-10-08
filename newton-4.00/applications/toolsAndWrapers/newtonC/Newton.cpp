@@ -97,112 +97,6 @@ World interface
 @{
 */
 
-void NewtonSetJointSerializationCallbacks (const NewtonWorld* const newtonWorld, NewtonOnJointSerializationCallback serializeJoint, NewtonOnJointDeserializationCallback deserializeJoint)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	world->SetJointSerializationCallbacks (dgWorld::OnJointSerializationCallback(serializeJoint), dgWorld::OnJointDeserializationCallback(deserializeJoint));
-}
-
-void NewtonGetJointSerializationCallbacks (const NewtonWorld* const newtonWorld, NewtonOnJointSerializationCallback* const serializeJoint, NewtonOnJointDeserializationCallback* const deserializeJoint)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	world->GetJointSerializationCallbacks ((dgWorld::OnJointSerializationCallback*)serializeJoint, (dgWorld::OnJointDeserializationCallback*)deserializeJoint);
-}
-
-
-void NewtonSerializeScene(const NewtonWorld* const newtonWorld, NewtonOnBodySerializationCallback bodyCallback, void* const bodyUserData,
-	NewtonSerializeCallback serializeCallback, void* const serializeHandle)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	world->SerializeScene(bodyUserData, dgWorld::OnBodySerialize(bodyCallback), (dgSerialize) serializeCallback, serializeHandle);
-}
-
-void NewtonDeserializeScene(const NewtonWorld* const newtonWorld, NewtonOnBodyDeserializationCallback bodyCallback, void* const bodyUserData,
-							NewtonDeserializeCallback deserializeCallback, void* const serializeHandle)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	world->DeserializeScene(bodyUserData, (dgWorld::OnBodyDeserialize)bodyCallback, (dgDeserialize) deserializeCallback, serializeHandle);
-}
-
-
-void NewtonSerializeToFile (const NewtonWorld* const newtonWorld, const char* const filename, NewtonOnBodySerializationCallback bodyCallback, void* const bodyUserData)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	FILE* const file = fopen(filename, "wb");
-	if (file) {
-		NewtonSerializeScene(newtonWorld, bodyCallback, bodyUserData, dgWorld::OnSerializeToFile, file);
-		fclose (file);
-	}
-}
-
-void NewtonDeserializeFromFile (const NewtonWorld* const newtonWorld, const char* const filename, NewtonOnBodyDeserializationCallback bodyCallback, void* const bodyUserData)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	FILE* const file = fopen(filename, "rb");
-	if (file) {
-		NewtonDeserializeScene(newtonWorld, bodyCallback, bodyUserData, dgWorld::OnDeserializeFromFile, file);
-		fclose (file);
-	}
-}
-
-NewtonBody* NewtonFindSerializedBody(const NewtonWorld* const newtonWorld, int bodySerializedID)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	dgAssert (0);
-	return (NewtonBody*) world->FindBodyFromSerializedID(bodySerializedID);
-}
-
-/*!
-  Specify a custom destructor callback for destroying the world.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param destructor function poiter callback
-
-  The application may specify its own world destructor.
-
-  See also: ::NewtonWorldSetDestructorCallback, ::NewtonWorldGetUserData
-*/
-void NewtonWorldSetDestructorCallback(const NewtonWorld* const newtonWorld, NewtonWorldDestructorCallback destructor)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	world->m_destructor =  destructor;
-}
-
-
-/*!
-  Return pointer to destructor call back function.
-
-  @param *newtonWorld Pointer to the Newton world.
-
-  See also: ::NewtonWorldGetUserData, ::NewtonWorldSetDestructorCallback
-*/
-NewtonWorldDestructorCallback NewtonWorldGetDestructorCallback(const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	return world->m_destructor;
-}
-
-void NewtonWorldSetCreateDestroyContactCallback(const NewtonWorld* const newtonWorld, NewtonCreateContactCallback createContact, NewtonDestroyContactCallback destroyContact)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	world->SetCreateDestroyContactCallback((dgWorld::OnCreateContact) createContact, (dgWorld::OnDestroyContact) destroyContact);
-}
-
-void NewtonWorldSetCollisionConstructorDestructorCallback (const NewtonWorld* const newtonWorld, NewtonCollisionCopyConstructionCallback constructor, NewtonCollisionDestructorCallback destructor)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *) newtonWorld;
-	world->SetCollisionInstanceConstructorDestructor((dgWorld::OnCollisionInstanceDuplicate) constructor, (dgWorld::OnCollisionInstanceDestroy)destructor);
-}
-
 /*! @} */ // end of group World
 
 /*! @defgroup GroupID GroupID
@@ -238,377 +132,6 @@ Complex collision primitives interface
 */
 
 
-/*!
-  Create a complex collision geometry to be controlled by the application.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param *minBox pointer to an array of at least three floats to hold minimum value for the box relative to the collision.
-  @param *maxBox pointer to an array of at least three floats to hold maximum value for the box relative to the collision.
-  @param *userData pointer to user data to be used as context for event callback.
-  @param collideCallback pointer to an event function for providing Newton with the polygon inside a given box region.
-  @param rayHitCallback pointer to an event function for providing Newton with ray intersection information.
-  @param destroyCallback pointer to an event function for destroying any data allocated for use by the application.
-  @param getInfoCallback fixme
-  @param getAABBOverlapTestCallback fixme
-  @param facesInAABBCallback fixme
-  @param serializeCallback fixme
-  @param shapeID fixme
-
-  @return Pointer to the user collision.
-
-  *UserMeshCollision* provides the application with a method of overloading the built-in collision system for background objects.
-  UserMeshCollision can be used for implementing collisions with height maps, collisions with BSP, and any other collision structure the application
-  supports and wishes to preserve.
-  However, *UserMeshCollision* can not take advantage of the efficient and sophisticated algorithms and data structures of the
-  built-in *TreeCollision*. We suggest you experiment with both methods and use the method best suited to your situation.
-
-  When a *UserMeshCollision* is assigned to a body, the mass of the body is ignored in all dynamics calculations.
-  This make the body behave as a static body.
-
-*/
-NewtonCollision* NewtonCreateUserMeshCollision(
-	const NewtonWorld* const newtonWorld, 
-	const dFloat* const minBox, 
-	const dFloat* const maxBox, 
-	void* const userData,
-	NewtonUserMeshCollisionCollideCallback collideCallback, 
-	NewtonUserMeshCollisionRayHitCallback rayHitCallback,
-	NewtonUserMeshCollisionDestroyCallback destroyCallback,
-	NewtonUserMeshCollisionGetCollisionInfo getInfoCallback, 
-	NewtonUserMeshCollisionAABBTest getAABBOverlapTestCallback,
-	NewtonUserMeshCollisionGetFacesInAABB facesInAABBCallback,
-	NewtonOnUserCollisionSerializationCallback serializeCallback,
-	int shapeID)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgVector p0 (minBox[0], minBox[1], minBox[2], dgFloat32(1.0f)); 
-	dgVector p1 (maxBox[0], maxBox[1], maxBox[2], dgFloat32(1.0f)); 
-
-	Newton* const world = (Newton *)newtonWorld;
-
-	dgUserMeshCreation data;
-	data.m_userData = userData; 
-	data.m_collideCallback = (dgCollisionUserMesh::OnUserMeshCollideCallback) collideCallback; 
-	data.m_rayHitCallback = (dgCollisionUserMesh::OnUserMeshRayHitCallback) rayHitCallback; 
-	data.m_destroyCallback = (dgCollisionUserMesh::OnUserMeshDestroyCallback) destroyCallback;
-	data.m_getInfoCallback = (dgCollisionUserMesh::OnUserMeshCollisionInfo)getInfoCallback;
-	data.m_getAABBOvelapTestCallback = (dgCollisionUserMesh::OnUserMeshAABBOverlapTest) getAABBOverlapTestCallback;
-	data.m_faceInAABBCallback = (dgCollisionUserMesh::OnUserMeshFacesInAABB) facesInAABBCallback;
-	data.m_serializeCallback = (dgCollisionUserMesh::OnUserMeshSerialize) serializeCallback;
-	
-
-	dgCollisionInstance* const collision = world->CreateStaticUserMesh (p0, p1, data);
-	collision->SetUserDataID(dgUnsigned32 (shapeID));
-	return (NewtonCollision*)collision; 
-}
-
-
-
-int NewtonUserMeshCollisionContinuousOverlapTest (const NewtonUserMeshCollisionCollideDesc* const collideDescData, const void* const rayHandle, const dFloat* const minAabb, const dFloat* const maxAabb)
-{
-	const dgFastRayTest* const ray = (dgFastRayTest*) rayHandle;
-
-	dgVector p0 (minAabb);
-	dgVector p1 (maxAabb);
-
-	dgVector q0 (collideDescData->m_boxP0);
-	dgVector q1 (collideDescData->m_boxP1);
-
-	p0 = p0 & dgVector::m_triplexMask;
-	p1 = p1 & dgVector::m_triplexMask;
-	q0 = q0 & dgVector::m_triplexMask;
-	q1 = q1 & dgVector::m_triplexMask;
-
-	dgVector box0 (p0 - q1);
-	dgVector box1 (p1 - q0);
-
-	dgFloat32 dist = ray->BoxIntersect(box0, box1);
-	return (dist < dgFloat32 (1.0f)) ? 1 : 0;
-}
-
-
-
-/*!
-  Create an empty complex collision geometry tree.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param shapeID fixme
-
-  @return Pointer to the collision tree.
-
-  *TreeCollision* is the preferred method within Newton for collision with polygonal meshes of arbitrary complexity.
-  The mesh must be made of flat non-intersecting polygons, but they do not explicitly need to be triangles.
-  *TreeCollision* can be serialized by the application to/from an arbitrary storage device.
-
-  When a *TreeCollision* is assigned to a body the mass of the body is ignored in all dynamics calculations.
-  This makes the body behave as a static body.
-
-  See also: ::NewtonTreeCollisionBeginBuild, ::NewtonTreeCollisionAddFace, ::NewtonTreeCollisionEndBuild, ::NewtonStaticCollisionSetDebugCallback, ::NewtonTreeCollisionGetFaceAttribute, ::NewtonTreeCollisionSetFaceAttribute
-*/
-NewtonCollision* NewtonCreateTreeCollision(const NewtonWorld* const newtonWorld, int shapeID)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	dgCollisionInstance* const collision =  world->CreateBVH ();
-	collision->SetUserDataID(dgUnsigned32 (shapeID));
-	return (NewtonCollision*) collision;
-}
-
-
-/*!
-  set a function call back to be call during the face query of a collision tree.
-
-  @param *staticCollision is the pointer to the static collision (a CollisionTree of a HeightFieldCollision)
-  @param *userCallback pointer to an event function to call before Newton evaluates the polygons colliding with a body. This parameter can be NULL.
-
-  because debug display display report all the faces of a collision primitive, it could get slow on very large static collision.
-  this function can be used for debugging purpose to just report only faces intersection the collision AABB of the collision shape colliding with the polyginal mesh collision.
-
-  this function is not recommended to use for production code only for debug purpose.
-
-  See also: ::NewtonTreeCollisionGetFaceAttribute, ::NewtonTreeCollisionSetFaceAttribute
-*/
-void NewtonStaticCollisionSetDebugCallback(const NewtonCollision* const staticCollision, NewtonTreeCollisionCallback userCallback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const collision = (dgCollisionInstance*)staticCollision;
-	if (collision->IsType (dgCollision::dgCollisionMesh_RTTI)) {
-		dgCollisionMesh* const mesh = (dgCollisionMesh*) collision->GetChildShape();
-		mesh->SetDebugCollisionCallback ((dgCollisionMeshCollisionCallback) userCallback);
-	}
-
-}
-
-/*!
-  set a function call back to be called during the face query of a collision tree.
-
-  @param *treeCollision is the pointer to the collision tree.
-  @param rayHitCallback pointer to an event function for providing Newton with ray intersection information.
-
-  In general a ray cast on a collision tree will stops at the first intersections with the closest face in the tree
-  that was hit by the ray. In some cases the application may be interested in the intesation with faces other than the fiorst hit.
-  In this cases the application can set this alternate callback and the ray scanner will notify the application of each face hit by the ray scan.
-
-  since this function faces the ray scanner to visit all of the potential faces intersected by the ray,
-  setting the function call back make the ray casting on collision tree less efficient than the default behavior.
-  So it is this functionality is only recommended for cases were the application is using especial effects like transparencies, or other effects
-
-  calling this function with *rayHitCallback* = NULL will rest the collision tree to it default raycast mode, which is return with the closest hit.
-
-  when *rayHitCallback* is not null then the callback is dalled with the follwing arguments
-  *const NewtonCollisio* collision - pointer to the collision tree
-  interseption - inetstion parameters of the ray
-  *normal - unnormalized face mormal in the space fo eth parent of the collision.
-  faceId -  id of this face in the collision tree.
-
-  See also: ::NewtonTreeCollisionGetFaceAttribute, ::NewtonTreeCollisionSetFaceAttribute
-*/
-void NewtonTreeCollisionSetUserRayCastCallback(const NewtonCollision* const treeCollision, NewtonCollisionTreeRayCastCallback rayHitCallback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const collision = (dgCollisionInstance*)treeCollision;
-//	dgCollisionBVH* const collision = (dgCollisionBVH*) treeCollision;
-	if (collision->IsType (dgCollision::dgCollisionBVH_RTTI)) {
-		dgCollisionBVH* const shape = (dgCollisionBVH*) collision->GetChildShape();
-		shape->SetCollisionRayCastCallback ((dgCollisionBVHUserRayCastCallback) rayHitCallback);
-	}
-}
-
-
-void NewtonHeightFieldSetUserRayCastCallback (const NewtonCollision* const heightField, NewtonHeightFieldRayCastCallback rayHitCallback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionInstance* const collision = (dgCollisionInstance*)heightField;
-	if (collision->IsType (dgCollision::dgCollisionHeightField_RTTI)) {
-		dgCollisionHeightField* const shape = (dgCollisionHeightField*) collision->GetChildShape();
-		shape->SetCollisionRayCastCallback ((dgCollisionHeightFieldRayCastCallback) rayHitCallback);
-	}
-}
-
-/*!
-  Prepare a *TreeCollision* to begin to accept the polygons that comprise the collision mesh.
-
-  @param *treeCollision is the pointer to the collision tree.
-
-  @return Nothing.
-
-  See also: ::NewtonTreeCollisionAddFace, ::NewtonTreeCollisionEndBuild
-*/
-void NewtonTreeCollisionBeginBuild(const NewtonCollision* const treeCollision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionBVH* const collision = (dgCollisionBVH*) ((dgCollisionInstance*)treeCollision)->GetChildShape();
-	dgAssert (collision->IsType (dgCollision::dgCollisionBVH_RTTI));
-
-	collision->BeginBuild();
-}
-
-/*!
-  Add an individual polygon to a *TreeCollision*.
-
-  @param *treeCollision is the pointer to the collision tree.
-  @param vertexCount number of vertex in *vertexPtr*
-  @param *vertexPtr pointer to an array of vertex. The vertex should consist of at least 3 floats each.
-  @param strideInBytes size of each vertex in bytes. This value should be 12 or larger.
-  @param faceAttribute id that identifies the polygon. The application can use this value to customize the behavior of the collision geometry.
-
-  @return Nothing.
-
-  After the call to *NewtonTreeCollisionBeginBuild* the *TreeCollision* is ready to accept polygons. The application should iterate
-  through the application's mesh, adding the mesh polygons to the *TreeCollision* one at a time.
-  The polygons must be flat and non-self intersecting.
-
-  See also: ::NewtonTreeCollisionAddFace, ::NewtonTreeCollisionEndBuild
-*/
-void NewtonTreeCollisionAddFace(const NewtonCollision* const treeCollision, int vertexCount, const dFloat* const vertexPtr, int strideInBytes, int faceAttribute)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionBVH* const collision = (dgCollisionBVH*) ((dgCollisionInstance*)treeCollision)->GetChildShape();
-	dgAssert (collision->IsType (dgCollision::dgCollisionBVH_RTTI));
-	collision->AddFace(vertexCount, vertexPtr, strideInBytes, faceAttribute);
-}
-
-/*!
-  Finalize the construction of the polygonal mesh.
-
-  @param *treeCollision is the pointer to the collision tree.
-  @param optimize flag that indicates to Newton whether it should optimize this mesh. Set to 1 to optimize the mesh, otherwise 0.
-
-  @return Nothing.
-
-
-  After the application has finished adding polygons to the *TreeCollision*, it must call this function to finalize the construction of the collision mesh.
-  If concave polygons are added to the *TreeCollision*, the application must call this function with the parameter *optimize* set to 1.
-  With the *optimize* parameter set to 1, Newton will optimize the collision mesh by removing non essential edges from adjacent flat polygons.
-  Newton will not change the topology of the mesh but significantly reduces the number of polygons in the mesh. The reduction factor of the number of polygons in the mesh depends upon the irregularity of the mesh topology.
-  A reduction factor of 1.5 to 2.0 is common.
-  Calling this function with the parameter *optimize* set to zero, will leave the mesh geometry unaltered.
-
-  See also: ::NewtonTreeCollisionAddFace, ::NewtonTreeCollisionEndBuild
-*/
-void NewtonTreeCollisionEndBuild(const NewtonCollision* const treeCollision, int optimize)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionBVH* const collision = (dgCollisionBVH*) ((dgCollisionInstance*)treeCollision)->GetChildShape();
-	dgAssert (collision->IsType (dgCollision::dgCollisionBVH_RTTI));
-	collision->EndBuild(optimize);
-}
-
-
-/*!
-  Get the user defined collision attributes stored with each face of the collision mesh.
-
-  @param treeCollision fixme
-  @param *faceIndexArray pointer to the face index list passed to the function *NewtonTreeCollisionCallback userCallback
-  @param indexCount fixme
-
-  @return User id of the face.
-
-  This function is used to obtain the user data stored in faces of the collision geometry.
-  The application can use this user data to achieve per polygon material behavior in large static collision meshes.
-
-  See also: ::NewtonTreeCollisionSetFaceAttribute, ::NewtonCreateTreeCollision
-*/
-int NewtonTreeCollisionGetFaceAttribute(const NewtonCollision* const treeCollision, const int* const faceIndexArray, int indexCount)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionBVH* const collision = (dgCollisionBVH*) ((dgCollisionInstance*)treeCollision)->GetChildShape();
-	dgAssert (collision->IsType (dgCollision::dgCollisionBVH_RTTI));
-
-	return int (collision->GetTagId (faceIndexArray, indexCount));
-}
-
-/*!
-  Change the user defined collision attribute stored with faces of the collision mesh.
-
-  @param *treeCollision fixme
-  @param *faceIndexArray pointer to the face index list passed to the NewtonTreeCollisionCallback function
-  @param indexCount fixme
-  @param attribute value of the user defined attribute to be stored with the face.
-
-  @return User id of the face.
-
-  This function is used to obtain the user data stored in faces of the collision geometry.
-  The application can use this user data to achieve per polygon material behavior in large static collision meshes.
-  By changing the value of this user data the application can achieve modifiable surface behavior with the collision geometry.
-  For example, in a driving game, the surface of a polygon that represents the street can changed from pavement to oily or wet after
-  some collision event occurs.
-
-  See also: ::NewtonTreeCollisionGetFaceAttribute, ::NewtonCreateTreeCollision
-*/
-void NewtonTreeCollisionSetFaceAttribute(const NewtonCollision* const treeCollision, const int* const faceIndexArray, int indexCount, int attribute)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionBVH* const collision = (dgCollisionBVH*) ((dgCollisionInstance*)treeCollision)->GetChildShape();
-	dgAssert (collision->IsType (dgCollision::dgCollisionBVH_RTTI));
-
-	collision->SetTagId (faceIndexArray, indexCount, dgUnsigned32 (attribute));
-}
-
-void NewtonTreeCollisionForEachFace (const NewtonCollision* const treeCollision, NewtonTreeCollisionFaceCallback forEachFaceCallback, void* const context) 
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgCollisionBVH* const collision = (dgCollisionBVH*) ((dgCollisionInstance*)treeCollision)->GetChildShape();
-	dgAssert (collision->IsType (dgCollision::dgCollisionBVH_RTTI));
-
-	collision->ForEachFace ((dgAABBIntersectCallback) forEachFaceCallback, context);
-}
-
-
-
-/*!
-  collect the vertex list index list mesh intersecting the AABB in collision mesh.
-
-  @param *treeCollision fixme
-  @param  *p0 - pointer to an array of at least three floats representing the ray origin in the local space of the geometry.
-  @param  *p1 - pointer to an array of at least three floats representing the ray end in the local space of the geometry.
-  @param **vertexArray pointer to a the vertex array of vertex.
-  @param *vertexCount pointer int to return the number of vertex in vertexArray.
-  @param *vertexStrideInBytes pointer to int to return the size of each vertex in vertexArray.
-  @param *indexList pointer to array on integers containing the triangles intersection the aabb.
-  @param maxIndexCount maximum number of indices the function will copy to indexList.
-  @param *faceAttribute pointer to array on integers top contain the face containing the .
-
-  @return the number of triangles in indexList.
-
-  indexList should be a list 3 * maxIndexCount the number of elements.
-
-  faceAttributet should be a list maxIndexCount the number of elements.
-
-  this function could be used by the application for many purposes.
-  for example it can be used to draw the collision geometry intersecting a collision primitive instead
-  of drawing the entire collision tree in debug mode.
-  Another use for this function is to to efficient draw projective texture shadows.
-*/
-int NewtonTreeCollisionGetVertexListTriangleListInAABB(const NewtonCollision* const treeCollision, const dFloat* const p0, const dFloat* const p1,
-													const dFloat** const vertexArray, int* const vertexCount, int* const vertexStrideInBytes, 
-													const int* const indexList, int maxIndexCount, const int* const faceAttribute) 
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	dgInt32 count = 0;
-	dgCollisionInstance* meshColl = (dgCollisionInstance*) treeCollision;
-	if (meshColl->IsType (dgCollision::dgCollisionMesh_RTTI)) {
-		dgCollisionMesh* const collision = (dgCollisionMesh*) ((dgCollisionInstance*)treeCollision)->GetChildShape();
-
-		dgVector pmin (p0[0], p0[1], p0[2], dgFloat32 (0.0f));
-		dgVector pmax (p1[0], p1[1], p1[2], dgFloat32 (0.0f));
-
-		dgCollisionMesh::dgMeshVertexListIndexList data;
-		data.m_indexList = (dgInt32 *)indexList;
-		data.m_userDataList = (dgInt32 *)faceAttribute;
-		data.m_maxIndexCount = maxIndexCount;
-		data.m_triangleCount = 0; 
-		collision->GetVertexListIndexList (pmin, pmax, data);
-
-		count = data.m_triangleCount;
-		*vertexArray = data.m_veterxArray; 
-		*vertexCount = data.m_vertexCount;
-		*vertexStrideInBytes = data.m_vertexStrideInBytes; 
-	}
-	return count;
-}
-
 /*! @} */ // end of CshapesConvexComples
 
 
@@ -627,104 +150,6 @@ Transform utility functions
 */
 
 
-/*!
-  Get the three Euler angles from a 4x4 rotation matrix arranged in row-major order.
-
-  @param matrix pointer to the 4x4 rotation matrix.
-  @param  angles0 - fixme
-  @param  angles1 - pointer to an array of at least three floats to hold the Euler angles.
-
-  @return Nothing.
-
-  The motivation for this function is that many graphics engines still use Euler angles to represent the orientation
-  of graphics entities.
-  The angles are expressed in radians and represent:
-  *angle[0]* - rotation about first matrix row
-  *angle[1]* - rotation about second matrix row
-  *angle[2]* - rotation about third matrix row
-
-  See also: ::NewtonSetEulerAngle
-*/
-void NewtonGetEulerAngle(const dFloat* const matrix, dFloat* const angles0, dFloat* const angles1)
-{
-	dgMatrix mat (matrix);
-
-	TRACE_FUNCTION(__FUNCTION__);
-	dgVector euler0;
-	dgVector euler1;
-	mat.CalcPitchYawRoll (euler0, euler1);
-
-	angles0[0] = euler0.m_x;
-	angles0[1] = euler0.m_y;
-	angles0[2] = euler0.m_z;
-
-	angles1[0] = euler1.m_x;
-	angles1[1] = euler1.m_y;
-	angles1[2] = euler1.m_z;
-
-}
-
-
-/*!
-  Build a rotation matrix from the Euler angles in radians.
-
-  @param matrix pointer to the 4x4 rotation matrix.
-  @param angles pointer to an array of at least three floats to hold the Euler angles.
-
-  @return Nothing.
-
-  The motivation for this function is that many graphics engines still use Euler angles to represent the orientation
-  of graphics entities.
-  The angles are expressed in radians and represent:
-  *angle[0]* - rotation about first matrix row
-  *angle[1]* - rotation about second matrix row
-  *angle[2]* - rotation about third matrix row
-
-  See also: ::NewtonGetEulerAngle
-*/
-void NewtonSetEulerAngle(const dFloat* const angles, dFloat* const matrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgMatrix mat (dgPitchMatrix (angles[0]) * dgYawMatrix(angles[1]) * dgRollMatrix(angles[2]));
-	//dgMatrix retMatrix (matrix);
-	dgMatrix& retMatrix = *((dgMatrix*) matrix);
-	
-	for (dgInt32 i = 0; i < 3; i ++) {
-		retMatrix[3][i] = 0.0f;
-		for (dgInt32 j = 0; j < 4; j ++) {
-			retMatrix[i][j] = mat[i][j]; 
-		}
-	}
-	retMatrix[3][3] = dgFloat32(1.0f);
-}
-
-
-/*!
-  Calculates the acceleration to satisfy the specified the spring damper system.
-
-  @param dt integration time step.
-  @param ks spring stiffness, it must be a positive value.
-  @param x spring position.
-  @param kd desired spring damper, it must be a positive value.
-  @param s spring velocity.
-
-  return: the spring acceleration.
-
-  the acceleration calculated by this function represent the mass, spring system of the form
-  a = -ks * x - kd * v.
-*/
-dFloat NewtonCalculateSpringDamperAcceleration(dFloat dt, dFloat ks, dFloat x, dFloat kd, dFloat v)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//at = - (ks * x + kd * v);
-	//at =  [- ks (x2 - x1) - kd * (v2 - v1) - dt * ks * (v2 - v1)] / [1 + dt * kd + dt * dt * ks] 
-	dgFloat32 ksd = dt * ks;
-	dgFloat32 num = ks * x + kd * v + ksd * v;
-	dgFloat32 den = dgFloat32 (1.0f) + dt * kd + dt * ksd;
-	dgAssert (den > 0.0f);
-	dFloat accel = - num / den;
-	return accel;
-}
 
 /*! @} */ // end of TransUtil
 
@@ -2377,5 +1802,122 @@ void NewtonWorldListenerDebug(const NewtonWorld* const newtonWorld, void* const 
 	TRACE_FUNCTION(__FUNCTION__);
 	//Newton* const world = (Newton*)newtonWorld;
 	//return world->ListenersDebug(context);
+	ndAssert(0);
+}
+
+
+void NewtonSerializeToFile(const NewtonWorld* const newtonWorld, const char* const filename, NewtonOnBodySerializationCallback bodyCallback, void* const bodyUserData)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//FILE* const file = fopen(filename, "wb");
+	//if (file) {
+	//	NewtonSerializeScene(newtonWorld, bodyCallback, bodyUserData, dgWorld::OnSerializeToFile, file);
+	//	fclose(file);
+	//}
+	ndAssert(0);
+}
+
+void NewtonDeserializeFromFile(const NewtonWorld* const newtonWorld, const char* const filename, NewtonOnBodyDeserializationCallback bodyCallback, void* const bodyUserData)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//FILE* const file = fopen(filename, "rb");
+	//if (file) {
+	//	NewtonDeserializeScene(newtonWorld, bodyCallback, bodyUserData, dgWorld::OnDeserializeFromFile, file);
+	//	fclose(file);
+	//}
+	ndAssert(0);
+}
+
+void NewtonSerializeScene(const NewtonWorld* const newtonWorld, NewtonOnBodySerializationCallback bodyCallback, void* const bodyUserData,
+	NewtonSerializeCallback serializeCallback, void* const serializeHandle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//world->SerializeScene(bodyUserData, dgWorld::OnBodySerialize(bodyCallback), (dgSerialize)serializeCallback, serializeHandle);
+	ndAssert(0);
+}
+
+void NewtonDeserializeScene(const NewtonWorld* const newtonWorld, NewtonOnBodyDeserializationCallback bodyCallback, void* const bodyUserData,
+	NewtonDeserializeCallback deserializeCallback, void* const serializeHandle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//world->DeserializeScene(bodyUserData, (dgWorld::OnBodyDeserialize)bodyCallback, (dgDeserialize)deserializeCallback, serializeHandle);
+	ndAssert(0);
+}
+
+NewtonBody* NewtonFindSerializedBody(const NewtonWorld* const newtonWorld, int bodySerializedID)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//dgAssert(0);
+	//return (NewtonBody*)world->FindBodyFromSerializedID(bodySerializedID);
+	ndAssert(0);
+	return 0;
+}
+
+void NewtonSetJointSerializationCallbacks(const NewtonWorld* const newtonWorld, NewtonOnJointSerializationCallback serializeJoint, NewtonOnJointDeserializationCallback deserializeJoint)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//world->SetJointSerializationCallbacks(dgWorld::OnJointSerializationCallback(serializeJoint), dgWorld::OnJointDeserializationCallback(deserializeJoint));
+	ndAssert(0);
+}
+
+void NewtonGetJointSerializationCallbacks(const NewtonWorld* const newtonWorld, NewtonOnJointSerializationCallback* const serializeJoint, NewtonOnJointDeserializationCallback* const deserializeJoint)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//world->GetJointSerializationCallbacks((dgWorld::OnJointSerializationCallback*)serializeJoint, (dgWorld::OnJointDeserializationCallback*)deserializeJoint);
+	ndAssert(0);
+}
+
+/*!
+  Specify a custom destructor callback for destroying the world.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param destructor function poiter callback
+
+  The application may specify its own world destructor.
+
+  See also: ::NewtonWorldSetDestructorCallback, ::NewtonWorldGetUserData
+*/
+void NewtonWorldSetDestructorCallback(const NewtonWorld* const newtonWorld, NewtonWorldDestructorCallback destructor)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//world->m_destructor = destructor;
+	ndAssert(0);
+}
+
+/*!
+  Return pointer to destructor call back function.
+
+  @param *newtonWorld Pointer to the Newton world.
+
+  See also: ::NewtonWorldGetUserData, ::NewtonWorldSetDestructorCallback
+*/
+NewtonWorldDestructorCallback NewtonWorldGetDestructorCallback(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//return world->m_destructor;
+	ndAssert(0);
+	return 0;
+}
+
+void NewtonWorldSetCreateDestroyContactCallback(const NewtonWorld* const newtonWorld, NewtonCreateContactCallback createContact, NewtonDestroyContactCallback destroyContact)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//world->SetCreateDestroyContactCallback((dgWorld::OnCreateContact)createContact, (dgWorld::OnDestroyContact)destroyContact);
+	ndAssert(0);
+}
+
+void NewtonWorldSetCollisionConstructorDestructorCallback(const NewtonWorld* const newtonWorld, NewtonCollisionCopyConstructionCallback constructor, NewtonCollisionDestructorCallback destructor)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//world->SetCollisionInstanceConstructorDestructor((dgWorld::OnCollisionInstanceDuplicate)constructor, (dgWorld::OnCollisionInstanceDestroy)destructor);
 	ndAssert(0);
 }

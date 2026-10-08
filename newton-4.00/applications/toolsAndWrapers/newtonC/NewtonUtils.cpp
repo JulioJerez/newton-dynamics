@@ -137,3 +137,106 @@ int NewtonWorldFloatSize()
 	return sizeof(ndFloat32);
 }
 
+
+/*!
+  Get the three Euler angles from a 4x4 rotation matrix arranged in row-major order.
+
+  @param matrix pointer to the 4x4 rotation matrix.
+  @param  angles0 - fixme
+  @param  angles1 - pointer to an array of at least three floats to hold the Euler angles.
+
+  @return Nothing.
+
+  The motivation for this function is that many graphics engines still use Euler angles to represent the orientation
+  of graphics entities.
+  The angles are expressed in radians and represent:
+  *angle[0]* - rotation about first matrix row
+  *angle[1]* - rotation about second matrix row
+  *angle[2]* - rotation about third matrix row
+
+  See also: ::NewtonSetEulerAngle
+*/
+void NewtonGetEulerAngle(const dFloat* const matrix, dFloat* const angles0, dFloat* const angles1)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+
+	//dgMatrix mat(matrix);
+	//
+	//dgVector euler0;
+	//dgVector euler1;
+	//mat.CalcPitchYawRoll(euler0, euler1);
+	//
+	//angles0[0] = euler0.m_x;
+	//angles0[1] = euler0.m_y;
+	//angles0[2] = euler0.m_z;
+	//
+	//angles1[0] = euler1.m_x;
+	//angles1[1] = euler1.m_y;
+	//angles1[2] = euler1.m_z;
+	ndAssert(0);
+}
+
+
+/*!
+  Build a rotation matrix from the Euler angles in radians.
+
+  @param matrix pointer to the 4x4 rotation matrix.
+  @param angles pointer to an array of at least three floats to hold the Euler angles.
+
+  @return Nothing.
+
+  The motivation for this function is that many graphics engines still use Euler angles to represent the orientation
+  of graphics entities.
+  The angles are expressed in radians and represent:
+  *angle[0]* - rotation about first matrix row
+  *angle[1]* - rotation about second matrix row
+  *angle[2]* - rotation about third matrix row
+
+  See also: ::NewtonGetEulerAngle
+*/
+void NewtonSetEulerAngle(const dFloat* const angles, dFloat* const matrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgMatrix mat(dgPitchMatrix(angles[0]) * dgYawMatrix(angles[1]) * dgRollMatrix(angles[2]));
+	////dgMatrix retMatrix (matrix);
+	//dgMatrix& retMatrix = *((dgMatrix*)matrix);
+	//
+	//for (dgInt32 i = 0; i < 3; i++) {
+	//	retMatrix[3][i] = 0.0f;
+	//	for (dgInt32 j = 0; j < 4; j++) {
+	//		retMatrix[i][j] = mat[i][j];
+	//	}
+	//}
+	//retMatrix[3][3] = dgFloat32(1.0f);
+	ndAssert(0);
+}
+
+
+/*!
+  Calculates the acceleration to satisfy the specified the spring damper system.
+
+  @param dt integration time step.
+  @param ks spring stiffness, it must be a positive value.
+  @param x spring position.
+  @param kd desired spring damper, it must be a positive value.
+  @param s spring velocity.
+
+  return: the spring acceleration.
+
+  the acceleration calculated by this function represent the mass, spring system of the form
+  a = -ks * x - kd * v.
+*/
+dFloat NewtonCalculateSpringDamperAcceleration(dFloat dt, dFloat ks, dFloat x, dFloat kd, dFloat v)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	////at = - (ks * x + kd * v);
+	////at =  [- ks (x2 - x1) - kd * (v2 - v1) - dt * ks * (v2 - v1)] / [1 + dt * kd + dt * dt * ks] 
+	//dgFloat32 ksd = dt * ks;
+	//dgFloat32 num = ks * x + kd * v + ksd * v;
+	//dgFloat32 den = dgFloat32(1.0f) + dt * kd + dt * ksd;
+	//dgAssert(den > 0.0f);
+	//dFloat accel = -num / den;
+	//return accel;
+	ndAssert(0);
+	return 0;
+}
