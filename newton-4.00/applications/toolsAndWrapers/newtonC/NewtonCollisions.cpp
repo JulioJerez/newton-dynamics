@@ -394,7 +394,7 @@ NewtonCollision* NewtonCreateChamferCylinder(const NewtonWorld* const newtonWorl
   will generate a loosely fitting hull and it willbe faster to generate.
 
 */
-NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* const newtonWorld, int count, const dFloat* const vertexCloud, int strideInBytes, dFloat32 tolerance, int shapeID, const dFloat* const offsetMatrix)
+NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* const newtonWorld, int count, const dFloat* const vertexCloud, int strideInBytes, dFloat tolerance, int shapeID, const dFloat* const offsetMatrix)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndMatrix matrix(ndGetIdentityMatrix());
@@ -1464,4 +1464,78 @@ NewtonCollision* NewtonCreateCompoundCollisionFromMesh(const NewtonWorld* const 
 	//return compound;
 	ndAssert(0);
 	return 0;
+}
+
+/*!
+  Serialize a general collision shape.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param *collision is the pointer to the collision tree shape.
+  @param serializeFunction pointer to the event function that will do the serialization.
+  @param  *serializeHandle	- user data that will be passed to the _NewtonSerialize_ callback.
+
+  @return Nothing.
+
+  Small and medium collision shapes like *TreeCollision* (under 50000 polygons) small convex hulls or compude collision can be constructed at application
+  startup without significant processing overhead.
+
+
+  See also: ::NewtonCollisionGetInfo
+*/
+void NewtonCollisionSerialize(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, NewtonSerializeCallback serializeFunction, void* const serializeHandle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//world->SerializeCollision((dgCollisionInstance*)collision, (dgSerialize)serializeFunction, serializeHandle);
+	ndAssert(0);
+}
+
+
+/*!
+  Create a collision shape via a serialization function.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param deserializeFunction pointer to the event function that will do the deserialization.
+  @param *serializeHandle user data that will be passed to the _NewtonSerialize_ callback.
+
+  @return Nothing.
+
+  this function is useful to to load collision primitive for and archive file. In the case of complex shapes like convex hull and compound collision the
+  it save a significant amount of construction time.
+
+  if this function is called to load a serialized tree collision, the tree collision will be loaded, but the function pointer callback will be set to NULL.
+  for this operation see function *NewtonCreateTreeCollisionFromSerialization*
+
+  See also: ::NewtonCollisionSerialize, ::NewtonCollisionGetInfo
+*/
+NewtonCollision* NewtonCreateCollisionFromSerialization(const NewtonWorld* const newtonWorld, NewtonDeserializeCallback deserializeFunction, void* const serializeHandle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//return  (NewtonCollision*)world->CreateCollisionFromSerialization((dgDeserialize)deserializeFunction, serializeHandle);
+	ndAssert(0);
+	return 0;
+}
+
+
+/*!
+  Get creation parameters for this collision objects.
+
+  @param collision is the pointer to a convex collision primitive.
+  @param *collisionInfo pointer to a collision information record.
+
+  This function can be used by the application for writing file format and for serialization.
+
+  See also: ::NewtonCollisionGetInfo, ::NewtonCollisionSerialize
+*/
+void NewtonCollisionGetInfo(const NewtonCollision* const collision, NewtonCollisionInfoRecord* const collisionInfo)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgCollisionInstance* const coll = (dgCollisionInstance*)collision;
+	//
+	//dgAssert(dgInt32(sizeof(dgCollisionInfo)) <= dgInt32(sizeof(NewtonCollisionInfoRecord)));
+	//dgCollisionInfo info;
+	//coll->GetCollisionInfo(&info);
+	//memcpy(collisionInfo, &info, sizeof(dgCollisionInfo));
+	ndAssert(0);
 }

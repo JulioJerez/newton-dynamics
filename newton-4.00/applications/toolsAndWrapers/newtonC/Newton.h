@@ -465,15 +465,6 @@ extern "C" {
 
 	NEWTON_API int NewtonUserMeshCollisionContinuousOverlapTest (const NewtonUserMeshCollisionCollideDesc* const collideDescData, const void* const continueCollisionHandle, const dFloat* const minAabb, const dFloat* const maxAabb);
 	
-	//  ***********************************************************************************************************
-	//
-	//	Collision serialization functions
-	//
-	// ***********************************************************************************************************
-	NEWTON_API NewtonCollision* NewtonCreateCollisionFromSerialization (const NewtonWorld* const newtonWorld, NewtonDeserializeCallback deserializeFunction, void* const serializeHandle);
-	NEWTON_API void NewtonCollisionSerialize (const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, NewtonSerializeCallback serializeFunction, void* const serializeHandle);
-	NEWTON_API void NewtonCollisionGetInfo (const NewtonCollision* const collision, NewtonCollisionInfoRecord* const collisionInfo);
-
 	// **********************************************************************************************
 	//
 	// Static collision shapes functions
@@ -996,6 +987,10 @@ extern "C" {
 	NEWTON_API NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* const newtonWorld, int count, const dFloat* const vertexCloud, int strideInBytes, dFloat tolerance, int shapeID, const dFloat* const offsetMatrix);
 	NEWTON_API NewtonCollision* NewtonCreateConvexHullFromMesh(const NewtonWorld* const newtonWorld, const NewtonMesh* const mesh, dFloat tolerance, int shapeID);
 	NEWTON_API NewtonCollision* NewtonCreateHeightFieldCollision(const NewtonWorld* const newtonWorld, int width, int height, int gridsDiagonals, int elevationdatType, const void* const elevationMap, const char* const attributeMap, dFloat verticalScale, dFloat horizontalScale_x, dFloat horizontalScale_z, int shapeID);
+
+	NEWTON_API NewtonCollision* NewtonCreateCollisionFromSerialization(const NewtonWorld* const newtonWorld, NewtonDeserializeCallback deserializeFunction, void* const serializeHandle);
+	NEWTON_API void NewtonCollisionSerialize(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, NewtonSerializeCallback serializeFunction, void* const serializeHandle);
+	NEWTON_API void NewtonCollisionGetInfo(const NewtonCollision* const collision, NewtonCollisionInfoRecord* const collisionInfo);
 
 	NEWTON_API void NewtonCollisionSetMatrix(const NewtonCollision* const collision, const dFloat* const matrix);
 	NEWTON_API void NewtonCollisionGetMatrix(const NewtonCollision* const collision, dFloat* const matrix);
