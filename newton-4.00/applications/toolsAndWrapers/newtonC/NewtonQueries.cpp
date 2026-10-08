@@ -26,6 +26,63 @@
 #include "newtonBodyNotify.h"
 
 /*!
+  Trigger callback function for each joint in the world.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param callback The callback function to invoke for each joint.
+  @param *userData User data to pass into the callback.
+
+  @return nothing
+
+  The application should provide the function *NewtonJointIterator callback* to
+  be called by Newton for every joint in the world.
+
+  Note that this function is primarily for debugging. The performance penalty
+  for calling it is high.
+
+  See also: ::NewtonWorldForEachBodyInAABBDo, ::NewtonWorldGetFirstBody
+*/
+void NewtonWorldForEachJointDo(const NewtonWorld* const newtonWorld, NewtonJointIterator callback, void* const userData)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	const ndJointList& jointList = world->GetJointList();
+
+	//dgTree<dgConstraint*, dgConstraint*> jointMap(world->dgWorld::GetAllocator());
+	//for (dgBodyMasterList::dgListNode* node = masterList.GetFirst()->GetNext(); node; node = node->GetNext()) {
+	//	dgBodyMasterListRow& row = node->GetInfo();
+	//	for (dgBodyMasterListRow::dgListNode* jointNode = row.GetFirst(); jointNode; jointNode = jointNode->GetNext()) {
+	//		const dgBodyMasterListCell& cell = jointNode->GetInfo();
+	//		if (cell.m_joint->GetId() != dgConstraint::m_contactConstraint) {
+	//			if (!jointMap.Find(cell.m_joint)) {
+	//				jointMap.Insert(cell.m_joint, cell.m_joint);
+	//				callback((const NewtonJoint*)cell.m_joint, userData);
+	//			}
+	//		}
+	//	}
+	//}
+	for (ndJointList::ndNode* node = jointList.GetFirst()->GetNext(); node; node = node->GetNext())
+	{
+		ndSharedPtr<ndJointBilateralConstraint>& joint = node->GetInfo();
+		callback(reinterpret_cast<NewtonJoint*>(&joint), userData);
+	}
+}
+
+void NewtonWorldForEachBodyDo(const NewtonWorld* const newtonWorld, NewtonBodyIterator callback, void* const userData)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	const ndBodyListView& jointList = world->GetBodyList();
+
+	for (ndBodyListView::ndNode* node = jointList.GetFirst()->GetNext(); node; node = node->GetNext())
+	{
+		ndSharedPtr<ndBody>& body = node->GetInfo();
+		callback(reinterpret_cast<NewtonBody*>(&body), userData);
+	}
+}
+
+
+/*!
   Shoot ray from point p0 to p1 and trigger callback for each body on that line.
 
   @param *newtonWorld Pointer to the Newton world.
@@ -191,4 +248,79 @@ void NewtonWorldForEachBodyInAABBDo(const NewtonWorld* const newtonWorld, const 
 
 	WorldBodiesInAabbNotify notify(world, callback, userData);
 	world->BodiesInAabb(notify, minBox, maxBox);
+}
+
+
+/*!
+  cast a simple convex shape along the ray that goes for the matrix position to the destination and get the firsts contacts of collision.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param *matrix pointer to an array of at least three floats containing the beginning and orienetaion of the shape in global space.
+  @param *target pointer to an array of at least three floats containing the end of the ray in global space.
+  @param shape collision shap[e use to cat the ray.
+  @param param pointe to a variable the will contart the time to closet aproah to the collision.
+  @param *userData user data to be passed to the prefilter callback.
+  @param prefilter user define function to be called for each body before intersection.
+  @param *info pointer to an array of contacts at the point of intesections.
+  @param maxContactsCount maximun number of contacts to be conclaculated, the variable sould be initialized to the capaciaty of *info*
+  @param threadIndex thread index from whe thsi function is called, zero if call form outsize a newton update
+
+  @return the number of contact at the intesection point (a value equal o lower than maxContactsCount.
+  variable *hitParam* will be set the uintesation parameter an the momen of impact.
+
+  passing and value of NULL in *info* an dzero in maxContactsCount will turn thos function into a spcial Ray cast
+  where the function will only calculate the *hitParam* at the momenet of contacts. tshi si one of the most effiecnet way to use thsio function.
+
+  these function is similar to *NewtonWorldRayCast* but instead of casting a point it cast a simple convex shape along a ray for maoprix.m_poit
+  to target position. the shape is global orientation and position is set to matrix and then is swept along the segment to target and it will stop at the very first intersession contact.
+
+  for case where the application need to cast solid short to medium rays, it is better to use this function instead of casting and array of parallel rays segments.
+  examples of these are: implementation of ray cast cars with cylindrical tires, foot placement of character controllers, kinematic motion of objects, user controlled continuous collision, etc.
+  this function may not be as efficient as sampling ray for long segment, for these cases try using parallel ray cast.
+
+  The most common use for the ray cast function is the closest body hit, In this case it is important, for performance reasons,
+  that the filter function returns the intersection parameter. If the filter function returns a value of zero the ray cast will terminate
+  immediately.
+
+  if prefilter is not NULL, Newton will call the application right before executing the intersections between the ray and the primitive.
+  if the function returns zero the Newton will not ray cast the primitive.
+  The application can use this callback to implement faster or smarter filters when implementing complex logic, otherwise for normal all ray cast
+  this parameter could be NULL.
+
+  See also: ::NewtonWorldRayCast
+*/
+int NewtonWorldConvexCast(const NewtonWorld* const newtonWorld, const dFloat* const matrix, const dFloat* const target, const NewtonCollision* const shape,
+	dFloat* const param, void* const userData, NewtonWorldRayPrefilterCallback prefilter, NewtonWorldConvexCastReturnInfo* const info,
+	int maxContactsCount, int threadIndex)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgVector destination(target[0], target[1], target[2], dgFloat32(0.0f));
+	//Newton* const world = (Newton*)newtonWorld;
+	//return world->GetBroadPhase()->ConvexCast((dgCollisionInstance*)shape, dgMatrix(matrix), destination, param, (OnRayPrecastAction)prefilter, userData, (dgConvexCastReturnInfo*)info, maxContactsCount, threadIndex);
+	ndAssert(0);
+	return 0;
+}
+
+int NewtonWorldCollide(const NewtonWorld* const newtonWorld, const dFloat* const matrix, const NewtonCollision* const shape, void* const userData,
+	NewtonWorldRayPrefilterCallback prefilter, NewtonWorldConvexCastReturnInfo* const info, int maxContactsCount, int threadIndex)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//return world->GetBroadPhase()->Collide((dgCollisionInstance*)shape, dgMatrix(matrix), (OnRayPrecastAction)prefilter, userData, (dgConvexCastReturnInfo*)info, maxContactsCount, threadIndex);
+	ndAssert(0);
+	return 0;
+}
+
+NewtonJoint* NewtonWorldFindJoint(const NewtonBody* const body0, const NewtonBody* const body1)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//for (NewtonJoint* joint = NewtonBodyGetFirstJoint(body0); joint; joint = NewtonBodyGetNextJoint(body0, joint)) {
+	//	if (((body0 == NewtonJointGetBody0(joint)) && (body1 == NewtonJointGetBody1(joint))) ||
+	//		((body1 == NewtonJointGetBody0(joint)) && (body0 == NewtonJointGetBody1(joint)))) {
+	//		return joint;
+	//	}
+	//}
+	//return NULL;
+	ndAssert(0);
+	return 0;
 }
