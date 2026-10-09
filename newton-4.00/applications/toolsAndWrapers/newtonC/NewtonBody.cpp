@@ -159,27 +159,6 @@ void NewtonBodySetCollidable(const NewtonBody* const bodyPtr, int collidable)
 	ndAssert(0);
 }
 
-int NewtonBodyGetType(const NewtonBody* const bodyPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//if (body->IsRTTIType(dgBody::m_dynamicBodyRTTI)) {
-	//	return NEWTON_DYNAMIC_BODY;
-	//}
-	//else if (body->IsRTTIType(dgBody::m_kinematicBodyRTTI)) {
-	//	return NEWTON_KINEMATIC_BODY;
-	//}
-	//else if (body->IsRTTIType(dgBody::m_dynamicBodyAsymentricRTTI)) {
-	//	return NEWTON_DYNAMIC_ASYMETRIC_BODY;
-	//	//	} else if (body->IsRTTIType(dgBody::m_deformableBodyRTTI)) {
-	//	//		return NEWTON_DEFORMABLE_BODY;
-	//}
-	//dgAssert(0);
-	//return 0;
-
-	ndAssert(0);
-	return 0;
-}
 
 int NewtonBodyGetID(const NewtonBody* const bodyPtr)
 {
@@ -1768,4 +1747,27 @@ void NewtonBodySetAutoSleep(const NewtonBody* const bodyPtr, int state)
 	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
 	ndBodyDynamic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyDynamic());
 	dynBody->SetAutoSleep(state ? true : false);
+}
+
+
+int NewtonBodyGetType(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//if (body->IsRTTIType(dgBody::m_dynamicBodyRTTI)) {
+	//	return NEWTON_DYNAMIC_BODY;
+	//}
+	//else if (body->IsRTTIType(dgBody::m_kinematicBodyRTTI)) {
+	//	return NEWTON_KINEMATIC_BODY;
+	//}
+	//else if (body->IsRTTIType(dgBody::m_dynamicBodyAsymentricRTTI)) {
+	//	return NEWTON_DYNAMIC_ASYMETRIC_BODY;
+	//	//	} else if (body->IsRTTIType(dgBody::m_deformableBodyRTTI)) {
+	//	//		return NEWTON_DEFORMABLE_BODY;
+	//}
+	//dgAssert(0);
+	//return 0;
+
+	ndAssert(0);
+	return 0;
 }
