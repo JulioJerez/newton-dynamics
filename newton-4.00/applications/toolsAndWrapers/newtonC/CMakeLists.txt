@@ -17,8 +17,8 @@ project(${projectName})
 
 message (${projectName})
 
-
-set (wrapper "${PROJECT_BINARY_DIR}")
+set(CMAKE_CONFIGURATION_TYPES Debug RelWithDebInfo Release)
+set(CMAKE_DEBUG_POSTFIX "_d")
 
 if(NEWTON_BUILD_SHARED_LIBS)
 	add_definitions(-D_NEWTON_BUILD_DLL)
@@ -77,5 +77,6 @@ endif()
 #	ARGS -E copy $<TARGET_FILE:${projectName}> C:/tmp/ChillwaveDrive-main/${projectName}${cSuffix})
 
 add_custom_command(
-	TARGET ${projectName} POST_BUILD COMMAND ${CMAKE_COMMAND}
-	ARGS -E copy $<TARGET_FILE:${projectName}> C:/development/builds/newton-3.14/applications/demosSandbox/Debug/${projectName}${cSuffix})
+	TARGET ${projectName} POST_BUILD 
+	COMMAND ${CMAKE_COMMAND}
+	ARGS -E copy $<TARGET_FILE:${projectName}> C:/development/builds/newton-3.14/applications/demosSandbox/Debug/${projectName}${CMAKE_DEBUG_POSTFIX}${cSuffix})

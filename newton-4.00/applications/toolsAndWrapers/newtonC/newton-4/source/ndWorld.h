@@ -48,7 +48,7 @@ class ndWorld: public ndClassAlloc
 	public:
 	enum ndSolverModes
 	{	
-		ndStandardSolver,
+		ndStandardSolver = 1,
 		ndSimd8Solver,
 		ndSimd16Solver,
 	};

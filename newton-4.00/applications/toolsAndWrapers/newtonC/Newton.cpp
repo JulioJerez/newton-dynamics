@@ -1036,16 +1036,6 @@ Joint common function s
 /*! @} */ // end of JointCommon
 
 
-NewtonCollision* NewtonCreateMassSpringDamperSystem (const NewtonWorld* const newtonWorld, int shapeID,
-													 const dFloat* const points, int pointCount, int strideInBytes, const dFloat* const pointMass, 
-													 const int* const links, int linksCount, const dFloat* const linksSpring, const dFloat* const linksDamper)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	Newton* const world = (Newton *)newtonWorld;
-	return (NewtonCollision*)world->CreateMassSpringDamperSystem (shapeID, pointCount, points, strideInBytes, pointMass, linksCount, links, linksSpring, linksDamper);
-}
-
-
 /*
 void NewtonDeformableMeshConstraintParticle(NewtonCollision* const deformableMesh, int particleIndex, const dFloat* const posit, const NewtonBody* const body)
 {
@@ -1241,49 +1231,6 @@ const int* NewtonDeformableMeshSegmentGetIndexList (const NewtonCollision* const
 /*! @} */ // end of
 
 
-void* NewtonCollisionAggregateCreate(NewtonWorld* const worldPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgWorld* const world = (dgWorld*) worldPtr;
-	return world->CreateAggreGate();
-}
-
-void NewtonCollisionAggregateDestroy(void* const aggregatePtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBroadPhaseAggregate* const aggregate = (dgBroadPhaseAggregate*) aggregatePtr;
-	aggregate->m_broadPhase->GetWorld()->DestroyAggregate(aggregate);
-}
-
-void NewtonCollisionAggregateAddBody(void* const aggregatePtr, const NewtonBody* const body)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBroadPhaseAggregate* const aggregate = (dgBroadPhaseAggregate*) aggregatePtr;
-	aggregate->AddBody((dgBody*)body);
-}
-
-void NewtonCollisionAggregateRemoveBody(void* const aggregatePtr, const NewtonBody* const body)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBroadPhaseAggregate* const aggregate = (dgBroadPhaseAggregate*) aggregatePtr;
-	aggregate->RemoveBody((dgBody*)body);
-}
-
-int NewtonCollisionAggregateGetSelfCollision(void* const aggregatePtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBroadPhaseAggregate* const aggregate = (dgBroadPhaseAggregate*) aggregatePtr;
-	return aggregate->GetSelfCollision() ? true : false;
-}
-
-void NewtonCollisionAggregateSetSelfCollision(void* const aggregatePtr, int state)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	dgBroadPhaseAggregate* const aggregate = (dgBroadPhaseAggregate*) aggregatePtr;
-	aggregate->SetSelfCollision(state ? true : false);
-}
-/*! @} */ // end of
-
 #endif
 
 // ***************************************************************
@@ -1457,7 +1404,7 @@ void* NewtonGetPreferedPlugin(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
-	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(ndWorld::ndSimd8Solver + 1);
+	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(ndWorld::ndSimd8Solver);
 	return reinterpret_cast<void*>(mode);
 }
 
@@ -1465,14 +1412,14 @@ void* NewtonCurrentPlugin(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
-	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(world->GetSelectedSolver() + 1);
+	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(world->GetSelectedSolver());
 	return reinterpret_cast<void*>(mode);
 }
 
 void* NewtonGetFirstPlugin(const NewtonWorld* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	return reinterpret_cast<void*>(ndWorld::ndStandardSolver + 1);
+	return reinterpret_cast<void*>(ndWorld::ndStandardSolver);
 }
 
 void* NewtonGetNextPlugin(const NewtonWorld* const newtonWorld, const void* const plugin)
@@ -1481,7 +1428,7 @@ void* NewtonGetNextPlugin(const NewtonWorld* const newtonWorld, const void* cons
 	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
 
 	ndInt32 enumerator = static_cast<ndInt32>(reinterpret_cast<uintptr_t>(plugin));
-	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(enumerator - 1);
+	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(enumerator);
 	switch (mode)
 	{
 		case ndWorld::ndStandardSolver:
@@ -1511,7 +1458,7 @@ void NewtonSelectPlugin(const NewtonWorld* const newtonWorld, const void* const 
 	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
 
 	ndInt32 enumerator = static_cast<ndInt32>(reinterpret_cast<uintptr_t>(plugin));
-	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(enumerator - 1);
+	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(enumerator);
 	world->SelectSolver(mode);
 }
 
@@ -1520,7 +1467,7 @@ const char* NewtonGetPluginString(const NewtonWorld* const newtonWorld, const vo
 	TRACE_FUNCTION(__FUNCTION__);
 	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	ndInt32 enumerator = static_cast<ndInt32>(reinterpret_cast<uintptr_t>(plugin));
-	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(enumerator - 1);
+	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(enumerator);
 	switch (mode)
 	{
 		case ndWorld::ndStandardSolver:
@@ -1861,7 +1808,9 @@ void NewtonSetJointSerializationCallbacks(const NewtonWorld* const newtonWorld, 
 	TRACE_FUNCTION(__FUNCTION__);
 	//Newton* const world = (Newton*)newtonWorld;
 	//world->SetJointSerializationCallbacks(dgWorld::OnJointSerializationCallback(serializeJoint), dgWorld::OnJointDeserializationCallback(deserializeJoint));
-	ndAssert(0);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	world->m_onJointSerialize = serializeJoint;
+	world->m_onJointDeserialize = deserializeJoint;
 }
 
 void NewtonGetJointSerializationCallbacks(const NewtonWorld* const newtonWorld, NewtonOnJointSerializationCallback* const serializeJoint, NewtonOnJointDeserializationCallback* const deserializeJoint)
@@ -1869,7 +1818,9 @@ void NewtonGetJointSerializationCallbacks(const NewtonWorld* const newtonWorld, 
 	TRACE_FUNCTION(__FUNCTION__);
 	//Newton* const world = (Newton*)newtonWorld;
 	//world->GetJointSerializationCallbacks((dgWorld::OnJointSerializationCallback*)serializeJoint, (dgWorld::OnJointDeserializationCallback*)deserializeJoint);
-	ndAssert(0);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	*serializeJoint = world->m_onJointSerialize;
+	*deserializeJoint = world->m_onJointDeserialize;
 }
 
 /*!
@@ -1911,7 +1862,9 @@ void NewtonWorldSetCreateDestroyContactCallback(const NewtonWorld* const newtonW
 	TRACE_FUNCTION(__FUNCTION__);
 	//Newton* const world = (Newton*)newtonWorld;
 	//world->SetCreateDestroyContactCallback((dgWorld::OnCreateContact)createContact, (dgWorld::OnDestroyContact)destroyContact);
-	ndAssert(0);
+	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	world->m_onCreateContact = createContact;
+	world->m_onDestroyContact = destroyContact;
 }
 
 void NewtonWorldSetCollisionConstructorDestructorCallback(const NewtonWorld* const newtonWorld, NewtonCollisionCopyConstructionCallback constructor, NewtonCollisionDestructorCallback destructor)

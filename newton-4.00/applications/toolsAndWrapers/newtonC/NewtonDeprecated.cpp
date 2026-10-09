@@ -229,13 +229,6 @@ void NewtonWorldCriticalSectionUnlock(const NewtonWorld* const)
 	ndAssert(0);
 }
 
-int NewtonAtomicSwap(int* const, int)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-	return 0;
-}
-
 int NewtonAtomicAdd(int* const ptr, int value)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -250,12 +243,6 @@ void NewtonDispachThreadJob(const NewtonWorld* const, NewtonJobTask, void* const
 	ndAssert(0);
 }
 
-void NewtonYield()
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-}
-
 void NewtonLoadPlugins(const NewtonWorld* const, const char* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -265,3 +252,55 @@ void NewtonUnloadPlugins(const NewtonWorld* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 }
+
+void* NewtonCollisionAggregateCreate(NewtonWorld* const worldPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgWorld* const world = (dgWorld*)worldPtr;
+	//return world->CreateAggreGate();
+	ndAssert(0);
+	return 0;
+}
+
+void NewtonCollisionAggregateDestroy(void* const aggregatePtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBroadPhaseAggregate* const aggregate = (dgBroadPhaseAggregate*)aggregatePtr;
+	//aggregate->m_broadPhase->GetWorld()->DestroyAggregate(aggregate);
+	ndAssert(0);
+}
+
+void NewtonCollisionAggregateAddBody(void* const aggregatePtr, const NewtonBody* const body)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBroadPhaseAggregate* const aggregate = (dgBroadPhaseAggregate*)aggregatePtr;
+	//aggregate->AddBody((dgBody*)body);
+	ndAssert(0);
+}
+
+void NewtonCollisionAggregateRemoveBody(void* const aggregatePtr, const NewtonBody* const body)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBroadPhaseAggregate* const aggregate = (dgBroadPhaseAggregate*)aggregatePtr;
+	//aggregate->RemoveBody((dgBody*)body);
+	ndAssert(0);
+}
+
+int NewtonCollisionAggregateGetSelfCollision(void* const aggregatePtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBroadPhaseAggregate* const aggregate = (dgBroadPhaseAggregate*)aggregatePtr;
+	//return aggregate->GetSelfCollision() ? true : false;
+	ndAssert(0);
+	return 0;
+}
+
+void NewtonCollisionAggregateSetSelfCollision(void* const aggregatePtr, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBroadPhaseAggregate* const aggregate = (dgBroadPhaseAggregate*)aggregatePtr;
+	//aggregate->SetSelfCollision(state ? true : false);
+	ndAssert(0);
+}
+/*! @} */ // end of
+

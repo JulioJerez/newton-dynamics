@@ -240,3 +240,32 @@ dFloat NewtonCalculateSpringDamperAcceleration(dFloat dt, dFloat ks, dFloat x, d
 	ndAssert(0);
 	return 0;
 }
+
+
+NewtonCollision* NewtonCreateMassSpringDamperSystem(const NewtonWorld* const newtonWorld, int shapeID,
+	const dFloat* const points, int pointCount, int strideInBytes, const dFloat* const pointMass,
+	const int* const links, int linksCount, const dFloat* const linksSpring, const dFloat* const linksDamper)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//return (NewtonCollision*)world->CreateMassSpringDamperSystem(shapeID, pointCount, points, strideInBytes, pointMass, linksCount, links, linksSpring, linksDamper);
+	ndAssert(0);
+	return 0;
+}
+
+int NewtonAtomicSwap(int* const ptr, int value)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+
+	ndScopeSpinLock lock(ndNewtonWorld::m_globalCriticalSection);
+	ndInt32 ret = *ptr;
+	*ptr = value;
+	return ret;
+}
+
+void NewtonYield()
+{
+	ndInt32 loop = 0;
+	ndThreadYield(loop);
+}
+

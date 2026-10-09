@@ -13,11 +13,19 @@
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
 
+ndSpinLock ndNewtonWorld::m_globalCriticalSection;
+
 ndNewtonWorld::ndNewtonWorld()
 	:ndWorld()
 	,m_userData(nullptr)
 	,m_bodyMaterialGroup(1)
 	,m_onPostUpdate(nullptr)
+	,m_onJointSerialize(nullptr)
+	,m_onJointDeserialize(nullptr)
+	,m_onBodySerialize(nullptr)
+	,m_onBodyDeserialize(nullptr)
+	,m_onCreateContact(nullptr)
+	,m_onDestroyContact(nullptr)
 {
 	SetSubSteps(2);
 	//SetThreadCount(2);

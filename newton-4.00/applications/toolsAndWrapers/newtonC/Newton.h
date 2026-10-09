@@ -22,7 +22,6 @@
 #ifndef __NEWTON_H__
 #define __NEWTON_H__
 
-
 #define NEWTON_MAJOR_VERSION 3 
 #define NEWTON_MINOR_VERSION 14 
 
@@ -44,7 +43,6 @@
 	#define NEWTON_API DG_LIBRARY_IMPORT
 #endif
 
-
 #ifndef dLong
 	#define dLong long long		
 #endif
@@ -64,6 +62,22 @@
 #ifndef dFloat64
 	#define dFloat64 double
 #endif
+
+template<class Object, class Handle>
+ndSharedPtr<Object>* SharedObjectFromHandle(const Handle* const ptr)
+{
+	ndSharedPtr<Object>* const sharedPtr = const_cast<ndSharedPtr<Object>*>(reinterpret_cast<const ndSharedPtr<Object>*>(ptr));
+	return sharedPtr;
+}
+
+template<class Object, class Handle>
+Object* ObjectFromHandle(const Handle* const ptr)
+{
+	const ndSharedPtr<Object>* const sharedPtr = SharedObjectFromHandle<Object, Handle>(ptr);
+	return const_cast<Object*>(**sharedPtr);
+}
+
+bool CheckFloat(ndFloat32* ptr, ndInt32 size);
 
 #ifdef __cplusplus 
 extern "C" {
@@ -357,27 +371,12 @@ extern "C" {
 
 	// Newton callback functions
 	typedef void (*NewtonWorldDestructorCallback) (const NewtonWorld* const world);
-
-	typedef void(*NewtonCreateContactCallback) (const NewtonWorld* const newtonWorld, NewtonJoint* const contact);
-	typedef void(*NewtonDestroyContactCallback) (const NewtonWorld* const newtonWorld, NewtonJoint* const contact);
-
 	typedef void (*NewtonWorldListenerDebugCallback) (const NewtonWorld* const world, void* const listener, void* const debugContext);
 	typedef void (*NewtonWorldListenerBodyDestroyCallback) (const NewtonWorld* const world, void* const listenerUserData, NewtonBody* const body);
 	typedef void (*NewtonWorldUpdateListenerCallback) (const NewtonWorld* const world, void* const listenerUserData, dFloat timestep);
 	typedef void (*NewtonWorldDestroyListenerCallback) (const NewtonWorld* const world, void* const listenerUserData);
 
 	typedef dLong (*NewtonGetTimeInMicrosencondsCallback) ();
-
-	typedef void (*NewtonSerializeCallback) (void* const serializeHandle, const void* const buffer, int size);
-	typedef void (*NewtonDeserializeCallback) (void* const serializeHandle, void* const buffer, int size);
-	
-	typedef void (*NewtonOnBodySerializationCallback) (NewtonBody* const body, void* const userData, NewtonSerializeCallback function, void* const serializeHandle);
-	typedef void (*NewtonOnBodyDeserializationCallback) (NewtonBody* const body, void* const userData, NewtonDeserializeCallback function, void* const serializeHandle);
-
-	typedef void (*NewtonOnJointSerializationCallback) (const NewtonJoint* const joint, NewtonSerializeCallback function, void* const serializeHandle);
-	typedef void (*NewtonOnJointDeserializationCallback) (NewtonBody* const body0, NewtonBody* const body1, NewtonDeserializeCallback function, void* const serializeHandle);
-
-	typedef void (*NewtonOnUserCollisionSerializationCallback) (void* const userData, NewtonSerializeCallback function, void* const serializeHandle);
 	
 	// user collision callbacks	
 	typedef void (*NewtonUserMeshCollisionDestroyCallback) (void* const userData);
@@ -428,31 +427,12 @@ extern "C" {
 	typedef void (*NewtonJobTask) (NewtonWorld* const world, void* const userData, int threadIndex);
 	typedef int (*NewtonReportProgress) (dFloat normalizedProgressPercent, void* const userData);
 
-	// **********************************************************************************************
-	// 
-	// collision aggregates, are a collision node on eh broad phase the serve as the root nod for a collection of rigid bodies
-	// that shared the property of being in close proximity all the time, they are similar to compound collision by the group bodies instead of collision instances
-	// These are good for speeding calculation calculation of rag doll, Vehicles or contractions of rigid bodied lined by joints.
-	// also for example if you know that many the life time of a group of bodies like the object on a house of a building will be localize to the confide of the building
-	// then warping the bodies under an aggregate will reduce collision calculation of almost an order of magnitude.
-	//
-	// **********************************************************************************************
-	NEWTON_API void* NewtonCollisionAggregateCreate (NewtonWorld* const world); 	
-	NEWTON_API void NewtonCollisionAggregateDestroy (void* const aggregate); 	
-	NEWTON_API void NewtonCollisionAggregateAddBody (void* const aggregate, const NewtonBody* const body);
-	NEWTON_API void NewtonCollisionAggregateRemoveBody (void* const aggregate, const NewtonBody* const body); 	
-
-	NEWTON_API int NewtonCollisionAggregateGetSelfCollision (void* const aggregate);
-	NEWTON_API void NewtonCollisionAggregateSetSelfCollision (void* const aggregate, int state);
 	
 	// **********************************************************************************************
 	//
 	// particle system interface (soft bodies, individual, pressure bodies and cloth)   
 	//
 	// **********************************************************************************************
-	NEWTON_API NewtonCollision* NewtonCreateMassSpringDamperSystem (const NewtonWorld* const newtonWorld, int shapeID,
-																	const dFloat* const points, int pointCount, int strideInBytes, const dFloat* const pointMass, 
-																	const int* const links, int linksCount, const dFloat* const linksSpring, const dFloat* const linksDamper);
 /*
 	NEWTON_API NewtonCollision* NewtonCreateClothPatch (const NewtonWorld* const newtonWorld, NewtonMesh* const mesh, int shapeID, NewtonClothPatchMaterial* const structuralMaterial, NewtonClothPatchMaterial* const bendMaterial);
 	NEWTON_API void NewtonDeformableMeshCreateClusters (NewtonCollision* const deformableMesh, int clusterCount, dFloat overlapingWidth);
@@ -586,6 +566,18 @@ extern "C" {
 	typedef unsigned (*NewtonWorldRayPrefilterCallback)(const NewtonBody* const body, const NewtonCollision* const collision, void* const userData);
 	typedef dFloat(*NewtonWorldRayFilterCallback)(const NewtonBody* const body, const NewtonCollision* const shapeHit, const dFloat* const hitContact, const dFloat* const hitNormal, dLong collisionID, void* const userData, dFloat intersectParam);
 
+	typedef void(*NewtonCreateContactCallback) (const NewtonWorld* const newtonWorld, NewtonJoint* const contact);
+	typedef void(*NewtonDestroyContactCallback) (const NewtonWorld* const newtonWorld, NewtonJoint* const contact);
+
+	typedef void (*NewtonSerializeCallback) (void* const serializeHandle, const void* const buffer, int size);
+	typedef void (*NewtonDeserializeCallback) (void* const serializeHandle, void* const buffer, int size);
+
+	typedef void (*NewtonOnBodySerializationCallback) (NewtonBody* const body, void* const userData, NewtonSerializeCallback function, void* const serializeHandle);
+	typedef void (*NewtonOnBodyDeserializationCallback) (NewtonBody* const body, void* const userData, NewtonDeserializeCallback function, void* const serializeHandle);
+	typedef void (*NewtonOnJointSerializationCallback) (const NewtonJoint* const joint, NewtonSerializeCallback function, void* const serializeHandle);
+	typedef void (*NewtonOnJointDeserializationCallback) (NewtonBody* const body0, NewtonBody* const body1, NewtonDeserializeCallback function, void* const serializeHandle);
+	typedef void (*NewtonOnUserCollisionSerializationCallback) (void* const userData, NewtonSerializeCallback function, void* const serializeHandle);
+
 	NEWTON_API void* NewtonAlloc(int sizeInBytes);
 	NEWTON_API void NewtonFree(void* const ptr);
 	NEWTON_API int NewtonGetMemoryUsed();
@@ -597,7 +589,6 @@ extern "C" {
 	NEWTON_API void NewtonSetEulerAngle(const dFloat* const eulersAngles, dFloat* const matrix);
 	NEWTON_API void NewtonGetEulerAngle(const dFloat* const matrix, dFloat* const eulersAngles0, dFloat* const eulersAngles1);
 	NEWTON_API dFloat NewtonCalculateSpringDamperAcceleration(dFloat dt, dFloat ks, dFloat x, dFloat kd, dFloat s);
-
 
 	// world interface
 	NEWTON_API NewtonWorld* NewtonCreate();
@@ -612,6 +603,9 @@ extern "C" {
 
 	NEWTON_API NewtonPostUpdateCallback NewtonGetPostUpdateCallback(const NewtonWorld* const newtonWorld);
 	NEWTON_API void NewtonSetPostUpdateCallback(const NewtonWorld* const newtonWorld, NewtonPostUpdateCallback callback);
+
+	NEWTON_API int NewtonWorldGetBodyCount(const NewtonWorld* const newtonWorld);
+	NEWTON_API int NewtonWorldGetConstraintCount(const NewtonWorld* const newtonWorld);
 
 	NEWTON_API void* NewtonGetPreferedPlugin(const NewtonWorld* const newtonWorld);
 	NEWTON_API void NewtonLoadPlugins(const NewtonWorld* const newtonWorld, const char* const plugInPath);
@@ -674,13 +668,12 @@ extern "C" {
 	NEWTON_API void* NewtonWorldGetListenerUserData(const NewtonWorld* const newtonWorld, void* const listener);
 	NEWTON_API NewtonWorldListenerBodyDestroyCallback NewtonWorldListenerGetBodyDestroyCallback(const NewtonWorld* const newtonWorld, void* const listener);
 
-
 	// multi threading interface 
 	NEWTON_API int NewtonGetThreadsCount(const NewtonWorld* const newtonWorld);
 	NEWTON_API int NewtonGetMaxThreadsCount(const NewtonWorld* const newtonWorld);
 	NEWTON_API void NewtonSetThreadsCount(const NewtonWorld* const newtonWorld, int threads);
 
-	// atomic operations, deprecated for newton 4
+	// deprecated functions for newton 4
 	NEWTON_API void NewtonYield();
 	NEWTON_API int NewtonAtomicAdd(int* const ptr, int value);
 	NEWTON_API int NewtonAtomicSwap(int* const ptr, int value);
@@ -691,8 +684,12 @@ extern "C" {
 	NEWTON_API NewtonBody* NewtonIslandGetBody(const void* const island, int bodyIndex);
 	NEWTON_API void NewtonIslandGetBodyAABB(const void* const island, int bodyIndex, dFloat* const p0, dFloat* const p1);
 
-	NEWTON_API int NewtonWorldGetBodyCount(const NewtonWorld* const newtonWorld);
-	NEWTON_API int NewtonWorldGetConstraintCount(const NewtonWorld* const newtonWorld);
+	NEWTON_API void* NewtonCollisionAggregateCreate(NewtonWorld* const world);
+	NEWTON_API void NewtonCollisionAggregateDestroy(void* const aggregate);
+	NEWTON_API void NewtonCollisionAggregateAddBody(void* const aggregate, const NewtonBody* const body);
+	NEWTON_API void NewtonCollisionAggregateRemoveBody(void* const aggregate, const NewtonBody* const body);
+	NEWTON_API int NewtonCollisionAggregateGetSelfCollision(void* const aggregate);
+	NEWTON_API void NewtonCollisionAggregateSetSelfCollision(void* const aggregate, int state);
 
 	// mesh geometry.
 	NEWTON_API NewtonMesh* NewtonMeshCreate(const NewtonWorld* const newtonWorld);
@@ -1255,25 +1252,13 @@ extern "C" {
 	NEWTON_API void NewtonUserJointGetGeneralRow(const NewtonJoint* const joint, int index, dFloat* const jacobian0, dFloat* const jacobian1);
 	NEWTON_API dFloat NewtonUserJointGetRowForce(const NewtonJoint* const joint, int row);
 
+	// miscelaneuos 
+	NEWTON_API NewtonCollision* NewtonCreateMassSpringDamperSystem(const NewtonWorld* const newtonWorld, int shapeID,
+		const dFloat* const points, int pointCount, int strideInBytes, const dFloat* const pointMass,
+		const int* const links, int linksCount, const dFloat* const linksSpring, const dFloat* const linksDamper);
+
 #ifdef __cplusplus 
 }
 #endif
-
-
-template<class Object, class Handle>
-ndSharedPtr<Object>* SharedObjectFromHandle(const Handle* const ptr)
-{
-	ndSharedPtr<Object>* const sharedPtr = const_cast<ndSharedPtr<Object>*>(reinterpret_cast<const ndSharedPtr<Object>*>(ptr));
-	return sharedPtr;
-}
-
-template<class Object, class Handle>
-Object* ObjectFromHandle(const Handle* const ptr)
-{
-	const ndSharedPtr<Object>* const sharedPtr = SharedObjectFromHandle<Object, Handle>(ptr);
-	return const_cast<Object*>(**sharedPtr);
-}
-
-bool CheckFloat(ndFloat32* ptr, ndInt32 size);
 
 #endif
