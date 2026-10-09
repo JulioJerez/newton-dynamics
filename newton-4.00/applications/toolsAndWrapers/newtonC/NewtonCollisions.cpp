@@ -25,6 +25,31 @@
 #include "newtonMaterial.h"
 #include "newtonBodyNotify.h"
 
+static void MapShapeId(const ndShapeInfo& info, NewtonCollisionInfoRecord& collisionInfo)
+{
+	switch (info.m_collisionType)
+	{
+		case m_box:
+		{
+			collisionInfo.m_collisionType = SERIALIZE_ID_BOX;
+			collisionInfo.m_box.m_x = info.m_box.m_x;
+			collisionInfo.m_box.m_y = info.m_box.m_y;
+			collisionInfo.m_box.m_z = info.m_box.m_z;
+			break;
+		}
+
+		case m_boundingBoxHierachy:
+		{
+			collisionInfo.m_collisionType = SERIALIZE_ID_TREE;
+			collisionInfo.m_collisionTree.m_indexCount = info.m_bvh.m_indexCount;
+			collisionInfo.m_collisionTree.m_vertexCount = info.m_bvh.m_vertexCount;
+			break;
+		}
+		default:
+			ndAssert(0);
+	}
+}
+
 NewtonCollision* NewtonCollisionCreateInstance(const NewtonCollision* const collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -1230,21 +1255,7 @@ void NewtonCollisionGetInfo(const NewtonCollision* const collision, NewtonCollis
 	collisionInfo->m_collisionMaterial.m_userId = info.m_shapeMaterial.m_userId;
 	collisionInfo->m_collisionMaterial.m_userData.m_ptr = info.m_shapeMaterial.m_userParam->m_ptrData;
 	ndMemCpy(&collisionInfo->m_offsetMatrix[0][0], &info.m_offsetMatrix[0][0], 16);
-
-	switch (info.m_collisionType)
-	{
-		case m_box:
-		{
-			collisionInfo->m_collisionType = SERIALIZE_ID_BOX;
-			collisionInfo->m_box.m_x = info.m_box.m_x;
-			collisionInfo->m_box.m_y = info.m_box.m_y;
-			collisionInfo->m_box.m_z = info.m_box.m_z;
-			break;
-		}
-
-		default:
-			ndAssert(0);
-	}
+	MapShapeId(info, *collisionInfo);
 }
 
 
@@ -1302,6 +1313,8 @@ int NewtonCollisionGetType(const NewtonCollision* const collision)
 	TRACE_FUNCTION(__FUNCTION__);
 	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
 	//return instance->GetCollisionPrimityType();
-	ndAssert(0);
-	return 0;
+	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	NewtonCollisionInfoRecord collisionInfo;
+	MapShapeId(instance->GetShapeInfo(), collisionInfo);
+	return collisionInfo.m_collisionType;
 }
