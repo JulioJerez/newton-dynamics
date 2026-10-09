@@ -257,6 +257,11 @@ void ndBodyKinematic::SetSceneNodes(ndScene* const scene, ndBodyListView::ndNode
 	m_sceneNode = node;
 }
 
+ndBodyListView::ndNode* ndBodyKinematic::GetSceneNode() const
+{
+	return const_cast<ndBodyListView::ndNode*>(*m_sceneNode);
+}
+
 ndVector ndBodyKinematic::GetForce() const
 {
 	return ndVector::m_zero;
