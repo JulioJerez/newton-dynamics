@@ -25,37 +25,6 @@
 #include "newtonMaterial.h"
 #include "newtonBodyNotify.h"
 
-/*!
-  Enable/disable multi-threaded constraint resolution for large islands
-  (disabled by default).
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param mode 1: enabled  0: disabled (default)
-
-  @return Nothing
-
-  Multi threaded mode is not always faster. Among the reasons are
-
-  1 - Significant software cost to set up threads, as well as instruction overhead.
-  2 - Different systems have different cost for running separate threads in a shared memory environment.
-  3 - Parallel algorithms often have decreased converge rate. This can be as
-	  high as half of the of the sequential version. Consequently, the parallel
-	  solver requires a higher number of interactions to achieve similar convergence.
-
-  It is recommended this option is enabled on system with more than two cores,
-  since the performance gain in a dual core system are marginally better. Your
-  mileage may vary.
-
-  At the very least the application must test the option to verify the performance gains.
-
-  This option has no impact on other subsystems of the engine.
-
-  See also: ::NewtonGetThreadsCount, ::NewtonSetThreadsCount
-*/
-void NewtonSetParallelSolverOnLargeIsland(const NewtonWorld* const, int)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-}
 
 int NewtonGetParallelSolverOnLargeIsland(const NewtonWorld* const newtonWorld)
 {
@@ -69,10 +38,6 @@ int NewtonGetBroadphaseAlgorithm(const NewtonWorld* const newtonWorld)
 	return 0;
 }
 
-void NewtonSelectBroadphaseAlgorithm(const NewtonWorld* const newtonWorld, int algorithmType)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-}
 
 void NewtonResetBroadphase(const NewtonWorld* const newtonWorld)
 {
@@ -302,5 +267,61 @@ void NewtonCollisionAggregateSetSelfCollision(void* const aggregatePtr, int stat
 	//aggregate->SetSelfCollision(state ? true : false);
 	ndAssert(0);
 }
-/*! @} */ // end of
 
+/*!
+  set a function call back to be call during the face query of a collision tree.
+
+  @param *staticCollision is the pointer to the static collision (a CollisionTree of a HeightFieldCollision)
+  @param *userCallback pointer to an event function to call before Newton evaluates the polygons colliding with a body. This parameter can be NULL.
+
+  because debug display display report all the faces of a collision primitive, it could get slow on very large static collision.
+  this function can be used for debugging purpose to just report only faces intersection the collision AABB of the collision shape colliding with the polyginal mesh collision.
+
+  this function is not recommended to use for production code only for debug purpose.
+
+  See also: ::NewtonTreeCollisionGetFaceAttribute, ::NewtonTreeCollisionSetFaceAttribute
+*/
+void NewtonStaticCollisionSetDebugCallback(const NewtonCollision* const staticCollision, NewtonTreeCollisionCallback userCallback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated funtion: %s\n", __FUNCDNAME__));
+}
+
+void NewtonSelectBroadphaseAlgorithm(const NewtonWorld* const newtonWorld, int algorithmType)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated funtion: %s\n", __FUNCDNAME__));
+}
+
+/*!
+  Enable/disable multi-threaded constraint resolution for large islands
+  (disabled by default).
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param mode 1: enabled  0: disabled (default)
+
+  @return Nothing
+
+  Multi threaded mode is not always faster. Among the reasons are
+
+  1 - Significant software cost to set up threads, as well as instruction overhead.
+  2 - Different systems have different cost for running separate threads in a shared memory environment.
+  3 - Parallel algorithms often have decreased converge rate. This can be as
+	  high as half of the of the sequential version. Consequently, the parallel
+	  solver requires a higher number of interactions to achieve similar convergence.
+
+  It is recommended this option is enabled on system with more than two cores,
+  since the performance gain in a dual core system are marginally better. Your
+  mileage may vary.
+
+  At the very least the application must test the option to verify the performance gains.
+
+  This option has no impact on other subsystems of the engine.
+
+  See also: ::NewtonGetThreadsCount, ::NewtonSetThreadsCount
+*/
+void NewtonSetParallelSolverOnLargeIsland(const NewtonWorld* const, int)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated funtion: %s\n", __FUNCDNAME__));
+}
