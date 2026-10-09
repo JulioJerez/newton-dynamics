@@ -370,17 +370,11 @@ NewtonBody* NewtonWorldGetFirstBody(const NewtonWorld* const newtonWorld)
 NewtonBody* NewtonWorldGetNextBody(const NewtonWorld* const newtonWorld, const NewtonBody* const curBody)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)curBody;
-	//
-	//dgBodyMasterList::dgListNode* const node = body->GetMasterList()->GetNext();
-	//if (node) {
-	//	return (NewtonBody*)node->GetInfo().GetBody();
-	//}
-	//else {
-	//	return NULL;
-	//}
-	ndAssert(0);
-	return 0;
+	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(curBody);
+	ndBodyKinematic* const kinBody = static_cast<ndBodyKinematic*>(body);
+	ndBodyListView::ndNode* const node = kinBody->GetSceneNode();
+	ndBodyListView::ndNode* const nextNode = node ? node->GetNext() : nullptr;
+	return nextNode ? reinterpret_cast<NewtonBody*>(&nextNode->GetInfo()) : nullptr;
 }
 
 /*!

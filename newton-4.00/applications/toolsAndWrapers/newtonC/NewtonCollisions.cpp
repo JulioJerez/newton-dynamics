@@ -436,15 +436,6 @@ void NewtonCollisionForEachPolygonDo(const NewtonCollision* const collisionPtr, 
 	ndAssert(0);
 }
 
-int NewtonCollisionGetType(const NewtonCollision* const collision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
-	//return instance->GetCollisionPrimityType();
-	ndAssert(0);
-	return 0;
-}
-
 int NewtonCollisionIsConvexShape(const NewtonCollision* const collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -511,29 +502,6 @@ void* NewtonCollisionGetUserData(const NewtonCollision* const collision)
 	ndAssert(0);
 	return 0;
 
-}
-
-void NewtonCollisionSetMaterial(const NewtonCollision* const collision, const NewtonCollisionMaterial* const userData)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
-	//dgCollisionInfo::dgInstanceMaterial& data = instance->m_material;
-	//data.m_alignPad = userData->m_userData.m_int;
-	//data.m_userId = userData->m_userId;
-	//memcpy(data.m_userParam, userData->m_userParam, sizeof(data.m_userParam));
-	//instance->SetMaterial(data);
-	ndAssert(0);
-}
-
-void NewtonCollisionGetMaterial(const NewtonCollision* const collision, NewtonCollisionMaterial* const userData)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
-	//const dgCollisionInfo::dgInstanceMaterial& data = instance->GetMaterial();
-	//userData->m_userId = data.m_userId;
-	//userData->m_userData.m_int = data.m_alignPad;
-	//memcpy(userData->m_userParam, data.m_userParam, sizeof(data.m_userParam));
-	ndAssert(0);
 }
 
 void* NewtonCollisionGetSubCollisionHandle(const NewtonCollision* const collision)
@@ -1283,9 +1251,57 @@ void NewtonCollisionGetInfo(const NewtonCollision* const collision, NewtonCollis
 NewtonCollision* NewtonCollisionGetParentInstance(const NewtonCollision* const collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
-	//return (NewtonCollision*)instance->GetParent();
 	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
 	ndShapeCompound* const compoundCollision = instance->GetShape()->GetAsShapeCompound();
 	return compoundCollision ? reinterpret_cast<NewtonCollision*> (compoundCollision->GetOwner()) : nullptr;
+}
+
+void NewtonCollisionGetMaterial(const NewtonCollision* const collision, NewtonCollisionMaterial* const userData)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
+	//const dgCollisionInfo::dgInstanceMaterial& data = instance->GetMaterial();
+	//userData->m_userId = data.m_userId;
+	//userData->m_userData.m_int = data.m_alignPad;
+	//memcpy(userData->m_userParam, data.m_userParam, sizeof(data.m_userParam));
+
+	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	ndShapeMaterial material = instance->GetMaterial();
+
+	userData->m_userId = material.m_userId;
+	userData->m_userData.m_int = material.m_data.m_alignPad;
+	for (ndInt32 i = 0; i < sizeof(material.m_userParam) / sizeof(material.m_userParam[0]); ++i)
+	{
+		userData->m_userParam[i].m_ptr = material.m_userParam[i].m_ptrData;
+	}
+}
+
+void NewtonCollisionSetMaterial(const NewtonCollision* const collision, const NewtonCollisionMaterial* const userData)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
+	//dgCollisionInfo::dgInstanceMaterial& data = instance->m_material;
+	//data.m_alignPad = userData->m_userData.m_int;
+	//data.m_userId = userData->m_userId;
+	//memcpy(data.m_userParam, userData->m_userParam, sizeof(data.m_userParam));
+	//instance->SetMaterial(data);
+
+	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	ndShapeMaterial material = instance->GetMaterial();
+	material.m_userId = userData->m_userId;
+	material.m_data.m_alignPad = userData->m_userData.m_int;
+	for (ndInt32 i = 0; i < sizeof(material.m_userParam) / sizeof(material.m_userParam[0]); ++i)
+	{
+		material.m_userParam[i].m_ptrData = userData->m_userParam[i].m_ptr;
+	}
+	instance->SetMaterial(material);
+}
+
+int NewtonCollisionGetType(const NewtonCollision* const collision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
+	//return instance->GetCollisionPrimityType();
+	ndAssert(0);
+	return 0;
 }

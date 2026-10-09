@@ -750,31 +750,6 @@ void NewtonBodySetGyroscopicTorque(const NewtonBody* const bodyPtr, int state)
 	ndAssert(0);
 }
 
-/*!
-  Set the auto-activation mode for this body.
-
-  @param *bodyPtr is the pointer to the body.
-  @param state active mode: 1 = auto-activation on (controlled by Newton). 0 = auto-activation off and body is active all the time.
-
-  @return Nothing.
-
-  Bodies are created with auto-activation on by default.
-
-  Auto activation enabled is the default state for the majority of bodies in a large scene.
-  However, for player control, ai control or some other special circumstance, the application may want to control
-  the activation/deactivation of the body.
-  In that case, the application may call NewtonBodySetAutoSleep (body, 0) followed by
-  NewtonBodySetFreezeState(body), this will make the body active forever.
-
-  See also: ::NewtonBodyGetFreezeState, ::NewtonBodySetFreezeState, ::NewtonBodyGetAutoSleep
-*/
-void NewtonBodySetAutoSleep(const NewtonBody* const bodyPtr, int state)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//body->SetAutoSleep(state ? true : false);
-	ndAssert(0);
-}
 
 /*!
   Get the auto-activation state of the body.
@@ -1765,4 +1740,32 @@ NewtonCollision* NewtonBodyGetCollision(const NewtonBody* const bodyPtr)
 	ndBodyDynamic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyDynamic());
 
 	return reinterpret_cast<NewtonCollision*>(&dynBody->GetCollisionShape());
+}
+
+/*!
+  Set the auto-activation mode for this body.
+
+  @param *bodyPtr is the pointer to the body.
+  @param state active mode: 1 = auto-activation on (controlled by Newton). 0 = auto-activation off and body is active all the time.
+
+  @return Nothing.
+
+  Bodies are created with auto-activation on by default.
+
+  Auto activation enabled is the default state for the majority of bodies in a large scene.
+  However, for player control, ai control or some other special circumstance, the application may want to control
+  the activation/deactivation of the body.
+  In that case, the application may call NewtonBodySetAutoSleep (body, 0) followed by
+  NewtonBodySetFreezeState(body), this will make the body active forever.
+
+  See also: ::NewtonBodyGetFreezeState, ::NewtonBodySetFreezeState, ::NewtonBodyGetAutoSleep
+*/
+void NewtonBodySetAutoSleep(const NewtonBody* const bodyPtr, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//body->SetAutoSleep(state ? true : false);
+	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBodyDynamic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyDynamic());
+	dynBody->SetAutoSleep(state ? true : false);
 }
