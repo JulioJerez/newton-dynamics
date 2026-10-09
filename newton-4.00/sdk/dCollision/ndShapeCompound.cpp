@@ -261,6 +261,7 @@ ndShapeCompound::ndShapeCompound()
 	,m_boxMaxRadius(ndFloat32(0.0f))
 	,m_root(nullptr)
 	,m_idIndex(0)
+	,m_owner(nullptr)
 {
 }
 
@@ -272,6 +273,7 @@ ndShapeCompound::ndShapeCompound(const ndShapeCompound& source)
 	,m_boxMaxRadius(ndFloat32(0.0f))
 	,m_root(nullptr)
 	,m_idIndex(0)
+	,m_owner(nullptr)
 {
 	ndTreeArray::Iterator iter(source.m_array);
 	for (iter.Begin(); iter; iter++) 
@@ -1301,6 +1303,11 @@ ndUnsigned64 ndShapeCompound::GetHash(ndUnsigned64 hash) const
 		crc = childShape->GetHash(crc);
 	}
 	return crc;
+}
+
+ndShapeInstance* ndShapeCompound::GetOwner() const
+{
+	return const_cast<ndShapeInstance*>(*m_owner);
 }
 
 ndSharedPtr<ndMeshCollisionShape> ndShapeCompound::GetMeshShape() const
