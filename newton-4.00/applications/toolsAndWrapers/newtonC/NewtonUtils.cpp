@@ -72,6 +72,7 @@ void operator delete(void* ptr) noexcept
 
 bool CheckFloat(ndFloat32* ptr, ndInt32 size)
 {
+#ifdef _DEBUG
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		if (!_finite(ptr[i]) || _isnan(ptr[i]))
@@ -79,6 +80,7 @@ bool CheckFloat(ndFloat32* ptr, ndInt32 size)
 			return false;
 		}
 	}
+#endif
 	return true;
 }
 

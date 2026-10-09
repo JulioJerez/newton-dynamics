@@ -731,55 +731,6 @@ void NewtonBodySetGyroscopicTorque(const NewtonBody* const bodyPtr, int state)
 
 
 /*!
-  Get the auto-activation state of the body.
-
-  @param *bodyPtr is the pointer to the body.
-
-  @return Auto activation state: 1 = auto-activation on. 0 = auto-activation off.
-
-  See also: ::NewtonBodySetAutoSleep, ::NewtonBodyGetSleepState
-*/
-int NewtonBodyGetAutoSleep(const NewtonBody* const bodyPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//
-	//return body->GetAutoSleep() ? 1 : 0;
-
-	ndAssert(0);
-	return 0;
-}
-
-
-/*!
-  Return the sleep mode of a rigid body.
-
-  @param *bodyPtr is the pointer to the body.
-
-  @return Sleep state: 0 = active. 1 = sleeping.
-
-  See also: ::NewtonBodySetAutoSleep
-*/
-int NewtonBodyGetSleepState(const NewtonBody* const bodyPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//return body->GetSleepState() ? 1 : 0;
-	ndAssert(0);
-	return 0;
-
-}
-
-void NewtonBodySetSleepState(const NewtonBody* const bodyPtr, int state)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//body->SetSleepState(state ? true : false);
-	ndAssert(0);
-}
-
-
-/*!
   Get the world axis aligned bounding box (AABB) of the body.
 
   @param *bodyPtr is the pointer to the body.
@@ -1721,6 +1672,39 @@ NewtonCollision* NewtonBodyGetCollision(const NewtonBody* const bodyPtr)
 	return reinterpret_cast<NewtonCollision*>(&dynBody->GetCollisionShape());
 }
 
+int NewtonBodyGetType(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//if (body->IsRTTIType(dgBody::m_dynamicBodyRTTI)) {
+	//	return NEWTON_DYNAMIC_BODY;
+	//}
+	//else if (body->IsRTTIType(dgBody::m_kinematicBodyRTTI)) {
+	//	return NEWTON_KINEMATIC_BODY;
+	//}
+	//else if (body->IsRTTIType(dgBody::m_dynamicBodyAsymentricRTTI)) {
+	//	return NEWTON_DYNAMIC_ASYMETRIC_BODY;
+	//	//	} else if (body->IsRTTIType(dgBody::m_deformableBodyRTTI)) {
+	//	//		return NEWTON_DEFORMABLE_BODY;
+	//}
+	//dgAssert(0);
+	//return 0;
+	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	if (body->IsType(ndBodyDynamic::StaticClassName()))
+	{
+		return NEWTON_DYNAMIC_BODY;
+	}
+	else if (body->IsType(ndBodyKinematic::StaticClassName()))
+	{
+		return NEWTON_KINEMATIC_BODY;
+	}
+	else
+	{
+		ndAssert(0);
+	}
+	return 0;
+}
+
 /*!
   Set the auto-activation mode for this body.
 
@@ -1749,25 +1733,51 @@ void NewtonBodySetAutoSleep(const NewtonBody* const bodyPtr, int state)
 	dynBody->SetAutoSleep(state ? true : false);
 }
 
+/*!
+  Get the auto-activation state of the body.
 
-int NewtonBodyGetType(const NewtonBody* const bodyPtr)
+  @param *bodyPtr is the pointer to the body.
+
+  @return Auto activation state: 1 = auto-activation on. 0 = auto-activation off.
+
+  See also: ::NewtonBodySetAutoSleep, ::NewtonBodyGetSleepState
+*/
+int NewtonBodyGetAutoSleep(const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	//dgBody* const body = (dgBody*)bodyPtr;
-	//if (body->IsRTTIType(dgBody::m_dynamicBodyRTTI)) {
-	//	return NEWTON_DYNAMIC_BODY;
-	//}
-	//else if (body->IsRTTIType(dgBody::m_kinematicBodyRTTI)) {
-	//	return NEWTON_KINEMATIC_BODY;
-	//}
-	//else if (body->IsRTTIType(dgBody::m_dynamicBodyAsymentricRTTI)) {
-	//	return NEWTON_DYNAMIC_ASYMETRIC_BODY;
-	//	//	} else if (body->IsRTTIType(dgBody::m_deformableBodyRTTI)) {
-	//	//		return NEWTON_DEFORMABLE_BODY;
-	//}
-	//dgAssert(0);
-	//return 0;
+	//
+	//return body->GetAutoSleep() ? 1 : 0;
+	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBodyDynamic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyDynamic());
+	return dynBody->GetAutoSleep() ? 1 : 0;
+}
 
-	ndAssert(0);
-	return 0;
+/*!
+  Return the sleep mode of a rigid body.
+
+  @param *bodyPtr is the pointer to the body.
+
+  @return Sleep state: 0 = active. 1 = sleeping.
+
+  See also: ::NewtonBodySetAutoSleep
+*/
+int NewtonBodyGetSleepState(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//return body->GetSleepState() ? 1 : 0;
+	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBodyDynamic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyDynamic());
+	return dynBody->GetSleepState() ? 1 : 0;
+}
+
+void NewtonBodySetSleepState(const NewtonBody* const bodyPtr, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//body->SetSleepState(state ? true : false);
+	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBodyDynamic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyDynamic());
+	dynBody->SetSleepState(state ? true : false);
 }

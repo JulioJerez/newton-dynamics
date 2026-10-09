@@ -430,37 +430,6 @@ NewtonCollision* NewtonCreateHeightFieldCollision(const NewtonWorld* const newto
 	return reinterpret_cast<NewtonCollision*>(instance);
 }
 
-
-/*!
-  Iterate thought polygon of the collision geometry of a body calling the function callback.
-
-  @param *collisionPtr is the pointer to the collision objects.
-  @param *matrixPtr is the pointer to the collision objects.
-  @param callback application define callback
-  @param *userDataPtr pointer to the user defined user data value.
-
-  @return nothing
-
-  This function used to be a member of the rigid body, but to making it a member of the collision object provides better
-  low lever display capabilities. The application can still call this function to show the collision of a rigid body by
-  getting the collision and the transformation matrix from the rigid, and then calling this functions.
-
-  This function can be called by the application in order to show the collision geometry. The application should provide a pointer to the function *NewtonCollisionIterator*,
-  Newton will convert the collision geometry into a polygonal mesh, and will call *callback* for every polygon of the mesh
-
-  this function affect severely the performance of Newton. The application should call this function only for debugging purpose
-
-  This function will ignore user define collision mesh
-  See also: ::NewtonWorldGetFirstBody, ::NewtonWorldForEachBodyInAABBDo
-*/
-void NewtonCollisionForEachPolygonDo(const NewtonCollision* const collisionPtr, const dFloat* const matrixPtr, NewtonCollisionIterator callback, void* const userDataPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const collision = (dgCollisionInstance*)(collisionPtr);
-	//collision->DebugCollision(dgMatrix(matrixPtr), (dgCollision::OnDebugCollisionMeshCallback)callback, userDataPtr);
-	ndAssert(0);
-}
-
 int NewtonCollisionIsConvexShape(const NewtonCollision* const collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
