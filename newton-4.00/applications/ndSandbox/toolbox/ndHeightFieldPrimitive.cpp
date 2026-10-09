@@ -223,15 +223,15 @@ ndSharedPtr<ndBody> BuildHeightFieldTerrain(ndDemoEntityManager* const scene, co
 		ndFloat32 high = heightfield[i].m_y;
 		heightMap[i] = ndReal(high);
 	}
-	heighfield->UpdateElevationMapAabb();
+	heightfieldShape->UpdateElevationMapAabb();
 
 	ndMatrix heighfieldLocation(location);
-	heighfieldLocation.m_posit.m_x -= 0.5f * ndFloat32(heighfield->GetWith()) * heighfield->GetWithScale();
-	heighfieldLocation.m_posit.m_z -= 0.5f * ndFloat32(heighfield->GetHeight()) * heighfield->GetHeightScale();
+	heighfieldLocation.m_posit.m_x -= 0.5f * ndFloat32(heightfieldShape->GetWith()) * heightfieldShape->GetWithScale();
+	heighfieldLocation.m_posit.m_z -= 0.5f * ndFloat32(heightfieldShape->GetHeight()) * heightfieldShape->GetHeightScale();
 
 	// add tile base sence node
 	ndSharedPtr<ndRenderTexture> texture(scene->GetRenderer()->GetTextureCache()->GetTexture(ndGetWorkingFileName(textureName)));
-	ndSharedPtr<ndRenderSceneNode> entity(new ndHeightfieldMesh(scene, heighfield, texture, heighfieldLocation));
+	ndSharedPtr<ndRenderSceneNode> entity(new ndHeightfieldMesh(scene, heightfieldShape, texture, heighfieldLocation));
 	
 	// generate a rigibody and added to the scene and world
 	ndPhysicsWorld* const world = scene->GetWorld();
