@@ -13,14 +13,16 @@
 #include "newtonWorld.h"
 #include "newtonBodyNotify.h"
 
-ndNewtonBodyNotify::ndNewtonBodyNotify(NewtonBody* const owner)
+ndNewtonBodyNotify::ndNewtonBodyNotify(ndNewtonWorld* const world, NewtonBody* const owner)
 	:ndModelBodyNotify()
 	,m_userData(nullptr)
 	,m_owner(owner)
+	,m_world(world)
 	,m_materialGoupId(0)
 	,m_capSpeed(ndFloat32 (60.0f))
 	,m_capOmega(ndFloat32(10.0f))
 	,m_bodyIsInWorld(false)
+	,m_onDestroy(nullptr)
 	,m_applyTransform(nullptr)
 	,m_forceAndTorque(nullptr)
 {
@@ -30,10 +32,12 @@ ndNewtonBodyNotify::ndNewtonBodyNotify(const ndNewtonBodyNotify& notify)
 	:ndModelBodyNotify(notify)
 	,m_userData(notify.m_userData)
 	,m_owner(notify.m_owner)
+	,m_world(notify.m_world)
 	,m_materialGoupId(notify.m_materialGoupId)
 	,m_capSpeed(notify.m_capSpeed)
 	,m_capOmega(notify.m_capOmega)
 	,m_bodyIsInWorld(false)
+	,m_onDestroy(notify.m_onDestroy)
 	,m_applyTransform(notify.m_applyTransform)
 	,m_forceAndTorque(notify.m_forceAndTorque)
 {
@@ -41,6 +45,12 @@ ndNewtonBodyNotify::ndNewtonBodyNotify(const ndNewtonBodyNotify& notify)
 
 ndNewtonBodyNotify::~ndNewtonBodyNotify()
 {
+	if (m_onDestroy)
+	{
+		ndAssert(m_world);
+		ndSharedPtr<ndBody> body(m_world->GetBody(GetBody()));
+		m_onDestroy(reinterpret_cast<NewtonBody*>(&body));
+	}
 }
 
 ndBodyNotify* ndNewtonBodyNotify::Clone() const

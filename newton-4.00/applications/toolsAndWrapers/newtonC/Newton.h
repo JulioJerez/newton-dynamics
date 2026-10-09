@@ -400,8 +400,6 @@ extern "C" {
 	typedef void (*NewtonTreeCollisionCallback) (const NewtonBody* const bodyWithTreeCollision, const NewtonBody* const body, int faceID, 
 												 int vertexCount, const dFloat* const vertex, int vertexStrideInBytes); 
 
-	typedef void (*NewtonBodyDestructor) (const NewtonBody* const body);
-
 	typedef int (*NewtonIslandUpdate) (const NewtonWorld* const newtonWorld, const void* islandHandle, int bodyCount);
 	
 	typedef void (*NewtonFractureCompoundCollisionOnEmitCompoundFractured) (NewtonBody* const fracturedBody);
@@ -557,6 +555,7 @@ extern "C" {
 	typedef void* (*NewtonAllocMemory) (int sizeInBytes);
 	typedef void (*NewtonFreeMemory) (void* const ptr, int sizeInBytes);
 
+	typedef void (*NewtonBodyDestructor) (const NewtonBody* const body);
 	typedef void (*NewtonPostUpdateCallback) (const NewtonWorld* const world, dFloat timestep);
 	typedef int (*NewtonOnAABBOverlap) (const NewtonJoint* const contact, dFloat timestep, int threadIndex);
 	typedef int (*NewtonOnCompoundSubCollisionAABBOverlap) (const NewtonJoint* const contact, dFloat timestep, const NewtonBody* const body0, const void* const collisionNode0, const NewtonBody* const body1, const void* const collisionNode1, int threadIndex);

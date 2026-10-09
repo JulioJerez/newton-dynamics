@@ -37,17 +37,6 @@ NewtonMesh* NewtonMeshCreateFromMesh(const NewtonMesh* const mesh)
 	return 0;
 }
 
-NewtonMesh* NewtonMeshCreateFromCollision(const NewtonCollision* const collision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	//dgCollisionInstance* const shape = (dgCollisionInstance*)collision;
-	//dgMeshEffect* const mesh = new (shape->GetAllocator()) dgMeshEffect(shape);
-	//return (NewtonMesh*)mesh;
-	ndAssert(0);
-	return 0;
-}
-
 NewtonMesh* NewtonMeshCreateConvexHull(const NewtonWorld* const newtonWorld, int count, const dFloat* const vertexCloud, int strideInBytes, dFloat tolerance)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -202,15 +191,6 @@ void NewtonMeshApplySphericalMapping(const NewtonMesh* const mesh, int material,
 	//dgMatrix matrix(aligmentMatrix);
 	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
 	//meshEffect->SphericalMapping(material, matrix);
-	ndAssert(0);
-}
-
-void NewtonMeshApplyBoxMapping(const NewtonMesh* const mesh, int front, int side, int top, const dFloat* const aligmentMatrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgMatrix matrix(aligmentMatrix);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//meshEffect->BoxMapping(front, side, top, matrix);
 	ndAssert(0);
 }
 
@@ -1107,6 +1087,15 @@ NewtonMesh* NewtonMeshCreate(const NewtonWorld* const newtonWorld)
 	return reinterpret_cast<NewtonMesh*>(mesh);
 }
 
+NewtonMesh* NewtonMeshCreateFromCollision(const NewtonCollision* const collision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+
+	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	ndSharedPtr<ndMeshEffect>* const mesh = new ndSharedPtr<ndMeshEffect>(new ndMeshEffect(*instance));
+	return reinterpret_cast<NewtonMesh*>(mesh);
+}
+
 void NewtonMeshDestroy(const NewtonMesh* const mesh)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -1283,4 +1272,19 @@ void NewtonMeshMaterialGetIndexStream(const NewtonMesh* const mesh, void* const 
 	
 	ndIndexArray* const indexArray = reinterpret_cast<ndIndexArray*> (handle);
 	meshEffect->GetMaterialGetIndexStream(indexArray, materialId, index);
+}
+
+
+void NewtonMeshApplyBoxMapping(const NewtonMesh* const mesh, int front, int side, int top, const dFloat* const aligmentMatrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMatrix matrix(aligmentMatrix);
+	if (!CheckFloat(&matrix[0][0], 16))
+	{
+		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
+		matrix = ndGetIdentityMatrix();
+	}
+
+	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	meshEffect->BoxMapping(front, side, top, matrix);
 }

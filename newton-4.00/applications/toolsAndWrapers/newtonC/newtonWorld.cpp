@@ -37,6 +37,17 @@ ndNewtonWorld::~ndNewtonWorld()
 {
 }
 
+void ndNewtonWorld::OnAddBody(ndBody* const body) const
+{
+	ndWorld::OnAddBody(body);
+}
+
+void ndNewtonWorld::OnRemoveBody(ndBody* const body) const
+{
+	ndWorld::OnRemoveBody(body);
+}
+
+
 void ndNewtonWorld::ClearMaterials()
 {
 	SetContactNotify(ndSharedPtr<ndContactNotify>(new ndContactCallback));

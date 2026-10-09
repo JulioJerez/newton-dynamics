@@ -50,6 +50,7 @@ class ndShapeCompound: public ndShape
 	D_CLASS_REFLECTION(ndShapeCompound,ndShape)
 
 	D_COLLISION_API ndShapeCompound();
+	D_COLLISION_API ndShapeCompound(const ndShapeCompound& source);
 	D_COLLISION_API virtual ~ndShapeCompound() override;
 
 	D_COLLISION_API const ndTreeArray& GetTree() const;
@@ -63,10 +64,10 @@ class ndShapeCompound: public ndShape
 	D_COLLISION_API virtual void EndAddRemove();
 	D_COLLISION_API ndSharedPtr<ndMeshCollisionShape> GetMeshShape() const override;
 
+	D_COLLISION_API ndShapeInstance* GetOwner() const;
+
 	protected:
 	class ndSpliteInfo;
-	D_COLLISION_API ndShapeCompound(const ndShapeCompound& source);
-
 	virtual ndShapeInfo GetShapeInfo() const override;
 	virtual void DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& debugCallback) const override;
 	virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const override;
@@ -102,6 +103,7 @@ class ndShapeCompound: public ndShape
 	ndFloat32 m_boxMaxRadius;
 	ndNodeBase* m_root;
 	ndInt32 m_idIndex;
+	ndWeakPtr<ndShapeInstance> m_owner;
 
 	friend class ndBodyKinematic;
 	friend class ndShapeInstance;

@@ -44,17 +44,16 @@ NewtonCollision* NewtonCollisionCreateInstance(const NewtonCollision* const coll
   to get the correct reference count of a collision primitive the application can call function *NewtonCollisionGetInfo*
 
 */
-void NewtonDestroyCollision(const NewtonCollision* const collisionPtr)
+void NewtonDestroyCollision(const NewtonCollision* const collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndSharedPtr<ndShapeInstance>* const instance(SharedObjectFromHandle<ndShapeInstance, NewtonCollision>(collisionPtr));
-	delete instance;
+	delete reinterpret_cast<const ndShapeInstance*>(collision);
 }
 
 void NewtonCollisionSetUserData(const NewtonCollision* const collision, void* const userData)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance* const instance = ObjectFromHandle<ndShapeInstance, NewtonCollision>(collision);
+	const ndShapeInstance* const instance = reinterpret_cast<const ndShapeInstance*>(collision);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userParam[0].m_ptrData = userData;
 }
@@ -62,7 +61,7 @@ void NewtonCollisionSetUserData(const NewtonCollision* const collision, void* co
 void NewtonCollisionSetMatrix(const NewtonCollision* collision, const dFloat* const matrixPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance instance(*ObjectFromHandle<ndShapeInstance, NewtonCollision>(collision));
+	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
 
 	ndMatrix matrix(matrixPtr);
 	if (!CheckFloat(&matrix[0][0], 16))
@@ -70,76 +69,16 @@ void NewtonCollisionSetMatrix(const NewtonCollision* collision, const dFloat* co
 		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
 		matrix = ndGetIdentityMatrix();
 	}
-	instance.SetLocalMatrix(matrix);
+	instance->SetLocalMatrix(matrix);
 }
 
 void NewtonCollisionGetMatrix(const NewtonCollision* const collision, dFloat* const matrixPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance instance(*ObjectFromHandle<ndShapeInstance, NewtonCollision>(collision));
+	const ndShapeInstance* const instance = reinterpret_cast<const ndShapeInstance*>(collision);
 
-	const ndMatrix instanceMatrix(instance.GetLocalMatrix());
+	const ndMatrix instanceMatrix(instance->GetLocalMatrix());
 	ndMemCpy(matrixPtr, &instanceMatrix[0][0], sizeof(ndMatrix) / sizeof(ndFloat32));
-}
-
-/*!
-  Create a container to hold an array of convex collision primitives.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param  shapeID: fixme
-
-  @return Pointer to the compound collision.
-
-  Compound collision primitives can only be made of convex collision primitives and they can not contain compound collision. Therefore they are treated as convex primitives.
-
-  Compound collision primitives are treated as instance collision objects that can not shared by multiples rigid bodies.
-
-*/
-NewtonCollision* NewtonCreateCompoundCollision(const NewtonWorld* const, int shapeID)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(new ndShapeInstance(new ndShapeCompound()));
-	ndShapeInstance* const instance = **shape;
-	ndShapeMaterial material = instance->GetMaterial();
-	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(shape);
-}
-
-void NewtonCompoundCollisionBeginAddRemove(NewtonCollision* const compoundCollision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance* const instance = ObjectFromHandle<ndShapeInstance, NewtonCollision>(compoundCollision);
-	ndShapeCompound* const collision = instance->GetShape()->GetAsShapeCompound();
-	if (collision)
-	{
-		collision->BeginAddRemove();
-	}
-}
-
-void NewtonCompoundCollisionEndAddRemove(NewtonCollision* const compoundCollision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance* const compoundInstance = ObjectFromHandle<ndShapeInstance, NewtonCollision>(compoundCollision);
-	ndShapeCompound* const collision = compoundInstance->GetShape()->GetAsShapeCompound();
-	if (collision)
-	{
-		collision->EndAddRemove();
-	}
-}
-
-void* NewtonCompoundCollisionAddSubCollision(NewtonCollision* const compoundCollision, const NewtonCollision* const convexCollision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	ndShapeInstance* const compoundInstance = ObjectFromHandle<ndShapeInstance, NewtonCollision>(compoundCollision);
-	ndShapeInstance* const childInstance = ObjectFromHandle<ndShapeInstance, NewtonCollision>(convexCollision);
-
-	ndShapeCompound* const collision = compoundInstance->GetShape()->GetAsShapeCompound();
-	if (collision && childInstance->GetShape()->GetAsShapeConvex())
-	{
-		return collision->AddCollision(childInstance);
-	}
-	return nullptr;
 }
 
 /*!
@@ -158,8 +97,8 @@ void* NewtonCompoundCollisionAddSubCollision(NewtonCollision* const compoundColl
 NewtonCollision* NewtonCreateNull(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(new ndShapeInstance(new ndShapeNull()));
-	return reinterpret_cast<NewtonCollision*>(shape);
+	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeNull());
+	return reinterpret_cast<NewtonCollision*>(instance);
 }
 
 /*!
@@ -183,12 +122,11 @@ NewtonCollision* NewtonCreateBox(const NewtonWorld* const, dFloat dx, dFloat dy,
 	{
 		matrix = ndMatrix(offsetMatrix);
 	}
-	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(new ndShapeInstance(new ndShapeBox(dx, dy, dz)));
-	ndShapeInstance* const instance = **shape;
+	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeBox(dx, dy, dz));
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(shape);
+	return reinterpret_cast<NewtonCollision*>(instance);
 }
 
 /*!
@@ -215,12 +153,11 @@ NewtonCollision* NewtonCreateSphere(const NewtonWorld* const newtonWorld, dFloat
 	{
 		matrix = ndMatrix(offsetMatrix);
 	}
-	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(new ndShapeInstance(new ndShapeSphere(radius)));
-	ndShapeInstance* const instance = **shape;
+	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeSphere(radius));
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(shape);
+	return reinterpret_cast<NewtonCollision*>(instance);
 }
 
 /*!
@@ -243,12 +180,11 @@ NewtonCollision* NewtonCreateCone(const NewtonWorld* const newtonWorld, dFloat r
 	{
 		matrix = ndMatrix(offsetMatrix);
 	}
-	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(new ndShapeInstance(new ndShapeCone(radius, height)));
-	ndShapeInstance* const instance = **shape;
+	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeCone(radius, height));
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(shape);
+	return reinterpret_cast<NewtonCollision*>(instance);
 }
 
 /*!
@@ -274,12 +210,11 @@ NewtonCollision* NewtonCreateCapsule(const NewtonWorld* const newtonWorld, dFloa
 	{
 		matrix = ndMatrix(offsetMatrix);
 	}
-	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(new ndShapeInstance(new ndShapeCapsule (radio0, radio1, height)));
-	ndShapeInstance* const instance = **shape;
+	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeCapsule (radio0, radio1, height));
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(shape);
+	return reinterpret_cast<NewtonCollision*>(instance);
 }
 
 /*!
@@ -303,12 +238,11 @@ NewtonCollision* NewtonCreateCylinder(const NewtonWorld* const newtonWorld, dFlo
 	{
 		matrix = ndMatrix(offsetMatrix);
 	}
-	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(new ndShapeInstance(new ndShapeCylinder(radio0, radio1, height)));
-	ndShapeInstance* const instance = **shape;
+	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeCylinder(radio0, radio1, height));
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(shape);
+	return reinterpret_cast<NewtonCollision*>(instance);
 }
 
 /*!
@@ -331,12 +265,11 @@ NewtonCollision* NewtonCreateChamferCylinder(const NewtonWorld* const newtonWorl
 	{
 		matrix = ndMatrix(offsetMatrix);
 	}
-	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(new ndShapeInstance(new ndShapeChamferCylinder(radius, height)));
-	ndShapeInstance* const instance = **shape;
+	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeChamferCylinder(radius, height));
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(shape);
+	return reinterpret_cast<NewtonCollision*>(instance);
 }
 
 
@@ -385,12 +318,11 @@ NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* const newtonWorld, in
 	{
 		matrix = ndMatrix(offsetMatrix);
 	}
-	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(new ndShapeInstance(new ndShapeConvexHull(count, strideInBytes, tolerance, vertexCloud)));
-	ndShapeInstance* const instance = **shape;
+	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeConvexHull(count, strideInBytes, tolerance, vertexCloud));
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(shape);
+	return reinterpret_cast<NewtonCollision*>(instance);
 }
 
 /*!
@@ -413,12 +345,10 @@ NewtonCollision* NewtonCreateConvexHullFromMesh(const NewtonWorld* const, const 
 	TRACE_FUNCTION(__FUNCTION__);
 	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
 
-	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(meshEffect->CreateConvexCollision(tolerance));
-	ndShapeInstance* const instance = **shape;
+	ndShapeInstance* const instance = meshEffect->CreateConvexCollision(tolerance);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-
-	return reinterpret_cast<NewtonCollision*>(shape);
+	return reinterpret_cast<NewtonCollision*>(instance);
 }
 
 
@@ -446,12 +376,7 @@ NewtonCollision* NewtonCreateHeightFieldCollision(const NewtonWorld* const newto
 	const void* const elevationMap, const char* const attributeMap, dFloat verticalScale, dFloat horizontalScale_x, dFloat horizontalScale_z, int shapeID)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//dgCollisionInstance* const collision = world->CreateHeightField(width, height, gridsDiagonals, elevationdatType, elevationMap, (const dgInt8* const)attributeMap, verticalScale, horizontalScale_x, horizontalScale_z);
-	//collision->SetUserDataID(dgUnsigned32(shapeID));
-	//return (NewtonCollision*)collision;
-	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(new ndShapeInstance(new ndShapeHeightfield(width, height, ndShapeHeightfield::ndGridConstruction(gridsDiagonals), horizontalScale_x, horizontalScale_z)));
-	ndShapeInstance* const instance = **shape;
+	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeHeightfield(width, height, ndShapeHeightfield::ndGridConstruction(gridsDiagonals), horizontalScale_x, horizontalScale_z));
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
 
@@ -477,132 +402,7 @@ NewtonCollision* NewtonCreateHeightFieldCollision(const NewtonWorld* const newto
 	heighfield->UpdateElevationMapAabb();
 
 
-	return reinterpret_cast<NewtonCollision*>(shape);
-}
-
-
-
-/*!
-  Create a height field collision geometry.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param shapeID fixme
-
-  @return Pointer to the collision.
-
-*/
-NewtonCollision* NewtonCreateSceneCollision(const NewtonWorld* const newtonWorld, int shapeID)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//
-	//dgCollisionInstance* const collision = world->CreateScene();
-	//
-	//collision->SetUserDataID(dgUnsigned32(shapeID));
-	//return (NewtonCollision*)collision;
-	ndAssert(0);
-	return nullptr;
-}
-
-NewtonCollision* NewtonSceneCollisionGetCollisionFromNode(NewtonCollision* const sceneCollision, const void* const node)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-	//return NewtonCompoundCollisionGetCollisionFromNode(sceneCollision, node);
-	return nullptr;
-}
-
-void* NewtonSceneCollisionGetFirstNode(NewtonCollision* const sceneCollision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//return NewtonCompoundCollisionGetFirstNode(sceneCollision);
-	ndAssert(0);
-	return nullptr;
-}
-
-void* NewtonSceneCollisionGetNextNode(NewtonCollision* const sceneCollision, const void* const node)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//return NewtonCompoundCollisionGetNextNode(sceneCollision, node);
-	ndAssert(0);
-	return nullptr;
-}
-
-void NewtonSceneCollisionBeginAddRemove(NewtonCollision* const sceneCollision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//NewtonCompoundCollisionBeginAddRemove(sceneCollision);
-	ndAssert(0);
-}
-
-void NewtonSceneCollisionEndAddRemove(NewtonCollision* const sceneCollision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//NewtonCompoundCollisionEndAddRemove(sceneCollision);
-	ndAssert(0);
-}
-
-void NewtonSceneCollisionSetSubCollisionMatrix(NewtonCollision* const sceneCollision, const void* const collisionNode, const dFloat* const matrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//NewtonCompoundCollisionSetSubCollisionMatrix(sceneCollision, collisionNode, matrix);
-	ndAssert(0);
-}
-
-void* NewtonSceneCollisionAddSubCollision(NewtonCollision* const sceneCollision, const NewtonCollision* const collision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	//dgCollisionInstance* const sceneInstance = (dgCollisionInstance*)sceneCollision;
-	//dgCollisionInstance* const sceneInstanceChild = (dgCollisionInstance*)collision;
-	//if (sceneInstance->IsType(dgCollision::dgCollisionScene_RTTI) && !sceneInstanceChild->IsType(dgCollision::dgCollisionCompound_RTTI)) {
-	//	dgCollisionScene* const collision1 = (dgCollisionScene*)sceneInstance->GetChildShape();
-	//	return collision1->AddCollision(sceneInstanceChild);
-	//}
-	//return NULL;
-	ndAssert(0);
-	return nullptr;
-}
-
-void NewtonSceneCollisionRemoveSubCollision(NewtonCollision* const sceneCollision, const void* const collisionNode)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const sceneInstance = (dgCollisionInstance*)sceneCollision;
-	//if (sceneInstance->IsType(dgCollision::dgCollisionScene_RTTI)) {
-	//	dgCollisionScene* const collision = (dgCollisionScene*)sceneInstance->GetChildShape();
-	//	dgCollisionInstance* const childCollision = collision->GetCollisionFromNode((dgCollisionCompound::dgTreeArray::dgTreeNode*)collisionNode);
-	//	if (childCollision) {
-	//		collision->RemoveCollision((dgCollisionCompound::dgTreeArray::dgTreeNode*)collisionNode);
-	//	}
-	//}
-	ndAssert(0);
-}
-
-void NewtonSceneCollisionRemoveSubCollisionByIndex(NewtonCollision* const sceneCollision, int nodeIndex)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)sceneCollision;
-	//if (instance->IsType(dgCollision::dgCollisionCompound_RTTI)) {
-	//	dgCollisionCompound* const collision = (dgCollisionCompound*)instance->GetChildShape();
-	//	NewtonSceneCollisionRemoveSubCollision(sceneCollision, collision->FindNodeByIndex(nodeIndex));
-	//}
-	ndAssert(0);
-}
-
-void* NewtonSceneCollisionGetNodeByIndex(NewtonCollision* const sceneCollision, int index)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//return NewtonCompoundCollisionGetNodeByIndex(sceneCollision, index);
-	ndAssert(0);
-	return nullptr;
-}
-
-int NewtonSceneCollisionGetNodeIndex(NewtonCollision* const sceneCollision, const void* const collisionNode)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//return NewtonCompoundCollisionGetNodeIndex(sceneCollision, collisionNode);
-	ndAssert(0);
-	return 0;
+	return reinterpret_cast<NewtonCollision*>(instance);
 }
 
 
@@ -744,16 +544,6 @@ void* NewtonCollisionGetSubCollisionHandle(const NewtonCollision* const collisio
 	ndAssert(0);
 	return 0;
 
-}
-
-NewtonCollision* NewtonCollisionGetParentInstance(const NewtonCollision* const collision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
-	//return (NewtonCollision*)instance->GetParent();
-
-	ndAssert(0);
-	return 0;
 }
 
 
@@ -1296,158 +1086,6 @@ const void* NewtonCollisionDataPointer(const NewtonCollision* const convexCollis
 }
 
 
-void NewtonCompoundCollisionRemoveSubCollision(NewtonCollision* const compoundCollision, const void* const collisionNode)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)compoundCollision;
-	//if (instance->IsType(dgCollision::dgCollisionCompound_RTTI)) {
-	//	dgCollisionCompound* const collision = (dgCollisionCompound*)instance->GetChildShape();
-	//	dgCollisionInstance* const childCollision = collision->GetCollisionFromNode((dgCollisionCompound::dgTreeArray::dgTreeNode*)collisionNode);
-	//	if (childCollision && childCollision->IsType(dgCollision::dgCollisionConvexShape_RTTI)) {
-	//		collision->RemoveCollision((dgCollisionCompound::dgTreeArray::dgTreeNode*)collisionNode);
-	//	}
-	//}
-	ndAssert(0);
-}
-
-void NewtonCompoundCollisionRemoveSubCollisionByIndex(NewtonCollision* const compoundCollision, int nodeIndex)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)compoundCollision;
-	//if (instance->IsType(dgCollision::dgCollisionCompound_RTTI)) {
-	//	dgCollisionCompound* const collision = (dgCollisionCompound*)instance->GetChildShape();
-	//	NewtonCompoundCollisionRemoveSubCollision(compoundCollision, collision->FindNodeByIndex(nodeIndex));
-	//}
-	ndAssert(0);
-}
-
-
-void NewtonCompoundCollisionSetSubCollisionMatrix(NewtonCollision* const compoundCollision, const void* const collisionNode, const dFloat* const matrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const compoundInstance = (dgCollisionInstance*)compoundCollision;
-	//if (compoundInstance->IsType(dgCollision::dgCollisionCompound_RTTI)) {
-	//	dgCollisionCompound* const collision = (dgCollisionCompound*)compoundInstance->GetChildShape();
-	//	collision->SetCollisionMatrix((dgCollisionCompound::dgTreeArray::dgTreeNode*)collisionNode, dgMatrix(matrix));
-	//}
-	ndAssert(0);
-}
-
-
-void* NewtonCompoundCollisionGetFirstNode(NewtonCollision* const compoundCollision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)compoundCollision;
-	//if (instance->IsType(dgCollision::dgCollisionCompound_RTTI)) {
-	//	dgCollisionCompound* const collision = (dgCollisionCompound*)instance->GetChildShape();
-	//	return collision->GetFirstNode();
-	//}
-	//return NULL;
-	ndAssert(0);
-	return 0;
-}
-
-void* NewtonCompoundCollisionGetNextNode(NewtonCollision* const compoundCollision, const void* const node)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)compoundCollision;
-	//if (instance->IsType(dgCollision::dgCollisionCompound_RTTI)) {
-	//	dgCollisionCompound* const collision = (dgCollisionCompound*)instance->GetChildShape();
-	//	return collision->GetNextNode((dgCollisionCompound::dgTreeArray::dgTreeNode*)node);
-	//}
-	//return NULL;
-	ndAssert(0);
-	return 0;
-}
-
-void* NewtonCompoundCollisionGetNodeByIndex(NewtonCollision* const compoundCollision, int index)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)compoundCollision;
-	//if (instance->IsType(dgCollision::dgCollisionCompound_RTTI)) {
-	//	dgCollisionCompound* const collision = (dgCollisionCompound*)instance->GetChildShape();
-	//	return collision->FindNodeByIndex(index);
-	//}
-	//return NULL;
-	ndAssert(0);
-	return 0;
-}
-
-int NewtonCompoundCollisionGetNodeIndex(NewtonCollision* const compoundCollision, const void* const node)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)compoundCollision;
-	//if (instance->IsType(dgCollision::dgCollisionCompound_RTTI)) {
-	//	dgCollisionCompound* const collision = (dgCollisionCompound*)instance->GetChildShape();
-	//	return collision->GetNodeIndex((dgCollisionCompound::dgTreeArray::dgTreeNode*)node);
-	//}
-	//return -1;
-	ndAssert(0);
-	return 0;
-}
-
-
-NewtonCollision* NewtonCompoundCollisionGetCollisionFromNode(NewtonCollision* const compoundCollision, const void* const node)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const compoundInstance = (dgCollisionInstance*)compoundCollision;
-	//if (compoundInstance->IsType(dgCollision::dgCollisionCompound_RTTI)) {
-	//	dgCollisionCompound* const collision = (dgCollisionCompound*)compoundInstance->GetChildShape();
-	//	return (NewtonCollision*)collision->GetCollisionFromNode((dgCollisionCompound::dgTreeArray::dgTreeNode*)node);
-	//}
-	//return NULL;
-	ndAssert(0);
-	return 0;
-}
-
-
-/*!
-  Create a compound collision from a concave mesh by an approximate convex partition
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param *convexAproximation fixme
-  @param hullTolerance fixme
-  @param shapeID fixme
-  @param subShapeID fixme
-
-
-  @return Pointer to the compound collision.
-
-  The algorithm will separated the the original mesh into a series of sub meshes until either
-  the worse concave point is smaller than the specified min concavity or the max number convex shapes is reached.
-
-  is is recommended that convex approximation are made by person with a graphics toll by physically overlaying collision primitives over the concave mesh.
-  but for quit test of maybe for simple meshes and algorithm approximations can be used.
-
-  is is recommended that for best performance this function is used in an off line toll and serialize the output.
-
-  Compound collision primitives are treated as instanced collision objects that cannot be shared by multiples rigid bodies.
-
-*/
-NewtonCollision* NewtonCreateCompoundCollisionFromMesh(const NewtonWorld* const newtonWorld, const NewtonMesh* const convexAproximation, dFloat hullTolerance, int shapeID, int subShapeID)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//NewtonCollision* const compound = NewtonCreateCompoundCollision(newtonWorld, shapeID);
-	//NewtonCompoundCollisionBeginAddRemove(compound);
-	//
-	//NewtonMesh* nextSegment = NULL;
-	//for (NewtonMesh* segment = NewtonMeshCreateFirstSingleSegment(convexAproximation); segment; segment = nextSegment) {
-	//	nextSegment = NewtonMeshCreateNextSingleSegment(convexAproximation, segment);
-	//
-	//	NewtonCollision* const convexHull = NewtonCreateConvexHullFromMesh(newtonWorld, segment, hullTolerance, subShapeID);
-	//	if (convexHull) {
-	//		NewtonCompoundCollisionAddSubCollision(compound, convexHull);
-	//		NewtonDestroyCollision(convexHull);
-	//	}
-	//	NewtonMeshDestroy(segment);
-	//}
-	//
-	//NewtonCompoundCollisionEndAddRemove(compound);
-	//
-	//return compound;
-	ndAssert(0);
-	return 0;
-}
 
 /*!
   Serialize a general collision shape.
@@ -1499,34 +1137,6 @@ NewtonCollision* NewtonCreateCollisionFromSerialization(const NewtonWorld* const
 	ndAssert(0);
 	return 0;
 }
-
-
-/*!
-  Get creation parameters for this collision objects.
-
-  @param collision is the pointer to a convex collision primitive.
-  @param *collisionInfo pointer to a collision information record.
-
-  This function can be used by the application for writing file format and for serialization.
-
-  See also: ::NewtonCollisionGetInfo, ::NewtonCollisionSerialize
-*/
-void NewtonCollisionGetInfo(const NewtonCollision* const collision, NewtonCollisionInfoRecord* const collisionInfo)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const coll = (dgCollisionInstance*)collision;
-	//
-	//dgAssert(dgInt32(sizeof(dgCollisionInfo)) <= dgInt32(sizeof(NewtonCollisionInfoRecord)));
-	//dgCollisionInfo info;
-	//coll->GetCollisionInfo(&info);
-	//memcpy(collisionInfo, &info, sizeof(dgCollisionInfo));
-	ndAssert(0);
-}
-
-
-
-
-
 
 void NewtonHeightFieldSetUserRayCastCallback(const NewtonCollision* const heightField, NewtonHeightFieldRayCastCallback rayHitCallback)
 {
@@ -1631,3 +1241,51 @@ int NewtonUserMeshCollisionContinuousOverlapTest(const NewtonUserMeshCollisionCo
 	return 0;
 }
 
+/*!
+  Get creation parameters for this collision objects.
+
+  @param collision is the pointer to a convex collision primitive.
+  @param *collisionInfo pointer to a collision information record.
+
+  This function can be used by the application for writing file format and for serialization.
+
+  See also: ::NewtonCollisionGetInfo, ::NewtonCollisionSerialize
+*/
+void NewtonCollisionGetInfo(const NewtonCollision* const collision, NewtonCollisionInfoRecord* const collisionInfo)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	const ndShapeInfo info(instance->GetShapeInfo());
+	
+	ndMemSet(collisionInfo->m_paramArray, dFloat(0.0f), sizeof (collisionInfo->m_paramArray) / sizeof (collisionInfo->m_paramArray[0]));
+
+	collisionInfo->m_collisionMaterial.m_userId = info.m_shapeMaterial.m_userId;
+	collisionInfo->m_collisionMaterial.m_userData.m_ptr = info.m_shapeMaterial.m_userParam->m_ptrData;
+	ndMemCpy(&collisionInfo->m_offsetMatrix[0][0], &info.m_offsetMatrix[0][0], 16);
+
+	switch (info.m_collisionType)
+	{
+		case m_box:
+		{
+			collisionInfo->m_collisionType = SERIALIZE_ID_BOX;
+			collisionInfo->m_box.m_x = info.m_box.m_x;
+			collisionInfo->m_box.m_y = info.m_box.m_y;
+			collisionInfo->m_box.m_z = info.m_box.m_z;
+			break;
+		}
+
+		default:
+			ndAssert(0);
+	}
+}
+
+
+NewtonCollision* NewtonCollisionGetParentInstance(const NewtonCollision* const collision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
+	//return (NewtonCollision*)instance->GetParent();
+	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	ndShapeCompound* const compoundCollision = instance->GetShape()->GetAsShapeCompound();
+	return compoundCollision ? reinterpret_cast<NewtonCollision*> (compoundCollision->GetOwner()) : nullptr;
+}

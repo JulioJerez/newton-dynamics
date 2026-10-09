@@ -147,13 +147,13 @@ void NewtonWorldRayCast(const NewtonWorld* const newtonWorld, const dFloat* cons
 			{
 			}
 
-			ndUnsigned32 OnRayPrecastAction(const ndBody* const body, const ndShapeInstance* const instance) override
+			ndUnsigned32 OnRayPrecastAction(const ndBody* const body, const ndShapeInstance* const instancePtr) override
 			{
 				if (m_prefilter)
 				{
-					ndWeakPtr<const ndShapeInstance> sharedInstance(instance);
 					ndSharedPtr<ndBody> sharedBody(m_world->GetBody(const_cast<ndBody*>(reinterpret_cast<const ndBody*>(body))));
-					return m_prefilter(reinterpret_cast<NewtonBody*>(&sharedBody), reinterpret_cast<const NewtonCollision*>(&sharedInstance), m_userData);
+					ndShapeInstance* const instance = const_cast<ndShapeInstance*>(instancePtr);
+					return m_prefilter(reinterpret_cast<NewtonBody*>(&sharedBody), reinterpret_cast<const NewtonCollision*>(instance), m_userData);
 				}
 				return true;
 			}
@@ -170,9 +170,11 @@ void NewtonWorldRayCast(const NewtonWorld* const newtonWorld, const dFloat* cons
 					// dLong collisionID, 
 					// void* const userData, 
 					// dFloat intersectParam);
-					ndWeakPtr<const ndShapeInstance> sharedInstance(contact.m_shapeInstance0);
+					// 
+					//ndWeakPtr<const ndShapeInstance> sharedInstance(contact.m_shapeInstance0);
+					ndShapeInstance* const instance = const_cast<ndShapeInstance*>(contact.m_shapeInstance0);
 					ndSharedPtr<ndBody> sharedBody(m_world->GetBody(const_cast<ndBody*>(reinterpret_cast<const ndBody*>(contact.m_body0))));
-					intersetParam = m_filter(reinterpret_cast<NewtonBody*>(&sharedBody), reinterpret_cast<const NewtonCollision*>(&sharedInstance), &intersetParam, &contact.m_normal[0], contact.m_shapeId0, m_userData, intersetParam);
+					intersetParam = m_filter(reinterpret_cast<NewtonBody*>(&sharedBody), reinterpret_cast<const NewtonCollision*>(instance), &intersetParam, &contact.m_normal[0], contact.m_shapeId0, m_userData, intersetParam);
 				}
 				return intersetParam;
 			}

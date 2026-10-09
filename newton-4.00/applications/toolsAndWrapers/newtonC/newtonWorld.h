@@ -43,6 +43,9 @@ class ndNewtonWorld: public ndWorld
 	virtual void Update(ndFloat32 timestep) override;
 	virtual void PostUpdate(ndFloat32 timestep) override;
 
+	virtual void OnAddBody(ndBody* const body) const override;
+	virtual void OnRemoveBody(ndBody* const body) const override;
+
 	ndWeakPtr<void> m_userData;
 	ndInt32 m_bodyMaterialGroup;
 

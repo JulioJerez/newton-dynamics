@@ -229,12 +229,11 @@ int NewtonTreeCollisionGetVertexListTriangleListInAABB(const NewtonCollision* co
 NewtonCollision* NewtonCreateTreeCollision(const NewtonWorld* const newtonWorld, int shapeID)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(new ndShapeInstance(new NewtonCollisionTree()));
-	ndShapeInstance* const instance = **shape;
+	ndShapeInstance* const instance = new ndShapeInstance(new NewtonCollisionTree());
 
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(shape);
+	return reinterpret_cast<NewtonCollision*>(instance);
 }
 
 NewtonCollision* NewtonCreateTreeCollisionFromMesh(const NewtonWorld* const, const NewtonMesh* const mesh, int shapeID)
@@ -242,12 +241,11 @@ NewtonCollision* NewtonCreateTreeCollisionFromMesh(const NewtonWorld* const, con
 	TRACE_FUNCTION(__FUNCTION__);
 	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
 
-	ndSharedPtr<ndShapeInstance>* const shape = new ndSharedPtr<ndShapeInstance>(meshEffect->CreateCollisionTree(false));
-	ndShapeInstance* const instance = **shape;
+	ndShapeInstance* const instance = meshEffect->CreateCollisionTree(false);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
 
-	return reinterpret_cast<NewtonCollision*>(shape);
+	return reinterpret_cast<NewtonCollision*>(instance);
 }
 
 
@@ -263,7 +261,7 @@ NewtonCollision* NewtonCreateTreeCollisionFromMesh(const NewtonWorld* const, con
 void NewtonTreeCollisionBeginBuild(const NewtonCollision* const treeCollision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance* const instance = ObjectFromHandle<ndShapeInstance, NewtonCollision>(treeCollision);
+	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(treeCollision));
 	NewtonCollisionTree* const shape = static_cast<NewtonCollisionTree*>(instance->GetShape()->GetAsShapeStaticBVH());
 	ndAssert(strcmp(shape->ClassName(), NewtonCollisionTree::StaticClassName()) == 0);
 	ndAssert(shape);
@@ -293,7 +291,7 @@ void NewtonTreeCollisionBeginBuild(const NewtonCollision* const treeCollision)
 void NewtonTreeCollisionAddFace(const NewtonCollision* const treeCollision, int vertexCount, const dFloat* const vertexPtr, int strideInBytes, int faceAttribute)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance* const instance = ObjectFromHandle<ndShapeInstance, NewtonCollision>(treeCollision);
+	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(treeCollision));
 	NewtonCollisionTree* const shape = static_cast<NewtonCollisionTree*>(instance->GetShape()->GetAsShapeStaticBVH());
 	ndAssert(strcmp(shape->ClassName(), NewtonCollisionTree::StaticClassName()) == 0);
 	ndAssert(shape);
@@ -329,11 +327,7 @@ void NewtonTreeCollisionAddFace(const NewtonCollision* const treeCollision, int 
 void NewtonTreeCollisionEndBuild(const NewtonCollision* const treeCollision, int optimize)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionBVH* const collision = (dgCollisionBVH*)((dgCollisionInstance*)treeCollision)->GetChildShape();
-	//dgAssert(collision->IsType(dgCollision::dgCollisionBVH_RTTI));
-	//collision->EndBuild(optimize);
-
-	ndShapeInstance* const instance = ObjectFromHandle<ndShapeInstance, NewtonCollision>(treeCollision);
+	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(treeCollision));
 	NewtonCollisionTree* const shape = static_cast<NewtonCollisionTree*>(instance->GetShape()->GetAsShapeStaticBVH());
 	ndAssert(strcmp(shape->ClassName(), NewtonCollisionTree::StaticClassName()) == 0);
 	ndAssert(shape);
