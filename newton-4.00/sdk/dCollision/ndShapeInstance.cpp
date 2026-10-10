@@ -48,7 +48,14 @@ ndShapeInstance::ndShapeInstance(ndShape* const shape)
 	,m_scaleType(m_unit)
 	,m_collisionMode(true)
 {
-	//ndAssert(m_shape);
+	if (shape)
+	{
+		ndShapeCompound* const compound = ((ndShape*)m_shape)->GetAsShapeCompound();
+		if (compound)
+		{
+			compound->m_owner = this;
+		}
+	}
 }
 
 ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance)
@@ -73,6 +80,12 @@ ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance)
 		m_shape->Release();
 		m_shape = new ndShapeCompound(*compound);
 		m_shape->AddRef();
+
+		ndShapeCompound* const newCompound = ((ndShape*)m_shape)->GetAsShapeCompound();
+		if (newCompound)
+		{
+			newCompound->m_owner = this;
+		}
 	}
 	ndAssert(m_shape);
 }
@@ -94,6 +107,14 @@ ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance, ndShape* const
 	,m_collisionMode(instance.m_collisionMode)
 {
 	ndAssert(m_shape);
+	if (shape)
+	{
+		ndShapeCompound* const compound = ((ndShape*)m_shape)->GetAsShapeCompound();
+		if (compound)
+		{
+			compound->m_owner = this;
+		}
+	}
 }
 
 ndShapeInstance::~ndShapeInstance()

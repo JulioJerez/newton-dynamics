@@ -705,10 +705,6 @@ bool DeserializeMesh (const NewtonMesh* const mesh, TiXmlElement* const rootNode
 	NewtonMeshBuildFromVertexListIndexList (mesh, &vertexFormat);
 	NewtonMeshSetVertexBaseCount(mesh, pointBaseCount);
 
-//const dFloat64* xxx = NewtonMeshGetVertexArray(mesh);
-//for (int i = 0; i < pointBaseCount; i++) {
-//	dTrace(("%d %f %f %f\n", i, xxx[4 * i + 0], xxx[4 * i + 1], xxx[4 * i + 2]));
-//}
 	if (vertexFormat.m_normal.m_data) {
 		delete[] vertexFormat.m_normal.m_data;
 		delete[] vertexFormat.m_normal.m_indexList;

@@ -15,15 +15,18 @@
 #include "newtonStdafx.h"
 
 class NewtonBody;
+class ndNewtonWorld;
 
 class ndNewtonBodyNotify : public ndModelBodyNotify
 {
 	public:
 	D_CLASS_REFLECTION(ndNewtonBodyNotify, ndModelBodyNotify)
+
+	typedef void (*NewtonBodyDestructor) (const NewtonBody* const body);
 	typedef void (*NewtonApplyForceAndTorque) (const NewtonBody* const body, ndFloat32 timestep, int threadIndex);
 	typedef void (*NewtonSetTransform) (const NewtonBody* const body, const ndFloat32* const matrix, int threadIndex);
 
-	ndNewtonBodyNotify(NewtonBody* const owner);
+	ndNewtonBodyNotify(ndNewtonWorld* const world, NewtonBody* const owner);
 	ndNewtonBodyNotify(const ndNewtonBodyNotify& notify);
 	virtual ~ndNewtonBodyNotify() override;
 
@@ -40,16 +43,20 @@ class ndNewtonBodyNotify : public ndModelBodyNotify
 	//ndSharedPtr<ndRenderSceneNode> m_entity;
 	//ndTransform m_transform;
 	//ndMatrix m_bindMatrix;
+
 	ndWeakPtr<void> m_userData;
 	ndWeakPtr<NewtonBody> m_owner;
+	ndWeakPtr<ndNewtonWorld> m_world;
 	ndInt32 m_materialGoupId;
 	ndFloat32 m_capSpeed;
 	ndFloat32 m_capOmega;
 
 	bool m_bodyIsInWorld;
 
+	NewtonBodyDestructor m_onDestroy;
 	NewtonSetTransform m_applyTransform;
 	NewtonApplyForceAndTorque m_forceAndTorque;
+	
 };
 
 

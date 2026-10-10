@@ -17,11 +17,21 @@ project(${projectName})
 
 message (${projectName})
 
-
-set (wrapper "${PROJECT_BINARY_DIR}")
+set(CMAKE_CONFIGURATION_TYPES Debug RelWithDebInfo Release)
+set(CMAKE_DEBUG_POSTFIX "_d")
 
 if(NEWTON_BUILD_SHARED_LIBS)
 	add_definitions(-D_NEWTON_BUILD_DLL)
+endif()
+
+string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" PROCESSOR_ARCH)
+
+if (PROCESSOR_ARCH  MATCHES "(x86)|(X86)|(amd64)|(AMD64)")
+	message ("x86-64 processor detected")
+
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}  /Zi /Od /fp:fast /march=skylake /arch:AVX2")
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}  /Gy /Zi /GS /Ox /Oi /Ot /Ob2 /Oy /Qpar /fp:fast /march=skylake /arch:AVX2")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE}  /Zi /O2 /Qpar /fp:fast /march=skylake /arch:AVX2")
 endif()
 
 # source and header files
@@ -53,6 +63,15 @@ endif()
 #	TARGET ${projectName} POST_BUILD COMMAND ${CMAKE_COMMAND}
 #	ARGS -E copy $<TARGET_FILE:${projectName}> ${wrapper}/${projectName}/${projectName}${CMAKE_DEBUG_POSTFIX}${cSuffix})
 
+#add_custom_command(
+#	TARGET ${projectName} POST_BUILD COMMAND ${CMAKE_COMMAND}
+#	ARGS -E copy $<TARGET_FILE:${projectName}> C:/tmp/dagon-physics/${projectName}${cSuffix})
+
+#add_custom_command(
+#	TARGET ${projectName} POST_BUILD COMMAND ${CMAKE_COMMAND}
+#	ARGS -E copy $<TARGET_FILE:${projectName}> C:/tmp/ChillwaveDrive-main/${projectName}${cSuffix})
+
 add_custom_command(
-	TARGET ${projectName} POST_BUILD COMMAND ${CMAKE_COMMAND}
-	ARGS -E copy $<TARGET_FILE:${projectName}> C:/tmp/dagon-physics/${projectName}${cSuffix})
+	TARGET ${projectName} POST_BUILD 
+	COMMAND ${CMAKE_COMMAND}
+	ARGS -E copy $<TARGET_FILE:${projectName}> C:/development/builds/newton-3.14/applications/demosSandbox/Debug/${projectName}${CMAKE_DEBUG_POSTFIX}${cSuffix})

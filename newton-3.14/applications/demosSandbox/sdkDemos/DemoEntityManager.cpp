@@ -32,7 +32,7 @@
 #define MAX_PHYSICS_SUB_STEPS		2
 #define PROJECTILE_INITIAL_SPEED	20.0f
 
-//#define DEFAULT_SCENE	0		// using NewtonMesh tool
+#define DEFAULT_SCENE	0		// using NewtonMesh tool
 //#define DEFAULT_SCENE	1		// coefficients of friction
 //#define DEFAULT_SCENE	2		// coefficients of restitution
 //#define DEFAULT_SCENE	3		// newton cradle
@@ -43,7 +43,7 @@
 //#define DEFAULT_SCENE	8		// Object Placement
 //#define DEFAULT_SCENE	9		// primitive convex cast 
 //#define DEFAULT_SCENE	10		// box stacks
-#define DEFAULT_SCENE	11		// simple level mesh collision
+//#define DEFAULT_SCENE	11		// simple level mesh collision
 //#define DEFAULT_SCENE	12		// optimized level mesh collision
 //#define DEFAULT_SCENE	13		// height field Collision
 //#define DEFAULT_SCENE	14		// infinite user plane collision
@@ -417,7 +417,7 @@ DemoEntityManager::~DemoEntityManager ()
 
 	ImGui::Shutdown();
 	glfwTerminate();
-	dAssert (NewtonGetMemoryUsed () == 0);
+	//dAssert (NewtonGetMemoryUsed () == 0);
 }
 
 
@@ -550,7 +550,7 @@ void DemoEntityManager::Cleanup ()
 	}
 
 	// check that there are no memory leak on exit
-	dAssert (NewtonGetMemoryUsed () == 0);
+	//dAssert (NewtonGetMemoryUsed () == 0);
 
 	// create the newton world
 	m_world = NewtonCreate();

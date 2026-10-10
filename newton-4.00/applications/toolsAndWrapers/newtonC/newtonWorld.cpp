@@ -13,10 +13,19 @@
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
 
+ndSpinLock ndNewtonWorld::m_globalCriticalSection;
+
 ndNewtonWorld::ndNewtonWorld()
 	:ndWorld()
 	,m_userData(nullptr)
 	,m_bodyMaterialGroup(1)
+	,m_onPostUpdate(nullptr)
+	,m_onJointSerialize(nullptr)
+	,m_onJointDeserialize(nullptr)
+	,m_onBodySerialize(nullptr)
+	,m_onBodyDeserialize(nullptr)
+	,m_onCreateContact(nullptr)
+	,m_onDestroyContact(nullptr)
 {
 	SetSubSteps(2);
 	//SetThreadCount(2);
@@ -27,6 +36,27 @@ ndNewtonWorld::ndNewtonWorld()
 ndNewtonWorld::~ndNewtonWorld()
 {
 }
+
+void ndNewtonWorld::OnAddBody(ndBody* const body) const
+{
+	ndWorld::OnAddBody(body);
+}
+
+void ndNewtonWorld::OnRemoveBody(ndBody* const body) const
+{
+	ndWorld::OnRemoveBody(body);
+}
+
+void ndNewtonWorld::OnAddJoint(ndJointBilateralConstraint* const joint) const
+{
+	ndWorld::OnAddJoint(joint);
+}
+
+void ndNewtonWorld::OnRemoveJoint(ndJointBilateralConstraint* const joint) const
+{
+	ndWorld::OnRemoveJoint(joint);
+}
+
 
 void ndNewtonWorld::ClearMaterials()
 {
@@ -47,9 +77,17 @@ ndMaterial* ndNewtonWorld::GetMaterial(int id0, int id1) const
 	return notify->GetMaterial(id0, id1);
 }
 
+void ndNewtonWorld::PostUpdate(ndFloat32 timestep)
+{
+	if (m_onPostUpdate)
+	{
+		m_onPostUpdate(reinterpret_cast<NewtonWorld*>(this), timestep);
+	}
+}
+
+
 void ndNewtonWorld::Update(ndFloat32 timestep)
 {
 	//ndTrace(("%f\n", timestep));
 	ndWorld::Update(timestep);
-	ndWorld::Sync();
 }
