@@ -51,11 +51,13 @@ bool ndNewtonMaterial::OnAabbOverlap(const ndContact* const, ndFloat32, const nd
 	return true;
 }
 
-void ndNewtonMaterial::OnContactCallback(const ndContact* const, ndFloat32) const
+void ndNewtonMaterial::OnContactCallback(const ndContact* const contact, ndFloat32 timestep) const
 {
 	if (m_onContactsProcess)
 	{
-		ndAssert(0);
+		ndSharedPtr<ndContact> sharedContact (const_cast<ndContact*>(contact));
+		sharedContact.AddRef();
+		m_onContactsProcess(reinterpret_cast<NewtonJoint*>(&sharedContact), timestep, 0);
 	}
 }
 

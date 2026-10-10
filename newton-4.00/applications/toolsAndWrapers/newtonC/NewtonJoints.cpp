@@ -79,43 +79,6 @@ void NewtonJointGetInfo(const NewtonJoint* const joint, NewtonJointRecord* const
 	ndAssert(0);
 }
 
-/*!
-  Get the first body connected by this joint.
-
-  @param *joint is the pointer to a convex collision primitive.
-
-
-  See also: ::// See also:
-*/
-NewtonBody* NewtonJointGetBody0(const NewtonJoint* const joint)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgConstraint* const contraint = (dgConstraint*)joint;
-	//dgBody* const body = contraint->GetBody0();
-	//dgWorld* const world = body->GetWorld();
-	//return (world->GetSentinelBody() != body) ? (NewtonBody*)body : NULL;
-	ndAssert(0);
-	return 0;
-}
-
-
-/*!
-  Get the second body connected by this joint.
-
-  @param *joint is the pointer to a convex collision primitive.
-
-  See also: ::// See also:
-*/
-NewtonBody* NewtonJointGetBody1(const NewtonJoint* const joint)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgConstraint* const contraint = (dgConstraint*)joint;
-	//dgBody* const body = contraint->GetBody1();
-	//dgWorld* const world = body->GetWorld();
-	//return (world->GetSentinelBody() != body) ? (NewtonBody*)body : NULL;
-	ndAssert(0);
-	return 0;
-}
 
 
 /*!
@@ -300,4 +263,38 @@ void NewtonJointSetDestructor(const NewtonJoint* const joint, NewtonConstraintDe
 	NewtonUserJoint* const baseJoint = ObjectFromHandle<NewtonUserJoint, NewtonJoint>(joint);
 	ndAssert(baseJoint->IsType(NewtonUserJoint::StaticClassName()));
 	baseJoint->m_onDestropy = destructor;
+}
+
+
+/*!
+  Get the first body connected by this joint.
+
+  @param *joint is the pointer to a convex collision primitive.
+
+
+  See also: ::// See also:
+*/
+NewtonBody* NewtonJointGetBody0(const NewtonJoint* const joint)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndConstraint* const baseJoint = ObjectFromHandle<ndConstraint, NewtonJoint>(joint);
+	ndBodyKinematic* const body = baseJoint->GetBody0()->GetAsBodyKinematic();
+	return reinterpret_cast<NewtonBody*>(&body->GetSceneNode()->GetInfo());
+}
+
+/*!
+  Get the second body connected by this joint.
+
+  @param *joint is the pointer to a convex collision primitive.
+
+  See also: ::// See also:
+*/
+NewtonBody* NewtonJointGetBody1(const NewtonJoint* const joint)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndConstraint* const baseJoint = ObjectFromHandle<ndConstraint, NewtonJoint>(joint);
+	ndBodyKinematic* const body = baseJoint->GetBody1()->GetAsBodyKinematic();
+	ndAssert(body->GetScene());
+	ndBodyKinematic* const sentinel = body->GetScene()->GetWorld()->GetSentinelBody();
+	return (sentinel != body) ? reinterpret_cast<NewtonBody*>(&body->GetSceneNode()->GetInfo()) : nullptr;
 }
