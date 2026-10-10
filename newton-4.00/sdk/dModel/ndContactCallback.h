@@ -84,14 +84,16 @@ class ndContactCallback: public ndContactNotify
 	virtual ndMaterial* GetMaterial(ndUnsigned32 id0, ndUnsigned32 id1) const;
 	virtual ndMaterial* GetMaterial(const ndContact* const contactJoint, const ndShapeInstance& instance0, const ndShapeInstance& instance1) const override;
 
-	private:
+	virtual void SetDefualtMaterial(ndSharedPtr<ndApplicationMaterial> material);
+
+	protected:
 	virtual bool OnAabbOverlap(const ndContact* const contactJoint, ndFloat32 timestep) const override;
 	virtual void OnContactCallback(const ndContact* const contactJoint, ndFloat32 timestep) const override;
 	virtual bool OnAabbOverlap(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1) const override;
 	virtual bool OnCompoundSubShapeOverlap(const ndContact* const contactJoint, ndFloat32 timestep, const ndShapeInstance* const instance0, const ndShapeInstance* const instance1) const override;
 	
 	ndMaterialGraph m_materialGraph;
-	ndApplicationMaterial m_defaultMaterial;
+	ndSharedPtr<ndApplicationMaterial> m_defaultMaterial;
 };
 
 #endif

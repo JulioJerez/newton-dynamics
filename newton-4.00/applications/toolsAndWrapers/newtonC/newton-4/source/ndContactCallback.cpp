@@ -81,7 +81,7 @@ ndApplicationMaterial& ndContactCallback::RegisterMaterial(const ndApplicationMa
 ndContactCallback::ndContactCallback()
 	:ndContactNotify(nullptr)
 	,m_materialGraph()
-	,m_defaultMaterial()
+	,m_defaultMaterial(new ndApplicationMaterial)
 {
 }
 
@@ -97,13 +97,18 @@ bool ndContactCallback::HasMaterial(ndUnsigned32 id0, ndUnsigned32 id1) const
 ndMaterial* ndContactCallback::GetMaterial(ndUnsigned32 id0, ndUnsigned32 id1) const
 {
 	ndMaterialGraph::ndNode* const node = m_materialGraph.GetNode(id0, id1);
-	return node ? node->GetInfo() : (ndMaterial*)&m_defaultMaterial;
+	return node ? node->GetInfo() : const_cast<ndApplicationMaterial*>(*m_defaultMaterial);
 }
 
 ndMaterial* ndContactCallback::GetMaterial(const ndContact* const, const ndShapeInstance& instance0, const ndShapeInstance& instance1) const
 {
 	ndMaterialGraph::ndNode* const node = m_materialGraph.GetNode(ndUnsigned32(instance0.GetMaterial().m_userId), ndUnsigned32(instance1.GetMaterial().m_userId));
-	return node ? node->GetInfo() : (ndMaterial*)&m_defaultMaterial;
+	return node ? node->GetInfo() : const_cast<ndApplicationMaterial*>(*m_defaultMaterial);
+}
+
+void ndContactCallback::SetDefualtMaterial(ndSharedPtr<ndApplicationMaterial> material)
+{
+	m_defaultMaterial = material;
 }
 
 bool ndContactCallback::OnAabbOverlap(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1) const

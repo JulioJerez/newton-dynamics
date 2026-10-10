@@ -30,11 +30,19 @@ ndNewtonWorld::ndNewtonWorld()
 	SetSubSteps(2);
 	//SetThreadCount(2);
 	SelectSolver(ndSimd8Solver);
-	SetContactNotify(ndSharedPtr<ndContactNotify>(new ndContactCallback));
+	SetContactCallback();
 }
 
 ndNewtonWorld::~ndNewtonWorld()
 {
+}
+
+void ndNewtonWorld::SetContactCallback()
+{
+	ndContactCallback* const callback = new ndContactCallback;
+	ndSharedPtr<ndApplicationMaterial> defaultMaterial(new ndNewtonMaterial);
+	callback->SetDefualtMaterial(defaultMaterial);
+	SetContactNotify(ndSharedPtr<ndContactNotify>(callback));
 }
 
 void ndNewtonWorld::OnAddBody(ndBody* const body) const
@@ -57,10 +65,9 @@ void ndNewtonWorld::OnRemoveJoint(ndJointBilateralConstraint* const joint) const
 	ndWorld::OnRemoveJoint(joint);
 }
 
-
 void ndNewtonWorld::ClearMaterials()
 {
-	SetContactNotify(ndSharedPtr<ndContactNotify>(new ndContactCallback));
+	SetContactCallback();
 }
 
 ndMaterial* ndNewtonWorld::GetMaterial(int id0, int id1) const
@@ -70,8 +77,11 @@ ndMaterial* ndNewtonWorld::GetMaterial(int id0, int id1) const
 	{
 		if ((id0 < m_bodyMaterialGroup) && (id1 < m_bodyMaterialGroup))
 		{
-			ndNewtonMaterial material;
-			notify->RegisterMaterial(material, id0, id1);
+			if ((id0 != 0) && (id1 != 0))
+			{
+				ndNewtonMaterial material;
+				notify->RegisterMaterial(material, id0, id1);
+			}
 		}
 	}
 	return notify->GetMaterial(id0, id1);
