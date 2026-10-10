@@ -48,8 +48,8 @@ ndNewtonBodyNotify::~ndNewtonBodyNotify()
 	if (m_onDestroy)
 	{
 		ndAssert(m_world);
-		ndSharedPtr<ndBody> body(m_world->GetBody(GetBody()));
-		m_onDestroy(reinterpret_cast<NewtonBody*>(&body));
+		ndSharedPtr<ndBody>* const body = m_world->GetBody(GetBody());
+		m_onDestroy(reinterpret_cast<NewtonBody*>(body));
 	}
 }
 

@@ -15,8 +15,8 @@
 #include "newtonStdafx.h"
 
 class NewtonBody;
-class NewtonWorld;
 class NewtonJoint;
+class NewtonWorld;
 
 class ndNewtonWorld: public ndWorld
 {
@@ -34,6 +34,8 @@ class ndNewtonWorld: public ndWorld
 	typedef void(*NewtonDestroyContactCallback) (const NewtonWorld* const newtonWorld, NewtonJoint* const contact);
 
 
+	D_CLASS_REFLECTION(ndNewtonWorld, ndWorld)
+
 	ndNewtonWorld();
 	virtual ~ndNewtonWorld() override;
 
@@ -45,6 +47,9 @@ class ndNewtonWorld: public ndWorld
 
 	virtual void OnAddBody(ndBody* const body) const override;
 	virtual void OnRemoveBody(ndBody* const body) const override;
+
+	virtual void OnAddJoint(ndJointBilateralConstraint* const joint) const override;
+	virtual void OnRemoveJoint(ndJointBilateralConstraint* const joint) const override;
 
 	ndWeakPtr<void> m_userData;
 	ndInt32 m_bodyMaterialGroup;

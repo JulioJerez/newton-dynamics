@@ -38,6 +38,16 @@ static void MapShapeId(const ndShapeInfo& info, NewtonCollisionInfoRecord& colli
 			break;
 		}
 
+		case m_convexHull:
+		{
+			collisionInfo.m_collisionType = SERIALIZE_ID_CONVEXHULL;
+			collisionInfo.m_convexHull.m_faceCount = info.m_convexhull.m_faceCount;
+			collisionInfo.m_convexHull.m_vertex = &info.m_convexhull.m_vertex[0].m_x;
+			collisionInfo.m_convexHull.m_vertexCount = info.m_convexhull.m_vertexCount;
+			collisionInfo.m_convexHull.m_vertexStrideInBytes = info.m_convexhull.m_strideInBytes;
+			break;
+		}
+
 		case m_boundingBoxHierachy:
 		{
 			collisionInfo.m_collisionType = SERIALIZE_ID_TREE;
@@ -170,7 +180,7 @@ NewtonCollision* NewtonCreateBox(const NewtonWorld* const, dFloat dx, dFloat dy,
   General ellipsoids are very good hull geometries to represent the outer shell of avatars in a game.
 
 */
-NewtonCollision* NewtonCreateSphere(const NewtonWorld* const newtonWorld, dFloat radius, int shapeID, const dFloat* const offsetMatrix)
+NewtonCollision* NewtonCreateSphere(const NewtonWorld* const, dFloat radius, int shapeID, const dFloat* const offsetMatrix)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndMatrix matrix(ndGetIdentityMatrix());
@@ -197,7 +207,7 @@ NewtonCollision* NewtonCreateSphere(const NewtonWorld* const newtonWorld, dFloat
   @return Pointer to the box
 
 */
-NewtonCollision* NewtonCreateCone(const NewtonWorld* const newtonWorld, dFloat radius, dFloat height, int shapeID, const dFloat* const offsetMatrix)
+NewtonCollision* NewtonCreateCone(const NewtonWorld* const,  dFloat radius, dFloat height, int shapeID, const dFloat* const offsetMatrix)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndMatrix matrix(ndGetIdentityMatrix());
@@ -227,7 +237,7 @@ NewtonCollision* NewtonCreateCone(const NewtonWorld* const newtonWorld, dFloat r
   the capsule height must equal of larger than the sum of the cap radius. If this is not the case the height will be clamped the 2 * radius.
 
 */
-NewtonCollision* NewtonCreateCapsule(const NewtonWorld* const newtonWorld, dFloat radio0, dFloat radio1, dFloat height, int shapeID, const dFloat* const offsetMatrix)
+NewtonCollision* NewtonCreateCapsule(const NewtonWorld* const,  dFloat radio0, dFloat radio1, dFloat height, int shapeID, const dFloat* const offsetMatrix)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndMatrix matrix(ndGetIdentityMatrix());
@@ -255,7 +265,7 @@ NewtonCollision* NewtonCreateCapsule(const NewtonWorld* const newtonWorld, dFloa
   @return Pointer to the box
 
 */
-NewtonCollision* NewtonCreateCylinder(const NewtonWorld* const newtonWorld, dFloat radio0, dFloat radio1, dFloat height, int shapeID, const dFloat* const offsetMatrix)
+NewtonCollision* NewtonCreateCylinder(const NewtonWorld* const,  dFloat radio0, dFloat radio1, dFloat height, int shapeID, const dFloat* const offsetMatrix)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndMatrix matrix(ndGetIdentityMatrix());
@@ -282,7 +292,7 @@ NewtonCollision* NewtonCreateCylinder(const NewtonWorld* const newtonWorld, dFlo
   @return Pointer to the box
 
 */
-NewtonCollision* NewtonCreateChamferCylinder(const NewtonWorld* const newtonWorld, dFloat radius, dFloat height, int shapeID, const dFloat* const offsetMatrix)
+NewtonCollision* NewtonCreateChamferCylinder(const NewtonWorld* const,  dFloat radius, dFloat height, int shapeID, const dFloat* const offsetMatrix)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndMatrix matrix(ndGetIdentityMatrix());
@@ -335,7 +345,7 @@ NewtonCollision* NewtonCreateChamferCylinder(const NewtonWorld* const newtonWorl
   will generate a loosely fitting hull and it willbe faster to generate.
 
 */
-NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* const newtonWorld, int count, const dFloat* const vertexCloud, int strideInBytes, dFloat tolerance, int shapeID, const dFloat* const offsetMatrix)
+NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* const,  int count, const dFloat* const vertexCloud, int strideInBytes, dFloat tolerance, int shapeID, const dFloat* const offsetMatrix)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndMatrix matrix(ndGetIdentityMatrix());
@@ -365,7 +375,7 @@ NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* const newtonWorld, in
 
   See also: ::NewtonCreateConvexHull, ::NewtonMeshCreate
 */
-NewtonCollision* NewtonCreateConvexHullFromMesh(const NewtonWorld* const, const NewtonMesh* const mesh, dFloat tolerance, int shapeID)
+NewtonCollision* NewtonCreateConvexHullFromMesh(const NewtonWorld* const,  const NewtonMesh* const mesh, dFloat tolerance, int shapeID)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
@@ -393,11 +403,11 @@ NewtonCollision* NewtonCreateConvexHullFromMesh(const NewtonWorld* const, const 
 
   @return Pointer to the collision.
 
-  NewtonCollision* NewtonCreateHeightFieldCollision(const NewtonWorld* const newtonWorld, int width, int height, int cellsDiagonals,
+  NewtonCollision* NewtonCreateHeightFieldCollision(const NewtonWorld* const,  int width, int height, int cellsDiagonals,
   const dFloat* const elevationMap, const char* const atributeMap,
   dFloat horizontalScale, int shapeID)
 */
-NewtonCollision* NewtonCreateHeightFieldCollision(const NewtonWorld* const newtonWorld, int width, int height, int gridsDiagonals, int elevationdatType,
+NewtonCollision* NewtonCreateHeightFieldCollision(const NewtonWorld* const, int width, int height, int gridsDiagonals, int elevationdatType,
 	const void* const elevationMap, const char* const attributeMap, dFloat verticalScale, dFloat horizontalScale_x, dFloat horizontalScale_z, int shapeID)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -1280,8 +1290,6 @@ void NewtonCollisionSetMaterial(const NewtonCollision* const collision, const Ne
 int NewtonCollisionGetType(const NewtonCollision* const collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
-	//return instance->GetCollisionPrimityType();
 	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
 	NewtonCollisionInfoRecord collisionInfo;
 	MapShapeId(instance->GetShapeInfo(), collisionInfo);

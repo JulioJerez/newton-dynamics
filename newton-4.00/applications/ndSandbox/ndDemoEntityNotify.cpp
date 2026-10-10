@@ -154,9 +154,9 @@ void ndDemoEntityNotify::RemoveBody()
 {
 	// check world bounds
 	ndPhysicsWorld* const world = m_manager->GetWorld();
-	ndSharedPtr<ndBody> body(world->GetBody(GetBody()));
+	ndSharedPtr<ndBody>* body = world->GetBody(GetBody());
 	if (body)
 	{
-		world->DefferedRemoveBody(body);
+		world->DefferedRemoveBody(*body);
 	}
 }

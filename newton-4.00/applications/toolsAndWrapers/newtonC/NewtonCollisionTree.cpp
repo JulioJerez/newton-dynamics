@@ -226,7 +226,7 @@ int NewtonTreeCollisionGetVertexListTriangleListInAABB(const NewtonCollision* co
 
   See also: ::NewtonTreeCollisionBeginBuild, ::NewtonTreeCollisionAddFace, ::NewtonTreeCollisionEndBuild, ::NewtonStaticCollisionSetDebugCallback, ::NewtonTreeCollisionGetFaceAttribute, ::NewtonTreeCollisionSetFaceAttribute
 */
-NewtonCollision* NewtonCreateTreeCollision(const NewtonWorld* const newtonWorld, int shapeID)
+NewtonCollision* NewtonCreateTreeCollision(const NewtonWorld* const, int shapeID)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndShapeInstance* const instance = new ndShapeInstance(new NewtonCollisionTree());

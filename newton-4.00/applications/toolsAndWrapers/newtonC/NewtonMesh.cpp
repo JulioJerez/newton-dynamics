@@ -37,7 +37,7 @@ NewtonMesh* NewtonMeshCreateFromMesh(const NewtonMesh* const mesh)
 	return 0;
 }
 
-NewtonMesh* NewtonMeshCreateConvexHull(const NewtonWorld* const newtonWorld, int count, const dFloat* const vertexCloud, int strideInBytes, dFloat tolerance)
+NewtonMesh* NewtonMeshCreateConvexHull(const NewtonWorld* const, int count, const dFloat* const vertexCloud, int strideInBytes, dFloat tolerance)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	//Newton* const world = (Newton*)newtonWorld;
@@ -74,7 +74,7 @@ void NewtonCreateTetrahedraLinearBlendSkinWeightsChannel(const NewtonMesh* const
 	ndAssert(0);
 }
 
-NewtonMesh* NewtonMeshCreateVoronoiConvexDecomposition(const NewtonWorld* const newtonWorld, int pointCount, const dFloat* const vertexCloud, int strideInBytes, int materialID, const dFloat* const textureMatrix)
+NewtonMesh* NewtonMeshCreateVoronoiConvexDecomposition(const NewtonWorld* const, int pointCount, const dFloat* const vertexCloud, int strideInBytes, int materialID, const dFloat* const textureMatrix)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	//Newton* const world = (Newton*)newtonWorld;
@@ -83,7 +83,7 @@ NewtonMesh* NewtonMeshCreateVoronoiConvexDecomposition(const NewtonWorld* const 
 	return 0;
 }
 
-NewtonMesh* NewtonMeshCreateFromSerialization(const NewtonWorld* const newtonWorld, NewtonDeserializeCallback deserializeFunction, void* const serializeHandle)
+NewtonMesh* NewtonMeshCreateFromSerialization(const NewtonWorld* const, NewtonDeserializeCallback deserializeFunction, void* const serializeHandle)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	//Newton* const world = (Newton*)newtonWorld;
@@ -123,7 +123,7 @@ NewtonMesh* NewtonMeshLoadOFF(const NewtonWorld* const newtonWorld, const char* 
 	return 0;
 }
 
-NewtonMesh* NewtonMeshLoadTetrahedraMesh(const NewtonWorld* const newtonWorld, const char* const filename)
+NewtonMesh* NewtonMeshLoadTetrahedraMesh(const NewtonWorld* const, const char* const filename)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	//Newton* const world = (Newton*)newtonWorld;
@@ -411,51 +411,6 @@ const int* NewtonMeshGetIndexToVertexMap(const NewtonMesh* const mesh)
 	TRACE_FUNCTION(__FUNCTION__);
 	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
 	//return meshEffect->GetIndexToVertexMap();
-	ndAssert(0);
-	return 0;
-}
-
-int NewtonMeshHasNormalChannel(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//return meshEffect->HasNormalChannel() ? 1 : 0;
-	ndAssert(0);
-	return 0;
-}
-
-int NewtonMeshHasBinormalChannel(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//return meshEffect->HasBinormalChannel() ? 1 : 0;
-	ndAssert(0);
-	return 0;
-}
-
-int NewtonMeshHasUV0Channel(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//return meshEffect->HasUV0Channel() ? 1 : 0;
-	ndAssert(0);
-	return 0;
-}
-
-int NewtonMeshHasUV1Channel(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//return meshEffect->HasUV1Channel() ? 1 : 0;
-	ndAssert(0);
-	return 0;
-}
-
-int NewtonMeshHasVertexColorChannel(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//return meshEffect->HasVertexColorChannel() ? 1 : 0;
 	ndAssert(0);
 	return 0;
 }
@@ -1080,7 +1035,7 @@ static ndMeshEffect::ndMeshVertexFormat ConvertFormat(const NewtonMeshVertexForm
 	return format;
 }
 
-NewtonMesh* NewtonMeshCreate(const NewtonWorld* const newtonWorld)
+NewtonMesh* NewtonMeshCreate(const NewtonWorld* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndSharedPtr<ndMeshEffect>* const mesh = new ndSharedPtr<ndMeshEffect>(new ndMeshEffect());
@@ -1287,4 +1242,48 @@ void NewtonMeshApplyBoxMapping(const NewtonMesh* const mesh, int front, int side
 
 	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
 	meshEffect->BoxMapping(front, side, top, matrix);
+}
+
+int NewtonMeshHasNormalChannel(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
+	//return meshEffect->HasNormalChannel() ? 1 : 0;
+	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	const ndMeshEffect::ndAttibuteFormat& attibutes = meshEffect->GetVertexAtributes();
+	return attibutes.m_normalChannel.GetCount() ? 1 : 0;
+}
+
+int NewtonMeshHasUV0Channel(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
+	//return meshEffect->HasUV0Channel() ? 1 : 0;
+	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	const ndMeshEffect::ndAttibuteFormat& attibutes = meshEffect->GetVertexAtributes();
+	return attibutes.m_uv0Channel.GetCount() ? 1 : 0;
+}
+
+int NewtonMeshHasUV1Channel(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	const ndMeshEffect::ndAttibuteFormat& attibutes = meshEffect->GetVertexAtributes();
+	return attibutes.m_uv1Channel.GetCount() ? 1 : 0;
+}
+
+int NewtonMeshHasBinormalChannel(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	const ndMeshEffect::ndAttibuteFormat& attibutes = meshEffect->GetVertexAtributes();
+	return attibutes.m_binormalChannel.GetCount() ? 1 : 0;
+}
+
+int NewtonMeshHasVertexColorChannel(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	const ndMeshEffect::ndAttibuteFormat& attibutes = meshEffect->GetVertexAtributes();
+	return attibutes.m_colorChannel.GetCount() ? 1 : 0;
 }

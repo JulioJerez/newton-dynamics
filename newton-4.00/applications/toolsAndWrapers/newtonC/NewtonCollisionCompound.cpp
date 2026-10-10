@@ -71,7 +71,7 @@ NewtonCollision* NewtonCreateCompoundCollision(const NewtonWorld* const, int sha
   Compound collision primitives are treated as instanced collision objects that cannot be shared by multiples rigid bodies.
 
 */
-NewtonCollision* NewtonCreateCompoundCollisionFromMesh(const NewtonWorld* const newtonWorld, const NewtonMesh* const convexAproximation, dFloat hullTolerance, int shapeID, int subShapeID)
+NewtonCollision* NewtonCreateCompoundCollisionFromMesh(const NewtonWorld* const, const NewtonMesh* const convexAproximation, dFloat hullTolerance, int shapeID, int subShapeID)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	//NewtonCollision* const compound = NewtonCreateCompoundCollision(newtonWorld, shapeID);
@@ -249,7 +249,7 @@ NewtonCollision* NewtonCompoundCollisionGetCollisionFromNode(NewtonCollision* co
   @return Pointer to the collision.
 
 */
-NewtonCollision* NewtonCreateSceneCollision(const NewtonWorld* const newtonWorld, int shapeID)
+NewtonCollision* NewtonCreateSceneCollision(const NewtonWorld* const, int shapeID)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	//Newton* const world = (Newton*)newtonWorld;

@@ -60,7 +60,7 @@ int NewtonMaterialGetDefaultGroupID(const NewtonWorld* const)
 int NewtonMaterialCreateGroupID(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
 	world->m_bodyMaterialGroup++;
 	return world->m_bodyMaterialGroup - 1;
 }
@@ -80,7 +80,7 @@ int NewtonMaterialCreateGroupID(const NewtonWorld* const newtonWorld)
 void NewtonMaterialDestroyAllGroupID(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
 	world->ClearMaterials();
 }
 
@@ -100,7 +100,7 @@ void NewtonMaterialDestroyAllGroupID(const NewtonWorld* const newtonWorld)
 void NewtonMaterialSetDefaultElasticity(const NewtonWorld* const newtonWorld, int id0, int id1, dFloat elasticCoef)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
 
 	ndMaterial* const material = world->GetMaterial(id0, id1);
 	material->m_restitution = ndClamp(elasticCoef, ndFloat32(0.0f), ndFloat32(1.0f));
@@ -124,7 +124,7 @@ void NewtonMaterialSetDefaultElasticity(const NewtonWorld* const newtonWorld, in
 void NewtonMaterialSetDefaultFriction(const NewtonWorld* const newtonWorld, int id0, int id1, dFloat staticFriction, dFloat kineticFriction)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
 	ndMaterial* const material = world->GetMaterial(id0, id1);
 
 	staticFriction = ndAbs(staticFriction);
@@ -179,7 +179,7 @@ void NewtonMaterialSetDefaultFriction(const NewtonWorld* const newtonWorld, int 
 void NewtonMaterialSetCollisionCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnAABBOverlap aabbOverlap, NewtonContactsProcess processCallback)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
 	ndNewtonMaterial* const material = static_cast<ndNewtonMaterial*>(world->GetMaterial(id0, id1));
 
 	material->m_onAABBOverlap = aabbOverlap;

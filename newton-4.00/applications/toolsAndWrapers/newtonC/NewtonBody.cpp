@@ -25,28 +25,60 @@
 #include "newtonMaterial.h"
 #include "newtonBodyNotify.h"
 
-NewtonBody* NewtonCreateAsymetricDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collisionPtr, const dFloat* const matrixPtr)
+/*!
+  Create a rigid body.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param *collisionPtr pointer to the collision object.
+  @param *matrixPtr fixme
+
+  @return Pointer to the rigid body.
+
+  This function creates a Newton rigid body and assigns a *collisionPtr* as the collision geometry representing the rigid body.
+  This function increments the reference count of the collision geometry.
+  All event functions are set to NULL and the material gruopID of the body is set to the default GroupID.
+
+  See also: ::NewtonDestroyBody
+*/
+NewtonBody* NewtonCreateDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrixPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-	return nullptr;
-	//Newton* const world = (Newton*)newtonWorld;
-	//dgCollisionInstance* collision = (dgCollisionInstance*)collisionPtr;
-	//if (!collisionPtr) {
-	//	collision = (dgCollisionInstance*)NewtonCreateNull(newtonWorld);
-	//}
-	//
-	//dgMatrix matrix(matrixPtr);
-	//matrix.m_front.m_w = dgFloat32(0.0f);
-	//matrix.m_up.m_w = dgFloat32(0.0f);
-	//matrix.m_right.m_w = dgFloat32(0.0f);
-	//matrix.m_posit.m_w = dgFloat32(1.0f);
-	//
-	//NewtonBody* const body = (NewtonBody*)world->CreateDynamicBodyAsymetric(collision, matrix);
-	//if (!collisionPtr) {
-	//	NewtonDestroyCollision((NewtonCollision*)collision);
-	//}
-	//return body;
+	ndMatrix matrix(matrixPtr);
+	if (!CheckFloat(&matrix[0][0], 16))
+	{
+		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
+		matrix = ndGetIdentityMatrix();
+	}
+
+	matrix.m_front.m_w = ndFloat32(0.0f);
+	matrix.m_up.m_w = ndFloat32(0.0f);
+	matrix.m_right.m_w = ndFloat32(0.0f);
+	matrix.m_posit.m_w = ndFloat32(1.0f);
+
+	ndSharedPtr<ndBody>* const body = new ndSharedPtr<ndBody>(new ndBodyDynamic());
+	ndBodyDynamic* const dynBody = (*body)->GetAsBodyDynamic();
+
+	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndSharedPtr<ndBodyNotify> bodyNotify(new ndNewtonBodyNotify(world, reinterpret_cast<NewtonBody*>(body)));
+
+	ndShapeInstance instance(new ndShapeNull());
+	ndShapeInstance* const instancePtr = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	if (collision)
+	{
+		instance = *instancePtr;
+	}
+
+	dynBody->SetMatrix(matrix);
+	dynBody->SetCollisionShape(instance);
+	dynBody->SetNotifyCallback(bodyNotify);
+	world->AddBody(*body);
+	return reinterpret_cast<NewtonBody*>(body);
+}
+
+NewtonBody* NewtonCreateAsymetricDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	return NewtonCreateDynamicBody(newtonWorld, collision, matrix);
 }
 
 NewtonBody* NewtonCreateKinematicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collisionPtr, const dFloat* const matrixPtr)
@@ -94,8 +126,6 @@ void NewtonDestroyBody(const NewtonBody* const bodyPtr)
 	//dgWorld* const world = body->GetWorld();
 	//world->DestroyBody(body);
 }
-
-
 
 /*!
   Gets the current simulation state of the specified body.
@@ -157,38 +187,6 @@ void NewtonBodySetCollidable(const NewtonBody* const bodyPtr, int collidable)
 	//body->SetCollidable(collidable ? true : false);
 
 	ndAssert(0);
-}
-
-
-int NewtonBodyGetID(const NewtonBody* const bodyPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//return body->GetUniqueID();
-
-	ndAssert(0);
-	return 0;
-}
-
-
-/*!
-  Return pointer to the Newton world of the specified body.
-
-  @param *bodyPtr Pointer to the body.
-
-  @return World that owns this body.
-
-  The application can also determine the world from a joint, if it queries one
-  of the bodies attached to that joint.
-*/
-NewtonWorld* NewtonBodyGetWorld(const NewtonBody* const bodyPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//return (NewtonWorld*)body->GetWorld();
-
-	ndAssert(0);
-	return 0;
 }
 
 NewtonBodyDestructor NewtonBodyGetDestructorCallback(const NewtonBody* const bodyPtr)
@@ -304,63 +302,6 @@ void NewtonBodySetMatrixRecursive(const NewtonBody* const bodyPtr, const dFloat*
 }
 
 
-
-/*!
-  Get the rotation part of the transformation matrix of a body, in form of a unit quaternion.
-
-  @param *bodyPtr pointer to the body.
-  @param *rotPtr pointer to an array of 4 floats that will hold the global rotation of the rigid body.
-
-  @return Nothing.
-
-  The rotation matrix is written set in the form of a unit quaternion in the format Rot (q0, q1, q1, q3)
-
-  The rotation quaternion is the same as what the application would get by using at function to extract a quaternion form a matrix.
-  however since the rigid body already contained the rotation in it, it is more efficient to just call this function avoiding expensive conversion.
-
-  this function could be very useful for the implementation of pseudo frame rate independent simulation.
-  by running the simulation at a fix rate and using linear interpolation between the last two simulation frames.
-  to determine the exact fraction of the render step.
-
-  See also: ::NewtonBodySetMatrix, ::NewtonBodyGetMatrix
-*/
-void NewtonBodyGetRotation(const NewtonBody* const bodyPtr, dFloat* const rotPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//const dgQuaternion& rot = body->GetRotation();
-	//rotPtr[0] = rot.m_x;
-	//rotPtr[1] = rot.m_y;
-	//rotPtr[2] = rot.m_z;
-	//rotPtr[3] = rot.m_w;
-
-	ndAssert(0);
-}
-
-
-/*!
-  Set the net force applied to a rigid body.
-
-  @param *bodyPtr pointer to the body.
-  @param *vectorPtr pointer to an array of 3 floats containing the net force to be applied to the body.
-
-  @return Nothing.
-
-  This function is only effective when called from *NewtonApplyForceAndTorque callback*
-
-  See also: ::NewtonBodyAddForce, ::NewtonBodyGetForce
-*/
-void  NewtonBodySetForce(const NewtonBody* const bodyPtr, const dFloat* const vectorPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//dgVector vector(vectorPtr[0], vectorPtr[1], vectorPtr[2], dgFloat32(0.0f));
-	//body->SetForce(vector);
-
-	ndAssert(0);
-}
-
-
 /*!
   Get the net force applied to a rigid body after the last NewtonUpdate.
 
@@ -379,27 +320,6 @@ void NewtonBodyGetForce(const NewtonBody* const bodyPtr, dFloat* const vectorPtr
 	//vectorPtr[0] = vector.m_x;
 	//vectorPtr[1] = vector.m_y;
 	//vectorPtr[2] = vector.m_z;
-	ndAssert(0);
-}
-
-/*!
-  Set the net torque applied to a rigid body.
-
-  @param *bodyPtr pointer to the body.
-  @param *vectorPtr pointer to an array of 3 floats containing the net torque to be applied to the body.
-
-  @return Nothing.
-
-  This function is only effective when called from *NewtonApplyForceAndTorque callback*
-
-  See also: ::NewtonBodyAddTorque, ::NewtonBodyGetTorque
-*/
-void  NewtonBodySetTorque(const NewtonBody* const bodyPtr, const dFloat* const vectorPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//dgVector vector(vectorPtr[0], vectorPtr[1], vectorPtr[2], dgFloat32(0.0f));
-	//body->SetTorque(vector);
 	ndAssert(0);
 }
 
@@ -893,57 +813,6 @@ void NewtonBodyIntegrateVelocity(const NewtonBody* const bodyPtr, dFloat timeste
 }
 
 /*!
-  Create a rigid body.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param *collisionPtr pointer to the collision object.
-  @param *matrixPtr fixme
-
-  @return Pointer to the rigid body.
-
-  This function creates a Newton rigid body and assigns a *collisionPtr* as the collision geometry representing the rigid body.
-  This function increments the reference count of the collision geometry.
-  All event functions are set to NULL and the material gruopID of the body is set to the default GroupID.
-
-  See also: ::NewtonDestroyBody
-*/
-NewtonBody* NewtonCreateDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrixPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndMatrix matrix(matrixPtr);
-	if (!CheckFloat(&matrix[0][0], 16))
-	{
-		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
-		matrix = ndGetIdentityMatrix();
-	}
-
-	matrix.m_front.m_w = ndFloat32(0.0f);
-	matrix.m_up.m_w = ndFloat32(0.0f);
-	matrix.m_right.m_w = ndFloat32(0.0f);
-	matrix.m_posit.m_w = ndFloat32(1.0f);
-
-	ndSharedPtr<ndBody>* const body = new ndSharedPtr<ndBody>(new ndBodyDynamic());
-	ndBodyDynamic* const dynBody = (*body)->GetAsBodyDynamic();
-
-	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
-	ndSharedPtr<ndBodyNotify> bodyNotify(new ndNewtonBodyNotify(world, reinterpret_cast<NewtonBody*>(body)));
-
-	ndShapeInstance instance(new ndShapeNull());
-	ndShapeInstance* const instancePtr = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
-	if (collision)
-	{
-		instance = *instancePtr;
-	}
-
-	dynBody->SetMatrix(matrix);
-	dynBody->SetCollisionShape(instance);
-	dynBody->SetNotifyCallback(bodyNotify);
-	world->AddBody(*body);
-	return reinterpret_cast<NewtonBody*>(body);
-}
-
-
-/*!
   Store a user defined data value with the body.
 
   @param *bodyPtr pointer to the body.
@@ -1138,6 +1007,37 @@ void NewtonBodyGetPosition(const NewtonBody* const bodyPtr, dFloat* const posPtr
 }
 
 /*!
+  Get the rotation part of the transformation matrix of a body, in form of a unit quaternion.
+
+  @param *bodyPtr pointer to the body.
+  @param *rotPtr pointer to an array of 4 floats that will hold the global rotation of the rigid body.
+
+  @return Nothing.
+
+  The rotation matrix is written set in the form of a unit quaternion in the format Rot (q0, q1, q1, q3)
+
+  The rotation quaternion is the same as what the application would get by using at function to extract a quaternion form a matrix.
+  however since the rigid body already contained the rotation in it, it is more efficient to just call this function avoiding expensive conversion.
+
+  this function could be very useful for the implementation of pseudo frame rate independent simulation.
+  by running the simulation at a fix rate and using linear interpolation between the last two simulation frames.
+  to determine the exact fraction of the render step.
+
+  See also: ::NewtonBodySetMatrix, ::NewtonBodyGetMatrix
+*/
+void NewtonBodyGetRotation(const NewtonBody* const bodyPtr, dFloat* const rotPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	const ndQuaternion& rot = body->GetRotation();
+	rotPtr[0] = rot.m_x;
+	rotPtr[1] = rot.m_y;
+	rotPtr[2] = rot.m_z;
+	rotPtr[3] = rot.m_w;
+}
+
+
+/*!
   Add the net force applied to a rigid body.
 
   @param *bodyPtr pointer to the body to be destroyed.
@@ -1158,6 +1058,27 @@ void  NewtonBodyAddForce(const NewtonBody* const bodyPtr, const dFloat* const ve
 }
 
 /*!
+  Set the net force applied to a rigid body.
+
+  @param *bodyPtr pointer to the body.
+  @param *vectorPtr pointer to an array of 3 floats containing the net force to be applied to the body.
+
+  @return Nothing.
+
+  This function is only effective when called from *NewtonApplyForceAndTorque callback*
+
+  See also: ::NewtonBodyAddForce, ::NewtonBodyGetForce
+*/
+void  NewtonBodySetForce(const NewtonBody* const bodyPtr, const dFloat* const vectorPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndVector vector(vectorPtr[0], vectorPtr[1], vectorPtr[2], ndFloat32(0.0f));
+	body->SetForce(vector);
+}
+
+
+/*!
   Add the net torque applied to a rigid body.
 
   @param *bodyPtr pointer to the body.
@@ -1175,6 +1096,26 @@ void  NewtonBodyAddTorque(const NewtonBody* const bodyPtr, const dFloat* const v
 	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	ndVector vector(vectorPtr[0], vectorPtr[1], vectorPtr[2], ndFloat32(0.0f));
 	body->SetTorque(body->GetTorque() + vector);
+}
+
+/*!
+  Set the net torque applied to a rigid body.
+
+  @param *bodyPtr pointer to the body.
+  @param *vectorPtr pointer to an array of 3 floats containing the net torque to be applied to the body.
+
+  @return Nothing.
+
+  This function is only effective when called from *NewtonApplyForceAndTorque callback*
+
+  See also: ::NewtonBodyAddTorque, ::NewtonBodyGetTorque
+*/
+void  NewtonBodySetTorque(const NewtonBody* const bodyPtr, const dFloat* const vectorPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndVector vector(vectorPtr[0], vectorPtr[1], vectorPtr[2], ndFloat32(0.0f));
+	body->SetTorque(vector);
 }
 
 /*!
@@ -1649,7 +1590,6 @@ void NewtonBodySetDestructorCallback(const NewtonBody* const bodyPtr, NewtonBody
 	bodyNotify->m_onDestroy = callback;
 }
 
-
 /*!
   Get the collision primitive of a body.
 
@@ -1745,9 +1685,6 @@ void NewtonBodySetAutoSleep(const NewtonBody* const bodyPtr, int state)
 int NewtonBodyGetAutoSleep(const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//
-	//return body->GetAutoSleep() ? 1 : 0;
 	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
 	ndBodyDynamic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyDynamic());
 	return dynBody->GetAutoSleep() ? 1 : 0;
@@ -1765,8 +1702,6 @@ int NewtonBodyGetAutoSleep(const NewtonBody* const bodyPtr)
 int NewtonBodyGetSleepState(const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//return body->GetSleepState() ? 1 : 0;
 	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
 	ndBodyDynamic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyDynamic());
 	return dynBody->GetSleepState() ? 1 : 0;
@@ -1775,9 +1710,33 @@ int NewtonBodyGetSleepState(const NewtonBody* const bodyPtr)
 void NewtonBodySetSleepState(const NewtonBody* const bodyPtr, int state)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//body->SetSleepState(state ? true : false);
 	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
 	ndBodyDynamic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyDynamic());
 	dynBody->SetSleepState(state ? true : false);
+}
+
+/*!
+  Return pointer to the Newton world of the specified body.
+
+  @param *bodyPtr Pointer to the body.
+
+  @return World that owns this body.
+
+  The application can also determine the world from a joint, if it queries one
+  of the bodies attached to that joint.
+*/
+NewtonWorld* NewtonBodyGetWorld(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBodyKinematic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyKinematic());
+	NewtonWorld* const world = dynBody->GetScene() ? reinterpret_cast<NewtonWorld*>(dynBody->GetScene()->GetWorld()) : nullptr ;
+	return  world;
+}
+
+int NewtonBodyGetID(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	return body->GetId();
 }

@@ -808,7 +808,7 @@ void ndRenderPrimitiveImplement::BuildWireframeDebugMesh(const ndRenderPrimitive
 			public:
 			ndDrawShape()
 				:ndShapeDebugNotify()
-				, m_lines(1024)
+				,m_lines(1024)
 			{
 			}
 

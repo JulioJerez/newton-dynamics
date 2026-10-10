@@ -24,7 +24,31 @@
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
 #include "newtonBodyNotify.h"
+#include "newtonUserJointClass.h"
 
+/*!
+  destroy a joint.
+
+  @param *newtonWorld is the pointer to the body.
+  @param *joint pointer to joint to be destroyed
+
+  @return nothing
+
+  The application can call this function when it wants to destroy a joint. This function can be used by the application to simulate
+  breakable joints
+
+  See also: ::NewtonConstraintCreateSlider
+*/
+void NewtonDestroyJoint(const NewtonWorld* const newtonWorld, const NewtonJoint* const joint)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//world->DestroyJoint((dgConstraint*)joint);
+	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndJointBilateralConstraint* const baseJoint = ObjectFromHandle<ndJointBilateralConstraint, NewtonJoint>(joint);
+	world->RemoveJoint(baseJoint);
+	delete baseJoint;
+}
 
 int NewtonJointIsActive(const NewtonJoint* const jointPtr)
 {
@@ -36,47 +60,6 @@ int NewtonJointIsActive(const NewtonJoint* const jointPtr)
 }
 
 
-/*!
-  Store a user defined data value with the joint.
-
-  @param *joint pointer to the joint.
-  @param *userData pointer to the user defined user data value.
-
-  @return Nothing.
-
-  The application can store a user defined value with the Joint. This value can be the pointer to a structure containing some application data for special effect.
-  if the application allocate some resource to store the user data, the application can register a joint destructor to get rid of the allocated resource when the Joint is destroyed
-
-  See also: ::NewtonJointSetDestructor
-*/
-void NewtonJointSetUserData(const NewtonJoint* const joint, void* const userData)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgConstraint* const contraint = (dgConstraint*)joint;
-	//contraint->SetUserData(userData);
-	ndAssert(0);
-}
-
-/*!
-  Retrieve a user defined data value stored with the joint.
-
-  @param *joint pointer to the joint.
-
-  @return The user defined data.
-
-  The application can store a user defined value with a joint. This value can be the pointer
-  to a structure to store some game play data for special effect.
-
-  See also: ::NewtonJointSetUserData
-*/
-void* NewtonJointGetUserData(const NewtonJoint* const joint)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgConstraint* const contraint = (dgConstraint*)joint;
-	//return contraint->GetUserData();
-	ndAssert(0);
-	return 0;
-}
 
 /*!
   Get creation parameters for this joint.
@@ -244,6 +227,60 @@ dFloat NewtonJointGetStiffness(const NewtonJoint* const joint)
 	return 0;
 }
 
+
+/*!
+  Store a user defined data value with the joint.
+
+  @param *joint pointer to the joint.
+  @param *userData pointer to the user defined user data value.
+
+  @return Nothing.
+
+  The application can store a user defined value with the Joint. This value can be the pointer to a structure containing some application data for special effect.
+  if the application allocate some resource to store the user data, the application can register a joint destructor to get rid of the allocated resource when the Joint is destroyed
+
+  See also: ::NewtonJointSetDestructor
+*/
+void NewtonJointSetUserData(const NewtonJoint* const jointPtr, void* const userData)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndJointBilateralConstraint* const baseJoint = ObjectFromHandle<ndJointBilateralConstraint, NewtonJoint>(jointPtr);
+	ndSharedPtr<ndJointUserData> sharedUserData (baseJoint->GetUserData());
+	if (!*sharedUserData)
+	{
+		sharedUserData = ndSharedPtr<ndJointUserData>(new NewtonJointUserData(baseJoint));
+		baseJoint->SetUserData(sharedUserData);
+	}
+	NewtonJointUserData* const jointUserData = static_cast<NewtonJointUserData*>(*sharedUserData);
+	jointUserData->m_userData = userData;
+}
+
+/*!
+  Retrieve a user defined data value stored with the joint.
+
+  @param *joint pointer to the joint.
+
+  @return The user defined data.
+
+  The application can store a user defined value with a joint. This value can be the pointer
+  to a structure to store some game play data for special effect.
+
+  See also: ::NewtonJointSetUserData
+*/
+void* NewtonJointGetUserData(const NewtonJoint* const joint)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndJointBilateralConstraint* const baseJoint = ObjectFromHandle<ndJointBilateralConstraint, NewtonJoint>(joint);
+	ndSharedPtr<ndJointUserData> sharedUserData(baseJoint->GetUserData());
+	if (*sharedUserData)
+	{
+		NewtonJointUserData* const jointUserData = static_cast<NewtonJointUserData*>(*sharedUserData);
+		return *jointUserData->m_userData;
+	}
+
+	return nullptr;
+}
+
 /*!
   Register a destructor callback to be called when the joint is about to be destroyed.
 
@@ -260,30 +297,7 @@ dFloat NewtonJointGetStiffness(const NewtonJoint* const joint)
 void NewtonJointSetDestructor(const NewtonJoint* const joint, NewtonConstraintDestructor destructor)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgConstraint* const contraint = (dgConstraint*)joint;
-	//contraint->SetDestructorCallback((OnConstraintDestroy)destructor);
-	ndAssert(0);
+	NewtonUserJoint* const baseJoint = ObjectFromHandle<NewtonUserJoint, NewtonJoint>(joint);
+	ndAssert(baseJoint->IsType(NewtonUserJoint::StaticClassName()));
+	baseJoint->m_onDestropy = destructor;
 }
-
-
-/*!
-  destroy a joint.
-
-  @param *newtonWorld is the pointer to the body.
-  @param *joint pointer to joint to be destroyed
-
-  @return nothing
-
-  The application can call this function when it wants to destroy a joint. This function can be used by the application to simulate
-  breakable joints
-
-  See also: ::NewtonConstraintCreateSlider
-*/
-void NewtonDestroyJoint(const NewtonWorld* const newtonWorld, const NewtonJoint* const joint)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//world->DestroyJoint((dgConstraint*)joint);
-	ndAssert(0);
-}
-

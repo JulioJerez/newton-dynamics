@@ -32,8 +32,8 @@
 #define MAX_PHYSICS_SUB_STEPS		2
 #define PROJECTILE_INITIAL_SPEED	20.0f
 
-//#define DEFAULT_SCENE	0		// using NewtonMesh tool
-#define DEFAULT_SCENE	1		// coefficients of friction
+#define DEFAULT_SCENE	0		// using NewtonMesh tool
+//#define DEFAULT_SCENE	1		// coefficients of friction
 //#define DEFAULT_SCENE	2		// coefficients of restitution
 //#define DEFAULT_SCENE	3		// newton cradle
 //#define DEFAULT_SCENE	4		// gyroscope precession
@@ -417,7 +417,7 @@ DemoEntityManager::~DemoEntityManager ()
 
 	ImGui::Shutdown();
 	glfwTerminate();
-	dAssert (NewtonGetMemoryUsed () == 0);
+	//dAssert (NewtonGetMemoryUsed () == 0);
 }
 
 

@@ -45,7 +45,7 @@
 void NewtonWorldForEachJointDo(const NewtonWorld* const newtonWorld, NewtonJointIterator callback, void* const userData)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
 	const ndJointList& jointList = world->GetJointList();
 
 	//dgTree<dgConstraint*, dgConstraint*> jointMap(world->dgWorld::GetAllocator());
@@ -71,7 +71,7 @@ void NewtonWorldForEachJointDo(const NewtonWorld* const newtonWorld, NewtonJoint
 void NewtonWorldForEachBodyDo(const NewtonWorld* const newtonWorld, NewtonBodyIterator callback, void* const userData)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
 	const ndBodyListView& jointList = world->GetBodyList();
 
 	for (ndBodyListView::ndNode* node = jointList.GetFirst()->GetNext(); node; node = node->GetNext())
@@ -151,9 +151,9 @@ void NewtonWorldRayCast(const NewtonWorld* const newtonWorld, const dFloat* cons
 			{
 				if (m_prefilter)
 				{
-					ndSharedPtr<ndBody> sharedBody(m_world->GetBody(const_cast<ndBody*>(reinterpret_cast<const ndBody*>(body))));
+					ndSharedPtr<ndBody>* const sharedBody =m_world->GetBody(const_cast<ndBody*>(reinterpret_cast<const ndBody*>(body)));
 					ndShapeInstance* const instance = const_cast<ndShapeInstance*>(instancePtr);
-					return m_prefilter(reinterpret_cast<NewtonBody*>(&sharedBody), reinterpret_cast<const NewtonCollision*>(instance), m_userData);
+					return m_prefilter(reinterpret_cast<NewtonBody*>(sharedBody), reinterpret_cast<const NewtonCollision*>(instance), m_userData);
 				}
 				return true;
 			}
@@ -162,19 +162,9 @@ void NewtonWorldRayCast(const NewtonWorld* const newtonWorld, const dFloat* cons
 			{
 				if (m_filter)
 				{
-					//typedef dFloat(*NewtonWorldRayFilterCallback)(
-					// const NewtonBody* const body, 
-					// const NewtonCollision* const shapeHit, 
-					// const dFloat* const hitContact, 
-					// const dFloat* const hitNormal, 
-					// dLong collisionID, 
-					// void* const userData, 
-					// dFloat intersectParam);
-					// 
-					//ndWeakPtr<const ndShapeInstance> sharedInstance(contact.m_shapeInstance0);
 					ndShapeInstance* const instance = const_cast<ndShapeInstance*>(contact.m_shapeInstance0);
-					ndSharedPtr<ndBody> sharedBody(m_world->GetBody(const_cast<ndBody*>(reinterpret_cast<const ndBody*>(contact.m_body0))));
-					intersetParam = m_filter(reinterpret_cast<NewtonBody*>(&sharedBody), reinterpret_cast<const NewtonCollision*>(instance), &intersetParam, &contact.m_normal[0], contact.m_shapeId0, m_userData, intersetParam);
+					ndSharedPtr<ndBody>* const  sharedBody = m_world->GetBody(const_cast<ndBody*>(reinterpret_cast<const ndBody*>(contact.m_body0)));
+					intersetParam = m_filter(reinterpret_cast<NewtonBody*>(sharedBody), reinterpret_cast<const NewtonCollision*>(instance), &intersetParam, &contact.m_normal[0], contact.m_shapeId0, m_userData, intersetParam);
 				}
 				return intersetParam;
 			}
@@ -185,7 +175,7 @@ void NewtonWorldRayCast(const NewtonWorld* const newtonWorld, const dFloat* cons
 			NewtonWorldRayPrefilterCallback m_prefilter;
 		};
 
-		ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+		ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
 		WorldRayCast rayCaster(world, userData, filter, prefilter);
 		const ndVector pp0(p0[0], p0[1], p0[2], ndFloat32(0.0f));
 		const ndVector pp1(p1[0], p1[1], p1[2], ndFloat32(0.0f));
@@ -219,7 +209,7 @@ void NewtonWorldForEachBodyInAABBDo(const NewtonWorld* const newtonWorld, const 
 {
 	TRACE_FUNCTION(__FUNCTION__);
 
-	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
 	const ndVector minBox(ndMin(p0[0], p1[0]), ndMin(p0[1], p1[1]), ndMin(p0[2], p1[2]), ndFloat32(0.0f));
 	const ndVector maxBox(ndMax(p0[0], p1[0]), ndMax(p0[1], p1[1]), ndMax(p0[2], p1[2]), ndFloat32(0.0f));
 
@@ -238,8 +228,8 @@ void NewtonWorldForEachBodyInAABBDo(const NewtonWorld* const newtonWorld, const 
 		{
 			if (m_callback)
 			{
-				ndSharedPtr<ndBody> sharedBody(m_world->GetBody(const_cast<ndBody*>(reinterpret_cast<const ndBody*>(body))));
-				m_callback(reinterpret_cast<NewtonBody*>(&sharedBody), m_userData);
+				ndSharedPtr<ndBody>* const sharedBody = m_world->GetBody(const_cast<ndBody*>(reinterpret_cast<const ndBody*>(body)));
+				m_callback(reinterpret_cast<NewtonBody*>(sharedBody), m_userData);
 			}
 		}
 
@@ -342,7 +332,7 @@ NewtonJoint* NewtonWorldFindJoint(const NewtonBody* const body0, const NewtonBod
 NewtonBody* NewtonWorldGetFirstBody(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = ObjectFromHandle<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
 	const ndBodyListView& bodyList = world->GetBodyList();
 	if (bodyList.GetCount())
 	{
@@ -367,7 +357,7 @@ NewtonBody* NewtonWorldGetFirstBody(const NewtonWorld* const newtonWorld)
 
   See also: ::NewtonWorldGetFirstBody, ::NewtonWorldForEachBodyInAABBDo, ::NewtonWorldForEachJointDo
 */
-NewtonBody* NewtonWorldGetNextBody(const NewtonWorld* const newtonWorld, const NewtonBody* const curBody)
+NewtonBody* NewtonWorldGetNextBody(const NewtonWorld* const, const NewtonBody* const curBody)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(curBody);
@@ -438,7 +428,7 @@ NewtonMaterial* NewtonWorldGetNextMaterial(const NewtonWorld* const newtonWorld,
   This function will ignore user define collision mesh
   See also: ::NewtonWorldGetFirstBody, ::NewtonWorldForEachBodyInAABBDo
 */
-void NewtonCollisionForEachPolygonDo(const NewtonCollision* const collision, const dFloat* const matrixPtr, NewtonCollisionIterator callback, void* const userDataPtr)
+void NewtonCollisionForEachPolygonDo(const NewtonCollision* const collision, const dFloat* const matrixPtr, NewtonCollisionIterator callback, void* const userData)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	//dgCollisionInstance* const collision = (dgCollisionInstance*)(collisionPtr);
@@ -452,6 +442,25 @@ void NewtonCollisionForEachPolygonDo(const NewtonCollision* const collision, con
 		matrix = ndGetIdentityMatrix();
 	}
 
+	class ndDrawShape : public ndShapeDebugNotify
+	{
+		public:
+		ndDrawShape(NewtonCollisionIterator callback, void* const userData)
+			:ndShapeDebugNotify()
+			,m_userData(userData)
+			,m_callback(callback)
 
-	ndAssert(0);
+		{
+		}
+
+		virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceVertex, const ndEdgeType* const) override
+		{
+			m_callback(m_userData, vertexCount, &faceVertex[0].m_x, 0);
+		}
+
+		//(void* const userData, int vertexCount, const dFloat* const faceArray, int faceId
+		void* const m_userData;
+		NewtonCollisionIterator m_callback;
+	};
+	ndDrawShape debugShape(callback, userData);
 }

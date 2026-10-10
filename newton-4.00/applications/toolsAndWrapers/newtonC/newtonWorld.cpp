@@ -47,6 +47,16 @@ void ndNewtonWorld::OnRemoveBody(ndBody* const body) const
 	ndWorld::OnRemoveBody(body);
 }
 
+void ndNewtonWorld::OnAddJoint(ndJointBilateralConstraint* const joint) const
+{
+	ndWorld::OnAddJoint(joint);
+}
+
+void ndNewtonWorld::OnRemoveJoint(ndJointBilateralConstraint* const joint) const
+{
+	ndWorld::OnRemoveJoint(joint);
+}
+
 
 void ndNewtonWorld::ClearMaterials()
 {
@@ -67,17 +77,17 @@ ndMaterial* ndNewtonWorld::GetMaterial(int id0, int id1) const
 	return notify->GetMaterial(id0, id1);
 }
 
-void ndNewtonWorld::Update(ndFloat32 timestep)
-{
-	//ndTrace(("%f\n", timestep));
-	ndWorld::Update(timestep);
-}
-
 void ndNewtonWorld::PostUpdate(ndFloat32 timestep)
 {
 	if (m_onPostUpdate)
 	{
-		ndWeakPtr<ndNewtonWorld> sharedWorld(this);
-		m_onPostUpdate(reinterpret_cast<NewtonWorld*>(&sharedWorld), timestep);
+		m_onPostUpdate(reinterpret_cast<NewtonWorld*>(this), timestep);
 	}
+}
+
+
+void ndNewtonWorld::Update(ndFloat32 timestep)
+{
+	//ndTrace(("%f\n", timestep));
+	ndWorld::Update(timestep);
 }

@@ -165,7 +165,6 @@ void ndShapeChamferCylinder::DebugShape(const ndMatrix& matrix, ndShapeDebugNoti
 	ndFloat32 sliceAngle = ndFloat32(0.0f);
 	ndFloat32 sliceStep = ndPi / ndFloat32(slices);
 	ndFloat32 breakStep = ndFloat32(2.0f) * ndPi / ndFloat32(brakes);
-	//ndVector pool[24 * (12 + 1)];
 	ndFixSizeArray<ndVector, 24 * (12 + 1)> pool;
 
 	ndMatrix rot(ndPitchMatrix(breakStep));

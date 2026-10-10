@@ -285,19 +285,36 @@ void ndWorld::OnSubStepPostUpdate(ndFloat32)
 {
 }
 
-ndSharedPtr<ndBody> ndWorld::GetBody(ndBody* const body) const
+//ndSharedPtr<ndBody> ndWorld::GetBody(ndBody* const body) const
+//{
+//	return m_scene->GetBody(body);
+//}
+//
+//ndSharedPtr<ndJointBilateralConstraint> ndWorld::GetJoint(ndJointBilateralConstraint* joint) const
+//{
+//	return joint->m_worldNode ? joint->m_worldNode->GetInfo() : ndSharedPtr<ndJointBilateralConstraint>(nullptr);
+//}
+//
+//ndSharedPtr<ndModel> ndWorld::GetModel(ndModel* const model) const
+//{
+//	return model->m_worldNode ? model->m_worldNode->GetInfo() : ndSharedPtr<ndModel>(nullptr);
+//}
+
+ndSharedPtr<ndBody>* ndWorld::GetBody(ndBody* const body) const
 {
-	return m_scene->GetBody(body);
+	ndBodyKinematic* const kinBody = body->GetAsBodyKinematic();
+	ndBodyListView::ndNode* const node = kinBody->GetSceneNode();
+	return node ? &node->GetInfo() : nullptr;
 }
 
-ndSharedPtr<ndJointBilateralConstraint> ndWorld::GetJoint(ndJointBilateralConstraint* joint) const
+D_NEWTON_API ndSharedPtr<ndModel>* ndWorld::GetModel(ndModel* const model) const
 {
-	return joint->m_worldNode->GetInfo();
+	return model->m_worldNode ? &model->m_worldNode->GetInfo() : nullptr;
 }
 
-ndSharedPtr<ndModel> ndWorld::GetModel(ndModel* const model) const
+D_NEWTON_API ndSharedPtr<ndJointBilateralConstraint>* ndWorld::GetJoint(ndJointBilateralConstraint* joint) const
 {
-	return model->m_worldNode ? model->m_worldNode->GetInfo() : ndSharedPtr<ndModel>(nullptr);
+	return joint->m_worldNode ? &joint->m_worldNode->GetInfo() : nullptr;
 }
 
 ndInt32 ndWorld::CompareJointByInvMass(const ndJointBilateralConstraint* const jointA, const ndJointBilateralConstraint* const jointB, void*)
@@ -1060,8 +1077,11 @@ void ndWorld::RemoveBody(ndBody* const body)
 			jointNode = jointNode->GetNext();
 			RemoveJoint(joint);
 		}
-		ndSharedPtr<ndBody> sharedBody(GetBody(body));
-		m_scene->RemoveBody(sharedBody);
+		ndSharedPtr<ndBody>* const sharedBody = GetBody(body);
+		if (sharedBody)
+		{
+			m_scene->RemoveBody(*sharedBody);
+		}
 	}
 }
 

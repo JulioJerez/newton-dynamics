@@ -234,10 +234,10 @@ void ndPhysicsWorld::DefferedRemoveBody(ndSharedPtr<ndBody> body)
 		ndModel* const model = kinematicBody->GetModel();
 		if (model)
 		{
-			ndSharedPtr<ndModel> modelPtr(GetModel(model));
-			if (*modelPtr)
+			ndSharedPtr<ndModel>* const modelPtr(GetModel(model));
+			if (modelPtr)
 			{
-				m_deadModels.Insert(modelPtr);
+				m_deadModels.Insert(*modelPtr);
 			}
 		}
 		else

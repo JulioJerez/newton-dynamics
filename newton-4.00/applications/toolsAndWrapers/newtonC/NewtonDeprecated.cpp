@@ -26,20 +26,20 @@
 #include "newtonBodyNotify.h"
 
 
-int NewtonGetParallelSolverOnLargeIsland(const NewtonWorld* const newtonWorld)
+int NewtonGetParallelSolverOnLargeIsland(const NewtonWorld* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	return 0;
 }
 
-int NewtonGetBroadphaseAlgorithm(const NewtonWorld* const newtonWorld)
+int NewtonGetBroadphaseAlgorithm(const NewtonWorld* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	return 0;
 }
 
 
-void NewtonResetBroadphase(const NewtonWorld* const newtonWorld)
+void NewtonResetBroadphase(const NewtonWorld* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 }
@@ -123,7 +123,7 @@ void NewtonSetIslandUpdateEvent(const NewtonWorld* const, NewtonIslandUpdate)
 
   See also: ::NewtonSetIslandUpdateEvent
 */
-NewtonBody* NewtonIslandGetBody(const void* const island, int bodyIndex)
+NewtonBody* NewtonIslandGetBody(const void* const, int)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	// do nothing
@@ -218,7 +218,7 @@ void NewtonUnloadPlugins(const NewtonWorld* const)
 	TRACE_FUNCTION(__FUNCTION__);
 }
 
-void* NewtonCollisionAggregateCreate(NewtonWorld* const worldPtr)
+void* NewtonCollisionAggregateCreate(NewtonWorld* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	//dgWorld* const world = (dgWorld*)worldPtr;
@@ -284,13 +284,13 @@ void NewtonCollisionAggregateSetSelfCollision(void* const aggregatePtr, int stat
 void NewtonStaticCollisionSetDebugCallback(const NewtonCollision* const staticCollision, NewtonTreeCollisionCallback userCallback)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndTrace(("deprecated funtion: %s\n", __FUNCDNAME__));
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
 
-void NewtonSelectBroadphaseAlgorithm(const NewtonWorld* const newtonWorld, int algorithmType)
+void NewtonSelectBroadphaseAlgorithm(const NewtonWorld* const, int)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndTrace(("deprecated funtion: %s\n", __FUNCDNAME__));
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
 
 /*!
@@ -323,5 +323,11 @@ void NewtonSelectBroadphaseAlgorithm(const NewtonWorld* const newtonWorld, int a
 void NewtonSetParallelSolverOnLargeIsland(const NewtonWorld* const, int)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndTrace(("deprecated funtion: %s\n", __FUNCDNAME__));
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
+}
+
+void NewtonUserJointMassScale(const NewtonJoint* const, dFloat, dFloat)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
