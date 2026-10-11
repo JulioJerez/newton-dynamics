@@ -58,6 +58,8 @@ class dCollisionParamProxy;
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndContactSolver: public ndDownHeap<ndMinkFace*, ndFloat32>  
 {
+	class ndQuerieBody;
+
 	public: 
 	class ndBoxBoxDistance2;
 

@@ -558,17 +558,6 @@ void* NewtonCollisionGetUserData(const NewtonCollision* const collision)
 
 }
 
-void* NewtonCollisionGetSubCollisionHandle(const NewtonCollision* const collision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
-	//return (void*)instance->GetCollisionHandle();
-	ndAssert(0);
-	return 0;
-
-}
-
-
 void NewtonCollisionGetScale(const NewtonCollision* const collision, dFloat* const scaleX, dFloat* const scaleY, dFloat* const scaleZ)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -1238,10 +1227,10 @@ void NewtonCollisionGetInfo(const NewtonCollision* const collision, NewtonCollis
 NewtonCollision* NewtonCollisionGetParentInstance(const NewtonCollision* const collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
-	ndShapeCompound* const compoundCollision = instance->GetShape()->GetAsShapeCompound();
-	return compoundCollision ? reinterpret_cast<NewtonCollision*> (compoundCollision->GetOwner()) : nullptr;
+	//ndShapeCompound* const compoundCollision = instance->GetShape()->GetAsShapeCompound();
+	//return !compoundCollision ? reinterpret_cast<NewtonCollision*> (compoundCollision->GetOwner()) : nullptr;
+	return reinterpret_cast<NewtonCollision*> (instance->GetParent());
 }
 
 void NewtonCollisionGetMaterial(const NewtonCollision* const collision, NewtonCollisionMaterial* const userData)
@@ -1301,4 +1290,11 @@ void NewtonCollisionSetScale(const NewtonCollision* const collision, dFloat scal
 	TRACE_FUNCTION(__FUNCTION__);
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	instance->SetScale(ndVector(scaleX, scaleY, scaleZ, ndFloat32(0.0f)));
+}
+
+void* NewtonCollisionGetSubCollisionHandle(const NewtonCollision* const collision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
+	return const_cast<void*>(instance->m_subCollisionHandle);
 }
