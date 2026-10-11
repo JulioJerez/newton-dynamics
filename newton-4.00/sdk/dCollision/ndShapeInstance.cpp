@@ -44,6 +44,7 @@ ndShapeInstance::ndShapeInstance(ndShape* const shape)
 	,m_shape(shape ? shape->AddRef() : shape)
 	,m_ownerBody(nullptr)
 	,m_subCollisionHandle(nullptr)
+	,m_parent(nullptr)
 	,m_skinMargin(ndFloat32(0.0f))
 	,m_scaleType(m_unit)
 	,m_collisionMode(true)
@@ -70,6 +71,7 @@ ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance)
 	,m_shape(instance.m_shape->AddRef())
 	,m_ownerBody(instance.m_ownerBody)
 	,m_subCollisionHandle(instance.m_subCollisionHandle)
+	,m_parent(nullptr)
 	,m_skinMargin(instance.m_skinMargin)
 	,m_scaleType(instance.m_scaleType)
 	,m_collisionMode(instance.m_collisionMode)
@@ -102,6 +104,7 @@ ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance, ndShape* const
 	,m_shape(shape->AddRef())
 	,m_ownerBody(instance.m_ownerBody)
 	,m_subCollisionHandle(instance.m_subCollisionHandle)
+	,m_parent(nullptr)
 	,m_skinMargin(instance.m_skinMargin)
 	,m_scaleType(instance.m_scaleType)
 	,m_collisionMode(instance.m_collisionMode)
@@ -119,7 +122,6 @@ ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance, ndShape* const
 
 ndShapeInstance::~ndShapeInstance()
 {
-	//ndAssert(!m_shape);
 	if (m_shape)
 	{
 		m_shape->Release();
@@ -347,6 +349,11 @@ void ndShapeInstance::SetShape(ndShape* const shape)
 	m_shape = shape ? shape->AddRef() : shape;
 }
 
+ndShapeInstance* ndShapeInstance::GetParent() const
+{
+	return const_cast<ndShapeInstance*>(*m_parent);
+}
+
 //const char* ndShapeInstance::ClassName() const
 //{
 //	return "ndShapeInstance";
@@ -447,18 +454,20 @@ ndShapeInstance& ndShapeInstance::operator=(const ndShapeInstance& instance)
 	const ndShapeCompound* const compound = ((ndShape*)instance.GetShape())->GetAsShapeCompound();
 	if (compound)
 	{
-		ndShapeCompound* const selfShape = new ndShapeCompound();
+		//ndShapeCompound* const selfShape = new ndShapeCompound();
+		//m_shape = selfShape->AddRef();
+		//
+		//selfShape->BeginAddRemove();
+		//ndShapeCompound::ndTreeArray::Iterator iter(compound->GetTree());
+		//for (iter.Begin(); iter; iter++)
+		//{
+		//	ndShapeCompound::ndNodeBase* const node = iter.GetNode()->GetInfo();
+		//	ndShapeInstance* const subInstance = node->GetShape();
+		//	selfShape->AddCollision(subInstance);
+		//}
+		//selfShape->EndAddRemove();
+		ndShapeCompound* const selfShape = new ndShapeCompound(*compound, this);
 		m_shape = selfShape->AddRef();
-
-		selfShape->BeginAddRemove();
-		ndShapeCompound::ndTreeArray::Iterator iter(compound->GetTree());
-		for (iter.Begin(); iter; iter++)
-		{
-			ndShapeCompound::ndNodeBase* const node = iter.GetNode()->GetInfo();
-			ndShapeInstance* const subInstance = node->GetShape();
-			selfShape->AddCollision(subInstance);
-		}
-		selfShape->EndAddRemove();
 	}
 	else
 	{

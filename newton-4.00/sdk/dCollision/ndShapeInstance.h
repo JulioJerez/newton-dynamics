@@ -128,6 +128,8 @@ class ndShapeInstance: public ndContainersFreeListAlloc<ndShapeInstance>
 	D_COLLISION_API ndShape* GetShape();
 	D_COLLISION_API const ndShape* GetShape() const;
 	D_COLLISION_API void SetShape(ndShape* const shape);
+
+	D_COLLISION_API ndShapeInstance* GetParent() const;
 	D_COLLISION_API ndVector SupportVertex(const ndVector& dir) const;
 	D_COLLISION_API ndMatrix GetScaledTransform(const ndMatrix& matrix) const;
 	D_COLLISION_API ndMatrix GetInvScaledTransform(const ndMatrix& matrix) const;
@@ -177,6 +179,7 @@ class ndShapeInstance: public ndContainersFreeListAlloc<ndShapeInstance>
 	const ndShape* m_shape;
 	const ndBody* m_ownerBody;
 	const void* m_subCollisionHandle;
+	ndWeakPtr<ndShapeInstance> m_parent;
 	ndFloat32 m_skinMargin;
 	ndScaleType m_scaleType;
 	bool m_collisionMode;
