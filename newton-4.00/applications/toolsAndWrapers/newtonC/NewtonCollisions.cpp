@@ -21,6 +21,7 @@
 
 #include "newtonStdafx.h"
 #include "Newton.h"
+#include "NewtonUtils.h"
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
 #include "newtonBodyNotify.h"
@@ -96,7 +97,8 @@ void NewtonCollisionSetUserData(const NewtonCollision* const collision, void* co
 void NewtonCollisionSetMatrix(const NewtonCollision* collision, const dFloat* const matrixPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	//ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 
 	ndMatrix matrix(matrixPtr);
 	if (!CheckFloat(&matrix[0][0], 16))
@@ -378,7 +380,7 @@ NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* const,  int count, co
 NewtonCollision* NewtonCreateConvexHullFromMesh(const NewtonWorld* const,  const NewtonMesh* const mesh, dFloat tolerance, int shapeID)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 
 	ndShapeInstance* const instance = meshEffect->CreateConvexCollision(tolerance);
 	ndShapeMaterial material = instance->GetMaterial();
@@ -1226,7 +1228,8 @@ int NewtonUserMeshCollisionContinuousOverlapTest(const NewtonUserMeshCollisionCo
 void NewtonCollisionGetInfo(const NewtonCollision* const collision, NewtonCollisionInfoRecord* const collisionInfo)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	//ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	const ndShapeInfo info(instance->GetShapeInfo());
 	
 	ndMemSet(collisionInfo->m_paramArray, dFloat(0.0f), sizeof (collisionInfo->m_paramArray) / sizeof (collisionInfo->m_paramArray[0]));
@@ -1241,7 +1244,8 @@ void NewtonCollisionGetInfo(const NewtonCollision* const collision, NewtonCollis
 NewtonCollision* NewtonCollisionGetParentInstance(const NewtonCollision* const collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	//ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	ndShapeCompound* const compoundCollision = instance->GetShape()->GetAsShapeCompound();
 	return compoundCollision ? reinterpret_cast<NewtonCollision*> (compoundCollision->GetOwner()) : nullptr;
 }
@@ -1255,7 +1259,8 @@ void NewtonCollisionGetMaterial(const NewtonCollision* const collision, NewtonCo
 	//userData->m_userData.m_int = data.m_alignPad;
 	//memcpy(userData->m_userParam, data.m_userParam, sizeof(data.m_userParam));
 
-	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	//ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	ndShapeMaterial material = instance->GetMaterial();
 
 	userData->m_userId = material.m_userId;
@@ -1276,7 +1281,8 @@ void NewtonCollisionSetMaterial(const NewtonCollision* const collision, const Ne
 	//memcpy(data.m_userParam, userData->m_userParam, sizeof(data.m_userParam));
 	//instance->SetMaterial(data);
 
-	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	//ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = userData->m_userId;
 	material.m_data.m_alignPad = userData->m_userData.m_int;
@@ -1290,7 +1296,8 @@ void NewtonCollisionSetMaterial(const NewtonCollision* const collision, const Ne
 int NewtonCollisionGetType(const NewtonCollision* const collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	//ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	NewtonCollisionInfoRecord collisionInfo;
 	MapShapeId(instance->GetShapeInfo(), collisionInfo);
 	return collisionInfo.m_collisionType;

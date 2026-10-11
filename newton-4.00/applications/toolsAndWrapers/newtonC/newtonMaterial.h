@@ -26,16 +26,16 @@ class ndNewtonMaterial : public ndApplicationMaterial
 
 	ndNewtonMaterial();
 	ndNewtonMaterial(const ndNewtonMaterial& src);
-	virtual ~ndNewtonMaterial();
+	virtual ~ndNewtonMaterial() override;
 
-	virtual ndApplicationMaterial* Clone() const
+	virtual ndApplicationMaterial* Clone() const override
 	{
 		return new ndNewtonMaterial(*this);
 	}
 
-	virtual void OnContactCallback(const ndContact* const joint, ndFloat32 timestep) const;
-	virtual bool OnAabbOverlap(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1) const;
-	virtual bool OnAabbOverlap(const ndContact* const joint, ndFloat32 timestep, const ndShapeInstance& instanceShape0, const ndShapeInstance& instanceShape1) const;
+	virtual void OnContactCallback(const ndContact* const joint, ndFloat32 timestep) const override;
+	virtual bool OnAabbOverlap(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1) const override;
+	virtual bool OnAabbOverlap(const ndContact* const joint, ndFloat32 timestep, const ndShapeInstance& instanceShape0, const ndShapeInstance& instanceShape1) const override;
 
 	NewtonOnAABBOverlap m_onAABBOverlap;
 	NewtonContactsProcess m_onContactsProcess;

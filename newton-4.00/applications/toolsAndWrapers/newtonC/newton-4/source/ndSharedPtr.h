@@ -49,6 +49,8 @@ class ndSharedPtr
 	bool operator==(const ndSharedPtr<T>& other) const;
 	bool operator!=(const ndSharedPtr<T>& other) const;
 
+	// only use these functions whne you know what you are doing
+	void AddRef();
 	ndInt32 GetRefCount() const;
 
 	protected:
@@ -197,9 +199,16 @@ bool ndSharedPtr<T>::operator< (const ndSharedPtr<T>& other) const
 }
 
 template <typename T>
+void ndSharedPtr<T>::AddRef()
+{
+	m_references->m_sharedRef++;
+}
+
+template <typename T>
 ndInt32 ndSharedPtr<T>::GetRefCount() const
 {
 	return m_references->m_sharedRef.load();
 }
+
 #endif 
 

@@ -114,6 +114,7 @@ D_MSV_NEWTON_CLASS_ALIGN_32
 class ndContact: public ndConstraint
 {
 	public:
+	D_CLASS_REFLECTION(ndContact, ndConstraint)
 	D_COLLISION_API ndContact();
 	D_COLLISION_API ndContact(const ndContact& src);
 	D_COLLISION_API virtual ~ndContact() override;

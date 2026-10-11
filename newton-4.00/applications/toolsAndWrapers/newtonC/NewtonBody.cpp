@@ -21,6 +21,7 @@
 
 #include "newtonStdafx.h"
 #include "Newton.h"
+#include "NewtonUtils.h"
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
 #include "newtonBodyNotify.h"
@@ -55,11 +56,12 @@ NewtonBody* NewtonCreateDynamicBody(const NewtonWorld* const newtonWorld, const 
 	matrix.m_right.m_w = ndFloat32(0.0f);
 	matrix.m_posit.m_w = ndFloat32(1.0f);
 
-	ndSharedPtr<ndBody>* const body = new ndSharedPtr<ndBody>(new ndBodyDynamic());
-	ndBodyDynamic* const dynBody = (*body)->GetAsBodyDynamic();
+	ndSharedPtr<ndBody> body (new ndBodyDynamic());
+	ndBodyDynamic* const dynBody = body->GetAsBodyDynamic();
 
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
-	ndSharedPtr<ndBodyNotify> bodyNotify(new ndNewtonBodyNotify(world, reinterpret_cast<NewtonBody*>(body)));
+	//ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndSharedPtr<ndBodyNotify> bodyNotify(new ndNewtonBodyNotify(world, reinterpret_cast<NewtonBody*>(*body)));
 
 	ndShapeInstance instance(new ndShapeNull());
 	ndShapeInstance* const instancePtr = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
@@ -71,8 +73,8 @@ NewtonBody* NewtonCreateDynamicBody(const NewtonWorld* const newtonWorld, const 
 	dynBody->SetMatrix(matrix);
 	dynBody->SetCollisionShape(instance);
 	dynBody->SetNotifyCallback(bodyNotify);
-	world->AddBody(*body);
-	return reinterpret_cast<NewtonBody*>(body);
+	world->AddBody(body);
+	return reinterpret_cast<NewtonBody*>(*body);
 }
 
 NewtonBody* NewtonCreateAsymetricDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix)
@@ -429,29 +431,6 @@ NewtonJoint* NewtonBodyGetNextContactJoint(const NewtonBody* const bodyPtr, cons
 	ndAssert(0);
 	return 0;
 }
-
-
-/*!
-  Return a pointer to the next contact joint the connect these two bodies, if the are colliding
-
-  @param *body0 pointer to one body.
-  @param *body1 pointer to secund body.
-
-  @return Contact if the body is colliding with anther body, NULL otherwise
-
-  See also: ::NewtonBodyGetFirstContactJoint, ::NewtonContactJointGetFirstContact, ::NewtonContactJointGetNextContact, ::NewtonContactJointRemoveContact
-*/
-NewtonJoint* NewtonBodyFindContact(const NewtonBody* const body0, const NewtonBody* const body1)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//const dgBody* const bodyPtr0 = (dgBody*)body0;
-	//const dgBody* const bodyPtr1 = (dgBody*)body1;
-	//return (NewtonJoint*)bodyPtr0->GetWorld()->FindContactJoint(bodyPtr0, bodyPtr1);
-
-	ndAssert(0);
-	return 0;
-}
-
 
 int NewtonBodyGetSerializedID(const NewtonBody* const bodyPtr)
 {
@@ -829,7 +808,7 @@ void  NewtonBodySetUserData(const NewtonBody* const bodyPtr, void* const userDat
 {
 	TRACE_FUNCTION(__FUNCTION__);
 
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
 	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
 	bodyNotify->m_userData = ndWeakPtr<void>(userDataPtr);
@@ -850,7 +829,7 @@ void  NewtonBodySetUserData(const NewtonBody* const bodyPtr, void* const userDat
 void* NewtonBodyGetUserData(const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
 	return *bodyNotify->m_userData;
 }
@@ -871,7 +850,7 @@ void* NewtonBodyGetUserData(const NewtonBody* const bodyPtr)
 void NewtonBodySetMaterialGroupID(const NewtonBody* const bodyPtr, int id)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
 	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
 	bodyNotify->m_materialGoupId = id;
@@ -884,7 +863,7 @@ void NewtonBodySetMaterialGroupID(const NewtonBody* const bodyPtr, int id)
 void  NewtonBodySetMassProperties(const NewtonBody* const bodyPtr, dFloat mass, const NewtonCollision* const collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	const ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
 	body->GetAsBodyKinematic()->SetMassMatrix(mass, *instance);
 }
@@ -911,7 +890,7 @@ void  NewtonBodySetMassProperties(const NewtonBody* const bodyPtr, dFloat mass, 
 NewtonApplyForceAndTorque NewtonBodyGetForceAndTorqueCallback(const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
 	return bodyNotify->m_forceAndTorque;
 }
@@ -934,7 +913,7 @@ NewtonApplyForceAndTorque NewtonBodyGetForceAndTorqueCallback(const NewtonBody* 
 void  NewtonBodySetForceAndTorqueCallback(const NewtonBody* const bodyPtr, NewtonApplyForceAndTorque callback)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
 	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
 	bodyNotify->m_forceAndTorque = callback;
@@ -959,7 +938,7 @@ void  NewtonBodySetForceAndTorqueCallback(const NewtonBody* const bodyPtr, Newto
 void NewtonBodySetMatrix(const NewtonBody* const bodyPtr, const dFloat* const matrixPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	ndMatrix matrix(matrixPtr);
 	if (!CheckFloat(&matrix[0][0], 16))
 	{
@@ -991,7 +970,7 @@ void NewtonBodySetMatrix(const NewtonBody* const bodyPtr, const dFloat* const ma
 void NewtonBodyGetMatrix(const NewtonBody* const bodyPtr, dFloat* const matrixPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	const ndMatrix matrix(body->GetMatrix());
 	ndMemCpy(matrixPtr, &matrix[0][0], sizeof(ndMatrix) / sizeof(ndFloat32));
 }
@@ -999,7 +978,7 @@ void NewtonBodyGetMatrix(const NewtonBody* const bodyPtr, dFloat* const matrixPt
 void NewtonBodyGetPosition(const NewtonBody* const bodyPtr, dFloat* const posPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	const ndMatrix matrix(body->GetMatrix());
 	posPtr[0] = matrix.m_posit.m_x;
 	posPtr[1] = matrix.m_posit.m_y;
@@ -1028,7 +1007,7 @@ void NewtonBodyGetPosition(const NewtonBody* const bodyPtr, dFloat* const posPtr
 void NewtonBodyGetRotation(const NewtonBody* const bodyPtr, dFloat* const rotPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	const ndQuaternion& rot = body->GetRotation();
 	rotPtr[0] = rot.m_x;
 	rotPtr[1] = rot.m_y;
@@ -1052,7 +1031,7 @@ void NewtonBodyGetRotation(const NewtonBody* const bodyPtr, dFloat* const rotPtr
 void  NewtonBodyAddForce(const NewtonBody* const bodyPtr, const dFloat* const vectorPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	ndVector vector(vectorPtr[0], vectorPtr[1], vectorPtr[2], ndFloat32(0.0f));
 	body->SetForce(body->GetForce() + vector);
 }
@@ -1072,7 +1051,7 @@ void  NewtonBodyAddForce(const NewtonBody* const bodyPtr, const dFloat* const ve
 void  NewtonBodySetForce(const NewtonBody* const bodyPtr, const dFloat* const vectorPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	ndVector vector(vectorPtr[0], vectorPtr[1], vectorPtr[2], ndFloat32(0.0f));
 	body->SetForce(vector);
 }
@@ -1093,7 +1072,7 @@ void  NewtonBodySetForce(const NewtonBody* const bodyPtr, const dFloat* const ve
 void  NewtonBodyAddTorque(const NewtonBody* const bodyPtr, const dFloat* const vectorPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	ndVector vector(vectorPtr[0], vectorPtr[1], vectorPtr[2], ndFloat32(0.0f));
 	body->SetTorque(body->GetTorque() + vector);
 }
@@ -1113,7 +1092,7 @@ void  NewtonBodyAddTorque(const NewtonBody* const bodyPtr, const dFloat* const v
 void  NewtonBodySetTorque(const NewtonBody* const bodyPtr, const dFloat* const vectorPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	ndVector vector(vectorPtr[0], vectorPtr[1], vectorPtr[2], ndFloat32(0.0f));
 	body->SetTorque(vector);
 }
@@ -1137,7 +1116,7 @@ void  NewtonBodySetTorque(const NewtonBody* const bodyPtr, const dFloat* const v
 void  NewtonBodySetTransformCallback(const NewtonBody* const bodyPtr, NewtonSetTransform callback)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
 	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
 	bodyNotify->m_applyTransform = callback;
@@ -1162,7 +1141,7 @@ void  NewtonBodySetTransformCallback(const NewtonBody* const bodyPtr, NewtonSetT
 NewtonSetTransform NewtonBodyGetTransformCallback(const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
 	return bodyNotify->m_applyTransform;
 }
@@ -1200,7 +1179,7 @@ NewtonSetTransform NewtonBodyGetTransformCallback(const NewtonBody* const bodyPt
 void NewtonBodySetContinuousCollisionMode(const NewtonBody* const bodyPtr, unsigned state)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	//body->SetContinueCollisionMode(state ? true : false);
 }
 
@@ -1223,7 +1202,7 @@ void NewtonBodySetContinuousCollisionMode(const NewtonBody* const bodyPtr, unsig
 int NewtonBodyGetContinuousCollisionMode(const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	//return body->GetContinueCollisionMode() ? 1 : false;
 	return 0;
 }
@@ -1250,7 +1229,7 @@ int NewtonBodyGetContinuousCollisionMode(const NewtonBody* const bodyPtr)
 void NewtonBodySetLinearDamping(const NewtonBody* const bodyPtr, dFloat linearDamp)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 
 	body->SetLinearDamping(linearDamp);
 }
@@ -1267,7 +1246,7 @@ void NewtonBodySetLinearDamping(const NewtonBody* const bodyPtr, dFloat linearDa
 dFloat NewtonBodyGetLinearDamping(const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 
 	return body->GetLinearDamping();
 }
@@ -1294,7 +1273,7 @@ dFloat NewtonBodyGetLinearDamping(const NewtonBody* const bodyPtr)
 void  NewtonBodySetAngularDamping(const NewtonBody* const bodyPtr, const dFloat* angularDamp)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 
 	ndVector vector(angularDamp[0], angularDamp[1], angularDamp[2], ndFloat32(0.0f));
 	body->SetAngularDamping(vector);
@@ -1312,7 +1291,7 @@ void  NewtonBodySetAngularDamping(const NewtonBody* const bodyPtr, const dFloat*
 void  NewtonBodyGetAngularDamping(const NewtonBody* const bodyPtr, dFloat* angularDamp)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 
 	ndVector vector(body->GetAngularDamping());
 	angularDamp[0] = vector.m_x;
@@ -1331,7 +1310,7 @@ void  NewtonBodyGetAngularDamping(const NewtonBody* const bodyPtr, dFloat* angul
 void NewtonBodySetVelocity(const NewtonBody* const bodyPtr, const dFloat* const velocity)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 
 	ndVector vector(velocity[0], velocity[1], velocity[2], ndFloat32(0.0f));
 	body->SetVelocity(vector);
@@ -1340,7 +1319,7 @@ void NewtonBodySetVelocity(const NewtonBody* const bodyPtr, const dFloat* const 
 void NewtonBodySetVelocityNoSleep(const NewtonBody* const bodyPtr, const dFloat* const velocity)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 
 	ndVector vector(velocity[0], velocity[1], velocity[2], ndFloat32(0.0f));
 	body->SetVelocityNoSleep(vector);
@@ -1358,7 +1337,7 @@ void NewtonBodyGetVelocity(const NewtonBody* const bodyPtr, dFloat* const veloci
 {
 	TRACE_FUNCTION(__FUNCTION__);
 
-	const ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	const ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 
 	ndVector vector(body->GetVelocity());
 	velocity[0] = vector.m_x;
@@ -1369,7 +1348,7 @@ void NewtonBodyGetVelocity(const NewtonBody* const bodyPtr, dFloat* const veloci
 void NewtonBodyGetPointVelocity(const NewtonBody* const bodyPtr, const dFloat* const point, dFloat* const velocOut)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	const ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	const ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	const ndVector veloc(body->GetVelocityAtPoint(ndVector(point[0], point[1], point[2], ndFloat32(0.0f))));
 	velocOut[0] = veloc[0];
 	velocOut[1] = veloc[1];
@@ -1388,7 +1367,7 @@ void NewtonBodyGetOmega(const NewtonBody* const bodyPtr, dFloat* const omega)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 
-	const ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	const ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	const ndVector vector(body->GetOmega());
 	omega[0] = vector.m_x;
 	omega[1] = vector.m_y;
@@ -1406,7 +1385,7 @@ void NewtonBodyGetOmega(const NewtonBody* const bodyPtr, dFloat* const omega)
 void NewtonBodySetOmega(const NewtonBody* const bodyPtr, const dFloat* const omega)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 
 	ndVector vector(omega[0], omega[1], omega[2], ndFloat32(0.0f));
 	body->SetOmega(vector);
@@ -1415,7 +1394,7 @@ void NewtonBodySetOmega(const NewtonBody* const bodyPtr, const dFloat* const ome
 void NewtonBodySetOmegaNoSleep(const NewtonBody* const bodyPtr, const dFloat* const omega)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 
 	ndVector vector(omega[0], omega[1], omega[2], ndFloat32(0.0f));
 	body->SetOmegaNoSleep(vector);
@@ -1437,9 +1416,8 @@ void NewtonBodySetOmegaNoSleep(const NewtonBody* const bodyPtr, const dFloat* co
 void  NewtonBodyGetMass(const NewtonBody* const bodyPtr, dFloat* const mass, dFloat* const Ixx, dFloat* const Iyy, dFloat* const Izz)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 
-	//	dgVector vector (body->GetApparentMass());
 	ndVector vector(body->GetMassMatrix());
 	Ixx[0] = vector.m_x;
 	Iyy[0] = vector.m_y;
@@ -1474,7 +1452,7 @@ void  NewtonBodyGetMass(const NewtonBody* const bodyPtr, dFloat* const mass, dFl
 void NewtonBodySetFullMassMatrix(const NewtonBody* const bodyPtr, dFloat mass, const dFloat* const inertiaMatrix)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	ndMatrix inertia(inertiaMatrix);
 	body->SetMassMatrix(mass, inertia);
 }
@@ -1530,7 +1508,7 @@ void NewtonBodySetMassMatrix(const NewtonBody* const bodyPtr, dFloat mass, dFloa
 void NewtonBodySetCentreOfMass(const NewtonBody* const bodyPtr, const dFloat* const comPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	ndVector vector(comPtr[0], comPtr[1], comPtr[2], ndFloat32(1.0f));
 	body->SetCentreOfMass(vector);
 }
@@ -1555,7 +1533,7 @@ void NewtonBodySetCentreOfMass(const NewtonBody* const bodyPtr, const dFloat* co
 void NewtonBodyGetCentreOfMass(const NewtonBody* const bodyPtr, dFloat* const comPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBodyKinematic* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	ndVector vector(body->GetCentreOfMass());
 	comPtr[0] = vector.m_x;
 	comPtr[1] = vector.m_y;
@@ -1584,8 +1562,9 @@ void NewtonBodyGetCentreOfMass(const NewtonBody* const bodyPtr, dFloat* const co
 void NewtonBodySetDestructorCallback(const NewtonBody* const bodyPtr, NewtonBodyDestructor callback)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
-	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
+	//ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
+	ndNewtonBodyNotify* const bodyNotify = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*body->GetNotifyCallback());
 	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
 	bodyNotify->m_onDestroy = callback;
 }
@@ -1604,12 +1583,9 @@ void NewtonBodySetDestructorCallback(const NewtonBody* const bodyPtr, NewtonBody
 NewtonCollision* NewtonBodyGetCollision(const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//return (NewtonCollision*)body->GetCollision();
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
-	ndBodyDynamic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyDynamic());
-
-	return reinterpret_cast<NewtonCollision*>(&dynBody->GetCollisionShape());
+	ndBodyKinematic* const body = PointerCast<ndBodyKinematic, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndAssert(body);
+	return PointerCast<NewtonCollision, ndShapeInstance>(&body->GetCollisionShape());
 }
 
 int NewtonBodyGetType(const NewtonBody* const bodyPtr)
@@ -1629,7 +1605,7 @@ int NewtonBodyGetType(const NewtonBody* const bodyPtr)
 	//}
 	//dgAssert(0);
 	//return 0;
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	if (body->IsType(ndBodyDynamic::StaticClassName()))
 	{
 		return NEWTON_DYNAMIC_BODY;
@@ -1668,7 +1644,7 @@ void NewtonBodySetAutoSleep(const NewtonBody* const bodyPtr, int state)
 	TRACE_FUNCTION(__FUNCTION__);
 	//dgBody* const body = (dgBody*)bodyPtr;
 	//body->SetAutoSleep(state ? true : false);
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	ndBodyDynamic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyDynamic());
 	dynBody->SetAutoSleep(state ? true : false);
 }
@@ -1685,7 +1661,7 @@ void NewtonBodySetAutoSleep(const NewtonBody* const bodyPtr, int state)
 int NewtonBodyGetAutoSleep(const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	ndBodyDynamic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyDynamic());
 	return dynBody->GetAutoSleep() ? 1 : 0;
 }
@@ -1702,7 +1678,7 @@ int NewtonBodyGetAutoSleep(const NewtonBody* const bodyPtr)
 int NewtonBodyGetSleepState(const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	ndBodyDynamic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyDynamic());
 	return dynBody->GetSleepState() ? 1 : 0;
 }
@@ -1710,7 +1686,7 @@ int NewtonBodyGetSleepState(const NewtonBody* const bodyPtr)
 void NewtonBodySetSleepState(const NewtonBody* const bodyPtr, int state)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	ndBodyDynamic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyDynamic());
 	dynBody->SetSleepState(state ? true : false);
 }
@@ -1728,7 +1704,7 @@ void NewtonBodySetSleepState(const NewtonBody* const bodyPtr, int state)
 NewtonWorld* NewtonBodyGetWorld(const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	ndBodyKinematic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyKinematic());
 	NewtonWorld* const world = dynBody->GetScene() ? reinterpret_cast<NewtonWorld*>(dynBody->GetScene()->GetWorld()) : nullptr ;
 	return  world;
@@ -1737,6 +1713,25 @@ NewtonWorld* NewtonBodyGetWorld(const NewtonBody* const bodyPtr)
 int NewtonBodyGetID(const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(bodyPtr);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	return body->GetId();
+}
+
+/*!
+  Return a pointer to the next contact joint the connect these two bodies, if the are colliding
+
+  @param *body0 pointer to one body.
+  @param *body1 pointer to secund body.
+
+  @return Contact if the body is colliding with anther body, NULL otherwise
+
+  See also: ::NewtonBodyGetFirstContactJoint, ::NewtonContactJointGetFirstContact, ::NewtonContactJointGetNextContact, ::NewtonContactJointRemoveContact
+*/
+NewtonJoint* NewtonBodyFindContact(const NewtonBody* const body0, const NewtonBody* const body1)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const kinBody0 = PointerCast<ndBodyKinematic, NewtonBody>(body0);
+	ndBodyKinematic* const kinBody1 = PointerCast<ndBodyKinematic, NewtonBody>(body1);
+	ndBodyKinematic::ndContactMap& contactMap = kinBody0->GetContactMap();
+	return PointerCast<NewtonJoint, ndContact>(contactMap.FindContact(kinBody0, kinBody1));
 }

@@ -70,9 +70,10 @@ ndScene::ndScene()
 	,m_subStepNumber(0)
 	,m_forceBalanceSceneCounter(0)
 {
-	m_sentinelBody = new ndBodySentinel;
+	m_sentinelBody = new ndBodySentinel(this);
+
+	m_sentinelBody->m_scene = this;
 	m_contactNotifyCallback = ndSharedPtr<ndContactNotify>(new ndContactNotify(this));
-	//m_contactNotifyCallback->m_scene = new ndContactNotify(nullptr) this;
 
 	for (ndInt32 i = 0; i < D_MAX_THREADS_COUNT; ++i)
 	{
@@ -112,6 +113,8 @@ ndScene::ndScene(const ndScene& src)
 	ndSwap(m_rootNode, stealData->m_rootNode);
 	ndSwap(m_sentinelBody, stealData->m_sentinelBody);
 	ndSwap(m_contactNotifyCallback, stealData->m_contactNotifyCallback);
+
+	m_sentinelBody->m_scene = this;
 	m_contactNotifyCallback->m_scene = this;
 
 	ndSpecialList<ndBodyKinematic>::ndNode* nextNode;
@@ -1597,7 +1600,6 @@ void ndScene::CreateNewContacts()
 			ndAssert(ndUnsigned32(body1->m_index) == pair.m_body1);
 
 			const ndContact* const constructor = m_contactNotifyCallback->GetContactConstructor(body0->GetCollisionShape(), body1->GetCollisionShape());
-			//ndContact* const contact = new ndContact;
 			ndContact* const contact = constructor->Clone();
 
 			contact->SetBodies(body0, body1);

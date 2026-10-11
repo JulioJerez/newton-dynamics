@@ -10,6 +10,7 @@
 */
 
 #include "newtonStdafx.h"
+#include "NewtonUtils.h"
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
 
@@ -42,20 +43,24 @@ bool ndNewtonMaterial::OnAabbOverlap(const ndBodyKinematic* const, const ndBodyK
 	return true;
 }
 
-bool ndNewtonMaterial::OnAabbOverlap(const ndContact* const, ndFloat32, const ndShapeInstance&, const ndShapeInstance&) const
+bool ndNewtonMaterial::OnAabbOverlap(const ndContact* const contact, ndFloat32 timestep, const ndShapeInstance& instance0, const ndShapeInstance& instance1) const
 {
 	if (m_onSubShapeAABBOverlap)
 	{
 		ndAssert(0);
 	}
+	else if (m_onAABBOverlap)
+	{
+		return m_onAABBOverlap(PointerCast<NewtonJoint, ndContact>(contact), timestep, 0);
+	}
 	return true;
 }
 
-void ndNewtonMaterial::OnContactCallback(const ndContact* const, ndFloat32) const
+void ndNewtonMaterial::OnContactCallback(const ndContact* const contact, ndFloat32 timestep) const
 {
 	if (m_onContactsProcess)
 	{
-		ndAssert(0);
+		m_onContactsProcess(PointerCast<NewtonJoint, ndContact>(contact), timestep, 0);
 	}
 }
 

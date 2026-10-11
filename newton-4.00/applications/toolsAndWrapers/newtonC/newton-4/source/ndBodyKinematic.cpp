@@ -103,6 +103,23 @@ void ndBodyKinematic::ndContactMap::DetachContact(ndContact* const contact)
 	Remove(key);
 }
 
+ndBodySentinel::ndBodySentinel(ndScene* const scene)
+	:ndBodyKinematic()
+{
+	m_scene = scene;
+}
+
+ndBodySentinel::~ndBodySentinel()
+{
+	m_scene = nullptr;
+}
+
+ndBodySentinel* ndBodySentinel::GetAsBodySentinel()
+{ 
+	return this; 
+}
+
+
 ndBodyKinematic::ndBodyKinematic()
 	:ndBody()
 	,m_inertiaPrincipalAxis(ndGetIdentityMatrix())

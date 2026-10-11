@@ -21,6 +21,7 @@
 
 #include "newtonStdafx.h"
 #include "Newton.h"
+#include "NewtonUtils.h"
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
 #include "newtonBodyNotify.h"
@@ -147,13 +148,11 @@ void NewtonWorldRayCast(const NewtonWorld* const newtonWorld, const dFloat* cons
 			{
 			}
 
-			ndUnsigned32 OnRayPrecastAction(const ndBody* const body, const ndShapeInstance* const instancePtr) override
+			ndUnsigned32 OnRayPrecastAction(const ndBody* const body, const ndShapeInstance* const instance) override
 			{
 				if (m_prefilter)
 				{
-					ndSharedPtr<ndBody>* const sharedBody =m_world->GetBody(const_cast<ndBody*>(reinterpret_cast<const ndBody*>(body)));
-					ndShapeInstance* const instance = const_cast<ndShapeInstance*>(instancePtr);
-					return m_prefilter(reinterpret_cast<NewtonBody*>(sharedBody), reinterpret_cast<const NewtonCollision*>(instance), m_userData);
+					return m_prefilter(PointerCast<NewtonBody, ndBody>(body), PointerCast<NewtonCollision, ndShapeInstance>(instance), m_userData);
 				}
 				return true;
 			}
@@ -162,9 +161,7 @@ void NewtonWorldRayCast(const NewtonWorld* const newtonWorld, const dFloat* cons
 			{
 				if (m_filter)
 				{
-					ndShapeInstance* const instance = const_cast<ndShapeInstance*>(contact.m_shapeInstance0);
-					ndSharedPtr<ndBody>* const  sharedBody = m_world->GetBody(const_cast<ndBody*>(reinterpret_cast<const ndBody*>(contact.m_body0)));
-					intersetParam = m_filter(reinterpret_cast<NewtonBody*>(sharedBody), reinterpret_cast<const NewtonCollision*>(instance), &intersetParam, &contact.m_normal[0], contact.m_shapeId0, m_userData, intersetParam);
+					intersetParam = m_filter(PointerCast<NewtonBody, ndBody>(contact.m_body0), PointerCast<NewtonCollision, ndShapeInstance>(contact.m_shapeInstance0), &intersetParam, &contact.m_normal[0], contact.m_shapeId0, m_userData, intersetParam);
 				}
 				return intersetParam;
 			}
@@ -175,7 +172,8 @@ void NewtonWorldRayCast(const NewtonWorld* const newtonWorld, const dFloat* cons
 			NewtonWorldRayPrefilterCallback m_prefilter;
 		};
 
-		ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+		//ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+		ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 		WorldRayCast rayCaster(world, userData, filter, prefilter);
 		const ndVector pp0(p0[0], p0[1], p0[2], ndFloat32(0.0f));
 		const ndVector pp1(p1[0], p1[1], p1[2], ndFloat32(0.0f));
@@ -337,7 +335,7 @@ NewtonBody* NewtonWorldGetFirstBody(const NewtonWorld* const newtonWorld)
 	if (bodyList.GetCount())
 	{
 		ndSharedPtr<ndBody>& body = bodyList.GetFirst()->GetInfo();
-		return reinterpret_cast<NewtonBody*>(&body);
+		return reinterpret_cast<NewtonBody*>(*body);
 	}
 	return nullptr;
 }
@@ -360,11 +358,10 @@ NewtonBody* NewtonWorldGetFirstBody(const NewtonWorld* const newtonWorld)
 NewtonBody* NewtonWorldGetNextBody(const NewtonWorld* const, const NewtonBody* const curBody)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = ObjectFromHandle<ndBody, NewtonBody>(curBody);
-	ndBodyKinematic* const kinBody = static_cast<ndBodyKinematic*>(body);
+	ndBodyKinematic* const kinBody = PointerCast<ndBody, NewtonBody>(curBody)->GetAsBodyKinematic();
 	ndBodyListView::ndNode* const node = kinBody->GetSceneNode();
 	ndBodyListView::ndNode* const nextNode = node ? node->GetNext() : nullptr;
-	return nextNode ? reinterpret_cast<NewtonBody*>(&nextNode->GetInfo()) : nullptr;
+	return nextNode ? reinterpret_cast<NewtonBody*>(*nextNode->GetInfo()) : nullptr;
 }
 
 /*!

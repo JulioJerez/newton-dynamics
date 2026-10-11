@@ -256,7 +256,11 @@ class ndBodyKinematic : public ndBody
 
 class ndBodySentinel : public ndBodyKinematic
 {
-	ndBodySentinel* GetAsBodySentinel() override { return this; }
+	public:
+	ndBodySentinel(ndScene* const scene);
+
+	virtual ~ndBodySentinel() override;
+	virtual ndBodySentinel* GetAsBodySentinel() override;
 };
 
 #endif 

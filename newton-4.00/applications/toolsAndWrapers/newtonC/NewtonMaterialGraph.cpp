@@ -21,6 +21,7 @@
 
 #include "newtonStdafx.h"
 #include "Newton.h"
+#include "NewtonUtils.h"
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
 #include "newtonBodyNotify.h"
@@ -500,121 +501,6 @@ dFloat NewtonMaterialGetContactMaxTangentImpact(const NewtonMaterial* const mate
 	return 0;
 }
 
-
-/*!
-  Get the contact position and normal in global space.
-
-  @param materialHandle pointer to a material pair.
-  @param *body pointer to body
-  @param *positPtr pointer to an array of at least three floats to hold the contact position.
-  @param *normalPtr pointer to an array of at least three floats to hold the contact normal.
-
-  @return Nothing.
-
-  This function can only be called from a material callback event handle.
-
-  See also: ::NewtonMaterialSetCollisionCallback
-*/
-void NewtonMaterialGetContactPositionAndNormal(const NewtonMaterial* const materialHandle, const NewtonBody* const body, dFloat* const positPtr, dFloat* const normalPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgContactMaterial* const material = (dgContactMaterial*)materialHandle;
-	//
-	//positPtr[0] = material->m_point.m_x;
-	//positPtr[1] = material->m_point.m_y;
-	//positPtr[2] = material->m_point.m_z;
-	//
-	//normalPtr[0] = material->m_normal.m_x;
-	//normalPtr[1] = material->m_normal.m_y;
-	//normalPtr[2] = material->m_normal.m_z;
-	//
-	//if ((dgBody*)body != material->m_body0) {
-	//	normalPtr[0] *= dgFloat32(-1.0f);
-	//	normalPtr[1] *= dgFloat32(-1.0f);
-	//	normalPtr[2] *= dgFloat32(-1.0f);
-	//}
-	ndAssert(0);
-}
-
-
-
-/*!
-  Get the contact force vector in global space.
-
-  @param materialHandle pointer to a material pair.
-  @param *body pointer to body
-  @param *forcePtr pointer to an array of at least three floats to hold the force vector in global space.
-
-  @return Nothing.
-
-  The contact force value is only valid when calculating resting contacts. This means if two bodies collide with
-  non zero relative velocity, the reaction force will be an impulse, which is not a reaction force, this will return zero vector.
-  this function will only return meaningful values when the colliding bodies are at rest.
-
-  This function can only be called from a material callback event handler.
-
-  See also: ::NewtonMaterialSetCollisionCallback
-*/
-void NewtonMaterialGetContactForce(const NewtonMaterial* const materialHandle, const NewtonBody* const body, dFloat* const forcePtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgContactMaterial* const material = (dgContactMaterial*)materialHandle;
-	//
-	//dgVector force(material->m_normal.Scale(material->m_normal_Force.m_force) + material->m_dir0.Scale(material->m_dir0_Force.m_force) + material->m_dir1.Scale(material->m_dir1_Force.m_force));
-	//
-	//forcePtr[0] = force.m_x;
-	//forcePtr[1] = force.m_y;
-	//forcePtr[2] = force.m_z;
-	//
-	//if ((dgBody*)body != material->m_body0) {
-	//	forcePtr[0] *= dgFloat32(-1.0f);
-	//	forcePtr[1] *= dgFloat32(-1.0f);
-	//	forcePtr[2] *= dgFloat32(-1.0f);
-	//}
-	ndAssert(0);
-}
-
-
-
-/*!
-  Get the contact tangent vector to the contact point.
-
-  @param materialHandle pointer to a material pair.
-  @param *body pointer to body
-  @param  *dir0 - pointer to an array of at least three floats to hold the contact primary tangent vector.
-  @param  *dir1 - pointer to an array of at least three floats to hold the contact secondary tangent vector.
-
-  @return Nothing.
-
-  This function can only be called from a material callback event handler.
-
-  See also: ::NewtonMaterialSetCollisionCallback
-*/
-void NewtonMaterialGetContactTangentDirections(const NewtonMaterial* const materialHandle, const NewtonBody* const body, dFloat* const dir0, dFloat* const dir1)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgContactMaterial* const material = (dgContactMaterial*)materialHandle;
-	//
-	//dir0[0] = material->m_dir0.m_x;
-	//dir0[1] = material->m_dir0.m_y;
-	//dir0[2] = material->m_dir0.m_z;
-	//
-	//dir1[0] = material->m_dir1.m_x;
-	//dir1[1] = material->m_dir1.m_y;
-	//dir1[2] = material->m_dir1.m_z;
-	//
-	//if ((dgBody*)body != material->m_body0) {
-	//	dir0[0] *= dgFloat32(-1.0f);
-	//	dir0[1] *= dgFloat32(-1.0f);
-	//	dir0[2] *= dgFloat32(-1.0f);
-	//
-	//	dir1[0] *= dgFloat32(-1.0f);
-	//	dir1[1] *= dgFloat32(-1.0f);
-	//	dir1[2] *= dgFloat32(-1.0f);
-	//}
-	ndAssert(0);
-}
-
 dFloat NewtonMaterialGetContactPenetration(const NewtonMaterial* const materialHandle)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -759,45 +645,6 @@ void NewtonMaterialSetContactFrictionState(const NewtonMaterial* const materialH
 	ndAssert(0);
 }
 
-/*!
-  Override the default value of the kinetic and static coefficient of friction for this contact.
-
-  @param materialHandle pointer to a material pair.
-  @param staticFrictionCoef static friction coefficient. Must be positive.
-  @param kineticFrictionCoef static friction coefficient. Must be positive.
-  @param index index to the tangent vector. 0 for primary tangent vector or 1 for the secondary tangent vector.
-
-  @return Nothing.
-
-  This function can only be called from a material callback event handler.
-
-  It is recommended that *coef* be set to a value lower or equal to 1.0, however because some synthetic materials
-  can have hight than one coefficient of friction Newton allows for the coefficient of friction to be as high as 2.0.
-
-  the value *staticFrictionCoef* and *kineticFrictionCoef* will be clamped between 0.01f and 2.0.
-  If the application wants to set a kinetic friction higher than the current static friction it must increase the static friction first.
-
-  See also: ::NewtonMaterialSetCollisionCallback, ::NewtonMaterialSetDefaultFriction
-*/
-void NewtonMaterialSetContactFrictionCoef(const NewtonMaterial* const materialHandle, dFloat staticFrictionCoef, dFloat kineticFrictionCoef, int index)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgContactMaterial* const material = (dgContactMaterial*)materialHandle;
-	//
-	//if (staticFrictionCoef < kineticFrictionCoef) {
-	//	staticFrictionCoef = kineticFrictionCoef;
-	//}
-	//
-	//if (index) {
-	//	material->m_staticFriction1 = dgClamp(staticFrictionCoef, dFloat(0.01f), dFloat(2.0f));
-	//	material->m_dynamicFriction1 = dgClamp(kineticFrictionCoef, dFloat(0.01f), dFloat(2.0f));
-	//}
-	//else {
-	//	material->m_staticFriction0 = dgClamp(staticFrictionCoef, dFloat(0.01f), dFloat(2.0f));
-	//	material->m_dynamicFriction0 = dgClamp(kineticFrictionCoef, dFloat(0.01f), dFloat(2.0f));
-	//}
-	ndAssert(0);
-}
 
 /*!
   Force the contact point to have a non-zero acceleration aligned this the contact normal.
@@ -960,4 +807,158 @@ void NewtonMaterialContactRotateTangentDirections(const NewtonMaterial* const ma
 	//	material->m_dir0 = material->m_dir1.CrossProduct(material->m_normal);
 	//}
 	ndAssert(0);
+}
+
+
+
+/*!
+  Get the contact tangent vector to the contact point.
+
+  @param materialHandle pointer to a material pair.
+  @param *body pointer to body
+  @param  *dir0 - pointer to an array of at least three floats to hold the contact primary tangent vector.
+  @param  *dir1 - pointer to an array of at least three floats to hold the contact secondary tangent vector.
+
+  @return Nothing.
+
+  This function can only be called from a material callback event handler.
+
+  See also: ::NewtonMaterialSetCollisionCallback
+*/
+void NewtonMaterialGetContactTangentDirections(const NewtonMaterial* const materialHandle, const NewtonBody* const body, dFloat* const dir0, dFloat* const dir1)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	const ndContactMaterial* const material = PointerCast<ndContactMaterial, NewtonMaterial>(materialHandle);
+
+	dir0[0] = material->m_dir0.m_x;
+	dir0[1] = material->m_dir0.m_y;
+	dir0[2] = material->m_dir0.m_z;
+	
+	dir1[0] = material->m_dir1.m_x;
+	dir1[1] = material->m_dir1.m_y;
+	dir1[2] = material->m_dir1.m_z;
+	
+	if (PointerCast<ndBody, NewtonBody>(body) != material->m_body0)
+	{
+		dir0[0] *= ndFloat32(-1.0f);
+		dir0[1] *= ndFloat32(-1.0f);
+		dir0[2] *= ndFloat32(-1.0f);
+				   
+		dir1[0] *= ndFloat32(-1.0f);
+		dir1[1] *= ndFloat32(-1.0f);
+		dir1[2] *= ndFloat32(-1.0f);
+	}
+}
+
+/*!
+  Get the contact force vector in global space.
+
+  @param materialHandle pointer to a material pair.
+  @param *body pointer to body
+  @param *forcePtr pointer to an array of at least three floats to hold the force vector in global space.
+
+  @return Nothing.
+
+  The contact force value is only valid when calculating resting contacts. This means if two bodies collide with
+  non zero relative velocity, the reaction force will be an impulse, which is not a reaction force, this will return zero vector.
+  this function will only return meaningful values when the colliding bodies are at rest.
+
+  This function can only be called from a material callback event handler.
+
+  See also: ::NewtonMaterialSetCollisionCallback
+*/
+void NewtonMaterialGetContactForce(const NewtonMaterial* const materialHandle, const NewtonBody* const body, dFloat* const forcePtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	const ndContactMaterial* const material = PointerCast<ndContactMaterial, NewtonMaterial>(materialHandle);
+
+	ndVector force(material->m_normal.Scale(material->m_normal_Force.m_force) + material->m_dir0.Scale(material->m_dir0_Force.m_force) + material->m_dir1.Scale(material->m_dir1_Force.m_force));
+	
+	forcePtr[0] = force.m_x;
+	forcePtr[1] = force.m_y;
+	forcePtr[2] = force.m_z;
+	
+	if (PointerCast<ndBody, NewtonBody>(body) != material->m_body0)
+	{
+		forcePtr[0] *= ndFloat32(-1.0f);
+		forcePtr[1] *= ndFloat32(-1.0f);
+		forcePtr[2] *= ndFloat32(-1.0f);
+	}
+}
+
+/*!
+  Get the contact position and normal in global space.
+
+  @param materialHandle pointer to a material pair.
+  @param *body pointer to body
+  @param *positPtr pointer to an array of at least three floats to hold the contact position.
+  @param *normalPtr pointer to an array of at least three floats to hold the contact normal.
+
+  @return Nothing.
+
+  This function can only be called from a material callback event handle.
+
+  See also: ::NewtonMaterialSetCollisionCallback
+*/
+void NewtonMaterialGetContactPositionAndNormal(const NewtonMaterial* const materialHandle, const NewtonBody* const body, dFloat* const positPtr, dFloat* const normalPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgContactMaterial* const material = (dgContactMaterial*)materialHandle;
+	const ndContactMaterial* const material = PointerCast<ndContactMaterial, NewtonMaterial>(materialHandle);
+
+	positPtr[0] = material->m_point.m_x;
+	positPtr[1] = material->m_point.m_y;
+	positPtr[2] = material->m_point.m_z;
+	
+	normalPtr[0] = material->m_normal.m_x;
+	normalPtr[1] = material->m_normal.m_y;
+	normalPtr[2] = material->m_normal.m_z;
+	
+	if (PointerCast<ndBody, NewtonBody>(body) != material->m_body0)
+	{
+		normalPtr[0] *= ndFloat32(-1.0f);
+		normalPtr[1] *= ndFloat32(-1.0f);
+		normalPtr[2] *= ndFloat32(-1.0f);
+	}
+}
+
+/*!
+  Override the default value of the kinetic and static coefficient of friction for this contact.
+
+  @param materialHandle pointer to a material pair.
+  @param staticFrictionCoef static friction coefficient. Must be positive.
+  @param kineticFrictionCoef static friction coefficient. Must be positive.
+  @param index index to the tangent vector. 0 for primary tangent vector or 1 for the secondary tangent vector.
+
+  @return Nothing.
+
+  This function can only be called from a material callback event handler.
+
+  It is recommended that *coef* be set to a value lower or equal to 1.0, however because some synthetic materials
+  can have hight than one coefficient of friction Newton allows for the coefficient of friction to be as high as 2.0.
+
+  the value *staticFrictionCoef* and *kineticFrictionCoef* will be clamped between 0.01f and 2.0.
+  If the application wants to set a kinetic friction higher than the current static friction it must increase the static friction first.
+
+  See also: ::NewtonMaterialSetCollisionCallback, ::NewtonMaterialSetDefaultFriction
+*/
+void NewtonMaterialSetContactFrictionCoef(const NewtonMaterial* const materialHandle, dFloat staticFrictionCoef, dFloat kineticFrictionCoef, int index)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndContactMaterial* const material = PointerCast<ndContactMaterial, NewtonMaterial>(materialHandle);
+	if (staticFrictionCoef < kineticFrictionCoef) 
+	{
+		staticFrictionCoef = kineticFrictionCoef;
+	}
+	
+	if (index) 
+	{
+		material->m_material.m_staticFriction1 = ndClamp(staticFrictionCoef, dFloat(0.01f), dFloat(2.0f));
+		material->m_material.m_kineticFriction1 = ndClamp(kineticFrictionCoef, dFloat(0.01f), dFloat(2.0f));
+	}
+	else 
+	{
+		material->m_material.m_staticFriction0 = ndClamp(staticFrictionCoef, dFloat(0.01f), dFloat(2.0f));
+		material->m_material.m_kineticFriction0 = ndClamp(kineticFrictionCoef, dFloat(0.01f), dFloat(2.0f));
+	}
 }
