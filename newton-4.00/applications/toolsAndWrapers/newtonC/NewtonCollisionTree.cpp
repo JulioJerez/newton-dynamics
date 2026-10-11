@@ -21,6 +21,7 @@
 
 #include "newtonStdafx.h"
 #include "Newton.h"
+#include "NewtonUtils.h"
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
 #include "newtonBodyNotify.h"
@@ -239,7 +240,7 @@ NewtonCollision* NewtonCreateTreeCollision(const NewtonWorld* const, int shapeID
 NewtonCollision* NewtonCreateTreeCollisionFromMesh(const NewtonWorld* const, const NewtonMesh* const mesh, int shapeID)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 
 	ndShapeInstance* const instance = meshEffect->CreateCollisionTree(false);
 	ndShapeMaterial material = instance->GetMaterial();

@@ -10,6 +10,7 @@
 */
 
 #include "newtonStdafx.h"
+#include "NewtonUtils.h"
 #include "newtonWorld.h"
 #include "newtonBodyNotify.h"
 
@@ -48,8 +49,7 @@ ndNewtonBodyNotify::~ndNewtonBodyNotify()
 	if (m_onDestroy)
 	{
 		ndAssert(m_world);
-		ndSharedPtr<ndBody>* const body = m_world->GetBody(GetBody());
-		m_onDestroy(reinterpret_cast<NewtonBody*>(body));
+		m_onDestroy(PointerCast<NewtonBody, ndBody>(GetBody()));
 	}
 }
 

@@ -21,6 +21,7 @@
 
 #include "newtonStdafx.h"
 #include "Newton.h"
+#include "NewtonUtils.h"
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
 #include "newtonBodyNotify.h"
@@ -214,17 +215,18 @@ NewtonJoint* NewtonConstraintCreateUserJoint(const NewtonWorld* const newtonWorl
 	const NewtonBody* const childBody, const NewtonBody* const parentBody)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
-	ndBodyKinematic* body0 = reinterpret_cast<ndBodyDynamic*>(ObjectFromHandle<ndBody, NewtonBody>(childBody)->GetAsBodyKinematic());
-	ndBodyKinematic* body1 = parentBody ? reinterpret_cast<ndBodyDynamic*>(ObjectFromHandle<ndBody, NewtonBody>(parentBody)->GetAsBodyKinematic()) : world->GetSentinelBody();
+	//ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+
+	ndBodyKinematic* body0 = PointerCast<ndBody, NewtonBody>(childBody)->GetAsBodyKinematic();
+	ndBodyKinematic* body1 = parentBody ? PointerCast<ndBody, NewtonBody>(parentBody)->GetAsBodyKinematic() : world->GetSentinelBody();
 	ndAssert(body0);
 	ndAssert(body1);
 	ndAssert(body0 != body1);
 
-	ndSharedPtr<ndJointBilateralConstraint>* const jointPtr = new ndSharedPtr<ndJointBilateralConstraint>(new NewtonUserJoint(maxDOF, body0, body1, body0->GetMatrix(), submitConstraints));
-
-	world->AddJoint(*jointPtr);
-	return reinterpret_cast<NewtonJoint*>(jointPtr);
+	ndSharedPtr<ndJointBilateralConstraint> joint (new NewtonUserJoint(maxDOF, body0, body1, body0->GetMatrix(), submitConstraints));
+	world->AddJoint(joint);
+	return PointerCast< NewtonJoint, ndJointBilateralConstraint>(*joint);
 }
 
 
@@ -257,7 +259,7 @@ void NewtonUserJointAddLinearRow(const NewtonJoint* const joint, const dFloat* c
 	ndVector pivotPoint0(pivot0[0], pivot0[1], pivot0[2], ndFloat32(0.0f));
 	ndVector pivotPoint1(pivot1[0], pivot1[1], pivot1[2], ndFloat32(0.0f));
 
-	NewtonUserJoint* const userJoint = ObjectFromHandle<NewtonUserJoint, NewtonJoint>(joint);
+	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
 	ndConstraintDescritor& desc = **userJoint->m_param;
 	userJoint->AddLinearRowJacobian(desc, pivotPoint0, pivotPoint1, direction);
 }
@@ -290,7 +292,7 @@ void NewtonUserJointAddAngularRow(const NewtonJoint* const joint, dFloat relativ
 	direction = direction.Normalize();
 	ndAssert(ndAbs(direction.DotProduct(direction).GetScalar() - ndFloat32(1.0f)) < ndFloat32(1.0e-3f));
 	
-	NewtonUserJoint* const userJoint = ObjectFromHandle<NewtonUserJoint, NewtonJoint>(joint);
+	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
 	ndConstraintDescritor& desc = **userJoint->m_param;
 	userJoint->AddAngularRowJacobian(desc, direction, relativeAngleError);
 }
@@ -310,7 +312,7 @@ void NewtonUserJointAddAngularRow(const NewtonJoint* const joint, dFloat relativ
 void NewtonUserJointSetRowStiffness(const NewtonJoint* const joint, dFloat stiffness)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	NewtonUserJoint* const userJoint = ObjectFromHandle<NewtonUserJoint, NewtonJoint>(joint);
+	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
 	ndConstraintDescritor& desc = **userJoint->m_param;
 	userJoint->SetDiagonalRegularizer(desc, ndFloat32(1.0f) - stiffness);
 }
@@ -331,7 +333,7 @@ void NewtonUserJointSetRowStiffness(const NewtonJoint* const joint, dFloat stiff
 void NewtonUserJointSetSolverModel(const NewtonJoint* const joint, int model)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	NewtonUserJoint* const userJoint = ObjectFromHandle<NewtonUserJoint, NewtonJoint>(joint);
+	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
 
 	ndJointBilateralSolverModel solverMode = m_jointkinematicOpenLoop;
 	switch(model)
@@ -362,7 +364,7 @@ void NewtonUserJointGetRowJacobian(const NewtonJoint* const joint, dFloat* const
 {
 	TRACE_FUNCTION(__FUNCTION__);
 
-	NewtonUserJoint* const userJoint = ObjectFromHandle<NewtonUserJoint, NewtonJoint>(joint);
+	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
 	ndConstraintDescritor& desc = **userJoint->m_param;
 	ndJacobian& jacobian0 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM0;
 	ndJacobian& jacobian1 = desc.m_jacobian[desc.m_rowsCount - 1].m_jacobianM1;
@@ -390,7 +392,7 @@ void NewtonUserJointGetRowJacobian(const NewtonJoint* const joint, dFloat* const
 void NewtonUserJointSetRowAcceleration(const NewtonJoint* const joint, dFloat acceleration)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	NewtonUserJoint* const userJoint = ObjectFromHandle<NewtonUserJoint, NewtonJoint>(joint);
+	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
 	ndConstraintDescritor& desc = **userJoint->m_param;
 	userJoint->SetMotorAcceleration(desc, acceleration);
 }
@@ -410,7 +412,7 @@ void NewtonUserJointSetRowAcceleration(const NewtonJoint* const joint, dFloat ac
 void NewtonUserJointSetRowMinimumFriction(const NewtonJoint* const joint, dFloat friction)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	NewtonUserJoint* const userJoint = ObjectFromHandle<NewtonUserJoint, NewtonJoint>(joint);
+	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
 	ndConstraintDescritor& desc = **userJoint->m_param;
 	userJoint->SetLowerFriction(desc, friction);
 }
@@ -430,7 +432,7 @@ void NewtonUserJointSetRowMinimumFriction(const NewtonJoint* const joint, dFloat
 void NewtonUserJointSetRowMaximumFriction(const NewtonJoint* const joint, dFloat friction)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	NewtonUserJoint* const userJoint = ObjectFromHandle<NewtonUserJoint, NewtonJoint>(joint);
+	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
 	ndConstraintDescritor& desc = **userJoint->m_param;
 	userJoint->SetHighFriction(desc, friction);
 }

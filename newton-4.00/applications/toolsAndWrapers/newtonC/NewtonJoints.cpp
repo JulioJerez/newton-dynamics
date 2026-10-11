@@ -21,6 +21,7 @@
 
 #include "newtonStdafx.h"
 #include "Newton.h"
+#include "NewtonUtils.h"
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
 #include "newtonBodyNotify.h"
@@ -45,7 +46,7 @@ void NewtonDestroyJoint(const NewtonWorld* const newtonWorld, const NewtonJoint*
 	//Newton* const world = (Newton*)newtonWorld;
 	//world->DestroyJoint((dgConstraint*)joint);
 	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
-	ndJointBilateralConstraint* const baseJoint = ObjectFromHandle<ndJointBilateralConstraint, NewtonJoint>(joint);
+	ndJointBilateralConstraint* const baseJoint = PointerCast<ndJointBilateralConstraint, NewtonJoint>(joint);
 	world->RemoveJoint(baseJoint);
 	delete baseJoint;
 }
@@ -58,7 +59,6 @@ int NewtonJointIsActive(const NewtonJoint* const jointPtr)
 	ndAssert(0);
 	return 0;
 }
-
 
 
 /*!
@@ -207,7 +207,7 @@ dFloat NewtonJointGetStiffness(const NewtonJoint* const joint)
 void NewtonJointSetUserData(const NewtonJoint* const jointPtr, void* const userData)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndJointBilateralConstraint* const baseJoint = ObjectFromHandle<ndJointBilateralConstraint, NewtonJoint>(jointPtr);
+	ndJointBilateralConstraint* const baseJoint = PointerCast<ndJointBilateralConstraint, NewtonJoint>(jointPtr);
 	ndSharedPtr<ndJointUserData> sharedUserData (baseJoint->GetUserData());
 	if (!*sharedUserData)
 	{
@@ -233,7 +233,7 @@ void NewtonJointSetUserData(const NewtonJoint* const jointPtr, void* const userD
 void* NewtonJointGetUserData(const NewtonJoint* const joint)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndJointBilateralConstraint* const baseJoint = ObjectFromHandle<ndJointBilateralConstraint, NewtonJoint>(joint);
+	ndJointBilateralConstraint* const baseJoint = PointerCast<ndJointBilateralConstraint, NewtonJoint>(joint);
 	ndSharedPtr<ndJointUserData> sharedUserData(baseJoint->GetUserData());
 	if (*sharedUserData)
 	{
@@ -260,7 +260,7 @@ void* NewtonJointGetUserData(const NewtonJoint* const joint)
 void NewtonJointSetDestructor(const NewtonJoint* const joint, NewtonConstraintDestructor destructor)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	NewtonUserJoint* const baseJoint = ObjectFromHandle<NewtonUserJoint, NewtonJoint>(joint);
+	NewtonUserJoint* const baseJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
 	ndAssert(baseJoint->IsType(NewtonUserJoint::StaticClassName()));
 	baseJoint->m_onDestropy = destructor;
 }
@@ -277,9 +277,8 @@ void NewtonJointSetDestructor(const NewtonJoint* const joint, NewtonConstraintDe
 NewtonBody* NewtonJointGetBody0(const NewtonJoint* const joint)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndConstraint* const baseJoint = ObjectFromHandle<ndConstraint, NewtonJoint>(joint);
-	ndBodyKinematic* const body = baseJoint->GetBody0()->GetAsBodyKinematic();
-	return reinterpret_cast<NewtonBody*>(&body->GetSceneNode()->GetInfo());
+	ndConstraint* const baseJoint = PointerCast<ndConstraint, NewtonJoint>(joint);
+	return PointerCast<NewtonBody, ndBody>(baseJoint->GetBody0());
 }
 
 /*!
@@ -292,9 +291,9 @@ NewtonBody* NewtonJointGetBody0(const NewtonJoint* const joint)
 NewtonBody* NewtonJointGetBody1(const NewtonJoint* const joint)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndConstraint* const baseJoint = ObjectFromHandle<ndConstraint, NewtonJoint>(joint);
+	ndConstraint* const baseJoint = PointerCast<ndConstraint, NewtonJoint>(joint);
 	ndBodyKinematic* const body = baseJoint->GetBody1()->GetAsBodyKinematic();
 	ndAssert(body->GetScene());
 	ndBodyKinematic* const sentinel = body->GetScene()->GetWorld()->GetSentinelBody();
-	return (sentinel != body) ? reinterpret_cast<NewtonBody*>(&body->GetSceneNode()->GetInfo()) : nullptr;
+	return (sentinel != body) ? PointerCast<NewtonBody, ndBodyKinematic>(body) : nullptr;
 }

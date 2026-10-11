@@ -21,6 +21,7 @@
 
 #include "newtonStdafx.h"
 #include "Newton.h"
+#include "NewtonUtils.h"
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
 #include "newtonBodyNotify.h"
@@ -49,57 +50,6 @@ int NewtonContactJointGetContactCount(const NewtonJoint* const contactJoint)
 	ndAssert(0);
 	return 0;
 }
-
-
-/*!
-  Return to pointer to the first contact from the contact array of the contact joint.
-
-  @param *contactJoint pointer to a contact joint.
-
-  @return a pointer to the first contact from the contact array, NULL if no contacts exist
-
-  See also: ::NewtonContactJointGetNextContact, ::NewtonContactGetMaterial, ::NewtonContactJointRemoveContact
-*/
-void* NewtonContactJointGetFirstContact(const NewtonJoint* const contactJoint)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgContact* const joint = (dgContact*)contactJoint;
-	//if ((joint->GetId() == dgConstraint::m_contactConstraint) && joint->GetCount() && joint->GetMaxDOF()) {
-	//	return joint->GetFirst();
-	//}
-	//else {
-	//	return NULL;
-	//}
-	ndAssert(0);
-	return 0;
-}
-
-/*!
-  Return a pointer to the next contact from the contact array of the contact joint.
-
-  @param *contactJoint pointer to a contact joint.
-  @param *contact pointer to current contact.
-
-  @return a pointer to the next contact in the contact array,  NULL if no contacts exist.
-
-  See also: ::NewtonContactJointGetFirstContact, ::NewtonContactGetMaterial, ::NewtonContactJointRemoveContact
-*/
-void* NewtonContactJointGetNextContact(const NewtonJoint* const contactJoint, void* const contact)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgContact* const joint = (dgContact*)contactJoint;
-	//
-	//if ((joint->GetId() == dgConstraint::m_contactConstraint) && joint->GetCount()) {
-	//	dgList<dgContactMaterial>::dgListNode* const node = (dgList<dgContactMaterial>::dgListNode*) contact;
-	//	return node->GetNext();
-	//}
-	//else {
-	//	return NULL;
-	//}
-	ndAssert(0);
-	return 0;
-}
-
 
 /*!
   Return to the next contact from the contact array of the contact joint.
@@ -156,25 +106,6 @@ void NewtonContactJointResetIntraJointCollision(const NewtonJoint* const contact
 	ndAssert(0);
 }
 
-/*!
-  Return to the next contact from the contact array of the contact joint.
-
-  @param *contact pointer to current contact.
-
-  @return first contact contact array of the joint contact exist, NULL otherwise
-
-  See also: ::NewtonContactJointGetFirstContact, ::NewtonContactJointGetNextContact
-*/
-NewtonMaterial* NewtonContactGetMaterial(const void* const contact)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	//dgList<dgContactMaterial>::dgListNode* const node = (dgList<dgContactMaterial>::dgListNode*) contact;
-	//dgContactMaterial& contactMaterial = node->GetInfo();
-	//return (NewtonMaterial*)&contactMaterial;
-	ndAssert(0);
-	return 0;
-}
 
 NewtonCollision* NewtonContactGetCollision0(const void* const contact)
 {
@@ -219,4 +150,72 @@ void* NewtonContactGetCollisionID1(const void* const contact)
 	//return (NewtonCollision*)contactMaterial.m_shapeId1;
 	ndAssert(0);
 	return 0;
+}
+
+/*!
+  Return to pointer to the first contact from the contact array of the contact joint.
+
+  @param *contactJoint pointer to a contact joint.
+
+  @return a pointer to the first contact from the contact array, NULL if no contacts exist
+
+  See also: ::NewtonContactJointGetNextContact, ::NewtonContactGetMaterial, ::NewtonContactJointRemoveContact
+*/
+void* NewtonContactJointGetFirstContact(const NewtonJoint* const contactJoint)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndContact* const contact = PointerCast<ndContact, NewtonJoint>(contactJoint);
+	if (contact->GetAsContact() && contact->IsActive())
+	{
+		const ndContactPointList& contactPoints = contact->GetContactPoints();
+		if (contactPoints.GetCount())
+		{
+			return contactPoints.GetFirst();
+		}
+	}
+	return nullptr;
+}
+
+
+/*!
+  Return to the next contact from the contact array of the contact joint.
+
+  @param *contact pointer to current contact.
+
+  @return first contact contact array of the joint contact exist, NULL otherwise
+
+  See also: ::NewtonContactJointGetFirstContact, ::NewtonContactJointGetNextContact
+*/
+NewtonMaterial* NewtonContactGetMaterial(const void* const contactPoint)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndContactPointList::ndNode* const node = PointerCast<ndContactPointList::ndNode, void>(contactPoint);
+	ndAssert(node);
+	return PointerCast<NewtonMaterial, ndContactMaterial>(&node->GetInfo());
+}
+
+/*!
+  Return a pointer to the next contact from the contact array of the contact joint.
+
+  @param *contactJoint pointer to a contact joint.
+  @param *contact pointer to current contact.
+
+  @return a pointer to the next contact in the contact array,  NULL if no contacts exist.
+
+  See also: ::NewtonContactJointGetFirstContact, ::NewtonContactGetMaterial, ::NewtonContactJointRemoveContact
+*/
+void* NewtonContactJointGetNextContact(const NewtonJoint* const contactJoint, void* const contact)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgContact* const joint = (dgContact*)contactJoint;
+	//
+	//if ((joint->GetId() == dgConstraint::m_contactConstraint) && joint->GetCount()) {
+	//	dgList<dgContactMaterial>::dgListNode* const node = (dgList<dgContactMaterial>::dgListNode*) contact;
+	//	return node->GetNext();
+	//}
+	//else {
+	//	return NULL;
+	//}
+	ndContactPointList::ndNode* const node = PointerCast<ndContactPointList::ndNode, void>(contact);
+	return node ? node->GetNext() : nullptr;
 }

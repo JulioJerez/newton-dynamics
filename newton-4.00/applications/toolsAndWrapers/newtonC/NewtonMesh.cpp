@@ -21,10 +21,26 @@
 
 #include "newtonStdafx.h"
 #include "Newton.h"
+#include "NewtonUtils.h"
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
 #include "newtonBodyNotify.h"
 
+NewtonMesh* NewtonMeshCreate(const NewtonWorld* const)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMeshEffect* const mesh = new ndMeshEffect();
+	return reinterpret_cast<NewtonMesh*>(mesh);
+}
+
+NewtonMesh* NewtonMeshCreateFromCollision(const NewtonCollision* const collision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+
+	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	ndMeshEffect* const mesh = new ndMeshEffect(*instance);
+	return reinterpret_cast<NewtonMesh*>(mesh);
+}
 
 NewtonMesh* NewtonMeshCreateFromMesh(const NewtonMesh* const mesh)
 {
@@ -90,6 +106,14 @@ NewtonMesh* NewtonMeshCreateFromSerialization(const NewtonWorld* const, NewtonDe
 	//return (NewtonMesh*)dgMeshEffect::CreateFromSerialization(world->dgWorld::GetAllocator(), (dgDeserialize)deserializeFunction, serializeHandle);
 	ndAssert(0);
 	return 0;
+}
+
+void NewtonMeshDestroy(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//ndSharedPtr<ndMeshEffect>* const instance(SharedObjectFromHandle____<ndMeshEffect, NewtonMesh>(mesh));
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	delete meshEffect;
 }
 
 void NewtonMeshSerialize(const NewtonMesh* const mesh, NewtonSerializeCallback serializeFunction, void* const serializeHandle)
@@ -1035,75 +1059,53 @@ static ndMeshEffect::ndMeshVertexFormat ConvertFormat(const NewtonMeshVertexForm
 	return format;
 }
 
-NewtonMesh* NewtonMeshCreate(const NewtonWorld* const)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndSharedPtr<ndMeshEffect>* const mesh = new ndSharedPtr<ndMeshEffect>(new ndMeshEffect());
-	return reinterpret_cast<NewtonMesh*>(mesh);
-}
-
-NewtonMesh* NewtonMeshCreateFromCollision(const NewtonCollision* const collision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
-	ndSharedPtr<ndMeshEffect>* const mesh = new ndSharedPtr<ndMeshEffect>(new ndMeshEffect(*instance));
-	return reinterpret_cast<NewtonMesh*>(mesh);
-}
-
-void NewtonMeshDestroy(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndSharedPtr<ndMeshEffect>* const instance(SharedObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh));
-	delete instance;
-}
 
 void NewtonMeshBeginBuild(const NewtonMesh* const mesh)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	meshEffect->BeginBuild();
 }
 
 void NewtonMeshBeginFace(const NewtonMesh* const mesh)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	meshEffect->BeginBuildFace();
 }
 
 void NewtonMeshAddPoint(const NewtonMesh* const mesh, dFloat64 x, dFloat64 y, dFloat64 z)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	meshEffect->AddPoint(x, y, z);
 }
 
 void NewtonMeshAddNormal(const NewtonMesh* const mesh, dFloat x, dFloat y, dFloat z)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	meshEffect->AddNormal(x, y, z);
 }
 
 void NewtonMeshAddMaterial(const NewtonMesh* const mesh, int materialIndex)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	meshEffect->AddMaterial(materialIndex);
 }
 
 void NewtonMeshEndFace(const NewtonMesh* const mesh)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	meshEffect->EndBuildFace();
 }
 
 void NewtonMeshEndBuild(const NewtonMesh* const mesh)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	meshEffect->EndBuild(false);
 }
 
@@ -1116,7 +1118,7 @@ void NewtonMeshClearVertexFormat(NewtonMeshVertexFormat* const format)
 void NewtonMeshBuildFromVertexListIndexList(const NewtonMesh* const mesh, const NewtonMeshVertexFormat* const format)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const instance = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const instance = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	ndMeshEffect::ndMeshVertexFormat meshFormat(ConvertFormat(format));
 	instance->BuildFromIndexList(&meshFormat);
 }
@@ -1130,56 +1132,56 @@ void NewtonMeshSetVertexBaseCount(const NewtonMesh* const mesh, int baseCount)
 int NewtonMeshGetPointCount(const NewtonMesh* const mesh)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	return meshEffect->GetPropertiesCount();
 }
 
 void NewtonMeshGetVertexChannel(const NewtonMesh* const mesh, int vertexStrideInByte, dFloat* const outBuffer)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	meshEffect->GetVertexChannel(vertexStrideInByte, (ndFloat32*)outBuffer);
 }
 
 void NewtonMeshGetNormalChannel(const NewtonMesh* const mesh, int vertexStrideInByte, dFloat* const outBuffer)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	meshEffect->GetNormalChannel(vertexStrideInByte, (ndFloat32*)outBuffer);
 }
 
 void NewtonMeshGetUV0Channel(const NewtonMesh* const mesh, int vertexStrideInByte, dFloat* const outBuffer)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	meshEffect->GetUV0Channel(vertexStrideInByte, (ndFloat32*)outBuffer);
 }
 
 void NewtonMeshGetUV1Channel(const NewtonMesh* const mesh, int vertexStrideInByte, dFloat* const outBuffer)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	meshEffect->GetUV1Channel(vertexStrideInByte, (ndFloat32*)outBuffer);
 }
 
 void NewtonMeshGetVertexColorChannel(const NewtonMesh* const mesh, int vertexStrideInByte, dFloat* const outBuffer)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	meshEffect->GetVertexColorChannel(vertexStrideInByte, (ndFloat32*)outBuffer);
 }
 
 void* NewtonMeshBeginHandle(const NewtonMesh* const mesh)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	return meshEffect->MaterialGeometryBegin();
 }
 
 void NewtonMeshEndHandle(const NewtonMesh* const mesh, void* const handle)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	ndIndexArray* const indexArray = reinterpret_cast<ndIndexArray*> (handle);
 	meshEffect->MaterialGeometryEnd(indexArray);
 }
@@ -1187,7 +1189,7 @@ void NewtonMeshEndHandle(const NewtonMesh* const mesh, void* const handle)
 int NewtonMeshNextMaterial(const NewtonMesh* const mesh, void* const handle, int materialId)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	
 	ndIndexArray* const indexArray = reinterpret_cast<ndIndexArray*> (handle);
 	return meshEffect->GetNextMaterial(indexArray, materialId);
@@ -1196,7 +1198,7 @@ int NewtonMeshNextMaterial(const NewtonMesh* const mesh, void* const handle, int
 int NewtonMeshFirstMaterial(const NewtonMesh* const mesh, void* const handle)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 
 	ndIndexArray* const indexArray = reinterpret_cast<ndIndexArray*> (handle);
 	return meshEffect->GetFirstMaterial(indexArray);
@@ -1205,7 +1207,7 @@ int NewtonMeshFirstMaterial(const NewtonMesh* const mesh, void* const handle)
 int NewtonMeshMaterialGetMaterial(const NewtonMesh* const mesh, void* const handle, int materialId)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	
 	ndIndexArray* const indexArray = reinterpret_cast<ndIndexArray*> (handle);
 	return  meshEffect->GetMaterialID(indexArray, materialId);
@@ -1214,7 +1216,7 @@ int NewtonMeshMaterialGetMaterial(const NewtonMesh* const mesh, void* const hand
 int NewtonMeshMaterialGetIndexCount(const NewtonMesh* const mesh, void* const handle, int materialId)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	
 	ndIndexArray* const indexArray = reinterpret_cast<ndIndexArray*> (handle);
 	return meshEffect->GetMaterialIndexCount(indexArray, materialId);
@@ -1223,7 +1225,7 @@ int NewtonMeshMaterialGetIndexCount(const NewtonMesh* const mesh, void* const ha
 void NewtonMeshMaterialGetIndexStream(const NewtonMesh* const mesh, void* const handle, int materialId, int* const index)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	
 	ndIndexArray* const indexArray = reinterpret_cast<ndIndexArray*> (handle);
 	meshEffect->GetMaterialGetIndexStream(indexArray, materialId, index);
@@ -1240,7 +1242,7 @@ void NewtonMeshApplyBoxMapping(const NewtonMesh* const mesh, int front, int side
 		matrix = ndGetIdentityMatrix();
 	}
 
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	meshEffect->BoxMapping(front, side, top, matrix);
 }
 
@@ -1249,7 +1251,7 @@ int NewtonMeshHasNormalChannel(const NewtonMesh* const mesh)
 	TRACE_FUNCTION(__FUNCTION__);
 	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
 	//return meshEffect->HasNormalChannel() ? 1 : 0;
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	const ndMeshEffect::ndAttibuteFormat& attibutes = meshEffect->GetVertexAtributes();
 	return attibutes.m_normalChannel.GetCount() ? 1 : 0;
 }
@@ -1259,7 +1261,7 @@ int NewtonMeshHasUV0Channel(const NewtonMesh* const mesh)
 	TRACE_FUNCTION(__FUNCTION__);
 	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
 	//return meshEffect->HasUV0Channel() ? 1 : 0;
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	const ndMeshEffect::ndAttibuteFormat& attibutes = meshEffect->GetVertexAtributes();
 	return attibutes.m_uv0Channel.GetCount() ? 1 : 0;
 }
@@ -1267,7 +1269,7 @@ int NewtonMeshHasUV0Channel(const NewtonMesh* const mesh)
 int NewtonMeshHasUV1Channel(const NewtonMesh* const mesh)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	const ndMeshEffect::ndAttibuteFormat& attibutes = meshEffect->GetVertexAtributes();
 	return attibutes.m_uv1Channel.GetCount() ? 1 : 0;
 }
@@ -1275,7 +1277,7 @@ int NewtonMeshHasUV1Channel(const NewtonMesh* const mesh)
 int NewtonMeshHasBinormalChannel(const NewtonMesh* const mesh)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	const ndMeshEffect::ndAttibuteFormat& attibutes = meshEffect->GetVertexAtributes();
 	return attibutes.m_binormalChannel.GetCount() ? 1 : 0;
 }
@@ -1283,7 +1285,7 @@ int NewtonMeshHasBinormalChannel(const NewtonMesh* const mesh)
 int NewtonMeshHasVertexColorChannel(const NewtonMesh* const mesh)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMeshEffect* const meshEffect = ObjectFromHandle<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	const ndMeshEffect::ndAttibuteFormat& attibutes = meshEffect->GetVertexAtributes();
 	return attibutes.m_colorChannel.GetCount() ? 1 : 0;
 }

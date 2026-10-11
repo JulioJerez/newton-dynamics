@@ -63,21 +63,6 @@
 	#define dFloat64 double
 #endif
 
-template<class Object, class Handle>
-ndSharedPtr<Object>* SharedObjectFromHandle(const Handle* const ptr)
-{
-	ndSharedPtr<Object>* const sharedPtr = const_cast<ndSharedPtr<Object>*>(reinterpret_cast<const ndSharedPtr<Object>*>(ptr));
-	return sharedPtr;
-}
-
-template<class Object, class Handle>
-Object* ObjectFromHandle(const Handle* const ptr)
-{
-	const ndSharedPtr<Object>* const sharedPtr = SharedObjectFromHandle<Object, Handle>(ptr);
-	return const_cast<Object*>(**sharedPtr);
-}
-
-bool CheckFloat(ndFloat32* ptr, ndInt32 size);
 
 #ifdef __cplusplus 
 extern "C" {
