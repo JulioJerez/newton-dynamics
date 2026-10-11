@@ -202,12 +202,6 @@ int NewtonAtomicAdd(int* const ptr, int value)
 	return value;
 }
 
-void NewtonDispachThreadJob(const NewtonWorld* const, NewtonJobTask, void* const, const char* const)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-}
-
 void NewtonLoadPlugins(const NewtonWorld* const, const char* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);

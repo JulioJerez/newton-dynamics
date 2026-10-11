@@ -69,6 +69,11 @@ class ndContactSolver: public ndDownHeap<ndMinkFace*, ndFloat32>
 		const ndShapeInstance* const shapeB, const ndMatrix& matrixB, const ndVector& velocB,
 		ndFixSizeArray<ndContactPoint, 16>& contactOut, ndContactNotify* const notification);
 
+	D_COLLISION_API void CalculateClosestPoints(
+		const ndShapeInstance* const shapeA, const ndMatrix& matrixA,
+		const ndShapeInstance* const shapeB, const ndMatrix& matrixB,
+		ndContactNotify* const notification);
+
 	ndVector GetSeparatingVector() const
 	{
 		return m_separatingVector;

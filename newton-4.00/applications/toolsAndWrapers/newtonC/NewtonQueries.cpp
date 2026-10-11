@@ -428,9 +428,6 @@ NewtonMaterial* NewtonWorldGetNextMaterial(const NewtonWorld* const newtonWorld,
 void NewtonCollisionForEachPolygonDo(const NewtonCollision* const collision, const dFloat* const matrixPtr, NewtonCollisionIterator callback, void* const userData)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const collision = (dgCollisionInstance*)(collisionPtr);
-	//collision->DebugCollision(dgMatrix(matrixPtr), (dgCollision::OnDebugCollisionMeshCallback)callback, userDataPtr);
-
 	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
 	ndMatrix matrix(matrixPtr);
 	if (!CheckFloat(&matrix[0][0], 16))
@@ -455,9 +452,81 @@ void NewtonCollisionForEachPolygonDo(const NewtonCollision* const collision, con
 			m_callback(m_userData, vertexCount, &faceVertex[0].m_x, 0);
 		}
 
-		//(void* const userData, int vertexCount, const dFloat* const faceArray, int faceId
 		void* const m_userData;
 		NewtonCollisionIterator m_callback;
 	};
 	ndDrawShape debugShape(callback, userData);
+}
+
+
+/*!
+  Calculate the closest points between two disjoint convex collision primitive.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param *collisionA pointer to collision primitive A.
+  @param *matrixA pointer to an array of 16 floats containing the offset matrix of collision primitiveA.
+  @param *collisionB pointer to collision primitive B.
+  @param *matrixB pointer to an array of 16 floats containing the offset matrix of collision primitiveB.
+  @param *contactA pointer to and array of a least 3 floats to contain the closest point to collisionA.
+  @param *contactB pointer to and array of a least 3 floats to contain the closest point to collisionB.
+  @param *normalAB pointer to and array of a least 3 floats to contain the separating vector normal.
+  @param  threadIndex -Thread index form where the call is made from, zeor otherwize
+
+  @return one if the tow bodies are disjoint and he closest point could be found,
+  zero if the two collision primitives are intersecting.
+
+  This function can be used as a low-level building block for a stand-alone collision system.
+  Applications that have already there own physics system, and only want and quick and fast collision solution,
+  can use Newton advanced collision engine as the low level collision detection part.
+  To do this the application only needs to initialize Newton, create the collision primitives at application discretion,
+  and just call this function when the objects are in close proximity. Applications using Newton as a collision system
+  only, are responsible for implementing their own broad phase collision determination, based on any high level tree structure.
+  Also the application should implement their own trivial aabb test, before calling this function .
+
+  the current implementation of this function does not work on collision trees, or user define collision.
+
+  See also: ::NewtonCollisionCollideContinue, ::NewtonCollisionPointDistance, ::NewtonCollisionCollide, ::NewtonCollisionRayCast, ::NewtonCollisionCalculateAABB
+*/
+int NewtonCollisionClosestPoint(const NewtonWorld* const newtonWorld,
+	const NewtonCollision* const collisionA, const dFloat* const matrixPtrA,
+	const NewtonCollision* const collisionB, const dFloat* const matrixPtrB,
+	dFloat* const contactA, dFloat* const contactB, dFloat* const normalAB, int threadIndex)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//return world->ClosestPoint((dgCollisionInstance*)collisionA, dgMatrix(matrixA),
+	//	(dgCollisionInstance*)collisionB, dgMatrix(matrixB),
+	//	*((dgTriplex*)contactA), *((dgTriplex*)contactB), *((dgTriplex*)normalAB), threadIndex);
+
+	const ndShapeInstance* const shapeA = PointerCast<ndShapeInstance, NewtonCollision>(collisionA);
+	const ndShapeInstance* const shapeB = PointerCast<ndShapeInstance, NewtonCollision>(collisionB);
+
+	ndMatrix matrixA(matrixPtrA);
+	if (!CheckFloat(&matrixA[0][0], 16))
+	{
+		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
+		matrixA = ndGetIdentityMatrix();
+	}
+
+	ndMatrix matrixB(matrixPtrB);
+	if (!CheckFloat(&matrixB[0][0], 16))
+	{
+		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
+		matrixB = ndGetIdentityMatrix();
+	}
+	ndContactSolver solver;
+	
+	solver.CalculateClosestPoints(shapeA, matrixA, shapeB, matrixB, nullptr);
+
+	const ndVector pointA(solver.GetClosetVector0());
+	const ndVector pointB(solver.GetClosetVector1());
+	const ndVector normal(solver.GetSeparatingVector());
+
+	for (ndInt32 i = 0; i < 3; ++i)
+	{
+		contactA[i] = pointA[i];
+		contactB[i] = pointB[i];
+		normalAB[i] = normal[i];
+	}
+	return 1;
 }

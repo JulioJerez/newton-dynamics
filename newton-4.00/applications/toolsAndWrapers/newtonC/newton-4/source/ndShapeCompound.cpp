@@ -542,7 +542,6 @@ ndVector ndShapeCompound::SupportVertex(const ndVector& dir) const
 
 ndVector ndShapeCompound::SupportVertexSpecialProjectPoint(const ndVector&, const ndVector& dir) const
 { 
-	ndAssert(0);
 	return SupportVertex(dir);
 }
 
