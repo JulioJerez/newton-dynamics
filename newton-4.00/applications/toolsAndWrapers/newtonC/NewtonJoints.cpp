@@ -237,7 +237,7 @@ void* NewtonJointGetUserData(const NewtonJoint* const joint)
 	ndSharedPtr<ndJointUserData> sharedUserData(baseJoint->GetUserData());
 	if (*sharedUserData)
 	{
-		NewtonJointUserData* const jointUserData = static_cast<NewtonJointUserData*>(*sharedUserData);
+		NewtonJointUserData* const jointUserData = PointerCast<NewtonJointUserData, ndJointUserData>(*sharedUserData);
 		return *jointUserData->m_userData;
 	}
 

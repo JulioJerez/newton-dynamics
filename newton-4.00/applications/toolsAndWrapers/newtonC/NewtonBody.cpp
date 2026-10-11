@@ -609,25 +609,6 @@ void NewtonBodySetFreezeState(const NewtonBody* const bodyPtr, int state)
 	ndAssert(0);
 }
 
-int NewtonBodyGetGyroscopicTorque(const NewtonBody* const bodyPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//return body->GetGyroMode() ? 1 : 0;
-
-	ndAssert(0);
-	return 0;
-
-}
-
-void NewtonBodySetGyroscopicTorque(const NewtonBody* const bodyPtr, int state)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//body->SetGyroMode(state ? true : false);
-	ndAssert(0);
-}
-
 
 /*!
   Get the world axis aligned bounding box (AABB) of the body.

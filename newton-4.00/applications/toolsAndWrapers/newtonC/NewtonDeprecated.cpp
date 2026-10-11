@@ -331,3 +331,16 @@ void NewtonUserJointMassScale(const NewtonJoint* const, dFloat, dFloat)
 	TRACE_FUNCTION(__FUNCTION__);
 	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
+
+int NewtonBodyGetGyroscopicTorque(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
+	return 1;
+}
+
+void NewtonBodySetGyroscopicTorque(const NewtonBody* const bodyPtr, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
+}

@@ -32,8 +32,7 @@ NewtonUserJoint::~NewtonUserJoint()
 {
 	if (m_onDestropy)
 	{
-		ndAssert(0);
-		//m_onDestropy ()
+		m_onDestropy(PointerCast<NewtonJoint, NewtonUserJoint>(this));
 	}
 }
 
@@ -47,9 +46,6 @@ void NewtonUserJoint::JacobianDerivative(ndConstraintDescritor& desc)
 	if (m_onSubmitJacobians)
 	{
 		m_param = &desc;
-		//ndWorld* const world = GetBody0()->GetAsBodyKinematic()->GetScene()->GetWorld();
-		//ndSharedPtr<ndJointBilateralConstraint>* const sharedPtr = world->GetJoint(this);
-		//m_onSubmitJacobians(reinterpret_cast<NewtonJoint*>(sharedPtr), desc.m_timestep, 0);
 		m_onSubmitJacobians(PointerCast<NewtonJoint, NewtonUserJoint>(this), desc.m_timestep, 0);
 	}
 }

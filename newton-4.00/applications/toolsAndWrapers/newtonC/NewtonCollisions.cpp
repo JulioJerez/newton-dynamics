@@ -30,12 +30,53 @@ static void MapShapeId(const ndShapeInfo& info, NewtonCollisionInfoRecord& colli
 {
 	switch (info.m_collisionType)
 	{
+		case m_sphere:
+		{
+			collisionInfo.m_collisionType = SERIALIZE_ID_SPHERE;
+			collisionInfo.m_sphere.m_radio = info.m_sphere.m_radius;
+			break;
+		}
+
+		case m_capsule:
+		{
+			collisionInfo.m_collisionType = SERIALIZE_ID_CAPSULE;
+			collisionInfo.m_capsule.m_radio0 = info.m_capsule.m_radio0;
+			collisionInfo.m_capsule.m_radio1 = info.m_capsule.m_radio1;
+			collisionInfo.m_capsule.m_height = info.m_capsule.m_height;
+			break;
+		}
+
+		case m_cylinder:
+		{
+			collisionInfo.m_collisionType = SERIALIZE_ID_CYLINDER;
+			collisionInfo.m_cylinder.m_radio0 = info.m_cylinder.m_radio0;
+			collisionInfo.m_cylinder.m_radio1 = info.m_cylinder.m_radio1;
+			collisionInfo.m_cylinder.m_height = info.m_cylinder.m_height;
+			break;
+		}
+
+		case m_chamferCylinder:
+		{
+			collisionInfo.m_collisionType = SERIALIZE_ID_CHAMFERCYLINDER;
+			collisionInfo.m_chamferCylinder.m_radio = info.m_chamferCylinder.m_radius;
+			collisionInfo.m_chamferCylinder.m_height = info.m_chamferCylinder.m_height;
+			break;
+		}
+
 		case m_box:
 		{
 			collisionInfo.m_collisionType = SERIALIZE_ID_BOX;
 			collisionInfo.m_box.m_x = info.m_box.m_x;
 			collisionInfo.m_box.m_y = info.m_box.m_y;
 			collisionInfo.m_box.m_z = info.m_box.m_z;
+			break;
+		}
+
+		case m_cone:
+		{
+			collisionInfo.m_collisionType = SERIALIZE_ID_CONE;
+			collisionInfo.m_cone.m_radio = info.m_cone.m_radius;
+			collisionInfo.m_cone.m_height = info.m_cone.m_height;
 			break;
 		}
 
@@ -46,6 +87,13 @@ static void MapShapeId(const ndShapeInfo& info, NewtonCollisionInfoRecord& colli
 			collisionInfo.m_convexHull.m_vertex = &info.m_convexhull.m_vertex[0].m_x;
 			collisionInfo.m_convexHull.m_vertexCount = info.m_convexhull.m_vertexCount;
 			collisionInfo.m_convexHull.m_vertexStrideInBytes = info.m_convexhull.m_strideInBytes;
+			break;
+		}
+
+		case m_compound:
+		{
+			collisionInfo.m_collisionType = SERIALIZE_ID_COMPOUND;
+			collisionInfo.m_compoundCollision.m_chidrenCount = info.m_compound.m_noUsed;
 			break;
 		}
 
@@ -518,15 +566,6 @@ void* NewtonCollisionGetSubCollisionHandle(const NewtonCollision* const collisio
 	ndAssert(0);
 	return 0;
 
-}
-
-
-void NewtonCollisionSetScale(const NewtonCollision* const collision, dFloat scaleX, dFloat scaleY, dFloat scaleZ)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
-	//instance->SetScale(dgVector(scaleX, scaleY, scaleZ, dgFloat32(0.0f)));
-	ndAssert(0);
 }
 
 
@@ -1296,9 +1335,15 @@ void NewtonCollisionSetMaterial(const NewtonCollision* const collision, const Ne
 int NewtonCollisionGetType(const NewtonCollision* const collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	NewtonCollisionInfoRecord collisionInfo;
 	MapShapeId(instance->GetShapeInfo(), collisionInfo);
 	return collisionInfo.m_collisionType;
+}
+
+void NewtonCollisionSetScale(const NewtonCollision* const collision, dFloat scaleX, dFloat scaleY, dFloat scaleZ)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
+	instance->SetScale(ndVector(scaleX, scaleY, scaleZ, ndFloat32(0.0f)));
 }

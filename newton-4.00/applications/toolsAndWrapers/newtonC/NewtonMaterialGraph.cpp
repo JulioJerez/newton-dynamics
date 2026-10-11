@@ -588,27 +588,6 @@ void NewtonMaterialSetContactThickness(const NewtonMaterial* const materialHandl
 }
 
 /*!
-  Override the default elasticity (coefficient of restitution) value for the contact.
-
-  @param materialHandle pointer to a material pair.
-  @param restitution elasticity value, must be positive.
-
-  @return Nothing.
-
-  This function can only be called from a material callback event handler.
-
-  See also: ::NewtonMaterialSetCollisionCallback, ::NewtonMaterialSetDefaultElasticity
-*/
-void NewtonMaterialSetContactElasticity(const NewtonMaterial* const materialHandle, dFloat restitution)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgContactMaterial* const material = (dgContactMaterial*)materialHandle;
-	//material->m_restitution = dgClamp(restitution, dFloat(0.0f), dFloat(2.0f));
-	ndAssert(0);
-}
-
-
-/*!
   Enable or disable friction calculation for this contact.
 
   @param materialHandle pointer to a material pair.
@@ -961,4 +940,25 @@ void NewtonMaterialSetContactFrictionCoef(const NewtonMaterial* const materialHa
 		material->m_material.m_staticFriction0 = ndClamp(staticFrictionCoef, dFloat(0.01f), dFloat(2.0f));
 		material->m_material.m_kineticFriction0 = ndClamp(kineticFrictionCoef, dFloat(0.01f), dFloat(2.0f));
 	}
+}
+
+/*!
+  Override the default elasticity (coefficient of restitution) value for the contact.
+
+  @param materialHandle pointer to a material pair.
+  @param restitution elasticity value, must be positive.
+
+  @return Nothing.
+
+  This function can only be called from a material callback event handler.
+
+  See also: ::NewtonMaterialSetCollisionCallback, ::NewtonMaterialSetDefaultElasticity
+*/
+void NewtonMaterialSetContactElasticity(const NewtonMaterial* const materialHandle, dFloat restitution)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgContactMaterial* const material = (dgContactMaterial*)materialHandle;
+	//material->m_restitution = dgClamp(restitution, dFloat(0.0f), dFloat(2.0f));
+	ndContactMaterial* const material = PointerCast<ndContactMaterial, NewtonMaterial>(materialHandle);
+	material->m_material.m_restitution = ndClamp(restitution, dFloat(0.0f), dFloat(1.0f));
 }
