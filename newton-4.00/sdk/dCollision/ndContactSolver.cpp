@@ -4005,8 +4005,6 @@ void ndContactSolver::CalculateContacts(
 	m_instance1.SetLocalMatrix(instanceB->GetLocalMatrix());
 	m_instance1.SetGlobalMatrix(m_instance1.GetLocalMatrix() * matrixB);
 
-	//bodyA.SetCollisionShape(m_instance0);
-	//bodyB.SetCollisionShape(m_instance1);
 	ndQuerieBody bodyA;
 	ndQuerieBody bodyB;
 	bodyA.SetCollisionShape(m_instance0);
@@ -4052,6 +4050,62 @@ void ndContactSolver::CalculateContacts(
 		contactPoint.m_shapeInstance1 = instanceB;
 		contactOut.PushBack(contactPoint);
 	}
+}
+
+bool ndContactSolver::CollisionTest(
+	const ndShapeInstance* const instanceA, const ndMatrix& matrixA, const ndVector& velocA,
+	const ndShapeInstance* const instanceB, const ndMatrix& matrixB, const ndVector& velocB,
+	ndContactNotify* const notification)
+{
+	ndContact contact;
+	ndShape* const shapeA = const_cast<ndShape*>(reinterpret_cast<const ndShape*>(instanceA->GetShape()));
+	ndShape* const shapeB = const_cast<ndShape*>(reinterpret_cast<const ndShape*>(instanceB->GetShape()));
+	ndContactPoint contactBuffer[D_MAX_CONTATCS];
+
+	m_instance0.SetShape(shapeA);
+	m_instance0.SetLocalMatrix(instanceA->GetLocalMatrix());
+	m_instance0.SetGlobalMatrix(m_instance0.GetLocalMatrix() * matrixA);
+
+	m_instance1.SetShape(shapeB);
+	m_instance1.SetLocalMatrix(instanceB->GetLocalMatrix());
+	m_instance1.SetGlobalMatrix(m_instance1.GetLocalMatrix() * matrixB);
+
+	ndQuerieBody bodyA;
+	ndQuerieBody bodyB;
+	bodyA.SetCollisionShape(m_instance0);
+	bodyB.SetCollisionShape(m_instance1);
+
+	bodyA.SetMatrix(matrixA);
+	bodyB.SetMatrix(matrixB);
+	bodyA.SetVelocity(velocA);
+	bodyB.SetVelocity(velocB);
+
+	if (!shapeA->GetAsShapeStaticMesh())
+	{
+		bodyA.SetMassMatrix(ndFloat32(1.0f), ndFloat32(1.0f), ndFloat32(1.0f), ndFloat32(1.0f));
+	}
+	if (!shapeB->GetAsShapeStaticMesh())
+	{
+		bodyB.SetMassMatrix(ndFloat32(1.0f), ndFloat32(1.0f), ndFloat32(1.0f), ndFloat32(1.0f));
+	}
+	contact.SetBodies(&bodyA, &bodyB);
+
+	m_closestPoint0 = ndVector::m_zero;
+	m_closestPoint1 = ndVector::m_zero;
+	m_separatingVector = ndVector(ndFloat32(0.0f), ndFloat32(1.0f), ndFloat32(0.0f), ndFloat32(0.0f));
+	m_contact = &contact;
+	m_freeFace = nullptr;
+	m_notification = notification;
+	m_contactBuffer = contactBuffer;
+	m_timestep = ndFloat32(1.0f);
+	m_skinMargin = ndFloat32(0.0f);
+	m_separationDistance = ndFloat32(1.0e10f);
+	m_maxCount = D_MAX_CONTATCS;
+	m_vertexIndex = 0;
+	m_pruneContacts = 1;
+	m_intersectionTestOnly = 1;
+
+	return CalculateContactsDiscrete() ? true : false;
 }
 
 ndInt32 ndContactSolver::CalculatePolySoupToHullContactsDescrete(ndPolygonMeshDesc& data)

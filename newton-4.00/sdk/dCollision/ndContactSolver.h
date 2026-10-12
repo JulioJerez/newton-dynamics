@@ -64,6 +64,11 @@ class ndContactSolver: public ndDownHeap<ndMinkFace*, ndFloat32>
 	D_COLLISION_API ndContactSolver();
 	~ndContactSolver() {}
 
+	D_COLLISION_API bool CollisionTest(
+		const ndShapeInstance* const shapeA, const ndMatrix& matrixA, const ndVector& velocA,
+		const ndShapeInstance* const shapeB, const ndMatrix& matrixB, const ndVector& velocB,
+		ndContactNotify* const notification);
+
 	D_COLLISION_API void CalculateContacts(
 		const ndShapeInstance* const shapeA, const ndMatrix& matrixA, const ndVector& velocA,
 		const ndShapeInstance* const shapeB, const ndMatrix& matrixB, const ndVector& velocB,
