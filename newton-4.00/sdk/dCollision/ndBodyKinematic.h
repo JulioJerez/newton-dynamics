@@ -130,6 +130,7 @@ class ndBodyKinematic : public ndBody
 	D_COLLISION_API void ClearMemory();
 	D_COLLISION_API virtual void IntegrateVelocity(ndFloat32 timestep);
 	D_COLLISION_API void SetMatrixUpdateScene(const ndMatrix& matrix);
+	D_COLLISION_API virtual void IntegrateSolverVelocity(ndFloat32 timestep);
 	D_COLLISION_API virtual ndContact* FindContact(const ndBody* const otherBody) const override;
 
 	D_COLLISION_API ndJacobian CalculateNetForce() const;

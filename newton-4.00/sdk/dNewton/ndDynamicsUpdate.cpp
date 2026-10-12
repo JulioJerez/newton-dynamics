@@ -1081,7 +1081,7 @@ void ndDynamicsUpdate::IntegrateBodies()
 		if (!body->m_equilibrium)
 		{
 			body->SetAcceleration(invTime * (body->m_veloc - body->m_accel), invTime * (body->m_omega - body->m_alpha));
-			body->IntegrateVelocity(timestep);
+			body->IntegrateSolverVelocity(timestep);
 		}
 		body->EvaluateSleepState(speedFreeze2, accelFreeze2);
 	});

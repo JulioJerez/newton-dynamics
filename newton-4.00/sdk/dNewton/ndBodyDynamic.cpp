@@ -315,6 +315,11 @@ void ndBodyDynamic::IntegrateVelocity(ndFloat32 timestep)
 	SaveExternalForces();
 }
 
+void ndBodyDynamic::IntegrateSolverVelocity(ndFloat32 timestep)
+{
+	IntegrateVelocity(timestep);
+}
+
 ndJacobian ndBodyDynamic::IntegrateForceAndToque(const ndVector& force, const ndVector& torque, const ndVector& timestep) const
 {
 	ndJacobian velocStep;

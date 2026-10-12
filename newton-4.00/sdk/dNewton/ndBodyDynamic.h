@@ -51,6 +51,7 @@ class ndBodyDynamic: public ndBodyKinematic
 	D_NEWTON_API virtual void ApplyExternalForces(ndInt32 threadIndex, ndFloat32 timestep) override;
 	D_NEWTON_API virtual void AddDampingAcceleration(ndFloat32 timestep) override;
 	D_NEWTON_API virtual void IntegrateVelocity(ndFloat32 timestep) override;
+	D_NEWTON_API virtual void IntegrateSolverVelocity(ndFloat32 timestep) override;
 	D_NEWTON_API virtual void InitSurrogateBody(ndBodyKinematic* const surrogate) const override;
 
 	D_NEWTON_API void SetForce(const ndVector& force) override;
