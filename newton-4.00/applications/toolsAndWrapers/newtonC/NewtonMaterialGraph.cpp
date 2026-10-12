@@ -189,30 +189,6 @@ void NewtonMaterialSetCollisionCallback(const NewtonWorld* const newtonWorld, in
 
 
 /*!
-  Set the material interaction between two physics materials  to be collidable or non-collidable by default.
-
-  @param *newtonWorld pointer to the Newton world.
-  @param  id0 - group id0
-  @param  id1 - group id1
-  @param state state for this material: 1 = collidable; 0 = non collidable
-
-  @return Nothing.
-*/
-void NewtonMaterialSetDefaultCollidable(const NewtonWorld* const newtonWorld, int id0, int id1, int state)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
-	//if (state) {
-	//	material->m_flags |= dgContactMaterial::m_collisionEnable;
-	//}
-	//else {
-	//	material->m_flags &= ~dgContactMaterial::m_collisionEnable;
-	//}
-	ndAssert(0);
-}
-
-/*!
   Set an imaginary thickness between the collision geometry of two colliding bodies whose physics
   properties are defined by this material pair
 
@@ -957,8 +933,31 @@ void NewtonMaterialSetContactFrictionCoef(const NewtonMaterial* const materialHa
 void NewtonMaterialSetContactElasticity(const NewtonMaterial* const materialHandle, dFloat restitution)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgContactMaterial* const material = (dgContactMaterial*)materialHandle;
-	//material->m_restitution = dgClamp(restitution, dFloat(0.0f), dFloat(2.0f));
 	ndContactMaterial* const material = PointerCast<ndContactMaterial, NewtonMaterial>(materialHandle);
 	material->m_material.m_restitution = ndClamp(restitution, dFloat(0.0f), dFloat(1.0f));
+}
+
+/*!
+  Set the material interaction between two physics materials  to be collidable or non-collidable by default.
+
+  @param *newtonWorld pointer to the Newton world.
+  @param  id0 - group id0
+  @param  id1 - group id1
+  @param state state for this material: 1 = collidable; 0 = non collidable
+
+  @return Nothing.
+*/
+void NewtonMaterialSetDefaultCollidable(const NewtonWorld* const newtonWorld, int id0, int id1, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndMaterial* const material = world->GetMaterial(id0, id1);
+	if (state) 
+	{
+		material->m_flags |= ndContactOptions::m_collisionEnable;
+	}
+	else 
+	{
+		material->m_flags &= ~ndContactOptions::m_collisionEnable;
+	}
 }

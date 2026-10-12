@@ -1681,13 +1681,11 @@ void NewtonBodySetSleepState(const NewtonBody* const bodyPtr, int state)
   The application can also determine the world from a joint, if it queries one
   of the bodies attached to that joint.
 */
-NewtonWorld* NewtonBodyGetWorld(const NewtonBody* const bodyPtr)
+NewtonWorld* NewtonBodyGetWorld(const NewtonBody* const body)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
-	ndBodyKinematic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyKinematic());
-	NewtonWorld* const world = dynBody->GetScene() ? reinterpret_cast<NewtonWorld*>(dynBody->GetScene()->GetWorld()) : nullptr ;
-	return  world;
+	ndBodyKinematic* const dynBody = PointerCast<ndBodyKinematic, NewtonBody>(body)->GetAsBodyKinematic();
+	return dynBody->GetScene() ? PointerCast<NewtonWorld, ndWorld>(dynBody->GetScene()->GetWorld()) : nullptr ;
 }
 
 int NewtonBodyGetID(const NewtonBody* const bodyPtr)

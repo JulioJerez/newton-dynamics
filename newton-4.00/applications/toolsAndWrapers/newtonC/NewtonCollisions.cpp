@@ -678,50 +678,6 @@ int NewtonCollisionIntersectionTest(const NewtonWorld* const newtonWorld, const 
 	//	threadIndex) ? 1 : 0;
 	ndAssert(0);
 	return 0;
-
-}
-
-/*!
-  Calculate contact points between two collision primitive.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param maxSize size of maximum number of elements in contacts, normals, and penetration.
-  @param *collisionA pointer to collision primitive A.
-  @param *matrixA pointer to an array of 16 floats containing the offset matrix of collision primitiveA.
-  @param *collisionB pointer to collision primitive B.
-  @param *matrixB pointer to an array of 16 floats containing the offset matrix of collision primitiveB.
-  @param *contacts pointer to and array of a least 3 times maxSize floats to contain the collision contact points.
-  @param *normals pointer to and array of a least 3 times maxSize floats to contain the collision contact normals.
-  @param *penetration pointer to and array of a least maxSize floats to contain the collision penetration at each contact.
-  @param attributeA fixme
-  @param attributeB fixme
-  @param threadIndex Thread index form where the call is made from, zeor otherwize
-
-  @return the number of contact points.
-
-  This function can be used as a low-level building block for a stand-alone collision system.
-  Applications that have already there own physics system, and only want and quick and fast collision solution,
-  can use Newton advanced collision engine as the low level collision detection part.
-  To do this the application only needs to initialize Newton, create the collision primitives at application discretion,
-  and just call this function when the objects are in close proximity. Applications using Newton as a collision system
-  only, are responsible for implementing their own broad phase collision determination, based on any high level tree structure.
-  Also the application should implement their own trivial aabb test, before calling this function .
-
-  See also: ::NewtonCollisionCollideContinue, ::NewtonCollisionClosestPoint, ::NewtonCollisionPointDistance, ::NewtonCollisionRayCast, ::NewtonCollisionCalculateAABB
-*/
-int NewtonCollisionCollide(const NewtonWorld* const newtonWorld, int maxSize,
-	const NewtonCollision* const collisionA, const dFloat* const matrixA,
-	const NewtonCollision* const collisionB, const dFloat* const matrixB,
-	dFloat* const contacts, dFloat* const normals, dFloat* const penetration,
-	dLong* const attributeA, dLong* const attributeB, int threadIndex)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//return world->Collide((dgCollisionInstance*)collisionA, dgMatrix(matrixA),
-	//	(dgCollisionInstance*)collisionB, dgMatrix(matrixB),
-	//	(dgTriplex*)contacts, (dgTriplex*)normals, penetration, attributeA, attributeB, maxSize, threadIndex);
-	ndAssert(0);
-	return 0;
 }
 
 /*!
@@ -782,39 +738,6 @@ int NewtonCollisionCollideContinue(const NewtonWorld* const newtonWorld, int max
 	ndAssert(0);
 	return 0;
 }
-
-
-/*!
-  Calculate the most extreme point of a convex collision shape along the given direction.
-
-  @param *collisionPtr pointer to the collision object.
-  @param *dir pointer to an array of at least three floats representing the search direction.
-  @param *vertex pointer to an array of at least three floats to hold the collision most extreme vertex along the search direction.
-
-  @return nothing.
-
-  the search direction must be in the space of the collision shape.
-
-  See also: ::NewtonCollisionRayCast, ::NewtonCollisionClosestPoint, ::NewtonCollisionPointDistance
-*/
-void NewtonCollisionSupportVertex(const NewtonCollision* const collisionPtr, const dFloat* const dir, dFloat* const vertex)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	//dgCollisionInstance* const collision = (dgCollisionInstance*)collisionPtr;
-	//
-	//const dgMatrix& matrix = collision->GetLocalMatrix();
-	//dgVector searchDir(matrix.UnrotateVector(dgVector(dir[0], dir[1], dir[2], dgFloat32(0.0f))));
-	//searchDir = searchDir.Normalize();
-	//dgVector vertexOut(matrix.TransformVector(collision->SupportVertex(searchDir)));
-	//
-	//vertex[0] = vertexOut[0];
-	//vertex[1] = vertexOut[1];
-	//vertex[2] = vertexOut[2];
-
-	ndAssert(0);
-}
-
 
 /*!
   Ray cast specific collision object.
