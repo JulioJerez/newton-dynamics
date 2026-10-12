@@ -963,6 +963,11 @@ void ndBodyKinematic::IntegrateVelocity(ndFloat32 timestep)
 	ndAssert(m_matrix.TestOrthogonal());
 }
 
+void ndBodyKinematic::IntegrateSolverVelocity(ndFloat32)
+{
+	// do nothing: kinematic bodies are no integated by the solver
+}
+
 void ndBodyKinematic::IntegrateExternalForce(ndFloat32 timestep)
 {
 	if (!m_equilibrium && (m_invMass.m_w > ndFloat32(0.0f)))

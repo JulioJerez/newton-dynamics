@@ -611,26 +611,6 @@ int NewtonCollisionGetMode(const NewtonCollision* const convexCollision)
 }
 
 
-// Set a flag on a convex collision shape to indicate that no contacts should calculated for this shape.
-//
-// @param convexCollision is the pointer to a convex collision primitive.
-// @param triggerMode 1 disable contact calculation, 0 enable contact calculation.
-// 
-// @return nothing
-//
-// this function can be used to place collision triggers in the scene. 
-// Setting this flag is not really a necessary to place a collision trigger however this option hint the engine that 
-// this particular shape is a trigger volume and no contact calculation is desired.
-//
-void NewtonCollisionSetMode(const NewtonCollision* const convexCollision, int mode)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const collision = (dgCollisionInstance*)convexCollision;
-	//collision->SetCollisionMode(mode ? true : false);
-	ndAssert(0);
-}
-
-
 /*!
   Calculate the closest point between a point and convex collision primitive.
 
@@ -1220,4 +1200,22 @@ void* NewtonCollisionGetSubCollisionHandle(const NewtonCollision* const collisio
 	TRACE_FUNCTION(__FUNCTION__);
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	return const_cast<void*>(instance->m_subCollisionHandle);
+}
+
+// Set a flag on a convex collision shape to indicate that no contacts should calculated for this shape.
+//
+// @param convexCollision is the pointer to a convex collision primitive.
+// @param triggerMode 1 disable contact calculation, 0 enable contact calculation.
+// 
+// @return nothing
+//
+// this function can be used to place collision triggers in the scene. 
+// Setting this flag is not really a necessary to place a collision trigger however this option hint the engine that 
+// this particular shape is a trigger volume and no contact calculation is desired.
+//
+void NewtonCollisionSetMode(const NewtonCollision* const collision, int mode)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
+	instance->SetCollisionMode(mode ? true : false);
 }

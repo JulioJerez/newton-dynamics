@@ -95,7 +95,6 @@ void ndNewtonWorld::PostUpdate(ndFloat32 timestep)
 	}
 }
 
-
 void ndNewtonWorld::Update(ndFloat32 timestep)
 {
 	//ndTrace(("%f\n", timestep));
