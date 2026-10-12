@@ -71,20 +71,6 @@ void operator delete(void* ptr) noexcept
 }
 #endif
 
-bool CheckFloat(ndFloat32* ptr, ndInt32 size)
-{
-#ifdef _DEBUG
-	for (ndInt32 i = 0; i < size; ++i)
-	{
-		if (!_finite(ptr[i]) || _isnan(ptr[i]))
-		{
-			return false;
-		}
-	}
-#endif
-	return true;
-}
-
 // fixme: needs docu
 // @param mallocFnt is a pointer to the memory allocator callback function. If this parameter is NULL the standard *malloc* function is used.
 // @param mfreeFnt is a pointer to the memory release callback function. If this parameter is NULL the standard *free* function is used.

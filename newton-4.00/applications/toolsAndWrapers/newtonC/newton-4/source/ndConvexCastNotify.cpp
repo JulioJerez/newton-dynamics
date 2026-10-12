@@ -31,21 +31,20 @@ bool ndConvexCastNotify::CastShape(const ndShapeInstance& castingInstance, const
 {
 	ndAssert(m_cachedScene);
 	ndContact contactJoint;
-	ndBodyKinematic body0;
 	ndContactNotify notify(*m_cachedScene);
 	ndFixSizeArray<ndContactPoint, D_MAX_CONTATCS> contactBuffer(D_MAX_CONTATCS);
 
 	#ifdef _DEBUG
-		//memset(&contactBuffer[0], 0, sizeof(ndContactPoint) * D_MAX_CONTATCS);
 		ndContactPoint zeroPoint;
 		zeroPoint.Init();
 		ndMemSet(&contactBuffer[0], zeroPoint, D_MAX_CONTATCS);
 	#endif
-	
+
+	ndQuerieBody body0;
 	body0.SetCollisionShape(castingInstance);
 	body0.SetMatrix(globalOrigin);
 	body0.SetMassMatrix(ndVector::m_one);
-	body0.SetVelocity(globalDest - globalOrigin.m_posit);
+	body0.SetVelocity(ndVector::m_triplexMask & (globalDest - globalOrigin.m_posit));
 	
 	contactJoint.SetBodies(&body0, targetBody);
 	
@@ -66,7 +65,6 @@ bool ndConvexCastNotify::CastShape(const ndShapeInstance& castingInstance, const
 			contact.m_body0 = nullptr;
 			contact.m_body1 = targetBody;
 			contact.m_shapeInstance0 = &castingInstance;
-			//contact.m_shapeInstance1 = &targetBody->GetCollisionShape();
 			ndAssert(contact.m_shapeInstance1 && contact.m_shapeInstance1->m_ownerBody == targetBody);
 			m_contacts.PushBack(contactBuffer[i]);
 		}

@@ -21,7 +21,31 @@ Object* PointerCast(const Handle* const ptr)
 	return const_cast<Object*>(reinterpret_cast<const Object*>(ptr));
 }
 
-bool CheckFloat(ndFloat32* ptr, ndInt32 size);
+inline bool CheckFloat____(const ndFloat32* ptr, ndInt32 size)
+{
+	#ifdef _DEBUG
+	for (ndInt32 i = 0; i < size; ++i)
+	{
+		if (!_finite(ptr[i]) || _isnan(ptr[i]))
+		{
+			return false;
+		}
+	}
+	#endif
+	return true;
+}
+
+inline ndMatrix GetMatrix(const ndFloat32* const matrix4x4Ptr)
+{
+	ndMatrix matrix(matrix4x4Ptr);
+	if (!CheckFloat____(&matrix[0][0], 16))
+	{
+		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
+		matrix = ndGetIdentityMatrix();
+	}
+	return matrix;
+}
+
 
 #endif 
 

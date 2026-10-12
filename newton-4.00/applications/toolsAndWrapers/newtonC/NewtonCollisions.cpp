@@ -145,15 +145,9 @@ void NewtonCollisionSetUserData(const NewtonCollision* const collision, void* co
 void NewtonCollisionSetMatrix(const NewtonCollision* collision, const dFloat* const matrixPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 
-	ndMatrix matrix(matrixPtr);
-	if (!CheckFloat(&matrix[0][0], 16))
-	{
-		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
-		matrix = ndGetIdentityMatrix();
-	}
+	ndMatrix matrix(GetMatrix(matrixPtr));
 	instance->SetLocalMatrix(matrix);
 }
 
@@ -649,17 +643,6 @@ int NewtonCollisionPointDistance(const NewtonWorld* const newtonWorld, const dFl
 }
 
 
-int NewtonCollisionIntersectionTest(const NewtonWorld* const newtonWorld, const NewtonCollision* const collisionA, const dFloat* const matrixA, const NewtonCollision* const collisionB, const dFloat* const matrixB, int threadIndex)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//return world->IntersectionTest((dgCollisionInstance*)collisionA, dgMatrix(matrixA),
-	//	(dgCollisionInstance*)collisionB, dgMatrix(matrixB),
-	//	threadIndex) ? 1 : 0;
-	ndAssert(0);
-	return 0;
-}
-
 /*!
   Calculate time of impact of impact and contact points between two collision primitive.
 
@@ -861,41 +844,7 @@ dFloat NewtonConvexCollisionCalculateVolume(const NewtonCollision* const convexC
 	//return collision->GetVolume();
 	ndAssert(0);
 	return 0;
-
 }
-
-
-/*!
-  Calculate the three principal axis and the the values of the inertia matrix of a convex collision objects.
-
-  @param convexCollision is the pointer to a convex collision primitive.
-  @param *inertia pointer to and array of a least 3 floats to hold the values of the principal inertia.
-  @param *origin pointer to and array of a least 3 floats to hold the values of the center of mass for the principal inertia.
-
-  This function calculate a general inertial matrix for arbitrary convex collision including compound collisions.
-
-  See also: ::NewtonBodySetMassMatrix, ::NewtonBodyGetMass, ::NewtonBodySetCentreOfMass, ::NewtonBodyGetCentreOfMass
-*/
-void NewtonConvexCollisionCalculateInertialMatrix(const NewtonCollision* convexCollision, dFloat* const inertia, dFloat* const origin)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const collision = (dgCollisionInstance*)convexCollision;
-	//
-	////	dgVector tmpInertia;
-	////	dgVector tmpOringin;
-	////	collision->CalculateInertia(tmpInertia, tmpOringin);
-	//dgMatrix tmpInertia(collision->CalculateInertia());
-	//
-	//inertia[0] = tmpInertia[0][0];
-	//inertia[1] = tmpInertia[1][1];
-	//inertia[2] = tmpInertia[2][2];
-	//origin[0] = tmpInertia[3][0];
-	//origin[1] = tmpInertia[3][1];
-	//origin[2] = tmpInertia[3][2];
-
-	ndAssert(0);
-}
-
 
 /*!
   Add buoyancy force and torque for bodies immersed in a fluid.
@@ -1218,4 +1167,30 @@ void NewtonCollisionSetMode(const NewtonCollision* const collision, int mode)
 	TRACE_FUNCTION(__FUNCTION__);
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	instance->SetCollisionMode(mode ? true : false);
+}
+
+
+/*!
+  Calculate the three principal axis and the the values of the inertia matrix of a convex collision objects.
+
+  @param convexCollision is the pointer to a convex collision primitive.
+  @param *inertia pointer to and array of a least 3 floats to hold the values of the principal inertia.
+  @param *origin pointer to and array of a least 3 floats to hold the values of the center of mass for the principal inertia.
+
+  This function calculate a general inertial matrix for arbitrary convex collision including compound collisions.
+
+  See also: ::NewtonBodySetMassMatrix, ::NewtonBodyGetMass, ::NewtonBodySetCentreOfMass, ::NewtonBodyGetCentreOfMass
+*/
+void NewtonConvexCollisionCalculateInertialMatrix(const NewtonCollision* const convexCollision, dFloat* const inertia, dFloat* const origin)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(convexCollision);
+	const ndMatrix tmpInertia(instance->CalculateInertia());
+	
+	inertia[0] = tmpInertia[0][0];
+	inertia[1] = tmpInertia[1][1];
+	inertia[2] = tmpInertia[2][2];
+	origin[0] = tmpInertia[3][0];
+	origin[1] = tmpInertia[3][1];
+	origin[2] = tmpInertia[3][2];
 }
