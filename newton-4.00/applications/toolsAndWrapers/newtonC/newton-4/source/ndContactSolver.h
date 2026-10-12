@@ -58,6 +58,8 @@ class dCollisionParamProxy;
 D_MSV_NEWTON_CLASS_ALIGN_32
 class ndContactSolver: public ndDownHeap<ndMinkFace*, ndFloat32>  
 {
+	class ndQuerieBody;
+
 	public: 
 	class ndBoxBoxDistance2;
 
@@ -68,6 +70,11 @@ class ndContactSolver: public ndDownHeap<ndMinkFace*, ndFloat32>
 		const ndShapeInstance* const shapeA, const ndMatrix& matrixA, const ndVector& velocA,
 		const ndShapeInstance* const shapeB, const ndMatrix& matrixB, const ndVector& velocB,
 		ndFixSizeArray<ndContactPoint, 16>& contactOut, ndContactNotify* const notification);
+
+	D_COLLISION_API void CalculateClosestPoints(
+		const ndShapeInstance* const shapeA, const ndMatrix& matrixA,
+		const ndShapeInstance* const shapeB, const ndMatrix& matrixB,
+		ndContactNotify* const notification);
 
 	ndVector GetSeparatingVector() const
 	{

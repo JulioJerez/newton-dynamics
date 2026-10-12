@@ -59,22 +59,24 @@ NewtonBody* NewtonCreateDynamicBody(const NewtonWorld* const newtonWorld, const 
 	ndSharedPtr<ndBody> body (new ndBodyDynamic());
 	ndBodyDynamic* const dynBody = body->GetAsBodyDynamic();
 
-	//ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
 	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	ndSharedPtr<ndBodyNotify> bodyNotify(new ndNewtonBodyNotify(world, reinterpret_cast<NewtonBody*>(*body)));
 
-	ndShapeInstance instance(new ndShapeNull());
-	ndShapeInstance* const instancePtr = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	ndShapeInstance instance(nullptr);
 	if (collision)
 	{
-		instance = *instancePtr;
+		instance = *PointerCast<ndShapeInstance, NewtonCollision>(collision);
+	}
+	else
+	{
+		instance.SetShape(new ndShapeNull());
 	}
 
 	dynBody->SetMatrix(matrix);
 	dynBody->SetCollisionShape(instance);
 	dynBody->SetNotifyCallback(bodyNotify);
 	world->AddBody(body);
-	return reinterpret_cast<NewtonBody*>(*body);
+	return PointerCast<NewtonBody, ndBodyDynamic>(dynBody);
 }
 
 NewtonBody* NewtonCreateAsymetricDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix)
@@ -83,28 +85,42 @@ NewtonBody* NewtonCreateAsymetricDynamicBody(const NewtonWorld* const newtonWorl
 	return NewtonCreateDynamicBody(newtonWorld, collision, matrix);
 }
 
-NewtonBody* NewtonCreateKinematicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collisionPtr, const dFloat* const matrixPtr)
+NewtonBody* NewtonCreateKinematicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrixPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-	return nullptr;
-	//Newton* const world = (Newton*)newtonWorld;
-	//dgCollisionInstance* collision = (dgCollisionInstance*)collisionPtr;
-	//if (!collisionPtr) {
-	//	collision = (dgCollisionInstance*)NewtonCreateNull(newtonWorld);
-	//}
-	//
-	//dgMatrix matrix(matrixPtr);
-	//matrix.m_front.m_w = dgFloat32(0.0f);
-	//matrix.m_up.m_w = dgFloat32(0.0f);
-	//matrix.m_right.m_w = dgFloat32(0.0f);
-	//matrix.m_posit.m_w = dgFloat32(1.0f);
-	//
-	//NewtonBody* const body = (NewtonBody*)world->CreateKinematicBody(collision, matrix);
-	//if (!collisionPtr) {
-	//	NewtonDestroyCollision((NewtonCollision*)collision);
-	//}
-	//return body;
+	ndMatrix matrix(matrixPtr);
+	if (!CheckFloat(&matrix[0][0], 16))
+	{
+		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
+		matrix = ndGetIdentityMatrix();
+	}
+
+	matrix.m_front.m_w = ndFloat32(0.0f);
+	matrix.m_up.m_w = ndFloat32(0.0f);
+	matrix.m_right.m_w = ndFloat32(0.0f);
+	matrix.m_posit.m_w = ndFloat32(1.0f);
+
+	ndSharedPtr<ndBody> body(new ndBodyKinematic());
+	ndBodyKinematic* const kinBody = body->GetAsBodyKinematic();
+
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndSharedPtr<ndBodyNotify> bodyNotify(new ndNewtonBodyNotify(world, reinterpret_cast<NewtonBody*>(*body)));
+
+	ndShapeInstance instance(nullptr);
+	if (collision)
+	{
+		instance = *PointerCast<ndShapeInstance, NewtonCollision>(collision);
+	}
+	else
+	{
+		instance.SetShape(new ndShapeNull());
+	}
+
+	kinBody->SetMatrix(matrix);
+	kinBody->SetCollisionShape(instance);
+	kinBody->SetNotifyCallback(bodyNotify);
+	world->AddBody(body);
+	return PointerCast<NewtonBody, ndBodyKinematic>(kinBody); ;
 }
 
 /*!
@@ -394,44 +410,6 @@ NewtonJoint* NewtonBodyGetNextJoint(const NewtonBody* const bodyPtr, const Newto
 }
 
 
-/*!
-  Return a pointer to the first contact joint attached to this rigid body.
-
-  @param *bodyPtr pointer to the body.
-
-  @return Contact if the body is colliding with anther body, NULL otherwise
-
-  See also: ::NewtonBodyGetNextContactJoint, ::NewtonContactJointGetFirstContact, ::NewtonContactJointGetNextContact, ::NewtonContactJointRemoveContact
-*/
-NewtonJoint* NewtonBodyGetFirstContactJoint(const NewtonBody* const bodyPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//return (NewtonJoint*)body->GetFirstContact();
-
-	ndAssert(0);
-	return 0;
-}
-
-/*!
-  Return a pointer to the next contact joint attached to this rigid body.
-
-  @param *bodyPtr pointer to the body.
-  @param *contactPtr pointer to corrent contact joint.
-
-  @return Contact if the body is colliding with anther body, NULL otherwise
-
-  See also: ::NewtonBodyGetFirstContactJoint, ::NewtonContactJointGetFirstContact, ::NewtonContactJointGetNextContact, ::NewtonContactJointRemoveContact
-*/
-NewtonJoint* NewtonBodyGetNextContactJoint(const NewtonBody* const bodyPtr, const NewtonJoint* const contactPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//return (NewtonJoint*)body->GetNextContact((dgConstraint*)contactPtr);
-	ndAssert(0);
-	return 0;
-}
-
 int NewtonBodyGetSerializedID(const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -609,25 +587,6 @@ void NewtonBodySetFreezeState(const NewtonBody* const bodyPtr, int state)
 	ndAssert(0);
 }
 
-int NewtonBodyGetGyroscopicTorque(const NewtonBody* const bodyPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//return body->GetGyroMode() ? 1 : 0;
-
-	ndAssert(0);
-	return 0;
-
-}
-
-void NewtonBodySetGyroscopicTorque(const NewtonBody* const bodyPtr, int state)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//body->SetGyroMode(state ? true : false);
-	ndAssert(0);
-}
-
 
 /*!
   Get the world axis aligned bounding box (AABB) of the body.
@@ -780,16 +739,6 @@ void NewtonBodyApplyImpulsePair(const NewtonBody* const bodyPtr, dFloat* const l
 
 }
 
-void NewtonBodyIntegrateVelocity(const NewtonBody* const bodyPtr, dFloat timestep)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//
-	//if (body->IsRTTIType(dgBody::m_kinematicBody) || (body->GetInvMass().m_w > dgFloat32(0.0f))) {
-	//	body->IntegrateVelocity(timestep);
-	//}
-	ndAssert(0);
-}
 
 /*!
   Store a user defined data value with the body.
@@ -1642,11 +1591,8 @@ int NewtonBodyGetType(const NewtonBody* const bodyPtr)
 void NewtonBodySetAutoSleep(const NewtonBody* const bodyPtr, int state)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//body->SetAutoSleep(state ? true : false);
-	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
-	ndBodyDynamic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyDynamic());
-	dynBody->SetAutoSleep(state ? true : false);
+	ndBodyKinematic* const body = PointerCast<ndBodyKinematic, NewtonBody>(bodyPtr);
+	body->SetAutoSleep(state ? true : false);
 }
 
 /*!
@@ -1661,9 +1607,8 @@ void NewtonBodySetAutoSleep(const NewtonBody* const bodyPtr, int state)
 int NewtonBodyGetAutoSleep(const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
-	ndBodyDynamic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyDynamic());
-	return dynBody->GetAutoSleep() ? 1 : 0;
+	ndBodyKinematic* const body = PointerCast<ndBodyKinematic, NewtonBody>(bodyPtr);
+	return body->GetAutoSleep() ? 1 : 0;
 }
 
 /*!
@@ -1678,17 +1623,15 @@ int NewtonBodyGetAutoSleep(const NewtonBody* const bodyPtr)
 int NewtonBodyGetSleepState(const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
-	ndBodyDynamic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyDynamic());
-	return dynBody->GetSleepState() ? 1 : 0;
+	ndBodyKinematic* const body = PointerCast<ndBodyKinematic, NewtonBody>(bodyPtr);
+	return body->GetSleepState() ? 1 : 0;
 }
 
 void NewtonBodySetSleepState(const NewtonBody* const bodyPtr, int state)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
-	ndBodyDynamic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyDynamic());
-	dynBody->SetSleepState(state ? true : false);
+	ndBodyKinematic* const body = PointerCast<ndBodyKinematic, NewtonBody>(bodyPtr);
+	body->SetSleepState(state ? true : false);
 }
 
 /*!
@@ -1701,13 +1644,11 @@ void NewtonBodySetSleepState(const NewtonBody* const bodyPtr, int state)
   The application can also determine the world from a joint, if it queries one
   of the bodies attached to that joint.
 */
-NewtonWorld* NewtonBodyGetWorld(const NewtonBody* const bodyPtr)
+NewtonWorld* NewtonBodyGetWorld(const NewtonBody* const body)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
-	ndBodyKinematic* const dynBody = reinterpret_cast<ndBodyDynamic*>(body->GetAsBodyKinematic());
-	NewtonWorld* const world = dynBody->GetScene() ? reinterpret_cast<NewtonWorld*>(dynBody->GetScene()->GetWorld()) : nullptr ;
-	return  world;
+	ndBodyKinematic* const dynBody = PointerCast<ndBodyKinematic, NewtonBody>(body)->GetAsBodyKinematic();
+	return dynBody->GetScene() ? PointerCast<NewtonWorld, ndWorld>(dynBody->GetScene()->GetWorld()) : nullptr ;
 }
 
 int NewtonBodyGetID(const NewtonBody* const bodyPtr)
@@ -1715,6 +1656,16 @@ int NewtonBodyGetID(const NewtonBody* const bodyPtr)
 	TRACE_FUNCTION(__FUNCTION__);
 	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	return body->GetId();
+}
+
+void NewtonBodyIntegrateVelocity(const NewtonBody* const body, dFloat timestep)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const kinBody = PointerCast<ndBodyKinematic, NewtonBody>(body);
+	if ((kinBody->GetInvMass() > ndFloat32(0.0f)) || !kinBody->IsType(ndBodyDynamic::StaticClassName()))
+	{
+		kinBody->IntegrateVelocity(timestep);
+	}
 }
 
 /*!
@@ -1734,4 +1685,62 @@ NewtonJoint* NewtonBodyFindContact(const NewtonBody* const body0, const NewtonBo
 	ndBodyKinematic* const kinBody1 = PointerCast<ndBodyKinematic, NewtonBody>(body1);
 	ndBodyKinematic::ndContactMap& contactMap = kinBody0->GetContactMap();
 	return PointerCast<NewtonJoint, ndContact>(contactMap.FindContact(kinBody0, kinBody1));
+}
+
+/*!
+  Return a pointer to the first contact joint attached to this rigid body.
+
+  @param *bodyPtr pointer to the body.
+
+  @return Contact if the body is colliding with anther body, NULL otherwise
+
+  See also: ::NewtonBodyGetNextContactJoint, ::NewtonContactJointGetFirstContact, ::NewtonContactJointGetNextContact, ::NewtonContactJointRemoveContact
+*/
+NewtonJoint* NewtonBodyGetFirstContactJoint(const NewtonBody* const body)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const kinBody = PointerCast<ndBodyKinematic, NewtonBody>(body);
+	ndBodyKinematic::ndContactMap& contactMap = kinBody->GetContactMap();
+	ndBodyKinematic::ndContactMap::Iterator it(contactMap);
+	for (it.Begin(); it; it++)
+	{
+		ndContact* const contact = it.GetNode()->GetInfo();
+		if (contact->IsActive())
+		{
+			return PointerCast<NewtonJoint, ndContact>(contact);
+		}
+	}
+	return nullptr;
+}
+
+/*!
+  Return a pointer to the next contact joint attached to this rigid body.
+
+  @param *bodyPtr pointer to the body.
+  @param *contactPtr pointer to corrent contact joint.
+
+  @return Contact if the body is colliding with anther body, NULL otherwise
+
+  See also: ::NewtonBodyGetFirstContactJoint, ::NewtonContactJointGetFirstContact, ::NewtonContactJointGetNextContact, ::NewtonContactJointRemoveContact
+*/
+NewtonJoint* NewtonBodyGetNextContactJoint(const NewtonBody* const body, const NewtonJoint* const contactPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const kinBody = PointerCast<ndBodyKinematic, NewtonBody>(body);
+	ndBodyKinematic::ndContactMap& contactMap = kinBody->GetContactMap();
+
+	ndContact* const contact = PointerCast<ndContact, NewtonJoint>(contactPtr);
+	ndBodyKinematic::ndContactkey key(contact->GetBody0()->GetId(), contact->GetBody1()->GetId());
+
+	ndBodyKinematic::ndContactMap::Iterator it(contactMap);
+	it.Set(contactMap.Find(key));
+	for (it++; it; it++)
+	{
+		ndContact* const contact = it.GetNode()->GetInfo();
+		if (contact->IsActive())
+		{
+			return PointerCast<NewtonJoint, ndContact>(contact);
+		}
+	}
+	return nullptr;
 }

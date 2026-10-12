@@ -202,12 +202,6 @@ int NewtonAtomicAdd(int* const ptr, int value)
 	return value;
 }
 
-void NewtonDispachThreadJob(const NewtonWorld* const, NewtonJobTask, void* const, const char* const)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-}
-
 void NewtonLoadPlugins(const NewtonWorld* const, const char* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -327,6 +321,19 @@ void NewtonSetParallelSolverOnLargeIsland(const NewtonWorld* const, int)
 }
 
 void NewtonUserJointMassScale(const NewtonJoint* const, dFloat, dFloat)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
+}
+
+int NewtonBodyGetGyroscopicTorque(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
+	return 1;
+}
+
+void NewtonBodySetGyroscopicTorque(const NewtonBody* const bodyPtr, int state)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));

@@ -21,7 +21,7 @@ ndNewtonBodyNotify::ndNewtonBodyNotify(ndNewtonWorld* const world, NewtonBody* c
 	,m_world(world)
 	,m_materialGoupId(0)
 	,m_capSpeed(ndFloat32 (60.0f))
-	,m_capOmega(ndFloat32(10.0f))
+	,m_capOmega(ndFloat32(75.0f))
 	,m_bodyIsInWorld(false)
 	,m_onDestroy(nullptr)
 	,m_applyTransform(nullptr)

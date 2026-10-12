@@ -30,12 +30,53 @@ static void MapShapeId(const ndShapeInfo& info, NewtonCollisionInfoRecord& colli
 {
 	switch (info.m_collisionType)
 	{
+		case m_sphere:
+		{
+			collisionInfo.m_collisionType = SERIALIZE_ID_SPHERE;
+			collisionInfo.m_sphere.m_radio = info.m_sphere.m_radius;
+			break;
+		}
+
+		case m_capsule:
+		{
+			collisionInfo.m_collisionType = SERIALIZE_ID_CAPSULE;
+			collisionInfo.m_capsule.m_radio0 = info.m_capsule.m_radio0;
+			collisionInfo.m_capsule.m_radio1 = info.m_capsule.m_radio1;
+			collisionInfo.m_capsule.m_height = info.m_capsule.m_height;
+			break;
+		}
+
+		case m_cylinder:
+		{
+			collisionInfo.m_collisionType = SERIALIZE_ID_CYLINDER;
+			collisionInfo.m_cylinder.m_radio0 = info.m_cylinder.m_radio0;
+			collisionInfo.m_cylinder.m_radio1 = info.m_cylinder.m_radio1;
+			collisionInfo.m_cylinder.m_height = info.m_cylinder.m_height;
+			break;
+		}
+
+		case m_chamferCylinder:
+		{
+			collisionInfo.m_collisionType = SERIALIZE_ID_CHAMFERCYLINDER;
+			collisionInfo.m_chamferCylinder.m_radio = info.m_chamferCylinder.m_radius;
+			collisionInfo.m_chamferCylinder.m_height = info.m_chamferCylinder.m_height;
+			break;
+		}
+
 		case m_box:
 		{
 			collisionInfo.m_collisionType = SERIALIZE_ID_BOX;
 			collisionInfo.m_box.m_x = info.m_box.m_x;
 			collisionInfo.m_box.m_y = info.m_box.m_y;
 			collisionInfo.m_box.m_z = info.m_box.m_z;
+			break;
+		}
+
+		case m_cone:
+		{
+			collisionInfo.m_collisionType = SERIALIZE_ID_CONE;
+			collisionInfo.m_cone.m_radio = info.m_cone.m_radius;
+			collisionInfo.m_cone.m_height = info.m_cone.m_height;
 			break;
 		}
 
@@ -46,6 +87,13 @@ static void MapShapeId(const ndShapeInfo& info, NewtonCollisionInfoRecord& colli
 			collisionInfo.m_convexHull.m_vertex = &info.m_convexhull.m_vertex[0].m_x;
 			collisionInfo.m_convexHull.m_vertexCount = info.m_convexhull.m_vertexCount;
 			collisionInfo.m_convexHull.m_vertexStrideInBytes = info.m_convexhull.m_strideInBytes;
+			break;
+		}
+
+		case m_compound:
+		{
+			collisionInfo.m_collisionType = SERIALIZE_ID_COMPOUND;
+			collisionInfo.m_compoundCollision.m_chidrenCount = info.m_compound.m_noUsed;
 			break;
 		}
 
@@ -510,26 +558,6 @@ void* NewtonCollisionGetUserData(const NewtonCollision* const collision)
 
 }
 
-void* NewtonCollisionGetSubCollisionHandle(const NewtonCollision* const collision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
-	//return (void*)instance->GetCollisionHandle();
-	ndAssert(0);
-	return 0;
-
-}
-
-
-void NewtonCollisionSetScale(const NewtonCollision* const collision, dFloat scaleX, dFloat scaleY, dFloat scaleZ)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
-	//instance->SetScale(dgVector(scaleX, scaleY, scaleZ, dgFloat32(0.0f)));
-	ndAssert(0);
-}
-
-
 void NewtonCollisionGetScale(const NewtonCollision* const collision, dFloat* const scaleX, dFloat* const scaleY, dFloat* const scaleZ)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -583,26 +611,6 @@ int NewtonCollisionGetMode(const NewtonCollision* const convexCollision)
 }
 
 
-// Set a flag on a convex collision shape to indicate that no contacts should calculated for this shape.
-//
-// @param convexCollision is the pointer to a convex collision primitive.
-// @param triggerMode 1 disable contact calculation, 0 enable contact calculation.
-// 
-// @return nothing
-//
-// this function can be used to place collision triggers in the scene. 
-// Setting this flag is not really a necessary to place a collision trigger however this option hint the engine that 
-// this particular shape is a trigger volume and no contact calculation is desired.
-//
-void NewtonCollisionSetMode(const NewtonCollision* const convexCollision, int mode)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const collision = (dgCollisionInstance*)convexCollision;
-	//collision->SetCollisionMode(mode ? true : false);
-	ndAssert(0);
-}
-
-
 /*!
   Calculate the closest point between a point and convex collision primitive.
 
@@ -641,51 +649,6 @@ int NewtonCollisionPointDistance(const NewtonWorld* const newtonWorld, const dFl
 }
 
 
-/*!
-  Calculate the closest points between two disjoint convex collision primitive.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param *collisionA pointer to collision primitive A.
-  @param *matrixA pointer to an array of 16 floats containing the offset matrix of collision primitiveA.
-  @param *collisionB pointer to collision primitive B.
-  @param *matrixB pointer to an array of 16 floats containing the offset matrix of collision primitiveB.
-  @param *contactA pointer to and array of a least 3 floats to contain the closest point to collisionA.
-  @param *contactB pointer to and array of a least 3 floats to contain the closest point to collisionB.
-  @param *normalAB pointer to and array of a least 3 floats to contain the separating vector normal.
-  @param  threadIndex -Thread index form where the call is made from, zeor otherwize
-
-  @return one if the tow bodies are disjoint and he closest point could be found,
-  zero if the two collision primitives are intersecting.
-
-  This function can be used as a low-level building block for a stand-alone collision system.
-  Applications that have already there own physics system, and only want and quick and fast collision solution,
-  can use Newton advanced collision engine as the low level collision detection part.
-  To do this the application only needs to initialize Newton, create the collision primitives at application discretion,
-  and just call this function when the objects are in close proximity. Applications using Newton as a collision system
-  only, are responsible for implementing their own broad phase collision determination, based on any high level tree structure.
-  Also the application should implement their own trivial aabb test, before calling this function .
-
-  the current implementation of this function does not work on collision trees, or user define collision.
-
-  See also: ::NewtonCollisionCollideContinue, ::NewtonCollisionPointDistance, ::NewtonCollisionCollide, ::NewtonCollisionRayCast, ::NewtonCollisionCalculateAABB
-*/
-int NewtonCollisionClosestPoint(const NewtonWorld* const newtonWorld,
-	const NewtonCollision* const collisionA, const dFloat* const matrixA,
-	const NewtonCollision* const collisionB, const dFloat* const matrixB,
-	dFloat* const contactA, dFloat* const contactB, dFloat* const normalAB, int threadIndex)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//return world->ClosestPoint((dgCollisionInstance*)collisionA, dgMatrix(matrixA),
-	//	(dgCollisionInstance*)collisionB, dgMatrix(matrixB),
-	//	*((dgTriplex*)contactA), *((dgTriplex*)contactB), *((dgTriplex*)normalAB), threadIndex);
-
-	ndAssert(0);
-	return 0;
-
-}
-
-
 int NewtonCollisionIntersectionTest(const NewtonWorld* const newtonWorld, const NewtonCollision* const collisionA, const dFloat* const matrixA, const NewtonCollision* const collisionB, const dFloat* const matrixB, int threadIndex)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -693,50 +656,6 @@ int NewtonCollisionIntersectionTest(const NewtonWorld* const newtonWorld, const 
 	//return world->IntersectionTest((dgCollisionInstance*)collisionA, dgMatrix(matrixA),
 	//	(dgCollisionInstance*)collisionB, dgMatrix(matrixB),
 	//	threadIndex) ? 1 : 0;
-	ndAssert(0);
-	return 0;
-
-}
-
-/*!
-  Calculate contact points between two collision primitive.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param maxSize size of maximum number of elements in contacts, normals, and penetration.
-  @param *collisionA pointer to collision primitive A.
-  @param *matrixA pointer to an array of 16 floats containing the offset matrix of collision primitiveA.
-  @param *collisionB pointer to collision primitive B.
-  @param *matrixB pointer to an array of 16 floats containing the offset matrix of collision primitiveB.
-  @param *contacts pointer to and array of a least 3 times maxSize floats to contain the collision contact points.
-  @param *normals pointer to and array of a least 3 times maxSize floats to contain the collision contact normals.
-  @param *penetration pointer to and array of a least maxSize floats to contain the collision penetration at each contact.
-  @param attributeA fixme
-  @param attributeB fixme
-  @param threadIndex Thread index form where the call is made from, zeor otherwize
-
-  @return the number of contact points.
-
-  This function can be used as a low-level building block for a stand-alone collision system.
-  Applications that have already there own physics system, and only want and quick and fast collision solution,
-  can use Newton advanced collision engine as the low level collision detection part.
-  To do this the application only needs to initialize Newton, create the collision primitives at application discretion,
-  and just call this function when the objects are in close proximity. Applications using Newton as a collision system
-  only, are responsible for implementing their own broad phase collision determination, based on any high level tree structure.
-  Also the application should implement their own trivial aabb test, before calling this function .
-
-  See also: ::NewtonCollisionCollideContinue, ::NewtonCollisionClosestPoint, ::NewtonCollisionPointDistance, ::NewtonCollisionRayCast, ::NewtonCollisionCalculateAABB
-*/
-int NewtonCollisionCollide(const NewtonWorld* const newtonWorld, int maxSize,
-	const NewtonCollision* const collisionA, const dFloat* const matrixA,
-	const NewtonCollision* const collisionB, const dFloat* const matrixB,
-	dFloat* const contacts, dFloat* const normals, dFloat* const penetration,
-	dLong* const attributeA, dLong* const attributeB, int threadIndex)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//return world->Collide((dgCollisionInstance*)collisionA, dgMatrix(matrixA),
-	//	(dgCollisionInstance*)collisionB, dgMatrix(matrixB),
-	//	(dgTriplex*)contacts, (dgTriplex*)normals, penetration, attributeA, attributeB, maxSize, threadIndex);
 	ndAssert(0);
 	return 0;
 }
@@ -799,39 +718,6 @@ int NewtonCollisionCollideContinue(const NewtonWorld* const newtonWorld, int max
 	ndAssert(0);
 	return 0;
 }
-
-
-/*!
-  Calculate the most extreme point of a convex collision shape along the given direction.
-
-  @param *collisionPtr pointer to the collision object.
-  @param *dir pointer to an array of at least three floats representing the search direction.
-  @param *vertex pointer to an array of at least three floats to hold the collision most extreme vertex along the search direction.
-
-  @return nothing.
-
-  the search direction must be in the space of the collision shape.
-
-  See also: ::NewtonCollisionRayCast, ::NewtonCollisionClosestPoint, ::NewtonCollisionPointDistance
-*/
-void NewtonCollisionSupportVertex(const NewtonCollision* const collisionPtr, const dFloat* const dir, dFloat* const vertex)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	//dgCollisionInstance* const collision = (dgCollisionInstance*)collisionPtr;
-	//
-	//const dgMatrix& matrix = collision->GetLocalMatrix();
-	//dgVector searchDir(matrix.UnrotateVector(dgVector(dir[0], dir[1], dir[2], dgFloat32(0.0f))));
-	//searchDir = searchDir.Normalize();
-	//dgVector vertexOut(matrix.TransformVector(collision->SupportVertex(searchDir)));
-	//
-	//vertex[0] = vertexOut[0];
-	//vertex[1] = vertexOut[1];
-	//vertex[2] = vertexOut[2];
-
-	ndAssert(0);
-}
-
 
 /*!
   Ray cast specific collision object.
@@ -1244,10 +1130,10 @@ void NewtonCollisionGetInfo(const NewtonCollision* const collision, NewtonCollis
 NewtonCollision* NewtonCollisionGetParentInstance(const NewtonCollision* const collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
-	ndShapeCompound* const compoundCollision = instance->GetShape()->GetAsShapeCompound();
-	return compoundCollision ? reinterpret_cast<NewtonCollision*> (compoundCollision->GetOwner()) : nullptr;
+	//ndShapeCompound* const compoundCollision = instance->GetShape()->GetAsShapeCompound();
+	//return !compoundCollision ? reinterpret_cast<NewtonCollision*> (compoundCollision->GetOwner()) : nullptr;
+	return reinterpret_cast<NewtonCollision*> (instance->GetParent());
 }
 
 void NewtonCollisionGetMaterial(const NewtonCollision* const collision, NewtonCollisionMaterial* const userData)
@@ -1296,9 +1182,40 @@ void NewtonCollisionSetMaterial(const NewtonCollision* const collision, const Ne
 int NewtonCollisionGetType(const NewtonCollision* const collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	NewtonCollisionInfoRecord collisionInfo;
 	MapShapeId(instance->GetShapeInfo(), collisionInfo);
 	return collisionInfo.m_collisionType;
+}
+
+void NewtonCollisionSetScale(const NewtonCollision* const collision, dFloat scaleX, dFloat scaleY, dFloat scaleZ)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
+	instance->SetScale(ndVector(scaleX, scaleY, scaleZ, ndFloat32(0.0f)));
+}
+
+void* NewtonCollisionGetSubCollisionHandle(const NewtonCollision* const collision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
+	return const_cast<void*>(instance->m_subCollisionHandle);
+}
+
+// Set a flag on a convex collision shape to indicate that no contacts should calculated for this shape.
+//
+// @param convexCollision is the pointer to a convex collision primitive.
+// @param triggerMode 1 disable contact calculation, 0 enable contact calculation.
+// 
+// @return nothing
+//
+// this function can be used to place collision triggers in the scene. 
+// Setting this flag is not really a necessary to place a collision trigger however this option hint the engine that 
+// this particular shape is a trigger volume and no contact calculation is desired.
+//
+void NewtonCollisionSetMode(const NewtonCollision* const collision, int mode)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
+	instance->SetCollisionMode(mode ? true : false);
 }

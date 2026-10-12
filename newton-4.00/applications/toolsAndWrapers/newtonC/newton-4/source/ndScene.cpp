@@ -1600,7 +1600,6 @@ void ndScene::CreateNewContacts()
 			ndAssert(ndUnsigned32(body1->m_index) == pair.m_body1);
 
 			const ndContact* const constructor = m_contactNotifyCallback->GetContactConstructor(body0->GetCollisionShape(), body1->GetCollisionShape());
-			//ndContact* const contact = new ndContact;
 			ndContact* const contact = constructor->Clone();
 
 			contact->SetBodies(body0, body1);

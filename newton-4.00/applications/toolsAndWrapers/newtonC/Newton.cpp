@@ -21,6 +21,7 @@
 
 #include "newtonStdafx.h"
 #include "Newton.h"
+#include "NewtonUtils.h"
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
 #include "newtonBodyNotify.h"
@@ -1252,7 +1253,7 @@ NewtonWorld* NewtonCreate()
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndNewtonWorld* const world = new ndNewtonWorld();
-	return reinterpret_cast<NewtonWorld*>(world);
+	return PointerCast<NewtonWorld, ndNewtonWorld>(world);
 }
 
 /*!
@@ -1268,7 +1269,8 @@ NewtonWorld* NewtonCreate()
 void NewtonDestroy(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	//ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	delete world;
 }
 
@@ -1291,7 +1293,7 @@ void NewtonDestroy(const NewtonWorld* const newtonWorld)
 void NewtonWorldSetUserData(const NewtonWorld* const newtonWorld, void* const userData)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	world->m_userData = userData;
 }
 
@@ -1307,7 +1309,7 @@ void NewtonWorldSetUserData(const NewtonWorld* const newtonWorld, void* const us
 void* NewtonWorldGetUserData(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	return *world->m_userData;
 }
 
@@ -1333,7 +1335,7 @@ void* NewtonWorldGetUserData(const NewtonWorld* const newtonWorld)
 void NewtonInvalidateCache(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	world->ClearCache();
 }
 
@@ -1356,7 +1358,7 @@ void NewtonInvalidateCache(const NewtonWorld* const newtonWorld)
 void NewtonDestroyAllBodies(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	const ndBodyListView& bodyList = world->GetBodyList();
 	while (bodyList.GetCount())
 	{
@@ -1385,7 +1387,7 @@ void NewtonDestroyAllBodies(const NewtonWorld* const newtonWorld)
 void NewtonUpdate(const NewtonWorld* const newtonWorld, dFloat timestep)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 
 	world->Update(timestep);
 	world->Sync();
@@ -1394,7 +1396,7 @@ void NewtonUpdate(const NewtonWorld* const newtonWorld, dFloat timestep)
 void NewtonUpdateAsync(const NewtonWorld* const newtonWorld, dFloat timestep)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 
 	world->Sync();
 	world->Update(timestep);
@@ -1403,7 +1405,7 @@ void NewtonUpdateAsync(const NewtonWorld* const newtonWorld, dFloat timestep)
 void* NewtonGetPreferedPlugin(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(ndWorld::ndSimd8Solver);
 	return reinterpret_cast<void*>(mode);
 }
@@ -1411,7 +1413,7 @@ void* NewtonGetPreferedPlugin(const NewtonWorld* const newtonWorld)
 void* NewtonCurrentPlugin(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(world->GetSelectedSolver());
 	return reinterpret_cast<void*>(mode);
 }
@@ -1425,7 +1427,7 @@ void* NewtonGetFirstPlugin(const NewtonWorld* const)
 void* NewtonGetNextPlugin(const NewtonWorld* const newtonWorld, const void* const plugin)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 
 	ndInt32 enumerator = static_cast<ndInt32>(reinterpret_cast<uintptr_t>(plugin));
 	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(enumerator);
@@ -1455,7 +1457,7 @@ void* NewtonGetNextPlugin(const NewtonWorld* const newtonWorld, const void* cons
 void NewtonSelectPlugin(const NewtonWorld* const newtonWorld, const void* const plugin)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 
 	ndInt32 enumerator = static_cast<ndInt32>(reinterpret_cast<uintptr_t>(plugin));
 	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(enumerator);
@@ -1465,7 +1467,7 @@ void NewtonSelectPlugin(const NewtonWorld* const newtonWorld, const void* const 
 const char* NewtonGetPluginString(const NewtonWorld* const newtonWorld, const void* const plugin)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	ndInt32 enumerator = static_cast<ndInt32>(reinterpret_cast<uintptr_t>(plugin));
 	ndWorld::ndSolverModes mode = ndWorld::ndSolverModes(enumerator);
 	switch (mode)
@@ -1507,7 +1509,7 @@ const char* NewtonGetPluginString(const NewtonWorld* const newtonWorld, const vo
 void NewtonSetSolverIterations(const NewtonWorld* const newtonWorld, int iterations)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	world->SetSolverIterations(iterations);
 }
 
@@ -1517,42 +1519,35 @@ Get the solver precision mode.
 int NewtonGetSolverIterations(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	return world->GetSolverIterations();
 }
 
 void NewtonSetNumberOfSubsteps(const NewtonWorld* const newtonWorld, int subSteps)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	world->SetSubSteps(subSteps);
 }
 
 int NewtonGetNumberOfSubsteps(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	return world->GetSubSteps();
 }
 
 dFloat NewtonGetLastUpdateTime(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	return world->GetUpdateTime();
 }
 
 void NewtonWaitForUpdateToFinish(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
-	world->Sync();
-}
-
-void NewtonSyncThreadJobs(const NewtonWorld* const newtonWorld)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	world->Sync();
 }
 
@@ -1575,7 +1570,7 @@ void NewtonSetThreadsCount(const NewtonWorld* const newtonWorld, int threads)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	world->SetThreadCount(threads);
 }
 
@@ -1592,7 +1587,7 @@ int NewtonGetThreadsCount(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	return world->GetThreadCount();
 }
 
@@ -1612,7 +1607,7 @@ int NewtonGetMaxThreadsCount(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	return world->GetScene()->GetMaxThreads();
 }
 
@@ -1627,7 +1622,7 @@ int NewtonGetMaxThreadsCount(const NewtonWorld* const newtonWorld)
 int NewtonWorldGetBodyCount(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	return world->GetBodyList().GetCount();
 }
 
@@ -1642,116 +1637,23 @@ int NewtonWorldGetBodyCount(const NewtonWorld* const newtonWorld)
 int NewtonWorldGetConstraintCount(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	return world->GetJointList().GetCount();
 }
 
 void NewtonSetPostUpdateCallback(const NewtonWorld* const newtonWorld, NewtonPostUpdateCallback callback)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	world->m_onPostUpdate = callback;
 }
 
 NewtonPostUpdateCallback NewtonGetPostUpdateCallback(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	return world->m_onPostUpdate;
 }
-
-void* NewtonWorldAddListener(const NewtonWorld* const newtonWorld, const char* const nameId, void* const listenerUserData)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//return world->AddListener(nameId, listenerUserData);
-	ndAssert(0);
-	return 0;
-}
-
-void* NewtonWorldGetListener(const NewtonWorld* const newtonWorld, const char* const nameId)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//return world->FindListener(nameId);
-	ndAssert(0);
-	return 0;
-}
-
-void* NewtonWorldGetListenerUserData(const NewtonWorld* const newtonWorld, void* const listener)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//return world->GetListenerUserData(listener);
-	ndAssert(0);
-	return 0;
-}
-
-NewtonWorldListenerBodyDestroyCallback NewtonWorldListenerGetBodyDestroyCallback(const NewtonWorld* const newtonWorld, void* const listener)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//return (NewtonWorldListenerBodyDestroyCallback)world->GetListenerBodyDestroyCallback(listener);
-	ndAssert(0);
-	return 0;
-}
-
-void NewtonWorldListenerSetBodyDestroyCallback(const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldListenerBodyDestroyCallback callback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//world->SetListenerBodyDestroyCallback(listener, (dgWorld::OnListenerBodyDestroyCallback)callback);
-	ndAssert(0);
-}
-
-void NewtonWorldListenerSetDestructorCallback(const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldDestroyListenerCallback callback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//return world->ListenerSetDestroyCallback(listener, (dgWorld::OnListenerDestroyCallback)callback);
-	ndAssert(0);
-}
-
-void NewtonWorldListenerSetPreUpdateCallback(const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldUpdateListenerCallback callback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//return world->ListenerSetPreUpdate(listener, (dgWorld::OnListenerUpdateCallback)callback);
-	ndAssert(0);
-}
-
-void NewtonWorldListenerSetPostUpdateCallback(const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldUpdateListenerCallback callback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//return world->ListenerSetPostUpdate(listener, (dgWorld::OnListenerUpdateCallback)callback);
-	ndAssert(0);
-}
-
-void NewtonWorldListenerSetPostStepCallback(const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldUpdateListenerCallback callback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//return world->ListenerSetPostStep(listener, (dgWorld::OnListenerUpdateCallback)callback);
-	ndAssert(0);
-}
-
-void NewtonWorldListenerSetDebugCallback(const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldListenerDebugCallback callback)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//return world->SetListenerBodyDebugCallback(listener, (dgWorld::OnListenerDebugCallback)callback);
-	ndAssert(0);
-}
-
-void NewtonWorldListenerDebug(const NewtonWorld* const newtonWorld, void* const context)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//return world->ListenersDebug(context);
-	ndAssert(0);
-}
-
 
 void NewtonSerializeToFile(const NewtonWorld* const newtonWorld, const char* const filename, NewtonOnBodySerializationCallback bodyCallback, void* const bodyUserData)
 {
@@ -1808,7 +1710,7 @@ void NewtonSetJointSerializationCallbacks(const NewtonWorld* const newtonWorld, 
 	TRACE_FUNCTION(__FUNCTION__);
 	//Newton* const world = (Newton*)newtonWorld;
 	//world->SetJointSerializationCallbacks(dgWorld::OnJointSerializationCallback(serializeJoint), dgWorld::OnJointDeserializationCallback(deserializeJoint));
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	world->m_onJointSerialize = serializeJoint;
 	world->m_onJointDeserialize = deserializeJoint;
 }
@@ -1818,7 +1720,7 @@ void NewtonGetJointSerializationCallbacks(const NewtonWorld* const newtonWorld, 
 	TRACE_FUNCTION(__FUNCTION__);
 	//Newton* const world = (Newton*)newtonWorld;
 	//world->GetJointSerializationCallbacks((dgWorld::OnJointSerializationCallback*)serializeJoint, (dgWorld::OnJointDeserializationCallback*)deserializeJoint);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	*serializeJoint = world->m_onJointSerialize;
 	*deserializeJoint = world->m_onJointDeserialize;
 }
@@ -1862,7 +1764,7 @@ void NewtonWorldSetCreateDestroyContactCallback(const NewtonWorld* const newtonW
 	TRACE_FUNCTION(__FUNCTION__);
 	//Newton* const world = (Newton*)newtonWorld;
 	//world->SetCreateDestroyContactCallback((dgWorld::OnCreateContact)createContact, (dgWorld::OnDestroyContact)destroyContact);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	world->m_onCreateContact = createContact;
 	world->m_onDestroyContact = destroyContact;
 }

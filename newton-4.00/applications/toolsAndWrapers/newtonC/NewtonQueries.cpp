@@ -226,8 +226,7 @@ void NewtonWorldForEachBodyInAABBDo(const NewtonWorld* const newtonWorld, const 
 		{
 			if (m_callback)
 			{
-				ndSharedPtr<ndBody>* const sharedBody = m_world->GetBody(const_cast<ndBody*>(reinterpret_cast<const ndBody*>(body)));
-				m_callback(reinterpret_cast<NewtonBody*>(sharedBody), m_userData);
+				m_callback(PointerCast<NewtonBody, ndBody>(body), m_userData);
 			}
 		}
 
@@ -428,9 +427,6 @@ NewtonMaterial* NewtonWorldGetNextMaterial(const NewtonWorld* const newtonWorld,
 void NewtonCollisionForEachPolygonDo(const NewtonCollision* const collision, const dFloat* const matrixPtr, NewtonCollisionIterator callback, void* const userData)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const collision = (dgCollisionInstance*)(collisionPtr);
-	//collision->DebugCollision(dgMatrix(matrixPtr), (dgCollision::OnDebugCollisionMeshCallback)callback, userDataPtr);
-
 	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
 	ndMatrix matrix(matrixPtr);
 	if (!CheckFloat(&matrix[0][0], 16))
@@ -455,9 +451,177 @@ void NewtonCollisionForEachPolygonDo(const NewtonCollision* const collision, con
 			m_callback(m_userData, vertexCount, &faceVertex[0].m_x, 0);
 		}
 
-		//(void* const userData, int vertexCount, const dFloat* const faceArray, int faceId
 		void* const m_userData;
 		NewtonCollisionIterator m_callback;
 	};
 	ndDrawShape debugShape(callback, userData);
 }
+
+/*!
+  Calculate the most extreme point of a convex collision shape along the given direction.
+
+  @param *collisionPtr pointer to the collision object.
+  @param *dir pointer to an array of at least three floats representing the search direction.
+  @param *vertex pointer to an array of at least three floats to hold the collision most extreme vertex along the search direction.
+
+  @return nothing.
+
+  the search direction must be in the space of the collision shape.
+
+  See also: ::NewtonCollisionRayCast, ::NewtonCollisionClosestPoint, ::NewtonCollisionPointDistance
+*/
+void NewtonCollisionSupportVertex(const NewtonCollision* const collision, const dFloat* const dir, dFloat* const vertex)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
+
+	const ndMatrix& matrix = instance->GetLocalMatrix();
+
+	ndVector searchDir(matrix.UnrotateVector(ndVector(dir[0], dir[1], dir[2], ndFloat32(0.0f))));
+	searchDir = searchDir.Normalize();
+	ndVector vertexOut(matrix.TransformVector(instance->SupportVertex(searchDir)));
+
+	vertex[0] = vertexOut[0];
+	vertex[1] = vertexOut[1];
+	vertex[2] = vertexOut[2];
+}
+
+/*!
+  Calculate the closest points between two disjoint convex collision primitive.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param *collisionA pointer to collision primitive A.
+  @param *matrixA pointer to an array of 16 floats containing the offset matrix of collision primitiveA.
+  @param *collisionB pointer to collision primitive B.
+  @param *matrixB pointer to an array of 16 floats containing the offset matrix of collision primitiveB.
+  @param *contactA pointer to and array of a least 3 floats to contain the closest point to collisionA.
+  @param *contactB pointer to and array of a least 3 floats to contain the closest point to collisionB.
+  @param *normalAB pointer to and array of a least 3 floats to contain the separating vector normal.
+  @param  threadIndex -Thread index form where the call is made from, zeor otherwize
+
+  @return one if the tow bodies are disjoint and he closest point could be found,
+  zero if the two collision primitives are intersecting.
+
+  This function can be used as a low-level building block for a stand-alone collision system.
+  Applications that have already there own physics system, and only want and quick and fast collision solution,
+  can use Newton advanced collision engine as the low level collision detection part.
+  To do this the application only needs to initialize Newton, create the collision primitives at application discretion,
+  and just call this function when the objects are in close proximity. Applications using Newton as a collision system
+  only, are responsible for implementing their own broad phase collision determination, based on any high level tree structure.
+  Also the application should implement their own trivial aabb test, before calling this function .
+
+  the current implementation of this function does not work on collision trees, or user define collision.
+
+  See also: ::NewtonCollisionCollideContinue, ::NewtonCollisionPointDistance, ::NewtonCollisionCollide, ::NewtonCollisionRayCast, ::NewtonCollisionCalculateAABB
+*/
+int NewtonCollisionClosestPoint(const NewtonWorld* const newtonWorld,
+	const NewtonCollision* const collisionA, const dFloat* const matrixPtrA,
+	const NewtonCollision* const collisionB, const dFloat* const matrixPtrB,
+	dFloat* const contactA, dFloat* const contactB, dFloat* const normalAB, int threadIndex)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	const ndShapeInstance* const shapeA = PointerCast<ndShapeInstance, NewtonCollision>(collisionA);
+	const ndShapeInstance* const shapeB = PointerCast<ndShapeInstance, NewtonCollision>(collisionB);
+
+	ndMatrix matrixA(matrixPtrA);
+	if (!CheckFloat(&matrixA[0][0], 16))
+	{
+		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
+		matrixA = ndGetIdentityMatrix();
+	}
+
+	ndMatrix matrixB(matrixPtrB);
+	if (!CheckFloat(&matrixB[0][0], 16))
+	{
+		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
+		matrixB = ndGetIdentityMatrix();
+	}
+	ndContactSolver solver;
+	
+	solver.CalculateClosestPoints(shapeA, matrixA, shapeB, matrixB, nullptr);
+
+	const ndVector pointA(solver.GetClosetVector0());
+	const ndVector pointB(solver.GetClosetVector1());
+	const ndVector normal(solver.GetSeparatingVector());
+
+	for (ndInt32 i = 0; i < 3; ++i)
+	{
+		contactA[i] = pointA[i];
+		contactB[i] = pointB[i];
+		normalAB[i] = normal[i];
+	}
+	return 1;
+}
+
+/*!
+  Calculate contact points between two collision primitive.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param maxSize size of maximum number of elements in contacts, normals, and penetration.
+  @param *collisionA pointer to collision primitive A.
+  @param *matrixA pointer to an array of 16 floats containing the offset matrix of collision primitiveA.
+  @param *collisionB pointer to collision primitive B.
+  @param *matrixB pointer to an array of 16 floats containing the offset matrix of collision primitiveB.
+  @param *contacts pointer to and array of a least 3 times maxSize floats to contain the collision contact points.
+  @param *normals pointer to and array of a least 3 times maxSize floats to contain the collision contact normals.
+  @param *penetration pointer to and array of a least maxSize floats to contain the collision penetration at each contact.
+  @param attributeA fixme
+  @param attributeB fixme
+  @param threadIndex Thread index form where the call is made from, zeor otherwize
+
+  @return the number of contact points.
+
+  This function can be used as a low-level building block for a stand-alone collision system.
+  Applications that have already there own physics system, and only want and quick and fast collision solution,
+  can use Newton advanced collision engine as the low level collision detection part.
+  To do this the application only needs to initialize Newton, create the collision primitives at application discretion,
+  and just call this function when the objects are in close proximity. Applications using Newton as a collision system
+  only, are responsible for implementing their own broad phase collision determination, based on any high level tree structure.
+  Also the application should implement their own trivial aabb test, before calling this function .
+
+  See also: ::NewtonCollisionCollideContinue, ::NewtonCollisionClosestPoint, ::NewtonCollisionPointDistance, ::NewtonCollisionRayCast, ::NewtonCollisionCalculateAABB
+*/
+int NewtonCollisionCollide(const NewtonWorld* const newtonWorld, int maxSize,
+	const NewtonCollision* const collisionA, const dFloat* const matrixPtrA,
+	const NewtonCollision* const collisionB, const dFloat* const matrixPtrB,
+	dFloat* const contacts, dFloat* const normals, dFloat* const penetration,
+	dLong* const attributeA, dLong* const attributeB, int threadIndex)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	const ndShapeInstance* const shapeA = PointerCast<ndShapeInstance, NewtonCollision>(collisionA);
+	const ndShapeInstance* const shapeB = PointerCast<ndShapeInstance, NewtonCollision>(collisionB);
+
+	ndMatrix matrixA(matrixPtrA);
+	if (!CheckFloat(&matrixA[0][0], 16))
+	{
+		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
+		matrixA = ndGetIdentityMatrix();
+	}
+
+	ndMatrix matrixB(matrixPtrB);
+	if (!CheckFloat(&matrixB[0][0], 16))
+	{
+		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
+		matrixB = ndGetIdentityMatrix();
+	}
+	ndContactSolver solver;
+
+	ndVector veloc(ndVector::m_zero);
+	ndFixSizeArray<ndContactPoint, 16> contactPoints;
+	solver.CalculateContacts(shapeA, matrixA, veloc, shapeB, matrixB, veloc, contactPoints, nullptr);
+	for (ndInt32 i = 0; i < contactPoints.GetCount(); ++i)
+	{
+		contacts[i * 3 + 0] = contactPoints[i].m_point.m_x;
+		contacts[i * 3 + 1] = contactPoints[i].m_point.m_y;
+		contacts[i * 3 + 2] = contactPoints[i].m_point.m_z;
+		normals[i * 3 + 0] = contactPoints[i].m_normal.m_x;
+		normals[i * 3 + 1] = contactPoints[i].m_normal.m_y;
+		normals[i * 3 + 2] = contactPoints[i].m_normal.m_z;
+		penetration[i] = contactPoints[i].m_penetration;
+		attributeA[i] = contactPoints[i].m_shapeId0;
+		attributeB[i] = contactPoints[i].m_shapeId1;
+	}
+	return contactPoints.GetCount();
+}
+
+

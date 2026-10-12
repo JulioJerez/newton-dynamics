@@ -209,24 +209,6 @@ void NewtonMeshApplyAngleBasedMapping(const NewtonMesh* const mesh, int material
 	ndAssert(0);
 }
 
-void NewtonMeshApplySphericalMapping(const NewtonMesh* const mesh, int material, const dFloat* const aligmentMatrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgMatrix matrix(aligmentMatrix);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//meshEffect->SphericalMapping(material, matrix);
-	ndAssert(0);
-}
-
-void NewtonMeshApplyCylindricalMapping(const NewtonMesh* const mesh, int cylinderMaterial, int capMaterial, const dFloat* const aligmentMatrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgMatrix matrix(aligmentMatrix);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//meshEffect->CylindricalMapping(cylinderMaterial, capMaterial, matrix);
-	ndAssert(0);
-}
-
 void NewtonMeshTriangulate(const NewtonMesh* const mesh)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -1231,6 +1213,19 @@ void NewtonMeshMaterialGetIndexStream(const NewtonMesh* const mesh, void* const 
 	meshEffect->GetMaterialGetIndexStream(indexArray, materialId, index);
 }
 
+void NewtonMeshApplySphericalMapping(const NewtonMesh* const mesh, int material, const dFloat* const aligmentMatrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMatrix matrix(aligmentMatrix);
+	if (!CheckFloat(&matrix[0][0], 16))
+	{
+		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
+		matrix = ndGetIdentityMatrix();
+	}
+	 
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	meshEffect->SphericalMapping(material, matrix);
+}
 
 void NewtonMeshApplyBoxMapping(const NewtonMesh* const mesh, int front, int side, int top, const dFloat* const aligmentMatrix)
 {
@@ -1245,6 +1240,22 @@ void NewtonMeshApplyBoxMapping(const NewtonMesh* const mesh, int front, int side
 	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	meshEffect->BoxMapping(front, side, top, matrix);
 }
+
+void NewtonMeshApplyCylindricalMapping(const NewtonMesh* const mesh, int cylinderMaterial, int capMaterial, const dFloat* const aligmentMatrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMatrix matrix(aligmentMatrix);
+	if (!CheckFloat(&matrix[0][0], 16))
+	{
+		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
+		matrix = ndGetIdentityMatrix();
+	}
+
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	//meshEffect->CylindricalMapping(cylinderMaterial, capMaterial, matrix);
+	meshEffect->CylindricalMapping(cylinderMaterial, matrix);
+}
+
 
 int NewtonMeshHasNormalChannel(const NewtonMesh* const mesh)
 {

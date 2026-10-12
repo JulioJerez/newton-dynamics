@@ -44,13 +44,14 @@ class ndShapeCompound: public ndShape
 	{
 		public:
 		D_COLLISION_API ndTreeArray();
-		D_COLLISION_API void AddNode(ndNodeBase* const node, ndInt32 index);
+		D_COLLISION_API void AddNode(ndNodeBase* const node, ndInt32 index, const ndShapeInstance* const parent);
 	};
 
 	D_CLASS_REFLECTION(ndShapeCompound,ndShape)
 
 	D_COLLISION_API ndShapeCompound();
-	D_COLLISION_API ndShapeCompound(const ndShapeCompound& source);
+	D_COLLISION_API ndShapeCompound(const ndShapeCompound& other);
+	D_COLLISION_API ndShapeCompound(const ndShapeCompound& source, const ndShapeInstance* const ownner);
 	D_COLLISION_API virtual ~ndShapeCompound() override;
 
 	D_COLLISION_API const ndTreeArray& GetTree() const;

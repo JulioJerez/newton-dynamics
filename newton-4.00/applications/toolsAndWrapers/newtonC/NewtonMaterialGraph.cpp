@@ -189,30 +189,6 @@ void NewtonMaterialSetCollisionCallback(const NewtonWorld* const newtonWorld, in
 
 
 /*!
-  Set the material interaction between two physics materials  to be collidable or non-collidable by default.
-
-  @param *newtonWorld pointer to the Newton world.
-  @param  id0 - group id0
-  @param  id1 - group id1
-  @param state state for this material: 1 = collidable; 0 = non collidable
-
-  @return Nothing.
-*/
-void NewtonMaterialSetDefaultCollidable(const NewtonWorld* const newtonWorld, int id0, int id1, int state)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
-	//if (state) {
-	//	material->m_flags |= dgContactMaterial::m_collisionEnable;
-	//}
-	//else {
-	//	material->m_flags &= ~dgContactMaterial::m_collisionEnable;
-	//}
-	ndAssert(0);
-}
-
-/*!
   Set an imaginary thickness between the collision geometry of two colliding bodies whose physics
   properties are defined by this material pair
 
@@ -588,27 +564,6 @@ void NewtonMaterialSetContactThickness(const NewtonMaterial* const materialHandl
 }
 
 /*!
-  Override the default elasticity (coefficient of restitution) value for the contact.
-
-  @param materialHandle pointer to a material pair.
-  @param restitution elasticity value, must be positive.
-
-  @return Nothing.
-
-  This function can only be called from a material callback event handler.
-
-  See also: ::NewtonMaterialSetCollisionCallback, ::NewtonMaterialSetDefaultElasticity
-*/
-void NewtonMaterialSetContactElasticity(const NewtonMaterial* const materialHandle, dFloat restitution)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgContactMaterial* const material = (dgContactMaterial*)materialHandle;
-	//material->m_restitution = dgClamp(restitution, dFloat(0.0f), dFloat(2.0f));
-	ndAssert(0);
-}
-
-
-/*!
   Enable or disable friction calculation for this contact.
 
   @param materialHandle pointer to a material pair.
@@ -960,5 +915,49 @@ void NewtonMaterialSetContactFrictionCoef(const NewtonMaterial* const materialHa
 	{
 		material->m_material.m_staticFriction0 = ndClamp(staticFrictionCoef, dFloat(0.01f), dFloat(2.0f));
 		material->m_material.m_kineticFriction0 = ndClamp(kineticFrictionCoef, dFloat(0.01f), dFloat(2.0f));
+	}
+}
+
+/*!
+  Override the default elasticity (coefficient of restitution) value for the contact.
+
+  @param materialHandle pointer to a material pair.
+  @param restitution elasticity value, must be positive.
+
+  @return Nothing.
+
+  This function can only be called from a material callback event handler.
+
+  See also: ::NewtonMaterialSetCollisionCallback, ::NewtonMaterialSetDefaultElasticity
+*/
+void NewtonMaterialSetContactElasticity(const NewtonMaterial* const materialHandle, dFloat restitution)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndContactMaterial* const material = PointerCast<ndContactMaterial, NewtonMaterial>(materialHandle);
+	material->m_material.m_restitution = ndClamp(restitution, dFloat(0.0f), dFloat(1.0f));
+}
+
+/*!
+  Set the material interaction between two physics materials  to be collidable or non-collidable by default.
+
+  @param *newtonWorld pointer to the Newton world.
+  @param  id0 - group id0
+  @param  id1 - group id1
+  @param state state for this material: 1 = collidable; 0 = non collidable
+
+  @return Nothing.
+*/
+void NewtonMaterialSetDefaultCollidable(const NewtonWorld* const newtonWorld, int id0, int id1, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndMaterial* const material = world->GetMaterial(id0, id1);
+	if (state) 
+	{
+		material->m_flags |= ndContactOptions::m_collisionEnable;
+	}
+	else 
+	{
+		material->m_flags &= ~ndContactOptions::m_collisionEnable;
 	}
 }

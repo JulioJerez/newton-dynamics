@@ -272,3 +272,17 @@ void NewtonYield()
 	ndThreadYield(loop);
 }
 
+
+void NewtonSyncThreadJobs(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	// do nothing
+	//ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	//world->Sync();
+}
+
+void NewtonDispachThreadJob(const NewtonWorld* const newtonWorld, NewtonJobTask task, void* const userData, const char* const)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	task (PointerCast<NewtonWorld, NewtonWorld>(newtonWorld), userData, 0);
+}

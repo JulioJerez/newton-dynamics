@@ -246,11 +246,12 @@ ndShapeCompound::ndTreeArray::ndTreeArray()
 {
 }
 
-void ndShapeCompound::ndTreeArray::AddNode(ndNodeBase* const node, ndInt32 index)
+void ndShapeCompound::ndTreeArray::AddNode(ndNodeBase* const node, ndInt32 index, const ndShapeInstance* const parent)
 {
 	ndTreeArray::ndNode* const myNode = Insert(node, index);
 	node->m_myNode = myNode;
 	node->m_shapeInstance->m_subCollisionHandle = myNode;
+	node->m_shapeInstance->m_parent = const_cast<ndShapeInstance*>(parent);
 }
 
 ndShapeCompound::ndShapeCompound()
@@ -275,13 +276,26 @@ ndShapeCompound::ndShapeCompound(const ndShapeCompound& source)
 	,m_idIndex(0)
 	,m_owner(nullptr)
 {
+	ndAssert(0);
+}
+
+ndShapeCompound::ndShapeCompound(const ndShapeCompound& source, const ndShapeInstance* const ownner)
+	:ndShape(source)
+	,m_array()
+	,m_treeEntropy(ndFloat32(0.0f))
+	,m_boxMinRadius(ndFloat32(0.0f))
+	,m_boxMaxRadius(ndFloat32(0.0f))
+	,m_root(nullptr)
+	,m_idIndex(0)
+	,m_owner(const_cast<ndShapeInstance*>(ownner))
+{
 	ndTreeArray::Iterator iter(source.m_array);
 	for (iter.Begin(); iter; iter++) 
 	{
 		ndNodeBase* const node = iter.GetNode()->GetInfo();
 		ndShapeInstance* const shape = node->GetShape();
 		ndNodeBase* const newNode = new ndNodeBase(shape);
-		m_array.AddNode(newNode, iter.GetNode()->GetKey());
+		m_array.AddNode(newNode, iter.GetNode()->GetKey(), ownner);
 	}
 
 	if (source.m_root) 
@@ -542,7 +556,6 @@ ndVector ndShapeCompound::SupportVertex(const ndVector& dir) const
 
 ndVector ndShapeCompound::SupportVertexSpecialProjectPoint(const ndVector&, const ndVector& dir) const
 { 
-	ndAssert(0);
 	return SupportVertex(dir);
 }
 
@@ -1081,7 +1094,7 @@ const ndShapeInstance* ndShapeCompound::GetShapeInstance(ndTreeArray::ndNode* co
 ndShapeCompound::ndTreeArray::ndNode* ndShapeCompound::AddCollision(ndShapeInstance* const subInstance)
 {
 	ndNodeBase* const newNode = new ndNodeBase(subInstance);
-	m_array.AddNode(newNode, m_idIndex);
+	m_array.AddNode(newNode, m_idIndex, *m_owner);
 
 	m_idIndex++;
 	

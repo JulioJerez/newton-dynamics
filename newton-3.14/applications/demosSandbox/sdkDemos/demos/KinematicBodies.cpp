@@ -164,9 +164,10 @@ class KinematicListener: public dCustomListener
 		DemoEntityManager* const scene = (DemoEntityManager*) NewtonWorldGetUserData(world);
 
 		NewtonCollision* const box = NewtonCreateBox(world, 5.0f, 0.25f, 4.0f, 0, NULL);
-		//dMatrix aligment(dRollMatrix(90.0f * dDegreeToRad));
-		//NewtonCollision* const box = NewtonCreateCylinder(world, 15.5f, 15.5f, 0.5f, 0, &aligment[0][0]);
 		NewtonBody* const body = NewtonCreateKinematicBody(world, box, &location[0][0]);
+
+		// only body with mass move: new for newton 3.15
+		NewtonBodySetMassProperties(body, 50.0f, box);
 
 		NewtonBodySetTransformCallback(body, DemoEntity::TransformCallback);
 		DemoMesh* const geometry = new DemoMesh("platform", scene->GetShaderCache(), box, "wood_4.tga", "wood_4.tga", "wood_1.tga");

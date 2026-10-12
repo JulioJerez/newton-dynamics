@@ -43,12 +43,9 @@
 void NewtonDestroyJoint(const NewtonWorld* const newtonWorld, const NewtonJoint* const joint)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//world->DestroyJoint((dgConstraint*)joint);
 	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
 	ndJointBilateralConstraint* const baseJoint = PointerCast<ndJointBilateralConstraint, NewtonJoint>(joint);
 	world->RemoveJoint(baseJoint);
-	delete baseJoint;
 }
 
 int NewtonJointIsActive(const NewtonJoint* const jointPtr)
@@ -237,7 +234,7 @@ void* NewtonJointGetUserData(const NewtonJoint* const joint)
 	ndSharedPtr<ndJointUserData> sharedUserData(baseJoint->GetUserData());
 	if (*sharedUserData)
 	{
-		NewtonJointUserData* const jointUserData = static_cast<NewtonJointUserData*>(*sharedUserData);
+		NewtonJointUserData* const jointUserData = PointerCast<NewtonJointUserData, ndJointUserData>(*sharedUserData);
 		return *jointUserData->m_userData;
 	}
 
