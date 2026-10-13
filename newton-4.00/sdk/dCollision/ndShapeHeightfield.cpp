@@ -198,8 +198,6 @@ void ndShapeHeightfield::CalculateMinExtend3d(const ndVector& p0, const ndVector
 	const ndVector scale(m_horizontalScale_x, ndFloat32(0.0f), m_horizontalScale_z, ndFloat32(0.0f));
 	const ndVector invScale(m_horizontalScaleInv_x, ndFloat32(0.0f), m_horizontalScaleInv_z, ndFloat32(0.0f));
 
-	//boxP0 = (invScale * (p0 - m_padding).Floor()) * scale;
-	//boxP1 = (invScale * (p1 + scale).Floor()) * scale;
 	boxP0 = (invScale * p0.Floor()) * scale;
 	boxP1 = (invScale * (p1 + scale).Ceiling()) * scale;
 

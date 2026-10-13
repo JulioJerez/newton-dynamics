@@ -10,6 +10,7 @@
 */
 
 #include "newtonStdafx.h"
+#include "NewtonUtils.h"
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
 
@@ -91,7 +92,7 @@ void ndNewtonWorld::PostUpdate(ndFloat32 timestep)
 {
 	if (m_onPostUpdate)
 	{
-		m_onPostUpdate(reinterpret_cast<NewtonWorld*>(this), timestep);
+		m_onPostUpdate(PointerCast<NewtonWorld, ndNewtonWorld>(this), timestep);
 	}
 }
 

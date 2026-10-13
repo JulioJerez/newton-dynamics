@@ -338,3 +338,28 @@ void NewtonBodySetGyroscopicTorque(const NewtonBody* const bodyPtr, int state)
 	TRACE_FUNCTION(__FUNCTION__);
 	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
+
+/*!
+  Sets the current simulation state of the specified body.
+
+  @param *bodyPtr pointer to the body to be changed.
+  @param state the new simulation state 0: disabled 1: active
+
+  @return Nothing.
+
+  See also: ::NewtonBodyGetSimulationState
+*/
+void NewtonBodySetSimulationState(const NewtonBody* const bodyPtr, const int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//dgWorld* const world = body->GetWorld();
+	//
+	//if (state) {
+	//	world->BodyEnableSimulation(body);
+	//}
+	//else {
+	//	world->BodyDisableSimulation(body);
+	//}
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
+}

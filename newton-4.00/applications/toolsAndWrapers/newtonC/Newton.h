@@ -643,7 +643,7 @@ extern "C" {
 	NEWTON_API void NewtonWorldSetCreateDestroyContactCallback(const NewtonWorld* const newtonWorld, NewtonCreateContactCallback createContact, NewtonDestroyContactCallback destroyContact);
 
 	// world listeners 
-	NEWTON_API void NewtonWorldRemoveListener(const void* const listener); // new for newton 3.15
+	NEWTON_API void NewtonWorldRemoveListener(const void* const listener);
 	NEWTON_API void* NewtonWorldAddListener(const NewtonWorld* const newtonWorld, const char* const nameId, void* const listenerUserData);
 	NEWTON_API void* NewtonWorldGetListener(const NewtonWorld* const newtonWorld, const char* const nameId);
 	NEWTON_API void NewtonWorldListenerSetDebugCallback(const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldListenerDebugCallback callback);

@@ -104,10 +104,77 @@ static void MapShapeId(const ndShapeInfo& info, NewtonCollisionInfoRecord& colli
 			collisionInfo.m_collisionTree.m_vertexCount = info.m_bvh.m_vertexCount;
 			break;
 		}
+		case m_staticProceduralMesh:
+		{
+			collisionInfo.m_collisionType = SERIALIZE_ID_USERMESH;
+			break;
+		}
+
 		default:
 			ndAssert(0);
 	}
 }
+
+class NewtonProceduralCollition : public ndShapeStaticProceduralMesh
+{
+	public:
+	D_CLASS_REFLECTION(NewtonProceduralCollitiuon, ndShapeStaticProceduralMesh)
+
+	typedef void (*NewtonUserMeshCollisionDestroyCallback) (void* const userData);
+	typedef dFloat(*NewtonUserMeshCollisionRayHitCallback) (NewtonUserMeshCollisionRayHitDesc* const lineDescData);
+	typedef void (*NewtonUserMeshCollisionGetCollisionInfo) (void* const userData, NewtonCollisionInfoRecord* const infoRecord);
+	typedef int (*NewtonUserMeshCollisionAABBTest) (void* const userData, const dFloat* const boxP0, const dFloat* const boxP1);
+	typedef void (*NewtonUserMeshCollisionCollideCallback) (NewtonUserMeshCollisionCollideDesc* const collideDescData, const void* const continueCollisionHandle);
+	typedef void (*NewtonOnUserCollisionSerializationCallback) (void* const userData, NewtonSerializeCallback function, void* const serializeHandle);
+	typedef int (*NewtonUserMeshCollisionGetFacesInAABB) (
+		void* const userData, const dFloat* const p0, const dFloat* const p1,
+		const dFloat** const vertexArray, int* const vertexCount, int* const vertexStrideInBytes,
+		const int* const indexList, int maxIndexCount, const int* const userDataList);
+
+
+	NewtonProceduralCollition(void* const userData, const ndVector& box0, const ndVector& box1)
+		:ndShapeStaticProceduralMesh()
+		,m_userData(userData)
+		,m_onDestroy(nullptr)
+		,m_box0(box0)
+		,m_box1(box1)
+	{
+	}
+
+	virtual ~NewtonProceduralCollition() override
+	{
+		ndAssert(0);
+	}
+
+
+	virtual void GetFacesPatch(ndPatchMesh& patch) const override
+	{
+		ndVector minBox;
+		ndVector maxBox;
+		if (m_onGetFacePatch && ndBoxBoxIntersection(minBox, maxBox, m_box0, m_box1, patch.m_boxP0, patch.m_boxP1))
+		{
+			ndAssert(0);
+			//patch.m_pointArray.SetCount(patch.m_pointArray.GetCapacity());
+			//patch.m_faceArray.SetCount(patch.m_pointArray.GetCapacity());
+			//m_onGetFacePatch(*m_userData, &patch.m_boxP0.m_x, &patch.m_boxP1.m_x,
+			//	&patch.m_pointArray[0].m_x, &patch.m_faceArray[0], )
+		}
+	}
+
+	ndWeakPtr<void> m_userData;
+	NewtonUserMeshCollisionDestroyCallback m_onDestroy;
+	//typedef dFloat(*NewtonUserMeshCollisionRayHitCallback) (NewtonUserMeshCollisionRayHitDesc* const lineDescData);
+	//typedef void (*NewtonUserMeshCollisionGetCollisionInfo) (void* const userData, NewtonCollisionInfoRecord* const infoRecord);
+	//typedef int (*NewtonUserMeshCollisionAABBTest) (void* const userData, const dFloat* const boxP0, const dFloat* const boxP1);
+	//typedef void (*NewtonUserMeshCollisionCollideCallback) (NewtonUserMeshCollisionCollideDesc* const collideDescData, const void* const continueCollisionHandle);
+	//typedef void (*NewtonOnUserCollisionSerializationCallback) (void* const userData, NewtonSerializeCallback function, void* const serializeHandle);
+	 
+	NewtonUserMeshCollisionCollideCallback m_onGetFacePatch;
+	//NewtonUserMeshCollisionGetFacesInAABB m_onGetFacePatch;
+
+	ndVector m_box0;
+	ndVector m_box1;
+};
 
 NewtonCollision* NewtonCollisionCreateInstance(const NewtonCollision* const collision)
 {
@@ -131,13 +198,14 @@ NewtonCollision* NewtonCollisionCreateInstance(const NewtonCollision* const coll
 void NewtonDestroyCollision(const NewtonCollision* const collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	delete reinterpret_cast<const ndShapeInstance*>(collision);
+	const ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
+	delete instance;
 }
 
 void NewtonCollisionSetUserData(const NewtonCollision* const collision, void* const userData)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	const ndShapeInstance* const instance = reinterpret_cast<const ndShapeInstance*>(collision);
+	const ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userParam[0].m_ptrData = userData;
 }
@@ -147,14 +215,14 @@ void NewtonCollisionSetMatrix(const NewtonCollision* collision, const dFloat* co
 	TRACE_FUNCTION(__FUNCTION__);
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 
-	ndMatrix matrix(GetMatrix(matrixPtr));
+	const ndMatrix matrix(GetMatrix(matrixPtr));
 	instance->SetLocalMatrix(matrix);
 }
 
 void NewtonCollisionGetMatrix(const NewtonCollision* const collision, dFloat* const matrixPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	const ndShapeInstance* const instance = reinterpret_cast<const ndShapeInstance*>(collision);
+	const ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 
 	const ndMatrix instanceMatrix(instance->GetLocalMatrix());
 	ndMemCpy(matrixPtr, &instanceMatrix[0][0], sizeof(ndMatrix) / sizeof(ndFloat32));
@@ -177,7 +245,7 @@ NewtonCollision* NewtonCreateNull(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeNull());
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 /*!
@@ -205,7 +273,7 @@ NewtonCollision* NewtonCreateBox(const NewtonWorld* const, dFloat dx, dFloat dy,
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 /*!
@@ -236,7 +304,7 @@ NewtonCollision* NewtonCreateSphere(const NewtonWorld* const, dFloat radius, int
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 /*!
@@ -263,7 +331,7 @@ NewtonCollision* NewtonCreateCone(const NewtonWorld* const,  dFloat radius, dFlo
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 /*!
@@ -293,7 +361,7 @@ NewtonCollision* NewtonCreateCapsule(const NewtonWorld* const,  dFloat radio0, d
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 /*!
@@ -321,7 +389,7 @@ NewtonCollision* NewtonCreateCylinder(const NewtonWorld* const,  dFloat radio0, 
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 /*!
@@ -348,7 +416,7 @@ NewtonCollision* NewtonCreateChamferCylinder(const NewtonWorld* const,  dFloat r
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 
@@ -401,7 +469,7 @@ NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* const,  int count, co
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 /*!
@@ -427,7 +495,7 @@ NewtonCollision* NewtonCreateConvexHullFromMesh(const NewtonWorld* const,  const
 	ndShapeInstance* const instance = meshEffect->CreateConvexCollision(tolerance);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 
@@ -480,8 +548,7 @@ NewtonCollision* NewtonCreateHeightFieldCollision(const NewtonWorld* const, int 
 	}
 	heighfield->UpdateElevationMapAabb();
 
-
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 int NewtonCollisionIsConvexShape(const NewtonCollision* const collision)
@@ -1002,11 +1069,17 @@ NewtonCollision* NewtonCreateUserMeshCollision(
 	int shapeID)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgVector p0(minBox[0], minBox[1], minBox[2], dgFloat32(1.0f));
-	//dgVector p1(maxBox[0], maxBox[1], maxBox[2], dgFloat32(1.0f));
-	//
-	//Newton* const world = (Newton*)newtonWorld;
-	//
+	const ndVector p0(minBox[0], minBox[1], minBox[2], ndFloat32(1.0f));
+	const ndVector p1(maxBox[0], maxBox[1], maxBox[2], ndFloat32(1.0f));
+	NewtonProceduralCollition* const shape = new NewtonProceduralCollition(userData, p0, p1);
+
+	shape->m_onDestroy = destroyCallback;
+	shape->m_onGetFacePatch = collideCallback;
+
+	ndShapeInstance* const instance = new ndShapeInstance(shape);
+
+	
+
 	//dgUserMeshCreation data;
 	//data.m_userData = userData;
 	//data.m_collideCallback = (dgCollisionUserMesh::OnUserMeshCollideCallback)collideCallback;
@@ -1016,13 +1089,14 @@ NewtonCollision* NewtonCreateUserMeshCollision(
 	//data.m_getAABBOvelapTestCallback = (dgCollisionUserMesh::OnUserMeshAABBOverlapTest)getAABBOverlapTestCallback;
 	//data.m_faceInAABBCallback = (dgCollisionUserMesh::OnUserMeshFacesInAABB)facesInAABBCallback;
 	//data.m_serializeCallback = (dgCollisionUserMesh::OnUserMeshSerialize)serializeCallback;
-	//
-	//
+	//ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	//dgCollisionInstance* const collision = world->CreateStaticUserMesh(p0, p1, data);
-	//collision->SetUserDataID(dgUnsigned32(shapeID));
+	//instance->SetUserDataID(dgUnsigned32(shapeID));
 	//return (NewtonCollision*)collision;
-	ndAssert(0);
-	return 0;
+
+	ndShapeMaterial material = instance->GetMaterial();
+	material.m_userId = shapeID;
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 int NewtonUserMeshCollisionContinuousOverlapTest(const NewtonUserMeshCollisionCollideDesc* const collideDescData, const void* const rayHandle, const dFloat* const minAabb, const dFloat* const maxAabb)
@@ -1063,7 +1137,6 @@ int NewtonUserMeshCollisionContinuousOverlapTest(const NewtonUserMeshCollisionCo
 void NewtonCollisionGetInfo(const NewtonCollision* const collision, NewtonCollisionInfoRecord* const collisionInfo)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	const ndShapeInfo info(instance->GetShapeInfo());
 	
@@ -1094,7 +1167,6 @@ void NewtonCollisionGetMaterial(const NewtonCollision* const collision, NewtonCo
 	//userData->m_userData.m_int = data.m_alignPad;
 	//memcpy(userData->m_userParam, data.m_userParam, sizeof(data.m_userParam));
 
-	//ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	ndShapeMaterial material = instance->GetMaterial();
 
@@ -1109,14 +1181,6 @@ void NewtonCollisionGetMaterial(const NewtonCollision* const collision, NewtonCo
 void NewtonCollisionSetMaterial(const NewtonCollision* const collision, const NewtonCollisionMaterial* const userData)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
-	//dgCollisionInfo::dgInstanceMaterial& data = instance->m_material;
-	//data.m_alignPad = userData->m_userData.m_int;
-	//data.m_userId = userData->m_userId;
-	//memcpy(data.m_userParam, userData->m_userParam, sizeof(data.m_userParam));
-	//instance->SetMaterial(data);
-
-	//ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = userData->m_userId;
