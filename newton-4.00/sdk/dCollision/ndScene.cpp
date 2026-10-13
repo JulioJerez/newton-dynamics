@@ -1716,6 +1716,18 @@ void ndScene::DeleteDeadContacts()
 			ndConstraint** constraintArray = (ndConstraint**)& m_contactArray[0];
 			ndMemCpy(&m_activeConstraintArray[0], constraintArray, m_activeConstraintArray.GetCount());
 		}
+
+		#ifdef _DEBUG
+		for (ndInt32 i = ndInt32(m_contactArray.GetCount()) - 1; i >= 0; --i)
+		{
+			ndContact* const contact = m_contactArray[i];
+			ndBodyKinematic* const body0 = contact->GetBody0()->GetAsBodyKinematic();
+			ndBodyKinematic* const body1 = contact->GetBody1()->GetAsBodyKinematic();
+			ndAssert(body0->GetContactMap().FindContact(body0, body1));
+			ndAssert(body1->GetContactMap().FindContact(body0, body1));
+		}
+		#endif	
+
 	}
 }
 
