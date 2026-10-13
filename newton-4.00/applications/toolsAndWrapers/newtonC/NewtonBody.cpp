@@ -44,12 +44,7 @@
 NewtonBody* NewtonCreateDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrixPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMatrix matrix(matrixPtr);
-	if (!CheckFloat(&matrix[0][0], 16))
-	{
-		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
-		matrix = ndGetIdentityMatrix();
-	}
+	ndMatrix matrix(GetMatrix(matrixPtr));
 
 	matrix.m_front.m_w = ndFloat32(0.0f);
 	matrix.m_up.m_w = ndFloat32(0.0f);
@@ -88,12 +83,7 @@ NewtonBody* NewtonCreateAsymetricDynamicBody(const NewtonWorld* const newtonWorl
 NewtonBody* NewtonCreateKinematicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrixPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMatrix matrix(matrixPtr);
-	if (!CheckFloat(&matrix[0][0], 16))
-	{
-		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
-		matrix = ndGetIdentityMatrix();
-	}
+	ndMatrix matrix(GetMatrix(matrixPtr));
 
 	matrix.m_front.m_w = ndFloat32(0.0f);
 	matrix.m_up.m_w = ndFloat32(0.0f);
@@ -164,30 +154,6 @@ int NewtonBodyGetSimulationState(const NewtonBody* const bodyPtr)
 	return 0;
 }
 
-/*!
-  Sets the current simulation state of the specified body.
-
-  @param *bodyPtr pointer to the body to be changed.
-  @param state the new simulation state 0: disabled 1: active
-
-  @return Nothing.
-
-  See also: ::NewtonBodyGetSimulationState
-*/
-void NewtonBodySetSimulationState(const NewtonBody* const bodyPtr, const int state)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//dgWorld* const world = body->GetWorld();
-	//
-	//if (state) {
-	//	world->BodyEnableSimulation(body);
-	//}
-	//else {
-	//	world->BodyDisableSimulation(body);
-	//}
-	ndAssert(0);
-}
 
 int NewtonBodyGetCollidable(const NewtonBody* const bodyPtr)
 {
@@ -888,12 +854,7 @@ void NewtonBodySetMatrix(const NewtonBody* const bodyPtr, const dFloat* const ma
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
-	ndMatrix matrix(matrixPtr);
-	if (!CheckFloat(&matrix[0][0], 16))
-	{
-		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
-		matrix = ndGetIdentityMatrix();
-	}
+	ndMatrix matrix(GetMatrix(matrixPtr));
 
 	matrix.m_front.m_w = ndFloat32(0.0f);
 	matrix.m_up.m_w = ndFloat32(0.0f);

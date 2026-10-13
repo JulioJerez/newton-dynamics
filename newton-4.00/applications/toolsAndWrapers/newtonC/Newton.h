@@ -23,7 +23,7 @@
 #define __NEWTON_H__
 
 #define NEWTON_MAJOR_VERSION 3 
-#define NEWTON_MINOR_VERSION 14 
+#define NEWTON_MINOR_VERSION 15 
 
 #if defined(_MSC_VER)
 	#define DG_LIBRARY_EXPORT __declspec(dllexport)
@@ -643,7 +643,7 @@ extern "C" {
 	NEWTON_API void NewtonWorldSetCreateDestroyContactCallback(const NewtonWorld* const newtonWorld, NewtonCreateContactCallback createContact, NewtonDestroyContactCallback destroyContact);
 
 	// world listeners 
-	NEWTON_API void NewtonWorldRemoveListener(const void* const listener); // new for newton 3.15
+	NEWTON_API void NewtonWorldRemoveListener(const void* const listener);
 	NEWTON_API void* NewtonWorldAddListener(const NewtonWorld* const newtonWorld, const char* const nameId, void* const listenerUserData);
 	NEWTON_API void* NewtonWorldGetListener(const NewtonWorld* const newtonWorld, const char* const nameId);
 	NEWTON_API void NewtonWorldListenerSetDebugCallback(const NewtonWorld* const newtonWorld, void* const listener, NewtonWorldListenerDebugCallback callback);

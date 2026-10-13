@@ -264,5 +264,28 @@ class ndBodySentinel : public ndBodyKinematic
 	virtual ndBodySentinel* GetAsBodySentinel() override;
 };
 
+class ndQuerieBody : public ndBodyKinematic
+{
+	public:
+	virtual void SetCollisionShape(const ndShapeInstance& instance) override
+	{
+		m_shapeInstance.m_ownerBody = this;
+		m_shapeInstance.m_globalMatrix = instance.m_globalMatrix;
+		m_shapeInstance.m_localMatrix = instance.m_localMatrix;
+		m_shapeInstance.m_alignmentMatrix = instance.m_alignmentMatrix;
+		m_shapeInstance.m_scale = instance.m_scale;
+		m_shapeInstance.m_invScale = instance.m_invScale;
+		m_shapeInstance.m_maxScale = instance.m_maxScale;
+		m_shapeInstance.m_scaleType = instance.m_scaleType;
+		m_shapeInstance.m_shapeMaterial = instance.m_shapeMaterial;
+		m_shapeInstance.m_skinMargin = instance.m_skinMargin;
+		m_shapeInstance.m_collisionMode = instance.m_collisionMode;
+		m_shapeInstance.m_ownerBody = instance.m_ownerBody;
+		m_shapeInstance.m_subCollisionHandle = instance.m_subCollisionHandle;
+		m_shapeInstance.SetShape(const_cast<ndShape*>(reinterpret_cast<const ndShape*>(instance.GetShape())));
+	}
+};
+
+
 #endif 
 

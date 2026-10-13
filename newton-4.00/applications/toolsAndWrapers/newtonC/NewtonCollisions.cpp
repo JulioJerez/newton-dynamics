@@ -104,10 +104,199 @@ static void MapShapeId(const ndShapeInfo& info, NewtonCollisionInfoRecord& colli
 			collisionInfo.m_collisionTree.m_vertexCount = info.m_bvh.m_vertexCount;
 			break;
 		}
+		case m_staticProceduralMesh:
+		{
+			collisionInfo.m_collisionType = SERIALIZE_ID_USERMESH;
+			break;
+		}
+
 		default:
 			ndAssert(0);
 	}
 }
+
+class NewtonProceduralCollition : public ndShapeStaticProceduralMesh
+{
+	public:
+	D_CLASS_REFLECTION(NewtonProceduralCollitiuon, ndShapeStaticProceduralMesh)
+
+	typedef void (*NewtonUserMeshCollisionDestroyCallback) (void* const userData);
+	typedef dFloat(*NewtonUserMeshCollisionRayHitCallback) (NewtonUserMeshCollisionRayHitDesc* const lineDescData);
+	typedef void (*NewtonUserMeshCollisionGetCollisionInfo) (void* const userData, NewtonCollisionInfoRecord* const infoRecord);
+	typedef int (*NewtonUserMeshCollisionAABBTest) (void* const userData, const dFloat* const boxP0, const dFloat* const boxP1);
+	typedef void (*NewtonUserMeshCollisionCollideCallback) (NewtonUserMeshCollisionCollideDesc* const collideDescData, const void* const continueCollisionHandle);
+	typedef void (*NewtonOnUserCollisionSerializationCallback) (void* const userData, NewtonSerializeCallback function, void* const serializeHandle);
+	typedef int (*NewtonUserMeshCollisionGetFacesInAABB) (
+		void* const userData, const dFloat* const p0, const dFloat* const p1,
+		const dFloat** const vertexArray, int* const vertexCount, int* const vertexStrideInBytes,
+		const int* const indexList, int maxIndexCount, const int* const userDataList);
+
+
+	NewtonProceduralCollition(void* const userData, const ndVector& box0, const ndVector& box1)
+		:ndShapeStaticProceduralMesh()
+		,m_userData(userData)
+		,m_onDestroy(nullptr)
+		,m_box0(box0)
+		,m_box1(box1)
+	{
+		m_boxSize = (m_box1 - m_box0) * ndVector::m_half;
+		m_boxOrigin = (m_box1 + m_box0) * ndVector::m_half;
+	}
+
+	virtual ~NewtonProceduralCollition() override
+	{
+		if (m_onDestroy)
+		{
+			m_onDestroy(PointerCast<void, void>(*m_userData));
+		}
+	}
+
+	virtual void CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) const override
+	{
+		ndAssert(0);
+	}
+
+	virtual void GetFacesPatch(ndPatchMesh& patch) const override
+	{
+		ndVector minBox;
+		ndVector maxBox;
+		if (m_onGetFacePatch && ndBoxBoxIntersection(minBox, maxBox, m_box0, m_box1, patch.m_boxP0, patch.m_boxP1))
+		{
+			NewtonUserMeshCollisionCollideDesc collideDescData;
+			//typedef struct NewtonUserMeshCollisionCollideDesc
+			//{
+			//	int	m_faceCount;                        	// the application should set here how many polygons intersect the query box
+			//	int m_vertexStrideInBytes;              	// the application should set here the size of each vertex
+			//	dFloat m_skinThickness;                     // this is the minimum skin separation specified by the material between these two colliding shapes
+			//	void* m_userData;                       	// user data passed to the collision geometry at creation time
+			//
+			//	NewtonBody* m_objBody;                  	// pointer to the colliding body
+			//	NewtonBody* m_polySoupBody;             	// pointer to the rigid body owner of this collision tree 
+			//	NewtonCollision* m_objCollision;			// collision shape of the colliding body, (no necessarily the collision of m_objBody)
+			//	NewtonCollision* m_polySoupCollision;		// collision shape of the collision tree, (no necessarily the collision of m_polySoupBody)
+			//
+			//	dFloat* m_vertex;                       	// the application should set here the pointer to the global vertex of the mesh. 
+			//	int* m_faceIndexCount;                  	// the application should set here the pointer to the vertex count of each face.
+			//	int* m_faceVertexIndex;                 	// the application should set here the pointer index array for each vertex on a face.
+			//	// the format of a face is I0, I1, I2, I3, ..., M, N, E0, E1, E2, ..., A
+			//	// I0, I1, I2, .. are the indices to the vertex, relative to m_vertex pointer
+			//	// M is the index to the material sub shape id
+			//	// N in the index to the vertex normal relative to m_vertex pointer
+			//	// E0, E1, E2, ... are the indices of the the face normal that is shared to that face edge, when the edge does not share a face normal then the edge index is set to index N, which the index to the face normal    
+			//	// A is and estimate of the largest diagonal of the face, this used internally as a hint to improve floating point accuracy and algorithm performance. 
+			//} NewtonUserMeshCollisionCollideDesc;
+
+			ndMemSet(PointerCast<char, NewtonUserMeshCollisionCollideDesc>(&collideDescData), char(0), sizeof(NewtonUserMeshCollisionCollideDesc));
+			for (ndInt32 i = 0; i < 4; ++i)
+			{
+				collideDescData.m_boxP0[i] = minBox[i];
+				collideDescData.m_boxP1[i] = maxBox[i];
+				collideDescData.m_boxDistanceTravel[i] = ndFloat32(0.0f);
+			}
+			collideDescData.m_threadNumber = 0;
+			collideDescData.m_userData = PointerCast<void,void>(*m_userData);
+			collideDescData.m_skinThickness = ndFloat32(0.0f);
+
+			collideDescData.m_objBody = nullptr;                  	// pointer to the colliding body
+			collideDescData.m_polySoupBody = nullptr;             	// pointer to the rigid body owner of this collision tree 
+			collideDescData.m_polySoupCollision = nullptr;		// collision shape of the collision tree, (no necessarily the collision of m_polySoupBody)
+			collideDescData.m_objCollision = PointerCast<NewtonCollision, ndShapeInstance>(patch.m_convexShapeInstance);
+			m_onGetFacePatch(&collideDescData, nullptr);
+			if (collideDescData.m_faceCount)
+			{
+				if (patch.m_queryType == patch.m_vertexListOnly)
+				{
+					patch.m_pointArray.PushBack(ndVector::m_zero);
+				}
+				else
+				{
+					// the application should set here the pointer index array for each vertex on a face.
+					//int* m_faceVertexIndex;                 	
+					//the format of a face is I0, I1, I2, I3, ..., M, N, E0, E1, E2, ..., A
+					//I0, I1, I2, .. are the indices to the vertex, relative to m_vertex pointer
+					//M is the index to the material sub shape id
+					//N in the index to the vertex normal relative to m_vertex pointer
+					//E0, E1, E2, ... are the indices of the the face normal that is shared to that face edge, when the edge does not share a face normal then the edge index is set to index N, which the index to the face normal    
+					//A is and estimate of the largest diagonal of the face, this used internally as a hint to improve floating point accuracy and algorithm performance. 
+
+					ndInt32 faceIndex = 0;
+					patch.m_vertexArrayHasDuplicated = true;
+					const ndFloat32* const vertex = collideDescData.m_vertex;
+					const ndInt32* const indexArray = collideDescData.m_faceVertexIndex;
+					const ndInt32* const facesIndexArray = collideDescData.m_faceIndexCount;
+					const ndInt32 stride = collideDescData.m_vertexStrideInBytes / sizeof(ndFloat32);
+					for (ndInt32 i = 0; i < collideDescData.m_faceCount; ++i)
+					{
+						const ndInt32 indexCount = facesIndexArray[i];
+						patch.m_faceArray.PushBack(indexCount);
+						patch.m_faceMaterialArray.PushBack(indexArray[faceIndex + indexCount]);
+
+						ndInt32 n = stride * indexArray[faceIndex + indexCount + 1];
+						const ndVector normal(vertex[n + 0], vertex[n + 1], vertex[n + 2], ndFloat32(0.0f));
+						patch.m_normalArray.PushBack(normal);
+						for (ndInt32 j = 0; j < indexCount; ++j)
+						{
+							ndInt32 k = stride * indexArray[faceIndex + j];
+							const ndVector point(vertex[k + 0], vertex[k + 1], vertex[k + 2], ndFloat32(1.0f));
+							patch.m_indexArray.PushBack(patch.m_pointArray.GetCount());
+							patch.m_pointArray.PushBack(point);
+						}
+						faceIndex += 2 * (indexCount + 1);
+					}
+				}
+			}
+		}
+	}
+
+	virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const
+	{
+		if (m_onRaycast)
+		{
+			//typedef struct NewtonUserMeshCollisionRayHitDesc
+			//{
+			//	dFloat m_p0[4];							// ray origin in collision local space
+			//	dFloat m_p1[4];                         // ray destination in collision local space   
+			//	dFloat m_normalOut[4];					// copy here the normal at the ray intersection
+			//	dLong m_userIdOut;						// copy here a user defined id for further feedback  
+			//	void* m_userData;                       // user data passed to the collision geometry at creation time
+			//} NewtonUserMeshCollisionRayHitDesc;
+
+			NewtonUserMeshCollisionRayHitDesc desc;
+			desc.m_userData = PointerCast<void, void>(*m_userData);
+			for (ndInt32 i = 0; i < 4; ++i)
+			{
+				desc.m_p0[i] = localP0[i];
+				desc.m_p1[i] = localP1[i];
+			}
+
+			ndFloat32 param = m_onRaycast(&desc);
+			if (param < ndFloat32(1.0f))
+			{
+				contactOut.m_shapeId0 = desc.m_userIdOut;
+				contactOut.m_normal.m_x = desc.m_normalOut[0];
+				contactOut.m_normal.m_y = desc.m_normalOut[1];
+				contactOut.m_normal.m_z = desc.m_normalOut[2];
+				contactOut.m_normal.m_w = ndFloat32 (0.0f);
+			}
+			return param;
+		}
+		return ndFloat32 (1.2f);
+	}
+
+
+	ndWeakPtr<void> m_userData;
+	NewtonUserMeshCollisionRayHitCallback m_onRaycast;
+	NewtonUserMeshCollisionDestroyCallback m_onDestroy;
+	NewtonUserMeshCollisionCollideCallback m_onGetFacePatch;
+
+	//typedef void (*NewtonUserMeshCollisionGetCollisionInfo) (void* const userData, NewtonCollisionInfoRecord* const infoRecord);
+	//typedef int (*NewtonUserMeshCollisionAABBTest) (void* const userData, const dFloat* const boxP0, const dFloat* const boxP1);
+	//typedef void (*NewtonUserMeshCollisionCollideCallback) (NewtonUserMeshCollisionCollideDesc* const collideDescData, const void* const continueCollisionHandle);
+	//typedef void (*NewtonOnUserCollisionSerializationCallback) (void* const userData, NewtonSerializeCallback function, void* const serializeHandle);
+
+	ndVector m_box0;
+	ndVector m_box1;
+};
 
 NewtonCollision* NewtonCollisionCreateInstance(const NewtonCollision* const collision)
 {
@@ -131,13 +320,14 @@ NewtonCollision* NewtonCollisionCreateInstance(const NewtonCollision* const coll
 void NewtonDestroyCollision(const NewtonCollision* const collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	delete reinterpret_cast<const ndShapeInstance*>(collision);
+	const ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
+	delete instance;
 }
 
 void NewtonCollisionSetUserData(const NewtonCollision* const collision, void* const userData)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	const ndShapeInstance* const instance = reinterpret_cast<const ndShapeInstance*>(collision);
+	const ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userParam[0].m_ptrData = userData;
 }
@@ -145,22 +335,16 @@ void NewtonCollisionSetUserData(const NewtonCollision* const collision, void* co
 void NewtonCollisionSetMatrix(const NewtonCollision* collision, const dFloat* const matrixPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 
-	ndMatrix matrix(matrixPtr);
-	if (!CheckFloat(&matrix[0][0], 16))
-	{
-		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
-		matrix = ndGetIdentityMatrix();
-	}
+	const ndMatrix matrix(GetMatrix(matrixPtr));
 	instance->SetLocalMatrix(matrix);
 }
 
 void NewtonCollisionGetMatrix(const NewtonCollision* const collision, dFloat* const matrixPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	const ndShapeInstance* const instance = reinterpret_cast<const ndShapeInstance*>(collision);
+	const ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 
 	const ndMatrix instanceMatrix(instance->GetLocalMatrix());
 	ndMemCpy(matrixPtr, &instanceMatrix[0][0], sizeof(ndMatrix) / sizeof(ndFloat32));
@@ -183,7 +367,7 @@ NewtonCollision* NewtonCreateNull(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeNull());
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 /*!
@@ -211,7 +395,7 @@ NewtonCollision* NewtonCreateBox(const NewtonWorld* const, dFloat dx, dFloat dy,
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 /*!
@@ -242,7 +426,7 @@ NewtonCollision* NewtonCreateSphere(const NewtonWorld* const, dFloat radius, int
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 /*!
@@ -269,7 +453,7 @@ NewtonCollision* NewtonCreateCone(const NewtonWorld* const,  dFloat radius, dFlo
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 /*!
@@ -299,7 +483,7 @@ NewtonCollision* NewtonCreateCapsule(const NewtonWorld* const,  dFloat radio0, d
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 /*!
@@ -327,7 +511,7 @@ NewtonCollision* NewtonCreateCylinder(const NewtonWorld* const,  dFloat radio0, 
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 /*!
@@ -354,7 +538,7 @@ NewtonCollision* NewtonCreateChamferCylinder(const NewtonWorld* const,  dFloat r
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 
@@ -407,7 +591,7 @@ NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* const,  int count, co
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 /*!
@@ -433,7 +617,7 @@ NewtonCollision* NewtonCreateConvexHullFromMesh(const NewtonWorld* const,  const
 	ndShapeInstance* const instance = meshEffect->CreateConvexCollision(tolerance);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 
@@ -486,8 +670,7 @@ NewtonCollision* NewtonCreateHeightFieldCollision(const NewtonWorld* const, int 
 	}
 	heighfield->UpdateElevationMapAabb();
 
-
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 int NewtonCollisionIsConvexShape(const NewtonCollision* const collision)
@@ -648,17 +831,6 @@ int NewtonCollisionPointDistance(const NewtonWorld* const newtonWorld, const dFl
 	return 0;
 }
 
-
-int NewtonCollisionIntersectionTest(const NewtonWorld* const newtonWorld, const NewtonCollision* const collisionA, const dFloat* const matrixA, const NewtonCollision* const collisionB, const dFloat* const matrixB, int threadIndex)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//return world->IntersectionTest((dgCollisionInstance*)collisionA, dgMatrix(matrixA),
-	//	(dgCollisionInstance*)collisionB, dgMatrix(matrixB),
-	//	threadIndex) ? 1 : 0;
-	ndAssert(0);
-	return 0;
-}
 
 /*!
   Calculate time of impact of impact and contact points between two collision primitive.
@@ -861,41 +1033,7 @@ dFloat NewtonConvexCollisionCalculateVolume(const NewtonCollision* const convexC
 	//return collision->GetVolume();
 	ndAssert(0);
 	return 0;
-
 }
-
-
-/*!
-  Calculate the three principal axis and the the values of the inertia matrix of a convex collision objects.
-
-  @param convexCollision is the pointer to a convex collision primitive.
-  @param *inertia pointer to and array of a least 3 floats to hold the values of the principal inertia.
-  @param *origin pointer to and array of a least 3 floats to hold the values of the center of mass for the principal inertia.
-
-  This function calculate a general inertial matrix for arbitrary convex collision including compound collisions.
-
-  See also: ::NewtonBodySetMassMatrix, ::NewtonBodyGetMass, ::NewtonBodySetCentreOfMass, ::NewtonBodyGetCentreOfMass
-*/
-void NewtonConvexCollisionCalculateInertialMatrix(const NewtonCollision* convexCollision, dFloat* const inertia, dFloat* const origin)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const collision = (dgCollisionInstance*)convexCollision;
-	//
-	////	dgVector tmpInertia;
-	////	dgVector tmpOringin;
-	////	collision->CalculateInertia(tmpInertia, tmpOringin);
-	//dgMatrix tmpInertia(collision->CalculateInertia());
-	//
-	//inertia[0] = tmpInertia[0][0];
-	//inertia[1] = tmpInertia[1][1];
-	//inertia[2] = tmpInertia[2][2];
-	//origin[0] = tmpInertia[3][0];
-	//origin[1] = tmpInertia[3][1];
-	//origin[2] = tmpInertia[3][2];
-
-	ndAssert(0);
-}
-
 
 /*!
   Add buoyancy force and torque for bodies immersed in a fluid.
@@ -1053,11 +1191,16 @@ NewtonCollision* NewtonCreateUserMeshCollision(
 	int shapeID)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgVector p0(minBox[0], minBox[1], minBox[2], dgFloat32(1.0f));
-	//dgVector p1(maxBox[0], maxBox[1], maxBox[2], dgFloat32(1.0f));
-	//
-	//Newton* const world = (Newton*)newtonWorld;
-	//
+	const ndVector p0(minBox[0], minBox[1], minBox[2], ndFloat32(1.0f));
+	const ndVector p1(maxBox[0], maxBox[1], maxBox[2], ndFloat32(1.0f));
+	NewtonProceduralCollition* const shape = new NewtonProceduralCollition(userData, p0, p1);
+
+	shape->m_onRaycast = rayHitCallback;
+	shape->m_onDestroy = destroyCallback;
+	shape->m_onGetFacePatch = collideCallback;
+
+	ndShapeInstance* const instance = new ndShapeInstance(shape);
+
 	//dgUserMeshCreation data;
 	//data.m_userData = userData;
 	//data.m_collideCallback = (dgCollisionUserMesh::OnUserMeshCollideCallback)collideCallback;
@@ -1067,13 +1210,14 @@ NewtonCollision* NewtonCreateUserMeshCollision(
 	//data.m_getAABBOvelapTestCallback = (dgCollisionUserMesh::OnUserMeshAABBOverlapTest)getAABBOverlapTestCallback;
 	//data.m_faceInAABBCallback = (dgCollisionUserMesh::OnUserMeshFacesInAABB)facesInAABBCallback;
 	//data.m_serializeCallback = (dgCollisionUserMesh::OnUserMeshSerialize)serializeCallback;
-	//
-	//
+	//ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	//dgCollisionInstance* const collision = world->CreateStaticUserMesh(p0, p1, data);
-	//collision->SetUserDataID(dgUnsigned32(shapeID));
+	//instance->SetUserDataID(dgUnsigned32(shapeID));
 	//return (NewtonCollision*)collision;
-	ndAssert(0);
-	return 0;
+
+	ndShapeMaterial material = instance->GetMaterial();
+	material.m_userId = shapeID;
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 int NewtonUserMeshCollisionContinuousOverlapTest(const NewtonUserMeshCollisionCollideDesc* const collideDescData, const void* const rayHandle, const dFloat* const minAabb, const dFloat* const maxAabb)
@@ -1114,7 +1258,6 @@ int NewtonUserMeshCollisionContinuousOverlapTest(const NewtonUserMeshCollisionCo
 void NewtonCollisionGetInfo(const NewtonCollision* const collision, NewtonCollisionInfoRecord* const collisionInfo)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	const ndShapeInfo info(instance->GetShapeInfo());
 	
@@ -1145,7 +1288,6 @@ void NewtonCollisionGetMaterial(const NewtonCollision* const collision, NewtonCo
 	//userData->m_userData.m_int = data.m_alignPad;
 	//memcpy(userData->m_userParam, data.m_userParam, sizeof(data.m_userParam));
 
-	//ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	ndShapeMaterial material = instance->GetMaterial();
 
@@ -1160,14 +1302,6 @@ void NewtonCollisionGetMaterial(const NewtonCollision* const collision, NewtonCo
 void NewtonCollisionSetMaterial(const NewtonCollision* const collision, const NewtonCollisionMaterial* const userData)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
-	//dgCollisionInfo::dgInstanceMaterial& data = instance->m_material;
-	//data.m_alignPad = userData->m_userData.m_int;
-	//data.m_userId = userData->m_userId;
-	//memcpy(data.m_userParam, userData->m_userParam, sizeof(data.m_userParam));
-	//instance->SetMaterial(data);
-
-	//ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = userData->m_userId;
@@ -1218,4 +1352,30 @@ void NewtonCollisionSetMode(const NewtonCollision* const collision, int mode)
 	TRACE_FUNCTION(__FUNCTION__);
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	instance->SetCollisionMode(mode ? true : false);
+}
+
+
+/*!
+  Calculate the three principal axis and the the values of the inertia matrix of a convex collision objects.
+
+  @param convexCollision is the pointer to a convex collision primitive.
+  @param *inertia pointer to and array of a least 3 floats to hold the values of the principal inertia.
+  @param *origin pointer to and array of a least 3 floats to hold the values of the center of mass for the principal inertia.
+
+  This function calculate a general inertial matrix for arbitrary convex collision including compound collisions.
+
+  See also: ::NewtonBodySetMassMatrix, ::NewtonBodyGetMass, ::NewtonBodySetCentreOfMass, ::NewtonBodyGetCentreOfMass
+*/
+void NewtonConvexCollisionCalculateInertialMatrix(const NewtonCollision* const convexCollision, dFloat* const inertia, dFloat* const origin)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(convexCollision);
+	const ndMatrix tmpInertia(instance->CalculateInertia());
+	
+	inertia[0] = tmpInertia[0][0];
+	inertia[1] = tmpInertia[1][1];
+	inertia[2] = tmpInertia[2][2];
+	origin[0] = tmpInertia[3][0];
+	origin[1] = tmpInertia[3][1];
+	origin[2] = tmpInertia[3][2];
 }

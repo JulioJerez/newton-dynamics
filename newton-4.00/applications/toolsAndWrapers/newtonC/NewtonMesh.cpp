@@ -159,15 +159,6 @@ NewtonMesh* NewtonMeshLoadTetrahedraMesh(const NewtonWorld* const, const char* c
 	return 0;
 }
 
-void NewtonMeshApplyTransform(const NewtonMesh* const mesh, const dFloat* const matrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//
-	//meshEffect->ApplyTransform(dgMatrix(matrix));
-	ndAssert(0);
-}
-
 void NewtonMeshFlipWinding(const NewtonMesh* const mesh)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -322,14 +313,6 @@ void NewtonMeshAddBinormal(const NewtonMesh* const mesh, dFloat x, dFloat y, dFl
 	TRACE_FUNCTION(__FUNCTION__);
 	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
 	//meshEffect->AddBinormal(x, y, z);
-	ndAssert(0);
-}
-
-void NewtonMeshAddUV0(const NewtonMesh* const mesh, dFloat u, dFloat v)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//meshEffect->AddUV0(u, v);
 	ndAssert(0);
 }
 
@@ -1216,12 +1199,7 @@ void NewtonMeshMaterialGetIndexStream(const NewtonMesh* const mesh, void* const 
 void NewtonMeshApplySphericalMapping(const NewtonMesh* const mesh, int material, const dFloat* const aligmentMatrix)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMatrix matrix(aligmentMatrix);
-	if (!CheckFloat(&matrix[0][0], 16))
-	{
-		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
-		matrix = ndGetIdentityMatrix();
-	}
+	ndMatrix matrix(GetMatrix(aligmentMatrix));
 	 
 	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	meshEffect->SphericalMapping(material, matrix);
@@ -1230,12 +1208,7 @@ void NewtonMeshApplySphericalMapping(const NewtonMesh* const mesh, int material,
 void NewtonMeshApplyBoxMapping(const NewtonMesh* const mesh, int front, int side, int top, const dFloat* const aligmentMatrix)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMatrix matrix(aligmentMatrix);
-	if (!CheckFloat(&matrix[0][0], 16))
-	{
-		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
-		matrix = ndGetIdentityMatrix();
-	}
+	ndMatrix matrix(GetMatrix(aligmentMatrix));
 
 	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	meshEffect->BoxMapping(front, side, top, matrix);
@@ -1244,12 +1217,7 @@ void NewtonMeshApplyBoxMapping(const NewtonMesh* const mesh, int front, int side
 void NewtonMeshApplyCylindricalMapping(const NewtonMesh* const mesh, int cylinderMaterial, int capMaterial, const dFloat* const aligmentMatrix)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMatrix matrix(aligmentMatrix);
-	if (!CheckFloat(&matrix[0][0], 16))
-	{
-		ndExpandTraceMessage(("uninitialized matrix, setting to identity\n"));
-		matrix = ndGetIdentityMatrix();
-	}
+	ndMatrix matrix(GetMatrix(aligmentMatrix));
 
 	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	//meshEffect->CylindricalMapping(cylinderMaterial, capMaterial, matrix);
@@ -1260,8 +1228,6 @@ void NewtonMeshApplyCylindricalMapping(const NewtonMesh* const mesh, int cylinde
 int NewtonMeshHasNormalChannel(const NewtonMesh* const mesh)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//return meshEffect->HasNormalChannel() ? 1 : 0;
 	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	const ndMeshEffect::ndAttibuteFormat& attibutes = meshEffect->GetVertexAtributes();
 	return attibutes.m_normalChannel.GetCount() ? 1 : 0;
@@ -1270,8 +1236,6 @@ int NewtonMeshHasNormalChannel(const NewtonMesh* const mesh)
 int NewtonMeshHasUV0Channel(const NewtonMesh* const mesh)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//return meshEffect->HasUV0Channel() ? 1 : 0;
 	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	const ndMeshEffect::ndAttibuteFormat& attibutes = meshEffect->GetVertexAtributes();
 	return attibutes.m_uv0Channel.GetCount() ? 1 : 0;
@@ -1299,4 +1263,20 @@ int NewtonMeshHasVertexColorChannel(const NewtonMesh* const mesh)
 	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	const ndMeshEffect::ndAttibuteFormat& attibutes = meshEffect->GetVertexAtributes();
 	return attibutes.m_colorChannel.GetCount() ? 1 : 0;
+}
+
+void NewtonMeshApplyTransform(const NewtonMesh* const mesh, const dFloat* const matrixPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+
+	ndMatrix matrix(GetMatrix(matrixPtr));
+	meshEffect->ApplyTransform(matrix);
+}
+
+void NewtonMeshAddUV0(const NewtonMesh* const mesh, dFloat u, dFloat v)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	meshEffect->AddUV0(u, v);
 }

@@ -255,8 +255,8 @@ class ndShape: public ndContainersFreeListAlloc<ndShape>
 	virtual ndUnsigned64 GetHash(ndUnsigned64 hash = 0) const;
 
 	virtual ndVector SupportVertex(const ndVector& dir) const = 0;
-	virtual ndVector SupportVertexSpecial(const ndVector& dir, ndFloat32 skinMargin) const = 0;
 	virtual void CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) const = 0;
+	virtual ndVector SupportVertexSpecial(const ndVector& dir, ndFloat32 skinMargin) const = 0;
 	virtual ndVector SupportVertexSpecialProjectPoint(const ndVector& point, const ndVector& dir) const = 0;
 	virtual ndInt32 CalculatePlaneIntersection(const ndVector& normal, const ndVector& point, ndVector* const contactsOut) const = 0;
 	virtual ndVector CalculateVolumeIntegral(const ndMatrix& globalMatrix, const ndVector& globalPlane, const ndShapeInstance& parentScale) const = 0;
