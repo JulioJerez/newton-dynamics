@@ -41,8 +41,8 @@
 //#define DEFAULT_SCENE	6		// primitive collision
 //#define DEFAULT_SCENE	7		// kinematic bodies
 //#define DEFAULT_SCENE	8		// Object Placement
-#define DEFAULT_SCENE	9		// primitive convex cast 
-//#define DEFAULT_SCENE	10		// box stacks
+//#define DEFAULT_SCENE	9		// primitive convex cast 
+#define DEFAULT_SCENE	10		// box stacks
 //#define DEFAULT_SCENE	11		// simple level mesh collision
 //#define DEFAULT_SCENE	12		// optimized level mesh collision
 //#define DEFAULT_SCENE	13		// height field Collision
@@ -248,7 +248,10 @@ DemoEntityManager::DemoEntityManager ()
 
 	m_hasJoytick = glfwJoystickPresent(0) ?  true : false;
 
-	m_mainFrame = glfwCreateWindow(1280, 720, "Newton Game Dynamics 3.14 demos", NULL, NULL);
+	int version = NewtonWorldGetVersion();
+	char title[256];
+	sprintf(title, "Newton Game Dynamics %d.%d demos", version / 100, version % 100);
+	m_mainFrame = glfwCreateWindow(1280, 720, title, NULL, NULL);
 	glfwMakeContextCurrent(m_mainFrame);
 
 	int monitorsCount;
@@ -918,7 +921,8 @@ void DemoEntityManager::LoadDemo(int menu)
 	char newTitle[256];
 	Cleanup();
 	m_demosSelection[menu].m_launchDemoCallback(this);
-	sprintf(newTitle, "Newton Game Dynamics 3.14 demo: %s", m_demosSelection[menu].m_name);
+	int version = NewtonWorldGetVersion();
+	sprintf(newTitle, "Newton Game Dynamics %d.%d demo: %s", version / 100, version % 100, m_demosSelection[menu].m_name);
 	glfwSetWindowTitle(m_mainFrame, newTitle);
 	ApplyMenuOptions();
 	ResetTimer();
