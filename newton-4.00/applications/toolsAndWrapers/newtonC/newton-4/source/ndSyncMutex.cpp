@@ -50,8 +50,9 @@ void ndSyncMutex::Release()
 {
 #ifndef D_USE_THREAD_EMULATION
 	std::unique_lock<std::mutex> lock(m_mutex);
-	m_count = (m_count >= 0) ? m_count - 1 : 0;
-	m_condition.notify_one();
+	m_count = (m_count > 0) ? m_count - 1 : 0;
+	//m_condition.notify_one();
+	m_condition.notify_all();
 #endif
 }
 

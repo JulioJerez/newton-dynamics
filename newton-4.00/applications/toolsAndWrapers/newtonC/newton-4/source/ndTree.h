@@ -357,7 +357,7 @@ typename ndTree<OBJECT, KEY, allocator>::ndNode* ndTree<OBJECT, KEY, allocator>:
 template<class OBJECT, class KEY, class allocator>
 typename ndTree<OBJECT, KEY, allocator>::ndNode* ndTree<OBJECT, KEY, allocator>::Maximum () const
 {
-	return m_head ? static_cast<ndNode*>m_head->Maximum() : nullptr;
+	return m_head ? static_cast<ndNode*>(m_head->Maximum()) : nullptr;
 }
 
 template<class OBJECT, class KEY, class allocator>

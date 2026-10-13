@@ -1688,6 +1688,18 @@ void ndScene::DeleteDeadContacts()
 		ND_PROFILE_ZONE();
 		ndContact** const tmpJointsArray = (ndContact**)&m_scratchBuffer[0];
 		ndCountingSort<ndContact*, ndJointActive, 2>(*this, tmpJointsArray, &m_contactArray[0], ndInt32(m_contactArray.GetCount()), prefixScan, nullptr);
+
+#ifdef _DEBUG
+		for (ndInt32 i = ndInt32(m_contactArray.GetCount()) - 1; i >= 0; --i)
+		{
+			ndContact* const contact = m_contactArray[i];
+			ndBodyKinematic* const body0 = contact->GetBody0()->GetAsBodyKinematic();
+			ndBodyKinematic* const body1 = contact->GetBody1()->GetAsBodyKinematic();
+			ndAssert(body0->GetContactMap().FindContact(body0, body1) == contact);
+			ndAssert(body1->GetContactMap().FindContact(body0, body1) == contact);
+		}
+#endif	
+
 		if (prefixScan[m_dead + 1] != prefixScan[m_dead])
 		{
 			auto DeleteContactArray = ndMakeObject::ndFunction([this, &prefixScan](ndInt32 groupId, ndInt32, ndInt32)
