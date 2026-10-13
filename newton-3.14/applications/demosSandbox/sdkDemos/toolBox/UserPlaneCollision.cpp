@@ -197,6 +197,7 @@ class dInfinitePlane
 			rayDesc->m_normalOut[0] = me->m_plane[0];
 			rayDesc->m_normalOut[1] = me->m_plane[1];
 			rayDesc->m_normalOut[2] = me->m_plane[2];
+			rayDesc->m_userIdOut = 0;
 		} else {
 			t = 1.2f;
 		}
