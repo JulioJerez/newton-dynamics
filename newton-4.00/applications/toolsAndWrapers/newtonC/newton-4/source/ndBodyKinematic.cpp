@@ -754,7 +754,13 @@ bool ndBodyKinematic::RayCast(ndRayCastNotify& callback, const ndFastRay& ray, n
 						contactOut.m_body1 = this;
 						contactOut.m_point = p;
 						contactOut.m_normal = globalMatrix.RotateVector(contactOut.m_normal);
-						state = callback.OnRayCastAction(contactOut, t) < ndFloat32 (1.0f);
+						const ndFloat32 param = callback.OnRayCastAction(contactOut, t);
+						if (param < maxT)
+						{
+							callback.m_param = param;
+							callback.m_contact = contactOut;
+						}
+						state = param < ndFloat32 (1.0f);
 					}
 				}
 			}

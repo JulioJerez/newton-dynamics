@@ -802,22 +802,6 @@ ndJointBilateralConstraint* ndScene::FindBilateralJoint(ndBodyKinematic* const b
 	return nullptr;
 }
 
-//void ndScene::FindCollidingPairs(ndBodyKinematic* const body, ndInt32 threadId)
-//{
-//	ndBvhLeafNode* const bodyNode = m_bvhSceneManager.GetLeafNode(body);
-//	ndAssert(bodyNode->GetAsSceneBodyNode());
-//	for (ndBvhNode* ptr = bodyNode; ptr->m_parent; ptr = ptr->m_parent)
-//	{
-//		ndBvhInternalNode* const parent = ptr->m_parent->GetAsSceneTreeNode();
-//		ndAssert(!parent->GetAsSceneBodyNode());
-//		ndBvhNode* const sibling = parent->m_right;
-//		if (sibling != ptr)
-//		{
-//			SubmitPairs(bodyNode, sibling, true, threadId);
-//		}
-//	}
-//}
-
 void ndScene::FindCollidingPairsForward(ndBodyKinematic* const body, ndInt32 threadId)
 {
 	ndBvhLeafNode* const bodyNode = m_bvhSceneManager.GetLeafNode(body);

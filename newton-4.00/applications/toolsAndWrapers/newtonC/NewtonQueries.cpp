@@ -293,13 +293,21 @@ void NewtonCollisionForEachPolygonDo(const NewtonCollision* const collision, con
 
 		virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceVertex, const ndEdgeType* const) override
 		{
-			m_callback(m_userData, vertexCount, &faceVertex[0].m_x, 0);
+			ndFixSizeArray<ndFloat32, 256> face;
+			for (ndInt32 i = 0; i < vertexCount; ++i)
+			{
+				face.PushBack(faceVertex[i].m_x);
+				face.PushBack(faceVertex[i].m_y);
+				face.PushBack(faceVertex[i].m_z);
+			}
+			m_callback(m_userData, vertexCount, &face[0], 0);
 		}
 
 		void* const m_userData;
 		NewtonCollisionIterator m_callback;
 	};
 	ndDrawShape debugShape(callback, userData);
+	instance->DebugShape(matrix, debugShape);
 }
 
 /*!

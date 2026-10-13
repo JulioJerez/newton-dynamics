@@ -23,7 +23,7 @@
 #define __NEWTON_H__
 
 #define NEWTON_MAJOR_VERSION 3 
-#define NEWTON_MINOR_VERSION 14 
+#define NEWTON_MINOR_VERSION 15 
 
 #if defined(_MSC_VER)
 	#define DG_LIBRARY_EXPORT __declspec(dllexport)
