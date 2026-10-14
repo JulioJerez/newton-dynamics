@@ -104,6 +104,23 @@ static void MapShapeId(const ndShapeInfo& info, NewtonCollisionInfoRecord& colli
 			collisionInfo.m_collisionTree.m_vertexCount = info.m_bvh.m_vertexCount;
 			break;
 		}
+
+		case m_heightField:
+		{
+			collisionInfo.m_collisionType = SERIALIZE_ID_HEIGHTFIELD;
+			collisionInfo.m_heightField.m_width = info.m_heightfield.m_width;
+			collisionInfo.m_heightField.m_height = info.m_heightfield.m_height;
+			collisionInfo.m_heightField.m_gridsDiagonals = info.m_heightfield.m_gridsDiagonals;
+			//collisionInfo.m_heightField.m_elevationDataType = 0info.m_heightfield.m_elevationDataType;
+			collisionInfo.m_heightField.m_elevationDataType = 0;
+			collisionInfo.m_heightField.m_verticalScale = ndFloat32 (1.0f);
+			collisionInfo.m_heightField.m_horizonalScale_x = info.m_heightfield.m_horizonalScale_x;
+			collisionInfo.m_heightField.m_horizonalScale_z = info.m_heightfield.m_horizonalScale_z;
+			collisionInfo.m_heightField.m_atributes = PointerCast<char, ndInt8>(info.m_heightfield.m_atributes);
+			collisionInfo.m_heightField.m_vertialElevation = PointerCast<float, ndReal>(info.m_heightfield.m_elevation);
+			break;
+		}
+
 		case m_staticProceduralMesh:
 		{
 			collisionInfo.m_collisionType = SERIALIZE_ID_USERMESH;
@@ -653,20 +670,25 @@ NewtonCollision* NewtonCreateHeightFieldCollision(const NewtonWorld* const, int 
 	ndArray<ndReal>& heightMap = heighfield->GetElevationMap();
 	ndArray<ndInt8>& materialMap = heighfield->GetAttributeMap();
 
-	ndAssert(0);
 	if (elevationdatType)
 	{
-		const ndReal* const elevations = reinterpret_cast<const ndReal*>(elevationMap);
+		const ndUnsigned16* const elevations = PointerCast<ndUnsigned16, void>(elevationMap);
 		for (ndInt32 i = 0; i < heightMap.GetCount(); ++i)
 		{
-			ndFloat32 high = elevations[i];
+			ndFloat32 high = ndFloat32(elevations[i]) * verticalScale;
 			heightMap[i] = ndReal(high);
 			materialMap[i] = attributeMap[i];
 		}
 	}
 	else
 	{
-		ndAssert(0);
+		const ndReal* const elevations = PointerCast<ndReal, void>(elevationMap);
+		for (ndInt32 i = 0; i < heightMap.GetCount(); ++i)
+		{
+			ndFloat32 high = elevations[i];
+			heightMap[i] = ndReal(high);
+			materialMap[i] = attributeMap[i];
+		}
 	}
 	heighfield->UpdateElevationMapAabb();
 
@@ -939,38 +961,6 @@ dFloat NewtonCollisionRayCast(const NewtonCollision* const collisionPtr, const d
 	ndAssert(0);
 	return 0;
 
-}
-
-/*!
-  Calculate an axis-aligned bounding box for this collision, the box is calculated relative to *offsetMatrix*.
-
-  @param *collisionPtr pointer to the collision object.
-  @param *offsetMatrix pointer to an array of 16 floats containing the offset matrix used as the coordinate system and center of the AABB.
-  @param  *p0 - pointer to an array of at least three floats to hold minimum value for the AABB.
-  @param  *p1 - pointer to an array of at least three floats to hold maximum value for the AABB.
-
-  @return Nothing.
-
-  See also: ::NewtonCollisionClosestPoint, ::NewtonCollisionPointDistance, ::NewtonCollisionCollide, ::NewtonCollisionRayCast
-*/
-void NewtonCollisionCalculateAABB(const NewtonCollision* const collisionPtr, const dFloat* const offsetMatrix, dFloat* const p0, dFloat* const p1)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const collision = (dgCollisionInstance*)collisionPtr;
-	//dgMatrix matrix(collision->GetLocalMatrix() * dgMatrix(offsetMatrix));
-	//
-	//dgVector q0;
-	//dgVector q1;
-	//
-	//collision->CalcAABB(matrix, q0, q1);
-	//p0[0] = q0.m_x;
-	//p0[1] = q0.m_y;
-	//p0[2] = q0.m_z;
-	//
-	//p1[0] = q1.m_x;
-	//p1[1] = q1.m_y;
-	//p1[2] = q1.m_z;
-	ndAssert(0);
 }
 
 int NewtonConvexHullGetVertexData(const NewtonCollision* const convexHullCollision, dFloat** const vertexData, int* strideInBytes)
@@ -1378,4 +1368,34 @@ void NewtonConvexCollisionCalculateInertialMatrix(const NewtonCollision* const c
 	origin[0] = tmpInertia[3][0];
 	origin[1] = tmpInertia[3][1];
 	origin[2] = tmpInertia[3][2];
+}
+
+/*!
+  Calculate an axis-aligned bounding box for this collision, the box is calculated relative to *offsetMatrix*.
+
+  @param *collisionPtr pointer to the collision object.
+  @param *offsetMatrix pointer to an array of 16 floats containing the offset matrix used as the coordinate system and center of the AABB.
+  @param  *p0 - pointer to an array of at least three floats to hold minimum value for the AABB.
+  @param  *p1 - pointer to an array of at least three floats to hold maximum value for the AABB.
+
+  @return Nothing.
+
+  See also: ::NewtonCollisionClosestPoint, ::NewtonCollisionPointDistance, ::NewtonCollisionCollide, ::NewtonCollisionRayCast
+*/
+void NewtonCollisionCalculateAABB(const NewtonCollision* const collisionPtr, const dFloat* const offsetMatrix, dFloat* const p0, dFloat* const p1)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collisionPtr);
+	ndMatrix matrix(instance->GetLocalMatrix() * GetMatrix(offsetMatrix));
+	
+	ndVector q0;
+	ndVector q1;
+	instance->CalculateAabb(matrix, q0, q1);
+	p0[0] = q0.m_x;
+	p0[1] = q0.m_y;
+	p0[2] = q0.m_z;
+	
+	p1[0] = q1.m_x;
+	p1[1] = q1.m_y;
+	p1[2] = q1.m_z;
 }
