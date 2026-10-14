@@ -29,9 +29,9 @@ string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" PROCESSOR_ARCH)
 if (PROCESSOR_ARCH  MATCHES "(x86)|(X86)|(amd64)|(AMD64)")
 	message ("x86-64 processor detected")
 
-	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}  /Zi /Od /fp:fast /march=skylake /arch:AVX2")
-	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}  /Gy /Zi /GS /Ox /Oi /Ot /Ob2 /Oy /Qpar /fp:fast /march=skylake /arch:AVX2")
-	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE}  /Zi /O2 /Qpar /fp:fast /march=skylake /arch:AVX2")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}  /Zi /Od /fp:fast /arch:AVX2")
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}  /Gy /Zi /GS /Ox /Oi /Ot /Ob2 /Oy /Qpar /fp:fast /arch:AVX2")
+	set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO}  /Zi /O2 /Qpar /fp:fast /arch:AVX2")
 endif()
 
 # source and header files
