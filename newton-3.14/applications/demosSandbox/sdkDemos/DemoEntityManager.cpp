@@ -42,12 +42,12 @@
 //#define DEFAULT_SCENE	7		// kinematic bodies
 //#define DEFAULT_SCENE	8		// Object Placement
 //#define DEFAULT_SCENE	9		// primitive convex cast 
-#define DEFAULT_SCENE	10		// box stacks
+//#define DEFAULT_SCENE	10		// box stacks
 //#define DEFAULT_SCENE	11		// simple level mesh collision
 //#define DEFAULT_SCENE	12		// optimized level mesh collision
 //#define DEFAULT_SCENE	13		// height field Collision
 //#define DEFAULT_SCENE	14		// infinite user plane collision
-//#define DEFAULT_SCENE	15		// user height field Collision
+#define DEFAULT_SCENE	15		// user height field Collision
 //#define DEFAULT_SCENE	16		// compound Collision
 //#define DEFAULT_SCENE	17		// simple Archimedes buoyancy
 //#define DEFAULT_SCENE	18		// uniform Scaled Collision
