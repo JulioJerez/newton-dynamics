@@ -139,14 +139,10 @@ if(UNIX)
 		set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -Wno-unused-cli ")
 	endif()
 
-	if (X86 AND NEWTON_ENABLE_AVX2)
-		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -march=skylake ")
-		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=skylake ")
-		set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -march=skylake ")
-	endif()
-
-	if (X86 AND NOT EMSCRIPTEN)
-		add_compile_options(-msse3)
+	if (X86 AND NEWTON_ENABLE_AVX2 AND(CMAKE_CXX_COMPILER_ID STREQUAL "Clang"))
+		set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -march=alderlake ")
+		set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -march=alderlake ")
+		set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -march=alderlake ")
 	endif()
 
 	include("GNUInstallDirs")
@@ -225,8 +221,6 @@ if (MSVC)
 	set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} ${CMAKE_WARNINGS} /Zi /Od")
 
 elseif(MINGW)
-	add_compile_options(-msse3)
-
 	if(CMAKE_CL_64)
 		message("build 64 bit")
 	else()
