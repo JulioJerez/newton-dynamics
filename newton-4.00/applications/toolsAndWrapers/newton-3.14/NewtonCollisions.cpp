@@ -945,44 +945,6 @@ dFloat NewtonConvexCollisionCalculateVolume(const NewtonCollision* const convexC
 	return 0;
 }
 
-/*!
-  Add buoyancy force and torque for bodies immersed in a fluid.
-
-  @param convexCollision fixme
-  @param matrix fixme
-  @param fluidPlane fixme
-  @param centerOfBuoyancy fixme
-
-  @return Nothing.
-
-  This function is only effective when called from *NewtonApplyForceAndTorque callback*
-
-  This function adds buoyancy force and torque to a body when it is immersed in a fluid.
-  The force is calculated according to Archimedes Buoyancy Principle. When the parameter *buoyancyPlane* is set to NULL, the body is considered
-  to completely immersed in the fluid. This can be used to simulate boats and lighter than air vehicles etc..
-
-  If *buoyancyPlane* return 0 buoyancy calculation for this collision primitive is ignored, this could be used to filter buoyancy calculation
-  of compound collision geometry with different IDs.
-
-  See also: ::NewtonConvexCollisionCalculateVolume
-*/
-//void NewtonConvexCollisionCalculateBuoyancyAcceleration (const NewtonCollision* const convexCollision, const dFloat* const matrix, const dFloat* const shapeOrigin, const dFloat* const gravityVector, const dFloat* const fluidPlane, dFloat fluidDensity, dFloat* const accel, dFloat* const alpha)
-dFloat NewtonConvexCollisionCalculateBuoyancyVolume(const NewtonCollision* const convexCollision, const dFloat* const matrix, const dFloat* const fluidPlane, dFloat* const centerOfBuoyancy)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)convexCollision;
-	//dgVector plane(fluidPlane[0], fluidPlane[1], fluidPlane[2], fluidPlane[3]);
-	//
-	//dgVector com(instance->CalculateBuoyancyVolume(dgMatrix(matrix), plane));
-	//centerOfBuoyancy[0] = com[0];
-	//centerOfBuoyancy[1] = com[1];
-	//centerOfBuoyancy[2] = com[2];
-	//return com.m_w;
-
-	ndAssert(0);
-	return 0;
-}
-
 const void* NewtonCollisionDataPointer(const NewtonCollision* const convexCollision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -992,8 +954,6 @@ const void* NewtonCollisionDataPointer(const NewtonCollision* const convexCollis
 	ndAssert(0);
 	return 0;
 }
-
-
 
 /*!
   Serialize a general collision shape.
@@ -1346,4 +1306,50 @@ NewtonCollision* NewtonCollisionCreateInstance(const NewtonCollision* const coll
 	TRACE_FUNCTION(__FUNCTION__);
 	ndShapeInstance* const instance = new ndShapeInstance(*PointerCast<ndShapeInstance, NewtonCollision>(collision));
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
+}
+
+/*!
+  Add buoyancy force and torque for bodies immersed in a fluid.
+
+  @param convexCollision fixme
+  @param matrix fixme
+  @param fluidPlane fixme
+  @param centerOfBuoyancy fixme
+
+  @return Nothing.
+
+  This function is only effective when called from *NewtonApplyForceAndTorque callback*
+
+  This function adds buoyancy force and torque to a body when it is immersed in a fluid.
+  The force is calculated according to Archimedes Buoyancy Principle. When the parameter *buoyancyPlane* is set to NULL, the body is considered
+  to completely immersed in the fluid. This can be used to simulate boats and lighter than air vehicles etc..
+
+  If *buoyancyPlane* return 0 buoyancy calculation for this collision primitive is ignored, this could be used to filter buoyancy calculation
+  of compound collision geometry with different IDs.
+
+  See also: ::NewtonConvexCollisionCalculateVolume
+*/
+//void NewtonConvexCollisionCalculateBuoyancyAcceleration (const NewtonCollision* const convexCollision, const dFloat* const matrix, const dFloat* const shapeOrigin, const dFloat* const gravityVector, const dFloat* const fluidPlane, dFloat fluidDensity, dFloat* const accel, dFloat* const alpha)
+dFloat NewtonConvexCollisionCalculateBuoyancyVolume(const NewtonCollision* const convexCollision, const dFloat* const matrixPtr, const dFloat* const fluidPlane, dFloat* const centerOfBuoyancy)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgCollisionInstance* const instance = (dgCollisionInstance*)convexCollision;
+	ndShapeInstance* const instance = new ndShapeInstance(*PointerCast<ndShapeInstance, NewtonCollision>(convexCollision));
+	const ndVector plane(fluidPlane[0], fluidPlane[1], fluidPlane[2], fluidPlane[3]);
+	
+	//dgVector com(instance->CalculateBuoyancyVolume(dgMatrix(matrix), plane));
+	//centerOfBuoyancy[0] = com[0];
+	//centerOfBuoyancy[1] = com[1];
+	//centerOfBuoyancy[2] = com[2];
+	//return com.m_w;
+
+	const ndMatrix matrix(GetMatrix(matrixPtr));
+
+	ndVector com;
+	ndFloat32 volume = instance->CalculateBuoyancyCenterOfPresure(com, matrix, plane);
+	centerOfBuoyancy[0] = com[0];
+	centerOfBuoyancy[1] = com[1];
+	centerOfBuoyancy[2] = com[2];
+	com.m_w = ndFloat32(0.0f);
+	return volume;
 }
