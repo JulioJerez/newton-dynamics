@@ -26,7 +26,6 @@
 #include "newtonMaterial.h"
 #include "newtonBodyNotify.h"
 
-
 class NewtonCollisionTree : public ndShapeStatic_bvh
 {
 	public:
@@ -234,7 +233,7 @@ NewtonCollision* NewtonCreateTreeCollision(const NewtonWorld* const, int shapeID
 
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 NewtonCollision* NewtonCreateTreeCollisionFromMesh(const NewtonWorld* const, const NewtonMesh* const mesh, int shapeID)
@@ -246,7 +245,7 @@ NewtonCollision* NewtonCreateTreeCollisionFromMesh(const NewtonWorld* const, con
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
 
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 

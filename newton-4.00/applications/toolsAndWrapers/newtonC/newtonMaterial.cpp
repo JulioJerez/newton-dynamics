@@ -45,9 +45,11 @@ bool ndNewtonMaterial::OnAabbOverlap(const ndBodyKinematic* const, const ndBodyK
 
 bool ndNewtonMaterial::OnAabbOverlap(const ndContact* const contact, ndFloat32 timestep, const ndShapeInstance& instance0, const ndShapeInstance& instance1) const
 {
-	if (m_onSubShapeAABBOverlap)
+	if (m_onSubShapeAABBOverlap && (instance0.m_subCollisionHandle || instance1.m_subCollisionHandle))
 	{
-		ndAssert(0);
+		NewtonBody* const body0 = PointerCast<NewtonBody, ndBodyKinematic>(contact->GetBody0());
+		NewtonBody* const body1 = PointerCast<NewtonBody, ndBodyKinematic>(contact->GetBody1());
+		return m_onSubShapeAABBOverlap(PointerCast<NewtonJoint, ndContact>(contact), timestep, body0, *instance0.m_subCollisionHandle, body1, *instance1.m_subCollisionHandle, 0);
 	}
 	else if (m_onAABBOverlap)
 	{

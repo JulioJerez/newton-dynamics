@@ -4418,7 +4418,8 @@ NewtonBody* NewtonCreateKinematicBody(const NewtonWorld* const newtonWorld, cons
 	return body;
 }
 
-NewtonBody* NewtonCreateTriggerVolume(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix)
+NewtonBody* NewtonCreateTriggerVolume(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix,
+	NewtonTriggerEnterVolume onEnter, NewtonTriggerExitVolume onExit, NewtonTriggerInVolume onTrigger)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	dgTrace(("warning: %s is a newton-4.00 unsupported feature, returnnimng a kinematic body\n "));

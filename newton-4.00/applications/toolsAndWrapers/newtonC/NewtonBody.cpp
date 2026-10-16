@@ -110,7 +110,7 @@ NewtonBody* NewtonCreateKinematicBody(const NewtonWorld* const newtonWorld, cons
 	kinBody->SetCollisionShape(instance);
 	kinBody->SetNotifyCallback(bodyNotify);
 	world->AddBody(body);
-	return PointerCast<NewtonBody, ndBodyKinematic>(kinBody); ;
+	return PointerCast<NewtonBody, ndBodyKinematic>(kinBody);
 }
 
 /*!
@@ -126,13 +126,19 @@ NewtonBody* NewtonCreateKinematicBody(const NewtonWorld* const newtonWorld, cons
 
   See also: ::NewtonCreateDynamicBody
 */
-void NewtonDestroyBody(const NewtonBody* const bodyPtr)
+void NewtonDestroyBody(const NewtonBody* const body)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//dgWorld* const world = body->GetWorld();
-	//world->DestroyBody(body);
+	ndBodyKinematic* const kinBody = PointerCast<ndBodyKinematic, NewtonBody>(body);
+	ndBodyListView::ndNode* node = kinBody->GetSceneNode();
+	if (node)
+	{
+		//dgBody* const body = (dgBody*)bodyPtr;
+		//dgWorld* const world = body->GetWorld();
+		//world->DestroyBody(body);
+		ndWorld* const world = kinBody->GetScene()->GetWorld();
+		world->RemoveBody(kinBody);
+	}
 }
 
 /*!
@@ -719,14 +725,14 @@ void NewtonBodyApplyImpulsePair(const NewtonBody* const bodyPtr, dFloat* const l
 
   See also: ::NewtonBodyGetUserData
 */
-void  NewtonBodySetUserData(const NewtonBody* const bodyPtr, void* const userDataPtr)
+void  NewtonBodySetUserData(const NewtonBody* const bodyPtr, void* const userData)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 
 	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
 	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
-	bodyNotify->m_userData = ndWeakPtr<void>(userDataPtr);
+	bodyNotify->m_userData = ndWeakPtr<void>(userData);
 }
 
 /*!
@@ -1520,13 +1526,13 @@ int NewtonBodyGetType(const NewtonBody* const bodyPtr)
 	{
 		return NEWTON_DYNAMIC_BODY;
 	}
+	else if (body->IsType(ndBodyTriggerVolume::StaticClassName()))
+	{
+		return NEWTON_TRIGGER_VOLUME;
+	}
 	else if (body->IsType(ndBodyKinematic::StaticClassName()))
 	{
 		return NEWTON_KINEMATIC_BODY;
-	}
-	else
-	{
-		ndAssert(0);
 	}
 	return 0;
 }

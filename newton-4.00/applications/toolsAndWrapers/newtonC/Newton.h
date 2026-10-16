@@ -74,6 +74,8 @@ extern "C" {
 	#define NEWTON_DYNAMIC_BODY								0
 	#define NEWTON_KINEMATIC_BODY							1
 	#define NEWTON_DYNAMIC_ASYMETRIC_BODY					2
+	//new in 3.15
+	#define NEWTON_TRIGGER_VOLUME							3 
 
 	#define SERIALIZE_ID_SPHERE								0
 	#define SERIALIZE_ID_CAPSULE							1
@@ -564,6 +566,10 @@ extern "C" {
 	typedef void (*NewtonWorldUpdateListenerCallback) (const NewtonWorld* const world, void* const listenerUserData, dFloat timestep);
 	typedef void (*NewtonWorldDestroyListenerCallback) (const NewtonWorld* const world, void* const listenerUserData);
 
+	// trigger volumes are Newton 4.0 backported to newton 3.15
+	typedef void (*NewtonTriggerEnterVolume)(const NewtonBody* const trigger, const NewtonBody* const body, dFloat timestep);
+	typedef void (*NewtonTriggerExitVolume)(const NewtonBody* const trigger, const NewtonBody* const body, dFloat timestep);
+	typedef void (*NewtonTriggerInVolume)(const NewtonBody* const trigger, const NewtonBody* const body, const NewtonJoint* const joint, dFloat timestep);
 
 	NEWTON_API void* NewtonAlloc(int sizeInBytes);
 	NEWTON_API void NewtonFree(void* const ptr);
@@ -1060,6 +1066,11 @@ extern "C" {
 	NEWTON_API NewtonBody* NewtonCreateKinematicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix);
 	NEWTON_API NewtonBody* NewtonCreateAsymetricDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix);
 	NEWTON_API void NewtonDestroyBody(const NewtonBody* const body);
+
+	// new for  newton3.15
+	NEWTON_API NewtonBody* NewtonCreateTriggerVolume(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix,
+		NewtonTriggerEnterVolume enterVolume, NewtonTriggerExitVolume onExit, NewtonTriggerInVolume onTrigger);
+
 
 	NEWTON_API void* NewtonBodyGetUserData(const NewtonBody* const body);
 	NEWTON_API void NewtonBodySetMaterialGroupID(const NewtonBody* const body, int id);
