@@ -280,6 +280,7 @@ void DemoCameraManager::UpdatePickBody(DemoEntityManager* const scene, bool mous
 		} else {
 			if (m_pickJoint) {
 				delete m_pickJoint;
+				m_pickJoint = NULL;
 			}
 			ResetPickBody();
 		}
