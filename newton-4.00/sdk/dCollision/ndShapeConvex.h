@@ -47,7 +47,8 @@ class ndShapeConvex: public ndShape
 	D_COLLISION_API ndShapeConvex (ndShapeID id);
 	D_COLLISION_API ~ndShapeConvex () override;
 
-	virtual ndShapeConvex* GetAsShapeConvex()  override { return this; }
+	D_COLLISION_API virtual ndShapeConvex* GetAsShapeConvex() override;
+	D_COLLISION_API virtual ndShape* Clone(ndShapeInstance* const parent) const override;
 
 	D_COLLISION_API void SetVolumeAndCG();
 	D_COLLISION_API virtual void MassProperties() override;
@@ -64,7 +65,7 @@ class ndShapeConvex: public ndShape
 	D_COLLISION_API virtual ndMatrix CalculateInertiaAndCenterOfMass(const ndMatrix& alignMatrix, const ndVector& localScale, const ndMatrix& matrix) const override;
 	D_COLLISION_API virtual ndFloat32 CalculateMassProperties(const ndMatrix& offset, ndVector& inertia, ndVector& crossInertia, ndVector& centerOfMass) const override;
 	D_COLLISION_API virtual ndVector CalculateVolumeIntegral(const ndMatrix& globalMatrix, const ndVector& globalPlane, const ndShapeInstance& parentScale) const override;
-	D_COLLISION_API virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const override;
+	D_COLLISION_API virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut, ndShapeInstance* const owner) const override;
 
 	bool SanityCheck(ndPolyhedra& hull) const;
 	bool SanityCheck(ndInt32 count, const ndVector& normal, ndVector* const contactsOut) const;

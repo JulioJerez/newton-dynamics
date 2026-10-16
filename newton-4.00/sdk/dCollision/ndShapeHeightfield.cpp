@@ -321,7 +321,7 @@ ndFloat32 ndShapeHeightfield::RayCastCell(const ndFastRay& ray, ndInt32 xIndex0,
 	return t;
 }
 
-ndFloat32 ndShapeHeightfield::RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const, ndContactPoint& contactOut) const
+ndFloat32 ndShapeHeightfield::RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const, ndContactPoint& contactOut, ndShapeInstance* const) const
 {
 	ndVector boxP0;
 	ndVector boxP1;

@@ -40,8 +40,7 @@ bool ndConvexCastNotify::CastShape(const ndShapeInstance& castingInstance, const
 		ndMemSet(&contactBuffer[0], zeroPoint, D_MAX_CONTATCS);
 	#endif
 
-	ndQuerieBody body0;
-	body0.SetCollisionShape(castingInstance);
+	ndQuerieBody body0(castingInstance);
 	body0.SetMatrix(globalOrigin);
 	body0.SetMassMatrix(ndVector::m_one);
 	body0.SetVelocity(ndVector::m_triplexMask & (globalDest - globalOrigin.m_posit));

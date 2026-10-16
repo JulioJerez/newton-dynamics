@@ -214,6 +214,11 @@ ndShapeStaticMesh::~ndShapeStaticMesh()
 {
 }
 
+ndShape* ndShapeStaticMesh::Clone(ndShapeInstance* const) const
+{
+	return const_cast<ndShapeStaticMesh*>(this);
+}
+
 ndFloat32 ndShapeStaticMesh::GetVolume() const
 {
 	return ndFloat32(0.0f);
@@ -272,7 +277,7 @@ void ndShapeStaticMesh::DebugShape(const ndMatrix&, ndShapeDebugNotify&) const
 {
 }
 
-ndFloat32 ndShapeStaticMesh::RayCast(ndRayCastNotify&, const ndVector&, const ndVector&, ndFloat32, const ndBody* const, ndContactPoint&) const
+ndFloat32 ndShapeStaticMesh::RayCast(ndRayCastNotify&, const ndVector&, const ndVector&, ndFloat32, const ndBody* const, ndContactPoint&, ndShapeInstance* const) const
 {
 	return ndFloat32(1.2f);
 }

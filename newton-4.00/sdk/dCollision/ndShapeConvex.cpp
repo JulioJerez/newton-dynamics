@@ -58,6 +58,16 @@ ndShapeConvex::~ndShapeConvex()
 	}
 }
 
+ndShape* ndShapeConvex::Clone(ndShapeInstance* const) const
+{
+	return const_cast<ndShapeConvex*>(this);
+}
+
+ndShapeConvex* ndShapeConvex::GetAsShapeConvex()
+{ 
+	return this; 
+}
+
 void ndShapeConvex::DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& debugCallback) const
 {
 	ndVector tmp[D_MAX_EDGE_COUNT];
@@ -236,13 +246,14 @@ void ndShapeConvex::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector
 	p1 = (origin + size) & ndVector::m_triplexMask;
 }
 
-ndFloat32 ndShapeConvex::RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32, const ndBody* const body, ndContactPoint& contactOut) const
+ndFloat32 ndShapeConvex::RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32, const ndBody* const body, ndContactPoint& contactOut, ndShapeInstance* const owner) const
 {
 	const ndBodyKinematic* const kinBody = const_cast<ndBody*>(body)->GetAsBodyKinematic();
-	ndShapeInstance tempInstance (kinBody->GetCollisionShape(), const_cast<ndShapeConvex*>(this));
+	ndAssert(*((*owner).m_shape) == this);
+	ndShapeInstance tempInstance(kinBody->GetCollisionShape(), (*owner).m_shape);
 	ndContactNotify* const notify = kinBody->GetScene() ? *kinBody->GetScene()->GetContactNotify() : nullptr;
 	ndContactSolver rayCaster(&tempInstance, notify, ndFloat32 (1.0f), 0);
-	return rayCaster.RayCast(localP0, localP1, contactOut);
+	return rayCaster.RayCast(localP0 & ndVector::m_triplexMask, localP1 & ndVector::m_triplexMask, contactOut);
 }
 
 ndVector ndShapeConvex::SupportVertex(const ndVector& dir) const
@@ -251,7 +262,6 @@ ndVector ndShapeConvex::SupportVertex(const ndVector& dir) const
 	ndAssert(ndAbs(dir.DotProduct(dir).GetScalar() - ndFloat32(1.0f)) < ndFloat32(1.0e-3f));
 
 	ndInt16 cache[16];
-	//memset(cache, -1, sizeof(cache));
 	ndMemSet(cache, ndInt16(-1), 16);
 	ndConvexSimplexEdge* edge = &m_simplex[0];
 

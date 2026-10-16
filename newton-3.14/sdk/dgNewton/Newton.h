@@ -24,9 +24,7 @@
 
 
 #define NEWTON_MAJOR_VERSION 3 
-#define NEWTON_MINOR_VERSION 15
-
-//#include <dgTypes.h>
+#define NEWTON_MINOR_VERSION 14
 
 #if defined(_MSC_VER)
 	#define DG_LIBRARY_EXPORT __declspec(dllexport)
@@ -442,6 +440,11 @@ extern "C" {
 
 	typedef void (*NewtonJobTask) (NewtonWorld* const world, void* const userData, int threadIndex);
 	typedef int (*NewtonReportProgress) (dFloat normalizedProgressPercent, void* const userData);
+
+	// trigger volumes are Newton 4.0 backported to newton 3.15
+	typedef void (*NewtonTriggerEnterVolume)(const NewtonBody* const trigger, const NewtonBody* const body, dFloat timestep);
+	typedef void (*NewtonTriggerExitVolume)(const NewtonBody* const trigger, const NewtonBody* const body, dFloat timestep);
+	typedef void (*NewtonTriggerInVolume)(const NewtonBody* const trigger, const NewtonBody* const body, const NewtonJoint* const joint, dFloat timestep);
 
 	// **********************************************************************************************
 	//
@@ -888,8 +891,11 @@ extern "C" {
 	NEWTON_API NewtonBody* NewtonCreateDynamicBody (const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix);
 	NEWTON_API NewtonBody* NewtonCreateKinematicBody (const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix);
 	NEWTON_API NewtonBody* NewtonCreateAsymetricDynamicBody(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix);
-
 	NEWTON_API void NewtonDestroyBody(const NewtonBody* const body);
+
+	// trigger volumes are Newton 4.0 backported to newton 3.15
+	NEWTON_API NewtonBody* NewtonCreateTriggerVolume(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix,
+		NewtonTriggerEnterVolume onEnter, NewtonTriggerExitVolume onExit, NewtonTriggerInVolume onTrigger);
 
 	NEWTON_API int NewtonBodyGetSimulationState(const NewtonBody* const body);
 	NEWTON_API void NewtonBodySetSimulationState(const NewtonBody* const bodyPtr, const int state);

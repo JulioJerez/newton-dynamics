@@ -79,10 +79,10 @@ class ndShapeMaterial
 	ndShapeMaterial()
 		:m_userId(0)
 	{
-		m_data.m_alignPad = 0;
+		m_data.m_userData = nullptr;
 		for (ndInt32 i = 0; i < ndInt32 (sizeof(m_userParam) / sizeof(m_userParam[0])); ++i)
 		{
-			m_userParam[i].m_intData = 0;
+			m_userParam[i].m_ptrData = nullptr;
 		}
 	}
 
@@ -90,7 +90,8 @@ class ndShapeMaterial
 	union nData
 	{
 		void* m_userData;
-		ndUnsigned64 m_alignPad;
+		ndFloat32 m_floatData;
+		ndUnsigned64 m_intData;
 	} m_data;
 
 	union ndExtraData
@@ -215,10 +216,6 @@ class ndShape: public ndContainersFreeListAlloc<ndShape>
 	D_BASE_CLASS_REFLECTION(ndShape)
 	D_COLLISION_API virtual ~ndShape();
 
-	D_COLLISION_API ndInt32 GetRefCount() const;
-	D_COLLISION_API virtual ndInt32 Release() const;
-	D_COLLISION_API virtual const ndShape* AddRef() const;
-
 	virtual ndShapeBox* GetAsShapeBox() { return nullptr; }
 	virtual ndShapeNull* GetAsShapeNull() { return nullptr; }
 	virtual ndShapeCone* GetAsShapeCone() { return nullptr; }
@@ -260,23 +257,23 @@ class ndShape: public ndContainersFreeListAlloc<ndShape>
 	virtual ndVector SupportVertexSpecialProjectPoint(const ndVector& point, const ndVector& dir) const = 0;
 	virtual ndInt32 CalculatePlaneIntersection(const ndVector& normal, const ndVector& point, ndVector* const contactsOut) const = 0;
 	virtual ndVector CalculateVolumeIntegral(const ndMatrix& globalMatrix, const ndVector& globalPlane, const ndShapeInstance& parentScale) const = 0;
-	virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const = 0;
+	virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut, ndShapeInstance* const owner) const = 0;
 	virtual void DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& debugCallback) const = 0;
 	
 	protected:
 	D_COLLISION_API ndShape(ndShapeID id);
 	D_COLLISION_API ndShape (const ndShape& source);
+	D_COLLISION_API virtual ndShape* Clone(ndShapeInstance* const parent = nullptr) const;
 
 	ndVector m_inertia;
 	ndVector m_crossInertia;
 	ndVector m_centerOfMass;
 	ndVector m_boxSize;
 	ndVector m_boxOrigin;
-
-	mutable ndAtomic<ndInt32> m_refCount;
 	ndShapeID m_collisionId;
 	ndClassPadding m_padding;
 
+	friend class ndShapeInstance;
 	static ndVector m_flushZero;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 

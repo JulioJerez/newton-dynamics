@@ -83,8 +83,7 @@ ndInt32 ndShapeUserDefinedImplicit::CalculatePlaneIntersection(const ndVector& n
 	return 1;
 }
 
-//ndFloat32 ndShapeUserDefinedImplicit::RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const, ndContactPoint& contactOut) const
-ndFloat32 ndShapeUserDefinedImplicit::RayCast(ndRayCastNotify&, const ndVector&, const ndVector&, ndFloat32, const ndBody* const, ndContactPoint&) const
+ndFloat32 ndShapeUserDefinedImplicit::RayCast(ndRayCastNotify&, const ndVector&, const ndVector&, ndFloat32, const ndBody* const, ndContactPoint&, ndShapeInstance* const) const
 {
 	ndAssert(0);
 	return 0.0f;

@@ -32,8 +32,9 @@ class ndShapeNull : public ndShape
 	D_CLASS_REFLECTION(ndShapeNull, ndShape)
 	D_COLLISION_API ndShapeNull();
 	D_COLLISION_API virtual ~ndShapeNull() override;
-
+	
 	D_COLLISION_API virtual ndShapeNull* GetAsShapeNull() override;
+	D_COLLISION_API virtual ndShape* Clone(ndShapeInstance* const owner) const override;
 
 	D_COLLISION_API virtual ndFloat32 GetVolume() const override;
 	D_COLLISION_API virtual ndShapeInfo GetShapeInfo() const override;
@@ -47,7 +48,7 @@ class ndShapeNull : public ndShape
 	D_COLLISION_API virtual ndVector SupportVertexSpecial(const ndVector& dir, ndFloat32 skinMargin) const override;
 	D_COLLISION_API virtual ndInt32 CalculatePlaneIntersection(const ndVector& normal, const ndVector& point, ndVector* const contactsOut) const override;
 	D_COLLISION_API virtual ndVector CalculateVolumeIntegral(const ndMatrix& globalMatrix, const ndVector& globalPlane, const ndShapeInstance& parentScale) const override;
-	D_COLLISION_API virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const override;
+	D_COLLISION_API virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut, ndShapeInstance* const owner) const override;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif 

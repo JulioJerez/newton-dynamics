@@ -43,11 +43,11 @@ ndShapeConvexPolygon::~ndShapeConvexPolygon ()
 {
 }
 
-ndInt32 ndShapeConvexPolygon::Release() const
-{
-	ndInt32 count = m_refCount.fetch_add(-1);
-	return count;
-}
+//ndInt32 ndShapeConvexPolygon::Release() const
+//{
+//	ndInt32 count = m_refCount.fetch_add(-1);
+//	return count;
+//}
 
 ndVector ndShapeConvexPolygon::SupportVertex(const ndVector& dir) const
 {

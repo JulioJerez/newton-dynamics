@@ -396,7 +396,7 @@ ndVector ndShapeCapsule::SupportVertexSpecial(const ndVector& direction, ndFloat
 	return p0 * m_transform;
 }
 
-ndFloat32 ndShapeCapsule::RayCast(ndRayCastNotify& callback, const ndVector& r0, const ndVector& r1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const
+ndFloat32 ndShapeCapsule::RayCast(ndRayCastNotify& callback, const ndVector& r0, const ndVector& r1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut, ndShapeInstance* const owner) const
 {
 	ndVector q0(r0 * m_transform);
 	ndVector q1(r1 * m_transform);
@@ -451,7 +451,7 @@ ndFloat32 ndShapeCapsule::RayCast(ndRayCastNotify& callback, const ndVector& r0,
 		}
 	}
 
-	ndFloat32 ret = ndShapeConvex::RayCast(callback, q0, q1, maxT, body, contactOut);
+	ndFloat32 ret = ndShapeConvex::RayCast(callback, q0, q1, maxT, body, contactOut, owner);
 	if (ret <= ndFloat32(1.0f)) 
 	{
 		contactOut.m_normal = m_transform * contactOut.m_normal;

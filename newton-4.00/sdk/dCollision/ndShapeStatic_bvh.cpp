@@ -188,7 +188,7 @@ ndFloat32 ndShapeStatic_bvh::RayHit(void* const context, const ndVector* const v
 	return t;
 }
 
-ndFloat32 ndShapeStatic_bvh::RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const
+ndFloat32 ndShapeStatic_bvh::RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut, ndShapeInstance* const) const
 {
 	ndBvhRay ray(localP0, localP1);
 	ray.m_t = ndFloat32(1.0f);

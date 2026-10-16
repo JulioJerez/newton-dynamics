@@ -373,7 +373,7 @@ class ndProcedural2dTerrainShape : public ndShapeStaticProceduralMesh
 		ShowDebugFaces(patch);
 	}
 
-	virtual ndFloat32 RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const, ndContactPoint& contactOut) const override
+	virtual ndFloat32 RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const, ndContactPoint& contactOut, ndShapeInstance* const) const override
 	{
 		ndVector boxP0;
 		ndVector boxP1;
