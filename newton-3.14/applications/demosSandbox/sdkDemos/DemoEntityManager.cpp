@@ -48,8 +48,8 @@
 //#define DEFAULT_SCENE	13		// height field Collision
 //#define DEFAULT_SCENE	14		// infinite user plane collision
 //#define DEFAULT_SCENE	15		// user height field Collision
-#define DEFAULT_SCENE	16		// compound Collision
-//#define DEFAULT_SCENE	17		// simple Archimedes buoyancy
+//#define DEFAULT_SCENE	16		// compound Collision
+#define DEFAULT_SCENE	17		// simple Archimedes buoyancy
 //#define DEFAULT_SCENE	18		// uniform Scaled Collision
 //#define DEFAULT_SCENE	19		// non uniform Scaled Collision
 //#define DEFAULT_SCENE	20		// scaled mesh collision
@@ -335,9 +335,9 @@ DemoEntityManager::DemoEntityManager ()
 //	m_showNormalForces = true;
 //	m_showContactPoints = true;
 //	m_showJointDebugInfo = true;
-	m_collisionDisplayMode = 2;
+//	m_collisionDisplayMode = 2;
 //	m_showListenersDebugInfo = true;
-	m_asynchronousPhysicsUpdate = true;
+//	m_asynchronousPhysicsUpdate = true;
 
 	Cleanup();
 	ResetTimer();
