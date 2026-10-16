@@ -125,7 +125,7 @@ void SimpleMeshLevelCollision (DemoEntityManager* const scene)
 	matrix.m_posit.m_z = 4.0f;
 	matrix.m_posit.m_y = 2.0f;
 
-	NewtonBody* body = CreateSimpleSolid(scene, geometry, 10.0f, matrix, collision, 0);
+	//NewtonBody* body = CreateSimpleSolid(scene, geometry, 10.0f, matrix, collision, 0);
 	// do not forget to release the assets	
 	geometry->Release();
 	NewtonDestroyCollision(collision);

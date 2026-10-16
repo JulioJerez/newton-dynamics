@@ -113,8 +113,7 @@ void ndArchimedesBuoyancyVolume::OnTrigger(const ndContact* const contact, ndFlo
 			// displaced by the volume under water. 
 			const ndFloat32 viscousDrag = FLUID_VISCOSITY;
 
-			ndShapeMaterial material(collision.GetMaterial());
-			body->GetCollisionShape().SetMaterial(material);
+			const ndShapeMaterial material(collision.GetMaterial());
 			ndFloat32 density = material.m_userParam[ndDemoContactCallback::m_density].m_floatData;
 			ndFloat32 desplacedVolume = density * collision.GetVolume();
 				
