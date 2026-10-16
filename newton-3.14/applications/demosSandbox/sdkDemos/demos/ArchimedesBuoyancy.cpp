@@ -30,36 +30,6 @@ class BuoyancyTriggerVolume
 
 	dVector CalculatePlane(const NewtonBody* const body) const
 	{
-		//class ndCastTriggerPlane : public ndRayCastClosestHitCallback
-		//{
-		//public:
-		//	ndCastTriggerPlane()
-		//		:ndRayCastClosestHitCallback()
-		//	{
-		//	}
-		//
-		//	ndUnsigned32 OnRayPrecastAction(const ndBody* const body, const ndShapeInstance* const)
-		//	{
-		//		return ndUnsigned32(((ndBody*)body)->GetAsBodyTriggerVolume() ? 1 : 0);
-		//	}
-		//};
-		//
-		//ndMatrix matrix(body->GetMatrix());
-		//
-		//ndVector p0(matrix.m_posit);
-		//ndVector p1(matrix.m_posit);
-		//
-		//p0.m_y += 30.0f;
-		//p1.m_y -= 30.0f;
-		//
-		//ndCastTriggerPlane rayCaster;
-		//m_hasPlane = body->GetScene()->RayCast(rayCaster, p0, p1);
-		//if (m_hasPlane)
-		//{
-		//	ndFloat32 dist = -rayCaster.m_contact.m_normal.DotProduct(rayCaster.m_contact.m_point).GetScalar();
-		//	m_plane = ndPlane(rayCaster.m_contact.m_normal, dist);
-		//}
-
 		dVector com;
 		dMatrix matrix;
 		NewtonBodyGetCentreOfMass(body, &com.m_x);
