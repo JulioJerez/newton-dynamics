@@ -279,7 +279,7 @@ ndShapeCompound::ndShapeCompound(const ndShapeCompound& source)
 	ndAssert(0);
 }
 
-ndShapeCompound::ndShapeCompound(const ndShapeCompound& source, const ndShapeInstance* const ownner)
+ndShapeCompound::ndShapeCompound(const ndShapeCompound& source, const ndShapeInstance* const parent)
 	:ndShape(source)
 	,m_array()
 	,m_treeEntropy(ndFloat32(0.0f))
@@ -287,7 +287,7 @@ ndShapeCompound::ndShapeCompound(const ndShapeCompound& source, const ndShapeIns
 	,m_boxMaxRadius(ndFloat32(0.0f))
 	,m_root(nullptr)
 	,m_idIndex(0)
-	,m_owner(const_cast<ndShapeInstance*>(ownner))
+	,m_owner(const_cast<ndShapeInstance*>(parent))
 {
 	ndTreeArray::Iterator iter(source.m_array);
 	for (iter.Begin(); iter; iter++) 
@@ -295,7 +295,7 @@ ndShapeCompound::ndShapeCompound(const ndShapeCompound& source, const ndShapeIns
 		ndNodeBase* const node = iter.GetNode()->GetInfo();
 		ndShapeInstance* const shape = node->GetShape();
 		ndNodeBase* const newNode = new ndNodeBase(shape);
-		m_array.AddNode(newNode, iter.GetNode()->GetKey(), ownner);
+		m_array.AddNode(newNode, iter.GetNode()->GetKey(), parent);
 	}
 
 	if (source.m_root) 
@@ -311,27 +311,27 @@ ndShapeCompound::ndShapeCompound(const ndShapeCompound& source, const ndShapeIns
 			ndNodeBase* const sourceNode = pool.Pop();
 			ndNodeBase* const stackParent = parents.Pop();
 	
-			ndNodeBase* parent = nullptr;
+			ndNodeBase* parentNode = nullptr;
 			if (sourceNode->m_type == m_node) 
 			{
-				parent = new ndNodeBase(*sourceNode);
+				parentNode = new ndNodeBase(*sourceNode);
 				if (!sourceNode->m_parent) 
 				{
-					m_root = parent;
+					m_root = parentNode;
 				}
 				else 
 				{
-					parent->m_parent = stackParent;
-					if (parent->m_parent) 
+					parentNode->m_parent = stackParent;
+					if (parentNode->m_parent)
 					{
 						if (sourceNode->m_parent->m_left == sourceNode) 
 						{
-							parent->m_parent->m_left = parent;
+							parentNode->m_parent->m_left = parentNode;
 						}
 						else 
 						{
 							ndAssert(sourceNode->m_parent->m_right == sourceNode);
-							parent->m_parent->m_right = parent;
+							parentNode->m_parent->m_right = parentNode;
 						}
 					}
 				}
@@ -361,13 +361,13 @@ ndShapeCompound::ndShapeCompound(const ndShapeCompound& source, const ndShapeIns
 	
 			if (sourceNode->m_left) 
 			{
-				parents.PushBack(parent);
+				parents.PushBack(parentNode);
 				pool.PushBack(sourceNode->m_left);
 			}
 	
 			if (sourceNode->m_right) 
 			{
-				parents.PushBack(parent);
+				parents.PushBack(parentNode);
 				pool.PushBack(sourceNode->m_right);
 			}
 		}
@@ -380,6 +380,11 @@ ndShapeCompound::~ndShapeCompound()
 	{
 		delete m_root;
 	}
+}
+
+ndShape* ndShapeCompound::Clone(ndShapeInstance* const parent) const
+{
+	return new ndShapeCompound(*this, parent);
 }
 
 ndShapeCompound* ndShapeCompound::GetAsShapeCompound()
@@ -600,7 +605,7 @@ ndVector ndShapeCompound::CalculateVolumeIntegral(const ndMatrix& globalMatrix, 
 	return volumePosit;
 }
 
-ndFloat32 ndShapeCompound::RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const
+ndFloat32 ndShapeCompound::RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut, ndShapeInstance* const) const
 {
 	if (!m_root) 
 	{
@@ -1076,11 +1081,6 @@ void ndShapeCompound::EndAddRemove()
 	}
 }
 
-void ndShapeCompound::RemoveNode(ndTreeArray::ndNode* const)
-{
-	ndAssert(0);
-}
-
 ndShapeInstance* ndShapeCompound::GetShapeInstance(ndTreeArray::ndNode* const node)
 {
 	return node->GetInfo()->GetShape();
@@ -1165,6 +1165,70 @@ ndShapeCompound::ndTreeArray::ndNode* ndShapeCompound::AddCollision(ndShapeInsta
 	}
 	
 	return newNode->m_myNode;
+}
+
+void ndShapeCompound::RemoveNode(ndTreeArray::ndNode* const node)
+{
+	m_array.Remove(node);
+	ndNodeBase* const treeNode = node->GetInfo();
+
+	if (!treeNode->m_parent)
+	{
+		delete (m_root);
+		m_root = nullptr;
+	}
+	else if (!treeNode->m_parent->m_parent)
+	{
+		ndNodeBase* const root = m_root;
+		if (treeNode->m_parent->m_left == treeNode)
+		{
+			m_root = treeNode->m_parent->m_right;
+			treeNode->m_parent->m_right = nullptr;
+		}
+		else
+		{
+			ndAssert(treeNode->m_parent->m_right == treeNode);
+			m_root = treeNode->m_parent->m_left;
+			treeNode->m_parent->m_left = nullptr;
+		}
+		m_root->m_parent = nullptr;
+		delete (root);
+	}
+	else
+	{
+		ndNodeBase* const root = treeNode->m_parent->m_parent;
+		if (treeNode->m_parent == root->m_left)
+		{
+			if (treeNode->m_parent->m_right == treeNode)
+			{
+				root->m_left = treeNode->m_parent->m_left;
+				treeNode->m_parent->m_left = nullptr;
+			}
+			else
+			{
+				ndAssert(treeNode->m_parent->m_left == treeNode);
+				root->m_left = treeNode->m_parent->m_right;
+				treeNode->m_parent->m_right = NULL;
+			}
+			root->m_left->m_parent = root;
+		}
+		else
+		{
+			if (treeNode->m_parent->m_right == treeNode)
+			{
+				root->m_right = treeNode->m_parent->m_left;
+				treeNode->m_parent->m_left = nullptr;
+			}
+			else
+			{
+				ndAssert(treeNode->m_parent->m_left == treeNode);
+				root->m_right = treeNode->m_parent->m_right;
+				treeNode->m_parent->m_right = nullptr;
+			}
+			root->m_right->m_parent = root;
+		}
+		delete (treeNode->m_parent);
+	}
 }
 
 void ndShapeCompound::MassProperties()

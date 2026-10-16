@@ -47,8 +47,8 @@
 //#define DEFAULT_SCENE	12		// optimized level mesh collision
 //#define DEFAULT_SCENE	13		// height field Collision
 //#define DEFAULT_SCENE	14		// infinite user plane collision
-#define DEFAULT_SCENE	15		// user height field Collision
-//#define DEFAULT_SCENE	16		// compound Collision
+//#define DEFAULT_SCENE	15		// user height field Collision
+#define DEFAULT_SCENE	16		// compound Collision
 //#define DEFAULT_SCENE	17		// simple Archimedes buoyancy
 //#define DEFAULT_SCENE	18		// uniform Scaled Collision
 //#define DEFAULT_SCENE	19		// non uniform Scaled Collision

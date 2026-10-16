@@ -324,8 +324,8 @@ ndContactSolver::ndContactSolver()
 
 ndContactSolver::ndContactSolver(ndShapeInstance* const instance, ndContactNotify* const notification, ndFloat32 timestep, ndInt32 threadIndex)
 	:ndDownHeap<ndMinkFace*, ndFloat32>(m_heapBuffer, sizeof (m_heapBuffer))
-	,m_instance0(*instance, (ndShape*)instance->GetShape())
-	,m_instance1(*instance, (ndShape*)instance->GetShape())
+	,m_instance0(*instance, instance->m_shape)
+	,m_instance1(*instance, instance->m_shape)
 	,m_separatingVector(ndContact::m_initialSeparatingVector)
 	,m_savedOriginOffset(ndVector::m_zero)
 	,m_contact(nullptr)
@@ -346,8 +346,8 @@ ndContactSolver::ndContactSolver(ndShapeInstance* const instance, ndContactNotif
 
 ndContactSolver::ndContactSolver(ndContact* const contact, ndContactNotify* const notification, ndFloat32 timestep, ndInt32 threadIndex)
 	:ndDownHeap<ndMinkFace*, ndFloat32>(m_heapBuffer, sizeof(m_heapBuffer))
-	,m_instance0(contact->GetBody0()->GetCollisionShape(), contact->GetBody0()->GetCollisionShape().GetShape())
-	,m_instance1(contact->GetBody1()->GetCollisionShape(), contact->GetBody1()->GetCollisionShape().GetShape())
+	,m_instance0(contact->GetBody0()->GetCollisionShape(), contact->GetBody0()->GetCollisionShape().m_shape)
+	,m_instance1(contact->GetBody1()->GetCollisionShape(), contact->GetBody1()->GetCollisionShape().m_shape)
 	,m_closestPoint0(ndVector::m_zero)
 	,m_closestPoint1(ndVector::m_zero)
 	,m_separatingVector(ndContact::m_initialSeparatingVector)
@@ -370,8 +370,8 @@ ndContactSolver::ndContactSolver(ndContact* const contact, ndContactNotify* cons
 
 ndContactSolver::ndContactSolver(const ndContactSolver& src, const ndShapeInstance& instance0, const ndShapeInstance& instance1)
 	:ndDownHeap<ndMinkFace*, ndFloat32>(m_heapBuffer, sizeof(m_heapBuffer))
-	,m_instance0(instance0, ((ndShapeInstance*)&instance0)->GetShape())
-	,m_instance1(instance1, ((ndShapeInstance*)&instance1)->GetShape())
+	,m_instance0(instance0, instance0.m_shape)
+	,m_instance1(instance1, instance1.m_shape)
 	,m_closestPoint0(ndVector::m_zero)
 	,m_closestPoint1(ndVector::m_zero)
 	,m_separatingVector(src.m_separatingVector)
@@ -2725,7 +2725,7 @@ ndInt32 ndContactSolver::ConvexToCompoundContactsDiscrete()
 				bool processContacts = m_notification->OnCompoundSubShapeOverlap(contactJoint, m_timestep, convexInstance, subShape);
 				if (processContacts)
 				{
-					ndShapeInstance childInstance(*subShape, subShape->GetShape());
+					ndShapeInstance childInstance(*subShape, subShape->m_shape);
 					childInstance.m_globalMatrix = childInstance.GetLocalMatrix() * matrix1;
 
 					ndContactSolver contactSolver(*this, m_instance0, childInstance);
@@ -2848,7 +2848,7 @@ ndInt32 ndContactSolver::CompoundToConvexContactsDiscrete()
 				bool processContacts = m_notification->OnCompoundSubShapeOverlap(contactJoint, m_timestep, subShape, convexInstance);
 				if (processContacts)
 				{
-					ndShapeInstance childInstance(*subShape, subShape->GetShape());
+					ndShapeInstance childInstance(*subShape, subShape->m_shape);
 					childInstance.m_globalMatrix = childInstance.GetLocalMatrix() * matrix0;
 
 					ndContactSolver contactSolver(*this, childInstance, m_instance1);
@@ -2928,7 +2928,7 @@ ndInt32 ndContactSolver::CompoundToCompoundContactsDiscrete()
 	ndAssert(compoundShape1);
 
 	ndInt32 contactCount = 0;
-	ndFixSizeArray<ndStackEntry, 2 * D_COMPOUND_STACK_DEPTH> stackPool;
+	ndFixSizeArray<ndStackEntry, 4 * D_COMPOUND_STACK_DEPTH> stackPool;
 
 	auto InsertNode = [&data, &stackPool](
 		const ndShapeCompound::ndNodeBase* const node0,
@@ -2980,8 +2980,8 @@ ndInt32 ndContactSolver::CompoundToCompoundContactsDiscrete()
 				bool processContacts = m_notification->OnCompoundSubShapeOverlap(contactJoint, m_timestep, subShape0, subShape1);
 				if (processContacts)
 				{
-					ndShapeInstance childInstance0(*subShape0, subShape0->GetShape());
-					ndShapeInstance childInstance1(*subShape1, subShape1->GetShape());
+					ndShapeInstance childInstance0(*subShape0, subShape0->m_shape);
+					ndShapeInstance childInstance1(*subShape1, subShape1->m_shape);
 					childInstance0.m_globalMatrix = childInstance0.GetLocalMatrix() * matrix0;
 					childInstance1.m_globalMatrix = childInstance1.GetLocalMatrix() * matrix1;
 
@@ -3131,7 +3131,7 @@ ndInt32 ndContactSolver::CompoundToShapeStaticBvhContactsDiscrete()
 				bool processContacts = m_notification->OnCompoundSubShapeOverlap(contactJoint, m_timestep, subShape, bvhTreeInstance);
 				if (processContacts)
 				{
-					ndShapeInstance childInstance(*subShape, subShape->GetShape());
+					ndShapeInstance childInstance(*subShape, subShape->m_shape);
 					childInstance.m_globalMatrix = childInstance.GetLocalMatrix() * compoundMatrix;
 
 					ndContactSolver contactSolver(*this, childInstance, m_instance1);
@@ -3336,7 +3336,7 @@ ndInt32 ndContactSolver::CompoundToStaticHeightfieldContactsDiscrete()
 				bool processContacts = m_notification->OnCompoundSubShapeOverlap(contactJoint, m_timestep, subShape, heightfieldInstance);
 				if (processContacts)
 				{
-					ndShapeInstance childInstance(*subShape, subShape->GetShape());
+					ndShapeInstance childInstance(*subShape, subShape->m_shape);
 					childInstance.m_globalMatrix = childInstance.GetLocalMatrix() * compoundMatrix;
 
 					ndContactSolver contactSolver(*this, childInstance, m_instance1);
@@ -3456,7 +3456,7 @@ ndInt32 ndContactSolver::CompoundToStaticProceduralMesh()
 				bool processContacts = m_notification->OnCompoundSubShapeOverlap(contactJoint, m_timestep, subShape, ProceduralInstance);
 				if (processContacts)
 				{
-					ndShapeInstance childInstance(*subShape, subShape->GetShape());
+					ndShapeInstance childInstance(*subShape, subShape->m_shape);
 					childInstance.m_globalMatrix = childInstance.GetLocalMatrix() * compoundMatrix;
 
 					ndContactSolver contactSolver(*this, childInstance, m_instance1);
@@ -3652,7 +3652,7 @@ ndInt32 ndContactSolver::ConvexToCompoundContactsContinue()
 				bool processContacts = m_notification->OnCompoundSubShapeOverlap(contactJoint, m_timestep, convexInstance, subShape);
 				if (processContacts)
 				{
-					ndShapeInstance childInstance(*subShape, subShape->GetShape());
+					ndShapeInstance childInstance(*subShape, subShape->m_shape);
 					childInstance.m_globalMatrix = childInstance.GetLocalMatrix() * compoundMatrix;
 
 					ndContactSolver contactSolver(*this, m_instance0, childInstance);
@@ -3750,12 +3750,12 @@ ndInt32 ndContactSolver::ConvexToCompoundContactsContinue()
 
 ndInt32 ndContactSolver::CalculatePolySoupToHullContactsContinue(ndPolygonMeshDesc& data)
 {
-	ndShapeConvexPolygon polygon;
 	ndShapeInstance polySoupInstance(m_instance1);
-
 	ndAssert(data.m_staticMeshQuery->m_faceIndexCount.GetCount());
-	m_instance1.m_shape->Release();
-	m_instance1.m_shape = polygon.AddRef();
+
+	ndShapeConvexPolygon polygon;
+	m_instance1.m_shape = ndSharedPtr<ndShape> (&polygon);
+
 	m_instance1.SetScale(ndVector::m_one);
 	m_instance1.m_localMatrix = ndGetIdentityMatrix();
 	m_instance1.m_globalMatrix = ndGetIdentityMatrix();
@@ -3864,6 +3864,7 @@ ndInt32 ndContactSolver::CalculatePolySoupToHullContactsContinue(ndPolygonMeshDe
 		}
 	}
 
+	m_instance1.m_shape.SetPtr(nullptr);
 	m_contactBuffer = contactOut;
 	m_instance1 = polySoupInstance;
 	if (minTimeStep < savedTimestep)
@@ -3874,7 +3875,7 @@ ndInt32 ndContactSolver::CalculatePolySoupToHullContactsContinue(ndPolygonMeshDe
 		m_separatingVector = separatingVector;
 		m_separationDistance = m_separatingVector.DotProduct(m_closestPoint0 - m_closestPoint1).GetScalar();
 	}
-
+	
 	return count;
 }
 
@@ -3949,10 +3950,8 @@ void ndContactSolver::CalculateClosestPoints(
 	m_instance1.SetLocalMatrix(instanceB->GetLocalMatrix());
 	m_instance1.SetGlobalMatrix(m_instance1.GetLocalMatrix() * matrixB);
 
-	ndQuerieBody bodyA;
-	ndQuerieBody bodyB;
-	bodyA.SetCollisionShape(m_instance0);
-	bodyB.SetCollisionShape(m_instance1);
+	ndQuerieBody bodyA(m_instance0);
+	ndQuerieBody bodyB(m_instance1);
 
 	bodyA.SetMatrix(matrixA);
 	bodyB.SetMatrix(matrixB);
@@ -4005,10 +4004,8 @@ void ndContactSolver::CalculateContacts(
 	m_instance1.SetLocalMatrix(instanceB->GetLocalMatrix());
 	m_instance1.SetGlobalMatrix(m_instance1.GetLocalMatrix() * matrixB);
 
-	ndQuerieBody bodyA;
-	ndQuerieBody bodyB;
-	bodyA.SetCollisionShape(m_instance0);
-	bodyB.SetCollisionShape(m_instance1);
+	ndQuerieBody bodyA(m_instance0);
+	ndQuerieBody bodyB(m_instance1);
 
 	bodyA.SetMatrix(matrixA);
 	bodyB.SetMatrix(matrixB);
@@ -4070,10 +4067,8 @@ bool ndContactSolver::CollisionTest(
 	m_instance1.SetLocalMatrix(instanceB->GetLocalMatrix());
 	m_instance1.SetGlobalMatrix(m_instance1.GetLocalMatrix() * matrixB);
 
-	ndQuerieBody bodyA;
-	ndQuerieBody bodyB;
-	bodyA.SetCollisionShape(m_instance0);
-	bodyB.SetCollisionShape(m_instance1);
+	ndQuerieBody bodyA(m_instance0);
+	ndQuerieBody bodyB(m_instance1);
 
 	bodyA.SetMatrix(matrixA);
 	bodyB.SetMatrix(matrixB);
@@ -4110,12 +4105,14 @@ bool ndContactSolver::CollisionTest(
 
 ndInt32 ndContactSolver::CalculatePolySoupToHullContactsDescrete(ndPolygonMeshDesc& data)
 {
-	ndShapeConvexPolygon polygon;
 	const ndShapeInstance polySoupInstance(m_instance1);
 	ndPolygonMeshDesc::ndStaticMeshFaceQuery& query = *data.m_staticMeshQuery;
 
 	ndAssert(query.m_faceIndexCount.GetCount());
-	m_instance1.m_shape = &polygon;
+
+	ndShapeConvexPolygon polygon;
+	m_instance1.m_shape = ndSharedPtr<ndShape>(&polygon);
+
 	m_instance1.SetScale(ndVector::m_one);
 	m_instance1.m_localMatrix = ndGetIdentityMatrix();
 	m_instance1.m_globalMatrix = ndGetIdentityMatrix();
@@ -4248,6 +4245,8 @@ ndInt32 ndContactSolver::CalculatePolySoupToHullContactsDescrete(ndPolygonMeshDe
 	ndAssert(!count || (closestDist < ndFloat32(1000.0f)));
 
 	m_separationDistance = closestDist;
+
+	m_instance1.m_shape.SetPtr(nullptr);
 	m_instance1.m_shape = polySoupInstance.m_shape;
 	m_instance1 = polySoupInstance;
 	return count;

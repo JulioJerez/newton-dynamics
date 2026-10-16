@@ -41,7 +41,7 @@ size_t ndMemory::GetMemoryAligment()
 
 size_t ndMemory::CalculateBufferSize(size_t size)
 {
-	return size + ndGetBufferPaddingInBytes;
+	return (size + ndGetBufferPaddingInBytes + 15) & ~0x0f;
 }
 
 size_t ndMemory::GetSize(void* const ptr)

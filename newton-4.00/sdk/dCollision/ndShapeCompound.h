@@ -53,6 +53,7 @@ class ndShapeCompound: public ndShape
 	D_COLLISION_API ndShapeCompound(const ndShapeCompound& other);
 	D_COLLISION_API ndShapeCompound(const ndShapeCompound& source, const ndShapeInstance* const ownner);
 	D_COLLISION_API virtual ~ndShapeCompound() override;
+	D_COLLISION_API virtual ndShape* Clone(ndShapeInstance* const owner) const override;
 
 	D_COLLISION_API const ndTreeArray& GetTree() const;
 	D_COLLISION_API virtual ndUnsigned64 GetHash(ndUnsigned64 hash) const override;
@@ -71,7 +72,7 @@ class ndShapeCompound: public ndShape
 	class ndSpliteInfo;
 	virtual ndShapeInfo GetShapeInfo() const override;
 	virtual void DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& debugCallback) const override;
-	virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const override;
+	virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut, ndShapeInstance* const owner) const override;
 
 	virtual ndFloat32 GetVolume() const override;
 	virtual ndFloat32 GetBoxMinRadius() const override;

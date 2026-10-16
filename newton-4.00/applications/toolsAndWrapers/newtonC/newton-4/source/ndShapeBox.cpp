@@ -238,7 +238,7 @@ ndVector ndShapeBox::SupportVertexSpecialProjectPoint(const ndVector& point, con
 	return point + dir.Scale(D_PENETRATION_TOL);
 }
 
-ndFloat32 ndShapeBox::RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32, const ndBody* const, ndContactPoint& contactOut) const
+ndFloat32 ndShapeBox::RayCast(ndRayCastNotify&, const ndVector& localP0, const ndVector& localP1, ndFloat32, const ndBody* const, ndContactPoint& contactOut, ndShapeInstance* const) const
 {
 	ndAssert(localP0.m_w == localP1.m_w);
 

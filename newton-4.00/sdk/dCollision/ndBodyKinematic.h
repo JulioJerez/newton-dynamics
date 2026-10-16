@@ -87,6 +87,7 @@ class ndBodyKinematic : public ndBody
 	D_CLASS_REFLECTION(ndBodyKinematic,ndBody)
 
 	D_COLLISION_API ndBodyKinematic();
+	D_COLLISION_API ndBodyKinematic(ndShape* const shape);
 	D_COLLISION_API ndBodyKinematic(const ndBodyKinematic& src);
 	D_COLLISION_API virtual ~ndBodyKinematic() override;
 
@@ -267,8 +268,10 @@ class ndBodySentinel : public ndBodyKinematic
 class ndQuerieBody : public ndBodyKinematic
 {
 	public:
-	virtual void SetCollisionShape(const ndShapeInstance& instance) override
+	ndQuerieBody(const ndShapeInstance& instance)
+		:ndBodyKinematic(nullptr)
 	{
+		//m_shapeInstance = instance;
 		m_shapeInstance.m_ownerBody = this;
 		m_shapeInstance.m_globalMatrix = instance.m_globalMatrix;
 		m_shapeInstance.m_localMatrix = instance.m_localMatrix;
@@ -280,9 +283,9 @@ class ndQuerieBody : public ndBodyKinematic
 		m_shapeInstance.m_shapeMaterial = instance.m_shapeMaterial;
 		m_shapeInstance.m_skinMargin = instance.m_skinMargin;
 		m_shapeInstance.m_collisionMode = instance.m_collisionMode;
-		m_shapeInstance.m_ownerBody = instance.m_ownerBody;
 		m_shapeInstance.m_subCollisionHandle = instance.m_subCollisionHandle;
-		m_shapeInstance.SetShape(const_cast<ndShape*>(reinterpret_cast<const ndShape*>(instance.GetShape())));
+		//m_shapeInstance.SetShape(const_cast<ndShape*>(reinterpret_cast<const ndShape*>(instance.GetShape())));
+		m_shapeInstance.m_shape = instance.m_shape;
 	}
 };
 

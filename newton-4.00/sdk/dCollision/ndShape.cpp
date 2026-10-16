@@ -34,7 +34,6 @@ ndShape::ndShape(ndShapeID id)
 	,m_centerOfMass(ndVector::m_zero)
 	,m_boxSize(ndVector::m_zero)
 	,m_boxOrigin(ndVector::m_zero)
-	,m_refCount(0)
 	,m_collisionId(id)
 {
 }
@@ -46,14 +45,18 @@ ndShape::ndShape(const ndShape& source)
 	,m_centerOfMass(source.m_centerOfMass)
 	,m_boxSize(source.m_boxSize)
 	,m_boxOrigin(source.m_boxOrigin)
-	,m_refCount(0)
 	,m_collisionId(source.m_collisionId)
 {
 }
 
 ndShape::~ndShape()
 {
-	ndAssert(m_refCount.load() == 0);
+}
+
+ndShape* ndShape::Clone(ndShapeInstance* const) const
+{
+	ndAssert(0);
+	return nullptr;
 }
 
 ndShapeInfo::ndShapeInfo()
@@ -155,28 +158,6 @@ ndShapeInfo ndShape::GetShapeInfo() const
 	ndShapeInfo info;
 	info.m_collisionType = m_collisionId;
 	return info;
-}
-
-const ndShape* ndShape::AddRef() const
-{
-	m_refCount.fetch_add(1);
-	return this;
-}
-
-ndInt32 ndShape::Release() const
-{
-	ndInt32 count = m_refCount.fetch_add(-1);
-	ndAssert(count >= 1);
-	if (count == 1)
-	{
-		delete this;
-	}
-	return count;
-}
-
-ndInt32 ndShape::GetRefCount() const
-{
-	return m_refCount.load();
 }
 
 ndSharedPtr<ndMeshCollisionShape> ndShape::GetMeshShape() const

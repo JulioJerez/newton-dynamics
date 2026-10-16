@@ -84,7 +84,7 @@ ndInt32 ndShapePoint::CalculatePlaneIntersection(const ndVector& normal, const n
 	return 1;
 }
 
-ndFloat32 ndShapePoint::RayCast(ndRayCastNotify&, const ndVector&, const ndVector&, ndFloat32, const ndBody* const, ndContactPoint&) const
+ndFloat32 ndShapePoint::RayCast(ndRayCastNotify&, const ndVector&, const ndVector&, ndFloat32, const ndBody* const, ndContactPoint&, ndShapeInstance* const) const
 {
 	ndAssert(0);
 	return ndFloat32 (1.2f);

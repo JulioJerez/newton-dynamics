@@ -44,7 +44,7 @@ class ndShapeStatic_bvh: public ndShapeStaticMesh, public ndAabbPolygonSoup
 
 	virtual ndShapeStatic_bvh* GetAsShapeStaticBVH() override { return this; }
 	D_COLLISION_API virtual void DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& debugCallback) const override;
-	D_COLLISION_API virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const override;
+	D_COLLISION_API virtual ndFloat32 RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut, ndShapeInstance* const owner) const override;
 	D_COLLISION_API virtual void GetCollidingFaces(ndPolygonMeshDesc* const data) const override;
 	D_COLLISION_API ndSharedPtr<ndMeshCollisionShape> GetMeshShape() const override;
 	

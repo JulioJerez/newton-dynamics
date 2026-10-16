@@ -262,8 +262,8 @@ NewtonCollision* NewtonCreateTreeCollisionFromMesh(const NewtonWorld* const, con
 void NewtonTreeCollisionBeginBuild(const NewtonCollision* const treeCollision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(treeCollision));
-	NewtonCollisionTree* const shape = static_cast<NewtonCollisionTree*>(instance->GetShape()->GetAsShapeStaticBVH());
+	ndShapeInstance* const instance = PointerCast< ndShapeInstance, NewtonCollision>(treeCollision);
+	NewtonCollisionTree* const shape = PointerCast<NewtonCollisionTree, ndShapeStatic_bvh>(instance->GetShape()->GetAsShapeStaticBVH());
 	ndAssert(strcmp(shape->ClassName(), NewtonCollisionTree::StaticClassName()) == 0);
 	ndAssert(shape);
 
@@ -292,8 +292,8 @@ void NewtonTreeCollisionBeginBuild(const NewtonCollision* const treeCollision)
 void NewtonTreeCollisionAddFace(const NewtonCollision* const treeCollision, int vertexCount, const dFloat* const vertexPtr, int strideInBytes, int faceAttribute)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(treeCollision));
-	NewtonCollisionTree* const shape = static_cast<NewtonCollisionTree*>(instance->GetShape()->GetAsShapeStaticBVH());
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(treeCollision);
+	NewtonCollisionTree* const shape = PointerCast<NewtonCollisionTree, ndShapeStatic_bvh>(instance->GetShape()->GetAsShapeStaticBVH());
 	ndAssert(strcmp(shape->ClassName(), NewtonCollisionTree::StaticClassName()) == 0);
 	ndAssert(shape);
 
@@ -328,12 +328,10 @@ void NewtonTreeCollisionAddFace(const NewtonCollision* const treeCollision, int 
 void NewtonTreeCollisionEndBuild(const NewtonCollision* const treeCollision, int optimize)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(treeCollision));
-	NewtonCollisionTree* const shape = static_cast<NewtonCollisionTree*>(instance->GetShape()->GetAsShapeStaticBVH());
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(treeCollision);
+	NewtonCollisionTree* const shape = PointerCast<NewtonCollisionTree, ndShapeStatic_bvh>(instance->GetShape()->GetAsShapeStaticBVH());
 	ndAssert(strcmp(shape->ClassName(), NewtonCollisionTree::StaticClassName()) == 0);
 	ndAssert(shape);
 	shape->m_builder->End(optimize);
-
-	NewtonCollisionTree* const newShape = new NewtonCollisionTree(**shape->m_builder);
-	instance->SetShape(newShape);
+	instance->m_shape = ndSharedPtr<ndShape>(new NewtonCollisionTree(**shape->m_builder));
 }

@@ -109,7 +109,7 @@ class ndShapeInstance: public ndContainersFreeListAlloc<ndShapeInstance>
 
 	D_COLLISION_API ndShapeInstance(ndShape* const shape);
 	D_COLLISION_API ndShapeInstance(const ndShapeInstance& instance);
-	D_COLLISION_API ndShapeInstance(const ndShapeInstance& instance, ndShape* const shape);
+	D_COLLISION_API ndShapeInstance(const ndShapeInstance& instance, const ndSharedPtr<ndShape>& shape);
 	D_COLLISION_API ~ndShapeInstance();
 
 	D_COLLISION_API ndShapeInstance& operator=(const ndShapeInstance& src);
@@ -176,9 +176,9 @@ class ndShapeInstance: public ndContainersFreeListAlloc<ndShapeInstance>
 	ndVector m_maxScale;
 
 	ndShapeMaterial m_shapeMaterial;
-	const ndShape* m_shape;
-	const ndBody* m_ownerBody;
-	const void* m_subCollisionHandle;
+	ndSharedPtr<ndShape> m_shape;
+	ndWeakPtr<ndBody> m_ownerBody;
+	ndWeakPtr<void> m_subCollisionHandle;
 	ndWeakPtr<ndShapeInstance> m_parent;
 	ndFloat32 m_skinMargin;
 	ndScaleType m_scaleType;

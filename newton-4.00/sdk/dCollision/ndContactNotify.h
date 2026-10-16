@@ -35,6 +35,10 @@ class ndMaterial : public ndContainersFreeListAlloc<ndMaterial>
 {
 	public:
 	D_COLLISION_API ndMaterial();
+	D_COLLISION_API virtual ~ndMaterial();
+
+	ndMaterial(const ndMaterial& other) = default;
+	ndMaterial& operator=(const ndMaterial& other) = default;
 
 	ndFloat32 m_restitution;
 	ndFloat32 m_staticFriction0;

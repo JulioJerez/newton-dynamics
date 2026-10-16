@@ -155,7 +155,7 @@ inline ndVector ndMatrix::TransformVector(const ndVector& v) const
 
 inline ndVector ndMatrix::UntransformVector(const ndVector& v) const
 {
-	return UnrotateVector(v - m_posit) | ndVector::m_wOne;
+	return UnrotateVector(ndVector::m_triplexMask & (v - m_posit)) | ndVector::m_wOne;
 }
 
 #endif

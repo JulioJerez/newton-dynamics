@@ -21,10 +21,30 @@
 
 #include "newtonStdafx.h"
 #include "Newton.h"
+#include "NewtonUtils.h"
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
 #include "newtonBodyNotify.h"
 
+class NewtonCompoundCollision : public ndShapeCompound
+{
+	public:
+	D_CLASS_REFLECTION(NewtonCompoundCollision, ndShapeCompound)
+	NewtonCompoundCollision()
+		:ndShapeCompound()
+	{
+	}
+
+	NewtonCompoundCollision(const NewtonCompoundCollision& source, const ndShapeInstance* const parent)
+		:ndShapeCompound(source, parent)
+	{
+	}
+	
+	virtual ndShape* Clone(ndShapeInstance* const parent) const override
+	{
+		return new NewtonCompoundCollision(*this, parent);
+	}
+};
 
 /*!
   Create a container to hold an array of convex collision primitives.
@@ -42,10 +62,10 @@
 NewtonCollision* NewtonCreateCompoundCollision(const NewtonWorld* const, int shapeID)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeCompound());
+	ndShapeInstance* const instance = new ndShapeInstance(new NewtonCompoundCollision());
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-	return reinterpret_cast<NewtonCollision*>(instance);
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
 /*!
@@ -99,8 +119,8 @@ NewtonCollision* NewtonCreateCompoundCollisionFromMesh(const NewtonWorld* const,
 void NewtonCompoundCollisionBeginAddRemove(NewtonCollision* const compoundCollision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(compoundCollision));
-	ndShapeCompound* const collision = instance->GetShape()->GetAsShapeCompound();
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(compoundCollision);
+	ndShapeCompound* const collision = PointerCast<NewtonCompoundCollision, ndShapeCompound>(instance->GetShape()->GetAsShapeCompound());
 	if (collision)
 	{
 		collision->BeginAddRemove();
@@ -110,8 +130,8 @@ void NewtonCompoundCollisionBeginAddRemove(NewtonCollision* const compoundCollis
 void NewtonCompoundCollisionEndAddRemove(NewtonCollision* const compoundCollision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(compoundCollision));
-	ndShapeCompound* const collision = instance->GetShape()->GetAsShapeCompound();
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(compoundCollision);
+	NewtonCompoundCollision* const collision = PointerCast<NewtonCompoundCollision, ndShapeCompound>(instance->GetShape()->GetAsShapeCompound());
 	if (collision)
 	{
 		collision->EndAddRemove();
@@ -122,43 +142,16 @@ void* NewtonCompoundCollisionAddSubCollision(NewtonCollision* const compoundColl
 {
 	TRACE_FUNCTION(__FUNCTION__);
 
-	ndShapeInstance* const compoundInstance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(compoundCollision));
-	ndShapeInstance* const childInstance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(convexCollision));
+	ndShapeInstance* const compoundInstance = PointerCast<ndShapeInstance, NewtonCollision>(compoundCollision);
+	ndShapeInstance* const childInstance = PointerCast<ndShapeInstance, NewtonCollision>(convexCollision);
 
-	ndShapeCompound* const collision = compoundInstance->GetShape()->GetAsShapeCompound();
+	NewtonCompoundCollision* const collision = PointerCast<NewtonCompoundCollision, ndShapeCompound>(compoundInstance->GetShape()->GetAsShapeCompound());
 	if (collision && childInstance->GetShape()->GetAsShapeConvex())
 	{
 		return collision->AddCollision(childInstance);
 	}
 	return nullptr;
 }
-
-
-void NewtonCompoundCollisionRemoveSubCollision(NewtonCollision* const compoundCollision, const void* const collisionNode)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)compoundCollision;
-	//if (instance->IsType(dgCollision::dgCollisionCompound_RTTI)) {
-	//	dgCollisionCompound* const collision = (dgCollisionCompound*)instance->GetChildShape();
-	//	dgCollisionInstance* const childCollision = collision->GetCollisionFromNode((dgCollisionCompound::dgTreeArray::dgTreeNode*)collisionNode);
-	//	if (childCollision && childCollision->IsType(dgCollision::dgCollisionConvexShape_RTTI)) {
-	//		collision->RemoveCollision((dgCollisionCompound::dgTreeArray::dgTreeNode*)collisionNode);
-	//	}
-	//}
-	ndAssert(0);
-}
-
-void NewtonCompoundCollisionRemoveSubCollisionByIndex(NewtonCollision* const compoundCollision, int nodeIndex)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)compoundCollision;
-	//if (instance->IsType(dgCollision::dgCollisionCompound_RTTI)) {
-	//	dgCollisionCompound* const collision = (dgCollisionCompound*)instance->GetChildShape();
-	//	NewtonCompoundCollisionRemoveSubCollision(compoundCollision, collision->FindNodeByIndex(nodeIndex));
-	//}
-	ndAssert(0);
-}
-
 
 void NewtonCompoundCollisionSetSubCollisionMatrix(NewtonCollision* const compoundCollision, const void* const collisionNode, const dFloat* const matrix)
 {
@@ -172,45 +165,6 @@ void NewtonCompoundCollisionSetSubCollisionMatrix(NewtonCollision* const compoun
 }
 
 
-void* NewtonCompoundCollisionGetFirstNode(NewtonCollision* const compoundCollision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)compoundCollision;
-	//if (instance->IsType(dgCollision::dgCollisionCompound_RTTI)) {
-	//	dgCollisionCompound* const collision = (dgCollisionCompound*)instance->GetChildShape();
-	//	return collision->GetFirstNode();
-	//}
-	//return NULL;
-	ndAssert(0);
-	return 0;
-}
-
-void* NewtonCompoundCollisionGetNextNode(NewtonCollision* const compoundCollision, const void* const node)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)compoundCollision;
-	//if (instance->IsType(dgCollision::dgCollisionCompound_RTTI)) {
-	//	dgCollisionCompound* const collision = (dgCollisionCompound*)instance->GetChildShape();
-	//	return collision->GetNextNode((dgCollisionCompound::dgTreeArray::dgTreeNode*)node);
-	//}
-	//return NULL;
-	ndAssert(0);
-	return 0;
-}
-
-void* NewtonCompoundCollisionGetNodeByIndex(NewtonCollision* const compoundCollision, int index)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)compoundCollision;
-	//if (instance->IsType(dgCollision::dgCollisionCompound_RTTI)) {
-	//	dgCollisionCompound* const collision = (dgCollisionCompound*)instance->GetChildShape();
-	//	return collision->FindNodeByIndex(index);
-	//}
-	//return NULL;
-	ndAssert(0);
-	return 0;
-}
-
 int NewtonCompoundCollisionGetNodeIndex(NewtonCollision* const compoundCollision, const void* const node)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -223,21 +177,6 @@ int NewtonCompoundCollisionGetNodeIndex(NewtonCollision* const compoundCollision
 	ndAssert(0);
 	return 0;
 }
-
-
-NewtonCollision* NewtonCompoundCollisionGetCollisionFromNode(NewtonCollision* const compoundCollision, const void* const node)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const compoundInstance = (dgCollisionInstance*)compoundCollision;
-	//if (compoundInstance->IsType(dgCollision::dgCollisionCompound_RTTI)) {
-	//	dgCollisionCompound* const collision = (dgCollisionCompound*)compoundInstance->GetChildShape();
-	//	return (NewtonCollision*)collision->GetCollisionFromNode((dgCollisionCompound::dgTreeArray::dgTreeNode*)node);
-	//}
-	//return NULL;
-	ndAssert(0);
-	return 0;
-}
-
 
 
 /*!
@@ -362,3 +301,121 @@ int NewtonSceneCollisionGetNodeIndex(NewtonCollision* const sceneCollision, cons
 	ndAssert(0);
 	return 0;
 }
+
+/*!
+  Set userData and the functions event handlers for the material interaction between two physics materials .
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param  id0 - group id0.
+  @param  id1 - group id1.
+  @param  *compoundAabbOverlap: fixme (can this be NULL?)
+
+  @return Nothing.
+
+  When the AABB extents of the collision geometry of two bodies overlap, the Newton collision system retrieves the material
+  interaction that defines the behavior between the pair of bodies. The material interaction is collected from a database of materials,
+  indexed by the material gruopID assigned to the bodies. If the material is tagged as non collidable,
+  then no action is taken and the simulation continues.
+  If the material is tagged as collidable, and a *aabbOverlap* was set for this material, then the *aabbOverlap* function is called.
+  If the function  *aabbOverlap* returns 0, no further action is taken for this material (this can be use to ignore the interaction under
+  certain conditions). If the function  *aabbOverlap* returns 1, Newton proceeds to calculate the array of contacts for the pair of
+  colliding bodies. If the function *processCallback* was set, the application receives a callback for every contact found between the
+  two colliding bodies. Here the application can perform fine grain control over the behavior of the collision system. For example,
+  rejecting the contact, making the contact frictionless, applying special effects to the surface etc.
+  After all contacts are processed and if the function *endCallback* was set, Newton calls *endCallback*.
+  Here the application can collect information gathered during the contact-processing phase and provide some feedback to the player.
+  A typical use for the material callback is to play sound effects. The application passes the address of structure in the *userData* along with
+  three event function callbacks. When the function *aabbOverlap* is called by Newton, the application resets a variable say *maximumImpactSpeed*.
+  Then for every call to the function *processCallback*, the application compares the impact speed for this contact with the value of
+  *maximumImpactSpeed*, if the value is larger, then the application stores the new value along with the position, and any other quantity desired.
+  When the application receives the call to *endCallback* the application plays a 3d sound based in the position and strength of the contact.
+*/
+void NewtonMaterialSetCompoundCollisionCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnCompoundSubCollisionAABBOverlap compoundAabbOverlap)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndNewtonMaterial* const material = PointerCast<ndNewtonMaterial, ndMaterial>(world->GetMaterial(id0, id1));
+	material->m_onSubShapeAABBOverlap = compoundAabbOverlap;
+}
+
+void* NewtonCompoundCollisionGetFirstNode(NewtonCollision* const compoundCollision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(compoundCollision);
+	NewtonCompoundCollision* const collision = PointerCast<NewtonCompoundCollision, ndShapeCompound>(instance->GetShape()->GetAsShapeCompound());
+	ndAssert(collision);
+	const ndShapeCompound::ndTreeArray& tree = collision->GetTree();
+
+	void* ptr = nullptr;
+	if (tree.GetCount())
+	{
+		ndShapeCompound::ndTreeArray::Iterator it(tree);
+		it.Begin();
+		ptr = it.GetNode();
+	}
+	return ptr;
+}
+
+void* NewtonCompoundCollisionGetNextNode(NewtonCollision* const compoundCollision, const void* const node)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(compoundCollision);
+	NewtonCompoundCollision* const collision = PointerCast<NewtonCompoundCollision, ndShapeCompound>(instance->GetShape()->GetAsShapeCompound());
+	ndAssert(collision);
+	const ndShapeCompound::ndTreeArray& tree = collision->GetTree();
+	ndAssert(tree.GetCount());
+
+	ndShapeCompound::ndTreeArray::Iterator it(tree);
+	it.Set(PointerCast<ndShapeCompound::ndTreeArray::ndNode, void>(node));
+	it++;
+	return it.GetNode();
+}
+
+
+void NewtonCompoundCollisionRemoveSubCollision(NewtonCollision* const compoundCollision, const void* const collisionNode)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(compoundCollision);
+	NewtonCompoundCollision* const collision = PointerCast<NewtonCompoundCollision, ndShapeCompound>(instance->GetShape()->GetAsShapeCompound());
+	ndAssert(collision);
+	collision->RemoveNode(PointerCast<ndShapeCompound::ndTreeArray::ndNode, void>(collisionNode));
+}
+
+void NewtonCompoundCollisionRemoveSubCollisionByIndex(NewtonCollision* const compoundCollision, int nodeIndex)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(compoundCollision);
+	NewtonCompoundCollision* const collision = PointerCast<NewtonCompoundCollision, ndShapeCompound>(instance->GetShape()->GetAsShapeCompound());
+	ndAssert(collision);
+
+	const ndShapeCompound::ndTreeArray& tree = collision->GetTree();
+	ndShapeCompound::ndTreeArray::ndNode* const node = tree.Find(nodeIndex);
+	if (node)
+	{
+		collision->RemoveNode(node);
+	}
+}
+
+
+void* NewtonCompoundCollisionGetNodeByIndex(NewtonCollision* const compoundCollision, int index)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(compoundCollision);
+	NewtonCompoundCollision* const collision = PointerCast<NewtonCompoundCollision, ndShapeCompound>(instance->GetShape()->GetAsShapeCompound());
+	ndAssert(collision);
+
+	const ndShapeCompound::ndTreeArray& tree = collision->GetTree();
+	ndShapeCompound::ndTreeArray::ndNode* const node = tree.Find(index);
+	return node;
+}
+
+NewtonCollision* NewtonCompoundCollisionGetCollisionFromNode(NewtonCollision* const compoundCollision, const void* const node)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(compoundCollision);
+	NewtonCompoundCollision* const collision = PointerCast<NewtonCompoundCollision, ndShapeCompound>(instance->GetShape()->GetAsShapeCompound());
+	ndAssert(collision);
+	const ndShapeInstance* const childShape = collision->GetShapeInstance(PointerCast<ndShapeCompound::ndTreeArray::ndNode, void>(node));
+	return PointerCast<NewtonCollision, ndShapeInstance>(childShape);
+}
+

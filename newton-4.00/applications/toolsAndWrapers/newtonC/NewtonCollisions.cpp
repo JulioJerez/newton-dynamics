@@ -315,15 +315,6 @@ class NewtonProceduralCollition : public ndShapeStaticProceduralMesh
 	ndVector m_box1;
 };
 
-NewtonCollision* NewtonCollisionCreateInstance(const NewtonCollision* const collision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
-	//return (NewtonCollision*) new (instance->GetAllocator()) dgCollisionInstance(*instance);
-	ndAssert(0);
-	return 0;
-}
-
 /*!
   Release a reference from this collision object returning control to Newton.
 
@@ -714,26 +705,6 @@ int NewtonCollisionIsStaticShape(const NewtonCollision* const collision)
 }
 
 /*!
-  Store a user defined value with a convex collision primitive.
-
-  @param collision is the pointer to a collision primitive.
-  @param id value to store with the collision primitive.
-
-  @return nothing
-
-  the application can store an id with any collision primitive. This id can be used to identify what type of collision primitive generated a contact.
-
-  See also: ::NewtonCollisionGetUserID, ::NewtonCreateBox, ::NewtonCreateSphere
-*/
-void NewtonCollisionSetUserID(const NewtonCollision* const collision, dLong id)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
-	//instance->SetUserDataID(id);
-	ndAssert(0);
-}
-
-/*!
   Return a user define value with a convex collision primitive.
 
   @param collision is the pointer to a convex collision primitive.
@@ -814,7 +785,6 @@ int NewtonCollisionGetMode(const NewtonCollision* const convexCollision)
 	ndAssert(0);
 	return 0;
 }
-
 
 /*!
   Calculate the closest point between a point and convex collision primitive.
@@ -911,56 +881,6 @@ int NewtonCollisionCollideContinue(const NewtonWorld* const newtonWorld, int max
 	//	*timeOfImpact, (dgTriplex*)contacts, (dgTriplex*)normals, penetration, attributeA, attributeB, maxSize, threadIndex);
 	ndAssert(0);
 	return 0;
-}
-
-/*!
-  Ray cast specific collision object.
-
-  @param *collisionPtr pointer to the collision object.
-  @param  *p0 - pointer to an array of at least three floats representing the ray origin in the local space of the geometry.
-  @param  *p1 - pointer to an array of at least three floats representing the ray end in the local space of the geometry.
-  @param *normal pointer to an array of at least three floats to hold the normal at the intersection point.
-  @param *attribute pointer to an array of at least one floats to hold the ID of the face hit by the ray.
-
-  @return the parametric value of the intersection, between 0.0 and 1.0, an value larger than 1.0 if the ray miss.
-
-  This function is intended for applications using newton collision system separate from the dynamics system, also for applications
-  implementing any king of special purpose logic like sensing distance to another object.
-
-  the ray most be local to the collisions geometry, for example and application ray casting the collision geometry of
-  of a rigid body, must first take the points p0, and p1 to the local space of the rigid body by multiplying the points by the
-  inverse of he rigid body transformation matrix.
-
-  See also: ::NewtonCollisionClosestPoint, ::NewtonCollisionSupportVertex, ::NewtonCollisionPointDistance, ::NewtonCollisionCollide, ::NewtonCollisionCalculateAABB
-*/
-dFloat NewtonCollisionRayCast(const NewtonCollision* const collisionPtr, const dFloat* const p0, const dFloat* const p1, dFloat* const normal, dLong* const attribute)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const collision = (dgCollisionInstance*)collisionPtr;
-	//
-	//const dgMatrix& matrix = collision->GetLocalMatrix();
-	//
-	//dgVector q0(matrix.UntransformVector(dgVector(p0[0], p0[1], p0[2], dgFloat32(0.0f))));
-	//dgVector q1(matrix.UntransformVector(dgVector(p1[0], p1[1], p1[2], dgFloat32(0.0f))));
-	//dgContactPoint contact;
-	//dgKinematicBody dommyBody;
-	//dommyBody.SetCollision(collision);
-	//dFloat t = collision->RayCast(q0, q1, dgFloat32(1.0f), contact, NULL, &dommyBody, NULL);
-	//dommyBody.SetCollision(NULL);
-	//
-	//if (t >= dFloat(0.0f) && t <= dFloat(dgFloat32(1.0f))) {
-	//	attribute[0] = (dLong)contact.m_shapeId0;
-	//
-	//	dgVector n(matrix.RotateVector(contact.m_normal));
-	//	normal[0] = n[0];
-	//	normal[1] = n[1];
-	//	normal[2] = n[2];
-	//}
-	//return t;
-
-	ndAssert(0);
-	return 0;
-
 }
 
 int NewtonConvexHullGetVertexData(const NewtonCollision* const convexHullCollision, dFloat** const vertexData, int* strideInBytes)
@@ -1282,7 +1202,7 @@ void NewtonCollisionGetMaterial(const NewtonCollision* const collision, NewtonCo
 	ndShapeMaterial material = instance->GetMaterial();
 
 	userData->m_userId = material.m_userId;
-	userData->m_userData.m_int = material.m_data.m_alignPad;
+	userData->m_userData.m_int = material.m_data.m_intData;
 	for (ndInt32 i = 0; i < sizeof(material.m_userParam) / sizeof(material.m_userParam[0]); ++i)
 	{
 		userData->m_userParam[i].m_ptr = material.m_userParam[i].m_ptrData;
@@ -1295,7 +1215,7 @@ void NewtonCollisionSetMaterial(const NewtonCollision* const collision, const Ne
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = userData->m_userId;
-	material.m_data.m_alignPad = userData->m_userData.m_int;
+	material.m_data.m_intData = userData->m_userData.m_int;
 	for (ndInt32 i = 0; i < sizeof(material.m_userParam) / sizeof(material.m_userParam[0]); ++i)
 	{
 		material.m_userParam[i].m_ptrData = userData->m_userParam[i].m_ptr;
@@ -1323,7 +1243,7 @@ void* NewtonCollisionGetSubCollisionHandle(const NewtonCollision* const collisio
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
-	return const_cast<void*>(instance->m_subCollisionHandle);
+	return PointerCast<void, void>(*instance->m_subCollisionHandle);
 }
 
 // Set a flag on a convex collision shape to indicate that no contacts should calculated for this shape.
@@ -1398,4 +1318,32 @@ void NewtonCollisionCalculateAABB(const NewtonCollision* const collisionPtr, con
 	p1[0] = q1.m_x;
 	p1[1] = q1.m_y;
 	p1[2] = q1.m_z;
+}
+
+/*!
+  Store a user defined value with a convex collision primitive.
+
+  @param collision is the pointer to a collision primitive.
+  @param id value to store with the collision primitive.
+
+  @return nothing
+
+  the application can store an id with any collision primitive. This id can be used to identify what type of collision primitive generated a contact.
+
+  See also: ::NewtonCollisionGetUserID, ::NewtonCreateBox, ::NewtonCreateSphere
+*/
+void NewtonCollisionSetUserID(const NewtonCollision* const collision, dLong id)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
+
+	ndShapeMaterial material = instance->GetMaterial();
+	material.m_data.m_intData = id;
+}
+
+NewtonCollision* NewtonCollisionCreateInstance(const NewtonCollision* const collision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = new ndShapeInstance(*PointerCast<ndShapeInstance, NewtonCollision>(collision));
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }

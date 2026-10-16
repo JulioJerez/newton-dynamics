@@ -1911,63 +1911,66 @@ ndAssert(0);
 
 void ndMeshEffect::PackAttibuteData()
 {
-	ndArray<ndInt32>attrIndexMap;
-	attrIndexMap.SetCount(m_attrib.m_pointChannel.GetCount());
-	m_attrib.CompactVertexData(m_points, &attrIndexMap[0], ndFloat32(1.0e-6f));
-
-	Iterator iter(*this);
-	for (iter.Begin(); iter; iter++)
+	if (m_attrib.GetCount())
 	{
-		ndEdge* const edge = &(*iter);
-		if (edge->m_incidentFace > 0)
-		{
-			edge->m_userData = ndUnsigned64(attrIndexMap[ndInt32(edge->m_userData)]);
-		}
-	}
+		ndArray<ndInt32>attrIndexMap;
+		attrIndexMap.SetCount(m_attrib.m_pointChannel.GetCount());
+		m_attrib.CompactVertexData(m_points, &attrIndexMap[0], ndFloat32(1.0e-6f));
 
-	ndMemSet(&attrIndexMap[0], -1, ndInt32(m_attrib.m_pointChannel.GetCount()));
-	ndAttibuteFormat tmpFormat(m_attrib);
-	m_attrib.Clear();
-
-	ndInt32 remapIndex = 0;
-	for (iter.Begin(); iter; iter++)
-	{
-		ndEdge* const edge = &(*iter);
-		if (edge->m_incidentFace > 0)
+		Iterator iter(*this);
+		for (iter.Begin(); iter; iter++)
 		{
-			ndInt32 index = ndInt32(edge->m_userData);
-			if (attrIndexMap[ndInt32 (edge->m_userData)] == -1)
+			ndEdge* const edge = &(*iter);
+			if (edge->m_incidentFace > 0)
 			{
-				attrIndexMap[index] = remapIndex;
-				remapIndex++;
-
-				m_attrib.m_pointChannel.PushBack(tmpFormat.m_pointChannel[index]);
-				if (tmpFormat.m_materialChannel.m_isValid)
-				{
-					m_attrib.m_materialChannel.PushBack(tmpFormat.m_materialChannel[index]);
-				}
-				if (tmpFormat.m_normalChannel.m_isValid)
-				{
-					m_attrib.m_normalChannel.PushBack(tmpFormat.m_normalChannel[index]);
-				}
-				if (tmpFormat.m_binormalChannel.m_isValid)
-				{
-					m_attrib.m_binormalChannel.PushBack(tmpFormat.m_binormalChannel[index]);
-				}
-				if (tmpFormat.m_uv0Channel.m_isValid)
-				{
-					m_attrib.m_uv0Channel.PushBack(tmpFormat.m_uv0Channel[index]);
-				}
-				if (tmpFormat.m_uv1Channel.m_isValid)
-				{
-					m_attrib.m_uv1Channel.PushBack(tmpFormat.m_uv1Channel[index]);
-				}
-				if (tmpFormat.m_colorChannel.m_isValid)
-				{
-					m_attrib.m_colorChannel.PushBack(tmpFormat.m_colorChannel[index]);
-				}
+				edge->m_userData = ndUnsigned64(attrIndexMap[ndInt32(edge->m_userData)]);
 			}
-			edge->m_userData = ndUnsigned64(attrIndexMap[index]);
+		}
+
+		ndMemSet(&attrIndexMap[0], -1, ndInt32(m_attrib.m_pointChannel.GetCount()));
+		ndAttibuteFormat tmpFormat(m_attrib);
+		m_attrib.Clear();
+
+		ndInt32 remapIndex = 0;
+		for (iter.Begin(); iter; iter++)
+		{
+			ndEdge* const edge = &(*iter);
+			if (edge->m_incidentFace > 0)
+			{
+				ndInt32 index = ndInt32(edge->m_userData);
+				if (attrIndexMap[ndInt32(edge->m_userData)] == -1)
+				{
+					attrIndexMap[index] = remapIndex;
+					remapIndex++;
+
+					m_attrib.m_pointChannel.PushBack(tmpFormat.m_pointChannel[index]);
+					if (tmpFormat.m_materialChannel.m_isValid)
+					{
+						m_attrib.m_materialChannel.PushBack(tmpFormat.m_materialChannel[index]);
+					}
+					if (tmpFormat.m_normalChannel.m_isValid)
+					{
+						m_attrib.m_normalChannel.PushBack(tmpFormat.m_normalChannel[index]);
+					}
+					if (tmpFormat.m_binormalChannel.m_isValid)
+					{
+						m_attrib.m_binormalChannel.PushBack(tmpFormat.m_binormalChannel[index]);
+					}
+					if (tmpFormat.m_uv0Channel.m_isValid)
+					{
+						m_attrib.m_uv0Channel.PushBack(tmpFormat.m_uv0Channel[index]);
+					}
+					if (tmpFormat.m_uv1Channel.m_isValid)
+					{
+						m_attrib.m_uv1Channel.PushBack(tmpFormat.m_uv1Channel[index]);
+					}
+					if (tmpFormat.m_colorChannel.m_isValid)
+					{
+						m_attrib.m_colorChannel.PushBack(tmpFormat.m_colorChannel[index]);
+					}
+				}
+				edge->m_userData = ndUnsigned64(attrIndexMap[index]);
+			}
 		}
 	}
 }

@@ -28,7 +28,7 @@
 #define LOAD_MESH_INDEX			201
 
 //#define DEFAULT_SCENE	0		// basic collision only
-#define DEFAULT_SCENE	1		// basic rigidbody
+//#define DEFAULT_SCENE	1		// basic rigidbody
 //#define DEFAULT_SCENE	2		// basic Stacks 
 //#define DEFAULT_SCENE	3		// basic friction
 //#define DEFAULT_SCENE	4		// basic sliding platform
@@ -40,7 +40,7 @@
 //#define DEFAULT_SCENE	10		// basic height field collision
 //#define DEFAULT_SCENE	11		// basic user height field 2d collision
 //#define DEFAULT_SCENE	12		// basic user marching cube 3d collision
-//#define DEFAULT_SCENE	13		// static compound scene collision 
+#define DEFAULT_SCENE	13		// static compound scene collision 
 //#define DEFAULT_SCENE	14		// basic convex approximate compound shapes
 //#define DEFAULT_SCENE	15		// basic model, and ai vehicle prop
 //#define DEFAULT_SCENE	16		// export articulated model

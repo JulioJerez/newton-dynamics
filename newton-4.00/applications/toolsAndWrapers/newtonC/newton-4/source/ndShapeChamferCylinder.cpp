@@ -254,7 +254,7 @@ ndVector ndShapeChamferCylinder::SupportVertexSpecial(const ndVector& dir, ndFlo
 	return sideDir.Normalize().Scale(m_radius);
 }
 
-ndFloat32 ndShapeChamferCylinder::RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const
+ndFloat32 ndShapeChamferCylinder::RayCast(ndRayCastNotify& callback, const ndVector& localP0, const ndVector& localP1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut, ndShapeInstance* const owner) const
 {
 	if (localP0.m_x > m_height) 
 	{
@@ -299,7 +299,7 @@ ndFloat32 ndShapeChamferCylinder::RayCast(ndRayCastNotify& callback, const ndVec
 	if (ndAbs(dir.m_x) > 0.9999f) 
 	{
 		//return ndShapeConvex::RayCast(localP0, localP1, maxT, contactOut, body, nullptr, nullptr);
-		return ndShapeConvex::RayCast(callback, localP0, localP1, maxT, body, contactOut);
+		return ndShapeConvex::RayCast(callback, localP0, localP1, maxT, body, contactOut, owner);
 	}
 
 	ndVector p0(localP0 & ndVector::m_triplexMask);

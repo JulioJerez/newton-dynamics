@@ -61,7 +61,7 @@ int NewtonMaterialGetDefaultGroupID(const NewtonWorld* const)
 int NewtonMaterialCreateGroupID(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	world->m_bodyMaterialGroup++;
 	return world->m_bodyMaterialGroup - 1;
 }
@@ -81,7 +81,7 @@ int NewtonMaterialCreateGroupID(const NewtonWorld* const newtonWorld)
 void NewtonMaterialDestroyAllGroupID(const NewtonWorld* const newtonWorld)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	world->ClearMaterials();
 }
 
@@ -101,7 +101,7 @@ void NewtonMaterialDestroyAllGroupID(const NewtonWorld* const newtonWorld)
 void NewtonMaterialSetDefaultElasticity(const NewtonWorld* const newtonWorld, int id0, int id1, dFloat elasticCoef)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 
 	ndMaterial* const material = world->GetMaterial(id0, id1);
 	material->m_restitution = ndClamp(elasticCoef, ndFloat32(0.0f), ndFloat32(1.0f));
@@ -125,7 +125,7 @@ void NewtonMaterialSetDefaultElasticity(const NewtonWorld* const newtonWorld, in
 void NewtonMaterialSetDefaultFriction(const NewtonWorld* const newtonWorld, int id0, int id1, dFloat staticFriction, dFloat kineticFriction)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	ndMaterial* const material = world->GetMaterial(id0, id1);
 
 	staticFriction = ndAbs(staticFriction);
@@ -180,8 +180,8 @@ void NewtonMaterialSetDefaultFriction(const NewtonWorld* const newtonWorld, int 
 void NewtonMaterialSetCollisionCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnAABBOverlap aabbOverlap, NewtonContactsProcess processCallback)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
-	ndNewtonMaterial* const material = static_cast<ndNewtonMaterial*>(world->GetMaterial(id0, id1));
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndNewtonMaterial* const material = PointerCast<ndNewtonMaterial, ndMaterial>(world->GetMaterial(id0, id1));
 
 	material->m_onAABBOverlap = aabbOverlap;
 	material->m_onContactsProcess = processCallback;
@@ -273,8 +273,6 @@ void NewtonMaterialJointResetSelftJointCollision(const NewtonWorld* const newton
 	ndAssert(0);
 }
 
-
-
 void NewtonMaterialSetContactGenerationCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnContactGeneration contactGeneration)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -283,45 +281,6 @@ void NewtonMaterialSetContactGenerationCallback(const NewtonWorld* const newtonW
 	//material->SetCollisionGenerationCallback((dgContactMaterial::OnContactGeneration)contactGeneration);
 	ndAssert(0);
 }
-
-/*!
-  Set userData and the functions event handlers for the material interaction between two physics materials .
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param  id0 - group id0.
-  @param  id1 - group id1.
-  @param  *compoundAabbOverlap: fixme (can this be NULL?)
-
-  @return Nothing.
-
-  When the AABB extents of the collision geometry of two bodies overlap, the Newton collision system retrieves the material
-  interaction that defines the behavior between the pair of bodies. The material interaction is collected from a database of materials,
-  indexed by the material gruopID assigned to the bodies. If the material is tagged as non collidable,
-  then no action is taken and the simulation continues.
-  If the material is tagged as collidable, and a *aabbOverlap* was set for this material, then the *aabbOverlap* function is called.
-  If the function  *aabbOverlap* returns 0, no further action is taken for this material (this can be use to ignore the interaction under
-  certain conditions). If the function  *aabbOverlap* returns 1, Newton proceeds to calculate the array of contacts for the pair of
-  colliding bodies. If the function *processCallback* was set, the application receives a callback for every contact found between the
-  two colliding bodies. Here the application can perform fine grain control over the behavior of the collision system. For example,
-  rejecting the contact, making the contact frictionless, applying special effects to the surface etc.
-  After all contacts are processed and if the function *endCallback* was set, Newton calls *endCallback*.
-  Here the application can collect information gathered during the contact-processing phase and provide some feedback to the player.
-  A typical use for the material callback is to play sound effects. The application passes the address of structure in the *userData* along with
-  three event function callbacks. When the function *aabbOverlap* is called by Newton, the application resets a variable say *maximumImpactSpeed*.
-  Then for every call to the function *processCallback*, the application compares the impact speed for this contact with the value of
-  *maximumImpactSpeed*, if the value is larger, then the application stores the new value along with the position, and any other quantity desired.
-  When the application receives the call to *endCallback* the application plays a 3d sound based in the position and strength of the contact.
-*/
-void NewtonMaterialSetCompoundCollisionCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnCompoundSubCollisionAABBOverlap compoundAabbOverlap)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
-	//
-	//material->SetCompoundCollisionCallback((dgContactMaterial::OnCompoundCollisionPrefilter)compoundAabbOverlap);
-	ndAssert(0);
-}
-
 
 /*!
   Get userData associated with this material.
@@ -485,42 +444,6 @@ dFloat NewtonMaterialGetContactPenetration(const NewtonMaterial* const materialH
 	ndAssert(0);
 	return 0;
 }
-
-NewtonCollision* NewtonMaterialGetBodyCollidingShape(const NewtonMaterial* const materialHandle, const NewtonBody* const body)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const bodyPtr = (dgBody*)body;
-	//dgContactMaterial* const material = (dgContactMaterial*)materialHandle;
-	//
-	//const dgCollisionInstance* collision = material->m_collision0;
-	//if (bodyPtr == material->m_body1) {
-	//	collision = material->m_collision1;
-	//}
-	//return (NewtonCollision*)collision;
-	ndAssert(0);
-	return 0;
-}
-
-
-//dFloat NewtonMaterialGetContactPruningTolerance(const NewtonBody* const body0, const NewtonBody* const body1)
-dFloat NewtonMaterialGetContactPruningTolerance(const NewtonJoint* const contactJointPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgContact* const contact = (dgContact*)contactJointPtr;
-	//return contact->GetPruningTolerance();
-	ndAssert(0);
-	return 0;
-}
-
-void NewtonMaterialSetContactPruningTolerance(const NewtonJoint* const contactJointPtr, dFloat tolerance)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgContact* const contact = (dgContact*)contactJointPtr;
-	//dgAssert(contact);
-	//contact->SetPruningTolerance(dgMax(tolerance, dFloat(1.0e-3f)));
-	ndAssert(0);
-}
-
 
 /*!
   Override the default softness value for the contact.
@@ -960,4 +883,22 @@ void NewtonMaterialSetDefaultCollidable(const NewtonWorld* const newtonWorld, in
 	{
 		material->m_flags &= ~ndContactOptions::m_collisionEnable;
 	}
+}
+
+NewtonCollision* NewtonMaterialGetBodyCollidingShape(const NewtonMaterial* const materialHandle, const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const bodyPtr = (dgBody*)body;
+	//dgContactMaterial* const material = (dgContactMaterial*)materialHandle;
+	//
+	//const dgCollisionInstance* collision = material->m_collision0;
+	//if (bodyPtr == material->m_body1) {
+	//	collision = material->m_collision1;
+	//}
+	//return (NewtonCollision*)collision;
+	ndContactMaterial* const material = PointerCast<ndContactMaterial, NewtonMaterial>(materialHandle);
+	ndBodyKinematic* const body = PointerCast<ndBodyKinematic, NewtonBody>(bodyPtr);
+
+	const ndShapeInstance* const instance = (body == material->m_body0) ? material->m_shapeInstance0 : material->m_shapeInstance1;
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }

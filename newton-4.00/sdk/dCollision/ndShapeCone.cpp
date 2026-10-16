@@ -248,9 +248,9 @@ ndVector ndShapeCone::SupportVertexSpecial(const ndVector& dir, ndFloat32) const
 	return p0;
 }
 
-ndFloat32 ndShapeCone::RayCast(ndRayCastNotify& callback, const ndVector& r0, const ndVector& r1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut) const
+ndFloat32 ndShapeCone::RayCast(ndRayCastNotify& callback, const ndVector& r0, const ndVector& r1, ndFloat32 maxT, const ndBody* const body, ndContactPoint& contactOut, ndShapeInstance* const owner) const
 {
-	return ndShapeConvex::RayCast(callback, r0, r1, maxT, body, contactOut);
+	return ndShapeConvex::RayCast(callback, r0, r1, maxT, body, contactOut, owner);
 }
 
 ndInt32 ndShapeCone::CalculatePlaneIntersection(const ndVector& normal, const ndVector& origin, ndVector* const contactsOut) const

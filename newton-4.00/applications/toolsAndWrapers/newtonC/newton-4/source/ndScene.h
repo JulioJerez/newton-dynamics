@@ -170,7 +170,6 @@ class ndScene : public ndThreadPool
 	ndSpinLock m_lock;
 	ndBvhNode* m_rootNode;
 	ndBodyKinematic* m_sentinelBody;
-	//ndContactNotify* m_contactNotifyCallback;
 	ndSharedPtr<ndContactNotify> m_contactNotifyCallback;
 	
 	ndFloat32 m_timestep;

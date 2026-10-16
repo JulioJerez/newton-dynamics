@@ -41,7 +41,7 @@ ndShapeInstance::ndShapeInstance(ndShape* const shape)
 	,m_scale(ndVector::m_one & ndVector::m_triplexMask)
 	,m_invScale(ndVector::m_one & ndVector::m_triplexMask)
 	,m_maxScale(ndVector::m_one & ndVector::m_triplexMask)
-	,m_shape(shape ? shape->AddRef() : shape)
+	,m_shape(shape)
 	,m_ownerBody(nullptr)
 	,m_subCollisionHandle(nullptr)
 	,m_parent(nullptr)
@@ -49,9 +49,9 @@ ndShapeInstance::ndShapeInstance(ndShape* const shape)
 	,m_scaleType(m_unit)
 	,m_collisionMode(true)
 {
-	if (shape)
+	if (m_shape)
 	{
-		ndShapeCompound* const compound = ((ndShape*)m_shape)->GetAsShapeCompound();
+		ndShapeCompound* const compound = m_shape->GetAsShapeCompound();
 		if (compound)
 		{
 			compound->m_owner = this;
@@ -68,31 +68,27 @@ ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance)
 	,m_invScale(instance.m_invScale)
 	,m_maxScale(instance.m_maxScale)
 	,m_shapeMaterial(instance.m_shapeMaterial)
-	,m_shape(instance.m_shape->AddRef())
+	,m_shape(instance.m_shape)
 	,m_ownerBody(instance.m_ownerBody)
-	,m_subCollisionHandle(instance.m_subCollisionHandle)
+	,m_subCollisionHandle(nullptr)
 	,m_parent(nullptr)
 	,m_skinMargin(instance.m_skinMargin)
 	,m_scaleType(instance.m_scaleType)
 	,m_collisionMode(instance.m_collisionMode)
 {
-	ndShapeCompound* const compound = ((ndShape*)m_shape)->GetAsShapeCompound();
-	if (compound)
+	ndAssert(*m_shape);
+	if (m_shape)
 	{
-		m_shape->Release();
-		m_shape = new ndShapeCompound(*compound);
-		m_shape->AddRef();
-
-		ndShapeCompound* const newCompound = ((ndShape*)m_shape)->GetAsShapeCompound();
-		if (newCompound)
+		ndShapeCompound* const compound = m_shape->GetAsShapeCompound();
+		if (compound)
 		{
-			newCompound->m_owner = this;
+			compound->m_owner = this;
 		}
 	}
 	ndAssert(m_shape);
 }
 
-ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance, ndShape* const shape)
+ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance, const ndSharedPtr<ndShape>& shape)
 	:ndContainersFreeListAlloc<ndShapeInstance>()
 	,m_globalMatrix(instance.m_globalMatrix)
 	,m_localMatrix(instance.m_localMatrix)
@@ -101,18 +97,18 @@ ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance, ndShape* const
 	,m_invScale(instance.m_invScale)
 	,m_maxScale(instance.m_maxScale)
 	,m_shapeMaterial(instance.m_shapeMaterial)
-	,m_shape(shape->AddRef())
+	,m_shape(shape)
 	,m_ownerBody(instance.m_ownerBody)
-	,m_subCollisionHandle(instance.m_subCollisionHandle)
+	,m_subCollisionHandle(nullptr)
 	,m_parent(nullptr)
 	,m_skinMargin(instance.m_skinMargin)
 	,m_scaleType(instance.m_scaleType)
 	,m_collisionMode(instance.m_collisionMode)
 {
-	ndAssert(m_shape);
+	ndAssert(*m_shape);
 	if (shape)
 	{
-		ndShapeCompound* const compound = ((ndShape*)m_shape)->GetAsShapeCompound();
+		ndShapeCompound* const compound = m_shape->GetAsShapeCompound();
 		if (compound)
 		{
 			compound->m_owner = this;
@@ -122,20 +118,16 @@ ndShapeInstance::ndShapeInstance(const ndShapeInstance& instance, ndShape* const
 
 ndShapeInstance::~ndShapeInstance()
 {
-	if (m_shape)
-	{
-		m_shape->Release();
-	}
 }
 
 ndShape* ndShapeInstance::GetShape()
 {
-	return (ndShape*)m_shape;
+	return *m_shape;
 }
 
 const ndShape* ndShapeInstance::GetShape() const
 {
-	return m_shape;
+	return *m_shape;
 }
 
 const ndMatrix& ndShapeInstance::GetAlignmentMatrix() const
@@ -340,35 +332,21 @@ ndUnsigned64 ndShapeInstance::GetUserDataID() const
 	return ndUnsigned64(m_shapeMaterial.m_userId);
 }
 
-void ndShapeInstance::SetShape(ndShape* const shape)
+//void ndShapeInstance::SetShape(ndShape* const shape)
+void ndShapeInstance::SetShape(ndShape* const)
 {
-	if (m_shape)
-	{
-		m_shape->Release();
-	}
-	m_shape = shape ? shape->AddRef() : shape;
+	ndAssert(0);
+	//if (m_shape)
+	//{
+	//	m_shape->Release();
+	//}
+	//m_shape = shape ? shape->AddRef() : shape;
 }
 
 ndShapeInstance* ndShapeInstance::GetParent() const
 {
 	return const_cast<ndShapeInstance*>(*m_parent);
 }
-
-//const char* ndShapeInstance::ClassName() const
-//{
-//	return "ndShapeInstance";
-//}
-//
-//const char* ndShapeInstance::StaticClassName()
-//{
-//	return "ndShapeInstance";
-//}
-//
-//const char* ndShapeInstance::SuperClassName() const
-//{
-//	return "ndShapeInstance";
-//}
-
 
 void ndShapeInstance::SavePLY(const char* const fileName) const
 {
@@ -444,36 +422,17 @@ ndShapeInstance& ndShapeInstance::operator=(const ndShapeInstance& instance)
 	m_skinMargin = instance.m_skinMargin;
 	m_collisionMode = instance.m_collisionMode;
 	m_ownerBody = instance.m_ownerBody;
-	m_subCollisionHandle = instance.m_subCollisionHandle;
 
-	if (m_shape != nullptr)
+	m_subCollisionHandle = nullptr;
+	ndShape* const cloneShape = *instance.m_shape ? instance.m_shape->Clone(this) : nullptr;
+	if (cloneShape == *instance.m_shape)
 	{
-		m_shape->Release();
-	}
-
-	const ndShapeCompound* const compound = ((ndShape*)instance.GetShape())->GetAsShapeCompound();
-	if (compound)
-	{
-		//ndShapeCompound* const selfShape = new ndShapeCompound();
-		//m_shape = selfShape->AddRef();
-		//
-		//selfShape->BeginAddRemove();
-		//ndShapeCompound::ndTreeArray::Iterator iter(compound->GetTree());
-		//for (iter.Begin(); iter; iter++)
-		//{
-		//	ndShapeCompound::ndNodeBase* const node = iter.GetNode()->GetInfo();
-		//	ndShapeInstance* const subInstance = node->GetShape();
-		//	selfShape->AddCollision(subInstance);
-		//}
-		//selfShape->EndAddRemove();
-		ndShapeCompound* const selfShape = new ndShapeCompound(*compound, this);
-		m_shape = selfShape->AddRef();
+		m_shape = instance.m_shape;  
 	}
 	else
 	{
-		m_shape = instance.m_shape->AddRef();
+		m_shape = ndSharedPtr<ndShape>(cloneShape);
 	}
-
 	return *this;
 }
 
@@ -494,7 +453,7 @@ ndShapeInfo ndShapeInstance::GetShapeInfo() const
 
 ndMatrix ndShapeInstance::CalculateInertia() const
 {
-	ndShape* const shape = (ndShape*)m_shape;
+	ndShape* const shape = const_cast<ndShape*>(*m_shape);
 	//if (shape->GetAsShapeNull() || !(shape->GetAsShapeConvex() || shape->GetAsShapeCompound()))
 	if (shape->GetAsShapeNull() || shape->GetAsShapeStaticMesh())
 	{
@@ -508,7 +467,8 @@ ndMatrix ndShapeInstance::CalculateInertia() const
 		for (it.Begin(); it; it++)
 		{
 			const ndShapeInstance* const subInStance = compound->GetShapeInstance(it.GetNode());
-			if (((ndShape*)subInStance->m_shape)->GetAsShapeStaticMesh())
+			//if (((ndShape*)subInStance->m_shape)->GetAsShapeStaticMesh())
+			if (subInStance->m_shape->GetAsShapeStaticMesh())
 			{
 				return ndGetZeroMatrix();
 			}
@@ -531,7 +491,7 @@ ndFloat32 ndShapeInstance::RayCast(ndRayCastNotify& callback, const ndVector& lo
 		{
 			case m_unit:
 			{
-				t = m_shape->RayCast(callback, localP0, localP1, maxT, body, contactOut);
+				t = m_shape->RayCast(callback, localP0, localP1, maxT, body, contactOut, const_cast<ndShapeInstance*>(this));
 				break;
 			}
 
@@ -539,7 +499,7 @@ ndFloat32 ndShapeInstance::RayCast(ndRayCastNotify& callback, const ndVector& lo
 			{
 				ndVector p0(localP0 * m_invScale);
 				ndVector p1(localP1 * m_invScale);
-				t = m_shape->RayCast(callback, p0, p1, maxT, body, contactOut);
+				t = m_shape->RayCast(callback, p0, p1, maxT, body, contactOut, const_cast<ndShapeInstance*>(this));
 				//if (t < maxT)
 				//{
 				//	ndAssert(!((ndShape*)m_shape)->GetAsShapeCompound());
@@ -553,10 +513,10 @@ ndFloat32 ndShapeInstance::RayCast(ndRayCastNotify& callback, const ndVector& lo
 			{
 				ndVector p0(localP0 * m_invScale);
 				ndVector p1(localP1 * m_invScale);
-				t = m_shape->RayCast(callback, p0, p1, maxT, body, contactOut);
+				t = m_shape->RayCast(callback, p0, p1, maxT, body, contactOut, const_cast<ndShapeInstance*>(this));
 				if (t < maxT)
 				{
-					ndAssert(!((ndShape*)m_shape)->GetAsShapeCompound());
+					ndAssert(!m_shape->GetAsShapeCompound());
 					ndVector normal(m_invScale * contactOut.m_normal);
 					contactOut.m_normal = normal.Normalize();
 					//contactOut.m_shapeInstance0 = this;
@@ -568,13 +528,13 @@ ndFloat32 ndShapeInstance::RayCast(ndRayCastNotify& callback, const ndVector& lo
 			case m_global:
 			default:
 			{
-				ndVector p0(m_alignmentMatrix.UntransformVector(localP0 * m_invScale));
-				ndVector p1(m_alignmentMatrix.UntransformVector(localP1 * m_invScale));
-				t = m_shape->RayCast(callback, p0, p1, maxT, body, contactOut);
+				const ndVector p0(m_alignmentMatrix.UntransformVector(localP0 * m_invScale) & ndVector::m_triplexMask);
+				const ndVector p1(m_alignmentMatrix.UntransformVector(localP1 * m_invScale) & ndVector::m_triplexMask);
+				t = m_shape->RayCast(callback, p0, p1, maxT, body, contactOut, const_cast<ndShapeInstance*>(this));
 				if (t < maxT)
 				{
-					ndAssert(!((ndShape*)m_shape)->GetAsShapeCompound());
-					ndVector normal(m_alignmentMatrix.RotateVector(m_invScale * contactOut.m_normal));
+					ndAssert(!m_shape->GetAsShapeCompound());
+					const ndVector normal(m_alignmentMatrix.RotateVector(m_invScale * contactOut.m_normal));
 					contactOut.m_normal = normal.Normalize();
 					//contactOut.m_shapeInstance0 = this;
 					//contactOut.m_shapeInstance1 = this;
@@ -648,10 +608,10 @@ void ndShapeInstance::SetScale(const ndVector& scale)
 	ndAssert(scaleY > ndFloat32(0.0f));
 	ndAssert(scaleZ > ndFloat32(0.0f));
 
-	if (((ndShape*)m_shape)->GetAsShapeCompound())
+	if (m_shape->GetAsShapeCompound())
 	{
 		ndAssert(m_scaleType == m_unit);
-		ndShapeCompound* const compound = ((ndShape*)m_shape)->GetAsShapeCompound();
+		ndShapeCompound* const compound = m_shape->GetAsShapeCompound();
 		compound->ApplyScale(scale);
 	}
 	else if ((ndAbs(scaleX - scaleY) < ndFloat32(1.0e-4f)) && (ndAbs(scaleX - scaleZ) < ndFloat32(1.0e-4f))) 
@@ -795,7 +755,7 @@ void ndShapeInstance::CalculateObb(ndVector& origin, ndVector& size) const
 
 void ndShapeInstance::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVector& p1) const
 {
-	ndShape* const shape = (ndShape*)m_shape;
+	ndShape* const shape = const_cast<ndShape*>(*m_shape);
 	if (shape->GetAsShapeStaticMesh())
 	{
 		ndMatrix scaleMatrix;
@@ -834,5 +794,7 @@ void ndShapeInstance::Serialize(ndMeshShapeInstance* const meshInstance) const
 	meshInstance->m_scale = m_scale;
 	meshInstance->m_localMatrix = m_localMatrix;
 	meshInstance->m_alignmentMatrix = m_alignmentMatrix;
-	meshInstance->m_shape = m_shape->GetMeshShape();
+
+	ndAssert(0);
+	//meshInstance->m_shape = m_shape->GetMeshShape();
 }

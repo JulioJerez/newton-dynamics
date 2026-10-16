@@ -671,3 +671,62 @@ int NewtonWorldConvexCast(const NewtonWorld* const newtonWorld, const dFloat* co
 	}
 	return contactCount;
 }
+
+
+/*!
+  Ray cast specific collision object.
+
+  @param *collisionPtr pointer to the collision object.
+  @param  *p0 - pointer to an array of at least three floats representing the ray origin in the local space of the geometry.
+  @param  *p1 - pointer to an array of at least three floats representing the ray end in the local space of the geometry.
+  @param *normal pointer to an array of at least three floats to hold the normal at the intersection point.
+  @param *attribute pointer to an array of at least one floats to hold the ID of the face hit by the ray.
+
+  @return the parametric value of the intersection, between 0.0 and 1.0, an value larger than 1.0 if the ray miss.
+
+  This function is intended for applications using newton collision system separate from the dynamics system, also for applications
+  implementing any king of special purpose logic like sensing distance to another object.
+
+  the ray most be local to the collisions geometry, for example and application ray casting the collision geometry of
+  of a rigid body, must first take the points p0, and p1 to the local space of the rigid body by multiplying the points by the
+  inverse of he rigid body transformation matrix.
+
+  See also: ::NewtonCollisionClosestPoint, ::NewtonCollisionSupportVertex, ::NewtonCollisionPointDistance, ::NewtonCollisionCollide, ::NewtonCollisionCalculateAABB
+*/
+dFloat NewtonCollisionRayCast(const NewtonCollision* const collision, const dFloat* const p0, const dFloat* const p1, dFloat* const normal, dLong* const attribute)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
+
+	class DommyNotify : public ndRayCastNotify
+	{
+		public:
+		virtual ndFloat32 OnRayCastAction(const ndContactPoint& contact, ndFloat32 intersetParam)
+		{
+			ndAssert(0);
+			return intersetParam;
+		}
+		
+		ndFloat32 m_param;
+	};
+	DommyNotify notify;
+
+	const ndMatrix matrix (instance->GetLocalMatrix());
+	const ndVector q0(matrix.UntransformVector(ndVector(p0[0], p0[1], p0[2], ndFloat32(0.0f))));
+	const ndVector q1(matrix.UntransformVector(ndVector(p1[0], p1[1], p1[2], ndFloat32(0.0f))));
+
+	ndContactPoint contact;
+	ndQuerieBody dommyBody(*instance);
+	ndFloat32 param = instance->RayCast(notify, q0 & ndVector::m_triplexMask, q1 & ndVector::m_triplexMask, &dommyBody, contact, ndFloat32(1.0f));
+
+	if (param >= ndFloat32(0.0f) && param <= ndFloat32(1.0f)) 
+	{
+		attribute[0] = dLong(contact.m_shapeId0);
+	
+		ndVector n(matrix.RotateVector(contact.m_normal));
+		normal[0] = n[0];
+		normal[1] = n[1];
+		normal[2] = n[2];
+	}
+	return param;
+}

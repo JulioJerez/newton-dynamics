@@ -42,6 +42,10 @@ ndMaterial::ndMaterial()
 	m_flags = m_collisionEnable | m_friction0Enable | m_friction1Enable;
 }
 
+ndMaterial::~ndMaterial()
+{
+}
+
 ndContactNotify::ndContactNotify(ndScene* const scene)
 	:ndClassAlloc()
 	,m_scene(scene)

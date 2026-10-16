@@ -34,6 +34,11 @@ ndShapeNull::~ndShapeNull()
 {
 }
 
+ndShape* ndShapeNull::Clone(ndShapeInstance* const) const
+{
+	return const_cast<ndShapeNull*>(this);
+}
+
 ndShapeNull* ndShapeNull::GetAsShapeNull()
 {
 	return this;
@@ -49,7 +54,7 @@ ndVector ndShapeNull::SupportVertexSpecial(const ndVector&, ndFloat32) const
 	return ndVector::m_zero;
 }
 
-ndFloat32 ndShapeNull::RayCast(ndRayCastNotify&, const ndVector&, const ndVector&, ndFloat32, const ndBody* const, ndContactPoint&) const
+ndFloat32 ndShapeNull::RayCast(ndRayCastNotify&, const ndVector&, const ndVector&, ndFloat32, const ndBody* const, ndContactPoint&, ndShapeInstance* const) const
 {
 	return ndFloat32(1.2f);
 }

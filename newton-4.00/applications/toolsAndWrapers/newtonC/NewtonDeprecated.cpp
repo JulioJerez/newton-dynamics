@@ -363,3 +363,18 @@ void NewtonBodySetSimulationState(const NewtonBody* const bodyPtr, const int sta
 	//}
 	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
+
+
+//dFloat NewtonMaterialGetContactPruningTolerance(const NewtonBody* const body0, const NewtonBody* const body1)
+dFloat NewtonMaterialGetContactPruningTolerance(const NewtonJoint* const contactJointPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
+	return ndFloat32 (0.0f);
+}
+
+void NewtonMaterialSetContactPruningTolerance(const NewtonJoint* const contactJointPtr, dFloat tolerance)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
+}
