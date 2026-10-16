@@ -378,3 +378,12 @@ void NewtonMaterialSetContactPruningTolerance(const NewtonJoint* const contactJo
 	TRACE_FUNCTION(__FUNCTION__);
 	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
+
+
+void NewtonCollisionSetSkinThickness(const NewtonCollision* const collisionPtr, dFloat thickness)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
+	//dgCollisionInstance* const collision = (dgCollisionInstance*)collisionPtr;
+	//collision->SetSkinThickness(thickness);
+}

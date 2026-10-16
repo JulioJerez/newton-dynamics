@@ -417,32 +417,6 @@ void NewtonBodySetCollision(const NewtonBody* const bodyPtr, const NewtonCollisi
 	ndAssert(0);
 }
 
-void NewtonBodySetCollisionScale(const NewtonBody* const bodyPtr, dFloat scaleX, dFloat scaleY, dFloat scaleZ)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//dgWorld* const world = body->GetWorld();
-	//NewtonCollision* const collision = NewtonBodyGetCollision(bodyPtr);
-	//
-	//dgFloat32 mass = body->GetInvMass().m_w > dgFloat32(0.0f) ? body->GetMass().m_w : dgFloat32(0.0f);
-	//NewtonCollisionSetScale(collision, scaleX, scaleY, scaleZ);
-	//
-	//NewtonJoint* nextJoint;
-	//for (NewtonJoint* joint = NewtonBodyGetFirstContactJoint(bodyPtr); joint; joint = nextJoint) {
-	//	dgConstraint* const contactJoint = (dgConstraint*)joint;
-	//	nextJoint = NewtonBodyGetNextContactJoint(bodyPtr, joint);
-	//	//world->DestroyConstraint (contactJoint);
-	//	contactJoint->ResetMaxDOF();
-	//}
-	//NewtonBodySetMassProperties(bodyPtr, mass, collision);
-	//body->UpdateCollisionMatrix(dgFloat32(0.0f), 0);
-	//world->GetBroadPhase()->ResetEntropy();
-
-	ndAssert(0);
-}
-
-
-
 /*!
   Get the material group id of the body.
 
@@ -1710,4 +1684,17 @@ NewtonJoint* NewtonBodyGetNextContactJoint(const NewtonBody* const body, const N
 		}
 	}
 	return nullptr;
+}
+
+void NewtonBodySetCollisionScale(const NewtonBody* const body, dFloat scaleX, dFloat scaleY, dFloat scaleZ)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const kinBody = PointerCast<ndBodyKinematic, NewtonBody>(body);
+	NewtonCollision* const collision = NewtonBodyGetCollision(body);
+	
+	ndFloat32 mass = kinBody->GetInvMass() > ndFloat32(0.0f) ? kinBody->GetMassMatrix().m_w : ndFloat32(0.0f);
+	NewtonCollisionSetScale(collision, scaleX, scaleY, scaleZ);
+	
+	NewtonBodySetMassProperties(body, mass, collision);
+	kinBody->SetMatrixUpdateScene(kinBody->GetMatrix());
 }

@@ -758,15 +758,6 @@ dFloat NewtonCollisionGetSkinThickness(const NewtonCollision* const collisionPtr
 	return 0;
 }
 
-void NewtonCollisionSetSkinThickness(const NewtonCollision* const collisionPtr, dFloat thickness)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const collision = (dgCollisionInstance*)collisionPtr;
-	//collision->SetSkinThickness(thickness);
-	ndAssert(0);
-}
-
-
 // Return the trigger volume flag of this shape.
 //
 // @param convexCollision is the pointer to a convex collision primitive.
