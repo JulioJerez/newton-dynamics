@@ -96,16 +96,6 @@ dFloat NewtonUserJointGetRowAcceleration(const NewtonJoint* const joint)
 	return 0;
 }
 
-
-dFloat NewtonUserJointCalculateRowZeroAcceleration(const NewtonJoint* const joint)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//NewtonUserJoint* const userJoint = (NewtonUserJoint*)joint;
-	//return userJoint->CalculateZeroMotorAcceleration();
-	ndAssert(0);
-	return 0;
-}
-
 /*!
   Calculates the row acceleration to satisfy the specified the spring damper system.
 
@@ -435,4 +425,12 @@ void NewtonUserJointSetRowMaximumFriction(const NewtonJoint* const joint, dFloat
 	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
 	ndConstraintDescritor& desc = **userJoint->m_param;
 	userJoint->SetHighFriction(desc, friction);
+}
+
+dFloat NewtonUserJointCalculateRowZeroAcceleration(const NewtonJoint* const joint)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
+	ndConstraintDescritor& desc = **userJoint->m_param;
+	return userJoint->GetMotorZeroAcceleration(desc);
 }

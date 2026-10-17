@@ -234,7 +234,7 @@ class ndSkeletonContainer
 	// low level support
 	void BuildSparseMatrix();
 	void InitLoopMassMatrix();
-	void FactorizationUpdate();
+	ndInt32 GetTotalJoints() const;
 	void ConditionMassMatrix() const;
 	ndFloat32* GetScratchBuffer(ndInt32 size) const;
 	void RebuildMassMatrix(const ndFloat32* const diagDamp) const;

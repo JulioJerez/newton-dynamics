@@ -264,6 +264,7 @@ inline void glMaterialParam (GLenum face, GLenum pname, const dFloat *params)
 //#define DEMO_CHECK_ASYN_UPDATE
 #define dRAND_MAX		0x0fffffff
 
+dFloat dRandf();
 unsigned dRand ();
 void dSetRandSeed (unsigned seed);
 dFloat dGaussianRandom (dFloat amp);

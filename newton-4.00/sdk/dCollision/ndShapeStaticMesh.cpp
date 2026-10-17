@@ -46,6 +46,11 @@ void ndPatchMesh::GetFacesPatch(ndPolygonMeshDesc* const data)
 		m_vertexArrayHasDuplicated = false;
 	}
 
+	if (m_faceArray.GetCount() == m_faceArray.GetCapacity())
+	{
+		m_faceArray.SetCount(m_faceArray.GetCapacity() - 1);
+	}
+
 	// generate the scan prefit
 	ndInt32 scanSum = 0;
 	for (ndInt32 i = 0; i < m_faceArray.GetCount(); ++i)

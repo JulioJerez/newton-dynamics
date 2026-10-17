@@ -50,6 +50,11 @@ unsigned dRand ()
 	return ___dRandSeed___ & dRAND_MAX;
 }
 
+dFloat dRandf()
+{
+	return dFloat(dRand()) / dFloat(dRAND_MAX);
+}
+
 // a pseudo Gaussian random with mean 0 and variance 0.5f
 dFloat dGaussianRandom (dFloat amp)
 {

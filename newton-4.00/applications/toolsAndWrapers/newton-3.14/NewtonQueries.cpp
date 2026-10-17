@@ -730,3 +730,59 @@ dFloat NewtonCollisionRayCast(const NewtonCollision* const collision, const dFlo
 	}
 	return param;
 }
+
+
+/*!
+  Add buoyancy force and torque for bodies immersed in a fluid.
+
+  @param convexCollision fixme
+  @param matrix fixme
+  @param fluidPlane fixme
+  @param centerOfBuoyancy fixme
+
+  @return Nothing.
+
+  This function is only effective when called from *NewtonApplyForceAndTorque callback*
+
+  This function adds buoyancy force and torque to a body when it is immersed in a fluid.
+  The force is calculated according to Archimedes Buoyancy Principle. When the parameter *buoyancyPlane* is set to NULL, the body is considered
+  to completely immersed in the fluid. This can be used to simulate boats and lighter than air vehicles etc..
+
+  If *buoyancyPlane* return 0 buoyancy calculation for this collision primitive is ignored, this could be used to filter buoyancy calculation
+  of compound collision geometry with different IDs.
+
+  See also: ::NewtonConvexCollisionCalculateVolume
+*/
+dFloat NewtonConvexCollisionCalculateBuoyancyVolume(const NewtonCollision* const convexCollision, const dFloat* const matrixPtr, const dFloat* const fluidPlane, dFloat* const centerOfBuoyancy)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(convexCollision);
+	const ndVector plane(fluidPlane[0], fluidPlane[1], fluidPlane[2], fluidPlane[3]);
+	const ndMatrix matrix(GetMatrix(matrixPtr));
+
+	ndVector com;
+	ndFloat32 volume = instance->CalculateBuoyancyCenterOfPresure(com, matrix, plane);
+	centerOfBuoyancy[0] = com[0];
+	centerOfBuoyancy[1] = com[1];
+	centerOfBuoyancy[2] = com[2];
+	com.m_w = ndFloat32(0.0f);
+	return volume;
+}
+
+/*!
+  calculate the total volume defined by a convex collision geometry.
+
+  @param *convexCollision pointer to the collision.
+
+  @return collision geometry volume. This function will return zero if the body collision geometry is no convex.
+
+  The total volume calculated by the function is only an approximation of the ideal volume. This is not an error, it is a fact resulting from the polygonal representation of convex solids.
+
+  This function can be used to assist the application in calibrating features like fluid density weigh factor when calibrating buoyancy forces for more realistic result.
+*/
+dFloat NewtonConvexCollisionCalculateVolume(const NewtonCollision* const convexCollision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(convexCollision);
+	return instance->GetVolume();
+}

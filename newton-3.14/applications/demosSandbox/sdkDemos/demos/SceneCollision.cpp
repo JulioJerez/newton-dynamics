@@ -70,7 +70,10 @@ class ComplexScene: public DemoEntity
 		for (void* proxyNode = NewtonSceneCollisionGetFirstNode(m_sceneCollision); proxyNode; proxyNode = NewtonSceneCollisionGetNextNode(m_sceneCollision, proxyNode)) {
 			NewtonCollision* const collision = NewtonSceneCollisionGetCollisionFromNode (m_sceneCollision, proxyNode);
 			DemoMesh* const mesh = (DemoMesh*) NewtonCollisionGetUserData(collision);
-			mesh->Release();
+			if (mesh)
+			{
+				mesh->Release();
+			}
 		}
 	}
 
@@ -88,12 +91,15 @@ class ComplexScene: public DemoEntity
 			NewtonCollision* const collision = NewtonSceneCollisionGetCollisionFromNode (m_sceneCollision, proxyNode);
 			DemoMesh* const mesh = (DemoMesh*) NewtonCollisionGetUserData(collision);
 
-			glPushMatrix();
-			NewtonCollisionGetMatrix (collision, &matrix[0][0]);
-			glMultMatrix(&matrix[0][0]);
-			mesh->Render(scene);
+			if (mesh)
+			{
+				glPushMatrix();
+				NewtonCollisionGetMatrix(collision, &matrix[0][0]);
+				glMultMatrix(&matrix[0][0]);
+				mesh->Render(scene);
 
-			glPopMatrix();
+				glPopMatrix();
+			}
 		}
 
 		// restore the matrix before leaving
@@ -226,15 +232,12 @@ class ComplexScene: public DemoEntity
 
 		// add compound to the scene collision
 		dMatrix matrix;
-		void* proxy;
-		NewtonCollision* shape;
-		
 		matrix = dRollMatrix(15.0f * dDegreeToRad);
 		matrix.m_posit.m_y = 3.0f;
 		matrix.m_posit.m_x = 3.0f;
 		matrix.m_posit.m_z = 0.0f;
-		proxy = NewtonSceneCollisionAddSubCollision (m_sceneCollision, box);
-		shape = NewtonSceneCollisionGetCollisionFromNode (m_sceneCollision, proxy);
+		void* proxy = NewtonSceneCollisionAddSubCollision (m_sceneCollision, box);
+		NewtonCollision* shape = NewtonSceneCollisionGetCollisionFromNode (m_sceneCollision, proxy);
 		NewtonSceneCollisionSetSubCollisionMatrix (m_sceneCollision, proxy, &matrix[0][0]);	
 		NewtonCollisionSetUserData(shape, mesh);
 		mesh->AddRef();
@@ -263,10 +266,10 @@ class ComplexScene: public DemoEntity
 
 		// add a collision tree to the scene
 		AddCollisionTreeMesh(scene);
-
+		
 		// add a hight field to the scene
 		AddCollisionHeightFieldMesh(scene);
-
+		
 		// add compound 
 		AddCollisionSingleShape(scene);
 

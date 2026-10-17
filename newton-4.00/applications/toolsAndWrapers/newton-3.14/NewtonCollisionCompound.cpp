@@ -39,7 +39,7 @@ class NewtonCompoundCollision : public ndShapeCompound
 		:ndShapeCompound(source, parent)
 	{
 	}
-	
+
 	virtual ndShape* Clone(ndShapeInstance* const parent) const override
 	{
 		return new NewtonCompoundCollision(*this, parent);
@@ -66,6 +66,21 @@ NewtonCollision* NewtonCreateCompoundCollision(const NewtonWorld* const, int sha
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
+}
+
+/*!
+  Create a height field collision geometry.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param shapeID fixme
+
+  @return Pointer to the collision.
+
+*/
+NewtonCollision* NewtonCreateSceneCollision(const NewtonWorld* const world, int shapeID)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	return NewtonCreateCompoundCollision(world, shapeID);
 }
 
 /*!
@@ -146,24 +161,20 @@ void* NewtonCompoundCollisionAddSubCollision(NewtonCollision* const compoundColl
 	ndShapeInstance* const childInstance = PointerCast<ndShapeInstance, NewtonCollision>(convexCollision);
 
 	NewtonCompoundCollision* const collision = PointerCast<NewtonCompoundCollision, ndShapeCompound>(compoundInstance->GetShape()->GetAsShapeCompound());
-	if (collision && childInstance->GetShape()->GetAsShapeConvex())
+	if (collision && !childInstance->GetShape()->GetAsShapeCompound())
 	{
 		return collision->AddCollision(childInstance);
 	}
+	// compound as child is not supported.
+	ndAssert(0);
 	return nullptr;
 }
 
-void NewtonCompoundCollisionSetSubCollisionMatrix(NewtonCollision* const compoundCollision, const void* const collisionNode, const dFloat* const matrix)
+void* NewtonSceneCollisionAddSubCollision(NewtonCollision* const sceneCollision, const NewtonCollision* const collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const compoundInstance = (dgCollisionInstance*)compoundCollision;
-	//if (compoundInstance->IsType(dgCollision::dgCollisionCompound_RTTI)) {
-	//	dgCollisionCompound* const collision = (dgCollisionCompound*)compoundInstance->GetChildShape();
-	//	collision->SetCollisionMatrix((dgCollisionCompound::dgTreeArray::dgTreeNode*)collisionNode, dgMatrix(matrix));
-	//}
-	ndAssert(0);
+	return NewtonCompoundCollisionAddSubCollision(sceneCollision, collision);
 }
-
 
 int NewtonCompoundCollisionGetNodeIndex(NewtonCollision* const compoundCollision, const void* const node)
 {
@@ -178,87 +189,28 @@ int NewtonCompoundCollisionGetNodeIndex(NewtonCollision* const compoundCollision
 	return 0;
 }
 
-
-/*!
-  Create a height field collision geometry.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param shapeID fixme
-
-  @return Pointer to the collision.
-
-*/
-NewtonCollision* NewtonCreateSceneCollision(const NewtonWorld* const, int shapeID)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//
-	//dgCollisionInstance* const collision = world->CreateScene();
-	//
-	//collision->SetUserDataID(dgUnsigned32(shapeID));
-	//return (NewtonCollision*)collision;
-	ndAssert(0);
-	return nullptr;
-}
-
-NewtonCollision* NewtonSceneCollisionGetCollisionFromNode(NewtonCollision* const sceneCollision, const void* const node)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-	//return NewtonCompoundCollisionGetCollisionFromNode(sceneCollision, node);
-	return nullptr;
-}
-
 void* NewtonSceneCollisionGetFirstNode(NewtonCollision* const sceneCollision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//return NewtonCompoundCollisionGetFirstNode(sceneCollision);
-	ndAssert(0);
-	return nullptr;
+	return NewtonCompoundCollisionGetFirstNode(sceneCollision);
 }
 
 void* NewtonSceneCollisionGetNextNode(NewtonCollision* const sceneCollision, const void* const node)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//return NewtonCompoundCollisionGetNextNode(sceneCollision, node);
-	ndAssert(0);
-	return nullptr;
+	return NewtonCompoundCollisionGetNextNode(sceneCollision, node);
 }
 
 void NewtonSceneCollisionBeginAddRemove(NewtonCollision* const sceneCollision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//NewtonCompoundCollisionBeginAddRemove(sceneCollision);
-	ndAssert(0);
+	NewtonCompoundCollisionBeginAddRemove(sceneCollision);
 }
 
 void NewtonSceneCollisionEndAddRemove(NewtonCollision* const sceneCollision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//NewtonCompoundCollisionEndAddRemove(sceneCollision);
-	ndAssert(0);
-}
-
-void NewtonSceneCollisionSetSubCollisionMatrix(NewtonCollision* const sceneCollision, const void* const collisionNode, const dFloat* const matrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//NewtonCompoundCollisionSetSubCollisionMatrix(sceneCollision, collisionNode, matrix);
-	ndAssert(0);
-}
-
-void* NewtonSceneCollisionAddSubCollision(NewtonCollision* const sceneCollision, const NewtonCollision* const collision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	//dgCollisionInstance* const sceneInstance = (dgCollisionInstance*)sceneCollision;
-	//dgCollisionInstance* const sceneInstanceChild = (dgCollisionInstance*)collision;
-	//if (sceneInstance->IsType(dgCollision::dgCollisionScene_RTTI) && !sceneInstanceChild->IsType(dgCollision::dgCollisionCompound_RTTI)) {
-	//	dgCollisionScene* const collision1 = (dgCollisionScene*)sceneInstance->GetChildShape();
-	//	return collision1->AddCollision(sceneInstanceChild);
-	//}
-	//return NULL;
-	ndAssert(0);
-	return nullptr;
+	NewtonCompoundCollisionEndAddRemove(sceneCollision);
 }
 
 void NewtonSceneCollisionRemoveSubCollision(NewtonCollision* const sceneCollision, const void* const collisionNode)
@@ -417,5 +369,25 @@ NewtonCollision* NewtonCompoundCollisionGetCollisionFromNode(NewtonCollision* co
 	ndAssert(collision);
 	const ndShapeInstance* const childShape = collision->GetShapeInstance(PointerCast<ndShapeCompound::ndTreeArray::ndNode, void>(node));
 	return PointerCast<NewtonCollision, ndShapeInstance>(childShape);
+}
+
+void NewtonCompoundCollisionSetSubCollisionMatrix(NewtonCollision* const compoundCollision, const void* const collisionNode, const dFloat* const matrixPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(NewtonCompoundCollisionGetCollisionFromNode(compoundCollision, collisionNode));
+	ndMatrix matrix(matrixPtr);
+	instance->SetLocalMatrix(matrix);
+}
+
+NewtonCollision* NewtonSceneCollisionGetCollisionFromNode(NewtonCollision* const sceneCollision, const void* const node)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	return NewtonCompoundCollisionGetCollisionFromNode(sceneCollision, node);
+}
+
+void NewtonSceneCollisionSetSubCollisionMatrix(NewtonCollision* const sceneCollision, const void* const collisionNode, const dFloat* const matrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonCompoundCollisionSetSubCollisionMatrix(sceneCollision, collisionNode, matrix);
 }
 

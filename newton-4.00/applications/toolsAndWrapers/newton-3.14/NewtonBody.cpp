@@ -220,28 +220,6 @@ void NewtonBodyGetInvMass(const NewtonBody* const bodyPtr, dFloat* const invMass
 	ndAssert(0);
 }
 
-
-void NewtonBodyGetInertiaMatrix(const NewtonBody* const bodyPtr, dFloat* const inertiaMatrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//
-	//dgMatrix matrix(body->CalculateInertiaMatrix());
-	//memcpy(inertiaMatrix, &matrix[0][0], sizeof(dgMatrix));
-
-	ndAssert(0);
-}
-
-void NewtonBodyGetInvInertiaMatrix(const NewtonBody* const bodyPtr, dFloat* const invInertiaMatrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//
-	//dgMatrix matrix(body->CalculateInvInertiaMatrix());
-	//memcpy(invInertiaMatrix, &matrix[0][0], sizeof(dgMatrix));
-	ndAssert(0);
-}
-
 void NewtonBodySetMatrixNoSleep(const NewtonBody* const bodyPtr, const dFloat* const matrixPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -416,32 +394,6 @@ void NewtonBodySetCollision(const NewtonBody* const bodyPtr, const NewtonCollisi
 
 	ndAssert(0);
 }
-
-void NewtonBodySetCollisionScale(const NewtonBody* const bodyPtr, dFloat scaleX, dFloat scaleY, dFloat scaleZ)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//dgWorld* const world = body->GetWorld();
-	//NewtonCollision* const collision = NewtonBodyGetCollision(bodyPtr);
-	//
-	//dgFloat32 mass = body->GetInvMass().m_w > dgFloat32(0.0f) ? body->GetMass().m_w : dgFloat32(0.0f);
-	//NewtonCollisionSetScale(collision, scaleX, scaleY, scaleZ);
-	//
-	//NewtonJoint* nextJoint;
-	//for (NewtonJoint* joint = NewtonBodyGetFirstContactJoint(bodyPtr); joint; joint = nextJoint) {
-	//	dgConstraint* const contactJoint = (dgConstraint*)joint;
-	//	nextJoint = NewtonBodyGetNextContactJoint(bodyPtr, joint);
-	//	//world->DestroyConstraint (contactJoint);
-	//	contactJoint->ResetMaxDOF();
-	//}
-	//NewtonBodySetMassProperties(bodyPtr, mass, collision);
-	//body->UpdateCollisionMatrix(dgFloat32(0.0f), 0);
-	//world->GetBroadPhase()->ResetEntropy();
-
-	ndAssert(0);
-}
-
-
 
 /*!
   Get the material group id of the body.
@@ -695,20 +647,6 @@ void NewtonBodyApplyImpulseArray(const NewtonBody* const bodyPtr, int impulseCou
 	//	body->ApplyImpulsesAtPoint(impulseCount, strideInByte, impulseArray, pointArray, timestep);
 	//}
 	ndAssert(0);
-}
-
-void NewtonBodyApplyImpulsePair(const NewtonBody* const bodyPtr, dFloat* const linearImpulse, dFloat* const angularImpulse, dFloat timestep)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//
-	//if (body->GetInvMass().m_w > dgFloat32(0.0f)) {
-	//	dgVector l(linearImpulse[0], linearImpulse[1], linearImpulse[2], dgFloat32(0.0f));
-	//	dgVector a(angularImpulse[0], angularImpulse[1], angularImpulse[2], dgFloat32(0.0f));
-	//	body->ApplyImpulsePair(l, a, timestep);
-	//}
-	ndAssert(0);
-
 }
 
 
@@ -1710,4 +1648,48 @@ NewtonJoint* NewtonBodyGetNextContactJoint(const NewtonBody* const body, const N
 		}
 	}
 	return nullptr;
+}
+
+void NewtonBodySetCollisionScale(const NewtonBody* const body, dFloat scaleX, dFloat scaleY, dFloat scaleZ)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const kinBody = PointerCast<ndBodyKinematic, NewtonBody>(body);
+	NewtonCollision* const collision = NewtonBodyGetCollision(body);
+	
+	ndFloat32 mass = kinBody->GetInvMass() > ndFloat32(0.0f) ? kinBody->GetMassMatrix().m_w : ndFloat32(0.0f);
+	NewtonCollisionSetScale(collision, scaleX, scaleY, scaleZ);
+	
+	NewtonBodySetMassProperties(body, mass, collision);
+	kinBody->SetMatrixUpdateScene(kinBody->GetMatrix());
+}
+
+void NewtonBodyGetInertiaMatrix(const NewtonBody* const body, dFloat* const inertiaMatrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const kinBody = PointerCast<ndBodyKinematic, NewtonBody>(body);
+
+	ndMatrix matrix(kinBody->CalculateInertiaMatrix());
+	ndMemCpy(inertiaMatrix, &matrix[0][0], sizeof(ndMatrix) / sizeof(ndFloat32));
+}
+
+void NewtonBodyGetInvInertiaMatrix(const NewtonBody* const body, dFloat* const invInertiaMatrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	ndBodyKinematic* const kinBody = PointerCast<ndBodyKinematic, NewtonBody>(body);
+	ndMatrix matrix(kinBody->CalculateInvInertiaMatrix());
+	//memcpy(invInertiaMatrix, &matrix[0][0], sizeof(dgMatrix));
+	ndMemCpy(invInertiaMatrix, &matrix[0][0], sizeof(ndMatrix) / sizeof(ndFloat32));
+}
+
+void NewtonBodyApplyImpulsePair(const NewtonBody* const body, dFloat* const linearImpulse, dFloat* const angularImpulse, dFloat timestep)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyDynamic* const kinBody = PointerCast<ndBodyKinematic, NewtonBody>(body)->GetAsBodyDynamic();
+	if (kinBody && (kinBody->GetInvMass() > ndFloat32(0.0f)))
+	{
+		ndVector l(linearImpulse[0], linearImpulse[1], linearImpulse[2], ndFloat32(0.0f));
+		ndVector a(angularImpulse[0], angularImpulse[1], angularImpulse[2], ndFloat32(0.0f));
+		kinBody->ApplyImpulsePair(l, a, timestep);
+	}
 }
