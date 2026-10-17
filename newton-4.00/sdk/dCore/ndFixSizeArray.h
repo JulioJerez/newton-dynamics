@@ -106,7 +106,7 @@ T ndFixSizeArray<T, maxSize>::Pop()
 template<class T, ndInt32 maxSize>
 void ndFixSizeArray<T, maxSize>::PushBack(const T& element)
 {
-	ndAssert(m_count <= maxSize);
+	ndAssert(m_count < maxSize);
 	m_array[m_count] = element;
 	m_count++;
 }
