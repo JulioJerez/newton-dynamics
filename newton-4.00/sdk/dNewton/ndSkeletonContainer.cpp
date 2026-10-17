@@ -964,11 +964,6 @@ void ndSkeletonContainer::RebuildMassMatrix(const ndFloat32* const diagDamp) con
 	}
 }
 
-void ndSkeletonContainer::FactorizationUpdate()
-{
-	ND_PROFILE_ZONE();
-}
-
 void ndSkeletonContainer::FactorizeMatrix(ndInt32 size, ndInt32 stride, ndFloat32* const matrix, ndFloat32* const diagDamp) const
 {
 	ND_PROFILE_ZONE();
@@ -1560,6 +1555,11 @@ void ndSkeletonContainer::SolveImmediate(ndIkSolver& solverInfo)
 	{
 		UpdateForcesImmediate(x);
 	}
+}
+
+ndInt32 ndSkeletonContainer::GetTotalJoints() const
+{
+	return ndInt32 (m_nodeList.GetCount() + m_transientLoopingContacts.GetCount() + m_transientLoopingJoints.GetCount() + m_permanentLoopingJoints.GetCount());
 }
 
 void ndSkeletonContainer::InitLoopMassMatrix()

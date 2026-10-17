@@ -39,7 +39,6 @@ class ndIkSolver: public ndClassAlloc
 
 	D_NEWTON_API void SolverBegin(ndSkeletonContainer* const skeleton, ndConstraint* const* loopConstraint, ndInt32 loopsCount, ndWorld* const world, ndFloat32 timestep, ndInt32 threadId);
 	D_NEWTON_API void Solve();
-	D_NEWTON_API void FactorizationUpdate();
 	D_NEWTON_API void UpdateJointAcceleration(ndConstraint* const joint);
 	D_NEWTON_API void SolverEnd();
 
