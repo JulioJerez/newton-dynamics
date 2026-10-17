@@ -480,10 +480,10 @@ class ndMeshEffect: public ndPolyhedra
 
 	D_COLLISION_API ndMeshEffect* ConvexMeshIntersection(const ndMeshEffect* const convexMesh) const;
 	D_COLLISION_API ndMeshEffect* InverseConvexMeshIntersection(const ndMeshEffect* const convexMesh) const;
-	D_COLLISION_API ndMeshEffect* CreateVoronoiConvexDecomposition(const ndArray<ndVector>& pointCloud, ndInt32 interiorMaterialIndex, const ndMatrix& textureProjectionMatrix);
-
 	D_COLLISION_API void DeserializeFromXml(const nd::TiXmlElement* const xmlNode);
 	D_COLLISION_API void SerializeToXml(nd::TiXmlElement* const xmlNode, const ndTree<ndString, ndUnsigned32>& boneMap) const;
+
+	D_COLLISION_API static ndMeshEffect* CreateVoronoiConvexDecomposition(const ndArray<ndVector>& pointCloud, ndInt32 interiorMaterialIndex, const ndMatrix& textureProjectionMatrix);
 
 	protected:
 	D_COLLISION_API void Init();

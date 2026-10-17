@@ -3134,9 +3134,6 @@ ndMatrix ndPolyhedra::CalculateSphere(ndBigVector& size, const ndFloat64* const 
 		}
 	}
 	ndAssert(vertexCountIndex <= vertexCount);
-
-	//ndMatrix axis(dGetIdentityMatrix());
-	//dgObb sphere(axis);
 	ndConvexHull3d convexHull(&pool[0].m_x, sizeof(ndBigVector), vertexCountIndex, 0.0f);
 
 	size = ndBigVector::m_zero;
@@ -3192,7 +3189,7 @@ ndMatrix ndPolyhedra::CalculateSphere(ndBigVector& size, const ndFloat64* const 
 		sphere.m_front = ndVector(ndFloat32(Ixx), ndFloat32(Ixy), ndFloat32(Ixz), ndFloat32(0.0f));
 		sphere.m_up    = ndVector(ndFloat32(Ixy), ndFloat32(Iyy), ndFloat32(Iyz), ndFloat32(0.0f));
 		sphere.m_right = ndVector(ndFloat32(Ixz), ndFloat32(Iyz), ndFloat32(Izz), ndFloat32(0.0f));
-		//ndVector eigenValues(sphere.EigenVectors());
+		const ndVector eigenValues(sphere.EigenVectors());
 
 		ndVector minVal(ndFloat32(1e15f));
 		ndVector maxVal(ndFloat32(-1e15f));

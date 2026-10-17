@@ -106,30 +106,6 @@ void NewtonContactJointResetIntraJointCollision(const NewtonJoint* const contact
 	ndAssert(0);
 }
 
-
-NewtonCollision* NewtonContactGetCollision0(const void* const contact)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	//dgList<dgContactMaterial>::dgListNode* const node = (dgList<dgContactMaterial>::dgListNode*) contact;
-	//dgContactMaterial& contactMaterial = node->GetInfo();
-	//return (NewtonCollision*)contactMaterial.m_collision0;
-
-	ndAssert(0);
-	return 0;
-}
-
-NewtonCollision* NewtonContactGetCollision1(const void* const contact)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	//dgList<dgContactMaterial>::dgListNode* const node = (dgList<dgContactMaterial>::dgListNode*) contact;
-	//dgContactMaterial& contactMaterial = node->GetInfo();
-	//return (NewtonCollision*)contactMaterial.m_collision1;
-	ndAssert(0);
-	return 0;
-}
-
 void* NewtonContactGetCollisionID0(const void* const contact)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -218,4 +194,20 @@ void* NewtonContactJointGetNextContact(const NewtonJoint* const contactJoint, vo
 	//}
 	ndContactPointList::ndNode* const node = PointerCast<ndContactPointList::ndNode, void>(contact);
 	return node ? node->GetNext() : nullptr;
+}
+
+NewtonCollision* NewtonContactGetCollision0(const void* const contactPoint)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndContactPointList::ndNode* const contactPointNode = PointerCast<ndContactPointList::ndNode, void>(contactPoint);
+	const ndContactMaterial& material = contactPointNode->GetInfo();
+	return PointerCast<NewtonCollision, ndShapeInstance>(material.m_shapeInstance0);
+}
+
+NewtonCollision* NewtonContactGetCollision1(const void* const contactPoint)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndContactPointList::ndNode* const contactPointNode = PointerCast<ndContactPointList::ndNode, void>(contactPoint);
+	const ndContactMaterial& material = contactPointNode->GetInfo();
+	return PointerCast<NewtonCollision, ndShapeInstance>(material.m_shapeInstance1);
 }

@@ -267,7 +267,7 @@ ndVector ndMatrix::SolveByGaussianElimination(const ndVector &v) const
 
 			if (permute != i)
 			{
-				ndAssert(pivot > ndFloat32(1.0e-6f));
+				ndAssert(pivot > ndFloat32(1.0e-8f));
 				ndSwap(ret[i], ret[permute]);
 				ndSwap(tmp[i], tmp[permute]);
 			}
