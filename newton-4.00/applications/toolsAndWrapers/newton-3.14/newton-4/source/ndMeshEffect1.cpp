@@ -1852,9 +1852,6 @@ void ndMeshEffect::PackPoints()
 
 void ndMeshEffect::UnpackPoints()
 {
-ndAssert(0);
-#if 0
-
 	do 
 	{
 		ndPointFormat points(m_points);
@@ -1906,7 +1903,6 @@ ndAssert(0);
 		ndAssert(m_attrib.m_pointChannel[i] == i);
 	}
 	#endif
-#endif
 }
 
 void ndMeshEffect::PackAttibuteData()
@@ -3100,11 +3096,8 @@ void ndMeshEffect::ApplyTransform(const ndMatrix& matrix)
 	}
 }
 
-//void ndMeshEffect::MergeFaces(const ndMeshEffect* const source)
-void ndMeshEffect::MergeFaces(const ndMeshEffect* const)
+void ndMeshEffect::MergeFaces(const ndMeshEffect* const source)
 {
-	ndAssert(0);
-#if 0
 	ndInt32 mark = source->IncLRU();
 	ndPolyhedra::Iterator iter(*source);
 	ndInt32 maxMatIndex = 0;
@@ -3162,11 +3155,10 @@ void ndMeshEffect::MergeFaces(const ndMeshEffect* const)
 		}
 	}
 
-	for (ndInt32 i = m_materials.GetCount(); i <= maxMatIndex; ++i)
+	for (ndInt32 i = ndInt32 (m_materials.GetCount()); i <= maxMatIndex; ++i)
 	{
 		m_materials.PushBack(source->m_materials[i]);
 	}
-#endif
 }
 
 // create a convex hull
@@ -3499,9 +3491,6 @@ ndShapeInstance* ndMeshEffect::CreateConvexCollision(ndFloat64 tolerance) const
 
 void ndMeshEffect::ConvertToPolygons()
 {
-	ndAssert(0);
-#if 0
-
 	UnpackPoints();
 	ndPolyhedra leftOversOut;
 	ndPolyhedra::ConvexPartition(&m_points.m_vertex[0].m_x, sizeof(ndBigVector), &leftOversOut);
@@ -3517,7 +3506,6 @@ void ndMeshEffect::ConvertToPolygons()
 
 	RepairTJoints();
 	ndAssert(Sanity());
-#endif
 }
 
 void ndMeshEffect::Triangulate()
@@ -3587,18 +3575,14 @@ ndEdge* ndMeshEffect::InsertEdgeVertex(ndEdge* const edge, ndFloat64 param)
 	return faceA1->m_next;
 }
 
-//void ndMeshEffect::AddInterpolatedEdgeAttribute(ndEdge* const edge, ndFloat64 param)
-void ndMeshEffect::AddInterpolatedEdgeAttribute(ndEdge* const, ndFloat64)
+void ndMeshEffect::AddInterpolatedEdgeAttribute(ndEdge* const edge, ndFloat64 param)
 {
-	ndAssert(0);
-#if 0
-
 	ndFloat64 t1 = param;
 	ndFloat64 t0 = ndFloat64(1.0f) - t1;
 	ndAssert(t1 >= ndFloat64(0.0f));
 	ndAssert(t1 <= ndFloat64(1.0f));
 
-	const ndInt32 vertexIndex = m_points.m_vertex.GetCount();
+	const ndInt32 vertexIndex = ndInt32 (m_points.m_vertex.GetCount());
 	m_points.m_vertex.PushBack(m_points.m_vertex[edge->m_incidentVertex].Scale(t0) + m_points.m_vertex[edge->m_next->m_incidentVertex].Scale(t1));
 	if (m_points.m_layers.GetCount())
 	{
@@ -3663,7 +3647,6 @@ void ndMeshEffect::AddInterpolatedEdgeAttribute(ndEdge* const, ndFloat64)
 	{
 		ndAssert(0);
 	}
-#endif
 }
 
 void ndMeshEffect::FlipWinding()

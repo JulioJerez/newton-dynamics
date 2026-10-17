@@ -745,13 +745,6 @@ ndMeshEffect* ndMeshEffect::CreateVoronoiConvexDecomposition(const ndArray<ndVec
 		count++;
 	}
 
-	ndBigVector meshMin;
-	ndBigVector meshMax;
-	CalculateAABB(meshMin, meshMax);
-
-	pMin = pMin.GetMin(meshMin);
-	pMax = pMax.GetMax(meshMax);
-
 	// add the bounding box as a barrier
 	pool[count + 0] = ndBigVector(pMin.m_x, pMin.m_y, pMin.m_z, ndFloat64(0.0f));
 	pool[count + 1] = ndBigVector(pMax.m_x, pMin.m_y, pMin.m_z, ndFloat64(0.0f));
@@ -860,13 +853,15 @@ ndMeshEffect* ndMeshEffect::CreateVoronoiConvexDecomposition(const ndArray<ndVec
 	}
 
 	voronoiPartition->EndBuild(false);
-	//voronoiPartition->SaveOFF("xxx0.off");
+	
+	voronoiPartition->AddMaterial(0);
+	voronoiPartition->AddMaterial(interiorMaterialIndex);
 
-	ndAssert(interiorMaterialIndex < m_materials.GetCount());
-	voronoiPartition->m_materials.SetCount(m_materials.GetCount());
-	for (ndInt32 i = 0; i < m_materials.GetCount(); ++i)
-	{
-		voronoiPartition->m_materials[i] = m_materials[i];
-	}
+	//ndAssert(interiorMaterialIndex < m_materials.GetCount());
+	//voronoiPartition->m_materials.SetCount(m_materials.GetCount());
+	//for (ndInt32 i = 0; i < m_materials.GetCount(); ++i)
+	//{
+	//	voronoiPartition->m_materials[i] = m_materials[i];
+	//}
 	return voronoiPartition;
 }

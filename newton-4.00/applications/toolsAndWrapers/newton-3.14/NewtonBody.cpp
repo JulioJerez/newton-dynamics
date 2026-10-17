@@ -188,37 +188,6 @@ NewtonBodyDestructor NewtonBodyGetDestructorCallback(const NewtonBody* const bod
 	return 0;
 }
 
-/*!
-  Get the inverse mass matrix of a rigid body.
-
-  @param *bodyPtr pointer to the body.
-  @param *invMass pointer to a variable that will hold the mass inverse value of the body.
-  @param *invIxx pointer to a variable that will hold the moment of inertia inverse of the first principal axis of inertia of the body.
-  @param *invIyy pointer to a variable that will hold the moment of inertia inverse of the first principal axis of inertia of the body.
-  @param *invIzz pointer to a variable that will hold the moment of inertia inverse of the first principal axis of inertia of the body.
-
-  @return Nothing.
-
-  See also: ::NewtonBodySetMassMatrix, ::NewtonBodyGetMass
-*/
-void NewtonBodyGetInvMass(const NewtonBody* const bodyPtr, dFloat* const invMass, dFloat* const invIxx, dFloat* const invIyy, dFloat* const invIzz)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//
-	////	dgVector vector1 (body->GetMass());
-	////	invIxx[0] = dgFloat32 (1.0f) / (vector1.m_x + dgFloat32 (1.0e-8f));
-	////	invIyy[0] = dgFloat32 (1.0f) / (vector1.m_y + dgFloat32 (1.0e-8f)); 
-	////	invIzz[0] = dgFloat32 (1.0f) / (vector1.m_z + dgFloat32 (1.0e-8f));
-	////	invMass[0] = dgFloat32 (1.0f) / (vector1.m_w + dgFloat32 (1.0e-8f));
-	//dgVector inverseMass(body->GetInvMass());
-	//invIxx[0] = inverseMass.m_x;
-	//invIyy[0] = inverseMass.m_y;
-	//invIzz[0] = inverseMass.m_z;
-	//invMass[0] = inverseMass.m_w;
-
-	ndAssert(0);
-}
 
 void NewtonBodySetMatrixNoSleep(const NewtonBody* const bodyPtr, const dFloat* const matrixPtr)
 {
@@ -1284,6 +1253,30 @@ void  NewtonBodyGetMass(const NewtonBody* const bodyPtr, dFloat* const mass, dFl
 		Izz[0] = 0.0f;
 		mass[0] = 0.0f;
 	}
+}
+
+/*!
+  Get the inverse mass matrix of a rigid body.
+
+  @param *bodyPtr pointer to the body.
+  @param *invMass pointer to a variable that will hold the mass inverse value of the body.
+  @param *invIxx pointer to a variable that will hold the moment of inertia inverse of the first principal axis of inertia of the body.
+  @param *invIyy pointer to a variable that will hold the moment of inertia inverse of the first principal axis of inertia of the body.
+  @param *invIzz pointer to a variable that will hold the moment of inertia inverse of the first principal axis of inertia of the body.
+
+  @return Nothing.
+
+  See also: ::NewtonBodySetMassMatrix, ::NewtonBodyGetMass
+*/
+void NewtonBodyGetInvMass(const NewtonBody* const bodyPtr, dFloat* const invMass, dFloat* const invIxx, dFloat* const invIyy, dFloat* const invIzz)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	const ndVector invInertia (body->GetInvInertia());
+	invIxx[0] = invInertia.m_x;
+	invIyy[0] = invInertia.m_y;
+	invIzz[0] = invInertia.m_z;
+	invMass[0] = invInertia.m_w;
 }
 
 /*!

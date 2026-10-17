@@ -55,8 +55,8 @@
 //#define DEFAULT_SCENE	20		// scaled mesh collision
 //#define DEFAULT_SCENE	21		// continuous collision
 //#define DEFAULT_SCENE	22		// flatland Game
-#define DEFAULT_SCENE	23		// scene Collision
-//#define DEFAULT_SCENE	24		// simple convex fracturing 
+//#define DEFAULT_SCENE	23		// scene Collision
+#define DEFAULT_SCENE	24		// simple convex fracturing 
 //#define DEFAULT_SCENE	25		// multi ray casting using the threading Job scheduler
 //#define DEFAULT_SCENE	26		// standard joints
 //#define DEFAULT_SCENE	27		// servo joints

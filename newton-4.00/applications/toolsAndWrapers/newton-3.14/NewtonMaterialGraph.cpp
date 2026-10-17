@@ -416,16 +416,6 @@ dFloat NewtonMaterialGetContactTangentSpeed(const NewtonMaterial* const material
 	return 0;
 }
 
-
-dFloat NewtonMaterialGetContactMaxNormalImpact(const NewtonMaterial* const materialHandle)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgContactMaterial* const material = (dgContactMaterial*)materialHandle;
-	//return material->m_normal_Force.m_impact;
-	ndAssert(0);
-	return 0;
-}
-
 dFloat NewtonMaterialGetContactMaxTangentImpact(const NewtonMaterial* const materialHandle, int index)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -888,17 +878,16 @@ void NewtonMaterialSetDefaultCollidable(const NewtonWorld* const newtonWorld, in
 NewtonCollision* NewtonMaterialGetBodyCollidingShape(const NewtonMaterial* const materialHandle, const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const bodyPtr = (dgBody*)body;
-	//dgContactMaterial* const material = (dgContactMaterial*)materialHandle;
-	//
-	//const dgCollisionInstance* collision = material->m_collision0;
-	//if (bodyPtr == material->m_body1) {
-	//	collision = material->m_collision1;
-	//}
-	//return (NewtonCollision*)collision;
 	ndContactMaterial* const material = PointerCast<ndContactMaterial, NewtonMaterial>(materialHandle);
 	ndBodyKinematic* const body = PointerCast<ndBodyKinematic, NewtonBody>(bodyPtr);
 
 	const ndShapeInstance* const instance = (body == material->m_body0) ? material->m_shapeInstance0 : material->m_shapeInstance1;
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
+}
+
+dFloat NewtonMaterialGetContactMaxNormalImpact(const NewtonMaterial* const materialHandle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndContactMaterial* const material = PointerCast<ndContactMaterial, NewtonMaterial>(materialHandle);
+	return material->m_normal_Force.m_impact;
 }

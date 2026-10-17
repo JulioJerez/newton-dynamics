@@ -30,16 +30,15 @@ NewtonMesh* NewtonMeshCreate(const NewtonWorld* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	ndMeshEffect* const mesh = new ndMeshEffect();
-	return reinterpret_cast<NewtonMesh*>(mesh);
+	return PointerCast<NewtonMesh, ndMeshEffect>(mesh);
 }
 
 NewtonMesh* NewtonMeshCreateFromCollision(const NewtonCollision* const collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-
-	ndShapeInstance* const instance = const_cast<ndShapeInstance*>(reinterpret_cast<const ndShapeInstance*>(collision));
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
 	ndMeshEffect* const mesh = new ndMeshEffect(*instance);
-	return reinterpret_cast<NewtonMesh*>(mesh);
+	return PointerCast<NewtonMesh, ndMeshEffect>(mesh);
 }
 
 NewtonMesh* NewtonMeshCreateFromMesh(const NewtonMesh* const mesh)
@@ -88,15 +87,6 @@ void NewtonCreateTetrahedraLinearBlendSkinWeightsChannel(const NewtonMesh* const
 	//dgMeshEffect* const meshEffect = (dgMeshEffect*)skinMesh;
 	//meshEffect->CreateTetrahedraLinearBlendSkinWeightsChannel((const dgMeshEffect*)tetrahedraMesh);
 	ndAssert(0);
-}
-
-NewtonMesh* NewtonMeshCreateVoronoiConvexDecomposition(const NewtonWorld* const, int pointCount, const dFloat* const vertexCloud, int strideInBytes, int materialID, const dFloat* const textureMatrix)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//return (NewtonMesh*)dgMeshEffect::CreateVoronoiConvexDecomposition(world->dgWorld::GetAllocator(), pointCount, strideInBytes, vertexCloud, materialID, dgMatrix(textureMatrix));
-	ndAssert(0);
-	return 0;
 }
 
 NewtonMesh* NewtonMeshCreateFromSerialization(const NewtonWorld* const, NewtonDeserializeCallback deserializeFunction, void* const serializeHandle)
@@ -164,22 +154,6 @@ void NewtonMeshFlipWinding(const NewtonMesh* const mesh)
 	TRACE_FUNCTION(__FUNCTION__);
 	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
 	//meshEffect->FlipWinding();
-	ndAssert(0);
-}
-
-void NewtonMeshCalculateOOBB(const NewtonMesh* const mesh, dFloat* const matrix, dFloat* const x, dFloat* const y, dFloat* const z)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//
-	//dgBigVector size;
-	//dgMatrix alignMatrix(meshEffect->CalculateOOBB(size));
-	//
-	////	*((dgMatrix *)matrix) = alignMatrix; 
-	//memcpy(matrix, &alignMatrix[0][0], sizeof(dgMatrix));
-	//*x = dgFloat32(size.m_x);
-	//*y = dgFloat32(size.m_y);
-	//*z = dgFloat32(size.m_z);
 	ndAssert(0);
 }
 
@@ -280,14 +254,6 @@ NewtonMesh* NewtonMeshIntersection(const NewtonMesh* const mesh, const NewtonMes
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	//return (NewtonMesh*)((dgMeshEffect*)mesh)->Intersection(dgMatrix(clipperMatrix), (dgMeshEffect*)clipper);
-	ndAssert(0);
-	return 0;
-}
-
-NewtonMesh* NewtonMeshConvexMeshIntersection(const NewtonMesh* const mesh, const NewtonMesh* const convexMesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//return (NewtonMesh*)((dgMeshEffect*)mesh)->ConvexMeshIntersection((dgMeshEffect*)convexMesh);
 	ndAssert(0);
 	return 0;
 }
@@ -472,28 +438,6 @@ NewtonMesh* NewtonMeshCreateNextSingleSegment(const NewtonMesh* const mesh, cons
 	ndAssert(0);
 	return 0;
 }
-
-NewtonMesh* NewtonMeshCreateFirstLayer(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	//dgMeshEffect* const effectMesh = (dgMeshEffect*)mesh;
-	//return (NewtonMesh*)effectMesh->GetFirstLayer();
-	ndAssert(0);
-	return 0;
-}
-
-NewtonMesh* NewtonMeshCreateNextLayer(const NewtonMesh* const mesh, const NewtonMesh* const segment)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-
-	//dgMeshEffect* const effectMesh = (dgMeshEffect*)mesh;
-	//return (NewtonMesh*)effectMesh->GetNextLayer((dgMeshEffect*)segment);
-	ndAssert(0);
-	return 0;
-}
-
-
 
 int NewtonMeshGetTotalFaceCount(const NewtonMesh* const mesh)
 {
@@ -933,7 +877,6 @@ int NewtonFracturedCompoundMeshPartGetIndexStream(const NewtonCollision* const f
 	return 0;
 }
 
-
 void* NewtonFracturedCompoundMeshPartGetFirstSegment(const NewtonFracturedCompoundMeshPart* const breakableComponentMesh)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -962,7 +905,6 @@ int NewtonFracturedCompoundMeshPartGetMaterial(const void* const segment)
 	return 0;
 }
 
-
 int NewtonFracturedCompoundMeshPartGetIndexCount(const void* const segment)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -972,7 +914,6 @@ int NewtonFracturedCompoundMeshPartGetIndexCount(const void* const segment)
 	ndAssert(0);
 	return 0;
 }
-
 
 static ndMeshEffect::ndMeshVertexFormat ConvertFormat(const NewtonMeshVertexFormat* const data)
 {
@@ -1220,7 +1161,6 @@ void NewtonMeshApplyCylindricalMapping(const NewtonMesh* const mesh, int cylinde
 	ndMatrix matrix(GetMatrix(aligmentMatrix));
 
 	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
-	//meshEffect->CylindricalMapping(cylinderMaterial, capMaterial, matrix);
 	meshEffect->CylindricalMapping(cylinderMaterial, matrix);
 }
 
@@ -1279,4 +1219,57 @@ void NewtonMeshAddUV0(const NewtonMesh* const mesh, dFloat u, dFloat v)
 	TRACE_FUNCTION(__FUNCTION__);
 	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	meshEffect->AddUV0(u, v);
+}
+
+void NewtonMeshCalculateOOBB(const NewtonMesh* const mesh, dFloat* const matrix, dFloat* const x, dFloat* const y, dFloat* const z)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	ndBigVector size;
+	const ndMatrix alignMatrix(meshEffect->CalculateOOBB(size));
+
+	ndMemCpy(matrix, &alignMatrix[0][0], sizeof(ndMatrix) / sizeof(ndFloat32));
+	*x = ndFloat32(size.m_x);
+	*y = ndFloat32(size.m_y);
+	*z = ndFloat32(size.m_z);
+}
+
+NewtonMesh* NewtonMeshCreateVoronoiConvexDecomposition(const NewtonWorld* const, int pointCount, const dFloat* const vertexCloud, int strideInBytes, int materialID, const dFloat* const textureMatrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndArray<ndVector> array;
+	ndInt32 stride = strideInBytes / sizeof(ndFloat32);
+	for (ndInt32 i = 0; i < pointCount; ++i)
+	{
+		ndInt32 j = stride * i;
+		const ndVector p(vertexCloud[j + 0], vertexCloud[j + 0], vertexCloud[j + 0], ndFloat32(1.0f));
+		array.PushBack(p);
+	}
+
+	const ndMatrix matrix(textureMatrix);
+	ndMeshEffect* const mesh = ndMeshEffect::CreateVoronoiConvexDecomposition(array, materialID, matrix);
+	return PointerCast<NewtonMesh, ndMeshEffect>(mesh);
+}
+
+NewtonMesh* NewtonMeshCreateFirstLayer(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	return PointerCast<NewtonMesh, ndMeshEffect>(meshEffect->GetFirstLayer());
+}
+
+NewtonMesh* NewtonMeshCreateNextLayer(const NewtonMesh* const mesh, const NewtonMesh* const segment)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect* const currentLayer = PointerCast<ndMeshEffect, NewtonMesh>(segment);
+	return PointerCast<NewtonMesh, ndMeshEffect>(meshEffect->GetNextLayer(currentLayer));
+}
+
+NewtonMesh* NewtonMeshConvexMeshIntersection(const NewtonMesh* const mesh, const NewtonMesh* const convexMesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	const ndMeshEffect* const currentLayer = PointerCast<ndMeshEffect, NewtonMesh>(convexMesh);
+	return PointerCast<NewtonMesh, ndMeshEffect>(meshEffect->ConvexMeshIntersection(currentLayer));
 }
