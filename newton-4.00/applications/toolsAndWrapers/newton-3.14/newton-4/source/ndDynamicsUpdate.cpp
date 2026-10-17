@@ -1174,8 +1174,8 @@ void ndDynamicsUpdate::InitSkeletons()
 
 				ndInt32 Compare(const ndSkeletonContainer* const elementA, const ndSkeletonContainer* const elementB) const
 				{
-					const ndInt32 rowsA = elementA->m_isResting ? 0 : elementA->m_nodeList.GetCount();
-					const ndInt32 rowsB = elementB->m_isResting ? 0 : elementB->m_nodeList.GetCount();
+					const ndInt32 rowsA = elementA->m_isResting ? 0 : elementA->GetTotalJoints();
+					const ndInt32 rowsB = elementB->m_isResting ? 0 : elementB->GetTotalJoints();
 					if (rowsA < rowsB)
 					{
 						return 1;
@@ -1194,7 +1194,8 @@ void ndDynamicsUpdate::InitSkeletons()
 			{
 				m_skeletonOrder.PushBack(sum);
 				const ndSkeletonContainer* const element = activeSkeletons[i];
-				sum += element->m_isResting ? 0 : element->m_nodeList.GetCount();;
+				const ndInt32 jointCount = element->m_isResting ? 0 : element->GetTotalJoints();
+				sum += jointCount;
 				m_activeSkeleton += element->m_isResting ? 0 : 1;
 			}
 			m_skeletonOrder.PushBack(sum);
@@ -1206,7 +1207,7 @@ void ndDynamicsUpdate::InitSkeletons()
 				if (!skeleton->m_isResting)
 				{
 					const ndInt32 sizeLeft = numbeOfJoints - m_skeletonOrder[i + 1];
-					const ndInt32 skelSize = skeleton->m_nodeList.GetCount();
+					const ndInt32 skelSize = skeleton->GetTotalJoints();
 					if ((skelSize >= D_PARALLEL_SKELETONS_CUT) && (skelSize > sizeLeft))
 					{
 						m_parallelSkeleton ++;

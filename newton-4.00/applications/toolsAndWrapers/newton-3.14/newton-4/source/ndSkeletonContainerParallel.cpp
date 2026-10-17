@@ -124,7 +124,7 @@ void ndSkeletonContainer::ParallelBuildSparseMatrix()
 	ndFloat32* const matrix = &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize];
 
 	const ndInt32 sparseFactor = ndInt32 (ndFloat32(size) * D_SPARSE_SKELETON_MATRIX_FACTOR);
-	ndAssert(sparseFactor > 0);
+	ndAssert(sparseFactor >= 0);
 	auto SparseRow = ndMakeObject::ndFunction([this, size, sparseFactor, matrix, sparseMatrix](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		ndInt32 floatsCount = 0;
@@ -148,10 +148,6 @@ void ndSkeletonContainer::ParallelBuildSparseMatrix()
 			}
 		}
 	});
-	//for (ndInt32 i = 0; i < size; ++i)
-	//{
-	//	SparseRow(i, 4);
-	//}
 	ndScene* const scene = m_owner->GetScene();
 	scene->ParallelExecute(SparseRow, size, 4);
 }

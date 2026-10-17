@@ -529,14 +529,6 @@ void ndIkSolver::SolverBegin(ndSkeletonContainer* const skeleton, ndConstraint* 
 	}
 }
 
-void ndIkSolver::FactorizationUpdate()
-{
-	if (*m_skeleton)
-	{
-		m_skeleton->FactorizationUpdate();
-	}
-}
-
 void ndIkSolver::SolverEnd()
 {
 	if (*m_skeleton)

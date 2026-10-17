@@ -332,14 +332,6 @@ void NewtonDestroyCollision(const NewtonCollision* const collision)
 	delete instance;
 }
 
-void NewtonCollisionSetUserData(const NewtonCollision* const collision, void* const userData)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	const ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
-	ndShapeMaterial material = instance->GetMaterial();
-	material.m_userParam[0].m_ptrData = userData;
-}
-
 void NewtonCollisionSetMatrix(const NewtonCollision* collision, const dFloat* const matrixPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -722,16 +714,6 @@ dLong NewtonCollisionGetUserID(const NewtonCollision* const collision)
 	//return instance->GetUserDataID();
 	ndAssert(0);
 	return 0;
-}
-
-void* NewtonCollisionGetUserData(const NewtonCollision* const collision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgCollisionInstance* const instance = (dgCollisionInstance*)collision;
-	//return instance->GetUserData();
-	ndAssert(0);
-	return 0;
-
 }
 
 void NewtonCollisionGetScale(const NewtonCollision* const collision, dFloat* const scaleX, dFloat* const scaleY, dFloat* const scaleZ)
@@ -1272,4 +1254,21 @@ NewtonCollision* NewtonCollisionCreateInstance(const NewtonCollision* const coll
 	TRACE_FUNCTION(__FUNCTION__);
 	ndShapeInstance* const instance = new ndShapeInstance(*PointerCast<ndShapeInstance, NewtonCollision>(collision));
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
+}
+
+void NewtonCollisionSetUserData(const NewtonCollision* const collision, void* const userData)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
+	ndShapeMaterial material = instance->GetMaterial();
+	material.m_userParam[0].m_ptrData = userData;
+	instance->SetMaterial(material);
+}
+
+void* NewtonCollisionGetUserData(const NewtonCollision* const collision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	const ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
+	const ndShapeMaterial material = instance->GetMaterial();
+	return material.m_userParam[0].m_ptrData;
 }
