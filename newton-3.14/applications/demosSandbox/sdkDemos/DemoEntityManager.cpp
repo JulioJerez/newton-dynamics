@@ -51,8 +51,8 @@
 //#define DEFAULT_SCENE	16		// compound Collision
 //#define DEFAULT_SCENE	17		// simple Archimedes buoyancy
 //#define DEFAULT_SCENE	18		// uniform Scaled Collision
-#define DEFAULT_SCENE	19		// non uniform Scaled Collision
-//#define DEFAULT_SCENE	20		// scaled mesh collision
+//#define DEFAULT_SCENE	19		// non uniform Scaled Collision
+#define DEFAULT_SCENE	20		// scaled mesh collision
 //#define DEFAULT_SCENE	21		// continuous collision
 //#define DEFAULT_SCENE	22		// flatland Game
 //#define DEFAULT_SCENE	23		// scene Collision

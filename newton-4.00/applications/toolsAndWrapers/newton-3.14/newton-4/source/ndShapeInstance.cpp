@@ -778,7 +778,8 @@ void ndShapeInstance::CalculateAabb(const ndMatrix& matrix, ndVector& p0, ndVect
 	{
 		for (ndInt32 i = 0; i < 3; ++i)
 		{
-			const ndVector dir(matrix[0][i], matrix[1][i], matrix[2][i], ndFloat32 (0.0f));
+			const ndVector scaledDir(matrix[0][i], matrix[1][i], matrix[2][i], ndFloat32 (0.0f));
+			const ndVector dir(scaledDir.Normalize());
 			p1[i] = matrix.TransformVector(SupportVertex(dir))[i];
 			p0[i] = matrix.TransformVector(SupportVertex(dir * ndVector::m_negOne))[i];
 		}
