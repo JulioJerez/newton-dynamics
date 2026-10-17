@@ -246,7 +246,7 @@ class dSimpleFractureListener: public dCustomParallelListener
 		dFloat invIzz;
 		NewtonBodyGetInvMass(effect.m_body, &invMass, &invIxx, &invIyy, &invIzz);
 
-		// if the force is bigger than N time Grabity, It is considered a collision force
+		// if the force is bigger than N time Gravity, It is considered a collision force
 		breakImpact *= invMass;
 
 		if (breakImpact > D_SIMPLE_FRACTIRE_BREAK_IMPACT_SPEED) {
