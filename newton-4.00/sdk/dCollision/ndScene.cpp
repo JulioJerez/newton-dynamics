@@ -1679,8 +1679,8 @@ void ndScene::DeleteDeadContacts()
 			ndContact* const contact = m_contactArray[i];
 			ndBodyKinematic* const body0 = contact->GetBody0()->GetAsBodyKinematic();
 			ndBodyKinematic* const body1 = contact->GetBody1()->GetAsBodyKinematic();
-			ndAssert(body0->GetContactMap().FindContact(body0, body1) == contact);
-			ndAssert(body1->GetContactMap().FindContact(body0, body1) == contact);
+			ndAssert(body0 && (body0->GetContactMap().FindContact(body0, body1) == contact));
+			ndAssert(body1 && (body1->GetContactMap().FindContact(body0, body1) == contact));
 		}
 #endif	
 
