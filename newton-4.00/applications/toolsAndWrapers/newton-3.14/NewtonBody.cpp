@@ -365,26 +365,6 @@ void NewtonBodySetCollision(const NewtonBody* const bodyPtr, const NewtonCollisi
 }
 
 /*!
-  Get the material group id of the body.
-
-  @param *bodyPtr pointer to the body.
-
-  @return Nothing.
-
-  See also: ::NewtonBodySetMaterialGroupID
-*/
-int NewtonBodyGetMaterialGroupID(const NewtonBody* const bodyPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//return int(body->GetGroupID());
-	ndAssert(0);
-	return 0;
-
-}
-
-
-/*!
   Set the collision state flag of this body when the body is connected to another body by a hierarchy of joints.
 
   @param *bodyPtr pointer to the body.
@@ -686,6 +666,29 @@ void NewtonBodySetMaterialGroupID(const NewtonBody* const bodyPtr, int id)
 	ndShapeInstance& instance = body->GetAsBodyKinematic()->GetCollisionShape();
 	ndShapeMaterial material = instance.GetMaterial();
 	material.m_userId = id;
+	instance.SetMaterial(material);
+}
+
+/*!
+  Get the material group id of the body.
+
+  @param *bodyPtr pointer to the body.
+
+  @return Nothing.
+
+  See also: ::NewtonBodySetMaterialGroupID
+*/
+int NewtonBodyGetMaterialGroupID(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
+	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
+	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
+	//ndShapeInstance& instance = body->GetAsBodyKinematic()->GetCollisionShape();
+	//ndShapeMaterial material = instance.GetMaterial();
+	//material.m_userId = id;
+	//instance.SetMaterial(material);
+	return bodyNotify->m_materialGoupId;
 }
 
 void  NewtonBodySetMassProperties(const NewtonBody* const bodyPtr, dFloat mass, const NewtonCollision* const collision)
@@ -1276,7 +1279,7 @@ void NewtonBodyGetInvMass(const NewtonBody* const bodyPtr, dFloat* const invMass
 	invIxx[0] = invInertia.m_x;
 	invIyy[0] = invInertia.m_y;
 	invIzz[0] = invInertia.m_z;
-	invMass[0] = invInertia.m_w;
+	invMass[0] = body->GetInvMass();
 }
 
 /*!

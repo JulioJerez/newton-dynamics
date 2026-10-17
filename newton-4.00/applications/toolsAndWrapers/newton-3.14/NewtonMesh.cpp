@@ -1242,7 +1242,7 @@ NewtonMesh* NewtonMeshCreateVoronoiConvexDecomposition(const NewtonWorld* const,
 	for (ndInt32 i = 0; i < pointCount; ++i)
 	{
 		ndInt32 j = stride * i;
-		const ndVector p(vertexCloud[j + 0], vertexCloud[j + 0], vertexCloud[j + 0], ndFloat32(1.0f));
+		const ndVector p(vertexCloud[j + 0], vertexCloud[j + 1], vertexCloud[j + 2], ndFloat32(1.0f));
 		array.PushBack(p);
 	}
 

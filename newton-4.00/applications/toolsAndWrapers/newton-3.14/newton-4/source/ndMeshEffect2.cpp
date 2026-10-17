@@ -728,8 +728,8 @@ ndMeshEffect* ndMeshEffect::CreateVoronoiConvexDecomposition(const ndArray<ndVec
 	ndFloat64 quantizeFactor = ndFloat64(16.0f);
 	ndFloat64 invQuantizeFactor = ndFloat64(1.0f) / quantizeFactor;
 	
-	ndBigVector pMin(ndFloat32(1.0e10f));
-	ndBigVector pMax(ndFloat32(-1.0e10f));
+	ndBigVector pMin(0.0f);
+	ndBigVector pMax(0.0f);
 	for (ndInt32 i = 0; i <pointCloud.GetCount(); ++i)
 	{
 		ndFloat64 x = pointCloud[i].m_x;
@@ -744,6 +744,8 @@ ndMeshEffect* ndMeshEffect::CreateVoronoiConvexDecomposition(const ndArray<ndVec
 		pool[count] = p;
 		count++;
 	}
+	pMin -= ndBigVector(0.5);
+	pMin += ndBigVector(0.5);
 
 	// add the bounding box as a barrier
 	pool[count + 0] = ndBigVector(pMin.m_x, pMin.m_y, pMin.m_z, ndFloat64(0.0f));
