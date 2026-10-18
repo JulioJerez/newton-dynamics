@@ -446,8 +446,9 @@ void ndShapeInstance::DebugShape(const ndMatrix& matrix, ndShapeDebugNotify& deb
 ndShapeInfo ndShapeInstance::GetShapeInfo() const
 {
 	ndShapeInfo info(m_shape->GetShapeInfo());
-	info.m_offsetMatrix = m_localMatrix;
 	info.m_scale = m_scale;
+	info.m_offsetMatrix = m_localMatrix;
+	info.m_shapeMaterial = m_shapeMaterial;
 	return info;
 }
 

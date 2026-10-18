@@ -386,6 +386,7 @@ ndSkeletonContainer::ndSkeletonContainer()
 	,m_permanentLoopingJoints()
 	,m_auxiliaryMemoryBuffer()
 	,m_lock()
+	,m_defualtRegularizer(D_DEFAULT_REGULARIZER)
 	,m_id(0)
 	,m_blockSize(0)
 	,m_rowCount(0)
@@ -393,6 +394,7 @@ ndSkeletonContainer::ndSkeletonContainer()
 	,m_auxiliaryRowCount(0)
 	,m_isResting(0)
 	,m_threadId(0)
+	,m_autoRegularization(true)
 {
 	m_auxiliaryMemoryBuffer.SetCount(1024 * 8);
 	m_auxiliaryMemoryBuffer.SetCount(0);
@@ -422,6 +424,21 @@ ndSkeletonContainer::~ndSkeletonContainer()
 ndInt32 ndSkeletonContainer::GetId() const
 {
 	return m_id;
+}
+
+bool ndSkeletonContainer::SetAutoRegualrization(bool state, ndFloat32 regularizer)
+{
+	if (state)
+	{
+		m_autoRegularization = true;
+		m_defualtRegularizer = D_DEFAULT_REGULARIZER;
+	}
+	else
+	{
+		m_autoRegularization = false;
+		m_defualtRegularizer = ndClamp(regularizer, D_DEFAULT_REGULARIZER, ndFloat32(100.0f) * D_DEFAULT_REGULARIZER);
+	}
+	return m_autoRegularization;
 }
 
 ndSkeletonContainer::ndNode* ndSkeletonContainer::GetRoot() const
@@ -559,6 +576,7 @@ void ndSkeletonContainer::Finalize(ndInt32 loopJointsCount, ndJointBilateralCons
 		joint->m_isInSkeleton = true;
 		m_permanentLoopingJoints.PushBack(joint);
 	}
+	m_owner->OnInitSkeleton(this);
 }
 
 void ndSkeletonContainer::AddCloseLoopJoint(ndConstraint* const joint)
@@ -713,7 +731,7 @@ void ndSkeletonContainer::CalculateLoopMassMatrixCoefficients(ndFloat32* const d
 		ndFloat32 diagonal = element.AddHorizontal() + rhs_i->m_diagDamp * ndFloat32(2.0f);
 		ndAssert(matrixRow11[index] == ndFloat32(0.0f));
 		matrixRow11[index] = diagonal;
-		diagDamp[index] = diagonal * ndFloat32(4.0e-3f);
+		diagDamp[index] = diagonal * m_defualtRegularizer;
 
 		const ndInt32 m0_i = m_pairs[primaryCount + index].m_m0;
 		const ndInt32 m1_i = m_pairs[primaryCount + index].m_m1;
@@ -1168,11 +1186,6 @@ void ndSkeletonContainer::SolveLcp(ndInt32 stride, ndInt32 size, ndFloat32* cons
 		}
 	}
 
-	//if (iterCount == 0)
-	//{
-	//	ndTrace(("maxIterCount%d\n", maxIterCount - iterCount));
-	//}
-
 	for (ndInt32 i = 0; i < size; ++i)
 	{
 		x[i] *= m_diagonalPreconditioner[i];
@@ -1183,25 +1196,28 @@ void ndSkeletonContainer::RegularizeLcp() const
 {
 	// note: this can be eliminated if I just regularize the diagonal unconditionally.
 	ndInt32 size = m_auxiliaryRowCount - m_blockSize;
-	ndFloat32* const matrix = &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize];
-
-	ndFloat32* const buffer = GetScratchBuffer(m_auxiliaryRowCount * m_auxiliaryRowCount);
-	if (!ndTestPSDmatrix(size, m_auxiliaryRowCount, matrix, &buffer[0]))
+	if (size)
 	{
-		ndFloat32* const regularizer = ndAlloca(ndFloat32, size);
-		ndMemSet(regularizer, ndFloat32(1.01f), size);
-		ndInt32 step = m_auxiliaryRowCount + 1;
-		ndFloat32 reg = ndFloat32(1.125f);
-		do
+		ndFloat32* const matrix = &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize];
+
+		ndFloat32* const buffer = GetScratchBuffer(m_auxiliaryRowCount * m_auxiliaryRowCount);
+		if (!ndTestPSDmatrix(size, m_auxiliaryRowCount, matrix, &buffer[0]))
 		{
-			ndFloat32* base = &m_massMatrix11[m_auxiliaryRowCount * m_auxiliaryRowCount - 1];
-			for (ndInt32 i = size - 1; i >= 0; --i)
+			ndFloat32* const regularizer = ndAlloca(ndFloat32, size);
+			ndMemSet(regularizer, ndFloat32(1.01f), size);
+			ndInt32 step = m_auxiliaryRowCount + 1;
+			ndFloat32 reg = ndFloat32(1.125f);
+			do
 			{
-				*base = *base * reg;
-				base -= step;
-			}
-			reg *= ndFloat32(1.125f);
-		} while (!ndTestPSDmatrix(size, m_auxiliaryRowCount, matrix, &buffer[0]));
+				ndFloat32* base = &m_massMatrix11[m_auxiliaryRowCount * m_auxiliaryRowCount - 1];
+				for (ndInt32 i = size - 1; i >= 0; --i)
+				{
+					*base = *base * reg;
+					base -= step;
+				}
+				reg *= ndFloat32(1.125f);
+			} while (!ndTestPSDmatrix(size, m_auxiliaryRowCount, matrix, &buffer[0]));
+		}
 	}
 }
 
@@ -1815,10 +1831,10 @@ void ndSkeletonContainer::InitLoopMassMatrix()
 			InitMassMatrixBoundedBlock(index);
 		}
 
-		ndAssert(!boundedSize || ndTestPSDmatrix(m_auxiliaryRowCount - m_blockSize, m_auxiliaryRowCount, &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize], GetScratchBuffer(m_auxiliaryRowCount * m_auxiliaryRowCount)));
+		ndAssert(!m_autoRegularization || !boundedSize || ndTestPSDmatrix(m_auxiliaryRowCount - m_blockSize, m_auxiliaryRowCount, &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize], GetScratchBuffer(m_auxiliaryRowCount * m_auxiliaryRowCount)));
 	}
 
-	if (m_transientLoopingContacts.GetCount() || m_transientLoopingJoints.GetCount())
+	if (m_autoRegularization && (m_permanentLoopingJoints.GetCount() || m_transientLoopingContacts.GetCount() || m_transientLoopingJoints.GetCount()))
 	{
 		RegularizeLcp();
 	}
@@ -2109,7 +2125,7 @@ void ndSkeletonContainer::InitMassMatrix(const ndLeftHandSide* const leftHandSid
 			{
 				Precondition(i);
 			}
-			ndAssert(ndTestPSDmatrix(size, stride, matrix, GetScratchBuffer(stride * stride)));
+			ndAssert(!m_autoRegularization || ndTestPSDmatrix(size, stride, matrix, GetScratchBuffer(stride * stride)));
 			BuildSparseMatrix();
 		}
 	}
