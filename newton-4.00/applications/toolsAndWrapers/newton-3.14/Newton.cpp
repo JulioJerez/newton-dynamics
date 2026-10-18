@@ -59,11 +59,6 @@
 
 #if 0
 
-/*! @defgroup Misc Misc
-Misc
-@{
-*/
-
 //#define SAVE_COLLISION
 
 #ifdef SAVE_COLLISION
@@ -90,84 +85,12 @@ void SaveCollision (const NewtonCollision* const collisionPtr)
 #endif
 
 
-/*! @} */ // end of group Misc
-
-
-/*! @defgroup World World
-World interface
-@{
-*/
-
-/*! @} */ // end of group World
-
-/*! @defgroup GroupID GroupID
-GroupID interface
-@{
-*/
-
-
-/*! @} */ // end of GroupID
-
-/*! @defgroup MaterialSetup MaterialSetup
-Material setup interface
-@{
-*/
-
-
-
-/*! @} */ // end of ContactBehaviour
-
-/*! @defgroup CshapesConvexSimple CshapesConvexSimple
-Convex collision primitives interface
-@{
-*/
-
-
-
-
-/*! @} */ // end of CshapesConvexSimple
-
-/*! @defgroup CshapesConvexComplex CshapesConvexComplex
-Complex collision primitives interface
-@{
-*/
-
-
-/*! @} */ // end of CshapesConvexComples
-
-
-/*! @defgroup CollisionLibraryGeneric CollisionLibraryGeneric
-Generic collision library functions
-@{
-*/
-
-
-/*! @} */ // end of CollisionLibraryGeneric
-
-
-/*! @defgroup TransUtil TransUtil
-Transform utility functions
-@{
-*/
-
-
-
-/*! @} */ // end of TransUtil
-
-/*! @defgroup RigidBodyInterface RigidBodyInterface
-Rigid Body Interface
-@{
-*/
-
-
-
 /*! @} */ // end of RigidBodyInterface
 
 /*! @defgroup ConstraintBall ConstraintBall
 Ball and Socket joint interface
 @{
 */
-
 
 /*!
   Create a ball an socket joint.

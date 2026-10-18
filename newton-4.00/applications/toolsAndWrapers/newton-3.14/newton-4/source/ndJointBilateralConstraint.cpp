@@ -620,6 +620,31 @@ void ndJointBilateralConstraint::AddAngularRowJacobian(ndConstraintDescritor& de
 	desc.m_rowsCount = index + 1;
 }
 
+void ndJointBilateralConstraint::SetJacobianDerivative(ndConstraintDescritor& desc, const ndJacobian& jacobian0, const ndJacobian& jacobian1)
+{
+	const ndInt32 index = desc.m_rowsCount;
+	ndForceImpactPair* const jointForce = &m_jointForce[index];
+
+	m_r0[index] = ndVector::m_zero;
+	m_r1[index] = ndVector::m_zero;
+	desc.m_jacobian[index].m_jacobianM0 = jacobian0;
+	desc.m_jacobian[index].m_jacobianM1 = jacobian1;
+
+	m_rowIsMotor &= ~(1 << index);
+	desc.m_jointSpeed[index] = ndFloat32(0.0f);
+	desc.m_penetration[index] = ndFloat32(0.0f);
+	desc.m_positError[index] = ndFloat32(0.0f);
+	desc.m_speedError[index] = ndFloat32(0.0f);
+
+	desc.m_jointAccel[index] = ndFloat32(0.0f);
+	desc.m_restitution[index] = ndFloat32(0.0f);
+	desc.m_zeroRowAcceleration[index] = ndFloat32(0.0f);
+	desc.m_penetrationStiffness[index] = ndFloat32(0.0f);
+	desc.m_forceBounds[index].m_jointForce = jointForce;
+	desc.m_diagonalRegularizer[index] = m_defualtDiagonalRegularizer;
+	desc.m_rowsCount = index + 1;
+}
+
 ndInt32 ndJointBilateralConstraint::GetKinematicState(ndKinematicState* const) const
 {
 	ndAssert(0);

@@ -138,28 +138,12 @@ void NewtonWorldForEachBodyInAABBDo(const NewtonWorld* const newtonWorld, const 
 	world->BodiesInAabb(notify, minBox, maxBox);
 }
 
-
-
 int NewtonWorldCollide(const NewtonWorld* const newtonWorld, const dFloat* const matrix, const NewtonCollision* const shape, void* const userData,
 	NewtonWorldRayPrefilterCallback prefilter, NewtonWorldConvexCastReturnInfo* const info, int maxContactsCount, int threadIndex)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	//Newton* const world = (Newton*)newtonWorld;
 	//return world->GetBroadPhase()->Collide((dgCollisionInstance*)shape, dgMatrix(matrix), (OnRayPrecastAction)prefilter, userData, (dgConvexCastReturnInfo*)info, maxContactsCount, threadIndex);
-	ndAssert(0);
-	return 0;
-}
-
-NewtonJoint* NewtonWorldFindJoint(const NewtonBody* const body0, const NewtonBody* const body1)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//for (NewtonJoint* joint = NewtonBodyGetFirstJoint(body0); joint; joint = NewtonBodyGetNextJoint(body0, joint)) {
-	//	if (((body0 == NewtonJointGetBody0(joint)) && (body1 == NewtonJointGetBody1(joint))) ||
-	//		((body1 == NewtonJointGetBody0(joint)) && (body0 == NewtonJointGetBody1(joint)))) {
-	//		return joint;
-	//	}
-	//}
-	//return NULL;
 	ndAssert(0);
 	return 0;
 }
@@ -785,4 +769,26 @@ dFloat NewtonConvexCollisionCalculateVolume(const NewtonCollision* const convexC
 	TRACE_FUNCTION(__FUNCTION__);
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(convexCollision);
 	return instance->GetVolume();
+}
+
+NewtonJoint* NewtonWorldFindJoint(const NewtonBody* const body0, const NewtonBody* const body1)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const kinBody0 = PointerCast<ndBodyKinematic, NewtonBody>(body0);
+	ndBodyKinematic* const kinBody1 = PointerCast<ndBodyKinematic, NewtonBody>(body1);
+
+	const ndBodyKinematic::ndJointList& jointList = kinBody0->GetJointList();
+	for (ndBodyKinematic::ndJointList::ndNode* node = jointList.GetFirst(); node; node = node->GetNext())
+	{
+		ndJointBilateralConstraint* const joint = node->GetInfo();
+		ndBodyKinematic* const jointBody0 = joint->GetBody0();
+		ndBodyKinematic* const jointBody1 = joint->GetBody1();
+		bool test = (jointBody0 == kinBody0) && (jointBody1 == kinBody1);
+		test = test || ((jointBody1 == kinBody0) && (jointBody0 == kinBody1));
+		if (test)
+		{
+			return PointerCast<NewtonJoint, ndJointBilateralConstraint>(joint);
+		}
+	}
+	return nullptr;
 }

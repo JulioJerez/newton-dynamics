@@ -16,6 +16,7 @@
 
 ndNewtonMaterial::ndNewtonMaterial()
 	:ndApplicationMaterial()
+	,m_usedData(nullptr)
 	,m_onAABBOverlap(nullptr)
 	,m_onContactsProcess(nullptr)
 	,m_onSubShapeAABBOverlap(nullptr)
@@ -24,6 +25,7 @@ ndNewtonMaterial::ndNewtonMaterial()
 
 ndNewtonMaterial::ndNewtonMaterial(const ndNewtonMaterial& copy)
 	:ndApplicationMaterial(copy)
+	,m_usedData(copy.m_usedData)
 	,m_onAABBOverlap(copy.m_onAABBOverlap)
 	,m_onContactsProcess(copy.m_onContactsProcess)
 	,m_onSubShapeAABBOverlap(copy.m_onSubShapeAABBOverlap)

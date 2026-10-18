@@ -37,6 +37,7 @@ class ndNewtonMaterial : public ndApplicationMaterial
 	virtual bool OnAabbOverlap(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1) const override;
 	virtual bool OnAabbOverlap(const ndContact* const joint, ndFloat32 timestep, const ndShapeInstance& instanceShape0, const ndShapeInstance& instanceShape1) const override;
 
+	ndWeakPtr<void> m_usedData;
 	NewtonOnAABBOverlap m_onAABBOverlap;
 	NewtonContactsProcess m_onContactsProcess;
 	NewtonOnCompoundSubCollisionAABBOverlap m_onSubShapeAABBOverlap;
