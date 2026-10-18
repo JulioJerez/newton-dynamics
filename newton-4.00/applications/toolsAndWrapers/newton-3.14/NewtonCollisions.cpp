@@ -28,6 +28,17 @@
 
 static void MapShapeId(const ndShapeInfo& info, NewtonCollisionInfoRecord& collisionInfo)
 {
+	collisionInfo.m_collisionMaterial.m_userId = info.m_shapeMaterial.m_userId;
+	collisionInfo.m_collisionMaterial.m_userData.m_ptr = info.m_shapeMaterial.m_data.m_userData;
+
+	const ndInt32 count0 = sizeof(info.m_shapeMaterial.m_userParam) / sizeof(info.m_shapeMaterial.m_userParam[0]);
+	const ndInt32 count1 = sizeof(collisionInfo.m_collisionMaterial.m_userParam) / sizeof(collisionInfo.m_collisionMaterial.m_userParam[0]);
+	const ndInt32 count = ndMin(count0, count1);
+	for (ndInt32 i = 0; i < count; ++i)
+	{
+		collisionInfo.m_collisionMaterial.m_userParam[i].m_ptr = info.m_shapeMaterial.m_userParam[i].m_ptrData;
+	}
+
 	switch (info.m_collisionType)
 	{
 		case m_sphere:
@@ -395,6 +406,7 @@ NewtonCollision* NewtonCreateBox(const NewtonWorld* const, dFloat dx, dFloat dy,
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
+	instance->SetMaterial(material);
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
@@ -426,6 +438,7 @@ NewtonCollision* NewtonCreateSphere(const NewtonWorld* const, dFloat radius, int
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
+	instance->SetMaterial(material);
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
@@ -453,6 +466,7 @@ NewtonCollision* NewtonCreateCone(const NewtonWorld* const,  dFloat radius, dFlo
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
+	instance->SetMaterial(material);
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
@@ -483,6 +497,7 @@ NewtonCollision* NewtonCreateCapsule(const NewtonWorld* const,  dFloat radio0, d
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
+	instance->SetMaterial(material);
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
@@ -511,6 +526,7 @@ NewtonCollision* NewtonCreateCylinder(const NewtonWorld* const,  dFloat radio0, 
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
+	instance->SetMaterial(material);
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
@@ -538,6 +554,7 @@ NewtonCollision* NewtonCreateChamferCylinder(const NewtonWorld* const,  dFloat r
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
+	instance->SetMaterial(material);
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
@@ -591,6 +608,7 @@ NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* const,  int count, co
 	instance->SetLocalMatrix(matrix);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
+	instance->SetMaterial(material);
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
@@ -617,6 +635,7 @@ NewtonCollision* NewtonCreateConvexHullFromMesh(const NewtonWorld* const,  const
 	ndShapeInstance* const instance = meshEffect->CreateConvexCollision(tolerance);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
+	instance->SetMaterial(material);
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
@@ -648,6 +667,7 @@ NewtonCollision* NewtonCreateHeightFieldCollision(const NewtonWorld* const, int 
 	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeHeightfield(width, height, ndShapeHeightfield::ndGridConstruction(gridsDiagonals), horizontalScale_x, horizontalScale_z));
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
+	instance->SetMaterial(material);
 
 	ndShapeHeightfield* const heighfield = instance->GetShape()->GetAsShapeHeightfield();
 	ndArray<ndReal>& heightMap = heighfield->GetElevationMap();
@@ -1021,6 +1041,7 @@ NewtonCollision* NewtonCreateUserMeshCollision(
 
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
+	instance->SetMaterial(material);
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 

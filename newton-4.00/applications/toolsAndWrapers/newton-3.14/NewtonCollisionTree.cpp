@@ -233,6 +233,7 @@ NewtonCollision* NewtonCreateTreeCollision(const NewtonWorld* const, int shapeID
 
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
+	instance->SetMaterial(material);
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 
@@ -244,7 +245,7 @@ NewtonCollision* NewtonCreateTreeCollisionFromMesh(const NewtonWorld* const, con
 	ndShapeInstance* const instance = meshEffect->CreateCollisionTree(false);
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
-
+	instance->SetMaterial(material);
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 

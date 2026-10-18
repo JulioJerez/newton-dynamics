@@ -73,42 +73,6 @@ dFloat NewtonUserJointGetRowAcceleration(const NewtonJoint* const joint)
 }
 
 /*!
-  Calculates the row acceleration to satisfy the specified the spring damper system.
-
-  @param *joint pointer to the joint.
-  @param rowStiffness fraction of the row reaction forces used a sspring damper penalty.
-  @param spring desired spring stiffness, it must be a positive value.
-  @param damper desired damper coefficient, it must be a positive value.
-
-  This function will override the default acceleration values set after a call to NewtonUserJointAddLinearRow or NewtonUserJointAddAngularRow.
-  friction value is context sensitive, if for linear constraint acceleration is a linear acceleration, for angular constraint acceleration is an
-  angular acceleration.
-
-  the acceleration calculated by this function represent the mass, spring system of the form
-  a = -ks * x - kd * v.
-
-  for this function to take place the joint stiffness must be set to a values lower than 1.0
-
-  See also: ::NewtonUserJointSetRowAcceleration, ::NewtonUserJointSetRowStiffness
-*/
-void NewtonUserJointSetRowMassIndependentSpringDamperAcceleration(const NewtonJoint* const joint, dFloat rowStiffness, dFloat spring, dFloat damper)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//NewtonUserJoint* const userJoint = (NewtonUserJoint*)joint;
-	//userJoint->SetMassIndependentSpringDamperAcceleration(rowStiffness, spring, damper);
-	ndAssert(0);
-}
-
-void NewtonUserJointSetRowMassDependentSpringDamperAcceleration(const NewtonJoint* const joint, dFloat spring, dFloat damper)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//NewtonUserJoint* const userJoint = (NewtonUserJoint*)joint;
-	//userJoint->SetMassDependentSpringDamperAcceleration(spring, damper);
-	ndAssert(0);
-}
-
-
-/*!
   Return the magnitude previews force or torque value calculated by the solver for this constraint row.
 
   @param *joint pointer to the joint.
@@ -445,3 +409,39 @@ void NewtonUserJointAddAngularRow(const NewtonJoint* const joint, dFloat relativ
 	ndConstraintDescritor& desc = **userJoint->m_param;
 	userJoint->AddAngularRowJacobian(desc, direction, relativeAngleError);
 }
+
+/*!
+  Calculates the row acceleration to satisfy the specified the spring damper system.
+
+  @param *joint pointer to the joint.
+  @param rowStiffness fraction of the row reaction forces used a sspring damper penalty.
+  @param spring desired spring stiffness, it must be a positive value.
+  @param damper desired damper coefficient, it must be a positive value.
+
+  This function will override the default acceleration values set after a call to NewtonUserJointAddLinearRow or NewtonUserJointAddAngularRow.
+  friction value is context sensitive, if for linear constraint acceleration is a linear acceleration, for angular constraint acceleration is an
+  angular acceleration.
+
+  the acceleration calculated by this function represent the mass, spring system of the form
+  a = -ks * x - kd * v.
+
+  for this function to take place the joint stiffness must be set to a values lower than 1.0
+
+  See also: ::NewtonUserJointSetRowAcceleration, ::NewtonUserJointSetRowStiffness
+*/
+void NewtonUserJointSetRowMassIndependentSpringDamperAcceleration(const NewtonJoint* const joint, dFloat rowStiffness, dFloat spring, dFloat damper)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
+	ndConstraintDescritor& desc = **userJoint->m_param;
+	userJoint->SetMassSpringDamperAcceleration(desc, ndFloat32 (1.0f) - rowStiffness, spring, damper);
+}
+
+void NewtonUserJointSetRowMassDependentSpringDamperAcceleration(const NewtonJoint* const joint, dFloat spring, dFloat damper)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
+	ndConstraintDescritor& desc = **userJoint->m_param;
+	userJoint->SetMassSpringDamperAcceleration(desc, desc.m_diagonalRegularizer[desc.m_rowsCount - 1], spring, damper);
+}
+

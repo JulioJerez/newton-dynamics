@@ -71,6 +71,12 @@ void ndNewtonWorld::ClearMaterials()
 	SetContactCallback();
 }
 
+void ndNewtonWorld::OnInitSkeleton(ndSkeletonContainer* const skeleton) const 
+{
+	ndWorld::OnInitSkeleton(skeleton);
+	skeleton->SetAutoRegualrization(false, ndFloat32(2.0f) * D_DEFAULT_REGULARIZER);
+}
+
 ndMaterial* ndNewtonWorld::GetMaterial(int id0, int id1) const
 {
 	ndContactCallback* const notify = static_cast<ndContactCallback*>(*GetContactNotify());

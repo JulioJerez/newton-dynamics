@@ -51,6 +51,8 @@ class ndNewtonWorld: public ndWorld
 	virtual void OnAddJoint(ndJointBilateralConstraint* const joint) const override;
 	virtual void OnRemoveJoint(ndJointBilateralConstraint* const joint) const override;
 
+	virtual void OnInitSkeleton(ndSkeletonContainer* const skeleton) const override;
+
 	void SetContactCallback();
 
 	ndWeakPtr<void> m_userData;

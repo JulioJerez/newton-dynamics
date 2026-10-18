@@ -12,6 +12,27 @@
 #include "ndModelStdafx.h"
 #include "ndContactCallback.h"
 
+class ndNewtonContact : public ndContact
+{
+	public:
+	D_CLASS_REFLECTION(ndNewtonContact, ndContact)
+
+	ndNewtonContact()
+		:ndContact()
+	{
+	}
+
+	ndNewtonContact(const ndNewtonContact& src)
+		:ndContact(src)
+	{
+	}
+
+	ndContact* Clone() const override
+	{
+		return new ndNewtonContact(*this);
+	}
+};
+
 ndApplicationMaterial::ndApplicationMaterial()
 	:ndMaterial()
 {
@@ -81,6 +102,7 @@ ndApplicationMaterial& ndContactCallback::RegisterMaterial(const ndApplicationMa
 ndContactCallback::ndContactCallback()
 	:ndContactNotify(nullptr)
 	,m_materialGraph()
+	,m_contactConstructure(new ndNewtonContact)
 	,m_defaultMaterial(new ndApplicationMaterial)
 {
 }
@@ -148,4 +170,9 @@ void ndContactCallback::OnContactCallback(const ndContact* const contactJoint, n
 	const ndApplicationMaterial* const material = (ndApplicationMaterial*)contactJoint->GetMaterial();
 	ndAssert(material);
 	material->OnContactCallback(contactJoint, timestep);
+}
+
+const ndContact* ndContactCallback::GetContactConstructor(const ndShapeInstance& id0, const ndShapeInstance& id1) const
+{
+	return *m_contactConstructure;
 }

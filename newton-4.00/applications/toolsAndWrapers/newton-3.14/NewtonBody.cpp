@@ -188,21 +188,6 @@ NewtonBodyDestructor NewtonBodyGetDestructorCallback(const NewtonBody* const bod
 	return 0;
 }
 
-
-void NewtonBodySetMatrixNoSleep(const NewtonBody* const bodyPtr, const dFloat* const matrixPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//dgMatrix matrix(matrixPtr);
-	//
-	//matrix.m_front.m_w = dgFloat32(0.0f);
-	//matrix.m_up.m_w = dgFloat32(0.0f);
-	//matrix.m_right.m_w = dgFloat32(0.0f);
-	//matrix.m_posit.m_w = dgFloat32(1.0f);
-	//body->SetMatrixNoSleep(matrix);
-	ndAssert(0);
-}
-
 /*!
   Apply hierarchical transformation to a body.
 
@@ -777,6 +762,20 @@ void NewtonBodySetMatrix(const NewtonBody* const bodyPtr, const dFloat* const ma
 	matrix.m_right.m_w = ndFloat32(0.0f);
 	matrix.m_posit.m_w = ndFloat32(1.0f);
 	body->SetMatrix(matrix);
+}
+
+void NewtonBodySetMatrixNoSleep(const NewtonBody* const bodyPtr, const dFloat* const matrixPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
+	ndMatrix matrix(GetMatrix(matrixPtr));
+
+	//body->SetMatrixNoSleep(matrix);
+	matrix.m_front.m_w = ndFloat32(0.0f);
+	matrix.m_up.m_w = ndFloat32(0.0f);
+	matrix.m_right.m_w = ndFloat32(0.0f);
+	matrix.m_posit.m_w = ndFloat32(1.0f);
+	body->SetMatrixNoSleep(matrix);
 }
 
 /*!

@@ -263,15 +263,6 @@ void NewtonMaterialJointResetSelftJointCollision(const NewtonWorld* const newton
 	ndAssert(0);
 }
 
-void NewtonMaterialSetContactGenerationCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnContactGeneration contactGeneration)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
-	//material->SetCollisionGenerationCallback((dgContactMaterial::OnContactGeneration)contactGeneration);
-	ndAssert(0);
-}
-
 
 /*!
   Get the userData set by the application when it created this material pair.
@@ -894,3 +885,11 @@ dFloat NewtonMaterialGetContactMaxNormalImpact(const NewtonMaterial* const mater
 	return material->m_normal_Force.m_impact;
 }
 
+void NewtonMaterialSetContactGenerationCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnContactGeneration contactGeneration)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
+	//Newton* const world = (Newton*)newtonWorld;
+	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
+	//material->SetCollisionGenerationCallback((dgContactMaterial::OnContactGeneration)contactGeneration);
+}
