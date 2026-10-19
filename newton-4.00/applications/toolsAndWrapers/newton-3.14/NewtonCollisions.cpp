@@ -1104,6 +1104,47 @@ NewtonCollision* NewtonCollisionGetParentInstance(const NewtonCollision* const c
 	return reinterpret_cast<NewtonCollision*> (instance->GetParent());
 }
 
+/*!
+  Store a user defined value with a convex collision primitive.
+
+  @param collision is the pointer to a collision primitive.
+  @param id value to store with the collision primitive.
+
+  @return nothing
+
+  the application can store an id with any collision primitive. This id can be used to identify what type of collision primitive generated a contact.
+
+  See also: ::NewtonCollisionGetUserID, ::NewtonCreateBox, ::NewtonCreateSphere
+*/
+void NewtonCollisionSetUserID(const NewtonCollision* const collision, dLong id)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
+
+	ndShapeMaterial material = instance->GetMaterial();
+	material.m_userId = id;
+	instance->SetMaterial(material);
+}
+
+/*!
+  Return a user define value with a convex collision primitive.
+
+  @param collision is the pointer to a convex collision primitive.
+
+  @return user id
+
+  the application can store an id with any collision primitive. This id can be used to identify what type of collision primitive generated a contact.
+
+  See also: ::NewtonCreateBox, ::NewtonCreateSphere
+*/
+dLong NewtonCollisionGetUserID(const NewtonCollision* const collision)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
+	const ndShapeMaterial material = instance->GetMaterial();
+	return material.m_userId;
+}
+
 void NewtonCollisionGetMaterial(const NewtonCollision* const collision, NewtonCollisionMaterial* const userData)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -1112,7 +1153,11 @@ void NewtonCollisionGetMaterial(const NewtonCollision* const collision, NewtonCo
 	const ndShapeMaterial material (instance->GetMaterial());
 	userData->m_userId = material.m_userId;
 	userData->m_userData.m_int = material.m_data.m_intData;
-	for (ndInt32 i = 0; i < sizeof(material.m_userParam) / sizeof(material.m_userParam[0]); ++i)
+
+	const ndInt32 count1 = ndInt32(sizeof(material.m_userParam) / sizeof(material.m_userParam[0]));
+	const ndInt32 count0 = ndInt32(sizeof(userData->m_userParam) / sizeof(userData->m_userParam[0]));
+	const ndInt32 count = ndMin(count0, count1);
+	for (ndInt32 i = 0; i < count; ++i)
 	{
 		userData->m_userParam[i].m_ptr = material.m_userParam[i].m_ptrData;
 	}
@@ -1125,7 +1170,11 @@ void NewtonCollisionSetMaterial(const NewtonCollision* const collision, const Ne
 	ndShapeMaterial material;
 	material.m_userId = userData->m_userId;
 	material.m_data.m_intData = userData->m_userData.m_int;
-	for (ndInt32 i = 0; i < sizeof(material.m_userParam) / sizeof(material.m_userParam[0]); ++i)
+
+	const ndInt32 count1 = ndInt32(sizeof(material.m_userParam) / sizeof(material.m_userParam[0]));
+	const ndInt32 count0 = ndInt32(sizeof(userData->m_userParam) / sizeof(userData->m_userParam[0]));
+	const ndInt32 count = ndMin(count0, count1);
+	for (ndInt32 i = 0; i < count; ++i)
 	{
 		material.m_userParam[i].m_ptrData = userData->m_userParam[i].m_ptr;
 	}
@@ -1227,47 +1276,6 @@ void NewtonCollisionCalculateAABB(const NewtonCollision* const collisionPtr, con
 	p1[0] = q1.m_x;
 	p1[1] = q1.m_y;
 	p1[2] = q1.m_z;
-}
-
-/*!
-  Store a user defined value with a convex collision primitive.
-
-  @param collision is the pointer to a collision primitive.
-  @param id value to store with the collision primitive.
-
-  @return nothing
-
-  the application can store an id with any collision primitive. This id can be used to identify what type of collision primitive generated a contact.
-
-  See also: ::NewtonCollisionGetUserID, ::NewtonCreateBox, ::NewtonCreateSphere
-*/
-void NewtonCollisionSetUserID(const NewtonCollision* const collision, dLong id)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
-
-	ndShapeMaterial material = instance->GetMaterial();
-	material.m_data.m_intData = id;
-	instance->SetMaterial(material);
-}
-
-/*!
-  Return a user define value with a convex collision primitive.
-
-  @param collision is the pointer to a convex collision primitive.
-
-  @return user id
-
-  the application can store an id with any collision primitive. This id can be used to identify what type of collision primitive generated a contact.
-
-  See also: ::NewtonCreateBox, ::NewtonCreateSphere
-*/
-dLong NewtonCollisionGetUserID(const NewtonCollision* const collision)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
-	const ndShapeMaterial material = instance->GetMaterial();
-	return material.m_data.m_intData;
 }
 
 NewtonCollision* NewtonCollisionCreateInstance(const NewtonCollision* const collision)

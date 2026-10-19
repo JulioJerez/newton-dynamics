@@ -10,6 +10,7 @@
 */
 
 #include "newtonStdafx.h"
+#include "Newton.h"
 #include "NewtonUtils.h"
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
@@ -43,7 +44,7 @@ class ndNewtonContact : public ndContact
 		ndBodyKinematic* const kinBody1 = GetBody1();
 		const ndNewtonBodyNotify* const notify0 = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*kinBody0->GetNotifyCallback());
 		const ndNewtonBodyNotify* const notify1 = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*kinBody1->GetNotifyCallback());
-		ndNewtonMaterial* const material = PointerCast<ndNewtonMaterial, ndMaterial>(m_world->GetMaterial(notify0->m_materialGoupId, notify1->m_materialGoupId));
+		const ndNewtonMaterial* const material = PointerCast<ndNewtonMaterial, ndMaterial>(m_world->GetMaterial(notify0->m_materialGoupId, notify1->m_materialGoupId));
 		ndAssert(material);
 		if (material->m_onContactGeneration)
 		{
@@ -52,14 +53,24 @@ class ndNewtonContact : public ndContact
 			// const NewtonBody* const body0, const NewtonCollision* const collision0, 
 			// const NewtonBody* const body1, const NewtonCollision* const collision1, 
 			// NewtonUserContactPoint* const contactBuffer, int maxCount, int threadIndex);
+
+			NewtonUserContactPoint contactBuffer[32];
+			const NewtonMaterial* const self = PointerCast<NewtonMaterial, ndNewtonMaterial>(material);
 			const NewtonBody* const body0 = PointerCast<NewtonBody, ndBodyKinematic>(kinBody0);
 			const NewtonBody* const body1 = PointerCast<NewtonBody, ndBodyKinematic>(kinBody1);
 			const NewtonCollision* const instance0 = PointerCast<NewtonCollision, ndShapeInstance>(&kinBody0->GetCollisionShape());
 			const NewtonCollision* const instance1 = PointerCast<NewtonCollision, ndShapeInstance>(&kinBody1->GetCollisionShape());
-			//material->m_onContactGeneration(material, )
-
+		
 			ndContactPointList& contacPointsList = m_contacPointsList;
-			ndContactPointList& contacPointsList1 = m_contacPointsList;
+			ndInt32 count = material->m_onContactGeneration(self, body0, instance0, body1, instance1, contactBuffer, contacPointsList.GetCount(), ndInt32(contacPointsList.GetCount()));
+			while (contacPointsList.GetCount() > count)
+			{
+				contacPointsList.Remove(contacPointsList.GetLast());
+			}
+		}
+		else
+		{
+			//ndAssert(0);
 		}
 		ndContact::JacobianDerivative(desc);
 	}
