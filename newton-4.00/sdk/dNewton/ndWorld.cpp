@@ -1098,7 +1098,7 @@ void ndWorld::OnRemoveModel(ndModel* const) const
 {
 }
 
-void ndWorld::OnInitSkeleton(ndSkeletonContainer* const skeleton) const
+void ndWorld::OnInitSkeleton(ndSkeletonContainer* const) const
 {
 }
 
