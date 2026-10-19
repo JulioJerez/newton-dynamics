@@ -41,6 +41,9 @@ class NewtonUserJoint : public ndJointBilateralConstraint
 
 	void UpdateParameters() override;
 
+	ndFloat32 GetRowForce(ndInt32 row) const;
+
+
 	ndWeakPtr<ndConstraintDescritor> m_param;
 	NewtonConstraintDestructor m_onDestropy;
 	NewtonUserBilateralCallback m_onSubmitJacobians;

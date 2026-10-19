@@ -73,27 +73,6 @@ dFloat NewtonUserJointGetRowAcceleration(const NewtonJoint* const joint)
 }
 
 /*!
-  Return the magnitude previews force or torque value calculated by the solver for this constraint row.
-
-  @param *joint pointer to the joint.
-  @param row index to the constraint row.
-
-  This function can be call for any of the previews row for this particular joint, The application must keep track of the meaning of the row.
-
-  This function can be used to produce special effects like breakable or malleable joints, fro example a hinge can turn into ball and socket
-  after the force in some of the row exceed  certain high value.
-*/
-dFloat NewtonUserJointGetRowForce(const NewtonJoint* const joint, int row)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//NewtonUserJoint* const userJoint = (NewtonUserJoint*)joint;
-	//return userJoint->GetRowForce(row);
-	ndAssert(0);
-	return 0;
-}
-
-
-/*!
   Set a constrain callback to collect the force calculated by the solver to enforce this constraint
 
   @param *joint pointer to the joint.
@@ -445,3 +424,22 @@ void NewtonUserJointSetRowMassDependentSpringDamperAcceleration(const NewtonJoin
 	userJoint->SetMassSpringDamperAcceleration(desc, desc.m_diagonalRegularizer[desc.m_rowsCount - 1], spring, damper);
 }
 
+
+/*!
+  Return the magnitude previews force or torque value calculated by the solver for this constraint row.
+
+  @param *joint pointer to the joint.
+  @param row index to the constraint row.
+
+  This function can be call for any of the previews row for this particular joint, The application must keep track of the meaning of the row.
+
+  This function can be used to produce special effects like breakable or malleable joints, fro example a hinge can turn into ball and socket
+  after the force in some of the row exceed  certain high value.
+*/
+dFloat NewtonUserJointGetRowForce(const NewtonJoint* const joint, int row)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
+	ndConstraintDescritor& desc = **userJoint->m_param;
+	return userJoint->GetRowForce(row);
+}
