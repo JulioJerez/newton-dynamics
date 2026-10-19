@@ -1045,7 +1045,18 @@ class ArticulatedVehicleManagerManager: public dModelManager
 
 		dExcavatorModel* const excavator = (dExcavatorModel*)NewtonCollisionGetUserData(collision0);
 		dAssert (excavator);
-		return excavator->CollideLink(material, body0, body1, contactBuffer);
+
+		if (NewtonWorldGetVersion() > (NEWTON_MAJOR_VERSION * 100 + NEWTON_MINOR_VERSION))
+		{
+			//For newton 4 we already have the contacts. 
+			//we could do a convex cast to make sure the thread link do not interpenetrate
+			//thin collision shape, but for now just return the first contact.
+			return dMin(maxCount, 1);
+		}
+		else
+		{
+			return excavator->CollideLink(material, body0, body1, contactBuffer);
+		}
 	}
 
 	dExcavatorModel* m_player;

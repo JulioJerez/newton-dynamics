@@ -48,16 +48,6 @@ void NewtonDestroyJoint(const NewtonWorld* const newtonWorld, const NewtonJoint*
 	world->RemoveJoint(baseJoint);
 }
 
-int NewtonJointIsActive(const NewtonJoint* const jointPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgConstraint* const joint = (dgConstraint*)jointPtr;
-	//return joint->IsActive() ? 1 : 0;
-	ndAssert(0);
-	return 0;
-}
-
-
 /*!
   Get creation parameters for this joint.
 
@@ -73,33 +63,6 @@ void NewtonJointGetInfo(const NewtonJoint* const joint, NewtonJointRecord* const
 	TRACE_FUNCTION(__FUNCTION__);
 	//dgConstraint* const contraint = (dgConstraint*)joint;
 	//contraint->GetInfo((dgConstraintInfo*)jointInfo);
-	ndAssert(0);
-}
-
-
-
-/*!
-  Enable or disable collision between the two bodies linked by this joint. The default state is collision disable when the joint is created.
-
-  @param *joint pointer to the joint.
-  @param state collision state, zero mean disable collision, non zero enable collision between linked bodies.
-
-  @return nothing.
-
-  usually when two bodies are linked by a joint, the application wants collision between this two bodies to be disabled.
-  This is the default behavior of joints when they are created, however when this behavior is not desired the application can change
-  it by setting collision on. If the application decides to enable collision between jointed bodies, the application should make sure the
-  collision geometry do not collide in the work space of the joint.
-
-  if the joint is destroyed the collision state of the two bodies linked by this joint is determined by the material pair assigned to each body.
-
-  See also: ::NewtonJointGetCollisionState, ::NewtonBodySetJointRecursiveCollision
-*/
-void NewtonJointSetCollisionState(const NewtonJoint* const joint, int state)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgConstraint* const contraint = (dgConstraint*)joint;
-	//return contraint->SetCollidable(state ? true : false);
 	ndAssert(0);
 }
 
@@ -293,4 +256,36 @@ NewtonBody* NewtonJointGetBody1(const NewtonJoint* const joint)
 	ndAssert(body->GetScene());
 	ndBodyKinematic* const sentinel = body->GetScene()->GetWorld()->GetSentinelBody();
 	return (sentinel != body) ? PointerCast<NewtonBody, ndBodyKinematic>(body) : nullptr;
+}
+
+int NewtonJointIsActive(const NewtonJoint* const jointPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndConstraint* const joint = PointerCast<ndConstraint, NewtonJoint>(jointPtr);
+	return joint->IsActive() ? 1 : 0;
+}
+
+/*!
+  Enable or disable collision between the two bodies linked by this joint. The default state is collision disable when the joint is created.
+
+  @param *joint pointer to the joint.
+  @param state collision state, zero mean disable collision, non zero enable collision between linked bodies.
+
+  @return nothing.
+
+  usually when two bodies are linked by a joint, the application wants collision between this two bodies to be disabled.
+  This is the default behavior of joints when they are created, however when this behavior is not desired the application can change
+  it by setting collision on. If the application decides to enable collision between jointed bodies, the application should make sure the
+  collision geometry do not collide in the work space of the joint.
+
+  if the joint is destroyed the collision state of the two bodies linked by this joint is determined by the material pair assigned to each body.
+
+  See also: ::NewtonJointGetCollisionState, ::NewtonBodySetJointRecursiveCollision
+*/
+void NewtonJointSetCollisionState(const NewtonJoint* const jointPtr, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonUserJoint* const joint = PointerCast<NewtonUserJoint, NewtonJoint>(jointPtr);
+	ndAssert(joint->IsType(NewtonUserJoint::StaticClassName()));
+	joint->SetCollidable(state ? true : false);
 }

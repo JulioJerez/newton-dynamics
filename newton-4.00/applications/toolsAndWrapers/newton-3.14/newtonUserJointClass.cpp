@@ -20,7 +20,6 @@ NewtonJointUserData::NewtonJointUserData(ndJointBilateralConstraint* const owner
 {
 }
 
-
 NewtonUserJoint::NewtonUserJoint(ndInt32 maxDof, ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrix, NewtonUserBilateralCallback jacobianCallback)
 	:ndJointBilateralConstraint(maxDof, body0, body1, globalMatrix)
 	,m_onDestropy(nullptr)
@@ -48,4 +47,14 @@ void NewtonUserJoint::JacobianDerivative(ndConstraintDescritor& desc)
 		m_param = &desc;
 		m_onSubmitJacobians(PointerCast<NewtonJoint, NewtonUserJoint>(this), desc.m_timestep, 0);
 	}
+}
+
+ndFloat32 NewtonUserJoint::GetRowForce(ndInt32 row) const
+{
+	ndFloat32 force = ndFloat32 (0.0f);
+	if ((row >= 0) && (row < ndInt32(GetMaxRowsCount())))
+	{
+		force = m_jointForce[row].m_force;
+	}
+	return force;
 }

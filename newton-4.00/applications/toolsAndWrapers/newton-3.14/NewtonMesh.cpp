@@ -332,15 +332,6 @@ int NewtonMeshGetVertexCount(const NewtonMesh* const mesh)
 	return 0;
 }
 
-int NewtonMeshGetVertexBaseCount(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//return meshEffect->GetVertexBaseCount();
-	ndAssert(0);
-	return 0;
-}
-
 int NewtonMeshGetVertexStrideInByte(const NewtonMesh* const mesh)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -357,15 +348,6 @@ const dFloat64* NewtonMeshGetVertexArray(const NewtonMesh* const mesh)
 	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
 	//
 	//return meshEffect->GetVertexPool();
-	ndAssert(0);
-	return 0;
-}
-
-const int* NewtonMeshGetIndexToVertexMap(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//return meshEffect->GetIndexToVertexMap();
 	ndAssert(0);
 	return 0;
 }
@@ -1029,12 +1011,6 @@ void NewtonMeshBuildFromVertexListIndexList(const NewtonMesh* const mesh, const 
 	instance->BuildFromIndexList(&meshFormat);
 }
 
-void NewtonMeshSetVertexBaseCount(const NewtonMesh* const mesh, int baseCount)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	// do nothing
-}
-
 int NewtonMeshGetPointCount(const NewtonMesh* const mesh)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -1272,4 +1248,30 @@ NewtonMesh* NewtonMeshConvexMeshIntersection(const NewtonMesh* const mesh, const
 	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	const ndMeshEffect* const currentLayer = PointerCast<ndMeshEffect, NewtonMesh>(convexMesh);
 	return PointerCast<NewtonMesh, ndMeshEffect>(meshEffect->ConvexMeshIntersection(currentLayer));
+}
+
+const int* NewtonMeshGetIndexToVertexMap(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
+	//return meshEffect->GetIndexToVertexMap();
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	const ndMeshEffect::ndAttibuteFormat& attribute = meshEffect->GetVertexAtributes();
+	return &attribute.m_pointChannel[0];
+}
+
+void NewtonMeshSetVertexBaseCount(const NewtonMesh* const mesh, int baseCount)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	meshEffect->SetVertexBaseCount(baseCount);
+}
+
+int NewtonMeshGetVertexBaseCount(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
+	//return meshEffect->GetVertexBaseCount();
+	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	return meshEffect->GetVertexBaseCount();
 }

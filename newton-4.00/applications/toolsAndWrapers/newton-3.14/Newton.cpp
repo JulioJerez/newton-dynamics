@@ -1641,8 +1641,6 @@ void NewtonSetJointSerializationCallbacks(const NewtonWorld* const newtonWorld, 
 void NewtonGetJointSerializationCallbacks(const NewtonWorld* const newtonWorld, NewtonOnJointSerializationCallback* const serializeJoint, NewtonOnJointDeserializationCallback* const deserializeJoint)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//world->GetJointSerializationCallbacks((dgWorld::OnJointSerializationCallback*)serializeJoint, (dgWorld::OnJointDeserializationCallback*)deserializeJoint);
 	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	*serializeJoint = world->m_onJointSerialize;
 	*deserializeJoint = world->m_onJointDeserialize;
