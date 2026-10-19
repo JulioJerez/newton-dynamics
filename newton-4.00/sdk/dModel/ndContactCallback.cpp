@@ -78,8 +78,8 @@ ndApplicationMaterial& ndContactCallback::RegisterMaterial(const ndApplicationMa
 //**********************************************************************
 // 
 //**********************************************************************
-ndContactCallback::ndContactCallback()
-	:ndContactNotify(nullptr)
+ndContactCallback::ndContactCallback(ndScene* const scene)
+	:ndContactNotify(scene)
 	,m_materialGraph()
 	,m_defaultMaterial(new ndApplicationMaterial)
 {

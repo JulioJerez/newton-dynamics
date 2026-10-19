@@ -65,6 +65,7 @@ NewtonCollision* NewtonCreateCompoundCollision(const NewtonWorld* const, int sha
 	ndShapeInstance* const instance = new ndShapeInstance(new NewtonCompoundCollision());
 	ndShapeMaterial material = instance->GetMaterial();
 	material.m_userId = shapeID;
+	instance->SetMaterial(material);
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
 

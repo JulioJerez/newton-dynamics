@@ -45,30 +45,6 @@ int NewtonUserJointGetSolverModel(const NewtonJoint* const joint)
 }
 
 
-/*!
-  set the general linear and angular Jacobian for the desired degree of freedom
-
-  @param *joint pointer to the joint.
-  @param  *jacobian0 - pointer of a set of six values defining the linear and angular Jacobian for body0.
-  @param  *jacobian1 - pointer of a set of six values defining the linear and angular Jacobian for body1.
-
-  In general this function must be used for very special effects and in combination with other joints.
-  it is expected that the user have a knowledge of Constrained dynamics to make a good used of this function.
-  Must typical application of this function are the creation of synchronization or control joints like gears, pulleys,
-  worm gear and some other mechanical control.
-
-  this function set the relative acceleration for this degree of freedom to zero. It is the
-  application responsibility to set the relative acceleration after a call to this function
-
-  See also: ::NewtonUserJointAddLinearRow, ::NewtonUserJointAddAngularRow
-*/
-void NewtonUserJointAddGeneralRow(const NewtonJoint* const joint, const dFloat* const jacobian0, const dFloat* const jacobian1)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//NewtonUserJoint* const userJoint = (NewtonUserJoint*)joint;
-	//userJoint->AddGeneralRowJacobian(jacobian0, jacobian1);
-	ndAssert(0);
-}
 
 int NewtonUserJoinRowsCount(const NewtonJoint* const joint)
 {
@@ -95,42 +71,6 @@ dFloat NewtonUserJointGetRowAcceleration(const NewtonJoint* const joint)
 	ndAssert(0);
 	return 0;
 }
-
-/*!
-  Calculates the row acceleration to satisfy the specified the spring damper system.
-
-  @param *joint pointer to the joint.
-  @param rowStiffness fraction of the row reaction forces used a sspring damper penalty.
-  @param spring desired spring stiffness, it must be a positive value.
-  @param damper desired damper coefficient, it must be a positive value.
-
-  This function will override the default acceleration values set after a call to NewtonUserJointAddLinearRow or NewtonUserJointAddAngularRow.
-  friction value is context sensitive, if for linear constraint acceleration is a linear acceleration, for angular constraint acceleration is an
-  angular acceleration.
-
-  the acceleration calculated by this function represent the mass, spring system of the form
-  a = -ks * x - kd * v.
-
-  for this function to take place the joint stiffness must be set to a values lower than 1.0
-
-  See also: ::NewtonUserJointSetRowAcceleration, ::NewtonUserJointSetRowStiffness
-*/
-void NewtonUserJointSetRowMassIndependentSpringDamperAcceleration(const NewtonJoint* const joint, dFloat rowStiffness, dFloat spring, dFloat damper)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//NewtonUserJoint* const userJoint = (NewtonUserJoint*)joint;
-	//userJoint->SetMassIndependentSpringDamperAcceleration(rowStiffness, spring, damper);
-	ndAssert(0);
-}
-
-void NewtonUserJointSetRowMassDependentSpringDamperAcceleration(const NewtonJoint* const joint, dFloat spring, dFloat damper)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//NewtonUserJoint* const userJoint = (NewtonUserJoint*)joint;
-	//userJoint->SetMassDependentSpringDamperAcceleration(spring, damper);
-	ndAssert(0);
-}
-
 
 /*!
   Return the magnitude previews force or torque value calculated by the solver for this constraint row.
@@ -220,72 +160,6 @@ NewtonJoint* NewtonConstraintCreateUserJoint(const NewtonWorld* const newtonWorl
 }
 
 
-/*!
-  Add a linear restricted degree of freedom.
-
-  @param *joint pointer to the joint.
-  @param  *pivot0 - pointer of a vector in global space fixed on body zero.
-  @param  *pivot1 - pointer of a vector in global space fixed on body one.
-  @param *dir pointer of a unit vector in global space along which the relative position, velocity and acceleration between the bodies will be driven to zero.
-
-  A linear constraint row calculates the Jacobian derivatives and relative acceleration required to enforce the constraint condition at
-  the attachment point and the pin direction considered fixed to both bodies.
-
-  The acceleration is calculated such that the relative linear motion between the two points is zero, the application can
-  afterward override this value to create motors.
-
-  after this function is call and internal DOF index will point to the current row entry in the constraint matrix.
-
-  This function call only be called from inside a *NewtonUserBilateralCallback* callback.
-
-  See also: ::NewtonUserJointAddAngularRow,
-*/
-void NewtonUserJointAddLinearRow(const NewtonJoint* const joint, const dFloat* const pivot0, const dFloat* const pivot1, const dFloat* const dir)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndVector direction(dir[0], dir[1], dir[2], ndFloat32(0.0f));
-	direction = direction.Normalize();
-	ndAssert(ndAbs(direction.DotProduct(direction).GetScalar() - ndFloat32(1.0f)) < ndFloat32(1.0e-4f));
-	ndVector pivotPoint0(pivot0[0], pivot0[1], pivot0[2], ndFloat32(0.0f));
-	ndVector pivotPoint1(pivot1[0], pivot1[1], pivot1[2], ndFloat32(0.0f));
-
-	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
-	ndConstraintDescritor& desc = **userJoint->m_param;
-	userJoint->AddLinearRowJacobian(desc, pivotPoint0, pivotPoint1, direction);
-}
-
-/*!
-  Add an angular restricted degree of freedom.
-
-  @param *joint pointer to the joint.
-  @param relativeAngleError relative angle error between both bodies around pin axis.
-  @param *pin pointer of a unit vector in global space along which the relative position, velocity and acceleration between the bodies will be driven to zero.
-
-  An angular constraint row calculates the Jacobian derivatives and relative acceleration required to enforce the constraint condition at
-  pin direction considered fixed to both bodies.
-
-  The acceleration is calculated such that the relative angular motion between the two points is zero, The application can
-  afterward override this value to create motors.
-
-  After this function is called and internal DOF index will point to the current row entry in the constraint matrix.
-
-  This function call only be called from inside a *NewtonUserBilateralCallback* callback.
-
-  This function is of not practical to enforce hard constraints, but it is very useful for making angular motors.
-
-  See also: ::NewtonUserJointAddLinearRow
-*/
-void NewtonUserJointAddAngularRow(const NewtonJoint* const joint, dFloat relativeAngleError, const dFloat* const pin)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndVector direction(pin[0], pin[1], pin[2], ndFloat32(0.0f));
-	direction = direction.Normalize();
-	ndAssert(ndAbs(direction.DotProduct(direction).GetScalar() - ndFloat32(1.0f)) < ndFloat32(1.0e-3f));
-	
-	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
-	ndConstraintDescritor& desc = **userJoint->m_param;
-	userJoint->AddAngularRowJacobian(desc, direction, relativeAngleError);
-}
 
 /*!
   Set the maximum percentage of the constraint force that will be applied to the constraint row.
@@ -434,3 +308,140 @@ dFloat NewtonUserJointCalculateRowZeroAcceleration(const NewtonJoint* const join
 	ndConstraintDescritor& desc = **userJoint->m_param;
 	return userJoint->GetMotorZeroAcceleration(desc);
 }
+
+
+/*!
+  set the general linear and angular Jacobian for the desired degree of freedom
+
+  @param *joint pointer to the joint.
+  @param  *jacobian0 - pointer of a set of six values defining the linear and angular Jacobian for body0.
+  @param  *jacobian1 - pointer of a set of six values defining the linear and angular Jacobian for body1.
+
+  In general this function must be used for very special effects and in combination with other joints.
+  it is expected that the user have a knowledge of Constrained dynamics to make a good used of this function.
+  Must typical application of this function are the creation of synchronization or control joints like gears, pulleys,
+  worm gear and some other mechanical control.
+
+  this function set the relative acceleration for this degree of freedom to zero. It is the
+  application responsibility to set the relative acceleration after a call to this function
+
+  See also: ::NewtonUserJointAddLinearRow, ::NewtonUserJointAddAngularRow
+*/
+void NewtonUserJointAddGeneralRow(const NewtonJoint* const joint, const dFloat* const jacobian0, const dFloat* const jacobian1)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
+
+	ndJacobian jacobia0;
+	ndJacobian jacobia1;
+	ndConstraintDescritor& desc = **userJoint->m_param;
+
+	jacobia0.m_linear = ndVector(jacobian0[0], jacobian0[1], jacobian0[2], ndFloat32(0.0f));
+	jacobia0.m_angular = ndVector(jacobian0[3], jacobian0[4], jacobian0[5], ndFloat32(0.0f));
+	jacobia1.m_linear = ndVector(jacobian1[0], jacobian1[1], jacobian1[2], ndFloat32(0.0f));
+	jacobia1.m_angular = ndVector(jacobian1[3], jacobian1[4], jacobian1[5], ndFloat32(0.0f));
+	userJoint->SetJacobianDerivative(desc, jacobia0, jacobia1);
+}
+
+/*!
+  Add a linear restricted degree of freedom.
+
+  @param *joint pointer to the joint.
+  @param  *pivot0 - pointer of a vector in global space fixed on body zero.
+  @param  *pivot1 - pointer of a vector in global space fixed on body one.
+  @param *dir pointer of a unit vector in global space along which the relative position, velocity and acceleration between the bodies will be driven to zero.
+
+  A linear constraint row calculates the Jacobian derivatives and relative acceleration required to enforce the constraint condition at
+  the attachment point and the pin direction considered fixed to both bodies.
+
+  The acceleration is calculated such that the relative linear motion between the two points is zero, the application can
+  afterward override this value to create motors.
+
+  after this function is call and internal DOF index will point to the current row entry in the constraint matrix.
+
+  This function call only be called from inside a *NewtonUserBilateralCallback* callback.
+
+  See also: ::NewtonUserJointAddAngularRow,
+*/
+void NewtonUserJointAddLinearRow(const NewtonJoint* const joint, const dFloat* const pivot0, const dFloat* const pivot1, const dFloat* const dir)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndVector direction(dir[0], dir[1], dir[2], ndFloat32(0.0f));
+	direction = direction.Normalize();
+	ndAssert(ndAbs(direction.DotProduct(direction).GetScalar() - ndFloat32(1.0f)) < ndFloat32(1.0e-4f));
+	ndVector pivotPoint0(pivot0[0], pivot0[1], pivot0[2], ndFloat32(0.0f));
+	ndVector pivotPoint1(pivot1[0], pivot1[1], pivot1[2], ndFloat32(0.0f));
+
+	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
+	ndConstraintDescritor& desc = **userJoint->m_param;
+	userJoint->AddLinearRowJacobian(desc, pivotPoint0, pivotPoint1, direction);
+}
+
+/*!
+  Add an angular restricted degree of freedom.
+
+  @param *joint pointer to the joint.
+  @param relativeAngleError relative angle error between both bodies around pin axis.
+  @param *pin pointer of a unit vector in global space along which the relative position, velocity and acceleration between the bodies will be driven to zero.
+
+  An angular constraint row calculates the Jacobian derivatives and relative acceleration required to enforce the constraint condition at
+  pin direction considered fixed to both bodies.
+
+  The acceleration is calculated such that the relative angular motion between the two points is zero, The application can
+  afterward override this value to create motors.
+
+  After this function is called and internal DOF index will point to the current row entry in the constraint matrix.
+
+  This function call only be called from inside a *NewtonUserBilateralCallback* callback.
+
+  This function is of not practical to enforce hard constraints, but it is very useful for making angular motors.
+
+  See also: ::NewtonUserJointAddLinearRow
+*/
+void NewtonUserJointAddAngularRow(const NewtonJoint* const joint, dFloat relativeAngleError, const dFloat* const pin)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndVector direction(pin[0], pin[1], pin[2], ndFloat32(0.0f));
+	direction = direction.Normalize();
+	ndAssert(ndAbs(direction.DotProduct(direction).GetScalar() - ndFloat32(1.0f)) < ndFloat32(1.0e-3f));
+
+	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
+	ndConstraintDescritor& desc = **userJoint->m_param;
+	userJoint->AddAngularRowJacobian(desc, direction, relativeAngleError);
+}
+
+/*!
+  Calculates the row acceleration to satisfy the specified the spring damper system.
+
+  @param *joint pointer to the joint.
+  @param rowStiffness fraction of the row reaction forces used a sspring damper penalty.
+  @param spring desired spring stiffness, it must be a positive value.
+  @param damper desired damper coefficient, it must be a positive value.
+
+  This function will override the default acceleration values set after a call to NewtonUserJointAddLinearRow or NewtonUserJointAddAngularRow.
+  friction value is context sensitive, if for linear constraint acceleration is a linear acceleration, for angular constraint acceleration is an
+  angular acceleration.
+
+  the acceleration calculated by this function represent the mass, spring system of the form
+  a = -ks * x - kd * v.
+
+  for this function to take place the joint stiffness must be set to a values lower than 1.0
+
+  See also: ::NewtonUserJointSetRowAcceleration, ::NewtonUserJointSetRowStiffness
+*/
+void NewtonUserJointSetRowMassIndependentSpringDamperAcceleration(const NewtonJoint* const joint, dFloat rowStiffness, dFloat spring, dFloat damper)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
+	ndConstraintDescritor& desc = **userJoint->m_param;
+	userJoint->SetMassSpringDamperAcceleration(desc, ndFloat32 (1.0f) - rowStiffness, spring, damper);
+}
+
+void NewtonUserJointSetRowMassDependentSpringDamperAcceleration(const NewtonJoint* const joint, dFloat spring, dFloat damper)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonUserJoint* const userJoint = PointerCast<NewtonUserJoint, NewtonJoint>(joint);
+	ndConstraintDescritor& desc = **userJoint->m_param;
+	userJoint->SetMassSpringDamperAcceleration(desc, desc.m_diagonalRegularizer[desc.m_rowsCount - 1], spring, damper);
+}
+

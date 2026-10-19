@@ -105,6 +105,8 @@ class ndWorld: public ndClassAlloc
 	D_NEWTON_API virtual void OnAddModel(ndModel* const model) const;
 	D_NEWTON_API virtual void OnRemoveModel(ndModel* const model) const;
 
+	D_NEWTON_API virtual void OnInitSkeleton(ndSkeletonContainer* const skeleton) const;
+
 	D_NEWTON_API const ndJointList& GetJointList() const;
 	D_NEWTON_API const ndModelList& GetModelList() const;
 	D_NEWTON_API const ndBodyListView& GetBodyList() const;

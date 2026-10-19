@@ -100,7 +100,8 @@ void ndPhysicsWorld::ndDefferedEntityList::RemovePendingItems()
 // **********************************************************
 //
 // **********************************************************
-ndDemoContactCallback::ndDemoContactCallback()
+ndDemoContactCallback::ndDemoContactCallback(ndScene* const scene)
+	:ndContactCallback(scene)
 {
 }
 
@@ -124,7 +125,7 @@ ndPhysicsWorld::ndPhysicsWorld(ndDemoEntityManager* const manager)
 	m_deadJoints.m_owner = this;
 	m_deadModels.m_owner = this;
 	m_deadEntities.m_owner = this;
-	SetContactNotify(ndSharedPtr<ndContactNotify>(new ndDemoContactCallback));
+	SetContactNotify(ndSharedPtr<ndContactNotify>(new ndDemoContactCallback(GetScene())));
 }
 
 ndPhysicsWorld::~ndPhysicsWorld()

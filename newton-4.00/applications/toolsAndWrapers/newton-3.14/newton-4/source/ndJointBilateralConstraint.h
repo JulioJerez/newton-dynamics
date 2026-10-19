@@ -139,6 +139,8 @@ class ndJointBilateralConstraint : public ndConstraint
 
 	D_COLLISION_API ndFloat32 CalculateAngle(const ndVector& planeDir, const ndVector& cosDir, const ndVector& sinDir) const;
 	D_COLLISION_API virtual void JointAccelerations(ndJointAccelerationDecriptor* const desc) override;
+
+	D_COLLISION_API void SetJacobianDerivative(ndConstraintDescritor& desc, const ndJacobian& jacobian0, const ndJacobian& jacobian1);
 	D_COLLISION_API void AddAngularRowJacobian(ndConstraintDescritor& desc, const ndVector& dir, ndFloat32 relAngle);
 	D_COLLISION_API void AddLinearRowJacobian(ndConstraintDescritor& desc, const ndVector& pivot0, const ndVector& pivot1, const ndVector& dir);
 

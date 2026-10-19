@@ -27,7 +27,7 @@
 #include "ndBodyNotify.h"
 #include "ndMeshBaseComponents.h"
 
-ndUnsigned32 ndBody::m_uniqueIdCount = 0;
+ndAtomic<ndUnsigned32> ndBody::m_uniqueIdCount = 1;
 
 ndBody::ndBody()
 	:ndContainersFreeListAlloc<ndBody>()
@@ -40,7 +40,7 @@ ndBody::ndBody()
 	,m_minAabb(ndVector::m_wOne)
 	,m_maxAabb(ndVector::m_wOne)
 	,m_notifyCallback(nullptr)
-	,m_uniqueId(m_uniqueIdCount)
+	,m_uniqueId(m_uniqueIdCount++)
 	,m_flags(0)
 	,m_isStatic(0)
 	,m_autoSleep(1)
@@ -53,7 +53,6 @@ ndBody::ndBody()
 	,m_sceneEquilibrium(0)
 	,m_skeletonSelfCollision(0)
 {
-	m_uniqueIdCount++;
 	m_transformIsDirty = 1;
 }
 
@@ -80,7 +79,6 @@ ndBody::ndBody(const ndBody& src)
 	,m_sceneForceUpdate(1)
 	,m_sceneEquilibrium(0)
 {
-	m_uniqueIdCount++;
 	m_transformIsDirty = 1;
 	if (*src.m_notifyCallback)
 	{

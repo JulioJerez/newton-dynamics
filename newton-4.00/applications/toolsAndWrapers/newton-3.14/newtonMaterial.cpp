@@ -13,19 +13,83 @@
 #include "NewtonUtils.h"
 #include "newtonWorld.h"
 #include "newtonMaterial.h"
+#include "newtonBodyNotify.h"
+
+class ndNewtonContact : public ndContact
+{
+	public:
+	D_CLASS_REFLECTION(ndNewtonContact, ndContact)
+
+		ndNewtonContact(ndNewtonWorld* const world)
+		:ndContact()
+		,m_world(world)
+	{
+	}
+
+	ndNewtonContact(const ndNewtonContact& src)
+		:ndContact(src)
+		,m_world(src.m_world)
+	{
+	}
+
+	ndContact* Clone() const override
+	{
+		return new ndNewtonContact(*this);
+	}
+
+	void JacobianDerivative(ndConstraintDescritor& desc) override
+	{
+		ndBodyKinematic* const kinBody0 = GetBody0();
+		ndBodyKinematic* const kinBody1 = GetBody1();
+		const ndNewtonBodyNotify* const notify0 = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*kinBody0->GetNotifyCallback());
+		const ndNewtonBodyNotify* const notify1 = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*kinBody1->GetNotifyCallback());
+		ndNewtonMaterial* const material = PointerCast<ndNewtonMaterial, ndMaterial>(m_world->GetMaterial(notify0->m_materialGoupId, notify1->m_materialGoupId));
+		ndAssert(material);
+		if (material->m_onContactGeneration)
+		{
+			//typedef int (*NewtonOnContactGeneration) (
+			// const NewtonMaterial* const material, 
+			// const NewtonBody* const body0, const NewtonCollision* const collision0, 
+			// const NewtonBody* const body1, const NewtonCollision* const collision1, 
+			// NewtonUserContactPoint* const contactBuffer, int maxCount, int threadIndex);
+			const NewtonBody* const body0 = PointerCast<NewtonBody, ndBodyKinematic>(kinBody0);
+			const NewtonBody* const body1 = PointerCast<NewtonBody, ndBodyKinematic>(kinBody1);
+			const NewtonCollision* const instance0 = PointerCast<NewtonCollision, ndShapeInstance>(&kinBody0->GetCollisionShape());
+			const NewtonCollision* const instance1 = PointerCast<NewtonCollision, ndShapeInstance>(&kinBody1->GetCollisionShape());
+			//material->m_onContactGeneration(material, )
+
+			ndContactPointList& contacPointsList = m_contacPointsList;
+			ndContactPointList& contacPointsList1 = m_contacPointsList;
+		}
+		ndContact::JacobianDerivative(desc);
+	}
+
+	ndWeakPtr<ndNewtonWorld> m_world;
+};
+
+
+ndNewtonContactCallback::ndNewtonContactCallback(ndScene* const scene)
+	:ndContactCallback(scene)
+{
+	m_defaultConstructor = ndSharedPtr<ndContact>(new ndNewtonContact(PointerCast<ndNewtonWorld, ndWorld>(scene->GetWorld())));
+}
 
 ndNewtonMaterial::ndNewtonMaterial()
 	:ndApplicationMaterial()
+	,m_usedData(nullptr)
 	,m_onAABBOverlap(nullptr)
 	,m_onContactsProcess(nullptr)
+	,m_onContactGeneration(nullptr)
 	,m_onSubShapeAABBOverlap(nullptr)
 {
 }
 
 ndNewtonMaterial::ndNewtonMaterial(const ndNewtonMaterial& copy)
 	:ndApplicationMaterial(copy)
+	,m_usedData(copy.m_usedData)
 	,m_onAABBOverlap(copy.m_onAABBOverlap)
 	,m_onContactsProcess(copy.m_onContactsProcess)
+	,m_onContactGeneration(copy.m_onContactGeneration)
 	,m_onSubShapeAABBOverlap(copy.m_onSubShapeAABBOverlap)
 {
 }
@@ -65,5 +129,3 @@ void ndNewtonMaterial::OnContactCallback(const ndContact* const contact, ndFloat
 		m_onContactsProcess(PointerCast<NewtonJoint, ndContact>(contact), timestep, 0);
 	}
 }
-
-

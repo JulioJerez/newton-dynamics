@@ -76,7 +76,7 @@ class ndMaterialGraph: public ndTree<ndApplicationMaterial*, ndMaterialHash, ndC
 class ndContactCallback: public ndContactNotify
 {
 	public: 
-	ndContactCallback();
+	ndContactCallback(ndScene* const scene);
 	virtual ~ndContactCallback() override;
 	virtual ndApplicationMaterial& RegisterMaterial(const ndApplicationMaterial& material, ndUnsigned32 id0, ndUnsigned32 id1);
 

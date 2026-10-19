@@ -57,7 +57,6 @@ ndWorld::ndWorld()
 	,m_collisionUpdate(false)
 {
 	// start the engine thread;
-	ndBody::m_uniqueIdCount = 0;
 	m_solver = new ndDynamicsUpdate(this);
 	m_scene = new ndWorldScene(this);
 
@@ -124,8 +123,6 @@ void ndWorld::CleanUp()
 		ndModel* const model = *m_modelList.GetFirst()->GetInfo();
 		RemoveModel(model);
 	}
-
-	ndBody::m_uniqueIdCount = 1;
 	m_scene->Cleanup();
 }
 
@@ -842,14 +839,6 @@ void ndWorld::UpdateSkeletons()
 	for (ndInt32 i = 0; i < m_activeSkeletons.GetCount(); ++i)
 	{
 		ndSkeletonContainer* const skeleton = m_activeSkeletons[i];
-		//const ndSkeletonContainer::ndNode* const node = skeleton->m_nodesOrder[0];
-		//ndAssert(node->m_body);
-		//ndAssert(node->m_body->GetInvMass() > ndFloat32 (0.0f));
-		//const ndModel* const model = node->m_body->GetAsBodyKinematic()->GetModel();
-		//if (model)
-		//{
-		//	skeleton->SetMulticoreSolver(model->GetMulticoreHint());
-		//}
 		skeleton->ClearCloseLoopJoints();
 	}
 
@@ -1106,6 +1095,10 @@ void ndWorld::OnAddModel(ndModel* const) const
 }
 
 void ndWorld::OnRemoveModel(ndModel* const) const
+{
+}
+
+void ndWorld::OnInitSkeleton(ndSkeletonContainer* const skeleton) const
 {
 }
 

@@ -388,7 +388,6 @@ extern "C" {
 	typedef void (*NewtonFractureCompoundCollisionOnEmitCompoundFractured) (NewtonBody* const fracturedBody);
 	typedef void (*NewtonFractureCompoundCollisionOnEmitChunk) (NewtonBody* const chunkBody, NewtonFracturedCompoundMeshPart* const fracturexChunkMesh, const NewtonCollision* const fracturedCompountCollision);
 	typedef void (*NewtonFractureCompoundCollisionReconstructMainMeshCallBack) (NewtonBody* const body, NewtonFracturedCompoundMeshPart* const mainMesh, const NewtonCollision* const fracturedCompountCollision);
-	typedef int  (*NewtonOnContactGeneration) (const NewtonMaterial* const material, const NewtonBody* const body0, const NewtonCollision* const collision0, const NewtonBody* const body1, const NewtonCollision* const collision1, NewtonUserContactPoint* const contactBuffer, int maxCount, int threadIndex);
 
 	typedef int (*NewtonBodyIterator) (const NewtonBody* const body, void* const userData);
 	typedef void (*NewtonJointIterator) (const NewtonJoint* const joint, void* const userData);
@@ -548,6 +547,7 @@ extern "C" {
 
 	typedef void(*NewtonCreateContactCallback) (const NewtonWorld* const newtonWorld, NewtonJoint* const contact);
 	typedef void(*NewtonDestroyContactCallback) (const NewtonWorld* const newtonWorld, NewtonJoint* const contact);
+	typedef int (*NewtonOnContactGeneration) (const NewtonMaterial* const material, const NewtonBody* const body0, const NewtonCollision* const collision0, const NewtonBody* const body1, const NewtonCollision* const collision1, NewtonUserContactPoint* const contactBuffer, int maxCount, int threadIndex);
 
 	typedef void (*NewtonSerializeCallback) (void* const serializeHandle, const void* const buffer, int size);
 	typedef void (*NewtonDeserializeCallback) (void* const serializeHandle, void* const buffer, int size);
@@ -861,7 +861,6 @@ extern "C" {
 	NEWTON_API void* NewtonFracturedCompoundMeshPartGetNextSegment(const void* const fractureCompoundMeshSegment);
 	NEWTON_API int NewtonFracturedCompoundMeshPartGetMaterial(const void* const fractureCompoundMeshSegment);
 	NEWTON_API int NewtonFracturedCompoundMeshPartGetIndexCount(const void* const fractureCompoundMeshSegment);
-
 
 	// materials
 	NEWTON_API int NewtonMaterialCreateGroupID(const NewtonWorld* const newtonWorld);

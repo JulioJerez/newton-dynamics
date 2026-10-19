@@ -244,16 +244,6 @@ void NewtonMaterialSetDefaultSoftness(const NewtonWorld* const newtonWorld, int 
 	ndAssert(0);
 }
 
-void NewtonMaterialSetCallbackUserData(const NewtonWorld* const newtonWorld, int id0, int id1, void* const userData)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
-	//material->SetUserData(userData);
-
-	ndAssert(0);
-}
-
 void NewtonMaterialJointResetIntraJointCollision(const NewtonWorld* const newtonWorld, int id0, int id1)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -271,36 +261,6 @@ void NewtonMaterialJointResetSelftJointCollision(const NewtonWorld* const newton
 	//material->m_flags |= dgContactMaterial::m_resetSkeletonSelfCollision;
 
 	ndAssert(0);
-}
-
-void NewtonMaterialSetContactGenerationCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnContactGeneration contactGeneration)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
-	//material->SetCollisionGenerationCallback((dgContactMaterial::OnContactGeneration)contactGeneration);
-	ndAssert(0);
-}
-
-/*!
-  Get userData associated with this material.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param  id0 - group id0.
-  @param  id1 - group id1.
-
-  @return Nothing.
-*/
-void* NewtonMaterialGetUserData(const NewtonWorld* const newtonWorld, int id0, int id1)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
-	//
-	//return material->GetUserData();
-
-	ndAssert(0);
-	return 0;
 }
 
 
@@ -875,6 +835,39 @@ void NewtonMaterialSetDefaultCollidable(const NewtonWorld* const newtonWorld, in
 	}
 }
 
+void NewtonMaterialSetCallbackUserData(const NewtonWorld* const newtonWorld, int id0, int id1, void* const userData)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
+	//material->SetUserData(userData);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndNewtonMaterial* const material = PointerCast<ndNewtonMaterial, ndMaterial>(world->GetMaterial(id0, id1));
+	material->m_usedData = userData;
+}
+
+/*!
+  Get userData associated with this material.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param  id0 - group id0.
+  @param  id1 - group id1.
+
+  @return Nothing.
+*/
+void* NewtonMaterialGetUserData(const NewtonWorld* const newtonWorld, int id0, int id1)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//Newton* const world = (Newton*)newtonWorld;
+	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
+	//
+	//return material->GetUserData();
+
+	ndAssert(0);
+	return 0;
+}
+
+
 NewtonCollision* NewtonMaterialGetBodyCollidingShape(const NewtonMaterial* const materialHandle, const NewtonBody* const bodyPtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -890,4 +883,13 @@ dFloat NewtonMaterialGetContactMaxNormalImpact(const NewtonMaterial* const mater
 	TRACE_FUNCTION(__FUNCTION__);
 	ndContactMaterial* const material = PointerCast<ndContactMaterial, NewtonMaterial>(materialHandle);
 	return material->m_normal_Force.m_impact;
+}
+
+void NewtonMaterialSetContactGenerationCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnContactGeneration contactGeneration)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndNewtonMaterial* const material = PointerCast<ndNewtonMaterial, ndMaterial>(world->GetMaterial(id0, id1));
+	ndAssert(material);
+	material->m_onContactGeneration = contactGeneration;
 }

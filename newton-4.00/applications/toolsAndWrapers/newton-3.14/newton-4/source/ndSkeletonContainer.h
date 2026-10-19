@@ -29,6 +29,7 @@ class ndJointBilateralConstraint;
 
 #define D_INV_IK_MAX_LINKS				256
 #define D_MAX_SKELETON_OPEN_LOOP_DOF	6
+#define D_DEFAULT_REGULARIZER			ndFloat32(4.0e-3f)
 #define D_SPARSE_SKELETON_MATRIX_FACTOR	ndFloat32 (0.5f)
 #define D_MAX_SKELETON_LCP_VALUE		(D_LCP_MAX_VALUE * ndFloat32 (0.25f))
 
@@ -40,6 +41,7 @@ class ndSkeletonContainer
 	D_NEWTON_API ndSkeletonContainer();
 	D_NEWTON_API ~ndSkeletonContainer();
 	D_NEWTON_API ndInt32 GetId() const;
+	D_NEWTON_API bool SetAutoRegualrization(bool state, ndFloat32 regularizer);
 
 	const ndNodeList& GetNodeList() const;
 	ndInt32 FindBoneIndex(const ndBodyKinematic* const body) const;
@@ -62,9 +64,9 @@ class ndSkeletonContainer
 	class ndNodePair
 	{
 		public:
-		const ndConstraint* m_joint;
 		ndInt32 m_m0;
 		ndInt32 m_m1;
+		const ndConstraint* m_joint;
 	};
 
 	D_MSV_NEWTON_CLASS_ALIGN_32
@@ -303,6 +305,7 @@ class ndSkeletonContainer
 
 	ndArray<ndInt8> m_auxiliaryMemoryBuffer;
 	ndSpinLock m_lock;
+	ndFloat32 m_defualtRegularizer;
 	ndInt32 m_id;
 	ndInt32 m_blockSize;
 	ndInt32 m_rowCount;
@@ -310,6 +313,7 @@ class ndSkeletonContainer
 	ndInt32 m_auxiliaryRowCount;
 	ndInt32 m_isResting;
 	ndInt32 m_threadId;
+	bool m_autoRegularization;
 
 	friend class ndWorld;
 	friend class ndIkSolver;

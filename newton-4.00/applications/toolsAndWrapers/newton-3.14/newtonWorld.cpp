@@ -40,7 +40,7 @@ ndNewtonWorld::~ndNewtonWorld()
 
 void ndNewtonWorld::SetContactCallback()
 {
-	ndContactCallback* const callback = new ndContactCallback;
+	ndContactCallback* const callback = new ndNewtonContactCallback(GetScene());
 	ndSharedPtr<ndApplicationMaterial> defaultMaterial(new ndNewtonMaterial);
 	callback->SetDefualtMaterial(defaultMaterial);
 	SetContactNotify(ndSharedPtr<ndContactNotify>(callback));
@@ -69,6 +69,12 @@ void ndNewtonWorld::OnRemoveJoint(ndJointBilateralConstraint* const joint) const
 void ndNewtonWorld::ClearMaterials()
 {
 	SetContactCallback();
+}
+
+void ndNewtonWorld::OnInitSkeleton(ndSkeletonContainer* const skeleton) const 
+{
+	ndWorld::OnInitSkeleton(skeleton);
+	skeleton->SetAutoRegualrization(false, ndFloat32(2.0f) * D_DEFAULT_REGULARIZER);
 }
 
 ndMaterial* ndNewtonWorld::GetMaterial(int id0, int id1) const

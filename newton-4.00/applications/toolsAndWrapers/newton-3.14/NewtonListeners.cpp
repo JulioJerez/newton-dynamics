@@ -98,6 +98,7 @@ class NewtonListenerNotify : public ndModelNotify
 		}
 	}
 
+	ndString m_name;
 	ndWeakPtr<void> m_userData;
 	NewtonWorldListenerDebugCallback m_onDebug;
 	NewtonWorldDestroyListenerCallback m_onDestroy;
@@ -107,7 +108,6 @@ class NewtonListenerNotify : public ndModelNotify
 	NewtonWorldListenerBodyDestroyCallback m_onBodyDestroy;
 };
 
-
 class NewtonListener : public ndModel
 {
 	public:
@@ -115,28 +115,17 @@ class NewtonListener : public ndModel
 
 	NewtonListener(const char* const name, void* const userData)
 		:ndModel()
-		,m_name(name)
 	{
 		ndSharedPtr<ndModelNotify> notify (new NewtonListenerNotify(userData));
 		SetNotifyCallback(notify);
+		NewtonListenerNotify* const litener = PointerCast<NewtonListenerNotify, ndModelNotify>(*notify);
+		litener->m_name = name;
 	}
 
 	~NewtonListener() override
 	{
 	}
-
-	ndString m_name;
 };
-
-void* NewtonWorldGetListener(const NewtonWorld* const newtonWorld, const char* const nameId)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//return world->FindListener(nameId);
-	ndAssert(0);
-	return 0;
-}
-
 
 NewtonWorldListenerBodyDestroyCallback NewtonWorldListenerGetBodyDestroyCallback(const NewtonWorld* const newtonWorld, void* const listener)
 {
@@ -254,4 +243,23 @@ void* NewtonWorldGetListenerUserData(const NewtonWorld* const, void* const liste
 	ndSharedPtr<ndModelNotify>& baseNofify = listener->GetNotifyCallback();
 	NewtonListenerNotify* const notify = PointerCast<NewtonListenerNotify, ndModelNotify>(*baseNofify);
 	return *notify->m_userData;
+}
+
+
+void* NewtonWorldGetListener(const NewtonWorld* const newtonWorld, const char* const nameId)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+
+	const ndModelList& modelList = world->GetModelList();
+	for (ndModelList::ndNode* node = modelList.GetFirst(); node; node = node->GetNext())
+	{
+		ndModel* model = *node->GetInfo();
+		NewtonListenerNotify* const notify = PointerCast<NewtonListenerNotify, ndModelNotify>(*model->GetNotifyCallback());
+		if (strcmp(notify->m_name.GetStr(), nameId) == 0)
+		{
+			return model;
+		}
+	}
+	return nullptr;
 }

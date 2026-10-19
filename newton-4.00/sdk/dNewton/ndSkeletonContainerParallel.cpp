@@ -110,7 +110,7 @@ void ndSkeletonContainer::ParallelInitMassMatrix(const ndLeftHandSide* const mat
 			ndScene* const scene = m_owner->GetScene();
 			scene->ParallelExecute(Precondition, size, 4);
 
-			ndAssert(ndTestPSDmatrix(size, stride, matrix, GetScratchBuffer(stride * stride)));
+			ndAssert(!m_autoRegularization || ndTestPSDmatrix(size, stride, matrix, GetScratchBuffer(stride * stride)));
 			ParallelBuildSparseMatrix();
 		}
 	}
@@ -525,16 +525,12 @@ void ndSkeletonContainer::ParallelInitLoopMassMatrix()
 			ndFloat32 elem = row1[m_blockSize + groupId] + ndDotProduct(m_blockSize, &accumulator[0], row1);
 			arow[groupId] = elem + diagDamp[m_blockSize + groupId];
 		});
-		//for (ndInt32 index = 0; index < boundedSize; ++index)
-		//{
-		//	InitMassMatrixBoundedBlock(index, 0);
-		//}
 		scene->ParallelExecute(InitMassMatrixBoundedBlock, boundedSize, 4);
 
-		ndAssert(!boundedSize || ndTestPSDmatrix(m_auxiliaryRowCount - m_blockSize, m_auxiliaryRowCount, &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize], GetScratchBuffer(m_auxiliaryRowCount * m_auxiliaryRowCount)));
+		ndAssert(!m_autoRegularization || !boundedSize || ndTestPSDmatrix(m_auxiliaryRowCount - m_blockSize, m_auxiliaryRowCount, &m_massMatrix11[m_auxiliaryRowCount * m_blockSize + m_blockSize], GetScratchBuffer(m_auxiliaryRowCount * m_auxiliaryRowCount)));
 	}
 
-	if (m_transientLoopingContacts.GetCount() || m_transientLoopingJoints.GetCount())
+	if (m_autoRegularization && (m_permanentLoopingJoints.GetCount() || m_transientLoopingContacts.GetCount() || m_transientLoopingJoints.GetCount()))
 	{
 		ParallelRegularizeLcp();
 	}
@@ -616,7 +612,7 @@ void ndSkeletonContainer::ParallelCalculateLoopMassMatrixCoefficients(ndFloat32*
 		ndFloat32 diagonal = element.AddHorizontal() + rhs_i->m_diagDamp * ndFloat32(2.0f);
 		ndAssert(matrixRow11[index] == ndFloat32(0.0f));
 		matrixRow11[index] = diagonal;
-		diagDamp[index] = diagonal * ndFloat32(4.0e-3f);
+		diagDamp[index] = diagonal * m_defualtRegularizer;
 
 		const ndInt32 m0_i = m_pairs[primaryCount + index].m_m0;
 		const ndInt32 m1_i = m_pairs[primaryCount + index].m_m1;
@@ -706,10 +702,6 @@ void ndSkeletonContainer::ParallelCalculateLoopMassMatrixCoefficients(ndFloat32*
 			}
 		}
 	});
-	//for (ndInt32 index = 0; index < m_auxiliaryRowCount; ++index)
-	//{
-	//	CalculateLoopMassMatrixCoefficients(index, 0);
-	//}
 	ndScene* const scene = m_owner->GetScene();
 	scene->ParallelExecute(CalculateLoopMassMatrixCoefficients, m_auxiliaryRowCount, 4);
 }
