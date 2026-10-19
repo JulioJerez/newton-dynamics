@@ -47,7 +47,7 @@ class ndDemoContactCallback : public ndContactCallback
 		m_soundSpeedThreshold,
 	};
 
-	ndDemoContactCallback();
+	ndDemoContactCallback(ndScene* const scene);
 	~ndDemoContactCallback() override;
 };
 

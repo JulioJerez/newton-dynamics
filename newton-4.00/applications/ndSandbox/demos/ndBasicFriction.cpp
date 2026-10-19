@@ -49,8 +49,8 @@ class ndFrictionContactCallback : public ndDemoContactCallback
 
 
 	public:
-	ndFrictionContactCallback()
-		:ndDemoContactCallback()
+	ndFrictionContactCallback(ndScene* const scene)
+		:ndDemoContactCallback(scene)
 	{
 	}
 
@@ -118,7 +118,7 @@ static void BuildFrictionRamp(ndDemoEntityManager* const scene)
 	ndPhysicsWorld* const world = scene->GetWorld();
 
 	// test user define contact generation
-	ndSharedPtr<ndContactNotify> userContacts(new ndFrictionContactCallback());
+	ndSharedPtr<ndContactNotify> userContacts(new ndFrictionContactCallback(world->GetScene()));
 	world->SetContactNotify(userContacts);
 
 	ndFrictionMaterial material;
