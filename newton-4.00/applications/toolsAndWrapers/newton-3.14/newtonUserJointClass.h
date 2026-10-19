@@ -29,11 +29,10 @@ class NewtonJointUserData : public ndJointUserData
 class NewtonUserJoint : public ndJointBilateralConstraint
 {
 	public:
-	typedef void (*NewtonConstraintDestructor) (const NewtonJoint* const me);
-	typedef void (*NewtonUserBilateralCallback) (const NewtonJoint* const userJoint, ndFloat32 timestep, int threadIndex);
-
 	D_CLASS_REFLECTION(NewtonUserJoint, ndJointBilateralConstraint)
 
+	typedef void (*NewtonConstraintDestructor) (const NewtonJoint* const me);
+	typedef void (*NewtonUserBilateralCallback) (const NewtonJoint* const userJoint, ndFloat32 timestep, int threadIndex);
 	NewtonUserJoint(ndInt32 maxDof, ndBodyKinematic* const body0, ndBodyKinematic* const body1, const ndMatrix& globalMatrix, NewtonUserBilateralCallback jacobianCallback);
 
 	virtual ~NewtonUserJoint() override;

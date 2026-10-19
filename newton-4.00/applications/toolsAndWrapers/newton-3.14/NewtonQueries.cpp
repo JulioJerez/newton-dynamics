@@ -138,16 +138,6 @@ void NewtonWorldForEachBodyInAABBDo(const NewtonWorld* const newtonWorld, const 
 	world->BodiesInAabb(notify, minBox, maxBox);
 }
 
-int NewtonWorldCollide(const NewtonWorld* const newtonWorld, const dFloat* const matrix, const NewtonCollision* const shape, void* const userData,
-	NewtonWorldRayPrefilterCallback prefilter, NewtonWorldConvexCastReturnInfo* const info, int maxContactsCount, int threadIndex)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//Newton* const world = (Newton*)newtonWorld;
-	//return world->GetBroadPhase()->Collide((dgCollisionInstance*)shape, dgMatrix(matrix), (OnRayPrecastAction)prefilter, userData, (dgConvexCastReturnInfo*)info, maxContactsCount, threadIndex);
-	ndAssert(0);
-	return 0;
-}
-
 /*!
   Get the first body in the body in the world body list.
 
@@ -791,4 +781,24 @@ NewtonJoint* NewtonWorldFindJoint(const NewtonBody* const body0, const NewtonBod
 		}
 	}
 	return nullptr;
+}
+
+int NewtonWorldCollide(const NewtonWorld* const newtonWorld, const dFloat* const matrixPtr, const NewtonCollision* const collision, void* const userData,
+	NewtonWorldRayPrefilterCallback prefilter, NewtonWorldConvexCastReturnInfo* const info, int maxContactsCount, int threadIndex)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMatrix matrix(GetMatrix(matrixPtr));
+
+	matrix.m_front.m_w = ndFloat32(0.0f);
+	matrix.m_up.m_w = ndFloat32(0.0f);
+	matrix.m_right.m_w = ndFloat32(0.0f);
+	matrix.m_posit.m_w = ndFloat32(1.0f);
+
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
+
+	//Newton* const world = (Newton*)newtonWorld;
+	//return world->GetBroadPhase()->Collide((dgCollisionInstance*)shape, dgMatrix(matrix), (OnRayPrecastAction)prefilter, userData, (dgConvexCastReturnInfo*)info, maxContactsCount, threadIndex);
+	ndAssert(0);
+	return 0;
 }

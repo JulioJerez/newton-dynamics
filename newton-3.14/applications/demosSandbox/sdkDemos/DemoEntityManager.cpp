@@ -63,8 +63,8 @@
 //#define DEFAULT_SCENE	28		// construction vehicle
 //#define DEFAULT_SCENE	29		// six axis manipulator
 //#define DEFAULT_SCENE	30		// hexapod Robot
-#define DEFAULT_SCENE	31		// basic rag doll
-//#define DEFAULT_SCENE	32		// balancing biped
+//#define DEFAULT_SCENE	31		// basic rag doll
+#define DEFAULT_SCENE	32		// balancing biped
 //#define DEFAULT_SCENE	33		// multi body body vehicle
 //#define DEFAULT_SCENE	34		// super Car
 //#define DEFAULT_SCENE	35		// heavy vehicles

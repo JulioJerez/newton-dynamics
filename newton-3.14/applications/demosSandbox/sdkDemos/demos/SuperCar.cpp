@@ -631,8 +631,11 @@ public:
 	~dRayCastVehicleModel() 
 	{
 		for (dList<dRayCastVehicleModel::dRayCastTire*>::dListNode* node = m_tires.GetFirst(); node; node = node->GetNext()) {
-			dRayCastVehicleModel::dRayCastTire* atire = node->GetInfo();
-			delete atire;
+			dRayCastVehicleModel::dRayCastTire* tire = node->GetInfo();
+			if (tire)
+			{
+				delete tire;
+			}
 		}
 		m_tires.RemoveAll();
 	};
@@ -1101,7 +1104,7 @@ public:
 		//
 		for (dList<dRayCastVehicleModel::dRayCastTire*>::dListNode* node = controller->m_tires.GetFirst(); node; node = node->GetNext()) {
 			dRayCastVehicleModel::dRayCastTire* atire = node->GetInfo();
-			if (controller->m_isDefaultCtrl)
+			if (atire && controller->m_isDefaultCtrl)
 			  UpdateDriverInput(controller, atire, timestep);
 			//
 			atire->ProcessPreUpdate(controller, timestep, threadID);
@@ -1124,6 +1127,8 @@ public:
 		int tirecnt = 0;
 		for (dList<dRayCastVehicleModel::dRayCastTire*>::dListNode* node = aMod->m_tires.GetFirst(); node; node = node->GetNext()) {
 			dRayCastVehicleModel::dRayCastTire* atire = node->GetInfo();
+			if (!atire)
+				continue;
 			//
 			dMatrix m_AbsoluteMatrix;
 			//
@@ -1169,6 +1174,8 @@ public:
 		//
 		for (dList<dRayCastVehicleModel::dRayCastTire*>::dListNode* node = controller->m_tires.GetFirst(); node; node = node->GetNext()) {
 			dRayCastVehicleModel::dRayCastTire* atire = node->GetInfo();
+			if (!atire)
+				continue;
 			// temporary surely need to change it later.
 			dMatrix vhchassismatrix;
 			NewtonBodyGetMatrix(controller->GetBody(), &vhchassismatrix[0][0]);	
