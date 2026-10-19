@@ -72,10 +72,10 @@ class ndContactNotify: public ndClassAlloc
 	
 	ndMaterial m_default;
 
-	private:
+	protected:
 	ndWeakPtr<ndScene> m_scene;
+	ndSharedPtr<ndContact> m_defaultConstructor;
 	ndClassPadding m_padding;
-	static ndContact m_defaultConstructor;
 
 	friend class ndScene;
 	friend class ndContactSolver;

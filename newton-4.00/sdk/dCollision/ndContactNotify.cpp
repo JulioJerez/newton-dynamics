@@ -24,8 +24,6 @@
 #include "ndContact.h"
 #include "ndContactNotify.h"
 
-ndContact ndContactNotify::m_defaultConstructor;
-
 ndMaterial::ndMaterial()
 	:ndContainersFreeListAlloc<ndMaterial>()
 {
@@ -49,6 +47,7 @@ ndMaterial::~ndMaterial()
 ndContactNotify::ndContactNotify(ndScene* const scene)
 	:ndClassAlloc()
 	,m_scene(scene)
+	,m_defaultConstructor(new ndContact)
 {
 }
 
@@ -58,7 +57,7 @@ ndContactNotify::~ndContactNotify()
 
 const ndContact* ndContactNotify::GetContactConstructor(const ndShapeInstance&, const ndShapeInstance&) const
 {
-	return &m_defaultConstructor;
+	return *m_defaultConstructor;
 }
 
 ndMaterial* ndContactNotify::GetMaterial(const ndContact* const, const ndShapeInstance&, const ndShapeInstance&) const
@@ -66,13 +65,6 @@ ndMaterial* ndContactNotify::GetMaterial(const ndContact* const, const ndShapeIn
 	return (ndMaterial*)&m_default;
 }
 
-//void ndContactNotify::OnBodyAdded(ndBodyKinematic* const) const
-//{
-//}
-//
-//void ndContactNotify::OnBodyRemoved(ndBodyKinematic* const) const
-//{
-//}
 
 //bool OnCompoundSubShapeOverlap(const ndContact* const contact, ndFloat32 timestep, const ndShapeInstance* const subShapeA, const ndShapeInstance* const subShapeB);
 bool ndContactNotify::OnCompoundSubShapeOverlap(const ndContact* const, ndFloat32, const ndShapeInstance* const, const ndShapeInstance* const) const
