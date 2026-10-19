@@ -888,8 +888,8 @@ dFloat NewtonMaterialGetContactMaxNormalImpact(const NewtonMaterial* const mater
 void NewtonMaterialSetContactGenerationCallback(const NewtonWorld* const newtonWorld, int id0, int id1, NewtonOnContactGeneration contactGeneration)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
-	//Newton* const world = (Newton*)newtonWorld;
-	//dgContactMaterial* const material = world->GetMaterial(dgUnsigned32(id0), dgUnsigned32(id1));
-	//material->SetCollisionGenerationCallback((dgContactMaterial::OnContactGeneration)contactGeneration);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndNewtonMaterial* const material = PointerCast<ndNewtonMaterial, ndMaterial>(world->GetMaterial(id0, id1));
+	ndAssert(material);
+	material->m_onContactGeneration = contactGeneration;
 }

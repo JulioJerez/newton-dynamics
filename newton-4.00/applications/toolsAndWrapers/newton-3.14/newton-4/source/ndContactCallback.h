@@ -11,8 +11,6 @@
 
 #ifndef ND_CONTACT_CALLBACK_H_
 #define ND_CONTACT_CALLBACK_H_
-
-class ndNewtonContact;
 		  
 class ndApplicationMaterial : public ndMaterial
 {
@@ -78,7 +76,7 @@ class ndMaterialGraph: public ndTree<ndApplicationMaterial*, ndMaterialHash, ndC
 class ndContactCallback: public ndContactNotify
 {
 	public: 
-	ndContactCallback();
+	ndContactCallback(ndScene* const scene);
 	virtual ~ndContactCallback() override;
 	virtual ndApplicationMaterial& RegisterMaterial(const ndApplicationMaterial& material, ndUnsigned32 id0, ndUnsigned32 id1);
 
@@ -93,11 +91,8 @@ class ndContactCallback: public ndContactNotify
 	virtual void OnContactCallback(const ndContact* const contactJoint, ndFloat32 timestep) const override;
 	virtual bool OnAabbOverlap(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1) const override;
 	virtual bool OnCompoundSubShapeOverlap(const ndContact* const contactJoint, ndFloat32 timestep, const ndShapeInstance* const instance0, const ndShapeInstance* const instance1) const override;
-
-	virtual const ndContact* GetContactConstructor(const ndShapeInstance& id0, const ndShapeInstance& id1) const override;
 	
 	ndMaterialGraph m_materialGraph;
-	ndSharedPtr<ndNewtonContact> m_contactConstructure;
 	ndSharedPtr<ndApplicationMaterial> m_defaultMaterial;
 };
 

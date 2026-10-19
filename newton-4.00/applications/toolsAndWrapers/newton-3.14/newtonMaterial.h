@@ -16,6 +16,9 @@
 
 class NewtonBody;
 class NewtonJoint;
+class NewtonMaterial;
+class NewtonCollision;
+struct NewtonUserContactPoint;
 
 class ndNewtonMaterial : public ndApplicationMaterial
 {
@@ -23,6 +26,7 @@ class ndNewtonMaterial : public ndApplicationMaterial
 	typedef int (*NewtonOnAABBOverlap) (const NewtonJoint* const contact, ndFloat32 timestep, int threadIndex);
 	typedef void (*NewtonContactsProcess) (const NewtonJoint* const contact, ndFloat32 timestep, int threadIndex);
 	typedef int (*NewtonOnCompoundSubCollisionAABBOverlap) (const NewtonJoint* const contact, ndFloat32 timestep, const NewtonBody* const body0, const void* const collisionNode0, const NewtonBody* const body1, const void* const collisionNode1, int threadIndex);
+	typedef int (*NewtonOnContactGeneration) (const NewtonMaterial* const material, const NewtonBody* const body0, const NewtonCollision* const collision0, const NewtonBody* const body1, const NewtonCollision* const collision1, NewtonUserContactPoint* const contactBuffer, int maxCount, int threadIndex);
 
 	ndNewtonMaterial();
 	ndNewtonMaterial(const ndNewtonMaterial& src);
@@ -40,7 +44,16 @@ class ndNewtonMaterial : public ndApplicationMaterial
 	ndWeakPtr<void> m_usedData;
 	NewtonOnAABBOverlap m_onAABBOverlap;
 	NewtonContactsProcess m_onContactsProcess;
+	NewtonOnContactGeneration m_onContactGeneration;
 	NewtonOnCompoundSubCollisionAABBOverlap m_onSubShapeAABBOverlap;
 };
+
+class ndNewtonContactCallback : public ndContactCallback
+{
+	public:
+	ndNewtonContactCallback(ndScene* const scene);
+};
+
+
 
 #endif

@@ -40,7 +40,7 @@ ndNewtonWorld::~ndNewtonWorld()
 
 void ndNewtonWorld::SetContactCallback()
 {
-	ndContactCallback* const callback = new ndContactCallback;
+	ndContactCallback* const callback = new ndNewtonContactCallback(GetScene());
 	ndSharedPtr<ndApplicationMaterial> defaultMaterial(new ndNewtonMaterial);
 	callback->SetDefualtMaterial(defaultMaterial);
 	SetContactNotify(ndSharedPtr<ndContactNotify>(callback));

@@ -57,7 +57,6 @@ ndWorld::ndWorld()
 	,m_collisionUpdate(false)
 {
 	// start the engine thread;
-	ndBody::m_uniqueIdCount = 0;
 	m_solver = new ndDynamicsUpdate(this);
 	m_scene = new ndWorldScene(this);
 
@@ -124,8 +123,6 @@ void ndWorld::CleanUp()
 		ndModel* const model = *m_modelList.GetFirst()->GetInfo();
 		RemoveModel(model);
 	}
-
-	ndBody::m_uniqueIdCount = 1;
 	m_scene->Cleanup();
 }
 

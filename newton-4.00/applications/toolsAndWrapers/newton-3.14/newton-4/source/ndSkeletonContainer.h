@@ -64,9 +64,9 @@ class ndSkeletonContainer
 	class ndNodePair
 	{
 		public:
-		const ndConstraint* m_joint;
 		ndInt32 m_m0;
 		ndInt32 m_m1;
+		const ndConstraint* m_joint;
 	};
 
 	D_MSV_NEWTON_CLASS_ALIGN_32
