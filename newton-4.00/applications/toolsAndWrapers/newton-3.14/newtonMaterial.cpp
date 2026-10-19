@@ -109,11 +109,18 @@ ndNewtonMaterial::~ndNewtonMaterial()
 {
 }
 
-bool ndNewtonMaterial::OnAabbOverlap(const ndBodyKinematic* const, const ndBodyKinematic* const) const
+bool ndNewtonMaterial::OnAabbOverlap(const ndBodyKinematic* const bodyPtr0, const ndBodyKinematic* const bodyPtr1) const
 {
 	if (m_onAABBOverlap)
 	{
-		ndAssert(0);
+		const NewtonBody* const body0 = PointerCast<NewtonBody, ndBodyKinematic>(bodyPtr0);
+		const NewtonBody* const body1 = PointerCast<NewtonBody, ndBodyKinematic>(bodyPtr1);
+		const ndContact* const contact = bodyPtr0->GetContactMap().FindContact(bodyPtr0, bodyPtr1);
+		if (!contact)
+		{
+			return true;
+		}
+		return m_onAABBOverlap(PointerCast<NewtonJoint, ndContact>(contact), ndFloat32 (0.0f), 0);
 	}
 	return true;
 }

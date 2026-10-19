@@ -709,7 +709,6 @@ void ndSkeletonContainer::ParallelCalculateLoopMassMatrixCoefficients(ndFloat32*
 void ndSkeletonContainer::ParallelConditionMassMatrix() const
 {
 	ND_PROFILE_ZONE();
-	//auto ConditionMassMatrix = [this](ndInt32 groupId)
 	auto ConditionMassMatrix = ndMakeObject::ndFunction([this](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		ndInt32 entry0 = 0;
@@ -760,10 +759,6 @@ void ndSkeletonContainer::ParallelConditionMassMatrix() const
 			}
 		}
 	});
-	//for (ndInt32 index = 0; index < m_auxiliaryRowCount; ++index)
-	//{
-	//	ConditionMassMatrix(index, 0);
-	//}
 	ndScene* const scene = m_owner->GetScene();
 	scene->ParallelExecute(ConditionMassMatrix, m_auxiliaryRowCount, 4);
 }
@@ -771,7 +766,6 @@ void ndSkeletonContainer::ParallelConditionMassMatrix() const
 void ndSkeletonContainer::ParallelRebuildMassMatrix(const ndFloat32* const diagDamp) const
 {
 	ND_PROFILE_ZONE();
-	//auto RebuildMassMatrix = [this, diagDamp](ndInt32 groupId)
 	auto RebuildMassMatrix = ndMakeObject::ndFunction([this, diagDamp](ndInt32 groupId, ndInt32, ndInt32)
 	{
 		const ndInt32 primaryCount = m_rowCount - m_auxiliaryRowCount;
@@ -801,10 +795,6 @@ void ndSkeletonContainer::ParallelRebuildMassMatrix(const ndFloat32* const diagD
 
 		matrixRow11[groupId] = ndMax(matrixRow11[groupId], diagDamp[groupId]);
 	});
-	//for (ndInt32 index = 0; index < m_auxiliaryRowCount; ++index)
-	//{
-	//	RebuildMassMatrix(index, 0);
-	//}
 	ndScene* const scene = m_owner->GetScene();
 	scene->ParallelExecute(RebuildMassMatrix, m_auxiliaryRowCount, 4);
 

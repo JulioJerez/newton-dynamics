@@ -4127,3 +4127,18 @@ ndFloat32 ndMeshEffect::RayCast(const ndVector& p0, const ndVector& p1) const
 
 	return hitParam;
 }
+
+ndInt32 ndMeshEffect::GetVertexBaseCount() const
+{
+	return m_vertexBaseCount;
+}
+
+void ndMeshEffect::SetVertexBaseCount(ndInt32 count)
+{
+	m_vertexBaseCount = count;
+}
+
+ndArray<ndMeshEffect::ndVertexWeight>& ndMeshEffect::GetVertexWeights()
+{
+	return m_points.m_skinWeights;
+}

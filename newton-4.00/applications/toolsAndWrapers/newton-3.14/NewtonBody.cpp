@@ -189,42 +189,6 @@ NewtonBodyDestructor NewtonBodyGetDestructorCallback(const NewtonBody* const bod
 }
 
 /*!
-  Apply hierarchical transformation to a body.
-
-  @param *bodyPtr pointer to the body.
-  @param *matrixPtr pointer to an array of 16 floats containing the global matrix of the rigid body.
-
-  @return Nothing.
-
-  This function applies the transformation matrix to the *body* and also applies the appropriate transformation matrix to
-  set of articulated bodies. If the body is in contact with another body the other body is not transformed.
-
-  this function should not be used to transform set of articulated bodies that are connected to a static body.
-  doing so will result in unpredictables results. Think for example moving a chain attached to a ceiling from one place to another,
-  to do that in real life a person first need to disconnect the chain (destroy the joint), move the chain (apply the transformation to the
-  entire chain), the reconnect it in the new position (recreate the joint again).
-
-  this function will set to zero the linear and angular velocity of all bodies that are part of the set of articulated body array.
-
-  The matrix should be arranged in row-major order (this is the way direct x stores matrices).
-  If you are using OpenGL matrices (column-major) you will need to transpose you matrices into a local array, before
-  passing them to Newton.
-
-  See also: ::NewtonBodySetMatrix
-*/
-void NewtonBodySetMatrixRecursive(const NewtonBody* const bodyPtr, const dFloat* const matrixPtr)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgBody* const body = (dgBody*)bodyPtr;
-	//Newton* const world = (Newton*)body->GetWorld();
-	//
-	//world->BodySetMatrix(body, dgMatrix(matrixPtr));
-
-	ndAssert(0);
-}
-
-
-/*!
   Get the net force applied to a rigid body after the last NewtonUpdate.
 
   @param *bodyPtr pointer to the body.
@@ -1686,5 +1650,74 @@ void NewtonBodyApplyImpulsePair(const NewtonBody* const body, dFloat* const line
 		ndVector l(linearImpulse[0], linearImpulse[1], linearImpulse[2], ndFloat32(0.0f));
 		ndVector a(angularImpulse[0], angularImpulse[1], angularImpulse[2], ndFloat32(0.0f));
 		kinBody->ApplyImpulsePair(l, a, timestep);
+	}
+}
+
+/*!
+  Apply hierarchical transformation to a body.
+
+  @param *bodyPtr pointer to the body.
+  @param *matrixPtr pointer to an array of 16 floats containing the global matrix of the rigid body.
+
+  @return Nothing.
+
+  This function applies the transformation matrix to the *body* and also applies the appropriate transformation matrix to
+  set of articulated bodies. If the body is in contact with another body the other body is not transformed.
+
+  this function should not be used to transform set of articulated bodies that are connected to a static body.
+  doing so will result in unpredictables results. Think for example moving a chain attached to a ceiling from one place to another,
+  to do that in real life a person first need to disconnect the chain (destroy the joint), move the chain (apply the transformation to the
+  entire chain), the reconnect it in the new position (recreate the joint again).
+
+  this function will set to zero the linear and angular velocity of all bodies that are part of the set of articulated body array.
+
+  The matrix should be arranged in row-major order (this is the way direct x stores matrices).
+  If you are using OpenGL matrices (column-major) you will need to transpose you matrices into a local array, before
+  passing them to Newton.
+
+  See also: ::NewtonBodySetMatrix
+*/
+void NewtonBodySetMatrixRecursive(const NewtonBody* const bodyPtr, const dFloat* const matrixPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//dgBody* const body = (dgBody*)bodyPtr;
+	//Newton* const world = (Newton*)body->GetWorld();
+	//world->BodySetMatrix(body, dgMatrix(matrixPtr));
+	ndMatrix matrix(GetMatrix(matrixPtr));
+
+	matrix.m_front.m_w = ndFloat32(0.0f);
+	matrix.m_up.m_w = ndFloat32(0.0f);
+	matrix.m_right.m_w = ndFloat32(0.0f);
+	matrix.m_posit.m_w = ndFloat32(1.0f);
+	ndBodyKinematic* const kinBody = PointerCast<ndBodyKinematic, NewtonBody>(bodyPtr)->GetAsBodyDynamic();
+
+	ndFixSizeArray<ndBodyKinematic*, 1024> queue;
+
+	ndMatrix relMatrix(kinBody->GetMatrix().OrthoInverse() * matrix);
+
+	ndTree<ndInt32, ndBodyKinematic*> filter;
+	 
+	queue.PushBack(kinBody);
+	while (queue.GetCount())
+	{
+		ndBodyKinematic* const body = queue.Pop();
+		if ((body->GetInvMass() > ndFloat32(0.0f)) && !filter.Find(body))
+		{
+			ndMatrix matrix(body->GetMatrix() * relMatrix);
+			body->SetOmega(matrix.RotateVector(body->GetOmega()));
+			body->SetVelocity(matrix.RotateVector(body->GetVelocity()));
+
+			body->SetSleepState(false);
+			body->SetMatrixUpdateScene(matrix);
+
+			filter.Insert(0, body);
+			ndBodyKinematic::ndJointList& jointsList = body->GetJointList();
+			for (ndBodyKinematic::ndJointList::ndNode* node = jointsList.GetFirst(); node; node = node->GetNext())
+			{
+				ndJointBilateralConstraint* const joint = node->GetInfo();
+				ndBodyKinematic* const childdBody = (joint->GetBody0() == body) ? joint->GetBody1() : joint->GetBody0();
+				queue.PushBack(childdBody);
+			}
+		}
 	}
 }

@@ -53,9 +53,7 @@ class ndMeshEffect: public ndPolyhedra
 	ndMeshEffect* Intersection (const dMatrix& matrix, const ndMeshEffect* const clipper) const;
 	void ClipMesh (const dMatrix& matrix, const ndMeshEffect* const clipper, ndMeshEffect** const top, ndMeshEffect** const bottom) const;
 	//bool PlaneClip (const dBigPlane& plane);
-	dInt32 GetVertexBaseCount() const;
-	void SetVertexBaseCount(dInt32 count);
-	
+		
 	dEdge* SpliteFace (dInt32 v0, dInt32 v1);
 
 	dInt32 GetTotalFaceCount() const;
@@ -132,7 +130,6 @@ class ndMeshEffect: public ndPolyhedra
 		public:
 		ndChannel();
 		ndChannel(const ndChannel& source);
-		//~ndChannel();
 
 		void Clear();
 		void PushBack(const T& element);
@@ -414,6 +411,9 @@ class ndMeshEffect: public ndPolyhedra
 	D_COLLISION_API ndInt32 GetFaceMaterial(ndEdge* const faceEdge) const;
 	D_COLLISION_API ndInt32 GenerateVertexFormat(ndMeshVertexFormat& format, ndArray<ndUnsigned8>& buffer) const;
 
+	D_COLLISION_API ndInt32 GetVertexBaseCount() const;
+	D_COLLISION_API void SetVertexBaseCount(ndInt32 count);
+
 	D_COLLISION_API ndArray<ndVertexWeight>& GetVertexWeights();
 	D_COLLISION_API ndFloat64 CalculateVolume() const;
 	D_COLLISION_API ndMatrix CalculateOOBB(ndBigVector& size) const;
@@ -525,11 +525,6 @@ ndMeshEffect::ndChannel<T, type>::ndChannel(const ndChannel& source)
 	,m_isValid(source.m_isValid)
 {
 }
-
-//template<class T, ndMeshEffect::ndChannelType type>
-//ndMeshEffect::ndChannel<T, type>::~ndChannel<T, type>()
-//{
-//}
 
 template<class T, ndMeshEffect::ndChannelType type>
 void ndMeshEffect::ndChannel<T, type>::Clear()
@@ -676,9 +671,4 @@ inline ndInt32 ndMeshEffect::ndAttibuteFormat::GetCount() const
 	return ndInt32(m_pointChannel.GetCount());
 }
 
-
-inline ndArray<ndMeshEffect::ndVertexWeight>& ndMeshEffect::GetVertexWeights()
-{
-	return m_points.m_skinWeights;
-}
 #endif
