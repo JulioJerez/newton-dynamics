@@ -498,15 +498,10 @@ class ndBigVector : public ndClassAlloc
 
 	inline static void Transpose4x4 (ndBigVector& dst0, ndBigVector& dst1, ndBigVector& dst2, ndBigVector& dst3, const ndBigVector& src0, const ndBigVector& src1, const ndBigVector& src2, const ndBigVector& src3)
 	{
-		ndBigVector tmp0 (src0);
-		ndBigVector tmp1 (src1);
-		ndBigVector tmp2 (src2);
-		ndBigVector tmp3 (src3);
-
-		dst0 = ndBigVector (tmp0.m_x, tmp1.m_x, tmp2.m_x, tmp3.m_x);
-		dst1 = ndBigVector (tmp0.m_y, tmp1.m_y, tmp2.m_y, tmp3.m_y);
-		dst2 = ndBigVector (tmp0.m_z, tmp1.m_z, tmp2.m_z, tmp3.m_z);
-		dst3 = ndBigVector (tmp0.m_w, tmp1.m_w, tmp2.m_w, tmp3.m_w);
+		dst0 = ndBigVector(src0[0], src1[0], src2[0], src3[0]);
+		dst1 = ndBigVector(src0[1], src1[1], src2[1], src3[1]);
+		dst2 = ndBigVector(src0[2], src1[2], src2[2], src3[2]);
+		dst3 = ndBigVector(src0[3], src1[3], src2[3], src3[3]);
 	}
 
 	union 
@@ -1049,15 +1044,10 @@ class ndVector : public ndClassAlloc
 
 	inline static void Transpose4x4(ndVector& dst0, ndVector& dst1, ndVector& dst2, ndVector& dst3, const ndVector& src0, const ndVector& src1, const ndVector& src2, const ndVector& src3)
 	{
-		ndVector tmp0(src0);
-		ndVector tmp1(src1);
-		ndVector tmp2(src2);
-		ndVector tmp3(src3);
-
-		dst0 = ndVector(tmp0.m_x, tmp1.m_x, tmp2.m_x, tmp3.m_x);
-		dst1 = ndVector(tmp0.m_y, tmp1.m_y, tmp2.m_y, tmp3.m_y);
-		dst2 = ndVector(tmp0.m_z, tmp1.m_z, tmp2.m_z, tmp3.m_z);
-		dst3 = ndVector(tmp0.m_w, tmp1.m_w, tmp2.m_w, tmp3.m_w);
+		dst0 = ndVector(src0[0], src1[0], src2[0], src3[0]);
+		dst1 = ndVector(src0[1], src1[1], src2[1], src3[1]);
+		dst2 = ndVector(src0[2], src1[2], src2[2], src3[2]);
+		dst3 = ndVector(src0[3], src1[3], src2[3], src3[3]);
 	}
 
 	union

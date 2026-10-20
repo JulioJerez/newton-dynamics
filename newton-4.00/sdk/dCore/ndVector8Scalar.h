@@ -258,24 +258,15 @@ class ndVector8
 		const ndVector8& src0, const ndVector8& src1, const ndVector8& src2, const ndVector8& src3,
 		const ndVector8& src4, const ndVector8& src5, const ndVector8& src6, const ndVector8& src7)
 	{
-		const ndMatrix off01(src0.m_angular, src1.m_angular, src2.m_angular, src3.m_angular);
-		const ndMatrix off10(src4.m_linear, src5.m_linear, src6.m_linear, src7.m_linear);
+		dst0 = ndVector8(ndVector(src0[0], src1[0], src2[0], src3[0]), ndVector(src4[0], src5[0], src6[0], src7[0]));
+		dst1 = ndVector8(ndVector(src0[1], src1[1], src2[1], src3[1]), ndVector(src4[1], src5[1], src6[1], src7[1]));
+		dst2 = ndVector8(ndVector(src0[2], src1[2], src2[2], src3[2]), ndVector(src4[2], src5[2], src6[2], src7[2]));
+		dst3 = ndVector8(ndVector(src0[3], src1[3], src2[3], src3[3]), ndVector(src4[3], src5[3], src6[3], src7[3]));
 
-		ndVector::Transpose4x4(
-			dst0.m_linear, dst1.m_linear, dst2.m_linear, dst3.m_linear,
-			src0.m_linear, src1.m_linear, src2.m_linear, src3.m_linear);
-
-		ndVector::Transpose4x4(
-			dst0.m_angular, dst1.m_angular, dst2.m_angular, dst3.m_angular,
-			off10[0], off10[1], off10[2], off10[3]);
-
-		ndVector::Transpose4x4(
-			dst4.m_linear, dst5.m_linear, dst6.m_linear, dst7.m_linear,
-			off01[0], off01[1], off01[2], off01[3]);
-
-		ndVector::Transpose4x4(
-			dst4.m_angular, dst5.m_angular, dst6.m_angular, dst7.m_angular,
-			src4.m_angular, src5.m_angular, src6.m_angular, src7.m_angular);
+		dst4 = ndVector8(ndVector(src0[4], src1[4], src2[4], src3[4]), ndVector(src4[4], src5[4], src6[4], src7[4]));
+		dst5 = ndVector8(ndVector(src0[5], src1[5], src2[5], src3[5]), ndVector(src4[5], src5[5], src6[5], src7[5]));
+		dst6 = ndVector8(ndVector(src0[6], src1[6], src2[6], src3[6]), ndVector(src4[6], src5[6], src6[6], src7[6]));
+		dst7 = ndVector8(ndVector(src0[7], src1[7], src2[7], src3[7]), ndVector(src4[7], src5[7], src6[7], src7[7]));
 	}
 
 	union
@@ -530,24 +521,15 @@ class ndVector8
 		const ndVector8& src0, const ndVector8& src1, const ndVector8& src2, const ndVector8& src3,
 		const ndVector8& src4, const ndVector8& src5, const ndVector8& src6, const ndVector8& src7)
 	{
-		const ndMatrix off01(src0.m_angular, src1.m_angular, src2.m_angular, src3.m_angular);
-		const ndMatrix off10(src4.m_linear, src5.m_linear, src6.m_linear, src7.m_linear);
+		dst0 = ndVector8(ndVector(src0[0], src1[0], src2[0], src3[0]), ndVector(src4[0], src5[0], src6[0], src7[0]));
+		dst1 = ndVector8(ndVector(src0[1], src1[1], src2[1], src3[1]), ndVector(src4[1], src5[1], src6[1], src7[1]));
+		dst2 = ndVector8(ndVector(src0[2], src1[2], src2[2], src3[2]), ndVector(src4[2], src5[2], src6[2], src7[2]));
+		dst3 = ndVector8(ndVector(src0[3], src1[3], src2[3], src3[3]), ndVector(src4[3], src5[3], src6[3], src7[3]));
 
-		ndVector::Transpose4x4(
-			dst0.m_linear, dst1.m_linear, dst2.m_linear, dst3.m_linear,
-			src0.m_linear, src1.m_linear, src2.m_linear, src3.m_linear);
-
-		ndVector::Transpose4x4(
-			dst0.m_angular, dst1.m_angular, dst2.m_angular, dst3.m_angular,
-			off10[0], off10[1], off10[2], off10[3]);
-
-		ndVector::Transpose4x4(
-			dst4.m_linear, dst5.m_linear, dst6.m_linear, dst7.m_linear,
-			off01[0], off01[1], off01[2], off01[3]);
-
-		ndVector::Transpose4x4(
-			dst4.m_angular, dst5.m_angular, dst6.m_angular, dst7.m_angular,
-			src4.m_angular, src5.m_angular, src6.m_angular, src7.m_angular);
+		dst4 = ndVector8(ndVector(src0[4], src1[4], src2[4], src3[4]), ndVector(src4[4], src5[4], src6[4], src7[4]));
+		dst5 = ndVector8(ndVector(src0[5], src1[5], src2[5], src3[5]), ndVector(src4[5], src5[5], src6[5], src7[5]));
+		dst6 = ndVector8(ndVector(src0[6], src1[6], src2[6], src3[6]), ndVector(src4[6], src5[6], src6[6], src7[6]));
+		dst7 = ndVector8(ndVector(src0[7], src1[7], src2[7], src3[7]), ndVector(src4[7], src5[7], src6[7], src7[7]));
 	}
 
 	union
