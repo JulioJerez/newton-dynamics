@@ -27,7 +27,7 @@
 #include "ndBodyNotify.h"
 #include "ndMeshBaseComponents.h"
 
-ndAtomic<ndUnsigned32> ndBody::m_uniqueIdCount = 1;
+ndAtomic<ndUnsigned32> ndBody::m_uniqueIdCount(1);
 
 ndBody::ndBody()
 	:ndContainersFreeListAlloc<ndBody>()
