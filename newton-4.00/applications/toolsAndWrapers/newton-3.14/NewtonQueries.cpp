@@ -847,5 +847,4 @@ int NewtonWorldCollide(const NewtonWorld* const newtonWorld, const dFloat* const
 		}
 	}
 	return contactCount;
-
 }

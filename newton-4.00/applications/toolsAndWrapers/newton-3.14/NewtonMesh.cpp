@@ -478,38 +478,6 @@ int NewtonMeshGetVertexIndexFromPoint(const NewtonMesh* const mesh, const void* 
 //	return ((dgMeshEffect*)mesh)->GetEdgeAttributeIndex (edge, *v0, *v1);
 //}
 
-void* NewtonMeshGetFirstFace(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//return ((dgMeshEffect*)mesh)->GetFirstFace();
-	ndAssert(0);
-	return 0;
-}
-
-void* NewtonMeshGetNextFace(const NewtonMesh* const mesh, const void* const face)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//return ((dgMeshEffect*)mesh)->GetNextFace(face);
-	ndAssert(0);
-	return 0;
-}
-
-int NewtonMeshIsFaceOpen(const NewtonMesh* const mesh, const void* const face)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//return ((dgMeshEffect*)mesh)->IsFaceOpen(face);
-	ndAssert(0);
-	return 0;
-}
-
-int NewtonMeshGetFaceIndexCount(const NewtonMesh* const mesh, const void* const face)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//return ((dgMeshEffect*)mesh)->GetFaceIndexCount(face);
-	ndAssert(0);
-	return 0;
-}
-
 int NewtonMeshGetFaceMaterial(const NewtonMesh* const mesh, const void* const face)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -522,13 +490,6 @@ void NewtonMeshSetFaceMaterial(const NewtonMesh* const mesh, const void* const f
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	//return ((dgMeshEffect*)mesh)->SetFaceMaterial(face, matId);
-	ndAssert(0);
-}
-
-void NewtonMeshGetFaceIndices(const NewtonMesh* const mesh, const void* const face, int* const indices)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//((dgMeshEffect*)mesh)->GetFaceIndex(face, indices);
 	ndAssert(0);
 }
 
@@ -1263,4 +1224,43 @@ void NewtonMeshGetEdgeIndices(const NewtonMesh* const mesh, const void* const ed
 	const ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	ndMeshEffect::ndNode* const node = PointerCast<ndMeshEffect::ndNode, void>(edge);
 	meshEffect->GetEdgeIndex(node, *v0, *v1);
+}
+
+void* NewtonMeshGetFirstFace(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	const ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	return meshEffect->GetFirstFace();
+}
+
+void* NewtonMeshGetNextFace(const NewtonMesh* const mesh, const void* const faceNode)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	const ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect::ndNode* const node = PointerCast<ndMeshEffect::ndNode, void>(faceNode);
+	return meshEffect->GetNextFace(node);
+}
+
+int NewtonMeshIsFaceOpen(const NewtonMesh* const mesh, const void* const faceNode)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	const ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect::ndNode* const node = PointerCast<ndMeshEffect::ndNode, void>(faceNode);
+	return meshEffect->IsFaceOpen(node);
+}
+
+int NewtonMeshGetFaceIndexCount(const NewtonMesh* const mesh, const void* const faceNode)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	const ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect::ndNode* const node = PointerCast<ndMeshEffect::ndNode, void>(faceNode);
+	return meshEffect->GetFaceIndexCount(node);
+}
+
+void NewtonMeshGetFaceIndices(const NewtonMesh* const mesh, const void* const faceNode, int* const indices)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	const ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect::ndNode* const node = PointerCast<ndMeshEffect::ndNode, void>(faceNode);
+	meshEffect->GetFaceIndex(node, indices);
 }
