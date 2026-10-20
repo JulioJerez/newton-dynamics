@@ -86,9 +86,6 @@ class ndMeshEffect: public ndPolyhedra
 	dInt32 GetPointIndex (const void* const point) const;
 	dInt32 GetVertexIndexFromPoint (const void* const point) const;
 
-	void* GetFirstEdge () const;
-	void* GetNextEdge (const void* const edge) const;
-	void GetEdgeIndex (const void* const edge, dInt32& v0, dInt32& v1) const;
 //	void GetEdgeAttributeIndex (const void* edge, dInt32& v0, dInt32& v1) const;
 
 	const dEdge* GetPolyhedraEdgeFromNode(const void* const edge) const;
@@ -484,6 +481,11 @@ class ndMeshEffect: public ndPolyhedra
 	D_COLLISION_API void SerializeToXml(nd::TiXmlElement* const xmlNode, const ndTree<ndString, ndUnsigned32>& boneMap) const;
 
 	D_COLLISION_API static ndMeshEffect* CreateVoronoiConvexDecomposition(const ndArray<ndVector>& pointCloud, ndInt32 interiorMaterialIndex, const ndMatrix& textureProjectionMatrix);
+
+
+	D_COLLISION_API ndNode* GetFirstEdge() const;
+	D_COLLISION_API ndNode* GetNextEdge(const ndMeshEffect::ndNode* const edgeNode) const;
+	D_COLLISION_API void GetEdgeIndex(const ndMeshEffect::ndNode* const edgeNode, ndInt32& v0, ndInt32& v1) const;
 
 	protected:
 	D_COLLISION_API void Init();

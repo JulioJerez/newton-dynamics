@@ -65,49 +65,6 @@ const ndEdge* ndMeshEffect::GetPolyhedraEdgeFromNode(const void* const edge) con
 	return &node->GetInfo();
 }
 
-void* ndMeshEffect::GetFirstEdge() const
-{
-	Iterator iter(*this);
-	iter.Begin();
-
-	ndNode* node = nullptr;
-	if (iter) {
-		ndInt32 mark = IncLRU();
-
-		node = iter.GetNode();
-
-		ndEdge* const edge = &node->GetInfo();
-		edge->m_mark = mark;
-		edge->m_twin->m_mark = mark;
-	}
-	return node;
-}
-
-void* ndMeshEffect::GetNextEdge(const void* const edge) const
-{
-	ndNode* const node0 = (ndNode*)edge;
-	ndInt32 mark = node0->GetInfo().m_mark;
-
-	Iterator iter(*this);
-	iter.Set(node0);
-	for (iter++; iter; iter++) {
-		ndNode* const node = iter.GetNode();
-		if (node->GetInfo().m_mark != mark) {
-			node->GetInfo().m_mark = mark;
-			node->GetInfo().m_twin->m_mark = mark;
-			return node;
-		}
-	}
-	return nullptr;
-}
-
-void ndMeshEffect::GetEdgeIndex(const void* const edge, ndInt32& v0, ndInt32& v1) const
-{
-	ndNode* const node = (ndNode*)edge;
-	v0 = node->GetInfo().m_incidentVertex;
-	v1 = node->GetInfo().m_twin->m_incidentVertex;
-}
-
 void* ndMeshEffect::GetFirstFace() const
 {
 	Iterator iter(*this);
@@ -4141,4 +4098,49 @@ void ndMeshEffect::SetVertexBaseCount(ndInt32 count)
 ndArray<ndMeshEffect::ndVertexWeight>& ndMeshEffect::GetVertexWeights()
 {
 	return m_points.m_skinWeights;
+}
+
+ndMeshEffect::ndNode* ndMeshEffect::GetFirstEdge() const
+{
+	Iterator iter(*this);
+	iter.Begin();
+
+	ndNode* node = nullptr;
+	if (iter) 
+	{
+		ndInt32 mark = IncLRU();
+
+		node = iter.GetNode();
+
+		ndEdge* const edge = &node->GetInfo();
+		edge->m_mark = mark;
+		edge->m_twin->m_mark = mark;
+	}
+	return node;
+}
+
+ndMeshEffect::ndNode* ndMeshEffect::GetNextEdge(const ndMeshEffect::ndNode* const edgeNode) const
+{
+	ndNode* const node0 = (ndNode*)edgeNode;
+	ndInt32 mark = node0->GetInfo().m_mark;
+
+	Iterator iter(*this);
+	iter.Set(node0);
+	for (iter++; iter; iter++) 
+	{
+		ndNode* const node = iter.GetNode();
+		if (node->GetInfo().m_mark != mark) 
+		{
+			node->GetInfo().m_mark = mark;
+			node->GetInfo().m_twin->m_mark = mark;
+			return node;
+		}
+	}
+	return nullptr;
+}
+
+void ndMeshEffect::GetEdgeIndex(const ndMeshEffect::ndNode* const edgeNode, ndInt32& v0, ndInt32& v1) const
+{
+	v0 = edgeNode->GetInfo().m_incidentVertex;
+	v1 = edgeNode->GetInfo().m_twin->m_incidentVertex;
 }

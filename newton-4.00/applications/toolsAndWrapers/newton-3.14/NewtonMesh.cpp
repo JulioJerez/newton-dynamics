@@ -323,35 +323,6 @@ void NewtonMeshOptimize(const NewtonMesh* const mesh)
 	ndAssert(0);
 }
 
-int NewtonMeshGetVertexCount(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//return meshEffect->GetVertexCount();
-	ndAssert(0);
-	return 0;
-}
-
-int NewtonMeshGetVertexStrideInByte(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//
-	//return meshEffect->GetVertexStrideInByte();
-	ndAssert(0);
-	return 0;
-}
-
-const dFloat64* NewtonMeshGetVertexArray(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//
-	//return meshEffect->GetVertexPool();
-	ndAssert(0);
-	return 0;
-}
-
 void NewtonMeshGetVertexDoubleChannel(const NewtonMesh* const mesh, int vertexStrideInByte, dFloat64* const outBuffer)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -499,29 +470,6 @@ int NewtonMeshGetVertexIndexFromPoint(const NewtonMesh* const mesh, const void* 
 	//return ((dgMeshEffect*)mesh)->GetVertexIndexFromPoint(point);
 	ndAssert(0);
 	return 0;
-}
-
-void* NewtonMeshGetFirstEdge(const NewtonMesh* const mesh)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//return ((dgMeshEffect*)mesh)->GetFirstEdge();
-	ndAssert(0);
-	return 0;
-}
-
-void* NewtonMeshGetNextEdge(const NewtonMesh* const mesh, const void* const edge)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//return ((dgMeshEffect*)mesh)->GetNextEdge(edge);
-	ndAssert(0);
-	return 0;
-}
-
-void NewtonMeshGetEdgeIndices(const NewtonMesh* const mesh, const void* const edge, int* const v0, int* const v1)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	//return ((dgMeshEffect*)mesh)->GetEdgeIndex(edge, *v0, *v1);
-	ndAssert(0);
 }
 
 
@@ -1270,8 +1218,49 @@ void NewtonMeshSetVertexBaseCount(const NewtonMesh* const mesh, int baseCount)
 int NewtonMeshGetVertexBaseCount(const NewtonMesh* const mesh)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgMeshEffect* const meshEffect = (dgMeshEffect*)mesh;
-	//return meshEffect->GetVertexBaseCount();
-	ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	const ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
 	return meshEffect->GetVertexBaseCount();
+}
+
+int NewtonMeshGetVertexCount(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	const ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	return meshEffect->GetVertexCount();
+}
+
+int NewtonMeshGetVertexStrideInByte(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	const ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	return meshEffect->GetVertexStrideInByte();
+}
+
+const dFloat64* NewtonMeshGetVertexArray(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	const ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	return meshEffect->GetVertexPool();
+}
+
+void* NewtonMeshGetFirstEdge(const NewtonMesh* const mesh)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	const ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	return meshEffect->GetFirstEdge();
+}
+
+void* NewtonMeshGetNextEdge(const NewtonMesh* const mesh, const void* const edge)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	const ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	return meshEffect->GetNextEdge(PointerCast<ndMeshEffect::ndNode, void> (edge));
+}
+
+void NewtonMeshGetEdgeIndices(const NewtonMesh* const mesh, const void* const edge, int* const v0, int* const v1)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	const ndMeshEffect* const meshEffect = PointerCast<ndMeshEffect, NewtonMesh>(mesh);
+	ndMeshEffect::ndNode* const node = PointerCast<ndMeshEffect::ndNode, void>(edge);
+	meshEffect->GetEdgeIndex(node, *v0, *v1);
 }
