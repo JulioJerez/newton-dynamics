@@ -880,6 +880,11 @@ bool ndWorld::ConvexCast(ndConvexCastNotify& callback, const ndShapeInstance& co
 	return m_scene->ConvexCast(callback, convexShape, globalOrigin, globalDest);
 }
 
+bool ndWorld::Collide(ndConvexCastNotify& callback, const ndShapeInstance& instance, const ndMatrix& globalOrigin, ndInt32 maxContacts) const
+{
+	return m_scene->Collide(callback, instance, globalOrigin, maxContacts);
+}
+
 void ndWorld::BodiesInAabb(ndBodiesInAabbNotify& callback, const ndVector& minBox, const ndVector& maxBox) const
 {
 	m_scene->BodiesInAabb(callback, minBox, maxBox);

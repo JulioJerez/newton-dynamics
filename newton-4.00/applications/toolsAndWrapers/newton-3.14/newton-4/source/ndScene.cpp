@@ -980,6 +980,53 @@ void ndScene::UpdateSpecial()
 	}
 }
 
+bool ndScene::Collide(ndConvexCastNotify& callback, ndFixSizeArray<const ndBvhNode*, D_SCENE_MAX_STACK_DEPTH>& stackPool, ndFixSizeArray<ndInt32, D_SCENE_MAX_STACK_DEPTH> overlaped, const ndVector& boxP0, const ndVector& boxP1, const ndShapeInstance& instance, const ndMatrix& matrix, ndInt32 maxContacts) const
+{
+	const ndVector veloc(ndVector::m_zero);
+	while (stackPool.GetCount())
+	{
+		ndInt32 test = overlaped.Pop();
+		const ndBvhNode* node = stackPool.Pop();
+		if (test) 
+		{
+			ndBody* const body = node->GetBody();
+			if (body) 
+			{
+				if (!node->m_isDead && callback.OnRayPrecastAction (body, &instance))
+				{
+					const ndMatrix matrixB(body->GetMatrix());
+					ndFixSizeArray<ndContactPoint, 16> contactPoints;
+					ndContactNotify notification(const_cast<ndScene*>(this));
+
+					ndContactSolver solver(instance, body->GetAsBodyKinematic()->GetCollisionShape());
+					solver.CalculateContacts(&instance, matrix, veloc, &body->GetAsBodyKinematic()->GetCollisionShape(), matrixB, veloc, contactPoints, &notification);
+					for (ndInt32 i = 0; i < contactPoints.GetCount(); ++i)
+					{
+						ndContactPoint& contactPoint = contactPoints[i];
+						contactPoint.m_body0 = body->GetAsBodyKinematic();
+						contactPoint.m_body1 = body->GetAsBodyKinematic();
+						callback.m_contacts.PushBack(contactPoint);
+						if (callback.m_contacts.GetCount() >= maxContacts)
+						{
+							break;
+						}
+					}
+				}
+			}
+			else 
+			{
+				const ndBvhNode* const left = node->GetLeft();
+				stackPool.PushBack(left);
+				overlaped.PushBack(ndOverlapTest(left->m_minBox, left->m_maxBox, boxP0, boxP1));
+				const ndBvhNode* const right = node->GetRight();
+				stackPool.PushBack(right);
+				overlaped.PushBack(ndOverlapTest(right->m_minBox, right->m_maxBox, boxP0, boxP1));
+			}
+		}
+	}
+	return callback.m_contacts.GetCount() ? true : false;
+}
+
 bool ndScene::ConvexCast(
 	ndConvexCastNotify& callback, 
 	ndFixSizeArray<const ndBvhNode*, D_SCENE_MAX_STACK_DEPTH>& stackPool, 
@@ -1294,6 +1341,26 @@ bool ndScene::RayCast(ndRayCastNotify& callback, const ndVector& globalOrigin, c
 		}
 	}
 	return state;
+}
+
+bool ndScene::Collide(ndConvexCastNotify& callback, const ndShapeInstance& instance, const ndMatrix& globalOrigin, ndInt32 maxContacts) const
+{
+	if (m_rootNode) 
+	{
+		ndVector boxP0;
+		ndVector boxP1;
+		ndAssert(globalOrigin.TestOrthogonal());
+		instance.CalculateAabb(instance.GetLocalMatrix() * globalOrigin, boxP0, boxP1);
+
+		ndFixSizeArray<ndInt32, D_SCENE_MAX_STACK_DEPTH> overlaped;
+		ndFixSizeArray<const ndBvhNode*, D_SCENE_MAX_STACK_DEPTH> stackPool;
+		
+		stackPool.PushBack(m_rootNode);
+		overlaped.PushBack(ndOverlapTest(m_rootNode->m_minBox, m_rootNode->m_maxBox, boxP0, boxP1));
+		return Collide(callback, stackPool, overlaped, boxP0, boxP1, instance, globalOrigin, maxContacts);
+	}
+
+	return false;
 }
 
 bool ndScene::ConvexCast(ndConvexCastNotify& callback, const ndShapeInstance& convexShape, const ndMatrix& globalOrigin, const ndVector& globalDest) const

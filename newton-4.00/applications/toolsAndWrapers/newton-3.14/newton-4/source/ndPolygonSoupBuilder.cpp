@@ -89,7 +89,7 @@ class ndPolygonSoupBuilder::ndPolySoupFilterAllocator: public ndPolyhedra
 	{
 	}
 
-	~ndPolySoupFilterAllocator ()
+	~ndPolySoupFilterAllocator () override
 	{
 	}
 

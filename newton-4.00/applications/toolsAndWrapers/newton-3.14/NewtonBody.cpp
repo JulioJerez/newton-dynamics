@@ -514,7 +514,6 @@ void* NewtonBodyGetUserData(const NewtonBody* const bodyPtr)
 	return *bodyNotify->m_userData;
 }
 
-
 /*!
   Assign a material group id to the body.
 
@@ -534,11 +533,6 @@ void NewtonBodySetMaterialGroupID(const NewtonBody* const bodyPtr, int id)
 	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
 	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
 	bodyNotify->m_materialGoupId = id;
-
-	ndShapeInstance& instance = body->GetAsBodyKinematic()->GetCollisionShape();
-	ndShapeMaterial material = instance.GetMaterial();
-	material.m_userId = id;
-	instance.SetMaterial(material);
 }
 
 /*!
@@ -556,10 +550,6 @@ int NewtonBodyGetMaterialGroupID(const NewtonBody* const bodyPtr)
 	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
 	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
-	//ndShapeInstance& instance = body->GetAsBodyKinematic()->GetCollisionShape();
-	//ndShapeMaterial material = instance.GetMaterial();
-	//material.m_userId = id;
-	//instance.SetMaterial(material);
 	return bodyNotify->m_materialGoupId;
 }
 

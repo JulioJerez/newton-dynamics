@@ -55,7 +55,6 @@ class ndConvexCastNotify : public ndClassAlloc
 	{
 	}
 
-
 	virtual ~ndConvexCastNotify()
 	{
 	}

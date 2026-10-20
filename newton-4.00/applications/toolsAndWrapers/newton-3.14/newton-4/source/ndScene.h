@@ -96,6 +96,7 @@ class ndScene : public ndThreadPool
 
 	D_COLLISION_API virtual void BodiesInAabb(ndBodiesInAabbNotify& callback, const ndVector& minBox, const ndVector& maxBox) const;
 	D_COLLISION_API virtual bool RayCast(ndRayCastNotify& callback, const ndVector& globalOrigin, const ndVector& globalDest) const;
+	D_COLLISION_API virtual bool Collide(ndConvexCastNotify& callback, const ndShapeInstance& instance, const ndMatrix& globalOrigin, ndInt32 maxContacts) const;
 	D_COLLISION_API virtual bool ConvexCast(ndConvexCastNotify& callback, const ndShapeInstance& convexShape, const ndMatrix& globalOrigin, const ndVector& globalDest) const;
 
 	D_COLLISION_API ndInt32 GetThreadCount() const;
@@ -133,6 +134,7 @@ class ndScene : public ndThreadPool
 	ndJointBilateralConstraint* FindBilateralJoint(ndBodyKinematic* const body0, ndBodyKinematic* const body1) const;
 	bool RayCast(ndRayCastNotify& callback, ndFixSizeArray<const ndBvhNode*, D_SCENE_MAX_STACK_DEPTH>& stackPool, ndFixSizeArray<ndFloat32, D_SCENE_MAX_STACK_DEPTH>& distance, const ndFastRay& ray) const;
 	bool ConvexCast(ndConvexCastNotify& callback, ndFixSizeArray<const ndBvhNode*, D_SCENE_MAX_STACK_DEPTH>& stackPool, ndFixSizeArray<ndFloat32, D_SCENE_MAX_STACK_DEPTH>& distance, const ndFastRay& ray, const ndShapeInstance& convexShape, const ndMatrix& globalOrigin, const ndVector& globalDest) const;
+	bool Collide(ndConvexCastNotify& callback, ndFixSizeArray<const ndBvhNode*, D_SCENE_MAX_STACK_DEPTH>& stackPool, ndFixSizeArray<ndInt32, D_SCENE_MAX_STACK_DEPTH> overlaped, const ndVector& boxP0, const ndVector& boxP1, const ndShapeInstance& instance, const ndMatrix& matrix, ndInt32 maxContacts) const;
 
 	// call from sub steps update
 	D_COLLISION_API virtual void ApplyExtForce();

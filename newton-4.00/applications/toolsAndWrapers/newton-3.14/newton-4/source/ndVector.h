@@ -29,18 +29,7 @@
 
 #define ndCheckVector(x) (ndCheckFloat(ndFloat64(x[0])) && ndCheckFloat(ndFloat64(x[1])) && ndCheckFloat(ndFloat64(x[2])) && ndCheckFloat(ndFloat64(x[3])))
 
-//#ifdef D_SCALAR_VECTOR_CLASS
-//	#include "ndVectorScalar.h"
-//#elif (defined (__x86_64) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64))
-//	#include "ndVectorSimd.h"
-//#elif (defined(__arm__) || defined(__aarch64__) || defined(__ARM_ARCH_ISA_A64) || defined(__ARM_ARCH_7S__) || defined(__ARM_ARCH_7A__))
-//	#include "ndVectorArmNeon.h"
-//#else
-//	// unknown cpu assume scaler instruction set until otherwise
-//	#include "ndVectorScalar.h"
-//#endif
-
-#ifdef D_SCALAR_VECTOR_CLASS
+#if defined (D_SCALAR_VECTOR_CLASS) || defined(__clang__)
 	#include "ndVectorScalar.h"
 #else
 	#include "ndVectorSimd.h"

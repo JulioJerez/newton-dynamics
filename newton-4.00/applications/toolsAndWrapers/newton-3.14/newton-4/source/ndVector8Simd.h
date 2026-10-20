@@ -24,7 +24,7 @@
 
 #include "ndVector.h"
 
-#ifdef D_NEWTON_USE_AVX2_OPTION
+#if defined(D_NEWTON_USE_AVX2_OPTION) && !defined(__clang__)
 
 	#ifdef D_NEWTON_USE_DOUBLE
 		D_MSV_NEWTON_CLASS_ALIGN_32
@@ -217,15 +217,15 @@
 				Transpose(
 					dst0.m_low, dst1.m_low, dst2.m_low, dst3.m_low,
 					src0.m_low, src1.m_low, src2.m_low, src3.m_low);
-
+				
 				Transpose(
 					dst0.m_high, dst1.m_high, dst2.m_high, dst3.m_high,
 					src4.m_low, src5.m_low, src6.m_low, src7.m_low);
-
+				
 				Transpose(
 					dst4.m_low, dst5.m_low, dst6.m_low, dst7.m_low,
 					src0.m_high, src1.m_high, src2.m_high, src3.m_high);
-
+				
 				Transpose(
 					dst4.m_high, dst5.m_high, dst6.m_high, dst7.m_high,
 					src4.m_high, src5.m_high, src6.m_high, src7.m_high);
@@ -427,7 +427,7 @@
 				const ndVector8& src4, const ndVector8& src5, const ndVector8& src6, const ndVector8& src7)
 			{
 				ndVector8 blocks4x4[8];
-
+			
 				blocks4x4[0].m_type = _mm256_permute2f128_ps(src0.m_type, src4.m_type, 0x20);
 				blocks4x4[1].m_type = _mm256_permute2f128_ps(src0.m_type, src4.m_type, 0x31);
 				blocks4x4[2].m_type = _mm256_permute2f128_ps(src1.m_type, src5.m_type, 0x20);
@@ -436,7 +436,7 @@
 				blocks4x4[5].m_type = _mm256_permute2f128_ps(src2.m_type, src6.m_type, 0x31);
 				blocks4x4[6].m_type = _mm256_permute2f128_ps(src3.m_type, src7.m_type, 0x20);
 				blocks4x4[7].m_type = _mm256_permute2f128_ps(src3.m_type, src7.m_type, 0x31);
-
+			
 				ndVector8 blocks2x2[8];
 				blocks2x2[0].m_type = _mm256_unpacklo_ps(blocks4x4[0].m_type, blocks4x4[4].m_type);
 				blocks2x2[1].m_type = _mm256_unpackhi_ps(blocks4x4[0].m_type, blocks4x4[4].m_type);
@@ -446,7 +446,7 @@
 				blocks2x2[5].m_type = _mm256_unpackhi_ps(blocks4x4[2].m_type, blocks4x4[6].m_type);
 				blocks2x2[6].m_type = _mm256_unpacklo_ps(blocks4x4[3].m_type, blocks4x4[7].m_type);
 				blocks2x2[7].m_type = _mm256_unpackhi_ps(blocks4x4[3].m_type, blocks4x4[7].m_type);
-
+			
 				dst0.m_type = _mm256_unpacklo_ps(blocks2x2[0].m_type, blocks2x2[4].m_type);
 				dst1.m_type = _mm256_unpackhi_ps(blocks2x2[0].m_type, blocks2x2[4].m_type);
 				dst2.m_type = _mm256_unpacklo_ps(blocks2x2[1].m_type, blocks2x2[5].m_type);
@@ -646,19 +646,19 @@
 		{
 			const ndMatrix off01(src0.m_angular, src1.m_angular, src2.m_angular, src3.m_angular);
 			const ndMatrix off10(src4.m_linear, src5.m_linear, src6.m_linear, src7.m_linear);
-
+		
 			ndVector::Transpose4x4(
 				dst0.m_linear, dst1.m_linear, dst2.m_linear, dst3.m_linear,
 				src0.m_linear, src1.m_linear, src2.m_linear, src3.m_linear);
-
+		
 			ndVector::Transpose4x4(
 				dst0.m_angular, dst1.m_angular, dst2.m_angular, dst3.m_angular,
 				off10[0], off10[1], off10[2], off10[3]);
-
+		
 			ndVector::Transpose4x4(
 				dst4.m_linear, dst5.m_linear, dst6.m_linear, dst7.m_linear,
 				off01[0], off01[1], off01[2], off01[3]);
-
+		
 			ndVector::Transpose4x4(
 				dst4.m_angular, dst5.m_angular, dst6.m_angular, dst7.m_angular,
 				src4.m_angular, src5.m_angular, src6.m_angular, src7.m_angular);

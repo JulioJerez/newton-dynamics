@@ -999,15 +999,10 @@ class ndBigVector : public ndClassAlloc
 	inline static void Transpose4x4(ndBigVector& dst0, ndBigVector& dst1, ndBigVector& dst2, ndBigVector& dst3,
 		const ndBigVector& src0, const ndBigVector& src1, const ndBigVector& src2, const ndBigVector& src3)
 	{
-		ndBigVector tmp0(src0);
-		ndBigVector tmp1(src1);
-		ndBigVector tmp2(src2);
-		ndBigVector tmp3(src3);
-
-		dst0 = ndBigVector(tmp0.m_x, tmp1.m_x, tmp2.m_x, tmp3.m_x);
-		dst1 = ndBigVector(tmp0.m_y, tmp1.m_y, tmp2.m_y, tmp3.m_y);
-		dst2 = ndBigVector(tmp0.m_z, tmp1.m_z, tmp2.m_z, tmp3.m_z);
-		dst3 = ndBigVector(tmp0.m_w, tmp1.m_w, tmp2.m_w, tmp3.m_w);
+		dst0 = ndBigVector(src0.m_x, src1.m_x, src2.m_x, src3.m_x);
+		dst1 = ndBigVector(src0.m_y, src1.m_y, src2.m_y, src3.m_y);
+		dst2 = ndBigVector(src0.m_z, src1.m_z, src2.m_z, src3.m_z);
+		dst3 = ndBigVector(src0.m_w, src1.m_w, src2.m_w, src3.m_w);
 	}
 
 	// return dot 4d dot product

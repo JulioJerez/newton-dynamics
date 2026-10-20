@@ -274,7 +274,7 @@ namespace nd
 				{
 				}
 
-				void Execute(int threadId)
+				void Execute(int threadId) override
 				{
 					Mesh& leftCH = m_commonData->m_workBuffers[threadId].m_leftMesh;
 					Mesh& rightCH = m_commonData->m_workBuffers[threadId].m_rightMesh;
@@ -629,7 +629,7 @@ namespace nd
 				{
 				}
 
-				void Execute(ndInt32)
+				void Execute(ndInt32) override
 				{
 					Mesh combinedCH;
 					SArray<Vec3> pts;

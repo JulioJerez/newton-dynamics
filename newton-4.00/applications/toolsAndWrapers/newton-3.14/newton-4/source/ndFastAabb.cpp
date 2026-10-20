@@ -29,9 +29,9 @@
 #include "ndFastAabb.h"
 #include "ndIntersections.h"
 
-#define D_USE_FLOAT_VERSION
-#define D_RAY_TOL_ERROR (ndFloat32 (-1.0e-3f))
-#define D_RAY_TOL_ADAPTIVE_ERROR (ndFloat32 (1.0e-1f))
+//#define D_USE_FLOAT_VERSION
+//#define D_RAY_TOL_ERROR (ndFloat32 (-1.0e-3f))
+//#define D_RAY_TOL_ADAPTIVE_ERROR (ndFloat32 (1.0e-1f))
 
 ndFastAabb::ndFastAabb()
 	:ndMatrix(ndGetIdentityMatrix())

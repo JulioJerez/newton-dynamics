@@ -130,6 +130,7 @@ class ndWorld: public ndClassAlloc
 	D_NEWTON_API void ClearCache();
 	D_NEWTON_API void BodiesInAabb(ndBodiesInAabbNotify& callback, const ndVector& minBox, const ndVector& maxBox) const;
 	D_NEWTON_API bool RayCast(ndRayCastNotify& callback, const ndVector& globalOrigin, const ndVector& globalDest) const;
+	D_NEWTON_API bool Collide(ndConvexCastNotify& callback, const ndShapeInstance& instance, const ndMatrix& globalOrigin, ndInt32 maxContacts) const;
 	D_NEWTON_API bool ConvexCast(ndConvexCastNotify& callback, const ndShapeInstance& convexShape, const ndMatrix& globalOrigin, const ndVector& globalDest) const;
 
 	D_NEWTON_API void CalculateJointContacts(ndContact* const contact);

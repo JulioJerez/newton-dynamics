@@ -35,14 +35,14 @@ namespace nd
 		{
 			public:
 			VHACD();
-			~VHACD(void);
+			~VHACD(void) override;
 
-			uint32_t GetNConvexHulls() const;
-			void GetConvexHull(const uint32_t index, ConvexHull& ch) const;
+			uint32_t GetNConvexHulls() const override;
+			void GetConvexHull(const uint32_t index, ConvexHull& ch) const override;
 			void Compute(
 				const float* const points, const uint32_t nPoints,
 				const uint32_t* const triangles, const uint32_t nTriangles,
-				const Parameters& params);
+				const Parameters& params) override;
 
 			private:
 			void ComputePrimitiveSet(const Parameters& params);

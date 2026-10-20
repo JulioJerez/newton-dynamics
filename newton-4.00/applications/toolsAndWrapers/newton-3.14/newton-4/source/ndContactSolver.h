@@ -62,22 +62,20 @@ class ndContactSolver: public ndDownHeap<ndMinkFace*, ndFloat32>
 	class ndBoxBoxDistance2;
 
 	D_COLLISION_API ndContactSolver();
+	D_COLLISION_API ndContactSolver(const ndShapeInstance& shapeA, const ndShapeInstance& shapeB);
 	~ndContactSolver() {}
 
 	D_COLLISION_API bool CollisionTest(
-		const ndShapeInstance* const shapeA, const ndMatrix& matrixA, const ndVector& velocA,
-		const ndShapeInstance* const shapeB, const ndMatrix& matrixB, const ndVector& velocB,
+		const ndMatrix& matrixA, const ndVector& velocA,
+		const ndMatrix& matrixB, const ndVector& velocB,
 		ndContactNotify* const notification);
 
 	D_COLLISION_API void CalculateContacts(
-		const ndShapeInstance* const shapeA, const ndMatrix& matrixA, const ndVector& velocA,
-		const ndShapeInstance* const shapeB, const ndMatrix& matrixB, const ndVector& velocB,
+		const ndShapeInstance* const instanceA, const ndMatrix& matrixA, const ndVector& velocA,
+		const ndShapeInstance* const instanceB, const ndMatrix& matrixB, const ndVector& velocB,
 		ndFixSizeArray<ndContactPoint, 16>& contactOut, ndContactNotify* const notification);
 
-	D_COLLISION_API void CalculateClosestPoints(
-		const ndShapeInstance* const shapeA, const ndMatrix& matrixA,
-		const ndShapeInstance* const shapeB, const ndMatrix& matrixB,
-		ndContactNotify* const notification);
+	D_COLLISION_API void CalculateClosestPoints(const ndMatrix& matrixA, const ndMatrix& matrixB, ndContactNotify* const notification);
 
 	ndVector GetSeparatingVector() const
 	{
