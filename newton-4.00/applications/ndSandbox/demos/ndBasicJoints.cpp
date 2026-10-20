@@ -205,7 +205,7 @@ static void BuildHinge(ndDemoEntityManager* const scene, const ndVector& origin,
 		{
 		}
 
-		void JacobianDerivative(ndConstraintDescritor& desc)
+		void JacobianDerivative(ndConstraintDescritor& desc) override
 		{
 			m_angle += ndFmod(5.0f * desc.m_timestep, 2.0f * ndPi);
 			ndFloat32 dist = 150.0f * ndDegreeToRad * ndSin(m_angle);
@@ -225,7 +225,7 @@ static void BuildHinge(ndDemoEntityManager* const scene, const ndVector& origin,
 		{
 		}
 
-		void JacobianDerivative(ndConstraintDescritor& desc)
+		void JacobianDerivative(ndConstraintDescritor& desc) override
 		{
 			ndFloat32 angle = GetAngle();
 			SetTargetAngle(angle + m_speed * desc.m_timestep);
@@ -309,7 +309,7 @@ static void BuildSlider(ndDemoEntityManager* const scene, const ndVector& origin
 		{
 		}
 
-		void JacobianDerivative(ndConstraintDescritor& desc)
+		void JacobianDerivative(ndConstraintDescritor& desc) override
 		{
 			m_angle += ndFmod(5.0f * desc.m_timestep, 2.0f * ndPi);
 			ndFloat32 dist = 0.9f * ndSin(m_angle);
@@ -490,7 +490,7 @@ static void BuildDoubleHinge(ndDemoEntityManager* const scene, const ndVector& o
 		{
 		}
 
-		void JacobianDerivative(ndConstraintDescritor& desc)
+		void JacobianDerivative(ndConstraintDescritor& desc) override
 		{
 			// first axis is a angle motor, by setting target angle;
 			ndFloat32 angle0 = GetAngle0();

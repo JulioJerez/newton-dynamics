@@ -18,7 +18,7 @@ class ndMenuRenderPass: public ndRenderPassGui
 {
 	public:
 	ndMenuRenderPass(ndDemoEntityManager* const owner);
-	virtual ~ndMenuRenderPass();
+	virtual ~ndMenuRenderPass() override;
 
 	void RenderScene() override;
 

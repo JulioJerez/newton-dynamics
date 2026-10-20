@@ -95,13 +95,13 @@ namespace nd
 			}
 
 
-			~MyRaycastMesh(void)
+			~MyRaycastMesh(void) override
 			{
 				delete[]mVertices;
 				delete[]mIndices;
 			}
 
-			virtual void release(void)
+			virtual void release(void) override
 			{
 				delete this;
 			}

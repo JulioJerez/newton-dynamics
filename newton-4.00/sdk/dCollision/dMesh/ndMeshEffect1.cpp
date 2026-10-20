@@ -3224,7 +3224,7 @@ ndMeshEffect::ndMeshEffect(const ndShapeInstance& shapeInstance)
 		{
 		}
 
-		virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceVertex, const ndEdgeType* const)
+		virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceVertex, const ndEdgeType* const) override
 		{
 			m_faceIndexCount.PushBack(vertexCount);
 			for (ndInt32 i = 0; i < vertexCount; ++i)

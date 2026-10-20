@@ -42,7 +42,7 @@ namespace ndMotorVehicle
 		{
 		}
 
-		virtual void Update(ndSoundSource* const source)
+		virtual void Update(ndSoundSource* const source) override
 		{
 			ndMultiBodyVehicleMotor* const motor = m_vehicle->GetMotor();
 
@@ -98,7 +98,7 @@ namespace ndMotorVehicle
 		{
 		}
 
-		void PostUpdate(ndFloat32 timestep, ndInt32 threadId)
+		void PostUpdate(ndFloat32 timestep, ndInt32 threadId) override
 		{
 			ndVehicleCommonNotify::PostUpdate(timestep, threadId);
 

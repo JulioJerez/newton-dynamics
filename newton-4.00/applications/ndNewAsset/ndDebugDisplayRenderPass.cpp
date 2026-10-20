@@ -762,12 +762,12 @@ void ndDebugDisplayRenderPass::RenderOptions()
 							SetScale(m_self->m_manager->m_gizmoScale);
 						}
 
-						void DrawPoint(const ndVector&, const ndVector&, ndFloat32)
+						void DrawPoint(const ndVector&, const ndVector&, ndFloat32) override
 						{
 							ndAssert(0);
 						}
 
-						virtual void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32)
+						virtual void DrawLine(const ndVector& p0, const ndVector& p1, const ndVector& color, ndFloat32) override
 						{
 							m_self->DrawLine(p0, p1, color);
 						}

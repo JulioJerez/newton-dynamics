@@ -78,12 +78,12 @@ class ndFrictionMaterial : public ndApplicationMaterial
 	{
 	}
 
-	ndApplicationMaterial* Clone() const
+	ndApplicationMaterial* Clone() const override
 	{
 		return new ndFrictionMaterial(*this);
 	}
 
-	virtual void OnContactCallback(const ndContact* const joint, ndFloat32) const
+	virtual void OnContactCallback(const ndContact* const joint, ndFloat32) const override
 	{
 		const ndContactPointList& contactPoints = joint->GetContactPoints();
 		ndFloat32 maxSpeed = 0.0f;

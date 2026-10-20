@@ -479,7 +479,7 @@ static void TestAutoDifferentiation()
 		class Sum: public ndFuntionEvaluator
 		{
 			public:
-			ndBrainDualNumber Evaluate(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			ndBrainDualNumber Evaluate(const ndBrainDualNumber& x, const ndBrainDualNumber& y) override
 			{
 				return ndBrainDualNumber(2) * x + ndBrainDualNumber(3) * y;
 			}
@@ -496,7 +496,7 @@ static void TestAutoDifferentiation()
 		{
 			public:
 			//Finding the partials of z = x * (x + y) + y * y at (x, y) = (2, 3)
-			ndBrainDualNumber Evaluate(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			ndBrainDualNumber Evaluate(const ndBrainDualNumber& x, const ndBrainDualNumber& y) override
 			{
 				return x * (x + y) + y * y;
 			}
@@ -528,7 +528,7 @@ static void TestAutoDifferentiation()
 		class Ratio : public ndFuntionEvaluator
 		{
 			public:
-			ndBrainDualNumber Evaluate(const ndBrainDualNumber& x, const ndBrainDualNumber& y)
+			ndBrainDualNumber Evaluate(const ndBrainDualNumber& x, const ndBrainDualNumber& y) override
 			{
 				return x / (x + y) + x * y;
 			}
@@ -565,7 +565,7 @@ static void TestAutoDifferentiation()
 		class MaxValue : public ndFuntionEvaluator
 		{
 			public:
-			ndBrainDualNumber Evaluate(const ndBrainDualNumber& x, const ndBrainDualNumber&)
+			ndBrainDualNumber Evaluate(const ndBrainDualNumber& x, const ndBrainDualNumber&) override
 			{
 				ndBrainDualNumber a(10.0f);
 				ndBrainDualNumber b(5.0f);

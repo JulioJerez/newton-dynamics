@@ -29,7 +29,7 @@ static ndSharedPtr<ndModel> LoadAndBindModel(ndDemoEntityManager* const scene, c
             SetModel(model);
         }
 
-        bool OnContactGeneration(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1)
+        bool OnContactGeneration(const ndBodyKinematic* const body0, const ndBodyKinematic* const body1) override
         {
             const ndModelArticulation* const articulation = GetModel()->GetAsModelArticulation();
             return articulation->PairCollide(body0, body1);

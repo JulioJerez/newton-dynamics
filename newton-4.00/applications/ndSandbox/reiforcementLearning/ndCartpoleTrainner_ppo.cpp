@@ -65,27 +65,27 @@ namespace ndCartpoleTrainer_ppo
 		{
 		}
 
-		ndBrainFloat CalculateReward()
+		ndBrainFloat CalculateReward() override
 		{
 			return m_owner->CalculateReward();
 		}
 
-		bool IsTerminal() const
+		bool IsTerminal() const override
 		{
 			return m_owner->IsTerminal();
 		}
 
-		void GetObservation(ndBrainFloat* const observation)
+		void GetObservation(ndBrainFloat* const observation) override
 		{
 			m_owner->GetObservation(observation);
 		}
 
-		virtual void ApplyActions(ndBrainFloat* const actions)
+		virtual void ApplyActions(ndBrainFloat* const actions) override
 		{
 			m_owner->ApplyActions(actions);
 		}
 
-		void ResetModel()
+		void ResetModel() override
 		{
 			m_owner->ResetModel();
 		}
@@ -162,7 +162,7 @@ namespace ndCartpoleTrainer_ppo
 			}
 		}
 
-		~TrainingUpdata()
+		~TrainingUpdata() override
 		{
 			if (m_outFile)
 			{
@@ -197,11 +197,11 @@ namespace ndCartpoleTrainer_ppo
 			return model;
 		}
 
-		void OnDebug(ndDemoEntityManager* const, bool)
+		void OnDebug(ndDemoEntityManager* const, bool) override
 		{
 		}
 
-		virtual void Update(ndDemoEntityManager* const manager, ndFloat32)
+		virtual void Update(ndDemoEntityManager* const manager, ndFloat32) override
 		{
 			ndUnsigned32 stopTraining = m_master->GetFramesCount();
 			if (stopTraining <= m_stopTraining)
