@@ -27,7 +27,7 @@ ndNomalizeMassDistribution::ndNomalizeMassDistribution(ndAssetEditor* const owne
 		{
 			const ndMeshBodyKinematic* const kinBody = (ndMeshBodyKinematic*)*body;
 			const ndVector inertia(kinBody->m_invMass.Reciproc());
-			m_totalMass += inertia.m_w;
+			m_totalMass += ndReal(inertia.m_w);
 		}
 	};
 	m_owner->GetMesh()->NodeIterator(TotalMass);
