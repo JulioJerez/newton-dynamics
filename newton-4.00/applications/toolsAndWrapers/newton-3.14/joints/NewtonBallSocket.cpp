@@ -41,8 +41,6 @@ class NewtonBallAndSockect: public ndJointSpherical
 	//NewtonBallCallback m_callback;
 };
 
-
-
 /*!
   Get the relative joint angle between the two bodies.
 

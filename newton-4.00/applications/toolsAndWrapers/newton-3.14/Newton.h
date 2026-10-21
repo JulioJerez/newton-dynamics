@@ -393,7 +393,7 @@ extern "C" {
 	typedef void (*NewtonJointIterator) (const NewtonJoint* const joint, void* const userData);
 	typedef void (*NewtonCollisionIterator) (void* const userData, int vertexCount, const dFloat* const faceArray, int faceId);
 
-	typedef void (*NewtonBallCallback) (const NewtonJoint* const ball, dFloat timestep);
+	typedef unsigned (*NewtonBallCallback) (const NewtonJoint* const ball, NewtonHingeSliderUpdateDesc* const desc);
 	typedef unsigned (*NewtonHingeCallback) (const NewtonJoint* const hinge, NewtonHingeSliderUpdateDesc* const desc);
 	typedef unsigned (*NewtonSliderCallback) (const NewtonJoint* const slider, NewtonHingeSliderUpdateDesc* const desc);
 	typedef unsigned (*NewtonUniversalCallback) (const NewtonJoint* const universal, NewtonHingeSliderUpdateDesc* const desc);
@@ -438,17 +438,6 @@ extern "C" {
 	NEWTON_API int NewtonDeformableMeshSegmentGetIndexCount (const NewtonCollision* const deformableMesh, const NewtonDeformableMeshSegment* const segment);
 	NEWTON_API const int* NewtonDeformableMeshSegmentGetIndexList (const NewtonCollision* const deformableMesh, const NewtonDeformableMeshSegment* const segment);
 */
-	// **********************************************************************************************
-	//
-	// Hinge joint functions
-	//
-	// **********************************************************************************************
-	NEWTON_API NewtonJoint* NewtonConstraintCreateHinge (const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const dFloat* pinDir, const NewtonBody* const childBody, const NewtonBody* const parentBody);
-	NEWTON_API void NewtonHingeSetUserCallback (const NewtonJoint* const hinge, NewtonHingeCallback callback);
-	NEWTON_API dFloat NewtonHingeGetJointAngle (const NewtonJoint* const hinge);
-	NEWTON_API dFloat NewtonHingeGetJointOmega (const NewtonJoint* const hinge);
-	NEWTON_API void NewtonHingeGetJointForce (const NewtonJoint* const hinge, dFloat* const force);
-	NEWTON_API dFloat NewtonHingeCalculateStopAlpha (const NewtonJoint* const hinge, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle);
 
 	// **********************************************************************************************
 	//
@@ -1260,6 +1249,14 @@ extern "C" {
 	NEWTON_API void NewtonBallSetTwistLimits(const NewtonJoint* const ball, dFloat minTwistAngle, dFloat maxTwistAngle);
 
 	NEWTON_API void NewtonBallSetSpringDamper(const NewtonJoint* const ball, dFloat regularizer, dFloat spring, dFloat32 damper);
+
+	// Hinge joint functions
+	NEWTON_API NewtonJoint* NewtonConstraintCreateHinge(const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const dFloat* pinDir, const NewtonBody* const childBody, const NewtonBody* const parentBody);
+	NEWTON_API void NewtonHingeSetUserCallback(const NewtonJoint* const hinge, NewtonHingeCallback callback);
+	NEWTON_API dFloat NewtonHingeGetJointAngle(const NewtonJoint* const hinge);
+	NEWTON_API dFloat NewtonHingeGetJointOmega(const NewtonJoint* const hinge);
+	NEWTON_API void NewtonHingeGetJointForce(const NewtonJoint* const hinge, dFloat* const force);
+	NEWTON_API dFloat NewtonHingeCalculateStopAlpha(const NewtonJoint* const hinge, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle);
 
 #ifdef __cplusplus 
 }
