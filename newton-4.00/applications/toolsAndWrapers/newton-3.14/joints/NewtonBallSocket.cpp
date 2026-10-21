@@ -232,3 +232,9 @@ void NewtonBallSetTwistLimits(const NewtonJoint* const joint, dFloat minTwistAng
 	userJoint->SetTwistLimits(minTwistAngle, maxTwistAngle);
 }
 
+void NewtonBallSetSpringDamper(const NewtonJoint* const joint, dFloat regularizer, dFloat spring, dFloat32 damper)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonBallAndSockect* const userJoint = PointerCast<NewtonBallAndSockect, NewtonJoint>(joint);
+	userJoint->SetAsSpringDamper(regularizer, spring, damper);
+}

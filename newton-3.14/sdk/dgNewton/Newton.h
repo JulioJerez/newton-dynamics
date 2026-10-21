@@ -1111,6 +1111,7 @@ extern "C" {
 	NEWTON_API void NewtonBallEnableTwist(const NewtonJoint* const ball, int state);
 	NEWTON_API void NewtonBallSetTwistLimits(const NewtonJoint* const ball, dFloat minTwistAngle, dFloat maxTwistAngle);
 
+	NEWTON_API void NewtonBallSetSpringDamper(const NewtonJoint* const ball, dFloat regularizer, dFloat spring, dFloat32 damper);
 
 	// **********************************************************************************************
 	//

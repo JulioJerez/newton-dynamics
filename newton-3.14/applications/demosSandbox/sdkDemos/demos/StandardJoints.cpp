@@ -176,40 +176,6 @@ static void AddFixDistance(DemoEntityManager* const scene, const dVector& origin
 }
 
 
-static void AddBallAndSockectWithFriction (DemoEntityManager* const scene, const dVector& origin)
-{
-	dVector size (1.0f, 1.0f, 1.0f);
-	NewtonBody* const base = CreateBox(scene, origin + dVector (0.0f,  5.0f + size.m_y + 0.25f, 0.0f, 0.0f), size.Scale (0.2f));
-	NewtonBody* const box0 = CreateCapule (scene, origin + dVector (0.0f,  5.0f, 0.0f, 0.0f), size);
-	NewtonBody* const box1 = CreateCapule (scene, origin + dVector (0.0f,  5.0f- size.m_y * 2.0f, 0.0f, 0.0f), size);
-
-	NewtonBodySetMassMatrix(base, 0.0f, 0.0f, 0.0f, 0.0f);
-	dMatrix pinMatrix (dGrammSchmidt (dVector (0.0f, -1.0f, 0.0f, 0.0f)));
-
-	// connect first box to the world
-	dMatrix matrix0;
-	NewtonBodyGetMatrix (box0, &matrix0[0][0]);
-	pinMatrix.m_posit = matrix0.m_posit + dVector (0.0f, size.m_y, 0.0f, 0.0f);
-	dMatrix rotateLimit (dYawMatrix (-30.0f * dDegreeToRad) * pinMatrix);
-	dCustomBallAndSocket* const joint0 = new dCustomBallAndSocket (pinMatrix, rotateLimit, box0, base);
-	joint0->EnableCone(true);
-	joint0->SetConeFriction(200.0f);
-	joint0->SetConeLimits (120.0f * dDegreeToRad);
-	joint0->EnableTwist(true);
-	joint0->SetTwistFriction(50.0f);
-	joint0->SetTwistLimits(-150.0f * dDegreeToRad, 150.0f * dDegreeToRad);
-
-	// link the two boxes
-	dMatrix matrix1;
-	NewtonBodyGetMatrix (box1, & matrix1[0][0]);
-	pinMatrix.m_posit = (matrix0.m_posit + matrix1.m_posit).Scale (0.5f);
-	dCustomBallAndSocket* const joint1 = new dCustomBallAndSocket (pinMatrix, box1, box0);
-	joint1->EnableCone(true);
-	joint1->SetConeFriction(200.0f);
-	joint1->SetConeLimits(120.0f * dDegreeToRad);
-	joint1->EnableTwist(true);
-	joint1->SetTwistLimits(-90.0f * dDegreeToRad, 90.0f * dDegreeToRad);
-}
 
 static void AddDoubleHinge(DemoEntityManager* const scene, const dVector& origin)
 {
@@ -912,19 +878,12 @@ static void Add6DOF(DemoEntityManager* const scene, const dVector& origin)
     NewtonConstraintCreateFix6Dof(world, box1, box0);
 }
 
-static unsigned BallCallback(const NewtonJoint* const ball, NewtonHingeSliderUpdateDesc* const desc)
-{
-	return 0;
-}
-
 static void AddLimitedBallAndSocket(DemoEntityManager* const scene, const dVector& origin)
 {
-
 	dVector size(1.0f, 1.0f, 1.0f);
 	NewtonBody* const base = CreateBox(scene, origin + dVector(0.0f, 5.0f + size.m_y + 0.25f, 0.0f, 0.0f), size.Scale(0.2f));
 
 	NewtonBody* const box0 = CreateCapule(scene, origin + dVector(0.0f, 5.0f, 0.0f, 0.0f), size);
-	NewtonBodySetGyroscopicTorque(box0, 1);
 	NewtonBodySetMassMatrix(base, 0.0f, 0.0f, 0.0f, 0.0f);
 	dMatrix pinMatrix(dGrammSchmidt(dVector(0.0f, -1.0f, 0.0f, 0.0f)));
 
@@ -936,26 +895,58 @@ static void AddLimitedBallAndSocket(DemoEntityManager* const scene, const dVecto
 	NewtonWorld* const world = scene->GetNewton();
 	// tilt the cone limit
 	NewtonJoint* const joint0 = NewtonConstraintCreateBall(world, &pinMatrix.m_posit[0], box0, base);
-	//joint0->EnableCone(true);
-	//joint0->EnableTwist(true);
-	//joint0->SetConeLimits(60.0f * dDegreeToRad);
-	//joint0->SetTwistLimits(0.0f * dDegreeToRad, 0.0f * dDegreeToRad);
-	//NewtonBallSetUserCallback(joint0, BallCallback);
 	NewtonBallEnableCone(joint0, 1);
 	NewtonBallEnableTwist(joint0, 1);
 	NewtonBallSetTwistLimits(joint0, 0.0f, 0.0f);
 	NewtonBallSetConeLimits1(joint0, 60.0f * dDegreeToRad);
 
 	// connect first box1 to box0 the world
-//	NewtonBody* const box1 = CreateCapule(scene, origin + dVector(0.0f, 5.0f - size.m_y * 2.0f, 0.0f, 0.0f), size);
-//	NewtonBodySetGyroscopicTorque(box1, 1);
-//	NewtonBodyGetMatrix(box1, &matrix[0][0]);
-//	pinMatrix.m_posit = matrix.m_posit + dVector(0.0f, size.m_y, 0.0f, 0.0f);
-//	dCustomBallAndSocket* const joint1 = new dCustomBallAndSocket(pinMatrix, box1, box0);
-//	joint1->EnableCone(true);
-//	joint1->SetConeLimits(30.0f * dDegreeToRad);
-//	joint1->EnableTwist(true);
-//	joint1->SetTwistLimits(-30.0f * dDegreeToRad, 30.0f * dDegreeToRad);
+	NewtonBody* const box1 = CreateCapule(scene, origin + dVector(0.0f, 5.0f - size.m_y * 2.0f, 0.0f, 0.0f), size);
+	NewtonBodyGetMatrix(box1, &matrix[0][0]);
+	pinMatrix.m_posit = matrix.m_posit + dVector(0.0f, size.m_y, 0.0f, 0.0f);
+	NewtonJoint* const joint1 = NewtonConstraintCreateBall(world, &pinMatrix.m_posit[0], box1, box0);
+	NewtonBallEnableCone(joint1, 1);
+	NewtonBallEnableTwist(joint1, 1);
+	NewtonBallSetConeLimits1(joint1, 30.0f * dDegreeToRad);
+	NewtonBallSetTwistLimits(joint1, -30.0f * dDegreeToRad, 30.0f * dDegreeToRad);
+}
+
+static void AddBallAndSockectWithFriction(DemoEntityManager* const scene, const dVector& origin)
+{
+	dVector size(1.0f, 1.0f, 1.0f);
+	NewtonBody* const base = CreateBox(scene, origin + dVector(0.0f, 5.0f + size.m_y + 0.25f, 0.0f, 0.0f), size.Scale(0.2f));
+	NewtonBody* const box0 = CreateCapule(scene, origin + dVector(0.0f, 5.0f, 0.0f, 0.0f), size);
+	NewtonBody* const box1 = CreateCapule(scene, origin + dVector(0.0f, 5.0f - size.m_y * 2.0f, 0.0f, 0.0f), size);
+
+	NewtonBodySetMassMatrix(base, 0.0f, 0.0f, 0.0f, 0.0f);
+	dMatrix pinMatrix(dGrammSchmidt(dVector(0.0f, -1.0f, 0.0f, 0.0f)));
+
+	NewtonWorld* const world = scene->GetNewton();
+
+	// connect first box to the world
+	dMatrix matrix0;
+	NewtonBodyGetMatrix(box0, &matrix0[0][0]);
+	pinMatrix.m_posit = matrix0.m_posit + dVector(0.0f, size.m_y, 0.0f, 0.0f);
+	dMatrix rotateLimit(dYawMatrix(-30.0f * dDegreeToRad) * pinMatrix);
+
+	NewtonJoint* const joint0 = NewtonConstraintCreateBall(world, &pinMatrix.m_posit[0], box0, base);
+	NewtonBallEnableCone(joint0, 1);
+	NewtonBallEnableTwist(joint0, 1);
+	NewtonBallSetConeLimits1(joint0, 120.0f * dDegreeToRad);
+	NewtonBallSetTwistLimits(joint0, -150.0f * dDegreeToRad, 150.0f * dDegreeToRad);
+	NewtonBallSetSpringDamper(joint0, 0.01f, 0.0f, 20.0f);
+
+	// link the two boxes
+	dMatrix matrix1;
+	NewtonBodyGetMatrix(box1, &matrix1[0][0]);
+	pinMatrix.m_posit = (matrix0.m_posit + matrix1.m_posit).Scale(0.5f);
+
+	NewtonJoint* const joint1 = NewtonConstraintCreateBall(world, &pinMatrix.m_posit[0], box1, box0);
+	NewtonBallEnableCone(joint1, 1);
+	NewtonBallEnableTwist(joint1, 1);
+	NewtonBallSetConeLimits1(joint1, 120.0f * dDegreeToRad);
+	NewtonBallSetTwistLimits(joint1, -90.0f * dDegreeToRad, 90.0f * dDegreeToRad);
+	NewtonBallSetSpringDamper(joint1, 0.01f, 0.0f, 20.0f);
 }
 
 void StandardJoints (DemoEntityManager* const scene)
@@ -974,8 +965,8 @@ void StandardJoints (DemoEntityManager* const scene)
 
 	//Add6DOF (scene, dVector (-20.0f, 0.0f, -25.0f));
 	//AddDistance (scene, dVector (-20.0f, 0.0f, -20.0f));
-	AddLimitedBallAndSocket (scene, dVector (-20.0f, 0.0f, -15.0f));
-	//AddBallAndSockectWithFriction (scene, dVector (-20.0f, 0.0f, -10.0f));
+	//AddLimitedBallAndSocket (scene, dVector (-20.0f, 0.0f, -15.0f));
+	AddBallAndSockectWithFriction (scene, dVector (-20.0f, 0.0f, -10.0f));
 	//AddFixDistance(scene, dVector(-20.0f, 0.0f, -5.0f));
 	//AddHinge (scene, dVector (-20.0f, 0.0f, 0.0f));
 	//AddHingeMotor(scene, dVector(0.0f, 0.0f, -20.0f));

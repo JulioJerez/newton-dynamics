@@ -6239,26 +6239,36 @@ void NewtonBallSetConeLimits(const NewtonJoint* const ball, const dFloat* pin, d
 
 void NewtonBallEnableCone(const NewtonJoint* const ball, int state)
 {
+	TRACE_FUNCTION(__FUNCTION__);
 	dgBallConstraint* const joint = (dgBallConstraint*)ball;
 	joint->SetConeLimitState(state ? true : false);
 }
 
 void NewtonBallSetConeLimits1(const NewtonJoint* const ball, dFloat maxConeAngle)
 {
+	TRACE_FUNCTION(__FUNCTION__);
 	dgBallConstraint* const joint = (dgBallConstraint*)ball;
 	joint->SetCone(maxConeAngle);
 }
 
 void NewtonBallEnableTwist(const NewtonJoint* const ball, int state)
 {
+	TRACE_FUNCTION(__FUNCTION__);
 	dgBallConstraint* const joint = (dgBallConstraint*)ball;
 	joint->SetTwistLimitState(state ? true : false);
 }
 
 void NewtonBallSetTwistLimits(const NewtonJoint* const ball, dFloat minTwistAngle, dFloat maxTwistAngle)
 {
+	TRACE_FUNCTION(__FUNCTION__);
 	dgBallConstraint* const joint = (dgBallConstraint*)ball;
 	joint->SetTwistLinmits(minTwistAngle, maxTwistAngle);
+}
+
+void NewtonBallSetSpringDamper(const NewtonJoint* const ball, dFloat regularizer, dFloat spring, dFloat32 damper)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	// do nothing
 }
 
 /*!
@@ -6277,13 +6287,10 @@ void NewtonBallSetTwistLimits(const NewtonJoint* const ball, dFloat minTwistAngl
 */
 void NewtonBallSetUserCallback(const NewtonJoint* const ball, NewtonBallCallback callback)
 {
-	dgBallConstraint* contraint;
-
 	TRACE_FUNCTION(__FUNCTION__);
-	contraint = (dgBallConstraint*) ball;
+	dgBallConstraint* contraint = (dgBallConstraint*) ball;
 	contraint->SetJointParameterCallback ((dgBallJointFriction)callback);
 }
-
 
 /*!
   Get the relative joint angle between the two bodies.
