@@ -1242,6 +1242,9 @@ extern "C" {
 	NEWTON_API void NewtonUserJointGetGeneralRow(const NewtonJoint* const joint, int index, dFloat* const jacobian0, dFloat* const jacobian1);
 	NEWTON_API dFloat NewtonUserJointGetRowForce(const NewtonJoint* const joint, int row);
 
+	// Fix 6 dof joint (new for 3.15)
+	NEWTON_API NewtonJoint* NewtonConstraintCreateFix6Dof(const NewtonWorld* const newtonWorld, const NewtonBody* const childBody, const NewtonBody* const parentBody);
+
 	// Ball and Socket joint functions
 	NEWTON_API NewtonJoint* NewtonConstraintCreateBall(const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const NewtonBody* const childBody, const NewtonBody* const parentBody);
 	NEWTON_API void NewtonBallSetUserCallback(const NewtonJoint* const ball, NewtonBallCallback callback);

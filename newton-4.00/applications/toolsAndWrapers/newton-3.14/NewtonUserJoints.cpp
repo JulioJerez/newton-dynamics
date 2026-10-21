@@ -124,11 +124,10 @@ NewtonJoint* NewtonConstraintCreateUserJoint(const NewtonWorld* const newtonWorl
 	const NewtonBody* const childBody, const NewtonBody* const parentBody)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//ndNewtonWorld* const world = const_cast<ndNewtonWorld*>(reinterpret_cast<const ndNewtonWorld*>(newtonWorld));
 	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 
-	ndBodyKinematic* body0 = PointerCast<ndBody, NewtonBody>(childBody)->GetAsBodyKinematic();
-	ndBodyKinematic* body1 = parentBody ? PointerCast<ndBody, NewtonBody>(parentBody)->GetAsBodyKinematic() : world->GetSentinelBody();
+	ndBodyKinematic* const body0 = PointerCast<ndBody, NewtonBody>(childBody)->GetAsBodyKinematic();
+	ndBodyKinematic* const body1 = parentBody ? PointerCast<ndBody, NewtonBody>(parentBody)->GetAsBodyKinematic() : world->GetSentinelBody();
 	ndAssert(body0);
 	ndAssert(body1);
 	ndAssert(body0 != body1);
@@ -287,7 +286,6 @@ dFloat NewtonUserJointCalculateRowZeroAcceleration(const NewtonJoint* const join
 	ndConstraintDescritor& desc = **userJoint->m_param;
 	return userJoint->GetMotorZeroAcceleration(desc);
 }
-
 
 /*!
   set the general linear and angular Jacobian for the desired degree of freedom

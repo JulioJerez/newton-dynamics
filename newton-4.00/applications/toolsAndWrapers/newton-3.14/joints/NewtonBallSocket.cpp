@@ -32,8 +32,8 @@ class NewtonBallAndSockect: public ndJointSpherical
 	public:
 	D_CLASS_REFLECTION(NewtonBallAndSockect, ndJointSpherical)
 
-	NewtonBallAndSockect()
-		:ndJointSpherical()
+	NewtonBallAndSockect(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
+		:ndJointSpherical(pinAndPivotFrame, child, parent)
 	{
 	}
 };
@@ -56,13 +56,22 @@ NewtonJoint* NewtonConstraintCreateBall(const NewtonWorld* const newtonWorld,
 	const NewtonBody* const parentBody)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-	return nullptr;
-	//Newton* const world = (Newton*)newtonWorld;
-	//dgBody* const body0 = (dgBody*)childBody;
-	//dgBody* const body1 = (dgBody*)parentBody;
-	//dgVector pivot(pivotPoint[0], pivotPoint[1], pivotPoint[2], dgFloat32(0.0f));
-	//return (NewtonJoint*)world->CreateBallConstraint(pivot, body0, body1);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndBodyKinematic* const body0 = PointerCast<ndBody, NewtonBody>(childBody)->GetAsBodyKinematic();
+	ndBodyKinematic* const body1 = parentBody ? PointerCast<ndBody, NewtonBody>(parentBody)->GetAsBodyKinematic() : world->GetSentinelBody();
+	ndAssert(body0);
+	ndAssert(body1);
+	ndAssert(body0 != body1);
+
+	ndMatrix matrix(GetMatrix(pivotPoint));
+	matrix.m_front.m_w = ndFloat32(0.0f);
+	matrix.m_up.m_w = ndFloat32(0.0f);
+	matrix.m_right.m_w = ndFloat32(0.0f);
+	matrix.m_posit.m_w = ndFloat32(1.0f);
+
+	ndSharedPtr<ndJointBilateralConstraint> joint(new NewtonBallAndSockect(matrix, body0, body1));
+	world->AddJoint(joint);
+	return PointerCast< NewtonJoint, ndJointBilateralConstraint>(*joint);
 }
 
 /*!
