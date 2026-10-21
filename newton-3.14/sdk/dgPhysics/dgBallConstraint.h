@@ -31,7 +31,7 @@
 //template<class T>	class dgPool;
 
 class dgBallConstraint;
-typedef dgUnsigned32 (dgApi *dgBallJointFriction) (const dgBallConstraint& ball,dgFloat32 timestep);
+typedef dgUnsigned32 (dgApi *dgBallJointFriction) (const dgBallConstraint& ball, dgJointCallbackParam* param);
 
 class dgBallConstraint: public dgBilateralConstraint  
 {
@@ -50,6 +50,8 @@ class dgBallConstraint: public dgBilateralConstraint
 	bool GetLatealLimitState () const; 
 	void SetLatealLimitState (bool state); 
 
+	void SetCone(dgFloat32 maxConeAngle);
+	void SetTwistLinmits(dgFloat32 minTwistAngle, dgFloat32 maxTwistAngle);
 	
 	void SetLimits (const dgVector& coneDir, dgFloat32 minConeAngle, dgFloat32 maxConeAngle, dgFloat32 maxTwistAngle,
 		            const dgVector& bilateralDir, dgFloat32 negativeBilateralConeAngle, dgFloat32 positiveBilateralConeAngle);
@@ -63,7 +65,6 @@ class dgBallConstraint: public dgBilateralConstraint
 	virtual dgUnsigned32 JacobianDerivative (dgContraintDescritor& params); 
 	virtual void Serialize (dgSerialize serializeCallback, void* const userData) {dgAssert (0);}
 
-	
 	dgVector m_angles;
 	union {
 		unsigned m_ballLimits;

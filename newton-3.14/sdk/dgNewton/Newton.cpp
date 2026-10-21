@@ -6237,6 +6237,29 @@ void NewtonBallSetConeLimits(const NewtonJoint* const ball, const dFloat* pin, d
 	joint->SetLimits (coneAxis, -maxConeAngle, maxConeAngle, maxTwistAngle, lateral, 0.0f, 0.0f);
 }
 
+void NewtonBallEnableCone(const NewtonJoint* const ball, int state)
+{
+	dgBallConstraint* const joint = (dgBallConstraint*)ball;
+	joint->SetConeLimitState(state ? true : false);
+}
+
+void NewtonBallSetConeLimits1(const NewtonJoint* const ball, dFloat maxConeAngle)
+{
+	dgBallConstraint* const joint = (dgBallConstraint*)ball;
+	joint->SetCone(maxConeAngle);
+}
+
+void NewtonBallEnableTwist(const NewtonJoint* const ball, int state)
+{
+	dgBallConstraint* const joint = (dgBallConstraint*)ball;
+	joint->SetTwistLimitState(state ? true : false);
+}
+
+void NewtonBallSetTwistLimits(const NewtonJoint* const ball, dFloat minTwistAngle, dFloat maxTwistAngle)
+{
+	dgBallConstraint* const joint = (dgBallConstraint*)ball;
+	joint->SetTwistLinmits(minTwistAngle, maxTwistAngle);
+}
 
 /*!
   Set an update call back to be called when either of the two bodies linked by the joint is active.

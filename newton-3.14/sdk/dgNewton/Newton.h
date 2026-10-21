@@ -427,7 +427,8 @@ extern "C" {
 	typedef void (*NewtonJointIterator) (const NewtonJoint* const joint, void* const userData);
 	typedef void (*NewtonCollisionIterator) (void* const userData, int vertexCount, const dFloat* const faceArray, int faceId);
 
-	typedef void (*NewtonBallCallback) (const NewtonJoint* const ball, dFloat timestep);
+	//typedef void (*NewtonBallCallback) (const NewtonJoint* const ball, dFloat timestep);
+	typedef unsigned (*NewtonBallCallback) (const NewtonJoint* const ball, NewtonHingeSliderUpdateDesc* const desc);
 	typedef unsigned (*NewtonHingeCallback) (const NewtonJoint* const hinge, NewtonHingeSliderUpdateDesc* const desc);
 	typedef unsigned (*NewtonSliderCallback) (const NewtonJoint* const slider, NewtonHingeSliderUpdateDesc* const desc);
 	typedef unsigned (*NewtonUniversalCallback) (const NewtonJoint* const universal, NewtonHingeSliderUpdateDesc* const desc);
@@ -1102,6 +1103,14 @@ extern "C" {
 	NEWTON_API void NewtonBallGetJointOmega (const NewtonJoint* const ball, dFloat* omega);
 	NEWTON_API void NewtonBallGetJointForce (const NewtonJoint* const ball, dFloat* const force);
 	NEWTON_API void NewtonBallSetConeLimits (const NewtonJoint* const ball, const dFloat* pin, dFloat maxConeAngle, dFloat maxTwistAngle);
+
+	// forward for 3.15
+	NEWTON_API void NewtonBallEnableCone(const NewtonJoint* const ball, int state);
+	NEWTON_API void NewtonBallSetConeLimits1(const NewtonJoint* const ball, dFloat maxConeAngle);
+
+	NEWTON_API void NewtonBallEnableTwist(const NewtonJoint* const ball, int state);
+	NEWTON_API void NewtonBallSetTwistLimits(const NewtonJoint* const ball, dFloat minTwistAngle, dFloat maxTwistAngle);
+
 
 	// **********************************************************************************************
 	//

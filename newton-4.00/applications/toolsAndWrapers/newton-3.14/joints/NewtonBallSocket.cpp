@@ -32,118 +32,15 @@ class NewtonBallAndSockect: public ndJointSpherical
 	public:
 	D_CLASS_REFLECTION(NewtonBallAndSockect, ndJointSpherical)
 
+	//typedef void (*NewtonBallCallback) (const NewtonJoint* const joint,  dFloat timestep);
+
 	NewtonBallAndSockect(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 		:ndJointSpherical(pinAndPivotFrame, child, parent)
 	{
 	}
+	//NewtonBallCallback m_callback;
 };
 
-/*!
-  Create a ball an socket joint.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param *pivotPoint is origin of ball and socket in global space.
-  @param *childBody is the pointer to the attached rigid body, this body can not be NULL or it can not have an infinity (zero) mass.
-  @param *parentBody is the pointer to the parent rigid body, this body can be NULL or any kind of rigid body.
-
-  @return Pointer to the ball and socket joint.
-
-  This function creates a ball and socket and add it to the world. By default joint disables collision with the linked bodies.
-*/
-NewtonJoint* NewtonConstraintCreateBall(const NewtonWorld* const newtonWorld,
-	const dFloat* pivotPoint,
-	const NewtonBody* const childBody,
-	const NewtonBody* const parentBody)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
-	ndBodyKinematic* const body0 = PointerCast<ndBody, NewtonBody>(childBody)->GetAsBodyKinematic();
-	ndBodyKinematic* const body1 = parentBody ? PointerCast<ndBody, NewtonBody>(parentBody)->GetAsBodyKinematic() : world->GetSentinelBody();
-	ndAssert(body0);
-	ndAssert(body1);
-	ndAssert(body0 != body1);
-
-	ndMatrix matrix(GetMatrix(pivotPoint));
-	matrix.m_front.m_w = ndFloat32(0.0f);
-	matrix.m_up.m_w = ndFloat32(0.0f);
-	matrix.m_right.m_w = ndFloat32(0.0f);
-	matrix.m_posit.m_w = ndFloat32(1.0f);
-
-	ndSharedPtr<ndJointBilateralConstraint> joint(new NewtonBallAndSockect(matrix, body0, body1));
-	world->AddJoint(joint);
-	return PointerCast< NewtonJoint, ndJointBilateralConstraint>(*joint);
-}
-
-/*!
-  Set the ball and socket cone and twist limits.
-
-  @param *ball is the pointer to a ball and socket joint.
-  @param *pin pointer to a unit vector defining the cone axis in global space.
-  @param maxConeAngle max angle in radians the attached body is allow to swing relative to the pin axis, a value of zero will disable this limits.
-  @param maxTwistAngle max angle in radians the attached body is allow to twist relative to the pin axis, a value of zero will disable this limits.
-
-  limits are disabled at creation time. A value of zero for *maxConeAngle* disable the cone limit, a value of zero for *maxTwistAngle* disable the twist limit
-  all non-zero value for *maxConeAngle* are clamped between 5 degree and 175 degrees
-
-  See also: ::NewtonConstraintCreateBall
-*/
-void NewtonBallSetConeLimits(const NewtonJoint* const ball, const dFloat* pin, dFloat maxConeAngle, dFloat maxTwistAngle)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-	//dgBallConstraint* const joint = (dgBallConstraint*)ball;
-	//
-	//dgVector coneAxis(pin[0], pin[1], pin[2], dgFloat32(0.0f));
-	//
-	//if (coneAxis.DotProduct(coneAxis).GetScalar() < 1.0e-3f) {
-	//	coneAxis.m_x = dgFloat32(1.0f);
-	//}
-	//dgVector tmp(dgFloat32(1.0f), dgFloat32(0.0f), dgFloat32(0.0f), dgFloat32(0.0f));
-	//if (dgAbs(tmp.DotProduct(coneAxis).GetScalar()) > dgFloat32(0.999f)) {
-	//	tmp = dgVector(dgFloat32(0.0f), dgFloat32(1.0f), dgFloat32(0.0f), dgFloat32(0.0f));
-	//	if (dgAbs(tmp.DotProduct(coneAxis).GetScalar()) > dgFloat32(0.999f)) {
-	//		tmp = dgVector(dgFloat32(0.0f), dgFloat32(0.0f), dgFloat32(1.0f), dgFloat32(0.0f));
-	//		dgAssert(dgAbs(tmp.DotProduct(coneAxis).GetScalar()) < dgFloat32(0.999f));
-	//	}
-	//}
-	//dgVector lateral(tmp.CrossProduct(coneAxis));
-	//dgAssert(lateral.m_w == dgFloat32(0.0f));
-	//dgAssert(coneAxis.m_w == dgFloat32(0.0f));
-	//lateral = lateral.Normalize();
-	//coneAxis = coneAxis.Normalize();
-	//
-	//maxConeAngle = dgAbs(maxConeAngle);
-	//maxTwistAngle = dgAbs(maxTwistAngle);
-	//joint->SetConeLimitState((maxConeAngle > dgDegreeToRad) ? true : false);
-	//joint->SetTwistLimitState((maxTwistAngle > dgDegreeToRad) ? true : false);
-	//joint->SetLatealLimitState(false);
-	//joint->SetLimits(coneAxis, -maxConeAngle, maxConeAngle, maxTwistAngle, lateral, 0.0f, 0.0f);
-}
-
-
-/*!
-  Set an update call back to be called when either of the two bodies linked by the joint is active.
-
-  @param *ball pointer to the joint.
-  @param callback pointer to the joint function call back.
-
-  @return nothing.
-
-  if the application wants to have some feedback from the joint simulation, the application can register a function
-  update callback to be called every time any of the bodies linked by this joint is active. This is useful to provide special
-  effects like particles, sound or even to simulate breakable moving parts.
-
-  See also: ::NewtonJointSetUserData
-*/
-void NewtonBallSetUserCallback(const NewtonJoint* const ball, NewtonBallCallback callback)
-{
-	ndAssert(0);
-	//dgBallConstraint* contraint;
-	//
-	//TRACE_FUNCTION(__FUNCTION__);
-	//contraint = (dgBallConstraint*)ball;
-	//contraint->SetJointParameterCallback((dgBallJointFriction)callback);
-}
 
 
 /*!
@@ -159,7 +56,7 @@ void NewtonBallSetUserCallback(const NewtonJoint* const ball, NewtonBallCallback
 
   See also: ::NewtonBallSetUserCallback
 */
-void NewtonBallGetJointAngle(const NewtonJoint* const ball, dFloat* angle)
+void NewtonBallGetJointAngle(const NewtonJoint* const joint,  dFloat* angle)
 {
 	ndAssert(0);
 	//dgBallConstraint* contraint;
@@ -186,7 +83,7 @@ void NewtonBallGetJointAngle(const NewtonJoint* const ball, dFloat* angle)
 
   See also: ::NewtonBallSetUserCallback
 */
-void NewtonBallGetJointOmega(const NewtonJoint* const ball, dFloat* omega)
+void NewtonBallGetJointOmega(const NewtonJoint* const joint,  dFloat* omega)
 {
 	ndAssert(0);
 	//dgBallConstraint* contraint;
@@ -212,7 +109,7 @@ void NewtonBallGetJointOmega(const NewtonJoint* const ball, dFloat* omega)
 
   See also: ::NewtonBallSetUserCallback
 */
-void NewtonBallGetJointForce(const NewtonJoint* const ball, dFloat* const force)
+void NewtonBallGetJointForce(const NewtonJoint* const joint,  dFloat* const force)
 {
 	ndAssert(0);
 	//// fixme: type? "constraint" instead of "contraint"?
@@ -225,3 +122,113 @@ void NewtonBallGetJointForce(const NewtonJoint* const ball, dFloat* const force)
 	//force[1] = forceVector.m_y;
 	//force[2] = forceVector.m_z;
 }
+
+
+/*!
+  Create a ball an socket joint.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param *pivotPoint is origin of ball and socket in global space.
+  @param *childBody is the pointer to the attached rigid body, this body can not be NULL or it can not have an infinity (zero) mass.
+  @param *parentBody is the pointer to the parent rigid body, this body can be NULL or any kind of rigid body.
+
+  @return Pointer to the ball and socket joint.
+
+  This function creates a ball and socket and add it to the world. By default joint disables collision with the linked bodies.
+*/
+NewtonJoint* NewtonConstraintCreateBall(const NewtonWorld* const newtonWorld,
+	const dFloat* pivotPoint,
+	const NewtonBody* const childBody,
+	const NewtonBody* const parentBody)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndBodyKinematic* const body0 = PointerCast<ndBody, NewtonBody>(childBody)->GetAsBodyKinematic();
+	ndBodyKinematic* const body1 = parentBody ? PointerCast<ndBody, NewtonBody>(parentBody)->GetAsBodyKinematic() : world->GetSentinelBody();
+	ndAssert(body0);
+	ndAssert(body1);
+	ndAssert(body0 != body1);
+
+	const ndVector pivot(pivotPoint[0], pivotPoint[1], pivotPoint[2], ndFloat32(0.0f));
+	const ndMatrix& bodyMatrix = body0->GetMatrix();
+
+	ndVector pin(ndVector::m_triplexMask & (pivot - bodyMatrix.m_posit));
+	if (pin.DotProduct(pin).GetScalar() < ndFloat32(1.0e-3f)) 
+	{
+		pin = bodyMatrix.m_front;
+	}
+	ndMatrix matrix(ndGramSchmidtMatrix(pin));
+	matrix.m_posit = pivot;
+	matrix.m_posit.m_w = ndFloat32(1.0f);
+	ndSharedPtr<ndJointBilateralConstraint> joint(new NewtonBallAndSockect(matrix, body0, body1));
+	world->AddJoint(joint);
+	return PointerCast< NewtonJoint, ndJointBilateralConstraint>(*joint);
+}
+
+/*!
+  Set an update call back to be called when either of the two bodies linked by the joint is active.
+
+  @param *ball pointer to the joint.
+  @param callback pointer to the joint function call back.
+
+  @return nothing.
+
+  if the application wants to have some feedback from the joint simulation, the application can register a function
+  update callback to be called every time any of the bodies linked by this joint is active. This is useful to provide special
+  effects like particles, sound or even to simulate breakable moving parts.
+
+  See also: ::NewtonJointSetUserData
+*/
+void NewtonBallSetUserCallback(const NewtonJoint* const joint, NewtonBallCallback callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
+}
+
+/*!
+  Set the ball and socket cone and twist limits.
+
+  @param *ball is the pointer to a ball and socket joint.
+  @param *pin pointer to a unit vector defining the cone axis in global space.
+  @param maxConeAngle max angle in radians the attached body is allow to swing relative to the pin axis, a value of zero will disable this limits.
+  @param maxTwistAngle max angle in radians the attached body is allow to twist relative to the pin axis, a value of zero will disable this limits.
+
+  limits are disabled at creation time. A value of zero for *maxConeAngle* disable the cone limit, a value of zero for *maxTwistAngle* disable the twist limit
+  all non-zero value for *maxConeAngle* are clamped between 5 degree and 175 degrees
+
+  See also: ::NewtonConstraintCreateBall
+*/
+void NewtonBallSetConeLimits(const NewtonJoint* const joint, const dFloat* pin, dFloat maxConeAngle, dFloat maxTwistAngle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
+}
+
+void NewtonBallEnableCone(const NewtonJoint* const joint, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonBallAndSockect* const userJoint = PointerCast<NewtonBallAndSockect, NewtonJoint>(joint);
+	userJoint->SetConeLimitState(state ? true : false);
+}
+
+void NewtonBallSetConeLimits1(const NewtonJoint* const joint, dFloat maxConeAngle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonBallAndSockect* const userJoint = PointerCast<NewtonBallAndSockect, NewtonJoint>(joint);
+	userJoint->SetConeLimit(maxConeAngle);
+}
+
+void NewtonBallEnableTwist(const NewtonJoint* const joint, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonBallAndSockect* const userJoint = PointerCast<NewtonBallAndSockect, NewtonJoint>(joint);
+	userJoint->SetTwistLimitState(state ? true : false);
+}
+
+void NewtonBallSetTwistLimits(const NewtonJoint* const joint, dFloat minTwistAngle, dFloat maxTwistAngle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonBallAndSockect* const userJoint = PointerCast<NewtonBallAndSockect, NewtonJoint>(joint);
+	userJoint->SetTwistLimits(minTwistAngle, maxTwistAngle);
+}
+

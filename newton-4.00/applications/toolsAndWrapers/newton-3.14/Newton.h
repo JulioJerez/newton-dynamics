@@ -1253,6 +1253,12 @@ extern "C" {
 	NEWTON_API void NewtonBallGetJointForce(const NewtonJoint* const ball, dFloat* const force);
 	NEWTON_API void NewtonBallSetConeLimits(const NewtonJoint* const ball, const dFloat* pin, dFloat maxConeAngle, dFloat maxTwistAngle);
 
+	NEWTON_API void NewtonBallEnableCone(const NewtonJoint* const ball, int state);
+	NEWTON_API void NewtonBallSetConeLimits1(const NewtonJoint* const ball, dFloat maxConeAngle);
+
+	NEWTON_API void NewtonBallEnableTwist(const NewtonJoint* const ball, int state);
+	NEWTON_API void NewtonBallSetTwistLimits(const NewtonJoint* const ball, dFloat minTwistAngle, dFloat maxTwistAngle);
+
 
 #ifdef __cplusplus 
 }
