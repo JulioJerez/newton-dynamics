@@ -358,7 +358,7 @@ void ndShapeInstance::SavePLY(const char* const fileName) const
 		{
 		}
 
-		virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceVertex, const ndEdgeType* const)
+		virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceVertex, const ndEdgeType* const) override
 		{
 			m_faceVertexCount.PushBack(vertexCount);
 			for (ndInt32 i = 0; i < vertexCount; ++i)

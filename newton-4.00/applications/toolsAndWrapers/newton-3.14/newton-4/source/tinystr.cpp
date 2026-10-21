@@ -23,7 +23,7 @@ distribution.
 */
 
 /*
- * THIS FILE WAS ALTERED BY Tyge Løvset, 7. April 2005.
+ * THIS FILE WAS ALTERED BY Tyge Lovset, 7. April 2005.
  */
 
 #include "ndCoreStdafx.h"
@@ -47,44 +47,44 @@ namespace nd
 	// Null rep.
 	TiXmlString::Rep TiXmlString::nullrep_ = { 0, 0, { '\0' } };
 
-	static void* __alloc__(size_t size)
+	static void* defualtAlloc(size_t size)
 	{
 		return ndMemory::Malloc(size);
 	}
 
-	static void __free__(void* const ptr)
+	static void defaultFree(void* const ptr)
 	{
 		return ndMemory::Free(ptr);
 	}
 
 	void *TiXmlString::operator new (size_t size)
 	{
-		return __alloc__(size);
+		return defualtAlloc(size);
 	}
 
 	void *TiXmlString::operator new[](size_t size)
 	{
-		return __alloc__(size);
+		return defualtAlloc(size);
 	}
 
 	void TiXmlString::operator delete (void* ptr)
 	{
-		__free__(ptr);
+		defaultFree(ptr);
 	}
 
 	void TiXmlString::operator delete[](void* ptr)
 	{
-		__free__(ptr);
+		defaultFree(ptr);
 	}
 
 	void* TiXmlString::Malloc(size_type size)
 	{
-		return __alloc__(size);
+		return defualtAlloc(size);
 	}
 
 	void TiXmlString::Free(void* ptr)
 	{
-		__free__(ptr);
+		defaultFree(ptr);
 	}
 
 	void TiXmlString::reserve (size_type cap)

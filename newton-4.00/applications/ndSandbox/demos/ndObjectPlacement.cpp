@@ -55,7 +55,7 @@ class ndObjectPlacementCamera : public ndDemoCameraNode
 			world.ConvexCast(*this, shape, origin, end);
 		}
 
-		virtual ndUnsigned32 OnRayPrecastAction(const ndBody* const, const ndShapeInstance* const)
+		virtual ndUnsigned32 OnRayPrecastAction(const ndBody* const, const ndShapeInstance* const) override
 		{
 			return 1;
 		}

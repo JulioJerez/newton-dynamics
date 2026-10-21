@@ -155,7 +155,7 @@ namespace ndUnicycleTrainer_sac
 			scene->AddEntity(visualMesh);
 		}
 
-		~TrainingUpdata()
+		~TrainingUpdata() override
 		{
 			if (m_outFile)
 			{
@@ -184,12 +184,12 @@ namespace ndUnicycleTrainer_sac
 			return model;
 		}
 
-		void OnDebug(ndDemoEntityManager* const, bool)
+		void OnDebug(ndDemoEntityManager* const, bool) override
 		{
 		}
 
 		//#pragma optimize( "", off )
-		virtual void Update(ndDemoEntityManager* const manager, ndFloat32)
+		virtual void Update(ndDemoEntityManager* const manager, ndFloat32) override
 		{
 			ndInt32 stopTraining = ndInt32(m_master->GetFramesCount());
 			if (stopTraining <= m_stopTraining)

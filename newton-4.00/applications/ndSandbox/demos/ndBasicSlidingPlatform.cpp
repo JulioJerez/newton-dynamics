@@ -42,9 +42,8 @@ class SimpleConveyorFloor : public ndModel
 				Attach(parent);
 			}
 		}
-		virtual ~ndNode()
+		virtual ~ndNode() override
 		{
-
 		}
 
 		ndSharedPtr<ndBody> m_body;
@@ -65,7 +64,7 @@ class SimpleConveyorFloor : public ndModel
 	{
 	}
 
-	virtual ~SimpleConveyorFloor()
+	virtual ~SimpleConveyorFloor() override
 	{
 		if (m_rootNode)
 			delete m_rootNode;

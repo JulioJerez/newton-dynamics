@@ -168,7 +168,7 @@ namespace ndUnicycleTrainer_ppo
 			}
 		}
 
-		~TrainingUpdata()
+		~TrainingUpdata() override
 		{
 			if (m_outFile)
 			{
@@ -202,11 +202,11 @@ namespace ndUnicycleTrainer_ppo
 			return model;
 		}
 
-		void OnDebug(ndDemoEntityManager* const, bool)
+		void OnDebug(ndDemoEntityManager* const, bool) override
 		{
 		}
 
-		virtual void Update(ndDemoEntityManager* const manager, ndFloat32)
+		virtual void Update(ndDemoEntityManager* const manager, ndFloat32) override
 		{
 			ndUnsigned32 stopTraining = m_master->GetFramesCount();
 			if (stopTraining <= m_stopTraining)

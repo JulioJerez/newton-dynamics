@@ -747,10 +747,10 @@ void SoftBodies(DemoEntityManager* const scene)
 
 	dVector location(0.0f, 6.0f, 0.0f, 0.0f);
 
-	SimpleSoftBodyEntity* const entity = new SimpleSoftBodyEntity(scene, location);
-	//entity->BuildRegularTetrahedra(scene, 0);
-	//entity->LoadTetrahedraCube (scene, 0);
-	entity->CreateTetrahedraPrimitive (scene, 0);
+	//SimpleSoftBodyEntity* const entity = new SimpleSoftBodyEntity(scene, location);
+	////entity->BuildRegularTetrahedra(scene, 0);
+	////entity->LoadTetrahedraCube (scene, 0);
+	//entity->CreateTetrahedraPrimitive (scene, 0);
 
 	dQuaternion rot;
 	dVector origin(location.m_x - 10.0f, 2.0f, location.m_z, 0.0f);
@@ -769,9 +769,9 @@ void ClothPatch(DemoEntityManager* const scene)
 	//	dVector location (8.0f, 0.0f, -10.0f, 0.0f) ;
 	dVector location(0.0f, 5.0f, 0.0f, 0.0f);
 
-	SimpleSoftBodyEntity* const entity = new SimpleSoftBodyEntity(scene, location);
-	//entity->BuildClothPatch(scene, 50, 50);
-	entity->BuildClothPatch(scene, 16, 16);
+	//SimpleSoftBodyEntity* const entity = new SimpleSoftBodyEntity(scene, location);
+	////entity->BuildClothPatch(scene, 50, 50);
+	//entity->BuildClothPatch(scene, 16, 16);
 
 	dQuaternion rot;
 	dVector origin(location.m_x - 10.0f, 2.0f, location.m_z, 0.0f);

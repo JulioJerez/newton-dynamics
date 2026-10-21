@@ -69,7 +69,7 @@ bool ndDemoCameraNode::UpdatePickBody()
 				{
 				}
 
-				ndFloat32 OnRayCastAction(const ndContactPoint& contact, ndFloat32 intersetParam)
+				ndFloat32 OnRayCastAction(const ndContactPoint& contact, ndFloat32 intersetParam) override
 				{
 					if (contact.m_body0->GetInvMass() == ndFloat32(0.0f))
 					{

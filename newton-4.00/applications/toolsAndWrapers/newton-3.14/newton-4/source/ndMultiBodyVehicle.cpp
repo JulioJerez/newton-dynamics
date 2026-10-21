@@ -1116,7 +1116,7 @@ void ndMultiBodyVehicle::CalculateCrowndGear()
 
 			driveTrainGearRatio = ndFloat32(1.0f) / (driveTrainGearRatio * gearBoxRatio);
 			ndFloat32 tireSpeed = tireRadios * motorMaxOmega * driveTrainGearRatio;
-			gearBox.m_crownGearRatio = tireSpeed / vehicleTopSpeed;
+			gearBox.m_crownGearRatio = ndReal(tireSpeed / vehicleTopSpeed);
 		};
 
 			

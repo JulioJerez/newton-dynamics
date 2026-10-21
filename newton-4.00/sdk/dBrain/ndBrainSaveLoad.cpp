@@ -54,7 +54,7 @@ ndBrain* ndBrainLoad::Load(const char* const pathName)
 			ndAssert(m_file);
 		}
 
-		~Loader()
+		~Loader() override
 		{
 			if (m_file)
 			{
@@ -62,7 +62,7 @@ ndBrain* ndBrainLoad::Load(const char* const pathName)
 			}
 		}
 
-		ndInt32 ReadInt() const
+		ndInt32 ReadInt() const override
 		{
 			ndInt32 value;
 			size_t readValues = 0;
@@ -70,7 +70,7 @@ ndBrain* ndBrainLoad::Load(const char* const pathName)
 			return value;
 		}
 
-		ndFloat32 ReadFloat() const
+		ndFloat32 ReadFloat() const override
 		{
 			ndReal value;
 			size_t readValues = 0;
@@ -78,7 +78,7 @@ ndBrain* ndBrainLoad::Load(const char* const pathName)
 			return ndFloat32 (value);
 		}
 
-		void ReadString(char* const buffer) const
+		void ReadString(char* const buffer) const override
 		{
 			size_t readValues = 0;
 			readValues += fscanf(m_file, "%s", buffer);
@@ -225,7 +225,7 @@ void ndBrainSave::Save(const ndBrain* const brain, const char* const pathName)
 			ndAssert(m_file);
 		}
 
-		~SaveAgent()
+		~SaveAgent() override
 		{
 			if (m_file)
 			{
@@ -233,7 +233,7 @@ void ndBrainSave::Save(const ndBrain* const brain, const char* const pathName)
 			}
 		}
 
-		void WriteData(const char* const data) const
+		void WriteData(const char* const data) const override
 		{
 			//ndInt32 error = 0;
 			//error = fprintf(m_file, "%s", data);

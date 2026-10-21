@@ -353,10 +353,10 @@ int NewtonCollisionClosestPoint(const NewtonWorld* const newtonWorld,
 
 	ndMatrix matrixA(GetMatrix(matrixPtrA));
 	ndMatrix matrixB(GetMatrix(matrixPtrB));
-	ndContactSolver solver;
+	ndContactSolver solver(*shapeA, *shapeB);
 	
 	ndContactNotify notification(world->GetScene());
-	solver.CalculateClosestPoints(shapeA, matrixA, shapeB, matrixB, &notification);
+	solver.CalculateClosestPoints(matrixA, matrixB, &notification);
 
 	const ndVector pointA(solver.GetClosetVector0());
 	const ndVector pointB(solver.GetClosetVector1());
@@ -443,209 +443,13 @@ int NewtonCollisionIntersectionTest(const NewtonWorld* const newtonWorld, const 
 
 	ndMatrix matrixA(GetMatrix(matrixPtrA));
 	ndMatrix matrixB(GetMatrix(matrixPtrB));
-	ndContactSolver solver;
+	ndContactSolver solver(*shapeA, *shapeB);
 
 	ndVector veloc(ndVector::m_zero);
 	ndFixSizeArray<ndContactPoint, 16> contactPoints;
 	ndContactNotify notification(world->GetScene());
-	return solver.CollisionTest(shapeA, matrixA, veloc, shapeB, matrixB, veloc, &notification) ? 1 : 0;
+	return solver.CollisionTest(matrixA, veloc, matrixB, veloc, &notification) ? 1 : 0;
 }
-
-/*!
-  Shoot ray from point p0 to p1 and trigger callback for each body on that line.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param *p0 - pointer to an array of at least three floats containing the beginning of the ray in global space.
-  @param *p1 - pointer to an array of at least three floats containing the end of the ray in global space.
-  @param filter Callback function for each hit during the ray scan.
-  @param *userData user data to pass along to the filter callback.
-  @param prefilter user defined function to be called for each body before intersection.
-  @param threadIndex Index of thread that called this function (zero if called form outsize a newton update).
-
-  @return nothing
-
-  The ray cast function will trigger the callback for every intersection between
-  the line segment (from p0 to p1) and a body in the world.
-
-  By writing the callback filter function in different ways the application can
-  implement different flavors of ray casting. For example an all body ray cast
-  can be easily implemented by having the filter function always returning 1.0,
-  and copying each rigid body into an array of pointers; a closest hit ray cast
-  can be implemented by saving the body with the smaller intersection parameter
-  and returning the parameter t; and a report the first body hit can be
-  implemented by having the filter function returning zero after the first call
-  and saving the pointer to the rigid body.
-
-  The most common use for the ray cast function is the closest body hit, In this
-  case it is important, for performance reasons, that the filter function
-  returns the intersection parameter. If the filter function returns a value of
-  zero the ray cast will terminate immediately.
-
-  if prefilter is not NULL, Newton will call the application right before
-  executing the intersections between the ray and the primitive. if the function
-  returns zero the Newton will not ray cast the primitive. passing a NULL
-  pointer will ray cast the. The application can use this implement faster or
-  smarter filters when implementing complex logic, otherwise for normal all ray
-  cast this parameter could be NULL.
-
-  The ray cast function is provided as an utility function, this means that even
-  thought the function is very high performance by function standards, it can
-  not by batched and therefore it can not be an incremental function. For
-  example the cost of calling 1000 ray cast is 1000 times the cost of calling
-  one ray cast. This is much different than the collision system where the cost
-  of calculating collision for 1000 pairs in much, much less that the 1000 times
-  the cost of one pair. Therefore this function must be used with care, as
-  excessive use of it can degrade performance.
-
-  See also: ::NewtonWorldConvexCast
-*/
-void NewtonWorldRayCast(const NewtonWorld* const newtonWorld, const dFloat* const p0, const dFloat* const p1, NewtonWorldRayFilterCallback filter, void* const userData, NewtonWorldRayPrefilterCallback prefilter, int threadIndex)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	if (filter)
-	{
-		class WorldRayCast : public ndRayCastClosestHitCallback
-		{
-			public:
-			WorldRayCast(ndNewtonWorld* const world, void* const userData, NewtonWorldRayFilterCallback filter, NewtonWorldRayPrefilterCallback prefilter)
-				:ndRayCastClosestHitCallback()
-				,m_userData(userData)
-				,m_world(world)
-				,m_filter(filter)
-				,m_prefilter(prefilter)
-			{
-			}
-
-			ndUnsigned32 OnRayPrecastAction(const ndBody* const body, const ndShapeInstance* const instance) override
-			{
-				if (m_prefilter)
-				{
-					return m_prefilter(PointerCast<NewtonBody, ndBody>(body), PointerCast<NewtonCollision, ndShapeInstance>(instance), m_userData);
-				}
-				return true;
-			}
-
-			ndFloat32 OnRayCastAction(const ndContactPoint& contact, ndFloat32 intersetParam) override
-			{
-				if (m_filter)
-				{
-					intersetParam = m_filter(PointerCast<NewtonBody, ndBody>(contact.m_body0), PointerCast<NewtonCollision, ndShapeInstance>(contact.m_shapeInstance0), &intersetParam, &contact.m_normal[0], contact.m_shapeId0, m_userData, intersetParam);
-				}
-				return intersetParam;
-			}
-
-			void* m_userData;
-			ndNewtonWorld* m_world;
-			NewtonWorldRayFilterCallback m_filter;
-			NewtonWorldRayPrefilterCallback m_prefilter;
-		};
-
-		ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
-		WorldRayCast rayCaster(world, userData, filter, prefilter);
-		const ndVector pp0(p0[0], p0[1], p0[2], ndFloat32(0.0f));
-		const ndVector pp1(p1[0], p1[1], p1[2], ndFloat32(0.0f));
-		world->RayCast(rayCaster, pp0, pp1);
-	}
-}
-
-/*!
-  cast a simple convex shape along the ray that goes for the matrix position to the destination and get the firsts contacts of collision.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param *matrix pointer to an array of at least three floats containing the beginning and orienetaion of the shape in global space.
-  @param *target pointer to an array of at least three floats containing the end of the ray in global space.
-  @param shape collision shap[e use to cat the ray.
-  @param param pointe to a variable the will contart the time to closet aproah to the collision.
-  @param *userData user data to be passed to the prefilter callback.
-  @param prefilter user define function to be called for each body before intersection.
-  @param *info pointer to an array of contacts at the point of intesections.
-  @param maxContactsCount maximun number of contacts to be conclaculated, the variable sould be initialized to the capaciaty of *info*
-  @param threadIndex thread index from whe thsi function is called, zero if call form outsize a newton update
-
-  @return the number of contact at the intesection point (a value equal o lower than maxContactsCount.
-  variable *hitParam* will be set the uintesation parameter an the momen of impact.
-
-  passing and value of NULL in *info* an dzero in maxContactsCount will turn thos function into a spcial Ray cast
-  where the function will only calculate the *hitParam* at the momenet of contacts. tshi si one of the most effiecnet way to use thsio function.
-
-  these function is similar to *NewtonWorldRayCast* but instead of casting a point it cast a simple convex shape along a ray for maoprix.m_poit
-  to target position. the shape is global orientation and position is set to matrix and then is swept along the segment to target and it will stop at the very first intersession contact.
-
-  for case where the application need to cast solid short to medium rays, it is better to use this function instead of casting and array of parallel rays segments.
-  examples of these are: implementation of ray cast cars with cylindrical tires, foot placement of character controllers, kinematic motion of objects, user controlled continuous collision, etc.
-  this function may not be as efficient as sampling ray for long segment, for these cases try using parallel ray cast.
-
-  The most common use for the ray cast function is the closest body hit, In this case it is important, for performance reasons,
-  that the filter function returns the intersection parameter. If the filter function returns a value of zero the ray cast will terminate
-  immediately.
-
-  if prefilter is not NULL, Newton will call the application right before executing the intersections between the ray and the primitive.
-  if the function returns zero the Newton will not ray cast the primitive.
-  The application can use this callback to implement faster or smarter filters when implementing complex logic, otherwise for normal all ray cast
-  this parameter could be NULL.
-
-  See also: ::NewtonWorldRayCast
-*/
-int NewtonWorldConvexCast(const NewtonWorld* const newtonWorld, const dFloat* const matrixPtr, const dFloat* const target, const NewtonCollision* const shape,
-	dFloat* const param, void* const userData, NewtonWorldRayPrefilterCallback prefilter, NewtonWorldConvexCastReturnInfo* const info,
-	int maxContactsCount, int threadIndex)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	class ndConvexCast : public ndConvexCastNotify
-	{
-		public:
-		typedef unsigned (*NewtonWorldRayPrefilterCallback)(const NewtonBody* const body, const NewtonCollision* const collision, void* const userData);
-
-		ndConvexCast(ndNewtonWorld* const world, const ndMatrix& origin, const ndVector& dst, const ndShapeInstance& shape,
-			NewtonWorldRayPrefilterCallback prefilter, void* const userData)
-			:ndConvexCastNotify()
-			,m_world(world)
-			,m_onFilter(prefilter)
-			,m_userData(userData)
-		{
-			world->ConvexCast(*this, shape, origin, dst);
-		}
-
-		virtual ndUnsigned32 OnRayPrecastAction(const ndBody* const bodyPtr, const ndShapeInstance* const collision)
-		{
-			if (m_onFilter)
-			{
-				NewtonBody* const body = PointerCast<NewtonBody, ndBody>(bodyPtr);
-				NewtonCollision* const instance = PointerCast<NewtonCollision, ndShapeInstance>(collision);
-				return m_onFilter(body, instance, *m_userData);
-			}
-			return 1;
-		}
-
-		ndWeakPtr<void> m_userData;
-		ndWeakPtr<ndNewtonWorld> m_world;
-		NewtonWorldRayPrefilterCallback m_onFilter;
-	};
-
-	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
-	const ndMatrix matrix(matrixPtr);
-	const ndVector destination(target[0], target[1], target[2], ndFloat32(0.0f));
-
-	ndAssert(matrix.TestOrthogonal());
-	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(shape);
-	ndAssert(instance->GetShape()->GetAsShapeConvex());
-	ndConvexCast caster(PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld), matrix, destination, *instance, prefilter, userData);
-	*param = caster.m_param;
-
-	const ndInt32 contactCount = ndMin(caster.m_contacts.GetCount(), maxContactsCount);
-	for (ndInt32 i = 0; i < contactCount; ++i)
-	{
-		info[i].m_contactID = caster.m_contacts[i].m_shapeId0;
-		info[i].m_hitBody = PointerCast<NewtonBody, ndBody>(caster.m_contacts[i].m_body0);
-		for (ndInt32 j = 0; j < 4; ++j)
-		{
-			info[i].m_point[j] = caster.m_contacts[i].m_point[j];
-			info[i].m_normal[j] = caster.m_contacts[i].m_normal[j];
-		}
-	}
-	return contactCount;
-}
-
 
 /*!
   Ray cast specific collision object.
@@ -783,22 +587,264 @@ NewtonJoint* NewtonWorldFindJoint(const NewtonBody* const body0, const NewtonBod
 	return nullptr;
 }
 
-int NewtonWorldCollide(const NewtonWorld* const newtonWorld, const dFloat* const matrixPtr, const NewtonCollision* const collision, void* const userData,
-	NewtonWorldRayPrefilterCallback prefilter, NewtonWorldConvexCastReturnInfo* const info, int maxContactsCount, int threadIndex)
+
+/*!
+  Shoot ray from point p0 to p1 and trigger callback for each body on that line.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param *p0 - pointer to an array of at least three floats containing the beginning of the ray in global space.
+  @param *p1 - pointer to an array of at least three floats containing the end of the ray in global space.
+  @param filter Callback function for each hit during the ray scan.
+  @param *userData user data to pass along to the filter callback.
+  @param prefilter user defined function to be called for each body before intersection.
+  @param threadIndex Index of thread that called this function (zero if called form outsize a newton update).
+
+  @return nothing
+
+  The ray cast function will trigger the callback for every intersection between
+  the line segment (from p0 to p1) and a body in the world.
+
+  By writing the callback filter function in different ways the application can
+  implement different flavors of ray casting. For example an all body ray cast
+  can be easily implemented by having the filter function always returning 1.0,
+  and copying each rigid body into an array of pointers; a closest hit ray cast
+  can be implemented by saving the body with the smaller intersection parameter
+  and returning the parameter t; and a report the first body hit can be
+  implemented by having the filter function returning zero after the first call
+  and saving the pointer to the rigid body.
+
+  The most common use for the ray cast function is the closest body hit, In this
+  case it is important, for performance reasons, that the filter function
+  returns the intersection parameter. If the filter function returns a value of
+  zero the ray cast will terminate immediately.
+
+  if prefilter is not NULL, Newton will call the application right before
+  executing the intersections between the ray and the primitive. if the function
+  returns zero the Newton will not ray cast the primitive. passing a NULL
+  pointer will ray cast the. The application can use this implement faster or
+  smarter filters when implementing complex logic, otherwise for normal all ray
+  cast this parameter could be NULL.
+
+  The ray cast function is provided as an utility function, this means that even
+  thought the function is very high performance by function standards, it can
+  not by batched and therefore it can not be an incremental function. For
+  example the cost of calling 1000 ray cast is 1000 times the cost of calling
+  one ray cast. This is much different than the collision system where the cost
+  of calculating collision for 1000 pairs in much, much less that the 1000 times
+  the cost of one pair. Therefore this function must be used with care, as
+  excessive use of it can degrade performance.
+
+  See also: ::NewtonWorldConvexCast
+*/
+void NewtonWorldRayCast(const NewtonWorld* const newtonWorld, const dFloat* const p0, const dFloat* const p1, NewtonWorldRayFilterCallback filter, void* const userData, NewtonWorldRayPrefilterCallback prefilter, int threadIndex)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndMatrix matrix(GetMatrix(matrixPtr));
+	if (filter)
+	{
+		class WorldRayCast : public ndRayCastClosestHitCallback
+		{
+		public:
+			WorldRayCast(ndNewtonWorld* const world, void* const userData, NewtonWorldRayFilterCallback filter, NewtonWorldRayPrefilterCallback prefilter)
+				:ndRayCastClosestHitCallback()
+				, m_userData(userData)
+				, m_world(world)
+				, m_filter(filter)
+				, m_prefilter(prefilter)
+			{
+			}
 
+			ndUnsigned32 OnRayPrecastAction(const ndBody* const body, const ndShapeInstance* const instance) override
+			{
+				if (m_prefilter)
+				{
+					return m_prefilter(PointerCast<NewtonBody, ndBody>(body), PointerCast<NewtonCollision, ndShapeInstance>(instance), m_userData);
+				}
+				return true;
+			}
+
+			ndFloat32 OnRayCastAction(const ndContactPoint& contact, ndFloat32 intersetParam) override
+			{
+				if (m_filter)
+				{
+					intersetParam = m_filter(PointerCast<NewtonBody, ndBody>(contact.m_body0), PointerCast<NewtonCollision, ndShapeInstance>(contact.m_shapeInstance0), &intersetParam, &contact.m_normal[0], contact.m_shapeId0, m_userData, intersetParam);
+				}
+				return intersetParam;
+			}
+
+			void* m_userData;
+			ndNewtonWorld* m_world;
+			NewtonWorldRayFilterCallback m_filter;
+			NewtonWorldRayPrefilterCallback m_prefilter;
+		};
+
+		ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+		WorldRayCast rayCaster(world, userData, filter, prefilter);
+		const ndVector pp0(p0[0], p0[1], p0[2], ndFloat32(0.0f));
+		const ndVector pp1(p1[0], p1[1], p1[2], ndFloat32(0.0f));
+		world->RayCast(rayCaster, pp0, pp1);
+	}
+}
+
+/*!
+  cast a simple convex shape along the ray that goes for the matrix position to the destination and get the firsts contacts of collision.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param *matrix pointer to an array of at least three floats containing the beginning and orienetaion of the shape in global space.
+  @param *target pointer to an array of at least three floats containing the end of the ray in global space.
+  @param shape collision shap[e use to cat the ray.
+  @param param pointe to a variable the will contart the time to closet aproah to the collision.
+  @param *userData user data to be passed to the prefilter callback.
+  @param prefilter user define function to be called for each body before intersection.
+  @param *info pointer to an array of contacts at the point of intesections.
+  @param maxContactsCount maximun number of contacts to be conclaculated, the variable sould be initialized to the capaciaty of *info*
+  @param threadIndex thread index from whe thsi function is called, zero if call form outsize a newton update
+
+  @return the number of contact at the intesection point (a value equal o lower than maxContactsCount.
+  variable *hitParam* will be set the uintesation parameter an the momen of impact.
+
+  passing and value of NULL in *info* an dzero in maxContactsCount will turn thos function into a spcial Ray cast
+  where the function will only calculate the *hitParam* at the momenet of contacts. tshi si one of the most effiecnet way to use thsio function.
+
+  these function is similar to *NewtonWorldRayCast* but instead of casting a point it cast a simple convex shape along a ray for maoprix.m_poit
+  to target position. the shape is global orientation and position is set to matrix and then is swept along the segment to target and it will stop at the very first intersession contact.
+
+  for case where the application need to cast solid short to medium rays, it is better to use this function instead of casting and array of parallel rays segments.
+  examples of these are: implementation of ray cast cars with cylindrical tires, foot placement of character controllers, kinematic motion of objects, user controlled continuous collision, etc.
+  this function may not be as efficient as sampling ray for long segment, for these cases try using parallel ray cast.
+
+  The most common use for the ray cast function is the closest body hit, In this case it is important, for performance reasons,
+  that the filter function returns the intersection parameter. If the filter function returns a value of zero the ray cast will terminate
+  immediately.
+
+  if prefilter is not NULL, Newton will call the application right before executing the intersections between the ray and the primitive.
+  if the function returns zero the Newton will not ray cast the primitive.
+  The application can use this callback to implement faster or smarter filters when implementing complex logic, otherwise for normal all ray cast
+  this parameter could be NULL.
+
+  See also: ::NewtonWorldRayCast
+*/
+int NewtonWorldConvexCast(const NewtonWorld* const newtonWorld, const dFloat* const matrixPtr, const dFloat* const target, const NewtonCollision* const shape,
+	dFloat* const param, void* const userData, NewtonWorldRayPrefilterCallback prefilter, NewtonWorldConvexCastReturnInfo* const info,
+	int maxContactsCount, int threadIndex)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMatrix matrix(matrixPtr);
 	matrix.m_front.m_w = ndFloat32(0.0f);
 	matrix.m_up.m_w = ndFloat32(0.0f);
 	matrix.m_right.m_w = ndFloat32(0.0f);
 	matrix.m_posit.m_w = ndFloat32(1.0f);
+	ndAssert(matrix.TestOrthogonal());
+	const ndVector destination(target[0], target[1], target[2], ndFloat32(0.0f));
+
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(shape);
+	ndAssert(instance->GetShape()->GetAsShapeConvex());
+
+	class ndConvexCast : public ndConvexCastNotify
+	{
+		public:
+		typedef unsigned (*NewtonWorldRayPrefilterCallback)(const NewtonBody* const body, const NewtonCollision* const collision, void* const userData);
+
+		ndConvexCast(ndNewtonWorld* const world, const ndMatrix& origin, const ndVector& dst, const ndShapeInstance& shape,
+			NewtonWorldRayPrefilterCallback prefilter, void* const userData)
+			:ndConvexCastNotify()
+			,m_world(world)
+			,m_onFilter(prefilter)
+			,m_userData(userData)
+		{
+			world->ConvexCast(*this, shape, origin, dst);
+		}
+
+		virtual ndUnsigned32 OnRayPrecastAction(const ndBody* const bodyPtr, const ndShapeInstance* const collision)
+		{
+			if (m_onFilter)
+			{
+				NewtonBody* const body = PointerCast<NewtonBody, ndBody>(bodyPtr);
+				NewtonCollision* const instance = PointerCast<NewtonCollision, ndShapeInstance>(collision);
+				return m_onFilter(body, instance, *m_userData);
+			}
+			return 1;
+		}
+
+		ndWeakPtr<void> m_userData;
+		ndWeakPtr<ndNewtonWorld> m_world;
+		NewtonWorldRayPrefilterCallback m_onFilter;
+	};
+
+	ndConvexCast caster(PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld), matrix, destination, *instance, prefilter, userData);
+	*param = caster.m_param;
+
+	const ndInt32 contactCount = ndMin(caster.m_contacts.GetCount(), maxContactsCount);
+	for (ndInt32 i = 0; i < contactCount; ++i)
+	{
+		info[i].m_contactID = caster.m_contacts[i].m_shapeId0;
+		info[i].m_hitBody = PointerCast<NewtonBody, ndBody>(caster.m_contacts[i].m_body0);
+		for (ndInt32 j = 0; j < 4; ++j)
+		{
+			info[i].m_point[j] = caster.m_contacts[i].m_point[j];
+			info[i].m_normal[j] = caster.m_contacts[i].m_normal[j];
+		}
+	}
+	return contactCount;
+}
+
+int NewtonWorldCollide(const NewtonWorld* const newtonWorld, const dFloat* const matrixPtr, const NewtonCollision* const collision, void* const userData,
+	NewtonWorldRayPrefilterCallback prefilter, NewtonWorldConvexCastReturnInfo* const info, int maxContactsCount, int threadIndex)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMatrix matrix(matrixPtr);
+	matrix.m_front.m_w = ndFloat32(0.0f);
+	matrix.m_up.m_w = ndFloat32(0.0f);
+	matrix.m_right.m_w = ndFloat32(0.0f);
+	matrix.m_posit.m_w = ndFloat32(1.0f);
+	ndAssert(matrix.TestOrthogonal());
 
 	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
+	ndAssert(instance->GetShape()->GetAsShapeConvex());
 
-	//Newton* const world = (Newton*)newtonWorld;
-	//return world->GetBroadPhase()->Collide((dgCollisionInstance*)shape, dgMatrix(matrix), (OnRayPrecastAction)prefilter, userData, (dgConvexCastReturnInfo*)info, maxContactsCount, threadIndex);
-	ndAssert(0);
-	return 0;
+	class ndCollideNotify : public ndConvexCastNotify
+	{
+		public:
+		typedef unsigned (*NewtonWorldRayPrefilterCallback)(const NewtonBody* const body, const NewtonCollision* const collision, void* const userData);
+
+		ndCollideNotify(ndNewtonWorld* const world, const ndMatrix& origin, const ndShapeInstance& shape,
+			NewtonWorldRayPrefilterCallback prefilter, void* const userData, ndInt32 maxContacts)
+			:ndConvexCastNotify()
+			,m_world(world)
+			,m_onFilter(prefilter)
+			,m_userData(userData)
+		{
+			world->Collide(*this, shape, origin, maxContacts);
+		}
+
+		virtual ndUnsigned32 OnRayPrecastAction(const ndBody* const bodyPtr, const ndShapeInstance* const collision)
+		{
+			if (m_onFilter)
+			{
+				NewtonBody* const body = PointerCast<NewtonBody, ndBody>(bodyPtr);
+				NewtonCollision* const instance = PointerCast<NewtonCollision, ndShapeInstance>(collision);
+				return m_onFilter(body, instance, *m_userData);
+			}
+			return 1;
+		}
+
+		ndWeakPtr<void> m_userData;
+		ndWeakPtr<ndNewtonWorld> m_world;
+		NewtonWorldRayPrefilterCallback m_onFilter;
+	};
+	ndCollideNotify collide(PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld), matrix, *instance, prefilter, userData, maxContactsCount);
+
+	const ndInt32 contactCount = ndMin(collide.m_contacts.GetCount(), maxContactsCount);
+	for (ndInt32 i = 0; i < contactCount; ++i)
+	{
+		info[i].m_contactID = collide.m_contacts[i].m_shapeId0;
+		info[i].m_hitBody = PointerCast<NewtonBody, ndBody>(collide.m_contacts[i].m_body0);
+		for (ndInt32 j = 0; j < 4; ++j)
+		{
+			info[i].m_point[j] = collide.m_contacts[i].m_point[j];
+			info[i].m_normal[j] = collide.m_contacts[i].m_normal[j];
+		}
+	}
+	return contactCount;
 }

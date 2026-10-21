@@ -65,99 +65,6 @@ const ndEdge* ndMeshEffect::GetPolyhedraEdgeFromNode(const void* const edge) con
 	return &node->GetInfo();
 }
 
-void* ndMeshEffect::GetFirstEdge() const
-{
-	Iterator iter(*this);
-	iter.Begin();
-
-	ndNode* node = nullptr;
-	if (iter) {
-		ndInt32 mark = IncLRU();
-
-		node = iter.GetNode();
-
-		ndEdge* const edge = &node->GetInfo();
-		edge->m_mark = mark;
-		edge->m_twin->m_mark = mark;
-	}
-	return node;
-}
-
-void* ndMeshEffect::GetNextEdge(const void* const edge) const
-{
-	ndNode* const node0 = (ndNode*)edge;
-	ndInt32 mark = node0->GetInfo().m_mark;
-
-	Iterator iter(*this);
-	iter.Set(node0);
-	for (iter++; iter; iter++) {
-		ndNode* const node = iter.GetNode();
-		if (node->GetInfo().m_mark != mark) {
-			node->GetInfo().m_mark = mark;
-			node->GetInfo().m_twin->m_mark = mark;
-			return node;
-		}
-	}
-	return nullptr;
-}
-
-void ndMeshEffect::GetEdgeIndex(const void* const edge, ndInt32& v0, ndInt32& v1) const
-{
-	ndNode* const node = (ndNode*)edge;
-	v0 = node->GetInfo().m_incidentVertex;
-	v1 = node->GetInfo().m_twin->m_incidentVertex;
-}
-
-void* ndMeshEffect::GetFirstFace() const
-{
-	Iterator iter(*this);
-	iter.Begin();
-
-	ndNode* node = nullptr;
-	if (iter) {
-		ndInt32 mark = IncLRU();
-		node = iter.GetNode();
-
-		ndEdge* const edge = &node->GetInfo();
-		ndEdge* ptr = edge;
-		do {
-			ptr->m_mark = mark;
-			ptr = ptr->m_next;
-		} while (ptr != edge);
-	}
-
-	return node;
-}
-
-void* ndMeshEffect::GetNextFace(const void* const face) const
-{
-	ndNode* const node0 = (ndNode*)face;
-	ndInt32 mark = node0->GetInfo().m_mark;
-
-	Iterator iter(*this);
-	iter.Set(node0);
-	for (iter++; iter; iter++) {
-		ndNode* node = iter.GetNode();
-		if (node->GetInfo().m_mark != mark) {
-			ndEdge* const edge = &node->GetInfo();
-			ndEdge* ptr = edge;
-			do {
-				ptr->m_mark = mark;
-				ptr = ptr->m_next;
-			} while (ptr != edge);
-			return node;
-		}
-	}
-	return nullptr;
-}
-
-
-ndInt32 ndMeshEffect::IsFaceOpen(const void* const face) const
-{
-	ndNode* const node = (ndNode*)face;
-	ndEdge* const edge = &node->GetInfo();
-	return (edge->m_incidentFace > 0) ? 0 : 1;
-}
 
 ndInt32 ndMeshEffect::GetFaceMaterial(const void* const face) const
 {
@@ -183,31 +90,6 @@ void ndMeshEffect::SetFaceMaterial(const void* const face, ndInt32 mateialID)
 	}
 }
 
-ndInt32 ndMeshEffect::GetFaceIndexCount(const void* const face) const
-{
-	ndInt32 count = 0;
-	ndNode* node = (ndNode*)face;
-	ndEdge* const edge = &node->GetInfo();
-	ndEdge* ptr = edge;
-	do {
-		count++;
-		ptr = ptr->m_next;
-	} while (ptr != edge);
-	return count;
-}
-
-void ndMeshEffect::GetFaceIndex(const void* const face, ndInt32* const indices) const
-{
-	ndInt32 count = 0;
-	ndNode* node = (ndNode*)face;
-	ndEdge* const edge = &node->GetInfo();
-	ndEdge* ptr = edge;
-	do {
-		indices[count] = ptr->m_incidentVertex;
-		count++;
-		ptr = ptr->m_next;
-	} while (ptr != edge);
-}
 
 void ndMeshEffect::GetFaceAttributeIndex(const void* const face, ndInt32* const indices) const
 {
@@ -3224,7 +3106,7 @@ ndMeshEffect::ndMeshEffect(const ndShapeInstance& shapeInstance)
 		{
 		}
 
-		virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceVertex, const ndEdgeType* const)
+		virtual void DrawPolygon(ndInt32 vertexCount, const ndVector* const faceVertex, const ndEdgeType* const) override
 		{
 			m_faceIndexCount.PushBack(vertexCount);
 			for (ndInt32 i = 0; i < vertexCount; ++i)
@@ -4141,4 +4023,128 @@ void ndMeshEffect::SetVertexBaseCount(ndInt32 count)
 ndArray<ndMeshEffect::ndVertexWeight>& ndMeshEffect::GetVertexWeights()
 {
 	return m_points.m_skinWeights;
+}
+
+ndMeshEffect::ndNode* ndMeshEffect::GetFirstEdge() const
+{
+	Iterator iter(*this);
+	iter.Begin();
+
+	ndNode* node = nullptr;
+	if (iter) 
+	{
+		ndInt32 mark = IncLRU();
+
+		node = iter.GetNode();
+
+		ndEdge* const edge = &node->GetInfo();
+		edge->m_mark = mark;
+		edge->m_twin->m_mark = mark;
+	}
+	return node;
+}
+
+ndMeshEffect::ndNode* ndMeshEffect::GetNextEdge(const ndNode* const edgeNode) const
+{
+	//ndNode* const node0 = (ndNode*)edgeNode;
+	ndInt32 mark = edgeNode->GetInfo().m_mark;
+
+	Iterator iter(*this);
+	iter.Set(const_cast<ndNode*>(edgeNode));
+	for (iter++; iter; iter++) 
+	{
+		ndNode* const node = iter.GetNode();
+		if (node->GetInfo().m_mark != mark) 
+		{
+			node->GetInfo().m_mark = mark;
+			node->GetInfo().m_twin->m_mark = mark;
+			return node;
+		}
+	}
+	return nullptr;
+}
+
+void ndMeshEffect::GetEdgeIndex(const ndNode* const edgeNode, ndInt32& v0, ndInt32& v1) const
+{
+	v0 = edgeNode->GetInfo().m_incidentVertex;
+	v1 = edgeNode->GetInfo().m_twin->m_incidentVertex;
+}
+
+ndMeshEffect::ndNode* ndMeshEffect::GetFirstFace() const
+{
+	Iterator iter(*this);
+	iter.Begin();
+
+	ndNode* node = nullptr;
+	if (iter) 
+	{
+		ndInt32 mark = IncLRU();
+		node = iter.GetNode();
+
+		ndEdge* const edge = &node->GetInfo();
+		ndEdge* ptr = edge;
+		do 
+		{
+			ptr->m_mark = mark;
+			ptr = ptr->m_next;
+		} while (ptr != edge);
+	}
+
+	return node;
+}
+
+ndMeshEffect::ndNode* ndMeshEffect::GetNextFace(const ndNode* const faceNode) const
+{
+	ndInt32 mark = faceNode->GetInfo().m_mark;
+
+	Iterator iter(*this);
+	iter.Set(const_cast<ndNode*>(faceNode));
+	for (iter++; iter; iter++) 
+	{
+		ndNode* node = iter.GetNode();
+		if (node->GetInfo().m_mark != mark) 
+		{
+			ndEdge* const edge = &node->GetInfo();
+			ndEdge* ptr = edge;
+			do 
+			{
+				ptr->m_mark = mark;
+				ptr = ptr->m_next;
+			} while (ptr != edge);
+			return node;
+		}
+	}
+	return nullptr;
+}
+
+ndInt32 ndMeshEffect::IsFaceOpen(const ndNode* const faceNode) const
+{
+	const ndEdge* const edge = &faceNode->GetInfo();
+	return (edge->m_incidentFace > 0) ? 0 : 1;
+}
+
+ndInt32 ndMeshEffect::GetFaceIndexCount(const ndNode* const faceNode) const
+{
+	ndInt32 count = 0;
+	const ndEdge* const edge = &faceNode->GetInfo();
+	const ndEdge* ptr = edge;
+	do 
+	{
+		count++;
+		ptr = ptr->m_next;
+	} while (ptr != edge);
+	return count;
+}
+
+void ndMeshEffect::GetFaceIndex(const ndNode* const faceNode, ndInt32* const indices) const
+{
+	ndInt32 count = 0;
+	const ndEdge* const edge = &faceNode->GetInfo();
+	const ndEdge* ptr = edge;
+	do 
+	{
+		indices[count] = ptr->m_incidentVertex;
+		count++;
+		ptr = ptr->m_next;
+	} while (ptr != edge);
 }

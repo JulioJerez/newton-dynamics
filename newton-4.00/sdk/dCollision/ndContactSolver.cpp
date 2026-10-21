@@ -322,6 +322,30 @@ ndContactSolver::ndContactSolver()
 {
 }
 
+ndContactSolver::ndContactSolver(const ndShapeInstance& instance0, const ndShapeInstance& instance1)
+	:ndDownHeap<ndMinkFace*, ndFloat32>(m_heapBuffer, sizeof(m_heapBuffer))
+	,m_instance0(instance0, instance0.m_shape)
+	,m_instance1(instance1, instance1.m_shape)
+	,m_separatingVector(ndContact::m_initialSeparatingVector)
+	,m_savedOriginOffset(ndVector::m_zero)
+	,m_contact(nullptr)
+	,m_freeFace(nullptr)
+	,m_notification(nullptr)
+	,m_contactBuffer(nullptr)
+	,m_timestep(ndFloat32(0.0f))
+	,m_skinMargin(ndFloat32(0.0f))
+	,m_separationDistance(ndFloat32(0.0f))
+	,m_threadId(0)
+	,m_maxCount(D_MAX_CONTATCS)
+	,m_faceIndex(0)
+	,m_vertexIndex(0)
+	,m_pruneContacts(1)
+	,m_intersectionTestOnly(0)
+{
+	m_instance0.SetLocalMatrix(instance0.m_localMatrix);
+	m_instance1.SetLocalMatrix(instance1.m_localMatrix);
+}
+
 ndContactSolver::ndContactSolver(ndShapeInstance* const instance, ndContactNotify* const notification, ndFloat32 timestep, ndInt32 threadIndex)
 	:ndDownHeap<ndMinkFace*, ndFloat32>(m_heapBuffer, sizeof (m_heapBuffer))
 	,m_instance0(*instance, instance->m_shape)
@@ -3932,22 +3956,17 @@ ndInt32 ndContactSolver::ConvexToStaticMeshContactsContinue()
 	return count;
 }
 
-void ndContactSolver::CalculateClosestPoints(
-	const ndShapeInstance* const instanceA, const ndMatrix& matrixA,
-	const ndShapeInstance* const instanceB, const ndMatrix& matrixB,
-	ndContactNotify* const notification)
+void ndContactSolver::CalculateClosestPoints(const ndMatrix& matrixA, const ndMatrix& matrixB, ndContactNotify* const notification)
 {
 	ndContact contact;
-	ndShape* const shapeA = const_cast<ndShape*>(reinterpret_cast<const ndShape*>(instanceA->GetShape()));
-	ndShape* const shapeB = const_cast<ndShape*>(reinterpret_cast<const ndShape*>(instanceB->GetShape()));
 	ndContactPoint contactBuffer[D_MAX_CONTATCS];
 
-	m_instance0.SetShape(shapeA);
-	m_instance0.SetLocalMatrix(instanceA->GetLocalMatrix());
+	ndShape* const shapeA = m_instance0.GetShape();
+	ndAssert(shapeA);
 	m_instance0.SetGlobalMatrix(m_instance0.GetLocalMatrix() * matrixA);
 
-	m_instance1.SetShape(shapeB);
-	m_instance1.SetLocalMatrix(instanceB->GetLocalMatrix());
+	ndShape* const shapeB = m_instance1.GetShape();
+	ndAssert(shapeB);
 	m_instance1.SetGlobalMatrix(m_instance1.GetLocalMatrix() * matrixB);
 
 	ndQuerieBody bodyA(m_instance0);
@@ -3992,16 +4011,14 @@ void ndContactSolver::CalculateContacts(
 	ndFixSizeArray<ndContactPoint, 16>& contactOut, ndContactNotify* const notification)
 {
 	ndContact contact;
-	ndShape* const shapeA = const_cast<ndShape*>(reinterpret_cast<const ndShape*>(instanceA->GetShape()));
-	ndShape* const shapeB = const_cast<ndShape*>(reinterpret_cast<const ndShape*>(instanceB->GetShape()));
 	ndContactPoint contactBuffer[D_MAX_CONTATCS];
 
-	m_instance0.SetShape(shapeA);
-	m_instance0.SetLocalMatrix(instanceA->GetLocalMatrix());
+	ndShape* const shapeA = m_instance0.GetShape();
+	ndAssert(shapeA);
 	m_instance0.SetGlobalMatrix(m_instance0.GetLocalMatrix() * matrixA);
 
-	m_instance1.SetShape(shapeB);
-	m_instance1.SetLocalMatrix(instanceB->GetLocalMatrix());
+	ndShape* const shapeB = m_instance1.GetShape();
+	ndAssert(shapeB);
 	m_instance1.SetGlobalMatrix(m_instance1.GetLocalMatrix() * matrixB);
 
 	ndQuerieBody bodyA(m_instance0);
@@ -4050,21 +4067,19 @@ void ndContactSolver::CalculateContacts(
 }
 
 bool ndContactSolver::CollisionTest(
-	const ndShapeInstance* const instanceA, const ndMatrix& matrixA, const ndVector& velocA,
-	const ndShapeInstance* const instanceB, const ndMatrix& matrixB, const ndVector& velocB,
+	const ndMatrix& matrixA, const ndVector& velocA,
+	const ndMatrix& matrixB, const ndVector& velocB,
 	ndContactNotify* const notification)
 {
 	ndContact contact;
-	ndShape* const shapeA = const_cast<ndShape*>(reinterpret_cast<const ndShape*>(instanceA->GetShape()));
-	ndShape* const shapeB = const_cast<ndShape*>(reinterpret_cast<const ndShape*>(instanceB->GetShape()));
 	ndContactPoint contactBuffer[D_MAX_CONTATCS];
 
-	m_instance0.SetShape(shapeA);
-	m_instance0.SetLocalMatrix(instanceA->GetLocalMatrix());
+	ndShape* const shapeA = m_instance0.GetShape();
+	ndAssert(shapeA);
 	m_instance0.SetGlobalMatrix(m_instance0.GetLocalMatrix() * matrixA);
 
-	m_instance1.SetShape(shapeB);
-	m_instance1.SetLocalMatrix(instanceB->GetLocalMatrix());
+	ndShape* const shapeB = m_instance1.GetShape();
+	ndAssert(shapeB);
 	m_instance1.SetGlobalMatrix(m_instance1.GetLocalMatrix() * matrixB);
 
 	ndQuerieBody bodyA(m_instance0);

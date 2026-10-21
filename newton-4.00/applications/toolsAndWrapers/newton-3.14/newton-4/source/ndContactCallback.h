@@ -17,7 +17,7 @@ class ndApplicationMaterial : public ndMaterial
 	public:
 	ndApplicationMaterial();
 	ndApplicationMaterial(const ndApplicationMaterial& src);
-	virtual ~ndApplicationMaterial();
+	virtual ~ndApplicationMaterial() override;
 
 	virtual ndApplicationMaterial* Clone() const
 	{
