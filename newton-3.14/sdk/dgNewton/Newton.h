@@ -1087,6 +1087,10 @@ extern "C" {
 	NEWTON_API int NewtonDeformableMeshSegmentGetIndexCount (const NewtonCollision* const deformableMesh, const NewtonDeformableMeshSegment* const segment);
 	NEWTON_API const int* NewtonDeformableMeshSegmentGetIndexList (const NewtonCollision* const deformableMesh, const NewtonDeformableMeshSegment* const segment);
 */
+
+	// Fix 6 dof joint only in newton 3.15
+	NEWTON_API NewtonJoint* NewtonConstraintCreateFix6Dof(const NewtonWorld* const newtonWorld, const NewtonBody* const childBody, const NewtonBody* const parentBody);
+
 	// **********************************************************************************************
 	//
 	// Ball and Socket joint functions

@@ -6339,6 +6339,60 @@ void NewtonBallGetJointForce(const NewtonJoint* const ball, dFloat* const force)
 	force[2] = forceVector.m_z;
 }
 
+//
+// Create a slider joint.
+//
+NewtonJoint* NewtonConstraintCreateHinge(const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const dFloat* pinDir, const NewtonBody* const childBody, const NewtonBody* const parentBody)
+{
+	Newton* const world = (Newton*)newtonWorld;
+	dgBody* const body0 = (dgBody*)childBody;
+	dgBody* const body1 = (dgBody*)parentBody;
+	dgVector pin(pinDir[0], pinDir[1], pinDir[2], dgFloat32(0.0f));
+	dgVector pivot(pivotPoint[0], pivotPoint[1], pivotPoint[2], dgFloat32(0.0f));
+	return (NewtonJoint*)world->CreateHingeConstraint(pivot, pin, body0, body1);
+}
+
+void NewtonHingeSetUserCallback(const NewtonJoint* const hinge, NewtonHingeCallback callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgHingeConstraint* contraint = (dgHingeConstraint*)hinge;
+	contraint->SetJointParameterCallback((dgHingeJointAcceleration)callback);
+}
+
+dFloat NewtonHingeGetJointAngle(const NewtonJoint* const hinge)
+{
+	dgHingeConstraint* contraint = (dgHingeConstraint*)hinge;
+	return contraint->GetJointAngle();
+}
+
+dFloat NewtonHingeGetJointOmega(const NewtonJoint* const hinge)
+{
+	dgHingeConstraint* contraint = (dgHingeConstraint*)hinge;
+	return contraint->GetJointOmega();
+}
+
+void NewtonHingeGetJointForce(const NewtonJoint* const hinge, dFloat* const force)
+{
+	dgHingeConstraint* contraint = (dgHingeConstraint*)hinge;
+	const dgVector forceVector(contraint->GetJointForce());
+	force[0] = forceVector.m_x;
+	force[1] = forceVector.m_y;
+	force[2] = forceVector.m_z;
+}
+
+dFloat NewtonHingeCalculateStopAlpha(const NewtonJoint* const hinge, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle)
+{
+	dgHingeConstraint* contraint = (dgHingeConstraint*)hinge;
+	return contraint->CalculateStopAlpha(angle, (dgJointCallbackParam*)desc);
+}
+
+// for foward compatibility with 3.14
+NewtonJoint* NewtonConstraintCreateFix6Dof(const NewtonWorld* const newtonWorld, const NewtonBody* const childBody, const NewtonBody* const parentBody)
+{
+	dgBody* const body0 = (dgBody*)childBody;
+	dgMatrix matrix(body0->GetMatrix());
+	return NewtonConstraintCreateHinge(newtonWorld, &matrix.m_posit[0], &matrix.m_front[0], childBody, parentBody);
+}
 
 /*! @} */ // end of ConstraintBall
 

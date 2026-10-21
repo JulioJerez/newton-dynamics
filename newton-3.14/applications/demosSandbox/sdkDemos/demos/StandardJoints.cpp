@@ -893,6 +893,7 @@ void AddFlexyPipe(DemoEntityManager* const scene, const dVector& origin)
 	// attach the handle to the world
 	new dFlexyPipeHandle(cylinderHandle, dir);
 }
+#endif
 
 static void Add6DOF(DemoEntityManager* const scene, const dVector& origin)
 {
@@ -900,30 +901,11 @@ static void Add6DOF(DemoEntityManager* const scene, const dVector& origin)
 	NewtonBody* const base = CreateBox(scene, origin + dVector(0.0f, 5.0f + size.m_y + 0.25f, 0.0f, 0.0f), size.Scale(0.2f));
 	NewtonBody* const box0 = CreateCapule(scene, origin + dVector(0.0f, 5.0f, 0.0f, 0.0f), size);
 
-	//	const dFloat yawLimit = 120.0f * dDegreeToRad;
-	const dFloat yawLimit = 60.0f * dDegreeToRad;
-	//	const dFloat rollLimit = 80.0f * dDegreeToRad;
-	const dFloat rollLimit = 60.0f * dDegreeToRad;
-	//	const dFloat pitchLimit = 80.0f * dDegreeToRad;
-	const dFloat pitchLimit = 60.0f * dDegreeToRad;
-
-	//const dFloat yawLimit = 0.0f * dDegreeToRad;
-	//const dFloat rollLimit = 0.0f * dDegreeToRad;
-	//const dFloat pitchLimit = 0.0f * dDegreeToRad;
+	NewtonWorld* const world = scene->GetNewton();
 
 	NewtonBodySetMassMatrix(base, 0.0f, 0.0f, 0.0f, 0.0f);
-	dMatrix pinMatrix(dGrammSchmidt(dVector(0.0f, -1.0f, 0.0f, 0.0f)));
-
 	// connect first box to the world
-	dMatrix matrix0;
-	NewtonBodyGetMatrix(box0, &matrix0[0][0]);
-	pinMatrix.m_posit = matrix0.m_posit + dVector(0.0f, size.m_y, 0.0f, 0.0f);
-	dCustomSixdof* const joint0 = new dCustomSixdof(pinMatrix, box0, base);
-	joint0->SetYawLimits(-yawLimit, yawLimit);
-	joint0->SetRollLimits(-rollLimit, rollLimit);
-	joint0->SetPitchLimits(-pitchLimit, pitchLimit);
-	//joint0->SetPitchLimits(-0, 0);
-	//joint0->DisableRotationX ();
+	NewtonConstraintCreateFix6Dof(world, box0, base);
 
 	// link the two boxes
 //	dMatrix matrix1;
@@ -936,7 +918,7 @@ static void Add6DOF(DemoEntityManager* const scene, const dVector& origin)
 //	joint1->SetPitchLimits(-pitchLimit, pitchLimit);
 	//joint1->DisableRotationX();
 }
-#endif
+
 
 static void AddLimitedBallAndSocket(DemoEntityManager* const scene, const dVector& origin)
 {
@@ -953,15 +935,15 @@ static void AddLimitedBallAndSocket(DemoEntityManager* const scene, const dVecto
 	NewtonBodyGetMatrix(box0, &matrix[0][0]);
 	pinMatrix.m_posit = matrix.m_posit + dVector(0.0f, size.m_y, 0.0f, 0.0f);
 
+	NewtonWorld* const world = scene->GetNewton();
 	// tilt the cone limit
-//	dMatrix tiltConeMatrix (dYawMatrix(-30.0f * dDegreeToRad) * pinMatrix);
 	dMatrix tiltConeMatrix(dYawMatrix(0.0f * dDegreeToRad) * pinMatrix);
-	dCustomBallAndSocket* const joint0 = new dCustomBallAndSocket(pinMatrix, tiltConeMatrix, box0, base);
-	joint0->EnableCone(true);
-	joint0->EnableTwist(true);
-	joint0->SetConeLimits(60.0f * dDegreeToRad);
-	//	joint0->SetTwistLimits (-1000.0f * dDegreeToRad, 1000.0f * dDegreeToRad);
-	joint0->SetTwistLimits(0.0f * dDegreeToRad, 0.0f * dDegreeToRad);
+	//dCustomBallAndSocket* const joint0 = new dCustomBallAndSocket(pinMatrix, tiltConeMatrix, box0, base);
+	NewtonJoint* const joint0 = NewtonConstraintCreateBall(world, &pinMatrix[0][0], box0, base);
+	//joint0->EnableCone(true);
+	//joint0->EnableTwist(true);
+	//joint0->SetConeLimits(60.0f * dDegreeToRad);
+	//joint0->SetTwistLimits(0.0f * dDegreeToRad, 0.0f * dDegreeToRad);
 
 	// connect first box1 to box0 the world
 //	NewtonBody* const box1 = CreateCapule(scene, origin + dVector(0.0f, 5.0f - size.m_y * 2.0f, 0.0f, 0.0f), size);
@@ -989,10 +971,9 @@ void StandardJoints (DemoEntityManager* const scene)
     dVector location (0.0f);
     dVector size (1.5f, 2.0f, 2.0f, 0.0f);
 
-#if 1
-	//Add6DOF (scene, dVector (-20.0f, 0.0f, -25.0f));
+	Add6DOF (scene, dVector (-20.0f, 0.0f, -25.0f));
 	//AddDistance (scene, dVector (-20.0f, 0.0f, -20.0f));
-	AddLimitedBallAndSocket (scene, dVector (-20.0f, 0.0f, -15.0f));
+	//AddLimitedBallAndSocket (scene, dVector (-20.0f, 0.0f, -15.0f));
 	//AddBallAndSockectWithFriction (scene, dVector (-20.0f, 0.0f, -10.0f));
 	//AddFixDistance(scene, dVector(-20.0f, 0.0f, -5.0f));
 	//AddHinge (scene, dVector (-20.0f, 0.0f, 0.0f));
@@ -1009,7 +990,6 @@ void StandardJoints (DemoEntityManager* const scene)
 	//AddDifferential(scene, dVector(-20.0f, 0.0f, 35.0f));
 	//AddPathFollow (scene, dVector (20.0f, 0.0f, 0.0f));
 	////AddFlexyPipe(scene, dVector(-20.0f, 0.0f, 0.0f));
-#endif
 
     // place camera into position
     dMatrix camMatrix (dGetIdentityMatrix());
