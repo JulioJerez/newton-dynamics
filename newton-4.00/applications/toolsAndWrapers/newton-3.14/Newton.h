@@ -440,18 +440,6 @@ extern "C" {
 */
 	// **********************************************************************************************
 	//
-	// Ball and Socket joint functions
-	//
-	// **********************************************************************************************
-	NEWTON_API NewtonJoint* NewtonConstraintCreateBall (const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const NewtonBody* const childBody, const NewtonBody* const parentBody);
-	NEWTON_API void NewtonBallSetUserCallback (const NewtonJoint* const ball, NewtonBallCallback callback);
-	NEWTON_API void NewtonBallGetJointAngle (const NewtonJoint* const ball, dFloat* angle);
-	NEWTON_API void NewtonBallGetJointOmega (const NewtonJoint* const ball, dFloat* omega);
-	NEWTON_API void NewtonBallGetJointForce (const NewtonJoint* const ball, dFloat* const force);
-	NEWTON_API void NewtonBallSetConeLimits (const NewtonJoint* const ball, const dFloat* pin, dFloat maxConeAngle, dFloat maxTwistAngle);
-
-	// **********************************************************************************************
-	//
 	// Hinge joint functions
 	//
 	// **********************************************************************************************
@@ -571,6 +559,7 @@ extern "C" {
 	typedef void (*NewtonTriggerExitVolume)(const NewtonBody* const trigger, const NewtonBody* const body, dFloat timestep);
 	typedef void (*NewtonTriggerInVolume)(const NewtonBody* const trigger, const NewtonBody* const body, const NewtonJoint* const joint, dFloat timestep);
 
+	// miscelaneos and unitlity functions
 	NEWTON_API void* NewtonAlloc(int sizeInBytes);
 	NEWTON_API void NewtonFree(void* const ptr);
 	NEWTON_API int NewtonGetMemoryUsed();
@@ -582,6 +571,10 @@ extern "C" {
 	NEWTON_API void NewtonSetEulerAngle(const dFloat* const eulersAngles, dFloat* const matrix);
 	NEWTON_API void NewtonGetEulerAngle(const dFloat* const matrix, dFloat* const eulersAngles0, dFloat* const eulersAngles1);
 	NEWTON_API dFloat NewtonCalculateSpringDamperAcceleration(dFloat dt, dFloat ks, dFloat x, dFloat kd, dFloat s);
+
+	NEWTON_API NewtonCollision* NewtonCreateMassSpringDamperSystem(const NewtonWorld* const newtonWorld, int shapeID,
+		const dFloat* const points, int pointCount, int strideInBytes, const dFloat* const pointMass,
+		const int* const links, int linksCount, const dFloat* const linksSpring, const dFloat* const linksDamper);
 
 	// world interface
 	NEWTON_API NewtonWorld* NewtonCreate();
@@ -1070,7 +1063,6 @@ extern "C" {
 	NEWTON_API NewtonBody* NewtonCreateTriggerVolume(const NewtonWorld* const newtonWorld, const NewtonCollision* const collision, const dFloat* const matrix,
 		NewtonTriggerEnterVolume enterVolume, NewtonTriggerExitVolume onExit, NewtonTriggerInVolume onTrigger);
 
-
 	NEWTON_API void* NewtonBodyGetUserData(const NewtonBody* const body);
 	NEWTON_API void NewtonBodySetMaterialGroupID(const NewtonBody* const body, int id);
 	NEWTON_API void NewtonBodySetUserData(const NewtonBody* const body, void* const userData);
@@ -1250,10 +1242,14 @@ extern "C" {
 	NEWTON_API void NewtonUserJointGetGeneralRow(const NewtonJoint* const joint, int index, dFloat* const jacobian0, dFloat* const jacobian1);
 	NEWTON_API dFloat NewtonUserJointGetRowForce(const NewtonJoint* const joint, int row);
 
-	// miscelaneuos 
-	NEWTON_API NewtonCollision* NewtonCreateMassSpringDamperSystem(const NewtonWorld* const newtonWorld, int shapeID,
-		const dFloat* const points, int pointCount, int strideInBytes, const dFloat* const pointMass,
-		const int* const links, int linksCount, const dFloat* const linksSpring, const dFloat* const linksDamper);
+	// Ball and Socket joint functions
+	NEWTON_API NewtonJoint* NewtonConstraintCreateBall(const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const NewtonBody* const childBody, const NewtonBody* const parentBody);
+	NEWTON_API void NewtonBallSetUserCallback(const NewtonJoint* const ball, NewtonBallCallback callback);
+	NEWTON_API void NewtonBallGetJointAngle(const NewtonJoint* const ball, dFloat* angle);
+	NEWTON_API void NewtonBallGetJointOmega(const NewtonJoint* const ball, dFloat* omega);
+	NEWTON_API void NewtonBallGetJointForce(const NewtonJoint* const ball, dFloat* const force);
+	NEWTON_API void NewtonBallSetConeLimits(const NewtonJoint* const ball, const dFloat* pin, dFloat maxConeAngle, dFloat maxTwistAngle);
+
 
 #ifdef __cplusplus 
 }

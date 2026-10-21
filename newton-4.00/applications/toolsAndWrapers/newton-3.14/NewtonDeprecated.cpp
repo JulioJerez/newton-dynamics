@@ -29,12 +29,14 @@
 int NewtonGetParallelSolverOnLargeIsland(const NewtonWorld* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 	return 0;
 }
 
 int NewtonGetBroadphaseAlgorithm(const NewtonWorld* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 	return 0;
 }
 
@@ -42,17 +44,20 @@ int NewtonGetBroadphaseAlgorithm(const NewtonWorld* const)
 void NewtonResetBroadphase(const NewtonWorld* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
 
 dFloat NewtonGetContactMergeTolerance(const NewtonWorld* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 	return ndFloat32(0.0f);
 }
 
 void NewtonSetContactMergeTolerance(const NewtonWorld* const, dFloat)
 {
 	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
 
 /*!
@@ -70,8 +75,7 @@ void NewtonSetContactMergeTolerance(const NewtonWorld* const, dFloat)
 void NewtonIslandGetBodyAABB(const void* const, int, dFloat* const, dFloat* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	// do nothing
-	ndAssert(0);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
 
 /*!
@@ -107,8 +111,7 @@ void NewtonIslandGetBodyAABB(const void* const, int, dFloat* const, dFloat* cons
 void NewtonSetIslandUpdateEvent(const NewtonWorld* const, NewtonIslandUpdate)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	// do nothing
-	ndAssert(0);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
 
 /*!
@@ -126,8 +129,7 @@ void NewtonSetIslandUpdateEvent(const NewtonWorld* const, NewtonIslandUpdate)
 NewtonBody* NewtonIslandGetBody(const void* const, int)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	// do nothing
-	ndAssert(0);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 	return nullptr;
 }
 
@@ -160,8 +162,7 @@ NewtonBody* NewtonIslandGetBody(const void* const, int)
 void NewtonWorldCriticalSectionLock(const NewtonWorld* const, int)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	// do nothing
-	ndAssert(0);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
 
 /*!
@@ -190,14 +191,14 @@ void NewtonWorldCriticalSectionLock(const NewtonWorld* const, int)
 void NewtonWorldCriticalSectionUnlock(const NewtonWorld* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	// do nothing
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 	ndAssert(0);
 }
 
 int NewtonAtomicAdd(int* const ptr, int value)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	// do nothing
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 	ndAssert(0);
 	return value;
 }
@@ -205,61 +206,51 @@ int NewtonAtomicAdd(int* const ptr, int value)
 void NewtonLoadPlugins(const NewtonWorld* const, const char* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
 
 void NewtonUnloadPlugins(const NewtonWorld* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
 
 void* NewtonCollisionAggregateCreate(NewtonWorld* const)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgWorld* const world = (dgWorld*)worldPtr;
-	//return world->CreateAggreGate();
-	ndAssert(0);
-	return 0;
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
+	return nullptr;
 }
 
 void NewtonCollisionAggregateDestroy(void* const aggregatePtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgBroadPhaseAggregate* const aggregate = (dgBroadPhaseAggregate*)aggregatePtr;
-	//aggregate->m_broadPhase->GetWorld()->DestroyAggregate(aggregate);
-	ndAssert(0);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
 
 void NewtonCollisionAggregateAddBody(void* const aggregatePtr, const NewtonBody* const body)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgBroadPhaseAggregate* const aggregate = (dgBroadPhaseAggregate*)aggregatePtr;
-	//aggregate->AddBody((dgBody*)body);
-	ndAssert(0);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
 
 void NewtonCollisionAggregateRemoveBody(void* const aggregatePtr, const NewtonBody* const body)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgBroadPhaseAggregate* const aggregate = (dgBroadPhaseAggregate*)aggregatePtr;
-	//aggregate->RemoveBody((dgBody*)body);
-	ndAssert(0);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
 
 int NewtonCollisionAggregateGetSelfCollision(void* const aggregatePtr)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgBroadPhaseAggregate* const aggregate = (dgBroadPhaseAggregate*)aggregatePtr;
-	//return aggregate->GetSelfCollision() ? true : false;
-	ndAssert(0);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 	return 0;
 }
 
 void NewtonCollisionAggregateSetSelfCollision(void* const aggregatePtr, int state)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	//dgBroadPhaseAggregate* const aggregate = (dgBroadPhaseAggregate*)aggregatePtr;
-	//aggregate->SetSelfCollision(state ? true : false);
-	ndAssert(0);
+	ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
 
 /*!

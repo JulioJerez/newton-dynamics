@@ -49,6 +49,8 @@ endif()
 file(GLOB CPP_SOURCE 
 	*.h
 	*.cpp
+	joints/*.h
+	joints/*.cpp
 	newton-4/source/*.h
 	newton-4/source/*.c
 	newton-4/source/*.cpp

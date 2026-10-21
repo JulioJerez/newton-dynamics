@@ -58,22 +58,23 @@
 //#define DEFAULT_SCENE	23		// scene Collision
 //#define DEFAULT_SCENE	24		// simple convex fracturing 
 //#define DEFAULT_SCENE	25		// multi ray casting using the threading Job scheduler
-//#define DEFAULT_SCENE	26		// standard joints
-//#define DEFAULT_SCENE	27		// servo joints
-//#define DEFAULT_SCENE	28		// construction vehicle
-//#define DEFAULT_SCENE	29		// six axis manipulator
-//#define DEFAULT_SCENE	30		// hexapod Robot
-//#define DEFAULT_SCENE	31		// basic rag doll
-//#define DEFAULT_SCENE	32		// balancing biped
-//#define DEFAULT_SCENE	33		// multi body body vehicle
-//#define DEFAULT_SCENE	34		// super Car
-//#define DEFAULT_SCENE	35		// heavy vehicles
-//#define DEFAULT_SCENE	36		// basic player controller
-//#define DEFAULT_SCENE	37		// animated player controller
-//#define DEFAULT_SCENE	38		// advanced player controller
-#define DEFAULT_SCENE	39		// cloth patch			
-//#define DEFAULT_SCENE	40		// soft bodies	
-//#define DEFAULT_SCENE	41		// BlackbirdDream Test
+#define DEFAULT_SCENE	26		// standard joints
+//#define DEFAULT_SCENE	27		// custom joints
+//#define DEFAULT_SCENE	28		// servo joints
+//#define DEFAULT_SCENE	29		// construction vehicle
+//#define DEFAULT_SCENE	30		// six axis manipulator
+//#define DEFAULT_SCENE	31		// hexapod Robot
+//#define DEFAULT_SCENE	32		// basic rag doll
+//#define DEFAULT_SCENE	33		// balancing biped
+//#define DEFAULT_SCENE	34		// multi body body vehicle
+//#define DEFAULT_SCENE	35		// super Car
+//#define DEFAULT_SCENE	36		// heavy vehicles
+//#define DEFAULT_SCENE	37		// basic player controller
+//#define DEFAULT_SCENE	38		// animated player controller
+//#define DEFAULT_SCENE	39		// advanced player controller
+//#define DEFAULT_SCENE	40		// cloth patch			
+//#define DEFAULT_SCENE	41		// soft bodies	
+//#define DEFAULT_SCENE	42		// BlackbirdDream Test
 						 
 /// demos forward declaration 
 void Friction (DemoEntityManager* const scene);
@@ -85,8 +86,8 @@ void ConvexCast (DemoEntityManager* const scene);
 void PrimitiveCollision (DemoEntityManager* const scene);
 void KinematicBodies (DemoEntityManager* const scene);
 void ObjectPlacement (DemoEntityManager* const scene);
-void ClothPatch(DemoEntityManager* const scene);
-void SoftBodies (DemoEntityManager* const scene);
+//void ClothPatch(DemoEntityManager* const scene);
+//void SoftBodies (DemoEntityManager* const scene);
 void BasicBoxStacks (DemoEntityManager* const scene);
 void SimpleMeshLevelCollision (DemoEntityManager* const scene);
 void OptimizedMeshLevelCollision (DemoEntityManager* const scene);
@@ -114,6 +115,7 @@ void PassiveRagdoll (DemoEntityManager* const scene);
 void BalancingBiped (DemoEntityManager* const scene);
 void ServoJoints (DemoEntityManager* const scene);
 void ConstructionVehicle (DemoEntityManager* const scene);
+void CustomJoints(DemoEntityManager* const scene);
 void StandardJoints (DemoEntityManager* const scene);
 void SixAxisManipulators(DemoEntityManager* const scene);
 void Hexapod(DemoEntityManager* const scene);
@@ -148,6 +150,7 @@ DemoEntityManager::SDKDemos DemoEntityManager::m_demosSelection[] =
 	{"Simple convex fracture", "demonstrate simple fracture destruction using Voronoi partition", SimpleConvexFracturing},
 	{"Parallel ray cast", "using the threading Job scheduler", MultiRayCast},
 	{"Standard Joints", "show some of the common joints", StandardJoints},
+	{"Custom Joints", "show some of the user define joints", CustomJoints},
 	{"Servo actuators joints", "demonstrate complex array of bodies interconnect by joints", ServoJoints},
 	{"Construction Vehicle", "demonstrate complex array of bodies interconnect by joints", ConstructionVehicle},
 	{"Six axis manipulator", "show using inverse dynamics to control robots", SixAxisManipulators },
@@ -160,9 +163,9 @@ DemoEntityManager::SDKDemos DemoEntityManager::m_demosSelection[] =
 	{"Basic player controller", "demonstrate simple player controller", BasicPlayerController},
 	{"Animated player controller", "demonstrate inverse kinematic player controller", AnimatedPlayerController},
 	{"Advanced player controller", "demonstrate player interacting with other objects", AdvancedPlayerController},
-	{"Simple cloth Patch", "show simple cloth patch", ClothPatch},
-	{"Simple soft Body", "show simple soft body", SoftBodies},
-	{"Blackbird Dream Test", "Blackbird Dream Test", BlackbirdDreamTest},
+	//{"Simple cloth Patch", "show simple cloth patch", ClothPatch},
+	//{"Simple soft Body", "show simple soft body", SoftBodies},
+	//{"Blackbird Dream Test", "Blackbird Dream Test", BlackbirdDreamTest},
 };
 
 DemoEntityManager::ButtonKey::ButtonKey (bool state)
