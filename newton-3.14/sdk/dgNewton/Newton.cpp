@@ -6386,14 +6386,6 @@ dFloat NewtonHingeCalculateStopAlpha(const NewtonJoint* const hinge, const Newto
 	return contraint->CalculateStopAlpha(angle, (dgJointCallbackParam*)desc);
 }
 
-// for foward compatibility with 3.14
-NewtonJoint* NewtonConstraintCreateFix6Dof(const NewtonWorld* const newtonWorld, const NewtonBody* const childBody, const NewtonBody* const parentBody)
-{
-	dgBody* const body0 = (dgBody*)childBody;
-	dgMatrix matrix(body0->GetMatrix());
-	return NewtonConstraintCreateHinge(newtonWorld, &matrix.m_posit[0], &matrix.m_front[0], childBody, parentBody);
-}
-
 /*! @} */ // end of ConstraintBall
 
 /*! @defgroup JointSlider JointSlider
@@ -6539,6 +6531,23 @@ void NewtonSliderGetJointForce(const NewtonJoint* const slider, dFloat* const fo
 	force[0] = forceVector.m_x;
 	force[1] = forceVector.m_y;
 	force[2] = forceVector.m_z;
+}
+
+static dgUnsigned32 FixJointAccel(const dgSlidingConstraint& slider, dgJointCallbackParam* param)
+{
+	param->m_accel = slider.CalculateStopAccel(0.0f, param);
+	return 1;
+}
+
+// for forward compatibility with 3.14
+NewtonJoint* NewtonConstraintCreateFix6Dof(const NewtonWorld* const newtonWorld, const NewtonBody* const childBody, const NewtonBody* const parentBody)
+{
+	dgBody* const body0 = (dgBody*)childBody;
+	dgMatrix matrix(body0->GetMatrix());
+	NewtonJoint* const joint = NewtonConstraintCreateSlider(newtonWorld, &matrix.m_posit[0], &matrix.m_front[0], childBody, parentBody);
+	dgSlidingConstraint* const slider = (dgSlidingConstraint*)joint;
+	slider->SetJointParameterCallback(FixJointAccel);
+	return joint;
 }
 
 
