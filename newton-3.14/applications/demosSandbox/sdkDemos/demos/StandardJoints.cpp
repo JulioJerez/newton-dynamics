@@ -111,72 +111,6 @@ static NewtonBody* CreateCylinder (DemoEntityManager* const scene, const dVector
 }
 
 #if 0
-static void AddDistance (DemoEntityManager* const scene, const dVector& origin)
-{
-	dVector size (1.0f, 1.0f, 1.0f);
-	NewtonBody* const box0 = CreateBox(scene, origin + dVector (0.0f, 6.0f + size.m_y + 0.25f, 0.0f, 0.0f), size.Scale (0.2f));
-	NewtonBody* const box1 = CreateCapule (scene, origin + dVector (0.0f, 6.0f, 0.0f, 0.0f), size);
-	NewtonBody* const box2 = CreateCapule (scene, origin + dVector (0.0f, 6.0f - size.m_y * 4.0f, 0.0f, 0.0f), size);
-
-	dMatrix pinMatrix (dGrammSchmidt (dVector (0.0f, -1.0f, 0.0f, 0.0f)));
-	NewtonBodySetMassMatrix(box0, 0.0f, 0.0f, 0.0f, 0.0f);
-
-	// connect first box to the world
-	dMatrix matrix0;
-	NewtonBodyGetMatrix (box1, &matrix0[0][0]);
-	pinMatrix.m_posit = matrix0.m_posit + dVector (0.0f, size.m_y, 0.0f, 0.0f);
-	new dCustomBallAndSocket (pinMatrix, box1, box0);
-
-	// link the two boxes with a distance joint
-	dMatrix matrix1;
-	NewtonBodyGetMatrix (box2, &matrix1[0][0]);
-
-	// get the origins
-	dVector pivot0 (matrix0.m_posit - dVector (0.0f, size.m_y, 0.0f, 0.0f));
-	dVector pivot1 (matrix1.m_posit + dVector (0.0f, size.m_y, 0.0f, 0.0f));
-
-	// connect bodies at a corner
-	new dCustomFixDistance (pivot1, pivot0, box2, box1);
-}
-
-static void FunnyDistanceJointNullForce(const NewtonBody* body, dFloat timestep, int threadIndex)
-{
-	dVector force(dVector(0.0f, 0.0f, 0.0f));
-	NewtonBodySetForce(body, &force.m_x);
-}
-
-static void AddFixDistance(DemoEntityManager* const scene, const dVector& origin)
-{
-	dVector size(1.0f, 1.0f, 1.0f);
-	NewtonBody* const box0 = CreateSphere(scene, origin + dVector(0.0f, 6.0f - size.m_y * 0.0f, 0.0f, 0.0f), size);
-	NewtonBody* const box1 = CreateSphere(scene, origin + dVector(0.0f, 6.0f - size.m_y * 1.0f, 0.0f, 0.0f), size);
-	NewtonBody* const box2 = CreateSphere(scene, origin + dVector(0.0f, 6.0f - size.m_y * 2.0f, 0.0f, 0.0f), size);
-	NewtonBody* const box3 = CreateSphere(scene, origin + dVector(0.0f, 6.0f - size.m_y * 3.0f, 0.0f, 0.0f), size);
-
-	NewtonBodySetForceAndTorqueCallback(box0, FunnyDistanceJointNullForce);
-	NewtonBodySetForceAndTorqueCallback(box1, FunnyDistanceJointNullForce);
-	NewtonBodySetForceAndTorqueCallback(box2, FunnyDistanceJointNullForce);
-	NewtonBodySetForceAndTorqueCallback(box3, FunnyDistanceJointNullForce);
-
-	dMatrix matrix0;
-	dMatrix matrix1;
-	NewtonBodyGetMatrix(box0, &matrix0[0][0]);
-	NewtonBodyGetMatrix(box1, &matrix1[0][0]);
-	new dCustomFixDistance(matrix1.m_posit, matrix0.m_posit, box1, box0);
-
-	dMatrix matrix2;
-	NewtonBodyGetMatrix(box1, &matrix1[0][0]);
-	NewtonBodyGetMatrix(box2, &matrix2[0][0]);
-	new dCustomFixDistance(matrix2.m_posit, matrix1.m_posit, box2, box1);
-
-	dMatrix matrix3;
-	NewtonBodyGetMatrix(box2, &matrix2[0][0]);
-	NewtonBodyGetMatrix(box3, &matrix3[0][0]);
-	new dCustomFixDistance(matrix3.m_posit, matrix2.m_posit, box3, box2);
-}
-
-
-
 static void AddDoubleHinge(DemoEntityManager* const scene, const dVector& origin)
 {
 	dVector size(1.0f, 1.0f, 1.0f);
@@ -282,37 +216,6 @@ static void AddSliderBug(DemoEntityManager* const scene, const dVector& origin)
 	// set limit on second axis
 	slider->EnableLimits(true);
 	slider->SetLimits(-0.5f, 0.5f);
-}
-
-static void AddHinge (DemoEntityManager* const scene, const dVector& origin)
-{
-    dVector size (1.5f, 1.5f, 0.125f);
-	NewtonBody* parent = CreateBox(scene, origin + dVector (-0.8f, 4.0f, 0.0f, 0.0f), dVector (0.2f, 0.125f, 0.125f));
-	NewtonBodySetMassMatrix(parent, 0.0f, 0.0f, 0.0f, 0.0f);
-    //the joint pin is the first row of the matrix, to make a upright pin we
-    //take the x axis and rotate by 90 degree around the y axis
-    dMatrix localPin (dRollMatrix(90.0f * dDegreeToRad));
-
-	dMatrix matrix;
-	dVector position (origin);
-	position.m_y += 4.0f;
-	NewtonBody* child = NULL;
-
-	int count = 6;
-	for (int i = 0; i < count; i ++) {
-		child = CreateBox (scene, position, size);
-		NewtonBodyGetMatrix(child, &matrix[0][0]);
-		matrix.m_posit += dVector(-size.m_x * 0.5f, 0.0f, 0.0f);
-		matrix = localPin * matrix;
-		dCustomHinge* const hinge = new dCustomHinge (matrix, child, parent);
-
-		hinge->EnableLimits (true);
-		hinge->SetLimits (-45.0f * dDegreeToRad, 45.0f * dDegreeToRad);
-		hinge->SetFriction(20.0f);
-
-		parent = child;
-		position.m_x += size.m_x;
-	}
 }
 
 static void AddHingeMotor(DemoEntityManager* const scene, const dVector& origin)
@@ -949,6 +852,38 @@ static void AddBallAndSockectWithFriction(DemoEntityManager* const scene, const 
 	NewtonBallSetSpringDamper(joint1, 0.01f, 0.0f, 20.0f);
 }
 
+
+static void AddHinge(DemoEntityManager* const scene, const dVector& origin)
+{
+	dVector size(1.5f, 1.5f, 0.125f);
+	NewtonBody* parent = CreateBox(scene, origin + dVector(-0.8f, 4.0f, 0.0f, 0.0f), dVector(0.2f, 0.125f, 0.125f));
+	NewtonBodySetMassMatrix(parent, 0.0f, 0.0f, 0.0f, 0.0f);
+	//the joint pin is the first row of the matrix, to make a upright pin we
+	//take the x axis and rotate by 90 degree around the y axis
+	dMatrix localPin(dRollMatrix(90.0f * dDegreeToRad));
+
+	dMatrix matrix;
+	dVector position(origin);
+	position.m_y += 4.0f;
+	NewtonBody* child = NULL;
+
+	int count = 6;
+	for (int i = 0; i < count; i++) {
+		child = CreateBox(scene, position, size);
+		NewtonBodyGetMatrix(child, &matrix[0][0]);
+		matrix.m_posit += dVector(-size.m_x * 0.5f, 0.0f, 0.0f);
+		matrix = localPin * matrix;
+		dCustomHinge* const hinge = new dCustomHinge(matrix, child, parent);
+
+		hinge->EnableLimits(true);
+		hinge->SetLimits(-45.0f * dDegreeToRad, 45.0f * dDegreeToRad);
+		hinge->SetFriction(20.0f);
+
+		parent = child;
+		position.m_x += size.m_x;
+	}
+}
+
 void StandardJoints (DemoEntityManager* const scene)
 {
     scene->CreateSkyBox();
@@ -964,11 +899,9 @@ void StandardJoints (DemoEntityManager* const scene)
     dVector size (1.5f, 2.0f, 2.0f, 0.0f);
 
 	//Add6DOF (scene, dVector (-20.0f, 0.0f, -25.0f));
-	//AddDistance (scene, dVector (-20.0f, 0.0f, -20.0f));
 	//AddLimitedBallAndSocket (scene, dVector (-20.0f, 0.0f, -15.0f));
-	AddBallAndSockectWithFriction (scene, dVector (-20.0f, 0.0f, -10.0f));
-	//AddFixDistance(scene, dVector(-20.0f, 0.0f, -5.0f));
-	//AddHinge (scene, dVector (-20.0f, 0.0f, 0.0f));
+	//AddBallAndSockectWithFriction (scene, dVector (-20.0f, 0.0f, -10.0f));
+	AddHinge (scene, dVector (-20.0f, 0.0f, 0.0f));
 	//AddHingeMotor(scene, dVector(0.0f, 0.0f, -20.0f));
 	//AddHingeSpringDamper (scene, dVector (dVector (-20.0f, 0.0f, 5.0f)));
 	//AddSlider (scene, dVector (-20.0f, 0.0f, 7.0f));
