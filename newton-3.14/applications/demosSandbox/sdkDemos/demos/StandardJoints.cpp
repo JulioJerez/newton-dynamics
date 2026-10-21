@@ -908,17 +908,9 @@ static void Add6DOF(DemoEntityManager* const scene, const dVector& origin)
 	NewtonConstraintCreateFix6Dof(world, box0, base);
 
 	// link the two boxes
-//	dMatrix matrix1;
-//	NewtonBody* const box1 = CreateCapule(scene, origin + dVector(0.0f, 5.0f - size.m_y * 2.0f, 0.0f, 0.0f), size);
-//	NewtonBodyGetMatrix (box1, &matrix1[0][0]);
-//	pinMatrix.m_posit = (matrix0.m_posit + matrix1.m_posit).Scale (0.5f);
-//	dCustomSixdof* const joint1 = new dCustomSixdof (pinMatrix, box1, box0);
-//	joint1->SetYawLimits(-yawLimit, yawLimit);
-//	joint1->SetRollLimits(-rollLimit, rollLimit);
-//	joint1->SetPitchLimits(-pitchLimit, pitchLimit);
-	//joint1->DisableRotationX();
+	NewtonBody* const box1 = CreateCapule(scene, origin + dVector(0.0f, 5.0f - size.m_y * 2.0f, 0.0f, 0.0f), size);
+    NewtonConstraintCreateFix6Dof(world, box1, box0);
 }
-
 
 static void AddLimitedBallAndSocket(DemoEntityManager* const scene, const dVector& origin)
 {
