@@ -6416,7 +6416,17 @@ dFloat NewtonHingeCalculateStopAlpha(const NewtonJoint* const hinge, const Newto
 	return contraint->CalculateStopAlpha(angle, (dgJointCallbackParam*)desc);
 }
 
-/*! @} */ // end of ConstraintBall
+void NewtonHingeEnableLimits(const NewtonJoint* const hinge, int state)
+{
+}
+
+void NewtonHingeSetLimits(const NewtonJoint* const hinge, dFloat minTwistAngle, dFloat maxTwistAngle)
+{
+}
+
+void NewtonHingeSetSpringDamper(const NewtonJoint* const ball, dFloat regularizer, dFloat spring, dFloat32 damper)
+{
+}
 
 /*! @defgroup JointSlider JointSlider
 Slider joint interface

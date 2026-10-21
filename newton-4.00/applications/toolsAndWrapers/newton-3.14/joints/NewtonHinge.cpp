@@ -42,22 +42,6 @@ class NewtonHinge: public ndJointHinge
 };
 
 
-//
-// Create a hinge joint.
-//
-NewtonJoint* NewtonConstraintCreateHinge(const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const dFloat* pinDir, const NewtonBody* const childBody, const NewtonBody* const parentBody)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-	return nullptr;
-	//Newton* const world = (Newton*)newtonWorld;
-	//dgBody* const body0 = (dgBody*)childBody;
-	//dgBody* const body1 = (dgBody*)parentBody;
-	//dgVector pin(pinDir[0], pinDir[1], pinDir[2], dgFloat32(0.0f));
-	//dgVector pivot(pivotPoint[0], pivotPoint[1], pivotPoint[2], dgFloat32(0.0f));
-	//return (NewtonJoint*)world->CreateHingeConstraint(pivot, pin, body0, body1);
-}
-
 void NewtonHingeSetUserCallback(const NewtonJoint* const hinge, NewtonHingeCallback callback)
 {
 	TRACE_FUNCTION(__FUNCTION__);
@@ -101,4 +85,49 @@ dFloat NewtonHingeCalculateStopAlpha(const NewtonJoint* const hinge, const Newto
 	return 0;
 	//dgHingeConstraint* contraint = (dgHingeConstraint*)hinge;
 	//return contraint->CalculateStopAlpha(angle, (dgJointCallbackParam*)desc);
+}
+
+//
+// Create a hinge joint.
+//
+NewtonJoint* NewtonConstraintCreateHinge(const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const dFloat* pinDir, const NewtonBody* const childBody, const NewtonBody* const parentBody)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndBodyKinematic* const body0 = PointerCast<ndBody, NewtonBody>(childBody)->GetAsBodyKinematic();
+	ndBodyKinematic* const body1 = parentBody ? PointerCast<ndBody, NewtonBody>(parentBody)->GetAsBodyKinematic() : world->GetSentinelBody();
+	ndAssert(body0);
+	ndAssert(body1);
+	ndAssert(body0 != body1);
+
+	const ndVector pivot(pivotPoint[0], pivotPoint[1], pivotPoint[2], ndFloat32(0.0f));
+	const ndMatrix& bodyMatrix = body0->GetMatrix();
+
+	ndVector pin(pinDir[0], pinDir[1], pinDir[2], ndFloat32 (0.0f));
+	ndMatrix matrix(ndGramSchmidtMatrix(pin));
+	matrix.m_posit = ndVector (pivotPoint[0], pivotPoint[1], pivotPoint[2], ndFloat32(1.0f));
+	ndSharedPtr<ndJointBilateralConstraint> joint(new NewtonHinge(matrix, body0, body1));
+	world->AddJoint(joint);
+	return PointerCast<NewtonJoint, ndJointBilateralConstraint>(*joint);
+}
+
+void NewtonHingeEnableLimits(const NewtonJoint* const joint, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
+	userJoint->SetLimitState(state ? true : false);
+}
+
+void NewtonHingeSetLimits(const NewtonJoint* const joint, dFloat minTwistAngle, dFloat maxTwistAngle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
+	userJoint->SetLimits(minTwistAngle, maxTwistAngle);
+}
+
+void NewtonHingeSetSpringDamper(const NewtonJoint* const joint, dFloat regularizer, dFloat spring, dFloat32 damper)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
+	userJoint->SetAsSpringDamper(regularizer, spring, damper);
 }

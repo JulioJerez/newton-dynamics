@@ -867,17 +867,19 @@ static void AddHinge(DemoEntityManager* const scene, const dVector& origin)
 	position.m_y += 4.0f;
 	NewtonBody* child = NULL;
 
+	NewtonWorld* const world = scene->GetNewton();
+
 	int count = 6;
 	for (int i = 0; i < count; i++) {
 		child = CreateBox(scene, position, size);
 		NewtonBodyGetMatrix(child, &matrix[0][0]);
 		matrix.m_posit += dVector(-size.m_x * 0.5f, 0.0f, 0.0f);
 		matrix = localPin * matrix;
-		dCustomHinge* const hinge = new dCustomHinge(matrix, child, parent);
 
-		hinge->EnableLimits(true);
-		hinge->SetLimits(-45.0f * dDegreeToRad, 45.0f * dDegreeToRad);
-		hinge->SetFriction(20.0f);
+		NewtonJoint* const hinge = NewtonConstraintCreateHinge(world, &matrix.m_posit[0], &matrix.m_front[0], child, parent);
+		NewtonHingeEnableLimits(hinge, 1);
+		NewtonHingeSetLimits(hinge, -45.0f * dDegreeToRad, 45.0f * dDegreeToRad);
+		NewtonHingeSetSpringDamper(hinge, 0.01f, 0.0f, 20.0f);
 
 		parent = child;
 		position.m_x += size.m_x;
