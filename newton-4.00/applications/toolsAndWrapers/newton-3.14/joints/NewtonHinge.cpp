@@ -139,8 +139,9 @@ void NewtonHingeSetAsMotor(const NewtonJoint* const joint, dFloat omega, dFloat 
 	userJoint->SetAsMotor(omega, maxTorque);
 }
 
-void NewtonHingeSetDryFriction(const NewtonJoint* const hinge, dFloat frictionTorque)
+void NewtonHingeSetDryFriction(const NewtonJoint* const joint, dFloat frictionTorque)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-
+	NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
+	userJoint->SetAsDryFriction(frictionTorque);
 }
