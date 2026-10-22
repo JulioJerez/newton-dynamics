@@ -30,11 +30,14 @@ class ndJointHinge: public ndJointBilateralConstraint
 	D_NEWTON_API ndFloat32 GetOmega() const;
 	D_NEWTON_API ndFloat32 GetTargetAngle() const;
 	D_NEWTON_API void SetTargetAngle(ndFloat32 angle);
-	D_NEWTON_API void SetAsMotor(ndFloat32 omega, ndFloat32 maxTorque);
+
 	D_NEWTON_API bool GetLimitState() const;
 	D_NEWTON_API void SetLimitState(bool state);
 	D_NEWTON_API void SetLimits(ndFloat32 minLimit, ndFloat32 maxLimit);
 	D_NEWTON_API void GetLimits(ndFloat32& minLimit, ndFloat32& maxLimit) const;
+
+	D_NEWTON_API void SetAsDryFriction(ndFloat32 maxFrictionTorque);
+	D_NEWTON_API void SetAsMotor(ndFloat32 omega, ndFloat32 maxTorque);
 	D_NEWTON_API void SetAsSpringDamper(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper);
 	D_NEWTON_API void GetSpringDamper(ndFloat32& regularizer, ndFloat32& spring, ndFloat32& damper) const;
 	D_NEWTON_API void DebugJoint(ndConstraintDebugCallback& debugCallback) const override;
@@ -56,8 +59,8 @@ class ndJointHinge: public ndJointBilateralConstraint
 	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
 	ndAxisParam m_axis;
-	ndFloat32 m_motorSpeed;
 	ndFloat32 m_maxTorque;
+	ndFloat32 m_motorSpeed;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif 
