@@ -678,7 +678,7 @@ static void AddHinge (DemoEntityManager* const scene, const dVector& origin)
 
 static void AddHingeMotor(DemoEntityManager* const scene, const dVector& origin)
 {
-	NewtonBody* parent = CreateBox(scene, origin + dVector(-0.8f, 6.0f, 0.0f, 0.0f), dVector(0.2f, 0.2f, 0.2f));
+	NewtonBody* parent = CreateBox(scene, origin + dVector(-0.8f, 8.0f, 0.0f, 0.0f), dVector(0.2f, 0.2f, 0.2f));
 	NewtonBodySetMassMatrix(parent, 0.0f, 0.0f, 0.0f, 0.0f);
 
 	dMatrix matrix;
@@ -1235,25 +1235,25 @@ void CustomJoints (DemoEntityManager* const scene)
     dVector location (0.0f);
     dVector size (1.5f, 2.0f, 2.0f, 0.0f);
 
-	//Add6DOF (scene, dVector (-20.0f, 0.0f, -25.0f));
-	//AddDistance (scene, dVector (-20.0f, 0.0f, -20.0f));
+	Add6DOF (scene, dVector (-20.0f, 0.0f, -25.0f));
+	AddDistance (scene, dVector (-20.0f, 0.0f, -20.0f));
 	AddLimitedBallAndSocket (scene, dVector (-20.0f, 0.0f, -15.0f));
-	//AddBallAndSockectWithFriction (scene, dVector (-20.0f, 0.0f, -10.0f));
-	//AddFixDistance(scene, dVector(-20.0f, 0.0f, -5.0f));
-	//AddHinge (scene, dVector (-20.0f, 0.0f, 0.0f));
-	//AddHingeMotor(scene, dVector(0.0f, 0.0f, -20.0f));
-	//AddHingeSpringDamper (scene, dVector (dVector (-20.0f, 0.0f, 5.0f)));
-	//AddSlider (scene, dVector (-20.0f, 0.0f, 7.0f));
-	//AddSliderSpringDamper (scene, dVector (dVector (-20.0f, 0.0f, 9.0f)));
-	//AddCylindrical (scene, dVector (-20.0f, 0.0f, 11.0f));
-	//AddSlidingContact (scene, dVector (-20.0f, 0.0f, 13.0f));
-	//AddDoubleHinge(scene, dVector (-20.0f, 0.0f, 17.0f));
-	//AddGear (scene, dVector (-20.0f, 0.0f, 22.0f));
-	//AddPulley (scene, dVector (-20.0f, 0.0f, 25.0f));
-	//AddGearAndRack (scene, dVector (-20.0f, 0.0f, 29.0f));
-	//AddDifferential(scene, dVector(-20.0f, 0.0f, 35.0f));
-	//AddPathFollow (scene, dVector (20.0f, 0.0f, 0.0f));
-	////AddFlexyPipe(scene, dVector(-20.0f, 0.0f, 0.0f));
+	AddBallAndSockectWithFriction (scene, dVector (-20.0f, 0.0f, -10.0f));
+	AddFixDistance(scene, dVector(-20.0f, 0.0f, -5.0f));
+	AddHinge (scene, dVector (-20.0f, 0.0f, 0.0f));
+	AddHingeMotor(scene, dVector(0.0f, 0.0f, -20.0f));
+	AddHingeSpringDamper (scene, dVector (dVector (-20.0f, 0.0f, 5.0f)));
+	AddSlider (scene, dVector (-20.0f, 0.0f, 7.0f));
+	AddSliderSpringDamper (scene, dVector (dVector (-20.0f, 0.0f, 9.0f)));
+	AddCylindrical (scene, dVector (-20.0f, 0.0f, 11.0f));
+	AddSlidingContact (scene, dVector (-20.0f, 0.0f, 13.0f));
+	AddDoubleHinge(scene, dVector (-20.0f, 0.0f, 17.0f));
+	AddGear (scene, dVector (-20.0f, 0.0f, 22.0f));
+	AddPulley (scene, dVector (-20.0f, 0.0f, 25.0f));
+	AddGearAndRack (scene, dVector (-20.0f, 0.0f, 29.0f));
+	AddDifferential(scene, dVector(-20.0f, 0.0f, 35.0f));
+	AddPathFollow (scene, dVector (20.0f, 0.0f, 0.0f));
+	//AddFlexyPipe(scene, dVector(-20.0f, 0.0f, 0.0f));
 
     // place camera into position
     dMatrix camMatrix (dGetIdentityMatrix());

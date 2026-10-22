@@ -30,6 +30,7 @@ class ndJointHinge: public ndJointBilateralConstraint
 	D_NEWTON_API ndFloat32 GetOmega() const;
 	D_NEWTON_API ndFloat32 GetTargetAngle() const;
 	D_NEWTON_API void SetTargetAngle(ndFloat32 angle);
+	D_NEWTON_API void SetAsMotor(ndFloat32 omega, ndFloat32 maxTorque);
 	D_NEWTON_API bool GetLimitState() const;
 	D_NEWTON_API void SetLimitState(bool state);
 	D_NEWTON_API void SetLimits(ndFloat32 minLimit, ndFloat32 maxLimit);
@@ -44,6 +45,8 @@ class ndJointHinge: public ndJointBilateralConstraint
 	D_NEWTON_API void UpdateParameters() override;
 	D_NEWTON_API ndFloat32 PenetrationOmega(ndFloat32 penetartion) const;
 	D_NEWTON_API void SubmitLimits(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
+
+	D_NEWTON_API void SubmitMotor(ndConstraintDescritor& desc, const ndMatrix& matrix0);
 	D_NEWTON_API void SubmitSpringDamper(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 
 	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
@@ -53,6 +56,8 @@ class ndJointHinge: public ndJointBilateralConstraint
 	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
 	ndAxisParam m_axis;
+	ndFloat32 m_motorSpeed;
+	ndFloat32 m_maxTorque;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif 

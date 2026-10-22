@@ -6428,6 +6428,10 @@ void NewtonHingeSetSpringDamper(const NewtonJoint* const ball, dFloat regularize
 {
 }
 
+void NewtonHingeSetAsMotor(const NewtonJoint* const hinge, dFloat omega, dFloat maxTorque)
+{
+}
+
 /*! @defgroup JointSlider JointSlider
 Slider joint interface
 @{

@@ -20,6 +20,8 @@
 ndJointHinge::ndJointHinge()
 	:ndJointBilateralConstraint()
 	,m_axis()
+	,m_motorSpeed(0.0f)
+	,m_maxTorque(0.0f)
 {
 	m_maxDof = 7;
 }
@@ -27,12 +29,16 @@ ndJointHinge::ndJointHinge()
 ndJointHinge::ndJointHinge(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(7, child, parent, pinAndPivotFrame)
 	,m_axis()
+	,m_motorSpeed(0.0f)
+	,m_maxTorque(0.0f)
 {
 }
 
 ndJointHinge::ndJointHinge(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(7, child, parent, pinAndPivotInChild, pinAndPivotInParent)
 	,m_axis()
+	,m_motorSpeed(0.0f)
+	,m_maxTorque(0.0f)
 {
 }
 
@@ -111,6 +117,12 @@ void ndJointHinge::SetTargetAngle(ndFloat32 angle)
 	m_axis.m_targetParam = angle;
 }
 
+void ndJointHinge::SetAsMotor(ndFloat32 omega, ndFloat32 maxTorque)
+{
+	m_motorSpeed = omega;
+	m_maxTorque = ndAbs(maxTorque);
+}
+
 void ndJointHinge::SetAsSpringDamper(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper)
 {
 	m_axis.m_springK = ndAbs(spring);
@@ -169,6 +181,15 @@ void ndJointHinge::DebugJoint(ndConstraintDebugCallback& debugCallback) const
 			}
 		}
 	}
+}
+
+void ndJointHinge::SubmitMotor(ndConstraintDescritor& desc, const ndMatrix& matrix0)
+{
+	AddAngularRowJacobian(desc, matrix0.m_front, ndFloat32 (0.0f));
+	ndFloat32 motorAccel = (m_motorSpeed - GetOmega()) * desc.m_invTimestep;
+	SetMotorAcceleration(desc, motorAccel);
+	SetLowerFriction(desc, -m_maxTorque);
+	SetLowerFriction(desc, m_maxTorque);
 }
 
 void ndJointHinge::SubmitSpringDamper(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& )
@@ -273,7 +294,11 @@ void ndJointHinge::JacobianDerivative(ndConstraintDescritor& desc)
 	CalculateGlobalMatrix(matrix0, matrix1);
 
 	ApplyBaseRows(desc, matrix0, matrix1);
-	if (m_axis.m_springDamperRegularizer && ((m_axis.m_springK > ndFloat32(0.0f)) || (m_axis.m_damperC > ndFloat32(0.0f))))
+	if (m_motorSpeed != ndFloat32(0.0f))
+	{
+		SubmitMotor(desc, matrix0);
+	}
+	else if (m_axis.m_springDamperRegularizer && ((m_axis.m_springK > ndFloat32(0.0f)) || (m_axis.m_damperC > ndFloat32(0.0f))))
 	{
 		// spring damper with limits
 		SubmitSpringDamper(desc, matrix0, matrix1);

@@ -1259,6 +1259,8 @@ extern "C" {
 	NEWTON_API dFloat NewtonHingeCalculateStopAlpha(const NewtonJoint* const hinge, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle);
 	NEWTON_API void NewtonHingeEnableLimits(const NewtonJoint* const hinge, int state);
 	NEWTON_API void NewtonHingeSetLimits(const NewtonJoint* const hinge, dFloat minTwistAngle, dFloat maxTwistAngle);
+
+	NEWTON_API void NewtonHingeSetAsMotor(const NewtonJoint* const hinge, dFloat omega, dFloat maxTorque);
 	NEWTON_API void NewtonHingeSetSpringDamper(const NewtonJoint* const ball, dFloat regularizer, dFloat spring, dFloat32 damper);
 
 #ifdef __cplusplus 

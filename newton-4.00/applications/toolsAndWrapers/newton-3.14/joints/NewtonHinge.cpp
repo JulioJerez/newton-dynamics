@@ -131,3 +131,9 @@ void NewtonHingeSetSpringDamper(const NewtonJoint* const joint, dFloat regulariz
 	NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
 	userJoint->SetAsSpringDamper(regularizer, spring, damper);
 }
+
+void NewtonHingeSetAsMotor(const NewtonJoint* const joint, dFloat omega, dFloat maxTorque)
+{
+	NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
+	userJoint->SetAsMotor(omega, maxTorque);
+}
