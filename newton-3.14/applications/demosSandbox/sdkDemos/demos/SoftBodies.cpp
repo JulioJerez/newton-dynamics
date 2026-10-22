@@ -735,7 +735,7 @@ points[index] -= dVector(width * 0.5f, height * 0.5f, depth * 0.5f, 0.0f);
 };
 
 
-
+/*
 void SoftBodies(DemoEntityManager* const scene)
 {
 	// load the sky box
@@ -777,3 +777,4 @@ void ClothPatch(DemoEntityManager* const scene)
 	dVector origin(location.m_x - 10.0f, 2.0f, location.m_z, 0.0f);
 	scene->SetCameraMatrix(rot, origin);
 }
+*/

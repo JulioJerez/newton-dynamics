@@ -192,7 +192,7 @@ class DemoEntityManager: public dList <DemoEntity*>
 	int m_lastCurrentScene;
 	int m_framesCount;
 	int m_physicsFramesCount;
-	int m_currentPlugin;
+	const void* m_currentPlugin;
 	dFloat m_fps;
 	dFloat m_timestepAcc;
 	dFloat m_currentListenerTimestep;

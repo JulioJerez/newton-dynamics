@@ -6237,6 +6237,39 @@ void NewtonBallSetConeLimits(const NewtonJoint* const ball, const dFloat* pin, d
 	joint->SetLimits (coneAxis, -maxConeAngle, maxConeAngle, maxTwistAngle, lateral, 0.0f, 0.0f);
 }
 
+void NewtonBallEnableCone(const NewtonJoint* const ball, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgBallConstraint* const joint = (dgBallConstraint*)ball;
+	joint->SetConeLimitState(state ? true : false);
+}
+
+void NewtonBallSetConeLimits1(const NewtonJoint* const ball, dFloat maxConeAngle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgBallConstraint* const joint = (dgBallConstraint*)ball;
+	joint->SetCone(maxConeAngle);
+}
+
+void NewtonBallEnableTwist(const NewtonJoint* const ball, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgBallConstraint* const joint = (dgBallConstraint*)ball;
+	joint->SetTwistLimitState(state ? true : false);
+}
+
+void NewtonBallSetTwistLimits(const NewtonJoint* const ball, dFloat minTwistAngle, dFloat maxTwistAngle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgBallConstraint* const joint = (dgBallConstraint*)ball;
+	joint->SetTwistLinmits(minTwistAngle, maxTwistAngle);
+}
+
+void NewtonBallSetSpringDamper(const NewtonJoint* const ball, dFloat regularizer, dFloat spring, dFloat32 damper)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	// do nothing
+}
 
 /*!
   Set an update call back to be called when either of the two bodies linked by the joint is active.
@@ -6254,13 +6287,10 @@ void NewtonBallSetConeLimits(const NewtonJoint* const ball, const dFloat* pin, d
 */
 void NewtonBallSetUserCallback(const NewtonJoint* const ball, NewtonBallCallback callback)
 {
-	dgBallConstraint* contraint;
-
 	TRACE_FUNCTION(__FUNCTION__);
-	contraint = (dgBallConstraint*) ball;
+	dgBallConstraint* contraint = (dgBallConstraint*) ball;
 	contraint->SetJointParameterCallback ((dgBallJointFriction)callback);
 }
-
 
 /*!
   Get the relative joint angle between the two bodies.
@@ -6339,8 +6369,72 @@ void NewtonBallGetJointForce(const NewtonJoint* const ball, dFloat* const force)
 	force[2] = forceVector.m_z;
 }
 
+//
+// Create a slider joint.
+//
+NewtonJoint* NewtonConstraintCreateHinge(const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const dFloat* pinDir, const NewtonBody* const childBody, const NewtonBody* const parentBody)
+{
+	Newton* const world = (Newton*)newtonWorld;
+	dgBody* const body0 = (dgBody*)childBody;
+	dgBody* const body1 = (dgBody*)parentBody;
+	dgVector pin(pinDir[0], pinDir[1], pinDir[2], dgFloat32(0.0f));
+	dgVector pivot(pivotPoint[0], pivotPoint[1], pivotPoint[2], dgFloat32(0.0f));
+	return (NewtonJoint*)world->CreateHingeConstraint(pivot, pin, body0, body1);
+}
 
-/*! @} */ // end of ConstraintBall
+void NewtonHingeSetUserCallback(const NewtonJoint* const hinge, NewtonHingeCallback callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgHingeConstraint* contraint = (dgHingeConstraint*)hinge;
+	contraint->SetJointParameterCallback((dgHingeJointAcceleration)callback);
+}
+
+dFloat NewtonHingeGetJointAngle(const NewtonJoint* const hinge)
+{
+	dgHingeConstraint* contraint = (dgHingeConstraint*)hinge;
+	return contraint->GetJointAngle();
+}
+
+dFloat NewtonHingeGetJointOmega(const NewtonJoint* const hinge)
+{
+	dgHingeConstraint* contraint = (dgHingeConstraint*)hinge;
+	return contraint->GetJointOmega();
+}
+
+void NewtonHingeGetJointForce(const NewtonJoint* const hinge, dFloat* const force)
+{
+	dgHingeConstraint* contraint = (dgHingeConstraint*)hinge;
+	const dgVector forceVector(contraint->GetJointForce());
+	force[0] = forceVector.m_x;
+	force[1] = forceVector.m_y;
+	force[2] = forceVector.m_z;
+}
+
+dFloat NewtonHingeCalculateStopAlpha(const NewtonJoint* const hinge, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle)
+{
+	dgHingeConstraint* contraint = (dgHingeConstraint*)hinge;
+	return contraint->CalculateStopAlpha(angle, (dgJointCallbackParam*)desc);
+}
+
+void NewtonHingeEnableLimits(const NewtonJoint* const hinge, int state)
+{
+}
+
+void NewtonHingeSetLimits(const NewtonJoint* const hinge, dFloat minTwistAngle, dFloat maxTwistAngle)
+{
+}
+
+void NewtonHingeSetDryFriction(const NewtonJoint* const hinge, dFloat frictionTorque)
+{
+}
+
+void NewtonHingeSetSpringDamper(const NewtonJoint* const hinge, dFloat regularizer, dFloat spring, dFloat32 damper)
+{
+}
+
+void NewtonHingeSetAsMotor(const NewtonJoint* const hinge, dFloat omega, dFloat maxTorque)
+{
+}
 
 /*! @defgroup JointSlider JointSlider
 Slider joint interface
@@ -6485,6 +6579,23 @@ void NewtonSliderGetJointForce(const NewtonJoint* const slider, dFloat* const fo
 	force[0] = forceVector.m_x;
 	force[1] = forceVector.m_y;
 	force[2] = forceVector.m_z;
+}
+
+static dgUnsigned32 FixJointAccel(const dgSlidingConstraint& slider, dgJointCallbackParam* param)
+{
+	param->m_accel = slider.CalculateStopAccel(0.0f, param);
+	return 1;
+}
+
+// for forward compatibility with 3.14
+NewtonJoint* NewtonConstraintCreateFix6Dof(const NewtonWorld* const newtonWorld, const NewtonBody* const childBody, const NewtonBody* const parentBody)
+{
+	dgBody* const body0 = (dgBody*)childBody;
+	dgMatrix matrix(body0->GetMatrix());
+	NewtonJoint* const joint = NewtonConstraintCreateSlider(newtonWorld, &matrix.m_posit[0], &matrix.m_front[0], childBody, parentBody);
+	dgSlidingConstraint* const slider = (dgSlidingConstraint*)joint;
+	slider->SetJointParameterCallback(FixJointAccel);
+	return joint;
 }
 
 
