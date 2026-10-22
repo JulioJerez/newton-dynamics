@@ -216,24 +216,6 @@ static void BuildHinge(ndDemoEntityManager* const scene, const ndVector& origin,
 		ndFloat32 m_angle;
 	};
 
-	class ndJointHingeMotor : public ndJointHinge
-	{
-		public:
-		ndJointHingeMotor(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
-			:ndJointHinge(pinAndPivotFrame, child, parent)
-			,m_speed(10.0f)
-		{
-		}
-
-		void JacobianDerivative(ndConstraintDescritor& desc) override
-		{
-			ndFloat32 angle = GetAngle();
-			SetTargetAngle(angle + m_speed * desc.m_timestep);
-			ndJointHinge::JacobianDerivative(desc);
-		}
-		ndFloat32 m_speed;
-	};
-
 	ndPhysicsWorld* const world = scene->GetWorld();
 	ndRender* const render = *scene->GetRenderer();
 
@@ -263,9 +245,20 @@ static void BuildHinge(ndDemoEntityManager* const scene, const ndVector& origin,
 	}
 
 	{
-		// viscous friction and limits
+		// proportional derivative hinge oscillator with limits
 		ndMatrix matrix(refMatrix);
 		matrix.m_posit.m_y += 1.2f;
+		ndSharedPtr<ndBody> body(MakePrimitive(scene, matrix, **shape, mesh, mass));
+		ndJointHinge* const joint = new ndJointHingeOscillator(matrix, body->GetAsBodyDynamic(), fixBody);
+		joint->SetAsSpringDamper(0.1f, 1500.0f, 10.0f);
+		ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
+		world->AddJoint(jointPtr);
+	}
+
+	{
+		// viscous friction and limits
+		ndMatrix matrix(refMatrix);
+		matrix.m_posit.m_y += 2.4f;
 		ndSharedPtr<ndBody> body(MakePrimitive(scene, matrix, **shape, mesh, mass));
 		ndJointHinge* const joint = new ndJointHinge(matrix, body->GetAsBodyDynamic(), fixBody);
 		joint->SetAsSpringDamper(0.1f, 0.0f, 1.0f);
@@ -276,23 +269,23 @@ static void BuildHinge(ndDemoEntityManager* const scene, const ndVector& origin,
 	}
 
 	{
-		// proportional derivative hinge oscillator with limits
+		// constant dry friction
 		ndMatrix matrix(refMatrix);
-		matrix.m_posit.m_y += 2.4f;
+		matrix.m_posit.m_y += 3.6f;
 		ndSharedPtr<ndBody> body(MakePrimitive(scene, matrix, **shape, mesh, mass));
-		ndJointHinge* const joint = new ndJointHingeOscillator(matrix, body->GetAsBodyDynamic(), fixBody);
-		joint->SetAsSpringDamper(0.1f, 1500.0f, 10.0f);
+		ndJointHinge* const joint = new ndJointHinge(matrix, body->GetAsBodyDynamic(), fixBody);
+		joint->SetAsDryFriction(20.0f);
 		ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
 		world->AddJoint(jointPtr);
 	}
 
 	{
-		// proportional derivative hinge motor with limits
+		// constant speed motor
 		ndMatrix matrix(refMatrix);
-		matrix.m_posit.m_y += 3.6f;
+		matrix.m_posit.m_y += 4.8f;
 		ndSharedPtr<ndBody> body(MakePrimitive(scene, matrix, **shape, mesh, mass));
-		ndJointHinge* const joint = new ndJointHingeMotor(matrix, body->GetAsBodyDynamic(), fixBody);
-		joint->SetAsSpringDamper(0.1f, 1500.0f, 10.0f);
+		ndJointHinge* const joint = new ndJointHinge(matrix, body->GetAsBodyDynamic(), fixBody);
+		joint->SetAsMotor(10.0f, 1000.0f);
 		ndSharedPtr<ndJointBilateralConstraint> jointPtr(joint);
 		world->AddJoint(jointPtr);
 	}
