@@ -6424,7 +6424,11 @@ void NewtonHingeSetLimits(const NewtonJoint* const hinge, dFloat minTwistAngle, 
 {
 }
 
-void NewtonHingeSetSpringDamper(const NewtonJoint* const ball, dFloat regularizer, dFloat spring, dFloat32 damper)
+void NewtonHingeSetDryFriction(const NewtonJoint* const hinge, dFloat frictionTorque)
+{
+}
+
+void NewtonHingeSetSpringDamper(const NewtonJoint* const hinge, dFloat regularizer, dFloat spring, dFloat32 damper)
 {
 }
 

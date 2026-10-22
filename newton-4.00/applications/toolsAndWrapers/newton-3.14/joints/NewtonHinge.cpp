@@ -134,6 +134,13 @@ void NewtonHingeSetSpringDamper(const NewtonJoint* const joint, dFloat regulariz
 
 void NewtonHingeSetAsMotor(const NewtonJoint* const joint, dFloat omega, dFloat maxTorque)
 {
+	TRACE_FUNCTION(__FUNCTION__);
 	NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
 	userJoint->SetAsMotor(omega, maxTorque);
+}
+
+void NewtonHingeSetDryFriction(const NewtonJoint* const hinge, dFloat frictionTorque)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+
 }

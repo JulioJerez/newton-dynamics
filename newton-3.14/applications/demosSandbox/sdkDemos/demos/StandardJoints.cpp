@@ -845,7 +845,8 @@ static void AddHinge(DemoEntityManager* const scene, const dVector& origin)
 		NewtonJoint* const hinge = NewtonConstraintCreateHinge(world, &matrix.m_posit[0], &matrix.m_front[0], child, parent);
 		NewtonHingeEnableLimits(hinge, 1);
 		NewtonHingeSetLimits(hinge, -45.0f * dDegreeToRad, 45.0f * dDegreeToRad);
-		NewtonHingeSetSpringDamper(hinge, 0.01f, 0.0f, 20.0f);
+		//NewtonHingeSetSpringDamper(hinge, 0.01f, 0.0f, 20.0f);
+		NewtonHingeSetDryFriction(hinge, 20.0f);
 
 		parent = child;
 		position.m_x += size.m_x;
@@ -901,8 +902,8 @@ void StandardJoints (DemoEntityManager* const scene)
 	//Add6DOF (scene, dVector (-20.0f, 0.0f, -25.0f));
 	//AddLimitedBallAndSocket (scene, dVector (-20.0f, 0.0f, -15.0f));
 	//AddBallAndSockectWithFriction (scene, dVector (-20.0f, 0.0f, -10.0f));
-	//AddHinge (scene, dVector (-20.0f, 0.0f, 0.0f));
-	AddHingeMotor(scene, dVector(0.0f, 0.0f, -20.0f));
+	AddHinge (scene, dVector (-20.0f, 0.0f, 0.0f));
+	//AddHingeMotor(scene, dVector(0.0f, 0.0f, -20.0f));
 	//AddHingeSpringDamper (scene, dVector (dVector (-20.0f, 0.0f, 5.0f)));
 	//AddSlider (scene, dVector (-20.0f, 0.0f, 7.0f));
 	//AddSliderSpringDamper (scene, dVector (dVector (-20.0f, 0.0f, 9.0f)));
