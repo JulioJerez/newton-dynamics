@@ -58,8 +58,8 @@
 //#define DEFAULT_SCENE	23		// scene Collision
 //#define DEFAULT_SCENE	24		// simple convex fracturing 
 //#define DEFAULT_SCENE	25		// multi ray casting using the threading Job scheduler
-#define DEFAULT_SCENE	26		// standard joints
-//#define DEFAULT_SCENE	27		// custom joints
+//#define DEFAULT_SCENE	26		// standard joints
+#define DEFAULT_SCENE	27		// custom joints
 //#define DEFAULT_SCENE	28		// servo joints
 //#define DEFAULT_SCENE	29		// construction vehicle
 //#define DEFAULT_SCENE	30		// six axis manipulator
@@ -211,7 +211,7 @@ DemoEntityManager::DemoEntityManager ()
 	,m_lastCurrentScene(DEFAULT_SCENE)
 	,m_framesCount(0)
 	,m_physicsFramesCount(0)
-	,m_currentPlugin(0)
+	,m_currentPlugin(nullptr)
 	,m_fps(0.0f)
 	,m_timestepAcc(0.0f)
 	,m_currentListenerTimestep(0.0f)
@@ -344,17 +344,6 @@ DemoEntityManager::DemoEntityManager ()
 
 	Cleanup();
 	ResetTimer();
-
-	m_currentPlugin = 0;
-	void* preferedPlugin = NewtonGetPreferedPlugin(m_world);
-	for (void* ptr = NewtonGetFirstPlugin(m_world); ptr; ptr = NewtonGetNextPlugin(m_world, ptr)) {
-		m_currentPlugin ++;
-		if (ptr == preferedPlugin) {
-			break;
-		}
-	}
-//m_currentPlugin = 2;
-
 	m_shadeCache.CreateAllEffects();
 
 /*
@@ -688,17 +677,11 @@ void DemoEntityManager::ApplyMenuOptions()
 	NewtonSelectBroadphaseAlgorithm(m_world, m_broadPhaseType);
 	NewtonSetParallelSolverOnLargeIsland (m_world, m_solveLargeIslandInParallel ? 1 : 0);	
 
-	void* plugin = NULL;
-	if (m_currentPlugin) {
-		int index = 1;
-		for (void* ptr = NewtonGetFirstPlugin(m_world); ptr; ptr = NewtonGetNextPlugin(m_world, ptr)) {
-			if (index == m_currentPlugin) {
-				plugin = ptr;
-			}
-			index ++;
-		}
+	const void* const plugin = NewtonCurrentPlugin(m_world);
+	if (plugin != m_currentPlugin)
+	{
+		NewtonSelectPlugin(m_world, m_currentPlugin);
 	}
-	NewtonSelectPlugin(m_world, plugin);
 }
 
 void DemoEntityManager::ShowMainMenuBar()
@@ -772,15 +755,52 @@ void DemoEntityManager::ShowMainMenuBar()
 			ImGui::Checkbox("solve large island in parallel", &m_solveLargeIslandInParallel);
 			ImGui::Separator();
 
-			int index = 0;
-			ImGui::RadioButton("default solver", &m_currentPlugin, index);
-			char ids[32][32];
-			for (void* plugin = NewtonGetFirstPlugin(m_world); plugin; plugin = NewtonGetNextPlugin(m_world, plugin)) {
-				index++;
-				const char* const id = NewtonGetPluginString(m_world, plugin);
-				sprintf (&ids[index][0], "%s", id);
-				ImGui::RadioButton(&ids[index][0], &m_currentPlugin, index);
+			int index = 1;
+			char ids[32][64];
+			sprintf(ids[0], "default");
+			if (NewtonWorldGetVersion() > 314)
+			{
+				index = 0;
 			}
+			for (void* plugin = NewtonGetFirstPlugin(m_world); plugin; plugin = NewtonGetNextPlugin(m_world, plugin))
+			{
+				sprintf(ids[index], "%s", NewtonGetPluginString(m_world, plugin));
+				index++;
+			}
+			dgInt32 currentId = 0;
+			if (m_currentPlugin)
+			{
+				const char* const id = NewtonGetPluginString(m_world, m_currentPlugin);
+				for (dgInt32 i = 0; i < index; ++i)
+				{
+					if (strcmp(id, ids[i]) == 0)
+					{
+						currentId = i;
+					}
+				}
+			}
+
+			dgInt32 pluginChanged = currentId;
+			for (dgInt32 i = 0; i < index; ++i)
+			{
+				ImGui::RadioButton(ids[i], &currentId, i);
+			}
+			if (pluginChanged != currentId)
+			{
+				if (currentId == 0)
+				{
+					m_currentPlugin = nullptr;
+				}
+				for (void* plugin = NewtonGetFirstPlugin(m_world); plugin; plugin = NewtonGetNextPlugin(m_world, plugin))
+				{
+					const char* const id = NewtonGetPluginString(m_world, plugin);
+					if (strcmp(id, ids[currentId]) == 0)
+					{
+						m_currentPlugin = plugin;
+					}
+				}
+			}
+
 			ImGui::Separator();
 
 			//ImGui::Text("iterative solver passes %d", m_solverPasses);
@@ -1053,16 +1073,15 @@ void DemoEntityManager::RenderStats()
 			sprintf (text, "memory used:   %d kbytes", NewtonGetMemoryUsed() / 1024);
 			ImGui::Text(text, "");
 
-			if (m_currentPlugin) {
-				int index = 1;
-				for (void* plugin = NewtonGetFirstPlugin(m_world); plugin; plugin = NewtonGetNextPlugin(m_world, plugin)) {
-					if (index == m_currentPlugin) {
-						sprintf(text, "plugin:        %s", NewtonGetPluginString(m_world, plugin));
-						ImGui::Text(text, "");
-					}
-					index++;
-				}
+			char pluginLable[64];
+			sprintf(pluginLable, "default");
+			const void* const currentPlugin = NewtonCurrentPlugin(m_world);
+			if (currentPlugin)
+			{
+				sprintf(pluginLable, "%s", NewtonGetPluginString(m_world, currentPlugin));
 			}
+			sprintf(text, "plugin:        %s", pluginLable);
+			ImGui::Text(text, "");
 
 			sprintf(text, "bodies:        %d", NewtonWorldGetBodyCount(m_world));
 			ImGui::Text(text, "");
