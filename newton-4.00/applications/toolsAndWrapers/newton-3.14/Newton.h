@@ -439,15 +439,6 @@ extern "C" {
 	NEWTON_API const int* NewtonDeformableMeshSegmentGetIndexList (const NewtonCollision* const deformableMesh, const NewtonDeformableMeshSegment* const segment);
 */
 
-	// **********************************************************************************************
-	//
-	// Up vector joint functions
-	//
-	// **********************************************************************************************
-	NEWTON_API NewtonJoint* NewtonConstraintCreateUpVector (const NewtonWorld* const newtonWorld, const dFloat* pinDir, const NewtonBody* const body); 
-	NEWTON_API void NewtonUpVectorGetPin (const NewtonJoint* const upVector, dFloat *pin);
-	NEWTON_API void NewtonUpVectorSetPin (const NewtonJoint* const upVector, const dFloat *pin);
-
 
 	// ********************************************************************************
 	//
@@ -1284,6 +1275,11 @@ extern "C" {
 	NEWTON_API void NewtonUniversalEnableLimits1(const NewtonJoint* const universal, int state);
 	NEWTON_API void NewtonUniversalSetLimits1(const NewtonJoint* const universal, dFloat minTwistAngle, dFloat maxTwistAngle);
 	NEWTON_API void NewtonRollerSetSpringDamper1(const NewtonJoint* const corkscrew, dFloat regularizer, dFloat spring, dFloat32 damper);
+
+	// Up vector joint functions
+	NEWTON_API NewtonJoint* NewtonConstraintCreateUpVector(const NewtonWorld* const newtonWorld, const dFloat* pinDir, const NewtonBody* const body);
+	NEWTON_API void NewtonUpVectorGetPin(const NewtonJoint* const upVector, dFloat* pin);
+	NEWTON_API void NewtonUpVectorSetPin(const NewtonJoint* const upVector, const dFloat* pin);
 
 #ifdef __cplusplus 
 }
