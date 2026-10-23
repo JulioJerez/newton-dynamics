@@ -777,7 +777,7 @@ static void AddSlidingContact(DemoEntityManager* const scene, const dVector& ori
 	
 	// set angular limit on second axis
 	NewtonRollerEnableAngularLimits(roller, 1);
-	NewtonRollerSetAngularLimits(roller, - 7.0f * dPi, 5.0f * dPi);
+	NewtonRollerSetAngularLimits(roller, -7.0f * dPi, 5.0f * dPi);
 }
 
 static void AddDoubleHinge(DemoEntityManager* const scene, const dVector& origin)
@@ -812,7 +812,6 @@ static void AddDoubleHinge(DemoEntityManager* const scene, const dVector& origin
 		NewtonUniversalSetLimits0(joint, -3.0f * dPi, 4.0f * dPi);
 	}
 
-#if 0
 	{
 		dMatrix matrix;
 		dVector damp(0.0f);
@@ -829,11 +828,12 @@ static void AddDoubleHinge(DemoEntityManager* const scene, const dVector& origin
 		NewtonBodySetAngularDamping(box2, &damp[0]);
 
 		NewtonBodyGetMatrix(box2, &matrix[0][0]);
-		dCustomDoubleHinge* const joint = new dCustomDoubleHinge(matrix, box2, box0);
-		joint->EnableLimits1(true);
-		joint->SetLimits1(-10.0f * dPi, 15.0f * dPi);
+		NewtonJoint* const joint = NewtonConstraintCreateUniversal(world, &matrix.m_posit[0], &matrix.m_front[0], &matrix.m_up[0], box2, box0);
+		NewtonUniversalEnableLimits1(joint, 1);
+		NewtonUniversalSetLimits1(joint, -10.0f * dPi, 15.0f * dPi);
 	}
 
+#if 0
 	{
 		dMatrix matrix;
 		dVector damp(0.0f);
