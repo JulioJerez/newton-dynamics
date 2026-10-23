@@ -1171,6 +1171,27 @@ extern "C" {
 
 	// **********************************************************************************************
 	//
+	// roller joint (new for 3.15)
+	//
+	// **********************************************************************************************
+	NEWTON_API NewtonJoint* NewtonConstraintCreateRoller(const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const dFloat* pinDir, const NewtonBody* const childBody, const NewtonBody* const parentBody);
+	NEWTON_API void NewtonRollerSetUserCallback(const NewtonJoint* const corkscrew, NewtonCorkscrewCallback callback);
+	NEWTON_API dFloat NewtonRollerGetJointPosit(const NewtonJoint* const corkscrew);
+	NEWTON_API dFloat NewtonRollerGetJointAngle(const NewtonJoint* const corkscrew);
+	NEWTON_API dFloat NewtonRollerGetJointVeloc(const NewtonJoint* const corkscrew);
+	NEWTON_API dFloat NewtonRollerGetJointOmega(const NewtonJoint* const corkscrew);
+	NEWTON_API void NewtonRollerGetJointForce(const NewtonJoint* const corkscrew, dFloat* const force);
+	NEWTON_API dFloat NewtonRollerCalculateStopAlpha(const NewtonJoint* const corkscrew, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle);
+	NEWTON_API dFloat NewtonRollerCalculateStopAccel(const NewtonJoint* const corkscrew, const NewtonHingeSliderUpdateDesc* const desc, dFloat position);
+
+	NEWTON_API void NewtonRollerEnableLinearLimits(const NewtonJoint* const corkscrew, int state);
+	NEWTON_API void NewtonRollerSetLinearLimits(const NewtonJoint* const corkscrew, dFloat minPosit, dFloat maxPosit);
+	NEWTON_API void NewtonRollerEnableAngularLimits(const NewtonJoint* const corkscrew, int state);
+	NEWTON_API void NewtonRollerSetAngularLimits(const NewtonJoint* const corkscrew, dFloat minTwistAngle, dFloat maxTwistAngle);
+
+
+	// **********************************************************************************************
+	//
 	// Universal joint functions
 	//
 	// **********************************************************************************************

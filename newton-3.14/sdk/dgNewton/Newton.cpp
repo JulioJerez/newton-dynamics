@@ -6836,22 +6836,111 @@ void NewtonCorkscrewGetJointForce(const NewtonJoint* const corkscrew, dFloat* co
 
 void NewtonCorkscrewEnableLinearLimits(const NewtonJoint* const slider, int state)
 {
+	TRACE_FUNCTION(__FUNCTION__);
 }
 
 void NewtonCorkscrewSetLinearLimits(const NewtonJoint* const slider, dFloat minPosit, dFloat maxPosit)
 {
+	TRACE_FUNCTION(__FUNCTION__);
 }
 
 void NewtonCorkscrewEnableAngularLimits(const NewtonJoint* const hinge, int state)
 {
+	TRACE_FUNCTION(__FUNCTION__);
 }
 
 void NewtonCorkscrewSetAngularLimits(const NewtonJoint* const hinge, dFloat minTwistAngle, dFloat maxTwistAngle)
 {
+	TRACE_FUNCTION(__FUNCTION__);
 }
 
+// 
+// roller joint (new for 3.15 bu not supported in 3.14
+//
+NewtonJoint* NewtonConstraintCreateRoller(const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const dFloat* pinDir, const NewtonBody* const childBody, const NewtonBody* const parentBody)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	return NewtonConstraintCreateCorkscrew(newtonWorld, pivotPoint, pinDir, childBody, parentBody);
+}
 
-/*! @} */ // end of JointSlider
+void NewtonRollerSetUserCallback(const NewtonJoint* const corkscrew, NewtonCorkscrewCallback callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgAssert(0);
+}
+
+dFloat NewtonRollerGetJointPosit(const NewtonJoint* const corkscrew)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgAssert(0);
+	return 0;
+}
+
+dFloat NewtonRollerGetJointAngle(const NewtonJoint* const corkscrew)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgAssert(0);
+	return 0;
+}
+
+dFloat NewtonRollerGetJointVeloc(const NewtonJoint* const corkscrew)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgAssert(0);
+	return 0;
+}
+
+dFloat NewtonRollerGetJointOmega(const NewtonJoint* const corkscrew)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgAssert(0);
+	return 0;
+}
+
+void NewtonRollerGetJointForce(const NewtonJoint* const corkscrew, dFloat* const force)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgAssert(0);
+}
+
+dFloat NewtonRollerCalculateStopAlpha(const NewtonJoint* const corkscrew, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgAssert(0);
+	return 0;
+}
+
+dFloat NewtonRollerCalculateStopAccel(const NewtonJoint* const corkscrew, const NewtonHingeSliderUpdateDesc* const desc, dFloat position)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgAssert(0);
+	return 0;
+}
+
+void NewtonRollerEnableLinearLimits(const NewtonJoint* const corkscrew, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgAssert(0);
+}
+
+void NewtonRollerSetLinearLimits(const NewtonJoint* const corkscrew, dFloat minPosit, dFloat maxPosit)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgAssert(0);
+}
+
+void NewtonRollerEnableAngularLimits(const NewtonJoint* const corkscrew, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgAssert(0);
+}
+
+void NewtonRollerSetAngularLimits(const NewtonJoint* const corkscrew, dFloat minTwistAngle, dFloat maxTwistAngle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	dgAssert(0);
+}
+
 
 /*! @defgroup JointUniversal JointUniversal
 Universal joint interface

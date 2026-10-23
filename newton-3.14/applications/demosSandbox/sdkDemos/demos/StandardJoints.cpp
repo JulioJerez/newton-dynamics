@@ -201,36 +201,6 @@ static void AddDoubleHinge(DemoEntityManager* const scene, const dVector& origin
 	}
 }
 
-static void AddSlidingContact(DemoEntityManager* const scene, const dVector& origin)
-{
-	// make a reel static
-	NewtonBody* const box0 = CreateBox(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), dVector(8.0f, 0.25f, 0.25f, 0.0f));
-	NewtonBody* const box1 = CreateWheel(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), 1.0f, 0.5f);
-
-	NewtonBodySetMassMatrix(box0, 0.0f, 0.0f, 0.0f, 0.0f);
-
-	dMatrix matrix;
-	//rotate body so that is lok like a wheel
-	NewtonBodyGetMatrix(box1, &matrix[0][0]);
-	matrix = dRollMatrix(90.0f * dDegreeToRad) * matrix;
-	NewtonBodySetMatrix(box1, &matrix[0][0]);
-	DemoEntity* const ent = (DemoEntity*)NewtonBodyGetUserData(box1);
-	ent->ResetMatrix(*scene, matrix);
-
-
-	//make joint matrix
-	dMatrix jointMatrix(dGetIdentityMatrix());
-	jointMatrix.m_posit = matrix.m_posit;
-
-	dCustomSlidingContact* const slider = new dCustomSlidingContact(jointMatrix, box1, box0);
-	slider->EnableLimits (true);
-	slider->SetLimits (-4.0f, 4.0f);
-	slider->SetAsSpringDamper(true, 0.7f, 80.0f, 0.0f);
-
-	// enable limit of first axis
-	slider->EnableAngularLimits(true);
-	slider->SetAngularLimits(-7.0f * dPi, 5.0f * dPi);
-}
 
 static dCustomHinge* AddHingeWheel (DemoEntityManager* const scene, const dVector& origin, dFloat radius, dFloat height, NewtonBody* const parent)
 {
@@ -857,7 +827,6 @@ static void AddCylindrical(DemoEntityManager* const scene, const dVector& origin
 
 	// connect the bodies by a CorkScrew joint
 	NewtonBodyGetMatrix(box1, &matrix[0][0]);
-	//dCustomCorkScrew* const cylinder = new dCustomCorkScrew(matrix, box1, box0);
 	NewtonJoint* const cylinder = NewtonConstraintCreateCorkscrew(world, &matrix.m_posit[0], &matrix.m_front[0], box1, box0);
 
 	// enable limit of first axis
@@ -869,6 +838,39 @@ static void AddCylindrical(DemoEntityManager* const scene, const dVector& origin
 	NewtonCorkscrewSetAngularLimits(cylinder, -4.0f * dPi, 6.0f * dPi);
 }
 
+static void AddSlidingContact(DemoEntityManager* const scene, const dVector& origin)
+{
+	// make a reel static
+	NewtonBody* const box0 = CreateBox(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), dVector(8.0f, 0.25f, 0.25f, 0.0f));
+	NewtonBody* const box1 = CreateWheel(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), 1.0f, 0.5f);
+
+	NewtonBodySetMassMatrix(box0, 0.0f, 0.0f, 0.0f, 0.0f);
+
+	NewtonWorld* const world = scene->GetNewton();
+
+	dMatrix matrix;
+	//rotate body so that is lok like a wheel
+	NewtonBodyGetMatrix(box1, &matrix[0][0]);
+	matrix = dRollMatrix(90.0f * dDegreeToRad) * matrix;
+	NewtonBodySetMatrix(box1, &matrix[0][0]);
+	DemoEntity* const ent = (DemoEntity*)NewtonBodyGetUserData(box1);
+	ent->ResetMatrix(*scene, matrix);
+
+
+	//make joint matrix
+	dMatrix jointMatrix(dGetIdentityMatrix());
+	jointMatrix.m_posit = matrix.m_posit;
+
+	//dCustomSlidingContact* const slider = new dCustomSlidingContact(jointMatrix, box1, box0);
+	NewtonJoint* const roller = NewtonConstraintCreateRoller(world, &jointMatrix.m_posit[0], &jointMatrix.m_front[0], box1, box0);
+	//slider->EnableLimits(true);
+	//slider->SetLimits(-4.0f, 4.0f);
+	//slider->SetAsSpringDamper(true, 0.7f, 80.0f, 0.0f);
+	//
+	//// enable limit of first axis
+	//slider->EnableAngularLimits(true);
+	//slider->SetAngularLimits(-7.0f * dPi, 5.0f * dPi);
+}
 
 
 void StandardJoints (DemoEntityManager* const scene)
@@ -893,8 +895,8 @@ void StandardJoints (DemoEntityManager* const scene)
 	//AddHingeSpringDamper (scene, dVector (dVector (-20.0f, 0.0f, 5.0f)));
 	//AddSlider (scene, dVector (-20.0f, 0.0f, 7.0f));
 	//AddSliderSpringDamper (scene, dVector (dVector (-20.0f, 0.0f, 9.0f)));
-	AddCylindrical (scene, dVector (-20.0f, 0.0f, 11.0f));
-	//AddSlidingContact (scene, dVector (-20.0f, 0.0f, 13.0f));
+	//AddCylindrical (scene, dVector (-20.0f, 0.0f, 11.0f));
+	AddSlidingContact (scene, dVector (-20.0f, 0.0f, 13.0f));
 	//AddDoubleHinge(scene, dVector (-20.0f, 0.0f, 17.0f));
 	//AddGear (scene, dVector (-20.0f, 0.0f, 22.0f));
 	//AddPulley (scene, dVector (-20.0f, 0.0f, 25.0f));
@@ -910,5 +912,4 @@ void StandardJoints (DemoEntityManager* const scene)
 //	dVector origin (-30.0f, 7.0f, 30.0f, 0.0f);
     scene->SetCameraMatrix(rot, origin);
 }
-
 
