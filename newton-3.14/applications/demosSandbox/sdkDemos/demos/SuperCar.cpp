@@ -136,61 +136,61 @@ public:
 	// dRayCastTire
 	class dRayCastTire : public dCustomJoint
 	{
-	public:
+		public:
 		dRayCastTire(NewtonBody* const chassisbody, dRayCastVehicleModel* const parentempty)
-		: dCustomJoint(2, chassisbody, NULL)
-		, m_hitParam(1.1f)
-		, m_hitBody(NULL)
-		, m_penetration(0.0f)
-		, m_contactID(0)
-		, m_hitContact(dVector(0.0f))
-		, m_hitNormal(dVector(0.0f))
-		, m_vehiclemodel(parentempty)
-		, m_lateralPin(dVector(0.0f))
-		, m_longitudinalPin(dVector(0.0f))
-		, m_localAxis(dVector(0.0f))
-		, m_brakeForce(0.0f)
-		, m_motorForce(0.0f)
-		, m_isOnContact(false)
-		, m_isOnContactEx(false)
-		, m_collision(NULL)
-		, m_chassisBody(chassisbody)
-		, m_arealpos(0.0f)
-		, m_spinAngle(0.0f)
-		, m_posit_y(0.0f)
-		, m_radius(0.3f)
-		, m_width(0.15f)
-		, m_springLength(0.2f)
-		, m_springConst(200.0f)
-		, m_springDamp(10.0f)
-		, m_mass(18.0f)
-		, m_longitudinalFriction(1.0f)
-		, m_lateralFriction(1.0f)
-		, m_tireLoad(0.0f)
-		, m_suspenssionHardLimit(0.0f)
-		, m_chassisSpeed(0.0f)
-		, m_tireSpeed(0.0f)
-		, m_realvelocity(dVector(0.0f))
-		, m_localtireMatrix(dGetIdentityMatrix())
-		, m_suspensionMatrix(dGetIdentityMatrix())
-		, m_hardPoint(dVector(0.0f))
-		, m_tireRenderMatrix(dGetIdentityMatrix())
-		, m_frameLocalMatrix(dGetIdentityMatrix())
-		, m_angleMatrix(dGetIdentityMatrix())
-		, m_TireAxelPosit(dVector(1.0f))
-		, m_LocalAxelPosit(dVector(1.0f))
-		, m_TireAxelVeloc(dVector(0.0f))
-		, m_suspenssionFactor(0.5f)
-		, m_suspenssionStep(1.0f / 60.0f)
-		, m_tireEntity(NULL)
-		, m_tireSide(tsTireSideA)
-        , m_steerSide(tsSteerSideB)
-		, m_tireSteer(tsNoSteer)
-		, m_tireAccel(tsNoAccel)
-		, m_brakeMode(tsNoBrake)
-		, m_steerAngle(0.0f)
-		, m_tireID(-1)
-		, m_handForce(0.0f)
+			:dCustomJoint(2, chassisbody, NULL)
+			,m_hitParam(1.1f)
+			,m_hitBody(NULL)
+			,m_penetration(0.0f)
+			,m_contactID(0)
+			,m_hitContact(dVector(0.0f))
+			,m_hitNormal(dVector(0.0f))
+			,m_vehiclemodel(parentempty)
+			,m_lateralPin(dVector(0.0f))
+			,m_longitudinalPin(dVector(0.0f))
+			,m_localAxis(dVector(0.0f))
+			,m_brakeForce(0.0f)
+			,m_motorForce(0.0f)
+			,m_isOnContact(false)
+			,m_isOnContactEx(false)
+			,m_collision(NULL)
+			,m_chassisBody(chassisbody)
+			,m_arealpos(0.0f)
+			,m_spinAngle(0.0f)
+			,m_posit_y(0.0f)
+			,m_radius(0.3f)
+			,m_width(0.15f)
+			,m_springLength(0.2f)
+			,m_springConst(200.0f)
+			,m_springDamp(10.0f)
+			,m_mass(18.0f)
+			,m_longitudinalFriction(1.0f)
+			,m_lateralFriction(1.0f)
+			,m_tireLoad(0.0f)
+			,m_suspenssionHardLimit(0.0f)
+			,m_chassisSpeed(0.0f)
+			,m_tireSpeed(0.0f)
+			,m_realvelocity(dVector(0.0f))
+			,m_localtireMatrix(dGetIdentityMatrix())
+			,m_suspensionMatrix(dGetIdentityMatrix())
+			,m_hardPoint(dVector(0.0f))
+			,m_tireRenderMatrix(dGetIdentityMatrix())
+			,m_frameLocalMatrix(dGetIdentityMatrix())
+			,m_angleMatrix(dGetIdentityMatrix())
+			,m_TireAxelPosit(dVector(1.0f))
+			,m_LocalAxelPosit(dVector(1.0f))
+			,m_TireAxelVeloc(dVector(0.0f))
+			,m_suspenssionFactor(0.5f)
+			,m_suspenssionStep(1.0f / 60.0f)
+			,m_tireEntity(NULL)
+			,m_tireSide(tsTireSideA)
+			,m_steerSide(tsSteerSideB)
+			,m_tireSteer(tsNoSteer)
+			,m_tireAccel(tsNoAccel)
+			,m_brakeMode(tsNoBrake)
+			,m_steerAngle(0.0f)
+			,m_tireID(-1)
+			,m_handForce(0.0f)
 		{
 		  SetSolverModel(2);
 		  m_world = NewtonBodyGetWorld(chassisbody);
@@ -216,7 +216,18 @@ public:
 		//
 		virtual ~dRayCastTire()
 		{
-			if (m_collision) {
+			for (dList<dRayCastVehicleModel::dRayCastTire*>::dListNode* node = m_vehiclemodel->m_tires.GetFirst(); node; node = node->GetNext())
+			{
+				dRayCastVehicleModel::dRayCastTire* tire = node->GetInfo();
+				if (tire == this)
+				{
+					m_vehiclemodel->m_tires.Remove(node);
+					break;
+				}
+			}
+
+			if (m_collision) 
+			{
 				NewtonDestroyCollision(m_collision);
 			}
 		};
@@ -734,67 +745,67 @@ public:
 	}
 	//
 	void AddTire(const char* const modelName, VehicleTireSide tireside, VehicleTireSteer tiresteer, VehicleSteerSide steerside, VehicleTireAccel tireaccel, VehicleTireBrake tirebrake,
-	dFloat lateralFriction = 1.0f, dFloat longitudinalFriction = 1.0f, dFloat slimitlength = 0.25f, dFloat smass = 14.0f, dFloat spingCont = 200.0f, dFloat sprintDamp = 10.0f)
+		dFloat lateralFriction = 1.0f, dFloat longitudinalFriction = 1.0f, dFloat slimitlength = 0.25f, dFloat smass = 14.0f, dFloat spingCont = 200.0f, dFloat sprintDamp = 10.0f)
 	{
 		if (m_vehicleEntity) {
-			dRayCastTire* m_tire = new dRayCastTire(this->GetBody(), this);
+			dRayCastTire* tire = new dRayCastTire(this->GetBody(), this);
 			// add Tires
 			dFloat width;
 			dFloat radii;
 			CalculateTireDimensions(modelName, width, radii, m_scene->GetNewton(), m_vehicleEntity);
 			//
-			m_tire->m_tireEntity = m_vehicleEntity->Find(modelName);
+			tire->m_tireEntity = m_vehicleEntity->Find(modelName);
 			//
-			m_tire->m_springConst = spingCont;
-			m_tire->m_springDamp = sprintDamp;
-			m_tire->m_steerSide = steerside;
-			m_tire->m_tireAccel = tireaccel;
-			m_tire->m_tireSteer = tiresteer;
-			m_tire->m_brakeMode = tirebrake;
-			m_tire->SetUserDestructorCallback(TireJointDeleteCallback);
-			m_tire->SetBodiesCollisionState(0);
+			tire->m_springConst = spingCont;
+			tire->m_springDamp = sprintDamp;
+			tire->m_steerSide = steerside;
+			tire->m_tireAccel = tireaccel;
+			tire->m_tireSteer = tiresteer;
+			tire->m_brakeMode = tirebrake;
+			tire->SetUserDestructorCallback(TireJointDeleteCallback);
+			tire->SetBodiesCollisionState(0);
 			//m_tire->SetUserDestructorCallback(NULL);
-			m_tire->m_tireSide = tireside;
+			tire->m_tireSide = tireside;
 			// for simplicity, tires are position in global space
-			m_tire->m_localtireMatrix = m_tire->m_tireEntity->GetCurrentMatrix();
-			m_tire->m_tireMatrix = (m_tire->m_tireEntity->GetCurrentMatrix() * m_chassisMatrix);
-			m_tire->m_arealpos = m_tire->m_tireMatrix.m_posit.m_y;
+			tire->m_localtireMatrix = tire->m_tireEntity->GetCurrentMatrix();
+			tire->m_tireMatrix = (tire->m_tireEntity->GetCurrentMatrix() * m_chassisMatrix);
+			tire->m_arealpos = tire->m_tireMatrix.m_posit.m_y;
 			//
 			//m_tires[m_tireCount]->m_localtireMatrix = m_tires[m_tireCount]->m_tireMatrix;
 			//m_tire->m_localtireMatrix.m_posit.m_y = 0.0f;
 			//
-			m_tire->m_localAxis = m_tire->GetLocalMatrix0().UnrotateVector(dVector(0.0f, 0.0f, 1.0f, 0.0f));
-			m_tire->m_localAxis.m_w = 0.0f;
+			tire->m_localAxis = tire->GetLocalMatrix0().UnrotateVector(dVector(0.0f, 0.0f, 1.0f, 0.0f));
+			tire->m_localAxis.m_w = 0.0f;
 			//
-			m_tire->m_suspensionMatrix.m_posit = m_tire->m_localtireMatrix.m_posit;
-			m_tire->m_hardPoint = m_tire->GetLocalMatrix0().UntransformVector(m_tire->m_localtireMatrix.m_posit);
+			tire->m_suspensionMatrix.m_posit = tire->m_localtireMatrix.m_posit;
+			tire->m_hardPoint = tire->GetLocalMatrix0().UntransformVector(tire->m_localtireMatrix.m_posit);
 			//
-			m_tire->m_longitudinalFriction = longitudinalFriction;
-			m_tire->m_lateralFriction = lateralFriction;
-			m_tire->m_mass = smass;
-			m_tire->m_width = width * 0.5f;
-			m_tire->m_radius = radii;
-			m_tire->m_springLength = slimitlength;
+			tire->m_longitudinalFriction = longitudinalFriction;
+			tire->m_lateralFriction = lateralFriction;
+			tire->m_mass = smass;
+			tire->m_width = width * 0.5f;
+			tire->m_radius = radii;
+			tire->m_springLength = slimitlength;
 			//
-			m_tire->m_posit_y = m_tire->m_springLength;
-			m_tire->m_suspenssionHardLimit = m_tire->m_radius * 0.5f;
+			tire->m_posit_y = tire->m_springLength;
+			tire->m_suspenssionHardLimit = tire->m_radius * 0.5f;
 			//
-			m_tire->m_tireID = m_tireCount;
+			tire->m_tireID = m_tireCount;
 			//
 			dVector r_shapePoints[TIRE_SHAPE_SIZE * 2];
 			//
 			for (int i = 0; i < TIRE_SHAPE_SIZE; i++) {
-				r_shapePoints[i].m_x = -m_tire->m_width;
-				r_shapePoints[i].m_y = m_tire->m_radius * dCos(2.0f * 3.1416 * dFloat(i) / dFloat(TIRE_SHAPE_SIZE));
-				r_shapePoints[i].m_z = m_tire->m_radius * dSin(2.0f * 3.1416 * dFloat(i) / dFloat(TIRE_SHAPE_SIZE));
+				r_shapePoints[i].m_x = -tire->m_width;
+				r_shapePoints[i].m_y = tire->m_radius * dCos(2.0f * 3.1416 * dFloat(i) / dFloat(TIRE_SHAPE_SIZE));
+				r_shapePoints[i].m_z = tire->m_radius * dSin(2.0f * 3.1416 * dFloat(i) / dFloat(TIRE_SHAPE_SIZE));
 				r_shapePoints[i + TIRE_SHAPE_SIZE].m_x = -r_shapePoints[i].m_x;
 				r_shapePoints[i + TIRE_SHAPE_SIZE].m_y = r_shapePoints[i].m_y;
 				r_shapePoints[i + TIRE_SHAPE_SIZE].m_z = r_shapePoints[i].m_z;
 			}
 			//
-			m_tire->m_collision = NewtonCreateConvexHull(m_scene->GetNewton(), TIRE_SHAPE_SIZE * 2, &r_shapePoints[0].m_x, sizeof(dVector), 0.0f, 0, NULL);
+			tire->m_collision = NewtonCreateConvexHull(m_scene->GetNewton(), TIRE_SHAPE_SIZE * 2, &r_shapePoints[0].m_x, sizeof(dVector), 0.0f, 0, NULL);
 			//
-			m_tires.Append(m_tire);
+			m_tires.Append(tire);
 			m_tireCount++;
 		}
 	};
