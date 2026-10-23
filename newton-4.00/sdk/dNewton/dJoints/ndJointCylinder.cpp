@@ -388,30 +388,30 @@ void ndJointCylinder::UpdateParameters()
 
 void ndJointCylinder::SubmitLimitsPosit(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1)
 {
-	if (m_rotationAxis.m_limitState)
+	if (m_positionAxis.m_limitState)
 	{
-		if ((m_rotationAxis.m_minLimit == ndFloat32(0.0f)) && (m_rotationAxis.m_maxLimit == ndFloat32(0.0f)))
+		if ((m_positionAxis.m_minLimit == ndFloat32(0.0f)) && (m_positionAxis.m_maxLimit == ndFloat32(0.0f)))
 		{
 			AddLinearRowJacobian(desc, matrix0.m_posit, matrix1.m_posit, matrix1.m_front);
 		}
 		else
 		{
-			ndFloat32 x = m_rotationAxis.m_param + m_rotationAxis.m_paramSpeed * desc.m_timestep;
-			if (x < m_rotationAxis.m_minLimit)
+			ndFloat32 x = m_positionAxis.m_param + m_positionAxis.m_paramSpeed * desc.m_timestep;
+			if (x < m_positionAxis.m_minLimit)
 			{
-				ndVector p1(matrix1.m_posit + matrix1.m_front.Scale(m_rotationAxis.m_minLimit));
+				ndVector p1(matrix1.m_posit + matrix1.m_front.Scale(m_positionAxis.m_minLimit));
 				AddLinearRowJacobian(desc, matrix0.m_posit, p1, matrix1.m_front);
 				const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
-				const ndFloat32 penetration = x - m_rotationAxis.m_minLimit;
+				const ndFloat32 penetration = x - m_positionAxis.m_minLimit;
 				const ndFloat32 recoveringAceel = -desc.m_invTimestep * PenetrationSpeed(-penetration);
 				SetMotorAcceleration(desc, stopAccel - recoveringAceel);
 				SetLowerFriction(desc, ndFloat32(0.0f));
 			}
-			else if (x > m_rotationAxis.m_maxLimit)
+			else if (x > m_positionAxis.m_maxLimit)
 			{
 				AddLinearRowJacobian(desc, matrix0.m_posit, matrix0.m_posit, matrix1.m_front);
 				const ndFloat32 stopAccel = GetMotorZeroAcceleration(desc);
-				const ndFloat32 penetration = x - m_rotationAxis.m_maxLimit;
+				const ndFloat32 penetration = x - m_positionAxis.m_maxLimit;
 				const ndFloat32 recoveringAceel = desc.m_invTimestep * PenetrationSpeed(penetration);
 				SetMotorAcceleration(desc, stopAccel - recoveringAceel);
 				SetHighFriction(desc, ndFloat32(0.0f));

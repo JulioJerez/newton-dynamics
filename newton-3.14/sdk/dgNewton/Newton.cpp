@@ -6834,6 +6834,22 @@ void NewtonCorkscrewGetJointForce(const NewtonJoint* const corkscrew, dFloat* co
 	force[2] = forceVector.m_z;
 }
 
+void NewtonCorkscrewEnableLinearLimits(const NewtonJoint* const slider, int state)
+{
+}
+
+void NewtonCorkscrewSetLinearLimits(const NewtonJoint* const slider, dFloat minPosit, dFloat maxPosit)
+{
+}
+
+void NewtonCorkscrewEnableAngularLimits(const NewtonJoint* const hinge, int state)
+{
+}
+
+void NewtonCorkscrewSetAngularLimits(const NewtonJoint* const hinge, dFloat minTwistAngle, dFloat maxTwistAngle)
+{
+}
+
 
 /*! @} */ // end of JointSlider
 

@@ -441,22 +441,6 @@ extern "C" {
 
 	// **********************************************************************************************
 	//
-	// Corkscrew joint functions
-	//
-	// **********************************************************************************************
-	NEWTON_API NewtonJoint* NewtonConstraintCreateCorkscrew (const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const dFloat* pinDir, const NewtonBody* const childBody, const NewtonBody* const parentBody);
-	NEWTON_API void NewtonCorkscrewSetUserCallback (const NewtonJoint* const corkscrew, NewtonCorkscrewCallback callback);
-	NEWTON_API dFloat NewtonCorkscrewGetJointPosit (const NewtonJoint* const corkscrew);
-	NEWTON_API dFloat NewtonCorkscrewGetJointAngle (const NewtonJoint* const corkscrew);
-	NEWTON_API dFloat NewtonCorkscrewGetJointVeloc (const NewtonJoint* const corkscrew);
-	NEWTON_API dFloat NewtonCorkscrewGetJointOmega (const NewtonJoint* const corkscrew);
-	NEWTON_API void NewtonCorkscrewGetJointForce (const NewtonJoint* const corkscrew, dFloat* const force);
-	NEWTON_API dFloat NewtonCorkscrewCalculateStopAlpha (const NewtonJoint* const corkscrew, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle);
-	NEWTON_API dFloat NewtonCorkscrewCalculateStopAccel (const NewtonJoint* const corkscrew, const NewtonHingeSliderUpdateDesc* const desc, dFloat position);
-
-
-	// **********************************************************************************************
-	//
 	// Universal joint functions
 	//
 	// **********************************************************************************************
@@ -1264,6 +1248,22 @@ extern "C" {
 	NEWTON_API void NewtonSliderSetDryFriction(const NewtonJoint* const slider, dFloat frictionForce);
 	NEWTON_API void NewtonSliderSetAsMotor(const NewtonJoint* const slider, dFloat speed, dFloat maxForce);
 	NEWTON_API void NewtonSliderSetSpringDamper(const NewtonJoint* const slider, dFloat regularizer, dFloat spring, dFloat32 damper);
+
+	// Corkscrew joint functions
+	NEWTON_API NewtonJoint* NewtonConstraintCreateCorkscrew(const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const dFloat* pinDir, const NewtonBody* const childBody, const NewtonBody* const parentBody);
+	NEWTON_API void NewtonCorkscrewSetUserCallback(const NewtonJoint* const corkscrew, NewtonCorkscrewCallback callback);
+	NEWTON_API dFloat NewtonCorkscrewGetJointPosit(const NewtonJoint* const corkscrew);
+	NEWTON_API dFloat NewtonCorkscrewGetJointAngle(const NewtonJoint* const corkscrew);
+	NEWTON_API dFloat NewtonCorkscrewGetJointVeloc(const NewtonJoint* const corkscrew);
+	NEWTON_API dFloat NewtonCorkscrewGetJointOmega(const NewtonJoint* const corkscrew);
+	NEWTON_API void NewtonCorkscrewGetJointForce(const NewtonJoint* const corkscrew, dFloat* const force);
+	NEWTON_API dFloat NewtonCorkscrewCalculateStopAlpha(const NewtonJoint* const corkscrew, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle);
+	NEWTON_API dFloat NewtonCorkscrewCalculateStopAccel(const NewtonJoint* const corkscrew, const NewtonHingeSliderUpdateDesc* const desc, dFloat position);
+
+	NEWTON_API void NewtonCorkscrewEnableLinearLimits(const NewtonJoint* const slider, int state);
+	NEWTON_API void NewtonCorkscrewSetLinearLimits(const NewtonJoint* const slider, dFloat minPosit, dFloat maxPosit);
+	NEWTON_API void NewtonCorkscrewEnableAngularLimits(const NewtonJoint* const hinge, int state);
+	NEWTON_API void NewtonCorkscrewSetAngularLimits(const NewtonJoint* const hinge, dFloat minTwistAngle, dFloat maxTwistAngle);
 
 #ifdef __cplusplus 
 }
