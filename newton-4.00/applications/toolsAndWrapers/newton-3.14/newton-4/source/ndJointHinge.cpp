@@ -306,14 +306,13 @@ void ndJointHinge::JacobianDerivative(ndConstraintDescritor& desc)
 
 	ApplyBaseRows(desc, matrix0, matrix1);
 
+	SubmitLimits(desc, matrix0, matrix1);
 	if (m_axis.m_springDamperRegularizer && ((m_axis.m_springK > ndFloat32(0.0f)) || (m_axis.m_damperC > ndFloat32(0.0f))))
 	{
 		SubmitSpringDamper(desc, matrix0, matrix1);
-		SubmitLimits(desc, matrix0, matrix1);
 	}
 	else if (m_maxTorque != ndFloat32(0.0f))
 	{
-		SubmitLimits(desc, matrix0, matrix1);
 		SubmitMotor(desc, matrix0);
 	}
 }
