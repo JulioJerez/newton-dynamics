@@ -326,3 +326,17 @@ void NewtonUniversalSetLimits1(const NewtonJoint* const joint, dFloat minAngle, 
 	NewtonDoubleHinge* const userJoint = PointerCast<NewtonDoubleHinge, NewtonJoint>(joint);
 	userJoint->SetLimits1(minAngle, maxAngle);
 }
+
+void NewtonRollerSetSpringDamper0(const NewtonJoint* const joint, dFloat regularizer, dFloat spring, dFloat32 damper)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonDoubleHinge* const userJoint = PointerCast<NewtonDoubleHinge, NewtonJoint>(joint);
+	userJoint->SetAsSpringDamper0(regularizer, spring, damper);
+}
+
+void NewtonRollerSetSpringDamper1(const NewtonJoint* const joint, dFloat regularizer, dFloat spring, dFloat32 damper)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonDoubleHinge* const userJoint = PointerCast<NewtonDoubleHinge, NewtonJoint>(joint);
+	userJoint->SetAsSpringDamper1(regularizer, spring, damper);
+}

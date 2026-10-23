@@ -7176,6 +7176,13 @@ void NewtonUniversalSetLimits1(const NewtonJoint* const universal, dFloat minTwi
 {
 }
 
+void NewtonRollerSetSpringDamper0(const NewtonJoint* const universal, dFloat regularizer, dFloat spring, dFloat32 damper)
+{
+}
+
+void NewtonRollerSetSpringDamper1(const NewtonJoint* const universal, dFloat regularizer, dFloat spring, dFloat32 damper)
+{
+}
 
 /*! @} */ // end of JointUniversal
 

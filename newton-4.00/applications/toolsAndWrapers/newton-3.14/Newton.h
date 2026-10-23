@@ -1279,8 +1279,11 @@ extern "C" {
 
 	NEWTON_API void NewtonUniversalEnableLimits0(const NewtonJoint* const universal, int state);
 	NEWTON_API void NewtonUniversalSetLimits0(const NewtonJoint* const universal, dFloat minPosit, dFloat maxPosit);
+	NEWTON_API void NewtonRollerSetSpringDamper0(const NewtonJoint* const corkscrew, dFloat regularizer, dFloat spring, dFloat32 damper);
+
 	NEWTON_API void NewtonUniversalEnableLimits1(const NewtonJoint* const universal, int state);
 	NEWTON_API void NewtonUniversalSetLimits1(const NewtonJoint* const universal, dFloat minTwistAngle, dFloat maxTwistAngle);
+	NEWTON_API void NewtonRollerSetSpringDamper1(const NewtonJoint* const corkscrew, dFloat regularizer, dFloat spring, dFloat32 damper);
 
 #ifdef __cplusplus 
 }

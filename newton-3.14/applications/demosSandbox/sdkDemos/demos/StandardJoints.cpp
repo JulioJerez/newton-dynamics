@@ -833,7 +833,6 @@ static void AddDoubleHinge(DemoEntityManager* const scene, const dVector& origin
 		NewtonUniversalSetLimits1(joint, -10.0f * dPi, 15.0f * dPi);
 	}
 
-#if 0
 	{
 		dMatrix matrix;
 		dVector damp(0.0f);
@@ -848,8 +847,8 @@ static void AddDoubleHinge(DemoEntityManager* const scene, const dVector& origin
 		NewtonBodySetAngularDamping(box2, &damp[0]);
 
 		NewtonBodyGetMatrix(box2, &matrix[0][0]);
-		dCustomDoubleHinge* const joint = new dCustomDoubleHinge(matrix, box2, box0);
-		joint->SetMassIndependentSpringDamper(true, 0.7f, 80.0f, 0.0f);
+		NewtonJoint* const joint = NewtonConstraintCreateUniversal(world, &matrix.m_posit[0], &matrix.m_front[0], &matrix.m_up[0], box2, box0);
+		NewtonRollerSetSpringDamper0(joint, 0.7f, 80.0f, 0.0f);;
 	}
 
 	{
@@ -866,11 +865,14 @@ static void AddDoubleHinge(DemoEntityManager* const scene, const dVector& origin
 		NewtonBodySetAngularDamping(box2, &damp[0]);
 
 		NewtonBodyGetMatrix(box2, &matrix[0][0]);
-		dCustomDoubleHinge* const joint = new dCustomDoubleHinge(matrix, box2, box0);
-		joint->SetFriction(10.0f);
-		joint->SetFriction1(10.0f);
+		NewtonJoint* const joint = NewtonConstraintCreateUniversal(world, &matrix.m_posit[0], &matrix.m_front[0], &matrix.m_up[0], box2, box0);
+		// for now just use vicuos friction. 
+		// later add dry friction.
+		//joint->SetFriction(10.0f);
+		//joint->SetFriction1(10.0f);
+		NewtonRollerSetSpringDamper0(joint, 0.01f, 0.0f, 10.0f);
+		NewtonRollerSetSpringDamper1(joint, 0.01f, 0.0f, 10.0f);
 	}
-#endif
 }
 
 
