@@ -32,13 +32,14 @@ class NewtonHinge: public ndJointHinge
 	public:
 	D_CLASS_REFLECTION(NewtonHinge, ndJointHinge)
 
-	//typedef void (*NewtonBallCallback) (const NewtonJoint* const joint,  dFloat timestep);
+	typedef void (*NewtonBallCallback) (const NewtonJoint* const joint,  dFloat timestep);
 
 	NewtonHinge(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 		:ndJointHinge(pinAndPivotFrame, child, parent)
+		,m_callback(nullptr)
 	{
 	}
-	//NewtonBallCallback m_callback;
+	NewtonBallCallback m_callback;
 };
 
 

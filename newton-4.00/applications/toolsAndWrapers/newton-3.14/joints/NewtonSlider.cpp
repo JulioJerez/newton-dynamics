@@ -27,18 +27,19 @@
 #include "newtonBodyNotify.h"
 #include "newtonUserJointClass.h"
 
-class NewtonSlider: public ndJointHinge
+class NewtonSlider: public ndJointSlider
 {
 	public:
-	D_CLASS_REFLECTION(NewtonSlider, ndJointHinge)
+	D_CLASS_REFLECTION(NewtonSlider, ndJointSlider)
 
-	//typedef void (*NewtonBallCallback) (const NewtonJoint* const joint,  dFloat timestep);
+	typedef unsigned (*NewtonSliderCallback) (const NewtonJoint* const slider, NewtonHingeSliderUpdateDesc* const desc);
 
 	NewtonSlider(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
-		:ndJointHinge(pinAndPivotFrame, child, parent)
+		:ndJointSlider(pinAndPivotFrame, child, parent)
+		,m_callback(nullptr)
 	{
 	}
-	//NewtonBallCallback m_callback;
+	NewtonSliderCallback m_callback;
 };
 
 
@@ -92,7 +93,6 @@ dFloat NewtonSliderCalculateStopAlpha(const NewtonJoint* const hinge, const Newt
 //
 NewtonJoint* NewtonConstraintCreateSlider(const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const dFloat* pinDir, const NewtonBody* const childBody, const NewtonBody* const parentBody)
 {
-	ndAssert(0);
 	TRACE_FUNCTION(__FUNCTION__);
 	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
 	ndBodyKinematic* const body0 = PointerCast<ndBody, NewtonBody>(childBody)->GetAsBodyKinematic();
@@ -141,7 +141,7 @@ void NewtonSliderSetAsMotor(const NewtonJoint* const joint, dFloat omega, dFloat
 	ndAssert(0);
 	TRACE_FUNCTION(__FUNCTION__);
 	NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
-	userJoint->SetAsMotor(omega, maxTorque);
+	//userJoint->SetAsMotor(omega, maxTorque);
 }
 
 void NewtonSliderSetDryFriction(const NewtonJoint* const joint, dFloat frictionTorque)
@@ -149,5 +149,5 @@ void NewtonSliderSetDryFriction(const NewtonJoint* const joint, dFloat frictionT
 	ndAssert(0);
 	TRACE_FUNCTION(__FUNCTION__);
 	NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
-	userJoint->SetAsDryFriction(frictionTorque);
+	//userJoint->SetAsDryFriction(frictionTorque);
 }
