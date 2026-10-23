@@ -441,22 +441,6 @@ extern "C" {
 
 	// **********************************************************************************************
 	//
-	// Universal joint functions
-	//
-	// **********************************************************************************************
-	NEWTON_API NewtonJoint* NewtonConstraintCreateUniversal (const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const dFloat* pinDir0, const dFloat* pinDir1, const NewtonBody* const childBody, const NewtonBody* const parentBody);
-	NEWTON_API void NewtonUniversalSetUserCallback (const NewtonJoint* const universal, NewtonUniversalCallback callback);
-	NEWTON_API dFloat NewtonUniversalGetJointAngle0 (const NewtonJoint* const universal);
-	NEWTON_API dFloat NewtonUniversalGetJointAngle1 (const NewtonJoint* const universal);
-	NEWTON_API dFloat NewtonUniversalGetJointOmega0 (const NewtonJoint* const universal);
-	NEWTON_API dFloat NewtonUniversalGetJointOmega1 (const NewtonJoint* const universal);
-	NEWTON_API void NewtonUniversalGetJointForce (const NewtonJoint* const universal, dFloat* const force);
-	NEWTON_API dFloat NewtonUniversalCalculateStopAlpha0 (const NewtonJoint* const universal, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle);
-	NEWTON_API dFloat NewtonUniversalCalculateStopAlpha1 (const NewtonJoint* const universal, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle);
-
-
-	// **********************************************************************************************
-	//
 	// Up vector joint functions
 	//
 	// **********************************************************************************************
@@ -1281,6 +1265,17 @@ extern "C" {
 	NEWTON_API void NewtonRollerEnableLinearLimits(const NewtonJoint* const corkscrew, int state);
 	NEWTON_API void NewtonRollerSetLinearLimits(const NewtonJoint* const corkscrew, dFloat minPosit, dFloat maxPosit);
 	NEWTON_API void NewtonRollerSetLinearSpringDamper(const NewtonJoint* const corkscrew, dFloat regularizer, dFloat spring, dFloat32 damper);
+
+	// Universal joint functions, actually a double hinge
+	NEWTON_API NewtonJoint* NewtonConstraintCreateUniversal(const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const dFloat* pinDir0, const dFloat* pinDir1, const NewtonBody* const childBody, const NewtonBody* const parentBody);
+	NEWTON_API void NewtonUniversalSetUserCallback(const NewtonJoint* const universal, NewtonUniversalCallback callback);
+	NEWTON_API dFloat NewtonUniversalGetJointAngle0(const NewtonJoint* const universal);
+	NEWTON_API dFloat NewtonUniversalGetJointAngle1(const NewtonJoint* const universal);
+	NEWTON_API dFloat NewtonUniversalGetJointOmega0(const NewtonJoint* const universal);
+	NEWTON_API dFloat NewtonUniversalGetJointOmega1(const NewtonJoint* const universal);
+	NEWTON_API void NewtonUniversalGetJointForce(const NewtonJoint* const universal, dFloat* const force);
+	NEWTON_API dFloat NewtonUniversalCalculateStopAlpha0(const NewtonJoint* const universal, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle);
+	NEWTON_API dFloat NewtonUniversalCalculateStopAlpha1(const NewtonJoint* const universal, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle);
 
 #ifdef __cplusplus 
 }
