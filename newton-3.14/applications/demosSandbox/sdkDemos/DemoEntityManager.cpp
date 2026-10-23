@@ -343,6 +343,7 @@ DemoEntityManager::DemoEntityManager ()
 //	m_asynchronousPhysicsUpdate = true;
 
 	Cleanup();
+	m_currentPlugin = NewtonGetPreferedPlugin(m_world);
 	ResetTimer();
 	m_shadeCache.CreateAllEffects();
 

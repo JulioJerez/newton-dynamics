@@ -220,14 +220,12 @@ dFloat NewtonCalculateSpringDamperAcceleration(dFloat dt, dFloat ks, dFloat x, d
 	TRACE_FUNCTION(__FUNCTION__);
 	////at = - (ks * x + kd * v);
 	////at =  [- ks (x2 - x1) - kd * (v2 - v1) - dt * ks * (v2 - v1)] / [1 + dt * kd + dt * dt * ks] 
-	//dgFloat32 ksd = dt * ks;
-	//dgFloat32 num = ks * x + kd * v + ksd * v;
-	//dgFloat32 den = dgFloat32(1.0f) + dt * kd + dt * ksd;
-	//dgAssert(den > 0.0f);
-	//dFloat accel = -num / den;
-	//return accel;
-	ndAssert(0);
-	return 0;
+	ndFloat32 ksd = dt * ks;
+	ndFloat32 num = ks * x + kd * v + ksd * v;
+	ndFloat32 den = ndFloat32(1.0f) + dt * kd + dt * ksd;
+	ndAssert(den > 0.0f);
+	ndFloat32 accel = -num / den;
+	return accel;
 }
 
 

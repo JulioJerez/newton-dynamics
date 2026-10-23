@@ -778,7 +778,7 @@ int NewtonWorldConvexCast(const NewtonWorld* const newtonWorld, const dFloat* co
 	for (ndInt32 i = 0; i < contactCount; ++i)
 	{
 		info[i].m_contactID = caster.m_contacts[i].m_shapeId0;
-		info[i].m_hitBody = PointerCast<NewtonBody, ndBody>(caster.m_contacts[i].m_body0);
+		info[i].m_hitBody = PointerCast<NewtonBody, ndBody>(caster.m_contacts[i].m_body1);
 		for (ndInt32 j = 0; j < 4; ++j)
 		{
 			info[i].m_point[j] = caster.m_contacts[i].m_point[j];
