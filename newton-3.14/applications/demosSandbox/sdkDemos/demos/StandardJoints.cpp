@@ -53,7 +53,7 @@ static NewtonBody* CreateSphere(DemoEntityManager* const scene, const dVector& l
 	return body;
 }
 
-static NewtonBody* CreateCapule (DemoEntityManager* const scene, const dVector& location, const dVector& size)
+static NewtonBody* CreateCapsule (DemoEntityManager* const scene, const dVector& location, const dVector& size)
 {
 	NewtonWorld* const world = scene->GetNewton();
 	int materialID =  NewtonMaterialGetDefaultGroupID (world);
@@ -111,211 +111,6 @@ static NewtonBody* CreateCylinder (DemoEntityManager* const scene, const dVector
 }
 
 #if 0
-static void AddDoubleHinge(DemoEntityManager* const scene, const dVector& origin)
-{
-	dVector size(1.0f, 1.0f, 1.0f);
-
-	NewtonBody* const box0 = CreateBox(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), dVector(0.25f, 0.25f, 5.0f, 0.0f));
-	NewtonBodySetMassMatrix(box0, 0.0f, 0.0f, 0.0f, 0.0f);
-
-	{
-		dMatrix matrix;
-		dVector damp(0.0f);
-		dVector omega1(0.0f, 2.0f, 50.0f, 0.0f);
-		NewtonBody* const box1 = CreateWheel(scene, origin + dVector(0.0f, 4.0f, 2.5f, 0.0f), 1.0f, 0.5f);
-		DemoEntity* const boxEntity1 = ((DemoEntity*) NewtonBodyGetUserData(box1));
-
-		NewtonBodySetGyroscopicTorque(box1, 1);
-		NewtonBodyGetMatrix(box1, &matrix[0][0]);
-		matrix = dYawMatrix (dPi * 0.5f) * matrix; 
-		NewtonBodySetMatrix(box1, &matrix[0][0]);
-	
-		boxEntity1->ResetMatrix (*scene, matrix);
-		NewtonBodySetOmega(box1, &omega1[0]);
-		NewtonBodySetLinearDamping(box1, 0.0f);
-		NewtonBodySetAngularDamping(box1, &damp[0]);
-		
-		//	// link the two boxes
-		NewtonBodyGetMatrix(box1, &matrix[0][0]);
-		dCustomDoubleHinge* const joint = new dCustomDoubleHinge(matrix, box1, box0);
-		joint->EnableLimits(false);
-		joint->SetLimits(-30.0f * dPi, 10.0f * dPi);
-	}
-
-	{
-		dMatrix matrix;
-		dVector damp(0.0f);
-		dVector omega2 (0.0f, 10.0f, 100.0f, 0.0f);
-		NewtonBody* const box2 = CreateWheel(scene, origin + dVector(0.0f, 4.0f, -2.5f, 0.0f), 1.0f, 0.5f);
-		DemoEntity* const boxEntity2 = ((DemoEntity*) NewtonBodyGetUserData(box2));
-		NewtonBodySetGyroscopicTorque(box2, 1);
-		NewtonBodyGetMatrix(box2, &matrix[0][0]);
-		matrix = dYawMatrix(dPi * 0.5f) * matrix;
-		NewtonBodySetMatrix(box2, &matrix[0][0]);
-		boxEntity2->ResetMatrix (*scene, matrix);
-		NewtonBodySetOmega(box2, &omega2[0]);
-		NewtonBodySetLinearDamping(box2, 0.0f);
-		NewtonBodySetAngularDamping(box2, &damp[0]);
-
-		NewtonBodyGetMatrix(box2, &matrix[0][0]);
-		dCustomDoubleHinge* const joint = new dCustomDoubleHinge(matrix, box2, box0);
-		joint->EnableLimits1(true);
-		joint->SetLimits1 (-10.0f * dPi, 15.0f * dPi);
-	}
-
-	{
-		dMatrix matrix;
-		dVector damp(0.0f);
-		NewtonBody* const box2 = CreateWheel(scene, origin + dVector(0.0f, 4.0f, -0.85f, 0.0f), 1.0f, 0.5f);
-		DemoEntity* const boxEntity2 = ((DemoEntity*)NewtonBodyGetUserData(box2));
-		NewtonBodySetGyroscopicTorque(box2, 1);
-		NewtonBodyGetMatrix(box2, &matrix[0][0]);
-		matrix = dYawMatrix(dPi * 0.5f) * matrix;
-		NewtonBodySetMatrix(box2, &matrix[0][0]);
-		boxEntity2->ResetMatrix(*scene, matrix);
-		NewtonBodySetLinearDamping(box2, 0.0f);
-		NewtonBodySetAngularDamping(box2, &damp[0]);
-
-		NewtonBodyGetMatrix(box2, &matrix[0][0]);
-		dCustomDoubleHinge* const joint = new dCustomDoubleHinge(matrix, box2, box0);
-		joint->SetMassIndependentSpringDamper(true, 0.7f, 80.0f, 0.0f);
-	}
-
-	{
-		dMatrix matrix;
-		dVector damp(0.0f);
-		NewtonBody* const box2 = CreateWheel(scene, origin + dVector(0.0f, 4.0f, 0.84f, 0.0f), 1.0f, 0.5f);
-		DemoEntity* const boxEntity2 = ((DemoEntity*)NewtonBodyGetUserData(box2));
-		NewtonBodySetGyroscopicTorque(box2, 1);
-		NewtonBodyGetMatrix(box2, &matrix[0][0]);
-		matrix = dYawMatrix(dPi * 0.5f) * matrix;
-		NewtonBodySetMatrix(box2, &matrix[0][0]);
-		boxEntity2->ResetMatrix(*scene, matrix);
-		NewtonBodySetLinearDamping(box2, 0.0f);
-		NewtonBodySetAngularDamping(box2, &damp[0]);
-
-		NewtonBodyGetMatrix(box2, &matrix[0][0]);
-		dCustomDoubleHinge* const joint = new dCustomDoubleHinge(matrix, box2, box0);
-		joint->SetFriction(10.0f);
-		joint->SetFriction1(10.0f);
-	}
-}
-
-static void AddSliderBug(DemoEntityManager* const scene, const dVector& origin)
-{
-	NewtonBody* const outerBody = CreateBox(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), dVector(2.0f, 1.5f, 1.5f, 0.0f).Scale (0.25f));
-	NewtonBody* const cylinder = CreateCylinder(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), 1.0f * 0.25f, 4.0f * 0.25f);
-
-	// connect the bodies by a Slider joint
-	dMatrix matrix;
-	NewtonBodyGetMatrix(cylinder, &matrix[0][0]);
-	dCustomCorkScrew* const slider = new dCustomCorkScrew(matrix, outerBody, cylinder);
-//	dCustomSlider* const slider = new dCustomSlider(matrix, outerBody, cylinder);
-//	dCustomSlidingContact* const slider = new dCustomSlidingContact(matrix, outerBody, cylinder);
-
-	// set limit on second axis
-	slider->EnableLimits(true);
-	slider->SetLimits(-0.5f, 0.5f);
-}
-
-static void AddSlider (DemoEntityManager* const scene, const dVector& origin)
-{
-    // make a reel static
-    NewtonBody* const box0 = CreateBox (scene, origin + dVector (0.0f, 4.0f, 0.0f, 0.0f), dVector (8.0f, 0.25f, 0.25f, 0.0f));
-    NewtonBody* const box1 = CreateWheel (scene, origin + dVector (0.0f, 4.0f, 0.0f, 0.0f), 1.0f, 0.5f);
-
-	dMatrix matrix;
-	NewtonBodySetMassMatrix(box0, 0.0f, 0.0f, 0.0f, 0.0f);
-
-	// connect the bodies by a Slider joint
-    NewtonBodyGetMatrix (box1, &matrix[0][0]);
-    dCustomSlider* const slider = new dCustomSlider (matrix, box1, box0);
-
-	// add some friction for more realism
-	slider->SetFriction(10.0f);
-
-    // enable limit of first axis
-    slider->EnableLimits(true);
-
-    // set limit on second axis
-    slider->SetLimits (-4.0f, 4.0f);
-}
-
-static void AddSliderSpringDamper (DemoEntityManager* const scene, const dVector& origin)
-{
-	// make a reel static
-	NewtonBody* const box0 = CreateBox(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), dVector(8.0f, 0.25f, 0.25f, 0.0f));
-	NewtonBody* const box1 = CreateWheel(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), 1.0f, 0.5f);
-
-	dMatrix matrix;
-	NewtonBodySetMassMatrix(box0, 0.0f, 0.0f, 0.0f, 0.0f);
-
-	// connect the bodies by a Slider joint
-	NewtonBodyGetMatrix(box1, &matrix[0][0]);
-	dCustomSlider* const slider = new dCustomSlider(matrix, box1, box0);
-
-	// enable limit of first axis
-	slider->EnableLimits(true);
-
-	// set limit on second axis
-	slider->SetLimits(-4.0f, 4.0f);
-	slider->SetAsSpringDamper(true, 0.7f, 80.0f, 0.0f);
-}
-
-
-static void AddSlidingContact(DemoEntityManager* const scene, const dVector& origin)
-{
-	// make a reel static
-	NewtonBody* const box0 = CreateBox(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), dVector(8.0f, 0.25f, 0.25f, 0.0f));
-	NewtonBody* const box1 = CreateWheel(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), 1.0f, 0.5f);
-
-	NewtonBodySetMassMatrix(box0, 0.0f, 0.0f, 0.0f, 0.0f);
-
-	dMatrix matrix;
-	//rotate body so that is lok like a wheel
-	NewtonBodyGetMatrix(box1, &matrix[0][0]);
-	matrix = dRollMatrix(90.0f * dDegreeToRad) * matrix;
-	NewtonBodySetMatrix(box1, &matrix[0][0]);
-	DemoEntity* const ent = (DemoEntity*)NewtonBodyGetUserData(box1);
-	ent->ResetMatrix(*scene, matrix);
-
-
-	//make joint matrix
-	dMatrix jointMatrix(dGetIdentityMatrix());
-	jointMatrix.m_posit = matrix.m_posit;
-
-	dCustomSlidingContact* const slider = new dCustomSlidingContact(jointMatrix, box1, box0);
-	slider->EnableLimits (true);
-	slider->SetLimits (-4.0f, 4.0f);
-	slider->SetAsSpringDamper(true, 0.7f, 80.0f, 0.0f);
-
-	// enable limit of first axis
-	slider->EnableAngularLimits(true);
-	slider->SetAngularLimits(-7.0f * dPi, 5.0f * dPi);
-}
-
-static void AddCylindrical (DemoEntityManager* const scene, const dVector& origin)
-{
-    // make a reel static
-    NewtonBody* const box0 = CreateCylinder (scene, origin + dVector (0.0f, 4.0f, 0.0f, 0.0f), 0.25f, 8.0f);
-    NewtonBody* const box1 = CreateWheel (scene, origin + dVector (0.0f, 4.0f, 0.0f, 0.0f), 1.0f, 0.5f);
-
-    dMatrix matrix;
-	NewtonBodySetMassMatrix(box0, 0.0f, 0.0f, 0.0f, 0.0f);
-
-	// connect the bodies by a CorkScrew joint
-    NewtonBodyGetMatrix (box1, &matrix[0][0]);
-    dCustomCorkScrew* const cylinder = new dCustomCorkScrew (matrix, box1, box0);
-
-    // enable limit of first axis
-    cylinder->EnableLimits(true);
-    cylinder->SetLimits (-4.0f, 4.0f);
-
-	// set angular limit on second axis
-	cylinder->EnableAngularLimits(true);
-	cylinder->SetAngularLimits(-4.0f * dPi, 6.0f * dPi);
-}
-
 static dCustomHinge* AddHingeWheel (DemoEntityManager* const scene, const dVector& origin, dFloat radius, dFloat height, NewtonBody* const parent)
 {
     NewtonBody* const wheel = CreateWheel (scene, origin, height, radius);
@@ -630,89 +425,13 @@ static void AddDifferential(DemoEntityManager* const scene, const dVector& origi
 	NewtonBodySetAngularDamping(box2, &damp[0]);
 	NewtonBodySetAngularDamping(box3, &damp[0]);
 }
-
-void AddFlexyPipe(DemoEntityManager* const scene, const dVector& origin)
-{
-	dArray<NewtonBody*> bodies;
-
-	int count = 50;
-//int count = 10;
-	NewtonWorld* const world = scene->GetNewton();
-
-	// set the friction low to emulate motion on some fluid 
-	int materialID = NewtonMaterialGetDefaultGroupID(world);
-	NewtonMaterialSetDefaultFriction(world, materialID, materialID, 0.2f, 0.2f);
-
-	dVector capsuleSize(0.25f, 0.5f, 0.25f);
-	dMatrix aligment(dYawMatrix(90.0f * dDegreeToRad));
-	NewtonCollision* const capsuleShape = CreateConvexCollision(world, &aligment[0][0], capsuleSize, _CAPSULE_PRIMITIVE, 0);
-	DemoMesh* const capsuleGeometry = new DemoMesh("primitive", scene->GetShaderCache(), capsuleShape, "smilli.tga", "smilli.tga", "smilli.tga");
-
-	dFloat mass = 1.0f;
-	dMatrix matrix(dGetIdentityMatrix());
-	matrix.m_posit = origin;
-	matrix.m_posit.m_y += 1.0f;
-	matrix.m_posit.m_w = 1.0f;
-	for (int i = 0; i < count; i++) {
-		bodies[i] = CreateSimpleSolid(scene, capsuleGeometry, mass, matrix, capsuleShape, 0);
-		matrix.m_posit.m_z += capsuleSize.m_y;
-	}
-	capsuleGeometry->Release();
-	NewtonDestroyCollision(capsuleShape);
-
-	// add the axial spinner joints
-	for (int i = 1; i < count; i++) {
-		dMatrix matrix0;
-		dMatrix matrix1;
-		NewtonBodyGetMatrix(bodies[i - 1], &matrix0[0][0]);
-		NewtonBodyGetMatrix(bodies[i], &matrix1[0][0]);
-		dMatrix jointMatrix(dGrammSchmidt(matrix1.m_posit - matrix0.m_posit));
-		jointMatrix.m_posit = (matrix0.m_posit + matrix1.m_posit).Scale(0.5f);
-		new dFlexyPipeSpinner (jointMatrix, bodies[i], bodies[i - 1]);
-	}
-
-	// add a cylinder to add as a controller handle 
-	dMatrix matrix0;
-	dMatrix matrix1;
-	NewtonBodyGetMatrix(bodies[0], &matrix0[0][0]);
-	NewtonBodyGetMatrix(bodies[1], &matrix1[0][0]);
-
-	dMatrix handleMatrix (matrix0);
-	handleMatrix.m_posit -= (matrix1.m_posit - matrix0.m_posit);
-
-	dVector cylinderSize(0.5f, 0.75f, 0.5f);
-	NewtonCollision* const cylinderShape = CreateConvexCollision(world, &aligment[0][0], cylinderSize, _CYLINDER_PRIMITIVE, 0);
-	DemoMesh* const cylinderGeometry = new DemoMesh("primitive", scene->GetShaderCache(), cylinderShape, "smilli.tga", "smilli.tga", "smilli.tga");
-
-	NewtonBody* const cylinderHandle = CreateSimpleSolid(scene, cylinderGeometry, mass * 30.0f, handleMatrix, cylinderShape, 0);
-
-	// connect the pipe to the handle
-	dVector dir(matrix1.m_posit - matrix0.m_posit);
-	dMatrix jointMatrix(dGrammSchmidt(dir));
-	jointMatrix.m_posit = (matrix0.m_posit + matrix1.m_posit).Scale (0.5f) - dir;
-
-	dCustomBallAndSocket* const joint = new dCustomBallAndSocket(jointMatrix, bodies[0], cylinderHandle);
-	joint->EnableTwist(true);
-	joint->SetTwistLimits(0.0f, 0.0f);
-	joint->SetTwistFriction(1.0e20f);
-	joint->EnableCone(true);
-	joint->SetConeLimits(0.0f);
-	joint->SetConeFriction(1.0e20f);
-	//joint->SetConeStiffness(0.95f);
-
-	cylinderGeometry->Release();
-	NewtonDestroyCollision(cylinderShape);
-
-	// attach the handle to the world
-	new dFlexyPipeHandle(cylinderHandle, dir);
-}
 #endif
 
 static void Add6DOF(DemoEntityManager* const scene, const dVector& origin)
 {
 	dVector size(1.0f, 1.0f, 1.0f);
 	NewtonBody* const base = CreateBox(scene, origin + dVector(0.0f, 5.0f + size.m_y + 0.25f, 0.0f, 0.0f), size.Scale(0.2f));
-	NewtonBody* const box0 = CreateCapule(scene, origin + dVector(0.0f, 5.0f, 0.0f, 0.0f), size);
+	NewtonBody* const box0 = CreateCapsule(scene, origin + dVector(0.0f, 5.0f, 0.0f, 0.0f), size);
 
 	NewtonWorld* const world = scene->GetNewton();
 
@@ -721,7 +440,7 @@ static void Add6DOF(DemoEntityManager* const scene, const dVector& origin)
 	NewtonConstraintCreateFix6Dof(world, box0, base);
 
 	// link the two boxes
-	NewtonBody* const box1 = CreateCapule(scene, origin + dVector(0.0f, 5.0f - size.m_y * 2.0f, 0.0f, 0.0f), size);
+	NewtonBody* const box1 = CreateCapsule(scene, origin + dVector(0.0f, 5.0f - size.m_y * 2.0f, 0.0f, 0.0f), size);
     NewtonConstraintCreateFix6Dof(world, box1, box0);
 }
 
@@ -730,7 +449,7 @@ static void AddLimitedBallAndSocket(DemoEntityManager* const scene, const dVecto
 	dVector size(1.0f, 1.0f, 1.0f);
 	NewtonBody* const base = CreateBox(scene, origin + dVector(0.0f, 5.0f + size.m_y + 0.25f, 0.0f, 0.0f), size.Scale(0.2f));
 
-	NewtonBody* const box0 = CreateCapule(scene, origin + dVector(0.0f, 5.0f, 0.0f, 0.0f), size);
+	NewtonBody* const box0 = CreateCapsule(scene, origin + dVector(0.0f, 5.0f, 0.0f, 0.0f), size);
 	NewtonBodySetMassMatrix(base, 0.0f, 0.0f, 0.0f, 0.0f);
 	dMatrix pinMatrix(dGrammSchmidt(dVector(0.0f, -1.0f, 0.0f, 0.0f)));
 
@@ -748,7 +467,7 @@ static void AddLimitedBallAndSocket(DemoEntityManager* const scene, const dVecto
 	NewtonBallSetConeLimits1(joint0, 60.0f * dDegreeToRad);
 
 	// connect first box1 to box0 the world
-	NewtonBody* const box1 = CreateCapule(scene, origin + dVector(0.0f, 5.0f - size.m_y * 2.0f, 0.0f, 0.0f), size);
+	NewtonBody* const box1 = CreateCapsule(scene, origin + dVector(0.0f, 5.0f - size.m_y * 2.0f, 0.0f, 0.0f), size);
 	NewtonBodyGetMatrix(box1, &matrix[0][0]);
 	pinMatrix.m_posit = matrix.m_posit + dVector(0.0f, size.m_y, 0.0f, 0.0f);
 	NewtonJoint* const joint1 = NewtonConstraintCreateBall(world, &pinMatrix.m_posit[0], box1, box0);
@@ -762,8 +481,8 @@ static void AddBallAndSockectWithFriction(DemoEntityManager* const scene, const 
 {
 	dVector size(1.0f, 1.0f, 1.0f);
 	NewtonBody* const base = CreateBox(scene, origin + dVector(0.0f, 5.0f + size.m_y + 0.25f, 0.0f, 0.0f), size.Scale(0.2f));
-	NewtonBody* const box0 = CreateCapule(scene, origin + dVector(0.0f, 5.0f, 0.0f, 0.0f), size);
-	NewtonBody* const box1 = CreateCapule(scene, origin + dVector(0.0f, 5.0f - size.m_y * 2.0f, 0.0f, 0.0f), size);
+	NewtonBody* const box0 = CreateCapsule(scene, origin + dVector(0.0f, 5.0f, 0.0f, 0.0f), size);
+	NewtonBody* const box1 = CreateCapsule(scene, origin + dVector(0.0f, 5.0f - size.m_y * 2.0f, 0.0f, 0.0f), size);
 
 	NewtonBodySetMassMatrix(base, 0.0f, 0.0f, 0.0f, 0.0f);
 	dMatrix pinMatrix(dGrammSchmidt(dVector(0.0f, -1.0f, 0.0f, 0.0f)));
@@ -885,6 +604,210 @@ static void AddHingeSpringDamper(DemoEntityManager* const scene, const dVector& 
 	NewtonHingeSetSpringDamper(hinge, 0.8f, 300.0f, 1.0f);
 }
 
+static void AddSlider(DemoEntityManager* const scene, const dVector& origin)
+{
+	// make a reel static
+	NewtonBody* const box0 = CreateBox(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), dVector(8.0f, 0.25f, 0.25f, 0.0f));
+	NewtonBody* const box1 = CreateWheel(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), 1.0f, 0.5f);
+
+	dMatrix matrix;
+	NewtonBodySetMassMatrix(box0, 0.0f, 0.0f, 0.0f, 0.0f);
+
+	NewtonWorld* const world = scene->GetNewton();
+
+	// connect the bodies by a Slider joint
+	NewtonBodyGetMatrix(box1, &matrix[0][0]);
+	NewtonJoint* const slider = NewtonConstraintCreateSlider(world, &matrix.m_posit[0], &matrix.m_front[0], box1, box0);
+
+	// enable limit of first axis
+	NewtonSliderEnableLimits(slider, 1);
+	NewtonSliderSetLimits(slider, -4.0f, 4.0f);
+
+	// add some friction for more realism
+	NewtonSliderSetDryFriction(slider, 10.0f);
+}
+
+static void AddSliderSpringDamper(DemoEntityManager* const scene, const dVector& origin)
+{
+	// make a reel static
+	NewtonBody* const box0 = CreateBox(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), dVector(8.0f, 0.25f, 0.25f, 0.0f));
+	NewtonBody* const box1 = CreateWheel(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), 1.0f, 0.5f);
+
+	dMatrix matrix;
+	NewtonBodySetMassMatrix(box0, 0.0f, 0.0f, 0.0f, 0.0f);
+
+	NewtonWorld* const world = scene->GetNewton();
+
+	// connect the bodies by a Slider joint
+	NewtonBodyGetMatrix(box1, &matrix[0][0]);
+	NewtonJoint* const slider = NewtonConstraintCreateSlider(world, &matrix.m_posit[0], &matrix.m_front[0], box1, box0);
+
+	NewtonSliderEnableLimits(slider, 1);
+	NewtonSliderSetLimits(slider, -4.0f, 4.0f);
+	NewtonSliderSetSpringDamper(slider, 0.7f, 80.0f, 0.0f);
+}
+
+static void AddCylindrical(DemoEntityManager* const scene, const dVector& origin)
+{
+	// make a reel static
+	NewtonBody* const box0 = CreateCylinder(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), 0.25f, 8.0f);
+	NewtonBody* const box1 = CreateWheel(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), 1.0f, 0.5f);
+
+	dMatrix matrix;
+	NewtonBodySetMassMatrix(box0, 0.0f, 0.0f, 0.0f, 0.0f);
+
+	NewtonWorld* const world = scene->GetNewton();
+
+	// connect the bodies by a CorkScrew joint
+	NewtonBodyGetMatrix(box1, &matrix[0][0]);
+	NewtonJoint* const cylinder = NewtonConstraintCreateCorkscrew(world, &matrix.m_posit[0], &matrix.m_front[0], box1, box0);
+
+	// enable limit of first axis
+	NewtonCorkscrewEnableLinearLimits(cylinder, 1);
+	NewtonCorkscrewSetLinearLimits(cylinder, - 4.0f, 4.0f);
+	
+	// set angular limit on second axis
+	NewtonCorkscrewEnableAngularLimits(cylinder, 1);
+	NewtonCorkscrewSetAngularLimits(cylinder, -4.0f * dPi, 6.0f * dPi);
+}
+
+static void AddSlidingContact(DemoEntityManager* const scene, const dVector& origin)
+{
+	// make a reel static
+	NewtonBody* const box0 = CreateBox(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), dVector(8.0f, 0.25f, 0.25f, 0.0f));
+	NewtonBody* const box1 = CreateWheel(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), 1.0f, 0.5f);
+
+	NewtonBodySetMassMatrix(box0, 0.0f, 0.0f, 0.0f, 0.0f);
+
+	NewtonWorld* const world = scene->GetNewton();
+
+	dMatrix matrix;
+	//rotate body so that is lok like a wheel
+	NewtonBodyGetMatrix(box1, &matrix[0][0]);
+	matrix = dRollMatrix(90.0f * dDegreeToRad) * matrix;
+	NewtonBodySetMatrix(box1, &matrix[0][0]);
+	DemoEntity* const ent = (DemoEntity*)NewtonBodyGetUserData(box1);
+	ent->ResetMatrix(*scene, matrix);
+
+
+	//make joint matrix
+	dMatrix jointMatrix(dGetIdentityMatrix());
+	jointMatrix.m_posit = matrix.m_posit;
+
+	NewtonJoint* const roller = NewtonConstraintCreateRoller(world, &jointMatrix.m_posit[0], &jointMatrix.m_up[0], box1, box0);
+	NewtonRollerEnableLinearLimits(roller, 1);
+	NewtonRollerSetLinearLimits(roller, -4.0f, 4.0f);
+	NewtonRollerSetLinearSpringDamper(roller, 0.7f, 80.0f, 0.0f);
+	
+	// set angular limit on second axis
+	NewtonRollerEnableAngularLimits(roller, 1);
+	NewtonRollerSetAngularLimits(roller, -7.0f * dPi, 5.0f * dPi);
+}
+
+static void AddDoubleHinge(DemoEntityManager* const scene, const dVector& origin)
+{
+	dVector size(1.0f, 1.0f, 1.0f);
+
+	NewtonWorld* const world = scene->GetNewton();
+	NewtonBody* const box0 = CreateBox(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), dVector(0.25f, 0.25f, 5.0f, 0.0f));
+	NewtonBodySetMassMatrix(box0, 0.0f, 0.0f, 0.0f, 0.0f);
+
+	{
+		dMatrix matrix;
+		dVector damp(0.0f);
+		dVector omega1(0.0f, 2.0f, 50.0f, 0.0f);
+		NewtonBody* const box1 = CreateWheel(scene, origin + dVector(0.0f, 4.0f, 2.5f, 0.0f), 1.0f, 0.5f);
+		DemoEntity* const boxEntity1 = ((DemoEntity*)NewtonBodyGetUserData(box1));
+
+		NewtonBodyGetMatrix(box1, &matrix[0][0]);
+		matrix = dYawMatrix(dPi * 0.5f) * matrix;
+		NewtonBodySetMatrix(box1, &matrix[0][0]);
+
+		boxEntity1->ResetMatrix(*scene, matrix);
+		NewtonBodySetOmega(box1, &omega1[0]);
+		NewtonBodySetLinearDamping(box1, 0.0f);
+		NewtonBodySetAngularDamping(box1, &damp[0]);
+
+		//	// link the two boxes
+		NewtonBodyGetMatrix(box1, &matrix[0][0]);
+		NewtonJoint* const joint = NewtonConstraintCreateUniversal(world, &matrix.m_posit[0], &matrix.m_front[0], &matrix.m_up[0], box1, box0);
+		NewtonUniversalEnableLimits0(joint, 1);
+		NewtonUniversalSetLimits0(joint, -3.0f * dPi, 4.0f * dPi);
+	}
+
+	{
+		dMatrix matrix;
+		dVector damp(0.0f);
+		dVector omega2(0.0f, 10.0f, 100.0f, 0.0f);
+		NewtonBody* const box2 = CreateWheel(scene, origin + dVector(0.0f, 4.0f, -2.5f, 0.0f), 1.0f, 0.5f);
+		DemoEntity* const boxEntity2 = ((DemoEntity*)NewtonBodyGetUserData(box2));
+
+		NewtonBodyGetMatrix(box2, &matrix[0][0]);
+		matrix = dYawMatrix(dPi * 0.5f) * matrix;
+		NewtonBodySetMatrix(box2, &matrix[0][0]);
+		boxEntity2->ResetMatrix(*scene, matrix);
+		NewtonBodySetOmega(box2, &omega2[0]);
+		NewtonBodySetLinearDamping(box2, 0.0f);
+		NewtonBodySetAngularDamping(box2, &damp[0]);
+
+		NewtonBodyGetMatrix(box2, &matrix[0][0]);
+		NewtonJoint* const joint = NewtonConstraintCreateUniversal(world, &matrix.m_posit[0], &matrix.m_front[0], &matrix.m_up[0], box2, box0);
+		NewtonUniversalEnableLimits1(joint, 1);
+		NewtonUniversalSetLimits1(joint, -10.0f * dPi, 15.0f * dPi);
+	}
+
+	{
+		dMatrix matrix;
+		dVector damp(0.0f);
+		NewtonBody* const box2 = CreateWheel(scene, origin + dVector(0.0f, 4.0f, -0.85f, 0.0f), 1.0f, 0.5f);
+		DemoEntity* const boxEntity2 = ((DemoEntity*)NewtonBodyGetUserData(box2));
+
+		NewtonBodyGetMatrix(box2, &matrix[0][0]);
+		matrix = dYawMatrix(dPi * 0.5f) * matrix;
+		NewtonBodySetMatrix(box2, &matrix[0][0]);
+		boxEntity2->ResetMatrix(*scene, matrix);
+		NewtonBodySetLinearDamping(box2, 0.0f);
+		NewtonBodySetAngularDamping(box2, &damp[0]);
+
+		NewtonBodyGetMatrix(box2, &matrix[0][0]);
+		NewtonJoint* const joint = NewtonConstraintCreateUniversal(world, &matrix.m_posit[0], &matrix.m_front[0], &matrix.m_up[0], box2, box0);
+		NewtonRollerSetSpringDamper0(joint, 0.7f, 80.0f, 0.0f);;
+	}
+
+	{
+		dMatrix matrix;
+		dVector damp(0.0f);
+		NewtonBody* const box2 = CreateWheel(scene, origin + dVector(0.0f, 4.0f, 0.84f, 0.0f), 1.0f, 0.5f);
+		DemoEntity* const boxEntity2 = ((DemoEntity*)NewtonBodyGetUserData(box2));
+
+		NewtonBodyGetMatrix(box2, &matrix[0][0]);
+		matrix = dYawMatrix(dPi * 0.5f) * matrix;
+		NewtonBodySetMatrix(box2, &matrix[0][0]);
+		boxEntity2->ResetMatrix(*scene, matrix);
+		NewtonBodySetLinearDamping(box2, 0.0f);
+		NewtonBodySetAngularDamping(box2, &damp[0]);
+
+		NewtonBodyGetMatrix(box2, &matrix[0][0]);
+		NewtonJoint* const joint = NewtonConstraintCreateUniversal(world, &matrix.m_posit[0], &matrix.m_front[0], &matrix.m_up[0], box2, box0);
+		// for now just use vicuos friction. 
+		// later add dry friction.
+		//joint->SetFriction(10.0f);
+		//joint->SetFriction1(10.0f);
+		NewtonRollerSetSpringDamper0(joint, 0.01f, 0.0f, 10.0f);
+		NewtonRollerSetSpringDamper1(joint, 0.01f, 0.0f, 10.0f);
+	}
+}
+
+static void AddUpVector(DemoEntityManager* const scene, const dVector& origin, dgFloat32 mass, dgFloat32 diameter)
+{
+	dVector size(1.25f * diameter, 2.0f * diameter, diameter);
+	NewtonBody* const capsule = CreateCapsule(scene, origin + dVector(0.0f, 4.0f, 2.5f, 0.0f), size);
+
+	NewtonWorld* const world = scene->GetNewton();
+	dVector pin(0.0f, 1.0f, 0.0f);
+	NewtonConstraintCreateUpVector(world, &pin[0], capsule);
+}
+
 
 void StandardJoints (DemoEntityManager* const scene)
 {
@@ -906,24 +829,22 @@ void StandardJoints (DemoEntityManager* const scene)
 	AddHinge (scene, dVector (-20.0f, 0.0f, 0.0f));
 	AddHingeMotor(scene, dVector(0.0f, 0.0f, -20.0f));
 	AddHingeSpringDamper (scene, dVector (dVector (-20.0f, 0.0f, 5.0f)));
-	//AddSlider (scene, dVector (-20.0f, 0.0f, 7.0f));
-	//AddSliderSpringDamper (scene, dVector (dVector (-20.0f, 0.0f, 9.0f)));
-	//AddCylindrical (scene, dVector (-20.0f, 0.0f, 11.0f));
-	//AddSlidingContact (scene, dVector (-20.0f, 0.0f, 13.0f));
-	//AddDoubleHinge(scene, dVector (-20.0f, 0.0f, 17.0f));
+	AddSlider (scene, dVector (-20.0f, 0.0f, 7.0f));
+	AddSliderSpringDamper (scene, dVector (dVector (-20.0f, 0.0f, 9.0f)));
+	AddCylindrical (scene, dVector (-20.0f, 0.0f, 11.0f));
+	AddSlidingContact (scene, dVector (-20.0f, 0.0f, 13.0f));
+	AddDoubleHinge(scene, dVector (-20.0f, 0.0f, 17.0f));
+	AddUpVector(scene, dVector(-15.0f, 0.0f, 10.0f), 10.0f, 0.35f);
 	//AddGear (scene, dVector (-20.0f, 0.0f, 22.0f));
 	//AddPulley (scene, dVector (-20.0f, 0.0f, 25.0f));
 	//AddGearAndRack (scene, dVector (-20.0f, 0.0f, 29.0f));
 	//AddDifferential(scene, dVector(-20.0f, 0.0f, 35.0f));
 	//AddPathFollow (scene, dVector (20.0f, 0.0f, 0.0f));
-	////AddFlexyPipe(scene, dVector(-20.0f, 0.0f, 0.0f));
 
     // place camera into position
     dMatrix camMatrix (dGetIdentityMatrix());
     dQuaternion rot (camMatrix);
-	dVector origin (-50.0f, 7.0f, 0.0f, 0.0f);
-//	dVector origin (-30.0f, 7.0f, 30.0f, 0.0f);
+	dVector origin (-50.0f, 5.0f, -5.0f, 0.0f);
     scene->SetCameraMatrix(rot, origin);
 }
-
 

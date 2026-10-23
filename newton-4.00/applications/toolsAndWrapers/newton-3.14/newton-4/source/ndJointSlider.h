@@ -41,7 +41,10 @@ class ndJointSlider: public ndJointBilateralConstraint
 	//D_NEWTON_API void SetMaxForceState(bool state);
 	//D_NEWTON_API void SetMaxForce(ndFloat32 force);
 
+	D_NEWTON_API void SetAsDryFriction(ndFloat32 maxFrictionForce);
+	D_NEWTON_API void SetAsMotor(ndFloat32 speed, ndFloat32 maxForce);
 	D_NEWTON_API virtual void SetAsSpringDamper(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper);
+
 	D_NEWTON_API void GetSpringDamper(ndFloat32& regularizer, ndFloat32& spring, ndFloat32& damper) const;
 	D_NEWTON_API void DebugJoint(ndConstraintDebugCallback& debugCallback) const override;
 	D_NEWTON_API void ClearMemory() override;
@@ -50,6 +53,8 @@ class ndJointSlider: public ndJointBilateralConstraint
 	D_NEWTON_API void UpdateParameters() override;
 	D_NEWTON_API ndFloat32 PenetrationSpeed(ndFloat32 penetration) const;
 	D_NEWTON_API void SubmitLimits(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
+
+	D_NEWTON_API void SubmitMotor(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 	D_NEWTON_API void SubmitSpringDamper(ndConstraintDescritor& desc, const ndMatrix& matrix0, const ndMatrix& matrix1);
 	
 	D_NEWTON_API void JacobianDerivative(ndConstraintDescritor& desc) override;
@@ -59,9 +64,9 @@ class ndJointSlider: public ndJointBilateralConstraint
 	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
 	ndAxisParam m_axis;
-	// do no forget to check this legacy
 	ndFloat32 m_maxForce;
-	//ndInt8 m_forceState;
+	ndFloat32 m_motorSpeed;
+
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 

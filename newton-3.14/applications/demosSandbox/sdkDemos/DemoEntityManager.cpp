@@ -58,7 +58,7 @@
 //#define DEFAULT_SCENE	23		// scene Collision
 //#define DEFAULT_SCENE	24		// simple convex fracturing 
 //#define DEFAULT_SCENE	25		// multi ray casting using the threading Job scheduler
-#define DEFAULT_SCENE	26		// standard joints
+//#define DEFAULT_SCENE	26		// standard joints
 //#define DEFAULT_SCENE	27		// custom joints
 //#define DEFAULT_SCENE	28		// servo joints
 //#define DEFAULT_SCENE	29		// construction vehicle
@@ -67,7 +67,7 @@
 //#define DEFAULT_SCENE	32		// basic rag doll
 //#define DEFAULT_SCENE	33		// balancing biped
 //#define DEFAULT_SCENE	34		// multi body body vehicle
-//#define DEFAULT_SCENE	35		// super Car
+#define DEFAULT_SCENE	35		// super Car
 //#define DEFAULT_SCENE	36		// heavy vehicles
 //#define DEFAULT_SCENE	37		// basic player controller
 //#define DEFAULT_SCENE	38		// animated player controller

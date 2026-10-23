@@ -6556,6 +6556,27 @@ dFloat NewtonSliderCalculateStopAccel(const NewtonJoint* const slider, const New
 	return contraint->CalculateStopAccel (distance, (dgJointCallbackParam*) desc);
 }
 
+void NewtonSliderEnableLimits(const NewtonJoint* const slider, int state)
+{
+}
+
+void NewtonSliderSetLimits(const NewtonJoint* const slider, dFloat minPosit, dFloat maxPosit)
+{
+}
+
+void NewtonSliderSetDryFriction(const NewtonJoint* const slider, dFloat frictionForce)
+{
+}
+
+void NewtonSliderSetAsMotor(const NewtonJoint* const slider, dFloat speed, dFloat maxForce)
+{
+}
+
+void NewtonSliderSetSpringDamper(const NewtonJoint* const slider, dFloat regularizer, dFloat spring, dFloat32 damper)
+{
+}
+
+
 /*!
   Get the total force asserted over the joint pivot point, to maintain the constraint.
 
@@ -6813,8 +6834,105 @@ void NewtonCorkscrewGetJointForce(const NewtonJoint* const corkscrew, dFloat* co
 	force[2] = forceVector.m_z;
 }
 
+void NewtonCorkscrewEnableLinearLimits(const NewtonJoint* const slider, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+}
 
-/*! @} */ // end of JointSlider
+void NewtonCorkscrewSetLinearLimits(const NewtonJoint* const slider, dFloat minPosit, dFloat maxPosit)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+}
+
+void NewtonCorkscrewEnableAngularLimits(const NewtonJoint* const hinge, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+}
+
+void NewtonCorkscrewSetAngularLimits(const NewtonJoint* const hinge, dFloat minTwistAngle, dFloat maxTwistAngle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+}
+
+// 
+// roller joint (new for 3.15 bu not supported in 3.14
+//
+NewtonJoint* NewtonConstraintCreateRoller(const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const dFloat* pinDir, const NewtonBody* const childBody, const NewtonBody* const parentBody)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	return NewtonConstraintCreateCorkscrew(newtonWorld, pivotPoint, pinDir, childBody, parentBody);
+}
+
+void NewtonRollerSetUserCallback(const NewtonJoint* const corkscrew, NewtonCorkscrewCallback callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+}
+
+dFloat NewtonRollerGetJointPosit(const NewtonJoint* const corkscrew)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	return 0;
+}
+
+dFloat NewtonRollerGetJointAngle(const NewtonJoint* const corkscrew)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	return 0;
+}
+
+dFloat NewtonRollerGetJointVeloc(const NewtonJoint* const corkscrew)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	return 0;
+}
+
+dFloat NewtonRollerGetJointOmega(const NewtonJoint* const corkscrew)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	return 0;
+}
+
+void NewtonRollerGetJointForce(const NewtonJoint* const corkscrew, dFloat* const force)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+}
+
+dFloat NewtonRollerCalculateStopAlpha(const NewtonJoint* const corkscrew, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	return 0;
+}
+
+dFloat NewtonRollerCalculateStopAccel(const NewtonJoint* const corkscrew, const NewtonHingeSliderUpdateDesc* const desc, dFloat position)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	return 0;
+}
+
+void NewtonRollerEnableLinearLimits(const NewtonJoint* const corkscrew, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+}
+
+void NewtonRollerSetLinearLimits(const NewtonJoint* const corkscrew, dFloat minPosit, dFloat maxPosit)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+}
+
+void NewtonRollerEnableAngularLimits(const NewtonJoint* const corkscrew, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+}
+
+void NewtonRollerSetAngularLimits(const NewtonJoint* const corkscrew, dFloat minTwistAngle, dFloat maxTwistAngle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+}
+
+void NewtonRollerSetLinearSpringDamper(const NewtonJoint* const corkscrew, dFloat regularizer, dFloat spring, dFloat32 damper)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+}
 
 /*! @defgroup JointUniversal JointUniversal
 Universal joint interface
@@ -7042,6 +7160,29 @@ void NewtonUniversalGetJointForce(const NewtonJoint* const universal, dFloat* co
 	force[2] = forceVector.m_z;
 }
 
+void NewtonUniversalEnableLimits0(const NewtonJoint* const universal, int state)
+{
+}
+
+void NewtonUniversalSetLimits0(const NewtonJoint* const universal, dFloat minPosit, dFloat maxPosit)
+{
+}
+
+void NewtonUniversalEnableLimits1(const NewtonJoint* const universal, int state)
+{
+}
+
+void NewtonUniversalSetLimits1(const NewtonJoint* const universal, dFloat minTwistAngle, dFloat maxTwistAngle)
+{
+}
+
+void NewtonRollerSetSpringDamper0(const NewtonJoint* const universal, dFloat regularizer, dFloat spring, dFloat32 damper)
+{
+}
+
+void NewtonRollerSetSpringDamper1(const NewtonJoint* const universal, dFloat regularizer, dFloat spring, dFloat32 damper)
+{
+}
 
 /*! @} */ // end of JointUniversal
 
