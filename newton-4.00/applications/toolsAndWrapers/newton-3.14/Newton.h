@@ -1277,6 +1277,11 @@ extern "C" {
 	NEWTON_API dFloat NewtonUniversalCalculateStopAlpha0(const NewtonJoint* const universal, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle);
 	NEWTON_API dFloat NewtonUniversalCalculateStopAlpha1(const NewtonJoint* const universal, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle);
 
+	NEWTON_API void NewtonUniversalEnableLimits0(const NewtonJoint* const universal, int state);
+	NEWTON_API void NewtonUniversalSetLimits0(const NewtonJoint* const universal, dFloat minPosit, dFloat maxPosit);
+	NEWTON_API void NewtonUniversalEnableLimits1(const NewtonJoint* const universal, int state);
+	NEWTON_API void NewtonUniversalSetLimits1(const NewtonJoint* const universal, dFloat minTwistAngle, dFloat maxTwistAngle);
+
 #ifdef __cplusplus 
 }
 #endif

@@ -7160,6 +7160,22 @@ void NewtonUniversalGetJointForce(const NewtonJoint* const universal, dFloat* co
 	force[2] = forceVector.m_z;
 }
 
+void NewtonUniversalEnableLimits0(const NewtonJoint* const universal, int state)
+{
+}
+
+void NewtonUniversalSetLimits0(const NewtonJoint* const universal, dFloat minPosit, dFloat maxPosit)
+{
+}
+
+void NewtonUniversalEnableLimits1(const NewtonJoint* const universal, int state)
+{
+}
+
+void NewtonUniversalSetLimits1(const NewtonJoint* const universal, dFloat minTwistAngle, dFloat maxTwistAngle)
+{
+}
+
 
 /*! @} */ // end of JointUniversal
 

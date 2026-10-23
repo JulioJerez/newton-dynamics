@@ -32,7 +32,7 @@ class NewtonDoubleHinge : public ndJointDoubleHinge
 	public:
 	D_CLASS_REFLECTION(NewtonDoubleHinge, ndJointDoubleHinge)
 
-	typedef unsigned (*NewtonUniversalCallback) (const NewtonJoint* const universal, NewtonHingeSliderUpdateDesc* const desc);
+	typedef unsigned (*NewtonUniversalCallback) (const NewtonJoint* const joint, NewtonHingeSliderUpdateDesc* const desc);
 
 	NewtonDoubleHinge(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 		:ndJointDoubleHinge(pinAndPivotFrame, child, parent)
@@ -41,40 +41,6 @@ class NewtonDoubleHinge : public ndJointDoubleHinge
 	}
 	NewtonUniversalCallback m_callback;
 };
-
-
-/*!
-  Create a universal joint.
-
-  @param *newtonWorld Pointer to the Newton world.
-  @param *pivotPoint is origin of the universal joint in global space.
-  @param  *pinDir0 - first axis of rotation fixed on childBody body and perpendicular to pinDir1.
-  @param  *pinDir1 - second axis of rotation fixed on parentBody body and perpendicular to pinDir0.
-  @param *childBody is the pointer to the attached rigid body, this body can not be NULL or it can not have an infinity (zero) mass.
-  @param *parentBody is the pointer to the parent rigid body, this body can be NULL or any kind of rigid body.
-
-  @return Pointer to the universal joint.
-
-  This function creates a universal joint and add it to the world. By default joint disables collision with the linked bodies.
-
-  a universal joint is a constraint that restricts twp rigid bodies to be connected to a point fixed on both bodies,
-  while and allowing one body to spin around a fix axis in is own frame, and the other body to spin around another axis fixes on
-  it own frame. Both axis must be mutually perpendicular.
-*/
-NewtonJoint* NewtonConstraintCreateUniversal(const NewtonWorld* const newtonWorld, const dFloat* pivotPoint,
-	const dFloat* pinDir0, const dFloat* pinDir1, const NewtonBody* const childBody, const NewtonBody* const parentBody)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-	return nullptr;
-	//Newton* const world = (Newton*)newtonWorld;
-	//dgBody* const body0 = (dgBody*)childBody;
-	//dgBody* const body1 = (dgBody*)parentBody;
-	//dgVector pin0(pinDir0[0], pinDir0[1], pinDir0[2], dgFloat32(0.0f));
-	//dgVector pin1(pinDir1[0], pinDir1[1], pinDir1[2], dgFloat32(0.0f));
-	//dgVector pivot(pivotPoint[0], pivotPoint[1], pivotPoint[2], dgFloat32(0.0f));
-	//return (NewtonJoint*)world->CreateUniversalConstraint(pivot, pin0, pin1, body0, body1);
-}
 
 
 /*!
@@ -97,7 +63,7 @@ NewtonJoint* NewtonConstraintCreateUniversal(const NewtonWorld* const newtonWorl
 
   See also: ::NewtonJointGetUserData, ::NewtonJointSetUserData
 */
-void NewtonUniversalSetUserCallback(const NewtonJoint* const universal, NewtonUniversalCallback callback)
+void NewtonUniversalSetUserCallback(const NewtonJoint* const joint, NewtonUniversalCallback callback)
 {
 	ndAssert(0);
 	//dgUniversalConstraint* contraint;
@@ -120,7 +86,7 @@ void NewtonUniversalSetUserCallback(const NewtonJoint* const universal, NewtonUn
 
   See also: ::NewtonUniversalSetUserCallback
 */
-dFloat NewtonUniversalGetJointAngle0(const NewtonJoint* const universal)
+dFloat NewtonUniversalGetJointAngle0(const NewtonJoint* const joint)
 {
 	ndAssert(0);
 	return 0;
@@ -144,7 +110,7 @@ dFloat NewtonUniversalGetJointAngle0(const NewtonJoint* const universal)
 
   See also: ::NewtonUniversalSetUserCallback
 */
-dFloat NewtonUniversalGetJointAngle1(const NewtonJoint* const universal)
+dFloat NewtonUniversalGetJointAngle1(const NewtonJoint* const joint)
 {
 	ndAssert(0);
 	return 0;
@@ -169,7 +135,7 @@ dFloat NewtonUniversalGetJointAngle1(const NewtonJoint* const universal)
 
   See also: ::NewtonUniversalSetUserCallback
 */
-dFloat NewtonUniversalGetJointOmega0(const NewtonJoint* const universal)
+dFloat NewtonUniversalGetJointOmega0(const NewtonJoint* const joint)
 {
 	ndAssert(0);
 	return 0;
@@ -194,7 +160,7 @@ dFloat NewtonUniversalGetJointOmega0(const NewtonJoint* const universal)
 
   See also: ::NewtonUniversalSetUserCallback
 */
-dFloat NewtonUniversalGetJointOmega1(const NewtonJoint* const universal)
+dFloat NewtonUniversalGetJointOmega1(const NewtonJoint* const joint)
 {
 	ndAssert(0);
 	return 0;
@@ -221,7 +187,7 @@ dFloat NewtonUniversalGetJointOmega1(const NewtonJoint* const universal)
 
   See also: ::NewtonUniversalSetUserCallback
 */
-dFloat NewtonUniversalCalculateStopAlpha0(const NewtonJoint* const universal, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle)
+dFloat NewtonUniversalCalculateStopAlpha0(const NewtonJoint* const joint, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle)
 {
 	ndAssert(0);
 	return 0;
@@ -246,7 +212,7 @@ dFloat NewtonUniversalCalculateStopAlpha0(const NewtonJoint* const universal, co
 
   See also: ::NewtonUniversalSetUserCallback
 */
-dFloat NewtonUniversalCalculateStopAlpha1(const NewtonJoint* const universal, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle)
+dFloat NewtonUniversalCalculateStopAlpha1(const NewtonJoint* const joint, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle)
 {
 	ndAssert(0);
 	return 0;
@@ -273,7 +239,7 @@ dFloat NewtonUniversalCalculateStopAlpha1(const NewtonJoint* const universal, co
 
   See also: ::NewtonUniversalSetUserCallback
 */
-void NewtonUniversalGetJointForce(const NewtonJoint* const universal, dFloat* const force)
+void NewtonUniversalGetJointForce(const NewtonJoint* const joint, dFloat* const force)
 {
 	ndAssert(0);
 	//dgUniversalConstraint* contraint;
@@ -288,4 +254,75 @@ void NewtonUniversalGetJointForce(const NewtonJoint* const universal, dFloat* co
 
 
 
+/*!
+  Create a universal joint.
 
+  @param *newtonWorld Pointer to the Newton world.
+  @param *pivotPoint is origin of the universal joint in global space.
+  @param  *pinDir0 - first axis of rotation fixed on childBody body and perpendicular to pinDir1.
+  @param  *pinDir1 - second axis of rotation fixed on parentBody body and perpendicular to pinDir0.
+  @param *childBody is the pointer to the attached rigid body, this body can not be NULL or it can not have an infinity (zero) mass.
+  @param *parentBody is the pointer to the parent rigid body, this body can be NULL or any kind of rigid body.
+
+  @return Pointer to the universal joint.
+
+  This function creates a universal joint and add it to the world. By default joint disables collision with the linked bodies.
+
+  a universal joint is a constraint that restricts twp rigid bodies to be connected to a point fixed on both bodies,
+  while and allowing one body to spin around a fix axis in is own frame, and the other body to spin around another axis fixes on
+  it own frame. Both axis must be mutually perpendicular.
+*/
+NewtonJoint* NewtonConstraintCreateUniversal(const NewtonWorld* const newtonWorld, const dFloat* pivotPoint,
+	const dFloat* pinDir0, const dFloat* pinDir1, const NewtonBody* const childBody, const NewtonBody* const parentBody)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndNewtonWorld* const world = PointerCast<ndNewtonWorld, NewtonWorld>(newtonWorld);
+	ndBodyKinematic* const body0 = PointerCast<ndBody, NewtonBody>(childBody)->GetAsBodyKinematic();
+	ndBodyKinematic* const body1 = parentBody ? PointerCast<ndBody, NewtonBody>(parentBody)->GetAsBodyKinematic() : world->GetSentinelBody();
+	ndAssert(body0);
+	ndAssert(body1);
+	ndAssert(body0 != body1);
+
+	const ndVector pivot(pivotPoint[0], pivotPoint[1], pivotPoint[2], ndFloat32(0.0f));
+	const ndMatrix& bodyMatrix = body0->GetMatrix();
+
+	ndVector pin0(pinDir0[0], pinDir0[1], pinDir0[2], ndFloat32(0.0f));
+	ndVector pin1(pinDir1[0], pinDir1[1], pinDir1[2], ndFloat32(0.0f));
+	ndMatrix matrix(ndGetIdentityMatrix());
+	matrix.m_front = pin0.Normalize();
+	matrix.m_right = (pin0.CrossProduct(pin1) & ndVector::m_triplexMask).Normalize();
+	matrix.m_up = matrix.m_right.CrossProduct(matrix.m_front);
+	matrix.m_posit = ndVector(pivotPoint[0], pivotPoint[1], pivotPoint[2], ndFloat32(1.0f));
+
+	ndSharedPtr<ndJointBilateralConstraint> joint(new NewtonDoubleHinge(matrix, body0, body1));
+	world->AddJoint(joint);
+	return PointerCast<NewtonJoint, ndJointBilateralConstraint>(*joint);
+}
+
+void NewtonUniversalEnableLimits0(const NewtonJoint* const joint, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonDoubleHinge* const userJoint = PointerCast<NewtonDoubleHinge, NewtonJoint>(joint);
+	userJoint->SetLimitState0(state ? true : false);
+}
+
+void NewtonUniversalSetLimits0(const NewtonJoint* const joint, dFloat minAngle, dFloat maxAngle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonDoubleHinge* const userJoint = PointerCast<NewtonDoubleHinge, NewtonJoint>(joint);
+	userJoint->SetLimits0(minAngle, maxAngle);
+}
+
+void NewtonUniversalEnableLimits1(const NewtonJoint* const joint, int state)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonDoubleHinge* const userJoint = PointerCast<NewtonDoubleHinge, NewtonJoint>(joint);
+	userJoint->SetLimitState1(state ? true : false);
+}
+
+void NewtonUniversalSetLimits1(const NewtonJoint* const joint, dFloat minAngle, dFloat maxAngle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonDoubleHinge* const userJoint = PointerCast<NewtonDoubleHinge, NewtonJoint>(joint);
+	userJoint->SetLimits1(minAngle, maxAngle);
+}

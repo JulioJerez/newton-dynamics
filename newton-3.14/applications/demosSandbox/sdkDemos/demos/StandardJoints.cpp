@@ -784,6 +784,7 @@ static void AddDoubleHinge(DemoEntityManager* const scene, const dVector& origin
 {
 	dVector size(1.0f, 1.0f, 1.0f);
 
+	NewtonWorld* const world = scene->GetNewton();
 	NewtonBody* const box0 = CreateBox(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), dVector(0.25f, 0.25f, 5.0f, 0.0f));
 	NewtonBodySetMassMatrix(box0, 0.0f, 0.0f, 0.0f, 0.0f);
 
@@ -806,9 +807,9 @@ static void AddDoubleHinge(DemoEntityManager* const scene, const dVector& origin
 
 		//	// link the two boxes
 		NewtonBodyGetMatrix(box1, &matrix[0][0]);
-		dCustomDoubleHinge* const joint = new dCustomDoubleHinge(matrix, box1, box0);
-		joint->EnableLimits(false);
-		joint->SetLimits(-30.0f * dPi, 10.0f * dPi);
+		NewtonJoint* const joint = NewtonConstraintCreateUniversal(world, &matrix.m_posit[0], &matrix.m_front[0], &matrix.m_up[0], box1, box0);
+		NewtonUniversalEnableLimits0(joint, 1);
+		NewtonUniversalSetLimits0(joint, -3.0f * dPi, 4.0f * dPi);
 	}
 
 #if 0
