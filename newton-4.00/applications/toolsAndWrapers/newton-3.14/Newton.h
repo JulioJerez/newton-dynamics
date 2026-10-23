@@ -1276,10 +1276,11 @@ extern "C" {
 	NEWTON_API dFloat NewtonRollerCalculateStopAlpha(const NewtonJoint* const corkscrew, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle);
 	NEWTON_API dFloat NewtonRollerCalculateStopAccel(const NewtonJoint* const corkscrew, const NewtonHingeSliderUpdateDesc* const desc, dFloat position);
 
-	NEWTON_API void NewtonRollerEnableLinearLimits(const NewtonJoint* const corkscrew, int state);
-	NEWTON_API void NewtonRollerSetLinearLimits(const NewtonJoint* const corkscrew, dFloat minPosit, dFloat maxPosit);
 	NEWTON_API void NewtonRollerEnableAngularLimits(const NewtonJoint* const corkscrew, int state);
 	NEWTON_API void NewtonRollerSetAngularLimits(const NewtonJoint* const corkscrew, dFloat minTwistAngle, dFloat maxTwistAngle);
+	NEWTON_API void NewtonRollerEnableLinearLimits(const NewtonJoint* const corkscrew, int state);
+	NEWTON_API void NewtonRollerSetLinearLimits(const NewtonJoint* const corkscrew, dFloat minPosit, dFloat maxPosit);
+	NEWTON_API void NewtonRollerSetLinearSpringDamper(const NewtonJoint* const corkscrew, dFloat regularizer, dFloat spring, dFloat32 damper);
 
 #ifdef __cplusplus 
 }

@@ -6866,81 +6866,73 @@ NewtonJoint* NewtonConstraintCreateRoller(const NewtonWorld* const newtonWorld, 
 void NewtonRollerSetUserCallback(const NewtonJoint* const corkscrew, NewtonCorkscrewCallback callback)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	dgAssert(0);
 }
 
 dFloat NewtonRollerGetJointPosit(const NewtonJoint* const corkscrew)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	dgAssert(0);
 	return 0;
 }
 
 dFloat NewtonRollerGetJointAngle(const NewtonJoint* const corkscrew)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	dgAssert(0);
 	return 0;
 }
 
 dFloat NewtonRollerGetJointVeloc(const NewtonJoint* const corkscrew)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	dgAssert(0);
 	return 0;
 }
 
 dFloat NewtonRollerGetJointOmega(const NewtonJoint* const corkscrew)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	dgAssert(0);
 	return 0;
 }
 
 void NewtonRollerGetJointForce(const NewtonJoint* const corkscrew, dFloat* const force)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	dgAssert(0);
 }
 
 dFloat NewtonRollerCalculateStopAlpha(const NewtonJoint* const corkscrew, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	dgAssert(0);
 	return 0;
 }
 
 dFloat NewtonRollerCalculateStopAccel(const NewtonJoint* const corkscrew, const NewtonHingeSliderUpdateDesc* const desc, dFloat position)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	dgAssert(0);
 	return 0;
 }
 
 void NewtonRollerEnableLinearLimits(const NewtonJoint* const corkscrew, int state)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	dgAssert(0);
 }
 
 void NewtonRollerSetLinearLimits(const NewtonJoint* const corkscrew, dFloat minPosit, dFloat maxPosit)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	dgAssert(0);
 }
 
 void NewtonRollerEnableAngularLimits(const NewtonJoint* const corkscrew, int state)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	dgAssert(0);
 }
 
 void NewtonRollerSetAngularLimits(const NewtonJoint* const corkscrew, dFloat minTwistAngle, dFloat maxTwistAngle)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	dgAssert(0);
 }
 
+void NewtonRollerSetLinearSpringDamper(const NewtonJoint* const corkscrew, dFloat regularizer, dFloat spring, dFloat32 damper)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+}
 
 /*! @defgroup JointUniversal JointUniversal
 Universal joint interface

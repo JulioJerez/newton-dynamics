@@ -1147,7 +1147,7 @@ extern "C" {
 	NEWTON_API void NewtonSliderSetLimits(const NewtonJoint* const slider, dFloat minPosit, dFloat maxPosit);
 	NEWTON_API void NewtonSliderSetDryFriction(const NewtonJoint* const slider, dFloat frictionForce);
 	NEWTON_API void NewtonSliderSetAsMotor(const NewtonJoint* const slider, dFloat speed, dFloat maxForce);
-	NEWTON_API void NewtonSliderSetSpringDamper(const NewtonJoint* const slder, dFloat regularizer, dFloat spring, dFloat32 damper);
+	NEWTON_API void NewtonSliderSetSpringDamper(const NewtonJoint* const slider, dFloat regularizer, dFloat spring, dFloat32 damper);
 
 	// **********************************************************************************************
 	//
@@ -1184,6 +1184,7 @@ extern "C" {
 	NEWTON_API dFloat NewtonRollerCalculateStopAlpha(const NewtonJoint* const corkscrew, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle);
 	NEWTON_API dFloat NewtonRollerCalculateStopAccel(const NewtonJoint* const corkscrew, const NewtonHingeSliderUpdateDesc* const desc, dFloat position);
 
+	NEWTON_API void NewtonRollerSetLinearSpringDamper(const NewtonJoint* const corkscrew, dFloat regularizer, dFloat spring, dFloat32 damper);
 	NEWTON_API void NewtonRollerEnableLinearLimits(const NewtonJoint* const corkscrew, int state);
 	NEWTON_API void NewtonRollerSetLinearLimits(const NewtonJoint* const corkscrew, dFloat minPosit, dFloat maxPosit);
 	NEWTON_API void NewtonRollerEnableAngularLimits(const NewtonJoint* const corkscrew, int state);

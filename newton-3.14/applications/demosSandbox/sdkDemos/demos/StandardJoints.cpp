@@ -833,7 +833,7 @@ static void AddCylindrical(DemoEntityManager* const scene, const dVector& origin
 	NewtonCorkscrewEnableLinearLimits(cylinder, 1);
 	NewtonCorkscrewSetLinearLimits(cylinder, - 4.0f, 4.0f);
 	
-	//// set angular limit on second axis
+	// set angular limit on second axis
 	NewtonCorkscrewEnableAngularLimits(cylinder, 1);
 	NewtonCorkscrewSetAngularLimits(cylinder, -4.0f * dPi, 6.0f * dPi);
 }
@@ -861,17 +861,15 @@ static void AddSlidingContact(DemoEntityManager* const scene, const dVector& ori
 	dMatrix jointMatrix(dGetIdentityMatrix());
 	jointMatrix.m_posit = matrix.m_posit;
 
-	//dCustomSlidingContact* const slider = new dCustomSlidingContact(jointMatrix, box1, box0);
-	NewtonJoint* const roller = NewtonConstraintCreateRoller(world, &jointMatrix.m_posit[0], &jointMatrix.m_front[0], box1, box0);
-	//slider->EnableLimits(true);
-	//slider->SetLimits(-4.0f, 4.0f);
-	//slider->SetAsSpringDamper(true, 0.7f, 80.0f, 0.0f);
-	//
-	//// enable limit of first axis
-	//slider->EnableAngularLimits(true);
-	//slider->SetAngularLimits(-7.0f * dPi, 5.0f * dPi);
+	NewtonJoint* const roller = NewtonConstraintCreateRoller(world, &jointMatrix.m_posit[0], &jointMatrix.m_up[0], box1, box0);
+	NewtonRollerEnableLinearLimits(roller, 1);
+	NewtonRollerSetLinearLimits(roller, -4.0f, 4.0f);
+	NewtonRollerSetLinearSpringDamper(roller, 0.7f, 80.0f, 0.0f);
+	
+	// set angular limit on second axis
+	NewtonRollerEnableAngularLimits(roller, 1);
+	NewtonRollerSetAngularLimits(roller, - 7.0f * dPi, 5.0f * dPi);
 }
-
 
 void StandardJoints (DemoEntityManager* const scene)
 {
