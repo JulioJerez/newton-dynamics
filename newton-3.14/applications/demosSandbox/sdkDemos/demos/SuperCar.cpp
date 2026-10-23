@@ -1240,12 +1240,15 @@ void SuperCar (DemoEntityManager* const scene)
 	//
 	// Vehicle Manager Construction:
 	dRayCastVehicleManager* const manager = new dRayCastVehicleManager(scene);
-	//
+	
+
 	dFloat vhMass = 1200.0f;
 	dVector vhCenterMass(0.025f, -0.25f, 0.0f, 0.0f);
 	dMatrix vhMatrix(dYawMatrix(-90.0f * dDegreeToRad));
 	vhMatrix.m_posit = FindFloor(scene->GetNewton(), vhMatrix.m_posit, 100.0f);
 	vhMatrix.m_posit.m_y += 2.5f;
+
+#if 0
 	//
 	// Vehicle Construction:
 	viper = manager->CreateVehicleRayCast("viper.ngd", false, vhMatrix, vhMass);
@@ -1261,8 +1264,11 @@ void SuperCar (DemoEntityManager* const scene)
 	//
 	// Set mass center after have add the tires.
 	viper->SetCenterChassisMass(vhCenterMass);
+#endif
+
 	//
 	//
+#if 1
 	vhMass = 1600.0f;
 	vhCenterMass = dVector(0.0f, -0.45f, 0.0f, 0.0f);
 	vhMatrix.m_posit.m_x += 5.0f;
@@ -1287,5 +1293,6 @@ void SuperCar (DemoEntityManager* const scene)
 	manager->SetPlayerController(currentVehicle);
 	//
 	AddPrimitiveArray(scene, 50.0f, location.m_posit, dVector(1.0f, 0.2f, 3.5f, 0.0f), 5, 5, 0.5f, _BOX_PRIMITIVE, defaultMaterial, shapeOffsetMatrix, 10.0f);
+#endif
 }
 
