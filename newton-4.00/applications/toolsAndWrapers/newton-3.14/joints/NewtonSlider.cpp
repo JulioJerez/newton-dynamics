@@ -114,40 +114,35 @@ NewtonJoint* NewtonConstraintCreateSlider(const NewtonWorld* const newtonWorld, 
 
 void NewtonSliderEnableLimits(const NewtonJoint* const joint, int state)
 {
-	ndAssert(0);
 	TRACE_FUNCTION(__FUNCTION__);
 	NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
 	userJoint->SetLimitState(state ? true : false);
 }
 
-void NewtonSliderSetLimits(const NewtonJoint* const joint, dFloat minTwistAngle, dFloat maxTwistAngle)
+void NewtonSliderSetLimits(const NewtonJoint* const joint, dFloat minPosit, dFloat maxPosit)
 {
-	ndAssert(0);
 	TRACE_FUNCTION(__FUNCTION__);
 	NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
-	userJoint->SetLimits(minTwistAngle, maxTwistAngle);
+	userJoint->SetLimits(minPosit, maxPosit);
 }
 
 void NewtonSliderSetSpringDamper(const NewtonJoint* const joint, dFloat regularizer, dFloat spring, dFloat32 damper)
 {
-	ndAssert(0);
 	TRACE_FUNCTION(__FUNCTION__);
 	NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
 	userJoint->SetAsSpringDamper(regularizer, spring, damper);
 }
 
-void NewtonSliderSetAsMotor(const NewtonJoint* const joint, dFloat omega, dFloat maxTorque)
+void NewtonSliderSetAsMotor(const NewtonJoint* const joint, dFloat speed, dFloat maxForce)
 {
-	ndAssert(0);
 	TRACE_FUNCTION(__FUNCTION__);
 	NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
-	//userJoint->SetAsMotor(omega, maxTorque);
+	userJoint->SetAsMotor(speed, maxForce);
 }
 
-void NewtonSliderSetDryFriction(const NewtonJoint* const joint, dFloat frictionTorque)
+void NewtonSliderSetDryFriction(const NewtonJoint* const joint, dFloat frictionForce)
 {
-	ndAssert(0);
 	TRACE_FUNCTION(__FUNCTION__);
 	NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
-	//userJoint->SetAsDryFriction(frictionTorque);
+	userJoint->SetAsDryFriction(frictionForce);
 }

@@ -6556,6 +6556,27 @@ dFloat NewtonSliderCalculateStopAccel(const NewtonJoint* const slider, const New
 	return contraint->CalculateStopAccel (distance, (dgJointCallbackParam*) desc);
 }
 
+void NewtonSliderEnableLimits(const NewtonJoint* const slider, int state)
+{
+}
+
+void NewtonSliderSetLimits(const NewtonJoint* const slider, dFloat minPosit, dFloat maxPosit)
+{
+}
+
+void NewtonSliderSetDryFriction(const NewtonJoint* const slider, dFloat frictionForce)
+{
+}
+
+void NewtonSliderSetAsMotor(const NewtonJoint* const slider, dFloat speed, dFloat maxForce)
+{
+}
+
+void NewtonSliderSetSpringDamper(const NewtonJoint* const slider, dFloat regularizer, dFloat spring, dFloat32 damper)
+{
+}
+
+
 /*!
   Get the total force asserted over the joint pivot point, to maintain the constraint.
 

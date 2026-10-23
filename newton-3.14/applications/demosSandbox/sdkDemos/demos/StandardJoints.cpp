@@ -861,14 +861,12 @@ static void AddSlider(DemoEntityManager* const scene, const dVector& origin)
 	//dCustomSlider* const slider = new dCustomSlider(matrix, box1, box0);
 	NewtonJoint* const slider = NewtonConstraintCreateSlider(world, &matrix.m_posit[0], &matrix.m_front[0], box1, box0);
 
-	// add some friction for more realism
-	//slider->SetFriction(10.0f);
-
 	// enable limit of first axis
-	//slider->EnableLimits(true);
+	NewtonSliderEnableLimits(slider, 1);
+	NewtonSliderSetLimits(slider, -4.0f, 4.0f);
 
-	// set limit on second axis
-	//slider->SetLimits(-4.0f, 4.0f);
+	// add some friction for more realism
+	NewtonSliderSetDryFriction(slider, 10.0f);
 }
 
 

@@ -1143,6 +1143,11 @@ extern "C" {
 	NEWTON_API void NewtonSliderGetJointForce (const NewtonJoint* const slider, dFloat* const force);
 	NEWTON_API dFloat NewtonSliderCalculateStopAccel (const NewtonJoint* const slider, const NewtonHingeSliderUpdateDesc* const desc, dFloat position);
 
+	NEWTON_API void NewtonSliderEnableLimits(const NewtonJoint* const slider, int state);
+	NEWTON_API void NewtonSliderSetLimits(const NewtonJoint* const slider, dFloat minPosit, dFloat maxPosit);
+	NEWTON_API void NewtonSliderSetDryFriction(const NewtonJoint* const slider, dFloat frictionForce);
+	NEWTON_API void NewtonSliderSetAsMotor(const NewtonJoint* const slider, dFloat speed, dFloat maxForce);
+	NEWTON_API void NewtonSliderSetSpringDamper(const NewtonJoint* const slider, dFloat regularizer, dFloat spring, dFloat32 damper);
 
 	// **********************************************************************************************
 	//
