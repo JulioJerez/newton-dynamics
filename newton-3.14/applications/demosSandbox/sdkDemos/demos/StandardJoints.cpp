@@ -201,46 +201,6 @@ static void AddDoubleHinge(DemoEntityManager* const scene, const dVector& origin
 	}
 }
 
-static void AddSliderBug(DemoEntityManager* const scene, const dVector& origin)
-{
-	NewtonBody* const outerBody = CreateBox(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), dVector(2.0f, 1.5f, 1.5f, 0.0f).Scale (0.25f));
-	NewtonBody* const cylinder = CreateCylinder(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), 1.0f * 0.25f, 4.0f * 0.25f);
-
-	// connect the bodies by a Slider joint
-	dMatrix matrix;
-	NewtonBodyGetMatrix(cylinder, &matrix[0][0]);
-	dCustomCorkScrew* const slider = new dCustomCorkScrew(matrix, outerBody, cylinder);
-//	dCustomSlider* const slider = new dCustomSlider(matrix, outerBody, cylinder);
-//	dCustomSlidingContact* const slider = new dCustomSlidingContact(matrix, outerBody, cylinder);
-
-	// set limit on second axis
-	slider->EnableLimits(true);
-	slider->SetLimits(-0.5f, 0.5f);
-}
-
-static void AddSlider (DemoEntityManager* const scene, const dVector& origin)
-{
-    // make a reel static
-    NewtonBody* const box0 = CreateBox (scene, origin + dVector (0.0f, 4.0f, 0.0f, 0.0f), dVector (8.0f, 0.25f, 0.25f, 0.0f));
-    NewtonBody* const box1 = CreateWheel (scene, origin + dVector (0.0f, 4.0f, 0.0f, 0.0f), 1.0f, 0.5f);
-
-	dMatrix matrix;
-	NewtonBodySetMassMatrix(box0, 0.0f, 0.0f, 0.0f, 0.0f);
-
-	// connect the bodies by a Slider joint
-    NewtonBodyGetMatrix (box1, &matrix[0][0]);
-    dCustomSlider* const slider = new dCustomSlider (matrix, box1, box0);
-
-	// add some friction for more realism
-	slider->SetFriction(10.0f);
-
-    // enable limit of first axis
-    slider->EnableLimits(true);
-
-    // set limit on second axis
-    slider->SetLimits (-4.0f, 4.0f);
-}
-
 static void AddSliderSpringDamper (DemoEntityManager* const scene, const dVector& origin)
 {
 	// make a reel static
@@ -885,6 +845,29 @@ static void AddHingeSpringDamper(DemoEntityManager* const scene, const dVector& 
 	NewtonHingeSetSpringDamper(hinge, 0.8f, 300.0f, 1.0f);
 }
 
+static void AddSlider(DemoEntityManager* const scene, const dVector& origin)
+{
+	// make a reel static
+	NewtonBody* const box0 = CreateBox(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), dVector(8.0f, 0.25f, 0.25f, 0.0f));
+	NewtonBody* const box1 = CreateWheel(scene, origin + dVector(0.0f, 4.0f, 0.0f, 0.0f), 1.0f, 0.5f);
+
+	dMatrix matrix;
+	NewtonBodySetMassMatrix(box0, 0.0f, 0.0f, 0.0f, 0.0f);
+
+	// connect the bodies by a Slider joint
+	NewtonBodyGetMatrix(box1, &matrix[0][0]);
+	dCustomSlider* const slider = new dCustomSlider(matrix, box1, box0);
+
+	// add some friction for more realism
+	slider->SetFriction(10.0f);
+
+	// enable limit of first axis
+	slider->EnableLimits(true);
+
+	// set limit on second axis
+	slider->SetLimits(-4.0f, 4.0f);
+}
+
 
 void StandardJoints (DemoEntityManager* const scene)
 {
@@ -900,13 +883,13 @@ void StandardJoints (DemoEntityManager* const scene)
     dVector location (0.0f);
     dVector size (1.5f, 2.0f, 2.0f, 0.0f);
 
-	Add6DOF (scene, dVector (-20.0f, 0.0f, -25.0f));
-	AddLimitedBallAndSocket (scene, dVector (-20.0f, 0.0f, -15.0f));
-	AddBallAndSockectWithFriction (scene, dVector (-20.0f, 0.0f, -10.0f));
-	AddHinge (scene, dVector (-20.0f, 0.0f, 0.0f));
-	AddHingeMotor(scene, dVector(0.0f, 0.0f, -20.0f));
-	AddHingeSpringDamper (scene, dVector (dVector (-20.0f, 0.0f, 5.0f)));
-	//AddSlider (scene, dVector (-20.0f, 0.0f, 7.0f));
+	//Add6DOF (scene, dVector (-20.0f, 0.0f, -25.0f));
+	//AddLimitedBallAndSocket (scene, dVector (-20.0f, 0.0f, -15.0f));
+	//AddBallAndSockectWithFriction (scene, dVector (-20.0f, 0.0f, -10.0f));
+	//AddHinge (scene, dVector (-20.0f, 0.0f, 0.0f));
+	//AddHingeMotor(scene, dVector(0.0f, 0.0f, -20.0f));
+	//AddHingeSpringDamper (scene, dVector (dVector (-20.0f, 0.0f, 5.0f)));
+	AddSlider (scene, dVector (-20.0f, 0.0f, 7.0f));
 	//AddSliderSpringDamper (scene, dVector (dVector (-20.0f, 0.0f, 9.0f)));
 	//AddCylindrical (scene, dVector (-20.0f, 0.0f, 11.0f));
 	//AddSlidingContact (scene, dVector (-20.0f, 0.0f, 13.0f));

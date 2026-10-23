@@ -441,19 +441,6 @@ extern "C" {
 
 	// **********************************************************************************************
 	//
-	// Slider joint functions
-	//
-	// **********************************************************************************************
-	NEWTON_API NewtonJoint* NewtonConstraintCreateSlider (const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const dFloat* pinDir, const NewtonBody* const childBody, const NewtonBody* const parentBody);
-	NEWTON_API void NewtonSliderSetUserCallback (const NewtonJoint* const slider, NewtonSliderCallback callback);
-	NEWTON_API dFloat NewtonSliderGetJointPosit (const NewtonJoint* slider);
-	NEWTON_API dFloat NewtonSliderGetJointVeloc (const NewtonJoint* slider);
-	NEWTON_API void NewtonSliderGetJointForce (const NewtonJoint* const slider, dFloat* const force);
-	NEWTON_API dFloat NewtonSliderCalculateStopAccel (const NewtonJoint* const slider, const NewtonHingeSliderUpdateDesc* const desc, dFloat position);
-
-
-	// **********************************************************************************************
-	//
 	// Corkscrew joint functions
 	//
 	// **********************************************************************************************
@@ -1257,12 +1244,27 @@ extern "C" {
 	NEWTON_API dFloat NewtonHingeGetJointOmega(const NewtonJoint* const hinge);
 	NEWTON_API void NewtonHingeGetJointForce(const NewtonJoint* const hinge, dFloat* const force);
 	NEWTON_API dFloat NewtonHingeCalculateStopAlpha(const NewtonJoint* const hinge, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle);
+
 	NEWTON_API void NewtonHingeEnableLimits(const NewtonJoint* const hinge, int state);
 	NEWTON_API void NewtonHingeSetLimits(const NewtonJoint* const hinge, dFloat minTwistAngle, dFloat maxTwistAngle);
-
 	NEWTON_API void NewtonHingeSetDryFriction(const NewtonJoint* const hinge, dFloat frictionTorque);
 	NEWTON_API void NewtonHingeSetAsMotor(const NewtonJoint* const hinge, dFloat omega, dFloat maxTorque);
 	NEWTON_API void NewtonHingeSetSpringDamper(const NewtonJoint* const ball, dFloat regularizer, dFloat spring, dFloat32 damper);
+
+	// Slider joint functions
+	NEWTON_API NewtonJoint* NewtonConstraintCreateSlider(const NewtonWorld* const newtonWorld, const dFloat* pivotPoint, const dFloat* pinDir, const NewtonBody* const childBody, const NewtonBody* const parentBody);
+	NEWTON_API void NewtonSliderSetUserCallback(const NewtonJoint* const slider, NewtonSliderCallback callback);
+	NEWTON_API dFloat NewtonSliderGetJointPosit(const NewtonJoint* slider);
+	NEWTON_API dFloat NewtonSliderGetJointVeloc(const NewtonJoint* slider);
+	NEWTON_API void NewtonSliderGetJointForce(const NewtonJoint* const slider, dFloat* const force);
+	NEWTON_API dFloat NewtonSliderCalculateStopAccel(const NewtonJoint* const slider, const NewtonHingeSliderUpdateDesc* const desc, dFloat position);
+
+	NEWTON_API void NewtonSliderEnableLimits(const NewtonJoint* const slider, int state);
+	NEWTON_API void NewtonSliderSetLimits(const NewtonJoint* const slider, dFloat minTwistAngle, dFloat maxTwistAngle);
+	NEWTON_API void NewtonSliderSetDryFriction(const NewtonJoint* const slider, dFloat frictionTorque);
+	NEWTON_API void NewtonSliderSetAsMotor(const NewtonJoint* const slider, dFloat omega, dFloat maxTorque);
+	NEWTON_API void NewtonSliderSetSpringDamper(const NewtonJoint* const ball, dFloat regularizer, dFloat spring, dFloat32 damper);
+
 
 #ifdef __cplusplus 
 }
