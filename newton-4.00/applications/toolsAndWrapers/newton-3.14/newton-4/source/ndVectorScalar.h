@@ -296,6 +296,16 @@ class ndBigVector : public ndClassAlloc
 		return normal;
 	}
 
+	inline ndBigVector Ceiling() const
+	{
+		return ndBigVector(ceil(m_x), ceil(m_y), ceil(m_z), ceil(m_w));
+	}
+
+	inline ndBigVector Floor() const
+	{
+		return ndBigVector(floor(m_x), floor(m_y), floor(m_z), floor(m_w));
+	}
+
 	inline ndBigVector GetInt () const
 	{
 		return ndBigVector (ndInt64 (floor (m_x)), ndInt64(floor (m_y)), ndInt64(floor (m_z)), ndInt64 (floor (m_w)));

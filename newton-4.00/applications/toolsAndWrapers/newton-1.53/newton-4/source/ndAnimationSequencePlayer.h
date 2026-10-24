@@ -1,0 +1,42 @@
+/* Copyright (c) <2003-2016> <Newton Game Dynamics>
+* 
+* This software is provided 'as-is', without any express or implied
+* warranty. In no event will the authors be held liable for any damages
+* arising from the use of this software.
+* 
+* Permission is granted to anyone to use this software for any purpose,
+* including commercial applications, and to alter it and redistribute it
+* freely
+*/
+
+#ifndef ND_ANIM_TAKE_DATA_H_
+#define ND_ANIM_TAKE_DATA_H_
+
+
+#include "ndAnimationBlendTreeNode.h"
+
+class ndAnimPose;
+class ndAnimationSequence;
+
+class ndAnimationSequencePlayer: public ndAnimationBlendTreeNode
+{
+	public:
+	ndAnimationSequencePlayer(ndSharedPtr<ndAnimationSequence>& sequence);
+	virtual ~ndAnimationSequencePlayer() override;
+
+	virtual void Evaluate(ndAnimationPose& output, ndVector& veloc) override;
+
+	ndFloat32 GetTime() const;
+	void SetTime(ndFloat32 time) override;
+
+	virtual void Update(ndFloat32 dt) override;
+
+	ndSharedPtr<ndAnimationSequence>& GetSequence();
+
+	private:
+	ndSharedPtr<ndAnimationSequence> m_sequence;
+	ndVector m_veloc;
+	ndFloat32 m_time;
+};
+
+#endif

@@ -1,0 +1,35 @@
+/* Copyright (c) <2003-2016> <Newton Game Dynamics>
+* 
+* This software is provided 'as-is', without any express or implied
+* warranty. In no event will the authors be held liable for any damages
+* arising from the use of this software.
+* 
+* Permission is granted to anyone to use this software for any purpose,
+* including commercial applications, and to alter it and redistribute it
+* freely
+*/
+
+#ifndef ND_ANIMATION_TWO_WAY_H_
+#define ND_ANIMATION_TWO_WAY_H_
+
+#include "ndAnimationBlendTreeNode.h"
+
+class ndAnimationTwoWayBlend: public ndAnimationBlendTreeNode
+{
+	public:
+	ndAnimationTwoWayBlend(const ndSharedPtr<ndAnimationBlendTreeNode>& node0, const ndSharedPtr<ndAnimationBlendTreeNode>& node1);
+	virtual ~ndAnimationTwoWayBlend() override;
+
+	ndFloat32 GetParam() const;
+	void SetParam(ndFloat32 param);
+
+	void Update(ndFloat32 dt) override;
+	void Evaluate(ndAnimationPose& output, ndVector& veloc) override;
+
+	protected:
+	ndSharedPtr<ndAnimationBlendTreeNode> m_node0;
+	ndSharedPtr<ndAnimationBlendTreeNode> m_node1;
+	ndFloat32 m_param;
+};
+
+#endif
