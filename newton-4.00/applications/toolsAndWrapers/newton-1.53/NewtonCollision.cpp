@@ -39,17 +39,11 @@
 // Remarks: 
 // Collision objects are reference counted objects. The application should call *NewtonReleaseCollision* in order to release references to the object.
 // Neglecting to release references to collision primitives is a common cause of memory leaks.
-void NewtonReleaseCollision(const NewtonWorld* newtonWorld, const NewtonCollision* collisionPtr)
+void NewtonReleaseCollision(const NewtonWorld* newtonWorld, const NewtonCollision* collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-
-	//Newton* world;
-	//dgCollision* collision;
-	//
-	//world = (Newton*)newtonWorld;
-	//collision = (dgCollision*)collisionPtr;
-	//world->ReleaseCollision(collision);
+	const ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collision);
+	delete instance;
 }
 
 
@@ -78,27 +72,6 @@ void NewtonReleaseCollision(const NewtonWorld* newtonWorld, const NewtonCollisio
 // See also: NewtonReleaseCollision, NewtonCreateConvexHullModifier
 NewtonCollision* NewtonCreateSphere(const NewtonWorld* newtonWorld, dFloat radiusX, dFloat radiusY, dFloat radiusZ, const dFloat* offsetMatrix)
 {
-	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-
-	//Newton* world;
-	//
-	//world = (Newton*)newtonWorld;
-	//dgMatrix matrix(dgGetIdentityMatrix());
-	//if (offsetMatrix) {
-	//	matrix = *((dgMatrix*)offsetMatrix);
-	//}
-	//
-	//radiusX = dgAbsf(radiusX);
-	//radiusY = dgAbsf(radiusY);
-	//radiusZ = dgAbsf(radiusZ);
-	//
-	//if ((dgAbsf(radiusX - radiusY) < 1.0e-5f) && (dgAbsf(radiusX - radiusZ) < 1.0e-5f)) {
-	//	return (NewtonCollision*)world->CreateSphere(radiusX, matrix);
-	//}
-	//
-	//return (NewtonCollision*)world->CreateEllipse(radiusX, radiusY, radiusZ, matrix);
-
 	TRACE_FUNCTION(__FUNCTION__);
 	ndMatrix matrix(ndGetIdentityMatrix());
 	if (offsetMatrix)

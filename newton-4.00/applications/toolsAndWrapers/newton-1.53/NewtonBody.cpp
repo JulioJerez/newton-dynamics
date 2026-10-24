@@ -26,7 +26,6 @@
 //#include "newtonMaterial.h"
 //#include "newtonBodyNotify.h"
 
-
 class ndNewtonBodyNotify : public ndModelBodyNotify
 {
 	public:
@@ -92,12 +91,18 @@ class ndNewtonBodyNotify : public ndModelBodyNotify
 
 	virtual void OnTransform(ndFloat32 timestep, const ndMatrix& matrix) override
 	{
-		ndAssert(0);
+		if (m_applyTransform)
+		{
+			ndAssert(0);
+		}
 	}
 
 	virtual void OnApplyExternalForce(ndInt32 threadIndex, ndFloat32 timestep) override
 	{
-		ndAssert(0);
+		if (m_forceAndTorque)
+		{
+			ndAssert(0);
+		}
 	}
 
 	//bool CheckInWorld(const ndMatrix& matrix) const;
@@ -1162,7 +1167,6 @@ void NewtonAddBodyImpulse(const NewtonBody* bodyPtr, const dFloat* pointDeltaVel
 NewtonBody* NewtonCreateBody(const NewtonWorld* newtonWorld, const NewtonCollision* collision)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
 	ndSharedPtr<ndBody> body(new ndBodyDynamic());
 	ndBodyDynamic* const dynBody = body->GetAsBodyDynamic();
 
@@ -1310,23 +1314,7 @@ void NewtonBodyForEachPolygonDo(const NewtonBody* bodyPtr, NewtonCollisionIterat
 // See also: NewtonBodyGetMatrix, NewtonBodySetMatrixRecursive 
 void NewtonBodySetMatrix(const NewtonBody* bodyPtr, const dFloat* matrixPtr)
 {
-	//dgBody* body;
-	//body = (dgBody*)bodyPtr;
-	//dgMatrix matrix(*((dgMatrix*)matrixPtr));
-	//
-	//matrix.m_front = matrix.m_front.Scale(dgRsqrt(matrix.m_front % matrix.m_front));
-	//matrix.m_right = matrix.m_front * matrix.m_up;
-	//matrix.m_right = matrix.m_right.Scale(dgRsqrt(matrix.m_right % matrix.m_right));
-	//matrix.m_up = matrix.m_right * matrix.m_front;
-	//
-	//matrix.m_front.m_w = dgFloat32(0.0f);
-	//matrix.m_up.m_w = dgFloat32(0.0f);
-	//matrix.m_right.m_w = dgFloat32(0.0f);
-	//matrix.m_posit.m_w = dgFloat32(1.0f);
-	//body->SetMatrix(matrix);
-
 	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
 	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	ndMatrix matrix(GetMatrix(matrixPtr));
 
@@ -1353,14 +1341,7 @@ void NewtonBodySetMatrix(const NewtonBody* bodyPtr, const dFloat* matrixPtr)
 // See also: NewtonBodySetMatrix
 void NewtonBodyGetMatrix(const NewtonBody* bodyPtr, dFloat* matrixPtr)
 {
-	//dgBody* body;
-	//body = (dgBody*)bodyPtr;
-	//
-	//dgMatrix& matrix = *((dgMatrix*)matrixPtr);
-	//matrix = body->GetMatrix();
-
 	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
 	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
 	const ndMatrix matrix(body->GetMatrix());
 	ndMemCpy(matrixPtr, &matrix[0][0], sizeof(ndMatrix) / sizeof(ndFloat32));
@@ -1395,29 +1376,7 @@ void NewtonBodySetFullMassMatrix(const NewtonBody* const bodyPtr, dFloat mass, c
 // See also: NewtonConvexCollisionCalculateInertialMatrix, NewtonBodyGetMassMatrix, NewtonBodyGetInvMass
 void NewtonBodySetMassMatrix(const NewtonBody* bodyPtr, dFloat mass, dFloat Ixx, dFloat Iyy, dFloat Izz)
 {
-	//dgBody* body;
-	//dFloat Ixx1;
-	//dFloat Iyy1;
-	//dFloat Izz1;
-	//body = (dgBody*)bodyPtr;
-	//
-	//mass = dgAbsf(mass);
-	//Ixx = dgAbsf(Ixx);
-	//Iyy = dgAbsf(Iyy);
-	//Izz = dgAbsf(Izz);
-	//
-	//Ixx1 = ClampValue(Ixx, dgFloat32(0.001f) * mass, dgFloat32(100.0f) * mass);
-	//Iyy1 = ClampValue(Iyy, dgFloat32(0.001f) * mass, dgFloat32(100.0f) * mass);
-	//Izz1 = ClampValue(Izz, dgFloat32(0.001f) * mass, dgFloat32(100.0f) * mass);
-	//if (mass < dgFloat32(1.0e-3f)) {
-	//	mass = DG_INFINITE_MASS * dgFloat32(1.5f);
-	//}
-	//
-	//body->SetMassMatrix(mass, Ixx1, Iyy1, Izz1);
-	//body->SetAparentMassMatrix(dgVector(Ixx, Iyy, Izz, mass));
-
 	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
 	ndMatrix inertia(ndGetIdentityMatrix());
 	inertia[0][0] = Ixx;
 	inertia[1][1] = Iyy;
@@ -1435,14 +1394,9 @@ void NewtonBodySetMassMatrix(const NewtonBody* bodyPtr, dFloat mass, dFloat Ixx,
 // See also: NewtonBodyGetOmega
 void NewtonBodySetOmega(const NewtonBody* bodyPtr, const dFloat* omega)
 {
-	//dgBody* body;
-	//body = (dgBody*)bodyPtr;
-	//dgVector vector(omega[0], omega[1], omega[2]);
-	//body->SetOmega(vector);
 	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
 	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 
-	ndVector vector(omega[0], omega[1], omega[2], ndFloat32(0.0f));
+	const ndVector vector(omega[0], omega[1], omega[2], ndFloat32(0.0f));
 	body->SetOmega(vector);
 }

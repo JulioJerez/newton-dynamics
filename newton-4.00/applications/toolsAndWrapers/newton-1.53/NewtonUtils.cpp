@@ -77,11 +77,14 @@ void operator delete(void* ptr) noexcept
 //
 void NewtonSetMemorySystem(NewtonAllocMemory mallocFnt, NewtonFreeMemory mfreeFnt)
 {
-	if ((newtonAlloc != mallocFnt) || (mfreeFnt != newtonFree))
+	if (mallocFnt && mfreeFnt)
 	{
-		newtonFree = mfreeFnt;
-		newtonAlloc = mallocFnt;
-		ndMemory::SetMemoryAllocators(ndNewtonAllocator, ndNewtonFree);
+		if ((newtonAlloc != mallocFnt) || (mfreeFnt != newtonFree))
+		{
+			newtonFree = mfreeFnt;
+			newtonAlloc = mallocFnt;
+			ndMemory::SetMemoryAllocators(ndNewtonAllocator, ndNewtonFree);
+		}
 	}
 }
 
