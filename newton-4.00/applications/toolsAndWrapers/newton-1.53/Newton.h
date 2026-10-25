@@ -209,31 +209,6 @@ extern "C" {
 
 	// **********************************************************************************************
 	//
-	// CollisionTree Utility functions
-	//
-	// **********************************************************************************************
-	NEWTON_API NewtonCollision* NewtonCreateTreeCollision (const NewtonWorld* newtonWorld, NewtonTreeCollisionCallback userCallback);
-	NEWTON_API void NewtonTreeCollisionBeginBuild (const NewtonCollision* treeCollision);
-	NEWTON_API void NewtonTreeCollisionAddFace (const NewtonCollision* treeCollision, int vertexCount, const dFloat* vertexPtr, 
-		int strideInBytes, int faceAttribute);
-	NEWTON_API void NewtonTreeCollisionEndBuild (const NewtonCollision* treeCollision, int optimize);
-
-	NEWTON_API void NewtonTreeCollisionSerialize (const NewtonCollision* treeCollision, NewtonSerialize serializeFunction, 
-		void* serializeHandle);
-
-	NEWTON_API NewtonCollision* NewtonCreateTreeCollisionFromSerialization (const NewtonWorld* newtonWorld, 
-		NewtonTreeCollisionCallback userCallback, NewtonDeserialize deserializeFunction, void* serializeHandle);
-
-	NEWTON_API int NewtonTreeCollisionGetFaceAtribute (const NewtonCollision* treeCollision, const int* faceIndexArray); 
-	NEWTON_API void NewtonTreeCollisionSetFaceAtribute (const NewtonCollision* treeCollision, const int* faceIndexArray, 
-		int attribute); 
-
-	NEWTON_API int NewtonTreeCollisionGetVertexListIndexListInAABB (const NewtonCollision* treeCollision, const dFloat* p0, const dFloat* p1,
-		const dFloat** vertexArray, int* vertexCount, int* vertexStrideInBytes, 
-		const int* indexList, int maxIndexCount); 
-	
-	// **********************************************************************************************
-	//
 	// General purpose collision library functions
 	//
 	// **********************************************************************************************
@@ -254,7 +229,6 @@ extern "C" {
 		dFloat* timeOfImpact, dFloat* contacts, dFloat* normals, dFloat* penetration);
 
 	NEWTON_API dFloat NewtonCollisionRayCast (const NewtonCollision* collision, const dFloat* p0, const dFloat* p1, dFloat* normals, int* attribute);
-	NEWTON_API void NewtonCollisionCalculateAABB (const NewtonCollision* collision, const dFloat *matrix, dFloat* p0, dFloat* p1);
 	
 
 	// **********************************************************************************************
@@ -486,6 +460,7 @@ extern "C" {
 	NEWTON_API int NewtonWorldGetVersion(const NewtonWorld* newtonWorld);
 	NEWTON_API void NewtonUpdate(const NewtonWorld* newtonWorld, dFloat timestep);
 
+	NEWTON_API void NewtonSetWorldSize(const NewtonWorld* newtonWorld, const dFloat* minPoint, const dFloat* maxPoint);
 	//NEWTON_API void NewtonDestroyAllBodies(const NewtonWorld* newtonWorld);
 
 	
@@ -495,7 +470,7 @@ extern "C" {
 	//NEWTON_API dFloat NewtonGetTimeStep(const NewtonWorld* newtonWorld);
 	//NEWTON_API void NewtonSetMinimumFrameRate(const NewtonWorld* newtonWorld, dFloat frameRate);
 	//NEWTON_API void NewtonSetBodyLeaveWorldEvent(const NewtonWorld* newtonWorld, NewtonBodyLeaveWorld callback);
-	//NEWTON_API void NewtonSetWorldSize(const NewtonWorld* newtonWorld, const dFloat* minPoint, const dFloat* maxPoint);
+
 	//
 	//NEWTON_API void NewtonWorldFreezeBody(const NewtonWorld* newtonWorld, const NewtonBody* body);
 	//NEWTON_API void NewtonWorldUnfreezeBody(const NewtonWorld* newtonWorld, const NewtonBody* body);
@@ -607,10 +582,36 @@ extern "C" {
 	NEWTON_API dFloat NewtonConvexCollisionCalculateVolume(const NewtonCollision* convexCollision);
 	NEWTON_API void NewtonConvexCollisionCalculateInertialMatrix(const NewtonCollision* convexCollision, dFloat* inertia, dFloat* origin);
 
+	NEWTON_API void NewtonCollisionCalculateAABB(const NewtonCollision* collision, const dFloat* matrix, dFloat* p0, dFloat* p1);
 	NEWTON_API void NewtonCollisionApplyScale(const NewtonCollision* convexCollision, dFloat scale);
 	NEWTON_API void NewtonCollisionMakeUnique(const NewtonWorld* newtonWorld, const NewtonCollision* collision);
 
 	NEWTON_API void NewtonReleaseCollision(const NewtonWorld* newtonWorld, const NewtonCollision* collision);
+
+	// **********************************************************************************************
+	//
+	// CollisionTree Utility functions
+	//
+	// **********************************************************************************************
+	NEWTON_API NewtonCollision* NewtonCreateTreeCollision(const NewtonWorld* newtonWorld, NewtonTreeCollisionCallback userCallback);
+	NEWTON_API void NewtonTreeCollisionBeginBuild(const NewtonCollision* treeCollision);
+	NEWTON_API void NewtonTreeCollisionAddFace(const NewtonCollision* treeCollision, int vertexCount, const dFloat* vertexPtr,
+		int strideInBytes, int faceAttribute);
+	NEWTON_API void NewtonTreeCollisionEndBuild(const NewtonCollision* treeCollision, int optimize);
+
+	NEWTON_API void NewtonTreeCollisionSerialize(const NewtonCollision* treeCollision, NewtonSerialize serializeFunction,
+		void* serializeHandle);
+
+	NEWTON_API NewtonCollision* NewtonCreateTreeCollisionFromSerialization(const NewtonWorld* newtonWorld,
+		NewtonTreeCollisionCallback userCallback, NewtonDeserialize deserializeFunction, void* serializeHandle);
+
+	NEWTON_API int NewtonTreeCollisionGetFaceAtribute(const NewtonCollision* treeCollision, const int* faceIndexArray);
+	NEWTON_API void NewtonTreeCollisionSetFaceAtribute(const NewtonCollision* treeCollision, const int* faceIndexArray,
+		int attribute);
+
+	NEWTON_API int NewtonTreeCollisionGetVertexListIndexListInAABB(const NewtonCollision* treeCollision, const dFloat* p0, const dFloat* p1,
+		const dFloat** vertexArray, int* vertexCount, int* vertexStrideInBytes,
+		const int* indexList, int maxIndexCount);
 
 #ifdef __cplusplus 
 }

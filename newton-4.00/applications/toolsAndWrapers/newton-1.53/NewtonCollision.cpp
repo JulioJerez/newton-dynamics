@@ -304,3 +304,33 @@ NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* newtonWorld, int coun
 	ndShapeMaterial material = instance->GetMaterial();
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }
+
+/*!
+  Calculate an axis-aligned bounding box for this collision, the box is calculated relative to *offsetMatrix*.
+
+  @param *collisionPtr pointer to the collision object.
+  @param *offsetMatrix pointer to an array of 16 floats containing the offset matrix used as the coordinate system and center of the AABB.
+  @param  *p0 - pointer to an array of at least three floats to hold minimum value for the AABB.
+  @param  *p1 - pointer to an array of at least three floats to hold maximum value for the AABB.
+
+  @return Nothing.
+
+  See also: ::NewtonCollisionClosestPoint, ::NewtonCollisionPointDistance, ::NewtonCollisionCollide, ::NewtonCollisionRayCast
+*/
+void NewtonCollisionCalculateAABB(const NewtonCollision* const collisionPtr, const dFloat* const offsetMatrix, dFloat* const p0, dFloat* const p1)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(collisionPtr);
+	ndMatrix matrix(instance->GetLocalMatrix() * GetMatrix(offsetMatrix));
+
+	ndVector q0;
+	ndVector q1;
+	instance->CalculateAabb(matrix, q0, q1);
+	p0[0] = q0.m_x;
+	p0[1] = q0.m_y;
+	p0[2] = q0.m_z;
+
+	p1[0] = q1.m_x;
+	p1[1] = q1.m_y;
+	p1[2] = q1.m_z;
+}

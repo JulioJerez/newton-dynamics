@@ -340,3 +340,10 @@ void NewtonUpdate(const NewtonWorld* newtonWorld, dFloat timestep)
 	world->Update(timestep);
 	world->Sync();
 }
+
+void NewtonSetWorldSize(const NewtonWorld* newtonWorld, const dFloat* minPoint, const dFloat* maxPoint)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//do nothing;
+	ndTrace(("deprecated: there not worlk bounds in newton 4\n"));
+}
