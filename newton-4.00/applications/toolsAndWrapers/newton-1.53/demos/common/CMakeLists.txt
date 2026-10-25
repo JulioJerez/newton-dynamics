@@ -35,5 +35,5 @@ add_library(${projectName} STATIC ${CPP_SOURCE})
 #	set_source_files_properties(ndModelStdafx.cpp PROPERTIES COMPILE_FLAGS "/YcndModelStdafx.h")
 #endif()
 
-
-
+message (${PROJECT_BINARY_DIR})
+install(DIRECTORY ../media DESTINATION "${PROJECT_BINARY_DIR}/demos")

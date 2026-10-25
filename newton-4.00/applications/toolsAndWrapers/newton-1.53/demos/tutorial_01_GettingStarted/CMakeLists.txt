@@ -15,15 +15,22 @@ include_directories(../common)
 
 link_directories(${libraryPath})
 
-#set(CMAKE_C_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi /Od /MTd")
-#set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /Zi /Od /MT")
-#set(CMAKE_C_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} /Zi /Od /MT")
-#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi /Od /MTd")
-#set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /Zi /Od /MT")
-#set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO} /Zi /Od /MT")
-
 add_executable(${projectName} ${CPP_SOURCE})
 
 target_link_libraries (${projectName} common newton)
 target_link_libraries (${projectName} "${CMAKE_CURRENT_SOURCE_DIR}/../gl/Glut32.lib")
 
+add_custom_command(
+	TARGET ${projectName} POST_BUILD 
+	COMMAND ${CMAKE_COMMAND}
+	ARGS -E copy ${CMAKE_CURRENT_SOURCE_DIR}/../gl/glew32.dll ${PROJECT_BINARY_DIR}/$<CONFIG>)
+
+add_custom_command(
+	TARGET ${projectName} POST_BUILD 
+	COMMAND ${CMAKE_COMMAND}
+	ARGS -E copy ${CMAKE_CURRENT_SOURCE_DIR}/../gl/Glut32.dll ${PROJECT_BINARY_DIR}/$<CONFIG>)
+
+add_custom_command(
+	TARGET ${projectName} POST_BUILD 
+	COMMAND ${CMAKE_COMMAND}
+	ARGS -E copy ${PROJECT_BINARY_DIR}/../../$<CONFIG>/newton.dll ${PROJECT_BINARY_DIR}/$<CONFIG>)

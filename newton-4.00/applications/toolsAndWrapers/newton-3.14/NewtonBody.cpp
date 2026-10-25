@@ -1078,7 +1078,6 @@ void NewtonBodySetVelocityNoSleep(const NewtonBody* const bodyPtr, const dFloat*
 void NewtonBodyGetVelocity(const NewtonBody* const bodyPtr, dFloat* const velocity)
 {
 	TRACE_FUNCTION(__FUNCTION__);
-
 	const ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 
 	ndVector vector(body->GetVelocity());

@@ -105,7 +105,7 @@ typedef unsigned int dUnsigned32;
 
 #ifdef _MSC_VER
 		// Windows user assets path
-		#define ASSETS_PATH "."
+		#define ASSETS_PATH "../media"
 		inline void GetWorkingFileName (const char* name, char* outPathName)
 		{
 			sprintf (outPathName, "%s/%s", ASSETS_PATH, name);

@@ -361,7 +361,7 @@ void InitOpenGl(
 	RenderLoop renderFnt)
 {
 	// initialize opengl	
-	int argc_ = 0;
+	int argc_ = 1;
 	glutInit (&argc_, argv);
 	glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 

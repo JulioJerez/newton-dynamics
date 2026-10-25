@@ -29,6 +29,7 @@ string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" PROCESSOR_ARCH)
 if (PROCESSOR_ARCH  MATCHES "(x86)|(X86)|(amd64)|(AMD64)")
 	message ("x86-64 processor detected")
 
+	option("NEWTON_BUILD_DEMOS" "build demos" ON)
 	option("NEWTON_ENABLE_AVX2" "enable AVX2" OFF)
 
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}  /Zi /Od")
@@ -63,34 +64,14 @@ include_directories(newton-4/source)
 
 add_library(${projectName} SHARED ${CPP_SOURCE})
 
+#if (MSVC OR MINGW)
+#  set (cSuffix ".dll")
+#else()
+#  set (cSuffix ".so")
+#endif()
 
-if (MSVC OR MINGW)
-  set (cSuffix ".dll")
-else()
-  set (cSuffix ".so")
+if (NEWTON_BUILD_DEMOS)
+	add_subdirectory(demos/common)
+	add_subdirectory(demos/tutorial_01_GettingStarted)
+	add_subdirectory(demos/tutorial_02_UsingCallbacks)
 endif()
-
-#add_custom_command(
-#	TARGET ${projectName} POST_BUILD COMMAND ${CMAKE_COMMAND}
-#	ARGS -E copy $<TARGET_FILE:${projectName}> ${wrapper}/${projectName}/${projectName}${CMAKE_DEBUG_POSTFIX}${cSuffix})
-
-#add_custom_command(
-#	TARGET ${projectName} POST_BUILD COMMAND ${CMAKE_COMMAND}
-#	ARGS -E copy $<TARGET_FILE:${projectName}> C:/tmp/dagon-physics/${projectName}${cSuffix})
-
-#add_custom_command(
-#	TARGET ${projectName} POST_BUILD COMMAND ${CMAKE_COMMAND}
-#	ARGS -E copy $<TARGET_FILE:${projectName}> C:/tmp/ChillwaveDrive-main/${projectName}${cSuffix})
-
-#add_custom_command(
-#	TARGET ${projectName} POST_BUILD 
-#	COMMAND ${CMAKE_COMMAND}
-#	ARGS -E copy $<TARGET_FILE:${projectName}> C:/development/builds/newton-3.14/applications/demosSandbox/Debug/${projectName}${CMAKE_DEBUG_POSTFIX}${cSuffix})
-
-#add_custom_command(
-#	TARGET ${projectName} POST_BUILD 
-#	COMMAND ${CMAKE_COMMAND}
-#	ARGS -E copy $<TARGET_FILE:${projectName}> C:/tmp/newton-1.53_01/NewtonSDK/samples/bin/${projectName}${CMAKE_DEBUG_POSTFIX}${cSuffix})
-
-add_subdirectory(demos/common)
-add_subdirectory(demos/tutorial_01_GettingStarted)
