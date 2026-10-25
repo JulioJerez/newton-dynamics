@@ -66,8 +66,8 @@
 //#define DEFAULT_SCENE	31		// hexapod Robot
 //#define DEFAULT_SCENE	32		// basic rag doll
 //#define DEFAULT_SCENE	33		// balancing biped
-//#define DEFAULT_SCENE	34		// multi body body vehicle
-#define DEFAULT_SCENE	35		// super Car
+#define DEFAULT_SCENE	34		// multi body body vehicle
+//#define DEFAULT_SCENE	35		// super Car
 //#define DEFAULT_SCENE	36		// heavy vehicles
 //#define DEFAULT_SCENE	37		// basic player controller
 //#define DEFAULT_SCENE	38		// animated player controller
@@ -343,6 +343,7 @@ DemoEntityManager::DemoEntityManager ()
 //	m_asynchronousPhysicsUpdate = true;
 
 	Cleanup();
+	m_currentPlugin = NewtonGetPreferedPlugin(m_world);
 	ResetTimer();
 	m_shadeCache.CreateAllEffects();
 

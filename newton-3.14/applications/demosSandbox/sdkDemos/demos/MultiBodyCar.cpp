@@ -36,7 +36,6 @@ struct TIRE_DATA
 	dFloat m_longitudinalStiffness;
 };
 
-
 #define VIPER_CHASSIS_MASS	1200.0f
 #define VIPER_TIRE_MASS		30.0f
 #define VIPER_DIFF_MASS		30.0f
@@ -56,7 +55,6 @@ static TIRE_DATA viperTire
 	20.0f,				//m_corneringStiffness
 	2.0f,				//m_longitudinalStiffness
 };
-
 
 #define MONSTER_TRUCK_CHASSIS_MASS	1200.0f
 #define MONSTER_TRUCK_TIRE_MASS		100.0f
@@ -83,8 +81,7 @@ class dMultiBodyVehicleManager: public dVehicleManager
 {
 	public:
 	dMultiBodyVehicleManager(NewtonWorld* const world)
-		:dVehicleManager(world)
-		,m_player(NULL)
+		:m_player(NULL)
 		,m_externalView(true)
 		,m_differentialMode(0)
 		,m_engineKeySwitch(false)
@@ -99,6 +96,8 @@ class dMultiBodyVehicleManager: public dVehicleManager
 		m_tachometer = LoadTexture("rpm_dial.tga");
 		m_redNeedle = LoadTexture("needle_red.tga");
 		m_greenNeedle = LoadTexture("needle_green.tga");
+
+		NewtonWorldListenerSetPreUpdateCallback(world, this, NewtonWorldUpdateListenerCallback callback);
 	}
 
 	~dMultiBodyVehicleManager()
@@ -749,6 +748,11 @@ axisCount = 0;
 		}
 	}
 
+	static void PreUpdate(const NewtonWorld* const world, void* const listenerUserData, dFloat timestep)
+	{
+		dgAssert(0);
+	}
+
 	dMultiBodyVehicle* m_player;
 	GLuint m_gears;
 	GLuint m_odometer;
@@ -898,6 +902,54 @@ static void AddBackground(DemoEntityManager* const scene)
 	//AddPrimitiveArray(scene, 10.0f, location.m_posit, size, count, count, 5.0f, _REGULAR_CONVEX_HULL_PRIMITIVE, 0, shapeOffsetMatrix);
 	//AddPrimitiveArray(scene, 10.0f, location.m_posit, size, count, count, 5.0f, _RANDOM_CONVEX_HULL_PRIMITIVE, 0, shapeOffsetMatrix);
 #endif
+}
+
+void MultibodyBodyCar_314(DemoEntityManager* const scene)
+{
+	//dMatrix location(dGetIdentityMatrix());
+	//location.m_posit = dVector(0.0f, 10.0f, 0.0f, 1.0f);
+	//location.m_posit.m_y += 10.0f;
+	//location.m_posit = FindFloor(scene->GetNewton(), location.m_posit, 100.0f);
+	//location.m_posit.m_y += 0.5f;
+	//
+	//// create a vehicle manager
+	//NewtonWorld* const world = scene->GetNewton();
+	//dMultiBodyVehicleManager* const manager = new dMultiBodyVehicleManager(world);
+	//
+	//// create a sport car
+	//dPointer<DemoEntity> viperModel(DemoEntity::LoadNGD_mesh("viper.ngd", scene->GetNewton(), scene->GetShaderCache()));
+	//dVehicle* const player0 = manager->CreateSportCar(location, viperModel.GetData());
+	//manager->SetAsPlayer(player0);
+	//
+	//// create an monster Truck
+	//location.m_posit.m_x = 0.0f;
+	//location.m_posit.m_y = 10.0f;
+	//location.m_posit.m_z = 0.0f;
+	//
+	//location.m_posit = FindFloor(scene->GetNewton(), location.m_posit, 100.0f);
+	//location.m_posit.m_y += 1.5f;
+	//
+	////	dPointer<DemoEntity> monsterTruck (DemoEntity::LoadNGD_mesh("monsterTruck.ngd", scene->GetNewton(), scene->GetShaderCache()));
+	//
+	//int count = 10;
+	//count = 0;
+	//for (int i = 0; i < count; i++) {
+	//	for (int j = 0; j < count; j++) {
+	//		dMatrix offset(location);
+	//		offset.m_posit += dVector(j * 5.0f + 4.0f, 0.0f, i * 5.0f, 0.0f);
+	//		//manager->CreateSportCar(offset, viperModel.GetData());
+	//		//manager->CreateOffRoadCar(offset, monsterTruck.GetData());
+	//	}
+	//}
+}
+
+void MultibodyBodyCar_400(DemoEntityManager* const scene)
+{
+	dPointer<DemoEntity> viperModel(DemoEntity::LoadNGD_mesh("viper.ngd", scene->GetNewton(), scene->GetShaderCache()));
+
+	NewtonWorld* const world = scene->GetNewton();
+	dMultiBodyVehicleManager* const manager = new dMultiBodyVehicleManager(world);
+	NewtonWorldAddListener(world, "vehicelManager", manager);
 
 }
 
@@ -907,50 +959,30 @@ void MultibodyBodyCar(DemoEntityManager* const scene)
 	scene->CreateSkyBox();
 	AddBackground(scene);
 
+	if (NewtonWorldGetVersion() > 314)
+	{
+		MultibodyBodyCar_314(scene);
+	}
+	else
+	{
+		MultibodyBodyCar_400(scene);
+	}
+
 	dMatrix location (dGetIdentityMatrix());
 	location.m_posit = dVector (0.0f, 10.0f, 0.0f, 1.0f);
 	location.m_posit.m_y += 10.0f;
 	location.m_posit = FindFloor (scene->GetNewton(), location.m_posit, 100.0f);
 	location.m_posit.m_y += 0.5f;
 
-	// create a vehicle manager
-	NewtonWorld* const world = scene->GetNewton();
-	dMultiBodyVehicleManager* const manager = new dMultiBodyVehicleManager(world);
-
-	// create a sport car
-	dPointer<DemoEntity> viperModel (DemoEntity::LoadNGD_mesh("viper.ngd", scene->GetNewton(), scene->GetShaderCache()));
-	dVehicle* const player0 = manager->CreateSportCar(location, viperModel.GetData());
-	manager->SetAsPlayer(player0);
-
-	// create an monster Truck
 	location.m_posit.m_x = 0.0f;
 	location.m_posit.m_y = 10.0f;
 	location.m_posit.m_z = 0.0f;
 
-	//location.m_posit.m_x = 140.0f;
-	//location.m_posit.m_z = -47.0f;
-
 	location.m_posit = FindFloor(scene->GetNewton(), location.m_posit, 100.0f);
 	location.m_posit.m_y += 1.5f;
 
-	dPointer<DemoEntity> monsterTruck (DemoEntity::LoadNGD_mesh("monsterTruck.ngd", scene->GetNewton(), scene->GetShaderCache()));
-//	dVehicle* const player1 = manager->CreateOffRoadCar(location, monsterTruck.GetData());
-//	manager->SetAsPlayer(player1);
-
-	int count = 10;
-	count = 0;
-	for (int i = 0; i < count; i++) {
-		for (int j = 0; j < count; j++) {
-			dMatrix offset(location);
-			offset.m_posit += dVector (j * 5.0f + 4.0f, 0.0f, i * 5.0f, 0.0f);
-			//manager->CreateSportCar(offset, viperModel.GetData());
-			manager->CreateOffRoadCar(offset, monsterTruck.GetData());
-		}
-	}
-
 	dQuaternion rot(dYawMatrix (90.0f * dDegreeToRad));
 	dVector origin(location.m_posit);
-//	dVector origin(-10.0f, 2.0f, 0.0f, 0.0f);
 	scene->SetCameraMatrix(rot, origin);
 }
 

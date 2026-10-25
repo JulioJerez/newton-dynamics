@@ -1,0 +1,171 @@
+/* Copyright (c) <2003-2022> <Julio Jerez, Newton Game Dynamics>
+* 
+* This software is provided 'as-is', without any express or implied
+* warranty. In no event will the authors be held liable for any damages
+* arising from the use of this software.
+* 
+* Permission is granted to anyone to use this software for any purpose,
+* including commercial applications, and to alter it and redistribute it
+* freely, subject to the following restrictions:
+* 
+* 1. The origin of this software must not be misrepresented; you must not
+* claim that you wrote the original software. If you use this software
+* in a product, an acknowledgment in the product documentation would be
+* appreciated but is not required.
+* 
+* 2. Altered source versions must be plainly marked as such, and must not be
+* misrepresented as being the original software.
+* 
+* 3. This notice may not be removed or altered from any source distribution.
+*/
+
+#ifndef ND_MODEL_ARTICULATION_H_
+#define ND_MODEL_ARTICULATION_H_
+
+#include "ndCoreStdafx.h"
+#include "ndNewtonStdafx.h"
+#include "ndModel.h"
+#include "ndIkSolver.h"
+#include "ndSkeletonContainer.h"
+
+class ndMultiBodyVehicle;
+
+D_MSV_NEWTON_CLASS_ALIGN_32
+class ndModelArticulation: public ndModel
+{
+	public: 
+	D_CLASS_REFLECTION(ndModelArticulation, ndModel)
+
+	class ndNode : public ndNodeHierarchy<ndNode>
+	{
+		public:
+		D_NEWTON_API ndNode(const ndNode& src);
+		D_NEWTON_API ndNode(const ndSharedPtr<ndBody>& body, const ndSharedPtr<ndJointBilateralConstraint>& joint, ndNode* const parent);
+		D_NEWTON_API virtual ~ndNode() override;
+
+		ndSharedPtr<ndBody> m_body;
+		ndSharedPtr<ndJointBilateralConstraint> m_joint;
+		ndString m_name;
+	};
+
+	class ndCenterOfMassDynamics
+	{
+		public:
+		D_NEWTON_API ndCenterOfMassDynamics();
+
+		ndVector m_force;
+		ndVector m_torque;
+		ndVector m_momentum;
+		ndVector m_angularMomentum;
+		ndVector m_com;
+		ndFloat32 m_mass;
+	};
+
+	class ndCollindPairs
+	{
+		public:
+		ndCollindPairs(const ndBody* const body0, const ndBody* const body1)
+			:m_id0(ndMin(body0->GetId(), body1->GetId()))
+			,m_id1(ndMax(body0->GetId(), body1->GetId()))
+		{
+		}
+
+		union
+		{
+			ndUnsigned64 m_id;
+			struct
+			{
+				ndUnsigned32 m_id0;
+				ndUnsigned32 m_id1;
+			};
+		};
+	};
+
+	D_NEWTON_API ndModelArticulation();
+	D_NEWTON_API ndModelArticulation(const ndModelArticulation& src);
+	D_NEWTON_API virtual ~ndModelArticulation() override;
+	D_NEWTON_API virtual ndModel* Clone() const override;
+
+	D_NEWTON_API virtual ndModelArticulation* GetAsModelArticulation() override;
+
+	D_NEWTON_API ndNode* GetRoot() const;
+	D_NEWTON_API ndNode* AddRootBody(const ndSharedPtr<ndBody>& rootBody);
+	D_NEWTON_API ndNode* AddLimb(ndNode* const parent, const ndSharedPtr<ndBody>& body, const ndSharedPtr<ndJointBilateralConstraint>& joint);
+
+	D_NEWTON_API ndList<ndModelArticulation::ndNode, ndContainersFreeListAlloc<ndNode>>& GetCloseLoops();
+	D_NEWTON_API const ndList<ndModelArticulation::ndNode, ndContainersFreeListAlloc<ndNode>>& GetCloseLoops() const;
+	D_NEWTON_API void AddCloseLoop(const ndSharedPtr<ndJointBilateralConstraint>& loopJoint, const char* const name = "none");
+
+	D_NEWTON_API virtual bool GetMulticoreHint() const override;
+	D_NEWTON_API virtual void SetMulticoreHint(bool hint) override;
+
+	D_NEWTON_API virtual bool IsSleeping() const;
+	D_NEWTON_API virtual bool SetSleep(ndFloat32 speed, ndFloat32 angularSpeed, ndFloat32 accel, ndFloat32 alpha) const override;
+
+	D_NEWTON_API const ndString& GetName() const;
+	D_NEWTON_API void SetName(const ndString& name);
+	D_NEWTON_API ndNode* FindByBodyId(ndInt32 bodyId) const;
+	D_NEWTON_API ndNode* FindByName(const char* const name) const;
+	D_NEWTON_API ndNode* FindByBody(const ndBody* const body) const;
+	D_NEWTON_API ndNode* FindLoopByName(const char* const name) const;
+	D_NEWTON_API ndNode* FindLoopByJoint(const ndJointBilateralConstraint* const joint) const;
+
+	D_NEWTON_API void ClearMemory();
+	D_NEWTON_API void SetTransform(const ndMatrix& matrix);
+	D_NEWTON_API bool IsCloseLoop(const ndNode* const node) const;
+
+	D_NEWTON_API void SetCollidingSubSelection(const ndNode* const node0, const ndNode* const node1);
+	D_NEWTON_API bool PairCollide(const ndBody* const body0, const ndBody* const body1) const;
+
+	D_NEWTON_API ndMatrix CalculateComMassMatrix() const;
+	D_NEWTON_API ndFloat32 CalculateConservativeInetiaScaler() const;
+	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassKinematics() const;
+	D_NEWTON_API ndCenterOfMassDynamics CalculateCentreOfMassDynamics(ndIkSolver& solver, ndFixSizeArray<ndJointBilateralConstraint*, D_INV_IK_MAX_LINKS>& extraJoints, ndFloat32 timestep) const;
+	
+	D_NEWTON_API virtual void Serialize(ndMesh* const rootNode) const;
+	D_NEWTON_API virtual void Deserialize(const ndMesh* const rootNode);
+
+	D_NEWTON_API virtual ndMesh* CreateDefaultMesh() const;
+	D_NEWTON_API virtual void SaveNdMesh(const char* const path) const;
+
+	template <typename Function>
+	void NodeIterator(Function func);
+
+	protected:
+	D_COLLISION_API virtual void OnAddToWorld() override;
+	D_COLLISION_API virtual void OnRemoveFromWorld() override;
+	
+	ndString m_name;
+	ndNode* m_rootNode;
+	ndArray<ndCollindPairs> m_collisionPairs;
+	ndList<ndNode, ndContainersFreeListAlloc<ndNode>> m_closeLoops;
+	bool m_solveMulticore;
+} D_GCC_NEWTON_CLASS_ALIGN_32;
+
+template <typename Function>
+void ndModelArticulation::NodeIterator(Function func)
+{
+	if (m_rootNode)
+	{
+		ndFixSizeArray<ndNode*, D_INV_IK_MAX_LINKS> stack;
+		stack.PushBack(m_rootNode);
+		while (stack.GetCount())
+		{
+			ndNode* const node = stack.Pop();
+			func(node);
+			for (ndNode* child = node->GetFirstChild(); child; child = child->GetNext())
+			{
+				stack.PushBack(child);
+			}
+		}
+
+		for (ndList<ndNode, ndContainersFreeListAlloc<ndNode>>::ndNode* loopNode = m_closeLoops.GetFirst(); loopNode; loopNode = loopNode->GetNext())
+		{
+			ndNode* const node = &loopNode->GetInfo();
+			func(node);
+		}
+	}
+}
+
+#endif 
+

@@ -581,11 +581,10 @@ return false;
 
 void dMultiBodyVehicle::PreUpdate(dFloat timestep)
 {
-	dAssert(0);
-//	virtual void ApplyInputs(dVehicle* const model, timestep) {}
-//	m_manager->UpdateDriverInput(this, timestep);
+	//virtual void ApplyInputs(dVehicle* const model, timestep) {}
+	//m_manager->UpdateDriverInput(this, timestep);
 
-	dAssert(0);
+	//dAssert(0);
 	//for (int i = 0; i < m_controlerCount; i ++) {
 	//	m_control[i]->Update(timestep);
 	//}
