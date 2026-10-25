@@ -316,7 +316,6 @@ extern "C" {
 		int m_unused[3];
 	} NewtonUserContactPoint;
 
-
 	typedef struct NewtonImmediateModeConstraint
 	{
 		dFloat m_jacobian01[8][6];

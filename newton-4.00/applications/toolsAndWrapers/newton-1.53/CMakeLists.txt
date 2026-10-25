@@ -87,7 +87,10 @@ endif()
 #	COMMAND ${CMAKE_COMMAND}
 #	ARGS -E copy $<TARGET_FILE:${projectName}> C:/development/builds/newton-3.14/applications/demosSandbox/Debug/${projectName}${CMAKE_DEBUG_POSTFIX}${cSuffix})
 
-add_custom_command(
-	TARGET ${projectName} POST_BUILD 
-	COMMAND ${CMAKE_COMMAND}
-	ARGS -E copy $<TARGET_FILE:${projectName}> C:/tmp/newton-1.53_01/NewtonSDK/samples/bin/${projectName}${CMAKE_DEBUG_POSTFIX}${cSuffix})
+#add_custom_command(
+#	TARGET ${projectName} POST_BUILD 
+#	COMMAND ${CMAKE_COMMAND}
+#	ARGS -E copy $<TARGET_FILE:${projectName}> C:/tmp/newton-1.53_01/NewtonSDK/samples/bin/${projectName}${CMAKE_DEBUG_POSTFIX}${cSuffix})
+
+add_subdirectory(demos/common)
+add_subdirectory(demos/tutorial_01_GettingStarted)

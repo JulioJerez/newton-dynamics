@@ -46,6 +46,25 @@ void NewtonReleaseCollision(const NewtonWorld* newtonWorld, const NewtonCollisio
 	delete instance;
 }
 
+/*!
+  Create a transparent collision primitive.
+
+  @param *newtonWorld Pointer to the Newton world.
+
+  @return Pointer to the collision object.
+
+  Some times the application needs to create helper rigid bodies that will never collide with other bodies,
+  for example the neck of a rag doll, or an internal part of an articulated structure. This can be done by using the material system
+  but it too much work and it will increase unnecessarily the material count, and therefore the project complexity. The Null collision
+  is a collision object that satisfy all this conditions without having to change the engine philosophy.
+
+*/
+NewtonCollision* NewtonCreateNull(const NewtonWorld* const newtonWorld)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeNull());
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
+}
 
 // Name: NewtonCreateSphere 
 // Create a generalized ellipsoid primitive..
@@ -87,9 +106,201 @@ NewtonCollision* NewtonCreateSphere(const NewtonWorld* newtonWorld, dFloat radiu
 	const ndVector scale(ndFloat32(1.0f), radiusY / radiusX, radiusZ / radiusX, ndFloat32(1.0f));
 	instance->SetScale(scale);
 	instance->SetLocalMatrix(matrix);
-	//ndShapeMaterial material = instance->GetMaterial();
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
+}
+
+
+/*!
+  Create a box primitive for collision.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param dx box side one x dimension.
+  @param dy box side one y dimension.
+  @param dz box side one z dimension.
+  @param shapeID fixme
+  @param *offsetMatrix pointer to an array of 16 floats containing the offset matrix of the box relative to the body. If this parameter is NULL, then the primitive is centered at the origin of the body.
+
+  @return Pointer to the box
+
+*/
+NewtonCollision* NewtonCreateBox(const NewtonWorld* const, dFloat dx, dFloat dy, dFloat dz, const dFloat* const offsetMatrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMatrix matrix(ndGetIdentityMatrix());
+	if (offsetMatrix)
+	{
+		matrix = ndMatrix(offsetMatrix);
+	}
+	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeBox(dx, dy, dz));
+	instance->SetLocalMatrix(matrix);
+	ndShapeMaterial material = instance->GetMaterial();
 	//material.m_userId = shapeID;
 	//instance->SetMaterial(material);
 	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
+}
 
+/*!
+  Create a cone primitive for collision.
+
+  @param *newtonWorld Pointer to the Newton world.
+  @param radius cone radius at the base.
+  @param height cone height along the x local axis from base to tip.
+  @param shapeID user specified collision index that can be use for multi material collision.
+  @param *offsetMatrix pointer to an array of 16 floats containing the offset matrix of the box relative to the body. If this parameter is NULL, then the primitive is centered at the origin of the body.
+
+  @return Pointer to the box
+
+*/
+NewtonCollision* NewtonCreateCone(const NewtonWorld* const, dFloat radius, dFloat height, const dFloat* const offsetMatrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMatrix matrix(ndGetIdentityMatrix());
+	if (offsetMatrix)
+	{
+		matrix = ndMatrix(offsetMatrix);
+	}
+	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeCone(radius, height));
+	instance->SetLocalMatrix(matrix);
+	ndShapeMaterial material = instance->GetMaterial();
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
+}
+
+// Name: NewtonCreateCapsule 
+// Create a capsule primitive for collision.
+//
+// Parameters:
+// *const NewtonWorld* *newtonWorld - is the pointer to the Newton world.
+// *dFloat* radius  - capsule radius at the base.  
+// *dFloat* height  - capsule height along the x local axis from tip to tip.  
+// *const dFloat* *offsetMatrix - pointer to an array of 16 floats containing the offset matrix of the box relative to the body. If this parameter is NULL, then the primitive is centered at the origin of the body.
+// 
+// Return: Pointer to the box
+// 
+// Remark: the capsule height must equal of larger than the sum of the cap radius. If this is not the case the height will be clamped the 2 * radius.
+//
+// Remarks: Collision primitives are reference counted objects. The application should call *NewtonReleaseCollision* in order to release references to the object.
+// Neglecting to release references to collision primitives is a common cause of memory leaks.
+// Collision primitives can be reused with more than one body. This will reduce the amount of memory used be the engine, as well
+// as speed up some calculations.
+//
+// See also: NewtonReleaseCollision, NewtonCreateConvexHullModifier
+NewtonCollision* NewtonCreateCapsule(const NewtonWorld* newtonWorld, dFloat radius, dFloat height, const dFloat* offsetMatrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMatrix matrix(ndGetIdentityMatrix());
+	if (offsetMatrix)
+	{
+		matrix = ndMatrix(offsetMatrix);
+	}
+	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeCapsule(radius, radius, height));
+	instance->SetLocalMatrix(matrix);
+	ndShapeMaterial material = instance->GetMaterial();
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
+}
+
+// Name: NewtonCreateCylinder 
+// Create a cylinder primitive for collision.
+//
+// Parameters:
+// *const NewtonWorld* *newtonWorld - is the pointer to the Newton world.
+// *dFloat* radius  - cylinder radius at the base.  
+// *dFloat* height  - cylinder height along the x local axis.  
+// *const dFloat* *offsetMatrix - pointer to an array of 16 floats containing the offset matrix of the box relative to the body. If this parameter is NULL, then the primitive is centered at the origin of the body.
+// 
+// Return: Pointer to the box
+//
+// Remarks: Collision primitives are reference counted objects. The application should call *NewtonReleaseCollision* in order to release references to the object.
+// Neglecting to release references to collision primitives is a common cause of memory leaks.
+// Collision primitives can be reused with more than one body. This will reduce the amount of memory used be the engine, as well
+// as speed up some calculations.
+//
+// See also: NewtonReleaseCollision, NewtonCreateConvexHullModifier
+NewtonCollision* NewtonCreateCylinder(const NewtonWorld* newtonWorld, dFloat radius, dFloat height, const dFloat* offsetMatrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMatrix matrix(ndGetIdentityMatrix());
+	if (offsetMatrix)
+	{
+		matrix = ndMatrix(offsetMatrix);
+	}
+	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeCylinder(radius, radius, height));
+	instance->SetLocalMatrix(matrix);
+	ndShapeMaterial material = instance->GetMaterial();
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
+}
+
+NewtonCollision* NewtonCreateChamferCylinder(const NewtonWorld* newtonWorld, dFloat radius, dFloat height, const dFloat* offsetMatrix);
+
+// Name: NewtonCreateChamferCylinder 
+// Create a ChamferCylinder primitive for collision.
+//
+// Parameters:
+// *const NewtonWorld* *newtonWorld - is the pointer to the Newton world.
+// *dFloat* radius  - ChamferCylinder radius at the base.  
+// *dFloat* height  - ChamferCylinder height along the x local axis.  
+// *const dFloat* *offsetMatrix - pointer to an array of 16 floats containing the offset matrix of the box relative to the body. If this parameter is NULL, then the primitive is centered at the origin of the body.
+// 
+// Return: Pointer to the box
+//
+// Remarks: Collision primitives are reference counted objects. The application should call *NewtonReleaseCollision* in order to release references to the object.
+// Neglecting to release references to collision primitives is a common cause of memory leaks.
+// Collision primitives can be reused with more than one body. This will reduce the amount of memory used be the engine, as well
+// as speed up some calculations.
+//
+// See also: NewtonReleaseCollision, NewtonCreateConvexHullModifier
+NewtonCollision* NewtonCreateChamferCylinder(const NewtonWorld* newtonWorld, dFloat radius, dFloat height, const dFloat* offsetMatrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMatrix matrix(ndGetIdentityMatrix());
+	if (offsetMatrix)
+	{
+		matrix = ndMatrix(offsetMatrix);
+	}
+	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeChamferCylinder(radius, height));
+	instance->SetLocalMatrix(matrix);
+	ndShapeMaterial material = instance->GetMaterial();
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
+}
+
+// Name: NewtonCreateConvexHull 
+// Create a ConvexHull primitive for collision from a cloud of points.
+//
+// Parameters:
+// *const NewtonWorld* *newtonWorld - is the pointer to the Newton world.
+// *dFloat* count  - number of consecutive point to follow must be at least 4.  
+// *const dFloat* vertexCloud - pointer to and array of point.  
+// *dFloat* strideInBytes - vertex size in bytes, must be at least 12.  
+// *const dFloat* *offsetMatrix - pointer to an array of 16 floats containing the offset matrix of the box relative to the body. If this parameter is NULL, then the primitive is centered at the origin of the body.
+// 
+// Return: Pointer to the box
+//
+// Remarks: Convex hulls are the solution to collision primitive that can not be easily represented by and implicit solid.
+// The implicit solid primitives (spheres, cubes, cylinders, capsules, cones, etc.), have constant time complexity for contact calculation
+// and are also extremely efficient on memory usage, therefore the application get perfect smooth behavior.
+// However for cases where the shape is too difficult or a polygonal representation is desired convex hulls are the ultimate solution. 
+// For example it is a mistake to model a 10000 point sphere as a convex hull, when the perfect sphere is available.
+//
+// Remarks: There is not upper limit as to how many vertex the application can pass to Newton to make a hull shape, 
+// however for performance and memory usage concern it is the application responsibility to keep the max vertex at the possible minimum. 
+// The minimum number of vertex should be equal or larger than 4 and it is the application responsibility that the points are part of a solid geometry. 
+// Unpredictable results will occur if all points happen to be collinear or coplanar.  
+//
+// Remarks: Collision primitives are reference counted objects. The application should call *NewtonReleaseCollision* in order to release references to the object.
+// Neglecting to release references to collision primitives is a common cause of memory leaks.
+// Collision primitives can be reused with more than one body. This will reduce the amount of memory used be the engine, as well
+// as speed up some calculations.
+//
+// See also: NewtonReleaseCollision, NewtonCreateConvexHullModifier
+NewtonCollision* NewtonCreateConvexHull(const NewtonWorld* newtonWorld, int count, const dFloat* vertexCloud, int strideInBytes, const dFloat* offsetMatrix)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndMatrix matrix(ndGetIdentityMatrix());
+	if (offsetMatrix)
+	{
+		matrix = ndMatrix(offsetMatrix);
+	}
+	ndShapeInstance* const instance = new ndShapeInstance(new ndShapeConvexHull(count, strideInBytes, ndFloat32 (1.0e-3f), vertexCloud));
+	instance->SetLocalMatrix(matrix);
+	ndShapeMaterial material = instance->GetMaterial();
+	return PointerCast<NewtonCollision, ndShapeInstance>(instance);
 }

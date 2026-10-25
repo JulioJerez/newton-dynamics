@@ -75,6 +75,16 @@ extern "C" {
 		void* m_userData;                       // user data passed to the collision geometry at creation time
 	} NewtonUserMeshCollisionRayHitDesc;
 
+	typedef struct NewtonUserContactPoint
+	{
+		dFloat m_point[4];
+		dFloat m_normal[4];
+		long long m_shapeId0;
+		long long m_shapeId1;
+		dFloat m_penetration;
+		int m_unused[3];
+	} NewtonUserContactPoint;
+
 	typedef struct NewtonHingeSliderUpdateDescTag
 	{
 		dFloat m_accel;
@@ -83,7 +93,6 @@ extern "C" {
 		dFloat m_timestep;
 	} NewtonHingeSliderUpdateDesc;
 
-
 	// Newton callback functions
 	typedef void* (*NewtonAllocMemory) (int sizeInBytes);
 	typedef void (*NewtonFreeMemory) (void *ptr, int sizeInBytes);
@@ -91,7 +100,6 @@ extern "C" {
 	typedef void (*NewtonSerialize) (void* serializeHandle, const void* buffer, size_t size);
 	typedef void (*NewtonDeserialize) (void* serializeHandle, void* buffer, size_t size);
 	
-
 	typedef void (*NewtonUserMeshCollisionCollideCallback) (NewtonUserMeshCollisionCollideDesc* collideDescData);
 	typedef dFloat (*NewtonUserMeshCollisionRayHitCallback) (NewtonUserMeshCollisionRayHitDesc* lineDescData);
 	typedef void (*NewtonUserMeshCollisionDestroyCallback) (void* descData);
