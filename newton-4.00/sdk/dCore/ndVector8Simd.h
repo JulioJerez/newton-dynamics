@@ -196,16 +196,15 @@
 				__m256d& dst0, __m256d& dst1, __m256d& dst2, __m256d& dst3,
 				const __m256d& src0, const __m256d& src1, const __m256d& src2, const __m256d& src3)
 			{
-				__m256d tmp[4];
-				tmp[0] = _mm256_permute2f128_pd(src0, src2, 0x20);
-				tmp[1] = _mm256_permute2f128_pd(src1, src3, 0x20);
-				tmp[2] = _mm256_permute2f128_pd(src0, src2, 0x31);
-				tmp[3] = _mm256_permute2f128_pd(src1, src3, 0x31);
+				__m256d r0 (_mm256_permute2f128_pd(src0, src2, 0x20));
+				__m256d r1 (_mm256_permute2f128_pd(src1, src3, 0x20));
+				__m256d r2 (_mm256_permute2f128_pd(src0, src2, 0x31));
+				__m256d r3 (_mm256_permute2f128_pd(src1, src3, 0x31));
 
-				dst0 = _mm256_unpacklo_pd(tmp[0], tmp[1]);
-				dst1 = _mm256_unpackhi_pd(tmp[0], tmp[1]);
-				dst2 = _mm256_unpacklo_pd(tmp[2], tmp[3]);
-				dst3 = _mm256_unpackhi_pd(tmp[2], tmp[3]);
+				dst0 = _mm256_unpacklo_pd(r0, r1);
+				dst1 = _mm256_unpackhi_pd(r0, r1);
+				dst2 = _mm256_unpacklo_pd(r2, r3);
+				dst3 = _mm256_unpackhi_pd(r2, r3);
 			}
 
 			static inline void Transpose(
