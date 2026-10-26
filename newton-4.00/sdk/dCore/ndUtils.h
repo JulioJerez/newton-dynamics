@@ -42,7 +42,7 @@
 	D_CORE_API bool ndCheckFloat(ndFloat64 x);
 #else
 	//#define ndCheckFloat(x) (isfinite(x) && !isnan(x))
-	#define ndCheckFloat(x) (1)
+	#define ndCheckFloat(x) (true)
 #endif
 
 inline ndInt32 ndExp2 (ndInt32 x)
