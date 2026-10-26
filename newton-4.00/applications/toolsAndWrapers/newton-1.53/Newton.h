@@ -193,20 +193,6 @@ extern "C" {
 	NEWTON_API void NewtonGetEulerAngle (const dFloat* matrix, dFloat* eulersAngles);
 	NEWTON_API void NewtonSetEulerAngle (const dFloat* eulersAngles, dFloat* matrix);
 
-	// **********************************************************************************************
-	//
-	// Slider joint functions
-	//
-	// **********************************************************************************************
-	NEWTON_API NewtonJoint* NewtonConstraintCreateSlider (const NewtonWorld* newtonWorld, 
-		const dFloat* pivotPoint, const dFloat* pinDir, 
-		const NewtonBody* childBody, const NewtonBody* parentBody);
-	NEWTON_API void NewtonSliderSetUserCallback (const NewtonJoint* slider, NewtonSliderCallBack callback);
-	NEWTON_API dFloat NewtonSliderGetJointPosit (const NewtonJoint* slider);
-	NEWTON_API dFloat NewtonSliderGetJointVeloc (const NewtonJoint* slider);
-	NEWTON_API void NewtonSliderGetJointForce (const NewtonJoint* slider, dFloat* force);
-	NEWTON_API dFloat NewtonSliderCalculateStopAccel (const NewtonJoint* slider, const NewtonHingeSliderUpdateDesc* desc, dFloat position);
-
 
 	// **********************************************************************************************
 	//
@@ -604,6 +590,21 @@ extern "C" {
 	NEWTON_API dFloat NewtonHingeGetJointOmega(const NewtonJoint* hinge);
 	NEWTON_API void NewtonHingeGetJointForce(const NewtonJoint* hinge, dFloat* force);
 	NEWTON_API dFloat NewtonHingeCalculateStopAlpha(const NewtonJoint* hinge, const NewtonHingeSliderUpdateDesc* desc, dFloat angle);
+
+	// **********************************************************************************************
+//
+// Slider joint functions
+//
+// **********************************************************************************************
+	NEWTON_API NewtonJoint* NewtonConstraintCreateSlider(const NewtonWorld* newtonWorld,
+		const dFloat* pivotPoint, const dFloat* pinDir,
+		const NewtonBody* childBody, const NewtonBody* parentBody);
+	NEWTON_API void NewtonSliderSetUserCallback(const NewtonJoint* slider, NewtonSliderCallBack callback);
+	NEWTON_API dFloat NewtonSliderGetJointPosit(const NewtonJoint* slider);
+	NEWTON_API dFloat NewtonSliderGetJointVeloc(const NewtonJoint* slider);
+	NEWTON_API void NewtonSliderGetJointForce(const NewtonJoint* slider, dFloat* force);
+	NEWTON_API dFloat NewtonSliderCalculateStopAccel(const NewtonJoint* slider, const NewtonHingeSliderUpdateDesc* desc, dFloat position);
+
 
 #ifdef __cplusplus 
 }
