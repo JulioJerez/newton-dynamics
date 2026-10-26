@@ -38,10 +38,10 @@
 
 
 #if (defined (WIN32) || defined(_WIN32) || defined (_M_ARM) || defined (_M_ARM64))
-	//#define ndCheckFloat(x) (1)
+	//inline bool ndCheckFloat(ndFloat64) { _finite(x) && !_isnan(x); }
 	inline bool ndCheckFloat(ndFloat64) { return true; }
 #else
-	//#define ndCheckFloat(x) (isfinite(x) && !isnan(x))
+	//inline bool ndCheckFloat(x) {reurn isfinite(x) && !isnan(x);}
 	inline bool ndCheckFloat(ndFloat64) { return true; }
 #endif
 
