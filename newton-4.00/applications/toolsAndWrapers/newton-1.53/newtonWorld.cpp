@@ -14,93 +14,9 @@
 #include "NewtonBody.h"
 #include "NewtonUtils.h"
 #include "newtonWorld.h"
-//#include "newtonMaterial.h"
+#include "NewtonMaterialGraph.h"
 
 ndSpinLock ndNewtonWorld::m_globalCriticalSection;
-
-class ndNewtonMaterial : public ndApplicationMaterial
-{
-	public:
-	typedef int (*NewtonOnAABBOverlap) (const NewtonJoint* const contact, ndFloat32 timestep, int threadIndex);
-	typedef void (*NewtonContactsProcess) (const NewtonJoint* const contact, ndFloat32 timestep, int threadIndex);
-	typedef int (*NewtonOnCompoundSubCollisionAABBOverlap) (const NewtonJoint* const contact, ndFloat32 timestep, const NewtonBody* const body0, const void* const collisionNode0, const NewtonBody* const body1, const void* const collisionNode1, int threadIndex);
-	typedef int (*NewtonOnContactGeneration) (const NewtonMaterial* const material, const NewtonBody* const body0, const NewtonCollision* const collision0, const NewtonBody* const body1, const NewtonCollision* const collision1, NewtonUserContactPoint* const contactBuffer, int maxCount, int threadIndex);
-
-	ndNewtonMaterial()
-		:ndApplicationMaterial()
-		,m_usedData(nullptr)
-		,m_onAABBOverlap(nullptr)
-		,m_onContactsProcess(nullptr)
-		,m_onContactGeneration(nullptr)
-		,m_onSubShapeAABBOverlap(nullptr)
-	{
-	}
-
-	ndNewtonMaterial(const ndNewtonMaterial& copy)
-		:ndApplicationMaterial(copy)
-		,m_usedData(copy.m_usedData)
-		,m_onAABBOverlap(copy.m_onAABBOverlap)
-		,m_onContactsProcess(copy.m_onContactsProcess)
-		,m_onContactGeneration(copy.m_onContactGeneration)
-		,m_onSubShapeAABBOverlap(copy.m_onSubShapeAABBOverlap)
-	{
-	}
-
-	virtual ~ndNewtonMaterial() override
-	{
-	}
-
-	virtual ndApplicationMaterial* Clone() const override
-	{
-		return new ndNewtonMaterial(*this);
-	}
-
-	virtual void OnContactCallback(const ndContact* const contact, ndFloat32 timestep) const override
-	{
-		if (m_onContactsProcess)
-		{
-			m_onContactsProcess(PointerCast<NewtonJoint, ndContact>(contact), timestep, 0);
-		}
-	}
-
-	virtual bool OnAabbOverlap(const ndBodyKinematic* const bodyPtr0, const ndBodyKinematic* const bodyPtr1) const override
-	{
-		if (m_onAABBOverlap)
-		{
-			const NewtonBody* const body0 = PointerCast<NewtonBody, ndBodyKinematic>(bodyPtr0);
-			const NewtonBody* const body1 = PointerCast<NewtonBody, ndBodyKinematic>(bodyPtr1);
-			const ndContact* const contact = bodyPtr0->GetContactMap().FindContact(bodyPtr0, bodyPtr1);
-			if (!contact)
-			{
-				return true;
-			}
-			return m_onAABBOverlap(PointerCast<NewtonJoint, ndContact>(contact), ndFloat32(0.0f), 0);
-		}
-		return true;
-	}
-
-	virtual bool OnAabbOverlap(const ndContact* const contact, ndFloat32 timestep, const ndShapeInstance& instance0, const ndShapeInstance& instance1) const override
-	{
-		if (m_onSubShapeAABBOverlap && (instance0.m_subCollisionHandle || instance1.m_subCollisionHandle))
-		{
-			NewtonBody* const body0 = PointerCast<NewtonBody, ndBodyKinematic>(contact->GetBody0());
-			NewtonBody* const body1 = PointerCast<NewtonBody, ndBodyKinematic>(contact->GetBody1());
-			return m_onSubShapeAABBOverlap(PointerCast<NewtonJoint, ndContact>(contact), timestep, body0, *instance0.m_subCollisionHandle, body1, *instance1.m_subCollisionHandle, 0);
-		}
-		else if (m_onAABBOverlap)
-		{
-			return m_onAABBOverlap(PointerCast<NewtonJoint, ndContact>(contact), timestep, 0);
-		}
-		return true;
-	}
-
-	ndWeakPtr<void> m_usedData;
-	NewtonOnAABBOverlap m_onAABBOverlap;
-	NewtonContactsProcess m_onContactsProcess;
-	NewtonOnContactGeneration m_onContactGeneration;
-	NewtonOnCompoundSubCollisionAABBOverlap m_onSubShapeAABBOverlap;
-};
-
 
 class ndNewtonContact : public ndContact
 {
@@ -126,38 +42,38 @@ public:
 
 	void JacobianDerivative(ndConstraintDescritor& desc) override
 	{
-		ndBodyKinematic* const kinBody0 = GetBody0();
-		ndBodyKinematic* const kinBody1 = GetBody1();
-		const ndNewtonBodyNotify* const notify0 = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*kinBody0->GetNotifyCallback());
-		const ndNewtonBodyNotify* const notify1 = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*kinBody1->GetNotifyCallback());
-		const ndNewtonMaterial* const material = PointerCast<ndNewtonMaterial, ndMaterial>(m_world->GetMaterial(notify0->m_materialGoupId, notify1->m_materialGoupId));
-		ndAssert(material);
-		if (material->m_onContactGeneration)
-		{
-			//typedef int (*NewtonOnContactGeneration) (
-			// const NewtonMaterial* const material, 
-			// const NewtonBody* const body0, const NewtonCollision* const collision0, 
-			// const NewtonBody* const body1, const NewtonCollision* const collision1, 
-			// NewtonUserContactPoint* const contactBuffer, int maxCount, int threadIndex);
-		
-			NewtonUserContactPoint contactBuffer[32];
-			const NewtonMaterial* const self = PointerCast<NewtonMaterial, ndNewtonMaterial>(material);
-			const NewtonBody* const body0 = PointerCast<NewtonBody, ndBodyKinematic>(kinBody0);
-			const NewtonBody* const body1 = PointerCast<NewtonBody, ndBodyKinematic>(kinBody1);
-			const NewtonCollision* const instance0 = PointerCast<NewtonCollision, ndShapeInstance>(&kinBody0->GetCollisionShape());
-			const NewtonCollision* const instance1 = PointerCast<NewtonCollision, ndShapeInstance>(&kinBody1->GetCollisionShape());
-		
-			ndContactPointList& contacPointsList = m_contacPointsList;
-			ndInt32 count = material->m_onContactGeneration(self, body0, instance0, body1, instance1, contactBuffer, contacPointsList.GetCount(), ndInt32(contacPointsList.GetCount()));
-			while (contacPointsList.GetCount() > count)
-			{
-				contacPointsList.Remove(contacPointsList.GetLast());
-			}
-		}
-		else
-		{
-			//ndAssert(0);
-		}
+		//ndBodyKinematic* const kinBody0 = GetBody0();
+		//ndBodyKinematic* const kinBody1 = GetBody1();
+		//const ndNewtonBodyNotify* const notify0 = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*kinBody0->GetNotifyCallback());
+		//const ndNewtonBodyNotify* const notify1 = PointerCast<ndNewtonBodyNotify, ndBodyNotify>(*kinBody1->GetNotifyCallback());
+		//const ndNewtonMaterial* const material = PointerCast<ndNewtonMaterial, ndMaterial>(m_world->GetMaterial(notify0->m_materialGoupId, notify1->m_materialGoupId));
+		//ndAssert(material);
+		//if (material->m_onContactGeneration)
+		//{
+		//	//typedef int (*NewtonOnContactGeneration) (
+		//	// const NewtonMaterial* const material, 
+		//	// const NewtonBody* const body0, const NewtonCollision* const collision0, 
+		//	// const NewtonBody* const body1, const NewtonCollision* const collision1, 
+		//	// NewtonUserContactPoint* const contactBuffer, int maxCount, int threadIndex);
+		//
+		//	NewtonUserContactPoint contactBuffer[32];
+		//	const NewtonMaterial* const self = PointerCast<NewtonMaterial, ndNewtonMaterial>(material);
+		//	const NewtonBody* const body0 = PointerCast<NewtonBody, ndBodyKinematic>(kinBody0);
+		//	const NewtonBody* const body1 = PointerCast<NewtonBody, ndBodyKinematic>(kinBody1);
+		//	const NewtonCollision* const instance0 = PointerCast<NewtonCollision, ndShapeInstance>(&kinBody0->GetCollisionShape());
+		//	const NewtonCollision* const instance1 = PointerCast<NewtonCollision, ndShapeInstance>(&kinBody1->GetCollisionShape());
+		//
+		//	ndContactPointList& contacPointsList = m_contacPointsList;
+		//	ndInt32 count = material->m_onContactGeneration(self, body0, instance0, body1, instance1, contactBuffer, contacPointsList.GetCount(), ndInt32(contacPointsList.GetCount()));
+		//	while (contacPointsList.GetCount() > count)
+		//	{
+		//		contacPointsList.Remove(contacPointsList.GetLast());
+		//	}
+		//}
+		//else
+		//{
+		//	//ndAssert(0);
+		//}
 		ndContact::JacobianDerivative(desc);
 	}
 
@@ -345,5 +261,12 @@ void NewtonSetWorldSize(const NewtonWorld* newtonWorld, const dFloat* minPoint, 
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	//do nothing;
-	ndTrace(("deprecated: there not worlk bounds in newton 4\n"));
+	ndTrace(("deprecated: there not world bounds in newton 4\n"));
+}
+
+void NewtonSetMinimumFrameRate(const NewtonWorld* newtonWorld, dFloat frameRate)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	//do nothing;
+	//ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }

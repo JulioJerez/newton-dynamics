@@ -196,16 +196,15 @@
 				__m256d& dst0, __m256d& dst1, __m256d& dst2, __m256d& dst3,
 				const __m256d& src0, const __m256d& src1, const __m256d& src2, const __m256d& src3)
 			{
-				__m256d tmp[4];
-				tmp[0] = _mm256_permute2f128_pd(src0, src2, 0x20);
-				tmp[1] = _mm256_permute2f128_pd(src1, src3, 0x20);
-				tmp[2] = _mm256_permute2f128_pd(src0, src2, 0x31);
-				tmp[3] = _mm256_permute2f128_pd(src1, src3, 0x31);
+				__m256d r0 (_mm256_permute2f128_pd(src0, src2, 0x20));
+				__m256d r1 (_mm256_permute2f128_pd(src1, src3, 0x20));
+				__m256d r2 (_mm256_permute2f128_pd(src0, src2, 0x31));
+				__m256d r3 (_mm256_permute2f128_pd(src1, src3, 0x31));
 
-				dst0 = _mm256_unpacklo_pd(tmp[0], tmp[1]);
-				dst1 = _mm256_unpackhi_pd(tmp[0], tmp[1]);
-				dst2 = _mm256_unpacklo_pd(tmp[2], tmp[3]);
-				dst3 = _mm256_unpackhi_pd(tmp[2], tmp[3]);
+				dst0 = _mm256_unpacklo_pd(r0, r1);
+				dst1 = _mm256_unpackhi_pd(r0, r1);
+				dst2 = _mm256_unpacklo_pd(r2, r3);
+				dst3 = _mm256_unpackhi_pd(r2, r3);
 			}
 
 			static inline void Transpose(
@@ -402,7 +401,6 @@
 			{
 				__m128 tmp0(_mm_max_ps(m_typeLow, m_typeHigh));
 				__m128 tmp1(_mm_max_ps(tmp0, _mm_movehl_ps(tmp0, tmp0)));
-				//__m128 tmp2(_mm_max_ps(tmp1, _mm_shuffle_ps(tmp1, tmp1, PERMUTE_MASK(2, 3, 0, 1))));
 				__m128 tmp2(_mm_max_ps(tmp1, _mm_permute_ps(tmp1, PERMUTE_MASK(2, 3, 0, 1))));
 				return _mm_cvtss_f32(tmp2);
 			}
@@ -426,35 +424,32 @@
 				const ndVector8& src0, const ndVector8& src1, const ndVector8& src2, const ndVector8& src3,
 				const ndVector8& src4, const ndVector8& src5, const ndVector8& src6, const ndVector8& src7)
 			{
-				ndVector8 blocks4x4[8];
+				__m256 r0 (_mm256_permute2f128_ps(src0.m_type, src4.m_type, 0x20));
+				__m256 r1 (_mm256_permute2f128_ps(src0.m_type, src4.m_type, 0x31));
+				__m256 r2 (_mm256_permute2f128_ps(src1.m_type, src5.m_type, 0x20));
+				__m256 r3 (_mm256_permute2f128_ps(src1.m_type, src5.m_type, 0x31));
+				__m256 r4 (_mm256_permute2f128_ps(src2.m_type, src6.m_type, 0x20));
+				__m256 r5 (_mm256_permute2f128_ps(src2.m_type, src6.m_type, 0x31));
+				__m256 r6 (_mm256_permute2f128_ps(src3.m_type, src7.m_type, 0x20));
+				__m256 r7 (_mm256_permute2f128_ps(src3.m_type, src7.m_type, 0x31));
 			
-				blocks4x4[0].m_type = _mm256_permute2f128_ps(src0.m_type, src4.m_type, 0x20);
-				blocks4x4[1].m_type = _mm256_permute2f128_ps(src0.m_type, src4.m_type, 0x31);
-				blocks4x4[2].m_type = _mm256_permute2f128_ps(src1.m_type, src5.m_type, 0x20);
-				blocks4x4[3].m_type = _mm256_permute2f128_ps(src1.m_type, src5.m_type, 0x31);
-				blocks4x4[4].m_type = _mm256_permute2f128_ps(src2.m_type, src6.m_type, 0x20);
-				blocks4x4[5].m_type = _mm256_permute2f128_ps(src2.m_type, src6.m_type, 0x31);
-				blocks4x4[6].m_type = _mm256_permute2f128_ps(src3.m_type, src7.m_type, 0x20);
-				blocks4x4[7].m_type = _mm256_permute2f128_ps(src3.m_type, src7.m_type, 0x31);
+				__m256 s0 (_mm256_unpacklo_ps(r0, r4));
+				__m256 s1 (_mm256_unpackhi_ps(r0, r4));
+				__m256 s2 (_mm256_unpacklo_ps(r1, r5));
+				__m256 s3 (_mm256_unpackhi_ps(r1, r5));
+				__m256 s4 (_mm256_unpacklo_ps(r2, r6));
+				__m256 s5 (_mm256_unpackhi_ps(r2, r6));
+				__m256 s6 (_mm256_unpacklo_ps(r3, r7));
+				__m256 s7 (_mm256_unpackhi_ps(r3, r7));
 			
-				ndVector8 blocks2x2[8];
-				blocks2x2[0].m_type = _mm256_unpacklo_ps(blocks4x4[0].m_type, blocks4x4[4].m_type);
-				blocks2x2[1].m_type = _mm256_unpackhi_ps(blocks4x4[0].m_type, blocks4x4[4].m_type);
-				blocks2x2[2].m_type = _mm256_unpacklo_ps(blocks4x4[1].m_type, blocks4x4[5].m_type);
-				blocks2x2[3].m_type = _mm256_unpackhi_ps(blocks4x4[1].m_type, blocks4x4[5].m_type);
-				blocks2x2[4].m_type = _mm256_unpacklo_ps(blocks4x4[2].m_type, blocks4x4[6].m_type);
-				blocks2x2[5].m_type = _mm256_unpackhi_ps(blocks4x4[2].m_type, blocks4x4[6].m_type);
-				blocks2x2[6].m_type = _mm256_unpacklo_ps(blocks4x4[3].m_type, blocks4x4[7].m_type);
-				blocks2x2[7].m_type = _mm256_unpackhi_ps(blocks4x4[3].m_type, blocks4x4[7].m_type);
-			
-				dst0.m_type = _mm256_unpacklo_ps(blocks2x2[0].m_type, blocks2x2[4].m_type);
-				dst1.m_type = _mm256_unpackhi_ps(blocks2x2[0].m_type, blocks2x2[4].m_type);
-				dst2.m_type = _mm256_unpacklo_ps(blocks2x2[1].m_type, blocks2x2[5].m_type);
-				dst3.m_type = _mm256_unpackhi_ps(blocks2x2[1].m_type, blocks2x2[5].m_type);
-				dst4.m_type = _mm256_unpacklo_ps(blocks2x2[2].m_type, blocks2x2[6].m_type);
-				dst5.m_type = _mm256_unpackhi_ps(blocks2x2[2].m_type, blocks2x2[6].m_type);
-				dst6.m_type = _mm256_unpacklo_ps(blocks2x2[3].m_type, blocks2x2[7].m_type);
-				dst7.m_type = _mm256_unpackhi_ps(blocks2x2[3].m_type, blocks2x2[7].m_type);
+				dst0.m_type = _mm256_unpacklo_ps(s0, s4);
+				dst1.m_type = _mm256_unpackhi_ps(s0, s4);
+				dst2.m_type = _mm256_unpacklo_ps(s1, s5);
+				dst3.m_type = _mm256_unpackhi_ps(s1, s5);
+				dst4.m_type = _mm256_unpacklo_ps(s2, s6);
+				dst5.m_type = _mm256_unpackhi_ps(s2, s6);
+				dst6.m_type = _mm256_unpacklo_ps(s3, s7);
+				dst7.m_type = _mm256_unpackhi_ps(s3, s7);
 			}
 
 			union

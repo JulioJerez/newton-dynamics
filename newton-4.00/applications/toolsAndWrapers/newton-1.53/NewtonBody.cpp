@@ -578,29 +578,6 @@ int NewtonBodyGetJointRecursiveCollision(const NewtonBody* bodyPtr)
 	return body->GetCollisionWithLinkedBodies() ? 1 : 0;
 }
 
-// Name: NewtonBodySetAutoFreeze 
-// Set the auto-activation mode for this body.
-//
-// Parameters:
-// *const NewtonBody* *bodyPtr - is the pointer to the body.
-// *int* state - active mode: 1 = auto-activation on (controlled by Newton). 0 = auto-activation off (controlled by the application). 
-// 
-// Return: Nothing.
-//
-// Remarks: Bodies are created with auto-activation on by default. 
-//
-// Remarks: Auto activation enabled is the default state for the majority of bodies in a large scene.
-// However, for player control, ai control or some other special circumstance, the application may want to control
-// the activation/deactivation of the body. In that case, the application may call NewtonBodySetAutoFreeze (body, 0) followed by
-// NewtonWorldUnfreezeBody(world, body), this will make the body active forever. 
-//
-// See also: NewtonWorldFreezeBody, NewtonWorldUnfreezeBody, NewtonBodyGetAutoFreeze, NewtonBodySetFreezeTreshold
-void NewtonBodySetAutoFreeze(const NewtonBody* bodyPtr, int state)
-{
-	dgBody* body;
-	body = (dgBody*)bodyPtr;
-	body->SetAutoFreeze(state ? true : false);
-}
 
 // Name: NewtonBodyGetAutoFreeze 
 // Get the auto-activation state of the body.
@@ -888,7 +865,6 @@ NewtonBody* NewtonCreateBody(const NewtonWorld* newtonWorld, const NewtonCollisi
 	return PointerCast<NewtonBody, ndBodyDynamic>(dynBody);
 }
 
-
 // Name: NewtonDestroyBody 
 // Destroy a rigid body.
 //
@@ -937,6 +913,33 @@ void  NewtonBodySetUserData(const NewtonBody* bodyPtr, void* userData)
 	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
 	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
 	bodyNotify->m_userData = ndWeakPtr<void>(userData);
+}
+
+void NewtonBodySetMaterialGroupID(const NewtonBody* bodyPtr, int id)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
+	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
+	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
+	bodyNotify->m_materialGoupId = id;
+}
+
+/*!
+  Get the material group id of the body.
+
+  @param *bodyPtr pointer to the body.
+
+  @return Nothing.
+
+  See also: ::NewtonBodySetMaterialGroupID
+*/
+int NewtonBodyGetMaterialGroupID(const NewtonBody* const bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBody* const body = PointerCast<ndBody, NewtonBody>(bodyPtr);
+	ndNewtonBodyNotify* const bodyNotify = static_cast<ndNewtonBodyNotify*>(*body->GetNotifyCallback());
+	ndAssert(bodyNotify && !strcmp(bodyNotify->ClassName(), ndNewtonBodyNotify::StaticClassName()));
+	return bodyNotify->m_materialGoupId;
 }
 
 // Name: NewtonBodyGetUserData
@@ -1384,4 +1387,32 @@ void NewtonBodyGetOmega(const NewtonBody* bodyPtr, dFloat* omega)
 	omega[0] = vector.m_x;
 	omega[1] = vector.m_y;
 	omega[2] = vector.m_z;
+}
+
+
+// Name: NewtonBodySetAutoFreeze 
+// Set the auto-activation mode for this body.
+//
+// Parameters:
+// *const NewtonBody* *bodyPtr - is the pointer to the body.
+// *int* state - active mode: 1 = auto-activation on (controlled by Newton). 0 = auto-activation off (controlled by the application). 
+// 
+// Return: Nothing.
+//
+// Remarks: Bodies are created with auto-activation on by default. 
+//
+// Remarks: Auto activation enabled is the default state for the majority of bodies in a large scene.
+// However, for player control, ai control or some other special circumstance, the application may want to control
+// the activation/deactivation of the body. In that case, the application may call NewtonBodySetAutoFreeze (body, 0) followed by
+// NewtonWorldUnfreezeBody(world, body), this will make the body active forever. 
+//
+// See also: NewtonWorldFreezeBody, NewtonWorldUnfreezeBody, NewtonBodyGetAutoFreeze, NewtonBodySetFreezeTreshold
+void NewtonBodySetAutoFreeze(const NewtonBody* bodyPtr, int state)
+{
+	//dgBody* body;
+	//body = (dgBody*)bodyPtr;
+	//body->SetAutoFreeze(state ? true : false);
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	body->SetAutoSleep(state ? true : false);
 }

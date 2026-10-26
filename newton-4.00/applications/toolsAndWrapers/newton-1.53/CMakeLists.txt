@@ -50,6 +50,8 @@ endif()
 file(GLOB CPP_SOURCE 
 	*.h
 	*.cpp
+	joints/*.h
+	joints/*.cpp
 	newton-4/source/*.h
 	newton-4/source/*.c
 	newton-4/source/*.cpp
@@ -75,5 +77,5 @@ if (NEWTON_BUILD_DEMOS)
 	add_subdirectory(demos/tutorial_01_GettingStarted)
 	add_subdirectory(demos/tutorial_02_UsingCallbacks)
 	add_subdirectory(demos/tutorial_03_UsingCollisionTree)
-	#add_subdirectory(demos/tutorial_04_IntroductionToMaterials)
+	add_subdirectory(demos/tutorial_04_IntroductionToMaterials)
 endif()

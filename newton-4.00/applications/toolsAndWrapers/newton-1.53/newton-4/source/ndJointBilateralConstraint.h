@@ -190,7 +190,8 @@ class ndJointBilateralConstraint : public ndConstraint
 	D_COLLISION_API virtual void SetIkMode(bool mode);
 	D_COLLISION_API virtual void SetIkSetAccel(const ndJacobian& body0Accel, const ndJacobian& body1Accel);
 
-	D_COLLISION_API const ndSharedPtr<ndJointUserData>& GetUserData() const;
+	D_COLLISION_API ndSharedPtr<ndJointUserData>* GetUserData();
+	D_COLLISION_API const ndSharedPtr<ndJointUserData>* GetUserData() const;
 	D_COLLISION_API void SetUserData(ndSharedPtr<ndJointUserData>& userData);
 
 	protected:

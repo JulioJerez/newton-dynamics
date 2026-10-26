@@ -839,54 +839,18 @@ class ndBigVector : public ndClassAlloc
 
 	inline ndBigVector Ceiling() const
 	{
-		// no that frequently called 
-		// just use the standard scalar function for now
-		ndFloat64 x = ndCeil(m_x);
-		ndFloat64 y = ndCeil(m_y);
-		ndFloat64 z = ndCeil(m_z);
-		ndFloat64 w = ndCeil(m_w);
-		return ndBigVector(x, y, z, w);
+		return ndBigVector(ceil(m_x), ceil(m_y), ceil(m_z), ceil(m_w));
 	}
 
 	inline ndBigVector Floor() const
 	{
-		// compiler does a better job? 
 		return ndBigVector(floor(m_x), floor(m_y), floor(m_z), floor(m_w));
-
-		//// no really, compiler still does a very poor job 
-		//ndInt64 x = _mm_cvtsd_si64(m_typeLow);
-		//ndInt64 y = _mm_cvtsd_si64(_mm_unpackhi_pd(m_typeLow, m_typeLow));
-		//ndInt64 z = _mm_cvtsd_si64(m_typeHigh);
-		//ndInt64 w = _mm_cvtsd_si64(_mm_unpackhi_pd(m_typeHigh, m_typeHigh));
-		//
-		//__m128d one(ndBigVector::m_one.m_typeLow);
-		//__m128d xy(_mm_unpacklo_pd(_mm_cvtsi64_sd(m_typeHigh, x), _mm_cvtsi64_sd(m_typeHigh, y)));
-		//__m128d zw(_mm_unpacklo_pd(_mm_cvtsi64_sd(m_typeHigh, z), _mm_cvtsi64_sd(m_typeHigh, w)));
-		//
-		//__m128d xy_round(_mm_and_pd(one, _mm_cmplt_pd(m_typeLow, xy)));
-		//__m128d zw_round(_mm_and_pd(one, _mm_cmplt_pd(m_typeHigh, zw)));
-		//return ndBigVector(_mm_sub_pd(xy, xy_round), _mm_sub_pd(zw, zw_round));
 	}
 
 	inline ndBigVector GetInt() const
 	{
 		// compiler does even worse job here. 
 		return ndBigVector(ndInt64(floor(m_x)), ndInt64(floor(m_y)), ndInt64(floor(m_z)), ndInt64(floor(m_w)));
-
-		//ndInt64 x = _mm_cvtsd_si64(m_typeLow);
-		//ndInt64 y = _mm_cvtsd_si64(_mm_unpackhi_pd(m_typeLow, m_typeLow));
-		//ndInt64 z = _mm_cvtsd_si64(m_typeHigh);
-		//ndInt64 w = _mm_cvtsd_si64(_mm_unpackhi_pd(m_typeHigh, m_typeHigh));
-		//
-		//__m128i xy_int(_mm_set_epi64x(y, x));
-		//__m128i zw_int(_mm_set_epi64x(w, z));
-		//
-		//__m128d xy_float(_mm_unpacklo_pd(_mm_cvtsi64_sd(m_typeHigh, x), _mm_cvtsi64_sd(m_typeHigh, y)));
-		//__m128d zw_float(_mm_unpacklo_pd(_mm_cvtsi64_sd(m_typeHigh, z), _mm_cvtsi64_sd(m_typeHigh, w)));
-		//
-		//__m128i xy_round(_mm_castpd_si128(_mm_cmplt_pd(m_typeLow, xy_float)));
-		//__m128i zw_round(_mm_castpd_si128(_mm_cmplt_pd(m_typeHigh, zw_float)));
-		//return ndBigVector(_mm_add_epi64(xy_int, xy_round), _mm_add_epi64(zw_int, zw_round));
 	}
 
 	// relational operators

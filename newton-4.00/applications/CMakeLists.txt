@@ -10,7 +10,7 @@
 
 cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
 
-add_subdirectory(toolsAndWrapers)
+#add_subdirectory(toolsAndWrapers)
 
 if (NEWTON_BUILD_TEST)
 	add_subdirectory(ndTest)

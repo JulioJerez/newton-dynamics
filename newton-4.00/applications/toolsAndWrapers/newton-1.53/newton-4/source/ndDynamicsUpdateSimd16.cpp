@@ -571,7 +571,6 @@ void ndDynamicsUpdateSimd16::InitJacobianMatrix()
 					reinterpret_cast<const ndVector8&>(row15->m_JMinv.m_jacobianM1));
 
 				#ifdef D_NEWTON_USE_DOUBLE
-					//ndInt64* const normalIndex = (ndInt64*)&row.m_normalForceIndex[0];
 					ndInt64* const normalIndex = reinterpret_cast<ndInt64*>(&row.m_normalForceIndex[0]);
 				#else
 					ndInt32* const normalIndex = reinterpret_cast<ndInt32*>(&row.m_normalForceIndex[0]);
