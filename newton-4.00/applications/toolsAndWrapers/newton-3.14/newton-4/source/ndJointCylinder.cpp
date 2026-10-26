@@ -144,6 +144,11 @@ ndFloat32 ndJointCylinder::GetPosit() const
 	return m_positionAxis.m_param;
 }
 
+ndFloat32 ndJointCylinder::GetSpeed() const
+{
+	return m_positionAxis.m_paramSpeed;
+}
+
 ndFloat32 ndJointCylinder::GetTargetPosit() const
 {
 	return m_positionAxis.m_targetParam;

@@ -29,7 +29,7 @@ class NewtonCylinder: public ndJointCylinder
 	public:
 	D_CLASS_REFLECTION(NewtonCylinder, ndJointCylinder)
 
-	typedef unsigned (*NewtonCorkscrewCallBack) (const NewtonJoint* corkscrew, NewtonHingeSliderUpdateDesc* desc);
+	typedef unsigned (*NewtonCorkscrewCallBack) (const NewtonJoint* joint, NewtonHingeSliderUpdateDesc* desc);
 
 	NewtonCylinder(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 		:ndJointCylinder(pinAndPivotFrame, child, parent)
@@ -112,3 +112,96 @@ void NewtonCorkscrewSetUserCallback(const NewtonJoint* joint, NewtonCorkscrewCal
 	NewtonCylinder* const userJoint = PointerCast<NewtonCylinder, NewtonJoint>(joint);
 	userJoint->m_callback = callback;
 }
+
+// Name: NewtonCorkscrewGetJointPosit
+// Get the relative joint angle between the two bodies.
+//
+// Parameters:
+// *const NewtonJoint* *Corkscrew - pointer to the joint.
+//
+// Return: the joint angle relative to the hinge pin.
+//
+// Remarks: this function can be used during a function update call back to provide the application with some special effect.
+// for example the application can play a bell sound when the joint angle passes some max value.
+// 
+// See also: NewtonCorkscrewSetUserCallback
+dFloat NewtonCorkscrewGetJointPosit(const NewtonJoint* joint)
+{
+	NewtonCylinder* const userJoint = PointerCast<NewtonCylinder, NewtonJoint>(joint);
+	return userJoint->GetPosit();
+}
+
+// Name: NewtonCorkscrewGetJointVeloc
+// Get the relative joint angular velocity between the two bodies.
+//
+// Parameters:
+// *const NewtonJoint* *Corkscrew - pointer to the joint.
+//
+// Return: the joint angular velocity relative to the pin axis.
+//
+// Remarks: this function can be used during a function update call back to provide the application with some special effect.
+// for example the application can play the creaky noise of a hanging lamp.
+// 
+// See also: NewtonCorkscrewSetUserCallback
+dFloat NewtonCorkscrewGetJointVeloc(const NewtonJoint* joint)
+{
+	NewtonCylinder* const userJoint = PointerCast<NewtonCylinder, NewtonJoint>(joint);
+	return userJoint->GetSpeed();
+}
+
+// Name: NewtonCorkscrewGetJointAngle
+// Get the relative joint angle between the two bodies.
+//
+// Parameters:
+// *const NewtonJoint* *Corkscrew - pointer to the joint.
+//
+// Return: the joint angle relative to the corkscrew pin.
+//
+// Remarks: this function can be used during a function update call back to provide the application with some special effect.
+// for example the application can play a bell sound when the joint angle passes some max value.
+// 
+// See also: NewtonCorkscrewSetUserCallback
+dFloat NewtonCorkscrewGetJointAngle(const NewtonJoint* joint)
+{
+	NewtonCylinder* const userJoint = PointerCast<NewtonCylinder, NewtonJoint>(joint);
+	return userJoint->GetAngle();
+}
+
+// Name: NewtonCorkscrewGetJointOmega
+// Get the relative joint angular velocity between the two bodies.
+//
+// Parameters:
+// *const NewtonJoint* *Corkscrew - pointer to the joint.
+//
+// Return: the joint angular velocity relative to the pin axis.
+//
+// Remarks: this function can be used during a function update call back to provide the application with some special effect.
+// for example the application can play the creaky noise of a hanging lamp.
+// 
+// See also: NewtonCorkscrewSetUserCallback
+dFloat NewtonCorkscrewGetJointOmega(const NewtonJoint* joint)
+{
+	NewtonCylinder* const userJoint = PointerCast<NewtonCylinder, NewtonJoint>(joint);
+	return userJoint->GetOmega();
+}
+
+// Name: NewtonCorkscrewGetJointForce
+// Calculate the angular acceleration needed to stop the corkscrew at the desired angle.
+//
+// Parameters:
+// *const NewtonJoint* *corkscrew - pointer to the joint.
+// *NewtonCorkscrewCorkscrewUpdateDesc* *desc - is the pointer to the Corkscrew or slide structure.
+// *dFloat* distance - desired stop distance relative to the pivot point
+//
+// Return: the relative linear acceleration needed to stop the corkscrew.
+//
+// Remarks: this function can only be called from a *NewtonCorkscrewCallBack* and it can be used by the application to implement corkscrew limits.
+// 
+// See also: NewtonCorkscrewSetUserCallback
+dFloat NewtonCorkscrewCalculateStopAccel(const NewtonJoint* joint, const NewtonHingeSliderUpdateDesc* desc, dFloat distance)
+{
+	NewtonCylinder* const userJoint = PointerCast<NewtonCylinder, NewtonJoint>(joint);
+	ndAssert(0);
+	return 0;
+}
+

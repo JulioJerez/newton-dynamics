@@ -1713,88 +1713,6 @@ NewtonJoint* NewtonConstraintCreateCorkscrew(const NewtonWorld* newtonWorld, con
 }
 
 
-// Name: NewtonCorkscrewGetJointPosit
-// Get the relative joint angle between the two bodies.
-//
-// Parameters:
-// *const NewtonJoint* *Corkscrew - pointer to the joint.
-//
-// Return: the joint angle relative to the hinge pin.
-//
-// Remarks: this function can be used during a function update call back to provide the application with some special effect.
-// for example the application can play a bell sound when the joint angle passes some max value.
-// 
-// See also: NewtonCorkscrewSetUserCallback
-dFloat NewtonCorkscrewGetJointPosit (const NewtonJoint* Corkscrew)
-{
-	dgCorkscrewConstraint* contraint;
-
-	contraint = (dgCorkscrewConstraint*) Corkscrew;
-	return contraint->GetJointPosit ();
-}
-
-// Name: NewtonCorkscrewGetJointVeloc
-// Get the relative joint angular velocity between the two bodies.
-//
-// Parameters:
-// *const NewtonJoint* *Corkscrew - pointer to the joint.
-//
-// Return: the joint angular velocity relative to the pin axis.
-//
-// Remarks: this function can be used during a function update call back to provide the application with some special effect.
-// for example the application can play the creaky noise of a hanging lamp.
-// 
-// See also: NewtonCorkscrewSetUserCallback
-dFloat NewtonCorkscrewGetJointVeloc(const NewtonJoint* Corkscrew)
-{
-	dgCorkscrewConstraint* contraint;
-
-	contraint = (dgCorkscrewConstraint*) Corkscrew;
-	return contraint->GetJointVeloc ();
-}
-
-// Name: NewtonCorkscrewGetJointAngle
-// Get the relative joint angle between the two bodies.
-//
-// Parameters:
-// *const NewtonJoint* *Corkscrew - pointer to the joint.
-//
-// Return: the joint angle relative to the corkscrew pin.
-//
-// Remarks: this function can be used during a function update call back to provide the application with some special effect.
-// for example the application can play a bell sound when the joint angle passes some max value.
-// 
-// See also: NewtonCorkscrewSetUserCallback
-dFloat NewtonCorkscrewGetJointAngle (const NewtonJoint* Corkscrew)
-{
-	dgCorkscrewConstraint* contraint;
-
-	contraint = (dgCorkscrewConstraint*) Corkscrew;
-	return contraint->GetJointAngle ();
-
-}
-
-// Name: NewtonCorkscrewGetJointOmega
-// Get the relative joint angular velocity between the two bodies.
-//
-// Parameters:
-// *const NewtonJoint* *Corkscrew - pointer to the joint.
-//
-// Return: the joint angular velocity relative to the pin axis.
-//
-// Remarks: this function can be used during a function update call back to provide the application with some special effect.
-// for example the application can play the creaky noise of a hanging lamp.
-// 
-// See also: NewtonCorkscrewSetUserCallback
-dFloat NewtonCorkscrewGetJointOmega(const NewtonJoint* Corkscrew)
-{
-	dgCorkscrewConstraint* contraint;
-
-	contraint = (dgCorkscrewConstraint*) Corkscrew;
-	return contraint->GetJointOmega ();
-}
-
-
 // Name: NewtonCorkscrewCalculateStopAlpha
 // Calculate the angular acceleration needed to stop the corkscrew at the desired angle.
 //
@@ -1814,27 +1732,6 @@ dFloat NewtonCorkscrewCalculateStopAlpha (const NewtonJoint* corkscrew, const Ne
 
 	contraint = (dgCorkscrewConstraint*) corkscrew;
 	return contraint->CalculateStopAlpha (angle, (dgJointCallBackParam*) desc);
-}
-
-
-// Name: NewtonCorkscrewGetJointForce
-// Calculate the angular acceleration needed to stop the corkscrew at the desired angle.
-//
-// Parameters:
-// *const NewtonJoint* *corkscrew - pointer to the joint.
-// *NewtonCorkscrewCorkscrewUpdateDesc* *desc - is the pointer to the Corkscrew or slide structure.
-// *dFloat* distance - desired stop distance relative to the pivot point
-//
-// Return: the relative linear acceleration needed to stop the corkscrew.
-//
-// Remarks: this function can only be called from a *NewtonCorkscrewCallBack* and it can be used by the application to implement corkscrew limits.
-// 
-// See also: NewtonCorkscrewSetUserCallback
-dFloat NewtonCorkscrewCalculateStopAccel(const NewtonJoint* corkscrew, const NewtonHingeSliderUpdateDesc* desc, dFloat distance)
-{
-	dgCorkscrewConstraint* contraint;
-	contraint = (dgCorkscrewConstraint*) corkscrew;
-	return contraint->CalculateStopAccel (distance, (dgJointCallBackParam*) desc);
 }
 
 // Name: NewtonCorkscrewGetJointForce

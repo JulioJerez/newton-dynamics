@@ -38,6 +38,7 @@ class ndJointCylinder: public ndJointBilateralConstraint
 	D_NEWTON_API void GetSpringDamperAngle(ndFloat32& regularizer, ndFloat32& spring, ndFloat32& damper) const;
 
 	D_NEWTON_API ndFloat32 GetPosit() const;
+	D_NEWTON_API ndFloat32 GetSpeed() const;
 	D_NEWTON_API ndFloat32 GetTargetPosit() const;
 	D_NEWTON_API void SetTargetPosit(ndFloat32 offset);
 	D_NEWTON_API bool GetLimitStatePosit() const;

@@ -483,12 +483,12 @@ class ndVector8
 
 	inline ndVector GetLow() const
 	{
-		return m_linear;
+		return m_pair.m_linear;
 	}
 
 	inline ndVector GetHigh() const
 	{
-		return m_angular;
+		return m_pair.m_angular;
 	}
 
 	inline ndFloat32 GetMax() const
@@ -532,15 +532,17 @@ class ndVector8
 		dst7 = ndVector8(ndVector(src0[7], src1[7], src2[7], src3[7]), ndVector(src4[7], src5[7], src6[7], src7[7]));
 	}
 
+	struct pair
+	{
+		ndVector m_linear;
+		ndVector m_angular;
+	};
+
 	union
 	{
 		ndFloat32 m_float[ND_SIMD8_WORK_GROUP_SIZE];
 		ndInt32 m_int[ND_SIMD8_WORK_GROUP_SIZE];
-		struct
-		{
-			ndVector m_linear;
-			ndVector m_angular;
-		};
+		pair m_pair;
 	};
 
 	D_CORE_API static ndVector8 m_one;

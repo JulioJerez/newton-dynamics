@@ -321,16 +321,6 @@ class ndBigVector : public ndClassAlloc
 							(a[3] == 0) ? ndFloat64 (-1.0f) : ndFloat64 (1.0f));
 	}
 
-	inline ndBigVector Floor () const
-	{
-		return ndBigVector (floor (m_x), floor(m_y), floor(m_z), floor(m_w));
-	}
-
-	inline ndBigVector Ceiling() const
-	{
-		return ndBigVector(ceil(m_x), ceil(m_y), ceil(m_z), ceil(m_w));
-	}
-
 	inline ndBigVector DotProduct (const ndBigVector &A) const
 	{
 		return ndBigVector (m_x * A.m_x + m_y * A.m_y + m_z * A.m_z + m_w * A.m_w);
