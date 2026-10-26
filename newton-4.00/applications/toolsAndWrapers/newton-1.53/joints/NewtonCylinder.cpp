@@ -29,7 +29,7 @@ class NewtonCylinder: public ndJointCylinder
 	public:
 	D_CLASS_REFLECTION(NewtonCylinder, ndJointCylinder)
 
-	typedef unsigned (*NewtonCylinderCallBack) (const NewtonJoint* Cylinder, NewtonCorkscrewCallBack* desc);
+	typedef unsigned (*NewtonCorkscrewCallBack) (const NewtonJoint* corkscrew, NewtonHingeSliderUpdateDesc* desc);
 
 	NewtonCylinder(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 		:ndJointCylinder(pinAndPivotFrame, child, parent)
@@ -59,7 +59,7 @@ class NewtonCylinder: public ndJointCylinder
 		ndJointCylinder::JacobianDerivative(desc);
 	}
 
-	NewtonCylinderCallBack m_callback;
+	NewtonCorkscrewCallBack m_callback;
 };
 
 //
@@ -84,4 +84,31 @@ NewtonJoint* NewtonConstraintCreateCorkscrew(const NewtonWorld* const newtonWorl
 	ndSharedPtr<ndJointBilateralConstraint> joint(new NewtonCylinder(matrix, body0, body1));
 	world->AddJoint(joint);
 	return PointerCast<NewtonJoint, ndJointBilateralConstraint>(*joint);
+}
+
+// Name: NewtonCorkscrewSetUserCallback
+// Set an update call back to be called when either of the two body linked by the joint is active.
+//
+// Parameters:
+// *const NewtonJoint* *Corkscrew - pointer to the joint.
+// *NewtonCorkscrewCallBack* callback - pointer to the joint function call back.
+//
+// Return: nothing.
+//
+// Remarks: if the application wants to have some feedback from the joint simulation, the application can register a function
+// update callback to be call every time any of the bodies linked by this joint is active. This is useful to provide special
+// effects like particles, sound or even to simulate breakable moving parts.
+//
+// Remarks: the function *NewtonCorkscrewCallBack callback* should return a bit field code.
+// if the application does not want to set the joint acceleration the return code is zero
+// if the application only wants to change the joint linear acceleration the return code is 1
+// if the application only wants to change the joint angular acceleration the return code is 2
+// if the application only wants to change the joint angular and linear acceleration the return code is 3
+// 
+// See also: NewtonJointGetUserData, NewtonJointSetUserData
+void NewtonCorkscrewSetUserCallback(const NewtonJoint* joint, NewtonCorkscrewCallBack callback)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonCylinder* const userJoint = PointerCast<NewtonCylinder, NewtonJoint>(joint);
+	userJoint->m_callback = callback;
 }

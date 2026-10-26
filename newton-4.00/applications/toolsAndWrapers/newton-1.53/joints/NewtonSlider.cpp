@@ -322,3 +322,42 @@ dFloat NewtonSliderGetJointVeloc(const NewtonJoint* const joint)
 	NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
 	return userJoint->GetSpeed();
 }
+
+// Name: NewtonSliderGetJointPosit
+// Get the relative joint angle between the two bodies.
+//
+// Parameters:
+// *const NewtonJoint* *Slider - pointer to the joint.
+//
+// Return: the joint angle relative to the hinge pin.
+//
+// Remarks: this function can be used during a function update call back to provide the application with some special effect.
+// for example the application can play a bell sound when the joint angle passes some max value.
+// 
+// See also: NewtonSliderSetUserCallback
+dFloat NewtonSliderGetJointPosit(const NewtonJoint* joint)
+{
+	NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
+	return userJoint->GetPosit();
+}
+
+// Name: NewtonSliderGetJointForce
+// Calculate the angular acceleration needed to stop the slider at the desired angle.
+//
+// Parameters:
+// *const NewtonJoint* *slider - pointer to the joint.
+// *NewtonSliderSliderUpdateDesc* *desc - is the pointer to the Slider or slide structure.
+// *dFloat* distance - desired stop distance relative to the pivot point
+//
+// Return: the relative linear acceleration needed to stop the slider.
+//
+// Remarks: this function can only be called from a *NewtonSliderCallBack* and it can be used by the application to implement slider limits.
+// 
+// See also: NewtonSliderSetUserCallback
+dFloat NewtonSliderCalculateStopAccel(const NewtonJoint* joint, const NewtonHingeSliderUpdateDesc* desc, dFloat distance)
+{
+	NewtonSlider* const userJoint = PointerCast<NewtonSlider, NewtonJoint>(joint);
+	//return contraint->CalculateStopAccel(distance, (dgJointCallBackParam*)desc);
+	ndAssert(0);
+	return 0;
+}

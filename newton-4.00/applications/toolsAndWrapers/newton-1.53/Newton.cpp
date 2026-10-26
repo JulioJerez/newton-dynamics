@@ -1633,25 +1633,6 @@ void NewtonSliderSetUserCallback(const NewtonJoint* Slider, NewtonSliderCallBack
 	contraint->SetJointParameterCallBack ((dgSlidingJointAcceleration)callback);
 }
 
-// Name: NewtonSliderGetJointPosit
-// Get the relative joint angle between the two bodies.
-//
-// Parameters:
-// *const NewtonJoint* *Slider - pointer to the joint.
-//
-// Return: the joint angle relative to the hinge pin.
-//
-// Remarks: this function can be used during a function update call back to provide the application with some special effect.
-// for example the application can play a bell sound when the joint angle passes some max value.
-// 
-// See also: NewtonSliderSetUserCallback
-dFloat NewtonSliderGetJointPosit (const NewtonJoint* Slider)
-{
-	dgSlidingConstraint* contraint;
-
-	contraint = (dgSlidingConstraint*) Slider;
-	return contraint->GetJointPosit ();
-}
 
 // Name: NewtonSliderGetJointVeloc
 // Get the relative joint angular velocity between the two bodies.
@@ -1671,28 +1652,6 @@ dFloat NewtonSliderGetJointVeloc(const NewtonJoint* Slider)
 
 	contraint = (dgSlidingConstraint*) Slider;
 	return contraint->GetJointVeloc ();
-}
-
-
-// Name: NewtonSliderGetJointForce
-// Calculate the angular acceleration needed to stop the slider at the desired angle.
-//
-// Parameters:
-// *const NewtonJoint* *slider - pointer to the joint.
-// *NewtonSliderSliderUpdateDesc* *desc - is the pointer to the Slider or slide structure.
-// *dFloat* distance - desired stop distance relative to the pivot point
-//
-// Return: the relative linear acceleration needed to stop the slider.
-//
-// Remarks: this function can only be called from a *NewtonSliderCallBack* and it can be used by the application to implement slider limits.
-// 
-// See also: NewtonSliderSetUserCallback
-dFloat NewtonSliderCalculateStopAccel(const NewtonJoint* slider, const NewtonHingeSliderUpdateDesc* desc, dFloat distance)
-{
-	dgSlidingConstraint* contraint;
-
-	contraint = (dgSlidingConstraint*) slider;
-	return contraint->CalculateStopAccel (distance, (dgJointCallBackParam*) desc);
 }
 
 // Name: NewtonSliderGetJointForce
@@ -1753,33 +1712,6 @@ NewtonJoint* NewtonConstraintCreateCorkscrew(const NewtonWorld* newtonWorld, con
 	return (NewtonJoint*) world->CreateCorkscrewConstraint (pivot, pin, body0, body1);
 }
 
-// Name: NewtonCorkscrewSetUserCallback
-// Set an update call back to be called when either of the two body linked by the joint is active.
-//
-// Parameters:
-// *const NewtonJoint* *Corkscrew - pointer to the joint.
-// *NewtonCorkscrewCallBack* callback - pointer to the joint function call back.
-//
-// Return: nothing.
-//
-// Remarks: if the application wants to have some feedback from the joint simulation, the application can register a function
-// update callback to be call every time any of the bodies linked by this joint is active. This is useful to provide special
-// effects like particles, sound or even to simulate breakable moving parts.
-//
-// Remarks: the function *NewtonCorkscrewCallBack callback* should return a bit field code.
-// if the application does not want to set the joint acceleration the return code is zero
-// if the application only wants to change the joint linear acceleration the return code is 1
-// if the application only wants to change the joint angular acceleration the return code is 2
-// if the application only wants to change the joint angular and linear acceleration the return code is 3
-// 
-// See also: NewtonJointGetUserData, NewtonJointSetUserData
-void NewtonCorkscrewSetUserCallback(const NewtonJoint* Corkscrew, NewtonCorkscrewCallBack callback)
-{
-	dgCorkscrewConstraint* contraint;
-
-	contraint = (dgCorkscrewConstraint*) Corkscrew;
-	contraint->SetJointParameterCallBack ((dgCorkscrewJointAcceleration)callback);
-}
 
 // Name: NewtonCorkscrewGetJointPosit
 // Get the relative joint angle between the two bodies.
