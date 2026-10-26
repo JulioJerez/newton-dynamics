@@ -300,51 +300,6 @@ void NewtonSetBodyLeaveWorldEvent(const NewtonWorld* newtonWorld, NewtonBodyLeav
 	world->SetLeavingWorldCallback ((OnLeavingWorldAction) callback);		
 }
 
-
-// Name: NewtonWorldFreezeBody 
-// Remove the body from the active simulation list.
-//
-// Parameters:
-// *const NewtonWorld* *newtonWorld - is the pointer to the Newton world
-// *const NewtonBody* *body - is the pointer to the body to be frozen
-// 
-// Return: Nothing.
-//
-// Remarks: When a body is created it is automatically placed in the active simulation list. As an optimization 
-// for large scenes, you may use this function to put background bodies in an inactive equilibrium state.
-//
-// Remarks: This function tells Newton that this body does not currently need to be simulated.
-// However, if the body is part of a larger configuration it may be affected indirectly by the reaction forces
-// of objects that it is connected to.
-//
-// See also: NewtonWorldUnfreezeBody, NewtonBodySetAutoFreeze, NewtonBodyGetAutoFreeze
-void NewtonWorldFreezeBody(const NewtonWorld* newtonWorld, const NewtonBody* body)
-{
-	Newton *world;
-	world = (Newton *) newtonWorld;
-	world->FreezeBody ((dgBody*) body);		
-}
-
-
-// Name: NewtonWorldUnfreezeBody 
-// Add the body to the active simulation list.
-//
-// Parameters:
-// *const NewtonWorld* *newtonWorld - is the pointer to the Newton world
-// *const NewtonBody* *body - is the pointer to the body to be activated
-// 
-// Return: Nothing
-//
-// Remarks: This function tells Newton to simulate the rigid body *body*.
-//
-// See also: NewtonWorldFreezeBody, NewtonBodySetAutoFreeze, NewtonBodyGetAutoFreeze
-void NewtonWorldUnfreezeBody(const NewtonWorld* newtonWorld, const NewtonBody* body)
-{
-	Newton *world;
-	world = (Newton *) newtonWorld;
-	world->UnfreezeBody ((dgBody*) body);		
-}
-
 // Name: NewtonWorldForEachBodyDo 
 // Iterate thought every body in the world calling the function callback.
 //
@@ -1525,51 +1480,6 @@ NewtonJoint* NewtonConstraintCreateBall(const NewtonWorld* newtonWorld,
 	dgVector pivot (pivotPoint[0], pivotPoint[1], pivotPoint[2]);
 	return (NewtonJoint*) world->CreateBallConstraint (pivot, body0, body1);
 }
-
-// Name: NewtonBallSetConeLimits
-// Set the ball and socket cone and twist limits.
-//
-// Parameters:
-// *const NewtonJoint* *ball - is the pointer to a ball and socket joint.
-// *const NewtonCollision* *pin - pointer to a unit vector defining the cone axis in global space.
-// *const dFloat* maxConeAngle - max angle in radians the attached body is allow to swing relative to the pin axis, a value of zero will disable this limits. 
-// *const dFloat* maxTwistAngle - max angle in radians the attached body is allow to twist relative to the pin axis, a value of zero will disable this limits. 
-//
-// Remarks: limits are disabled at creation time. A value of zero for *maxConeAngle* disable the cone limit, a value of zero for *maxTwistAngle* disable the twist limit
-// all non-zero value for *maxConeAngle* are clamped between 5 degree and 175 degrees   
-//
-// See also: NewtonConstraintCreateBall
-void NewtonBallSetConeLimits(const NewtonJoint* ball, const dFloat* pin, dFloat maxConeAngle, dFloat maxTwistAngle)
-{
-	dgBallConstraint* joint;
-
-	joint = (dgBallConstraint*) ball;
-
-	dgVector coneAxis (pin[0], pin[1], pin[2]); 
-
-	if ((coneAxis % coneAxis) < 1.0e-3f) {
-		coneAxis.m_x = dgFloat32(1.0f);
-	}
-	dgVector tmp (1.0, 0.0f, 0.0f); 
-	if (dgAbsf (tmp % coneAxis) > 0.999f) {
-		tmp = dgVector (0.0, dgFloat32(1.0f), 0.0f); 
-		if (dgAbsf (tmp % coneAxis) > 0.999f) {
-			tmp = dgVector (0.0, 0.0f, dgFloat32(1.0f)); 
-			_ASSERTE (dgAbsf (tmp % coneAxis) < 0.999f);
-		}
-	}
-	dgVector lateral (tmp * coneAxis); 
-	lateral = lateral.Scale (dgRsqrt (lateral % lateral));
-	coneAxis = coneAxis.Scale (dgRsqrt (coneAxis % coneAxis));
-
-	maxConeAngle = dgAbsf (maxConeAngle);
-	maxTwistAngle = dgAbsf (maxTwistAngle);
-	joint->SetConeLimitState ((maxConeAngle > dgDEG2RAD) ? true : false); 
-	joint->SetTwistLimitState ((maxTwistAngle > dgDEG2RAD) ? true : false);
-	joint->SetLatealLimitState (false); 
-	joint->SetLimits (coneAxis, -maxConeAngle, maxConeAngle, maxTwistAngle, lateral, 0.0f, 0.0f);
-}
-
 
 // Name: NewtonBallSetUserCallback
 // Set an update call back to be called when either of the two bodies linked by the joint is active.

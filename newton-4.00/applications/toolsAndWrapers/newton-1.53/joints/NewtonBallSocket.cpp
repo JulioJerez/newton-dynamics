@@ -248,3 +248,48 @@ NewtonJoint* NewtonConstraintCreateBall(const NewtonWorld* const newtonWorld,
 	world->AddJoint(joint);
 	return PointerCast< NewtonJoint, ndJointBilateralConstraint>(*joint);
 }
+
+// Name: NewtonBallSetConeLimits
+// Set the ball and socket cone and twist limits.
+//
+// Parameters:
+// *const NewtonJoint* *ball - is the pointer to a ball and socket joint.
+// *const NewtonCollision* *pin - pointer to a unit vector defining the cone axis in global space.
+// *const dFloat* maxConeAngle - max angle in radians the attached body is allow to swing relative to the pin axis, a value of zero will disable this limits. 
+// *const dFloat* maxTwistAngle - max angle in radians the attached body is allow to twist relative to the pin axis, a value of zero will disable this limits. 
+//
+// Remarks: limits are disabled at creation time. A value of zero for *maxConeAngle* disable the cone limit, a value of zero for *maxTwistAngle* disable the twist limit
+// all non-zero value for *maxConeAngle* are clamped between 5 degree and 175 degrees   
+//
+// See also: NewtonConstraintCreateBall
+void NewtonBallSetConeLimits(const NewtonJoint* joint, const dFloat* pin, dFloat maxConeAngle, dFloat maxTwistAngle)
+{
+	NewtonBallAndSockect* const userJoint = PointerCast<NewtonBallAndSockect, NewtonJoint>(joint);
+
+	//dgVector coneAxis(pin[0], pin[1], pin[2]);
+	//if ((coneAxis % coneAxis) < 1.0e-3f) {
+	//	coneAxis.m_x = dgFloat32(1.0f);
+	//}
+	//dgVector tmp(1.0, 0.0f, 0.0f);
+	//if (dgAbsf(tmp % coneAxis) > 0.999f) {
+	//	tmp = dgVector(0.0, dgFloat32(1.0f), 0.0f);
+	//	if (dgAbsf(tmp % coneAxis) > 0.999f) {
+	//		tmp = dgVector(0.0, 0.0f, dgFloat32(1.0f));
+	//		_ASSERTE(dgAbsf(tmp % coneAxis) < 0.999f);
+	//	}
+	//}
+	//dgVector lateral(tmp * coneAxis);
+	//lateral = lateral.Scale(dgRsqrt(lateral % lateral));
+	//coneAxis = coneAxis.Scale(dgRsqrt(coneAxis % coneAxis));
+	//
+	//maxConeAngle = dgAbsf(maxConeAngle);
+	//maxTwistAngle = dgAbsf(maxTwistAngle);
+	//joint->SetConeLimitState((maxConeAngle > dgDEG2RAD) ? true : false);
+	//joint->SetTwistLimitState((maxTwistAngle > dgDEG2RAD) ? true : false);
+	//joint->SetLatealLimitState(false);
+	//joint->SetLimits(coneAxis, -maxConeAngle, maxConeAngle, maxTwistAngle, lateral, 0.0f, 0.0f);
+
+	ndAssert(0);
+	//userJoint->SetConeLimit(maxConeAngle);
+	//userJoint->SetTwistLimitState((maxTwistAngle > dgDEG2RAD) ? true : false);
+}

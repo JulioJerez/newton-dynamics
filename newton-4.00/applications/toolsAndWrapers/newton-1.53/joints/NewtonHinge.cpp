@@ -29,7 +29,7 @@ class NewtonHinge: public ndJointHinge
 	public:
 	D_CLASS_REFLECTION(NewtonHinge, ndJointHinge)
 
-	typedef unsigned (*NewtonHingeCallBack) (const NewtonJoint* hinge, NewtonHingeSliderUpdateDesc* desc);
+	typedef unsigned (*NewtonHingeCallBack) (const NewtonJoint* joint, NewtonHingeSliderUpdateDesc* desc);
 
 	NewtonHinge(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 		:ndJointHinge(pinAndPivotFrame, child, parent)
@@ -111,7 +111,7 @@ NewtonJoint* NewtonConstraintCreateHinge(const NewtonWorld* newtonWorld, const d
 // effects like particles, sound or even to simulate breakable moving parts.
 // 
 // See also: NewtonJointGetUserData, NewtonJointSetUserData
-void NewtonHingeSetUserCallback(const NewtonJoint* Hinge, NewtonHingeCallBack callback)
+void NewtonHingeSetUserCallback(const NewtonJoint* joint, NewtonHingeCallBack callback)
 {
 	dgHingeConstraint* contraint;
 
@@ -162,27 +162,6 @@ dFloat NewtonHingeGetJointOmega(const NewtonJoint* Hinge)
 }
 
 // Name: NewtonHingeGetJointForce
-// Calculate the angular acceleration needed to stop the hinge at the desired angle.
-//
-// Parameters:
-// *const NewtonJoint* *Hinge - pointer to the joint.
-// *NewtonHingeSliderUpdateDesc* *desc - is the pointer to and the Hinge or slide structure.
-// *dFloat* angle - is the desired hinge stop angle 
-//
-// Return: the relative angular acceleration needed to stop the hinge.
-//
-// Remarks: this function can only be called from a *NewtonHingeCallBack* and it can be used by the application to implement hinge limits.
-// 
-// See also: NewtonHingeSetUserCallback
-dFloat NewtonHingeCalculateStopAlpha(const NewtonJoint* hinge, const NewtonHingeSliderUpdateDesc* desc, dFloat angle)
-{
-	dgHingeConstraint* contraint;
-
-	contraint = (dgHingeConstraint*)hinge;
-	return contraint->CalculateStopAlpha(angle, (dgJointCallBackParam*)desc);
-}
-
-// Name: NewtonHingeGetJointForce
 // Get the total force asserted over the joint pivot point, to maintain the constraint.
 //
 // Parameters:
@@ -195,7 +174,7 @@ dFloat NewtonHingeCalculateStopAlpha(const NewtonJoint* hinge, const NewtonHinge
 // for example the application can destroy the joint if the force exceeds some predefined value.
 // 
 // See also: NewtonHingeSetUserCallback
-void NewtonHingeGetJointForce(const NewtonJoint* Hinge, dFloat* force)
+void NewtonHingeGetJointForce(const NewtonJoint* joint, dFloat* force)
 {
 	dgHingeConstraint* contraint;
 
@@ -206,16 +185,7 @@ void NewtonHingeGetJointForce(const NewtonJoint* Hinge, dFloat* force)
 	force[2] = forceVector.m_z;
 }
 
-dFloat NewtonHingeGetJointAngle(const NewtonJoint* const hinge)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-	return 0;
-	//dgHingeConstraint* contraint = (dgHingeConstraint*)hinge;
-	//return contraint->GetJointAngle();
-}
-
-void NewtonHingeGetJointForce(const NewtonJoint* const hinge, dFloat* const force)
+void NewtonHingeGetJointForce(const NewtonJoint* const joint, dFloat* const force)
 {
 	TRACE_FUNCTION(__FUNCTION__);
 	//dgHingeConstraint* contraint = (dgHingeConstraint*)hinge;
@@ -223,15 +193,6 @@ void NewtonHingeGetJointForce(const NewtonJoint* const hinge, dFloat* const forc
 	//force[0] = forceVector.m_x;
 	//force[1] = forceVector.m_y;
 	//force[2] = forceVector.m_z;
-}
-
-dFloat NewtonHingeCalculateStopAlpha(const NewtonJoint* const hinge, const NewtonHingeSliderUpdateDesc* const desc, dFloat angle)
-{
-	TRACE_FUNCTION(__FUNCTION__);
-	ndAssert(0);
-	return 0;
-	//dgHingeConstraint* contraint = (dgHingeConstraint*)hinge;
-	//return contraint->CalculateStopAlpha(angle, (dgJointCallbackParam*)desc);
 }
 
 
@@ -322,3 +283,33 @@ dFloat NewtonHingeGetJointOmega(const NewtonJoint* const joint)
 	NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
 	return userJoint->GetOmega();
 }
+
+dFloat NewtonHingeGetJointAngle(const NewtonJoint* const joint)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
+	return userJoint->GetAngle();
+}
+
+// Name: NewtonHingeGetJointForce
+// Calculate the angular acceleration needed to stop the hinge at the desired angle.
+//
+// Parameters:
+// *const NewtonJoint* *Hinge - pointer to the joint.
+// *NewtonHingeSliderUpdateDesc* *desc - is the pointer to and the Hinge or slide structure.
+// *dFloat* angle - is the desired hinge stop angle 
+//
+// Return: the relative angular acceleration needed to stop the hinge.
+//
+// Remarks: this function can only be called from a *NewtonHingeCallBack* and it can be used by the application to implement hinge limits.
+// 
+// See also: NewtonHingeSetUserCallback
+dFloat NewtonHingeCalculateStopAlpha(const NewtonJoint* joint, const NewtonHingeSliderUpdateDesc* desc, dFloat angle)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	NewtonHinge* const userJoint = PointerCast<NewtonHinge, NewtonJoint>(joint);
+	ndAssert(0);
+	//return userJoint->GetMotorZeroAcceleration(angle, (dgJointCallBackParam*)desc);
+	return 0;
+}
+

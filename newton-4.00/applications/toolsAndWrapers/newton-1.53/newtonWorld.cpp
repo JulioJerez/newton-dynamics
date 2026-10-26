@@ -270,3 +270,50 @@ void NewtonSetMinimumFrameRate(const NewtonWorld* newtonWorld, dFloat frameRate)
 	//do nothing;
 	//ndTrace(("deprecated function: %s\n", __FUNCDNAME__));
 }
+
+// Name: NewtonWorldFreezeBody 
+// Remove the body from the active simulation list.
+//
+// Parameters:
+// *const NewtonWorld* *newtonWorld - is the pointer to the Newton world
+// *const NewtonBody* *body - is the pointer to the body to be frozen
+// 
+// Return: Nothing.
+//
+// Remarks: When a body is created it is automatically placed in the active simulation list. As an optimization 
+// for large scenes, you may use this function to put background bodies in an inactive equilibrium state.
+//
+// Remarks: This function tells Newton that this body does not currently need to be simulated.
+// However, if the body is part of a larger configuration it may be affected indirectly by the reaction forces
+// of objects that it is connected to.
+//
+// See also: NewtonWorldUnfreezeBody, NewtonBodySetAutoFreeze, NewtonBodyGetAutoFreeze
+void NewtonWorldFreezeBody(const NewtonWorld* newtonWorld, const NewtonBody* body)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndAssert(0);
+	//Newton* world;
+	//world = (Newton*)newtonWorld;
+	//world->FreezeBody((dgBody*)body);
+}
+
+// Name: NewtonWorldUnfreezeBody 
+// Add the body to the active simulation list.
+//
+// Parameters:
+// *const NewtonWorld* *newtonWorld - is the pointer to the Newton world
+// *const NewtonBody* *body - is the pointer to the body to be activated
+// 
+// Return: Nothing
+//
+// Remarks: This function tells Newton to simulate the rigid body *body*.
+//
+// See also: NewtonWorldFreezeBody, NewtonBodySetAutoFreeze, NewtonBodyGetAutoFreeze
+void NewtonWorldUnfreezeBody(const NewtonWorld* newtonWorld, const NewtonBody* body)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndAssert(0);
+	//Newton* world;
+	//world = (Newton*)newtonWorld;
+	//world->UnfreezeBody((dgBody*)body);
+}

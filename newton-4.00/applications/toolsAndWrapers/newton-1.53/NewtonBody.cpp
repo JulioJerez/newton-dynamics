@@ -257,51 +257,6 @@ void NewtonBodySetMatrixRecursive(const NewtonBody* bodyPtr, const dFloat* matri
 }
 
 
-// Name: NewtonBodySetCentreOfMass 
-// Set the relative position of the center of mass of a rigid body.
-//
-// Parameters:
-// *const NewtonBody* *bodyPtr - pointer to the body.
-// *const dFloat* *comPtr - pointer to an array of 3 floats containing the relative offset of the center of mass of the body.
-//
-// Return: Nothing.
-//
-// Remarks: This function can be used to set the relative offset of the center of mass of a rigid body.
-// when a rigid body is created the center of mass is set the the point c(0, 0, 0), and normally this is 
-// the best setting for a rigid body. However the are situations in which and object does not have symmetry or
-// simple some kind of special effect is desired, and this origin need to be changed.
-//
-// Remarks: Care must be taken when offsetting the center of mass of a body. 
-// The application must make sure that the external torques resulting from forces applied at at point
-// relative to the center of mass are calculated appropriately.
-// this could be done Transform and Torque callback function as the follow pseudo code fragment shows:
-//
-// Matrix matrix;
-// Vector center;
-//
-// NewtonGatMetrix(body, matrix)
-// NewtonGetCentreOfMass(body, center);
-//
-// for global space torque.  
-// Vector localForce (fx, fy, fz);
-// Vector localPosition (x, y, z);
-// Vector localTroque (crossproduct ((localPosition - center). localForce);
-// Vector globalTroque (matrix.RotateVector (localTroque));
-// 
-// for global space torque. 
-// Vector globalCentre (matrix.TranformVector (center));
-// Vector globalPosition (x, y, z);
-// Vector globalForce (fx, fy, fz);
-// Vector globalTroque (crossproduct ((globalPosition - globalCentre). globalForce);
-//
-// See also: NewtonConvexCollisionCalculateInertialMatrix, NewtonBodyGetCentreOfMass 
-void NewtonBodySetCentreOfMass(const NewtonBody* bodyPtr, const dFloat* comPtr)
-{
-	dgBody* body;
-	body = (dgBody*)bodyPtr;
-	dgVector vector(comPtr[0], comPtr[1], comPtr[2]);
-	body->SetCentreOfMass(vector);
-}
 
 
 // Name: NewtonBodyGetCentreOfMass 
@@ -702,99 +657,6 @@ void NewtonBodyGetAABB(const NewtonBody* bodyPtr, dFloat* p0, dFloat* p1)
 
 }
 
-
-
-// Name: NewtonBodySetLinearDamping 
-// Apply the linear viscous damping coefficient to the body. 
-//
-// Parameters:
-// *const NewtonBody* *bodyPtr - is the pointer to the body.
-// *dFloat* linearDamp - linear damping coefficient.
-//
-// Remarks: the default value of *linearDamp* is clamped to a value between 0.0 and 1.0; the default value is 0.1,
-// There is a non zero implicit attenuation value of 0.0001 assume by the integrator.
-//
-// Remarks: The dampening viscous friction force is added to the external force applied to the body every frame before going to the solver-integrator. 
-// This force is proportional to the square of the magnitude of the velocity to the body in the opposite direction of the velocity of the body. 
-// An application can set *linearDamp* to zero when the application takes control of the external forces and torque applied to the body, should the application
-// desire to have absolute control of the forces over that body. However, it is recommended that the *linearDamp* coefficient is set to a non-zero 
-// value for the majority of background bodies. This saves the application from having to control these forces and also prevents the integrator from
-// adding very large velocities to a body.
-//
-// See also: NewtonBodyGetLinearDamping
-void NewtonBodySetLinearDamping(const NewtonBody* bodyPtr, dFloat linearDamp)
-{
-	dgBody* body;
-	body = (dgBody*)bodyPtr;
-	body->SetLinearDamping(linearDamp);
-}
-
-// Name: NewtonBodyGetLinearDamping 
-// Get the linear viscous damping of the body. 
-//
-// Parameters:
-// *const NewtonBody* *bodyPtr - is the pointer to the body.
-//
-// Return: The linear damping coefficient. 
-//
-// See also: NewtonBodySetLinearDamping
-dFloat NewtonBodyGetLinearDamping(const NewtonBody* bodyPtr)
-{
-	dgBody* body;
-	body = (dgBody*)bodyPtr;
-
-	return body->GetLinearDamping();
-}
-
-
-// Name: NewtonBodySetAngularDamping 
-// Apply the angular viscous damping coefficient to the body. 
-//
-// Parameters:
-// *const NewtonBody* *bodyPtr - is the pointer to the body.
-// *dFloat* *angularDamp - pointer to an array of at least three floats containing the angular damping coefficients for the principal axis of the body.
-//
-// Remarks: the default value of *angularDamp* is clamped to a value between 0.0 and 1.0; the default value is 0.1,
-// There is a non zero implicit attenuation value of 0.0001 assumed by the integrator.
-//
-// Remarks: The dampening viscous friction torque is added to the external torque applied to the body every frame before going to the solver-integrator. 
-// This torque is proportional to the square of the magnitude of the angular velocity to the body in the opposite direction of the angular velocity of the body. 
-// An application can set *angularDamp* to zero when the to take control of the external forces and torque applied to the body, should the application
-// desire to have absolute control of the forces over that body. However, it is recommended that the *linearDamp* coefficient be set to a non-zero 
-// value for the majority of background bodies. This saves the application from needing to control these forces and also prevents the integrator from
-// adding very large velocities to a body.
-//
-// See also: NewtonBodyGetAngularDamping
-void  NewtonBodySetAngularDamping(const NewtonBody* bodyPtr, const dFloat* angularDamp)
-{
-	dgBody* body;
-	body = (dgBody*)bodyPtr;
-	dgVector vector(angularDamp[0], angularDamp[1], angularDamp[2]);
-	body->SetAngularDamping(vector);
-}
-
-
-// Name: NewtonBodyGetAngularDamping 
-// Get the linear viscous damping of the body. 
-//
-// Parameters:
-// *const NewtonBody* *bodyPtr - is the pointer to the body.
-// *dFloat* *angularDamp - pointer to an array of at least three floats to hold the angular damping coefficient for the principal axis of the body.
-//
-// See also: NewtonBodySetAngularDamping
-void  NewtonBodyGetAngularDamping(const NewtonBody* bodyPtr, dFloat* angularDamp)
-{
-	dgBody* body;
-	body = (dgBody*)bodyPtr;
-
-	//	dgVector& vector = *((dgVector*) angularDamp);
-	//	vector = body->GetAngularDamping();
-
-	dgVector vector(body->GetAngularDamping());
-	angularDamp[0] = vector.m_x;
-	angularDamp[1] = vector.m_y;
-	angularDamp[2] = vector.m_z;
-}
 
 // Name: NewtonAddBodyImpulse
 // Add an impulse to a specific point on a body.
@@ -1415,4 +1277,139 @@ void NewtonBodySetAutoFreeze(const NewtonBody* bodyPtr, int state)
 	TRACE_FUNCTION(__FUNCTION__);
 	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
 	body->SetAutoSleep(state ? true : false);
+}
+
+// Name: NewtonBodySetLinearDamping 
+// Apply the linear viscous damping coefficient to the body. 
+//
+// Parameters:
+// *const NewtonBody* *bodyPtr - is the pointer to the body.
+// *dFloat* linearDamp - linear damping coefficient.
+//
+// Remarks: the default value of *linearDamp* is clamped to a value between 0.0 and 1.0; the default value is 0.1,
+// There is a non zero implicit attenuation value of 0.0001 assume by the integrator.
+//
+// Remarks: The dampening viscous friction force is added to the external force applied to the body every frame before going to the solver-integrator. 
+// This force is proportional to the square of the magnitude of the velocity to the body in the opposite direction of the velocity of the body. 
+// An application can set *linearDamp* to zero when the application takes control of the external forces and torque applied to the body, should the application
+// desire to have absolute control of the forces over that body. However, it is recommended that the *linearDamp* coefficient is set to a non-zero 
+// value for the majority of background bodies. This saves the application from having to control these forces and also prevents the integrator from
+// adding very large velocities to a body.
+//
+// See also: NewtonBodyGetLinearDamping
+void NewtonBodySetLinearDamping(const NewtonBody* bodyPtr, dFloat linearDamp)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+
+	body->SetLinearDamping(linearDamp);
+}
+
+// Name: NewtonBodySetAngularDamping 
+// Apply the angular viscous damping coefficient to the body. 
+//
+// Parameters:
+// *const NewtonBody* *bodyPtr - is the pointer to the body.
+// *dFloat* *angularDamp - pointer to an array of at least three floats containing the angular damping coefficients for the principal axis of the body.
+//
+// Remarks: the default value of *angularDamp* is clamped to a value between 0.0 and 1.0; the default value is 0.1,
+// There is a non zero implicit attenuation value of 0.0001 assumed by the integrator.
+//
+// Remarks: The dampening viscous friction torque is added to the external torque applied to the body every frame before going to the solver-integrator. 
+// This torque is proportional to the square of the magnitude of the angular velocity to the body in the opposite direction of the angular velocity of the body. 
+// An application can set *angularDamp* to zero when the to take control of the external forces and torque applied to the body, should the application
+// desire to have absolute control of the forces over that body. However, it is recommended that the *linearDamp* coefficient be set to a non-zero 
+// value for the majority of background bodies. This saves the application from needing to control these forces and also prevents the integrator from
+// adding very large velocities to a body.
+//
+// See also: NewtonBodyGetAngularDamping
+void  NewtonBodySetAngularDamping(const NewtonBody* bodyPtr, const dFloat* angularDamp)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+
+	ndVector vector(angularDamp[0], angularDamp[1], angularDamp[2], ndFloat32(0.0f));
+	body->SetAngularDamping(vector);
+}
+
+// Name: NewtonBodyGetLinearDamping 
+// Get the linear viscous damping of the body. 
+//
+// Parameters:
+// *const NewtonBody* *bodyPtr - is the pointer to the body.
+//
+// Return: The linear damping coefficient. 
+//
+// See also: NewtonBodySetLinearDamping
+dFloat NewtonBodyGetLinearDamping(const NewtonBody* bodyPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+
+	return body->GetLinearDamping();
+}
+
+// Name: NewtonBodyGetAngularDamping 
+// Get the linear viscous damping of the body. 
+//
+// Parameters:
+// *const NewtonBody* *bodyPtr - is the pointer to the body.
+// *dFloat* *angularDamp - pointer to an array of at least three floats to hold the angular damping coefficient for the principal axis of the body.
+//
+// See also: NewtonBodySetAngularDamping
+void  NewtonBodyGetAngularDamping(const NewtonBody* bodyPtr, dFloat* angularDamp)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+
+	ndVector vector(body->GetAngularDamping());
+	angularDamp[0] = vector.m_x;
+	angularDamp[1] = vector.m_y;
+	angularDamp[2] = vector.m_z;
+}
+
+// Name: NewtonBodySetCentreOfMass 
+// Set the relative position of the center of mass of a rigid body.
+//
+// Parameters:
+// *const NewtonBody* *bodyPtr - pointer to the body.
+// *const dFloat* *comPtr - pointer to an array of 3 floats containing the relative offset of the center of mass of the body.
+//
+// Return: Nothing.
+//
+// Remarks: This function can be used to set the relative offset of the center of mass of a rigid body.
+// when a rigid body is created the center of mass is set the the point c(0, 0, 0), and normally this is 
+// the best setting for a rigid body. However the are situations in which and object does not have symmetry or
+// simple some kind of special effect is desired, and this origin need to be changed.
+//
+// Remarks: Care must be taken when offsetting the center of mass of a body. 
+// The application must make sure that the external torques resulting from forces applied at at point
+// relative to the center of mass are calculated appropriately.
+// this could be done Transform and Torque callback function as the follow pseudo code fragment shows:
+//
+// Matrix matrix;
+// Vector center;
+//
+// NewtonGatMetrix(body, matrix)
+// NewtonGetCentreOfMass(body, center);
+//
+// for global space torque.  
+// Vector localForce (fx, fy, fz);
+// Vector localPosition (x, y, z);
+// Vector localTroque (crossproduct ((localPosition - center). localForce);
+// Vector globalTroque (matrix.RotateVector (localTroque));
+// 
+// for global space torque. 
+// Vector globalCentre (matrix.TranformVector (center));
+// Vector globalPosition (x, y, z);
+// Vector globalForce (fx, fy, fz);
+// Vector globalTroque (crossproduct ((globalPosition - globalCentre). globalForce);
+//
+// See also: NewtonConvexCollisionCalculateInertialMatrix, NewtonBodyGetCentreOfMass 
+void NewtonBodySetCentreOfMass(const NewtonBody* bodyPtr, const dFloat* comPtr)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndBodyKinematic* const body = PointerCast<ndBody, NewtonBody>(bodyPtr)->GetAsBodyKinematic();
+	ndVector vector(comPtr[0], comPtr[1], comPtr[2], ndFloat32(1.0f));
+	body->SetCentreOfMass(vector);
 }

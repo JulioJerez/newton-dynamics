@@ -334,3 +334,28 @@ void NewtonCollisionCalculateAABB(const NewtonCollision* const collisionPtr, con
 	p1[1] = q1.m_y;
 	p1[2] = q1.m_z;
 }
+
+/*!
+  Calculate the three principal axis and the the values of the inertia matrix of a convex collision objects.
+
+  @param convexCollision is the pointer to a convex collision primitive.
+  @param *inertia pointer to and array of a least 3 floats to hold the values of the principal inertia.
+  @param *origin pointer to and array of a least 3 floats to hold the values of the center of mass for the principal inertia.
+
+  This function calculate a general inertial matrix for arbitrary convex collision including compound collisions.
+
+  See also: ::NewtonBodySetMassMatrix, ::NewtonBodyGetMass, ::NewtonBodySetCentreOfMass, ::NewtonBodyGetCentreOfMass
+*/
+void NewtonConvexCollisionCalculateInertialMatrix(const NewtonCollision* const convexCollision, dFloat* const inertia, dFloat* const origin)
+{
+	TRACE_FUNCTION(__FUNCTION__);
+	ndShapeInstance* const instance = PointerCast<ndShapeInstance, NewtonCollision>(convexCollision);
+	const ndMatrix tmpInertia(instance->CalculateInertia());
+
+	inertia[0] = tmpInertia[0][0];
+	inertia[1] = tmpInertia[1][1];
+	inertia[2] = tmpInertia[2][2];
+	origin[0] = tmpInertia[3][0];
+	origin[1] = tmpInertia[3][1];
+	origin[2] = tmpInertia[3][2];
+}
