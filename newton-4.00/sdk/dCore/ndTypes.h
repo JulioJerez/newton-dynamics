@@ -166,12 +166,15 @@
 #endif
 
 //************************************************************
-#if defined(_DEBUG) || defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__)
-	#define ndAssert(x)
+#if defined(_DEBUG)
+	#if defined (D_DISABLE_ASSERT) || defined(__clang__) || defined(__GNUC__)
+		#define ndAssert(x)
+	#else
+		#define ndAssert(x) _ASSERTE(x)
+	#endif
 #else
-	#define ndAssert(x) _ASSERTE(x)
+	#define ndAssert(x)
 #endif
-
 
 #define D_NEWTON_ENFORCE_CLASS_ALIGNMENT
 
