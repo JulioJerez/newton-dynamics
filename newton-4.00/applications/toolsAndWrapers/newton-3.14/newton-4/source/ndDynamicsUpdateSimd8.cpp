@@ -807,7 +807,6 @@ void ndDynamicsUpdateSimd8::CalculateJointsForce()
 				}
 			}
 
-			//normalForce[0] = ndVector8(ndFloat32(1.0f));
 			normalForce[0] = ndVector8::m_one;
 			const ndInt32 rowsCount = jointGroup[0]->m_rowCount;
 

@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.10.0 FATAL_ERROR)
 
 project("tutorial_02_UsingCallbacks")
 set (projectName "tutorial_02_UsingCallbacks")
+message ("${projectName}")
 
 file(GLOB CPP_SOURCE *.h *.cpp)
 

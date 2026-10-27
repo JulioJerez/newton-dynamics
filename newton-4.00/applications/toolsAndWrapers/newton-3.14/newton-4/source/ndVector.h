@@ -29,9 +29,10 @@
 
 #define ndCheckVector(x) (ndCheckFloat(ndFloat64(x[0])) && ndCheckFloat(ndFloat64(x[1])) && ndCheckFloat(ndFloat64(x[2])) && ndCheckFloat(ndFloat64(x[3])))
 
-#if defined (D_SCALAR_VECTOR_CLASS) || defined(__clang__)
+#if defined (D_SCALAR_VECTOR_CLASS) || defined(__clang__)  || defined(__GNUC__)
 	#include "ndVectorScalar.h"
 #else
+// using explicit intrinsics only for visual studio compiler
 	#include "ndVectorSimd.h"
 #endif
 

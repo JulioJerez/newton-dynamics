@@ -192,9 +192,14 @@ void ndJointBilateralConstraint::SetLocalMatrix1(const ndMatrix& matrix)
 	m_localMatrix1 = matrix;
 }
 
-const ndSharedPtr<ndJointUserData>& ndJointBilateralConstraint::GetUserData() const
+ndSharedPtr<ndJointUserData>* ndJointBilateralConstraint::GetUserData()
 {
-	return m_userData;
+	return &m_userData;
+}
+
+const ndSharedPtr<ndJointUserData>* ndJointBilateralConstraint::GetUserData() const
+{
+	return &m_userData;
 }
 
 void ndJointBilateralConstraint::SetUserData(ndSharedPtr<ndJointUserData>& userData)

@@ -889,11 +889,11 @@ void ndDynamicsUpdate::InitJacobianMatrix()
 
 			const ndInt32 index0 = jointIndex * 2 + 0;
 			ndVector8& outBody0 = internalForces[index0];
-			outBody0 = forceAcc.m_low;
+			outBody0 = forceAcc.GetLow();
 
 			const ndInt32 index1 = jointIndex * 2 + 1;
 			ndVector8& outBody1 = internalForces[index1];
-			outBody1 = forceAcc.m_high;
+			outBody1 = forceAcc.GetHigh();
 		};
 
 		ndConstraint* const joint = jointArray[groupId];
@@ -1050,10 +1050,10 @@ void ndDynamicsUpdate::UpdateForceFeedback()
 			const ndVector16 f(rhs->m_force);
 			forceTorque = forceTorque.MulAdd(reinterpret_cast<const ndVector16&>(lhs->m_Jt.m_jacobianM0), f);
 		}
-		joint->m_forceBody0 = forceTorque.m_low.GetLow();
-		joint->m_torqueBody0 = forceTorque.m_low.GetHigh();
-		joint->m_forceBody1 = forceTorque.m_high.GetLow();
-		joint->m_torqueBody1 = forceTorque.m_high.GetHigh();
+		joint->m_forceBody0 = forceTorque.GetLow().GetLow();
+		joint->m_torqueBody0 = forceTorque.GetLow().GetHigh();
+		joint->m_forceBody1 = forceTorque.GetHigh().GetLow();
+		joint->m_torqueBody1 = forceTorque.GetHigh().GetHigh();
 		joint->UpdateParameters();
 	});
 
@@ -1390,11 +1390,11 @@ void ndDynamicsUpdate::CalculateJointsForce()
 
 			const ndInt32 index0 = jointIndex * 2 + 0;
 			ndVector8& outBody0 = jointPartialForces[index0];
-			outBody0 = forceTorqueM.m_low;
+			outBody0 = forceTorqueM.GetLow();
 
 			const ndInt32 index1 = jointIndex * 2 + 1;
 			ndVector8& outBody1 = jointPartialForces[index1];
-			outBody1 = forceTorqueM.m_high;
+			outBody1 = forceTorqueM.GetHigh();
 		};
 
 		ndConstraint* const joint = jointArray[groupId];

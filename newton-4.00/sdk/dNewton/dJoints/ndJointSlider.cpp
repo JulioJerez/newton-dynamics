@@ -20,8 +20,6 @@
 ndJointSlider::ndJointSlider()
 	:ndJointBilateralConstraint()
 	,m_axis()
-	,m_maxForce(ndFloat32 (0.0f))
-	,m_motorSpeed(ndFloat32(0.0f))
 {
 	m_maxDof = 7;
 }
@@ -29,16 +27,12 @@ ndJointSlider::ndJointSlider()
 ndJointSlider::ndJointSlider(const ndMatrix& pinAndPivotFrame, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(7, child, parent, pinAndPivotFrame)
 	,m_axis()
-	,m_maxForce(ndFloat32(0.0f))
-	,m_motorSpeed(ndFloat32(0.0f))
 {
 }
 
 ndJointSlider::ndJointSlider(const ndMatrix& pinAndPivotInChild, const ndMatrix& pinAndPivotInParent, ndBodyKinematic* const child, ndBodyKinematic* const parent)
 	:ndJointBilateralConstraint(7, child, parent, pinAndPivotInChild)
 	,m_axis()
-	,m_maxForce(ndFloat32(0.0f))
-	,m_motorSpeed(ndFloat32(0.0f))
 {
 	ndMatrix tmp;
 	CalculateLocalMatrix(pinAndPivotInChild, m_localMatrix0, tmp);
@@ -141,16 +135,16 @@ void ndJointSlider::GetLimits(ndFloat32& minLimit, ndFloat32& maxLimit) const
 //	m_maxForce = ndClamp(force, ndFloat32(0.1f), D_LCP_MAX_VALUE);
 //}
 
-void ndJointSlider::SetAsMotor(ndFloat32 omega, ndFloat32 maxForce)
+void ndJointSlider::SetAsMotor(ndFloat32 speed, ndFloat32 maxForce)
 {
-	m_motorSpeed = omega;
-	m_maxForce = ndAbs(maxForce);
+	m_axis.m_motorSpeed = speed;
+	m_axis.m_dryFrictionForce = ndAbs(maxForce);
 }
 
 void ndJointSlider::SetAsDryFriction(ndFloat32 maxFrictionForce)
 {
-	m_motorSpeed = ndFloat32(0.0f);
-	m_maxForce = ndAbs(maxFrictionForce);
+	m_axis.m_motorSpeed = ndFloat32(0.0f);
+	m_axis.m_dryFrictionForce = ndAbs(maxFrictionForce);
 }
 
 void ndJointSlider::SetAsSpringDamper(ndFloat32 regularizer, ndFloat32 spring, ndFloat32 damper)
@@ -278,11 +272,11 @@ void ndJointSlider::SubmitMotor(ndConstraintDescritor& desc, const ndMatrix& mat
 {
 	const ndVector p1(matrix1.m_posit + matrix1.m_front.Scale(m_axis.m_targetParam));
 	AddLinearRowJacobian(desc, matrix0.m_posit, p1, matrix1.m_front);
-	ndFloat32 relativeSpeed = m_motorSpeed - GetSpeed();
+	ndFloat32 relativeSpeed = m_axis.m_motorSpeed - GetSpeed();
 	ndFloat32 motorAccel = relativeSpeed * desc.m_invTimestep;
 	SetMotorAcceleration(desc, motorAccel);
-	SetLowerFriction(desc, -m_maxForce);
-	SetHighFriction(desc, m_maxForce);
+	SetLowerFriction(desc, -m_axis.m_dryFrictionForce);
+	SetHighFriction(desc, m_axis.m_dryFrictionForce);
 	if (m_hitLimits)
 	{
 		SetDiagonalRegularizer(desc, ndFloat32(1.0e-3f));
@@ -329,7 +323,7 @@ void ndJointSlider::JacobianDerivative(ndConstraintDescritor& desc)
 	{
 		SubmitSpringDamper(desc, matrix0, matrix1);
 	}
-	else if (m_maxForce != ndFloat32(0.0f))
+	else if (m_axis.m_dryFrictionForce != ndFloat32(0.0f))
 	{
 		SubmitMotor(desc, matrix0, matrix1);
 	}

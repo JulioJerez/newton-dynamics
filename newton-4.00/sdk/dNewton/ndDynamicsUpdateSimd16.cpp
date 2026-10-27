@@ -419,13 +419,13 @@ void ndDynamicsUpdateSimd16::InitJacobianMatrix()
 				const ndLeftHandSide* const row6 = &leftHandSide[jointsPtr[index + 6]->m_rowStart + k];
 				const ndLeftHandSide* const row7 = &leftHandSide[jointsPtr[index + 7]->m_rowStart + k];
 				ndVector8::Transpose(
-					row.m_Jt.m_jacobianM0.m_linear.m_x.m_low,
-					row.m_Jt.m_jacobianM0.m_linear.m_y.m_low,
-					row.m_Jt.m_jacobianM0.m_linear.m_z.m_low,
+					row.m_Jt.m_jacobianM0.m_linear.m_x.m_pair.m_low,
+					row.m_Jt.m_jacobianM0.m_linear.m_y.m_pair.m_low,
+					row.m_Jt.m_jacobianM0.m_linear.m_z.m_pair.m_low,
 					dommy,
-					row.m_Jt.m_jacobianM0.m_angular.m_x.m_low,
-					row.m_Jt.m_jacobianM0.m_angular.m_y.m_low,
-					row.m_Jt.m_jacobianM0.m_angular.m_z.m_low,
+					row.m_Jt.m_jacobianM0.m_angular.m_x.m_pair.m_low,
+					row.m_Jt.m_jacobianM0.m_angular.m_y.m_pair.m_low,
+					row.m_Jt.m_jacobianM0.m_angular.m_z.m_pair.m_low,
 					dommy,
 					reinterpret_cast<const ndVector8&>(row0->m_Jt.m_jacobianM0),
 					reinterpret_cast<const ndVector8&>(row1->m_Jt.m_jacobianM0),
@@ -437,13 +437,13 @@ void ndDynamicsUpdateSimd16::InitJacobianMatrix()
 					reinterpret_cast<const ndVector8&>(row7->m_Jt.m_jacobianM0));
 				
 				ndVector8::Transpose(
-					row.m_Jt.m_jacobianM1.m_linear.m_x.m_low,
-					row.m_Jt.m_jacobianM1.m_linear.m_y.m_low,
-					row.m_Jt.m_jacobianM1.m_linear.m_z.m_low,
+					row.m_Jt.m_jacobianM1.m_linear.m_x.m_pair.m_low,
+					row.m_Jt.m_jacobianM1.m_linear.m_y.m_pair.m_low,
+					row.m_Jt.m_jacobianM1.m_linear.m_z.m_pair.m_low,
 					dommy,
-					row.m_Jt.m_jacobianM1.m_angular.m_x.m_low,
-					row.m_Jt.m_jacobianM1.m_angular.m_y.m_low,
-					row.m_Jt.m_jacobianM1.m_angular.m_z.m_low,
+					row.m_Jt.m_jacobianM1.m_angular.m_x.m_pair.m_low,
+					row.m_Jt.m_jacobianM1.m_angular.m_y.m_pair.m_low,
+					row.m_Jt.m_jacobianM1.m_angular.m_z.m_pair.m_low,
 					dommy,
 					reinterpret_cast<const ndVector8&>(row0->m_Jt.m_jacobianM1),
 					reinterpret_cast<const ndVector8&>(row1->m_Jt.m_jacobianM1),
@@ -455,13 +455,13 @@ void ndDynamicsUpdateSimd16::InitJacobianMatrix()
 					reinterpret_cast<const ndVector8&>(row7->m_Jt.m_jacobianM1));
 				
 				ndVector8::Transpose(
-					row.m_JMinv.m_jacobianM0.m_linear.m_x.m_low,
-					row.m_JMinv.m_jacobianM0.m_linear.m_y.m_low,
-					row.m_JMinv.m_jacobianM0.m_linear.m_z.m_low,
+					row.m_JMinv.m_jacobianM0.m_linear.m_x.m_pair.m_low,
+					row.m_JMinv.m_jacobianM0.m_linear.m_y.m_pair.m_low,
+					row.m_JMinv.m_jacobianM0.m_linear.m_z.m_pair.m_low,
 					dommy,
-					row.m_JMinv.m_jacobianM0.m_angular.m_x.m_low,
-					row.m_JMinv.m_jacobianM0.m_angular.m_y.m_low,
-					row.m_JMinv.m_jacobianM0.m_angular.m_z.m_low,
+					row.m_JMinv.m_jacobianM0.m_angular.m_x.m_pair.m_low,
+					row.m_JMinv.m_jacobianM0.m_angular.m_y.m_pair.m_low,
+					row.m_JMinv.m_jacobianM0.m_angular.m_z.m_pair.m_low,
 					dommy,
 					reinterpret_cast<const ndVector8&>(row0->m_JMinv.m_jacobianM0),
 					reinterpret_cast<const ndVector8&>(row1->m_JMinv.m_jacobianM0),
@@ -473,13 +473,13 @@ void ndDynamicsUpdateSimd16::InitJacobianMatrix()
 					reinterpret_cast<const ndVector8&>(row7->m_JMinv.m_jacobianM0));
 				
 				ndVector8::Transpose(
-					row.m_JMinv.m_jacobianM1.m_linear.m_x.m_low,
-					row.m_JMinv.m_jacobianM1.m_linear.m_y.m_low,
-					row.m_JMinv.m_jacobianM1.m_linear.m_z.m_low,
+					row.m_JMinv.m_jacobianM1.m_linear.m_x.m_pair.m_low,
+					row.m_JMinv.m_jacobianM1.m_linear.m_y.m_pair.m_low,
+					row.m_JMinv.m_jacobianM1.m_linear.m_z.m_pair.m_low,
 					dommy,
-					row.m_JMinv.m_jacobianM1.m_angular.m_x.m_low,
-					row.m_JMinv.m_jacobianM1.m_angular.m_y.m_low,
-					row.m_JMinv.m_jacobianM1.m_angular.m_z.m_low,
+					row.m_JMinv.m_jacobianM1.m_angular.m_x.m_pair.m_low,
+					row.m_JMinv.m_jacobianM1.m_angular.m_y.m_pair.m_low,
+					row.m_JMinv.m_jacobianM1.m_angular.m_z.m_pair.m_low,
 					dommy,
 					reinterpret_cast<const ndVector8&>(row0->m_JMinv.m_jacobianM1),
 					reinterpret_cast<const ndVector8&>(row1->m_JMinv.m_jacobianM1),
@@ -499,13 +499,13 @@ void ndDynamicsUpdateSimd16::InitJacobianMatrix()
 				const ndLeftHandSide* const row14 = &leftHandSide[jointsPtr[index + 14]->m_rowStart + k];
 				const ndLeftHandSide* const row15 = &leftHandSide[jointsPtr[index + 15]->m_rowStart + k];
 				ndVector8::Transpose(
-					row.m_Jt.m_jacobianM0.m_linear.m_x.m_high,
-					row.m_Jt.m_jacobianM0.m_linear.m_y.m_high,
-					row.m_Jt.m_jacobianM0.m_linear.m_z.m_high,
+					row.m_Jt.m_jacobianM0.m_linear.m_x.m_pair.m_high,
+					row.m_Jt.m_jacobianM0.m_linear.m_y.m_pair.m_high,
+					row.m_Jt.m_jacobianM0.m_linear.m_z.m_pair.m_high,
 					dommy,
-					row.m_Jt.m_jacobianM0.m_angular.m_x.m_high,
-					row.m_Jt.m_jacobianM0.m_angular.m_y.m_high,
-					row.m_Jt.m_jacobianM0.m_angular.m_z.m_high,
+					row.m_Jt.m_jacobianM0.m_angular.m_x.m_pair.m_high,
+					row.m_Jt.m_jacobianM0.m_angular.m_y.m_pair.m_high,
+					row.m_Jt.m_jacobianM0.m_angular.m_z.m_pair.m_high,
 					dommy,
 					reinterpret_cast<const ndVector8&>(row8->m_Jt.m_jacobianM0),
 					reinterpret_cast<const ndVector8&>(row9->m_Jt.m_jacobianM0),
@@ -517,13 +517,13 @@ void ndDynamicsUpdateSimd16::InitJacobianMatrix()
 					reinterpret_cast<const ndVector8&>(row15->m_Jt.m_jacobianM0));
 
 				ndVector8::Transpose(
-					row.m_Jt.m_jacobianM1.m_linear.m_x.m_high,
-					row.m_Jt.m_jacobianM1.m_linear.m_y.m_high,
-					row.m_Jt.m_jacobianM1.m_linear.m_z.m_high,
+					row.m_Jt.m_jacobianM1.m_linear.m_x.m_pair.m_high,
+					row.m_Jt.m_jacobianM1.m_linear.m_y.m_pair.m_high,
+					row.m_Jt.m_jacobianM1.m_linear.m_z.m_pair.m_high,
 					dommy,
-					row.m_Jt.m_jacobianM1.m_angular.m_x.m_high,
-					row.m_Jt.m_jacobianM1.m_angular.m_y.m_high,
-					row.m_Jt.m_jacobianM1.m_angular.m_z.m_high,
+					row.m_Jt.m_jacobianM1.m_angular.m_x.m_pair.m_high,
+					row.m_Jt.m_jacobianM1.m_angular.m_y.m_pair.m_high,
+					row.m_Jt.m_jacobianM1.m_angular.m_z.m_pair.m_high,
 					dommy,
 					reinterpret_cast<const ndVector8&>(row8->m_Jt.m_jacobianM1),
 					reinterpret_cast<const ndVector8&>(row9->m_Jt.m_jacobianM1),
@@ -535,13 +535,13 @@ void ndDynamicsUpdateSimd16::InitJacobianMatrix()
 					reinterpret_cast<const ndVector8&>(row15->m_Jt.m_jacobianM1));
 
 				ndVector8::Transpose(
-					row.m_JMinv.m_jacobianM0.m_linear.m_x.m_high,
-					row.m_JMinv.m_jacobianM0.m_linear.m_y.m_high,
-					row.m_JMinv.m_jacobianM0.m_linear.m_z.m_high,
+					row.m_JMinv.m_jacobianM0.m_linear.m_x.m_pair.m_high,
+					row.m_JMinv.m_jacobianM0.m_linear.m_y.m_pair.m_high,
+					row.m_JMinv.m_jacobianM0.m_linear.m_z.m_pair.m_high,
 					dommy,
-					row.m_JMinv.m_jacobianM0.m_angular.m_x.m_high,
-					row.m_JMinv.m_jacobianM0.m_angular.m_y.m_high,
-					row.m_JMinv.m_jacobianM0.m_angular.m_z.m_high,
+					row.m_JMinv.m_jacobianM0.m_angular.m_x.m_pair.m_high,
+					row.m_JMinv.m_jacobianM0.m_angular.m_y.m_pair.m_high,
+					row.m_JMinv.m_jacobianM0.m_angular.m_z.m_pair.m_high,
 					dommy,
 					reinterpret_cast<const ndVector8&>(row8->m_JMinv.m_jacobianM0),
 					reinterpret_cast<const ndVector8&>(row9->m_JMinv.m_jacobianM0),
@@ -553,13 +553,13 @@ void ndDynamicsUpdateSimd16::InitJacobianMatrix()
 					reinterpret_cast<const ndVector8&>(row15->m_JMinv.m_jacobianM0));
 
 				ndVector8::Transpose(
-					row.m_JMinv.m_jacobianM1.m_linear.m_x.m_high,
-					row.m_JMinv.m_jacobianM1.m_linear.m_y.m_high,
-					row.m_JMinv.m_jacobianM1.m_linear.m_z.m_high,
+					row.m_JMinv.m_jacobianM1.m_linear.m_x.m_pair.m_high,
+					row.m_JMinv.m_jacobianM1.m_linear.m_y.m_pair.m_high,
+					row.m_JMinv.m_jacobianM1.m_linear.m_z.m_pair.m_high,
 					dommy,
-					row.m_JMinv.m_jacobianM1.m_angular.m_x.m_high,
-					row.m_JMinv.m_jacobianM1.m_angular.m_y.m_high,
-					row.m_JMinv.m_jacobianM1.m_angular.m_z.m_high,
+					row.m_JMinv.m_jacobianM1.m_angular.m_x.m_pair.m_high,
+					row.m_JMinv.m_jacobianM1.m_angular.m_y.m_pair.m_high,
+					row.m_JMinv.m_jacobianM1.m_angular.m_z.m_pair.m_high,
 					dommy,
 					reinterpret_cast<const ndVector8&>(row8->m_JMinv.m_jacobianM1),
 					reinterpret_cast<const ndVector8&>(row9->m_JMinv.m_jacobianM1),
@@ -571,7 +571,6 @@ void ndDynamicsUpdateSimd16::InitJacobianMatrix()
 					reinterpret_cast<const ndVector8&>(row15->m_JMinv.m_jacobianM1));
 
 				#ifdef D_NEWTON_USE_DOUBLE
-					//ndInt64* const normalIndex = (ndInt64*)&row.m_normalForceIndex[0];
 					ndInt64* const normalIndex = reinterpret_cast<ndInt64*>(&row.m_normalForceIndex[0]);
 				#else
 					ndInt32* const normalIndex = reinterpret_cast<ndInt32*>(&row.m_normalForceIndex[0]);
@@ -1004,23 +1003,23 @@ void ndDynamicsUpdateSimd16::CalculateJointsForce()
 
 			ndVector8::Transpose(
 				force0[0], force0[1], force0[2], force0[3], force0[4], force0[5], force0[6], force0[7],
-				forceM0.m_linear.m_x.m_low, forceM0.m_linear.m_y.m_low, forceM0.m_linear.m_z.m_low, ndVector16::m_zero.m_low,
-				forceM0.m_angular.m_x.m_low, forceM0.m_angular.m_y.m_low, forceM0.m_angular.m_z.m_low, ndVector16::m_zero.m_low);
+				forceM0.m_linear.m_x.m_pair.m_low, forceM0.m_linear.m_y.m_pair.m_low, forceM0.m_linear.m_z.m_pair.m_low, ndVector16::m_zero.m_pair.m_low,
+				forceM0.m_angular.m_x.m_pair.m_low, forceM0.m_angular.m_y.m_pair.m_low, forceM0.m_angular.m_z.m_pair.m_low, ndVector16::m_zero.m_pair.m_low);
 
 			ndVector8::Transpose(
 				force0[8], force0[9], force0[10], force0[11], force0[12], force0[13], force0[14], force0[15],
-				forceM0.m_linear.m_x.m_high, forceM0.m_linear.m_y.m_high, forceM0.m_linear.m_z.m_high, ndVector16::m_zero.m_high,
-				forceM0.m_angular.m_x.m_high, forceM0.m_angular.m_y.m_high, forceM0.m_angular.m_z.m_high, ndVector16::m_zero.m_high);
+				forceM0.m_linear.m_x.m_pair.m_high, forceM0.m_linear.m_y.m_pair.m_high, forceM0.m_linear.m_z.m_pair.m_high, ndVector16::m_zero.m_pair.m_high,
+				forceM0.m_angular.m_x.m_pair.m_high, forceM0.m_angular.m_y.m_pair.m_high, forceM0.m_angular.m_z.m_pair.m_high, ndVector16::m_zero.m_pair.m_high);
 
 			ndVector8::Transpose(
 				force1[0], force1[1], force1[2], force1[3], force1[4], force1[5], force1[6], force1[7],
-				forceM1.m_linear.m_x.m_low, forceM1.m_linear.m_y.m_low, forceM1.m_linear.m_z.m_low, ndVector16::m_zero.m_low,
-				forceM1.m_angular.m_x.m_low, forceM1.m_angular.m_y.m_low, forceM1.m_angular.m_z.m_low, ndVector16::m_zero.m_low);
+				forceM1.m_linear.m_x.m_pair.m_low, forceM1.m_linear.m_y.m_pair.m_low, forceM1.m_linear.m_z.m_pair.m_low, ndVector16::m_zero.m_pair.m_low,
+				forceM1.m_angular.m_x.m_pair.m_low, forceM1.m_angular.m_y.m_pair.m_low, forceM1.m_angular.m_z.m_pair.m_low, ndVector16::m_zero.m_pair.m_low);
 
 			ndVector8::Transpose(
 				force1[8], force1[9], force1[10], force1[11], force1[12], force1[13], force1[14], force1[15],
-				forceM1.m_linear.m_x.m_high, forceM1.m_linear.m_y.m_high, forceM1.m_linear.m_z.m_high, ndVector16::m_zero.m_high,
-				forceM1.m_angular.m_x.m_high, forceM1.m_angular.m_y.m_high, forceM1.m_angular.m_z.m_high, ndVector16::m_zero.m_high);
+				forceM1.m_linear.m_x.m_pair.m_high, forceM1.m_linear.m_y.m_pair.m_high, forceM1.m_linear.m_z.m_pair.m_high, ndVector16::m_zero.m_pair.m_high,
+				forceM1.m_angular.m_x.m_pair.m_high, forceM1.m_angular.m_y.m_pair.m_high, forceM1.m_angular.m_z.m_pair.m_high, ndVector16::m_zero.m_pair.m_high);
 
 			ndRightHandSide* const rightHandSide = &m_rightHandSide[0];
 			for (ndInt32 i = 0; i < ND_SIMD16_WORK_GROUP_SIZE; ++i)

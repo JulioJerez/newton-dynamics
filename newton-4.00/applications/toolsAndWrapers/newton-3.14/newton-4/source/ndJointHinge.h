@@ -59,8 +59,6 @@ class ndJointHinge: public ndJointBilateralConstraint
 	D_NEWTON_API virtual ndSharedPtr<ndMeshJoint> GetMeshJoint(const ndMesh* const owner) const override;
 
 	ndAxisParam m_axis;
-	ndFloat32 m_maxTorque;
-	ndFloat32 m_motorSpeed;
 } D_GCC_NEWTON_CLASS_ALIGN_32;
 
 #endif 

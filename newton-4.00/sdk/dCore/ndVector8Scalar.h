@@ -220,12 +220,12 @@ class ndVector8
 
 	inline ndVector GetLow() const
 	{
-		return m_linear;
+		return m_pair.m_linear;
 	}
 
 	inline ndVector GetHigh() const
 	{
-		return m_angular;
+		return m_pair.m_angular;
 	}
 
 	inline ndFloat32 GetMax() const
@@ -258,26 +258,28 @@ class ndVector8
 		const ndVector8& src0, const ndVector8& src1, const ndVector8& src2, const ndVector8& src3,
 		const ndVector8& src4, const ndVector8& src5, const ndVector8& src6, const ndVector8& src7)
 	{
-		dst0 = ndVector8(ndVector(src0[0], src1[0], src2[0], src3[0]), ndVector(src4[0], src5[0], src6[0], src7[0]));
-		dst1 = ndVector8(ndVector(src0[1], src1[1], src2[1], src3[1]), ndVector(src4[1], src5[1], src6[1], src7[1]));
-		dst2 = ndVector8(ndVector(src0[2], src1[2], src2[2], src3[2]), ndVector(src4[2], src5[2], src6[2], src7[2]));
-		dst3 = ndVector8(ndVector(src0[3], src1[3], src2[3], src3[3]), ndVector(src4[3], src5[3], src6[3], src7[3]));
+		dst0 = ndVector8(ndBigVector(src0.m_float[0], src1.m_float[0], src2.m_float[0], src3.m_float[0]), ndBigVector(src4.m_float[0], src5.m_float[0], src6.m_float[0], src7.m_float[0]));
+		dst1 = ndVector8(ndBigVector(src0.m_float[1], src1.m_float[1], src2.m_float[1], src3.m_float[1]), ndBigVector(src4.m_float[1], src5.m_float[1], src6.m_float[1], src7.m_float[1]));
+		dst2 = ndVector8(ndBigVector(src0.m_float[2], src1.m_float[2], src2.m_float[2], src3.m_float[2]), ndBigVector(src4.m_float[2], src5.m_float[2], src6.m_float[2], src7.m_float[2]));
+		dst3 = ndVector8(ndBigVector(src0.m_float[3], src1.m_float[3], src2.m_float[3], src3.m_float[3]), ndBigVector(src4.m_float[3], src5.m_float[3], src6.m_float[3], src7.m_float[3]));
 
-		dst4 = ndVector8(ndVector(src0[4], src1[4], src2[4], src3[4]), ndVector(src4[4], src5[4], src6[4], src7[4]));
-		dst5 = ndVector8(ndVector(src0[5], src1[5], src2[5], src3[5]), ndVector(src4[5], src5[5], src6[5], src7[5]));
-		dst6 = ndVector8(ndVector(src0[6], src1[6], src2[6], src3[6]), ndVector(src4[6], src5[6], src6[6], src7[6]));
-		dst7 = ndVector8(ndVector(src0[7], src1[7], src2[7], src3[7]), ndVector(src4[7], src5[7], src6[7], src7[7]));
+		dst4 = ndVector8(ndBigVector(src0.m_float[4], src1.m_float[4], src2.m_float[4], src3.m_float[4]), ndBigVector(src4.m_float[4], src5.m_float[4], src6.m_float[4], src7.m_float[4]));
+		dst5 = ndVector8(ndBigVector(src0.m_float[5], src1.m_float[5], src2.m_float[5], src3.m_float[5]), ndBigVector(src4.m_float[5], src5.m_float[5], src6.m_float[5], src7.m_float[5]));
+		dst6 = ndVector8(ndBigVector(src0.m_float[6], src1.m_float[6], src2.m_float[6], src3.m_float[6]), ndBigVector(src4.m_float[6], src5.m_float[6], src6.m_float[6], src7.m_float[6]));
+		dst7 = ndVector8(ndBigVector(src0.m_float[7], src1.m_float[7], src2.m_float[7], src3.m_float[7]), ndBigVector(src4.m_float[7], src5.m_float[7], src6.m_float[7], src7.m_float[7]));
 	}
+
+	struct pair
+	{
+		ndBigVector m_linear;
+		ndBigVector m_angular;
+	};
 
 	union
 	{
 		ndFloat64 m_float[ND_SIMD8_WORK_GROUP_SIZE];
 		ndInt64 m_int[ND_SIMD8_WORK_GROUP_SIZE];
-		struct
-		{
-			ndBigVector m_linear;
-			ndBigVector m_angular;
-		};
+		pair m_pair;
 	};
 
 	D_CORE_API static ndVector8 m_one;
@@ -483,12 +485,12 @@ class ndVector8
 
 	inline ndVector GetLow() const
 	{
-		return m_linear;
+		return m_pair.m_linear;
 	}
 
 	inline ndVector GetHigh() const
 	{
-		return m_angular;
+		return m_pair.m_angular;
 	}
 
 	inline ndFloat32 GetMax() const
@@ -521,26 +523,28 @@ class ndVector8
 		const ndVector8& src0, const ndVector8& src1, const ndVector8& src2, const ndVector8& src3,
 		const ndVector8& src4, const ndVector8& src5, const ndVector8& src6, const ndVector8& src7)
 	{
-		dst0 = ndVector8(ndVector(src0[0], src1[0], src2[0], src3[0]), ndVector(src4[0], src5[0], src6[0], src7[0]));
-		dst1 = ndVector8(ndVector(src0[1], src1[1], src2[1], src3[1]), ndVector(src4[1], src5[1], src6[1], src7[1]));
-		dst2 = ndVector8(ndVector(src0[2], src1[2], src2[2], src3[2]), ndVector(src4[2], src5[2], src6[2], src7[2]));
-		dst3 = ndVector8(ndVector(src0[3], src1[3], src2[3], src3[3]), ndVector(src4[3], src5[3], src6[3], src7[3]));
+		dst0 = ndVector8(ndVector(src0.m_float[0], src1.m_float[0], src2.m_float[0], src3.m_float[0]), ndVector(src4.m_float[0], src5.m_float[0], src6.m_float[0], src7.m_float[0]));
+		dst1 = ndVector8(ndVector(src0.m_float[1], src1.m_float[1], src2.m_float[1], src3.m_float[1]), ndVector(src4.m_float[1], src5.m_float[1], src6.m_float[1], src7.m_float[1]));
+		dst2 = ndVector8(ndVector(src0.m_float[2], src1.m_float[2], src2.m_float[2], src3.m_float[2]), ndVector(src4.m_float[2], src5.m_float[2], src6.m_float[2], src7.m_float[2]));
+		dst3 = ndVector8(ndVector(src0.m_float[3], src1.m_float[3], src2.m_float[3], src3.m_float[3]), ndVector(src4.m_float[3], src5.m_float[3], src6.m_float[3], src7.m_float[3]));
 
-		dst4 = ndVector8(ndVector(src0[4], src1[4], src2[4], src3[4]), ndVector(src4[4], src5[4], src6[4], src7[4]));
-		dst5 = ndVector8(ndVector(src0[5], src1[5], src2[5], src3[5]), ndVector(src4[5], src5[5], src6[5], src7[5]));
-		dst6 = ndVector8(ndVector(src0[6], src1[6], src2[6], src3[6]), ndVector(src4[6], src5[6], src6[6], src7[6]));
-		dst7 = ndVector8(ndVector(src0[7], src1[7], src2[7], src3[7]), ndVector(src4[7], src5[7], src6[7], src7[7]));
+		dst4 = ndVector8(ndVector(src0.m_float[4], src1.m_float[4], src2.m_float[4], src3.m_float[4]), ndVector(src4.m_float[4], src5.m_float[4], src6.m_float[4], src7.m_float[4]));
+		dst5 = ndVector8(ndVector(src0.m_float[5], src1.m_float[5], src2.m_float[5], src3.m_float[5]), ndVector(src4.m_float[5], src5.m_float[5], src6.m_float[5], src7.m_float[5]));
+		dst6 = ndVector8(ndVector(src0.m_float[6], src1.m_float[6], src2.m_float[6], src3.m_float[6]), ndVector(src4.m_float[6], src5.m_float[6], src6.m_float[6], src7.m_float[6]));
+		dst7 = ndVector8(ndVector(src0.m_float[7], src1.m_float[7], src2.m_float[7], src3.m_float[7]), ndVector(src4.m_float[7], src5.m_float[7], src6.m_float[7], src7.m_float[7]));
 	}
+
+	struct pair
+	{
+		ndVector m_linear;
+		ndVector m_angular;
+	};
 
 	union
 	{
 		ndFloat32 m_float[ND_SIMD8_WORK_GROUP_SIZE];
 		ndInt32 m_int[ND_SIMD8_WORK_GROUP_SIZE];
-		struct
-		{
-			ndVector m_linear;
-			ndVector m_angular;
-		};
+		pair m_pair;
 	};
 
 	D_CORE_API static ndVector8 m_one;

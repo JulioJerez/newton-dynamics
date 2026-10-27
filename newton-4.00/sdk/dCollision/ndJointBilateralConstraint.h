@@ -107,6 +107,8 @@ class ndJointBilateralConstraint : public ndConstraint
 			,m_maxLimit(ndFloat32(1.0e10f))
 			,m_targetParam(ndFloat32(0.0f))
 			,m_maxForce(D_LCP_MAX_VALUE)
+			,m_motorSpeed(ndFloat32(0.0f))
+			,m_dryFrictionForce(ndFloat32(0.0f))
 			,m_springDamperRegularizer(ndFloat32(1.0e-3f))
 			,m_limitState(false)
 			,m_hitLimits(false)
@@ -121,6 +123,8 @@ class ndJointBilateralConstraint : public ndConstraint
 		ndFloat32 m_maxLimit;
 		ndFloat32 m_targetParam;
 		ndFloat32 m_maxForce;
+		ndFloat32 m_motorSpeed;
+		ndFloat32 m_dryFrictionForce;
 		ndFloat32 m_springDamperRegularizer;
 		bool m_limitState;
 		bool m_hitLimits;
@@ -190,7 +194,8 @@ class ndJointBilateralConstraint : public ndConstraint
 	D_COLLISION_API virtual void SetIkMode(bool mode);
 	D_COLLISION_API virtual void SetIkSetAccel(const ndJacobian& body0Accel, const ndJacobian& body1Accel);
 
-	D_COLLISION_API const ndSharedPtr<ndJointUserData>& GetUserData() const;
+	D_COLLISION_API ndSharedPtr<ndJointUserData>* GetUserData();
+	D_COLLISION_API const ndSharedPtr<ndJointUserData>* GetUserData() const;
 	D_COLLISION_API void SetUserData(ndSharedPtr<ndJointUserData>& userData);
 
 	protected:

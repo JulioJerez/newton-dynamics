@@ -46,10 +46,20 @@ if (PROCESSOR_ARCH  MATCHES "(x86)|(X86)|(amd64)|(AMD64)")
 	endif()
 endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang") 
+	add_definitions(-DD_SCALAR_VECTOR_CLASS)
+endif()
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU") 
+	add_definitions(-DD_SCALAR_VECTOR_CLASS)
+endif()
+
 # source and header files
 file(GLOB CPP_SOURCE 
 	*.h
 	*.cpp
+	joints/*.h
+	joints/*.cpp
 	newton-4/source/*.h
 	newton-4/source/*.c
 	newton-4/source/*.cpp
@@ -74,4 +84,7 @@ if (NEWTON_BUILD_DEMOS)
 	add_subdirectory(demos/common)
 	add_subdirectory(demos/tutorial_01_GettingStarted)
 	add_subdirectory(demos/tutorial_02_UsingCallbacks)
+	add_subdirectory(demos/tutorial_03_UsingCollisionTree)
+	add_subdirectory(demos/tutorial_04_IntroductionToMaterials)
+	add_subdirectory(demos/tutorial_05_UsingJoints)
 endif()

@@ -1130,19 +1130,19 @@ struct MaterialImpl : Material
 	const Texture* getTexture(Texture::TextureType type) const override { return textures[type]; }
 	Color getDiffuseColor() const override { return diffuse_color; }
 	Color getSpecularColor() const override { return specular_color; }
-    Color getReflectionColor() const override { return reflection_color; };
-    Color getAmbientColor() const override { return ambient_color; };
-    Color getEmissiveColor() const override { return emissive_color; };
+    Color getReflectionColor() const override { return reflection_color; }
+    Color getAmbientColor() const override { return ambient_color; }
+    Color getEmissiveColor() const override { return emissive_color; }
 
-    double getDiffuseFactor() const override { return diffuse_factor; };
-    double getSpecularFactor() const override { return specular_factor; };
-    double getReflectionFactor() const override { return reflection_factor; };
-    double getShininess() const override { return shininess; };
-    double getShininessExponent() const override { return shininess_exponent; };
-    double getAmbientFactor() const override { return ambient_factor; };
-    double getBumpFactor() const override { return bump_factor; };
-    double getEmissiveFactor() const override { return emissive_factor; };
-	double getOpacityFactor() const override { return opacity_factor; };
+    double getDiffuseFactor() const override { return diffuse_factor; }
+    double getSpecularFactor() const override { return specular_factor; }
+    double getReflectionFactor() const override { return reflection_factor; }
+    double getShininess() const override { return shininess; }
+    double getShininessExponent() const override { return shininess_exponent; }
+    double getAmbientFactor() const override { return ambient_factor; }
+    double getBumpFactor() const override { return bump_factor; }
+    double getEmissiveFactor() const override { return emissive_factor; }
+	double getOpacityFactor() const override { return opacity_factor; }
 
 	const Texture* textures[Texture::TextureType::COUNT];
 	Color diffuse_color;

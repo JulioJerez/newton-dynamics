@@ -38,8 +38,6 @@ D_MSV_NEWTON_CLASS_ALIGN_32
 class ndBigVector : public ndClassAlloc
 {
 	public:
-	//D_OPERATOR_NEW_AND_DELETE
-
 	inline ndBigVector()
 	{
 	}
@@ -179,14 +177,14 @@ class ndBigVector : public ndClassAlloc
 	{
 		ndAssert (i < 4);
 		ndAssert (i >= 0);
-		return (&m_x)[i];
+		return m_f[i];
 	}
 
 	inline const ndFloat64& operator[] (ndInt32 i) const
 	{
 		ndAssert (i < 4);
 		ndAssert (i >= 0);
-		return (&m_x)[i];
+		return m_f[i];
 	}
 
 	inline ndBigVector& operator= (const ndBigVector& A)
@@ -321,16 +319,6 @@ class ndBigVector : public ndClassAlloc
 							(a[3] == 0) ? ndFloat64 (-1.0f) : ndFloat64 (1.0f));
 	}
 
-	inline ndBigVector Floor () const
-	{
-		return ndBigVector (floor (m_x), floor(m_y), floor(m_z), floor(m_w));
-	}
-
-	inline ndBigVector Ceiling() const
-	{
-		return ndBigVector(ceil(m_x), ceil(m_y), ceil(m_z), ceil(m_w));
-	}
-
 	inline ndBigVector DotProduct (const ndBigVector &A) const
 	{
 		return ndBigVector (m_x * A.m_x + m_y * A.m_y + m_z * A.m_z + m_w * A.m_w);
@@ -406,34 +394,34 @@ class ndBigVector : public ndClassAlloc
 
 	inline ndBigVector operator> (const ndBigVector& data) const
 	{
-		return ndBigVector ((m_ix > data.m_ix) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iy > data.m_iy) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iz > data.m_iz) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iw > data.m_iw) ? ndInt64 (-1) : ndInt64 (0));
+		return ndBigVector ((m_x > data.m_x) ? ndInt64 (-1) : ndInt64 (0),
+							(m_y > data.m_y) ? ndInt64 (-1) : ndInt64 (0),
+							(m_z > data.m_z) ? ndInt64 (-1) : ndInt64 (0),
+							(m_w > data.m_w) ? ndInt64 (-1) : ndInt64 (0));
 	}
 
 	inline ndBigVector operator< (const ndBigVector& data) const
 	{
-		return ndBigVector ((m_ix < data.m_ix) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iy < data.m_iy) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iz < data.m_iz) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iw < data.m_iw) ? ndInt64 (-1) : ndInt64 (0));
+		return ndBigVector ((m_x < data.m_x) ? ndInt64 (-1) : ndInt64 (0),
+							(m_y < data.m_y) ? ndInt64 (-1) : ndInt64 (0),
+							(m_z < data.m_z) ? ndInt64 (-1) : ndInt64 (0),
+							(m_w < data.m_w) ? ndInt64 (-1) : ndInt64 (0));
 	}
 
 	inline ndBigVector operator>= (const ndBigVector& data) const
 	{
-		return ndBigVector ((m_ix >= data.m_ix) ? ndInt64 (-1) : ndInt64 (0), 
-							(m_iy >= data.m_iy) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iz >= data.m_iz) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iw >= data.m_iw) ? ndInt64 (-1) : ndInt64 (0));
+		return ndBigVector ((m_x >= data.m_x) ? ndInt64 (-1) : ndInt64 (0), 
+							(m_y >= data.m_y) ? ndInt64 (-1) : ndInt64 (0),
+							(m_z >= data.m_z) ? ndInt64 (-1) : ndInt64 (0),
+							(m_w >= data.m_w) ? ndInt64 (-1) : ndInt64 (0));
 	}
 
 	inline ndBigVector operator<= (const ndBigVector& data) const
 	{
-		return ndBigVector ((m_ix <= data.m_ix) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iy <= data.m_iy) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iz <= data.m_iz) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iw <= data.m_iw) ? ndInt64 (-1) : ndInt64 (0));
+		return ndBigVector ((m_x <= data.m_x) ? ndInt64 (-1) : ndInt64 (0),
+							(m_y <= data.m_y) ? ndInt64 (-1) : ndInt64 (0),
+							(m_z <= data.m_z) ? ndInt64 (-1) : ndInt64 (0),
+							(m_w <= data.m_w) ? ndInt64 (-1) : ndInt64 (0));
 	}
 
 	// logical operations
@@ -531,6 +519,7 @@ class ndBigVector : public ndClassAlloc
 			ndInt64 m_iw;
 		};
 		ndInt64 m_i[4];
+		ndFloat64 m_f[4];
 	};
 
 	D_CORE_API static ndBigVector m_zero;
@@ -570,8 +559,6 @@ D_MSV_NEWTON_CLASS_ALIGN_16
 class ndVector : public ndClassAlloc
 {
 	public:
-	//D_OPERATOR_NEW_AND_DELETE
-
 	inline ndVector()
 	{
 	}
@@ -598,26 +585,26 @@ class ndVector : public ndClassAlloc
 	// emulate gather instruction
 	inline ndVector(const ndFloat32* const baseAddr, const ndInt32* const index)
 		:m_x(baseAddr[index[0]])
-		, m_y(baseAddr[index[1]])
-		, m_z(baseAddr[index[2]])
-		, m_w(baseAddr[index[3]])
+		,m_y(baseAddr[index[1]])
+		,m_z(baseAddr[index[2]])
+		,m_w(baseAddr[index[3]])
 	{
 	}
 
 #ifndef	D_NEWTON_USE_DOUBLE
 	inline ndVector(const ndFloat64* const ptr)
 		:m_x(ndFloat32(ptr[0]))
-		, m_y(ndFloat32(ptr[1]))
-		, m_z(ndFloat32(ptr[2]))
-		, m_w(ndFloat32(ptr[3]))
+		,m_y(ndFloat32(ptr[1]))
+		,m_z(ndFloat32(ptr[2]))
+		,m_w(ndFloat32(ptr[3]))
 	{
 	}
 
 	inline ndVector(ndFloat64 x, ndFloat64 y, ndFloat64 z, ndFloat64 w)
 		:m_x(ndFloat32(x))
-		, m_y(ndFloat32(y))
-		, m_z(ndFloat32(z))
-		, m_w(ndFloat32(w))
+		,m_y(ndFloat32(y))
+		,m_z(ndFloat32(z))
+		,m_w(ndFloat32(w))
 	{
 	}
 
@@ -719,14 +706,14 @@ class ndVector : public ndClassAlloc
 	{
 		ndAssert(i < 4);
 		ndAssert(i >= 0);
-		return (&m_x)[i];
+		return m_f[i];
 	}
 
 	inline const ndFloat32& operator[] (ndInt32 i) const
 	{
 		ndAssert(i < 4);
 		ndAssert(i >= 0);
-		return (&m_x)[i];
+		return m_f[i];
 	}
 
 	inline ndVector& operator= (const ndVector& A)
@@ -1054,10 +1041,10 @@ class ndVector : public ndClassAlloc
 
 	inline static void Transpose4x4(ndVector& dst0, ndVector& dst1, ndVector& dst2, ndVector& dst3, const ndVector& src0, const ndVector& src1, const ndVector& src2, const ndVector& src3)
 	{
-		dst0 = ndVector(src0[0], src1[0], src2[0], src3[0]);
-		dst1 = ndVector(src0[1], src1[1], src2[1], src3[1]);
-		dst2 = ndVector(src0[2], src1[2], src2[2], src3[2]);
-		dst3 = ndVector(src0[3], src1[3], src2[3], src3[3]);
+		dst0 = ndVector(src0.m_x, src1.m_x, src2.m_x, src3.m_x);
+		dst1 = ndVector(src0.m_y, src1.m_y, src2.m_y, src3.m_y);
+		dst2 = ndVector(src0.m_z, src1.m_z, src2.m_z, src3.m_z);
+		dst3 = ndVector(src0.m_w, src1.m_w, src2.m_w, src3.m_w);
 	}
 
 	union
@@ -1077,6 +1064,7 @@ class ndVector : public ndClassAlloc
 			ndInt32 m_iw;
 		};
 		ndInt32 m_i[4];
+		ndFloat32 m_f[4];
 	};
 
 	D_CORE_API static ndVector m_zero;
