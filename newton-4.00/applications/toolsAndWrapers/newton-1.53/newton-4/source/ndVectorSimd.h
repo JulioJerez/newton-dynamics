@@ -440,16 +440,15 @@ class ndBigVector: public ndClassAlloc
 		ndBigVector& dst0, ndBigVector& dst1, ndBigVector& dst2, ndBigVector& dst3,
 		const ndBigVector& src0, const ndBigVector& src1, const ndBigVector& src2, const ndBigVector& src3)
 	{
-		__m256d tmp[4];
-		tmp[0] = _mm256_permute2f128_pd(src0.m_type, src2.m_type, 0x20);
-		tmp[1] = _mm256_permute2f128_pd(src1.m_type, src3.m_type, 0x20);
-		tmp[2] = _mm256_permute2f128_pd(src0.m_type, src2.m_type, 0x31);
-		tmp[3] = _mm256_permute2f128_pd(src1.m_type, src3.m_type, 0x31);
+		__m256d tmp0(_mm256_permute2f128_pd(src0.m_type, src2.m_type, 0x20));
+		__m256d tmp1(_mm256_permute2f128_pd(src1.m_type, src3.m_type, 0x20));
+		__m256d tmp2(_mm256_permute2f128_pd(src0.m_type, src2.m_type, 0x31));
+		__m256d tmp3(_mm256_permute2f128_pd(src1.m_type, src3.m_type, 0x31));
 
-		dst0 = _mm256_unpacklo_pd(tmp[0], tmp[1]);
-		dst1 = _mm256_unpackhi_pd(tmp[0], tmp[1]);
-		dst2 = _mm256_unpacklo_pd(tmp[2], tmp[3]);
-		dst3 = _mm256_unpackhi_pd(tmp[2], tmp[3]);
+		dst0 = _mm256_unpacklo_pd(tmp0, tmp1);
+		dst1 = _mm256_unpackhi_pd(tmp0, tmp1);
+		dst2 = _mm256_unpacklo_pd(tmp2, tmp3);
+		dst3 = _mm256_unpackhi_pd(tmp2, tmp3);
 	}
 
 	// return dot 4d dot product

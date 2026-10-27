@@ -396,34 +396,34 @@ class ndBigVector : public ndClassAlloc
 
 	inline ndBigVector operator> (const ndBigVector& data) const
 	{
-		return ndBigVector ((m_ix > data.m_ix) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iy > data.m_iy) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iz > data.m_iz) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iw > data.m_iw) ? ndInt64 (-1) : ndInt64 (0));
+		return ndBigVector ((m_x > data.m_x) ? ndInt64 (-1) : ndInt64 (0),
+							(m_y > data.m_y) ? ndInt64 (-1) : ndInt64 (0),
+							(m_z > data.m_z) ? ndInt64 (-1) : ndInt64 (0),
+							(m_w > data.m_w) ? ndInt64 (-1) : ndInt64 (0));
 	}
 
 	inline ndBigVector operator< (const ndBigVector& data) const
 	{
-		return ndBigVector ((m_ix < data.m_ix) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iy < data.m_iy) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iz < data.m_iz) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iw < data.m_iw) ? ndInt64 (-1) : ndInt64 (0));
+		return ndBigVector ((m_x < data.m_x) ? ndInt64 (-1) : ndInt64 (0),
+							(m_y < data.m_y) ? ndInt64 (-1) : ndInt64 (0),
+							(m_z < data.m_z) ? ndInt64 (-1) : ndInt64 (0),
+							(m_w < data.m_w) ? ndInt64 (-1) : ndInt64 (0));
 	}
 
 	inline ndBigVector operator>= (const ndBigVector& data) const
 	{
-		return ndBigVector ((m_ix >= data.m_ix) ? ndInt64 (-1) : ndInt64 (0), 
-							(m_iy >= data.m_iy) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iz >= data.m_iz) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iw >= data.m_iw) ? ndInt64 (-1) : ndInt64 (0));
+		return ndBigVector ((m_x >= data.m_x) ? ndInt64 (-1) : ndInt64 (0), 
+							(m_y >= data.m_y) ? ndInt64 (-1) : ndInt64 (0),
+							(m_z >= data.m_z) ? ndInt64 (-1) : ndInt64 (0),
+							(m_w >= data.m_w) ? ndInt64 (-1) : ndInt64 (0));
 	}
 
 	inline ndBigVector operator<= (const ndBigVector& data) const
 	{
-		return ndBigVector ((m_ix <= data.m_ix) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iy <= data.m_iy) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iz <= data.m_iz) ? ndInt64 (-1) : ndInt64 (0),
-							(m_iw <= data.m_iw) ? ndInt64 (-1) : ndInt64 (0));
+		return ndBigVector ((m_x <= data.m_x) ? ndInt64 (-1) : ndInt64 (0),
+							(m_y <= data.m_y) ? ndInt64 (-1) : ndInt64 (0),
+							(m_z <= data.m_z) ? ndInt64 (-1) : ndInt64 (0),
+							(m_w <= data.m_w) ? ndInt64 (-1) : ndInt64 (0));
 	}
 
 	// logical operations
@@ -1044,10 +1044,10 @@ class ndVector : public ndClassAlloc
 
 	inline static void Transpose4x4(ndVector& dst0, ndVector& dst1, ndVector& dst2, ndVector& dst3, const ndVector& src0, const ndVector& src1, const ndVector& src2, const ndVector& src3)
 	{
-		dst0 = ndVector(src0[0], src1[0], src2[0], src3[0]);
-		dst1 = ndVector(src0[1], src1[1], src2[1], src3[1]);
-		dst2 = ndVector(src0[2], src1[2], src2[2], src3[2]);
-		dst3 = ndVector(src0[3], src1[3], src2[3], src3[3]);
+		dst0 = ndVector(src0.m_x, src1.m_x, src2.m_x, src3.m_x);
+		dst1 = ndVector(src0.m_y, src1.m_y, src2.m_y, src3.m_y);
+		dst2 = ndVector(src0.m_z, src1.m_z, src2.m_z, src3.m_z);
+		dst3 = ndVector(src0.m_w, src1.m_w, src2.m_w, src3.m_w);
 	}
 
 	union
