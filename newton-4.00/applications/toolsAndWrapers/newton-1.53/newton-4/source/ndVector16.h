@@ -35,38 +35,32 @@ class ndVector16
 	}
 
 	inline ndVector16(const ndFloat32 val)
-		:m_low(val)
-		,m_high(val)
+		:m_pair(val)
 	{
 	}
 
 	inline ndVector16(const ndInt32 val)
-		:m_low(val)
-		,m_high(val)
+		:m_pair(val)
 	{
 	}
 
 	inline ndVector16(const ndVector16& copy)
-		:m_low(copy.m_low)
-		,m_high(copy.m_high)
+		:m_pair(copy.m_pair)
 	{
 	}
 
 	inline ndVector16(const ndVector8& low, const ndVector8& high)
-		:m_low(low)
-		,m_high(high)
+		:m_pair(low, high)
 	{
 	}
 
 	inline ndVector16(const ndVector& v0, const ndVector& v1, const ndVector& v2, const ndVector& v3)
-		:m_low(v0, v1)
-		,m_high(v2, v3)
+		:m_pair(v0, v1, v2, v3)
 	{
 	}
 
 	inline ndVector16(const ndVector16* const baseAddr, const ndVector16& index)
-		:m_low(&baseAddr->m_low, index.m_low)
-		,m_high(&baseAddr->m_low, index.m_high)
+		:m_pair(baseAddr, index)
 	{
 	}
 
@@ -74,111 +68,169 @@ class ndVector16
 	{
 		ndAssert(i >= 0);
 		ndAssert(i < ND_SIMD16_WORK_GROUP_SIZE);
-		ndFloat32* const data = &m_low[0];
-		return data[i];
+		return m_float[i];
 	}
 
 	inline const ndFloat32& operator[] (ndInt32 i) const
 	{
 		ndAssert(i >= 0);
 		ndAssert(i < ND_SIMD16_WORK_GROUP_SIZE);
-		const ndFloat32* const data = &m_low[0];
-		return data[i];
+		return m_float[i];
 	}
 
 	inline ndVector16& operator= (const ndVector16& A)
 	{
-		m_low = A.m_low;
-		m_high = A.m_high;
+		m_pair.m_low = A.m_pair.m_low;
+		m_pair.m_high = A.m_pair.m_high;
 		return *this;
 	}
 
 	inline ndVector16 operator+ (const ndVector16& A) const
 	{
-		return ndVector16(m_low + A.m_low, m_high + A.m_high);
+		return ndVector16(m_pair.m_low + A.m_pair.m_low, m_pair.m_high + A.m_pair.m_high);
 	}
 
 	inline ndVector16 operator- (const ndVector16& A) const
 	{
-		return ndVector16(m_low - A.m_low, m_high - A.m_high);
+		return ndVector16(m_pair.m_low - A.m_pair.m_low, m_pair.m_high - A.m_pair.m_high);
 	}
 
 	inline ndVector16 operator* (const ndVector16& A) const
 	{
-		return ndVector16(m_low * A.m_low, m_high * A.m_high);
+		return ndVector16(m_pair.m_low * A.m_pair.m_low, m_pair.m_high * A.m_pair.m_high);
 	}
 
 	inline ndVector16 MulAdd(const ndVector16& A, const ndVector16& B) const
 	{
-		return ndVector16(m_low.MulAdd(A.m_low, B.m_low), m_high.MulAdd(A.m_high, B.m_high));
+		return ndVector16(m_pair.m_low.MulAdd(A.m_pair.m_low, B.m_pair.m_low), m_pair.m_high.MulAdd(A.m_pair.m_high, B.m_pair.m_high));
 	}
 
 	inline ndVector16 MulSub(const ndVector16& A, const ndVector16& B) const
 	{
-		return ndVector16(m_low.MulSub(A.m_low, B.m_low), m_high.MulSub(A.m_high, B.m_high));
+		return ndVector16(m_pair.m_low.MulSub(A.m_pair.m_low, B.m_pair.m_low), m_pair.m_high.MulSub(A.m_pair.m_high, B.m_pair.m_high));
 	}
 
 	inline ndVector16 operator> (const ndVector16& A) const
 	{
-		return ndVector16(m_low > A.m_low, m_high > A.m_high);
+		return ndVector16(m_pair.m_low > A.m_pair.m_low, m_pair.m_high > A.m_pair.m_high);
 	}
 
 	inline ndVector16 operator< (const ndVector16& A) const
 	{
-		return ndVector16(m_low < A.m_low, m_high < A.m_high);
+		return ndVector16(m_pair.m_low < A.m_pair.m_low, m_pair.m_high < A.m_pair.m_high);
 	}
 
 	inline ndVector16 operator| (const ndVector16& A) const
 	{
-		return ndVector16(m_low | A.m_low, m_high | A.m_high);
+		return ndVector16(m_pair.m_low | A.m_pair.m_low, m_pair.m_high | A.m_pair.m_high);
 	}
 
 	inline ndVector16 operator& (const ndVector16& A) const
 	{
-		return ndVector16(m_low & A.m_low, m_high & A.m_high);
+		return ndVector16(m_pair.m_low & A.m_pair.m_low, m_pair.m_high & A.m_pair.m_high);
 	}
 
 	inline ndVector16 GetMin(const ndVector16& A) const
 	{
-		return ndVector16(m_low.GetMin(A.m_low), m_high.GetMin(A.m_high));
+		return ndVector16(m_pair.m_low.GetMin(A.m_pair.m_low), m_pair.m_high.GetMin(A.m_pair.m_high));
 	}
 
 	inline ndVector16 GetMax(const ndVector16& A) const
 	{
-		return ndVector16(m_low.GetMax(A.m_low), m_high.GetMax(A.m_high));
+		return ndVector16(m_pair.m_low.GetMax(A.m_pair.m_low), m_pair.m_high.GetMax(A.m_pair.m_high));
 	}
 
 	inline ndVector16 Select(const ndVector16& data, const ndVector16& mask) const
 	{
-		return ndVector16(m_low.Select(data.m_low, mask.m_low), m_high.Select(data.m_high, mask.m_high));
+		return ndVector16(m_pair.m_low.Select(data.m_pair.m_low, mask.m_pair.m_low), m_pair.m_high.Select(data.m_pair.m_high, mask.m_pair.m_high));
 	}
 
 	inline ndVector8 GetLow() const
 	{
-		return m_low;
+		return m_pair.m_low;
 	}
 
 	inline ndVector8 GetHigh() const
 	{
-		return m_high;
+		return m_pair.m_high;
 	}
 
 	inline ndFloat32 GetMax() const
 	{
-		return ndMax (m_low.GetMax(), m_high.GetMax());
+		return ndMax (m_pair.m_low.GetMax(), m_pair.m_high.GetMax());
 	}
 
 	inline ndFloat32 AddHorizontal() const
 	{
-		return (m_low + m_high).AddHorizontal();
+		return (m_pair.m_low + m_pair.m_high).AddHorizontal();
 	}
 
 	static inline void FlushRegisters()
 	{
 	}
 
-	ndVector8 m_low;
-	ndVector8 m_high;
+	struct pair
+	{
+		inline pair()
+		{
+		}
+
+		inline pair(const ndFloat32 val)
+			:m_low(val)
+			,m_high(val)
+		{
+		}
+
+		inline pair(const ndInt32 val)
+			:m_low(val)
+			,m_high(val)
+		{
+		}
+
+		inline pair(const pair& copy)
+			:m_low(copy.m_low)
+			,m_high(copy.m_high)
+		{
+		}
+
+		inline pair(const ndVector8& low, const ndVector8& high)
+			:m_low(low)
+			,m_high(high)
+		{
+		}
+
+		inline pair(const ndVector& v0, const ndVector& v1, const ndVector& v2, const ndVector& v3)
+			:m_low(v0, v1)
+			,m_high(v2, v3)
+		{
+		}
+
+		inline pair(const ndVector16* const baseAddr, const ndVector16& index)
+			:m_low(&baseAddr->m_pair.m_low, index.m_pair.m_low)
+			,m_high(&baseAddr->m_pair.m_low, index.m_pair.m_high)
+		{
+		}
+
+		ndVector8 m_low;
+		ndVector8 m_high;
+	};
+
+	#ifdef D_NEWTON_USE_DOUBLE
+	union
+	{
+		ndFloat64 m_float[ND_SIMD16_WORK_GROUP_SIZE];
+		ndInt64 m_int[ND_SIMD16_WORK_GROUP_SIZE];
+		pair m_pair;
+	};
+	#else
+	union
+	{
+		ndFloat32 m_float[ND_SIMD16_WORK_GROUP_SIZE];
+		ndInt32 m_int[ND_SIMD16_WORK_GROUP_SIZE];
+		pair m_pair;
+	};
+	#endif
+
 
 	D_CORE_API static ndVector16 m_one;
 	D_CORE_API static ndVector16 m_zero;
