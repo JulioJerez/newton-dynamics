@@ -75,16 +75,14 @@
 			{
 				ndAssert(i >= 0);
 				ndAssert(i < ND_SIMD8_WORK_GROUP_SIZE);
-				ndFloat32* const ptr = (ndFloat32*)&m_low;
-				return ptr[i];
+				return m_float[i];
 			}
 
 			inline const ndFloat32& operator[] (ndInt32 i) const
 			{
 				ndAssert(i >= 0);
 				ndAssert(i < ND_SIMD8_WORK_GROUP_SIZE);
-				const ndFloat32* const ptr = (ndFloat32*)&m_low;
-				return ptr[i];
+				return m_float[i];
 			}
 
 			inline ndVector8& operator= (const ndVector8& A)
@@ -305,16 +303,14 @@
 			{
 				ndAssert(i >= 0);
 				ndAssert(i < ND_SIMD8_WORK_GROUP_SIZE);
-				ndFloat32* const ptr = (ndFloat32*)&m_type;
-				return ptr[i];
+				return m_float[i];
 			}
 
 			inline const ndFloat32& operator[] (ndInt32 i) const
 			{
 				ndAssert(i >= 0);
 				ndAssert(i < ND_SIMD8_WORK_GROUP_SIZE);
-				const ndFloat32* const ptr = (ndFloat32*)&m_type;
-				return ptr[i];
+				return m_float[i];
 			}
 
 			inline ndVector8& operator= (const ndVector8& A)
@@ -387,13 +383,11 @@
 
 			inline ndVector GetLow() const
 			{
-				//return m_vector8.m_linear;
 				return m_typeLow;
 			}
 
 			inline ndVector GetHigh() const
 			{
-				//return m_vector8.m_angular;
 				return m_typeHigh;
 			}
 
@@ -452,23 +446,26 @@
 				dst7.m_type = _mm256_unpackhi_ps(s3, s7);
 			}
 
+			struct pair
+			{
+				ndVector m_linear;
+				ndVector m_angular;
+			};
+
+			struct simd4Pair
+			{
+				__m128 m_typeLow;
+				__m128 m_typeHigh;
+			};
+			xxxxxxxxxxxxxxxx
 			union
 			{
 				ndFloat32 m_float[ND_SIMD8_WORK_GROUP_SIZE];
 				ndInt32 m_int[ND_SIMD8_WORK_GROUP_SIZE];
-				struct
-				{
-					ndVector m_linear;
-					ndVector m_angular;
-				} m_vector8;
-
+				pair m_pair;
 				__m256 m_type;
 				__m256i m_typeInt;
-				struct
-				{
-					__m128 m_typeLow;
-					__m128 m_typeHigh;
-				};
+				simd4Pair m_simd4Pair;
 			};
 
 			D_CORE_API static ndVector8 m_one;
@@ -530,16 +527,14 @@
 		{
 			ndAssert(i >= 0);
 			ndAssert(i < ND_SIMD8_WORK_GROUP_SIZE);
-			ndFloat32* const ptr = (ndFloat32*)&m_linear;
-			return ptr[i];
+			return m_float[i];
 		}
 
 		inline const ndFloat32& operator[] (ndInt32 i) const
 		{
 			ndAssert(i >= 0);
 			ndAssert(i < ND_SIMD8_WORK_GROUP_SIZE);
-			const ndFloat32* const ptr = (ndFloat32*)&m_linear;
-			return ptr[i];
+			return m_float[i];
 		}
 
 		inline ndVector8& operator= (const ndVector8& A)

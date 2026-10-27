@@ -179,14 +179,14 @@ class ndBigVector : public ndClassAlloc
 	{
 		ndAssert (i < 4);
 		ndAssert (i >= 0);
-		return (&m_x)[i];
+		return m_f[i];
 	}
 
 	inline const ndFloat64& operator[] (ndInt32 i) const
 	{
 		ndAssert (i < 4);
 		ndAssert (i >= 0);
-		return (&m_x)[i];
+		return m_f[i];
 	}
 
 	inline ndBigVector& operator= (const ndBigVector& A)
@@ -521,6 +521,7 @@ class ndBigVector : public ndClassAlloc
 			ndInt64 m_iw;
 		};
 		ndInt64 m_i[4];
+		ndFloat64 m_f[4];
 	};
 
 	D_CORE_API static ndBigVector m_zero;
@@ -560,8 +561,6 @@ D_MSV_NEWTON_CLASS_ALIGN_16
 class ndVector : public ndClassAlloc
 {
 	public:
-	//D_OPERATOR_NEW_AND_DELETE
-
 	inline ndVector()
 	{
 	}
@@ -588,26 +587,26 @@ class ndVector : public ndClassAlloc
 	// emulate gather instruction
 	inline ndVector(const ndFloat32* const baseAddr, const ndInt32* const index)
 		:m_x(baseAddr[index[0]])
-		, m_y(baseAddr[index[1]])
-		, m_z(baseAddr[index[2]])
-		, m_w(baseAddr[index[3]])
+		,m_y(baseAddr[index[1]])
+		,m_z(baseAddr[index[2]])
+		,m_w(baseAddr[index[3]])
 	{
 	}
 
 #ifndef	D_NEWTON_USE_DOUBLE
 	inline ndVector(const ndFloat64* const ptr)
 		:m_x(ndFloat32(ptr[0]))
-		, m_y(ndFloat32(ptr[1]))
-		, m_z(ndFloat32(ptr[2]))
-		, m_w(ndFloat32(ptr[3]))
+		,m_y(ndFloat32(ptr[1]))
+		,m_z(ndFloat32(ptr[2]))
+		,m_w(ndFloat32(ptr[3]))
 	{
 	}
 
 	inline ndVector(ndFloat64 x, ndFloat64 y, ndFloat64 z, ndFloat64 w)
 		:m_x(ndFloat32(x))
-		, m_y(ndFloat32(y))
-		, m_z(ndFloat32(z))
-		, m_w(ndFloat32(w))
+		,m_y(ndFloat32(y))
+		,m_z(ndFloat32(z))
+		,m_w(ndFloat32(w))
 	{
 	}
 
@@ -709,14 +708,14 @@ class ndVector : public ndClassAlloc
 	{
 		ndAssert(i < 4);
 		ndAssert(i >= 0);
-		return (&m_x)[i];
+		return m_f[i];
 	}
 
 	inline const ndFloat32& operator[] (ndInt32 i) const
 	{
 		ndAssert(i < 4);
 		ndAssert(i >= 0);
-		return (&m_x)[i];
+		return m_f[i];
 	}
 
 	inline ndVector& operator= (const ndVector& A)
@@ -1067,6 +1066,7 @@ class ndVector : public ndClassAlloc
 			ndInt32 m_iw;
 		};
 		ndInt32 m_i[4];
+		ndFloat32 m_f[4];
 	};
 
 	D_CORE_API static ndVector m_zero;
